@@ -25,7 +25,8 @@ export default class GPUTable {
 
   constructor(gl, opts) {
     this.gl = gl;
-    this.columns = {};
+    this.accessors = {};
+    this.buffers = {};
     if ('columns' in opts) {
       this.addColumns(opts.columns);
     }
@@ -35,23 +36,23 @@ export default class GPUTable {
   //   latitude: {array: size: },
   //   longitude: ...
   // }
-  // Takes an object where key is the name of the colum and value is an object {array, type, size, ..}
-  addColumn(columns) {
+  // Takes an object where key is the name of the colum and value is an object {data, type, size, ..}
+  addColumns(columns) {
     for(const name in columns) {
-      log.assert(!this.columns[name]);
-      const accessor =  Accessor.resolve(columns[name]);
-      accessor.buffer = new Buffer(this.gl, accessor);
-      this.columns[name] = accessor;
+      log.assert(!this.buffers[name]);
+      this.accessors[name] =  Accessor.resolve(columns[name]);
+      this.buffers[name] = new Buffer(this.gl, {data: columns[name].data, accessor: this.accessors[name]});
     }
   }
 
   // takes one ora array of column names to be deleted
-  removeColumn(name) {
+  removeColumns(name) {
     const names = Array.isArray(name) ? name : [name];
     for (const n of names) {
-      if (n in this.columns) {
-        this.columns[n].buffer.delte();
-        delete this.columns[n];
+      if (n in this.buffers) {
+        this.buffers[n].delte();
+        delete this.buffers[n];
+        delete this.accessors[n];
       }
     }
   }
