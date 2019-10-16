@@ -1,0 +1,34 @@
+{
+  "name": "@deck.gl/gpu-table",
+  "description": "deck.gl gpu-table",
+  "license": "MIT",
+  "version": "7.4.0-alpha.2",
+  "publishConfig": {
+    "access": "public"
+  },
+  "keywords": [
+    "webgl",
+    "visualization",
+    "layer"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/uber/deck.gl.git"
+  },
+  "main": "dist/es5/index.js",
+  "module": "dist/esm/index.js",
+  "esnext": "dist/es6/index.js",
+  "files": [
+    "dist",
+    "src",
+    "dist.min.js"
+  ],
+  "sideEffects": false,
+  "scripts": {
+    "build-bundle": "webpack --config ../../scripts/bundle.config.js",
+    "prepublishOnly": "npm run build-bundle && npm run build-bundle -- --env.dev"
+  },
+  "peerDependencies": {
+    "@deck.gl/core": "^7.3.0-beta"
+  }
+}
