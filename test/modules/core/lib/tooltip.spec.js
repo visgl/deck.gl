@@ -1,32 +1,9 @@
-/* global window */
-import Tooltip from '@deck.gl/core/lib/tooltip';
 import test from 'tape-catch';
 
-let document;
-if (typeof window === undefined || !window.document) {
-  const {JSDOM} = require('jsdom');
-  const dom = new JSDOM(`<!DOCTYPE html>`);
-  document = dom.window.document;
-} else {
-  document = window.document;
-}
+import Tooltip from '@deck.gl/core/lib/tooltip';
+import DocumentTest from 'deck.gl-test/utils/document';
 
-const CANVAS_PARENT_CLASS_NAME = 'tooltip-canvas-parent';
 const pickedInfo = {object: {elevationValue: 10}, x: 0, y: 0};
-
-function setup() {
-  const canvas = document.createElement('canvas');
-  const canvasParent = document.createElement('div');
-  canvasParent.className = 'tooltip-canvas-parent';
-  canvasParent.appendChild(canvas);
-  document.body.appendChild(canvasParent);
-  return new Tooltip(canvas);
-}
-
-function teardown() {
-  const el = document.getElementsByClassName(CANVAS_PARENT_CLASS_NAME)[0];
-  el.remove();
-}
 
 function getTooltipFunc(pickedValue) {
   return {
@@ -45,60 +22,75 @@ function getTooltipFuncDefault(pickedValue) {
 }
 
 test('Tooltip#constructor', t => {
-  const tooltip = setup(); // eslint-disable-line
-  t.ok(document.getElementsByClassName('deck-tooltip'), 'Tooltip exists in document');
-  t.equals(document.getElementsByClassName('deck-tooltip')[0].style.top, '0px');
-  teardown();
+  const documentTest = new DocumentTest(Tooltip);
+  documentTest.setup();
+  t.ok(documentTest.document.getElementsByClassName('deck-tooltip'), 'Tooltip exists in document');
+  t.equals(documentTest.document.getElementsByClassName('deck-tooltip')[0].style.top, '0px');
+  documentTest.teardown();
   t.end();
 });
 
 test('Tooltip#setTooltip', t => {
-  const tooltip = setup();
+  const documentTest = new DocumentTest(Tooltip);
+  documentTest.setup();
+  const tooltip = documentTest.testObject;
   tooltip.setTooltip(getTooltipFunc(pickedInfo), pickedInfo.x, pickedInfo.y);
   t.equals(tooltip.el.style.backgroundColor, 'lemonchiffon');
   t.equals(tooltip.el.innerHTML, '<strong>Number of points:</strong> 10');
   t.equals(tooltip.el.className, 'coolTooltip');
-  teardown();
+  documentTest.teardown();
   t.end();
 });
 
 test('Tooltip#setTooltipWithString', t => {
-  const tooltip = setup();
+  const documentTest = new DocumentTest(Tooltip);
+  documentTest.setup();
+  const tooltip = documentTest.testObject;
   const pickedInfoFunc = info => `Number of points: ${info.object.elevationValue}`;
   tooltip.setTooltip(pickedInfoFunc(pickedInfo), pickedInfo.x, pickedInfo.y);
   t.equals(tooltip.el.innerText, 'Number of points: 10');
   t.equals(tooltip.el.className, 'deck-tooltip');
-  teardown();
+  documentTest.teardown();
   t.end();
 });
 
 test('Tooltip#setTooltipDefaults', t => {
-  const tooltip = setup();
+  const documentTest = new DocumentTest(Tooltip);
+  documentTest.setup();
+  const tooltip = documentTest.testObject;
   const tooltipResult = getTooltipFuncDefault(pickedInfo);
   tooltip.setTooltip(tooltipResult, pickedInfo.x, pickedInfo.y);
   t.equals(tooltip.el.innerText, 'Number of points: 10');
   t.equals(tooltip.el.className, 'deck-tooltip');
-  teardown();
+  documentTest.teardown();
   t.end();
 });
 
 test('Tooltip#setTooltipNullCase', t => {
-  const tooltip = setup();
+  const documentTest = new DocumentTest(Tooltip);
+  documentTest.setup();
+  const tooltip = documentTest.testObject;
   tooltip.setTooltip(null, pickedInfo.x, pickedInfo.y);
   t.equals(tooltip.el.style.display, 'none');
-  teardown();
+  documentTest.teardown();
   t.end();
 });
 
 test('Tooltip#remove', t => {
-  const tooltip = setup();
-  t.equals(document.getElementsByClassName('deck-tooltip').length, 1, 'Tooltip element present');
+  const documentTest = new DocumentTest(Tooltip);
+  documentTest.setup();
+  const tooltip = documentTest.testObject;
+  t.equals(
+    documentTest.document.getElementsByClassName('deck-tooltip').length,
+    1,
+    'Tooltip element present'
+  );
   tooltip.remove();
   t.equals(
-    document.getElementsByClassName('deck-tooltip').length,
+    documentTest.document.getElementsByClassName('deck-tooltip').length,
     0,
     'Tooltip element successfully removed'
   );
-  teardown();
+  documentTest.teardown();
   t.end();
 });
