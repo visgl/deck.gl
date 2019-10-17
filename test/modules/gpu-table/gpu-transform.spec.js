@@ -33,7 +33,7 @@ test('gpuTransform#imports', t => {
   t.end();
 });
 
-test.only('gpuTransform', t => {
+test('gpuTransform', t => {
   const LONGITUDES = [1.0, 2.0, 3.0];
   const LATITUDES = [11.0, 12.0, 13.0];
   const gpuTable = new GPUTable(gl, {
@@ -42,7 +42,9 @@ test.only('gpuTransform', t => {
       latitude: {data: new Float32Array(LATITUDES)}
     }
   });
-  gpuTransform(gpuTable, {/* mapping empty for now */});
+  gpuTransform(gpuTable, {
+    /* mapping empty for now */
+  });
 
   t.ok(gpuTable.buffers.position, 'should create position Buffer');
   t.ok(gpuTable.accessors.position, 'should create position Accessor');
@@ -50,10 +52,10 @@ test.only('gpuTransform', t => {
   // Buffer.getData() is WebGL2 only
   if (isWebGL2(gl)) {
     const positions = gpuTable.buffers.position.getData();
-    for (let i=0; i<LONGITUDES.length; i++) {
-      t.equal(positions[i*3], LONGITUDES[i], `should match longitude at index: ${i}`);
-      t.equal(positions[i*3+1], LATITUDES[i], `should match latitude at index: ${i}`);
-      t.equal(positions[i*3+2], 0, `should match z at index: ${i}`);
+    for (let i = 0; i < LONGITUDES.length; i++) {
+      t.equal(positions[i * 3], LONGITUDES[i], `should match longitude at index: ${i}`);
+      t.equal(positions[i * 3 + 1], LATITUDES[i], `should match latitude at index: ${i}`);
+      t.equal(positions[i * 3 + 2], 0, `should match z at index: ${i}`);
     }
   }
   t.end();
