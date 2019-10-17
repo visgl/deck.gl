@@ -11,6 +11,10 @@ const DEFAULT_STYLE = {
   zIndex: 2
 };
 
+function getDiv() {
+  return document.createElement('div');
+}
+
 function getTooltipDefault(pickedInfo) {
   if (!pickedInfo.picked) {
     return null;
@@ -31,7 +35,7 @@ const EXCLUDES = new Set(['position', 'index']);
 
 function tabularize(json) {
   // Turns a JSON object of picked info into HTML for a tooltip
-  const dataTable = document.createElement('div');
+  const dataTable = getDiv();
   dataTable.className = 'dataTable';
 
   // Creates rows of two columns for the tooltip
@@ -39,16 +43,16 @@ function tabularize(json) {
     if (EXCLUDES.has(key)) {
       continue; // eslint-disable-line
     }
-    const header = document.createElement('div');
+    const header = getDiv();
     header.className = 'header';
     header.innerText = key;
 
-    const valueElement = document.createElement('div');
+    const valueElement = getDiv();
     valueElement.className = 'value';
 
     valueElement.innerText = toText(json[key]);
 
-    const row = document.createElement('div');
+    const row = getDiv();
 
     setStyles(row, header, valueElement);
 
