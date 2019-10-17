@@ -33,7 +33,7 @@ test('gpuTransform#imports', t => {
   t.end();
 });
 
-test('gpuTransform', t => {
+test.only('gpuTransform', t => {
   const LONGITUDES = [1.0, 2.0, 3.0];
   const LATITUDES = [11.0, 12.0, 13.0];
   const gpuTable = new GPUTable(gl, {
@@ -43,7 +43,10 @@ test('gpuTransform', t => {
     }
   });
   gpuTransform(gpuTable, {
-    /* mapping empty for now */
+    position: {
+      sourceColumns: ['longitude', 'latitude'],
+      glslCode: 'position = vec3(longitude, latitude, 0.0);'
+    }
   });
 
   t.ok(gpuTable.buffers.position, 'should create position Buffer');

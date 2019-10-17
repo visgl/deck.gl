@@ -20,18 +20,20 @@
 
 // should create a new column based on mapping and gpuTable.
 import {Buffer, Transform, _Accessor as Accessor} from '@luma.gl/core';
-
+import {log} from '@deck.gl/core';
 import GL from '@luma.gl/constants';
 
-export default function gpuTransform(gpuTable, mapping) {
-  // For now hardcoding everything for position
+export default function gpuTransform(gpuTable, mappings) {
+  // TODO: For now hardcoding everything for position
   const longitudeBuffer = gpuTable.buffers.longitude;
   const latitudeBuffer = gpuTable.buffers.latitude;
 
   const byteLength = longitudeBuffer.byteLength * 3;
   const positionAccessor = Accessor.resolve({size: 3, type: GL.FLOAT});
   const positionBuffer = new Buffer(gpuTable.gl, {byteLength, accessor: positionAccessor});
+  const targetAccessors = {position: positionAccessor};
 
+  const {inject, varyings} = getShaderOptions(gpuTable, mappings, targetAccessors);
   const transform = new Transform(gpuTable.gl, {
     sourceBuffers: {
       longitude: longitudeBuffer,
@@ -40,20 +42,75 @@ export default function gpuTransform(gpuTable, mapping) {
     feedbackBuffers: {
       position: positionBuffer
     },
-    varyings: ['position'],
+    varyings,
+    inject,
     elementCount: longitudeBuffer.getElementCount(),
-    vs: `
-    attribute float longitude;
-    attribute float latitude;
-    varying vec3 position;
-
-    void main()
-    {
-      position = vec3(longitude, latitude, 0.);
-    }`
+    vs: 'void main() {}'
   });
   transform.run();
   transform.delete();
   gpuTable.addColumns({position: {buffer: positionBuffer, accessor: positionAccessor}});
   return;
+}
+
+function getShaderOptions(gpuTable, mappings, targetAccessors) {
+  let columns = [];
+  let glslCode = '';
+  let declarations = '';
+  const varyings = [];
+  for (const target in mappings) {
+    if (mappings[target].sourceColumns) {
+      columns = columns.concat(mappings[target].sourceColumns);
+    }
+    glslCode = `${glslCode}${mappings[target].glslCode}\n`;
+    const accessor = targetAccessors[target];
+    const type = getType(accessor);
+    declarations = `${declarations}varying ${type} ${target};\n`;
+    varyings.push(target);
+  }
+
+  // filter out duplicates
+  columns = new Set(columns);
+  columns.forEach(column => {
+    const accessor = gpuTable.accessors[column];
+    const type = getType(accessor);
+    declarations = `${declarations}attribute ${type} ${column};\n`;
+  });
+  return {
+    inject: {
+      'vs:#decl': declarations,
+      'vs:#main-start': glslCode
+    },
+    varyings
+  };
+}
+
+// TODO
+// Utility methods that can be moved to some global scope
+// or just any existing luma.gl shadertools methods
+
+function getType(accessor) {
+  switch (accessor.type) {
+    case GL.FLOAT:
+      switch (accessor.size) {
+        case 1:
+          return 'float';
+        case 2:
+          return 'vec2';
+        case 3:
+          return 'vec3';
+        case 4:
+          return 'vec4';
+        default:
+          // invalid size
+          log.assert(false);
+          break;
+      }
+      break;
+    default:
+      // TODO: add other cases
+      log.assert(false);
+      break;
+  }
+  return null;
 }
