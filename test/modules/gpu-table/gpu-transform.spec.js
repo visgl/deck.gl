@@ -33,7 +33,7 @@ test('gpuTransform#imports', t => {
   t.end();
 });
 
-test.only('gpuTransform', t => {
+test('gpuTransform', t => {
   const LONGITUDES = [1.0, 2.0, 3.0];
   const LATITUDES = [11.0, 12.0, 13.0];
   const gpuTable = new GPUTable(gl, {
