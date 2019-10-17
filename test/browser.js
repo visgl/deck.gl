@@ -51,6 +51,7 @@ test('deck.gl', t => {
   require('./modules/aggregation-layers/utils/grid-aggregation-utils.spec');
   require('./modules/aggregation-layers/heatmap-layer/heatmap-layer.spec');
   require('./modules/core/lib/pick-layers.spec');
+  require('./modules/gpu-table/gpu-transform.spec');
 
   require('./render');
   require('./interaction');

@@ -19,6 +19,46 @@
 // THE SOFTWARE.
 
 // should create a new column based on mapping and gpuTable.
-// export default gpuTransform(gpuTable, mapping) {
-//
-// }
+import {
+  Buffer,
+  Transform,
+   _Accessor as Accessor
+} from '@luma.gl/core';
+
+import GL from '@luma.gl/constants';
+
+export default function gpuTransform(gpuTable, mapping) {
+
+  // For now hardcoding everything for position
+  const longitudeBuffer = gpuTable.buffers.longitude;
+  const latitudeBuffer = gpuTable.buffers.latitude;
+
+  const byteLength = longitudeBuffer.byteLength * 3;
+  const positionAccessor = Accessor.resolve({size:3, type: GL.FLOAT});
+  const positionBuffer = new Buffer(gpuTable.gl, {byteLength, accessor: positionAccessor});
+
+  const transform = new Transform(gpuTable.gl, {
+    sourceBuffers: {
+      longitude: longitudeBuffer,
+      latitude: latitudeBuffer
+    },
+    feedbackBuffers : {
+      position: positionBuffer
+    },
+    varyings: ['position'],
+    elementCount: longitudeBuffer.getElementCount(),
+    vs: `
+    attribute float longitude;
+    attribute float latitude;
+    varying vec3 position;
+
+    void main()
+    {
+      position = vec3(longitude, latitude, 0.);
+    }`
+  });
+  transform.run();
+  transform.delete();
+  gpuTable.addColumns({position: {buffer: positionBuffer, accessor: positionAccessor}});
+  return;
+};

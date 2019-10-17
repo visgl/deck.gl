@@ -35,8 +35,10 @@ export default class GPUTable {
   addColumns(columns) {
     for (const name in columns) {
       log.assert(!this.buffers[name]);
-      this.accessors[name] = Accessor.resolve(columns[name]);
-      this.buffers[name] = new Buffer(this.gl, {
+      const {accessor, buffer, data} = columns[name];
+      log.assert(buffer || data);
+      this.accessors[name] = accessor || Accessor.resolve(columns[name]);
+      this.buffers[name] = buffer || new Buffer(this.gl, {
         data: columns[name].data,
         accessor: this.accessors[name]
       });
