@@ -11,11 +11,11 @@ const DEFAULT_STYLE = {
   zIndex: 2
 };
 
-function getDiv() {
+export function getDiv() {
   return document.createElement('div');
 }
 
-function getTooltipDefault(pickedInfo) {
+export function getTooltipDefault(pickedInfo) {
   if (!pickedInfo.picked) {
     return null;
   }
@@ -33,7 +33,7 @@ function getTooltipDefault(pickedInfo) {
 
 const EXCLUDES = new Set(['position', 'index']);
 
-function tabularize(json) {
+export function tabularize(json) {
   // Turns a JSON object of picked info into HTML for a tooltip
   const dataTable = getDiv();
   dataTable.className = 'dataTable';
@@ -87,7 +87,7 @@ function setStyles(row, header, value) {
   });
 }
 
-function toText(jsonValue) {
+export function toText(jsonValue) {
   // Set contents of table value, trimming for certain types of data
   let text;
   if (Array.isArray(jsonValue) && jsonValue.length > 4) {
@@ -110,7 +110,7 @@ function toText(jsonValue) {
   return text;
 }
 
-function substituteIn(template, json) {
+export function substituteIn(template, json) {
   let output = template;
   for (const key in json) {
     output = output.replace(`{${key}}`, json[key]);

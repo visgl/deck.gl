@@ -1,9 +1,10 @@
+// eslint-disable-next-line
 import test from 'tape-catch';
 import DocumentTest from 'deck.gl-test/utils/document';
 
-import * as wt from '@deck.gl/jupyter-widget/widget-tooltip';
+import makeTooltip, * as wt from '@deck.gl/jupyter-widget/widget-tooltip';
 
-const pickedInfo = {object: {elevationValue: 10, position: [0, 0]}, x: 0, y: 0};
+const pickedInfo = {object: {elevationValue: 10, position: [0, 0]}, x: 0, y: 0, picked: true};
 
 const jsDomDocument = new DocumentTest();
 wt.getDiv = () => {
@@ -11,18 +12,25 @@ wt.getDiv = () => {
 };
 
 // eslint-disable-next-line
-const TOOLTIP_HTML =
-  '"<div style="display: flex; flex-direction: row; justify-content: space-between; align-items: stretch;"><div class="header" style="font-weight: 700; margin-right: 10px; flex: 1 1 0%;">elevationValue</div><div class="value" style="flex: 0 0 auto; max-width: 250px; overflow: hidden; white-space: nowrap; text-overflow: ellipsis;">10</div></div>';
+const TOOLTIP_HTML = {
+  html:
+    '<div style="display: flex; flex-direction: row; justify-content: space-between; align-items: stretch;"><div class="header" style="font-weight: 700; margin-right: 10px; flex: 1;"></div><div class="value" style="flex: 0 0 auto; max-width: 250px; overflow: hidden; white-space: nowrap; text-overflow: ellipsis;"></div></div>',
+  style: {
+    fontFamily: '"Helvetica Neue", Helvetica, Arial, sans-serif',
+    display: 'flex',
+    flex: 'wrap',
+    maxWidth: '500px',
+    flexDirection: 'column',
+    zIndex: 2
+  }
+};
 
 test('getDefaultTooltip', t => {
-  const pickedInfoNull = Object.assign({picked: false}, pickedInfo);
-  t.equal(wt.getTooltipDefault(pickedInfoNull), null, 'should return null if nothing picked');
-  t.equal(wt.lastTooltip, undefined, 'lastTooltip should be undefined');
-  t.equal(wt.lastPickedObject, undefined, 'lastTooltip should be undefined');
+  Object.assign(pickedInfo, {picked: false});
+  t.equal(wt.getTooltipDefault(pickedInfo), null, 'should return null if nothing picked');
+  Object.assign(pickedInfo, {picked: true});
   const tooltip = wt.getTooltipDefault(pickedInfo);
-  t.equal(tooltip, wt.lastTooltip, 'lastTooltip should be present');
-  t.equal(tooltip, wt.lastPickedObject, 'lastPickedObject should be present');
-  t.equal(tooltip, TOOLTIP_HTML, 'tooltip is expected result');
+  t.deepEquals(tooltip, TOOLTIP_HTML, 'tooltip is expected result');
   t.end();
 });
 
@@ -30,7 +38,7 @@ test('toText', t => {
   const TESTING_TABLE = [
     {
       input: ['arma', 'virumque', 'cano', 'Troiae'],
-      expected: "['arma', 'virumque', 'cano', 'Troiae']",
+      expected: '["arma","virumque","cano","Troiae"]',
       message: 'should convert arrays to strings'
     },
     {
@@ -45,7 +53,7 @@ test('toText', t => {
     },
     {
       input: {id: 1},
-      expected: '{"id": 1}',
+      expected: '{"id":1}',
       message: 'should convert JSON to strings'
     },
     {
@@ -62,7 +70,7 @@ test('toText', t => {
     }
   ];
   for (const kv of TESTING_TABLE) {
-    t.equal(wt.toText(kv.input), kv.output, kv.message);
+    t.equal(wt.toText(kv.input), kv.expected, kv.message);
   }
   t.end();
 });
@@ -73,19 +81,23 @@ test('substituteIn', t => {
       quote: "Be an optimist. There's not much use being anything else.",
       origin: 'Winston Churchill'
     }),
-    "Be an optimist. There's not much use being anything else. - Winston Churchill"
+    '"Be an optimist. There\'s not much use being anything else." - Winston Churchill'
   );
   t.end();
 });
 
 test('makeTooltip', t => {
-  t.equal(wt.makeTooltip(null), null, 'If no tooltip JSON passed, return null');
+  t.equal(makeTooltip(null), null, 'If no tooltip JSON passed, return null');
   const htmlTooltip = {
-    html: '<b>Hey {all}</b>',
+    html: '<b>Elevation Value:</b> {elevationValue}',
     style: {
       backgroundColor: 'lemonchiffon'
     }
   };
-  t.equal(typeof wt.makeTooltip(htmlTooltip), 'function');
+  const tooltip = makeTooltip(htmlTooltip)(pickedInfo);
+  t.deepEquals(tooltip, {
+    style: {backgroundColor: 'lemonchiffon'},
+    html: '<b>Elevation Value:</b> 10'
+  });
   t.end();
 });
