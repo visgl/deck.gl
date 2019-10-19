@@ -2,14 +2,13 @@
 import test from 'tape-catch';
 import DocumentTest from 'deck.gl-test/utils/document';
 
-import makeTooltip, * as wt from '@deck.gl/jupyter-widget/widget-tooltip';
+import {getModule} from './utils.spec';
+
+const TOOLTIP_LIB = '@deck.gl/jupyter-widget/widget-tooltip';
 
 const pickedInfo = {object: {elevationValue: 10, position: [0, 0]}, x: 0, y: 0, picked: true};
 
 const jsDomDocument = new DocumentTest();
-wt.getDiv = () => {
-  return jsDomDocument.createElement('div');
-};
 
 // eslint-disable-next-line
 const TOOLTIP_HTML = {
@@ -25,7 +24,27 @@ const TOOLTIP_HTML = {
   }
 };
 
+function safelyGetModule(t) {
+  // Skip tests if in headless browser environment
+  let module;
+  try {
+    module = getModule(TOOLTIP_LIB);
+  } catch (err) {
+    t.end();
+  }
+  return module;
+}
+
 test('getDefaultTooltip', t => {
+  const wt = safelyGetModule(t);
+  if (!wt) {
+    return;
+  }
+
+  wt.getDiv = () => {
+    return jsDomDocument.createElement('div');
+  };
+
   Object.assign(pickedInfo, {picked: false});
   t.equal(wt.getTooltipDefault(pickedInfo), null, 'should return null if nothing picked');
   Object.assign(pickedInfo, {picked: true});
@@ -35,6 +54,11 @@ test('getDefaultTooltip', t => {
 });
 
 test('toText', t => {
+  const wt = safelyGetModule(t);
+  if (!wt) {
+    return;
+  }
+
   const TESTING_TABLE = [
     {
       input: ['arma', 'virumque', 'cano', 'Troiae'],
@@ -76,6 +100,11 @@ test('toText', t => {
 });
 
 test('substituteIn', t => {
+  const wt = safelyGetModule(t);
+  if (!wt) {
+    return;
+  }
+
   t.equal(
     wt.substituteIn('"{quote}" - {origin}', {
       quote: "Be an optimist. There's not much use being anything else.",
@@ -87,6 +116,11 @@ test('substituteIn', t => {
 });
 
 test('makeTooltip', t => {
+  const wt = safelyGetModule(t);
+  if (!wt) {
+    return;
+  }
+  const makeTooltip = wt.default;
   t.equal(makeTooltip(null), null, 'If no tooltip JSON passed, return null');
   const htmlTooltip = {
     html: '<b>Elevation Value:</b> {elevationValue}',
