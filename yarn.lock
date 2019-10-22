@@ -751,23 +751,23 @@
     unique-filename "^1.1.1"
     which "^1.3.1"
 
-"@jupyter-widgets/base@^1.1.10 || ^2":
-  version "2.0.1"
-  resolved "https://registry.yarnpkg.com/@jupyter-widgets/base/-/base-2.0.1.tgz#b31b5c8b2206bb008216f32abd488e5414bce3b7"
-  integrity sha512-jRNeQzvEf6MMGUaEPfBzgZ+IT4XOInpw8Ef+CunNUmUCiQZ8WfNpFR671S0Vu3xO6yGKMTU2QPdk8/aCsJRw9w==
+"@jupyter-widgets/base@^1.1.10":
+  version "1.2.5"
+  resolved "https://registry.yarnpkg.com/@jupyter-widgets/base/-/base-1.2.5.tgz#328933f1b96fd8438a415be24575916d497553dc"
+  integrity sha512-D/cYIo0o0wnTeR2uFTZqwxyxglE4UkJ2mGPEhN1G1a1pnIip+3GcONPjYY+w6OLzShKz10R9V7hUQTqcvRaW8Q==
   dependencies:
-    "@jupyterlab/services" "^4.0.0"
+    "@jupyterlab/services" "^1.0.1 || ^2.0.0 || ^3.0.0 || 4.0.0-alpha.3 || 4.0.0-alpha.6 || 4.0.0-alpha.8"
     "@phosphor/coreutils" "^1.2.0"
     "@phosphor/messaging" "^1.2.1"
     "@phosphor/widgets" "^1.3.0"
-    "@types/backbone" "^1.4.1"
-    "@types/lodash" "^4.14.134"
+    "@types/backbone" "^1.3.33"
+    "@types/lodash" "^4.14.66"
     backbone "1.2.3"
     base64-js "^1.2.1"
     jquery "^3.1.1"
     lodash "^4.17.4"
 
-"@jupyterlab/coreutils@^3.1.0":
+"@jupyterlab/coreutils@^3.0.0-alpha.8":
   version "3.1.0"
   resolved "https://registry.yarnpkg.com/@jupyterlab/coreutils/-/coreutils-3.1.0.tgz#b307569462c468d6a09dfa06f32fed03e55dd811"
   integrity sha512-ZqgzDUyanyvc86gtCrIbc1M6iniKHYmWNWHvWOcnq3KIP3wk3grchsTYPTfQDxcUS6F04baPGp/KohEU2ml40Q==
@@ -784,7 +784,7 @@
     path-posix "~1.0.0"
     url-parse "~1.4.3"
 
-"@jupyterlab/observables@^2.3.0":
+"@jupyterlab/observables@^2.2.0-alpha.8":
   version "2.3.0"
   resolved "https://registry.yarnpkg.com/@jupyterlab/observables/-/observables-2.3.0.tgz#db58eee4c874920d5099ccdbe7dc85a9d278782b"
   integrity sha512-I3Cmu0qUU3Emzai0MRBmiSHd1c42DtOuDYAru0/cvlI8xQKzin7t/EF9TahxSEBEDDNU4RRjADUYG9T3WefYtA==
@@ -795,17 +795,17 @@
     "@phosphor/messaging" "^1.2.3"
     "@phosphor/signaling" "^1.2.3"
 
-"@jupyterlab/services@^4.0.0":
-  version "4.1.1"
-  resolved "https://registry.yarnpkg.com/@jupyterlab/services/-/services-4.1.1.tgz#5071c317461cb1f318b2fdd5e3f175281d5c8399"
-  integrity sha512-HuayhkG+g5T4sZ1cKEJmF9KkCLnOMpcx+e5bk2cmTc3i3ByF5lp9EZOdkqG7OBc0pQz/6EaPcuiEGSHsV2706Q==
+"@jupyterlab/services@^1.0.1 || ^2.0.0 || ^3.0.0 || 4.0.0-alpha.3 || 4.0.0-alpha.6 || 4.0.0-alpha.8":
+  version "4.0.0-alpha.8"
+  resolved "https://registry.yarnpkg.com/@jupyterlab/services/-/services-4.0.0-alpha.8.tgz#8124d66a40c5fc22a8978628dc9874f53babf418"
+  integrity sha512-rt3xABRMxIMsffkgqeHto2202P5xY52FndHqqQnfSMILPOZ1gMq80vvNsePf3R2RS5KnK2hk6N5YSlKZPeXx/g==
   dependencies:
-    "@jupyterlab/coreutils" "^3.1.0"
-    "@jupyterlab/observables" "^2.3.0"
-    "@phosphor/algorithm" "^1.1.3"
-    "@phosphor/coreutils" "^1.3.1"
-    "@phosphor/disposable" "^1.2.0"
-    "@phosphor/signaling" "^1.2.3"
+    "@jupyterlab/coreutils" "^3.0.0-alpha.8"
+    "@jupyterlab/observables" "^2.2.0-alpha.8"
+    "@phosphor/algorithm" "^1.1.2"
+    "@phosphor/coreutils" "^1.3.0"
+    "@phosphor/disposable" "^1.1.2"
+    "@phosphor/signaling" "^1.2.2"
     node-fetch "^2.6.0"
     ws "^7.0.0"
 
@@ -1828,7 +1828,7 @@
     once "^1.4.0"
     universal-user-agent "^4.0.0"
 
-"@phosphor/algorithm@^1.1.3", "@phosphor/algorithm@^1.2.0":
+"@phosphor/algorithm@^1.1.2", "@phosphor/algorithm@^1.1.3", "@phosphor/algorithm@^1.2.0":
   version "1.2.0"
   resolved "https://registry.yarnpkg.com/@phosphor/algorithm/-/algorithm-1.2.0.tgz#4a19aa59261b7270be696672dc3f0663f7bef152"
   integrity sha512-C9+dnjXyU2QAkWCW6QVDGExk4hhwxzAKf5/FIuYlHAI9X5vFv99PYm0EREDxX1PbMuvfFBZhPNu0PvuSDQ7sFA==
@@ -1852,10 +1852,18 @@
     "@phosphor/keyboard" "^1.1.3"
     "@phosphor/signaling" "^1.3.0"
 
-"@phosphor/coreutils@^1.2.0", "@phosphor/coreutils@^1.3.1":
+"@phosphor/coreutils@^1.2.0", "@phosphor/coreutils@^1.3.0", "@phosphor/coreutils@^1.3.1":
   version "1.3.1"
   resolved "https://registry.yarnpkg.com/@phosphor/coreutils/-/coreutils-1.3.1.tgz#441e34f42340f7faa742a88b2a181947a88d7226"
   integrity sha512-9OHCn8LYRcPU/sbHm5v7viCA16Uev3gbdkwqoQqlV+EiauDHl70jmeL7XVDXdigl66Dz0LI11C99XOxp+s3zOA==
+
+"@phosphor/disposable@^1.1.2":
+  version "1.3.1"
+  resolved "https://registry.yarnpkg.com/@phosphor/disposable/-/disposable-1.3.1.tgz#be98fe12bd8c9a4600741cb83b0a305df28628f3"
+  integrity sha512-0NGzoTXTOizWizK/brKKd5EjJhuuEH4903tLika7q6wl/u0tgneJlTh7R+MBVeih0iNxtuJAfBa3IEY6Qmj+Sw==
+  dependencies:
+    "@phosphor/algorithm" "^1.2.0"
+    "@phosphor/signaling" "^1.3.1"
 
 "@phosphor/disposable@^1.2.0", "@phosphor/disposable@^1.3.0":
   version "1.3.0"
@@ -1895,6 +1903,13 @@
   version "1.1.3"
   resolved "https://registry.yarnpkg.com/@phosphor/properties/-/properties-1.1.3.tgz#63e4355be5e22a411c566fd1860207038f171598"
   integrity sha512-GiglqzU77s6+tFVt6zPq9uuyu/PLQPFcqZt914ZhJ4cN/7yNI/SLyMzpYZ56IRMXvzK9TUgbRna6URE3XAwFUg==
+
+"@phosphor/signaling@^1.2.2", "@phosphor/signaling@^1.3.1":
+  version "1.3.1"
+  resolved "https://registry.yarnpkg.com/@phosphor/signaling/-/signaling-1.3.1.tgz#1cd10b069bdb2c9adb3ba74245b30141e5afc2d7"
+  integrity sha512-Eq3wVCPQAhUd9+gUGaYygMr+ov7dhSGblSBXiDzpZlSIfa8OVD4P3cCvYXr/acDTNmZ/gHTcSFO8/n3rDkeXzg==
+  dependencies:
+    "@phosphor/algorithm" "^1.2.0"
 
 "@phosphor/signaling@^1.2.3", "@phosphor/signaling@^1.3.0":
   version "1.3.0"
@@ -1945,7 +1960,7 @@
     probe.gl "3.1.1"
     puppeteer "^1.16.0"
 
-"@types/backbone@^1.4.1":
+"@types/backbone@^1.3.33":
   version "1.4.1"
   resolved "https://registry.yarnpkg.com/@types/backbone/-/backbone-1.4.1.tgz#aa03f9f69994bd96646c50cfc70b5f30d38aafaa"
   integrity sha512-KYfGuQy4d2vvYXbn0uHFZ6brFLndatTMomxBlljpbWf4kFpA3BG/6LA3ec+J9iredrX6eAVI7sm9SVAvwiIM6g==
@@ -1974,7 +1989,7 @@
   dependencies:
     "@types/sizzle" "*"
 
-"@types/lodash@^4.14.134":
+"@types/lodash@^4.14.66":
   version "4.14.144"
   resolved "https://registry.yarnpkg.com/@types/lodash/-/lodash-4.14.144.tgz#12e57fc99064bce45e5ab3c8bc4783feb75eab8e"
   integrity sha512-ogI4g9W5qIQQUhXAclq6zhqgqNUr7UlFaqDHbch7WLSLeeM/7d3CRaw7GLajxvyFvhJqw4Rpcz5bhoaYtIx6Tg==
