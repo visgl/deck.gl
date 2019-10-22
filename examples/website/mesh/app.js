@@ -8,7 +8,7 @@ import {
   LightingEffect,
   AmbientLight
 } from '@deck.gl/core';
-import {SolidPolygonLayer} from 'deck.gl/layers';
+import {SolidPolygonLayer} from '@deck.gl/layers';
 import {SimpleMeshLayer} from '@deck.gl/mesh-layers';
 
 import {OBJLoader} from '@loaders.gl/obj';
