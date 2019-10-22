@@ -1,6 +1,6 @@
 {
   "name": "@deck.gl/jupyter-widget",
-  "description": "Jupyter widget for rendering deck.gl in a Jupyter notebook",
+  "description": "Toolbox for rendering map data visualizations, optimized for Jupyter and built on deck.gl",
   "license": "MIT",
   "version": "7.4.0-alpha.2",
   "keywords": [
