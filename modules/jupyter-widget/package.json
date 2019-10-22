@@ -29,7 +29,7 @@
     "prepublishOnly": "webpack"
   },
   "dependencies": {
-    "@jupyter-widgets/base": "^1.1.10"
+    "@jupyter-widgets/base": "^1.1.10 || ^2"
   },
   "jupyterlab": {
     "extension": "src/plugin"
