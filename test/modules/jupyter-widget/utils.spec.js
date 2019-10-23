@@ -1,6 +1,7 @@
 /* global window, console */
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
+/* eslint-disable import/namespace */
 
 import * as widgets from '@jupyter-widgets/base';
 
