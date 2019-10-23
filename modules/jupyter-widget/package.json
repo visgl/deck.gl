@@ -1,6 +1,6 @@
 {
   "name": "@deck.gl/jupyter-widget",
-  "description": "Toolbox for rendering map data visualizations, optimized for Jupyter and built on deck.gl",
+  "description": "Jupyter widget for rendering deck.gl in a Jupyter notebook",
   "license": "MIT",
   "version": "7.4.0-alpha.2",
   "keywords": [
@@ -25,10 +25,11 @@
   "scripts": {
     "watch": "(cd ../main && npm run build-bundle -- --env.dev) && ln -f ../main/dist/dist.dev.js ./dist/deckgl.dev.js && webpack-dev-server --env.dev --port 8080",
     "build": "webpack",
+    "build:labextension": "npm pack",
     "prepublishOnly": "webpack"
   },
   "dependencies": {
-    "@jupyter-widgets/base": "^1.1.10"
+    "@jupyter-widgets/base": "^1.1.10 || ^2"
   },
   "jupyterlab": {
     "extension": "src/plugin"
