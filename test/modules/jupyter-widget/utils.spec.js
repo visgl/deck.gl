@@ -1,6 +1,7 @@
 /* global window, console */
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
+/* eslint-disable import/namespace */
 
 import * as widgets from '@jupyter-widgets/base';
 
@@ -55,6 +56,21 @@ export class DummyManager extends widgets.ManagerBase {
       v.on('remove', () => console.log('view removed', v)); //eslint-disable-line
       return v.el;
     });
+  }
+
+  loadClass(className, moduleName, moduleVersion) {
+    if (moduleName === '@jupyter-widgets/base') {
+      if (widgets[className]) {
+        return Promise.resolve(widgets[className]);
+      }
+      return Promise.reject(`Cannot find class ${className}`);
+    } else if (moduleName === 'jupyter-datawidgets') {
+      if (this.testClasses[className]) {
+        return Promise.resolve(this.testClasses[className]);
+      }
+      return Promise.reject(`Cannot find class ${className}`);
+    }
+    return Promise.reject(`Cannot find module ${moduleName}`);
   }
 
   _get_comm_info() {
