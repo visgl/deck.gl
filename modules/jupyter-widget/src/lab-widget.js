@@ -16,8 +16,6 @@ function addScript(url) {
   });
 }
 
-console.log('dare we touch the sun');
-
 // TODO where to keep these requirements so that they're centralized?
 // Duplicates of requirements in bindings/python/pydeck/requirejs_dependencies.json
 const REQUIREMENTS = [
