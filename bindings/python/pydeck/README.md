@@ -147,10 +147,11 @@ To enable the widget in a Jupyter Notebook, run:
 
 To enable develop with Jupyter Lab, run:
 
-```
+```bash
 # Execute in deck.gl/modules/jupyter-widget directory
-jupyter labextension install @jupyter-widgets/jupyterlab-manager
-jupyter labextension install .
+jupyter labextension install @jupyter-widgets/jupyterlab-manager@1.0.3 --no-build
+jupyter labextension install . --no-build
+jupyter lab build
 ```
 
 ### Tests
