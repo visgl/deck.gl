@@ -158,11 +158,10 @@ export default class HeatmapLayer extends CompositeLayer {
 
     return new TriangleLayer(
       this.getSubLayerProps({
-        id: `${this.id}-triangle-layer`,
+        id: 'triangle-layer',
         updateTriggers
       }),
       {
-        id: 'heatmap-triangle-layer',
         data: {
           attributes: {
             positions: triPositionBuffer,
