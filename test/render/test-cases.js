@@ -1192,6 +1192,35 @@ export const TEST_CASES = [
     goldenImage: './test/render/golden-images/text-layer-multi-lines.png'
   },
   {
+    name: 'text-layer-auto-wrapping',
+    viewState: {
+      latitude: 37.751537058389985,
+      longitude: -122.42694203247012,
+      zoom: 11.5,
+      pitch: 0,
+      bearing: 0
+    },
+    layers: [
+      new TextLayer({
+        id: 'text-layer',
+        data: dataSamples.points.slice(0, 3),
+        fontFamily: 'Arial',
+        wordBreak: 'break-word',
+        width: 1000,
+        getText: x => `${x.LOCATION_NAME}\n${x.ADDRESS}`,
+        getPosition: x => x.COORDINATES,
+        getColor: x => [153, 0, 0],
+        getSize: x => 16,
+        getAngle: x => 0,
+        sizeScale: 1,
+        getTextAnchor: x => 'middle',
+        getAlignmentBaseline: x => 'center',
+        getPixelOffset: x => [10, 0]
+      })
+    ],
+    goldenImage: './test/render/golden-images/text-layer-auto-wrapping.png'
+  },
+  {
     name: 'gpu-grid-lnglat',
     viewState: GRID_LAYER_INFO.viewState,
     layers: [
