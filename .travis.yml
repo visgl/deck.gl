@@ -47,6 +47,8 @@ matrix:
       python:
         - "3.5"
         - "2.7"
+      node_js:
+        - 10.16.0
       cache:
         pip: true
         directories:
