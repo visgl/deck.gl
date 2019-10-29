@@ -1,5 +1,6 @@
 import test from 'tape-catch';
-import * as base from '@jupyter-widgets/base';
+
+const base = require('@jupyter-widgets/base');
 
 class BlankClass {
   constructor() {
@@ -12,10 +13,8 @@ class BlankClass {
   }
 }
 
-console.table(base); // eslint-disable-line
-
-base.DOMWidgetModel.DOMWidgetModel = BlankClass;
-base.DOMWidgetView.DOMWidgetView = BlankClass;
+base.DOMWidgetModel = BlankClass;
+base.DOMWidgetView = BlankClass;
 
 function getDeckModel(state) {
   // Require at runtime, after the environment is polyfilled
