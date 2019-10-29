@@ -14,12 +14,13 @@ Also see luma.gl roadmaps, such as the GPGPU roadmap
 
 | Roadmap                                                            | Status       | Description |
 | ---                                                                | ---          | ---         |
+| [**GPU Table Roadmap**](../roadmaps/api-evolution-roadmap.md)  | Draft        | Ideas for changes/extensions to the core deck.gl API |
 | [**API Evolution Roadmap**](../roadmaps/api-evolution-roadmap.md)  | Draft        | Ideas for changes/extensions to the core deck.gl API |
 | [**New Layers Roadmap**](../roadmaps/layers-roadmap.md)            | Draft        | Ideas for new layers |
 | [**Animation Roadmap**](../roadmaps/animation-roadmap.md)          | Draft        | Animation API roadmap |
 | [**Performance Roadmap**](../roadmaps/performance-roadmap.md)      | Draft        | Performance Improvements |
 | [**Infovis Roadmap**](../roadmaps/infovis-roadmap.md)              | Draft        | Infovis (non-geospatial) features roadmap |
-| [**Reduce Distribution Size**](../roadmaps/dist-size-roadmap.md)   | Ongoing      | Reduce size of distribution and the bundle size of applications using deck.gl |
+| [**Reduce Distribution Size**](../roadmaps/dist-size-roadmap.md)   | Implemented  | Reduce size of distribution and the bundle size of applications using deck.gl |
 | [**Pure JS and Scripting Roadmap**](../roadmaps/purejs-roadmap.md) | Implemented  | Support for Scripting and Pure-JS APIs |
 
 
@@ -49,7 +50,7 @@ Possible other animation related RFCs:
 | [**Unified ViewState**](vNext/view-state-rfc.md) | @ibgreen | **Deferred** | Controversial proposal for an even more Unified View/Controller Architecture. Review again after all Controller/Multiview RFCs have been approved/implemented |
 
 
-## v7.x Binary Data RFCs
+## v8.x Binary Data RFCs
 
 Group of related RFCs loosely targeted for 7.x releases.
 
