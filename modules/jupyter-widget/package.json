@@ -28,7 +28,12 @@
     "prepublishOnly": "webpack"
   },
   "dependencies": {
-    "@jupyter-widgets/base": "^1.1.10 || ^2"
+    "@jupyter-widgets/base": "^1.1.10 || ^2",
+    "mapbox-gl": "^1.2.1",
+    "h3-js": "^3.4.3",
+    "s2-geometry": "^1.2.10",
+    "@loaders.gl/csv": "^1.2.2",
+    "deck.gl": "^7.3.0"
   },
   "jupyterlab": {
     "extension": "src/plugin"

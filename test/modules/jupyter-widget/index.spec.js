@@ -1,4 +1,21 @@
 import test from 'tape-catch';
+import * as base from '@jupyter-widgets/base';
+
+class BlankClass {
+  constructor() {
+    this.model = this.defaults();
+    this.el = {appendChild: x => x};
+  }
+
+  defaults() {
+    return null;
+  }
+}
+
+console.table(base); // eslint-disable-line
+
+base.DOMWidgetModel.DOMWidgetModel = BlankClass;
+base.DOMWidgetView.DOMWidgetView = BlankClass;
 
 function getDeckModel(state) {
   // Require at runtime, after the environment is polyfilled
@@ -18,7 +35,7 @@ function getDeckModel(state) {
   }
 }
 
-test('jupyter-widget should be createable', t => {
+test.only('jupyter-widget should be createable', t => {
   const model = getDeckModel({});
   if (model) {
     t.deepEquals(model.get('json_input'), null, 'json_input should be null');
