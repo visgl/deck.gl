@@ -103,8 +103,9 @@ class FrontendBuild(Command):
 
     def has_build_utilities(self):
         try:
-            check_call(["npm", "--version"], stdout=open(os.devnull, 'wb'))
-            check_call(["yarn", "--version"], stdout=open(os.devnull, 'wb'))
+            check_call(["npm", "--version"], stdout=sys.stdout)
+            check_call(["yarn", "--version"], stdout=sys.stdout)
+            check_call(["node", "--version"], stdout=sys.stdout)
             return True
         except Exception:
             return False
