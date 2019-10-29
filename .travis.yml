@@ -47,8 +47,6 @@ matrix:
       python:
         - "3.5"
         - "2.7"
-      node_js:
-        - 10.16.0
       cache:
         pip: true
         directories:
@@ -56,5 +54,6 @@ matrix:
       install:
         - pip install -r requirements.txt
         - pip install -r requirements-dev.txt
+        - nvm use 10.16.0
         - pip install -e . --install-option "--build_all"
       script: pytest --cov=pydeck
