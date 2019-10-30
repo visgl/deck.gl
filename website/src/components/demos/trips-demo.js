@@ -2,7 +2,7 @@ import React, {Component} from 'react';
 
 import {MAPBOX_STYLES, DATA_URI} from '../../constants/defaults';
 import {readableInteger} from '../../utils/format-utils';
-import {App} from 'website-examples/trips/app';
+import App from 'website-examples/trips/app';
 
 const EMPTY_ARRAY = [];
 

@@ -1,7 +1,7 @@
 import React, {Component} from 'react';
 import {readableInteger} from '../../utils/format-utils';
 import {MAPBOX_STYLES, DATA_URI} from '../../constants/defaults';
-import {App} from 'website-examples/data-filter/app';
+import App from 'website-examples/data-filter/app';
 
 export default class DataFilterDemo extends Component {
   static get data() {

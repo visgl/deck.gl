@@ -1,7 +1,7 @@
 import React, {Component} from 'react';
 import {readableInteger} from '../../utils/format-utils';
 import {MAPBOX_STYLES, DATA_URI} from '../../constants/defaults';
-import {App, COLOR_SCALE} from 'website-examples/highway/app';
+import App, {COLOR_SCALE} from 'website-examples/highway/app';
 
 const EMPTY_ARRAY = [];
 
@@ -72,7 +72,7 @@ export default class HighwayDemo extends Component {
 
     return (
       <div>
-        <App 
+        <App
           {...otherProps}
           year={params.year.value}
           accidents={data && data[0] || EMPTY_ARRAY}

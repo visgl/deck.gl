@@ -1,13 +1,7 @@
 import React, {Component} from 'react';
 import {MAPBOX_STYLES, DATA_URI} from '../../constants/defaults';
 import {readableInteger} from '../../utils/format-utils';
-import {App} from 'website-examples/icon/app';
-
-import autobind from 'autobind-decorator';
-
-function stopPropagation(evt) {
-  evt.stopPropagation();
-}
+import App from 'website-examples/icon/app';
 
 export default class IconDemo extends Component {
 

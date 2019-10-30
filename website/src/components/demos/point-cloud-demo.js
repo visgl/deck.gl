@@ -1,7 +1,7 @@
 import React, {Component} from 'react';
 import autobind from 'autobind-decorator';
 import {readableInteger} from '../../utils/format-utils';
-import {App} from 'website-examples/point-cloud/app';
+import App from 'website-examples/point-cloud/app';
 
 export default class PointCloudDemo extends Component {
   static get data() {

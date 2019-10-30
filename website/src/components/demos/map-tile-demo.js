@@ -1,6 +1,6 @@
 import React, {Component} from 'react';
 import {MAPBOX_STYLES} from '../../constants/defaults';
-import {App} from 'website-examples/map-tile/app';
+import App from 'website-examples/map-tile/app';
 
 export default class LineDemo extends Component {
   static get parameters() {
