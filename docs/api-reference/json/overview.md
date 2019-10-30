@@ -21,7 +21,7 @@ deck.gl supports a declarative system for describing layers and their props, and
   </div>
 </div>
 
-See our [live demo](https://deck.gl/json).
+See our [live demo](https://deck.gl/playground).
 
 
 The module was created to enable specifying deck.gl visualizations using [JSON formatted](https://www.json.org/) text files and strings, but is completely generic and
