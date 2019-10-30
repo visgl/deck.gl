@@ -18,7 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-/* global setTimeout */
+/* global setTimeout clearTimeout */
 import GL from '@luma.gl/constants';
 import {
   getBounds,
@@ -190,7 +190,8 @@ export default class HeatmapLayer extends AggregationLayer {
       maxWeightsTexture,
       triPositionBuffer,
       triTexCoordBuffer,
-      colorTexture
+      colorTexture,
+      updateTimer
     } = this.state;
     /* eslint-disable no-unused-expressions */
     weightsTransform && weightsTransform.delete();
@@ -200,6 +201,7 @@ export default class HeatmapLayer extends AggregationLayer {
     triPositionBuffer && triPositionBuffer.delete();
     triTexCoordBuffer && triTexCoordBuffer.delete();
     colorTexture && colorTexture.delete();
+    updateTimer && clearTimeout(updateTimer);
     /* eslint-enable no-unused-expressions */
   }
 
