@@ -26,7 +26,7 @@ const MS_PER_DAY = 8.64e7; // milliseconds in a day
 
 const dataFilter = new DataFilterExtension({filterSize: 1});
 
-export class App extends Component {
+export default class App extends Component {
   constructor(props) {
     super(props);
 

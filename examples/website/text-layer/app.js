@@ -28,7 +28,7 @@ const INITIAL_VIEW_STATE = {
   bearing: 0
 };
 
-export class App extends Component {
+export default class App extends Component {
   constructor(props) {
     super(props);
 
