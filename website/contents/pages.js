@@ -188,7 +188,7 @@ export const examplePages = generatePath([
     children: [
       {
         name: 'Playground',
-        external: 'http://deck.gl/json'
+        external: 'http://deck.gl/playground'
       }
     ]
   }
