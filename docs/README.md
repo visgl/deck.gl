@@ -1,13 +1,13 @@
 <p align="center">
   These docs are for
-  <a href="https://github.com/uber/deck.gl/blob/7.2-release/docs/README.md">
-    <img src="https://img.shields.io/badge/deck.gl-v7.2-brightgreen.svg?style=flat-square" />
+  <a href="https://github.com/uber/deck.gl/blob/7.3-release/docs/README.md">
+    <img src="https://img.shields.io/badge/deck.gl-v7.3-brightgreen.svg?style=flat-square" />
   </a>
   Looking for an old version?
+  <a href="https://github.com/uber/deck.gl/blob/7.2-release/docs/README.md">
+    <img src="https://img.shields.io/badge/deck.gl-v7.2-green.svg?style=flat-square" />
   <a href="https://github.com/uber/deck.gl/blob/7.1-release/docs/README.md">
     <img src="https://img.shields.io/badge/deck.gl-v7.1-green.svg?style=flat-square" />
-  <a href="https://github.com/uber/deck.gl/blob/7.0-release/docs/README.md">
-    <img src="https://img.shields.io/badge/deck.gl-v7.0-green.svg?style=flat-square" />
   <a href="https://github.com/uber/deck.gl/blob/6.0-release/docs/README.md">
     <img src="https://img.shields.io/badge/deck.gl-v6.0-green.svg?style=flat-square" />
   </a>
