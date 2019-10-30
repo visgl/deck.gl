@@ -502,7 +502,7 @@ The projection algorithm used for geospatial coordinates (layers with `coordinat
 
 ### JSON API (Experimental)
 
-A new experimental module `@deck.gl/json` provides a set of classes that allows deck.gl layers and views to be specified using JSON-formatted text files. To facilitate experimentation, a JSON layer browser is available on [http://deck.gl/json](http://deck.gl/json).
+A new experimental module `@deck.gl/json` provides a set of classes that allows deck.gl layers and views to be specified using JSON-formatted text files. To facilitate experimentation, a JSON layer browser is available on [http://deck.gl/playground](http://deck.gl/playground).
 
 
 ### Enhanced Multiview Support
