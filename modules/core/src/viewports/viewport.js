@@ -82,7 +82,6 @@ export default class Viewport {
     this.unprojectPosition = this.unprojectPosition.bind(this);
     this.projectFlat = this.projectFlat.bind(this);
     this.unprojectFlat = this.unprojectFlat.bind(this);
-    this.getMatrices = this.getMatrices.bind(this);
   }
 
   // Two viewports are equal if width and height are identical, and if
@@ -205,35 +204,6 @@ export default class Viewport {
       });
     }
     return this.distanceScales;
-  }
-
-  getMatrices({modelMatrix = null} = {}) {
-    let modelViewProjectionMatrix = this.viewProjectionMatrix;
-    let pixelProjectionMatrix = this.pixelProjectionMatrix;
-    let pixelUnprojectionMatrix = this.pixelUnprojectionMatrix;
-
-    if (modelMatrix) {
-      modelViewProjectionMatrix = mat4.multiply([], this.viewProjectionMatrix, modelMatrix);
-      pixelProjectionMatrix = mat4.multiply([], this.pixelProjectionMatrix, modelMatrix);
-      pixelUnprojectionMatrix = mat4.invert([], pixelProjectionMatrix);
-    }
-
-    const matrices = Object.assign({
-      modelViewProjectionMatrix,
-      viewProjectionMatrix: this.viewProjectionMatrix,
-      viewMatrix: this.viewMatrix,
-      projectionMatrix: this.projectionMatrix,
-
-      // project/unproject between pixels and world
-      pixelProjectionMatrix,
-      pixelUnprojectionMatrix,
-
-      width: this.width,
-      height: this.height,
-      scale: this.scale
-    });
-
-    return matrices;
   }
 
   containsPixel({x, y, width = 1, height = 1}) {

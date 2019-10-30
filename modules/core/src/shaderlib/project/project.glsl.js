@@ -189,24 +189,4 @@ float project_pixel_size(float pixels) {
 vec2 project_pixel_size(vec2 pixels) {
   return pixels;
 }
-
-// Deprecated, remove in v8
-float project_scale(float meters) {
-  return project_size(meters);
-}
-vec2 project_scale(vec2 meters) {
-  return project_size(meters);
-}
-vec3 project_scale(vec3 meters) {
-  return project_size(meters);
-}
-vec4 project_scale(vec4 meters) {
-  return project_size(meters);
-}
-vec4 project_to_clipspace(vec4 position) {
-  return project_common_position_to_clipspace(position);
-}
-vec4 project_pixel_to_clipspace(vec2 pixels) {
-  return vec4(project_pixel_size_to_clipspace(pixels), 0.0, 0.0);
-}
 `;

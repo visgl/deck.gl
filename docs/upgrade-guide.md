@@ -1,5 +1,21 @@
 # Upgrade Guide
 
+## Upgrading from deck.gl v7.x to v8.0
+
+### Breaking Changes
+
+##### Removed
+
+- `project` shader module
+  + `project_scale`: use `project_size`
+  + `project_to_clipspace`: use `project_position_to_clipspace`
+  + `project_pixel_to_clipspace`: use `project_pixel_size_to_clipspace`
+- `WebMercatorViewport` class
+  + `getLocationAtPoint`: use `getMapCenterByLngLatPosition`
+  + `lngLatDeltaToMeters`
+  + `metersToLngLatDelta`
+
+
 ## Upgrading from deck.gl v7.2 to v7.3
 
 #### Core

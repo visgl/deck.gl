@@ -146,19 +146,3 @@ test('WebMercatorViewport.getScales', t => {
   }
   t.end();
 });
-
-test('WebMercatorViewport.meterDeltas', t => {
-  config.EPSILON = LNGLAT_TOLERANCE;
-
-  for (const vc of TEST_VIEWPORTS) {
-    const viewport = new WebMercatorViewport(vc.mapState);
-    for (const tc of TEST_VIEWPORTS) {
-      const coordinate = [tc.mapState.longitude, tc.mapState.latitude, 0];
-      const deltaLngLat = viewport.metersToLngLatDelta(coordinate);
-      const deltaMeters = viewport.lngLatDeltaToMeters(deltaLngLat);
-      t.comment(`Comparing [${deltaMeters}] to [${coordinate}]`);
-      t.ok(equals(deltaMeters, coordinate), 'deltaLngLat to deltaMeters');
-    }
-  }
-  t.end();
-});
