@@ -14,6 +14,7 @@ Also see luma.gl roadmaps, such as the GPGPU roadmap
 
 | Roadmap                                                            | Status       | Description |
 | ---                                                                | ---          | ---         |
+| [**GPU Table Roadmap**](../roadmaps/gpu-table-roadmap.md)  | Draft        | Evolution of the `GPUTable` class across deck.gl v8.x releases |
 | [**API Evolution Roadmap**](../roadmaps/api-evolution-roadmap.md)  | Draft        | Ideas for changes/extensions to the core deck.gl API |
 | [**New Layers Roadmap**](../roadmaps/layers-roadmap.md)            | Draft        | Ideas for new layers |
 | [**Animation Roadmap**](../roadmaps/animation-roadmap.md)          | Draft        | Animation API roadmap |
