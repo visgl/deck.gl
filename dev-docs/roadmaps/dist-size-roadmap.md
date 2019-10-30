@@ -10,7 +10,6 @@
 
 It is the premise of this document that there is no single silver bullet to help us solve the distribution size issue. While we'd love to be proven wrong, it is expected that we will have to apply a combination of continued efforts in multiple areas and be thoughtful about how we organize code going forward.
 
-
 ## Critera
 
 To make meaningful progress, we need to define some measurement criteria:
@@ -19,18 +18,11 @@ To make meaningful progress, we need to define some measurement criteria:
 * Size of bundle before application minification (debug)
 * Easy of debugging
 
-While one might be tempted to focus on prod sizes, many users look at the debug sizes (which affects build/load/debug cycle speeds) so optimizing both are important.
+While one might be tempted to focus on prod sizes, many users look at the debug sizes (which affects build/load/debug cycle speeds) so optimizing both are important. Script sizes also matter.
 
+> A lot has already been done, see the sections towards the bottom of this doc for details.
 
-## Progress
-
-A lot has already been done, see the sections towards the bottom of this doc for details.
-
-
-## Proposed Techniques
-
-Ordered loosely after expected size savings
-
+## Proposals
 
 ### Proper Minification Techniques
 
@@ -60,6 +52,32 @@ There are three known techniques to achieve this in JavaScript:
 * Subdirectory Imports - NOT USED, DUE TO TECHNICAL COMPLICATIONS
 
 
+### Subdirectory Imports
+
+STATUS: HAS SEVERE ISSUES, NOT PURSUED
+
+This technique (offering subdirectory imports `import ScatterplotLayer from 'deck.gl/scatterplot-layer'`) has serious complications when combined with tree shaking. Unless we can solve these this technique can not be used in deck.gl.
+
+### Remove asserts in production
+
+Write a babel plugin to strip asserts
+
+STATUS: PROMISING, NEEDS EXPERIMENTATION
+EFFORT: MODEST
+
+There are npm packages that strip out asserts in production builds.
+
+WORK ITEM:
+* Experiment with assert-stripping packages for production builds
+* If good results, include example/recipe in our webpage
+* Use in our own apps
+
+## Implemented
+
+### Inline GL constants
+
+Write a babel plugin to inline GL constantss
+
 ### Tree-Shaking
 
 STATUS: PARTIALLY SUPPORTED, NEEDS MORE WORK
@@ -81,41 +99,6 @@ WORK ITEMS:
 WEBPACK 2
 * UglifyJS support for ES6 is not strong, tree shaking must be done on transpiled code
 
-
-### Subdirectory Imports
-
-STATUS: HAS SEVERE ISSUES, NOT PURSUED
-
-This technique (offering subdirectory imports `import ScatterplotLayer from 'deck.gl/scatterplot-layer'`) has serious complications when combined with tree shaking. Unless we can solve these this technique can not be used in deck.gl.
-
-
-
-## Additional Ideas
-
-### Inline GL constants
-
-Write a babel plugin to inline GL constantss
-
-
-### Remove asserts in production
-
-Write a babel plugin to strip asserts
-
-STATUS: PROMISING, NEEDS EXPERIMENTATION
-EFFORT: MODEST
-
-There are npm packages that strip out asserts in production builds.
-
-WORK ITEM:
-* Experiment with assert-stripping packages for production builds
-* If good results, include example/recipe in our webpage
-* Use in our own apps
-
-
-
-## Implemented Improvements
-
-
 ### Publishing Separate Packages
 
 Status: IMPLEMENTED
@@ -130,13 +113,11 @@ This is mostly helpful when we have parts of the library that are clearly option
 NEXT STEPS:
 * We'd need to define a meaningful separation into sub-packages - if most apps end up importing all the modules we haven't really gained anything.
 
-
 ### Use Automatic Attribute Updaters
 
 Status: IMPLEMENTED - at least for the easy use cases
 
 Most layer attribute updaters are doing the same thing which could easily be automated, especially if we had prop types for accessors. This could remove 10-20% of the code from each layer, at the cost of layer source code being a little less easily understood.
-
 
 ### Dependency Reduction
 
@@ -146,7 +127,6 @@ Upside: MEDIUM - BIG
 Status: IMPLEMENTED
 
 luma.gl and deck.gl now have a minimal number of dependencies.
-
 
 ### Replace gl-matrix with custom math library
 
@@ -158,8 +138,6 @@ gl-matrix takes about 200KB it includes every function many that are never used.
 
 Creating our own math library that handpicks the most common functions from the stack-gl versions of these libraries brings the size down to about 60KB and can make this code more amenable to tree-shaking.
 
-
-
 ### Remove v4.0 Deprecated Code
 
 Status: IMPLEMENTED
@@ -170,7 +148,6 @@ While the amount of backwards compatible code is generally modest deck.gl contai
 
 WORK ITEMS:
 * ChoroplethLayers should be removed in next big release.
-
 
 ### Remove Duplicated Code
 
