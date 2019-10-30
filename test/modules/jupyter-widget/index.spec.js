@@ -1,26 +1,15 @@
 import test from 'tape-catch';
 
-const base = require('@jupyter-widgets/base');
-
-class BlankClass {
-  constructor() {
-    this.model = this.defaults();
-    this.el = {appendChild: x => x};
-  }
-
-  defaults() {
-    return null;
-  }
-}
-
-base.DOMWidgetModel = BlankClass;
-base.DOMWidgetView = BlankClass;
+const moduleAlias = require('module-alias');
+moduleAlias.addAlias('@jupyter-widgets/base', (fromPath, request, alias) => {
+  return `${__dirname}/mock-widget-base.js`;
+});
 
 function getDeckModel(state) {
   // Require at runtime, after the environment is polyfilled
   try {
     const {DeckGLModel} = require('@deck.gl/jupyter-widget');
-    const {createTestModel} = require('./utils.spec');
+    const {createTestModel} = require('./mock-widget-base');
 
     const model = createTestModel(DeckGLModel, state);
     return model;
@@ -34,7 +23,7 @@ function getDeckModel(state) {
   }
 }
 
-test.only('jupyter-widget should be createable', t => {
+test('jupyter-widget should be createable', t => {
   const model = getDeckModel({});
   if (model) {
     t.deepEquals(model.get('json_input'), null, 'json_input should be null');
