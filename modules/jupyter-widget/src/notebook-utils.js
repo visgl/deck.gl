@@ -1,28 +1,37 @@
 /* global document, window */
-/* Supports pydeck in a RequireJS-driven environment, like
- * a Jupyter notebook or pydeck's standalone HTML page.
- */
 import createDeckFromDependencies from './initializer';
 
-const REQUIREJS_URL = 'https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js';
+const externalLibraires = [
+  'https://unpkg.com/deck.gl/dist.min.js',
+  'https://api.tiles.mapbox.com/mapbox-gl-js/v1.2.1/mapbox-gl.js',
+  'https://unpkg.com/h3-js@^3.4.3/dist/h3-js.umd.js',
+  'https://bundle.run/s2-geometry@1.2.10?name=index.js',
+  'https://unpkg.com/@loaders.gl/csv@1.2.2/dist/dist.min.js'
+];
 
-if (!window.require) {
-  const requirejs = document.createElement('script');
-  requirejs.setAttribute('src', REQUIREJS_URL);
-  document.head.appendChild(requirejs);
+function getJsLib(url) {
+  return new Promise((res, rej) => {
+    const script = document.createElement('script');
+    script.src = url;
+    script.onload = () => {
+      res();
+    };
+    script.onerror = () => {
+      rej();
+    };
+    document.head.append(script);
+  });
 }
 
 export function initDeck({mapboxApiKey, container, jsonInput, tooltip, onComplete, handleClick}) {
-  require(['mapbox-gl', 'h3', 's2Geometry'], mapboxgl => {
-    require(['deck.gl', 'loaders.gl/csv'], (deck, loaders) => {
-      createDeckFromDependencies({
-        dependencies: {deck, loaders, mapboxgl},
-        mapboxApiKey,
-        jsonInput,
-        tooltip,
-        onComplete,
-        handleClick
-      });
+  Promise.all(externalLibraires.map(lib => getJsLib(lib))).then(() => {
+    const dependencies = {deck: window.deck, loaders: window.loaders, mapboxgl: window.mapboxgl};
+    createDeckFromDependencies({
+      dependencies,
+      jsonInput,
+      tooltip,
+      onComplete,
+      handleClick
     });
   });
 }
