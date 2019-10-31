@@ -1,14 +1,11 @@
 // eslint-disable-next-line
 import test from 'tape-catch';
-import DocumentTest from 'deck.gl-test/utils/document';
 
 import {getModule} from './utils.spec';
 
 const TOOLTIP_LIB = '@deck.gl/jupyter-widget/widget-tooltip';
 
 const pickedInfo = {object: {elevationValue: 10, position: [0, 0]}, x: 0, y: 0, picked: true};
-
-const jsDomDocument = new DocumentTest();
 
 // eslint-disable-next-line
 const TOOLTIP_HTML = {
@@ -40,10 +37,6 @@ test('getDefaultTooltip', t => {
   if (!wt) {
     return;
   }
-
-  wt.getDiv = () => {
-    return jsDomDocument.createElement('div');
-  };
 
   Object.assign(pickedInfo, {picked: false});
   t.equal(wt.getTooltipDefault(pickedInfo), null, 'should return null if nothing picked');

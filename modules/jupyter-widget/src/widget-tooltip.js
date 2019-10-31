@@ -11,7 +11,7 @@ const DEFAULT_STYLE = {
   zIndex: 2
 };
 
-export function getDiv() {
+function getDiv() {
   return document.createElement('div');
 }
 
