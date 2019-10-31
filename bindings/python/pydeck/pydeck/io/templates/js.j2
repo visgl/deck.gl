@@ -3,13 +3,6 @@ const jsonInput = {{json_input}};
 const MAPBOX_API_KEY = '{{mapbox_key}}';
 const tooltip = {{tooltip}};
 
-define('@jupyter-widgets/base', function() {
-  return {
-    DOMWidgetModel: function() {},
-    DOMWidgetView: function() {}
-  };
-});
-
 requirejs.config(DEPENDENCIES);
 
 requirejs(['@deck.gl/jupyter-widget'], (root) => {
