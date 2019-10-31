@@ -98,6 +98,8 @@ export default class GPUGridLayer extends GridAggregationLayer {
   }
 
   // TODO: is this better than checking changeFlags.dataChanged ?
+  // When changedAgttributes has a key, then don't need to check the newTriggers
+  // Let aggregation layer define list of props to check, when changed requires aggregation.
   // updateAttributes(changedAttributes) {
   //   // eslint-disable-next-line
   //   for (const name in changedAttributes) {

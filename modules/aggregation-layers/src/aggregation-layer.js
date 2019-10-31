@@ -80,7 +80,7 @@ export default class AggregationLayer extends CompositeLayer {
   }
 
   _updateShaders(shaders) {
-    throw new Error(`Layer ${this.id} , sublayer must implement _updateShaders()`);
+    throw new Error();
   }
 
   // override Composite layer private method to create AttributeManager instance
