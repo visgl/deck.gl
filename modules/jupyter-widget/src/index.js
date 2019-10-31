@@ -18,4 +18,3 @@ if (dataBaseUrl) {
 
 export {MODULE_VERSION, MODULE_NAME} from './version';
 export {DeckGLModel, DeckGLView} from './widget';
-export {initDeck} from './utils';
