@@ -24,46 +24,51 @@ export function updateDeck(inputJSON, {jsonConverter, deckgl}) {
   deckgl.setProps(results);
 }
 
-export function initDeck({mapboxApiKey, container, jsonInput, tooltip, onComplete, handleClick}) {
-  require(['mapbox-gl', 'h3', 's2Geometry'], mapboxgl => {
-    require(['deck.gl', 'loaders.gl/csv'], (deck, loaders) => {
-      try {
-        // Filter down to the deck.gl classes of interest
-        const classesDict = {};
-        const classes = Object.keys(deck).filter(
-          x => (x.indexOf('Layer') > 0 || x.indexOf('View') > 0) && x.indexOf('_') !== 0
-        );
-        classes.map(k => (classesDict[k] = deck[k]));
+export function createDeck({
+  dependencies,
+  mapboxApiKey,
+  container,
+  jsonInput,
+  tooltip,
+  onComplete,
+  handleClick
+}) {
+  try {
+    // Filter down to the deck.gl classes of interest
+    const {deck, loaders, mapboxgl} = dependencies;
+    const classesDict = {};
+    const classes = Object.keys(deck).filter(
+      x => (x.indexOf('Layer') > 0 || x.indexOf('View') > 0) && x.indexOf('_') !== 0
+    );
+    classes.map(k => (classesDict[k] = deck[k]));
 
-        loaders.registerLoaders([loaders.CSVLoader]);
+    loaders.registerLoaders([loaders.CSVLoader]);
 
-        const jsonConverter = new deck.JSONConverter({
-          configuration: {
-            classes: classesDict
-          }
-        });
-
-        const props = jsonConverter.convert(jsonInput);
-
-        const getTooltip = makeTooltip(tooltip);
-
-        const deckgl = new deck.DeckGL({
-          ...props,
-          map: mapboxgl,
-          mapboxApiAccessToken: mapboxApiKey,
-          onClick: handleClick,
-          getTooltip,
-          container
-        });
-        if (onComplete) {
-          onComplete({jsonConverter, deckgl});
-        }
-      } catch (err) {
-        // This will fail in node tests
-        // eslint-disable-next-line
-        console.error(err);
+    const jsonConverter = new deck.JSONConverter({
+      configuration: {
+        classes: classesDict
       }
-      return {};
     });
-  });
+
+    const props = jsonConverter.convert(jsonInput);
+
+    const getTooltip = makeTooltip(tooltip);
+
+    const deckgl = new deck.DeckGL({
+      ...props,
+      map: mapboxgl,
+      mapboxApiAccessToken: mapboxApiKey,
+      onClick: handleClick,
+      getTooltip,
+      container
+    });
+    if (onComplete) {
+      onComplete({jsonConverter, deckgl});
+    }
+  } catch (err) {
+    // This will fail in node tests
+    // eslint-disable-next-line
+    console.error(err);
+  }
+  return {};
 }

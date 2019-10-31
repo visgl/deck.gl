@@ -3,7 +3,9 @@ import {DOMWidgetModel, DOMWidgetView} from '@jupyter-widgets/base';
 
 import {MODULE_NAME, MODULE_VERSION} from './version';
 
-import {loadCss, hideMapboxCSSWarning, initDeck, updateDeck} from './utils';
+import {loadCss, hideMapboxCSSWarning, createDeck, updateDeck} from './utils';
+
+import {fetchDependencies} from './fetch-dependencies';
 
 const MAPBOX_CSS_URL = 'https://api.tiles.mapbox.com/mapbox-gl-js/v1.2.1/mapbox-gl.css';
 
@@ -73,15 +75,18 @@ export class DeckGLView extends DOMWidgetView {
     const tooltip = this.model.get('tooltip');
 
     loadCss(MAPBOX_CSS_URL);
-    initDeck({
-      mapboxApiKey,
-      container,
-      jsonInput,
-      tooltip,
-      onComplete: ({jsonConverter, deckgl}) => {
-        this.jsonDeck = {jsonConverter, deckgl};
-      },
-      handleClick: this.handleClick.bind(this)
+    fetchDependencies().then(dependencies => {
+      createDeck({
+        dependencies,
+        mapboxApiKey,
+        container,
+        jsonInput,
+        tooltip,
+        onComplete: ({jsonConverter, deckgl}) => {
+          this.jsonDeck = {jsonConverter, deckgl};
+        },
+        handleClick: this.handleClick.bind(this)
+      });
     });
   }
 

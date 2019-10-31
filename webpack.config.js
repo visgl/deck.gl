@@ -4,5 +4,6 @@ module.exports = env => {
   const config = getWebpackConfig(env);
   // Unfortunately, ocular-dev-tool swallows logs...
   require('fs').writeFileSync('/tmp/ocular.log', JSON.stringify(config, null, 2));
+  config.node.module = 'empty';
   return config;
 };
