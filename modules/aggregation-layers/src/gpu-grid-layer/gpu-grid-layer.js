@@ -59,6 +59,9 @@ const defaultProps = {
   gpuAggregation: true
 };
 
+// props , when changed requires re aggregation (weightmap generation)
+const AGGREGATION_PROPS = ['gpuAggregation', 'colorAggregation', 'elevationAggregation'];
+
 export default class GPUGridLayer extends GridAggregationLayer {
   initializeState() {
     const {gl} = this.context;
@@ -66,7 +69,7 @@ export default class GPUGridLayer extends GridAggregationLayer {
     if (!isSupported) {
       log.error('GPUGridLayer is not supported on this browser, use GridLayer instead')();
     }
-    super.initializeState();
+    super.initializeState(AGGREGATION_PROPS);
     this.setState({isSupported});
     const attributeManager = this.getAttributeManager();
     attributeManager.add({
@@ -110,19 +113,11 @@ export default class GPUGridLayer extends GridAggregationLayer {
 
   _isDataChanged({oldProps, props, changeFlags}) {
     // Flags affecting aggregation data
+
     if (changeFlags.dataChanged) {
       return true;
     }
-    if (oldProps.gpuAggregation !== props.gpuAggregation) {
-      return true;
-    }
-    if (
-      oldProps.colorAggregation !== props.colorAggregation ||
-      oldProps.elevationAggregation !== props.elevationAggregation
-    ) {
-      return true;
-    }
-    if (this._getUniformsChangeFlag({oldProps, props})) {
+    if (this._isAggregationPropChanged({oldProps, props, changeFlags})) {
       return true;
     }
     if (

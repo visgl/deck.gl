@@ -117,6 +117,15 @@ test('ContourLayer#updates', t => {
       },
       {
         updateProps: {
+          gpuAggregation: false // default value is true
+        },
+        spies: ['_aggregateData'],
+        onAfterUpdate({spies}) {
+          t.ok(spies._aggregateData.called, 'should re-aggregate data on gpuAggregation change');
+        }
+      },
+      {
+        updateProps: {
           cellSize: 500 // changed from 400 to 500
         },
         spies: ['_onGetSublayerColor', '_aggregateData', '_generateContours'],

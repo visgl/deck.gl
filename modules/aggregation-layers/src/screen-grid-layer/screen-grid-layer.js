@@ -35,6 +35,9 @@ const defaultProps = Object.assign({}, ScreenGridCellLayer.defaultProps, {
   aggregation: 'SUM'
 });
 
+// props , when changed requires re aggregation (weightmap generation)
+const AGGREGATION_PROPS = ['gpuAggregation'];
+
 export default class ScreenGridLayer extends GridAggregationLayer {
   initializeState() {
     const {gl} = this.context;
@@ -44,7 +47,7 @@ export default class ScreenGridLayer extends GridAggregationLayer {
       log.error(`ScreenGridLayer: ${this.id} is not supported on this browser`)();
       return;
     }
-    super.initializeState();
+    super.initializeState(AGGREGATION_PROPS);
     const weights = {
       color: {
         size: 1,
@@ -72,8 +75,7 @@ export default class ScreenGridLayer extends GridAggregationLayer {
     super.updateState({oldProps, props, changeFlags});
 
     const cellSizeChanged = props.cellSizePixels !== oldProps.cellSizePixels;
-    const dataChanged =
-      props.aggregation !== oldProps.aggregation || this._getUniformsChangeFlag({oldProps, props});
+    const dataChanged = this._isAggregationPropChanged({oldProps, props});
 
     if (cellSizeChanged || changeFlags.viewportChanged) {
       this._updateGridParams();

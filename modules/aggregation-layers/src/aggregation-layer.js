@@ -33,6 +33,13 @@ const UNIFORM_PROPS = [
 ];
 
 export default class AggregationLayer extends CompositeLayer {
+  initializeState(aggregationProps = []) {
+    super.initializeState();
+    this.setState({
+      aggregationProps: aggregationProps.concat(UNIFORM_PROPS)
+    });
+  }
+
   updateState(opts) {
     super.updateState(opts);
     const {changeFlags} = opts;
@@ -68,11 +75,12 @@ export default class AggregationLayer extends CompositeLayer {
     return moduleSettings;
   }
 
-  // check if any uniforms changed that affect aggregation.
-  _getUniformsChangeFlag(opts) {
+  // returns null when none of the props changed,
+  _isAggregationPropChanged(opts) {
+    const {aggregationProps} = this.state;
     const oldProps = {};
     const props = {};
-    for (const propName of UNIFORM_PROPS) {
+    for (const propName of aggregationProps) {
       oldProps[propName] = opts.oldProps[propName];
       props[propName] = opts.props[propName];
     }

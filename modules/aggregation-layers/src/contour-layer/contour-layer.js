@@ -36,6 +36,7 @@ const defaultProps = {
   cellSize: {type: 'number', min: 1, max: 1000, value: 1000},
   getPosition: {type: 'accessor', value: x => x.position},
   getWeight: {type: 'accessor', value: x => 1},
+  gpuAggregation: true,
 
   // contour lines
   contours: [{threshold: DEFAULT_THRESHOLD}],
@@ -44,9 +45,12 @@ const defaultProps = {
   zOffset: 0.005
 };
 
+// props , when changed requires re aggregation (weightmap generation)
+const AGGREGATION_PROPS = ['gpuAggregation'];
+
 export default class ContourLayer extends GridAggregationLayer {
   initializeState() {
-    super.initializeState();
+    super.initializeState(AGGREGATION_PROPS);
     this.setState({
       contourData: {},
       colorTrigger: 0,
@@ -169,13 +173,12 @@ export default class ContourLayer extends GridAggregationLayer {
   _isDataChanged({oldProps, props, changeFlags}) {
     if (
       changeFlags.dataChanged ||
-      oldProps.gpuAggregation !== props.gpuAggregation ||
       (changeFlags.updateTriggersChanged &&
         (changeFlags.updateTriggersChanged.all || changeFlags.updateTriggersChanged.getPosition))
     ) {
       return true;
     }
-    if (this._getUniformsChangeFlag({oldProps, props})) {
+    if (this._isAggregationPropChanged({oldProps, props})) {
       return true;
     }
 

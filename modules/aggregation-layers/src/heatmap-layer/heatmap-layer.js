@@ -76,6 +76,9 @@ const REQUIRED_FEATURES = [
   // FEATURES.FLOAT_BLEND, // implictly supported when TEXTURE_FLOAT is supported
 ];
 
+// props , when changed requires re aggregation (weightmap generation)
+const AGGREGATION_PROPS = ['radiusPixels'];
+
 export default class HeatmapLayer extends AggregationLayer {
   initializeState() {
     const {gl} = this.context;
@@ -84,7 +87,7 @@ export default class HeatmapLayer extends AggregationLayer {
       log.error(`HeatmapLayer: ${this.id} is not supported on this browser`)();
       return;
     }
-    super.initializeState();
+    super.initializeState(AGGREGATION_PROPS);
     this.setState({supported: true});
     this._setupTextureParams();
     this._setupAttributes();
@@ -109,7 +112,7 @@ export default class HeatmapLayer extends AggregationLayer {
       changeFlags.boundsChanged = this._updateBounds();
     }
 
-    if (changeFlags.dataChanged || changeFlags.boundsChanged || changeFlags.uniformsChanged) {
+    if (changeFlags.dataChanged || changeFlags.boundsChanged) {
       this._updateWeightmap();
     } else if (changeFlags.viewportZoomChanged) {
       this._debouncedUpdateWeightmap();
@@ -219,13 +222,9 @@ export default class HeatmapLayer extends AggregationLayer {
   }
 
   _getChangeFlags(opts) {
-    const {oldProps, props} = opts;
     const changeFlags = {};
-    if (this._isDataChanged(opts)) {
+    if (this._isDataChanged(opts) || this._isAggregationPropChanged(opts)) {
       changeFlags.dataChanged = true;
-    }
-    if (oldProps.radiusPixels !== props.radiusPixels || this._getUniformsChangeFlag(opts)) {
-      changeFlags.uniformsChanged = true;
     }
     changeFlags.viewportChanged = opts.changeFlags.viewportChanged;
 
