@@ -30,7 +30,7 @@ import {
   fp64 as fp64ShaderModule,
   withParameters
 } from '@luma.gl/core';
-import {log, project64} from '@deck.gl/core';
+import {log, project64, mergeShaders} from '@deck.gl/core';
 import {worldToPixels} from 'viewport-mercator-project';
 const {fp64ifyMatrix4} = fp64ShaderModule;
 
@@ -723,20 +723,21 @@ export default class GPUGridAggregator {
 
   getAggregationModel(fp64 = false) {
     const {gl} = this;
-    const shaderOptions = {};
-    Object.assign(shaderOptions, this.state.shaderOptions, {
-      vs: fp64 ? AGGREGATE_TO_GRID_VS_FP64 : AGGREGATE_TO_GRID_VS,
-      fs: AGGREGATE_TO_GRID_FS
-    });
-    const modules = fp64 ? [project64] : ['project32'];
 
-    shaderOptions.modules = modules.concat(shaderOptions.modules || []);
+    const shaders = mergeShaders(
+      {
+        vs: fp64 ? AGGREGATE_TO_GRID_VS_FP64 : AGGREGATE_TO_GRID_VS,
+        fs: AGGREGATE_TO_GRID_FS,
+        modules: fp64 ? [project64] : ['project32']
+      },
+      this.state.shaderOptions
+    );
 
     return new Model(gl, {
       id: 'Gird-Aggregation-Model',
       vertexCount: 0,
       drawMode: GL.POINTS,
-      ...shaderOptions
+      ...shaders
     });
   }
 

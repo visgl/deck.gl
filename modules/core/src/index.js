@@ -91,6 +91,7 @@ export {fp64LowPart} from './utils/math-utils';
 import Tesselator from './utils/tesselator'; // Export? move to luma.gl or math.gl?
 import {count} from './utils/count';
 import memoize from './utils/memoize';
+export {mergeShaders} from './utils/shader';
 
 // lighting
 export {AmbientLight} from '@luma.gl/core';

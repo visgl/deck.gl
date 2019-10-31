@@ -37,7 +37,7 @@ import {
   hasFeatures,
   isWebGL2
 } from '@luma.gl/core';
-import {AttributeManager, COORDINATE_SYSTEM, log} from '@deck.gl/core';
+import {AttributeManager, COORDINATE_SYSTEM, log, mergeShaders} from '@deck.gl/core';
 import TriangleLayer from './triangle-layer';
 import AggregationLayer from '../aggregation-layer';
 import {defaultColorRange, colorRangeToFlatArray} from '../utils/color-utils';
@@ -296,13 +296,15 @@ export default class HeatmapLayer extends AggregationLayer {
     if (weightsTransform) {
       weightsTransform.delete();
     }
-    const shaders = {};
-    Object.assign(shaders, shaderOptions, {
-      vs: weights_vs,
-      _fs: weights_fs
-    });
-    const modules = ['project32'];
-    shaders.modules = modules.concat(shaders.modules || []);
+    const shaders = mergeShaders(
+      {
+        vs: weights_vs,
+        _fs: weights_fs,
+        modules: ['project32']
+      },
+      shaderOptions
+    );
+
     weightsTransform = new Transform(gl, {
       id: `${this.id}-weights-transform`,
       elementCount: 1,
