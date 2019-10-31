@@ -205,7 +205,6 @@ export default class GPUGridLayer extends GridAggregationLayer {
     const {
       data,
       cellSize: cellSizeMeters,
-      getPosition,
       gpuAggregation,
       getColorWeight,
       colorAggregation,
@@ -236,7 +235,6 @@ export default class GPUGridLayer extends GridAggregationLayer {
     const {weights, gridSize, gridOrigin, cellSize, boundingBox} = pointToDensityGridData({
       data,
       cellSizeMeters,
-      getPosition,
       weightParams,
       gpuAggregation,
       gpuGridAggregator: this.state.gpuGridAggregator,

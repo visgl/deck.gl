@@ -109,7 +109,6 @@ export default class ContourLayer extends GridAggregationLayer {
     const {
       data,
       cellSize: cellSizeMeters,
-      // getPosition,
       getWeight,
       gpuAggregation,
       fp64,

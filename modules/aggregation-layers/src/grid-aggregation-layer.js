@@ -22,14 +22,12 @@ import AggregationLayer from './aggregation-layer';
 import GPUGridAggregator from './utils/gpu-grid-aggregation/gpu-grid-aggregator';
 
 export default class GridAggregationLayer extends AggregationLayer {
-  initializeState({needsAggregator = true} = {}) {
+  initializeState() {
     const {gl} = this.context;
     super.initializeState();
-    if (needsAggregator) {
-      this.setState({
-        gpuGridAggregator: new GPUGridAggregator(gl, {id: `${this.id}-gpu-aggregator`})
-      });
-    }
+    this.setState({
+      gpuGridAggregator: new GPUGridAggregator(gl, {id: `${this.id}-gpu-aggregator`})
+    });
   }
 
   finalizeState() {

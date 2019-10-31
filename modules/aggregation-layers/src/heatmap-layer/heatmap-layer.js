@@ -84,7 +84,7 @@ export default class HeatmapLayer extends AggregationLayer {
       log.error(`HeatmapLayer: ${this.id} is not supported on this browser`)();
       return;
     }
-    super.initializeState({needsAggregator: false});
+    super.initializeState();
     this.setState({supported: true});
     this._setupTextureParams();
     this._setupAttributes();
@@ -310,10 +310,7 @@ export default class HeatmapLayer extends AggregationLayer {
       _targetTextureVarying: 'weightsTexture',
       ...shaders
     });
-    this.setState({
-      weightsTransform
-      // model: weightsTransform.model
-    });
+    this.setState({weightsTransform});
   }
 
   _setupResources() {
