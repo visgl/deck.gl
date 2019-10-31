@@ -17,7 +17,6 @@ from subprocess import check_call
 import sys
 
 from dependency_managers import (
-    create_notebook_requirejs,
     create_standalone_render_requirejs,
 )
 
@@ -156,7 +155,6 @@ class FrontendBuild(Command):
         self.copy_frontend_build()
         log.info('Creating RequireJS configs.')
         setup_environment = 'production' if prod_build else 'development'
-        create_notebook_requirejs(load_requirejs_dependencies(), here, setup_environment=setup_environment)
         create_standalone_render_requirejs(load_requirejs_dependencies(), here, setup_environment=setup_environment)
 
         for t in self.target_files:
