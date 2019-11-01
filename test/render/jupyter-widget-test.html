@@ -13,11 +13,12 @@
   <script type="text/javascript" src='/node_modules/s2-geometry/src/s2geometry.js'></script>
   <script type="text/javascript" src='/node_modules/@loaders.gl/csv/dist/dist.min.js'></script>
   <script type="text/javascript" src='/modules/main/dist.min.js'></script>
-  <script type="text/javascript" src='/modules/jupyter-widget/dist/index.js'></script>
+  <script type="text/javascript" src='/modules/jupyter-widget/dist/index.standalone.js'></script>
   <script type="text/javascript">
+
 function render(jsonInput) {
-  createDeck({
-    dependencies: 
+  deckglwidget.createDeck({
+    dependencies: {deck, mapboxgl, loaders},
     mapboxApiKey: 'NO_API_KEY', 
     container: document.getElementById('app'),
     jsonInput,

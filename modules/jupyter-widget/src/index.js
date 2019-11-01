@@ -16,10 +16,7 @@ if (dataBaseUrl) {
   window.__webpack_public_path__ = `${dataBaseUrl}nbextensions/pydeck/nb_extension`;
 }
 
-const widget = dataBaseUrl ? require('./widget') : {};
-const [DeckGLModel, DeckGLView] = [widget.DeckGLModel, widget.DeckGLView];
-
 export {MODULE_VERSION, MODULE_NAME} from './version';
-export {DeckGLModel, DeckGLView};
+export {DeckGLModel, DeckGLView} from './widget';
 export {createDeck} from './utils';
 export {fetchDependencies} from './fetch-dependencies';

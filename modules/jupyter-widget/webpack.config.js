@@ -4,74 +4,100 @@ const path = require('path');
 const packageVersion = require('./package.json').version;
 const webpack = require('webpack');
 
-const config = {
-  /**
-   * Embeddable @deck.gl/jupyter-widget bundle
-   *
-   * This bundle is almost identical to the notebook extension bundle. The only
-   * difference is in the configuration of the webpack public path for the
-   * static assets.
-   *
-   * The target bundle is always `dist/index.js`, which is the path required by
-   * the custom widget embedder.
-   */
-  entry: './src/index.js',
-  output: {
-    filename: 'index.js',
-    path: path.resolve(__dirname, 'dist'),
-    libraryTarget: 'amd'
-  },
-  devtool: 'source-map',
-  module: {
-    rules: [
-      {
-        // Compile ES2015 using babel
-        test: /\.js$/,
-        loader: 'babel-loader',
-        include: /src/,
-        options: {
-          presets: [['@babel/preset-env', {forceAllTransforms: true}]],
-          // all of the helpers will reference the module @babel/runtime to avoid duplication
-          // across the compiled output.
-          plugins: [
-            '@babel/transform-runtime',
-            'inline-webgl-constants',
-            ['remove-glsl-comments', {patterns: ['**/*.glsl.js']}]
-          ]
-        }
-      }
+const rules = [
+  {
+    // Compile ES2015 using babel
+    test: /\.js$/,
+    loader: 'babel-loader',
+    include: /src/,
+    options: {
+      presets: [['@babel/preset-env', {forceAllTransforms: true}]],
+      // all of the helpers will reference the module @babel/runtime to avoid duplication
+      // across the compiled output.
+      plugins: [
+        '@babel/transform-runtime',
+        'inline-webgl-constants',
+        ['remove-glsl-comments', {patterns: ['**/*.glsl.js']}]
+      ]
+    }
+  }
+];
+
+const externals = [
+  '@jupyter-widgets/base',
+  'deck.gl',
+  'mapbox-gl',
+  'h3',
+  's2Geometry',
+  'loaders.gl/csv'
+];
+
+const config = [
+  {
+    /**
+     * Embeddable @deck.gl/jupyter-widget bundle
+     *
+     * This bundle is almost identical to the notebook extension bundle. The only
+     * difference is in the configuration of the webpack public path for the
+     * static assets.
+     *
+     * The target bundle is always `dist/index.js`, which is the path required by
+     * the custom widget embedder.
+     */
+    entry: './src/index.js',
+    output: {
+      filename: 'index.js',
+      path: path.resolve(__dirname, 'dist'),
+      libraryTarget: 'amd'
+    },
+    devtool: 'source-map',
+    module: {
+      rules
+    },
+    // Packages that shouldn't be bundled but loaded at runtime
+    externals,
+    plugins: [
+      // Uncomment for bundle size debug
+      // new (require('webpack-bundle-analyzer')).BundleAnalyzerPlugin()
     ]
   },
-  // Packages that shouldn't be bundled but loaded at runtime
-  externals: [
-    '@jupyter-widgets/base',
-    'deck.gl',
-    'mapbox-gl',
-    'h3',
-    's2Geometry',
-    'loaders.gl/csv'
-  ],
-  plugins: [
-    // Uncomment for bundle size debug
-    // new (require('webpack-bundle-analyzer')).BundleAnalyzerPlugin()
-  ]
-};
+  /**
+   * Embeddable bundle exclusively with the standalone version of @deck.gl/jupyter-widget,
+   * which removes the Jupyter-specific libraries (e.g., @jupyter-widget/base) from the tool
+   */
+  {
+    entry: './src/index.standalone.js',
+    output: {
+      filename: 'index.standalone.js',
+      path: path.resolve(__dirname, 'dist'),
+      libraryTarget: 'umd'
+    },
+    devtool: 'source-map',
+    externals,
+    name: 'deckwidget',
+    module: {
+      rules
+    },
+    plugins: []
+  }
+];
 
 module.exports = env => {
-  if (env && env.dev) {
-    config.mode = 'development';
-    config.devServer = {
-      contentBase: path.join(__dirname, 'dist')
-    };
-  } else {
-    config.mode = 'production';
+  for (const c of config) {
+    if (env && env.dev) {
+      c.mode = 'development';
+      c.devServer = {
+        contentBase: path.join(__dirname, 'dist')
+      };
+    } else {
+      c.mode = 'production';
+    }
+
+    c.plugins.push(
+      new webpack.DefinePlugin({
+        __VERSION__: JSON.stringify(packageVersion)
+      })
+    );
   }
-
-  config.plugins.push(
-    new webpack.DefinePlugin({
-      __VERSION__: JSON.stringify(packageVersion)
-    })
-  );
-
   return config;
 };
