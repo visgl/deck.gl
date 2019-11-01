@@ -1057,13 +1057,13 @@ export default class GPUGridAggregator {
     if (opts.fp64 !== this.state.fp64 || modelDirty) {
       this.setupModels(opts.fp64);
       this.setState({fp64: opts.fp64, modelDirty: false});
-
-      // this maps color/elevation to weight name.
-      this.setupWeightAttributes(opts);
-
-      this.gridAggregationModel.setVertexCount(vertexCount);
-      this.gridAggregationModel.setAttributes(attributes);
     }
+
+    // this maps color/elevation to weight name.
+    this.setupWeightAttributes(opts);
+
+    this.gridAggregationModel.setVertexCount(vertexCount);
+    this.gridAggregationModel.setAttributes(attributes);
 
     if (changeFlags.cellSizeChanged || changeFlags.viewportChanged) {
       this.allAggregationModel.setInstanceCount(numCol * numRow);
