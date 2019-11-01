@@ -8,9 +8,6 @@
 
 As the community of deck.gl grow, we see new use cases emerge regarding both input data formats (e.g. fixed coordinate frame) and output projection methods (e.g. globe, Stereographic, Conic, etc.). The existing projection system is limiting the scenarios that we can address due to its tight coupling of geospatial data and the WebMercator projection. This RFC proposes changes to the projection system (including the `Layer` and `Viewport` classes and the `project` shader module) to create a more extensible architecture that allows future expansion.
 
-Related:
-
-- [Projection Mode Improvements](/dev-docs/RFCs/vNext/projection-mode-improvements-rfc.md)
 
 ## Projection System: History and Current State
 
@@ -23,6 +20,8 @@ The current data flow and interaction between components:
 ## Problems and Proposals
 
 ### Consistent common space
+
+Related: [Coordinate Space RFC](/dev-docs/RFCs/v8.0/coordinate-space-rfc.md)
 
 The current common space is defined such that 1 common unit is equal to 1 screen pixel at the viewport center.
 
@@ -39,6 +38,8 @@ This change will allow us to:
 
 
 ### Decouple coordinate system and projection mode
+
+Related: [Projection Mode Improvements](/dev-docs/RFCs/vNext/projection-mode-improvements-rfc.md)
 
 The current system hard-codes the mapping between input data format and their presentation:
 
