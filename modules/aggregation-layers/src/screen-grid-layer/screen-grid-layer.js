@@ -75,7 +75,7 @@ export default class ScreenGridLayer extends GridAggregationLayer {
     super.updateState({oldProps, props, changeFlags});
 
     const cellSizeChanged = props.cellSizePixels !== oldProps.cellSizePixels;
-    const dataChanged = this._isAggregationPropChanged({oldProps, props});
+    const dataChanged = this._isAggregationDirty({oldProps, props});
 
     if (cellSizeChanged || changeFlags.viewportChanged) {
       this._updateGridParams();
@@ -90,15 +90,6 @@ export default class ScreenGridLayer extends GridAggregationLayer {
       });
     }
   }
-
-  // TODO: is this better than checking changeFlags.dataChanged ?
-  // updateAttributes(changedAttributes) {
-  //   // eslint-disable-next-line
-  //   for (const name in changedAttributes) {
-  //     this.setState({dataChanged: true});
-  //     break;
-  //   }
-  // }
 
   renderLayers() {
     if (!this.state.supported) {

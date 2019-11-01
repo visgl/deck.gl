@@ -53,7 +53,6 @@ test('GPUGridLayer', t => {
 test('GPUGridLayer#renderLayers', t => {
   const webgl1Spies = setupSpysForWebGL1(gl);
 
-  makeSpy(GPUGridLayer.prototype, '_isDataChanged');
   makeSpy(GPUGridLayer.prototype, '_aggregateData');
 
   const layer = new GPUGridLayer(SAMPLE_PROPS);
@@ -66,9 +65,7 @@ test('GPUGridLayer#renderLayers', t => {
 
   t.ok(sublayer instanceof GPUGridCellLayer, 'Sublayer GPUGridCellLayer layer rendered');
 
-  t.ok(GPUGridLayer.prototype._isDataChanged.called, 'should call _isDataChanged');
   t.ok(GPUGridLayer.prototype._aggregateData.called, 'should call _aggregateData');
-  GPUGridLayer.prototype._isDataChanged.restore();
   GPUGridLayer.prototype._aggregateData.restore();
 
   restoreSpies(webgl1Spies);
@@ -109,12 +106,10 @@ test('GPUGridLayer#updates', t => {
         updateProps: {
           colorRange: GPUGridLayer.defaultProps.colorRange.slice()
         },
-        spies: ['_isDataChanged', '_aggregateData'],
+        spies: ['_aggregateData'],
         onAfterUpdate({layer, subLayers, spies}) {
-          t.ok(spies._isDataChanged.called, 'should call _isDataChanged');
           t.notOk(spies._aggregateData.called, 'should not call _aggregateData');
 
-          spies._isDataChanged.restore();
           spies._aggregateData.restore();
         }
       },
@@ -122,12 +117,10 @@ test('GPUGridLayer#updates', t => {
         updateProps: {
           cellSize: 10
         },
-        spies: ['_isDataChanged', '_aggregateData'],
+        spies: ['_aggregateData'],
         onAfterUpdate({layer, subLayers, spies}) {
-          t.ok(spies._isDataChanged.called, 'should call _isDataChanged');
           t.ok(spies._aggregateData.called, 'should call _aggregateData');
 
-          spies._isDataChanged.restore();
           spies._aggregateData.restore();
         }
       },
@@ -135,12 +128,10 @@ test('GPUGridLayer#updates', t => {
         updateProps: {
           colorAggregation: 3
         },
-        spies: ['_isDataChanged', '_aggregateData'],
+        spies: ['_aggregateData'],
         onAfterUpdate({layer, subLayers, spies}) {
-          t.ok(spies._isDataChanged.called, 'should call _isDataChanged');
           t.ok(spies._aggregateData.called, 'should call _aggregateData');
 
-          spies._isDataChanged.restore();
           spies._aggregateData.restore();
         }
       }

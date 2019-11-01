@@ -19,7 +19,7 @@
 // THE SOFTWARE.
 
 import {CompositeLayer, AttributeManager, experimental} from '@deck.gl/core';
-import {cssToDeviceRatio} from '@luma.gl/core';
+import {cssToDeviceRatio, log} from '@luma.gl/core';
 const {compareProps} = experimental;
 
 // props when changed results in new uniforms that requires re-aggregation
@@ -34,10 +34,10 @@ const UNIFORM_PROPS = [
 
 export default class AggregationLayer extends CompositeLayer {
   initializeState(aggregationProps = []) {
-    super.initializeState();
-    this.setState({
-      aggregationProps: aggregationProps.concat(UNIFORM_PROPS)
-    });
+      super.initializeState();
+      this.setState({
+        aggregationProps: aggregationProps.concat(UNIFORM_PROPS)
+      });
   }
 
   updateState(opts) {
@@ -53,6 +53,16 @@ export default class AggregationLayer extends CompositeLayer {
 
     // Explictly call to update attributes as 'CompositeLayer' doesn't call this
     this._updateAttributes(opts.props);
+  }
+
+  updateAttributes(changedAttributes) {
+    let dataChanged = false;
+    // eslint-disable-next-line
+    for (const name in changedAttributes) {
+      dataChanged = true;
+      break;
+    }
+    this.setState({dataChanged});
   }
 
   getAttributes() {
@@ -75,8 +85,10 @@ export default class AggregationLayer extends CompositeLayer {
     return moduleSettings;
   }
 
-  // returns null when none of the props changed,
-  _isAggregationPropChanged(opts) {
+  _isAggregationDirty(opts) {
+    if (this.state.dataChanged) {
+      return true;
+    }
     const {aggregationProps} = this.state;
     const oldProps = {};
     const props = {};
@@ -84,11 +96,12 @@ export default class AggregationLayer extends CompositeLayer {
       oldProps[propName] = opts.oldProps[propName];
       props[propName] = opts.props[propName];
     }
-    return compareProps({oldProps, newProps: props, propTypes: this.constructor._propTypes});
+    return Boolean(compareProps({oldProps, newProps: props, propTypes: this.constructor._propTypes}));
   }
 
   _updateShaders(shaders) {
-    throw new Error();
+    // Sublayers should implement this method.
+    log.assert(false);
   }
 
   // override Composite layer private method to create AttributeManager instance

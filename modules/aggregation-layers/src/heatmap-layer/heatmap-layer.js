@@ -223,7 +223,7 @@ export default class HeatmapLayer extends AggregationLayer {
 
   _getChangeFlags(opts) {
     const changeFlags = {};
-    if (this._isDataChanged(opts) || this._isAggregationPropChanged(opts)) {
+    if (this._isAggregationDirty(opts)) {
       changeFlags.dataChanged = true;
     }
     changeFlags.viewportChanged = opts.changeFlags.viewportChanged;
@@ -250,18 +250,6 @@ export default class HeatmapLayer extends AggregationLayer {
       }),
       maxWeightsTexture: new Texture2D(gl, {format, type, ...TEXTURE_OPTIONS}) // 1 X 1 texture,
     });
-  }
-
-  _isDataChanged({changeFlags}) {
-    if (
-      changeFlags.updateTriggersChanged &&
-      (changeFlags.updateTriggersChanged.all ||
-        changeFlags.updateTriggersChanged.getPosition ||
-        changeFlags.updateTriggersChanged.getWeight)
-    ) {
-      return true;
-    }
-    return false;
   }
 
   _setupAttributes() {

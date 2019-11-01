@@ -85,7 +85,7 @@ export default class GPUGridLayer extends GridAggregationLayer {
       return;
     }
     super.updateState(opts);
-    const dataChanged = this._isDataChanged(opts);
+    const dataChanged = this._isAggregationDirty(opts);
     const cellSizeChanged = opts.oldProps.cellSize !== opts.props.cellSize;
     if (dataChanged || cellSizeChanged) {
       this._aggregateData({
@@ -98,39 +98,6 @@ export default class GPUGridLayer extends GridAggregationLayer {
         gridHash: null
       });
     }
-  }
-
-  // TODO: is this better than checking changeFlags.dataChanged ?
-  // When changedAgttributes has a key, then don't need to check the newTriggers
-  // Let aggregation layer define list of props to check, when changed requires aggregation.
-  // updateAttributes(changedAttributes) {
-  //   // eslint-disable-next-line
-  //   for (const name in changedAttributes) {
-  //     this.setState({dataChanged: true});
-  //     break;
-  //   }
-  // }
-
-  _isDataChanged({oldProps, props, changeFlags}) {
-    // Flags affecting aggregation data
-
-    if (changeFlags.dataChanged) {
-      return true;
-    }
-    if (this._isAggregationPropChanged({oldProps, props, changeFlags})) {
-      return true;
-    }
-    if (
-      changeFlags.updateTriggersChanged &&
-      (changeFlags.updateTriggersChanged.all ||
-        changeFlags.updateTriggersChanged.getPosition ||
-        changeFlags.updateTriggersChanged.getColorWeight ||
-        changeFlags.updateTriggersChanged.getElevationWeight)
-    ) {
-      return true;
-    }
-
-    return false;
   }
 
   getHashKeyForIndex(index) {

@@ -66,7 +66,7 @@ export default class ContourLayer extends GridAggregationLayer {
   updateState(opts) {
     super.updateState(opts);
     let contoursChanged = false;
-    const dataChanged = this._isDataChanged(opts);
+    const dataChanged = this._isAggregationDirty(opts);
     const cellSizeChanged = opts.oldProps.cellSize !== opts.props.cellSize;
     if (dataChanged || cellSizeChanged) {
       this.setState({countsData: null});
@@ -168,21 +168,6 @@ export default class ContourLayer extends GridAggregationLayer {
 
     // contourData contains both iso-lines and iso-bands if requested.
     this.setState({contourData});
-  }
-
-  _isDataChanged({oldProps, props, changeFlags}) {
-    if (
-      changeFlags.dataChanged ||
-      (changeFlags.updateTriggersChanged &&
-        (changeFlags.updateTriggersChanged.all || changeFlags.updateTriggersChanged.getPosition))
-    ) {
-      return true;
-    }
-    if (this._isAggregationPropChanged({oldProps, props})) {
-      return true;
-    }
-
-    return false;
   }
 
   _getLineLayerProps() {
