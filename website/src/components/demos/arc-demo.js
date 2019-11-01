@@ -3,7 +3,7 @@ import autobind from 'autobind-decorator';
 
 import {MAPBOX_STYLES, DATA_URI} from '../../constants/defaults';
 import {readableInteger} from '../../utils/format-utils';
-import {App, inFlowColors, outFlowColors} from 'website-examples/arc/app';
+import App, {inFlowColors, outFlowColors} from 'website-examples/arc/app';
 
 const colorRamp = inFlowColors.slice().reverse().concat(outFlowColors)
   .map(color => `rgb(${color.join(',')})`);

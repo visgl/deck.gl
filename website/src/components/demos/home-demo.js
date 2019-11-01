@@ -1,6 +1,6 @@
 import React, {Component} from 'react';
 import {MAPBOX_STYLES, DATA_URI} from '../../constants/defaults';
-import {App} from 'website-examples/trips/app';
+import App from 'website-examples/trips/app';
 
 import {AmbientLight, DirectionalLight, LightingEffect} from '@deck.gl/core';
 import {PhongMaterial} from '@luma.gl/core';

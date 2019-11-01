@@ -1,7 +1,7 @@
 import React, {Component} from 'react';
 import autobind from 'autobind-decorator';
 import {MAPBOX_STYLES} from '../../constants/defaults';
-import {App} from 'website-examples/3d-tiles/app';
+import App from 'website-examples/3d-tiles/app';
 
 export default class GeoJsonDemo extends Component {
   static get data() {

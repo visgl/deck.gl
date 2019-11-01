@@ -1,11 +1,7 @@
 import React, {Component} from 'react';
 import {MAPBOX_STYLES, DATA_URI} from '../../constants/defaults';
 import {readableInteger} from '../../utils/format-utils';
-import {App} from 'website-examples/tagmap/app';
-
-function stopPropagation(evt) {
-  evt.stopPropagation();
-}
+import App from 'website-examples/tagmap/app';
 
 export default class TextDemo extends Component {
 

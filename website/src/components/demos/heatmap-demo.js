@@ -1,7 +1,7 @@
 import React, {Component} from 'react';
 import {readableInteger} from '../../utils/format-utils';
 import {MAPBOX_STYLES, DATA_URI} from '../../constants/defaults';
-import {App} from 'website-examples/heatmap/app';
+import App from 'website-examples/heatmap/app';
 
 export default class HeatmapDemo extends Component {
   static get data() {

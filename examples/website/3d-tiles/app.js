@@ -25,7 +25,7 @@ const INITIAL_VIEW_STATE = {
   zoom: 17
 };
 
-export class App extends PureComponent {
+export default class App extends PureComponent {
   constructor(props) {
     super(props);
 
