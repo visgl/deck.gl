@@ -65,7 +65,7 @@ test('EffectManager#set and get Effects', t => {
   const effect2 = new Effect();
   effectManager.setEffects([effect1, effect2]);
   let effects = effectManager.getEffects();
-  t.equal(effects.length, 2, 'Effect set and get successfully');
+  t.equal(effects.length, 3, 'Effect set and get successfully');
 
   effectManager.setProps({effects: [effect1]});
   effects = effectManager.getEffects();
@@ -78,7 +78,7 @@ test('EffectManager#cleanup resource', t => {
   const effectManager = new EffectManager({gl, layerManager});
   effectManager.setEffects([effect]);
   const resBegin = getResourceCounts();
-  effect.prepare(gl);
+  effect.preRender(gl);
   effectManager.setEffects([]);
   const resEnd = getResourceCounts();
 
@@ -91,11 +91,11 @@ test('EffectManager#finalize', t => {
   const effectManager = new EffectManager({gl, layerManager});
   effectManager.setEffects([effect]);
   const resBegin = getResourceCounts();
-  effect.prepare(gl);
+  effect.preRender(gl);
   effectManager.finalize();
   const resEnd = getResourceCounts();
 
-  t.deepEqual(resBegin, resEnd, 'Effect manager is finalized well');
+  t.deepEqual(resBegin, resEnd, 'Effect manager is finalized');
   t.end();
 });
 
@@ -106,8 +106,8 @@ test('EffectManager#setProps', t => {
 
   t.deepEqual(effectManager.effects, [effect], 'Effect manager set props correctly');
   t.equal(
-    effectManager.needApplyDefaultLighting,
-    false,
+    effectManager._internalEffects.length,
+    1,
     'Effect Manager should not need to apply default lighting'
   );
   t.equal(effectManager.needsRedraw(), 'effects changed', 'Effect Manager should need redraw');
@@ -126,8 +126,8 @@ test('EffectManager#setProps', t => {
 
   effectManager.setProps({effects: []});
   t.equal(
-    effectManager.needApplyDefaultLighting,
-    true,
+    effectManager._internalEffects.length,
+    1,
     'Effect Manager should need to apply default lighting'
   );
 

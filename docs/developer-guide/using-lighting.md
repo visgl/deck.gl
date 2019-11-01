@@ -1,4 +1,4 @@
-# Guide to Using Lighting Effect
+# Using Lighting
 
 A deck.gl lighting effect is a visual approximation of environment illumination based on simplified models to make rendering appear more realistic.
 

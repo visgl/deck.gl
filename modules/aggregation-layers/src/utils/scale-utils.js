@@ -40,13 +40,107 @@ export function quantizeScale(domain, range, value) {
   return range[clampIdx];
 }
 
-// return a quantize scale function
-export function getQuantizeScale(domain, range) {
-  return value => quantizeScale(domain, range, value);
+export function getScale(domain, range, scaleFunction) {
+  function scale(value) {
+    return scaleFunction(domain, range, value);
+  }
+
+  scale.domain = () => domain;
+  scale.range = () => range;
+
+  return scale;
 }
 
-// return a linear scale funciton
+// return a quantize scale function
+export function getQuantizeScale(domain, range) {
+  return getScale(domain, range, quantizeScale);
+}
+
+// return a linear scale function
 export function getLinearScale(domain, range) {
-  return value =>
-    ((value - domain[0]) / (domain[1] - domain[0])) * (range[1] - range[0]) + range[0];
+  return getScale(domain, range, linearScale);
+}
+
+// quantile
+
+function ascending(a, b) {
+  return a - b;
+}
+
+function threshold(domain, fraction) {
+  const domainLength = domain.length;
+  if (fraction <= 0 || domainLength < 2) {
+    return domain[0];
+  }
+  if (fraction >= 1) {
+    return domain[domainLength - 1];
+  }
+
+  const domainFraction = (domainLength - 1) * fraction;
+  const lowIndex = Math.floor(domainFraction);
+  const low = domain[lowIndex];
+  const high = domain[lowIndex + 1];
+  return low + (high - low) * (domainFraction - lowIndex);
+}
+
+function bisectRight(a, x) {
+  let lo = 0;
+  let hi = a.length;
+  while (lo < hi) {
+    const mid = (lo + hi) >>> 1;
+    if (ascending(a[mid], x) > 0) {
+      hi = mid;
+    } else {
+      lo = mid + 1;
+    }
+  }
+  return lo;
+}
+
+// return a quantize scale function
+function quantileScale(thresholds) {
+  return (domain, range, value) => {
+    return range[bisectRight(thresholds, value)];
+  };
+}
+
+export function getQuantileScale(domain, range) {
+  const sortedDomain = domain.sort(ascending);
+  let i = 0;
+  const n = Math.max(1, range.length);
+  const thresholds = new Array(n - 1);
+  while (++i < n) {
+    thresholds[i - 1] = threshold(sortedDomain, i / n);
+  }
+  const quantileScaleThresholds = () => quantileScale(thresholds);
+
+  return getScale(sortedDomain, range, quantileScaleThresholds());
+}
+
+// ordinal
+function ordinalScale(domainMap) {
+  return (domain, range, value) => {
+    const key = `${value}`;
+    let d = domainMap.get(key);
+    if (d === undefined) {
+      // update the domain
+      d = domain.push(value);
+      domainMap.set(key, d);
+    }
+    return range[(d - 1) % range.length];
+  };
+}
+
+export function getOrdinalScale(domain, range) {
+  const domainMap = new Map();
+  const uniqueDomain = [];
+  for (const d of domain) {
+    const key = `${d}`;
+    if (!domainMap.has(key)) {
+      domainMap.set(key, uniqueDomain.push(d));
+    }
+  }
+  const ordinalScaleDomainMap = () => ordinalScale(domainMap);
+
+  return getScale(uniqueDomain, range, ordinalScaleDomainMap());
 }

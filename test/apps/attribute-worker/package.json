@@ -4,8 +4,8 @@
     "start-local": "webpack-dev-server --env.local --progress --hot --port 3000 --open"
   },
   "dependencies": {
-    "@deck.gl/core": "^6.3.0",
-    "@deck.gl/layers": "^6.3.0",
+    "@deck.gl/core": "^7.3.0-beta",
+    "@deck.gl/layers": "^7.3.0-beta",
     "webworkify-webpack": "^2.1.3"
   },
   "devDependencies": {

@@ -1,5 +1,5 @@
 import test from 'tape-catch';
-import {vecFinite} from '../../../utils/utils';
+import {vecNormalized} from '../../../utils/utils';
 import {Viewport} from 'deck.gl';
 import * as mat4 from 'gl-matrix/mat4';
 
@@ -102,21 +102,17 @@ test('Viewport.containsPixel', t => {
 });
 
 test('Viewport.getFrustumPlanes', t => {
-  const viewport = new Viewport(TEST_VIEWPORTS[0].mapState);
-  let planes = viewport.getFrustumPlanes();
+  for (const testCase of TEST_VIEWPORTS) {
+    const viewport = new Viewport(testCase.mapState);
+    const planes = viewport.getFrustumPlanes();
 
-  for (const side in planes) {
-    const plane = planes[side];
-    t.ok(Number.isFinite(plane.d), 'd is defined');
-    t.ok(vecFinite(plane.n), 'n is defined');
-  }
+    for (const side in planes) {
+      const plane = planes[side];
+      t.ok(Number.isFinite(plane.distance), 'distance is defined');
+      t.ok(vecNormalized(plane.normal), 'normal is defined');
+    }
 
-  planes = viewport.getFrustumPlanes();
-
-  for (const side in planes) {
-    const plane = planes[side];
-    t.ok(Number.isFinite(plane.d), 'cached d is defined');
-    t.ok(vecFinite(plane.n), 'cached n is defined');
+    t.is(viewport.getFrustumPlanes(), planes, 'frustum planes are cached');
   }
 
   t.end();

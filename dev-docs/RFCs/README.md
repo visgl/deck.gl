@@ -14,12 +14,13 @@ Also see luma.gl roadmaps, such as the GPGPU roadmap
 
 | Roadmap                                                            | Status       | Description |
 | ---                                                                | ---          | ---         |
+| [**GPU Table Roadmap**](../roadmaps/gpu-table-roadmap.md)  | Draft        | Evolution of the `GPUTable` class across deck.gl v8.x releases |
 | [**API Evolution Roadmap**](../roadmaps/api-evolution-roadmap.md)  | Draft        | Ideas for changes/extensions to the core deck.gl API |
 | [**New Layers Roadmap**](../roadmaps/layers-roadmap.md)            | Draft        | Ideas for new layers |
 | [**Animation Roadmap**](../roadmaps/animation-roadmap.md)          | Draft        | Animation API roadmap |
 | [**Performance Roadmap**](../roadmaps/performance-roadmap.md)      | Draft        | Performance Improvements |
 | [**Infovis Roadmap**](../roadmaps/infovis-roadmap.md)              | Draft        | Infovis (non-geospatial) features roadmap |
-| [**Reduce Distribution Size**](../roadmaps/dist-size-roadmap.md)   | Ongoing      | Reduce size of distribution and the bundle size of applications using deck.gl |
+| [**Reduce Distribution Size**](../roadmaps/dist-size-roadmap.md)   | Implemented  | Reduce size of distribution and the bundle size of applications using deck.gl |
 | [**Pure JS and Scripting Roadmap**](../roadmaps/purejs-roadmap.md) | Implemented  | Support for Scripting and Pure-JS APIs |
 
 
@@ -35,6 +36,7 @@ These RFCs are not yet associated with any specific release.
 | [**Render Layer to Texture**](vNext/render-layer-to-texture-rfc.md) | TBD | Proposed | Allow layers to render to texture and then use texture in subsequent layers.  |
 | [**Layer Extension**](vNext/layer-extension-rfc.md) | @pessimistress | **Draft** | Adding optional functionalities to layers on-demand |
 | [**Fixed Frame Coordinate System**](vNext/fixed-frame-coordinates-rfc.md) | @ibgreen | Draft | Add support for fixed frame (WGS84 cartesian) coordinates |
+| [**Component Wrapping System**](vNext/component-wrapping-rfc.md) | @ibgreen | **Draft** | A unified system for exposing JS components to Python/Jupyter Notebook/JSON etc. |
 
 Possible other animation related RFCs:
 - integration with event handling (enter leave triggers for animations)
@@ -49,7 +51,7 @@ Possible other animation related RFCs:
 | [**Unified ViewState**](vNext/view-state-rfc.md) | @ibgreen | **Deferred** | Controversial proposal for an even more Unified View/Controller Architecture. Review again after all Controller/Multiview RFCs have been approved/implemented |
 
 
-## v7.x Binary Data RFCs
+## v8.x Binary Data RFCs
 
 Group of related RFCs loosely targeted for 7.x releases.
 

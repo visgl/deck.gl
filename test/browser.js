@@ -49,9 +49,11 @@ test('deck.gl', t => {
   require('./modules/main/bundle');
   require('./modules/aggregation-layers/utils/gpu-grid-aggregator.spec');
   require('./modules/aggregation-layers/utils/grid-aggregation-utils.spec');
+  require('./modules/aggregation-layers/heatmap-layer/heatmap-layer.spec');
   require('./modules/core/lib/pick-layers.spec');
 
   require('./render');
+  require('./interaction');
 
   t.end();
 });

@@ -4,28 +4,21 @@
 
     <script src="https://unpkg.com/deck.gl@^7.0.0/dist.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/rest.js/15.2.6/octokit-rest.min.js"></script>
-    <script src="https://api.tiles.mapbox.com/mapbox-gl-js/v0.50.0/mapbox-gl.js"></script>
 
     <style type="text/css">
       body {
         width: 100vw;
         height: 100vh;
         margin: 0;
+        background: #f7f7f7;
+        overflow: hidden;
       }
-      #tooltip:empty {
-        display: none;
-      }
-      #tooltip {
+      .deck-tooltip {
         font-family: Helvetica, Arial, sans-serif;
-        position: absolute;
-        padding: 4px;
+        padding: 6px !important;
         margin: 8px;
-        background: rgba(0, 0, 0, 0.8);
-        color: #fff;
         max-width: 300px;
         font-size: 10px;
-        z-index: 9;
-        pointer-events: none;
       }
     </style>
   </head>
@@ -36,109 +29,20 @@
 
   <script type="text/javascript">
 
-    const octokit = new Octokit();
-
     const {DeckGL, IconLayer, LineLayer, ScatterplotLayer, TextLayer, COORDINATE_SYSTEM} = deck;
-    
-    const linkAngles = range(0, 360, 12);
 
     const deckgl =  new DeckGL({
-      views: [new OrthographicView()],
+      views: new OrthographicView(),
       viewState: { target: [0, 0, 0], zoom: 2 },
-      controller: false,
-      layers: [],
+      controller: true,
+      getTooltip: ({object}) => object && `${object.login}\nContributions: ${object.contributions}`
     });
 
-    function range(start, stop, step) {
-      step = step || 1;
-      const array = [];
-      for (let i=start; i<stop; i+=step){
-        array.push(i);
-      }
-      return array;
-    }
-
-    function addTargetPositionToContributor(contributor, linkDistance) {
-      const randomIndex = Math.floor(Math.random() * linkAngles.length);
-      const angle = linkAngles[randomIndex] * Math.PI / 180;
-      const x = Math.cos(angle) * linkDistance;
-      const y = Math.sin(angle) * linkDistance;
-      contributor['targetPosition'] = [ x, y ];
-      linkAngles.splice(randomIndex, 1);
-    }
-
-    function calculateMedian(inputArray) {
-      const array = [...inputArray];
-      if(array.length === 0) {
-        return 0;
-      }
-      array.sort((a, b) => a - b);
-      const medianIndex = Math.floor(array.length / 2);
-      if (array.length % 2) {
-        return array[medianIndex];
-      }
-      return (array[medianIndex - 1] + array[medianIndex]) / 2.0;
-    }
-
-    function calculateQuartiles(array) {
-      const secondQuartile = calculateMedian(array);
-      const firstHalfOfArray = array.filter(number => number < secondQuartile);
-      const secondHalfOfArray = array.filter(number => number > secondQuartile);
-
-      const firstQuartile = calculateMedian(firstHalfOfArray);
-      const thirdQuartile = calculateMedian(secondHalfOfArray);
-
-      return {firstQuartile, secondQuartile, thirdQuartile};
-    }
-
-    function updateTooltip({x, y, object}) {
-      const tooltip = document.getElementById('tooltip');
-      if (object) {
-        tooltip.style.top = `${y}px`;
-        tooltip.style.left = `${x}px`;
-        tooltip.innerHTML = `
-        <div><b>${object.login}</b></div>
-        <div>Contributions: ${object.contributions}</div>`;
-      } else {
-        tooltip.innerHTML = '';
-      }
-    }
-
-    function getSizeOfIcon(contributions, quartiles, ninetiethPercentile) {
-      const {firstQuartile, secondQuartile, thirdQuartile} = quartiles;
-
-        if (contributions <= firstQuartile) {
-          return 15;
-        } else if (contributions > firstQuartile && contributions <= secondQuartile) {
-          return 20;
-        } else if (contributions > secondQuartile && contributions <= thirdQuartile) {
-          return 25;
-        } else if (contributions > thirdQuartile && contributions <= ninetiethPercentile) {
-          return 32;
-        }
-        return 40;
-    }
-    
-
     function renderLayers(data) {
-      const sourcePosition = [0, 0];
-      const listOfContributions = data.map(contributor => contributor.contributions);
-      const quartiles = calculateQuartiles(listOfContributions);
-      const ninetiethPercentile = [...listOfContributions]
-        .sort((a, b) => a - b)[Math.floor(0.90 * listOfContributions.length)];
-
-      const maxContributions = Math.max(...listOfContributions);
-      const minContributions = Math.min(...listOfContributions);
-
-      listOfContributions.forEach((number, index) => {
-        const linkDistance = 20 * ((number - minContributions) 
-        / (maxContributions - minContributions)) + 30;
-
-        addTargetPositionToContributor(data[index], linkDistance);
-      })
+      const ORIGIN = [0, 0];
 
       const iconLayer = new IconLayer({
-        id: 'icon-layer',
+        id: 'users',
         coordinateSystem: COORDINATE_SYSTEM.IDENTITY,
         data,
         getIcon: d => ({
@@ -146,51 +50,73 @@
           width: 128,
           height: 128
         }),
-        getSize : d => getSizeOfIcon(d.contributions, quartiles, ninetiethPercentile),
-        getPosition: d => d.targetPosition,
-        pickable: true,
-        onHover: updateTooltip
+        getSize : d => d.size,
+        getPosition: d => d.position,
+        sizeUnits: 'meters',
+        pickable: true
       });
 
       const lineLayer = new LineLayer({
-        id: 'line',
+        id: 'links',
         coordinateSystem: COORDINATE_SYSTEM.IDENTITY,
         data,
         pickable: true,
-        getSourcePosition: d => sourcePosition,
-        getTargetPosition: d => d.targetPosition,
-        getColor: d => [228, 228, 228],
+        getSourcePosition: d => ORIGIN,
+        getTargetPosition: d => d.position,
+        getColor: [228, 228, 228],
         getWidth: 3
       });
 
       const scatterPlotLayer = new ScatterplotLayer({
-        id: 'scatter',
+        id: 'deck.gl-circle',
         coordinateSystem: COORDINATE_SYSTEM.IDENTITY,
-        data: [ {position: [0, 0], color: [23, 38, 42], radius: 12} ],
+        data: [{position: [0, 0]}],
         getPosition: d => d.position,
-        getFillColor: d => d.color,
-        getRadius: d => d.radius,
+        getFillColor: [23, 38, 42],
+        getRadius: 12,
+        radiusMaxPixels: 60,
         opacity: 1
       });
 
       const textLayer = new TextLayer({
-        id: 'text-layer',
+        id: 'deck.gl-label',
         coordinateSystem: COORDINATE_SYSTEM.IDENTITY,
-        data: [{position: [0, 0], text: 'Deck.gl', color: [255, 255, 255]}],
+        data: [{position: [0, 0]}],
         getSize: 15,
         getPosition: d => d.position,
-        getText: d => d.text,
-        getColor: d => d.color
+        getText: d => 'Deck.gl',
+        getColor: [255, 255, 255]
       });
 
       deckgl.setProps({ layers: [lineLayer, iconLayer, scatterPlotLayer, textLayer] });
     }
 
-    octokit.repos.getContributors({
-      owner: 'uber',
-      repo: 'deck.gl' })
-    .then(result => result.data)
-    .then(data => renderLayers(data))
+    new Octokit().repos.getContributors({ owner: 'uber', repo: 'deck.gl' })
+    .then(result => {
+      let {data} = result;
+      // process data
+      const listOfContributions = data.map(contributor => contributor.contributions);
+      const maxContributions = Math.max(...listOfContributions);
+
+      // shuffle
+      data.sort(() => 0.5 - Math.random());
+      data = data.map((d, i) => {
+        const angle = i / data.length * 2 * Math.PI;
+        const distance = 30 * Math.sqrt(d.contributions / maxContributions) + 16;
+        const x = Math.cos(angle) * distance;
+        const y = Math.sin(angle) * distance;
+        const size = Math.log2(d.contributions) + 1;
+        return {
+          login: d.login,
+          avatar_url: d.avatar_url,
+          contributions: d.contributions,
+          position: [x, y],
+          size
+        };
+      });
+
+      renderLayers(data);
+    })
 
   </script>
 </html>

@@ -14,11 +14,14 @@ export function vecEquals(v1, v2) {
   return v1.length === v2.length;
 }
 
-export function vecFinite(v) {
+export function vecNormalized(v) {
   for (let i = 0; i < v.length; ++i) {
     if (!Number.isFinite(v[i])) {
       return false;
     }
+  }
+  if (!floatEquals(v.len(), 1)) {
+    return false;
   }
 
   return true;

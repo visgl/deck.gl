@@ -19,7 +19,7 @@
 // THE SOFTWARE.
 
 import assert from '../utils/assert';
-import {_ShaderCache as ShaderCache} from '@luma.gl/core';
+import {Timeline} from '@luma.gl/addons';
 import seer from 'seer';
 import Layer from './layer';
 import {LIFECYCLE} from '../lifecycle/constants';
@@ -28,6 +28,7 @@ import {flatten} from '../utils/flatten';
 import {Stats} from 'probe.gl';
 
 import Viewport from '../viewports/viewport';
+import {createProgramManager} from '../shaderlib';
 
 import {
   setPropOverrides,
@@ -45,10 +46,6 @@ const INITIAL_CONTEXT = Object.seal({
   layerManager: null,
   deck: null,
   gl: null,
-  time: -1,
-
-  // Settings
-  useDevicePixels: true, // Exposed in case custom layers need to adjust sizes
 
   // General resources
   stats: null, // for tracking lifecycle performance
@@ -57,7 +54,6 @@ const INITIAL_CONTEXT = Object.seal({
   shaderCache: null,
   pickingFBO: null, // Screen-size framebuffer that layers can reuse
 
-  animationProps: null,
   mousePosition: null,
 
   userData: {} // Place for any custom app `context`
@@ -67,7 +63,7 @@ const layerName = layer => (layer instanceof Layer ? `${layer}` : !layer ? 'null
 
 export default class LayerManager {
   // eslint-disable-next-line
-  constructor(gl, {deck, stats, viewport = null} = {}) {
+  constructor(gl, {deck, stats, viewport = null, timeline = null} = {}) {
     // Currently deck.gl expects the DeckGL.layers array to be different
     // whenever React rerenders. If the same layers array is used, the
     // LayerManager's diffing algorithm will generate a fatal error and
@@ -85,10 +81,11 @@ export default class LayerManager {
       deck,
       gl,
       // Enabling luma.gl Program caching using private API (_cachePrograms)
-      shaderCache: gl && new ShaderCache({gl, _cachePrograms: true}),
+      programManager: gl && createProgramManager(gl),
       stats: stats || new Stats({id: 'deck.gl'}),
       // Make sure context.viewport is not empty on the first layer initialization
-      viewport: viewport || new Viewport({id: 'DEFAULT-INITIAL-VIEWPORT'}) // Current viewport, exposed to layers for project* function
+      viewport: viewport || new Viewport({id: 'DEFAULT-INITIAL-VIEWPORT'}), // Current viewport, exposed to layers for project* function
+      timeline: timeline || new Timeline()
     });
 
     this._needsRedraw = 'Initial render';
@@ -149,12 +146,7 @@ export default class LayerManager {
       : this.layers;
   }
 
-  /**
-   * Set props needed for layer rendering and picking.
-   * Parameters are to be passed as a single object, with the following values:
-   * @param {Boolean} useDevicePixels
-   */
-  /* eslint-disable complexity, max-statements */
+  // Set props needed for layer rendering and picking.
   setProps(props) {
     if ('debug' in props) {
       this._debug = props.debug;
@@ -165,21 +157,16 @@ export default class LayerManager {
       this.context.userData = props.userData;
     }
 
-    if ('useDevicePixels' in props) {
-      this.context.useDevicePixels = props.useDevicePixels;
-    }
-
     // TODO - For now we set layers before viewports to preserve changeFlags
     if ('layers' in props) {
       this.setLayers(props.layers);
     }
   }
-  /* eslint-enable complexity, max-statements */
 
   // Supply a new layer list, initiating sublayer generation and layer matching
-  setLayers(newLayers) {
+  setLayers(newLayers, forceUpdate = false) {
     // TODO - something is generating state updates that cause rerender of the same
-    if (newLayers === this.lastRenderedLayers) {
+    if (!forceUpdate && newLayers === this.lastRenderedLayers) {
       log.log(3, 'Ignoring layer update due to layer array not changed')();
       return this;
     }
@@ -206,18 +193,16 @@ export default class LayerManager {
   }
 
   // Update layers from last cycle if `setNeedsUpdate()` has been called
-  updateLayers(animationProps = {}) {
-    if ('time' in animationProps) {
-      this.context.time = animationProps.time;
-    }
+  updateLayers() {
     // NOTE: For now, even if only some layer has changed, we update all layers
     // to ensure that layer id maps etc remain consistent even if different
     // sublayers are rendered
     const reason = this.needsUpdate();
     if (reason) {
       this.setNeedsRedraw(`updating layers: ${reason}`);
-      // HACK - Call with a copy of lastRenderedLayers to trigger a full update
-      this.setLayers([...this.lastRenderedLayers]);
+      // Force a full update
+      const forceUpdate = true;
+      this.setLayers(this.lastRenderedLayers, forceUpdate);
     }
   }
 
@@ -291,7 +276,7 @@ export default class LayerManager {
     // Finalize unmatched layers
     const error2 = this._finalizeOldLayers(oldLayerMap);
 
-    this._needsUpdate = false;
+    this._needsUpdate = generatedLayers.some(layer => layer.hasUniformTransition());
 
     const firstError = error || error2;
     return {error: firstError, generatedLayers};

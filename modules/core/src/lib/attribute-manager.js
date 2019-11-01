@@ -112,7 +112,7 @@ export default class AttributeManager {
    * change detection, but instead makes it easy to build such detection
    * by offering the ability to "invalidate" each attribute separately.
    */
-  constructor(gl, {id = 'attribute-manager', stats} = {}) {
+  constructor(gl, {id = 'attribute-manager', stats, timeline} = {}) {
     this.id = id;
     this.gl = gl;
 
@@ -126,7 +126,8 @@ export default class AttributeManager {
     this.stats = stats;
 
     this.attributeTransitionManager = new AttributeTransitionManager(gl, {
-      id: `${id}-transitions`
+      id: `${id}-transitions`,
+      timeline
     });
 
     // For debugging sanity, prevent uninitialized members
@@ -238,7 +239,7 @@ export default class AttributeManager {
         )
       ) {
         // Attribute is using external buffer from the props
-      } else if (attribute.setGenericValue(props[attribute.getAccessor()])) {
+      } else if (attribute.setConstantValue(props[attribute.getAccessor()])) {
         // Attribute is using generic value from the props
       } else if (attribute.needsUpdate()) {
         updated = true;
@@ -273,9 +274,9 @@ export default class AttributeManager {
 
   // Update attribute transition to the current timestamp
   // Returns `true` if any transition is in progress
-  updateTransition(timestamp) {
+  updateTransition() {
     const {attributeTransitionManager} = this;
-    const transitionUpdated = attributeTransitionManager.setCurrentTime(timestamp);
+    const transitionUpdated = attributeTransitionManager.run();
     this.needsRedraw = this.needsRedraw || transitionUpdated;
     return transitionUpdated;
   }

@@ -19,7 +19,7 @@ export function diffProps(props, oldProps) {
     newProps: props,
     oldProps,
     propTypes: getPropTypes(props),
-    ignoreProps: {data: null, updateTriggers: null, extensions: null}
+    ignoreProps: {data: null, updateTriggers: null, extensions: null, transitions: null}
   });
 
   // Now check if any data related props have changed
@@ -36,8 +36,27 @@ export function diffProps(props, oldProps) {
     dataChanged: dataChangedReason,
     propsChanged: propsChangedReason,
     updateTriggersChanged: updateTriggersChangedReason,
-    extensionsChanged: diffExtensions(props, oldProps)
+    extensionsChanged: diffExtensions(props, oldProps),
+    transitionsChanged: diffTransitions(props, oldProps)
   };
+}
+
+function diffTransitions(props, oldProps) {
+  if (!props.transitions) {
+    return null;
+  }
+  const result = {};
+  const propTypes = getPropTypes(props);
+
+  for (const key in props.transitions) {
+    const propType = propTypes[key];
+    const type = propType && propType.type;
+    const isTransitionable = type === 'number' || type === 'color' || type === 'array';
+    if (isTransitionable && comparePropValues(props[key], oldProps[key], propType)) {
+      result[key] = true;
+    }
+  }
+  return result;
 }
 
 /**

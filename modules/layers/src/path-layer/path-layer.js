@@ -66,6 +66,8 @@ export default class PathLayer extends Layer {
         // Hack - Attribute class needs this to properly apply partial update
         // The first 3 numbers of the value is just padding
         offset: 12,
+        type: GL.DOUBLE,
+        fp64: this.use64bitPositions(),
         transition: ATTRIBUTE_TRANSITION,
         accessor: 'getPath',
         update: this.calculateStartPositions,
@@ -81,6 +83,8 @@ export default class PathLayer extends Layer {
       },
       endPositions: {
         size: 3,
+        type: GL.DOUBLE,
+        fp64: this.use64bitPositions(),
         transition: ATTRIBUTE_TRANSITION,
         accessor: 'getPath',
         update: this.calculateEndPositions,
@@ -93,18 +97,6 @@ export default class PathLayer extends Layer {
             offset: 12
           }
         }
-      },
-      instanceLeftStartPositions64xyLow: {
-        size: 4,
-        stride: 8,
-        update: this.calculateLeftStartPositions64xyLow,
-        noAlloc
-      },
-      instanceEndRightPositions64xyLow: {
-        size: 4,
-        stride: 8,
-        update: this.calculateEndRightPositions64xyLow,
-        noAlloc
       },
       instanceTypes: {
         size: 1,
@@ -136,7 +128,9 @@ export default class PathLayer extends Layer {
     /* eslint-enable max-len */
 
     this.setState({
-      pathTesselator: new PathTesselator({})
+      pathTesselator: new PathTesselator({
+        fp64: this.use64bitPositions()
+      })
     });
   }
 
@@ -156,7 +150,6 @@ export default class PathLayer extends Layer {
         data: props.data,
         getGeometry: props.getPath,
         positionFormat: props.positionFormat,
-        fp64: this.use64bitPositions(),
         dataChanged: changeFlags.dataChanged
       });
       this.setState({
@@ -285,8 +278,7 @@ export default class PathLayer extends Layer {
             positions: new Float32Array(SEGMENT_POSITIONS)
           }
         }),
-        isInstanced: true,
-        shaderCache: this.context.shaderCache
+        isInstanced: true
       })
     );
   }
@@ -310,46 +302,6 @@ export default class PathLayer extends Layer {
 
     attribute.bufferLayout = pathTesselator.bufferLayout;
     attribute.value = pathTesselator.get('segmentTypes');
-  }
-
-  calculateLeftStartPositions64xyLow(attribute) {
-    const isFP64 = this.use64bitPositions();
-    attribute.constant = !isFP64;
-
-    if (isFP64) {
-      attribute.value = this.state.pathTesselator.get('startPositions64XyLow');
-    } else {
-      attribute.value = new Float32Array(4);
-    }
-  }
-
-  calculateEndRightPositions64xyLow(attribute) {
-    const isFP64 = this.use64bitPositions();
-    attribute.constant = !isFP64;
-
-    if (isFP64) {
-      attribute.value = this.state.pathTesselator.get('endPositions64XyLow');
-    } else {
-      attribute.value = new Float32Array(4);
-    }
-  }
-
-  clearPickingColor(color) {
-    const pickedPathIndex = this.decodePickingColor(color);
-    const {bufferLayout} = this.state.pathTesselator;
-    const numVertices = bufferLayout[pickedPathIndex];
-
-    let startInstanceIndex = 0;
-    for (let pathIndex = 0; pathIndex < pickedPathIndex; pathIndex++) {
-      startInstanceIndex += bufferLayout[pathIndex];
-    }
-
-    const {instancePickingColors} = this.getAttributeManager().attributes;
-
-    const {value} = instancePickingColors;
-    const endInstanceIndex = startInstanceIndex + numVertices;
-    value.fill(0, startInstanceIndex * 3, endInstanceIndex * 3);
-    instancePickingColors.update({value});
   }
 }
 

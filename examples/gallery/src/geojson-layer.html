@@ -10,27 +10,19 @@
         width: 100vw;
         height: 100vh;
         margin: 0;
+        overflow: hidden;
       }
-      #tooltip:empty {
-        display: none;
-      }
-      #tooltip {
+      .deck-tooltip {
         font-family: Helvetica, Arial, sans-serif;
-        position: absolute;
-        padding: 4px;
+        padding: 6px !important;
         margin: 8px;
-        background: rgba(0, 0, 0, 0.8);
-        color: #fff;
         max-width: 300px;
         font-size: 10px;
-        z-index: 9;
-        pointer-events: none;
       }
     </style>
   </head>
 
   <body>
-    <div id="tooltip"></div>
   </body>
 
   <script type="text/javascript">
@@ -68,8 +60,7 @@
       getFillColor: f => colorScale(f.properties.growth),
       getLineColor: [255, 255, 255],
 
-      pickable: true,
-      onHover: updateTooltip
+      pickable: true
     });
 
     new DeckGL({
@@ -80,7 +71,8 @@
       zoom: 11,
       maxZoom: 16,
       pitch: 45,
-      layers: [geojsonLayer]
+      layers: [geojsonLayer],
+      getTooltip
     });
 
     function colorScale(x) {
@@ -91,21 +83,11 @@
       return COLOR_SCALE[i] || COLOR_SCALE[COLOR_SCALE.length - 1];
     }
 
-    function updateTooltip({x, y, object}) {
-      const tooltip = document.getElementById('tooltip');
-
-      if (object) {
-        tooltip.style.top = `${y}px`;
-        tooltip.style.left = `${x}px`;
-        tooltip.innerHTML = `
-    <div><b>Average Property Value &nbsp;</b></div>
-    <div><div>${object.properties.valuePerSqm} / m<sup>2</sup></div></div>
-    <div><b>Growth</b></div>
-    <div>${Math.round(object.properties.growth * 100)}%</div>
-    `;
-      } else { 
-        tooltip.innerHTML = '';
-      }
+    function getTooltip({object}) {
+      return object && `Average Property Value
+        ${object.properties.valuePerSqm}
+        Growth
+        ${Math.round(object.properties.growth * 100)}`;
     }
 
   </script>

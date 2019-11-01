@@ -138,10 +138,10 @@ new IconLayer({});
 To use pre-bundled scripts:
 
 ```html
-<script src="https://unpkg.com/deck.gl@~7.0.0/dist.min.js"></script>
+<script src="https://unpkg.com/deck.gl@^7.0.0/dist.min.js"></script>
 <!-- or -->
-<script src="https://unpkg.com/@deck.gl/core@~7.0.0/dist.min.js"></script>
-<script src="https://unpkg.com/@deck.gl/layers@~7.0.0/dist.min.js"></script>
+<script src="https://unpkg.com/@deck.gl/core@^7.0.0/dist.min.js"></script>
+<script src="https://unpkg.com/@deck.gl/layers@^7.0.0/dist.min.js"></script>
 ```
 
 ```js
@@ -178,7 +178,7 @@ If you choose to use auto packing, then `iconAtlas` and `iconMapping` should not
 otherwise it causes error since `IconLayer` will attempt to retrieve icons from 
 given pre-packed `iconAtlas`.
 
-##### `sizeScale` (Number, optional)
+##### `sizeScale` (Number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
 
 - Default: `1`
 
@@ -190,13 +190,13 @@ Icon size multiplier.
 
 The units of the size specified by `getSize`, one of `'meters'`, `'pixels'`. When zooming in and out, meter sizes scale with the base map, and pixel sizes remain the same on screen.
 
-##### `sizeMinPixels` (Number, optional)
+##### `sizeMinPixels` (Number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
 
 * Default: `0`
 
 The minimum size in pixels.
 
-##### `sizeMaxPixels` (Number, optional)
+##### `sizeMaxPixels` (Number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
 
 * Default: `Number.MAX_SAFE_INTEGER`
 
@@ -207,6 +207,13 @@ The maximum size in pixels.
 - Default: `true`
 
 If on, the icon always faces camera. Otherwise the icon faces up (z)
+
+##### `alphaCutoff` (Number, optional)
+
+- Default: `0.05`
+
+Discard pixels whose opacity is below this threshold. A discarded pixel would create a "hole" in the icon that is not considered part of the object. This is useful for customizing picking behavior, e.g. setting `alphaCutoff: 0, autoHighlight` will highlight an object whenever the cursor moves into its bounding box, instead of over the visible pixels.
+
 
 ### Data Accessors
 

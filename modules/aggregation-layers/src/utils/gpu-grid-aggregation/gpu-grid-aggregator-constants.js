@@ -39,3 +39,17 @@ export const DEFAULT_WEIGHT_PARAMS = {
 export const IDENTITY_MATRIX = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1];
 export const PIXEL_SIZE = 4; // RGBA32F
 export const WEIGHT_SIZE = 3;
+
+export const MAX_MIN_TEXTURE_OPTS = {
+  format: GL.RGBA32F,
+  type: GL.FLOAT,
+  border: 0,
+  mipmaps: false,
+  parameters: {
+    [GL.TEXTURE_MAG_FILTER]: GL.NEAREST,
+    [GL.TEXTURE_MIN_FILTER]: GL.NEAREST
+  },
+  dataFormat: GL.RGBA,
+  width: 1,
+  height: 1
+};

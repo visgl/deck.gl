@@ -1,57 +1,10 @@
 import test from 'tape-catch';
-import {_JSONConverter as JSONConverter, _JSONLayer as JSONLayer} from '@deck.gl/json';
+import {makeSpy} from '@probe.gl/test-utils';
 
-import {COORDINATE_SYSTEM} from '@deck.gl/core';
-import GL from '@luma.gl/constants';
-
-export const configuration = {
-  // a map of all layers that should be exposes as JSONLayers
-  layers: Object.assign({}, require('@deck.gl/layers')),
-  // Any non-standard views
-  views: {},
-  // Enumerations that should be available to JSON parser
-  // Will be resolved as `<enum-name>.<enum-value>`
-  enumerations: {
-    COORDINATE_SYSTEM,
-    GL
-  }
-};
-
-export const JSON_DATA = {
-  initialViewState: {
-    longitude: -122.45,
-    latitude: 37.8,
-    zoom: 12
-  },
-  mapStyle: {},
-  views: [
-    {
-      type: 'MapView',
-      height: '50%',
-      controller: true
-    },
-    {
-      type: 'FirstPersonView',
-      y: '50%',
-      height: '50%'
-    }
-  ],
-  layers: [
-    {
-      type: 'ScatterplotLayer',
-      data: [{position: [-122.45, 37.8]}],
-      getPosition: 'position',
-      getColor: [255, 0, 0, 255],
-      getRadius: 1000
-    },
-    {
-      type: 'TextLayer',
-      data: [[-122.45, 37.8]],
-      getPosition: '-',
-      getText: d => 'Hello World'
-    }
-  ]
-};
+import {MapController} from '@deck.gl/core';
+import {JSONConverter} from '@deck.gl/json';
+import configuration, {log} from './json-configuration-for-deck';
+import JSON_DATA from './data/deck-props.json';
 
 test('JSONConverter#import', t => {
   t.ok(JSONConverter, 'JSONConverter imported');
@@ -68,14 +21,23 @@ test('JSONConverter#convert', t => {
   const jsonConverter = new JSONConverter({configuration});
   t.ok(jsonConverter, 'JSONConverter created');
 
-  const deckProps = jsonConverter.convertJsonToDeckProps(JSON_DATA);
+  const deckProps = jsonConverter.convert(JSON_DATA);
   t.ok(deckProps, 'JSONConverter converted correctly');
 
   t.is(deckProps.views.length, 2, 'JSONConverter converted views');
+  t.is(deckProps.controller, MapController, 'Should evaluate constants.');
 
-  const layer = deckProps.layers[0];
-  t.is(layer && layer.constructor, JSONLayer, 'JSONConverter created JSONLayer');
-  t.is(layer.props.data.length, 2, 'JSONLayer has data');
+  t.end();
+});
 
+test('JSONConverter#badConvert', t => {
+  const jsonConverter = new JSONConverter({configuration});
+  t.ok(jsonConverter, 'JSONConverter created');
+  const badData = JSON.parse(JSON.stringify(JSON_DATA));
+  badData.layers[0].type = 'InvalidLayer';
+  makeSpy(log, 'warn');
+  jsonConverter.convert(badData);
+  t.ok(log.warn.called, 'should produce a warning message if the layer type is invalid');
+  log.warn.restore();
   t.end();
 });

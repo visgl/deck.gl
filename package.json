@@ -19,8 +19,8 @@
   "scripts": {
     "bootstrap": "PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true yarn && ocular-bootstrap",
     "clean": "ocular-clean",
-    "build": "ocular-clean && ocular-build",
-    "version": "ocular-build core,main",
+    "build": "ocular-clean && ocular-build && lerna run build",
+    "prepublish": "ocular-build core,main",
     "lint": "ocular-lint",
     "cover": "ocular-test cover",
     "publish": "ocular-publish",
@@ -41,11 +41,13 @@
     "jsdom": false
   },
   "devDependencies": {
-    "@luma.gl/effects": "^7.2.0-alpha.1",
-    "@probe.gl/bench": "^3.0.2",
-    "@probe.gl/test-utils": "^3.0.2",
+    "@luma.gl/effects": "^7.4.0-alpha.2",
+    "@probe.gl/bench": "^3.1.1",
+    "@probe.gl/test-utils": "^3.1.1",
+    "@loaders.gl/csv": "^1.3.3",
+    "@loaders.gl/polyfills": "^1.3.3",
     "babel-loader": "^8.0.0",
-    "babel-plugin-inline-webgl-constants": "^1.0.0",
+    "babel-plugin-inline-webgl-constants": "^1.0.1",
     "babel-plugin-remove-glsl-comments": "^0.1.0",
     "babel-preset-minify": "^0.5.0",
     "canvas": "^2.6.0",
@@ -57,7 +59,7 @@
     "gl": "^4.3.3",
     "glsl-transpiler": "^1.8.3",
     "jsdom": "^15.0.0",
-    "ocular-dev-tools": "0.0.27",
+    "ocular-dev-tools": "0.0.29",
     "png.js": "^0.1.1",
     "pre-commit": "^1.2.2",
     "pre-push": "^0.1.1",
@@ -72,4 +74,3 @@
     "bindings-precommit-tests"
   ]
 }
-

@@ -9,7 +9,7 @@ export default `\
 
 // Instance attributes
 _attribute vec3 instancePositions;
-_attribute vec2 instancePositions64xy;
+_attribute vec2 instancePositions64xyLow;
 _attribute vec4 instanceColors;
 _attribute vec3 instancePickingColors;
 _attribute mat3 instanceModelMatrix;
@@ -18,6 +18,7 @@ _attribute vec3 instanceTranslation;
 // Uniforms
 uniform float sizeScale;
 uniform mat4 sceneModelMatrix;
+uniform bool enableOffsetModelMatrix;
 
 // Attributes
 _attribute vec4 POSITION;
@@ -50,6 +51,7 @@ void main(void) {
   #endif
 
   geometry.worldPosition = instancePositions;
+  geometry.pickingColor = instancePickingColors;
 
   #ifdef MODULE_PBR
     // set PBR data
@@ -67,10 +69,16 @@ void main(void) {
   #endif
 
   vec3 pos = (instanceModelMatrix * (sceneModelMatrix * POSITION).xyz) * sizeScale + instanceTranslation;
-  pos = project_size(pos);
-  DECKGL_FILTER_SIZE(pos, geometry);
 
-  gl_Position = project_position_to_clipspace(instancePositions, instancePositions64xy, pos, geometry.position);
+  if(enableOffsetModelMatrix) {
+    DECKGL_FILTER_SIZE(pos, geometry);
+    gl_Position = project_position_to_clipspace(pos + instancePositions, instancePositions64xyLow, vec3(0.0), geometry.position);
+  }
+  else {
+    pos = project_size(pos);
+    DECKGL_FILTER_SIZE(pos, geometry);
+    gl_Position = project_position_to_clipspace(instancePositions, instancePositions64xyLow, pos, geometry.position);
+  }
   DECKGL_FILTER_GL_POSITION(gl_Position, geometry);
 
   #ifdef MODULE_PBR
@@ -80,7 +88,5 @@ void main(void) {
 
   vColor = instanceColors;
   DECKGL_FILTER_COLOR(vColor, geometry);
-
-  picking_setPickingColor(instancePickingColors);
 }
 `;

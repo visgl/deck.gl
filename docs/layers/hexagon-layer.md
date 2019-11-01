@@ -65,11 +65,11 @@ new HexagonLayer({});
 To use pre-bundled scripts:
 
 ```html
-<script src="https://unpkg.com/deck.gl@~7.0.0/dist.min.js"></script>
+<script src="https://unpkg.com/deck.gl@^7.0.0/dist.min.js"></script>
 <!-- or -->
-<script src="https://unpkg.com/@deck.gl/core@~7.0.0/dist.min.js"></script>
-<script src="https://unpkg.com/@deck.gl/layers@~7.0.0/dist.min.js"></script>
-<script src="https://unpkg.com/@deck.gl/aggregation-layers@~7.0.0/dist.min.js"></script>
+<script src="https://unpkg.com/@deck.gl/core@^7.0.0/dist.min.js"></script>
+<script src="https://unpkg.com/@deck.gl/layers@^7.0.0/dist.min.js"></script>
+<script src="https://unpkg.com/@deck.gl/aggregation-layers@^7.0.0/dist.min.js"></script>
 ```
 
 ```js
@@ -83,7 +83,7 @@ Inherits from all [Base Layer](/docs/api-reference/layer.md) and [CompositeLayer
 
 ### Render Options
 
-##### `radius` (Number, optional)
+##### `radius` (Number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
 
 * Default: `1000`
 
@@ -120,7 +120,7 @@ to number of counts by passing in an arbitrary color domain. This property is ex
 Specified as an array of 6 colors [color1, color2, ... color6]. Each color is an array of 3 or 4 values [R, G, B] or [R, G, B, A], representing intensities of Red, Green, Blue and Alpha channels.  Each intensity is a value between 0 and 255. When Alpha not provided a value of 255 is used. By default `colorRange` is set to
 [colorbrewer](http://colorbrewer2.org/#type=sequential&scheme=YlOrRd&n=6) `6-class YlOrRd`.
 
-##### `coverage` (Number, optional)
+##### `coverage` (Number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
 
 * Default: `1`
 
@@ -144,7 +144,7 @@ with the same elevation scale for comparison.
 
 Elevation scale output range
 
-##### `elevationScale` (Number, optional)
+##### `elevationScale` (Number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
 
 * Default: `1`
 
@@ -158,28 +158,28 @@ all hexagons without updating the data.
 
 Whether to enable cell elevation. Cell elevation scale by count of points in each cell. If set to false, all cells will be flat.
 
-##### `upperPercentile` (Number, optional)
+##### `upperPercentile` (Number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
 
 * Default: `100`
 
 Filter bins and re-calculate color by `upperPercentile`. Hexagons with color value
 larger than the upperPercentile will be hidden.
 
-##### `lowerPercentile` (Number, optional)
+##### `lowerPercentile` (Number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
 
 * Default: `0`
 
 Filter bins and re-calculate color by `lowerPercentile`. Hexagons with color value
 smaller than the lowerPercentile will be hidden.
 
-##### `elevationUpperPercentile` (Number, optional)
+##### `elevationUpperPercentile` (Number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
 
 * Default: `100`
 
 Filter bins and re-calculate elevation by `elevationUpperPercentile`. Hexagons with elevation value
 larger than the elevationUpperPercentile will be hidden.
 
-##### `elevationLowerPercentile` (Number, optional)
+##### `elevationLowerPercentile` (Number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
 
 * Default: `100`
 
@@ -211,21 +211,13 @@ It takes an array of points inside each bin as arguments, returns a number. For 
 You can pass in `getColorValue` to color the bins by avg/mean/max of a specific attributes of each point.
 By default `getColorValue` returns the length of the points array.
 
-Note: hexagon layer compares whether `getColorValue` has changed to
-recalculate the value for each bin that its color based on. You should
-pass in the function defined outside the render function so it doesn't create a
-new function on every rendering pass.
 
 ```js
  class MyHexagonLayer {
-    getColorValue (points) {
-        return points.length;
-    }
-
     renderLayers() {
       return new HexagonLayer({
         id: 'hexagon-layer',
-        getColorValue: this.getColorValue // instead of getColorValue: (points) => { return points.length; }
+        getColorValue: points => points.length
         data,
         radius: 500
       });
@@ -238,8 +230,6 @@ new function on every rendering pass.
 * Default: `point => 1`
 
 `getColorWeight` is the accessor function to get the weight of a point used to calcuate the color value for a cell.
-
-Note: similar to `getColorValue`, grid layer compares whether `getColorWeight` has changed to recalculate the value for each bin that its color based on.
 
 
 ##### `colorAggregation` (String, optional)
@@ -254,28 +244,22 @@ Note: `getColorWeight` and `colorAggregation` together define how color value of
 
 * Using `getColorValue`
 ```js
-function getCount(points) {
-  return points.length;
-}
 ...
 const layer = new HexagonLayer({
   id: 'my-hexagon-layer',
   ...
-  getColorValue: getCount,
+  getColorValue: points => points.length,
   ...
 });
 ```
 
 * Using `getColorWeight` and `colorAggregation`
 ```js
-function getWeight(point) {
-  return 1;
-}
 ...
 const layer = new HexagonLayer({
   id: 'my-hexagon-layer',
   ...
-  getColorWeight: getWeight,
+  getColorWeight: point => 1,
   colorAggregation: 'SUM'
   ...
 });
@@ -299,14 +283,11 @@ const layer = new HexagonLayer({
 
 * Using `getColorWeight` and `colorAggregation`
 ```js
-function getWeight(point) {
-  return point.SPACES;
-}
 ...
 const layer = new HexagonLayer({
   id: 'my-hexagon-layer',
   ...
-  getColorWeight: getWeight,
+  getColorWeight: point => point.SPACES,
   colorAggregation: 'SUM'
   ...
 });
@@ -323,11 +304,6 @@ Similar to `getColorValue`, `getElevationValue` is the accessor function to get 
 It takes an array of points inside each bin as arguments, returns a number.
 By default `getElevationValue` returns the length of the points array.
 
-Note: hexagon layer compares whether `getElevationValue` has changed to
-recalculate the value for each bin for elevation. You should
-pass in the function defined outside the render function so it doesn't create a
-new function on every rendering pass.
-
 
 ##### `getElevationWeight` (Function, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
 
@@ -335,7 +311,6 @@ new function on every rendering pass.
 
 `getElevationWeight` is the accessor function to get the weight of a point used to calcuate the elevation value for a cell.
 
-Note: similar to `getElevationValue`, grid layer compares whether `getElevationWeight` has changed to recalculate the value for each bin that its color based on.
 
 ##### `elevationAggregation` (String, optional)
 
@@ -351,28 +326,22 @@ Note: `getElevationWeight` and `elevationAggregation` together define how elevat
 * Using `getElevationValue`
 
 ```js
-function getCount(points) {
-  return points.length;
-}
 ...
 const layer = new HexagonLayer({
   id: 'my-hexagon-layer',
   ...
-  getElevationValue: getCount,
+  getElevationValue: points => points.length,
   ...
 });
 ```
 
 * Using `getElevationWeight` and `elevationAggregation`
 ```js
-function getWeight(point) {
-  return 1;
-}
 ...
 const layer = new HexagonLayer({
   id: 'my-hexagon-layer',
   ...
-  getElevationWeight: getWeight,
+  getElevationWeight: point => 1,
   elevationAggregation: 'SUM'
   ...
 });
@@ -396,14 +365,11 @@ const layer = new HexagonLayer({
 
 * Using `getElevationWeight` and `elevationAggregation`
 ```js
-function getWeight(point) {
-  return point.SPACES;
-}
 ...
 const layer = new HexagonLayer({
   id: 'my-hexagon-layer',
   ...
-  getElevationWeight: getWeight,
+  getElevationWeight: point => point.SPACES,
   elevationAggregation: 'MAX'
   ...
 });

@@ -2,7 +2,7 @@
 
 > For details about deck.gl's views system and code examples, visit the [Views and Projections](/docs/developer-guide/views.md) article.
 
-The `View` class and it subclasses are used to specify where and how your deck.gl layers should be rendered. Applications typically instantitate at least one `View` subclass.
+The `View` class and its subclasses are used to specify where and how your deck.gl layers should be rendered. Applications typically instantiate at least one `View` subclass.
 
 Views allow you to specify:
 
@@ -79,7 +79,7 @@ The `viewState` property is intended to support a number of use cases:
 
 ##### `clear` (Boolean|Object, optional)
 
-Clears the contents (pixels) of the viewport. The value of the `clear` prop is passed as argument to luma.gl's `clear` function. If `true` clears color and depth buffers. If an object, behaviour is controller by the following fields:
+Clears the contents (pixels) of the viewport. The value of the `clear` prop is passed as an argument to luma.gl's `clear` function. If `true` clears color and depth buffers. If an object, behaviour is controlled by the following fields:
 
 * `color` (Boolean or Array) - if not `false`, clears all active color buffers with either the provided color or the currently set clear color.
 * `depth` (Boolean)  - if `true`, clears the depth buffer.
@@ -151,7 +151,7 @@ Note: For speed, deck.gl uses shallow equality. This means that a value of `fals
 View.makeViewport({width, height, viewState})
 ```
 
-Builds a [Viewport](/docs/api-reference/viewport.md) using the viewport type and props in the `View`and provided `width`, `height` and `viewState`. The contents of `viewState` needs to be compatible with the particular `View` sublass in use.
+Builds a [Viewport](/docs/api-reference/viewport.md) using the viewport type and props in the `View` and provided `width`, `height` and `viewState`. The contents of `viewState` needs to be compatible with the particular `View` subclass in use.
 
 
 ##### `getDimensions`

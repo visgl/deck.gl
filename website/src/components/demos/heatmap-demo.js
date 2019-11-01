@@ -1,29 +1,21 @@
 import React, {Component} from 'react';
 import {readableInteger} from '../../utils/format-utils';
-import {App} from 'website-examples/3d-heatmap/app';
-
 import {MAPBOX_STYLES, DATA_URI} from '../../constants/defaults';
+import {App} from 'website-examples/heatmap/app';
 
 export default class HeatmapDemo extends Component {
   static get data() {
     return {
-      url: `${DATA_URI}/heatmap-data.txt`,
-      worker: 'workers/heatmap-data-decoder.js'
+      url: `${DATA_URI}/screen-grid-data-uber-pickups-nyc.txt`,
+      worker: 'workers/screen-grid-data-decoder.js'
     };
   }
 
   static get parameters() {
     return {
-      radius: {displayName: 'Radius', type: 'range', value: 2000, step: 100, min: 500, max: 20000},
-      coverage: {displayName: 'Coverage', type: 'range', value: 0.7, step: 0.1, min: 0, max: 1},
-      upperPercentile: {
-        displayName: 'Upper Percentile',
-        type: 'range',
-        value: 100,
-        step: 0.1,
-        min: 80,
-        max: 100
-      }
+      radius: {displayName: 'Radius', type: 'range', value: 5, step: 1, min: 1, max: 50},
+      intensity: {displayName: 'Intensity', type: 'range', value: 1, step: 0.1, min: 0, max: 5},
+      threshold: {displayName: 'Threshold', type: 'range', value: 0.03, step: 0.01, min: 0, max: 1}
     };
   }
 
@@ -32,89 +24,45 @@ export default class HeatmapDemo extends Component {
   }
 
   static renderInfo(meta) {
-    const colorRamp = App.defaultColorRange.slice().map(color => `rgb(${color.join(',')})`);
-
     return (
       <div>
-        <h3>United Kingdom Road Safety</h3>
-        <p>Personal injury road accidents in GB from 1979</p>
-        <p>The layer aggregates data within the boundary of each hexagon cell</p>
-
-        <div className="layout">
-          {colorRamp.map((c, i) => (
-            <div
-              key={i}
-              className="legend"
-              style={{background: c, width: `${100 / colorRamp.length}%`}}
-            />
-          ))}
+        <h3>Uber Pickup Locations In NewYork City</h3>
+        <p>Pickup locations form April to September 2014.</p>
+        <div>
+          <img src="./images/colorbrewer_YlOrRd_6.png" style={{height: 8, width: '100%'}} />
         </div>
         <p className="layout">
-          <span className="col-1-2">Fewer Accidents</span>
-          <span className="col-1-2 text-right">More Accidents</span>
+          <span className="col-1-2">Fewer</span>
+          <span className="col-1-2 text-right">More</span>
         </p>
-
         <p>
-          Data source: <a href="https://data.gov.uk">DATA.GOV.UK</a>
+          Data source:{' '}
+          <a href="https://github.com/fivethirtyeight/uber-tlc-foil-response">
+            Uber TLC FOIL Response
+          </a>
         </p>
-
-        <div className="layout">
-          <div className="stat col-1-2">
-            Accidents
-            <b>{readableInteger(meta.count) || 0}</b>
-          </div>
+        <div className="stat">
+          No. of Samples
+          <b>{readableInteger(meta.count || 0)}</b>
         </div>
-      </div>
-    );
-  }
-
-  constructor(props) {
-    super(props);
-
-    this.state = {
-      hoveredObject: null
-    };
-  }
-
-  _onHover({x, y, object}) {
-    this.setState({x, y, hoveredObject: object});
-  }
-
-  _renderTooltip() {
-    const {x, y, hoveredObject} = this.state;
-
-    if (!hoveredObject) {
-      return null;
-    }
-
-    const lat = hoveredObject.position[1];
-    const lng = hoveredObject.position[0];
-    const count = hoveredObject.points.length;
-
-    return (
-      <div className="tooltip" style={{left: x, top: y}}>
-        <div>{`latitude: ${Number.isFinite(lat) ? lat.toFixed(6) : ''}`}</div>
-        <div>{`longitude: ${Number.isFinite(lng) ? lng.toFixed(6) : ''}`}</div>
-        <div>{`${count} Accidents`}</div>
       </div>
     );
   }
 
   render() {
-    const {data, params} = this.props;
+    const {params, data} = this.props;
+    const radiusPixels = params.radius.value;
+    const intensity = params.intensity.value;
+    const threshold = params.threshold.value;
 
     return (
-      <div>
-        {this._renderTooltip()}
-        <App
-          {...this.props}
-          data={data}
-          radius={params.radius.value}
-          upperPercentile={params.upperPercentile.value}
-          coverage={params.coverage.value}
-          onHover={this._onHover.bind(this)}
-        />
-      </div>
+      <App
+        {...this.props}
+        data={data}
+        intensity={intensity}
+        threshold={threshold}
+        radiusPixels={radiusPixels}
+      />
     );
   }
 }

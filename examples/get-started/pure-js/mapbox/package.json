@@ -8,9 +8,9 @@
     "build": "webpack -p"
   },
   "dependencies": {
-    "@deck.gl/core": "^7.0.0-beta",
-    "@deck.gl/layers": "^7.0.0-beta",
-    "mapbox-gl": "~0.53.0"
+    "@deck.gl/core": "^7.3.0-beta",
+    "@deck.gl/layers": "^7.3.0-beta",
+    "mapbox-gl": "^1.0.0"
   },
   "devDependencies": {
     "webpack": "^4.20.2",

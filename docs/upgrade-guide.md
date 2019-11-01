@@ -1,41 +1,142 @@
 # Upgrade Guide
 
+## Upgrading from deck.gl v7.2 to v7.3
+
+#### Core
+
+- `layer.setLayerNeedsUpdate` is renamed to `layer.setNeedsUpdate()` and the old name will be removed in the next major release.
+- Previously deprecated `Layer` class method, `screenToDevicePixels`, is removed. Use luma.gl [utility methods](https://luma.gl/#/documentation/api-reference/webgl-2-classes/device-pixels) instead.
+
+#### Layers
+
+- `ScreenGridLayer`: support is now limited to browsers that implement either WebGL2 or the `OES_texture_float` extension. [coverage stats](https://webglstats.com/webgl/extension/OES_texture_float)
+- Some shader attributes are renamed for consistency:
+
+| Layer | Old | New |
+| ----- | --- | --- |
+| `LineLayer` | `instanceSourceTargetPositions64xyLow.xy` | `instanceSourcePositions64xyLow` |
+| | `instanceSourceTargetPositions64xyLow.zw` | `instanceTargetPositions64xyLow` |
+| `PathLayer` | `instanceLeftStartPositions64xyLow.xy` | `instanceLeftPositions64xyLow`  |
+| | `instanceLeftStartPositions64xyLow.zw` | `instanceStartPositions64xyLow` |
+| | `instanceEndRightPositions64xyLow.xy`  | `instanceEndPositions64xyLow`   |
+| | `instanceEndRightPositions64xyLow.zw`  | `instanceRightPositions64xyLow` |
+| `ArcLayer` | `instancePositions64Low` | `instancePositions64xyLow`  |
+| `ScenegraphLayer` | `instancePositions64xy` | `instancePositions64xyLow`  |
+| `SimpleMeshLayer` | `instancePositions64xy` | `instancePositions64xyLow`  |
+
+
+#### @deck.gl/json
+
+- Non-breaking Change: The `_JSONConverter` class has been renamed to `JSONConverter` (deprecated alias still available).
+- Non-breaking Change: The `_JSONConverter.convertJson()` method has been renamed to `JSONConverter.convert()`  (deprecated stub still available).
+- Breaking Change: The `_JSONConverter` no longer automatically injects deck.gl `View` classes and enumerations. If reqiured need to import and add these to your `JSONConfiguration`.
+- Removed: The `JSONLayer` is no longer included in this module. The code for this layer has been moved to an example in `/test/apps/json-layer`, and would need to be copied into applications to be used.
+
+
+## Upgrading from deck.gl v7.1 to v7.2
+
+#### Breaking Changes
+
+##### Layer methods
+
+Following `Layer` class methods have been removed :
+
+| Removed            | Alternate       | Comment |
+| ---              | --- | --- |
+| `use64bitProjection`  | use `Fp64Extension` | details in `fp64 prop` section below  |
+| `is64bitEnabled`      | use `Fp64Extension` | details in `fp64 prop` section below  |
+| `updateAttributes` | `_updateAttributes` | method is renamed |
+
+
+##### fp64 prop
+
+The deprecated `fp64` prop is removed. The current 32-bit projection is generally precise enough for almost all use cases. If you previously use this feature:
+
+  ```js
+  /// old
+  import {COORDINATE_SYSTEM} from '@deck.gl/core';
+
+  new ScatterplotLayer({
+    coordinateSystem: COORDINATE_SYSTEM.LNGLAT_DEPRECATED,
+    fp64: true,
+    ...
+  })
+  ```
+
+  It can be changed to:
+
+  ```js
+  /// new
+  import {COORDINATE_SYSTEM} from '@deck.gl/core';
+  import {Fp64Extension} from '@deck.gl/extensions';
+
+  new ScatterplotLayer({
+    coordinateSystem: COORDINATE_SYSTEM.LNGLAT_DEPRECATED,
+    extensions: [new Fp64Extension()],
+    ...
+  })
+  ```
+
+##### Color Attributes and Uniforms
+
+All core layer shaders now receive **normalized** color attributes and uniforms. If you were previously subclassing a core layer with custom vertex shaders, you should expect the color attributes to be in `[0, 1]` range instead of `[0, 255]`.
+
+##### project64 Shader Module
+
+The `project64` shader module is no longer registered by default. If you were previously using a custom layer that depends on this module:
+
+  ```js
+  getShaders() {
+    return {vs, fs, modules: ['project64']};
+  }
+  ```
+
+  It can be changed to:
+
+  ```js
+  import {project64} from '@deck.gl/core';
+
+  getShaders() {
+    return {vs, fs, modules: [project64]};
+  }
+  ```
+#### CPU Grid layer and Hexagon layer updateTriggers
+
+`getElevationValue`, `getElevationWeight` and `getColorValue`, `getColorWeight` are now compared using `updateTriggers` like other layer [accessors](https://github.com/uber/deck.gl/blob/master/docs/developer-guide/using-layers.md#accessors). Update them without passing updateTriggers will no longer trigger layer update.
+
+#### Deprecations
+
+IE support is deprecated and will be removed in the next major release.
+
+
 ## Upgrading from deck.gl v7.0 to v7.1
 
-### Layer Props
-
-Breaking Changes:
+#### Breaking Changes
 
 - Fixed a bug where `coordinateOrigin`'s `z` is not applied in `METER_OFFSETS` and `LNGLAT_OFFSETS` coordinate systems.
+- If your application was subclassing `GridLayer`, you should now subclass `CPUGridLayer` instead, and either use it directly, or provide it as the sublayer class for `GridLayer` using `_subLayerProps`:
 
-Deprecations:
+  ```js
+  class EnhancedCPUGridLayer extends CPUGridLayer {
+  // enhancments
+  }
+
+  // Code initilizing GridLayer
+  const myGridLayer = new GridLayer({
+    // props
+    ...
+    // Override sublayer type for 'CPU'
+    _subLayerProps: {
+      CPU: {
+        type: EnhancedCPUGridLayer
+      }
+    }
+  });
+  ```
+
+#### Deprecations
 
 - `getColor` props in `ColumnLayer` and `H3HexagonLayer` are deprecated. Use `getLineColor` and `getFillColor` instead.
-
-### GridLayer
-
-Breaking Changes:
-
-- If your application is not subclassing `GridLayer`, no additional changes are needed. If you are subclassing `GridLayer`, you should now subclass `CPUGridLayer` instead, and either use it directly, or provide it as the sublayer class for `GridLayer` using `_subLayerProps`:
-
-```js
-class EnhancedCPUGridLayer extends CPUGridLayer {
-// enhancments
-}
-
-// Code initilizing GridLayer
-const myGridLayer = new GridLayer({
-  // props
-  ...
-  // Override sublayer type for 'CPU'
-  _subLayerProps: {
-    CPU: {
-      type: EnhancedCPUGridLayer
-    }
-  }
-});
-```
-
 
 ## Upgrading from deck.gl v6.4 to v7.0
 

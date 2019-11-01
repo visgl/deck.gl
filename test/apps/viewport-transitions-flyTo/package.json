@@ -4,17 +4,17 @@
     "start-local": "webpack-dev-server --env.local --progress --hot --open"
   },
   "dependencies": {
-    "deck.gl": "^6.0.0",
-    "react": "^16.0.0",
-    "react-dom": "^16.0.0",
-    "react-map-gl": "^3.3.0"
+    "deck.gl": "^7.3.0-beta",
+    "react": "^16.3.0",
+    "react-dom": "^16.3.0",
+    "react-map-gl": "^5.0.11"
   },
   "devDependencies": {
-    "babel-preset-es2015": "^6.18.0",
-    "babel-preset-react": "^6.16.0",
-    "babel-preset-stage-2": "^6.18.0",
-    "buble-loader": "^0.4.0",
-    "webpack": "^2.4.0",
-    "webpack-dev-server": "^3.1.11"
+    "@babel/core": "^7.4.0",
+    "@babel/preset-react": "^7.0.0",
+    "babel-loader": "^8.0.5",
+    "webpack": "^4.20.2",
+    "webpack-cli": "^3.1.2",
+    "webpack-dev-server": "^3.1.1"
   }
 }

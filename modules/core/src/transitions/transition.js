@@ -1,47 +1,28 @@
-export const TRANSITION_STATE = {
-  NONE: 'none',
-  PENDING: 'pending',
-  IN_PROGRESS: 'in_progress',
-  ENDED: 'ended'
-};
-
 function noop() {}
+
+const DEFAULT_SETTINGS = {
+  onStart: noop,
+  onUpdate: noop,
+  onInterrupt: noop,
+  onEnd: noop
+};
 
 export default class Transition {
   /**
-   * @params props {object} - properties of the transition.
-   *
-   * @params props.duration {number} - total time to complete the transition
-   * @params props.easing {func} - easing function
-   * @params props.onStart {func} - callback when transition starts
-   * @params props.onUpdate {func} - callback when transition updates
-   * @params props.onInterrupt {func} - callback when transition is interrupted
-   * @params props.onEnd {func} - callback when transition ends
-   *
-   * Any additional properties are also saved on the instance but have no effect.
+   * @params timeline {Timeline}
    */
-  constructor(props) {
-    this._startTime = null;
-    this._state = TRANSITION_STATE.NONE;
+  constructor(timeline) {
+    this._inProgress = false;
+    this._handle = null;
+    this.timeline = timeline;
 
     // Defaults
-    this.duration = 1;
-    this.easing = t => t;
-    this.onStart = noop;
-    this.onUpdate = noop;
-    this.onInterrupt = noop;
-    this.onEnd = noop;
-
-    Object.assign(this, props);
+    this.settings = {};
   }
 
   /* Public API */
-  get state() {
-    return this._state;
-  }
-
   get inProgress() {
-    return this._state === TRANSITION_STATE.PENDING || this._state === TRANSITION_STATE.IN_PROGRESS;
+    return this._inProgress;
   }
 
   /**
@@ -49,68 +30,67 @@ export default class Transition {
    * @params props {object} - optional overriding props. see constructor
    */
   start(props) {
-    if (this.inProgress) {
-      this.onInterrupt(this);
+    this.cancel();
+    this.settings = Object.assign({}, DEFAULT_SETTINGS, props);
+    this._inProgress = true;
+
+    const {timeline, settings} = this;
+    this._handle = timeline.addChannel({
+      delay: timeline.getTime(),
+      duration: settings.duration
+    });
+    settings.onStart(this);
+  }
+
+  /**
+   * end this transition if it is in progress.
+   */
+  end() {
+    if (this._inProgress) {
+      this.timeline.removeChannel(this._handle);
+      this._handle = null;
+      this._inProgress = false;
+      this.settings.onEnd(this);
     }
-    Object.assign(this, props);
-    this._setState(TRANSITION_STATE.PENDING);
   }
 
   /**
    * cancel this transition if it is in progress.
    */
   cancel() {
-    if (this.inProgress) {
-      this.onInterrupt(this);
-      this._setState(TRANSITION_STATE.NONE);
+    if (this._inProgress) {
+      this.settings.onInterrupt(this);
+      this.timeline.removeChannel(this._handle);
+      this._handle = null;
+      this._inProgress = false;
     }
   }
 
   /**
-   * update this transition.
-   * @params currentTime {number} - timestamp of the update. should be in the same unit as `duration`.
+   * update this transition. Returns `true` if updated.
    */
-  update(currentTime) {
-    if (this.state === TRANSITION_STATE.PENDING) {
-      this._startTime = currentTime;
-      this._setState(TRANSITION_STATE.IN_PROGRESS);
+  update() {
+    if (!this._inProgress) {
+      return false;
     }
 
-    if (this.state === TRANSITION_STATE.IN_PROGRESS) {
-      let shouldEnd = false;
-      let time = (currentTime - this._startTime) / this.duration;
-      if (time >= 1) {
-        time = 1;
-        shouldEnd = true;
-      }
-      this.time = this.easing(time);
-      this.onUpdate(this);
+    this.time = this.timeline.getTime(this._handle);
+    // Call subclass method
+    this._onUpdate();
+    // Call user callback
+    this.settings.onUpdate(this);
 
-      if (shouldEnd) {
-        this._setState(TRANSITION_STATE.ENDED);
-      }
-      return true;
+    // This only works if `settings.duration` is set
+    // Spring transition must call `end` manually
+    if (this.timeline.isFinished(this._handle)) {
+      this.end();
     }
-
-    return false;
+    return true;
   }
 
   /* Private API */
-  _setState(newState) {
-    if (this._state === newState) {
-      return;
-    }
 
-    this._state = newState;
-
-    switch (newState) {
-      case TRANSITION_STATE.PENDING:
-        this.onStart(this);
-        break;
-      case TRANSITION_STATE.ENDED:
-        this.onEnd(this);
-        break;
-      default:
-    }
+  _onUpdate() {
+    // for subclass override
   }
 }

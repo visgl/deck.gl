@@ -30,10 +30,6 @@ test('BitmapLayer#constructor', t => {
             positionsWithZ,
             'should update positions'
           );
-          t.ok(
-            layer.getAttributeManager().attributes.positions64xyLow,
-            'should add positions64xyLow'
-          );
         }
       },
       {
@@ -46,10 +42,6 @@ test('BitmapLayer#constructor', t => {
             layer.getAttributeManager().attributes.positions.value,
             positions,
             'should update positions'
-          );
-          t.ok(
-            layer.getAttributeManager().attributes.positions64xyLow,
-            'should add positions64xyLow'
           );
         }
       }

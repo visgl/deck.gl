@@ -48,6 +48,11 @@ export default class BaseAttribute {
     if (buffer) {
       this.externalBuffer = buffer;
       this.constant = false;
+      // Hack: Float64Array value is required for double-precision attributes
+      // to generate correct shader attributes
+      // This is so that we can manually set value to indicate that the external
+      // buffer uses interleaved 64-bit values
+      this.value = value || null;
 
       this.type = opts.type || buffer.accessor.type;
       if (buffer.accessor.divisor !== undefined) {
@@ -74,7 +79,12 @@ export default class BaseAttribute {
 
       // Create buffer if needed
       if (!constant && this.gl) {
-        this.buffer = this.buffer || this._createBuffer(opts);
+        this.buffer =
+          this.buffer ||
+          new Buffer(this.gl, {
+            id: this.id,
+            target: this.target
+          });
         this.buffer.setData({data: value});
         this.type = this.buffer.accessor.type;
       }
@@ -103,27 +113,6 @@ export default class BaseAttribute {
       return [buffer, this];
     }
     return null;
-  }
-
-  _createBuffer(opts) {
-    // Move accessor fields to accessor object
-    const props = Object.assign({}, opts, {
-      id: this.id,
-      target: this.target,
-      accessor: {
-        type: this.type
-      }
-    });
-    if (Number.isFinite(props.divisor)) {
-      props.accessor.divisor = props.divisor;
-    }
-    delete props.divisor;
-    if (Number.isFinite(props.size)) {
-      props.accessor.size = props.size;
-    }
-    delete props.size;
-
-    return new Buffer(this.gl, props);
   }
 
   // Sets all accessor props except type

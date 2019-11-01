@@ -2,7 +2,8 @@ import React, {Component} from 'react';
 import {render} from 'react-dom';
 
 import {StaticMap} from 'react-map-gl';
-import DeckGL, {LineLayer, ScatterplotLayer} from 'deck.gl';
+import DeckGL from '@deck.gl/react';
+import {LineLayer, ScatterplotLayer} from '@deck.gl/layers';
 import GL from '@luma.gl/constants';
 
 // Set your mapbox token here
@@ -42,7 +43,7 @@ function getSize(type) {
   return 60;
 }
 
-export class App extends Component {
+export default class App extends Component {
   constructor(props) {
     super(props);
     this.state = {

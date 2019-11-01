@@ -75,6 +75,7 @@ export default class SolidPolygonLayer extends Layer {
     this.setState({
       numInstances: 0,
       polygonTesselator: new PolygonTesselator({
+        fp64: this.use64bitPositions(),
         IndexType: !gl || hasFeature(gl, FEATURES.ELEMENT_INDEX_UINT32) ? Uint32Array : Uint16Array
       })
     });
@@ -89,6 +90,8 @@ export default class SolidPolygonLayer extends Layer {
       indices: {size: 1, isIndexed: true, update: this.calculateIndices, noAlloc},
       positions: {
         size: 3,
+        type: GL.DOUBLE,
+        fp64: this.use64bitPositions(),
         transition: ATTRIBUTE_TRANSITION,
         accessor: 'getPolygon',
         update: this.calculatePositions,
@@ -104,25 +107,6 @@ export default class SolidPolygonLayer extends Layer {
           },
           nextPositions: {
             offset: 12,
-            divisor: 1
-          }
-        }
-      },
-      positions64xyLow: {
-        size: 2,
-        update: this.calculatePositionsLow,
-        noAlloc,
-        shaderAttributes: {
-          positions64xyLow: {
-            offset: 0,
-            divisor: 0
-          },
-          instancePositions64xyLow: {
-            offset: 0,
-            divisor: 1
-          },
-          nextPositions64xyLow: {
-            offset: 8,
             divisor: 1
           }
         }
@@ -304,8 +288,7 @@ export default class SolidPolygonLayer extends Layer {
             isSideVertex: false
           },
           vertexCount: 0,
-          isIndexed: true,
-          shaderCache: this.context.shaderCache
+          isIndexed: true
         })
       );
     }
@@ -326,8 +309,7 @@ export default class SolidPolygonLayer extends Layer {
             }
           }),
           instanceCount: 0,
-          isInstanced: 1,
-          shaderCache: this.context.shaderCache
+          isInstanced: 1
         })
       );
 
@@ -352,38 +334,9 @@ export default class SolidPolygonLayer extends Layer {
     attribute.bufferLayout = polygonTesselator.bufferLayout;
     attribute.value = polygonTesselator.get('positions');
   }
-  calculatePositionsLow(attribute) {
-    const isFP64 = this.use64bitPositions();
-    attribute.constant = !isFP64;
-
-    if (!isFP64) {
-      attribute.value = new Float32Array(2);
-      return;
-    }
-
-    attribute.value = this.state.polygonTesselator.get('positions64xyLow');
-  }
 
   calculateVertexValid(attribute) {
     attribute.value = this.state.polygonTesselator.get('vertexValid');
-  }
-
-  clearPickingColor(color) {
-    const pickedPolygonIndex = this.decodePickingColor(color);
-    const {bufferLayout} = this.state.polygonTesselator;
-    const numVertices = bufferLayout[pickedPolygonIndex];
-
-    let startInstanceIndex = 0;
-    for (let polygonIndex = 0; polygonIndex < pickedPolygonIndex; polygonIndex++) {
-      startInstanceIndex += bufferLayout[polygonIndex];
-    }
-
-    const {pickingColors} = this.getAttributeManager().attributes;
-
-    const {value} = pickingColors;
-    const endInstanceIndex = startInstanceIndex + numVertices;
-    value.fill(0, startInstanceIndex * 3, endInstanceIndex * 3);
-    pickingColors.update({value});
   }
 }
 

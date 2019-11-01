@@ -187,8 +187,8 @@ export default class Controller {
   }
   /* eslint-enable complexity, max-statements */
 
-  updateTransition(timestamp) {
-    this.transitionManager.updateTransition(timestamp);
+  updateTransition() {
+    this.transitionManager.updateTransition();
   }
 
   toggleEvents(eventNames, enabled) {

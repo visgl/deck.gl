@@ -118,13 +118,21 @@ Returns:
 
   * `minBuffer` (Buffer, optional) : Contains data for one pixel with R, G, B and A channels contain min value of all aggregated grid cells. When aggregation is performed on CPU, `minBuffer` is `null` but `minData` Array is returned with same data. This value is `null` when `needMin` is false. (R: weight#1 min value G: weight#2 min value B: weight#3 min value A: total count)
 
+  * `minTexture` (Texture2D, optional) : Texture2D object (1X1 size with RGBA_FLOAT_32 format) contains same data as `minBuffer`.
+
   * `maxBuffer` (Buffer, optional) : Contains data for one pixel with R, G, B and A channels contain max value of all aggregated grid cells. When aggregation is performed on CPU, `maxBuffer` is `null` but `maxData` Array is returned with same data. This value is `null` when `needMax` is false. (R: weight#1 max value G: weight#2 max value B: weight#3 max value A: total count)
+
+  * `maxTexture` (Texture2D, optional) : Texture2D object (1X1 size with RGBA_FLOAT_32 format) contains same data as `maxBuffer`.
 
   * `maxMinBuffer` (Buffer, optional) : Contains data for one pixel, with RGB channels contains max value of all aggregated grid cells and A channel contains minimum value of all aggregated grid cells. When `combineMaxMin` is `false` this value will be `null`. (R: weight#1 max value G: weight#2 max value B: weight#3 max value A: weight#1 min value)
 
-  NOTE: `minBuffer`, `maxBuffer` and `maxMinBuffer` are usually consumed by setting them as uniform buffer object or read by the CPU.
+  * `maxMinTexture` (Texture2D, optional) : Texture2D object (1X1 size with RGBA_FLOAT_32 format) contains same data as `maxMinBuffer`.
 
-  NOTE: Aggregation result is always in `Buffer` objects to provide common API irrespective of whether aggregation is performed on CPU or GPU. `Texture` objects are provided when aggregation is done on GPU, and `Array` objects are provided when aggregation is performed on CPU.
+  NOTES:
+  * `minBuffer`, `maxBuffer` and `maxMinBuffer` are usually consumed by setting them as uniform buffer object or read by the CPU.
+  * Aggregation data per cell,  is always in `Buffer` objects to provide common API irrespective of whether aggregation is performed on CPU or GPU.
+  * Min-max aggregation results is provided in form of `Texture2D` and `Buffer` objects whether aggregation is performed on CPU or GPU.
+  * When aggregation is performed on CPU, min-max  aggregation results are also provided in form of Float32Arrays.
 
 
 ### getData

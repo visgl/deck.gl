@@ -1,7 +1,9 @@
 import test from 'tape-catch';
 import TransitionManager from '@deck.gl/core/controllers/transition-manager';
+import FlyToInterpolator from '@deck.gl/core/transitions/viewport-fly-to-interpolator.js';
 import {testExports} from '@deck.gl/core/controllers/map-controller';
 const {MapState} = testExports;
+import {Timeline} from '@luma.gl/addons';
 
 /* global global, setTimeout, clearTimeout */
 // backfill requestAnimationFrame on Node
@@ -45,7 +47,7 @@ const TEST_CASES = [
         zoom: 12,
         pitch: 0,
         bearing: 0,
-        transitionDuration: 200
+        transitionDuration: 'auto'
       },
       // transitionDuration is 0
       {width: 100, height: 100, longitude: -70.9, latitude: 41, zoom: 12, pitch: 60, bearing: 0},
@@ -98,9 +100,21 @@ const TEST_CASES = [
         pitch: 0,
         bearing: 0,
         transitionDuration: 200
+      },
+      // viewport change interrupting transition - 'auto'
+      {
+        width: 100,
+        height: 100,
+        longitude: -122.45,
+        latitude: 37.78,
+        zoom: 12,
+        pitch: 0,
+        bearing: 0,
+        transitionInterpolator: new FlyToInterpolator({speed: 50}),
+        transitionDuration: 'auto'
       }
     ],
-    expect: [true, true]
+    expect: [true, true, true]
   }
 ];
 
@@ -113,7 +127,8 @@ test('TransitionManager#constructor', t => {
 });
 
 test('TransitionManager#processViewStateChange', t => {
-  const mergeProps = props => Object.assign({}, TransitionManager.defaultProps, props);
+  const timeline = new Timeline();
+  const mergeProps = props => Object.assign({timeline}, TransitionManager.defaultProps, props);
 
   TEST_CASES.forEach(testCase => {
     const transitionManager = new TransitionManager(MapState, mergeProps(testCase.initialProps));
@@ -131,6 +146,7 @@ test('TransitionManager#processViewStateChange', t => {
 });
 
 test('TransitionManager#callbacks', t => {
+  const timeline = new Timeline();
   const testCase = TEST_CASES[1];
 
   let startCount = 0;
@@ -165,7 +181,8 @@ test('TransitionManager#callbacks', t => {
     }
   };
 
-  const mergeProps = props => Object.assign({}, TransitionManager.defaultProps, callbacks, props);
+  const mergeProps = props =>
+    Object.assign({timeline}, TransitionManager.defaultProps, callbacks, props);
 
   const transitionManager = new TransitionManager(MapState, mergeProps(testCase.initialProps));
 
@@ -174,14 +191,52 @@ test('TransitionManager#callbacks', t => {
     transitionManager.processViewStateChange(transitionProps);
   });
 
-  transitionManager.updateTransition(200);
-  transitionManager.updateTransition(400);
-  transitionManager.updateTransition(600);
-  transitionManager.updateTransition(800);
+  timeline.setTime(200);
+  transitionManager.updateTransition();
+  timeline.setTime(400);
+  transitionManager.updateTransition();
+  timeline.setTime(600);
+  transitionManager.updateTransition();
+  timeline.setTime(800);
+  transitionManager.updateTransition();
 
-  t.is(startCount, 2, 'onTransitionStart() called twice');
-  t.is(interruptCount, 1, 'onTransitionInterrupt() called once');
+  t.is(startCount, 3, 'onTransitionStart() called twice');
+  t.is(interruptCount, 2, 'onTransitionInterrupt() called once');
   t.is(endCount, 1, 'onTransitionEnd() called once');
-  t.is(updateCount, 3, 'onViewStateChange() called');
+  t.is(updateCount, 5, 'onViewStateChange() called');
+  t.end();
+});
+
+test('TransitionManager#auto#duration', t => {
+  const timeline = new Timeline();
+  const mergeProps = props => Object.assign({timeline}, TransitionManager.defaultProps, props);
+  const initialProps = {
+    width: 100,
+    height: 100,
+    longitude: -122.45,
+    latitude: 37.78,
+    zoom: 12,
+    pitch: 0,
+    bearing: 0,
+    transitionDuration: 200
+  };
+  const transitionManager = new TransitionManager(MapState, mergeProps(initialProps));
+  transitionManager.processViewStateChange(
+    mergeProps({
+      width: 100,
+      height: 100,
+      longitude: -100.45, // changed
+      latitude: 37.78,
+      zoom: 12,
+      pitch: 0,
+      bearing: 0,
+      transitionInterpolator: new FlyToInterpolator({speed: 50}),
+      transitionDuration: 'auto'
+    })
+  );
+  t.ok(
+    Number.isFinite(transitionManager.duration) && transitionManager.duration > 0,
+    'should set duration when using "auto" mode' + ' ' + transitionManager.duration
+  );
   t.end();
 });

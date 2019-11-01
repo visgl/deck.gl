@@ -1,26 +1,37 @@
 #!/usr/bin/env python
 # coding: utf-8
-
 from __future__ import unicode_literals
 
 import ipywidgets as widgets
-from traitlets import Int, Unicode
+from traitlets import Any, Int, Unicode
 
 from ._frontend import module_name, module_version
 
 class DeckGLWidget(widgets.DOMWidget):
     """
-    DeckGLWidget accepts JSON encoded deck.gl layers and layer properties
-    and renders them based on provided view states and properties.
+    Jupyter environment widget that takes JSON and
+    renders a deck.gl visualization based on provided properties.
 
     You may set a Mapbox API key as an environment variable to use Mapbox maps in your visualization
 
+    A pydeck user should be interfacing with this class only via the Deck object
+
     Attributes
     ----------
-    json_input : str
-        JSON as a string meant for reading into deck.gl JSON API
-    mapbox_key : str
-        API key for Mapbox map tiles
+        json_input : str, default ''
+            JSON as a string meant for reading into deck.gl JSON API
+        mapbox_key : str, default ''
+            API key for Mapbox map tiles
+        height : int, default 500
+            Height of Jupyter notebook cell, in pixels
+        width : int or str, default "100%"
+            Width of Jupyter notebook cell, in pixels or, if a string, a CSS width
+        selected_data : list of int
+            Data passed from Jupyter widget frontend back to Python backend
+        tooltip : bool or dict of {str: str}, default True
+            See the ``Deck`` constructor.
+
+
     """
     _model_name = Unicode('DeckGLModel').tag(sync=True)
     _model_module = Unicode(module_name).tag(sync=True)
@@ -31,4 +42,6 @@ class DeckGLWidget(widgets.DOMWidget):
     mapbox_key = Unicode('', allow_none=True).tag(sync=True)
     json_input = Unicode('').tag(sync=True)
     height = Int(500).tag(sync=True)
-    width = Int(500).tag(sync=True)
+    width = Any('100%').tag(sync=True)
+    selected_data = Any().tag(sync=True)
+    tooltip = Any(True).tag(sync=True)

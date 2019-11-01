@@ -29,13 +29,16 @@ const myScatterplotLayer = new MapboxLayer({
     getColor: [255, 0, 0]
 });
 
-// add to mapbox
-map.addLayer(myScatterplotLayer);
+// wait for map to be ready
+map.on('load', () => {
+    // add to mapbox
+    map.addLayer(myScatterplotLayer);
 
-// update the layer
-myScatterplotLayer.setProps({
-    getColor: [0, 0, 255]
-});
+    // update the layer
+    myScatterplotLayer.setProps({
+      getColor: [0, 0, 255]
+    });
+}
 ```
 
 ### Use a Layer from an Existing Deck's Layer Stack
@@ -64,23 +67,26 @@ const deck = new Deck({
     ]
 });
 
-// add to mapbox
-map.addLayer(new MapboxLayer({id: 'my-scatterplot', deck}));
+// wait for map to be ready
+map.on('load', () => {
+    // add to mapbox
+    map.addLayer(new MapboxLayer({id: 'my-scatterplot', deck}));
 
-// update the layer
-deck.setProps({
-    layers: [
-        new ScatterplotLayer({
-            id: 'my-scatterplot',
-            data: [
-                {position: [-74.5, 40], size: 100}
-            ],
-            getPosition: d => d.position,
-            getRadius: d => d.size,
-            getFillColor: [0, 0, 255]
-        })
-    ]
-});
+    // update the layer
+    deck.setProps({
+        layers: [
+            new ScatterplotLayer({
+                id: 'my-scatterplot',
+                data: [
+                    {position: [-74.5, 40], size: 100}
+                ],
+                getPosition: d => d.position,
+                getRadius: d => d.size,
+                getFillColor: [0, 0, 255]
+            })
+        ]
+    });
+}
 ```
 
 

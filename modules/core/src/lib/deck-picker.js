@@ -18,21 +18,26 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {Framebuffer, readPixelsToArray} from '@luma.gl/core';
-import getPixelRatio from '../utils/get-pixel-ratio';
+import {
+  Framebuffer,
+  Texture2D,
+  isWebGL2,
+  readPixelsToArray,
+  cssToDeviceRatio,
+  cssToDevicePixels
+} from '@luma.gl/core';
+import GL from '@luma.gl/constants';
 import assert from '../utils/assert';
 import PickLayersPass from '../passes/pick-layers-pass';
 import {getClosestObject, getUniqueObjects} from './picking/query-object';
-import {processPickInfo, getLayerPickingInfo} from './picking/pick-info';
+import {processPickInfo, callLayerPickingCallbacks, getLayerPickingInfo} from './picking/pick-info';
 
 export default class DeckPicker {
   constructor(gl) {
     this.gl = gl;
     this.pickingFBO = null;
     this.pickLayersPass = new PickLayersPass(gl);
-    this.pixelRatio = null;
     this.layerFilter = null;
-    this.pickingEvent = null;
     this.lastPickedInfo = {
       // For callback tracking and auto highlight
       index: -1,
@@ -42,63 +47,29 @@ export default class DeckPicker {
   }
 
   setProps(props) {
-    if ('useDevicePixels' in props) {
-      this.pixelRatio = getPixelRatio(props.useDevicePixels);
-    }
-
     if ('layerFilter' in props) {
       this.layerFilter = props.layerFilter;
     }
-    this.pickLayersPass.setProps({
-      pixelRatio: this.pixelRatio,
-      layerFilter: this.layerFilter
-    });
+  }
+
+  finalize() {
+    if (this.pickingFBO) {
+      this.pickingFBO.delete();
+    }
+    if (this.depthFBO) {
+      this.depthFBO.color.delete();
+      this.depthFBO.delete();
+    }
   }
 
   // Pick the closest info at given coordinate
-  pickObject({
-    x,
-    y,
-    mode,
-    radius = 0,
-    layers,
-    viewports,
-    activateViewport,
-    depth = 1,
-    event = null
-  }) {
-    // Allow layers to access the event
-    this.pickingEvent = event;
-    const result = this.pickClosestObject({
-      // User params
-      x,
-      y,
-      radius,
-      layers,
-      mode,
-      depth,
-      // Injected params
-      viewports,
-      onViewportActive: activateViewport
-    });
-
-    // Clear the current event
-    this.pickingEvent = null;
-    return result;
+  pickObject(opts) {
+    return this._pickClosestObject(opts);
   }
 
   // Get all unique infos within a bounding box
-  pickObjects({x, y, width, height, layers, viewports, activateViewport}) {
-    return this.pickVisibleObjects({
-      x,
-      y,
-      width,
-      height,
-      layers,
-      mode: 'pickObjects',
-      viewports,
-      onViewportActive: activateViewport
-    });
+  pickObjects(opts) {
+    return this._pickVisibleObjects(opts);
   }
 
   // Returns a new picking info object by assuming the last picked object is still picked
@@ -123,32 +94,57 @@ export default class DeckPicker {
   }
 
   // Private
-  updatePickingBuffer() {
+  _resizeBuffer() {
     const {gl} = this;
     // Create a frame buffer if not already available
     if (!this.pickingFBO) {
       this.pickingFBO = new Framebuffer(gl);
+      if (Framebuffer.isSupported(gl, {colorBufferFloat: true})) {
+        this.depthFBO = new Framebuffer(gl);
+        this.depthFBO.attach({
+          [GL.COLOR_ATTACHMENT0]: new Texture2D(gl, {
+            format: isWebGL2(gl) ? GL.RGBA32F : GL.RGBA,
+            type: GL.FLOAT
+          })
+        });
+      }
     }
     // Resize it to current canvas size (this is a noop if size hasn't changed)
     this.pickingFBO.resize({width: gl.canvas.width, height: gl.canvas.height});
+    this.depthFBO.resize({width: gl.canvas.width, height: gl.canvas.height});
     return this.pickingFBO;
   }
 
   // Pick the closest object at the given (x,y) coordinate
-  // eslint-disable-next-line max-statements
-  pickClosestObject({layers, viewports, x, y, radius, depth = 1, mode, onViewportActive}) {
-    this.updatePickingBuffer();
+  // eslint-disable-next-line max-statements,complexity
+  _pickClosestObject({
+    layers,
+    viewports,
+    x,
+    y,
+    radius = 0,
+    depth = 1,
+    mode = 'query',
+    event,
+    unproject3D,
+    onViewportActive
+  }) {
+    this._resizeBuffer();
     // Convert from canvas top-left to WebGL bottom-left coordinates
-    // And compensate for pixelRatio
-    const pixelRatio = this.pixelRatio;
-    const deviceX = Math.round(x * pixelRatio);
     // Top-left coordinates [x, y] to bottom-left coordinates [deviceX, deviceY]
-    const deviceY = Math.round(this.gl.canvas.height - (y + 1) * pixelRatio);
+    // And compensate for pixelRatio
+    const pixelRatio = cssToDeviceRatio(this.gl);
+    const devicePixelRange = cssToDevicePixels(this.gl, [x, y], true);
+    const devicePixel = [
+      devicePixelRange.x + Math.floor(devicePixelRange.width / 2),
+      devicePixelRange.y + Math.floor(devicePixelRange.height / 2)
+    ];
+
     const deviceRadius = Math.round(radius * pixelRatio);
     const {width, height} = this.pickingFBO;
-    const deviceRect = this.getPickingRect({
-      deviceX,
-      deviceY,
+    const deviceRect = this._getPickingRect({
+      deviceX: devicePixel[0],
+      deviceY: devicePixel[1],
       deviceRadius,
       deviceWidth: width,
       deviceHeight: height
@@ -161,32 +157,46 @@ export default class DeckPicker {
     for (let i = 0; i < depth; i++) {
       const pickedColors =
         deviceRect &&
-        this.drawAndSamplePickingBuffer({
+        this._drawAndSample({
           layers,
           viewports,
           onViewportActive,
           deviceRect,
+          pass: `picking:${mode}`,
           redrawReason: mode
         });
 
       const pickInfo = getClosestObject({
         pickedColors,
         layers,
-        deviceX,
-        deviceY,
+        deviceX: devicePixel[0],
+        deviceY: devicePixel[1],
         deviceRadius,
         deviceRect
       });
+
+      let z;
+      if (pickInfo.pickedLayer && unproject3D && this.depthFBO) {
+        const zValues = this._drawAndSample({
+          layers: [pickInfo.pickedLayer],
+          viewports,
+          onViewportActive,
+          deviceRect: {x: pickInfo.pickedX, y: pickInfo.pickedY, width: 1, height: 1},
+          pass: `picking:${mode}`,
+          redrawReason: 'pick-z',
+          pickZ: true
+        });
+        // picked value is in common space (pixels) from the camera target (viewport.position)
+        // convert it to meters from the ground
+        z = zValues[0] * viewports[0].distanceScales.metersPerPixel[2] + viewports[0].position[2];
+      }
 
       // Only exclude if we need to run picking again.
       // We need to run picking again if an object is detected AND
       // we have not exhausted the requested depth.
       if (pickInfo.pickedColor && i + 1 < depth) {
         const layerId = pickInfo.pickedColor[3] - 1;
-        if (!affectedLayers[layerId]) {
-          // backup original colors
-          affectedLayers[layerId] = layers[layerId].copyPickingColors();
-        }
+        affectedLayers[layerId] = true;
         layers[layerId].clearPickingColor(pickInfo.pickedColor);
       }
 
@@ -199,12 +209,11 @@ export default class DeckPicker {
         viewports,
         x,
         y,
-        deviceX,
-        deviceY,
+        z,
         pixelRatio
       });
 
-      const processedPickInfos = this.callLayerPickingCallbacks(infos, mode);
+      const processedPickInfos = callLayerPickingCallbacks(infos, mode, event);
 
       if (processedPickInfos) {
         processedPickInfos.forEach(info => result.push(info));
@@ -217,36 +226,53 @@ export default class DeckPicker {
     }
 
     // reset only affected buffers
-    Object.keys(affectedLayers).forEach(layerId =>
-      layers[layerId].restorePickingColors(affectedLayers[layerId])
-    );
+    for (const layerId in affectedLayers) {
+      layers[layerId].restorePickingColors();
+    }
 
     return {result, emptyInfo: infos && infos.get(null)};
   }
 
   // Pick all objects within the given bounding box
-  pickVisibleObjects({layers, viewports, x, y, width, height, mode, onViewportActive}) {
-    this.updatePickingBuffer();
+  _pickVisibleObjects({
+    layers,
+    viewports,
+    x,
+    y,
+    width = 1,
+    height = 1,
+    mode = 'query',
+    onViewportActive
+  }) {
+    this._resizeBuffer();
     // Convert from canvas top-left to WebGL bottom-left coordinates
     // And compensate for pixelRatio
-    const pixelRatio = this.pixelRatio;
-    const deviceLeft = Math.round(x * pixelRatio);
-    const deviceBottom = Math.round(this.gl.canvas.height - y * pixelRatio);
-    const deviceRight = Math.round((x + width) * pixelRatio);
-    const deviceTop = Math.round(this.gl.canvas.height - (y + height) * pixelRatio);
+    const pixelRatio = cssToDeviceRatio(this.gl);
+    const leftTop = cssToDevicePixels(this.gl, [x, y], true);
+
+    // take left and top (y inverted in device pixels) from start location
+    const deviceLeft = leftTop.x;
+    const deviceTop = leftTop.y + leftTop.height;
+
+    // take right and bottom (y inverted in device pixels) from end location
+    const rightBottom = cssToDevicePixels(this.gl, [x + width, y + height], true);
+    const deviceRight = rightBottom.x + rightBottom.width;
+    const deviceBottom = rightBottom.y;
 
     const deviceRect = {
       x: deviceLeft,
-      y: deviceTop,
+      y: deviceBottom,
+      // deviceTop and deviceRight represent the first pixel outside the desired rect
       width: deviceRight - deviceLeft,
-      height: deviceBottom - deviceTop
+      height: deviceTop - deviceBottom
     };
 
-    const pickedColors = this.drawAndSamplePickingBuffer({
+    const pickedColors = this._drawAndSample({
       layers,
       viewports,
       onViewportActive,
       deviceRect,
+      pass: `picking:${mode}`,
       redrawReason: mode
     });
 
@@ -278,7 +304,7 @@ export default class DeckPicker {
   }
 
   // returns pickedColor or null if no pickable layers found.
-  drawAndSamplePickingBuffer({layers, viewports, onViewportActive, deviceRect, redrawReason}) {
+  _drawAndSample({layers, viewports, onViewportActive, deviceRect, pass, redrawReason, pickZ}) {
     assert(deviceRect);
     assert(Number.isFinite(deviceRect.width) && deviceRect.width > 0, '`width` must be > 0');
     assert(Number.isFinite(deviceRect.height) && deviceRect.height > 0, '`height` must be > 0');
@@ -288,25 +314,24 @@ export default class DeckPicker {
       return null;
     }
 
-    const pickingFBO = this.pickingFBO;
-    // turn off lighting by adding empty light source object
-    // lights shader module relies on the `lightSources` to turn on/off lighting
-    const effectProps = {lightSources: {}};
+    const pickingFBO = pickZ ? this.depthFBO : this.pickingFBO;
 
     this.pickLayersPass.render({
       layers,
+      layerFilter: this.layerFilter,
       viewports,
       onViewportActive,
       pickingFBO,
       deviceRect,
+      pass,
       redrawReason,
-      effectProps
+      pickZ
     });
 
     // Read from an already rendered picking buffer
     // Returns an Uint8ClampedArray of picked pixels
     const {x, y, width, height} = deviceRect;
-    const pickedColors = new Uint8Array(width * height * 4);
+    const pickedColors = new (pickZ ? Float32Array : Uint8Array)(width * height * 4);
     readPixelsToArray(pickingFBO, {
       sourceX: x,
       sourceY: y,
@@ -314,12 +339,13 @@ export default class DeckPicker {
       sourceHeight: height,
       target: pickedColors
     });
+
     return pickedColors;
   }
 
   // Calculate a picking rect centered on deviceX and deviceY and clipped to device
   // Returns null if pixel is outside of device
-  getPickingRect({deviceX, deviceY, deviceRadius, deviceWidth, deviceHeight}) {
+  _getPickingRect({deviceX, deviceY, deviceRadius, deviceWidth, deviceHeight}) {
     // Create a box of size `radius * 2 + 1` centered at [deviceX, deviceY]
     const x = Math.max(0, deviceX - deviceRadius);
     const y = Math.max(0, deviceY - deviceRadius);
@@ -332,43 +358,5 @@ export default class DeckPicker {
     }
 
     return {x, y, width, height};
-  }
-
-  // Per-layer event handlers (e.g. onClick, onHover) are provided by the
-  // user and out of deck.gl's control. It's very much possible that
-  // the user calls React lifecycle methods in these function, such as
-  // ReactComponent.setState(). React lifecycle methods sometimes induce
-  // a re-render and re-generation of props of deck.gl and its layers,
-  // which invalidates all layers currently passed to this very function.
-
-  // Therefore, per-layer event handlers must be invoked at the end
-  // of the picking operation. NO operation that relies on the states of current
-  // layers should be called after this code.
-  callLayerPickingCallbacks(infos, mode) {
-    const unhandledPickInfos = [];
-    const pickingEvent = this.pickingEvent;
-
-    infos.forEach(info => {
-      if (!info.layer) {
-        return;
-      }
-
-      let handled = false;
-      switch (mode) {
-        case 'hover':
-          handled = info.layer.onHover(info, pickingEvent);
-          break;
-        case 'query':
-          break;
-        default:
-          throw new Error('unknown pick type');
-      }
-
-      if (!handled) {
-        unhandledPickInfos.push(info);
-      }
-    });
-
-    return unhandledPickInfos;
   }
 }

@@ -88,8 +88,7 @@ export default class GPUGridCellLayer extends Layer {
       Object.assign({}, this.getShaders(), {
         id: this.props.id,
         geometry: new CubeGeometry(),
-        isInstanced: true,
-        shaderCache: this.context.shaderCache
+        isInstanced: true
       })
     );
   }
@@ -115,7 +114,7 @@ export default class GPUGridCellLayer extends Layer {
       colorMaxMinBuffer: data.color.maxMinBuffer,
       elevationMaxMinBuffer: data.elevation.maxMinBuffer
     };
-    const colorRange = colorRangeToFlatArray(this.props.colorRange, Float32Array, 255);
+    const colorRange = colorRangeToFlatArray(this.props.colorRange);
 
     this.bindUniformBuffers(uniformBuffers);
     this.state.model

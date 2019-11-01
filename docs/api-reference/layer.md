@@ -402,23 +402,44 @@ new Layer({
       duration: 300,
       easing: d3.easeCubicInOut,
       enter: value => [value[0], value[1], value[2], 0] // fade in
+    },
+    getRadius: {
+      type: 'spring',
+      stiffness: 0.01,
+      damping: 0.15,
+      enter: value => [0] // grow from size 0
     }
   }
 });
 ```
 
-| Parameter     | Type       | Default     | Description |
-| ---------     | --------   | ----------- | ----------- |
-| `duration`    | `Number`   | `0`         | Duration of the transition animation, in milliseconds |
-| `easing`      | `Function` | LINEAR (`t => t`) | Easing function that maps a value from [0, 1] to [0, 1], see [http://easings.net/](http://easings.net/)  |
-| `enter`      | `Function` | APPEARANCE (`value => value`) | Callback to get the value that the entering vertices are transitioning from. See notes below |
+Each accessor name is mapped to an object that is the transition setting. The object may contain the following fields:
+
+| Key           | Type       | Default     | Description |
+| ------------- | --------   | ----------- | ----------- |
+| `type`        | `String`   | `'interpolation'` | Type of the transition (either `'interpolation'` or `'spring'`) |
+| `enter`       | `Function` | APPEARANCE (`value => value`) | Callback to get the value that the entering vertices are transitioning from. See notes below |
 | `onStart`     | `Function` | `null`      | Callback when the transition is started |
 | `onEnd`       | `Function` | `null`      | Callback when the transition is done |
 | `onInterrupt` | `Function` | `null`      | Callback when the transition is interrupted |
 
+Additional fields for `type: 'interpolation'`:
+
+| Key           | Type       | Default     | Description |
+| ------------- | --------   | ----------- | ----------- |
+| `duration`    | `Number`   | `0`         | Duration of the transition animation, in milliseconds |
+| `easing`      | `Function` | LINEAR (`t => t`) | Easing function that maps a value from [0, 1] to [0, 1], see [http://easings.net/](http://easings.net/) |
+
+Additional fields for `type: 'spring'`:
+
+| Key           | Type       | Default     | Description |
+| ------------- | --------   | ----------- | ----------- |
+| `stiffness`   | `Number`   | `0.05`      | "Tension" factor for the spring |
+| `damping`     | `Number`   | `0.5`       | "Friction" factor that counteracts the spring's acceleration |
+
 Notes:
 
-* As a shorthand, if an accessor key maps to a number rather than an object, then the number is assigned to the `duration` parameter.
+* As a shorthand, if an accessor key maps to a number rather than an object, then the number is assigned to the `duration` parameter, and an `interpolation` transition is used.
 * Attribute transition is performed between the values at the same index. If the new data is larger, `enter` callback is called for each new vertex to backfill the values to transition from.
 * `enter` should return the value to transition from. for the current vertex. It receives two arguments:
   - `toValue` (TypedArray) - the new value to transition to, for the current vertex
@@ -454,6 +475,17 @@ The state object allows a layer to store persistent information cross rendering 
 > Layer methods are designed to support the creation of new layers or layer sub-classing and are NOT intended to be called by applications.
 
 ### General Methods
+
+##### `clone`
+
+```js
+const updatedLayer = layer.clone(overrideProps);
+```
+
+Create a copy of this layer, optionally change some prop values.
+
+Arguments:
+- `overrideProps` (Object, optional) - layer props to update.
 
 ##### `setState`
 
@@ -610,20 +642,6 @@ Returns:
 
 * World coordinates in `[x, y]`.
 
-
-##### `screenToDevicePixels`
-
-Simply multiplies `pixels` parameter with `window.devicePixelRatio` if available. Useful to adjust e.g. line widths to get more consistent visuals between low and high resolution displays.
-
-Parameters:
-
-* `pixels` (Number) - The number in screen pixels.
-
-Returns:
-
-* A number in device pixels
-
-
 ### Layer Picking Methods
 
 For the usage of these methods, see [how picking works](/docs/developer-guide/custom-layers/picking.md).
@@ -643,7 +661,7 @@ Returns:
 
 Note:
 
-* The null picking color is returned when a pixel is picked that is not covered by the layer, or when they layer has selected to render a pixel using the null picking color to make it unpickable.
+* The null picking color is returned when a pixel is picked that is not covered by the layer, or when the layer has selected to render a pixel using the null picking color to make it unpickable.
 
 ##### `encodePickingColor`
 
@@ -668,7 +686,7 @@ Notes:
 
 Returns:
 
-* a "null" picking color which is equal the the color of pixels not covered by the layer. This color is guaranteed not to match any index value greater than or equal to zero.
+* a "null" picking color which is equal the color of pixels not covered by the layer. This color is guaranteed not to match any index value greater than or equal to zero.
 
 ## Source
 

@@ -157,17 +157,21 @@ vec2 project_position(vec2 position) {
   return projected_position.xy;
 }
 
-//
-// Projects from "world" coordinates to clip space.
-// Uses project_uViewProjectionMatrix
-//
-vec4 project_common_position_to_clipspace(vec4 position) {
+vec4 project_common_position_to_clipspace(vec4 position, mat4 viewProjectionMatrix, vec4 center) {
   if (project_uCoordinateSystem == COORDINATE_SYSTEM_METER_OFFSETS ||
     project_uCoordinateSystem == COORDINATE_SYSTEM_LNGLAT_OFFSETS) {
     // Needs to be divided with project_uCommonUnitsPerMeter
     position.w *= project_uCommonUnitsPerMeter.z;
   }
-  return project_uViewProjectionMatrix * position + project_uCenter;
+  return viewProjectionMatrix * position + center;
+}
+
+//
+// Projects from common space coordinates to clip space.
+// Uses project_uViewProjectionMatrix
+//
+vec4 project_common_position_to_clipspace(vec4 position) {
+  return project_common_position_to_clipspace(position, project_uViewProjectionMatrix, project_uCenter);
 }
 
 // Returns a clip space offset that corresponds to a given number of screen pixels

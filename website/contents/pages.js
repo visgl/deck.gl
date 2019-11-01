@@ -57,7 +57,7 @@ export const examplePages = generatePath([
       {
         name: 'HexagonLayer',
         content: {
-          demo: 'HeatmapDemo',
+          demo: 'HexagonDemo',
           code: getCodeUrl('examples/website/3d-heatmap')
         }
       },
@@ -130,6 +130,20 @@ export const examplePages = generatePath([
           demo: 'TripsDemo',
           code: getCodeUrl('examples/website/trips')
         }
+      },
+      {
+        name: 'HeatmapLayer',
+        content: {
+          demo: 'HeatmapDemo',
+          code: getCodeUrl('examples/website/heatmap')
+        }
+      },
+      {
+        name: 'Tile3DLayer',
+        content: {
+          demo: 'Tiles3DDemo',
+          code: getCodeUrl('examples/website/3d-tiles')
+        }
       }
     ]
   },
@@ -159,6 +173,16 @@ export const examplePages = generatePath([
         }
       }
     ]
+  },
+  {
+    name: 'Declarative Layers',
+    expanded: true,
+    children: [
+      {
+        name: 'Playground',
+        external: 'http://deck.gl/playground'
+      }
+    ]
   }
 ]);
 
@@ -166,6 +190,14 @@ export const showcasePages = generatePath([
   {
     name: 'Overview',
     content: 'markdown/showcase.md'
+  },
+  {
+    name: 'Isochronic Map',
+    external: 'http://pessimistress.github.io/isochronic-map/'
+  },
+  {
+    name: 'Simulating the 2016 Primary',
+    external: 'http://mcvs.thesunstirade.com/'
   },
   {
     name: 'The Bad Bet',
@@ -408,6 +440,10 @@ export const docPages = generatePath([
             content: getDocUrl('layers/geojson-layer.md')
           },
           {
+            name: 'HeatmapLayer',
+            content: getDocUrl('layers/heatmap-layer.md')
+          },
+          {
             name: 'IconLayer',
             content: getDocUrl('layers/icon-layer.md')
           },
@@ -492,6 +528,10 @@ export const docPages = generatePath([
           {
             name: 'TileLayer',
             content: getDocUrl('layers/tile-layer.md')
+          },
+          {
+            name: 'Tile3DLayer',
+            content: getDocUrl('layers/tile-3d-layer.md')
           },
           {
             name: 'TripsLayer',

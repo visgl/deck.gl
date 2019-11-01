@@ -3,6 +3,7 @@ import AttributeTransitionManager from '@deck.gl/core/lib/attribute-transition-m
 import Attribute from '@deck.gl/core/lib/attribute';
 import test from 'tape-catch';
 import {isWebGL2} from '@luma.gl/core';
+import {Timeline} from '@luma.gl/addons';
 import {gl} from '@deck.gl/test-utils';
 
 const TEST_ATTRIBUTES = {
@@ -55,10 +56,9 @@ test('AttributeTransitionManager#constructor', t => {
 
 if (isWebGL2(gl)) {
   test('AttributeTransitionManager#update', t => {
-    const manager = new AttributeTransitionManager(gl, {id: 'attribute-transition'});
+    const timeline = new Timeline();
+    const manager = new AttributeTransitionManager(gl, {id: 'attribute-transition', timeline});
     const attributes = Object.assign({}, TEST_ATTRIBUTES);
-
-    t.notOk(manager.transform, 'transform is not constructed');
 
     attributes.indices.setNeedsRedraw('initial');
     attributes.instanceSizes.setNeedsRedraw('initial');
@@ -68,54 +68,57 @@ if (isWebGL2(gl)) {
     t.notOk(manager.hasAttribute('indices'), 'no transition for indices');
     t.notOk(manager.hasAttribute('instanceSizes'), 'no transition for instanceSizes');
     t.notOk(manager.hasAttribute('instancePositions'), 'no transition for instancePositions');
-    t.notOk(manager.transform, 'transform is not constructed');
 
     manager.update({attributes, transitions: {getSize: 1000, getElevation: 1000}, numInstances: 0});
     t.notOk(manager.hasAttribute('indices'), 'no transition for indices');
     t.ok(manager.hasAttribute('instanceSizes'), 'added transition for instanceSizes');
     t.ok(manager.hasAttribute('instancePositions'), 'added transition for instancePositions');
-    t.ok(manager.transform, 'a new transform is constructed');
 
-    const sizeTransition = manager.attributeTransitions.instanceSizes;
-    t.is(sizeTransition.buffer.getElementCount(), 1, 'buffer has correct size');
+    const sizeTransition = manager.transitions.instanceSizes;
+    t.is(sizeTransition.buffers[0].getElementCount(), 1, 'buffer has correct size');
 
-    let lastTransform = manager.transform;
+    const positionTransform = manager.transitions.instancePositions.transform;
+    t.ok(positionTransform, 'transform is constructed for instancePositions');
     delete attributes.instancePositions;
 
     manager.update({attributes, transitions: {getSize: 1000, getElevation: 1000}, numInstances: 4});
     t.ok(manager.hasAttribute('instanceSizes'), 'added transition for instanceSizes');
     t.notOk(manager.hasAttribute('instancePositions'), 'removed transition for instancePositions');
-    t.ok(
-      manager.transform && manager.transform !== lastTransform,
-      'a new transform is constructed'
-    );
-    t.notOk(lastTransform.model.program._handle, 'last transform is deleted');
-    t.is(sizeTransition.buffer.getElementCount(), 4, 'buffer has correct size');
+    t.notOk(positionTransform._handle, 'instancePositions transform is deleted');
+    t.is(sizeTransition.buffers[0].getElementCount(), 4, 'buffer has correct size');
 
     attributes.instanceSizes.update({value: new Float32Array(5).fill(1)});
     manager.update({attributes, transitions: {getSize: 1000}, numInstances: 5});
-    t.deepEquals(sizeTransition.fromState.getData({}), [0, 0, 0, 0, 1], 'from buffer is extended');
-    t.is(sizeTransition.buffer.getElementCount(), 5, 'buffer has correct size');
+    manager.run();
+    let transitioningBuffer = manager.getAttributes().instanceSizes.getBuffer();
+    t.deepEquals(
+      transitioningBuffer.getData(),
+      [0, 0, 0, 0, 1],
+      'buffer is extended with new data'
+    );
+    t.is(transitioningBuffer.getElementCount(), 5, 'buffer has correct size');
 
     attributes.instanceSizes.update({constant: true, value: [2]});
     manager.update({attributes, transitions: {getSize: 1000}, numInstances: 6});
+    manager.run();
+    transitioningBuffer = manager.getAttributes().instanceSizes.getBuffer();
     t.deepEquals(
-      sizeTransition.fromState.getData({}),
-      [0, 0, 0, 0, 0, 2],
-      'from buffer is extended'
+      transitioningBuffer.getData(),
+      [0, 0, 0, 0, 1, 2],
+      'buffer is extended with new data'
     );
-    t.is(sizeTransition.buffer.getElementCount(), 6, 'buffer has correct size');
+    t.is(transitioningBuffer.getElementCount(), 6, 'buffer has correct size');
 
-    lastTransform = manager.transform;
     manager.finalize();
-    t.notOk(lastTransform.model.program._handle, 'transform is deleted');
+    t.notOk(transitioningBuffer._handle, 'transform buffer is deleted');
+    t.notOk(manager.transitions.instanceSizes, 'transition is deleted');
 
     t.end();
   });
 
   test('AttributeTransitionManager#transition', t => {
-    /* TODO - restore
-    const manager = new AttributeTransitionManager(gl, {id: 'attribute-transition'});
+    const timeline = new Timeline();
+    const manager = new AttributeTransitionManager(gl, {id: 'attribute-transition', timeline});
     const attributes = Object.assign({}, TEST_ATTRIBUTES);
 
     let startCounter = 0;
@@ -139,26 +142,32 @@ if (isWebGL2(gl)) {
     attributes.instanceSizes.update({value: new Float32Array(4).fill(1)});
     attributes.instanceSizes.setNeedsRedraw('initial');
 
+    timeline.setTime(0);
     manager.update({attributes, transitions, numInstances: 4});
-    manager.setCurrentTime(0);
+    manager.run();
     t.is(startCounter, 1, 'transition starts');
 
+    timeline.setTime(500);
     attributes.instanceSizes.needsRedraw({clearChangedFlags: true});
     manager.update({attributes, transitions, numInstances: 4});
-    manager.setCurrentTime(500);
+    manager.run();
     t.is(startCounter, 1, 'no new transition is triggered');
 
+    timeline.setTime(1000);
     attributes.instanceSizes.update({value: new Float32Array(4).fill(3)});
     attributes.instanceSizes.setNeedsRedraw('update');
-
     manager.update({attributes, transitions, numInstances: 4});
-    manager.setCurrentTime(1000);
+    manager.run();
     t.is(interruptCounter, 1, 'transition is interrupted');
     t.is(startCounter, 2, 'new transition is triggered');
 
-    manager.setCurrentTime(1500);
+    timeline.setTime(1500);
+    manager.run();
     t.deepEquals(
-      manager.getAttributes().instanceSizes.getData(),
+      manager
+        .getAttributes()
+        .instanceSizes.getBuffer()
+        .getData(),
       [2, 2, 2, 2],
       'attribute in transition'
     );
@@ -167,28 +176,33 @@ if (isWebGL2(gl)) {
     attributes.instanceSizes.setNeedsRedraw('update');
 
     manager.update({attributes, transitions, numInstances: 4});
-    manager.setCurrentTime(1500);
+    manager.run();
     t.is(interruptCounter, 2, 'transition is interrupted');
     t.is(startCounter, 3, 'new transition is triggered');
 
-    manager.setCurrentTime(2000);
+    timeline.setTime(2000);
+    manager.run();
     t.deepEquals(
-      manager.getAttributes().instanceSizes.getData(),
+      manager
+        .getAttributes()
+        .instanceSizes.getBuffer()
+        .getData(),
       [3, 3, 3, 3],
       'attribute in transition'
     );
 
-    manager.setCurrentTime(2500);
+    timeline.setTime(2500);
+    manager.run();
     t.is(endCounter, 1, 'transition ends');
 
     manager.finalize();
-    */
     t.end();
   });
 } else {
   // AttributeTransitionManager should not fail in WebGL1
   test('AttributeTransitionManager#update, setCurrentTime', t => {
-    const manager = new AttributeTransitionManager(gl, {id: 'attribute-transition'});
+    const timeline = new Timeline();
+    const manager = new AttributeTransitionManager(gl, {id: 'attribute-transition', timeline});
     const attributes = Object.assign({}, TEST_ATTRIBUTES);
 
     attributes.instanceSizes.setNeedsRedraw('initial');
@@ -196,8 +210,9 @@ if (isWebGL2(gl)) {
     manager.update({attributes, transitions: {getSize: 1000, getElevation: 1000}, numInstances: 4});
     t.pass('update does not throw error');
 
-    manager.setCurrentTime(0);
-    t.pass('setCurrentTime does not throw error');
+    timeline.setTime(0);
+    manager.run();
+    t.pass('run does not throw error');
 
     t.is(Object.keys(manager.getAttributes()).length, 0, 'no attributes added to transition');
     manager.finalize();

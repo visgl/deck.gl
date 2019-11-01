@@ -8,8 +8,10 @@ import {
   OrbitView,
   AmbientLight,
   DirectionalLight,
-  LightingEffect
+  LightingEffect,
+  PostProcessEffect
 } from '@deck.gl/core';
+import {SolidPolygonLayer} from '@deck.gl/layers';
 
 import React, {PureComponent} from 'react';
 import autobind from 'react-autobind';
@@ -22,6 +24,8 @@ import LayerControls from './components/layer-controls';
 import LAYER_CATEGORIES from './examples';
 import Map from './map';
 
+import {ink} from '@luma.gl/effects';
+
 const AMBIENT_LIGHT = new AmbientLight({
   color: [255, 255, 255],
   intensity: 1.2
@@ -30,13 +34,29 @@ const AMBIENT_LIGHT = new AmbientLight({
 const DIRECTIONAL_LIGHT = new DirectionalLight({
   color: [255, 255, 255],
   intensity: 3.0,
-  direction: [-3, -9, -1]
+  direction: [-3, -1, -9]
+});
+
+const DIRECTIONAL_LIGHT_SHADOW = new DirectionalLight({
+  color: [255, 255, 255],
+  intensity: 3.0,
+  direction: [-3, -1, -9],
+  _shadow: true
 });
 
 const GLOBAL_LIGHTING = new LightingEffect({
   AMBIENT_LIGHT,
   DIRECTIONAL_LIGHT
 });
+
+const GLOBAL_LIGHTING_WITH_SHADOW = new LightingEffect({
+  AMBIENT_LIGHT,
+  DIRECTIONAL_LIGHT_SHADOW
+});
+
+const POST_PROCESS = new PostProcessEffect(ink, {strength: 0.5});
+
+const LAND_COVER = [[[-122.3, 37.7], [-122.3, 37.9], [-122.6, 37.9], [-122.6, 37.7]]];
 
 // ---- View ---- //
 export default class App extends PureComponent {
@@ -49,6 +69,8 @@ export default class App extends PureComponent {
         ScatterplotLayer: true
       },
       settings: {
+        shadow: false,
+        postProcessing: false,
         orthographic: false,
         multiview: false,
         infovis: false,
@@ -66,7 +88,8 @@ export default class App extends PureComponent {
         // effects: false,
       },
 
-      enableDepthPickOnClick: false
+      enableDepthPickOnClick: false,
+      shakeCamera: false // Shake camera to force rendering every frame
     };
 
     this.mapRef = React.createRef();
@@ -106,8 +129,8 @@ export default class App extends PureComponent {
     this.mapRef.current.pickObjects({x: 0, y: 0, width, height});
   }
 
-  _multiDepthPick(x, y) {
-    this.mapRef.current.pickMultipleObjects({x, y});
+  _multiDepthPick({x, y}) {
+    this.mapRef.current.pickMultipleObjects({x, y, unproject3D: true});
   }
 
   _renderExampleLayer(example, settings, index) {
@@ -133,7 +156,17 @@ export default class App extends PureComponent {
   /* eslint-disable max-depth */
   _renderExamples() {
     let index = 1;
-    const layers = [];
+    const layers = [
+      // the ground - for shadows to drop on
+      new SolidPolygonLayer({
+        id: 'ground',
+        data: LAND_COVER,
+        getPolygon: f => f,
+        extruded: false,
+        filled: true,
+        getFillColor: [0, 0, 0, 0]
+      })
+    ];
     const {activeExamples} = this.state;
 
     for (const categoryName of Object.keys(LAYER_CATEGORIES)) {
@@ -212,9 +245,12 @@ export default class App extends PureComponent {
 
   _getEffects() {
     // TODO
-    // const {effects} = this.state.settings;
+    const {shadow, postProcessing} = this.state.settings;
 
-    return [GLOBAL_LIGHTING];
+    return [
+      shadow ? GLOBAL_LIGHTING_WITH_SHADOW : GLOBAL_LIGHTING,
+      postProcessing && POST_PROCESS
+    ].filter(Boolean);
   }
 
   render() {
@@ -225,9 +261,11 @@ export default class App extends PureComponent {
         <Map
           ref={this.mapRef}
           layers={this._renderExamples()}
+          onClick={this.state.enableDepthPickOnClick && this._multiDepthPick}
           views={this._getViews()}
           effects={this._getEffects()}
           settings={settings}
+          shakeCamera={this.state.shakeCamera}
         />
         <div id="control-panel">
           <div style={{textAlign: 'center', padding: '5px 0 5px'}}>
@@ -240,6 +278,9 @@ export default class App extends PureComponent {
               }
             >
               <b>Multi Depth Pick ({this.state.enableDepthPickOnClick ? 'ON' : 'OFF'})</b>
+            </button>
+            <button onClick={() => this.setState({shakeCamera: !this.state.shakeCamera})}>
+              <b>Shake Camera ({this.state.shakeCamera ? 'ON' : 'OFF'})</b>
             </button>
           </div>
           <LayerControls

@@ -29,6 +29,7 @@ export function pointToDensityGridData({
     gridData = parseGridData(data, getPosition, weightParams);
     boundingBox = gridData.boundingBox;
   }
+  log.assert(cellSizeMeters > 0);
   let cellSize = [cellSizeMeters, cellSizeMeters];
   let worldOrigin = [0, 0];
   log.assert(

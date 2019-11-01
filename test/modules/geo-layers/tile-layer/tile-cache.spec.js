@@ -25,123 +25,120 @@ const maxZoom = 13;
 const minZoom = 11;
 
 const getTileData = () => Promise.resolve(null);
-const testTileCache = new TileCache({
+const testTileCacheProps = {
   getTileData,
   maxSize: cacheMaxSize,
   minZoom,
-  maxZoom
-});
+  maxZoom,
+  onTileLoad: () => {}
+};
 
 test('TileCache#TileCache#should clear the cache when finalize is called', t => {
-  testTileCache.update(testViewport, () => null);
-  t.equal(testTileCache._cache.size, 1);
-  testTileCache.finalize();
-  t.equal(testTileCache._cache.size, 0);
+  const tileCache = new TileCache(testTileCacheProps);
+  tileCache.update(testViewport);
+  t.equal(tileCache._cache.size, 1);
+  tileCache.finalize();
+  t.equal(tileCache._cache.size, 0);
   t.end();
 });
 
 test('TileCache#should call onUpdate with the expected tiles', t => {
-  testTileCache.update(testViewport, tiles => {
-    t.equal(tiles.length, 1);
-    t.equal(tiles[0].x, testTile.x);
-    t.equal(tiles[0].y, testTile.y);
-    t.equal(tiles[0].z, testTile.z);
-    t.end();
-  });
-  testTileCache.finalize();
+  const tileCache = new TileCache(testTileCacheProps);
+  tileCache.update(testViewport);
+
+  t.equal(tileCache.tiles[0].x, testTile.x);
+  t.equal(tileCache.tiles[0].y, testTile.y);
+  t.equal(tileCache.tiles[0].z, testTile.z);
+
+  tileCache.finalize();
+  t.end();
 });
 
 test('TileCache#should clear not visible tiles when cache is full', t => {
+  const tileCache = new TileCache(testTileCacheProps);
   // load a viewport to fill the cache
-
-  testTileCache.update(testViewport, () => null);
+  tileCache.update(testViewport);
   // load another viewport. The previous cached tiles shouldn't be visible
-  testTileCache.update(
+  tileCache.update(
     new WebMercatorViewport(
       Object.assign({}, testViewState, {
         longitude: -100,
         latitude: 80
-        // tile is 12-910-2958
       })
-    ),
-    tiles => {
-      t.equal(testTileCache._cache.size, 1);
-      const x = 910;
-      const y = 459;
-      const z = 12;
-      const expectedTile = new Tile({x, y, z, getTileData});
-      const actualTile = testTileCache._cache.get(`${z}-${x}-${y}`);
-      t.equal(actualTile.x, expectedTile.x);
-      t.equal(actualTile.y, expectedTile.y);
-      t.equal(actualTile.z, expectedTile.z);
-      t.end();
-    }
+    )
   );
-  testTileCache.finalize();
+
+  t.equal(tileCache._cache.size, 1);
+  t.ok(tileCache._cache.get('12-910-459'), 'expected tile is in cache');
+
+  tileCache.finalize();
+  t.end();
 });
 
 test('TileCache#should load the cached parent tiles while we are loading the current tiles', t => {
-  testTileCache.update(testViewport, tiles => null);
+  const tileCache = new TileCache(testTileCacheProps);
+  tileCache.update(testViewport);
 
   const zoomedInViewport = new WebMercatorViewport(
     Object.assign({}, testViewState, {
       zoom: maxZoom
     })
   );
-  testTileCache.update(zoomedInViewport, tiles => {
-    t.true(
-      tiles.some(tile => tile.x === testTile.x && tile.y === testTile.y && tile.z === testTile.z)
-    );
-    t.end();
-  });
-  testTileCache.finalize();
+  tileCache.update(zoomedInViewport);
+  t.ok(
+    tileCache.tiles.some(
+      tile => tile.x === testTile.x && tile.y === testTile.y && tile.z === testTile.z
+    ),
+    'loads cached parent tiles'
+  );
+
+  tileCache.finalize();
+  t.end();
 });
 
 test('TileCache#should try to load the existing zoom levels if we zoom in too far', t => {
+  const tileCache = new TileCache(testTileCacheProps);
   const zoomedInViewport = new WebMercatorViewport(
     Object.assign({}, testViewState, {
       zoom: 20
     })
   );
 
-  testTileCache.update(zoomedInViewport, tiles => {
-    tiles.forEach(tile => {
-      t.equal(tile.z, maxZoom);
-    });
-    t.end();
+  tileCache.update(zoomedInViewport);
+  tileCache.tiles.forEach(tile => {
+    t.equal(tile.z, maxZoom);
   });
-  testTileCache.finalize();
+
+  tileCache.finalize();
+  t.end();
 });
 
 test('TileCache#should not display anything if we zoom out too far', t => {
+  const tileCache = new TileCache(testTileCacheProps);
   const zoomedOutViewport = new WebMercatorViewport(
     Object.assign({}, testViewState, {
       zoom: 1
     })
   );
 
-  testTileCache.update(zoomedOutViewport, tiles => {
-    t.equal(tiles.length, 0);
-    t.end();
-  });
-  testTileCache.finalize();
+  tileCache.update(zoomedOutViewport);
+  t.equal(tileCache.tiles.length, 0);
+  tileCache.finalize();
+  t.end();
 });
 
 test('TileCache#should set isLoaded to true even when loading the tile throws an error', t => {
   const errorTileCache = new TileCache({
     getTileData: () => Promise.reject(null),
-    onTileError: () => {},
+    onTileError: () => {
+      t.equal(errorTileCache.tiles[0].isLoaded, true);
+      errorTileCache.finalize();
+      t.end();
+    },
     maxSize: cacheMaxSize,
     minZoom,
     maxZoom
   });
 
-  errorTileCache.update(testViewport, tiles => {
-    // eslint-disable-next-line
-    setTimeout(() => {
-      t.equal(tiles[0].isLoaded, true);
-      t.end();
-    });
-  });
-  errorTileCache.finalize();
+  errorTileCache.update(testViewport);
 });

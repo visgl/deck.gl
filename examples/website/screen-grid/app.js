@@ -1,7 +1,8 @@
 import React, {Component} from 'react';
 import {render} from 'react-dom';
 import {StaticMap} from 'react-map-gl';
-import DeckGL, {ScreenGridLayer} from 'deck.gl';
+import DeckGL from '@deck.gl/react';
+import {ScreenGridLayer} from '@deck.gl/aggregation-layers';
 import {isWebGL2} from '@luma.gl/core';
 
 // Set your mapbox token here
@@ -29,7 +30,7 @@ const colorRange = [
   [189, 0, 38, 255]
 ];
 
-export class App extends Component {
+export default class App extends Component {
   _renderLayers() {
     const {data = DATA_URL, cellSize = 20, gpuAggregation = true, aggregation = 'Sum'} = this.props;
 

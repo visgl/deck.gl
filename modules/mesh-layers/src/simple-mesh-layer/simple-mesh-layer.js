@@ -22,7 +22,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {Layer, createIterable, fp64LowPart} from '@deck.gl/core';
+import {Layer} from '@deck.gl/core';
 import GL from '@luma.gl/constants';
 import {Model, Geometry, Texture2D, PhongMaterial, isWebGL2} from '@luma.gl/core';
 
@@ -92,6 +92,7 @@ const defaultProps = {
     depthTest: true,
     depthFunc: GL.LEQUAL
   },
+  opacity: 1.0,
 
   // NOTE(Tarek): Quick and dirty wireframe. Just draws
   // the same mesh with LINE_STRIPS. Won't follow edges
@@ -127,13 +128,10 @@ export default class SimpleMeshLayer extends Layer {
     attributeManager.addInstanced({
       instancePositions: {
         transition: true,
+        type: GL.DOUBLE,
+        fp64: this.use64bitPositions(),
         size: 3,
         accessor: 'getPosition'
-      },
-      instancePositions64xy: {
-        size: 2,
-        accessor: 'getPosition',
-        update: this.calculateInstancePositions64xyLow
       },
       instanceColors: {
         type: GL.UNSIGNED_BYTE,
@@ -214,8 +212,7 @@ export default class SimpleMeshLayer extends Layer {
       Object.assign({}, this.getShaders(), {
         id: this.props.id,
         geometry: getGeometry(mesh),
-        isInstanced: true,
-        shaderCache: this.context.shaderCache
+        isInstanced: true
       })
     );
 
@@ -246,27 +243,6 @@ export default class SimpleMeshLayer extends Layer {
         sampler: texture || emptyTexture,
         hasTexture: Boolean(texture)
       });
-    }
-  }
-
-  calculateInstancePositions64xyLow(attribute, {startRow, endRow}) {
-    const isFP64 = this.use64bitPositions();
-    attribute.constant = !isFP64;
-
-    if (!isFP64) {
-      attribute.value = new Float32Array(2);
-      return;
-    }
-
-    const {data, getPosition} = this.props;
-    const {value, size} = attribute;
-    let i = startRow * size;
-    const {iterable, objectInfo} = createIterable(data, startRow, endRow);
-    for (const object of iterable) {
-      objectInfo.index++;
-      const position = getPosition(object, objectInfo);
-      value[i++] = fp64LowPart(position[0]);
-      value[i++] = fp64LowPart(position[1]);
     }
   }
 }

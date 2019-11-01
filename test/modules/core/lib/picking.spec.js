@@ -112,7 +112,7 @@ test('processPickInfo', t => {
   const lastPickedInfo = {};
   parameters.lastPickedInfo = lastPickedInfo;
 
-  const testLayerUniforms = testLayer.getModels()[0].program.uniforms;
+  const testLayerUniforms = testLayer.getModels()[0].getUniforms();
 
   for (const testCase of TEST_CASES) {
     parameters.pickInfo = testCase.pickInfo;

@@ -73,7 +73,10 @@ export {
   PointLight,
   DirectionalLight,
   // Extension
-  LayerExtension
+  LayerExtension,
+  // Utilities
+  fp64LowPart,
+  createIterable
 } from '@deck.gl/core';
 
 // EXPERIMENTAL CORE LIB CLASSES (May change in minor version bumps, use at your own risk)
@@ -137,7 +140,9 @@ export {
   HexagonLayer,
   ContourLayer,
   GridLayer,
-  GPUGridLayer
+  GPUGridLayer,
+  AGGREGATION_OPERATION,
+  HeatmapLayer
 } from '@deck.gl/aggregation-layers';
 
 export {
@@ -146,7 +151,8 @@ export {
   H3ClusterLayer,
   H3HexagonLayer,
   TileLayer,
-  TripsLayer
+  TripsLayer,
+  Tile3DLayer
 } from '@deck.gl/geo-layers';
 
 export {SimpleMeshLayer, ScenegraphLayer} from '@deck.gl/mesh-layers';

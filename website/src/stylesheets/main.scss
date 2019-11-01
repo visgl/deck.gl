@@ -1,6 +1,7 @@
 @import 'markdown';
 @import 'mixins';
 @import 'icon';
+@import 'fontface';
 
 $primary: #00ADE6;
 $secondary: #05E3D5;
@@ -16,10 +17,14 @@ $topbar-height: 64px;
 @import 'showcase';
 
 body {
-  font-family: ff-clan-web-pro, "Helvetica Neue", Helvetica, sans-serif !important;
+  font-family: "UberMove", "Helvetica Neue", Helvetica, sans-serif !important;
   font-size: 12px;
   line-height: 1.833;
   overflow-y: auto;
+}
+
+p, li, td, th {
+  font-family: "UberMoveText";
 }
 
 * {
@@ -50,7 +55,6 @@ header {
   white-space: nowrap;
   position: relative;
   z-index: 10001;
-  position: fixed;
   top: 0;
   left: 0;
   width: 100%;

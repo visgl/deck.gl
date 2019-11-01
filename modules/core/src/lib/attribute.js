@@ -8,6 +8,8 @@ import * as range from '../utils/range';
 import log from '../utils/log';
 import BaseAttribute from './base-attribute';
 import typedArrayManager from '../utils/typed-array-manager';
+import {toDoublePrecisionArray} from '../utils/math-utils';
+import {normalizeTransitionSettings} from './attribute-transition-utils';
 
 const DEFAULT_STATE = {
   isExternalBuffer: false,
@@ -18,9 +20,37 @@ const DEFAULT_STATE = {
   updateRanges: range.FULL
 };
 
+function addDoublePrecisionAttributes(attribute, shaderAttributeDefs) {
+  const doubleShaderAttributeDefs = {};
+  for (const shaderAttributeName in shaderAttributeDefs) {
+    const def = shaderAttributeDefs[shaderAttributeName];
+    const offset = 'offset' in def ? def.offset : attribute.offset;
+    const stride = 'stride' in def ? def.stride : attribute.size * 4;
+
+    doubleShaderAttributeDefs[`${shaderAttributeName}32`] = Object.assign({}, def, {
+      offset,
+      stride
+    });
+    doubleShaderAttributeDefs[`${shaderAttributeName}64`] = Object.assign({}, def, {
+      offset: offset * 2,
+      stride: stride * 2
+    });
+    doubleShaderAttributeDefs[`${shaderAttributeName}64xyLow`] = Object.assign({}, def, {
+      offset: offset * 2 + stride,
+      stride: stride * 2
+    });
+  }
+  return doubleShaderAttributeDefs;
+}
+
 export default class Attribute extends BaseAttribute {
   constructor(gl, opts = {}) {
-    super(gl, opts);
+    const logicalType = opts.type;
+    const doublePrecision = logicalType === GL.DOUBLE;
+
+    // DOUBLE is not a valid WebGL buffer type
+    // tell BaseAttribute to set the accessor type to FLOAT
+    super(gl, doublePrecision ? {...opts, type: GL.FLOAT} : opts);
 
     const {
       // deck.gl fields
@@ -28,45 +58,60 @@ export default class Attribute extends BaseAttribute {
       noAlloc = false,
       update = null,
       accessor = null,
+      transform = null,
       bufferLayout = null
     } = opts;
 
     let {defaultValue = [0, 0, 0, 0]} = opts;
     defaultValue = Array.isArray(defaultValue) ? defaultValue : [defaultValue];
 
+    // This is the attribute type defined by the layer
+    // If an external buffer is provided, this.type may be overwritten
+    // But we always want to use defaultType for allocation
+    this.defaultType = logicalType || this.type || GL.FLOAT;
     this.shaderAttributes = {};
     this.hasShaderAttributes = false;
+    this.doublePrecision = doublePrecision;
 
-    if (opts.shaderAttributes) {
-      const shaderAttributes = opts.shaderAttributes;
+    // `fp64: false` tells a double-precision attribute to allocate Float32Arrays
+    // by default when using auto-packing. This is more efficient in use cases where
+    // high precision is unnecessary, but the `64xyLow` attribute is still required
+    // by the shader.
+    if (doublePrecision && opts.fp64 === false) {
+      this.defaultType = GL.FLOAT;
+    }
+
+    let shaderAttributes = opts.shaderAttributes || (doublePrecision && {[this.id]: {}});
+
+    if (shaderAttributes) {
+      const shaderAttributeNames = Object.keys(shaderAttributes);
+      shaderAttributes = doublePrecision
+        ? addDoublePrecisionAttributes(this, shaderAttributes)
+        : shaderAttributes;
       for (const shaderAttributeName in shaderAttributes) {
         const shaderAttribute = shaderAttributes[shaderAttributeName];
 
         // Initialize the attribute descriptor, with WebGL and metadata fields
-        this.shaderAttributes[shaderAttributeName] = new Attribute(
+        this.shaderAttributes[shaderAttributeName] = new BaseAttribute(
           this.gl,
           Object.assign(
             {
+              size: this.size,
+              normalized: this.normalized,
+              integer: this.integer,
               offset: this.offset,
               stride: this.stride,
-              normalized: this.normalized
+              divisor: this.divisor
             },
             shaderAttribute,
             {
               id: shaderAttributeName,
-              // Luma fields
-              constant: shaderAttribute.constant || false,
-              isIndexed: shaderAttribute.isIndexed || shaderAttribute.elements,
-              size: (shaderAttribute.elements && 1) || shaderAttribute.size || this.size,
-              value: shaderAttribute.value || null,
-              divisor: shaderAttribute.instanced || shaderAttribute.divisor || this.divisor,
-              buffer: this.getBuffer(),
-              noAlloc: true
+              buffer: this.getBuffer()
             }
           )
         );
 
-        this.hasShaderAttributes = true;
+        this.hasShaderAttributes = shaderAttributeNames;
       }
     }
 
@@ -75,6 +120,7 @@ export default class Attribute extends BaseAttribute {
       noAlloc,
       update: update || (accessor && this._standardAccessor),
       accessor,
+      transform,
       defaultValue,
       bufferLayout
     });
@@ -121,7 +167,18 @@ export default class Attribute extends BaseAttribute {
 
   getShaderAttributes() {
     const shaderAttributes = {};
-    if (this.hasShaderAttributes) {
+    if (this.doublePrecision) {
+      const isBuffer64Bit = this.value instanceof Float64Array;
+      for (const shaderAttributeName of this.hasShaderAttributes) {
+        shaderAttributes[shaderAttributeName] = this.shaderAttributes[
+          isBuffer64Bit ? `${shaderAttributeName}64` : `${shaderAttributeName}32`
+        ];
+        const shaderAttributeLowPartName = `${shaderAttributeName}64xyLow`;
+        shaderAttributes[shaderAttributeLowPartName] = isBuffer64Bit
+          ? this.shaderAttributes[shaderAttributeLowPartName]
+          : new Float32Array(this.size); // use constant for low part if buffer is 32-bit
+      }
+    } else if (this.hasShaderAttributes) {
       Object.assign(shaderAttributes, this.shaderAttributes);
     } else {
       shaderAttributes[this.id] = this;
@@ -131,27 +188,26 @@ export default class Attribute extends BaseAttribute {
   }
 
   supportsTransition() {
-    return this.userData.transition;
+    return Boolean(this.userData.transition);
   }
 
   // Resolve transition settings object if transition is enabled, otherwise `null`
   getTransitionSetting(opts) {
-    const {transition, accessor} = this.userData;
-    if (!transition) {
+    const {accessor} = this.userData;
+    // `userData` is a bit of a misnomer here, these are the transition settings defined by
+    // the layer itself, not the layer's user
+    // TODO: have the layer resolve these transition settings itself?
+    const layerSettings = this.userData.transition;
+    if (!this.supportsTransition()) {
       return null;
     }
-    let settings = Array.isArray(accessor) ? opts[accessor.find(a => opts[a])] : opts[accessor];
+    // these are the transition settings passed in by the user
+    const userSettings = Array.isArray(accessor)
+      ? opts[accessor.find(a => opts[a])]
+      : opts[accessor];
 
     // Shorthand: use duration instead of parameter object
-    if (Number.isFinite(settings)) {
-      settings = {duration: settings};
-    }
-
-    if (settings && settings.duration > 0) {
-      return Object.assign({}, transition, settings);
-    }
-
-    return null;
+    return normalizeTransitionSettings(userSettings, layerSettings);
   }
 
   setNeedsUpdate(reason = this.id, dataRange) {
@@ -185,7 +241,7 @@ export default class Attribute extends BaseAttribute {
       assert(Number.isFinite(numInstances));
       // Allocate at least one element to ensure a valid buffer
       const allocCount = Math.max(numInstances, 1);
-      const ArrayType = glArrayFromType(this.type || GL.FLOAT);
+      const ArrayType = glArrayFromType(this.defaultType);
       const oldValue = state.allocatedValue;
       const shouldCopy = state.updateRanges !== range.FULL;
 
@@ -230,26 +286,34 @@ export default class Attribute extends BaseAttribute {
       for (const [startRow, endRow] of updateRanges) {
         update.call(context, this, {data, startRow, endRow, props, numInstances, bufferLayout});
       }
+      const doublePrecision = this.doublePrecision && this.value instanceof Float64Array;
       if (this.constant || !this.buffer || this.buffer.byteLength < this.value.byteLength) {
+        const attributeValue = this.value;
         // call base clas `update` method to upload value to GPU
         this.update({
-          value: this.value,
+          value: doublePrecision ? toDoublePrecisionArray(attributeValue, this) : attributeValue,
           constant: this.constant
         });
+        // Save the 64-bit version
+        this.value = attributeValue;
       } else {
         for (const [startRow, endRow] of updateRanges) {
-          const startOffset = Number.isFinite(startRow)
-            ? this._getVertexOffset(startRow, this.bufferLayout)
-            : 0;
+          const startOffset = Number.isFinite(startRow) ? this.getVertexOffset(startRow) : 0;
           const endOffset = Number.isFinite(endRow)
-            ? this._getVertexOffset(endRow, this.bufferLayout)
+            ? this.getVertexOffset(endRow)
             : noAlloc || !Number.isFinite(numInstances)
               ? this.value.length
               : numInstances * this.size;
 
           // Only update the changed part of the attribute
           this.buffer.subData({
-            data: this.value.subarray(startOffset, endOffset),
+            data: doublePrecision
+              ? toDoublePrecisionArray(this.value, {
+                  size: this.size,
+                  startIndex: startOffset,
+                  endIndex: endOffset
+                })
+              : this.value.subarray(startOffset, endOffset),
             offset: startOffset * this.value.BYTES_PER_ELEMENT
           });
         }
@@ -274,7 +338,7 @@ export default class Attribute extends BaseAttribute {
 
   // Use generic value
   // Returns true if successful
-  setGenericValue(value) {
+  setConstantValue(value) {
     const state = this.userData;
 
     if (value === undefined || typeof value === 'function') {
@@ -293,12 +357,12 @@ export default class Attribute extends BaseAttribute {
     state.needsRedraw = state.needsUpdate || hasChanged;
     this.clearNeedsUpdate();
     state.isExternalBuffer = true;
-    this._updateShaderAttributes();
     return true;
   }
 
   // Use external buffer
   // Returns true if successful
+  // eslint-disable-next-line max-statements
   setExternalBuffer(buffer) {
     const state = this.userData;
 
@@ -311,7 +375,7 @@ export default class Attribute extends BaseAttribute {
     this.clearNeedsUpdate();
 
     if (state.lastExternalBuffer === buffer) {
-      return false;
+      return true;
     }
     state.isExternalBuffer = true;
     state.lastExternalBuffer = buffer;
@@ -325,24 +389,52 @@ export default class Attribute extends BaseAttribute {
       opts = Object.assign({constant: false}, buffer);
     }
 
-    if (opts.value) {
-      const ArrayType = glArrayFromType(this.type || GL.FLOAT);
-      if (!(opts.value instanceof ArrayType)) {
-        log.warn(`Attribute prop ${this.id} is casted to ${ArrayType.name}`)();
-        // Cast to proper type
-        opts.value = new ArrayType(opts.value);
-      }
+    this._checkExternalBuffer(opts);
+
+    if (this.doublePrecision && opts.value instanceof Float64Array) {
+      opts.originalValue = opts.value;
+      opts.value = toDoublePrecisionArray(opts.value, this);
     }
 
     this.update(opts);
-    state.needsRedraw = true;
 
-    this._updateShaderAttributes();
+    state.needsRedraw = true;
+    if (opts.originalValue) {
+      this.value = opts.originalValue;
+    }
+
     return true;
   }
 
   // PRIVATE HELPER METHODS
-  _getVertexOffset(row, bufferLayout) {
+  _checkExternalBuffer(opts) {
+    const {value} = opts;
+    if (!opts.constant && value) {
+      const ArrayType = glArrayFromType(this.defaultType);
+
+      let illegalArrayType = false;
+      if (this.doublePrecision) {
+        // not 32bit or 64bit
+        illegalArrayType = value.BYTES_PER_ELEMENT < 4;
+      } else if (this.hasShaderAttributes) {
+        illegalArrayType =
+          value.BYTES_PER_ELEMENT !== ArrayType.BYTES_PER_ELEMENT &&
+          // Shader attributes have hard-coded offsets and strides
+          // TODO - switch to element offsets and element strides?
+          Object.values(this.shaderAttributes).some(
+            attribute => attribute.offset || attribute.stride
+          );
+      }
+      if (illegalArrayType) {
+        throw new Error(`Attribute ${this.id} does not support ${value.constructor.name}`);
+      }
+      if (!(value instanceof ArrayType) && this.normalized && !('normalized' in opts)) {
+        log.warn(`Attribute ${this.id} is normalized`)();
+      }
+    }
+  }
+
+  getVertexOffset(row, bufferLayout = this.bufferLayout) {
     let offset = this.elementOffset;
     if (bufferLayout) {
       let index = 0;
@@ -394,18 +486,23 @@ export default class Attribute extends BaseAttribute {
   _standardAccessor(attribute, {data, startRow, endRow, props, numInstances, bufferLayout}) {
     const state = attribute.userData;
 
-    const {accessor} = state;
+    const {accessor, transform} = state;
     const {value, size} = attribute;
     const accessorFunc = typeof accessor === 'function' ? accessor : props[accessor];
 
     assert(typeof accessorFunc === 'function', `accessor "${accessor}" is not a function`);
 
-    let i = attribute._getVertexOffset(startRow, bufferLayout);
+    let i = attribute.getVertexOffset(startRow, bufferLayout);
     const {iterable, objectInfo} = createIterable(data, startRow, endRow);
     for (const object of iterable) {
       objectInfo.index++;
 
-      const objectValue = accessorFunc(object, objectInfo);
+      let objectValue = accessorFunc(object, objectInfo);
+      if (transform) {
+        // transform callbacks could be bound to a particular layer instance.
+        // always point `this` to the current layer.
+        objectValue = transform.call(this, objectValue);
+      }
 
       if (bufferLayout) {
         attribute._normalizeValue(objectValue, objectInfo.target);
@@ -465,11 +562,13 @@ export default class Attribute extends BaseAttribute {
 }
 
 /* eslint-disable complexity */
-export function glArrayFromType(glType, {clamped = true} = {}) {
+function glArrayFromType(glType) {
   // Sorted in some order of likelihood to reduce amount of comparisons
   switch (glType) {
     case GL.FLOAT:
       return Float32Array;
+    case GL.DOUBLE:
+      return Float64Array;
     case GL.UNSIGNED_SHORT:
     case GL.UNSIGNED_SHORT_5_6_5:
     case GL.UNSIGNED_SHORT_4_4_4_4:
@@ -478,7 +577,7 @@ export function glArrayFromType(glType, {clamped = true} = {}) {
     case GL.UNSIGNED_INT:
       return Uint32Array;
     case GL.UNSIGNED_BYTE:
-      return clamped ? Uint8ClampedArray : Uint8Array;
+      return Uint8ClampedArray;
     case GL.BYTE:
       return Int8Array;
     case GL.SHORT:

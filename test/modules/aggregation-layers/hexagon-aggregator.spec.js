@@ -23,6 +23,8 @@ import test from 'tape-catch';
 import * as FIXTURES from 'deck.gl-test/data';
 
 import {pointToHexbin} from '@deck.gl/aggregation-layers/hexagon-layer/hexagon-aggregator';
+import {makeSpy} from '@probe.gl/test-utils';
+import {log} from '@deck.gl/core';
 
 const getPosition = d => d.COORDINATES;
 const iterableData = new Set(FIXTURES.points);
@@ -34,5 +36,20 @@ test('pointToHexbin', t => {
     typeof pointToHexbin({data: iterableData, radius, getPosition}, viewport) === 'object',
     'should work with iterables'
   );
+  t.end();
+});
+
+test('pointToHexbin#invalidData', t => {
+  makeSpy(log, 'warn');
+  const onePoint = FIXTURES.points[0];
+  onePoint.COORDINATES = ['', ''];
+  t.ok(
+    typeof pointToHexbin({data: [onePoint], radius, getPosition}, viewport) === 'object',
+    'should still produce an object in the presence of non-finite values'
+  );
+
+  t.ok(log.warn.called, 'should produce a warning message in the presence of non-finite values');
+
+  log.warn.restore();
   t.end();
 });

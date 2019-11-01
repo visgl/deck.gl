@@ -1,4 +1,4 @@
-# Installing, Building and Running Examples
+# Installing and Running Examples
 
 ## Installation
 

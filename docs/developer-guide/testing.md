@@ -1,4 +1,4 @@
-# Testing deck.gl Layers and Applications
+# Testing Layers and Applications
 
 Testing WebGL code is much harder than testing regular JavaScript. GPU and browser dependent commands may not run under Node. Rendering behavior differs cross platforms and hardware. Since it draws into a canvas, there is also no precisely verifiable output.
 

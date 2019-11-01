@@ -11,7 +11,7 @@ in vec2 texCoords;
 
 // Instance attributes
 in vec3 instancePositions;
-in vec2 instancePositions64xy;
+in vec2 instancePositions64xyLow;
 in vec4 instanceColors;
 in vec3 instancePickingColors;
 in mat3 instanceModelMatrix;
@@ -27,6 +27,7 @@ out vec4 vColor;
 void main(void) {
   geometry.worldPosition = instancePositions;
   geometry.uv = texCoords;
+  geometry.pickingColor = instancePickingColors;
 
   vTexCoord = texCoords;
   cameraPosition = project_uCameraPosition;
@@ -38,12 +39,10 @@ void main(void) {
   pos = project_size(pos);
   DECKGL_FILTER_SIZE(pos, geometry);
 
-  gl_Position = project_position_to_clipspace(instancePositions, instancePositions64xy, pos, position_commonspace);
+  gl_Position = project_position_to_clipspace(instancePositions, instancePositions64xyLow, pos, position_commonspace);
   geometry.position = position_commonspace;
   DECKGL_FILTER_GL_POSITION(gl_Position, geometry);
 
   DECKGL_FILTER_COLOR(vColor, geometry);
-
-  picking_setPickingColor(instancePickingColors);
 }
 `;

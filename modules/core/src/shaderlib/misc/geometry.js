@@ -25,6 +25,7 @@ struct VertexGeometry {
   vec3 worldPositionAlt;
   vec3 normal;
   vec2 uv;
+  vec3 pickingColor;
 } geometry;
 `;
 

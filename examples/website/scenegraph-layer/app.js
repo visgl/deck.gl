@@ -19,7 +19,7 @@ const MAPBOX_STYLE =
 
 const DATA_URL = 'https://opensky-network.org/api/states/all';
 const MODEL_URL =
-  'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/Duck/glTF-Binary/Duck.glb';
+  'https://raw.githubusercontent.com/uber-common/deck.gl-data/master/examples/scenegraph-layer/airplane.glb';
 const REFRESH_TIME = 30000;
 
 const ANIMATIONS = {
@@ -48,7 +48,7 @@ const DATA_INDEX = {
   POSITION_SOURCE: 16
 };
 
-export class App extends Component {
+export default class App extends Component {
   constructor(props) {
     super(props);
     this.state = {};
@@ -102,7 +102,7 @@ export class App extends Component {
           id: 'scenegraph-layer',
           data,
           pickable: true,
-          sizeScale: 2000,
+          sizeScale: 500,
           scenegraph: MODEL_URL,
           _animations: ANIMATIONS,
           getPosition: d => [

@@ -7,7 +7,7 @@
     "build": "browserify ./app.js -o dist/app.js -t babelify -t envify"
   },
   "dependencies": {
-    "deck.gl": "^7.0.0-beta",
+    "deck.gl": "^7.3.0-beta",
     "react": "^16.3.0",
     "react-dom": "^16.3.0",
     "react-map-gl": "^5.0.0"

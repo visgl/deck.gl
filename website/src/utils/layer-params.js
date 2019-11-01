@@ -24,18 +24,34 @@ export function propToParam(key, propType, value) {
       param.min = propType && 'min' in propType ? propType.min : 0;
       param.max = propType && 'max' in propType ? propType.max : 100;
       return {...param, type: 'range', step: param.max === 100 ? 1 : 0.01};
-    case 'accessor':
-      return {...param, type: 'function'};
-    case 'string':
-      if (/\.(png|jpg|jpeg|gif)/i.test(value)) {
-        return {...param, type: 'link'};
+    case 'accessor': {
+      const result = {...param, type: 'function'};
+      const altValue = propType.value;
+      let altType = typeof altValue;
+      if (Array.isArray(altValue) && key.endsWith('Color')) {
+        altType = 'color';
       }
-      break;
+      if (altType === 'boolean' || altType === 'color') {
+        result.altType = altType;
+        result.altValue = altValue;
+      }
+      if (altType === 'number') {
+        result.altType = 'range';
+        result.altValue = altValue;
+        result.step = 1;
+        result.min = 0;
+        result.max = 100;
+      }
+      return result;
+    }
     case 'color':
       return {...param, type: 'color'};
     case 'object':
       if (/mapping|domain|range/i.test(key)) {
         return {...param, type: 'json'};
+      }
+      if (propType && propType.async) {
+        return {...param, type: 'link'};
       }
       break;
     default:
@@ -56,7 +72,12 @@ export function getLayerParams(layer, propParameters = {}) {
     if (propParameters[key]) {
       paramsArray.push({name: key, ...propParameters[key]});
     } else {
-      const param = propToParam(key, layer.constructor._propTypes[key], layer.props[key]);
+      const LAYER_PROPTYPES = layer.constructor._propTypes[key];
+      const param = propToParam(
+        key,
+        LAYER_PROPTYPES,
+        layer.props._asyncPropOriginalValues[key] || layer.props[key]
+      );
       if (param) {
         paramsArray.push(param);
       }

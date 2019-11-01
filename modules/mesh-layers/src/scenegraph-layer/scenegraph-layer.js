@@ -18,7 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {Layer, createIterable, fp64LowPart} from '@deck.gl/core';
+import {Layer} from '@deck.gl/core';
 import {ScenegraphNode, isWebGL2, pbr, log} from '@luma.gl/core';
 import {createGLTFObjects} from '@luma.gl/addons';
 import GL from '@luma.gl/constants';
@@ -46,9 +46,11 @@ const defaultProps = {
   sizeScale: {type: 'number', value: 1, min: 0},
   getPosition: {type: 'accessor', value: x => x.position},
   getColor: {type: 'accessor', value: DEFAULT_COLOR},
+  opacity: {type: 'number', min: 0, max: 1, value: 1.0},
 
   // flat or pbr
   _lighting: 'flat',
+  _composeModelMatrix: false,
   // _lighting must be pbr for this to work
   _imageBasedLightingEnvironment: null,
 
@@ -68,13 +70,10 @@ export default class ScenegraphLayer extends Layer {
     attributeManager.addInstanced({
       instancePositions: {
         size: 3,
+        type: GL.DOUBLE,
+        fp64: this.use64bitPositions(),
         accessor: 'getPosition',
         transition: true
-      },
-      instancePositions64xy: {
-        size: 2,
-        accessor: 'getPosition',
-        update: this.calculateInstancePositions64xyLow
       },
       instanceColors: {
         type: GL.UNSIGNED_BYTE,
@@ -235,13 +234,10 @@ export default class ScenegraphLayer extends Layer {
     };
   }
 
-  updateAttributes(props) {
-    super.updateAttributes(props);
+  updateAttributes(changedAttributes) {
     this.setState({attributesAvailable: true});
     if (!this.state.scenegraph) return;
 
-    const attributeManager = this.getAttributeManager();
-    const changedAttributes = attributeManager.getChangedAttributes({clearChangedFlags: true});
     this.state.scenegraph.traverse(model => {
       this._setModelAttributes(model.model, changedAttributes);
     });
@@ -254,7 +250,7 @@ export default class ScenegraphLayer extends Layer {
       this.state.animator.animate(context.animationProps.time);
     }
 
-    const {sizeScale} = this.props;
+    const {sizeScale, opacity, _composeModelMatrix} = this.props;
     const numInstances = this.getNumInstances();
     this.state.scenegraph.traverse((model, {worldMatrix}) => {
       model.model.setInstanceCount(numInstances);
@@ -263,33 +259,14 @@ export default class ScenegraphLayer extends Layer {
         parameters,
         uniforms: {
           sizeScale,
+          opacity,
+          enableOffsetModelMatrix: _composeModelMatrix,
           sceneModelMatrix: worldMatrix,
           // Needed for PBR (TODO: find better way to get it)
           u_Camera: model.model.program.uniforms.project_uCameraPosition
         }
       });
     });
-  }
-
-  calculateInstancePositions64xyLow(attribute, {startRow, endRow}) {
-    const isFP64 = this.use64bitPositions();
-    attribute.constant = !isFP64;
-
-    if (!isFP64) {
-      attribute.value = new Float32Array(2);
-      return;
-    }
-
-    const {data, getPosition} = this.props;
-    const {value, size} = attribute;
-    let i = startRow * size;
-    const {iterable, objectInfo} = createIterable(data, startRow, endRow);
-    for (const point of iterable) {
-      objectInfo.index++;
-      const position = getPosition(point, objectInfo);
-      value[i++] = fp64LowPart(position[0]);
-      value[i++] = fp64LowPart(position[1]);
-    }
   }
 }
 

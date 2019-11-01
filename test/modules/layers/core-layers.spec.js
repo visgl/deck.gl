@@ -54,13 +54,7 @@ test('ScreenGridLayer', t => {
     },
     assert: t.ok,
     onBeforeUpdate: ({testCase}) => t.comment(testCase.title),
-    onAfterUpdate: ({layer}) => {
-      t.deepEquals(
-        layer.state.model.program.uniforms.cellScale,
-        layer.state.cellScale,
-        'should update cellScale'
-      );
-    }
+    onAfterUpdate: ({testCase}) => t.comment(testCase.title)
   });
 
   testLayer({Layer: ScreenGridLayer, testCases, onError: t.notOk});
@@ -79,7 +73,7 @@ test('ScatterplotLayer', t => {
     onBeforeUpdate: ({testCase}) => t.comment(testCase.title),
     onAfterUpdate: ({layer}) => {
       t.is(
-        layer.state.model.program.uniforms.radiusScale,
+        layer.state.model.getUniforms().radiusScale,
         layer.props.radiusScale,
         'should update radiusScale'
       );
@@ -138,7 +132,7 @@ test('ArcLayer#non-iterable', t => {
           );
           t.deepEquals(
             instancePositions.slice(0, 4),
-            [data[0].START[0], data[0].START[1], data[0].END[0], data[0].END[1]].map(Math.fround),
+            [data[0].START[0], data[0].START[1], data[0].END[0], data[0].END[1]],
             'instancePositions has correct content'
           );
         }
@@ -161,7 +155,7 @@ test('PointCloudLayer', t => {
     onBeforeUpdate: ({testCase}) => t.comment(testCase.title),
     onAfterUpdate: ({layer}) => {
       t.is(
-        layer.state.model.program.uniforms.pointSize,
+        layer.state.model.getUniforms().pointSize,
         layer.props.radiusPixels,
         'should update pointSize'
       );
@@ -226,11 +220,16 @@ test('GridCellLayer', t => {
 });
 
 test('IconLayer', t => {
+  /* global document */
+  const canvas = document.createElement('canvas');
+  canvas.width = 24;
+  canvas.height = 24;
+
   const testCases = generateLayerTests({
     Layer: IconLayer,
     sampleProps: {
       data: FIXTURES.points,
-      iconAtlas: {},
+      iconAtlas: canvas,
       iconMapping: {
         marker: {x: 0, y: 0, width: 24, height: 24}
       },
@@ -258,7 +257,7 @@ test('PathLayer', t => {
     onBeforeUpdate: ({testCase}) => t.comment(testCase.title),
     onAfterUpdate: ({layer}) => {
       t.is(
-        layer.state.model.program.uniforms.widthMinPixels,
+        layer.state.model.getUniforms().widthMinPixels,
         layer.props.widthMinPixels,
         'should update widthMinPixels'
       );

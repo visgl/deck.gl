@@ -14,20 +14,12 @@
         margin: 0;
         overflow: hidden;
       }
-      #tooltip:empty {
-        display: none;
-      }
-      #tooltip {
+      .deck-tooltip {
         font-family: Helvetica, Arial, sans-serif;
-        position: absolute;
-        padding: 4px;
+        padding: 6px !important;
         margin: 8px;
-        background: rgba(0, 0, 0, 0.8);
-        color: #fff;
         max-width: 300px;
         font-size: 10px;
-        z-index: 9;
-        pointer-events: none;
       }
       #options {
         position: fixed;
@@ -88,7 +80,8 @@
     mapboxApiAccessToken: '<mapbox-access-token>',
     mapStyle: 'mapbox://styles/mapbox/dark-v9',
     pickingRadius: 5,
-    layers: []
+    layers: [],
+    getTooltip
   });
 
   d3.csv('https://raw.githubusercontent.com/uber-common/deck.gl-data/master/examples/highway/accidents.csv')
@@ -131,7 +124,6 @@
         getLineWidth: getLineWidth,
 
         pickable: true,
-        onHover: updateTooltip,
 
         updateTriggers: {
           getLineColor: {year},
@@ -189,8 +181,7 @@
       });
   }
 
-  function updateTooltip(info) {
-    const tooltip = d3.select('#tooltip');
+  function getTooltip(info) {
     const props = info.object ? info.object.properties : null;
     let content = '';
 
@@ -211,9 +202,9 @@
       } else {
         content += `<div>no accidents recorded in <b>${year}</b></div>`;
       }
-      tooltip.style('display', 'block').style('left', info.x).style('top', info.y).html(content);
+      return {html: content};
     } else {
-      tooltip.style('display', 'none');
+      return null;
     }
   }
 

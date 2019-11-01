@@ -104,8 +104,10 @@ export default class MarkdownPage extends PureComponent {
   }
 
   componentDidUpdate(prevProps, prevState) {
-    if (prevState.html !== this.state.html || prevProps.query !== this.props.query) {
-      this._jumpTo(this.props.query);
+    if (prevState.html !== this.state.html) {
+      this._jumpTo(this.props.query, false);
+    } else if (prevProps.query !== this.props.query) {
+      this._jumpTo(this.props.query, true);
     }
   }
 
@@ -123,7 +125,7 @@ export default class MarkdownPage extends PureComponent {
 
   // Because we use hash paths in react-router, hash jump links do not work
   // In-page links can be passed using ?section=<id>
-  _jumpTo(search) {
+  _jumpTo(search, inPage) {
     let section = search.match(/section=([^\?&]+)/);
     section = section && section[1];
 
@@ -135,7 +137,7 @@ export default class MarkdownPage extends PureComponent {
         this.refs.container.scrollTop = scrollTop;
       }
     }
-    if (!section) {
+    if (!section && !inPage) {
       this.refs.container.scrollTop = 0;
     }
   }

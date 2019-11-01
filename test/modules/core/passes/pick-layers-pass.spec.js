@@ -34,14 +34,13 @@ test('PickLayersPass#drawPickingBuffer', t => {
     layers: layerManager.getLayers(),
     onViewportActive: layerManager.activateViewport,
     pickingFBO,
-    deviceRect: {x: 0, y: 0, width: 100, height: 100},
-    effectProps: {lightSources: {}}
+    deviceRect: {x: 0, y: 0, width: 100, height: 100}
   });
 
   const subLayers = layer.getSubLayers();
   const models = subLayers[0].getModels();
 
-  t.ok(`PickLayersPass rendered well`);
+  t.ok(`PickLayersPass rendered`);
   t.equal(
     models[0].program.uniforms.lighting_uEnabled,
     false,

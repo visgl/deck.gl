@@ -76,11 +76,11 @@ new ScreenGridLayer({});
 To use pre-bundled scripts:
 
 ```html
-<script src="https://unpkg.com/deck.gl@~7.0.0/dist.min.js"></script>
+<script src="https://unpkg.com/deck.gl@^7.0.0/dist.min.js"></script>
 <!-- or -->
-<script src="https://unpkg.com/@deck.gl/core@~7.0.0/dist.min.js"></script>
-<script src="https://unpkg.com/@deck.gl/layers@~7.0.0/dist.min.js"></script>
-<script src="https://unpkg.com/@deck.gl/aggregation-layers@~7.0.0/dist.min.js"></script>
+<script src="https://unpkg.com/@deck.gl/core@^7.0.0/dist.min.js"></script>
+<script src="https://unpkg.com/@deck.gl/layers@^7.0.0/dist.min.js"></script>
+<script src="https://unpkg.com/@deck.gl/aggregation-layers@^7.0.0/dist.min.js"></script>
 ```
 
 ```js
@@ -94,13 +94,13 @@ Inherits from all [Base Layer](/docs/api-reference/layer.md) properties.
 
 ### Render Options
 
-##### `cellSizePixels` (Number, optional)
+##### `cellSizePixels` (Number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
 
 * Default: `100`
 
 Unit width/height of the bins.
 
-##### `cellMarginPixels` (Number, optional) **NEW in 6.0**
+##### `cellMarginPixels` (Number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
 
 * Default: `2`, gets clamped to [0, 5]
 
@@ -135,7 +135,7 @@ Specified as an array of 6 colors [color1, color2, ... color6]. Each color is an
 
 NOTE: `minColor` and `maxColor` take precedence over `colorDomain` and `colorRange`, to use `colorDomain` and `colorRange` do not provide `minColor` and `maxColor`.
 
-##### `gpuAggregation` (bool, optional) **NEW in 6.0**
+##### `gpuAggregation` (bool, optional)
 
 * Default: true
 
@@ -143,7 +143,7 @@ When set to true and browser supports GPU aggregation, aggregation is performed 
 
 NOTE: GPU Aggregation requires WebGL2 support by the browser. When `gpuAggregation` is set to true and browser doesn't support WebGL2, aggregation falls back to CPU.
 
-##### `aggregation` (String, optional) **EXPERIMENTAL** **NEW in 7.0**
+##### `aggregation` (String, optional) **EXPERIMENTAL**
 
 * Default: 'SUM'
 

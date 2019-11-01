@@ -1,8 +1,10 @@
 import React, {PureComponent} from 'react';
 import {render} from 'react-dom';
 
-import DeckGL, {TileLayer, BitmapLayer} from 'deck.gl';
-import {loadImage} from '@loaders.gl/images';
+import DeckGL from '@deck.gl/react';
+import {TileLayer} from '@deck.gl/geo-layers';
+import {BitmapLayer} from '@deck.gl/layers';
+import {load} from '@loaders.gl/core';
 
 const INITIAL_VIEW_STATE = {
   latitude: 47.65,
@@ -15,7 +17,7 @@ const INITIAL_VIEW_STATE = {
 // https://wiki.openstreetmap.org/wiki/Slippy_map_tilenames#Tile_servers
 const tileServer = 'https://c.tile.openstreetmap.org/';
 
-export class App extends PureComponent {
+export default class App extends PureComponent {
   constructor(props) {
     super(props);
     this.state = {};
@@ -54,7 +56,7 @@ export class App extends PureComponent {
         minZoom: 0,
         maxZoom: 19,
 
-        getTileData: ({x, y, z}) => loadImage(`${tileServer}/${z}/${x}/${y}.png`),
+        getTileData: ({x, y, z}) => load(`${tileServer}/${z}/${x}/${y}.png`),
 
         renderSubLayers: props => {
           const {

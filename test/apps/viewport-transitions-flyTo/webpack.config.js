@@ -4,37 +4,39 @@
 // avoid destructuring for older Node version support
 const resolve = require('path').resolve;
 const webpack = require('webpack');
+const path = require('path');
 
-// Otherwise modules imported from outside this directory does not compile.
-// Also needed if modules from this directory were imported elsewhere
-// Seems to be a Babel bug
-// https://github.com/babel/babel-loader/issues/149#issuecomment-191991686
-const BABEL_CONFIG = {
-  presets: ['es2015', 'react', 'stage-2'].map(function configMap(name) {
-    return require.resolve(`babel-preset-${name}`);
-  })
-};
+module.exports = {
+  mode: 'development',
 
-const config = {
+  devtool: 'source-map',
+
   entry: {
     app: resolve('./src/root.js')
   },
 
-  devtool: 'source-map',
+  output: {
+    path: path.resolve(__dirname, 'dist'),
+    filename: 'bundle.js',
+    publicPath: '/'
+  },
 
   module: {
     rules: [
       {
-        // Compile ES2015 using bable
+        // Unfortunately, webpack doesn't import library sourcemaps on its own...
         test: /\.js$/,
-        include: [resolve('.')],
+        use: ['source-map-loader'],
+        enforce: 'pre'
+      },
+      {
+        // Remove if your app does not use JSX or you don't need to support old browsers
+        test: /\.js$/,
+        loader: 'babel-loader',
         exclude: [/node_modules/],
-        use: [
-          {
-            loader: 'babel-loader',
-            options: BABEL_CONFIG
-          }
-        ]
+        options: {
+          presets: ['@babel/preset-react']
+        }
       }
     ]
   },
@@ -51,7 +53,3 @@ const config = {
   // Optional: Enables reading mapbox token from environment variable
   plugins: [new webpack.EnvironmentPlugin(['MapboxAccessToken'])]
 };
-
-// Enables bundling against src in this repo rather than the installed version
-module.exports = env =>
-  env && env.local ? require('../webpack.config.local')(config)(env) : config;

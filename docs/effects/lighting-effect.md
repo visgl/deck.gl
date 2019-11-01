@@ -32,16 +32,19 @@ Array of [DirectionalLight](/docs/api-reference/lights/directional-light.md) sou
 
 * Default: two directional light sources
 
-| Light Source |      Color      | Intensity |   Direction  |
-|:------------:|:---------------:|:---------:|:------------:|
-| 1            | [255, 255, 255] | 1.0       | [-1, -3, -1] |
-| 2            | [255, 255, 255] | 0.9       | [1, 8, -2.5] |
+| Light Source |      Color      | Intensity |   Direction  |  _shadow  |
+|:------------:|:---------------:|:---------:|:------------:|:--------:|
+| 1            | [255, 255, 255] | 1.0       | [-1, -3, -1] |   false  |
+| 2            | [255, 255, 255] | 0.9       | [1, 8, -2.5] |   false  |
+
+* For rendering experimental shadow effect, `_shadow` prop of [DirectionalLight](/docs/api-reference/lights/directional-light.md) must be set to `true`. The effect can be toggled on and off for a layer by setting layer's `shadowEnabled` prop.
 
 ##### `pointLights` (Array, optional)
 
 Array of [PointLight](/docs/api-reference/lights/point-light.md) source which emits from a point in all directions.
 
 * Default: `[]`
+
 
 ## Remarks
 

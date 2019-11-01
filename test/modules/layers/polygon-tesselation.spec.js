@@ -155,13 +155,6 @@ test('PolygonTesselator#constructor', t => {
       t.ok(ArrayBuffer.isView(tesselator.get('indices')), 'PolygonTesselator.get indices');
       t.ok(ArrayBuffer.isView(tesselator.get('positions')), 'PolygonTesselator.get positions');
       t.ok(ArrayBuffer.isView(tesselator.get('vertexValid')), 'PolygonTesselator.get vertexValid');
-
-      if (testCase.params.fp64) {
-        t.ok(
-          ArrayBuffer.isView(tesselator.get('positions64xyLow')),
-          'PolygonTesselator.get positions64xyLow'
-        );
-      }
     });
   });
 

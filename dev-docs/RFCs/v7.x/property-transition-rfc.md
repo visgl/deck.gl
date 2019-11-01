@@ -2,8 +2,8 @@
 
 > Note: This RFC Makes a strong distinction between "animation" and "transitions". For information the distinction, see the introduction, for more information aboutabout property animation, see the complementary RFC about that topic.
 
-* **Authors**: Ib Green, ...
-* **Date**: Aug 2018 (Initial version Aug 2017)
+* **Authors**: Ib Green, Xiaoji Chen
+* **Date**: Aug 2019 (Initial version Aug 2017)
 * **Status**: **Draft**
 
 
@@ -41,11 +41,15 @@ The following types of animations are not included in this RFC.
 
 ### Background - Current State
 
-In deck.gl v4.1:
-* layers are only redrawn when the dirty flag of at least one layer is set, or when the viewport changes.
-* layer dirty flags are only set when new layers are actually provided by the application (which typically happens when application state changes).
+In deck.gl v7.2:
 
-
+* layers support attribute transition with the `transitions` prop, where accessor names are used as keys.
+* layers are redrawn if:
+  - user provided a new layer instance with changed props (as defined by the prop type)
+  - the viewport changes
+  - there is an ongoing attribute transition
+  - an async prop is loaded
+  - layer state has changed via calling `setState` internally
 
 ## Proposal: Automatic interpolation of properties
 
@@ -66,7 +70,7 @@ Options:
 
 ### Issue: Dependence on a PropTypes System
 
-Reference: See the separate [prop-types RFC]()
+Reference: See the separate [prop-types RFC](/dev-docs/RFCs/v6.3/prop-types-rfc.md)
 
 A prop-types system would allow deck.gl to see if a certain property is interpolatable at all. If the prop is an integer or a float, or a color the interpolation strategy is clear, if a function or string we should not attempt interpolation. And deck.gl could start small, and gradually add interpolation support for more types as the system was built out.
 

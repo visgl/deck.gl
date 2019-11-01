@@ -1,5 +1,5 @@
 import os
-from pathlib import Path
+from os.path import relpath, realpath
 import tempfile
 import time
 import webbrowser
@@ -12,13 +12,16 @@ TEMPLATES_PATH = os.path.join(os.path.dirname(__file__), './templates/')
 j2_env = jinja2.Environment(loader=jinja2.FileSystemLoader(TEMPLATES_PATH),
                             trim_blocks=True)
 
-def render_json_to_html(json_input, mapbox_api_key=None):
+def render_json_to_html(json_input, mapbox_key=None, tooltip=True):
     js = j2_env.get_template('index.j2')
+    if type(tooltip) == bool:
+        tooltip = 'true' if tooltip else 'false'
     html_str = js.render(
-        mapbox_api_key=mapbox_api_key,
+        mapbox_key=mapbox_key,
         json_input=json_input,
-        release_version='7.1.7',
-        mapbox_gl_version='0.53.1')
+        mapbox_gl_version='1.2.1',
+        tooltip=tooltip
+    )
     return html_str
 
 
@@ -50,7 +53,10 @@ def make_directory_if_not_exists(path):
 
 
 def add_html_extension(fname):
-    return str(Path(fname).with_suffix('.html'))
+    SUFFIX = '.html'
+    if fname.endswith(SUFFIX):
+        return str(fname)
+    return str(fname + '.html')
 
 
 def deck_to_html(
@@ -60,29 +66,21 @@ def deck_to_html(
         open_browser=False,
         notebook_display=False,
         iframe_height=500,
-        iframe_width=500):
+        iframe_width=500,
+        tooltip=True):
     """Converts deck.gl format JSON to an HTML page"""
-    html = render_json_to_html(deck_json, mapbox_key)
+    html = render_json_to_html(deck_json, mapbox_key=mapbox_key, tooltip=tooltip)
     f = None
     try:
         f = open_named_or_temporary_file(filename)
         f.write(html)
     finally:
         if f is None:
-            raise Exception("deckgl did not write a file")
+            raise Exception("pydeck could not write a file")
         f.close()
     if open_browser:
-        display_html(f.name)
-    if is_jupyter_notebook() is True and notebook_display is True:
-        display(IFrame('file://' + f.name, width=iframe_width, height=iframe_width))  # noqa
-    return f.name
-
-
-def is_jupyter_notebook():
-    """Returns True if environment is a Jupyter notebook"""
-    try:
-        ip = get_ipython()  # noqa
-        if ip.has_trait('kernel'):
-            return True
-    finally:
-        return False
+        display_html(realpath(f.name))
+    if notebook_display:
+        notebook_to_html_path = relpath(f.name)
+        display(IFrame(os.path.join('./', notebook_to_html_path), width=iframe_width, height=iframe_height))  # noqa
+    return realpath(f.name)

@@ -1,0 +1,30 @@
+{
+  "description": "The deck.gl website tile-3d-layer example",
+  "websiteUrl": "https://deck.gl/#/examples/geo-layers/tile-3d-layer",
+  "initialViewState": {
+    "latitude": 29.99,
+    "longitude": 31.13,
+    "pitch": 45,
+    "maxPitch": 60,
+    "bearing": 0,
+    "minZoom": 2,
+    "maxZoom": 30,
+    "zoom": 12.8
+  },
+  "views": [
+    {
+      "type": "MapView",
+      "mapStyle": "mapbox://styles/mapbox/dark-v9",
+      "controller": true
+    }
+  ],
+  "layers": [
+    {
+      "type": "Tile3DLayer",
+      "id": "tiles-cairo-vricon",
+      "DracoLoader": "DracoLoader",
+      "_ionAssetId": 29328,
+      "_ionAccessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiJlNGZmZjBjMS04ZGYwLTRhYjAtOWIzYy0wZWJmNzI4OWZhNGEiLCJpZCI6MTYyMywic2NvcGVzIjpbImFzciIsImdjIl0sImFzc2V0cyI6WzI5MzI4LDI5MzMxLDI5MzMyLDI5MzMzLDI5MzM0LDI5MzM1LDEsMiwzLDQsMzk1NF0sImlhdCI6MTU2MDQ0ODA2Nn0.zZPuc5WzTsrKNviCY2jyhmDwJITXzhbRTnJS025_uBw"
+    }
+  ]
+}

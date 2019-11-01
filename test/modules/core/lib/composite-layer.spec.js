@@ -19,7 +19,8 @@
 // THE SOFTWARE.
 
 import test from 'tape-catch';
-import {CompositeLayer, Layer, COORDINATE_SYSTEM} from 'deck.gl';
+import {LayerManager, CompositeLayer, Layer, COORDINATE_SYSTEM} from 'deck.gl';
+import {gl, testLayer} from '@deck.gl/test-utils';
 
 const SUB_LAYER_ID = 'sub-layer-id';
 const BASE_LAYER_ID = 'composite-layer-id';
@@ -58,13 +59,23 @@ const OVERRIDE_PROPS = {
   }
 };
 
-class TestLayer extends Layer {}
+class TestLayer extends Layer {
+  initializeState() {}
+}
 
 TestLayer.layerName = 'TestLayer';
 
 class TestCompositeLayer extends CompositeLayer {
+  initializeState() {
+    this.state = {scale: 1};
+  }
+
   renderLayers() {
-    return [new TestLayer(this.getSubLayerProps())];
+    return [
+      new TestLayer(this.getSubLayerProps(), {
+        scale: this.state.scale
+      })
+    ];
   }
 }
 
@@ -92,7 +103,9 @@ test('CompositeLayer#getSubLayerProps', t => {
     );
   }
 
-  const sublayers = layer.renderLayers();
+  const layerManager = new LayerManager(gl);
+  layerManager.setLayers([layer]);
+  const sublayers = layer.getSubLayers();
   const subProps = sublayers[0].props;
   for (const propName in BASE_LAYER_PROPS) {
     t.equal(
@@ -101,6 +114,7 @@ test('CompositeLayer#getSubLayerProps', t => {
       `CompositeLayer subLayerProp ${propName} ok`
     );
   }
+  layerManager.finalize();
 
   t.end();
 });
@@ -155,12 +169,9 @@ test('CompositeLayer#getSubLayerProps(override)', t => {
   for (const tc of TEST_CASES) {
     const {name, sublayerProps, baseLayerProps, overrideProps, expected} = tc;
     const layer = new TestCompositeLayer(
-      Object.assign(
-        {id: BASE_LAYER_ID},
-        Object.assign({}, baseLayerProps, {
-          _subLayerProps: {[SUB_LAYER_ID]: overrideProps}
-        })
-      )
+      Object.assign({id: BASE_LAYER_ID}, baseLayerProps, {
+        _subLayerProps: {[SUB_LAYER_ID]: overrideProps}
+      })
     );
     const combinedSublayerProps = layer.getSubLayerProps(
       sublayerProps && Object.assign({id: SUB_LAYER_ID}, sublayerProps)
@@ -173,6 +184,100 @@ test('CompositeLayer#getSubLayerProps(override)', t => {
       );
     }
   }
+
+  t.end();
+});
+
+test('CompositeLayer#getSubLayerProps(accessor)', t => {
+  class TestWrapperLayer extends CompositeLayer {
+    initializeState() {}
+
+    updateState({props}) {
+      this.setState({
+        data: props.data.map((d, i) => this.getSubLayerRow({position: [0, 0]}, d, i))
+      });
+    }
+
+    renderLayers() {
+      return [
+        new TestLayer(
+          {
+            getColor: this.getSubLayerAccessor(this.props.getColor)
+          },
+          this.getSubLayerProps({id: 'wrapped'}),
+          {
+            data: this.state.data
+          }
+        ),
+        new TestLayer(
+          {
+            getColor: this.props.getColor
+          },
+          this.getSubLayerProps({id: 'pass-through'}),
+          {
+            data: this.props.data
+          }
+        )
+      ];
+    }
+  }
+
+  TestWrapperLayer.layerName = 'TestWrapperLayer';
+  TestWrapperLayer.defaultProps = {
+    getColor: {type: 'accessor', value: [0, 0, 0]}
+  };
+
+  const testCases = [
+    {
+      props: {
+        id: 'wrapper-layer',
+        data: [{color: [255, 0, 0]}],
+        getColor: d => d.color
+      },
+      onAfterUpdate: ({subLayers}) => {
+        let props = subLayers[0].props;
+        t.deepEqual(
+          props.getColor(props.data[0]),
+          [255, 0, 0],
+          `sublayer ${subLayers[0].id} getColor returns correct result`
+        );
+        props = subLayers[1].props;
+        t.deepEqual(
+          props.getColor(props.data[0]),
+          [255, 0, 0],
+          `sublayer ${subLayers[1].id} getColor returns correct result`
+        );
+      }
+    },
+    {
+      updateProps: {
+        _subLayerProps: {
+          wrapped: {
+            getColor: d => d.color
+          },
+          'pass-through': {
+            getColor: d => d.color
+          }
+        }
+      },
+      onAfterUpdate: ({subLayers}) => {
+        let props = subLayers[0].props;
+        t.deepEqual(
+          props.getColor(props.data[0]),
+          [255, 0, 0],
+          `sublayer ${subLayers[0].id} getColor returns correct result`
+        );
+        props = subLayers[1].props;
+        t.deepEqual(
+          props.getColor(props.data[0]),
+          [255, 0, 0],
+          `sublayer ${subLayers[1].id} getColor returns correct result`
+        );
+      }
+    }
+  ];
+
+  testLayer({Layer: TestWrapperLayer, testCases, onError: t.notOk});
 
   t.end();
 });
@@ -208,6 +313,29 @@ test('CompositeLayer#getSubLayerRow, getSubLayerAccessor', t => {
     {object: originalRow, index: 0},
     'returns correct picking info'
   );
+
+  t.end();
+});
+
+test('CompositeLayer#setState', t => {
+  const layerManager = new LayerManager(gl);
+  const compositeLayer = new TestCompositeLayer(BASE_LAYER_PROPS);
+  let subLayer = null;
+
+  layerManager.setLayers([compositeLayer]);
+  subLayer = compositeLayer.getSubLayers()[0];
+  t.is(subLayer.props.scale, 1, 'sublayer has default props');
+
+  layerManager.updateLayers();
+  t.is(subLayer, compositeLayer.getSubLayers()[0], 'composite layer should not rerender');
+
+  compositeLayer.setState({scale: 2});
+  layerManager.updateLayers();
+  t.not(subLayer, compositeLayer.getSubLayers()[0], 'composite layer should rerender');
+  subLayer = compositeLayer.getSubLayers()[0];
+  t.is(subLayer.props.scale, 2, 'sublayer has updated props from state');
+
+  layerManager.finalize();
 
   t.end();
 });

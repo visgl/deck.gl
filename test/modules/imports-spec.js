@@ -94,3 +94,33 @@ test('Top-level imports', t0 => {
 
   t0.end();
 });
+
+test('deck.gl re-exports', t => {
+  const findMissingExports = (source, target) => {
+    const missingExports = [];
+    for (const key in source) {
+      // Exclude experimental exports
+      if (key[0] !== '_' && key !== 'experimental' && target[key] !== source[key]) {
+        missingExports.push(key);
+      }
+    }
+    return missingExports.length ? missingExports : null;
+  };
+
+  t.notOk(findMissingExports(core, deck), 'deck.gl re-exports everything from @deck.gl/core');
+  t.notOk(findMissingExports(layers, deck), 'deck.gl re-exports everything from @deck.gl/layers');
+  t.notOk(
+    findMissingExports(aggregationLayers, deck),
+    'deck.gl re-exports everything from @deck.gl/aggregation-layers'
+  );
+  t.notOk(
+    findMissingExports(geoLayers, deck),
+    'deck.gl re-exports everything from @deck.gl/geo-layers'
+  );
+  t.notOk(
+    findMissingExports(meshLayers, deck),
+    'deck.gl re-exports everything from @deck.gl/mesh-layers'
+  );
+
+  t.end();
+});

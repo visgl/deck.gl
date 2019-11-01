@@ -18,7 +18,9 @@ const BABEL_CONFIG = {
   presets: [['@babel/preset-env', {useBuiltIns: 'usage'}], '@babel/preset-react'],
   plugins: [
     ['@babel/plugin-proposal-decorators', {legacy: true}],
-    ['@babel/plugin-proposal-class-properties', {loose: true}]
+    ['@babel/plugin-proposal-class-properties', {loose: true}],
+    'inline-webgl-constants',
+    ['remove-glsl-comments', {patterns: ['**/*.glsl.js']}]
   ]
 };
 
@@ -32,10 +34,6 @@ const COMMON_CONFIG = {
   output: {
     path: resolve(__dirname, './dist'),
     filename: 'bundle.js'
-  },
-
-  externals: {
-    'highlight.js': 'hljs'
   },
 
   module: {
@@ -76,7 +74,8 @@ const COMMON_CONFIG = {
     modules: [resolve('./node_modules'), resolve('../node_modules')],
     alias: Object.assign({}, ALIASES, {
       'website-examples': resolve('../examples/website'),
-      'viewport-mercator-project': resolve('../node_modules/viewport-mercator-project')
+      'viewport-mercator-project': resolve('../node_modules/viewport-mercator-project'),
+      supercluster: resolve('../node_modules/supercluster/dist/supercluster.js')
     })
   },
 
@@ -125,6 +124,21 @@ const addProdConfig = config => {
       DOCS_DIR: JSON.stringify('https://raw.githubusercontent.com/uber/deck.gl/master')
     })
   );
+
+  config.externals = {
+    'highlight.js': 'hljs',
+    'h3-js': 'h3',
+    'deck.gl': 'deck',
+    '@deck.gl/aggregation-layers': 'deck',
+    '@deck.gl/core': 'deck',
+    '@deck.gl/extensions': 'deck',
+    '@deck.gl/geo-layers': 'deck',
+    '@deck.gl/layers': 'deck',
+    '@deck.gl/mesh-layers': 'deck',
+    '@loaders.gl/core': 'loaders',
+    '@luma.gl/core': 'luma',
+    'mapbox-gl': 'mapboxgl'
+  };
 
   return Object.assign(config, {
     mode: 'production'

@@ -4,7 +4,8 @@ View state transitions provide smooth and visually appealing transitions when Vi
 
 Following fields of `viewState` can be used to achieve viewport transitions.
 
-* `transitionDuration` (Number, optional, default: 0) - Transition duration in milliseconds, default value 0, implies no transition.
+* `transitionDuration` (Number|String, optional, default: 0) - Transition duration in milliseconds, default value 0, implies no transition.
+When using `FlyToInterpolator`, it can also be set to `'auto'` where actual duration is auto calculated based on start and end viewports and is linear to the distance between them. This duration can be further customized using `speed` parameter to `FlyToInterpolator` constructor.
 * `transitionEasing` (Function, optional, default: `t => t`) - Easing function that can be used to achieve effects like "Ease-In-Cubic", "Ease-Out-Cubic", etc. Default value performs Linear easing. (list of sample easing functions: <http://easings.net/>)
 * `transitionInterpolator` (Object, optional, default: `LinearInterpolator`) - An interpolator object that defines the transition behavior between two viewports, deck.gl provides `LinearInterpolator` and `FlyToInterpolator`. Default value, `LinearInterpolator`, performs linear interpolation on `ViewState` fields. `FlyToInterpolator` animates `ViewStates` similar to MapBox `flyTo` API and applicable for `MapState`, this is pretty useful when camera center changes by long distance. But a user can provide any custom implementation for this object using `TrasitionInterpolator` base class.    
 * `transitionInterruption` (TRANSITION_EVENTS (Number), optional, default: BREAK) - This field controls how to process a new `ViewState` change that occurs while performing an existing transition. This field has no impact once transition is complete. Here is the list of all possible values with resulting behavior.
@@ -171,7 +172,7 @@ Parameters:
 
 * opts (Object | Array) -
 
-* Object with following fields
+Object with following fields
 * compare: prop names used in equality check.
 * extract: prop names needed for interpolation.
 * required: prop names that must be supplied.
@@ -236,11 +237,23 @@ Interpolator class, inherits from `TransitionInterpolator`. This class is design
 
 ### Constructor
 
+Parameters:
+
+* props (Object) -
+
+Object with following fields
+* `curve` (Number, optional, default: 1.414) - The zooming "curve" that will occur along the flight path.
+* `speed` (Number, optional, default: 1.2) - The average speed of the animation defined in relation to `options.curve`, it linearly affects the duration, higher speed returns smaller durations and vice versa.
+* `screenSpeed` (Number, optional) - The average speed of the animation measured in screenfuls per second. Similar to `opts.speed` it linearly affects the duration,  when specified `opts.speed` is ignored.
+* `maxDuration` (Number, optional) - Maximum duration in milliseconds, if calculated duration exceeds this value, `0` is returned.
+
 Initializes super class with an object with following props:
 
 * compare: ['longitude', 'latitude', 'zoom', 'bearing', 'pitch']
 * extract: ['width', 'height', 'longitude', 'latitude', 'zoom', 'bearing', 'pitch']
 * required: ['width', 'height', 'latitude', 'longitude', 'zoom']
+
+### Methods
 
 #### interpolateProps
 
@@ -253,3 +266,14 @@ Parameters:
 Returns:
 
 * Object with interpolated ViewState props.
+
+#### getDuration
+
+Parameters:
+
+* startProps (Object): Object with staring ViewState props.
+* endProps (Object): Object with ending ViewState props.
+
+Returns:
+
+* `transitionDuration` value in milliseconds.

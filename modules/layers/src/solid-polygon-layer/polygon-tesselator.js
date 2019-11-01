@@ -24,7 +24,7 @@
 // - 3D surfaces (top and sides only)
 // - 3D wireframes (not yet)
 import * as Polygon from './polygon';
-import {experimental, fp64LowPart} from '@deck.gl/core';
+import {experimental} from '@deck.gl/core';
 const {Tesselator} = experimental;
 
 // This class is set up to allow querying one attribute at a time
@@ -34,11 +34,9 @@ export default class PolygonTesselator extends Tesselator {
     super({
       data,
       getGeometry,
-      fp64,
       positionFormat,
       attributes: {
-        positions: {size: 3},
-        positions64xyLow: {size: 2, fp64Only: true},
+        positions: {size: 3, type: fp64 ? Float64Array : Float32Array},
         vertexValid: {type: Uint8ClampedArray, size: 1},
         indices: {type: IndexType, size: 1}
       }
@@ -93,8 +91,7 @@ export default class PolygonTesselator extends Tesselator {
   // Flatten out all the vertices of all the sub subPolygons
   _updatePositions(polygon, {vertexStart, geometrySize}) {
     const {
-      attributes: {positions, positions64xyLow, vertexValid},
-      fp64,
+      attributes: {positions, vertexValid},
       positionSize
     } = this;
 
@@ -109,10 +106,6 @@ export default class PolygonTesselator extends Tesselator {
       positions[i * 3] = x;
       positions[i * 3 + 1] = y;
       positions[i * 3 + 2] = z;
-      if (fp64) {
-        positions64xyLow[i * 2] = fp64LowPart(x);
-        positions64xyLow[i * 2 + 1] = fp64LowPart(y);
-      }
       vertexValid[i] = 1;
       i++;
     }

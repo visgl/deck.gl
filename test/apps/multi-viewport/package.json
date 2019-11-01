@@ -5,8 +5,8 @@
     "start-es6": "webpack-dev-server --env.es6 --progress --hot --open"
   },
   "dependencies": {
-    "deck.gl": "^7.0.0",
-    "math.gl": "^2.1.0",
+    "deck.gl": "^7.3.0-beta",
+    "math.gl": "^3.0.0",
     "react": "^16.3.0",
     "react-dom": "^16.3.0",
     "react-map-gl": "^4.1.2"

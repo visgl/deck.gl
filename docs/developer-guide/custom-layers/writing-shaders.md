@@ -138,6 +138,7 @@ Arguments:
 - `vec3 normal` - The normal at the current vertex in common space. Only populated for 3D layers.
 - `vec2 uv` - The uv position at the current vertex.
 - `vec4 position` - The position of the current vertex in common space. Populated during projection.
+- `vec3 pickingColor` - The picking color of the current vertex.
 
 ### FragmentGeometry struct
 
@@ -180,4 +181,4 @@ The luma.gl/deck.gl shader modules provide javascript functions to set their uni
 
 ## Remarks
 
-* **Use With Other GLSL Code Assemblers** - Your shader code can be run through another GLSL code assembler like [glslify](https://github.com/stackgl/glslify) before you pass it to `assembleShaders`. This means that you are not forced to work with onlyy luma.gl shader modules, you can use multiple techniques to organize your shader code to fit your project needs.
+* **Use With Other GLSL Code Assemblers** - Your shader code can be run through another GLSL code assembler like [glslify](https://github.com/stackgl/glslify) before you pass it to `assembleShaders`. This means that you are not forced to work with only luma.gl shader modules, you can use multiple techniques to organize your shader code to fit your project needs.

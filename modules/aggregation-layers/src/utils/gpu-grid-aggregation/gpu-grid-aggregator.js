@@ -1,3 +1,23 @@
+// Copyright (c) 2015 - 2018 Uber Technologies, Inc.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in
+// all copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+// THE SOFTWARE.
+
 import GL from '@luma.gl/constants';
 import {
   Buffer,
@@ -36,7 +56,7 @@ import AGGREGATE_TO_GRID_FS from './aggregate-to-grid-fs.glsl';
 import AGGREGATE_ALL_VS_FP64 from './aggregate-all-vs-64.glsl';
 import AGGREGATE_ALL_FS from './aggregate-all-fs.glsl';
 import TRANSFORM_MEAN_VS from './transform-mean-vs.glsl';
-import {getFloatTexture, getFramebuffer, getFloatArray} from './gpu-grid-aggregator-utils.js';
+import {getFloatTexture, getFramebuffer, getFloatArray} from './../resource-utils.js';
 
 const BUFFER_NAMES = ['aggregationBuffer', 'maxMinBuffer', 'minBuffer', 'maxBuffer'];
 const ARRAY_BUFFER_MAP = {
@@ -44,6 +64,14 @@ const ARRAY_BUFFER_MAP = {
   minData: 'minBuffer',
   maxMinData: 'maxMinBuffer'
 };
+
+const REQUIRED_FEATURES = [
+  FEATURES.WEBGL2, // TODO: Remove after trannsform refactor
+  FEATURES.COLOR_ATTACHMENT_RGBA32F,
+  FEATURES.BLEND_EQUATION_MINMAX,
+  FEATURES.FLOAT_BLEND,
+  FEATURES.TEXTURE_FLOAT
+];
 
 export default class GPUGridAggregator {
   // Decode and return aggregation data of given pixel.
@@ -87,15 +115,7 @@ export default class GPUGridAggregator {
   }
 
   static isSupported(gl) {
-    return (
-      isWebGL2(gl) &&
-      hasFeatures(
-        gl,
-        FEATURES.BLEND_EQUATION_MINMAX,
-        FEATURES.COLOR_ATTACHMENT_RGBA32F,
-        FEATURES.TEXTURE_FLOAT
-      )
-    );
+    return hasFeatures(gl, REQUIRED_FEATURES);
   }
 
   // DEBUG ONLY
@@ -125,7 +145,6 @@ export default class GPUGridAggregator {
 
   constructor(gl, opts = {}) {
     this.id = opts.id || 'gpu-grid-aggregator';
-    this.shaderCache = opts.shaderCache || null;
     this.gl = gl;
     this.state = {
       // cache weights and position data to process when data is not changed
@@ -214,7 +233,7 @@ export default class GPUGridAggregator {
       return this.runAggregationOnGPU(aggregationParams);
     }
     if (useGPU) {
-      log.info('GPUGridAggregator: GPU Aggregation not supported, falling back to CPU')();
+      log.warn('GPUGridAggregator: GPU Aggregation not supported, falling back to CPU')();
     }
     return this.runAggregationOnCPU(aggregationParams);
   }
@@ -572,7 +591,7 @@ export default class GPUGridAggregator {
   }
   /* eslint-disable max-statements */
 
-  updateCPUResultBuffer({gl, bufferName, id, data, result}) {
+  _uploadResultsToGPU({gl, bufferName, textureName, id, data, result}) {
     const {resources} = this.state;
     const resourceName = `cpu-result-${id}-${bufferName}`;
     result[bufferName] = result[bufferName] || resources[resourceName];
@@ -582,6 +601,13 @@ export default class GPUGridAggregator {
       // save resource for garbage collection
       resources[resourceName] = new Buffer(gl, data);
       result[bufferName] = resources[resourceName];
+    }
+
+    // Upload result to a texture
+    if (textureName) {
+      const texture = this._getMinMaxTexture(`${id}-textureName`);
+      texture.setImageData({data});
+      result[textureName] = texture;
     }
   }
 
@@ -594,7 +620,7 @@ export default class GPUGridAggregator {
       const {aggregationData, minData, maxData, maxMinData} = results[id];
       const {needMin, needMax} = weights[id];
       const combineMaxMin = needMin && needMax && weights[id].combineMaxMin;
-      this.updateCPUResultBuffer({
+      this._uploadResultsToGPU({
         gl: this.gl,
         bufferName: 'aggregationBuffer',
         id,
@@ -602,27 +628,30 @@ export default class GPUGridAggregator {
         result: results[id]
       });
       if (combineMaxMin) {
-        this.updateCPUResultBuffer({
+        this._uploadResultsToGPU({
           gl: this.gl,
           bufferName: 'maxMinBuffer',
+          textureName: 'maxMinTexture',
           id,
           data: maxMinData,
           result: results[id]
         });
       } else {
         if (needMin) {
-          this.updateCPUResultBuffer({
+          this._uploadResultsToGPU({
             gl: this.gl,
             bufferName: 'minBuffer',
+            textureName: 'minTexture',
             id,
             data: minData,
             result: results[id]
           });
         }
         if (needMax) {
-          this.updateCPUResultBuffer({
+          this._uploadResultsToGPU({
             gl: this.gl,
             bufferName: 'maxBuffer',
+            textureName: 'maxTexture',
             id,
             data: maxData,
             result: results[id]
@@ -642,7 +671,8 @@ export default class GPUGridAggregator {
       maxMinFramebuffers,
       minFramebuffers,
       maxFramebuffers,
-      weights
+      weights,
+      resources
     } = this.state;
 
     for (const id in weights) {
@@ -658,18 +688,21 @@ export default class GPUGridAggregator {
           target: weights[id].maxMinBuffer, // update if a buffer is provided
           sourceType: GL.FLOAT
         });
+        results[id].maxMinTexture = resources[`${id}-maxMinTexture`];
       } else {
         if (needMin) {
           results[id].minBuffer = readPixelsToBuffer(minFramebuffers[id], {
             target: weights[id].minBuffer, // update if a buffer is provided
             sourceType: GL.FLOAT
           });
+          results[id].minTexture = resources[`${id}-minTexture`];
         }
         if (needMax) {
           results[id].maxBuffer = readPixelsToBuffer(maxFramebuffers[id], {
             target: weights[id].maxBuffer, // update if a buffer is provided
             sourceType: GL.FLOAT
           });
+          results[id].maxTexture = resources[`${id}-maxTexture`];
         }
       }
     }
@@ -678,27 +711,25 @@ export default class GPUGridAggregator {
   }
 
   getAggregationModel(fp64 = false) {
-    const {gl, shaderCache} = this;
+    const {gl} = this;
     return new Model(gl, {
       id: 'Gird-Aggregation-Model',
       vs: fp64 ? AGGREGATE_TO_GRID_VS_FP64 : AGGREGATE_TO_GRID_VS,
       fs: AGGREGATE_TO_GRID_FS,
       modules: fp64 ? [project64] : ['project32'],
-      shaderCache,
       vertexCount: 0,
       drawMode: GL.POINTS
     });
   }
 
   getAllAggregationModel() {
-    const {gl, shaderCache} = this;
+    const {gl} = this;
     const {numCol, numRow} = this.state;
     return new Model(gl, {
       id: 'All-Aggregation-Model',
       vs: AGGREGATE_ALL_VS_FP64,
       fs: AGGREGATE_ALL_FS,
       modules: [fp64ShaderModule],
-      shaderCache,
       vertexCount: 1,
       drawMode: GL.POINTS,
       isInstanced: true,
@@ -882,7 +913,6 @@ export default class GPUGridAggregator {
       maxMinFramebuffers,
       minFramebuffers,
       maxFramebuffers,
-      resources,
       meanTextures,
       equations,
       weights
@@ -920,28 +950,25 @@ export default class GPUGridAggregator {
       if (needMin || needMax) {
         if (needMin && needMax && combineMaxMin) {
           if (!maxMinFramebuffers[id]) {
-            resources[`${id}-maxMin`] = getFloatTexture(this.gl, {id: `${id}-maxMinTex`});
-            maxMinFramebuffers[id] = getFramebuffer(this.gl, {
-              id: `${id}-maxMinFb`,
-              texture: resources[`${id}-maxMin`]
-            });
+            texture = this._getMinMaxTexture(`${id}-maxMinTexture`);
+            maxMinFramebuffers[id] = getFramebuffer(this.gl, {id: `${id}-maxMinFb`, texture});
           }
         } else {
           if (needMin) {
             if (!minFramebuffers[id]) {
-              resources[`${id}-min`] = getFloatTexture(this.gl, {id: `${id}-minTex`});
+              texture = this._getMinMaxTexture(`${id}-minTexture`);
               minFramebuffers[id] = getFramebuffer(this.gl, {
                 id: `${id}-minFb`,
-                texture: resources[`${id}-min`]
+                texture
               });
             }
           }
           if (needMax) {
             if (!maxFramebuffers[id]) {
-              resources[`${id}-max`] = getFloatTexture(this.gl, {id: `${id}-maxTex`});
+              texture = this._getMinMaxTexture(`${id}-maxTexture`);
               maxFramebuffers[id] = getFramebuffer(this.gl, {
                 id: `${id}-maxFb`,
-                texture: resources[`${id}-max`]
+                texture
               });
             }
           }
@@ -950,6 +977,14 @@ export default class GPUGridAggregator {
     }
   }
   /* eslint-enable complexity, max-depth */
+
+  _getMinMaxTexture(name) {
+    const {resources} = this.state;
+    if (!resources[name]) {
+      resources[name] = getFloatTexture(this.gl, {id: `resourceName`});
+    }
+    return resources[name];
+  }
 
   setupModels(fp64 = false) {
     if (this.gridAggregationModel) {

@@ -1,0 +1,30 @@
+{
+  "description": "The deck.gl website ScatterplotLayer example in JSON format",
+  "websiteUrl": "https://deck.gl/#/examples/core-layers/scattterplot-layer",
+  "initialViewState": {
+    "longitude": -74,
+    "latitude": 40.7,
+    "zoom": 11,
+    "maxZoom": 16,
+    "pitch": 0,
+    "bearing": 0
+  },
+  "views": [
+    {
+      "type": "MapView",
+      "controller": true,
+      "mapStyle": "mapbox://styles/mapbox/light-v9"
+    }
+  ],
+  "layers": [
+    {
+      "type": "ScatterplotLayer",
+      "data": "https://raw.githubusercontent.com/uber-common/deck.gl-data/master/examples/scatterplot/manhattan.json",
+      "radiusScale": 30,
+      "radiusMinPixels": 0.25,
+      "getPosition": "-",
+      "getFillColor": [0, 128, 255],
+      "getRadius": 1
+    }
+  ]
+}

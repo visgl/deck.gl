@@ -1,6 +1,7 @@
 import React, {Component} from 'react';
 import {render} from 'react-dom';
-import DeckGL, {OrbitView} from 'deck.gl';
+import DeckGL from '@deck.gl/react';
+import {OrbitView} from '@deck.gl/core';
 import PlotLayer from './plot-layer';
 import {scaleLinear} from 'd3-scale';
 
@@ -21,7 +22,7 @@ function getScale({min, max}) {
     .range([0, 1]);
 }
 
-export class App extends Component {
+export default class App extends Component {
   constructor(props) {
     super(props);
     this.state = {

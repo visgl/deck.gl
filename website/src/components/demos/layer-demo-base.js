@@ -1,7 +1,6 @@
 import React, {Component} from 'react';
-import DeckGL from 'deck.gl';
+import DeckGL from '@deck.gl/react';
 import {StaticMap} from 'react-map-gl';
-import autobind from 'autobind-decorator';
 
 import {MAPBOX_STYLES} from '../../constants/defaults';
 import {getLayerParams} from '../../utils/layer-params';
@@ -15,6 +14,15 @@ const INITIAL_VIEW_STATE = {
   bearing: 0
 };
 
+const TOOLTIP_STYLE = {
+  padding: '4px',
+  background: 'rgba(0, 0, 0, 0.8)',
+  color: '#fff',
+  maxWidth: '300px',
+  fontSize: '10px',
+  zIndex: 9
+};
+
 export default function createLayerDemoClass(settings) {
   const renderLayer = (data, params, extraProps = {}) => {
     if (!data && !settings.allowMissingData) {
@@ -26,6 +34,10 @@ export default function createLayerDemoClass(settings) {
     if (params) {
       Object.keys(params).forEach(key => {
         props[key] = params[key].value;
+        if (key.startsWith('get')) {
+          props.updateTriggers = props.updateTriggers || {};
+          props.updateTriggers[key] = props[key];
+        }
       });
     }
 
@@ -68,53 +80,31 @@ export default function createLayerDemoClass(settings) {
       };
     }
 
-    @autobind
-    _onHover(info) {
-      this.setState({hoveredItem: info});
-    }
-
-    _renderTooltip() {
-      const {hoveredItem} = this.state;
-      if (hoveredItem && hoveredItem.index >= 0) {
-        const {formatTooltip} = settings;
-        const info = formatTooltip ? formatTooltip(hoveredItem.object) : hoveredItem.index;
-        return (
-          info && (
-            <div className="tooltip" style={{left: hoveredItem.x, top: hoveredItem.y}}>
-              {info
-                .toString()
-                .split('\n')
-                .map((str, i) => (
-                  <p key={i}>{str}</p>
-                ))}
-            </div>
-          )
-        );
+    _getTooltip(pickedInfo) {
+      if (!pickedInfo.object) {
+        return null;
       }
-      return null;
+      const {formatTooltip} = settings;
+      return {
+        text: formatTooltip ? formatTooltip(pickedInfo.object) : pickedInfo.index,
+        style: TOOLTIP_STYLE
+      };
     }
 
     render() {
       const {params, data} = this.props;
-      const layers = [
-        renderLayer(data, params, {
-          onHover: this._onHover
-        })
-      ];
+      const layers = [renderLayer(data, params)];
 
       return (
-        <div>
-          <DeckGL pickingRadius={5}
-            initialViewState={INITIAL_VIEW_STATE}
-            controller={true}
-            layers={layers} >
-            <StaticMap reuseMaps
-              mapStyle={MAPBOX_STYLES.LIGHT}
-              preventStyleDiffing={true}
-              mapboxApiAccessToken={process.env.MapboxAccessToken} />
-          </DeckGL>
-          {this._renderTooltip()}
-        </div>
+        <DeckGL
+          pickingRadius={5}
+          initialViewState={INITIAL_VIEW_STATE}
+          getTooltip={this._getTooltip}
+          controller={true}
+          layers={layers}
+        >
+          <StaticMap reuseMaps mapStyle={MAPBOX_STYLES.LIGHT} preventStyleDiffing={true} />
+        </DeckGL>
       );
     }
   }

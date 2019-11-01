@@ -29,8 +29,7 @@ export function processPickInfo({
   viewports,
   x,
   y,
-  deviceX,
-  deviceY,
+  z,
   pixelRatio
 }) {
   const {pickedColor, pickedLayer, pickedObjectIndex} = pickInfo;
@@ -64,7 +63,7 @@ export function processPickInfo({
   }
 
   const viewport = getViewportFromCoordinates({viewports}); // TODO - add coords
-  const coordinate = viewport && viewport.unproject([x, y]);
+  const coordinate = viewport && viewport.unproject([x, y], {targetZ: z});
 
   const baseInfo = {
     color: null,
@@ -77,7 +76,7 @@ export function processPickInfo({
     coordinate,
     // TODO remove the lngLat prop after compatibility check
     lngLat: coordinate,
-    devicePixel: [deviceX, deviceY],
+    devicePixel: [pickInfo.pickedX, pickInfo.pickedY],
     pixelRatio
   };
 
@@ -111,14 +110,11 @@ export function processPickInfo({
       infos.set(info.layer.id, info);
     }
 
-    if (mode === 'hover') {
-      const pickingSelectedColor =
-        layer.props.autoHighlight && pickedLayer === layer ? pickedColor : null;
-
+    if (mode === 'hover' && layer.props.autoHighlight) {
       layer.setModuleParameters({
-        pickingSelectedColor
+        pickingSelectedColor: pickedLayer === layer ? pickedColor : null
       });
-      // TODO this needsRedraw logic should be fixed in layer
+      // setModuleParameters does not trigger redraw
       layer.setNeedsRedraw();
     }
   });
@@ -152,4 +148,39 @@ export function getLayerPickingInfo({layer, info, mode}) {
 function getViewportFromCoordinates({viewports}) {
   const viewport = viewports[0];
   return viewport;
+}
+
+// Per-layer event handlers (e.g. onClick, onHover) are provided by the
+// user and out of deck.gl's control. It's very much possible that
+// the user calls React lifecycle methods in these function, such as
+// ReactComponent.setState(). React lifecycle methods sometimes induce
+// a re-render and re-generation of props of deck.gl and its layers,
+// which invalidates all layers currently passed to this very function.
+
+// Therefore, per-layer event handlers must be invoked at the end
+// of the picking operation. NO operation that relies on the states of current
+// layers should be called after this code.
+export function callLayerPickingCallbacks(infos, mode, event) {
+  const unhandledPickInfos = [];
+
+  infos.forEach(info => {
+    if (!info.layer) {
+      return;
+    }
+
+    let handled = false;
+    switch (mode) {
+      case 'hover':
+        handled = info.layer.onHover(info, event);
+        break;
+      case 'query':
+      default:
+    }
+
+    if (!handled) {
+      unhandledPickInfos.push(info);
+    }
+  });
+
+  return unhandledPickInfos;
 }

@@ -2,7 +2,6 @@ import React, {PureComponent} from 'react';
 import autobind from 'autobind-decorator';
 
 export default class GenericInput extends PureComponent {
-
   @autobind _onChange(evt) {
     const {value, type} = evt.target;
     let newValue = value;
@@ -21,24 +20,36 @@ export default class GenericInput extends PureComponent {
     return this.props.onChange(this.props.name, newValue);
   }
 
+  @autobind _resetFunction() {
+    return this.props.onChange(this.props.name, this.props.altValue);
+  }
+
   render() {
     const {displayName, type, displayValue} = this.props;
     const props = {...this.props};
     delete props.displayName;
     delete props.displayValue;
+    delete props.altType;
+    delete props.altValue;
 
     if (type === 'link') {
-      return (<div className="input">
-        <label>{displayName}</label>
-        <a href={displayValue} target="_new">{displayValue}</a>
-      </div>);
+      return (
+        <div className="input">
+          <label>{displayName}</label>
+          <a href={displayValue} target="_new">
+            {displayValue}
+          </a>
+        </div>
+      );
     }
     if (type === 'function' || type === 'json') {
-      // non-editable
-      return (<div className="input">
-        <label>{displayName}</label>
-        <input type="text" disabled value={displayValue} />
-      </div>);
+      const editable = 'altValue' in this.props;
+      return (
+        <div className="input">
+          <label>{displayName}</label>
+          <button type="text" disabled={!editable} onClick={ this._resetFunction }>{displayValue}</button>
+        </div>
+      );
     }
 
     if (type === 'checkbox') {
@@ -48,11 +59,10 @@ export default class GenericInput extends PureComponent {
     return (
       <div className="input">
         <label>{displayName}</label>
-        <div className="tooltip">{displayName}: {displayValue}</div>
-        <input
-          {...props}
-          value={displayValue}
-          onChange={ this._onChange }/>
+        <div className="tooltip">
+          {displayName}: {displayValue}
+        </div>
+        <input {...props} value={displayValue} onChange={this._onChange} />
       </div>
     );
   }

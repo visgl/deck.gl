@@ -25,7 +25,7 @@ attribute vec3 positions;
 attribute vec4 instanceSourceColors;
 attribute vec4 instanceTargetColors;
 attribute vec4 instancePositions;
-attribute vec4 instancePositions64Low;
+attribute vec4 instancePositions64xyLow;
 attribute vec3 instancePickingColors;
 attribute float instanceWidths;
 attribute float instanceHeights;
@@ -82,8 +82,8 @@ void main(void) {
   geometry.worldPosition = vec3(instancePositions.xy, 0.0);
   geometry.worldPositionAlt = vec3(instancePositions.zw, 0.0);
 
-  vec2 source = project_position(geometry.worldPosition, instancePositions64Low.xy).xy;
-  vec2 target = project_position(geometry.worldPositionAlt, instancePositions64Low.zw).xy;
+  vec2 source = project_position(geometry.worldPosition, instancePositions64xyLow.xy).xy;
+  vec2 target = project_position(geometry.worldPositionAlt, instancePositions64xyLow.zw).xy;
 
   float segmentIndex = positions.x;
   float segmentRatio = getSegmentRatio(segmentIndex);
@@ -99,6 +99,7 @@ void main(void) {
   geometry.position = vec4(currPos, 1.0);
   uv = vec2(segmentRatio, positions.y);
   geometry.uv = uv;
+  geometry.pickingColor = instancePickingColors;
 
   // Multiply out width and clamp to limits
   // mercator pixels are interpreted as screen pixels
@@ -118,8 +119,5 @@ void main(void) {
   vec4 color = mix(instanceSourceColors, instanceTargetColors, segmentRatio);
   vColor = vec4(color.rgb, color.a * opacity);
   DECKGL_FILTER_COLOR(vColor, geometry);
-
-  // Set color to be rendered to picking fbo (also used to check for selection highlight).
-  picking_setPickingColor(instancePickingColors);
 }
 `;

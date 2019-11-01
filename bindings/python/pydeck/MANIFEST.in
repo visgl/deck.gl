@@ -5,10 +5,6 @@ include setupbase.py
 include pytest.ini
 include .coverage.rc
 
-include package.json
-include webpack.config.js
-include pydeck/labextension/*.tgz
-
 # Examples
 graft examples
 
@@ -18,10 +14,7 @@ prune tests/build
 
 # Javascript files
 graft pydeck/nbextension
-graft src
-prune **/node_modules
-prune coverage
-prune lib
+prune setup
 
 # Patterns to exclude from any directory
 global-exclude *~

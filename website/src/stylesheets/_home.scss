@@ -48,8 +48,8 @@
 }
 
 #banner {
-  background: $black-20;
-  color: $white;
+  background: $white;
+  color: $black-20;
   position: relative;
   @include venderPrefix(user-select, none);
 
@@ -70,15 +70,16 @@
 
   p {
     font-size: 16px;
-    color: $white-40;
+    color: $black-40;
   }
   .btn {
-    border: solid 2px $primary;
-    @include linearGradientH(border-image, $primary, $secondary);
-    border-image-slice: 2;
+    text-transform: none;
+    font-size: 16px;
+    color: $white;
+    background: $black;
   }
   .btn:hover {
-    background: rgba(0, 173, 230, 0.3);
+    background: $black-40;
   }
 }
 
@@ -179,5 +180,8 @@
       padding: 0 24px;
       width: auto;
     }
+  }
+  .floater {
+    display: none;
   }
 }

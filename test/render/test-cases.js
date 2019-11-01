@@ -12,7 +12,10 @@ import {
   OrbitView,
   OrthographicView,
   FirstPersonView,
-  PostProcessEffect
+  PostProcessEffect,
+  LightingEffect,
+  AmbientLight,
+  DirectionalLight
 } from '@deck.gl/core';
 import {noise, vignette} from '@luma.gl/effects';
 
@@ -41,7 +44,8 @@ import {
   ContourLayer,
   ScreenGridLayer,
   CPUGridLayer,
-  HexagonLayer
+  HexagonLayer,
+  HeatmapLayer
 } from '@deck.gl/aggregation-layers';
 import {H3HexagonLayer, H3ClusterLayer, S2Layer, TripsLayer} from '@deck.gl/geo-layers';
 
@@ -733,6 +737,36 @@ export const TEST_CASES = [
     goldenImage: './test/render/golden-images/gridcell-lnglat.png'
   },
   {
+    name: 'cpu-grid-layer:quantile',
+    viewState: GRID_LAYER_INFO.viewState,
+    layers: [
+      new CPUGridLayer(
+        Object.assign({}, GRID_LAYER_INFO.props, {
+          id: 'cpu-grid-layer:quantile',
+          getColorValue,
+          getElevationValue,
+          colorScaleType: 'quantile'
+        })
+      )
+    ],
+    goldenImage: './test/render/golden-images/cpu-layer-quantile.png'
+  },
+  {
+    name: 'cpu-grid-layer:ordinal',
+    viewState: GRID_LAYER_INFO.viewState,
+    layers: [
+      new CPUGridLayer(
+        Object.assign({}, GRID_LAYER_INFO.props, {
+          id: 'cpu-grid-layer:ordinal',
+          getColorValue,
+          getElevationValue,
+          colorScaleType: 'ordinal'
+        })
+      )
+    ],
+    goldenImage: './test/render/golden-images/cpu-layer-ordinal.png'
+  },
+  {
     name: 'grid-lnglat',
     viewState: GRID_LAYER_INFO.viewState,
     layers: [
@@ -865,6 +899,55 @@ export const TEST_CASES = [
     goldenImage: './test/render/golden-images/column-lnglat.png'
   },
   {
+    name: 'column-shadow-lnglat',
+    effects: [
+      new LightingEffect({
+        ambientLight: new AmbientLight({
+          color: [255, 255, 255],
+          intensity: 1.0
+        }),
+        dirLight: new DirectionalLight({
+          color: [255, 255, 255],
+          intensity: 1.0,
+          direction: [-10, -2, -15],
+          _shadow: true
+        })
+      })
+    ],
+    viewState: {
+      latitude: 37.751537058389985,
+      longitude: -122.42694203247012,
+      zoom: 11.5,
+      pitch: 30,
+      bearing: 0,
+      orthographic: true
+    },
+    layers: [
+      new ColumnLayer({
+        id: 'column-lnglat',
+        data: dataSamples.hexagons,
+        radius: 250,
+        angle: Math.PI / 2,
+        coverage: 1,
+        extruded: true,
+        pickable: true,
+        opacity: 1,
+        shadowEnabled: false,
+        getPosition: h => h.centroid,
+        getFillColor: h => [48, 128, h.value * 255, 255],
+        getElevation: h => h.value * 5000
+      }),
+      new HexagonLayer(
+        Object.assign({}, HEXAGON_LAYER_INFO.props, {
+          id: 'hexagon-lnglat',
+          getColorValue,
+          getElevationValue
+        })
+      )
+    ],
+    goldenImage: './test/render/golden-images/column-shadow-lnglat.png'
+  },
+  {
     name: 'column-lnglat-stroke',
     viewState: {
       latitude: 37.751537058389985,
@@ -923,6 +1006,27 @@ export const TEST_CASES = [
       )
     ],
     goldenImage: './test/render/golden-images/hexagon-lnglat.png'
+  },
+  {
+    name: 'heatmap-lnglat',
+    viewState: {
+      latitude: 37.75,
+      longitude: -122.44,
+      zoom: 11.5,
+      pitch: 30,
+      bearing: 0
+    },
+    layers: [
+      new HeatmapLayer({
+        id: 'heatmap-lnglat',
+        data: dataSamples.points,
+        pickable: false,
+        getPosition: d => d.COORDINATES,
+        radiusPixels: 35,
+        threshold: 0.1
+      })
+    ],
+    goldenImage: './test/render/golden-images/heatmap-lnglat.png'
   },
   {
     name: 'pointcloud-lnglat',
@@ -1086,6 +1190,35 @@ export const TEST_CASES = [
       })
     ],
     goldenImage: './test/render/golden-images/text-layer-multi-lines.png'
+  },
+  {
+    name: 'text-layer-auto-wrapping',
+    viewState: {
+      latitude: 37.751537058389985,
+      longitude: -122.42694203247012,
+      zoom: 11.5,
+      pitch: 0,
+      bearing: 0
+    },
+    layers: [
+      new TextLayer({
+        id: 'text-layer',
+        data: dataSamples.points.slice(0, 3),
+        fontFamily: 'Arial',
+        wordBreak: 'break-word',
+        width: 1000,
+        getText: x => `${x.LOCATION_NAME}\n${x.ADDRESS}`,
+        getPosition: x => x.COORDINATES,
+        getColor: x => [153, 0, 0],
+        getSize: x => 16,
+        getAngle: x => 0,
+        sizeScale: 1,
+        getTextAnchor: x => 'middle',
+        getAlignmentBaseline: x => 'center',
+        getPixelOffset: x => [10, 0]
+      })
+    ],
+    goldenImage: './test/render/golden-images/text-layer-auto-wrapping.png'
   },
   {
     name: 'gpu-grid-lnglat',

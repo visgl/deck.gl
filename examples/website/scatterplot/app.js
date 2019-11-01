@@ -1,7 +1,8 @@
 import React, {Component} from 'react';
 import {render} from 'react-dom';
 import {StaticMap} from 'react-map-gl';
-import DeckGL, {ScatterplotLayer} from 'deck.gl';
+import DeckGL from '@deck.gl/react';
+import {ScatterplotLayer} from '@deck.gl/layers';
 
 // Set your mapbox token here
 const MAPBOX_TOKEN = process.env.MapboxAccessToken; // eslint-disable-line
@@ -21,7 +22,7 @@ const INITIAL_VIEW_STATE = {
   bearing: 0
 };
 
-export class App extends Component {
+export default class App extends Component {
   _renderLayers() {
     const {
       data = DATA_URL,

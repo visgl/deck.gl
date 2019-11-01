@@ -80,11 +80,11 @@ new TileLayer({});
 To use pre-bundled scripts:
 
 ```html
-<script src="https://unpkg.com/deck.gl@~7.0.0/dist.min.js"></script>
+<script src="https://unpkg.com/deck.gl@^7.0.0/dist.min.js"></script>
 <!-- or -->
-<script src="https://unpkg.com/@deck.gl/core@~7.0.0/dist.min.js"></script>
-<script src="https://unpkg.com/@deck.gl/layers@~7.0.0/dist.min.js"></script>
-<script src="https://unpkg.com/@deck.gl/geo-layers@~7.0.0/dist.min.js"></script>
+<script src="https://unpkg.com/@deck.gl/core@^7.0.0/dist.min.js"></script>
+<script src="https://unpkg.com/@deck.gl/layers@^7.0.0/dist.min.js"></script>
+<script src="https://unpkg.com/@deck.gl/geo-layers@^7.0.0/dist.min.js"></script>
 ```
 
 ```js
@@ -124,7 +124,7 @@ The maximum cache size for a tile layer. If not defined, it is calculated using 
 
 ##### `getTileData` (Function,  optional)
 
-`getTileData` given x, y, z indices of the tile, returns a Promise that resolves to the decoded tile data.
+`getTileData` given x, y, z indices of the tile, returns the tile data or a Promise that resolves to the tile data.
 
 - Default: `getTileData: ({x, y, z}) => Promise.resolve(null)`
 

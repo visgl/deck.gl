@@ -44,3 +44,4 @@ import './s2-layer.spec';
 import './trips-layer.spec';
 import './great-circle-layer.spec';
 import './h3-layers.spec';
+import './tile-3d-layer';

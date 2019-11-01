@@ -44,7 +44,7 @@ const defaultProps = {
   elevationScale: {type: 'number', min: 0, value: 1},
 
   // grid
-  cellSize: {type: 'number', min: 0, max: 1000, value: 1000},
+  cellSize: {type: 'number', min: 1, max: 1000, value: 1000},
   coverage: {type: 'number', min: 0, max: 1, value: 1},
   getPosition: {type: 'accessor', value: x => x.position},
   extruded: false,
@@ -65,8 +65,7 @@ export default class GPUGridLayer extends CompositeLayer {
       log.error('GPUGridLayer is not supported on this browser, use GridLayer instead')();
     }
     const options = {
-      id: `${this.id}-gpu-aggregator`,
-      shaderCache: this.context.shaderCache
+      id: `${this.id}-gpu-aggregator`
     };
     this.state = {
       gpuGridAggregator: new GPUGridAggregator(gl, options),
@@ -258,7 +257,7 @@ export default class GPUGridLayer extends CompositeLayer {
 
     const {weights, gridSize, gridOrigin, cellSize} = this.state;
 
-    const colorRange = colorRangeToFlatArray(this.props.colorRange, Float32Array, 255);
+    const colorRange = colorRangeToFlatArray(this.props.colorRange);
 
     const SubLayerClass = this.getSubLayerClass('gpu-grid-cell', GPUGridCellLayer);
 

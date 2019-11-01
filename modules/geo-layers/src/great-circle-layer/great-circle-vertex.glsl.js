@@ -25,7 +25,7 @@ attribute vec3 positions;
 attribute vec4 instanceSourceColors;
 attribute vec4 instanceTargetColors;
 attribute vec4 instancePositions;
-attribute vec4 instancePositions64Low;
+attribute vec4 instancePositions64xyLow;
 attribute vec3 instancePickingColors;
 attribute float instanceWidths;
 
@@ -91,6 +91,7 @@ void main(void) {
   float segmentRatio = getSegmentRatio(segmentIndex);
   uv = vec2(segmentRatio, positions.y);
   geometry.uv = uv;
+  geometry.pickingColor = instancePickingColors;
   
   // if it's the first point, use next - current as direction
   // otherwise use current - prev
@@ -105,8 +106,8 @@ void main(void) {
   vec3 currPos = vec3(degrees(interpolate(source, target, angularDist, segmentRatio)), 0.0);
   vec3 nextPos = vec3(degrees(interpolate(source, target, angularDist, nextSegmentRatio)), 0.0);
 
-  vec2 currPos64Low = mix(instancePositions64Low.xy, instancePositions64Low.zw, segmentRatio);
-  vec2 nextPos64Low = mix(instancePositions64Low.xy, instancePositions64Low.zw, nextSegmentRatio);
+  vec2 currPos64Low = mix(instancePositions64xyLow.xy, instancePositions64xyLow.zw, segmentRatio);
+  vec2 nextPos64Low = mix(instancePositions64xyLow.xy, instancePositions64xyLow.zw, nextSegmentRatio);
 
   vec4 curr = project_position_to_clipspace(currPos, currPos64Low, vec3(0.0), geometry.position);
   vec4 next = project_position_to_clipspace(nextPos, nextPos64Low, vec3(0.0));
@@ -129,8 +130,5 @@ void main(void) {
   vec4 color = mix(instanceSourceColors, instanceTargetColors, segmentRatio);
   vColor = vec4(color.rgb, color.a * opacity);
   DECKGL_FILTER_COLOR(vColor, geometry);
-
-  // Set color to be rendered to picking fbo (also used to check for selection highlight).
-  picking_setPickingColor(instancePickingColors);
 }
 `;

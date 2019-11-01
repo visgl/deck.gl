@@ -49,7 +49,42 @@ The array of deck.gl layers to be rendered. This array is expected to be an arra
 
 ##### `layerFilter` (Function)
 
-Optionally takes a function `({layer, viewport, isPicking}) => Boolean` that is called before a layer is rendered. Gives the application an opportunity to filter out layers from the layer list during either rendering or picking. Filtering can be done per viewport or per layer or both. This enables techniques like adding helper layers that work as masks during picking but do not show up during rendering. All the lifecycle methods are still triggered even a if a layer is filtered out using this prop.
+Default: `null`
+
+If supplied, will be called before a layer is drawn to determine whether it should be rendered. This gives the application an opportunity to filter out layers from the layer list during either rendering or picking. Filtering can be done per viewport or per layer or both. This enables techniques like adding helper layers that work as masks during picking but do not show up during rendering.
+
+```js
+new Deck({
+  // ...
+  layerFilter: ({layer, viewport}) => {
+    if (viewport.id !== 'minimap' && layer.id === 'geofence') {
+      // only display geofence in the minimap
+      return false;
+    }
+    return true;
+  }
+}
+```
+
+Notes:
+
+- `layerFilter` does not override the visibility defined by the layer's `visible` and `pickable` props.
+- All the lifecycle methods are still triggered even a if a layer is filtered out using this prop.
+
+Arguments:
+
+- `layer` (Layer) - the layer to be drawn
+- `viewport` (Viewport) - the current viewport
+- `isPicking` (Boolean) - whether this is a picking pass
+- `renderPass` (String) - the name of the current render pass. Some standard passes are:
+  + `'screen'` - drawing to screen
+  + `'picking:hover'` - drawing to offscreen picking buffer due to pointer move
+  + `'picking:query'` - drawing to offscreen picking buffer due to user-initiated query, e.g. calling `deck.pickObject`.
+  + `'shadow'` - drawing to shadow map
+
+Returns:
+
+`true` if the layer should be drawn.
 
 ##### `getCursor` (Function)
 
@@ -138,7 +173,7 @@ Canvas ID to allow style customization in CSS.
 
 ##### `style` (Object, optional)
 
-Css styles for the deckgl-canvas.
+CSS styles for the deckgl-canvas.
 
 ##### `touchAction` (String, optional)
 
@@ -152,15 +187,48 @@ By default, the deck canvas captures all touch interactions. This prop is useful
 
 Extra pixels around the pointer to include while picking. This is helpful when rendered objects are difficult to target, for example irregularly shaped icons, small moving circles or interaction by touch. Default `0`.
 
-##### `useDevicePixels` (Boolean, optional)
+#### `getTooltip` (Function, optional)
 
-When true, device's full resolution will be used for rendering, this value can change per frame, like when moving windows between screens or when changing zoom level of the browser.
+Callback that takes a hovered-over point and renders a tooltip. If the prop is not specified, the tooltip is hidden.
+
+Callback arguments:
+
+* `info` - the [picking info](/docs/developer-guide/interactivity.md#the-picking-info-object) describing the object being hovered.
+
+If the callback returns `null`, the tooltip is hidden, with the CSS `display` property set to `none`.
+If the callback returns a string, that string is rendered in a tooltip with the default CSS styling described below.
+Otherwise, the callback can return an object with the following fields:
+
+* `text` (String, optional) - Specifies the `innerText` attribute of the tooltip.
+* `html` (String, optional) - Specifies the `innerHTML` attribute of the tooltip. Note that this will override the specified `innerText`.
+* `className` (String, optional) - Class name to attach to the tooltip element. The element has the default class name of `deck-tooltip`.
+* `style` (Object, optional) - An object of CSS styles to apply to the tooltip element, which can override the default styling.
+
+By default, the tooltip has the following CSS style:
+
+```css
+z-index: 1;
+position: absolute;
+color: #a0a7b4;
+background-color: #29323c;
+padding: 10px;
+```
+
+##### `useDevicePixels` (Boolean|Number, optional)
+
+Controls the resolution of drawing buffer used for rendering.
+
+* `true`: `Device (physical) pixels` resolution is used for rendering, this resolution is defined by `window.devicePixelRatio`. On Retina/HD systems this resolution is usually twice as big as `CSS pixels` resolution.
+* `false`: `CSS pixels` resolution (equal to the canvas size) is used for rendering.
+* `Number` (Experimental): Specified Number is used as a custom ratio (drawing buffer resolution to `CSS pixel` resolution) to determine drawing buffer size, a value less than `one` uses resolution smaller than `CSS pixels`, gives better performance but produces blurry images, a value greater than `one` uses resolution bigger than CSS pixels resolution (canvas size), produces sharp images but at a lower performance.
 
 Default value is `true`.
 
 Note:
 
-* Consider setting to `false` unless you require high resolution, as it affects rendering performance.
+* Consider setting to `false` or to a Number less than `one` if better rendering performance is needed.
+
+* When it is set to a high Number (like, 4 or more), it is possible to hit the system limit for allocating drawing buffer, such cases will log a warning and fallback to system allowed resolution.
 
 ##### `gl` (Object, optional)
 
@@ -169,6 +237,10 @@ gl context, will be autocreated if not supplied.
 ##### `glOptions` (Object, optional)
 
 Additional options used when creating the WebGLContext. See [WebGL context attributes](https://developer.mozilla.org/en-US/docs/Web/API/HTMLCanvasElement/getContext).
+
+##### `_framebuffer` (Object, optional)
+
+(Experimental) Render to a custom frame buffer other than to screen.
 
 ##### `parameters` (Object, optional)
 
@@ -366,6 +438,7 @@ deck.pickObject({x, y, radius, layerIds})
 * `y` (Number) - y position in pixels
 * `radius` (Number, optional) - radius of tolerance in pixels. Default `0`.
 * `layerIds` (Array, optional) - a list of layer ids to query from. If not specified, then all pickable and visible layers are queried.
+* `unproject3D` (Boolean, optional) - if `true`, `info.coordinate` will be a 3D point by unprojecting the `x, y` screen coordinates onto the picked geometry. Default `false`.
 
 Returns:
 
@@ -385,6 +458,7 @@ deck.pickMultipleObjects({x, y, radius, layerIds, depth})
 * `radius`=`0` (Number, optional) - radius of tolerance in pixels.
 * `layerIds`=`null` (Array, optional) - a list of layer ids to query from. If not specified, then all pickable and visible layers are queried.
 * `depth`=`10` - Specifies the max
+* `unproject3D` (Boolean, optional) - if `true`, `info.coordinate` will be a 3D point by unprojecting the `x, y` screen coordinates onto the picked geometry. Default `false`.
 
 Returns:
 

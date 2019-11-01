@@ -25,41 +25,25 @@ test('PostProcessEffect#constructor', t => {
   t.end();
 });
 
-test('PostProcessEffect#prepare', t => {
+test('PostProcessEffect#postRender', t => {
   const effect = new PostProcessEffect(testModule);
-  effect.prepare(gl);
-  t.ok(effect.passes, 'post-processing pass created');
-  t.equal(effect.passes.length, 1, 'post-processing pass length is right');
-  effect.cleanup();
-
-  t.end();
-});
-
-test('PostProcessEffect#render', t => {
-  const effect = new PostProcessEffect(testModule);
-  effect.prepare(gl);
+  effect.preRender(gl);
   const inputBuffer = new Framebuffer(gl);
   const outputBuffer = new Framebuffer(gl);
 
-  const params1 = effect.render({inputBuffer, outputBuffer});
-  t.ok(params1, 'post-processing effect rendered without throwing');
-  t.deepEqual(
-    params1,
-    {inputBuffer: outputBuffer, outputBuffer: inputBuffer},
-    'post-processing effect buffer swapped'
-  );
+  const buffer1 = effect.postRender(gl, {inputBuffer, swapBuffer: outputBuffer});
+  t.ok(effect.passes, 'post-processing pass created');
 
-  const params2 = effect.render({
+  t.ok(buffer1, 'post-processing effect rendered without throwing');
+  t.is(buffer1, outputBuffer, 'post-processing effect buffer swapped');
+
+  const buffer2 = effect.postRender(gl, {
     inputBuffer,
-    outputBuffer,
+    swapBuffer: outputBuffer,
     target: Framebuffer.getDefaultFramebuffer(gl)
   });
-  t.ok(params2, 'post-processing effect rendered without throwing');
-  t.deepEqual(
-    params2,
-    {inputBuffer: outputBuffer, outputBuffer: inputBuffer},
-    'post-processing effect buffer swapped'
-  );
+  t.ok(buffer2, 'post-processing effect rendered without throwing');
+  t.is(buffer2, Framebuffer.getDefaultFramebuffer(gl), 'post-processing effect rendered to target');
 
   effect.cleanup();
   inputBuffer.delete();

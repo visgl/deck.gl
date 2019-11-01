@@ -6,9 +6,9 @@ export default class Effect {
     Object.assign(this.props, props);
   }
 
-  prepare() {}
+  preRender() {}
 
-  getParameters() {}
+  getModuleParameters() {}
 
   cleanup() {}
 }

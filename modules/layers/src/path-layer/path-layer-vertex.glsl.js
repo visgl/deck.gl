@@ -28,8 +28,10 @@ attribute vec3 instanceStartPositions;
 attribute vec3 instanceEndPositions;
 attribute vec3 instanceLeftPositions;
 attribute vec3 instanceRightPositions;
-attribute vec4 instanceLeftStartPositions64xyLow;
-attribute vec4 instanceEndRightPositions64xyLow;
+attribute vec2 instanceLeftPositions64xyLow;
+attribute vec2 instanceStartPositions64xyLow;
+attribute vec2 instanceEndPositions64xyLow;
+attribute vec2 instanceRightPositions64xyLow;
 attribute float instanceStrokeWidths;
 attribute vec4 instanceColors;
 attribute vec3 instancePickingColors;
@@ -130,8 +132,8 @@ vec3 lineJoin(
   offsetScale = mix(offsetScale, 1.0 / max(cosHalfA, 0.001), step(0.5, cornerPosition));
 
   // special treatment for start cap and end cap
-  bool isStartCap = !isEnd && (instanceTypes == 1.0 || instanceTypes == 3.0);
-  bool isEndCap = isEnd && (instanceTypes == 2.0 || instanceTypes == 3.0);
+  bool isStartCap = lenA == 0.0 || (!isEnd && (instanceTypes == 1.0 || instanceTypes == 3.0));
+  bool isEndCap = lenB == 0.0 || (isEnd && (instanceTypes == 2.0 || instanceTypes == 3.0));
   bool isCap = isStartCap || isEndCap;
 
   // 0: center, 1: side
@@ -213,22 +215,20 @@ void clipLine(inout vec4 position, vec4 refPosition) {
 void main() {
   geometry.worldPosition = instanceStartPositions;
   geometry.worldPositionAlt = instanceEndPositions;
+  geometry.pickingColor = instancePickingColors;
 
   vColor = vec4(instanceColors.rgb, instanceColors.a * opacity);
-
-  // Set color to be rendered to picking fbo (also used to check for selection highlight).
-  picking_setPickingColor(instancePickingColors);
 
   float isEnd = positions.x;
 
   vec3 prevPosition = mix(instanceLeftPositions, instanceStartPositions, isEnd);
-  vec2 prevPosition64xyLow = mix(instanceLeftStartPositions64xyLow.xy, instanceLeftStartPositions64xyLow.zw, isEnd);
+  vec2 prevPosition64xyLow = mix(instanceLeftPositions64xyLow, instanceStartPositions64xyLow, isEnd);
 
   vec3 currPosition = mix(instanceStartPositions, instanceEndPositions, isEnd);
-  vec2 currPosition64xyLow = mix(instanceLeftStartPositions64xyLow.zw, instanceEndRightPositions64xyLow.xy, isEnd);
+  vec2 currPosition64xyLow = mix(instanceStartPositions64xyLow, instanceEndPositions64xyLow, isEnd);
 
   vec3 nextPosition = mix(instanceEndPositions, instanceRightPositions, isEnd);
-  vec2 nextPosition64xyLow = mix(instanceEndRightPositions64xyLow.xy, instanceEndRightPositions64xyLow.zw, isEnd);
+  vec2 nextPosition64xyLow = mix(instanceEndPositions64xyLow, instanceRightPositions64xyLow, isEnd);
 
   if (billboard) {
     // Extrude in clipspace

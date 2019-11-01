@@ -73,7 +73,7 @@ export const deckgl = new Deck({
   mapboxgl
 });
 
-deck.gl.setProps(jsonConverter.convertJSONToProps(JSON))
+deck.gl.setProps(jsonConverter.convert(JSON))
 ```
 
 ### `JSONLayer` (New Class)

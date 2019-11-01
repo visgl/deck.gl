@@ -17,7 +17,7 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
-import {experimental, fp64LowPart} from '@deck.gl/core';
+import {experimental} from '@deck.gl/core';
 const {Tesselator} = experimental;
 
 const START_CAP = 1;
@@ -31,11 +31,10 @@ export default class PathTesselator extends Tesselator {
     super({
       data,
       getGeometry,
-      fp64,
       positionFormat,
       attributes: {
-        startPositions: {size: 3, padding: 3},
-        endPositions: {size: 3, padding: 3},
+        startPositions: {size: 3, padding: 3, type: fp64 ? Float64Array : Float32Array},
+        endPositions: {size: 3, padding: 3, type: fp64 ? Float64Array : Float32Array},
         segmentTypes: {size: 1, type: Uint8ClampedArray},
         startPositions64XyLow: {size: 2, padding: 2, fp64Only: true},
         endPositions64XyLow: {size: 2, padding: 2, fp64Only: true}
@@ -55,20 +54,17 @@ export default class PathTesselator extends Tesselator {
       // invalid path
       return 0;
     }
-    return this.isClosed(path) ? numPoints + 1 : Math.max(0, numPoints - 1);
+    if (this.isClosed(path)) {
+      // minimum 3 vertices
+      return numPoints < 3 ? 0 : numPoints + 1;
+    }
+    return numPoints - 1;
   }
 
   /* eslint-disable max-statements, complexity */
   updateGeometryAttributes(path, context) {
     const {
-      attributes: {
-        startPositions,
-        endPositions,
-        startPositions64XyLow,
-        endPositions64XyLow,
-        segmentTypes
-      },
-      fp64
+      attributes: {startPositions, endPositions, segmentTypes}
     } = this;
 
     const {geometrySize} = context;
@@ -110,13 +106,6 @@ export default class PathTesselator extends Tesselator {
       endPositions[i * 3] = endPoint[0];
       endPositions[i * 3 + 1] = endPoint[1];
       endPositions[i * 3 + 2] = endPoint[2] || 0;
-
-      if (fp64) {
-        startPositions64XyLow[i * 2 + 2] = fp64LowPart(startPoint[0]);
-        startPositions64XyLow[i * 2 + 3] = fp64LowPart(startPoint[1]);
-        endPositions64XyLow[i * 2] = fp64LowPart(endPoint[0]);
-        endPositions64XyLow[i * 2 + 1] = fp64LowPart(endPoint[1]);
-      }
     }
   }
   /* eslint-enable max-statements, complexity */

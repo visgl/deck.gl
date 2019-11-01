@@ -2,7 +2,7 @@
   "name": "@deck.gl/mesh-layers",
   "description": "deck.gl layers that loads 3D meshes or scene graphs",
   "license": "MIT",
-  "version": "7.2.0-alpha.4",
+  "version": "7.4.0-alpha.2",
   "publishConfig": {
     "access": "public"
   },
@@ -30,9 +30,9 @@
     "prepublishOnly": "npm run build-bundle && npm run build-bundle -- --env.dev"
   },
   "peerDependencies": {
-    "@deck.gl/core": "^7.0.0"
+    "@deck.gl/core": "^7.3.0-beta"
   },
   "dependencies": {
-    "@luma.gl/addons": "^7.2.0-alpha.4"
+    "@luma.gl/addons": "^7.4.0-alpha.2"
   }
 }

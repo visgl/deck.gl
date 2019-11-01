@@ -13,7 +13,7 @@ export function tile2boundingBox(x, y, z) {
 }
 
 export default class Tile {
-  constructor({getTileData, x, y, z, onTileError}) {
+  constructor({getTileData, x, y, z, onTileLoad, onTileError}) {
     this.x = x;
     this.y = y;
     this.z = z;
@@ -23,14 +23,12 @@ export default class Tile {
     this._data = null;
     this._isLoaded = false;
     this._loader = this._loadData();
+    this.onTileLoad = onTileLoad;
     this.onTileError = onTileError;
   }
 
   get data() {
-    if (this._data) {
-      return Promise.resolve(this._data);
-    }
-    return this._loader;
+    return this._data || this._loader;
   }
 
   get isLoaded() {
@@ -42,11 +40,12 @@ export default class Tile {
     if (!this.getTileData) {
       return null;
     }
-    const getTileDataPromise = this.getTileData({x, y, z, bbox});
-    return getTileDataPromise
+
+    return Promise.resolve(this.getTileData({x, y, z, bbox}))
       .then(buffers => {
         this._data = buffers;
         this._isLoaded = true;
+        this.onTileLoad(this);
         return buffers;
       })
       .catch(err => {

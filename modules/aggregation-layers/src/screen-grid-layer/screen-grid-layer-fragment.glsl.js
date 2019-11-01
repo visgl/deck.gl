@@ -20,21 +20,19 @@
 
 /* fragment shader for the grid-layer */
 export default `\
-#version 300 es
 #define SHADER_NAME screen-grid-layer-fragment-shader
 
 precision highp float;
 
-in vec4 vColor;
-in float vSampleCount;
-out vec4 fragColor;
+varying vec4 vColor;
+varying float vSampleCount;
 
 void main(void) {
   if (vSampleCount <= 0.0) {
     discard;
   }
-  fragColor = vColor;
+  gl_FragColor = vColor;
 
-  fragColor = picking_filterColor(fragColor);
+  DECKGL_FILTER_COLOR(gl_FragColor, geometry);
 }
 `;

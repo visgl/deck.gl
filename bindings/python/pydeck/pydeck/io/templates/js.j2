@@ -1,84 +1,22 @@
-requirejs.config({
-  paths: {
-    deck: 'https://unpkg.com/deck.gl@{{release_version}}/dist.min',
-    mapboxgl: 'https://api.tiles.mapbox.com/mapbox-gl-js/v{{mapbox_gl_version}}/mapbox-gl',
-    h3: 'https://unpkg.com/h3-js@3.4.3/dist/h3-js.umd',
-    S2: 'https://unpkg.com/s2-geometry@1.2.10/src/s2geometry'
-  },
-  shim : {
-    'deck': ['h3', 'S2']
-  }
+const DEPENDENCIES = {% include 'requirejs_dependencies.json' %};
+const jsonInput = {{json_input}};
+const MAPBOX_API_KEY = '{{mapbox_key}}';
+const tooltip = {{tooltip}};
 
+define('@jupyter-widgets/base', function() {
+  return {
+    DOMWidgetModel: function() {},
+    DOMWidgetView: function() {}
+  };
 });
 
-let config, mapLayer, jsonInput, jsonConverter;
+requirejs.config(DEPENDENCIES);
 
-jsonInput = JSON.parse(JSON.stringify({{json_input}}));
-
-function setMapProps(map, props) {
-  if ('viewState' in props && props.viewState.longitude && props.viewState.latitude) {
-    const {viewState} = props;
-    map.jumpTo({
-      center: [viewState.longitude, viewState.latitude],
-      zoom: Number.isFinite(viewState.zoom) ? viewState.zoom : 10,
-      bearing: viewState.bearing || 0,
-      pitch: viewState.pitch || 0
-    });
-  }
-
-  if (props.map && 'style' in props.map) {
-    if (props.map.style !== map.deckStyle) {
-      map.setStyle(props.map.style);
-      map.deckStyle = props.map.style;
-    }
-  }
-}
-
-
-function onViewportChange({viewState}) {
-  config.setProps({viewState});
-  setMapProps(mapLayer, {viewState});
-}
-
-
-function valueChanged() {
-  const jsonProps = jsonConverter.convertJsonToDeckProps(jsonInput);
-  config.setProps(jsonProps);
-  setMapProps(mapLayer, config.props);
-}
-
-
-function init(deck, mapboxgl) {
-  deck.log.priority=1
-  let layersDict = {};
-
-  const layers = Object.keys(deck).filter(x => x.indexOf('Layer') > 0 && x.indexOf('_') != 0);
-
-  layers.map(k => layersDict[k] = deck[k]);
-
-   mapboxgl.accessToken = '{{mapbox_api_key}}';
-   mapLayer = new mapboxgl.Map({
-    container: 'map',
-    interactive: false,
-    style: null
+requirejs(['@deck.gl/jupyter-widget'], (root) => {
+  const deck = root.initDeck({
+    mapboxApiKey: MAPBOX_API_KEY, 
+    container: document.getElementById('deck-container'),
+    jsonInput,
+    tooltip
   });
-
-  jsonConverter = new deck._JSONConverter({
-    configuration: {
-      layers: layersDict
-      
-    }
-  });
-
-  config = new deck.Deck({
-    canvas: 'deck-map-container',
-    height: '100%',
-    width: '100%',
-    onLoad: valueChanged.bind(this),
-    views: [new deck.MapView()],
-    onViewStateChange: onViewportChange.bind(this)
-  });
-}
-
-
-requirejs(['deck', 'mapboxgl'], init);
+})

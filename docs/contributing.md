@@ -10,14 +10,14 @@ Note that once your PR is about to be merged, you will be asked to register as a
 
 ## Process and Guidelines
 
-Developer documentaion is available [here](https://github.com/uber/deck.gl/tree/master/dev-docs). We are ready to prepare additional documentation if requested by contributors.
+Developer documentation is available [here](https://github.com/uber/deck.gl/tree/master/dev-docs). We are ready to prepare additional documentation if requested by contributors.
 
 
 ## Developing deck.gl
 
 ### Node Version Requirement
 
-Running deck.gl as a dependency in another project (e.g. via `npm i deck.gl`) requires Node `4.x` or higher. Building deck.gl from source has a dependency on Node `8.x` or higher. Either upgrade to a supported version, or install something like [nvm](https://github.com/creationix/nvm) to manage Node versions.
+Running deck.gl as a dependency in another project (e.g. via `npm i deck.gl`) requires Node `4.x` or higher. Building deck.gl from the source has a dependency on Node `10.x` or higher. Either upgrade to a supported version, or install something like [nvm](https://github.com/creationix/nvm) to manage Node versions.
 
 ### Install yarn
 

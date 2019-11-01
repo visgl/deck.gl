@@ -69,11 +69,11 @@ new CPUGridLayer({});
 To use pre-bundled scripts:
 
 ```html
-<script src="https://unpkg.com/deck.gl@~7.0.0/dist.min.js"></script>
+<script src="https://unpkg.com/deck.gl@^7.0.0/dist.min.js"></script>
 <!-- or -->
-<script src="https://unpkg.com/@deck.gl/core@~7.0.0/dist.min.js"></script>
-<script src="https://unpkg.com/@deck.gl/layers@~7.0.0/dist.min.js"></script>
-<script src="https://unpkg.com/@deck.gl/aggregation-layers@~7.0.0/dist.min.js"></script>
+<script src="https://unpkg.com/@deck.gl/core@^7.0.0/dist.min.js"></script>
+<script src="https://unpkg.com/@deck.gl/layers@^7.0.0/dist.min.js"></script>
+<script src="https://unpkg.com/@deck.gl/aggregation-layers@^7.0.0/dist.min.js"></script>
 ```
 
 ```js
@@ -87,7 +87,7 @@ Inherits from all [Base Layer](/docs/api-reference/layer.md) and [CompositeLayer
 
 ### Render Options
 
-##### `cellSize` (Number, optional)
+##### `cellSize` (Number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
 
 * Default: `1000`
 
@@ -106,7 +106,7 @@ Color scale domain, default is set to the range of point counts in each cell.
 Specified as an array of 6 colors [color1, color2, ... color6]. Each color is an array of 3 or 4 values [R, G, B] or [R, G, B, A], representing intensities of Red, Green, Blue and Alpha channels.  Each intensity is a value between 0 and 255. When Alpha not provided a value of 255 is used. By default `colorRange` is set to
 [colorbrewer](http://colorbrewer2.org/#type=sequential&scheme=YlOrRd&n=6) `6-class YlOrRd`.
 
-##### `coverage` (Number, optional)
+##### `coverage` (Number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
 
 * Default: `1`
 
@@ -126,7 +126,7 @@ Elevation scale input domain, default is set to the extent of point counts in ea
 
 Elevation scale output range
 
-##### `elevationScale` (Number, optional)
+##### `elevationScale` (Number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
 
 * Default: `1`
 
@@ -140,34 +140,39 @@ Cell elevation multiplier. The elevation of cell is calculated by
 
 Whether to enable cell elevation. Cell elevation scale by count of points in each cell. If set to false, all cell will be flat.
 
-##### `upperPercentile` (Number, optional)
+##### `upperPercentile` (Number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
 
 * Default: `100`
 
 Filter cells and re-calculate color by `upperPercentile`. Cells with value
 larger than the upperPercentile will be hidden.
 
-##### `lowerPercentile` (Number, optional)
+##### `lowerPercentile` (Number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
 
 * Default: `0`
 
 Filter cells and re-calculate color by `lowerPercentile`. Cells with value
 smaller than the lowerPercentile will be hidden.
 
-##### `elevationUpperPercentile` (Number, optional)
+##### `elevationUpperPercentile` (Number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
 
 * Default: `100`
 
 Filter cells and re-calculate elevation by `elevationUpperPercentile`. Cells with elevation value
 larger than the elevationUpperPercentile will be hidden.
 
-##### `elevationLowerPercentile` (Number, optional)
+##### `elevationLowerPercentile` (Number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
 
 * Default: `100`
 
 Filter cells and re-calculate elevation by `elevationLowerPercentile`. Cells with elevation value
 smaller than the elevationLowerPercentile will be hidden.
 
+##### `colorScaleType` (String, optional)
+
+* Default: 'quantize'
+
+Scaling function used to determine the color of the grid cell, default value is 'quantize'. Supported Values are 'quantize', 'linear', 'quantile' and 'ordinal'.
 
 ##### `material` (Object, optional)
 
@@ -193,19 +198,12 @@ It takes an array of points inside each cell as arguments, returns a number. For
 You can pass in `getColorValue` to color the cells by avg/mean/max of a specific attributes of each point.
 By default `getColorValue` returns the length of the points array.
 
-Note: grid layer compares whether `getColorValue` has changed to recalculate the value for each bin that its color based on.
-You should pass in the function defined outside the render function so it doesn't create a new function on every rendering pass.
-
 ```js
  class MyGridLayer {
-    getColorValue (points) {
-        return points.length;
-    }
-
     renderLayers() {
       return new CPUGridLayer({
         id: 'grid-layer',
-        getColorValue: this.getColorValue // instead of getColorValue: (points) => { return points.length; }
+        getColorValue: points => points.length
         data,
         cellSize: 500
       });
@@ -220,7 +218,6 @@ You should pass in the function defined outside the render function so it doesn'
 
 `getColorWeight` is the accessor function to get the weight of a point used to calculate the color value for a cell.
 
-
 ##### `colorAggregation` (String, optional)
 
 * Default: 'SUM'
@@ -233,28 +230,24 @@ Note: `getColorWeight` and `colorAggregation` together define how color value of
 
 * Using `getColorValue`
 ```js
-function getCount(points) {
-  return points.length;
-}
+
 ...
 const layer = new CPUGridLayer({
   id: 'my-grid-layer',
   ...
-  getColorValue: getCount,
+  getColorValue: points => points.length,
   ...
 });
 ```
 
 * Using `getColorWeight` and `colorAggregation`
 ```js
-function getWeight(point) {
-  return 1;
-}
+
 ...
 const layer = new CPUGridLayer({
   id: 'my-grid-layer',
   ...
-  getColorWeight: getWeight,
+  getColorWeight: point => 1,
   colorAggregation: 'SUM'
   ...
 });
@@ -278,14 +271,11 @@ const layer = new CPUGridLayer({
 
 * Using `getColorWeight` and `colorAggregation`
 ```js
-function getWeight(point) {
-  return point.SPACES;
-}
 ...
 const layer = new CPUGridLayer({
   id: 'my-grid-layer',
   ...
-  getColorWeight: getWeight,
+  getColorWeight: point => point.SPACES,
   colorAggregation: 'SUM'
   ...
 });
@@ -302,16 +292,11 @@ Similar to `getColorValue`, `getElevationValue` is the accessor function to get 
 It takes an array of points inside each cell as arguments, returns a number.
 By default `getElevationValue` returns the length of the points array.
 
-Note: grid layer compares whether `getElevationValue` has changed to recalculate the value for each cell for its elevation.
-You should pass in the function defined outside the render function so it doesn't create a new function on every rendering pass.
-
-
 ##### `getElevationWeight` (Function, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
 
 * Default: `point => 1`
 
-`getElevationWeight` is the accessor function to get the weight of a point used to calcuate the elevation value for a cell.
-
+`getElevationWeight` is the accessor function to get the weight of a point used to calculate the elevation value for a cell.
 
 ##### `elevationAggregation` (String, optional)
 
@@ -327,28 +312,22 @@ Note: `getElevationWeight` and `elevationAggregation` together define how elevat
 * Using `getElevationValue`
 
 ```js
-function getCount(points) {
-  return points.length;
-}
 ...
 const layer = new CPUGridLayer({
   id: 'my-grid-layer',
   ...
-  getElevationValue: getCount,
+  getElevationValue: points => points.length
   ...
 });
 ```
 
 * Using `getElevationWeight` and `elevationAggregation`
 ```js
-function getWeight(point) {
-  return 1;
-}
 ...
 const layer = new CPUGridLayer({
   id: 'my-grid-layer',
   ...
-  getElevationWeight: getWeight,
+  getElevationWeight: point => 1,
   elevationAggregation: 'SUM'
   ...
 });
@@ -372,14 +351,11 @@ const layer = new CPUGridLayer({
 
 * Using `getElevationWeight` and `elevationAggregation`
 ```js
-function getWeight(point) {
-  return point.SPACES;
-}
 ...
 const layer = new CPUGridLayer({
   id: 'my-grid-layer',
   ...
-  getElevationWeight: getWeight,
+  getElevationWeight: point => point.SPACES,
   elevationAggregation: 'MAX'
   ...
 });

@@ -1,7 +1,7 @@
 import pandas as pd
 
 from pydeck.data_utils.viewport_helpers import (
-    autocompute_viewport,
+    compute_view,
     bbox_to_zoom_level,
     euclidean,
     is_pandas_df,
@@ -48,9 +48,9 @@ def test_is_pandas_df():
     assert is_pandas_df(pd.DataFrame())
 
 
-def test_autocompute_viewport():
-    actual = autocompute_viewport(POINTS, 0.95, ViewState)
-    actual_pandas = autocompute_viewport(pd.DataFrame(POINTS), 0.95, ViewState)
-    EXPECTED = '{"bearing": 0, "latitude": 20.0, "longitude": 20.0, "maxZoom": 21, "minZoom": 1, "pitch": 0, "zoom": 7}'
+def test_compute_view():
+    actual = compute_view(POINTS, 0.95, ViewState)
+    actual_pandas = compute_view(pd.DataFrame(POINTS), 0.95, ViewState)
+    EXPECTED = '{"bearing": 0, "latitude": 20.0, "longitude": 20.0, "maxZoom": 20, "minZoom": 0, "pitch": 0, "zoom": 7}'
     assert str(actual) == str(actual_pandas)
     assert str(actual) == str(EXPECTED)

@@ -1,30 +1,22 @@
-import GL from '@luma.gl/constants';
-import {Buffer, Transform} from '@luma.gl/core';
-import {getShaders, getBuffers, padBuffer} from './attribute-transition-utils';
-import Attribute from './attribute';
-import BaseAttribute from './base-attribute';
-import Transition from '../transitions/transition';
+import {Transform} from '@luma.gl/core';
+import GPUInterpolationTransition from '../transitions/gpu-interpolation-transition';
+import GPUSpringTransition from '../transitions/gpu-spring-transition';
 import log from '../utils/log';
-import assert from '../utils/assert';
 
-const noop = () => {};
-const DEFAULT_TRANSITION_SETTINGS = {
-  duration: 0,
-  easing: t => t,
-  onStart: noop,
-  onEnd: noop,
-  onInterrupt: noop
+const TRANSITION_TYPES = {
+  interpolation: GPUInterpolationTransition,
+  spring: GPUSpringTransition
 };
 
 export default class AttributeTransitionManager {
-  constructor(gl, {id}) {
+  constructor(gl, {id, timeline}) {
     this.id = id;
     this.gl = gl;
+    this.timeline = timeline;
 
-    this.attributeTransitions = {};
+    this.transitions = {};
     this.needsRedraw = false;
-    this.transform = null;
-    this.numInstances = 0;
+    this.numInstances = 1;
 
     if (Transform.isSupported(gl)) {
       this.isSupported = true;
@@ -35,10 +27,7 @@ export default class AttributeTransitionManager {
   }
 
   finalize() {
-    if (this.transform) {
-      this.transform.delete();
-    }
-    for (const attributeName in this.attributeTransitions) {
+    for (const attributeName in this.transitions) {
       this._removeTransition(attributeName);
     }
   }
@@ -48,7 +37,6 @@ export default class AttributeTransitionManager {
   // Called when attribute manager updates
   // Check the latest attributes for updates.
   update({attributes, transitions = {}, numInstances}) {
-    this.opts = transitions;
     // Transform class will crash if elementCount is 0
     this.numInstances = numInstances || 1;
 
@@ -56,51 +44,37 @@ export default class AttributeTransitionManager {
       return;
     }
 
-    const {attributeTransitions} = this;
-    const changedTransitions = {};
-
     for (const attributeName in attributes) {
-      const hasChanged = this._updateAttribute(attributeName, attributes[attributeName]);
+      const attribute = attributes[attributeName];
+      const settings = attribute.getTransitionSetting(transitions);
 
-      if (hasChanged) {
-        changedTransitions[attributeName] = attributeTransitions[attributeName];
-      }
+      // this attribute might not support transitions?
+      if (!settings) continue; // eslint-disable-line no-continue
+      this._updateAttribute(attributeName, attribute, settings);
     }
 
-    for (const attributeName in attributeTransitions) {
+    for (const attributeName in this.transitions) {
       const attribute = attributes[attributeName];
-
-      if (!attribute || !attribute.supportsTransition()) {
+      if (!attribute || !attribute.getTransitionSetting(transitions)) {
         // Animated attribute has been removed
         this._removeTransition(attributeName);
       }
-    }
-
-    if (!this.transform) {
-      this._createModel();
-    } else if (this.transform) {
-      const {sourceBuffers, feedbackBuffers} = getBuffers(changedTransitions);
-      this.transform.update({
-        elementCount: this.numInstances,
-        sourceBuffers,
-        feedbackBuffers
-      });
     }
   }
 
   // Returns `true` if attribute is transition-enabled
   hasAttribute(attributeName) {
-    return attributeName in this.attributeTransitions;
+    const transition = this.transitions[attributeName];
+    return transition && transition.inProgress;
   }
 
   // Get all the animated attributes
   getAttributes() {
     const animatedAttributes = {};
 
-    for (const attributeName in this.attributeTransitions) {
-      const transition = this.attributeTransitions[attributeName];
-
-      if (transition.buffer) {
+    for (const attributeName in this.transitions) {
+      const transition = this.transitions[attributeName];
+      if (transition.inProgress) {
         animatedAttributes[attributeName] = transition.attributeInTransition;
       }
     }
@@ -111,188 +85,61 @@ export default class AttributeTransitionManager {
   /* eslint-disable max-statements */
   // Called every render cycle, run transform feedback
   // Returns `true` if anything changes
-  setCurrentTime(currentTime) {
-    if (!this.transform || this.numInstances === 0) {
+  run() {
+    if (!this.isSupported || this.numInstances === 0) {
       return false;
     }
 
-    const uniforms = {};
-
-    let needsRedraw = this.needsRedraw;
-    this.needsRedraw = false;
-
-    for (const attributeName in this.attributeTransitions) {
-      const transition = this.attributeTransitions[attributeName];
-      const updated = transition.update(currentTime);
+    for (const attributeName in this.transitions) {
+      const updated = this.transitions[attributeName].update();
       if (updated) {
-        uniforms[`${attributeName}Time`] = transition.time;
-        needsRedraw = true;
+        this.needsRedraw = true;
       }
     }
 
-    if (needsRedraw) {
-      this.transform.run({uniforms});
-    }
-
+    const needsRedraw = this.needsRedraw;
+    this.needsRedraw = false;
     return needsRedraw;
   }
   /* eslint-enable max-statements */
 
   /* Private methods */
-  _createTransition(attributeName, attribute) {
-    let transition = this.attributeTransitions[attributeName];
-    if (!transition) {
-      transition = new Transition({
-        name: attributeName,
-        attribute,
-        attributeInTransition: new Attribute(this.gl, attribute),
-        bufferLayout: attribute.bufferLayout
-      });
-      this.attributeTransitions[attributeName] = transition;
-      this._invalidateModel();
-      return transition;
-    }
-    return null;
-  }
-
   _removeTransition(attributeName) {
-    const transition = this.attributeTransitions[attributeName];
-    if (transition) {
-      if (transition.buffer) {
-        transition.buffer.delete();
-      }
-      if (transition._swapBuffer) {
-        transition._swapBuffer.delete();
-      }
-      delete this.attributeTransitions[attributeName];
-      this._invalidateModel();
-    }
+    this.transitions[attributeName].cancel();
+    delete this.transitions[attributeName];
   }
 
   // Check an attributes for updates
   // Returns a transition object if a new transition is triggered.
-  _updateAttribute(attributeName, attribute) {
-    const settings = attribute.getTransitionSetting(this.opts);
-
-    if (settings) {
-      let hasChanged;
-      let transition = this.attributeTransitions[attributeName];
+  _updateAttribute(attributeName, attribute, settings) {
+    const transition = this.transitions[attributeName];
+    // an attribute can change transition type when it updates
+    // let's remove the transition when that happens so we can create the new transition type
+    // TODO: when switching transition types, make sure to carry over the attribute's
+    // previous buffers, currentLength, bufferLayout, etc, to be used as the starting point
+    // for the next transition
+    let isNew = !transition || transition.type !== settings.type;
+    if (isNew) {
       if (transition) {
-        hasChanged = attribute.needsRedraw();
+        this._removeTransition(attributeName);
+      }
+
+      const TransitionType = TRANSITION_TYPES[settings.type];
+      if (TransitionType) {
+        this.transitions[attributeName] = new TransitionType({
+          attribute,
+          timeline: this.timeline,
+          gl: this.gl
+        });
       } else {
-        // New animated attributes have been added
-        transition = this._createTransition(attributeName, attribute);
-        hasChanged = true;
-      }
-
-      if (hasChanged) {
-        this._triggerTransition(transition, settings);
-        return true;
+        log.error(`unsupported transition type '${settings.type}'`)();
+        isNew = false;
       }
     }
 
-    return false;
-  }
-
-  // Invalidates the current model
-  _invalidateModel() {
-    if (this.transform) {
-      this.transform.delete();
-      this.transform = null;
+    if (isNew || attribute.needsRedraw()) {
+      this.needsRedraw = true;
+      this.transitions[attributeName].start(settings, this.numInstances);
     }
-  }
-
-  // Create a model for the transform feedback
-  _createModel() {
-    if (Object.keys(this.attributeTransitions).length === 0) {
-      // no transitions
-      return;
-    }
-    this.transform = new Transform(
-      this.gl,
-      Object.assign(
-        {
-          elementCount: this.numInstances
-        },
-        getBuffers(this.attributeTransitions),
-        getShaders(this.attributeTransitions)
-      )
-    );
-  }
-
-  // get current values of an attribute, clipped/padded to the size of the new buffer
-  _getNextTransitionStates(transition, settings) {
-    const {attribute} = transition;
-    const {size, offset} = attribute;
-
-    let toState;
-    if (attribute.constant) {
-      toState = new BaseAttribute(this.gl, {constant: true, value: attribute.value, size, offset});
-    } else {
-      toState = new BaseAttribute(this.gl, {
-        constant: false,
-        buffer: attribute.getBuffer(),
-        divisor: 0,
-        size,
-        offset,
-        // attribute's `value` does not match the content of external buffer,
-        // will need to call buffer.getData if needed
-        value: attribute.externalBuffer ? null : attribute.value
-      });
-    }
-    const fromState = transition.buffer || toState;
-    const toLength = attribute.userData.noAlloc ? attribute.value.length : this.numInstances * size;
-    const fromLength = (fromState instanceof Buffer && fromState.getElementCount()) || toLength;
-
-    // Alternate between two buffers when new transitions start.
-    // Last destination buffer is used as an attribute (from state),
-    // And the other buffer is now the destination buffer.
-    let buffer = transition._swapBuffer;
-    transition._swapBuffer = transition.buffer;
-
-    if (!buffer) {
-      buffer = new Buffer(this.gl, {
-        data: new Float32Array(toLength),
-        usage: GL.DYNAMIC_COPY
-      });
-    } else if (buffer.getElementCount() < toLength) {
-      // Pad buffers to be the same length
-      buffer.setData({
-        data: new Float32Array(toLength)
-      });
-    }
-
-    transition.attributeInTransition.update({buffer});
-
-    padBuffer({
-      fromState,
-      toState,
-      fromLength,
-      toLength,
-      fromBufferLayout: transition.bufferLayout,
-      toBufferLayout: attribute.bufferLayout,
-      offset: attribute.elementOffset,
-      getData: settings.enter
-    });
-
-    transition.bufferLayout = attribute.bufferLayout;
-
-    return {fromState, toState, buffer};
-  }
-
-  // Start a new transition using the current settings
-  // Updates transition state and from/to buffer
-  _triggerTransition(transition, settings) {
-    // Check if settings is valid
-    assert(settings && settings.duration > 0);
-
-    this.needsRedraw = true;
-
-    const transitionSettings = Object.assign({}, DEFAULT_TRANSITION_SETTINGS, settings);
-
-    // Attribute descriptor to transition from
-    transition.start(
-      Object.assign({}, this._getNextTransitionStates(transition, settings), transitionSettings)
-    );
   }
 }

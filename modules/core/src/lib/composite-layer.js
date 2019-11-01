@@ -37,7 +37,12 @@ export default class CompositeLayer extends Layer {
   // Updates selected state members and marks the composite layer to need rerender
   setState(updateObject) {
     super.setState(updateObject);
-    this.setLayerNeedsUpdate();
+    // Trigger a layer update
+    // Although conceptually layer.draw and compositeLayer.renderLayers are equivalent,
+    // they are executed during different lifecycles.
+    // draw can be called without calling updateState (e.g. most viewport changes),
+    // while renderLayers can only be called during a recursive layer update.
+    this.setNeedsUpdate();
   }
 
   // called to augment the info object that is bubbled up from a sublayer
@@ -152,6 +157,18 @@ export default class CompositeLayer extends Layer {
       const overridingSublayerProps = overridingProps && overridingProps[sublayerProps.id];
       const overridingSublayerTriggers =
         overridingSublayerProps && overridingSublayerProps.updateTriggers;
+
+      if (overridingSublayerProps) {
+        const propTypes = this.constructor._propTypes;
+        for (const key in overridingSublayerProps) {
+          const propType = propTypes[key];
+          // eslint-disable-next-line
+          if (propType && propType.type === 'accessor') {
+            overridingSublayerProps[key] = this.getSubLayerAccessor(overridingSublayerProps[key]);
+          }
+        }
+      }
+
       Object.assign(
         newProps,
         sublayerProps,

@@ -47,8 +47,7 @@ export default class ContourLayer extends CompositeLayer {
   initializeState() {
     const {gl} = this.context;
     const options = {
-      id: `${this.id}-gpu-aggregator`,
-      shaderCache: this.context.shaderCache
+      id: `${this.id}-gpu-aggregator`
     };
     this.state = {
       contourData: {},

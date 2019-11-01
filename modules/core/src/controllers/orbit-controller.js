@@ -13,6 +13,8 @@ const DEFAULT_STATE = {
   fovy: 50,
   zoom: 0,
   target: [0, 0, 0],
+  minRotationX: -90,
+  maxRotationX: 90,
   minZoom: -Infinity,
   maxZoom: Infinity
 };
@@ -27,6 +29,11 @@ const LINEAR_TRANSITION_PROPS = {
 /* Helpers */
 
 const zoom2Scale = zoom => Math.pow(2, zoom);
+
+// const mod = (value, divisor) => {
+//   const modulus = value % divisor;
+//   return modulus < 0 ? divisor + modulus : modulus;
+// };
 
 export class OrbitState extends ViewState {
   constructor({
@@ -43,6 +50,8 @@ export class OrbitState extends ViewState {
     fovy = DEFAULT_STATE.fovy,
 
     /* Viewport constraints */
+    minRotationX = DEFAULT_STATE.minRotationX,
+    maxRotationX = DEFAULT_STATE.maxRotationX,
     minZoom = DEFAULT_STATE.minZoom,
     maxZoom = DEFAULT_STATE.maxZoom,
 
@@ -66,6 +75,8 @@ export class OrbitState extends ViewState {
       target,
       fovy,
       zoom,
+      minRotationX,
+      maxRotationX,
       minZoom,
       maxZoom
     });
@@ -150,13 +161,15 @@ export class OrbitState extends ViewState {
     if (!Number.isFinite(startRotationX) || !Number.isFinite(startRotationOrbit)) {
       return this;
     }
-
-    const newRotationX = clamp(startRotationX + deltaScaleY * 180, -89.999, 89.999);
-    const newRotationOrbit = (startRotationOrbit + deltaScaleX * 180) % 360;
+    if (startRotationX < -90 || startRotationX > 90) {
+      // When looking at the "back" side of the scene, invert horizontal drag
+      // so that the camera movement follows user input
+      deltaScaleX *= -1;
+    }
 
     return this._getUpdatedState({
-      rotationX: newRotationX,
-      rotationOrbit: newRotationOrbit,
+      rotationX: startRotationX + deltaScaleY * 180,
+      rotationOrbit: startRotationOrbit + deltaScaleX * 180,
       isRotating: true
     });
   }
@@ -335,9 +348,10 @@ export class OrbitState extends ViewState {
   // Apply any constraints (mathematical or defined by _viewportProps) to map state
   _applyConstraints(props) {
     // Ensure zoom is within specified range
-    const {maxZoom, minZoom, zoom} = props;
-    props.zoom = zoom > maxZoom ? maxZoom : zoom;
-    props.zoom = zoom < minZoom ? minZoom : zoom;
+    const {maxZoom, minZoom, zoom, maxRotationX, minRotationX} = props;
+
+    props.zoom = clamp(zoom, minZoom, maxZoom);
+    props.rotationX = clamp(props.rotationX, minRotationX, maxRotationX);
 
     return props;
   }

@@ -60,6 +60,7 @@ vec2 rotate_by_angle(vec2 vertex, float angle) {
 void main(void) {
   geometry.worldPosition = instancePositions;
   geometry.uv = positions;
+  geometry.pickingColor = instancePickingColors;
   uv = positions;
 
   vec2 iconSize = instanceIconFrames.zw;
@@ -103,7 +104,6 @@ void main(void) {
 
   vColor = vec4(instanceColors.rgb, instanceColors.a * opacity);
   DECKGL_FILTER_COLOR(vColor, geometry);
-  picking_setPickingColor(instancePickingColors);
 
   vGamma = gamma / (sizeScale * iconSize.y);
 }
