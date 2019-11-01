@@ -483,5 +483,4 @@ export default class GPUColumn {
     }
   }
   */
-
 }
