@@ -469,15 +469,12 @@ export default class HeatmapLayer extends AggregationLayer {
       height: textureSize * RESOLUTION
     });
 
-    const uniforms = Object.assign(
-      {},
-      {
-        radiusPixels,
-        commonBounds,
-        textureWidth: textureSize,
-        weightsScale
-      }
-    );
+    const uniforms = {
+      radiusPixels,
+      commonBounds,
+      textureWidth: textureSize,
+      weightsScale
+    };
     // Attribute manager sets data array count as instaceCount on model
     // we need to set that as elementCount on 'weightsTransform'
     weightsTransform.update({

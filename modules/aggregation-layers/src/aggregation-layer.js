@@ -34,10 +34,10 @@ const UNIFORM_PROPS = [
 
 export default class AggregationLayer extends CompositeLayer {
   initializeState(aggregationProps = []) {
-      super.initializeState();
-      this.setState({
-        aggregationProps: aggregationProps.concat(UNIFORM_PROPS)
-      });
+    super.initializeState();
+    this.setState({
+      aggregationProps: aggregationProps.concat(UNIFORM_PROPS)
+    });
   }
 
   updateState(opts) {
@@ -96,7 +96,9 @@ export default class AggregationLayer extends CompositeLayer {
       oldProps[propName] = opts.oldProps[propName];
       props[propName] = opts.props[propName];
     }
-    return Boolean(compareProps({oldProps, newProps: props, propTypes: this.constructor._propTypes}));
+    return Boolean(
+      compareProps({oldProps, newProps: props, propTypes: this.constructor._propTypes})
+    );
   }
 
   _updateShaders(shaders) {
