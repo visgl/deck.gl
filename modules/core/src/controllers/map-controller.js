@@ -252,7 +252,10 @@ class MapState extends ViewState {
     const zoom = this._calculateNewZoom({scale, startZoom});
 
     const zoomedViewport = new WebMercatorViewport(Object.assign({}, this._viewportProps, {zoom}));
-    const [longitude, latitude] = zoomedViewport.getLocationAtPoint({lngLat: startZoomLngLat, pos});
+    const [longitude, latitude] = zoomedViewport.getMapCenterByLngLatPosition({
+      lngLat: startZoomLngLat,
+      pos
+    });
 
     return this._getUpdatedState({
       zoom,

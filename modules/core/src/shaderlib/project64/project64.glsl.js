@@ -101,9 +101,4 @@ vec4 project_position_to_clipspace(
     position, position64xyLow, offset, commonPosition
   );
 }
-
-// Deprecated, remove in v8
-vec4 project_to_clipspace_fp64(vec2 vertex_pos_modelspace[4]) {
-  return project_common_position_to_clipspace_fp64(vertex_pos_modelspace);
-}
 `;

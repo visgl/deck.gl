@@ -35,11 +35,5 @@ export default {
   name: 'project',
   dependencies: [fp32],
   vs: projectShader,
-  getUniforms,
-  deprecations: [
-    // Deprecated, remove in v8
-    {type: 'function', old: 'project_scale', new: 'project_size'},
-    {type: 'function', old: 'project_to_clipspace', new: 'project_common_position_to_clipspace'},
-    {type: 'function', old: 'project_pixel_to_clipspace', new: 'project_pixel_size_to_clipspace'}
-  ]
+  getUniforms
 };

@@ -988,11 +988,6 @@ ${flags.viewportChanged ? 'viewport' : ''}\
     this.setNeedsRedraw();
     log.deprecated('layer.setUniforms', 'model.setUniforms')();
   }
-
-  use64bitProjection() {
-    log.removed('use64bitProjection', 'Fp64Extension')();
-    return false;
-  }
 }
 
 Layer.layerName = 'Layer';

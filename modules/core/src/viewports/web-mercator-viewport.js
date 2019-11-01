@@ -33,10 +33,6 @@ import {
 // TODO - import from math.gl
 import * as vec2 from 'gl-matrix/vec2';
 
-import assert from '../utils/assert';
-
-const ERR_ARGUMENT = 'Illegal argument to WebMercatorViewport';
-
 export default class WebMercatorViewport extends Viewport {
   /**
    * @classdesc
@@ -120,52 +116,9 @@ export default class WebMercatorViewport extends Viewport {
 
     this.orthographic = orthographic;
 
-    // Bind methods
-    this.metersToLngLatDelta = this.metersToLngLatDelta.bind(this);
-    this.lngLatDeltaToMeters = this.lngLatDeltaToMeters.bind(this);
-
     Object.freeze(this);
   }
   /* eslint-enable complexity, max-statements */
-
-  /**
-   * Converts a meter offset to a lnglat offset
-   *
-   * Note: Uses simple linear approximation around the viewport center
-   * Error increases with size of offset (roughly 1% per 100km)
-   *
-   * @param {[Number,Number]|[Number,Number,Number]) xyz - array of meter deltas
-   * @return {[Number,Number]|[Number,Number,Number]) - array of [lng,lat,z] deltas
-   */
-  metersToLngLatDelta(xyz) {
-    const [x, y, z = 0] = xyz;
-    assert(Number.isFinite(x) && Number.isFinite(y) && Number.isFinite(z), ERR_ARGUMENT);
-    const {pixelsPerMeter, degreesPerPixel} = this.distanceScales;
-    const deltaLng = x * pixelsPerMeter[0] * degreesPerPixel[0];
-    const deltaLat = y * pixelsPerMeter[1] * degreesPerPixel[1];
-    return xyz.length === 2 ? [deltaLng, deltaLat] : [deltaLng, deltaLat, z];
-  }
-
-  /**
-   * Converts a lnglat offset to a meter offset
-   *
-   * Note: Uses simple linear approximation around the viewport center
-   * Error increases with size of offset (roughly 1% per 100km)
-   *
-   * @param {[Number,Number]|[Number,Number,Number]) deltaLngLatZ - array of [lng,lat,z] deltas
-   * @return {[Number,Number]|[Number,Number,Number]) - array of meter deltas
-   */
-  lngLatDeltaToMeters(deltaLngLatZ) {
-    const [deltaLng, deltaLat, deltaZ = 0] = deltaLngLatZ;
-    assert(
-      Number.isFinite(deltaLng) && Number.isFinite(deltaLat) && Number.isFinite(deltaZ),
-      ERR_ARGUMENT
-    );
-    const {pixelsPerDegree, metersPerPixel} = this.distanceScales;
-    const deltaX = deltaLng * pixelsPerDegree[0] * metersPerPixel[0];
-    const deltaY = deltaLat * pixelsPerDegree[1] * metersPerPixel[1];
-    return deltaLngLatZ.length === 2 ? [deltaX, deltaY] : [deltaX, deltaY, deltaZ];
-  }
 
   /**
    * Add a meter delta to a base lnglat coordinate, returning a new lnglat array
@@ -199,11 +152,6 @@ export default class WebMercatorViewport extends Viewport {
     const newCenter = vec2.add([], this.center, translate);
 
     return this.unprojectFlat(newCenter);
-  }
-
-  // Legacy method name
-  getLocationAtPoint({lngLat, pos}) {
-    return this.getMapCenterByLngLatPosition({lngLat, pos});
   }
 
   /**

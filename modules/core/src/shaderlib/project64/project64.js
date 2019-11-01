@@ -29,14 +29,7 @@ export default {
   name: 'project64',
   dependencies: [project, fp64],
   vs: project64Shader,
-  getUniforms,
-  deprecations: [
-    {
-      type: 'function',
-      old: 'project_to_clipspace_fp64',
-      new: 'project_common_position_to_clipspace_fp64'
-    }
-  ]
+  getUniforms
 };
 
 // TODO - this module should calculate the 64 bit uniforms
