@@ -16,10 +16,6 @@ from shutil import copy
 from subprocess import check_call
 import sys
 
-from dependency_managers import (
-    create_standalone_render_requirejs,
-)
-
 here = os.path.dirname(os.path.abspath(__file__))
 
 
