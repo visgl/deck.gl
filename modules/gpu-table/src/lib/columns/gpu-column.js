@@ -1,29 +1,73 @@
 /* eslint-disable complexity */
+import GL from '@luma.gl/constants';
 import {Buffer} from '@luma.gl/core';
 import assert from '../utils/assert';
-// import BaseAttribute from './base-attribute';
+
 import typedArrayManager from '../utils/typed-array-manager';
 import {toDoublePrecisionArray} from '../utils/double-precision';
 import {getTypedArrayFromGLType} from '../utils/gl-types';
-
-// TODO - remove
-/* eslint-disable */
+import {length} from 'gl-matrix/cjs/vec4';
 
 export default class GPUColumn {
-  constructor(gl, options = {}) {
-    const logicalType = options.type;
+  constructor(gl, name, value, options = {}) {
+    this.gl = gl;
+    this.name = name;
+    this.isManaged = true;
+    this.buffer = null;
+    this.accessors = {};
 
-    let {defaultValue = [0, 0, 0, 0]} = options;
-    defaultValue = Array.isArray(defaultValue) ? defaultValue : [defaultValue];
+    Object.seal(this.userData);
 
-    // This is the attribute type defined by the layer
-    // If an external buffer is provided, this.type may be overwritten
-    // But we always want to use defaultType for allocation
-    this.defaultType = logicalType || this.type || GL.FLOAT;
-    this.attributes = {};
-    this.hasShaderAttributes = false;
-    // this.doublePrecision = doublePrecision;
+    this._setColumn(column);
+  }
 
+  delete() {
+    if (this.isManaged && this.buffer) {
+      this.buffer.delete();
+      this.buffer = null;
+    }
+    return this;
+  }
+
+  finalize() {
+    return this.delete();
+  }
+
+  getBuffer() {
+    return this.buffer;
+  }
+
+  // PRIVATE
+
+  _setColumn(column) {
+    if (column instanceof Buffer) {
+      this.buffer = column;
+      return;
+    }
+
+    if (column instanceof WebGLBuffer) {
+      this.buffer = new Buffer(this.gl, {handle: column});
+      return;
+    }
+
+    if (column instanceof ArrayBuffer) {
+      const byteLength = column.byteLength; // PAD to make texture compatible: power of 2
+      this.buffer = new Buffer(this.gl, {byteLength});
+      this.buffer.subData(column);
+      return;
+    }
+
+    if (ArrayBuffer.isView(column)) {
+      const byteLength = column.byteLength; // PAD to make texture compatible: power of 2
+      this.buffer = new Buffer(this.gl, {byteLength});
+      this.buffer.subData(column);
+      return;
+    }
+
+    assert(false);
+  }
+
+  /*
     switch (this.getGLType()) {
       case GL.DOUBLE:
         this.attributes = this._addDoublePrecisionAttributes(this);
@@ -40,29 +84,6 @@ export default class GPUColumn {
         throw new Error(`Unknown column type ${this.getGLType()}`);
     }
 
-    assert(this.attributes);
-
-    Object.seal(this.userData);
-
-  }
-
-  delete() {
-
-  }
-
-  needsUpdate() {
-    return this.userData.needsUpdate;
-  }
-
-  needsRedraw({clearChangedFlags = false} = {}) {
-    const needsRedraw = this.userData.needsRedraw;
-    this.userData.needsRedraw = this.userData.needsRedraw && !clearChangedFlags;
-    return needsRedraw;
-  }
-
-  getBuffer() {
-    return this.externalBuffer || this.buffer;
-  }
 
   getValue() {
     const buffer = this.externalBuffer || this.buffer;
@@ -72,7 +93,7 @@ export default class GPUColumn {
     return null;
   }
 
-  /* eslint-disable max-statements */
+  // eslint-disable max-statements
   update(options) {
     const {value, buffer, constant = this.constant || false} = options;
 
@@ -218,38 +239,8 @@ export default class GPUColumn {
   }
 
   updateBuffer({numInstances, bufferLayout, data, props, context}) {
-    if (!this.needsUpdate()) {
-      return false;
-    }
+    // doublePrecision ? toDoublePrecisionArray(attributeValue, this) : attributeValue,
 
-    const state = this.userData;
-
-    const {update, updateRanges, noAlloc} = state;
-
-    let updated = true;
-    if (update) {
-      // Custom updater - typically for non-instanced layers
-      for (const [startRow, endRow] of updateRanges) {
-        update.call(context, this, {data, startRow, endRow, props, numInstances, bufferLayout});
-      }
-      const doublePrecision = this.doublePrecision && this.value instanceof Float64Array;
-      if (this.constant || !this.buffer || this.buffer.byteLength < this.value.byteLength) {
-        const attributeValue = this.value;
-        // call base clas `update` method to upload value to GPU
-        this.update({
-          value: doublePrecision ? toDoublePrecisionArray(attributeValue, this) : attributeValue,
-          constant: this.constant
-        });
-        // Save the 64-bit version
-        this.value = attributeValue;
-      } else {
-        for (const [startRow, endRow] of updateRanges) {
-          const startOffset = Number.isFinite(startRow) ? this.getVertexOffset(startRow) : 0;
-          const endOffset = Number.isFinite(endRow)
-            ? this.getVertexOffset(endRow)
-            : noAlloc || !Number.isFinite(numInstances)
-              ? this.value.length
-              : numInstances * this.size;
 
           // Only update the changed part of the attribute
           this.buffer.subData({
@@ -265,21 +256,9 @@ export default class GPUColumn {
         }
       }
       this._checkAttributeArray();
-    } else {
-      updated = false;
     }
 
-    this._updateShaderAttributes();
-
-    this.clearNeedsUpdate();
-    state.needsRedraw = true;
-
     return updated;
-  }
-
-  update(props) {
-    super.update(props);
-    this._updateShaderAttributes();
   }
 
   // Use generic value
@@ -394,7 +373,7 @@ export default class GPUColumn {
     return offset + row * this.size;
   }
 
-  /* check user supplied values and apply fallback */
+  // check user supplied values and apply fallback
   _normalizeValue(value, out = [], start = 0) {
     const {defaultValue} = this.userData;
 
@@ -403,7 +382,7 @@ export default class GPUColumn {
       return out;
     }
 
-    /* eslint-disable no-fallthrough, default-case */
+    // eslint-disable no-fallthrough, default-case
     switch (this.size) {
       case 4:
         out[start + 3] = Number.isFinite(value[3]) ? value[3] : defaultValue[3];
@@ -503,4 +482,6 @@ export default class GPUColumn {
       });
     }
   }
+  */
+
 }

@@ -18,7 +18,8 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {Buffer, _Accessor as Accessor} from '@luma.gl/core';
+import GL from '@luma.gl/constants';
+import {Buffer} from '@luma.gl/core';
 import {log} from '@deck.gl/core';
 
 /* eslint-disable guard-for-in */
@@ -33,9 +34,13 @@ export default class GPUTable {
 
     this.schema = {};
     this.columns = {};
+    this.buffers = {};
 
     this.accessors = {};
     this.instancedAccessors = {};
+
+    this.attributes = {};
+    this.instancedAttributes = {};
 
     this.needsRedraw = true;
 
@@ -53,8 +58,8 @@ export default class GPUTable {
   }
 
   finalize() {
-    for (const attributeName in this.attributes) {
-      this.attributes[attributeName].delete();
+    for (const columnName in this.columns) {
+      this.columns[columnName].finalize();
     }
   }
 
@@ -95,7 +100,7 @@ export default class GPUTable {
   // Takes an object where key is the name of the colum and value is an object {data, type, size, ..}
   addColumns(columns) {
     for (const name in columns) {
-      this.addColumn(name, columns[name]);
+      this._addColumn(name, columns[name]);
     }
     return this;
   }
@@ -128,6 +133,7 @@ export default class GPUTable {
     return this;
   }
 
+  /*
   // Adds attributes
   addFixedSizeColumn(column) {
     this._add(attributes, updaters, {instanced: 1});
@@ -168,38 +174,16 @@ export default class GPUTable {
   addRecordBatch(recordBatch) {
     throw new Error('not implemented');
   }
+  */
 
   // PRIVATE METHODS
 
-  _createColumn(name, attribute, extraProps) {
-    return new GPUColumn(this.gl, Object.assign({}, attribute, props));
-  }
-
-  _normalizeColumn(name, column) {
+  _addColumn(name, column) {
     // Ensure not already present
     log.assert(!this.columns[name] && !this.buffers[name]);
-
-    if (column instanceof Buffer) {
-      return [column, column.accessor || {}];
-    }
-
-    if (column instanceof WebGLBuffer) {
-      return [new Buffer(this.gl, {handle: column}), {}];
-    }
-
-    if (column instanceof ArrayBuffer) {
-      return [new Buffer(this.gl, {data: ArrayBuffer, byteLength: ...})];
-    }
-
-    if (ArrayBuffer.isView(column)) {
-      // TBD
-    }
-
-
-    let accessor = column.accessor || {};
-    let
-    this.accessors[name] = accessor || {};
-    return this;
+    const gpuColumn = new GPUColumn(this.gl, name, column);
+    this.columns[name] = gpuColumn;
+    this.buffers[name] = gpuColumn.buffer;
   }
 
   // Makes sure that the buffer can be evenly divided by a power of two
