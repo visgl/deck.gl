@@ -45,7 +45,7 @@ const defaultProps = {
   zOffset: 0.005
 };
 
-// props , when changed requires re aggregation (weightmap generation)
+// props , when changed requires re-aggregation
 const AGGREGATION_PROPS = ['gpuAggregation'];
 
 export default class ContourLayer extends GridAggregationLayer {
@@ -87,15 +87,6 @@ export default class ContourLayer extends GridAggregationLayer {
     }
   }
 
-  // TODO: is this better than checking changeFlags.dataChanged ?
-  // updateAttributes(changedAttributes) {
-  //   // eslint-disable-next-line
-  //   for (const name in changedAttributes) {
-  //     this.setState({dataChanged: true});
-  //     break;
-  //   }
-  // }
-
   renderLayers() {
     const {contourSegments, contourPolygons} = this.state.contourData;
     const hasIsolines = contourSegments && contourSegments.length > 0;
@@ -123,7 +114,6 @@ export default class ContourLayer extends GridAggregationLayer {
     const {weights, gridSize, gridOrigin, cellSize, boundingBox} = pointToDensityGridData({
       data,
       cellSizeMeters,
-      // getPosition,
       weightParams: {count: {getWeight}},
       gpuAggregation,
       gpuGridAggregator,

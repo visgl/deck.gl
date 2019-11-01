@@ -76,7 +76,7 @@ const REQUIRED_FEATURES = [
   // FEATURES.FLOAT_BLEND, // implictly supported when TEXTURE_FLOAT is supported
 ];
 
-// props , when changed requires re aggregation (weightmap generation)
+// props , when changed requires re-aggregation
 const AGGREGATION_PROPS = ['radiusPixels'];
 
 export default class HeatmapLayer extends AggregationLayer {

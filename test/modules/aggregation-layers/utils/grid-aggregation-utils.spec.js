@@ -84,8 +84,6 @@ test('GridAggregationUtils#pointToDensityGridData (CPU vs GPU)', t => {
       `Min data should match for cellSizeMeters:${cellSizeMeters}`
     );
 
-    // TODO - This is failing in headless browser test. Might be related to
-    // https://github.com/uber/deck.gl/issues/3156
     t.deepEqual(
       cpuMaxCountsData[3],
       gpuMaxCountData[3],

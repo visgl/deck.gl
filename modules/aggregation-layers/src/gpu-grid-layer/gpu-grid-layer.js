@@ -59,7 +59,7 @@ const defaultProps = {
   gpuAggregation: true
 };
 
-// props , when changed requires re aggregation (weightmap generation)
+// props , when changed requires re-aggregation
 const AGGREGATION_PROPS = ['gpuAggregation', 'colorAggregation', 'elevationAggregation'];
 
 export default class GPUGridLayer extends GridAggregationLayer {

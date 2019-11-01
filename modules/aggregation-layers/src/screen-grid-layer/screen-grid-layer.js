@@ -35,7 +35,7 @@ const defaultProps = Object.assign({}, ScreenGridCellLayer.defaultProps, {
   aggregation: 'SUM'
 });
 
-// props , when changed requires re aggregation (weightmap generation)
+// props , when changed requires re-aggregation
 const AGGREGATION_PROPS = ['gpuAggregation'];
 
 export default class ScreenGridLayer extends GridAggregationLayer {
