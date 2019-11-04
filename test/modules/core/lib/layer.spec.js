@@ -283,8 +283,7 @@ test('Layer#project', t => {
     height: 300,
     viewState: {longitude: 0, latitude: 0, zoom: 10}
   });
-
-  t.ok(equals(layer.project([0, 0, 100]), [200, 150, 0.8788028155547649]), 'returns correct value');
+  t.ok(equals(layer.project([0, 0, 100]), [200, 150, 0.9981698636949582]), 'returns correct value');
 
   layer = new SubLayer({
     coordinateSystem: COORDINATE_SYSTEM.METER_OFFSETS,
@@ -301,7 +300,7 @@ test('Layer#project', t => {
     equals(layer.project([100, 100, 100]), [
       215.91962780165122,
       134.08037212774843,
-      0.8788028155547649
+      0.9981698636949582
     ]),
     'returns correct value'
   );

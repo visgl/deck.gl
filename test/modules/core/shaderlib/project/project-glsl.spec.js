@@ -134,19 +134,19 @@ const TEST_CASES = [
       {
         name: 'project_size(float)',
         func: ({project_size}) => project_size(1),
-        output: TEST_VIEWPORT.getDistanceScales().pixelsPerMeter[2],
+        output: TEST_VIEWPORT.getDistanceScales().unitsPerMeter[2],
         vs: TRANSFORM_VS.project_size(1)
       },
       {
         name: 'project_size(vec2)',
         func: ({project_size_vec2}) => project_size_vec2([1, 1]),
-        output: TEST_VIEWPORT.getDistanceScales().pixelsPerMeter.slice(0, 2),
+        output: TEST_VIEWPORT.getDistanceScales().unitsPerMeter.slice(0, 2),
         vs: TRANSFORM_VS.project_size_vec2([1, 1])
       },
       {
         name: 'project_size(vec3)',
         func: ({project_size_vec3}) => project_size_vec3([1, 1, 1]),
-        output: TEST_VIEWPORT.getDistanceScales().pixelsPerMeter,
+        output: TEST_VIEWPORT.getDistanceScales().unitsPerMeter,
         vs: TRANSFORM_VS.project_size_vec3([1, 1, 1])
       },
       {

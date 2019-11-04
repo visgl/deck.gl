@@ -909,7 +909,7 @@ export const TEST_CASES = [
         dirLight: new DirectionalLight({
           color: [255, 255, 255],
           intensity: 1.0,
-          direction: [-10, -2, -15],
+          direction: [-10, 2, -15],
           _shadow: true
         })
       })

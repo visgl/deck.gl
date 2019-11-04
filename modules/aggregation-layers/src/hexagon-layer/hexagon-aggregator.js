@@ -32,7 +32,7 @@ import {createIterable, log} from '@deck.gl/core';
  */
 export function pointToHexbin({data, radius, getPosition}, viewport) {
   // get hexagon radius in mercator world unit
-  const radiusInPixel = getRadiusInPixel(radius, viewport);
+  const radiusCommon = getRadiusInCommon(radius, viewport);
 
   // add world space coordinates to points
   const screenPoints = [];
@@ -56,7 +56,7 @@ export function pointToHexbin({data, radius, getPosition}, viewport) {
   }
 
   const newHexbin = hexbin()
-    .radius(radiusInPixel)
+    .radius(radiusCommon)
     .x(d => d.screenCoord[0])
     .y(d => d.screenCoord[1]);
 
@@ -78,9 +78,9 @@ export function pointToHexbin({data, radius, getPosition}, viewport) {
 
  * @return {Number} radius in mercator world spcae coordinates
  */
-export function getRadiusInPixel(radius, viewport) {
-  const {pixelsPerMeter} = viewport.getDistanceScales();
+export function getRadiusInCommon(radius, viewport) {
+  const {unitsPerMeter} = viewport.getDistanceScales();
 
   // x, y distance should be the same
-  return radius * pixelsPerMeter[0];
+  return radius * unitsPerMeter[0];
 }

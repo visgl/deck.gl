@@ -98,7 +98,7 @@ test('Sunlight#getProjectedLight', t => {
   const projectedLight = sunLight.getProjectedLight({layer});
   t.deepEqual(
     projectedLight.direction,
-    [0.8448592259153318, -0.5349886806145961, -0.8670767876117542],
+    [0.8448592259153318, 0.5349886806145961, -0.8670767876117542],
     'Sun light is ok'
   );
   t.end();

@@ -98,7 +98,7 @@ vec2 project_mercator_(vec2 lnglat) {
   }
   return vec2(
     radians(x) + PI,
-    PI - log(tan_fp32(PI * 0.25 + radians(lnglat.y) * 0.5))
+    PI + log(tan_fp32(PI * 0.25 + radians(lnglat.y) * 0.5))
   );
 }
 
@@ -109,7 +109,7 @@ vec4 project_position(vec4 position, vec2 position64xyLow) {
   // TODO - why not simply subtract center and fall through?
   if (project_uCoordinateSystem == COORDINATE_SYSTEM_LNG_LAT) {
     return project_uModelMatrix * vec4(
-      project_mercator_(position.xy) * WORLD_SCALE * project_uScale,
+      project_mercator_(position.xy) * WORLD_SCALE,
       project_size(position.z),
       position.w
     );
@@ -181,12 +181,12 @@ vec2 project_pixel_size_to_clipspace(vec2 pixels) {
 }
 
 float project_size_to_pixel(float meters) {
-  return project_size(meters);
+  return project_size(meters) * project_uScale;
 }
 float project_pixel_size(float pixels) {
-  return pixels;
+  return pixels / project_uScale;
 }
 vec2 project_pixel_size(vec2 pixels) {
-  return pixels;
+  return pixels / project_uScale;
 }
 `;

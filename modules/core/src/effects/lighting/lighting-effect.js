@@ -10,12 +10,12 @@ const DEFAULT_DIRECTIONAL_LIGHT_PROPS = [
   {
     color: [255, 255, 255],
     intensity: 1.0,
-    direction: [-1, -3, -1]
+    direction: [-1, 3, -1]
   },
   {
     color: [255, 255, 255],
     intensity: 0.9,
-    direction: [1, 8, -2.5]
+    direction: [1, -8, -2.5]
   }
 ];
 const DEFAULT_SHADOW_COLOR = [0, 0, 0, 200 / 255];

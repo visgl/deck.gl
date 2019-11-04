@@ -24,6 +24,8 @@ import {WebMercatorViewport} from '@deck.gl/core';
 import {ScatterplotLayer, GeoJsonLayer} from '@deck.gl/layers';
 import {testInitializeLayer} from '@deck.gl/test-utils';
 
+import {equals} from 'math.gl';
+
 const testLayer = new ScatterplotLayer({
   id: 'test-layer',
   data: ['a', 'b'],
@@ -122,7 +124,12 @@ test('processPickInfo', t => {
     const info = infos.get(testCase.info.layer && testCase.info.layer.id);
 
     for (const key in testCase.info) {
-      t.deepEqual(info[key], testCase.info[key], `info.${key}`);
+      const expected = testCase.info[key];
+      if (Number.isFinite(expected) || Array.isArray(expected)) {
+        t.ok(equals(info[key], expected), `info.${key}`);
+      } else {
+        t.deepEqual(info[key], expected, `info.${key}`);
+      }
     }
     for (const key in testCase.lastPickedInfo) {
       t.deepEqual(lastPickedInfo[key], testCase.lastPickedInfo[key], `lastPickedInfo.${key}`);

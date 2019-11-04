@@ -18,8 +18,11 @@ function getBoundingBox(viewport) {
   ];
 }
 
-function pixelsToTileIndex(a) {
-  return a / TILE_SIZE;
+function getTileIndex(lngLat, scale) {
+  let [x, y] = lngLatToWorld(lngLat);
+  x *= scale / TILE_SIZE;
+  y = (1 - y / TILE_SIZE) * scale;
+  return [x, y];
 }
 
 /**
@@ -41,8 +44,8 @@ export function getTileIndices(viewport, maxZoom, minZoom) {
 
   const bbox = getBoundingBox(viewport);
 
-  let [minX, minY] = lngLatToWorld([bbox[0], bbox[3]], viewport.scale).map(pixelsToTileIndex);
-  let [maxX, maxY] = lngLatToWorld([bbox[2], bbox[1]], viewport.scale).map(pixelsToTileIndex);
+  let [minX, minY] = getTileIndex([bbox[0], bbox[3]], viewport.scale);
+  let [maxX, maxY] = getTileIndex([bbox[2], bbox[1]], viewport.scale);
 
   /*
       |  TILE  |  TILE  |  TILE  |

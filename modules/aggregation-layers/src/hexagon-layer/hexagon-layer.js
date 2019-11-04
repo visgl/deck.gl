@@ -109,7 +109,7 @@ export default class HexagonLayer extends CompositeLayer {
 
       // transform to space coordinates
       const {viewport} = this.context;
-      const {pixelsPerMeter} = viewport.getDistanceScales();
+      const {unitsPerMeter} = viewport.getDistanceScales();
       const spaceCoord0 = this.projectFlat(vertex0);
       const spaceCoord3 = this.projectFlat(vertex3);
 
@@ -120,7 +120,7 @@ export default class HexagonLayer extends CompositeLayer {
 
       // Calculate angle that the perpendicular hexagon vertex axis is tilted
       angle = ((Math.acos(dx / dxy) * -Math.sign(dy)) / Math.PI) * 180 + 90;
-      radius = dxy / 2 / pixelsPerMeter[0];
+      radius = dxy / 2 / unitsPerMeter[0];
     }
 
     this.setState({angle, radius});

@@ -18,7 +18,7 @@ const cullingVolume = new CullingVolume([
 export function getFrameState(viewport, frameNumber) {
   // Traverse and and request. Update _selectedTiles so that we know what to render.
   const {cameraDirection, cameraUp, height} = viewport;
-  const {metersPerPixel} = viewport.distanceScales;
+  const {metersPerUnit} = viewport.distanceScales;
 
   const viewportCenterCartographic = [viewport.longitude, viewport.latitude, 0];
   // TODO - Ellipsoid.eastNorthUpToFixedFrame() breaks on raw array, create a Vector.
@@ -37,10 +37,10 @@ export function getFrameState(viewport, frameNumber) {
 
   // These should still be normalized as the transform has scale 1 (goes from meters to meters)
   const cameraDirectionCartesian = new Vector3(
-    enuToFixedTransform.transformAsVector(new Vector3(cameraDirection).scale(metersPerPixel))
+    enuToFixedTransform.transformAsVector(new Vector3(cameraDirection).scale(metersPerUnit))
   ).normalize();
   const cameraUpCartesian = new Vector3(
-    enuToFixedTransform.transformAsVector(new Vector3(cameraUp).scale(metersPerPixel))
+    enuToFixedTransform.transformAsVector(new Vector3(cameraUp).scale(metersPerUnit))
   ).normalize();
 
   commonSpacePlanesToWGS84(viewport);

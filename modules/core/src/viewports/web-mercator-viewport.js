@@ -49,11 +49,12 @@ export default class WebMercatorViewport extends Viewport {
       pitch = 0,
       bearing = 0,
       nearZMultiplier = 0.1,
-      farZMultiplier = 10,
+      farZMultiplier = 1.01,
       orthographic = false
     } = opts;
 
     let {width, height, altitude = 1.5} = opts;
+    const scale = Math.pow(2, zoom);
 
     // Silently allow apps to send in 0,0 to facilitate isomorphic render etc
     width = width || 1;
@@ -80,6 +81,7 @@ export default class WebMercatorViewport extends Viewport {
       height,
       pitch,
       bearing,
+      scale,
       altitude
     });
 
