@@ -31,7 +31,7 @@ function getViewMatrix({height, fovy, orbitAxis, rotationX, rotationOrbit, zoom}
   // Without modifying the default near/far planes, we instead scale down the common space to
   // remove the distortion to the depth field.
   const projectionScale = Math.pow(2, zoom) / (height || 1);
-  viewMatrix.scale([projectionScale, projectionScale, projectionScale]);
+  viewMatrix.scale(projectionScale);
 
   return viewMatrix;
 }

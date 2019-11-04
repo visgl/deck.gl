@@ -38,9 +38,7 @@ export default class FirstPersonView extends View {
     // Just the direction. All the positioning is done in viewport.js
     const zoom = getMeterZoom(props);
     const scale = Math.pow(2, zoom);
-    const viewMatrix = new Matrix4()
-      .lookAt({eye: [0, 0, 0], center, up})
-      .scale([scale, scale, scale]);
+    const viewMatrix = new Matrix4().lookAt({eye: [0, 0, 0], center, up}).scale(scale);
 
     return new Viewport(
       Object.assign({}, props, {

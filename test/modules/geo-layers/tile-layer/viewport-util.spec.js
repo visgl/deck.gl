@@ -31,20 +31,20 @@ const TEST_CASES = [
     maxZoom: undefined,
     output: ['0,1,3', '0,2,3', '0,3,3', '1,1,3', '1,2,3', '1,3,3', '2,1,3', '2,2,3', '2,3,3']
   },
-  // The new projection matrix no longer unproject to the exact corners
-  // {
-  //   title: 'flat viewport (exact)',
-  //   viewport: new WebMercatorViewport({
-  //     width: 1024,
-  //     height: 1024,
-  //     longitude: 0,
-  //     latitude: 0,
-  //     zoom: 4
-  //   }),
-  //   minZoom: undefined,
-  //   maxZoom: undefined,
-  //   output: ['6,6,4', '6,7,4', '6,8,4', '7,6,4', '7,7,4', '7,8,4', '8,6,4', '8,7,4', '8,8,4']
-  // },
+  {
+    title: 'flat viewport (exact)',
+    viewport: new WebMercatorViewport({
+      width: 1024,
+      height: 1024,
+      longitude: 0,
+      latitude: 0,
+      orthographic: true,
+      zoom: 2
+    }),
+    minZoom: undefined,
+    maxZoom: undefined,
+    output: ['1,1,2', '1,2,2', '2,1,2', '2,2,2']
+  },
   {
     title: 'under zoom',
     viewport: new WebMercatorViewport({longitude: -90, latitude: 45, zoom: 3}),

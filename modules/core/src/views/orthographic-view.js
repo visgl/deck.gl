@@ -31,7 +31,7 @@ class OrthographicViewport extends Viewport {
       width,
       height,
       position: target,
-      viewMatrix: viewMatrix.clone().scale([scale, scale, scale]),
+      viewMatrix: viewMatrix.clone().scale(scale),
       projectionMatrix: getProjectionMatrix({width, height, near, far}),
       zoom
     });
