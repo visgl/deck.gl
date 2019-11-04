@@ -150,8 +150,6 @@ class FrontendBuild(Command):
         self.clean_frontend_build()
         self.copy_frontend_build()
         log.info('Creating RequireJS configs.')
-        setup_environment = 'production' if prod_build else 'development'
-        create_standalone_render_requirejs(load_requirejs_dependencies(), here, setup_environment=setup_environment)
 
         for t in self.target_files:
             if not os.path.exists(t):
