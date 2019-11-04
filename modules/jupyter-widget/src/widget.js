@@ -70,14 +70,14 @@ export class DeckGLView extends DOMWidgetView {
     container.style.height = height;
     container.style.position = 'relative';
 
+    const mapboxApiKey = this.model.get('mapbox_key');
+    const jsonInput = JSON.parse(this.model.get('json_input'));
+    const tooltip = this.model.get('tooltip');
+
     if (this.model.get('js_warning')) {
       const errorBox = addErrorBox();
       container.append(errorBox);
     }
-
-    const mapboxApiKey = this.model.get('mapbox_key');
-    const jsonInput = JSON.parse(this.model.get('json_input'));
-    const tooltip = this.model.get('tooltip');
 
     loadCss(MAPBOX_CSS_URL);
     initDeck({
@@ -102,6 +102,7 @@ export class DeckGLView extends DOMWidgetView {
 
   render() {
     super.render();
+
     this.model.on('change:json_input', this.valueChanged.bind(this), this);
   }
 
@@ -135,7 +136,7 @@ export class DeckGLView extends DOMWidgetView {
 
   handleWarning(warningMessage) {
     const errorBox = this.el.getElementsByClassName(ERROR_BOX_CLASSNAME)[0];
-    if (this.model.get('js_warning')) {
+    if (this.model.get('js_warning') && errorBox) {
       errorBox.innerText = warningMessage;
     }
   }
