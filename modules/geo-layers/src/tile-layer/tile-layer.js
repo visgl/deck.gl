@@ -46,9 +46,7 @@ export default class TileLayer extends CompositeLayer {
         onTileError: this._onTileError.bind(this)
       });
       this.setState({tileCache});
-    } else if (
-      changeFlags.updateTriggersChanged
-    ) {
+    } else if (changeFlags.updateTriggersChanged) {
       // if any updateTriggersChanged (other than getTileData), delete the layer
       this.state.tileCache.tiles.forEach(tile => {
         tile.layer = null;
