@@ -66,7 +66,7 @@ export function initDeck({
         });
 
         const warn = deck.log.warn;
-        deck.log.warn = wrapWarn(warn, handleWarning);
+        deck.log.warn = injectFunction(warn, handleWarning);
         if (onComplete) {
           onComplete({jsonConverter, deckgl});
         }
@@ -80,9 +80,9 @@ export function initDeck({
   });
 }
 
-function wrapWarn(warnFunction, messageHandler) {
-  return (message, err) => {
-    messageHandler(message);
-    return warnFunction(message, err);
+function injectFunction(warnFunction, messageHandler) {
+  return (...args) => {
+    messageHandler(...args);
+    return warnFunction(...args);
   };
 }
