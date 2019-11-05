@@ -31,3 +31,47 @@ test('TileLayer', t => {
   testLayer({Layer: TileLayer, testCases, onError: t.notOk});
   t.end();
 });
+
+test('TileLayer#updateTriggers', t => {
+  const testCases = [
+    {
+      props: {
+        getTileData: 0
+      },
+      onAfterUpdate({layer}) {
+        t.equal(layer.state.tileCache._getTileData, 0, 'Should create a tileCache.');
+      }
+    },
+    {
+      updateProps: {
+        getTileData: 1
+      },
+      onAfterUpdate({layer}) {
+        t.equal(
+          layer.state.tileCache._getTileData,
+          0,
+          'Should not create a tileCache when updateTriggers not changed.'
+        );
+      }
+    },
+    {
+      updateProps: {
+        getTileData: 2,
+        updateTriggers: {
+          getTileData: 2
+        }
+      },
+      onAfterUpdate({layer}) {
+        t.equal(
+          layer.state.tileCache._getTileData,
+          2,
+          'Should create a new tileCache with updated getTileData.'
+        );
+      }
+    }
+  ];
+
+  testLayer({Layer: TileLayer, testCases, onError: t.notOk});
+
+  t.end();
+});
