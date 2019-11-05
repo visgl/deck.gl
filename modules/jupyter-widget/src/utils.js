@@ -1,6 +1,7 @@
+/* eslint-disable no-console */
+/* global document */
 import makeTooltip from './widget-tooltip';
 
-/* global document */
 export function loadCss(url) {
   const link = document.createElement('link');
   link.type = 'text/css';
@@ -24,7 +25,15 @@ export function updateDeck(inputJSON, {jsonConverter, deckgl}) {
   deckgl.setProps(results);
 }
 
-export function initDeck({mapboxApiKey, container, jsonInput, tooltip, onComplete, handleClick}) {
+export function initDeck({
+  mapboxApiKey,
+  container,
+  jsonInput,
+  tooltip,
+  onComplete,
+  handleClick,
+  handleWarning
+}) {
   require(['mapbox-gl', 'h3', 's2Geometry'], mapboxgl => {
     require(['deck.gl', 'loaders.gl/csv'], (deck, loaders) => {
       try {
@@ -55,6 +64,12 @@ export function initDeck({mapboxApiKey, container, jsonInput, tooltip, onComplet
           getTooltip,
           container
         });
+
+        const warn = deck.log.warn;
+        // TODO overrride console.warn instead
+        // Right now this isn't doable (in a Notebook at least)
+        // because the widget loads in deck.gl (and its logger) before @deck.gl/jupyter-widget
+        deck.log.warn = injectFunction(warn, handleWarning);
         if (onComplete) {
           onComplete({jsonConverter, deckgl});
         }
@@ -66,4 +81,11 @@ export function initDeck({mapboxApiKey, container, jsonInput, tooltip, onComplet
       return {};
     });
   });
+}
+
+function injectFunction(warnFunction, messageHandler) {
+  return (...args) => {
+    messageHandler(...args);
+    return warnFunction(...args);
+  };
 }

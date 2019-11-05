@@ -6,6 +6,7 @@ import {MODULE_NAME, MODULE_VERSION} from './version';
 import {loadCss, hideMapboxCSSWarning, initDeck, updateDeck} from './utils';
 
 const MAPBOX_CSS_URL = 'https://api.tiles.mapbox.com/mapbox-gl-js/v1.2.1/mapbox-gl.css';
+const ERROR_BOX_CLASSNAME = 'error-box';
 
 // Note: Variables shared explictly between Python and JavaScript use snake_case
 export class DeckGLModel extends DOMWidgetModel {
@@ -20,10 +21,11 @@ export class DeckGLModel extends DOMWidgetModel {
       _view_module_version: DeckGLModel.view_module_version,
       json_input: null,
       mapbox_key: null,
-      selected_data: null,
+      selected_data: [],
       tooltip: null,
       width: '100%',
-      height: 500
+      height: 500,
+      js_warning: false
     };
   }
 
@@ -72,6 +74,11 @@ export class DeckGLView extends DOMWidgetView {
     const jsonInput = JSON.parse(this.model.get('json_input'));
     const tooltip = this.model.get('tooltip');
 
+    if (this.model.get('js_warning')) {
+      const errorBox = addErrorBox();
+      container.append(errorBox);
+    }
+
     loadCss(MAPBOX_CSS_URL);
     initDeck({
       mapboxApiKey,
@@ -81,7 +88,8 @@ export class DeckGLView extends DOMWidgetView {
       onComplete: ({jsonConverter, deckgl}) => {
         this.jsonDeck = {jsonConverter, deckgl};
       },
-      handleClick: this.handleClick.bind(this)
+      handleClick: this.handleClick.bind(this),
+      handleWarning: this.handleWarning.bind(this)
     });
   }
 
@@ -94,6 +102,7 @@ export class DeckGLView extends DOMWidgetView {
 
   render() {
     super.render();
+
     this.model.on('change:json_input', this.valueChanged.bind(this), this);
   }
 
@@ -103,15 +112,49 @@ export class DeckGLView extends DOMWidgetView {
     hideMapboxCSSWarning();
   }
 
-  handleClick(e) {
-    if (!e) {
+  handleClick(datum, e) {
+    if (!datum || !datum.object) {
+      this.model.set('selected_data', JSON.stringify(''));
+      this.model.save_changes();
       return;
     }
-    if (e.object && e.object.points) {
-      this.model.set('selected_data', e.object.points);
+    const multiselectEnabled = e.srcEvent.metaKey || e.srcEvent.metaKey;
+    const dataPayload = datum.object && datum.object.points ? datum.object.points : datum.object;
+    if (multiselectEnabled) {
+      let selectedData = JSON.parse(this.model.get('selected_data'));
+      if (!Array.isArray(selectedData)) {
+        selectedData = [];
+      }
+      selectedData.push(dataPayload);
+      this.model.set('selected_data', JSON.stringify(selectedData));
     } else {
-      this.model.set('selected_data', e.object);
+      // Single selection
+      this.model.set('selected_data', JSON.stringify(dataPayload));
     }
     this.model.save_changes();
   }
+
+  handleWarning(warningMessage) {
+    const errorBox = this.el.getElementsByClassName(ERROR_BOX_CLASSNAME)[0];
+    if (this.model.get('js_warning') && errorBox) {
+      errorBox.innerText = warningMessage;
+    }
+  }
+}
+
+function addErrorBox() {
+  const errorBox = document.createElement('div');
+  errorBox.className = ERROR_BOX_CLASSNAME;
+  Object.assign(errorBox.style, {
+    width: '100%',
+    height: '20px',
+    position: 'absolute',
+    zIndex: '1000',
+    backgroundColor: 'lemonchiffon',
+    cursor: 'pointer'
+  });
+  errorBox.onclick = e => {
+    errorBox.style.display = 'none';
+  };
+  return errorBox;
 }
