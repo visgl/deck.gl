@@ -28,7 +28,7 @@ import {
   addMetersToLngLat,
   getProjectionParameters,
   fitBounds
-} from 'viewport-mercator-project';
+} from '@math.gl/web-mercator';
 
 // TODO - import from math.gl
 import * as vec2 from 'gl-matrix/vec2';

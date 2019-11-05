@@ -1,4 +1,4 @@
-import {lngLatToWorld} from 'viewport-mercator-project';
+import {lngLatToWorld} from '@math.gl/web-mercator';
 
 const TILE_SIZE = 512;
 

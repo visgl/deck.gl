@@ -31,7 +31,7 @@ import {
   worldToLngLat,
   worldToPixels,
   pixelsToWorld
-} from 'viewport-mercator-project';
+} from '@math.gl/web-mercator';
 
 import assert from '../utils/assert';
 

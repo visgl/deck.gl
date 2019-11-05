@@ -31,7 +31,7 @@ import {
   withParameters
 } from '@luma.gl/core';
 import {log, project64, mergeShaders} from '@deck.gl/core';
-import {worldToPixels} from 'viewport-mercator-project';
+import {worldToPixels} from '@math.gl/web-mercator';
 const {fp64ifyMatrix4} = fp64ShaderModule;
 
 import {
