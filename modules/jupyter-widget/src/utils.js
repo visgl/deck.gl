@@ -66,6 +66,9 @@ export function initDeck({
         });
 
         const warn = deck.log.warn;
+        // TODO overrride console.warn instead
+        // Right now this isn't doable (in a Notebook at least)
+        // because the widget loads in deck.gl (and its logger) before @deck.gl/jupyter-widget
         deck.log.warn = injectFunction(warn, handleWarning);
         if (onComplete) {
           onComplete({jsonConverter, deckgl});
