@@ -21,7 +21,7 @@ export class DeckGLModel extends DOMWidgetModel {
       _view_module_version: DeckGLModel.view_module_version,
       json_input: null,
       mapbox_key: null,
-      selected_data: null,
+      selected_data: [],
       tooltip: null,
       width: '100%',
       height: 500,
@@ -70,14 +70,14 @@ export class DeckGLView extends DOMWidgetView {
     container.style.height = height;
     container.style.position = 'relative';
 
+    const mapboxApiKey = this.model.get('mapbox_key');
+    const jsonInput = JSON.parse(this.model.get('json_input'));
+    const tooltip = this.model.get('tooltip');
+
     if (this.model.get('js_warning')) {
       const errorBox = addErrorBox();
       container.append(errorBox);
     }
-
-    const mapboxApiKey = this.model.get('mapbox_key');
-    const jsonInput = JSON.parse(this.model.get('json_input'));
-    const tooltip = this.model.get('tooltip');
 
     loadCss(MAPBOX_CSS_URL);
     initDeck({
@@ -102,6 +102,7 @@ export class DeckGLView extends DOMWidgetView {
 
   render() {
     super.render();
+
     this.model.on('change:json_input', this.valueChanged.bind(this), this);
   }
 
@@ -111,21 +112,31 @@ export class DeckGLView extends DOMWidgetView {
     hideMapboxCSSWarning();
   }
 
-  handleClick(e) {
-    if (!e) {
+  handleClick(datum, e) {
+    if (!datum || !datum.object) {
+      this.model.set('selected_data', JSON.stringify(''));
+      this.model.save_changes();
       return;
     }
-    if (e.object && e.object.points) {
-      this.model.set('selected_data', e.object.points);
+    const multiselectEnabled = e.srcEvent.metaKey || e.srcEvent.metaKey;
+    const dataPayload = datum.object && datum.object.points ? datum.object.points : datum.object;
+    if (multiselectEnabled) {
+      let selectedData = JSON.parse(this.model.get('selected_data'));
+      if (!Array.isArray(selectedData)) {
+        selectedData = [];
+      }
+      selectedData.push(dataPayload);
+      this.model.set('selected_data', JSON.stringify(selectedData));
     } else {
-      this.model.set('selected_data', e.object);
+      // Single selection
+      this.model.set('selected_data', JSON.stringify(dataPayload));
     }
     this.model.save_changes();
   }
 
   handleWarning(warningMessage) {
     const errorBox = this.el.getElementsByClassName(ERROR_BOX_CLASSNAME)[0];
-    if (this.model.get('js_warning')) {
+    if (this.model.get('js_warning') && errorBox) {
       errorBox.innerText = warningMessage;
     }
   }

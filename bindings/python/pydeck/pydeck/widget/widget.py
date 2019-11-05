@@ -44,6 +44,6 @@ class DeckGLWidget(widgets.DOMWidget):
     json_input = Unicode('').tag(sync=True)
     height = Int(500).tag(sync=True)
     width = Any('100%').tag(sync=True)
-    selected_data = Any().tag(sync=True)
+    selected_data = Unicode('[]').tag(sync=True)
     tooltip = Any(True).tag(sync=True)
     js_warning = Bool(False).tag(sync=True)
