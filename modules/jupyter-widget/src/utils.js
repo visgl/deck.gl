@@ -1,5 +1,5 @@
 /* eslint-disable no-console */
-/* global document, console */
+/* global document, console, window */
 import makeTooltip from './widget-tooltip';
 
 export function loadCss(url) {
@@ -64,8 +64,12 @@ export function initDeck({
           getTooltip,
           container
         });
-        const warn = console.warn;
-        console.warn = wrapWarn(warn, handleWarning);
+
+        if (handleWarning) {
+          const warn = deck.log.warn;
+          deck.log.warn = wrapWarn(warn, handleWarning).bind(window.console);
+        }
+
         if (onComplete) {
           onComplete({jsonConverter, deckgl});
         }
