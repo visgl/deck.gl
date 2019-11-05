@@ -310,6 +310,20 @@ export default class AttributeManager {
     return changedAttributes;
   }
 
+  // Returns shader attributes
+  getShaderAttributes(attributes, excludeAttributes = {}) {
+    if (!attributes) {
+      attributes = this.getAttributes();
+    }
+    const shaderAttributes = {};
+    for (const attributeName in attributes) {
+      if (!excludeAttributes[attributeName]) {
+        Object.assign(shaderAttributes, attributes[attributeName].getShaderAttributes());
+      }
+    }
+    return shaderAttributes;
+  }
+
   // PROTECTED METHODS - Only to be used by collaborating classes, not by apps
 
   // Returns object containing all accessors as keys, with non-null values

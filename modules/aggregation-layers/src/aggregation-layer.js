@@ -66,9 +66,7 @@ export default class AggregationLayer extends CompositeLayer {
   }
 
   getAttributes() {
-    const attributes = this.getAttributeManager().getAttributes();
-    // call  Layer method to get shader attributes
-    return this._getShaderAttributes(attributes);
+    return this.getAttributeManager().getShaderAttributes();
   }
 
   getModuleSettings() {

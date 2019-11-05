@@ -494,19 +494,13 @@ export default class Layer extends Component {
     value.set(pickingColorCache.subarray(startRow * size, endRow * size), startRow * size);
   }
 
-  _getShaderAttributes(attributes, excludeAttributes = {}) {
-    const shaderAttributes = {};
-    for (const attributeName in attributes) {
-      if (!excludeAttributes[attributeName]) {
-        Object.assign(shaderAttributes, attributes[attributeName].getShaderAttributes());
-      }
-    }
-    return shaderAttributes;
-  }
-
   _setModelAttributes(model, changedAttributes) {
+    const attributeManager = this.getAttributeManager();
     const excludeAttributes = model.userData.excludeAttributes || {};
-    const shaderAttributes = this._getShaderAttributes(changedAttributes, excludeAttributes);
+    const shaderAttributes = attributeManager.getShaderAttributes(
+      changedAttributes,
+      excludeAttributes
+    );
 
     model.setAttributes(shaderAttributes);
   }
