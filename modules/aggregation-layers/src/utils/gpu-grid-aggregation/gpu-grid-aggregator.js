@@ -300,7 +300,7 @@ export default class GPUGridAggregator {
       this.setState({cellSize});
     }
 
-    this.validateProps(aggregationParams, opts);
+    // validateProps(aggregationParams, opts);
 
     this.setState({useGPU});
     aggregationParams.gridTransformMatrix =
@@ -330,33 +330,6 @@ export default class GPUGridAggregator {
     const numRow = Math.ceil(height / cellSize[1]);
     this.setState({numCol, numRow, windowSize: [width, height]});
   }
-
-  /* eslint-disable complexity */
-  // validate and log.assert
-  validateProps(aggregationParams, opts) {
-    const {changeFlags, projectPoints, gridTransformMatrix} = aggregationParams;
-    log.assert(
-      changeFlags.dataChanged || changeFlags.viewportChanged || changeFlags.cellSizeChanged
-    );
-
-    // log.assert for required options
-    log.assert(
-      !changeFlags.dataChanged ||
-        (opts.attributes &&
-          opts.weights &&
-          (!opts.projectPositions || opts.moduleSettings.viewport) &&
-          opts.cellSize)
-    );
-    log.assert(!changeFlags.cellSizeChanged || opts.cellSize);
-
-    // viewport is needed only when performing screen space aggregation (projectPoints is true)
-    log.assert(!(changeFlags.viewportChanged && projectPoints) || opts.moduleSettings.viewport);
-
-    if (projectPoints && gridTransformMatrix) {
-      log.warn('projectPoints is true, gridTransformMatrix is ignored')();
-    }
-  }
-  /* eslint-enable complexity */
 
   // CPU Aggregation methods
 
@@ -1076,3 +1049,30 @@ function getMeanTransform(gl, opts) {
     )
   );
 }
+
+/* eslint-disable complexity */
+// DEBUG ONLY
+// validateProps(aggregationParams, opts) {
+//   const {changeFlags, projectPoints, gridTransformMatrix} = aggregationParams;
+//   log.assert(
+//     changeFlags.dataChanged || changeFlags.viewportChanged || changeFlags.cellSizeChanged
+//   );
+//
+//   // log.assert for required options
+//   log.assert(
+//     !changeFlags.dataChanged ||
+//       (opts.attributes &&
+//         opts.weights &&
+//         (!opts.projectPositions || opts.moduleSettings.viewport) &&
+//         opts.cellSize)
+//   );
+//   log.assert(!changeFlags.cellSizeChanged || opts.cellSize);
+//
+//   // viewport is needed only when performing screen space aggregation (projectPoints is true)
+//   log.assert(!(changeFlags.viewportChanged && projectPoints) || opts.moduleSettings.viewport);
+//
+//   if (projectPoints && gridTransformMatrix) {
+//     log.warn('projectPoints is true, gridTransformMatrix is ignored')();
+//   }
+// }
+/* eslint-enable complexity */
