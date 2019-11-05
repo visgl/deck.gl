@@ -41,7 +41,7 @@ test('pointToHexbin', t => {
 
 test('pointToHexbin#invalidData', t => {
   makeSpy(log, 'warn');
-  const onePoint = FIXTURES.points[0];
+  const onePoint = Object.assign({}, FIXTURES.points[0]);
   onePoint.COORDINATES = ['', ''];
   t.ok(
     typeof pointToHexbin({data: [onePoint], radius, getPosition}, viewport) === 'object',

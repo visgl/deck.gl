@@ -76,7 +76,8 @@ export {
   LayerExtension,
   // Utilities
   fp64LowPart,
-  createIterable
+  createIterable,
+  mergeShaders
 } from '@deck.gl/core';
 
 // EXPERIMENTAL CORE LIB CLASSES (May change in minor version bumps, use at your own risk)

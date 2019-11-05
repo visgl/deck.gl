@@ -495,13 +495,12 @@ export default class Layer extends Component {
   }
 
   _setModelAttributes(model, changedAttributes) {
-    const shaderAttributes = {};
+    const attributeManager = this.getAttributeManager();
     const excludeAttributes = model.userData.excludeAttributes || {};
-    for (const attributeName in changedAttributes) {
-      if (!excludeAttributes[attributeName]) {
-        Object.assign(shaderAttributes, changedAttributes[attributeName].getShaderAttributes());
-      }
-    }
+    const shaderAttributes = attributeManager.getShaderAttributes(
+      changedAttributes,
+      excludeAttributes
+    );
 
     model.setAttributes(shaderAttributes);
   }

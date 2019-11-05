@@ -80,7 +80,7 @@ void main(void) {
       inValue: valueBuffer
     },
     vs,
-    modules: ['project32', 'gouraud-lighting', 'picking', 'fp64'],
+    modules: ['project32', 'gouraud-lighting', 'picking'],
     // inject,
     feedbackBuffers: {
       outColor: outBuffer

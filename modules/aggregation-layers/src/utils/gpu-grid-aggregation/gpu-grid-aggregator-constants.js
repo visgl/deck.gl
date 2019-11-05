@@ -13,7 +13,8 @@ export const DEFAULT_RUN_PARAMS = {
   fp64: false,
   viewport: null,
   gridTransformMatrix: null,
-  createBufferObjects: true
+  createBufferObjects: true,
+  moduleSettings: {}
 };
 
 export const MAX_32_BIT_FLOAT = 3.402823466e38;

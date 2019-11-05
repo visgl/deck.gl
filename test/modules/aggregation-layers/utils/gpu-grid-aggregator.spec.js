@@ -75,6 +75,7 @@ function testCounterMinMax(aggregator, t, opts) {
   t.equal(maxMinData[3], 2, `${testName} combineMaxMin: min weight should match`);
 }
 /* eslint-enable max-statements */
+
 test('GPUGridAggregator#GPU', t => {
   const sa = new GPUGridAggregator(gl);
   testCounterMinMax(sa, t, {useGPU: true});
@@ -171,7 +172,7 @@ test('GPUGridAggregator worldspace aggregation #CompareCPUandGPU', t => {
 
   // 32-bit aggregation
   results = sa.run(Object.assign({}, fixtureWorldSpace, {useGPU: true}));
-  let gpuResults = {
+  const gpuResults = {
     aggregationData: results.weight1.aggregationBuffer.getData(),
     minData: results.weight1.minBuffer.getData(),
     maxData: results.weight1.maxBuffer.getData()
@@ -179,13 +180,14 @@ test('GPUGridAggregator worldspace aggregation #CompareCPUandGPU', t => {
   t.deepEqual(gpuResults, cpuResults, '32bit aggregation: cpu and gpu results should match');
 
   // 64-bit aggregation
-  results = sa.run(Object.assign({}, fixtureWorldSpace, {useGPU: true, fp64: true}));
-  gpuResults = {
-    aggregationData: results.weight1.aggregationBuffer.getData(),
-    minData: results.weight1.minBuffer.getData(),
-    maxData: results.weight1.maxBuffer.getData()
-  };
-  t.deepEqual(gpuResults, cpuResults, '64bit aggregation: cpu and gpu results should match');
+  // TODO: enable after integrating fp64 extension
+  // results = sa.run(Object.assign({}, fixtureWorldSpace, {useGPU: true, fp64: true, attributes, vertexCount}));
+  // gpuResults = {
+  //   aggregationData: results.weight1.aggregationBuffer.getData(),
+  //   minData: results.weight1.minBuffer.getData(),
+  //   maxData: results.weight1.maxBuffer.getData()
+  // };
+  // t.deepEqual(gpuResults, cpuResults, '64bit aggregation: cpu and gpu results should match');
 
   t.end();
 });

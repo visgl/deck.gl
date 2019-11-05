@@ -1,4 +1,4 @@
-// Copyright (c) 2015 - 2018 Uber Technologies, Inc.
+// Copyright (c) 2015 - 2017 Uber Technologies, Inc.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -18,15 +18,33 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-export default `\
-#define SHADER_NAME gpu-aggregation-to-grid-fs
+import AggregationLayer from './aggregation-layer';
+import GPUGridAggregator from './utils/gpu-grid-aggregation/gpu-grid-aggregator';
 
-precision highp float;
+export default class GridAggregationLayer extends AggregationLayer {
+  initializeState(aggregationProps) {
+    const {gl} = this.context;
+    super.initializeState(aggregationProps);
+    this.setState({
+      gpuGridAggregator: new GPUGridAggregator(gl, {id: `${this.id}-gpu-aggregator`})
+    });
+  }
 
-varying vec3 vWeights;
+  finalizeState() {
+    super.finalizeState();
+    const {gpuGridAggregator} = this.state;
+    if (gpuGridAggregator) {
+      gpuGridAggregator.delete();
+    }
+  }
 
-void main(void) {
-  gl_FragColor = vec4(vWeights, 1.0);
-  DECKGL_FILTER_COLOR(gl_FragColor, geometry);
+  _updateShaders(shaders) {
+    this.state.gpuGridAggregator.updateShaders(shaders);
+  }
+
+  _getAggregationModel() {
+    return this.state.gpuGridAggregator.gridAggregationModel;
+  }
 }
-`;
+
+GridAggregationLayer.layerName = 'GridAggregationLayer';

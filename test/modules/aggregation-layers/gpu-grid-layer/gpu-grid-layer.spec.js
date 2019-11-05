@@ -53,8 +53,7 @@ test('GPUGridLayer', t => {
 test('GPUGridLayer#renderLayers', t => {
   const webgl1Spies = setupSpysForWebGL1(gl);
 
-  makeSpy(GPUGridLayer.prototype, 'getAggregationFlags');
-  makeSpy(GPUGridLayer.prototype, 'getLayerData');
+  makeSpy(GPUGridLayer.prototype, '_aggregateData');
 
   const layer = new GPUGridLayer(SAMPLE_PROPS);
 
@@ -66,10 +65,8 @@ test('GPUGridLayer#renderLayers', t => {
 
   t.ok(sublayer instanceof GPUGridCellLayer, 'Sublayer GPUGridCellLayer layer rendered');
 
-  t.ok(GPUGridLayer.prototype.getAggregationFlags.called, 'should call getAggregationFlags');
-  t.ok(GPUGridLayer.prototype.getLayerData.called, 'should call getLayerData');
-  GPUGridLayer.prototype.getAggregationFlags.restore();
-  GPUGridLayer.prototype.getLayerData.restore();
+  t.ok(GPUGridLayer.prototype._aggregateData.called, 'should call _aggregateData');
+  GPUGridLayer.prototype._aggregateData.restore();
 
   restoreSpies(webgl1Spies);
   t.end();
@@ -109,39 +106,33 @@ test('GPUGridLayer#updates', t => {
         updateProps: {
           colorRange: GPUGridLayer.defaultProps.colorRange.slice()
         },
-        spies: ['getAggregationFlags', 'getLayerData'],
+        spies: ['_aggregateData'],
         onAfterUpdate({layer, subLayers, spies}) {
-          t.ok(spies.getAggregationFlags.called, 'should call getAggregationFlags');
-          t.notOk(spies.getLayerData.called, 'should not call getLayerData');
+          t.notOk(spies._aggregateData.called, 'should not call _aggregateData');
 
-          spies.getAggregationFlags.restore();
-          spies.getLayerData.restore();
+          spies._aggregateData.restore();
         }
       },
       {
         updateProps: {
           cellSize: 10
         },
-        spies: ['getAggregationFlags', 'getLayerData'],
+        spies: ['_aggregateData'],
         onAfterUpdate({layer, subLayers, spies}) {
-          t.ok(spies.getAggregationFlags.called, 'should call getAggregationFlags');
-          t.ok(spies.getLayerData.called, 'should call getLayerData');
+          t.ok(spies._aggregateData.called, 'should call _aggregateData');
 
-          spies.getAggregationFlags.restore();
-          spies.getLayerData.restore();
+          spies._aggregateData.restore();
         }
       },
       {
         updateProps: {
           colorAggregation: 3
         },
-        spies: ['getAggregationFlags', 'getLayerData'],
+        spies: ['_aggregateData'],
         onAfterUpdate({layer, subLayers, spies}) {
-          t.ok(spies.getAggregationFlags.called, 'should call getAggregationFlags');
-          t.ok(spies.getLayerData.called, 'should call getLayerData');
+          t.ok(spies._aggregateData.called, 'should call _aggregateData');
 
-          spies.getAggregationFlags.restore();
-          spies.getLayerData.restore();
+          spies._aggregateData.restore();
         }
       }
     ]

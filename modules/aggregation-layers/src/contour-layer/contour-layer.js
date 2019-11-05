@@ -19,12 +19,13 @@
 // THE SOFTWARE.
 
 import {equals} from 'math.gl';
-import {CompositeLayer} from '@deck.gl/core';
 import {LineLayer, SolidPolygonLayer} from '@deck.gl/layers';
+import GL from '@luma.gl/constants';
 import {generateContours} from './contour-utils';
 
 import GPUGridAggregator from '../utils/gpu-grid-aggregation/gpu-grid-aggregator';
 import {pointToDensityGridData} from '../utils/gpu-grid-aggregation/grid-aggregation-utils';
+import GridAggregationLayer from '../grid-aggregation-layer';
 
 const DEFAULT_COLOR = [255, 255, 255, 255];
 const DEFAULT_STROKE_WIDTH = 1;
@@ -35,6 +36,7 @@ const defaultProps = {
   cellSize: {type: 'number', min: 1, max: 1000, value: 1000},
   getPosition: {type: 'accessor', value: x => x.position},
   getWeight: {type: 'accessor', value: x => 1},
+  gpuAggregation: true,
 
   // contour lines
   contours: [{threshold: DEFAULT_THRESHOLD}],
@@ -43,47 +45,46 @@ const defaultProps = {
   zOffset: 0.005
 };
 
-export default class ContourLayer extends CompositeLayer {
+// props , when changed requires re-aggregation
+const AGGREGATION_PROPS = ['gpuAggregation'];
+
+export default class ContourLayer extends GridAggregationLayer {
   initializeState() {
-    const {gl} = this.context;
-    const options = {
-      id: `${this.id}-gpu-aggregator`
-    };
-    this.state = {
+    super.initializeState(AGGREGATION_PROPS);
+    this.setState({
       contourData: {},
-      gridAggregator: new GPUGridAggregator(gl, options),
       colorTrigger: 0,
       strokeWidthTrigger: 0
-    };
+    });
+    const attributeManager = this.getAttributeManager();
+    attributeManager.add({
+      positions: {size: 3, accessor: 'getPosition', type: GL.DOUBLE, fp64: false},
+      count: {size: 3, accessor: 'getWeight'}
+    });
   }
 
-  updateState({oldProps, props, changeFlags}) {
-    let dataChanged = false;
+  updateState(opts) {
+    super.updateState(opts);
     let contoursChanged = false;
-    const aggregationFlags = this._getAggregationFlags({oldProps, props, changeFlags});
-    if (aggregationFlags) {
-      dataChanged = true;
-      // Clear countsData cache
+    const dataChanged = this._isAggregationDirty(opts);
+    const cellSizeChanged = opts.oldProps.cellSize !== opts.props.cellSize;
+    if (dataChanged || cellSizeChanged) {
       this.setState({countsData: null});
-      this._aggregateData(aggregationFlags);
+      this._aggregateData({
+        dataChanged,
+        cellSizeChanged
+      });
     }
-
-    if (this._shouldRebuildContours({oldProps, props})) {
+    if (this._shouldRebuildContours(opts)) {
       contoursChanged = true;
-      this._updateThresholdData(props);
+      this._updateThresholdData(opts.props);
     }
-
-    if (dataChanged || contoursChanged) {
+    if (dataChanged || cellSizeChanged || contoursChanged) {
       this._generateContours();
     } else {
       // data for sublayers not changed check if color or strokeWidth need to be updated
-      this._updateSubLayerTriggers(oldProps, props);
+      this._updateSubLayerTriggers(opts.oldProps, opts.props);
     }
-  }
-
-  finalizeState() {
-    super.finalizeState();
-    this.state.gridAggregator.delete();
   }
 
   renderLayers() {
@@ -103,24 +104,27 @@ export default class ContourLayer extends CompositeLayer {
     const {
       data,
       cellSize: cellSizeMeters,
-      getPosition,
       getWeight,
       gpuAggregation,
       fp64,
       coordinateSystem
     } = this.props;
+    const {gpuGridAggregator} = this.state;
+
     const {weights, gridSize, gridOrigin, cellSize, boundingBox} = pointToDensityGridData({
       data,
       cellSizeMeters,
-      getPosition,
       weightParams: {count: {getWeight}},
       gpuAggregation,
-      gpuGridAggregator: this.state.gridAggregator,
+      gpuGridAggregator,
       fp64,
       coordinateSystem,
       viewport: this.context.viewport,
       boundingBox: this.state.boundingBox, // avoid parsing data when it is not changed.
-      aggregationFlags
+      aggregationFlags,
+      vertexCount: this.getNumInstances(),
+      attributes: this.getAttributes(),
+      moduleSettings: this.getModuleSettings()
     });
 
     this.setState({
@@ -154,22 +158,6 @@ export default class ContourLayer extends CompositeLayer {
 
     // contourData contains both iso-lines and iso-bands if requested.
     this.setState({contourData});
-  }
-
-  _getAggregationFlags({oldProps, props, changeFlags}) {
-    let aggregationFlags = null;
-    if (
-      changeFlags.dataChanged ||
-      oldProps.gpuAggregation !== props.gpuAggregation ||
-      (changeFlags.updateTriggersChanged &&
-        (changeFlags.updateTriggersChanged.all || changeFlags.updateTriggersChanged.getPosition))
-    ) {
-      aggregationFlags = Object.assign({}, aggregationFlags, {dataChanged: true});
-    }
-    if (oldProps.cellSize !== props.cellSize) {
-      aggregationFlags = Object.assign({}, aggregationFlags, {cellSizeChanged: true});
-    }
-    return aggregationFlags;
   }
 
   _getLineLayerProps() {

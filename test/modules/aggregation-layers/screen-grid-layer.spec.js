@@ -26,7 +26,7 @@ import {ScreenGridLayer} from '@deck.gl/aggregation-layers';
 const getPosition = d => d.COORDINATES;
 
 test('ScreenGridLayer', t => {
-  const testCases = generateLayerTests({
+  let testCases = generateLayerTests({
     Layer: ScreenGridLayer,
     sampleProps: {
       data: FIXTURES.points.slice(0, 3),
@@ -38,6 +38,25 @@ test('ScreenGridLayer', t => {
       t.ok(layer.state.aggregationResults !== null, 'should update state.aggregationResults');
     }
   });
+
+  testCases = testCases.concat([
+    {
+      updateProps: {
+        gpuAggregation: true
+      }
+    },
+    {
+      updateProps: {
+        gpuAggregation: false
+      },
+      spies: ['_updateAggregation'],
+      onAfterUpdate({layer, subLayers, spies}) {
+        t.ok(spies._updateAggregation.called, 'should call _aggregateData');
+
+        spies._updateAggregation.restore();
+      }
+    }
+  ]);
 
   testLayer({Layer: ScreenGridLayer, testCases, onError: t.notOk});
 
