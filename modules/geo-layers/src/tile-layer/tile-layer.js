@@ -28,7 +28,11 @@ export default class TileLayer extends CompositeLayer {
 
   updateState({props, oldProps, context, changeFlags}) {
     let {tileCache} = this.state;
-    if (!tileCache || changeFlags.updateTriggersChanged) {
+    if (
+      !tileCache ||
+      (changeFlags.updateTriggersChanged &&
+        (changeFlags.updateTriggersChanged.all || changeFlags.updateTriggersChanged.getTileData))
+    ) {
       const {getTileData, maxZoom, minZoom, maxCacheSize} = props;
       if (tileCache) {
         tileCache.finalize();
@@ -42,7 +46,13 @@ export default class TileLayer extends CompositeLayer {
         onTileError: this._onTileError.bind(this)
       });
       this.setState({tileCache});
+    } else if (changeFlags.updateTriggersChanged) {
+      // if any updateTriggersChanged (other than getTileData), delete the layer
+      this.state.tileCache.tiles.forEach(tile => {
+        tile.layer = null;
+      });
     }
+
     const {viewport} = context;
     if (changeFlags.viewportChanged && viewport.id !== 'DEFAULT-INITIAL-VIEWPORT') {
       const z = this.getLayerZoomLevel();
