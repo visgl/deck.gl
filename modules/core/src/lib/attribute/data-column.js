@@ -36,7 +36,7 @@ export default class DataColumn {
     this.id = opts.id;
     this.size = opts.size;
 
-    const logicalType = opts.type;
+    const logicalType = opts.logicalType || opts.type;
     const doublePrecision = logicalType === GL.DOUBLE;
 
     let {defaultValue = [0, 0, 0, 0]} = opts;
@@ -49,6 +49,7 @@ export default class DataColumn {
       bufferType =
         gl && hasFeature(gl, FEATURES.ELEMENT_INDEX_UINT32) ? GL.UNSIGNED_INT : GL.UNSIGNED_SHORT;
     }
+    opts.logicalType = logicalType;
     opts.type = bufferType;
 
     // This is the attribute type defined by the layer
@@ -155,25 +156,30 @@ export default class DataColumn {
       opts = {buffer: opts};
     }
 
-    if (opts.buffer) {
-      state.externalBuffer = opts.buffer;
-      state.constant = false;
-    } else {
-      state.externalBuffer = null;
-    }
     if (opts.constant) {
       // set constant
-      opts.value = this._normalizeValue(opts.value);
-      const hasChanged = !this._areValuesEqual(opts.value, this.value);
+      let value = opts.value;
+      value = this._normalizeValue(value);
+      if (this.settings.normalized) {
+        value = this._normalizeConstant(value);
+      }
+      const hasChanged = !this._areValuesEqual(value, this.value);
 
       if (!hasChanged) {
         return false;
       }
+      state.externalBuffer = null;
       state.constant = true;
+      this.value = value;
+      opts.value = value;
+    } else if (opts.buffer) {
+      state.externalBuffer = opts.buffer;
+      state.constant = false;
       this.value = opts.value;
     } else if (opts.value) {
       this._checkExternalBuffer(opts);
       this.value = opts.value;
+      state.externalBuffer = null;
       state.constant = false;
 
       if (this.doublePrecision) {
@@ -184,8 +190,6 @@ export default class DataColumn {
 
       this.buffer.setData(opts.value);
       opts.buffer = this.buffer;
-    } else {
-      this.value = null;
     }
 
     this._updateShaderAttributes(opts);
@@ -271,6 +275,31 @@ export default class DataColumn {
       if (!(value instanceof ArrayType) && this.normalized && !('normalized' in opts)) {
         log.warn(`Attribute ${this.id} is normalized`)();
       }
+    }
+  }
+
+  // https://developer.mozilla.org/en-US/docs/Web/API/WebGLRenderingContext/vertexAttribPointer
+  _normalizeConstant(value) {
+    switch (this.bufferType) {
+      case GL.BYTE:
+        // normalize [-128, 127] to [-1, 1]
+        return new Float32Array(value).map(x => ((x + 128) / 255) * 2 - 1);
+
+      case GL.SHORT:
+        // normalize [-32768, 32767] to [-1, 1]
+        return new Float32Array(value).map(x => ((x + 32768) / 65535) * 2 - 1);
+
+      case GL.UNSIGNED_BYTE:
+        // normalize [0, 255] to [0, 1]
+        return new Float32Array(value).map(x => x / 255);
+
+      case GL.UNSIGNED_SHORT:
+        // normalize [0, 65535] to [0, 1]
+        return new Float32Array(value).map(x => x / 65535);
+
+      default:
+        // No normalization for gl.FLOAT and gl.HALF_FLOAT
+        return value;
     }
   }
 

@@ -185,7 +185,11 @@ test('AttributeManager.update - external buffers', t => {
       colors: new Uint32Array([0, 0, 0])
     }
   });
-  t.is(attribute.shaderAttributes.colors.type, gl.UNSIGNED_INT, 'colors accessor is set to correct type');
+  t.is(
+    attribute.shaderAttributes.colors.type,
+    gl.UNSIGNED_INT,
+    'colors accessor is set to correct type'
+  );
 
   t.end();
 });

@@ -1,5 +1,4 @@
 /* eslint-disable complexity */
-import GL from '@luma.gl/constants';
 import {_Accessor as Accessor} from '@luma.gl/core';
 
 export default class ShaderAttribute {
@@ -33,9 +32,6 @@ export default class ShaderAttribute {
       }
     }
 
-    if (this.normalized) {
-      constantValue = normalizeConstant(constantValue, this.type);
-    }
     this.value = constantValue;
   }
 
@@ -71,30 +67,5 @@ export default class ShaderAttribute {
     this.normalized = normalized;
     this.integer = integer;
     this.divisor = divisor;
-  }
-}
-
-// https://developer.mozilla.org/en-US/docs/Web/API/WebGLRenderingContext/vertexAttribPointer
-function normalizeConstant(value, type) {
-  switch (type) {
-    case GL.BYTE:
-      // normalize [-128, 127] to [-1, 1]
-      return new Float32Array(value).map(x => ((x + 128) / 255) * 2 - 1);
-
-    case GL.SHORT:
-      // normalize [-32768, 32767] to [-1, 1]
-      return new Float32Array(value).map(x => ((x + 32768) / 65535) * 2 - 1);
-
-    case GL.UNSIGNED_BYTE:
-      // normalize [0, 255] to [0, 1]
-      return new Float32Array(value).map(x => x / 255);
-
-    case GL.UNSIGNED_SHORT:
-      // normalize [0, 65535] to [0, 1]
-      return new Float32Array(value).map(x => x / 65535);
-
-    default:
-      // No normalization for gl.FLOAT and gl.HALF_FLOAT
-      return value;
   }
 }

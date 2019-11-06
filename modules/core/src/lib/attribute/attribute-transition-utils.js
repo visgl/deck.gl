@@ -1,4 +1,3 @@
-import ShaderAttribute from './shader-attribute';
 import {padArray} from '../../utils/array-utils';
 
 const DEFAULT_TRANSITION_SETTINGS = {
@@ -73,9 +72,9 @@ export function cycleBuffers(buffers) {
 }
 
 export function getAttributeBufferLength(attribute, numInstances) {
-  const {doublePrecision, userData, value, size} = attribute;
+  const {doublePrecision, settings, value, size} = attribute;
   const multiplier = doublePrecision ? 2 : 1;
-  return (userData.noAlloc ? value.length : numInstances * size) * multiplier;
+  return (settings.noAlloc ? value.length : numInstances * size) * multiplier;
 }
 
 // This helper is used when transitioning attributes from a set of values in one buffer layout
@@ -107,8 +106,8 @@ export function padBuffer({
     return;
   }
 
-  const toData = attribute.constant ? attribute.getValue() : attribute.getBuffer().getData({});
-  if (attribute.normalized) {
+  const toData = attribute.constant ? attribute.value : attribute.getBuffer().getData({});
+  if (attribute.settings.normalized) {
     const getter = getData;
     getData = (value, chunk) => attribute._normalizeConstant(getter(value, chunk));
   }

@@ -20,7 +20,7 @@ export default class GPUInterpolationTransition {
     // attribute, it will be converted and returned as a regular attribute
     // `attribute.userData` is the original options passed when constructing the attribute.
     // This ensures that we set the proper `doublePrecision` flag and shader attributes.
-    this.attributeInTransition = new Attribute(gl, attribute.userData);
+    this.attributeInTransition = new Attribute(gl, attribute.settings);
     this.currentBufferLayout = attribute.bufferLayout;
     // storing currentLength because this.buffer may be larger than the actual length we want to use
     // this is because we only reallocate buffers when they grow, not when they shrink,
@@ -72,7 +72,7 @@ export default class GPUInterpolationTransition {
 
     this.currentBufferLayout = attribute.bufferLayout;
     this.currentLength = getAttributeBufferLength(attribute, numInstances);
-    this.attributeInTransition.update({
+    this.attributeInTransition.setData({
       buffer: buffers[1],
       // Hack: Float64Array is required for double-precision attributes
       // to generate correct shader attributes
