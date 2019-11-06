@@ -41,19 +41,6 @@ function getIconId(icon) {
   return icon && (icon.id || icon.url);
 }
 
-// traverse icons in a row of icon atlas
-// extend each icon with left-top coordinates
-function buildRowMapping(mapping, columns, yOffset) {
-  for (let i = 0; i < columns.length; i++) {
-    const {icon, xOffset} = columns[i];
-    const id = getIconId(icon);
-    mapping[id] = Object.assign({}, icon, {
-      x: xOffset,
-      y: yOffset
-    });
-  }
-}
-
 // resize texture without losing original data
 function resizeTexture(texture, width, height) {
   const oldWidth = texture.width;
@@ -77,20 +64,39 @@ function resizeTexture(texture, width, height) {
   return texture;
 }
 
+// traverse icons in a row of icon atlas
+// extend each icon with left-top coordinates
+function buildRowMapping(mapping, columns, yOffset) {
+  for (let i = 0; i < columns.length; i++) {
+    const {icon, xOffset} = columns[i];
+    const id = getIconId(icon);
+    mapping[id] = Object.assign({}, icon, {
+      x: xOffset,
+      y: yOffset
+    });
+  }
+}
+
 /**
  * Generate coordinate mapping to retrieve icon left-top position from an icon atlas
  * @param icons {Array<Object>} list of icons, each icon requires url, width, height
  * @param buffer {Number} add buffer to the right and bottom side of the image
  * @param xOffset {Number} right position of last icon in old mapping
  * @param yOffset {Number} top position in last icon in old mapping
+ * @param rowHeight {Number} rowHeight of the last icon's row
  * @param canvasWidth {Number} max width of canvas
  * @param mapping {object} old mapping
  * @returns {{mapping: {'/icon/1': {url, width, height, ...}},, canvasHeight: {Number}}}
  */
-export function buildMapping({icons, buffer, mapping = {}, xOffset = 0, yOffset = 0, canvasWidth}) {
-  // height of current row
-  let rowHeight = 0;
-
+export function buildMapping({
+  icons,
+  buffer,
+  mapping = {},
+  xOffset = 0,
+  yOffset = 0,
+  rowHeight = 0,
+  canvasWidth
+}) {
   let columns = [];
   // Strategy to layout all the icons into a texture:
   // traverse the icons sequentially, layout the icons from left to right, top to bottom
@@ -132,6 +138,7 @@ export function buildMapping({icons, buffer, mapping = {}, xOffset = 0, yOffset 
 
   return {
     mapping,
+    rowHeight,
     xOffset,
     yOffset,
     canvasWidth,
@@ -192,6 +199,7 @@ export default class IconManager {
     this._xOffset = 0;
     // top position of last icon
     this._yOffset = 0;
+    this._rowHeight = 0;
     this._buffer = DEFAULT_BUFFER;
     this._canvasWidth = DEFAULT_CANVAS_WIDTH;
     this._canvasHeight = 0;
@@ -262,15 +270,17 @@ export default class IconManager {
 
     if (icons.length > 0) {
       // generate icon mapping
-      const {mapping, xOffset, yOffset, canvasHeight} = buildMapping({
+      const {mapping, xOffset, yOffset, rowHeight, canvasHeight} = buildMapping({
         icons,
         buffer: this._buffer,
         canvasWidth: this._canvasWidth,
         mapping: this._mapping,
+        rowHeight: this._rowHeight,
         xOffset: this._xOffset,
         yOffset: this._yOffset
       });
 
+      this._rowHeight = rowHeight;
       this._mapping = mapping;
       this._xOffset = xOffset;
       this._yOffset = yOffset;
