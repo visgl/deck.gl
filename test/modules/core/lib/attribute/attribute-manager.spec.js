@@ -168,6 +168,8 @@ test('AttributeManager.update - external buffers', t => {
   attribute = attributeManager.getAttributes()['colors'];
   t.ok(ArrayBuffer.isView(attribute.value), 'colors attribute has typed array');
 
+  const colors = attribute.getShaderAttributes().colors;
+
   attributeManager.update({
     numInstances: 1,
     buffers: {
@@ -176,11 +178,7 @@ test('AttributeManager.update - external buffers', t => {
     }
   });
 
-  t.is(
-    attribute.shaderAttributes.colors.getAccessor().type,
-    gl.FLOAT,
-    'colors accessor is set to correct type'
-  );
+  t.is(colors.getAccessor().type, gl.FLOAT, 'colors accessor is set to correct type');
 
   attributeManager.update({
     numInstances: 1,
@@ -189,11 +187,7 @@ test('AttributeManager.update - external buffers', t => {
       colors: new Uint32Array([0, 0, 0])
     }
   });
-  t.is(
-    attribute.shaderAttributes.colors.getAccessor().type,
-    gl.UNSIGNED_INT,
-    'colors accessor is set to correct type'
-  );
+  t.is(colors.getAccessor().type, gl.UNSIGNED_INT, 'colors accessor is set to correct type');
 
   t.end();
 });

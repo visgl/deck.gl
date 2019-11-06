@@ -2,30 +2,30 @@
 import GL from '@luma.gl/constants';
 import {hasFeature, FEATURES, Buffer} from '@luma.gl/core';
 import ShaderAttribute from './shader-attribute';
+import {glArrayFromType} from './gl-utils';
 import typedArrayManager from '../../utils/typed-array-manager';
 import {toDoublePrecisionArray} from '../../utils/math-utils';
 import log from '../../utils/log';
 
-function addDoublePrecisionAttributes(attribute, shaderAttributeDefs) {
+function addDoublePrecisionAttributes(id, baseAccessor, shaderAttributeOptions) {
   const doubleShaderAttributeDefs = {};
-  for (const shaderAttributeName in shaderAttributeDefs) {
-    const def = shaderAttributeDefs[shaderAttributeName];
-    const offset = 'offset' in def ? def.offset : attribute.offset || 0;
-    const stride = 'stride' in def ? def.stride : attribute.size * 4;
+  const offset =
+    'offset' in shaderAttributeOptions ? shaderAttributeOptions.offset : baseAccessor.offset || 0;
+  const stride =
+    'stride' in shaderAttributeOptions ? shaderAttributeOptions.stride : baseAccessor.size * 4;
 
-    doubleShaderAttributeDefs[`${shaderAttributeName}32`] = Object.assign({}, def, {
-      offset,
-      stride
-    });
-    doubleShaderAttributeDefs[`${shaderAttributeName}64`] = Object.assign({}, def, {
-      offset: offset * 2,
-      stride: stride * 2
-    });
-    doubleShaderAttributeDefs[`${shaderAttributeName}64xyLow`] = Object.assign({}, def, {
-      offset: offset * 2 + stride,
-      stride: stride * 2
-    });
-  }
+  doubleShaderAttributeDefs[`${id}32`] = Object.assign({}, shaderAttributeOptions, {
+    offset,
+    stride
+  });
+  doubleShaderAttributeDefs[`${id}64`] = Object.assign({}, shaderAttributeOptions, {
+    offset: offset * 2,
+    stride: stride * 2
+  });
+  doubleShaderAttributeDefs[`${id}64xyLow`] = Object.assign({}, shaderAttributeOptions, {
+    offset: offset * 2 + stride,
+    stride: stride * 2
+  });
   return doubleShaderAttributeDefs;
 }
 
@@ -50,6 +50,8 @@ export default class DataColumn {
     } else if (!bufferType && opts.isIndexed) {
       bufferType =
         gl && hasFeature(gl, FEATURES.ELEMENT_INDEX_UINT32) ? GL.UNSIGNED_INT : GL.UNSIGNED_SHORT;
+    } else if (!bufferType) {
+      bufferType = GL.FLOAT;
     }
     opts.logicalType = logicalType;
     opts.type = bufferType;
@@ -69,30 +71,13 @@ export default class DataColumn {
       this.defaultType = Float32Array;
     }
 
-    let shaderAttributeDefs = opts.shaderAttributes || {[this.id]: {}};
-    this.shaderAttributeNames = Object.keys(shaderAttributeDefs);
-    if (doublePrecision) {
-      shaderAttributeDefs = addDoublePrecisionAttributes(opts, shaderAttributeDefs);
-    }
-    this.shaderAttributeDefs = shaderAttributeDefs;
-
-    for (const shaderAttributeName in shaderAttributeDefs) {
-      // Initialize the attribute descriptor, with WebGL and metadata fields
-      const shaderAttribute = new ShaderAttribute(this, {
-        ...shaderAttributeDefs[shaderAttributeName],
-        type: bufferType,
-        id: shaderAttributeName
-      });
-      this.shaderAttributes[shaderAttributeName] = shaderAttribute;
-    }
-
     this.value = null;
     this.settings = Object.assign({}, opts, {
       defaultValue
     });
     this.state = {
       externalBuffer: null,
-      externalAccessor: null,
+      bufferAccessor: opts,
       allocatedValue: null,
       constant: false
     };
@@ -122,23 +107,29 @@ export default class DataColumn {
     typedArrayManager.release(this.state.allocatedValue);
   }
 
-  getShaderAttributes() {
+  getShaderAttributes(id, options) {
     if (this.doublePrecision) {
       const shaderAttributes = {};
       const isBuffer64Bit = this.value instanceof Float64Array;
-      for (const shaderAttributeName of this.shaderAttributeNames) {
-        shaderAttributes[shaderAttributeName] = this.shaderAttributes[
-          isBuffer64Bit ? `${shaderAttributeName}64` : `${shaderAttributeName}32`
-        ];
-        const shaderAttributeLowPartName = `${shaderAttributeName}64xyLow`;
-        shaderAttributes[shaderAttributeLowPartName] = isBuffer64Bit
-          ? this.shaderAttributes[shaderAttributeLowPartName]
-          : new Float32Array(this.size); // use constant for low part if buffer is 32-bit
-      }
+
+      const doubleShaderAttributeDefs = addDoublePrecisionAttributes(
+        id,
+        this.getAccessor(),
+        options || {}
+      );
+
+      shaderAttributes[id] = new ShaderAttribute(
+        this,
+        doubleShaderAttributeDefs[isBuffer64Bit ? `${id}64` : `${id}32`]
+      );
+      const shaderAttributeLowPartName = `${id}64xyLow`;
+      shaderAttributes[shaderAttributeLowPartName] = isBuffer64Bit
+        ? new ShaderAttribute(this, doubleShaderAttributeDefs[shaderAttributeLowPartName])
+        : new Float32Array(this.size); // use constant for low part if buffer is 32-bit
       return shaderAttributes;
     }
 
-    return this.shaderAttributes;
+    return {[id]: options ? new ShaderAttribute(this, options) : this};
   }
 
   getBuffer() {
@@ -146,6 +137,17 @@ export default class DataColumn {
       return null;
     }
     return this.state.externalBuffer || this._buffer;
+  }
+
+  getValue() {
+    if (this.state.constant) {
+      return this.value;
+    }
+    return [this.getBuffer(), this.getAccessor()];
+  }
+
+  getAccessor() {
+    return this.state.bufferAccessor;
   }
 
   // returns true if success
@@ -177,6 +179,7 @@ export default class DataColumn {
       state.externalBuffer = opts.buffer;
       state.constant = false;
       this.value = opts.value;
+      opts.type = opts.buffer.accessor.type;
     } else if (opts.value) {
       this._checkExternalBuffer(opts);
 
@@ -190,9 +193,10 @@ export default class DataColumn {
       }
 
       this.buffer.setData(value);
+      opts.type = this.buffer.accessor.type;
     }
 
-    state.externalAccessor = opts;
+    state.bufferAccessor = {...this.settings, ...opts};
     return true;
   }
 
@@ -200,13 +204,14 @@ export default class DataColumn {
     const {value} = this;
     const {startOffset = 0, endOffset} = opts;
     this.buffer.subData({
-      data: this.doublePrecision && value instanceof Float64Array
-        ? toDoublePrecisionArray(value, {
-            size: this.size,
-            startIndex: startOffset,
-            endIndex: endOffset
-          })
-        : value.subarray(startOffset, endOffset),
+      data:
+        this.doublePrecision && value instanceof Float64Array
+          ? toDoublePrecisionArray(value, {
+              size: this.size,
+              startIndex: startOffset,
+              endIndex: endOffset
+            })
+          : value.subarray(startOffset, endOffset),
       offset: startOffset * value.BYTES_PER_ELEMENT
     });
   }
@@ -241,7 +246,7 @@ export default class DataColumn {
     state.allocatedValue = this.value;
     state.constant = false;
     state.externalBuffer = null;
-    state.externalAccessor = null;
+    state.bufferAccessor = this.settings;
     return true;
   }
 
@@ -255,19 +260,11 @@ export default class DataColumn {
       if (this.doublePrecision) {
         // not 32bit or 64bit
         illegalArrayType = value.BYTES_PER_ELEMENT < 4;
-      } else {
-        illegalArrayType =
-          value.BYTES_PER_ELEMENT !== ArrayType.BYTES_PER_ELEMENT &&
-          // Shader attributes have hard-coded offsets and strides
-          // TODO - switch to element offsets and element strides?
-          Object.values(this.shaderAttributes).some(
-            attribute => attribute.opts.offset || attribute.opts.stride
-          );
       }
       if (illegalArrayType) {
         throw new Error(`Attribute ${this.id} does not support ${value.constructor.name}`);
       }
-      if (!(value instanceof ArrayType) && this.normalized && !('normalized' in opts)) {
+      if (!(value instanceof ArrayType) && this.settings.normalized && !('normalized' in opts)) {
         log.warn(`Attribute ${this.id} is normalized`)();
       }
     }
@@ -326,32 +323,3 @@ export default class DataColumn {
     return true;
   }
 }
-
-/* eslint-disable complexity */
-function glArrayFromType(glType) {
-  // Sorted in some order of likelihood to reduce amount of comparisons
-  switch (glType) {
-    case GL.FLOAT:
-      return Float32Array;
-    case GL.DOUBLE:
-      return Float64Array;
-    case GL.UNSIGNED_SHORT:
-    case GL.UNSIGNED_SHORT_5_6_5:
-    case GL.UNSIGNED_SHORT_4_4_4_4:
-    case GL.UNSIGNED_SHORT_5_5_5_1:
-      return Uint16Array;
-    case GL.UNSIGNED_INT:
-      return Uint32Array;
-    case GL.UNSIGNED_BYTE:
-      return Uint8ClampedArray;
-    case GL.BYTE:
-      return Int8Array;
-    case GL.SHORT:
-      return Int16Array;
-    case GL.INT:
-      return Int32Array;
-    default:
-      throw new Error('Failed to deduce type from array');
-  }
-}
-/* eslint-enable complexity */

@@ -1,16 +1,12 @@
 /* eslint-disable complexity */
-import {_Accessor as Accessor} from '@luma.gl/core';
+import {glArrayFromType} from './gl-utils';
 
 /* This class creates a luma.gl-compatible "view" on top of a DataColumn instance */
 export default class ShaderAttribute {
   constructor(dataColumn, opts) {
     // Options that cannot be changed later
-    this.id = opts.id;
     this.opts = opts;
     this.source = dataColumn;
-
-    const {offset = 0} = opts;
-    this.elementOffset = offset / Accessor.getBytesPerElement(opts);
   }
 
   get value() {
@@ -31,7 +27,7 @@ export default class ShaderAttribute {
     if (value && value.length !== size) {
       constantValue = new Float32Array(size);
       // initiate offset values
-      const index = this.elementOffset;
+      const index = accessor.offset / glArrayFromType(accessor.type).BYTES_PER_ELEMENT; // element offset
       for (let i = 0; i < size; ++i) {
         constantValue[i] = value[index + i];
       }
@@ -41,19 +37,11 @@ export default class ShaderAttribute {
   }
 
   getAccessor() {
-    const {source} = this;
-    const buffer = source.getBuffer();
-    const props = {
+    return {
       // source data accessor
-      ...source.settings,
-      // user overrides
-      ...source.state.externalAccessor,
+      ...this.source.getAccessor(),
       // shader attribute overrides
       ...this.opts
     };
-    if (buffer) {
-      props.type = buffer.accessor.type;
-    }
-    return new Accessor(props);
   }
 }

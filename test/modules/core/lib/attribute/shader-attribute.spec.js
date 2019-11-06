@@ -8,12 +8,8 @@ import {gl} from '@deck.gl/test-utils';
 test('ShaderAttribute#constructor', t => {
   const dataColumn = new DataColumn(gl, {id: 'test-data', size: 3});
 
-  let shaderAttribute = new ShaderAttribute(dataColumn, {id: 'test-attribute', divisor: 0});
+  const shaderAttribute = new ShaderAttribute(dataColumn, {id: 'test-attribute', divisor: 0});
   t.ok(shaderAttribute, 'ShaderAttribute constructed');
-  t.is(shaderAttribute.elementOffset, 0, 'elementOffset is set');
-
-  shaderAttribute = new ShaderAttribute(dataColumn, {id: 'test-attribute', divisor: 1, offset: 12});
-  t.is(shaderAttribute.elementOffset, 3, 'elementOffset is set');
 
   t.end();
 });

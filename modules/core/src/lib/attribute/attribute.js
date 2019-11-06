@@ -71,10 +71,6 @@ export default class Attribute extends DataColumn {
     return [this.id].concat((typeof accessor !== 'function' && accessor) || []);
   }
 
-  getAccessor() {
-    return this.settings.accessor;
-  }
-
   supportsTransition() {
     return Boolean(this.settings.transition);
   }
@@ -234,6 +230,20 @@ export default class Attribute extends DataColumn {
       return offset;
     }
     return offset + row * this.size;
+  }
+
+  getShaderAttributes() {
+    const shaderAttributeDefs = this.settings.shaderAttributes || {[this.id]: null};
+    const shaderAttributes = {};
+
+    for (const shaderAttributeName in shaderAttributeDefs) {
+      Object.assign(
+        shaderAttributes,
+        super.getShaderAttributes(shaderAttributeName, shaderAttributeDefs[shaderAttributeName])
+      );
+    }
+
+    return shaderAttributes;
   }
 
   _standardAccessor(attribute, {data, startRow, endRow, props, numInstances, bufferLayout}) {

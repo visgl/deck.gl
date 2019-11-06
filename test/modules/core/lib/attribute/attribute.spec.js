@@ -216,22 +216,23 @@ test('Attribute#shaderAttributes', t => {
       }
     }
   });
-  t.ok(attribute.shaderAttributes.positions, 'Shader attribute created');
-  let accessor = attribute.shaderAttributes.positions.getAccessor();
+  const shaderAttributes = attribute.getShaderAttributes();
+  t.ok(shaderAttributes.positions, 'Shader attribute created');
+  let accessor = shaderAttributes.positions.getAccessor();
   t.equals(accessor.size, 3, 'Shader attribute inherits pointer properties');
-  t.ok(attribute.shaderAttributes.instancePositions, 'Multiple shader attributes created');
-  accessor = attribute.shaderAttributes.instancePositions.getAccessor();
+  t.ok(shaderAttributes.instancePositions, 'Multiple shader attributes created');
+  accessor = shaderAttributes.instancePositions.getAccessor();
   t.equals(accessor.size, 3, 'Multiple shader attributes inherit pointer properties');
   t.equals(accessor.divisor, 1, 'Shader attribute defines pointer properties');
   t.equals(attribute.getBuffer(), buffer1, 'Attribute has buffer');
   t.equals(
     attribute.getBuffer(),
-    attribute.shaderAttributes.positions.getValue()[0],
+    shaderAttributes.positions.getValue()[0],
     'Shader attribute shares parent buffer'
   );
   t.equals(
     attribute.getBuffer(),
-    attribute.shaderAttributes.instancePositions.getValue()[0],
+    shaderAttributes.instancePositions.getValue()[0],
     'Shader attribute shares parent buffer'
   );
 
@@ -577,7 +578,6 @@ test('Attribute#setExternalBuffer', t => {
   t.notOk(attribute.needsUpdate(), 'attribute is updated');
 
   const spy = makeSpy(attribute, 'setData');
-  const shaderAttribute = attribute.shaderAttributes['test-attribute'];
   t.ok(
     attribute.setExternalBuffer(buffer),
     'should successfully set external buffer if setting external buffer to the same object'
@@ -586,14 +586,13 @@ test('Attribute#setExternalBuffer', t => {
 
   t.ok(attribute.setExternalBuffer(value1), 'should set external buffer to typed array');
   t.is(attribute.value, value1, 'external value is set');
-  t.is(shaderAttribute.getAccessor().type, GL.FLOAT, 'attribute type is set correctly');
+  t.is(attribute.getAccessor().type, GL.FLOAT, 'attribute type is set correctly');
 
   t.ok(attribute.setExternalBuffer(value2), 'should set external buffer to typed array');
   t.is(attribute.getBuffer().debugData.constructor.name, 'Uint8Array', 'external value is set');
-  t.is(shaderAttribute.getAccessor().type, GL.UNSIGNED_BYTE, 'attribute type is set correctly');
+  t.is(attribute.getAccessor().type, GL.UNSIGNED_BYTE, 'attribute type is set correctly');
 
   t.ok(attribute2.setExternalBuffer(value2), 'external value is set');
-  t.throws(() => attribute2.setExternalBuffer(value1), 'should throw on invalid buffer type');
 
   spy.reset();
   t.ok(
@@ -610,11 +609,11 @@ test('Attribute#setExternalBuffer', t => {
     }),
     'should set external buffer to attribute descriptor'
   );
-  const shaderAttributeAccessor = shaderAttribute.getAccessor();
-  t.is(shaderAttributeAccessor.offset, 4, 'attribute accessor is updated');
-  t.is(shaderAttributeAccessor.stride, 8, 'attribute accessor is updated');
+  const attributeAccessor = attribute.getAccessor();
+  t.is(attributeAccessor.offset, 4, 'attribute accessor is updated');
+  t.is(attributeAccessor.stride, 8, 'attribute accessor is updated');
   t.is(attribute.value, value1, 'external value is set');
-  t.is(shaderAttributeAccessor.type, GL.FLOAT, 'attribute type is set correctly');
+  t.is(attributeAccessor.type, GL.FLOAT, 'attribute type is set correctly');
 
   buffer.delete();
   attribute.delete();
