@@ -3,7 +3,27 @@ import {Layer, LayerExtension} from '@deck.gl/core';
 import {ScatterplotLayer, GeoJsonLayer} from '@deck.gl/layers';
 import {testLayer} from '@deck.gl/test-utils';
 
+const RE_DRAW_PROPS = ['prop1', 'prop2'];
+const BASE_PROPS = {
+  prop1: 'one',
+  prop2: 'two'
+};
+const NEW_PROPS_NO_REDRAW = {
+  prop1: 'one',
+  prop2: 'two',
+  prop3: 'three'
+};
+const NEW_PROPS_REDRAW = {
+  prop1: 'one',
+  prop2: 'four',
+  prop3: 'three'
+};
+
 class MockExtension extends LayerExtension {
+  constructor(opts) {
+    super(opts);
+    this.redrawProps = RE_DRAW_PROPS;
+  }
   getShaders() {
     return {modules: [{name: 'empty-module', vs: ''}]};
   }
@@ -177,5 +197,19 @@ test('LayerExtension#CompositeLayer passthrough', t => {
 
   t.is(MockExtension.finalizeCalled, 2, 'finalizeState called');
 
+  t.end();
+});
+
+test('LayerExtension#needsRedraw', t => {
+  const extension = new MockExtension({assert: t.ok});
+
+  t.notOk(
+    extension.needsRedraw({oldProps: BASE_PROPS, props: NEW_PROPS_NO_REDRAW}),
+    'needsRedraw should return false'
+  );
+  t.ok(
+    extension.needsRedraw({oldProps: BASE_PROPS, props: NEW_PROPS_REDRAW}),
+    'needsRedraw should return true'
+  );
   t.end();
 });

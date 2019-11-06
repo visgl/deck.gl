@@ -22,22 +22,10 @@ import {CompositeLayer, AttributeManager, experimental} from '@deck.gl/core';
 import {cssToDeviceRatio, log} from '@luma.gl/core';
 const {compareProps} = experimental;
 
-// props when changed results in new uniforms that requires re-aggregation
-const UNIFORM_PROPS = [
-  // DATA-FILTER extension
-  'filterEnabled',
-  'filterRange',
-  'filterSoftRange',
-  'filterTransformSize',
-  'filterTransformColor'
-];
-
 export default class AggregationLayer extends CompositeLayer {
   initializeState(aggregationProps = []) {
     super.initializeState();
-    this.setState({
-      aggregationProps: aggregationProps.concat(UNIFORM_PROPS)
-    });
+    this.setState({aggregationProps});
   }
 
   updateState(opts) {
@@ -94,9 +82,13 @@ export default class AggregationLayer extends CompositeLayer {
       oldProps[propName] = opts.oldProps[propName];
       props[propName] = opts.props[propName];
     }
-    return Boolean(
-      compareProps({oldProps, newProps: props, propTypes: this.constructor._propTypes})
-    );
+    if (compareProps({oldProps, newProps: props, propTypes: this.constructor._propTypes})) {
+      return true;
+    }
+
+    const {extensions} = opts.props;
+    const redrawOpts = Object.assign({}, opts, {propTypes: this.constructor._propTypes});
+    return extensions.some(extension => extension.needsRedraw(redrawOpts));
   }
 
   _updateShaders(shaders) {

@@ -39,12 +39,13 @@ const DATA_TYPE_FROM_SIZE = {
 };
 
 export default class DataFilterExtension extends LayerExtension {
-  constructor({filterSize = 1} = {}) {
+  constructor({filterSize = 1, redrawProps} = {}) {
     if (!DATA_TYPE_FROM_SIZE[filterSize]) {
       throw new Error('filterSize out of range');
     }
 
     super({filterSize});
+    this.redrawProps = redrawProps || Object.keys(defaultProps);
   }
 
   getShaders(extension) {
