@@ -7,8 +7,8 @@ import {
   getSourceBufferAttribute,
   getAttributeBufferLength,
   cycleBuffers
-} from '../lib/attribute-transition-utils';
-import Attribute from '../lib/attribute';
+} from '../lib/attribute/attribute-transition-utils';
+import Attribute from '../lib/attribute/attribute';
 import Transition from './transition';
 
 export default class GPUSpringTransition {

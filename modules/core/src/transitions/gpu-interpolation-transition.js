@@ -1,13 +1,13 @@
 import GL from '@luma.gl/constants';
 import {Buffer, Transform} from '@luma.gl/core';
-import Attribute from '../lib/attribute';
+import Attribute from '../lib/attribute/attribute';
 import {
   padBuffer,
   getAttributeTypeFromSize,
   getSourceBufferAttribute,
   getAttributeBufferLength,
   cycleBuffers
-} from '../lib/attribute-transition-utils';
+} from '../lib/attribute/attribute-transition-utils';
 import Transition from './transition';
 
 export default class GPUInterpolationTransition {

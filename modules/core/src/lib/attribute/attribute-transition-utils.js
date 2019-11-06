@@ -1,5 +1,5 @@
-import BaseAttribute from '../lib/base-attribute';
-import {padArray} from '../utils/array-utils';
+import ShaderAttribute from './shader-attribute';
+import {padArray} from '../../utils/array-utils';
 
 const DEFAULT_TRANSITION_SETTINGS = {
   interpolation: {
@@ -33,17 +33,24 @@ export function normalizeTransitionSettings(userSettings, layerSettings) {
 // (2) BUFFERS WITH OFFSETS ALWAYS CONTAIN VALUES OF THE SAME SIZE
 // (3) THE OPERATIONS IN THE SHADER ARE PER-COMPONENT (addition and scaling)
 export function getSourceBufferAttribute(gl, attribute) {
-  const {size, value, normalized, constant} = attribute;
   // The Attribute we pass to Transform as a sourceBuffer must have {divisor: 0}
   // so we create a copy of the attribute (with divisor=0) to use when running
   // transform feedback
-  if (constant) {
-    // don't pass normalized here because the `value` from a normalized attribute is
-    // already normalized
-    return new BaseAttribute(gl, {constant, value, size});
-  }
   const buffer = attribute.getBuffer();
-  return new BaseAttribute(gl, {divisor: 0, constant, buffer, size, normalized});
+  if (buffer) {
+    return [
+      attribute.getBuffer(),
+      {
+        divisor: 0,
+        size: attribute.size,
+        normalized: attribute.settings.normalized
+      }
+    ];
+  }
+  // constant
+  // don't pass normalized here because the `value` from a normalized attribute is
+  // already normalized
+  return attribute.value;
 }
 
 export function getAttributeTypeFromSize(size) {

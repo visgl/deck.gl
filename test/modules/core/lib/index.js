@@ -18,10 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import './base-attribute.spec';
-import './attribute.spec';
-import './attribute-manager.spec';
-import './attribute-transition-manager.spec';
+import './attribute';
 import './deck.spec';
 import './deck-picker.spec';
 import './layer.spec';

@@ -1,0 +1,357 @@
+/* eslint-disable complexity */
+import GL from '@luma.gl/constants';
+import {hasFeature, FEATURES, Buffer} from '@luma.gl/core';
+import ShaderAttribute from './shader-attribute';
+import typedArrayManager from '../../utils/typed-array-manager';
+import {toDoublePrecisionArray} from '../../utils/math-utils';
+import log from '../../utils/log';
+
+function addDoublePrecisionAttributes(attribute, shaderAttributeDefs) {
+  const doubleShaderAttributeDefs = {};
+  for (const shaderAttributeName in shaderAttributeDefs) {
+    const def = shaderAttributeDefs[shaderAttributeName];
+    const offset = 'offset' in def ? def.offset : attribute.offset || 0;
+    const stride = 'stride' in def ? def.stride : attribute.size * 4;
+
+    doubleShaderAttributeDefs[`${shaderAttributeName}32`] = Object.assign({}, def, {
+      offset,
+      stride
+    });
+    doubleShaderAttributeDefs[`${shaderAttributeName}64`] = Object.assign({}, def, {
+      offset: offset * 2,
+      stride: stride * 2
+    });
+    doubleShaderAttributeDefs[`${shaderAttributeName}64xyLow`] = Object.assign({}, def, {
+      offset: offset * 2 + stride,
+      stride: stride * 2
+    });
+  }
+  return doubleShaderAttributeDefs;
+}
+
+export default class DataColumn {
+  /* eslint-disable max-statements */
+  constructor(gl, opts) {
+    this.gl = gl;
+    this.id = opts.id;
+    this.size = opts.size;
+
+    const logicalType = opts.type;
+    const doublePrecision = logicalType === GL.DOUBLE;
+
+    let {defaultValue = [0, 0, 0, 0]} = opts;
+    defaultValue = Array.isArray(defaultValue) ? defaultValue : [defaultValue];
+
+    let bufferType = logicalType;
+    if (doublePrecision) {
+      bufferType = GL.FLOAT;
+    } else if (!bufferType && opts.isIndexed) {
+      bufferType =
+        gl && hasFeature(gl, FEATURES.ELEMENT_INDEX_UINT32) ? GL.UNSIGNED_INT : GL.UNSIGNED_SHORT;
+    }
+    opts.type = bufferType;
+
+    // This is the attribute type defined by the layer
+    // If an external buffer is provided, this.type may be overwritten
+    // But we always want to use defaultType for allocation
+    this.defaultType = glArrayFromType(logicalType || this.type || GL.FLOAT);
+    this.bufferType = bufferType;
+    this.shaderAttributes = {};
+    this.doublePrecision = doublePrecision;
+
+    // `fp64: false` tells a double-precision attribute to allocate Float32Arrays
+    // by default when using auto-packing. This is more efficient in use cases where
+    // high precision is unnecessary, but the `64xyLow` attribute is still required
+    // by the shader.
+    if (doublePrecision && opts.fp64 === false) {
+      this.defaultType = Float32Array;
+    }
+
+    let shaderAttributeDefs = opts.shaderAttributes || {[this.id]: {}};
+    this.shaderAttributeNames = Object.keys(shaderAttributeDefs);
+    if (doublePrecision) {
+      shaderAttributeDefs = addDoublePrecisionAttributes(opts, shaderAttributeDefs);
+    }
+    this.shaderAttributeDefs = shaderAttributeDefs;
+
+    for (const shaderAttributeName in shaderAttributeDefs) {
+      // Initialize the attribute descriptor, with WebGL and metadata fields
+      const shaderAttribute = new ShaderAttribute(
+        Object.assign({}, opts, shaderAttributeDefs[shaderAttributeName], {
+          id: shaderAttributeName,
+          type: bufferType
+        })
+      );
+      this.shaderAttributes[shaderAttributeName] = shaderAttribute;
+    }
+
+    this.value = null;
+    this.settings = Object.assign({}, opts, {
+      defaultValue
+    });
+    this.state = {
+      externalBuffer: null,
+      allocatedValue: null,
+      constant: false
+    };
+    this._buffer = null;
+
+    this.setData(opts);
+  }
+  /* eslint-enable max-statements */
+
+  get buffer() {
+    if (!this._buffer) {
+      const {isIndexed} = this.settings;
+      this._buffer = new Buffer(this.gl, {
+        id: this.id,
+        target: isIndexed ? GL.ELEMENT_ARRAY_BUFFER : GL.ARRAY_BUFFER
+      });
+    }
+    return this._buffer;
+  }
+
+  delete() {
+    if (this._buffer) {
+      this._buffer.delete();
+      this._buffer = null;
+    }
+    typedArrayManager.release(this.state.allocatedValue);
+  }
+
+  getShaderAttributes() {
+    if (this.doublePrecision) {
+      const shaderAttributes = {};
+      const isBuffer64Bit = this.value instanceof Float64Array;
+      for (const shaderAttributeName of this.shaderAttributeNames) {
+        shaderAttributes[shaderAttributeName] = this.shaderAttributes[
+          isBuffer64Bit ? `${shaderAttributeName}64` : `${shaderAttributeName}32`
+        ];
+        const shaderAttributeLowPartName = `${shaderAttributeName}64xyLow`;
+        shaderAttributes[shaderAttributeLowPartName] = isBuffer64Bit
+          ? this.shaderAttributes[shaderAttributeLowPartName]
+          : new Float32Array(this.size); // use constant for low part if buffer is 32-bit
+      }
+      return shaderAttributes;
+    }
+
+    return this.shaderAttributes;
+  }
+
+  getBuffer() {
+    if (this.constant) {
+      return null;
+    }
+    return this.state.externalBuffer || this._buffer;
+  }
+
+  // returns true if success
+  // eslint-disable-next-line max-statements
+  setData(opts) {
+    const {state} = this;
+    if (ArrayBuffer.isView(opts)) {
+      opts = {value: opts};
+    } else if (opts instanceof Buffer) {
+      opts = {buffer: opts};
+    }
+
+    if (opts.buffer) {
+      state.externalBuffer = opts.buffer;
+      state.constant = false;
+    } else {
+      state.externalBuffer = null;
+    }
+    if (opts.constant) {
+      // set constant
+      opts.value = this._normalizeValue(opts.value);
+      const hasChanged = !this._areValuesEqual(opts.value, this.value);
+
+      if (!hasChanged) {
+        return false;
+      }
+      state.constant = true;
+      this.value = opts.value;
+    } else if (opts.value) {
+      this._checkExternalBuffer(opts);
+      this.value = opts.value;
+      state.constant = false;
+
+      if (this.doublePrecision) {
+        if (opts.value instanceof Float64Array) {
+          opts.value = toDoublePrecisionArray(opts.value, this);
+        }
+      }
+
+      this.buffer.setData(opts.value);
+      opts.buffer = this.buffer;
+    } else {
+      this.value = null;
+    }
+
+    this._updateShaderAttributes(opts);
+    return true;
+  }
+
+  updateSubBuffer(opts = {}) {
+    const {value} = this;
+    const {startOffset = 0, endOffset} = opts;
+    this.buffer.subData({
+      data: this.doublePrecision
+        ? toDoublePrecisionArray(value, {
+            size: this.size,
+            startIndex: startOffset,
+            endIndex: endOffset
+          })
+        : value.subarray(startOffset, endOffset),
+      offset: startOffset * value.BYTES_PER_ELEMENT
+    });
+  }
+
+  allocate({numInstances, copy = false}) {
+    const {state} = this;
+    const oldValue = state.allocatedValue;
+
+    // Allocate at least one element to ensure a valid buffer
+    this.value = typedArrayManager.allocate(oldValue, numInstances + 1, {
+      size: this.size,
+      type: this.defaultType,
+      copy
+    });
+
+    if (this.buffer.byteLength < this.value.byteLength) {
+      this.buffer.reallocate(this.value.byteLength);
+
+      if (copy && oldValue) {
+        // Upload the full existing attribute value to the GPU, so that updateBuffer
+        // can choose to only update a partial range.
+        // TODO - copy old buffer to new buffer on the GPU
+        this.buffer.subData({
+          data:
+            oldValue instanceof Float64Array
+              ? toDoublePrecisionArray(oldValue, {size: this.size})
+              : oldValue
+        });
+      }
+    }
+
+    state.allocatedValue = this.value;
+    state.constant = false;
+    state.externalBuffer = null;
+    this._updateShaderAttributes({
+      ...this.settings,
+      buffer: this.buffer,
+      value: this.value
+    });
+
+    return true;
+  }
+
+  // PRIVATE HELPER METHODS
+  _checkExternalBuffer(opts) {
+    const {value} = opts;
+    if (!opts.constant && value) {
+      const ArrayType = this.defaultType;
+
+      let illegalArrayType = false;
+      if (this.doublePrecision) {
+        // not 32bit or 64bit
+        illegalArrayType = value.BYTES_PER_ELEMENT < 4;
+      } else {
+        illegalArrayType =
+          value.BYTES_PER_ELEMENT !== ArrayType.BYTES_PER_ELEMENT &&
+          // Shader attributes have hard-coded offsets and strides
+          // TODO - switch to element offsets and element strides?
+          Object.values(this.shaderAttributes).some(
+            attribute => attribute.offset || attribute.stride
+          );
+      }
+      if (illegalArrayType) {
+        throw new Error(`Attribute ${this.id} does not support ${value.constructor.name}`);
+      }
+      if (!(value instanceof ArrayType) && this.normalized && !('normalized' in opts)) {
+        log.warn(`Attribute ${this.id} is normalized`)();
+      }
+    }
+  }
+
+  /* check user supplied values and apply fallback */
+  _normalizeValue(value, out = [], start = 0) {
+    const {defaultValue} = this.settings;
+
+    if (!Array.isArray(value) && !ArrayBuffer.isView(value)) {
+      out[start] = Number.isFinite(value) ? value : defaultValue[0];
+      return out;
+    }
+
+    /* eslint-disable no-fallthrough, default-case */
+    switch (this.size) {
+      case 4:
+        out[start + 3] = Number.isFinite(value[3]) ? value[3] : defaultValue[3];
+      case 3:
+        out[start + 2] = Number.isFinite(value[2]) ? value[2] : defaultValue[2];
+      case 2:
+        out[start + 1] = Number.isFinite(value[1]) ? value[1] : defaultValue[1];
+      case 1:
+        out[start + 0] = Number.isFinite(value[0]) ? value[0] : defaultValue[0];
+    }
+
+    return out;
+  }
+
+  _areValuesEqual(value1, value2, size = this.size) {
+    if (!value1 || !value2) {
+      return false;
+    }
+    for (let i = 0; i < size; i++) {
+      if (value1[i] !== value2[i]) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  _updateShaderAttributes(opts) {
+    const {shaderAttributes, shaderAttributeDefs} = this;
+    for (const shaderAttributeName in shaderAttributes) {
+      const shaderAttribute = shaderAttributes[shaderAttributeName];
+      shaderAttribute.setAccessor({
+        ...opts,
+        ...shaderAttributeDefs[shaderAttributeName]
+      });
+      if (opts.buffer) {
+        shaderAttribute.setBuffer(opts.buffer, opts.value);
+      } else if (opts.constant) {
+        shaderAttribute.setConstantValue(opts.value);
+      }
+    }
+  }
+}
+
+/* eslint-disable complexity */
+function glArrayFromType(glType) {
+  // Sorted in some order of likelihood to reduce amount of comparisons
+  switch (glType) {
+    case GL.FLOAT:
+      return Float32Array;
+    case GL.DOUBLE:
+      return Float64Array;
+    case GL.UNSIGNED_SHORT:
+    case GL.UNSIGNED_SHORT_5_6_5:
+    case GL.UNSIGNED_SHORT_4_4_4_4:
+    case GL.UNSIGNED_SHORT_5_5_5_1:
+      return Uint16Array;
+    case GL.UNSIGNED_INT:
+      return Uint32Array;
+    case GL.UNSIGNED_BYTE:
+      return Uint8ClampedArray;
+    case GL.BYTE:
+      return Int8Array;
+    case GL.SHORT:
+      return Int16Array;
+    case GL.INT:
+      return Int32Array;
+    default:
+      throw new Error('Failed to deduce type from array');
+  }
+}
+/* eslint-enable complexity */

@@ -20,7 +20,7 @@
 
 /* eslint-disable guard-for-in */
 import Attribute from './attribute';
-import log from '../utils/log';
+import log from '../../utils/log';
 
 import AttributeTransitionManager from './attribute-transition-manager';
 

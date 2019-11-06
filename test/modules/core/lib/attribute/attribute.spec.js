@@ -19,7 +19,7 @@
 // THE SOFTWARE.
 
 /* eslint-disable dot-notation, max-statements, no-unused-vars */
-import Attribute from '@deck.gl/core/lib/attribute';
+import Attribute from '@deck.gl/core/lib/attribute/attribute';
 import GL from '@luma.gl/constants';
 import {Buffer, isWebGL2} from '@luma.gl/core';
 import test from 'tape-catch';
@@ -37,7 +37,7 @@ test('Attribute#constructor', t => {
   t.ok(attribute, 'Attribute construction successful');
   t.is(typeof attribute.getBuffer, 'function', 'Attribute.getBuffer function available');
   t.ok(attribute.allocate, 'Attribute.allocate function available');
-  t.ok(attribute.update, 'Attribute.update function available');
+  t.ok(attribute.updateBuffer, 'Attribute.update function available');
 
   t.throws(() => new Attribute(gl, {size: 1}), 'Attribute missing update option');
 
@@ -46,10 +46,10 @@ test('Attribute#constructor', t => {
 
 test('Attribute#delete', t => {
   const attribute = new Attribute(gl, {size: 1, accessor: 'a', value: new Float32Array(4)});
-  t.ok(attribute.buffer, 'Attribute created Buffer object');
+  t.ok(attribute._buffer, 'Attribute created Buffer object');
 
   attribute.delete();
-  t.notOk(attribute.buffer, 'Attribute deleted Buffer object');
+  t.notOk(attribute._buffer, 'Attribute deleted Buffer object');
 
   t.end();
 });
@@ -237,25 +237,25 @@ test('Attribute#shaderAttributes', t => {
   t.equals(attribute.getBuffer(), buffer1, 'Attribute has buffer');
   t.equals(
     attribute.getBuffer(),
-    attribute.shaderAttributes.positions.getBuffer(),
+    attribute.shaderAttributes.positions.buffer,
     'Shader attribute shares parent buffer'
   );
   t.equals(
     attribute.getBuffer(),
-    attribute.shaderAttributes.instancePositions.getBuffer(),
+    attribute.shaderAttributes.instancePositions.buffer,
     'Shader attribute shares parent buffer'
   );
 
-  attribute.update({buffer: buffer2});
+  attribute.setData({buffer: buffer2});
   t.equals(attribute.getBuffer(), buffer2, 'Buffer was updated');
   t.equals(
     attribute.getBuffer(),
-    attribute.shaderAttributes.positions.getBuffer(),
+    attribute.shaderAttributes.positions.buffer,
     'Shader attribute buffer was updated'
   );
   t.equals(
     attribute.getBuffer(),
-    attribute.shaderAttributes.instancePositions.getBuffer(),
+    attribute.shaderAttributes.instancePositions.buffer,
     'Shader attribute buffer was updated'
   );
 
@@ -601,7 +601,8 @@ test('Attribute#setExternalBuffer', t => {
   t.is(attribute.getBuffer(), buffer, 'external buffer is set');
   t.notOk(attribute.needsUpdate(), 'attribute is updated');
 
-  const spy = makeSpy(attribute, 'update');
+  const spy = makeSpy(attribute, 'setData');
+  const shaderAttribute = attribute.shaderAttributes['test-attribute'];
   t.ok(
     attribute.setExternalBuffer(buffer),
     'should successfully set external buffer if setting external buffer to the same object'
@@ -610,11 +611,11 @@ test('Attribute#setExternalBuffer', t => {
 
   t.ok(attribute.setExternalBuffer(value1), 'should set external buffer to typed array');
   t.is(attribute.value, value1, 'external value is set');
-  t.is(attribute.type, GL.FLOAT, 'attribute type is set correctly');
+  t.is(shaderAttribute.type, GL.FLOAT, 'attribute type is set correctly');
 
   t.ok(attribute.setExternalBuffer(value2), 'should set external buffer to typed array');
-  t.is(attribute.buffer.debugData.constructor.name, 'Uint8Array', 'external value is set');
-  t.is(attribute.type, GL.UNSIGNED_BYTE, 'attribute type is set correctly');
+  t.is(attribute.getBuffer().debugData.constructor.name, 'Uint8Array', 'external value is set');
+  t.is(shaderAttribute.type, GL.UNSIGNED_BYTE, 'attribute type is set correctly');
 
   t.ok(attribute2.setExternalBuffer(value2), 'external value is set');
   t.throws(() => attribute2.setExternalBuffer(value1), 'should throw on invalid buffer type');
@@ -634,10 +635,10 @@ test('Attribute#setExternalBuffer', t => {
     }),
     'should set external buffer to attribute descriptor'
   );
-  t.is(attribute.offset, 4, 'attribute accessor is updated');
-  t.is(attribute.stride, 8, 'attribute accessor is updated');
+  t.is(shaderAttribute.offset, 4, 'attribute accessor is updated');
+  t.is(shaderAttribute.stride, 8, 'attribute accessor is updated');
   t.is(attribute.value, value1, 'external value is set');
-  t.is(attribute.type, GL.FLOAT, 'attribute type is set correctly');
+  t.is(shaderAttribute.type, GL.FLOAT, 'attribute type is set correctly');
 
   buffer.delete();
   attribute.delete();
@@ -657,14 +658,14 @@ test('Attribute#doublePrecision', t0 => {
 
     if (is64Bit) {
       t.is(
-        shaderAttributes.positions.externalBuffer,
+        shaderAttributes.positions.buffer,
         attribute.getBuffer(),
         'shaderAttributes.positions buffer'
       );
       t.is(shaderAttributes.positions.offset, 0, 'shaderAttributes.positions offset');
       t.is(shaderAttributes.positions.stride, 24, 'shaderAttributes.positions stride');
       t.is(
-        shaderAttributes.positions64xyLow.externalBuffer,
+        shaderAttributes.positions64xyLow.buffer,
         attribute.getBuffer(),
         'shaderAttributes.positions64xyLow buffer'
       );
@@ -680,7 +681,7 @@ test('Attribute#doublePrecision', t0 => {
       );
     } else {
       t.is(
-        shaderAttributes.positions.externalBuffer,
+        shaderAttributes.positions.buffer,
         attribute.getBuffer(),
         'shaderAttributes.positions buffer'
       );
