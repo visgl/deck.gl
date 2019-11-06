@@ -40,11 +40,16 @@ export default class ShaderAttribute {
     const {source} = this;
     const buffer = source.getBuffer();
     const props = {
+      // source data accessor
       ...source.settings,
+      // user overrides
       ...source.state.externalAccessor,
-      ...this.opts,
-      ...(buffer && buffer.accessor)
+      // shader attribute overrides
+      ...this.opts
     };
+    if (buffer) {
+      props.type = buffer.accessor.type;
+    }
     return new Accessor(props);
   }
 }

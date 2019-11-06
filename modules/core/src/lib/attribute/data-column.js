@@ -39,8 +39,10 @@ export default class DataColumn {
     const logicalType = opts.logicalType || opts.type;
     const doublePrecision = logicalType === GL.DOUBLE;
 
-    let {defaultValue = [0, 0, 0, 0]} = opts;
-    defaultValue = Array.isArray(defaultValue) ? defaultValue : [defaultValue];
+    let {defaultValue} = opts;
+    defaultValue = Number.isFinite(defaultValue)
+      ? [defaultValue]
+      : defaultValue || new Array(this.size).fill(0);
 
     let bufferType = logicalType;
     if (doublePrecision) {
@@ -55,7 +57,7 @@ export default class DataColumn {
     // This is the attribute type defined by the layer
     // If an external buffer is provided, this.type may be overwritten
     // But we always want to use defaultType for allocation
-    this.defaultType = glArrayFromType(logicalType || this.type || GL.FLOAT);
+    this.defaultType = glArrayFromType(logicalType || bufferType || GL.FLOAT);
     this.shaderAttributes = {};
     this.doublePrecision = doublePrecision;
 
@@ -307,18 +309,10 @@ export default class DataColumn {
       return out;
     }
 
-    /* eslint-disable no-fallthrough, default-case */
-    switch (this.size) {
-      case 4:
-        out[start + 3] = Number.isFinite(value[3]) ? value[3] : defaultValue[3];
-      case 3:
-        out[start + 2] = Number.isFinite(value[2]) ? value[2] : defaultValue[2];
-      case 2:
-        out[start + 1] = Number.isFinite(value[1]) ? value[1] : defaultValue[1];
-      case 1:
-        out[start + 0] = Number.isFinite(value[0]) ? value[0] : defaultValue[0];
+    let i = this.size;
+    while (--i >= 0) {
+      out[start + i] = Number.isFinite(value[i]) ? value[i] : defaultValue[i];
     }
-
     return out;
   }
 
