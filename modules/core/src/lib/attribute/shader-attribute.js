@@ -13,6 +13,10 @@ export default class ShaderAttribute {
     this.elementOffset = offset / Accessor.getBytesPerElement(opts);
   }
 
+  get value() {
+    return this.source.value;
+  }
+
   getValue() {
     const buffer = this.source.getBuffer();
     const accessor = this.getAccessor();

@@ -185,10 +185,8 @@ export default class DataColumn {
       state.constant = false;
       this.value = value;
 
-      if (this.doublePrecision) {
-        if (value instanceof Float64Array) {
-          value = toDoublePrecisionArray(value, this);
-        }
+      if (this.doublePrecision && value instanceof Float64Array) {
+        value = toDoublePrecisionArray(value, this);
       }
 
       this.buffer.setData(value);
@@ -202,7 +200,7 @@ export default class DataColumn {
     const {value} = this;
     const {startOffset = 0, endOffset} = opts;
     this.buffer.subData({
-      data: this.doublePrecision
+      data: this.doublePrecision && value instanceof Float64Array
         ? toDoublePrecisionArray(value, {
             size: this.size,
             startIndex: startOffset,

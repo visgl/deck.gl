@@ -340,7 +340,7 @@ export default class GPUGridAggregator {
     for (const id in weights) {
       const {size, operation} = weights[id];
       // TODO - value might not exist (e.g. attribute transition)
-      const values = attributes[id].source.value;
+      const values = attributes[id].value;
       const {aggregationData} = results[id];
       for (let sizeIndex = 0; sizeIndex < size; sizeIndex++) {
         const cellElementIndex = cellIndex + sizeIndex;
@@ -508,8 +508,7 @@ export default class GPUGridAggregator {
     }
 
     const validCellIndices = new Set();
-    // TODO - value might not exist (e.g. attribute transition)
-    const positions = attributes.positions.source.value;
+    const positions = attributes.positions.value;
     const posSize = 3;
     for (let posIndex = 0; posIndex < vertexCount; posIndex++) {
       let x;

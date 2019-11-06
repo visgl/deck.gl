@@ -77,7 +77,7 @@ export function pointToDensityGridData({
 /* eslint-disable max-statements */
 function getBoundingBox(attributes, vertexCount) {
   // TODO - value might not exist (e.g. attribute transition)
-  const positions = attributes.positions.source.value;
+  const positions = attributes.positions.value;
 
   let yMin = Infinity;
   let yMax = -Infinity;
