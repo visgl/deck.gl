@@ -57,12 +57,9 @@ class TestAggregationLayer extends AggregationLayer {
     super.updateState(opts);
     this.setState({aggregationDirty: this._isAggregationDirty(opts)});
   }
-  _updateShaders(shaderOptions) {
-  }
+  _updateShaders(shaderOptions) {}
 
-  updateAttributes(changedAttributes) {
-  }
-
+  updateAttributes(changedAttributes) {}
 }
 
 TestAggregationLayer.layerName = 'TestAggregationLayer';
@@ -96,7 +93,10 @@ test('AggregationLayer#updateState', t => {
         spies: ['_updateShaders', 'updateAttributes'],
         onAfterUpdate({spies, layer}) {
           t.ok(spies.updateAttributes.called, 'should always call updateAttributes');
-          t.notOk(spies._updateShaders.called, 'should not call _updateShaders when extensions not changed');
+          t.notOk(
+            spies._updateShaders.called,
+            'should not call _updateShaders when extensions not changed'
+          );
           t.notOk(layer.state.aggregationDirty, 'Aggregation should not be dirty');
         }
       },
@@ -106,7 +106,10 @@ test('AggregationLayer#updateState', t => {
         },
         spies: ['_updateShaders', 'updateAttributes'],
         onAfterUpdate({layer}) {
-          t.ok(layer.state.aggregationDirty, 'Aggregation should be dirty when an aggregation prop is changed');
+          t.ok(
+            layer.state.aggregationDirty,
+            'Aggregation should be dirty when an aggregation prop is changed'
+          );
         }
       },
       {
@@ -133,7 +136,10 @@ test('AggregationLayer#updateState', t => {
           filterEnabled: false // default true earlier
         },
         onAfterUpdate({layer}) {
-          t.ok(layer.state.aggregationDirty, 'Aggregation should not be dirty when extension prop is changed');
+          t.ok(
+            layer.state.aggregationDirty,
+            'Aggregation should not be dirty when extension prop is changed'
+          );
         }
       }
     ]
