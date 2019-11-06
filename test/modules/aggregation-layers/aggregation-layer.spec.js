@@ -58,8 +58,8 @@ class TestAggregationLayer extends AggregationLayer {
     this.setState({aggregationDirty: this._isAggregationDirty(opts)});
   }
   _updateShaders(shaderOptions) {}
-
-  updateAttributes(changedAttributes) {}
+  //
+  // updateAttributes(changedAttributes) {}
 }
 
 TestAggregationLayer.layerName = 'TestAggregationLayer';
