@@ -84,6 +84,7 @@ let positions = [
 ];
 
 let positions64xyLow = positions.map(pos => fp64LowPart(pos));
+const {width, height} = viewport;
 const fixture = {
   positions,
   positions64xyLow,
@@ -113,16 +114,16 @@ const fixture = {
       needMax: true
     }
   },
-  windowSize: [500, 500],
   cellSize: [25, 25],
-  gridSize: [20, 20],
   changeFlags: {
     dataChanged: true
   },
   moduleSettings: {viewport},
   projectPoints: true,
   translation: [1, -1],
-  scaling: [viewport.width / 2, -viewport.height / 2, 1]
+  scaling: [width / 2, -height / 2, 1],
+  numCol: Math.ceil(width / 25),
+  numRow: Math.ceil(height / 25)
 };
 
 Object.assign(fixture, buildAttributes(fixture));

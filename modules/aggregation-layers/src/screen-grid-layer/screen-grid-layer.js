@@ -21,7 +21,7 @@
 import {log} from '@deck.gl/core';
 import GL from '@luma.gl/constants';
 import GPUGridAggregator from '../utils/gpu-grid-aggregation/gpu-grid-aggregator';
-import {AGGREGATION_OPERATION} from '../utils/aggregation-operation-utils';
+import {AGGREGATION_OPERATION, getValueFunc} from '../utils/aggregation-operation-utils';
 import ScreenGridCellLayer from './screen-grid-cell-layer';
 import GridAggregationLayer from '../grid-aggregation-layer';
 import {getFloatTexture} from '../utils/resource-utils.js';
@@ -34,8 +34,16 @@ const defaultProps = Object.assign({}, ScreenGridCellLayer.defaultProps, {
   aggregation: 'SUM'
 });
 
-// props , when changed requires re-aggregation
-const AGGREGATION_PROPS = ['aggregation', 'getWeight'];
+const POSITION_ATTRIBUTE_NAME = 'positions';
+const DIMENSIONS = {
+  data: {
+    props: ['cellSizePixels']
+  },
+  weights: {
+    props: ['aggregation'],
+    accessors: ['getWeight']
+  }
+};
 
 export default class ScreenGridLayer extends GridAggregationLayer {
   initializeState() {
@@ -47,7 +55,7 @@ export default class ScreenGridLayer extends GridAggregationLayer {
       return;
     }
     super.initializeState({
-      aggregationProps: AGGREGATION_PROPS,
+      dimensions: DIMENSIONS,
       getCellSize: props => props.cellSizePixels
     });
     const weights = {
@@ -60,14 +68,17 @@ export default class ScreenGridLayer extends GridAggregationLayer {
     };
     this.setState({
       supported: true,
+      projectPoints: true, // aggregation in screen space
       weights,
       subLayerData: {attributes: {}},
-      screenSpaceAggregation: true,
-      maxTexture: weights.count.maxTexture
+      maxTexture: weights.count.maxTexture,
+      positionAttributeName: 'positions',
+      posOffset: [0, 0],
+      translation: [1, -1]
     });
     const attributeManager = this.getAttributeManager();
     attributeManager.add({
-      positions: {
+      [POSITION_ATTRIBUTE_NAME]: {
         size: 3,
         accessor: 'getPosition',
         type: GL.DOUBLE,
@@ -152,8 +163,11 @@ export default class ScreenGridLayer extends GridAggregationLayer {
     count.maxTexture.setImageData({data: maxData});
   }
 
-  updateAggregationFlags(opts) {
-    const cellSizeChanged = opts.oldProps.cellSizePixels !== opts.props.cellSizePixels;
+  /* eslint-disable complexity, max-statements */
+  updateAggregationState(opts) {
+    const cellSize = opts.props.cellSizePixels;
+    const cellSizeChanged = opts.oldProps.cellSizePixels !== cellSize;
+    const {viewportChanged} = opts.changeFlags;
     let gpuAggregation = opts.props.gpuAggregation;
     if (this.state.gpuAggregation !== opts.props.gpuAggregation) {
       if (gpuAggregation && !GPUGridAggregator.isSupported(this.context.gl)) {
@@ -162,25 +176,73 @@ export default class ScreenGridLayer extends GridAggregationLayer {
       }
     }
     const gpuAggregationChanged = gpuAggregation !== this.state.gpuAggregation;
-    // Consider switching between CPU and GPU aggregation as data changed as it requires
-    // re aggregation.
-    const dataChanged =
-      this.state.dataChanged || gpuAggregationChanged || opts.changeFlags.viewportChanged;
-
     this.setState({
-      dataChanged,
-      cellSizeChanged,
-      cellSize: opts.props.cellSizePixels,
-      needsReProjection: dataChanged || cellSizeChanged,
       gpuAggregation
     });
+
+    const {positionsChanged, dimensions} = this.state;
+    const {data, weights} = dimensions;
+    const aggregationDataDirty =
+      positionsChanged ||
+      gpuAggregationChanged ||
+      viewportChanged ||
+      this.isAggregationDirty(opts, {
+        compareAll: gpuAggregation, // check for all (including extentions props) when using gpu aggregation
+        dimension: data
+      });
+    const aggregationWeightsDirty = this.isAggregationDirty(opts, {dimension: weights});
+
+    this.setState({
+      aggregationDataDirty,
+      aggregationWeightsDirty
+    });
+
+    const {viewport} = this.context;
+
+    if (viewportChanged || cellSizeChanged) {
+      const {width, height} = viewport;
+      const numCol = Math.ceil(width / cellSize);
+      const numRow = Math.ceil(height / cellSize);
+      this.allocateResources(numRow, numCol);
+      this.setState({
+        // transformation from clipspace to screen(pixel) space
+        scaling: [width / 2, -height / 2, 1],
+
+        gridOffset: {xOffset: cellSize, yOffset: cellSize},
+        width,
+        height,
+        numCol,
+        numRow
+      });
+    }
+
+    if (aggregationWeightsDirty) {
+      this._updateAccessors(opts);
+    }
+    if (aggregationDataDirty || aggregationWeightsDirty) {
+      this._resetResults();
+    }
   }
+  /* eslint-enable complexity, max-statements */
 
   // Private
 
-  _getGridOffset() {
-    const {cellSize} = this.state;
-    return {xOffset: cellSize, yOffset: cellSize};
+  _updateAccessors(opts) {
+    const {getWeight, aggregation} = opts.props;
+    const {count} = this.state.weights;
+    if (this.state.gpuAggregation) {
+      count.getWeight = getWeight;
+      count.operation = AGGREGATION_OPERATION[aggregation];
+    } else {
+      this.setState({getValue: getValueFunc(aggregation, getWeight)});
+    }
+  }
+
+  _resetResults() {
+    const {count} = this.state.weights;
+    if (count) {
+      count.aggregationData = null;
+    }
   }
 }
 

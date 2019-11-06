@@ -24,7 +24,6 @@ export default `\
 attribute vec3 positions;
 attribute vec3 positions64Low;
 attribute vec3 weights;
-uniform vec2 windowSize;
 uniform vec2 cellSize;
 uniform vec2 gridSize;
 uniform bool projectPoints;

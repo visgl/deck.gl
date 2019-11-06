@@ -1,3 +1,6 @@
+import {log, COORDINATE_SYSTEM} from '@deck.gl/core';
+const R_EARTH = 6378000;
+
 function toFinite(n) {
   return Number.isFinite(n) ? n : 0;
 }
@@ -35,6 +38,27 @@ export function getBoundingBox(attributes, vertexCount) {
 }
 /* eslint-enable max-statements */
 
+export function alignBoundingBox(boundingBox, gridOffset, coordinateSystem, viewport) {
+  const {width, height} = viewport;
+
+  // Origin to define grid
+  // DEFAULT coordinate system is treated as LNGLAT
+  const worldOrigin =
+    coordinateSystem === COORDINATE_SYSTEM.CARTESIAN ? [-width / 2, -height / 2] : [-180, -90];
+
+  // Other coordinate systems not supported/verified yet.
+  log.assert(
+    [COORDINATE_SYSTEM.CARTESIAN, COORDINATE_SYSTEM.LNGLAT, COORDINATE_SYSTEM.DEFAULT].includes(
+      coordinateSystem
+    )
+  );
+
+  const {xMin, yMin} = boundingBox;
+  boundingBox.xMin = alignToCell(xMin - worldOrigin[0], gridOffset.xOffset) + worldOrigin[0];
+  boundingBox.yMin = alignToCell(yMin - worldOrigin[1], gridOffset.yOffset) + worldOrigin[1];
+  return boundingBox;
+}
+
 // Aligns `inValue` to given `cellSize`
 export function alignToCell(inValue, cellSize) {
   const sign = inValue < 0 ? -1 : 1;
@@ -44,4 +68,78 @@ export function alignToCell(inValue, cellSize) {
   value = Math.floor(value / cellSize) * cellSize;
 
   return value * sign;
+}
+
+/**
+ * Based on geometric center of sample points, calculate cellSize in lng/lat (degree) space
+ * @param {object} boundingBox - {xMin, yMin, xMax, yMax} contains bounding box of data
+ * @param {number} cellSize - grid cell size in meters
+ * @param {boolean, optional} converToDegrees - when true offsets are converted from meters to lng/lat (degree) space
+ * @returns {xOffset, yOffset} - cellSize size
+ */
+
+export function getGridOffset(boundingBox, cellSize, convertToMeters = true) {
+  if (!convertToMeters) {
+    return {xOffset: cellSize, yOffset: cellSize};
+  }
+
+  const {yMin, yMax} = boundingBox;
+  const centerLat = (yMin + yMax) / 2;
+
+  return calculateGridLatLonOffset(cellSize, centerLat);
+}
+
+export function getGridParams(boundingBox, cellSize, viewport, coordinateSystem) {
+  const gridOffset = getGridOffset(
+    boundingBox,
+    cellSize,
+    coordinateSystem !== COORDINATE_SYSTEM.IDENTITY
+  );
+
+  const boundingBoxAligned = alignBoundingBox(boundingBox, gridOffset, coordinateSystem, viewport);
+
+  const {xMin, yMin, xMax, yMax} = boundingBox;
+  const translation = [-1 * xMin, -1 * yMin];
+
+  const width = xMax - xMin + gridOffset.xOffset;
+  const height = yMax - yMin + gridOffset.yOffset;
+
+  const numCol = Math.ceil(width / gridOffset.xOffset);
+  const numRow = Math.ceil(height / gridOffset.yOffset);
+  return {gridOffset, boundingBoxAligned, translation, width, height, numCol, numRow};
+}
+
+/**
+ * calculate grid layer cell size in lat lon based on world unit size
+ * and current latitude
+ * @param {number} cellSize
+ * @param {number} latitude
+ * @returns {object} - lat delta and lon delta
+ */
+function calculateGridLatLonOffset(cellSize, latitude) {
+  const yOffset = calculateLatOffset(cellSize);
+  const xOffset = calculateLonOffset(latitude, cellSize);
+  return {yOffset, xOffset};
+}
+
+/**
+ * with a given x-km change, calculate the increment of latitude
+ * based on stackoverflow http://stackoverflow.com/questions/7477003
+ * @param {number} dy - change in km
+ * @return {number} - increment in latitude
+ */
+function calculateLatOffset(dy) {
+  return (dy / R_EARTH) * (180 / Math.PI);
+}
+
+/**
+ * with a given x-km change, and current latitude
+ * calculate the increment of longitude
+ * based on stackoverflow http://stackoverflow.com/questions/7477003
+ * @param {number} lat - latitude of current location (based on city)
+ * @param {number} dx - change in km
+ * @return {number} - increment in longitude
+ */
+function calculateLonOffset(lat, dx) {
+  return ((dx / R_EARTH) * (180 / Math.PI)) / Math.cos((lat * Math.PI) / 180);
 }

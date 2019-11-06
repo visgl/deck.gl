@@ -39,12 +39,23 @@ class TestLayer extends Layer {
 
 TestLayer.layerName = 'TestLayer';
 
-const AGGREGATION_PROPS = ['cellSize'];
+const DIMENSIONS = {
+  data: {
+    props: ['cellSize'],
+    accessors: ['getPosition']
+  },
+  weights: {
+    props: ['aggregation'],
+    accessors: ['getWeight']
+  }
+};
 
 class TestGridAggregationLayer extends GridAggregationLayer {
   initializeState() {
     const {gl} = this.context;
-    super.initializeState({aggregationProps: AGGREGATION_PROPS});
+    super.initializeState({
+      dimensions: DIMENSIONS
+    });
     this.setState({
       weights: {
         count: {
@@ -96,26 +107,40 @@ class TestGridAggregationLayer extends GridAggregationLayer {
   }
 
   _getGridOffset(opts) {
-    const {cellSize, screenSpaceAggregation} = this.state;
-    if (!screenSpaceAggregation) {
+    const {cellSize, projectPoints} = this.state;
+    if (!projectPoints) {
       return super._getGridOffset(opts);
     }
     return {xOffset: cellSize, yOffset: cellSize};
   }
 
   updateAggregationFlags(opts) {
-    const cellSizeChanged = opts.oldProps.cellSize !== opts.props.cellSize;
-    const gpuAggregation = opts.props.gpuAggregation;
+    const {props, oldProps} = opts;
+    const cellSizeChanged = oldProps.cellSize !== props.cellSize;
+    const gpuAggregation = props.gpuAggregation;
     const gpuAggregationChanged = gpuAggregation !== this.state.gpuAggregation;
-    // Consider switching between CPU and GPU aggregation as data changed as it requires
-    // re aggregation.
-    const dataChanged = this.state.dataChanged || gpuAggregationChanged;
     this.setState({
-      dataChanged,
       cellSizeChanged,
-      cellSize: opts.props.cellSize,
-      needsReProjection: dataChanged || cellSizeChanged,
+      cellSize: props.cellSize,
       gpuAggregation
+    });
+
+    const {positionsChanged, dimensions} = this.state;
+    const {data, weights} = dimensions;
+    const aggregationDataDirty =
+      positionsChanged ||
+      this.isAggregationDirty(opts, {
+        dimension: data,
+        compareAll: gpuAggregation // data-filter extension is only supported when using gpu aggregation
+      });
+    const aggregationWeightsDirty = this.isAggregationDirty(opts, {
+      dimension: weights
+    });
+
+    this.setState({
+      // Consider switching between CPU and GPU aggregation as data changed as it requires re aggregation.
+      aggregationDataDirty: aggregationDataDirty || gpuAggregationChanged,
+      aggregationWeightsDirty
     });
   }
 

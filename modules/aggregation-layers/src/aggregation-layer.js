@@ -20,22 +20,16 @@
 
 import {CompositeLayer, AttributeManager, _compareProps as compareProps} from '@deck.gl/core';
 import {cssToDeviceRatio} from '@luma.gl/core';
-
-// props when changed results in new uniforms that requires re-aggregation
-const UNIFORM_PROPS = [
-  // DATA-FILTER extension
-  'filterEnabled',
-  'filterRange',
-  'filterSoftRange',
-  'filterTransformSize',
-  'filterTransformColor'
-];
+import {filterProps} from './utils/prop-utils';
 
 export default class AggregationLayer extends CompositeLayer {
-  initializeState(aggregationProps = []) {
+  initializeState(dimensions) {
     super.initializeState();
+
     this.setState({
-      aggregationProps: aggregationProps.concat(UNIFORM_PROPS)
+      // Layer props , when changed doesn't require updating aggregation
+      ignoreProps: filterProps(this.constructor._propTypes, dimensions.data.props),
+      dimensions
     });
   }
 
@@ -55,13 +49,9 @@ export default class AggregationLayer extends CompositeLayer {
   }
 
   updateAttributes(changedAttributes) {
-    let dataChanged = false;
-    // eslint-disable-next-line
-    for (const name in changedAttributes) {
-      dataChanged = true;
-      break;
-    }
-    this.setState({dataChanged});
+    // Super classes, can refer to state.changedAttributes to determine what
+    // attributes changed
+    this.setState({changedAttributes});
   }
 
   getAttributes() {
@@ -86,20 +76,65 @@ export default class AggregationLayer extends CompositeLayer {
     // Default implemention is empty, subclasses can update their Model objects if needed
   }
 
-  isAggregationDirty(opts) {
-    if (this.state.dataChanged || opts.changeFlags.extensionsChanged) {
-      return true;
+  /**
+   * Checks if aggregation is dirty
+   * @param {Object} updateOpts - object {props, oldProps, changeFlags}
+   * @param {Object} params - object {dimension, compareAll}
+   * @param {Object} params.dimension - {props, accessors} array of props and/pr accessors
+   * @param {Boolean} params.compareAll - when `true` it will include non layer props for comparision
+   * @returns {Boolean} - returns true if dimensions' prop or accessor is changed
+   **/
+  isAggregationDirty(updateOpts, params = {}) {
+    const {props, oldProps, changeFlags} = updateOpts;
+    const {compareAll = false, dimension} = params;
+    const {ignoreProps} = this.state;
+    const {props: dataProps, accessors = []} = dimension;
+    const {updateTriggersChanged} = changeFlags;
+    if (updateTriggersChanged) {
+      if (updateTriggersChanged.all) {
+        return true;
+      }
+      for (const accessor of accessors) {
+        if (updateTriggersChanged[accessor]) {
+          return true;
+        }
+      }
     }
-    const {aggregationProps} = this.state;
-    const oldProps = {};
-    const props = {};
-    for (const propName of aggregationProps) {
-      oldProps[propName] = opts.oldProps[propName];
-      props[propName] = opts.props[propName];
+    if (compareAll) {
+      if (changeFlags.extensionsChanged) {
+        return true;
+      }
+      // Compare non layer props too (like extension props)
+      // ignoreprops refers to all Layer props other than aggregation props that need to be comapred
+      return compareProps({
+        oldProps,
+        newProps: props,
+        ignoreProps,
+        propTypes: this.constructor._propTypes
+      });
     }
-    return Boolean(
-      compareProps({oldProps, newProps: props, propTypes: this.constructor._propTypes})
-    );
+    // Compare props of the dimension
+    for (const name of dataProps) {
+      if (props[name] !== oldProps[name]) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  /**
+   * Checks if an attribute is changed
+   * @param {String} name - name of the attribute
+   * @returns {Boolean} - `true` if attribute `name` is changed, `false` otherwise,
+   *                       If `name` is not passed or `undefiend`, `true` if any attribute is changed, `false` otherwise
+   **/
+  isAttributeChanged(name) {
+    const {changedAttributes} = this.state;
+    if (!name) {
+      // if name not specified return true if any attribute is changed
+      return !isObjectEmpty(changedAttributes);
+    }
+    return changedAttributes && changedAttributes[name] !== undefined;
   }
 
   // Private
@@ -111,6 +146,20 @@ export default class AggregationLayer extends CompositeLayer {
       stats: this.context.stats
     });
   }
+}
+
+// Helper methods
+
+// Returns true if given object is empty, false otherwise.
+function isObjectEmpty(obj) {
+  let isEmpty = true;
+  /* eslint-disable no-unused-vars  */
+  for (const key in obj) {
+    isEmpty = false;
+    break;
+  }
+  /* eslint-enable no-unused-vars  */
+  return isEmpty;
 }
 
 AggregationLayer.layerName = 'AggregationLayer';

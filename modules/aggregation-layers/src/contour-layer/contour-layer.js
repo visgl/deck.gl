@@ -24,7 +24,8 @@ import {generateContours} from './contour-utils';
 import {log} from '@deck.gl/core';
 
 import GPUGridAggregator from '../utils/gpu-grid-aggregation/gpu-grid-aggregator';
-import {AGGREGATION_OPERATION} from '../utils/aggregation-operation-utils';
+import {AGGREGATION_OPERATION, getValueFunc} from '../utils/aggregation-operation-utils';
+import {getBoundingBox, getGridParams} from '../utils/grid-aggregation-utils';
 import GridAggregationLayer from '../grid-aggregation-layer';
 
 const DEFAULT_COLOR = [255, 255, 255, 255];
@@ -45,14 +46,26 @@ const defaultProps = {
   zOffset: 0.005
 };
 
-// props , when changed requires re-aggregation
-const AGGREGATION_PROPS = ['aggregation', 'getWeight'];
+const POSITION_ATTRIBUTE_NAME = 'positions';
+
+const DIMENSIONS = {
+  data: {
+    props: ['cellSize']
+  },
+  weights: {
+    props: ['aggregation'],
+    accessors: ['getWeight']
+  }
+};
 
 export default class ContourLayer extends GridAggregationLayer {
   initializeState() {
-    super.initializeState({aggregationProps: AGGREGATION_PROPS});
+    super.initializeState({
+      dimensions: DIMENSIONS
+    });
     this.setState({
       contourData: {},
+      projectPoints: false,
       weights: {
         count: {
           size: 1,
@@ -62,7 +75,7 @@ export default class ContourLayer extends GridAggregationLayer {
     });
     const attributeManager = this.getAttributeManager();
     attributeManager.add({
-      positions: {
+      [POSITION_ATTRIBUTE_NAME]: {
         size: 3,
         accessor: 'getPosition',
         type: GL.DOUBLE,
@@ -132,8 +145,12 @@ export default class ContourLayer extends GridAggregationLayer {
 
   // Aggregation Overrides
 
-  updateAggregationFlags({props, oldProps}) {
-    const cellSizeChanged = oldProps.cellSize !== props.cellSize;
+  /* eslint-disable max-statements, complexity */
+  updateAggregationState(opts) {
+    const {props, oldProps} = opts;
+    const {cellSize, coordinateSystem} = props;
+    const {viewport} = this.context;
+    const cellSizeChanged = oldProps.cellSize !== cellSize;
     let gpuAggregation = props.gpuAggregation;
     if (this.state.gpuAggregation !== props.gpuAggregation) {
       if (gpuAggregation && !GPUGridAggregator.isSupported(this.context.gl)) {
@@ -142,16 +159,83 @@ export default class ContourLayer extends GridAggregationLayer {
       }
     }
     const gpuAggregationChanged = gpuAggregation !== this.state.gpuAggregation;
-    // Consider switching between CPU and GPU aggregation as data changed as it requires
-    // re aggregation.
-    const dataChanged = this.state.dataChanged || gpuAggregationChanged;
     this.setState({
-      dataChanged,
-      cellSizeChanged,
-      cellSize: props.cellSize,
-      needsReProjection: dataChanged || cellSizeChanged,
       gpuAggregation
     });
+
+    const {dimensions} = this.state;
+    const positionsChanged = this.isAttributeChanged(POSITION_ATTRIBUTE_NAME);
+    const {data, weights} = dimensions;
+
+    let {boundingBox} = this.state;
+    if (positionsChanged) {
+      boundingBox = getBoundingBox(this.getAttributes(), this.getNumInstances());
+    }
+    if (positionsChanged || cellSizeChanged) {
+      const {
+        gridOffset,
+        boundingBoxAligned,
+        translation,
+        width,
+        height,
+        numCol,
+        numRow
+      } = getGridParams(boundingBox, cellSize, viewport, coordinateSystem);
+      this.allocateResources(numRow, numCol);
+      this.setState({
+        gridOffset,
+        boundingBox: boundingBoxAligned,
+        translation,
+        posOffset: translation.slice(), // Used for CPU aggregation, to offset points
+        width,
+        height,
+        numCol,
+        numRow
+      });
+    }
+
+    const aggregationDataDirty =
+      positionsChanged ||
+      gpuAggregationChanged ||
+      this.isAggregationDirty(opts, {
+        dimension: data,
+        compareAll: gpuAggregation // check for all (including extentions props) when using gpu aggregation
+      });
+    const aggregationWeightsDirty = this.isAggregationDirty(opts, {
+      dimension: weights
+    });
+
+    if (aggregationWeightsDirty) {
+      this._updateAccessors(opts);
+    }
+    if (aggregationDataDirty || aggregationWeightsDirty) {
+      this._resetResults();
+    }
+    this.setState({
+      aggregationDataDirty,
+      aggregationWeightsDirty
+    });
+  }
+  /* eslint-enable max-statements, complexity */
+
+  // Private (Aggregation)
+
+  _updateAccessors(opts) {
+    const {getWeight, aggregation} = opts.props;
+    const {count} = this.state.weights;
+    if (this.state.gpuAggregation) {
+      count.getWeight = getWeight;
+      count.operation = AGGREGATION_OPERATION[aggregation];
+    } else {
+      this.setState({getValue: getValueFunc(aggregation, getWeight)});
+    }
+  }
+
+  _resetResults() {
+    const {count} = this.state.weights;
+    if (count) {
+      count.aggregationData = null;
+    }
   }
 
   // Private (Contours)

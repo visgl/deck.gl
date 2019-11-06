@@ -52,8 +52,11 @@ test('ScreenGridLayer', t => {
       onAfterUpdate({layer, oldState}) {
         if (oldState.gpuAggregation) {
           // Under WebGL1 gpuAggregation is always false, this change is a nop
-          const {dataChanged} = layer.state;
-          t.ok(dataChanged, 'should set dataChanged when gpuAggregation prop changes');
+          const {aggregationDataDirty} = layer.state;
+          t.ok(
+            aggregationDataDirty,
+            'should set aggregationDataDirty when gpuAggregation prop changes'
+          );
         }
       }
     }
