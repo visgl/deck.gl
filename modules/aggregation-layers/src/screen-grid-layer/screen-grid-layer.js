@@ -75,7 +75,7 @@ export default class ScreenGridLayer extends GridAggregationLayer {
     super.updateState({oldProps, props, changeFlags});
 
     const cellSizeChanged = props.cellSizePixels !== oldProps.cellSizePixels;
-    const dataChanged = this._isAggregationDirty({oldProps, props});
+    const dataChanged = this._isAggregationDirty({oldProps, props, changeFlags});
 
     if (cellSizeChanged || changeFlags.viewportChanged) {
       this._updateGridParams();

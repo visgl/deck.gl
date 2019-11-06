@@ -84,7 +84,7 @@ export default class AggregationLayer extends CompositeLayer {
   }
 
   _isAggregationDirty(opts) {
-    if (this.state.dataChanged) {
+    if (this.state.dataChanged || opts.changeFlags.extensionsChanged) {
       return true;
     }
     const {aggregationProps} = this.state;
