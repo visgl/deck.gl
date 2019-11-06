@@ -76,7 +76,8 @@ export function pointToDensityGridData({
 // Parse input data to build positions, wights and bounding box.
 /* eslint-disable max-statements */
 function getBoundingBox(attributes, vertexCount) {
-  const positions = attributes.positions.value;
+  // TODO - value might not exist (e.g. attribute transition)
+  const positions = attributes.positions.source.value;
 
   let yMin = Infinity;
   let yMax = -Infinity;

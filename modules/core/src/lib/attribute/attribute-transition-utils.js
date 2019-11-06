@@ -100,19 +100,20 @@ export function padBuffer({
   const toBufferLayout = attribute.bufferLayout;
   const hasBufferLayout = fromBufferLayout && toBufferLayout;
   const toLength = getAttributeBufferLength(attribute, numInstances);
+  const isConstant = attribute.state.constant;
 
   // check if buffer needs to be padded
   if (!hasBufferLayout && fromLength >= toLength) {
     return;
   }
 
-  const toData = attribute.constant ? attribute.value : attribute.getBuffer().getData({});
+  const toData = isConstant ? attribute.value : attribute.getBuffer().getData({});
   if (attribute.settings.normalized) {
     const getter = getData;
     getData = (value, chunk) => attribute._normalizeConstant(getter(value, chunk));
   }
 
-  const getMissingData = attribute.constant
+  const getMissingData = isConstant
     ? (i, chunk) => getData(toData, chunk)
     : (i, chunk) => getData(toData.subarray(i, i + size), chunk);
 

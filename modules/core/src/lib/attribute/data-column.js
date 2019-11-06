@@ -56,7 +56,6 @@ export default class DataColumn {
     // If an external buffer is provided, this.type may be overwritten
     // But we always want to use defaultType for allocation
     this.defaultType = glArrayFromType(logicalType || this.type || GL.FLOAT);
-    this.bufferType = bufferType;
     this.shaderAttributes = {};
     this.doublePrecision = doublePrecision;
 
@@ -77,12 +76,11 @@ export default class DataColumn {
 
     for (const shaderAttributeName in shaderAttributeDefs) {
       // Initialize the attribute descriptor, with WebGL and metadata fields
-      const shaderAttribute = new ShaderAttribute(
-        Object.assign({}, opts, shaderAttributeDefs[shaderAttributeName], {
-          id: shaderAttributeName,
-          type: bufferType
-        })
-      );
+      const shaderAttribute = new ShaderAttribute(this, {
+        ...shaderAttributeDefs[shaderAttributeName],
+        type: bufferType,
+        id: shaderAttributeName
+      });
       this.shaderAttributes[shaderAttributeName] = shaderAttribute;
     }
 
@@ -92,6 +90,7 @@ export default class DataColumn {
     });
     this.state = {
       externalBuffer: null,
+      externalAccessor: null,
       allocatedValue: null,
       constant: false
     };
@@ -103,10 +102,11 @@ export default class DataColumn {
 
   get buffer() {
     if (!this._buffer) {
-      const {isIndexed} = this.settings;
+      const {isIndexed, type} = this.settings;
       this._buffer = new Buffer(this.gl, {
         id: this.id,
-        target: isIndexed ? GL.ELEMENT_ARRAY_BUFFER : GL.ARRAY_BUFFER
+        target: isIndexed ? GL.ELEMENT_ARRAY_BUFFER : GL.ARRAY_BUFFER,
+        type
       });
     }
     return this._buffer;
@@ -140,7 +140,7 @@ export default class DataColumn {
   }
 
   getBuffer() {
-    if (this.constant) {
+    if (this.state.constant) {
       return null;
     }
     return this.state.externalBuffer || this._buffer;
@@ -171,28 +171,28 @@ export default class DataColumn {
       state.externalBuffer = null;
       state.constant = true;
       this.value = value;
-      opts.value = value;
     } else if (opts.buffer) {
       state.externalBuffer = opts.buffer;
       state.constant = false;
       this.value = opts.value;
     } else if (opts.value) {
       this._checkExternalBuffer(opts);
-      this.value = opts.value;
+
+      let value = opts.value;
       state.externalBuffer = null;
       state.constant = false;
+      this.value = value;
 
       if (this.doublePrecision) {
-        if (opts.value instanceof Float64Array) {
-          opts.value = toDoublePrecisionArray(opts.value, this);
+        if (value instanceof Float64Array) {
+          value = toDoublePrecisionArray(value, this);
         }
       }
 
-      this.buffer.setData(opts.value);
-      opts.buffer = this.buffer;
+      this.buffer.setData(value);
     }
 
-    this._updateShaderAttributes(opts);
+    state.externalAccessor = opts;
     return true;
   }
 
@@ -241,12 +241,7 @@ export default class DataColumn {
     state.allocatedValue = this.value;
     state.constant = false;
     state.externalBuffer = null;
-    this._updateShaderAttributes({
-      ...this.settings,
-      buffer: this.buffer,
-      value: this.value
-    });
-
+    state.externalAccessor = null;
     return true;
   }
 
@@ -266,7 +261,7 @@ export default class DataColumn {
           // Shader attributes have hard-coded offsets and strides
           // TODO - switch to element offsets and element strides?
           Object.values(this.shaderAttributes).some(
-            attribute => attribute.offset || attribute.stride
+            attribute => attribute.opts.offset || attribute.opts.stride
           );
       }
       if (illegalArrayType) {
@@ -280,7 +275,7 @@ export default class DataColumn {
 
   // https://developer.mozilla.org/en-US/docs/Web/API/WebGLRenderingContext/vertexAttribPointer
   _normalizeConstant(value) {
-    switch (this.bufferType) {
+    switch (this.settings.type) {
       case GL.BYTE:
         // normalize [-128, 127] to [-1, 1]
         return new Float32Array(value).map(x => ((x + 128) / 255) * 2 - 1);
@@ -337,22 +332,6 @@ export default class DataColumn {
       }
     }
     return true;
-  }
-
-  _updateShaderAttributes(opts) {
-    const {shaderAttributes, shaderAttributeDefs} = this;
-    for (const shaderAttributeName in shaderAttributes) {
-      const shaderAttribute = shaderAttributes[shaderAttributeName];
-      shaderAttribute.setAccessor({
-        ...opts,
-        ...shaderAttributeDefs[shaderAttributeName]
-      });
-      if (opts.buffer) {
-        shaderAttribute.setBuffer(opts.buffer, opts.value);
-      } else if (opts.constant) {
-        shaderAttribute.setConstantValue(opts.value);
-      }
-    }
   }
 }
 

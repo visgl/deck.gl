@@ -27,7 +27,7 @@ export default class Attribute extends DataColumn {
       noAlloc,
       update: update || (accessor && this._standardAccessor),
       accessor,
-      elementOffset: offset / Accessor.getBytesPerElement({type: this.bufferType}),
+      elementOffset: offset / Accessor.getBytesPerElement(this.settings),
       transform
     });
 
@@ -176,7 +176,7 @@ export default class Attribute extends DataColumn {
     }
 
     this.clearNeedsUpdate();
-    this.state.needsRedraw = true;
+    this.setNeedsRedraw();
 
     return updated;
   }
@@ -184,15 +184,15 @@ export default class Attribute extends DataColumn {
   // Use generic value
   // Returns true if successful
   setConstantValue(value) {
-    const {state} = this;
-
     if (value === undefined || typeof value === 'function') {
       return false;
     }
 
     const hasChanged = super.setData({constant: true, value});
 
-    state.needsRedraw = state.needsUpdate || hasChanged;
+    if (hasChanged) {
+      this.setNeedsRedraw();
+    }
     this.clearNeedsUpdate();
     return true;
   }
@@ -214,8 +214,7 @@ export default class Attribute extends DataColumn {
       return true;
     }
     state.lastExternalBuffer = buffer;
-    state.needsRedraw = true;
-
+    this.setNeedsRedraw();
     super.setData(buffer);
 
     return true;

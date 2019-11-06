@@ -176,7 +176,11 @@ test('AttributeManager.update - external buffers', t => {
     }
   });
 
-  t.is(attribute.shaderAttributes.colors.type, gl.FLOAT, 'colors accessor is set to correct type');
+  t.is(
+    attribute.shaderAttributes.colors.getAccessor().type,
+    gl.FLOAT,
+    'colors accessor is set to correct type'
+  );
 
   attributeManager.update({
     numInstances: 1,
@@ -186,7 +190,7 @@ test('AttributeManager.update - external buffers', t => {
     }
   });
   t.is(
-    attribute.shaderAttributes.colors.type,
+    attribute.shaderAttributes.colors.getAccessor().type,
     gl.UNSIGNED_INT,
     'colors accessor is set to correct type'
   );
