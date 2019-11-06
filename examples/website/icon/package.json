@@ -14,7 +14,6 @@
     "supercluster": "^6.0.1"
   },
   "devDependencies": {
-    "@luma.gl/debug": "^7.3.2",
     "@babel/core": "^7.4.0",
     "@babel/preset-react": "^7.0.0",
     "babel-loader": "^8.0.5",
