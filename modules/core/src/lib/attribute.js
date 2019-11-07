@@ -260,7 +260,12 @@ export default class Attribute extends BaseAttribute {
           // Upload the full existing attribute value to the GPU, so that updateBuffer
           // can choose to only update a partial range.
           // TODO - copy old buffer to new buffer on the GPU
-          this.buffer.subData(oldValue);
+          this.buffer.subData({
+            data:
+              oldValue instanceof Float64Array
+                ? toDoublePrecisionArray(oldValue, {size: this.size})
+                : oldValue
+          });
         }
       }
 
