@@ -21,7 +21,7 @@
 /* eslint-disable dot-notation, max-statements, no-unused-vars */
 import Attribute from '@deck.gl/core/lib/attribute';
 import GL from '@luma.gl/constants';
-import {Buffer} from '@luma.gl/core';
+import {Buffer, isWebGL2} from '@luma.gl/core';
 import test from 'tape-catch';
 import {gl} from '@deck.gl/test-utils';
 import {makeSpy} from '@probe.gl/test-utils';
@@ -128,6 +128,74 @@ test('Attribute#allocate', t => {
   t.not(attribute.value, allocatedValue, 'created new typed array');
 
   attribute.delete();
+  t.end();
+});
+
+test('Attribute#allocate - partial', t => {
+  if (!isWebGL2(gl)) {
+    // buffer.getData() is WebGL2 only
+    t.comment('This test requires WebGL2');
+    t.end();
+    return;
+  }
+
+  let positions = new Attribute(gl, {
+    id: 'positions',
+    update: attr => {
+      attr.value[0] = 180;
+      attr.value[1] = 90;
+    },
+    size: 2
+  });
+
+  positions.allocate(1);
+  let value = positions.value;
+  value[0] = 180;
+  value[1] = 90;
+  // make sure buffer is created
+  positions.updateBuffer({});
+  t.deepEqual(positions.buffer.getData().slice(0, 2), [180, 90], 'value uploaded to buffer');
+
+  positions.setNeedsUpdate('test', {startRow: 1, endRow: 2});
+  positions.allocate(value.length / 2 + 1); // array might be overallocated
+  t.notEqual(positions.value, value, 'a new value array is allocated');
+  t.deepEqual(positions.value.slice(0, 2), [180, 90], 'old value is copied to new array');
+  t.deepEqual(positions.buffer.getData().slice(0, 2), [180, 90], 'old value is copied to buffer');
+
+  positions.delete();
+
+  // double precision
+  positions = new Attribute(gl, {
+    id: 'positions64',
+    type: GL.DOUBLE,
+    update: attr => {
+      attr.value[0] = 179.9;
+      attr.value[1] = 89.9;
+    },
+    size: 2
+  });
+
+  positions.allocate(1);
+  value = positions.value;
+  // make sure buffer is created
+  positions.updateBuffer({});
+  t.deepEqual(
+    positions.buffer.getData().slice(0, 4),
+    [179.89999389648438, 89.9000015258789, 0.00000610351571594947, -0.0000015258789289873675],
+    'value uploaded to buffer'
+  );
+
+  positions.setNeedsUpdate('test', {startRow: 1, endRow: 2});
+  positions.allocate(value.length / 2 + 1); // array might be overallocated
+  t.notEqual(positions.value, value, 'a new value array is allocated');
+  t.deepEqual(positions.value.slice(0, 2), [179.9, 89.9], 'old value is copied to new array');
+  t.deepEqual(
+    positions.buffer.getData().slice(0, 4),
+    [179.89999389648438, 89.9000015258789, 0.00000610351571594947, -0.0000015258789289873675],
+    'old value is copied to buffer'
+  );
+
+  positions.delete();
   t.end();
 });
 
