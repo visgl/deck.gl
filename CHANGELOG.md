@@ -19,6 +19,11 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v7.3
 
+#### deck.gl [v7.3.4] - Nov 4 2019
+
+- TileLayer: only invalidate tile.layer when updateTriggerChanged (#3823)
+- HeatmapLayer: fix sublayer id (#3813)
+
 #### deck.gl [v7.3.3] - Oct 15 2019
 
 - TileLayer: Invalidate cache when updateTriggers changed (#3788)
