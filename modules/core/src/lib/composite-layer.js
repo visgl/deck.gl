@@ -118,7 +118,7 @@ export default class CompositeLayer extends Layer {
   }
 
   // Returns sub layer props for a specific sublayer
-  getSubLayerProps(sublayerProps) {
+  getSubLayerProps(sublayerProps = {}) {
     const {
       opacity,
       pickable,
@@ -153,46 +153,45 @@ export default class CompositeLayer extends Layer {
       extensions
     };
 
-    if (sublayerProps) {
-      const overridingSublayerProps = overridingProps && overridingProps[sublayerProps.id];
-      const overridingSublayerTriggers =
-        overridingSublayerProps && overridingSublayerProps.updateTriggers;
+    const overridingSublayerProps = overridingProps && sublayerProps.id && overridingProps[sublayerProps.id];
+    const overridingSublayerTriggers =
+      overridingSublayerProps && overridingSublayerProps.updateTriggers;
+    const sublayerId = sublayerProps.id || 'sublayer';
 
-      if (overridingSublayerProps) {
-        const propTypes = this.constructor._propTypes;
-        for (const key in overridingSublayerProps) {
-          const propType = propTypes[key];
-          // eslint-disable-next-line
-          if (propType && propType.type === 'accessor') {
-            overridingSublayerProps[key] = this.getSubLayerAccessor(overridingSublayerProps[key]);
-          }
+    if (overridingSublayerProps) {
+      const propTypes = this.constructor._propTypes;
+      for (const key in overridingSublayerProps) {
+        const propType = propTypes[key];
+        // eslint-disable-next-line
+        if (propType && propType.type === 'accessor') {
+          overridingSublayerProps[key] = this.getSubLayerAccessor(overridingSublayerProps[key]);
         }
       }
-
-      Object.assign(
-        newProps,
-        sublayerProps,
-        // experimental feature that allows users to override sublayer props via parent layer prop
-        overridingSublayerProps,
-        {
-          id: `${this.props.id}-${sublayerProps.id}`,
-          updateTriggers: Object.assign(
-            {
-              all: this.props.updateTriggers.all
-            },
-            sublayerProps.updateTriggers,
-            overridingSublayerTriggers
-          )
-        }
-      );
     }
+
+    Object.assign(
+      newProps,
+      sublayerProps,
+      // experimental feature that allows users to override sublayer props via parent layer prop
+      overridingSublayerProps,
+      {
+        id: `${this.props.id}-${sublayerId}`,
+        updateTriggers: Object.assign(
+          {
+            all: this.props.updateTriggers.all
+          },
+          sublayerProps.updateTriggers,
+          overridingSublayerTriggers
+        )
+      }
+    );
 
     // Pass through extension props
     for (const extension of extensions) {
       const passThroughProps = extension.getSubLayerProps.call(this, extension);
       Object.assign(newProps, passThroughProps, {
         updateTriggers: Object.assign(
-          newProps.updateTriggers || {},
+          newProps.updateTriggers,
           passThroughProps.updateTriggers
         )
       });
