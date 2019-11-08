@@ -140,13 +140,14 @@ export default class CPUAggregator {
     return defaultDimensions;
   }
 
-  updateState({oldProps, props, changeFlags}, viewport) {
+  updateState(opts) {
+    const {oldProps, props, changeFlags, viewport, attributes} = opts;
     this.updateGetValueFuncs(oldProps, props, changeFlags);
     const reprojectNeeded = this.needsReProjectPoints(oldProps, props, changeFlags);
 
     if (changeFlags.dataChanged || reprojectNeeded) {
       // project data into hexagons, and get sortedColorBins
-      this.getAggregatedData(props, viewport);
+      this.getAggregatedData(props, viewport, attributes);
     } else {
       const dimensionChanges = this.getDimensionChanges(oldProps, props, changeFlags) || [];
       // this here is layer
@@ -181,12 +182,20 @@ export default class CPUAggregator {
     return result;
   }
 
-  getAggregatedData(props, viewport) {
+  getAggregatedData(props, viewport, attributes) {
     const aggregator = this._getAggregator(props);
 
     // result should contain a data array and other props
     // result = {data: [], ...other props}
-    const result = aggregator(props, viewport);
+    // const opts = Object.assign({}, props, {viewport, attributes});
+    // const {cellSize, data, getPosition} = props;
+    const result = aggregator({
+      cellSize: this._getCellSize(props),
+      data: props.data,
+      viewport,
+      attributes
+      // getPosition: props.getPosition
+    });
     this.setState({
       layerData: this.normalizeResult(result)
     });

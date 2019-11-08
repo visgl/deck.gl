@@ -29,8 +29,9 @@ const R_EARTH = 6378000;
  * @param {function} getPosition - position accessor
  * @returns {object} - grid data, cell dimension
  */
-export function pointToDensityGridDataCPU({data, cellSize, getPosition}) {
-  const {gridHash, gridOffset} = _pointsToGridHashing(data, cellSize, getPosition);
+export function pointToDensityGridDataCPU(opts) {
+  const {data, cellSize, attributes} = opts;
+  const {gridHash, gridOffset} = _pointsToGridHashing(data, cellSize, attributes);
   const result = _getGridLayerDataFromGridHash(gridHash, gridOffset);
 
   return {
@@ -48,16 +49,20 @@ export function pointToDensityGridDataCPU({data, cellSize, getPosition}) {
  * @returns {object} - grid hash and cell dimension
  */
 /* eslint-disable max-statements */
-function _pointsToGridHashing(points = [], cellSize, getPosition) {
+function _pointsToGridHashing(points = [], cellSize, attributes) {
   // find the geometric center of sample points
   let latMin = Infinity;
   let latMax = -Infinity;
   let pLat;
 
   const {iterable, objectInfo} = createIterable(points);
+  const posSize = 3;
+  const positions = attributes.positions.value;
+  /* eslint-disable-next-line no-unused-vars */
   for (const pt of iterable) {
     objectInfo.index++;
-    pLat = getPosition(pt, objectInfo)[1];
+    // TODO: this logic should go into Attribute class
+    pLat = positions[objectInfo.index * posSize + 1];
     if (Number.isFinite(pLat)) {
       latMin = pLat < latMin ? pLat : latMin;
       latMax = pLat > latMax ? pLat : latMax;
@@ -79,7 +84,9 @@ function _pointsToGridHashing(points = [], cellSize, getPosition) {
   objectInfo.index = -1;
   for (const pt of iterable) {
     objectInfo.index++;
-    const [lng, lat] = getPosition(pt, objectInfo);
+    // const [lng, lat] = getPosition(pt, objectInfo);
+    const lng = positions[objectInfo.index * posSize];
+    const lat = positions[objectInfo.index * posSize + 1];
 
     if (Number.isFinite(lat) && Number.isFinite(lng)) {
       const latIdx = Math.floor((lat + 90) / gridOffset.yOffset);

@@ -18,12 +18,12 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {CompositeLayer} from '@deck.gl/core';
 import {GridCellLayer} from '@deck.gl/layers';
 
 import {defaultColorRange} from '../utils/color-utils';
 import {pointToDensityGridDataCPU} from './grid-aggregator';
 import CPUAggregator from '../utils/cpu-aggregator';
+import AggregationLayer from '../aggregation-layer';
 
 function nop() {}
 
@@ -63,7 +63,7 @@ const defaultProps = {
   material: true
 };
 
-export default class CPUGridLayer extends CompositeLayer {
+export default class CPUGridLayer extends AggregationLayer {
   initializeState() {
     const cpuAggregator = new CPUAggregator({
       getAggregator: props => props.gridAggregator,
@@ -74,15 +74,27 @@ export default class CPUGridLayer extends CompositeLayer {
       cpuAggregator,
       aggregatorState: cpuAggregator.state
     };
+    const attributeManager = this.getAttributeManager();
+    attributeManager.add({
+      positions: {size: 3, accessor: 'getPosition' /* , type: GL.DOUBLE, fp64: false*/ },
+    });
+    // color and elevation attributes can't be added, as they
+    // operate aggregation results.
   }
 
-  updateState({oldProps, props, changeFlags}) {
+  updateState(opts) {
+    super.updateState(opts);
+    // TODO: should _isAggregationDirty be called (to identify if re aggregation is needed
+    // either due to data changed or relevant prop changed ?
     this.setState({
       // make a copy of the internal state of cpuAggregator for testing
-      aggregatorState: this.state.cpuAggregator.updateState(
-        {oldProps, props, changeFlags},
-        this.context.viewport
-      )
+      aggregatorState: this.state.cpuAggregator.updateState(Object.assign({},
+        opts,
+        {
+          viewport: this.context.viewport,
+          attributes: this.getAttributes()
+        }
+      ))
     });
   }
 
@@ -102,6 +114,11 @@ export default class CPUGridLayer extends CompositeLayer {
 
   _getSublayerUpdateTriggers() {
     return this.state.cpuAggregator.getUpdateTriggers(this.props);
+  }
+
+  // stub
+  _updateShaders(shaders) {
+    // This layer performs aggregation on CPU, nothing to do in this method
   }
 
   renderLayers() {

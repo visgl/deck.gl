@@ -18,13 +18,14 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {CompositeLayer, log} from '@deck.gl/core';
+import {log} from '@deck.gl/core';
 import {ColumnLayer} from '@deck.gl/layers';
 
 import {defaultColorRange} from '../utils/color-utils';
 
 import {pointToHexbin} from './hexagon-aggregator';
 import CPUAggregator from '../utils/cpu-aggregator';
+import AggregationLayer from '../aggregation-layer';
 
 function nop() {}
 
@@ -61,7 +62,7 @@ const defaultProps = {
   material: true
 };
 
-export default class HexagonLayer extends CompositeLayer {
+export default class HexagonLayer extends AggregationLayer {
   initializeState() {
     const cpuAggregator = new CPUAggregator({
       getAggregator: props => props.hexagonAggregator,
@@ -72,17 +73,29 @@ export default class HexagonLayer extends CompositeLayer {
       cpuAggregator,
       aggregatorState: cpuAggregator.state
     };
+    const attributeManager = this.getAttributeManager();
+    attributeManager.add({
+      positions: {size: 3, accessor: 'getPosition' /* , type: GL.DOUBLE, fp64: false*/ },
+    });
+    // color and elevation attributes can't be added, as they
+    // operate aggregation results.
   }
 
-  updateState({oldProps, props, changeFlags}) {
+  updateState(opts) {
+    super.updateState(opts);
+    // TODO: should _isAggregationDirty be called (to identify if re aggregation is needed
+    // either due to data changed or relevant prop changed ?
     const {cpuAggregator} = this.state;
     const oldLayerData = cpuAggregator.state.layerData;
     this.setState({
       // make a copy of the internal state of cpuAggregator for testing
-      aggregatorState: cpuAggregator.updateState(
-        {oldProps, props, changeFlags},
-        this.context.viewport
-      )
+      aggregatorState: cpuAggregator.updateState(Object.assign({},
+        opts,
+        {
+          viewport: this.context.viewport,
+          attributes: this.getAttributes()
+        }
+      ))
     });
 
     if (oldLayerData !== cpuAggregator.state.layerData) {
@@ -140,6 +153,12 @@ export default class HexagonLayer extends CompositeLayer {
   _getSublayerUpdateTriggers() {
     return this.state.cpuAggregator.getUpdateTriggers(this.props);
   }
+
+  // stub
+  _updateShaders(shaders) {
+    // This layer performs aggregation on CPU, nothing to do in this method
+  }
+
 
   renderLayers() {
     const {elevationScale, extruded, coverage, material, transitions} = this.props;

@@ -168,7 +168,7 @@ export default class ScreenGridLayer extends GridAggregationLayer {
 
     const {cellSizePixels, gpuAggregation} = this.props;
 
-    const {positions, weights} = this.state;
+    const {weights} = this.state;
     const {viewport} = this.context;
 
     weights.color.operation =
@@ -186,7 +186,6 @@ export default class ScreenGridLayer extends GridAggregationLayer {
       gridTransformMatrix = viewport.pixelProjectionMatrix;
     }
     const results = this.state.gpuGridAggregator.run({
-      positions,
       weights,
       cellSize: [cellSizePixels, cellSizePixels],
       viewport,
