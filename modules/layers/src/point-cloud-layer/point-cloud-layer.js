@@ -20,14 +20,19 @@
 
 import {Layer, project32, gouraudLighting, picking} from '@deck.gl/core';
 import GL from '@luma.gl/constants';
-import {Model, Geometry, PhongMaterial} from '@luma.gl/core';
+import {Model, Geometry} from '@luma.gl/core';
 
 import vs from './point-cloud-layer-vertex.glsl';
 import fs from './point-cloud-layer-fragment.glsl';
 
 const DEFAULT_COLOR = [0, 0, 0, 255];
 const DEFAULT_NORMAL = [0, 0, 1];
-const defaultMaterial = new PhongMaterial();
+const defaultMaterial = {
+  ambient: 0.35,
+  diffuse: 0.6,
+  shininess: 32,
+  specularColor: [30, 30, 30]
+};
 
 const defaultProps = {
   sizeUnits: 'pixels',

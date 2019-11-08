@@ -44,10 +44,6 @@ export {
   PlaneGeometry,
   SphereGeometry,
   TruncatedConeGeometry,
-  // Materials
-  Material,
-  PhongMaterial,
-  PBRMaterial,
   // Shader Modules
   fp32,
   fp64,

@@ -20,9 +20,14 @@
 
 import {Layer, project32, gouraudLighting, picking} from '@deck.gl/core';
 import GL from '@luma.gl/constants';
-import {Model, PhongMaterial} from '@luma.gl/core';
+import {Model} from '@luma.gl/core';
 import ColumnGeometry from './column-geometry';
-const defaultMaterial = new PhongMaterial();
+const defaultMaterial = {
+  ambient: 0.35,
+  diffuse: 0.6,
+  shininess: 32,
+  specularColor: [30, 30, 30]
+};
 
 import vs from './column-layer-vertex.glsl';
 import fs from './column-layer-fragment.glsl';

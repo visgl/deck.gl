@@ -18,7 +18,6 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {PhongMaterial} from '@luma.gl/core';
 import {CompositeLayer} from '@deck.gl/core';
 import {GridCellLayer} from '@deck.gl/layers';
 
@@ -28,7 +27,12 @@ import CPUAggregator from '../utils/cpu-aggregator';
 
 function nop() {}
 
-const defaultMaterial = new PhongMaterial();
+const defaultMaterial = {
+  ambient: 0.35,
+  diffuse: 0.6,
+  shininess: 32,
+  specularColor: [30, 30, 30]
+};
 
 const defaultProps = {
   // color

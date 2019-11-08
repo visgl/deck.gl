@@ -20,7 +20,7 @@
 
 import {Layer, project32, gouraudLighting, picking} from '@deck.gl/core';
 import GL from '@luma.gl/constants';
-import {Model, Geometry, hasFeature, FEATURES, PhongMaterial} from '@luma.gl/core';
+import {Model, Geometry, hasFeature, FEATURES} from '@luma.gl/core';
 
 // Polygon geometry generation is managed by the polygon tesselator
 import PolygonTesselator from './polygon-tesselator';
@@ -30,7 +30,12 @@ import vsSide from './solid-polygon-layer-vertex-side.glsl';
 import fs from './solid-polygon-layer-fragment.glsl';
 
 const DEFAULT_COLOR = [0, 0, 0, 255];
-const defaultMaterial = new PhongMaterial();
+const defaultMaterial = {
+  ambient: 0.35,
+  diffuse: 0.6,
+  shininess: 32,
+  specularColor: [30, 30, 30]
+};
 
 const defaultProps = {
   filled: true,

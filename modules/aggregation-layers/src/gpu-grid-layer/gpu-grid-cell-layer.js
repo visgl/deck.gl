@@ -20,8 +20,13 @@
 
 import {Layer, fp64LowPart, project32, gouraudLighting, picking} from '@deck.gl/core';
 import GL from '@luma.gl/constants';
-import {Model, CubeGeometry, PhongMaterial, fp64 as fp64ShaderModule} from '@luma.gl/core';
-const defaultMaterial = new PhongMaterial();
+import {Model, CubeGeometry, fp64 as fp64ShaderModule} from '@luma.gl/core';
+const defaultMaterial = {
+  ambient: 0.35,
+  diffuse: 0.6,
+  shininess: 32,
+  specularColor: [30, 30, 30]
+};
 import {defaultColorRange, colorRangeToFlatArray} from '../utils/color-utils';
 
 import vs from './gpu-grid-cell-layer-vertex.glsl';
