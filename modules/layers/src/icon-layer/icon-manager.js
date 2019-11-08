@@ -1,6 +1,6 @@
 /* global document */
 import GL from '@luma.gl/constants';
-import {Texture2D, readPixelsToBuffer} from '@luma.gl/core';
+import {Texture2D, copyToTexture, cloneTextureFrom} from '@luma.gl/core';
 import {loadImage} from '@loaders.gl/images';
 import {createIterable} from '@deck.gl/core';
 
@@ -19,7 +19,7 @@ function nextPowOfTwo(number) {
   return Math.pow(2, Math.ceil(Math.log2(number)));
 }
 
-// resize image to given width and height
+// update comment to create a new texture and copy original data.
 function resizeImage(ctx, imageData, width, height) {
   const {naturalWidth, naturalHeight} = imageData;
   if (width === naturalWidth && height === naturalHeight) {
@@ -42,26 +42,19 @@ function getIconId(icon) {
 }
 
 // resize texture without losing original data
-function resizeTexture(texture, width, height) {
+function resizeTexture(gl, texture, width, height) {
   const oldWidth = texture.width;
   const oldHeight = texture.height;
-  const oldPixels = readPixelsToBuffer(texture, {});
 
-  texture.resize({width, height});
-
-  texture.setSubImageData({
-    data: oldPixels,
-    x: 0,
-    y: height - oldHeight,
+  const newTexture = cloneTextureFrom(texture, {width, height});
+  copyToTexture(texture, newTexture, {
+    targetY: height - oldHeight,
     width: oldWidth,
-    height: oldHeight,
-    parameters: DEFAULT_TEXTURE_PARAMETERS
+    height: oldHeight
   });
 
-  texture.generateMipmap();
-
-  oldPixels.delete();
-  return texture;
+  texture.delete();
+  return newTexture;
 }
 
 // traverse icons in a row of icon atlas
@@ -296,7 +289,12 @@ export default class IconManager {
       }
 
       if (this._texture.height !== this._canvasHeight) {
-        resizeTexture(this._texture, this._canvasWidth, this._canvasHeight);
+        this._texture = resizeTexture(
+          this.gl,
+          this._texture,
+          this._canvasWidth,
+          this._canvasHeight
+        );
       }
 
       this.onUpdate();

@@ -584,12 +584,13 @@ export const TEST_CASES = [
       pitch: 0,
       bearing: 0
     },
-    // rendering times
-    renderingTimes: 2,
     layers: [
       new IconLayer({
         id: 'icon-lnglat-auto',
         data: dataSamples.points,
+        updateTriggers: {
+          getIcon: 1
+        },
         sizeScale: 12,
         coordinateSystem: COORDINATE_SYSTEM.LNGLAT_DEPRECATED,
         getPosition: d => d.COORDINATES,
@@ -610,6 +611,50 @@ export const TEST_CASES = [
       })
     ],
     goldenImage: './test/render/golden-images/icon-lnglat.png'
+  },
+  // This is based on last test case
+  // use the same layer id 'icon-lnglat-auto' as last test case to trigger the layer update and test texture resize logic
+  {
+    name: 'icon-lnglat-auto-2',
+    viewState: {
+      latitude: 37.751537058389985,
+      longitude: -122.42694203247012,
+      zoom: 11.5,
+      pitch: 0,
+      bearing: 0
+    },
+    layers: [
+      new IconLayer({
+        id: 'icon-lnglat-auto',
+        data: dataSamples.points,
+        updateTriggers: {
+          getIcon: 2
+        },
+        sizeScale: 12,
+        coordinateSystem: COORDINATE_SYSTEM.LNGLAT_DEPRECATED,
+        getPosition: d => d.COORDINATES,
+        getColor: d => [64, 64, 72],
+        getIcon: d => {
+          if (d.PLACEMENT === 'SW') {
+            return {
+              url: './test/render/golden-images/pointcloud-meter.png',
+              width: 256,
+              height: 256,
+              anchorY: 256,
+              mask: false
+            };
+          }
+          return {
+            url: './test/render/golden-images/h3-hexagon-flat.png',
+            width: 1024,
+            height: 1024,
+            anchorY: 1024,
+            mask: false
+          };
+        }
+      })
+    ],
+    goldenImage: './test/render/golden-images/icon-lnglat-resize-texture.png'
   },
   {
     name: 'icon-meters',
