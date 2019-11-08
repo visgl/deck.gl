@@ -150,14 +150,14 @@ export default class GPUGridCellLayer extends Layer {
 
   calculateColors(attribute) {
     const {data} = this.props;
-    attribute.setData({
+    attribute.update({
       buffer: data.color.aggregationBuffer
     });
   }
 
   calculateElevations(attribute) {
     const {data} = this.props;
-    attribute.setData({
+    attribute.update({
       buffer: data.elevation.aggregationBuffer
     });
   }

@@ -72,7 +72,7 @@ export default class GPUInterpolationTransition {
 
     this.currentBufferLayout = attribute.bufferLayout;
     this.currentLength = getAttributeBufferLength(attribute, numInstances);
-    this.attributeInTransition.setData({
+    this.attributeInTransition.update({
       buffer: buffers[1],
       // Hack: Float64Array is required for double-precision attributes
       // to generate correct shader attributes

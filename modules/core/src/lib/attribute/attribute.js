@@ -111,6 +111,11 @@ export default class Attribute extends DataColumn {
     this.state.needsRedraw = this.state.needsRedraw || reason;
   }
 
+  update(opts) {
+    // backward compatibility
+    this.setData(opts);
+  }
+
   allocate(numInstances) {
     const {state, settings} = this;
 
@@ -184,7 +189,7 @@ export default class Attribute extends DataColumn {
       return false;
     }
 
-    const hasChanged = super.setData({constant: true, value});
+    const hasChanged = this.setData({constant: true, value});
 
     if (hasChanged) {
       this.setNeedsRedraw();
@@ -211,7 +216,7 @@ export default class Attribute extends DataColumn {
     }
     state.lastExternalBuffer = buffer;
     this.setNeedsRedraw();
-    super.setData(buffer);
+    this.setData(buffer);
 
     return true;
   }

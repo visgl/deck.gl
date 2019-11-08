@@ -87,7 +87,7 @@ if (isWebGL2(gl)) {
     t.notOk(positionTransform._handle, 'instancePositions transform is deleted');
     t.is(sizeTransition.buffers[0].getElementCount(), 4, 'buffer has correct size');
 
-    attributes.instanceSizes.setData({value: new Float32Array(5).fill(1)});
+    attributes.instanceSizes.update({value: new Float32Array(5).fill(1)});
     manager.update({attributes, transitions: {getSize: 1000}, numInstances: 5});
     manager.run();
     let transitioningBuffer = manager.getAttributes().instanceSizes.getBuffer();
@@ -98,7 +98,7 @@ if (isWebGL2(gl)) {
     );
     t.is(transitioningBuffer.getElementCount(), 5, 'buffer has correct size');
 
-    attributes.instanceSizes.setData({constant: true, value: [2]});
+    attributes.instanceSizes.update({constant: true, value: [2]});
     manager.update({attributes, transitions: {getSize: 1000}, numInstances: 6});
     manager.run();
     transitioningBuffer = manager.getAttributes().instanceSizes.getBuffer();
@@ -139,7 +139,7 @@ if (isWebGL2(gl)) {
       }
     };
 
-    attributes.instanceSizes.setData({value: new Float32Array(4).fill(1)});
+    attributes.instanceSizes.update({value: new Float32Array(4).fill(1)});
     attributes.instanceSizes.setNeedsRedraw('initial');
 
     timeline.setTime(0);
@@ -154,7 +154,7 @@ if (isWebGL2(gl)) {
     t.is(startCounter, 1, 'no new transition is triggered');
 
     timeline.setTime(1000);
-    attributes.instanceSizes.setData({value: new Float32Array(4).fill(3)});
+    attributes.instanceSizes.update({value: new Float32Array(4).fill(3)});
     attributes.instanceSizes.setNeedsRedraw('update');
     manager.update({attributes, transitions, numInstances: 4});
     manager.run();
@@ -172,7 +172,7 @@ if (isWebGL2(gl)) {
       'attribute in transition'
     );
 
-    attributes.instanceSizes.setData({value: new Float32Array(4).fill(4)});
+    attributes.instanceSizes.update({value: new Float32Array(4).fill(4)});
     attributes.instanceSizes.setNeedsRedraw('update');
 
     manager.update({attributes, transitions, numInstances: 4});

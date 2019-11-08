@@ -69,7 +69,7 @@ export default class GPUSpringTransition {
 
     this.currentBufferLayout = attribute.bufferLayout;
     this.currentLength = getAttributeBufferLength(attribute, numInstances);
-    this.attributeInTransition.setData({
+    this.attributeInTransition.update({
       buffer: buffers[1],
       // Hack: Float64Array is required for double-precision attributes
       // to generate correct shader attributes
@@ -124,7 +124,7 @@ export default class GPUSpringTransition {
     });
 
     cycleBuffers(buffers);
-    this.attributeInTransition.setData({buffer: buffers[1]});
+    this.attributeInTransition.update({buffer: buffers[1]});
 
     const isTransitioning = readPixelsToArray(framebuffer)[0] > 0;
 
