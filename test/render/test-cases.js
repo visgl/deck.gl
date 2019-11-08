@@ -131,14 +131,6 @@ function getElevationWeight(point) {
 }
 const elevationAggregation = 'max';
 
-function getIconAccessor(testId) {
-  if (testId === 'icon-lnglat-auto-2') {
-    return 1;
-  }
-
-  return 2;
-}
-
 export const WIDTH = 800;
 export const HEIGHT = 450;
 
@@ -597,7 +589,7 @@ export const TEST_CASES = [
         id: 'icon-lnglat-auto',
         data: dataSamples.points,
         updateTriggers: {
-          getIcon: () => getIconAccessor('icon-lnglat-auto')
+          getIcon: 1
         },
         sizeScale: 12,
         coordinateSystem: COORDINATE_SYSTEM.LNGLAT_DEPRECATED,
@@ -636,7 +628,7 @@ export const TEST_CASES = [
         id: 'icon-lnglat-auto',
         data: dataSamples.points,
         updateTriggers: {
-          getIcon: () => getIconAccessor('icon-lnglat-auto-2')
+          getIcon: 2
         },
         sizeScale: 12,
         coordinateSystem: COORDINATE_SYSTEM.LNGLAT_DEPRECATED,
