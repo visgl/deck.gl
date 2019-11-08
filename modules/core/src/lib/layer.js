@@ -20,7 +20,7 @@
 
 /* eslint-disable react/no-direct-mutation-state */
 import {COORDINATE_SYSTEM} from './constants';
-import AttributeManager from './attribute-manager';
+import AttributeManager from './attribute/attribute-manager';
 import {removeLayerInSeer} from './seer-integration';
 import UniformTransitionManager from './uniform-transition-manager';
 import {diffProps, validateProps} from '../lifecycle/props';
@@ -524,7 +524,7 @@ export default class Layer extends Component {
   restorePickingColors() {
     const {pickingColors, instancePickingColors} = this.getAttributeManager().attributes;
     const colors = pickingColors || instancePickingColors;
-    colors.update({value: colors.value});
+    colors.updateSubBuffer({startOffset: 0});
   }
 
   // Deduces numer of instances. Intention is to support:

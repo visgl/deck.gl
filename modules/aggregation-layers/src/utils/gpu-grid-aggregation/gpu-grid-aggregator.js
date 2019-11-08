@@ -339,6 +339,7 @@ export default class GPUGridAggregator {
     const {weights, results, cellIndex, posIndex, attributes} = opts;
     for (const id in weights) {
       const {size, operation} = weights[id];
+      // TODO - value might not exist (e.g. attribute transition)
       const values = attributes[id].value;
       const {aggregationData} = results[id];
       for (let sizeIndex = 0; sizeIndex < size; sizeIndex++) {

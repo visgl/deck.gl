@@ -1,5 +1,5 @@
 import {WebMercatorViewport} from 'deck.gl';
-import AttributeManager from '@deck.gl/core/lib/attribute-manager';
+import AttributeManager from '@deck.gl/core/lib/attribute/attribute-manager';
 import * as dataSamples from '../../examples/layer-browser/src/data-samples';
 import {fp64} from '@luma.gl/core';
 import {gl} from '@deck.gl/test-utils';

@@ -1,13 +1,13 @@
 import GL from '@luma.gl/constants';
 import {Buffer, Transform} from '@luma.gl/core';
-import Attribute from '../lib/attribute';
+import Attribute from '../lib/attribute/attribute';
 import {
   padBuffer,
   getAttributeTypeFromSize,
   getSourceBufferAttribute,
   getAttributeBufferLength,
   cycleBuffers
-} from '../lib/attribute-transition-utils';
+} from '../lib/attribute/attribute-transition-utils';
 import Transition from './transition';
 
 export default class GPUInterpolationTransition {
@@ -20,7 +20,7 @@ export default class GPUInterpolationTransition {
     // attribute, it will be converted and returned as a regular attribute
     // `attribute.userData` is the original options passed when constructing the attribute.
     // This ensures that we set the proper `doublePrecision` flag and shader attributes.
-    this.attributeInTransition = new Attribute(gl, attribute.userData);
+    this.attributeInTransition = new Attribute(gl, attribute.settings);
     this.currentBufferLayout = attribute.bufferLayout;
     // storing currentLength because this.buffer may be larger than the actual length we want to use
     // this is because we only reallocate buffers when they grow, not when they shrink,

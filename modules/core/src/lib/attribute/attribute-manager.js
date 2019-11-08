@@ -20,7 +20,7 @@
 
 /* eslint-disable guard-for-in */
 import Attribute from './attribute';
-import log from '../utils/log';
+import log from '../../utils/log';
 
 import AttributeTransitionManager from './attribute-transition-manager';
 
@@ -239,7 +239,7 @@ export default class AttributeManager {
         )
       ) {
         // Attribute is using external buffer from the props
-      } else if (attribute.setConstantValue(props[attribute.getAccessor()])) {
+      } else if (attribute.setConstantValue(props[attribute.settings.accessor])) {
         // Attribute is using generic value from the props
       } else if (attribute.needsUpdate()) {
         updated = true;

@@ -1,7 +1,7 @@
 import {Transform} from '@luma.gl/core';
-import GPUInterpolationTransition from '../transitions/gpu-interpolation-transition';
-import GPUSpringTransition from '../transitions/gpu-spring-transition';
-import log from '../utils/log';
+import GPUInterpolationTransition from '../../transitions/gpu-interpolation-transition';
+import GPUSpringTransition from '../../transitions/gpu-spring-transition';
+import log from '../../utils/log';
 
 const TRANSITION_TYPES = {
   interpolation: GPUInterpolationTransition,

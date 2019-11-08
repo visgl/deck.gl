@@ -1,4 +1,4 @@
-import {normalizeTransitionSettings} from './attribute-transition-utils';
+import {normalizeTransitionSettings} from './attribute/attribute-transition-utils';
 import CPUInterpolationTransition from '../transitions/cpu-interpolation-transition';
 import CPUSpringTransition from '../transitions/cpu-spring-transition';
 import log from '../utils/log';

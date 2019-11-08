@@ -24,5 +24,5 @@ export {COORDINATE_SYSTEM} from './constants';
 // Export core objects
 export {default as Layer} from './layer';
 export {default as CompositeLayer} from './composite-layer';
-export {default as AttributeManager} from './attribute-manager';
+export {default as AttributeManager} from './attribute/attribute-manager';
 export {default as LayerManager} from './layer-manager';

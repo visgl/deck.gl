@@ -1,5 +1,4 @@
-import BaseAttribute from '../lib/base-attribute';
-import {padArray} from '../utils/array-utils';
+import {padArray} from '../../utils/array-utils';
 
 const DEFAULT_TRANSITION_SETTINGS = {
   interpolation: {
@@ -33,17 +32,24 @@ export function normalizeTransitionSettings(userSettings, layerSettings) {
 // (2) BUFFERS WITH OFFSETS ALWAYS CONTAIN VALUES OF THE SAME SIZE
 // (3) THE OPERATIONS IN THE SHADER ARE PER-COMPONENT (addition and scaling)
 export function getSourceBufferAttribute(gl, attribute) {
-  const {size, value, normalized, constant} = attribute;
   // The Attribute we pass to Transform as a sourceBuffer must have {divisor: 0}
   // so we create a copy of the attribute (with divisor=0) to use when running
   // transform feedback
-  if (constant) {
-    // don't pass normalized here because the `value` from a normalized attribute is
-    // already normalized
-    return new BaseAttribute(gl, {constant, value, size});
-  }
   const buffer = attribute.getBuffer();
-  return new BaseAttribute(gl, {divisor: 0, constant, buffer, size, normalized});
+  if (buffer) {
+    return [
+      attribute.getBuffer(),
+      {
+        divisor: 0,
+        size: attribute.size,
+        normalized: attribute.settings.normalized
+      }
+    ];
+  }
+  // constant
+  // don't pass normalized here because the `value` from a normalized attribute is
+  // already normalized
+  return attribute.value;
 }
 
 export function getAttributeTypeFromSize(size) {
@@ -66,9 +72,9 @@ export function cycleBuffers(buffers) {
 }
 
 export function getAttributeBufferLength(attribute, numInstances) {
-  const {doublePrecision, userData, value, size} = attribute;
+  const {doublePrecision, settings, value, size} = attribute;
   const multiplier = doublePrecision ? 2 : 1;
-  return (userData.noAlloc ? value.length : numInstances * size) * multiplier;
+  return (settings.noAlloc ? value.length : numInstances * size) * multiplier;
 }
 
 // This helper is used when transitioning attributes from a set of values in one buffer layout
@@ -94,19 +100,20 @@ export function padBuffer({
   const toBufferLayout = attribute.bufferLayout;
   const hasBufferLayout = fromBufferLayout && toBufferLayout;
   const toLength = getAttributeBufferLength(attribute, numInstances);
+  const isConstant = attribute.state.constant;
 
   // check if buffer needs to be padded
   if (!hasBufferLayout && fromLength >= toLength) {
     return;
   }
 
-  const toData = attribute.constant ? attribute.getValue() : attribute.getBuffer().getData({});
-  if (attribute.normalized) {
+  const toData = isConstant ? attribute.value : attribute.getBuffer().getData({});
+  if (attribute.settings.normalized) {
     const getter = getData;
     getData = (value, chunk) => attribute._normalizeConstant(getter(value, chunk));
   }
 
-  const getMissingData = attribute.constant
+  const getMissingData = isConstant
     ? (i, chunk) => getData(toData, chunk)
     : (i, chunk) => getData(toData.subarray(i, i + size), chunk);
 
