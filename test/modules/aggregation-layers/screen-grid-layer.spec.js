@@ -49,11 +49,12 @@ test('ScreenGridLayer', t => {
       updateProps: {
         gpuAggregation: false
       },
-      spies: ['_updateAggregation'],
-      onAfterUpdate({layer, subLayers, spies}) {
-        t.ok(spies._updateAggregation.called, 'should call _aggregateData');
-
-        spies._updateAggregation.restore();
+      onAfterUpdate({layer, oldState}) {
+        if (oldState.gpuAggregation) {
+          // Under WebGL1 gpuAggregation is always false, this change is a nop
+          const {dataChanged} = layer.state;
+          t.ok(dataChanged, 'should set dataChanged when gpuAggregation prop changes');
+        }
       }
     }
   ]);

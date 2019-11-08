@@ -20,79 +20,11 @@
 
 import test from 'tape-catch';
 
-import {alignToCell} from '@deck.gl/aggregation-layers/utils/gpu-grid-aggregation/grid-aggregation-utils';
-
-import GPUGridAggregator from '@deck.gl/aggregation-layers/utils/gpu-grid-aggregation/gpu-grid-aggregator';
-import {pointToDensityGridData} from '@deck.gl/aggregation-layers/utils/gpu-grid-aggregation/grid-aggregation-utils';
-
-import {gl} from '@deck.gl/test-utils';
-import {points, GridAggregationData} from 'deck.gl-test/data';
-
-const getPosition = d => d.COORDINATES;
-const gpuGridAggregator = new GPUGridAggregator(gl);
-
-function filterEmptyChannels(inArray) {
-  const outArray = [];
-  for (let i = 0; i < inArray.length; i += 4) {
-    outArray.push(inArray[i], inArray[i + 3]);
-  }
-  return outArray;
-}
-
-function compareArrays(t, name, cpu, gpu) {
-  t.deepEqual(filterEmptyChannels(gpu), filterEmptyChannels(cpu), name);
-}
+import {alignToCell} from '@deck.gl/aggregation-layers/utils/grid-aggregation-utils';
 
 test('GridAggregationUtils#alignToCell (CPU)', t => {
   t.equal(alignToCell(-3, 5), -5);
   t.equal(alignToCell(3, 5), 0);
-
-  t.end();
-});
-
-test('GridAggregationUtils#pointToDensityGridData (CPU vs GPU)', t => {
-  const opts = {
-    data: points,
-    getPosition,
-    weightParams: {weight: {needMax: 1, needMin: 1, getWeight: x => 1}},
-    gpuGridAggregator,
-    aggregationFlags: {dataChanged: true},
-    fp64: false // TODO: enable once FP64 extension support is resolved
-  };
-  const {attributes, vertexCount} = GridAggregationData.buildAttributes({
-    data: opts.data,
-    weights: opts.weightParams,
-    getPosition: x => x.COORDINATES
-  });
-  const CELLSIZES = [1000, 5000]; // cell size 500 requires 64 bit aggregation
-  for (const cellSizeMeters of CELLSIZES) {
-    opts.cellSizeMeters = cellSizeMeters;
-    opts.gpuAggregation = false;
-    const cpuResults = pointToDensityGridData(Object.assign({}, opts, {attributes, vertexCount}));
-    opts.gpuAggregation = true;
-    const gpuResults = pointToDensityGridData(Object.assign({}, opts, {attributes, vertexCount}));
-
-    compareArrays(
-      t,
-      `Cell aggregation data should match for cellSizeMeters:${cellSizeMeters}`,
-      cpuResults.weights.weight.aggregationBuffer.getData(),
-      gpuResults.weights.weight.aggregationBuffer.getData()
-    );
-
-    compareArrays(
-      t,
-      `Max data should match for cellSizeMeters:${cellSizeMeters}`,
-      cpuResults.weights.weight.maxBuffer.getData(),
-      gpuResults.weights.weight.maxBuffer.getData()
-    );
-
-    compareArrays(
-      t,
-      `Min data should match for cellSizeMeters:${cellSizeMeters}`,
-      cpuResults.weights.weight.minBuffer.getData(),
-      gpuResults.weights.weight.minBuffer.getData()
-    );
-  }
 
   t.end();
 });

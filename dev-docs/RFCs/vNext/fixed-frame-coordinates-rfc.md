@@ -19,7 +19,7 @@ However, fixed frame geospatial coordinates are also well-defined and have a com
 
 During our collaboration with the Cesium team around 3D tiles in loaders.gl and math.gl, we had to implement support for fixed frame geospatial coordinates in math.gl (for Ellipsoid math and WGS84 transformations from cartesian to cartographic coordinates).
 
-This puts us in a position where we now have both the necessary support libraries, an initial use case for, and a more mature understanding of fixed frame geospatial coodinates, so it makes sense to create an RFC to dig into what adding fixed frame coordinate support directly to deck.gl would mean.
+This puts us in a position where we now have both the necessary support libraries, an initial use case for, and a more mature understanding of fixed frame geospatial coordinates, so it makes sense to create an RFC to dig into what adding fixed frame coordinate support directly to deck.gl would mean.
 
 
 ## Overview
@@ -112,4 +112,3 @@ new Layer({
 ### Proposal: Built-in Frustum Culling Functionality in deck.gl
 
 Would be easier to implement in a fixed coordinate system.
-

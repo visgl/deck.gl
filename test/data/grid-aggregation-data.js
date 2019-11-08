@@ -20,7 +20,7 @@ const viewportUpdated = new WebMercatorViewport(
   Object.assign({}, viewportProps, {zoom: viewportProps.zoom - 3})
 );
 
-function buildDataProp(opts) {
+export function buildDataProp(opts) {
   const pointCount = opts.positions.length / 2;
   const dataProp = [];
   for (let i = 0; i < pointCount; i++) {
@@ -34,7 +34,7 @@ function buildDataProp(opts) {
   return dataProp;
 }
 
-function buildAttributes(opts) {
+export function buildAttributes(opts) {
   const {weights} = opts;
 
   const data = opts.data || buildDataProp(opts);
@@ -108,7 +108,7 @@ const fixture = {
         1,
         500 // gets aggregated when viewport is zoomed out
       ],
-      size: 3,
+      size: 1,
       needMin: true,
       needMax: true
     }
@@ -120,7 +120,9 @@ const fixture = {
     dataChanged: true
   },
   moduleSettings: {viewport},
-  projectPoints: true
+  projectPoints: true,
+  translation: [1, -1],
+  scaling: [viewport.width / 2, -viewport.height / 2, 1]
 };
 
 Object.assign(fixture, buildAttributes(fixture));
@@ -231,7 +233,6 @@ function generateRandomGridPoints(pointCount) {
   const weights = {
     weight1: {
       values: weightValues,
-      size: 3,
       needMin: true,
       needMax: true
     }
