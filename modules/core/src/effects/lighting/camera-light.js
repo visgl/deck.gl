@@ -1,4 +1,4 @@
-import PointLight from './point-light';
+import {PointLight} from './lights';
 import {getUniformsFromViewport} from '../../shaderlib/project/viewport-uniforms';
 
 export default class CameraLight extends PointLight {

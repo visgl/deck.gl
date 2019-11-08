@@ -32,6 +32,7 @@ export class DirectionalLight {
     this.id = props.id || `directional-${idCount++}`;
     this.color = color;
     this.intensity = intensity;
+    this.type = 'directional';
     this.direction = new Vector3(direction).normalize().toArray();
     this.shadow = _shadow;
   }

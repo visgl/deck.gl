@@ -9,7 +9,7 @@
   "dependencies": {
     "@deck.gl/mesh-layers": "^7.3.0-beta",
     "@deck.gl/react": "^7.3.0-beta",
-    "@luma.gl/addons": "^7.3.0-beta",
+    "@luma.gl/addons": "^8.0.0-alpha.2",
     "react": "^16.3.0",
     "react-dom": "^16.3.0",
     "react-map-gl": "^5.0.0"
