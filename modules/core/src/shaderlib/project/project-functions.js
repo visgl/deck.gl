@@ -7,18 +7,16 @@ import {LNGLAT_AUTO_OFFSET_ZOOM_THRESHOLD} from './viewport-uniforms';
 
 import * as vec4 from 'gl-matrix/vec4';
 import * as vec3 from 'gl-matrix/vec3';
-import {getDistanceScales, addMetersToLngLat} from 'viewport-mercator-project';
+import {addMetersToLngLat} from '@math.gl/web-mercator';
 
 // In project.glsl, offset modes calculate z differently from LNG_LAT mode.
-// offset modes apply the y adjustment (pixelsPerMeter2) when projecting z
+// offset modes apply the y adjustment (unitsPerMeter2) when projecting z
 // LNG_LAT mode only use the linear scale.
 function lngLatZToWorldPosition(lngLatZ, viewport, offsetMode = false) {
   const [longitude, latitude, z = 0] = lngLatZ;
   const [X, Y] = viewport.projectFlat(lngLatZ);
-  const distanceScales = offsetMode
-    ? getDistanceScales({longitude, latitude, scale: viewport.scale})
-    : viewport.getDistanceScales();
-  const Z = z * distanceScales.pixelsPerMeter[2];
+  const distanceScales = viewport.getDistanceScales(offsetMode && [longitude, latitude]);
+  const Z = z * distanceScales.unitsPerMeter[2];
   return [X, Y, Z];
 }
 

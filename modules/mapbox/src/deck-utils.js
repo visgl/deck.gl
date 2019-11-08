@@ -135,13 +135,11 @@ function getViewport(deck, map, useMapboxProjection = true) {
             nearZMultiplier:
               (mapboxVersion.major === 1 && mapboxVersion.minor >= 3) || mapboxVersion.major >= 2
                 ? 0.02
-                : 1 / (deck.height || 1),
-            farZMultiplier: 1.01
+                : 1 / (deck.height || 1)
           }
         : {
-            // use deck.gl's projection matrix
-            nearZMultiplier: 0.1,
-            farZMultiplier: 10
+            // use deck.gl's own default
+            nearZMultiplier: 0.1
           }
     )
   );

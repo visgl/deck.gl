@@ -196,8 +196,7 @@ export default class ColumnLayer extends Layer {
     } = this.props;
     const {model, fillVertexCount, wireframeVertexCount, edgeDistance} = this.state;
 
-    const widthMultiplier =
-      lineWidthUnits === 'pixels' ? viewport.distanceScales.metersPerPixel[2] : 1;
+    const widthMultiplier = lineWidthUnits === 'pixels' ? viewport.metersPerPixel : 1;
 
     model.setUniforms(
       Object.assign({}, uniforms, {

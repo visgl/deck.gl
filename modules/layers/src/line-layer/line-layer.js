@@ -101,7 +101,7 @@ export default class LineLayer extends Layer {
     const {viewport} = this.context;
     const {widthUnits, widthScale, widthMinPixels, widthMaxPixels} = this.props;
 
-    const widthMultiplier = widthUnits === 'pixels' ? viewport.distanceScales.metersPerPixel[2] : 1;
+    const widthMultiplier = widthUnits === 'pixels' ? viewport.metersPerPixel : 1;
 
     this.state.model
       .setUniforms(

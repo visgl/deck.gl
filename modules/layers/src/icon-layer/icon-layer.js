@@ -188,8 +188,7 @@ export default class IconLayer extends Layer {
           Object.assign({}, uniforms, {
             iconsTexture,
             iconsTextureDim: [iconsTexture.width, iconsTexture.height],
-            sizeScale:
-              sizeScale * (sizeUnits === 'pixels' ? viewport.distanceScales.metersPerPixel[2] : 1),
+            sizeScale: sizeScale * (sizeUnits === 'pixels' ? viewport.metersPerPixel : 1),
             sizeMinPixels,
             sizeMaxPixels,
             billboard,

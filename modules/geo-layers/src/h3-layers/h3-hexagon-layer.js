@@ -157,7 +157,7 @@ export default class H3HexagonLayer extends CompositeLayer {
       return;
     }
 
-    const {pixelsPerMeter} = viewport.distanceScales;
+    const {unitsPerMeter} = viewport.distanceScales;
 
     let vertices = h3ToPolygon(hex);
     const [centerLat, centerLng] = h3ToGeo(hex);
@@ -165,8 +165,8 @@ export default class H3HexagonLayer extends CompositeLayer {
     const [centerX, centerY] = viewport.projectFlat([centerLng, centerLat]);
     vertices = vertices.map(p => {
       const worldPosition = viewport.projectFlat(p);
-      worldPosition[0] = (worldPosition[0] - centerX) / pixelsPerMeter[0];
-      worldPosition[1] = (worldPosition[1] - centerY) / pixelsPerMeter[1];
+      worldPosition[0] = (worldPosition[0] - centerX) / unitsPerMeter[0];
+      worldPosition[1] = (worldPosition[1] - centerY) / unitsPerMeter[1];
       return worldPosition;
     });
 

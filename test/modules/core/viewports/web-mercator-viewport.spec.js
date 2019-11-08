@@ -139,10 +139,10 @@ test('WebMercatorViewport.getScales', t => {
   for (const vc of TEST_VIEWPORTS) {
     const viewport = new WebMercatorViewport(vc.mapState);
     const distanceScales = viewport.getDistanceScales();
-    t.ok(Array.isArray(distanceScales.metersPerPixel), 'metersPerPixel defined');
-    t.ok(Array.isArray(distanceScales.pixelsPerMeter), 'pixelsPerMeter defined');
-    t.ok(Array.isArray(distanceScales.degreesPerPixel), 'degreesPerPixel defined');
-    t.ok(Array.isArray(distanceScales.pixelsPerDegree), 'pixelsPerDegree defined');
+    t.ok(Array.isArray(distanceScales.metersPerUnit), 'metersPerCommonUnit defined');
+    t.ok(Array.isArray(distanceScales.unitsPerMeter), 'commonUnitsPerMeter defined');
+    t.ok(Array.isArray(distanceScales.degreesPerUnit), 'degreesPerCommonUnit defined');
+    t.ok(Array.isArray(distanceScales.unitsPerDegree), 'commonUnitsPerDegree defined');
   }
   t.end();
 });

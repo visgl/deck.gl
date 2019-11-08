@@ -38,11 +38,12 @@ const TEST_CASES = [
       height: 1024,
       longitude: 0,
       latitude: 0,
-      zoom: 4
+      orthographic: true,
+      zoom: 2
     }),
     minZoom: undefined,
     maxZoom: undefined,
-    output: ['6,6,4', '6,7,4', '6,8,4', '7,6,4', '7,7,4', '7,8,4', '8,6,4', '8,7,4', '8,8,4']
+    output: ['1,1,2', '1,2,2', '2,1,2', '2,2,2']
   },
   {
     title: 'under zoom',

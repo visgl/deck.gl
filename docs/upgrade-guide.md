@@ -15,6 +15,13 @@
   + `lngLatDeltaToMeters`
   + `metersToLngLatDelta`
 
+##### projection system
+
+- The [common space](/docs/shader-module/project.md) is no longer scaled to the current zoom level. This is part of an effort to make the geometry calculation more consistent and predictable. While one old common unit is equivalent to 1 screen pixel at the viewport center, one new common unit is equivalent to `viewport.scale` pixels at the viewport center.
+- `viewport.distanceScales` keys are renamed:
+  + `pixelsPerMeter` -> `unitsPerMeter`
+  + `metersPerPixel` -> `metersPerUnit`
+
 
 ## Upgrading from deck.gl v7.2 to v7.3
 

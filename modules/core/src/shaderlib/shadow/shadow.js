@@ -21,7 +21,7 @@ import {createModuleInjection} from '@luma.gl/core';
 import {PROJECT_COORDINATE_SYSTEM} from '../project/constants';
 import {Vector3, Matrix4} from 'math.gl';
 import memoize from '../../utils/memoize';
-import {pixelsToWorld} from 'viewport-mercator-project';
+import {pixelsToWorld} from '@math.gl/web-mercator';
 
 const vs = `
 const int max_lights = 2;

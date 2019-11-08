@@ -3,6 +3,7 @@ import LightingEffect from '@deck.gl/core/effects/lighting/lighting-effect';
 import {_CameraLight as CameraLight, DirectionalLight, PointLight} from '@deck.gl/core';
 import {ProgramManager} from '@luma.gl/core';
 import {MapView, PolygonLayer, LayerManager} from 'deck.gl';
+import {equals} from 'math.gl';
 import * as FIXTURES from 'deck.gl-test/data';
 import {gl} from '@deck.gl/test-utils';
 
@@ -47,7 +48,10 @@ test('LightingEffect#getModuleParameters', t => {
 
   const {lightSources} = lightingEffect.getModuleParameters(layer);
   t.is(lightSources.pointLights.length, 2, 'Lights are exported');
-  t.deepEqual(lightSources.pointLights[0].position, [0, 0, 150], 'Camera light projection is ok');
+  t.ok(
+    equals(lightSources.pointLights[0].position, [0, 0, 0.018310546875]),
+    'Camera light projection is ok'
+  );
   t.deepEqual(lightSources.pointLights[1].color, [255, 0, 0], 'point light color is ok');
 
   t.equal(lightSources.ambientLight, null, 'Lighting effect getParameters is ok');

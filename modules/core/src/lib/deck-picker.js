@@ -188,7 +188,7 @@ export default class DeckPicker {
         });
         // picked value is in common space (pixels) from the camera target (viewport.position)
         // convert it to meters from the ground
-        z = zValues[0] * viewports[0].distanceScales.metersPerPixel[2] + viewports[0].position[2];
+        z = zValues[0] * viewports[0].distanceScales.metersPerUnit[2] + viewports[0].position[2];
       }
 
       // Only exclude if we need to run picking again.

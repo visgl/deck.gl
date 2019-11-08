@@ -79,9 +79,9 @@ void main(void) {
 
   pixelOffset = rotate_by_angle(pixelOffset, instanceAngles) * instanceScale;
   pixelOffset += instancePixelOffset;
+  pixelOffset.y *= -1.0;
   
   if (billboard)  {
-    pixelOffset.y *= -1.0;
     gl_Position = project_position_to_clipspace(instancePositions, instancePositions64xyLow, vec3(0.0), geometry.position); 
     vec3 offset = vec3(pixelOffset, 0.0);
     DECKGL_FILTER_SIZE(offset, geometry);

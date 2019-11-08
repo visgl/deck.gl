@@ -114,10 +114,7 @@ function calculateMatrixAndOffset({
       // Calculate transformed projectionCenter (using 64 bit precision JS)
       // This is the key to offset mode precision
       // (avoids doing this addition in 32 bit precision in GLSL)
-      const positionCommonSpace = viewport.projectPosition(
-        shaderCoordinateOrigin,
-        Math.pow(2, coordinateZoom)
-      );
+      const positionCommonSpace = viewport.projectPosition(shaderCoordinateOrigin);
 
       cameraPosCommon = [
         cameraPosCommon[0] - positionCommonSpace[0],
@@ -234,8 +231,8 @@ function calculateViewportUniforms({
 
     // Distance at which screen pixels are projected
     project_uFocalDistance: viewport.focalDistance || 1,
-    project_uCommonUnitsPerMeter: distanceScales.pixelsPerMeter,
-    project_uCommonUnitsPerWorldUnit: distanceScales.pixelsPerMeter,
+    project_uCommonUnitsPerMeter: distanceScales.unitsPerMeter,
+    project_uCommonUnitsPerWorldUnit: distanceScales.unitsPerMeter,
     project_uCommonUnitsPerWorldUnit2: DEFAULT_PIXELS_PER_UNIT2,
     project_uScale: viewport.scale, // This is the mercator scale (2 ** zoom)
 
@@ -248,8 +245,8 @@ function calculateViewportUniforms({
   const distanceScalesAtOrigin = viewport.getDistanceScales(shaderCoordinateOrigin);
   switch (shaderCoordinateSystem) {
     case PROJECT_COORDINATE_SYSTEM.METER_OFFSETS:
-      uniforms.project_uCommonUnitsPerWorldUnit = distanceScalesAtOrigin.pixelsPerMeter;
-      uniforms.project_uCommonUnitsPerWorldUnit2 = distanceScalesAtOrigin.pixelsPerMeter2;
+      uniforms.project_uCommonUnitsPerWorldUnit = distanceScalesAtOrigin.unitsPerMeter;
+      uniforms.project_uCommonUnitsPerWorldUnit2 = distanceScalesAtOrigin.unitsPerMeter2;
       break;
 
     case PROJECT_COORDINATE_SYSTEM.LNGLAT_AUTO_OFFSET:
@@ -257,8 +254,8 @@ function calculateViewportUniforms({
     // eslint-disable-line no-fallthrough
     case PROJECT_COORDINATE_SYSTEM.LNG_LAT:
     case PROJECT_COORDINATE_SYSTEM.LNGLAT_OFFSETS:
-      uniforms.project_uCommonUnitsPerWorldUnit = distanceScalesAtOrigin.pixelsPerDegree;
-      uniforms.project_uCommonUnitsPerWorldUnit2 = distanceScalesAtOrigin.pixelsPerDegree2;
+      uniforms.project_uCommonUnitsPerWorldUnit = distanceScalesAtOrigin.unitsPerDegree;
+      uniforms.project_uCommonUnitsPerWorldUnit2 = distanceScalesAtOrigin.unitsPerDegree2;
       break;
 
     case PROJECT_COORDINATE_SYSTEM.IDENTITY:

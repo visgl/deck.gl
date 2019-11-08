@@ -1763,6 +1763,14 @@
     gl-matrix "^3.0.0"
     math.gl "3.0.0-beta.3"
 
+"@math.gl/web-mercator@^3.1.0-alpha":
+  version "3.1.0-alpha.2"
+  resolved "https://registry.yarnpkg.com/@math.gl/web-mercator/-/web-mercator-3.1.0-alpha.2.tgz#bc62baf57747cab981cccb882ec9709cf1d473e8"
+  integrity sha512-NMYu64ksLVuTpiPXaMVCYCYBUG8orIpl2H3/QY6lasA/6rUN/RV9Kqs25mu/aTDjOex7AXFjyc9plvpP5lvAiw==
+  dependencies:
+    "@babel/runtime" "^7.0.0"
+    gl-matrix "^3.0.0"
+
 "@mrmlnc/readdir-enhanced@^2.2.1":
   version "2.2.1"
   resolved "https://registry.yarnpkg.com/@mrmlnc/readdir-enhanced/-/readdir-enhanced-2.2.1.tgz#524af240d1a360527b730475ecfa1344aa540dde"

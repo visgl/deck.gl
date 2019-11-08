@@ -123,8 +123,7 @@ export default class ScatterplotLayer extends Layer {
       lineWidthMaxPixels
     } = this.props;
 
-    const widthMultiplier =
-      lineWidthUnits === 'pixels' ? viewport.distanceScales.metersPerPixel[2] : 1;
+    const widthMultiplier = lineWidthUnits === 'pixels' ? viewport.metersPerPixel : 1;
 
     this.state.model
       .setUniforms(

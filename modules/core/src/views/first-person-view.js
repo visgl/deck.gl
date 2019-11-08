@@ -1,5 +1,6 @@
 import View from './view';
 import Viewport from '../viewports/viewport';
+import {getMeterZoom} from '@math.gl/web-mercator';
 import {Matrix4, _SphericalCoordinates as SphericalCoordinates} from 'math.gl';
 import FirstPersonController from '../controllers/first-person-controller';
 
@@ -35,11 +36,13 @@ export default class FirstPersonView extends View {
     const center = modelMatrix ? modelMatrix.transformDirection(dir) : dir;
 
     // Just the direction. All the positioning is done in viewport.js
-    const viewMatrix = new Matrix4().lookAt({eye: [0, 0, 0], center, up});
+    const zoom = getMeterZoom(props);
+    const scale = Math.pow(2, zoom);
+    const viewMatrix = new Matrix4().lookAt({eye: [0, 0, 0], center, up}).scale(scale);
 
     return new Viewport(
       Object.assign({}, props, {
-        zoom: null, // triggers meter level zoom
+        zoom,
         viewMatrix
       })
     );

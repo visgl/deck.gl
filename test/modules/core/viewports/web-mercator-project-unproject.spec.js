@@ -23,7 +23,7 @@ const TEST_CASES = [
     title: 'project (corner)',
     func: 'project',
     input: [-122.55, 37.83],
-    expected: [-1.329741801625046, 6.796120915775314]
+    expected: [-1.3297418016723466, 6.796120915775524]
   },
   {
     title: 'unproject (center)',
@@ -35,31 +35,31 @@ const TEST_CASES = [
     title: 'unproject (corner)',
     func: 'unproject',
     input: [0, 0],
-    expected: [-122.55024809579456, 37.832294933238586]
+    expected: [-122.55024809579457, 37.832294933238764]
   },
   {
     title: 'projectFlat (center)',
     func: 'projectFlat',
     input: [-122.43, 37.75],
-    expected: [237142.08819, 573305.65851]
+    expected: [81.87733333333331, 314.0564849501292]
   },
   {
     title: 'unProjectFlat (center)',
     func: 'unprojectFlat',
-    input: [237142.08819, 573305.65851],
-    expected: [-122.43, 37.749999999]
+    input: [81.87733333333331, 314.0564849501292],
+    expected: [-122.43, 37.75]
   },
   {
     title: 'projectFlat (corner)',
     func: 'projectFlat',
     input: [-122.55, 37.83],
-    expected: [236647.78473, 572888.66298]
+    expected: [81.70666666666665, 314.20045973576964]
   },
   {
     title: 'unprojectFlat (corner)',
     func: 'unprojectFlat',
-    input: [236647, 572888],
-    expected: [-122.5501905, 37.830127124]
+    input: [81.70666666666665, 314.20045973576964],
+    expected: [-122.55, 37.83]
   }
 ];
 
@@ -83,8 +83,8 @@ test('Viewport projection', t => {
   TEST_CASES.forEach(({title, func, input, expected}) => {
     const output = viewport[func](input);
     t.deepEquals(
-      output.map(x => toLowPrecision(x)),
-      expected.map(x => toLowPrecision(x)),
+      output.map(x => toLowPrecision(x, 7)),
+      expected.map(x => toLowPrecision(x, 7)),
       `viewport.${func}(${title})`
     );
   });
