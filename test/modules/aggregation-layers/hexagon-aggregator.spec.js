@@ -30,10 +30,17 @@ const getPosition = d => d.COORDINATES;
 const iterableData = new Set(FIXTURES.points);
 const radius = 500;
 const viewport = FIXTURES.sampleViewport;
+const positionValue = Array.from(iterableData).reduce((acc, pt) => {
+  const pos = getPosition(pt);
+  acc = acc.concat([pos[0], pos[1], pos[2] || 0]);
+  return acc;
+}, []);
+const attributes = {positions: {value: positionValue}};
 
 test('pointToHexbin', t => {
   t.ok(
-    typeof pointToHexbin({data: iterableData, radius, getPosition}, viewport) === 'object',
+    typeof pointToHexbin({data: iterableData, radius, getPosition, viewport, attributes}) ===
+      'object',
     'should work with iterables'
   );
   t.end();
@@ -44,7 +51,13 @@ test('pointToHexbin#invalidData', t => {
   const onePoint = Object.assign({}, FIXTURES.points[0]);
   onePoint.COORDINATES = ['', ''];
   t.ok(
-    typeof pointToHexbin({data: [onePoint], radius, getPosition}, viewport) === 'object',
+    typeof pointToHexbin({
+      data: [onePoint],
+      radius,
+      getPosition,
+      viewport,
+      attributes: {positions: {value: (onePoint.COORDINATES = ['', ''])}}
+    }) === 'object',
     'should still produce an object in the presence of non-finite values'
   );
 

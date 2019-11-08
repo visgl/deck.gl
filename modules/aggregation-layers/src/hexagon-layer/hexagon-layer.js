@@ -18,13 +18,14 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {CompositeLayer, log} from '@deck.gl/core';
+import {log} from '@deck.gl/core';
 import {ColumnLayer} from '@deck.gl/layers';
 
 import {defaultColorRange} from '../utils/color-utils';
 
 import {pointToHexbin} from './hexagon-aggregator';
 import CPUAggregator from '../utils/cpu-aggregator';
+import AggregationLayer from '../aggregation-layer';
 
 function nop() {}
 
@@ -61,7 +62,7 @@ const defaultProps = {
   material: true
 };
 
-export default class HexagonLayer extends CompositeLayer {
+export default class HexagonLayer extends AggregationLayer {
   initializeState() {
     const cpuAggregator = new CPUAggregator({
       getAggregator: props => props.hexagonAggregator,
@@ -72,16 +73,25 @@ export default class HexagonLayer extends CompositeLayer {
       cpuAggregator,
       aggregatorState: cpuAggregator.state
     };
+    const attributeManager = this.getAttributeManager();
+    attributeManager.add({
+      positions: {size: 3, accessor: 'getPosition' /* , type: GL.DOUBLE, fp64: false*/}
+    });
+    // color and elevation attributes can't be added, as they
+    // need to be aggregated per bin.
   }
 
-  updateState({oldProps, props, changeFlags}) {
+  updateState(opts) {
+    super.updateState(opts);
     const {cpuAggregator} = this.state;
     const oldLayerData = cpuAggregator.state.layerData;
     this.setState({
       // make a copy of the internal state of cpuAggregator for testing
       aggregatorState: cpuAggregator.updateState(
-        {oldProps, props, changeFlags},
-        this.context.viewport
+        Object.assign({}, opts, {
+          viewport: this.context.viewport,
+          attributes: this.getAttributes()
+        })
       )
     });
 

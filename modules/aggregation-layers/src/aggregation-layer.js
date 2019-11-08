@@ -19,7 +19,7 @@
 // THE SOFTWARE.
 
 import {CompositeLayer, AttributeManager, experimental} from '@deck.gl/core';
-import {cssToDeviceRatio, log} from '@luma.gl/core';
+import {cssToDeviceRatio} from '@luma.gl/core';
 const {compareProps} = experimental;
 
 // props when changed results in new uniforms that requires re-aggregation
@@ -100,8 +100,8 @@ export default class AggregationLayer extends CompositeLayer {
   }
 
   _updateShaders(shaders) {
-    // Sublayers should implement this method.
-    log.assert(false);
+    // Default implemention is empty, sublayers can update their Model objects
+    // if needed
   }
 
   // override Composite layer private method to create AttributeManager instance

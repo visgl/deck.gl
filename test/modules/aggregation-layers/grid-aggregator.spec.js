@@ -29,8 +29,15 @@ const iterableData = new Set(FIXTURES.points);
 const cellSize = 500;
 
 test('pointToDensityGridDataCPU', t => {
+  // fill with some dummy data
+  const positions = new Array(iterableData.size * 3);
   t.ok(
-    typeof pointToDensityGridDataCPU(iterableData, cellSize, getPosition) === 'object',
+    typeof pointToDensityGridDataCPU({
+      data: iterableData,
+      cellSize,
+      getPosition,
+      attributes: {positions: {value: positions}}
+    }) === 'object',
     'should work with iterables'
   );
   t.end();

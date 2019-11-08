@@ -18,12 +18,12 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {CompositeLayer} from '@deck.gl/core';
 import {GridCellLayer} from '@deck.gl/layers';
 
 import {defaultColorRange} from '../utils/color-utils';
 import {pointToDensityGridDataCPU} from './grid-aggregator';
 import CPUAggregator from '../utils/cpu-aggregator';
+import AggregationLayer from '../aggregation-layer';
 
 function nop() {}
 
@@ -63,7 +63,7 @@ const defaultProps = {
   material: true
 };
 
-export default class CPUGridLayer extends CompositeLayer {
+export default class CPUGridLayer extends AggregationLayer {
   initializeState() {
     const cpuAggregator = new CPUAggregator({
       getAggregator: props => props.gridAggregator,
@@ -74,14 +74,23 @@ export default class CPUGridLayer extends CompositeLayer {
       cpuAggregator,
       aggregatorState: cpuAggregator.state
     };
+    const attributeManager = this.getAttributeManager();
+    attributeManager.add({
+      positions: {size: 3, accessor: 'getPosition' /* , type: GL.DOUBLE, fp64: false*/}
+    });
+    // color and elevation attributes can't be added, as they
+    // need to be aggregated per bin.
   }
 
-  updateState({oldProps, props, changeFlags}) {
+  updateState(opts) {
+    super.updateState(opts);
     this.setState({
       // make a copy of the internal state of cpuAggregator for testing
       aggregatorState: this.state.cpuAggregator.updateState(
-        {oldProps, props, changeFlags},
-        this.context.viewport
+        Object.assign({}, opts, {
+          viewport: this.context.viewport,
+          attributes: this.getAttributes()
+        })
       )
     });
   }
