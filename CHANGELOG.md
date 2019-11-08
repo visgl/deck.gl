@@ -19,6 +19,13 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v7.3
 
+#### deck.gl [v7.3.5] - Nov 8 2019
+
+- Fix texture crash in Safari (#3848)
+- Fix: custom controller events (#3857)
+- Fix attribute allocation bug when using partial update with dou… (#3854)
+- Fix IcanLayer autopacking bug (#3847)
+
 #### deck.gl [v7.3.4] - Nov 4 2019
 
 - TileLayer: only invalidate tile.layer when updateTriggerChanged (#3823)
