@@ -263,8 +263,9 @@ export default class ScenegraphLayer extends Layer {
         uniforms: {
           sizeScale,
           opacity,
+          sizeMinPixels,
+          sizeMaxPixels,
           enableOffsetModelMatrix: _composeModelMatrix,
-          sizePixels: [sizeMinPixels, sizeMaxPixels],
           sceneModelMatrix: worldMatrix,
           // Needed for PBR (TODO: find better way to get it)
           u_Camera: model.model.program.uniforms.project_uCameraPosition

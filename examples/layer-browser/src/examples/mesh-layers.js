@@ -105,7 +105,7 @@ const ScenegraphLayerPbrIblExample = {
       'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/DamagedHelmet/glTF-Binary/DamagedHelmet.glb',
     getPosition: d => d.COORDINATES,
     getOrientation: [0, 0, 90],
-    getTranslation: [0, 0, 1000],
+    getTranslation: d => [0, 0, 1000],
     getScale: [10, 10, 10],
     _lighting: 'pbr',
     _imageBasedLightingEnvironment: ({gl}) =>
@@ -123,7 +123,7 @@ const ScenegraphLayerMinMaxExample = {
     scenegraph: CUBE_1x1x1,
     getPosition: d => d.COORDINATES,
     getOrientation: [0, 0, 0],
-    getTranslation: [0, 0, 0],
+    getTranslation: d => [0, 0, 0],
     getScale: [1, 1, 1],
     _lighting: 'pbr',
     sizeMinPixels: 5,

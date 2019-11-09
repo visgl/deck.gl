@@ -17,7 +17,8 @@ _attribute vec3 instanceTranslation;
 
 // Uniforms
 uniform float sizeScale;
-uniform vec2 sizePixels;
+uniform float sizeMinPixels;
+uniform float sizeMaxPixels;
 uniform mat4 sceneModelMatrix;
 uniform bool enableOffsetModelMatrix;
 
@@ -69,8 +70,6 @@ void main(void) {
     geometry.uv = pbr_vUV;
   #endif
 
-  float sizeMinPixels = sizePixels.x;
-  float sizeMaxPixels = sizePixels.y;
   float originalSize = project_size_to_pixel(sizeScale);
   float clampedSize = clamp(originalSize, sizeMinPixels, sizeMaxPixels);
 
