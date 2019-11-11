@@ -68,7 +68,7 @@ const defaultProps = {
   // gpu data filter
   filterEnabled: false,
   filterRange: null,
-  getFilterValue: {type: 'accessor', value: 0}
+  getFilterValue: {type: 'accessor', value: null}
 };
 
 export default class CPUGridLayer extends CompositeLayer {

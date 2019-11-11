@@ -26,7 +26,8 @@ import {gl} from '@deck.gl/test-utils';
 
 const SAMPLE_PROPS = {
   data: FIXTURES.points.slice(0, 3),
-  getPosition: d => d.COORDINATES
+  getPosition: d => d.COORDINATES,
+  getFilterValue: null
   // gpuAggregation: false
 };
 

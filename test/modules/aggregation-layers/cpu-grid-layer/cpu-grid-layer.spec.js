@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 // Copyright (c) 2015 - 2017 Uber Technologies, Inc.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -33,7 +32,8 @@ test('CPUGridLayer', t => {
     Layer: CPUGridLayer,
     sampleProps: {
       data: FIXTURES.points.slice(0, 3),
-      getPosition: d => d.COORDINATES
+      getPosition: d => d.COORDINATES,
+      getFilterValue: null
     },
     assert: t.ok,
     onBeforeUpdate: ({testCase}) => t.comment(testCase.title),
@@ -135,21 +135,21 @@ test('CPUGridLayer#updates', t => {
     };
     return assertStateUpdate(shouldUpdate, 'cellSize');
   }
-  function getChecksForFilterChange() {
+  function getChecksForFilterChange(triggered) {
     const shouldUpdate = {
       layerData: false,
       dimensions: {
         fillColor: {
-          sortedBins: true,
-          valueDomain: true,
-          getValue: true,
-          scaleFunc: true
+          sortedBins: triggered,
+          valueDomain: triggered,
+          getValue: triggered,
+          scaleFunc: triggered
         },
         elevation: {
-          sortedBins: true,
-          valueDomain: true,
-          getValue: true,
-          scaleFunc: true
+          sortedBins: triggered,
+          valueDomain: triggered,
+          getValue: triggered,
+          scaleFunc: triggered
         }
       }
     };
@@ -330,10 +330,10 @@ test('CPUGridLayer#updates', t => {
           );
 
           const firstSortedBin = fillColor.sortedBins.sortedBins[0];
-          const binTocell = layerData.data.find(d => d.index === firstSortedBin.i);
+          const binToCell = layerData.data.find(d => d.index === firstSortedBin.i);
 
           t.ok(
-            fillColor.sortedBins.binMap[binTocell.index] === firstSortedBin,
+            fillColor.sortedBins.binMap[binToCell.index] === firstSortedBin,
             'Correct aggregatorState.dimension.fillColor.sortedBins.binMap created'
           );
         }
@@ -345,7 +345,7 @@ test('CPUGridLayer#updates', t => {
           filterEnabled: true
         },
         onAfterUpdate: ({layer, oldState}) => {
-          getChecksForFilterChange()({layer, oldState});
+          getChecksForFilterChange(true)({layer, oldState});
 
           const {
             layerData,
@@ -366,6 +366,64 @@ test('CPUGridLayer#updates', t => {
             elevation.sortedBins,
             'aggregatorState.dimensions.elevation.sortedColorBins calculated'
           );
+        }
+      },
+      {
+        updateProps: {
+          filterRange: [8, 10]
+        },
+        onAfterUpdate: ({layer, oldState}) => {
+          getChecksForFilterChange(true)({layer, oldState});
+
+          const {layerData} = layer.state.aggregatorState;
+          // eslint-disable-next-line no-undef
+          const isPointFiltered = layerData.data.every(bin =>
+            bin.filteredPoints.every(pt => pt.SPACES >= 8 && pt.SPACES <= 10)
+          );
+
+          t.ok(isPointFiltered, 'filteredPoints in bins should be correct');
+        }
+      },
+      {
+        updateProps: {
+          getFilterValue: pt => pt.RACKS
+        },
+        onAfterUpdate: ({layer, oldState}) => {
+          getChecksForFilterChange(false)({layer, oldState});
+        }
+      },
+      {
+        updateProps: {
+          getFilterValue: pt => pt.RACKS,
+          updateTriggers: {
+            getFilterValue: 'RACKS'
+          }
+        },
+        onAfterUpdate: ({layer, oldState}) => {
+          getChecksForFilterChange(true)({layer, oldState});
+
+          const {layerData} = layer.state.aggregatorState;
+          const isPointFiltered = layerData.data.every(bin =>
+            bin.filteredPoints.every(pt => pt.RACKS >= 8 && pt.RACKS <= 10)
+          );
+
+          t.ok(isPointFiltered, 'filteredPoints in bins should be correct');
+        }
+      },
+      {
+        updateProps: {
+          getFilterValue: null,
+          filterEnabled: false,
+          filterRange: null,
+          updateTriggers: {}
+        },
+        onAfterUpdate: ({layer, oldState}) => {
+          getChecksForFilterChange(true)({layer, oldState});
+
+          const {layerData} = layer.state.aggregatorState;
+          const isPointFiltered = layerData.data.every(bin => bin.filteredPoints === null);
+
+          t.ok(isPointFiltered, 'filteredPoints in bins should be reset to null');
         }
       },
       {

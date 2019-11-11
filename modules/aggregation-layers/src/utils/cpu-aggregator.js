@@ -483,7 +483,9 @@ export default class CPUAggregator {
         binInfo[pickingInfo] = value;
       }
 
-      object = Object.assign(binInfo, cell);
+      object = Object.assign(binInfo, cell, {
+        points: cell.filteredPoints || cell.points
+      });
     }
 
     // add bin colorValue and elevationValue to info
