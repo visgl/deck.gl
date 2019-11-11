@@ -3,7 +3,7 @@ import TransitionManager from '@deck.gl/core/controllers/transition-manager';
 import FlyToInterpolator from '@deck.gl/core/transitions/viewport-fly-to-interpolator.js';
 import {testExports} from '@deck.gl/core/controllers/map-controller';
 const {MapState} = testExports;
-import {Timeline} from '@luma.gl/addons';
+import {Timeline} from '@luma.gl/engine';
 
 /* global global, setTimeout, clearTimeout */
 // backfill requestAnimationFrame on Node

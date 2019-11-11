@@ -24,7 +24,7 @@ import LayerControls from './components/layer-controls';
 import LAYER_CATEGORIES from './examples';
 import Map from './map';
 
-import {ink} from '@luma.gl/effects';
+import {ink} from '@luma.gl/engine';
 
 const AMBIENT_LIGHT = new AmbientLight({
   color: [255, 255, 255],

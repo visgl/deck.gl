@@ -3,7 +3,7 @@ import AttributeTransitionManager from '@deck.gl/core/lib/attribute/attribute-tr
 import Attribute from '@deck.gl/core/lib/attribute/attribute';
 import test from 'tape-catch';
 import {isWebGL2} from '@luma.gl/core';
-import {Timeline} from '@luma.gl/addons';
+import {Timeline} from '@luma.gl/engine';
 import {gl} from '@deck.gl/test-utils';
 
 const TEST_ATTRIBUTES = {

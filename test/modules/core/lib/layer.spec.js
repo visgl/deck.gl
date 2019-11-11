@@ -23,7 +23,7 @@ import {Layer, AttributeManager, COORDINATE_SYSTEM, MapView, OrbitView} from 'de
 import {testInitializeLayer, testLayer} from '@deck.gl/test-utils';
 import {makeSpy} from '@probe.gl/test-utils';
 import {equals, Matrix4} from 'math.gl';
-import {Timeline} from '@luma.gl/addons';
+import {Timeline} from '@luma.gl/engine';
 
 import {sleep, testAsyncData} from './async-iterator-test-utils';
 

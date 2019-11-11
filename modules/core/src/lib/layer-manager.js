@@ -19,7 +19,7 @@
 // THE SOFTWARE.
 
 import assert from '../utils/assert';
-import {Timeline} from '@luma.gl/addons';
+import {Timeline} from '@luma.gl/engine';
 import seer from 'seer';
 import Layer from './layer';
 import {LIFECYCLE} from '../lifecycle/constants';
