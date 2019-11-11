@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 // Copyright (c) 2015 - 2017 Uber Technologies, Inc.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -133,6 +134,26 @@ test('CPUGridLayer#updates', t => {
       }
     };
     return assertStateUpdate(shouldUpdate, 'cellSize');
+  }
+  function getChecksForFilterChange() {
+    const shouldUpdate = {
+      layerData: false,
+      dimensions: {
+        fillColor: {
+          sortedBins: true,
+          valueDomain: true,
+          getValue: true,
+          scaleFunc: true
+        },
+        elevation: {
+          sortedBins: true,
+          valueDomain: true,
+          getValue: true,
+          scaleFunc: true
+        }
+      }
+    };
+    return assertStateUpdate(shouldUpdate, 'filter');
   }
   function getChecksForPositionChange(triggerChange) {
     const shouldUpdate = {
@@ -314,6 +335,36 @@ test('CPUGridLayer#updates', t => {
           t.ok(
             fillColor.sortedBins.binMap[binTocell.index] === firstSortedBin,
             'Correct aggregatorState.dimension.fillColor.sortedBins.binMap created'
+          );
+        }
+      },
+      {
+        updateProps: {
+          filterRange: [4, 10],
+          getFilterValue: pt => pt.SPACES,
+          filterEnabled: true
+        },
+        onAfterUpdate: ({layer, oldState}) => {
+          getChecksForFilterChange()({layer, oldState});
+
+          const {
+            layerData,
+            dimensions: {fillColor, elevation}
+          } = layer.state.aggregatorState;
+          // eslint-disable-next-line no-undef
+          const isPointFiltered = layerData.data.every(bin =>
+            bin.filteredPoints.every(pt => pt.SPACES >= 4 && pt.SPACES <= 10)
+          );
+
+          t.ok(isPointFiltered, 'filteredPoints in bins should be correct');
+
+          t.ok(
+            fillColor.sortedBins,
+            'aggregatorState.dimensions.fillColor.sortedColorBins calculated'
+          );
+          t.ok(
+            elevation.sortedBins,
+            'aggregatorState.dimensions.elevation.sortedColorBins calculated'
           );
         }
       },

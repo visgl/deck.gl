@@ -24,30 +24,56 @@
 // avg/mean/max of specific value of the point
 const defaultGetValue = points => points.length;
 
+const defaultProps = {
+  getValue: defaultGetValue,
+  filterEnabled: false,
+  filterRange: null,
+  getFilterValue: 0
+};
+
 export default class BinSorter {
-  constructor(bins = [], getValue = defaultGetValue) {
-    this.sortedBins = this.getSortedBins(bins, getValue);
+  constructor(bins = [], props = defaultProps) {
+    // const {getValue = defaultGetValue} = props;
+    this.sortedBins = this.getSortedBins(bins, props);
     this.maxCount = this.getMaxCount();
     this.binMap = this.getBinMap();
   }
 
+  filterPoint(point, getFilterValue, filterRange) {
+    const value = getFilterValue(point);
+
+    if (Array.isArray(value)) {
+      // filterSize > 1
+      return value.every((val, idx) => val >= filterRange[idx][0] && val <= filterRange[idx][1]);
+    }
+    return value >= filterRange[0] && value <= filterRange[1];
+  }
   /**
    * Get an array of object with sorted values and index of bins
    * @param {Array} bins
    * @param {Function} getValue
    * @return {Array} array of values and index lookup
    */
-  getSortedBins(bins, getValue) {
+  getSortedBins(bins, props) {
+    const {getValue = defaultGetValue, filterEnabled, filterRange, getFilterValue} = props;
+    const hasFilter = filterEnabled === true && Array.isArray(filterRange);
+
     return bins
       .reduce((accu, h, i) => {
-        const value = getValue(h.points);
+        const filteredPoints = hasFilter
+          ? h.points.filter(pt => this.filterPoint(pt, getFilterValue, filterRange))
+          : h.points;
+
+        h.filteredPoints = hasFilter ? filteredPoints : null;
+
+        const value = getValue(filteredPoints);
 
         if (value !== null && value !== undefined) {
           // filter bins if value is null or undefined
           accu.push({
             i: Number.isFinite(h.index) ? h.index : i,
             value,
-            counts: h.points.length
+            counts: filteredPoints.length
           });
         }
 

@@ -41,6 +41,16 @@ const defaultDimensions = [
         },
         aggregation: {
           prop: 'colorAggregation'
+        },
+        filterRange: {
+          prop: 'filterRange'
+        },
+        filterEnabled: {
+          prop: 'filterEnabled'
+        },
+        getFilterValue: {
+          prop: 'getFilterValue',
+          updateTrigger: 'getFilterValue'
         }
       }
     },
@@ -82,6 +92,16 @@ const defaultDimensions = [
         },
         aggregation: {
           prop: 'elevationAggregation'
+        },
+        filterRange: {
+          prop: 'filterRange'
+        },
+        filterEnabled: {
+          prop: 'filterEnabled'
+        },
+        getFilterValue: {
+          prop: 'getFilterValue',
+          updateTrigger: 'getFilterValue'
         }
       }
     },
@@ -381,7 +401,12 @@ export default class CPUAggregator {
     const {key} = dimensionUpdater;
     const {getValue} = this.state.dimensions[key];
 
-    const sortedBins = new BinSorter(this.state.layerData.data || [], getValue);
+    const sortedBins = new BinSorter(this.state.layerData.data || [], {
+      getValue,
+      filterEnabled: props.filterEnabled,
+      filterRange: props.filterRange,
+      getFilterValue: props.getFilterValue
+    });
     this.setDimensionState(key, {sortedBins});
     this.getDimensionValueDomain(props, dimensionUpdater);
   }
