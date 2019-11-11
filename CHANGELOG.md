@@ -23,8 +23,8 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 - Fix texture crash in Safari (#3848)
 - Fix: custom controller events (#3857)
-- Fix attribute allocation bug when using partial update with dou… (#3854)
-- Fix IcanLayer autopacking bug (#3847)
+- Fix attribute allocation bug when using partial update with double precision (#3854)
+- Fix IconLayer autopacking bug (#3847)
 
 #### deck.gl [v7.3.4] - Nov 4 2019
 
