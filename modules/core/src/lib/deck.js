@@ -717,7 +717,10 @@ export default class Deck {
     // If initialViewState was set on creation, auto track position
     if (this.viewState) {
       this.viewState[params.viewId] = viewState;
-      this.viewManager.setProps({viewState});
+      if (!this.props.viewState) {
+        // Apply internal view state
+        this.viewManager.setProps({viewState: {...this.viewState}});
+      }
     }
   }
 
