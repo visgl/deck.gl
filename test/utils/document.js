@@ -1,20 +1,12 @@
 /* global window */
 
-function applyConstructorOrFunction(functionOrConstructor, ...args) {
-  try {
-    return new functionOrConstructor(...args); // eslint-disable-line new-cap
-  } catch (err) {
-    return functionOrConstructor(...args);
-  }
-}
-
 export default class DocumentTest {
   // Simplify the testing of deck.gl work that requires a document and canvas
   constructor(canvasCallback) {
     this.document = this._createDocument();
     this.canvasParent = null;
     this.testObject = null;
-    this.canvasCallback = canvasCallback;
+    this._setup(canvasCallback);
   }
 
   _createDocument() {
@@ -28,19 +20,21 @@ export default class DocumentTest {
     return documentClone;
   }
 
-  setup() {
+  _setup(canvasCallback) {
     // Creates a canvas which can be passed to canvasCallback
     // to add a node to
     const canvas = this.document.createElement('canvas');
+
     const canvasParent = this.document.createElement('div');
     canvasParent.className = 'canvas-parent';
     canvasParent.appendChild(canvas);
     this.canvasParent = canvasParent;
+
     this.document.body.appendChild(canvasParent);
-    this.testObject = applyConstructorOrFunction(this.canvasCallback, canvas);
+    this.testObject = canvasCallback(canvas);
   }
 
-  teardown() {
+  finalize() {
     this.testObject.remove();
     this.canvasParent.remove();
   }
