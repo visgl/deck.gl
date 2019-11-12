@@ -25,7 +25,7 @@ import {DataFilterExtension} from '@deck.gl/extensions';
 import {testLayer} from '@deck.gl/test-utils';
 
 const BASE_LAYER_ID = 'composite-layer-id';
-const PROPS = {
+const defaultProps = {
   cellSize: 10,
   prop1: 5
 };
@@ -38,9 +38,18 @@ TestLayer.layerName = 'TestLayer';
 
 const AGGREGATION_PROPS = ['cellSize'];
 
+// props , when changed doesn't require updating aggregation
+const ignoreProps = Object.keys(defaultProps).reduce((accu, cur) => {
+  if (!AGGREGATION_PROPS.includes(cur)) {
+    accu[cur] = defaultProps[cur];
+  }
+  return accu;
+}, {});
+
+
 class TestAggregationLayer extends AggregationLayer {
   initializeState() {
-    super.initializeState(AGGREGATION_PROPS);
+    super.initializeState(ignoreProps);
   }
 
   renderLayers() {
@@ -65,7 +74,7 @@ class TestAggregationLayer extends AggregationLayer {
 TestAggregationLayer.layerName = 'TestAggregationLayer';
 
 test('AggregationLayer#constructor', t => {
-  const layer = new TestAggregationLayer(Object.assign({id: BASE_LAYER_ID}, PROPS));
+  const layer = new TestAggregationLayer(Object.assign({id: BASE_LAYER_ID}, defaultProps));
   t.ok(layer, 'AggregationLayer created');
   t.end();
 });
@@ -138,7 +147,7 @@ test('AggregationLayer#updateState', t => {
         onAfterUpdate({layer}) {
           t.ok(
             layer.state.aggregationDirty,
-            'Aggregation should not be dirty when extension prop is changed'
+            'Aggregation should be dirty when extension prop is changed'
           );
         }
       }
