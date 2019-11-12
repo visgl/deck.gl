@@ -62,7 +62,7 @@ const defaultProps = {
 
   visible: true,
   pickable: false,
-  opacity: {type: 'number', min: 0, max: 1, value: 0.8},
+  opacity: {type: 'number', min: 0, max: 1, value: 1},
 
   onHover: {type: 'function', value: null, compare: false, optional: true},
   onClick: {type: 'function', value: null, compare: false, optional: true},

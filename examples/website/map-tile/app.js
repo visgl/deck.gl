@@ -51,7 +51,6 @@ export default class App extends PureComponent {
         onHover: this._onHover,
         autoHighlight,
         highlightColor,
-        opacity: 1,
         // https://wiki.openstreetmap.org/wiki/Zoom_levels
         minZoom: 0,
         maxZoom: 19,

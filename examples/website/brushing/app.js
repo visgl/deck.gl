@@ -172,7 +172,6 @@ export default class App extends Component {
         id: 'sources',
         data: sources,
         brushingRadius: brushRadius,
-        opacity: 1,
         brushingEnabled: enableBrushing,
         pickable: false,
         // only show source points when brushing
@@ -187,7 +186,6 @@ export default class App extends Component {
         lineWidthMinPixels: 2,
         stroked: true,
         filled: false,
-        opacity: 1,
         brushingEnabled: enableBrushing,
         // only show rings when brushing
         radiusScale: enableBrushing ? 4000 : 0,
@@ -198,7 +196,6 @@ export default class App extends Component {
         id: 'targets',
         data: targets,
         brushingRadius: brushRadius,
-        opacity: 1,
         brushingEnabled: enableBrushing,
         pickable: true,
         radiusScale: 3000,

@@ -43,6 +43,7 @@
         new LineLayer({
           id: 'line',
           data: 'https://raw.githubusercontent.com/uber-common/deck.gl-data/master/examples/line/heathrow-flights.json',
+          opacity: 0.8,
           pickable: true,
           getSourcePosition: d => d.start,
           getTargetPosition: d => d.end,

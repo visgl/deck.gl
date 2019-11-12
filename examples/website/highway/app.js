@@ -114,7 +114,6 @@ export default class App extends Component {
       new GeoJsonLayer({
         id: 'geojson',
         data: roads,
-        opacity: 1,
         stroked: false,
         filled: false,
         lineWidthMinPixels: 0.5,

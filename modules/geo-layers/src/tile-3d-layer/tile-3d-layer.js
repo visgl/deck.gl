@@ -11,7 +11,6 @@ import {getFrameState} from './get-frame-state';
 const defaultProps = {
   getPointColor: [0, 0, 0],
   pointSize: 1.0,
-  opacity: 1.0,
 
   data: null,
   _ionAssetId: null,

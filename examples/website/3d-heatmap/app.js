@@ -87,7 +87,6 @@ export default class App extends Component {
         extruded: true,
         getPosition: d => d,
         onHover: this.props.onHover,
-        opacity: 1,
         pickable: Boolean(this.props.onHover),
         radius,
         upperPercentile,

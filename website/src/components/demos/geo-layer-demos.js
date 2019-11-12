@@ -74,7 +74,6 @@ export const TileLayerDemo = createLayerDemoClass({
   allowMissingData: true,
   props: {
     stroked: false,
-    opacity: 1,
 
     getLineColor: [192, 192, 192],
     getFillColor: [140, 170, 180],

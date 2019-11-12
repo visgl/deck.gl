@@ -35,7 +35,6 @@ loadScript(GOOGLE_MAPS_API_URL).then(() => {
         // Styles
         filled: true,
         pointRadiusMinPixels: 2,
-        opacity: 1,
         pointRadiusScale: 2000,
         getRadius: f => 11 - f.properties.scalerank,
         getFillColor: [200, 0, 80, 180],

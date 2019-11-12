@@ -46,7 +46,6 @@ const defaultProps = {
   sizeScale: {type: 'number', value: 1, min: 0},
   getPosition: {type: 'accessor', value: x => x.position},
   getColor: {type: 'accessor', value: DEFAULT_COLOR},
-  opacity: {type: 'number', min: 0, max: 1, value: 1.0},
 
   // flat or pbr
   _lighting: 'flat',

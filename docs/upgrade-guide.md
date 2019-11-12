@@ -4,6 +4,10 @@
 
 ### Breaking Changes
 
+##### Defaults
+
+- The `opacity` prop of all layers is now default to `1` (used to be `0.8`).
+
 ##### Removed
 
 - `project` shader module

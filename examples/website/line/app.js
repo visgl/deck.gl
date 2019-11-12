@@ -90,6 +90,7 @@ export default class App extends Component {
       new LineLayer({
         id: 'flight-paths',
         data: flightPaths,
+        opacity: 0.8,
         getSourcePosition: d => d.start,
         getTargetPosition: d => d.end,
         getColor,

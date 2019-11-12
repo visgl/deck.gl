@@ -32,6 +32,7 @@
       "type": "LineLayer",
       "id": "flight-paths",
       "data": "https://raw.githubusercontent.com/uber-common/deck.gl-data/master/examples/line/heathrow-flights.json",
+      "opacity": 0.8,
       "strokeWidth": 3,
       "getSourcePosition": "start",
       "getTargetPosition": "end",
