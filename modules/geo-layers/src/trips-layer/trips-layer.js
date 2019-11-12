@@ -31,13 +31,12 @@ export default class TripsLayer extends PathLayer {
   getShaders() {
     const shaders = super.getShaders();
     shaders.inject = {
-      // Timestamp of the vertex
       'vs:#decl': `\
 uniform float trailLength;
 attribute vec2 instanceTimestamps;
 varying float vTime;
 `,
-      // Apply a small shift to battle z-fighting
+      // Timestamp of the vertex
       'vs:#main-end': `\
 vTime = instanceTimestamps.x + (instanceTimestamps.y - instanceTimestamps.x) * vPathPosition.y / vPathLength;
 `,
