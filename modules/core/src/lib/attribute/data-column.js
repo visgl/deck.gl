@@ -167,7 +167,7 @@ export default class DataColumn {
       if (this.settings.normalized) {
         value = this._normalizeConstant(value);
       }
-      const hasChanged = !this._areValuesEqual(value, this.value);
+      const hasChanged = !state.constant || !this._areValuesEqual(value, this.value);
 
       if (!hasChanged) {
         return false;

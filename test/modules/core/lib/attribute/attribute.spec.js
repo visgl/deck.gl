@@ -131,6 +131,52 @@ test('Attribute#allocate', t => {
   t.end();
 });
 
+test('Attribute#setConstantValue', t => {
+  let attribute = new Attribute(gl, {
+    id: 'positions',
+    size: 3,
+    accessor: 'getPosition'
+  });
+
+  attribute.allocate(4);
+  attribute.updateBuffer({
+    numInstances: 4,
+    data: new Array(4),
+    props: {
+      getPosition: () => [0, 0, 0]
+    }
+  });
+  // clear redraw flag
+  t.ok(attribute.getValue()[0] instanceof Buffer, 'attribute is using packed buffer');
+  attribute.needsRedraw({clearChangedFlags: true});
+
+  attribute.setConstantValue([0, 0, 0]);
+  t.deepEqual(attribute.getValue(), [0, 0, 0], 'attribute set to constant value');
+  t.ok(attribute.needsRedraw({clearChangedFlags: true}), 'attribute marked needs redraw');
+
+  attribute.setConstantValue([0, 0, 0]);
+  t.notOk(attribute.needsRedraw({clearChangedFlags: true}), 'attribute should not need redraw');
+
+  attribute.setConstantValue([0, 0, 1]);
+  t.deepEqual(attribute.getValue(), [0, 0, 1], 'attribute set to constant value');
+  t.ok(attribute.needsRedraw({clearChangedFlags: true}), 'attribute marked needs redraw');
+
+  attribute.delete();
+
+  attribute = new Attribute(gl, {
+    id: 'colors',
+    size: 3,
+    type: GL.UNSIGNED_BYTE,
+    accessor: 'getColor',
+    normalized: true
+  });
+
+  attribute.setConstantValue([255, 255, 0]);
+  t.deepEqual(attribute.getValue(), [1, 1, 0], 'constant value is normalized');
+
+  t.end();
+});
+
 test('Attribute#allocate - partial', t => {
   if (!isWebGL2(gl)) {
     // buffer.getData() is WebGL2 only
