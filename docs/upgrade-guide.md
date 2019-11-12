@@ -14,6 +14,10 @@
   + `getLocationAtPoint`: use `getMapCenterByLngLatPosition`
   + `lngLatDeltaToMeters`
   + `metersToLngLatDelta`
+- `Layer` class
+  + `setLayerNeedsUpdate`: use `setNeedsUpdate`
+  + `setUniforms`: use `model.setUniforms`
+  + `use64bitProjection`
 
 ##### projection system
 
