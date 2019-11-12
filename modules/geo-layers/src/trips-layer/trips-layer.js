@@ -19,7 +19,7 @@
 // THE SOFTWARE.
 
 import {PathLayer} from '@deck.gl/layers';
-import {createIterable} from '@deck.gl/core';
+import {createIterable, log} from '@deck.gl/core';
 
 const defaultProps = {
   trailLength: {type: 'number', value: 120, min: 0},
@@ -31,30 +31,14 @@ export default class TripsLayer extends PathLayer {
   getShaders() {
     const shaders = super.getShaders();
     shaders.inject = {
-      // Timestamp of the vertex
       'vs:#decl': `\
 uniform float trailLength;
-uniform bool isPath3D;
 attribute vec2 instanceTimestamps;
 varying float vTime;
 `,
-      // Remove the z component (timestamp) from position
-      // TODO - Legacy use case, remove in v8
-      'vec3 nextPosition = mix(instanceEndPositions, instanceRightPositions, isEnd);': `\
-vec2 timestamps = instanceTimestamps;
-if (!isPath3D) {
-  prevPosition.z = 0.0;
-  currPosition.z = 0.0;
-  nextPosition.z = 0.0;
-  timestamps.x = instanceStartPositions.z;
-  timestamps.y = instanceEndPositions.z;
-}
-`,
-      // Apply a small shift to battle z-fighting
+      // Timestamp of the vertex
       'vs:#main-end': `\
-float shiftZ = sin(timestamps.x) * 1e-4;
-gl_Position.z += shiftZ;
-vTime = timestamps.x + (timestamps.y - timestamps.x) * vPathPosition.y / vPathLength;
+vTime = instanceTimestamps.x + (instanceTimestamps.y - instanceTimestamps.x) * vPathPosition.y / vPathLength;
 `,
       'fs:#decl': `\
 uniform float trailLength;
@@ -86,13 +70,11 @@ if(vTime > currentTime || vTime < currentTime - trailLength) {
   }
 
   draw(params) {
-    const {trailLength, currentTime, getTimestamps} = this.props;
+    const {trailLength, currentTime} = this.props;
 
     params.uniforms = Object.assign({}, params.uniforms, {
       trailLength,
-      currentTime,
-      // TODO - remove in v8
-      isPath3D: Boolean(getTimestamps)
+      currentTime
     });
 
     super.draw(params);
@@ -100,13 +82,6 @@ if(vTime > currentTime || vTime < currentTime - trailLength) {
 
   calculateInstanceTimestamps(attribute, {startRow, endRow}) {
     const {data, getTimestamps} = this.props;
-
-    if (!getTimestamps) {
-      // TODO - Legacy use case, remove in v8
-      attribute.constant = true;
-      attribute.value = new Float32Array(2);
-      return;
-    }
 
     const {
       pathTesselator: {bufferLayout, instanceCount}
@@ -125,6 +100,11 @@ if(vTime > currentTime || vTime < currentTime - trailLength) {
 
       const geometrySize = bufferLayout[objectInfo.index];
       const timestamps = getTimestamps(object, objectInfo);
+
+      // Support for legacy use case is removed in v8.0
+      // TODO - remove when all apps are updated
+      log.assert(timestamps, 'TrisLayer: invalid timestamps');
+
       // For each line segment, we have [startTimestamp, endTimestamp]
       for (let j = 0; j < geometrySize; j++) {
         value[i++] = timestamps[j];

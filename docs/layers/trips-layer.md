@@ -104,6 +104,8 @@ See [PathLayer](/docs/layers/path-layer.md) documentation for supported path for
 
 ##### `getTimestamps` ([Function](/docs/developer-guide/using-layers.md#accessors), optional)
 
+- Default: `d => d.timestamps`
+
 Returns an array of timestamps, one for each navigation point in the geometry returned by `getPath`, representing the time that the point is visited.
 
 Because timestamps are stored as 32-bit floating numbers, raw unix epoch time can not be used. You may test the validity of a timestamp by calling `Math.fround(t)` to check if there would be any loss of precision.
