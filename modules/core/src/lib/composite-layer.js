@@ -153,8 +153,7 @@ export default class CompositeLayer extends Layer {
       extensions
     };
 
-    const overridingSublayerProps =
-      overridingProps && sublayerProps.id && overridingProps[sublayerProps.id];
+    const overridingSublayerProps = overridingProps && overridingProps[sublayerProps.id];
     const overridingSublayerTriggers =
       overridingSublayerProps && overridingSublayerProps.updateTriggers;
     const sublayerId = sublayerProps.id || 'sublayer';
