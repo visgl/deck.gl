@@ -3,10 +3,12 @@
 A shader library facilitates creating shaders that work seamlessly with deck.gl. The `modules` parameter passed to the [Model](https://github.com/uber/luma.gl/blob/master/docs/api-reference/core/model.md) class can dynamically include parts from this library into your own GLSL code:
 
 ```js
+import {picking, project32, gouraudLighting} from '@deck.gl/core';
+
 const model = new Model(gl, {
   vs: '// vertex shader GLSL source'
   fs: '// fragment shader GLSL source',
-  modules: ['picking', 'project', 'lighting'] // list of optional module names
+  modules: [picking, project32, gouraudLighting] // list of optional module names
 });
 ```
 

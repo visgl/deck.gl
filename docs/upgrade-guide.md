@@ -32,6 +32,29 @@
   + `pixelsPerMeter` -> `unitsPerMeter`
   + `metersPerPixel` -> `metersPerUnit`
 
+##### Shader modules
+
+This change affects custom layers. deck.gl is no longer registering shaders by default. This means any `modules` array defined in `layer.getShaders()` or `new Model()` must now use the full shader module objects, instead of just their names. All supported shader modules can be imported from `@deck.gl/core`.
+
+```js
+/// OLD
+new Model({
+  // ...
+  modules: ['picking', 'project32', 'gouraud-lighting']
+});
+```
+
+Should now become
+
+```js
+import {picking, project32, gouraudLighting} from '@deck.gl/core';
+/// NEW
+new Model({
+  // ...
+  modules: [picking, project32, gouraudLighting]
+});
+```
+
 
 ## Upgrading from deck.gl v7.2 to v7.3
 

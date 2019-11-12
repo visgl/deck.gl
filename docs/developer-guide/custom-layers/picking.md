@@ -103,12 +103,13 @@ If your layer creates its own [Model](https://github.com/uber/luma.gl/blob/maste
 
 ```js
 import {Model} from '@luma.gl/core';
+import {picking} from '@deck.gl/core';
 
 new Model(gl, {
   ...
   vs: CUSTOM_VS,
   fs: CUSTOM_FS,
-  modules: ['picking', ...]
+  modules: [picking]
 });
 ```
 
