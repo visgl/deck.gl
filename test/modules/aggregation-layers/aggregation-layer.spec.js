@@ -46,7 +46,6 @@ const ignoreProps = Object.keys(defaultProps).reduce((accu, cur) => {
   return accu;
 }, {});
 
-
 class TestAggregationLayer extends AggregationLayer {
   initializeState() {
     super.initializeState(ignoreProps);
