@@ -26,6 +26,7 @@ import {generateContours} from './contour-utils';
 import GPUGridAggregator from '../utils/gpu-grid-aggregation/gpu-grid-aggregator';
 import {pointToDensityGridData} from '../utils/gpu-grid-aggregation/grid-aggregation-utils';
 import GridAggregationLayer from '../grid-aggregation-layer';
+import {filterProps} from '../utils/prop-utils';
 
 const DEFAULT_COLOR = [255, 255, 255, 255];
 const DEFAULT_STROKE_WIDTH = 1;
@@ -48,12 +49,7 @@ const defaultProps = {
 const AGGREGATION_PROPS = ['cellSize', 'gpuAggregation'];
 
 // props , when changed doesn't require updating aggregation
-const ignoreProps = Object.keys(defaultProps).reduce((accu, cur) => {
-  if (!AGGREGATION_PROPS.includes(cur)) {
-    accu[cur] = defaultProps[cur];
-  }
-  return accu;
-}, {});
+const ignoreProps = filterProps(defaultProps, AGGREGATION_PROPS);
 
 export default class ContourLayer extends GridAggregationLayer {
   initializeState() {

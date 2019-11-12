@@ -41,6 +41,7 @@ import {AttributeManager, COORDINATE_SYSTEM, log, mergeShaders} from '@deck.gl/c
 import TriangleLayer from './triangle-layer';
 import AggregationLayer from '../aggregation-layer';
 import {defaultColorRange, colorRangeToFlatArray} from '../utils/color-utils';
+import {filterProps} from '../utils/prop-utils';
 import weights_vs from './weights-vs.glsl';
 import weights_fs from './weights-fs.glsl';
 import vs_max from './max-vs.glsl';
@@ -79,12 +80,7 @@ const REQUIRED_FEATURES = [
 const AGGREGATION_PROPS = ['radiusPixels'];
 
 // props , when changed doesn't require updating aggregation
-const ignoreProps = Object.keys(defaultProps).reduce((accu, cur) => {
-  if (!AGGREGATION_PROPS.includes(cur)) {
-    accu[cur] = defaultProps[cur];
-  }
-  return accu;
-}, {});
+const ignoreProps = filterProps(defaultProps, AGGREGATION_PROPS);
 
 export default class HeatmapLayer extends AggregationLayer {
   initializeState() {

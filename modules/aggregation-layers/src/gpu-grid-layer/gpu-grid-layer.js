@@ -29,6 +29,7 @@ import {defaultColorRange, colorRangeToFlatArray} from '../utils/color-utils';
 import GPUGridCellLayer from './gpu-grid-cell-layer';
 import {pointToDensityGridDataCPU} from './../cpu-grid-layer/grid-aggregator';
 import GridAggregationLayer from '../grid-aggregation-layer';
+import {filterProps} from '../utils/prop-utils';
 
 const defaultMaterial = new PhongMaterial();
 const defaultProps = {
@@ -67,12 +68,7 @@ const AGGREGATION_PROPS = [
 ];
 
 // props , when changed doesn't require updating aggregation
-const ignoreProps = Object.keys(defaultProps).reduce((accu, cur) => {
-  if (!AGGREGATION_PROPS.includes(cur)) {
-    accu[cur] = defaultProps[cur];
-  }
-  return accu;
-}, {});
+const ignoreProps = filterProps(defaultProps, AGGREGATION_PROPS);
 
 export default class GPUGridLayer extends GridAggregationLayer {
   initializeState() {

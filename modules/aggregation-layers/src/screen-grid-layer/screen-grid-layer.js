@@ -23,6 +23,7 @@ import GPUGridAggregator from '../utils/gpu-grid-aggregation/gpu-grid-aggregator
 import {AGGREGATION_OPERATION} from '../utils/aggregation-operation-utils';
 import ScreenGridCellLayer from './screen-grid-cell-layer';
 import GridAggregationLayer from '../grid-aggregation-layer';
+import {filterProps} from '../utils/prop-utils';
 
 import GL from '@luma.gl/constants';
 import {Buffer} from '@luma.gl/core';
@@ -38,12 +39,7 @@ const defaultProps = Object.assign({}, ScreenGridCellLayer.defaultProps, {
 const AGGREGATION_PROPS = ['gpuAggregation'];
 
 // props , when changed doesn't require updating aggregation
-const ignoreProps = Object.keys(defaultProps).reduce((accu, cur) => {
-  if (!AGGREGATION_PROPS.includes(cur)) {
-    accu[cur] = defaultProps[cur] || ScreenGridCellLayer.defaultProps[cur];
-  }
-  return accu;
-}, {});
+const ignoreProps = filterProps(defaultProps, AGGREGATION_PROPS);
 
 export default class ScreenGridLayer extends GridAggregationLayer {
   initializeState() {
