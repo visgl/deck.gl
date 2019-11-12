@@ -17,6 +17,8 @@ _attribute vec3 instanceTranslation;
 
 // Uniforms
 uniform float sizeScale;
+uniform float sizeMinPixels;
+uniform float sizeMaxPixels;
 uniform mat4 sceneModelMatrix;
 uniform bool enableOffsetModelMatrix;
 
@@ -68,7 +70,10 @@ void main(void) {
     geometry.uv = pbr_vUV;
   #endif
 
-  vec3 pos = (instanceModelMatrix * (sceneModelMatrix * POSITION).xyz) * sizeScale + instanceTranslation;
+  float originalSize = project_size_to_pixel(sizeScale);
+  float clampedSize = clamp(originalSize, sizeMinPixels, sizeMaxPixels);
+
+  vec3 pos = (instanceModelMatrix * (sceneModelMatrix * POSITION).xyz) * sizeScale * (clampedSize / originalSize) + instanceTranslation;
 
   if(enableOffsetModelMatrix) {
     DECKGL_FILTER_SIZE(pos, geometry);

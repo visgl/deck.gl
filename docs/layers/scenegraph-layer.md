@@ -184,6 +184,18 @@ Explicitly define a 4x4 column-major model matrix for the mesh. If provided, wil
 * If an array is provided, it is used as the transform matrix for all objects.
 * If a function is provided, it is called on each object to retrieve its transform matrix.
 
+##### `sizeMinPixels` (Number, optional)
+
+* Default: `0`
+
+The minimum size in pixels for one unit of the scene.
+
+##### `sizeMaxPixels` (Number, optional)
+
+* Default: `Number.MAX_SAFE_INTEGER`
+
+The maximum size in pixels for one unit of the scene.
+
 ## Source
 
 [modules/mesh-layers/src/scenegraph-layer](https://github.com/uber/deck.gl/tree/master/modules/mesh-layers/src/scenegraph-layer)
