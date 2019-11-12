@@ -2,7 +2,7 @@
 
 * **Author**: Xiaoji Chen
 * **Date**: October 2019
-* **Status**: **Draft**
+* **Status**: **Pending Review**
 
 ## Overview
 
@@ -46,6 +46,7 @@ The current system hard-codes the mapping between input data format and their pr
 | coordinateSystem | Common Space | Supported View Type |
 | --- | --- | --- |
 | `LNGLAT` (default) | Web Mercator | `MapView`/`FirstPersonView` |
+| `LNGLAT_DEPRECATED` | Web Mercator | `MapView`/`FirstPersonView` |
 | `LNGLAT_AUTO_OFFSET` | offseted Web Mercator (dynamic origin) | `MapView`/`FirstPersonView` |
 | `LNGLAT_OFFSETS` | offseted Web Mercator (fixed origin) | `MapView`/`FirstPersonView` |
 | `METER_OFFSETS` | offseted Web Mercator (fixed origin) | `MapView`/`FirstPersonView` |
@@ -57,14 +58,18 @@ Proposal:
   + `LNGLAT`
   + `LNGLAT_OFFSETS`
   + `METER_OFFSETS`
-  + `FIXED_FRAME`
+  + `WGS84`
   + `CARTESIAN`
   + `DEFAULT` - `LNGLAT` if rendering into a geospatial view, `CARTESIAN` otherwise
 - `PROJECTION_MODE` enums - discribe the common space, defined by the viewport. The viewport will also supply projection matrices that properly view these defined common spaces.
   + `WEB_MERCATOR` - the surface of the earth to 512x512 square (Mapbox scale convention)
+  + `WEB_MERCATOR_AUTO_OFFSET` - `WEB_MERCATOR` using auto-offset mode
   + `WGS84` - the 3D earth in a R~=100 sphere (1px:65536m at zoom=0) (any precision concerns?)
   + `IDENTITY` - no transform
 
+Notes:
+
+- `COORDINATE_SYSTEM.LNGLAT_DEPRECATED` will be removed. From the user's perspective, `coordinateSystem` should only describe the data that they have. The `Fp64Extension` may communicate with the project module via an internal setting to disable the auto offset.
 
 ## Open Questions
 
