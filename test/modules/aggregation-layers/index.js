@@ -34,3 +34,4 @@ import './utils/color-utils.spec';
 import './utils/aggregation-operation-utils.spec';
 import './heatmap-layer/heatmap-layer-utils.spec';
 import './screengrid-cell-layer.spec';
+import './aggregation-layer.spec';
