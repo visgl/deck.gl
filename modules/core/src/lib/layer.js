@@ -823,7 +823,7 @@ ${flags.viewportChanged ? 'viewport' : ''}\
     if (changeFlags.updateTriggersChanged) {
       for (const key in changeFlags.updateTriggersChanged) {
         if (changeFlags.updateTriggersChanged[key]) {
-          this._activeUpdateTrigger(key);
+          this.invalidateAttribute(key);
         }
       }
     }
@@ -962,30 +962,6 @@ ${flags.viewportChanged ? 'viewport' : ''}\
   _onAsyncPropUpdated() {
     this.diffProps(this.props, this.internalState.getOldProps());
     this.setNeedsUpdate();
-  }
-
-  // Operate on each changed triggers, will be called when an updateTrigger changes
-  _activeUpdateTrigger(propName) {
-    this.invalidateAttribute(propName);
-  }
-
-  // DEPRECATED METHODS
-
-  // TODO - remove in v8
-  setLayerNeedsUpdate() {
-    log.deprecated('layer.setLayerNeedsUpdate', 'layer.setNeedsUpdate')();
-    this.setNeedsUpdate();
-  }
-
-  // Updates selected state members and marks the object for redraw
-  setUniforms(uniformMap) {
-    for (const model of this.getModels()) {
-      model.setUniforms(uniformMap);
-    }
-
-    // TODO - set needsRedraw on the model(s)?
-    this.setNeedsRedraw();
-    log.deprecated('layer.setUniforms', 'model.setUniforms')();
   }
 }
 
