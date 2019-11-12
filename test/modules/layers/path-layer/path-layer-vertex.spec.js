@@ -2,6 +2,7 @@ import test from 'tape-catch';
 
 // import {COORDINATE_SYSTEM, Viewport, WebMercatorViewport} from 'deck.gl';
 import {gl} from '@deck.gl/test-utils';
+import {picking, project32} from '@deck.gl/core';
 import {Transform, Buffer} from '@luma.gl/core';
 import VS from '../../../../modules/layers/src/path-layer/path-layer-vertex.glsl';
 
@@ -27,7 +28,7 @@ varying float result;
       inFlag
     },
     vs: VS,
-    modules: ['picking', 'project32'],
+    modules: [picking, project32],
     inject,
     feedbackMap: {
       inFlag: 'result'

@@ -18,7 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {Layer} from '@deck.gl/core';
+import {Layer, project32, gouraudLighting, picking} from '@deck.gl/core';
 import GL from '@luma.gl/constants';
 import {Model, Geometry, hasFeature, FEATURES, PhongMaterial} from '@luma.gl/core';
 
@@ -66,7 +66,7 @@ export default class SolidPolygonLayer extends Layer {
       vs,
       fs,
       defines: {},
-      modules: ['project32', 'gouraud-lighting', 'picking']
+      modules: [project32, gouraudLighting, picking]
     });
   }
 

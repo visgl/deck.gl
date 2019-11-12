@@ -20,7 +20,7 @@
 
 import GL from '@luma.gl/constants';
 import {Model, Geometry, FEATURES, hasFeatures} from '@luma.gl/core';
-import {Layer, log} from '@deck.gl/core';
+import {Layer, log, picking} from '@deck.gl/core';
 import {defaultColorRange, colorRangeToFlatArray} from '../utils/color-utils';
 import vs from './screen-grid-layer-vertex.glsl';
 import fs from './screen-grid-layer-fragment.glsl';
@@ -43,7 +43,7 @@ export default class ScreenGridCellLayer extends Layer {
   }
 
   getShaders() {
-    return {vs, fs, modules: ['picking']};
+    return {vs, fs, modules: [picking]};
   }
 
   initializeState() {

@@ -18,7 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {Layer} from '@deck.gl/core';
+import {Layer, project32, gouraudLighting, picking} from '@deck.gl/core';
 import GL from '@luma.gl/constants';
 import {Model, PhongMaterial} from '@luma.gl/core';
 import ColumnGeometry from './column-geometry';
@@ -59,7 +59,7 @@ const defaultProps = {
 
 export default class ColumnLayer extends Layer {
   getShaders() {
-    return super.getShaders({vs, fs, modules: ['project32', 'gouraud-lighting', 'picking']});
+    return super.getShaders({vs, fs, modules: [project32, gouraudLighting, picking]});
   }
 
   /**

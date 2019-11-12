@@ -1,4 +1,4 @@
-import {Layer} from '@deck.gl/core';
+import {Layer, picking} from '@deck.gl/core';
 import GL from '@luma.gl/constants';
 import {Model} from '@luma.gl/core';
 
@@ -81,7 +81,7 @@ export default class SurfaceLayer extends Layer {
       id: `${this.props.id}-surface`,
       vs: surfaceVertex,
       fs: fragmentShader,
-      modules: ['picking'],
+      modules: [picking],
       drawMode: GL.TRIANGLES,
       vertexCount: 0,
       isIndexed: true

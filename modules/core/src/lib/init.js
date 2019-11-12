@@ -24,7 +24,6 @@ import {HTMLImageLoader} from '@loaders.gl/images';
 import {global} from '../utils/globals';
 import log from '../utils/log';
 import jsonLoader from '../utils/json-loader';
-import {initializeShaderModules} from '../shaderlib';
 
 // Version detection using babel plugin
 // Fallback for tests and SSR since global variable is defined by Webpack.
@@ -48,8 +47,6 @@ if (!global.deck) {
   };
 
   registerLoaders([jsonLoader, HTMLImageLoader]);
-
-  initializeShaderModules();
 }
 
 export default global.deck;

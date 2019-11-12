@@ -18,7 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {Layer} from '@deck.gl/core';
+import {Layer, project32, gouraudLighting, picking} from '@deck.gl/core';
 import GL from '@luma.gl/constants';
 import {Model, Geometry, PhongMaterial} from '@luma.gl/core';
 
@@ -65,7 +65,7 @@ function normalizeData(data) {
 
 export default class PointCloudLayer extends Layer {
   getShaders(id) {
-    return super.getShaders({vs, fs, modules: ['project32', 'gouraud-lighting', 'picking']});
+    return super.getShaders({vs, fs, modules: [project32, gouraudLighting, picking]});
   }
 
   initializeState() {

@@ -18,7 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {Layer, fp64LowPart} from '@deck.gl/core';
+import {Layer, fp64LowPart, project32, gouraudLighting, picking} from '@deck.gl/core';
 import GL from '@luma.gl/constants';
 import {Model, CubeGeometry, PhongMaterial, fp64 as fp64ShaderModule} from '@luma.gl/core';
 const defaultMaterial = new PhongMaterial();
@@ -58,7 +58,7 @@ export default class GPUGridCellLayer extends Layer {
     return super.getShaders({
       vs,
       fs,
-      modules: ['project32', 'gouraud-lighting', 'picking', fp64ShaderModule]
+      modules: [project32, gouraudLighting, picking, fp64ShaderModule]
     });
   }
 

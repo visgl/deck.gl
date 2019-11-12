@@ -30,7 +30,7 @@ import {
   fp64 as fp64ShaderModule,
   withParameters
 } from '@luma.gl/core';
-import {log, project64, mergeShaders} from '@deck.gl/core';
+import {log, project32, project64, mergeShaders} from '@deck.gl/core';
 import {worldToPixels} from '@math.gl/web-mercator';
 const {fp64ifyMatrix4} = fp64ShaderModule;
 
@@ -1008,7 +1008,7 @@ function getAggregationModel(gl, shaderOptions, fp64 = false) {
     {
       vs: fp64 ? AGGREGATE_TO_GRID_VS_FP64 : AGGREGATE_TO_GRID_VS,
       fs: AGGREGATE_TO_GRID_FS,
-      modules: fp64 ? [project64] : ['project32']
+      modules: fp64 ? [project64] : [project32]
     },
     shaderOptions
   );

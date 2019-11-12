@@ -18,8 +18,12 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {registerShaderModules, ProgramManager} from '@luma.gl/core';
-import {fp32, gouraudlighting, phonglighting} from '@luma.gl/core';
+import {ProgramManager} from '@luma.gl/core';
+import {
+  fp32,
+  gouraudlighting as gouraudLighting,
+  phonglighting as phongLighting
+} from '@luma.gl/core';
 import geometry from './misc/geometry';
 import project from './project/project';
 import project32 from './project32/project32';
@@ -36,10 +40,6 @@ const SHADER_HOOKS = [
   'fs:DECKGL_FILTER_COLOR(inout vec4 color, FragmentGeometry geometry)'
 ];
 
-export function initializeShaderModules() {
-  registerShaderModules([fp32, project, project32, gouraudlighting, phonglighting, picking]);
-}
-
 export function createProgramManager(gl) {
   const programManager = ProgramManager.getDefaultProgramManager(gl);
 
@@ -53,4 +53,4 @@ export function createProgramManager(gl) {
   return programManager;
 }
 
-export {picking, project, project64, gouraudlighting, phonglighting, shadow};
+export {picking, project, project32, project64, gouraudLighting, phongLighting, shadow};
