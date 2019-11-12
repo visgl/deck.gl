@@ -1,10 +1,5 @@
 import test from 'tape-catch';
 
-const moduleAlias = require('module-alias');
-moduleAlias.addAlias('@jupyter-widgets/base', (fromPath, request, alias) => {
-  return `${__dirname}/mock-widget-base.js`;
-});
-
 function getDeckModel(state) {
   // Require at runtime, after the environment is polyfilled
   try {

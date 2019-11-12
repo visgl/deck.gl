@@ -19,8 +19,14 @@
 // THE SOFTWARE.
 
 /* global window */
+require('module-alias/register');
 const test = require('tape');
 const {_enableDOMLogging: enableDOMLogging} = require('@probe.gl/test-utils');
+const moduleAlias = require('module-alias');
+
+moduleAlias.addAlias('@jupyter-widgets/base', (fromPath, request, alias) => {
+  return `${__dirname}/modules/jupyter-widget/mock-widget-base.js`;
+});
 
 // require('@luma.gl/debug');
 

@@ -3,6 +3,7 @@ class BlankClass {
   constructor(attributes = {}) {
     Object.assign(attributes, this.defaults());
     this.model = new Map(Object.entries(attributes));
+    this.model.widget_manager = {};
     this.el = {appendChild: x => x};
   }
 
