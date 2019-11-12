@@ -19,6 +19,10 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v7.3
 
+#### deck.gl [v7.3.6] - Nov 11 2019
+
+- Bump loaders.gl dependencies (#3862)
+
 #### deck.gl [v7.3.5] - Nov 8 2019
 
 - Fix texture crash in Safari (#3848)
