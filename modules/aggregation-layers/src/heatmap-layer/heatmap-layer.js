@@ -76,8 +76,15 @@ const REQUIRED_FEATURES = [
   // FEATURES.FLOAT_BLEND, // implictly supported when TEXTURE_FLOAT is supported
 ];
 
-// props , when changed requires re-aggregation
 const AGGREGATION_PROPS = ['radiusPixels'];
+
+// props , when changed doesn't require updating aggregation
+const ignoreProps = Object.keys(defaultProps).reduce((accu, cur) => {
+  if (!AGGREGATION_PROPS.includes(cur)) {
+    accu[cur] = defaultProps[cur];
+  }
+  return accu;
+}, {});
 
 export default class HeatmapLayer extends AggregationLayer {
   initializeState() {
@@ -87,7 +94,7 @@ export default class HeatmapLayer extends AggregationLayer {
       log.error(`HeatmapLayer: ${this.id} is not supported on this browser`)();
       return;
     }
-    super.initializeState(AGGREGATION_PROPS);
+    super.initializeState(ignoreProps);
     this.setState({supported: true});
     this._setupTextureParams();
     this._setupAttributes();

@@ -45,12 +45,19 @@ const defaultProps = {
   zOffset: 0.005
 };
 
-// props , when changed requires re-aggregation
-const AGGREGATION_PROPS = ['gpuAggregation'];
+const AGGREGATION_PROPS = ['cellSize', 'gpuAggregation'];
+
+// props , when changed doesn't require updating aggregation
+const ignoreProps = Object.keys(defaultProps).reduce((accu, cur) => {
+  if (!AGGREGATION_PROPS.includes(cur)) {
+    accu[cur] = defaultProps[cur];
+  }
+  return accu;
+}, {});
 
 export default class ContourLayer extends GridAggregationLayer {
   initializeState() {
-    super.initializeState(AGGREGATION_PROPS);
+    super.initializeState(ignoreProps);
     this.setState({
       contourData: {},
       colorTrigger: 0,

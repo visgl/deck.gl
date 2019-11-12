@@ -35,8 +35,15 @@ const defaultProps = Object.assign({}, ScreenGridCellLayer.defaultProps, {
   aggregation: 'SUM'
 });
 
-// props , when changed requires re-aggregation
 const AGGREGATION_PROPS = ['gpuAggregation'];
+
+// props , when changed doesn't require updating aggregation
+const ignoreProps = Object.keys(defaultProps).reduce((accu, cur) => {
+  if (!AGGREGATION_PROPS.includes(cur)) {
+    accu[cur] = defaultProps[cur] || ScreenGridCellLayer.defaultProps[cur];
+  }
+  return accu;
+}, {});
 
 export default class ScreenGridLayer extends GridAggregationLayer {
   initializeState() {
@@ -47,7 +54,7 @@ export default class ScreenGridLayer extends GridAggregationLayer {
       log.error(`ScreenGridLayer: ${this.id} is not supported on this browser`)();
       return;
     }
-    super.initializeState(AGGREGATION_PROPS);
+    super.initializeState(ignoreProps);
     const weights = {
       color: {
         size: 1,

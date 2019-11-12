@@ -59,8 +59,20 @@ const defaultProps = {
   gpuAggregation: true
 };
 
-// props , when changed requires re-aggregation
-const AGGREGATION_PROPS = ['gpuAggregation', 'colorAggregation', 'elevationAggregation'];
+const AGGREGATION_PROPS = [
+  'gpuAggregation',
+  'colorAggregation',
+  'elevationAggregation',
+  'cellSize'
+];
+
+// props , when changed doesn't require updating aggregation
+const ignoreProps = Object.keys(defaultProps).reduce((accu, cur) => {
+  if (!AGGREGATION_PROPS.includes(cur)) {
+    accu[cur] = defaultProps[cur];
+  }
+  return accu;
+}, {});
 
 export default class GPUGridLayer extends GridAggregationLayer {
   initializeState() {
@@ -69,7 +81,7 @@ export default class GPUGridLayer extends GridAggregationLayer {
     if (!isSupported) {
       log.error('GPUGridLayer is not supported on this browser, use GridLayer instead')();
     }
-    super.initializeState(AGGREGATION_PROPS);
+    super.initializeState(ignoreProps);
     this.setState({isSupported});
     const attributeManager = this.getAttributeManager();
     attributeManager.add({

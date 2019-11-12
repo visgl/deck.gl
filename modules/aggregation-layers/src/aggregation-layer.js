@@ -18,14 +18,14 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {CompositeLayer, AttributeManager, experimental} from '@deck.gl/core';
+import {CompositeLayer, AttributeManager, experimental, Layer} from '@deck.gl/core';
 import {cssToDeviceRatio, log} from '@luma.gl/core';
 const {compareProps} = experimental;
 
 export default class AggregationLayer extends CompositeLayer {
-  initializeState(aggregationProps = []) {
+  initializeState(ignoreProps = {}) {
     super.initializeState();
-    this.setState({aggregationProps});
+    this.setState({ignoreProps: Object.assign({}, ignoreProps, Layer.defaultProps)});
   }
 
   updateState(opts) {
@@ -75,20 +75,17 @@ export default class AggregationLayer extends CompositeLayer {
     if (this.state.dataChanged || opts.changeFlags.extensionsChanged) {
       return true;
     }
-    const {aggregationProps} = this.state;
-    const oldProps = {};
-    const props = {};
-    for (const propName of aggregationProps) {
-      oldProps[propName] = opts.oldProps[propName];
-      props[propName] = opts.props[propName];
-    }
-    if (compareProps({oldProps, newProps: props, propTypes: this.constructor._propTypes})) {
+    if (
+      compareProps({
+        oldProps: opts.oldProps,
+        newProps: opts.props,
+        ignoreProps: this.state.ignoreProps,
+        propTypes: this.constructor._propTypes
+      })
+    ) {
       return true;
     }
-
-    const {extensions} = opts.props;
-    const redrawOpts = Object.assign({}, opts, {propTypes: this.constructor._propTypes});
-    return extensions.some(extension => extension.needsRedraw(redrawOpts));
+    return false;
   }
 
   _updateShaders(shaders) {
