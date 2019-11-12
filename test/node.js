@@ -14,6 +14,12 @@ global.Image = dom.window.Image;
 global.HTMLCanvasElement = dom.window.HTMLCanvasElement;
 global.HTMLVideoElement = dom.window.HTMLVideoElement;
 
+const moduleAlias = require('module-alias');
+
+moduleAlias.addAlias('@jupyter-widgets/base', (fromPath, request, alias) => {
+  return `${__dirname}/modules/jupyter-widget/mock-widget-base.js`;
+});
+
 const {gl} = require('@deck.gl/test-utils');
 // Create a dummy canvas for the headless gl context
 const canvas = global.document.createElement('canvas');

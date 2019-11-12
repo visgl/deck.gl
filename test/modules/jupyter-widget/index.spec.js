@@ -18,7 +18,8 @@ function getDeckModel(state) {
   }
 }
 
-test('jupyter-widget should be createable', t => {
+// TODO REVERT
+test.only('jupyter-widget should be createable', t => {
   const model = getDeckModel({});
   if (model) {
     t.deepEquals(model.get('json_input'), null, 'json_input should be null');
