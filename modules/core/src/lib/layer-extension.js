@@ -18,7 +18,6 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 import {deepEqual} from '../utils/deep-equal';
-import {compareProps} from '../lifecycle/props';
 
 export class LayerExtension {
   constructor(opts = {}) {
@@ -62,21 +61,6 @@ export class LayerExtension {
   }
 
   initializeState(context, extension) {}
-
-  // Called with old and current props to determine if layer needs to redraw
-  needsRedraw(opts) {
-    const {redrawProps} = this;
-    if (!redrawProps || redrawProps.length === 0) {
-      return false;
-    }
-    const oldProps = {};
-    const newProps = {};
-    for (const propName of redrawProps) {
-      oldProps[propName] = opts.oldProps[propName];
-      newProps[propName] = opts.props[propName];
-    }
-    return Boolean(compareProps({oldProps, newProps, propTypes: opts.propTypes}));
-  }
 
   updateState(params, extension) {}
 

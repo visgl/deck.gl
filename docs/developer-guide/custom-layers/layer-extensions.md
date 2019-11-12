@@ -164,20 +164,6 @@ Arguments:
 
 * `extension` - the source extension instance.
 
-### `needsRedraw`
-
-An extension provides a set of uniforms through layer props. When any of these props change, layer needs to redraw. A regular layer always gets redrawn when any prop is changed, but a layer implementing custom rendering (like `HeatmapLayer`, which performs aggregation as a separate draw), needs to know if an extension requires re-draw. Each extension can set `this.redrawProps` array, with set of props when changed requires a redraw. Base `LayerExtension` class provides `needsRedraw` method and if any prop in `this.redrawProps` is changed, this method will return `true`, otherwise `false`.
-
-Arguments:
-
-* `opt`: object with following fields
-  * `oldProps` : old props object
-  * `props` : new props object
-  * `propTypes`: prop types object
-
-Returns `true` if redraw is required, `false` otherwise.
-
-If an extension doesn't set a `this.redrawProps` this method will always return `false`.
 
 ## Example: Layer Extension
 
@@ -206,14 +192,14 @@ class RedFilter extends LayerExtension {
       }
     };
   }
-
+  
   updateState(params) {
     const {highlightRed = true} = params.props;
     for (const model of this.getModels()) {
       model.setUniforms({highlightRed});
     }
   }
-
+  
   getSubLayerProps() {
     const {highlightRed = true} = params.props;
     return {
