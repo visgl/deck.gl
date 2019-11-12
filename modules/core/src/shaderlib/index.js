@@ -19,11 +19,7 @@
 // THE SOFTWARE.
 
 import {ProgramManager} from '@luma.gl/core';
-import {
-  fp32,
-  gouraudlighting as gouraudLighting,
-  phonglighting as phongLighting
-} from '@luma.gl/core';
+import {gouraudlighting as gouraudLighting, phonglighting as phongLighting} from '@luma.gl/core';
 import geometry from './misc/geometry';
 import project from './project/project';
 import project32 from './project32/project32';
