@@ -83,8 +83,7 @@ const defaultProps = Object.assign({}, PolygonLayer.defaultProps, {
   highPrecision: false,
   coverage: {type: 'number', min: 0, max: 1, value: 1},
   getHexagon: {type: 'accessor', value: x => x.hexagon},
-  extruded: true,
-  getColor: null
+  extruded: true
 });
 
 // not supported
@@ -190,8 +189,6 @@ export default class H3HexagonLayer extends CompositeLayer {
       lineWidthScale,
       lineWidthMinPixels,
       lineWidthMaxPixels,
-      // TODO - Deprecate getColor Prop in v8.0
-      getColor,
       getFillColor,
       getElevation,
       getLineColor,
@@ -212,11 +209,11 @@ export default class H3HexagonLayer extends CompositeLayer {
       lineWidthMaxPixels,
       material,
       getElevation,
-      getFillColor: getColor || getFillColor,
+      getFillColor,
       getLineColor,
       getLineWidth,
       updateTriggers: {
-        getFillColor: updateTriggers.getColor || updateTriggers.getFillColor,
+        getFillColor: updateTriggers.getFillColor,
         getElevation: updateTriggers.getElevation,
         getLineColor: updateTriggers.getLineColor,
         getLineWidth: updateTriggers.getLineWidth

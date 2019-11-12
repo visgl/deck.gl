@@ -9,7 +9,7 @@ export default {
   ArcLayer: {
     data:
       'https://raw.githubusercontent.com/uber-common/deck.gl-data/master/website/bart-segments.json',
-    getStrokeWidth: 12,
+    getWidth: 12,
     getSourcePosition: d => d.from.coordinates,
     getTargetPosition: d => d.to.coordinates,
     getSourceColor: d => [Math.sqrt(d.inbound), 140, 0],
@@ -18,7 +18,7 @@ export default {
   LineLayer: {
     data:
       'https://raw.githubusercontent.com/uber-common/deck.gl-data/master/website/bart-segments.json',
-    getStrokeWidth: 12,
+    getWidth: 12,
     getSourcePosition: d => d.from.coordinates,
     getTargetPosition: d => d.to.coordinates,
     getColor: d => [Math.sqrt(d.inbound + d.outbound), 140, 0]
