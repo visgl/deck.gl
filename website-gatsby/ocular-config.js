@@ -1,10 +1,11 @@
+/* eslint-disable no-multi-str */
 const resolve = require('path').resolve;
 
 const DOCS = require('../docs/table-of-contents.json');
 const DEPENDENCIES = require('./package.json').dependencies;
 // eslint-disable-next-line import/no-extraneous-dependencies
 const ALIASES = require('ocular-dev-tools/config/ocular.config')({
-  root: resolve(__dirname, '../..')
+  root: resolve(__dirname, '..')
 }).aliases;
 
 // When duplicating example dependencies in website, autogenerate
@@ -30,7 +31,7 @@ module.exports = {
 
   PROJECT_NAME: 'deck.gl',
   PROJECT_ORG: 'uber',
-  PROJECT_URL: 'https://github.com/uber/deck.gl',
+  PROJECT_URL: 'https://deck.gl',
   PROJECT_DESC: 'A WebGL-powered framework for visual exploratory analysis of large datasets.',
   PATH_PREFIX: '/',
 
@@ -57,7 +58,8 @@ module.exports = {
     {
       text: 'High-Precision Computations in the GPU',
       // eslint-disable-next-line
-      desc: 'Using polynomial expansions of geospatial projections, \
+      desc:
+        'Using polynomial expansions of geospatial projections, \
 and through emulation of 64 bit floating point computations in the GPU, \
 deck.gl renders datasets with unparalleled accuracy and performance.',
       img: 'images/icon-high-precision.svg'
@@ -65,7 +67,8 @@ deck.gl renders datasets with unparalleled accuracy and performance.',
     {
       text: 'A Layered Approach to Data Visualization',
       // eslint-disable-next-line
-      desc: 'deck.gl allows complex visualizations to be constructed by \
+      desc:
+        'deck.gl allows complex visualizations to be constructed by \
 composing existing layers, and makes it easy to package and \
 share new visualizations as reusable layers. We already offer \
 a catalog of proven layers and we have many more in the works.',
@@ -74,7 +77,8 @@ a catalog of proven layers and we have many more in the works.',
     {
       text: 'Rich Base Map Support',
       // eslint-disable-next-line
-      desc: 'Geospatial visualizations can use vector tile layers to render maps, \
+      desc:
+        'Geospatial visualizations can use vector tile layers to render maps, \
 or use Mapbox GL or Google Maps as base maps with automatically synchronized camera systems. \
 When used with Mapbox GL it automatically coordinates with the Mapbox perspective camera system \
 and the mapbox custom layer API to provide compelling 3D visualizations on top of your \
@@ -84,15 +88,35 @@ Mapbox base maps.',
     {
       text: 'Deep React Integration',
       // eslint-disable-next-line
-      desc: 'The optional React integration provides highly performant WebGL rendering \
-under React\'s functional programming paradigm.',
+      desc:
+        "The optional React integration provides highly performant WebGL rendering \
+under React's functional programming paradigm.",
       img: 'images/icon-react.svg'
-    },
+    }
   ],
 
-  PROJECTS: [],
+  PROJECTS: [
+    {
+      name: 'deck.gl',
+      url: 'https://deck.gl'
+    },
+    {
+      name: 'luma.gl',
+      url: 'https://luma.gl'
+    },
+    {
+      name: 'react-map-gl',
+      url: 'https://uber.github.io/react-map-gl'
+    },
+    {
+      name: 'react-vis',
+      url: 'https://uber.github.io/react-vis'
+    }
+  ],
 
   ADDITIONAL_LINKS: [],
+
+  LINK_TO_GET_STARTED: '/docs',
 
   EXAMPLES: [
     {
@@ -172,14 +196,13 @@ under React\'s functional programming paradigm.',
       path: 'examples/brushing',
       image: 'images/examples/demo-thumb-brushing.jpg',
       componentUrl: resolve(__dirname, '../examples/website/brushing/app.js')
-    },
-    {
-      title: '3D Surface Explorer',
-      path: 'examples/plot',
-      image: 'images/examples/demo-thumb-plot.jpg',
-      componentUrl: resolve(__dirname, '../examples/website/plot/app.js')
     }
-
+    // {
+    //   title: '3D Surface Explorer',
+    //   path: 'examples/plot',
+    //   image: 'images/examples/demo-thumb-plot.jpg',
+    //   componentUrl: resolve(__dirname, '../examples/website/plot/app.js')
+    // }
     // {
     //   title: 'Point Clouds & Meshes',
     //   image: 'images/example-pointcloud.png',
@@ -208,3 +231,4 @@ under React\'s functional programming paradigm.',
     }
   }
 };
+/* eslint-enable no-multi-str */
