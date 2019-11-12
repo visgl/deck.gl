@@ -44,12 +44,15 @@
     new DeckGL({
       mapboxApiAccessToken: '<mapbox-access-token>',
       mapStyle: 'mapbox://styles/mapbox/dark-v9',
-      longitude: -122.38,
-      latitude: 37.6,
-      zoom: 1,
-      maxZoom: 20,
-      pitch: 30,
-      bearing: 0,
+      initialViewState: {
+        longitude: -122.38,
+        latitude: 37.6,
+        zoom: 1,
+        maxZoom: 20,
+        pitch: 30,
+        bearing: 0,
+      },
+      controller: true,
       layers: [greatCircleLayer],
       getTooltip: ({object}) => object && `${object.from.name} to ${object.to.name}`
     });

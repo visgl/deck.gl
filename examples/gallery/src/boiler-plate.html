@@ -14,10 +14,13 @@
     new DeckGL({
       mapboxApiAccessToken: '<mapbox-access-token>',
       mapStyle: 'mapbox://styles/mapbox/light-v9',
-      longitude: -122.45,
-      latitude: 37.78,
-      zoom: 11,
-      maxZoom: 16,
+      initialViewState: {
+        longitude: -122.45,
+        latitude: 37.78,
+        zoom: 11,
+        maxZoom: 16
+      },
+      controller: true,
       layers: [
         new ScatterplotLayer({
           data: [

@@ -63,12 +63,15 @@
     const deckgl = new DeckGL({
       mapboxApiAccessToken: '<mapbox-access-token>',
       mapStyle: 'mapbox://styles/mapbox/dark-v9',
-      longitude: -122.4,
-      latitude: 37.74,
-      zoom: 11,
-      maxZoom: 15,
-      pitch: 30,
-      bearing: 0,
+      initialViewState: {
+        longitude: -122.4,
+        latitude: 37.74,
+        zoom: 11,
+        maxZoom: 15,
+        pitch: 30,
+        bearing: 0
+      },
+      controller: true,
       getTooltip: ({object}) => object && `${object.name}\n${object.address}`
     });
     

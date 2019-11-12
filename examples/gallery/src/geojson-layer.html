@@ -66,11 +66,14 @@
     new DeckGL({
       mapboxApiAccessToken: '<mapbox-access-token>',
       mapStyle: 'mapbox://styles/mapbox/light-v9',
-      latitude: 49.254,
-      longitude: -123.13,
-      zoom: 11,
-      maxZoom: 16,
-      pitch: 45,
+      initialViewState: {
+        latitude: 49.254,
+        longitude: -123.13,
+        zoom: 11,
+        maxZoom: 16,
+        pitch: 45
+      },
+      controller: true,
       layers: [geojsonLayer],
       getTooltip
     });

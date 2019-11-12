@@ -21,11 +21,14 @@
     new DeckGL({
       mapboxApiAccessToken: '<mapbox-access-token>',
       mapStyle: 'mapbox://styles/mapbox/dark-v9',
-      longitude: -122.4,
-      latitude: 37.74,
-      zoom: 10,
-      maxZoom: 15,
-      pitch: 30,
+      initialViewState: {
+        longitude: -122.4,
+        latitude: 37.74,
+        zoom: 10,
+        maxZoom: 15,
+        pitch: 30
+      },
+      controller: true,
       layers: [
         new ColumnLayer({
           id: 'column',

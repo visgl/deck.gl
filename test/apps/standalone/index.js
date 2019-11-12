@@ -1,6 +1,6 @@
 /* global deck, document */
 /* eslint-disable no-unused-vars */
-import 'deck.gl/../standalone';
+import 'deck.gl/../bundle';
 import {choropleths} from '../../../examples/layer-browser/src/data-samples';
 
 const SAMPLE_SIZE = 10;
@@ -20,10 +20,13 @@ for (let x = 0; x < SAMPLE_SIZE; x++) {
 const geoExample = new deck.DeckGL({
   mapboxApiAccessToken: __MAPBOX_TOKEN__, // eslint-disable-line
   container: document.getElementById('geo'),
-  longitude: -122.45,
-  latitude: 37.78,
-  zoom: 11,
-  pitch: 30,
+  initialViewState: {
+    longitude: -122.45,
+    latitude: 37.78,
+    zoom: 11,
+    pitch: 30
+  },
+  controller: true,
   onViewStateChange: console.log, // eslint-disable-line
   layers: [
     new deck.GeoJsonLayer({
@@ -42,7 +45,8 @@ const nonGeoExample = new deck.DeckGL({
   container: document.getElementById('non-geo'),
   mapbox: false /* disable map */,
   views: [new deck.OrbitView()],
-  viewState: {distance: 1, fov: 50, rotationX: 45, rotationOrbit: 30, zoom: 0.05},
+  initialViewState: {distance: 1, fov: 50, rotationX: 45, rotationOrbit: 30, zoom: 0.05},
+  controller: true,
   layers: [
     new deck.PointCloudLayer({
       id: 'pointCloud',
@@ -52,7 +56,7 @@ const nonGeoExample = new deck.DeckGL({
       getPosition: d => d.position,
       getColor: d => d.color,
       getNormal: [0, 0, 1],
-      radiusPixels: 10
+      pointSize: 10
     })
   ]
 });

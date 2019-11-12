@@ -63,12 +63,15 @@
     const deckgl = new DeckGL({
       mapboxApiAccessToken: '<mapbox-access-token>',
       mapStyle: 'mapbox://styles/mapbox/dark-v9',
-      longitude: -1.4157,
-      latitude: 52.2324,
-      zoom: 6,
-      minZoom: 5,
-      maxZoom: 15,
-      pitch: 40.5
+      initialViewState: {
+        longitude: -1.4157,
+        latitude: 52.2324,
+        zoom: 6,
+        minZoom: 5,
+        maxZoom: 15,
+        pitch: 40.5
+      },
+      controller: true
     });
 
     let data = null;

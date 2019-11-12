@@ -56,11 +56,12 @@
     const deckgl = new DeckGL({
       mapboxApiAccessToken: '<mapbox-access-token>',
       mapStyle: 'mapbox://styles/mapbox/light-v9',
-      viewState: {
+      initialViewState: {
         longitude: CITIES[0].longitude,
         latitude: CITIES[0].latitude,
         zoom: 10
       },
+      controller: true,
       layers: [
         new ScatterplotLayer({
           data: CITIES,
