@@ -6,6 +6,12 @@
 
 ##### Removed
 
+- `ArcLayer` props
+  + `getStrokeWidth`: use `getWidth`
+- `LineLayer` props
+  + `getStrokeWidth`: use `getWidth`
+- `H3HexagonLayer` props
+  + `getColor`: use `getFillColor` and `getLineColor`
 - `project` shader module
   + `project_scale`: use `project_size`
   + `project_to_clipspace`: use `project_position_to_clipspace`
