@@ -21,11 +21,6 @@
 /* global window */
 const test = require('tape');
 const {_enableDOMLogging: enableDOMLogging} = require('@probe.gl/test-utils');
-const moduleAlias = require('module-alias');
-
-moduleAlias.addAlias('@jupyter-widgets/base', (fromPath, request, alias) => {
-  return `${__dirname}/modules/jupyter-widget/mock-widget-base.js`;
-});
 
 let failed = false;
 test.onFinish(window.browserTestDriver_finish);
@@ -45,6 +40,11 @@ enableDOMLogging({
 });
 
 test('deck.gl', t => {
+  const moduleAlias = require('module-alias');
+  moduleAlias.addAlias('@jupyter-widgets/base', (fromPath, request, alias) => {
+    return `${__dirname}/modules/jupyter-widget/mock-widget-base.js`;
+  });
+
   require('./modules');
 
   // Tests currently only work in browser
