@@ -8,9 +8,11 @@ const TEST_CASES = [
   {
     name: 'ScatterplotLayer',
     json: {
-      longitude: 0,
-      latitude: 0,
-      zoom: 12,
+      viewState: {
+        longitude: 0,
+        latitude: 0,
+        zoom: 12
+      },
       layers: [
         {
           type: 'ScatterplotLayer',

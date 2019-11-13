@@ -24,11 +24,14 @@ const AIR_PORTS =
 const deckgl = new deck.DeckGL({
   container: 'container',
 
-  latitude: 51.47,
-  longitude: 0.45,
-  zoom: 4,
-  bearing: 0,
-  pitch: 30,
+  initialViewState: {
+    latitude: 51.47,
+    longitude: 0.45,
+    zoom: 4,
+    bearing: 0,
+    pitch: 30
+  },
+  controller: true,
 
   layers: [
     new deck.GeoJsonLayer({

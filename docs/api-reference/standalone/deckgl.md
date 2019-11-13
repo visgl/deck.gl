@@ -11,9 +11,12 @@ Make sure to read the [Using deck.gl Scripting API](/docs/get-started/using-stan
 new deck.DeckGL({
   mapboxApiAccessToken: '<your_token_here>',
   mapStyle: 'mapbox://styles/mapbox/light-v9',
-  longitude: -122.45,
-  latitude: 37.8,
-  zoom: 12,
+  initialViewState: {
+    longitude: -122.45,
+    latitude: 37.8,
+    zoom: 12
+  },
+  controller: true,
   layers: [
     new deck.ScatterplotLayer({
       data: [

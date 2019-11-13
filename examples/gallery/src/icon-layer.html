@@ -33,7 +33,7 @@
 
     const deckgl =  new DeckGL({
       views: new OrthographicView(),
-      viewState: { target: [0, 0, 0], zoom: 2 },
+      initialViewState: { target: [0, 0, 0], zoom: 2 },
       controller: true,
       getTooltip: ({object}) => object && `${object.login}\nContributions: ${object.contributions}`
     });

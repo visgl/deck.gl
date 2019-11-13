@@ -25,6 +25,13 @@
   + `setUniforms`: use `model.setUniforms`
   + `use64bitProjection`
 
+##### Standalone bundle
+
+The pre-bundled version, a.k.a. the [scripting API](/docs/get-started/using-standalone.md#using-the-scripting-api) has been aligned with the interface of the core [Deck](/docs/api-reference/deck.md) class.
+
+- Top-level view state props such as `longitude`, `latitude`, `zoom` are no longer supported. To specify the default view state, use `initialViewState`.
+- `controller` is no longer on by default, use `controller: true`.
+
 ##### projection system
 
 - The [common space](/docs/shader-module/project.md) is no longer scaled to the current zoom level. This is part of an effort to make the geometry calculation more consistent and predictable. While one old common unit is equivalent to 1 screen pixel at the viewport center, one new common unit is equivalent to `viewport.scale` pixels at the viewport center.

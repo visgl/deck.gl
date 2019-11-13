@@ -234,7 +234,7 @@ export default class ViewManager {
 
       this.viewState = viewState;
     } else {
-      log.warn('setting null viewState')();
+      log.warn('missing `viewState` or `initialViewState`')();
     }
   }
 
