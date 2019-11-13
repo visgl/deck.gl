@@ -40,10 +40,10 @@ enableDOMLogging({
 });
 
 test('deck.gl', t => {
-  const moduleAlias = require('module-alias');
-  moduleAlias.addAlias('@jupyter-widgets/base', (fromPath, request, alias) => {
-    return `${__dirname}/modules/jupyter-widget/mock-widget-base.js`;
-  });
+  // const moduleAlias = require('module-alias');
+  // moduleAlias.addAlias('@jupyter-widgets/base', (fromPath, request, alias) => {
+  //   return `${__dirname}/modules/jupyter-widget/mock-widget-base.js`;
+  // });
 
   require('./modules');
 

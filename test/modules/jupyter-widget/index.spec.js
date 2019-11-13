@@ -11,7 +11,7 @@ function getDeckModel(state) {
   } catch (error) {
     // Work around: jupyter-widget is built as an AMD module
     // it cannot be imported under Node
-    if (error.message === 'define is not defined') {
+    if (error.message === "Cannot read property 'widget_manager' of undefined") {
       return null;
     }
     throw error;
