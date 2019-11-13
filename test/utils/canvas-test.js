@@ -1,6 +1,6 @@
 /* global window */
 
-/** Provides a clean document object for testing */
+/** Create a clean document object for testing */
 function createDocument() {
   // Creates a global document object via JSDOM or a shallow clone of the browser's document
   if (typeof window === undefined || !window.document) {
@@ -12,7 +12,7 @@ function createDocument() {
   return documentClone;
 }
 
-/** Provides a setup for testing */
+/* Create a clean canvas, its parent, and a document node for testing */
 export function setup() {
   // Creates a canvas which can be passed to canvasCallback
   // to add a node to
@@ -23,5 +23,9 @@ export function setup() {
   canvasParent.className = 'canvas-parent';
   canvasParent.appendChild(canvas);
   localDocument.body.appendChild(canvasParent);
-  return canvasParent;
+  return {
+    testDocument: localDocument,
+    canvasContainer: canvasParent,
+    canvas
+  };
 }
