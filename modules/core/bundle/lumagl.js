@@ -49,6 +49,6 @@ export {
   fp64,
   project,
   picking,
-  gouraudlighting,
-  phonglighting
+  gouraudLighting,
+  phongLighting
 } from '@luma.gl/core';

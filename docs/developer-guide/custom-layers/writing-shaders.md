@@ -34,8 +34,8 @@ The `project` module also has two extensions, [project32](/docs/shader-modules/p
 
 A simple lighting package is provided in deck.gl, supporting a single directional light in addition to ambient light. Turning on lighting requires normals to be provided for each vertex. There are two flavors:
 
-- [gouraudlighting](https://github.com/uber/luma.gl/blob/master/modules/shadertools/src/modules/phong-lighting/phong-lighting.js) - for lighting calculated in the vertex shader
-- [phonglighting](https://github.com/uber/luma.gl/blob/master/modules/shadertools/src/modules/phong-lighting/phong-lighting.js) - for lighting calculated in the fragment shader
+- [gouraudLighting](https://github.com/uber/luma.gl/blob/master/modules/shadertools/src/modules/phong-lighting/phong-lighting.js) - for lighting calculated in the vertex shader
+- [phongLighting](https://github.com/uber/luma.gl/blob/master/modules/shadertools/src/modules/phong-lighting/phong-lighting.js) - for lighting calculated in the fragment shader
 
 
 #### fp64
