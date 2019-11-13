@@ -22,6 +22,7 @@
     	"type": "ScreenGridLayer",
       "id": "grid",
       "data": "https://raw.githubusercontent.com/uber-common/deck.gl-data/master/examples/screen-grid/ca-transit-stops.json",
+      "opacity": 0.8,
       "cellSizePixels": 20,
       "colorRange": [
         [255, 255, 178, 25],

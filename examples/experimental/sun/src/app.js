@@ -67,7 +67,6 @@ export class App extends Component {
       new SolidPolygonLayer({
         id: 'buildings',
         data,
-        opacity: 1,
         extruded: true,
         getPolygon: f => f.polygon,
         getElevation: f => f.height,
@@ -77,7 +76,6 @@ export class App extends Component {
       new SolidPolygonLayer({
         id: 'land',
         data: landCover,
-        opacity: 1,
         extruded: false,
         getPolygon: f => f,
         getFillColor: [0, 0, 0, 0]

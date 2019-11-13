@@ -77,7 +77,6 @@ export default class App extends PureComponent {
       new SolidPolygonLayer({
         id: 'background',
         data: background,
-        opacity: 1,
         extruded: false,
         coordinateSystem: COORDINATE_SYSTEM.IDENTITY,
         getPolygon: f => f,

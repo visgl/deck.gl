@@ -26,7 +26,6 @@ export default class App extends PureComponent {
       new HeatmapLayer({
         data,
         id: 'heatmp-layer',
-        opacity: 1,
         pickable: false,
         getPosition: d => [d[0], d[1]],
         getWeight: d => d[2],

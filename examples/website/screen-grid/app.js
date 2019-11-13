@@ -38,6 +38,7 @@ export default class App extends Component {
       new ScreenGridLayer({
         id: 'grid',
         data,
+        opacity: 0.8,
         getPosition: d => [d[0], d[1]],
         getWeight: d => d[2],
         cellSizePixels: cellSize,

@@ -95,7 +95,7 @@ In the second example (conditional rendering) the layer state will be destroyed 
 
 ##### `opacity` (Number, optional)
 
-* Default: `0.8`
+* Default: `1`
 
 The opacity of the layer.
 

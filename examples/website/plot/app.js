@@ -72,7 +72,6 @@ export default class App extends Component {
           drawAxes: showAxis,
           axesPadding: 0.25,
           axesColor: [0, 0, 0, 128],
-          opacity: 1,
           pickable: true,
           onHover: this._onHover,
           updateTriggers: {

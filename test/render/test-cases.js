@@ -70,7 +70,6 @@ const GRID_LAYER_INFO = {
   props: {
     data: dataSamples.points,
     cellSize: 200,
-    opacity: 1,
     extruded: true,
     pickable: true,
     getPosition: d => d.COORDINATES
@@ -91,7 +90,6 @@ const HEXAGON_LAYER_INFO = {
     extruded: true,
     pickable: true,
     radius: 1000,
-    opacity: 1,
     elevationScale: 1,
     elevationRange: [0, 3000],
     coverage: 1,
@@ -175,6 +173,7 @@ export const TEST_CASES = [
       new GeoJsonLayer({
         id: 'geojson-lnglat',
         data: dataSamples.geojson,
+        opacity: 0.8,
         getRadius: f => MARKER_SIZE_MAP[f.properties['marker-size']],
         getFillColor: f => parseColor(f.properties.fill || f.properties['marker-color']),
         getLineColor: f => parseColor(f.properties.stroke),
@@ -224,6 +223,7 @@ export const TEST_CASES = [
       new PointCloudLayer({
         id: 'pointcloud-identity',
         data: [{position: [0, 100, 0]}, {position: [-100, -100, 0]}, {position: [100, -100, 0]}],
+        opacity: 0.8,
         coordinateSystem: COORDINATE_SYSTEM.IDENTITY,
         getPosition: d => d.position,
         getNormal: d => [0, 0.5, 0.2],
@@ -247,6 +247,7 @@ export const TEST_CASES = [
         id: 'screengrid-infoviz',
         data: screenSpaceData,
         coordinateSystem: COORDINATE_SYSTEM.IDENTITY,
+        opacity: 0.8,
         getPosition: d => d,
         cellSizePixels: 40,
         pickable: false
@@ -271,7 +272,6 @@ export const TEST_CASES = [
         getPosition: d => d,
         coordinateSystem: COORDINATE_SYSTEM.IDENTITY,
         cellSize: 40,
-        opacity: 1,
         contours: [
           {threshold: 1, color: [50, 50, 50]},
           {threshold: 2, color: [100, 100, 100]},
@@ -298,7 +298,6 @@ export const TEST_CASES = [
         getPosition: d => d,
         coordinateSystem: COORDINATE_SYSTEM.IDENTITY,
         cellSize: 40,
-        opacity: 1,
         contours: [
           {threshold: [1, 2], color: [150, 0, 0]},
           {threshold: [2, 5], color: [0, 150, 0]}
@@ -423,7 +422,6 @@ export const TEST_CASES = [
         getPosition: d => d.COORDINATES,
         getFillColor: d => [255, 128, 0],
         getRadius: d => d.SPACES,
-        opacity: 1,
         pickable: true,
         radiusScale: 30,
         radiusMinPixels: 1,
@@ -449,7 +447,6 @@ export const TEST_CASES = [
         getPosition: d => d.COORDINATES,
         getFillColor: d => [255, 128, 0],
         getRadius: d => d.SPACES,
-        opacity: 1,
         pickable: true,
         radiusScale: 30,
         radiusMinPixels: 1,
@@ -472,6 +469,7 @@ export const TEST_CASES = [
       new ArcLayer({
         id: 'arc-lnglat',
         data: dataSamples.routes,
+        opacity: 0.8,
         strokeWidth: 2,
         getSourcePosition: d => d.START,
         getTargetPosition: d => d.END,
@@ -498,6 +496,7 @@ export const TEST_CASES = [
       new LineLayer({
         id: 'line-lnglat',
         data: dataSamples.routes,
+        opacity: 0.8,
         getWidth: 0,
         widthMinPixels: 2,
         getSourcePosition: d => d.START,
@@ -627,6 +626,7 @@ export const TEST_CASES = [
       new IconLayer({
         id: 'icon-lnglat-auto',
         data: dataSamples.points,
+        opacity: 0.8,
         updateTriggers: {
           getIcon: 2
         },
@@ -703,6 +703,7 @@ export const TEST_CASES = [
       new GeoJsonLayer({
         id: 'geojson-lnglat',
         data: dataSamples.geojson,
+        opacity: 0.8,
         getRadius: f => MARKER_SIZE_MAP[f.properties['marker-size']],
         getFillColor: f => {
           const color = parseColor(f.properties.fill || f.properties['marker-color']);
@@ -736,6 +737,7 @@ export const TEST_CASES = [
       new GeoJsonLayer({
         id: 'geojson-extruded-lnglat',
         data: dataSamples.geojson,
+        opacity: 0.8,
         extruded: true,
         wireframe: true,
         getRadius: f => MARKER_SIZE_MAP[f.properties['marker-size']],
@@ -774,7 +776,6 @@ export const TEST_CASES = [
         cellSize: dataSamples.worldGrid.cellSize,
         extruded: true,
         pickable: true,
-        opacity: 1,
         getFillColor: g => [245, 166, g.value * 255, 255],
         getElevation: h => h.value * 5000
       })
@@ -888,6 +889,7 @@ export const TEST_CASES = [
       new ScreenGridLayer({
         id: 'screengrid-lnglat-cpu-aggregation',
         data: dataSamples.points,
+        opacity: 0.8,
         getPosition: d => d.COORDINATES,
         cellSizePixels: 40,
         pickable: false,
@@ -909,6 +911,7 @@ export const TEST_CASES = [
       new ScreenGridLayer({
         id: 'screengrid-lnglat-colorRange',
         data: dataSamples.points,
+        opacity: 0.8,
         getPosition: d => d.COORDINATES,
         cellSizePixels: 40,
         pickable: false
@@ -935,7 +938,6 @@ export const TEST_CASES = [
         coverage: 1,
         extruded: true,
         pickable: true,
-        opacity: 1,
         getPosition: h => h.centroid,
         getFillColor: h => [48, 128, h.value * 255, 255],
         getElevation: h => h.value * 5000
@@ -976,7 +978,6 @@ export const TEST_CASES = [
         coverage: 1,
         extruded: true,
         pickable: true,
-        opacity: 1,
         shadowEnabled: false,
         getPosition: h => h.centroid,
         getFillColor: h => [48, 128, h.value * 255, 255],
@@ -1012,7 +1013,6 @@ export const TEST_CASES = [
         extruded: false,
         stroked: true,
         pickable: true,
-        opacity: 1,
         lineWidthUnits: 'pixels',
         getPosition: h => h.centroid,
         getFillColor: h => [48, 128, h.value * 255, 255],
@@ -1065,6 +1065,7 @@ export const TEST_CASES = [
       new HeatmapLayer({
         id: 'heatmap-lnglat',
         data: dataSamples.points,
+        opacity: 0.8,
         pickable: false,
         getPosition: d => d.COORDINATES,
         radiusPixels: 35,
@@ -1091,7 +1092,6 @@ export const TEST_CASES = [
         getPosition: d => [d.position[0] * 1e-5, d.position[1] * 1e-5, d.position[2]],
         getNormal: d => d.normal,
         getColor: d => d.color,
-        opacity: 1,
         pointSize: 2,
         pickable: true
       })
@@ -1116,7 +1116,6 @@ export const TEST_CASES = [
         getPosition: d => d.position,
         getNormal: d => d.normal,
         getColor: d => d.color,
-        opacity: 1,
         pointSize: 2,
         pickable: true
       })
@@ -1136,7 +1135,6 @@ export const TEST_CASES = [
       new PathLayer({
         id: 'path-meter',
         data: dataSamples.meterPaths,
-        opacity: 1.0,
         getColor: f => [255, 0, 0],
         getWidth: f => 10,
         widthMinPixels: 1,
@@ -1167,6 +1165,7 @@ export const TEST_CASES = [
       new TextLayer({
         id: 'text-layer',
         data: dataSamples.points.slice(0, 50),
+        opacity: 0.8,
         fontFamily: 'Arial',
         getText: x => `${x.PLACEMENT}-${x.YR_INSTALLED}`,
         getPosition: x => x.COORDINATES,
@@ -1194,6 +1193,7 @@ export const TEST_CASES = [
       new TextLayer({
         id: 'text-layer',
         data: dataSamples.points.slice(0, 50),
+        opacity: 0.8,
         fontFamily: 'Arial',
         getText: x => `${x.PLACEMENT}-${x.YR_INSTALLED}`,
         getPosition: x => x.COORDINATES,
@@ -1222,6 +1222,7 @@ export const TEST_CASES = [
       new TextLayer({
         id: 'text-layer',
         data: dataSamples.points.slice(0, 10),
+        opacity: 0.8,
         fontFamily: 'Arial',
         getText: x => `${x.PLACEMENT}\n${x.YR_INSTALLED}`,
         getPosition: x => x.COORDINATES,
@@ -1249,6 +1250,7 @@ export const TEST_CASES = [
       new TextLayer({
         id: 'text-layer',
         data: dataSamples.points.slice(0, 3),
+        opacity: 0.8,
         fontFamily: 'Arial',
         wordBreak: 'break-word',
         width: 1000,
@@ -1305,7 +1307,6 @@ export const TEST_CASES = [
         id: 'contour-lnglat-cpu-aggregation',
         data: dataSamples.points,
         cellSize: 200,
-        opacity: 1,
         getPosition: d => d.COORDINATES,
         contours: [
           {threshold: 1, color: [255, 0, 0], strokeWidth: 6},
@@ -1331,7 +1332,6 @@ export const TEST_CASES = [
         id: 'contour-lnglat',
         data: dataSamples.points,
         cellSize: 200,
-        opacity: 1,
         getPosition: d => d.COORDINATES,
         contours: [
           {threshold: 1, color: [255, 0, 0], strokeWidth: 6},
@@ -1357,7 +1357,6 @@ export const TEST_CASES = [
         id: 'contour-isobands-lnglat',
         data: dataSamples.points,
         cellSize: 200,
-        opacity: 1,
         getPosition: d => d.COORDINATES,
         contours: [
           {threshold: [1, 5], color: [255, 0, 0], strokeWidth: 6},
@@ -1381,6 +1380,7 @@ export const TEST_CASES = [
     layers: [
       new H3HexagonLayer({
         data: h3.kRing('882830829bfffff', 4),
+        opacity: 0.8,
         getHexagon: d => d,
         getFillColor: (d, {index}) => [255, index * 5, 0],
         getElevation: (d, {index}) => index * 100
@@ -1400,6 +1400,7 @@ export const TEST_CASES = [
     layers: [
       new H3HexagonLayer({
         data: h3.kRing('891c0000003ffff', 4),
+        opacity: 0.8,
         getHexagon: d => d,
         getFillColor: (d, {index}) => [255, index * 5, 0],
         getElevation: (d, {index}) => index * 10
@@ -1419,6 +1420,7 @@ export const TEST_CASES = [
     layers: [
       new H3HexagonLayer({
         data: h3.kRing('882830829bfffff', 4),
+        opacity: 0.8,
         getHexagon: d => d,
         extruded: false,
         stroked: true,
@@ -1441,6 +1443,7 @@ export const TEST_CASES = [
     layers: [
       new H3HexagonLayer({
         data: h3.kRing('882830829bfffff', 4),
+        opacity: 0.8,
         getHexagon: d => d,
         extruded: false,
         stroked: true,
@@ -1466,6 +1469,7 @@ export const TEST_CASES = [
         data: h3
           .polyfill([[-90, -180], [90, -180], [90, 0], [-90, 0]], 0)
           .concat(h3.polyfill([[-90, 180], [90, 180], [90, 0], [-90, 0]], 0)),
+        opacity: 0.8,
         getHexagon: d => d,
         extruded: false,
         filled: false,
@@ -1488,6 +1492,7 @@ export const TEST_CASES = [
     layers: [
       new H3ClusterLayer({
         data: ['882830829bfffff'],
+        opacity: 0.8,
         getHexagons: d => h3.kRing(d, 6),
         getLineWidth: 100,
         stroked: true,
@@ -1507,6 +1512,7 @@ export const TEST_CASES = [
     },
     layers: [
       new BitmapLayer({
+        opacity: 0.8,
         bounds: [-122.45, 37.7, -122.35, 37.8],
         image: ICON_ATLAS
       })
@@ -1526,6 +1532,7 @@ export const TEST_CASES = [
       new TripsLayer({
         id: 'trips-3d',
         data: dataSamples.trips,
+        opacity: 0.8,
         getPath: d => [d[0].begin_shape].concat(d.map(leg => leg.end_shape)),
         getTimestamps: d => [d[0].begin_time].concat(d.map(leg => leg.end_time)),
         getColor: [253, 128, 93],
@@ -1554,7 +1561,6 @@ export const TEST_CASES = [
         getPosition: d => d.COORDINATES,
         getFillColor: d => [255, 128, 0],
         getRadius: d => d.SPACES,
-        opacity: 1,
         pickable: true,
         radiusScale: 30,
         radiusMinPixels: 1,
@@ -1575,6 +1581,7 @@ export const TEST_CASES = [
     layers: [
       new S2Layer({
         data: dataSamples.s2cells,
+        opacity: 0.8,
         filled: true,
         stroked: false,
         getS2Token: f => f.token,
