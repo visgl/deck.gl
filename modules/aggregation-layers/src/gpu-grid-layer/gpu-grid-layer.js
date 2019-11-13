@@ -29,13 +29,6 @@ import GPUGridCellLayer from './gpu-grid-cell-layer';
 import {pointToDensityGridDataCPU} from './../cpu-grid-layer/grid-aggregator';
 import GridAggregationLayer from '../grid-aggregation-layer';
 
-const defaultMaterial = {
-  ambient: 0.35,
-  diffuse: 0.6,
-  shininess: 32,
-  specularColor: [30, 30, 30]
-};
-
 const defaultProps = {
   // color
   colorDomain: null,
@@ -58,7 +51,7 @@ const defaultProps = {
   fp64: false,
 
   // Optional material for 'lighting' shader module
-  material: defaultMaterial,
+  material: true,
 
   // GPU Aggregation
   gpuAggregation: true

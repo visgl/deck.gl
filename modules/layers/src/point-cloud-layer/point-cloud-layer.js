@@ -27,12 +27,6 @@ import fs from './point-cloud-layer-fragment.glsl';
 
 const DEFAULT_COLOR = [0, 0, 0, 255];
 const DEFAULT_NORMAL = [0, 0, 1];
-const defaultMaterial = {
-  ambient: 0.35,
-  diffuse: 0.6,
-  shininess: 32,
-  specularColor: [30, 30, 30]
-};
 
 const defaultProps = {
   sizeUnits: 'pixels',
@@ -42,7 +36,7 @@ const defaultProps = {
   getNormal: {type: 'accessor', value: DEFAULT_NORMAL},
   getColor: {type: 'accessor', value: DEFAULT_COLOR},
 
-  material: defaultMaterial,
+  material: true,
 
   // Depreated
   radiusPixels: {deprecatedFor: 'pointSize'}

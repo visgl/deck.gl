@@ -35,9 +35,9 @@ import {
   createGLContext,
   trackContextState,
   setParameters,
+  Timeline,
   lumaStats
 } from '@luma.gl/core';
-import {Timeline} from '@luma.gl/engine';
 import {Stats} from 'probe.gl';
 import {EventManager} from 'mjolnir.js';
 

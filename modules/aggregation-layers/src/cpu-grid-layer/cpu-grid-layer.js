@@ -27,13 +27,6 @@ import CPUAggregator from '../utils/cpu-aggregator';
 
 function nop() {}
 
-const defaultMaterial = {
-  ambient: 0.35,
-  diffuse: 0.6,
-  shininess: 32,
-  specularColor: [30, 30, 30]
-};
-
 const defaultProps = {
   // color
   colorDomain: null,
@@ -67,7 +60,7 @@ const defaultProps = {
   extruded: false,
 
   // Optional material for 'lighting' shader module
-  material: defaultMaterial
+  material: true
 };
 
 export default class CPUGridLayer extends CompositeLayer {

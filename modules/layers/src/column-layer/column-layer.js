@@ -22,12 +22,6 @@ import {Layer, project32, gouraudLighting, picking} from '@deck.gl/core';
 import GL from '@luma.gl/constants';
 import {Model} from '@luma.gl/core';
 import ColumnGeometry from './column-geometry';
-const defaultMaterial = {
-  ambient: 0.35,
-  diffuse: 0.6,
-  shininess: 32,
-  specularColor: [30, 30, 30]
-};
 
 import vs from './column-layer-vertex.glsl';
 import fs from './column-layer-fragment.glsl';
@@ -58,7 +52,7 @@ const defaultProps = {
   getLineColor: {type: 'accessor', value: DEFAULT_COLOR},
   getLineWidth: {type: 'accessor', value: 1},
   getElevation: {type: 'accessor', value: 1000},
-  material: defaultMaterial,
+  material: true,
   getColor: {deprecatedFor: ['getFillColor', 'getLineColor']}
 };
 

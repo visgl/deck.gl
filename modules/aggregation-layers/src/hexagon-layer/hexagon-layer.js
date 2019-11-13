@@ -28,13 +28,6 @@ import CPUAggregator from '../utils/cpu-aggregator';
 
 function nop() {}
 
-const defaultMaterial = {
-  ambient: 0.35,
-  diffuse: 0.6,
-  shininess: 32,
-  specularColor: [30, 30, 30]
-};
-
 const defaultProps = {
   // color
   colorDomain: null,
@@ -65,7 +58,7 @@ const defaultProps = {
   hexagonAggregator: pointToHexbin,
   getPosition: {type: 'accessor', value: x => x.position},
   // Optional material for 'lighting' shader module
-  material: defaultMaterial
+  material: true
 };
 
 export default class HexagonLayer extends CompositeLayer {

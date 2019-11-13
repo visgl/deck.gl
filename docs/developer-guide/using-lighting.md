@@ -51,8 +51,7 @@ The `lights` has all the light sources that the lighting effect uses to build th
 
 ## Constructing A Material Instance
 
-A material represents a lighting model specified per layer, a [PhongMaterial](https://github.com/uber/luma.gl/tree/7.0-release/docs/api-reference/core/materials/phong-material.md)
-can be instantiated with model parameters.
+A material represents a lighting model specified per layer, represented .
 
 ```js
 import {PhongMaterial} from '@luma.gl/core';

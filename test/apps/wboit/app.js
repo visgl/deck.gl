@@ -87,12 +87,7 @@ export default class App extends PureComponent {
   render() {
     const {opacity, wireframe, lightMode, wboit} = this.state;
 
-    let material = {
-      ambient: 0.35,
-      diffuse: 0.6,
-      shininess: 32,
-      specularColor: [30, 30, 30]
-    };
+    let material = true;
     let lightingEffect = new LightingEffect();
 
     if (lightMode === 2) {

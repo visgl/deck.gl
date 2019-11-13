@@ -29,12 +29,6 @@ import {getGeojsonFeatures, separateGeojsonFeatures} from './geojson';
 
 const defaultLineColor = [0, 0, 0, 255];
 const defaultFillColor = [0, 0, 0, 255];
-const defaultMaterial = {
-  ambient: 0.35,
-  diffuse: 0.6,
-  shininess: 32,
-  specularColor: [30, 30, 30]
-};
 
 const defaultProps = {
   stroked: true,
@@ -70,7 +64,7 @@ const defaultProps = {
   // Polygon extrusion accessor
   getElevation: {type: 'accessor', value: 1000},
   // Optional material for 'lighting' shader module
-  material: defaultMaterial
+  material: true
 };
 
 function getCoordinates(f) {

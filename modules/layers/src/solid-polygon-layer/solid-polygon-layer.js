@@ -30,12 +30,6 @@ import vsSide from './solid-polygon-layer-vertex-side.glsl';
 import fs from './solid-polygon-layer-fragment.glsl';
 
 const DEFAULT_COLOR = [0, 0, 0, 255];
-const defaultMaterial = {
-  ambient: 0.35,
-  diffuse: 0.6,
-  shininess: 32,
-  specularColor: [30, 30, 30]
-};
 
 const defaultProps = {
   filled: true,
@@ -56,7 +50,7 @@ const defaultProps = {
   getLineColor: {type: 'accessor', value: DEFAULT_COLOR},
 
   // Optional settings for 'lighting' shader module
-  material: defaultMaterial
+  material: true
 };
 
 const ATTRIBUTE_TRANSITION = {
