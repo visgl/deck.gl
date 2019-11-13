@@ -51,7 +51,7 @@ The `lights` has all the light sources that the lighting effect uses to build th
 
 ## Constructing A Material Instance
 
-A material is a plain JavaScript object representing a lighting model specified per layer. Properties are `ambient` (number 0-1), `diffuse` (number 0-1), `shininess` (number > 0), `specularColor` (array [0-255, 0-255, 0-255]). Setting a material property to the value `true`, will set all properties to their defaults, which are:
+A material is a plain JavaScript object representing a lighting model specified per layer. Properties are `ambient` (number 0-1), `diffuse` (number 0-1), `shininess` (number > 0), `specularColor` (array [0-255, 0-255, 0-255]). Setting a material property to the value `true` will set all properties to their defaults, which are:
 
 ```js
 {
