@@ -141,18 +141,21 @@ export default class CPUAggregator {
   }
 
   updateState(opts) {
-    const {oldProps, props, changeFlags, viewport, attributes} = opts;
+    const {oldProps, props, changeFlags, viewport, attributes, projectPoints} = opts;
     this.updateGetValueFuncs(oldProps, props, changeFlags);
     const reprojectNeeded = this.needsReProjectPoints(oldProps, props, changeFlags);
-
+    let aggregationDirty = false;
     if (changeFlags.dataChanged || reprojectNeeded) {
-      // project data into hexagons, and get sortedColorBins
-      this.getAggregatedData(props, viewport, attributes);
+      // project data into bin and aggregate wegiths per bin
+      this.getAggregatedData(props, viewport, attributes, projectPoints);
+      aggregationDirty = true;
     } else {
       const dimensionChanges = this.getDimensionChanges(oldProps, props, changeFlags) || [];
       // this here is layer
       dimensionChanges.forEach(f => typeof f === 'function' && f());
+      aggregationDirty = true;
     }
+    this.setState({aggregationDirty});
 
     return this.state;
   }
@@ -182,19 +185,17 @@ export default class CPUAggregator {
     return result;
   }
 
-  getAggregatedData(props, viewport, attributes) {
+  getAggregatedData(props, viewport, attributes, projectPoints) {
     const aggregator = this._getAggregator(props);
 
-    // result should contain a data array and other props
-    // result = {data: [], ...other props}
-    // const opts = Object.assign({}, props, {viewport, attributes});
-    // const {cellSize, data, getPosition} = props;
+    const {cellSize, radius, data} = props;
     const result = aggregator({
-      cellSize: this._getCellSize(props),
-      data: props.data,
+      data,
+      cellSize,
+      radius,
       viewport,
-      attributes
-      // getPosition: props.getPosition
+      attributes,
+      projectPoints
     });
     this.setState({
       layerData: this.normalizeResult(result)

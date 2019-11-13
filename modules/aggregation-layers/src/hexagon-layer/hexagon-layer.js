@@ -75,27 +75,24 @@ export default class HexagonLayer extends AggregationLayer {
     };
     const attributeManager = this.getAttributeManager();
     attributeManager.add({
-      positions: {size: 3, accessor: 'getPosition' /* , type: GL.DOUBLE, fp64: false*/ },
+      positions: {size: 3, accessor: 'getPosition' /* , type: GL.DOUBLE, fp64: false*/}
     });
     // color and elevation attributes can't be added, as they
-    // operate aggregation results.
+    // need to be aggregated per bin.
   }
 
   updateState(opts) {
     super.updateState(opts);
-    // TODO: should _isAggregationDirty be called (to identify if re aggregation is needed
-    // either due to data changed or relevant prop changed ?
     const {cpuAggregator} = this.state;
     const oldLayerData = cpuAggregator.state.layerData;
     this.setState({
       // make a copy of the internal state of cpuAggregator for testing
-      aggregatorState: cpuAggregator.updateState(Object.assign({},
-        opts,
-        {
+      aggregatorState: cpuAggregator.updateState(
+        Object.assign({}, opts, {
           viewport: this.context.viewport,
           attributes: this.getAttributes()
-        }
-      ))
+        })
+      )
     });
 
     if (oldLayerData !== cpuAggregator.state.layerData) {
@@ -153,12 +150,6 @@ export default class HexagonLayer extends AggregationLayer {
   _getSublayerUpdateTriggers() {
     return this.state.cpuAggregator.getUpdateTriggers(this.props);
   }
-
-  // stub
-  _updateShaders(shaders) {
-    // This layer performs aggregation on CPU, nothing to do in this method
-  }
-
 
   renderLayers() {
     const {elevationScale, extruded, coverage, material, transitions} = this.props;

@@ -31,7 +31,7 @@ import {createIterable, log} from '@deck.gl/core';
  * @return {Object} - hexagons and countRange
  */
 export function pointToHexbin(opts) {
-  const {data, cellSize: radius, viewport, attributes} = opts;
+  const {data, radius, viewport, attributes} = opts;
   // get hexagon radius in mercator world unit
   const radiusCommon = getRadiusInCommon(radius, viewport);
 
@@ -43,7 +43,7 @@ export function pointToHexbin(opts) {
   for (const object of iterable) {
     objectInfo.index++;
     const posIndex = objectInfo.index * posSize;
-    const position = positions.slice(posIndex, posIndex+2);
+    const position = positions.slice(posIndex, posIndex + 2);
     // const position = getPosition(object, objectInfo);
     const arrayIsFinite = Number.isFinite(position[0]) && Number.isFinite(position[1]);
     if (arrayIsFinite) {

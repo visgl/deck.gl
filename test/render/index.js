@@ -22,7 +22,7 @@ import test from 'tape';
 import {TEST_CASES, WIDTH, HEIGHT} from './test-cases';
 import {SnapshotTestRunner} from '@deck.gl/test-utils';
 
-// import './jupyter-widget';
+import './jupyter-widget';
 
 test('Render Test', t => {
   // tape's default timeout is 500ms
@@ -38,7 +38,7 @@ test('Render Test', t => {
       imageDiffOptions: {
         threshold: 0.99
         // uncomment to save screenshot to disk
-        // saveOnFail: true,
+        // saveOnFail: true
         // uncomment `saveAs` to overwrite current golden images
         // if left commented will be saved as `[name]-fail.png.` enabling comparison
         // saveAs: '[name].png'
