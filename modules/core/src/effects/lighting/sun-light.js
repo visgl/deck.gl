@@ -1,4 +1,4 @@
-import {DirectionalLight} from './lights';
+import {DirectionalLight} from './directional-light';
 import {getSunlightDirection} from './suncalc';
 
 export default class SunLight extends DirectionalLight {
