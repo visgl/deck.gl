@@ -50,8 +50,13 @@ export {
   // For custom layers
   AttributeManager,
   // Shader modules
+  picking,
   project,
+  project32,
   project64,
+  gouraudLighting,
+  phongLighting,
+  shadow,
   // Internal classes
   LayerManager,
   DeckRenderer,

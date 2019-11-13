@@ -22,7 +22,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {Layer} from '@deck.gl/core';
+import {Layer, project32, phongLighting, picking} from '@deck.gl/core';
 import GL from '@luma.gl/constants';
 import {Model, Geometry, Texture2D, PhongMaterial, isWebGL2} from '@luma.gl/core';
 
@@ -119,7 +119,7 @@ export default class SimpleMeshLayer extends Layer {
     const vs = gl2 ? vs3 : vs1;
     const fs = gl2 ? fs3 : fs1;
 
-    return super.getShaders({vs, fs, modules: ['project32', 'phong-lighting', 'picking']});
+    return super.getShaders({vs, fs, modules: [project32, phongLighting, picking]});
   }
 
   initializeState() {

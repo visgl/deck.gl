@@ -20,7 +20,7 @@
 
 /* global HTMLVideoElement */
 import GL from '@luma.gl/constants';
-import {Layer} from '@deck.gl/core';
+import {Layer, project32, picking} from '@deck.gl/core';
 import {Model, Geometry, Texture2D} from '@luma.gl/core';
 
 import vs from './bitmap-layer-vertex';
@@ -53,7 +53,7 @@ const defaultProps = {
  */
 export default class BitmapLayer extends Layer {
   getShaders() {
-    return super.getShaders({vs, fs, modules: ['project32', 'picking']});
+    return super.getShaders({vs, fs, modules: [project32, picking]});
   }
 
   initializeState() {

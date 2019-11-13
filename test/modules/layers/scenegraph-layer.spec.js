@@ -21,6 +21,7 @@
 import test from 'tape-catch';
 import {testLayer, generateLayerTests} from '@deck.gl/test-utils';
 
+import {project32} from '@deck.gl/core';
 import {ScenegraphLayer} from '@deck.gl/mesh-layers';
 import {GroupNode, ModelNode, CubeGeometry} from '@luma.gl/core';
 
@@ -101,7 +102,7 @@ test('ScenegraphLayer#tests', t => {
             geometry: new CubeGeometry(),
             vs,
             fs,
-            modules: ['project32'],
+            modules: [project32],
             isInstanced: true
           })
         ]);

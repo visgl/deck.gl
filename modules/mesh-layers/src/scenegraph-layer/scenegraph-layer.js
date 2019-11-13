@@ -18,7 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {Layer} from '@deck.gl/core';
+import {Layer, project32, picking} from '@deck.gl/core';
 import {ScenegraphNode, isWebGL2, pbr, log} from '@luma.gl/core';
 import {createGLTFObjects} from '@luma.gl/addons';
 import GL from '@luma.gl/constants';
@@ -206,7 +206,7 @@ export default class ScenegraphLayer extends Layer {
   }
 
   getLoadOptions() {
-    const modules = ['project32', 'picking'];
+    const modules = [project32, picking];
     const {_lighting, _imageBasedLightingEnvironment} = this.props;
 
     if (_lighting === 'pbr') {
