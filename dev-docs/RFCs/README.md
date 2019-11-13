@@ -37,6 +37,7 @@ These RFCs are not yet associated with any specific release.
 | [**Layer Extension**](vNext/layer-extension-rfc.md) | @pessimistress | **Draft** | Adding optional functionalities to layers on-demand |
 | [**Fixed Frame Coordinate System**](vNext/fixed-frame-coordinates-rfc.md) | @ibgreen | Draft | Add support for fixed frame (WGS84 cartesian) coordinates |
 | [**Component Wrapping System**](vNext/component-wrapping-rfc.md) | @ibgreen | **Draft** | A unified system for exposing JS components to Python/Jupyter Notebook/JSON etc. |
+| [**Projection System Expansion**](v8.0/projection-system-expansion-rfc.md) | @pessimistress | **Draft** | Changes to the projection system to support various data and projection formats. |
 
 Possible other animation related RFCs:
 - integration with event handling (enter leave triggers for animations)
