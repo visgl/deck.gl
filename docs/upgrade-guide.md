@@ -62,6 +62,22 @@ new Model({
 });
 ```
 
+##### Multi-view state handling
+
+We have fixed a bug when using `initialViewState` with multiple views. In the past, the state change in one view is unintendedly propagated to all views. As a result of this fix, multiple views (e.g. mini map) are no longer synchronized by default. To synchronize them, define the views with an explicit `viewState.id`:
+
+```js
+new Deck({
+  // ...
+  views: [
+    new MapView({id: 'main'}),
+    new MapView({id: 'minimap', controller: false, viewState: {id: 'main', pitch: 0, zoom: 10}})
+  ]
+})
+```
+
+See [View class](/docs/api-reference/view.md) documentation for details.
+
 
 ## Upgrading from deck.gl v7.2 to v7.3
 
