@@ -67,7 +67,7 @@ vec4 project_common_position_to_clipspace_fp64(vec2 vertex_pos_modelspace[4]) {
 }
 
 vec4 project_position_to_clipspace(
-  vec3 position, vec2 position64xyLow, vec3 offset, out vec4 commonPosition
+  vec3 position, vec3 position64xyLow, vec3 offset, out vec4 commonPosition
 ) {
   // This is the local offset to the instance position
   vec2 offset64[4];
@@ -77,7 +77,7 @@ vec4 project_position_to_clipspace(
 
   // Apply web mercator projection (depends on coordinate system imn use)
   vec2 projectedPosition64xy[2];
-  project_position_fp64(position.xy, position64xyLow, projectedPosition64xy);
+  project_position_fp64(position.xy, position64xyLow.xy, projectedPosition64xy);
 
   vec2 commonPosition64[4];
   commonPosition64[0] = sum_fp64(offset64[0], projectedPosition64xy[0]);
@@ -91,7 +91,7 @@ vec4 project_position_to_clipspace(
 }
 
 vec4 project_position_to_clipspace(
-  vec3 position, vec2 position64xyLow, vec3 offset
+  vec3 position, vec3 position64xyLow, vec3 offset
 ) {
   vec4 commonPosition;
   return project_position_to_clipspace(

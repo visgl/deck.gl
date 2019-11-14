@@ -22,7 +22,7 @@ export default `\
 #define SHADER_NAME gpu-aggregation-to-grid-vs-64
 
 attribute vec2 positions;
-attribute vec2 positions64xyLow;
+attribute vec2 positions64Low;
 attribute vec3 weights;
 uniform vec2 windowSize;
 uniform vec2 cellSize;
@@ -32,12 +32,12 @@ uniform bool projectPoints;
 
 varying vec3 vWeights;
 
-void project_to_pixel(vec2 pos, vec2 pos64xyLow, out vec2 pixelXY64[2]) {
+void project_to_pixel(vec2 pos, vec2 pos64Low, out vec2 pixelXY64[2]) {
 
   vec2 result64[4];
   vec2 position64[4];
-  position64[0] = vec2(pos.x, pos64xyLow.x);
-  position64[1] = vec2(pos.y, pos64xyLow.y);
+  position64[0] = vec2(pos.x, pos64Low.x);
+  position64[1] = vec2(pos.y, pos64Low.y);
   position64[2] = vec2(0., 0.);
   position64[3] = vec2(1., 0.);
   mat4_vec4_mul_fp64(uProjectionMatrixFP64, position64,
@@ -52,18 +52,18 @@ void main(void) {
   vWeights = weights;
 
   vec2 windowPos = positions;
-  vec2 windowPos64xyLow = positions64xyLow;
+  vec2 windowPos64Low = positions64Low;
   if (projectPoints) {
     vec2 projectedXY[2];
-    project_position_fp64(windowPos, windowPos64xyLow, projectedXY);
+    project_position_fp64(windowPos, windowPos64Low, projectedXY);
     windowPos.x = projectedXY[0].x;
     windowPos.y = projectedXY[1].x;
-    windowPos64xyLow.x = projectedXY[0].y;
-    windowPos64xyLow.y = projectedXY[1].y;
+    windowPos64Low.x = projectedXY[0].y;
+    windowPos64Low.y = projectedXY[1].y;
   }
 
   vec2 pixelXY64[2];
-  project_to_pixel(windowPos, windowPos64xyLow, pixelXY64);
+  project_to_pixel(windowPos, windowPos64Low, pixelXY64);
 
   // Transform (0,0):windowSize -> (0, 0): gridSize
   vec2 gridXY64[2];

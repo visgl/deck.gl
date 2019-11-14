@@ -22,7 +22,7 @@ function addDoublePrecisionAttributes(id, baseAccessor, shaderAttributeOptions) 
     offset: offset * 2,
     stride: stride * 2
   });
-  doubleShaderAttributeDefs[`${id}64xyLow`] = Object.assign({}, shaderAttributeOptions, {
+  doubleShaderAttributeDefs[`${id}64Low`] = Object.assign({}, shaderAttributeOptions, {
     offset: offset * 2 + stride,
     stride: stride * 2
   });
@@ -65,7 +65,7 @@ export default class DataColumn {
 
     // `fp64: false` tells a double-precision attribute to allocate Float32Arrays
     // by default when using auto-packing. This is more efficient in use cases where
-    // high precision is unnecessary, but the `64xyLow` attribute is still required
+    // high precision is unnecessary, but the `64Low` attribute is still required
     // by the shader.
     if (doublePrecision && opts.fp64 === false) {
       this.defaultType = Float32Array;
@@ -122,7 +122,7 @@ export default class DataColumn {
         this,
         doubleShaderAttributeDefs[isBuffer64Bit ? `${id}64` : `${id}32`]
       );
-      const shaderAttributeLowPartName = `${id}64xyLow`;
+      const shaderAttributeLowPartName = `${id}64Low`;
       shaderAttributes[shaderAttributeLowPartName] = isBuffer64Bit
         ? new ShaderAttribute(this, doubleShaderAttributeDefs[shaderAttributeLowPartName])
         : new Float32Array(this.size); // use constant for low part if buffer is 32-bit

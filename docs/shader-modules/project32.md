@@ -9,14 +9,14 @@ The `project32` shader module is an extension of the [project](/docs/shader-modu
 32 bit implementation of the `project_position_to_clipspace` interface.
 
 ```glsl
-vec4 project_position_to_clipspace(vec3 position, vec2 position64xyLow, vec3 offset)
-vec4 project_position_to_clipspace(vec3 position, vec2 position64xyLow, vec3 offset, out vec4 commonPosition)
+vec4 project_position_to_clipspace(vec3 position, vec3 position64Low, vec3 offset)
+vec4 project_position_to_clipspace(vec3 position, vec3 position64Low, vec3 offset, out vec4 commonPosition)
 ```
 
 Parameters:
 
 * `position` - vertex position in the layer's coordinate system.
-* `position64xyLow` - always ignored
+* `position64Low` - lower part of the vertex position, calculated as `aLow = a - Math.fround(a)`.
 * `offset` - offset from the coordinate, in common space
 * `commonPosition` - projected position in the common space
 

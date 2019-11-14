@@ -158,7 +158,7 @@ The following `type` values are supported for attribute definitions:
 | type | value array type | notes |
 | ---- | ---------------- | ----- |
 | `GL.FLOAT` | `Float32Array` | |
-| `GL.DOUBLE` | `Float64Array` | Because 64-bit floats are not supported by WebGL, the value is converted to an interleaved `Float32Array` before uploading to the GPU. It is exposed to the vertex shader as two attributes, `<attribute_name>` and `<attribute_name>64xyLow`, the sum of which is the 64-bit value. |
+| `GL.DOUBLE` | `Float64Array` | Because 64-bit floats are not supported by WebGL, the value is converted to an interleaved `Float32Array` before uploading to the GPU. It is exposed to the vertex shader as two attributes, `<attribute_name>` and `<attribute_name>64Low`, the sum of which is the 64-bit value. |
 | `GL.BYTE` | `Int8Array` | |
 | `GL.SHORT` | `Int16Array` | |
 | `GL.INT` | `Int32Array` | |

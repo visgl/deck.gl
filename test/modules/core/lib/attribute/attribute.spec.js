@@ -673,7 +673,7 @@ test('Attribute#doublePrecision', t0 => {
     const shaderAttributes = attribute.getShaderAttributes();
     t.deepEqual(
       Object.keys(shaderAttributes),
-      ['positions', 'positions64xyLow'],
+      ['positions', 'positions64Low'],
       'shaderAttributes generated'
     );
 
@@ -683,19 +683,19 @@ test('Attribute#doublePrecision', t0 => {
       t.is(accessor.offset, 0, 'shaderAttributes.positions offset');
       t.is(accessor.stride, 24, 'shaderAttributes.positions stride');
 
-      const [buffer64Low, accessor64Low] = shaderAttributes.positions64xyLow.getValue();
-      t.is(buffer64Low, attribute.getBuffer(), 'shaderAttributes.positions64xyLow buffer');
-      t.is(accessor64Low.offset, 12, 'shaderAttributes.positions64xyLow offset');
-      t.is(accessor64Low.stride, 24, 'shaderAttributes.positions64xyLow stride');
+      const [buffer64Low, accessor64Low] = shaderAttributes.positions64Low.getValue();
+      t.is(buffer64Low, attribute.getBuffer(), 'shaderAttributes.positions64Low buffer');
+      t.is(accessor64Low.offset, 12, 'shaderAttributes.positions64Low offset');
+      t.is(accessor64Low.stride, 24, 'shaderAttributes.positions64Low stride');
     } else {
       const [buffer, accessor] = shaderAttributes.positions.getValue();
       t.is(buffer, attribute.getBuffer(), 'shaderAttributes.positions buffer');
       t.is(accessor.offset, 0, 'shaderAttributes.positions offset');
       t.is(accessor.stride, 12, 'shaderAttributes.positions stride');
       t.deepEqual(
-        shaderAttributes.positions64xyLow,
+        shaderAttributes.positions64Low,
         [0, 0, 0],
-        'shaderAttributes.positions64xyLow is constant'
+        'shaderAttributes.positions64Low is constant'
       );
     }
   };

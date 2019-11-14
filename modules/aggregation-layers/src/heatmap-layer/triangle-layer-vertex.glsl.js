@@ -36,7 +36,7 @@ varying float vIntensityMin;
 varying float vIntensityMax;
 
 void main(void) {
-  gl_Position = project_position_to_clipspace(positions, vec2(0.0), vec3(0.0));
+  gl_Position = project_position_to_clipspace(positions, vec3(0.0), vec3(0.0));
   vTexCoords = texCoords;
   float maxValue = texture2D(maxTexture, vec2(0.5)).r;
   float minValue = maxValue * threshold;

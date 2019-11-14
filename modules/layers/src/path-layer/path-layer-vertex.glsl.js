@@ -28,10 +28,10 @@ attribute vec3 instanceStartPositions;
 attribute vec3 instanceEndPositions;
 attribute vec3 instanceLeftPositions;
 attribute vec3 instanceRightPositions;
-attribute vec2 instanceLeftPositions64xyLow;
-attribute vec2 instanceStartPositions64xyLow;
-attribute vec2 instanceEndPositions64xyLow;
-attribute vec2 instanceRightPositions64xyLow;
+attribute vec3 instanceLeftPositions64Low;
+attribute vec3 instanceStartPositions64Low;
+attribute vec3 instanceEndPositions64Low;
+attribute vec3 instanceRightPositions64Low;
 attribute float instanceStrokeWidths;
 attribute vec4 instanceColors;
 attribute vec3 instancePickingColors;
@@ -222,19 +222,19 @@ void main() {
   float isEnd = positions.x;
 
   vec3 prevPosition = mix(instanceLeftPositions, instanceStartPositions, isEnd);
-  vec2 prevPosition64xyLow = mix(instanceLeftPositions64xyLow, instanceStartPositions64xyLow, isEnd);
+  vec3 prevPosition64Low = mix(instanceLeftPositions64Low, instanceStartPositions64Low, isEnd);
 
   vec3 currPosition = mix(instanceStartPositions, instanceEndPositions, isEnd);
-  vec2 currPosition64xyLow = mix(instanceStartPositions64xyLow, instanceEndPositions64xyLow, isEnd);
+  vec3 currPosition64Low = mix(instanceStartPositions64Low, instanceEndPositions64Low, isEnd);
 
   vec3 nextPosition = mix(instanceEndPositions, instanceRightPositions, isEnd);
-  vec2 nextPosition64xyLow = mix(instanceEndPositions64xyLow, instanceRightPositions64xyLow, isEnd);
+  vec3 nextPosition64Low = mix(instanceEndPositions64Low, instanceRightPositions64Low, isEnd);
 
   if (billboard) {
     // Extrude in clipspace
-    vec4 prevPositionScreen = project_position_to_clipspace(prevPosition, prevPosition64xyLow, ZERO_OFFSET);
-    vec4 currPositionScreen = project_position_to_clipspace(currPosition, currPosition64xyLow, ZERO_OFFSET, geometry.position);
-    vec4 nextPositionScreen = project_position_to_clipspace(nextPosition, nextPosition64xyLow, ZERO_OFFSET);
+    vec4 prevPositionScreen = project_position_to_clipspace(prevPosition, prevPosition64Low, ZERO_OFFSET);
+    vec4 currPositionScreen = project_position_to_clipspace(currPosition, currPosition64Low, ZERO_OFFSET, geometry.position);
+    vec4 nextPositionScreen = project_position_to_clipspace(nextPosition, nextPosition64Low, ZERO_OFFSET);
 
     clipLine(prevPositionScreen, currPositionScreen);
     clipLine(nextPositionScreen, currPositionScreen);
@@ -249,9 +249,9 @@ void main() {
     gl_Position = vec4(pos * currPositionScreen.w, currPositionScreen.w);
   } else {
     // Extrude in commonspace
-    prevPosition = project_position(prevPosition, prevPosition64xyLow);
-    currPosition = project_position(currPosition, currPosition64xyLow);
-    nextPosition = project_position(nextPosition, nextPosition64xyLow);
+    prevPosition = project_position(prevPosition, prevPosition64Low);
+    currPosition = project_position(currPosition, currPosition64Low);
+    nextPosition = project_position(nextPosition, nextPosition64Low);
 
     vec4 pos = vec4(
       lineJoin(prevPosition, currPosition, nextPosition),

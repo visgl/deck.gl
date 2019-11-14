@@ -22,14 +22,14 @@ The uniforms of the `project64` shader module are prefixed with `project64_` in 
 64 bit implementation of the `project_position_to_clipspace` interface.
 
 ```glsl
-vec4 project_position_to_clipspace(vec3 position, vec2 position64xyLow, vec3 offset)
-vec4 project_position_to_clipspace(vec3 position, vec2 position64xyLow, vec3 offset, out vec4 commonPosition)
+vec4 project_position_to_clipspace(vec3 position, vec3 position64Low, vec3 offset)
+vec4 project_position_to_clipspace(vec3 position, vec3 position64Low, vec3 offset, out vec4 commonPosition)
 ```
 
 Parameters:
 
 * `position` - vertex position in the layer's coordinate system.
-* `position64xyLow` - low part of the vertex position's xy
+* `position64Low` - low part of the vertex position, calculated as `aLow = a - Math.fround(a)`.
 * `offset` - offset from the coordinate, in common space
 * `commonPosition` - projected position in the common space
 
@@ -43,7 +43,7 @@ Projected position in the clipspace.
 
 ```glsl
 void project_position_fp64(vec4 position_fp64, out vec2 out_val[2])
-void project_position_fp64(vec2 position, vec2 position64xyLow, out vec2 out_val[2])
+void project_position_fp64(vec2 position, vec2 position64Low, out vec2 out_val[2])
 ```
 
 

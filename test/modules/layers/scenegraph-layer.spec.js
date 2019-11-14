@@ -41,7 +41,7 @@ uniform float sizeScale;
 attribute vec3 positions;
 
 attribute vec3 instancePositions;
-attribute vec2 instancePositions64xy;
+attribute vec3 instancePositions64Low;
 attribute vec4 instanceColors;
 attribute vec3 instanceTranslation;
 
@@ -54,7 +54,7 @@ void main(void) {
   pos = project_size(pos);
 
   vec4 position_commonspace;
-  gl_Position = project_position_to_clipspace(instancePositions, instancePositions64xy, pos, position_commonspace);
+  gl_Position = project_position_to_clipspace(instancePositions, instancePositions64Low, pos, position_commonspace);
 }
 `;
 
