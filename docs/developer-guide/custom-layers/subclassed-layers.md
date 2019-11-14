@@ -206,7 +206,7 @@ attribute vec3 positions;
 attribute vec3 instanceNormals;
 attribute vec4 instanceColors;
 attribute vec3 instancePositions;
-attribute vec2 instancePositions64xyLow;
+attribute vec3 instancePositions64Low;
 attribute vec3 instancePickingColors;
 
 /* New attribute */
@@ -221,7 +221,7 @@ void main(void) {
   unitPosition = positions.xy;
 
   vec4 position_commonspace;
-  gl_Position = project_position_to_clipspace(instancePositions, instancePositions64xyLow, vec3(0.), position_commonspace);
+  gl_Position = project_position_to_clipspace(instancePositions, instancePositions64Low, vec3(0.), position_commonspace);
   /* replaced uniform 'radiusPixels' with 'instanceRadiusPixels' */
   gl_Position.xy += project_pixel_size_to_clipspace(positions.xy * instanceRadiusPixels);
 

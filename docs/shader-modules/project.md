@@ -74,7 +74,9 @@ project_[<source_space>]_<object_type>_[to_<target_space>]
 ```glsl
 vec2 project_position(vec2 position)
 vec3 project_position(vec3 position)
+vec3 project_position(vec3 position, vec3 position64Low)
 vec4 project_position(vec4 position)
+vec4 project_position(vec4 position, vec3 position64Low)
 ```
 
 Converts the coordinates of a point from the world space to the common space. The coordinates are interpreted according to `coordinateSystem` and `modelMatrix` is applied.

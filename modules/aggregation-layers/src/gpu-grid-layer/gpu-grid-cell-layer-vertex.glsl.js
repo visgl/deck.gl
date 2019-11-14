@@ -120,14 +120,14 @@ void main(void) {
   instancePositionYFP64 = sum_fp64(instancePositionYFP64, vec2(gridOrigin[1], gridOriginLow[1]));
 
   vec3 centroidPosition = vec3(instancePositionXFP64[0], instancePositionYFP64[0], elevation);
-  vec2 centroidPosition64xyLow = vec2(instancePositionXFP64[1], instancePositionYFP64[1]);
+  vec3 centroidPosition64Low = vec3(instancePositionXFP64[1], instancePositionYFP64[1], 0.0);
   vec3 pos = vec3(project_size(positions.xy + offset) * dotRadius, 0.);
 
   // Set color to be rendered to picking fbo (also used to check for selection highlight).
   picking_setPickingColor(instancePickingColors);
 
   vec4 position_commonspace;
-  gl_Position = project_position_to_clipspace(centroidPosition, centroidPosition64xyLow, pos, position_commonspace);
+  gl_Position = project_position_to_clipspace(centroidPosition, centroidPosition64Low, pos, position_commonspace);
 
   // Light calculations
   // Worldspace is the linear space after Mercator projection

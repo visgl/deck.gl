@@ -9,7 +9,7 @@ export default `\
 
 // Instance attributes
 _attribute vec3 instancePositions;
-_attribute vec2 instancePositions64xyLow;
+_attribute vec3 instancePositions64Low;
 _attribute vec4 instanceColors;
 _attribute vec3 instancePickingColors;
 _attribute mat3 instanceModelMatrix;
@@ -77,12 +77,12 @@ void main(void) {
 
   if(enableOffsetModelMatrix) {
     DECKGL_FILTER_SIZE(pos, geometry);
-    gl_Position = project_position_to_clipspace(pos + instancePositions, instancePositions64xyLow, vec3(0.0), geometry.position);
+    gl_Position = project_position_to_clipspace(pos + instancePositions, instancePositions64Low, vec3(0.0), geometry.position);
   }
   else {
     pos = project_size(pos);
     DECKGL_FILTER_SIZE(pos, geometry);
-    gl_Position = project_position_to_clipspace(instancePositions, instancePositions64xyLow, pos, geometry.position);
+    gl_Position = project_position_to_clipspace(instancePositions, instancePositions64Low, pos, geometry.position);
   }
   DECKGL_FILTER_GL_POSITION(gl_Position, geometry);
 

@@ -42,7 +42,7 @@ void main(void) {
 
   vec4 windowPos = vec4(positions, 0, 1.);
   if (projectPoints) {
-    windowPos = project_position_to_clipspace(vec3(positions, 0), vec2(0, 0), vec3(0, 0, 0));
+    windowPos = project_position_to_clipspace(vec3(positions, 0), vec3(0), vec3(0));
   }
 
   vec2 pos = project_to_pixel(windowPos);

@@ -83,24 +83,22 @@ function getVendor() {
 }
 
 const TRANSFORM_VS = {
-  project_position_to_clipspace: (pos, xy64LowPos = [0, 0]) => `\
+  project_position_to_clipspace: (pos, pos64Low = [0, 0, 0]) => `\
 varying vec4 outValue;
 
 void main()
 {
   outValue = project_position_to_clipspace(${toGLSLVec(pos)}, ${toGLSLVec(
-    xy64LowPos
+    pos64Low
   )}, vec3(0, 0, 0));
 }
 `,
-  project_position_to_clipspace_world_position: (pos, xy64LowPos = [0, 0]) => `\
+  project_position_to_clipspace_world_position: (pos, pos64Low = [0, 0, 0]) => `\
 varying vec4 outValue;
 
 void main()
 {
-  project_position_to_clipspace(${toGLSLVec(pos)}, ${toGLSLVec(
-    xy64LowPos
-  )}, vec3(0, 0, 0), outValue);
+  project_position_to_clipspace(${toGLSLVec(pos)}, ${toGLSLVec(pos64Low)}, vec3(0, 0, 0), outValue);
 }
 `
 };
@@ -116,7 +114,7 @@ const TEST_CASES = [
         name: 'project_position_to_clipspace_world_position',
         func: ({project_position_to_clipspace}) => {
           let worldPosition = [];
-          project_position_to_clipspace([-122.45, 37.78, 0], [0, 0], [0, 0, 0], worldPosition);
+          project_position_to_clipspace([-122.45, 37.78, 0], [0, 0, 0], [0, 0, 0], worldPosition);
           [worldPosition] = project_position_to_clipspace.__out__;
           return worldPosition;
         },
@@ -125,35 +123,35 @@ const TEST_CASES = [
         gpu64BitPrecision: 1e-7,
         vs: TRANSFORM_VS.project_position_to_clipspace_world_position(
           [-122.45, 37.78, 0],
-          [fp64LowPart(-122.45), fp64LowPart(37.78)]
+          [fp64LowPart(-122.45), fp64LowPart(37.78), 0]
         )
       },
       {
         name: 'project_position_to_clipspace',
         skipGPUs: ['Intel'],
-        func: ({project_position_to_clipspace_vec3_vec2_vec3}) =>
-          project_position_to_clipspace_vec3_vec2_vec3([-122.45, 37.78, 0], [0, 0], [0, 0, 0]),
+        func: ({project_position_to_clipspace_vec3_vec3_vec3}) =>
+          project_position_to_clipspace_vec3_vec3_vec3([-122.45, 37.78, 0], [0, 0, 0], [0, 0, 0]),
         mapResult: coords => clipspaceToScreen(TEST_VIEWPORT, coords),
         output: TEST_VIEWPORT.project([-122.45, 37.78, 0]),
         precision: PIXEL_TOLERANCE,
         gpu64BitPrecision: 1e-7,
         vs: TRANSFORM_VS.project_position_to_clipspace(
           [-122.45, 37.78, 0],
-          [fp64LowPart(-122.45), fp64LowPart(37.78)]
+          [fp64LowPart(-122.45), fp64LowPart(37.78), 0]
         )
       },
       {
         name: 'project_position_to_clipspace (non-zero Z)',
         skipGPUs: ['Intel'],
-        func: ({project_position_to_clipspace_vec3_vec2_vec3}) =>
-          project_position_to_clipspace_vec3_vec2_vec3([-122.45, 37.78, 100], [0, 0], [0, 0, 0]),
+        func: ({project_position_to_clipspace_vec3_vec3_vec3}) =>
+          project_position_to_clipspace_vec3_vec3_vec3([-122.45, 37.78, 100], [0, 0, 0], [0, 0, 0]),
         mapResult: coords => clipspaceToScreen(TEST_VIEWPORT, coords),
         output: TEST_VIEWPORT.project([-122.45, 37.78, 100]),
         precision: PIXEL_TOLERANCE,
         gpu64BitPrecision: 1e-6, // test fails with 1e-7
         vs: TRANSFORM_VS.project_position_to_clipspace(
           [-122.45, 37.78, 100],
-          [fp64LowPart(-122.45), fp64LowPart(37.78)]
+          [fp64LowPart(-122.45), fp64LowPart(37.78), 0]
         )
       }
     ]
@@ -172,7 +170,7 @@ const TEST_CASES = [
 
         func: ({project_position_to_clipspace}) => {
           let worldPosition = [];
-          project_position_to_clipspace([-122.05, 37.92, 0], [0, 0], [0, 0, 0], worldPosition);
+          project_position_to_clipspace([-122.05, 37.92, 0], [0, 0, 0], [0, 0, 0], worldPosition);
           [worldPosition] = project_position_to_clipspace.__out__;
           return worldPosition;
         },
@@ -181,22 +179,22 @@ const TEST_CASES = [
         gpu64BitPrecision: 1e-7,
         vs: TRANSFORM_VS.project_position_to_clipspace_world_position(
           [-122.05, 37.92, 0],
-          [fp64LowPart(-122.05), fp64LowPart(37.92)]
+          [fp64LowPart(-122.05), fp64LowPart(37.92), 0]
         )
       },
       {
         name: 'project_position_to_clipspace',
         skipGPUs: ['Intel'],
 
-        func: ({project_position_to_clipspace_vec3_vec2_vec3}) =>
-          project_position_to_clipspace_vec3_vec2_vec3([-122.05, 37.92, 0], [0, 0], [0, 0, 0]),
+        func: ({project_position_to_clipspace_vec3_vec3_vec3}) =>
+          project_position_to_clipspace_vec3_vec3_vec3([-122.05, 37.92, 0], [0, 0, 0], [0, 0, 0]),
         mapResult: coords => clipspaceToScreen(TEST_VIEWPORT_HIGH_ZOOM, coords),
         output: TEST_VIEWPORT_HIGH_ZOOM.project([-122.05, 37.92, 0]),
         precision: PIXEL_TOLERANCE,
         gpu64BitPrecision: 1e-7,
         vs: TRANSFORM_VS.project_position_to_clipspace(
           [-122.05, 37.92, 0],
-          [fp64LowPart(-122.05), fp64LowPart(37.92)]
+          [fp64LowPart(-122.05), fp64LowPart(37.92), 0]
         )
       }
     ]
@@ -213,7 +211,7 @@ const TEST_CASES = [
         name: 'project_position_to_clipspace_world_position',
         func: ({project_position_to_clipspace}) => {
           let worldPosition = [];
-          project_position_to_clipspace([0.05, 0.08, 0], [0, 0], [0, 0, 0], worldPosition);
+          project_position_to_clipspace([0.05, 0.08, 0], [0, 0, 0], [0, 0, 0], worldPosition);
           [worldPosition] = project_position_to_clipspace.__out__;
           return worldPosition;
         },
@@ -225,21 +223,21 @@ const TEST_CASES = [
         gpu64BitPrecision: 1e-7,
         vs: TRANSFORM_VS.project_position_to_clipspace_world_position(
           [0.05, 0.08, 0],
-          [fp64LowPart(0.05), fp64LowPart(0.08)]
+          [fp64LowPart(0.05), fp64LowPart(0.08), 0]
         )
       },
       {
         name: 'project_position_to_clipspace',
 
-        func: ({project_position_to_clipspace_vec3_vec2_vec3}) =>
-          project_position_to_clipspace_vec3_vec2_vec3([0.05, 0.08, 0], [0, 0], [0, 0, 0]),
+        func: ({project_position_to_clipspace_vec3_vec3_vec3}) =>
+          project_position_to_clipspace_vec3_vec3_vec3([0.05, 0.08, 0], [0, 0, 0], [0, 0, 0]),
         mapResult: coords => clipspaceToScreen(TEST_VIEWPORT, coords),
         output: TEST_VIEWPORT.project([-122, 38, 0]),
         precision: PIXEL_TOLERANCE,
         gpu64BitPrecision: 1e-7,
         vs: TRANSFORM_VS.project_position_to_clipspace(
           [0.05, 0.08, 0],
-          [fp64LowPart(0.05), fp64LowPart(0.08)]
+          [fp64LowPart(0.05), fp64LowPart(0.08), 0]
         )
       }
     ]

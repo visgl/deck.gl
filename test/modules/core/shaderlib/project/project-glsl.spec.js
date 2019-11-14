@@ -95,7 +95,7 @@ void main()
   )}, ${meter[2].toFixed(MAX_FRACTION_DIGITS)}));
   }
   `,
-  project_position: (pos, xy64LowPos = [0, 0]) => `\
+  project_position: (pos, pos64Low = [0, 0, 0]) => `\
 varying vec4 outValue;
 
 void main()
@@ -104,9 +104,9 @@ void main()
     MAX_FRACTION_DIGITS
   )}, ${pos[2].toFixed(MAX_FRACTION_DIGITS)}, ${pos[3].toFixed(
     MAX_FRACTION_DIGITS
-  )}), vec2(${xy64LowPos[0].toFixed(MAX_FRACTION_DIGITS)}, ${xy64LowPos[1].toFixed(
+  )}), vec3(${pos64Low[0].toFixed(MAX_FRACTION_DIGITS)}, ${pos64Low[1].toFixed(
     MAX_FRACTION_DIGITS
-  )}));
+  )}, ${pos64Low[2].toFixed(MAX_FRACTION_DIGITS)}));
 }
 `,
   project_common_position_to_clipspace_vec4: pos => `\
@@ -116,9 +116,7 @@ void main()
 {
   vec4 pos = project_position(vec4(${pos[0].toFixed(MAX_FRACTION_DIGITS)}, ${pos[1].toFixed(
     MAX_FRACTION_DIGITS
-  )}, ${pos[2].toFixed(MAX_FRACTION_DIGITS)}, ${pos[3].toFixed(
-    MAX_FRACTION_DIGITS
-  )}), vec2(0., 0.));
+  )}, ${pos[2].toFixed(MAX_FRACTION_DIGITS)}, ${pos[3].toFixed(MAX_FRACTION_DIGITS)}), vec3(0.));
   outValue = project_common_position_to_clipspace(pos);
 }
 `
@@ -151,19 +149,19 @@ const TEST_CASES = [
       },
       {
         name: 'project_position',
-        func: ({project_position}) => project_position([-122.45, 37.78, 0, 1], [0, 0]),
+        func: ({project_position}) => project_position([-122.45, 37.78, 0, 1], [0, 0, 0]),
         output: TEST_VIEWPORT.projectFlat([-122.45, 37.78]).concat([0, 1]),
         gpuPrecision: PIXEL_TOLERANCE,
         vs: TRANSFORM_VS.project_position(
           [-122.45, 37.78, 0, 1],
-          [fp64LowPart(-122.45), fp64LowPart(37.78)]
+          [fp64LowPart(-122.45), fp64LowPart(37.78), 0]
         )
       },
       {
         name: 'project_common_position_to_clipspace(vec4)',
         func: ({project_position, project_common_position_to_clipspace_vec4}) =>
           project_common_position_to_clipspace_vec4(
-            project_position([-122.45, 37.78, 0, 1], [0, 0])
+            project_position([-122.45, 37.78, 0, 1], [0, 0, 0])
           ),
         mapResult: coords => clipspaceToScreen(TEST_VIEWPORT, coords),
         output: TEST_VIEWPORT.project([-122.45, 37.78, 0]),
@@ -174,7 +172,7 @@ const TEST_CASES = [
         name: 'project_common_position_to_clipspace (vec4, non-zero z)',
         func: ({project_position, project_common_position_to_clipspace_vec4}) =>
           project_common_position_to_clipspace_vec4(
-            project_position([-122.45, 37.78, 100, 1], [0, 0])
+            project_position([-122.45, 37.78, 100, 1], [0, 0, 0])
           ),
         mapResult: coords => clipspaceToScreen(TEST_VIEWPORT, coords),
         output: TEST_VIEWPORT.project([-122.45, 37.78, 100]),
@@ -192,7 +190,7 @@ const TEST_CASES = [
     tests: [
       {
         name: 'project_position',
-        func: ({project_position}) => project_position([-122.05, 37.92, 0, 1], [0, 0]),
+        func: ({project_position}) => project_position([-122.05, 37.92, 0, 1], [0, 0, 0]),
         // common space position is offset from viewport center
         output: getPixelOffset(
           TEST_VIEWPORT_HIGH_ZOOM.projectPosition([-122.05, 37.92, 0]),
@@ -205,7 +203,7 @@ const TEST_CASES = [
         name: 'project_common_position_to_clipspace(vec4)',
         func: ({project_position, project_common_position_to_clipspace_vec4}) =>
           project_common_position_to_clipspace_vec4(
-            project_position([-122.05, 37.92, 0, 1], [0, 0])
+            project_position([-122.05, 37.92, 0, 1], [0, 0, 0])
           ),
         mapResult: coords => clipspaceToScreen(TEST_VIEWPORT_HIGH_ZOOM, coords),
         output: TEST_VIEWPORT_HIGH_ZOOM.project([-122.05, 37.92, 0]),
@@ -216,7 +214,7 @@ const TEST_CASES = [
         name: 'project_common_position_to_clipspace (vec4, non-zero z)',
         func: ({project_position, project_common_position_to_clipspace_vec4}) =>
           project_common_position_to_clipspace_vec4(
-            project_position([-122.05, 37.92, 100, 1], [0, 0])
+            project_position([-122.05, 37.92, 100, 1], [0, 0, 0])
           ),
         mapResult: coords => clipspaceToScreen(TEST_VIEWPORT_HIGH_ZOOM, coords),
         output: TEST_VIEWPORT_HIGH_ZOOM.project([-122.05, 37.92, 100]),
@@ -236,7 +234,7 @@ const TEST_CASES = [
     tests: [
       {
         name: 'project_position',
-        func: ({project_position}) => project_position([1000, 1000, 0, 1], [0, 0]),
+        func: ({project_position}) => project_position([1000, 1000, 0, 1], [0, 0, 0]),
         // common space position is offset from coordinateOrigin
         // @turf/destination
         // destination([-122.05, 37.92], 1 * Math.sqrt(2), 45) -> [ -122.0385984916185, 37.92899265369385 ]
@@ -250,7 +248,9 @@ const TEST_CASES = [
       {
         name: 'project_common_position_to_clipspace(vec4)',
         func: ({project_position, project_common_position_to_clipspace_vec4}) =>
-          project_common_position_to_clipspace_vec4(project_position([1000, 1000, 0, 1], [0, 0])),
+          project_common_position_to_clipspace_vec4(
+            project_position([1000, 1000, 0, 1], [0, 0, 0])
+          ),
         mapResult: coords => clipspaceToScreen(TEST_VIEWPORT, coords),
         output: TEST_VIEWPORT.project([-122.0385984916185, 37.92899265369385, 100]),
         precision: PIXEL_TOLERANCE,
@@ -268,7 +268,7 @@ const TEST_CASES = [
     tests: [
       {
         name: 'project_position',
-        func: ({project_position}) => project_position([0.05, 0.08, 0, 1], [0, 0]),
+        func: ({project_position}) => project_position([0.05, 0.08, 0, 1], [0, 0, 0]),
         // common space position is offset from coordinateOrigin
         output: getPixelOffset(
           TEST_VIEWPORT.projectPosition([-122, 38, 0]),
@@ -280,7 +280,9 @@ const TEST_CASES = [
       {
         name: 'project_common_position_to_clipspace(vec4)',
         func: ({project_position, project_common_position_to_clipspace_vec4}) =>
-          project_common_position_to_clipspace_vec4(project_position([0.05, 0.08, 0, 1], [0, 0])),
+          project_common_position_to_clipspace_vec4(
+            project_position([0.05, 0.08, 0, 1], [0, 0, 0])
+          ),
         mapResult: coords => clipspaceToScreen(TEST_VIEWPORT, coords),
         output: TEST_VIEWPORT.project([-122, 38, 0]),
         precision: PIXEL_TOLERANCE,
@@ -298,7 +300,7 @@ const TEST_CASES = [
     tests: [
       {
         name: 'project_position',
-        func: ({project_position}) => project_position([200, 200, 0, 1], [0, 0]),
+        func: ({project_position}) => project_position([200, 200, 0, 1], [0, 0, 0]),
         // common space position is offset from viewport center
         output: getPixelOffset(
           TEST_VIEWPORT_ORTHO.projectPosition([-200, 200, 10]),
@@ -310,7 +312,7 @@ const TEST_CASES = [
       {
         name: 'project_common_position_to_clipspace(vec4)',
         func: ({project_position, project_common_position_to_clipspace_vec4}) =>
-          project_common_position_to_clipspace_vec4(project_position([200, 200, 0, 1], [0, 0])),
+          project_common_position_to_clipspace_vec4(project_position([200, 200, 0, 1], [0, 0, 0])),
         mapResult: coords => clipspaceToScreen(TEST_VIEWPORT, coords),
         output: TEST_VIEWPORT_ORTHO.project([-200, 200, 10]),
         precision: PIXEL_TOLERANCE,

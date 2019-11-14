@@ -89,14 +89,11 @@ function calculateMatrixAndOffset({
       shaderCoordinateSystem = PROJECT_COORDINATE_SYSTEM.LNG_LAT;
     } else {
       // Use LNGLAT_AUTO_OFFSET
-      const lng = Math.fround(viewport.longitude);
-      const lat = Math.fround(viewport.latitude);
-      shaderCoordinateOrigin = [lng, lat];
+      shaderCoordinateOrigin = [Math.fround(viewport.longitude), Math.fround(viewport.latitude), 0];
     }
   }
   if (shaderCoordinateSystem === PROJECT_COORDINATE_SYSTEM.IDENTITY) {
-    // We only support 64-bit precision in the X and Y components of positions for now
-    shaderCoordinateOrigin = [Math.fround(viewport.position[0]), Math.fround(viewport.position[1])];
+    shaderCoordinateOrigin = viewport.position.map(Math.fround);
   }
 
   shaderCoordinateOrigin[2] = shaderCoordinateOrigin[2] || 0;

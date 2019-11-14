@@ -150,8 +150,6 @@ export default class GPUGridAggregator {
       // cache weights and position data to process when data is not changed
       weights: null,
       gridPositions: null,
-      positionsBuffer: null,
-      positions64xyLowBuffer: null,
       vertexCount: 0,
 
       // flags/variables that affect the aggregation
@@ -197,8 +195,6 @@ export default class GPUGridAggregator {
   delete() {
     const {gridAggregationModel, allAggregationModel, meanTransform} = this;
     const {
-      positionsBuffer,
-      positions64xyLowBuffer,
       textures,
       framebuffers,
       maxMinFramebuffers,
@@ -212,8 +208,6 @@ export default class GPUGridAggregator {
     allAggregationModel && allAggregationModel.delete();
     meanTransform && meanTransform.delete();
 
-    positionsBuffer && positionsBuffer.delete();
-    positions64xyLowBuffer && positions64xyLowBuffer.delete();
     deleteResources([
       framebuffers,
       textures,

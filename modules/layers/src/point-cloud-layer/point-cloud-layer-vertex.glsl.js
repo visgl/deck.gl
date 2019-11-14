@@ -25,7 +25,7 @@ attribute vec3 positions;
 attribute vec3 instanceNormals;
 attribute vec4 instanceColors;
 attribute vec3 instancePositions;
-attribute vec2 instancePositions64xyLow;
+attribute vec3 instancePositions64Low;
 attribute vec3 instancePickingColors;
 
 uniform float opacity;
@@ -47,7 +47,7 @@ void main(void) {
   vec3 offset = vec3(positions.xy * radiusPixels, 0.0);
   DECKGL_FILTER_SIZE(offset, geometry);
 
-  gl_Position = project_position_to_clipspace(instancePositions, instancePositions64xyLow, vec3(0.), geometry.position);
+  gl_Position = project_position_to_clipspace(instancePositions, instancePositions64Low, vec3(0.), geometry.position);
   gl_Position.xy += project_pixel_size_to_clipspace(offset.xy);
   DECKGL_FILTER_GL_POSITION(gl_Position, geometry);
 
