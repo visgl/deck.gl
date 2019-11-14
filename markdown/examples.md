@@ -132,7 +132,7 @@
 <div>
   <div class="thumb">
     <div data-title="Playground" data-name="@deck.gl/json">
-      <a href="https://deck.gl/json">
+      <a href="https://deck.gl/playground">
         <img src="images/demo-thumb-playground.jpg" />
       </a>
     </div>
