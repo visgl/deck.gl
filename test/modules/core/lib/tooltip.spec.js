@@ -72,19 +72,20 @@ test('Tooltip#setTooltipNullCase', t => {
 
 test('Tooltip#remove', t => {
   const {testDocument, canvas} = setup();
+  // eslint-disable-next-line
+  console.log(testDocument);
   const tooltip = new Tooltip(canvas);
 
   t.equals(
-    testDocument.document.getElementsByClassName('deck-tooltip').length,
+    testDocument.getElementsByClassName('deck-tooltip').length,
     1,
     'Tooltip element present'
   );
   tooltip.remove();
   t.equals(
-    testDocument.document.getElementsByClassName('deck-tooltip').length,
+    testDocument.getElementsByClassName('deck-tooltip').length,
     0,
     'Tooltip element successfully removed'
   );
-  testDocument.finalize();
   t.end();
 });
