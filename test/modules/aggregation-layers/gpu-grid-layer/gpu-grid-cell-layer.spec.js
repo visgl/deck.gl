@@ -68,10 +68,7 @@ test('GPUGridCellLayer#updates', t => {
           cellSize: 123
         },
         onAfterUpdate({layer, spies}) {
-          t.ok(
-            layer.state.model.program.uniforms.cellSize === 123,
-            'cellSize unifrom should get updated'
-          );
+          t.equal(layer.state.model.uniforms.cellSize, 123, 'cellSize uniform should get updated');
         }
       }
     ]

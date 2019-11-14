@@ -44,15 +44,11 @@ export {
   PlaneGeometry,
   SphereGeometry,
   TruncatedConeGeometry,
-  // Materials
-  Material,
-  PhongMaterial,
-  PBRMaterial,
   // Shader Modules
   fp32,
   fp64,
   project,
   picking,
-  gouraudlighting,
-  phonglighting
+  gouraudLighting,
+  phongLighting
 } from '@luma.gl/core';

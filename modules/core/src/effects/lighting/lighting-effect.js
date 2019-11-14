@@ -1,5 +1,6 @@
-import {AmbientLight, Texture2D, ProgramManager} from '@luma.gl/core';
-import DirectionalLight from './directional-light';
+import {Texture2D, ProgramManager} from '@luma.gl/core';
+import {AmbientLight} from './ambient-light';
+import {DirectionalLight} from './directional-light';
 import Effect from '../../lib/effect';
 import {Matrix4, Vector3} from 'math.gl';
 import ShadowPass from '../../passes/shadow-pass';

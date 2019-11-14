@@ -1,6 +1,6 @@
 import test from 'tape-catch';
 import Transition from '@deck.gl/core/transitions/transition';
-import {Timeline} from '@luma.gl/addons';
+import {Timeline} from '@luma.gl/core';
 
 test('Transition#constructor', t => {
   const transition = new Transition(new Timeline());

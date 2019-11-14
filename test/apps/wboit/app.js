@@ -1,7 +1,6 @@
 import React, {PureComponent, Fragment} from 'react';
 import DeckGL from '@deck.gl/react';
 import {AmbientLight, DirectionalLight, LightingEffect} from '@deck.gl/core';
-import {PhongMaterial} from '@luma.gl/core';
 import {StaticMap} from 'react-map-gl';
 import {SolidPolygonLayer} from '@deck.gl/layers';
 import WBOITLayer from './wboit-layer/wboit-layer';
@@ -88,17 +87,17 @@ export default class App extends PureComponent {
   render() {
     const {opacity, wireframe, lightMode, wboit} = this.state;
 
-    let material = new PhongMaterial();
+    let material = true;
     let lightingEffect = new LightingEffect();
 
     if (lightMode === 2) {
       // Ambient Light only / Flat
-      material = new PhongMaterial({
+      material = {
         ambient: 1.0,
         diffuse: 0.0,
         shininess: 32,
         specularColor: [255, 255, 255]
-      });
+      };
 
       lightingEffect = new LightingEffect({
         light1: new AmbientLight({
@@ -108,12 +107,12 @@ export default class App extends PureComponent {
       });
     } else if (lightMode === 3) {
       // Single Directional
-      material = new PhongMaterial({
+      material = {
         ambient: 0.5,
         diffuse: 0.5,
         shininess: 32,
         specularColor: [255, 255, 255]
-      });
+      };
 
       lightingEffect = new LightingEffect({
         light1: new AmbientLight({

@@ -18,7 +18,6 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {PhongMaterial} from '@luma.gl/core';
 import {CompositeLayer} from '@deck.gl/core';
 import {GridCellLayer} from '@deck.gl/layers';
 
@@ -27,8 +26,6 @@ import {pointToDensityGridDataCPU} from './grid-aggregator';
 import CPUAggregator from '../utils/cpu-aggregator';
 
 function nop() {}
-
-const defaultMaterial = new PhongMaterial();
 
 const defaultProps = {
   // color
@@ -63,7 +60,7 @@ const defaultProps = {
   extruded: false,
 
   // Optional material for 'lighting' shader module
-  material: defaultMaterial
+  material: true
 };
 
 export default class CPUGridLayer extends CompositeLayer {

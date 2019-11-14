@@ -24,7 +24,7 @@
 
 import {Layer, project32, phongLighting, picking} from '@deck.gl/core';
 import GL from '@luma.gl/constants';
-import {Model, Geometry, Texture2D, PhongMaterial, isWebGL2} from '@luma.gl/core';
+import {Model, Geometry, Texture2D, isWebGL2} from '@luma.gl/core';
 
 import {MATRIX_ATTRIBUTES} from '../utils/matrix';
 
@@ -81,7 +81,6 @@ function getGeometry(data) {
 }
 
 const DEFAULT_COLOR = [0, 0, 0, 255];
-const defaultMaterial = new PhongMaterial();
 
 const defaultProps = {
   mesh: {value: null, type: 'object', async: true},
@@ -98,7 +97,7 @@ const defaultProps = {
   // of the original mesh.
   wireframe: false,
   // Optional material for 'lighting' shader module
-  material: defaultMaterial,
+  material: true,
   getPosition: {type: 'accessor', value: x => x.position},
   getColor: {type: 'accessor', value: DEFAULT_COLOR},
 

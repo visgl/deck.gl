@@ -30,8 +30,9 @@ export {COORDINATE_SYSTEM} from './lib/constants';
 
 // Effects
 export {default as LightingEffect} from './effects/lighting/lighting-effect';
-export {default as PointLight} from './effects/lighting/point-light';
-export {default as DirectionalLight} from './effects/lighting/directional-light';
+export {AmbientLight} from './effects/lighting/ambient-light';
+export {DirectionalLight} from './effects/lighting/directional-light';
+export {PointLight} from './effects/lighting/point-light';
 export {default as _CameraLight} from './effects/lighting/camera-light';
 export {default as _SunLight} from './effects/lighting/sun-light';
 export {default as PostProcessEffect} from './effects/post-process-effect';
@@ -99,9 +100,6 @@ import Tesselator from './utils/tesselator'; // Export? move to luma.gl or math.
 import {count} from './utils/count';
 import memoize from './utils/memoize';
 export {mergeShaders} from './utils/shader';
-
-// lighting
-export {AmbientLight} from '@luma.gl/core';
 
 export {LayerExtension} from './lib/layer-extension';
 

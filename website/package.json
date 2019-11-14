@@ -13,6 +13,7 @@
     "lint": "eslint src --ignore-pattern workers"
   },
   "dependencies": {
+    "@deck.gl/core": "^7.3.5",
     "@loaders.gl/csv": "^1.3.3",
     "@loaders.gl/draco": "^1.3.3",
     "@loaders.gl/las": "^1.3.3",

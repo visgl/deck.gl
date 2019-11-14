@@ -20,9 +20,8 @@
 
 import {Layer, project32, gouraudLighting, picking} from '@deck.gl/core';
 import GL from '@luma.gl/constants';
-import {Model, PhongMaterial} from '@luma.gl/core';
+import {Model} from '@luma.gl/core';
 import ColumnGeometry from './column-geometry';
-const defaultMaterial = new PhongMaterial();
 
 import vs from './column-layer-vertex.glsl';
 import fs from './column-layer-fragment.glsl';
@@ -53,7 +52,7 @@ const defaultProps = {
   getLineColor: {type: 'accessor', value: DEFAULT_COLOR},
   getLineWidth: {type: 'accessor', value: 1},
   getElevation: {type: 'accessor', value: 1000},
-  material: defaultMaterial,
+  material: true,
   getColor: {deprecatedFor: ['getFillColor', 'getLineColor']}
 };
 

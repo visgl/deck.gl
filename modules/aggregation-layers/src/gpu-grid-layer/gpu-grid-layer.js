@@ -18,7 +18,6 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {PhongMaterial} from '@luma.gl/core';
 import GL from '@luma.gl/constants';
 import {log} from '@deck.gl/core';
 
@@ -30,7 +29,6 @@ import GPUGridCellLayer from './gpu-grid-cell-layer';
 import {pointToDensityGridDataCPU} from './../cpu-grid-layer/grid-aggregator';
 import GridAggregationLayer from '../grid-aggregation-layer';
 
-const defaultMaterial = new PhongMaterial();
 const defaultProps = {
   // color
   colorDomain: null,
@@ -53,7 +51,7 @@ const defaultProps = {
   fp64: false,
 
   // Optional material for 'lighting' shader module
-  material: defaultMaterial,
+  material: true,
 
   // GPU Aggregation
   gpuAggregation: true

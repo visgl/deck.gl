@@ -2,7 +2,6 @@
 import React, {Component} from 'react';
 import {render} from 'react-dom';
 import {StaticMap} from 'react-map-gl';
-import {PhongMaterial} from '@luma.gl/core';
 import {AmbientLight, PointLight, LightingEffect} from '@deck.gl/core';
 import DeckGL from '@deck.gl/react';
 import {PolygonLayer} from '@deck.gl/layers';
@@ -32,12 +31,12 @@ const pointLight = new PointLight({
 
 const lightingEffect = new LightingEffect({ambientLight, pointLight});
 
-const material = new PhongMaterial({
+const material = {
   ambient: 0.1,
   diffuse: 0.6,
   shininess: 32,
   specularColor: [60, 64, 70]
-});
+};
 
 const DEFAULT_THEME = {
   buildingColor: [74, 80, 87],

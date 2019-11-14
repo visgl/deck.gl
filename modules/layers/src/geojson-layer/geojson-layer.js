@@ -21,7 +21,6 @@
 import {CompositeLayer} from '@deck.gl/core';
 import ScatterplotLayer from '../scatterplot-layer/scatterplot-layer';
 import PathLayer from '../path-layer/path-layer';
-import {PhongMaterial} from '@luma.gl/core';
 // Use primitive layer to avoid "Composite Composite" layers for now
 import SolidPolygonLayer from '../solid-polygon-layer/solid-polygon-layer';
 import {replaceInRange} from '../utils';
@@ -30,7 +29,6 @@ import {getGeojsonFeatures, separateGeojsonFeatures} from './geojson';
 
 const defaultLineColor = [0, 0, 0, 255];
 const defaultFillColor = [0, 0, 0, 255];
-const defaultMaterial = new PhongMaterial();
 
 const defaultProps = {
   stroked: true,
@@ -66,7 +64,7 @@ const defaultProps = {
   // Polygon extrusion accessor
   getElevation: {type: 'accessor', value: 1000},
   // Optional material for 'lighting' shader module
-  material: defaultMaterial
+  material: true
 };
 
 function getCoordinates(f) {
