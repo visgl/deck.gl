@@ -6,8 +6,7 @@
 
 # ArcLayer
 
-The Arc Layer renders raised arcs joining pairs of source and target points,
-specified as latitude/longitude coordinates.
+The Arc Layer renders raised arcs joining pairs of source and target points.
 
 ```js
 import DeckGL from '@deck.gl/react';
