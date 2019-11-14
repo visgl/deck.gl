@@ -18,7 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {Layer, createIterable, picking} from '@deck.gl/core';
+import {Layer, picking} from '@deck.gl/core';
 
 import GL from '@luma.gl/constants';
 import {Model, Geometry} from '@luma.gl/core';
@@ -53,13 +53,19 @@ export default class ArcLayer extends Layer {
 
     /* eslint-disable max-len */
     attributeManager.addInstanced({
-      instancePositions: {
-        size: 4,
+      instanceSourcePositions: {
+        size: 3,
         type: GL.DOUBLE,
         fp64: this.use64bitPositions(),
         transition: true,
-        accessor: ['getSourcePosition', 'getTargetPosition'],
-        update: this.calculateInstancePositions
+        accessor: 'getSourcePosition'
+      },
+      instanceTargetPositions: {
+        size: 3,
+        type: GL.DOUBLE,
+        fp64: this.use64bitPositions(),
+        transition: true,
+        accessor: 'getTargetPosition'
       },
       instanceSourceColors: {
         size: this.props.colorFormat.length,
@@ -160,24 +166,6 @@ export default class ArcLayer extends Layer {
     model.setUniforms({numSegments: NUM_SEGMENTS});
 
     return model;
-  }
-
-  calculateInstancePositions(attribute, {startRow, endRow}) {
-    const {data, getSourcePosition, getTargetPosition} = this.props;
-    const {value, size} = attribute;
-    let i = startRow * size;
-    const {iterable, objectInfo} = createIterable(data, startRow, endRow);
-    for (const object of iterable) {
-      objectInfo.index++;
-      const sourcePosition = getSourcePosition(object, objectInfo);
-      value[i++] = sourcePosition[0];
-      value[i++] = sourcePosition[1];
-      // Call `getTargetPosition` after `sourcePosition` is used in case both accessors write into
-      // the same temp array
-      const targetPosition = getTargetPosition(object, objectInfo);
-      value[i++] = targetPosition[0];
-      value[i++] = targetPosition[1];
-    }
   }
 }
 

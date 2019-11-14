@@ -470,15 +470,48 @@ export const TEST_CASES = [
         id: 'arc-lnglat',
         data: dataSamples.routes,
         opacity: 0.8,
-        strokeWidth: 2,
+        getWidth: 2,
         getSourcePosition: d => d.START,
         getTargetPosition: d => d.END,
         getSourceColor: d => [64, 255, 0],
-        getTargetColor: d => [0, 128, 200],
-        pickable: true
+        getTargetColor: d => [0, 128, 200]
       })
     ],
     goldenImage: './test/render/golden-images/arc-lnglat.png',
+    imageDiffOptions: !IS_HEADLESS && {
+      threshold: 0.985
+    }
+  },
+  {
+    name: 'arc-lnglat-3d',
+    viewState: {
+      latitude: 37.788,
+      longitude: -122.45,
+      zoom: 13,
+      pitch: 60,
+      bearing: 0
+    },
+    layers: [
+      new ArcLayer({
+        id: 'arc-lnglat-3d',
+        data: [
+          {source: [-122.46, 37.77, -150], target: [-122.44, 37.77, 450], height: 0.5},
+          {source: [-122.46, 37.77, -150], target: [-122.44, 37.77, 450], height: 1},
+          {source: [-122.46, 37.77, -150], target: [-122.44, 37.77, 450], height: 2},
+          {source: [-122.46, 37.78, 600], target: [-122.44, 37.78, 0], height: 0.5},
+          {source: [-122.46, 37.78, 600], target: [-122.44, 37.78, 0], height: 1},
+          {source: [-122.46, 37.78, 600], target: [-122.44, 37.78, 0], height: 2}
+        ],
+        opacity: 0.8,
+        getWidth: 4,
+        getSourcePosition: d => d.source,
+        getTargetPosition: d => d.target,
+        getHeight: d => d.height,
+        getSourceColor: d => [255, 255, 0],
+        getTargetColor: d => [255, 0, 0]
+      })
+    ],
+    goldenImage: './test/render/golden-images/arc-lnglat-3d.png',
     imageDiffOptions: !IS_HEADLESS && {
       threshold: 0.985
     }
@@ -1139,7 +1172,6 @@ export const TEST_CASES = [
         getWidth: f => 10,
         widthMinPixels: 1,
         pickable: false,
-        strokeWidth: 5,
         widthScale: 100,
         autoHighlight: false,
         highlightColor: [255, 255, 255, 255],
