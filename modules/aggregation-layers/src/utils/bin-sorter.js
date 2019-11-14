@@ -83,6 +83,16 @@ export default class BinSorter {
       .sort((a, b) => a.value - b.value);
   }
 
+  percentileToIndex([lowerPercentile, upperPercentile]) {
+    const len = this.sortedBins.length;
+    if (!len) {
+      return [0, 0];
+    }
+    const lowerIdx = Math.ceil((lowerPercentile / 100) * (len - 1));
+    const upperIdx = Math.floor((upperPercentile / 100) * (len - 1));
+
+    return [lowerIdx, upperIdx];
+  }
   /**
    * Get a mapping from cell/hexagon index to sorted bin
    * This is used to retrieve bin value for color calculation
@@ -106,13 +116,31 @@ export default class BinSorter {
    * @return {Array} array of new value range
    */
   getValueRange([lower, upper]) {
-    const len = this.sortedBins.length;
-    if (!len) {
-      return [0, 0];
-    }
-    const lowerIdx = Math.ceil((lower / 100) * (len - 1));
-    const upperIdx = Math.floor((upper / 100) * (len - 1));
-
+    const [lowerIdx, upperIdx] = this.percentileToIndex([lower, upper]);
     return [this.sortedBins[lowerIdx].value, this.sortedBins[upperIdx].value];
+  }
+
+  getValueDomainByScale(scale, [lower, upper]) {
+    const indexEdge = this.percentileToIndex([lower, upper]);
+    return this.getScaleDomain(scale, indexEdge);
+  }
+
+  getScaleDomain(scaleType, [lowerIdx, upperIdx]) {
+    const bins = this.sortedBins;
+
+    switch (scaleType) {
+      case 'quantize':
+      case 'linear':
+        return [bins[lowerIdx].value, bins[upperIdx].value];
+
+      case 'quantile':
+        return bins.slice(lowerIdx, upperIdx + 1).map(d => d.value);
+
+      case 'ordinal':
+        return bins.map(b => b.value).sort();
+
+      default:
+        return [bins[lowerIdx].value, bins[upperIdx].value];
+    }
   }
 }

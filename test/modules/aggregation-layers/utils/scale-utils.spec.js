@@ -2,10 +2,21 @@ import test from 'tape-catch';
 import {
   quantizeScale,
   getQuantileScale,
-  getOrdinalScale
+  getOrdinalScale,
+  getLinearScale
 } from '@deck.gl/aggregation-layers/utils/scale-utils';
 
 const RANGE = [100, 200, 300, 400, 500, 600, 700, 800, 900, 1000];
+const LINEAR_SCALE_TEST_CASES = [
+  {
+    title: 'multi-value-domain',
+    domain: [1, 10],
+    range: [2, 20],
+    value: 5,
+    result: 10
+  }
+];
+
 const QUANTIZE_SCALE_TEST_CASES = [
   {
     title: 'multi-value-domain',
@@ -97,6 +108,15 @@ test('scale-utils#import', t => {
   t.end();
 });
 
+test.only('scale-utils@linearScale', t => {
+  for (const tc of LINEAR_SCALE_TEST_CASES) {
+    const linearScale = getLinearScale(tc.domain, tc.range);
+    const result = linearScale(tc.value);
+    t.deepEqual(result, tc.result, `quantizeScale ${tc.title} returned expected value`);
+  }
+  t.end();
+});
+
 test('scale-utils#quantizeScale', t => {
   for (const tc of QUANTIZE_SCALE_TEST_CASES) {
     const result = quantizeScale(tc.domain, tc.range, tc.value);
@@ -120,7 +140,7 @@ test('scale-utils#quantileScale', t => {
   t.end();
 });
 
-test('scale-utils#ordinalScale', t => {
+test.only('scale-utils#ordinalScale', t => {
   for (const tc of ORDINAL_SCALE_TEST_CASES) {
     const ordinalScale = getOrdinalScale(tc.domain, tc.range);
     for (const i in tc.values) {
