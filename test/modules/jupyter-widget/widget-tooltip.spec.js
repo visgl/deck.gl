@@ -1,16 +1,14 @@
 // eslint-disable-next-line
 import test from 'tape-catch';
 
-import {getModule} from './utils.spec';
-
-const TOOLTIP_LIB = '@deck.gl/jupyter-widget/widget-tooltip';
+import * as widgetTooltipModule from '@deck.gl/jupyter-widget/widget-tooltip';
 
 const pickedInfo = {object: {elevationValue: 10, position: [0, 0]}, x: 0, y: 0, picked: true};
 
 // eslint-disable-next-line
 const TOOLTIP_HTML = {
   html:
-    '<div style="display: flex; flex-direction: row; justify-content: space-between; align-items: stretch;"><div class="header" style="font-weight: 700; margin-right: 10px; flex: 1;"></div><div class="value" style="flex: 0 0 auto; max-width: 250px; overflow: hidden; white-space: nowrap; text-overflow: ellipsis;"></div></div>',
+    '<div style="display: flex; flex-direction: row; justify-content: space-between; align-items: stretch;"><div class="header" style="font-weight: 700; margin-right: 10px; flex: 1 1 0%;"></div><div class="value" style="flex: 0 0 auto; max-width: 250px; overflow: hidden; white-space: nowrap; text-overflow: ellipsis;"></div></div>',
   style: {
     fontFamily: '"Helvetica Neue", Helvetica, Arial, sans-serif',
     display: 'flex',
@@ -21,25 +19,7 @@ const TOOLTIP_HTML = {
   }
 };
 
-function safelyGetModule(t) {
-  // Skip tests if in headless browser environment
-  let module;
-  try {
-    module = getModule(TOOLTIP_LIB);
-  } catch (err) {
-    return null;
-  }
-  return module;
-}
-
 test('getDefaultTooltip', t => {
-  const widgetTooltipModule = safelyGetModule(t);
-  if (!widgetTooltipModule) {
-    t.comment('Test skipped in a headless browser environment');
-    t.end();
-    return;
-  }
-
   Object.assign(pickedInfo, {picked: false});
   t.equal(
     widgetTooltipModule.getTooltipDefault(pickedInfo),
@@ -55,13 +35,6 @@ test('getDefaultTooltip', t => {
 });
 
 test('toText', t => {
-  const widgetTooltipModule = safelyGetModule(t);
-  if (!widgetTooltipModule) {
-    t.comment('Widget tooltip module failed to load');
-    t.end();
-    return;
-  }
-
   const TESTING_TABLE = [
     {
       input: ['arma', 'virumque', 'cano', 'Troiae'],
@@ -103,13 +76,6 @@ test('toText', t => {
 });
 
 test('substituteIn', t => {
-  const widgetTooltipModule = safelyGetModule(t);
-  if (!widgetTooltipModule) {
-    t.comment('Widget tooltip module failed to load');
-    t.end();
-    return;
-  }
-
   t.equal(
     widgetTooltipModule.substituteIn('"{quote}" - {origin}', {
       quote: "Be an optimist. There's not much use being anything else.",
@@ -121,13 +87,6 @@ test('substituteIn', t => {
 });
 
 test('makeTooltip', t => {
-  const widgetTooltipModule = safelyGetModule(t);
-  if (!widgetTooltipModule) {
-    t.comment('Widget tooltip module failed to load');
-    t.end();
-    return;
-  }
-
   const makeTooltip = widgetTooltipModule.default;
   t.equal(makeTooltip(null), null, 'If no tooltip JSON passed, return null');
   const htmlTooltip = {

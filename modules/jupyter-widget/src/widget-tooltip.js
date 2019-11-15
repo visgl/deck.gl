@@ -68,7 +68,7 @@ function setStyles(row, header, value) {
   Object.assign(header.style, {
     fontWeight: 700,
     marginRight: '10px',
-    flex: 1
+    flex: '1 1 0%'
   });
 
   Object.assign(value.style, {
