@@ -27,28 +27,36 @@ function safelyGetModule(t) {
   try {
     module = getModule(TOOLTIP_LIB);
   } catch (err) {
-    t.end();
+    return null;
   }
   return module;
 }
 
 test('getDefaultTooltip', t => {
-  const wt = safelyGetModule(t);
-  if (!wt) {
+  const widgetTooltipModule = safelyGetModule(t);
+  if (!widgetTooltipModule) {
+    t.comment('Widget tooltip module failed to load');
+    t.end();
     return;
   }
 
   Object.assign(pickedInfo, {picked: false});
-  t.equal(wt.getTooltipDefault(pickedInfo), null, 'should return null if nothing picked');
+  t.equal(
+    widgetTooltipModule.getTooltipDefault(pickedInfo),
+    null,
+    'should return null if nothing picked'
+  );
   Object.assign(pickedInfo, {picked: true});
-  const tooltip = wt.getTooltipDefault(pickedInfo);
+  const tooltip = widgetTooltipModule.getTooltipDefault(pickedInfo);
   t.deepEquals(tooltip, TOOLTIP_HTML, 'tooltip is expected result');
   t.end();
 });
 
 test('toText', t => {
-  const wt = safelyGetModule(t);
-  if (!wt) {
+  const widgetTooltipModule = safelyGetModule(t);
+  if (!widgetTooltipModule) {
+    t.comment('Widget tooltip module failed to load');
+    t.end();
     return;
   }
 
@@ -87,19 +95,21 @@ test('toText', t => {
     }
   ];
   for (const kv of TESTING_TABLE) {
-    t.equal(wt.toText(kv.input), kv.expected, kv.message);
+    t.equal(widgetTooltipModule.toText(kv.input), kv.expected, kv.message);
   }
   t.end();
 });
 
 test('substituteIn', t => {
-  const wt = safelyGetModule(t);
-  if (!wt) {
+  const widgetTooltipModule = safelyGetModule(t);
+  if (!widgetTooltipModule) {
+    t.comment('Widget tooltip module failed to load');
+    t.end();
     return;
   }
 
   t.equal(
-    wt.substituteIn('"{quote}" - {origin}', {
+    widgetTooltipModule.substituteIn('"{quote}" - {origin}', {
       quote: "Be an optimist. There's not much use being anything else.",
       origin: 'Winston Churchill'
     }),
@@ -109,11 +119,14 @@ test('substituteIn', t => {
 });
 
 test('makeTooltip', t => {
-  const wt = safelyGetModule(t);
-  if (!wt) {
+  const widgetTooltipModule = safelyGetModule(t);
+  if (!widgetTooltipModule) {
+    t.comment('Widget tooltip module failed to load');
+    t.end();
     return;
   }
-  const makeTooltip = wt.default;
+
+  const makeTooltip = widgetTooltipModule.default;
   t.equal(makeTooltip(null), null, 'If no tooltip JSON passed, return null');
   const htmlTooltip = {
     html: '<b>Elevation Value:</b> {elevationValue}',
