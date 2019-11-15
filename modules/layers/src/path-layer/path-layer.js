@@ -61,7 +61,7 @@ export default class PathLayer extends Layer {
     const attributeManager = this.getAttributeManager();
     /* eslint-disable max-len */
     attributeManager.addInstanced({
-      startPositions: {
+      positions: {
         size: 3,
         // Hack - Attribute class needs this to properly apply partial update
         // The first 3 numbers of the value is just padding
@@ -70,7 +70,7 @@ export default class PathLayer extends Layer {
         fp64: this.use64bitPositions(),
         transition: ATTRIBUTE_TRANSITION,
         accessor: 'getPath',
-        update: this.calculateStartPositions,
+        update: this.calculatePositions,
         noAlloc,
         shaderAttributes: {
           instanceLeftPositions: {
@@ -78,23 +78,12 @@ export default class PathLayer extends Layer {
           },
           instanceStartPositions: {
             offset: 12
-          }
-        }
-      },
-      endPositions: {
-        size: 3,
-        type: GL.DOUBLE,
-        fp64: this.use64bitPositions(),
-        transition: ATTRIBUTE_TRANSITION,
-        accessor: 'getPath',
-        update: this.calculateEndPositions,
-        noAlloc,
-        shaderAttributes: {
+          },
           instanceEndPositions: {
-            offset: 0
+            offset: 24
           },
           instanceRightPositions: {
-            offset: 12
+            offset: 36
           }
         }
       },
@@ -283,18 +272,11 @@ export default class PathLayer extends Layer {
     );
   }
 
-  calculateStartPositions(attribute) {
+  calculatePositions(attribute) {
     const {pathTesselator} = this.state;
 
     attribute.bufferLayout = pathTesselator.bufferLayout;
-    attribute.value = pathTesselator.get('startPositions');
-  }
-
-  calculateEndPositions(attribute) {
-    const {pathTesselator} = this.state;
-
-    attribute.bufferLayout = pathTesselator.bufferLayout;
-    attribute.value = pathTesselator.get('endPositions');
+    attribute.value = pathTesselator.get('positions');
   }
 
   calculateSegmentTypes(attribute) {

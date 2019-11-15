@@ -30,7 +30,7 @@ const SAMPLE_DATA = [
   {path: new Float64Array([1, 1, 2, 2, 3, 3]), width: 1, dashArray: [0, 0], color: [0, 0, 0]},
   {path: [[1, 1], [2, 2], [3, 3], [1, 1]], width: 3, dashArray: [2, 1], color: [0, 0, 255]}
 ];
-const INSTANCE_COUNT = 9;
+const INSTANCE_COUNT = 12;
 
 const TEST_DATA = [
   {
@@ -82,26 +82,17 @@ test('PathTesselator#constructor', t => {
       t.comment(`  ${testCase.title}`);
       const tesselator = new PathTesselator(Object.assign({}, testData, testCase.params));
 
-      t.ok(
-        ArrayBuffer.isView(tesselator.get('startPositions')),
-        'PathTesselator.get startPositions'
-      );
+      t.ok(ArrayBuffer.isView(tesselator.get('positions')), 'PathTesselator.get positions');
       t.deepEquals(
-        tesselator.get('startPositions').slice(0, 9),
-        [0, 0, 0, 1, 1, 0, 2, 2, 0],
-        'startPositions are filled'
+        tesselator.get('positions').slice(0, 12),
+        [0, 0, 0, 1, 1, 0, 2, 2, 0, 3, 3, 0],
+        'positions are filled'
       );
 
-      t.ok(ArrayBuffer.isView(tesselator.get('endPositions')), 'PathTesselator.get endPositions');
       t.deepEquals(
-        tesselator.get('endPositions').slice(0, 9),
-        [2, 2, 0, 3, 3, 0, 2, 2, 0],
-        'endPositions are filled'
-      );
-      t.deepEquals(
-        tesselator.get('endPositions').slice(21, 30),
-        [2, 2, 0, 3, 3, 0, 0, 0, 0],
-        'endPositions is handling loop correctly'
+        tesselator.get('positions').slice(24, 33),
+        [2, 2, 0, 3, 3, 0, 1, 1, 0],
+        'positions is handling loop correctly'
       );
     });
   });
@@ -125,36 +116,76 @@ test('PathTesselator#partial update', t => {
     positionFormat: 'XY'
   });
 
-  let startPositions = tesselator.get('startPositions').slice(0, 18);
-  t.is(tesselator.instanceCount, 7, 'Initial instance count');
+  let positions = tesselator.get('positions').slice(0, 21);
+  t.is(tesselator.instanceCount, 9, 'Initial instance count');
   t.deepEquals(
-    startPositions,
-    [0, 0, 0, 1, 1, 0, 2, 2, 0, 1, 1, 0, 2, 2, 0, 3, 3, 0],
-    'startPositions'
+    positions,
+    [0, 0, 0, 1, 1, 0, 2, 2, 0, 3, 3, 0, 1, 1, 0, 2, 2, 0, 3, 3, 0],
+    'positions'
   );
   t.deepEquals(Array.from(accessorCalled), ['A', 'B'], 'Accessor called on all data');
 
   sampleData[2] = {path: [[4, 4], [5, 5], [6, 6]], id: 'C'};
   accessorCalled.clear();
   tesselator.updatePartialGeometry({startRow: 2});
-  startPositions = tesselator.get('startPositions').slice(0, 30);
-  t.is(tesselator.instanceCount, 9, 'Updated instance count');
+  positions = tesselator.get('positions').slice(0, 39);
+  t.is(tesselator.instanceCount, 12, 'Updated instance count');
   t.deepEquals(
-    startPositions,
-    [0, 0, 0, 1, 1, 0, 2, 2, 0, 1, 1, 0, 2, 2, 0, 3, 3, 0, 1, 1, 0, 2, 2, 0, 4, 4, 0, 5, 5, 0],
-    'startPositions'
+    positions,
+    [
+      0,
+      0,
+      0,
+      1,
+      1,
+      0,
+      2,
+      2,
+      0,
+      3,
+      3,
+      0,
+      1,
+      1,
+      0,
+      2,
+      2,
+      0,
+      3,
+      3,
+      0,
+      1,
+      1,
+      0,
+      2,
+      2,
+      0,
+      3,
+      3,
+      0,
+      4,
+      4,
+      0,
+      5,
+      5,
+      0,
+      6,
+      6,
+      0
+    ],
+    'positions'
   );
   t.deepEquals(Array.from(accessorCalled), ['C'], 'Accessor called only on partial data');
 
   sampleData[0] = {path: [[6, 6], [5, 5], [4, 4]], id: 'A'};
   accessorCalled.clear();
   tesselator.updatePartialGeometry({startRow: 0, endRow: 1});
-  startPositions = tesselator.get('startPositions').slice(0, 30);
-  t.is(tesselator.instanceCount, 9, 'Updated instance count');
+  positions = tesselator.get('positions').slice(0, 30);
+  t.is(tesselator.instanceCount, 12, 'Updated instance count');
   t.deepEquals(
-    startPositions,
-    [0, 0, 0, 6, 6, 0, 5, 5, 0, 1, 1, 0, 2, 2, 0, 3, 3, 0, 1, 1, 0, 2, 2, 0, 4, 4, 0, 5, 5, 0],
-    'startPositions'
+    positions,
+    [0, 0, 0, 6, 6, 0, 5, 5, 0, 4, 4, 0, 1, 1, 0, 2, 2, 0, 3, 3, 0, 1, 1, 0, 2, 2, 0, 3, 3, 0],
+    'positions'
   );
   t.deepEquals(Array.from(accessorCalled), ['A'], 'Accessor called only on partial data');
 
