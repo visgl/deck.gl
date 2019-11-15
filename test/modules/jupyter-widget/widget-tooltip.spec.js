@@ -21,7 +21,10 @@ const TOOLTIP_HTML = {
 };
 
 function cleanup() {
-  document.querySelector('.deck-tooltip').remove();
+  const tooltip = document.querySelector('.deck-tooltip');
+  if (tooltip) {
+    tooltip.remove();
+  }
 }
 
 test('getDefaultTooltip', t => {
