@@ -87,10 +87,10 @@ test('Tooltip#remove', t => {
   const {canvasContainer, canvas, remove} = setupCanvasTest();
   const tooltip = new Tooltip(canvas);
 
-  t.equals(canvasContainer.querySelector('.deck-tooltip').length, 1, 'Tooltip element present');
+  t.equals(canvasContainer.querySelectorAll('.deck-tooltip').length, 1, 'Tooltip element present');
   tooltip.remove();
   t.equals(
-    canvasContainer.querySelector('.deck-tooltip').length,
+    canvasContainer.querySelectorAll('.deck-tooltip').length,
     0,
     'Tooltip element successfully removed'
   );
