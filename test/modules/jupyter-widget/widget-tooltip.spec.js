@@ -35,7 +35,7 @@ function safelyGetModule(t) {
 test('getDefaultTooltip', t => {
   const widgetTooltipModule = safelyGetModule(t);
   if (!widgetTooltipModule) {
-    t.comment('Widget tooltip module failed to load');
+    t.comment('Test skipped in a headless browser environment');
     t.end();
     return;
   }
@@ -49,6 +49,8 @@ test('getDefaultTooltip', t => {
   Object.assign(pickedInfo, {picked: true});
   const tooltip = widgetTooltipModule.getTooltipDefault(pickedInfo);
   t.deepEquals(tooltip, TOOLTIP_HTML, 'tooltip is expected result');
+  const tooltipCached = widgetTooltipModule.getTooltipDefault(pickedInfo);
+  t.deepEquals(tooltipCached, TOOLTIP_HTML, 'tooltip called twice hits its cached value');
   t.end();
 });
 
@@ -139,5 +141,17 @@ test('makeTooltip', t => {
     style: {backgroundColor: 'lemonchiffon'},
     html: '<b>Elevation Value:</b> 10'
   });
+
+  const textTooltip = {
+    text: 'testing',
+    style: {
+      backgroundColor: 'lemonchiffon'
+    }
+  };
+  t.deepEquals(textTooltip, {
+    style: {backgroundColor: 'lemonchiffon'},
+    text: 'testing'
+  });
+
   t.end();
 });
