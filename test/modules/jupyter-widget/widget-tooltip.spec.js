@@ -1,4 +1,5 @@
 // eslint-disable-next-line
+/* global document */
 import test from 'tape-catch';
 
 import * as widgetTooltipModule from '@deck.gl/jupyter-widget/widget-tooltip';
@@ -8,7 +9,7 @@ const pickedInfo = {object: {elevationValue: 10, position: [0, 0]}, x: 0, y: 0, 
 // eslint-disable-next-line
 const TOOLTIP_HTML = {
   html:
-    '<div style="display: flex; flex-direction: row; justify-content: space-between; align-items: stretch;"><div class="header" style="font-weight: 700; margin-right: 10px; flex: 1 1 0%;">elevationValue</div><div class="value" style="flex: 0 0 auto; max-width: 250px; overflow: hidden; white-space: nowrap; text-overflow: ellipsis;"></div></div>',
+    '<div style="display: flex; flex-direction: row; justify-content: space-between; align-items: stretch;"><div class="header" style="font-weight: 700; margin-right: 10px; flex: 1 1 0%;"></div><div class="value" style="flex: 0 0 auto; max-width: 250px; overflow: hidden; white-space: nowrap; text-overflow: ellipsis;"></div></div>',
   style: {
     fontFamily: '"Helvetica Neue", Helvetica, Arial, sans-serif',
     display: 'flex',
@@ -18,6 +19,10 @@ const TOOLTIP_HTML = {
     zIndex: 2
   }
 };
+
+function cleanup() {
+  document.querySelector('.deck-tooltip').remove();
+}
 
 test('getDefaultTooltip', t => {
   Object.assign(pickedInfo, {picked: false});
@@ -31,6 +36,7 @@ test('getDefaultTooltip', t => {
   t.deepEquals(tooltip, TOOLTIP_HTML, 'tooltip is expected result');
   const tooltipCached = widgetTooltipModule.getTooltipDefault(pickedInfo);
   t.deepEquals(tooltipCached, TOOLTIP_HTML, 'tooltip called twice hits its cached value');
+  cleanup();
   t.end();
 });
 
@@ -72,6 +78,7 @@ test('toText', t => {
   for (const kv of TESTING_TABLE) {
     t.equal(widgetTooltipModule.toText(kv.input), kv.expected, kv.message);
   }
+  cleanup();
   t.end();
 });
 
@@ -83,6 +90,7 @@ test('substituteIn', t => {
     }),
     '"Be an optimist. There\'s not much use being anything else." - Winston Churchill'
   );
+  cleanup();
   t.end();
 });
 
@@ -112,5 +120,6 @@ test('makeTooltip', t => {
     text: 'testing'
   });
 
+  cleanup();
   t.end();
 });
