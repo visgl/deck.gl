@@ -104,7 +104,7 @@ Each key-value pair in `data.attributes` maps from an accessor prop name (e.g. `
     + `offset` (Number) - offset of the first vertex attribute into the buffer, in bytes
     + `stride` (Number) - the offset between the beginning of consecutive vertex attributes, in bytes
 
-The `value` array represents a flat buffer that stacks the value for each object that would otherwise be returned by a function accessor. For example, `getPosition: d => [d.x, d.y, d.z]` is equivalent to `getPosition: {value: new Float64Array([x0, y0, z0, x1, y1, z1, ...])}`. This buffer can be constructed on the server side by something like `data.flatMap(d => [d.x, d.y, d.z])`.
+The `value` array represents a flat buffer that contains the value for each object that would otherwise be returned by a function accessor. For example, `getPosition: d => [d.x, d.y, d.z]` is equivalent to `getPosition: {value: new Float64Array([x0, y0, z0, x1, y1, z1, ...])}`. This buffer can be constructed by something like `data.flatMap(d => [d.x, d.y, d.z])`.
 
 Additionally, `attribute.vertexCounts` must be specified if the attributes contain variable-width data, for example paths and polygons. `vertexCounts` must be an array that contains the number of vertices at each object index. For most layers, it is assumed to be `new Array(data.length).fill(1)`.
 
@@ -145,12 +145,12 @@ new PointCloudLayer({
    binary data: {
      positions: [p00x, p00y, p01x, p01y, p02x, p02y, p10x, p10y, ...],
      colors: [p00r, p00g, p00b, p01r, p01g, p01b, p02r, p02g, p02b, p10r, p10g, p10b, ...],
-     poingCountPerPath: [3, 2, ...]
+     pointCountPerPath: [3, 2, ...]
    }
 */
 new PathLayer({
   data: {
-    length: binaryData.poingCountPerPath.length,
+    length: binaryData.pointCountPerPath.length,
     vertexCounts: binaryData.pointCountPerPath,
     attributes: {
       getPath: {value: binaryData.positions, size: 2},
