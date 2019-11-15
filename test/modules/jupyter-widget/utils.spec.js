@@ -59,9 +59,7 @@ export class DummyManager extends widgets.ManagerBase {
 
   loadClass(className, moduleName, moduleVersion) {
     if (moduleName === '@jupyter-widgets/base') {
-      // eslint-disable-next-line
       if (widgets[className]) {
-        // eslint-disable-next-line
         return Promise.resolve(widgets[className]);
       }
       return Promise.reject(`Cannot find class ${className}`);
