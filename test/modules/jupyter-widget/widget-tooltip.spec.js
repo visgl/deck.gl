@@ -8,7 +8,7 @@ const pickedInfo = {object: {elevationValue: 10, position: [0, 0]}, x: 0, y: 0, 
 // eslint-disable-next-line
 const TOOLTIP_HTML = {
   html:
-    '<div style="display: flex; flex-direction: row; justify-content: space-between; align-items: stretch;"><div class="header" style="font-weight: 700; margin-right: 10px; flex: 1 1 0%;"></div><div class="value" style="flex: 0 0 auto; max-width: 250px; overflow: hidden; white-space: nowrap; text-overflow: ellipsis;"></div></div>',
+    '<div style="display: flex; flex-direction: row; justify-content: space-between; align-items: stretch;"><div class="header" style="font-weight: 700; margin-right: 10px; flex: 1 1 0%;">elevationValue</div><div class="value" style="flex: 0 0 auto; max-width: 250px; overflow: hidden; white-space: nowrap; text-overflow: ellipsis;"></div></div>',
   style: {
     fontFamily: '"Helvetica Neue", Helvetica, Arial, sans-serif',
     display: 'flex',
