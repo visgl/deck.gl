@@ -70,27 +70,43 @@ Before v7, once the data is downloaded, the application is still required to con
 
     This method skips step 2 entirely, and is possibly the most performant we'll ever get. However, it requires the application (BE and FE) to have knowledge of the internal implementation of a layer, including attribute names, array types and layouts, which is not documented and prone to breakage between minor releases.
 
+## Terms
+
+- **Logical attribute** - the attribute provided by the user, in the format from the layer documentation.
+- **Deck attribute** - the attribute created by the `AttributeManager`, by applying a pre-defined transform to the logical attribute(s). The Deck attribute is mapped 1:1 with a WebGL buffer.
+- **Shader attribute** - the attribute seen by the vertex shader. A Deck attribute may map to multiple shader attributes using the same WebGL buffer and different accessors.
+
+For example, for scatterplot positions, the logical attribute is a `Float64Array` in the format of  `x0, y0, z0, x1, y1, z1, ...`. The Deck attribute is an interleved `Float32Array` in the format of `x0, y0, z0, x0Low, y0Low, z0Low, ...`. Two shader attributes are created from the Deck attribute: `instancePositions` and `instancePositions64Low`.
+
+Example2: for polygon positions, the logical attribute is an array that flattens all polygon vertices. The Deck attribute include a normalized `positions` array (vertices may be added to close loops) and an `indices` array from triangulation.
 
 ## Goals
 
 Moving into v8.x, we want to make binary data a first-class citizen, in the following ways:
 
-* All core layers accept a variety of binary data inputs, without exposing the internal layer implementation
+* All core layers accept binary data inputs as logical attributes.
 * Binary data are directly uploaded to the GPU if possible, and basic packing operations (e.g. position interleving, transform matrix construction) are performed on the GPU instead of CPU
 
 
 ## Proposal
 
-Adding an additional override to the `accessor` prop type that is a string. `props.data[accessor]` should yield a loaders.gl-compatible "attribute descriptor" object.
-We shall explain this in the documentation as follows:
+Allow `data.attributes` use an accessor name as the key that map to a loaders.gl-compatible "attribute descriptor" object.
+We shall explain this in the [binary data developer guide](/docs/developer-guide/performance.md#on-using-binary-data) as follows:
 
-A layer prop of type `accessor` can optionally be a string. If a string is provided, it is used as the key to query from `data` for a JavaScript object containing the following fields:
+Each key-value pair in `data.attributes` maps from an accessor prop name (e.g. `getPosition`) to one of the following formats:
 
-- `value` ([TypedArray](https://developer.mozilla.org/en/docs/Web/JavaScript/Reference/Global_Objects/TypedArray)) - a flat buffer that stacks the value for each object that would otherwise be returned by a function accessor. For example, `getPosition: d => [d.x, d.y, d.z]` is equivalent to `getPosition: {value: new Float64Array([x0, y0, z0, x1, y1, z1, ...])}`. This buffer can be constructed on the server side by something like `data.flatMap(d => [d.x, d.y, d.z])`.
-- `size` (Number) - the number of elements per value in the typed array. For example, an RGB color has size 3, and an RGBA color has size 4.
-- `elementStride` (Number, optional) - the length per vertex in the typed array. This is needed if the buffer contains interleved information that should not be used for this accessor. Default to `size`.
-- `elementOffset` (Number, optional) - the number of elements into each vertex where the value starts. Default to `0`.
-- `bufferLayout` (Array, optional) - the number of vertices per object. This is needed by various-width data sources such as `PathLayer` and `PolygonLayer`, referring to the number of points per path/polygon respectively. For most layers, it is assumed to be `[1, 1, 1, ...]`.
+  - luma.gl `Buffer` instance
+  - A typed array
+  - An object containing the following optional fields. For more information, see [WebGL vertex attribute API](https://developer.mozilla.org/en-US/docs/Web/API/WebGLRenderingContext/vertexAttribPointer).
+    + `buffer` (Buffer)
+    + `value` ([TypedArray](https://developer.mozilla.org/en/docs/Web/JavaScript/Reference/Global_Objects/TypedArray))
+    + `size` (Number) - the number of elements per vertex attribute.
+    + `offset` (Number) - offset of the first vertex attribute into the buffer, in bytes
+    + `stride` (Number) - the offset between the beginning of consecutive vertex attributes, in bytes
+
+The `value` array represents a flat buffer that stacks the value for each object that would otherwise be returned by a function accessor. For example, `getPosition: d => [d.x, d.y, d.z]` is equivalent to `getPosition: {value: new Float64Array([x0, y0, z0, x1, y1, z1, ...])}`. This buffer can be constructed on the server side by something like `data.flatMap(d => [d.x, d.y, d.z])`.
+
+Additionally, `attribute.vertexCounts` must be specified if the attributes contain variable-width data, for example paths and polygons. `vertexCounts` must be an array that contains the number of vertices at each object index. For most layers, it is assumed to be `new Array(data.length).fill(1)`.
 
 ```js
 // EXAMPLE 1 - PointCloudLayer
@@ -108,12 +124,12 @@ A layer prop of type `accessor` can optionally be a string. If a string is provi
 new PointCloudLayer({
   data: {
     length: binaryData.length / 6,
-    positions: {value: binaryData, size: 2, elementStride: 6, elementOffset: 0},
-    colors: {value: binaryData, size: 4, elementStride: 6, elementOffset: 2, normalized: true}
-  },
-  getPosition: 'positions',
-  getColor: 'colors',
-  getNormal: [0, 0, 0]
+    attributes: {
+      getPosition: {value: binaryData, size: 2, elementStride: 6, elementOffset: 0},
+      getColor: {value: binaryData, size: 4, elementStride: 6, elementOffset: 2, normalized: true},
+      getNormal: {value: [0, 0, 0], constant: true}
+    }
+  }
 });
 ```
 
@@ -135,17 +151,18 @@ new PointCloudLayer({
 new PathLayer({
   data: {
     length: binaryData.poingCountPerPath.length,
-    paths: {value: binaryData.positions, size: 2, bufferLayout: binaryData.pointCountPerPath},
-    colors: {value: binaryData.colors, size: 3, bufferLayout: pointCountPerPath}
-  },
-  getPath: 'paths',
-  getColor: 'colors'
+    vertexCounts: binaryData.pointCountPerPath,
+    attributes: {
+      getPath: {value: binaryData.positions, size: 2},
+      getColor: {value: binaryData.colors, size: 3}
+    }
+  }
 });
 ```
 
 Implementation notes:
 
-* If an accessor turns out to be a string, the `AttributeManager` will attempt to retrieve the information from `data` and pass it to the `Attribute` instance.
+* If an accessor name appears in `data.attributes`, the `AttributeManager` will pass it to the `Attribute` instance as a "logical attribute".
 * For auto-updated attributes (most common), the attribute will directly upload the buffer to GPU, skipping the local packing step.
 * For attributes that require CPU-based processing (e.g. polygon normalization, path tesselation, icon mapping), the buffer will be treated as a source from which the auto updater draws values from, similar to calling an accessor function for each object.
 
@@ -155,17 +172,6 @@ The advantages of this new API include:
 * No dependency on undocumented information. To switch to using binary, the user can simply "flatten" their data with `data.flatMap(accessor)`, where `accessor` is a function that already works in the traditional use case. If tesselation/transform is required, the `Attribute` class will do it under the hood, hiding the implementation detail from applications.
 * loaders.gl friendly. When loading from an URL with e.g. a CSV or Arrow loader, the binaries will be accessible by specifying a "path" into the parsed data.
 * Future extensibility. This new API will allow users to prepare data and structure applications in a way that may naturally transition into custom GPU-based data processing, e.g.
-
-```js
-new PointCloudLayer({
-  data: {
-    ...
-    longitude: {value: <Float32Array>, size: 1},
-    latitude: {value: <Float32Array>, size: 1}
-  },
-  getPosition: new GPUData({sources: ['longitude', 'latitude'], operation: 'join'})
-});
-```
 
 Relevant RFCs for full data frame support:
 
