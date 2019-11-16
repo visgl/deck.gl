@@ -61,7 +61,15 @@ function padArrayChunk({source, target, start = 0, end, getData}) {
  * @params {Array<Number>} [sourceVertexStarts] - subdivision of the original data in [object0StartIndex, object1StartIndex, ...]
  * @params {Array<Number>} [targetVertexStarts] - subdivision of the output data in [object0StartIndex, object1StartIndex, ...]
  */
-export function padArray({source, target, size, offset = 0, getData, sourceVertexStarts, targetVertexStarts}) {
+export function padArray({
+  source,
+  target,
+  size,
+  offset = 0,
+  getData,
+  sourceVertexStarts,
+  targetVertexStarts
+}) {
   if (!Array.isArray(targetVertexStarts)) {
     // Flat arrays
     padArrayChunk({

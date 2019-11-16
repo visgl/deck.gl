@@ -262,7 +262,8 @@ export default class Attribute extends DataColumn {
 
       if (vertexStarts) {
         attribute._normalizeValue(objectValue, objectInfo.target);
-        const numVertices = (vertexStarts[objectInfo.index + 1] || numInstances) - vertexStarts[objectInfo.index];
+        const numVertices =
+          (vertexStarts[objectInfo.index + 1] || numInstances) - vertexStarts[objectInfo.index];
         fillArray({
           target: attribute.value,
           source: objectInfo.target,
