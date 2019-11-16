@@ -36,7 +36,6 @@ const EXCLUDES = new Set(['position', 'index']);
 export function tabularize(json) {
   // Turns a JSON object of picked info into HTML for a tooltip
   const dataTable = getDiv();
-  dataTable.className = 'dataTable';
 
   // Creates rows of two columns for the tooltip
   for (const key in json) {
@@ -45,12 +44,12 @@ export function tabularize(json) {
     }
     const header = getDiv();
     header.className = 'header';
-    header.innerText = key;
+    header.textContent = key;
 
     const valueElement = getDiv();
     valueElement.className = 'value';
 
-    valueElement.innerText = toText(json[key]);
+    valueElement.textContent = toText(json[key]);
 
     const row = getDiv();
 
@@ -60,6 +59,7 @@ export function tabularize(json) {
     row.appendChild(valueElement);
     dataTable.appendChild(row);
   }
+
   return dataTable.innerHTML;
 }
 
