@@ -216,7 +216,7 @@ export default class AttributeManager {
   update({
     data,
     numInstances,
-    bufferLayout,
+    vertexStarts,
     transitions,
     props = {},
     buffers = {},
@@ -246,7 +246,7 @@ export default class AttributeManager {
         this._updateAttribute({
           attribute,
           numInstances,
-          bufferLayout,
+          vertexStarts,
           data,
           props,
           context

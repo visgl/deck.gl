@@ -84,21 +84,17 @@ if(vTime > currentTime || vTime < currentTime - trailLength) {
     const {data, getTimestamps} = this.props;
 
     const {
-      pathTesselator: {bufferLayout, instanceCount}
+      pathTesselator: {vertexStarts, instanceCount}
     } = this.state;
     const value = new Float32Array(instanceCount * 2);
 
     const {iterable, objectInfo} = createIterable(data, startRow, endRow);
-    let i = 0;
-
-    for (let objectIndex = 0; objectIndex < startRow; objectIndex++) {
-      i += bufferLayout[objectIndex] * 2;
-    }
+    let i = vertexStarts[startRow] * 2;
 
     for (const object of iterable) {
       objectInfo.index++;
 
-      const geometrySize = bufferLayout[objectInfo.index];
+      const maxI = (vertexStarts[objectInfo.index + 1] || instanceCount) * 2;
       const timestamps = getTimestamps(object, objectInfo);
 
       // Support for legacy use case is removed in v8.0
@@ -106,7 +102,7 @@ if(vTime > currentTime || vTime < currentTime - trailLength) {
       log.assert(timestamps, 'TrisLayer: invalid timestamps');
 
       // For each line segment, we have [startTimestamp, endTimestamp]
-      for (let j = 0; j < geometrySize; j++) {
+      for (let j = 0; i < maxI; j++) {
         value[i++] = timestamps[j];
         value[i++] = timestamps[j + 1];
       }

@@ -425,12 +425,12 @@ export default class Layer extends Component {
 
     // Figure out data length
     const numInstances = this.getNumInstances(props);
-    const bufferLayout = this.getBufferLayout(props);
+    const vertexStarts = this.getVertexStarts(props);
 
     attributeManager.update({
       data: props.data,
       numInstances,
-      bufferLayout,
+      vertexStarts,
       props,
       transitions: props.transitions,
       buffers: props,
@@ -554,17 +554,17 @@ export default class Layer extends Component {
   // The default (null) is one value each object.
   // Some data formats (e.g. paths, polygons) have various length. Their buffer layout
   //  is in the form of [L0, L1, L2, ...]
-  getBufferLayout(props) {
+  getVertexStarts(props) {
     props = props || this.props;
 
-    // First Check if bufferLayout is provided as an explicit value
-    if (props.bufferLayout !== undefined) {
-      return props.bufferLayout;
+    // First Check if vertexStarts is provided as an explicit value
+    if (props.vertexStarts !== undefined) {
+      return props.vertexStarts;
     }
 
     // Second check if the layer has set its own value
-    if (this.state && this.state.bufferLayout !== undefined) {
-      return this.state.bufferLayout;
+    if (this.state && this.state.vertexStarts) {
+      return this.state.vertexStarts;
     }
 
     return null;

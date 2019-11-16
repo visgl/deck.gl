@@ -143,7 +143,7 @@ export default class PathLayer extends Layer {
       });
       this.setState({
         numInstances: pathTesselator.instanceCount,
-        bufferLayout: pathTesselator.bufferLayout
+        vertexStarts: pathTesselator.vertexStarts
       });
       if (!changeFlags.dataChanged) {
         // Base `layer.updateState` only invalidates all attributes on data change
@@ -275,14 +275,14 @@ export default class PathLayer extends Layer {
   calculatePositions(attribute) {
     const {pathTesselator} = this.state;
 
-    attribute.bufferLayout = pathTesselator.bufferLayout;
+    attribute.vertexStarts = pathTesselator.vertexStarts;
     attribute.value = pathTesselator.get('positions');
   }
 
   calculateSegmentTypes(attribute) {
     const {pathTesselator} = this.state;
 
-    attribute.bufferLayout = pathTesselator.bufferLayout;
+    attribute.vertexStarts = pathTesselator.vertexStarts;
     attribute.value = pathTesselator.get('segmentTypes');
   }
 }

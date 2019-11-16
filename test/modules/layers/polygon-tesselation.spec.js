@@ -150,7 +150,7 @@ test('PolygonTesselator#constructor', t => {
 
       t.is(tesselator.instanceCount, 73, 'PolygonTesselator counts points correctly');
       t.is(tesselator.vertexCount, 135, 'PolygonTesselator counts indices correctly');
-      t.ok(Array.isArray(tesselator.bufferLayout), 'PolygonTesselator.bufferLayout');
+      t.ok(Array.isArray(tesselator.vertexStarts), 'PolygonTesselator.vertexStarts');
 
       t.ok(ArrayBuffer.isView(tesselator.get('indices')), 'PolygonTesselator.get indices');
       t.ok(ArrayBuffer.isView(tesselator.get('positions')), 'PolygonTesselator.get positions');

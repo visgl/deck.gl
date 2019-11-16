@@ -66,7 +66,7 @@ export default class PolygonTesselator extends Tesselator {
 
   // Flatten the indices array
   _updateIndices(polygon, {geometryIndex, vertexStart: offset, indexStart}) {
-    const {attributes, indexLayout, typedArrayManager} = this;
+    const {attributes, indexStarts, typedArrayManager} = this;
 
     let target = attributes.indices;
     let i = indexStart;
@@ -84,7 +84,7 @@ export default class PolygonTesselator extends Tesselator {
       target[i++] = indices[j] + offset;
     }
 
-    indexLayout[geometryIndex] = indices.length;
+    indexStarts[geometryIndex + 1] = indexStart + indices.length;
     attributes.indices = target;
   }
 
