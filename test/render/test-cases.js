@@ -97,6 +97,8 @@ const HEXAGON_LAYER_INFO = {
   }
 };
 
+const POINTCLOUD = dataSamples.getPointCloud();
+
 function getMean(pts, key) {
   const filtered = pts.filter(pt => Number.isFinite(pt[key]));
 
@@ -550,7 +552,6 @@ export const TEST_CASES = [
       bearing: 0
     },
     // rendering times
-    renderingTimes: 2,
     layers: [
       new IconLayer({
         id: 'icon-lnglat',
@@ -574,6 +575,50 @@ export const TEST_CASES = [
     goldenImage: './test/render/golden-images/icon-lnglat.png'
   },
   {
+    name: 'icon-lnglat-external-buffer',
+    viewState: {
+      latitude: 37.751537058389985,
+      longitude: -122.42694203247012,
+      zoom: 11.5,
+      pitch: 0,
+      bearing: 0
+    },
+    // rendering times
+    layers: [
+      new IconLayer({
+        id: 'icon-lnglat',
+        data: {
+          length: dataSamples.points.length,
+          attributes: {
+            getPosition: {
+              value: new Float32Array(dataSamples.points.flatMap(d => d.COORDINATES)),
+              size: 2
+            },
+            getSize: new Float32Array(dataSamples.points.flatMap(d => (d.RACKS > 2 ? 2 : 1))),
+            getIcon: {
+              value: new Uint8Array(
+                dataSamples.points.flatMap(d => (d.PLACEMENT === 'SW' ? 1 : 2))
+              ),
+              size: 1
+            }
+          }
+        },
+        iconAtlas: ICON_ATLAS,
+        iconMapping: {1: dataSamples.iconAtlas.marker, 2: dataSamples.iconAtlas['marker-warning']},
+        sizeScale: 12,
+        getColor: [64, 64, 72],
+        opacity: 0.8,
+        pickable: true
+      })
+    ],
+    onAfterRender: ({layers, done}) => {
+      if (layers[0].state.iconManager.getTexture()) {
+        done();
+      }
+    },
+    goldenImage: './test/render/golden-images/icon-lnglat.png'
+  },
+  {
     name: 'icon-lnglat-facing-up',
     viewState: {
       latitude: 37.751537058389985,
@@ -582,8 +627,6 @@ export const TEST_CASES = [
       pitch: 60,
       bearing: 0
     },
-    // rendering times
-    renderingTimes: 2,
     layers: [
       new IconLayer({
         id: 'icon-lnglat',
@@ -1119,7 +1162,7 @@ export const TEST_CASES = [
     layers: [
       new PointCloudLayer({
         id: 'pointcloud-lnglat',
-        data: dataSamples.getPointCloud(),
+        data: POINTCLOUD,
         coordinateSystem: COORDINATE_SYSTEM.LNGLAT_OFFSETS,
         coordinateOrigin: dataSamples.positionOrigin,
         getPosition: d => [d.position[0] * 1e-5, d.position[1] * 1e-5, d.position[2]],
@@ -1143,12 +1186,16 @@ export const TEST_CASES = [
     layers: [
       new PointCloudLayer({
         id: 'pointcloud-meter',
-        data: dataSamples.getPointCloud(),
+        data: {
+          length: POINTCLOUD.length,
+          attributes: {
+            getPosition: new Float32Array(POINTCLOUD.flatMap(d => d.position)),
+            getNormal: new Float32Array(POINTCLOUD.flatMap(d => d.normal)),
+            getColor: {value: new Uint8Array(POINTCLOUD.flatMap(d => d.color)), size: 3}
+          }
+        },
         coordinateSystem: COORDINATE_SYSTEM.METER_OFFSETS,
         coordinateOrigin: dataSamples.positionOrigin,
-        getPosition: d => d.position,
-        getNormal: d => d.normal,
-        getColor: d => d.color,
         pointSize: 2,
         pickable: true
       })

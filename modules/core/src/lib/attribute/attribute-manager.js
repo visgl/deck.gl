@@ -216,7 +216,7 @@ export default class AttributeManager {
   update({
     data,
     numInstances,
-    startIndices,
+    startIndices = null,
     transitions,
     props = {},
     buffers = {},
@@ -232,21 +232,21 @@ export default class AttributeManager {
 
     for (const attributeName in this.attributes) {
       const attribute = this.attributes[attributeName];
+      const accessorName = attribute.settings.accessor;
+      attribute.startIndices = startIndices;
 
-      if (
-        attribute.setExternalBuffer(
-          buffers[attributeName] || (data.attributes && data.attributes[attributeName])
-        )
-      ) {
-        // Attribute is using external buffer from the props
-      } else if (attribute.setConstantValue(props[attribute.settings.accessor])) {
-        // Attribute is using generic value from the props
+      if (attribute.setVirtualBuffer(buffers[attributeName])) {
+        // Step 1: try set virtual attribute from external buffers
+      } else if (attribute.setLogicalBuffer(buffers[accessorName], data.startIndices)) {
+        // Step 2: try set logical attribute from external buffers
+      } else if (attribute.setConstantValue(props[accessorName])) {
+        // Step 3: try set constant value from props
       } else if (attribute.needsUpdate()) {
+        // Step 4: update via updater callback
         updated = true;
         this._updateAttribute({
           attribute,
           numInstances,
-          startIndices,
           data,
           props,
           context

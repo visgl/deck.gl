@@ -144,7 +144,7 @@ test('AttributeManager.update - 0 numInstances', t => {
   t.end();
 });
 
-test('AttributeManager.update - external buffers', t => {
+test('AttributeManager.update - external virtual buffers', t => {
   const attributeManager = new AttributeManager(gl);
 
   const dummyUpdate = () => t.fail('updater should not be called when external buffer is present');
@@ -188,6 +188,89 @@ test('AttributeManager.update - external buffers', t => {
     }
   });
   t.is(colors.getAccessor().type, gl.UNSIGNED_INT, 'colors accessor is set to correct type');
+
+  t.end();
+});
+
+test('AttributeManager.update - external logical buffers', t => {
+  const attributeManager = new AttributeManager(gl);
+
+  const dummyAccessor = () =>
+    t.fail('accessor should not be called when external buffer is present');
+
+  attributeManager.add({
+    positions: {size: 2, accessor: 'getPosition'},
+    colors: {size: 4, type: GL.UNSIGNED_BYTE, accessor: 'getColor', defaultValue: [0, 0, 0, 255]},
+    types: {size: 1, accessor: 'getType', transform: x => x - 65}
+  });
+
+  // First update, should autoalloc and update the value array
+  attributeManager.update({
+    numInstances: 2,
+    data: {length: 2},
+    props: {
+      getPosition: dummyAccessor,
+      getColor: dummyAccessor,
+      getType: dummyAccessor
+    },
+    buffers: {
+      getPosition: new Float32Array([1, 1, 2, 2]),
+      getColor: {value: new Uint8ClampedArray([255, 0, 0, 0, 255, 0]), size: 3},
+      getType: new Uint8Array([65, 68])
+    }
+  });
+
+  let attribute = attributeManager.getAttributes()['positions'];
+  t.deepEqual(attribute.value, [1, 1, 2, 2], 'positions attribute has value');
+
+  attribute = attributeManager.getAttributes()['colors'];
+  t.deepEqual(attribute.value, [255, 0, 0, 0, 255, 0], 'colors attribute has value');
+  t.is(attribute.getAccessor().size, 3, 'colors attribute has correct size');
+
+  attribute = attributeManager.getAttributes()['types'];
+  t.deepEqual(attribute.value.slice(0, 2), [0, 3], 'types attribute has value');
+
+  t.end();
+});
+
+test('AttributeManager.update - external logical buffers - variable width', t => {
+  const attributeManager = new AttributeManager(gl);
+
+  const dummyAccessor = () =>
+    t.fail('accessor should not be called when external buffer is present');
+
+  attributeManager.add({
+    positions: {size: 2, accessor: 'getPosition'},
+    colors: {size: 4, type: GL.UNSIGNED_BYTE, accessor: 'getColor', defaultValue: [0, 0, 0, 255]}
+  });
+
+  // First update, should autoalloc and update the value array
+  attributeManager.update({
+    numInstances: 3,
+    startIndices: [0, 2],
+    data: {
+      length: 2,
+      vertexStarts: [0, 1]
+    },
+    props: {
+      getPosition: dummyAccessor,
+      getColor: dummyAccessor
+    },
+    buffers: {
+      getPosition: new Float32Array([1, 1, 2, 2]),
+      getColor: {value: new Uint8ClampedArray([255, 0, 0, 0, 255, 0]), size: 3}
+    }
+  });
+
+  let attribute = attributeManager.getAttributes()['positions'];
+  t.deepEqual(attribute.value.slice(0, 6), [1, 1, 1, 1, 2, 2], 'positions attribute has value');
+
+  attribute = attributeManager.getAttributes()['colors'];
+  t.deepEqual(
+    attribute.value.slice(0, 12),
+    [255, 0, 0, 255, 255, 0, 0, 255, 0, 255, 0, 255],
+    'colors attribute has value'
+  );
 
   t.end();
 });

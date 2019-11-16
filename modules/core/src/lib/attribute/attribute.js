@@ -1,7 +1,7 @@
 /* eslint-disable complexity */
 import DataColumn from './data-column';
 import assert from '../../utils/assert';
-import {createIterable} from '../../utils/iterable-utils';
+import {createIterable, getAccessorFromBuffer} from '../../utils/iterable-utils';
 import {fillArray} from '../../utils/flatten';
 import * as range from '../../utils/range';
 import {normalizeTransitionSettings} from './attribute-transition-utils';
@@ -23,13 +23,15 @@ export default class Attribute extends DataColumn {
     Object.assign(this.settings, {
       transition,
       noAlloc,
-      update: update || (accessor && this._standardAccessor),
+      update: update || (accessor && this._autoUpdater),
       accessor,
       transform
     });
 
     Object.assign(this.state, {
-      lastExternalBuffer: null,
+      lastVirtualBuffer: null,
+      lastLogicalBuffer: null,
+      logicalAccessor: null,
       needsUpdate: true,
       needsRedraw: false,
       updateRanges: range.FULL,
@@ -133,7 +135,7 @@ export default class Attribute extends DataColumn {
     return false;
   }
 
-  updateBuffer({numInstances, startIndices, data, props, context}) {
+  updateBuffer({numInstances, data, props, context}) {
     if (!this.needsUpdate()) {
       return false;
     }
@@ -147,7 +149,7 @@ export default class Attribute extends DataColumn {
     if (update) {
       // Custom updater - typically for non-instanced layers
       for (const [startRow, endRow] of updateRanges) {
-        update.call(context, this, {data, startRow, endRow, props, numInstances, startIndices});
+        update.call(context, this, {data, startRow, endRow, props, numInstances});
       }
       if (!this.value) {
         // no value was assigned during update
@@ -198,27 +200,73 @@ export default class Attribute extends DataColumn {
   // Use external buffer
   // Returns true if successful
   // eslint-disable-next-line max-statements
-  setExternalBuffer(buffer) {
+  setVirtualBuffer(buffer) {
     const {state} = this;
 
     if (!buffer) {
-      state.lastExternalBuffer = null;
+      state.lastVirtualBuffer = null;
       return false;
     }
 
     this.clearNeedsUpdate();
 
-    if (state.lastExternalBuffer === buffer) {
+    if (state.lastVirtualBuffer === buffer) {
       return true;
     }
-    state.lastExternalBuffer = buffer;
+    state.lastVirtualBuffer = buffer;
     this.setNeedsRedraw();
     this.setData(buffer);
-
     return true;
   }
 
-  getVertexOffset(row, startIndices = this.startIndices) {
+  setLogicalBuffer(buffer, startIndices = null) {
+    const {state, settings} = this;
+
+    if (!buffer) {
+      state.lastLogicalBuffer = null;
+      state.logicalAccessor = null;
+      return false;
+    }
+
+    if (settings.noAlloc) {
+      // Let the layer handle this
+      return false;
+    }
+
+    if (state.lastLogicalBuffer === buffer) {
+      this.clearNeedsUpdate();
+      return true;
+    }
+    state.lastLogicalBuffer = buffer;
+    this.setNeedsRedraw();
+
+    const needsUpdate = settings.transform || startIndices !== this.startIndices;
+
+    if (needsUpdate) {
+      if (ArrayBuffer.isView(buffer)) {
+        buffer = {value: buffer};
+      }
+      assert(ArrayBuffer.isView(buffer.value), `invalid ${settings.accessor}`);
+      const needsNormalize = buffer.size && buffer.size !== this.size;
+
+      state.logicalAccessor = getAccessorFromBuffer(buffer.value, {
+        size: buffer.size || this.size,
+        stride: buffer.stride,
+        offset: buffer.offset,
+        startIndices,
+        nested: needsNormalize
+      });
+      // Fall through to auto updater
+      return false;
+    }
+
+    this.clearNeedsUpdate();
+    this.setData(buffer);
+    return true;
+  }
+
+  getVertexOffset(row) {
+    const {startIndices} = this;
     const vertexIndex = startIndices ? startIndices[row] : row;
     return vertexIndex * this.size;
   }
@@ -238,15 +286,16 @@ export default class Attribute extends DataColumn {
   }
 
   /* eslint-disable max-depth, max-statements */
-  _standardAccessor(attribute, {data, startRow, endRow, props, numInstances, startIndices}) {
-    const {settings, value, size} = attribute;
+  _autoUpdater(attribute, {data, startRow, endRow, props, numInstances}) {
+    const {settings, state, value, size, startIndices} = attribute;
 
     const {accessor, transform} = settings;
-    const accessorFunc = typeof accessor === 'function' ? accessor : props[accessor];
+    const accessorFunc =
+      state.logicalAccessor || (typeof accessor === 'function' ? accessor : props[accessor]);
 
     assert(typeof accessorFunc === 'function', `accessor "${accessor}" is not a function`);
 
-    let i = attribute.getVertexOffset(startRow, startIndices);
+    let i = attribute.getVertexOffset(startRow);
     const {iterable, objectInfo} = createIterable(data, startRow, endRow);
     for (const object of iterable) {
       objectInfo.index++;
@@ -285,7 +334,6 @@ export default class Attribute extends DataColumn {
       }
     }
     attribute.constant = false;
-    attribute.startIndices = startIndices;
   }
   /* eslint-enable max-depth, max-statements */
 

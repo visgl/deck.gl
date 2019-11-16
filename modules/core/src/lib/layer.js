@@ -433,7 +433,7 @@ export default class Layer extends Component {
       startIndices,
       props,
       transitions: props.transitions,
-      buffers: props,
+      buffers: props.data.attributes,
       context: this,
       // Don't worry about non-attribute props
       ignoreUnknownAttributes: true
