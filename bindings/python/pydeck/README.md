@@ -140,11 +140,6 @@ pip install -r requirements-dev.txt
 pip install -e .
 ```
 
-To enable the widget in a Jupyter Notebook, run:
-
-```
-```
-
 To enable develop with Jupyter Lab, run:
 
 ```bash
