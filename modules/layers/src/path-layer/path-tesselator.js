@@ -33,11 +33,8 @@ export default class PathTesselator extends Tesselator {
       getGeometry,
       positionFormat,
       attributes: {
-        startPositions: {size: 3, padding: 3, type: fp64 ? Float64Array : Float32Array},
-        endPositions: {size: 3, padding: 3, type: fp64 ? Float64Array : Float32Array},
-        segmentTypes: {size: 1, type: Uint8ClampedArray},
-        startPositions64XyLow: {size: 2, padding: 2, fp64Only: true},
-        endPositions64XyLow: {size: 2, padding: 2, fp64Only: true}
+        positions: {size: 3, padding: 3, type: fp64 ? Float64Array : Float32Array},
+        segmentTypes: {size: 1, type: Uint8ClampedArray}
       }
     });
   }
@@ -56,15 +53,15 @@ export default class PathTesselator extends Tesselator {
     }
     if (this.isClosed(path)) {
       // minimum 3 vertices
-      return numPoints < 3 ? 0 : numPoints + 1;
+      return numPoints < 3 ? 0 : numPoints + 2;
     }
-    return numPoints - 1;
+    return numPoints;
   }
 
   /* eslint-disable max-statements, complexity */
   updateGeometryAttributes(path, context) {
     const {
-      attributes: {startPositions, endPositions, segmentTypes}
+      attributes: {positions, segmentTypes}
     } = this;
 
     const {geometrySize} = context;
@@ -73,15 +70,10 @@ export default class PathTesselator extends Tesselator {
     }
     const isPathClosed = this.isClosed(path);
 
-    let startPoint;
-    let endPoint;
-
-    // startPositions   --  A0  B0 B1 B2 B3 B0 B1
-    // endPositions         A1  B1 B2 B3 B0 B1 B2  --
-    // segmentTypes         3   4  0  0  0  0  4
+    // positions   --  A0 A1 B0 B1 B2 B3 B0 B1 B2 --
+    // segmentTypes     3  4  4  0  0  0  0  4  4
     for (let i = context.vertexStart, ptIndex = 0; ptIndex < geometrySize; i++, ptIndex++) {
-      startPoint = endPoint || this.getPointOnPath(path, 0);
-      endPoint = this.getPointOnPath(path, ptIndex + 1);
+      const p = this.getPointOnPath(path, ptIndex);
 
       segmentTypes[i] = 0;
       if (ptIndex === 0) {
@@ -91,21 +83,20 @@ export default class PathTesselator extends Tesselator {
           segmentTypes[i] += START_CAP;
         }
       }
-      if (ptIndex === geometrySize - 1) {
+      if (ptIndex === geometrySize - 2) {
         if (isPathClosed) {
           segmentTypes[i] += INVALID;
         } else {
           segmentTypes[i] += END_CAP;
         }
       }
+      if (ptIndex === geometrySize - 1) {
+        segmentTypes[i] += INVALID;
+      }
 
-      startPositions[i * 3 + 3] = startPoint[0];
-      startPositions[i * 3 + 4] = startPoint[1];
-      startPositions[i * 3 + 5] = startPoint[2] || 0;
-
-      endPositions[i * 3] = endPoint[0];
-      endPositions[i * 3 + 1] = endPoint[1];
-      endPositions[i * 3 + 2] = endPoint[2] || 0;
+      positions[i * 3 + 3] = p[0];
+      positions[i * 3 + 4] = p[1];
+      positions[i * 3 + 5] = p[2] || 0;
     }
   }
   /* eslint-enable max-statements, complexity */
