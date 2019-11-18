@@ -106,7 +106,7 @@ Each key-value pair in `data.attributes` maps from an accessor prop name (e.g. `
 
 The `value` array represents a flat buffer that contains the value for each object that would otherwise be returned by a function accessor. For example, `getPosition: d => [d.x, d.y, d.z]` is equivalent to `getPosition: {value: new Float64Array([x0, y0, z0, x1, y1, z1, ...])}`. This buffer can be constructed by something like `data.flatMap(d => [d.x, d.y, d.z])`.
 
-Additionally, `attribute.vertexStarts` must be specified if the attributes contain variable-width data, for example paths and polygons. `vertexStarts` must be an array that contains the starting indices of each object. For most layers, it is assumed to be `[0, 1, 2, 3, ...]` as in one vertex per object.
+Additionally, `data.startIndices` must be specified if the attributes contain variable-width data, for example paths and polygons. `startIndices` is an array that contains the index of the first vertex in each object. For most layers, it is assumed to be `[0, 1, 2, 3, ...]` as in one vertex per object.
 
 ```js
 // EXAMPLE 1 - PointCloudLayer
@@ -151,7 +151,7 @@ new PointCloudLayer({
 new PathLayer({
   data: {
     length: binaryData.positions.length / 2,
-    vertexStarts: binaryData.startingIndices,
+    startIndices: binaryData.startingIndices,
     attributes: {
       getPath: {value: binaryData.positions, size: 2},
       getColor: {value: binaryData.colors, size: 3}
