@@ -59,7 +59,9 @@ export class DummyManager extends widgets.ManagerBase {
 
   loadClass(className, moduleName, moduleVersion) {
     if (moduleName === '@jupyter-widgets/base') {
+      // eslint-disable-next-line import/namespace
       if (widgets[className]) {
+        // eslint-disable-next-line import/namespace
         return Promise.resolve(widgets[className]);
       }
       return Promise.reject(`Cannot find class ${className}`);
@@ -88,6 +90,16 @@ export function createTestModel(constructor, attributes) {
     widget_manager,
     model_id: id
   };
-
   return new constructor(attributes, modelOptions);
+}
+
+export function getModule(modulePath, onError) {
+  // Require at runtime, after the environment is polyfilled
+  try {
+    return require(modulePath);
+  } catch (error) {
+    // Work around: jupyter-widget is built as an AMD module
+    // it cannot be imported under Node
+    return onError(error);
+  }
 }

@@ -11,7 +11,11 @@ const DEFAULT_STYLE = {
   zIndex: 2
 };
 
-function getTooltipDefault(pickedInfo) {
+function getDiv() {
+  return document.createElement('div');
+}
+
+export function getTooltipDefault(pickedInfo) {
   if (!pickedInfo.picked) {
     return null;
   }
@@ -29,26 +33,25 @@ function getTooltipDefault(pickedInfo) {
 
 const EXCLUDES = new Set(['position', 'index']);
 
-function tabularize(json) {
+export function tabularize(json) {
   // Turns a JSON object of picked info into HTML for a tooltip
-  const dataTable = document.createElement('div');
-  dataTable.className = 'dataTable';
+  const dataTable = getDiv();
 
   // Creates rows of two columns for the tooltip
   for (const key in json) {
     if (EXCLUDES.has(key)) {
       continue; // eslint-disable-line
     }
-    const header = document.createElement('div');
+    const header = getDiv();
     header.className = 'header';
-    header.innerText = key;
+    header.textContent = key;
 
-    const valueElement = document.createElement('div');
+    const valueElement = getDiv();
     valueElement.className = 'value';
 
-    valueElement.innerText = toText(json[key]);
+    valueElement.textContent = toText(json[key]);
 
-    const row = document.createElement('div');
+    const row = getDiv();
 
     setStyles(row, header, valueElement);
 
@@ -56,6 +59,7 @@ function tabularize(json) {
     row.appendChild(valueElement);
     dataTable.appendChild(row);
   }
+
   return dataTable.innerHTML;
 }
 
@@ -64,7 +68,7 @@ function setStyles(row, header, value) {
   Object.assign(header.style, {
     fontWeight: 700,
     marginRight: '10px',
-    flex: 1
+    flex: '1 1 0%'
   });
 
   Object.assign(value.style, {
@@ -83,7 +87,7 @@ function setStyles(row, header, value) {
   });
 }
 
-function toText(jsonValue) {
+export function toText(jsonValue) {
   // Set contents of table value, trimming for certain types of data
   let text;
   if (Array.isArray(jsonValue) && jsonValue.length > 4) {
@@ -106,7 +110,7 @@ function toText(jsonValue) {
   return text;
 }
 
-function substituteIn(template, json) {
+export function substituteIn(template, json) {
   let output = template;
   for (const key in json) {
     output = output.replace(`{${key}}`, json[key]);
