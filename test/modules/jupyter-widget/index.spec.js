@@ -4,14 +4,14 @@ function getDeckModel(state) {
   // Require at runtime, after the environment is polyfilled
   try {
     const {DeckGLModel} = require('@deck.gl/jupyter-widget');
-    const {createTestModel} = require('./utils.spec');
+    const {createTestModel} = require('./mock-widget-base');
 
     const model = createTestModel(DeckGLModel, state);
     return model;
   } catch (error) {
     // Work around: jupyter-widget is built as an AMD module
     // it cannot be imported under Node
-    if (error.message === 'define is not defined') {
+    if (error.message === "Cannot read property 'widget_manager' of undefined") {
       return null;
     }
     throw error;
