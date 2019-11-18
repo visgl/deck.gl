@@ -308,7 +308,7 @@ test('Attribute#updateBuffer', t => {
     {
       title: 'variable size',
       numInstances: 10,
-      bufferLayout: [2, 1, 4, 3]
+      startIndices: [0, 2, 3, 7]
     }
   ];
 
@@ -404,7 +404,7 @@ test('Attribute#updateBuffer', t => {
       attribute.allocate(param.numInstances);
       attribute.updateBuffer({
         numInstances: param.numInstances,
-        bufferLayout: param.bufferLayout,
+        startIndices: param.startIndices,
         data: TEST_PROPS.data,
         props: TEST_PROPS
       });
@@ -504,7 +504,7 @@ test('Attribute#updateBuffer - partial', t => {
       attribute: ATTRIBUTE_2,
       params: {
         numInstances: 10,
-        bufferLayout: [2, 1, 4, 3, 1]
+        startIndices: [0, 2, 3, 7]
       },
       value: [0, 0, 11, 22, 22, 22, 22, 33, 33, 33]
     },
@@ -518,7 +518,7 @@ test('Attribute#updateBuffer - partial', t => {
       ],
       params: {
         numInstances: 10,
-        bufferLayout: [2, 1, 4, 3]
+        startIndices: [0, 2, 3, 7]
       },
       value: [0, 0, 11, 22, 22, 22, 22, 30, 30, 30]
     },
@@ -533,7 +533,7 @@ test('Attribute#updateBuffer - partial', t => {
       ],
       params: {
         numInstances: 10,
-        bufferLayout: [2, 1, 4, 3]
+        startIndices: [0, 2, 3, 7]
       },
       value: [0, 0, 10, 21, 21, 21, 21, 30, 30, 30]
     },
@@ -551,7 +551,7 @@ test('Attribute#updateBuffer - partial', t => {
       ],
       params: {
         numInstances: 13,
-        bufferLayout: [2, 1, 4, 3, 1, 2]
+        startIndices: [0, 2, 3, 7, 10, 11]
       },
       value: [0, 0, 10, 20, 20, 20, 20, 30, 30, 30, 41, 52, 52]
     }

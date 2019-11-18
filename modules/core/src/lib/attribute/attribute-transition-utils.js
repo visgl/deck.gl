@@ -89,7 +89,7 @@ export function padBuffer({
   numInstances,
   attribute,
   fromLength,
-  fromBufferLayout,
+  fromStartIndices,
   getData = x => x
 }) {
   // TODO: move the precisionMultiplier logic to the attribute when retrieving
@@ -97,13 +97,13 @@ export function padBuffer({
   const precisionMultiplier = attribute.doublePrecision ? 2 : 1;
   const size = attribute.size * precisionMultiplier;
   const offset = attribute.elementOffset * precisionMultiplier;
-  const toBufferLayout = attribute.bufferLayout;
-  const hasBufferLayout = fromBufferLayout && toBufferLayout;
+  const toStartIndices = attribute.startIndices;
+  const hasStartIndices = fromStartIndices && toStartIndices;
   const toLength = getAttributeBufferLength(attribute, numInstances);
   const isConstant = attribute.state.constant;
 
   // check if buffer needs to be padded
-  if (!hasBufferLayout && fromLength >= toLength) {
+  if (!hasStartIndices && fromLength >= toLength) {
     return;
   }
 
@@ -122,8 +122,8 @@ export function padBuffer({
   padArray({
     source,
     target: data,
-    sourceLayout: fromBufferLayout,
-    targetLayout: toBufferLayout,
+    sourceStartIndices: fromStartIndices,
+    targetStartIndices: toStartIndices,
     offset,
     size,
     getData: getMissingData

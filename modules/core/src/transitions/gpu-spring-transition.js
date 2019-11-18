@@ -25,7 +25,7 @@ export default class GPUSpringTransition {
       gl,
       Object.assign({}, attribute.settings, {normalized: false})
     );
-    this.currentBufferLayout = attribute.bufferLayout;
+    this.currentStartIndices = attribute.startIndices;
     // storing currentLength because this.buffer may be larger than the actual length we want to use
     // this is because we only reallocate buffers when they grow, not when they shrink,
     // due to performance costs
@@ -52,14 +52,14 @@ export default class GPUSpringTransition {
   // we need to start animating towards the new values
   // this also correctly resizes / pads the transform's buffers
   // in case the attribute's buffer has changed in length or in
-  // bufferLayout
+  // startIndices
   start(transitionSettings, numInstances) {
     const {gl, buffers, attribute} = this;
     const padBufferOpts = {
       numInstances,
       attribute,
       fromLength: this.currentLength,
-      fromBufferLayout: this.currentBufferLayout,
+      fromStartIndices: this.currentStartIndices,
       getData: transitionSettings.enter
     };
 
@@ -67,7 +67,7 @@ export default class GPUSpringTransition {
       padBuffer({buffer, ...padBufferOpts});
     }
 
-    this.currentBufferLayout = attribute.bufferLayout;
+    this.currentStartIndices = attribute.startIndices;
     this.currentLength = getAttributeBufferLength(attribute, numInstances);
     this.attributeInTransition.update({
       buffer: buffers[1],

@@ -253,7 +253,7 @@ export default class SolidPolygonLayer extends Layer {
 
       this.setState({
         numInstances: polygonTesselator.instanceCount,
-        bufferLayout: polygonTesselator.bufferLayout
+        startIndices: polygonTesselator.vertexStarts
       });
 
       if (!changeFlags.dataChanged) {
@@ -324,13 +324,13 @@ export default class SolidPolygonLayer extends Layer {
 
   calculateIndices(attribute) {
     const {polygonTesselator} = this.state;
-    attribute.bufferLayout = polygonTesselator.indexLayout;
+    attribute.startIndices = polygonTesselator.indexStarts;
     attribute.value = polygonTesselator.get('indices');
   }
 
   calculatePositions(attribute) {
     const {polygonTesselator} = this.state;
-    attribute.bufferLayout = polygonTesselator.bufferLayout;
+    attribute.startIndices = polygonTesselator.vertexStarts;
     attribute.value = polygonTesselator.get('positions');
   }
 

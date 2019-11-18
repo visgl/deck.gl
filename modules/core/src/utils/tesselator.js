@@ -25,8 +25,8 @@ export default class Tesselator {
     const {attributes = {}} = opts;
 
     this.typedArrayManager = defaultTypedArrayManager;
-    this.indexLayout = null;
-    this.bufferLayout = null;
+    this.indexStarts = null;
+    this.vertexStarts = null;
     this.vertexCount = 0;
     this.instanceCount = 0;
     this.attributes = {};
@@ -90,28 +90,25 @@ export default class Tesselator {
       return;
     }
 
-    let {indexLayout, bufferLayout} = this;
+    let {indexStarts, vertexStarts} = this;
 
     if (!dataRange) {
       // Full update - regenerate buffer layout from scratch
-      indexLayout = [];
-      bufferLayout = [];
+      indexStarts = [0];
+      vertexStarts = [0];
     }
 
     const {startRow = 0, endRow = Infinity} = dataRange || {};
     this._forEachGeometry(
       (geometry, dataIndex) => {
-        bufferLayout[dataIndex] = this.getGeometrySize(geometry);
+        vertexStarts[dataIndex + 1] = vertexStarts[dataIndex] + this.getGeometrySize(geometry);
       },
       startRow,
       endRow
     );
 
     // count instances
-    let instanceCount = 0;
-    for (const count of bufferLayout) {
-      instanceCount += count;
-    }
+    const instanceCount = vertexStarts[vertexStarts.length - 1];
 
     // allocate attributes
     const {attributes, _attributeDefs, typedArrayManager, fp64} = this;
@@ -128,37 +125,24 @@ export default class Tesselator {
       }
     }
 
-    this.indexLayout = indexLayout;
-    this.bufferLayout = bufferLayout;
+    this.indexStarts = indexStarts;
+    this.vertexStarts = vertexStarts;
     this.instanceCount = instanceCount;
 
-    const context = {
-      vertexStart: 0,
-      indexStart: 0
-    };
-    for (let i = 0; i < startRow; i++) {
-      context.vertexStart += bufferLayout[i];
-      context.indexStart += indexLayout[i] || 0;
-    }
+    const context = {};
 
     this._forEachGeometry(
       (geometry, dataIndex) => {
-        const geometrySize = bufferLayout[dataIndex];
+        context.vertexStart = vertexStarts[dataIndex];
+        context.indexStart = indexStarts[dataIndex];
+        context.geometrySize = vertexStarts[dataIndex + 1] - vertexStarts[dataIndex];
         context.geometryIndex = dataIndex;
-        context.geometrySize = geometrySize;
         this.updateGeometryAttributes(geometry, context);
-        context.vertexStart += geometrySize;
-        context.indexStart += indexLayout[dataIndex] || 0;
       },
       startRow,
       endRow
     );
 
-    // count vertices
-    let vertexCount = context.indexStart;
-    for (let i = endRow; i < indexLayout.length; i++) {
-      vertexCount += indexLayout[i];
-    }
-    this.vertexCount = vertexCount;
+    this.vertexCount = indexStarts[indexStarts.length - 1];
   }
 }
