@@ -219,7 +219,7 @@ test('PathLayer', t => {
         layer.props.widthMinPixels,
         'should update widthMinPixels'
       );
-      t.ok(layer.getVertexStarts(), 'should have vertex layout');
+      t.ok(layer.getStartIndices(), 'should have vertex layout');
     }
   });
 

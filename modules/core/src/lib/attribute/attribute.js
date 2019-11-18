@@ -19,7 +19,7 @@ export default class Attribute extends DataColumn {
       update = null,
       accessor = null,
       transform = null,
-      vertexStarts = null
+      startIndices = null
     } = opts;
 
     Object.assign(this.settings, {
@@ -36,7 +36,7 @@ export default class Attribute extends DataColumn {
       needsUpdate: true,
       needsRedraw: false,
       updateRanges: range.FULL,
-      vertexStarts
+      startIndices
     });
 
     Object.seal(this.settings);
@@ -46,12 +46,12 @@ export default class Attribute extends DataColumn {
     this._validateAttributeUpdaters();
   }
 
-  get vertexStarts() {
-    return this.state.vertexStarts;
+  get startIndices() {
+    return this.state.startIndices;
   }
 
-  set vertexStarts(layout) {
-    this.state.vertexStarts = layout;
+  set startIndices(layout) {
+    this.state.startIndices = layout;
   }
 
   needsUpdate() {
@@ -136,7 +136,7 @@ export default class Attribute extends DataColumn {
     return false;
   }
 
-  updateBuffer({numInstances, vertexStarts, data, props, context}) {
+  updateBuffer({numInstances, startIndices, data, props, context}) {
     if (!this.needsUpdate()) {
       return false;
     }
@@ -150,7 +150,7 @@ export default class Attribute extends DataColumn {
     if (update) {
       // Custom updater - typically for non-instanced layers
       for (const [startRow, endRow] of updateRanges) {
-        update.call(context, this, {data, startRow, endRow, props, numInstances, vertexStarts});
+        update.call(context, this, {data, startRow, endRow, props, numInstances, startIndices});
       }
       if (!this.value) {
         // no value was assigned during update
@@ -221,8 +221,8 @@ export default class Attribute extends DataColumn {
     return true;
   }
 
-  getVertexOffset(row, vertexStarts = this.vertexStarts) {
-    const vertexIndex = vertexStarts ? vertexStarts[row] : row;
+  getVertexOffset(row, startIndices = this.startIndices) {
+    const vertexIndex = startIndices ? startIndices[row] : row;
     return this.settings.elementOffset + vertexIndex * this.size;
   }
 
@@ -240,7 +240,7 @@ export default class Attribute extends DataColumn {
     return shaderAttributes;
   }
 
-  _standardAccessor(attribute, {data, startRow, endRow, props, numInstances, vertexStarts}) {
+  _standardAccessor(attribute, {data, startRow, endRow, props, numInstances, startIndices}) {
     const {settings, value, size} = attribute;
 
     const {accessor, transform} = settings;
@@ -248,7 +248,7 @@ export default class Attribute extends DataColumn {
 
     assert(typeof accessorFunc === 'function', `accessor "${accessor}" is not a function`);
 
-    let i = attribute.getVertexOffset(startRow, vertexStarts);
+    let i = attribute.getVertexOffset(startRow, startIndices);
     const {iterable, objectInfo} = createIterable(data, startRow, endRow);
     for (const object of iterable) {
       objectInfo.index++;
@@ -260,10 +260,10 @@ export default class Attribute extends DataColumn {
         objectValue = transform.call(this, objectValue);
       }
 
-      if (vertexStarts) {
+      if (startIndices) {
         attribute._normalizeValue(objectValue, objectInfo.target);
         const numVertices =
-          (vertexStarts[objectInfo.index + 1] || numInstances) - vertexStarts[objectInfo.index];
+          (startIndices[objectInfo.index + 1] || numInstances) - startIndices[objectInfo.index];
         fillArray({
           target: attribute.value,
           source: objectInfo.target,
@@ -277,7 +277,7 @@ export default class Attribute extends DataColumn {
       }
     }
     attribute.constant = false;
-    attribute.vertexStarts = vertexStarts;
+    attribute.startIndices = startIndices;
   }
 
   // Validate deck.gl level fields
