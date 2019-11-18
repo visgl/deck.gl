@@ -261,15 +261,19 @@ export default class Attribute extends DataColumn {
       }
 
       if (startIndices) {
-        attribute._normalizeValue(objectValue, objectInfo.target);
         const numVertices =
           (startIndices[objectInfo.index + 1] || numInstances) - startIndices[objectInfo.index];
-        fillArray({
-          target: attribute.value,
-          source: objectInfo.target,
-          start: i,
-          count: numVertices
-        });
+        if (objectValue && objectValue.length > size) {
+          attribute.value.set(objectValue, i);
+        } else {
+          attribute._normalizeValue(objectValue, objectInfo.target);
+          fillArray({
+            target: attribute.value,
+            source: objectInfo.target,
+            start: i,
+            count: numVertices
+          });
+        }
         i += numVertices * size;
       } else {
         attribute._normalizeValue(objectValue, value, i);
