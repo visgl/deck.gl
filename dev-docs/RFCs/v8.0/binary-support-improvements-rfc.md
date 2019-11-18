@@ -106,7 +106,7 @@ Each key-value pair in `data.attributes` maps from an accessor prop name (e.g. `
 
 The `value` array represents a flat buffer that contains the value for each object that would otherwise be returned by a function accessor. For example, `getPosition: d => [d.x, d.y, d.z]` is equivalent to `getPosition: {value: new Float64Array([x0, y0, z0, x1, y1, z1, ...])}`. This buffer can be constructed by something like `data.flatMap(d => [d.x, d.y, d.z])`.
 
-Additionally, `attribute.vertexCounts` must be specified if the attributes contain variable-width data, for example paths and polygons. `vertexCounts` must be an array that contains the number of vertices at each object index. For most layers, it is assumed to be `new Array(data.length).fill(1)`.
+Additionally, `attribute.vertexStarts` must be specified if the attributes contain variable-width data, for example paths and polygons. `vertexStarts` must be an array that contains the starting indices of each object. For most layers, it is assumed to be `[0, 1, 2, 3, ...]` as in one vertex per object.
 
 ```js
 // EXAMPLE 1 - PointCloudLayer
@@ -125,8 +125,8 @@ new PointCloudLayer({
   data: {
     length: binaryData.length / 6,
     attributes: {
-      getPosition: {value: binaryData, size: 2, elementStride: 6, elementOffset: 0},
-      getColor: {value: binaryData, size: 4, elementStride: 6, elementOffset: 2, normalized: true},
+      getPosition: {value: binaryData, size: 2, stride: 24, offset: 0},
+      getColor: {value: binaryData, size: 4, stride: 24, offset: 8, normalized: true},
       getNormal: {value: [0, 0, 0], constant: true}
     }
   }
@@ -145,13 +145,13 @@ new PointCloudLayer({
    binary data: {
      positions: [p00x, p00y, p01x, p01y, p02x, p02y, p10x, p10y, ...],
      colors: [p00r, p00g, p00b, p01r, p01g, p01b, p02r, p02g, p02b, p10r, p10g, p10b, ...],
-     pointCountPerPath: [3, 2, ...]
+     startingIndices: [0, 3, 5, ...]
    }
 */
 new PathLayer({
   data: {
-    length: binaryData.pointCountPerPath.length,
-    vertexCounts: binaryData.pointCountPerPath,
+    length: binaryData.positions.length / 2,
+    vertexStarts: binaryData.startingIndices,
     attributes: {
       getPath: {value: binaryData.positions, size: 2},
       getColor: {value: binaryData.colors, size: 3}
