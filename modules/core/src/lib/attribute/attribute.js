@@ -240,6 +240,7 @@ export default class Attribute extends DataColumn {
     return shaderAttributes;
   }
 
+  /* eslint-disable max-depth, max-statements */
   _standardAccessor(attribute, {data, startRow, endRow, props, numInstances, startIndices}) {
     const {settings, value, size} = attribute;
 
@@ -263,12 +264,18 @@ export default class Attribute extends DataColumn {
       if (startIndices) {
         const numVertices =
           (startIndices[objectInfo.index + 1] || numInstances) - startIndices[objectInfo.index];
-        if (objectValue && objectValue.length > size) {
-          attribute.value.set(objectValue, i);
+        if (objectValue && Array.isArray(objectValue[0])) {
+          let startIndex = i;
+          for (const item of objectValue) {
+            attribute._normalizeValue(item, value, startIndex);
+            startIndex += size;
+          }
+        } else if (objectValue && objectValue.length > size) {
+          value.set(objectValue, i);
         } else {
           attribute._normalizeValue(objectValue, objectInfo.target);
           fillArray({
-            target: attribute.value,
+            target: value,
             source: objectInfo.target,
             start: i,
             count: numVertices
@@ -283,6 +290,7 @@ export default class Attribute extends DataColumn {
     attribute.constant = false;
     attribute.startIndices = startIndices;
   }
+  /* eslint-enable max-depth, max-statements */
 
   // Validate deck.gl level fields
   _validateAttributeUpdaters() {

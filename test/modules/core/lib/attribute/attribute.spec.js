@@ -425,8 +425,8 @@ test('Attribute#updateBuffer', t => {
 test('Attribute#standard accessor - variable width', t => {
   const TEST_PROPS = {
     data: [
-      {id: 'A', value: [10, 11], color: [255, 0, 0, 255, 255, 0]},
-      {id: 'B', value: [20], color: [128, 128, 128, 128, 128, 128]},
+      {id: 'A', value: [10, 11], color: [[255, 0, 0], [255, 255, 0]]},
+      {id: 'B', value: [20], color: [[128, 128, 128], [128, 128, 128]]},
       {id: 'C', value: [30, 31, 32], color: [255, 255, 255]}
     ],
     getColor: d => d.color,
@@ -447,10 +447,36 @@ test('Attribute#standard accessor - variable width', t => {
       attribute: new Attribute(gl, {
         id: 'colors',
         type: GL.UNSIGNED_BYTE,
-        size: 3,
+        size: 4,
+        defaultValue: [0, 0, 0, 255],
         accessor: 'getColor'
       }),
-      result: [255, 0, 0, 255, 255, 0, 128, 128, 128, 255, 255, 255, 255, 255, 255, 255, 255, 255]
+      result: [
+        255,
+        0,
+        0,
+        255,
+        255,
+        255,
+        0,
+        255,
+        128,
+        128,
+        128,
+        255,
+        255,
+        255,
+        255,
+        255,
+        255,
+        255,
+        255,
+        255,
+        255,
+        255,
+        255,
+        255
+      ]
     }
   ];
 
