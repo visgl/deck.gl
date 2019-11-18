@@ -422,6 +422,55 @@ test('Attribute#updateBuffer', t => {
   t.end();
 });
 
+test('Attribute#standard accessor - variable width', t => {
+  const TEST_PROPS = {
+    data: [
+      {id: 'A', value: [10, 11], color: [255, 0, 0, 255, 255, 0]},
+      {id: 'B', value: [20], color: [128, 128, 128, 128, 128, 128]},
+      {id: 'C', value: [30, 31, 32], color: [255, 255, 255]}
+    ],
+    getColor: d => d.color,
+    getValue: d => d.value
+  };
+
+  const TEST_CASES = [
+    {
+      attribute: new Attribute(gl, {
+        id: 'values',
+        type: GL.FLOAT,
+        size: 1,
+        accessor: 'getValue'
+      }),
+      result: [10, 11, 20, 30, 31, 32]
+    },
+    {
+      attribute: new Attribute(gl, {
+        id: 'colors',
+        type: GL.UNSIGNED_BYTE,
+        size: 3,
+        accessor: 'getColor'
+      }),
+      result: [255, 0, 0, 255, 255, 0, 128, 128, 128, 255, 255, 255, 255, 255, 255, 255, 255, 255]
+    }
+  ];
+
+  for (const testCase of TEST_CASES) {
+    const {attribute, result} = testCase;
+    attribute.setNeedsUpdate(true);
+    attribute.allocate(10);
+    attribute.updateBuffer({
+      numInstances: 6,
+      startIndices: [0, 2, 3],
+      data: TEST_PROPS.data,
+      props: TEST_PROPS
+    });
+
+    t.deepEqual(attribute.value.slice(0, result.length), result, 'attribute buffer is updated');
+  }
+
+  t.end();
+});
+
 test('Attribute#updateBuffer - partial', t => {
   let accessorCalled = 0;
 

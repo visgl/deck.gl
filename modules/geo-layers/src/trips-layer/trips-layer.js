@@ -87,7 +87,6 @@ if(vTime > currentTime || vTime < currentTime - trailLength) {
 
     super.draw(params);
   }
-
 }
 
 TripsLayer.layerName = 'TripsLayer';
