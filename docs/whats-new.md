@@ -2,6 +2,10 @@
 
 This page contains highlights of each deck.gl release. Also check our [vis.gl blog](https://medium.com/vis-gl) for news about new releases and features in deck.gl.
 
+## deck.gl v8.0
+
+- `ArcLayer` supports drawing arcs between two 3D positions.
+
 ## deck.gl v7.3
 
 Release Date: Sep xx, 2019
