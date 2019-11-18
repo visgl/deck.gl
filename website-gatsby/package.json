@@ -21,6 +21,7 @@
     "@luma.gl/core": "^8.0.0-alpha.5",
     "@luma.gl/webgl": "^8.0.0-alpha.5",
     "@probe.gl/stats-widget": "^3.0.1",
+    "d3-color": "^1.4.0",
     "d3-request": "^1.0.6",
     "d3-scale": "^3.0.0",
     "rbush": "^2.0.2",
@@ -30,6 +31,7 @@
   },
   "devDependencies": {
     "gatsby": "^2.3.0",
+    "gatsby-plugin-sass": "^2.1.21",
     "gatsby-plugin-styletron": "^3.0.5",
     "gh-pages": "^2.0.1",
     "ocular-gatsby": "1.0.4",

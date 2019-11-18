@@ -1,0 +1,321 @@
+@import url('https://api.tiles.mapbox.com/mapbox-gl-js/v1.3.1/mapbox-gl.css');
+
+$primary: #00ADE6;
+$secondary: #05E3D5;
+$black: #041725;
+$black-20: #213746;
+$black-40: #5A666D;
+$white: #EDEDED;
+$white-40: #8D9BA3;
+$topbar-height: 64px;
+
+.banner {
+  .container {
+    background: rgba(0, 0, 0, 0);
+  }
+}
+
+.banner .hero .options-panel {
+  display: none;
+}
+
+.stat {
+  text-transform: uppercase;
+  font-size: 0.833em;
+
+  b {
+    display: block;
+    font-size: 3em;
+    font-weight: bold;
+    line-height: 1.833;
+  }
+}
+.tooltip {
+  position: absolute;
+  padding: 4px;
+  background: rgba(0, 0, 0, 0.8);
+  color: #fff;
+  max-width: 300px;
+  font-size: 10px;
+  z-index: 9;
+  pointer-events: none;
+}
+.top-right {
+  position: absolute;
+  right: 0;
+  top: 0;
+}
+.options-panel {
+  width: 344px;
+  background: #fff;
+  box-shadow: 0 0 4px rgba(0, 0, 0, 0.15);
+  margin: 24px;
+  padding: 12px 24px;
+  max-height: 96%;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overflow-y: overlay;
+  outline: none;
+
+  hr {
+    margin: 12px -24px;
+  }
+  .source-link {
+    text-align: right;
+    margin-top: 8px;
+
+    a {
+      font-weight: bold;
+      color: $black-40;
+      font-size: 11px;
+    }
+  }
+  .input {
+    position: relative;
+    width: 100%;
+
+    &:last-child {
+      margin-bottom: 20px;
+    }
+
+    >* {
+      vertical-align: middle;
+      white-space: nowrap;
+    }
+    label {
+      display: inline-block;
+      width: 40%;
+      margin-right: 10%;
+      color: $black-40;
+      margin-top: 2px;
+      margin-bottom: 2px;
+    }
+    input, a, button {
+      background: #fff;
+      font-size: 0.9em;
+      text-transform: none;
+      text-overflow: ellipsis;
+      overflow: hidden;
+      display: inline-block;
+      padding: 0 4px;
+      margin: 0;
+      width: 50%;
+      height: 20px;
+      line-height: 1.833;
+      text-align: left;
+    }
+    button {
+      color: initial;
+    }
+    button:disabled {
+      color: #aaa;
+      cursor: default;
+      background: #eee;
+    }
+    input {
+      border: solid 1px #ccc;
+
+      &:disabled {
+        background: $white;
+      }
+      &[type="checkbox"] {
+        height: auto;
+      }
+    }
+
+    .tooltip {
+      left: 50%;
+      top: 24px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 200ms;
+    }
+    &:hover .tooltip {
+      opacity: 1;
+    }
+  }
+  h3 {
+    font-size: 1.2em;
+    font-weight: 500;
+    margin: 8px 0;
+  }
+
+  a {
+    display: inline;
+    color: $primary;
+  }
+
+  p {
+    margin-bottom: 16px;
+  }
+  .legend {
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+  }
+  .spinner {
+    height: 18px;
+    line-height: 18px;
+    font-size: 10px;
+
+    >div {
+      white-space: nowrap;
+      left: 0;
+      bottom: 0;
+      position: absolute;
+      height: 18px;
+      padding-left: 20px;
+      transition: width 0.5s;
+    }
+    .spinner--fill {
+      background: $primary;
+      color: $white;
+      overflow: hidden;
+    }
+    .spinner--text {
+      color: $black-40;
+    }
+
+    &.done {
+      height: 0 !important;
+      line-height: 0;
+      font-size: 0;
+      transition: height 0.5s 1s;
+
+      >div {
+        height: 0 !important;
+        transition: height 0.5s 1s;
+      }
+    }
+  }
+}
+code {
+  font-family: Consolas, "Liberation Mono", Menlo, Courier, monospace !important;
+}
+.demo {
+  position: relative;
+  overflow: hidden !important;
+  height: 100vh;
+  transition: height 600ms ease-in;
+}
+.markdown {
+  height: 100%;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+.markdown .demo {
+  height: 80vh;
+
+  >div:first-child {
+    margin-top: 0;
+    transition: margin-top 600ms ease-in;
+  }
+
+  &:not(:hover) {
+    height: 30vh;
+    min-height: 200px;
+    transition: height 300ms;
+
+    >div:first-child {
+      margin-top: -20vh;
+      transition: margin-top 300ms;
+    }
+    .options-panel {
+      overflow-y: hidden;
+    }
+  }
+}
+
+@media (max-width: 768px) {
+  .flexbox--row {
+    display: block;
+  }
+  .toc {
+    position: absolute;
+    width: 100vw;
+    max-width: initial;
+    height: 0;
+    z-index: 9;
+
+    >div {
+      padding-top: 220px;
+    }
+  }
+  .toc.open {
+    height: 100%;
+  }
+  .options-panel {
+    width: 100%;
+    margin: 0;
+  }
+  .options-panel:not(.focus) {
+    cursor: pointer;
+    >div > *, hr, .input {
+      display: none;
+    }
+    &:before {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      color: $white-40;
+      font-size: 24px;
+      font-family: 'deckgl';
+      content: "\e906";
+    }
+    >.spinner {
+      height: 3px;
+      line-height: 0;
+      font-size: 0;
+
+      .spinner--fill {
+        height: 3px;
+        display: block;
+      }
+    }
+    h3 {
+      display: block;
+    }
+  }
+  .tabs .tip {
+    display: none;
+  }
+  .markdown-body {
+    padding: 40px 12px 96px;
+  }
+  .markdown .demo:not(:hover) .options-panel {
+    .input, hr {
+      display: none;
+    }
+  }
+}
+
+.icon-demo {
+  .tooltip {
+    padding: 4px 12px;
+    max-width: 240px;
+    max-height: 320px;
+    box-sizing: content-box;
+    overflow-y: hidden;
+
+    h5 {
+      font-size: 1em;
+    }
+    p {
+      display: none;
+      text-indent: 4px;
+    }
+  }
+  .tooltip.interactive {
+    border: solid 4px transparent;
+    margin: -4px;
+    background: $white;
+    color: $black;
+    pointer-events: all;
+    width: 240px;
+    overflow-y: auto;
+
+    p {
+      display: block;
+    }
+  }
+}
