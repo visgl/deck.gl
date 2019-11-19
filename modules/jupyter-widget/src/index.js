@@ -12,6 +12,5 @@ if (dataBaseUrl) {
   window.__webpack_public_path__ = `${dataBaseUrl}nbextensions/pydeck/nb_extension`;
 }
 
-export {DeckGLView, DeckGLModel} from './notebook-widget';
+export {DeckGLView, DeckGLModel, createDeckWithImports} from './create-deck';
 export {MODULE_VERSION, MODULE_NAME} from './version';
-export {initDeck} from './notebook-utils';
