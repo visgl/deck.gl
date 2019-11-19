@@ -62,6 +62,7 @@ export default class PolygonTesselator extends Tesselator {
 
     this._updateIndices(polygon, context);
     this._updatePositions(polygon, context);
+    this._updateVertexValid(polygon, context);
   }
 
   // Flatten the indices array
@@ -91,14 +92,12 @@ export default class PolygonTesselator extends Tesselator {
   // Flatten out all the vertices of all the sub subPolygons
   _updatePositions(polygon, {vertexStart, geometrySize}) {
     const {
-      attributes: {positions, vertexValid},
+      attributes: {positions},
       positionSize
     } = this;
+    const {positions: polygonPositions} = polygon;
 
-    let i = vertexStart;
-    const {positions: polygonPositions, holeIndices} = polygon;
-
-    for (let j = 0; j < geometrySize; j++) {
+    for (let i = vertexStart, j = 0; j < geometrySize; i++, j++) {
       const x = polygonPositions[j * positionSize];
       const y = polygonPositions[j * positionSize + 1];
       const z = positionSize > 2 ? polygonPositions[j * positionSize + 2] : 0;
@@ -106,10 +105,15 @@ export default class PolygonTesselator extends Tesselator {
       positions[i * 3] = x;
       positions[i * 3 + 1] = y;
       positions[i * 3 + 2] = z;
-      vertexValid[i] = 1;
-      i++;
     }
+  }
 
+  _updateVertexValid(polygon, {vertexStart, geometrySize}) {
+    const {
+      attributes: {vertexValid},
+      positionSize
+    } = this;
+    const {holeIndices} = polygon;
     /* We are reusing the some buffer for `nextPositions` by offseting one vertex
      * to the left. As a result,
      * the last vertex of each ring overlaps with the first vertex of the next ring.
@@ -119,6 +123,7 @@ export default class PolygonTesselator extends Tesselator {
       nextPositions  A1 A2 A3 A4 B0 B1 B2 C0 C1 ...
       vertexValid    1  1  1  1  0  1  1  0  1 ...
      */
+    vertexValid.fill(1, vertexStart, vertexStart + geometrySize);
     if (holeIndices) {
       for (let j = 0; j < holeIndices.length; j++) {
         vertexValid[vertexStart + holeIndices[j] / positionSize - 1] = 0;

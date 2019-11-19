@@ -58,48 +58,45 @@ export default class PathTesselator extends Tesselator {
     return numPoints;
   }
 
-  /* eslint-disable max-statements, complexity */
   updateGeometryAttributes(path, context) {
-    const {
-      attributes: {positions, segmentTypes}
-    } = this;
-
-    const {geometrySize} = context;
-    if (geometrySize === 0) {
+    if (context.geometrySize === 0) {
       return;
     }
+    this._updateSegmentTypes(path, context);
+    this._updatePositions(path, context);
+  }
+
+  _updateSegmentTypes(path, context) {
+    const {segmentTypes} = this.attributes;
     const isPathClosed = this.isClosed(path);
+    const {vertexStart, geometrySize} = context;
 
     // positions   --  A0 A1 B0 B1 B2 B3 B0 B1 B2 --
     // segmentTypes     3  4  4  0  0  0  0  4  4
-    for (let i = context.vertexStart, ptIndex = 0; ptIndex < geometrySize; i++, ptIndex++) {
+    segmentTypes.fill(0, vertexStart, vertexStart + geometrySize);
+    if (isPathClosed) {
+      segmentTypes[vertexStart] = INVALID;
+      segmentTypes[vertexStart + geometrySize - 2] = INVALID;
+    } else {
+      segmentTypes[vertexStart] += START_CAP;
+      segmentTypes[vertexStart + geometrySize - 2] += END_CAP;
+    }
+    segmentTypes[vertexStart + geometrySize - 1] = INVALID;
+  }
+
+  _updatePositions(path, context) {
+    const {positions} = this.attributes;
+    const {vertexStart, geometrySize} = context;
+
+    // positions   --  A0 A1 B0 B1 B2 B3 B0 B1 B2 --
+    // segmentTypes     3  4  4  0  0  0  0  4  4
+    for (let i = vertexStart, ptIndex = 0; ptIndex < geometrySize; i++, ptIndex++) {
       const p = this.getPointOnPath(path, ptIndex);
-
-      segmentTypes[i] = 0;
-      if (ptIndex === 0) {
-        if (isPathClosed) {
-          segmentTypes[i] += INVALID;
-        } else {
-          segmentTypes[i] += START_CAP;
-        }
-      }
-      if (ptIndex === geometrySize - 2) {
-        if (isPathClosed) {
-          segmentTypes[i] += INVALID;
-        } else {
-          segmentTypes[i] += END_CAP;
-        }
-      }
-      if (ptIndex === geometrySize - 1) {
-        segmentTypes[i] += INVALID;
-      }
-
       positions[i * 3 + 3] = p[0];
       positions[i * 3 + 4] = p[1];
       positions[i * 3 + 5] = p[2] || 0;
     }
   }
-  /* eslint-enable max-statements, complexity */
 
   /* Utilities */
   getPathLength(path) {
