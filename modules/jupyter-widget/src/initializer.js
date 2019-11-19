@@ -1,6 +1,5 @@
 import makeTooltip from './widget-tooltip';
 
-// Build path shared by three access points
 export default function createDeckFromDependencies({
   dependencies,
   mapboxApiKey,
@@ -20,7 +19,7 @@ export default function createDeckFromDependencies({
     );
     classes.map(k => (classesDict[k] = deck[k]));
 
-    loaders.registerLoaders([loaders.CSVLoader, loaders.Tile3DLoader, loaders.LASWorkerLoader]);
+    loaders.registerLoaders([loaders.CSVLoader]);
 
     const jsonConverter = new deck.JSONConverter({
       configuration: {

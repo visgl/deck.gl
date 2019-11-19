@@ -9,6 +9,7 @@ from setuptools.command.develop import develop
 
 import atexit
 from distutils import log
+import glob
 import json
 import os
 from shutil import copy
@@ -114,6 +115,8 @@ class FrontendBuild(Command):
            Overwrites destination files"""
         js_dist_dir = os.path.join(widget_dir, "dist")
         nbextension_folder = os.path.join(here, "pydeck", "nbextension", "static")
+        labextension_folder = os.path.join(here, "pydeck", "labextension")
+        labextension_tgz = glob.glob(os.path.join(widget_dir, "deck.gl-jupyter-widget-*.tgz"))[0]
         js_files = [
             {
                 "source": os.path.join(js_dist_dir, "index.js"),
@@ -122,6 +125,10 @@ class FrontendBuild(Command):
             {
                 "source": os.path.join(js_dist_dir, "index.js.map"),
                 "destination": nbextension_folder,
+            },
+            {
+                "source": labextension_tgz,
+                "destination": labextension_folder
             },
         ]
         for js_file in js_files:
@@ -273,8 +280,9 @@ if __name__ == "__main__":
                     "pydeck/nbextension/static/index.js",
                     "pydeck/io/templates/requirejs_dependencies.json",
                     "pydeck/nbextension/static/index.js.map",
-                ],
-            ),
+                ]),
+            ('share/jupyter/lab/extensions', ['pydeck/labextension/*']),
+
             ("etc/jupyter/nbconfig/notebook.d", ["pydeck.json"]),
         ],
         zip_safe=False,
