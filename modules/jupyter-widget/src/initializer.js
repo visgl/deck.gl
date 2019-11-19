@@ -1,7 +1,9 @@
+/* global document */
 import makeTooltip from './widget-tooltip';
 
 export default function createDeckFromDependencies({
   dependencies,
+  jsonConverterConfiguration,
   mapboxApiKey,
   container,
   jsonInput,
@@ -12,32 +14,26 @@ export default function createDeckFromDependencies({
 }) {
   try {
     // Filter down to the deck.gl classes of interest
-    const {deck, loaders, mapboxgl} = dependencies;
-    const classesDict = {};
-    const classes = Object.keys(deck).filter(
-      x => (x.indexOf('Layer') > 0 || x.indexOf('View') > 0) && x.indexOf('_') !== 0
-    );
-    classes.map(k => (classesDict[k] = deck[k]));
-
-    loaders.registerLoaders([loaders.CSVLoader]);
+    const {deck, mapboxgl} = dependencies;
 
     const jsonConverter = new deck.JSONConverter({
-      configuration: {
-        classes: classesDict
-      }
+      configuration: jsonConverterConfiguration
     });
 
     const props = jsonConverter.convert(jsonInput);
 
     const getTooltip = makeTooltip(tooltip);
 
-    const deckgl = new deck.DeckGL({
+    container.appendChild(document.createElement('canvas'));
+    const canvas = container.firstElementChild;
+
+    const deckgl = new deck.Deck({
       ...props,
       map: mapboxgl,
       mapboxApiAccessToken: mapboxApiKey,
       onClick: handleClick,
       getTooltip,
-      container
+      canvas
     });
 
     const warn = deck.log.warn;
