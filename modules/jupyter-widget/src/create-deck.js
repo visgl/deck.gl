@@ -3,7 +3,8 @@
 import {DeckGLModel, DeckGLView} from './widget';
 import makeTooltip from './widget-tooltip';
 
-import * as mapboxgl from 'mapbox-gl';
+const IN_NODE = typeof process === 'object';
+const mapboxgl = IN_NODE ? require('mapbox-gl') : {};
 
 import {CSVLoader} from '@loaders.gl/csv';
 import {Tile3DLoader} from '@loaders.gl/3d-tiles';
