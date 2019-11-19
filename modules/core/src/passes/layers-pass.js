@@ -1,12 +1,13 @@
 import GL from '@luma.gl/constants';
 import Pass from './pass';
-import {clear, withParameters, cssToDeviceRatio} from '@luma.gl/core';
+import {clear, setParameters, withParameters, cssToDeviceRatio} from '@luma.gl/core';
 
 export default class LayersPass extends Pass {
   render(props) {
     const gl = this.gl;
 
-    return withParameters(gl, {framebuffer: props.target}, () => this._drawLayers(props));
+    setParameters(gl, {framebuffer: props.target});
+    return this._drawLayers(props);
   }
 
   // PRIVATE
@@ -174,7 +175,6 @@ function clearGLCanvas(gl) {
   const width = gl.drawingBufferWidth;
   const height = gl.drawingBufferHeight;
   // clear depth and color buffers, restoring transparency
-  withParameters(gl, {viewport: [0, 0, width, height]}, () => {
-    gl.clear(GL.COLOR_BUFFER_BIT | GL.DEPTH_BUFFER_BIT);
-  });
+  setParameters(gl, {viewport: [0, 0, width, height]});
+  gl.clear(GL.COLOR_BUFFER_BIT | GL.DEPTH_BUFFER_BIT);
 }
