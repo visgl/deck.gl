@@ -69,6 +69,19 @@ export default class Tesselator {
   }
 
   /* Private utility methods */
+  _allocate(instanceCount, copy) {
+    // allocate attributes
+    const {attributes, _attributeDefs, typedArrayManager} = this;
+    for (const name in _attributeDefs) {
+      const def = _attributeDefs[name];
+      // If dataRange is supplied, this is a partial update.
+      // In case we need to reallocate the typed array, it will need the old values copied
+      // before performing partial update.
+      def.copy = copy;
+
+      attributes[name] = typedArrayManager.allocate(attributes[name], instanceCount, def);
+    }
+  }
 
   /**
    * Visit all objects
@@ -111,19 +124,7 @@ export default class Tesselator {
     const instanceCount = vertexStarts[vertexStarts.length - 1];
 
     // allocate attributes
-    const {attributes, _attributeDefs, typedArrayManager, fp64} = this;
-    for (const name in _attributeDefs) {
-      const def = _attributeDefs[name];
-      // If dataRange is supplied, this is a partial update.
-      // In case we need to reallocate the typed array, it will need the old values copied
-      // before performing partial update.
-      def.copy = Boolean(dataRange);
-
-      // do not create fp64-only attributes unless in fp64 mode
-      if (!def.fp64Only || fp64) {
-        attributes[name] = typedArrayManager.allocate(attributes[name], instanceCount, def);
-      }
-    }
+    this._allocate(instanceCount, Boolean(dataRange));
 
     this.indexStarts = indexStarts;
     this.vertexStarts = vertexStarts;
