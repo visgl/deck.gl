@@ -64,6 +64,7 @@ const defaultProps = {
   sizeUnits: 'pixels',
   sizeMinPixels: 0,
   sizeMaxPixels: Number.MAX_SAFE_INTEGER,
+  backgroundColor: [0, 0, 0, 0],
 
   characterSet: DEFAULT_CHAR_SET,
   fontFamily: DEFAULT_FONT_FAMILY,
@@ -241,6 +242,7 @@ export default class TextLayer extends CompositeLayer {
     const {data, dataDiff, scale, iconAtlas, iconMapping} = this.state;
 
     const {
+      backgroundColor,
       getPosition,
       getColor,
       getSize,
@@ -265,6 +267,7 @@ export default class TextLayer extends CompositeLayer {
         sdf,
         iconAtlas,
         iconMapping,
+        backgroundColor,
 
         _dataDiff: dataDiff && (() => dataDiff),
 

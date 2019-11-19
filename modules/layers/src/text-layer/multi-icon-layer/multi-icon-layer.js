@@ -30,6 +30,7 @@ const DEFAULT_GAMMA = 0.2;
 const DEFAULT_BUFFER = 192.0 / 256;
 
 const defaultProps = {
+  backgroundColor: {type: 'color', value: [0, 0, 0, 0]},
   // each paragraph can have one or multiple row(s)
   // each row can have one or multiple character(s)
   getRowSize: {type: 'accessor', value: x => x.rowSize || [0, 0]},
@@ -80,7 +81,7 @@ export default class MultiIconLayer extends IconLayer {
 
   updateState(updateParams) {
     super.updateState(updateParams);
-    const {changeFlags} = updateParams;
+    const {changeFlags, oldProps, props} = updateParams;
 
     if (
       changeFlags.updateTriggersChanged &&
@@ -88,17 +89,28 @@ export default class MultiIconLayer extends IconLayer {
     ) {
       this.getAttributeManager().invalidate('instanceOffsets');
     }
+
+    if (props.backgroundColor !== oldProps.backgroundColor) {
+      const backgroundColor = props.backgroundColor.map(c => c / 255.0);
+      if (backgroundColor.length === 3) {
+        // alpha
+        backgroundColor.push(1.0);
+      }
+      this.setState({backgroundColor});
+    }
   }
 
   draw({uniforms}) {
     const {sdf} = this.props;
+    const {backgroundColor} = this.state;
     super.draw({
       uniforms: Object.assign({}, uniforms, {
         // Refer the following doc about gamma and buffer
         // https://blog.mapbox.com/drawing-text-with-signed-distance-fields-in-mapbox-gl-b0933af6f817
         buffer: DEFAULT_BUFFER,
         gamma: DEFAULT_GAMMA,
-        sdf: Boolean(sdf)
+        sdf: Boolean(sdf),
+        backgroundColor
       })
     });
   }

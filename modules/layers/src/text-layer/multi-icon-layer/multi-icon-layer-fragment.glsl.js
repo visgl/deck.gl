@@ -27,6 +27,7 @@ uniform sampler2D iconsTexture;
 uniform float buffer;
 uniform bool sdf;
 uniform float alphaCutoff;
+uniform vec4 transparentColor;
 
 varying vec4 vColor;
 varying vec2 vTextureCoords;
@@ -47,12 +48,13 @@ void main(void) {
 
   // Take the global opacity and the alpha from vColor into account for the alpha component
   float a = alpha * vColor.a;
-
+  
+  vec4 color = vec4(vColor.rgb, a);;
   if (a < alphaCutoff) {
-    discard;
+    color = transparentColor;
   }
 
-  gl_FragColor = vec4(vColor.rgb, a);
+  gl_FragColor = color;
 
   DECKGL_FILTER_COLOR(gl_FragColor, geometry);
 }
