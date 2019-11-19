@@ -476,6 +476,7 @@ export default class Deck {
       height,
       useDevicePixels,
       autoResizeDrawingBuffer,
+      autoResizeViewport: false,
       gl,
       onCreateContext: opts =>
         createGLContext(Object.assign({}, glOptions, opts, {canvas: this.canvas, debug})),

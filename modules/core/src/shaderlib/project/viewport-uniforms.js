@@ -172,18 +172,14 @@ export function getUniformsFromViewport({
 } = {}) {
   assert(viewport);
 
-  return Object.assign(
-    {
-      project_uModelMatrix: modelMatrix || IDENTITY_MATRIX
-    },
-    getMemoizedViewportUniforms({
-      viewport,
-      devicePixelRatio,
-      coordinateSystem,
-      coordinateOrigin,
-      wrapLongitude
-    })
-  );
+  return getMemoizedViewportUniforms({
+    viewport,
+    devicePixelRatio,
+    coordinateSystem,
+    coordinateOrigin,
+    wrapLongitude,
+    modelMatrix
+  });
 }
 
 function calculateViewportUniforms({
@@ -191,7 +187,8 @@ function calculateViewportUniforms({
   devicePixelRatio,
   coordinateSystem,
   coordinateOrigin,
-  wrapLongitude
+  wrapLongitude,
+  modelMatrix
 }) {
   const coordinateZoom = viewport.zoom;
 
@@ -236,7 +233,8 @@ function calculateViewportUniforms({
     project_uViewProjectionMatrix: viewProjectionMatrix,
 
     // This is for lighting calculations
-    project_uCameraPosition: cameraPosCommon
+    project_uCameraPosition: cameraPosCommon,
+    project_uModelMatrix: modelMatrix || IDENTITY_MATRIX
   };
 
   const distanceScalesAtOrigin = viewport.getDistanceScales(shaderCoordinateOrigin);
