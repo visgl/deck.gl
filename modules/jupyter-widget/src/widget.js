@@ -119,7 +119,9 @@ export class DeckGLView extends DOMWidgetView {
 
   remove() {
     if (this.jsonDeck) {
-      this.jsonDeck.deckgl.finalize();
+      if (this.jsonDeck.deckgl.finalize) {
+        this.jsonDeck.deckgl.finalize();
+      }
       this.jsonDeck = null;
     }
   }
