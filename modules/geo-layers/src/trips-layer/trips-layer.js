@@ -19,7 +19,6 @@
 // THE SOFTWARE.
 
 import {PathLayer} from '@deck.gl/layers';
-import {createIterable, log} from '@deck.gl/core';
 
 const defaultProps = {
   trailLength: {type: 'number', value: 120, min: 0},
@@ -33,12 +32,13 @@ export default class TripsLayer extends PathLayer {
     shaders.inject = {
       'vs:#decl': `\
 uniform float trailLength;
-attribute vec2 instanceTimestamps;
+attribute float instanceTimestamps;
+attribute float instanceNextTimestamps;
 varying float vTime;
 `,
       // Timestamp of the vertex
       'vs:#main-end': `\
-vTime = instanceTimestamps.x + (instanceTimestamps.y - instanceTimestamps.x) * vPathPosition.y / vPathLength;
+vTime = instanceTimestamps + (instanceNextTimestamps - instanceTimestamps) * vPathPosition.y / vPathLength;
 `,
       'fs:#decl': `\
 uniform float trailLength;
@@ -62,9 +62,17 @@ if(vTime > currentTime || vTime < currentTime - trailLength) {
 
     const attributeManager = this.getAttributeManager();
     attributeManager.addInstanced({
-      instanceTimestamps: {
-        size: 2,
-        update: this.calculateInstanceTimestamps
+      timestamps: {
+        size: 1,
+        accessor: 'getTimestamps',
+        shaderAttributes: {
+          instanceTimestamps: {
+            offset: 0
+          },
+          instanceNextTimestamps: {
+            offset: 4
+          }
+        }
       }
     });
   }
@@ -78,37 +86,6 @@ if(vTime > currentTime || vTime < currentTime - trailLength) {
     });
 
     super.draw(params);
-  }
-
-  calculateInstanceTimestamps(attribute, {startRow, endRow}) {
-    const {data, getTimestamps} = this.props;
-
-    const {
-      pathTesselator: {vertexStarts, instanceCount}
-    } = this.state;
-    const value = new Float32Array(instanceCount * 2);
-
-    const {iterable, objectInfo} = createIterable(data, startRow, endRow);
-    let i = vertexStarts[startRow] * 2;
-
-    for (const object of iterable) {
-      objectInfo.index++;
-
-      const maxI = (vertexStarts[objectInfo.index + 1] || instanceCount) * 2;
-      const timestamps = getTimestamps(object, objectInfo);
-
-      // Support for legacy use case is removed in v8.0
-      // TODO - remove when all apps are updated
-      log.assert(timestamps, 'TrisLayer: invalid timestamps');
-
-      // For each line segment, we have [startTimestamp, endTimestamp]
-      for (let j = 0; i < maxI; j++) {
-        value[i++] = timestamps[j];
-        value[i++] = timestamps[j + 1];
-      }
-    }
-    attribute.constant = false;
-    attribute.value = value;
   }
 }
 
