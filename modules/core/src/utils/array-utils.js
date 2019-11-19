@@ -61,15 +61,7 @@ function padArrayChunk({source, target, start = 0, end, getData}) {
  * @params {Array<Number>} [sourceStartIndices] - subdivision of the original data in [object0StartIndex, object1StartIndex, ...]
  * @params {Array<Number>} [targetStartIndices] - subdivision of the output data in [object0StartIndex, object1StartIndex, ...]
  */
-export function padArray({
-  source,
-  target,
-  size,
-  offset = 0,
-  getData,
-  sourceStartIndices,
-  targetStartIndices
-}) {
+export function padArray({source, target, size, getData, sourceStartIndices, targetStartIndices}) {
   if (!Array.isArray(targetStartIndices)) {
     // Flat arrays
     padArrayChunk({
@@ -81,15 +73,15 @@ export function padArray({
   }
 
   // Arrays have internal structure
-  let sourceIndex = offset;
-  let targetIndex = offset;
+  let sourceIndex = 0;
+  let targetIndex = 0;
   const getChunkData = getData && ((i, chunk) => getData(i + targetIndex, chunk));
 
   const n = Math.min(sourceStartIndices.length, targetStartIndices.length);
 
   for (let i = 1; i < n; i++) {
-    const nextSourceIndex = sourceStartIndices[i] * size + offset;
-    const nextTargetIndex = targetStartIndices[i] * size + offset;
+    const nextSourceIndex = sourceStartIndices[i] * size;
+    const nextTargetIndex = targetStartIndices[i] * size;
 
     padArrayChunk({
       source: source.subarray(sourceIndex, nextSourceIndex),

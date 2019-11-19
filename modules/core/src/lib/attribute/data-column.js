@@ -10,7 +10,7 @@ import log from '../../utils/log';
 function addDoublePrecisionAttributes(id, baseAccessor, shaderAttributeOptions) {
   const doubleShaderAttributeDefs = {};
   const offset =
-    'offset' in shaderAttributeOptions ? shaderAttributeOptions.offset : baseAccessor.offset || 0;
+    'offset' in shaderAttributeOptions ? shaderAttributeOptions.offset : baseAccessor.offset;
   const stride =
     'stride' in shaderAttributeOptions ? shaderAttributeOptions.stride : baseAccessor.size * 4;
 
@@ -73,6 +73,7 @@ export default class DataColumn {
 
     this.value = null;
     this.settings = Object.assign({}, opts, {
+      offset: opts.offset || 0,
       defaultValue
     });
     this.state = {
@@ -97,6 +98,11 @@ export default class DataColumn {
       });
     }
     return this._buffer;
+  }
+
+  get byteOffset() {
+    const {offset} = this.settings;
+    return this.doublePrecision && this.value instanceof Float64Array ? offset * 2 : offset;
   }
 
   delete() {
@@ -187,13 +193,19 @@ export default class DataColumn {
       state.externalBuffer = null;
       state.constant = false;
       this.value = value;
+      const {buffer, byteOffset} = this;
 
       if (this.doublePrecision && value instanceof Float64Array) {
         value = toDoublePrecisionArray(value, this);
       }
-
-      this.buffer.setData(value);
-      opts.type = this.buffer.accessor.type;
+      // TODO: support offset in buffer.setData?
+      if (buffer.byteLength < value.byteLength + byteOffset) {
+        buffer.reallocate(value.byteLength + byteOffset);
+      }
+      // Hack: force Buffer to infer data type
+      buffer.setAccessor(null);
+      buffer.subData({data: value, offset: byteOffset});
+      opts.type = buffer.accessor.type;
     }
 
     state.bufferAccessor = {...this.settings, ...opts};
@@ -212,7 +224,7 @@ export default class DataColumn {
               endIndex: endOffset
             })
           : value.subarray(startOffset, endOffset),
-      offset: startOffset * value.BYTES_PER_ELEMENT
+      offset: startOffset * value.BYTES_PER_ELEMENT + this.byteOffset
     });
   }
 
@@ -221,29 +233,30 @@ export default class DataColumn {
     const oldValue = state.allocatedValue;
 
     // Allocate at least one element to ensure a valid buffer
-    this.value = typedArrayManager.allocate(oldValue, numInstances + 1, {
+    const value = typedArrayManager.allocate(oldValue, numInstances + 1, {
       size: this.size,
       type: this.defaultType,
       copy
     });
+    this.value = value;
+    const {buffer, byteOffset} = this;
 
-    if (this.buffer.byteLength < this.value.byteLength) {
-      this.buffer.reallocate(this.value.byteLength);
+    if (buffer.byteLength < value.byteLength + byteOffset) {
+      buffer.reallocate(value.byteLength + byteOffset);
 
       if (copy && oldValue) {
         // Upload the full existing attribute value to the GPU, so that updateBuffer
         // can choose to only update a partial range.
         // TODO - copy old buffer to new buffer on the GPU
-        this.buffer.subData({
+        buffer.subData({
           data:
-            oldValue instanceof Float64Array
-              ? toDoublePrecisionArray(oldValue, {size: this.size})
-              : oldValue
+            oldValue instanceof Float64Array ? toDoublePrecisionArray(oldValue, this) : oldValue,
+          offset: byteOffset
         });
       }
     }
 
-    state.allocatedValue = this.value;
+    state.allocatedValue = value;
     state.constant = false;
     state.externalBuffer = null;
     state.bufferAccessor = this.settings;
