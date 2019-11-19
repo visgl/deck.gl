@@ -17,7 +17,7 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
-import {createIterable} from './iterable-utils';
+import {createIterable, getAccessorFromBuffer} from './iterable-utils';
 import defaultTypedArrayManager from './typed-array-manager';
 
 export default class Tesselator {
@@ -41,12 +41,32 @@ export default class Tesselator {
   /* Public methods */
   updateGeometry(opts) {
     Object.assign(this.opts, opts);
-    const {data, getGeometry, positionFormat, dataChanged, normalize = true} = this.opts;
+    const {
+      data,
+      buffers = {},
+      getGeometry,
+      positionFormat,
+      dataChanged,
+      normalize = true
+    } = this.opts;
+    let {geometryBuffer} = this.opts;
 
     this.data = data;
     this.getGeometry = getGeometry;
-    this.positionSize = positionFormat === 'XY' ? 2 : 3;
+    this.positionSize =
+      (geometryBuffer && geometryBuffer.size) || (positionFormat === 'XY' ? 2 : 3);
+    this.buffers = buffers;
     this.normalize = normalize;
+
+    geometryBuffer = ArrayBuffer.isView(geometryBuffer) ? {value: geometryBuffer} : geometryBuffer;
+    if (geometryBuffer) {
+      this.getGeometry = getAccessorFromBuffer(geometryBuffer.value, {
+        size: this.positionSize,
+        offset: geometryBuffer.offset,
+        stride: geometryBuffer.stride,
+        startIndices: data.startIndices
+      });
+    }
 
     if (Array.isArray(dataChanged)) {
       // is partial update
@@ -77,15 +97,21 @@ export default class Tesselator {
   /* Private utility methods */
   _allocate(instanceCount, copy) {
     // allocate attributes
-    const {attributes, _attributeDefs, typedArrayManager} = this;
+    const {attributes, buffers, _attributeDefs, typedArrayManager} = this;
     for (const name in _attributeDefs) {
-      const def = _attributeDefs[name];
-      // If dataRange is supplied, this is a partial update.
-      // In case we need to reallocate the typed array, it will need the old values copied
-      // before performing partial update.
-      def.copy = copy;
+      if (name in buffers) {
+        // Use external buffer
+        typedArrayManager.release(attributes[name]);
+        attributes[name] = null;
+      } else {
+        const def = _attributeDefs[name];
+        // If dataRange is supplied, this is a partial update.
+        // In case we need to reallocate the typed array, it will need the old values copied
+        // before performing partial update.
+        def.copy = copy;
 
-      attributes[name] = typedArrayManager.allocate(attributes[name], instanceCount, def);
+        attributes[name] = typedArrayManager.allocate(attributes[name], instanceCount, def);
+      }
     }
   }
 
