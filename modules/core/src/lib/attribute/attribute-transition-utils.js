@@ -130,6 +130,7 @@ export function padBuffer({
     getData: getMissingData
   });
 
+  // TODO: support offset in buffer.setData?
   if (buffer.byteLength < data.byteLength + byteOffset) {
     buffer.reallocate(data.byteLength + byteOffset);
   }
