@@ -36,12 +36,12 @@ test('Render Test', t => {
       onTestFail: (testCase, result) => t.fail(result.error || `match: ${result.matchPercentage}`),
 
       imageDiffOptions: {
-        threshold: 0.99
+        threshold: 0.99,
         // uncomment to save screenshot to disk
-        // saveOnFail: true,
+        saveOnFail: true,
         // uncomment `saveAs` to overwrite current golden images
         // if left commented will be saved as `[name]-fail.png.` enabling comparison
-        // saveAs: '[name].png'
+        saveAs: '[name].png'
       }
     })
     .then(() => t.end());
