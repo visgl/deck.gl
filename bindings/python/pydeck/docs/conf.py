@@ -11,7 +11,7 @@ author = u'Andrew Duberstein'
 # The short X.Y version
 version = u''
 # The full version, including alpha/beta/rc tags
-release = u'0.1.dev5'
+release = u'0.1.dev6'
 # Extensions to generate documents from our docstrings here
 extensions = [
     'sphinx.ext.autodoc',

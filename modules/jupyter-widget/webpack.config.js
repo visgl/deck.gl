@@ -30,12 +30,13 @@ const config = {
         loader: 'babel-loader',
         include: /src/,
         options: {
+          babelrc: false,
           presets: [['@babel/preset-env', {forceAllTransforms: true}]],
           // all of the helpers will reference the module @babel/runtime to avoid duplication
           // across the compiled output.
           plugins: [
             '@babel/transform-runtime',
-            'inline-webgl-constants',
+            // 'inline-webgl-constants',
             ['remove-glsl-comments', {patterns: ['**/*.glsl.js']}]
           ]
         }
