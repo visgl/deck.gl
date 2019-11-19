@@ -9,16 +9,10 @@ from setuptools.command.develop import develop
 
 import atexit
 from distutils import log
-import json
 import os
 from shutil import copy
 from subprocess import check_call
 import sys
-
-from dependency_managers import (
-    create_notebook_requirejs,
-    create_standalone_render_requirejs,
-)
 
 here = os.path.dirname(os.path.abspath(__file__))
 
@@ -162,13 +156,6 @@ class FrontendBuild(Command):
         self.clean_frontend_build()
         self.copy_frontend_build()
         log.info("Creating RequireJS configs for notebook and standalone environments.")
-        setup_environment = "production" if prod_build else "development"
-        create_notebook_requirejs(
-            load_requirejs_dependencies(), here, setup_environment=setup_environment
-        )
-        create_standalone_render_requirejs(
-            load_requirejs_dependencies(), here, setup_environment=setup_environment
-        )
 
         for t in self.target_files:
             if not os.path.exists(t):
@@ -192,10 +179,6 @@ def js_prerelease(command, strict=False):
             update_package_data(self.distribution)
 
     return DecoratedCommand
-
-
-def load_requirejs_dependencies():
-    return json.loads(read("requirejs_dependencies.json"))
 
 
 version_ns = {}
@@ -263,7 +246,6 @@ if __name__ == "__main__":
                 [
                     "pydeck/nbextension/static/extensionRequires.js",
                     "pydeck/nbextension/static/index.js",
-                    "pydeck/io/templates/requirejs_dependencies.json",
                     "pydeck/nbextension/static/index.js.map",
                 ]),
             ("etc/jupyter/nbconfig/notebook.d", ["pydeck.json"]),
