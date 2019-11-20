@@ -29,8 +29,8 @@ export default class Attribute extends DataColumn {
     });
 
     Object.assign(this.state, {
-      lastVirtualBuffer: null,
-      lastLogicalBuffer: null,
+      lastExternalBuffer: null,
+      logicalValue: null,
       logicalAccessor: null,
       needsUpdate: true,
       needsRedraw: false,
@@ -200,30 +200,33 @@ export default class Attribute extends DataColumn {
   // Use external buffer
   // Returns true if successful
   // eslint-disable-next-line max-statements
-  setVirtualBuffer(buffer) {
+  setExternalBuffer(buffer) {
     const {state} = this;
 
     if (!buffer) {
-      state.lastVirtualBuffer = null;
+      state.lastExternalBuffer = null;
       return false;
     }
 
     this.clearNeedsUpdate();
 
-    if (state.lastVirtualBuffer === buffer) {
+    if (state.lastExternalBuffer === buffer) {
       return true;
     }
-    state.lastVirtualBuffer = buffer;
+    state.lastExternalBuffer = buffer;
     this.setNeedsRedraw();
     this.setData(buffer);
     return true;
   }
 
-  setLogicalBuffer(buffer, startIndices = null) {
+  // Logical value is a typed array packed from mapping the source data with the accessor
+  // If the logical value is the same as the attribute value, set it directly
+  // Otherwise use the auto updater for transform/normalization
+  setLogicalValue(buffer, startIndices = null) {
     const {state, settings} = this;
 
     if (!buffer) {
-      state.lastLogicalBuffer = null;
+      state.logicalValue = null;
       state.logicalAccessor = null;
       return false;
     }
@@ -233,20 +236,20 @@ export default class Attribute extends DataColumn {
       return false;
     }
 
-    if (state.lastLogicalBuffer === buffer) {
+    if (state.logicalValue === buffer) {
       this.clearNeedsUpdate();
       return true;
     }
-    state.lastLogicalBuffer = buffer;
+    state.logicalValue = buffer;
     this.setNeedsRedraw();
 
+    if (ArrayBuffer.isView(buffer)) {
+      buffer = {value: buffer};
+    }
+    assert(ArrayBuffer.isView(buffer.value), `invalid ${settings.accessor}`);
     const needsUpdate = settings.transform || startIndices !== this.startIndices;
 
     if (needsUpdate) {
-      if (ArrayBuffer.isView(buffer)) {
-        buffer = {value: buffer};
-      }
-      assert(ArrayBuffer.isView(buffer.value), `invalid ${settings.accessor}`);
       const needsNormalize = buffer.size && buffer.size !== this.size;
 
       state.logicalAccessor = getAccessorFromBuffer(buffer.value, {

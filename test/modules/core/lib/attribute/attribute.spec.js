@@ -110,10 +110,10 @@ test('Attribute#allocate', t => {
   t.ok(attribute.allocate(4), 'allocate successful');
   t.is(attribute.value, allocatedValue, 'reused the same typed array');
 
-  attribute.setVirtualBuffer(externalValue);
+  attribute.setExternalBuffer(externalValue);
   t.notOk(attributeNoAlloc.allocate(4), 'Should not allocate if external buffer is used');
 
-  attribute.setVirtualBuffer(null);
+  attribute.setExternalBuffer(null);
   t.ok(attribute.allocate(4), 'allocate successful');
   t.is(attribute.value, allocatedValue, 'reused the same typed array');
 
@@ -667,7 +667,7 @@ test('Attribute#updateBuffer - partial', t => {
   t.end();
 });
 
-test('Attribute#setVirtualBuffer', t => {
+test('Attribute#setExternalBuffer', t => {
   const attribute = new Attribute(gl, {
     id: 'test-attribute',
     type: GL.FLOAT,
@@ -689,38 +689,38 @@ test('Attribute#setVirtualBuffer', t => {
   const value2 = new Uint8Array(4);
 
   attribute.setNeedsUpdate();
-  t.notOk(attribute.setVirtualBuffer(null), 'should do nothing if setting external buffer to null');
+  t.notOk(attribute.setExternalBuffer(null), 'should do nothing if setting external buffer to null');
   t.ok(attribute.needsUpdate(), 'attribute still needs update');
 
-  t.ok(attribute.setVirtualBuffer(buffer), 'should set external buffer to Buffer object');
+  t.ok(attribute.setExternalBuffer(buffer), 'should set external buffer to Buffer object');
   t.is(attribute.getBuffer(), buffer, 'external buffer is set');
   t.notOk(attribute.needsUpdate(), 'attribute is updated');
 
   const spy = makeSpy(attribute, 'setData');
   t.ok(
-    attribute.setVirtualBuffer(buffer),
+    attribute.setExternalBuffer(buffer),
     'should successfully set external buffer if setting external buffer to the same object'
   );
   t.notOk(spy.called, 'Should not call update if setting external buffer to the same object');
 
-  t.ok(attribute.setVirtualBuffer(value1), 'should set external buffer to typed array');
+  t.ok(attribute.setExternalBuffer(value1), 'should set external buffer to typed array');
   t.is(attribute.value, value1, 'external value is set');
   t.is(attribute.getAccessor().type, GL.FLOAT, 'attribute type is set correctly');
 
-  t.ok(attribute.setVirtualBuffer(value2), 'should set external buffer to typed array');
+  t.ok(attribute.setExternalBuffer(value2), 'should set external buffer to typed array');
   t.is(attribute.getAccessor().type, GL.UNSIGNED_BYTE, 'attribute type is set correctly');
 
-  t.ok(attribute2.setVirtualBuffer(value2), 'external value is set');
+  t.ok(attribute2.setExternalBuffer(value2), 'external value is set');
 
   spy.reset();
   t.ok(
-    attribute.setVirtualBuffer(value2),
+    attribute.setExternalBuffer(value2),
     'should successfully set external buffer if setting external buffer to the same object'
   );
   t.notOk(spy.called, 'Should not call update if setting external buffer to the same object');
 
   t.ok(
-    attribute.setVirtualBuffer({
+    attribute.setExternalBuffer({
       offset: 4,
       stride: 8,
       value: value1
@@ -737,6 +737,64 @@ test('Attribute#setVirtualBuffer', t => {
   attribute.delete();
   attribute2.delete();
 
+  t.end();
+});
+
+test('Attribute#setLogicalValue', t => {
+  let attribute = new Attribute(gl, {
+    id: 'test-attribute',
+    type: GL.FLOAT,
+    size: 3,
+    update: () => {}
+  });
+  let value = new Float32Array(12);
+
+  attribute.setNeedsUpdate();
+  t.notOk(attribute.setLogicalValue(null), 'should do nothing if setting external buffer to null');
+  t.ok(attribute.needsUpdate(), 'attribute still needs update');
+
+  const spy = makeSpy(attribute, 'setData');
+  t.ok(attribute.setLogicalValue(value), 'should use external logical value');
+  t.is(spy.callCount, 1, 'setData is called');
+  t.notOk(attribute.needsUpdate(), 'attribute is updated');
+
+  attribute.setNeedsUpdate();
+  t.ok(attribute.setLogicalValue(value), 'should use external logical value');
+  t.is(spy.callCount, 1, 'setData is called only once on the same data');
+  t.notOk(attribute.needsUpdate(), 'attribute is updated');
+
+  t.throws(() => attribute.setLogicalValue([0, 1, 2, 3]), 'should throw if external value is invalid');
+
+  spy.reset();
+  attribute.delete();
+
+  attribute = new Attribute(gl, {
+    id: 'test-attribute',
+    type: GL.FLOAT,
+    size: 3,
+    noAlloc: true,
+    update: () => {}
+  });
+  attribute.setNeedsUpdate();
+  t.notOk(attribute.setLogicalValue(value), 'should do nothing if noAlloc');
+  t.ok(attribute.needsUpdate(), 'attribute still needs update');
+
+  attribute = new Attribute(gl, {
+    id: 'test-attribute-with-transform',
+    type: GL.UNSIGNED_BYTE,
+    size: 4,
+    defaultValue: [0, 0, 0, 255],
+    transform: x => x + 1,
+    update: () => {}
+  });
+  value = {value: new Uint8Array(12), size: 3};
+
+  attribute.setNeedsUpdate();
+  t.notOk(attribute.setLogicalValue(value), 'should require update');
+  t.ok(attribute.state.logicalAccessor, 'logicalAccessor is assigned');
+  t.ok(attribute.needsUpdate(), 'attribute still needs update');
+
+  attribute.delete();
   t.end();
 });
 
@@ -792,21 +850,21 @@ test('Attribute#doublePrecision', t0 => {
     t.deepEqual(attribute.value.slice(0, 6), [0, 1, 2, 1, 1, 2], 'Attribute value is populated');
     validateShaderAttributes(t, attribute, true);
 
-    attribute.setVirtualBuffer(new Uint32Array([3, 4, 5, 4, 4, 5]));
+    attribute.setExternalBuffer(new Uint32Array([3, 4, 5, 4, 4, 5]));
     t.ok(attribute.value instanceof Uint32Array, 'Attribute is Uint32Array');
     validateShaderAttributes(t, attribute, false);
 
     t.throws(
-      () => attribute.setVirtualBuffer(new Uint8Array([3, 4, 5, 4, 4, 5])),
+      () => attribute.setExternalBuffer(new Uint8Array([3, 4, 5, 4, 4, 5])),
       'should throw on invalid buffer'
     );
 
-    attribute.setVirtualBuffer(new Float64Array([3, 4, 5, 4, 4, 5]));
+    attribute.setExternalBuffer(new Float64Array([3, 4, 5, 4, 4, 5]));
     t.ok(attribute.value instanceof Float64Array, 'Attribute is Float64Array');
     validateShaderAttributes(t, attribute, true);
 
     const buffer = new Buffer(gl, 12);
-    attribute.setVirtualBuffer(buffer);
+    attribute.setExternalBuffer(buffer);
     validateShaderAttributes(t, attribute, false);
 
     buffer.delete();
@@ -835,21 +893,21 @@ test('Attribute#doublePrecision', t0 => {
     t.deepEqual(attribute.value.slice(0, 6), [0, 1, 2, 1, 1, 2], 'Attribute value is populated');
     validateShaderAttributes(t, attribute, false);
 
-    attribute.setVirtualBuffer(new Uint32Array([3, 4, 5, 4, 4, 5]));
+    attribute.setExternalBuffer(new Uint32Array([3, 4, 5, 4, 4, 5]));
     t.ok(attribute.value instanceof Uint32Array, 'Attribute is Uint32Array');
     validateShaderAttributes(t, attribute, false);
 
     t.throws(
-      () => attribute.setVirtualBuffer(new Uint8Array([3, 4, 5, 4, 4, 5])),
+      () => attribute.setExternalBuffer(new Uint8Array([3, 4, 5, 4, 4, 5])),
       'should throw on invalid buffer'
     );
 
-    attribute.setVirtualBuffer(new Float64Array([3, 4, 5, 4, 4, 5]));
+    attribute.setExternalBuffer(new Float64Array([3, 4, 5, 4, 4, 5]));
     t.ok(attribute.value instanceof Float64Array, 'Attribute is Float64Array');
     validateShaderAttributes(t, attribute, true);
 
     const buffer = new Buffer(gl, 12);
-    attribute.setVirtualBuffer(buffer);
+    attribute.setExternalBuffer(buffer);
     validateShaderAttributes(t, attribute, false);
 
     buffer.delete();

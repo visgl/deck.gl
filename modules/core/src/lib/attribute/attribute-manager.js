@@ -235,10 +235,14 @@ export default class AttributeManager {
       const accessorName = attribute.settings.accessor;
       attribute.startIndices = startIndices;
 
-      if (attribute.setVirtualBuffer(buffers[attributeName])) {
-        // Step 1: try set virtual attribute from external buffers
-      } else if (attribute.setLogicalBuffer(buffers[accessorName], data.startIndices)) {
-        // Step 2: try set logical attribute from external buffers
+      if (props[attributeName]) {
+        log.removed(`props.${attributeName}`, `data.attributes.${attributeName}`)();
+      }
+
+      if (attribute.setExternalBuffer(buffers[attributeName])) {
+        // Step 1: try update attribute directly from external buffers
+      } else if (attribute.setLogicalValue(buffers[accessorName], data.startIndices)) {
+        // Step 2: try set logical value from external buffers
       } else if (attribute.setConstantValue(props[accessorName])) {
         // Step 3: try set constant value from props
       } else if (attribute.needsUpdate()) {
