@@ -109,7 +109,7 @@ test('polygon#fuctions', t => {
     t.comment(object.name);
 
     const complexPolygon = Polygon.normalize(object.polygon, 2);
-    t.ok(ArrayBuffer.isView(complexPolygon.positions), 'Polygon.normalize flattens positions');
+    t.ok(ArrayBuffer.isView(complexPolygon.positions || complexPolygon), 'Polygon.normalize flattens positions');
     if (complexPolygon.holeIndices) {
       t.ok(
         Array.isArray(complexPolygon.holeIndices),

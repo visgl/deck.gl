@@ -130,6 +130,9 @@ export default class PathTesselator extends Tesselator {
   }
 
   isClosed(path) {
+    if (!this.normalize) {
+      return false;
+    }
     const numPoints = this.getPathLength(path);
     const firstPoint = this.getPointOnPath(path, 0);
     const lastPoint = this.getPointOnPath(path, numPoints - 1);
