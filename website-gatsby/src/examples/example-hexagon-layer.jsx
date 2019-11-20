@@ -115,7 +115,9 @@ export default class HexagonDemo extends Component {
               <b>{readableInteger(dataCount)}</b>
             </div>
           </div>
+
           <hr />
+
           <div className="input">
             <label>Coverage</label>
             <input

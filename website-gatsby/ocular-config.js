@@ -118,9 +118,9 @@ based maps.',
     },
     {
       title: 'IconLayer',
-      path: 'examples/icon',
+      path: 'examples/website/icon',
       image: 'images/examples/demo-thumb-icon.jpg',
-      componentUrl: resolve(__dirname, '../examples/website/icon/app.js')
+      componentUrl: resolve(__dirname, './src/examples/example-icon-layer.jsx')
     },
     {
       title: 'GeoJsonLayer (Polygons)',
