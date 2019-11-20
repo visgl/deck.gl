@@ -19,6 +19,7 @@
 // THE SOFTWARE.
 import {createIterable, getAccessorFromBuffer} from './iterable-utils';
 import defaultTypedArrayManager from './typed-array-manager';
+import assert from './assert';
 
 export default class Tesselator {
   constructor(opts = {}) {
@@ -45,12 +46,11 @@ export default class Tesselator {
       data,
       buffers = {},
       getGeometry,
+      geometryBuffer,
       positionFormat,
       dataChanged,
       normalize = true
     } = this.opts;
-    let {geometryBuffer} = this.opts;
-
     this.data = data;
     this.getGeometry = getGeometry;
     this.positionSize =
@@ -58,15 +58,21 @@ export default class Tesselator {
     this.buffers = buffers;
     this.normalize = normalize;
 
-    geometryBuffer = ArrayBuffer.isView(geometryBuffer) ? {value: geometryBuffer} : geometryBuffer;
+    // Handle external logical value
     if (geometryBuffer) {
-      this.getGeometry = getAccessorFromBuffer(geometryBuffer.value, {
-        size: this.positionSize,
-        offset: geometryBuffer.offset,
-        stride: geometryBuffer.stride,
-        startIndices: data.startIndices
-      });
+      assert(
+        ArrayBuffer.isView(geometryBuffer.value || geometryBuffer) && data.startIndices,
+        'invalid geometries'
+      );
+      this.getGeometry = this.getGeometryFromBuffer(geometryBuffer);
+
+      if (!normalize) {
+        // skip packing and set attribute value directly
+        // TODO - avoid mutating user-provided object
+        buffers.positions = geometryBuffer;
+      }
     }
+    this.geometryBuffer = buffers.positions;
 
     if (Array.isArray(dataChanged)) {
       // is partial update
@@ -92,6 +98,15 @@ export default class Tesselator {
   // Returns the number of vertices in a geometry
   getGeometrySize(geometry) {
     throw new Error('Not implemented');
+  }
+
+  getGeometryFromBuffer(geometryBuffer) {
+    return getAccessorFromBuffer(geometryBuffer.value || geometryBuffer, {
+      size: this.positionSize,
+      offset: geometryBuffer.offset,
+      stride: geometryBuffer.stride,
+      startIndices: this.data.startIndices
+    });
   }
 
   /* Private utility methods */
@@ -135,25 +150,33 @@ export default class Tesselator {
       return;
     }
 
-    let {indexStarts, vertexStarts} = this;
-
-    if (!dataRange) {
-      // Full update - regenerate buffer layout from scratch
-      indexStarts = [0];
-      vertexStarts = [0];
-    }
-
+    let {indexStarts, vertexStarts, instanceCount} = this;
+    const {geometryBuffer} = this;
     const {startRow = 0, endRow = Infinity} = dataRange || {};
-    this._forEachGeometry(
-      (geometry, dataIndex) => {
-        vertexStarts[dataIndex + 1] = vertexStarts[dataIndex] + this.getGeometrySize(geometry);
-      },
-      startRow,
-      endRow
-    );
 
-    // count instances
-    const instanceCount = vertexStarts[vertexStarts.length - 1];
+    if (this.normalize || !geometryBuffer) {
+      if (!dataRange) {
+        // Full update - regenerate buffer layout from scratch
+        indexStarts = [0];
+        vertexStarts = [0];
+      }
+      this._forEachGeometry(
+        (geometry, dataIndex) => {
+          vertexStarts[dataIndex + 1] = vertexStarts[dataIndex] + this.getGeometrySize(geometry);
+        },
+        startRow,
+        endRow
+      );
+      // count instances
+      instanceCount = vertexStarts[vertexStarts.length - 1];
+    } else {
+      const bufferValue = geometryBuffer.value || geometryBuffer;
+      const bufferStride =
+        geometryBuffer.stride / bufferValue.BYTES_PER_ELEMENT || this.positionSize;
+      // assume user provided data is already normalized
+      vertexStarts = this.data.startIndices;
+      instanceCount = bufferValue.length / bufferStride;
+    }
 
     // allocate attributes
     this._allocate(instanceCount, Boolean(dataRange));

@@ -141,6 +141,7 @@ export default class PathLayer extends Layer {
         data: props.data,
         geometryBuffer: buffers.getPath,
         buffers,
+        normalize: props._normalize,
         getGeometry: props.getPath,
         positionFormat: props.positionFormat,
         dataChanged: changeFlags.dataChanged

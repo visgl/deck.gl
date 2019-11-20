@@ -56,6 +56,15 @@ export default class PolygonTesselator extends Tesselator {
     return Polygon.getVertexCount(polygon, this.positionSize, this.normalize);
   }
 
+  getGeometryFromBuffer(buffer) {
+    const getGeometry = super.getGeometryFromBuffer(buffer);
+    if (this.normalize || !this.buffers.indices) {
+      return getGeometry;
+    }
+    // we don't need to read the positions if no normalization/tesselation
+    return () => null;
+  }
+
   updateGeometryAttributes(polygon, context) {
     if (this.normalize) {
       polygon = Polygon.normalize(polygon, this.positionSize, context.geometrySize);
@@ -71,6 +80,9 @@ export default class PolygonTesselator extends Tesselator {
     const {attributes, indexStarts, typedArrayManager} = this;
 
     let target = attributes.indices;
+    if (!target) {
+      return;
+    }
     let i = indexStart;
 
     // 1. get triangulated indices for the internal areas
@@ -96,6 +108,9 @@ export default class PolygonTesselator extends Tesselator {
       attributes: {positions},
       positionSize
     } = this;
+    if (!positions) {
+      return;
+    }
     const polygonPositions = polygon.positions || polygon;
 
     for (let i = vertexStart, j = 0; j < geometrySize; i++, j++) {
@@ -114,7 +129,7 @@ export default class PolygonTesselator extends Tesselator {
       attributes: {vertexValid},
       positionSize
     } = this;
-    const {holeIndices} = polygon;
+    const holeIndices = polygon && polygon.holeIndices;
     /* We are reusing the some buffer for `nextPositions` by offseting one vertex
      * to the left. As a result,
      * the last vertex of each ring overlaps with the first vertex of the next ring.
