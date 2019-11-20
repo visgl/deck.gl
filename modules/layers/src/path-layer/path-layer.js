@@ -63,8 +63,7 @@ export default class PathLayer extends Layer {
     attributeManager.addInstanced({
       positions: {
         size: 3,
-        // Hack - Attribute class needs this to properly apply partial update
-        // The first 3 numbers of the value is just padding
+        // Start filling buffer from 3 elements in
         offset: 12,
         type: GL.DOUBLE,
         fp64: this.use64bitPositions(),

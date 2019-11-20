@@ -710,7 +710,6 @@ test('Attribute#setExternalBuffer', t => {
   t.is(attribute.getAccessor().type, GL.FLOAT, 'attribute type is set correctly');
 
   t.ok(attribute.setExternalBuffer(value2), 'should set external buffer to typed array');
-  t.is(attribute.getBuffer().debugData.constructor.name, 'Uint8Array', 'external value is set');
   t.is(attribute.getAccessor().type, GL.UNSIGNED_BYTE, 'attribute type is set correctly');
 
   t.ok(attribute2.setExternalBuffer(value2), 'external value is set');
@@ -797,11 +796,6 @@ test('Attribute#doublePrecision', t0 => {
 
     attribute.setExternalBuffer(new Uint32Array([3, 4, 5, 4, 4, 5]));
     t.ok(attribute.value instanceof Uint32Array, 'Attribute is Uint32Array');
-    t.deepEqual(
-      attribute.buffer.debugData.slice(0, 6),
-      [3, 4, 5, 4, 4, 5],
-      'Attribute value is set'
-    );
     validateShaderAttributes(t, attribute, false);
 
     t.throws(
@@ -811,11 +805,6 @@ test('Attribute#doublePrecision', t0 => {
 
     attribute.setExternalBuffer(new Float64Array([3, 4, 5, 4, 4, 5]));
     t.ok(attribute.value instanceof Float64Array, 'Attribute is Float64Array');
-    t.deepEqual(
-      attribute.buffer.debugData.slice(0, 6),
-      [3, 4, 5, 0, 0, 0],
-      'Attribute value is set'
-    );
     validateShaderAttributes(t, attribute, true);
 
     const buffer = new Buffer(gl, 12);
@@ -850,11 +839,6 @@ test('Attribute#doublePrecision', t0 => {
 
     attribute.setExternalBuffer(new Uint32Array([3, 4, 5, 4, 4, 5]));
     t.ok(attribute.value instanceof Uint32Array, 'Attribute is Uint32Array');
-    t.deepEqual(
-      attribute.buffer.debugData.slice(0, 6),
-      [3, 4, 5, 4, 4, 5],
-      'Attribute value is set'
-    );
     validateShaderAttributes(t, attribute, false);
 
     t.throws(
@@ -864,11 +848,6 @@ test('Attribute#doublePrecision', t0 => {
 
     attribute.setExternalBuffer(new Float64Array([3, 4, 5, 4, 4, 5]));
     t.ok(attribute.value instanceof Float64Array, 'Attribute is Float64Array');
-    t.deepEqual(
-      attribute.buffer.debugData.slice(0, 6),
-      [3, 4, 5, 0, 0, 0],
-      'Attribute value is set'
-    );
     validateShaderAttributes(t, attribute, true);
 
     const buffer = new Buffer(gl, 12);

@@ -1,5 +1,4 @@
 /* eslint-disable complexity */
-import {_Accessor as Accessor} from '@luma.gl/core';
 import DataColumn from './data-column';
 import assert from '../../utils/assert';
 import {createIterable} from '../../utils/iterable-utils';
@@ -13,7 +12,6 @@ export default class Attribute extends DataColumn {
 
     const {
       // deck.gl fields
-      offset = 0,
       transition = false,
       noAlloc = false,
       update = null,
@@ -27,7 +25,6 @@ export default class Attribute extends DataColumn {
       noAlloc,
       update: update || (accessor && this._standardAccessor),
       accessor,
-      elementOffset: offset / Accessor.getBytesPerElement(this.settings),
       transform
     });
 
@@ -223,7 +220,7 @@ export default class Attribute extends DataColumn {
 
   getVertexOffset(row, startIndices = this.startIndices) {
     const vertexIndex = startIndices ? startIndices[row] : row;
-    return this.settings.elementOffset + vertexIndex * this.size;
+    return vertexIndex * this.size;
   }
 
   getShaderAttributes() {

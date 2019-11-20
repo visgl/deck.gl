@@ -96,7 +96,7 @@ export function padBuffer({
   // its `size` and `elementOffset`?
   const precisionMultiplier = attribute.doublePrecision ? 2 : 1;
   const size = attribute.size * precisionMultiplier;
-  const offset = attribute.elementOffset * precisionMultiplier;
+  const byteOffset = attribute.byteOffset;
   const toStartIndices = attribute.startIndices;
   const hasStartIndices = fromStartIndices && toStartIndices;
   const toLength = getAttributeBufferLength(attribute, numInstances);
@@ -107,7 +107,9 @@ export function padBuffer({
     return;
   }
 
-  const toData = isConstant ? attribute.value : attribute.getBuffer().getData({});
+  const toData = isConstant
+    ? attribute.value
+    : attribute.getBuffer().getData({srcByteOffset: byteOffset});
   if (attribute.settings.normalized) {
     const getter = getData;
     getData = (value, chunk) => attribute._normalizeConstant(getter(value, chunk));
@@ -124,10 +126,13 @@ export function padBuffer({
     target: data,
     sourceStartIndices: fromStartIndices,
     targetStartIndices: toStartIndices,
-    offset,
     size,
     getData: getMissingData
   });
 
-  buffer.setData({data});
+  // TODO: support offset in buffer.setData?
+  if (buffer.byteLength < data.byteLength + byteOffset) {
+    buffer.reallocate(data.byteLength + byteOffset);
+  }
+  buffer.subData({data, offset: byteOffset});
 }

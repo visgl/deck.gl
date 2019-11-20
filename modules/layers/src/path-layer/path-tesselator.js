@@ -33,7 +33,7 @@ export default class PathTesselator extends Tesselator {
       getGeometry,
       positionFormat,
       attributes: {
-        positions: {size: 3, padding: 3, type: fp64 ? Float64Array : Float32Array},
+        positions: {size: 3, type: fp64 ? Float64Array : Float32Array},
         segmentTypes: {size: 1, type: Uint8ClampedArray}
       }
     });
@@ -92,9 +92,9 @@ export default class PathTesselator extends Tesselator {
     // segmentTypes     3  4  4  0  0  0  0  4  4
     for (let i = vertexStart, ptIndex = 0; ptIndex < geometrySize; i++, ptIndex++) {
       const p = this.getPointOnPath(path, ptIndex);
-      positions[i * 3 + 3] = p[0];
-      positions[i * 3 + 4] = p[1];
-      positions[i * 3 + 5] = p[2] || 0;
+      positions[i * 3] = p[0];
+      positions[i * 3 + 1] = p[1];
+      positions[i * 3 + 2] = p[2] || 0;
     }
   }
 
