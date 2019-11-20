@@ -101,20 +101,20 @@ based maps.',
 
   LINK_TO_GET_STARTED: '/docs',
 
-  INDEX_PAGE_URL: resolve(__dirname, './templates/index.jsx'),
+  INDEX_PAGE_URL: resolve(__dirname, './src/index.jsx'),
 
   EXAMPLES: [
     {
       title: 'LineLayer',
       path: 'examples/website/line',
       image: 'images/examples/demo-thumb-line.jpg',
-      componentUrl: resolve(__dirname, './templates/examples/example-line-layer.jsx')
+      componentUrl: resolve(__dirname, './src/examples/example-line-layer.jsx')
     },
     {
       title: 'HexagonLayer',
-      path: 'examples/heatmap',
+      path: 'examples/website/3d-heatmap',
       image: 'images/examples/demo-thumb-heatmap.jpg',
-      componentUrl: resolve(__dirname, '../examples/website/3d-heatmap/app.js')
+      componentUrl: resolve(__dirname, './src/examples/example-hexagon-layer.jsx')
     },
     {
       title: 'IconLayer',

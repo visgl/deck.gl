@@ -1,8 +1,8 @@
 import React, {Component} from 'react';
-import InfoPanel from '../../src/components/info-panel';
-import {MAPBOX_STYLES, DATA_URI, GITHUB_TREE} from '../../src/constants/defaults';
-import {loadData} from '../../src/utils/data-utils';
-import {readableInteger} from '../../src/utils/format-utils';
+import InfoPanel from '../components/info-panel';
+import {MAPBOX_STYLES, DATA_URI, GITHUB_TREE} from '../constants/defaults';
+import {loadData} from '../utils/data-utils';
+import {readableInteger} from '../utils/format-utils';
 import App from '../../../examples/website/line/app';
 
 export default class LineDemo extends Component {
