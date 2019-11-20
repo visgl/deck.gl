@@ -142,7 +142,6 @@ class FrontendBuild(Command):
                 stderr=sys.stderr,
                 env=env,
             )
-            log.info("Creating lab extension .tgz with `npm pack`.")
         else:
             log.info("Installing build dependencies with `npm run build`.")
             check_call(
@@ -155,7 +154,6 @@ class FrontendBuild(Command):
 
         self.clean_frontend_build()
         self.copy_frontend_build()
-        log.info("Creating RequireJS configs for notebook and standalone environments.")
 
         for t in self.target_files:
             if not os.path.exists(t):
@@ -234,7 +232,7 @@ if __name__ == "__main__":
         install_requires=[
             'ipykernel>=5.1.2;python_version>="3.4"',
             'ipython>=5.8.0;python_version<"3.4"',
-            "ipywidgets>=7.0.0,<8",
+            "ipywidgets>=7.0.0,<7.5",
             "traitlets>=4.3.2",
             "jinja2>=2.10.1",
         ],
