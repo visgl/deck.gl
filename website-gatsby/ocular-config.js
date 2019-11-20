@@ -32,7 +32,7 @@ module.exports = {
   PROJECT_NAME: 'deck.gl',
   PROJECT_ORG: 'uber',
   PROJECT_URL: 'https://deck.gl',
-  PROJECT_DESC: 'A WebGL-powered framework for visual exploratory analysis of large datasets.',
+  PROJECT_DESC: 'Large-scale WebGL-powered Data Visualization',
   PATH_PREFIX: '/',
 
   FOOTER_LOGO: '',
@@ -51,22 +51,7 @@ module.exports = {
 
   HOME_BULLETS: [
     {
-      text: '',
-      desc: '',
-      img: 'images/icon-high-precision.svg'
-    },
-    {
-      text: 'High-Precision Computations in the GPU',
-      // eslint-disable-next-line
-      desc:
-        'Using polynomial expansions of geospatial projections, \
-and through emulation of 64 bit floating point computations in the GPU, \
-deck.gl renders datasets with unparalleled accuracy and performance.',
-      img: 'images/icon-high-precision.svg'
-    },
-    {
       text: 'A Layered Approach to Data Visualization',
-      // eslint-disable-next-line
       desc:
         'deck.gl allows complex visualizations to be constructed by \
 composing existing layers, and makes it easy to package and \
@@ -75,22 +60,20 @@ a catalog of proven layers and we have many more in the works.',
       img: 'images/icon-layers.svg'
     },
     {
-      text: 'Rich Base Map Support',
-      // eslint-disable-next-line
+      text: 'High-Precision Computations in the GPU',
       desc:
-        'Geospatial visualizations can use vector tile layers to render maps, \
-or use Mapbox GL or Google Maps as base maps with automatically synchronized camera systems. \
-When used with Mapbox GL it automatically coordinates with the Mapbox perspective camera system \
-and the mapbox custom layer API to provide compelling 3D visualizations on top of your \
-Mapbox base maps.',
-      img: 'images/icon-layers.svg'
+        'By emulating 64 bit floating point computations in the GPU, \
+deck.gl renders datasets with unparalleled accuracy and performance.',
+      img: 'images/icon-high-precision.svg'
     },
     {
-      text: 'Deep React Integration',
-      // eslint-disable-next-line
+      text: 'React and Mapbox GL Integrations',
       desc:
-        "The optional React integration provides highly performant WebGL rendering \
-under React's functional programming paradigm.",
+        'deck.gl is a great match with React, supporting efficient WebGL \
+rendering under the Reactive programming paradigm. And when used with \
+Mapbox GL it automatically coordinates with the Mapbox camera system \
+to provide compelling 2D and 3D visualizations on top of your Mapbox \
+based maps.',
       img: 'images/icon-react.svg'
     }
   ],
@@ -118,12 +101,14 @@ under React's functional programming paradigm.",
 
   LINK_TO_GET_STARTED: '/docs',
 
+  INDEX_PAGE_URL: resolve(__dirname, './templates/index.jsx'),
+
   EXAMPLES: [
     {
       title: 'LineLayer',
-      path: 'examples/line',
+      path: 'examples/website/line',
       image: 'images/examples/demo-thumb-line.jpg',
-      componentUrl: resolve(__dirname, '../examples/website/line/app.js')
+      componentUrl: resolve(__dirname, './templates/examples/example-line-layer.jsx')
     },
     {
       title: 'HexagonLayer',

@@ -5,9 +5,10 @@ export default class InfoPanel extends PureComponent {
     const { name, controls, sourceLink} = this.props;
 
     return (
-      <div className="options-panel top-right" tabIndex="0">
+      <div className="top-right options-panel" tabIndex="0">
         <h3>{name}</h3>
-        <div className="control-panel" dangerouslySetInnerHTML={{__html: controls}} />
+        <div className="control-panel" />
+        {this.props.children}
 
         {sourceLink && (
           <div className="source-link">
