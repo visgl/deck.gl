@@ -87,6 +87,17 @@ These RFCS were implemented in v7.1.
 | [**GPU Acceleration in GridLayer**](v7.1/gpu-grid-layer.md) | @1chandu | **Implemented** | GPU Accelerated aggregation support in GridLayer. |
 
 
+## v7.2 RFCs
+
+| RFC | Author | Status | Description |
+| --- | ---    | ---    | ---         |
+| [**Layer Culling**](v7.x/layer-culling-rfc.md) | @ibgreen | **Draft** | Implement Frustum Culling for deck.gl layers, initially as opt-in system|
+
+## v7.1 RFCs
+
+| RFC | Author | Status | Description |
+| --- | ---    | ---    | ---         |
+
 ## v7.0 RFCs
 
 These RFCS were implemented in v7.0. Also see [luma.gl RFCs](https://github.com/uber/luma.gl/tree/master/dev-docs/RFCs#v70-rfcs).
