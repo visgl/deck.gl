@@ -580,7 +580,6 @@ export default class Deck {
     setParameters(gl, {
       blend: true,
       blendFunc: [GL.SRC_ALPHA, GL.ONE_MINUS_SRC_ALPHA, GL.ONE, GL.ONE_MINUS_SRC_ALPHA],
-      polygonOffsetFill: true,
       depthTest: true,
       depthFunc: GL.LEQUAL
     });

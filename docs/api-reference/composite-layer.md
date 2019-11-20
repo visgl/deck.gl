@@ -158,7 +158,6 @@ Returns a properties object used to generate a sublayer, with the following keys
   + `pickable`
   + `visible`
   + `parameters`
-  + `getPolygonOffset`
   + `highlightedObjectIndex`
   + `autoHighlight`
   + `highlightColor`

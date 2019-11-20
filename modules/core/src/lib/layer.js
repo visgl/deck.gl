@@ -84,15 +84,6 @@ const defaultProps = {
 
   animation: null, // Passed prop animation functions to evaluate props
 
-  // Offset depth based on layer index to avoid z-fighting.
-  // Negative values pull layer towards the camera
-  // https://www.opengl.org/archives/resources/faq/technical/polygonoffset.htm
-  getPolygonOffset: {
-    type: 'function',
-    value: ({layerIndex}) => [0, -layerIndex * 100],
-    compare: false
-  },
-
   // Selection/Highlighting
   highlightedObjectIndex: null,
   autoHighlight: false,
@@ -697,12 +688,6 @@ export default class Layer extends Component {
     if (moduleParameters) {
       this.setModuleParameters(moduleParameters);
     }
-
-    // Apply polygon offset to avoid z-fighting
-    // TODO - move to draw-layers
-    const {getPolygonOffset} = this.props;
-    const offsets = (getPolygonOffset && getPolygonOffset(uniforms)) || [0, 0];
-    parameters.polygonOffset = offsets;
 
     // Call subclass lifecycle method
     setParameters(this.context.gl, parameters);
