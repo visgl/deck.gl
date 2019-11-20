@@ -4,68 +4,89 @@ const path = require('path');
 const packageVersion = require('./package.json').version;
 const webpack = require('webpack');
 
-const config = {
-  /**
-   * Embeddable @deck.gl/jupyter-widget bundle
-   *
-   * This bundle is almost identical to the notebook extension bundle. The only
-   * difference is in the configuration of the webpack public path for the
-   * static assets.
-   *
-   * The target bundle is always `dist/index.js`, which is the path required by
-   * the custom widget embedder.
-   */
-  entry: './src/index.js',
-  output: {
-    filename: 'index.js',
-    path: path.resolve(__dirname, 'dist'),
-    libraryTarget: 'amd'
-  },
-  devtool: 'source-map',
-  module: {
-    rules: [
-      {
-        // Compile ES2015 using babel
-        test: /\.js$/,
-        loader: 'babel-loader',
-        include: /src/,
-        options: {
-          babelrc: false,
-          presets: [['@babel/preset-env', {forceAllTransforms: true}]],
-          // all of the helpers will reference the module @babel/runtime to avoid duplication
-          // across the compiled output.
-          plugins: [
-            '@babel/transform-runtime',
-            // 'inline-webgl-constants',
-            ['remove-glsl-comments', {patterns: ['**/*.glsl.js']}]
-          ]
-        }
-      }
+const rules = [
+  {
+    // Compile ES2015 using babel
+    test: /\.js$/,
+    loader: 'babel-loader',
+    include: /src/,
+    options: {
+      babelrc: false,
+      presets: [['@babel/preset-env', {forceAllTransforms: true}]],
+      // all of the helpers will reference the module @babel/runtime to avoid duplication
+      // across the compiled output.
+      plugins: [
+        '@babel/transform-runtime',
+        // 'inline-webgl-constants',
+        ['remove-glsl-comments', {patterns: ['**/*.glsl.js']}]
+      ]
+    }
+  }
+];
+
+const config = [
+  {
+    /**
+     * Embeddable @deck.gl/jupyter-widget bundle
+     *
+     * This bundle is almost identical to the notebook extension bundle. The only
+     * difference is in the configuration of the webpack public path for the
+     * static assets.
+     *
+     * The target bundle is always `dist/index.js`, which is the path required by
+     * the custom widget embedder.
+     */
+    entry: './src/index.js',
+    output: {
+      filename: 'index.js',
+      path: path.resolve(__dirname, 'dist'),
+      libraryTarget: 'amd'
+    },
+    devtool: 'source-map',
+    module: {
+      rules
+    },
+    // Packages that shouldn't be bundled but loaded at runtime
+    externals: ['@jupyter-widgets/base'],
+    plugins: [
+      // Uncomment for bundle size debug
+      // new (require('webpack-bundle-analyzer')).BundleAnalyzerPlugin()
     ]
   },
-  // Packages that shouldn't be bundled but loaded at runtime
-  externals: ['@jupyter-widgets/base'],
-  plugins: [
-    // Uncomment for bundle size debug
-    // new (require('webpack-bundle-analyzer')).BundleAnalyzerPlugin()
-  ]
-};
+  {
+    entry: './src/standalone-html-index.js',
+    output: {
+      filename: 'standalone-html-bundle.js',
+      path: path.resolve(__dirname, 'dist'),
+      libraryTarget: 'umd'
+    },
+    devtool: 'source-map',
+    module: {
+      rules
+    },
+    plugins: [
+      // Uncomment for bundle size debug
+      // new (require('webpack-bundle-analyzer')).BundleAnalyzerPlugin()
+    ]
+  }
+];
 
 module.exports = env => {
-  if (env && env.dev) {
-    config.mode = 'development';
-    config.devServer = {
-      contentBase: path.join(__dirname, 'dist')
-    };
-  } else {
-    config.mode = 'production';
+  for (const conf of config) {
+    if (env && env.dev) {
+      conf.mode = 'development';
+      conf.devServer = {
+        contentBase: path.join(__dirname, 'dist')
+      };
+    } else {
+      conf.mode = 'production';
+    }
+
+    conf.plugins.push(
+      new webpack.DefinePlugin({
+        __VERSION__: JSON.stringify(packageVersion)
+      })
+    );
   }
-
-  config.plugins.push(
-    new webpack.DefinePlugin({
-      __VERSION__: JSON.stringify(packageVersion)
-    })
-  );
-
   return config;
 };
