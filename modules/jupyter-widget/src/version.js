@@ -4,6 +4,5 @@
  * The html widget manager assumes that this is the same as the npm package
  * version number.
  */
-const data = require('../package.json');
-export const MODULE_VERSION = data.version;
-export const MODULE_NAME = data.name;
+export const MODULE_VERSION = '7.4.0-alpha-2';
+export const MODULE_NAME = '@deck.gl/jupyter-widget';
