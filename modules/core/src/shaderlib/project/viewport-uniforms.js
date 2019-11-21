@@ -180,7 +180,7 @@ export function getUniformsFromViewport({
     wrapLongitude
   });
 
-  uniforms.project_uModelMatrix = modelMatrix || IDENTITY_MATRIX
+  uniforms.project_uModelMatrix = modelMatrix || IDENTITY_MATRIX;
 
   return uniforms;
 }

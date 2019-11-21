@@ -373,6 +373,7 @@ The `parameters` allows applications to specify values for WebGL parameters such
 
 To get access to static parameter values, applications can `import GL from 'luma.gl'`. Please refer to the luma.gl [setParameters](http://uber.github.io/luma.gl/#/documentation/api-reference/get-parameter) API for documentation on supported parameters and values.
 
+
 ##### `getPolygonOffset` (Function, optional)
 
 * Default: `({layerIndex}) => [0, -layerIndex * 100]`
