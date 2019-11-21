@@ -1545,9 +1545,7 @@ export const TEST_CASES = [
     },
     layers: [
       new H3HexagonLayer({
-        data: h3
-          .polyfill([[-90, -180], [90, -180], [90, 0], [-90, 0]], 0)
-          .concat(h3.polyfill([[-90, 180], [90, 180], [90, 0], [-90, 0]], 0)),
+        data: h3.getRes0Indexes(),
         opacity: 0.8,
         getHexagon: d => d,
         extruded: false,
