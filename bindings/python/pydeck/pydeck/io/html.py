@@ -12,9 +12,6 @@ TEMPLATES_PATH = os.path.join(os.path.dirname(__file__), './templates/')
 j2_env = jinja2.Environment(loader=jinja2.FileSystemLoader(TEMPLATES_PATH),
                             trim_blocks=True)
 
-here = os.path.dirname(os.path.realpath(__file__))
-# TODO change, for development only
-lib_path = os.path.join(here, '../nbextension/index')
 
 def render_json_to_html(json_input, mapbox_key=None, tooltip=True):
     js = j2_env.get_template('index.j2')
@@ -23,8 +20,8 @@ def render_json_to_html(json_input, mapbox_key=None, tooltip=True):
     html_str = js.render(
         mapbox_key=mapbox_key,
         json_input=json_input,
-        mapbox_gl_version='1.2.1',
-        deckgl_jupyter_widget_bundle=lib_path,
+        # TODO change, for development only
+        deckgl_jupyter_widget_bundle='./standalone-html-bundle.js',
         tooltip=tooltip
     )
     return html_str
