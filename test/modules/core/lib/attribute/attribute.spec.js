@@ -689,7 +689,10 @@ test('Attribute#setExternalBuffer', t => {
   const value2 = new Uint8Array(4);
 
   attribute.setNeedsUpdate();
-  t.notOk(attribute.setExternalBuffer(null), 'should do nothing if setting external buffer to null');
+  t.notOk(
+    attribute.setExternalBuffer(null),
+    'should do nothing if setting external buffer to null'
+  );
   t.ok(attribute.needsUpdate(), 'attribute still needs update');
 
   t.ok(attribute.setExternalBuffer(buffer), 'should set external buffer to Buffer object');
@@ -763,7 +766,10 @@ test('Attribute#setLogicalValue', t => {
   t.is(spy.callCount, 1, 'setData is called only once on the same data');
   t.notOk(attribute.needsUpdate(), 'attribute is updated');
 
-  t.throws(() => attribute.setLogicalValue([0, 1, 2, 3]), 'should throw if external value is invalid');
+  t.throws(
+    () => attribute.setLogicalValue([0, 1, 2, 3]),
+    'should throw if external value is invalid'
+  );
 
   spy.reset();
   attribute.delete();
