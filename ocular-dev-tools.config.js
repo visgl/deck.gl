@@ -5,9 +5,9 @@ const LUMA_ALIASES_LOCAL = {
   '@luma.gl/constants': `${__dirname}/../luma.gl/modules/constants/src`,
   '@luma.gl/core': `${__dirname}/../luma.gl/modules/core/src`,
   '@luma.gl/debug': `${__dirname}/../luma.gl/modules/debug/src`,
+  '@luma.gl/engine': `${__dirname}/../luma.gl/modules/engine/src`,
   '@luma.gl/webgl': `${__dirname}/../luma.gl/modules/webgl/src`,
-  '@luma.gl/webgl-state-tracker': `${__dirname}/../luma.gl/modules/webgl-state-tracker/src`,
-  '@luma.gl/webgl2-polyfill': `${__dirname}/../luma.gl/modules/webgl2-polyfill/src`
+  '@luma.gl/gltools': `${__dirname}/../luma.gl/modules/gltools/src`
 };
 
 const useLocalLuma = false;

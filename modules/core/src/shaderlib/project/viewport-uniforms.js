@@ -172,18 +172,17 @@ export function getUniformsFromViewport({
 } = {}) {
   assert(viewport);
 
-  return Object.assign(
-    {
-      project_uModelMatrix: modelMatrix || IDENTITY_MATRIX
-    },
-    getMemoizedViewportUniforms({
-      viewport,
-      devicePixelRatio,
-      coordinateSystem,
-      coordinateOrigin,
-      wrapLongitude
-    })
-  );
+  const uniforms = getMemoizedViewportUniforms({
+    viewport,
+    devicePixelRatio,
+    coordinateSystem,
+    coordinateOrigin,
+    wrapLongitude
+  });
+
+  uniforms.project_uModelMatrix = modelMatrix || IDENTITY_MATRIX;
+
+  return uniforms;
 }
 
 function calculateViewportUniforms({

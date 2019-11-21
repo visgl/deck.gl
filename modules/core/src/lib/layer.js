@@ -27,7 +27,7 @@ import {diffProps, validateProps} from '../lifecycle/props';
 import {count} from '../utils/count';
 import log from '../utils/log';
 import GL from '@luma.gl/constants';
-import {withParameters} from '@luma.gl/core';
+import {withParameters, setParameters} from '@luma.gl/core';
 import assert from '../utils/assert';
 import {mergeShaders} from '../utils/shader';
 import {projectPosition, getWorldPosition} from '../shaderlib/project/project-functions';
@@ -702,12 +702,14 @@ export default class Layer extends Component {
     // TODO - move to draw-layers
     const {getPolygonOffset} = this.props;
     const offsets = (getPolygonOffset && getPolygonOffset(uniforms)) || [0, 0];
-    parameters.polygonOffset = offsets;
+
+    setParameters({polygonOffset: offsets});
 
     // Call subclass lifecycle method
     withParameters(this.context.gl, parameters, () => {
       this.draw({moduleParameters, uniforms, parameters, context: this.context});
     });
+
     // End lifecycle method
 
     this.props = currentProps;

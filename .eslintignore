@@ -4,4 +4,4 @@ node_modules/
 workers/
 dist.js
 *.min.js
-mapbox-gl-dev.js
+mapbox-gl.js

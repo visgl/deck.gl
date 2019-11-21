@@ -126,18 +126,17 @@ export default class ScatterplotLayer extends Layer {
     const widthMultiplier = lineWidthUnits === 'pixels' ? viewport.metersPerPixel : 1;
 
     this.state.model
-      .setUniforms(
-        Object.assign({}, uniforms, {
-          stroked: stroked ? 1 : 0,
-          filled,
-          radiusScale,
-          radiusMinPixels,
-          radiusMaxPixels,
-          lineWidthScale: lineWidthScale * widthMultiplier,
-          lineWidthMinPixels,
-          lineWidthMaxPixels
-        })
-      )
+      .setUniforms(uniforms)
+      .setUniforms({
+        stroked: stroked ? 1 : 0,
+        filled,
+        radiusScale,
+        radiusMinPixels,
+        radiusMaxPixels,
+        lineWidthScale: lineWidthScale * widthMultiplier,
+        lineWidthMinPixels,
+        lineWidthMaxPixels
+      })
       .draw();
   }
 
