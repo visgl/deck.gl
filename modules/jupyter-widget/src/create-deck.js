@@ -1,5 +1,3 @@
-/* global document */
-
 import {DeckGLModel, DeckGLView} from './widget';
 import makeTooltip from './widget-tooltip';
 
@@ -19,7 +17,7 @@ import {
   log
 } from '@deck.gl/core';
 
-import DeckGL from '@deck.gl/core/bundle';
+import DeckGL from '../../core/bundle/deckgl';
 
 import * as Layers from '@deck.gl/layers';
 import * as AggregationLayers from '@deck.gl/aggregation-layers';
@@ -78,16 +76,13 @@ function createDeck({
 
     const getTooltip = makeTooltip(tooltip);
 
-    container.appendChild(document.createElement('canvas'));
-    const canvas = container.firstElementChild;
-
     const deckgl = new DeckGL({
       ...props,
       map: mapboxgl,
       mapboxApiAccessToken: mapboxApiKey,
       onClick: handleClick,
       getTooltip,
-      canvas
+      container
     });
 
     const warn = log.warn;
