@@ -30,6 +30,7 @@ const BASE_LAYER_PROPS = {
   pickable: true,
   visible: false,
   parameters: {},
+  getPolygonOffset: null,
   highlightedObjectIndex: 3,
   autoHighlight: true,
   highlightColor: [1, 1, 1],

@@ -27,7 +27,7 @@ import {diffProps, validateProps} from '../lifecycle/props';
 import {count} from '../utils/count';
 import log from '../utils/log';
 import GL from '@luma.gl/constants';
-import {withParameters} from '@luma.gl/core';
+import {withParameters, setParameters} from '@luma.gl/core';
 import assert from '../utils/assert';
 import {mergeShaders} from '../utils/shader';
 import {projectPosition, getWorldPosition} from '../shaderlib/project/project-functions';
@@ -83,6 +83,15 @@ const defaultProps = {
   framebuffer: null,
 
   animation: null, // Passed prop animation functions to evaluate props
+
+  // Offset depth based on layer index to avoid z-fighting.
+  // Negative values pull layer towards the camera
+  // https://www.opengl.org/archives/resources/faq/technical/polygonoffset.htm
+  getPolygonOffset: {
+    type: 'function',
+    value: ({layerIndex}) => [0, -layerIndex * 100],
+    compare: false
+  },
 
   // Selection/Highlighting
   highlightedObjectIndex: null,
@@ -688,6 +697,13 @@ export default class Layer extends Component {
     if (moduleParameters) {
       this.setModuleParameters(moduleParameters);
     }
+
+    // Apply polygon offset to avoid z-fighting
+    // TODO - move to draw-layers
+    const {getPolygonOffset} = this.props;
+    const offsets = (getPolygonOffset && getPolygonOffset(uniforms)) || [0, 0];
+
+    setParameters({polygonOffset: offsets});
 
     // Call subclass lifecycle method
     withParameters(this.context.gl, parameters, () => {

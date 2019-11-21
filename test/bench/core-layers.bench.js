@@ -128,7 +128,12 @@ const PROPS1 = {
   uniforms: {},
   framebuffer: null,
 
-  animation: null // Passed prop animation functions to evaluate props\
+  animation: null, // Passed prop animation functions to evaluate props
+
+  // Offset depth based on layer index to avoid z-fighting.
+  // Negative values pull layer towards the camera
+  // https://www.opengl.org/archives/resources/faq/technical/polygonoffset.htm
+  getPolygonOffset: ({layerIndex}) => [0, -layerIndex * 100]
 };
 
 const PROPS2 = {
