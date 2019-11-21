@@ -27,7 +27,7 @@ import {diffProps, validateProps} from '../lifecycle/props';
 import {count} from '../utils/count';
 import log from '../utils/log';
 import GL from '@luma.gl/constants';
-import {setParameters} from '@luma.gl/core';
+import {withParameters} from '@luma.gl/core';
 import assert from '../utils/assert';
 import {mergeShaders} from '../utils/shader';
 import {projectPosition, getWorldPosition} from '../shaderlib/project/project-functions';
@@ -690,8 +690,9 @@ export default class Layer extends Component {
     }
 
     // Call subclass lifecycle method
-    setParameters(this.context.gl, parameters);
-    this.draw({moduleParameters, uniforms, parameters, context: this.context});
+    withParameters(this.context.gl, parameters, () => {
+      this.draw({moduleParameters, uniforms, parameters, context: this.context});
+    });
 
     // End lifecycle method
 
