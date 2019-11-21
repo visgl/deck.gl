@@ -401,10 +401,10 @@ test('Attribute#updateBuffer', t => {
     for (const param of TEST_PARAMS) {
       const {attribute} = testCase;
       attribute.setNeedsUpdate(true);
+      attribute.startIndices = param.startIndices;
       attribute.allocate(param.numInstances);
       attribute.updateBuffer({
         numInstances: param.numInstances,
-        startIndices: param.startIndices,
         data: TEST_PROPS.data,
         props: TEST_PROPS
       });
@@ -483,10 +483,10 @@ test('Attribute#standard accessor - variable width', t => {
   for (const testCase of TEST_CASES) {
     const {attribute, result} = testCase;
     attribute.setNeedsUpdate(true);
+    attribute.startIndices = [0, 2, 3];
     attribute.allocate(10);
     attribute.updateBuffer({
       numInstances: 6,
-      startIndices: [0, 2, 3],
       data: TEST_PROPS.data,
       props: TEST_PROPS
     });
@@ -647,6 +647,7 @@ test('Attribute#updateBuffer - partial', t => {
     // reset stats
     accessorCalled = 0;
 
+    attribute.startIndices = testCase.params.startIndices;
     attribute.allocate(testCase.params.numInstances);
     attribute.updateBuffer({
       ...testCase.params,
@@ -739,6 +740,67 @@ test('Attribute#setExternalBuffer', t => {
   attribute.delete();
   attribute2.delete();
 
+  t.end();
+});
+
+test('Attribute#setBinaryValue', t => {
+  let attribute = new Attribute(gl, {
+    id: 'test-attribute',
+    type: GL.FLOAT,
+    size: 3,
+    update: () => {}
+  });
+  let value = new Float32Array(12);
+
+  attribute.setNeedsUpdate();
+  t.notOk(attribute.setBinaryValue(null), 'should do nothing if setting external buffer to null');
+  t.ok(attribute.needsUpdate(), 'attribute still needs update');
+
+  const spy = makeSpy(attribute, 'setData');
+  t.ok(attribute.setBinaryValue(value), 'should use external binary value');
+  t.is(spy.callCount, 1, 'setData is called');
+  t.notOk(attribute.needsUpdate(), 'attribute is updated');
+
+  attribute.setNeedsUpdate();
+  t.ok(attribute.setBinaryValue(value), 'should use external binary value');
+  t.is(spy.callCount, 1, 'setData is called only once on the same data');
+  t.notOk(attribute.needsUpdate(), 'attribute is updated');
+
+  t.throws(
+    () => attribute.setBinaryValue([0, 1, 2, 3]),
+    'should throw if external value is invalid'
+  );
+
+  spy.reset();
+  attribute.delete();
+
+  attribute = new Attribute(gl, {
+    id: 'test-attribute',
+    type: GL.FLOAT,
+    size: 3,
+    noAlloc: true,
+    update: () => {}
+  });
+  attribute.setNeedsUpdate();
+  t.notOk(attribute.setBinaryValue(value), 'should do nothing if noAlloc');
+  t.ok(attribute.needsUpdate(), 'attribute still needs update');
+
+  attribute = new Attribute(gl, {
+    id: 'test-attribute-with-transform',
+    type: GL.UNSIGNED_BYTE,
+    size: 4,
+    defaultValue: [0, 0, 0, 255],
+    transform: x => x + 1,
+    update: () => {}
+  });
+  value = {value: new Uint8Array(12), size: 3};
+
+  attribute.setNeedsUpdate();
+  t.notOk(attribute.setBinaryValue(value), 'should require update');
+  t.ok(attribute.state.binaryAccessor, 'binaryAccessor is assigned');
+  t.ok(attribute.needsUpdate(), 'attribute still needs update');
+
+  attribute.delete();
   t.end();
 });
 
