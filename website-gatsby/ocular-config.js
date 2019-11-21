@@ -130,9 +130,9 @@ based maps.',
     },
     {
       title: 'GeoJsonLayer (Paths)',
-      path: 'examples/highway',
+      path: 'examples/website/highway',
       image: 'images/examples/demo-thumb-highway.jpg',
-      componentUrl: resolve(__dirname, '../examples/website/highway/app.js')
+      componentUrl: resolve(__dirname, './src/examples/example-highway-demo.jsx')
     },
     {
       title: 'ScreenGridLayer',

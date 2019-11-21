@@ -15,7 +15,7 @@ export default class LineDemo extends Component {
       flightDataCount: 0
     };
 
-    this.handleChange = this.handleChange.bind(this);
+    this._handleChange = this._handleChange.bind(this);
   }
 
   componentDidMount() {
@@ -36,7 +36,7 @@ export default class LineDemo extends Component {
     );
   }
 
-  handleChange(event) {
+  _handleChange(event) {
     this.setState({width: parseFloat(event.target.value)});
   }
 
@@ -75,7 +75,7 @@ export default class LineDemo extends Component {
               min="0"
               max="10"
               value={width}
-              onChange={this.handleChange}
+              onChange={this._handleChange}
             />
           </div>
         </InfoPanel>
