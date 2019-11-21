@@ -138,6 +138,16 @@ test('getAccessorFromBuffer', t => {
       output: [[1, 1, 0, 2, 2, 0], [3, 3, 0]]
     },
     {
+      title: 'variable-width buffer with offset',
+      input: {
+        value: new Float32Array([0, 0, 0, 1, 1, 0, 2, 2, 0, 3, 3, 0]),
+        size: 3,
+        offset: 12,
+        startIndices: [0, 2]
+      },
+      output: [[1, 1, 0, 2, 2, 0], [3, 3, 0]]
+    },
+    {
       title: 'variable-width buffer with stride and offset',
       input: {
         value: new Float32Array([0, 0, 0, 1, 1, 0, 2, 2, 0, 3, 3, 0]),

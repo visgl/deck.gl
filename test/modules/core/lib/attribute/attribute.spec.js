@@ -743,7 +743,7 @@ test('Attribute#setExternalBuffer', t => {
   t.end();
 });
 
-test('Attribute#setLogicalValue', t => {
+test('Attribute#setBinaryValue', t => {
   let attribute = new Attribute(gl, {
     id: 'test-attribute',
     type: GL.FLOAT,
@@ -753,21 +753,21 @@ test('Attribute#setLogicalValue', t => {
   let value = new Float32Array(12);
 
   attribute.setNeedsUpdate();
-  t.notOk(attribute.setLogicalValue(null), 'should do nothing if setting external buffer to null');
+  t.notOk(attribute.setBinaryValue(null), 'should do nothing if setting external buffer to null');
   t.ok(attribute.needsUpdate(), 'attribute still needs update');
 
   const spy = makeSpy(attribute, 'setData');
-  t.ok(attribute.setLogicalValue(value), 'should use external logical value');
+  t.ok(attribute.setBinaryValue(value), 'should use external binary value');
   t.is(spy.callCount, 1, 'setData is called');
   t.notOk(attribute.needsUpdate(), 'attribute is updated');
 
   attribute.setNeedsUpdate();
-  t.ok(attribute.setLogicalValue(value), 'should use external logical value');
+  t.ok(attribute.setBinaryValue(value), 'should use external binary value');
   t.is(spy.callCount, 1, 'setData is called only once on the same data');
   t.notOk(attribute.needsUpdate(), 'attribute is updated');
 
   t.throws(
-    () => attribute.setLogicalValue([0, 1, 2, 3]),
+    () => attribute.setBinaryValue([0, 1, 2, 3]),
     'should throw if external value is invalid'
   );
 
@@ -782,7 +782,7 @@ test('Attribute#setLogicalValue', t => {
     update: () => {}
   });
   attribute.setNeedsUpdate();
-  t.notOk(attribute.setLogicalValue(value), 'should do nothing if noAlloc');
+  t.notOk(attribute.setBinaryValue(value), 'should do nothing if noAlloc');
   t.ok(attribute.needsUpdate(), 'attribute still needs update');
 
   attribute = new Attribute(gl, {
@@ -796,8 +796,8 @@ test('Attribute#setLogicalValue', t => {
   value = {value: new Uint8Array(12), size: 3};
 
   attribute.setNeedsUpdate();
-  t.notOk(attribute.setLogicalValue(value), 'should require update');
-  t.ok(attribute.state.logicalAccessor, 'logicalAccessor is assigned');
+  t.notOk(attribute.setBinaryValue(value), 'should require update');
+  t.ok(attribute.state.binaryAccessor, 'binaryAccessor is assigned');
   t.ok(attribute.needsUpdate(), 'attribute still needs update');
 
   attribute.delete();

@@ -30,8 +30,8 @@ export default class Attribute extends DataColumn {
 
     Object.assign(this.state, {
       lastExternalBuffer: null,
-      logicalValue: null,
-      logicalAccessor: null,
+      binaryValue: null,
+      binaryAccessor: null,
       needsUpdate: true,
       needsRedraw: false,
       updateRanges: range.FULL,
@@ -219,15 +219,15 @@ export default class Attribute extends DataColumn {
     return true;
   }
 
-  // Logical value is a typed array packed from mapping the source data with the accessor
-  // If the logical value is the same as the attribute value, set it directly
+  // Binary value is a typed array packed from mapping the source data with the accessor
+  // If the returned value from the accessor is the same as the attribute value, set it directly
   // Otherwise use the auto updater for transform/normalization
-  setLogicalValue(buffer, startIndices = null) {
+  setBinaryValue(buffer, startIndices = null) {
     const {state, settings} = this;
 
     if (!buffer) {
-      state.logicalValue = null;
-      state.logicalAccessor = null;
+      state.binaryValue = null;
+      state.binaryAccessor = null;
       return false;
     }
 
@@ -236,11 +236,11 @@ export default class Attribute extends DataColumn {
       return false;
     }
 
-    if (state.logicalValue === buffer) {
+    if (state.binaryValue === buffer) {
       this.clearNeedsUpdate();
       return true;
     }
-    state.logicalValue = buffer;
+    state.binaryValue = buffer;
     this.setNeedsRedraw();
 
     if (ArrayBuffer.isView(buffer)) {
@@ -252,7 +252,7 @@ export default class Attribute extends DataColumn {
     if (needsUpdate) {
       const needsNormalize = buffer.size && buffer.size !== this.size;
 
-      state.logicalAccessor = getAccessorFromBuffer(buffer.value, {
+      state.binaryAccessor = getAccessorFromBuffer(buffer.value, {
         size: buffer.size || this.size,
         stride: buffer.stride,
         offset: buffer.offset,
@@ -294,7 +294,7 @@ export default class Attribute extends DataColumn {
 
     const {accessor, transform} = settings;
     const accessorFunc =
-      state.logicalAccessor || (typeof accessor === 'function' ? accessor : props[accessor]);
+      state.binaryAccessor || (typeof accessor === 'function' ? accessor : props[accessor]);
 
     assert(typeof accessorFunc === 'function', `accessor "${accessor}" is not a function`);
 

@@ -92,6 +92,11 @@ export function getAccessorFromBuffer(typedArray, {size, stride, offset, startIn
         }
         result[i - startIndex] = target;
       }
+    } else if (elementStride === size) {
+      result = typedArray.subarray(
+        startIndex * size + elementOffset,
+        endIndex * size + elementOffset
+      );
     } else {
       result = new typedArray.constructor((endIndex - startIndex) * size);
       let targetIndex = 0;

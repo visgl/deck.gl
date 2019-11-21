@@ -241,8 +241,8 @@ export default class AttributeManager {
 
       if (attribute.setExternalBuffer(buffers[attributeName])) {
         // Step 1: try update attribute directly from external buffers
-      } else if (attribute.setLogicalValue(buffers[accessorName], data.startIndices)) {
-        // Step 2: try set logical value from external buffers
+      } else if (attribute.setBinaryValue(buffers[accessorName], data.startIndices)) {
+        // Step 2: try set packed value from external typed array
       } else if (attribute.setConstantValue(props[accessorName])) {
         // Step 3: try set constant value from props
       } else if (attribute.needsUpdate()) {
