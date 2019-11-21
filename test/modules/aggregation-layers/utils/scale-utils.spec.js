@@ -108,7 +108,7 @@ test('scale-utils#import', t => {
   t.end();
 });
 
-test.only('scale-utils@linearScale', t => {
+test('scale-utils@linearScale', t => {
   for (const tc of LINEAR_SCALE_TEST_CASES) {
     const linearScale = getLinearScale(tc.domain, tc.range);
     const result = linearScale(tc.value);
@@ -140,7 +140,7 @@ test('scale-utils#quantileScale', t => {
   t.end();
 });
 
-test.only('scale-utils#ordinalScale', t => {
+test('scale-utils#ordinalScale', t => {
   for (const tc of ORDINAL_SCALE_TEST_CASES) {
     const ordinalScale = getOrdinalScale(tc.domain, tc.range);
     for (const i in tc.values) {

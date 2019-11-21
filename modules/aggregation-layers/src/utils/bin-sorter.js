@@ -1,3 +1,5 @@
+/* eslint-disable no-undef */
+/* eslint-disable no-console */
 // Copyright (c) 2015 - 2017 Uber Technologies, Inc.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -23,6 +25,7 @@
 // this is where to pass in a function to color the bins by
 // avg/mean/max of specific value of the point
 const defaultGetValue = points => points.length;
+import {clamp, getQuantileDomain, getOrdinalDomain} from './scale-utils';
 
 // access array of points in each bin
 const defaultGetPoints = bin => bin.points;
@@ -85,11 +88,14 @@ export default class BinSorter {
 
   percentileToIndex([lowerPercentile, upperPercentile]) {
     const len = this.sortedBins.length;
-    if (!len) {
+    if (len < 2) {
       return [0, 0];
     }
-    const lowerIdx = Math.ceil((lowerPercentile / 100) * (len - 1));
-    const upperIdx = Math.floor((upperPercentile / 100) * (len - 1));
+
+    const [lower, upper] = [lowerPercentile, upperPercentile].map(n => clamp(n, 0, 100));
+
+    const lowerIdx = Math.ceil((lower / 100) * (len - 1));
+    const upperIdx = Math.floor((upper / 100) * (len - 1));
 
     return [lowerIdx, upperIdx];
   }
@@ -116,12 +122,20 @@ export default class BinSorter {
    * @return {Array} array of new value range
    */
   getValueRange([lower, upper]) {
+    if (!this.sortedBins.length) {
+      return [];
+    }
     const [lowerIdx, upperIdx] = this.percentileToIndex([lower, upper]);
+
     return [this.sortedBins[lowerIdx].value, this.sortedBins[upperIdx].value];
   }
 
   getValueDomainByScale(scale, [lower, upper]) {
+    if (!this.sortedBins.length) {
+      return [];
+    }
     const indexEdge = this.percentileToIndex([lower, upper]);
+
     return this.getScaleDomain(scale, indexEdge);
   }
 
@@ -134,10 +148,10 @@ export default class BinSorter {
         return [bins[lowerIdx].value, bins[upperIdx].value];
 
       case 'quantile':
-        return bins.slice(lowerIdx, upperIdx + 1).map(d => d.value);
+        return getQuantileDomain(bins.slice(lowerIdx, upperIdx + 1), d => d.value);
 
       case 'ordinal':
-        return bins.map(b => b.value).sort();
+        return getOrdinalDomain(bins, d => d.value);
 
       default:
         return [bins[lowerIdx].value, bins[upperIdx].value];

@@ -146,3 +146,58 @@ export function quantizeScale(domain, range, value) {
 export function linearScale(domain, range, value) {
   return ((value - domain[0]) / (domain[1] - domain[0])) * (range[1] - range[0]) + range[0];
 }
+
+// get scale domains
+function notNullOrUndefined(d) {
+  return d !== undefined && d !== null;
+}
+
+export function unique(values) {
+  const results = [];
+  values.forEach(v => {
+    if (!results.includes(v) && notNullOrUndefined(v)) {
+      results.push(v);
+    }
+  });
+
+  return results;
+}
+
+function getTruthyValues(data, valueAccessor) {
+  const values = typeof valueAccessor === 'function' ? data.map(valueAccessor) : data;
+  return values.filter(notNullOrUndefined);
+}
+
+export function getLinearDomain(data, valueAccessor) {
+  const sorted = getTruthyValues(data, valueAccessor).sort();
+  return sorted.length ? [sorted[0], sorted[sorted.length - 1]] : [0, 0];
+}
+
+export function getQuantileDomain(data, valueAccessor) {
+  return getTruthyValues(data, valueAccessor);
+}
+
+export function getOrdinalDomain(data, valueAccessor) {
+  return unique(getTruthyValues(data, valueAccessor));
+}
+
+export function getScaleDomain(scaleType, data, valueAccessor) {
+  switch (scaleType) {
+    case 'quantize':
+    case 'linear':
+      return getLinearDomain(data, valueAccessor);
+
+    case 'quantile':
+      return getQuantileDomain(data, valueAccessor);
+
+    case 'ordinal':
+      return getOrdinalDomain(data, valueAccessor);
+
+    default:
+      return getLinearDomain(data, valueAccessor);
+  }
+}
+
+export function clamp(value, min, max) {
+  return Math.max(min, Math.min(max, value));
+}
