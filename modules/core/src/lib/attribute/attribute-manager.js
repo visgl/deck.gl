@@ -243,8 +243,10 @@ export default class AttributeManager {
         // Step 1: try update attribute directly from external buffers
       } else if (attribute.setBinaryValue(buffers[accessorName], data.startIndices)) {
         // Step 2: try set packed value from external typed array
-      } else if (attribute.setConstantValue(props[accessorName])) {
+      } else if (!buffers[accessorName] && attribute.setConstantValue(props[accessorName])) {
         // Step 3: try set constant value from props
+        // Note: if buffers[accessorName] is supplied, ignore props[accessorName]
+        // This may happen when setBinaryValue falls through to use the auto updater
       } else if (attribute.needsUpdate()) {
         // Step 4: update via updater callback
         updated = true;
