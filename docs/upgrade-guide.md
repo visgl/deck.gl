@@ -28,6 +28,7 @@
   + `setLayerNeedsUpdate`: use `setNeedsUpdate`
   + `setUniforms`: use `model.setUniforms`
   + `use64bitProjection`
+  + `projectFlat`: use `projectPosition`
 
 ##### Standalone bundle
 

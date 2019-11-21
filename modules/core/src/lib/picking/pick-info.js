@@ -134,7 +134,7 @@ export function getLayerPickingInfo({layer, info, mode}) {
     // layer.pickLayer() function requires a non-null ```layer.state```
     // object to function properly. So the layer referenced here
     // must be the "current" layer, not an "out-dated" / "invalidated" layer
-    info = layer.pickLayer({info, mode, sourceLayer});
+    info = layer.getPickingInfo({info, mode, sourceLayer});
     layer = layer.parent;
   }
   return info;

@@ -8,6 +8,3 @@ export {default as JSONConfiguration} from './json-configuration';
 export {default as _convertFunctions} from './helpers/convert-functions';
 export {default as _parseExpressionString} from './helpers/parse-expression-string';
 export {shallowEqualObjects as _shallowEqualObjects} from './utils/shallow-equal-objects';
-
-// DEPRECATED
-export {default as _JSONConverter} from './json-converter';
