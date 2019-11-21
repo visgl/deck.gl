@@ -168,7 +168,12 @@ function getFlatVertexCount(positions, size, startIndex = 0, endIndex) {
  * @param {Number} positionSize - size of a position, 2 (xy) or 3 (xyz)
  * @returns {Number} vertex count
  */
-export function getVertexCount(polygon, positionSize) {
+export function getVertexCount(polygon, positionSize, normalization = true) {
+  if (!normalization) {
+    polygon = polygon.positions || polygon;
+    return polygon.length / positionSize;
+  }
+
   validate(polygon);
 
   if (polygon.positions) {
@@ -255,7 +260,7 @@ export function normalize(polygon, positionSize, vertexCount) {
   if (Number.isFinite(polygon[0])) {
     // simple flat
     copyFlatRing(positions, 0, polygon, positionSize);
-    return {positions, holeIndices: null};
+    return positions;
   }
   if (!isSimple(polygon)) {
     // complex polygon
@@ -272,7 +277,7 @@ export function normalize(polygon, positionSize, vertexCount) {
   }
   // simple polygon
   copyNestedRing(positions, 0, polygon, positionSize);
-  return {positions, holeIndices: null};
+  return positions;
 }
 /* eslint-enable max-statements */
 
@@ -289,5 +294,5 @@ export function getSurfaceIndices(normalizedPolygon, positionSize) {
     holeIndices = normalizedPolygon.holeIndices.map(positionIndex => positionIndex / positionSize);
   }
   // Let earcut triangulate the polygon
-  return earcut(normalizedPolygon.positions, holeIndices, positionSize);
+  return earcut(normalizedPolygon.positions || normalizedPolygon, holeIndices, positionSize);
 }

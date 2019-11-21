@@ -30,11 +30,10 @@ const {Tesselator} = experimental;
 // This class is set up to allow querying one attribute at a time
 // the way the AttributeManager expects it
 export default class PolygonTesselator extends Tesselator {
-  constructor({data, getGeometry, fp64, positionFormat, IndexType = Uint32Array}) {
+  constructor(opts) {
+    const {fp64, IndexType = Uint32Array} = opts;
     super({
-      data,
-      getGeometry,
-      positionFormat,
+      ...opts,
       attributes: {
         positions: {size: 3, type: fp64 ? Float64Array : Float32Array},
         vertexValid: {type: Uint8ClampedArray, size: 1},
@@ -54,11 +53,13 @@ export default class PolygonTesselator extends Tesselator {
 
   /* Implement base Tesselator interface */
   getGeometrySize(polygon) {
-    return Polygon.getVertexCount(polygon, this.positionSize);
+    return Polygon.getVertexCount(polygon, this.positionSize, this.normalize);
   }
 
   updateGeometryAttributes(polygon, context) {
-    polygon = Polygon.normalize(polygon, this.positionSize, context.geometrySize);
+    if (this.normalize) {
+      polygon = Polygon.normalize(polygon, this.positionSize, context.geometrySize);
+    }
 
     this._updateIndices(polygon, context);
     this._updatePositions(polygon, context);
@@ -95,7 +96,7 @@ export default class PolygonTesselator extends Tesselator {
       attributes: {positions},
       positionSize
     } = this;
-    const {positions: polygonPositions} = polygon;
+    const polygonPositions = polygon.positions || polygon;
 
     for (let i = vertexStart, j = 0; j < geometrySize; i++, j++) {
       const x = polygonPositions[j * positionSize];

@@ -99,10 +99,9 @@ export default class PolygonLayer extends CompositeLayer {
     const {iterable, objectInfo} = createIterable(data, startRow, endRow);
     for (const object of iterable) {
       objectInfo.index++;
-      const {positions, holeIndices} = Polygon.normalize(
-        getPolygon(object, objectInfo),
-        positionSize
-      );
+      const polygon = Polygon.normalize(getPolygon(object, objectInfo), positionSize);
+      const {holeIndices} = polygon;
+      const positions = polygon.positions || polygon;
 
       if (holeIndices) {
         // split the positions array into `holeIndices.length + 1` rings

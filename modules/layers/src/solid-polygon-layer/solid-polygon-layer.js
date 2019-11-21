@@ -37,6 +37,7 @@ const defaultProps = {
   extruded: false,
   // Whether to draw a GL.LINES wireframe of the polygon
   wireframe: false,
+  _normalize: true,
 
   // elevation multiplier
   elevationScale: {type: 'number', min: 0, value: 1},
@@ -245,6 +246,7 @@ export default class SolidPolygonLayer extends Layer {
       const {polygonTesselator} = this.state;
       polygonTesselator.updateGeometry({
         data: props.data,
+        normalize: props._normalize,
         getGeometry: props.getPolygon,
         positionFormat: props.positionFormat,
         fp64: this.use64bitPositions(),
