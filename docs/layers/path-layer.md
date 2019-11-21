@@ -130,6 +130,18 @@ Only works if `rounded` is `false`.
 
 Only effective if `getDashArray` is specified. If `true`, adjust gaps for the dashes to align at both ends.
 
+##### `_pathType` (Object, optional)
+
+* Default: `null`
+
+> Note: This prop is experimental
+
+One of `null`, `'loop'` or `'open'`.
+
+If `'loop'` or `'open'`, will skip normalizing the coordinates returned by `getPath` and instead assume all paths are to be loops or open paths. Disabling normalization improves performance during data update, but makes the layer prone to error in case the data is malformed. It is only recommended when you use this layer with preprocessed static data or validation on the backend.
+
+When normalization is disabled, paths must be specified in the format of flat array. Open paths must contain at least 2 vertices and closed paths must contain at least 3 vertices. See `getPath` below for details.
+
 ### Data Accessors
 
 ##### `getPath` ([Function](/docs/developer-guide/using-layers.md#accessors), optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")

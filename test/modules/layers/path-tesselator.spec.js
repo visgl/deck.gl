@@ -188,3 +188,34 @@ test('PathTesselator#partial update', t => {
 
   t.end();
 });
+
+test('PathTesselator#normalize', t => {
+  const sampleData = [
+    {path: [1, 1, 2, 2, 3, 3], id: 'A'},
+    {path: [1, 1, 2, 2, 3, 3, 1, 1], id: 'B'}
+  ];
+  const tesselator = new PathTesselator({
+    data: sampleData,
+    loop: false,
+    normalize: false,
+    getGeometry: d => d.path,
+    positionFormat: 'XY'
+  });
+
+  t.is(tesselator.instanceCount, 7, 'Updated instanceCount as open paths');
+
+  tesselator.updateGeometry({
+    loop: true,
+    normalize: false
+  });
+
+  t.is(tesselator.instanceCount, 11, 'Updated instanceCount as closed loops');
+
+  tesselator.updateGeometry({
+    normalize: true
+  });
+
+  t.is(tesselator.instanceCount, 9, 'Updated instanceCount with normalization');
+
+  t.end();
+});

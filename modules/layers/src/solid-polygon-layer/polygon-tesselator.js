@@ -30,11 +30,10 @@ const {Tesselator} = experimental;
 // This class is set up to allow querying one attribute at a time
 // the way the AttributeManager expects it
 export default class PolygonTesselator extends Tesselator {
-  constructor({data, getGeometry, fp64, positionFormat, IndexType = Uint32Array}) {
+  constructor(opts) {
+    const {fp64, IndexType = Uint32Array} = opts;
     super({
-      data,
-      getGeometry,
-      positionFormat,
+      ...opts,
       attributes: {
         positions: {size: 3, type: fp64 ? Float64Array : Float32Array},
         vertexValid: {type: Uint8ClampedArray, size: 1},

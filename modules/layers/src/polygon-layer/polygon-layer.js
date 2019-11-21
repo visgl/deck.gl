@@ -99,10 +99,7 @@ export default class PolygonLayer extends CompositeLayer {
     const {iterable, objectInfo} = createIterable(data, startRow, endRow);
     for (const object of iterable) {
       objectInfo.index++;
-      const polygon = Polygon.normalize(
-        getPolygon(object, objectInfo),
-        positionSize
-      );
+      const polygon = Polygon.normalize(getPolygon(object, objectInfo), positionSize);
       const {holeIndices} = polygon;
       const positions = polygon.positions || polygon;
 

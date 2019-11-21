@@ -109,7 +109,10 @@ test('polygon#fuctions', t => {
     t.comment(object.name);
 
     const complexPolygon = Polygon.normalize(object.polygon, 2);
-    t.ok(ArrayBuffer.isView(complexPolygon.positions || complexPolygon), 'Polygon.normalize flattens positions');
+    t.ok(
+      ArrayBuffer.isView(complexPolygon.positions || complexPolygon),
+      'Polygon.normalize flattens positions'
+    );
     if (complexPolygon.holeIndices) {
       t.ok(
         Array.isArray(complexPolygon.holeIndices),
@@ -250,6 +253,33 @@ test('PolygonTesselator#partial update', t => {
   ], 'positions');
   t.deepEquals(indices, [1, 3, 2, 7, 4, 5, 5, 6, 7, 10, 12, 11], 'incides');
   t.deepEquals(Array.from(accessorCalled), ['A'], 'Accessor called only on partial data');
+
+  t.end();
+});
+
+test('PolygonTesselator#normalize', t => {
+  const sampleData = [
+    {polygon: [1, 1, 2, 2, 3, 0], id: 'not-closed'},
+    {polygon: [0, 0, 2, 0, 2, 2, 0, 2, 0, 0], id: 'closed'},
+    {
+      polygon: {positions: [0, 0, 3, 0, 3, 3, 0, 3, 1, 1, 2, 1, 1, 2], holeIndices: [8]},
+      id: 'not-closed-with-holes'
+    }
+  ];
+  const tesselator = new PolygonTesselator({
+    data: sampleData,
+    normalize: false,
+    getGeometry: d => d.polygon,
+    positionFormat: 'XY'
+  });
+
+  t.is(tesselator.instanceCount, 15, 'Updated instanceCount without normalization');
+
+  tesselator.updateGeometry({
+    normalize: true
+  });
+
+  t.is(tesselator.instanceCount, 18, 'Updated instanceCount with normalization');
 
   t.end();
 });

@@ -38,7 +38,8 @@ const defaultProps = {
   miterLimit: {type: 'number', min: 0, value: 4},
   dashJustified: false,
   billboard: false,
-  _normalize: true,
+  // `loop` or `open`
+  _pathType: null,
 
   getPath: {type: 'accessor', value: object => object.path},
   getColor: {type: 'accessor', value: DEFAULT_COLOR},
@@ -137,7 +138,8 @@ export default class PathLayer extends Layer {
       const {pathTesselator} = this.state;
       pathTesselator.updateGeometry({
         data: props.data,
-        normalize: props._normalize,
+        normalize: !props._pathType,
+        loop: props._pathType === 'loop',
         getGeometry: props.getPath,
         positionFormat: props.positionFormat,
         dataChanged: changeFlags.dataChanged

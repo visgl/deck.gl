@@ -27,13 +27,11 @@ const INVALID = 4;
 // This class is set up to allow querying one attribute at a time
 // the way the AttributeManager expects it
 export default class PathTesselator extends Tesselator {
-  constructor({data, getGeometry, positionFormat, fp64}) {
+  constructor(opts) {
     super({
-      data,
-      getGeometry,
-      positionFormat,
+      ...opts,
       attributes: {
-        positions: {size: 3, type: fp64 ? Float64Array : Float32Array},
+        positions: {size: 3, type: opts.fp64 ? Float64Array : Float32Array},
         segmentTypes: {size: 1, type: Uint8ClampedArray}
       }
     });
@@ -46,6 +44,11 @@ export default class PathTesselator extends Tesselator {
 
   /* Implement base Tesselator interface */
   getGeometrySize(path) {
+    if (!this.normalize) {
+      const numPoints = path.length / this.positionSize;
+      return this.opts.loop ? numPoints + 2 : numPoints;
+    }
+
     const numPoints = this.getPathLength(path);
     if (numPoints < 2) {
       // invalid path
@@ -131,7 +134,7 @@ export default class PathTesselator extends Tesselator {
 
   isClosed(path) {
     if (!this.normalize) {
-      return false;
+      return this.opts.loop;
     }
     const numPoints = this.getPathLength(path);
     const firstPoint = this.getPointOnPath(path, 0);
