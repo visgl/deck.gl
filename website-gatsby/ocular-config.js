@@ -124,9 +124,9 @@ based maps.',
     },
     {
       title: 'GeoJsonLayer (Polygons)',
-      path: 'examples/geojson',
+      path: 'examples/website/geojson',
       image: 'images/examples/demo-thumb-geojson.jpg',
-      componentUrl: resolve(__dirname, '../examples/website/geojson/app.js')
+      componentUrl: resolve(__dirname, './src/examples/example-geojson-layer.jsx')
     },
     {
       title: 'GeoJsonLayer (Paths)',
