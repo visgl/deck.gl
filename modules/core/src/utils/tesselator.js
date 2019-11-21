@@ -191,7 +191,8 @@ export default class Tesselator {
       (geometry, dataIndex) => {
         context.vertexStart = vertexStarts[dataIndex];
         context.indexStart = indexStarts[dataIndex];
-        context.geometrySize = vertexStarts[dataIndex + 1] - vertexStarts[dataIndex];
+        const vertexEnd = dataIndex < vertexStarts.length - 1 ? vertexStarts[dataIndex + 1] : instanceCount;
+        context.geometrySize = vertexEnd - vertexStarts[dataIndex];
         context.geometryIndex = dataIndex;
         this.updateGeometryAttributes(geometry, context);
       },

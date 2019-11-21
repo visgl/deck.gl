@@ -44,11 +44,12 @@ export default class PolygonTesselator extends Tesselator {
 
   /* Getters */
   get(attributeName) {
+    const {attributes} = this;
     if (attributeName === 'indices') {
-      return this.attributes.indices.subarray(0, this.vertexCount);
+      return attributes.indices && attributes.indices.subarray(0, this.vertexCount);
     }
 
-    return this.attributes[attributeName];
+    return attributes[attributeName];
   }
 
   /* Implement base Tesselator interface */

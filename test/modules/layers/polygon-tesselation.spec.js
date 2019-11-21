@@ -283,3 +283,60 @@ test('PolygonTesselator#normalize', t => {
 
   t.end();
 });
+
+test('PolygonTesselator#geometryBuffer', t => {
+  const sampleData = {
+    length: 2,
+    startIndices: [0, 3],
+    attributes: {
+      getPolygon: new Float64Array([1, 1, 2, 2, 3, 3, 0, 0, 2, 0, 2, 2, 0, 2, 0, 0])
+    }
+  };
+  const tesselator = new PolygonTesselator({
+    data: sampleData,
+    buffers: sampleData.attributes,
+    geometryBuffer: sampleData.attributes.getPolygon,
+    positionFormat: 'XY'
+  });
+
+  t.is(tesselator.instanceCount, 9, 'Updated instanceCount from geometryBuffer');
+  t.deepEquals(
+    tesselator.get('positions').slice(0, 27),
+    [1, 1, 0, 2, 2, 0, 3, 3, 0, 1, 1, 0, 0, 0, 0, 2, 0, 0, 2, 2, 0, 0, 2, 0, 0, 0, 0],
+    'positions are populated'
+  );
+  t.ok(tesselator.get('indices'), 'indices generated');
+  t.deepEquals(
+    tesselator.get('vertexValid').slice(0, 9),
+    [1, 1, 1, 0, 1, 1, 1, 1, 0],
+    'vertexValid are populated'
+  );
+
+  tesselator.updateGeometry({
+    normalize: false
+  });
+
+  t.is(tesselator.instanceCount, 8, 'Updated instanceCount from geometryBuffer');
+  t.is(tesselator.vertexStarts, sampleData.startIndices, 'Used external startIndices');
+  t.notOk(tesselator.get('positions'), 'skipped packing positions');
+  t.ok(tesselator.get('indices'), 'indices generated');
+  t.deepEquals(
+    tesselator.get('vertexValid').slice(0, 8),
+    [1, 1, 0, 1, 1, 1, 1, 0],
+    'vertexValid are populated'
+  );
+
+  sampleData.attributes.indices = new Uint16Array([6, 3, 4, 4, 5, 6]);
+  tesselator.updateGeometry({
+    normalize: false
+  });
+  t.notOk(tesselator.get('positions'), 'skipped packing positions');
+  t.notOk(tesselator.get('indices'), 'skipped packing indices');
+  t.deepEquals(
+    tesselator.get('vertexValid').slice(0, 8),
+    [1, 1, 0, 1, 1, 1, 1, 0],
+    'vertexValid are populated'
+  );
+
+  t.end();
+});
