@@ -84,16 +84,13 @@ export default class PickLayersPass extends LayersPass {
     };
   }
 
-  _getLayerParameters(layer, layerIndex) {
-    // All parameter resolving is done here instead of the layer
-    // Blend parameters must not be overridden during picking
-    return Object.assign({}, layer.props.parameters, this.getLayerParameters(layer, layerIndex));
-  }
-
   getLayerParameters(layer, layerIndex) {
     // These will override any layer parameters
-    return this.pickZ
+    const pickParameters = this.pickZ
       ? {blend: false}
       : {...PICKING_PARAMETERS, blend: true, blendColor: [0, 0, 0, (layerIndex + 1) / 255]};
+
+    // Override layer parameters with pick parameters
+    return Object.assign({}, layer.props.parameters, pickParameters);
   }
 }

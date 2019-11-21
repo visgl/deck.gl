@@ -90,7 +90,7 @@ export default class LayersPass extends Pass {
 
         const _moduleParameters = this._getModuleParameters(layer, effects, pass, moduleParameters);
         const uniforms = Object.assign({}, layer.context.uniforms, {layerIndex});
-        const layerParameters = this._getLayerParameters(layer, layerIndex);
+        const layerParameters = this.getLayerParameters(layer, layerIndex);
 
         layer.drawLayer({
           moduleParameters: _moduleParameters,
@@ -113,7 +113,7 @@ export default class LayersPass extends Pass {
   }
 
   getLayerParameters(layer, layerIndex) {
-    return null;
+    return layer.props.parameters;
   }
 
   /* Private */
@@ -146,10 +146,6 @@ export default class LayersPass extends Pass {
     }
 
     return Object.assign(moduleParameters, this.getModuleParameters(layer, effects), overrides);
-  }
-
-  _getLayerParameters(layer, layerIndex) {
-    return layer.props.parameters;
   }
 }
 
