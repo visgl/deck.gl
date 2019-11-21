@@ -8,39 +8,30 @@ import {Tile3DLoader} from '@loaders.gl/3d-tiles';
 import {LASWorkerLoader} from '@loaders.gl/las';
 import * as loaders from '@loaders.gl/core';
 
-import {
-  COORDINATE_SYSTEM,
-  MapView,
-  FirstPersonView,
-  OrbitView,
-  OrthographicView,
-  log
-} from '@deck.gl/core';
-
-import DeckGL from '../../core/bundle/deckgl';
-
-import * as Layers from '@deck.gl/layers';
-import * as AggregationLayers from '@deck.gl/aggregation-layers';
-import * as GeoLayers from '@deck.gl/geo-layers';
-import * as MeshLayers from '@deck.gl/mesh-layers';
-import GL from '@luma.gl/constants';
+import * as deck from '../../core/bundle';
 
 import {JSONConverter} from '@deck.gl/json';
+
+import GL from '@luma.gl/constants';
+
+function extractClasses() {
+  // Get classes for registration from standalone deck.gl
+  const classesDict = {};
+  const classes = Object.keys(deck).filter(
+    x => (x.indexOf('Layer') > 0 || x.indexOf('View') > 0) && x.indexOf('_') !== 0
+  );
+  classes.map(k => (classesDict[k] = deck[k]));
+  // TODO properly register layers (they aren't appearing here')
+  return deck;
+}
 
 function createDeckWithImports(args) {
   // Handle JSONConverter and loaders configuration
   const jsonConverterConfiguration = {
-    classes: Object.assign(
-      {MapView, FirstPersonView, OrbitView, OrthographicView},
-      Layers,
-      AggregationLayers,
-      GeoLayers,
-      MeshLayers
-    ),
-
+    classes: extractClasses(),
     // Will be resolved as `<enum-name>.<enum-value>`
     enumerations: {
-      COORDINATE_SYSTEM,
+      COORDINATE_SYSTEM: deck.COORDINATE_SYSTEM,
       GL
     },
 
@@ -76,7 +67,7 @@ function createDeck({
 
     const getTooltip = makeTooltip(tooltip);
 
-    const deckgl = new DeckGL({
+    const deckgl = new deck.DeckGL({
       ...props,
       map: mapboxgl,
       mapboxApiAccessToken: mapboxApiKey,
@@ -85,11 +76,11 @@ function createDeck({
       container
     });
 
-    const warn = log.warn;
+    const warn = deck.log.warn;
     // TODO overrride console.warn instead
     // Right now this isn't doable (in a Notebook at least)
     // because the widget loads in deck.gl (and its logger) before @deck.gl/jupyter-widget
-    log.warn = injectFunction(warn, handleWarning);
+    deck.log.warn = injectFunction(warn, handleWarning);
 
     if (onComplete) {
       onComplete({jsonConverter, deckgl});
