@@ -12,7 +12,6 @@ import * as loaders from '@loaders.gl/core';
 
 import {
   COORDINATE_SYSTEM,
-  Deck,
   MapView,
   FirstPersonView,
   OrbitView,
@@ -20,7 +19,8 @@ import {
   log
 } from '@deck.gl/core';
 
-// import {DeckGL} from '@deck.gl/core/bundle';
+import DeckGL from '@deck.gl/core/bundle';
+
 import * as Layers from '@deck.gl/layers';
 import * as AggregationLayers from '@deck.gl/aggregation-layers';
 import * as GeoLayers from '@deck.gl/geo-layers';
@@ -81,7 +81,7 @@ function createDeck({
     container.appendChild(document.createElement('canvas'));
     const canvas = container.firstElementChild;
 
-    const deckgl = new Deck({
+    const deckgl = new DeckGL({
       ...props,
       map: mapboxgl,
       mapboxApiAccessToken: mapboxApiKey,
