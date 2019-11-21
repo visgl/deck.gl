@@ -162,6 +162,8 @@ test('GPUGridAggregator#CompareCPUandGPU', t => {
 });
 
 test('GPUGridAggregator worldspace aggregation #CompareCPUandGPU', t => {
+  Object.assign(fixtureWorldSpace, GridAggregationData.buildAttributes(fixtureWorldSpace));
+
   const sa = new GPUGridAggregator(gl);
   let results = sa.run(Object.assign({}, fixtureWorldSpace, {useGPU: false}));
   const cpuResults = {

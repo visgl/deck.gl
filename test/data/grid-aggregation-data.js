@@ -366,8 +366,6 @@ const fixtureWorldSpace = {
   }
 };
 
-Object.assign(fixtureWorldSpace, buildAttributes(fixtureWorldSpace));
-
 export const GridAggregationData = {
   viewport,
   fixture,
