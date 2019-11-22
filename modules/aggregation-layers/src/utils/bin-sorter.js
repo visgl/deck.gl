@@ -37,15 +37,6 @@ export default class BinSorter {
     this.binMap = this.getBinMap();
   }
 
-  // filterPoint(point, getFilterValue, filterRange) {
-  //   const value = getFilterValue(point);
-
-  //   if (Array.isArray(value)) {
-  //     // filterSize > 1
-  //     return value.every((val, idx) => val >= filterRange[idx][0] && val <= filterRange[idx][1]);
-  //   }
-  //   return value >= filterRange[0] && value <= filterRange[1];
-  // }
   /**
    * Get an array of object with sorted values and index of bins
    * @param {Array} bins
