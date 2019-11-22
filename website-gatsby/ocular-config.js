@@ -166,9 +166,9 @@ based maps.',
     },
     {
       title: 'TileLayer',
-      path: 'examples/maptile',
+      path: 'examples/website/map-tile',
       image: 'images/examples/demo-thumb-tile.jpg',
-      componentUrl: resolve(__dirname, '../examples/website/map-tile/app.js')
+      componentUrl: resolve(__dirname, './src/examples/example-tile-layer.jsx')
     },
     {
       title: 'TripsLayer',
