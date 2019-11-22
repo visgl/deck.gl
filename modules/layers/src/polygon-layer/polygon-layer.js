@@ -220,7 +220,9 @@ export default class PolygonLayer extends CompositeLayer {
           rounded: lineJointRounded,
           miterLimit: lineMiterLimit,
           dashJustified: lineDashJustified,
-          _pathType: _normalize ? null : 'loop',
+
+          // Already normalized
+          _pathType: 'loop',
 
           transitions: transitions && {
             getWidth: transitions.getLineWidth,
