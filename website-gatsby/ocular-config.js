@@ -172,9 +172,9 @@ based maps.',
     },
     {
       title: 'TripsLayer',
-      path: 'examples/trips',
+      path: 'examples/website/trips',
       image: 'images/examples/demo-thumb-trip.jpg',
-      componentUrl: resolve(__dirname, '../examples/website/trips/app.js')
+      componentUrl: resolve(__dirname, './src/examples/example-trips-layer.jsx')
     },
     {
       title: 'Brushing Layer',
