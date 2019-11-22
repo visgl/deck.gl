@@ -18,7 +18,10 @@ test('PathExtension#PathLayer', t => {
       onAfterUpdate: ({layer}) => {
         const uniforms = layer.state.model.getUniforms();
         t.is(uniforms.dashAlignMode, 0, 'has dashAlignMode uniform');
-        t.ok(layer.getAttributeManager().getAttributes().instanceDashArrays.value, 'instanceDashArrays attribute is populated');
+        t.ok(
+          layer.getAttributeManager().getAttributes().instanceDashArrays.value,
+          'instanceDashArrays attribute is populated'
+        );
       }
     },
     {
@@ -29,7 +32,10 @@ test('PathExtension#PathLayer', t => {
       onAfterUpdate: ({layer}) => {
         const uniforms = layer.state.model.getUniforms();
         t.is(uniforms.dashAlignMode, 1, 'has dashAlignMode uniform');
-        t.ok(layer.getAttributeManager().getAttributes().instanceDashArrays.value, 'instanceDashArrays attribute is populated');
+        t.ok(
+          layer.getAttributeManager().getAttributes().instanceDashArrays.value,
+          'instanceDashArrays attribute is populated'
+        );
       }
     }
   ];
@@ -54,7 +60,10 @@ test('PathExtension#PolygonLayer', t => {
         const pathLayer = subLayers.find(l => l.id.endsWith('stroke'));
         const uniforms = pathLayer.state.model.getUniforms();
         t.is(uniforms.dashAlignMode, 0, 'has dashAlignMode uniform');
-        t.ok(pathLayer.getAttributeManager().getAttributes().instanceDashArrays.value, 'instanceDashArrays attribute is populated');
+        t.ok(
+          pathLayer.getAttributeManager().getAttributes().instanceDashArrays.value,
+          'instanceDashArrays attribute is populated'
+        );
       }
     },
     {
@@ -66,7 +75,10 @@ test('PathExtension#PolygonLayer', t => {
         const pathLayer = subLayers.find(l => l.id.endsWith('stroke'));
         const uniforms = pathLayer.state.model.getUniforms();
         t.is(uniforms.dashAlignMode, 1, 'has dashAlignMode uniform');
-        t.ok(pathLayer.getAttributeManager().getAttributes().instanceDashArrays.value, 'instanceDashArrays attribute is populated');
+        t.ok(
+          pathLayer.getAttributeManager().getAttributes().instanceDashArrays.value,
+          'instanceDashArrays attribute is populated'
+        );
       }
     }
   ];
