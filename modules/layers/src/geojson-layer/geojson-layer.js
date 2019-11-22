@@ -74,7 +74,7 @@ export default class GeoJsonLayer extends CompositeLayer {
     };
 
     if (this.props.getLineDashArray) {
-      log.removed('getLineDashArray', 'PathExtension')();
+      log.removed('getLineDashArray', 'PathStyleExtension')();
     }
   }
 

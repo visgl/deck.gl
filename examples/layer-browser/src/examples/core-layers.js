@@ -14,7 +14,7 @@ import {
   TextLayer
 } from '@deck.gl/layers';
 
-import {PathExtension} from '@deck.gl/extensions';
+import {PathStyleExtension} from '@deck.gl/extensions';
 
 const {flattenVertices} = experimental;
 
@@ -138,7 +138,7 @@ const GeoJsonLayerExample = {
     lineWidthMinPixels: 1,
     pickable: true,
     dashJustified: true,
-    extensions: [new PathExtension({dash: true})]
+    extensions: [new PathStyleExtension({dash: true})]
   }
 };
 
@@ -180,7 +180,7 @@ const PolygonLayerExample = {
     pickable: true,
     dashJustified: true,
     elevationScale: 0.6,
-    extensions: [new PathExtension({dash: true})]
+    extensions: [new PathStyleExtension({dash: true})]
   }
 };
 
@@ -221,7 +221,7 @@ const PathLayerExample = {
     widthMinPixels: 1,
     pickable: true,
     dashJustified: true,
-    extensions: [new PathExtension({dash: true})]
+    extensions: [new PathStyleExtension({dash: true})]
   }
 };
 

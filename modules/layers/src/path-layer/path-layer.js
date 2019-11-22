@@ -121,7 +121,7 @@ export default class PathLayer extends Layer {
     });
 
     if (this.props.getDashArray && !this.props.extensions.length) {
-      log.removed('getDashArray', 'PathExtension')();
+      log.removed('getDashArray', 'PathStyleExtension')();
     }
   }
 

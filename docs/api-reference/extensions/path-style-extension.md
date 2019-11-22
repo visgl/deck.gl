@@ -1,13 +1,13 @@
 
-# PathExtension
+# PathStyleExtension
 
-The `PathExtension` adds selected features to the [PathLayer](/docs/layers/path-layer.md) and composite layers that render the `PathLayer`, e.g. [PolygonLayer](/docs/layers/polygon-layer.md) and [GeoJsonLayer](/docs/layers/geojson-layer.md).
+The `PathStyleExtension` adds selected features to the [PathLayer](/docs/layers/path-layer.md) and composite layers that render the `PathLayer`, e.g. [PolygonLayer](/docs/layers/polygon-layer.md) and [GeoJsonLayer](/docs/layers/geojson-layer.md).
 
 > Note: In v8.0, the `getDashArray` and `dashJustified` props are removed from the `PathLayer` and moved into this extension.
 
 ```js
 import {PolygonLayer} from '@deck.gl/layers';
-import {PathExtension} from '@deck.gl/extensions';
+import {PathStyleExtension} from '@deck.gl/extensions';
 
 const layer = new PolygonLayer({
   id: 'polygon-layer',
@@ -15,7 +15,7 @@ const layer = new PolygonLayer({
   ...
   getDashArray: [3, 2],
   dashJustified: true,
-  extensions: [new PathExtension({dash: true})]
+  extensions: [new PathStyleExtension({dash: true})]
 });
 ```
 
@@ -30,8 +30,8 @@ npm install @deck.gl/core @deck.gl/layers @deck.gl/extensions
 ```
 
 ```js
-import {PathExtension} from '@deck.gl/extensions';
-new PathExtension({});
+import {PathStyleExtension} from '@deck.gl/extensions';
+new PathStyleExtension({});
 ```
 
 To use pre-bundled scripts:
@@ -45,20 +45,20 @@ To use pre-bundled scripts:
 ```
 
 ```js
-new deck.PathExtension({});
+new deck.PathStyleExtension({});
 ```
 
 ## Constructor
 
 ```js
-new PathExtension({dash});
+new PathStyleExtension({dash});
 ```
 
 * `dash` (Boolean) - add capability to render dashed lines. Default `false`.
 
 ## Layer Properties
 
-When added to a layer via the `extensions` prop, the `PathExtension` adds the following properties to the layer:
+When added to a layer via the `extensions` prop, the `PathStyleExtension` adds the following properties to the layer:
 
 
 ##### `getDashArray` ([Function](/docs/developer-guide/using-layers.md#accessors)|Array)

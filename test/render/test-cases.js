@@ -19,7 +19,7 @@ import {
 } from '@deck.gl/core';
 import {noise, vignette} from '@luma.gl/engine';
 
-import {Fp64Extension, PathExtension} from '@deck.gl/extensions';
+import {Fp64Extension, PathStyleExtension} from '@deck.gl/extensions';
 
 const effect1 = new PostProcessEffect(noise);
 const effect2 = new PostProcessEffect(vignette);
@@ -368,9 +368,7 @@ export const TEST_CASES = [
       new PolygonLayer({
         id: 'polygon-lnglat',
         coordinateSystem: COORDINATE_SYSTEM.IDENTITY,
-        data: [
-          [[-100, -100], [-100, 100], [100, 100], [100, -100]]
-        ],
+        data: [[[-100, -100], [-100, 100], [100, 100], [100, -100]]],
         getPolygon: f => f,
         filled: false,
         stroked: true,
@@ -379,7 +377,7 @@ export const TEST_CASES = [
         getLineWidth: 10,
         opacity: 1,
         dashJustified: true,
-        extensions: [new PathExtension({dash: true})]
+        extensions: [new PathStyleExtension({dash: true})]
       })
     ],
     goldenImage: './test/render/golden-images/polygon-dash.png'

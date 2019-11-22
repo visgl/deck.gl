@@ -1,11 +1,11 @@
 import test from 'tape-catch';
-import {PathExtension} from '@deck.gl/extensions';
+import {PathStyleExtension} from '@deck.gl/extensions';
 import {PathLayer, PolygonLayer} from '@deck.gl/layers';
 import {testLayer} from '@deck.gl/test-utils';
 
 import * as FIXTURES from 'deck.gl-test/data';
 
-test('PathExtension#PathLayer', t => {
+test('PathStyleExtension#PathLayer', t => {
   const testCases = [
     {
       props: {
@@ -13,7 +13,7 @@ test('PathExtension#PathLayer', t => {
         data: FIXTURES.zigzag,
         getPath: d => d.path,
         getDashArray: [0, 0],
-        extensions: [new PathExtension({dash: true})]
+        extensions: [new PathStyleExtension({dash: true})]
       },
       onAfterUpdate: ({layer}) => {
         const uniforms = layer.state.model.getUniforms();
@@ -45,7 +45,7 @@ test('PathExtension#PathLayer', t => {
   t.end();
 });
 
-test('PathExtension#PolygonLayer', t => {
+test('PathStyleExtension#PolygonLayer', t => {
   const testCases = [
     {
       props: {
@@ -54,7 +54,7 @@ test('PathExtension#PolygonLayer', t => {
         getPolygon: d => d,
         stroke: true,
         getDashArray: [0, 0],
-        extensions: [new PathExtension({dash: true})]
+        extensions: [new PathStyleExtension({dash: true})]
       },
       onAfterUpdate: ({subLayers}) => {
         const pathLayer = subLayers.find(l => l.id.endsWith('stroke'));

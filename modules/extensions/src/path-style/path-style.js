@@ -19,14 +19,14 @@
 // THE SOFTWARE.
 
 import {LayerExtension, mergeShaders} from '@deck.gl/core';
-import {dashShaders} from './path-shader.glsl';
+import {dashShaders} from './shaders.glsl';
 
 const defaultProps = {
   getDashArray: {type: 'accessor', value: [0, 0]},
   dashJustified: false
 };
 
-export default class PathExtension extends LayerExtension {
+export default class PathStyleExtension extends LayerExtension {
   constructor({dash = false} = {}) {
     super({dash});
   }
@@ -80,5 +80,5 @@ export default class PathExtension extends LayerExtension {
   }
 }
 
-PathExtension.extensionName = 'PathExtension';
-PathExtension.defaultProps = defaultProps;
+PathStyleExtension.extensionName = 'PathStyleExtension';
+PathStyleExtension.defaultProps = defaultProps;
