@@ -142,9 +142,9 @@ based maps.',
     },
     {
       title: 'ArcLayer',
-      path: 'examples/arc',
+      path: 'examples/website/arc',
       image: 'images/examples/demo-thumb-arc.jpg',
-      componentUrl: resolve(__dirname, '../examples/website/arc/app.js')
+      componentUrl: resolve(__dirname, './src/examples/example-arc-layer.jsx')
     },
     {
       title: 'ScatterplotLayer',

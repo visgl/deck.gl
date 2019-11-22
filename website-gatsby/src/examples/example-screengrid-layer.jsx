@@ -24,7 +24,6 @@ export default class LineDemo extends Component {
       `${DATA_URI}/screen-grid-data-uber-pickups-nyc.txt`,
       '/workers/screen-grid-data-decoder.js',
       (response, meta) => {
-        console.log(response, meta);
         this.setState({
           data: response,
           dataCount: meta.count
@@ -46,7 +45,7 @@ export default class LineDemo extends Component {
 
   render() {
     const {data, dataCount, cellSize, gpuAggregation} = this.state;
-    console.log(this.state);
+
     return (
       <div>
         <App
