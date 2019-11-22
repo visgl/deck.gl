@@ -315,7 +315,7 @@ test('HexagonLayer#updateLayer', t => {
       },
       {
         updateProps: {
-          getFilterBy: pt => pt.SPACES >= 4 && pt.SPACES <= 10
+          filterData: pt => pt.SPACES >= 4 && pt.SPACES <= 10
         },
         onAfterUpdate: ({layer, oldState}) => {
           getChecksForFilterChange(false)({layer, oldState});
@@ -328,9 +328,9 @@ test('HexagonLayer#updateLayer', t => {
       },
       {
         updateProps: {
-          getFilterBy: pt => pt.SPACES >= 4 && pt.SPACES <= 10,
+          filterData: pt => pt.SPACES >= 4 && pt.SPACES <= 10,
           updateTriggers: {
-            getFilterBy: 1
+            filterData: 1
           }
         },
         onAfterUpdate: ({layer, oldState}) => {
@@ -359,9 +359,9 @@ test('HexagonLayer#updateLayer', t => {
       },
       {
         updateProps: {
-          getFilterBy: null,
+          filterData: null,
           updateTriggers: {
-            getFilterBy: 0
+            filterData: 0
           }
         },
         onAfterUpdate: ({layer, oldState}) => {

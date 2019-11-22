@@ -26,7 +26,7 @@ const defaultGetValue = points => points.length;
 
 const defaultProps = {
   getValue: defaultGetValue,
-  getFilterBy: null
+  filterData: null
 };
 
 export default class BinSorter {
@@ -44,12 +44,12 @@ export default class BinSorter {
    * @return {Array} array of values and index lookup
    */
   getSortedBins(bins, props) {
-    const {getValue = defaultGetValue, getFilterBy} = props;
-    const hasFilter = typeof getFilterBy === 'function';
+    const {getValue = defaultGetValue, filterData} = props;
+    const hasFilter = typeof filterData === 'function';
 
     return bins
       .reduce((accu, h, i) => {
-        const filteredPoints = hasFilter ? h.points.filter(getFilterBy) : h.points;
+        const filteredPoints = hasFilter ? h.points.filter(filterData) : h.points;
 
         h.filteredPoints = hasFilter ? filteredPoints : null;
 
