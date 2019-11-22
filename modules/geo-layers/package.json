@@ -36,7 +36,7 @@
     "@math.gl/culling": "^3.0.0",
     "@math.gl/geospatial": "^3.0.0",
     "@math.gl/web-mercator": "^3.1.0-alpha",
-    "h3-js": "^3.4.3",
+    "h3-js": "^3.6.0",
     "long": "^3.2.0",
     "s2-geometry": "^1.2.10"
   },
