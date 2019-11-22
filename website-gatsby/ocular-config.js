@@ -154,9 +154,9 @@ based maps.',
     },
     {
       title: 'PointCloudLayer',
-      path: 'examples/pointcloud',
+      path: 'examples/website/pointcloud',
       image: 'images/examples/demo-thumb-point-cloud.jpg',
-      componentUrl: resolve(__dirname, '../examples/website/point-cloud/app.js')
+      componentUrl: resolve(__dirname, './src/examples/example-pointcloud-layer.jsx')
     },
     {
       title: 'TextLayer',
