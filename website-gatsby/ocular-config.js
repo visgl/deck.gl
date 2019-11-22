@@ -148,9 +148,9 @@ based maps.',
     },
     {
       title: 'ScatterplotLayer',
-      path: 'examples/scatterplot',
+      path: 'examples/website/scatterplot',
       image: 'images/examples/demo-thumb-scatterplot.jpg',
-      componentUrl: resolve(__dirname, '../examples/website/scatterplot/app.js')
+      componentUrl: resolve(__dirname, './src/examples/example-scatterplot-layer.jsx')
     },
     {
       title: 'PointCloudLayer',

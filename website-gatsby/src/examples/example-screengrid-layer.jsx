@@ -5,7 +5,7 @@ import {loadData} from '../utils/data-utils';
 import {readableInteger} from '../utils/format-utils';
 import App from '../../../examples/website/screen-grid/app';
 
-export default class LineDemo extends Component {
+export default class ScreengridDemo extends Component {
   constructor(props) {
     super(props);
     this.state = {

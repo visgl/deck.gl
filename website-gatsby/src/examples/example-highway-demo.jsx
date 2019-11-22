@@ -5,7 +5,7 @@ import {loadData} from '../utils/data-utils';
 import {readableInteger} from '../utils/format-utils';
 import App, {COLOR_SCALE} from '../../../examples/website/highway/app';
 
-export default class IconDemo extends Component {
+export default class HighwayDemo extends Component {
   constructor(props) {
     super(props);
     this.state = {
