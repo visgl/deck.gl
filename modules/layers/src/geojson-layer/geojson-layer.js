@@ -18,7 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {CompositeLayer} from '@deck.gl/core';
+import {CompositeLayer, log} from '@deck.gl/core';
 import ScatterplotLayer from '../scatterplot-layer/scatterplot-layer';
 import PathLayer from '../path-layer/path-layer';
 // Use primitive layer to avoid "Composite Composite" layers for now
@@ -49,8 +49,6 @@ const defaultProps = {
   pointRadiusMinPixels: 0, //  min point radius in pixels
   pointRadiusMaxPixels: Number.MAX_SAFE_INTEGER, // max point radius in pixels
 
-  lineDashJustified: false,
-
   // Line and polygon outline color
   getLineColor: {type: 'accessor', value: defaultLineColor},
   // Point and polygon fill color
@@ -59,8 +57,6 @@ const defaultProps = {
   getRadius: {type: 'accessor', value: 1},
   // Line and polygon outline accessors
   getLineWidth: {type: 'accessor', value: 1},
-  // Line dash array accessor
-  getLineDashArray: {type: 'accessor', value: [0, 0]},
   // Polygon extrusion accessor
   getElevation: {type: 'accessor', value: 1000},
   // Optional material for 'lighting' shader module
@@ -76,6 +72,10 @@ export default class GeoJsonLayer extends CompositeLayer {
     this.state = {
       features: {}
     };
+
+    if (this.props.getLineDashArray) {
+      log.removed('getLineDashArray', 'PathExtension')();
+    }
   }
 
   updateState({props, changeFlags}) {

@@ -14,6 +14,8 @@ import {
   TextLayer
 } from '@deck.gl/layers';
 
+import {PathExtension} from '@deck.gl/extensions';
+
 const {flattenVertices} = experimental;
 
 // Demonstrate immutable support
@@ -107,12 +109,12 @@ const GeoJsonLayerExample = {
   layer: GeoJsonLayer,
   getData: () => dataSamples.geojson,
   propTypes: {
-    getLineDashArray: {type: 'compound', elements: ['lineDashSizeLine']},
-    lineDashSizeLine: {
+    getDashArray: {type: 'compound', elements: ['dashSizeLine']},
+    dashSizeLine: {
       type: 'number',
       max: 20,
       onUpdate: (newValue, newSettings, change) => {
-        change('getLineDashArray', [newValue, 20 - newValue]);
+        change('getDashArray', [newValue, 20 - newValue]);
       }
     }
   },
@@ -129,12 +131,14 @@ const GeoJsonLayerExample = {
       const opacity = (f.properties['stroke-opacity'] || 1) * 255;
       return setOpacity(color, opacity);
     },
-    getLineDashArray: f => [20, 0],
+    getDashArray: f => [20, 0],
     getLineWidth: f => f.properties['stroke-width'],
     getElevation: f => 500,
     lineWidthScale: 10,
     lineWidthMinPixels: 1,
-    pickable: true
+    pickable: true,
+    dashJustified: true,
+    extensions: [new PathExtension({dash: true})]
   }
 };
 
@@ -156,12 +160,12 @@ const PolygonLayerExample = {
   layer: PolygonLayer,
   getData: () => dataSamples.polygons,
   propTypes: {
-    getLineDashArray: {type: 'compound', elements: ['lineDashSizeLine']},
-    lineDashSizeLine: {
+    getDashArray: {type: 'compound', elements: ['dashSizeLine']},
+    dashSizeLine: {
       type: 'number',
       max: 20,
       onUpdate: (newValue, newSettings, change) => {
-        change('getLineDashArray', [newValue, 20 - newValue]);
+        change('getDashArray', [newValue, 20 - newValue]);
       }
     }
   },
@@ -169,13 +173,14 @@ const PolygonLayerExample = {
     getPolygon: f => f,
     getFillColor: f => [200 + Math.random() * 55, 0, 0],
     getLineColor: f => [0, 0, 0, 255],
-    getLineDashArray: f => [20, 0],
+    getDashArray: f => [20, 0],
     getLineWidth: f => 20,
     getElevation: f => Math.random() * 1000,
     opacity: 0.8,
     pickable: true,
-    lineDashJustified: true,
-    elevationScale: 0.6
+    dashJustified: true,
+    elevationScale: 0.6,
+    extensions: [new PathExtension({dash: true})]
   }
 };
 
@@ -214,21 +219,9 @@ const PathLayerExample = {
     getWidth: f => 10,
     getDashArray: f => [20, 0],
     widthMinPixels: 1,
-    pickable: true
-  }
-};
-
-const PathLayerBinaryExample = {
-  ...PathLayerExample,
-  getData: () =>
-    dataSamples.zigzag.map(({path}) => {
-      // Convert each path from an array of points to an array of numbers
-      return flattenVertices(path, {dimensions: 2});
-    }),
-  props: {
-    ...PathLayerExample.props,
-    getPath: d => d,
-    positionFormat: 'XY'
+    pickable: true,
+    dashJustified: true,
+    extensions: [new PathExtension({dash: true})]
   }
 };
 
@@ -413,7 +406,6 @@ export default {
     PolygonLayer: PolygonLayerExample,
     'PolygonLayer (Flat)': PolygonLayerBinaryExample,
     PathLayer: PathLayerExample,
-    'PathLayer (Flat)': PathLayerBinaryExample,
     ScatterplotLayer: ScatterplotLayerExample,
     ArcLayer: ArcLayerExample,
     LineLayer: LineLayerExample,

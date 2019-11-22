@@ -189,9 +189,11 @@ export default class CompositeLayer extends Layer {
     // Pass through extension props
     for (const extension of extensions) {
       const passThroughProps = extension.getSubLayerProps.call(this, extension);
-      Object.assign(newProps, passThroughProps, {
-        updateTriggers: Object.assign(newProps.updateTriggers, passThroughProps.updateTriggers)
-      });
+      if (passThroughProps) {
+        Object.assign(newProps, passThroughProps, {
+          updateTriggers: Object.assign(newProps.updateTriggers, passThroughProps.updateTriggers)
+        });
+      }
     }
 
     return newProps;

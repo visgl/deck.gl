@@ -42,7 +42,15 @@ export function mergeShaders(target, source) {
     }
   }
   if ('inject' in source) {
-    result.inject = Object.assign({}, target.inject, source.inject);
+    if (!target.inject) {
+      result.inject = source.inject;
+    } else {
+      const mergedInjection = {...target.inject};
+      for (const key in source.inject) {
+        mergedInjection[key] = (mergedInjection[key] || '') + source.inject[key];
+      }
+      result.inject = mergedInjection;
+    }
   }
   return result;
 }

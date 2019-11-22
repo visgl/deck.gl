@@ -18,7 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {CompositeLayer, createIterable} from '@deck.gl/core';
+import {CompositeLayer, createIterable, log} from '@deck.gl/core';
 import SolidPolygonLayer from '../solid-polygon-layer/solid-polygon-layer';
 import PathLayer from '../path-layer/path-layer';
 import * as Polygon from '../solid-polygon-layer/polygon';
@@ -41,7 +41,6 @@ const defaultProps = {
   lineWidthMaxPixels: Number.MAX_SAFE_INTEGER,
   lineJointRounded: false,
   lineMiterLimit: 4,
-  lineDashJustified: false,
 
   getPolygon: {type: 'accessor', value: f => f.polygon},
   // Polygon fill color
@@ -50,8 +49,6 @@ const defaultProps = {
   getLineColor: {type: 'accessor', value: defaultLineColor},
   // Line and polygon outline accessors
   getLineWidth: {type: 'accessor', value: 1},
-  // Line dash array accessor
-  getLineDashArray: {type: 'accessor', value: [0, 0]},
   // Polygon extrusion accessor
   getElevation: {type: 'accessor', value: 1000},
 
@@ -64,6 +61,10 @@ export default class PolygonLayer extends CompositeLayer {
     this.state = {
       paths: []
     };
+
+    if (this.props.getLineDashArray) {
+      log.removed('getLineDashArray', 'PathExtension')();
+    }
   }
 
   updateState({oldProps, props, changeFlags}) {

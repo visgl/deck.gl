@@ -124,12 +124,6 @@ If `false`, the width always faces up.
 The maximum extent of a joint in ratio to the stroke width.
 Only works if `rounded` is `false`.
 
-##### `dashJustified` (Boolean, optional)
-
-* Default: `false`
-
-Only effective if `getDashArray` is specified. If `true`, adjust gaps for the dashes to align at both ends.
-
 ##### `_pathType` (Object, optional)
 
 * Default: `null`
@@ -180,16 +174,6 @@ The width of each path, in units specified by `widthUnits` (default meters).
 
 * If a number is provided, it is used as the width for all paths.
 * If a function is provided, it is called on each path to retrieve its width.
-
-##### `getDashArray` ([Function](/docs/developer-guide/using-layers.md#accessors)|Array, optional)
-
-* Default: `null`
-
-The dash array to draw each path with: `[dashSize, gapSize]` relative to the width of the path.
-
-* If an array is provided, it is used as the dash array for all paths.
-* If a function is provided, it is called on each path to retrieve its dash array. Return `[0, 0]` to draw the path in solid line.
-* If this accessor is not specified, all paths are drawn as solid lines.
 
 ## Source
 

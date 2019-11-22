@@ -14,6 +14,10 @@
   + `getStrokeWidth`: use `getWidth`
 - `LineLayer` props
   + `getStrokeWidth`: use `getWidth`
+- `PathLayer` props
+  + `getDashArray`: use [PathExtension](/docs/api-reference/extensions/path-extension.md)
+- `PolygonLayer` and `GeoJsonLayer` props
+  + `getLineDashArray`: use [PathExtension](/docs/api-reference/extensions/path-extension.md)
 - `H3HexagonLayer` props
   + `getColor`: use `getFillColor` and `getLineColor`
 - `project` shader module
