@@ -136,9 +136,9 @@ based maps.',
     },
     {
       title: 'ScreenGridLayer',
-      path: 'examples/screengrid',
+      path: 'examples/website/screengrid',
       image: 'images/examples/demo-thumb-screengrid.jpg',
-      componentUrl: resolve(__dirname, '../examples/website/screen-grid/app.js')
+      componentUrl: resolve(__dirname, './src/examples/example-screengrid-layer.jsx')
     },
     {
       title: 'ArcLayer',
