@@ -385,7 +385,7 @@ export default class CPUAggregator {
   }
 
   getDimensionSortedBins(props, dimensionUpdater) {
-    // const {getColorValue} = this.state;
+
     const {key} = dimensionUpdater;
     const {getValue} = this.state.dimensions[key];
 

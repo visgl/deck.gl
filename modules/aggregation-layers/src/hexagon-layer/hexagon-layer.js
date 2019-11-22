@@ -64,7 +64,7 @@ const defaultProps = {
   material: defaultMaterial,
 
   // data filter
-  filterData: {type: 'function', value: null}
+  filterData: {type: 'function', value: null, optional: true}
 };
 
 export default class HexagonLayer extends CompositeLayer {
