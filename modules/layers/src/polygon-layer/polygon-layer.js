@@ -33,6 +33,7 @@ const defaultProps = {
   extruded: false,
   elevationScale: 1,
   wireframe: false,
+  _normalize: true,
 
   lineWidthUnits: 'meters',
   lineWidthScale: 1,
@@ -91,7 +92,7 @@ export default class PolygonLayer extends CompositeLayer {
   }
 
   _getPaths(dataRange = {}) {
-    const {data, getPolygon, positionFormat} = this.props;
+    const {data, getPolygon, positionFormat, _normalize} = this.props;
     const paths = [];
     const positionSize = positionFormat === 'XY' ? 2 : 3;
     const {startRow, endRow} = dataRange;
@@ -99,7 +100,10 @@ export default class PolygonLayer extends CompositeLayer {
     const {iterable, objectInfo} = createIterable(data, startRow, endRow);
     for (const object of iterable) {
       objectInfo.index++;
-      const polygon = Polygon.normalize(getPolygon(object, objectInfo), positionSize);
+      let polygon = getPolygon(object, objectInfo);
+      if (_normalize) {
+        polygon = Polygon.normalize(polygon, positionSize);
+      }
       const {holeIndices} = polygon;
       const positions = polygon.positions || polygon;
 
@@ -131,6 +135,7 @@ export default class PolygonLayer extends CompositeLayer {
       filled,
       extruded,
       wireframe,
+      _normalize,
       elevationScale,
       transitions,
       positionFormat
@@ -175,6 +180,7 @@ export default class PolygonLayer extends CompositeLayer {
 
           filled,
           wireframe,
+          _normalize,
 
           getElevation,
           getFillColor,
@@ -214,6 +220,9 @@ export default class PolygonLayer extends CompositeLayer {
           rounded: lineJointRounded,
           miterLimit: lineMiterLimit,
           dashJustified: lineDashJustified,
+
+          // Already normalized
+          _pathType: 'loop',
 
           transitions: transitions && {
             getWidth: transitions.getLineWidth,

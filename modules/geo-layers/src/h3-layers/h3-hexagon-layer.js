@@ -53,7 +53,7 @@ function getHexagonCentroid(getHexagon, object, objectInfo) {
   return [lng, lat];
 }
 
-function h3ToPolygon(hexId, coverage = 1) {
+function h3ToPolygon(hexId, coverage = 1, flatten) {
   const vertices = h3ToGeoBoundary(hexId, true);
 
   if (coverage !== 1) {
@@ -62,6 +62,16 @@ function h3ToPolygon(hexId, coverage = 1) {
   } else {
     // normalize w.r.t to start vertex
     normalizeLongitudes(vertices);
+  }
+
+  if (flatten) {
+    const positions = new Float64Array(vertices.length * 2);
+    let i = 0;
+    for (const pt of vertices) {
+      positions[i++] = pt[0];
+      positions[i++] = pt[1];
+    }
+    return positions;
   }
 
   return vertices;
@@ -237,9 +247,11 @@ export default class H3HexagonLayer extends CompositeLayer {
       }),
       {
         data,
+        _normalize: false,
+        positionFormat: 'XY',
         getPolygon: (object, objectInfo) => {
           const hexagonId = getHexagon(object, objectInfo);
-          return h3ToPolygon(hexagonId, coverage);
+          return h3ToPolygon(hexagonId, coverage, true);
         }
       }
     );
