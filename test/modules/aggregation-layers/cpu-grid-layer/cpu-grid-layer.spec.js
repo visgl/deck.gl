@@ -1,3 +1,5 @@
+/* eslint-disable no-undef */
+/* eslint-disable no-console */
 // Copyright (c) 2015 - 2017 Uber Technologies, Inc.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -32,8 +34,7 @@ test('CPUGridLayer', t => {
     Layer: CPUGridLayer,
     sampleProps: {
       data: FIXTURES.points.slice(0, 3),
-      getPosition: d => d.COORDINATES,
-      getFilterValue: null
+      getPosition: d => d.COORDINATES
     },
     assert: t.ok,
     onBeforeUpdate: ({testCase}) => t.comment(testCase.title),
@@ -153,7 +154,7 @@ test('CPUGridLayer#updates', t => {
         }
       }
     };
-    return assertStateUpdate(shouldUpdate, 'filter');
+    return assertStateUpdate(shouldUpdate, 'getFilterBy');
   }
   function getChecksForPositionChange(triggerChange) {
     const shouldUpdate = {
@@ -340,9 +341,23 @@ test('CPUGridLayer#updates', t => {
       },
       {
         updateProps: {
-          filterRange: [4, 10],
-          getFilterValue: pt => pt.SPACES,
-          filterEnabled: true
+          getFilterBy: pt => pt.SPACES >= 4 && pt.SPACES <= 10
+        },
+        onAfterUpdate: ({layer, oldState}) => {
+          getChecksForFilterChange(false)({layer, oldState});
+
+          const {layerData} = layer.state.aggregatorState;
+          const isPointFiltered = layerData.data.every(bin => bin.filteredPoints === null);
+
+          t.ok(isPointFiltered, 'filteredPoints in bins should be reset to null');
+        }
+      },
+      {
+        updateProps: {
+          getFilterBy: pt => pt.SPACES >= 4 && pt.SPACES <= 10,
+          updateTriggers: {
+            getFilterBy: 1
+          }
         },
         onAfterUpdate: ({layer, oldState}) => {
           getChecksForFilterChange(true)({layer, oldState});
@@ -351,7 +366,7 @@ test('CPUGridLayer#updates', t => {
             layerData,
             dimensions: {fillColor, elevation}
           } = layer.state.aggregatorState;
-          // eslint-disable-next-line no-undef
+
           const isPointFiltered = layerData.data.every(bin =>
             bin.filteredPoints.every(pt => pt.SPACES >= 4 && pt.SPACES <= 10)
           );
@@ -370,52 +385,10 @@ test('CPUGridLayer#updates', t => {
       },
       {
         updateProps: {
-          filterRange: [8, 10]
-        },
-        onAfterUpdate: ({layer, oldState}) => {
-          getChecksForFilterChange(true)({layer, oldState});
-
-          const {layerData} = layer.state.aggregatorState;
-          // eslint-disable-next-line no-undef
-          const isPointFiltered = layerData.data.every(bin =>
-            bin.filteredPoints.every(pt => pt.SPACES >= 8 && pt.SPACES <= 10)
-          );
-
-          t.ok(isPointFiltered, 'filteredPoints in bins should be correct');
-        }
-      },
-      {
-        updateProps: {
-          getFilterValue: pt => pt.RACKS
-        },
-        onAfterUpdate: ({layer, oldState}) => {
-          getChecksForFilterChange(false)({layer, oldState});
-        }
-      },
-      {
-        updateProps: {
-          getFilterValue: pt => pt.RACKS,
+          getFilterBy: null,
           updateTriggers: {
-            getFilterValue: 'RACKS'
+            getFilterBy: 0
           }
-        },
-        onAfterUpdate: ({layer, oldState}) => {
-          getChecksForFilterChange(true)({layer, oldState});
-
-          const {layerData} = layer.state.aggregatorState;
-          const isPointFiltered = layerData.data.every(bin =>
-            bin.filteredPoints.every(pt => pt.RACKS >= 8 && pt.RACKS <= 10)
-          );
-
-          t.ok(isPointFiltered, 'filteredPoints in bins should be correct');
-        }
-      },
-      {
-        updateProps: {
-          getFilterValue: null,
-          filterEnabled: false,
-          filterRange: null,
-          updateTriggers: {}
         },
         onAfterUpdate: ({layer, oldState}) => {
           getChecksForFilterChange(true)({layer, oldState});

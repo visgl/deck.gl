@@ -391,9 +391,7 @@ export default class CPUAggregator {
 
     const sortedBins = new BinSorter(this.state.layerData.data || [], {
       getValue,
-      filterEnabled: props.filterEnabled,
-      filterRange: props.filterRange,
-      getFilterValue: props.getFilterValue
+      getFilterBy: props.getFilterBy
     });
     this.setDimensionState(key, {sortedBins});
     this.getDimensionValueDomain(props, dimensionUpdater);

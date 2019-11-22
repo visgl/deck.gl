@@ -1,3 +1,5 @@
+/* eslint-disable no-undef */
+/* eslint-disable no-console */
 // Copyright (c) 2015 - 2017 Uber Technologies, Inc.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -207,6 +209,7 @@ function makeAltDataTestCases(props, propTypes) {
     }
   };
   for (const propName in props) {
+    console.log(propName);
     if (propTypes[propName].type === 'accessor') {
       nonIterableProps[propName] = (_, info) => props[propName](originalData[info.index], info);
     }

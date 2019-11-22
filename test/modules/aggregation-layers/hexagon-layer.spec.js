@@ -32,8 +32,7 @@ test('HexagonLayer', t => {
     Layer: HexagonLayer,
     sampleProps: {
       data: data.points.slice(0, 3),
-      getPosition: d => d.COORDINATES,
-      getFilterValue: null
+      getPosition: d => d.COORDINATES
     },
     assert: t.ok,
     onBeforeUpdate: ({testCase}) => t.comment(testCase.title),
@@ -100,7 +99,7 @@ test('HexagonLayer#updateLayer', t => {
         }
       }
     };
-    return assertStateUpdate(shouldUpdate, 'filter');
+    return assertStateUpdate(shouldUpdate, 'getFitlerBy');
   }
   function getChecksForRadiusChange() {
     const shouldUpdate = {
@@ -316,52 +315,54 @@ test('HexagonLayer#updateLayer', t => {
       },
       {
         updateProps: {
-          filterRange: [8, 10]
-        },
-        onAfterUpdate: ({layer, oldState}) => {
-          getChecksForFilterChange(true)({layer, oldState});
-
-          const {layerData} = layer.state.aggregatorState;
-          // eslint-disable-next-line no-undef
-          const isPointFiltered = layerData.data.every(bin =>
-            bin.filteredPoints.every(pt => pt.SPACES >= 8 && pt.SPACES <= 10)
-          );
-
-          t.ok(isPointFiltered, 'filteredPoints in bins should be correct');
-        }
-      },
-      {
-        updateProps: {
-          getFilterValue: pt => pt.RACKS
+          getFilterBy: pt => pt.SPACES >= 4 && pt.SPACES <= 10
         },
         onAfterUpdate: ({layer, oldState}) => {
           getChecksForFilterChange(false)({layer, oldState});
+
+          const {layerData} = layer.state.aggregatorState;
+          const isPointFiltered = layerData.data.every(bin => bin.filteredPoints === null);
+
+          t.ok(isPointFiltered, 'filteredPoints in bins should be reset to null');
         }
       },
       {
         updateProps: {
-          getFilterValue: pt => pt.RACKS,
+          getFilterBy: pt => pt.SPACES >= 4 && pt.SPACES <= 10,
           updateTriggers: {
-            getFilterValue: 'RACKS'
+            getFilterBy: 1
           }
         },
         onAfterUpdate: ({layer, oldState}) => {
           getChecksForFilterChange(true)({layer, oldState});
 
-          const {layerData} = layer.state.aggregatorState;
+          const {
+            layerData,
+            dimensions: {fillColor, elevation}
+          } = layer.state.aggregatorState;
+
           const isPointFiltered = layerData.data.every(bin =>
-            bin.filteredPoints.every(pt => pt.RACKS >= 8 && pt.RACKS <= 10)
+            bin.filteredPoints.every(pt => pt.SPACES >= 4 && pt.SPACES <= 10)
           );
 
           t.ok(isPointFiltered, 'filteredPoints in bins should be correct');
+
+          t.ok(
+            fillColor.sortedBins,
+            'aggregatorState.dimensions.fillColor.sortedColorBins calculated'
+          );
+          t.ok(
+            elevation.sortedBins,
+            'aggregatorState.dimensions.elevation.sortedColorBins calculated'
+          );
         }
       },
       {
         updateProps: {
-          getFilterValue: null,
-          filterEnabled: false,
-          filterRange: null,
-          updateTriggers: {}
+          getFilterBy: null,
+          updateTriggers: {
+            getFilterBy: 0
+          }
         },
         onAfterUpdate: ({layer, oldState}) => {
           getChecksForFilterChange(true)({layer, oldState});
