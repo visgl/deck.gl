@@ -84,7 +84,7 @@ const DEFAULT_COLOR = [0, 0, 0, 255];
 
 const defaultProps = {
   mesh: {value: null, type: 'object', async: true},
-  texture: null,
+  texture: {type: 'object', value: null, async: true},
   sizeScale: {type: 'number', value: 1, min: 0},
   // TODO - parameters should be merged, not completely overridden
   parameters: {
