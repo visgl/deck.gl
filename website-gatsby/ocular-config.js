@@ -160,9 +160,9 @@ based maps.',
     },
     {
       title: 'TextLayer',
-      path: 'examples/text',
+      path: 'examples/website/text-layer',
       image: 'images/examples/demo-thumb-text.jpg',
-      componentUrl: resolve(__dirname, '../examples/website/tagmap/app.js')
+      componentUrl: resolve(__dirname, './src/examples/example-text-layer.jsx')
     },
     {
       title: 'TileLayer',
