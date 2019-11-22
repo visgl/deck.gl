@@ -113,7 +113,7 @@ based maps.',
     {
       title: 'HexagonLayer',
       path: 'examples/website/3d-heatmap',
-      image: 'images/examples/demo-thumb-heatmap.jpg',
+      image: 'images/examples/demo-thumb-hexagon.jpg',
       componentUrl: resolve(__dirname, './src/examples/example-hexagon-layer.jsx')
     },
     {
@@ -177,10 +177,10 @@ based maps.',
       componentUrl: resolve(__dirname, './src/examples/example-trips-layer.jsx')
     },
     {
-      title: 'Brushing Layer',
-      path: 'examples/brushing',
-      image: 'images/examples/demo-thumb-brushing.jpg',
-      componentUrl: resolve(__dirname, '../examples/website/brushing/app.js')
+      title: 'HeatmapLayer',
+      path: 'examples/website/heatmap',
+      image: 'images/examples/demo-thumb-heatmap.jpg',
+      componentUrl: resolve(__dirname, './src/examples/example-heatmap-layer.jsx')
     }
     // {
     //   title: '3D Surface Explorer',
