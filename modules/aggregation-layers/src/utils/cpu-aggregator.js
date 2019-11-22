@@ -42,15 +42,9 @@ const defaultDimensions = [
         aggregation: {
           prop: 'colorAggregation'
         },
-        filterRange: {
-          prop: 'filterRange'
-        },
-        filterEnabled: {
-          prop: 'filterEnabled'
-        },
-        getFilterValue: {
-          prop: 'getFilterValue',
-          updateTrigger: 'getFilterValue'
+        getFilterBy: {
+          prop: 'getFilterBy',
+          updateTrigger: 'getFilterBy'
         }
       }
     },
@@ -93,15 +87,9 @@ const defaultDimensions = [
         aggregation: {
           prop: 'elevationAggregation'
         },
-        filterRange: {
-          prop: 'filterRange'
-        },
-        filterEnabled: {
-          prop: 'filterEnabled'
-        },
-        getFilterValue: {
-          prop: 'getFilterValue',
-          updateTrigger: 'getFilterValue'
+        getFilterBy: {
+          prop: 'getFilterBy',
+          updateTrigger: 'getFilterBy'
         }
       }
     },

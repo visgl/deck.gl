@@ -26,9 +26,7 @@ const defaultGetValue = points => points.length;
 
 const defaultProps = {
   getValue: defaultGetValue,
-  filterEnabled: false,
-  filterRange: null,
-  getFilterValue: 0
+  getFilterBy: null
 };
 
 export default class BinSorter {
@@ -39,15 +37,15 @@ export default class BinSorter {
     this.binMap = this.getBinMap();
   }
 
-  filterPoint(point, getFilterValue, filterRange) {
-    const value = getFilterValue(point);
+  // filterPoint(point, getFilterValue, filterRange) {
+  //   const value = getFilterValue(point);
 
-    if (Array.isArray(value)) {
-      // filterSize > 1
-      return value.every((val, idx) => val >= filterRange[idx][0] && val <= filterRange[idx][1]);
-    }
-    return value >= filterRange[0] && value <= filterRange[1];
-  }
+  //   if (Array.isArray(value)) {
+  //     // filterSize > 1
+  //     return value.every((val, idx) => val >= filterRange[idx][0] && val <= filterRange[idx][1]);
+  //   }
+  //   return value >= filterRange[0] && value <= filterRange[1];
+  // }
   /**
    * Get an array of object with sorted values and index of bins
    * @param {Array} bins
@@ -55,14 +53,12 @@ export default class BinSorter {
    * @return {Array} array of values and index lookup
    */
   getSortedBins(bins, props) {
-    const {getValue = defaultGetValue, filterEnabled, filterRange, getFilterValue} = props;
-    const hasFilter = filterEnabled === true && Array.isArray(filterRange);
+    const {getValue = defaultGetValue, getFilterBy} = props;
+    const hasFilter = typeof getFilterBy === 'function';
 
     return bins
       .reduce((accu, h, i) => {
-        const filteredPoints = hasFilter
-          ? h.points.filter(pt => this.filterPoint(pt, getFilterValue, filterRange))
-          : h.points;
+        const filteredPoints = hasFilter ? h.points.filter(getFilterBy) : h.points;
 
         h.filteredPoints = hasFilter ? filteredPoints : null;
 

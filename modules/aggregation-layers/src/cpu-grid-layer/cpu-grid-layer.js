@@ -65,10 +65,8 @@ const defaultProps = {
   // Optional material for 'lighting' shader module
   material: defaultMaterial,
 
-  // gpu data filter
-  filterEnabled: false,
-  filterRange: null,
-  getFilterValue: {type: 'accessor', value: null}
+  // data filter
+  getFilterBy: {type: 'accessor', value: null}
 };
 
 export default class CPUGridLayer extends CompositeLayer {
