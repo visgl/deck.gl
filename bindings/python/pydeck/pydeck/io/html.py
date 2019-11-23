@@ -20,8 +20,8 @@ def render_json_to_html(json_input, mapbox_key=None, tooltip=True):
     html_str = js.render(
         mapbox_key=mapbox_key,
         json_input=json_input,
-        # TODO change, for development only
-        deckgl_jupyter_widget_bundle='./standalone-html-bundle.js',
+        # TODO change before publication to the NPM-hosted module
+        deckgl_jupyter_widget_bundle='',
         tooltip=tooltip
     )
     return html_str

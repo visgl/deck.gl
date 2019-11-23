@@ -2,7 +2,9 @@
   <head>
     <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
     <title>pydeck</title>
-    {% include 'imports.j2' %}
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap-theme.min.css" />
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.3/css/font-awesome.min.css" />
+    <script src="{{deckgl_jupyter_widget_bundle}}"></script>
     <style>
     body {
       margin: 0;
@@ -44,15 +46,15 @@
     </div>
   </body>
   <script>
-  const jsonInput = {{json_input}};
-  const MAPBOX_API_KEY = '{{mapbox_key}}';
-  const tooltip = {{tooltip}};
+    const jsonInput = {{json_input}};
+    const MAPBOX_API_KEY = '{{mapbox_key}}';
+    const tooltip = {{tooltip}};
   
-  const deck = createDeckWithImports({
-    mapboxApiKey: MAPBOX_API_KEY, 
-    container: document.getElementById('deck-container'),
-    jsonInput,
-    tooltip
-  });
+    const deck = createDeckWithImports({
+      mapboxApiKey: MAPBOX_API_KEY, 
+      container: document.getElementById('deck-container'),
+      jsonInput,
+      tooltip
+    });
   </script>
 </html>

@@ -8,9 +8,7 @@ import {Tile3DLoader} from '@loaders.gl/3d-tiles';
 import {LASWorkerLoader} from '@loaders.gl/las';
 import * as loaders from '@loaders.gl/core';
 
-import * as deck from '../../core/bundle';
-
-import {JSONConverter} from '@deck.gl/json';
+import * as deck from './deck-bundle';
 
 import GL from '@luma.gl/constants';
 
@@ -21,7 +19,6 @@ function extractClasses() {
     x => (x.indexOf('Layer') > 0 || x.indexOf('View') > 0) && x.indexOf('_') !== 0
   );
   classes.map(k => (classesDict[k] = deck[k]));
-  // TODO properly register layers (they aren't appearing here')
   return deck;
 }
 
@@ -57,9 +54,7 @@ function createDeck({
   handleWarning
 }) {
   try {
-    // Filter down to the deck.gl classes of interest
-
-    const jsonConverter = new JSONConverter({
+    const jsonConverter = new deck.JSONConverter({
       configuration: jsonConverterConfiguration
     });
 
@@ -76,11 +71,13 @@ function createDeck({
       container
     });
 
-    const warn = deck.log.warn;
     // TODO overrride console.warn instead
     // Right now this isn't doable (in a Notebook at least)
     // because the widget loads in deck.gl (and its logger) before @deck.gl/jupyter-widget
-    deck.log.warn = injectFunction(warn, handleWarning);
+    if (handleWarning) {
+      const warn = deck.log.warn;
+      deck.log.warn = injectFunction(warn, handleWarning);
+    }
 
     if (onComplete) {
       onComplete({jsonConverter, deckgl});
