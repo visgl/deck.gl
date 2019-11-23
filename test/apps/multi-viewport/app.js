@@ -37,8 +37,6 @@ const DEFAULT_VIEWPORT_PROPS = {
   longitude: -74,
   latitude: 40.72,
   zoom: 13,
-  maxZoom: 16,
-  pitch: 60,
   bearing: 270
 };
 
@@ -47,14 +45,37 @@ class Root extends Component {
     super(props);
     this.state = {
       time: 1000,
-      trailLength: 50
+      trailLength: 50,
+      viewStates: {
+        firstPerson: {...DEFAULT_VIEWPORT_PROPS, pitch: 0, zoom: 0, position: [0, 0, 2]},
+        baseMap: {...DEFAULT_VIEWPORT_PROPS, pitch: 60}
+      }
     };
+
+    this._onViewStateChange = this._onViewStateChange.bind(this);
   }
 
-  _onValueChange(settingName, newValue) {
-    this.setState({
-      [settingName]: newValue
-    });
+  _onViewStateChange({viewId, viewState}) {
+    const viewStates = {...this.state.viewStates, [viewId]: viewState};
+
+    if (viewId === 'baseMap') {
+      viewStates.firstPerson = {
+        ...viewStates.firstPerson,
+        ...viewState,
+        pitch: viewStates.firstPerson.pitch,
+        zoom: viewStates.firstPerson.zoom
+      };
+    }
+    if (viewId === 'firstPerson') {
+      viewStates.baseMap = {
+        ...viewStates.baseMap,
+        ...viewState,
+        pitch: viewStates.baseMap.pitch,
+        zoom: viewStates.baseMap.zoom
+      };
+    }
+
+    this.setState({viewStates});
   }
 
   _renderLayers() {
@@ -120,18 +141,13 @@ class Root extends Component {
         id="first-person"
         width="100%"
         height="100%"
-        initialViewState={DEFAULT_VIEWPORT_PROPS}
+        viewState={this.state.viewStates}
+        onViewStateChange={this._onViewStateChange}
         layers={this._renderLayers()}
       >
-        <FirstPersonView
-          id="1st-person"
-          controller={true}
-          height="50%"
-          fovy={50}
-          position={[0, 0, 2]}
-        />
+        <FirstPersonView id="firstPerson" controller={true} height="50%" fovy={50} />
 
-        <MapView id="basemap" controller={true} y="50%" height="50%" position={[0, 0, 0]}>
+        <MapView id="baseMap" controller={true} y="50%" height="50%" position={[0, 0, 0]}>
           {this._renderMap}
         </MapView>
       </DeckGL>

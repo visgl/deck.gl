@@ -22,14 +22,15 @@ export default class FirstPersonView extends View {
     const {
       // view matrix arguments
       modelMatrix = null,
-      bearing,
+      bearing = 0,
+      pitch = 0,
       up = [0, 0, 1] // Defines up direction, default positive z axis,
     } = props.viewState;
 
     // Always calculate direction from bearing and pitch
     const dir = getDirectionFromBearingAndPitch({
       bearing,
-      pitch: 89
+      pitch: 90 + pitch
     });
 
     // Direction is relative to model coordinates, of course

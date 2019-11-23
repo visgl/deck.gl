@@ -2,7 +2,7 @@
   <img src="https://img.shields.io/badge/geopspatial-yes-lightgrey.svg?style=flat-square" alt="geospatial" />
 </p>
 
-# FirstPersonView Class (Experimental)
+# FirstPersonView Class
 
 The [`FirstPersonView`] class is a subclass of [View](/docs/api-reference/viewport.md) that describes a "camera" placed at the exact position specified by the `viewState`, looking **towards** the direction and orientation specified by the application.
 
@@ -10,15 +10,11 @@ This is in contrast with e.g. [ThirdPersonView](/docs/api-reference/viewport.md)
 
 To render, a `FirstPersonView` needs to be combined with a `viewState` object with the following parameters:
 
-* `position` (`Number[3]`) - position
-
-A `FirstPersonView` will work with geospatial coordinate systems if a geospatial "anchor point" is provided in the `viewState` via:
-
 * `longitude`
 * `latitude`
-* `zoom`
-
-The `position` vector will then be interpreted as meter offsets from this anchor point.
+* `position` (`Number[3]`) - meter offsets of the camera from the lng-lat anchor point.
+* `bearing` (`Number`, optional) - bearing angle in degrees. Default `0` (north).
+* `pitch` (`Number`, optional) - bearing angle in degrees. Default `0` (horizontal).
 
 For more information on using `View` classes, consult the [Views](/docs/developer-guide/views.md) article.
 

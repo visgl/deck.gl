@@ -11,8 +11,8 @@ To render, `MapView` needs to be used together with a `viewState` with the follo
 - `longitude` (`Number`) - longitude at the map center
 - `latitude` (`Number`) - latitude at the map center
 - `zoom` (`Number`) - zoom level
-- `pitch` (`Number`, optional) - pitch angle in degrees. Default `0`.
-- `bearing` (`Number`, optional) - bearing angle in degrees. Default `0`.
+- `pitch` (`Number`, optional) - pitch angle in degrees. Default `0` (top-down).
+- `bearing` (`Number`, optional) - bearing angle in degrees. Default `0` (north).
 - `maxZoom` (`Number`, optional) - max zoom level. Default `20`.
 - `minZoom` (`Number`, optional) - min zoom level. Default `0`.
 - `maxPitch` (`Number`, optional) - max pitch angle. Default `60`.
