@@ -31,7 +31,6 @@ const defaultProps = {
 
 export default class BinSorter {
   constructor(bins = [], props = defaultProps) {
-    // const {getValue = defaultGetValue} = props;
     this.sortedBins = this.getSortedBins(bins, props);
     this.maxCount = this.getMaxCount();
     this.binMap = this.getBinMap();
