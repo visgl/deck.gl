@@ -46,7 +46,7 @@ function buildAttributes(opts) {
   attributeManager.add({
     positions: {size: 3, accessor: 'getPosition', type: gl.DOUBLE}
   });
-  accessorProps.getPosition = x => x.position;
+  accessorProps.getPosition = opts.getPosition || (x => x.position);
   for (const weightId in weights) {
     const accessor = `get${weightId}`;
     attributeManager.add({
