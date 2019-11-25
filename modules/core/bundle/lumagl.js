@@ -1,40 +1,27 @@
 // Cherry-pick luma core exports that are relevant to deck
 export {
   // Core classes
-  AnimationLoop,
   Model,
   Transform,
-  ClipSpace,
   ProgramManager,
+  Timeline,
   // Context utilities
-  isWebGL,
   isWebGL2,
   FEATURES,
-  hasFeature,
   hasFeatures,
-  getFeatures,
-  getParameter,
   getParameters,
-  setParameter,
   setParameters,
   withParameters,
   // WebGL1 classes
   Buffer,
-  Shader,
-  VertexShader,
-  FragmentShader,
   Program,
   Framebuffer,
   Renderbuffer,
   Texture2D,
   TextureCube,
   // WebGL2 classes
-  Query,
   Texture3D,
   TransformFeedback,
-  VertexArrayObject,
-  VertexArray,
-  UniformBufferLayout,
   // Geometries
   Geometry,
   ConeGeometry,
@@ -45,10 +32,6 @@ export {
   SphereGeometry,
   TruncatedConeGeometry,
   // Shader Modules
-  fp32,
   fp64,
-  project,
-  picking,
-  gouraudLighting,
-  phongLighting
+  pbr
 } from '@luma.gl/core';
