@@ -403,17 +403,12 @@ export default class CPUAggregator {
   getDimensionValueDomain(props, dimensionUpdater) {
     const {getDomain, key} = dimensionUpdater;
     const {
-      triggers: {lowerPercentile, upperPercentile, scaleType},
-      onSet
+      triggers: {lowerPercentile, upperPercentile, scaleType}
     } = getDomain;
     const valueDomain = this.state.dimensions[key].sortedBins.getValueDomainByScale(
       props[scaleType.prop],
       [props[lowerPercentile.prop], props[upperPercentile.prop]]
     );
-
-    if (typeof onSet === 'object' && typeof props[onSet.props] === 'function') {
-      props[onSet.props](valueDomain);
-    }
 
     this.setDimensionState(key, {valueDomain});
     this.getDimensionScale(props, dimensionUpdater);
@@ -423,11 +418,15 @@ export default class CPUAggregator {
     const {key, getScaleFunc, getDomain} = dimensionUpdater;
     const {domain, range} = getScaleFunc.triggers;
     const {scaleType} = getDomain.triggers;
-
+    const {onSet} = getDomain;
     const dimensionRange = props[range.prop];
     const dimensionDomain = props[domain.prop] || this.state.dimensions[key].valueDomain;
     const getScaleFunction = this.getScaleFunctionByScaleType(props[scaleType.prop]);
     const scaleFunc = getScaleFunction(dimensionDomain, dimensionRange);
+
+    if (typeof onSet === 'object' && typeof props[onSet.props] === 'function') {
+      props[onSet.props](scaleFunc.domain());
+    }
 
     this.setDimensionState(key, {scaleFunc});
   }
