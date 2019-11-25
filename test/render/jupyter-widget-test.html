@@ -8,7 +8,6 @@
 </head>
 <body>
   <div id="app"></div>
-  <script src="/modules/jupyter-widget/dist/index.js"></script>
   <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.js"></script>
   <script type="text/javascript">
 
@@ -20,8 +19,10 @@ define('@jupyter-widgets/base', function() {
 });
 
 const DEPENDENCIES = {
-    '@deck.gl/jupyter-widget': '/modules/jupyter-widget/dist/index',
-}
+  paths: {
+    '@deck.gl/jupyter-widget': '/modules/jupyter-widget/dist/index'
+  }
+};
 
 requirejs.config(DEPENDENCIES);
 
@@ -39,7 +40,7 @@ function render(jsonInput) {
       }
     });
   })
-}
+};
 
 window.onmessage = evt => {
   if (evt.data.json) {

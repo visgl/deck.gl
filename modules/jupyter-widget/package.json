@@ -39,6 +39,7 @@
     "@deck.gl/aggregation-layers": "7.4.0-alpha.2",
     "@deck.gl/geo-layers": "7.4.0-alpha.2",
     "@deck.gl/mesh-layers": "7.4.0-alpha.2",
+    "@deck.gl/layers": "7.4.0-alpha.2",
     "@deck.gl/json": "7.4.0-alpha.2"
   },
   "jupyterlab": {
