@@ -58,7 +58,6 @@ const defaultProps = {
     compare: false
   },
   updateTriggers: {}, // Update triggers: a core change detection mechanism in deck.gl
-  numInstances: undefined,
 
   visible: true,
   pickable: false,
@@ -80,9 +79,6 @@ const defaultProps = {
   parameters: {},
   uniforms: {},
   extensions: [],
-  framebuffer: null,
-
-  animation: null, // Passed prop animation functions to evaluate props
 
   // Offset depth based on layer index to avoid z-fighting.
   // Negative values pull layer towards the camera
@@ -157,11 +153,6 @@ export default class Layer extends Component {
     return this.state && (this.state.models || (this.state.model ? [this.state.model] : []));
   }
 
-  // TODO - Gradually phase out, does not support multi model layers
-  getSingleModel() {
-    return this.state && this.state.model;
-  }
-
   getAttributeManager() {
     return this.internalState && this.internalState.attributeManager;
   }
@@ -175,16 +166,6 @@ export default class Layer extends Component {
   // Returns the default parse options for async props
   getLoadOptions() {
     return this.props.loadOptions;
-  }
-
-  // Use iteration (the only required capability on data) to get first element
-  // deprecated since we are effectively only supporting Arrays
-  getFirstObject() {
-    const {data} = this.props;
-    for (const object of data) {
-      return object;
-    }
-    return null;
   }
 
   // PROJECTION METHODS
@@ -220,22 +201,6 @@ export default class Layer extends Component {
       coordinateOrigin: this.props.coordinateOrigin,
       coordinateSystem: this.props.coordinateSystem
     });
-  }
-
-  // DEPRECATE: This does not handle offset modes
-  projectFlat(lngLat) {
-    log.deprecated('layer.projectFlat', 'layer.projectPosition')();
-    const {viewport} = this.context;
-    assert(Array.isArray(lngLat));
-    return viewport.projectFlat(lngLat);
-  }
-
-  // DEPRECATE: This is not meaningful in offset modes
-  unprojectFlat(xy) {
-    log.deprecated('layer.unprojectFlat')();
-    const {viewport} = this.context;
-    assert(Array.isArray(xy));
-    return viewport.unprojectFlat(xy);
   }
 
   use64bitPositions() {
@@ -546,8 +511,7 @@ export default class Layer extends Component {
     }
 
     // Use container library to get a count for any ES6 container or object
-    const {data} = this.props;
-    return count(data);
+    return count(props.data);
   }
 
   // Buffer layout describes how many attribute values are packed for each data object
@@ -586,10 +550,6 @@ export default class Layer extends Component {
     }
     // End subclass lifecycle methods
 
-    // TODO deprecated, for backwards compatibility with older layers
-    // in case layer resets state
-    this.state.attributeManager = this.getAttributeManager();
-
     // initializeState callback tends to clear state
     this.setChangeFlags({
       dataChanged: true,
@@ -599,12 +559,6 @@ export default class Layer extends Component {
     });
 
     this._updateState();
-
-    const model = this.getSingleModel();
-    if (model) {
-      model.id = this.props.id;
-      model.program.id = `${this.props.id}-program`;
-    }
   }
 
   // Called by layer manager
@@ -713,13 +667,6 @@ export default class Layer extends Component {
     // End lifecycle method
 
     this.props = currentProps;
-  }
-
-  // {uniforms = {}, ...opts}
-  pickLayer(opts) {
-    // Call subclass lifecycle method
-    return this.getPickingInfo(opts);
-    // End lifecycle method
   }
 
   // Helper methods
