@@ -350,6 +350,7 @@ export const TEST_CASES = [
       new PolygonLayer({
         id: 'polygon-lnglat-64',
         data: dataSamples.polygons,
+        coordinateSystem: COORDINATE_SYSTEM.LNGLAT_DEPRECATED,
         getPolygon: f => f,
         getFillColor: [200, 0, 0],
         getLineColor: [0, 0, 0],
@@ -358,7 +359,8 @@ export const TEST_CASES = [
         opacity: 0.8,
         pickable: true,
         lineWidthMinPixels: 1,
-        lineDashJustified: true
+        lineDashJustified: true,
+        extensions: [new Fp64Extension()]
       })
     ],
     goldenImage: './test/render/golden-images/polygon-lnglat.png'
@@ -382,6 +384,47 @@ export const TEST_CASES = [
         getWidth: f => 100,
         widthMinPixels: 1,
         pickable: true
+      })
+    ],
+    goldenImage: './test/render/golden-images/path-lnglat.png'
+  },
+  {
+    name: 'path-lnglat-binary',
+    viewState: {
+      latitude: 37.751537058389985,
+      longitude: -122.42694203247012,
+      zoom: 11.5,
+      pitch: 0,
+      bearing: 0
+    },
+    layers: [
+      new PathLayer({
+        id: 'path-lnglat',
+        data: {
+          length: dataSamples.zigzag.length,
+          startIndices: dataSamples.zigzag.reduce(
+            (acc, d) => {
+              acc.push(acc[acc.length - 1] + d.path.length);
+              return acc;
+            },
+            [0]
+          ),
+          attributes: {
+            getPath: {
+              value: new Float64Array(dataSamples.zigzag.flatMap(d => d.path.flat())),
+              size: 2
+            },
+            getColor: {
+              value: new Uint8Array(
+                dataSamples.zigzag.flatMap(d => d.path.flatMap(p => [128, 0, 0]))
+              ),
+              size: 3
+            }
+          }
+        },
+        getWidth: 100,
+        opacity: 0.6,
+        widthMinPixels: 1
       })
     ],
     goldenImage: './test/render/golden-images/path-lnglat.png'

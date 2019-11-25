@@ -136,8 +136,11 @@ export default class PathLayer extends Layer {
 
     if (geometryChanged) {
       const {pathTesselator} = this.state;
+      const buffers = props.data.attributes || {};
       pathTesselator.updateGeometry({
         data: props.data,
+        geometryBuffer: buffers.getPath,
+        buffers,
         normalize: !props._pathType,
         loop: props._pathType === 'loop',
         getGeometry: props.getPath,

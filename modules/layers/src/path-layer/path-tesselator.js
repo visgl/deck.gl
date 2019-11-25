@@ -37,6 +37,14 @@ export default class PathTesselator extends Tesselator {
     });
   }
 
+  getGeometryFromBuffer(buffer) {
+    if (this.normalize) {
+      return super.getGeometryFromBuffer(buffer);
+    }
+    // we don't need to read the positions if no normalization
+    return () => null;
+  }
+
   /* Getters */
   get(attributeName) {
     return this.attributes[attributeName];
@@ -89,6 +97,9 @@ export default class PathTesselator extends Tesselator {
 
   _updatePositions(path, context) {
     const {positions} = this.attributes;
+    if (!positions) {
+      return;
+    }
     const {vertexStart, geometrySize} = context;
 
     // positions   --  A0 A1 B0 B1 B2 B3 B0 B1 B2 --

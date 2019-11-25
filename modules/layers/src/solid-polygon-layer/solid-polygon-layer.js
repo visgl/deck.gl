@@ -244,9 +244,12 @@ export default class SolidPolygonLayer extends Layer {
     // tessellator needs to be invoked
     if (geometryConfigChanged) {
       const {polygonTesselator} = this.state;
+      const buffers = props.data.attributes || {};
       polygonTesselator.updateGeometry({
         data: props.data,
         normalize: props._normalize,
+        geometryBuffer: buffers.getPolygon,
+        buffers,
         getGeometry: props.getPolygon,
         positionFormat: props.positionFormat,
         fp64: this.use64bitPositions(),
