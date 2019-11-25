@@ -31,7 +31,7 @@ import {points, GridAggregationData} from 'deck.gl-test/data';
 const getPosition = d => d.COORDINATES;
 const gpuGridAggregator = new GPUGridAggregator(gl);
 
-function filterEmptryChannels(inArray) {
+function filterEmptyChannels(inArray) {
   const outArray = [];
   for (let i = 0; i < inArray.length; i += 4) {
     outArray.push(inArray[i], inArray[i + 3]);
@@ -40,7 +40,7 @@ function filterEmptryChannels(inArray) {
 }
 
 function compareArrays(t, name, cpu, gpu) {
-  t.deepEqual(filterEmptryChannels(gpu), filterEmptryChannels(cpu), name);
+  t.deepEqual(filterEmptyChannels(gpu), filterEmptyChannels(cpu), name);
 }
 
 test('GridAggregationUtils#alignToCell (CPU)', t => {
