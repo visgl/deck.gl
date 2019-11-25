@@ -58,11 +58,11 @@ Group of related RFCs loosely targeted for 7.x releases.
 
 | RFC | Author | Status | Description |
 | --- | ---    | ---    | ---         |
-| [**Binary Data RFC**](v7.x-binary/binary-data-rfc.md) | @ibgreen @pessimistress | **Draft** | Support binary data as input to deck.gl layers. |
 | [**GLSL Accessor RFC**](/dev-docs/v7.x-binary/glsl-accessor-rfc.md) | @ibgreen | **Draft** | Allow apps to define GLSL accessors to directly access injected columnar data or implement advanved effects |
 | [**Texture Attribute RFC**](/dev-docs/v7.x-binary/texture-attribute-rfc.md) | @ibgreen | **Draft** | Enable variable-primitive layers_ to read _descriptive attributes_ from a binary column. |
 | [**GPU Data Frame Support**](/dev-docs/v7.x-binary/gpu-data-frame-rfc.md) | @ibgreen | **Draft** | Proposal for enabling deck.gl to apply data frame filters on GPU. |
 | [**Chunked Data Support**](/dev-docs/v7.x-binary/chunked-data-rfc.md) | @ibgreen | **Draft** | Support Chunked Columnar data on the GPU. |
+| [**Binary Support Improvements**](/dev-docs/v7.x-binary/chunked-data-rfc.md) | @pessimistress | **Draft** | API change for more intuitive binary data usage. |
 
 
 ## v7.x RFCs
@@ -71,6 +71,7 @@ RFCs loosely targeted for 7.x releases. Also see [luma.gl RFCs](https://github.c
 
 | RFC | Author | Status | Description |
 | --- | ---    | ---    | ---         |
+| [**Binary Data RFC**](v7.x-binary/binary-data-rfc.md) | @ibgreen @pessimistress | **Draft** | Support binary data as input to deck.gl layers. |
 | [**Imperative API Improvements**](v7.x/imperative-api-rfc.md) | @ibgreen | **draft** | Potential API improvements for imperative programming. |
 | [**Partial Updates**](vNext/partial-updates-rfc.md) | @ibgreen @georgios-uber | **draft** | Allow partial updates of vertex attributes to support high-performance editing. |
 | [**Project / Unproject Improvements**](v7.x/project-unproject-rfc.md) | @ibgreen | **Draft** | Consolidating, generalizing and simplifying JS `project`/`unproject` API, covering uses from new features such as MultiView. |

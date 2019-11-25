@@ -2,7 +2,7 @@
 
 * Authors: Ib Green, Xiaoji Chen
 * Date: December 19, 2018
-* Status: **Draft**
+* Status: **Implemented**
 
 > This RFC was written as an article for the deck.gl Developer's Guide, rather than in the standard format. The intention was to copy some of this text to the developer's guide once it matures.
 
