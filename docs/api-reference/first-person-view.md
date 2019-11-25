@@ -14,7 +14,9 @@ To render, a `FirstPersonView` needs to be combined with a `viewState` object wi
 * `latitude`
 * `position` (`Number[3]`) - meter offsets of the camera from the lng-lat anchor point.
 * `bearing` (`Number`, optional) - bearing angle in degrees. Default `0` (north).
-* `pitch` (`Number`, optional) - bearing angle in degrees. Default `0` (horizontal).
+* `pitch` (`Number`, optional) - pitch angle in degrees. Default `0` (horizontal).
+- `maxPitch` (`Number`, optional) - max pitch angle. Default `90` (up).
+- `minPitch` (`Number`, optional) - min pitch angle. Default `-90` (down).
 
 For more information on using `View` classes, consult the [Views](/docs/developer-guide/views.md) article.
 
