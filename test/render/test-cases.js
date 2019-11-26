@@ -17,7 +17,7 @@ import {
   AmbientLight,
   DirectionalLight
 } from '@deck.gl/core';
-import {noise, vignette} from '@luma.gl/engine';
+import {noise, vignette} from '@luma.gl/shadertools';
 
 import {Fp64Extension} from '@deck.gl/extensions';
 

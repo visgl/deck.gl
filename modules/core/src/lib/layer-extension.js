@@ -64,5 +64,7 @@ export class LayerExtension {
 
   updateState(params, extension) {}
 
+  addShaderHooks(programManager) {}
+
   finalizeState(extension) {}
 }

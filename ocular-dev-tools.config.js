@@ -10,7 +10,7 @@ const LUMA_ALIASES_LOCAL = {
   '@luma.gl/gltools': `${__dirname}/../luma.gl/modules/gltools/src`
 };
 
-const useLocalLuma = false;
+const useLocalLuma = true;
 
 const config = {
   lint: {
