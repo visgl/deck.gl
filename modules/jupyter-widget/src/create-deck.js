@@ -15,9 +15,7 @@ import GL from '@luma.gl/constants';
 function extractClasses() {
   // Get classes for registration from standalone deck.gl
   const classesDict = {};
-  const classes = Object.keys(deck).filter(
-    x => (x.indexOf('Layer') > 0 || x.indexOf('View') > 0) && x.indexOf('_') !== 0
-  );
+  const classes = Object.keys(deck).filter(x => x.charAt(0) === x.charAt(0).toUpperCase());
   classes.map(k => (classesDict[k] = deck[k]));
   return deck;
 }

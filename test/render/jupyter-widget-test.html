@@ -8,30 +8,14 @@
 </head>
 <body>
   <div id="app"></div>
-  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.js"></script>
+  <script type="text/javascript" src="/modules/jupyter-widget/dist/standalone-html-bundle.js"></script>
   <script type="text/javascript">
-
-define('@jupyter-widgets/base', function() {
-  return {
-    DOMWidgetModel: function() {},
-    DOMWidgetView: function() {}
-  };
-});
-
-const DEPENDENCIES = {
-  paths: {
-    '@deck.gl/jupyter-widget': '/modules/jupyter-widget/dist/index'
-  }
-};
-
-requirejs.config(DEPENDENCIES);
-
-function render(jsonInput) {
-  requirejs(['@deck.gl/jupyter-widget'], (root) => {
-    root.createDeckWithImports({
+window.onmessage = evt => {
+  if (evt.data.json) {
+    createDeckWithImports({
       mapboxApiKey: 'NO_API_KEY', 
       container: document.getElementById('app'),
-      jsonInput,
+      jsonInput: evt.data.json,
       useTooltip: true,
       onComplete: ({deckgl}) => {
         deckgl.setProps({
@@ -39,15 +23,8 @@ function render(jsonInput) {
         });
       }
     });
-  })
-};
-
-window.onmessage = evt => {
-  if (evt.data.json) {
-    render(evt.data.json);
   }
 };
-
   </script>
 </body>
 </html>

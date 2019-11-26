@@ -18,6 +18,7 @@ function getDeckModel(state) {
   }
 }
 
+// TODO re-activate test
 test.skip('jupyter-widget should be createable', t => {
   const model = getDeckModel({});
   if (model) {
@@ -31,6 +32,7 @@ test.skip('jupyter-widget should be createable', t => {
   t.end();
 });
 
+// TODO re-activate test
 test.skip('jupyter-widget should be creatable with a value', t => {
   const state = {
     mapbox_key: 'fake-key',
