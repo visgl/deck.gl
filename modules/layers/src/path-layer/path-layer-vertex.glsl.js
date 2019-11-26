@@ -35,7 +35,6 @@ attribute vec3 instanceRightPositions64Low;
 attribute float instanceStrokeWidths;
 attribute vec4 instanceColors;
 attribute vec3 instancePickingColors;
-attribute vec2 instanceDashArrays;
 
 uniform float widthScale;
 uniform float widthMinPixels;
@@ -49,7 +48,6 @@ uniform float opacity;
 varying vec4 vColor;
 varying vec2 vCornerOffset;
 varying float vMiterLength;
-varying vec2 vDashArray;
 varying vec2 vPathPosition;
 varying float vPathLength;
 
@@ -159,7 +157,6 @@ vec3 lineJoin(
   vCornerOffset = offsetVec * offsetDirection * offsetScale;
 
   // Generate variables for dash calculation
-  vDashArray = instanceDashArrays;
   vPathLength = L;
   // vec2 offsetFromStartOfPath = isEnd ? vCornerOffset + deltaA : vCornerOffset;
   vec2 offsetFromStartOfPath = vCornerOffset;

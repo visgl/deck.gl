@@ -19,7 +19,7 @@ import {
 } from '@deck.gl/core';
 import {noise, vignette} from '@luma.gl/engine';
 
-import {Fp64Extension} from '@deck.gl/extensions';
+import {Fp64Extension, PathStyleExtension} from '@deck.gl/extensions';
 
 const effect1 = new PostProcessEffect(noise);
 const effect2 = new PostProcessEffect(vignette);
@@ -327,12 +327,8 @@ export const TEST_CASES = [
         getPolygon: f => f,
         getFillColor: [200, 0, 0],
         getLineColor: [0, 0, 0],
-        getLineDashArray: [20, 0],
-        getWidth: f => 20,
         opacity: 0.8,
-        pickable: true,
-        lineWidthMinPixels: 1,
-        lineDashJustified: true
+        lineWidthMinPixels: 1
       })
     ],
     goldenImage: './test/render/golden-images/polygon-lnglat.png'
@@ -354,16 +350,37 @@ export const TEST_CASES = [
         getPolygon: f => f,
         getFillColor: [200, 0, 0],
         getLineColor: [0, 0, 0],
-        getLineDashArray: [20, 0],
-        getWidth: f => 20,
         opacity: 0.8,
-        pickable: true,
         lineWidthMinPixels: 1,
-        lineDashJustified: true,
         extensions: [new Fp64Extension()]
       })
     ],
     goldenImage: './test/render/golden-images/polygon-lnglat.png'
+  },
+  {
+    name: 'polygon-dash',
+    views: new OrthographicView(),
+    viewState: {
+      target: [0, 0, 0],
+      zoom: 0
+    },
+    layers: [
+      new PolygonLayer({
+        id: 'polygon-lnglat',
+        coordinateSystem: COORDINATE_SYSTEM.IDENTITY,
+        data: [[[-100, -100], [-100, 100], [100, 100], [100, -100]]],
+        getPolygon: f => f,
+        filled: false,
+        stroked: true,
+        getLineColor: [0, 0, 0],
+        getDashArray: [6, 3],
+        getLineWidth: 10,
+        opacity: 1,
+        dashJustified: true,
+        extensions: [new PathStyleExtension({dash: true})]
+      })
+    ],
+    goldenImage: './test/render/golden-images/polygon-dash.png'
   },
   {
     name: 'path-lnglat',

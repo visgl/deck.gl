@@ -405,10 +405,6 @@ export default class AttributeManager {
           attribute.setNeedsUpdate(attribute.id, dataRange);
         }
       });
-    } else {
-      let message = `invalidating non-existent trigger ${triggerName} for ${this.id}\n`;
-      message += `Valid triggers: ${Object.keys(attributes).join(', ')}`;
-      log.warn(message, invalidatedAttributes)();
     }
     return invalidatedAttributes;
   }

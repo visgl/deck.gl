@@ -177,13 +177,6 @@ Type of joint. If `true`, draw round joints. Otherwise draw miter joints.
 The maximum extent of a joint in ratio to the stroke width.
 Only works if `lineJointRounded` is `false`.
 
-##### `lineDashJustified` (Boolean, optional)
-
-* Default: `false`
-
-Justify dashes together.
-Only works if `getLineDashArray` is specified.
-
 ##### `material` (Object, optional)
 
 * Default: `true`
@@ -288,15 +281,6 @@ Only applies if `extruded: true`.
 
 **Note:** If 3D positions are returned by `getPolygon`, the extrusion returned by `getElevation` is added to the base altitude of each vertex.
 
-##### `getLineDashArray` ([Function](/docs/developer-guide/using-layers.md#accessors)|Array, optional)
-
-* Default: `null`
-
-The dash array to draw each outline path with: `[dashSize, gapSize]` relative to the width of the line. (See PathLayer)
-
-* If an array is provided, it is used as the dash array for all paths.
-* If a function is provided, it is called on each path to retrieve its dash array. Return `[0, 0]` to draw the path in solid line.
-* If this accessor is not specified, all paths are drawn as solid lines.
 
 ## Sub Layers
 

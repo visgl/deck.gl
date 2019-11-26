@@ -18,7 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {Layer, project32, picking} from '@deck.gl/core';
+import {Layer, project32, picking, log} from '@deck.gl/core';
 import GL from '@luma.gl/constants';
 import {Model, Geometry} from '@luma.gl/core';
 
@@ -36,15 +36,13 @@ const defaultProps = {
   widthMaxPixels: {type: 'number', min: 0, value: Number.MAX_SAFE_INTEGER}, // max stroke width in pixels
   rounded: false,
   miterLimit: {type: 'number', min: 0, value: 4},
-  dashJustified: false,
   billboard: false,
   // `loop` or `open`
   _pathType: null,
 
   getPath: {type: 'accessor', value: object => object.path},
   getColor: {type: 'accessor', value: DEFAULT_COLOR},
-  getWidth: {type: 'accessor', value: 1},
-  getDashArray: {type: 'accessor', value: [0, 0]}
+  getWidth: {type: 'accessor', value: 1}
 };
 
 const ATTRIBUTE_TRANSITION = {
@@ -100,7 +98,6 @@ export default class PathLayer extends Layer {
         transition: ATTRIBUTE_TRANSITION,
         defaultValue: 1
       },
-      instanceDashArrays: {size: 2, accessor: 'getDashArray'},
       instanceColors: {
         size: this.props.colorFormat.length,
         type: GL.UNSIGNED_BYTE,
@@ -122,6 +119,10 @@ export default class PathLayer extends Layer {
         fp64: this.use64bitPositions()
       })
     });
+
+    if (this.props.getDashArray && !this.props.extensions.length) {
+      log.removed('getDashArray', 'PathStyleExtension')();
+    }
   }
 
   updateState({oldProps, props, changeFlags}) {
@@ -177,8 +178,7 @@ export default class PathLayer extends Layer {
       widthUnits,
       widthScale,
       widthMinPixels,
-      widthMaxPixels,
-      dashJustified
+      widthMaxPixels
     } = this.props;
 
     const widthMultiplier = widthUnits === 'pixels' ? viewport.metersPerPixel : 1;
@@ -188,7 +188,6 @@ export default class PathLayer extends Layer {
         Object.assign({}, uniforms, {
           jointType: Number(rounded),
           billboard,
-          alignMode: Number(dashJustified),
           widthScale: widthScale * widthMultiplier,
           miterLimit,
           widthMinPixels,
