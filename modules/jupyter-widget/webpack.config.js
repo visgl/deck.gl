@@ -42,7 +42,6 @@ const config = [
       path: resolve(__dirname, 'dist'),
       libraryTarget: 'amd'
     },
-    mode: 'development',
     devtool: 'source-map',
     module: {
       rules
