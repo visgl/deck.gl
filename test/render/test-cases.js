@@ -235,7 +235,6 @@ export const TEST_CASES = [
     ],
     goldenImage: './test/render/golden-images/pointcloud-identity.png'
   },
-  // TODO: fix infoviz test cases
   {
     name: 'screengrid-infoviz',
     views: [new OrthographicView()],
