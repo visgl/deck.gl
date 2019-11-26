@@ -51,7 +51,7 @@ const defaultProps = {
   fp64: false,
 
   // Optional material for 'lighting' shader module
-  material: true,
+  material: true
 };
 
 // props , when changed requires re-aggregation
