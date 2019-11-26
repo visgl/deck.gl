@@ -32,7 +32,7 @@ import {
   Buffer,
   Texture2D,
   Transform,
-  getParameter,
+  getParameters,
   FEATURES,
   hasFeatures,
   isWebGL2
@@ -262,7 +262,7 @@ export default class HeatmapLayer extends AggregationLayer {
 
   _setupTextureParams() {
     const {gl} = this.context;
-    const textureSize = Math.min(SIZE_2K, getParameter(gl, gl.MAX_TEXTURE_SIZE));
+    const textureSize = Math.min(SIZE_2K, getParameters(gl, gl.MAX_TEXTURE_SIZE));
     const floatTargetSupport = hasFeatures(gl, FEATURES.COLOR_ATTACHMENT_RGBA32F);
     const {format, type} = getTextureParams({gl, floatTargetSupport});
     const weightsScale = floatTargetSupport ? 1 : 1 / 255;
