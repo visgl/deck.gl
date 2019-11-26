@@ -29,7 +29,7 @@ import {
   fp64 as fp64ShaderModule,
   withParameters
 } from '@luma.gl/core';
-import {log, project64, mergeShaders} from '@deck.gl/core';
+import {log, project32, project64, mergeShaders} from '@deck.gl/core';
 const {fp64ifyMatrix4} = fp64ShaderModule;
 
 import {

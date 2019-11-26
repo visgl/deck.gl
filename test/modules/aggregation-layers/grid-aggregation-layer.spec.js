@@ -89,10 +89,10 @@ class TestGridAggregationLayer extends GridAggregationLayer {
     maxBuffer.delete();
   }
 
-  _getGridOffset() {
+  _getGridOffset(opts) {
     const {cellSize, screenSpaceAggregation} = this.state;
     if (!screenSpaceAggregation) {
-      return super._getGridOffset();
+      return super._getGridOffset(opts);
     }
     return {xOffset: cellSize, yOffset: cellSize};
   }
