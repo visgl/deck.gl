@@ -77,7 +77,7 @@ export default class DataFilterExtension extends LayerExtension {
     }
   }
 
-  addShaderHooks(programManager) {
+  addShaderInjections(programManager) {
     programManager.addModuleInjection(shaderModule, {
       hook: 'vs:#main-start',
       injection: `

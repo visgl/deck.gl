@@ -71,7 +71,7 @@ export default class BrushingExtension extends LayerExtension {
     }
   }
 
-  addShaderHooks(programManager) {
+  addShaderInjections(programManager) {
     programManager.addModuleInjection(shaderModule, {
       hook: 'vs:DECKGL_FILTER_GL_POSITION',
       injection: `

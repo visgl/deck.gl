@@ -94,7 +94,7 @@ export default class LayerManager {
 
     this.activateViewport = this.activateViewport.bind(this);
 
-    this._registeredExtensions = {};
+    this._extensionInjections = {};
 
     // Seer integration
     this._initSeer = this._initSeer.bind(this);
@@ -376,9 +376,9 @@ export default class LayerManager {
 
     layer.props.extensions.forEach(extension => {
       const name = extension.constructor.name;
-      if (!this._registeredExtensions[name]) {
-        extension.addShaderHooks(this.context.programManager);
-        this._registeredExtensions[name] = true;
+      if (!this._extensionInjections[name]) {
+        extension.addShaderInjections(this.context.programManager);
+        this._extensionInjections[name] = true;
       }
     });
 
