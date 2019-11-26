@@ -52,8 +52,8 @@ test('FirstPersonController', t => {
       pitch: 15,
       position: [0, 0, 2]
     },
-    // TODO - support keyboard
-    ['keyboard']
+    // FirstPersonController does not pan
+    ['pan', 'pan#function key']
   );
 
   t.end();
