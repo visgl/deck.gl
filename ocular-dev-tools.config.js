@@ -7,10 +7,11 @@ const LUMA_ALIASES_LOCAL = {
   '@luma.gl/debug': `${__dirname}/../luma.gl/modules/debug/src`,
   '@luma.gl/engine': `${__dirname}/../luma.gl/modules/engine/src`,
   '@luma.gl/webgl': `${__dirname}/../luma.gl/modules/webgl/src`,
-  '@luma.gl/gltools': `${__dirname}/../luma.gl/modules/gltools/src`
+  '@luma.gl/gltools': `${__dirname}/../luma.gl/modules/gltools/src`,
+  '@luma.gl/test-utils': `${__dirname}/../luma.gl/modules/test-utils/src`
 };
 
-const useLocalLuma = false;
+const useLocalLuma = true;
 
 const config = {
   lint: {
