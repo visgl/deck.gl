@@ -12,7 +12,7 @@
   <script type="text/javascript">
 window.onmessage = evt => {
   if (evt.data.json) {
-    createDeckWithImports({
+    createDeck({
       mapboxApiKey: 'NO_API_KEY', 
       container: document.getElementById('app'),
       jsonInput: evt.data.json,

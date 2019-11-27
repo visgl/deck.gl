@@ -16,11 +16,13 @@ function extractClasses() {
   // Get classes for registration from standalone deck.gl
   const classesDict = {};
   const classes = Object.keys(deck).filter(x => x.charAt(0) === x.charAt(0).toUpperCase());
-  classes.map(k => (classesDict[k] = deck[k]));
+  for (const cls of classes) {
+    classesDict[cls] = deck[cls];
+  }
   return deck;
 }
 
-function createDeckWithImports(args) {
+function createDeck(args) {
   // Handle JSONConverter and loaders configuration
   const jsonConverterConfiguration = {
     classes: extractClasses(),
@@ -38,10 +40,10 @@ function createDeckWithImports(args) {
   };
 
   loaders.registerLoaders([CSVLoader, Tile3DLoader, LASWorkerLoader]);
-  createDeck({jsonConverterConfiguration, ...args});
+  _createDeck({jsonConverterConfiguration, ...args});
 }
 
-function createDeck({
+function _createDeck({
   jsonConverterConfiguration,
   mapboxApiKey,
   container,
@@ -95,5 +97,5 @@ function injectFunction(warnFunction, messageHandler) {
   };
 }
 
-DeckGLView.deckInitFunction = createDeckWithImports;
-export {DeckGLView, DeckGLModel, createDeckWithImports};
+DeckGLView.deckInitFunction = createDeck;
+export {DeckGLView, DeckGLModel, createDeck};
