@@ -20,7 +20,6 @@
 
 import assert from '../utils/assert';
 import {Timeline} from '@luma.gl/core';
-import seer from 'seer';
 import Layer from './layer';
 import {LIFECYCLE} from '../lifecycle/constants';
 import log from '../utils/log';
@@ -29,14 +28,6 @@ import {Stats} from 'probe.gl';
 
 import Viewport from '../viewports/viewport';
 import {createProgramManager} from '../shaderlib';
-
-import {
-  setPropOverrides,
-  layerEditListener,
-  seerInitListener,
-  initLayerInSeer,
-  updateLayerInSeer
-} from './seer-integration';
 
 const LOG_PRIORITY_LIFECYCLE = 2;
 const LOG_PRIORITY_LIFECYCLE_MINOR = 4;
@@ -94,26 +85,15 @@ export default class LayerManager {
 
     this.activateViewport = this.activateViewport.bind(this);
 
-    // Seer integration
-    this._initSeer = this._initSeer.bind(this);
-    this._editSeer = this._editSeer.bind(this);
-
     Object.seal(this);
-
-    seerInitListener(this._initSeer);
-    layerEditListener(this._editSeer);
   }
 
   // Method to call when the layer manager is not needed anymore.
-  // Currently used in the <DeckGL> componentWillUnmount lifecycle to unbind Seer listeners.
   finalize() {
     // Finalize all layers
     for (const layer of this.layers) {
       this._finalizeLayer(layer);
     }
-
-    seer.removeListener(this._initSeer);
-    seer.removeListener(this._editSeer);
   }
 
   // Check if a redraw is needed
@@ -310,12 +290,10 @@ export default class LayerManager {
         if (!oldLayer) {
           const err = this._initializeLayer(newLayer);
           error = error || err;
-          initLayerInSeer(newLayer); // Initializes layer in seer chrome extension (if connected)
         } else {
           this._transferLayerState(oldLayer, newLayer);
           const err = this._updateLayer(newLayer);
           error = error || err;
-          updateLayerInSeer(newLayer); // Updates layer in seer chrome extension (if connected)
         }
         generatedLayers.push(newLayer);
 
@@ -431,29 +409,5 @@ export default class LayerManager {
     layer.lifecycle = LIFECYCLE.FINALIZED;
     log.log(LOG_PRIORITY_LIFECYCLE, `finalizing ${layerName(layer)}`)();
     return error;
-  }
-
-  // SEER INTEGRATION
-
-  /**
-   * Called upon Seer initialization, manually sends layers data.
-   */
-  _initSeer() {
-    this.layers.forEach(layer => {
-      initLayerInSeer(layer);
-      updateLayerInSeer(layer);
-    });
-  }
-
-  /**
-   * On Seer property edition, set override and update layers.
-   */
-  _editSeer(payload) {
-    if (payload.type !== 'edit' || payload.valuePath[0] !== 'props') {
-      return;
-    }
-
-    setPropOverrides(payload.itemKey, payload.valuePath.slice(1), payload.value);
-    this.updateLayers();
   }
 }

@@ -1,4 +1,3 @@
-import {applyPropOverrides} from '../lib/seer-integration';
 import log from '../utils/log';
 import {isAsyncIterable} from '../utils/iterable-utils';
 import {parsePropTypes} from './prop-types';
@@ -42,9 +41,6 @@ export function createProps() {
   checkDeprecatedProps(layerName, propsInstance, deprecatedProps);
   checkDeprecatedProps(layerName, propsInstance.updateTriggers, deprecatedProps);
   checkDeprecatedProps(layerName, propsInstance.transitions, deprecatedProps);
-
-  // SEER: Apply any overrides from the seer debug extension if it is active
-  applyPropOverrides(propsInstance);
 
   // Props must be immutable
   Object.freeze(propsInstance);
