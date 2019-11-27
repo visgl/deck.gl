@@ -33,6 +33,8 @@
   + `setUniforms`: use `model.setUniforms`
   + `use64bitProjection`
   + `projectFlat`: use `projectPosition`
+- `PerspectiveView` class - use `FirstPersonView`
+- `ThirdPersonView` class - use `MapView` (geospatial) or `OrbitView` (info-vis)
 
 ##### Standalone bundle
 
