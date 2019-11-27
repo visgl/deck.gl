@@ -46,6 +46,8 @@ The pre-bundled version, a.k.a. the [scripting API](/docs/get-started/using-stan
 
 In older versions of deck, we used to set `UNPACK_FLIP_Y_WEBGL` by default when creating textures from images. This is removed in v8.0 to better align with [WebGL best practice](https://github.com/KhronosGroup/WebGL/issues/2577). As a result, the texCoords in the shaders of `BitmapLayer`, `IconLayer` and `TextLayer` are y-flipped. This only affects users who extend these layers.
 
+Users of `SimpleMeshLayer` with texture will need to flip their texture image vertically.
+
 The change has allowed us to support loading textures from `ImageBitmap`, in use cases such as rendering to `OffscreenCanvas` on a web worker. 
 
 ##### projection system
