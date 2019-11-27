@@ -12,7 +12,7 @@ const LUMA_ALIASES_LOCAL = {
   '@luma.gl/test-utils': `${__dirname}/../luma.gl/modules/test-utils/src`
 };
 
-const useLocalLuma = true;
+const useLocalLuma = false;
 
 const config = {
   lint: {
