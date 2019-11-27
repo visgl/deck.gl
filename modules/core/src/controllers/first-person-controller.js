@@ -1,5 +1,6 @@
 import Controller from './controller';
 import ViewState from './view-state';
+import {mod} from '../utils/math-utils';
 
 import {Vector3, _SphericalCoordinates as SphericalCoordinates, clamp} from 'math.gl';
 
@@ -229,6 +230,21 @@ class FirstPersonState extends ViewState {
     return this.zoom({scale: 0.5});
   }
 
+  // shortest path between two view states
+  shortestPathFrom(viewState) {
+    const fromProps = viewState.getViewportProps();
+    const props = Object.assign({}, this._viewportProps);
+    const {bearing, longitude} = props;
+
+    if (Math.abs(bearing - fromProps.bearing) > 180) {
+      props.bearing = bearing < 0 ? bearing + 360 : bearing - 360;
+    }
+    if (Math.abs(longitude - fromProps.longitude) > 180) {
+      props.longitude = longitude < 0 ? longitude + 360 : longitude - 360;
+    }
+    return props;
+  }
+
   /* Private methods */
   _move(direction, speed = 1, fromPosition = this._viewportProps.position) {
     const delta = direction.scale(speed * MOVEMENT_SPEED);
@@ -247,8 +263,16 @@ class FirstPersonState extends ViewState {
   // Apply any constraints (mathematical or defined by _viewportProps) to map state
   _applyConstraints(props) {
     // Ensure pitch and zoom are within specified range
-    const {pitch, maxPitch, minPitch} = props;
+    const {pitch, maxPitch, minPitch, longitude, bearing} = props;
     props.pitch = clamp(pitch, minPitch, maxPitch);
+
+    // Normalize degrees
+    if (longitude < -180 || longitude > 180) {
+      props.longitude = mod(longitude + 180, 360) - 180;
+    }
+    if (bearing < -180 || bearing > 180) {
+      props.bearing = mod(bearing + 180, 360) - 180;
+    }
 
     return props;
   }

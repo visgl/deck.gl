@@ -56,8 +56,8 @@ export default class App extends PureComponent {
     this.setState({
       viewState: {
         ...viewState,
-        rotationOrbit: viewState.rotationOrbit + 30,
-        transitionDuration: 600,
+        rotationOrbit: viewState.rotationOrbit + 120,
+        transitionDuration: 2400,
         transitionInterpolator,
         onTransitionEnd: this._rotateCamera
       }

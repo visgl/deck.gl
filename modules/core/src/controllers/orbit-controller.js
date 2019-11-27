@@ -3,6 +3,7 @@ import Controller from './controller';
 import ViewState from './view-state';
 import LinearInterpolator from '../transitions/linear-interpolator';
 import {TRANSITION_EVENTS} from './transition-manager';
+import {mod} from '../utils/math-utils';
 
 const MOVEMENT_SPEED = 50; // per keyboard click
 
@@ -29,11 +30,6 @@ const LINEAR_TRANSITION_PROPS = {
 /* Helpers */
 
 const zoom2Scale = zoom => Math.pow(2, zoom);
-
-// const mod = (value, divisor) => {
-//   const modulus = value % divisor;
-//   return modulus < 0 ? divisor + modulus : modulus;
-// };
 
 export class OrbitState extends ViewState {
   constructor({
@@ -185,9 +181,16 @@ export class OrbitState extends ViewState {
     });
   }
 
-  // default implementation of shortest path between two view states
+  // shortest path between two view states
   shortestPathFrom(viewState) {
+    const fromProps = viewState.getViewportProps();
     const props = Object.assign({}, this._viewportProps);
+    const {rotationOrbit} = props;
+
+    if (Math.abs(rotationOrbit - fromProps.rotationOrbit) > 180) {
+      props.rotationOrbit = rotationOrbit < 0 ? rotationOrbit + 360 : rotationOrbit - 360;
+    }
+
     return props;
   }
 
@@ -348,10 +351,13 @@ export class OrbitState extends ViewState {
   // Apply any constraints (mathematical or defined by _viewportProps) to map state
   _applyConstraints(props) {
     // Ensure zoom is within specified range
-    const {maxZoom, minZoom, zoom, maxRotationX, minRotationX} = props;
+    const {maxZoom, minZoom, zoom, maxRotationX, minRotationX, rotationOrbit} = props;
 
     props.zoom = clamp(zoom, minZoom, maxZoom);
     props.rotationX = clamp(props.rotationX, minRotationX, maxRotationX);
+    if (rotationOrbit < -180 || rotationOrbit > 180) {
+      props.rotationOrbit = mod(rotationOrbit + 180, 360) - 180;
+    }
 
     return props;
   }
