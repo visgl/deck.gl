@@ -26,13 +26,6 @@ deck.log.priority = 2
 | 3+        | Additional logging around layer lifecycle, prop diffing etc |
 
 
-## Seer Integration
-
-deck.gl is integrated with the [Seer Chrome Extension](https://chrome.google.com/webstore/detail/seer/eogckabefmgphfgngjdmmlfbddmonfdh?hl=en). Simply installing Seer and rerunning your application opens up a new "Seer" tab in the Chrome developer tools, providing you with the ability to see all your deck.gl layers, inspect (and edit) their properties and attributes and check per layer timings, such as the latest GPU draw calls or attribute updates.
-
-Since luma.gl v4 also has a Seer integration, it is possible to follow links from deck.gl layer to luma.gl models inside Seer, enabling you to further drill down and understand what data is ultimately being generated and processed by the GPU.
-
-
 ## WebGL debugging using luma.gl
 
 For lower level debugging, including debugging of layer rendering and picking, deck.gl is built on luma.gl which has extensive debugging and instrumentation support for WebGL level code and GPU input values (shader uniforms and attributes). To enable debug logging simply issue the following commands in your browser console:
