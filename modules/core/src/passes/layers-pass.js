@@ -69,7 +69,7 @@ export default class LayersPass extends Pass {
       pickableCount: 0
     };
 
-    setParameters({viewport: glViewport});
+    setParameters(gl, {viewport: glViewport});
 
     // render layers in normal colors
     layers.forEach((layer, layerIndex) => {
