@@ -19,7 +19,7 @@ function extractClasses() {
   for (const cls of classes) {
     classesDict[cls] = deck[cls];
   }
-  return deck;
+  return classesDict;
 }
 
 // Handle JSONConverter and loaders configuration
