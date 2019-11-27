@@ -364,8 +364,7 @@ export default class Viewport {
       fovy,
       near = 0.1, // Distance of near clipping plane
       far = 1000, // Distance of far clipping plane
-      focalDistance = 1, // Only needed for orthographic views
-      orthographicFocalDistance
+      focalDistance = 1
     } = opts;
 
     const radians = fovyRadians || (fovyDegrees || fovy || 75) * DEGREES_TO_RADIANS;
@@ -374,7 +373,7 @@ export default class Viewport {
       orthographic,
       fovyRadians: radians,
       aspect: this.width / this.height,
-      focalDistance: orthographicFocalDistance || focalDistance,
+      focalDistance,
       near,
       far
     };

@@ -67,18 +67,15 @@ export {
 export {default as View} from './views/view';
 export {default as MapView} from './views/map-view';
 export {default as FirstPersonView} from './views/first-person-view';
-export {default as ThirdPersonView} from './views/third-person-view';
 export {default as OrbitView} from './views/orbit-view';
-export {default as PerspectiveView} from './views/perspective-view';
 export {default as OrthographicView} from './views/orthographic-view';
 
 // Controllers
 export {default as Controller} from './controllers/controller';
 export {default as MapController} from './controllers/map-controller';
-// Experimental Controllers
-export {default as _FirstPersonController} from './controllers/first-person-controller';
-export {default as _OrbitController} from './controllers/orbit-controller';
-export {default as _OrthographicController} from './controllers/orthographic-controller';
+export {default as FirstPersonController} from './controllers/first-person-controller';
+export {default as OrbitController} from './controllers/orbit-controller';
+export {default as OrthographicController} from './controllers/orthographic-controller';
 
 // EXPERIMENTAL EXPORTS
 

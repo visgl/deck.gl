@@ -1,10 +1,21 @@
-<p class="badges">
-  <img src="https://img.shields.io/badge/geopspatial-no-lightgrey.svg?style=flat-square" alt="geospatial" />
-</p>
+# OrthographicView Class
 
-# OrthographicView Class (Experimental)
+The [`OrthographicView`] class is a subclass of [View](/docs/api-reference/view.md) that creates a top-down view of the XY plane. It is usually used for rendering 2D charts in non-geospatial use cases.
 
-The [`OrthographicView`] class is a subclass of [View](/docs/api-reference/view.md) that creates a perspective view using classic "3D camera" view state parameters.
+It's recommended that you read the [Views and Projections guide](/docs/developer-guide/views.md) before using this class.
+
+
+## Constructor
+
+```js
+import {OrthographicView} from '@deck.gl/core';
+const view = new OrthographicView({id, ...});
+```
+
+`OrthographicView` takes the same parameters as the [View](/docs/api-reference/view.md) superclass constructor.
+
+
+## View State
 
 To render, `OrthographicView` needs to be used together with a `viewState` with the following parameters:
 
@@ -13,27 +24,34 @@ To render, `OrthographicView` needs to be used together with a `viewState` with 
 * `minZoom` (`Number`, optional) - The min zoom level of the viewport. Default `-Infinity`.
 * `maxZoom` (`Number`, optional) - The max zoom level of the viewport. Default `Infinity`.
 
-For more information on using `View` classes, consult the [Views](/docs/developer-guide/views.md) article.
 
+## OrthographicController
 
-## Constructor
+By default, `OrthographicView` uses the `OrthographicController` to handle interactivity. To enable the controller, use:
 
 ```js
-new OrthographicView({controller: true});
+const view = new OrthographicView({id: '2d-scene', controller: true});
 ```
 
-The `OrthographicView` constructor takes the same parameters as the [View](/docs/api-reference/view.md) superclass constructor.
+`OrthographicController` supports the following interactions:
 
+- `dragPan`: Drag to pan
+- `scrollZoom`: Mouse wheel to zoom
+- `doubleClickZoom`: Double click to zoom in, with shift/ctrl down to zoom out
+- `touchZoom`: Pinch zoom
+- `keyboard`: Keyboard (arrow keys to pan, +/- to zoom)
 
-## Methods
+You can further customize its behavior by extending the class:
 
-Inherits all [View methods](/docs/api-reference/view.md#methods).
+```js
+import {OrthographicView} from '@deck.gl/core';
 
+class MyOrthographicView extends OrthographicView {}
 
-## Remarks
+const view = new OrthographicView({id: '3d-scene', controller: MyOrthographicView});
+```
 
-* When zooming with orthographic view, the size (width and height) of the view and window are no longer the same. In such case, specify `right` and `bottom` together with `left` and `top` explicitly to define the view size.
-* Refer to `examples/experimental/orthographic-zooming` for example.
+See the documentation of [Controller](/docs/api-reference/controller.md) for implementation details.
 
 
 ## Source
