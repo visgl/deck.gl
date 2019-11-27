@@ -22,29 +22,25 @@ function extractClasses() {
   return deck;
 }
 
-function createDeck(args) {
-  // Handle JSONConverter and loaders configuration
-  const jsonConverterConfiguration = {
-    classes: extractClasses(),
-    // Will be resolved as `<enum-name>.<enum-value>`
-    enumerations: {
-      COORDINATE_SYSTEM: deck.COORDINATE_SYSTEM,
-      GL
-    },
+// Handle JSONConverter and loaders configuration
+const jsonConverterConfiguration = {
+  classes: extractClasses(),
+  // Will be resolved as `<enum-name>.<enum-value>`
+  enumerations: {
+    COORDINATE_SYSTEM: deck.COORDINATE_SYSTEM,
+    GL
+  },
 
-    // Constants that should be resolved with the provided values by JSON converter
-    constants: {
-      Tile3DLoader,
-      LASWorkerLoader
-    }
-  };
+  // Constants that should be resolved with the provided values by JSON converter
+  constants: {
+    Tile3DLoader,
+    LASWorkerLoader
+  }
+};
 
-  loaders.registerLoaders([CSVLoader, Tile3DLoader, LASWorkerLoader]);
-  _createDeck({jsonConverterConfiguration, ...args});
-}
+loaders.registerLoaders([CSVLoader, Tile3DLoader, LASWorkerLoader]);
 
-function _createDeck({
-  jsonConverterConfiguration,
+function createDeck({
   mapboxApiKey,
   container,
   jsonInput,
