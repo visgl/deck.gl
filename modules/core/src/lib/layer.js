@@ -657,7 +657,7 @@ export default class Layer extends Component {
     const {getPolygonOffset} = this.props;
     const offsets = (getPolygonOffset && getPolygonOffset(uniforms)) || [0, 0];
 
-    setParameters({polygonOffset: offsets});
+    setParameters(this.context.gl, {polygonOffset: offsets});
 
     // Call subclass lifecycle method
     withParameters(this.context.gl, parameters, () => {
