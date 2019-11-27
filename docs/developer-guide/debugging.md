@@ -49,8 +49,3 @@ In the browser console, setting `luma.log.priority` to various values will enabl
 | 1         | Minimal logging    |
 | 2 and 3   | Will display all uniforms and attributes before each draw call, allowing you to be confident in what values your shaders are actually working on. |
 | 4         | Will trace every single gl call.
-
-
-## Remarks
-
-* Seer remembers its "on/off" setting across application reloads. This is significant because it means that the Seer extension can be left installed even in heavy deck.gl applications with lots of layers, and turned on only during debugging, without any performance impact during normal usage.
