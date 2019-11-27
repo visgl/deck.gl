@@ -33,6 +33,10 @@ const DEFAULT_TEXTURE_PARAMETERS = {
   [GL.TEXTURE_WRAP_T]: GL.CLAMP_TO_EDGE
 };
 
+const DEFAULT_PIXEL_PARAMETERS = {
+  [GL.UNPACK_FLIP_Y_WEBGL]: true
+};
+
 const defaultProps = {
   image: {type: 'object', value: null, async: true},
   bounds: {type: 'array', value: [1, 0, 0, 1], compare: true},
@@ -231,6 +235,7 @@ export default class BitmapLayer extends Layer {
           width: 1,
           height: 1,
           parameters: DEFAULT_TEXTURE_PARAMETERS,
+          pixelStore: DEFAULT_PIXEL_PARAMETERS,
           mipmaps: false
         })
       });
@@ -239,7 +244,8 @@ export default class BitmapLayer extends Layer {
       this.setState({
         bitmapTexture: new Texture2D(gl, {
           data: image,
-          parameters: DEFAULT_TEXTURE_PARAMETERS
+          parameters: DEFAULT_TEXTURE_PARAMETERS,
+          pixelStore: DEFAULT_PIXEL_PARAMETERS
         })
       });
     }
