@@ -11,7 +11,6 @@ const DEFAULT_STATE = {
   orbitAxis: 'Z',
   rotationX: 0,
   rotationOrbit: 0,
-  fovy: 50,
   zoom: 0,
   target: [0, 0, 0],
   minRotationX: -90,
@@ -43,7 +42,6 @@ export class OrbitState extends ViewState {
     rotationOrbit = DEFAULT_STATE.rotationOrbit, // Rotation around orbit axis
     target = DEFAULT_STATE.target,
     zoom = DEFAULT_STATE.zoom,
-    fovy = DEFAULT_STATE.fovy,
 
     /* Viewport constraints */
     minRotationX = DEFAULT_STATE.minRotationX,
@@ -69,7 +67,6 @@ export class OrbitState extends ViewState {
       rotationX,
       rotationOrbit,
       target,
-      fovy,
       zoom,
       minRotationX,
       maxRotationX,
