@@ -64,7 +64,5 @@ export class LayerExtension {
 
   updateState(params, extension) {}
 
-  addShaderInjections(programManager) {}
-
   finalizeState(extension) {}
 }

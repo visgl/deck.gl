@@ -76,38 +76,6 @@ export default class DataFilterExtension extends LayerExtension {
       });
     }
   }
-
-  addShaderInjections(programManager) {
-    programManager.addModuleInjection(shaderModule, {
-      hook: 'vs:#main-start',
-      injection: `
-    #ifdef NON_INSTANCED_MODEL
-    dataFilter_setValue(filterValues);
-    #else
-    dataFilter_setValue(instanceFilterValues);
-    #endif
-      `
-    });
-
-    programManager.addModuleInjection(shaderModule, {
-      hook: 'vs:DECKGL_FILTER_SIZE',
-      injection: `
-    if (filter_transformSize) {
-      size = size * dataFilter_value;
-    }
-      `
-    });
-
-    programManager.addModuleInjection(shaderModule, {
-      hook: 'fs:DECKGL_FILTER_COLOR',
-      injection: `
-    if (dataFilter_value == 0.0) discard;
-    if (filter_transformColor) {
-      color.a *= dataFilter_value;
-    }
-      `
-    });
-  }
 }
 
 DataFilterExtension.extensionName = 'DataFilterExtension';

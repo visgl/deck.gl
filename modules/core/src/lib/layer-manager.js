@@ -94,8 +94,6 @@ export default class LayerManager {
 
     this.activateViewport = this.activateViewport.bind(this);
 
-    this._extensionInjections = {};
-
     // Seer integration
     this._initSeer = this._initSeer.bind(this);
     this._editSeer = this._editSeer.bind(this);
@@ -373,14 +371,6 @@ export default class LayerManager {
 
     // Set back pointer (used in picking)
     layer.internalState.layer = layer;
-
-    layer.props.extensions.forEach(extension => {
-      const name = extension.constructor.name;
-      if (!this._extensionInjections[name]) {
-        extension.addShaderInjections(this.context.programManager);
-        this._extensionInjections[name] = true;
-      }
-    });
 
     // Save layer on model for picking purposes
     // store on model.userData rather than directly on model

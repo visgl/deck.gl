@@ -71,36 +71,6 @@ export default class BrushingExtension extends LayerExtension {
     }
   }
 
-  addShaderInjections(programManager) {
-    programManager.addModuleInjection(shaderModule, {
-      hook: 'vs:DECKGL_FILTER_GL_POSITION',
-      injection: `
-    vec2 brushingTarget;
-    if (brushing_target == 0) {
-      brushingTarget = geometry.worldPosition.xy;
-    } else if (brushing_target == 1) {
-      brushingTarget = geometry.worldPositionAlt.xy;
-    } else {
-      #ifdef NON_INSTANCED_MODEL
-      brushingTarget = brushingTargets;
-      #else
-      brushingTarget = instanceBrushingTargets;
-      #endif
-    }
-    brushing_setVisible(brushing_isPointInRange(brushingTarget));
-      `
-    });
-
-    programManager.addModuleInjection(shaderModule, {
-      hook: 'fs:DECKGL_FILTER_COLOR',
-      injection: `
-    if (brushing_enabled && brushing_isVisible < 0.5) {
-      discard;
-    }
-      `
-    });
-  }
-
   finalizeState(extension) {
     // Remove event listeners
     if (this.context.deck) {

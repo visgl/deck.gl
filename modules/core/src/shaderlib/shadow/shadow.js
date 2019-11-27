@@ -96,7 +96,6 @@ vec4 shadow_filterShadowColor(vec4 color) {
 }
 `;
 
-const moduleName = 'shadow';
 const getMemoizedViewportCenterPosition = memoize(getViewportCenterPosition);
 const getMemoizedViewProjectionMatrices = memoize(getViewProjectionMatrices);
 
@@ -198,27 +197,19 @@ function createShadowUniforms(opts = {}, context = {}) {
   return uniforms;
 }
 
-export function addShadowModuleInjections(programManager) {
-  programManager.addModuleInjection(moduleName, {
-    hook: 'vs:DECKGL_FILTER_GL_POSITION',
-    injection: `
-  position = shadow_setVertexPosition(geometry.position);
-    `
-  });
-
-  programManager.addModuleInjection(moduleName, {
-    hook: 'fs:DECKGL_FILTER_COLOR',
-    injection: `
-  color = shadow_filterShadowColor(color);
-    `
-  });
-}
-
 export default {
   name: 'shadow',
   dependencies: [project],
   vs,
   fs,
+  inject: {
+    'vs:DECKGL_FILTER_GL_POSITION': `
+  position = shadow_setVertexPosition(geometry.position);
+    `,
+    'fs:DECKGL_FILTER_COLOR': `
+  color = shadow_filterShadowColor(color);
+    `
+  },
   getUniforms: (opts = {}, context = {}) => {
     if (opts.drawToShadowMap || (opts.shadowMaps && opts.shadowMaps.length > 0)) {
       const shadowUniforms = {};

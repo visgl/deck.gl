@@ -24,8 +24,8 @@ import geometry from './misc/geometry';
 import project from './project/project';
 import project32 from './project32/project32';
 import project64 from './project64/project64';
-import {default as shadow, addShadowModuleInjections} from './shadow/shadow';
-import {default as picking, addPickingModuleInjections} from './picking/picking';
+import shadow from './shadow/shadow';
+import picking from './picking/picking';
 
 const DEFAULT_MODULES = [geometry, project];
 
@@ -45,9 +45,6 @@ export function createProgramManager(gl) {
   for (const shaderHook of SHADER_HOOKS) {
     programManager.addShaderHook(shaderHook);
   }
-
-  addShadowModuleInjections(programManager);
-  addPickingModuleInjections(programManager);
 
   return programManager;
 }
