@@ -306,7 +306,6 @@ export default class IconManager {
 
   _loadIcons(icons) {
     const ctx = this._canvas.getContext('2d');
-    const canvasHeight = this._texture.height;
 
     for (const icon of icons) {
       loadImage(icon.url).then(imageData => {

@@ -2,7 +2,6 @@
 
 import {Texture2D} from '@luma.gl/core';
 import TinySDF from '@mapbox/tiny-sdf';
-import GL from '@luma.gl/constants';
 
 import {buildMapping} from './utils';
 import LRUCache from './lru-cache';
