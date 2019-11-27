@@ -88,24 +88,24 @@ const getUniforms = opts => {
 
 const inject = {
   'vs:#main-start': `
-#ifdef NON_INSTANCED_MODEL
-dataFilter_setValue(filterValues);
-#else
-dataFilter_setValue(instanceFilterValues);
-#endif
+    #ifdef NON_INSTANCED_MODEL
+    dataFilter_setValue(filterValues);
+    #else
+    dataFilter_setValue(instanceFilterValues);
+    #endif
   `,
 
   'vs:DECKGL_FILTER_SIZE': `
-if (filter_transformSize) {
-  size = size * dataFilter_value;
-}
+    if (filter_transformSize) {
+      size = size * dataFilter_value;
+    }
   `,
 
   'fs:DECKGL_FILTER_COLOR': `
-if (dataFilter_value == 0.0) discard;
-if (filter_transformColor) {
-  color.a *= dataFilter_value;
-}
+    if (dataFilter_value == 0.0) discard;
+    if (filter_transformColor) {
+      color.a *= dataFilter_value;
+    }
   `
 };
 

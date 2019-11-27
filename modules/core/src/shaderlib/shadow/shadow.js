@@ -204,10 +204,10 @@ export default {
   fs,
   inject: {
     'vs:DECKGL_FILTER_GL_POSITION': `
-  position = shadow_setVertexPosition(geometry.position);
+    position = shadow_setVertexPosition(geometry.position);
     `,
     'fs:DECKGL_FILTER_COLOR': `
-  color = shadow_filterShadowColor(color);
+    color = shadow_filterShadowColor(color);
     `
   },
   getUniforms: (opts = {}, context = {}) => {

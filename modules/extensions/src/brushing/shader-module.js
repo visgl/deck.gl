@@ -62,25 +62,25 @@ const TARGET = {
 
 const inject = {
   'vs:DECKGL_FILTER_GL_POSITION': `
-vec2 brushingTarget;
-if (brushing_target == 0) {
-  brushingTarget = geometry.worldPosition.xy;
-} else if (brushing_target == 1) {
-  brushingTarget = geometry.worldPositionAlt.xy;
-} else {
-  #ifdef NON_INSTANCED_MODEL
-  brushingTarget = brushingTargets;
-  #else
-  brushingTarget = instanceBrushingTargets;
-  #endif
-}
-brushing_setVisible(brushing_isPointInRange(brushingTarget));
+    vec2 brushingTarget;
+    if (brushing_target == 0) {
+      brushingTarget = geometry.worldPosition.xy;
+    } else if (brushing_target == 1) {
+      brushingTarget = geometry.worldPositionAlt.xy;
+    } else {
+      #ifdef NON_INSTANCED_MODEL
+      brushingTarget = brushingTargets;
+      #else
+      brushingTarget = instanceBrushingTargets;
+      #endif
+    }
+    brushing_setVisible(brushing_isPointInRange(brushingTarget));
   `,
 
   'fs:DECKGL_FILTER_COLOR': `
-if (brushing_enabled && brushing_isVisible < 0.5) {
-  discard;
-}
+    if (brushing_enabled && brushing_isVisible < 0.5) {
+      discard;
+    }
   `
 };
 
