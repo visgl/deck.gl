@@ -19,7 +19,7 @@
 // THE SOFTWARE.
 
 import {registerLoaders} from '@loaders.gl/core';
-import {ImageBitmapLoader} from '@loaders.gl/images';
+import {ImageLoader} from '@loaders.gl/images';
 
 import {global} from '../utils/globals';
 import log from '../utils/log';
@@ -46,7 +46,7 @@ if (!global.deck) {
     log
   };
 
-  registerLoaders([jsonLoader, ImageBitmapLoader]);
+  registerLoaders([jsonLoader, ImageLoader]);
 }
 
 export default global.deck;
