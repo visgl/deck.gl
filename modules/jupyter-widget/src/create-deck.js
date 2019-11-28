@@ -1,5 +1,3 @@
-/* global document */
-
 import {DeckGLModel, DeckGLView} from './widget';
 import makeTooltip from './widget-tooltip';
 
@@ -10,55 +8,39 @@ import {Tile3DLoader} from '@loaders.gl/3d-tiles';
 import {LASWorkerLoader} from '@loaders.gl/las';
 import * as loaders from '@loaders.gl/core';
 
-import {
-  COORDINATE_SYSTEM,
-  Deck,
-  MapView,
-  FirstPersonView,
-  OrbitView,
-  OrthographicView,
-  log
-} from '@deck.gl/core';
+import * as deck from './deck-bundle';
 
-// import {DeckGL} from '@deck.gl/core/bundle';
-import * as Layers from '@deck.gl/layers';
-import * as AggregationLayers from '@deck.gl/aggregation-layers';
-import * as GeoLayers from '@deck.gl/geo-layers';
-import * as MeshLayers from '@deck.gl/mesh-layers';
 import GL from '@luma.gl/constants';
 
-import {JSONConverter} from '@deck.gl/json';
-
-function createDeckWithImports(args) {
-  // Handle JSONConverter and loaders configuration
-  const jsonConverterConfiguration = {
-    classes: Object.assign(
-      {MapView, FirstPersonView, OrbitView, OrthographicView},
-      Layers,
-      AggregationLayers,
-      GeoLayers,
-      MeshLayers
-    ),
-
-    // Will be resolved as `<enum-name>.<enum-value>`
-    enumerations: {
-      COORDINATE_SYSTEM,
-      GL
-    },
-
-    // Constants that should be resolved with the provided values by JSON converter
-    constants: {
-      Tile3DLoader,
-      LASWorkerLoader
-    }
-  };
-
-  loaders.registerLoaders([CSVLoader, Tile3DLoader, LASWorkerLoader]);
-  createDeck({jsonConverterConfiguration, ...args});
+function extractClasses() {
+  // Get classes for registration from standalone deck.gl
+  const classesDict = {};
+  const classes = Object.keys(deck).filter(x => x.charAt(0) === x.charAt(0).toUpperCase());
+  for (const cls of classes) {
+    classesDict[cls] = deck[cls];
+  }
+  return classesDict;
 }
 
+// Handle JSONConverter and loaders configuration
+const jsonConverterConfiguration = {
+  classes: extractClasses(),
+  // Will be resolved as `<enum-name>.<enum-value>`
+  enumerations: {
+    COORDINATE_SYSTEM: deck.COORDINATE_SYSTEM,
+    GL
+  },
+
+  // Constants that should be resolved with the provided values by JSON converter
+  constants: {
+    Tile3DLoader,
+    LASWorkerLoader
+  }
+};
+
+loaders.registerLoaders([CSVLoader, Tile3DLoader, LASWorkerLoader]);
+
 function createDeck({
-  jsonConverterConfiguration,
   mapboxApiKey,
   container,
   jsonInput,
@@ -68,9 +50,7 @@ function createDeck({
   handleWarning
 }) {
   try {
-    // Filter down to the deck.gl classes of interest
-
-    const jsonConverter = new JSONConverter({
+    const jsonConverter = new deck.JSONConverter({
       configuration: jsonConverterConfiguration
     });
 
@@ -78,23 +58,22 @@ function createDeck({
 
     const getTooltip = makeTooltip(tooltip);
 
-    container.appendChild(document.createElement('canvas'));
-    const canvas = container.firstElementChild;
-
-    const deckgl = new Deck({
+    const deckgl = new deck.DeckGL({
       ...props,
       map: mapboxgl,
       mapboxApiAccessToken: mapboxApiKey,
       onClick: handleClick,
       getTooltip,
-      canvas
+      container
     });
 
-    const warn = log.warn;
     // TODO overrride console.warn instead
     // Right now this isn't doable (in a Notebook at least)
     // because the widget loads in deck.gl (and its logger) before @deck.gl/jupyter-widget
-    log.warn = injectFunction(warn, handleWarning);
+    if (handleWarning) {
+      const warn = deck.log.warn;
+      deck.log.warn = injectFunction(warn, handleWarning);
+    }
 
     if (onComplete) {
       onComplete({jsonConverter, deckgl});
@@ -114,5 +93,5 @@ function injectFunction(warnFunction, messageHandler) {
   };
 }
 
-DeckGLView.deckInitFunction = createDeckWithImports;
-export {DeckGLView, DeckGLModel, createDeckWithImports};
+DeckGLView.deckInitFunction = createDeck;
+export {DeckGLView, DeckGLModel, createDeck};

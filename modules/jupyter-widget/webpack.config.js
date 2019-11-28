@@ -1,8 +1,9 @@
-// File leans heavily on configuration in
-// https://github.com/jupyter-widgets/widget-ts-cookiecutter/blob/master/%7B%7Bcookiecutter.github_project_name%7D%7D/webpack.config.js
-const path = require('path');
-const packageVersion = require('./package.json').version;
-const webpack = require('webpack');
+const {resolve} = require('path');
+
+const ALIASES = require('ocular-dev-tools/config/ocular.config')({
+  aliasMode: 'src',
+  root: resolve(__dirname, '../..')
+}).aliases;
 
 const rules = [
   {
@@ -29,35 +30,39 @@ const config = [
     /**
      * Embeddable @deck.gl/jupyter-widget bundle
      *
-     * This bundle is almost identical to the notebook extension bundle. The only
-     * difference is in the configuration of the webpack public path for the
-     * static assets.
+     * Used in JupyterLab (whose entry point is at plugin.js) and Jupyter Notebook alike.
      *
-     * The target bundle is always `dist/index.js`, which is the path required by
-     * the custom widget embedder.
      */
     entry: './src/index.js',
+    resolve: {
+      alias: ALIASES
+    },
     output: {
       filename: 'index.js',
-      path: path.resolve(__dirname, 'dist'),
+      path: resolve(__dirname, 'dist'),
       libraryTarget: 'amd'
     },
     devtool: 'source-map',
     module: {
       rules
     },
-    // Packages that shouldn't be bundled but loaded at runtime
-    externals: ['@jupyter-widgets/base'],
+    externals: {
+      '@jupyter-widgets/base': false
+    },
     plugins: [
       // Uncomment for bundle size debug
       // new (require('webpack-bundle-analyzer')).BundleAnalyzerPlugin()
     ]
   },
+  // Used for standalone HTML renderer only
   {
     entry: './src/standalone-html-index.js',
+    resolve: {
+      alias: ALIASES
+    },
     output: {
       filename: 'standalone-html-bundle.js',
-      path: path.resolve(__dirname, 'dist'),
+      path: resolve(__dirname, 'dist'),
       libraryTarget: 'umd'
     },
     devtool: 'source-map',
@@ -71,22 +76,4 @@ const config = [
   }
 ];
 
-module.exports = env => {
-  for (const conf of config) {
-    if (env && env.dev) {
-      conf.mode = 'development';
-      conf.devServer = {
-        contentBase: path.join(__dirname, 'dist')
-      };
-    } else {
-      conf.mode = 'production';
-    }
-
-    conf.plugins.push(
-      new webpack.DefinePlugin({
-        __VERSION__: JSON.stringify(packageVersion)
-      })
-    );
-  }
-  return config;
-};
+module.exports = config;
