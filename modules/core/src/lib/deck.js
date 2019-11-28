@@ -33,7 +33,7 @@ import GL from '@luma.gl/constants';
 import {
   AnimationLoop,
   createGLContext,
-  trackContextState,
+  instrumentGLContext,
   setParameters,
   Timeline,
   lumaStats
@@ -572,7 +572,7 @@ export default class Deck {
     // if external context...
     if (!this.canvas) {
       this.canvas = gl.canvas;
-      trackContextState(gl, {enable: true, copyState: true});
+      instrumentGLContext(gl, {enable: true, copyState: true});
     }
 
     this.tooltip = new Tooltip(this.canvas);
