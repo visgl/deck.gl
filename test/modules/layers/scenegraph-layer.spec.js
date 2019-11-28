@@ -24,7 +24,7 @@ import {testLayer, generateLayerTests} from '@deck.gl/test-utils';
 import {project32} from '@deck.gl/core';
 import {ScenegraphLayer} from '@deck.gl/mesh-layers';
 import {CubeGeometry} from '@luma.gl/core';
-import {GroupNode, ModelNode} from '@luma.gl/addons';
+import {GroupNode, ModelNode} from '@luma.gl/experimental';
 
 import * as FIXTURES from 'deck.gl-test/data';
 

@@ -19,7 +19,7 @@
 // THE SOFTWARE.
 
 import {LayerManager, MapView, DeckRenderer} from '@deck.gl/core';
-import {VertexArrayObject} from '@luma.gl/core';
+import {VertexArrayObject} from '@luma.gl/webgl';
 
 import {makeSpy} from '@probe.gl/test-utils';
 import gl from './utils/setup-gl';

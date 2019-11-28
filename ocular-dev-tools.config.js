@@ -9,7 +9,8 @@ const LUMA_ALIASES_LOCAL = {
   '@luma.gl/webgl': `${__dirname}/../luma.gl/modules/webgl/src`,
   '@luma.gl/gltools': `${__dirname}/../luma.gl/modules/gltools/src`,
   '@luma.gl/shadertools': `${__dirname}/../luma.gl/modules/shadertools/src`,
-  '@luma.gl/test-utils': `${__dirname}/../luma.gl/modules/test-utils/src`
+  '@luma.gl/test-utils': `${__dirname}/../luma.gl/modules/test-utils/src`,
+  '@luma.gl/experimental': `${__dirname}/../luma.gl/modules/experimental/src`
 };
 
 const useLocalLuma = false;

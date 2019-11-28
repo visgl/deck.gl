@@ -20,7 +20,7 @@
 
 import {Layer, project32, picking} from '@deck.gl/core';
 import {isWebGL2, pbr, log} from '@luma.gl/core';
-import {ScenegraphNode, createGLTFObjects} from '@luma.gl/addons';
+import {ScenegraphNode, createGLTFObjects} from '@luma.gl/experimental';
 import GL from '@luma.gl/constants';
 import {waitForGLTFAssets} from './gltf-utils';
 
@@ -112,7 +112,7 @@ export default class ScenegraphLayer extends Layer {
       // Signature 1: props.scenegraph is a proper luma.gl Scenegraph
       scenegraphData = {scenes: [props.scenegraph]};
     } else if (props.scenegraph && !props.scenegraph.gltf) {
-      // Converts loaders.gl gltf to luma.gl scenegraph using the undocumented @luma.gl/addons function
+      // Converts loaders.gl gltf to luma.gl scenegraph using the undocumented @luma.gl/experimental function
       const gltf = props.scenegraph;
       const gltfObjects = createGLTFObjects(gl, gltf, this.getLoadOptions());
       scenegraphData = Object.assign({gltf}, gltfObjects);
