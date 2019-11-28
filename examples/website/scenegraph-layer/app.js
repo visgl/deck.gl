@@ -6,7 +6,7 @@ import {StaticMap} from 'react-map-gl';
 import DeckGL from '@deck.gl/react';
 import {ScenegraphLayer} from '@deck.gl/mesh-layers';
 
-import {GLTFScenegraphLoader} from '@luma.gl/addons';
+import {GLTFScenegraphLoader} from '@luma.gl/experimental';
 import {registerLoaders} from '@loaders.gl/core';
 
 registerLoaders([GLTFScenegraphLoader]);

@@ -25,7 +25,7 @@ function makeLocalDevConfig(EXAMPLE_DIR = LIB_DIR, linkToLuma) {
     '@luma.gl/webgl': `${ROOT_DIR}/../luma.gl/modules/webgl/src`,
     '@luma.gl/gltools': `${ROOT_DIR}/../luma.gl/modules/gltools/src`,
     '@luma.gl/shadertools': `${ROOT_DIR}/../luma.gl/modules/shadertools/src`,
-    '@luma.gl/addons': `${ROOT_DIR}/../luma.gl/modules/addons/src`
+    '@luma.gl/experimental': `${ROOT_DIR}/../luma.gl/modules/experimental/src`
   };
   const LUMA_LOCAL_ALIASES = {
     '@luma.gl/constants': `${ROOT_DIR}/node_modules/@luma.gl/constants`,
@@ -34,8 +34,8 @@ function makeLocalDevConfig(EXAMPLE_DIR = LIB_DIR, linkToLuma) {
     '@luma.gl/webgl': `${ROOT_DIR}/node_modules/@luma.gl/webgl`,
     '@luma.gl/gltools': `${ROOT_DIR}/node_modules/@luma.gl/gltools`,
     '@luma.gl/shadertools': `${ROOT_DIR}/node_modules/@luma.gl/shadertools`,
-    '@luma.gl/addons': `${ROOT_DIR}/node_modules/@luma.gl/addons`,
-    // @luma.gl/addons is not available in the root node_modules, must be imported
+    '@luma.gl/experimental': `${ROOT_DIR}/node_modules/@luma.gl/experimental`,
+    // @luma.gl/experimental is not available in the root node_modules, must be imported
     // where required.
     '@loaders.gl/core': `${ROOT_DIR}/node_modules/@loaders.gl/core`
   };

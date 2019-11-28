@@ -11,7 +11,7 @@ The `ScenegraphLayer` renders a number of instances of a complete luma.gl sceneg
 import DeckGL from '@deck.gl/react';
 import {ScenegraphLayer} from '@deck.gl/mesh-layers';
 import {registerLoaders} from '@loaders.gl/core';
-import {GLTFScenegraphLoader} from '@luma.gl/addons';
+import {GLTFScenegraphLoader} from '@luma.gl/experimental';
 
 // Register the proper loader for scenegraph.gltf
 registerLoaders([GLTFScenegraphLoader]);
