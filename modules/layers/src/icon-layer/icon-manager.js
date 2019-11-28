@@ -15,10 +15,6 @@ const DEFAULT_TEXTURE_PARAMETERS = {
   [GL.TEXTURE_MAG_FILTER]: GL.LINEAR
 };
 
-const DEFAULT_PIXEL_PARAMETERS = {
-  [GL.UNPACK_FLIP_Y_WEBGL]: true
-};
-
 function nextPowOfTwo(number) {
   return Math.pow(2, Math.ceil(Math.log2(number)));
 }
@@ -256,8 +252,7 @@ export default class IconManager {
       // Browser object: Image, ImageData, HTMLCanvasElement, ImageBitmap
       this._texture = new Texture2D(this.gl, {
         data: iconAtlas,
-        parameters: DEFAULT_TEXTURE_PARAMETERS,
-        pixelStore: DEFAULT_PIXEL_PARAMETERS
+        parameters: DEFAULT_TEXTURE_PARAMETERS
       });
       this.onUpdate();
     }
@@ -311,7 +306,6 @@ export default class IconManager {
 
   _loadIcons(icons) {
     const ctx = this._canvas.getContext('2d');
-    const canvasHeight = this._texture.height;
 
     for (const icon of icons) {
       loadImage(icon.url).then(imageData => {
@@ -323,10 +317,9 @@ export default class IconManager {
         this._texture.setSubImageData({
           data,
           x,
-          y: canvasHeight - y - height, // flip Y as texture stored as reversed Y
+          y,
           width,
-          height,
-          parameters: DEFAULT_PIXEL_PARAMETERS
+          height
         });
 
         // Call to regenerate mipmaps after modifying texture(s)

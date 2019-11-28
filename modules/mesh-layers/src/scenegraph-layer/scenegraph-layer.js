@@ -267,7 +267,7 @@ export default class ScenegraphLayer extends Layer {
           enableOffsetModelMatrix: _composeModelMatrix,
           sceneModelMatrix: worldMatrix,
           // Needed for PBR (TODO: find better way to get it)
-          u_Camera: model.model.program.uniforms.project_uCameraPosition
+          u_Camera: model.model.getUniforms().project_uCameraPosition
         }
       });
     });

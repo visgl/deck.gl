@@ -100,8 +100,6 @@ void main(void) {
     (positions.xy + 1.0) / 2.0
   ) / iconsTextureDim;
 
-  vTextureCoords.y = 1.0 - vTextureCoords.y;
-
   vColor = vec4(instanceColors.rgb, instanceColors.a * opacity);
   DECKGL_FILTER_COLOR(vColor, geometry);
 
