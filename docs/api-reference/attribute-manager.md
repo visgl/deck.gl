@@ -19,16 +19,16 @@ For more information consult the [Attribute Management](/docs/developer-guide/cu
 ##### `setDefaultLogFunctions`
 
 Sets log functions to help trace or time attribute updates.
-Default logging uses the luma.gl logger.
+Default logging uses the deck.gl logger.
 
 Note that the app may not be in control of when update is called,
 so hooks are provided for update start and end.
 
 Parameters:
 
-* `opts.onLog` (Function) - callback, called to print
-* `opts.onUpdateStart` (Function) - callback, called before update() starts
-* `opts.onUpdateEnd` (Function) - callback, called after update() ends
+* `opts.onUpdateStart` (Function) - callback, called before an attribute starts updating
+* `opts.onUpdate` (Function) - callback, called when update is performed. Receives an argument `message` detailing the update operation.
+* `opts.onUpdateEnd` (Function) - callback, called after an attribute is updated. Receives an argument `message` detailing the update operation.
 
 
 ## Constructor

@@ -33,13 +33,13 @@ const logFunctions = {
   timeStart: null,
   onUpdateStart: () => {
     logFunctions.savedMessages.length = 0;
-    logFunctions.timeStart = new Date();
+    logFunctions.timeStart = Date.now();
   },
   onUpdate: message => {
     logFunctions.savedMessages.push(message);
   },
   onUpdateEnd: message => {
-    const timeMs = Math.round(new Date() - logFunctions.timeStart);
+    const timeMs = Math.round(Date.now() - logFunctions.timeStart);
     log.group(LOG_START_END_PRIORITY, `${message} in ${timeMs}ms`, {
       collapsed: true
     })();
