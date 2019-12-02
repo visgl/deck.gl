@@ -52,6 +52,10 @@ Users of `SimpleMeshLayer` with texture will need to flip their texture image ve
 
 The change has allowed us to support loading textures from `ImageBitmap`, in use cases such as rendering to `OffscreenCanvas` on a web worker. 
 
+##### Production Mode
+
+deck.gl now removes low-level logging when `NODE_ENV` is `production`. This helps reduce bundle size and improve runtime performance.
+
 ##### projection system
 
 - The [common space](/docs/shader-module/project.md) is no longer scaled to the current zoom level. This is part of an effort to make the geometry calculation more consistent and predictable. While one old common unit is equivalent to 1 screen pixel at the viewport center, one new common unit is equivalent to `viewport.scale` pixels at the viewport center.
