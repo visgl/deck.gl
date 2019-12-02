@@ -1,7 +1,6 @@
-import {DeckGLModel, DeckGLView} from './widget';
 import makeTooltip from './widget-tooltip';
 
-import {__ssr_safe__mapboxgl as mapboxgl} from './ssr-safe-mapbox';
+import * as mapboxgl from './ssr-safe-mapbox';
 
 import {CSVLoader} from '@loaders.gl/csv';
 import {Tile3DLoader} from '@loaders.gl/3d-tiles';
@@ -93,5 +92,4 @@ function injectFunction(warnFunction, messageHandler) {
   };
 }
 
-DeckGLView.deckInitFunction = createDeck;
-export {DeckGLView, DeckGLModel, createDeck};
+export {createDeck};

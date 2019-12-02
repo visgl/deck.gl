@@ -3,6 +3,8 @@ import {DOMWidgetModel, DOMWidgetView} from '@jupyter-widgets/base';
 
 import {MODULE_NAME, MODULE_VERSION} from './version';
 
+import {createDeck} from './create-deck';
+
 const MAPBOX_CSS_URL = 'https://api.tiles.mapbox.com/mapbox-gl-js/v1.2.1/mapbox-gl.css';
 const ERROR_BOX_CLASSNAME = 'error-box';
 
@@ -77,9 +79,6 @@ export class DeckGLModel extends DOMWidgetModel {
 
 export class DeckGLView extends DOMWidgetView {
   initialize() {
-    if (!DeckGLView.deckInitFunction) {
-      throw new Error('Class needs a deckInitFunction');
-    }
     this.listenTo(this.model, 'destroy', this.remove);
 
     const container = document.createElement('div');
@@ -104,7 +103,7 @@ export class DeckGLView extends DOMWidgetView {
     }
 
     loadCss(MAPBOX_CSS_URL);
-    DeckGLView.deckInitFunction({
+    createDeck({
       mapboxApiKey,
       container,
       jsonInput,
