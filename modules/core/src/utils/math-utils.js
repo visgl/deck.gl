@@ -7,6 +7,11 @@ export function createMat4() {
   return [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1];
 }
 
+export function mod(value, divisor) {
+  const modulus = value % divisor;
+  return modulus < 0 ? divisor + modulus : modulus;
+}
+
 // Extract camera vectors (move to math library?)
 export function extractCameraVectors({viewMatrix, viewMatrixInverse}) {
   // Read the translation from the inverse view matrix

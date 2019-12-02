@@ -37,9 +37,7 @@ export {
   View,
   MapView,
   FirstPersonView,
-  ThirdPersonView,
   OrbitView,
-  PerspectiveView,
   OrthographicView,
   // Viewports
   Viewport,
@@ -47,6 +45,9 @@ export {
   // Controllers
   Controller,
   MapController,
+  OrbitController,
+  FirstPersonController,
+  OrthographicController,
   // For custom layers
   AttributeManager,
   // Shader modules
@@ -62,9 +63,6 @@ export {
   DeckRenderer,
   // Logging
   log,
-  // Controllers
-  _OrbitController,
-  _FirstPersonController,
   // Transition bindings
   TRANSITION_EVENTS,
   LinearInterpolator,

@@ -3,6 +3,7 @@ import Controller from './controller';
 import ViewState from './view-state';
 import LinearInterpolator from '../transitions/linear-interpolator';
 import {TRANSITION_EVENTS} from './transition-manager';
+import {mod} from '../utils/math-utils';
 
 const MOVEMENT_SPEED = 50; // per keyboard click
 
@@ -10,7 +11,6 @@ const DEFAULT_STATE = {
   orbitAxis: 'Z',
   rotationX: 0,
   rotationOrbit: 0,
-  fovy: 50,
   zoom: 0,
   target: [0, 0, 0],
   minRotationX: -90,
@@ -30,11 +30,6 @@ const LINEAR_TRANSITION_PROPS = {
 
 const zoom2Scale = zoom => Math.pow(2, zoom);
 
-// const mod = (value, divisor) => {
-//   const modulus = value % divisor;
-//   return modulus < 0 ? divisor + modulus : modulus;
-// };
-
 export class OrbitState extends ViewState {
   constructor({
     ViewportType,
@@ -47,7 +42,6 @@ export class OrbitState extends ViewState {
     rotationOrbit = DEFAULT_STATE.rotationOrbit, // Rotation around orbit axis
     target = DEFAULT_STATE.target,
     zoom = DEFAULT_STATE.zoom,
-    fovy = DEFAULT_STATE.fovy,
 
     /* Viewport constraints */
     minRotationX = DEFAULT_STATE.minRotationX,
@@ -73,7 +67,6 @@ export class OrbitState extends ViewState {
       rotationX,
       rotationOrbit,
       target,
-      fovy,
       zoom,
       minRotationX,
       maxRotationX,
@@ -185,9 +178,16 @@ export class OrbitState extends ViewState {
     });
   }
 
-  // default implementation of shortest path between two view states
+  // shortest path between two view states
   shortestPathFrom(viewState) {
+    const fromProps = viewState.getViewportProps();
     const props = Object.assign({}, this._viewportProps);
+    const {rotationOrbit} = props;
+
+    if (Math.abs(rotationOrbit - fromProps.rotationOrbit) > 180) {
+      props.rotationOrbit = rotationOrbit < 0 ? rotationOrbit + 360 : rotationOrbit - 360;
+    }
+
     return props;
   }
 
@@ -348,10 +348,13 @@ export class OrbitState extends ViewState {
   // Apply any constraints (mathematical or defined by _viewportProps) to map state
   _applyConstraints(props) {
     // Ensure zoom is within specified range
-    const {maxZoom, minZoom, zoom, maxRotationX, minRotationX} = props;
+    const {maxZoom, minZoom, zoom, maxRotationX, minRotationX, rotationOrbit} = props;
 
     props.zoom = clamp(zoom, minZoom, maxZoom);
     props.rotationX = clamp(props.rotationX, minRotationX, maxRotationX);
+    if (rotationOrbit < -180 || rotationOrbit > 180) {
+      props.rotationOrbit = mod(rotationOrbit + 180, 360) - 180;
+    }
 
     return props;
   }

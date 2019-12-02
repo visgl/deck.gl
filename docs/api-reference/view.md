@@ -1,6 +1,6 @@
 # View Class
 
-> For details about deck.gl's views system and code examples, visit the [Views and Projections](/docs/developer-guide/views.md) article.
+> For detailed explanations and code examples about deck.gl's views system, visit the [Views and Projections](/docs/developer-guide/views.md) article.
 
 The `View` class and its subclasses are used to specify where and how your deck.gl layers should be rendered. Applications typically instantiate at least one `View` subclass.
 
@@ -17,7 +17,7 @@ deck.gl offers a set of `View` classes that package the camera and controller lo
 ## Constructor(props : Object)
 
 ```js
-const view = View({id, x, y, width, height, ...});
+const view = new View({id, x, y, width, height, ...});
 ```
 
 Parameters:
@@ -120,10 +120,6 @@ Whether to create an orthographic or perspective projection matrix. Default is `
 
 Modifier of viewport scale. Corresponds to the number of pixels per meter. Default `1`.
 
-##### `orthographicFocalDistance` (`Number`, optional)
-
-Used by orthographic projections only. The distance at which the field-of-view frustum is sampled to extract the extents of the view box. Default `1`.
-
 
 ## Methods
 
@@ -134,9 +130,9 @@ Note: most applications just create Views with the appropriate props and do not 
 
 Returns `true` if deck.gl can determine that the supplied `View` instance is identical (equivalent) with this view.
 
-`View.equals(view)`
+`view.equals(otherView)`
 
-* `view` (View) - The view to compare with.
+* `otherView` (`View`) - Another view instance to compare with.
 
 Returns:
 
@@ -148,10 +144,16 @@ Note: For speed, deck.gl uses shallow equality. This means that a value of `fals
 ##### `makeViewport`
 
 ```js
-View.makeViewport({width, height, viewState})
+view.makeViewport({width, height, viewState})
 ```
 
-Builds a [Viewport](/docs/api-reference/viewport.md) using the viewport type and props in the `View` and provided `width`, `height` and `viewState`. The contents of `viewState` needs to be compatible with the particular `View` subclass in use.
+Parameters:
+
+* `width` (`Number`) - Dimension in pixels of the target viewport.
+* `height` (`Number`) - Dimension in pixels of the target viewport.
+* `viewState` (`Object`) - [view state](/docs/developer-guide/views.md) compatible with the current `View` subclass in use. Note that any prop provided to the `View` constructor will override that inside the `viewState`.
+
+Returns a [Viewport](/docs/api-reference/viewport.md) using the viewport type, props in the `View` and provided dimensions and view state.
 
 
 ##### `getDimensions`
@@ -167,25 +169,12 @@ Parameters:
 * `width` (`Number`) - Dimension in CSS pixels of the deck.gl "canvas".
 * `height` (`Number`) - Dimension in CSS pixels of the deck.gl "canvas".
 
-Returns:
+Returns an object containing the following fields:
 
 * `x` (`Number`) - x position in CSS pixels
 * `y` (`Number`) - y position in CSS pixels
 * `width` (`Number`) - width in CSS pixels
 * `height` (`Number`) - height in CSS pixels
-
-
-##### `getMatrix`
-
-```js
-View.getMatrix({width, height})
-```
-
-Returns:
-
-* `viewMatrix` (Array[16], optional) - View matrix. Default to identity matrix. Defaults is to create from `fov`, `near`, `far` opts (aspect is calculated).
-
-A projection matrix depends on the aspect ratio and needs to be recalculated whenever width and height changes.
 
 
 ## Remarks
