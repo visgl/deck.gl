@@ -27,35 +27,26 @@ import AttributeTransitionManager from './attribute-transition-manager';
 const LOG_START_END_PRIORITY = 2;
 const LOG_DETAIL_PRIORITY = 3;
 
-function noop() {}
-
 // Default loggers
 const logFunctions = {
-  savedMessages: null,
+  savedMessages: [],
   timeStart: null,
-  onLog: ({level, message}) => {
-    log.log(level, message)();
+  onUpdateStart: () => {
+    logFunctions.savedMessages.length = 0;
+    logFunctions.timeStart = Date.now();
   },
-  onUpdateStart: ({level, numInstances}) => {
-    logFunctions.savedMessages = [];
-    logFunctions.timeStart = new Date();
+  onUpdate: message => {
+    logFunctions.savedMessages.push(message);
   },
-  onUpdate: ({level, message}) => {
-    if (logFunctions.savedMessages) {
-      logFunctions.savedMessages.push(message);
-    }
-  },
-  onUpdateEnd: ({level, id, numInstances}) => {
-    const timeMs = Math.round(new Date() - logFunctions.timeStart);
-    const time = `${timeMs}ms`;
-    log.group(level, `Updated attributes for ${numInstances} instances in ${id} in ${time}`, {
+  onUpdateEnd: message => {
+    const timeMs = Math.round(Date.now() - logFunctions.timeStart);
+    log.group(LOG_START_END_PRIORITY, `${message} in ${timeMs}ms`, {
       collapsed: true
     })();
-    for (const message of logFunctions.savedMessages) {
-      log.log(level, message)();
+    for (const updateMessage of logFunctions.savedMessages) {
+      log.log(LOG_DETAIL_PRIORITY, updateMessage)();
     }
-    log.groupEnd(level, `Updated attributes for ${numInstances} instances in ${id} in ${time}`)();
-    logFunctions.savedMessages = null;
+    log.groupEnd(LOG_START_END_PRIORITY)();
   }
 };
 
@@ -64,29 +55,15 @@ export default class AttributeManager {
    * Sets log functions to help trace or time attribute updates.
    * Default logging uses deck logger.
    *
-   * `onLog` is called for each attribute.
-   *
    * To enable detailed control of timming and e.g. hierarchical logging,
    * hooks are also provided for update start and end.
    *
    * @param {Object} [opts]
-   * @param {String} [onLog=] - called to print
    * @param {String} [onUpdateStart=] - called before update() starts
    * @param {String} [onUpdateEnd=] - called after update() ends
    */
-  static setDefaultLogFunctions({onLog, onUpdateStart, onUpdate, onUpdateEnd} = {}) {
-    if (onLog !== undefined) {
-      logFunctions.onLog = onLog || noop;
-    }
-    if (onUpdateStart !== undefined) {
-      logFunctions.onUpdateStart = onUpdateStart || noop;
-    }
-    if (onUpdate !== undefined) {
-      logFunctions.onUpdate = onUpdate || noop;
-    }
-    if (onUpdateEnd !== undefined) {
-      logFunctions.onUpdateEnd = onUpdateEnd || noop;
-    }
+  static setDefaultLogFunctions(functions) {
+    Object.assign(logFunctions, functions);
   }
 
   /**
@@ -195,10 +172,10 @@ export default class AttributeManager {
   invalidate(triggerName, dataRange) {
     const invalidatedAttributes = this._invalidateTrigger(triggerName, dataRange);
     // For performance tuning
-    logFunctions.onLog({
-      level: LOG_DETAIL_PRIORITY,
-      message: `invalidated attributes ${invalidatedAttributes} (${triggerName}) for ${this.id}`
-    });
+    log.log(
+      LOG_DETAIL_PRIORITY,
+      `invalidated attributes ${invalidatedAttributes} (${triggerName}) for ${this.id}`
+    )();
   }
 
   invalidateAll(dataRange) {
@@ -206,10 +183,7 @@ export default class AttributeManager {
       this.attributes[attributeName].setNeedsUpdate(attributeName, dataRange);
     }
     // For performance tuning
-    logFunctions.onLog({
-      level: LOG_DETAIL_PRIORITY,
-      message: `invalidated all attributes for ${this.id}`
-    });
+    log.log(LOG_DETAIL_PRIORITY, `invalidated all attributes for ${this.id}`)();
   }
 
   // Ensure all attribute buffers are updated from props or data.
@@ -225,7 +199,7 @@ export default class AttributeManager {
     // keep track of whether some attributes are updated
     let updated = false;
 
-    logFunctions.onUpdateStart({level: LOG_START_END_PRIORITY, id: this.id, numInstances});
+    logFunctions.onUpdateStart();
     if (this.stats) {
       this.stats.get('Update Attributes').timeStart();
     }
@@ -264,7 +238,7 @@ export default class AttributeManager {
 
     if (updated) {
       // Only initiate alloc/update (and logging) if actually needed
-      logFunctions.onUpdateEnd({level: LOG_START_END_PRIORITY, id: this.id, numInstances});
+      logFunctions.onUpdateEnd(`Updated attributes for ${numInstances} instances in ${this.id}`);
     }
 
     if (this.stats) {
@@ -413,11 +387,7 @@ export default class AttributeManager {
     const {attribute, numInstances} = opts;
 
     if (attribute.allocate(numInstances)) {
-      logFunctions.onUpdate({
-        level: LOG_DETAIL_PRIORITY,
-        message: `${attribute.id} allocated ${numInstances}`,
-        id: this.id
-      });
+      logFunctions.onUpdate(`${attribute.id} allocated ${numInstances}`);
     }
 
     // Calls update on any buffers that need update
@@ -428,10 +398,7 @@ export default class AttributeManager {
       this.needsRedraw = true;
 
       const timeMs = Math.round(Date.now() - timeStart);
-      logFunctions.onUpdate({
-        level: LOG_DETAIL_PRIORITY,
-        message: `${attribute.id} updated ${numInstances} in ${timeMs}ms`
-      });
+      logFunctions.onUpdate(`${attribute.id} updated ${numInstances} in ${timeMs}ms`);
     }
   }
 }
