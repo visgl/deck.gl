@@ -134,15 +134,12 @@ export default class DeckRenderer {
     const primitiveCount = totalCount - compositeCount;
     const hiddenCount = primitiveCount - visibleCount;
 
-    let message = '';
-    message += `RENDER #${this.renderCount} \
-${visibleCount} (of ${totalCount} layers) to ${pass} because ${redrawReason} `;
-    if (log.priority > LOG_PRIORITY_DRAW) {
-      message += `\
-(${hiddenCount} hidden, ${compositeCount} composite ${pickableCount} pickable)`;
-    }
-
-    log.log(LOG_PRIORITY_DRAW, message)();
+    log.log(
+      LOG_PRIORITY_DRAW,
+      `RENDER #${this.renderCount} \
+${visibleCount} (of ${totalCount} layers) to ${pass} because ${redrawReason} \
+(${hiddenCount} hidden, ${compositeCount} composite ${pickableCount} pickable)`
+    )();
 
     if (stats) {
       stats.get('Redraw Layers').add(visibleCount);
