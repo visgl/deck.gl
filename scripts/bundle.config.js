@@ -45,6 +45,17 @@ function getExternals(packageInfo) {
   return externals;
 }
 
+const babelOptions = {
+  presets: [['@babel/preset-env', {forceAllTransforms: true}]],
+  // all of the helpers will reference the module @babel/runtime to avoid duplication
+  // across the compiled output.
+  plugins: [
+    '@babel/transform-runtime',
+    'inline-webgl-constants',
+    ['remove-glsl-comments', {patterns: ['**/*.glsl.js']}]
+  ]
+};
+
 const config = {
   mode: 'production',
 
@@ -69,16 +80,7 @@ const config = {
         test: /\.js$/,
         loader: 'babel-loader',
         include: /src/,
-        options: {
-          presets: [['@babel/preset-env', {forceAllTransforms: true}]],
-          // all of the helpers will reference the module @babel/runtime to avoid duplication
-          // across the compiled output.
-          plugins: [
-            '@babel/transform-runtime',
-            'inline-webgl-constants',
-            ['remove-glsl-comments', {patterns: ['**/*.glsl.js']}]
-          ]
-        }
+        options: babelOptions
       }
     ]
   },
@@ -114,6 +116,8 @@ module.exports = (env = {}) => {
     config.output.filename = 'dist/dist.dev.js';
     // Disable transpilation
     config.module.rules = [];
+  } else {
+    babelOptions.plugins.push(resolve(__dirname, './babel-plugin-remove-log'));
   }
 
   // NOTE uncomment to display config
