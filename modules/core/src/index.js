@@ -41,13 +41,16 @@ export {default as PostProcessEffect} from './effects/post-process-effect';
 export {default as _LayersPass} from './passes/layers-pass';
 
 // Experimental Pure JS (non-React) bindings
-export {default as Deck} from './lib/deck';
-
-export {default as LayerManager} from './lib/layer-manager';
-export {default as AttributeManager} from './lib/attribute/attribute-manager';
-export {default as Layer} from './lib/layer';
-export {default as CompositeLayer} from './lib/composite-layer';
-export {default as DeckRenderer} from './lib/deck-renderer';
+export {
+  Deck,
+  DeckRenderer,
+  Effect,
+  LayerManager,
+  AttributeManager,
+  Layer,
+  CompositeLayer,
+  LayerExtension
+} from './lib';
 
 // Viewports
 export {default as Viewport} from './viewports/viewport';
@@ -79,9 +82,6 @@ export {default as OrthographicController} from './controllers/orthographic-cont
 
 // EXPERIMENTAL EXPORTS
 
-// Experimental Effects (non-React) bindings
-export {default as Effect} from './lib/effect';
-
 // Eperimental Transitions
 export {TRANSITION_EVENTS} from './controllers/transition-manager';
 export {default as LinearInterpolator} from './transitions/linear-interpolator';
@@ -97,8 +97,6 @@ import Tesselator from './utils/tesselator'; // Export? move to luma.gl or math.
 import {count} from './utils/count';
 import memoize from './utils/memoize';
 export {mergeShaders} from './utils/shader';
-
-export {LayerExtension} from './lib/layer-extension';
 
 // props
 import {compareProps} from './lifecycle/props';

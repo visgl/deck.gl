@@ -682,7 +682,7 @@ export default class Layer extends Component {
     // Update primary flags
     if (flags.dataChanged && !changeFlags.dataChanged) {
       changeFlags.dataChanged = flags.dataChanged;
-      log.log(LOG_PRIORITY_UPDATE + 1, () => `dataChanged: ${flags.dataChanged} in ${this.id}`)();
+      log.log(LOG_PRIORITY_UPDATE + 1, `dataChanged: ${flags.dataChanged} in ${this.id}`)();
     }
     if (flags.updateTriggersChanged && !changeFlags.updateTriggersChanged) {
       changeFlags.updateTriggersChanged =
@@ -691,32 +691,29 @@ export default class Layer extends Component {
           : flags.updateTriggersChanged || changeFlags.updateTriggersChanged;
       log.log(
         LOG_PRIORITY_UPDATE + 1,
-        () =>
-          'updateTriggersChanged: ' +
-          `${Object.keys(flags.updateTriggersChanged).join(', ')} in ${this.id}`
+        `updateTriggersChanged: ${Object.keys(flags.updateTriggersChanged).join(', ')} in ${
+          this.id
+        }`
       )();
     }
     if (flags.propsChanged && !changeFlags.propsChanged) {
       changeFlags.propsChanged = flags.propsChanged;
-      log.log(LOG_PRIORITY_UPDATE + 1, () => `propsChanged: ${flags.propsChanged} in ${this.id}`)();
+      log.log(LOG_PRIORITY_UPDATE + 1, `propsChanged: ${flags.propsChanged} in ${this.id}`)();
     }
     if (flags.extensionsChanged && !changeFlags.extensionsChanged) {
       changeFlags.extensionsChanged = flags.extensionsChanged;
       log.log(
         LOG_PRIORITY_UPDATE + 1,
-        () => `extensionsChanged: ${flags.extensionsChanged} in ${this.id}`
+        `extensionsChanged: ${flags.extensionsChanged} in ${this.id}`
       )();
     }
     if (flags.viewportChanged && !changeFlags.viewportChanged) {
       changeFlags.viewportChanged = flags.viewportChanged;
-      log.log(
-        LOG_PRIORITY_UPDATE + 2,
-        () => `viewportChanged: ${flags.viewportChanged} in ${this.id}`
-      )();
+      log.log(LOG_PRIORITY_UPDATE + 2, `viewportChanged: ${flags.viewportChanged} in ${this.id}`)();
     }
     if (flags.stateChanged && !changeFlags.stateChanged) {
       changeFlags.stateChanged = flags.stateChanged;
-      log.log(LOG_PRIORITY_UPDATE + 1, () => `stateChanged: ${flags.stateChanged} in ${this.id}`)();
+      log.log(LOG_PRIORITY_UPDATE + 1, `stateChanged: ${flags.stateChanged} in ${this.id}`)();
     }
 
     // Update composite flags
