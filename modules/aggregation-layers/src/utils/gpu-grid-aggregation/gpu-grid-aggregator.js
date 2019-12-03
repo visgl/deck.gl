@@ -301,7 +301,6 @@ export default class GPUGridAggregator {
       results[id] = {};
       const {needMin, needMax, combineMaxMin} = weights[id];
       results[id].aggregationTexture = textures[id];
-      // console.log(`Reading GPU aggregation results for weight:${id} into ${weights[id].aggregationBuffer.id}`);
       results[id].aggregationBuffer = readPixelsToBuffer(framebuffers[id], {
         target: weights[id].aggregationBuffer, // update if a buffer is provided
         sourceType: GL.FLOAT

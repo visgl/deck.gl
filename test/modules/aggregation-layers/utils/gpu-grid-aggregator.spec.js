@@ -37,10 +37,7 @@ function testCounterMinMax(aggregator, t, opts) {
 
   let weight1 = Object.assign({}, fixture.weights.weight1, {size});
   let results = aggregator.run(Object.assign({}, fixture, {weights: {weight1}, useGPU}));
-  // GPUGridAggregator.logData(results.weight1);
 
-  // const minData = results.weight1.minBuffer.getData();
-  // const maxData = results.weight1.maxBuffer.getData();
   const {minData, maxData} = aggregator.getData('weight1');
   t.equal(maxData[3], 3, `${testName} needMax: total count should match`);
   t.equal(minData[3], 3, `${testName} needMin: total count should match`);
@@ -124,8 +121,6 @@ function testAggregationOperations(opts) {
   );
   const cpuResults = cpuAggregator(aggregationOpts);
   let results = gpuAggregator.run(aggregationOpts);
-
-  // results = gpuAggregator.run(aggregationOpts);
 
   const gpuResults = {
     minData: results.weight1.minBuffer.getData(),
