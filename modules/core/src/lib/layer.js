@@ -865,8 +865,18 @@ ${flags.viewportChanged ? 'viewport' : ''}\
     });
 
     this.state = {};
-    // TODO deprecated, for backwards compatibility with older layers
-    this.state.attributeManager = attributeManager;
+    // for backwards compatibility with older layers
+    // TODO - remove in next release
+    /* eslint-disable accessor-pairs */
+    Object.defineProperty(this.state, 'attributeManager', {
+      get: () => {
+        log.deprecated('layer.state.attributeManager', 'layer.getAttributeManager()');
+        return attributeManager;
+      }
+    });
+    /* eslint-enable accessor-pairs */
+
+    this.internalState.layer = this;
     this.internalState.uniformTransitions = new UniformTransitionManager(this.context.timeline);
     this.internalState.onAsyncPropUpdated = this._onAsyncPropUpdated.bind(this);
 
@@ -885,22 +895,15 @@ ${flags.viewportChanged ? 'viewport' : ''}\
 
     // Move internalState
     this.internalState = internalState;
-    this.internalState.component = this;
+    this.internalState.layer = this;
 
     // Move state
     this.state = state;
-    // Deprecated: layer references on `state`
-    state.layer = this;
     // We keep the state ref on old layers to support async actions
     // oldLayer.state = null;
 
     // Ensure any async props are updated
     this.internalState.setAsyncProps(this.props);
-
-    // Update model layer reference
-    for (const model of this.getModels()) {
-      model.userData.layer = this;
-    }
 
     this.diffProps(this.props, this.internalState.getOldProps());
   }

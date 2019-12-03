@@ -347,15 +347,6 @@ export default class LayerManager {
       // TODO - what should the lifecycle state be here? LIFECYCLE.INITIALIZATION_FAILED?
     }
 
-    // Set back pointer (used in picking)
-    layer.internalState.layer = layer;
-
-    // Save layer on model for picking purposes
-    // store on model.userData rather than directly on model
-    for (const model of layer.getModels()) {
-      model.userData.layer = layer;
-    }
-
     return error;
   }
 

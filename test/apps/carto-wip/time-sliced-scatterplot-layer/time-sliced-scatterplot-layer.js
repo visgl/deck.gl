@@ -33,7 +33,7 @@ export default class TimeSlicedScatterplotLayer extends ScatterplotLayer {
   initializeState() {
     super.initializeState();
 
-    this.state.attributeManager.addInstanced({
+    this.getAttributeManager().addInstanced({
       time: {size: 1, accessor: 'getTime', defaultValue: 0, update: this.calculateTime}
     });
     /* eslint-enable max-len */
