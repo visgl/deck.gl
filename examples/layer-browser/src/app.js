@@ -197,7 +197,7 @@ export default class App extends PureComponent {
 
     switch (coordinateSystem) {
       case COORDINATE_SYSTEM.METER_OFFSETS:
-      case COORDINATE_SYSTEM.IDENTITY:
+      case COORDINATE_SYSTEM.CARTESIAN:
         const {
           settings: {rotationZ, rotationX}
         } = this.state;

@@ -22,25 +22,38 @@
 // "project" and "project64" shader modules. Both places need to be
 // updated.
 
-// TODO: Maybe "POSITIONS" would be a better name?
+// Describes the format of positions
 export const COORDINATE_SYSTEM = {
+  // `LNGLAT` if rendering into a geospatial viewport, `CARTESIAN` otherwise
+  DEFAULT: -1,
   // Positions are interpreted as [lng, lat, elevation]
   // lng lat are degrees, elevation is meters. distances as meters.
   LNGLAT: 1,
-  LNGLAT_DEPRECATED: 5,
 
   // Positions are interpreted as meter offsets, distances as meters
   METER_OFFSETS: 2,
-  // Planned to deprecate in later versions, in favor of METER_OFFSETS
-  METERS: 2,
 
   // Positions are interpreted as lng lat offsets: [deltaLng, deltaLat, elevation]
   // deltaLng, deltaLat are delta degrees, elevation is meters.
   // distances as meters.
   LNGLAT_OFFSETS: 3,
 
+  // Non-geospatial
+  CARTESIAN: 0,
+
+  // Deprecated
   // Positions and distances are not transformed: [x, y, z] in unit coordinates
   IDENTITY: 0
+};
+
+// Describes the common space
+export const PROJECTION_MODE = {
+  WEB_MERCATOR: 1.0,
+
+  // This is automatically assigned by the project module
+  WEB_MERCATOR_AUTO_OFFSET: 4.0,
+
+  IDENTITY: 0.0
 };
 
 export const EVENTS = {

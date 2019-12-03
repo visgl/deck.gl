@@ -68,7 +68,7 @@ export default class App extends PureComponent {
         id: 'mini-coopers',
         data: SAMPLE_DATA,
         mesh: MESH_URL,
-        coordinateSystem: COORDINATE_SYSTEM.IDENTITY,
+        coordinateSystem: COORDINATE_SYSTEM.CARTESIAN,
         getPosition: d => d.position,
         getColor: d => d.color,
         getOrientation: d => d.orientation
@@ -78,7 +78,7 @@ export default class App extends PureComponent {
         id: 'background',
         data: background,
         extruded: false,
-        coordinateSystem: COORDINATE_SYSTEM.IDENTITY,
+        coordinateSystem: COORDINATE_SYSTEM.CARTESIAN,
         getPolygon: f => f,
         getFillColor: [0, 0, 0, 0]
       })

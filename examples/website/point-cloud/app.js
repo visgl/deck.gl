@@ -96,7 +96,7 @@ export default class App extends PureComponent {
         id: 'laz-point-cloud-layer',
         data: LAZ_SAMPLE,
         onDataLoad: this._onLoad,
-        coordinateSystem: COORDINATE_SYSTEM.IDENTITY,
+        coordinateSystem: COORDINATE_SYSTEM.CARTESIAN,
         getNormal: [0, 1, 0],
         getColor: [255, 255, 255],
         opacity: 0.5,

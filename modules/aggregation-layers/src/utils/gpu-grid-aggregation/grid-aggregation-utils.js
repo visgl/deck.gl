@@ -28,8 +28,15 @@ export function pointToDensityGridData({
   log.assert(cellSizeMeters > 0);
   let cellSize = [cellSizeMeters, cellSizeMeters];
   let worldOrigin = [0, 0];
+
+  if (coordinateSystem === COORDINATE_SYSTEM.DEFAULT) {
+    coordinateSystem =
+      viewport && !viewport.isGeospatial ? COORDINATE_SYSTEM.CARTESIAN : COORDINATE_SYSTEM.LNGLAT;
+  }
+
   log.assert(
-    coordinateSystem === COORDINATE_SYSTEM.LNGLAT || coordinateSystem === COORDINATE_SYSTEM.IDENTITY
+    coordinateSystem === COORDINATE_SYSTEM.LNGLAT ||
+      coordinateSystem === COORDINATE_SYSTEM.CARTESIAN
   );
 
   switch (coordinateSystem) {
@@ -39,7 +46,7 @@ export function pointToDensityGridData({
       cellSize = [gridOffset.xOffset, gridOffset.yOffset];
       worldOrigin = [-180, -90]; // Origin used to define grid cell boundaries
       break;
-    case COORDINATE_SYSTEM.IDENTITY:
+    case COORDINATE_SYSTEM.CARTESIAN:
       const {width, height} = viewport;
       worldOrigin = [-width / 2, -height / 2]; // Origin used to define grid cell boundaries
       break;

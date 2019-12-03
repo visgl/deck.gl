@@ -18,17 +18,22 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {PROJECT_COORDINATE_SYSTEM} from './constants';
+import {COORDINATE_SYSTEM, PROJECTION_MODE} from '../../lib/constants';
 
 // We are generating these from the js code in constants.js
-const COORDINATE_SYSTEM_GLSL_CONSTANTS = Object.keys(PROJECT_COORDINATE_SYSTEM)
-  .map(key => `const float COORDINATE_SYSTEM_${key} = ${PROJECT_COORDINATE_SYSTEM[key]}.;`)
+const COORDINATE_SYSTEM_GLSL_CONSTANTS = Object.keys(COORDINATE_SYSTEM)
+  .map(key => `const float COORDINATE_SYSTEM_${key} = ${COORDINATE_SYSTEM[key]}.;`)
+  .join('');
+const PROJECTION_MODE_GLSL_CONSTANTS = Object.keys(PROJECTION_MODE)
+  .map(key => `const float PROJECTION_MODE_${key} = ${PROJECTION_MODE[key]}.;`)
   .join('');
 
 export default `\
 ${COORDINATE_SYSTEM_GLSL_CONSTANTS}
+${PROJECTION_MODE_GLSL_CONSTANTS}
 
 uniform float project_uCoordinateSystem;
+uniform float project_uProjectionMode;
 uniform float project_uScale;
 uniform bool project_uWrapLongitude;
 uniform float project_uAntimeridian;
@@ -81,7 +86,7 @@ vec3 project_normal(vec3 vector) {
 
 vec4 project_offset_(vec4 offset) {
   float dy = offset.y;
-  if (project_uCoordinateSystem == COORDINATE_SYSTEM_LNGLAT_AUTO_OFFSET) {
+  if (project_uCoordinateSystem == COORDINATE_SYSTEM_LNGLAT) {
     dy = clamp(dy, -1., 1.);
   }
   vec3 commonUnitsPerWorldUnit = project_uCommonUnitsPerWorldUnit + project_uCommonUnitsPerWorldUnit2 * dy;
@@ -103,11 +108,10 @@ vec2 project_mercator_(vec2 lnglat) {
 }
 
 //
-// Projects lnglats (or meter offsets, depending on mode) to common space
+// Projects positions (defined by project_uCoordinateSystem) to common space (defined by project_uProjectionMode)
 //
 vec4 project_position(vec4 position, vec3 position64Low) {
-  // TODO - why not simply subtract center and fall through?
-  if (project_uCoordinateSystem == COORDINATE_SYSTEM_LNG_LAT) {
+  if (project_uCoordinateSystem == COORDINATE_SYSTEM_LNGLAT && project_uProjectionMode == PROJECTION_MODE_WEB_MERCATOR) {
     return project_uModelMatrix * vec4(
       project_mercator_(position.xy) * WORLD_SCALE,
       project_size(position.z),
@@ -115,19 +119,14 @@ vec4 project_position(vec4 position, vec3 position64Low) {
     );
   }
 
-  if (project_uCoordinateSystem == COORDINATE_SYSTEM_LNGLAT_AUTO_OFFSET) {
-    // Subtract high part of 64 bit value. Convert remainder to float32, preserving precision.
-    return project_offset_(vec4(position.xyz - project_uCoordinateOrigin + position64Low, position.w));
-  }
-
-  if (project_uCoordinateSystem == COORDINATE_SYSTEM_LNGLAT_OFFSETS) {
-    return project_offset_(position);
-  }
-
-  // METER_OFFSETS or IDENTITY
-  // Apply model matrix
   vec4 position_world = project_uModelMatrix * position;
-  if (project_uCoordinateSystem == COORDINATE_SYSTEM_IDENTITY) {
+
+  if (project_uCoordinateSystem == COORDINATE_SYSTEM_LNGLAT && project_uProjectionMode == PROJECTION_MODE_WEB_MERCATOR_AUTO_OFFSET) {
+    // Subtract high part of 64 bit value. Convert remainder to float32, preserving precision.
+    position_world.xyz -= project_uCoordinateOrigin;
+    position_world.xyz += position64Low;
+  }
+  if (project_uProjectionMode == PROJECTION_MODE_IDENTITY) {
     position_world.xyz -= project_uCoordinateOrigin;
     // Translation is already added to the high parts
     position_world += project_uModelMatrix * vec4(position64Low, 0.0);

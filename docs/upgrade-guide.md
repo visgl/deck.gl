@@ -35,6 +35,9 @@
   + `projectFlat`: use `projectPosition`
 - `PerspectiveView` class - use `FirstPersonView`
 - `ThirdPersonView` class - use `MapView` (geospatial) or `OrbitView` (info-vis)
+- `COORDINATE_SYSTEM` enum
+  + `LNGLAT_DEPRECATED`: use `LNGLAT`
+  + `METERS`: use `METER_OFFSETS`
 
 ##### Standalone bundle
 

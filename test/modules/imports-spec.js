@@ -82,8 +82,11 @@ test('Top-level imports', t0 => {
     t.ok(deck.LineLayer, 'LineLayer symbol imported');
 
     t.ok(Number.isFinite(deck.COORDINATE_SYSTEM.LNGLAT), 'COORDINATE_SYSTEM.LNGLAT imported');
-    t.ok(Number.isFinite(deck.COORDINATE_SYSTEM.METERS), 'COORDINATE_SYSTEM.METERS imported');
-    t.ok(Number.isFinite(deck.COORDINATE_SYSTEM.IDENTITY), 'COORDINATE_SYSTEM.IDENTITY imported');
+    t.ok(
+      Number.isFinite(deck.COORDINATE_SYSTEM.METER_OFFSETS),
+      'COORDINATE_SYSTEM.METERS imported'
+    );
+    t.ok(Number.isFinite(deck.COORDINATE_SYSTEM.CARTESIAN), 'COORDINATE_SYSTEM.CARTESIAN imported');
     t.end();
   });
 

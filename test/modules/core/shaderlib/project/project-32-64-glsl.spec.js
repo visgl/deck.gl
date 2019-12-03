@@ -157,10 +157,10 @@ const TEST_CASES = [
     ]
   },
   {
-    title: 'LNGLAT_DEPRECATED mode',
+    title: 'LNGLAT mode - high zoom',
     params: {
       viewport: TEST_VIEWPORT_HIGH_ZOOM,
-      coordinateSystem: COORDINATE_SYSTEM.LNGLAT_DEPRECATED
+      coordinateSystem: COORDINATE_SYSTEM.LNGLAT
     },
     tests: [
       {
@@ -174,7 +174,10 @@ const TEST_CASES = [
           [worldPosition] = project_position_to_clipspace.__out__;
           return worldPosition;
         },
-        output: TEST_VIEWPORT_HIGH_ZOOM.projectFlat([-122.05, 37.92]).concat([0, 1]),
+        output: TEST_VIEWPORT_HIGH_ZOOM.projectFlat([-122.05, 37.92])
+          .map((x, i) => x - TEST_VIEWPORT_HIGH_ZOOM.center[i])
+          .concat([0, 1]),
+        output64: TEST_VIEWPORT_HIGH_ZOOM.projectFlat([-122.05, 37.92]).concat([0, 1]),
         precision: PIXEL_TOLERANCE,
         gpu64BitPrecision: 1e-7,
         vs: TRANSFORM_VS.project_position_to_clipspace_world_position(
@@ -250,7 +253,7 @@ test('project32&64#vs', t => {
   [false, true].forEach(usefp64 => {
     /* eslint-disable max-nested-callbacks, complexity */
     TEST_CASES.forEach(testCase => {
-      if (usefp64 && testCase.params.coordinateSystem !== COORDINATE_SYSTEM.LNGLAT_DEPRECATED) {
+      if (usefp64 && testCase.params.coordinateSystem !== COORDINATE_SYSTEM.LNGLAT) {
         // Apply 64 bit projection only for LNGLAT_DEPRECATED
         return;
       }
@@ -262,7 +265,7 @@ test('project32&64#vs', t => {
         uniforms = Object.assign(uniforms, project64.getUniforms(testCase.params, uniforms));
       }
       testCase.tests.forEach(c => {
-        const expected = c.output;
+        const expected = (usefp64 && c.output64) || c.output;
         const skipOnGPU = c.skipGPUs && c.skipGPUs.some(gpu => vendor.indexOf(gpu) >= 0);
 
         if (Transform.isSupported(gl) && !skipOnGPU) {

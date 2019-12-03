@@ -28,7 +28,7 @@ const defaultProps = {
   zTitle: AxesLayer.defaultProps.zTitle,
   axesPadding: AxesLayer.defaultProps.padding,
   axesColor: AxesLayer.defaultProps.color,
-  coordinateSystem: COORDINATE_SYSTEM.IDENTITY
+  coordinateSystem: COORDINATE_SYSTEM.CARTESIAN
 };
 
 /*

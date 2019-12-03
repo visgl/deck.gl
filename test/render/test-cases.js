@@ -200,7 +200,7 @@ export const TEST_CASES = [
       new ScatterplotLayer({
         id: 'orthographic-64',
         opacity: 0.1,
-        coordinateSystem: COORDINATE_SYSTEM.IDENTITY,
+        coordinateSystem: COORDINATE_SYSTEM.CARTESIAN,
         data: dataSamples.getPoints100K().map(p => [p[0] + 10000, p[1] + 10000]),
         getPosition: d => d,
         getRadius: 0,
@@ -226,7 +226,7 @@ export const TEST_CASES = [
         id: 'pointcloud-identity',
         data: [{position: [0, 100, 0]}, {position: [-100, -100, 0]}, {position: [100, -100, 0]}],
         opacity: 0.8,
-        coordinateSystem: COORDINATE_SYSTEM.IDENTITY,
+        coordinateSystem: COORDINATE_SYSTEM.CARTESIAN,
         getPosition: d => d.position,
         getNormal: d => [0, 0.5, 0.2],
         getColor: d => [255, 255, 0, 128],
@@ -248,7 +248,7 @@ export const TEST_CASES = [
       new ScreenGridLayer({
         id: 'screengrid-infoviz',
         data: screenSpaceData,
-        coordinateSystem: COORDINATE_SYSTEM.IDENTITY,
+        coordinateSystem: COORDINATE_SYSTEM.CARTESIAN,
         opacity: 0.8,
         getPosition: d => d,
         cellSizePixels: 40,
@@ -272,7 +272,7 @@ export const TEST_CASES = [
         id: 'contour-infoviz',
         data: screenSpaceData,
         getPosition: d => d,
-        coordinateSystem: COORDINATE_SYSTEM.IDENTITY,
+        coordinateSystem: COORDINATE_SYSTEM.CARTESIAN,
         cellSize: 40,
         contours: [
           {threshold: 1, color: [50, 50, 50]},
@@ -298,7 +298,7 @@ export const TEST_CASES = [
         id: 'contour-isobands-infoviz',
         data: screenSpaceData,
         getPosition: d => d,
-        coordinateSystem: COORDINATE_SYSTEM.IDENTITY,
+        coordinateSystem: COORDINATE_SYSTEM.CARTESIAN,
         cellSize: 40,
         contours: [
           {threshold: [1, 2], color: [150, 0, 0]},
@@ -346,7 +346,7 @@ export const TEST_CASES = [
       new PolygonLayer({
         id: 'polygon-lnglat-64',
         data: dataSamples.polygons,
-        coordinateSystem: COORDINATE_SYSTEM.LNGLAT_DEPRECATED,
+        coordinateSystem: COORDINATE_SYSTEM.LNGLAT,
         getPolygon: f => f,
         getFillColor: [200, 0, 0],
         getLineColor: [0, 0, 0],
@@ -367,7 +367,7 @@ export const TEST_CASES = [
     layers: [
       new PolygonLayer({
         id: 'polygon-lnglat',
-        coordinateSystem: COORDINATE_SYSTEM.IDENTITY,
+        coordinateSystem: COORDINATE_SYSTEM.CARTESIAN,
         data: [[[-100, -100], [-100, 100], [100, 100], [100, -100]]],
         getPolygon: f => f,
         filled: false,
@@ -505,7 +505,7 @@ export const TEST_CASES = [
       new ScatterplotLayer({
         id: 'scatterplot-lnglat',
         data: dataSamples.points,
-        coordinateSystem: COORDINATE_SYSTEM.LNGLAT_DEPRECATED,
+        coordinateSystem: COORDINATE_SYSTEM.LNGLAT,
         getPosition: d => d.COORDINATES,
         getFillColor: d => [255, 128, 0],
         getRadius: d => d.SPACES,
@@ -727,7 +727,6 @@ export const TEST_CASES = [
           getIcon: 1
         },
         sizeScale: 12,
-        coordinateSystem: COORDINATE_SYSTEM.LNGLAT_DEPRECATED,
         getPosition: d => d.COORDINATES,
         getColor: d => [64, 64, 72],
         getIcon: d => {
@@ -767,7 +766,6 @@ export const TEST_CASES = [
           getIcon: 2
         },
         sizeScale: 12,
-        coordinateSystem: COORDINATE_SYSTEM.LNGLAT_DEPRECATED,
         getPosition: d => d.COORDINATES,
         getColor: d => [64, 64, 72],
         getIcon: d => {

@@ -18,7 +18,7 @@ test('Fp64Extension', t => {
     },
     {
       updateProps: {
-        coordinateSystem: COORDINATE_SYSTEM.LNGLAT_DEPRECATED,
+        coordinateSystem: COORDINATE_SYSTEM.LNGLAT,
         extensions: [new Fp64Extension()]
       },
       onAfterUpdate: ({layer}) => {

@@ -103,7 +103,6 @@ function getUniformsError(uniforms, formats) {
 test('project#getUniforms', t => {
   let uniforms = project.getUniforms({viewport: TEST_VIEWPORTS.map});
   t.notOk(getUniformsError(uniforms, UNIFORMS), 'Uniforms validated');
-  t.notOk(uniforms.project_uCoordinateOrigin, 'Should not return shader coordinate origin');
   t.deepEqual(uniforms.project_uCenter, [0, 0, 0, 0], 'Returned zero projection center');
 
   uniforms = project.getUniforms({viewport: TEST_VIEWPORTS.mapHighZoom});
@@ -121,12 +120,11 @@ test('project#getUniforms', t => {
     coordinateOrigin: [-122.4, 37.7]
   });
   t.notOk(getUniformsError(uniforms, UNIFORMS), 'Uniforms validated');
-  t.notOk(uniforms.project_uCoordinateOrigin, 'Should not returned shader coordinate origin');
   t.ok(uniforms.project_uCenter.some(x => x), 'Returned non-trivial projection center');
 
   uniforms = project.getUniforms({
     viewport: TEST_VIEWPORTS.infoVis,
-    coordinateSystem: COORDINATE_SYSTEM.IDENTITY
+    coordinateSystem: COORDINATE_SYSTEM.CARTESIAN
   });
   t.notOk(getUniformsError(uniforms, UNIFORMS), 'Uniforms validated');
   t.deepEqual(

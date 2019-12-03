@@ -17,7 +17,7 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
-import {PROJECT_COORDINATE_SYSTEM} from '../project/constants';
+import {COORDINATE_SYSTEM, PROJECTION_MODE} from '../../lib/constants';
 import project from '../project/project';
 import {Vector3, Matrix4} from 'math.gl';
 import memoize from '../../utils/memoize';
@@ -173,9 +173,12 @@ function createShadowUniforms(opts = {}, context = {}) {
       .clone()
       .translate(new Vector3(opts.viewport.center).negate());
 
-    if (context.project_uCoordinateSystem === PROJECT_COORDINATE_SYSTEM.LNG_LAT) {
+    if (
+      context.project_uCoordinateSystem === COORDINATE_SYSTEM.LNGLAT &&
+      context.project_uProjectionMode === PROJECTION_MODE.WEB_MERCATOR
+    ) {
       viewProjectionMatrices[i] = viewProjectionMatrixCentered;
-      projectCenters[i] = [0, 0, 0, 0];
+      projectCenters[i] = center;
     } else {
       viewProjectionMatrices[i] = viewProjectionMatrix
         .clone()
