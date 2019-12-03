@@ -21,51 +21,19 @@
 /* eslint-disable guard-for-in */
 import Attribute from './attribute';
 import log from '../../utils/log';
+import debug from '../../debug';
+const debugLog = debug.log;
 
 import AttributeTransitionManager from './attribute-transition-manager';
 
-const LOG_START_END_PRIORITY = 2;
-const LOG_DETAIL_PRIORITY = 3;
-
-// Default loggers
-const logFunctions = {
-  savedMessages: [],
-  timeStart: null,
-  onUpdateStart: () => {
-    logFunctions.savedMessages.length = 0;
-    logFunctions.timeStart = Date.now();
-  },
-  onUpdate: message => {
-    logFunctions.savedMessages.push(message);
-  },
-  onUpdateEnd: message => {
-    const timeMs = Math.round(Date.now() - logFunctions.timeStart);
-    log.group(LOG_START_END_PRIORITY, `${message} in ${timeMs}ms`, {
-      collapsed: true
-    })();
-    for (const updateMessage of logFunctions.savedMessages) {
-      log.log(LOG_DETAIL_PRIORITY, updateMessage)();
-    }
-    log.groupEnd(LOG_START_END_PRIORITY)();
-  }
-};
+const EVENT_INVALIDATE = 'attributeManager.invalidate';
+const EVENT_UPDATE_START = 'attributeManager.updateStart';
+const EVENT_UPDATE_END = 'attributeManager.updateEnd';
+const EVENT_ATTRIBUTE_UPDATE_START = 'attribute.updateStart';
+const EVENT_ATTRIBUTE_ALLOCATE = 'attribute.allocate';
+const EVENT_ATTRIBUTE_UPDATE_END = 'attribute.updateEnd';
 
 export default class AttributeManager {
-  /**
-   * Sets log functions to help trace or time attribute updates.
-   * Default logging uses deck logger.
-   *
-   * To enable detailed control of timming and e.g. hierarchical logging,
-   * hooks are also provided for update start and end.
-   *
-   * @param {Object} [opts]
-   * @param {String} [onUpdateStart=] - called before update() starts
-   * @param {String} [onUpdateEnd=] - called after update() ends
-   */
-  static setDefaultLogFunctions(functions) {
-    Object.assign(logFunctions, functions);
-  }
-
   /**
    * @classdesc
    * Automated attribute generation and management. Suitable when a set of
@@ -172,10 +140,7 @@ export default class AttributeManager {
   invalidate(triggerName, dataRange) {
     const invalidatedAttributes = this._invalidateTrigger(triggerName, dataRange);
     // For performance tuning
-    log.log(
-      LOG_DETAIL_PRIORITY,
-      `invalidated attributes ${invalidatedAttributes} (${triggerName}) for ${this.id}`
-    )();
+    debugLog(EVENT_INVALIDATE, this, triggerName, invalidatedAttributes);
   }
 
   invalidateAll(dataRange) {
@@ -183,7 +148,7 @@ export default class AttributeManager {
       this.attributes[attributeName].setNeedsUpdate(attributeName, dataRange);
     }
     // For performance tuning
-    log.log(LOG_DETAIL_PRIORITY, `invalidated all attributes for ${this.id}`)();
+    debugLog(EVENT_INVALIDATE, this, 'all');
   }
 
   // Ensure all attribute buffers are updated from props or data.
@@ -199,7 +164,7 @@ export default class AttributeManager {
     // keep track of whether some attributes are updated
     let updated = false;
 
-    logFunctions.onUpdateStart();
+    debugLog(EVENT_UPDATE_START, this);
     if (this.stats) {
       this.stats.get('Update Attributes').timeStart();
     }
@@ -238,7 +203,7 @@ export default class AttributeManager {
 
     if (updated) {
       // Only initiate alloc/update (and logging) if actually needed
-      logFunctions.onUpdateEnd(`Updated attributes for ${numInstances} instances in ${this.id}`);
+      debugLog(EVENT_UPDATE_END, this, numInstances);
     }
 
     if (this.stats) {
@@ -385,20 +350,17 @@ export default class AttributeManager {
 
   _updateAttribute(opts) {
     const {attribute, numInstances} = opts;
+    debugLog(EVENT_ATTRIBUTE_UPDATE_START, attribute);
 
     if (attribute.allocate(numInstances)) {
-      logFunctions.onUpdate(`${attribute.id} allocated ${numInstances}`);
+      debugLog(EVENT_ATTRIBUTE_ALLOCATE, attribute, numInstances);
     }
 
     // Calls update on any buffers that need update
-    const timeStart = Date.now();
-
     const updated = attribute.updateBuffer(opts);
     if (updated) {
       this.needsRedraw = true;
-
-      const timeMs = Math.round(Date.now() - timeStart);
-      logFunctions.onUpdate(`${attribute.id} updated ${numInstances} in ${timeMs}ms`);
+      debugLog(EVENT_ATTRIBUTE_UPDATE_END, attribute, numInstances);
     }
   }
 }

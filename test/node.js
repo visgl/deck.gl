@@ -27,4 +27,7 @@ canvas.width = gl.drawingBufferWidth;
 canvas.height = gl.drawingBufferHeight;
 gl.canvas = canvas;
 
+const debug = require('@deck.gl/core/debug');
+debug.enable();
+
 require('./modules');

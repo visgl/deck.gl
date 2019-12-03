@@ -45,10 +45,6 @@ const fixture = {
 
 test('AttributeManager imports', t => {
   t.equals(typeof AttributeManager, 'function', 'AttributeManager import successful');
-  t.ok(
-    AttributeManager.setDefaultLogFunctions,
-    'AttributeManager.setDefaultLogFunctions available'
-  );
   t.end();
 });
 
@@ -293,38 +289,5 @@ test('AttributeManager.invalidate', t => {
     'invalidated attribute by accessor name'
   );
 
-  t.end();
-});
-
-test('AttributeManager.setDefaultLogFunctions', t => {
-  // track which updaters were called
-  const updaterCalled = {};
-  AttributeManager.setDefaultLogFunctions({
-    onUpdateStart: () => {
-      updaterCalled.start = true;
-    },
-    onUpdate: () => {
-      updaterCalled.update = true;
-    },
-    onUpdateEnd: () => {
-      updaterCalled.end = true;
-    }
-  });
-
-  const attributeManager = new AttributeManager(gl);
-  attributeManager.add({positions: {size: 2, update}});
-
-  // First update, should autoalloc and update the value array
-  attributeManager.update({
-    numInstances: 1,
-    data: [{}]
-  });
-
-  const attribute = attributeManager.getAttributes()['positions'];
-  t.ok(ArrayBuffer.isView(attribute.value), 'logged attribute has typed array');
-
-  t.ok(updaterCalled.start, 'onUpdateStart called');
-  t.ok(updaterCalled.update, 'onUpdate called');
-  t.ok(updaterCalled.end, 'onUpdateEnd called');
   t.end();
 });

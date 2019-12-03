@@ -18,8 +18,11 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 import Layer from './layer';
-import log from '../utils/log';
+import debug from '../debug';
+const debugLog = debug.log;
 import {flatten} from '../utils/flatten';
+
+const EVENT_RENDER_LAYERS = 'compositeLayer.renderLayers';
 
 export default class CompositeLayer extends Layer {
   get isComposite() {
@@ -206,17 +209,16 @@ export default class CompositeLayer extends Layer {
   // Called by layer manager to render subLayers
   _renderLayers() {
     let {subLayers} = this.internalState;
-    if (subLayers && !this.needsUpdate()) {
-      log.log(3, `Composite layer reused subLayers ${this}`, this.internalState.subLayers)();
-    } else {
+    const shouldUpdate = !subLayers || this.needsUpdate();
+    if (shouldUpdate) {
       subLayers = this.renderLayers();
       // Flatten the returned array, removing any null, undefined or false
       // this allows layers to render sublayers conditionally
       // (see CompositeLayer.renderLayers docs)
       subLayers = flatten(subLayers, {filter: Boolean});
       this.internalState.subLayers = subLayers;
-      log.log(2, `Composite layer rendered new subLayers ${this}`, subLayers)();
     }
+    debugLog(EVENT_RENDER_LAYERS, this, shouldUpdate, subLayers);
 
     // populate reference to parent layer (this layer)
     // NOTE: needs to be done even when reusing layers as the parent may have changed

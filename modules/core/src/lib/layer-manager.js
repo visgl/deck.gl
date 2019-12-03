@@ -23,14 +23,16 @@ import {Timeline} from '@luma.gl/core';
 import Layer from './layer';
 import {LIFECYCLE} from '../lifecycle/constants';
 import log from '../utils/log';
+import debug from '../debug';
+const debugLog = debug.log;
 import {flatten} from '../utils/flatten';
 import {Stats} from 'probe.gl';
 
 import Viewport from '../viewports/viewport';
 import {createProgramManager} from '../shaderlib';
 
-const LOG_PRIORITY_LIFECYCLE = 2;
-const LOG_PRIORITY_LIFECYCLE_MINOR = 4;
+const EVENT_SET_LAYERS = 'layerManager.setLayers';
+const EVENT_ACTIVATE_VIEWPORT = 'layerManager.activateViewport';
 
 // CONTEXT IS EXPOSED TO LAYERS
 const INITIAL_CONTEXT = Object.seal({
@@ -146,8 +148,10 @@ export default class LayerManager {
   // Supply a new layer list, initiating sublayer generation and layer matching
   setLayers(newLayers, forceUpdate = false) {
     // TODO - something is generating state updates that cause rerender of the same
-    if (!forceUpdate && newLayers === this.lastRenderedLayers) {
-      log.log(3, 'Ignoring layer update due to layer array not changed')();
+    const shouldUpdate = forceUpdate || newLayers !== this.lastRenderedLayers;
+    debugLog(EVENT_SET_LAYERS, this, shouldUpdate, newLayers);
+
+    if (!shouldUpdate) {
       return this;
     }
     this.lastRenderedLayers = newLayers;
@@ -212,7 +216,7 @@ export default class LayerManager {
     const viewportChanged = !oldViewport || !viewport.equals(oldViewport);
 
     if (viewportChanged) {
-      log.log(4, 'Viewport changed', viewport)();
+      debugLog(EVENT_ACTIVATE_VIEWPORT, this, viewport);
 
       this.context.viewport = viewport;
 
@@ -335,8 +339,6 @@ export default class LayerManager {
 
   // Initializes a single layer, calling layer methods
   _initializeLayer(layer) {
-    log.log(LOG_PRIORITY_LIFECYCLE, `initializing ${layerName(layer)}`)();
-
     let error = null;
     try {
       layer._initialize();
@@ -355,25 +357,12 @@ export default class LayerManager {
     newLayer.lifecycle = LIFECYCLE.MATCHED;
 
     if (newLayer !== oldLayer) {
-      log.log(
-        LOG_PRIORITY_LIFECYCLE_MINOR,
-        `matched ${layerName(newLayer)}`,
-        oldLayer,
-        '->',
-        newLayer
-      )();
       oldLayer.lifecycle = LIFECYCLE.AWAITING_GC;
-    } else {
-      log.log(LOG_PRIORITY_LIFECYCLE_MINOR, `Matching layer is unchanged ${newLayer.id}`)();
     }
   }
 
   // Updates a single layer, cleaning all flags
   _updateLayer(layer) {
-    log.log(
-      LOG_PRIORITY_LIFECYCLE_MINOR,
-      `updating ${layer} because: ${layer.printChangeFlags()}`
-    )();
     let error = null;
     try {
       layer._update();
@@ -398,7 +387,6 @@ export default class LayerManager {
       error = err;
     }
     layer.lifecycle = LIFECYCLE.FINALIZED;
-    log.log(LOG_PRIORITY_LIFECYCLE, `finalizing ${layerName(layer)}`)();
     return error;
   }
 }
