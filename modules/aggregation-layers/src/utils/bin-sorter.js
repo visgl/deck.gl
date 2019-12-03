@@ -23,11 +23,12 @@
 // this is where to pass in a function to color the bins by
 // avg/mean/max of specific value of the point
 const defaultGetValue = points => points.length;
+const MAX_32_BIT_FLOAT = 3.402823466e38;
 
 export default class BinSorter {
-  constructor(bins = [], getValue = defaultGetValue) {
-    this.sortedBins = this.getSortedBins(bins, getValue);
-    this.maxCount = this.getMaxCount();
+  constructor(bins = [], getValue = defaultGetValue, sort = true) {
+    this.sortedBins = this.getSortedBins(bins, getValue, sort);
+    this._updateMinMaxValues();
     this.binMap = this.getBinMap();
   }
 
@@ -37,23 +38,25 @@ export default class BinSorter {
    * @param {Function} getValue
    * @return {Array} array of values and index lookup
    */
-  getSortedBins(bins, getValue) {
-    return bins
-      .reduce((accu, h, i) => {
-        const value = getValue(h.points);
+  getSortedBins(bins, getValue, sort) {
+    const aggregatedBins = bins.reduce((accu, h, i) => {
+      const value = getValue(h.points);
 
-        if (value !== null && value !== undefined) {
-          // filter bins if value is null or undefined
-          accu.push({
-            i: Number.isFinite(h.index) ? h.index : i,
-            value,
-            counts: h.points.length
-          });
-        }
+      if (value !== null && value !== undefined) {
+        // filter bins if value is null or undefined
+        accu.push({
+          i: Number.isFinite(h.index) ? h.index : i,
+          value,
+          counts: h.points.length
+        });
+      }
 
-        return accu;
-      }, [])
-      .sort((a, b) => a.value - b.value);
+      return accu;
+    }, []);
+    if (!sort) {
+      return aggregatedBins;
+    }
+    return aggregatedBins.sort((a, b) => a.value - b.value);
   }
 
   /**
@@ -75,16 +78,6 @@ export default class BinSorter {
   }
 
   /**
-   * Get ths max count of all bins
-   * @return {Number | Boolean} max count
-   */
-  getMaxCount() {
-    let maxCount = 0;
-    this.sortedBins.forEach(x => (maxCount = maxCount > x.counts ? maxCount : x.counts));
-    return maxCount;
-  }
-
-  /**
    * Get a mapping from cell/hexagon index to sorted bin
    * This is used to retrieve bin value for color calculation
    * @return {Object} bin index to sortedBins
@@ -97,5 +90,28 @@ export default class BinSorter {
         }),
       {}
     );
+  }
+
+  // Private
+
+  /**
+   * Get ths max count of all bins
+   * @return {Number | Boolean} max count
+   */
+  _updateMinMaxValues() {
+    let maxCount = 0;
+    let maxValue = 0;
+    let minValue = MAX_32_BIT_FLOAT;
+    let totalCount = 0;
+    for (const x of this.sortedBins) {
+      maxCount = maxCount > x.counts ? maxCount : x.counts;
+      maxValue = maxValue > x.value ? maxValue : x.value;
+      minValue = minValue < x.value ? minValue : x.value;
+      totalCount += x.counts;
+    }
+    this.maxCount = maxCount;
+    this.maxValue = maxValue;
+    this.minValue = minValue;
+    this.totalCount = totalCount;
   }
 }
