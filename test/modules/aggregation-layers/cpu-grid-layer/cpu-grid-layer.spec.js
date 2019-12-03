@@ -340,12 +340,12 @@ test('CPUGridLayer#updates', t => {
           );
 
           t.ok(
-            Array.isArray(fillColor.sortedBins.sortedBins),
-            'aggregatorState.dimension.fillColor.sortedBins.sortedBins calculated'
+            Array.isArray(fillColor.sortedBins.aggregatedBins),
+            'aggregatorState.dimension.fillColor.sortedBins.aggregatedBins calculated'
           );
           t.ok(
-            Array.isArray(elevation.sortedBins.sortedBins),
-            'aggregatorState.dimension.elevation.sortedBins.sortedBins calculated'
+            Array.isArray(elevation.sortedBins.aggregatedBins),
+            'aggregatorState.dimension.elevation.sortedBins.aggregatedBins calculated'
           );
           t.ok(
             Number.isFinite(fillColor.sortedBins.maxCount),
@@ -356,7 +356,7 @@ test('CPUGridLayer#updates', t => {
             'aggregatorState.dimension.elevation.sortedBins.maxCount calculated'
           );
 
-          const firstSortedBin = fillColor.sortedBins.sortedBins[0];
+          const firstSortedBin = fillColor.sortedBins.aggregatedBins[0];
           const binTocell = layerData.data.find(d => d.index === firstSortedBin.i);
 
           t.ok(

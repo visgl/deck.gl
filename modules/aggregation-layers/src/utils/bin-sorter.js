@@ -27,18 +27,20 @@ const MAX_32_BIT_FLOAT = 3.402823466e38;
 
 export default class BinSorter {
   constructor(bins = [], getValue = defaultGetValue, sort = true) {
-    this.sortedBins = this.getSortedBins(bins, getValue, sort);
+    this.aggregatedBins = this.getAggregatedBins(bins, getValue, sort);
     this._updateMinMaxValues();
     this.binMap = this.getBinMap();
   }
 
   /**
-   * Get an array of object with sorted values and index of bins
+   * Get an array of object with aggregated values and index of bins
+   * Array object will be sorted by value optionally.
    * @param {Array} bins
    * @param {Function} getValue
+   * @param {Bool} sort
    * @return {Array} array of values and index lookup
    */
-  getSortedBins(bins, getValue, sort) {
+  getAggregatedBins(bins, getValue, sort) {
     const aggregatedBins = bins.reduce((accu, h, i) => {
       const value = getValue(h.points);
 
@@ -67,23 +69,23 @@ export default class BinSorter {
    * @return {Array} array of new value range
    */
   getValueRange([lower, upper]) {
-    const len = this.sortedBins.length;
+    const len = this.aggregatedBins.length;
     if (!len) {
       return [0, 0];
     }
     const lowerIdx = Math.ceil((lower / 100) * (len - 1));
     const upperIdx = Math.floor((upper / 100) * (len - 1));
 
-    return [this.sortedBins[lowerIdx].value, this.sortedBins[upperIdx].value];
+    return [this.aggregatedBins[lowerIdx].value, this.aggregatedBins[upperIdx].value];
   }
 
   /**
    * Get a mapping from cell/hexagon index to sorted bin
    * This is used to retrieve bin value for color calculation
-   * @return {Object} bin index to sortedBins
+   * @return {Object} bin index to aggregatedBins
    */
   getBinMap() {
-    return this.sortedBins.reduce(
+    return this.aggregatedBins.reduce(
       (mapper, curr) =>
         Object.assign(mapper, {
           [curr.i]: curr
@@ -103,7 +105,7 @@ export default class BinSorter {
     let maxValue = 0;
     let minValue = MAX_32_BIT_FLOAT;
     let totalCount = 0;
-    for (const x of this.sortedBins) {
+    for (const x of this.aggregatedBins) {
       maxCount = maxCount > x.counts ? maxCount : x.counts;
       maxValue = maxValue > x.value ? maxValue : x.value;
       minValue = minValue < x.value ? minValue : x.value;
