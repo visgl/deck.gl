@@ -77,8 +77,8 @@ export default class HexagonLayer extends AggregationLayer {
     attributeManager.add({
       positions: {size: 3, accessor: 'getPosition' /* , type: GL.DOUBLE, fp64: false*/}
     });
-    // color and elevation attributes can't be added, as they
-    // need to be aggregated per bin.
+    // color and elevation attributes can't be added as attributes
+    // they are calcualted using 'getValue' accessor that takes an array of pints.
   }
 
   updateState(opts) {

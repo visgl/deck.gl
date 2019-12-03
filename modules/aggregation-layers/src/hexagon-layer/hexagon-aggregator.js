@@ -45,7 +45,6 @@ export function pointToHexbin(opts) {
     objectInfo.index++;
     const posIndex = objectInfo.index * POSITION_ATTRIBUTE_SIZE;
     const position = positions.slice(posIndex, posIndex + 2);
-    // const position = getPosition(object, objectInfo);
     const arrayIsFinite = Number.isFinite(position[0]) && Number.isFinite(position[1]);
     if (arrayIsFinite) {
       screenPoints.push(

@@ -43,9 +43,9 @@ export function pointToDensityGridDataCPU(opts) {
 
 /**
  * Based on geometric center of sample points, calculate cellSize in lng/lat (degree) space
- * @param {object} gridData - contains bounding box of data
+ * @param {object} boundingBox - {xMin, yMin, xMax, yMax} contains bounding box of data
  * @param {number} cellSize - grid cell size in meters
- * @returns {yOffset, xOffset} - cellSize size lng/lat (degree) space.
+ * @returns {xOffset, yOffset} - cellSize size lng/lat (degree) space.
  */
 
 export function getGridOffset(boundingBox, cellSize) {
@@ -105,7 +105,6 @@ function pointsToGridHashing(opts) {
   objectInfo.index = -1;
   for (const pt of iterable) {
     objectInfo.index++;
-    // const [lng, lat] = getPosition(pt, objectInfo);
     let lng = positions[objectInfo.index * POSITION_ATTRIBUTE_SIZE];
     let lat = positions[objectInfo.index * POSITION_ATTRIBUTE_SIZE + 1];
 
@@ -113,12 +112,10 @@ function pointsToGridHashing(opts) {
       [lng, lat] = viewport.project([lng, lat]);
     }
 
-    // console.log(`lat: ${lat} lng: ${lng}`);
     if (Number.isFinite(lat) && Number.isFinite(lng)) {
       const latIdx = Math.floor((lat + offsets[1]) / gridOffset.yOffset);
       const lonIdx = Math.floor((lng + offsets[0]) / gridOffset.xOffset);
       const key = `${latIdx}-${lonIdx}`;
-      // console.log(`${key} ${pt}`);
 
       gridHash[key] = gridHash[key] || {count: 0, points: [], lonIdx, latIdx};
       gridHash[key].count += 1;

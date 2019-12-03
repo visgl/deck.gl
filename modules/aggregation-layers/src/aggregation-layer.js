@@ -100,8 +100,7 @@ export default class AggregationLayer extends CompositeLayer {
   }
 
   _updateShaders(shaders) {
-    // Default implemention is empty, sublayers can update their Model objects
-    // if needed
+    // Default implemention is empty, subclasses can update their Model objects if needed
   }
 
   // override Composite layer private method to create AttributeManager instance
