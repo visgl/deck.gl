@@ -39,7 +39,10 @@ test('ContourLayer', t => {
     assert: t.ok,
     onBeforeUpdate: ({testCase}) => t.comment(testCase.title),
     onAfterUpdate({layer}) {
-      t.ok(layer.state.countsData, 'should update state.countsData');
+      if (layer.getNumInstances() > 0) {
+        const {aggregationData} = layer.state.weights.count;
+        t.ok(aggregationData, 'should create aggregationData');
+      }
     }
   });
 
@@ -97,9 +100,10 @@ test('ContourLayer#updates', t => {
           pickable: true
         },
         onAfterUpdate({layer}) {
-          const {countsData, contourData, thresholdData} = layer.state;
+          const {aggregationData} = layer.state.weights.count;
+          const {contourData, thresholdData} = layer.state;
 
-          t.ok(countsData.length > 0, 'ContourLayer data is aggregated');
+          t.ok(aggregationData.length > 0, 'ContourLayer data is aggregated');
           t.ok(
             Array.isArray(contourData.contourSegments) && contourData.contourSegments.length > 1,
             'ContourLayer iso-lines calculated'
@@ -119,26 +123,32 @@ test('ContourLayer#updates', t => {
         updateProps: {
           gpuAggregation: false // default value is true
         },
-        spies: ['_aggregateData'],
-        onAfterUpdate({spies}) {
-          t.ok(spies._aggregateData.called, 'should re-aggregate data on gpuAggregation change');
+        spies: ['_updateAggregation'],
+        onAfterUpdate({spies, layer, oldState}) {
+          if (oldState.gpuAggregation) {
+            // Under WebGL1, gpuAggregation will be false
+            t.ok(
+              spies._updateAggregation.called,
+              'should re-aggregate data on gpuAggregation change'
+            );
+          }
         }
       },
       {
         updateProps: {
           cellSize: 500 // changed from 400 to 500
         },
-        spies: ['_onGetSublayerColor', '_aggregateData', '_generateContours'],
+        spies: ['_onGetSublayerColor', '_updateAggregation', '_generateContours'],
         onAfterUpdate({layer, subLayers, spies}) {
           t.ok(subLayers.length === 2, 'Sublayers rendered');
 
-          t.ok(spies._aggregateData.called, 'should re-aggregate data on cellSize change');
+          t.ok(spies._updateAggregation.called, 'should re-aggregate data on cellSize change');
           t.ok(spies._generateContours.called, 'should re-generate contours on cellSize change');
           t.ok(
             spies._onGetSublayerColor.called,
             'should call _onGetSublayerColor on cellSize change'
           );
-          spies._aggregateData.restore();
+          spies._updateAggregation.restore();
           spies._generateContours.restore();
           spies._onGetSublayerColor.restore();
         }
@@ -151,7 +161,7 @@ test('ContourLayer#updates', t => {
             {threshold: [6, 10], color: [0, 0, 255]}
           ]
         },
-        spies: ['_updateThresholdData', '_generateContours', '_aggregateData'],
+        spies: ['_updateThresholdData', '_generateContours', '_updateAggregation'],
         onAfterUpdate({subLayers, spies}) {
           t.ok(subLayers.length === 2, 'Sublayers rendered');
 
@@ -164,12 +174,12 @@ test('ContourLayer#updates', t => {
             'should re-generate contours  on countours count change'
           );
           t.ok(
-            !spies._aggregateData.called,
+            !spies._updateAggregation.called,
             'should NOT re-aggregate data  on countours count change'
           );
           spies._updateThresholdData.restore();
           spies._generateContours.restore();
-          spies._aggregateData.restore();
+          spies._updateAggregation.restore();
         }
       },
       {
@@ -204,7 +214,7 @@ test('ContourLayer#updates', t => {
             {threshold: [6, 50], color: [0, 0, 255]}
           ]
         },
-        spies: ['_onGetSublayerColor', '_generateContours', '_aggregateData'],
+        spies: ['_onGetSublayerColor', '_generateContours', '_updateAggregation'],
         onAfterUpdate({subLayers, spies}) {
           t.ok(subLayers.length === 2, 'Sublayers rendered');
 
@@ -213,10 +223,13 @@ test('ContourLayer#updates', t => {
             !spies._generateContours.called,
             'should NOT generate contours on threshold color change'
           );
-          t.ok(!spies._aggregateData.called, 'should NOT aggregate data on threshold color change');
+          t.ok(
+            !spies._updateAggregation.called,
+            'should NOT aggregate data on threshold color change'
+          );
           spies._onGetSublayerColor.restore();
           spies._generateContours.restore();
-          spies._aggregateData.restore();
+          spies._updateAggregation.restore();
         }
       }
     ]
