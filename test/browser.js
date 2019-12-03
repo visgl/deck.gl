@@ -22,7 +22,7 @@
 const test = require('tape');
 const {_enableDOMLogging: enableDOMLogging} = require('@probe.gl/test-utils');
 
-require('@luma.gl/debug');
+// require('@luma.gl/debug');
 
 let failed = false;
 test.onFinish(window.browserTestDriver_finish);
