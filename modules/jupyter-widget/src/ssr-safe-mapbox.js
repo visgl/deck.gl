@@ -6,4 +6,4 @@ if (process.browser) {
   __ssr_safe__mapboxgl = require('mapbox-gl');
 }
 
-module.exports = __ssr_safe__mapboxgl;
+export {__ssr_safe__mapboxgl};
