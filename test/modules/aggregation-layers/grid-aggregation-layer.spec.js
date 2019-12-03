@@ -229,10 +229,11 @@ test('GridAggregationLayer#CPUvsGPUAggregation', t => {
 
   testCases = [
     ...testCases,
-    ...getTestCases(t, {cellSize: 600}),
-    ...getTestCases(t, {aggregation: 'MAX'}),
-    ...getTestCases(t, {aggregation: 'MIN'}),
-    ...getTestCases(t, {aggregation: 'MEAN'})
+    ...getTestCases(t, {cellSize: 600, aggregation: 'MAX'})
+    // Takes too long on CI
+    // ...getTestCases(t, {aggregation: 'MAX'}),
+    // ...getTestCases(t, {aggregation: 'MIN'}),
+    // ...getTestCases(t, {aggregation: 'MEAN'})
   ];
 
   testLayer({
