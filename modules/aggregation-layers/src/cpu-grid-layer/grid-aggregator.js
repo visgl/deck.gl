@@ -21,6 +21,7 @@
 import {createIterable} from '@deck.gl/core';
 
 const R_EARTH = 6378000;
+const POSITION_ATTRIBUTE_SIZE = 3; // TODO: issue #3956
 
 /**
  * Calculate density grid from an array of points
@@ -68,7 +69,6 @@ function pointsToGridHashing(opts) {
   const {data = [], cellSize, attributes, viewport, projectPoints} = opts;
 
   const {iterable, objectInfo} = createIterable(data);
-  const posSize = 3;
   const positions = attributes.positions.value;
   let boundingBox = opts.boundingBox;
   if (!boundingBox) {
@@ -78,7 +78,7 @@ function pointsToGridHashing(opts) {
     // eslint-disable-next-line no-unused-vars
     for (const pt of iterable) {
       objectInfo.index++;
-      pLat = positions[objectInfo.index * posSize + 1];
+      pLat = positions[objectInfo.index * POSITION_ATTRIBUTE_SIZE + 1];
 
       if (Number.isFinite(pLat)) {
         latMin = pLat < latMin ? pLat : latMin;
@@ -106,8 +106,8 @@ function pointsToGridHashing(opts) {
   for (const pt of iterable) {
     objectInfo.index++;
     // const [lng, lat] = getPosition(pt, objectInfo);
-    let lng = positions[objectInfo.index * posSize];
-    let lat = positions[objectInfo.index * posSize + 1];
+    let lng = positions[objectInfo.index * POSITION_ATTRIBUTE_SIZE];
+    let lat = positions[objectInfo.index * POSITION_ATTRIBUTE_SIZE + 1];
 
     if (projectPoints) {
       [lng, lat] = viewport.project([lng, lat]);

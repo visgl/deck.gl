@@ -21,6 +21,8 @@
 import {hexbin} from 'd3-hexbin';
 import {createIterable, log} from '@deck.gl/core';
 
+const POSITION_ATTRIBUTE_SIZE = 3; // TODO: issue #3956
+
 /**
  * Use d3-hexbin to performs hexagonal binning from geo points to hexagons
  * @param {Iterable} data - array of points
@@ -38,11 +40,10 @@ export function pointToHexbin(opts) {
   // add world space coordinates to points
   const screenPoints = [];
   const {iterable, objectInfo} = createIterable(data);
-  const posSize = 3;
   const positions = attributes.positions.value;
   for (const object of iterable) {
     objectInfo.index++;
-    const posIndex = objectInfo.index * posSize;
+    const posIndex = objectInfo.index * POSITION_ATTRIBUTE_SIZE;
     const position = positions.slice(posIndex, posIndex + 2);
     // const position = getPosition(object, objectInfo);
     const arrayIsFinite = Number.isFinite(position[0]) && Number.isFinite(position[1]);
