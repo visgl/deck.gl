@@ -1,6 +1,6 @@
 build/
 dist/
-dist.min.js
+*.min.js
 node_modules/
 coverage/
 test/**/*-failed.png
