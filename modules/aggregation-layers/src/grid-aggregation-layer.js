@@ -192,7 +192,6 @@ export default class GridAggregationLayer extends AggregationLayer {
       const result = cpuGridAggregator({
         data: props.data,
         gridOffset,
-        // cellSize, not needed when gridOffest is provide
         width,
         height,
         gridTransformMatrix,

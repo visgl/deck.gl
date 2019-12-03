@@ -1,13 +1,13 @@
 # Aggregation Layers
 
-All of the layers in `@deck.gl/aggregation-layers` module perform some sort of data aggregation. Process (CPU vs GPU) and type (aggregation to rectangular bins, hexagon bins and pixels) changes. There are some common tasks all these aggregation layers do with some customizations.
+All of the layers in `@deck.gl/aggregation-layers` module perform some sort of data aggregation. All these layers perform aggregation with different parameters (CPU vs GPU, aggregation to rectangular bins vs hexagon bins, world space vs screen space etc).
 
-Following two abstract Composite layers are provided to help write an aggregation layer.
+Following tow abstract composite layers perform most of the common tasks for aggregation with flexibility of customizations. All of the aggregation Layers are subclasses of these Layers.
 
 
 ## AggregationLayer
 
-This in an abstract layer, subclassed form `CompositeLayer` and all layers in `@deck.gl/aggregation-layers` are subclassed from layer.
+This in an abstract Layer, subclassed form `CompositeLayer` and all layers in `@deck.gl/aggregation-layers` are subclassed from this Layer.
 
 ### Integration with `AttributeManger`
 
@@ -19,7 +19,7 @@ Constructor, takes an array of props, `aggregationProps`, and a private method `
 
 ### Updating shaders
 
-When performing GPU aggregations, `Model` objects used in GPU aggregation should be updated when Layer's `extensions` are changed, this is detected during `updateState` and `_updateShaders` is called, by default this method is empty, but subclasses can override correctly update the `Model` objects if needed.
+When performing GPU aggregations, `Model` objects used in GPU aggregation should be updated when Layer's `extensions` are changed, this is detected during `updateState` and `_updateShaders` is called, by default this method is empty, but subclasses can override and update the aggregation `Model` objects if needed.
 
 
 ## GridAggregationLayer
@@ -28,7 +28,7 @@ This in an abstract layer, subclassed form `AggregationLayer` and provides suppo
 
 ### Updating aggregation flags
 
-A layer extending this class must implement `_updateAggregationFlags()` method, during this method layers extending this class should set following variables in `state` object :
+A layer extending this class must implement `_updateAggregationFlags()` method to set following variables in `state` object :
 
 - `gpuAggregation` : Should be set to `true` if aggregating on `GPU`, `false` otherwise.
 - `needsReProjection` : Should be set to `true` if data needs to be reprojected. For example, `ScreenGridLayer` sets this flag to true when `viewport` is changed.
