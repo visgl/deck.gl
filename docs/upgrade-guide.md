@@ -39,6 +39,13 @@
   + `LNGLAT_DEPRECATED`: use `LNGLAT`
   + `METERS`: use `METER_OFFSETS`
 
+##### Debugging
+
+Type `deck.debug(true)` in the console together with `deck.log.priority=<number>` to enable debug mode.
+
+deck.gl now removes most logging when bundling under `NODE_ENV=production`.
+
+
 ##### Standalone bundle
 
 The pre-bundled version, a.k.a. the [scripting API](/docs/get-started/using-standalone.md#using-the-scripting-api) has been aligned with the interface of the core [Deck](/docs/api-reference/deck.md) class.
