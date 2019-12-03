@@ -53,7 +53,7 @@ test('GPUGridLayer', t => {
 test('GPUGridLayer#renderLayers', t => {
   const webgl1Spies = setupSpysForWebGL1(gl);
 
-  makeSpy(GPUGridLayer.prototype, '_getAggregatedData');
+  makeSpy(GPUGridLayer.prototype, '_updateAggregation');
 
   const layer = new GPUGridLayer(SAMPLE_PROPS);
 
@@ -65,8 +65,8 @@ test('GPUGridLayer#renderLayers', t => {
 
   t.ok(sublayer instanceof GPUGridCellLayer, 'Sublayer GPUGridCellLayer layer rendered');
 
-  t.ok(GPUGridLayer.prototype._getAggregatedData.called, 'should call _getAggregatedData');
-  GPUGridLayer.prototype._getAggregatedData.restore();
+  t.ok(GPUGridLayer.prototype._updateAggregation.called, 'should call _updateAggregation');
+  GPUGridLayer.prototype._updateAggregation.restore();
 
   restoreSpies(webgl1Spies);
   t.end();
@@ -95,33 +95,33 @@ test('GPUGridLayer#updates', t => {
         updateProps: {
           colorRange: GPUGridLayer.defaultProps.colorRange.slice()
         },
-        spies: ['_getAggregatedData'],
+        spies: ['_updateAggregation'],
         onAfterUpdate({layer, subLayers, spies}) {
-          t.notOk(spies._getAggregatedData.called, 'should not call _getAggregatedData');
+          t.notOk(spies._updateAggregation.called, 'should not call _updateAggregation');
 
-          spies._getAggregatedData.restore();
+          spies._updateAggregation.restore();
         }
       },
       {
         updateProps: {
           cellSize: 10
         },
-        spies: ['_getAggregatedData'],
+        spies: ['_updateAggregation'],
         onAfterUpdate({layer, subLayers, spies}) {
-          t.ok(spies._getAggregatedData.called, 'should call _getAggregatedData');
+          t.ok(spies._updateAggregation.called, 'should call _updateAggregation');
 
-          spies._getAggregatedData.restore();
+          spies._updateAggregation.restore();
         }
       },
       {
         updateProps: {
           colorAggregation: 3
         },
-        spies: ['_getAggregatedData'],
+        spies: ['_updateAggregation'],
         onAfterUpdate({layer, subLayers, spies}) {
-          t.ok(spies._getAggregatedData.called, 'should call _getAggregatedData');
+          t.ok(spies._updateAggregation.called, 'should call _updateAggregation');
 
-          spies._getAggregatedData.restore();
+          spies._updateAggregation.restore();
         }
       }
     ]

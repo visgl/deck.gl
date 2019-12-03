@@ -30,8 +30,8 @@ const R_EARTH = 6378000;
  * @returns {object} - grid data, cell dimension
  */
 export function pointToDensityGridDataCPU(opts) {
-  const hashInfo = _pointsToGridHashing(opts);
-  const result = _getGridLayerDataFromGridHash(hashInfo);
+  const hashInfo = pointsToGridHashing(opts);
+  const result = getGridLayerDataFromGridHash(hashInfo);
 
   return {
     gridHash: hashInfo.gridHash,
@@ -53,7 +53,7 @@ export function getGridOffset(boundingBox, cellSize) {
   const latMax = yMax;
   const centerLat = (latMin + latMax) / 2;
 
-  return _calculateGridLatLonOffset(cellSize, centerLat);
+  return calculateGridLatLonOffset(cellSize, centerLat);
 }
 
 /**
@@ -64,7 +64,7 @@ export function getGridOffset(boundingBox, cellSize) {
  * @returns {object} - grid hash and cell dimension
  */
 /* eslint-disable max-statements, complexity */
-function _pointsToGridHashing(opts) {
+function pointsToGridHashing(opts) {
   const {data = [], cellSize, attributes, viewport, projectPoints} = opts;
 
   const {iterable, objectInfo} = createIterable(data);
@@ -130,16 +130,18 @@ function _pointsToGridHashing(opts) {
 }
 /* eslint-enable max-statements, complexity */
 
-function _getGridLayerDataFromGridHash({gridHash, gridOffset, offsets}) {
-  return Object.keys(gridHash).reduce((accu, key, i) => {
+function getGridLayerDataFromGridHash({gridHash, gridOffset, offsets}) {
+  const data = [];
+  let i = 0;
+  for (const key in gridHash) {
     const idxs = key.split('-');
     const latIdx = parseInt(idxs[0], 10);
     const lonIdx = parseInt(idxs[1], 10);
 
-    accu.push(
+    data.push(
       Object.assign(
         {
-          index: i,
+          index: i++,
           position: [
             offsets[0] + gridOffset.xOffset * lonIdx,
             offsets[1] + gridOffset.yOffset * latIdx
@@ -148,9 +150,8 @@ function _getGridLayerDataFromGridHash({gridHash, gridOffset, offsets}) {
         gridHash[key]
       )
     );
-
-    return accu;
-  }, []);
+  }
+  return data;
 }
 
 /**
@@ -160,9 +161,9 @@ function _getGridLayerDataFromGridHash({gridHash, gridOffset, offsets}) {
  * @param {number} latitude
  * @returns {object} - lat delta and lon delta
  */
-function _calculateGridLatLonOffset(cellSize, latitude) {
-  const yOffset = _calculateLatOffset(cellSize);
-  const xOffset = _calculateLonOffset(latitude, cellSize);
+function calculateGridLatLonOffset(cellSize, latitude) {
+  const yOffset = calculateLatOffset(cellSize);
+  const xOffset = calculateLonOffset(latitude, cellSize);
   return {yOffset, xOffset};
 }
 
@@ -172,7 +173,7 @@ function _calculateGridLatLonOffset(cellSize, latitude) {
  * @param {number} dy - change in km
  * @return {number} - increment in latitude
  */
-function _calculateLatOffset(dy) {
+function calculateLatOffset(dy) {
   return (dy / R_EARTH) * (180 / Math.PI);
 }
 
@@ -184,6 +185,6 @@ function _calculateLatOffset(dy) {
  * @param {number} dx - change in km
  * @return {number} - increment in longitude
  */
-function _calculateLonOffset(lat, dx) {
+function calculateLonOffset(lat, dx) {
   return ((dx / R_EARTH) * (180 / Math.PI)) / Math.cos((lat * Math.PI) / 180);
 }

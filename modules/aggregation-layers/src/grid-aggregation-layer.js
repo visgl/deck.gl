@@ -20,13 +20,12 @@
 
 import AggregationLayer from './aggregation-layer';
 import GPUGridAggregator from './utils/gpu-grid-aggregation/gpu-grid-aggregator';
-import {AGGREGATION_OPERATION} from './utils/aggregation-operation-utils';
+import {AGGREGATION_OPERATION, getValueFunc} from './utils/aggregation-operation-utils';
 import {Buffer} from '@luma.gl/core';
 import {WebMercatorViewport, log, COORDINATE_SYSTEM} from '@deck.gl/core';
 import GL from '@luma.gl/constants';
 import {Matrix4} from 'math.gl';
-import {getBoundingBox} from './utils/grid-aggregation-utils';
-import {getValueFunc} from './utils/aggregation-operation-utils';
+import {getBoundingBox, alignToCell} from './utils/grid-aggregation-utils';
 import BinSorter from './utils/bin-sorter';
 import {pointToDensityGridDataCPU, getGridOffset} from './cpu-grid-layer/grid-aggregator';
 
@@ -43,11 +42,12 @@ export default class GridAggregationLayer extends AggregationLayer {
   }
 
   updateState(opts) {
-    // will get new attributes
+    // get current attributes
     super.updateState(opts);
 
+    this._updateAggregationFlags(opts);
     // update bounding box and cellSize
-    this._updateAggregationState(opts);
+    this._updateProjectionParams(opts);
 
     let aggregationDirty = false;
     const {needsReProjection, gpuAggregation} = this.state;
@@ -58,7 +58,7 @@ export default class GridAggregationLayer extends AggregationLayer {
     if (needsReProjection || (gpuAggregation && needsReAggregation)) {
       this._updateAccessors(opts);
       this._resetResults();
-      this._getAggregatedData(opts);
+      this._updateAggregation(opts);
       aggregationDirty = true;
     }
     if (!gpuAggregation && (aggregationDirty || needsReAggregation)) {
@@ -86,11 +86,6 @@ export default class GridAggregationLayer extends AggregationLayer {
 
   // Private
 
-  _updateAggregationState(opts) {
-    this._updateAggregationFlags(opts);
-    this._updateProjectionParams(opts);
-  }
-
   _alignBoundingBox(opts) {
     const {screenSpaceAggregation, boundingBox, gridOffset} = this.state;
     const {coordinateSystem} = opts.props;
@@ -117,6 +112,7 @@ export default class GridAggregationLayer extends AggregationLayer {
     boundingBox.xMin = alignToCell(xMin - worldOrigin[0], gridOffset.xOffset) + worldOrigin[0];
     boundingBox.yMin = alignToCell(yMin - worldOrigin[1], gridOffset.yOffset) + worldOrigin[1];
   }
+
   // eslint-disable-next-line
   _updateProjectionParams(opts) {
     const {viewport} = this.context;
@@ -172,7 +168,7 @@ export default class GridAggregationLayer extends AggregationLayer {
     }
   }
 
-  _getAggregatedData(opts) {
+  _updateAggregation(opts) {
     const {
       cpuGridAggregator,
       gpuGridAggregator,
@@ -191,8 +187,6 @@ export default class GridAggregationLayer extends AggregationLayer {
     const {viewport} = this.context;
     const attributes = this.getAttributes();
     const vertexCount = this.getNumInstances();
-
-    // TODO verify CPU aggregation path first.
 
     if (!gpuAggregation) {
       const result = cpuGridAggregator({
@@ -260,7 +254,6 @@ export default class GridAggregationLayer extends AggregationLayer {
     this._updateResults({aggregationData, maxMinData, maxData, minData});
   }
 
-  // Private
   _allocateResources(numRow, numCol) {
     if (this.state.numRow !== numRow || this.state.numCol !== numCol) {
       const {count} = this.state.weights;
@@ -332,27 +325,15 @@ export default class GridAggregationLayer extends AggregationLayer {
   }
 
   _updateShaders(shaders) {
-    this.state.gpuGridAggregator.updateShaders(shaders);
-  }
-
-  _getAggregationModel() {
-    return this.state.gpuGridAggregator.gridAggregationModel;
+    if (this.state.gpuAggregation) {
+      this.state.gpuGridAggregator.updateShaders(shaders);
+    }
   }
 
   _updateAggregationFlags(opts) {
     // Sublayers should implement this method.
     log.assert(false)();
   }
-}
-
-export function alignToCell(inValue, cellSize) {
-  const sign = inValue < 0 ? -1 : 1;
-
-  let value = sign < 0 ? Math.abs(inValue) + cellSize : Math.abs(inValue);
-
-  value = Math.floor(value / cellSize) * cellSize;
-
-  return value * sign;
 }
 
 GridAggregationLayer.layerName = 'GridAggregationLayer';

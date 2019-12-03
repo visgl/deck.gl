@@ -210,9 +210,6 @@ export default class HeatmapLayer extends AggregationLayer {
 
   // PRIVATE
 
-  _getAggregationModel() {
-    return this.state.weightsTransform.model;
-  }
   // override Composite layer private method to create AttributeManager instance
   _getAttributeManager() {
     return new AttributeManager(this.context.gl, {

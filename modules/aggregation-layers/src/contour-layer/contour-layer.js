@@ -221,10 +221,10 @@ export default class ContourLayer extends GridAggregationLayer {
 
   // Private (Aggregation)
 
-  _updateAggregationFlags(opts) {
-    const cellSizeChanged = opts.oldProps.cellSize !== opts.props.cellSize;
-    let gpuAggregation = opts.props.gpuAggregation;
-    if (this.state.gpuAggregation !== opts.props.gpuAggregation) {
+  _updateAggregationFlags({props, oldProps}) {
+    const cellSizeChanged = oldProps.cellSize !== props.cellSize;
+    let gpuAggregation = props.gpuAggregation;
+    if (this.state.gpuAggregation !== props.gpuAggregation) {
       if (gpuAggregation && !GPUGridAggregator.isSupported(this.context.gl)) {
         log.warn('GPU Grid Aggregation not supported, falling back to CPU')();
         gpuAggregation = false;
@@ -237,7 +237,7 @@ export default class ContourLayer extends GridAggregationLayer {
     this.setState({
       dataChanged,
       cellSizeChanged,
-      cellSize: opts.props.cellSize,
+      cellSize: props.cellSize,
       needsReProjection: dataChanged || cellSizeChanged,
       gpuAggregation
     });

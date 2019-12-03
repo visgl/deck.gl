@@ -28,7 +28,7 @@ const MAX_32_BIT_FLOAT = 3.402823466e38;
 export default class BinSorter {
   constructor(bins = [], getValue = defaultGetValue, sort = true) {
     this.sortedBins = this.getSortedBins(bins, getValue, sort);
-    this.updateMinMaxValues();
+    this._updateMinMaxValues();
     this.binMap = this.getBinMap();
   }
 
@@ -78,23 +78,6 @@ export default class BinSorter {
   }
 
   /**
-   * Get ths max count of all bins
-   * @return {Number | Boolean} max count
-   */
-  updateMinMaxValues() {
-    this.maxCount = 0;
-    this.maxValue = 0;
-    this.minValue = MAX_32_BIT_FLOAT;
-    this.totalCount = 0;
-    this.sortedBins.forEach(x => {
-      this.maxCount = this.maxCount > x.counts ? this.maxCount : x.counts;
-      this.maxValue = this.maxValue > x.value ? this.maxValue : x.value;
-      this.minValue = this.minValue < x.value ? this.minValue : x.value;
-      this.totalCount += x.counts;
-    });
-  }
-
-  /**
    * Get a mapping from cell/hexagon index to sorted bin
    * This is used to retrieve bin value for color calculation
    * @return {Object} bin index to sortedBins
@@ -107,5 +90,28 @@ export default class BinSorter {
         }),
       {}
     );
+  }
+
+  // Private
+
+  /**
+   * Get ths max count of all bins
+   * @return {Number | Boolean} max count
+   */
+  _updateMinMaxValues() {
+    let maxCount = 0;
+    let maxValue = 0;
+    let minValue = MAX_32_BIT_FLOAT;
+    let totalCount = 0;
+    for (const x of this.sortedBins) {
+      maxCount = maxCount > x.counts ? maxCount : x.counts;
+      maxValue = maxValue > x.value ? maxValue : x.value;
+      minValue = minValue < x.value ? minValue : x.value;
+      totalCount += x.counts;
+    }
+    this.maxCount = maxCount;
+    this.maxValue = maxValue;
+    this.minValue = minValue;
+    this.totalCount = totalCount;
   }
 }
