@@ -64,7 +64,7 @@ const defaultProps = {
   sizeUnits: 'pixels',
   sizeMinPixels: 0,
   sizeMaxPixels: Number.MAX_SAFE_INTEGER,
-  backgroundColor: [0, 0, 0, 0],
+  backgroundColor: {type: 'color', value: [0, 0, 0, 0]},
 
   characterSet: DEFAULT_CHAR_SET,
   fontFamily: DEFAULT_FONT_FAMILY,
