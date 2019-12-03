@@ -1,21 +1,19 @@
-# GPUGridAggregator Class (Advanced)
+# GPUGridAggregator Class (Advanced) (WebGL2)
 
-`GPUGridAggregator` performs grid aggregation on GPU under WebGL2, falls back to CPU aggregation otherwise. Aggregation can be performed either in world space or in screen space.
+`GPUGridAggregator` performs grid aggregation on GPU. Aggregation can be performed either in world space or in screen space.
 
 # Usage (Aggregation in World space)
 ```
 const aggregator = new GPUGridAggregator(gl);
 
 const results = aggregator.run({
-  positions: [-120.4193, 34.7751, -118.67079, 34.03948, ... ] // lng, lat pairs
+  attributes, // position and weight attributes
   weights: {
     weight1: {
-      values: [ 2, 10, ... ] // weight per point
       operation: AGGREGATION_OPERATION.MEAN,
       needMax: true,
     }
   },
-  useGPU: true,
   cellSize: [50, 50],
   width: 500,
   height: 500
@@ -34,15 +32,13 @@ You can also perform aggregation in screen space by provide a viewport and set `
 const aggregator = new GPUGridAggregator(gl);
 
 const results = aggregator.run({
-  positions: [-120.4193, 34.7751, -118.67079, 34.03948, ... ] // lng, lat pairs
+  attributes, // position and weight attributes
   weights: {
     weight1: {
-      values: [ 2, 10, ... ] // weight per point
       operation: AGGREGATION_OPERATION.MEAN,
       needMax: true,
     }
   },
-  useGPU: true,
   cellSize: [50, 50],
   width: 500,
   height: 500,
@@ -76,7 +72,6 @@ const results = gpuGridAggregator.run({
   cellSize: [5, 5],
   viewport,
   changeFlags,
-  useGPU: true,
   projectPoints: true,
   gridTransformMatrix
 });
@@ -84,7 +79,6 @@ const results = gpuGridAggregator.run({
 
 Parameters:
 * positions (Array) : Array of points in world space (lng, lat).
-* positions64xyLow (Array, Optional) : Array of low precision values of points in world space (lng, lat).
 * weights  (Object) : Object contains one or more weights. Key represents id and corresponding object represents the weight. Each weight object contains following values:
 
   * `values` (Array, Float32Array or Buffer) : Contains weight values for all points, there should be 3 floats for each point, un-used values can be 0.
@@ -92,7 +86,7 @@ Parameters:
   * `operation` (Enum {SUM, MEAN, MIN or MAX}, default: SUM) : Defines aggregation operation.
   * `needMin` (Boolean, default: false) : when true additional aggregation steps are performed to calculate minimum of all aggregation values and total count, result object will contain minBuffer.
   * `needMax` (Boolean, default: false) : when true additional aggregation steps are performed to calculate maximum of all aggregation values and total count, result object will contain maxBuffer.
-  * `combineMaxMin` (Boolean, default: false) : Applicable only when `needMin` and `needMax` are set. When true, both min and max values are calculated in single aggregation step using `blendEquationSeparate` WebGL API. But since Alpha channel can only contain one float, it will only provide minimum value for first weight in Alpha channel and RGB channels store maximum value upto 3 weights. Also when selected total count is not availabe. Result object will contain maxMinBuffer.
+  * `combineMaxMin` (Boolean, default: false) : Applicable only when `needMin` and `needMax` are set. When true, both min and max values are calculated in single aggregation step using `blendEquationSeparate` WebGL API. But since Alpha channel can only contain one float, it will only provide minimum value for first weight in Alpha channel and RGB channels store maximum value up to 3 weights. Also when selected total count is not available. Result object will contain maxMinBuffer.
 
 * cellSize: (Array) : Size of the cell, cellSize[0] is width and cellSize[1] is height.
 * width: (Number, Optional) : Grid width in pixels, deduced from ‘viewport’ when not provided.
