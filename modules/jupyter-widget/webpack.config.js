@@ -1,9 +1,13 @@
 const {resolve} = require('path');
+const webpack = require('webpack');
 
 const ALIASES = require('ocular-dev-tools/config/ocular.config')({
   aliasMode: 'src',
   root: resolve(__dirname, '../..')
 }).aliases;
+
+const PACKAGE_ROOT = resolve('.');
+const PACKAGE_INFO = require(resolve(PACKAGE_ROOT, 'package.json'));
 
 const rules = [
   {
@@ -52,6 +56,9 @@ const config = [
     plugins: [
       // Uncomment for bundle size debug
       // new (require('webpack-bundle-analyzer')).BundleAnalyzerPlugin()
+      new webpack.DefinePlugin({
+        __VERSION__: JSON.stringify(PACKAGE_INFO.version)
+      })
     ]
   },
   // Used for standalone HTML renderer only
@@ -72,6 +79,9 @@ const config = [
     plugins: [
       // Uncomment for bundle size debug
       // new (require('webpack-bundle-analyzer')).BundleAnalyzerPlugin()
+      new webpack.DefinePlugin({
+        __VERSION__: JSON.stringify(PACKAGE_INFO.version)
+      })
     ]
   }
 ];
