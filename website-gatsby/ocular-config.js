@@ -187,7 +187,12 @@ based maps.',
       path: 'examples/website/3d-tiles',
       image: 'images/examples/demo-thumb-3d-tiles.jpg',
       componentUrl: resolve(__dirname, './src/examples/example-tile3d-layer.jsx')
-
+    },
+    {
+      title: 'Brushing',
+      path: 'examples/website/brushing',
+      image: 'images/examples/demo-thumb-brushing.jpg',
+      componentUrl: resolve(__dirname, './src/examples/example-brushing-demo.jsx')
     }
     // {
     //   title: '3D Surface Explorer',
