@@ -10,7 +10,7 @@ const cachedExpressionMap = {
 // Calculates an accessor function from a JSON string
 // '-' : x => x
 // 'a.b.c': x => x.a.b.c
-export default function parseExpressionString(propValue, configuration) {
+export default function parseExpressionString(propValue, configuration, isAccessor) {
   // NOTE: Can be null which represents invalid function. Return null so that prop can be omitted
   if (propValue in cachedExpressionMap) {
     return cachedExpressionMap[propValue];
