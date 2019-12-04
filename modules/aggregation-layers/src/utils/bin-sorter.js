@@ -26,8 +26,8 @@ const defaultGetValue = points => points.length;
 const MAX_32_BIT_FLOAT = 3.402823466e38;
 
 export default class BinSorter {
-  constructor(bins = [], getValue = defaultGetValue, sort = true) {
-    this.aggregatedBins = this.getAggregatedBins(bins, getValue, sort);
+  constructor(bins = [], getValue = defaultGetValue) {
+    this.aggregatedBins = this.getAggregatedBins(bins, getValue);
     this._updateMinMaxValues();
     this.binMap = this.getBinMap();
   }
@@ -37,10 +37,9 @@ export default class BinSorter {
    * Array object will be sorted by value optionally.
    * @param {Array} bins
    * @param {Function} getValue
-   * @param {Bool} sort
    * @return {Array} array of values and index lookup
    */
-  getAggregatedBins(bins, getValue, sort) {
+  getAggregatedBins(bins, getValue) {
     const aggregatedBins = bins.reduce((accu, h, i) => {
       const value = getValue(h.points);
 
@@ -55,10 +54,7 @@ export default class BinSorter {
 
       return accu;
     }, []);
-    if (!sort) {
-      return aggregatedBins;
-    }
-    return aggregatedBins.sort((a, b) => a.value - b.value);
+    return aggregatedBins;
   }
 
   /**
@@ -69,14 +65,17 @@ export default class BinSorter {
    * @return {Array} array of new value range
    */
   getValueRange([lower, upper]) {
-    const len = this.aggregatedBins.length;
+    if (!this.sortedBins) {
+      this.sortedBins = this.aggregatedBins.sort((a, b) => a.value - b.value);
+    }
+    const len = this.sortedBins.length;
     if (!len) {
       return [0, 0];
     }
     const lowerIdx = Math.ceil((lower / 100) * (len - 1));
     const upperIdx = Math.floor((upper / 100) * (len - 1));
 
-    return [this.aggregatedBins[lowerIdx].value, this.aggregatedBins[upperIdx].value];
+    return [this.sortedBins[lowerIdx].value, this.sortedBins[upperIdx].value];
   }
 
   /**
@@ -117,3 +116,5 @@ export default class BinSorter {
     this.totalCount = totalCount;
   }
 }
+
+// Helper methods
