@@ -20,14 +20,14 @@
   ],
   "layers": [
     {
-      "type": "ScatterplotLayer",
+      "@@type": "ScatterplotLayer",
       "data": [{"position": [-122.45, 37.8]}],
       "getPosition": "position",
       "getFillColor": [255, 0, 0, 255],
       "getRadius": 1000
     },
     {
-      "type": "TextLayer",
+      "@@type": "TextLayer",
       "data": [[-122.45, 37.8]],
       "getPosition": "-",
       "elevationRange": [0, 3000],

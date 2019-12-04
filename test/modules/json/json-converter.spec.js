@@ -5,6 +5,7 @@ import {MapController} from '@deck.gl/core';
 import {JSONConverter} from '@deck.gl/json';
 import configuration, {log} from './json-configuration-for-deck';
 import JSON_DATA from './data/deck-props.json';
+import COMPLEX_JSON from './data/complex-data.json';
 
 test('JSONConverter#import', t => {
   t.ok(JSONConverter, 'JSONConverter imported');
@@ -34,10 +35,26 @@ test('JSONConverter#badConvert', t => {
   const jsonConverter = new JSONConverter({configuration});
   t.ok(jsonConverter, 'JSONConverter created');
   const badData = JSON.parse(JSON.stringify(JSON_DATA));
-  badData.layers[0].type = 'InvalidLayer';
+  badData.layers[0]['@@type'] = 'InvalidLayer';
   makeSpy(log, 'warn');
   jsonConverter.convert(badData);
   t.ok(log.warn.called, 'should produce a warning message if the layer type is invalid');
   log.warn.restore();
+  t.end();
+});
+
+test('JSONConverter#handleTypeAsKey', t => {
+  const jsonConverter = new JSONConverter({configuration});
+  t.ok(jsonConverter, 'JSONConverter created');
+  const complexData = JSON.parse(JSON.stringify(COMPLEX_JSON));
+  const deckProps = jsonConverter.convert(complexData);
+  t.ok(deckProps.layers.length === 3, 'should have three layers');
+  t.ok(deckProps.layers[0].id === 'ScatterplotLayer', 'should have a ScatterplotLayer at index 0');
+  t.ok(deckProps.layers[1].id === 'TextLayer', 'should have a TextLayer at index 1');
+  t.ok(deckProps.layers[2].id === 'GeoJsonLayer', 'should have a GeoJsonLayer at index 2');
+  t.ok(deckProps.layers[2].props.data.features[0].type === 'Feature');
+  // TODO implement function parsing
+  // deckProps.layers.length === 3
+  // deckProps.layers[1].getTextAnchor === 'end'
   t.end();
 });
