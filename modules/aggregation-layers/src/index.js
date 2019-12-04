@@ -39,7 +39,9 @@ import {
   quantizeScale,
   getQuantizeScale,
   getQuantileScale,
-  getOrdinalScale
+  getOrdinalScale,
+  getScaleFunctionByScaleType,
+  getScaleDomain
 } from './utils/scale-utils';
 import {defaultColorRange} from './utils/color-utils';
 
@@ -52,6 +54,7 @@ export const experimental = {
   getQuantizeScale,
   getQuantileScale,
   getOrdinalScale,
-
+  getScaleFunctionByScaleType,
+  getScaleDomain,
   defaultColorRange
 };

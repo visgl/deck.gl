@@ -84,7 +84,7 @@ export default class BinSorter {
       .sort((a, b) => a.value - b.value);
   }
 
-  percentileToIndex([lowerPercentile, upperPercentile]) {
+  _percentileToIndex([lowerPercentile, upperPercentile]) {
     const len = this.sortedBins.length;
     if (len < 2) {
       return [0, 0];
@@ -123,7 +123,7 @@ export default class BinSorter {
     if (!this.sortedBins.length) {
       return [];
     }
-    const [lowerIdx, upperIdx] = this.percentileToIndex([lower, upper]);
+    const [lowerIdx, upperIdx] = this._percentileToIndex([lower, upper]);
 
     return [this.sortedBins[lowerIdx].value, this.sortedBins[upperIdx].value];
   }
@@ -132,12 +132,12 @@ export default class BinSorter {
     if (!this.sortedBins.length) {
       return [];
     }
-    const indexEdge = this.percentileToIndex([lower, upper]);
+    const indexEdge = this._percentileToIndex([lower, upper]);
 
-    return this.getScaleDomain(scale, indexEdge);
+    return this._getScaleDomain(scale, indexEdge);
   }
 
-  getScaleDomain(scaleType, [lowerIdx, upperIdx]) {
+  _getScaleDomain(scaleType, [lowerIdx, upperIdx]) {
     const bins = this.sortedBins;
 
     switch (scaleType) {
