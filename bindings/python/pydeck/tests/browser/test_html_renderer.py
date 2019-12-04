@@ -2,7 +2,7 @@ import pytest
 import os
 from pydeck import Deck, Layer, ViewState
 
-from ..const import FIXTURE_STRING
+from ..fixtures import fixtures
 
 text_data = [{'text': 'Test', 'position': [0.0, 0.0]}]
 scatterplot_data = [
