@@ -9,32 +9,32 @@ class ViewState(JSONMixin):
 
     Parameters
     ---------
-    longitude : float, default 0.0
+    longitude : float, default None
         x-coordinate of focus
-    latitude : float, default 0.0
+    latitude : float, default None
         y-coordinate of focus
-    zoom : float, default 1
+    zoom : float, default None
         Magnification level of the map, usually between 0 (representing the whole world)
         and 24 (close to individual buildings)
-    min_zoom : float, default 0
+    min_zoom : float, default None
         Least mangified zoom level the user can navigate to
-    max_zoom : float, default 20
+    max_zoom : float, default None
         Most magnified zoom level the user can navigate to
-    pitch : float, default 0
+    pitch : float, default None
         Up/down angle relative to the map's plane, with 0 being looking directly at the map
-    bearing : float, default 0
+    bearing : float, default None
         Left/right angle relative to the map's true north, with 0 being aligned to true north
     """
 
     def __init__(
         self,
-        longitude=0.0,
-        latitude=0.0,
-        zoom=1,
-        min_zoom=0,
-        max_zoom=20,
-        pitch=0,
-        bearing=0,
+        longitude=None,
+        latitude=None,
+        zoom=None,
+        min_zoom=None,
+        max_zoom=None,
+        pitch=None,
+        bearing=None,
         **kwargs
     ):
         self.longitude = longitude
