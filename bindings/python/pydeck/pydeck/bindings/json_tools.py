@@ -52,9 +52,6 @@ def default_serialize(o, remap_function=lower_camel_case_keys):
     for ignore_attr in IGNORE_KEYS:
         if attrs.get(ignore_attr):
             del attrs[ignore_attr]
-    if attrs.get('type'):
-        attrs['@@type'] = attrs['type']
-        del attrs['type']
     if remap_function:
         remap_function(attrs)
     return attrs
