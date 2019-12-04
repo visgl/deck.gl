@@ -10,7 +10,6 @@
   },
   "layers": [
     {
-      "@@type": "HexagonLayer",
       "coverage": 1,
       "data": "https://raw.githubusercontent.com/uber-common/deck.gl-data/master/examples/3d-heatmap/heatmap-data.csv",
       "elevationRange": [
@@ -19,6 +18,7 @@
       ],
       "elevationScale": 50,
       "extruded": true,
+      "getPosition": "[lng, lat]",
       "id": "heatmap",
       "lightSettings": {
         "ambientRatio": 0.4,
@@ -32,14 +32,15 @@
           8000
         ],
         "numberOfLights": 2
-      }
+      },
+      "@@type": "HexagonLayer"
     }
   ],
   "mapStyle": "mapbox://styles/mapbox/dark-v9",
   "views": [
     {
-      "@@type": "MapView",
-      "controller": true
+      "controller": true,
+      "@@type": "MapView"
     }
   ]
 }
