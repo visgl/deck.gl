@@ -1,6 +1,7 @@
 /* global window, console */
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
+/* eslint-disable import/namespace */
 
 import * as widgets from '@jupyter-widgets/base';
 
@@ -91,15 +92,4 @@ export function createTestModel(constructor, attributes) {
     model_id: id
   };
   return new constructor(attributes, modelOptions);
-}
-
-export function getModule(modulePath, onError) {
-  // Require at runtime, after the environment is polyfilled
-  try {
-    return require(modulePath);
-  } catch (error) {
-    // Work around: jupyter-widget is built as an AMD module
-    // it cannot be imported under Node
-    return onError(error);
-  }
 }
