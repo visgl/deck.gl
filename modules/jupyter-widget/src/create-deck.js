@@ -39,7 +39,7 @@ const jsonConverterConfiguration = {
 
 loaders.registerLoaders([CSVLoader, Tile3DLoader, LASWorkerLoader]);
 
-function createDeck({
+export function createDeck({
   mapboxApiKey,
   container,
   jsonInput,
@@ -91,5 +91,3 @@ function injectFunction(warnFunction, messageHandler) {
     return warnFunction(...args);
   };
 }
-
-export {createDeck};
