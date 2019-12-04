@@ -845,6 +845,7 @@ ${flags.viewportChanged ? 'viewport' : ''}\
 
   _initState() {
     assert(!this.internalState && !this.state);
+    assert(isFinite(this.props.coordinateSystem), `${this.id}: invalid coordinateSystem`);
 
     const attributeManager = this._getAttributeManager();
 

@@ -21,6 +21,7 @@
 // Note: The numeric values here are matched by shader code in the
 // "project" and "project64" shader modules. Both places need to be
 // updated.
+import log from '../utils/log';
 
 // Describes the format of positions
 export const COORDINATE_SYSTEM = {
@@ -39,21 +40,24 @@ export const COORDINATE_SYSTEM = {
   LNGLAT_OFFSETS: 3,
 
   // Non-geospatial
-  CARTESIAN: 0,
-
-  // Deprecated
-  // Positions and distances are not transformed: [x, y, z] in unit coordinates
-  IDENTITY: 0
+  CARTESIAN: 0
 };
+
+// Deprecated
+/* eslint-disable accessor-pairs */
+Object.defineProperty(COORDINATE_SYSTEM, 'IDENTITY', {
+  get: () => log.deprecated('COORDINATE_SYSTEM.IDENTITY', 'COORDINATE_SYSTEM.CARTESIAN')() || 0
+});
+/* eslint-enable accessor-pairs */
 
 // Describes the common space
 export const PROJECTION_MODE = {
-  WEB_MERCATOR: 1.0,
+  WEB_MERCATOR: 1,
 
   // This is automatically assigned by the project module
-  WEB_MERCATOR_AUTO_OFFSET: 4.0,
+  WEB_MERCATOR_AUTO_OFFSET: 4,
 
-  IDENTITY: 0.0
+  IDENTITY: 0
 };
 
 export const EVENTS = {
