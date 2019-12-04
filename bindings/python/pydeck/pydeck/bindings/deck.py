@@ -6,13 +6,14 @@ from .json_tools import JSONMixin
 from .layer import Layer
 from ..io.html import deck_to_html
 from ..widget import DeckGLWidget
+from .view import View
 
 
 class Deck(JSONMixin):
     def __init__(
         self,
         layers=[],
-        views=[],
+        views=[View(type='MapView', controller=True)],
         map_style='mapbox://styles/mapbox/dark-v9',
         mapbox_key=None,
         initial_view_state=None,
