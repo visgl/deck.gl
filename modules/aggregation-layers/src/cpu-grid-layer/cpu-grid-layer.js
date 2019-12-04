@@ -60,7 +60,10 @@ const defaultProps = {
   extruded: false,
 
   // Optional material for 'lighting' shader module
-  material: true
+  material: true,
+
+  // data filter
+  filterData: {type: 'function', value: null, optional: true}
 };
 
 export default class CPUGridLayer extends CompositeLayer {
