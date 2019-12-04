@@ -289,14 +289,6 @@ test('HexagonLayer#updateLayer', t => {
             Array.isArray(elevation.sortedBins.sortedBins),
             'aggregatorState.dimension.elevation.sortedBins.sortedBins calculated'
           );
-          t.ok(
-            Number.isFinite(fillColor.sortedBins.maxCount),
-            'aggregatorState.dimension.fillColor.sortedBins.maxCount calculated'
-          );
-          t.ok(
-            Number.isFinite(elevation.sortedBins.maxCount),
-            'aggregatorState.dimension.elevation.sortedBins.maxCount calculated'
-          );
 
           const firstSortedBin = fillColor.sortedBins.sortedBins[0];
           const binTocell = layerData.data.find(d => d.index === firstSortedBin.i);

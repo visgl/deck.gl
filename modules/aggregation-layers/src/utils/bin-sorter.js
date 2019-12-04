@@ -24,16 +24,22 @@
 // avg/mean/max of specific value of the point
 const defaultGetValue = points => points.length;
 
+// access array of points in each bin
+const defaultGetPoints = bin => bin.points;
+// access index of each bin
+const defaultGetIndex = bin => bin.index;
+
 const defaultProps = {
   getValue: defaultGetValue,
+  getPoints: defaultGetPoints,
+  getIndex: defaultGetIndex,
   filterData: null
 };
 
 export default class BinSorter {
   constructor(bins = [], props = defaultProps) {
-    this.sortedBins = this.getSortedBins(bins, props);
-    this.maxCount = this.getMaxCount();
-    this.binMap = this.getBinMap();
+    this.sortedBins = this._getSortedBins(bins, props);
+    this.binMap = this._getBinMap();
   }
 
   /**
@@ -42,22 +48,31 @@ export default class BinSorter {
    * @param {Function} getValue
    * @return {Array} array of values and index lookup
    */
-  getSortedBins(bins, props) {
-    const {getValue = defaultGetValue, filterData} = props;
+  _getSortedBins(bins, props) {
+    const {
+      getValue = defaultGetValue,
+      getPoints = defaultGetPoints,
+      getIndex = defaultGetIndex,
+      filterData
+    } = props;
+
     const hasFilter = typeof filterData === 'function';
 
     return bins
       .reduce((accu, h, i) => {
-        const filteredPoints = hasFilter ? h.points.filter(filterData) : h.points;
+        const points = getPoints(h);
+        const index = getIndex(h);
+
+        const filteredPoints = hasFilter ? points.filter(filterData) : points;
 
         h.filteredPoints = hasFilter ? filteredPoints : null;
 
-        const value = getValue(filteredPoints);
+        const value = filteredPoints.length ? getValue(filteredPoints) : null;
 
         if (value !== null && value !== undefined) {
           // filter bins if value is null or undefined
           accu.push({
-            i: Number.isFinite(h.index) ? h.index : i,
+            i: Number.isFinite(index) ? index : i,
             value,
             counts: filteredPoints.length
           });
@@ -66,6 +81,21 @@ export default class BinSorter {
         return accu;
       }, [])
       .sort((a, b) => a.value - b.value);
+  }
+
+  /**
+   * Get a mapping from cell/hexagon index to sorted bin
+   * This is used to retrieve bin value for color calculation
+   * @return {Object} bin index to sortedBins
+   */
+  _getBinMap() {
+    return this.sortedBins.reduce(
+      (mapper, curr) =>
+        Object.assign(mapper, {
+          [curr.i]: curr
+        }),
+      {}
+    );
   }
 
   /**
@@ -84,30 +114,5 @@ export default class BinSorter {
     const upperIdx = Math.floor((upper / 100) * (len - 1));
 
     return [this.sortedBins[lowerIdx].value, this.sortedBins[upperIdx].value];
-  }
-
-  /**
-   * Get ths max count of all bins
-   * @return {Number | Boolean} max count
-   */
-  getMaxCount() {
-    let maxCount = 0;
-    this.sortedBins.forEach(x => (maxCount = maxCount > x.counts ? maxCount : x.counts));
-    return maxCount;
-  }
-
-  /**
-   * Get a mapping from cell/hexagon index to sorted bin
-   * This is used to retrieve bin value for color calculation
-   * @return {Object} bin index to sortedBins
-   */
-  getBinMap() {
-    return this.sortedBins.reduce(
-      (mapper, curr) =>
-        Object.assign(mapper, {
-          [curr.i]: curr
-        }),
-      {}
-    );
   }
 }
