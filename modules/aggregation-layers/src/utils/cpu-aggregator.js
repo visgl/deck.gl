@@ -41,6 +41,10 @@ const defaultDimensions = [
         },
         aggregation: {
           prop: 'colorAggregation'
+        },
+        filterData: {
+          prop: 'filterData',
+          updateTrigger: 'filterData'
         }
       }
     },
@@ -82,6 +86,10 @@ const defaultDimensions = [
         },
         aggregation: {
           prop: 'elevationAggregation'
+        },
+        filterData: {
+          prop: 'filterData',
+          updateTrigger: 'filterData'
         }
       }
     },
@@ -377,11 +385,13 @@ export default class CPUAggregator {
   }
 
   getDimensionSortedBins(props, dimensionUpdater) {
-    // const {getColorValue} = this.state;
     const {key} = dimensionUpdater;
     const {getValue} = this.state.dimensions[key];
 
-    const sortedBins = new BinSorter(this.state.layerData.data || [], getValue);
+    const sortedBins = new BinSorter(this.state.layerData.data || [], {
+      getValue,
+      filterData: props.filterData
+    });
     this.setDimensionState(key, {sortedBins});
     this.getDimensionValueDomain(props, dimensionUpdater);
   }
@@ -420,8 +430,14 @@ export default class CPUAggregator {
   getSubLayerDimensionAttribute(key, nullValue) {
     return cell => {
       const {sortedBins, scaleFunc} = this.state.dimensions[key];
+      const bin = sortedBins.binMap[cell.index];
 
-      const cv = sortedBins.binMap[cell.index] && sortedBins.binMap[cell.index].value;
+      if (bin && bin.counts === 0) {
+        // no points left in bin after filtering
+        return nullValue;
+      }
+
+      const cv = bin && bin.value;
       const domain = scaleFunc.domain();
 
       const isValueInDomain = cv >= domain[0] && cv <= domain[domain.length - 1];
@@ -458,7 +474,9 @@ export default class CPUAggregator {
         binInfo[pickingInfo] = value;
       }
 
-      object = Object.assign(binInfo, cell);
+      object = Object.assign(binInfo, cell, {
+        points: cell.filteredPoints || cell.points
+      });
     }
 
     // add bin colorValue and elevationValue to info

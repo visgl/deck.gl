@@ -81,7 +81,26 @@ test('HexagonLayer#updateLayer', t => {
       );
     };
   }
-
+  function getChecksForFilterChange(triggered) {
+    const shouldUpdate = {
+      layerData: false,
+      dimensions: {
+        fillColor: {
+          sortedBins: triggered,
+          valueDomain: triggered,
+          getValue: triggered,
+          scaleFunc: triggered
+        },
+        elevation: {
+          sortedBins: triggered,
+          valueDomain: triggered,
+          getValue: triggered,
+          scaleFunc: triggered
+        }
+      }
+    };
+    return assertStateUpdate(shouldUpdate, 'getFitlerBy');
+  }
   function getChecksForRadiusChange() {
     const shouldUpdate = {
       layerData: true,
@@ -270,14 +289,6 @@ test('HexagonLayer#updateLayer', t => {
             Array.isArray(elevation.sortedBins.sortedBins),
             'aggregatorState.dimension.elevation.sortedBins.sortedBins calculated'
           );
-          t.ok(
-            Number.isFinite(fillColor.sortedBins.maxCount),
-            'aggregatorState.dimension.fillColor.sortedBins.maxCount calculated'
-          );
-          t.ok(
-            Number.isFinite(elevation.sortedBins.maxCount),
-            'aggregatorState.dimension.elevation.sortedBins.maxCount calculated'
-          );
 
           const firstSortedBin = fillColor.sortedBins.sortedBins[0];
           const binTocell = layerData.data.find(d => d.index === firstSortedBin.i);
@@ -293,6 +304,66 @@ test('HexagonLayer#updateLayer', t => {
           hexagonAggregator: points => ({hexagons: []})
         },
         onAfterUpdate: getChecksForRadiusChange()
+      },
+      {
+        updateProps: {
+          filterData: pt => pt.SPACES >= 4 && pt.SPACES <= 10
+        },
+        onAfterUpdate: ({layer, oldState}) => {
+          getChecksForFilterChange(false)({layer, oldState});
+
+          const {layerData} = layer.state.aggregatorState;
+          const isPointFiltered = layerData.data.every(bin => bin.filteredPoints === null);
+
+          t.ok(isPointFiltered, 'filteredPoints in bins should be reset to null');
+        }
+      },
+      {
+        updateProps: {
+          filterData: pt => pt.SPACES >= 4 && pt.SPACES <= 10,
+          updateTriggers: {
+            filterData: 1
+          }
+        },
+        onAfterUpdate: ({layer, oldState}) => {
+          getChecksForFilterChange(true)({layer, oldState});
+
+          const {
+            layerData,
+            dimensions: {fillColor, elevation}
+          } = layer.state.aggregatorState;
+
+          const isPointFiltered = layerData.data.every(bin =>
+            bin.filteredPoints.every(pt => pt.SPACES >= 4 && pt.SPACES <= 10)
+          );
+
+          t.ok(isPointFiltered, 'filteredPoints in bins should be correct');
+
+          t.ok(
+            fillColor.sortedBins,
+            'aggregatorState.dimensions.fillColor.sortedColorBins calculated'
+          );
+          t.ok(
+            elevation.sortedBins,
+            'aggregatorState.dimensions.elevation.sortedColorBins calculated'
+          );
+        }
+      },
+      {
+        updateProps: {
+          filterData: null,
+          updateTriggers: {
+            filterData: 0
+          }
+        },
+        onAfterUpdate: ({layer, oldState}) => {
+          getChecksForFilterChange(true)({layer, oldState});
+
+          const {layerData} = layer.state.aggregatorState;
+          const isPointFiltered = layerData.data.every(bin => bin.filteredPoints === null);
+
+          t.ok(isPointFiltered, 'filteredPoints in bins should be reset to null');
+        }
       },
       {
         updateProps: {

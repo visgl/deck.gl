@@ -61,7 +61,10 @@ const defaultProps = {
   hexagonAggregator: pointToHexbin,
   getPosition: {type: 'accessor', value: x => x.position},
   // Optional material for 'lighting' shader module
-  material: defaultMaterial
+  material: defaultMaterial,
+
+  // data filter
+  filterData: {type: 'function', value: null, optional: true}
 };
 
 export default class HexagonLayer extends CompositeLayer {
