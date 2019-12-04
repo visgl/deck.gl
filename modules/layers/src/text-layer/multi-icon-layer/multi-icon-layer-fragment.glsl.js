@@ -48,7 +48,7 @@ void main(void) {
   float a = alpha * vColor.a;
   
   if (a < alphaCutoff) {
-    if (backgroundColor.a < 0.001) {
+    if ((backgroundColor.a < 0.001) || picking_uActive) {
       discard;
     } else {
       gl_FragColor = vec4(backgroundColor.rgb, backgroundColor.a * vColor.a);
