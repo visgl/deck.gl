@@ -107,24 +107,23 @@ function pointsToGridHashing(props, aggregationParams) {
 /* eslint-enable max-statements, complexity */
 
 function getGridLayerDataFromGridHash({gridHash, gridOffset, offsets}) {
-  const data = [];
+  const data = new Array(Object.keys(gridHash).length);
   let i = 0;
   for (const key in gridHash) {
     const idxs = key.split('-');
     const latIdx = parseInt(idxs[0], 10);
     const lonIdx = parseInt(idxs[1], 10);
+    const index = i++;
 
-    data.push(
-      Object.assign(
-        {
-          index: i++,
-          position: [
-            offsets[0] + gridOffset.xOffset * lonIdx,
-            offsets[1] + gridOffset.yOffset * latIdx
-          ]
-        },
-        gridHash[key]
-      )
+    data[index] = Object.assign(
+      {
+        index,
+        position: [
+          offsets[0] + gridOffset.xOffset * lonIdx,
+          offsets[1] + gridOffset.yOffset * latIdx
+        ]
+      },
+      gridHash[key]
     );
   }
   return data;

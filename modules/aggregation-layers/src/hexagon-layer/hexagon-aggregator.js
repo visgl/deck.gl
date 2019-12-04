@@ -44,7 +44,7 @@ export function pointToHexbin(props, aggregationParams) {
   for (const object of iterable) {
     objectInfo.index++;
     const posIndex = objectInfo.index * size;
-    const position = positions.slice(posIndex, posIndex + 2);
+    const position = [positions[posIndex], positions[posIndex + 1]];
     const arrayIsFinite = Number.isFinite(position[0]) && Number.isFinite(position[1]);
     if (arrayIsFinite) {
       screenPoints.push(
