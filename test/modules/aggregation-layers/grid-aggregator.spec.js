@@ -27,17 +27,24 @@ import {pointToDensityGridDataCPU} from '@deck.gl/aggregation-layers/cpu-grid-la
 const getPosition = d => d.COORDINATES;
 const iterableData = new Set(FIXTURES.points);
 const cellSize = 500;
+function getAccessor() {
+  return {size: 3};
+}
 
 test('pointToDensityGridDataCPU', t => {
   // fill with some dummy data
   const positions = new Array(iterableData.size * 3);
+  const props = {
+    data: iterableData,
+    cellSize,
+    getPosition
+  };
+  const aggregationParams = {
+    attributes: {positions: {value: positions, getAccessor}},
+    numInstances: iterableData.size
+  };
   t.ok(
-    typeof pointToDensityGridDataCPU({
-      data: iterableData,
-      cellSize,
-      getPosition,
-      attributes: {positions: {value: positions}}
-    }) === 'object',
+    typeof pointToDensityGridDataCPU(props, aggregationParams) === 'object',
     'should work with iterables'
   );
   t.end();

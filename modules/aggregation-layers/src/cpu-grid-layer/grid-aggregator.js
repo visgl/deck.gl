@@ -21,7 +21,6 @@
 import {createIterable} from '@deck.gl/core';
 
 const R_EARTH = 6378000;
-const POSITION_ATTRIBUTE_SIZE = 3; // TODO: issue #3956
 
 /**
  * Calculate density grid from an array of points
@@ -30,8 +29,8 @@ const POSITION_ATTRIBUTE_SIZE = 3; // TODO: issue #3956
  * @param {function} getPosition - position accessor
  * @returns {object} - grid data, cell dimension
  */
-export function pointToDensityGridDataCPU(opts) {
-  const hashInfo = pointsToGridHashing(opts);
+export function pointToDensityGridDataCPU(props, aggregationParams) {
+  const hashInfo = pointsToGridHashing(props, aggregationParams);
   const result = getGridLayerDataFromGridHash(hashInfo);
 
   return {
@@ -65,34 +64,15 @@ export function getGridOffset(boundingBox, cellSize) {
  * @returns {object} - grid hash and cell dimension
  */
 /* eslint-disable max-statements, complexity */
-function pointsToGridHashing(opts) {
-  const {data = [], cellSize, attributes, viewport, projectPoints} = opts;
-
-  const {iterable, objectInfo} = createIterable(data);
+function pointsToGridHashing(props, aggregationParams) {
+  const {data = [], cellSize} = props;
+  const {attributes, viewport, projectPoints, numInstances} = aggregationParams;
   const positions = attributes.positions.value;
-  let boundingBox = opts.boundingBox;
-  if (!boundingBox) {
-    let latMin = Infinity;
-    let latMax = -Infinity;
-    let pLat;
-    // eslint-disable-next-line no-unused-vars
-    for (const pt of iterable) {
-      objectInfo.index++;
-      pLat = positions[objectInfo.index * POSITION_ATTRIBUTE_SIZE + 1];
-
-      if (Number.isFinite(pLat)) {
-        latMin = pLat < latMin ? pLat : latMin;
-        latMax = pLat > latMax ? pLat : latMax;
-      }
-    }
-    boundingBox = {yMin: latMin, yMax: latMax};
-  }
-
-  const offsets = opts.cellOffset || [180, 90];
-  let gridOffset = opts.gridOffset;
-  if (!gridOffset) {
-    gridOffset = getGridOffset(boundingBox, cellSize);
-  }
+  const {size} = attributes.positions.getAccessor();
+  const boundingBox =
+    aggregationParams.boundingBox || getPositionBoundingBox(attributes.positions, numInstances);
+  const offsets = aggregationParams.cellOffset || [180, 90];
+  const gridOffset = aggregationParams.gridOffset || getGridOffset(boundingBox, cellSize);
 
   if (gridOffset.xOffset <= 0 || gridOffset.yOffset <= 0) {
     return {gridHash: {}, gridOffset};
@@ -101,12 +81,11 @@ function pointsToGridHashing(opts) {
   // calculate count per cell
   const gridHash = {};
 
-  // Iterating over again, reset index
-  objectInfo.index = -1;
+  const {iterable, objectInfo} = createIterable(data);
   for (const pt of iterable) {
     objectInfo.index++;
-    let lng = positions[objectInfo.index * POSITION_ATTRIBUTE_SIZE];
-    let lat = positions[objectInfo.index * POSITION_ATTRIBUTE_SIZE + 1];
+    let lng = positions[objectInfo.index * size];
+    let lat = positions[objectInfo.index * size + 1];
 
     if (projectPoints) {
       [lng, lat] = viewport.project([lng, lat]);
@@ -184,4 +163,31 @@ function calculateLatOffset(dy) {
  */
 function calculateLonOffset(lat, dx) {
   return ((dx / R_EARTH) * (180 / Math.PI)) / Math.cos((lat * Math.PI) / 180);
+}
+
+// Calculate bounding box of position attribute
+function getPositionBoundingBox(positionAttribute, numInstance) {
+  // TODO - value might not exist (e.g. attribute transition)
+  const positions = positionAttribute.value;
+  const {size} = positionAttribute.getAccessor();
+
+  let yMin = Infinity;
+  let yMax = -Infinity;
+  let xMin = Infinity;
+  let xMax = -Infinity;
+  let y;
+  let x;
+
+  for (let i = 0; i < numInstance; i++) {
+    x = positions[i * size];
+    y = positions[i * size + 1];
+    if (Number.isFinite(x) && Number.isFinite(y)) {
+      yMin = y < yMin ? y : yMin;
+      yMax = y > yMax ? y : yMax;
+      xMin = x < xMin ? x : xMin;
+      xMax = x > xMax ? x : xMax;
+    }
+  }
+
+  return {xMin, xMax, yMin, yMax};
 }

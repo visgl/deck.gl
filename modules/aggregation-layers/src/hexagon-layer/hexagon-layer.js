@@ -87,12 +87,10 @@ export default class HexagonLayer extends AggregationLayer {
     const oldLayerData = cpuAggregator.state.layerData;
     this.setState({
       // make a copy of the internal state of cpuAggregator for testing
-      aggregatorState: cpuAggregator.updateState(
-        Object.assign({}, opts, {
-          viewport: this.context.viewport,
-          attributes: this.getAttributes()
-        })
-      )
+      aggregatorState: cpuAggregator.updateState(opts, {
+        viewport: this.context.viewport,
+        attributes: this.getAttributes()
+      })
     });
 
     if (oldLayerData !== cpuAggregator.state.layerData) {

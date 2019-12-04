@@ -143,10 +143,14 @@ export default class GPUGridLayer extends GridAggregationLayer {
       };
       if (mode !== 'hover') {
         // perform CPU aggregation for full list of points for each cell
-        const {data, getPosition} = this.props;
+        const {props} = this;
         let {gridHash} = this.state;
         if (!gridHash) {
-          const cpuAggregation = pointToDensityGridDataCPU(data, this.props.cellSize, getPosition);
+          const cpuAggregation = pointToDensityGridDataCPU(props, {
+            viewport: this.context.viewport,
+            attributes: this.getAttributes(),
+            numInstances: this.getNumInstances(props)
+          });
           gridHash = cpuAggregation.gridHash;
           this.setState({gridHash});
         }

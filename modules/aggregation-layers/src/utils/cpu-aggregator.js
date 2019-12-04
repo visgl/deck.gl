@@ -140,14 +140,14 @@ export default class CPUAggregator {
     return defaultDimensions;
   }
 
-  updateState(opts) {
-    const {oldProps, props, changeFlags, viewport, attributes, projectPoints} = opts;
+  updateState(opts, aggregationParams) {
+    const {oldProps, props, changeFlags} = opts;
     this.updateGetValueFuncs(oldProps, props, changeFlags);
     const reprojectNeeded = this.needsReProjectPoints(oldProps, props, changeFlags);
     let aggregationDirty = false;
     if (changeFlags.dataChanged || reprojectNeeded) {
       // project data into bin and aggregate wegiths per bin
-      this.getAggregatedData(props, viewport, attributes, projectPoints);
+      this.getAggregatedData(props, aggregationParams);
       aggregationDirty = true;
     } else {
       const dimensionChanges = this.getDimensionChanges(oldProps, props, changeFlags) || [];
@@ -185,18 +185,10 @@ export default class CPUAggregator {
     return result;
   }
 
-  getAggregatedData(props, viewport, attributes, projectPoints) {
+  getAggregatedData(props, aggregationParams) {
     const aggregator = this._getAggregator(props);
 
-    const {cellSize, radius, data} = props;
-    const result = aggregator({
-      data,
-      cellSize,
-      radius,
-      viewport,
-      attributes,
-      projectPoints
-    });
+    const result = aggregator(props, aggregationParams);
     this.setState({
       layerData: this.normalizeResult(result)
     });

@@ -21,8 +21,6 @@
 import {hexbin} from 'd3-hexbin';
 import {createIterable, log} from '@deck.gl/core';
 
-const POSITION_ATTRIBUTE_SIZE = 3; // TODO: issue #3956
-
 /**
  * Use d3-hexbin to performs hexagonal binning from geo points to hexagons
  * @param {Iterable} data - array of points
@@ -32,8 +30,9 @@ const POSITION_ATTRIBUTE_SIZE = 3; // TODO: issue #3956
 
  * @return {Object} - hexagons and countRange
  */
-export function pointToHexbin(opts) {
-  const {data, radius, viewport, attributes} = opts;
+export function pointToHexbin(props, aggregationParams) {
+  const {data, radius} = props;
+  const {viewport, attributes} = aggregationParams;
   // get hexagon radius in mercator world unit
   const radiusCommon = getRadiusInCommon(radius, viewport);
 
@@ -41,9 +40,10 @@ export function pointToHexbin(opts) {
   const screenPoints = [];
   const {iterable, objectInfo} = createIterable(data);
   const positions = attributes.positions.value;
+  const {size} = attributes.positions.getAccessor();
   for (const object of iterable) {
     objectInfo.index++;
-    const posIndex = objectInfo.index * POSITION_ATTRIBUTE_SIZE;
+    const posIndex = objectInfo.index * size;
     const position = positions.slice(posIndex, posIndex + 2);
     const arrayIsFinite = Number.isFinite(position[0]) && Number.isFinite(position[1]);
     if (arrayIsFinite) {

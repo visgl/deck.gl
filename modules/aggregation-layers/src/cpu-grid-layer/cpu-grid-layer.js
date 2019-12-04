@@ -86,12 +86,11 @@ export default class CPUGridLayer extends AggregationLayer {
     super.updateState(opts);
     this.setState({
       // make a copy of the internal state of cpuAggregator for testing
-      aggregatorState: this.state.cpuAggregator.updateState(
-        Object.assign({}, opts, {
-          viewport: this.context.viewport,
-          attributes: this.getAttributes()
-        })
-      )
+      aggregatorState: this.state.cpuAggregator.updateState(opts, {
+        viewport: this.context.viewport,
+        attributes: this.getAttributes(),
+        numInstances: this.getNumInstances(opts.props)
+      })
     });
   }
 
