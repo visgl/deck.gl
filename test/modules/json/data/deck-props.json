@@ -8,12 +8,12 @@
   "mapStyle": {},
   "views": [
     {
-      "type": "MapView",
+      "@@type": "MapView",
       "height": "50%",
       "controller": true
     },
     {
-      "type": "FirstPersonView",
+      "@@type": "FirstPersonView",
       "y": "50%",
       "height": "50%"
     }
