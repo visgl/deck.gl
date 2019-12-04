@@ -15,7 +15,7 @@ const TEST_CASES = [
       },
       layers: [
         {
-          type: 'ScatterplotLayer',
+          '@@type': 'ScatterplotLayer',
           data: [[0, 0], [0.01, 0.01]],
           getPosition: '-',
           getRadius: 500,
