@@ -11,7 +11,7 @@ const cachedExpressionMap = {
 // '-' : x => x
 // 'a.b.c': x => x.a.b.c
 export default function parseExpressionString(propValue, configuration, isAccessor) {
-  // NOTE: Can be null which represents invalid function. Return null so that prop can be ommitted
+  // NOTE: Can be null which represents invalid function. Return null so that prop can be omitted
   if (propValue in cachedExpressionMap) {
     return cachedExpressionMap[propValue];
   }
@@ -23,8 +23,8 @@ export default function parseExpressionString(propValue, configuration, isAccess
     func = row => get(row, propValue);
   } else {
     // NOTE: To avoid security risks, the arguments passed to the
-    // compiled expresion must only give access to pure data (no globals etc)
-    // We disable function call syntax?
+    // compiled expression must only give access to pure data (no globals etc)
+    // We disable function call syntax
     traverse(ast, node => {
       if (node.type === 'CallExpression') {
         throw new Error('Function calls not allowed in JSON expressions');

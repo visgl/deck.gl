@@ -2,7 +2,7 @@
 import parseExpressionString from './helpers/parse-expression-string';
 import assert from './utils/assert';
 
-const DEFAULT_TYPE_KEY = 'type';
+const DEFAULT_TYPE_KEY = '@@type';
 
 const isObject = value => value && typeof value === 'object';
 
