@@ -40,20 +40,24 @@ export default class BinSorter {
    * @return {Array} array of values and index lookup
    */
   getAggregatedBins(bins, getValue) {
-    const aggregatedBins = bins.reduce((accu, h, i) => {
-      const value = getValue(h.points);
+    const binCount = bins.length;
+    const aggregatedBins = [];
+    let index = 0;
+    for (let binIndex = 0; binIndex < binCount; binIndex++) {
+      const bin = bins[binIndex];
+      const value = getValue(bin.points);
 
       if (value !== null && value !== undefined) {
         // filter bins if value is null or undefined
-        accu.push({
-          i: Number.isFinite(h.index) ? h.index : i,
+        aggregatedBins[index] = {
+          i: Number.isFinite(bin.index) ? bin.index : binIndex,
           value,
-          counts: h.points.length
-        });
+          counts: bin.points.length
+        };
+        index++;
       }
+    }
 
-      return accu;
-    }, []);
     return aggregatedBins;
   }
 
@@ -84,13 +88,11 @@ export default class BinSorter {
    * @return {Object} bin index to aggregatedBins
    */
   getBinMap() {
-    return this.aggregatedBins.reduce(
-      (mapper, curr) =>
-        Object.assign(mapper, {
-          [curr.i]: curr
-        }),
-      {}
-    );
+    const binMap = {};
+    for (const bin of this.aggregatedBins) {
+      binMap[bin.i] = bin;
+    }
+    return binMap;
   }
 
   // Private
