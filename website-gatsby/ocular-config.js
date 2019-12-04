@@ -181,6 +181,13 @@ based maps.',
       path: 'examples/website/heatmap',
       image: 'images/examples/demo-thumb-heatmap.jpg',
       componentUrl: resolve(__dirname, './src/examples/example-heatmap-layer.jsx')
+    },
+    {
+      title: 'Tile3DLayer',
+      path: 'examples/website/3d-tiles',
+      image: 'images/examples/demo-thumb-3d-tiles.jpg',
+      componentUrl: resolve(__dirname, './src/examples/example-tile3d-layer.jsx')
+
     }
     // {
     //   title: '3D Surface Explorer',
@@ -193,12 +200,6 @@ based maps.',
     //   image: 'images/example-pointcloud.png',
     //   componentUrl: resolve(__dirname, './examples/pointcloud/app.js')
     //   path: 'examples/pointcloud'
-    // },
-    // {
-    //   title: '3D Tiles',
-    //   image: 'images/example-gltf.jpg',
-    //   componentUrl: resolve(__dirname, './examples/3d-tiles/app.js')
-    //   path: 'examples/3d-tiles'
     // },
     // {
     //   title: 'GLTF',
