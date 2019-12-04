@@ -44,7 +44,6 @@ test('BinSorter.init', t => {
 
   const expectedResult = {
     sortedBins: expectedSortedBins,
-    maxCount: 3,
     binMap: {
       0: expectedSortedBins[0],
       1: expectedSortedBins[2],
@@ -63,10 +62,10 @@ test('BinSorter', t => {
     points.reduce((accu, p) => (Number.isFinite(p.a) ? accu + p.a : accu), 0);
 
   t.doesNotThrow(() => {
-    sortedBins = new BinSorter([], getValue);
+    sortedBins = new BinSorter([], {getValue});
   }, 'create sortedBins with empyt bin and getValue should not fail');
 
-  sortedBins = new BinSorter(mockBins, getValue);
+  sortedBins = new BinSorter(mockBins, {getValue});
 
   const expectedBins = [
     {i: 0, value: 0, counts: 1},
@@ -76,10 +75,10 @@ test('BinSorter', t => {
 
   t.deepEqual(sortedBins.sortedBins, expectedBins, 'should create correct sorted bins');
 
-  sortedBins = new BinSorter(mockBins, () => null);
+  sortedBins = new BinSorter(mockBins, {getValue: () => null});
   t.deepEqual(
     sortedBins,
-    {sortedBins: [], maxCount: 0, binMap: {}},
+    {sortedBins: [], binMap: {}},
     'should empty bins if getValue return null'
   );
 
@@ -93,7 +92,7 @@ test('BinSorter.getValueDomain', t => {
 
   sortedBins = new BinSorter([{points: []}]);
   const domainOne = sortedBins.getValueDomainByScale('quantize');
-  t.deepEqual(domainOne, [0, 0], 'should create correct domain if there is only 1 bin');
+  t.deepEqual(domainOne, [], 'should create correct domain if there is only 1 bin');
 
   sortedBins = new BinSorter(mockBins);
 
@@ -106,7 +105,7 @@ test('BinSorter.getValueDomain', t => {
   const quantileDomain = sortedBins.getValueDomainByScale('quantile');
   t.deepEqual(quantileDomain, [1, 2, 3], 'should create correct quantileDomain');
 
-  sortedBins = new BinSorter(mockBins, points => 'a');
+  sortedBins = new BinSorter(mockBins, {getValue: points => 'a'});
 
   const ordinalDomain = sortedBins.getValueDomainByScale('ordinal');
   t.deepEqual(ordinalDomain, ['a'], 'should create correct ordinalDomain');

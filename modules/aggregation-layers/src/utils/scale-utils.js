@@ -201,3 +201,19 @@ export function getScaleDomain(scaleType, data, valueAccessor) {
 export function clamp(value, min, max) {
   return Math.max(min, Math.min(max, value));
 }
+
+export function getScaleFunctionByScaleType(scaleType) {
+  switch (scaleType) {
+    case 'quantize':
+      return getQuantizeScale;
+    case 'linear':
+      return getLinearScale;
+    case 'quantile':
+      return getQuantileScale;
+    case 'ordinal':
+      return getOrdinalScale;
+
+    default:
+      return getQuantizeScale;
+  }
+}
