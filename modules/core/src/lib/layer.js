@@ -68,7 +68,7 @@ const defaultProps = {
   onDrag: {type: 'function', value: null, compare: false, optional: true},
   onDragEnd: {type: 'function', value: null, compare: false, optional: true},
 
-  coordinateSystem: COORDINATE_SYSTEM.LNGLAT,
+  coordinateSystem: COORDINATE_SYSTEM.DEFAULT,
   coordinateOrigin: {type: 'array', value: [0, 0, 0], compare: true},
   modelMatrix: {type: 'array', value: null, compare: true, optional: true},
   wrapLongitude: false,
@@ -203,9 +203,11 @@ export default class Layer extends Component {
   }
 
   use64bitPositions() {
+    const {coordinateSystem} = this.props;
     return (
-      this.props.coordinateSystem === COORDINATE_SYSTEM.LNGLAT ||
-      this.props.coordinateSystem === COORDINATE_SYSTEM.IDENTITY
+      coordinateSystem === COORDINATE_SYSTEM.DEFAULT ||
+      coordinateSystem === COORDINATE_SYSTEM.LNGLAT ||
+      coordinateSystem === COORDINATE_SYSTEM.IDENTITY
     );
   }
 
@@ -843,6 +845,7 @@ ${flags.viewportChanged ? 'viewport' : ''}\
 
   _initState() {
     assert(!this.internalState && !this.state);
+    assert(isFinite(this.props.coordinateSystem), `${this.id}: invalid coordinateSystem`);
 
     const attributeManager = this._getAttributeManager();
 

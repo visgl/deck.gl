@@ -31,7 +31,7 @@ new PointCloudLayer({
 | `COORDINATE_SYSTEM.LNGLAT` (default) | [longitude, latitude, altitude] | meters | Longitude and latitude are specified as [WGS84](https://gisgeography.com/wgs84-world-geodetic-system/) coordinates in degrees from Greenwich meridian / equator respectively, and altitude is specified in meters above sea level. |
 | `COORDINATE_SYSTEM.METER_OFFSETS` *   | [Δx, Δy, Δz]   | meters | Positions are given in meter offsets from a reference geo-location that is specified separately (`coordinateOrigin`). The `x` axis points map east, the `y` axis points map north, and `z` points up. |
 | `COORDINATE_SYSTEM.LNGLAT_OFFSETS`    | [Δlongitude, Δlatitude, Δaltitude]   | meters | Positions are given in meter offsets from a reference geo-location that is specified separately (`coordinateOrigin`). |
-| `COORDINATE_SYSTEM.IDENTITY`         | [x, y, z] | identity units | A linear system with no interpretation for pure info-vis layers. Viewports can be used without supplying geospatial reference points. |
+| `COORDINATE_SYSTEM.CARTESIAN`         | [x, y, z] | identity units | A linear system with no interpretation for pure info-vis layers. Viewports can be used without supplying geospatial reference points. |
 | `COORDINATE_SYSTEM.LNGLAT_DEPRECATED`| [longitude, latitude, altitude] | meters | A lower precision version of the `COORDINATE_SYSTEM.LNGLAT` mode, that was the default until deck.gl v6.2. Will be removed in a future release. |
 
 * Note that although UTM ([Universal Transverse Mercator](https://en.wikipedia.org/wiki/Universal_Transverse_Mercator_coordinate_system)) coordinates uses similar meter offsets as the deck.gl meters mode, be aware there are subtle differences, so be careful before making assumptions.

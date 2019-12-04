@@ -59,15 +59,6 @@ const TEST_CASES = [
     result: [-0.014226562499999318, 0.03599588695612965, 0.016187212628251565]
   },
   {
-    title: 'LNGLAT_DEPRECATED',
-    position: [-122.465, 37.8, 1000],
-    params: {
-      viewport: TEST_VIEWPORT,
-      coordinateSystem: COORDINATE_SYSTEM.LNGLAT_DEPRECATED
-    },
-    result: [81.82755555555553, 314.14645092139926, 0.016182831898449417]
-  },
-  {
     title: 'LNGLAT_OFFSETS',
     position: [-0.05, 0.06, 50],
     params: {

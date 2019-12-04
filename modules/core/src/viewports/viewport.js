@@ -33,6 +33,8 @@ import {
   pixelsToWorld
 } from '@math.gl/web-mercator';
 
+import {PROJECTION_MODE} from '../lib/constants';
+
 import assert from '../utils/assert';
 
 const DEGREES_TO_RADIANS = Math.PI / 180;
@@ -91,6 +93,15 @@ export default class Viewport {
 
   get metersPerPixel() {
     return this.distanceScales.metersPerUnit[2] / this.scale;
+  }
+
+  get projectionMode() {
+    if (this.isGeospatial) {
+      return this.zoom < 12
+        ? PROJECTION_MODE.WEB_MERCATOR
+        : PROJECTION_MODE.WEB_MERCATOR_AUTO_OFFSET;
+    }
+    return PROJECTION_MODE.IDENTITY;
   }
 
   // Two viewports are equal if width and height are identical, and if
