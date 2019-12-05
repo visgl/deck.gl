@@ -6,13 +6,13 @@
     body {
       padding: 0;
       margin: 0;
+      background: white;
     }
 
     #app {
       width: 100vw;
       height: 100vh;
       overflow: hidden;
-      background: white;
     }
   </style>
 </head>
@@ -21,24 +21,31 @@
   <div id="app"></div>
   <script type="text/javascript" src="/modules/jupyter-widget/dist/standalone-html-bundle.js"></script>
   <script type="text/javascript">
-    let deck;
     window.onmessage = evt => {
-      if (!deck) {
-        deck = createDeck({
+      if (evt.data.json) {
+        const previousCanvas = document.querySelector('#deckgl-overlay');
+        if (previousCanvas) {
+          previousCanvas.remove();
+        }
+
+        createDeck({
           mapboxApiKey: 'NO_API_KEY',
           container: document.getElementById('app'),
           jsonInput: evt.data.json,
-          useTooltip: true
-        });
-
-        deck.setProps({
-          onAfterRender: () => window.top.postMessage('done')
+          useTooltip: true,
+          onComplete: ({ deckgl }) => {
+            deckgl.setProps({
+              onAfterRender: () => {
+                window.top.postMessage('done')
+              }
+            });
+          }
         });
 
       } else {
         updateDeck(evt.data.json, deck);
       }
-    }
+    };
   </script>
 </body>
 
