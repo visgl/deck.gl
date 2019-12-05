@@ -20,7 +20,6 @@
 
 import {equals} from 'math.gl';
 import {LineLayer, SolidPolygonLayer} from '@deck.gl/layers';
-import GL from '@luma.gl/constants';
 import {generateContours} from './contour-utils';
 import {log} from '@deck.gl/core';
 

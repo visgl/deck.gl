@@ -25,8 +25,6 @@ import ScreenGridCellLayer from './screen-grid-cell-layer';
 import GridAggregationLayer from '../grid-aggregation-layer';
 import {getFloatTexture} from '../utils/resource-utils.js';
 
-import GL from '@luma.gl/constants';
-
 const defaultProps = Object.assign({}, ScreenGridCellLayer.defaultProps, {
   getPosition: {type: 'accessor', value: d => d.position},
   getWeight: {type: 'accessor', value: d => 1},
