@@ -81,12 +81,13 @@ const TEST_CASES = [
     goldenImage: './test/render/golden-images/jupyter-widget-scatterplot-and-text.png'
   },
   {
+    name: 'GeoJsonLayer',
     json: {
       description: 'Test of GeoJsonLayer',
       initialViewState: {
         longitude: -122.45,
         latitude: 37.8,
-        zoom: 12
+        zoom: 10
       },
       layers: [
         {
@@ -98,8 +99,15 @@ const TEST_CASES = [
                 type: 'Feature',
                 properties: {},
                 geometry: {
-                  type: 'Point',
-                  coordinates: [-122.42923736572264, 37.80544394934271]
+                  type: 'Polygon',
+                  coordinates: [
+                    [
+                      [-122.42923736572264, 37.80544394934271],
+                      [0, 37.80544394934271],
+                      [-122.42923736572264, 0],
+                      [-122.42923736572264, 37.80544394934271]
+                    ]
+                  ]
                 }
               }
             ]
