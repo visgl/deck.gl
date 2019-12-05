@@ -19,6 +19,7 @@
 // THE SOFTWARE.
 
 import {createIterable} from '@deck.gl/core';
+import GL from '@luma.gl/constants';
 import IconLayer from '../../icon-layer/icon-layer';
 
 import vs from './multi-icon-layer-vertex.glsl';
@@ -68,6 +69,11 @@ export default class MultiIconLayer extends IconLayer {
         size: 2,
         transition: true,
         accessor: 'getPixelOffset'
+      },
+      instancePickingColors: {
+        type: GL.UNSIGNED_BYTE,
+        size: 3,
+        update: this.calculateInstancePickingColors
       }
     });
   }
