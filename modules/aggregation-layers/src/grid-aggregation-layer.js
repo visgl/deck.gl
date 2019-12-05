@@ -29,6 +29,8 @@ import {getBoundingBox, alignToCell} from './utils/grid-aggregation-utils';
 import BinSorter from './utils/bin-sorter';
 import {pointToDensityGridDataCPU, getGridOffset} from './cpu-grid-layer/grid-aggregator';
 
+const EMPTY_MATRIX = new Matrix4();
+
 export default class GridAggregationLayer extends AggregationLayer {
   initializeState({aggregationProps, getCellSize}) {
     const {gl} = this.context;
@@ -182,15 +184,19 @@ export default class GridAggregationLayer extends AggregationLayer {
 
       this._alignBoundingBox(opts);
       let {width, height} = viewport;
-      let gridTransformMatrix = new Matrix4();
+      let gridTransformMatrix;
       let cellOffset = [0, 0];
       let projectPoints = false;
+      let translation = [0, 0];
+      let scaling = [0, 0, 0]; // [x, y, z] : x,y represent scaling in x and y and z > 0 implies scaling enabled otherwise not
 
       if (screenSpaceAggregation) {
         if (viewport instanceof WebMercatorViewport) {
           // project points from world space (lng/lat) to viewport (screen) space.
           projectPoints = true;
-          gridTransformMatrix = viewport.viewportMatrix;
+          // gridTransformMatrix = viewport.viewportMatrix;
+          scaling = [viewport.width/2, -viewport.height/2, 1];
+          translation = [1, -1];
         } else {
           // Support Ortho viewport use cases.
           projectPoints = false;
@@ -203,8 +209,9 @@ export default class GridAggregationLayer extends AggregationLayer {
         height = yMax - yMin + gridOffset.yOffset;
 
         // Setup transformation matrix so that every point is in +ve range
-        gridTransformMatrix = gridTransformMatrix.translate([-1 * xMin, -1 * yMin, 0]);
+        // gridTransformMatrix = gridTransformMatrix.translate([-1 * xMin, -1 * yMin, 0]);
         cellOffset = [-1 * xMin, -1 * yMin];
+        translation = [-1 * xMin, -1 * yMin];
         projectPoints = false;
       }
       const numCol = Math.ceil(width / gridOffset.xOffset);
@@ -212,6 +219,8 @@ export default class GridAggregationLayer extends AggregationLayer {
       this.allocateResources(numRow, numCol);
       this.setState({
         gridTransformMatrix,
+        translation,
+        scaling,
         projectPoints,
         width,
         height,
@@ -229,6 +238,8 @@ export default class GridAggregationLayer extends AggregationLayer {
       gridOffset,
       cellOffset,
       gridTransformMatrix,
+      translation,
+      scaling,
       width,
       height,
       boundingBox,
@@ -247,7 +258,7 @@ export default class GridAggregationLayer extends AggregationLayer {
         gridOffset,
         width,
         height,
-        gridTransformMatrix,
+        // gridTransformMatrix,
         projectPoints,
         attributes,
         viewport,
@@ -267,6 +278,8 @@ export default class GridAggregationLayer extends AggregationLayer {
         numCol,
         numRow,
         gridTransformMatrix,
+        translation,
+        scaling,
         useGPU: true, // _TODO_ delete this option in gpu aggregator
         vertexCount, // : vertexCount / 2,
         projectPoints,

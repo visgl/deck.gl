@@ -253,7 +253,6 @@ export default class GPUGridAggregator {
       gridTransformMatrix,
       moduleSettings,
       weights,
-      projectPoints,
       cellSize,
       numCol,
       numRow
@@ -261,8 +260,15 @@ export default class GPUGridAggregator {
     const {viewport} = moduleSettings;
     // validateProps(aggregationParams, opts);
 
-    aggregationParams.gridTransformMatrix =
-      (projectPoints ? viewport.viewportMatrix : gridTransformMatrix) || IDENTITY_MATRIX;
+    if (!gridTransformMatrix) {
+      aggregationParams.matrixValid = false;
+      aggregationParams.gridTransformMatrix = IDENTITY_MATRIX;
+    } else {
+      aggregationParams.matrixValid = true;
+    }
+
+    // aggregationParams.translation = new Float32Array([1, -1]);
+    // aggregationParams.scaling = new Float32Array([viewport.width / 2, -viewport.height/2, 1]);
 
     if (weights) {
       aggregationParams.weights = normalizeWeightParams(weights);
@@ -336,6 +342,7 @@ export default class GPUGridAggregator {
     const {
       cellSize,
       gridTransformMatrix,
+      matrixValid,
       projectPoints,
       attributes,
       moduleSettings,
@@ -343,7 +350,9 @@ export default class GPUGridAggregator {
       numRow,
       width,
       height,
-      weights
+      weights,
+      translation,
+      scaling
     } = opts;
     const {maxMinFramebuffers, minFramebuffers, maxFramebuffers} = this.state;
 
@@ -360,7 +369,10 @@ export default class GPUGridAggregator {
       gridSize,
       uProjectionMatrix: gridTransformMatrix,
       uProjectionMatrixFP64,
-      projectPoints
+      projectPoints,
+      matrixValid,
+      translation,
+      scaling,
     };
 
     for (const id in weights) {

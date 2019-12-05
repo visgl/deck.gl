@@ -120,7 +120,9 @@ const fixture = {
     dataChanged: true
   },
   moduleSettings: {viewport},
-  projectPoints: true
+  projectPoints: true,
+  translation: [1, -1],
+  scaling: [viewport.width/2, -viewport.height/2, 1]
 };
 
 Object.assign(fixture, buildAttributes(fixture));

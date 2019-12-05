@@ -171,7 +171,7 @@ export default class GPUGridLayer extends GridAggregationLayer {
           const {
             gridOffset,
             cellOffset,
-            gridTransformMatrix,
+            // gridTransformMatrix,
             width,
             height,
             boundingBox
@@ -183,7 +183,7 @@ export default class GPUGridLayer extends GridAggregationLayer {
             gridOffset,
             width,
             height,
-            gridTransformMatrix,
+            // gridTransformMatrix,
             attributes,
             viewport,
             cellOffset,
