@@ -37,10 +37,13 @@ if (global.deck && global.deck.VERSION !== version) {
 }
 
 if (!global.deck) {
-  log.log(
-    0,
-    `deck.gl ${version} - set deck.log.priority=1 (or higher) to trace attribute updates`
-  )();
+  // eslint-disable-next-line
+  if (process.env.NODE_ENV !== 'production') {
+    log.log(
+      0,
+      `deck.gl ${version} - set deck.log.priority=1 (or higher) to trace attribute updates`
+    )();
+  }
 
   global.deck = global.deck || {
     VERSION: version,

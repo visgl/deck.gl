@@ -3,7 +3,7 @@ import {getLoggers} from './loggers';
 
 /* debug utility */
 
-let loggers;
+let loggers = {};
 
 // Conditionally load default loggers in development mode
 // eslint-disable-next-line
