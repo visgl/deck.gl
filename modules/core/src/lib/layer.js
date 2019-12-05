@@ -31,6 +31,7 @@ import {withParameters, setParameters} from '@luma.gl/core';
 import assert from '../utils/assert';
 import {mergeShaders} from '../utils/shader';
 import {projectPosition, getWorldPosition} from '../shaderlib/project/project-functions';
+import typedArrayManager from '../utils/typed-array-manager';
 
 import Component from '../lifecycle/component';
 import LayerState from './layer-state';
@@ -432,32 +433,29 @@ export default class Layer extends Component {
     return this.props;
   }
 
-  calculateInstancePickingColors(attribute, {numInstances, startRow, endRow}) {
-    const {value, size} = attribute;
-
+  calculateInstancePickingColors(attribute, {numInstances}) {
     // calculateInstancePickingColors always generates the same sequence.
     // pickingColorCache saves the largest generated sequence for reuse
-    const cacheSize = pickingColorCache.length / size;
+    const cacheSize = pickingColorCache.length / 3;
 
     if (cacheSize < numInstances) {
+      pickingColorCache = typedArrayManager.allocate(pickingColorCache, numInstances, {
+        size: 3,
+        copy: true
+      });
       // If the attribute is larger than the cache, resize the cache and populate the missing chunk
-      const newPickingColorCache = new Uint8ClampedArray(numInstances * size);
-      newPickingColorCache.set(pickingColorCache);
+      const newCacheSize = pickingColorCache.length / 3;
       const pickingColor = [];
 
-      for (let i = cacheSize; i < numInstances; i++) {
+      for (let i = cacheSize; i < newCacheSize; i++) {
         this.encodePickingColor(i, pickingColor);
-        newPickingColorCache[i * size + 0] = pickingColor[0];
-        newPickingColorCache[i * size + 1] = pickingColor[1];
-        newPickingColorCache[i * size + 2] = pickingColor[2];
+        pickingColorCache[i * 3 + 0] = pickingColor[0];
+        pickingColorCache[i * 3 + 1] = pickingColor[1];
+        pickingColorCache[i * 3 + 2] = pickingColor[2];
       }
-
-      pickingColorCache = newPickingColorCache;
     }
 
-    // Copy the last calculated picking color sequence into the attribute
-    endRow = Math.min(endRow, numInstances);
-    value.set(pickingColorCache.subarray(startRow * size, endRow * size), startRow * size);
+    attribute.value = pickingColorCache.subarray(0, numInstances * 3);
   }
 
   _setModelAttributes(model, changedAttributes) {
@@ -840,6 +838,7 @@ export default class Layer extends Component {
         instancePickingColors: {
           type: GL.UNSIGNED_BYTE,
           size: 3,
+          noAlloc: true,
           update: this.calculateInstancePickingColors
         }
       });
