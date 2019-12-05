@@ -6,15 +6,15 @@ class View(JSONMixin):
 
     Parameters
     ---------
-    type : str, default "MapView"
+    type : str, default None
         deck.gl view to display, e.g., MapView
-    controller : bool, default True
+    controller : bool, default None
         If enabled, camera becomes interactive.
     """
     def __init__(
         self,
-        type='MapView',
-        controller=True
+        type=None,
+        controller=None
     ):
         self.type = type
         self.controller = controller

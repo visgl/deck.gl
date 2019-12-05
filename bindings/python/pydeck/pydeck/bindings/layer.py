@@ -10,7 +10,6 @@ class Layer(JSONMixin):
         type,
         data,
         id=None,
-        get_position='[lng, lat]',
         **kwargs
     ):
         """Configures a deck.gl layer for rendering on a map. Parameters passed
@@ -30,9 +29,6 @@ class Layer(JSONMixin):
             Unique name for layer
         data : str or list of dict of {str: Any} or pandas.DataFrame
             Either a URL of data to load in or an array of data
-        get_position : str, default '[lng, lat]'
-            Name of position field, as a string. If the position field is given by two values,
-            both as a list in a string should be provided.
         **kwargs
             Any of the parameters passable to a deck.gl layer.
 
@@ -76,7 +72,6 @@ class Layer(JSONMixin):
         self.id = id or str(uuid.uuid4())
         self._data = None
         self.data = data.to_dict(orient='records') if is_pandas_df(data) else data
-        self.get_position = get_position
 
         # Add any other kwargs to the JSON output
         if kwargs:

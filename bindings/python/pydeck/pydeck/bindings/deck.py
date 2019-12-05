@@ -4,20 +4,19 @@ import warnings
 
 from .json_tools import JSONMixin
 from .layer import Layer
-from .view import View
-from .view_state import ViewState
 from ..io.html import deck_to_html
 from ..widget import DeckGLWidget
+from .view import View
 
 
 class Deck(JSONMixin):
     def __init__(
         self,
         layers=[],
-        views=[View()],
+        views=[View(type='MapView', controller=True)],
         map_style='mapbox://styles/mapbox/dark-v9',
         mapbox_key=None,
-        initial_view_state=ViewState(),
+        initial_view_state=None,
         width='100%',
         height=500,
         tooltip=True,
@@ -31,12 +30,12 @@ class Deck(JSONMixin):
 
         layers : pydeck.Layer or list of pydeck.Layer, default []
             List of :class:`pydeck.bindings.layer.Layer` layers to render.
-        views : list of pydeck.View, default [pydeck.View()]
+        views : list of pydeck.View, []
             List of :class:`pydeck.bindings.view.View` objects to render.
         map_style : str, default 'mapbox://styles/mapbox/dark-v9'
             URI for Mapbox basemap style. See Mapbox's `gallery <https://www.mapbox.com/gallery/>`_ for examples.
             If not using a basemap, you can set this value to to an empty string, `''`.
-        initial_view_state : pydeck.ViewState, default pydeck.ViewState()
+        initial_view_state : pydeck.ViewState, default None
             Initial camera angle relative to the map, defaults to a fully zoomed out 0, 0-centered map
             To compute a viewport from data, see :func:`pydeck.data_utils.viewport_helpers.compute_view`
         mapbox_key : str, default None
