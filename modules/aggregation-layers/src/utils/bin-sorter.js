@@ -129,7 +129,7 @@ export default class BinSorter {
     if (Array.isArray(percentileRange)) {
       const idxRange = this._percentileToIndex(percentileRange);
       lowerIdx = idxRange[0];
-      upperIdx = idxRange[1]
+      upperIdx = idxRange[1];
     }
 
     return [this.sortedBins[lowerIdx].value, this.sortedBins[upperIdx].value];
