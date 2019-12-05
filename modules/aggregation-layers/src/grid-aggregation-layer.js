@@ -45,7 +45,7 @@ export default class GridAggregationLayer extends AggregationLayer {
     // get current attributes
     super.updateState(opts);
 
-    this._updateAggregationFlags(opts);
+    this.updateAggregationFlags(opts);
     // update bounding box and cellSize
     this._updateProjectionParams(opts);
 
@@ -89,16 +89,15 @@ export default class GridAggregationLayer extends AggregationLayer {
     super.finalizeState();
   }
 
-  // Private (Must be implemented by the subclasses)
-
-  _updateAggregationFlags(opts) {
+  // Must be implemented by subclasses
+  updateAggregationFlags(opts) {
     // Sublayers should implement this method.
     log.assert(false)();
   }
 
-  // Private (Can be overriden by subclasses for customizations)
+  // Methods that can be overriden by subclasses for customizations
 
-  _allocateResources(numRow, numCol) {
+  allocateResources(numRow, numCol) {
     if (this.state.numRow !== numRow || this.state.numCol !== numCol) {
       const {count} = this.state.weights;
       const dataBytes = numCol * numRow * 4 * 4;
@@ -116,7 +115,7 @@ export default class GridAggregationLayer extends AggregationLayer {
     }
   }
 
-  _updateResults({aggregationData, maxMinData, maxData, minData}) {
+  updateResults({aggregationData, maxMinData, maxData, minData}) {
     const {count} = this.state.weights;
     if (count) {
       count.aggregationData = aggregationData;
@@ -126,14 +125,14 @@ export default class GridAggregationLayer extends AggregationLayer {
     }
   }
 
-  _updateWeightParams(opts) {
+  updateWeightParams(opts) {
     const {getWeight, aggregation} = opts.props;
     const {count} = this.state.weights;
     count.getWeight = getWeight;
     count.operation = AGGREGATION_OPERATION[aggregation];
   }
 
-  _updateShaders(shaders) {
+  updateShaders(shaders) {
     if (this.state.gpuAggregation) {
       this.state.gpuGridAggregator.updateShaders(shaders);
     }
@@ -210,7 +209,7 @@ export default class GridAggregationLayer extends AggregationLayer {
       }
       const numCol = Math.ceil(width / gridOffset.xOffset);
       const numRow = Math.ceil(height / gridOffset.yOffset);
-      this._allocateResources(numRow, numCol);
+      this.allocateResources(numRow, numCol);
       this.setState({
         gridTransformMatrix,
         projectPoints,
@@ -302,7 +301,7 @@ export default class GridAggregationLayer extends AggregationLayer {
     const maxMinData = new Float32Array([maxValue, 0, 0, minValue]);
     const maxData = new Float32Array([maxValue, 0, 0, totalCount]);
     const minData = new Float32Array([minValue, 0, 0, totalCount]);
-    this._updateResults({aggregationData, maxMinData, maxData, minData});
+    this.updateResults({aggregationData, maxMinData, maxData, minData});
   }
 
   _getGridOffset(opts) {
@@ -322,7 +321,7 @@ export default class GridAggregationLayer extends AggregationLayer {
 
   _updateAccessors(opts) {
     if (this.state.gpuAggregation) {
-      this._updateWeightParams(opts);
+      this.updateWeightParams(opts);
     } else {
       this._updateGetValueFuncs(opts);
     }

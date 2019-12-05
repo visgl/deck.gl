@@ -26,7 +26,7 @@ attributeManager.add({
 
 During update state, Subclasses of `AggregationLayer` must first call 'super.updateState()', which calls
 
-- `_updateShaders(shaders)` : Subclasses can override this if they need to update shaders, for example, when performing GPU aggregation, aggregation shaders must be merged with argument of this function  to correctly apply `extensions`.
+- `updateShaders(shaders)` : Subclasses can override this if they need to update shaders, for example, when performing GPU aggregation, aggregation shaders must be merged with argument of this function  to correctly apply `extensions`.
 
 - `_updateAttributes`: This checks and updates attributes based on updated props.
 

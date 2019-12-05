@@ -138,7 +138,7 @@ export default class ScreenGridLayer extends GridAggregationLayer {
 
   // Private Methods
 
-  _updateResults({aggregationData, maxData}) {
+  updateResults({aggregationData, maxData}) {
     const {count} = this.state.weights;
     count.aggregationData = aggregationData;
     count.aggregationBuffer.setData({data: aggregationData});
@@ -146,7 +146,7 @@ export default class ScreenGridLayer extends GridAggregationLayer {
     count.maxTexture.setImageData({data: maxData});
   }
 
-  _updateAggregationFlags(opts) {
+  updateAggregationFlags(opts) {
     const cellSizeChanged = opts.oldProps.cellSizePixels !== opts.props.cellSizePixels;
     let gpuAggregation = opts.props.gpuAggregation;
     if (this.state.gpuAggregation !== opts.props.gpuAggregation) {

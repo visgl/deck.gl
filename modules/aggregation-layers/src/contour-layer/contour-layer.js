@@ -201,7 +201,7 @@ export default class ContourLayer extends GridAggregationLayer {
 
   // Private (Aggregation)
 
-  _updateAggregationFlags({props, oldProps}) {
+  updateAggregationFlags({props, oldProps}) {
     const cellSizeChanged = oldProps.cellSize !== props.cellSize;
     let gpuAggregation = props.gpuAggregation;
     if (this.state.gpuAggregation !== props.gpuAggregation) {

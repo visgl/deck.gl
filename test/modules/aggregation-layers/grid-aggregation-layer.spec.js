@@ -97,7 +97,7 @@ class TestGridAggregationLayer extends GridAggregationLayer {
     return {xOffset: cellSize, yOffset: cellSize};
   }
 
-  _updateAggregationFlags(opts) {
+  updateAggregationFlags(opts) {
     const cellSizeChanged = opts.oldProps.cellSize !== opts.props.cellSize;
     const gpuAggregation = opts.props.gpuAggregation;
     const gpuAggregationChanged = gpuAggregation !== this.state.gpuAggregation;
@@ -114,7 +114,7 @@ class TestGridAggregationLayer extends GridAggregationLayer {
   }
 
   // capture results
-  _updateResults(results) {
+  updateResults(results) {
     this.setState({cpuResults: results});
   }
 }

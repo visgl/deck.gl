@@ -48,7 +48,7 @@ export default class AggregationLayer extends CompositeLayer {
       if (shaders && shaders.defines) {
         shaders.defines.NON_INSTANCED_MODEL = 1;
       }
-      this._updateShaders(shaders);
+      this.updateShaders(shaders);
     }
 
     // Explictly call to update attributes as 'CompositeLayer' doesn't call this
@@ -83,6 +83,12 @@ export default class AggregationLayer extends CompositeLayer {
     return moduleSettings;
   }
 
+  updateShaders(shaders) {
+    // Default implemention is empty, subclasses can update their Model objects if needed
+  }
+
+  // Private
+
   _isAggregationDirty(opts) {
     if (this.state.dataChanged || opts.changeFlags.extensionsChanged) {
       return true;
@@ -97,10 +103,6 @@ export default class AggregationLayer extends CompositeLayer {
     return Boolean(
       compareProps({oldProps, newProps: props, propTypes: this.constructor._propTypes})
     );
-  }
-
-  _updateShaders(shaders) {
-    // Default implemention is empty, subclasses can update their Model objects if needed
   }
 
   // override Composite layer private method to create AttributeManager instance

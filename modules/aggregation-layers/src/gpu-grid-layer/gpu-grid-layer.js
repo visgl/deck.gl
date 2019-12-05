@@ -265,7 +265,7 @@ export default class GPUGridLayer extends GridAggregationLayer {
   }
 
   // Private
-  _updateWeightParams(opts) {
+  updateWeightParams(opts) {
     const {getColorWeight, colorAggregation, getElevationWeight, elevationAggregation} = opts.props;
     const {color, elevation} = this.state.weights;
     color.getWeight = getColorWeight;
@@ -274,7 +274,7 @@ export default class GPUGridLayer extends GridAggregationLayer {
     elevation.operation = AGGREGATION_OPERATION[elevationAggregation];
   }
 
-  _allocateResources(numRow, numCol) {
+  allocateResources(numRow, numCol) {
     if (this.state.numRow !== numRow || this.state.numCol !== numCol) {
       const {color, elevation} = this.state.weights;
       const dataBytes = numCol * numRow * 4 * 4;
@@ -284,7 +284,7 @@ export default class GPUGridLayer extends GridAggregationLayer {
     }
   }
 
-  _updateAggregationFlags(opts) {
+  updateAggregationFlags(opts) {
     const cellSizeChanged = opts.oldProps.cellSize !== opts.props.cellSize;
     const {dataChanged} = this.state;
     this.setState({

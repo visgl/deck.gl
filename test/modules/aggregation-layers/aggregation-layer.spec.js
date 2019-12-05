@@ -57,7 +57,7 @@ class TestAggregationLayer extends AggregationLayer {
     super.updateState(opts);
     this.setState({aggregationDirty: this._isAggregationDirty(opts)});
   }
-  _updateShaders(shaderOptions) {}
+  updateShaders(shaderOptions) {}
   //
   // updateAttributes(changedAttributes) {}
 }
@@ -90,12 +90,12 @@ test('AggregationLayer#updateState', t => {
         updateProps: {
           prop1: 20
         },
-        spies: ['_updateShaders', 'updateAttributes'],
+        spies: ['updateShaders', 'updateAttributes'],
         onAfterUpdate({spies, layer}) {
           t.ok(spies.updateAttributes.called, 'should always call updateAttributes');
           t.notOk(
-            spies._updateShaders.called,
-            'should not call _updateShaders when extensions not changed'
+            spies.updateShaders.called,
+            'should not call updateShaders when extensions not changed'
           );
           t.notOk(layer.state.aggregationDirty, 'Aggregation should not be dirty');
         }
@@ -104,7 +104,7 @@ test('AggregationLayer#updateState', t => {
         updateProps: {
           cellSize: 21
         },
-        spies: ['_updateShaders', 'updateAttributes'],
+        spies: ['updateShaders', 'updateAttributes'],
         onAfterUpdate({layer}) {
           t.ok(
             layer.state.aggregationDirty,
@@ -116,9 +116,9 @@ test('AggregationLayer#updateState', t => {
         updateProps: {
           extensions: [new DataFilterExtension({filterSize: 2})] // default value is true
         },
-        spies: ['_updateShaders'],
+        spies: ['updateShaders'],
         onAfterUpdate({spies, layer}) {
-          t.ok(spies._updateShaders.called, 'should call _updateShaders when extensions changed');
+          t.ok(spies.updateShaders.called, 'should call updateShaders when extensions changed');
           t.ok(layer.state.aggregationDirty, 'Aggregation should be dirty when extensions changed');
         }
       },

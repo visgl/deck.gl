@@ -332,7 +332,7 @@ export default class HeatmapLayer extends AggregationLayer {
   }
 
   // overwrite super class method to update transform model
-  _updateShaders(shaderOptions) {
+  updateShaders(shaderOptions) {
     // sahder params (modules, injects) changed, update model object
     this._createWeightsTransform(shaderOptions);
   }
