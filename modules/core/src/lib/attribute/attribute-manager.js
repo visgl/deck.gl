@@ -25,12 +25,12 @@ import debug from '../../debug';
 
 import AttributeTransitionManager from './attribute-transition-manager';
 
-const EVENT_INVALIDATE = 'attributeManager.invalidate';
-const EVENT_UPDATE_START = 'attributeManager.updateStart';
-const EVENT_UPDATE_END = 'attributeManager.updateEnd';
-const EVENT_ATTRIBUTE_UPDATE_START = 'attribute.updateStart';
-const EVENT_ATTRIBUTE_ALLOCATE = 'attribute.allocate';
-const EVENT_ATTRIBUTE_UPDATE_END = 'attribute.updateEnd';
+const TRACE_INVALIDATE = 'attributeManager.invalidate';
+const TRACE_UPDATE_START = 'attributeManager.updateStart';
+const TRACE_UPDATE_END = 'attributeManager.updateEnd';
+const TRACE_ATTRIBUTE_UPDATE_START = 'attribute.updateStart';
+const TRACE_ATTRIBUTE_ALLOCATE = 'attribute.allocate';
+const TRACE_ATTRIBUTE_UPDATE_END = 'attribute.updateEnd';
 
 export default class AttributeManager {
   /**
@@ -139,7 +139,7 @@ export default class AttributeManager {
   invalidate(triggerName, dataRange) {
     const invalidatedAttributes = this._invalidateTrigger(triggerName, dataRange);
     // For performance tuning
-    debug(EVENT_INVALIDATE, this, triggerName, invalidatedAttributes);
+    debug(TRACE_INVALIDATE, this, triggerName, invalidatedAttributes);
   }
 
   invalidateAll(dataRange) {
@@ -147,7 +147,7 @@ export default class AttributeManager {
       this.attributes[attributeName].setNeedsUpdate(attributeName, dataRange);
     }
     // For performance tuning
-    debug(EVENT_INVALIDATE, this, 'all');
+    debug(TRACE_INVALIDATE, this, 'all');
   }
 
   // Ensure all attribute buffers are updated from props or data.
@@ -163,7 +163,7 @@ export default class AttributeManager {
     // keep track of whether some attributes are updated
     let updated = false;
 
-    debug(EVENT_UPDATE_START, this);
+    debug(TRACE_UPDATE_START, this);
     if (this.stats) {
       this.stats.get('Update Attributes').timeStart();
     }
@@ -202,7 +202,7 @@ export default class AttributeManager {
 
     if (updated) {
       // Only initiate alloc/update (and logging) if actually needed
-      debug(EVENT_UPDATE_END, this, numInstances);
+      debug(TRACE_UPDATE_END, this, numInstances);
     }
 
     if (this.stats) {
@@ -349,17 +349,17 @@ export default class AttributeManager {
 
   _updateAttribute(opts) {
     const {attribute, numInstances} = opts;
-    debug(EVENT_ATTRIBUTE_UPDATE_START, attribute);
+    debug(TRACE_ATTRIBUTE_UPDATE_START, attribute);
 
     if (attribute.allocate(numInstances)) {
-      debug(EVENT_ATTRIBUTE_ALLOCATE, attribute, numInstances);
+      debug(TRACE_ATTRIBUTE_ALLOCATE, attribute, numInstances);
     }
 
     // Calls update on any buffers that need update
     const updated = attribute.updateBuffer(opts);
     if (updated) {
       this.needsRedraw = true;
-      debug(EVENT_ATTRIBUTE_UPDATE_END, attribute, numInstances);
+      debug(TRACE_ATTRIBUTE_UPDATE_END, attribute, numInstances);
     }
   }
 }

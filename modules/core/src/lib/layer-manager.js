@@ -30,8 +30,8 @@ import {Stats} from 'probe.gl';
 import Viewport from '../viewports/viewport';
 import {createProgramManager} from '../shaderlib';
 
-const EVENT_SET_LAYERS = 'layerManager.setLayers';
-const EVENT_ACTIVATE_VIEWPORT = 'layerManager.activateViewport';
+const TRACE_SET_LAYERS = 'layerManager.setLayers';
+const TRACE_ACTIVATE_VIEWPORT = 'layerManager.activateViewport';
 
 // CONTEXT IS EXPOSED TO LAYERS
 const INITIAL_CONTEXT = Object.seal({
@@ -148,7 +148,7 @@ export default class LayerManager {
   setLayers(newLayers, forceUpdate = false) {
     // TODO - something is generating state updates that cause rerender of the same
     const shouldUpdate = forceUpdate || newLayers !== this.lastRenderedLayers;
-    debug(EVENT_SET_LAYERS, this, shouldUpdate, newLayers);
+    debug(TRACE_SET_LAYERS, this, shouldUpdate, newLayers);
 
     if (!shouldUpdate) {
       return this;
@@ -215,7 +215,7 @@ export default class LayerManager {
     const viewportChanged = !oldViewport || !viewport.equals(oldViewport);
 
     if (viewportChanged) {
-      debug(EVENT_ACTIVATE_VIEWPORT, this, viewport);
+      debug(TRACE_ACTIVATE_VIEWPORT, this, viewport);
 
       this.context.viewport = viewport;
 

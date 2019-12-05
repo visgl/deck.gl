@@ -3,7 +3,7 @@ import DrawLayersPass from '../passes/draw-layers-pass';
 import PickLayersPass from '../passes/pick-layers-pass';
 import {Framebuffer} from '@luma.gl/core';
 
-const EVENT_RENDER_LAYERS = 'deckRenderer.renderLayers';
+const TRACE_RENDER_LAYERS = 'deckRenderer.renderLayers';
 
 export default class DeckRenderer {
   constructor(gl) {
@@ -58,7 +58,7 @@ export default class DeckRenderer {
 
     this.renderCount++;
 
-    debug(EVENT_RENDER_LAYERS, this, renderStats, opts);
+    debug(TRACE_RENDER_LAYERS, this, renderStats, opts);
   }
 
   needsRedraw(opts = {clearRedrawFlags: false}) {

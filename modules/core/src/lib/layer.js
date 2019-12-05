@@ -24,7 +24,6 @@ import AttributeManager from './attribute/attribute-manager';
 import UniformTransitionManager from './uniform-transition-manager';
 import {diffProps, validateProps} from '../lifecycle/props';
 import {count} from '../utils/count';
-import log from '../utils/log';
 import debug from '../debug';
 import GL from '@luma.gl/constants';
 import {withParameters, setParameters} from '@luma.gl/core';
@@ -39,11 +38,11 @@ import {worldToPixels} from '@math.gl/web-mercator';
 
 import {load} from '@loaders.gl/core';
 
-const EVENT_CHANGE_FLAG = 'layer.changeFlag';
-const EVENT_INITIALIZE = 'layer.initialize';
-const EVENT_UPDATE = 'layer.update';
-const EVENT_FINALIZE = 'layer.finalize';
-const EVENT_MATCHED = 'layer.matched';
+const TRACE_CHANGE_FLAG = 'layer.changeFlag';
+const TRACE_INITIALIZE = 'layer.initialize';
+const TRACE_UPDATE = 'layer.update';
+const TRACE_FINALIZE = 'layer.finalize';
+const TRACE_MATCHED = 'layer.matched';
 
 const EMPTY_ARRAY = Object.freeze([]);
 
@@ -541,7 +540,7 @@ export default class Layer extends Component {
   // Called by layer manager when a new layer is found
   /* eslint-disable max-statements */
   _initialize() {
-    debug(EVENT_INITIALIZE, this);
+    debug(TRACE_INITIALIZE, this);
 
     this._initState();
 
@@ -570,7 +569,7 @@ export default class Layer extends Component {
     // Call subclass lifecycle method
     const stateNeedsUpdate = this.needsUpdate();
     // End lifecycle method
-    debug(EVENT_UPDATE, this, stateNeedsUpdate);
+    debug(TRACE_UPDATE, this, stateNeedsUpdate);
 
     if (stateNeedsUpdate) {
       this._updateState();
@@ -627,7 +626,7 @@ export default class Layer extends Component {
   // Called by manager when layer is about to be disposed
   // Note: not guaranteed to be called on application shutdown
   _finalize() {
-    debug(EVENT_FINALIZE, this);
+    debug(TRACE_FINALIZE, this);
     assert(this.internalState && this.state);
 
     // Call subclass lifecycle method
@@ -686,30 +685,30 @@ export default class Layer extends Component {
     // Update primary flags
     if (flags.dataChanged && !changeFlags.dataChanged) {
       changeFlags.dataChanged = flags.dataChanged;
-      debug(EVENT_CHANGE_FLAG, this, 'dataChanged', flags);
+      debug(TRACE_CHANGE_FLAG, this, 'dataChanged', flags);
     }
     if (flags.updateTriggersChanged && !changeFlags.updateTriggersChanged) {
       changeFlags.updateTriggersChanged =
         changeFlags.updateTriggersChanged && flags.updateTriggersChanged
           ? Object.assign({}, flags.updateTriggersChanged, changeFlags.updateTriggersChanged)
           : flags.updateTriggersChanged || changeFlags.updateTriggersChanged;
-      debug(EVENT_CHANGE_FLAG, this, 'updateTriggersChanged', flags);
+      debug(TRACE_CHANGE_FLAG, this, 'updateTriggersChanged', flags);
     }
     if (flags.propsChanged && !changeFlags.propsChanged) {
       changeFlags.propsChanged = flags.propsChanged;
-      debug(EVENT_CHANGE_FLAG, this, 'propsChanged', flags);
+      debug(TRACE_CHANGE_FLAG, this, 'propsChanged', flags);
     }
     if (flags.extensionsChanged && !changeFlags.extensionsChanged) {
       changeFlags.extensionsChanged = flags.extensionsChanged;
-      debug(EVENT_CHANGE_FLAG, this, 'extensionsChanged', flags);
+      debug(TRACE_CHANGE_FLAG, this, 'extensionsChanged', flags);
     }
     if (flags.viewportChanged && !changeFlags.viewportChanged) {
       changeFlags.viewportChanged = flags.viewportChanged;
-      debug(EVENT_CHANGE_FLAG, this, 'viewportChanged', flags);
+      debug(TRACE_CHANGE_FLAG, this, 'viewportChanged', flags);
     }
     if (flags.stateChanged && !changeFlags.stateChanged) {
       changeFlags.stateChanged = flags.stateChanged;
-      debug(EVENT_CHANGE_FLAG, this, 'stateChanged', flags);
+      debug(TRACE_CHANGE_FLAG, this, 'stateChanged', flags);
     }
 
     // Update composite flags
@@ -882,7 +881,7 @@ ${flags.viewportChanged ? 'viewport' : ''}\
 
   // Called by layer manager to transfer state from an old layer
   _transferState(oldLayer) {
-    debug(EVENT_MATCHED, this, this === oldLayer);
+    debug(TRACE_MATCHED, this, this === oldLayer);
 
     const {state, internalState} = oldLayer;
     assert(state && internalState);
