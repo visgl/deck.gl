@@ -56,13 +56,11 @@ test('JSONConverter#handleTypeAsKey', t => {
   t.ok(jsonConverter, 'JSONConverter created');
   const complexData = JSON.parse(JSON.stringify(COMPLEX_JSON));
   const deckProps = jsonConverter.convert(complexData);
-  t.ok(deckProps.layers.length === 3, 'should have three layers');
+  t.ok(deckProps.layers.length, 4, 'should have four layers');
   t.ok(deckProps.layers[0].id === 'ScatterplotLayer', 'should have a ScatterplotLayer at index 0');
   t.ok(deckProps.layers[1].id === 'TextLayer', 'should have a TextLayer at index 1');
   t.ok(deckProps.layers[2].id === 'GeoJsonLayer', 'should have a GeoJsonLayer at index 2');
+  t.ok(deckProps.layers[3].id === 'PointCloudLayer', 'should have a PointCloudLayer at index 3');
   t.ok(deckProps.layers[2].props.data.features[0].type === 'Feature');
-  // TODO implement function parsing
-  // deckProps.layers.length === 3
-  // deckProps.layers[1].getTextAnchor === 'end'
   t.end();
 });
