@@ -189,8 +189,7 @@ export default class GridAggregationLayer extends AggregationLayer {
     const vertexCount = this.getNumInstances();
 
     if (!gpuAggregation) {
-      const result = cpuGridAggregator({
-        data: props.data,
+      const result = cpuGridAggregator(props, {
         gridOffset,
         width,
         height,
@@ -233,12 +232,12 @@ export default class GridAggregationLayer extends AggregationLayer {
   _uploadAggregationResults() {
     const {numCol, numRow} = this.state;
     const {data} = this.state.layerData;
-    const {sortedBins, minValue, maxValue, totalCount} = this.state.sortedBins;
+    const {aggregatedBins, minValue, maxValue, totalCount} = this.state.sortedBins;
 
     const ELEMENTCOUNT = 4;
     const aggregationSize = numCol * numRow * ELEMENTCOUNT;
     const aggregationData = new Float32Array(aggregationSize).fill(0);
-    for (const bin of sortedBins) {
+    for (const bin of aggregatedBins) {
       const {lonIdx, latIdx} = data[bin.i];
       const {value, counts} = bin;
       // console.log(`lonIdx: ${lonIdx} latIdx: ${latIdx} numCol: ${numCol}`);

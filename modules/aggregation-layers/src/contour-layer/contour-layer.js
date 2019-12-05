@@ -25,6 +25,7 @@ import {generateContours} from './contour-utils';
 import {log} from '@deck.gl/core';
 
 import GPUGridAggregator from '../utils/gpu-grid-aggregation/gpu-grid-aggregator';
+import {AGGREGATION_OPERATION} from '../utils/aggregation-operation-utils';
 import GridAggregationLayer from '../grid-aggregation-layer';
 
 const DEFAULT_COLOR = [255, 255, 255, 255];
@@ -56,7 +57,10 @@ export default class ContourLayer extends GridAggregationLayer {
       contourData: {},
       colorTrigger: 0,
       strokeWidthTrigger: 0,
-      weights: {count: {}}
+      weights: {count: {
+        size: 1,
+        operation: AGGREGATION_OPERATION.SUM
+      }}
     });
     const attributeManager = this.getAttributeManager();
     attributeManager.add({
