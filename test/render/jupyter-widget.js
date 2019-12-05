@@ -35,6 +35,7 @@ const TEST_CASES = [
       },
       layers: [
         {
+          '@@type': 'ScatterplotLayer',
           data: [
             {
               position: [-0.002, 0.002],
@@ -55,21 +56,25 @@ const TEST_CASES = [
           ],
           getColor: 'rgb',
           getPosition: 'position',
-          getRadius: 100,
-          type: 'ScatterplotLayer'
+          getRadius: 100
         },
         {
+          '@@type': 'TextLayer',
           data: [
             {
               position: [0, 0],
               text: 'Test'
+            },
+            {
+              position: [0.002, 0],
+              text: 'Testing'
             }
           ],
-          fontSize: 72,
-          getColor: [255, 255, 255],
+          fontSize: 144,
+          getColor: [0, 0, 255],
           getPosition: 'position',
-          getTextAnchor: 'end',
-          type: 'TextLayer'
+          getTextAnchor: '"start"',
+          fontFamily: 'Times, Times New Roman, Georgia, serif'
         }
       ]
     },
@@ -85,7 +90,7 @@ const TEST_CASES = [
       },
       layers: [
         {
-          type: 'GeoJsonLayer',
+          '@@type': 'GeoJsonLayer',
           data: {
             type: 'FeatureCollection',
             features: [
@@ -112,7 +117,7 @@ const TEST_CASES = [
   }
 ];
 
-test('jupyter-widget Render Test', t => {
+test.only('jupyter-widget Render Test', t => {
   const iframe = document.createElement('iframe');
   iframe.width = WIDTH;
   iframe.height = HEIGHT;
@@ -152,7 +157,7 @@ test('jupyter-widget Render Test', t => {
 
     const diffOptions = {
       // uncomment to save screenshot to disk
-      // saveOnFail: true,
+      saveOnFail: true,
       threshold: 0.99,
       ...testCase.imageDiffOptions,
       region: {
