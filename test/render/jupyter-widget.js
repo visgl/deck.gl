@@ -29,13 +29,12 @@ const TEST_CASES = [
     name: 'ScatterplotLayer and TextLayer',
     json: {
       description: 'Test of plotting multiple layers at once',
-      viewState: {
+      initialViewState: {
         maxZoom: 20,
         zoom: 15
       },
       layers: [
         {
-          '@@type': 'ScatterplotLayer',
           data: [
             {
               position: [-0.002, 0.002],
@@ -54,44 +53,39 @@ const TEST_CASES = [
               rgb: [123, 159, 53]
             }
           ],
-          getColor: '@@=rgb',
-          getPosition: '@@=position',
-          getRadius: 100
+          getColor: 'rgb',
+          getPosition: 'position',
+          getRadius: 100,
+          type: 'ScatterplotLayer'
         },
         {
-          '@@type': 'TextLayer',
           data: [
             {
               position: [0, 0],
               text: 'Test'
-            },
-            {
-              position: [0.002, 0],
-              text: 'Testing'
             }
           ],
-          fontSize: 144,
-          getColor: [0, 0, 255],
-          getPosition: '@@=position',
-          getTextAnchor: 'start',
-          fontFamily: 'Times, Times New Roman, Georgia, serif'
+          fontSize: 72,
+          getColor: [255, 255, 255],
+          getPosition: 'position',
+          getTextAnchor: 'end',
+          type: 'TextLayer'
         }
       ]
     },
     goldenImage: './test/render/golden-images/jupyter-widget-scatterplot-and-text.png'
   },
   {
-    name: 'GeoJsonLayer',
     json: {
       description: 'Test of GeoJsonLayer',
-      viewState: {
+      initialViewState: {
         longitude: -122.45,
         latitude: 37.8,
-        zoom: 0
+        zoom: 12
       },
       layers: [
         {
-          '@@type': 'GeoJsonLayer',
+          type: 'GeoJsonLayer',
           data: {
             type: 'FeatureCollection',
             features: [
@@ -99,15 +93,8 @@ const TEST_CASES = [
                 type: 'Feature',
                 properties: {},
                 geometry: {
-                  type: 'Polygon',
-                  coordinates: [
-                    [
-                      [-122.42923736572264, 37.80544394934271],
-                      [0, 37.80544394934271],
-                      [-122.42923736572264, 0],
-                      [-122.42923736572264, 37.80544394934271]
-                    ]
-                  ]
+                  type: 'Point',
+                  coordinates: [-122.42923736572264, 37.80544394934271]
                 }
               }
             ]
