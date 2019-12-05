@@ -55,14 +55,19 @@ export default class GridAggregationLayer extends AggregationLayer {
     if (this.getNumInstances() <= 0) {
       return;
     }
+    // CPU aggregation is two steps
+    // 1. Create bins (based on cellSize and position) 2. Aggregate weights for each bin
+    // For GPU aggregation both above steps are combined into one step
+
+    // step-1
     if (needsReProjection || (gpuAggregation && needsReAggregation)) {
       this._updateAccessors(opts);
       this._resetResults();
       this._updateAggregation(opts);
       aggregationDirty = true;
     }
+    // step-2 (Applicalbe for CPU aggregation only)
     if (!gpuAggregation && (aggregationDirty || needsReAggregation)) {
-      // In case of CPU aggregation
       this._resetResults();
       this._updateWeightBins();
       this._uploadAggregationResults();
@@ -82,6 +87,56 @@ export default class GridAggregationLayer extends AggregationLayer {
       gpuGridAggregator.delete();
     }
     super.finalizeState();
+  }
+
+  // Private (Must be implemented by the subclasses)
+
+  _updateAggregationFlags(opts) {
+    // Sublayers should implement this method.
+    log.assert(false)();
+  }
+
+  // Private (Can be overriden by subclasses for customizations)
+
+  _allocateResources(numRow, numCol) {
+    if (this.state.numRow !== numRow || this.state.numCol !== numCol) {
+      const {count} = this.state.weights;
+      const dataBytes = numCol * numRow * 4 * 4;
+      if (count.aggregationBuffer) {
+        count.aggregationBuffer.delete();
+      }
+      count.aggregationBuffer = new Buffer(this.context.gl, {
+        byteLength: dataBytes,
+        accessor: {
+          size: 4,
+          type: GL.FLOAT,
+          divisor: 1
+        }
+      });
+    }
+  }
+
+  _updateResults({aggregationData, maxMinData, maxData, minData}) {
+    const {count} = this.state.weights;
+    if (count) {
+      count.aggregationData = aggregationData;
+      count.maxMinData = maxMinData;
+      count.maxData = maxData;
+      count.minData = minData;
+    }
+  }
+
+  _updateWeightParams(opts) {
+    const {getWeight, aggregation} = opts.props;
+    const {count} = this.state.weights;
+    count.getWeight = getWeight;
+    count.operation = AGGREGATION_OPERATION[aggregation];
+  }
+
+  _updateShaders(shaders) {
+    if (this.state.gpuAggregation) {
+      this.state.gpuGridAggregator.updateShaders(shaders);
+    }
   }
 
   // Private
@@ -240,7 +295,6 @@ export default class GridAggregationLayer extends AggregationLayer {
     for (const bin of aggregatedBins) {
       const {lonIdx, latIdx} = data[bin.i];
       const {value, counts} = bin;
-      // console.log(`lonIdx: ${lonIdx} latIdx: ${latIdx} numCol: ${numCol}`);
       const cellIndex = (lonIdx + latIdx * numCol) * ELEMENTCOUNT;
       aggregationData[cellIndex] = value;
       aggregationData[cellIndex + ELEMENTCOUNT - 1] = counts;
@@ -248,26 +302,7 @@ export default class GridAggregationLayer extends AggregationLayer {
     const maxMinData = new Float32Array([maxValue, 0, 0, minValue]);
     const maxData = new Float32Array([maxValue, 0, 0, totalCount]);
     const minData = new Float32Array([minValue, 0, 0, totalCount]);
-    // aggregationBuffer.setData({data: aggregationData});
     this._updateResults({aggregationData, maxMinData, maxData, minData});
-  }
-
-  _allocateResources(numRow, numCol) {
-    if (this.state.numRow !== numRow || this.state.numCol !== numCol) {
-      const {count} = this.state.weights;
-      const dataBytes = numCol * numRow * 4 * 4;
-      if (count.aggregationBuffer) {
-        count.aggregationBuffer.delete();
-      }
-      count.aggregationBuffer = new Buffer(this.context.gl, {
-        byteLength: dataBytes,
-        accessor: {
-          size: 4,
-          type: GL.FLOAT,
-          divisor: 1
-        }
-      });
-    }
   }
 
   _getGridOffset(opts) {
@@ -285,29 +320,12 @@ export default class GridAggregationLayer extends AggregationLayer {
     }
   }
 
-  _updateResults({aggregationData, maxMinData, maxData, minData}) {
-    const {count} = this.state.weights;
-    if (count) {
-      count.aggregationData = aggregationData;
-      count.maxMinData = maxMinData;
-      count.maxData = maxData;
-      count.minData = minData;
-    }
-  }
-
   _updateAccessors(opts) {
     if (this.state.gpuAggregation) {
       this._updateWeightParams(opts);
     } else {
       this._updateGetValueFuncs(opts);
     }
-  }
-
-  _updateWeightParams(opts) {
-    const {getWeight, aggregation} = opts.props;
-    const {count} = this.state.weights;
-    count.getWeight = getWeight;
-    count.operation = AGGREGATION_OPERATION[aggregation];
   }
 
   _updateGetValueFuncs({oldProps, props, changeFlags}) {
@@ -320,17 +338,6 @@ export default class GridAggregationLayer extends AggregationLayer {
     ) {
       this.setState({getValue: getValueFunc(props.aggregation, props.getWeight)});
     }
-  }
-
-  _updateShaders(shaders) {
-    if (this.state.gpuAggregation) {
-      this.state.gpuGridAggregator.updateShaders(shaders);
-    }
-  }
-
-  _updateAggregationFlags(opts) {
-    // Sublayers should implement this method.
-    log.assert(false)();
   }
 }
 

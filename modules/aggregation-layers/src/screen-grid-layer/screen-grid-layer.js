@@ -68,7 +68,7 @@ export default class ScreenGridLayer extends GridAggregationLayer {
     });
     const attributeManager = this.getAttributeManager();
     attributeManager.add({
-      positions: {size: 3, accessor: 'getPosition', type: GL.DOUBLE, fp64: false},
+      positions: {size: 3, accessor: 'getPosition'},
       // this attribute is used in gpu aggregation path only
       count: {size: 3, accessor: 'getWeight'}
     });

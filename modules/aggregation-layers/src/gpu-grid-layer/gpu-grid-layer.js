@@ -91,7 +91,7 @@ export default class GPUGridLayer extends GridAggregationLayer {
     });
     const attributeManager = this.getAttributeManager();
     attributeManager.add({
-      positions: {size: 3, accessor: 'getPosition', type: GL.DOUBLE, fp64: false},
+      positions: {size: 3, accessor: 'getPosition'},
       color: {size: 3, accessor: 'getColorWeight'},
       elevation: {size: 3, accessor: 'getElevationWeight'}
     });

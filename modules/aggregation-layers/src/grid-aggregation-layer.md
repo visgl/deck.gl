@@ -1,30 +1,8 @@
-# Aggregation Layers
+# GridAggregationLayer
 
-All of the layers in `@deck.gl/aggregation-layers` module perform some sort of data aggregation. All these layers perform aggregation with different parameters (CPU vs GPU, aggregation to rectangular bins vs hexagon bins, world space vs screen space etc).
+This layer performs some common tasks required to perform aggregation to grid cells, especially it takes care of building required parameters for CPU and GPU aggregation and calling appropriate aggregation utility methods. Default implementation supports aggregation of single weight, subclasses can customize aggregation to multiple methods.
 
-Following tow abstract composite layers perform most of the common tasks for aggregation with flexibility of customizations. All of the aggregation Layers are subclasses of these Layers.
-
-
-## AggregationLayer
-
-This in an abstract Layer, subclassed form `CompositeLayer` and all layers in `@deck.gl/aggregation-layers` are subclassed from this Layer.
-
-### Integration with `AttributeManger`
-
-It creates `AttributeManger` and makes it available for its subclasses. Any aggregation layer can add attributes to the `AttributeManager` and retrieve them using `getAttributes` method.
-
-### Checking if aggregation is dirty
-
-Constructor, takes an array of props, `aggregationProps`, and a private method `_isAggregationDirty()` is provided that returns `true` when any of the props in `aggregationProps` are changed. Subclasses can customize this to desired props by providing `aggregatinProps` array.
-
-### Updating shaders
-
-When performing GPU aggregations, `Model` objects used in GPU aggregation should be updated when Layer's `extensions` are changed, this is detected during `updateState` and `_updateShaders` is called, by default this method is empty, but subclasses can override and update the aggregation `Model` objects if needed.
-
-
-## GridAggregationLayer
-
-This in an abstract layer, subclassed form `AggregationLayer` and provides support for aggregation to grid cells and handles aggregation on both CPU and GPU. `GPUGridLayer`, `ScreenGridLayer` and `ContourLayer` are subclassed from this layer.
+This in an abstract layer, subclassed form `AggregationLayer`, `GPUGridLayer`, `ScreenGridLayer` and `ContourLayer` are subclassed from this layer.
 
 ### Updating aggregation flags
 
