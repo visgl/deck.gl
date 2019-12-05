@@ -1,11 +1,11 @@
-import React, {Component, Fragment} from 'react';
-import {render} from 'react-dom';
+import React, { Component, Fragment } from 'react';
+import { render } from 'react-dom';
 import AutoSizer from 'react-virtualized-auto-sizer';
-import {StaticMap} from 'react-map-gl';
+import { StaticMap } from 'react-map-gl';
 import DeckWithMaps from './deck-with-maps';
 
-import {FlyToInterpolator} from '@deck.gl/core';
-import {JSONConverter, JSONConfiguration, _shallowEqualObjects} from '@deck.gl/json';
+import { FlyToInterpolator } from '@deck.gl/core';
+import { JSONConverter, JSONConfiguration, _shallowEqualObjects } from '@deck.gl/json';
 import JSON_CONVERTER_CONFIGURATION from './configuration';
 
 import AceEditor from 'react-ace';
@@ -38,7 +38,7 @@ export class App extends Component {
 
     // Configure and create the JSON converter instance
     const configuration = new JSONConfiguration(JSON_CONVERTER_CONFIGURATION);
-    this.jsonConverter = new JSONConverter({configuration});
+    this.jsonConverter = new JSONConverter({ configuration });
   }
 
   componentDidMount() {
@@ -59,7 +59,7 @@ export class App extends Component {
   _setJSON(json) {
     const jsonProps = this.jsonConverter.convert(json);
     this._updateViewState(jsonProps);
-    this.setState({jsonProps});
+    this.setState({ jsonProps });
   }
 
   // Handle `json.initialViewState`
@@ -127,7 +127,7 @@ export class App extends Component {
   }
 
   render() {
-    const {jsonProps, initialViewState} = this.state;
+    const { jsonProps, initialViewState } = this.state;
     return (
       <Fragment>
         {/* Left Pane: Ace Editor and Template Selector */}
@@ -136,7 +136,7 @@ export class App extends Component {
 
           <div id="editor">
             <AutoSizer>
-              {({width, height}) => (
+              {({ width, height }) => (
                 <AceEditor
                   width={`${width}px`}
                   height={`${height}px`}
@@ -144,7 +144,7 @@ export class App extends Component {
                   theme="github"
                   onChange={this._onEditorChange}
                   name="AceEditorDiv"
-                  editorProps={{$blockScrolling: true}}
+                  editorProps={{ $blockScrolling: true }}
                   ref={instance => {
                     this.ace = instance;
                   }}
