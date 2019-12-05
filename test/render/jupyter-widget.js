@@ -165,7 +165,7 @@ test.only('jupyter-widget Render Test', t => {
 
     const diffOptions = {
       // uncomment to save screenshot to disk
-      saveOnFail: true,
+      // saveOnFail: true,
       threshold: 0.99,
       ...testCase.imageDiffOptions,
       region: {
