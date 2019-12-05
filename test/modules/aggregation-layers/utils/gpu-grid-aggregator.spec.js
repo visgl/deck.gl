@@ -81,10 +81,10 @@ test('GPUGridAggregator#GPU', t => {
 
 const {generateRandomGridPoints} = GridAggregationData;
 
-function cpuAggregator(opts) {
-  const layerData = pointToDensityGridDataCPU(opts);
+function cpuAggregator(props, aggregationParms) {
+  const layerData = pointToDensityGridDataCPU(props, aggregationParms);
   // const {getWeight} = opts.weights.weight1;
-  const {aggregation} = opts;
+  const {aggregation} = aggregationParms;
   const getValue = getValueFunc(aggregation, x => x.weight1[0]);
   const {minValue, maxValue, totalCount} = new BinSorter(layerData.data, getValue, false);
   const maxMinData = new Float32Array([maxValue, 0, 0, minValue]);
@@ -119,7 +119,19 @@ function testAggregationOperations(opts) {
       weights: {weight1: weight}
     }
   );
-  const cpuResults = cpuAggregator(aggregationOpts);
+  // const props = Object.assign({}, fixture, pointsData);
+  const cpuResults = cpuAggregator({
+    data: pointsData.data,
+    cellSize: fixture.cellSize
+  }, {
+    aggregation,
+    viewport: fixture.moduleSettings.viewport,
+    gridOffset: {xOffset: fixture.cellSize[0], yOffset: fixture.cellSize[1]},
+    cellOffset: [0, 0],
+    attributes: pointsData.attributes,
+    projectPoints: fixture.projectPoints,
+    numInstances: pointsData.vertexCount
+  });
   let results = gpuAggregator.run(aggregationOpts);
 
   const gpuResults = {
