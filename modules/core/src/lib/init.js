@@ -23,7 +23,7 @@ import {ImageLoader} from '@loaders.gl/images';
 
 import {global} from '../utils/globals';
 import log from '../utils/log';
-import {register as registerLoggers} from '../debug';
+import {register} from '../debug';
 import jsonLoader from '../utils/json-loader';
 
 // Version detection using babel plugin
@@ -46,7 +46,8 @@ if (!global.deck) {
     VERSION: version,
     version,
     log,
-    registerLoggers
+    // experimental
+    _registerLoggers: register
   };
 
   registerLoaders([jsonLoader, ImageLoader]);

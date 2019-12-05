@@ -12,11 +12,7 @@ export const getLoggers = log => ({
   /* Layer events */
 
   'layer.changeFlag': (layer, key, flags) => {
-    let value = flags[key];
-    if (key === 'updateTriggersChanged') {
-      value = Object.keys(value).join(', ');
-    }
-    log.log(PRIORITY_UPDATE_DETAIL, `${key}: ${value} in ${layer.id}`)();
+    log.log(PRIORITY_UPDATE_DETAIL, `${layer.id} ${key}: `, flags[key])();
   },
 
   'layer.initialize': layer => {
@@ -24,7 +20,13 @@ export const getLoggers = log => ({
   },
   'layer.update': (layer, needsUpdate) => {
     if (needsUpdate) {
-      log.log(PRIORITY_MINOR_UPDATE, `Updating ${layer} because: ${layer.printChangeFlags()}`)();
+      const flags = layer.getChangeFlags();
+      log.log(
+        PRIORITY_MINOR_UPDATE,
+        `Updating ${layer} because: ${Object.keys(flags)
+          .filter(key => flags[key])
+          .join(', ')}`
+      )();
     } else {
       log.log(PRIORITY_INFO, `${layer} does not need update`)();
     }

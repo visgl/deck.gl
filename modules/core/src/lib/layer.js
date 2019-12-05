@@ -743,16 +743,6 @@ export default class Layer extends Component {
     };
   }
 
-  printChangeFlags() {
-    const flags = this.internalState.changeFlags;
-    return `\
-${flags.dataChanged ? 'data ' : ''}\
-${flags.propsChanged ? 'props ' : ''}\
-${flags.updateTriggersChanged ? 'triggers ' : ''}\
-${flags.viewportChanged ? 'viewport' : ''}\
-`;
-  }
-
   // Compares the layers props with old props from a matched older layer
   // and extracts change flags that describe what has change so that state
   // can be update correctly with minimal effort
