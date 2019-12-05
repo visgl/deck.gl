@@ -697,9 +697,7 @@ export default class Layer extends Component {
       changeFlags.extensionsChanged;
     changeFlags.propsOrDataChanged = propsOrDataChanged;
     changeFlags.somethingChanged =
-      propsOrDataChanged ||
-      flags.viewportChanged ||
-      flags.stateChanged;
+      propsOrDataChanged || flags.viewportChanged || flags.stateChanged;
   }
   /* eslint-enable complexity */
 
@@ -825,7 +823,7 @@ export default class Layer extends Component {
       attributeManager,
       layer: this
     });
-    this.clearChangeFlags();  // populate this.internalState.changeFlags
+    this.clearChangeFlags(); // populate this.internalState.changeFlags
 
     this.state = {};
     // for backwards compatibility with older layers
