@@ -7,26 +7,32 @@
     "bearing": 30,
     "pitch": 30
   },
-
   "map": true,
-
   "views": [
     {
-      "type": "MapView",
+      "@@type": "MapView",
       "controller": true
     }
   ],
-
   "layers": [
     {
-      "type": "GeoJsonLayer",
+      "@@type": "GeoJsonLayer",
       "data": "https://d2ad6b4ur7yvpq.cloudfront.net/naturalearth-3.3.0/ne_110m_admin_1_states_provinces_shp.geojson",
       "stroked": true,
       "filled": true,
       "lineWidthMinPixels": 2,
       "opacity": 0.4,
-      "getLineColor": [255, 100, 100],
-      "getFillColor": [200, 160, 0, 180]
+      "getLineColor": [
+        255,
+        100,
+        100
+      ],
+      "getFillColor": [
+        200,
+        160,
+        0,
+        180
+      ]
     }
   ]
 }

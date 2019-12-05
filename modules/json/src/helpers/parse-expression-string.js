@@ -1,4 +1,4 @@
-import {get} from '../utils/get';
+import { get } from '../utils/get';
 
 // expression-eval: Small jsep based expression parser that supports array and object indexing
 import expressionEval from 'expression-eval';
@@ -12,6 +12,7 @@ const cachedExpressionMap = {
 // 'a.b.c': x => x.a.b.c
 export default function parseExpressionString(propValue, configuration) {
   // NOTE: Can be null which represents invalid function. Return null so that prop can be omitted
+  console.table({ propValue })
   if (propValue in cachedExpressionMap) {
     return cachedExpressionMap[propValue];
   }
@@ -20,7 +21,9 @@ export default function parseExpressionString(propValue, configuration) {
   // Compile with expression-eval
   const ast = expressionEval.parse(propValue);
   if (!ast.right && !ast.left && ast.type === 'Identifier') {
-    func = row => get(row, propValue);
+    func = row => {
+      return get(row, propValue);
+    };
   } else {
     // NOTE: To avoid security risks, the arguments passed to the
     // compiled expression must only give access to pure data (no globals etc)
@@ -30,7 +33,10 @@ export default function parseExpressionString(propValue, configuration) {
         throw new Error('Function calls not allowed in JSON expressions');
       }
     });
-    func = row => expressionEval.eval(ast, row);
+    // TODO Something like `expressionEval.eval(ast, {row});` would be useful for unpacking arrays
+    func = row => {
+      return expressionEval.eval(ast, row)
+    };
   }
 
   // Cache the compiled function

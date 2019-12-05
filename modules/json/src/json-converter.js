@@ -10,7 +10,7 @@
 
 import assert from './utils/assert';
 import JSONConfiguration from './json-configuration';
-import {instantiateClass} from './helpers/instantiate-class';
+import { instantiateClass } from './helpers/instantiate-class';
 import parseJSON from './helpers/parse-json';
 
 const isObject = value => value && typeof value === 'object';
@@ -22,13 +22,13 @@ export default class JSONConverter {
   constructor(props) {
     this.log = console; // eslint-disable-line
     this.configuration = {};
-    this.onJSONChange = () => {};
+    this.onJSONChange = () => { };
     this.json = null;
     this.convertedJson = null;
     this.setProps(props);
   }
 
-  finalize() {}
+  finalize() { }
 
   setProps(props) {
     // HANDLE CONFIGURATION PROPS
@@ -103,17 +103,17 @@ function convertJSONRecursively(json, key, configuration) {
 
 // Returns true if an object has a `type` field
 function isClassInstance(json, configuration) {
-  const {typeKey} = configuration;
+  const { typeKey } = configuration;
   return isObject(json) && Boolean(json[typeKey]);
 }
 
 function convertClassInstance(json, configuration) {
   // Extract the class type field
-  const {typeKey} = configuration;
+  const { typeKey } = configuration;
   const type = json[typeKey];
 
   // Prepare a props object and ensure all values have been converted
-  let props = {...json};
+  let props = { ...json };
   delete props[typeKey];
 
   props = convertPlainObject(props, configuration);
