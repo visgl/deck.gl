@@ -84,13 +84,13 @@ export default class BinSorter {
       .sort((a, b) => a.value - b.value);
   }
 
-  _percentileToIndex([lowerPercentile, upperPercentile]) {
+  _percentileToIndex(percentileRange) {
     const len = this.sortedBins.length;
     if (len < 2) {
       return [0, 0];
     }
 
-    const [lower, upper] = [lowerPercentile, upperPercentile].map(n => clamp(n, 0, 100));
+    const [lower, upper] = percentileRange.map(n => clamp(n, 0, 100));
 
     const lowerIdx = Math.ceil((lower / 100) * (len - 1));
     const upperIdx = Math.floor((upper / 100) * (len - 1));
@@ -119,11 +119,18 @@ export default class BinSorter {
    * @param {Number} range[1] - upper bound
    * @return {Array} array of new value range
    */
-  getValueRange([lower, upper]) {
+  getValueRange(percentileRange) {
     if (!this.sortedBins.length) {
       return [];
     }
-    const [lowerIdx, upperIdx] = this._percentileToIndex([lower, upper]);
+    let lowerIdx = 0;
+    let upperIdx = this.sortedBins.length - 1;
+
+    if (Array.isArray(percentileRange)) {
+      const idxRange = this._percentileToIndex(percentileRange);
+      lowerIdx = idxRange[0];
+      upperIdx = idxRange[1]
+    }
 
     return [this.sortedBins[lowerIdx].value, this.sortedBins[upperIdx].value];
   }
