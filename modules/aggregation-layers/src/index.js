@@ -30,6 +30,7 @@ export {AGGREGATION_OPERATION} from './utils/aggregation-operation-utils';
 // experimental export
 export {default as HeatmapLayer} from './heatmap-layer/heatmap-layer';
 export {default as _GPUGridAggregator} from './utils/gpu-grid-aggregation/gpu-grid-aggregator';
+export {default as _CPUAggregator} from './utils/cpu-aggregator';
 
 import {default as BinSorter} from './utils/bin-sorter';
 import {
@@ -38,7 +39,9 @@ import {
   quantizeScale,
   getQuantizeScale,
   getQuantileScale,
-  getOrdinalScale
+  getOrdinalScale,
+  getScaleFunctionByScaleType,
+  getScaleDomain
 } from './utils/scale-utils';
 import {defaultColorRange} from './utils/color-utils';
 
@@ -51,6 +54,7 @@ export const experimental = {
   getQuantizeScale,
   getQuantileScale,
   getOrdinalScale,
-
+  getScaleFunctionByScaleType,
+  getScaleDomain,
   defaultColorRange
 };

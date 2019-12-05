@@ -20,48 +20,46 @@
 
 import {log} from '@deck.gl/core';
 
-// Linear scale maps continuous domain to continuous range
-export function linearScale(domain, range, value) {
-  return ((value - domain[0]) / (domain[1] - domain[0])) * (range[1] - range[0]) + range[0];
-}
-
-// Quantize scale is similar to linear scales,
-// except it uses a discrete rather than continuous range
-export function quantizeScale(domain, range, value) {
-  const domainRange = domain[1] - domain[0];
-  if (domainRange <= 0) {
-    log.warn('quantizeScale: invalid domain, returning range[0]')();
-    return range[0];
-  }
-  const step = domainRange / range.length;
-  const idx = Math.floor((value - domain[0]) / step);
-  const clampIdx = Math.max(Math.min(idx, range.length - 1), 0);
-
-  return range[clampIdx];
-}
-
+// a scale function wrapper just like d3-scales
 export function getScale(domain, range, scaleFunction) {
-  function scale(value) {
-    return scaleFunction(domain, range, value);
-  }
-
+  const scale = scaleFunction;
   scale.domain = () => domain;
   scale.range = () => range;
 
   return scale;
 }
 
+// Quantize scale is similar to linear scales,
+// except it uses a discrete rather than continuous range
 // return a quantize scale function
 export function getQuantizeScale(domain, range) {
-  return getScale(domain, range, quantizeScale);
+  const scaleFunction = value => quantizeScale(domain, range, value);
+
+  return getScale(domain, range, scaleFunction);
 }
 
 // return a linear scale function
 export function getLinearScale(domain, range) {
-  return getScale(domain, range, linearScale);
+  const scaleFunction = value => linearScale(domain, range, value);
+
+  return getScale(domain, range, scaleFunction);
 }
 
-// quantile
+export function getQuantileScale(domain, range) {
+  // calculate threshold
+  const sortedDomain = domain.sort(ascending);
+  let i = 0;
+  const n = Math.max(1, range.length);
+  const thresholds = new Array(n - 1);
+  while (++i < n) {
+    thresholds[i - 1] = threshold(sortedDomain, i / n);
+  }
+
+  const scaleFunction = value => thresholdsScale(thresholds, range, value);
+  scaleFunction.thresholds = () => thresholds;
+
+  return getScale(domain, range, scaleFunction);
+}
 
 function ascending(a, b) {
   return a - b;
@@ -98,37 +96,20 @@ function bisectRight(a, x) {
 }
 
 // return a quantize scale function
-function quantileScale(thresholds) {
-  return (domain, range, value) => {
-    return range[bisectRight(thresholds, value)];
-  };
+function thresholdsScale(thresholds, range, value) {
+  return range[bisectRight(thresholds, value)];
 }
 
-export function getQuantileScale(domain, range) {
-  const sortedDomain = domain.sort(ascending);
-  let i = 0;
-  const n = Math.max(1, range.length);
-  const thresholds = new Array(n - 1);
-  while (++i < n) {
-    thresholds[i - 1] = threshold(sortedDomain, i / n);
+// ordinal Scale
+function ordinalScale(domain, domainMap, range, value) {
+  const key = `${value}`;
+  let d = domainMap.get(key);
+  if (d === undefined) {
+    // update the domain
+    d = domain.push(value);
+    domainMap.set(key, d);
   }
-  const quantileScaleThresholds = () => quantileScale(thresholds);
-
-  return getScale(sortedDomain, range, quantileScaleThresholds());
-}
-
-// ordinal
-function ordinalScale(domainMap) {
-  return (domain, range, value) => {
-    const key = `${value}`;
-    let d = domainMap.get(key);
-    if (d === undefined) {
-      // update the domain
-      d = domain.push(value);
-      domainMap.set(key, d);
-    }
-    return range[(d - 1) % range.length];
-  };
+  return range[(d - 1) % range.length];
 }
 
 export function getOrdinalScale(domain, range) {
@@ -140,7 +121,99 @@ export function getOrdinalScale(domain, range) {
       domainMap.set(key, uniqueDomain.push(d));
     }
   }
-  const ordinalScaleDomainMap = () => ordinalScale(domainMap);
 
-  return getScale(uniqueDomain, range, ordinalScaleDomainMap());
+  const scaleFunction = value => ordinalScale(uniqueDomain, domainMap, range, value);
+
+  return getScale(domain, range, scaleFunction);
+}
+
+// Quantize scale is similar to linear scales,
+// except it uses a discrete rather than continuous range
+export function quantizeScale(domain, range, value) {
+  const domainRange = domain[1] - domain[0];
+  if (domainRange <= 0) {
+    log.warn('quantizeScale: invalid domain, returning range[0]')();
+    return range[0];
+  }
+  const step = domainRange / range.length;
+  const idx = Math.floor((value - domain[0]) / step);
+  const clampIdx = Math.max(Math.min(idx, range.length - 1), 0);
+
+  return range[clampIdx];
+}
+
+// Linear scale maps continuous domain to continuous range
+export function linearScale(domain, range, value) {
+  return ((value - domain[0]) / (domain[1] - domain[0])) * (range[1] - range[0]) + range[0];
+}
+
+// get scale domains
+function notNullOrUndefined(d) {
+  return d !== undefined && d !== null;
+}
+
+export function unique(values) {
+  const results = [];
+  values.forEach(v => {
+    if (!results.includes(v) && notNullOrUndefined(v)) {
+      results.push(v);
+    }
+  });
+
+  return results;
+}
+
+function getTruthyValues(data, valueAccessor) {
+  const values = typeof valueAccessor === 'function' ? data.map(valueAccessor) : data;
+  return values.filter(notNullOrUndefined);
+}
+
+export function getLinearDomain(data, valueAccessor) {
+  const sorted = getTruthyValues(data, valueAccessor).sort();
+  return sorted.length ? [sorted[0], sorted[sorted.length - 1]] : [0, 0];
+}
+
+export function getQuantileDomain(data, valueAccessor) {
+  return getTruthyValues(data, valueAccessor);
+}
+
+export function getOrdinalDomain(data, valueAccessor) {
+  return unique(getTruthyValues(data, valueAccessor));
+}
+
+export function getScaleDomain(scaleType, data, valueAccessor) {
+  switch (scaleType) {
+    case 'quantize':
+    case 'linear':
+      return getLinearDomain(data, valueAccessor);
+
+    case 'quantile':
+      return getQuantileDomain(data, valueAccessor);
+
+    case 'ordinal':
+      return getOrdinalDomain(data, valueAccessor);
+
+    default:
+      return getLinearDomain(data, valueAccessor);
+  }
+}
+
+export function clamp(value, min, max) {
+  return Math.max(min, Math.min(max, value));
+}
+
+export function getScaleFunctionByScaleType(scaleType) {
+  switch (scaleType) {
+    case 'quantize':
+      return getQuantizeScale;
+    case 'linear':
+      return getLinearScale;
+    case 'quantile':
+      return getQuantileScale;
+    case 'ordinal':
+      return getOrdinalScale;
+
+    default:
+      return getQuantizeScale;
+  }
 }

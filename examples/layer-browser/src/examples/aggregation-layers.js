@@ -79,6 +79,7 @@ const CPUGridLayerExample = {
     opacity: 1,
     extruded: true,
     pickable: true,
+    colorScaleType: 'quantize',
     getPosition: d => d.COORDINATES,
     getColorValue: points => getMean(points, 'SPACES'),
     getElevationValue: points => getMax(points, 'SPACES')
@@ -97,6 +98,7 @@ const HexagonLayerExample = {
     elevationScale: 1,
     elevationRange: [0, 3000],
     coverage: 1,
+    colorScaleType: 'quantile',
     getPosition: d => d.COORDINATES,
     getColorValue: points => getMean(points, 'SPACES'),
     getElevationValue: points => getMax(points, 'SPACES')
