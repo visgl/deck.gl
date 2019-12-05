@@ -19,7 +19,6 @@
 // THE SOFTWARE.
 import Layer from './layer';
 import debug from '../debug';
-const debugLog = debug.log;
 import {flatten} from '../utils/flatten';
 
 const EVENT_RENDER_LAYERS = 'compositeLayer.renderLayers';
@@ -218,7 +217,7 @@ export default class CompositeLayer extends Layer {
       subLayers = flatten(subLayers, {filter: Boolean});
       this.internalState.subLayers = subLayers;
     }
-    debugLog(EVENT_RENDER_LAYERS, this, shouldUpdate, subLayers);
+    debug(EVENT_RENDER_LAYERS, this, shouldUpdate, subLayers);
 
     // populate reference to parent layer (this layer)
     // NOTE: needs to be done even when reusing layers as the parent may have changed

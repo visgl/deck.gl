@@ -1,5 +1,5 @@
 const logState = {
-  amMessages: []
+  attributeUpdateMessages: []
 };
 
 const PRIORITY_MAJOR_UPDATE = 1; // Events with direct perf impact
@@ -76,16 +76,16 @@ export const getLoggers = log => ({
   },
 
   'attributeManager.updateStart': attributeManager => {
-    logState.amMessages.length = 0;
-    logState.amUpdateStart = Date.now();
+    logState.attributeUpdateMessages.length = 0;
+    logState.attributeManagerUpdateStart = Date.now();
   },
   'attributeManager.updateEnd': (attributeManager, numInstances) => {
-    const timeMs = Math.round(Date.now() - logState.amUpdateStart);
+    const timeMs = Math.round(Date.now() - logState.attributeManagerUpdateStart);
     log.groupCollapsed(
       PRIORITY_MINOR_UPDATE,
       `Updated attributes for ${numInstances} instances in ${attributeManager.id} in ${timeMs}ms`
     )();
-    for (const updateMessage of logState.amMessages) {
+    for (const updateMessage of logState.attributeUpdateMessages) {
       log.log(PRIORITY_UPDATE_DETAIL, updateMessage)();
     }
     log.groupEnd(PRIORITY_MINOR_UPDATE)();
@@ -94,16 +94,16 @@ export const getLoggers = log => ({
   /* Attribute events */
 
   'attribute.updateStart': attribute => {
-    logState.attrUpdateStart = Date.now();
+    logState.attributeUpdateStart = Date.now();
   },
   'attribute.allocate': (attribute, numInstances) => {
     const message = `${attribute.id} allocated ${numInstances}`;
-    logState.amMessages.push(message);
+    logState.attributeUpdateMessages.push(message);
   },
   'attribute.updateEnd': (attribute, numInstances) => {
-    const timeMs = Math.round(Date.now() - logState.attrUpdateStart);
+    const timeMs = Math.round(Date.now() - logState.attributeUpdateStart);
     const message = `${attribute.id} updated ${numInstances} in ${timeMs}ms`;
-    logState.amMessages.push(message);
+    logState.attributeUpdateMessages.push(message);
   },
 
   /* Render events */

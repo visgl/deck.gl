@@ -1,4 +1,5 @@
+/* global deck */
 import {getLoggers} from '../src/debug/loggers';
 
-/* global deck */
-deck.debug.register(getLoggers);
+const loggers = getLoggers(deck.log);
+deck.registerLoggers(loggers);

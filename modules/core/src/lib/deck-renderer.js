@@ -1,5 +1,4 @@
 import debug from '../debug';
-const debugLog = debug.log;
 import DrawLayersPass from '../passes/draw-layers-pass';
 import PickLayersPass from '../passes/pick-layers-pass';
 import {Framebuffer} from '@luma.gl/core';
@@ -59,7 +58,7 @@ export default class DeckRenderer {
 
     this.renderCount++;
 
-    debugLog(EVENT_RENDER_LAYERS, this, renderStats, opts);
+    debug(EVENT_RENDER_LAYERS, this, renderStats, opts);
   }
 
   needsRedraw(opts = {clearRedrawFlags: false}) {

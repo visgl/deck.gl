@@ -24,7 +24,6 @@ import Layer from './layer';
 import {LIFECYCLE} from '../lifecycle/constants';
 import log from '../utils/log';
 import debug from '../debug';
-const debugLog = debug.log;
 import {flatten} from '../utils/flatten';
 import {Stats} from 'probe.gl';
 
@@ -149,7 +148,7 @@ export default class LayerManager {
   setLayers(newLayers, forceUpdate = false) {
     // TODO - something is generating state updates that cause rerender of the same
     const shouldUpdate = forceUpdate || newLayers !== this.lastRenderedLayers;
-    debugLog(EVENT_SET_LAYERS, this, shouldUpdate, newLayers);
+    debug(EVENT_SET_LAYERS, this, shouldUpdate, newLayers);
 
     if (!shouldUpdate) {
       return this;
@@ -216,7 +215,7 @@ export default class LayerManager {
     const viewportChanged = !oldViewport || !viewport.equals(oldViewport);
 
     if (viewportChanged) {
-      debugLog(EVENT_ACTIVATE_VIEWPORT, this, viewport);
+      debug(EVENT_ACTIVATE_VIEWPORT, this, viewport);
 
       this.context.viewport = viewport;
 

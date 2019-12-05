@@ -22,7 +22,6 @@
 import Attribute from './attribute';
 import log from '../../utils/log';
 import debug from '../../debug';
-const debugLog = debug.log;
 
 import AttributeTransitionManager from './attribute-transition-manager';
 
@@ -140,7 +139,7 @@ export default class AttributeManager {
   invalidate(triggerName, dataRange) {
     const invalidatedAttributes = this._invalidateTrigger(triggerName, dataRange);
     // For performance tuning
-    debugLog(EVENT_INVALIDATE, this, triggerName, invalidatedAttributes);
+    debug(EVENT_INVALIDATE, this, triggerName, invalidatedAttributes);
   }
 
   invalidateAll(dataRange) {
@@ -148,7 +147,7 @@ export default class AttributeManager {
       this.attributes[attributeName].setNeedsUpdate(attributeName, dataRange);
     }
     // For performance tuning
-    debugLog(EVENT_INVALIDATE, this, 'all');
+    debug(EVENT_INVALIDATE, this, 'all');
   }
 
   // Ensure all attribute buffers are updated from props or data.
@@ -164,7 +163,7 @@ export default class AttributeManager {
     // keep track of whether some attributes are updated
     let updated = false;
 
-    debugLog(EVENT_UPDATE_START, this);
+    debug(EVENT_UPDATE_START, this);
     if (this.stats) {
       this.stats.get('Update Attributes').timeStart();
     }
@@ -203,7 +202,7 @@ export default class AttributeManager {
 
     if (updated) {
       // Only initiate alloc/update (and logging) if actually needed
-      debugLog(EVENT_UPDATE_END, this, numInstances);
+      debug(EVENT_UPDATE_END, this, numInstances);
     }
 
     if (this.stats) {
@@ -350,17 +349,17 @@ export default class AttributeManager {
 
   _updateAttribute(opts) {
     const {attribute, numInstances} = opts;
-    debugLog(EVENT_ATTRIBUTE_UPDATE_START, attribute);
+    debug(EVENT_ATTRIBUTE_UPDATE_START, attribute);
 
     if (attribute.allocate(numInstances)) {
-      debugLog(EVENT_ATTRIBUTE_ALLOCATE, attribute, numInstances);
+      debug(EVENT_ATTRIBUTE_ALLOCATE, attribute, numInstances);
     }
 
     // Calls update on any buffers that need update
     const updated = attribute.updateBuffer(opts);
     if (updated) {
       this.needsRedraw = true;
-      debugLog(EVENT_ATTRIBUTE_UPDATE_END, attribute, numInstances);
+      debug(EVENT_ATTRIBUTE_UPDATE_END, attribute, numInstances);
     }
   }
 }

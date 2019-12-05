@@ -679,7 +679,7 @@ export default class Deck {
     if (this._metricsCounter++ % 60 === 0) {
       this._getMetrics();
       this.stats.reset();
-      log.table(3, this.metrics)();
+      log.table(4, this.metrics)();
 
       // Experimental: report metrics
       if (this.props._onMetrics) {

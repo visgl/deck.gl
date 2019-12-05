@@ -23,7 +23,7 @@ import {ImageLoader} from '@loaders.gl/images';
 
 import {global} from '../utils/globals';
 import log from '../utils/log';
-import debug from '../debug';
+import {register as registerLoggers} from '../debug';
 import jsonLoader from '../utils/json-loader';
 
 // Version detection using babel plugin
@@ -37,13 +37,18 @@ if (global.deck && global.deck.VERSION !== version) {
 }
 
 if (!global.deck) {
+  log.log(
+    0,
+    `deck.gl ${version} - set deck.log.priority=1 (or higher) to trace attribute updates`
+  )();
+
   global.deck = global.deck || {
     VERSION: version,
     version,
-    log
+    log,
+    registerLoggers
   };
 
-  debug.init(global.deck);
   registerLoaders([jsonLoader, ImageLoader]);
 }
 
