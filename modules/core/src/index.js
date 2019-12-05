@@ -98,7 +98,7 @@ import {count} from './utils/count';
 import memoize from './utils/memoize';
 export {mergeShaders} from './utils/shader';
 
-export {LayerExtension} from './lib/layer-extension';
+export {default as LayerExtension} from './lib/layer-extension';
 
 // props
 import {compareProps} from './lifecycle/props';

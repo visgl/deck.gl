@@ -25,6 +25,7 @@ import UniformTransitionManager from './uniform-transition-manager';
 import {diffProps, validateProps} from '../lifecycle/props';
 import {count} from '../utils/count';
 import log from '../utils/log';
+import debug from '../debug';
 import GL from '@luma.gl/constants';
 import {withParameters, setParameters} from '@luma.gl/core';
 import assert from '../utils/assert';
@@ -38,7 +39,11 @@ import {worldToPixels} from '@math.gl/web-mercator';
 
 import {load} from '@loaders.gl/core';
 
-const LOG_PRIORITY_UPDATE = 1;
+const TRACE_CHANGE_FLAG = 'layer.changeFlag';
+const TRACE_INITIALIZE = 'layer.initialize';
+const TRACE_UPDATE = 'layer.update';
+const TRACE_FINALIZE = 'layer.finalize';
+const TRACE_MATCHED = 'layer.matched';
 
 const EMPTY_ARRAY = Object.freeze([]);
 
@@ -365,13 +370,8 @@ export default class Layer extends Component {
     }
 
     if (name === 'all') {
-      log.log(LOG_PRIORITY_UPDATE, `updateTriggers invalidating all attributes: ${diffReason}`)();
       attributeManager.invalidateAll();
     } else {
-      log.log(
-        LOG_PRIORITY_UPDATE,
-        `updateTriggers invalidating attribute ${name}: ${diffReason}`
-      )();
       attributeManager.invalidate(name);
     }
   }
@@ -541,6 +541,8 @@ export default class Layer extends Component {
   // Called by layer manager when a new layer is found
   /* eslint-disable max-statements */
   _initialize() {
+    debug(TRACE_INITIALIZE, this);
+
     this._initState();
 
     // Call subclass lifecycle methods
@@ -568,6 +570,7 @@ export default class Layer extends Component {
     // Call subclass lifecycle method
     const stateNeedsUpdate = this.needsUpdate();
     // End lifecycle method
+    debug(TRACE_UPDATE, this, stateNeedsUpdate);
 
     if (stateNeedsUpdate) {
       this._updateState();
@@ -624,6 +627,7 @@ export default class Layer extends Component {
   // Called by manager when layer is about to be disposed
   // Note: not guaranteed to be called on application shutdown
   _finalize() {
+    debug(TRACE_FINALIZE, this);
     assert(this.internalState && this.state);
 
     // Call subclass lifecycle method
@@ -682,41 +686,30 @@ export default class Layer extends Component {
     // Update primary flags
     if (flags.dataChanged && !changeFlags.dataChanged) {
       changeFlags.dataChanged = flags.dataChanged;
-      log.log(LOG_PRIORITY_UPDATE + 1, () => `dataChanged: ${flags.dataChanged} in ${this.id}`)();
+      debug(TRACE_CHANGE_FLAG, this, 'dataChanged', flags);
     }
     if (flags.updateTriggersChanged && !changeFlags.updateTriggersChanged) {
       changeFlags.updateTriggersChanged =
         changeFlags.updateTriggersChanged && flags.updateTriggersChanged
           ? Object.assign({}, flags.updateTriggersChanged, changeFlags.updateTriggersChanged)
           : flags.updateTriggersChanged || changeFlags.updateTriggersChanged;
-      log.log(
-        LOG_PRIORITY_UPDATE + 1,
-        () =>
-          'updateTriggersChanged: ' +
-          `${Object.keys(flags.updateTriggersChanged).join(', ')} in ${this.id}`
-      )();
+      debug(TRACE_CHANGE_FLAG, this, 'updateTriggersChanged', flags);
     }
     if (flags.propsChanged && !changeFlags.propsChanged) {
       changeFlags.propsChanged = flags.propsChanged;
-      log.log(LOG_PRIORITY_UPDATE + 1, () => `propsChanged: ${flags.propsChanged} in ${this.id}`)();
+      debug(TRACE_CHANGE_FLAG, this, 'propsChanged', flags);
     }
     if (flags.extensionsChanged && !changeFlags.extensionsChanged) {
       changeFlags.extensionsChanged = flags.extensionsChanged;
-      log.log(
-        LOG_PRIORITY_UPDATE + 1,
-        () => `extensionsChanged: ${flags.extensionsChanged} in ${this.id}`
-      )();
+      debug(TRACE_CHANGE_FLAG, this, 'extensionsChanged', flags);
     }
     if (flags.viewportChanged && !changeFlags.viewportChanged) {
       changeFlags.viewportChanged = flags.viewportChanged;
-      log.log(
-        LOG_PRIORITY_UPDATE + 2,
-        () => `viewportChanged: ${flags.viewportChanged} in ${this.id}`
-      )();
+      debug(TRACE_CHANGE_FLAG, this, 'viewportChanged', flags);
     }
     if (flags.stateChanged && !changeFlags.stateChanged) {
       changeFlags.stateChanged = flags.stateChanged;
-      log.log(LOG_PRIORITY_UPDATE + 1, () => `stateChanged: ${flags.stateChanged} in ${this.id}`)();
+      debug(TRACE_CHANGE_FLAG, this, 'stateChanged', flags);
     }
 
     // Update composite flags
@@ -749,16 +742,6 @@ export default class Layer extends Component {
       propsOrDataChanged: false,
       somethingChanged: false
     };
-  }
-
-  printChangeFlags() {
-    const flags = this.internalState.changeFlags;
-    return `\
-${flags.dataChanged ? 'data ' : ''}\
-${flags.propsChanged ? 'props ' : ''}\
-${flags.updateTriggersChanged ? 'triggers ' : ''}\
-${flags.viewportChanged ? 'viewport' : ''}\
-`;
   }
 
   // Compares the layers props with old props from a matched older layer
@@ -889,6 +872,8 @@ ${flags.viewportChanged ? 'viewport' : ''}\
 
   // Called by layer manager to transfer state from an old layer
   _transferState(oldLayer) {
+    debug(TRACE_MATCHED, this, this === oldLayer);
+
     const {state, internalState} = oldLayer;
     assert(state && internalState);
 

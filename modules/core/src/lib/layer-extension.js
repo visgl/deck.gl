@@ -19,7 +19,7 @@
 // THE SOFTWARE.
 import {deepEqual} from '../utils/deep-equal';
 
-export class LayerExtension {
+export default class LayerExtension {
   constructor(opts = {}) {
     this.opts = opts;
   }
