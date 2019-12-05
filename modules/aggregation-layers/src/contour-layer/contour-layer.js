@@ -54,8 +54,6 @@ export default class ContourLayer extends GridAggregationLayer {
     super.initializeState({aggregationProps: AGGREGATION_PROPS});
     this.setState({
       contourData: {},
-      colorTrigger: 0,
-      strokeWidthTrigger: 0,
       weights: {
         count: {
           size: 1,
@@ -74,16 +72,16 @@ export default class ContourLayer extends GridAggregationLayer {
   updateState(opts) {
     super.updateState(opts);
     let contoursChanged = false;
+    const {oldProps, props} = opts;
     const {aggregationDirty} = this.state;
-    if (this._shouldRebuildContours(opts)) {
+
+    if (oldProps.contours !== props.contours || oldProps.zOffset !== props.zOffset) {
       contoursChanged = true;
       this._updateThresholdData(opts.props);
     }
-    if (aggregationDirty || (contoursChanged && this.getNumInstances() > 0)) {
+
+    if (this.getNumInstances() > 0 && (aggregationDirty || contoursChanged)) {
       this._generateContours();
-    } else {
-      // data for sublayers not changed check if color or strokeWidth need to be updated
-      this._updateSubLayerTriggers(opts.oldProps, opts.props);
     }
   }
 
@@ -110,7 +108,6 @@ export default class ContourLayer extends GridAggregationLayer {
     }
 
     const {cellWeights} = GPUGridAggregator.getCellData({countsData: aggregationData});
-    // const thresholds = this.props.contours.map(x => x.threshold);
     const contourData = generateContours({
       thresholdData,
       cellWeights,
@@ -124,8 +121,6 @@ export default class ContourLayer extends GridAggregationLayer {
   }
 
   _getLineLayerProps() {
-    const {colorTrigger, strokeWidthTrigger} = this.state;
-
     return this.getSubLayerProps({
       id: 'contour-line-layer',
       data: this.state.contourData.contourSegments,
@@ -133,38 +128,33 @@ export default class ContourLayer extends GridAggregationLayer {
       getTargetPosition: d => d.end,
       getColor: this._onGetSublayerColor.bind(this),
       getWidth: this._onGetSublayerStrokeWidth.bind(this),
-      widthUnits: 'pixels',
-      updateTriggers: {
-        getColor: colorTrigger,
-        getWidth: strokeWidthTrigger
-      }
+      widthUnits: 'pixels'
     });
   }
 
   _updateThresholdData(props) {
-    const thresholdData = props.contours.map((x, index) => {
-      return {
-        threshold: x.threshold,
-        zIndex: x.zIndex || index,
-        zOffset: props.zOffset
+    const {contours, zOffset} = props;
+    const count = contours.length;
+    const thresholdData = new Array(count);
+    for (let i = 0; i < count; i++) {
+      const {threshold, zIndex} = contours[i];
+      thresholdData[i] = {
+        threshold,
+        zIndex: zIndex || i,
+        zOffset
       };
-    });
+    }
     this.setState({thresholdData});
   }
 
   // Private (Sublayers)
 
   _getSolidPolygonLayerProps() {
-    const {colorTrigger} = this.state;
-
     return this.getSubLayerProps({
       id: 'contour-solid-polygon-layer',
       data: this.state.contourData.contourPolygons,
       getPolygon: d => d.vertices,
-      getFillColor: this._onGetSublayerColor.bind(this),
-      updateTriggers: {
-        getFillColor: colorTrigger
-      }
+      getFillColor: this._onGetSublayerColor.bind(this)
     });
   }
 
@@ -192,21 +182,6 @@ export default class ContourLayer extends GridAggregationLayer {
       return false;
     });
     return strokeWidth;
-  }
-
-  _updateSubLayerTriggers(oldProps, props) {
-    if (oldProps && oldProps.contours && props && props.contours) {
-      if (props.contours.some((contour, i) => contour.color !== oldProps.contours[i].color)) {
-        this.state.colorTrigger++;
-      }
-      if (
-        props.contours.some(
-          (contour, i) => contour.strokeWidth !== oldProps.contours[i].strokeWidth
-        )
-      ) {
-        this.state.strokeWidthTrigger++;
-      }
-    }
   }
 
   _shouldRebuildContours({oldProps, props}) {

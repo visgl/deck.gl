@@ -14,6 +14,12 @@
 import DeckGL from '@deck.gl/react';
 import {ContourLayer} from '@deck.gl/aggregation-layers';
 
+const CONTOURS = [
+  {threshold: 1, color: [255, 0, 0, 255], strokeWidth: 1}, // => Isoline for threshold 1
+  {threshold: 5, color: [0, 255, 0], strokeWidth: 2}, // => Isoline for threshold 5
+  {threshold: [6, 10], color: [0, 0, 255, 128]} // => Isoband for threshold range [6, 10)
+];
+
 const App = ({data, viewport}) => {
 
   /**
@@ -26,11 +32,7 @@ const App = ({data, viewport}) => {
   const layer = new ContourLayer({
     id: 'contourLayer',
     // Three contours are rendered.
-    contours: [
-      {threshold: 1, color: [255, 0, 0, 255], strokeWidth: 1}, // => Isoline for threshold 1
-      {threshold: 5, color: [0, 255, 0], strokeWidth: 2}, // => Isoline for threshold 5
-      {threshold: [6, 10], color: [0, 0, 255, 128]} // => Isoband for threshold range [6, 10)
-    ],
+    contours: CONTOURS,
     cellSize: 200,
     getPosition: d => d.COORDINATES,
   });
@@ -106,6 +108,8 @@ Array of objects with following keys
 * `strokeWidth` (Number, optional) : Applicable for `Isoline`s only, width of the Isoline in pixels, if not specified a default value of `1` is used.
 
 * `zIndex` (Number, optional) : Defines z order of the contour. Contour with higher `zIndex` value is rendered above contours with lower `zIndex` values. When visualizing overlapping contours, `zIndex` along with `zOffset` (defined below) can be used to precisely layout contours. This also avoids z-fighting rendering issues. If not specified a unique value from `0` to `n` (number of contours) is assigned.
+
+NOTE: Like any other layer prop, a shallow comparison is performed on `contours` prop to determine if it is changed. When changed, contours are re-generated, to avoid un-necessary contour generation, this shouldn't be defined as inline array, instead should be set to an object, that changes, only when any of the contour data is changed.
 
 ##### `zOffset` (Number, optional)
 
