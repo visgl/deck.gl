@@ -24,6 +24,7 @@ import AttributeManager from './attribute/attribute-manager';
 import UniformTransitionManager from './uniform-transition-manager';
 import {diffProps, validateProps} from '../lifecycle/props';
 import {count} from '../utils/count';
+import log from '../utils/log';
 import debug from '../debug';
 import GL from '@luma.gl/constants';
 import {withParameters, setParameters} from '@luma.gl/core';

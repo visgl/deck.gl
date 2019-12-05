@@ -14,7 +14,7 @@ deck.gl (and luma.gl) are based on the probe.gl debugging library, providing use
 In your browser console, select the priority you would like:
 
 ```js
-deck.debug(true)
+deck.log.enable()
 deck.log.priority = 2
 ```
 

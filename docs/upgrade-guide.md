@@ -39,12 +39,6 @@
   + `LNGLAT_DEPRECATED`: use `LNGLAT`
   + `METERS`: use `METER_OFFSETS`
 
-##### Debugging
-
-Type `deck.debug(true)` in the console together with `deck.log.priority=<number>` to enable debug mode.
-
-deck.gl now removes most logging when bundling under `NODE_ENV=production`.
-
 
 ##### Debugging
 
