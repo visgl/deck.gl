@@ -678,50 +678,24 @@ export default class Layer extends Component {
   // Dirty some change flags, will be handled by updateLayer
   /* eslint-disable complexity */
   setChangeFlags(flags) {
-    this.internalState.changeFlags = this.internalState.changeFlags || {};
-    const changeFlags = this.internalState.changeFlags;
+    const {changeFlags} = this.internalState;
 
-    // Update primary flags
-    if (flags.dataChanged && !changeFlags.dataChanged) {
-      changeFlags.dataChanged = flags.dataChanged;
-      debug(TRACE_CHANGE_FLAG, this, 'dataChanged', flags);
-    }
-    if (flags.updateTriggersChanged && !changeFlags.updateTriggersChanged) {
-      changeFlags.updateTriggersChanged =
-        changeFlags.updateTriggersChanged && flags.updateTriggersChanged
-          ? Object.assign({}, flags.updateTriggersChanged, changeFlags.updateTriggersChanged)
-          : flags.updateTriggersChanged || changeFlags.updateTriggersChanged;
-      debug(TRACE_CHANGE_FLAG, this, 'updateTriggersChanged', flags);
-    }
-    if (flags.propsChanged && !changeFlags.propsChanged) {
-      changeFlags.propsChanged = flags.propsChanged;
-      debug(TRACE_CHANGE_FLAG, this, 'propsChanged', flags);
-    }
-    if (flags.extensionsChanged && !changeFlags.extensionsChanged) {
-      changeFlags.extensionsChanged = flags.extensionsChanged;
-      debug(TRACE_CHANGE_FLAG, this, 'extensionsChanged', flags);
-    }
-    if (flags.viewportChanged && !changeFlags.viewportChanged) {
-      changeFlags.viewportChanged = flags.viewportChanged;
-      debug(TRACE_CHANGE_FLAG, this, 'viewportChanged', flags);
-    }
-    if (flags.stateChanged && !changeFlags.stateChanged) {
-      changeFlags.stateChanged = flags.stateChanged;
-      debug(TRACE_CHANGE_FLAG, this, 'stateChanged', flags);
+    for (const key in changeFlags) {
+      if (flags[key] && !changeFlags[key]) {
+        changeFlags[key] = flags[key];
+        debug(TRACE_CHANGE_FLAG, this, key, flags);
+      }
     }
 
     // Update composite flags
     const propsOrDataChanged =
-      flags.dataChanged ||
-      flags.updateTriggersChanged ||
-      flags.propsChanged ||
-      flags.extensionsChanged;
-    changeFlags.propsOrDataChanged = changeFlags.propsOrDataChanged || propsOrDataChanged;
+      changeFlags.dataChanged ||
+      changeFlags.updateTriggersChanged ||
+      changeFlags.propsChanged ||
+      changeFlags.extensionsChanged;
+    changeFlags.propsOrDataChanged = propsOrDataChanged;
     changeFlags.somethingChanged =
-      changeFlags.somethingChanged ||
-      propsOrDataChanged ||
-      flags.viewportChanged ||
-      flags.stateChanged;
+      propsOrDataChanged || flags.viewportChanged || flags.stateChanged;
   }
   /* eslint-enable complexity */
 
@@ -848,6 +822,7 @@ export default class Layer extends Component {
       attributeManager,
       layer: this
     });
+    this.clearChangeFlags(); // populate this.internalState.changeFlags
 
     this.state = {};
     // for backwards compatibility with older layers
