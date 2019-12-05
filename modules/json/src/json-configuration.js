@@ -51,9 +51,5 @@ export default class JSONConfiguration {
 }
 
 function convertFunction(value, key, configuration) {
-  if (key.startsWith('get')) {
-    const isAccessor = true;
-    return parseExpressionString(value, configuration, isAccessor);
-  }
-  return value;
+  return parseExpressionString(value, configuration);
 }

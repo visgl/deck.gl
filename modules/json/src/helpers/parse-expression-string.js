@@ -10,7 +10,7 @@ const cachedExpressionMap = {
 // Calculates an accessor function from a JSON string
 // '-' : x => x
 // 'a.b.c': x => x.a.b.c
-export default function parseExpressionString(propValue, configuration, isAccessor) {
+export default function parseExpressionString(propValue, configuration) {
   // NOTE: Can be null which represents invalid function. Return null so that prop can be omitted
   if (propValue in cachedExpressionMap) {
     return cachedExpressionMap[propValue];
@@ -30,10 +30,7 @@ export default function parseExpressionString(propValue, configuration, isAccess
         throw new Error('Function calls not allowed in JSON expressions');
       }
     });
-    func = isAccessor
-      ? row => expressionEval.eval(ast, row)
-      : // TBD - how do we pass args to general (non-accessor) functions?
-        args => expressionEval.eval(ast, {args});
+    func = row => expressionEval.eval(ast, row);
   }
 
   // Cache the compiled function

@@ -1,6 +1,7 @@
 import test from 'tape-catch';
 import {makeSpy} from '@probe.gl/test-utils';
 
+import {COORDINATE_SYSTEM} from '@deck.gl/core/lib/constants';
 import {MapController} from '@deck.gl/core';
 import {JSONConverter} from '@deck.gl/json';
 import configuration, {log} from './json-configuration-for-deck';
@@ -22,11 +23,18 @@ test('JSONConverter#convert', t => {
   const jsonConverter = new JSONConverter({configuration});
   t.ok(jsonConverter, 'JSONConverter created');
 
-  const deckProps = jsonConverter.convert(JSON_DATA);
+  let deckProps = jsonConverter.convert(JSON_DATA);
   t.ok(deckProps, 'JSONConverter converted correctly');
-
   t.is(deckProps.views.length, 2, 'JSONConverter converted views');
   t.is(deckProps.controller, MapController, 'Should evaluate constants.');
+
+  deckProps = jsonConverter.convert(COMPLEX_JSON);
+  const pointCloudLayerProps = deckProps.layers[3].props;
+  t.is(
+    pointCloudLayerProps.coordinateSystem,
+    COORDINATE_SYSTEM.METER_OFFSETS,
+    'Should evaluate enums.'
+  );
 
   t.end();
 });
@@ -48,13 +56,11 @@ test('JSONConverter#handleTypeAsKey', t => {
   t.ok(jsonConverter, 'JSONConverter created');
   const complexData = JSON.parse(JSON.stringify(COMPLEX_JSON));
   const deckProps = jsonConverter.convert(complexData);
-  t.ok(deckProps.layers.length === 3, 'should have three layers');
+  t.ok(deckProps.layers.length, 4, 'should have four layers');
   t.ok(deckProps.layers[0].id === 'ScatterplotLayer', 'should have a ScatterplotLayer at index 0');
   t.ok(deckProps.layers[1].id === 'TextLayer', 'should have a TextLayer at index 1');
   t.ok(deckProps.layers[2].id === 'GeoJsonLayer', 'should have a GeoJsonLayer at index 2');
+  t.ok(deckProps.layers[3].id === 'PointCloudLayer', 'should have a PointCloudLayer at index 3');
   t.ok(deckProps.layers[2].props.data.features[0].type === 'Feature');
-  // TODO implement function parsing
-  // deckProps.layers.length === 3
-  // deckProps.layers[1].getTextAnchor === 'end'
   t.end();
 });
