@@ -57,11 +57,9 @@ export function createDeck({
 }) {
   let deckgl;
   try {
-    if (!jsonConverter) {
-      jsonConverter = new deck.JSONConverter({
-        configuration: jsonConverterConfiguration
-      });
-    }
+    jsonConverter = new deck.JSONConverter({
+      configuration: jsonConverterConfiguration
+    });
 
     const props = jsonConverter.convert(jsonInput);
 
