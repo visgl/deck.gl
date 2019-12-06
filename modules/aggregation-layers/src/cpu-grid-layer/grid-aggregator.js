@@ -86,9 +86,10 @@ function pointsToGridHashing(props, aggregationParams) {
     objectInfo.index++;
     let lng = positions[objectInfo.index * size];
     let lat = positions[objectInfo.index * size + 1];
+    const z = size >= 3 ? positions[objectInfo.index * size + 2] : 0;
 
     if (projectPoints) {
-      [lng, lat] = viewport.project([lng, lat]);
+      [lng, lat] = viewport.project([lng, lat, z]);
     }
 
     if (Number.isFinite(lat) && Number.isFinite(lng)) {
