@@ -2,9 +2,9 @@ import makeTooltip from './widget-tooltip';
 
 import mapboxgl from './ssr-safe-mapbox';
 
-import { CSVLoader } from '@loaders.gl/csv';
-import { Tile3DLoader } from '@loaders.gl/3d-tiles';
-import { LASWorkerLoader } from '@loaders.gl/las';
+import {CSVLoader} from '@loaders.gl/csv';
+import {Tile3DLoader} from '@loaders.gl/3d-tiles';
+import {LASWorkerLoader} from '@loaders.gl/las';
 import * as loaders from '@loaders.gl/core';
 
 import * as deck from './deck-bundle';
@@ -39,7 +39,7 @@ const jsonConverterConfiguration = {
 
 loaders.registerLoaders([CSVLoader, Tile3DLoader, LASWorkerLoader]);
 
-let jsonConverter = new deck.JSONConverter({
+const jsonConverter = new deck.JSONConverter({
   configuration: jsonConverterConfiguration
 });
 
