@@ -29,7 +29,7 @@ const TEST_CASES = [
     name: 'ScatterplotLayer and TextLayer',
     json: {
       description: 'Test of plotting multiple layers at once',
-      initialViewState: {
+      viewState: {
         maxZoom: 20,
         zoom: 15
       },
@@ -84,7 +84,7 @@ const TEST_CASES = [
     name: 'GeoJsonLayer',
     json: {
       description: 'Test of GeoJsonLayer',
-      initialViewState: {
+      viewState: {
         longitude: -122.45,
         latitude: 37.8,
         zoom: 10
@@ -302,7 +302,7 @@ const TEST_CASES = [
   }
 ];
 
-test('jupyter-widget Render Test', t => {
+test.only('jupyter-widget Render Test', t => {
   const iframe = document.createElement('iframe');
   iframe.width = WIDTH;
   iframe.height = HEIGHT;

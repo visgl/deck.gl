@@ -39,9 +39,7 @@ const jsonConverterConfiguration = {
 
 loaders.registerLoaders([CSVLoader, Tile3DLoader, LASWorkerLoader]);
 
-const jsonConverter = new deck.JSONConverter({
-  configuration: jsonConverterConfiguration
-});
+let jsonConverter;
 
 export function updateDeck(inputJSON, deckgl) {
   const results = jsonConverter.convert(inputJSON);
@@ -58,6 +56,12 @@ export function createDeck({
 }) {
   let deckgl;
   try {
+    if (!jsonConverter) {
+      jsonConverter = new deck.JSONConverter({
+        configuration: jsonConverterConfiguration
+      });
+    }
+
     const props = jsonConverter.convert(jsonInput);
 
     const getTooltip = makeTooltip(tooltip);
