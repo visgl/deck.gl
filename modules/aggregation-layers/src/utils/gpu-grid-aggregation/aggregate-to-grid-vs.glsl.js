@@ -58,8 +58,17 @@ void main(void) {
 
   vec2 pos = project_to_pixel(windowPos);
 
+  vec2 pixelXY64[2];
+  pixelXY64[0] = vec2(pos.x, 0.);
+  pixelXY64[1] = vec2(pos.y, 0.);
+
   // Transform (0,0):windowSize -> (0, 0): gridSize
-  pos = floor(pos / cellSize);
+  vec2 gridXY64[2];
+  gridXY64[0] = div_fp64(pixelXY64[0], vec2(cellSize.x, 0));
+  gridXY64[1] = div_fp64(pixelXY64[1], vec2(cellSize.y, 0));
+  float x = floor(gridXY64[0].x);
+  float y = floor(gridXY64[1].x);
+  pos = vec2(x, y);
 
   // Transform (0,0):gridSize -> (-1, -1):(1,1)
   pos = (pos * (2., 2.) / (gridSize)) - (1., 1.);
@@ -67,6 +76,7 @@ void main(void) {
   // Move to pixel center, pixel-size in screen sapce (2/gridSize) * 0.5 => 1/gridSize
   vec2 offset = 1.0 / gridSize;
   pos = pos + offset;
+
 
   gl_Position = vec4(pos, 0.0, 1.0);
 }

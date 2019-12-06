@@ -24,12 +24,9 @@ import {AGGREGATION_OPERATION, getValueFunc} from './utils/aggregation-operation
 import {Buffer} from '@luma.gl/core';
 import {WebMercatorViewport, log, COORDINATE_SYSTEM} from '@deck.gl/core';
 import GL from '@luma.gl/constants';
-import {Matrix4} from 'math.gl';
 import {getBoundingBox, alignToCell} from './utils/grid-aggregation-utils';
 import BinSorter from './utils/bin-sorter';
 import {pointToDensityGridDataCPU, getGridOffset} from './cpu-grid-layer/grid-aggregator';
-
-const EMPTY_MATRIX = new Matrix4();
 
 export default class GridAggregationLayer extends AggregationLayer {
   initializeState({aggregationProps, getCellSize}) {
@@ -195,7 +192,7 @@ export default class GridAggregationLayer extends AggregationLayer {
           // project points from world space (lng/lat) to viewport (screen) space.
           projectPoints = true;
           // gridTransformMatrix = viewport.viewportMatrix;
-          scaling = [viewport.width/2, -viewport.height/2, 1];
+          scaling = [viewport.width / 2, -viewport.height / 2, 1];
           translation = [1, -1];
         } else {
           // Support Ortho viewport use cases.

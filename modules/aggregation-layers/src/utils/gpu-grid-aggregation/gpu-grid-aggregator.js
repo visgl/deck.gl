@@ -26,11 +26,10 @@ import {
   hasFeatures,
   isWebGL2,
   readPixelsToBuffer,
-  fp64 as fp64ShaderModule,
+  fp64,
   withParameters
 } from '@luma.gl/core';
-import {log, project32, project64, mergeShaders} from '@deck.gl/core';
-const {fp64ifyMatrix4} = fp64ShaderModule;
+import {log, project32, mergeShaders} from '@deck.gl/core';
 
 import {
   DEFAULT_RUN_PARAMS,
@@ -46,7 +45,6 @@ import {
 import {AGGREGATION_OPERATION} from '../aggregation-operation-utils';
 
 import AGGREGATE_TO_GRID_VS from './aggregate-to-grid-vs.glsl';
-import AGGREGATE_TO_GRID_VS_FP64 from './aggregate-to-grid-vs-64.glsl';
 import AGGREGATE_TO_GRID_FS from './aggregate-to-grid-fs.glsl';
 import AGGREGATE_ALL_VS_FP64 from './aggregate-all-vs-64.glsl';
 import AGGREGATE_ALL_FS from './aggregate-all-fs.glsl';
@@ -142,9 +140,6 @@ export default class GPUGridAggregator {
     this.id = opts.id || 'gpu-grid-aggregator';
     this.gl = gl;
     this.state = {
-      // flags/variables that affect the aggregation
-      fp64: null,
-
       // per weight GPU resources
       weightAttributes: {},
       textures: {},
@@ -356,7 +351,6 @@ export default class GPUGridAggregator {
     } = opts;
     const {maxMinFramebuffers, minFramebuffers, maxFramebuffers} = this.state;
 
-    const uProjectionMatrixFP64 = fp64ifyMatrix4(gridTransformMatrix);
     const gridSize = [numCol, numRow];
     const parameters = {
       blend: true,
@@ -368,11 +362,10 @@ export default class GPUGridAggregator {
       cellSize,
       gridSize,
       uProjectionMatrix: gridTransformMatrix,
-      uProjectionMatrixFP64,
       projectPoints,
       matrixValid,
       translation,
-      scaling,
+      scaling
     };
 
     for (const id in weights) {
@@ -585,8 +578,8 @@ export default class GPUGridAggregator {
     return resources[name];
   }
 
-  _setupModels({fp64 = false, numCol = 0, numRow = 0} = {}) {
-    this._setupAggregationModel(fp64);
+  _setupModels({numCol = 0, numRow = 0} = {}) {
+    this._setupAggregationModel();
     if (!this.allAggregationModel) {
       const {gl} = this;
       const instanceCount = numCol * numRow;
@@ -594,13 +587,13 @@ export default class GPUGridAggregator {
     }
   }
 
-  _setupAggregationModel(fp64 = false) {
+  _setupAggregationModel() {
     const {gl} = this;
     const {shaderOptions} = this.state;
     if (this.gridAggregationModel) {
       this.gridAggregationModel.delete();
     }
-    this.gridAggregationModel = getAggregationModel(gl, shaderOptions, fp64);
+    this.gridAggregationModel = getAggregationModel(gl, shaderOptions);
   }
 
   // set up buffers for all weights
@@ -638,9 +631,9 @@ export default class GPUGridAggregator {
     const {vertexCount, attributes, numCol, numRow} = opts;
     const {modelDirty} = this.state;
 
-    if (opts.fp64 !== this.state.fp64 || modelDirty) {
+    if (modelDirty) {
       this._setupModels(opts);
-      this.setState({fp64: opts.fp64, modelDirty: false});
+      this.setState({modelDirty: false});
     }
 
     // this maps color/elevation to weight name.
@@ -672,12 +665,12 @@ function deleteResources(resources) {
   });
 }
 
-function getAggregationModel(gl, shaderOptions, fp64 = false) {
+function getAggregationModel(gl, shaderOptions) {
   const shaders = mergeShaders(
     {
-      vs: fp64 ? AGGREGATE_TO_GRID_VS_FP64 : AGGREGATE_TO_GRID_VS,
+      vs: AGGREGATE_TO_GRID_VS,
       fs: AGGREGATE_TO_GRID_FS,
-      modules: fp64 ? [project64] : [project32]
+      modules: [fp64, project32]
     },
     shaderOptions
   );
@@ -695,7 +688,7 @@ function getAllAggregationModel(gl, instanceCount) {
     id: 'All-Aggregation-Model',
     vs: AGGREGATE_ALL_VS_FP64,
     fs: AGGREGATE_ALL_FS,
-    modules: [fp64ShaderModule],
+    modules: [fp64],
     vertexCount: 1,
     drawMode: GL.POINTS,
     isInstanced: true,
