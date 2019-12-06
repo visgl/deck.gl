@@ -32,8 +32,6 @@
           onComplete: ({ deckgl }) => {
             if (window.previousDeck) {
               window.previousDeck.finalize();
-              const previousCanvas = document.querySelector('#deckgl-overlay');
-              previousCanvas.remove();
             }
             deckgl.setProps({
               onAfterRender: () => {
