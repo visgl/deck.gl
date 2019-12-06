@@ -557,21 +557,16 @@ export default class GPUGridAggregator {
   }
 
   _setupModels({numCol = 0, numRow = 0} = {}) {
-    this._setupAggregationModel();
-    if (!this.allAggregationModel) {
-      const {gl} = this;
-      const instanceCount = numCol * numRow;
-      this.allAggregationModel = getAllAggregationModel(gl, instanceCount);
-    }
-  }
-
-  _setupAggregationModel() {
     const {gl} = this;
     const {shaderOptions} = this.state;
     if (this.gridAggregationModel) {
       this.gridAggregationModel.delete();
     }
     this.gridAggregationModel = getAggregationModel(gl, shaderOptions);
+    if (!this.allAggregationModel) {
+      const instanceCount = numCol * numRow;
+      this.allAggregationModel = getAllAggregationModel(gl, instanceCount);
+    }
   }
 
   // set up buffers for all weights
