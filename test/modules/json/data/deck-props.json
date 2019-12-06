@@ -4,7 +4,7 @@
     "latitude": 37.8,
     "zoom": 12
   },
-  "controller": "@@!MapController",
+  "controller": "@@#MapController",
   "mapStyle": {},
   "views": [
     {
