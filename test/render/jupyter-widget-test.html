@@ -21,12 +21,11 @@
   <div id="app"></div>
   <script type="text/javascript" src="/modules/jupyter-widget/dist/standalone-html-bundle.js"></script>
   <script type="text/javascript">
-    function cleanup(deckgl) {
-       const previousCanvas = document.querySelector('#deckgl-overlay');
-       if (previousCanvas) {
-         previousCanvas.remove();
-       }
-       deckgl.finalize();
+    let currentDeck;
+    if (currentDeck) {
+      currentDeck.finalize();
+      const previousCanvas = document.querySelector('#deckgl-overlay');
+      previousCanvas.remove();
     }
 
     window.onmessage = evt => {
@@ -38,10 +37,10 @@
           jsonInput: evt.data.json,
           useTooltip: true,
           onComplete: ({ deckgl }) => {
+            currentDeck = deckgl;
             deckgl.setProps({
               onAfterRender: () => {
                 window.top.postMessage('done')
-		cleanup(deckgl);
               }
             });
           }
