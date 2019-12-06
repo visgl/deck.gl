@@ -110,7 +110,8 @@ export default class MultiIconLayer extends IconLayer {
         buffer: DEFAULT_BUFFER,
         gamma: DEFAULT_GAMMA,
         sdf: Boolean(sdf),
-        backgroundColor
+        backgroundColor,
+        shouldDrawBackground: backgroundColor[3] > 0
       })
     });
   }

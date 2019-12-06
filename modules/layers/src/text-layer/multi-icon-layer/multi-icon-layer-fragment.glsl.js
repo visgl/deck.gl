@@ -27,6 +27,7 @@ uniform sampler2D iconsTexture;
 uniform float buffer;
 uniform bool sdf;
 uniform float alphaCutoff;
+uniform bool shouldDrawBackground;
 uniform vec4 backgroundColor;
 
 varying vec4 vColor;
@@ -48,18 +49,18 @@ void main(void) {
   float a = alpha * vColor.a;
   
   if (a < alphaCutoff) {
-    if ((backgroundColor.a < 0.001) || picking_uActive) {
-      discard;
-    } else {
+    if (shouldDrawBackground && !picking_uActive) {
       gl_FragColor = vec4(backgroundColor.rgb, backgroundColor.a * vColor.a);
       return;
+    } else {
+      discard;
     }
   }
 
-  if (backgroundColor.a < 0.001) {
-    gl_FragColor = vec4(vColor.rgb, a);
-  } else {
+  if (shouldDrawBackground) {
     gl_FragColor = vec4(mix(backgroundColor.rgb, vColor.rgb, alpha), backgroundColor.a * vColor.a);
+  } else {
+    gl_FragColor = vec4(vColor.rgb, a);
   }
 
   DECKGL_FILTER_COLOR(gl_FragColor, geometry);
