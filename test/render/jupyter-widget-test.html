@@ -31,7 +31,7 @@
           useTooltip: true,
           onComplete: ({ deckgl }) => {
             if (window.previousDeck) {
-              currentDeck.finalize();
+              window.previousDeck.finalize();
               const previousCanvas = document.querySelector('#deckgl-overlay');
               previousCanvas.remove();
             }
