@@ -87,7 +87,7 @@ const TEST_CASES = [
       viewState: {
         longitude: -122.45,
         latitude: 37.8,
-        zoom: 10
+        zoom: 0
       },
       layers: [
         {
