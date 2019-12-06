@@ -42,7 +42,6 @@ const defaultProps = {
   // contour lines
   contours: [{threshold: DEFAULT_THRESHOLD}],
 
-  fp64: false,
   zOffset: 0.005
 };
 

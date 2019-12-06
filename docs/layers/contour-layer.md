@@ -117,12 +117,6 @@ NOTE: Like any other layer prop, a shallow comparison is performed on `contours`
 
 A very small z offset that is added for each vertex of a contour (Isoline or Isoband). This is needed to control the layout of contours, especially when rendering overlapping contours. Imagine a case where an Isoline is specified which is overlapped with an Isoband. To make sure the Isoline is visible we need to render this above the Isoband.
 
-##### `fp64` (Boolean, optional)
-
-* Default: `false`
-
-Whether the aggregation should be performed in high-precision 64-bit mode. Note that since deck.gl v6.1, the default 32-bit projection uses a hybrid mode that matches 64-bit precision with significantly better performance.
-
 ### Data Accessors
 
 ##### `getPosition` ([Function](/docs/developer-guide/using-layers.md#accessors), optional)

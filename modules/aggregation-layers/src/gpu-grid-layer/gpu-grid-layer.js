@@ -48,7 +48,6 @@ const defaultProps = {
   coverage: {type: 'number', min: 0, max: 1, value: 1},
   getPosition: {type: 'accessor', value: x => x.position},
   extruded: false,
-  fp64: false,
 
   // Optional material for 'lighting' shader module
   material: true

@@ -75,7 +75,7 @@ export default class HexagonLayer extends AggregationLayer {
     };
     const attributeManager = this.getAttributeManager();
     attributeManager.add({
-      positions: {size: 3, accessor: 'getPosition' /* , type: GL.DOUBLE, fp64: false*/}
+      positions: {size: 3, accessor: 'getPosition'}
     });
     // color and elevation attributes can't be added as attributes
     // they are calcualted using 'getValue' accessor that takes an array of pints.
