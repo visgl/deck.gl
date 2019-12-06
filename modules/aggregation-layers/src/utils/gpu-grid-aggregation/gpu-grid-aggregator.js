@@ -46,7 +46,7 @@ import {AGGREGATION_OPERATION} from '../aggregation-operation-utils';
 
 import AGGREGATE_TO_GRID_VS from './aggregate-to-grid-vs.glsl';
 import AGGREGATE_TO_GRID_FS from './aggregate-to-grid-fs.glsl';
-import AGGREGATE_ALL_VS_FP64 from './aggregate-all-vs-64.glsl';
+import AGGREGATE_ALL_VS from './aggregate-all-vs.glsl';
 import AGGREGATE_ALL_FS from './aggregate-all-fs.glsl';
 import TRANSFORM_MEAN_VS from './transform-mean-vs.glsl';
 import {getFloatTexture, getFramebuffer} from './../resource-utils.js';
@@ -686,7 +686,7 @@ function getAggregationModel(gl, shaderOptions) {
 function getAllAggregationModel(gl, instanceCount) {
   return new Model(gl, {
     id: 'All-Aggregation-Model',
-    vs: AGGREGATE_ALL_VS_FP64,
+    vs: AGGREGATE_ALL_VS,
     fs: AGGREGATE_ALL_FS,
     modules: [fp64],
     vertexCount: 1,
