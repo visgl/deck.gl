@@ -19,6 +19,7 @@
 // THE SOFTWARE.
 
 import {equals} from 'math.gl';
+import GL from '@luma.gl/constants';
 import {LineLayer, SolidPolygonLayer} from '@deck.gl/layers';
 import {generateContours} from './contour-utils';
 import {log} from '@deck.gl/core';
@@ -62,7 +63,12 @@ export default class ContourLayer extends GridAggregationLayer {
     });
     const attributeManager = this.getAttributeManager();
     attributeManager.add({
-      positions: {size: 3, accessor: 'getPosition'},
+      positions: {
+        size: 3,
+        accessor: 'getPosition',
+        type: GL.DOUBLE,
+        fp64: this.use64bitPositions()
+      },
       // this attribute is used in gpu aggregation path only
       count: {size: 3, accessor: 'getWeight'}
     });

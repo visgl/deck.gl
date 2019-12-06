@@ -19,6 +19,7 @@
 // THE SOFTWARE.
 
 import {log} from '@deck.gl/core';
+import GL from '@luma.gl/constants';
 import GPUGridAggregator from '../utils/gpu-grid-aggregation/gpu-grid-aggregator';
 import {AGGREGATION_OPERATION} from '../utils/aggregation-operation-utils';
 import ScreenGridCellLayer from './screen-grid-cell-layer';
@@ -66,7 +67,12 @@ export default class ScreenGridLayer extends GridAggregationLayer {
     });
     const attributeManager = this.getAttributeManager();
     attributeManager.add({
-      positions: {size: 3, accessor: 'getPosition'},
+      positions: {
+        size: 3,
+        accessor: 'getPosition',
+        type: GL.DOUBLE,
+        fp64: this.use64bitPositions()
+      },
       // this attribute is used in gpu aggregation path only
       count: {size: 3, accessor: 'getWeight'}
     });

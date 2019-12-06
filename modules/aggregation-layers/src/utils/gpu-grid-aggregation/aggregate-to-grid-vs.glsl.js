@@ -22,6 +22,7 @@ export default `\
 #define SHADER_NAME gpu-aggregation-to-grid-vs
 
 attribute vec3 positions;
+attribute vec3 positions64Low;
 attribute vec3 weights;
 uniform vec2 windowSize;
 uniform vec2 cellSize;
@@ -46,7 +47,7 @@ void main(void) {
 
   vec4 windowPos = vec4(positions, 1.);
   if (projectPoints) {
-    windowPos = project_position_to_clipspace(positions, vec3(0), vec3(0));
+    windowPos = project_position_to_clipspace(positions, positions64Low, vec3(0));
   }
 
   vec2 pos = project_to_pixel(windowPos);
