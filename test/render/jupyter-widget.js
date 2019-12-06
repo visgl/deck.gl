@@ -87,7 +87,7 @@ const TEST_CASES = [
       viewState: {
         longitude: -122.45,
         latitude: 37.8,
-        zoom: 10
+        zoom: 0
       },
       layers: [
         {
@@ -166,7 +166,7 @@ test('jupyter-widget Render Test', t => {
 
     const diffOptions = {
       // uncomment to save screenshot to disk
-      // saveOnFail: true,
+      saveOnFail: true,
       threshold: 0.99,
       ...testCase.imageDiffOptions,
       region: {
