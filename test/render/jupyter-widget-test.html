@@ -28,15 +28,13 @@
           mapboxApiKey: 'NO_API_KEY',
           container: document.getElementById('app'),
           jsonInput: evt.data.json,
-          onComplete: ({ deckgl }) => {
-            deckgl.setProps({
-              onAfterRender: () => {
-                window.top.postMessage('done')
-              }
-            });
-          },
           useTooltip: true
         });
+
+        deck.setProps({
+          onAfterRender: () => window.top.postMessage('done')
+        });
+
       } else {
         updateDeck(evt.data.json, deck);
       }
