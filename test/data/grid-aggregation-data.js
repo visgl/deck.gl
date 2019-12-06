@@ -194,8 +194,6 @@ const fixtureUpdated = Object.assign({}, fixture, {
   moduleSettings: {viewport: viewportUpdated}
 });
 
-Object.assign(fixtureUpdated, buildAttributes(fixtureUpdated));
-
 function generateRandomGridPoints(pointCount) {
   const topLeft = {
     lng: -128.0, // -124.506026,
