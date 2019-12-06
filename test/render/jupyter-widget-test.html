@@ -6,7 +6,6 @@
     body {
       padding: 0;
       margin: 0;
-      background: white;
     }
 
     #app {
@@ -21,28 +20,26 @@
   <div id="app"></div>
   <script type="text/javascript" src="/modules/jupyter-widget/dist/standalone-html-bundle.js"></script>
   <script type="text/javascript">
+    let deck;
     window.onmessage = evt => {
-      if (evt.data.json) {
-
-        createDeck({
-          mapboxApiKey: 'NO_API_KEY',
-          container: document.getElementById('app'),
-          jsonInput: evt.data.json,
-          useTooltip: true,
-          onComplete: ({ deckgl }) => {
-            if (window.previousDeck) {
-              window.previousDeck.finalize();
-            }
-            deckgl.setProps({
-              onAfterRender: () => {
-                window.top.postMessage('done')
-              }
-            });
-            window.previousDeck = deckgl;
-          }
-        });
+      if (!deck) {
+          deck = createDeck({
+            mapboxApiKey: 'NO_API_KEY',
+            container: document.getElementById('app'),
+            jsonInput: evt.data.json,
+            onComplete: ({ deckgl }) => {
+              deckgl.setProps({
+                onAfterRender: () => {
+                  window.top.postMessage('done')
+                }
+              });
+	    },
+            useTooltip: true
+          });
+      } else {
+        updateDeck(evt.data.json, deck);
       }
-    };
+    }
   </script>
 </body>
 

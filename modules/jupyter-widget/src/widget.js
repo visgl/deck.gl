@@ -3,7 +3,7 @@ import {DOMWidgetModel, DOMWidgetView} from '@jupyter-widgets/base';
 
 import {MODULE_NAME, MODULE_VERSION} from './version';
 
-import {createDeck} from './create-deck';
+import {createDeck, updateDeck} from './create-deck';
 
 const MAPBOX_CSS_URL = 'https://api.tiles.mapbox.com/mapbox-gl-js/v1.2.1/mapbox-gl.css';
 const ERROR_BOX_CLASSNAME = 'error-box';
@@ -24,11 +24,6 @@ function loadCss(url) {
   link.rel = 'stylesheet';
   link.href = url;
   document.getElementsByTagName('head')[0].appendChild(link);
-}
-
-function updateDeck(inputJSON, {jsonConverter, deckgl}) {
-  const results = jsonConverter.convert(inputJSON);
-  deckgl.setProps(results);
 }
 
 // Note: Variables shared explictly between Python and JavaScript use snake_case
