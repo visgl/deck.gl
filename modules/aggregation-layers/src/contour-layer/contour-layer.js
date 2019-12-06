@@ -92,7 +92,8 @@ export default class ContourLayer extends GridAggregationLayer {
 
     // Contour lines layer
     const lineLayer =
-      contourSegments && contourSegments.length > 0 &&
+      contourSegments &&
+      contourSegments.length > 0 &&
       new LinesSubLayerClass(
         {
           widthUnits: 'pixels'
@@ -111,7 +112,8 @@ export default class ContourLayer extends GridAggregationLayer {
 
     // Contour bands layer
     const bandsLayer =
-      contourPolygons && contourPolygons.length > 0 &&
+      contourPolygons &&
+      contourPolygons.length > 0 &&
       new BandsSubLayerClass(
         this.getSubLayerProps({
           id: 'contour-solid-polygon-layer'
