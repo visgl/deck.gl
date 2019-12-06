@@ -19,7 +19,7 @@ and used to resolve this JSON object:
 {
   "layers": [
     {
-      "type": "ScatterplotLayer",
+      "@@type": "ScatterplotLayer",
       "data": ...,
       "getColor": [0, 128, 255],
       "getRadius": 1
@@ -42,7 +42,7 @@ will replace the layers discriptor with
 }
 ```
 
-Whenever the `JSONConverter` component finds a "type" field, it looks into a "class catalog". This can be a layer, a view, or other objects.
+Whenever the `JSONConverter` component finds the "@@type" field, it looks into a "class catalog". This can be a layer, a view, or other objects.
 
 
 ### Enumerations
@@ -70,17 +70,17 @@ and used to resolve this JSON object:
     {
       "type": "ScatterplotLayer",
       "data": ...,
-      "coordinateSystem": "COORDINATE_SYSTEM.METER_OFFSETS",
+      "coordinateSystem": "@@#COORDINATE_SYSTEM.METER_OFFSETS",
       "parameters": {
         "blend": true,
-        "blendFunc": ["GL.ONE", "GL.ZERO", "GL.SRC_ALPHA", "GL.DST_ALPHA"]
+        "blendFunc": ["@@#GL.ONE", "@@#GL.ZERO", "@@#GL.SRC_ALPHA", "@@#GL.DST_ALPHA"]
       }
     }
   ]
 }
 ```
 
-`<enum-name>.<enum-value>` will be resolved to values in the `enumerations` config:
+`@@#<enum-name>.<enum-value>` will be resolved to values in the `enumerations` config:
 
 ```js
 {
@@ -101,4 +101,16 @@ and used to resolve this JSON object:
 
 Functions are parsed from strings.
 
-> TBA
+```
+{
+  layers: [
+    new ScatterplotLayer({
+      data: ...,
+      coordinateSystem: 2,
+      parameters: {
+        blend: true,
+        blendFunc: [1, 0, 770, 772]
+      }
+    })
+  ]
+}

@@ -11,11 +11,6 @@
       "@@type": "MapView",
       "height": "50%",
       "controller": true
-    },
-    {
-      "@@type": "FirstPersonView",
-      "y": "50%",
-      "height": "50%"
     }
   ],
   "layers": [
