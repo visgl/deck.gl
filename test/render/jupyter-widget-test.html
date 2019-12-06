@@ -23,19 +23,19 @@
     let deck;
     window.onmessage = evt => {
       if (!deck) {
-          deck = createDeck({
-            mapboxApiKey: 'NO_API_KEY',
-            container: document.getElementById('app'),
-            jsonInput: evt.data.json,
-            onComplete: ({ deckgl }) => {
-              deckgl.setProps({
-                onAfterRender: () => {
-                  window.top.postMessage('done')
-                }
-              });
-	    },
-            useTooltip: true
-          });
+        deck = createDeck({
+          mapboxApiKey: 'NO_API_KEY',
+          container: document.getElementById('app'),
+          jsonInput: evt.data.json,
+          onComplete: ({ deckgl }) => {
+            deckgl.setProps({
+              onAfterRender: () => {
+                window.top.postMessage('done')
+              }
+            });
+          },
+          useTooltip: true
+        });
       } else {
         updateDeck(evt.data.json, deck);
       }
