@@ -95,9 +95,6 @@ export default class ContourLayer extends GridAggregationLayer {
       contourSegments &&
       contourSegments.length > 0 &&
       new LinesSubLayerClass(
-        {
-          widthUnits: 'pixels'
-        },
         this.getSubLayerProps({
           id: 'contour-line-layer'
         }),
