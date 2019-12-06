@@ -2,9 +2,9 @@ import makeTooltip from './widget-tooltip';
 
 import mapboxgl from './ssr-safe-mapbox';
 
-import {CSVLoader} from '@loaders.gl/csv';
-import {Tile3DLoader} from '@loaders.gl/3d-tiles';
-import {LASWorkerLoader} from '@loaders.gl/las';
+import { CSVLoader } from '@loaders.gl/csv';
+import { Tile3DLoader } from '@loaders.gl/3d-tiles';
+import { LASWorkerLoader } from '@loaders.gl/las';
 import * as loaders from '@loaders.gl/core';
 
 import * as deck from './deck-bundle';
@@ -39,7 +39,9 @@ const jsonConverterConfiguration = {
 
 loaders.registerLoaders([CSVLoader, Tile3DLoader, LASWorkerLoader]);
 
-let jsonConverter;
+let jsonConverter = new deck.JSONConverter({
+  configuration: jsonConverterConfiguration
+});
 
 export function updateDeck(inputJSON, deckgl) {
   const results = jsonConverter.convert(inputJSON);
@@ -56,10 +58,6 @@ export function createDeck({
 }) {
   let deckgl;
   try {
-    jsonConverter = new deck.JSONConverter({
-      configuration: jsonConverterConfiguration
-    });
-
     const props = jsonConverter.convert(jsonInput);
 
     const getTooltip = makeTooltip(tooltip);
