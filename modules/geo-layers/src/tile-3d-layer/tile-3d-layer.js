@@ -20,7 +20,7 @@ const defaultProps = {
   onTilesetLoad: tileset3d => {},
   onTileLoad: tileHeader => {},
   onTileUnload: tileHeader => {},
-  onTileLoadFail: (tile, message, url) => {}
+  onTileError: (tile, message, url) => {}
 };
 
 export default class Tile3DLayer extends CompositeLayer {
@@ -63,7 +63,7 @@ export default class Tile3DLayer extends CompositeLayer {
         this.setNeedsUpdate();
       },
       onTileUnload: this.props.onTileUnload,
-      onTileLoadFail: this.props.onTileLoadFail,
+      onTileError: this.props.onTileError,
       // TODO: explicit passing should not be needed, registerLoaders should suffice
       fetchOptions,
       ...ionMetadata,
