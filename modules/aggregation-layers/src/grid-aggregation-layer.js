@@ -50,7 +50,7 @@ export default class GridAggregationLayer extends AggregationLayer {
 
     let aggregationDirty = false;
     const {needsReProjection, gpuAggregation} = this.state;
-    const needsReAggregation = this._isAggregationDirty(opts);
+    const needsReAggregation = this.isAggregationDirty(opts);
     if (this.getNumInstances() <= 0) {
       return;
     }

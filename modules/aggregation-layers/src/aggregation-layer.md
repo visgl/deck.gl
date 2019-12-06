@@ -32,4 +32,4 @@ During update state, Subclasses of `AggregationLayer` must first call 'super.upd
 
 ### Checking if aggregation is dirty
 
-Constructor, takes an array of props, `aggregationProps`, and a private method `_isAggregationDirty()` is provided that returns `true` when any of the props in `aggregationProps` are changed. Subclasses can customize this to desired props by providing `aggregatinProps` array.
+Constructor, takes an array of props, `aggregationProps`, and a private method `isAggregationDirty()` is provided that returns `true` when any of the props in `aggregationProps` are changed. Subclasses can customize this to desired props by providing `aggregatinProps` array.

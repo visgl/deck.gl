@@ -55,7 +55,7 @@ class TestAggregationLayer extends AggregationLayer {
     // clear state
     this.setState({aggregationDirty: false});
     super.updateState(opts);
-    this.setState({aggregationDirty: this._isAggregationDirty(opts)});
+    this.setState({aggregationDirty: this.isAggregationDirty(opts)});
   }
   updateShaders(shaderOptions) {}
   //

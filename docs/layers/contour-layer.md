@@ -109,7 +109,7 @@ Array of objects with following keys
 
 * `zIndex` (Number, optional) : Defines z order of the contour. Contour with higher `zIndex` value is rendered above contours with lower `zIndex` values. When visualizing overlapping contours, `zIndex` along with `zOffset` (defined below) can be used to precisely layout contours. This also avoids z-fighting rendering issues. If not specified a unique value from `0` to `n` (number of contours) is assigned.
 
-NOTE: Like any other layer prop, a shallow comparison is performed on `contours` prop to determine if it is changed. When changed, contours are re-generated, to avoid un-necessary contour generation, this shouldn't be defined as inline array, instead should be set to an object, that changes, only when any of the contour data is changed.
+NOTE: Like any other layer prop, a shallow comparison is performed on `contours` prop to determine if it is changed. This prop should be set to an array object, that changes only when contours need to be changed.
 
 ##### `zOffset` (Number, optional)
 

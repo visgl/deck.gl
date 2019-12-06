@@ -215,21 +215,6 @@ export default class ContourLayer extends GridAggregationLayer {
     });
     return strokeWidth;
   }
-
-  _shouldRebuildContours({oldProps, props}) {
-    if (
-      !oldProps.contours ||
-      !oldProps.zOffset ||
-      oldProps.contours.length !== props.contours.length ||
-      oldProps.zOffset !== props.zOffset
-    ) {
-      return true;
-    }
-    const oldThresholds = oldProps.contours.map(x => x.threshold);
-    const thresholds = props.contours.map(x => x.threshold);
-
-    return thresholds.some((_, i) => !equals(thresholds[i], oldThresholds[i]));
-  }
 }
 
 ContourLayer.layerName = 'ContourLayer';

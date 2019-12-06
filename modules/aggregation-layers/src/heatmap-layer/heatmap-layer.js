@@ -222,7 +222,7 @@ export default class HeatmapLayer extends AggregationLayer {
 
   _getChangeFlags(opts) {
     const changeFlags = {};
-    if (this._isAggregationDirty(opts)) {
+    if (this.isAggregationDirty(opts)) {
       changeFlags.dataChanged = true;
     }
     changeFlags.viewportChanged = opts.changeFlags.viewportChanged;

@@ -87,9 +87,7 @@ export default class AggregationLayer extends CompositeLayer {
     // Default implemention is empty, subclasses can update their Model objects if needed
   }
 
-  // Private
-
-  _isAggregationDirty(opts) {
+  isAggregationDirty(opts) {
     if (this.state.dataChanged || opts.changeFlags.extensionsChanged) {
       return true;
     }
@@ -104,6 +102,8 @@ export default class AggregationLayer extends CompositeLayer {
       compareProps({oldProps, newProps: props, propTypes: this.constructor._propTypes})
     );
   }
+
+  // Private
 
   // override Composite layer private method to create AttributeManager instance
   _getAttributeManager() {
