@@ -168,14 +168,7 @@ export default class GPUGridLayer extends GridAggregationLayer {
         const {props} = this;
         let {gridHash} = this.state;
         if (!gridHash) {
-          const {
-            gridOffset,
-            cellOffset,
-            // gridTransformMatrix,
-            width,
-            height,
-            boundingBox
-          } = this.state;
+          const {gridOffset, cellOffset, width, height, boundingBox} = this.state;
           const {viewport} = this.context;
           const attributes = this.getAttributes();
           // const vertexCount = this.getNumInstances();
@@ -183,7 +176,6 @@ export default class GPUGridLayer extends GridAggregationLayer {
             gridOffset,
             width,
             height,
-            // gridTransformMatrix,
             attributes,
             viewport,
             cellOffset,

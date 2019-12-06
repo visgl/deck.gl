@@ -39,7 +39,6 @@ import {
   MAX_MIN_BLEND_EQUATION,
   EQUATION_MAP,
   DEFAULT_WEIGHT_PARAMS,
-  IDENTITY_MATRIX,
   PIXEL_SIZE
 } from './gpu-grid-aggregator-constants';
 import {AGGREGATION_OPERATION} from '../aggregation-operation-utils';
@@ -244,26 +243,9 @@ export default class GPUGridAggregator {
 
   _normalizeAggregationParams(opts) {
     const aggregationParams = Object.assign({}, DEFAULT_RUN_PARAMS, opts);
-    const {
-      gridTransformMatrix,
-      moduleSettings,
-      weights,
-      cellSize,
-      numCol,
-      numRow
-    } = aggregationParams;
+    const {moduleSettings, weights, cellSize, numCol, numRow} = aggregationParams;
     const {viewport} = moduleSettings;
     // validateProps(aggregationParams, opts);
-
-    if (!gridTransformMatrix) {
-      aggregationParams.matrixValid = false;
-      aggregationParams.gridTransformMatrix = IDENTITY_MATRIX;
-    } else {
-      aggregationParams.matrixValid = true;
-    }
-
-    // aggregationParams.translation = new Float32Array([1, -1]);
-    // aggregationParams.scaling = new Float32Array([viewport.width / 2, -viewport.height/2, 1]);
 
     if (weights) {
       aggregationParams.weights = normalizeWeightParams(weights);
@@ -336,8 +318,6 @@ export default class GPUGridAggregator {
   _renderAggregateData(opts) {
     const {
       cellSize,
-      gridTransformMatrix,
-      matrixValid,
       projectPoints,
       attributes,
       moduleSettings,
@@ -361,9 +341,7 @@ export default class GPUGridAggregator {
       windowSize: [width, height],
       cellSize,
       gridSize,
-      uProjectionMatrix: gridTransformMatrix,
       projectPoints,
-      matrixValid,
       translation,
       scaling
     };
@@ -712,30 +690,3 @@ function getMeanTransform(gl, opts) {
     )
   );
 }
-
-/* eslint-disable complexity */
-// DEBUG ONLY
-// validateProps(aggregationParams, opts) {
-//   const {changeFlags, projectPoints, gridTransformMatrix} = aggregationParams;
-//   log.assert(
-//     changeFlags.dataChanged || changeFlags.viewportChanged || changeFlags.cellSizeChanged
-//   );
-//
-//   // log.assert for required options
-//   log.assert(
-//     !changeFlags.dataChanged ||
-//       (opts.attributes &&
-//         opts.weights &&
-//         (!opts.projectPositions || opts.moduleSettings.viewport) &&
-//         opts.cellSize)
-//   );
-//   log.assert(!changeFlags.cellSizeChanged || opts.cellSize);
-//
-//   // viewport is needed only when performing screen space aggregation (projectPoints is true)
-//   log.assert(!(changeFlags.viewportChanged && projectPoints) || opts.moduleSettings.viewport);
-//
-//   if (projectPoints && gridTransformMatrix) {
-//     log.warn('projectPoints is true, gridTransformMatrix is ignored')();
-//   }
-// }
-/* eslint-enable complexity */

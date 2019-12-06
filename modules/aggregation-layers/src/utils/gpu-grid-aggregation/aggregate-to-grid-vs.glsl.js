@@ -26,24 +26,17 @@ attribute vec3 weights;
 uniform vec2 windowSize;
 uniform vec2 cellSize;
 uniform vec2 gridSize;
-uniform mat4 uProjectionMatrix;
 uniform bool projectPoints;
 uniform vec2 translation;
 uniform vec3 scaling;
-uniform bool matrixValid;
 
 varying vec3 vWeights;
 
 vec2 project_to_pixel(vec4 pos) {
   vec4 result;
-  if (matrixValid) {
-    result =  uProjectionMatrix * pos;
-    result.xy = result.xy/result.w;
-  } else {
-    pos.xy = pos.xy/pos.w;
-    result = pos + vec4(translation, 0., 0.);
-    result.xy = scaling.z > 0. ? result.xy * scaling.xy : result.xy;
-  }
+  pos.xy = pos.xy/pos.w;
+  result = pos + vec4(translation, 0., 0.);
+  result.xy = scaling.z > 0. ? result.xy * scaling.xy : result.xy;
   return result.xy;
 }
 

@@ -73,7 +73,8 @@ const results = gpuGridAggregator.run({
   viewport,
   changeFlags,
   projectPoints: true,
-  gridTransformMatrix
+  translation,
+  scaling
 });
 ```
 
@@ -100,8 +101,11 @@ Parameters:
 * countsBuffer: (Buffer, optional) : used to update aggregation data per grid, details in Output section.
 * maxCountBuffer: (Buffer, optional) : used to update total aggregation data, details in Output section.
 * projectPoints (Bool) : when true performs aggregation in screen space.
-* gridTransformMatrix (Mat4) : used to transform input positions before aggregating them (for example, lng/lat can be moved to +ve range, when doing world space aggregation, projectPoints=false).
+* translation (Array) : [xOffset, yOffset], used to translate input positions before aggregating them (for example, lng/lat can be moved to +ve range).
+* scaling (Array) : [xScale, yScale, isScalingValid] : `xScale`, `yScale` define scaling to be applied before aggregating. Scaling is applied only when `isScalingValie` is > 0.
 * createBufferObjects (Bool, options, default: true) : Only applicable when aggregation is performed on CPU. When set to false, aggregated data is not uploaded into Buffer objects. In a typical use case, Applications need data in `Buffer` objects to use them in next rendering cycle, hence by default its value is true, but if needed this step can be avoided by setting this flag to false.
+
+NOTE: When doing screen space aggregation, i.e projectPoints is true, `translation` and `scaling` should be set to transformation required for camera space (NDC) to screen (pixel) space.
 
 Returns:
 * An object, where key represents `id` of the weight and value contains following aggregated data.
