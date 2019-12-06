@@ -93,7 +93,6 @@ Parameters:
 * width: (Number, Optional) : Grid width in pixels, deduced from ‘viewport’ when not provided.
 * height: (Number, Optional) : Grid height in pixels, deduced from ‘viewport’ when not provided.
 * viewport: (Object, Viewport) : Contains size of viewport and also used to perform projection.
-* useGPU: (Boolean, optional, default: true) : When true and browser supports required WebGL features, aggregation is performed on GPU, otherwise on CPU.
 * changeFlags: (Object, Optional) : Object with following keyed values, that determine whether to re-create internal WebGL resources for performing aggregation compared to last run. If no value is provided, all flags are treated to be true.
 	* dataChanged (Bool) : should be set to true when data is changed.
 	* viewportChanged (Bool) : should be set to true when viewport is changed.

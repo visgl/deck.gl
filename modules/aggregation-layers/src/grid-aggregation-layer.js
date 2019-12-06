@@ -157,7 +157,7 @@ export default class GridAggregationLayer extends AggregationLayer {
         worldOrigin = [-width / 2, -height / 2]; // Origin used to define grid cell boundaries
         break;
       default:
-        // Currently other coodinate systems not supported/verified.
+        // Currently other coordinate systems not supported/verified.
         log.assert(false);
     }
 
@@ -262,8 +262,7 @@ export default class GridAggregationLayer extends AggregationLayer {
         numRow,
         translation,
         scaling,
-        useGPU: true, // _TODO_ delete this option in gpu aggregator
-        vertexCount, // : vertexCount / 2,
+        vertexCount,
         projectPoints,
         attributes,
         moduleSettings: this.getModuleSettings()

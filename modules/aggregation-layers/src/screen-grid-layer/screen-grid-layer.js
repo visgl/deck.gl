@@ -136,7 +136,7 @@ export default class ScreenGridLayer extends GridAggregationLayer {
     return info;
   }
 
-  // Private Methods
+  // Aggregation Overrides
 
   updateResults({aggregationData, maxData}) {
     const {count} = this.state.weights;
@@ -169,6 +169,8 @@ export default class ScreenGridLayer extends GridAggregationLayer {
       gpuAggregation
     });
   }
+
+  // Private
 
   _getGridOffset() {
     const {cellSize} = this.state;

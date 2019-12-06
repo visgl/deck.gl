@@ -95,6 +95,30 @@ export default class ContourLayer extends GridAggregationLayer {
     return [lineLayer, solidPolygonLayer];
   }
 
+  // Aggregation Overrides
+
+  updateAggregationFlags({props, oldProps}) {
+    const cellSizeChanged = oldProps.cellSize !== props.cellSize;
+    let gpuAggregation = props.gpuAggregation;
+    if (this.state.gpuAggregation !== props.gpuAggregation) {
+      if (gpuAggregation && !GPUGridAggregator.isSupported(this.context.gl)) {
+        log.warn('GPU Grid Aggregation not supported, falling back to CPU')();
+        gpuAggregation = false;
+      }
+    }
+    const gpuAggregationChanged = gpuAggregation !== this.state.gpuAggregation;
+    // Consider switching between CPU and GPU aggregation as data changed as it requires
+    // re aggregation.
+    const dataChanged = this.state.dataChanged || gpuAggregationChanged;
+    this.setState({
+      dataChanged,
+      cellSizeChanged,
+      cellSize: props.cellSize,
+      needsReProjection: dataChanged || cellSizeChanged,
+      gpuAggregation
+    });
+  }
+
   // Private (Contours)
 
   _generateContours() {
@@ -196,30 +220,6 @@ export default class ContourLayer extends GridAggregationLayer {
     const thresholds = props.contours.map(x => x.threshold);
 
     return thresholds.some((_, i) => !equals(thresholds[i], oldThresholds[i]));
-  }
-
-  // Private (Aggregation)
-
-  updateAggregationFlags({props, oldProps}) {
-    const cellSizeChanged = oldProps.cellSize !== props.cellSize;
-    let gpuAggregation = props.gpuAggregation;
-    if (this.state.gpuAggregation !== props.gpuAggregation) {
-      if (gpuAggregation && !GPUGridAggregator.isSupported(this.context.gl)) {
-        log.warn('GPU Grid Aggregation not supported, falling back to CPU')();
-        gpuAggregation = false;
-      }
-    }
-    const gpuAggregationChanged = gpuAggregation !== this.state.gpuAggregation;
-    // Consider switching between CPU and GPU aggregation as data changed as it requires
-    // re aggregation.
-    const dataChanged = this.state.dataChanged || gpuAggregationChanged;
-    this.setState({
-      dataChanged,
-      cellSizeChanged,
-      cellSize: props.cellSize,
-      needsReProjection: dataChanged || cellSizeChanged,
-      gpuAggregation
-    });
   }
 }
 

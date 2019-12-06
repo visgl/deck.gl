@@ -170,7 +170,6 @@ export default class GPUGridLayer extends GridAggregationLayer {
           const {gridOffset, cellOffset, width, height, boundingBox} = this.state;
           const {viewport} = this.context;
           const attributes = this.getAttributes();
-          // const vertexCount = this.getNumInstances();
           const cpuAggregation = pointToDensityGridDataCPU(props, {
             gridOffset,
             width,
@@ -255,7 +254,8 @@ export default class GPUGridLayer extends GridAggregationLayer {
     super.finalizeState();
   }
 
-  // Private
+  // Aggregation Overrides
+
   updateWeightParams(opts) {
     const {getColorWeight, colorAggregation, getElevationWeight, elevationAggregation} = opts.props;
     const {color, elevation} = this.state.weights;
