@@ -302,7 +302,7 @@ const TEST_CASES = [
   }
 ];
 
-test('jupyter-widget Render Test', t => {
+test.only('jupyter-widget Render Test', t => {
   const iframe = document.createElement('iframe');
   iframe.width = WIDTH;
   iframe.height = HEIGHT;
