@@ -161,7 +161,9 @@ export default class HeatmapLayer extends AggregationLayer {
     } = this.state;
     const {updateTriggers, intensity, threshold} = this.props;
 
-    return new TriangleLayer(
+    const TriangleLayerClass = this.getSubLayerClass('triangle', TriangleLayer);
+
+    return new TriangleLayerClass(
       this.getSubLayerProps({
         id: 'triangle-layer',
         updateTriggers

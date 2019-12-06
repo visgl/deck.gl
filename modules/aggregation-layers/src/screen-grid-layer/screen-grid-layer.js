@@ -87,9 +87,9 @@ export default class ScreenGridLayer extends GridAggregationLayer {
     const {maxTexture, numRow, numCol, weights} = this.state;
     const {updateTriggers} = this.props;
     const {aggregationBuffer} = weights.count;
-    //   this.state.subLayerData.attributes.instanceCounts = aggregationBuffer;
+    const CellLayerClass = this.getSubLayerClass('cells', ScreenGridCellLayer);
 
-    return new ScreenGridCellLayer(
+    return new CellLayerClass(
       this.props,
       this.getSubLayerProps({
         id: 'cell-layer',

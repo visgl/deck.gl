@@ -86,13 +86,44 @@ export default class ContourLayer extends GridAggregationLayer {
 
   renderLayers() {
     const {contourSegments, contourPolygons} = this.state.contourData;
-    const hasIsolines = contourSegments && contourSegments.length > 0;
-    const hasIsobands = contourPolygons && contourPolygons.length > 0;
 
-    const lineLayer = hasIsolines && new LineLayer(this._getLineLayerProps());
-    const solidPolygonLayer =
-      hasIsobands && new SolidPolygonLayer(this._getSolidPolygonLayerProps());
-    return [lineLayer, solidPolygonLayer];
+    const LinesSubLayerClass = this.getSubLayerClass('lines', LineLayer);
+    const BandsSubLayerClass = this.getSubLayerClass('bands', SolidPolygonLayer);
+
+    // Contour lines layer
+    const lineLayer =
+      contourSegments && contourSegments.length > 0 &&
+      new LinesSubLayerClass(
+        {
+          widthUnits: 'pixels'
+        },
+        this.getSubLayerProps({
+          id: 'contour-line-layer'
+        }),
+        {
+          data: this.state.contourData.contourSegments,
+          getSourcePosition: d => d.start,
+          getTargetPosition: d => d.end,
+          getColor: this._onGetSublayerColor.bind(this),
+          getWidth: this._onGetSublayerStrokeWidth.bind(this)
+        }
+      );
+
+    // Contour bands layer
+    const bandsLayer =
+      contourPolygons && contourPolygons.length > 0 &&
+      new BandsSubLayerClass(
+        this.getSubLayerProps({
+          id: 'contour-solid-polygon-layer'
+        }),
+        {
+          data: this.state.contourData.contourPolygons,
+          getPolygon: d => d.vertices,
+          getFillColor: this._onGetSublayerColor.bind(this)
+        }
+      );
+
+    return [lineLayer, bandsLayer];
   }
 
   // Aggregation Overrides
@@ -143,18 +174,6 @@ export default class ContourLayer extends GridAggregationLayer {
     this.setState({contourData});
   }
 
-  _getLineLayerProps() {
-    return this.getSubLayerProps({
-      id: 'contour-line-layer',
-      data: this.state.contourData.contourSegments,
-      getSourcePosition: d => d.start,
-      getTargetPosition: d => d.end,
-      getColor: this._onGetSublayerColor.bind(this),
-      getWidth: this._onGetSublayerStrokeWidth.bind(this),
-      widthUnits: 'pixels'
-    });
-  }
-
   _updateThresholdData(props) {
     const {contours, zOffset} = props;
     const count = contours.length;
@@ -171,15 +190,6 @@ export default class ContourLayer extends GridAggregationLayer {
   }
 
   // Private (Sublayers)
-
-  _getSolidPolygonLayerProps() {
-    return this.getSubLayerProps({
-      id: 'contour-solid-polygon-layer',
-      data: this.state.contourData.contourPolygons,
-      getPolygon: d => d.vertices,
-      getFillColor: this._onGetSublayerColor.bind(this)
-    });
-  }
 
   _onGetSublayerColor(element) {
     // element is either a line segment or polygon
