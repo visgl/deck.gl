@@ -110,9 +110,7 @@ export class DeckGLView extends DOMWidgetView {
 
   remove() {
     if (this.deck) {
-      if (this.deckgl.finalize) {
-        this.deckgl.finalize();
-      }
+      this.deck.finalize();
       this.deck = null;
     }
   }
