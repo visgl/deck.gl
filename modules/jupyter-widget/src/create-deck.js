@@ -51,7 +51,6 @@ export function createDeck({
   container,
   jsonInput,
   tooltip,
-  onComplete,
   handleClick,
   handleWarning
 }) {
@@ -80,10 +79,6 @@ export function createDeck({
     if (handleWarning) {
       const warn = deck.log.warn;
       deck.log.warn = injectFunction(warn, handleWarning);
-    }
-
-    if (onComplete) {
-      onComplete({jsonConverter, deckgl});
     }
   } catch (err) {
     // This will fail in node tests

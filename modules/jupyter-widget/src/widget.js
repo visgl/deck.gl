@@ -98,25 +98,22 @@ export class DeckGLView extends DOMWidgetView {
     }
 
     loadCss(MAPBOX_CSS_URL);
-    createDeck({
+    this.deck = createDeck({
       mapboxApiKey,
       container,
       jsonInput,
       tooltip,
-      onComplete: ({jsonConverter, deckgl}) => {
-        this.jsonDeck = {jsonConverter, deckgl};
-      },
       handleClick: this.handleClick.bind(this),
       handleWarning: this.handleWarning.bind(this)
     });
   }
 
   remove() {
-    if (this.jsonDeck) {
-      if (this.jsonDeck.deckgl.finalize) {
-        this.jsonDeck.deckgl.finalize();
+    if (this.deck) {
+      if (this.deckgl.finalize) {
+        this.deckgl.finalize();
       }
-      this.jsonDeck = null;
+      this.deck = null;
     }
   }
 
@@ -127,7 +124,7 @@ export class DeckGLView extends DOMWidgetView {
   }
 
   valueChanged() {
-    updateDeck(JSON.parse(this.model.get('json_input')), this.jsonDeck);
+    updateDeck(JSON.parse(this.model.get('json_input')), this.deck);
     // Jupyter notebook displays an error that this suppresses
     hideMapboxCSSWarning();
   }
