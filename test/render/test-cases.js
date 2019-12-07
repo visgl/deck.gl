@@ -1420,19 +1420,6 @@ export const TEST_CASES = [
     goldenImage: './test/render/golden-images/gpu-grid-lnglat.png'
   },
   {
-    name: 'gpu-grid-lnglat-cpu-aggregation',
-    viewState: GRID_LAYER_INFO.viewState,
-    layers: [
-      new GPUGridLayer(
-        Object.assign({}, GRID_LAYER_INFO.props, {
-          id: 'gpu-grid-lnglat-cpu-aggregation',
-          gpuAggregation: false
-        })
-      )
-    ],
-    goldenImage: './test/render/golden-images/gpu-grid-lnglat.png'
-  },
-  {
     name: 'contour-lnglat-cpu-aggregation',
     viewState: {
       latitude: 37.751537058389985,
