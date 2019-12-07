@@ -50,7 +50,7 @@ void main(void) {
   
   if (a < alphaCutoff) {
     if (shouldDrawBackground && !picking_uActive) {
-      gl_FragColor = vec4(backgroundColor.rgb, backgroundColor.a * vColor.a);
+      gl_FragColor = vec4(backgroundColor.rgb, vColor.a);
       return;
     } else {
       discard;
@@ -58,7 +58,7 @@ void main(void) {
   }
 
   if (shouldDrawBackground) {
-    gl_FragColor = vec4(mix(backgroundColor.rgb, vColor.rgb, alpha), backgroundColor.a * vColor.a);
+    gl_FragColor = vec4(mix(backgroundColor.rgb, vColor.rgb, alpha), vColor.a);
   } else {
     gl_FragColor = vec4(vColor.rgb, a);
   }
