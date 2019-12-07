@@ -14,6 +14,8 @@ import {instantiateClass} from './helpers/instantiate-class';
 import parseJSON from './helpers/parse-json';
 
 const isObject = value => value && typeof value === 'object';
+const FUNCTION_IDENTIFIER = '@@=';
+const CONSTANT_IDENTIFIER = '@@#';
 
 export default class JSONConverter {
   constructor(props) {
@@ -131,24 +133,22 @@ function convertPlainObject(json, configuration) {
 }
 
 // Convert one string value in an object
-// TODO - hard to convert without type hint
-// TODO - Define a syntax for functions so we don't need to sniff types?
-// if (json.indexOf('@@: ') === 0)
-// if (typeHint === function)
-// parseExpressionString(propValue, configuration, isAccessor);
-
 // TODO - We could also support string syntax for hydrating other types, like regexps...
 // But no current use case
 function convertString(string, key, configuration) {
-  if (configuration.constants[string]) {
-    return configuration.constants[string];
-  }
-  if (configuration.enumerations[string]) {
-    // TODO - look up
-    return string;
-  }
-  if (configuration.convertFunction) {
+  // Here the JSON value is supposed to be treated as a function
+  if (string.startsWith(FUNCTION_IDENTIFIER) && configuration.convertFunction) {
+    string = string.replace(FUNCTION_IDENTIFIER, '');
     return configuration.convertFunction(string, key, configuration);
+  }
+  if (string.startsWith(CONSTANT_IDENTIFIER)) {
+    string = string.replace(CONSTANT_IDENTIFIER, '');
+    if (configuration.constants[string]) {
+      return configuration.constants[string];
+    }
+    // enum
+    const [enumVarName, enumValName] = string.split('.');
+    return configuration.enumerations[enumVarName][enumValName];
   }
   return string;
 }

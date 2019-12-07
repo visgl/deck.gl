@@ -3,7 +3,7 @@ import {DOMWidgetModel, DOMWidgetView} from '@jupyter-widgets/base';
 
 import {MODULE_NAME, MODULE_VERSION} from './version';
 
-import {createDeck} from './create-deck';
+import {createDeck, updateDeck} from './create-deck';
 
 const MAPBOX_CSS_URL = 'https://api.tiles.mapbox.com/mapbox-gl-js/v1.2.1/mapbox-gl.css';
 const ERROR_BOX_CLASSNAME = 'error-box';
@@ -24,11 +24,6 @@ function loadCss(url) {
   link.rel = 'stylesheet';
   link.href = url;
   document.getElementsByTagName('head')[0].appendChild(link);
-}
-
-function updateDeck(inputJSON, {jsonConverter, deckgl}) {
-  const results = jsonConverter.convert(inputJSON);
-  deckgl.setProps(results);
 }
 
 // Note: Variables shared explictly between Python and JavaScript use snake_case
@@ -103,25 +98,20 @@ export class DeckGLView extends DOMWidgetView {
     }
 
     loadCss(MAPBOX_CSS_URL);
-    createDeck({
+    this.deck = createDeck({
       mapboxApiKey,
       container,
       jsonInput,
       tooltip,
-      onComplete: ({jsonConverter, deckgl}) => {
-        this.jsonDeck = {jsonConverter, deckgl};
-      },
       handleClick: this.handleClick.bind(this),
       handleWarning: this.handleWarning.bind(this)
     });
   }
 
   remove() {
-    if (this.jsonDeck) {
-      if (this.jsonDeck.deckgl.finalize) {
-        this.jsonDeck.deckgl.finalize();
-      }
-      this.jsonDeck = null;
+    if (this.deck) {
+      this.deck.finalize();
+      this.deck = null;
     }
   }
 
@@ -132,7 +122,7 @@ export class DeckGLView extends DOMWidgetView {
   }
 
   valueChanged() {
-    updateDeck(JSON.parse(this.model.get('json_input')), this.jsonDeck);
+    updateDeck(JSON.parse(this.model.get('json_input')), this.deck);
     // Jupyter notebook displays an error that this suppresses
     hideMapboxCSSWarning();
   }

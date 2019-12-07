@@ -1,8 +1,11 @@
 {
-  "description": "Test",
   "initialViewState": {
-    "longitude": -122.45,
-    "latitude": 37.8,
+    "bearing": 0,
+    "latitude": -122.45,
+    "longitude": 37.8,
+    "maxZoom": 20,
+    "minZoom": 0,
+    "pitch": 0,
     "zoom": 12
   },
   "layers": [
@@ -22,7 +25,9 @@
         0,
         255
       ],
-      "getRadius": 1000
+      "getPosition": "position",
+      "getRadius": 1000,
+      "id": "scatterplot"
     },
     {
       "@@type": "TextLayer",
@@ -35,54 +40,52 @@
           "text": "Hello World"
         }
       ],
-      "getTextAnchor": "end"
+      "getPosition": "[lng, lat]",
+      "getTextAnchor": "end",
+      "id": "textlayer"
     },
     {
       "@@type": "GeoJsonLayer",
       "data": {
-        "type": "FeatureCollection",
         "features": [
           {
-            "type": "Feature",
-            "properties": {},
             "geometry": {
-              "type": "Point",
               "coordinates": [
                 -122.42923736572264,
                 37.80544394934271
-              ]
-            }
+              ],
+              "type": "Point"
+            },
+            "properties": {},
+            "type": "Feature"
           }
-        ]
+        ],
+        "type": "FeatureCollection"
       },
-      "stroked": true,
       "filled": true,
-      "lineWidthMinPixels": 2,
-      "opacity": 0.4,
-      "getLineColor": [
-        255,
-        100,
-        100
-      ],
       "getFillColor": [
         200,
         160,
         0,
         180
-      ]
-    },
-    {
-      "@@type": "PointCloudLayer",
-      "data": [
-        {
-	  "position": [-122.4, 37.7, 12],
-	  "normal": [-1, 0, 0],
-	  "color": [255, 255, 0]
-	}
       ],
-      "pointSize": 10,
-      "coordinateSystem": "@@#COORDINATE_SYSTEM.METER_OFFSETS",
-      "coordinateOrigin": [-122.4, 37.74]
+      "getLineColor": [
+        255,
+        100,
+        100
+      ],
+      "getPosition": "features.geometry.coordinates",
+      "id": "geojsonlayer",
+      "lineWidthMinPixels": 2,
+      "opacity": 0.4,
+      "stroked": true
+    }
+  ],
+  "mapStyle": "mapbox://styles/mapbox/dark-v9",
+  "views": [
+    {
+      "@@type": "MapView",
+      "controller": true
     }
   ]
 }
