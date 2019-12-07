@@ -86,7 +86,7 @@ function cpuAggregator(props, aggregationParms) {
   // const {getWeight} = opts.weights.weight1;
   const {aggregation} = aggregationParms;
   const getValue = getValueFunc(aggregation, x => x.weight1[0]);
-  const {minValue, maxValue, totalCount} = new BinSorter(layerData.data, getValue, false);
+  const {minValue, maxValue, totalCount} = new BinSorter(layerData.data, {getValue});
   const maxMinData = new Float32Array([maxValue, 0, 0, minValue]);
   const maxData = new Float32Array([maxValue, 0, 0, totalCount]);
   const minData = new Float32Array([minValue, 0, 0, totalCount]);

@@ -38,16 +38,20 @@ test('BinSorter.init', t => {
 
   const expectedSortedBins = [
     {i: 0, value: 1, counts: 1},
-    {i: 2, value: 2, counts: 2},
-    {i: 1, value: 3, counts: 3}
+    {i: 1, value: 3, counts: 3},
+    {i: 2, value: 2, counts: 2}
   ];
 
   const expectedResult = {
-    sortedBins: expectedSortedBins,
+    aggregatedBins: expectedSortedBins,
+    maxCount: 3,
+    minValue: 1,
+    maxValue: 3,
+    totalCount: 6,
     binMap: {
       0: expectedSortedBins[0],
-      1: expectedSortedBins[2],
-      2: expectedSortedBins[1]
+      1: expectedSortedBins[1],
+      2: expectedSortedBins[2]
     }
   };
 
@@ -69,16 +73,16 @@ test('BinSorter', t => {
 
   const expectedBins = [
     {i: 0, value: 0, counts: 1},
-    {i: 2, value: 5, counts: 2},
-    {i: 1, value: 17, counts: 3}
+    {i: 1, value: 17, counts: 3},
+    {i: 2, value: 5, counts: 2}
   ];
 
-  t.deepEqual(sortedBins.sortedBins, expectedBins, 'should create correct sorted bins');
+  t.deepEqual(sortedBins.aggregatedBins, expectedBins, 'should create correct sorted bins');
 
-  sortedBins = new BinSorter(mockBins, {getValue: () => null});
+  const {aggregatedBins, binMap} = new BinSorter(mockBins, {getValue: () => null});
   t.deepEqual(
-    sortedBins,
-    {sortedBins: [], binMap: {}},
+    {aggregatedBins, binMap},
+    {aggregatedBins: [], binMap: {}},
     'should empty bins if getValue return null'
   );
 

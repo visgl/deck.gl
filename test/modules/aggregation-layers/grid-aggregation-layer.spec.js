@@ -207,7 +207,7 @@ function getTestCases(t, updateProps) {
   ];
 }
 
-test.only('GridAggregationLayer#CPUvsGPUAggregation', t => {
+test('GridAggregationLayer#CPUvsGPUAggregation', t => {
   let testCases = [
     {
       props: {

@@ -274,7 +274,7 @@ export default class GridAggregationLayer extends AggregationLayer {
   _updateWeightBins() {
     const {getValue} = this.state;
 
-    const sortedBins = new BinSorter(this.state.layerData.data || [], getValue, false);
+    const sortedBins = new BinSorter(this.state.layerData.data || [], {getValue});
     this.setState({sortedBins});
   }
 
