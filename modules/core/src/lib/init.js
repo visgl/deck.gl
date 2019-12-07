@@ -21,7 +21,7 @@
 import {registerLoaders} from '@loaders.gl/core';
 import {ImageLoader} from '@loaders.gl/images';
 
-import {global} from '../utils/globals';
+import {global} from 'probe.gl/env';
 import log from '../utils/log';
 import {register} from '../debug';
 import jsonLoader from '../utils/json-loader';
@@ -41,7 +41,7 @@ if (!global.deck) {
   if (process.env.NODE_ENV !== 'production') {
     log.log(
       0,
-      `deck.gl ${version} - set deck.log.priority=1 (or higher) to trace attribute updates`
+      `deck.gl ${version} - set deck.log.level=1 (or higher) to trace attribute updates`
     )();
   }
 

@@ -2,42 +2,42 @@ const logState = {
   attributeUpdateMessages: []
 };
 
-const PRIORITY_MAJOR_UPDATE = 1; // Events with direct perf impact
-const PRIORITY_MINOR_UPDATE = 2; // Events that may affect perf
-const PRIORITY_UPDATE_DETAIL = 3;
-const PRIORITY_INFO = 4;
-const PRIORITY_DRAW = 2;
+const LOG_LEVEL_MAJOR_UPDATE = 1; // Events with direct perf impact
+const LOG_LEVEL_MINOR_UPDATE = 2; // Events that may affect perf
+const LOG_LEVEL_UPDATE_DETAIL = 3;
+const LOG_LEVEL_INFO = 4;
+const LOG_LEVEL_DRAW = 2;
 
 export const getLoggers = log => ({
   /* Layer events */
 
   'layer.changeFlag': (layer, key, flags) => {
-    log.log(PRIORITY_UPDATE_DETAIL, `${layer.id} ${key}: `, flags[key])();
+    log.log(LOG_LEVEL_UPDATE_DETAIL, `${layer.id} ${key}: `, flags[key])();
   },
 
   'layer.initialize': layer => {
-    log.log(PRIORITY_MAJOR_UPDATE, `Initializing ${layer}`)();
+    log.log(LOG_LEVEL_MAJOR_UPDATE, `Initializing ${layer}`)();
   },
   'layer.update': (layer, needsUpdate) => {
     if (needsUpdate) {
       const flags = layer.getChangeFlags();
       log.log(
-        PRIORITY_MINOR_UPDATE,
+        LOG_LEVEL_MINOR_UPDATE,
         `Updating ${layer} because: ${Object.keys(flags)
           .filter(key => flags[key])
           .join(', ')}`
       )();
     } else {
-      log.log(PRIORITY_INFO, `${layer} does not need update`)();
+      log.log(LOG_LEVEL_INFO, `${layer} does not need update`)();
     }
   },
   'layer.matched': (layer, changed) => {
     if (changed) {
-      log.log(PRIORITY_INFO, `Matched ${layer}, state transfered`)();
+      log.log(LOG_LEVEL_INFO, `Matched ${layer}, state transfered`)();
     }
   },
   'layer.finalize': layer => {
-    log.log(PRIORITY_MAJOR_UPDATE, `Finalizing ${layer}`)();
+    log.log(LOG_LEVEL_MAJOR_UPDATE, `Finalizing ${layer}`)();
   },
 
   /* CompositeLayer events */
@@ -45,12 +45,12 @@ export const getLoggers = log => ({
   'compositeLayer.renderLayers': (layer, updated, subLayers) => {
     if (updated) {
       log.log(
-        PRIORITY_MINOR_UPDATE,
+        LOG_LEVEL_MINOR_UPDATE,
         `Composite layer rendered new subLayers ${layer}`,
         subLayers
       )();
     } else {
-      log.log(PRIORITY_INFO, `Composite layer reused subLayers ${layer}`, subLayers)();
+      log.log(LOG_LEVEL_INFO, `Composite layer reused subLayers ${layer}`, subLayers)();
     }
   },
 
@@ -58,19 +58,19 @@ export const getLoggers = log => ({
 
   'layerManager.setLayers': (layerManager, updated, layers) => {
     if (updated) {
-      log.log(PRIORITY_MINOR_UPDATE, `Updating ${layers.length} deck layers`)();
+      log.log(LOG_LEVEL_MINOR_UPDATE, `Updating ${layers.length} deck layers`)();
     }
   },
 
   'layerManager.activateViewport': (layerManager, viewport) => {
-    log.log(PRIORITY_UPDATE_DETAIL, 'Viewport changed', viewport)();
+    log.log(LOG_LEVEL_UPDATE_DETAIL, 'Viewport changed', viewport)();
   },
 
   /* AttributeManager events */
 
   'attributeManager.invalidate': (attributeManager, trigger, attributeNames) => {
     log.log(
-      PRIORITY_MAJOR_UPDATE,
+      LOG_LEVEL_MAJOR_UPDATE,
       attributeNames
         ? `invalidated attributes ${attributeNames} (${trigger}) for ${attributeManager.id}`
         : `invalidated all attributes for ${attributeManager.id}`
@@ -84,13 +84,13 @@ export const getLoggers = log => ({
   'attributeManager.updateEnd': (attributeManager, numInstances) => {
     const timeMs = Math.round(Date.now() - logState.attributeManagerUpdateStart);
     log.groupCollapsed(
-      PRIORITY_MINOR_UPDATE,
+      LOG_LEVEL_MINOR_UPDATE,
       `Updated attributes for ${numInstances} instances in ${attributeManager.id} in ${timeMs}ms`
     )();
     for (const updateMessage of logState.attributeUpdateMessages) {
-      log.log(PRIORITY_UPDATE_DETAIL, updateMessage)();
+      log.log(LOG_LEVEL_UPDATE_DETAIL, updateMessage)();
     }
-    log.groupEnd(PRIORITY_MINOR_UPDATE)();
+    log.groupEnd(LOG_LEVEL_MINOR_UPDATE)();
   },
 
   /* Attribute events */
@@ -118,7 +118,7 @@ export const getLoggers = log => ({
       const hiddenCount = primitiveCount - visibleCount;
 
       log.log(
-        PRIORITY_DRAW,
+        LOG_LEVEL_DRAW,
         `RENDER #${deckRenderer.renderCount} \
   ${visibleCount} (of ${totalCount} layers) to ${pass} because ${redrawReason} \
   (${hiddenCount} hidden, ${compositeCount} composite ${pickableCount} pickable)`

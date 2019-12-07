@@ -16,7 +16,7 @@ export function register(handlers) {
 }
 
 export default function debug(eventType) {
-  if (deckLog.priority > 0 && loggers[eventType]) {
+  if (deckLog.level > 0 && loggers[eventType]) {
     // Not using ...args to defeat perf hit from array construction
     loggers[eventType].call(...arguments);
   }
