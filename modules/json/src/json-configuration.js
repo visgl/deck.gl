@@ -2,7 +2,7 @@
 import parseExpressionString from './helpers/parse-expression-string';
 import assert from './utils/assert';
 
-const DEFAULT_TYPE_KEY = 'type';
+const DEFAULT_TYPE_KEY = '@@type';
 
 const isObject = value => value && typeof value === 'object';
 
@@ -51,9 +51,5 @@ export default class JSONConfiguration {
 }
 
 function convertFunction(value, key, configuration) {
-  if (key.startsWith('get')) {
-    const isAccessor = true;
-    return parseExpressionString(value, configuration, isAccessor);
-  }
-  return value;
+  return parseExpressionString(value, configuration);
 }

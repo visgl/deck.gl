@@ -4,6 +4,9 @@ from ..data_utils import is_pandas_df
 from .json_tools import JSONMixin
 
 
+TYPE_IDENTIFIER = '@@type'
+
+
 class Layer(JSONMixin):
     def __init__(
         self,
@@ -88,3 +91,11 @@ class Layer(JSONMixin):
             self._data = data_set.to_dict(orient='records')
         else:
             self._data = data_set
+
+    @property
+    def type(self):
+        return getattr(self, TYPE_IDENTIFIER)
+
+    @type.setter
+    def type(self, type_name):
+        self.__setattr__(TYPE_IDENTIFIER, type_name)

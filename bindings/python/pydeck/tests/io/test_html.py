@@ -17,12 +17,12 @@ from pydeck.io.html import (
     open_named_or_temporary_file
 )
 
-from ..const import FIXTURE_STRING
+from ..fixtures import fixtures
 
 
 def test_rendering_is_not_broken():
-    rendered = render_json_to_html(FIXTURE_STRING, 'fake_key')
-    assert FIXTURE_STRING in rendered
+    rendered = render_json_to_html(fixtures['minimal'], 'fake_key')
+    assert fixtures['minimal'] in rendered
     assert 'fake_key' in rendered
 
 
