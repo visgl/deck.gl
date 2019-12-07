@@ -24,7 +24,7 @@ import {ScenegraphNode, createGLTFObjects} from '@luma.gl/experimental';
 import GL from '@luma.gl/constants';
 import {waitForGLTFAssets} from './gltf-utils';
 
-import {MATRIX_ATTRIBUTES} from '../utils/matrix';
+import {MATRIX_ATTRIBUTES, shouldComposeModelMatrix} from '../utils/matrix';
 
 import vs from './scenegraph-layer-vertex.glsl';
 import fs from './scenegraph-layer-fragment.glsl';
@@ -52,7 +52,6 @@ const defaultProps = {
 
   // flat or pbr
   _lighting: 'flat',
-  _composeModelMatrix: false,
   // _lighting must be pbr for this to work
   _imageBasedLightingEnvironment: null,
 
@@ -252,7 +251,8 @@ export default class ScenegraphLayer extends Layer {
       this.state.animator.animate(context.animationProps.time);
     }
 
-    const {sizeScale, sizeMinPixels, sizeMaxPixels, opacity, _composeModelMatrix} = this.props;
+    const {viewport} = this.context;
+    const {sizeScale, sizeMinPixels, sizeMaxPixels, opacity, coordinateSystem} = this.props;
     const numInstances = this.getNumInstances();
     this.state.scenegraph.traverse((model, {worldMatrix}) => {
       model.model.setInstanceCount(numInstances);
@@ -264,7 +264,7 @@ export default class ScenegraphLayer extends Layer {
           opacity,
           sizeMinPixels,
           sizeMaxPixels,
-          enableOffsetModelMatrix: _composeModelMatrix,
+          composeModelMatrix: shouldComposeModelMatrix(viewport, coordinateSystem),
           sceneModelMatrix: worldMatrix,
           // Needed for PBR (TODO: find better way to get it)
           u_Camera: model.model.getUniforms().project_uCameraPosition

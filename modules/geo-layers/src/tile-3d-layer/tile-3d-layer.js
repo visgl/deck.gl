@@ -185,7 +185,6 @@ export default class Tile3DLayer extends CompositeLayer {
         coordinateSystem: COORDINATE_SYSTEM.METER_OFFSETS,
         coordinateOrigin: cartographicOrigin,
         modelMatrix,
-        _composeModelMatrix: true,
         getTransformMatrix: instance => instance.modelMatrix,
         getPosition: instance => [0, 0, 0]
       }

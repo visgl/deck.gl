@@ -1,4 +1,4 @@
-import {createIterable} from '@deck.gl/core';
+import {COORDINATE_SYSTEM, createIterable} from '@deck.gl/core';
 
 /* eslint-disable max-statements, complexity */
 const RADIAN_PER_DEGREE = Math.PI / 180;
@@ -153,3 +153,17 @@ export const MATRIX_ATTRIBUTES = {
     }
   }
 };
+
+export function shouldComposeModelMatrix(viewport, coordinateSystem) {
+  // only apply composeModelMatrix when in cartesian or meter_offsets coordinate system
+  if (coordinateSystem === COORDINATE_SYSTEM.DEFAULT) {
+    coordinateSystem = viewport.isGeospatial
+      ? COORDINATE_SYSTEM.LNGLAT
+      : COORDINATE_SYSTEM.CARTESIAN;
+  }
+
+  return (
+    coordinateSystem === COORDINATE_SYSTEM.CARTESIAN ||
+    coordinateSystem === COORDINATE_SYSTEM.METER_OFFSETS
+  );
+}

@@ -121,6 +121,7 @@ Whether to render the mesh in wireframe mode.
 This is an object that contains material props for [lighting effect](/docs/effects/lighting-effect.md) applied on extruded polygons.
 Check [the lighting guide](/docs/developer-guide/using-lighting.md#constructing-a-material-instance) for configurable settings.
 
+
 ### Data Accessors
 
 
@@ -144,9 +145,9 @@ The color of each object, in `r, g, b, [a]`. Each component is in the 0-255 rang
 
 - Default: `[0, 0, 0]`
 
-Object orientation defined as a vec3 of Euler angles, `[pitch, yaw, roll]` in degrees.
+Object orientation defined as a vec3 of Euler angles, `[pitch, yaw, roll]` in degrees. This will be composed with layer's [modelMatrix](https://github.com/uber/deck.gl/blob/master/docs/api-reference/layer.md#modelmatrix-number16-optional).
 
-* If an array is provided, it is used as the orientation for all objects.
+* If an array is provided, it is used as the orientation for all objects. 
 * If a function is provided, it is called on each object to retrieve its orientation.
 
 ##### `getScale` ([Function](/docs/developer-guide/using-layers.md#accessors)|Array, optional)
@@ -162,7 +163,7 @@ Scaling factor on the mesh along each axis.
 
 - Default: `[0, 0, 0]`
 
-Translation of the mesh along each axis. Offset from the center position given by `getPosition`. `[x, y, z]` in meters.
+Translation of the mesh along each axis. Offset from the center position given by `getPosition`. `[x, y, z]` in meters. This will be composed with layer's [modelMatrix](https://github.com/uber/deck.gl/blob/master/docs/api-reference/layer.md#modelmatrix-number16-optional).
 
 * If an array is provided, it is used as the offset for all objects.
 * If a function is provided, it is called on each object to retrieve its offset.

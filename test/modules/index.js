@@ -24,6 +24,7 @@ import './core';
 import './layers';
 import './aggregation-layers';
 import './geo-layers';
+import './mesh-layers';
 
 import './google-maps';
 import './mapbox';
