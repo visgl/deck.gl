@@ -23,7 +23,10 @@
 // this is where to pass in a function to color the bins by
 // avg/mean/max of specific value of the point
 const defaultGetValue = points => points.length;
+
 import {clamp, getQuantileDomain, getOrdinalDomain} from './scale-utils';
+
+const MAX_32_BIT_FLOAT = 3.402823466e38;
 
 // access array of points in each bin
 const defaultGetPoints = bin => bin.points;
@@ -39,17 +42,19 @@ const defaultProps = {
 
 export default class BinSorter {
   constructor(bins = [], props = defaultProps) {
-    this.sortedBins = this._getSortedBins(bins, props);
-    this.binMap = this._getBinMap();
+    this.aggregatedBins = this.getAggregatedBins(bins, props);
+    this._updateMinMaxValues();
+    this.binMap = this.getBinMap();
   }
 
   /**
-   * Get an array of object with sorted values and index of bins
+   * Get an array of object with aggregated values and index of bins
+   * Array object will be sorted by value optionally.
    * @param {Array} bins
    * @param {Function} getValue
    * @return {Array} array of values and index lookup
    */
-  _getSortedBins(bins, props) {
+  getAggregatedBins(bins, props) {
     const {
       getValue = defaultGetValue,
       getPoints = defaultGetPoints,
@@ -58,30 +63,32 @@ export default class BinSorter {
     } = props;
 
     const hasFilter = typeof filterData === 'function';
+    const binCount = bins.length;
+    const aggregatedBins = [];
+    let index = 0;
 
-    return bins
-      .reduce((accu, h, i) => {
-        const points = getPoints(h);
-        const index = getIndex(h);
+    for (let binIndex = 0; binIndex < binCount; binIndex++) {
+      const bin = bins[binIndex];
+      const points = getPoints(bin);
+      const i = getIndex(bin);
 
-        const filteredPoints = hasFilter ? points.filter(filterData) : points;
+      const filteredPoints = hasFilter ? points.filter(filterData) : points;
 
-        h.filteredPoints = hasFilter ? filteredPoints : null;
+      bin.filteredPoints = hasFilter ? filteredPoints : null;
 
-        const value = filteredPoints.length ? getValue(filteredPoints) : null;
+      const value = filteredPoints.length ? getValue(filteredPoints) : null;
 
-        if (value !== null && value !== undefined) {
-          // filter bins if value is null or undefined
-          accu.push({
-            i: Number.isFinite(index) ? index : i,
-            value,
-            counts: filteredPoints.length
-          });
-        }
-
-        return accu;
-      }, [])
-      .sort((a, b) => a.value - b.value);
+      if (value !== null && value !== undefined) {
+        // filter bins if value is null or undefined
+        aggregatedBins[index] = {
+          i: Number.isFinite(i) ? i : binIndex,
+          value,
+          counts: filteredPoints.length
+        };
+        index++;
+      }
+    }
+    return aggregatedBins;
   }
 
   _percentileToIndex(percentileRange) {
@@ -97,19 +104,41 @@ export default class BinSorter {
 
     return [lowerIdx, upperIdx];
   }
+
   /**
    * Get a mapping from cell/hexagon index to sorted bin
    * This is used to retrieve bin value for color calculation
-   * @return {Object} bin index to sortedBins
+   * @return {Object} bin index to aggregatedBins
    */
-  _getBinMap() {
-    return this.sortedBins.reduce(
-      (mapper, curr) =>
-        Object.assign(mapper, {
-          [curr.i]: curr
-        }),
-      {}
-    );
+  getBinMap() {
+    const binMap = {};
+    for (const bin of this.aggregatedBins) {
+      binMap[bin.i] = bin;
+    }
+    return binMap;
+  }
+
+  // Private
+
+  /**
+   * Get ths max count of all bins
+   * @return {Number | Boolean} max count
+   */
+  _updateMinMaxValues() {
+    let maxCount = 0;
+    let maxValue = 0;
+    let minValue = MAX_32_BIT_FLOAT;
+    let totalCount = 0;
+    for (const x of this.aggregatedBins) {
+      maxCount = maxCount > x.counts ? maxCount : x.counts;
+      maxValue = maxValue > x.value ? maxValue : x.value;
+      minValue = minValue < x.value ? minValue : x.value;
+      totalCount += x.counts;
+    }
+    this.maxCount = maxCount;
+    this.maxValue = maxValue;
+    this.minValue = minValue;
+    this.totalCount = totalCount;
   }
 
   /**
@@ -120,6 +149,9 @@ export default class BinSorter {
    * @return {Array} array of new value range
    */
   getValueRange(percentileRange) {
+    if (!this.sortedBins) {
+      this.sortedBins = this.aggregatedBins.sort((a, b) => a.value - b.value);
+    }
     if (!this.sortedBins.length) {
       return [];
     }
@@ -136,6 +168,9 @@ export default class BinSorter {
   }
 
   getValueDomainByScale(scale, [lower = 0, upper = 100] = []) {
+    if (!this.sortedBins) {
+      this.sortedBins = this.aggregatedBins.sort((a, b) => a.value - b.value);
+    }
     if (!this.sortedBins.length) {
       return [];
     }

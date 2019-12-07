@@ -8,7 +8,7 @@
 # GPUGridLayer (WebGL2)
 
 The `GPUGridLayer` renders a grid heatmap based on an array of points.
-It takes the constant cell size, aggregates input points into cells. When possible aggregation is performed on GPU. The color
+It takes the constant cell size, aggregates input points into cells. This layer performs aggregation on GPU hence not supported in non WebGL2 browsers. The color
 and height of the cell is scaled by number of points it contains.
 
 `GPUGridLayer` is one of the sublayers for [GridLayer](/docs/layers/grid-layer.md) and is only supported when using `WebGL2` enabled browsers. It is provided to customize GPU Aggregation for advanced use cases. For any regular use case, [GridLayer](/docs/layers/grid-layer.md) is recommended.
@@ -30,7 +30,6 @@ const App = ({data, viewport}) => {
    */
   const layer = new GPUGridLayer({
     id: 'gpu-grid-layer',
-    gpuAggregation: true,
     data,
     pickable: true,
     extruded: true,
@@ -51,7 +50,9 @@ const App = ({data, viewport}) => {
 
 **Note:** The `GPUGridLayer` at the moment only works with `COORDINATE_SYSTEM.LNGLAT`.
 
-**Note:** This layer is similar to [CPUGridLayer](/docs/layers/cpu-grid-layer.md) but supports aggregation on GPU when possible. Check below for more detailed differences of this layer compared to `CPUGridLayer`.
+**Note:** GPU Aggregation is faster only when using large data sets (point count is more than 500K), for smaller data sets GPU Aggregation could be potentially slower than CPU Aggregation.
+
+**Note:** This layer is similar to [CPUGridLayer](/docs/layers/cpu-grid-layer.md) but performs aggregation on GPU. Check below for more detailed differences of this layer compared to `CPUGridLayer`.
 
 
 ## Installation
@@ -136,22 +137,6 @@ Cell elevation multiplier. The elevation of cell is calculated by
 * Default: `true`
 
 Whether to enable cell elevation. Cell elevation scale by count of points in each cell. If set to false, all cell will be flat.
-
-##### `fp64` (Boolean, optional)
-
-* Default: `false`
-
-Whether the aggregation should be performed in high-precision 64-bit mode. Note that since deck.gl v6.1, the default 32-bit projection uses a hybrid mode that matches 64-bit precision with significantly better performance.
-
-##### `gpuAggregation` (bool, optional)
-
-* Default: true
-
-When set to true and browser supports GPU aggregation, aggregation is performed on GPU. GPU aggregation can be 2 to 3 times faster depending upon number of points and number of cells.
-
-**Note:** GPU Aggregation requires WebGL2. When `gpuAggregation` is set to true and browser doesn't support WebGL2, aggregation falls back to CPU.
-
-**Note:** GPU Aggregation is faster only when using large data sets (point count is more than 500K), for smaller data sets GPU Aggregation could be potentially slower than CPU Aggregation.
 
 ##### `material` (Object, optional)
 

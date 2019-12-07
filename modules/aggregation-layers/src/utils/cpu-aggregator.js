@@ -152,18 +152,22 @@ export default class CPUAggregator {
     return defaultDimensions;
   }
 
-  updateState({oldProps, props, changeFlags}, viewport) {
+  updateState(opts, aggregationParams) {
+    const {oldProps, props, changeFlags} = opts;
     this.updateGetValueFuncs(oldProps, props, changeFlags);
     const reprojectNeeded = this.needsReProjectPoints(oldProps, props, changeFlags);
-
+    let aggregationDirty = false;
     if (changeFlags.dataChanged || reprojectNeeded) {
-      // project data into hexagons, and get sortedColorBins
-      this.getAggregatedData(props, viewport);
+      // project data into bin and aggregate wegiths per bin
+      this.getAggregatedData(props, aggregationParams);
+      aggregationDirty = true;
     } else {
       const dimensionChanges = this.getDimensionChanges(oldProps, props, changeFlags) || [];
       // this here is layer
       dimensionChanges.forEach(f => typeof f === 'function' && f());
+      aggregationDirty = true;
     }
+    this.setState({aggregationDirty});
 
     return this.state;
   }
@@ -193,12 +197,10 @@ export default class CPUAggregator {
     return result;
   }
 
-  getAggregatedData(props, viewport) {
+  getAggregatedData(props, aggregationParams) {
     const aggregator = this._getAggregator(props);
 
-    // result should contain a data array and other props
-    // result = {data: [], ...other props}
-    const result = aggregator(props, viewport);
+    const result = aggregator(props, aggregationParams);
     this.setState({
       layerData: this.normalizeResult(result)
     });
