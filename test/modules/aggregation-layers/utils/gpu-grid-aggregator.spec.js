@@ -32,11 +32,11 @@ function verifyResults({t, cpuResults, gpuResults, testName}) {
 
 /* eslint-disable max-statements */
 function testCounterMinMax(aggregator, t, opts) {
-  const {useGPU, size = 1} = opts;
-  const testName = `${useGPU ? 'GPU' : 'CPU'} size: ${size}:`;
+  const {size = 1} = opts;
+  const testName = `GPU : size: ${size}:`;
 
   let weight1 = Object.assign({}, fixture.weights.weight1, {size});
-  let results = aggregator.run(Object.assign({}, fixture, {weights: {weight1}, useGPU}));
+  let results = aggregator.run(Object.assign({}, fixture, {weights: {weight1}}));
 
   const {minData, maxData} = aggregator.getData('weight1');
   t.equal(maxData[3], 3, `${testName} needMax: total count should match`);
@@ -53,7 +53,7 @@ function testCounterMinMax(aggregator, t, opts) {
   }
 
   weight1 = Object.assign({}, weight1, {combineMaxMin: true});
-  results = aggregator.run(Object.assign({}, fixture, {weights: {weight1}, useGPU}));
+  results = aggregator.run(Object.assign({}, fixture, {weights: {weight1}}));
 
   const maxMinData = results.weight1.maxMinBuffer.getData();
   t.equal(maxMinData[0], 4, `${testName} combineMaxMin: max weight should match`);
@@ -73,18 +73,18 @@ function testCounterMinMax(aggregator, t, opts) {
 
 test('GPUGridAggregator#GPU', t => {
   const sa = new GPUGridAggregator(gl);
-  testCounterMinMax(sa, t, {useGPU: true});
-  testCounterMinMax(sa, t, {useGPU: true, size: 2});
-  testCounterMinMax(sa, t, {useGPU: true, size: 3});
+  testCounterMinMax(sa, t, {size: 1});
+  testCounterMinMax(sa, t, {size: 2});
+  testCounterMinMax(sa, t, {size: 3});
   t.end();
 });
 
 const {generateRandomGridPoints} = GridAggregationData;
 
-function cpuAggregator(opts) {
-  const layerData = pointToDensityGridDataCPU(opts);
+function cpuAggregator(props, aggregationParms) {
+  const layerData = pointToDensityGridDataCPU(props, aggregationParms);
   // const {getWeight} = opts.weights.weight1;
-  const {aggregation} = opts;
+  const {aggregation} = aggregationParms;
   const getValue = getValueFunc(aggregation, x => x.weight1[0]);
   const {minValue, maxValue, totalCount} = new BinSorter(layerData.data, getValue, false);
   const maxMinData = new Float32Array([maxValue, 0, 0, minValue]);
@@ -119,7 +119,22 @@ function testAggregationOperations(opts) {
       weights: {weight1: weight}
     }
   );
-  const cpuResults = cpuAggregator(aggregationOpts);
+  // const props = Object.assign({}, fixture, pointsData);
+  const cpuResults = cpuAggregator(
+    {
+      data: pointsData.data,
+      cellSize: fixture.cellSize
+    },
+    {
+      aggregation,
+      viewport: fixture.moduleSettings.viewport,
+      gridOffset: {xOffset: fixture.cellSize[0], yOffset: fixture.cellSize[1]},
+      cellOffset: [0, 0],
+      attributes: pointsData.attributes,
+      projectPoints: fixture.projectPoints,
+      numInstances: pointsData.vertexCount
+    }
+  );
   let results = gpuAggregator.run(aggregationOpts);
 
   const gpuResults = {

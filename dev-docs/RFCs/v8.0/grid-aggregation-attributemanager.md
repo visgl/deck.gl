@@ -28,7 +28,7 @@ Introduce new composite layer `AggregationLayer`, which owns `GPUGridAggregator`
 
 #### Attributes setup
 
-`AttributeManager` is only available for `Layer` and it's subclasses and not available for a `CompositeLayer`. We can create an instance of `AttributeManger` in `AggregationLayer` and provide it to all aggregation layers which can be used for all offline renderings performed for aggregation.
+`AttributeManager` is only available for `Layer` and it's subclasses and not available for a `CompositeLayer`. We can create an instance of `AttributeManager` in `AggregationLayer` and provide it to all aggregation layers which can be used for all offline renderings performed for aggregation.
 
 #### Model setup
 

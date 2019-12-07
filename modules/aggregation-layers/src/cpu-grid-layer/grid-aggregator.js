@@ -82,21 +82,19 @@ function pointsToGridHashing(props, aggregationParams) {
   const gridHash = {};
 
   const {iterable, objectInfo} = createIterable(data);
+  const position = new Array(3);
   for (const pt of iterable) {
     objectInfo.index++;
-    let lng = positions[objectInfo.index * size];
-    let lat = positions[objectInfo.index * size + 1];
+    position[0] = positions[objectInfo.index * size];
+    position[1] = positions[objectInfo.index * size + 1];
+    position[2] = size >= 3 ? positions[objectInfo.index * size + 2] : 0;
+    const [x, y] = projectPoints ? viewport.project(position) : position;
+    if (Number.isFinite(x) && Number.isFinite(y)) {
+      const yIndex = Math.floor((y + offsets[1]) / gridOffset.yOffset);
+      const xIndex = Math.floor((x + offsets[0]) / gridOffset.xOffset);
+      const key = `${yIndex}-${xIndex}`;
 
-    if (projectPoints) {
-      [lng, lat] = viewport.project([lng, lat]);
-    }
-
-    if (Number.isFinite(lat) && Number.isFinite(lng)) {
-      const latIdx = Math.floor((lat + offsets[1]) / gridOffset.yOffset);
-      const lonIdx = Math.floor((lng + offsets[0]) / gridOffset.xOffset);
-      const key = `${latIdx}-${lonIdx}`;
-
-      gridHash[key] = gridHash[key] || {count: 0, points: [], lonIdx, latIdx};
+      gridHash[key] = gridHash[key] || {count: 0, points: [], lonIdx: xIndex, latIdx: yIndex};
       gridHash[key].count += 1;
       gridHash[key].points.push(pt);
     }

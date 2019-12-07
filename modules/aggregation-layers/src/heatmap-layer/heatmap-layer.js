@@ -161,7 +161,9 @@ export default class HeatmapLayer extends AggregationLayer {
     } = this.state;
     const {updateTriggers, intensity, threshold} = this.props;
 
-    return new TriangleLayer(
+    const TriangleLayerClass = this.getSubLayerClass('triangle', TriangleLayer);
+
+    return new TriangleLayerClass(
       this.getSubLayerProps({
         id: 'triangle-layer',
         updateTriggers
@@ -210,9 +212,6 @@ export default class HeatmapLayer extends AggregationLayer {
 
   // PRIVATE
 
-  _getAggregationModel() {
-    return this.state.weightsTransform.model;
-  }
   // override Composite layer private method to create AttributeManager instance
   _getAttributeManager() {
     return new AttributeManager(this.context.gl, {
@@ -223,7 +222,7 @@ export default class HeatmapLayer extends AggregationLayer {
 
   _getChangeFlags(opts) {
     const changeFlags = {};
-    if (this._isAggregationDirty(opts)) {
+    if (this.isAggregationDirty(opts)) {
       changeFlags.dataChanged = true;
     }
     changeFlags.viewportChanged = opts.changeFlags.viewportChanged;
@@ -335,7 +334,7 @@ export default class HeatmapLayer extends AggregationLayer {
   }
 
   // overwrite super class method to update transform model
-  _updateShaders(shaderOptions) {
+  updateShaders(shaderOptions) {
     // sahder params (modules, injects) changed, update model object
     this._createWeightsTransform(shaderOptions);
   }

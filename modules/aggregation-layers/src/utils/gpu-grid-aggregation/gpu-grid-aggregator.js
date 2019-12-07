@@ -26,11 +26,10 @@ import {
   hasFeatures,
   isWebGL2,
   readPixelsToBuffer,
-  fp64 as fp64ShaderModule,
+  fp64,
   withParameters
 } from '@luma.gl/core';
-import {log, project32, project64, mergeShaders} from '@deck.gl/core';
-const {fp64ifyMatrix4} = fp64ShaderModule;
+import {log, project32, mergeShaders} from '@deck.gl/core';
 
 import {
   DEFAULT_RUN_PARAMS,
@@ -40,15 +39,13 @@ import {
   MAX_MIN_BLEND_EQUATION,
   EQUATION_MAP,
   DEFAULT_WEIGHT_PARAMS,
-  IDENTITY_MATRIX,
   PIXEL_SIZE
 } from './gpu-grid-aggregator-constants';
 import {AGGREGATION_OPERATION} from '../aggregation-operation-utils';
 
 import AGGREGATE_TO_GRID_VS from './aggregate-to-grid-vs.glsl';
-import AGGREGATE_TO_GRID_VS_FP64 from './aggregate-to-grid-vs-64.glsl';
 import AGGREGATE_TO_GRID_FS from './aggregate-to-grid-fs.glsl';
-import AGGREGATE_ALL_VS_FP64 from './aggregate-all-vs-64.glsl';
+import AGGREGATE_ALL_VS from './aggregate-all-vs.glsl';
 import AGGREGATE_ALL_FS from './aggregate-all-fs.glsl';
 import TRANSFORM_MEAN_VS from './transform-mean-vs.glsl';
 import {getFloatTexture, getFramebuffer} from './../resource-utils.js';
@@ -142,9 +139,6 @@ export default class GPUGridAggregator {
     this.id = opts.id || 'gpu-grid-aggregator';
     this.gl = gl;
     this.state = {
-      // flags/variables that affect the aggregation
-      fp64: null,
-
       // per weight GPU resources
       weightAttributes: {},
       textures: {},
@@ -249,20 +243,9 @@ export default class GPUGridAggregator {
 
   _normalizeAggregationParams(opts) {
     const aggregationParams = Object.assign({}, DEFAULT_RUN_PARAMS, opts);
-    const {
-      gridTransformMatrix,
-      moduleSettings,
-      weights,
-      projectPoints,
-      cellSize,
-      numCol,
-      numRow
-    } = aggregationParams;
+    const {moduleSettings, weights, cellSize, numCol, numRow} = aggregationParams;
     const {viewport} = moduleSettings;
     // validateProps(aggregationParams, opts);
-
-    aggregationParams.gridTransformMatrix =
-      (projectPoints ? viewport.viewportMatrix : gridTransformMatrix) || IDENTITY_MATRIX;
 
     if (weights) {
       aggregationParams.weights = normalizeWeightParams(weights);
@@ -335,7 +318,6 @@ export default class GPUGridAggregator {
   _renderAggregateData(opts) {
     const {
       cellSize,
-      gridTransformMatrix,
       projectPoints,
       attributes,
       moduleSettings,
@@ -343,11 +325,12 @@ export default class GPUGridAggregator {
       numRow,
       width,
       height,
-      weights
+      weights,
+      translation,
+      scaling
     } = opts;
     const {maxMinFramebuffers, minFramebuffers, maxFramebuffers} = this.state;
 
-    const uProjectionMatrixFP64 = fp64ifyMatrix4(gridTransformMatrix);
     const gridSize = [numCol, numRow];
     const parameters = {
       blend: true,
@@ -358,9 +341,9 @@ export default class GPUGridAggregator {
       windowSize: [width, height],
       cellSize,
       gridSize,
-      uProjectionMatrix: gridTransformMatrix,
-      uProjectionMatrixFP64,
-      projectPoints
+      projectPoints,
+      translation,
+      scaling
     };
 
     for (const id in weights) {
@@ -573,22 +556,17 @@ export default class GPUGridAggregator {
     return resources[name];
   }
 
-  _setupModels({fp64 = false, numCol = 0, numRow = 0} = {}) {
-    this._setupAggregationModel(fp64);
-    if (!this.allAggregationModel) {
-      const {gl} = this;
-      const instanceCount = numCol * numRow;
-      this.allAggregationModel = getAllAggregationModel(gl, instanceCount);
-    }
-  }
-
-  _setupAggregationModel(fp64 = false) {
+  _setupModels({numCol = 0, numRow = 0} = {}) {
     const {gl} = this;
     const {shaderOptions} = this.state;
     if (this.gridAggregationModel) {
       this.gridAggregationModel.delete();
     }
-    this.gridAggregationModel = getAggregationModel(gl, shaderOptions, fp64);
+    this.gridAggregationModel = getAggregationModel(gl, shaderOptions);
+    if (!this.allAggregationModel) {
+      const instanceCount = numCol * numRow;
+      this.allAggregationModel = getAllAggregationModel(gl, instanceCount);
+    }
   }
 
   // set up buffers for all weights
@@ -626,9 +604,9 @@ export default class GPUGridAggregator {
     const {vertexCount, attributes, numCol, numRow} = opts;
     const {modelDirty} = this.state;
 
-    if (opts.fp64 !== this.state.fp64 || modelDirty) {
+    if (modelDirty) {
       this._setupModels(opts);
-      this.setState({fp64: opts.fp64, modelDirty: false});
+      this.setState({modelDirty: false});
     }
 
     // this maps color/elevation to weight name.
@@ -660,12 +638,12 @@ function deleteResources(resources) {
   });
 }
 
-function getAggregationModel(gl, shaderOptions, fp64 = false) {
+function getAggregationModel(gl, shaderOptions) {
   const shaders = mergeShaders(
     {
-      vs: fp64 ? AGGREGATE_TO_GRID_VS_FP64 : AGGREGATE_TO_GRID_VS,
+      vs: AGGREGATE_TO_GRID_VS,
       fs: AGGREGATE_TO_GRID_FS,
-      modules: fp64 ? [project64] : [project32]
+      modules: [fp64, project32]
     },
     shaderOptions
   );
@@ -681,9 +659,9 @@ function getAggregationModel(gl, shaderOptions, fp64 = false) {
 function getAllAggregationModel(gl, instanceCount) {
   return new Model(gl, {
     id: 'All-Aggregation-Model',
-    vs: AGGREGATE_ALL_VS_FP64,
+    vs: AGGREGATE_ALL_VS,
     fs: AGGREGATE_ALL_FS,
-    modules: [fp64ShaderModule],
+    modules: [fp64],
     vertexCount: 1,
     drawMode: GL.POINTS,
     isInstanced: true,
@@ -707,30 +685,3 @@ function getMeanTransform(gl, opts) {
     )
   );
 }
-
-/* eslint-disable complexity */
-// DEBUG ONLY
-// validateProps(aggregationParams, opts) {
-//   const {changeFlags, projectPoints, gridTransformMatrix} = aggregationParams;
-//   log.assert(
-//     changeFlags.dataChanged || changeFlags.viewportChanged || changeFlags.cellSizeChanged
-//   );
-//
-//   // log.assert for required options
-//   log.assert(
-//     !changeFlags.dataChanged ||
-//       (opts.attributes &&
-//         opts.weights &&
-//         (!opts.projectPositions || opts.moduleSettings.viewport) &&
-//         opts.cellSize)
-//   );
-//   log.assert(!changeFlags.cellSizeChanged || opts.cellSize);
-//
-//   // viewport is needed only when performing screen space aggregation (projectPoints is true)
-//   log.assert(!(changeFlags.viewportChanged && projectPoints) || opts.moduleSettings.viewport);
-//
-//   if (projectPoints && gridTransformMatrix) {
-//     log.warn('projectPoints is true, gridTransformMatrix is ignored')();
-//   }
-// }
-/* eslint-enable complexity */

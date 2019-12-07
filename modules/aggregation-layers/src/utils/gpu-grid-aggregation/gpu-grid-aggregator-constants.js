@@ -9,10 +9,7 @@ export const DEFAULT_CHANGE_FLAGS = {
 export const DEFAULT_RUN_PARAMS = {
   changeFlags: DEFAULT_CHANGE_FLAGS,
   projectPoints: false,
-  useGPU: true,
-  fp64: false,
   viewport: null,
-  gridTransformMatrix: null,
   createBufferObjects: true,
   moduleSettings: {}
 };
@@ -37,7 +34,6 @@ export const DEFAULT_WEIGHT_PARAMS = {
   combineMaxMin: false
 };
 
-export const IDENTITY_MATRIX = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1];
 export const PIXEL_SIZE = 4; // RGBA32F
 export const WEIGHT_SIZE = 3;
 

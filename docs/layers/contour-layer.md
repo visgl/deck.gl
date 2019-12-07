@@ -14,6 +14,12 @@
 import DeckGL from '@deck.gl/react';
 import {ContourLayer} from '@deck.gl/aggregation-layers';
 
+const CONTOURS = [
+  {threshold: 1, color: [255, 0, 0, 255], strokeWidth: 1}, // => Isoline for threshold 1
+  {threshold: 5, color: [0, 255, 0], strokeWidth: 2}, // => Isoline for threshold 5
+  {threshold: [6, 10], color: [0, 0, 255, 128]} // => Isoband for threshold range [6, 10)
+];
+
 const App = ({data, viewport}) => {
 
   /**
@@ -26,11 +32,7 @@ const App = ({data, viewport}) => {
   const layer = new ContourLayer({
     id: 'contourLayer',
     // Three contours are rendered.
-    contours: [
-      {threshold: 1, color: [255, 0, 0, 255], strokeWidth: 1}, // => Isoline for threshold 1
-      {threshold: 5, color: [0, 255, 0], strokeWidth: 2}, // => Isoline for threshold 5
-      {threshold: [6, 10], color: [0, 0, 255, 128]} // => Isoband for threshold range [6, 10)
-    ],
+    contours: CONTOURS,
     cellSize: 200,
     getPosition: d => d.COORDINATES,
   });
@@ -107,17 +109,13 @@ Array of objects with following keys
 
 * `zIndex` (Number, optional) : Defines z order of the contour. Contour with higher `zIndex` value is rendered above contours with lower `zIndex` values. When visualizing overlapping contours, `zIndex` along with `zOffset` (defined below) can be used to precisely layout contours. This also avoids z-fighting rendering issues. If not specified a unique value from `0` to `n` (number of contours) is assigned.
 
+NOTE: Like any other layer prop, a shallow comparison is performed on `contours` prop to determine if it is changed. This prop should be set to an array object, that changes only when contours need to be changed.
+
 ##### `zOffset` (Number, optional)
 
 * Default: `0.005`
 
 A very small z offset that is added for each vertex of a contour (Isoline or Isoband). This is needed to control the layout of contours, especially when rendering overlapping contours. Imagine a case where an Isoline is specified which is overlapped with an Isoband. To make sure the Isoline is visible we need to render this above the Isoband.
-
-##### `fp64` (Boolean, optional)
-
-* Default: `false`
-
-Whether the aggregation should be performed in high-precision 64-bit mode. Note that since deck.gl v6.1, the default 32-bit projection uses a hybrid mode that matches 64-bit precision with significantly better performance.
 
 ### Data Accessors
 
