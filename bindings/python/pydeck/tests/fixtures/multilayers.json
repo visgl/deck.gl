@@ -1,11 +1,7 @@
 {
   "initialViewState": {
-    "bearing": 0,
     "latitude": -122.45,
     "longitude": 37.8,
-    "maxZoom": 20,
-    "minZoom": 0,
-    "pitch": 0,
     "zoom": 12
   },
   "layers": [
@@ -40,7 +36,7 @@
           "text": "Hello World"
         }
       ],
-      "getPosition": "[lng, lat]",
+      "getPosition": "position",
       "getTextAnchor": "end",
       "id": "textlayer"
     },
