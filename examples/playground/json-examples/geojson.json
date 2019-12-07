@@ -11,14 +11,14 @@
   },
   "views": [
     {
-      "type": "MapView",
+      "@@type": "MapView",
       "controller": true,
       "mapStyle": "mapbox://styles/mapbox/light-v9"
     }
   ],
   "layers": [
     {
-      "type": "GeoJsonLayer",
+      "@@type": "GeoJsonLayer",
       "data": "https://raw.githubusercontent.com/uber-common/deck.gl-data/master/examples/geojson/vancouver-blocks.json",
       "opacity": 0.8,
       "stroked": false,
@@ -26,9 +26,17 @@
       "extruded": true,
       "wireframe": true,
       "elevationScale": 0.10,
-      "getElevation": "properties.valuePerSqm",
-      "getFillColor": [199, 233, 180],
-      "getLineColor": [255, 255, 255]
+      "getElevation": "@@=properties.valuePerSqm",
+      "getFillColor": [
+        199,
+        233,
+        180
+      ],
+      "getLineColor": [
+        255,
+        255,
+        255
+      ]
     }
   ]
 }
