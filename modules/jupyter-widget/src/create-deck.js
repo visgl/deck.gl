@@ -39,25 +39,30 @@ const jsonConverterConfiguration = {
 
 loaders.registerLoaders([CSVLoader, Tile3DLoader, LASWorkerLoader]);
 
+const jsonConverter = new deck.JSONConverter({
+  configuration: jsonConverterConfiguration
+});
+
+export function updateDeck(inputJSON, deckgl) {
+  const results = jsonConverter.convert(inputJSON);
+  deckgl.setProps(results);
+}
+
 export function createDeck({
   mapboxApiKey,
   container,
   jsonInput,
   tooltip,
-  onComplete,
   handleClick,
   handleWarning
 }) {
+  let deckgl;
   try {
-    const jsonConverter = new deck.JSONConverter({
-      configuration: jsonConverterConfiguration
-    });
-
     const props = jsonConverter.convert(jsonInput);
 
     const getTooltip = makeTooltip(tooltip);
 
-    const deckgl = new deck.DeckGL({
+    deckgl = new deck.DeckGL({
       ...props,
       map: mapboxgl,
       mapboxApiAccessToken: mapboxApiKey,
@@ -73,16 +78,12 @@ export function createDeck({
       const warn = deck.log.warn;
       deck.log.warn = injectFunction(warn, handleWarning);
     }
-
-    if (onComplete) {
-      onComplete({jsonConverter, deckgl});
-    }
   } catch (err) {
     // This will fail in node tests
     // eslint-disable-next-line
     console.error(err);
   }
-  return {};
+  return deckgl;
 }
 
 function injectFunction(warnFunction, messageHandler) {

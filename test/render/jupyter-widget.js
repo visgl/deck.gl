@@ -24,6 +24,104 @@ const TEST_CASES = [
       ]
     },
     goldenImage: './test/render/golden-images/jupyter-widget-scatterplot.png'
+  },
+  {
+    name: 'ScatterplotLayer and TextLayer',
+    json: {
+      description: 'Test of plotting multiple layers at once',
+      viewState: {
+        maxZoom: 20,
+        zoom: 15
+      },
+      layers: [
+        {
+          '@@type': 'ScatterplotLayer',
+          data: [
+            {
+              position: [-0.002, 0.002],
+              rgb: [136, 45, 97]
+            },
+            {
+              position: [-0.002, -0.002],
+              rgb: [170, 57, 57]
+            },
+            {
+              position: [0.002, -0.002],
+              rgb: [45, 136, 45]
+            },
+            {
+              position: [0.002, 0.002],
+              rgb: [123, 159, 53]
+            }
+          ],
+          getColor: 'rgb',
+          getPosition: 'position',
+          getRadius: 100
+        },
+        {
+          '@@type': 'TextLayer',
+          data: [
+            {
+              position: [0, 0],
+              text: 'Test'
+            },
+            {
+              position: [0.002, 0],
+              text: 'Testing'
+            }
+          ],
+          fontSize: 144,
+          getColor: [0, 0, 255],
+          getPosition: 'position',
+          getTextAnchor: '"start"',
+          fontFamily: 'Times, Times New Roman, Georgia, serif'
+        }
+      ]
+    },
+    goldenImage: './test/render/golden-images/jupyter-widget-scatterplot-and-text.png'
+  },
+  {
+    name: 'GeoJsonLayer',
+    json: {
+      description: 'Test of GeoJsonLayer',
+      viewState: {
+        longitude: -122.45,
+        latitude: 37.8,
+        zoom: 0
+      },
+      layers: [
+        {
+          '@@type': 'GeoJsonLayer',
+          data: {
+            type: 'FeatureCollection',
+            features: [
+              {
+                type: 'Feature',
+                properties: {},
+                geometry: {
+                  type: 'Polygon',
+                  coordinates: [
+                    [
+                      [-122.42923736572264, 37.80544394934271],
+                      [0, 37.80544394934271],
+                      [-122.42923736572264, 0],
+                      [-122.42923736572264, 37.80544394934271]
+                    ]
+                  ]
+                }
+              }
+            ]
+          },
+          stroked: true,
+          filled: true,
+          lineWidthMinPixels: 2,
+          opacity: 0.4,
+          getLineColor: [255, 100, 100],
+          getFillColor: [200, 160, 0, 180]
+        }
+      ]
+    },
+    goldenImage: './test/render/golden-images/jupyter-widget-geojsonlayer.png'
   }
 ];
 
@@ -54,6 +152,7 @@ test('jupyter-widget Render Test', t => {
         }
       };
     });
+    // TODO can add a done POST here
   }
 
   function nextTest() {
