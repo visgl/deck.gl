@@ -49,10 +49,17 @@ void main(void) {
   float a = alpha * vColor.a;
   
   if (a < alphaCutoff) {
+    // We are now in the background, let's decide what to draw
     if (shouldDrawBackground && !picking_uActive) {
+      // draw background color and return if not picking
       gl_FragColor = vec4(backgroundColor.rgb, vColor.a);
       return;
+    } else if (picking_uActive) {
+      // allow picking to work and pick the background
+      DECKGL_FILTER_COLOR(gl_FragColor, geometry);
+      return;
     } else {
+      // no background and no picking
       discard;
     }
   }
