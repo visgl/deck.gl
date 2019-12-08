@@ -26,9 +26,9 @@ import {
   hasFeatures,
   isWebGL2,
   readPixelsToBuffer,
-  fp64,
   withParameters
 } from '@luma.gl/core';
+import {fp64arithmetic} from '@luma.gl/shadertools';
 import {log, project32, mergeShaders} from '@deck.gl/core';
 
 import {
@@ -643,7 +643,7 @@ function getAggregationModel(gl, shaderOptions) {
     {
       vs: AGGREGATE_TO_GRID_VS,
       fs: AGGREGATE_TO_GRID_FS,
-      modules: [fp64, project32]
+      modules: [fp64arithmetic, project32]
     },
     shaderOptions
   );
@@ -661,7 +661,7 @@ function getAllAggregationModel(gl, instanceCount) {
     id: 'All-Aggregation-Model',
     vs: AGGREGATE_ALL_VS,
     fs: AGGREGATE_ALL_FS,
-    modules: [fp64],
+    modules: [fp64arithmetic],
     vertexCount: 1,
     drawMode: GL.POINTS,
     isInstanced: true,
