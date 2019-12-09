@@ -63,7 +63,7 @@ export default class Tile3DLayer extends CompositeLayer {
         this.setNeedsUpdate();
       },
       onTileUnload: this.props.onTileUnload,
-      onTileError: this.props.onTileError,
+      onTileLoadFail: this.props.onTileError,
       // TODO: explicit passing should not be needed, registerLoaders should suffice
       fetchOptions,
       ...ionMetadata,
