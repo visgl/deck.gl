@@ -289,8 +289,7 @@ test('project32&64#vs', t => {
           // luma's assembleShaders require WebGL context to work
           const module = usefp64 ? project64 : project32;
           const dependencies = appendDependencies(module, []).concat(module);
-          const vsSource =
-            dependencies.map(dep => dep.vs).join('');
+          const vsSource = dependencies.map(dep => dep.vs).join('');
 
           const projectVS = compileVertexShader(vsSource);
 
