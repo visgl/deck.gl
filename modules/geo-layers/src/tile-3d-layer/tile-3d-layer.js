@@ -3,6 +3,7 @@
 import {COORDINATE_SYSTEM, CompositeLayer} from '@deck.gl/core';
 import {PointCloudLayer} from '@deck.gl/layers';
 import {ScenegraphLayer} from '@deck.gl/mesh-layers';
+import {log} from '@deck.gl/core';
 
 import {Tileset3D, _getIonTilesetMetadata} from '@loaders.gl/3d-tiles';
 
@@ -36,6 +37,9 @@ export default class Tile3DLayer extends CompositeLayer {
   }
 
   async updateState({props, oldProps}) {
+    if ('onTileLoadFail' in props) {
+      log.warn('`onTileLoadFail` is deprecated. use `onTileError` instead.');
+    }
     if (props.data && props.data !== oldProps.data) {
       await this._loadTileset(props.data);
     } else if (

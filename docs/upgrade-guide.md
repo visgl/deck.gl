@@ -8,10 +8,6 @@
 
 - The `opacity` prop of all layers is now default to `1` (used to be `0.8`).
 
-#### Deprecations
-
-- `onTileLoadFail` props in `Tile3DLayer` are deprecated. Use `onTileError` instead.
-
 ##### Removed
 
 - `ArcLayer` props
@@ -24,6 +20,8 @@
   + `getLineDashArray`: use [PathStyleExtension](/docs/api-reference/extensions/path-style-extension.md)
 - `H3HexagonLayer` props
   + `getColor`: use `getFillColor` and `getLineColor`
+- `Tile3DLayer` props:
+  + `onTileLoadFail`: use `onTileError`
 - `project` shader module
   + `project_scale`: use `project_size`
   + `project_to_clipspace`: use `project_position_to_clipspace`
