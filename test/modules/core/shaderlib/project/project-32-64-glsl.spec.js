@@ -287,14 +287,9 @@ test('project32&64#vs', t => {
         } else {
           // TODO - resolve dependencies properly
           // luma's assembleShaders require WebGL context to work
-          const vsSource =
-            []
-              .concat(
-                usefp64 ? project64.dependencies : project32.dependencies,
-                project.dependencies
-              )
-              .map(dep => dep.vs)
-              .join('') + (usefp64 ? project64.vs : project32.vs);
+          const module = usefp64 ? project64 : project32;
+          const dependencies = appendDependencies(module, []).concat(module);
+          const vsSource = dependencies.map(dep => dep.vs).join('');
 
           const projectVS = compileVertexShader(vsSource);
 
@@ -308,9 +303,9 @@ test('project32&64#vs', t => {
             uniforms.project_uViewProjectionMatrixFP64 = normalizedProjectMatrix64;
           }
 
-          const module = projectVS(uniforms);
+          const projectFunc = projectVS(uniforms);
           config.EPSILON = c.precision || 1e-7;
-          let actual = c.func(module);
+          let actual = c.func(projectFunc);
           actual = c.mapResult ? c.mapResult(actual) : actual;
           const name = `CPU: ${usefp64 ? 'project64' : 'project32'} ${c.name}`;
           verifyResult({t, name, actual, expected});
@@ -323,3 +318,14 @@ test('project32&64#vs', t => {
   config.EPSILON = oldEpsilon;
   t.end();
 });
+
+function appendDependencies(module, result) {
+  const dependencies = module.dependencies;
+  if (dependencies && dependencies.length > 0) {
+    for (const dep of dependencies) {
+      result = appendDependencies(dep, result);
+    }
+    result = result.concat(dependencies);
+  }
+  return result;
+}
