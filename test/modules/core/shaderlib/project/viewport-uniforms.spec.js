@@ -21,7 +21,8 @@
 import test from 'tape-catch';
 
 import {COORDINATE_SYSTEM, MapView, OrbitView} from 'deck.gl';
-import {project, project64} from '@deck.gl/core/shaderlib';
+import {project} from '@deck.gl/core';
+import {project64} from '@deck.gl/extensions';
 
 const TEST_VIEWPORTS = {
   map: new MapView().makeViewport({

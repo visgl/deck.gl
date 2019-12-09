@@ -20,8 +20,8 @@
 
 import {fp64} from '@luma.gl/core';
 const {fp64ify, fp64ifyMatrix4} = fp64;
-import project from '../project/project';
-import memoize from '../../utils/memoize';
+import {project, experimental} from '@deck.gl/core';
+const {memoize} = experimental;
 
 import project64Shader from './project64.glsl';
 

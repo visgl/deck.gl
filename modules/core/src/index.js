@@ -54,15 +54,7 @@ export {default as Viewport} from './viewports/viewport';
 export {default as WebMercatorViewport} from './viewports/web-mercator-viewport';
 
 // Shader modules
-export {
-  picking,
-  project,
-  project32,
-  project64,
-  gouraudLighting,
-  phongLighting,
-  shadow
-} from './shaderlib';
+export {picking, project, project32, gouraudLighting, phongLighting, shadow} from './shaderlib';
 
 export {default as View} from './views/view';
 export {default as MapView} from './views/map-view';

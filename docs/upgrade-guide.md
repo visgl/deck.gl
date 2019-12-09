@@ -71,6 +71,7 @@ The change has allowed us to support loading textures from `ImageBitmap`, in use
   + `project`: `vec3 project_position(vec3 position, vec2 position64xyLow)` is now `vec3 project_position(vec3 position, vec3 position64Low)`.
   + `project`: `vec4 project_position(vec4 position, vec2 position64xyLow)` is now `vec4 project_position(vec4 position, vec3 position64Low)`.
   + `project32` and `project64`: `vec4 project_position_to_clipspace(vec3 position, vec2 position64xyLow, vec3 offset)` is now `vec4 project_position_to_clipspace(vec3 position, vec3 position64Low, vec3 offset)`.
+- The shader module [project64](/docs/shader-modules/project64.md) is no longer included in `@deck.gl/core` and `deck.gl`. You can still import it from `@deck.gl/extensions`.
 
 ##### Shader modules
 

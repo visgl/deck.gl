@@ -54,7 +54,6 @@ export {
   picking,
   project,
   project32,
-  project64,
   gouraudLighting,
   phongLighting,
   shadow,

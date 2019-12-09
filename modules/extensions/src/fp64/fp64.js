@@ -18,7 +18,8 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {LayerExtension, COORDINATE_SYSTEM, project64} from '@deck.gl/core';
+import {LayerExtension, COORDINATE_SYSTEM} from '@deck.gl/core';
+import project64 from './project64';
 
 export default class Fp64Extension extends LayerExtension {
   getShaders(opts) {
