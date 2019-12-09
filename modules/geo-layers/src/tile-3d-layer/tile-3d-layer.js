@@ -26,6 +26,9 @@ const defaultProps = {
 
 export default class Tile3DLayer extends CompositeLayer {
   initializeState() {
+    if ('onTileLoadFail' in this.props) {
+      log.removed('onTileLoadFail', 'onTileError')();
+    }
     this.state = {
       layerMap: {},
       tileset3d: null
@@ -37,9 +40,6 @@ export default class Tile3DLayer extends CompositeLayer {
   }
 
   async updateState({props, oldProps}) {
-    if ('onTileLoadFail' in props) {
-      log.warn('`onTileLoadFail` is deprecated. use `onTileError` instead.');
-    }
     if (props.data && props.data !== oldProps.data) {
       await this._loadTileset(props.data);
     } else if (
