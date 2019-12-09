@@ -18,7 +18,6 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {equals} from 'math.gl';
 import GL from '@luma.gl/constants';
 import {LineLayer, SolidPolygonLayer} from '@deck.gl/layers';
 import {generateContours} from './contour-utils';
@@ -102,7 +101,7 @@ export default class ContourLayer extends GridAggregationLayer {
       contourSegments.length > 0 &&
       new LinesSubLayerClass(
         this.getSubLayerProps({
-          id: 'contour-line-layer'
+          id: 'lines'
         }),
         {
           data: this.state.contourData.contourSegments,
@@ -119,7 +118,7 @@ export default class ContourLayer extends GridAggregationLayer {
       contourPolygons.length > 0 &&
       new BandsSubLayerClass(
         this.getSubLayerProps({
-          id: 'contour-solid-polygon-layer'
+          id: 'bands'
         }),
         {
           data: this.state.contourData.contourPolygons,
@@ -186,6 +185,7 @@ export default class ContourLayer extends GridAggregationLayer {
     for (let i = 0; i < count; i++) {
       const {threshold, zIndex} = contours[i];
       thresholdData[i] = {
+        index: i, // index into props.contours
         threshold,
         zIndex: zIndex || i,
         zOffset
@@ -199,27 +199,12 @@ export default class ContourLayer extends GridAggregationLayer {
   _onGetSublayerColor(element) {
     // element is either a line segment or polygon
     const {contours} = this.props;
-    let color = DEFAULT_COLOR;
-    contours.forEach(data => {
-      if (equals(data.threshold, element.threshold)) {
-        color = data.color || DEFAULT_COLOR;
-      }
-    });
-    return color;
+    return contours[element.index].color || DEFAULT_COLOR;
   }
 
-  _onGetSublayerStrokeWidth(segment) {
+  _onGetSublayerStrokeWidth(element) {
     const {contours} = this.props;
-    let strokeWidth = DEFAULT_STROKE_WIDTH;
-    // Linearly searches the contours, but there should only be few contours
-    contours.some(contour => {
-      if (contour.threshold === segment.threshold) {
-        strokeWidth = contour.strokeWidth || DEFAULT_STROKE_WIDTH;
-        return true;
-      }
-      return false;
-    });
-    return strokeWidth;
+    return contours[element.index].strokeWidth || DEFAULT_STROKE_WIDTH;
   }
 }
 

@@ -15,8 +15,8 @@ export function generateContours({
   const width = gridSize[0];
   const height = gridSize[1];
 
-  thresholdData.forEach((data, index) => {
-    const {threshold} = data;
+  thresholdData.forEach((data) => {
+    const {threshold, index} = data;
     for (let x = -1; x < width; x++) {
       for (let y = -1; y < height; y++) {
         // Get the MarchingSquares code based on neighbor cell weights.
@@ -45,7 +45,8 @@ export function generateContours({
           polygons.forEach(polygon => {
             contourPolygons.push({
               vertices: polygon,
-              threshold
+              threshold,
+              index
             });
           });
         } else {
@@ -56,7 +57,8 @@ export function generateContours({
             contourSegments.push({
               start: vertices[i],
               end: vertices[i + 1],
-              threshold
+              threshold,
+              index
             });
           }
         }
