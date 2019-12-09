@@ -30,8 +30,5 @@ export {
   IcoSphereGeometry,
   PlaneGeometry,
   SphereGeometry,
-  TruncatedConeGeometry,
-  // Shader Modules
-  fp64,
-  pbr
+  TruncatedConeGeometry
 } from '@luma.gl/core';

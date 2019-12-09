@@ -20,7 +20,8 @@
 
 import {equals} from 'math.gl';
 import {Transform} from '@luma.gl/core';
-import {project64, project32} from '@deck.gl/core';
+import {project32} from '@deck.gl/core';
+import {project64} from '@deck.gl/extensions';
 
 export function getPixelOffset(p1, p2) {
   return [p1[0] - p2[0], p1[1] - p2[1], p1[2] - p2[2], 1];

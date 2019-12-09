@@ -24,8 +24,8 @@ import GL from '@luma.gl/constants';
 
 // import {COORDINATE_SYSTEM, Viewport, WebMercatorViewport} from 'deck.gl';
 import {COORDINATE_SYSTEM, WebMercatorViewport} from 'deck.gl';
-import project32 from '../../../../../modules/core/src/shaderlib/project32/project32';
-import {project, project64} from '@deck.gl/core/shaderlib';
+import {project, project32} from '@deck.gl/core';
+import {project64} from '@deck.gl/extensions';
 // import {Matrix4, config} from 'math.gl';
 import {config} from 'math.gl';
 import {gl} from '@deck.gl/test-utils';
