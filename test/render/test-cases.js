@@ -30,20 +30,6 @@ const effect2 = new PostProcessEffect(vignette);
 
 const ICON_ATLAS = './test/render/icon-atlas.png';
 
-const SAMPLE_DATA = (([xCount, yCount], spacing) => {
-  const data = [];
-  for (let x = 0; x < xCount; x++) {
-    for (let y = 0; y < yCount; y++) {
-      data.push({
-        position: [(x - (xCount - 1) / 2) * spacing, (y - (yCount - 1) / 2) * spacing],
-        color: [(x / (xCount - 1)) * 255, 128, (y / (yCount - 1)) * 255],
-        orientation: [(x / (xCount - 1)) * 60 - 30, 0, -90]
-      });
-    }
-  }
-  return data;
-})([10, 10], 120);
-
 const meshLayerInstanceMatrix = new Matrix4().rotateY((45 / 180) * Math.PI);
 
 import {
@@ -1760,7 +1746,7 @@ export const TEST_CASES = [
     goldenImage: './test/render/golden-images/s2-layer-l2.png'
   },
   {
-    name: 'simple-mesh-layer',
+    name: 'simple-mesh-layer-lnglat',
     viewState: {
       latitude: 37.75,
       longitude: -122.45,
@@ -1770,18 +1756,18 @@ export const TEST_CASES = [
     },
     layers: [
       new SimpleMeshLayer({
-        id: 'simple-mesh-layer',
+        id: 'simple-mesh-layer-lnglat',
         data: dataSamples.points.slice(0, 10),
         mesh: cube,
         sizeScale: 100,
         modelMatrix: new Matrix4().rotateX((-45 / 180) * Math.PI),
-        coordinateSystem: COORDINATE_SYSTEM.DEFAULT,
+        coordinateSystem: COORDINATE_SYSTEM.LNGLAT,
         getPosition: d => d.COORDINATES,
         getColor: [0, 255, 255, 125],
         getTransformMatrix: meshLayerInstanceMatrix
       })
     ],
-    goldenImage: './test/render/golden-images/simple-mesh-layer.png'
+    goldenImage: './test/render/golden-images/simple-mesh-layer-lnglat.png'
   },
   {
     name: 'simple-mesh-layer-modelmatrix',
@@ -1802,7 +1788,7 @@ export const TEST_CASES = [
     layers: [
       new SimpleMeshLayer({
         id: 'simple-mesh-layer-cartesian',
-        data: SAMPLE_DATA,
+        data: dataSamples.meshSampleData,
         mesh: cube,
         sizeScale: 10,
         coordinateSystem: COORDINATE_SYSTEM.CARTESIAN,
@@ -1826,7 +1812,7 @@ export const TEST_CASES = [
     layers: [
       new SimpleMeshLayer({
         id: 'simple-mesh-layer-meter-offsets',
-        data: SAMPLE_DATA,
+        data: dataSamples.meshSampleData,
         mesh: cube,
         sizeScale: 30,
         coordinateOrigin: [-122.45, 37.75, 0],
