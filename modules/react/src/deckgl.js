@@ -20,8 +20,7 @@
 
 import React, {createElement} from 'react';
 import PropTypes from 'prop-types';
-import {Deck, experimental} from '@deck.gl/core';
-const {memoize} = experimental;
+import {Deck, _memoize as memoize} from '@deck.gl/core';
 
 import extractJSXLayers from './utils/extract-jsx-layers';
 import positionChildrenUnderViews from './utils/position-children-under-views';

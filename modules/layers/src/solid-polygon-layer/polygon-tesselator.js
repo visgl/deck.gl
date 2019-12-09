@@ -24,8 +24,7 @@
 // - 3D surfaces (top and sides only)
 // - 3D wireframes (not yet)
 import * as Polygon from './polygon';
-import {experimental} from '@deck.gl/core';
-const {Tesselator} = experimental;
+import {Tesselator} from '@deck.gl/core';
 
 // This class is set up to allow querying one attribute at a time
 // the way the AttributeManager expects it

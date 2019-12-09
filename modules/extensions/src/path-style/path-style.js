@@ -18,7 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {LayerExtension, mergeShaders} from '@deck.gl/core';
+import {LayerExtension, _mergeShaders as mergeShaders} from '@deck.gl/core';
 import {dashShaders} from './shaders.glsl';
 
 const defaultProps = {

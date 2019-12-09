@@ -4,8 +4,6 @@
  */
 const deck = require('../../core/bundle');
 
-const {experimental} = deck;
-
 Object.assign(
   deck,
   require('@deck.gl/layers'),
@@ -14,7 +12,5 @@ Object.assign(
   require('@deck.gl/mesh-layers'),
   require('@deck.gl/json')
 );
-
-Object.assign(deck.experimental, experimental);
 
 module.exports = deck;

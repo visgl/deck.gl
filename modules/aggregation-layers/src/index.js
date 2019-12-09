@@ -32,29 +32,15 @@ export {default as HeatmapLayer} from './heatmap-layer/heatmap-layer';
 export {default as _GPUGridAggregator} from './utils/gpu-grid-aggregation/gpu-grid-aggregator';
 export {default as _CPUAggregator} from './utils/cpu-aggregator';
 
-import {default as BinSorter} from './utils/bin-sorter';
-import {
-  linearScale,
-  getLinearScale,
-  quantizeScale,
-  getQuantizeScale,
-  getQuantileScale,
-  getOrdinalScale,
-  getScaleFunctionByScaleType,
-  getScaleDomain
+export {default as _BinSorter} from './utils/bin-sorter';
+export {
+  linearScale as _linearScale,
+  getLinearScale as _getLinearScale,
+  quantizeScale as _quantizeScale,
+  getQuantizeScale as _getQuantizeScale,
+  getQuantileScale as _getQuantileScale,
+  getOrdinalScale as _getOrdinalScale,
+  getScaleFunctionByScaleType as _getScaleFunctionByScaleType,
+  getScaleDomain as _getScaleDomain
 } from './utils/scale-utils';
-import {defaultColorRange} from './utils/color-utils';
-
-export const experimental = {
-  BinSorter,
-
-  linearScale,
-  getLinearScale,
-  quantizeScale,
-  getQuantizeScale,
-  getQuantileScale,
-  getOrdinalScale,
-  getScaleFunctionByScaleType,
-  getScaleDomain,
-  defaultColorRange
-};
+export {defaultColorRange as _defaultColorRange} from './utils/color-utils';

@@ -53,29 +53,6 @@ function flattenArray(array, filter, map, result) {
   return result;
 }
 
-// Flattens nested array of vertices, padding third coordinate as needed
-export function flattenVertices(nestedArray, {result = [], dimensions = 3} = {}) {
-  let index = -1;
-  let vertexLength = 0;
-  while (++index < nestedArray.length) {
-    const value = nestedArray[index];
-    if (Array.isArray(value) || ArrayBuffer.isView(value)) {
-      flattenVertices(value, {result, dimensions});
-    } else {
-      // eslint-disable-next-line
-      if (vertexLength < dimensions) {
-        result.push(value);
-        vertexLength++;
-      }
-    }
-  }
-  // Add a third coordinate if needed
-  if (vertexLength > 0 && vertexLength < dimensions) {
-    result.push(0);
-  }
-  return result;
-}
-
 // Uses copyWithin to significantly speed up typed array value filling
 export function fillArray({target, source, start = 0, count = 1}) {
   const length = source.length;
