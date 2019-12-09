@@ -8,6 +8,10 @@
 
 - The `opacity` prop of all layers is now default to `1` (used to be `0.8`).
 
+#### Deprecations
+
+- `onTileLoadFail` props in `Tile3DLayer` are deprecated. Use `onTileError` instead.
+
 ##### Removed
 
 - `ArcLayer` props
