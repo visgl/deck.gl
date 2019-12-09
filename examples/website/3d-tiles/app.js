@@ -74,7 +74,6 @@ export default class App extends PureComponent {
       _ionAssetId: 43978,
       _ionAccessToken: ION_TOKEN,
       pointSize: 2,
-      onTileLoadFail: this._onTilesetLoad,
       onTilesetLoad: this._onTilesetLoad
     });
   }
