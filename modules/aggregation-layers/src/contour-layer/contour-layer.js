@@ -107,8 +107,8 @@ export default class ContourLayer extends GridAggregationLayer {
           data: this.state.contourData.contourSegments,
           getSourcePosition: d => d.start,
           getTargetPosition: d => d.end,
-          getColor: this._onGetSublayerColor.bind(this),
-          getWidth: this._onGetSublayerStrokeWidth.bind(this)
+          getColor: d => d.contour.color || DEFAULT_COLOR,
+          getWidth: d => d.contour.strokeWidth || DEFAULT_STROKE_WIDTH
         }
       );
 
@@ -123,7 +123,7 @@ export default class ContourLayer extends GridAggregationLayer {
         {
           data: this.state.contourData.contourPolygons,
           getPolygon: d => d.vertices,
-          getFillColor: this._onGetSublayerColor.bind(this)
+          getFillColor: d => d.contour.color || DEFAULT_COLOR
         }
       );
 
@@ -191,16 +191,6 @@ export default class ContourLayer extends GridAggregationLayer {
       };
     }
     this.setState({thresholdData});
-  }
-
-  // Private (Sublayers)
-
-  _onGetSublayerColor(element) {
-    return element.contour.color || DEFAULT_COLOR;
-  }
-
-  _onGetSublayerStrokeWidth(element) {
-    return element.contour.strokeWidth || DEFAULT_STROKE_WIDTH;
   }
 }
 
