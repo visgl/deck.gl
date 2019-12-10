@@ -67,10 +67,10 @@ if(vTime > currentTime || vTime < currentTime - trailLength) {
         accessor: 'getTimestamps',
         shaderAttributes: {
           instanceTimestamps: {
-            offset: 0
+            vertexOffset: 0
           },
           instanceNextTimestamps: {
-            offset: 4
+            vertexOffset: 1
           }
         }
       }

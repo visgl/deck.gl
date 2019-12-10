@@ -12,16 +12,27 @@ function getStride(accessor) {
 }
 
 function resolveShaderAttribute(baseAccessor, shaderAttributeOptions) {
+  if (shaderAttributeOptions.offset) {
+    log.removed('shaderAttribute.offset', 'vertexOffset, elementOffset')();
+  }
+
+  // All shader attributes share the parent's stride
   const stride = getStride(baseAccessor);
+  // `vertexOffset` is used to access the neighboring vertex's value
+  // e.g. `nextPositions` in polygon
   const vertexOffset =
     'vertexOffset' in shaderAttributeOptions
       ? shaderAttributeOptions.vertexOffset
       : baseAccessor.vertexOffset || 0;
+  // `elementOffset` is defined when shader attribute's size is smaller than the parent's
+  // e.g. `translations` in transform matrix
   const elementOffset = shaderAttributeOptions.elementOffset || 0;
   const offset =
+    // offsets defined by the attribute
     vertexOffset * stride +
     elementOffset * baseAccessor.bytesPerElement +
-    (baseAccessor.bufferOffset || 0);
+    // offsets defined by external buffers if any
+    (baseAccessor.offset || 0);
 
   return {
     ...shaderAttributeOptions,
@@ -30,17 +41,16 @@ function resolveShaderAttribute(baseAccessor, shaderAttributeOptions) {
   };
 }
 
-function addDoublePrecisionAttributes(id, baseAccessor, shaderAttributeOptions) {
-  const doubleShaderAttributeDefs = {};
+function resolveDoublePrecisionShaderAttributes(baseAccessor, shaderAttributeOptions) {
   const resolvedOptions = resolveShaderAttribute(baseAccessor, shaderAttributeOptions);
 
-  doubleShaderAttributeDefs[`${id}32`] = resolvedOptions;
-  doubleShaderAttributeDefs[`${id}64`] = resolvedOptions;
-  doubleShaderAttributeDefs[`${id}64Low`] = {
-    ...resolvedOptions,
-    offset: resolvedOptions.offset + baseAccessor.size * 4
+  return {
+    high: resolvedOptions,
+    low: {
+      ...resolvedOptions,
+      offset: resolvedOptions.offset + baseAccessor.size * 4
+    }
   };
-  return doubleShaderAttributeDefs;
 }
 
 export default class DataColumn {
@@ -74,7 +84,7 @@ export default class DataColumn {
     // This is the attribute type defined by the layer
     // If an external buffer is provided, this.type may be overwritten
     // But we always want to use defaultType for allocation
-    this.defaultType = glArrayFromType(logicalType || bufferType || GL.FLOAT);
+    let defaultType = glArrayFromType(logicalType || bufferType || GL.FLOAT);
     this.shaderAttributes = {};
     this.doublePrecision = doublePrecision;
 
@@ -83,15 +93,16 @@ export default class DataColumn {
     // high precision is unnecessary, but the `64Low` attribute is still required
     // by the shader.
     if (doublePrecision && opts.fp64 === false) {
-      this.defaultType = Float32Array;
+      defaultType = Float32Array;
     }
-    opts.bytesPerElement = this.defaultType.BYTES_PER_ELEMENT;
+    opts.bytesPerElement = defaultType.BYTES_PER_ELEMENT;
 
+    this.defaultType = defaultType;
     this.value = null;
     this.settings = opts;
     this.state = {
       externalBuffer: null,
-      bufferAccessor: this.settings,
+      bufferAccessor: opts,
       allocatedValue: null,
       constant: false
     };
@@ -107,7 +118,7 @@ export default class DataColumn {
       this._buffer = new Buffer(this.gl, {
         id: this.id,
         target: isIndexed ? GL.ELEMENT_ARRAY_BUFFER : GL.ARRAY_BUFFER,
-        type
+        accessor: {type}
       });
     }
     return this._buffer;
@@ -134,19 +145,14 @@ export default class DataColumn {
       const shaderAttributes = {};
       const isBuffer64Bit = this.value instanceof Float64Array;
 
-      const doubleShaderAttributeDefs = addDoublePrecisionAttributes(
-        id,
+      const doubleShaderAttributeDefs = resolveDoublePrecisionShaderAttributes(
         this.getAccessor(),
         options || {}
       );
 
-      shaderAttributes[id] = new ShaderAttribute(
-        this,
-        doubleShaderAttributeDefs[isBuffer64Bit ? `${id}64` : `${id}32`]
-      );
-      const shaderAttributeLowPartName = `${id}64Low`;
-      shaderAttributes[shaderAttributeLowPartName] = isBuffer64Bit
-        ? new ShaderAttribute(this, doubleShaderAttributeDefs[shaderAttributeLowPartName])
+      shaderAttributes[id] = new ShaderAttribute(this, doubleShaderAttributeDefs.high);
+      shaderAttributes[`${id}64Low`] = isBuffer64Bit
+        ? new ShaderAttribute(this, doubleShaderAttributeDefs.low)
         : new Float32Array(this.size); // use constant for low part if buffer is 32-bit
       return shaderAttributes;
     }
@@ -204,11 +210,14 @@ export default class DataColumn {
       state.constant = true;
       this.value = value;
     } else if (opts.buffer) {
-      state.externalBuffer = opts.buffer;
+      const buffer = opts.buffer;
+      state.externalBuffer = buffer;
       state.constant = false;
       this.value = opts.value;
-      accessor.type = opts.buffer.accessor.type;
-      accessor.bytesPerElement = opts.buffer.BYTES_PER_ELEMENT;
+
+      // Copy the type of the buffer into the accessor
+      accessor.type = buffer.accessor.type;
+      accessor.bytesPerElement = buffer.accessor.BYTES_PER_ELEMENT;
       accessor.stride = getStride(accessor);
     } else if (opts.value) {
       this._checkExternalBuffer(opts);
@@ -218,8 +227,6 @@ export default class DataColumn {
       state.constant = false;
       this.value = value;
 
-      const bufferOffset = opts.offset || 0;
-      accessor.bufferOffset = bufferOffset;
       accessor.bytesPerElement = value.BYTES_PER_ELEMENT;
       accessor.stride = getStride(accessor);
 
@@ -230,13 +237,13 @@ export default class DataColumn {
       }
       // TODO: support offset in buffer.setData?
       if (buffer.byteLength < value.byteLength + byteOffset) {
+        // Over allocation is required because shader attributes may have bigger offsets
         buffer.reallocate((value.byteLength + byteOffset) * 2);
       }
       // Hack: force Buffer to infer data type
       buffer.setAccessor(null);
       buffer.subData({data: value, offset: byteOffset});
       accessor.type = buffer.accessor.type;
-      accessor.offset = byteOffset + bufferOffset;
     }
 
     return true;

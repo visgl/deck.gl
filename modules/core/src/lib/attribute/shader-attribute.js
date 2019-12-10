@@ -26,7 +26,7 @@ export default class ShaderAttribute {
     if (value && value.length !== size) {
       constantValue = new Float32Array(size);
       // initiate offset values
-      const index = accessor.elementOffset; // element offset
+      const index = accessor.elementOffset || 0; // element offset
       for (let i = 0; i < size; ++i) {
         constantValue[i] = value[index + i];
       }

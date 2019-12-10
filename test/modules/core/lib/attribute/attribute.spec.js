@@ -259,6 +259,10 @@ test('Attribute#shaderAttributes', t => {
       positions: {},
       instancePositions: {
         divisor: 1
+      },
+      instanceNextPositions: {
+        vertexOffset: 1,
+        divisor: 1
       }
     }
   });
@@ -270,6 +274,10 @@ test('Attribute#shaderAttributes', t => {
   accessor = shaderAttributes.instancePositions.getAccessor();
   t.equals(accessor.size, 3, 'Multiple shader attributes inherit pointer properties');
   t.equals(accessor.divisor, 1, 'Shader attribute defines pointer properties');
+  accessor = shaderAttributes.instanceNextPositions.getAccessor();
+  t.equals(accessor.stride, 12, 'Shader attribute defines explicit stride');
+  t.equals(accessor.offset, 12, 'Shader attribute defines offset');
+
   t.equals(attribute.getBuffer(), buffer1, 'Attribute has buffer');
   t.equals(
     attribute.getBuffer(),
@@ -674,16 +682,6 @@ test('Attribute#setExternalBuffer', t => {
     size: 3,
     update: () => {}
   });
-  const attribute2 = new Attribute(gl, {
-    id: 'test-attribute-with-shader-attributes',
-    type: GL.UNSIGNED_BYTE,
-    size: 4,
-    normalized: true,
-    update: () => {},
-    shaderAttributes: {
-      shaderAttribute: {offset: 4}
-    }
-  });
   const buffer = new Buffer(gl, 12);
   const value1 = new Float32Array(4);
   const value2 = new Uint8Array(4);
@@ -713,8 +711,6 @@ test('Attribute#setExternalBuffer', t => {
   t.ok(attribute.setExternalBuffer(value2), 'should set external buffer to typed array');
   t.is(attribute.getAccessor().type, GL.UNSIGNED_BYTE, 'attribute type is set correctly');
 
-  t.ok(attribute2.setExternalBuffer(value2), 'external value is set');
-
   spy.reset();
   t.ok(
     attribute.setExternalBuffer(value2),
@@ -735,6 +731,75 @@ test('Attribute#setExternalBuffer', t => {
   t.is(attributeAccessor.stride, 8, 'attribute accessor is updated');
   t.is(attribute.value, value1, 'external value is set');
   t.is(attributeAccessor.type, GL.FLOAT, 'attribute type is set correctly');
+
+  buffer.delete();
+  attribute.delete();
+
+  t.end();
+});
+
+test('Attribute#setExternalBuffer#shaderAttributes', t => {
+  const attribute = new Attribute(gl, {
+    id: 'test-attribute-with-shader-attributes',
+    type: GL.UNSIGNED_BYTE,
+    size: 4,
+    normalized: true,
+    update: () => {},
+    shaderAttributes: {
+      a: {size: 1, elementOffset: 1}
+    }
+  });
+  const attribute2 = new Attribute(gl, {
+    id: 'test-attribute-with-shader-attributes',
+    type: GL.DOUBLE,
+    size: 4,
+    vertexOffset: 1,
+    update: () => {},
+    shaderAttributes: {
+      a: {vertexOffset: 0}
+    }
+  });
+
+  const buffer = new Buffer(gl, 16);
+  const value8 = new Uint8Array(16);
+  const value32 = new Float32Array(16);
+  const value64 = new Float64Array(16);
+
+  attribute.setExternalBuffer(value8);
+  let shaderAttributes = attribute.getShaderAttributes();
+  t.is(shaderAttributes.a.getAccessor().stride, 4, 'shaderAttribute has correct stride');
+  t.is(shaderAttributes.a.getAccessor().offset, 1, 'shaderAttribute has correct offset');
+
+  attribute.setExternalBuffer({value: value8, stride: 8, offset: 2});
+  shaderAttributes = attribute.getShaderAttributes();
+  t.is(shaderAttributes.a.getAccessor().stride, 8, 'shaderAttribute has correct stride');
+  t.is(shaderAttributes.a.getAccessor().offset, 3, 'shaderAttribute has correct offset');
+
+  attribute.setExternalBuffer({value: value32, offset: 2});
+  shaderAttributes = attribute.getShaderAttributes();
+  t.is(shaderAttributes.a.getAccessor().stride, 16, 'shaderAttribute has correct stride');
+  t.is(shaderAttributes.a.getAccessor().offset, 6, 'shaderAttribute has correct offset');
+
+  attribute2.setExternalBuffer(value32);
+  shaderAttributes = attribute2.getShaderAttributes();
+  t.is(shaderAttributes.a.getAccessor().stride, 16, 'shaderAttribute has correct stride');
+  t.is(shaderAttributes.a.getAccessor().offset, 0, 'shaderAttribute has correct offset');
+  t.deepEqual(shaderAttributes.a64Low, [0, 0, 0, 0], 'shaderAttribute low part is constant');
+
+  attribute2.setExternalBuffer({value: value64, stride: 48, offset: 8});
+  shaderAttributes = attribute2.getShaderAttributes();
+  t.is(shaderAttributes.a.getAccessor().stride, 48, 'shaderAttribute has correct stride');
+  t.is(shaderAttributes.a.getAccessor().offset, 8, 'shaderAttribute has correct offset');
+  t.is(
+    shaderAttributes.a64Low.getAccessor().stride,
+    48,
+    'shaderAttribute low part has correct stride'
+  );
+  t.is(
+    shaderAttributes.a64Low.getAccessor().offset,
+    24,
+    'shaderAttribute low part has correct offset'
+  );
 
   buffer.delete();
   attribute.delete();
@@ -836,7 +901,7 @@ test('Attribute#doublePrecision', t0 => {
     }
   };
 
-  test('Attribute#doublePrecision#fp64:true', t => {
+  t0.test('Attribute#doublePrecision#fp64:true', t => {
     const attribute = new Attribute(gl, {
       id: 'positions',
       type: GL.DOUBLE,
@@ -878,7 +943,7 @@ test('Attribute#doublePrecision', t0 => {
     t.end();
   });
 
-  test('Attribute#doublePrecision#fp64:false', t => {
+  t0.test('Attribute#doublePrecision#fp64:false', t => {
     const attribute = new Attribute(gl, {
       id: 'positions',
       type: GL.DOUBLE,
