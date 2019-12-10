@@ -183,11 +183,10 @@ export default class ContourLayer extends GridAggregationLayer {
     const count = contours.length;
     const thresholdData = new Array(count);
     for (let i = 0; i < count; i++) {
-      const {threshold, zIndex} = contours[i];
+      const contour = contours[i];
       thresholdData[i] = {
-        index: i, // index into props.contours
-        threshold,
-        zIndex: zIndex || i,
+        contour,
+        zIndex: contour.zIndex || i,
         zOffset
       };
     }
@@ -197,14 +196,11 @@ export default class ContourLayer extends GridAggregationLayer {
   // Private (Sublayers)
 
   _onGetSublayerColor(element) {
-    // element is either a line segment or polygon
-    const {contours} = this.props;
-    return contours[element.index].color || DEFAULT_COLOR;
+    return element.contour.color || DEFAULT_COLOR;
   }
 
   _onGetSublayerStrokeWidth(element) {
-    const {contours} = this.props;
-    return contours[element.index].strokeWidth || DEFAULT_STROKE_WIDTH;
+    return element.contour.strokeWidth || DEFAULT_STROKE_WIDTH;
   }
 }
 

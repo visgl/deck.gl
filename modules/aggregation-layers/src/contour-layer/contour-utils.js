@@ -18,7 +18,8 @@ export function generateContours({
   let polygonIndex = 0;
 
   for (const data of thresholdData) {
-    const {threshold, index} = data;
+    const {contour} = data;
+    const {threshold} = contour;
     for (let x = -1; x < width; x++) {
       for (let y = -1; y < height; y++) {
         // Get the MarchingSquares code based on neighbor cell weights.
@@ -47,8 +48,7 @@ export function generateContours({
           for (const polygon of polygons) {
             contourPolygons[polygonIndex++] = {
               vertices: polygon,
-              threshold,
-              index
+              contour
             };
           }
         } else {
@@ -59,8 +59,7 @@ export function generateContours({
             contourSegments[segmentIndex++] = {
               start: vertices[i],
               end: vertices[i + 1],
-              threshold,
-              index
+              contour
             };
           }
         }
