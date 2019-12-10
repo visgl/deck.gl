@@ -29,7 +29,7 @@ import {
   withParameters
 } from '@luma.gl/core';
 import {fp64arithmetic} from '@luma.gl/shadertools';
-import {log, project32, mergeShaders} from '@deck.gl/core';
+import {log, project32, _mergeShaders as mergeShaders} from '@deck.gl/core';
 
 import {
   DEFAULT_RUN_PARAMS,

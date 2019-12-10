@@ -37,7 +37,13 @@ import {
   hasFeatures,
   isWebGL2
 } from '@luma.gl/core';
-import {AttributeManager, COORDINATE_SYSTEM, log, mergeShaders, project32} from '@deck.gl/core';
+import {
+  AttributeManager,
+  COORDINATE_SYSTEM,
+  log,
+  _mergeShaders as mergeShaders,
+  project32
+} from '@deck.gl/core';
 import TriangleLayer from './triangle-layer';
 import AggregationLayer from '../aggregation-layer';
 import {defaultColorRange, colorRangeToFlatArray} from '../utils/color-utils';

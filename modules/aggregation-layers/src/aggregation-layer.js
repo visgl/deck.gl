@@ -18,9 +18,8 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {CompositeLayer, AttributeManager, experimental} from '@deck.gl/core';
+import {CompositeLayer, AttributeManager, _compareProps as compareProps} from '@deck.gl/core';
 import {cssToDeviceRatio} from '@luma.gl/core';
-const {compareProps} = experimental;
 
 // props when changed results in new uniforms that requires re-aggregation
 const UNIFORM_PROPS = [

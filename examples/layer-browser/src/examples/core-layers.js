@@ -1,5 +1,3 @@
-import {experimental} from '@deck.gl/core';
-
 import {
   ScatterplotLayer,
   ArcLayer,
@@ -16,11 +14,10 @@ import {
 
 import {PathStyleExtension} from '@deck.gl/extensions';
 
-const {flattenVertices} = experimental;
-
 // Demonstrate immutable support
 import * as dataSamples from '../data-samples';
 import {parseColor, setOpacity} from '../utils/color';
+import flattenVertices from '../utils/flatten-vertices';
 
 const MARKER_SIZE_MAP = {
   small: 200,

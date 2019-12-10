@@ -19,8 +19,6 @@
 // THE SOFTWARE.
 /* eslint-disable max-len */
 
-const experimental = {};
-
 //
 // CORE LIBRARY
 //
@@ -77,45 +75,10 @@ export {
   // Extension
   LayerExtension,
   // Utilities
+  Tesselator,
   fp64LowPart,
-  createIterable,
-  mergeShaders
+  createIterable
 } from '@deck.gl/core';
-
-// EXPERIMENTAL CORE LIB CLASSES (May change in minor version bumps, use at your own risk)
-import {experimental as CoreExperimental} from '@deck.gl/core';
-import {experimental as AggregationExperimental} from '@deck.gl/aggregation-layers';
-
-// Experimental Data Accessor Helpers
-// INTERNAL - TODO remove from experimental exports
-const {
-  // For layers
-  count,
-  flattenVertices,
-  fillArray
-} = CoreExperimental;
-
-const {
-  BinSorter,
-  linearScale,
-  getLinearScale,
-  quantizeScale,
-  getQuantizeScale,
-  defaultColorRange
-} = AggregationExperimental;
-
-Object.assign(experimental, {
-  // For layers
-  BinSorter,
-  linearScale,
-  getLinearScale,
-  quantizeScale,
-  getQuantizeScale,
-  defaultColorRange,
-  count,
-  flattenVertices,
-  fillArray
-});
 
 //
 // LAYERS PACKAGES
@@ -165,9 +128,3 @@ export {SimpleMeshLayer, ScenegraphLayer} from '@deck.gl/mesh-layers';
 //
 
 export {default, DeckGL} from '@deck.gl/react';
-
-//
-// EXPERIMENTAL EXPORTS
-//
-
-export {experimental};
