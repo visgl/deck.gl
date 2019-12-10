@@ -3,6 +3,7 @@
 import {COORDINATE_SYSTEM, CompositeLayer} from '@deck.gl/core';
 import {PointCloudLayer} from '@deck.gl/layers';
 import {ScenegraphLayer} from '@deck.gl/mesh-layers';
+import {log} from '@deck.gl/core';
 
 import {Tileset3D, _getIonTilesetMetadata} from '@loaders.gl/3d-tiles';
 
@@ -20,11 +21,14 @@ const defaultProps = {
   onTilesetLoad: tileset3d => {},
   onTileLoad: tileHeader => {},
   onTileUnload: tileHeader => {},
-  onTileLoadFail: (tile, message, url) => {}
+  onTileError: (tile, message, url) => {}
 };
 
 export default class Tile3DLayer extends CompositeLayer {
   initializeState() {
+    if ('onTileLoadFail' in this.props) {
+      log.removed('onTileLoadFail', 'onTileError')();
+    }
     this.state = {
       layerMap: {},
       tileset3d: null
@@ -63,7 +67,7 @@ export default class Tile3DLayer extends CompositeLayer {
         this.setNeedsUpdate();
       },
       onTileUnload: this.props.onTileUnload,
-      onTileLoadFail: this.props.onTileLoadFail,
+      onTileLoadFail: this.props.onTileError,
       // TODO: explicit passing should not be needed, registerLoaders should suffice
       fetchOptions,
       ...ionMetadata,
