@@ -1758,7 +1758,7 @@ export const TEST_CASES = [
         data: dataSamples.meshSampleData,
         mesh: cube,
         sizeScale: 30,
-        modelMatrix: new Matrix4().rotateZ((45 / 180) * Math.PI),
+        modelMatrix: new Matrix4().translate([0, 0, 1000]),
         coordinateOrigin: [-122.45, 37.75, 0],
         coordinateSystem: COORDINATE_SYSTEM.LNGLAT_OFFSETS,
         getPosition: d => [d.position[0] / 1e5, d.position[1] / 1e5, 10],
@@ -1769,7 +1769,7 @@ export const TEST_CASES = [
     goldenImage: './test/render/golden-images/simple-mesh-layer-lnglat.png'
   },
   {
-    name: 'simple-mesh-layer-modelmatrix',
+    name: 'simple-mesh-layer-cartesian',
     viewState: {
       target: [0, 0, 0],
       rotationX: 0,
@@ -1789,7 +1789,7 @@ export const TEST_CASES = [
         id: 'simple-mesh-layer-cartesian',
         data: dataSamples.meshSampleData,
         mesh: cube,
-        sizeScale: 10,
+        sizeScale: 30,
         coordinateSystem: COORDINATE_SYSTEM.CARTESIAN,
         modelMatrix: new Matrix4().rotateX((-45 / 180) * Math.PI),
         getPosition: d => d.position,
@@ -1813,7 +1813,6 @@ export const TEST_CASES = [
         id: 'simple-mesh-layer-meter-offsets',
         data: dataSamples.meshSampleData,
         mesh: cube,
-        sizeUnits: 'meters',
         sizeScale: 30,
         coordinateOrigin: [-122.45, 37.75, 0],
         coordinateSystem: COORDINATE_SYSTEM.METER_OFFSETS,
