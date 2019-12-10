@@ -17,7 +17,71 @@ Each version should:
 Ref: http://keepachangelog.com/en/0.3.0/
 -->
 
-## deck.gl v7.4
+## deck.gl v8.0
+
+### deck.gl v8.0 Prereleases
+
+#### deck.gl [8.0.0-alpha.1] - Dec 9 2019
+
+- Tile3DLayer: v8.0 audit (#3972)
+- move project64 module to extensions (#3981)
+- GPUGridAggregator: use fp64arithmetic module instead of fp64 (#3978)
+- CPUAggregation Refactor : Grid and Hexagon Layers, use attributes for position (#3951)
+- @deck.gl/json: Use @@type to register convertible classes (#3958)
+- Upgrade probe.gl (part 2) (#3973)
+- upgrade probe.gl (#3971)
+- Clean up change flags handling in Layer class (#3968)
+- reuse instancePickingColor array (#3969)
+- Debug API (#3957)
+- pydeck: Set fewer defaults within Python API (#3960)
+- Clean up layer internal state (#3955)
+- [JupyterLab support] Enable JupyterLab for pydeck (#3638)
+- Projection modes (#3950)
+- Improve AttributeManager logging perf (#3941)
+- More luma updates (#3942)
+- Remove seer integration (#3940)
+- Remove texture flip (#3939)
+- Fix polygon offset (#3938)
+- Updates to luma 8.0 alpha 10 (#3934)
+- Fix FirstPersonView and FirstPersonController (#3924)
+- Move PathLayer getDashArray feature to an extension (#3922)
+- Simplify bundle luma exports (#3913)
+- Support binary logical attributes in PathLayer and SolidPolygonLayer (#3916)
+- Various core deprecations (#3919)
+- Add option to skip normalization in PolygonLayer (#3921)
+- Bump h3-js (#3918)
+- Optimize (#3906)
+- Move substantial data operation inside unit tests (#3917)
+- Support binary logical attributes (#3898)
+- Add option to skip normalization in tesselators (#3905)
+- Handle offset in DataColumn (#3902)
+- Light tesselator refactor (#3901)
+- Support variable-width values in auto update (#3897)
+- Change bufferLayout to startIndices (#3894)
+- simplify PathLayer attributes (#3889)
+- Support 3D in ArcLayer (#3888)
+- Use 3D 64-bit positions (#3885)
+- Fix playground example and website examples (#3883)
+- Bump to luma 8.0 (#3868)
+- [v8.0] Change layer opacity default to 1 (#3879)
+- Fix view state handling (#3870)
+- [v8.0] Scripting API update (#3880)
+- Remove dependency on `registerShaderModule` (#3882)
+- AggregationLayer : minor fixes and unit tests. (#3851)
+- remove deprecated layer props (#3878)
+- Layer class deprecations (#3877)
+- Implement min/max pixels for scenegraph-layer (#3382)
+- v8.0 TripsLayer API change (#3874)
+- Bump loaders.gl dependencies (#3862)
+- Fix attribute constant comparison (#3872)
+- Attribute class refactor (#3852)
+- Zoom-independent common space (#3841)
+- Optionally surface pydeck warnings in widget UI (#3785)
+- Integrate all aggregation layers with AttributeManager (#3777)
+- viewport/projection related deprecations (#3832)
+- TextLayer: support text auto wrapping (#3682)
+- ScreenGridLayer: Split into Composite and SubLayer (#3726)
+
 
 ### deck.gl v7.4 Prereleases
 
@@ -45,7 +109,47 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v7.3
 
+#### deck.gl [v7.3.6] - Nov 11 2019
+
+- Bump loaders.gl dependencies (#3862)
+
+#### deck.gl [v7.3.5] - Nov 8 2019
+
+- Fix texture crash in Safari (#3848)
+- Fix: custom controller events (#3857)
+- Fix attribute allocation bug when using partial update with double precision (#3854)
+- Fix IconLayer autopacking bug (#3847)
+
+#### deck.gl [v7.3.4] - Nov 4 2019
+
+- TileLayer: only invalidate tile.layer when updateTriggerChanged (#3823)
+- HeatmapLayer: fix sublayer id (#3813)
+
+#### deck.gl [v7.3.3] - Oct 15 2019
+
+- TileLayer: Invalidate cache when updateTriggers changed (#3788)
+- Bump luma.gl to 7.3.2
+
+#### deck.gl [v7.3.2] - Oct 3 2019
+
+- GridLayer: enforce point size to workaround ANGLE bug (#3738)
+- Bump luma.gl to 7.3.1
+- HeatmapLayer: set point size to address ANGLE bug (#3732)
+- TileLayer: cache rendered sub layers (#3730)
+- Bump pydeck to 0.1.dev5 (#3715
+
+#### deck.gl [v7.3.1] - Sep 30 2019
+
+- Clamp HeatmapLayer colorDomain on iOS (#3723)
+
+#### deck.gl [v7.3.0] - Sep 30 2019
+
 ### deck.gl v7.3 Prereleases
+
+#### deck.gl [v7.3.0-beta.9] - Sep 27 2019
+
+- HeatmapLayer: Add 'colorDomain' prop (#3714)
+- Bump luma to prod version (#3712)
 
 #### deck.gl [v7.3.0-beta.8] - Sep 26 2019
 
