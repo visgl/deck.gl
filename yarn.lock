@@ -1986,14 +1986,14 @@
   dependencies:
     "@babel/runtime" "^7.0.0"
 
-"@probe.gl/test-utils@^3.1.1":
-  version "3.1.1"
-  resolved "https://registry.yarnpkg.com/@probe.gl/test-utils/-/test-utils-3.1.1.tgz#3ffb632b590ae82ae40011e520be0a2e5eb94059"
-  integrity sha512-jeOficrZ6zEc38kQTLVfj98GHb551EHv17QSUPTB2lr7grhD2juA+g0h7mmQWW6QNVEzXkJROo2Bv2LO1Ci5Fw==
+"@probe.gl/test-utils@^3.2.0-beta.3":
+  version "3.2.0-beta.3"
+  resolved "https://registry.yarnpkg.com/@probe.gl/test-utils/-/test-utils-3.2.0-beta.3.tgz#6c72ef49a73e3bd3d1d0932cb764aac042cade4c"
+  integrity sha512-TWcd+D9eJUlnkBzRohPo6dY4pFAzCRhphXywu754POYxEHZI4pGFXPN1kZdNzI3xdZazfT2h8sMUeFkCx/gsQA==
   dependencies:
     "@babel/runtime" "^7.0.0"
     pixelmatch "^4.0.2"
-    probe.gl "3.1.1"
+    probe.gl "3.2.0-beta.3"
     puppeteer "^1.16.0"
 
 "@types/backbone@^1.4.1":
@@ -8517,13 +8517,6 @@ private@^0.1.6:
   version "0.1.8"
   resolved "https://registry.yarnpkg.com/private/-/private-0.1.8.tgz#2381edb3689f7a53d653190060fcf822d2f368ff"
   integrity sha512-VvivMrbvd2nKkiG38qjULzlc+4Vx4wm/whI9pQD35YrARNnhxeiRktSOhSukRLFNlzg6Br/cJPet5J/u19r/mg==
-
-probe.gl@3.1.1, probe.gl@^3.1.1:
-  version "3.1.1"
-  resolved "https://registry.yarnpkg.com/probe.gl/-/probe.gl-3.1.1.tgz#58f5d23efe588b9d9af10add6b47587f8e6c72b3"
-  integrity sha512-mD/DzhaYVftrRpobJd/W5JNhDVYCpClhuCGeOphuNZO1+qM6tOlBIf/6ETz11JyolZoJTTeT6aiVXOuIVyAVRg==
-  dependencies:
-    "@babel/runtime" "^7.0.0"
 
 probe.gl@3.2.0-beta.3, probe.gl@^3.2.0-beta.3:
   version "3.2.0-beta.3"

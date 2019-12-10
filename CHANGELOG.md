@@ -21,6 +21,13 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ### deck.gl v8.0 Prereleases
 
+#### deck.gl [8.0.0-alpha.2] - Dec 10 2019
+
+- ContourLayer: optimize sublayer prop setup (#3985)
+- Enable composeModelMatrix for meshlayers (#3977)
+- Remove `experimental` export, use underscores (#3982)
+- Various bug fixes for using binary data (#3987)
+
 #### deck.gl [8.0.0-alpha.1] - Dec 9 2019
 
 - Tile3DLayer: v8.0 audit (#3972)
