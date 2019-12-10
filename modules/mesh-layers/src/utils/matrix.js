@@ -1,4 +1,4 @@
-import {createIterable} from '@deck.gl/core';
+import {COORDINATE_SYSTEM, createIterable} from '@deck.gl/core';
 
 /* eslint-disable max-statements, complexity */
 const RADIAN_PER_DEGREE = Math.PI / 180;
@@ -153,3 +153,15 @@ export const MATRIX_ATTRIBUTES = {
     }
   }
 };
+
+// only apply composeModelMatrix when in cartesian or meter_offsets coordinate system
+// with `composeModelMatrix` enabled, the rotation part of the layer's modelMatrix will be composed to instance's transformations
+// since rotating latitude and longitude can not provide meaningful results, hence `composeModelMatrix` is disabled
+// when in LNGLAT and LNGLAT_OFFSET coordinates.
+export function shouldComposeModelMatrix(viewport, coordinateSystem) {
+  return (
+    coordinateSystem === COORDINATE_SYSTEM.CARTESIAN ||
+    coordinateSystem === COORDINATE_SYSTEM.METER_OFFSETS ||
+    (coordinateSystem === COORDINATE_SYSTEM.DEFAULT && !viewport.isGeospatial)
+  );
+}

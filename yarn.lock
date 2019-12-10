@@ -1508,27 +1508,12 @@
   dependencies:
     "@babel/runtime" "^7.3.1"
 
-"@loaders.gl/core@1.3.3":
-  version "1.3.3"
-  resolved "https://registry.yarnpkg.com/@loaders.gl/core/-/core-1.3.3.tgz#b7ab8f3ef153f9b928ca05f9890b3acf7b42e595"
-  integrity sha512-cy64jNc1E3YYSp4Jt6VQXuscG4/GkaXkdQmmmCA525/LeBzyYBXADAq1ly+WpZNjhiVGs4jU5tJCRaTie7hucw==
-  dependencies:
-    "@babel/runtime" "^7.3.1"
-
 "@loaders.gl/core@1.3.4", "@loaders.gl/core@^1.3.4":
   version "1.3.4"
   resolved "https://registry.yarnpkg.com/@loaders.gl/core/-/core-1.3.4.tgz#eb6222865bf121f0063c4355121f92b499a3df17"
   integrity sha512-9yjNuWL/qaN68tDY/HnWjQ/5YMtIXo/Rw1NgGyrIpt+aQpK9YhIg7ZLd06vIOzEg1N/3FxjaEcauRTOKpiiMHA==
   dependencies:
     "@babel/runtime" "^7.3.1"
-
-"@loaders.gl/csv@^1.3.3":
-  version "1.3.3"
-  resolved "https://registry.yarnpkg.com/@loaders.gl/csv/-/csv-1.3.3.tgz#a4019ad5893e105fc35e1a7d8d1aa0a8c467d317"
-  integrity sha512-Tk8mUCwJuFy1bKAXjtKjsj9O74PGCIhUnlnH2XX5WksJMTGI8vud2GJXqH3QaFRMNPKYJ9XtDQfUrFMx6A0CFQ==
-  dependencies:
-    "@loaders.gl/core" "1.3.3"
-    "@loaders.gl/experimental" "1.3.3"
 
 "@loaders.gl/csv@^1.3.4":
   version "1.3.4"
@@ -1537,13 +1522,6 @@
   dependencies:
     "@loaders.gl/core" "1.3.4"
     "@loaders.gl/experimental" "1.3.4"
-
-"@loaders.gl/experimental@1.3.3":
-  version "1.3.3"
-  resolved "https://registry.yarnpkg.com/@loaders.gl/experimental/-/experimental-1.3.3.tgz#9a4603b2c509aaa2f20775a7d7a8fc7a308c76b4"
-  integrity sha512-F2f6Tdwu+b52O4ISFNP7WzjsZSAPMvm5jWHtvIG2ozPdIydnIaHPWGF9wfB56l2rJro78VrpO/v/zOBEaqbS+w==
-  dependencies:
-    "@loaders.gl/core" "1.3.3"
 
 "@loaders.gl/experimental@1.3.4":
   version "1.3.4"
@@ -1610,10 +1588,10 @@
     "@loaders.gl/images" "1.3.4"
     math.gl "^3.0.0-beta.3"
 
-"@loaders.gl/polyfills@^1.3.3":
-  version "1.3.3"
-  resolved "https://registry.yarnpkg.com/@loaders.gl/polyfills/-/polyfills-1.3.3.tgz#f9aea525f936f92c0124179dd887b12a5e47f5f1"
-  integrity sha512-BtChCZYeaI56JMk2s1funQ0kM5iTkXNXa/25OHOXo7iztOgSxO8tf3/unRjQ72ywtksW3EgYItsVWmbo9NBrbg==
+"@loaders.gl/polyfills@^1.3.4":
+  version "1.3.5"
+  resolved "https://registry.yarnpkg.com/@loaders.gl/polyfills/-/polyfills-1.3.5.tgz#13a8399d5188eb85d3a2db7f04d88189222dae59"
+  integrity sha512-hsCwmzSkqlickGfh694qmtD2kOY6l/JMXUE7h5U1FUQ5FJ6TsXcgXzBHqwj9HqeFELn7ba8gnka+lk8pTDZacA==
   dependencies:
     get-pixels "^3.3.2"
     ndarray "^1.0.18"
@@ -2008,14 +1986,14 @@
   dependencies:
     "@babel/runtime" "^7.0.0"
 
-"@probe.gl/test-utils@^3.2.0-beta.3":
-  version "3.2.0-beta.3"
-  resolved "https://registry.yarnpkg.com/@probe.gl/test-utils/-/test-utils-3.2.0-beta.3.tgz#6c72ef49a73e3bd3d1d0932cb764aac042cade4c"
-  integrity sha512-TWcd+D9eJUlnkBzRohPo6dY4pFAzCRhphXywu754POYxEHZI4pGFXPN1kZdNzI3xdZazfT2h8sMUeFkCx/gsQA==
+"@probe.gl/test-utils@^3.1.1":
+  version "3.1.1"
+  resolved "https://registry.yarnpkg.com/@probe.gl/test-utils/-/test-utils-3.1.1.tgz#3ffb632b590ae82ae40011e520be0a2e5eb94059"
+  integrity sha512-jeOficrZ6zEc38kQTLVfj98GHb551EHv17QSUPTB2lr7grhD2juA+g0h7mmQWW6QNVEzXkJROo2Bv2LO1Ci5Fw==
   dependencies:
     "@babel/runtime" "^7.0.0"
     pixelmatch "^4.0.2"
-    probe.gl "3.2.0-beta.3"
+    probe.gl "3.1.1"
     puppeteer "^1.16.0"
 
 "@types/backbone@^1.4.1":
@@ -8539,6 +8517,13 @@ private@^0.1.6:
   version "0.1.8"
   resolved "https://registry.yarnpkg.com/private/-/private-0.1.8.tgz#2381edb3689f7a53d653190060fcf822d2f368ff"
   integrity sha512-VvivMrbvd2nKkiG38qjULzlc+4Vx4wm/whI9pQD35YrARNnhxeiRktSOhSukRLFNlzg6Br/cJPet5J/u19r/mg==
+
+probe.gl@3.1.1, probe.gl@^3.1.1:
+  version "3.1.1"
+  resolved "https://registry.yarnpkg.com/probe.gl/-/probe.gl-3.1.1.tgz#58f5d23efe588b9d9af10add6b47587f8e6c72b3"
+  integrity sha512-mD/DzhaYVftrRpobJd/W5JNhDVYCpClhuCGeOphuNZO1+qM6tOlBIf/6ETz11JyolZoJTTeT6aiVXOuIVyAVRg==
+  dependencies:
+    "@babel/runtime" "^7.0.0"
 
 probe.gl@3.2.0-beta.3, probe.gl@^3.2.0-beta.3:
   version "3.2.0-beta.3"

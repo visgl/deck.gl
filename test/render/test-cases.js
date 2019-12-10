@@ -18,8 +18,12 @@ import {
   DirectionalLight
 } from '@deck.gl/core';
 import {noise, vignette} from '@luma.gl/shadertools';
+import {CubeGeometry} from '@luma.gl/core';
+const cube = new CubeGeometry();
 
 import {Fp64Extension, PathStyleExtension} from '@deck.gl/extensions';
+import {SimpleMeshLayer} from '@deck.gl/mesh-layers';
+import {Matrix4} from 'math.gl';
 
 const effect1 = new PostProcessEffect(noise);
 const effect2 = new PostProcessEffect(vignette);
@@ -118,17 +122,21 @@ function getMax(pts, key) {
 function getColorValue(points) {
   return getMean(points, 'SPACES');
 }
+
 function getColorWeight(point) {
   return point.SPACES;
 }
+
 const colorAggregation = 'mean';
 
 function getElevationValue(points) {
   return getMax(points, 'SPACES');
 }
+
 function getElevationWeight(point) {
   return point.SPACES;
 }
+
 const elevationAggregation = 'max';
 
 export const WIDTH = 800;
@@ -1692,7 +1700,7 @@ export const TEST_CASES = [
     goldenImage: './test/render/golden-images/post-process-effects.png'
   },
   {
-    name: 'S2Layer',
+    name: 's2-layer',
     viewState: {
       latitude: 37.75,
       longitude: -122.45,
@@ -1714,7 +1722,7 @@ export const TEST_CASES = [
     goldenImage: './test/render/golden-images/s2-layer.png'
   },
   {
-    name: 'S2Layer',
+    name: 's2-layer-l2',
     viewState: {
       latitude: 40,
       longitude: -100,
@@ -1734,5 +1742,86 @@ export const TEST_CASES = [
       })
     ],
     goldenImage: './test/render/golden-images/s2-layer-l2.png'
+  },
+  {
+    name: 'simple-mesh-layer-lnglat',
+    viewState: {
+      latitude: 37.75,
+      longitude: -122.45,
+      zoom: 14,
+      pitch: 0,
+      bearing: 0
+    },
+    layers: [
+      new SimpleMeshLayer({
+        id: 'simple-mesh-layer-lnglat',
+        data: dataSamples.meshSampleData,
+        mesh: cube,
+        sizeScale: 30,
+        modelMatrix: new Matrix4().translate([0, 0, 1000]),
+        coordinateOrigin: [-122.45, 37.75, 0],
+        coordinateSystem: COORDINATE_SYSTEM.LNGLAT_OFFSETS,
+        getPosition: d => [d.position[0] / 1e5, d.position[1] / 1e5, 10],
+        getColor: d => d.color,
+        getOrientation: d => d.orientation
+      })
+    ],
+    goldenImage: './test/render/golden-images/simple-mesh-layer-lnglat.png'
+  },
+  {
+    name: 'simple-mesh-layer-cartesian',
+    viewState: {
+      target: [0, 0, 0],
+      rotationX: 0,
+      rotationOrbit: 0,
+      orbitAxis: 'Y',
+      fov: 30,
+      zoom: -1.5
+    },
+    views: [
+      new OrbitView({
+        near: 0.1,
+        far: 2
+      })
+    ],
+    layers: [
+      new SimpleMeshLayer({
+        id: 'simple-mesh-layer-cartesian',
+        data: dataSamples.meshSampleData,
+        mesh: cube,
+        sizeScale: 30,
+        coordinateSystem: COORDINATE_SYSTEM.CARTESIAN,
+        modelMatrix: new Matrix4().rotateX((-45 / 180) * Math.PI),
+        getPosition: d => d.position,
+        getColor: d => d.color,
+        getOrientation: d => d.orientation
+      })
+    ],
+    goldenImage: './test/render/golden-images/simple-mesh-layer-cartesian.png'
+  },
+  {
+    name: 'simple-mesh-layer-meter-offsets',
+    viewState: {
+      latitude: 37.75,
+      longitude: -122.45,
+      zoom: 14,
+      pitch: 0,
+      bearing: 0
+    },
+    layers: [
+      new SimpleMeshLayer({
+        id: 'simple-mesh-layer-meter-offsets',
+        data: dataSamples.meshSampleData,
+        mesh: cube,
+        sizeScale: 30,
+        coordinateOrigin: [-122.45, 37.75, 0],
+        coordinateSystem: COORDINATE_SYSTEM.METER_OFFSETS,
+        modelMatrix: new Matrix4().rotateX((-45 / 180) * Math.PI),
+        getPosition: d => d.position,
+        getColor: d => d.color,
+        getOrientation: d => d.orientation
+      })
+    ],
+    goldenImage: './test/render/golden-images/simple-mesh-layer-meter-offsets.png'
   }
 ];

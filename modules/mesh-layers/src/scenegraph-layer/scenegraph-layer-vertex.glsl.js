@@ -20,7 +20,7 @@ uniform float sizeScale;
 uniform float sizeMinPixels;
 uniform float sizeMaxPixels;
 uniform mat4 sceneModelMatrix;
-uniform bool enableOffsetModelMatrix;
+uniform bool composeModelMatrix;
 
 // Attributes
 _attribute vec4 POSITION;
@@ -74,8 +74,7 @@ void main(void) {
   float clampedSize = clamp(originalSize, sizeMinPixels, sizeMaxPixels);
 
   vec3 pos = (instanceModelMatrix * (sceneModelMatrix * POSITION).xyz) * sizeScale * (clampedSize / originalSize) + instanceTranslation;
-
-  if(enableOffsetModelMatrix) {
+  if(composeModelMatrix) {
     DECKGL_FILTER_SIZE(pos, geometry);
     gl_Position = project_position_to_clipspace(pos + instancePositions, instancePositions64Low, vec3(0.0), geometry.position);
   }
