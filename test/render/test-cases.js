@@ -30,8 +30,6 @@ const effect2 = new PostProcessEffect(vignette);
 
 const ICON_ATLAS = './test/render/icon-atlas.png';
 
-const meshLayerInstanceMatrix = new Matrix4().rotateY((45 / 180) * Math.PI);
-
 import {
   ScatterplotLayer,
   BitmapLayer,
@@ -1750,21 +1748,22 @@ export const TEST_CASES = [
     viewState: {
       latitude: 37.75,
       longitude: -122.45,
-      zoom: 11.5,
+      zoom: 14,
       pitch: 0,
       bearing: 0
     },
     layers: [
       new SimpleMeshLayer({
         id: 'simple-mesh-layer-lnglat',
-        data: dataSamples.points.slice(0, 10),
+        data: dataSamples.meshSampleData,
         mesh: cube,
-        sizeScale: 100,
-        modelMatrix: new Matrix4().rotateX((-45 / 180) * Math.PI),
-        coordinateSystem: COORDINATE_SYSTEM.LNGLAT,
-        getPosition: d => d.COORDINATES,
-        getColor: [0, 255, 255, 125],
-        getTransformMatrix: meshLayerInstanceMatrix
+        sizeScale: 30,
+        modelMatrix: new Matrix4().rotateZ((45 / 180) * Math.PI),
+        coordinateOrigin: [-122.45, 37.75, 0],
+        coordinateSystem: COORDINATE_SYSTEM.LNGLAT_OFFSETS,
+        getPosition: d => [d.position[0] / 1e5, d.position[1] / 1e5, 10],
+        getColor: d => d.color,
+        getOrientation: d => d.orientation
       })
     ],
     goldenImage: './test/render/golden-images/simple-mesh-layer-lnglat.png'
@@ -1814,10 +1813,11 @@ export const TEST_CASES = [
         id: 'simple-mesh-layer-meter-offsets',
         data: dataSamples.meshSampleData,
         mesh: cube,
+        sizeUnits: 'meters',
         sizeScale: 30,
         coordinateOrigin: [-122.45, 37.75, 0],
         coordinateSystem: COORDINATE_SYSTEM.METER_OFFSETS,
-        modelMatrix: new Matrix4().rotateZ((45 / 180) * Math.PI),
+        modelMatrix: new Matrix4().rotateX((-45 / 180) * Math.PI),
         getPosition: d => d.position,
         getColor: d => d.color,
         getOrientation: d => d.orientation
