@@ -206,7 +206,7 @@ export default class SolidPolygonLayer extends Layer {
     }
 
     if (topModel) {
-      topModel.setVertexCount(polygonTesselator.getVertexCount());
+      topModel.setVertexCount(polygonTesselator.vertexCount);
       topModel.setUniforms(renderUniforms).draw();
     }
   }

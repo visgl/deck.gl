@@ -154,12 +154,12 @@ export default class Tesselator {
     const {geometryBuffer} = this;
     const {startRow = 0, endRow = Infinity} = dataRange || {};
 
+    if (!dataRange) {
+      // Full update - regenerate buffer layout from scratch
+      indexStarts = [0];
+      vertexStarts = [0];
+    }
     if (this.normalize || !geometryBuffer) {
-      if (!dataRange) {
-        // Full update - regenerate buffer layout from scratch
-        indexStarts = [0];
-        vertexStarts = [0];
-      }
       this._forEachGeometry(
         (geometry, dataIndex) => {
           vertexStarts[dataIndex + 1] = vertexStarts[dataIndex] + this.getGeometrySize(geometry);
@@ -175,7 +175,6 @@ export default class Tesselator {
         geometryBuffer.stride / bufferValue.BYTES_PER_ELEMENT || this.positionSize;
       // assume user provided data is already normalized
       vertexStarts = this.data.startIndices;
-      indexStarts = indexStarts || [0];
       instanceCount = bufferValue.length / bufferStride;
     }
 
