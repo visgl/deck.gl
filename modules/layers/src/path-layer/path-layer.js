@@ -63,8 +63,8 @@ export default class PathLayer extends Layer {
     attributeManager.addInstanced({
       positions: {
         size: 3,
-        // Start filling buffer from 3 elements in
-        offset: 12,
+        // Start filling buffer from 1 vertex in
+        vertexOffset: 1,
         type: GL.DOUBLE,
         fp64: this.use64bitPositions(),
         transition: ATTRIBUTE_TRANSITION,
@@ -73,16 +73,16 @@ export default class PathLayer extends Layer {
         noAlloc,
         shaderAttributes: {
           instanceLeftPositions: {
-            offset: 0
+            vertexOffset: 0
           },
           instanceStartPositions: {
-            offset: 12
+            vertexOffset: 1
           },
           instanceEndPositions: {
-            offset: 24
+            vertexOffset: 2
           },
           instanceRightPositions: {
-            offset: 36
+            vertexOffset: 3
           }
         }
       },

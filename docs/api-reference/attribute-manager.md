@@ -63,8 +63,6 @@ Takes a single parameter as a map of attribute descriptor objects:
   - luma.gl [accessor parameters](https://luma.gl/#/documentation/api-reference/webgl-2-classes/accessor):
     * `type` (Enum, optional) - data type of the attribute, see "Remarks" section below.
     * `size` (Number) - number of elements per object
-    * `offset` (Number) - default `0`
-    * `stride` (Number) - default `0`
     * `normalized` (Boolean) - default `false`
     * `integer` (Boolean) - WebGL2 only, default `false`
     * `divisor` (Boolean, optional) - `1` if this is an instanced attribute
@@ -83,7 +81,9 @@ Takes a single parameter as a map of attribute descriptor objects:
   - `shaderAttributes` (Object, optional) - If this attribute maps to multiple
     attributes in the vertex shader, that mapping can be defined here. All
     `shaderAttributes` will share a single buffer created based on the `size`
-    parameter. This can be used to interleave attributes. Each shader attribute object may contain any of the [accessor parameters](https://luma.gl/#/documentation/api-reference/webgl-2-classes/accessor) to override the parent attribute's with.
+    parameter. This can be used to interleave attributes. Each shader attribute object may contain any of the [accessor parameters](https://luma.gl/#/documentation/api-reference/webgl-2-classes/accessor) to override the parent attribute's with, and/or one of the following:
+    * `vertexOffset` (Number) - default `0`.
+    * `elementOffset` (Number) - default `0`.
 
 ##### `addInstanced`
 

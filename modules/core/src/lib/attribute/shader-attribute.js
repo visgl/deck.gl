@@ -1,5 +1,4 @@
 /* eslint-disable complexity */
-import {glArrayFromType} from './gl-utils';
 
 /* This class creates a luma.gl-compatible "view" on top of a DataColumn instance */
 export default class ShaderAttribute {
@@ -27,7 +26,7 @@ export default class ShaderAttribute {
     if (value && value.length !== size) {
       constantValue = new Float32Array(size);
       // initiate offset values
-      const index = accessor.offset / glArrayFromType(accessor.type).BYTES_PER_ELEMENT; // element offset
+      const index = accessor.elementOffset; // element offset
       for (let i = 0; i < size; ++i) {
         constantValue[i] = value[index + i];
       }

@@ -175,6 +175,7 @@ export default class Tesselator {
         geometryBuffer.stride / bufferValue.BYTES_PER_ELEMENT || this.positionSize;
       // assume user provided data is already normalized
       vertexStarts = this.data.startIndices;
+      indexStarts = indexStarts || [0];
       instanceCount = bufferValue.length / bufferStride;
     }
 
