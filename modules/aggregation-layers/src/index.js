@@ -33,14 +33,3 @@ export {default as _GPUGridAggregator} from './utils/gpu-grid-aggregation/gpu-gr
 export {default as _CPUAggregator} from './utils/cpu-aggregator';
 
 export {default as _BinSorter} from './utils/bin-sorter';
-export {
-  linearScale as _linearScale,
-  getLinearScale as _getLinearScale,
-  quantizeScale as _quantizeScale,
-  getQuantizeScale as _getQuantizeScale,
-  getQuantileScale as _getQuantileScale,
-  getOrdinalScale as _getOrdinalScale,
-  getScaleFunctionByScaleType as _getScaleFunctionByScaleType,
-  getScaleDomain as _getScaleDomain
-} from './utils/scale-utils';
-export {defaultColorRange as _defaultColorRange} from './utils/color-utils';
