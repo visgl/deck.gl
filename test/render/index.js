@@ -29,7 +29,7 @@ test('Render Test', t => {
   t.timeoutAfter(TEST_CASES.length * 2000);
 
   new SnapshotTestRunner({width: WIDTH, height: HEIGHT})
-    .add(TEST_CASES.filter(tt => tt.name.indexOf('simple-mesh-layer') >= 0))
+    .add(TEST_CASES)
     .run({
       onTestStart: testCase => t.comment(testCase.name),
       onTestPass: (testCase, result) => t.pass(`match: ${result.matchPercentage}`),
@@ -38,7 +38,7 @@ test('Render Test', t => {
       imageDiffOptions: {
         threshold: 0.99
         // uncomment to save screenshot to disk
-        // saveOnFail: true
+        // saveOnFail: true,
         // uncomment `saveAs` to overwrite current golden images
         // if left commented will be saved as `[name]-fail.png.` enabling comparison
         // saveAs: '[name].png'
