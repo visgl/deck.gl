@@ -131,6 +131,15 @@ Method called to retrieve the position of each point.
 
 Method called to retrieve weight of each point. By default each point will use a weight of `1`.
 
+
+## Sub Layers
+
+The `ContourLayer` renders the following sublayers:
+
+* `lines` - For Isolines, rendered by [LineLayer](/docs/layers/line-layer.md)
+* `bands` - For Isobands, rendered by [SolidPolygonLayer](/docs/layers/solid-polygon-layer.md)
+
+
 ## Source
 
 [modules/aggregation-layers/src/contour-layer](https://github.com/uber/deck.gl/tree/master/modules/aggregation-layers/src/contour-layer)

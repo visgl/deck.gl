@@ -18,7 +18,6 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {equals} from 'math.gl';
 import GL from '@luma.gl/constants';
 import {LineLayer, SolidPolygonLayer} from '@deck.gl/layers';
 import {generateContours} from './contour-utils';
@@ -102,14 +101,14 @@ export default class ContourLayer extends GridAggregationLayer {
       contourSegments.length > 0 &&
       new LinesSubLayerClass(
         this.getSubLayerProps({
-          id: 'contour-line-layer'
+          id: 'lines'
         }),
         {
           data: this.state.contourData.contourSegments,
           getSourcePosition: d => d.start,
           getTargetPosition: d => d.end,
-          getColor: this._onGetSublayerColor.bind(this),
-          getWidth: this._onGetSublayerStrokeWidth.bind(this)
+          getColor: d => d.contour.color || DEFAULT_COLOR,
+          getWidth: d => d.contour.strokeWidth || DEFAULT_STROKE_WIDTH
         }
       );
 
@@ -119,12 +118,12 @@ export default class ContourLayer extends GridAggregationLayer {
       contourPolygons.length > 0 &&
       new BandsSubLayerClass(
         this.getSubLayerProps({
-          id: 'contour-solid-polygon-layer'
+          id: 'bands'
         }),
         {
           data: this.state.contourData.contourPolygons,
           getPolygon: d => d.vertices,
-          getFillColor: this._onGetSublayerColor.bind(this)
+          getFillColor: d => d.contour.color || DEFAULT_COLOR
         }
       );
 
@@ -184,42 +183,14 @@ export default class ContourLayer extends GridAggregationLayer {
     const count = contours.length;
     const thresholdData = new Array(count);
     for (let i = 0; i < count; i++) {
-      const {threshold, zIndex} = contours[i];
+      const contour = contours[i];
       thresholdData[i] = {
-        threshold,
-        zIndex: zIndex || i,
+        contour,
+        zIndex: contour.zIndex || i,
         zOffset
       };
     }
     this.setState({thresholdData});
-  }
-
-  // Private (Sublayers)
-
-  _onGetSublayerColor(element) {
-    // element is either a line segment or polygon
-    const {contours} = this.props;
-    let color = DEFAULT_COLOR;
-    contours.forEach(data => {
-      if (equals(data.threshold, element.threshold)) {
-        color = data.color || DEFAULT_COLOR;
-      }
-    });
-    return color;
-  }
-
-  _onGetSublayerStrokeWidth(segment) {
-    const {contours} = this.props;
-    let strokeWidth = DEFAULT_STROKE_WIDTH;
-    // Linearly searches the contours, but there should only be few contours
-    contours.some(contour => {
-      if (contour.threshold === segment.threshold) {
-        strokeWidth = contour.strokeWidth || DEFAULT_STROKE_WIDTH;
-        return true;
-      }
-      return false;
-    });
-    return strokeWidth;
   }
 }
 
