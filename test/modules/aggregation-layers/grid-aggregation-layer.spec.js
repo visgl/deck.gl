@@ -214,7 +214,7 @@ test('GridAggregationLayer#CPUvsGPUAggregation', t => {
         data: fixture.data,
         getWeight: x => x.weight1[0],
         aggregation: 'SUM',
-        cellSize: 500,
+        cellSize: 5000,
         gpuAggregation: false
       },
       onAfterUpdate({layer}) {
@@ -234,11 +234,10 @@ test('GridAggregationLayer#CPUvsGPUAggregation', t => {
 
   testCases = [
     ...testCases,
-    ...getTestCases(t, {cellSize: 600, aggregation: 'MAX'})
-    // Takes too long on CI
-    // ...getTestCases(t, {aggregation: 'MAX'}),
-    // ...getTestCases(t, {aggregation: 'MIN'}),
-    // ...getTestCases(t, {aggregation: 'MEAN'})
+    ...getTestCases(t, {cellSize: 6000, aggregation: 'MAX'}),
+    ...getTestCases(t, {aggregation: 'MAX'}),
+    ...getTestCases(t, {aggregation: 'MIN'}),
+    ...getTestCases(t, {aggregation: 'MEAN'})
   ];
 
   testLayer({
