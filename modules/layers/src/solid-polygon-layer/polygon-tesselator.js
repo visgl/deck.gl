@@ -52,6 +52,15 @@ export default class PolygonTesselator extends Tesselator {
   }
 
   /* Implement base Tesselator interface */
+  updateGeometry(opts) {
+    super.updateGeometry(opts);
+
+    const externalIndices = this.buffers.indices;
+    if (externalIndices) {
+      this.vertexCount = (externalIndices.value || externalIndices).length;
+    }
+  }
+
   getGeometrySize(polygon) {
     return Polygon.getVertexCount(polygon, this.positionSize, this.normalize);
   }

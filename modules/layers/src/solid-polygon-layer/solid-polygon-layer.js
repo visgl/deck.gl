@@ -98,15 +98,15 @@ export default class SolidPolygonLayer extends Layer {
         noAlloc,
         shaderAttributes: {
           positions: {
-            offset: 0,
+            vertexOffset: 0,
             divisor: 0
           },
           instancePositions: {
-            offset: 0,
+            vertexOffset: 0,
             divisor: 1
           },
           nextPositions: {
-            offset: 12,
+            vertexOffset: 1,
             divisor: 1
           }
         }
@@ -206,7 +206,7 @@ export default class SolidPolygonLayer extends Layer {
     }
 
     if (topModel) {
-      topModel.setVertexCount(polygonTesselator.get('indices').length);
+      topModel.setVertexCount(polygonTesselator.vertexCount);
       topModel.setUniforms(renderUniforms).draw();
     }
   }

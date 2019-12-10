@@ -56,23 +56,19 @@ export const MATRIX_ATTRIBUTES = {
   shaderAttributes: {
     instanceModelMatrix__LOCATION_0: {
       size: 3,
-      stride: 48,
-      offset: 0
+      elementOffset: 0
     },
     instanceModelMatrix__LOCATION_1: {
       size: 3,
-      stride: 48,
-      offset: 12
+      elementOffset: 3
     },
     instanceModelMatrix__LOCATION_2: {
       size: 3,
-      stride: 48,
-      offset: 24
+      elementOffset: 6
     },
     instanceTranslation: {
       size: 3,
-      stride: 48,
-      offset: 36
+      elementOffset: 9
     }
   },
 

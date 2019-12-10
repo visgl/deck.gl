@@ -27,7 +27,7 @@ test('ShaderAttribute#getValue#constant', t => {
   const shaderAttribute2 = new ShaderAttribute(dataColumn2, {
     id: 'matrices_col2',
     size: 4,
-    offset: 16
+    elementOffset: 4
   });
 
   t.notOk(shaderAttribute1.getValue(), 'no value is set');
@@ -59,7 +59,7 @@ test('ShaderAttribute#getValue#buffer', t => {
   t.is(value[1].type, GL.FLOAT, 'accessor has correct type');
   t.is(value[1].size, 3, 'accessor has correct size');
   t.is(value[1].divisor, 0, 'accessor has correct divisor');
-  t.notOk(value[1].stride, 'accessor has default stride');
+  t.is(value[1].stride, 12, 'accessor has correct stride');
   value = shaderAttribute2.getValue();
   t.is(value[1].divisor, 1, 'accessor has correct divisor');
 
@@ -77,7 +77,7 @@ test('ShaderAttribute#getValue#buffer', t => {
   value = shaderAttribute1.getValue();
   t.is(value[0], buffer, 'using external buffer');
   t.is(value[1].type, GL.FLOAT, 'accessor has correct type');
-  t.notOk(value[1].stride, 'accessor has default stride');
+  t.is(value[1].stride, 12, 'accessor has correct stride');
 
   dataColumn.delete();
   buffer.delete();
