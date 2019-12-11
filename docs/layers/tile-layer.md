@@ -116,11 +116,11 @@ The maximum cache size for a tile layer. If not defined, it is calculated using 
 
 ### Render Options
 
-##### `onViewportLoaded` (Function, optional)
+##### `onViewportLoad` (Function, optional)
 
-`onViewportLoaded` is a function that is called when all tiles in the current viewport are loaded. Data in the viewport is passed in as an array to this callback function.
+`onViewportLoad` is a function that is called when all tiles in the current viewport are loaded. Data in the viewport is passed in as an array to this callback function.
 
-- Default: `onViewportLoaded: (data) => null`
+- Default: `onViewportLoad: (data) => null`
 
 ##### `getTileData` (Function,  optional)
 

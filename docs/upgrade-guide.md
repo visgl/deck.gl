@@ -23,6 +23,8 @@
   + `getColor`: use `getFillColor` and `getLineColor`
 - `Tile3DLayer` props:
   + `onTileLoadFail`: use `onTileError`
+- `TileLayer` props:
+  + `onViewportLoaded`: use `onViewportLoad`  
 - `project` shader module
   + `project_scale`: use `project_size`
   + `project_to_clipspace`: use `project_position_to_clipspace`
