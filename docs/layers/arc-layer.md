@@ -129,7 +129,7 @@ Method called to retrieve the target position of each object.
 
 * Default: `[0, 0, 0, 255]`
 
-The rgba color at the source, in `r, g, b, [a]`. Each component is in the 0-255 range.
+The rgba color is in the format of `[r, g, b, [a]]`. Each channel is a number between 0-255 and `a` is 255 if not supplied.
 
 * If an array is provided, it is used as the source color for all objects.
 * If a function is provided, it is called on each object to retrieve its source color.

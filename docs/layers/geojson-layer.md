@@ -212,8 +212,7 @@ Check [the lighting guide](/docs/developer-guide/using-lighting.md#constructing-
 
 * Default: `[0, 0, 0, 255]`
 
-The rgba color of line string and/or the outline of polygon for a GeoJson feature, depending on its type.
-Format is `r, g, b, [a]`. Each component is in the 0-255 range.
+The rgba color is in the format of `[r, g, b, [a]]`. Each channel is a number between 0-255 and `a` is 255 if not supplied.
 
 * If an array is provided, it is used as the line color for all features.
 * If a function is provided, it is called on each feature to retrieve its line color.
@@ -223,7 +222,8 @@ Format is `r, g, b, [a]`. Each component is in the 0-255 range.
 * Default: `[0, 0, 0, 255]`
 
 The solid color of the polygon and point features of a GeoJson.
-Format is `r, g, b, [a]`. Each component is in the 0-255 range.
+Format is `[r, g, b, [a]]`. Each channel is a number between 0-255 and `a` is 255 if not supplied.
+
 
 * If an array is provided, it is used as the fill color for all features.
 * If a function is provided, it is called on each feature to retrieve its fill color.
