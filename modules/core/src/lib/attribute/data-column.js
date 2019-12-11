@@ -197,7 +197,7 @@ export default class DataColumn {
     if (opts.constant) {
       // set constant
       let value = opts.value;
-      value = this._normalizeValue(value);
+      value = this._normalizeValue(value, [], 0);
       if (this.settings.normalized) {
         value = this._normalizeConstant(value);
       }
@@ -346,25 +346,48 @@ export default class DataColumn {
   }
 
   /* check user supplied values and apply fallback */
-  _normalizeValue(value, out = [], start = 0) {
-    const {defaultValue} = this.settings;
+  _normalizeValue(value, out, start) {
+    const {defaultValue, size} = this.settings;
 
-    if (!Array.isArray(value) && !ArrayBuffer.isView(value)) {
-      out[start] = Number.isFinite(value) ? value : defaultValue[0];
+    if (Number.isFinite(value)) {
+      out[start] = value;
+      return out;
+    }
+    if (!value) {
+      out[start] = defaultValue[0];
       return out;
     }
 
-    let i = this.size;
-    while (--i >= 0) {
-      out[start + i] = Number.isFinite(value[i]) ? value[i] : defaultValue[i];
+    // Important - switch cases are 5x more performant than a for loop!
+    /* eslint-disable no-fallthrough, default-case */
+    switch (size) {
+      case 4:
+        out[start + 3] = Number.isFinite(value[3]) ? value[3] : defaultValue[3];
+      case 3:
+        out[start + 2] = Number.isFinite(value[2]) ? value[2] : defaultValue[2];
+      case 2:
+        out[start + 1] = Number.isFinite(value[1]) ? value[1] : defaultValue[1];
+      case 1:
+        out[start + 0] = Number.isFinite(value[0]) ? value[0] : defaultValue[0];
+        break;
+
+      default:
+        // In the rare case where the attribute size > 4, do it the slow way
+        // This is used for e.g. transform matrices
+        let i = size;
+        while (--i >= 0) {
+          out[start + i] = Number.isFinite(value[i]) ? value[i] : defaultValue[i];
+        }
     }
+
     return out;
   }
 
-  _areValuesEqual(value1, value2, size = this.size) {
+  _areValuesEqual(value1, value2) {
     if (!value1 || !value2) {
       return false;
     }
+    const {size} = this;
     for (let i = 0; i < size; i++) {
       if (value1[i] !== value2[i]) {
         return false;

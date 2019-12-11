@@ -34,7 +34,7 @@ import attributeUpdateBench from './attribute-update.bench';
 import comparePropsBench from './compare-props.bench';
 import textAutoWrappingBench from './text-auto-wrapping.bench';
 
-const suite = new Bench({});
+const suite = new Bench({minIterations: 10});
 
 // add tests
 layerBench(suite);

@@ -322,7 +322,7 @@ export default class Attribute extends DataColumn {
         } else if (objectValue && objectValue.length > size) {
           value.set(objectValue, i);
         } else {
-          attribute._normalizeValue(objectValue, objectInfo.target);
+          attribute._normalizeValue(objectValue, objectInfo.target, 0);
           fillArray({
             target: value,
             source: objectInfo.target,
