@@ -11,12 +11,11 @@
 import assert from './utils/assert';
 import JSONConfiguration from './json-configuration';
 import {instantiateClass} from './helpers/instantiate-class';
+
+import {FUNCTION_IDENTIFIER, CONSTANT_IDENTIFIER} from './syntactic-sugar';
 import parseJSON from './helpers/parse-json';
 
 const isObject = value => value && typeof value === 'object';
-const FUNCTION_IDENTIFIER = '@@=';
-const ENUM_IDENTIFIER = '@@#';
-const CONSTANT_IDENTIFIER = '@@!';
 
 export default class JSONConverter {
   constructor(props) {
@@ -104,7 +103,8 @@ function convertJSONRecursively(json, key, configuration) {
 // Returns true if an object has a `type` field
 function isClassInstance(json, configuration) {
   const {typeKey} = configuration;
-  return isObject(json) && Boolean(json[typeKey]);
+  const isClass = isObject(json) && Boolean(json[typeKey]);
+  return isClass;
 }
 
 function convertClassInstance(json, configuration) {
@@ -140,16 +140,7 @@ function convertString(string, key, configuration) {
   // Here the JSON value is supposed to be treated as a function
   if (string.startsWith(FUNCTION_IDENTIFIER) && configuration.convertFunction) {
     string = string.replace(FUNCTION_IDENTIFIER, '');
-    return configuration.convertFunction(string, key, configuration);
-  }
-  if (string.startsWith(CONSTANT_IDENTIFIER)) {
-    string = string.replace(CONSTANT_IDENTIFIER, '');
-    return configuration.constants[string];
-  }
-  if (string.startsWith(ENUM_IDENTIFIER)) {
-    string = string.replace(ENUM_IDENTIFIER, '');
-    const [enumVarName, enumValName] = string.split('.');
-    return configuration.enumerations[enumVarName][enumValName];
+    return configuration.convertFunction(string, configuration);
   }
   if (string.startsWith(CONSTANT_IDENTIFIER)) {
     string = string.replace(CONSTANT_IDENTIFIER, '');

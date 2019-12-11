@@ -50,6 +50,7 @@ def create_multi_layer_test_object():
         "TextLayer",
         id='textlayer',
         data=[{"position": [-122.45, 37.8], "text": "Hello World"}],
+        get_position='position',
         get_text_anchor="end",
     )
     geojson_layer = Layer(

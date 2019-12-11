@@ -54,8 +54,8 @@ const TEST_CASES = [
               rgb: [123, 159, 53]
             }
           ],
-          getColor: 'rgb',
-          getPosition: 'position',
+          getColor: '@@=rgb',
+          getPosition: '@@=position',
           getRadius: 100
         },
         {
@@ -72,8 +72,8 @@ const TEST_CASES = [
           ],
           fontSize: 144,
           getColor: [0, 0, 255],
-          getPosition: 'position',
-          getTextAnchor: '"start"',
+          getPosition: '@@=position',
+          getTextAnchor: 'start',
           fontFamily: 'Times, Times New Roman, Georgia, serif'
         }
       ]

@@ -19,7 +19,6 @@
       ],
       "elevationScale": 50,
       "extruded": true,
-      "getPosition": "[lng, lat]",
       "id": "heatmap",
       "lightSettings": {
         "ambientRatio": 0.4,

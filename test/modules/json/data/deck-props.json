@@ -4,13 +4,18 @@
     "latitude": 37.8,
     "zoom": 12
   },
-  "controller": "@@!MapController",
+  "controller": "@@#MapController",
   "mapStyle": {},
   "views": [
     {
       "@@type": "MapView",
       "height": "50%",
       "controller": true
+    },
+    {
+      "@@type": "FirstPersonView",
+      "y": "50%",
+      "height": "50%"
     }
   ],
   "layers": [
@@ -46,7 +51,7 @@
         0,
         3000
       ],
-      "getText": "Hello World",
+      "getText": "@@=Hello World",
       "billboard": false
     }
   ]
