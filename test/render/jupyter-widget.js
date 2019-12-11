@@ -192,10 +192,10 @@ const TEST_CASES = [
     goldenImage: './test/render/golden-images/jupyter-widget-hexagon-layer-function-syntax.png'
   },
   {
-    name: 'Failed HexagonLayer, Successful ScreenGrid',
+    name: 'Failed HexagonLayer, Successful Heatmap',
     json: {
       description:
-        'HexagonLayer without a function string should fail but ScreenGridLayer should succeed',
+        'HexagonLayer without a function string should fail but HeatmapLayer should succeed',
       viewState: {
         longitude: 0,
         latitude: 0,
@@ -256,8 +256,8 @@ const TEST_CASES = [
           ]
         },
         {
-          '@@type': 'ScreenGridLayer',
-          id: 'successful-screengrid',
+          '@@type': 'HeatmapLayer',
+          id: 'successful-heatmap',
           data: [
             {lat: 0, lon: 0},
             {lat: 0, lon: 0},
