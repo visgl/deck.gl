@@ -91,7 +91,7 @@ Text size multiplier.
 
 ##### `sizeUnits` (String, optional)
 
-* Default: `pixels` 
+* Default: `pixels`
 
 The units of the size specified by `getSize`, one of `'meters'`, `'pixels'`. When zooming in and out, meter sizes scale with the base map, and pixel sizes remain the same on screen.
 
@@ -160,7 +160,7 @@ Available options are `break-all` and `break-word`. A valid `maxWidth` has to be
 * Default: `-1`
 
 `maxWidth` is used together with `break-word` for wrapping text. The value of `maxWidth` specifies the width limit to break the text into multiple lines.
- 
+
 ### Data Accessors
 
 ##### `getText` ([Function](/docs/developer-guide/using-layers.md#accessors), optional)
@@ -190,7 +190,7 @@ The font size of each text label, in units specified by `sizeUnits` (default pix
 
 * Default: `[0, 0, 0, 255]`
 
-The rgba color of each text label, in `r, g, b, [a]`. Each component is in the 0-255 range.
+The rgba color is in the format of `[r, g, b, [a]]`. Each channel is a number between 0-255 and `a` is 255 if not supplied.
 
 * If an array is provided, it is used as the color for all objects.
 * If a function is provided, it is called on each object to retrieve its color.

@@ -120,7 +120,7 @@ The normal of each object, in `[nx, ny, nz]`.
 
 * Default: `[0, 0, 0, 255]`
 
-The rgba color of each object, in `r, g, b, [a]`. Each component is in the 0-255 range.
+The rgba color is in the format of `[r, g, b, [a]]`. Each channel is a number between 0-255 and `a` is 255 if not supplied.
 
 * If an array is provided, it is used as the color for all objects.
 * If a function is provided, it is called on each object to retrieve its color.
@@ -128,4 +128,3 @@ The rgba color of each object, in `r, g, b, [a]`. Each component is in the 0-255
 ## Source
 
 [modules/layers/src/point-cloud-layer](https://github.com/uber/deck.gl/tree/master/modules/layers/src/point-cloud-layer)
-
