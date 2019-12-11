@@ -1,27 +1,30 @@
 import parseExpressionString from './parse-expression-string';
-import {getPropTypes, isFunctionProp} from './deck-prop-types';
+
+import {FUNCTION_IDENTIFIER} from '../syntactic-sugar';
+
+function hasFunctionIdentifier(value) {
+  return typeof value === 'string' && value.startsWith(FUNCTION_IDENTIFIER);
+}
+
+function trimFunctionIdentifier(value) {
+  return value.replace(FUNCTION_IDENTIFIER, '');
+}
 
 // Try to determine if any props are function valued
 // and if so convert their string values to functions
-export default function convertFunctions(Class, props, configuration) {
-  const propTypes = getPropTypes(Class);
-
+export default function convertFunctions(props, configuration) {
   // Use deck.gl prop types if available.
-  return convertFunctionsUsingPropTypes(props, propTypes, configuration);
-}
-
-function convertFunctionsUsingPropTypes(props, propTypes, configuration) {
   const replacedProps = {};
   for (const propName in props) {
     let propValue = props[propName];
 
     // Parse string valued expressions
-    const isFunction = isFunctionProp(propTypes, propName);
+    const isFunction = hasFunctionIdentifier(propValue);
 
-    // Parse string as "expression", return equivalent JavaScript function
-    if (isFunction && typeof propValue === 'string') {
-      const isAccessor = true;
-      propValue = parseExpressionString(propValue, configuration, isAccessor);
+    if (isFunction) {
+      // Parse string as "expression", return equivalent JavaScript function
+      propValue = trimFunctionIdentifier(propValue);
+      propValue = parseExpressionString(propValue, configuration);
     }
 
     // Invalid functions return null, show default value instead.
