@@ -1,6 +1,8 @@
 # Conversion Reference
 
-The JSON framework inspects the "raw" parsed JSON data structure before supplying it to deck.gl as props. One thing this conversion process needs to is to replace certain objects in the structure with instances of objects.
+The @deck.g/json framework inspects the "raw" parsed JSON data structure before supplying it to deck.gl as props.
+This conversion process replaces certain objects in the structure with instances of objects.
+This file explains how to convert JSON into layers and their props for rendering
 
 
 ## Classes
@@ -19,7 +21,7 @@ and used to resolve this JSON object:
 {
   "layers": [
     {
-      "type": "ScatterplotLayer",
+      "@@type": "ScatterplotLayer",
       "data": ...,
       "getColor": [0, 128, 255],
       "getRadius": 1
@@ -28,7 +30,7 @@ and used to resolve this JSON object:
 }
 ```
 
-will replace the layers discriptor with
+will replace the layers descriptor with
 
 ```js
 {
@@ -42,7 +44,7 @@ will replace the layers discriptor with
 }
 ```
 
-Whenever the `JSONConverter` component finds a "type" field, it looks into a "class catalog". This can be a layer, a view, or other objects.
+Whenever the `JSONConverter` component finds the `@@type` field, it looks into a "class catalog." This can be a layer, a view, or other objects, provided it has been registered.
 
 
 ### Enumerations
@@ -70,17 +72,17 @@ and used to resolve this JSON object:
     {
       "type": "ScatterplotLayer",
       "data": ...,
-      "coordinateSystem": "COORDINATE_SYSTEM.METER_OFFSETS",
+      "coordinateSystem": "@@#COORDINATE_SYSTEM.METER_OFFSETS",
       "parameters": {
         "blend": true,
-        "blendFunc": ["GL.ONE", "GL.ZERO", "GL.SRC_ALPHA", "GL.DST_ALPHA"]
+        "blendFunc": ["@@#GL.ONE", "@@#GL.ZERO", "@@#GL.SRC_ALPHA", "@@#GL.DST_ALPHA"]
       }
     }
   ]
 }
 ```
 
-`<enum-name>.<enum-value>` will be resolved to values in the `enumerations` config:
+`@@#<enum-name>.<enum-value>` will be resolved to values in the `enumerations` config:
 
 ```js
 {
@@ -99,6 +101,32 @@ and used to resolve this JSON object:
 
 ## Functions
 
-Functions are parsed from strings.
+Functions are parsed from strings with a `@@=` prefix.
 
-> TBA
+```json
+    "layers": [{
+        "@@type": "HexagonLayer",
+        "data": [
+            {"lat":0,"lng":0},
+            {"lat":0,"lng":0},
+            {"lat":0,"lng":0},
+            {"lat":1.2,"lng":1.2},
+            {"lat":1.2,"lng":1.2},
+            {"lat":1.2,"lng":1.2}
+        ],
+        "getPosition": "@@=[lng, lat]",
+```
+
+In this case, a function is generated of the format `(row) => [row.lng, row.lat]`, reading from the JSON data rows.
+
+Passing `-` will simply return a function of the format `(row) => (row)`. For example, if data were a list of lat/lng values (e.g., `[[0, 0], [0, 0]]`),
+passing `-` would return those values.
+
+Additionally, `@@=` provides access to a small Javascript expression parser. You can apply basic Boolean and arithmetic operations via this parser.
+For example, the following are all valid functions:
+
+```json
+"getPosition": "@@=[lng / 10, lat / 10]",
+"getFillColor": "@@=[color / 255, 200, 20]",
+"getLineColor": "@@=value > 10 ? [255, 0, 0] : [0, 255, 200]",
+```
