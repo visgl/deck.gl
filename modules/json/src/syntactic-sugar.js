@@ -1,0 +1,5 @@
+const FUNCTION_IDENTIFIER = '@@=';
+const CONSTANT_IDENTIFIER = '@@#';
+const TYPE_KEY = '@@type';
+
+export {FUNCTION_IDENTIFIER, CONSTANT_IDENTIFIER, TYPE_KEY};

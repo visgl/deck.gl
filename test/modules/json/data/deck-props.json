@@ -51,7 +51,7 @@
         0,
         3000
       ],
-      "getText": "Hello World",
+      "getText": "@@=Hello World",
       "billboard": false
     }
   ]

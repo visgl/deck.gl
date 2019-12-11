@@ -11,7 +11,7 @@ test('JSONConverter#render', t => {
 
   const deckProps = jsonConverter.convert(JSON_DATA);
   t.ok(deckProps, 'JSONConverter converted correctly');
-
+  console.log({deckProps}); // eslint-disable-line
   const jsonDeck = new Deck(
     Object.assign(
       {

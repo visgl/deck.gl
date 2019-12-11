@@ -27,9 +27,7 @@ function instantiateJavaScriptClass(Class, props, configuration) {
   if (configuration.preProcessClassProps) {
     props = configuration.preProcessClassProps(Class, props, configuration);
   }
-
-  props = convertFunctions(Class, props, configuration);
-
+  props = convertFunctions(props, configuration);
   return new Class(props);
 }
 
@@ -41,7 +39,7 @@ function instantiateReactComponent(Component, props, configuration) {
     props = configuration.preProcessClassProps(Component, props, configuration);
   }
 
-  props = convertFunctions(Component, props, configuration);
+  props = convertFunctions(props, configuration);
 
   return React.createElement(Component, props, children);
 }
