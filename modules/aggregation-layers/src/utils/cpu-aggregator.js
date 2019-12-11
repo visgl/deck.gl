@@ -43,8 +43,8 @@ const defaultDimensions = [
           prop: 'colorAggregation'
         },
         filterData: {
-          prop: 'filterData',
-          updateTrigger: 'filterData'
+          prop: '_filterData',
+          updateTrigger: '_filterData'
         }
       }
     },
@@ -90,8 +90,8 @@ const defaultDimensions = [
           prop: 'elevationAggregation'
         },
         filterData: {
-          prop: 'filterData',
-          updateTrigger: 'filterData'
+          prop: '_filterData',
+          updateTrigger: '_filterData'
         }
       }
     },
@@ -378,7 +378,7 @@ export default class CPUAggregator {
 
     const sortedBins = new BinSorter(this.state.layerData.data || [], {
       getValue,
-      filterData: props.filterData
+      filterData: props._filterData
     });
     this.setDimensionState(key, {sortedBins});
     this.getDimensionValueDomain(props, dimensionUpdater);
