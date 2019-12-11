@@ -19,6 +19,12 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v7.3
 
+#### deck.gl [v7.3.7] - Dec 10 2019
+
+- Voodoo fix for polygon rendering on Linux/Intel (#3990)
+- [Enhancement] Supporting quantile and other scale type in aggregation layer (#3920)
+- [Experimental] add _filterData prop to cpu aggregation layer (#3876)
+
 #### deck.gl [v7.3.6] - Nov 11 2019
 
 - Bump loaders.gl dependencies (#3862)
