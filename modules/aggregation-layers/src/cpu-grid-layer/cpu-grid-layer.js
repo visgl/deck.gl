@@ -63,7 +63,7 @@ const defaultProps = {
   material: true,
 
   // data filter
-  filterData: {type: 'function', value: null, optional: true}
+  _filterData: {type: 'function', value: null, optional: true}
 };
 
 export default class CPUGridLayer extends AggregationLayer {
