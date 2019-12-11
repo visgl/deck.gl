@@ -28,7 +28,7 @@ frequently (e.g. animations), "stutter" can be visible even for layers with just
 
 Some good places to check for performance improvements are:
 
-* **Has `data` really changed?**
+#### Avoid unnecessary shallow change in data prop
 
   The layer does a shallow comparison between renders to determine if it needs to regenerate buffers. If
   nothing has changed, make sure you supply the *same* data object every time you render. If the data object has to change shallowly for some reason, consider using the `dataComparator` prop to supply a custom comparison logic.
@@ -79,7 +79,7 @@ Some good places to check for performance improvements are:
   }
   ```
 
-* **Is the change internal to each object?**
+#### Use updateTriggers
 
   So `data` has indeed changed. Do we have an entirely new collection of objects? Or did just certain fields changed in each row? Remember that changing `data` will update *all* buffers, so if, for example, object positions have not changed, it will be a waste of time to recalculate them.
 
@@ -141,7 +141,7 @@ Some good places to check for performance improvements are:
   }
   ```
 
-* **Is the data change incremental?**
+#### Handle incremental data loading
 
   A common technique for handling big datasets on the client side is to load data in chunks. We want to update the visualization whenever a new chunk comes in. If we append the new chunk to an existing data array, deck.gl will recalculate the whole buffers, even for the previously loaded chunks where nothing have changed:
 
@@ -216,7 +216,7 @@ Some good places to check for performance improvements are:
 
   See [Layer properties](/docs/api-reference/layer.md#basic-properties) for details.
 
-* **When to remove a layer**
+#### Favor layer visibility over addition and removal
 
   Removing a layer will lose all of its internal states, including generated buffers. If the layer is added back later, all the WebGL resources need to be regenerated again. In the use cases where layers need to be toggled frequently (e.g. via a control panel), there might be a significant perf penalty:
 
@@ -282,7 +282,7 @@ Some good places to check for performance improvements are:
 
 99% of the CPU time that deck.gl spends in updating buffers is calling the accessors you supply to the layer. Since they are called on every data object, any performance issue in the accessors is amplified by the size of your data.
 
-* **Use constants before callback functions**
+#### Favor constants over callback functions
 
   Most accessors accept constant values as well as functions. Constant props are extremely cheap to update in comparison. Use `ScatterplotLayer` as an example, the following two prop settings yield exactly the same visual outcome:
 
@@ -342,7 +342,7 @@ Some good places to check for performance improvements are:
   ```
 
 
-* **Use trivial functions as accessors**
+#### Use trivial functions as accessors
 
   Whenever possible, make the accessors trivial functions and utilize pre-defined and/or pre-computed data.
 
@@ -427,11 +427,15 @@ Some good places to check for performance improvements are:
   }
   ```
 
-### On Using Binary Data
+### Use Binary Data
 
-When creating data-intensive applications, it is often desirable to offload client-side data processing to the server or web workers. To transfer data efficiently between threads, some binary format is likely involved.
+When creating data-intensive applications, it is often desirable to offload client-side data processing to the server or web workers.
 
-* **Supply binary data to the `data` prop**
+The server can send data to the client more efficiently using binary formats, e.g. [protobuf](https://developers.google.com/protocol-buffers), [Arrow](https://arrow.apache.org/) or simply a custom binary blob.
+
+Some deck.gl applications use web workers to load data and generate attributes to get the processing off the main thread. Modern worker implementations allow ownership of typed arrays to be [transferred directly](https://developer.mozilla.org/en-US/docs/Web/API/Worker/postMessage#Parameters) between threads at virtualy no cost, bypassing serialization and deserialization of JSON objects.
+
+#### Supply binary blobs to the data prop
 
   Assume we have the data source encoded in the following format:
 
@@ -512,23 +516,39 @@ When creating data-intensive applications, it is often desirable to offload clie
   })
   ```
 
-* **Supplying attributes directly**
+#### Supply attributes directly
 
-  While the built-in attribute generation functionality is a major part of a `Layer`s functionality, it is possible for applications to bypass it, and supply the layer with precalculated attributes.
+  While the built-in attribute generation functionality is a major part of a `Layer`s functionality, it can become a major bottleneck in performance since it is done on CPU in the main thread. If the application needs to push many data changes frequently, for example to render animations, data updates can block rendering and user interaction. In this case, the application should consider precalculated attributes on the back end or in web workers. 
 
-  Some deck.gl applications use workers to load data and generate attributes to get the processing off the main thread. Modern worker implementations allow ownership of typed arrays to be transferred between threads which takes care of about half of the biggest performance problem with workers (deserialization of calculated data when transferring it between threads).
+  Deck.gl layers accepts external attributes as either a typed array or a WebGL buffer. Such attributes, if prepared carefully, can be directly utilized by the GPU, thus bypassing the CPU-bound attribute generation completely.
 
-  To generate attributes for the `PointCloudLayer`:
+  This technique offers the maximum performance possible in terms of data throughput, and is commonly used in heavy-duty, performance-sensitive applications.
+
+  To generate an attribute buffer for a layer, take the results returned from each object by the `get*` accessors and flatten them into a typed array. For example, consider the following layers:
+
+  ```js
+  // Calculate attributes on the main thread
+  new PointCloudLayer({
+    // data format: [{position: [0, 0, 0], color: [255, 0, 0]}, ...]
+    data: POINT_CLOUD_DATA,
+    getPosition: d => d.position,
+    getColor: d => d.color,
+    getNormal: [0, 0, 1]
+  })
+  ```
+
+  Should we move the attribute generation to a web worker:
 
   ```js
   // Worker
+  // positions can be sent as either float32 or float64, depending on precision requirements
   // point[0].x, point[0].y, point[0].z, point[1].x, point[1].y, point[1].z, ...
-  const positions = new Float32Array(...);
-  // point[0].r, point[0].g, point[0].b, point[0].a, point[1].r, point[1].g, point[1].b, point[1].a, ...
-  const colors = new Uint8ClampedArray(...);
+  const positions = new Float64Array(POINT_CLOUD_DATA.flatMap(d => d.position));
+  // point[0].r, point[0].g, point[0].b, point[1].r, point[1].g, point[1].b, ...
+  const colors = new Uint8Array(POINT_CLOUD_DATA.flatMap(d => d.color));
 
   // send back to main thread
-  postMessage({pointCount, positions, colors}, [positions.buffer, colors.buffer]);
+  postMessage({pointCount: POINT_CLOUD_DATA.length, positions, colors}, [positions.buffer, colors.buffer]);
   ```
 
   ```js
@@ -539,8 +559,8 @@ When creating data-intensive applications, it is often desirable to offload clie
       // this is required so that the layer knows how many points to draw
       length: data.pointCount,
       attributes: {
-        instancePositions: data.positions,
-        instanceColors: data.colors,
+        getPosition: {value: data.positions, size: 3},
+        getColor: {value: data.colors, size: 3},
       }
     },
     // constant accessor works without raw data
@@ -548,35 +568,45 @@ When creating data-intensive applications, it is often desirable to offload clie
   });
   ```
 
-  It is also possible to use interleaved or custom layout external buffers by supplying a descriptor instead of typed array to each attribute:
+  Note that instead of `getPosition`, we supply a `data.attributes.getPosition` object. This object defines the buffer from which `PointCloudLayer` should access its positions data. See the base `Layer` class' [data prop](/docs/api-reference/layer.md#basic-properties) for details.
+
+  It is also possible to use interleaved or custom layout external buffers:
 
   ```js
+  // Worker
+  // point[0].x, point[0].y, point[0].z, point[0].r, point[0].g, point[0].b, point[1].x, point[1].y, point[1].z, point[1].r, point[1].g, point[1].b, ...
+  const positionsAndColors = new Float32Array(POINT_CLOUD_DATA.flatMap(d => [
+    d.position[0],
+    d.position[1],
+    d.position[2],
+    // colors must be normalized if sent as floats
+    d.color[0] / 255,
+    d.color[1] / 255,
+    d.color[2] / 255
+  ]));
+
+  // send back to main thread
+  postMessage({pointCount: POINT_CLOUD_DATA.length, positionsAndColors}, [positionsAndColors.buffer]);
+  ```
+
+  ```js
+  import {Buffer} from '@luma.gl/core';
+  const buffer = new Buffer(gl, {data: data.positionsAndColors});
+
   new PointCloudLayer({
     data: {
       length : data.pointCount,
       attributes: {
-        instancePositions: data.positions,
-        // point[0].r, point[0].g, point[0].b, point[1].r, point[1].g, point[1].b, ...
-        instanceColors: {value: data.colors, size: 3, stride: 3},
+        getPosition: {buffer, size: 3, offset: 0, stride: 24},
+        getColor: {buffer, size: 3, offset: 12, stride: 24},
       }
     },
-    // tell the layer that `instanceColors` does not contain alpha channel
-    colorFormat: 'RGB',
     // constant accessor works without raw data
     getNormal: [0, 0, 1]
   });
   ```
 
-  Each value in `data.attributes` may be one of the following formats:
-
-  - luma.gl `Buffer` instance
-  - A typed array
-  - An object containing the following optional fields. For more information, see [WebGL vertex attribute API](https://developer.mozilla.org/en-US/docs/Web/API/WebGLRenderingContext/vertexAttribPointer).
-    + `buffer` (Buffer)
-    + `value` (TypedArray)
-    + `size` (Number) - the number of elements per vertex attribute.
-    + `offset` (Number) - offset of the first vertex attribute into the buffer, in bytes
-    + `stride` (Number) - the offset between the beginning of consecutive vertex attributes, in bytes
+  Note that external attributes only work with primitive layers, not composite layers, because composite layers often need to preprocess the data before passing it to the sub layers. Some layers that deal with variable-width data, such as `PathLayer`, `SolidPolygonLayer`, require additional information passed along with `data.attributes`. Consult each layer's documentation before use.
 
 
 ## Layer Rendering Performance

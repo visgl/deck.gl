@@ -175,6 +175,67 @@ The width of each path, in units specified by `widthUnits` (default meters).
 * If a number is provided, it is used as the width for all paths.
 * If a function is provided, it is called on each path to retrieve its width.
 
+
+## Use binary attributes
+
+This section is about the special requirements when [supplying attributes directly](/docs/developer-guide/performance.md#supply-attributes-directly) to a `PathLayer`.
+
+Because each path have different number of vertices, when `data.attributes.getPath` is supplied, the layer also requires an array `data.startIndices` that describes the vertex index at the start of each path. For example, if there are 3 paths of 2, 3, and 4 vertices each, `startIndices` should be `[0, 2, 5, 9]`.
+
+Additionally, all other attributes (`getColor`, `getWidth`, etc.), if supplied, must contain the same layout (number of vertices) as the `getPath` buffer.
+
+To truly realize the performance gain from using binary data, the app likely wants to skip all data processing in this layer. Specify the `_pathType` prop to skip normalization.
+
+Example use case:
+
+```js
+// USE PLAIN JSON OBJECTS
+const PATH_DATA = [
+  {
+    path: [[-122.4, 37.7], [-122.5, 37.8], [-122.6, 37.85]],
+    name: 'Richmond - Millbrae',
+    color: [255, 0, 0]
+  },
+  ...
+];
+
+new PathLayer({
+  data: PATH_DATA,
+  getPath: d => d.path,
+  getColor: d => d.color
+})
+```
+
+Convert to using binary attributes:
+
+```js
+// USE BINARY
+// Flatten the path vertices
+// [-122.4, 37.7, -122.5, 37.8, -122.6, 37.85, ...]
+const positions = new Float64Array(PATH_DATA.map(d => d.path).flat(2));
+// The color attribute must supply one color for each vertex
+// [255, 0, 0, 255, 0, 0, 255, 0, 0, ...]
+const colors = new Uint8Array(PATH_DATA.map(d => d.path.map(_ => d.color)).flat(2));
+// The "layout" that tells PathLayer where each path starts
+const startIndices = new Uint16Array(PATH_DATA.reduce((acc, d) => {
+  const lastIndex = acc[acc.length - 1];
+  acc.push(lastIndex + d.path.length);
+  return acc;
+}, [0]));
+
+new PathLayer({
+  data: {
+    length: PATH_DATA.length,
+    startIndices: startIndices, // this is required to render the paths correctly!
+    attributes: {
+      getPath: {value: positions, size: 2},
+      getColor: {value: colors, size: 3}
+    }
+  },
+  _pathType: 'open' // this instructs the layer to skip normalization and use the binary as-is
+})
+```
+
 ## Source
 
 [modules/layers/src/path-layer](https://github.com/uber/deck.gl/tree/master/modules/layers/src/path-layer)

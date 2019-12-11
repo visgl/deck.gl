@@ -274,6 +274,13 @@ The rotating angle  of each object, in degrees.
 - If a function is provided, it is called on each object to retrieve its angle.
 
 
+## Use binary attributes
+
+This section is about the special requirements when [supplying attributes directly](/docs/developer-guide/performance.md#supply-attributes-directly) to an `IconLayer`.
+
+If `data.attributes.getIcon` is supplied, since its value can only be a typed array, `iconMapping` can only use integers as keys.
+
+
 ## Source
 
 [modules/layers/src/icon-layer](https://github.com/uber/deck.gl/tree/master/modules/layers/src/icon-layer)
