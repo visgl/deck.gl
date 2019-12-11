@@ -109,12 +109,18 @@ Ref: http://keepachangelog.com/en/0.3.0/
 - delete deprecated buffer props (#3651)
 - Consolidate picking injection (#3720)
 - Picking 3D point (#3721)
-- Add domain method to scales (#3631) 
+- Add domain method to scales (#3631)
 - Integrate Quantile and Ordinal scaling (#3609)
 - Clean up picking code (#3724)
 
 
 ## deck.gl v7.3
+
+#### deck.gl [v7.3.7] - Dec 10 2019
+
+- Voodoo fix for polygon rendering on Linux/Intel (#3990)
+- [Enhancement] Supporting quantile and other scale type in aggregation layer (#3920)
+- [Experimental] add _filterData prop to cpu aggregation layer (#3876)
 
 #### deck.gl [v7.3.6] - Nov 11 2019
 
