@@ -17,6 +17,8 @@ Performance is one of the biggest focus of this update. Layer updates (data chan
 | Redraw (CPU Time) | 76ms  | 26ms  | -66%   |
 | Redraw (GPU Time) | 17ms  | 10ms  | -41%   |
 
+In addition to runtime performance, deck.gl also added a production mode to optimize bundle size. The v8.0 minified bundle of `@deck.gl/core` is 50kb lighter than that of v7.3.
+
 ### Better Binary Data Support
 
 It is now possible to replace a layer's accessors with binary data attributes. This technique offers the maximum performance in terms of data throughput in applications where a lot of data is loaded and/or frequently updated:
@@ -55,6 +57,14 @@ This use case is discussed in detail in the [performance developer guide](/docs/
 - `ContourLayer` (GPU aggregation only)
 - `GridLayer` (GPU aggregation only)
 
+### pydeck
+
+- pydeck now supports JupyterLab.
+- The Jupyter widget now allows users to click multiple objects in a visualization and pass them to the Python backend.
+- JavaScript errors are now surfaced in the Jupyter UI.
+- Support for non-Mercator visualizations.
+- The JSON parser has introduced syntactic identifiers in an effort to become more generic and robust. It is able to work with a wider range of data formats and layer types. See upgrade guide for details.
+
 ### Other New Features and Improvements
 
 - Render to a frame buffer by specifying the `_framebuffer` prop of [Deck](/docs/api-reference/deck.md).
@@ -65,6 +75,8 @@ This use case is discussed in detail in the [performance developer guide](/docs/
 - [ScenegraphLayer](/docs/layers/scenegraph-layer.md) adds props `sizeMinPixels` and `sizeMaxPixels`.
 - 64-bit positions are now 3D instead of 2D. This improves render precision when using `OrbitView`.
 - `FirstPersonView` now supports pitch; controller works more intuitively; graduates from experimental status.
+- `FlyToInterpolator` now supports `duration: 'auto'`.
+
 
 ## deck.gl v7.3
 
