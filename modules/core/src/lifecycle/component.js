@@ -1,7 +1,7 @@
 import {LIFECYCLE} from '../lifecycle/constants';
 import {createProps} from './create-props';
-import {PROP_KEYS} from './constants';
-const {ASYNC_ORIGINAL, ASYNC_RESOLVED, ASYNC_DEFAULTS} = PROP_KEYS;
+import {PROP_SYMBOLS} from './constants';
+const {ASYNC_ORIGINAL, ASYNC_RESOLVED, ASYNC_DEFAULTS} = PROP_SYMBOLS;
 import ComponentState from './component-state';
 
 const defaultProps = {};

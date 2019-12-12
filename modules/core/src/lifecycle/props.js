@@ -1,7 +1,7 @@
 import assert from '../utils/assert';
-import {PROP_KEYS} from './constants';
+import {PROP_SYMBOLS} from './constants';
 
-const {COMPONENT} = PROP_KEYS;
+const {COMPONENT} = PROP_SYMBOLS;
 
 export function validateProps(props) {
   const propTypes = getPropTypes(props);

@@ -1,9 +1,9 @@
 import log from '../utils/log';
 import {isAsyncIterable} from '../utils/iterable-utils';
 import {parsePropTypes} from './prop-types';
-import {PROP_KEYS} from './constants';
+import {PROP_SYMBOLS} from './constants';
 
-const {COMPONENT, ASYNC_ORIGINAL, ASYNC_RESOLVED, ASYNC_DEFAULTS} = PROP_KEYS;
+const {COMPONENT, ASYNC_ORIGINAL, ASYNC_RESOLVED, ASYNC_DEFAULTS} = PROP_SYMBOLS;
 
 // Create a property object
 export function createProps() {
@@ -27,7 +27,8 @@ export function createProps() {
   // "Copy" all sync props
   for (let i = 0; i < arguments.length; ++i) {
     const props = arguments[i];
-    // Do not use Object.assign here to avoid copying Symbols
+    // Do not use Object.assign here to avoid Symbols in props overwriting our private fields
+    // This might happen if one of the arguments is another props instance
     for (const key in props) {
       propsInstance[key] = props[key];
     }

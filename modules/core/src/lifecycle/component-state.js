@@ -21,8 +21,8 @@
 import log from '../utils/log';
 import assert from '../utils/assert';
 import {isAsyncIterable} from '../utils/iterable-utils';
-import {PROP_KEYS} from './constants';
-const {ASYNC_ORIGINAL, ASYNC_RESOLVED, ASYNC_DEFAULTS} = PROP_KEYS;
+import {PROP_SYMBOLS} from './constants';
+const {ASYNC_ORIGINAL, ASYNC_RESOLVED, ASYNC_DEFAULTS} = PROP_SYMBOLS;
 
 const EMPTY_PROPS = Object.freeze({});
 
