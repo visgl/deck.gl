@@ -1,8 +1,15 @@
 # Conversion Reference
 
+| Prefix | Description | Example usage |
+| --- | --- | --- |
+| `@@type` | Interpret a string as a JavaScript class or React component, resolving in the JSONConfiguration. | `"@@type": "ScatterplotLayer"`
+| `@@=` | Interpret the rest of the string as a function, parsing unquoted character strings as identifiers | `"@@=[lng, lat]"`
+| `@@#` | Interpret the rest of the string as a constant, resolving in the JSON configuration | `"@@#GL.ONE"`
+
+
 The @deck.g/json framework inspects the "raw" parsed JSON data structure before supplying it to deck.gl as props. This conversion process replaces certain objects in the structure with instances of objects.
 
-## Classes and using @@type
+## Classes and using `@@type`
 
 Conversion happens by default for classes. For example, when this configuration of classes is passed to a
  `JSONConverter`–
@@ -49,7 +56,7 @@ like that in the configuration object above. These classes can be layers, views,
  provided the classes have been registered.
 
 
-### Enumerations and using the @@# prefix
+### Enumerations and using the `@@#` prefix
 
 Often deck.gl visualizations require access to particular enumerations. For this reason, a configuration
  object can also contain a map of enumerations that should be made available to the @deck.gl/json string
@@ -105,7 +112,7 @@ the `@@#<enum-name>.<enum-value>` will be resolved to values in the `enumeration
 }
 ```
 
-## Functions and using the @@= prefix
+## Functions and using the `@@=` prefix
 
 Functions are parsed from value strings with a `@@=` prefix.
 
