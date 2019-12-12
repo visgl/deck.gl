@@ -364,9 +364,6 @@ const TextLayerExample = {
       name: 'maxWidth',
       type: 'number',
       max: 5000
-    },
-    backgroundColor: {
-      type: 'color'
     }
   },
   props: {

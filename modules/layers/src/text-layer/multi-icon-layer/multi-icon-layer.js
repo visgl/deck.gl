@@ -30,7 +30,7 @@ const DEFAULT_GAMMA = 0.2;
 const DEFAULT_BUFFER = 192.0 / 256;
 
 const defaultProps = {
-  backgroundColor: {value: null, optional: true},
+  backgroundColor: {type: 'color', value: null, optional: true},
   // each paragraph can have one or multiple row(s)
   // each row can have one or multiple character(s)
   getRowSize: {type: 'accessor', value: x => x.rowSize || [0, 0]},
