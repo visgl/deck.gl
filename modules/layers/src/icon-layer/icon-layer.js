@@ -200,7 +200,9 @@ export default class IconLayer extends Layer {
   }
 
   _getModel(gl) {
-    const positions = [-1, -1, 0, -1, 1, 0, 1, 1, 0, 1, -1, 0];
+    // The icon-layer vertex shader uses 2d positions
+    // specifed via: attribute vec2 positions;
+    const positions = [-1, -1, -1, 1, 1, 1, 1, -1];
 
     return new Model(
       gl,
@@ -209,7 +211,12 @@ export default class IconLayer extends Layer {
         geometry: new Geometry({
           drawMode: GL.TRIANGLE_FAN,
           attributes: {
-            positions: new Float32Array(positions)
+            // The size must be explicitly passed here otherwise luma.gl
+            // will default to assuming that positions are 3D (x,y,z)
+            positions: {
+              size: 2,
+              value: new Float32Array(positions)
+            }
           }
         }),
         isInstanced: true
