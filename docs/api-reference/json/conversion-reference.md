@@ -1,13 +1,11 @@
 # Conversion Reference
 
-The @deck.g/json framework inspects the "raw" parsed JSON data structure before supplying it to deck.gl as props.
-This conversion process replaces certain objects in the structure with instances of objects.
-This file explains how to convert JSON into layers and their props for rendering
+The @deck.g/json framework inspects the "raw" parsed JSON data structure before supplying it to deck.gl as props. This conversion process replaces certain objects in the structure with instances of objects.
 
+## Classes and using @@type
 
-## Classes
-
-Conversion happens by default for classes. For example, when this configuration is passed to `JSONConverter`:
+Conversion happens by default for classes. For example, when this configuration of classes is passed to a
+ `JSONConverter`–
 
 ```js
 const configuration = {
@@ -15,7 +13,7 @@ const configuration = {
 };
 ```
 
-and used to resolve this JSON object:
+and used to resolve this JSON object–
 
 ```json
 {
@@ -30,7 +28,7 @@ and used to resolve this JSON object:
 }
 ```
 
-will replace the layers descriptor with
+it will replace the layers descriptor with
 
 ```js
 {
@@ -44,12 +42,20 @@ will replace the layers descriptor with
 }
 ```
 
-Whenever the `JSONConverter` component finds the `@@type` field, it looks into a "class catalog." This can be a layer, a view, or other objects, provided it has been registered.
+A warning will be raised if the named layer is not registered.
+
+Whenever the `JSONConverter` component finds the `@@type` field, it looks into the "class catalog"
+like that in the configuration object above. These classes can be layers, views, or other objects,
+ provided the classes have been registered.
 
 
-### Enumerations
+### Enumerations and using the @@# prefix
 
-A map of enumerations that should be made available to the JSON string resolver. For example, when this configuration is passed to `JSONConverter`:
+Often deck.gl visualizations require access to particular enumerations. For this reason, a configuration
+ object can also contain a map of enumerations that should be made available to the @deck.gl/json string
+resolver. The `@@#` prefix on an enumeration triggers this lookup.
+
+For example, when this configuration is passed to the `JSONConverter`–
 
 ```js
 import {COORDINATE_SYSTEM} from '@deck.gl/core';
@@ -64,7 +70,7 @@ const configuration = {
 };
 ```
 
-and used to resolve this JSON object:
+and used to resolve this JSON object–
 
 ```json
 {
@@ -82,14 +88,14 @@ and used to resolve this JSON object:
 }
 ```
 
-`@@#<enum-name>.<enum-value>` will be resolved to values in the `enumerations` config:
+the `@@#<enum-name>.<enum-value>` will be resolved to values in the `enumerations` config:
 
 ```js
 {
   layers: [
     new ScatterplotLayer({
       data: ...,
-      coordinateSystem: 2,
+      coordinateSystem: 2,  // The enumerated value of COORDINATE_SYSTEM.METER_OFFSETS
       parameters: {
         blend: true,
         blendFunc: [1, 0, 770, 772]
@@ -99,9 +105,9 @@ and used to resolve this JSON object:
 }
 ```
 
-## Functions
+## Functions and using the @@= prefix
 
-Functions are parsed from strings with a `@@=` prefix.
+Functions are parsed from value strings with a `@@=` prefix.
 
 ```json
     "layers": [{
@@ -117,16 +123,26 @@ Functions are parsed from strings with a `@@=` prefix.
         "getPosition": "@@=[lng, lat]",
 ```
 
-In this case, a function is generated of the format `(row) => [row.lng, row.lat]`, reading from the JSON data rows.
+In this case, a function is generated of the format `(datum) => [datum["lng"], datum["lng"]]`, reading
+from the JSON data rows.
 
-Passing `-` will simply return a function of the format `(row) => (row)`. For example, if data were a list of lat/lng values (e.g., `[[0, 0], [0, 0]]`),
-passing `-` would return those values.
+Passing `@@=-` will simply return a function of the format `(datum) => (datum)`. For example, if data were
+an array of coordinates (e.g., `[[0, 1], [0, 5]]`), passing `@@=-` would return those values.
 
-Additionally, `@@=` provides access to a small Javascript expression parser. You can apply basic Boolean and arithmetic operations via this parser.
-For example, the following are all valid functions:
+Additionally, `@@=` provides access to a small Javascript expression parser. You can apply basic Boolean,
+inline conditionals, and arithmetic operations via this parser.
+For example, the following are all valid functions–
 
 ```json
-"getPosition": "@@=[lng / 10, lat / 10]",
+"getPosition": "@@=[lng, lat, altitudeMeters]",
 "getFillColor": "@@=[color / 255, 200, 20]",
 "getLineColor": "@@=value > 10 ? [255, 0, 0] : [0, 255, 200]",
+```
+
+Each would be evaluated to an expression equivalent to–
+
+```javascript
+datum => [datum.lng, datum.lat, altitudeMeters / 1000]
+datum => [datum.color / 255, 200, 20]
+datum => datum.value > 10 ? [255, 0, 0] : [0, 255, 200]
 ```
