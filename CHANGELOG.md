@@ -19,6 +19,10 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v7.3
 
+#### deck.gl [v7.3.8] - Dec 12 2019
+
+- Fix trips layer timestamps attribute partial update (#4004)
+
 #### deck.gl [v7.3.7] - Dec 10 2019
 
 - Voodoo fix for polygon rendering on Linux/Intel (#3990)
