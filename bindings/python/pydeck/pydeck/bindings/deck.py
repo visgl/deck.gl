@@ -20,6 +20,7 @@ class Deck(JSONMixin):
         width='100%',
         height=500,
         tooltip=True,
+        description=None,
     ):
         '''This is the renderer and configuration for a deck.gl visualization, similar to the
         `Deck <https://deck.gl/#/documentation/deckgl-api-reference/deck>`_ class from deck.gl.
@@ -74,6 +75,7 @@ class Deck(JSONMixin):
         self.deck_widget.height = height
         self.deck_widget.width = width
         self.deck_widget.tooltip = tooltip
+        self.description = None
         if self.mapbox_key is None:
             warnings.warn(
                 'Mapbox API key is not set. This may impact available features of pydeck.', UserWarning)

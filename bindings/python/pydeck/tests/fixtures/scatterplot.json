@@ -8,7 +8,7 @@
     {
       "@@type": "ScatterplotLayer",
       "data": [[0, 0], [0.01, 0.01]],
-      "getPosition": "-",
+      "getPosition": "@@=-",
       "getRadius": 500,
       "getFillColor": [255, 0, 0]
     }
