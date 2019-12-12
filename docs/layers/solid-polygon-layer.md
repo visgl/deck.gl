@@ -163,6 +163,69 @@ Only applies if `extruded: true`.
 * If a number is provided, it is used as the elevation for all polygons.
 * If a function is provided, it is called on each object to retrieve its elevation.
 
+
+## Use binary attributes
+
+This section is about the special requirements when [supplying attributes directly](/docs/developer-guide/performance.md#supply-attributes-directly) to a `SolidPolygonLayer`.
+
+Because each polygon has a different number of vertices, when `data.attributes.getPolygon` is supplied, the layer also requires an array `data.startIndices` that describes the vertex index at the start of each polygon. For example, if there are 3 polygons of 3, 4, and 5 vertices each (including the end vertex that overlaps with the first vertex to close the loop), `startIndices` should be `[0, 3, 7, 12]`. *Polygons with holes are not supported when using precalculated attributes.*
+
+Additionally, all other attributes (`getFillColor`, `getElevation`, etc.), if supplied, must contain the same layout (number of vertices) as the `getPolygon` buffer.
+
+To truly realize the performance gain from using binary data, the app likely wants to skip all data processing in this layer. Specify the `_normalize` prop to skip normalization.
+
+Example use case:
+
+```js
+// USE PLAIN JSON OBJECTS
+const POLYGON_DATA = [
+  {
+     contour: [[-122.4, 37.7], [-122.4, 37.8], [-122.5, 37.8], [-122.5, 37.7], [-122.4, 37.7]],
+     population: 26599
+  },
+  ...
+];
+
+new SolidPolygonLayer({
+  data: POLYGON_DATA,
+  getPolygon: d => d.contour,
+  getElevation: d => d.population,
+  getFillColor: [0, 100, 60, 160]
+})
+```
+
+Convert to using binary attributes:
+
+```js
+// USE BINARY
+// Flatten the polygon vertices
+// [-122.4, 37.7, -122.4, 37.8, -122.5, 37.8, -122.5, 37.7, -122.4, 37.7, ...]
+const positions = new Float64Array(POLYGON_DATA.map(d => d.contour).flat(2));
+// The color attribute must supply one color for each vertex
+// [255, 0, 0, 255, 0, 0, 255, 0, 0, ...]
+const elevations = new Uint8Array(POLYGON_DATA.map(d => d.contour.map(_ => d.population)).flat());
+// The "layout" that tells PathLayer where each path starts
+const startIndices = new Uint16Array(POLYGON_DATA.reduce((acc, d) => {
+  const lastIndex = acc[acc.length - 1];
+  acc.push(lastIndex + d.contour.length);
+  return acc;
+}, [0]));
+
+new SolidPolygonLayer({
+  data: {
+    length: POLYGON_DATA.length,
+    startIndices: startIndices, // this is required to render the paths correctly!
+    attributes: {
+      getPolygon: {value: positions, size: 2},
+      getElevation: {value: elevations, size: 1}
+    }
+  },
+  _normalize: false, // this instructs the layer to skip normalization and use the binary as-is
+  getFillColor: [0, 100, 60, 160]
+})
+```
+
+
 ## Remarks
 
 * This layer only renders filled polygons. If you need to render polygon
