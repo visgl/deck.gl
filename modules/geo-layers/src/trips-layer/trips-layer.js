@@ -109,9 +109,9 @@ if(vTime > currentTime || vTime < currentTime - trailLength) {
     }
 
     const {
-      pathTesselator: {bufferLayout, instanceCount}
+      pathTesselator: {bufferLayout}
     } = this.state;
-    const value = new Float32Array(instanceCount * 2);
+    const {value} = attribute;
 
     const {iterable, objectInfo} = createIterable(data, startRow, endRow);
     let i = 0;
@@ -131,8 +131,8 @@ if(vTime > currentTime || vTime < currentTime - trailLength) {
         value[i++] = timestamps[j + 1];
       }
     }
+    attribute.bufferLayout = bufferLayout;
     attribute.constant = false;
-    attribute.value = value;
   }
 }
 
