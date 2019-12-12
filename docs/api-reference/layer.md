@@ -71,7 +71,7 @@ The keys in `data.attributes` correspond to the [accessor](/docs/developer-guide
 Each value in `data.attributes` may be one of the following formats:
 
 - luma.gl [Buffer](https://luma.gl/docs/api-reference/webgl/buffer) instance
-- A typed array
+- A typed array, which will be used to create a `Buffer`
 - An object containing the following optional fields. For more information, see [WebGL vertex attribute API](https://developer.mozilla.org/en-US/docs/Web/API/WebGLRenderingContext/vertexAttribPointer).
   + `buffer` ([Buffer](https://luma.gl/docs/api-reference/webgl/buffer))
   + `value` (TypedArray)
