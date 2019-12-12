@@ -17,7 +17,7 @@ const TEST_CASES = [
         {
           '@@type': 'ScatterplotLayer',
           data: [[0, 0], [0.01, 0.01]],
-          getPosition: '-',
+          getPosition: '@@=-',
           getRadius: 500,
           getFillColor: [255, 0, 0]
         }
@@ -54,8 +54,8 @@ const TEST_CASES = [
               rgb: [123, 159, 53]
             }
           ],
-          getColor: 'rgb',
-          getPosition: 'position',
+          getColor: '@@=rgb',
+          getPosition: '@@=position',
           getRadius: 100
         },
         {
@@ -72,8 +72,8 @@ const TEST_CASES = [
           ],
           fontSize: 144,
           getColor: [0, 0, 255],
-          getPosition: 'position',
-          getTextAnchor: '"start"',
+          getPosition: '@@=position',
+          getTextAnchor: 'start',
           fontFamily: 'Times, Times New Roman, Georgia, serif'
         }
       ]
@@ -122,6 +122,183 @@ const TEST_CASES = [
       ]
     },
     goldenImage: './test/render/golden-images/jupyter-widget-geojsonlayer.png'
+  },
+  {
+    name: 'HexagonLayer with Function',
+    json: {
+      description: 'HexagonLayer with a function string',
+      viewState: {
+        longitude: 0,
+        latitude: 0,
+        zoom: 5,
+        pitch: 40.5,
+        bearing: -27.396674584323023
+      },
+      views: [
+        {
+          '@@type': 'MapView',
+          controller: true
+        }
+      ],
+      layers: [
+        {
+          '@@type': 'HexagonLayer',
+          id: 'heatmap',
+          data: [
+            {lat: 0, lon: 0},
+            {lat: 0, lon: 0},
+            {lat: 0, lon: 0},
+            {lat: 0, lon: 1},
+            {lat: 0.1, lon: 1},
+            {lat: 0.1, lon: 0.1},
+            {lat: 0.1, lon: 0.1},
+            {lat: 0.1, lon: 0.1},
+            {lat: 0.1, lon: 0.1},
+            {lat: 0.2, lon: 1.2},
+            {lat: 0.2, lon: 1.2},
+            {lat: 0.2, lon: 1.2},
+            {lat: 0.2, lon: 1.2},
+            {lat: 0.1, lon: 0.1},
+            {lat: 0.1, lon: 0.1},
+            {lat: 1.2, lon: 1.2},
+            {lat: 1.2, lon: 1.2},
+            {lat: 1.2, lon: 1.2},
+            {lat: 0.1, lon: 0.1},
+            {lat: 1.2, lon: 1.2},
+            {lat: 1.2, lon: 1.2},
+            {lat: 0.1, lon: 0.1},
+            {lat: 1.2, lon: 1.2},
+            {lat: 1.2, lon: 1.2},
+            {lat: 1.2, lon: 1.2},
+            {lat: 1.2, lon: 1.2}
+          ],
+          elevationRange: [0, 150],
+          elevationScale: 1800,
+          extruded: true,
+          getPosition: '@@=[lon, lat]',
+          radius: 10000,
+          upperPercentile: 100,
+          colorRange: [
+            [1, 152, 189],
+            [73, 227, 206],
+            [216, 254, 181],
+            [254, 237, 177],
+            [254, 173, 84],
+            [209, 55, 78]
+          ]
+        }
+      ]
+    },
+    goldenImage: './test/render/golden-images/jupyter-widget-hexagon-layer-function-syntax.png'
+  },
+  {
+    name: 'Failed HexagonLayer, Successful Heatmap',
+    json: {
+      description:
+        'HexagonLayer without a function string should fail but HeatmapLayer should succeed',
+      viewState: {
+        longitude: 0,
+        latitude: 0,
+        zoom: 5,
+        pitch: 40.5,
+        bearing: -27.396674584323023
+      },
+      views: [
+        {
+          '@@type': 'MapView',
+          controller: true
+        }
+      ],
+      layers: [
+        {
+          '@@type': 'HexagonLayer',
+          id: 'failed-heatmap',
+          data: [
+            {lat: 0, lon: 0},
+            {lat: 0, lon: 0},
+            {lat: 0, lon: 0},
+            {lat: 0, lon: 1},
+            {lat: 0.1, lon: 1},
+            {lat: 0.1, lon: 0.1},
+            {lat: 0.1, lon: 0.1},
+            {lat: 0.1, lon: 0.1},
+            {lat: 0.1, lon: 0.1},
+            {lat: 0.2, lon: 1.2},
+            {lat: 0.2, lon: 1.2},
+            {lat: 0.2, lon: 1.2},
+            {lat: 0.2, lon: 1.2},
+            {lat: 0.1, lon: 0.1},
+            {lat: 0.1, lon: 0.1},
+            {lat: 1.2, lon: 1.2},
+            {lat: 1.2, lon: 1.2},
+            {lat: 1.2, lon: 1.2},
+            {lat: 0.1, lon: 0.1},
+            {lat: 1.2, lon: 1.2},
+            {lat: 1.2, lon: 1.2},
+            {lat: 0.1, lon: 0.1},
+            {lat: 1.2, lon: 1.2},
+            {lat: 1.2, lon: 1.2},
+            {lat: 1.2, lon: 1.2},
+            {lat: 1.2, lon: 1.2}
+          ],
+          elevationRange: [0, 15],
+          elevationScale: 1800,
+          getPosition: '[lon, lat]',
+          radius: 10000,
+          upperPercentile: 100,
+          colorRange: [
+            [1, 152, 189],
+            [73, 227, 206],
+            [216, 254, 181],
+            [254, 237, 177],
+            [254, 173, 84],
+            [209, 55, 78]
+          ]
+        },
+        {
+          '@@type': 'HeatmapLayer',
+          id: 'successful-heatmap',
+          data: [
+            {lat: 0, lon: 0},
+            {lat: 0, lon: 0},
+            {lat: 0, lon: 0},
+            {lat: 0, lon: 1},
+            {lat: 0.1, lon: 1},
+            {lat: 0.1, lon: 0.1},
+            {lat: 0.1, lon: 0.1},
+            {lat: 0.1, lon: 0.1},
+            {lat: 0.1, lon: 0.1},
+            {lat: 0.2, lon: 1.2},
+            {lat: 0.2, lon: 1.2},
+            {lat: 0.2, lon: 1.2},
+            {lat: 0.2, lon: 1.2},
+            {lat: 0.1, lon: 0.1},
+            {lat: 0.1, lon: 0.1},
+            {lat: 1.2, lon: 1.2},
+            {lat: 1.2, lon: 1.2},
+            {lat: 1.2, lon: 1.2},
+            {lat: 0.1, lon: 0.1},
+            {lat: 1.2, lon: 1.2},
+            {lat: 1.2, lon: 1.2},
+            {lat: 0.1, lon: 0.1},
+            {lat: 1.2, lon: 1.2},
+            {lat: 1.2, lon: 1.2},
+            {lat: 1.2, lon: 1.2},
+            {lat: 1.2, lon: 1.2}
+          ],
+          getPosition: '@@=[lon, lat]',
+          colorRange: [
+            [1, 152, 189],
+            [73, 227, 206],
+            [216, 254, 181],
+            [254, 237, 177],
+            [254, 173, 84],
+            [209, 55, 78]
+          ]
+        }
+      ]
+    },
+    goldenImage: './test/render/golden-images/jupyter-widget-failed-function.png'
   }
 ];
 
@@ -152,7 +329,6 @@ test('jupyter-widget Render Test', t => {
         }
       };
     });
-    // TODO can add a done POST here
   }
 
   function nextTest() {
