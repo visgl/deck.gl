@@ -28,7 +28,7 @@ uniform float buffer;
 uniform bool sdf;
 uniform float alphaCutoff;
 uniform bool shouldDrawBackground;
-uniform vec4 backgroundColor;
+uniform vec3 backgroundColor;
 
 varying vec4 vColor;
 varying vec2 vTextureCoords;
@@ -52,7 +52,7 @@ void main(void) {
     // We are now in the background, let's decide what to draw
     if (shouldDrawBackground && !picking_uActive) {
       // draw background color and return if not picking
-      gl_FragColor = vec4(backgroundColor.rgb, vColor.a);
+      gl_FragColor = vec4(backgroundColor, vColor.a);
       return;
     } else if (picking_uActive) {
       // allow picking to work and pick the background
@@ -65,7 +65,7 @@ void main(void) {
   }
 
   if (shouldDrawBackground) {
-    gl_FragColor = vec4(mix(backgroundColor.rgb, vColor.rgb, alpha), vColor.a);
+    gl_FragColor = vec4(mix(backgroundColor, vColor.rgb, alpha), vColor.a);
   } else {
     gl_FragColor = vec4(vColor.rgb, a);
   }

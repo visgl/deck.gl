@@ -113,11 +113,12 @@ The maximum size in pixels.
 
 If on, the text always faces camera. Otherwise the text faces up (z).
 
-##### `backgroundColor` (Array) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
+##### `backgroundColor` (Array, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
 
-- Default `[0, 0, 0, 0]`
+- Default `null`
 
-The color to use for text background, in `[r, g, b]` or `[r, g, b, a]`. Each component is in the `[0, 255]` range.
+The color to use for text background, in `[r, g, b]`. Each component is in the `[0, 255]` range.
+Alpha is determined by the per-object color.
 
 ##### `fontFamily` (String, optional)
 

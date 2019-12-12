@@ -30,7 +30,7 @@ const DEFAULT_GAMMA = 0.2;
 const DEFAULT_BUFFER = 192.0 / 256;
 
 const defaultProps = {
-  backgroundColor: {type: 'color', value: [0, 0, 0, 0]},
+  backgroundColor: {value: null, optional: true},
   // each paragraph can have one or multiple row(s)
   // each row can have one or multiple character(s)
   getRowSize: {type: 'accessor', value: x => x.rowSize || [0, 0]},
@@ -91,11 +91,9 @@ export default class MultiIconLayer extends IconLayer {
     }
 
     if (props.backgroundColor !== oldProps.backgroundColor) {
-      const backgroundColor = props.backgroundColor.map(c => c / 255.0);
-      if (backgroundColor.length === 3) {
-        // alpha
-        backgroundColor.push(1.0);
-      }
+      const backgroundColor = Array.isArray(props.backgroundColor)
+        ? props.backgroundColor.map(c => c / 255.0).slice(0, 3)
+        : null;
       this.setState({backgroundColor});
     }
   }
@@ -103,6 +101,8 @@ export default class MultiIconLayer extends IconLayer {
   draw({uniforms}) {
     const {sdf} = this.props;
     const {backgroundColor} = this.state;
+    const shouldDrawBackground = Array.isArray(backgroundColor);
+
     super.draw({
       uniforms: Object.assign({}, uniforms, {
         // Refer the following doc about gamma and buffer
@@ -110,8 +110,8 @@ export default class MultiIconLayer extends IconLayer {
         buffer: DEFAULT_BUFFER,
         gamma: DEFAULT_GAMMA,
         sdf: Boolean(sdf),
-        backgroundColor,
-        shouldDrawBackground: backgroundColor[3] > 0
+        backgroundColor: shouldDrawBackground ? backgroundColor : [0, 0, 0],
+        shouldDrawBackground
       })
     });
   }
