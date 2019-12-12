@@ -1,0 +1,16 @@
+{
+  "viewState": {
+    "longitude": 0,
+    "latitude": 0,
+    "zoom": 12
+  },
+  "layers": [
+    {
+      "@@type": "ScatterplotLayer",
+      "data": [[0, 0], [0.01, 0.01]],
+      "getPosition": "-",
+      "getRadius": 500,
+      "getFillColor": [255, 0, 0]
+    }
+  ]
+}
