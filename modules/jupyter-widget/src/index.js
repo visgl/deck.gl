@@ -6,7 +6,7 @@
 // Some static assets may be required by the custom widget javascript. The base
 // url for the notebook is not known at build time and is therefore computed
 // dynamically.
-const dataBaseUrl = document.body && document.getAttribute('data-base-url');
+const dataBaseUrl = document.body && document.body.getAttribute('data-base-url');
 if (dataBaseUrl) {
   window.__webpack_public_path__ = `${dataBaseUrl}nbextensions/pydeck/nb_extension`;
 }
