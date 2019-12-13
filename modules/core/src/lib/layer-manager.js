@@ -99,7 +99,19 @@ export default class LayerManager {
 
   // Check if a redraw is needed
   needsRedraw(opts = {clearRedrawFlags: false}) {
-    return this._checkIfNeedsRedraw(opts);
+    let redraw = this._needsRedraw;
+    if (opts.clearRedrawFlags) {
+      this._needsRedraw = false;
+    }
+
+    // This layers list doesn't include sublayers, relying on composite layers
+    for (const layer of this.layers) {
+      // Call every layer to clear their flags
+      const layerNeedsRedraw = layer.getNeedsRedraw(opts);
+      redraw = redraw || layerNeedsRedraw;
+    }
+
+    return redraw;
   }
 
   // Check if a deep update of all layers is needed
@@ -161,17 +173,8 @@ export default class LayerManager {
       layer.context = this.context;
     }
 
-    const {error, generatedLayers} = this._updateLayers({
-      oldLayers: this.layers,
-      newLayers
-    });
+    this._updateLayers(this.layers, newLayers);
 
-    this.layers = generatedLayers;
-
-    // Throw first error found, if any
-    if (error) {
-      throw error;
-    }
     return this;
   }
 
@@ -193,24 +196,10 @@ export default class LayerManager {
   // PRIVATE METHODS
   //
 
-  _checkIfNeedsRedraw(opts) {
-    let redraw = this._needsRedraw;
-    if (opts.clearRedrawFlags) {
-      this._needsRedraw = false;
-    }
-
-    // This layers list doesn't include sublayers, relying on composite layers
-    for (const layer of this.layers) {
-      // Call every layer to clear their flags
-      const layerNeedsRedraw = layer.getNeedsRedraw(opts);
-      redraw = redraw || layerNeedsRedraw;
-    }
-
-    return redraw;
-  }
-
   // Make a viewport "current" in layer context, updating viewportChanged flags
   activateViewport(viewport) {
+    assert(viewport, 'LayerManager: viewport not set');
+
     const oldViewport = this.context.viewport;
     const viewportChanged = !oldViewport || !viewport.equals(oldViewport);
 
@@ -218,16 +207,15 @@ export default class LayerManager {
       debug(TRACE_ACTIVATE_VIEWPORT, this, viewport);
 
       this.context.viewport = viewport;
+      const changeFlags = {viewportChanged: true};
 
       // Update layers states
       // Let screen space layers update their state based on viewport
       for (const layer of this.layers) {
-        layer.setChangeFlags({viewportChanged: 'Viewport changed'});
+        layer.setChangeFlags(changeFlags);
         this._updateLayer(layer);
       }
     }
-
-    assert(this.context.viewport, 'LayerManager: viewport not set');
 
     return this;
   }
@@ -235,7 +223,7 @@ export default class LayerManager {
   // Match all layers, checking for caught errors
   // To avoid having an exception in one layer disrupt other layers
   // TODO - mark layers with exceptions as bad and remove from rendering cycle?
-  _updateLayers({oldLayers, newLayers}) {
+  _updateLayers(oldLayers, newLayers) {
     // Create old layer map
     const oldLayerMap = {};
     for (const oldLayer of oldLayers) {
@@ -250,24 +238,32 @@ export default class LayerManager {
     const generatedLayers = [];
 
     // Match sublayers
-    const error = this._updateSublayersRecursively({
-      newLayers,
-      oldLayerMap,
-      generatedLayers
-    });
+    const error = this._updateSublayersRecursively(newLayers, oldLayerMap, generatedLayers);
 
     // Finalize unmatched layers
     const error2 = this._finalizeOldLayers(oldLayerMap);
 
-    this._needsUpdate = generatedLayers.some(layer => layer.hasUniformTransition());
+    let needsUpdate = false;
+    for (const layer of generatedLayers) {
+      if (layer.hasUniformTransition()) {
+        needsUpdate = true;
+        break;
+      }
+    }
 
+    this._needsUpdate = needsUpdate;
+    this.layers = generatedLayers;
+
+    // Throw first error found, if any
     const firstError = error || error2;
-    return {error: firstError, generatedLayers};
+    if (firstError) {
+      throw firstError;
+    }
   }
 
   /* eslint-disable complexity,max-statements */
   // Note: adds generated layers to `generatedLayers` array parameter
-  _updateSublayersRecursively({newLayers, oldLayerMap, generatedLayers}) {
+  _updateSublayersRecursively(newLayers, oldLayerMap, generatedLayers) {
     let error = null;
 
     for (const newLayer of newLayers) {
@@ -309,11 +305,7 @@ export default class LayerManager {
       }
 
       if (sublayers) {
-        const err = this._updateSublayersRecursively({
-          newLayers: sublayers,
-          oldLayerMap,
-          generatedLayers
-        });
+        const err = this._updateSublayersRecursively(sublayers, oldLayerMap, generatedLayers);
         error = error || err;
       }
     }
@@ -328,7 +320,8 @@ export default class LayerManager {
     for (const layerId in oldLayerMap) {
       const layer = oldLayerMap[layerId];
       if (layer) {
-        error = error || this._finalizeLayer(layer);
+        const err = this._finalizeLayer(layer);
+        error = error || err;
       }
     }
     return error;
@@ -338,17 +331,16 @@ export default class LayerManager {
 
   // Initializes a single layer, calling layer methods
   _initializeLayer(layer) {
-    let error = null;
     try {
       layer._initialize();
       layer.lifecycle = LIFECYCLE.INITIALIZED;
     } catch (err) {
       log.warn(`error while initializing ${layerName(layer)}\n`, err)();
-      error = error || err;
+      return err;
       // TODO - what should the lifecycle state be here? LIFECYCLE.INITIALIZATION_FAILED?
     }
 
-    return error;
+    return null;
   }
 
   _transferLayerState(oldLayer, newLayer) {
@@ -362,30 +354,29 @@ export default class LayerManager {
 
   // Updates a single layer, cleaning all flags
   _updateLayer(layer) {
-    let error = null;
     try {
       layer._update();
     } catch (err) {
       log.warn(`error during update of ${layerName(layer)}`, err)();
       // Save first error
-      error = err;
+      return err;
     }
-    return error;
+    return null;
   }
 
   // Finalizes a single layer
   _finalizeLayer(layer) {
-    assert(layer.lifecycle !== LIFECYCLE.AWAITING_FINALIZATION);
+    this._needsRedraw = this._needsRedraw || `finalized ${layerName(layer)}`;
+
     layer.lifecycle = LIFECYCLE.AWAITING_FINALIZATION;
-    let error = null;
-    this.setNeedsRedraw(`finalized ${layerName(layer)}`);
+
     try {
       layer._finalize();
+      layer.lifecycle = LIFECYCLE.FINALIZED;
     } catch (err) {
       log.warn(`error during finalization of ${layerName(layer)}`, err)();
-      error = err;
+      return err;
     }
-    layer.lifecycle = LIFECYCLE.FINALIZED;
-    return error;
+    return null;
   }
 }

@@ -210,7 +210,7 @@ export default class Layer extends Component {
     return (
       coordinateSystem === COORDINATE_SYSTEM.DEFAULT ||
       coordinateSystem === COORDINATE_SYSTEM.LNGLAT ||
-      coordinateSystem === COORDINATE_SYSTEM.IDENTITY
+      coordinateSystem === COORDINATE_SYSTEM.CARTESIAN
     );
   }
 
