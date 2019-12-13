@@ -50,7 +50,6 @@ const config = [
     module: {
       rules
     },
-    mode: 'development',
     externals: {
       '@jupyter-widgets/base': false
     },
