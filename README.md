@@ -59,7 +59,12 @@ const scatterplotLayer = new ScatterplotLayer({
 ```js
 import DeckGL from 'deck.gl';
 
-<DeckGL width="100%" height="100%" longitude={-122.4} latitude={37.78} zoom={8} controller={true} layers={[scatterplotLayer]} />
+<DeckGL
+  width="100%"
+  height="100%"
+  initialViewState={{longitude: -122.4, latitude: 37.78, zoom: 8}}
+  controller={true}
+  layers={[scatterplotLayer]} />
 ```
 
 ## Using deck.gl with Pure JS
@@ -68,12 +73,13 @@ import DeckGL from 'deck.gl';
 import {Deck} from '@deck.gl/core';
 
 const deck = new Deck({
-  container: document.body,
   width: '100vw',
   height: '100vh',
-  longitude: -122.4,
-  latitude: 37.78,
-  zoom: 8,
+  initialViewState: {
+    longitude: -122.4,
+    latitude: 37.78,
+    zoom: 8
+  },
   controller: true,
   layers: [scatterplotLayer]
 });
@@ -84,7 +90,7 @@ Minimum setups of end-to-end deck.gl usage is also showcased in the [hello-world
 To learn how to use deck.gl through the many examples that come with the deck.gl repo, please clone the latest **release** branch:
 
 ```
-git clone -b 6.2-release --single-branch https://github.com/uber/deck.gl.git
+git clone -b 7.3-release --single-branch https://github.com/uber/deck.gl.git
 ```
 
 For the most up-to-date information, see our [API documentations](http://deck.gl/#/documentation)

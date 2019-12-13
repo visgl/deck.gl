@@ -8,7 +8,7 @@
     "build": "rm -rf dist && mkdir dist && cp index.html dist/ && webpack --env.production=true"
   },
   "dependencies": {
-    "deck.gl": "^7.3.6",
+    "deck.gl": "^8.0.0-beta",
     "@loaders.gl/csv": "^2.0.0-beta.5",
     "@loaders.gl/core": "^2.0.0-beta.5",
     "@loaders.gl/draco": "^2.0.0-beta.5",

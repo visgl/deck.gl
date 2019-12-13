@@ -30,7 +30,7 @@
     "prepublishOnly": "npm run build-bundle && npm run build-bundle -- --env.dev"
   },
   "peerDependencies": {
-    "@deck.gl/core": "^7.3.0-beta"
+    "@deck.gl/core": "^8.0.0-beta"
   },
   "dependencies": {
     "@luma.gl/experimental": "^8.0.0-beta.3"
