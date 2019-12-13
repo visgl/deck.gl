@@ -54,14 +54,12 @@ void main(void) {
       // draw background color and return if not picking
       gl_FragColor = vec4(backgroundColor, vColor.a);
       return;
-    } else if (picking_uActive) {
-      // allow picking to work and pick the background
-      DECKGL_FILTER_COLOR(gl_FragColor, geometry);
-      return;
-    } else {
+    } else if (!picking_uActive) {
       // no background and no picking
       discard;
     }
+    // else (picking):
+    // allow picking to work and pick the background (fall-through to DECKGL_FILTER_COLOR)
   }
 
   if (shouldDrawBackground) {

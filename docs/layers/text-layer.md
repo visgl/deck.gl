@@ -118,7 +118,7 @@ If on, the text always faces camera. Otherwise the text faces up (z).
 - Default `null`
 
 The color to use for text background, in `[r, g, b]`. Each component is in the `[0, 255]` range.
-Alpha is determined by the per-object color.
+The alpha of the background matches the opacity of each object, controlled by the props `getColor` and `opacity`.
 
 ##### `fontFamily` (String, optional)
 
