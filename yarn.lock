@@ -1536,14 +1536,6 @@
   resolved "https://registry.yarnpkg.com/@loaders.gl/images/-/images-2.0.0-beta.1.tgz#125398747b9e6fc48a684bcb226b87e4feba8552"
   integrity sha512-aXzZOgSQENDBpg5WmaNXaYjSVPQp1UYeiLi3CZwsbTCpDO2nuKWrR5X22tlmG4gOfeObPdW8LnE0Y9kI6noIWw==
 
-"@loaders.gl/las@^2.0.0-beta.3":
-  version "2.0.0-beta.3"
-  resolved "https://registry.yarnpkg.com/@loaders.gl/las/-/las-2.0.0-beta.3.tgz#8cc6e537a492881730eab4f6549d30d6862dce6a"
-  integrity sha512-KTi5jauz6tmbUIZ1Rg9oZhtcuMiUQ98fKcIIEZxE5JYDGBOMrPVibMFjjrL67cVwSu5gze4UjDEa7qiV3a7BqQ==
-  dependencies:
-    "@babel/runtime" "^7.3.1"
-    "@loaders.gl/loader-utils" "2.0.0-beta.3"
-
 "@loaders.gl/loader-utils@2.0.0-beta.3":
   version "2.0.0-beta.3"
   resolved "https://registry.yarnpkg.com/@loaders.gl/loader-utils/-/loader-utils-2.0.0-beta.3.tgz#12265238a85c897bd539de6e98cd29c7eac226b2"

@@ -44,12 +44,13 @@ const config = [
     output: {
       filename: 'index.js',
       path: resolve(__dirname, 'dist'),
-      libraryTarget: 'amd'
+      libraryTarget: 'umd'
     },
     devtool: 'source-map',
     module: {
       rules
     },
+    mode: 'development',
     externals: {
       '@jupyter-widgets/base': false
     },

@@ -6,11 +6,26 @@
 // Some static assets may be required by the custom widget javascript. The base
 // url for the notebook is not known at build time and is therefore computed
 // dynamically.
-const dataBaseUrl = document.querySelector('body').getAttribute('data-base-url');
+const dataBaseUrl =
+  document &&
+  document.querySelector('body') &&
+  document.querySelector('body').getAttribute('data-base-url');
 if (dataBaseUrl) {
   window.__webpack_public_path__ = `${dataBaseUrl}nbextensions/pydeck/nb_extension`;
 }
 
-export {createDeck} from './create-deck';
-export {DeckGLView, DeckGLModel} from './widget';
-export {MODULE_VERSION, MODULE_NAME} from './version';
+let DeckGLModel;
+let DeckGLView;
+const {createDeck} = require('./create-deck');
+const {MODULE_VERSION, MODULE_NAME} = require('./version');
+
+try {
+  const widgetClasses = require('./widget');
+  DeckGLView = widgetClasses.DeckGLView;
+  DeckGLModel = widgetClasses.DeckGLModel;
+} catch (err) {
+  DeckGLModel = null;
+  DeckGLView = null;
+}
+
+module.exports = {DeckGLView, DeckGLModel, MODULE_VERSION, MODULE_NAME, createDeck};
