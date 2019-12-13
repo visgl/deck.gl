@@ -592,7 +592,7 @@ export default class Deck {
     timeline.play();
     this.animationLoop.attachTimeline(timeline);
 
-    this.eventManager = new EventManager(gl.canvas, {
+    this.eventManager = new EventManager(this.props.parent || gl.canvas, {
       touchAction: this.props.touchAction,
       events: {
         pointerdown: this._onPointerDown,
@@ -717,10 +717,10 @@ export default class Deck {
 
     // If initialViewState was set on creation, auto track position
     if (this.viewState) {
-      this.viewState[params.viewId] = viewState;
+      this.viewState = {...this.viewState, [params.viewId]: viewState};
       if (!this.props.viewState) {
         // Apply internal view state
-        this.viewManager.setProps({viewState: {...this.viewState}});
+        this.viewManager.setProps({viewState: this.viewState});
       }
     }
   }

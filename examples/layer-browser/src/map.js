@@ -30,6 +30,23 @@ const VIEW_LABEL_STYLES = {
   color: '#FFFFFF'
 };
 
+const INITIAL_VIEW_STATES = {
+  basemap: {
+    latitude: 37.752,
+    longitude: -122.427,
+    zoom: 11.5,
+    pitch: 0,
+    bearing: 0
+  },
+  infovis: {
+    target: [0, 0, 0],
+    zoom: 3,
+    rotationX: -30,
+    rotationOrbit: 30,
+    orbitAxis: 'Y'
+  }
+};
+
 const ViewportLabel = props => (
   <div style={{position: 'absolute'}}>
     <div style={{...VIEW_LABEL_STYLES, display: ''}}>{props.children}</div>
@@ -42,20 +59,6 @@ export default class Map extends PureComponent {
     autobind(this);
 
     this.state = {
-      mapViewState: {
-        latitude: 37.752,
-        longitude: -122.427,
-        zoom: 11.5,
-        pitch: 0,
-        bearing: 0
-      },
-      orbitViewState: {
-        target: [0, 0, 0],
-        zoom: 3,
-        rotationX: -30,
-        rotationOrbit: 30,
-        orbitAxis: 'Y'
-      },
       hoveredItem: null,
       clickedItem: null,
       queriedItems: null,
@@ -110,17 +113,6 @@ export default class Map extends PureComponent {
     this.setState({metrics: Object.assign({}, metrics)});
   }
 
-  _onViewStateChange({viewState, viewId}) {
-    if (viewId === 'infovis') {
-      this.setState({orbitViewState: viewState});
-      return;
-    }
-    if (viewState.pitch > 60) {
-      viewState.pitch = 60;
-    }
-    this.setState({mapViewState: viewState});
-  }
-
   _onHover(info) {
     this.setState({hoveredItem: info});
   }
@@ -142,12 +134,12 @@ export default class Map extends PureComponent {
   }
 
   render() {
-    const {orbitViewState, mapViewState, hoveredItem, clickedItem, queriedItems} = this.state;
+    const {hoveredItem, clickedItem, queriedItems} = this.state;
     const {
       layers,
       views,
       effects,
-      settings: {infovis, pickingRadius, drawPickingColors, useDevicePixels}
+      settings: {pickingRadius, drawPickingColors, useDevicePixels}
     } = this.props;
 
     return (
@@ -161,8 +153,7 @@ export default class Map extends PureComponent {
           layers={layers}
           layerFilter={this._layerFilter}
           views={views}
-          viewState={infovis ? orbitViewState : mapViewState}
-          onViewStateChange={this._onViewStateChange}
+          initialViewState={INITIAL_VIEW_STATES}
           effects={effects}
           pickingRadius={pickingRadius}
           onHover={this._onHover}

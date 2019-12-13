@@ -55,9 +55,7 @@ export default function positionChildrenUnderViews({children, viewports, deck, C
     const style = {
       position: 'absolute',
       // Use child's z-index for ordering
-      zIndex: childStyle && childStyle.zIndex,
-      // If this container is on top, it will block interaction with the deck canvas
-      pointerEvents: 'none',
+      zIndex: childStyle ? childStyle.zIndex : -1,
       left: x,
       top: y,
       width,
@@ -70,7 +68,10 @@ export default function positionChildrenUnderViews({children, viewports, deck, C
         viewport,
         container: deck.canvas.offsetParent,
         eventManager: deck.eventManager,
-        onViewStateChange: deck._onViewStateChange
+        onViewStateChange: params => {
+          params.viewId = viewId;
+          deck._onViewStateChange(params);
+        }
       };
       viewChildren = createElement(ContextProvider, {value: contextValue}, viewChildren);
     }
