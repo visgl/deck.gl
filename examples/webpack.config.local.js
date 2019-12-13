@@ -37,7 +37,8 @@ function makeLocalDevConfig(EXAMPLE_DIR = LIB_DIR, linkToLuma) {
     '@luma.gl/experimental': `${ROOT_DIR}/node_modules/@luma.gl/experimental`,
     // @luma.gl/experimental is not available in the root node_modules, must be imported
     // where required.
-    '@loaders.gl/core': `${ROOT_DIR}/node_modules/@loaders.gl/core`
+    '@loaders.gl/core': `${ROOT_DIR}/node_modules/@loaders.gl/core`,
+    '@loaders.gl/images': `${ROOT_DIR}/node_modules/@loaders.gl/images`
   };
 
   const LUMA_ALIASES = linkToLuma ? LUMA_LINK_ALIASES : LUMA_LOCAL_ALIASES;
