@@ -7,7 +7,7 @@
     "start-local": "webpack-dev-server --env.local --progress --hot --open"
   },
   "dependencies": {
-    "@loaders.gl/obj": "^2.0.0-beta",
+    "@loaders.gl/obj": "^2.0.0-beta.3",
     "deck.gl": "^7.3.0-beta",
     "react": "^16.3.0",
     "react-dom": "^16.3.0",
