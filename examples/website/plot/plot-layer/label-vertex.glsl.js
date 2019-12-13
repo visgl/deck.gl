@@ -95,7 +95,6 @@ void main(void) {
   vec2 textureSize = vec2(sum3(labelWidths * instanceNormals), labelHeight);
 
   vTexCoords = (textureOrigin + textureSize * texCoords) / labelTextureDim;
-  vTexCoords.y = 1.0 - vTexCoords.y;
 
   vec3 position_modelspace = vec3(instancePositions.x) *
     instanceNormals + gridVertexOffset * gridDims / 2.0 + gridCenter * abs(gridVertexOffset);
