@@ -16,7 +16,7 @@ if (dataBaseUrl) {
 
 let DeckGLModel;
 let DeckGLView;
-const {createDeck} = require('./create-deck');
+const {createDeck, updateDeck} = require('./create-deck');
 const {MODULE_VERSION, MODULE_NAME} = require('./version');
 
 try {
@@ -28,4 +28,11 @@ try {
   DeckGLView = null;
 }
 
-module.exports = {DeckGLView, DeckGLModel, MODULE_VERSION, MODULE_NAME, createDeck};
+module.exports = {
+  DeckGLView,
+  DeckGLModel,
+  MODULE_VERSION,
+  MODULE_NAME,
+  createDeck,
+  updateDeck
+};
