@@ -35,8 +35,6 @@ import {
 
 import {PROJECTION_MODE} from '../lib/constants';
 
-import assert from '../utils/assert';
-
 const DEGREES_TO_RADIANS = Math.PI / 180;
 
 const IDENTITY = createMat4();
@@ -274,7 +272,6 @@ export default class Viewport {
   // INTERNAL METHODS
 
   _createProjectionMatrix({orthographic, fovyRadians, aspect, focalDistance, near, far}) {
-    assert(Number.isFinite(fovyRadians));
     return orthographic
       ? new Matrix4().orthographic({fovy: fovyRadians, aspect, focalDistance, near, far})
       : new Matrix4().perspective({fovy: fovyRadians, aspect, near, far});
@@ -371,18 +368,15 @@ export default class Viewport {
       // Projection matrix parameters, used if projectionMatrix not supplied
       orthographic = false,
       fovyRadians,
-      fovyDegrees,
-      fovy,
+      fovy = 75,
       near = 0.1, // Distance of near clipping plane
       far = 1000, // Distance of far clipping plane
       focalDistance = 1
     } = opts;
 
-    const radians = fovyRadians || (fovyDegrees || fovy || 75) * DEGREES_TO_RADIANS;
-
     this.projectionProps = {
       orthographic,
-      fovyRadians: radians,
+      fovyRadians: fovyRadians || fovy * DEGREES_TO_RADIANS,
       aspect: this.width / this.height,
       focalDistance,
       near,

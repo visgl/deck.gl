@@ -193,13 +193,10 @@ export default class Layer extends Component {
   // Always unprojects to the viewport's coordinate system
   unproject(xy) {
     const {viewport} = this.context;
-    assert(Array.isArray(xy));
     return viewport.unproject(xy);
   }
 
   projectPosition(xyz) {
-    assert(Array.isArray(xyz));
-
     return projectPosition(xyz, {
       viewport: this.context.viewport,
       modelMatrix: this.props.modelMatrix,
@@ -242,7 +239,6 @@ export default class Layer extends Component {
   // Returns the picking color that doesn't match any subfeature
   // Use if some graphics do not belong to any pickable subfeature
   encodePickingColor(i, target = []) {
-    assert(i < 16777215, 'index out of picking color range');
     target[0] = (i + 1) & 255;
     target[1] = ((i + 1) >> 8) & 255;
     target[2] = (((i + 1) >> 8) >> 8) & 255;
@@ -446,6 +442,7 @@ export default class Layer extends Component {
       // If the attribute is larger than the cache, resize the cache and populate the missing chunk
       const newCacheSize = pickingColorCache.length / 3;
       const pickingColor = [];
+      assert(newCacheSize < 16777215, 'index out of picking color range');
 
       for (let i = cacheSize; i < newCacheSize; i++) {
         this.encodePickingColor(i, pickingColor);

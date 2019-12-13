@@ -159,8 +159,6 @@ function calculateViewportUniforms({
     viewport
   });
 
-  assert(viewProjectionMatrix, 'Viewport missing modelViewProjectionMatrix');
-
   // Calculate projection pixels per unit
   const distanceScales = viewport.getDistanceScales();
 
