@@ -1,6 +1,5 @@
 import LinearInterpolator from '../transitions/linear-interpolator';
 import Transition from '../transitions/transition';
-import assert from '../utils/assert';
 
 const noop = () => {};
 
@@ -22,7 +21,6 @@ const DEFAULT_PROPS = {
 
 export default class TransitionManager {
   constructor(ControllerState, props = {}) {
-    assert(ControllerState);
     this.ControllerState = ControllerState;
     this.props = Object.assign({}, DEFAULT_PROPS, props);
     this.propsInTransition = null;
@@ -112,8 +110,6 @@ export default class TransitionManager {
   }
 
   _triggerTransition(startProps, endProps) {
-    assert(this._isTransitionEnabled(endProps), 'Transition is not enabled');
-
     const startViewstate = new this.ControllerState(startProps);
     const endViewStateProps = new this.ControllerState(endProps).shortestPathFrom(startViewstate);
 

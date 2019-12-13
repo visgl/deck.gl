@@ -226,8 +226,6 @@ class MapState extends ViewState {
    *   relative scale.
    */
   zoom({pos, startPos, scale}) {
-    assert(scale > 0, '`scale` must be a positive number');
-
     // Make sure we zoom around the current mouse position rather than map center
     let {startZoom, startZoomLngLat} = this._interactiveState;
 
@@ -241,13 +239,6 @@ class MapState extends ViewState {
       startZoom = this._viewportProps.zoom;
       startZoomLngLat = this._unproject(startPos) || this._unproject(pos);
     }
-
-    // take the start lnglat and put it where the mouse is down.
-    assert(
-      startZoomLngLat,
-      '`startZoomLngLat` prop is required ' +
-        'for zoom behavior to calculate where to position the map.'
-    );
 
     const zoom = this._calculateNewZoom({scale, startZoom});
 

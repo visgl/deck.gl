@@ -1,4 +1,3 @@
-import assert from '../utils/assert';
 import {PROP_SYMBOLS} from './constants';
 
 const {COMPONENT} = PROP_SYMBOLS;
@@ -84,8 +83,6 @@ export function compareProps({
   propTypes = {},
   triggerName = 'props'
 } = {}) {
-  assert(oldProps !== undefined && newProps !== undefined, 'compareProps args');
-
   // shallow equality => deep equality
   if (oldProps === newProps) {
     return null;
