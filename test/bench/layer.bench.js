@@ -22,7 +22,7 @@
 import * as data from 'deck.gl-test/data';
 
 import {LayerManager, MapView, DeckRenderer} from '@deck.gl/core';
-import {ScatterplotLayer} from '@deck.gl/layers';
+import {ScatterplotLayer, GeoJsonLayer} from '@deck.gl/layers';
 import {gl} from '@deck.gl/test-utils';
 
 // import {testInitializeLayer} from '@deck.gl/test-utils';
@@ -78,6 +78,43 @@ export default function layerBench(suite) {
         layers: layerManager.getLayers(),
         onViewportActive: layerManager.activateViewport
       });
+    })
+    .add(
+      'initialize layers - composite',
+      () => {
+        // clean up
+        layerManager.setLayers([]);
+      },
+      () => {
+        testIdx++;
+        layerManager.setLayers(
+          Array.from(
+            {length: 100},
+            (_, i) =>
+              new GeoJsonLayer({
+                id: `test-${testIdx}-geojson-layer-${i}`,
+                data: data.geojson,
+                stroked: true,
+                filled: true
+              })
+          )
+        );
+      }
+    )
+    .add('update layers - composite', () => {
+      const newData = {...data.geojson};
+      layerManager.setLayers(
+        Array.from(
+          {length: 100},
+          (_, i) =>
+            new GeoJsonLayer({
+              id: `test-${testIdx}-geojson-layer-${i}`,
+              data: newData,
+              stroked: true,
+              filled: true
+            })
+        )
+      );
     })
     .add('encoding picking color', () => {
       testIdx++;
