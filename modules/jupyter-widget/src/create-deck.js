@@ -4,7 +4,6 @@ import mapboxgl from './ssr-safe-mapbox';
 
 import {CSVLoader} from '@loaders.gl/csv';
 import {Tile3DLoader} from '@loaders.gl/3d-tiles';
-import {LASWorkerLoader} from '@loaders.gl/las';
 import * as loaders from '@loaders.gl/core';
 
 import * as deck from './deck-bundle';
@@ -32,12 +31,11 @@ const jsonConverterConfiguration = {
 
   // Constants that should be resolved with the provided values by JSON converter
   constants: {
-    Tile3DLoader,
-    LASWorkerLoader
+    Tile3DLoader
   }
 };
 
-loaders.registerLoaders([CSVLoader, Tile3DLoader, LASWorkerLoader]);
+loaders.registerLoaders([CSVLoader, Tile3DLoader]);
 
 const jsonConverter = new deck.JSONConverter({
   configuration: jsonConverterConfiguration

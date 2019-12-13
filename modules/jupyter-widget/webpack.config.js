@@ -44,7 +44,7 @@ const config = [
     output: {
       filename: 'index.js',
       path: resolve(__dirname, 'dist'),
-      libraryTarget: 'amd'
+      libraryTarget: 'umd'
     },
     devtool: 'source-map',
     module: {
@@ -52,29 +52,6 @@ const config = [
     },
     externals: {
       '@jupyter-widgets/base': false
-    },
-    plugins: [
-      // Uncomment for bundle size debug
-      // new (require('webpack-bundle-analyzer')).BundleAnalyzerPlugin()
-      new webpack.DefinePlugin({
-        __VERSION__: JSON.stringify(PACKAGE_INFO.version)
-      })
-    ]
-  },
-  // Used for standalone HTML renderer only
-  {
-    entry: './src/standalone-html-index.js',
-    resolve: {
-      alias: ALIASES
-    },
-    output: {
-      filename: 'standalone-html-bundle.js',
-      path: resolve(__dirname, 'dist'),
-      libraryTarget: 'umd'
-    },
-    devtool: 'source-map',
-    module: {
-      rules
     },
     plugins: [
       // Uncomment for bundle size debug
