@@ -1,12 +1,13 @@
 {
   "description": "Test of plotting multiple layers at once",
-  "viewState": {
+  "initialViewState": {
     "maxZoom": 20,
     "zoom": 15
   },
   "layers": [
     {
       "@@type": "ScatterplotLayer",
+      "id": "first",
       "data": [
         {
           "position": [-0.002, 0.002],
@@ -25,12 +26,13 @@
           "rgb": [123, 159, 53]
         }
       ],
-      "getColor": "rgb",
-      "getPosition": "position",
+      "getColor": "@@=rgb",
+      "getPosition": "@@=position",
       "getRadius": 100
     },
     {
       "@@type": "TextLayer",
+      "id": "second",
       "data": [
         {
           "position": [0, 0],
@@ -43,7 +45,7 @@
       ],
       "fontSize": 144,
       "getColor": [0, 0, 255],
-      "getPosition": ":@=position",
+      "getPosition": "@@=position",
       "getTextAnchor": "start",
       "fontFamily": "Times, Times New Roman, Georgia, serif"
     }

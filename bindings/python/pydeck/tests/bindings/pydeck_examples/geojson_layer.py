@@ -1,3 +1,5 @@
+from pydeck import Deck, Layer, ViewState
+
 features = {
     "type": "FeatureCollection",
     "features": [
@@ -23,12 +25,19 @@ features = {
 def create_geojson_layer_test_object():
     return Deck(
         description="Test of GeoJsonLayer",
-        view_state=ViewState(longitude=-122.45, latitude=37.8, zoom=0),
-        layers=[Layer("GeoJsonLayer", data=features)],
-        stroked=True,
-        filled=True,
-        line_width_min_pixels=2,
-        opacity=0.4,
-        get_line_color=[255, 100, 100],
-        get_fill_color=[200, 160, 0, 180],
-    )
+        map_style=None,
+        initial_view_state=ViewState(longitude=-122.45, latitude=37.8, zoom=0),
+        layers=[
+            Layer(
+                "GeoJsonLayer",
+                id='geojson-layer',
+                data=features,
+                stroked=True,
+                filled=True,
+                line_width_min_pixels=2,
+                opacity=0.4,
+                get_line_color=[255, 100, 100],
+                get_fill_color=[200, 160, 0, 180],
+            )
+        ],
+        views=None)

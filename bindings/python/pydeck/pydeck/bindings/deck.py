@@ -13,16 +13,16 @@ class Deck(JSONMixin):
     def __init__(
         self,
         layers=[],
-        views=[View(type='MapView', controller=True)],
-        map_style='mapbox://styles/mapbox/dark-v9',
+        views=[View(type="MapView", controller=True)],
+        map_style="mapbox://styles/mapbox/dark-v9",
         mapbox_key=None,
         initial_view_state=None,
-        width='100%',
+        width="100%",
         height=500,
         tooltip=True,
         description=None,
     ):
-        '''This is the renderer and configuration for a deck.gl visualization, similar to the
+        """This is the renderer and configuration for a deck.gl visualization, similar to the
         `Deck <https://deck.gl/#/documentation/deckgl-api-reference/deck>`_ class from deck.gl.
         Pass `Deck` a Mapbox API token to display a basemap; see the notes below.
 
@@ -59,7 +59,7 @@ class Deck(JSONMixin):
             https://deck.gl/#/documentation/deckgl-api-reference/deck
         .. _gallery:
             https://www.mapbox.com/gallery/
-        '''
+        """
         self.layers = []
         if isinstance(layers, Layer):
             self.layers.append(layers)
@@ -70,15 +70,17 @@ class Deck(JSONMixin):
         # Use passed view state
         self.initial_view_state = initial_view_state
         self.deck_widget = DeckGLWidget()
-        self.mapbox_key = mapbox_key or os.getenv('MAPBOX_API_KEY')
+        self.mapbox_key = mapbox_key or os.getenv("MAPBOX_API_KEY")
         self.deck_widget.mapbox_key = self.mapbox_key
         self.deck_widget.height = height
         self.deck_widget.width = width
         self.deck_widget.tooltip = tooltip
-        self.description = None
+        self.description = description
         if self.mapbox_key is None:
             warnings.warn(
-                'Mapbox API key is not set. This may impact available features of pydeck.', UserWarning)
+                "Mapbox API key is not set. This may impact available features of pydeck.",
+                UserWarning,
+            )
 
     @property
     def selected_data(self):
@@ -87,28 +89,29 @@ class Deck(JSONMixin):
         return literal_eval(self.deck_widget.selected_data)
 
     def show(self):
-        '''Display current Deck object for a Jupyter notebook'''
+        """Display current Deck object for a Jupyter notebook"""
         self.update()
         return self.deck_widget
 
     def update(self):
-        '''Update a deck.gl map to reflect the current configuration
+        """Update a deck.gl map to reflect the current configuration
 
         For example, if you've modified data passed to Layer and rendered the map using `.show()`,
         you can call `update` to change the data on the map.
 
         Intended for use in a Jupyter environment.
-        '''
+        """
         self.deck_widget.json_input = self.to_json()
 
     def to_html(
-            self,
-            filename=None,
-            open_browser=False,
-            notebook_display=True,
-            iframe_width=700,
-            iframe_height=500):
-        '''Write a file and loads it to an iframe, if in a Jupyter environment;
+        self,
+        filename=None,
+        open_browser=False,
+        notebook_display=True,
+        iframe_width=700,
+        iframe_height=500,
+    ):
+        """Write a file and loads it to an iframe, if in a Jupyter environment;
         otherwise, write a file and optionally open it in a web browser
 
         Parameters
@@ -127,7 +130,7 @@ class Deck(JSONMixin):
         Returns
         -------
             str : Returns absolute path of the file
-        '''
+        """
         json_blob = self.to_json()
         f = deck_to_html(
             json_blob,
@@ -137,5 +140,6 @@ class Deck(JSONMixin):
             notebook_display=notebook_display,
             iframe_height=iframe_height,
             iframe_width=iframe_width,
-            tooltip=self.deck_widget.tooltip)
+            tooltip=self.deck_widget.tooltip,
+        )
         return f

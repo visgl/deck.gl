@@ -1,5 +1,5 @@
 {
-  "viewState": {
+  "initialViewState": {
     "longitude": 0,
     "latitude": 0,
     "zoom": 12
@@ -10,6 +10,7 @@
       "data": [[0, 0], [0.01, 0.01]],
       "getPosition": "@@=-",
       "getRadius": 500,
+      "id": "scatterplot",
       "getFillColor": [255, 0, 0]
     }
   ]

@@ -1,6 +1,6 @@
 {
   "description": "Test of GeoJsonLayer",
-  "viewState": {
+  "initialViewState": {
     "longitude": -122.45,
     "latitude": 37.8,
     "zoom": 0
@@ -8,6 +8,7 @@
   "layers": [
     {
       "@@type": "GeoJsonLayer",
+      "id": "geojson-layer",
       "data": {
         "type": "FeatureCollection",
         "features": [
