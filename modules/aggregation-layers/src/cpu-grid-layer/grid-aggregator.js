@@ -24,9 +24,20 @@ const R_EARTH = 6378000;
 
 /**
  * Calculate density grid from an array of points
- * @param {Iterable} data
- * @param {number} cellSize - cell size in meters
- * @param {function} getPosition - position accessor
+ * @param {Object} props - object containing :
+ * @param {Iterable} [props.data] - data objects to be aggregated
+ * @param {Integer} [props.cellSize] - size of the grid cell
+ *
+ * @param {Object} aggregationParams - object containing :
+ * @param {Object} gridOffset - {xOffset, yOffset} cell size in meters
+ * @param {Integer} width - width of the grid
+ * @param {Integer} height - height of the grid
+ * @param {Boolean} projectPoints - `true` if doing screen space projection, `false` otherwise
+ * @param {Array} attributes - attributes array containing position values
+ * @param {Viewport} viewport - viewport to be used for projection
+ * @param {Array} cellOffset - [xOffset, yOffset] offset to be applied to positions to get cell index
+ * @param {Object} boundingBox - {xMin, yMin, xMax, yMax} bounding box of input data
+ *
  * @returns {object} - grid data, cell dimension
  */
 export function pointToDensityGridDataCPU(props, aggregationParams) {
@@ -56,13 +67,6 @@ export function getGridOffset(boundingBox, cellSize) {
   return calculateGridLatLonOffset(cellSize, centerLat);
 }
 
-/**
- * Project points into each cell, return a hash table of cells
- * @param {Iterable} points
- * @param {number} cellSize - unit size in meters
- * @param {function} getPosition - position accessor
- * @returns {object} - grid hash and cell dimension
- */
 /* eslint-disable max-statements, complexity */
 function pointsToGridHashing(props, aggregationParams) {
   const {data = [], cellSize} = props;
