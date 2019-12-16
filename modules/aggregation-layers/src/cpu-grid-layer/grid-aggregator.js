@@ -96,7 +96,7 @@ function pointsToGridHashing(props, aggregationParams) {
       const xIndex = Math.floor((x + offsets[0]) / gridOffset.xOffset);
       if (
         !projectPoints ||
-        // when doing screen space agggregation, filter points outside of the viewport range.
+        // when doing screen space agggregation (projectPoints = true), filter points outside of the viewport range.
         (xIndex >= 0 && xIndex < numCol && yIndex >= 0 && yIndex < numRow)
       ) {
         const key = `${yIndex}-${xIndex}`;
