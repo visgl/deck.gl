@@ -33,6 +33,6 @@
     "@deck.gl/core": "^8.0.0-beta"
   },
   "dependencies": {
-    "@luma.gl/experimental": "^8.0.0-beta.3"
+    "@luma.gl/experimental": "^8.0.0-beta.4"
   }
 }
