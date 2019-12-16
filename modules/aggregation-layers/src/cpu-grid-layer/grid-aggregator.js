@@ -66,7 +66,7 @@ export function getGridOffset(boundingBox, cellSize) {
 /* eslint-disable max-statements, complexity */
 function pointsToGridHashing(props, aggregationParams) {
   const {data = [], cellSize} = props;
-  const {attributes, viewport, projectPoints, numInstances} = aggregationParams;
+  const {attributes, viewport, projectPoints, numInstances, width, height} = aggregationParams;
   const positions = attributes.positions.value;
   const {size} = attributes.positions.getAccessor();
   const boundingBox =
@@ -77,6 +77,8 @@ function pointsToGridHashing(props, aggregationParams) {
   if (gridOffset.xOffset <= 0 || gridOffset.yOffset <= 0) {
     return {gridHash: {}, gridOffset};
   }
+  const numCol = Math.ceil(width / gridOffset.xOffset);
+  const numRow = Math.ceil(height / gridOffset.yOffset);
 
   // calculate count per cell
   const gridHash = {};
@@ -92,11 +94,16 @@ function pointsToGridHashing(props, aggregationParams) {
     if (Number.isFinite(x) && Number.isFinite(y)) {
       const yIndex = Math.floor((y + offsets[1]) / gridOffset.yOffset);
       const xIndex = Math.floor((x + offsets[0]) / gridOffset.xOffset);
-      const key = `${yIndex}-${xIndex}`;
+      if (!projectPoints || (
+        // when doing screen space agggregation, filter points outside of the viewport range.
+        xIndex >= 0 && xIndex < numCol && yIndex >= 0 && yIndex < numRow
+      )) {
+        const key = `${yIndex}-${xIndex}`;
 
-      gridHash[key] = gridHash[key] || {count: 0, points: [], lonIdx: xIndex, latIdx: yIndex};
-      gridHash[key].count += 1;
-      gridHash[key].points.push(pt);
+        gridHash[key] = gridHash[key] || {count: 0, points: [], lonIdx: xIndex, latIdx: yIndex};
+        gridHash[key].count += 1;
+        gridHash[key].points.push(pt);
+      }
     }
   }
 

@@ -60,7 +60,8 @@ class TestGridAggregationLayer extends GridAggregationLayer {
             accessor: {size: 4, type: GL.FLOAT, divisor: 1}
           })
         }
-      }
+      },
+      screenSpaceAggregation: true
     });
     const attributeManager = this.getAttributeManager();
     attributeManager.add({
@@ -214,7 +215,7 @@ test('GridAggregationLayer#CPUvsGPUAggregation', t => {
         data: fixture.data,
         getWeight: x => x.weight1[0],
         aggregation: 'SUM',
-        cellSize: 5000,
+        cellSize: 50,
         gpuAggregation: false
       },
       onAfterUpdate({layer}) {
