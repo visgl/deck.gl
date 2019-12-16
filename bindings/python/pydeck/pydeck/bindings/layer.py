@@ -5,6 +5,8 @@ from .json_tools import JSONMixin
 
 
 TYPE_IDENTIFIER = '@@type'
+FUNCTION_IDENTIFIER = '@@='
+QUOTE_CHARS = {"'", '"', "`"}
 
 
 class Layer(JSONMixin):
@@ -78,6 +80,30 @@ class Layer(JSONMixin):
 
         # Add any other kwargs to the JSON output
         if kwargs:
+            for k, v in kwargs.items():
+                # We assume strings and arrays of strings are identifiers
+                # ["lng", "lat"] would be converted to '[lng, lat]'
+                # TODO given that data here is usually a list of records,
+                # we could probably check that the identifier is in the row
+                # Errors on case like get_position='-', however
+
+                if isinstance(v, str) and v[0] in QUOTE_CHARS and v[0] == v[-1]:
+                    # Skip quoted strings
+                    kwargs[k] = v.replace(v[0], '')
+                elif isinstance(v, str):
+                    # Have @deck.gl/json treat strings values as functions
+                    kwargs[k] = FUNCTION_IDENTIFIER + v
+
+                elif isinstance(v, list) and v != [] and isinstance(v[0], str):
+                    # Allows the user to pass lists e.g. to specify coordinates
+                    array_as_str = ''
+                    for i, identifier in enumerate(v):
+                        if i == len(v) - 1:
+                            array_as_str += '{}'.format(identifier)
+                        else:
+                            array_as_str += '{}, '.format(identifier)
+                    kwargs[k] = '{}[{}]'.format(FUNCTION_IDENTIFIER, array_as_str)
+
             self.__dict__.update(kwargs)
 
     @property

@@ -21,7 +21,7 @@
         0,
         255
       ],
-      "getPosition": "position",
+      "getPosition": "@@=position",
       "getRadius": 1000,
       "id": "scatterplot"
     },
@@ -36,7 +36,7 @@
           "text": "Hello World"
         }
       ],
-      "getPosition": "position",
+      "getPosition": "@@=position",
       "getTextAnchor": "end",
       "id": "textlayer"
     },
@@ -70,7 +70,6 @@
         100,
         100
       ],
-      "getPosition": "features.geometry.coordinates",
       "id": "geojsonlayer",
       "lineWidthMinPixels": 2,
       "opacity": 0.4,

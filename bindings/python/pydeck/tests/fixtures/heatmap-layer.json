@@ -1,0 +1,105 @@
+{
+  "description":
+    "HexagonLayer without a function string should fail but HeatmapLayer should succeed",
+  "initialViewState": {
+    "longitude": 0,
+    "latitude": 0,
+    "zoom": 5,
+    "pitch": 40.5,
+    "bearing": -27.396674584323023
+  },
+  "views": [
+    {
+      "@@type": "MapView",
+      "controller": true
+    }
+  ],
+  "layers": [
+    {
+      "@@type": "HexagonLayer",
+      "id": "failed-heatmap",
+      "data": [
+        {"lat": 0, "lon": 0},
+        {"lat": 0, "lon": 0},
+        {"lat": 0, "lon": 0},
+        {"lat": 0, "lon": 1},
+        {"lat": 0.1, "lon": 1},
+        {"lat": 0.1, "lon": 0.1},
+        {"lat": 0.1, "lon": 0.1},
+        {"lat": 0.1, "lon": 0.1},
+        {"lat": 0.1, "lon": 0.1},
+        {"lat": 0.2, "lon": 1.2},
+        {"lat": 0.2, "lon": 1.2},
+        {"lat": 0.2, "lon": 1.2},
+        {"lat": 0.2, "lon": 1.2},
+        {"lat": 0.1, "lon": 0.1},
+        {"lat": 0.1, "lon": 0.1},
+        {"lat": 1.2, "lon": 1.2},
+        {"lat": 1.2, "lon": 1.2},
+        {"lat": 1.2, "lon": 1.2},
+        {"lat": 0.1, "lon": 0.1},
+        {"lat": 1.2, "lon": 1.2},
+        {"lat": 1.2, "lon": 1.2},
+        {"lat": 0.1, "lon": 0.1},
+        {"lat": 1.2, "lon": 1.2},
+        {"lat": 1.2, "lon": 1.2},
+        {"lat": 1.2, "lon": 1.2},
+        {"lat": 1.2, "lon": 1.2}
+      ],
+      "elevationRange": [0, 15],
+      "elevationScale": 1800,
+      "getPosition": "[lon, lat]",
+      "radius": 10000,
+      "upperPercentile": 100,
+      "colorRange": [
+        [1, 152, 189],
+        [73, 227, 206],
+        [216, 254, 181],
+        [254, 237, 177],
+        [254, 173, 84],
+        [209, 55, 78]
+      ]
+    },
+    {
+      "@@type": "HeatmapLayer",
+      "id": "successful-heatmap",
+      "data": [
+        {"lat": 0, "lon": 0},
+        {"lat": 0, "lon": 0},
+        {"lat": 0, "lon": 0},
+        {"lat": 0, "lon": 1},
+        {"lat": 0.1, "lon": 1},
+        {"lat": 0.1, "lon": 0.1},
+        {"lat": 0.1, "lon": 0.1},
+        {"lat": 0.1, "lon": 0.1},
+        {"lat": 0.1, "lon": 0.1},
+        {"lat": 0.2, "lon": 1.2},
+        {"lat": 0.2, "lon": 1.2},
+        {"lat": 0.2, "lon": 1.2},
+        {"lat": 0.2, "lon": 1.2},
+        {"lat": 0.1, "lon": 0.1},
+        {"lat": 0.1, "lon": 0.1},
+        {"lat": 1.2, "lon": 1.2},
+        {"lat": 1.2, "lon": 1.2},
+        {"lat": 1.2, "lon": 1.2},
+        {"lat": 0.1, "lon": 0.1},
+        {"lat": 1.2, "lon": 1.2},
+        {"lat": 1.2, "lon": 1.2},
+        {"lat": 0.1, "lon": 0.1},
+        {"lat": 1.2, "lon": 1.2},
+        {"lat": 1.2, "lon": 1.2},
+        {"lat": 1.2, "lon": 1.2},
+        {"lat": 1.2, "lon": 1.2}
+      ],
+      "getPosition": "@@=[lon, lat]",
+      "colorRange": [
+        [1, 152, 189],
+        [73, 227, 206],
+        [216, 254, 181],
+        [254, 237, 177],
+        [254, 173, 84],
+        [209, 55, 78]
+      ]
+    }
+  ]
+}
