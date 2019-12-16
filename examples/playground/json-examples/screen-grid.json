@@ -62,7 +62,7 @@
           255
         ]
       ],
-      "getPosition": "-",
+      "getPosition": "@@=-",
       "gpuAggregation": true
     }
   ]

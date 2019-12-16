@@ -20,8 +20,8 @@
       "@@type": "TagmapLayer",
       "id": "twitter-topics-tagmap",
       "data": "https://rivulet-zhang.github.io/dataRepo/tagmap/hashtags10k.json",
-      "getLabel": "label",
-      "getPosition": "coordinates",
+      "getLabel": "@@=label",
+      "getPosition": "@@=coordinates",
       "minFontSize": 14,
       "maxFontSize": 50
     },
@@ -29,8 +29,8 @@
       "@@type": "TextLayer",
       "id": "twitter-topics-raw",
       "data": "https://rivulet-zhang.github.io/dataRepo/tagmap/hashtags10k.json",
-      "getText": "label",
-      "getPosition": "coordinates",
+      "getText": "@@=label",
+      "getPosition": "@@=coordinates",
       "getColor": [
         29,
         145,
