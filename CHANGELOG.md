@@ -28,7 +28,6 @@ Ref: http://keepachangelog.com/en/0.3.0/
 - Clean up LayerManager (#4011)
 - Audit assert usages (#4012)
 - React: eventManager listens to all children (#4013)
-- Fix plot example labels (#4014)
 - Bump loaders.gl to 2.0.0-beta (#4009)
 - TextLayer: support background color (#3903)
 - Improve createProps perf (#4007)
