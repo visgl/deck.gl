@@ -33,9 +33,9 @@
     "@loaders.gl/3d-tiles": "^2.0.0-beta.5",
     "@loaders.gl/core": "^2.0.0-beta.5",
     "@loaders.gl/gltf": "^2.0.0-beta.5",
-    "@math.gl/culling": "^3.0.0",
-    "@math.gl/geospatial": "^3.0.0",
-    "@math.gl/web-mercator": "^3.1.0-alpha",
+    "@math.gl/culling": "^3.1.1",
+    "@math.gl/geospatial": "^3.1.1",
+    "@math.gl/web-mercator": "^3.1.1",
     "h3-js": "^3.6.0",
     "long": "^3.2.0",
     "s2-geometry": "^1.2.10"

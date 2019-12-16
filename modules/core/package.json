@@ -35,10 +35,10 @@
     "@loaders.gl/core": "^2.0.0-beta.5",
     "@loaders.gl/images": "^2.0.0-beta.5",
     "@luma.gl/core": "^8.0.0-beta.3",
-    "@math.gl/web-mercator": "^3.1.0-alpha",
+    "@math.gl/web-mercator": "^3.1.1",
     "gl-matrix": "^3.0.0",
-    "math.gl": "^3.0.0",
+    "math.gl": "^3.1.1",
     "mjolnir.js": "^2.1.2",
-    "probe.gl": "^3.2.0-beta.3"
+    "probe.gl": "^3.2.0"
   }
 }

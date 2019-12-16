@@ -1705,6 +1705,14 @@
   resolved "https://registry.yarnpkg.com/@mapbox/whoots-js/-/whoots-js-3.1.0.tgz#497c67a1cef50d1a2459ba60f315e448d2ad87fe"
   integrity sha512-Es6WcD0nO5l+2BOQS4uLfNPYQaNDfbot3X1XUoloz+x0mPDS3eeORZJl06HXjwBG1fOGwCRnzK88LMdxKRrd6Q==
 
+"@math.gl/core@3.1.1":
+  version "3.1.1"
+  resolved "https://registry.yarnpkg.com/@math.gl/core/-/core-3.1.1.tgz#68fdfe369b07e147026b7270926297ab416a96cb"
+  integrity sha512-49hzuVHLrlI9t/sykWk4TqGYfqoUbOnc904w1RX2LGX/fciK4dDc0V/90Q4avpFseiknFW/sYDtXzoCLkwzBzg==
+  dependencies:
+    "@babel/runtime" "^7.0.0"
+    gl-matrix "^3.0.0"
+
 "@math.gl/culling@^3.0.0":
   version "3.0.0"
   resolved "https://registry.yarnpkg.com/@math.gl/culling/-/culling-3.0.0.tgz#6ffb0b73cf4490568fe0961e8e902ea49d12447b"
@@ -1713,6 +1721,15 @@
     "@babel/runtime" "^7.0.0"
     gl-matrix "^3.0.0"
     math.gl "3.0.0"
+
+"@math.gl/culling@^3.1.1":
+  version "3.1.1"
+  resolved "https://registry.yarnpkg.com/@math.gl/culling/-/culling-3.1.1.tgz#47b9e8e9a9d981d90255041bcf091ceb4b1ccd53"
+  integrity sha512-gbVV15aBNwrENHjpnkvG0lY4XMYyZCvCE7lZOe4wAYXA3oMvDFvfyIWsPhlwsqMP2dvZ5DGCmr1dZ1iUpXomvg==
+  dependencies:
+    "@babel/runtime" "^7.0.0"
+    "@math.gl/core" "3.1.1"
+    gl-matrix "^3.0.0"
 
 "@math.gl/geospatial@^3.0.0":
   version "3.0.0"
@@ -1723,10 +1740,19 @@
     gl-matrix "^3.0.0"
     math.gl "3.0.0"
 
-"@math.gl/web-mercator@^3.1.0-alpha":
-  version "3.1.0-alpha.2"
-  resolved "https://registry.yarnpkg.com/@math.gl/web-mercator/-/web-mercator-3.1.0-alpha.2.tgz#bc62baf57747cab981cccb882ec9709cf1d473e8"
-  integrity sha512-NMYu64ksLVuTpiPXaMVCYCYBUG8orIpl2H3/QY6lasA/6rUN/RV9Kqs25mu/aTDjOex7AXFjyc9plvpP5lvAiw==
+"@math.gl/geospatial@^3.1.1":
+  version "3.1.1"
+  resolved "https://registry.yarnpkg.com/@math.gl/geospatial/-/geospatial-3.1.1.tgz#82bad1081bbd516fa7efc912ff3483710191aca0"
+  integrity sha512-yvdjJIroww4qeZ1FOaJqQGG71nfwGq0w5uXC1vGIVNzpO/Y9/xdQpJuBG2z6mrGXp/gUrP1R66RxQy6i9D7lxg==
+  dependencies:
+    "@babel/runtime" "^7.0.0"
+    "@math.gl/core" "3.1.1"
+    gl-matrix "^3.0.0"
+
+"@math.gl/web-mercator@^3.1.1":
+  version "3.1.1"
+  resolved "https://registry.yarnpkg.com/@math.gl/web-mercator/-/web-mercator-3.1.1.tgz#4825cd2b847d7d1438a5114e7afacab18f1ae414"
+  integrity sha512-pzl58XEdHG/J49H1HfTXKuJqp7F971qcLHdJR7B9OJSjJlmoLBxDMETVFbOzHBsiwoIqTsZgJYHGwmLYIf2avQ==
   dependencies:
     "@babel/runtime" "^7.0.0"
     gl-matrix "^3.0.0"
@@ -1922,13 +1948,20 @@
     "@phosphor/signaling" "^1.3.0"
     "@phosphor/virtualdom" "^1.2.0"
 
-"@probe.gl/bench@^3.2.0-beta.3":
-  version "3.2.0-beta.3"
-  resolved "https://registry.yarnpkg.com/@probe.gl/bench/-/bench-3.2.0-beta.3.tgz#46930b74687047a4f43a5c10a55bdf847196c6fb"
-  integrity sha512-C6iukR4OMzi0xczcTvlSrBrQqLeeb+5sZEoKj4oc5W63edGgw23zqMkiWyl2L7d3UD5lpdM4sixeEqkTsr5szQ==
+"@probe.gl/bench@^3.2.0":
+  version "3.2.0"
+  resolved "https://registry.yarnpkg.com/@probe.gl/bench/-/bench-3.2.0.tgz#323cf42e1b3fb33a93d0e5282c49fd050a3b063f"
+  integrity sha512-nAEeRQIpo5eEBSmQ9O0RNp2I6jxrAVEzZnpPBa5Bkc1TrD40S9Eu/EqCUkxcQDTwNMKZIK6A4EIIIph5Qj3Rlg==
   dependencies:
     "@babel/runtime" "^7.0.0"
-    probe.gl "3.2.0-beta.3"
+    probe.gl "3.2.0"
+
+"@probe.gl/stats@3.2.0":
+  version "3.2.0"
+  resolved "https://registry.yarnpkg.com/@probe.gl/stats/-/stats-3.2.0.tgz#642005c308d768db2ace859482fd89942cbbfc31"
+  integrity sha512-Imo1NZwvV3B9jzVZDXz9Fl1rnhR54wb2YG41Ey25QrHQVH6sFqe2gUutFEY2T/sLLVkbFGNWuZU7jVqCRCJTdw==
+  dependencies:
+    "@babel/runtime" "^7.0.0"
 
 "@probe.gl/stats@3.2.0-beta.3":
   version "3.2.0-beta.3"
@@ -1937,14 +1970,14 @@
   dependencies:
     "@babel/runtime" "^7.0.0"
 
-"@probe.gl/test-utils@^3.2.0-beta.3":
-  version "3.2.0-beta.3"
-  resolved "https://registry.yarnpkg.com/@probe.gl/test-utils/-/test-utils-3.2.0-beta.3.tgz#6c72ef49a73e3bd3d1d0932cb764aac042cade4c"
-  integrity sha512-TWcd+D9eJUlnkBzRohPo6dY4pFAzCRhphXywu754POYxEHZI4pGFXPN1kZdNzI3xdZazfT2h8sMUeFkCx/gsQA==
+"@probe.gl/test-utils@^3.2.0":
+  version "3.2.0"
+  resolved "https://registry.yarnpkg.com/@probe.gl/test-utils/-/test-utils-3.2.0.tgz#abca814fab2977d65f44fd2e0a987f58118546b1"
+  integrity sha512-vsRH/noJnmeqtEoeIPBJbDd8bwJxlrVS8sUhlln9oFIKAok/mfwlSuf3MIwab9KxBGMBIUS2uRoAYz1XrJIHAQ==
   dependencies:
     "@babel/runtime" "^7.0.0"
     pixelmatch "^4.0.2"
-    probe.gl "3.2.0-beta.3"
+    probe.gl "3.2.0"
     puppeteer "^1.16.0"
 
 "@types/backbone@^1.4.1":
@@ -6971,6 +7004,13 @@ math.gl@3.0.0, math.gl@^3.0.0:
     "@babel/runtime" "^7.0.0"
     gl-matrix "^3.0.0"
 
+math.gl@^3.1.1:
+  version "3.1.1"
+  resolved "https://registry.yarnpkg.com/math.gl/-/math.gl-3.1.1.tgz#66d8a53994f16b0d65b18df994b727eb41a797ae"
+  integrity sha512-gfXOcPeGGn0dwLsRxlon0xJdkEo3pK3eKHxVsJ0ZBzKwewLgEReohUMsKfY0o2rFixXvDSLq/8lSh67Snxle0g==
+  dependencies:
+    "@math.gl/core" "3.1.1"
+
 md5.js@^1.3.4:
   version "1.3.5"
   resolved "https://registry.yarnpkg.com/md5.js/-/md5.js-1.3.5.tgz#b5d07b8e3216e3e27cd728d72f70d1e6a342005f"
@@ -8462,13 +8502,13 @@ private@^0.1.6:
   resolved "https://registry.yarnpkg.com/private/-/private-0.1.8.tgz#2381edb3689f7a53d653190060fcf822d2f368ff"
   integrity sha512-VvivMrbvd2nKkiG38qjULzlc+4Vx4wm/whI9pQD35YrARNnhxeiRktSOhSukRLFNlzg6Br/cJPet5J/u19r/mg==
 
-probe.gl@3.2.0-beta.3, probe.gl@^3.2.0-beta.3:
-  version "3.2.0-beta.3"
-  resolved "https://registry.yarnpkg.com/probe.gl/-/probe.gl-3.2.0-beta.3.tgz#c13508491a0c5ac3cd0ca64d0618276875c498f6"
-  integrity sha512-vJG0X7GPYTRVf0LeFMdGRn8CAB71VG1QR6dfKZYSQwzvjAHdd4ote154Fn+pXj/BBfTQZSCa5DRmuyvFXO5kNg==
+probe.gl@3.2.0, probe.gl@^3.2.0:
+  version "3.2.0"
+  resolved "https://registry.yarnpkg.com/probe.gl/-/probe.gl-3.2.0.tgz#f5368a5bc963ec12e19645e2b6ce0294f682f31f"
+  integrity sha512-rJPW92vyl3cf0xpg1xwZPUKWqF0j7sktsmQQ0ILbpXDtEeHFXGC+VeBYpDZc/l1mlj6ft6fum0NP/rLr36HirA==
   dependencies:
     "@babel/runtime" "^7.0.0"
-    "@probe.gl/stats" "3.2.0-beta.3"
+    "@probe.gl/stats" "3.2.0"
 
 probe.gl@^3.1.1:
   version "3.1.1"
@@ -8476,6 +8516,14 @@ probe.gl@^3.1.1:
   integrity sha512-mD/DzhaYVftrRpobJd/W5JNhDVYCpClhuCGeOphuNZO1+qM6tOlBIf/6ETz11JyolZoJTTeT6aiVXOuIVyAVRg==
   dependencies:
     "@babel/runtime" "^7.0.0"
+
+probe.gl@^3.2.0-beta.3:
+  version "3.2.0-beta.3"
+  resolved "https://registry.yarnpkg.com/probe.gl/-/probe.gl-3.2.0-beta.3.tgz#c13508491a0c5ac3cd0ca64d0618276875c498f6"
+  integrity sha512-vJG0X7GPYTRVf0LeFMdGRn8CAB71VG1QR6dfKZYSQwzvjAHdd4ote154Fn+pXj/BBfTQZSCa5DRmuyvFXO5kNg==
+  dependencies:
+    "@babel/runtime" "^7.0.0"
+    "@probe.gl/stats" "3.2.0-beta.3"
 
 process-nextick-args@~2.0.0:
   version "2.0.1"
