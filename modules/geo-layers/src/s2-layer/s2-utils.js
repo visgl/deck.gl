@@ -34,7 +34,7 @@ function getGeoBounds({face, ij, level}) {
   // resolution is the number of segments to generate per edge.
   // We exponentially reduce resolution as level increases so it doesn't affect perf
   // when there are a large number of cells
-  const resolution = Math.max(1, MAX_RESOLUTION * Math.pow(2, -level));
+  const resolution = Math.max(1, Math.ceil(MAX_RESOLUTION * Math.pow(2, -level)));
 
   for (let i = 0; i < 4; i++) {
     const offset = offsets[i].slice(0);
