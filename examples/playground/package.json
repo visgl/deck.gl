@@ -5,7 +5,7 @@
   "scripts": {
     "start": "webpack-dev-server --progress --hot --open",
     "start-local": "webpack-dev-server --env.local --progress --hot --open",
-    "build": "rm -rf dist && mkdir dist && cp index.html dist/ && webpack --env.production=true"
+    "build": "rm -rf dist && mkdir dist && cp index.html dist/ && webpack --env.local --env.production=true"
   },
   "dependencies": {
     "deck.gl": "^7.3.6",
