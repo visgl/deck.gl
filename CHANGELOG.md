@@ -23,7 +23,6 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ### deck.gl [8.0.0-beta.1] - Dec 13 2019
 
-- Bump dependency versions in modules, examples and docs (#4015)
 - bump loaders.gl to beta.5 (#4018)
 - pydeck: Make a single bundle for use in standalone and Jupyter rendering (#4010)
 - Clean up LayerManager (#4011)
