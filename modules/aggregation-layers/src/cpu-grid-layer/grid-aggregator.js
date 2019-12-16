@@ -94,10 +94,11 @@ function pointsToGridHashing(props, aggregationParams) {
     if (Number.isFinite(x) && Number.isFinite(y)) {
       const yIndex = Math.floor((y + offsets[1]) / gridOffset.yOffset);
       const xIndex = Math.floor((x + offsets[0]) / gridOffset.xOffset);
-      if (!projectPoints || (
+      if (
+        !projectPoints ||
         // when doing screen space agggregation, filter points outside of the viewport range.
-        xIndex >= 0 && xIndex < numCol && yIndex >= 0 && yIndex < numRow
-      )) {
+        (xIndex >= 0 && xIndex < numCol && yIndex >= 0 && yIndex < numRow)
+      ) {
         const key = `${yIndex}-${xIndex}`;
 
         gridHash[key] = gridHash[key] || {count: 0, points: [], lonIdx: xIndex, latIdx: yIndex};
