@@ -35,12 +35,9 @@ Ref: http://keepachangelog.com/en/0.3.0/
 - Icon layer: Use 2D positions to match vertex shader (#3736)
 - Update documentation about using binary data (#3998)
 - @deck.gl/json: Fix function lookups in classes (#3995)
-- Doc: update data filter extension doc (#3996)
 - @deck.gl/json: Document new syntactic sugar (#4000)
 - TileLayer: change onViewportLoaded to onViewportLoad (#3997)
-- add layer update bench tests (#3994)
 - Fix bundle config (#3992)
-- [Doc]: update color prop description in all layers (#3993)
 - Prop rename: filterData to _filterData (#3989)
 - Voodoo fix for polygon rendering on Linux/Intel (#3990)
 
