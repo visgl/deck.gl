@@ -21,6 +21,30 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ### deck.gl v8.0 Prereleases
 
+### deck.gl [8.0.0-beta.1] - Dec 13 2019
+
+- Bump dependency versions in modules, examples and docs (#4015)
+- bump loaders.gl to beta.5 (#4018)
+- pydeck: Make a single bundle for use in standalone and Jupyter rendering (#4010)
+- Clean up LayerManager (#4011)
+- Audit assert usages (#4012)
+- React: eventManager listens to all children (#4013)
+- Fix plot example labels (#4014)
+- Bump loaders.gl to 2.0.0-beta (#4009)
+- TextLayer: support background color (#3903)
+- Improve createProps perf (#4007)
+- Icon layer: Use 2D positions to match vertex shader (#3736)
+- Update documentation about using binary data (#3998)
+- @deck.gl/json: Fix function lookups in classes (#3995)
+- Doc: update data filter extension doc (#3996)
+- @deck.gl/json: Document new syntactic sugar (#4000)
+- TileLayer: change onViewportLoaded to onViewportLoad (#3997)
+- add layer update bench tests (#3994)
+- Fix bundle config (#3992)
+- [Doc]: update color prop description in all layers (#3993)
+- Prop rename: filterData to _filterData (#3989)
+- Voodoo fix for polygon rendering on Linux/Intel (#3990)
+
 #### deck.gl [8.0.0-alpha.2] - Dec 10 2019
 
 - ContourLayer: optimize sublayer prop setup (#3985)
