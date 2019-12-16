@@ -45,12 +45,13 @@ varying vec4 vFillColor;
 varying vec4 vLineColor;
 varying vec2 unitPosition;
 varying float innerUnitRadius;
+varying float outerRadiusPixels;
 
 void main(void) {
   geometry.worldPosition = instancePositions;
 
   // Multiply out radius and clamp to limits
-  float outerRadiusPixels = clamp(
+  outerRadiusPixels = clamp(
     project_size_to_pixel(radiusScale * instanceRadius),
     radiusMinPixels, radiusMaxPixels
   );
