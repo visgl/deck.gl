@@ -33,7 +33,7 @@ function getGeoBounds({face, ij, level}) {
   // resolution is the number of segments to generate per edge.
   // We exponentially reduce resolution as level increases so it doesn't affect perf
   // when there are a large number of cells
-  const resolution = Math.max(1, MAX_RESOLUTION * Math.pow(2, -level));
+  const resolution = Math.max(1, Math.ceil(MAX_RESOLUTION * Math.pow(2, -level)));
   const result = new Float64Array(4 * resolution * 2 + 2);
   let ptIndex = 0;
 
