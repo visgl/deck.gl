@@ -18,7 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {Layer, project32, gouraudLighting, picking} from '@deck.gl/core';
+import {Layer, project32, gouraudLighting, picking, COORDINATE_SYSTEM} from '@deck.gl/core';
 import GL from '@luma.gl/constants';
 import {Model, Geometry, hasFeature, FEATURES} from '@luma.gl/core';
 
@@ -71,10 +71,16 @@ export default class SolidPolygonLayer extends Layer {
   }
 
   initializeState() {
-    const {gl} = this.context;
+    const {gl, viewport} = this.context;
+    let {coordinateSystem} = this.props;
+    if (viewport.isGeospatial && coordinateSystem === COORDINATE_SYSTEM.DEFAULT) {
+      coordinateSystem = COORDINATE_SYSTEM.LNGLAT;
+    }
+
     this.setState({
       numInstances: 0,
       polygonTesselator: new PolygonTesselator({
+        preproject: coordinateSystem === COORDINATE_SYSTEM.LNGLAT,
         fp64: this.use64bitPositions(),
         IndexType: !gl || hasFeature(gl, FEATURES.ELEMENT_INDEX_UINT32) ? Uint32Array : Uint16Array
       })
