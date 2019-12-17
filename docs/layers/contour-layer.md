@@ -92,6 +92,18 @@ When set to true and browser supports GPU aggregation, aggregation is performed 
 
 NOTE: GPU Aggregation requires WebGL2 support by the browser. When `gpuAggregation` is set to true and browser doesn't support WebGL2, aggregation falls back to CPU.
 
+##### `aggregation` (String, optional)
+
+* Default: 'SUM'
+
+Defines the type of aggregation operation, valid values are 'SUM', 'MEAN', 'MIN' and 'MAX'. When no value or an invalid value is set, 'SUM' is used as aggregation.
+
+* SUM : Grid cell contains sum of all weights that fall into it.
+* MEAN : Grid cell contains mean of all weights that fall into it.
+* MIN : Grid cell contains minimum of all weights that fall into it.
+* MAX : Grid cell contains maximum of all weights that fall into it.
+
+
 ##### `contours` (Array, optional)
 
 * Default: `[{threshold: 1}]`

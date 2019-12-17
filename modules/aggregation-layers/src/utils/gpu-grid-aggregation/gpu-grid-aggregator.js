@@ -515,7 +515,7 @@ export default class GPUGridAggregator {
         });
       }
       framebuffers[id].resize(framebufferSize);
-      equations[id] = EQUATION_MAP[operation];
+      equations[id] = EQUATION_MAP[operation] || EQUATION_MAP.SUM;
       // For min/max framebuffers will use default size 1X1
       if (needMin || needMax) {
         if (needMin && needMax && combineMaxMin) {

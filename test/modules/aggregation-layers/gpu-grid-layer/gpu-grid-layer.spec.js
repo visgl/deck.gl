@@ -115,7 +115,7 @@ test('GPUGridLayer#updates', t => {
       },
       {
         updateProps: {
-          colorAggregation: 3
+          colorAggregation: 'MAX'
         },
         spies: ['_updateAggregation'],
         onAfterUpdate({layer, subLayers, spies}) {
