@@ -31,6 +31,7 @@ export default class Tesselator {
     this.instanceCount = 0;
     this.attributes = {};
     this._attributeDefs = attributes;
+    this.opts = opts;
 
     this.updateGeometry(opts);
 

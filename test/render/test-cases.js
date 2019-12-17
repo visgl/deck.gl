@@ -759,6 +759,25 @@ export const TEST_CASES = [
     goldenImage: './test/render/golden-images/geojson-extruded-lnglat.png'
   },
   {
+    name: 'geojson-large',
+    viewState: {
+      longitude: -95,
+      latitude: 60,
+      zoom: 3
+    },
+    layers: [
+      new GeoJsonLayer({
+        id: 'geojson-layer-large',
+        data: dataSamples.geojsonLarge,
+        stroked: false,
+        filled: true,
+        opacity: 0.5,
+        getFillColor: [200, 0, 0]
+      })
+    ],
+    goldenImage: './test/render/golden-images/geojson-large.png'
+  },
+  {
     name: 'gridcell-lnglat',
     viewState: {
       latitude: 37.751537058389985,

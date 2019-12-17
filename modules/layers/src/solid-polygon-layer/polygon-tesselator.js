@@ -30,11 +30,12 @@ const {Tesselator} = experimental;
 // This class is set up to allow querying one attribute at a time
 // the way the AttributeManager expects it
 export default class PolygonTesselator extends Tesselator {
-  constructor({data, getGeometry, fp64, positionFormat, IndexType = Uint32Array}) {
+  constructor({data, getGeometry, fp64, positionFormat, IndexType = Uint32Array, preproject}) {
     super({
       data,
       getGeometry,
       positionFormat,
+      preproject,
       attributes: {
         positions: {size: 3, type: fp64 ? Float64Array : Float32Array},
         vertexValid: {type: Uint8ClampedArray, size: 1},
@@ -72,7 +73,7 @@ export default class PolygonTesselator extends Tesselator {
     let i = indexStart;
 
     // 1. get triangulated indices for the internal areas
-    const indices = Polygon.getSurfaceIndices(polygon, this.positionSize);
+    const indices = Polygon.getSurfaceIndices(polygon, this.positionSize, this.opts.preproject);
 
     // make sure the buffer is large enough
     target = typedArrayManager.allocate(target, indexStart + indices.length, {

@@ -18,7 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {Layer} from '@deck.gl/core';
+import {Layer, COORDINATE_SYSTEM} from '@deck.gl/core';
 import GL from '@luma.gl/constants';
 import {Model, Geometry, hasFeature, FEATURES, PhongMaterial} from '@luma.gl/core';
 
@@ -75,6 +75,7 @@ export default class SolidPolygonLayer extends Layer {
     this.setState({
       numInstances: 0,
       polygonTesselator: new PolygonTesselator({
+        preproject: this.props.coordinateSystem === COORDINATE_SYSTEM.LNGLAT,
         fp64: this.use64bitPositions(),
         IndexType: !gl || hasFeature(gl, FEATURES.ELEMENT_INDEX_UINT32) ? Uint32Array : Uint16Array
       })
