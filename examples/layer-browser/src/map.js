@@ -17,17 +17,16 @@ const MapboxAccessToken =
 
 const NAVIGATION_CONTROL_STYLES = {
   margin: 10,
-  position: 'absolute',
-  zIndex: 1
+  position: 'absolute'
 };
 
 const VIEW_LABEL_STYLES = {
-  zIndex: 10,
   padding: 5,
   margin: 20,
   fontSize: 12,
   backgroundColor: '#282727',
-  color: '#FFFFFF'
+  color: '#FFFFFF',
+  position: 'absolute'
 };
 
 const INITIAL_VIEW_STATES = {
@@ -47,11 +46,7 @@ const INITIAL_VIEW_STATES = {
   }
 };
 
-const ViewportLabel = props => (
-  <div style={{position: 'absolute'}}>
-    <div style={{...VIEW_LABEL_STYLES, display: ''}}>{props.children}</div>
-  </div>
-);
+const ViewportLabel = props => <div style={VIEW_LABEL_STYLES}>{props.children}</div>;
 
 export default class Map extends PureComponent {
   constructor(props) {
