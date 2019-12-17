@@ -4,6 +4,9 @@ import {StaticMap} from 'react-map-gl';
 import DeckGL from '@deck.gl/react';
 import {ScatterplotLayer} from '@deck.gl/layers';
 import {DataFilterExtension} from '@deck.gl/extensions';
+import {Client as Styletron} from 'styletron-engine-atomic';
+import {Provider as StyletronProvider} from 'styletron-react';
+import {LightTheme, BaseProvider} from 'baseui';
 
 import RangeInput from './range-input';
 
@@ -25,6 +28,8 @@ const INITIAL_VIEW_STATE = {
 const MS_PER_DAY = 8.64e7; // milliseconds in a day
 
 const dataFilter = new DataFilterExtension({filterSize: 1});
+
+const engine = new Styletron();
 
 export default class App extends Component {
   constructor(props) {
@@ -165,7 +170,14 @@ export default class App extends Component {
 }
 
 export function renderToDOM(container) {
-  render(<App />, container);
+  render(
+    <StyletronProvider value={engine}>
+      <BaseProvider theme={LightTheme}>
+        <App />
+      </BaseProvider>
+    </StyletronProvider>,
+    container
+  );
   require('d3-request').csv(DATA_URL, (error, response) => {
     if (!error) {
       const data = response.map(row => ({
@@ -175,7 +187,14 @@ export function renderToDOM(container) {
         depth: Number(row.Depth),
         magnitude: Number(row.Magnitude)
       }));
-      render(<App data={data} />, container);
+      render(
+        <StyletronProvider value={engine}>
+          <BaseProvider theme={LightTheme}>
+            <App data={data} />
+          </BaseProvider>
+        </StyletronProvider>,
+        container
+      );
     }
   });
 }

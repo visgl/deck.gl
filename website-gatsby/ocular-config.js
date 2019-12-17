@@ -193,6 +193,12 @@ based maps.',
       path: 'examples/website/brushing',
       image: 'images/examples/demo-thumb-brushing.jpg',
       componentUrl: resolve(__dirname, './src/examples/example-brushing-demo.jsx')
+    },
+    {
+      title: 'Data Filtering',
+      path: 'examples/website/data-filter',
+      image: 'images/examples/demo-thumb-data-filter.jpg',
+      componentUrl: resolve(__dirname, './src/examples/example-data-filter-demo.jsx')
     }
     // {
     //   title: '3D Surface Explorer',
