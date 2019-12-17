@@ -241,8 +241,6 @@ export default class GridAggregationLayer extends AggregationLayer {
     if (!gpuAggregation) {
       const result = cpuGridAggregator(props, {
         gridOffset,
-        width,
-        height,
         projectPoints,
         attributes,
         viewport,

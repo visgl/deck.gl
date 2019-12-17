@@ -106,7 +106,6 @@ function testAggregationOperations(opts) {
 
   const weight = Object.assign({}, pointsData.weights.weight1, {operation: op});
   const maxMinweight = Object.assign({}, weight, {combineMaxMin: true});
-  const {width, height} = fixture.moduleSettings.viewport;
   const aggregationOpts = Object.assign(
     {
       aggregation,
@@ -133,9 +132,7 @@ function testAggregationOperations(opts) {
       cellOffset: [0, 0],
       attributes: pointsData.attributes,
       projectPoints: fixture.projectPoints,
-      numInstances: pointsData.vertexCount,
-      width,
-      height
+      numInstances: pointsData.vertexCount
     }
   );
   let results = gpuAggregator.run(aggregationOpts);

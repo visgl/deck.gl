@@ -70,7 +70,7 @@ export function getGridOffset(boundingBox, cellSize) {
 /* eslint-disable max-statements, complexity */
 function pointsToGridHashing(props, aggregationParams) {
   const {data = [], cellSize} = props;
-  const {attributes, viewport, projectPoints, numInstances, width, height} = aggregationParams;
+  const {attributes, viewport, projectPoints, numInstances} = aggregationParams;
   const positions = attributes.positions.value;
   const {size} = attributes.positions.getAccessor();
   const boundingBox =
@@ -81,6 +81,8 @@ function pointsToGridHashing(props, aggregationParams) {
   if (gridOffset.xOffset <= 0 || gridOffset.yOffset <= 0) {
     return {gridHash: {}, gridOffset};
   }
+
+  const {width, height} = viewport;
   const numCol = Math.ceil(width / gridOffset.xOffset);
   const numRow = Math.ceil(height / gridOffset.yOffset);
 
