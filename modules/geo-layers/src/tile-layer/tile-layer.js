@@ -4,12 +4,12 @@ import {GeoJsonLayer} from '@deck.gl/layers';
 import TileCache from './utils/tile-cache';
 
 const defaultProps = {
-  renderSubLayers: {type: 'function', value: props => new GeoJsonLayer(props)},
-  getTileData: {type: 'function', value: ({x, y, z}) => Promise.resolve(null)},
+  renderSubLayers: {type: 'function', value: props => new GeoJsonLayer(props), compare: false},
+  getTileData: {type: 'function', value: ({x, y, z}) => Promise.resolve(null), compare: false},
   // TODO - change to onViewportLoad to align with Tile3DLayer
-  onViewportLoad: {type: 'function', optional: true, value: null},
+  onViewportLoad: {type: 'function', optional: true, value: null, compare: false},
   // eslint-disable-next-line
-  onTileError: {type: 'function', value: err => console.error(err)},
+  onTileError: {type: 'function', value: err => console.error(err), compare: false},
   maxZoom: null,
   minZoom: 0,
   maxCacheSize: null
