@@ -153,7 +153,7 @@ export default class GridAggregationLayer extends AggregationLayer {
       case COORDINATE_SYSTEM.LNGLAT_DEPRECATED:
         worldOrigin = [-180, -90]; // Origin used to define grid cell boundaries
         break;
-      case COORDINATE_SYSTEM.IDENTITY:
+      case COORDINATE_SYSTEM.CARTESIAN:
         const {width, height} = this.context.viewport;
         worldOrigin = [-width / 2, -height / 2]; // Origin used to define grid cell boundaries
         break;
@@ -299,7 +299,7 @@ export default class GridAggregationLayer extends AggregationLayer {
 
   _getGridOffset(opts) {
     const {cellSize, boundingBox} = this.state;
-    if (opts.props.coordinateSystem === COORDINATE_SYSTEM.IDENTITY) {
+    if (opts.props.coordinateSystem === COORDINATE_SYSTEM.CARTESIAN) {
       return {xOffset: cellSize, yOffset: cellSize};
     }
     return getGridOffset(boundingBox, cellSize);
