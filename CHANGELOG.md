@@ -21,6 +21,20 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ### deck.gl v8.0 Prereleases
 
+### deck.gl [8.0.0-beta.2] - Dec 17 2019
+
+- Fix ScenegraphLayer asset wait (#4025)
+- pydeck: Update for new @deck.gl/json API and add additional tes… (#4020)
+- Smooth edges in scatterplot (#4021)
+- Fix s2 layer polygon generation (#4024)
+- Tweak to scenegraph layer fix (#4027)
+- Bump math.gl and probe.gl dependencies (#4029)
+- React module fixes (#4032)
+- [Fix]: CPU Aggregation: filter out points outside of viewport. (#4026)
+- Support preprojection in PolygonTesselator (#4035)
+- Fix WebGL BlendEquation warnings (#4037)
+- Layer bug fixes (#4040)
+
 ### deck.gl [8.0.0-beta.1] - Dec 13 2019
 
 - bump loaders.gl to beta.5 (#4018)
