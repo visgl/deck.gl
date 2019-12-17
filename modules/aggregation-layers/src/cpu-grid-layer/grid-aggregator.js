@@ -24,9 +24,20 @@ const R_EARTH = 6378000;
 
 /**
  * Calculate density grid from an array of points
- * @param {Iterable} data
- * @param {number} cellSize - cell size in meters
- * @param {function} getPosition - position accessor
+ * @param {Object} props - object containing :
+ * @param {Iterable} [props.data] - data objects to be aggregated
+ * @param {Integer} [props.cellSize] - size of the grid cell
+ *
+ * @param {Object} aggregationParams - object containing :
+ * @param {Object} gridOffset - {xOffset, yOffset} cell size in meters
+ * @param {Integer} width - width of the grid
+ * @param {Integer} height - height of the grid
+ * @param {Boolean} projectPoints - `true` if doing screen space projection, `false` otherwise
+ * @param {Array} attributes - attributes array containing position values
+ * @param {Viewport} viewport - viewport to be used for projection
+ * @param {Array} cellOffset - [xOffset, yOffset] offset to be applied to positions to get cell index
+ * @param {Object} boundingBox - {xMin, yMin, xMax, yMax} bounding box of input data
+ *
  * @returns {object} - grid data, cell dimension
  */
 export function pointToDensityGridDataCPU(props, aggregationParams) {
@@ -56,13 +67,6 @@ export function getGridOffset(boundingBox, cellSize) {
   return calculateGridLatLonOffset(cellSize, centerLat);
 }
 
-/**
- * Project points into each cell, return a hash table of cells
- * @param {Iterable} points
- * @param {number} cellSize - unit size in meters
- * @param {function} getPosition - position accessor
- * @returns {object} - grid hash and cell dimension
- */
 /* eslint-disable max-statements, complexity */
 function pointsToGridHashing(props, aggregationParams) {
   const {data = [], cellSize} = props;
@@ -78,6 +82,10 @@ function pointsToGridHashing(props, aggregationParams) {
     return {gridHash: {}, gridOffset};
   }
 
+  const {width, height} = viewport;
+  const numCol = Math.ceil(width / gridOffset.xOffset);
+  const numRow = Math.ceil(height / gridOffset.yOffset);
+
   // calculate count per cell
   const gridHash = {};
 
@@ -92,11 +100,17 @@ function pointsToGridHashing(props, aggregationParams) {
     if (Number.isFinite(x) && Number.isFinite(y)) {
       const yIndex = Math.floor((y + offsets[1]) / gridOffset.yOffset);
       const xIndex = Math.floor((x + offsets[0]) / gridOffset.xOffset);
-      const key = `${yIndex}-${xIndex}`;
+      if (
+        !projectPoints ||
+        // when doing screen space agggregation (projectPoints = true), filter points outside of the viewport range.
+        (xIndex >= 0 && xIndex < numCol && yIndex >= 0 && yIndex < numRow)
+      ) {
+        const key = `${yIndex}-${xIndex}`;
 
-      gridHash[key] = gridHash[key] || {count: 0, points: [], lonIdx: xIndex, latIdx: yIndex};
-      gridHash[key].count += 1;
-      gridHash[key].points.push(pt);
+        gridHash[key] = gridHash[key] || {count: 0, points: [], lonIdx: xIndex, latIdx: yIndex};
+        gridHash[key].count += 1;
+        gridHash[key].points.push(pt);
+      }
     }
   }
 

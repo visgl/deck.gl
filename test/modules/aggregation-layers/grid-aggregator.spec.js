@@ -25,7 +25,8 @@ import * as FIXTURES from 'deck.gl-test/data';
 import {pointToDensityGridDataCPU} from '@deck.gl/aggregation-layers/cpu-grid-layer/grid-aggregator';
 
 const getPosition = d => d.COORDINATES;
-const iterableData = new Set(FIXTURES.points);
+const {points, sampleViewport} = FIXTURES;
+const iterableData = new Set(points);
 const cellSize = 500;
 function getAccessor() {
   return {size: 3};
@@ -41,7 +42,8 @@ test('pointToDensityGridDataCPU', t => {
   };
   const aggregationParams = {
     attributes: {positions: {value: positions, getAccessor}},
-    numInstances: iterableData.size
+    numInstances: iterableData.size,
+    viewport: sampleViewport
   };
   t.ok(
     typeof pointToDensityGridDataCPU(props, aggregationParams) === 'object',
