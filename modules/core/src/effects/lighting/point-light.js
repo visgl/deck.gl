@@ -33,7 +33,7 @@ export class PointLight {
       coordinateOrigin,
       fromCoordinateSystem: viewport.isGeospatial
         ? COORDINATE_SYSTEM.LNGLAT
-        : COORDINATE_SYSTEM.IDENTITY,
+        : COORDINATE_SYSTEM.CARTESIAN,
       fromCoordinateOrigin: [0, 0, 0]
     });
     projectedLight.color = this.color;

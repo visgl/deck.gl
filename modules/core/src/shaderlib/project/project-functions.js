@@ -81,7 +81,7 @@ export function getWorldPosition(
         offsetMode
       );
 
-    case COORDINATE_SYSTEM.IDENTITY:
+    case COORDINATE_SYSTEM.CARTESIAN:
     default:
       return viewport.projectPosition([x, y, z]);
   }
@@ -133,7 +133,7 @@ export function projectPosition(position, params) {
 
     case COORDINATE_SYSTEM.LNGLAT:
     case COORDINATE_SYSTEM.LNGLAT_DEPRECATED:
-    case COORDINATE_SYSTEM.IDENTITY:
+    case COORDINATE_SYSTEM.CARTESIAN:
     default:
       return getWorldPosition(position, {
         viewport,

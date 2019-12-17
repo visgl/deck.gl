@@ -17,5 +17,8 @@ void main(void) {
   DECKGL_FILTER_GL_POSITION(gl_Position, geometry);
 
   vTexCoord = texCoords;
+
+  vec4 color = vec4(0.0);
+  DECKGL_FILTER_COLOR(color, geometry);
 }
 `;
