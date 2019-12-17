@@ -24,7 +24,7 @@
       "id": "airports",
       "data": "https://raw.githubusercontent.com/uber-common/deck.gl-data/master/examples/line/airports.json",
       "radiusScale": 20,
-      "getPosition": "coordinates",
+      "getPosition": "@@=coordinates",
       "getFillColor": [
         255,
         140,
@@ -38,8 +38,8 @@
       "data": "https://raw.githubusercontent.com/uber-common/deck.gl-data/master/examples/line/heathrow-flights.json",
       "opacity": 0.8,
       "strokeWidth": 3,
-      "getSourcePosition": "start",
-      "getTargetPosition": "end",
+      "getSourcePosition": "@@=start",
+      "getTargetPosition": "@@=end",
       "getColor": [
         200,
         32,

@@ -22,7 +22,7 @@
       "data": "https://raw.githubusercontent.com/uber-common/deck.gl-data/master/examples/scatterplot/manhattan.json",
       "radiusScale": 30,
       "radiusMinPixels": 0.25,
-      "getPosition": "-",
+      "getPosition": "@@=-",
       "getFillColor": [
         0,
         128,

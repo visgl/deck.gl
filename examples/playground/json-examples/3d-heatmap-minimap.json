@@ -48,7 +48,7 @@
       "elevationRange": [0, 3000],
       "elevationScale": 50,
       "extruded": true,
-      "getPosition": "-",
+      "getPosition": "@@=-",
       "radius": 1000,
       "upperPercentile": 100,
 
