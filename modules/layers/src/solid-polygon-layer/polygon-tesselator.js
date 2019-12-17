@@ -95,7 +95,7 @@ export default class PolygonTesselator extends Tesselator {
     let i = indexStart;
 
     // 1. get triangulated indices for the internal areas
-    const indices = Polygon.getSurfaceIndices(polygon, this.positionSize);
+    const indices = Polygon.getSurfaceIndices(polygon, this.positionSize, this.opts.preproject);
 
     // make sure the buffer is large enough
     target = typedArrayManager.allocate(target, indexStart + indices.length, {
