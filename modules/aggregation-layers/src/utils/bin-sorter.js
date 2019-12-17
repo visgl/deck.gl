@@ -24,36 +24,121 @@
 // avg/mean/max of specific value of the point
 const defaultGetValue = points => points.length;
 
+import {clamp, getQuantileDomain, getOrdinalDomain} from './scale-utils';
+
+const MAX_32_BIT_FLOAT = 3.402823466e38;
+
+// access array of points in each bin
+const defaultGetPoints = bin => bin.points;
+// access index of each bin
+const defaultGetIndex = bin => bin.index;
+
+const defaultProps = {
+  getValue: defaultGetValue,
+  getPoints: defaultGetPoints,
+  getIndex: defaultGetIndex,
+  filterData: null
+};
+
 export default class BinSorter {
-  constructor(bins = [], getValue = defaultGetValue) {
-    this.sortedBins = this.getSortedBins(bins, getValue);
-    this.maxCount = this.getMaxCount();
+  constructor(bins = [], props = defaultProps) {
+    this.aggregatedBins = this.getAggregatedBins(bins, props);
+    this._updateMinMaxValues();
     this.binMap = this.getBinMap();
   }
 
   /**
-   * Get an array of object with sorted values and index of bins
+   * Get an array of object with aggregated values and index of bins
+   * Array object will be sorted by value optionally.
    * @param {Array} bins
    * @param {Function} getValue
    * @return {Array} array of values and index lookup
    */
-  getSortedBins(bins, getValue) {
-    return bins
-      .reduce((accu, h, i) => {
-        const value = getValue(h.points);
+  getAggregatedBins(bins, props) {
+    const {
+      getValue = defaultGetValue,
+      getPoints = defaultGetPoints,
+      getIndex = defaultGetIndex,
+      filterData
+    } = props;
 
-        if (value !== null && value !== undefined) {
-          // filter bins if value is null or undefined
-          accu.push({
-            i: Number.isFinite(h.index) ? h.index : i,
-            value,
-            counts: h.points.length
-          });
-        }
+    const hasFilter = typeof filterData === 'function';
+    const binCount = bins.length;
+    const aggregatedBins = [];
+    let index = 0;
 
-        return accu;
-      }, [])
-      .sort((a, b) => a.value - b.value);
+    for (let binIndex = 0; binIndex < binCount; binIndex++) {
+      const bin = bins[binIndex];
+      const points = getPoints(bin);
+      const i = getIndex(bin);
+
+      const filteredPoints = hasFilter ? points.filter(filterData) : points;
+
+      bin.filteredPoints = hasFilter ? filteredPoints : null;
+
+      const value = filteredPoints.length ? getValue(filteredPoints) : null;
+
+      if (value !== null && value !== undefined) {
+        // filter bins if value is null or undefined
+        aggregatedBins[index] = {
+          i: Number.isFinite(i) ? i : binIndex,
+          value,
+          counts: filteredPoints.length
+        };
+        index++;
+      }
+    }
+    return aggregatedBins;
+  }
+
+  _percentileToIndex(percentileRange) {
+    const len = this.sortedBins.length;
+    if (len < 2) {
+      return [0, 0];
+    }
+
+    const [lower, upper] = percentileRange.map(n => clamp(n, 0, 100));
+
+    const lowerIdx = Math.ceil((lower / 100) * (len - 1));
+    const upperIdx = Math.floor((upper / 100) * (len - 1));
+
+    return [lowerIdx, upperIdx];
+  }
+
+  /**
+   * Get a mapping from cell/hexagon index to sorted bin
+   * This is used to retrieve bin value for color calculation
+   * @return {Object} bin index to aggregatedBins
+   */
+  getBinMap() {
+    const binMap = {};
+    for (const bin of this.aggregatedBins) {
+      binMap[bin.i] = bin;
+    }
+    return binMap;
+  }
+
+  // Private
+
+  /**
+   * Get ths max count of all bins
+   * @return {Number | Boolean} max count
+   */
+  _updateMinMaxValues() {
+    let maxCount = 0;
+    let maxValue = 0;
+    let minValue = MAX_32_BIT_FLOAT;
+    let totalCount = 0;
+    for (const x of this.aggregatedBins) {
+      maxCount = maxCount > x.counts ? maxCount : x.counts;
+      maxValue = maxValue > x.value ? maxValue : x.value;
+      minValue = minValue < x.value ? minValue : x.value;
+      totalCount += x.counts;
+    }
+    this.maxCount = maxCount;
+    this.maxValue = maxValue;
+    this.minValue = minValue;
+    this.totalCount = totalCount;
   }
 
   /**
@@ -63,39 +148,53 @@ export default class BinSorter {
    * @param {Number} range[1] - upper bound
    * @return {Array} array of new value range
    */
-  getValueRange([lower, upper]) {
-    const len = this.sortedBins.length;
-    if (!len) {
-      return [0, 0];
+  getValueRange(percentileRange) {
+    if (!this.sortedBins) {
+      this.sortedBins = this.aggregatedBins.sort((a, b) => a.value - b.value);
     }
-    const lowerIdx = Math.ceil((lower / 100) * (len - 1));
-    const upperIdx = Math.floor((upper / 100) * (len - 1));
+    if (!this.sortedBins.length) {
+      return [];
+    }
+    let lowerIdx = 0;
+    let upperIdx = this.sortedBins.length - 1;
+
+    if (Array.isArray(percentileRange)) {
+      const idxRange = this._percentileToIndex(percentileRange);
+      lowerIdx = idxRange[0];
+      upperIdx = idxRange[1];
+    }
 
     return [this.sortedBins[lowerIdx].value, this.sortedBins[upperIdx].value];
   }
 
-  /**
-   * Get ths max count of all bins
-   * @return {Number | Boolean} max count
-   */
-  getMaxCount() {
-    let maxCount = 0;
-    this.sortedBins.forEach(x => (maxCount = maxCount > x.counts ? maxCount : x.counts));
-    return maxCount;
+  getValueDomainByScale(scale, [lower = 0, upper = 100] = []) {
+    if (!this.sortedBins) {
+      this.sortedBins = this.aggregatedBins.sort((a, b) => a.value - b.value);
+    }
+    if (!this.sortedBins.length) {
+      return [];
+    }
+    const indexEdge = this._percentileToIndex([lower, upper]);
+
+    return this._getScaleDomain(scale, indexEdge);
   }
 
-  /**
-   * Get a mapping from cell/hexagon index to sorted bin
-   * This is used to retrieve bin value for color calculation
-   * @return {Object} bin index to sortedBins
-   */
-  getBinMap() {
-    return this.sortedBins.reduce(
-      (mapper, curr) =>
-        Object.assign(mapper, {
-          [curr.i]: curr
-        }),
-      {}
-    );
+  _getScaleDomain(scaleType, [lowerIdx, upperIdx]) {
+    const bins = this.sortedBins;
+
+    switch (scaleType) {
+      case 'quantize':
+      case 'linear':
+        return [bins[lowerIdx].value, bins[upperIdx].value];
+
+      case 'quantile':
+        return getQuantileDomain(bins.slice(lowerIdx, upperIdx + 1), d => d.value);
+
+      case 'ordinal':
+        return getOrdinalDomain(bins, d => d.value);
+
+      default:
+        return [bins[lowerIdx].value, bins[upperIdx].value];
+    }
   }
 }

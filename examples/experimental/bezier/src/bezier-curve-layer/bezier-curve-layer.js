@@ -42,7 +42,7 @@ export default class BezierCurveLayer extends Layer {
   }
 
   initializeState() {
-    const {attributeManager} = this.state;
+    const attributeManager = this.getAttributeManager();
 
     /* eslint-disable max-len */
     attributeManager.addInstanced({

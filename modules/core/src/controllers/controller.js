@@ -214,12 +214,6 @@ export default class Controller {
     }
   }
 
-  // DEPRECATED
-
-  setOptions(props) {
-    return this.setProps(props);
-  }
-
   // Private Methods
 
   /* Callback util */

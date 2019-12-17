@@ -1,0 +1,40 @@
+{
+  "description": "Test of GeoJsonLayer",
+  "initialViewState": {
+    "longitude": -122.45,
+    "latitude": 37.8,
+    "zoom": 0
+  },
+  "layers": [
+    {
+      "@@type": "GeoJsonLayer",
+      "id": "geojson-layer",
+      "data": {
+        "type": "FeatureCollection",
+        "features": [
+          {
+            "type": "Feature",
+            "properties": {},
+            "geometry": {
+              "type": "Polygon",
+              "coordinates": [
+                [
+                  [-122.42923736572264, 37.80544394934271],
+                  [0, 37.80544394934271],
+                  [-122.42923736572264, 0],
+                  [-122.42923736572264, 37.80544394934271]
+                ]
+              ]
+            }
+          }
+        ]
+      },
+      "stroked": true,
+      "filled": true,
+      "lineWidthMinPixels": 2,
+      "opacity": 0.4,
+      "getLineColor": [255, 100, 100],
+      "getFillColor": [200, 160, 0, 180]
+    }
+  ]
+}

@@ -12,6 +12,7 @@ TEMPLATES_PATH = os.path.join(os.path.dirname(__file__), './templates/')
 j2_env = jinja2.Environment(loader=jinja2.FileSystemLoader(TEMPLATES_PATH),
                             trim_blocks=True)
 
+
 def render_json_to_html(json_input, mapbox_key=None, tooltip=True):
     js = j2_env.get_template('index.j2')
     if type(tooltip) == bool:
@@ -19,7 +20,8 @@ def render_json_to_html(json_input, mapbox_key=None, tooltip=True):
     html_str = js.render(
         mapbox_key=mapbox_key,
         json_input=json_input,
-        mapbox_gl_version='1.2.1',
+        # TODO change before publication to the NPM-hosted module
+        deckgl_jupyter_widget_bundle='',
         tooltip=tooltip
     )
     return html_str

@@ -1,0 +1,86 @@
+{
+  "initialViewState": {
+    "latitude": -122.45,
+    "longitude": 37.8,
+    "zoom": 12
+  },
+  "layers": [
+    {
+      "@@type": "ScatterplotLayer",
+      "data": [
+        {
+          "position": [
+            -122.45,
+            37.8
+          ]
+        }
+      ],
+      "getFillColor": [
+        255,
+        0,
+        0,
+        255
+      ],
+      "getPosition": "@@=position",
+      "getRadius": 1000,
+      "id": "scatterplot"
+    },
+    {
+      "@@type": "TextLayer",
+      "data": [
+        {
+          "position": [
+            -122.45,
+            37.8
+          ],
+          "text": "Hello World"
+        }
+      ],
+      "getPosition": "@@=position",
+      "getTextAnchor": "end",
+      "id": "textlayer"
+    },
+    {
+      "@@type": "GeoJsonLayer",
+      "data": {
+        "features": [
+          {
+            "geometry": {
+              "coordinates": [
+                -122.42923736572264,
+                37.80544394934271
+              ],
+              "type": "Point"
+            },
+            "properties": {},
+            "type": "Feature"
+          }
+        ],
+        "type": "FeatureCollection"
+      },
+      "filled": true,
+      "getFillColor": [
+        200,
+        160,
+        0,
+        180
+      ],
+      "getLineColor": [
+        255,
+        100,
+        100
+      ],
+      "id": "geojsonlayer",
+      "lineWidthMinPixels": 2,
+      "opacity": 0.4,
+      "stroked": true
+    }
+  ],
+  "mapStyle": "mapbox://styles/mapbox/dark-v9",
+  "views": [
+    {
+      "@@type": "MapView",
+      "controller": true
+    }
+  ]
+}

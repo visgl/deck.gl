@@ -259,6 +259,10 @@ test('Attribute#shaderAttributes', t => {
       positions: {},
       instancePositions: {
         divisor: 1
+      },
+      instanceNextPositions: {
+        vertexOffset: 1,
+        divisor: 1
       }
     }
   });
@@ -270,6 +274,10 @@ test('Attribute#shaderAttributes', t => {
   accessor = shaderAttributes.instancePositions.getAccessor();
   t.equals(accessor.size, 3, 'Multiple shader attributes inherit pointer properties');
   t.equals(accessor.divisor, 1, 'Shader attribute defines pointer properties');
+  accessor = shaderAttributes.instanceNextPositions.getAccessor();
+  t.equals(accessor.stride, 12, 'Shader attribute defines explicit stride');
+  t.equals(accessor.offset, 12, 'Shader attribute defines offset');
+
   t.equals(attribute.getBuffer(), buffer1, 'Attribute has buffer');
   t.equals(
     attribute.getBuffer(),
@@ -401,10 +409,10 @@ test('Attribute#updateBuffer', t => {
     for (const param of TEST_PARAMS) {
       const {attribute} = testCase;
       attribute.setNeedsUpdate(true);
+      attribute.startIndices = param.startIndices;
       attribute.allocate(param.numInstances);
       attribute.updateBuffer({
         numInstances: param.numInstances,
-        startIndices: param.startIndices,
         data: TEST_PROPS.data,
         props: TEST_PROPS
       });
@@ -483,10 +491,10 @@ test('Attribute#standard accessor - variable width', t => {
   for (const testCase of TEST_CASES) {
     const {attribute, result} = testCase;
     attribute.setNeedsUpdate(true);
+    attribute.startIndices = [0, 2, 3];
     attribute.allocate(10);
     attribute.updateBuffer({
       numInstances: 6,
-      startIndices: [0, 2, 3],
       data: TEST_PROPS.data,
       props: TEST_PROPS
     });
@@ -647,6 +655,7 @@ test('Attribute#updateBuffer - partial', t => {
     // reset stats
     accessorCalled = 0;
 
+    attribute.startIndices = testCase.params.startIndices;
     attribute.allocate(testCase.params.numInstances);
     attribute.updateBuffer({
       ...testCase.params,
@@ -672,16 +681,6 @@ test('Attribute#setExternalBuffer', t => {
     type: GL.FLOAT,
     size: 3,
     update: () => {}
-  });
-  const attribute2 = new Attribute(gl, {
-    id: 'test-attribute-with-shader-attributes',
-    type: GL.UNSIGNED_BYTE,
-    size: 4,
-    normalized: true,
-    update: () => {},
-    shaderAttributes: {
-      shaderAttribute: {offset: 4}
-    }
   });
   const buffer = new Buffer(gl, 12);
   const value1 = new Float32Array(4);
@@ -712,8 +711,6 @@ test('Attribute#setExternalBuffer', t => {
   t.ok(attribute.setExternalBuffer(value2), 'should set external buffer to typed array');
   t.is(attribute.getAccessor().type, GL.UNSIGNED_BYTE, 'attribute type is set correctly');
 
-  t.ok(attribute2.setExternalBuffer(value2), 'external value is set');
-
   spy.reset();
   t.ok(
     attribute.setExternalBuffer(value2),
@@ -737,8 +734,138 @@ test('Attribute#setExternalBuffer', t => {
 
   buffer.delete();
   attribute.delete();
+
+  t.end();
+});
+
+test('Attribute#setExternalBuffer#shaderAttributes', t => {
+  const attribute = new Attribute(gl, {
+    id: 'test-attribute-with-shader-attributes',
+    type: GL.UNSIGNED_BYTE,
+    size: 4,
+    normalized: true,
+    update: () => {},
+    shaderAttributes: {
+      a: {size: 1, elementOffset: 1}
+    }
+  });
+  const attribute2 = new Attribute(gl, {
+    id: 'test-attribute-with-shader-attributes',
+    type: GL.DOUBLE,
+    size: 4,
+    vertexOffset: 1,
+    update: () => {},
+    shaderAttributes: {
+      a: {vertexOffset: 0}
+    }
+  });
+
+  const buffer = new Buffer(gl, 16);
+  const value8 = new Uint8Array(16);
+  const value32 = new Float32Array(16);
+  const value64 = new Float64Array(16);
+
+  attribute.setExternalBuffer(value8);
+  let shaderAttributes = attribute.getShaderAttributes();
+  t.is(shaderAttributes.a.getAccessor().stride, 4, 'shaderAttribute has correct stride');
+  t.is(shaderAttributes.a.getAccessor().offset, 1, 'shaderAttribute has correct offset');
+
+  attribute.setExternalBuffer({value: value8, stride: 8, offset: 2});
+  shaderAttributes = attribute.getShaderAttributes();
+  t.is(shaderAttributes.a.getAccessor().stride, 8, 'shaderAttribute has correct stride');
+  t.is(shaderAttributes.a.getAccessor().offset, 3, 'shaderAttribute has correct offset');
+
+  attribute.setExternalBuffer({value: value32, offset: 2});
+  shaderAttributes = attribute.getShaderAttributes();
+  t.is(shaderAttributes.a.getAccessor().stride, 16, 'shaderAttribute has correct stride');
+  t.is(shaderAttributes.a.getAccessor().offset, 6, 'shaderAttribute has correct offset');
+
+  attribute2.setExternalBuffer(value32);
+  shaderAttributes = attribute2.getShaderAttributes();
+  t.is(shaderAttributes.a.getAccessor().stride, 16, 'shaderAttribute has correct stride');
+  t.is(shaderAttributes.a.getAccessor().offset, 0, 'shaderAttribute has correct offset');
+  t.deepEqual(shaderAttributes.a64Low, [0, 0, 0, 0], 'shaderAttribute low part is constant');
+
+  attribute2.setExternalBuffer({value: value64, stride: 48, offset: 8});
+  shaderAttributes = attribute2.getShaderAttributes();
+  t.is(shaderAttributes.a.getAccessor().stride, 48, 'shaderAttribute has correct stride');
+  t.is(shaderAttributes.a.getAccessor().offset, 8, 'shaderAttribute has correct offset');
+  t.is(
+    shaderAttributes.a64Low.getAccessor().stride,
+    48,
+    'shaderAttribute low part has correct stride'
+  );
+  t.is(
+    shaderAttributes.a64Low.getAccessor().offset,
+    24,
+    'shaderAttribute low part has correct offset'
+  );
+
+  buffer.delete();
+  attribute.delete();
   attribute2.delete();
 
+  t.end();
+});
+
+test('Attribute#setBinaryValue', t => {
+  let attribute = new Attribute(gl, {
+    id: 'test-attribute',
+    type: GL.FLOAT,
+    size: 3,
+    update: () => {}
+  });
+  let value = new Float32Array(12);
+
+  attribute.setNeedsUpdate();
+  t.notOk(attribute.setBinaryValue(null), 'should do nothing if setting external buffer to null');
+  t.ok(attribute.needsUpdate(), 'attribute still needs update');
+
+  const spy = makeSpy(attribute, 'setData');
+  t.ok(attribute.setBinaryValue(value), 'should use external binary value');
+  t.is(spy.callCount, 1, 'setData is called');
+  t.notOk(attribute.needsUpdate(), 'attribute is updated');
+
+  attribute.setNeedsUpdate();
+  t.ok(attribute.setBinaryValue(value), 'should use external binary value');
+  t.is(spy.callCount, 1, 'setData is called only once on the same data');
+  t.notOk(attribute.needsUpdate(), 'attribute is updated');
+
+  t.throws(
+    () => attribute.setBinaryValue([0, 1, 2, 3]),
+    'should throw if external value is invalid'
+  );
+
+  spy.reset();
+  attribute.delete();
+
+  attribute = new Attribute(gl, {
+    id: 'test-attribute',
+    type: GL.FLOAT,
+    size: 3,
+    noAlloc: true,
+    update: () => {}
+  });
+  attribute.setNeedsUpdate();
+  t.notOk(attribute.setBinaryValue(value), 'should do nothing if noAlloc');
+  t.ok(attribute.needsUpdate(), 'attribute still needs update');
+
+  attribute = new Attribute(gl, {
+    id: 'test-attribute-with-transform',
+    type: GL.UNSIGNED_BYTE,
+    size: 4,
+    defaultValue: [0, 0, 0, 255],
+    transform: x => x + 1,
+    update: () => {}
+  });
+  value = {value: new Uint8Array(12), size: 3};
+
+  attribute.setNeedsUpdate();
+  t.notOk(attribute.setBinaryValue(value), 'should require update');
+  t.ok(attribute.state.binaryAccessor, 'binaryAccessor is assigned');
+  t.ok(attribute.needsUpdate(), 'attribute still needs update');
+
+  attribute.delete();
   t.end();
 });
 
@@ -774,7 +901,7 @@ test('Attribute#doublePrecision', t0 => {
     }
   };
 
-  test('Attribute#doublePrecision#fp64:true', t => {
+  t0.test('Attribute#doublePrecision#fp64:true', t => {
     const attribute = new Attribute(gl, {
       id: 'positions',
       type: GL.DOUBLE,
@@ -816,7 +943,7 @@ test('Attribute#doublePrecision', t0 => {
     t.end();
   });
 
-  test('Attribute#doublePrecision#fp64:false', t => {
+  t0.test('Attribute#doublePrecision#fp64:false', t => {
     const attribute = new Attribute(gl, {
       id: 'positions',
       type: GL.DOUBLE,

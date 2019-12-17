@@ -85,11 +85,9 @@ Note that the set of view state parameters that will be used varies between View
 | ---                                                            | ---         | ---         | ---         |
 | [`View`](/docs/api-reference/view.md)                          |    |    | The base view has to be supplied with raw view and projection matrices. It is typically only instantiated directly if the application needs to work with views that have been supplied from external sources, such as the [WebVR API](https://developer.mozilla.org/en-US/docs/Web/API/WebVR_API). |
 | [`MapView`](/docs/api-reference/map-view.md) (default)         | geospatial | full support | This class renders data using the [Web Meractor projection](https://en.wikipedia.org/wiki/Web_Mercator_projection) and is designed to match an external base map library such as mapbox-gl or Google Maps.
-| [`FirstPersonView`](/docs/api-reference/first-person-view.md)  | geospatial | experimental | The camera is positioned in a provided geolocation and looks in a provided direction, similar to that of a [first-person game](https://en.wikipedia.org/wiki/First-person_(gaming)). |
-| [`ThirdPersonView`](/docs/api-reference/first-person-view.md)  | geospatial | experimental | The camera looks at a provided geolocation from a provided direction, similar to that of a [third-person game](https://en.wikipedia.org/wiki/Virtual_camera_system#Third-person_view). |
+| [`FirstPersonView`](/docs/api-reference/first-person-view.md)  | geospatial | full support | The camera is positioned in a provided geolocation and looks in a provided direction, similar to that of a [first-person game](https://en.wikipedia.org/wiki/First-person_(gaming)). |
 | [`OrthographicView`](/docs/api-reference/orthographic-view.md) | info-vis (2D)     | full support | The camera looks at a target point from top-down. Does not rotate. |
 | [`OrbitView`](/docs/api-reference/perspective-view.md)         | info-vis (3D)     | full support | The camera looks at a target point from a provided direction. Rotates around the target. |
-| [`PerspectiveView`](/docs/api-reference/perspective-view.md)   | info-vis (3D)     | experimental | The camera looks at a target point from a provided direction. Rotates around the camera position. |
 
 
 ## Examples

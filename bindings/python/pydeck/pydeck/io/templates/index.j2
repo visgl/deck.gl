@@ -2,9 +2,43 @@
   <head>
     <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
     <title>pydeck</title>
-    {% include 'imports.j2' %}
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap-theme.min.css" />
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.3/css/font-awesome.min.css" />
+    <script src="{{deckgl_jupyter_widget_bundle}}"></script>
     <style>
-    {% include 'style.j2' %}
+    body {
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+    }
+    
+    #deck-map-container {
+      width: 100%;
+      height: 100%;
+      background-color: black;
+    }
+    
+    #map {
+      pointer-events: none;
+      height: 100%;
+      width: 100%;
+      position: absolute;
+      z-index: 1;
+    }
+    
+    #deckgl-overlay {
+      z-index: 2;
+    }
+    
+    #deck-map-wrapper {
+      width: 100%;
+      height: 100%;
+    }
+    
+    #deck-container {
+      width: 100vw;
+      height: 100vh;
+    }
     </style>
   </head>
   <body>
@@ -12,6 +46,15 @@
     </div>
   </body>
   <script>
-  {% include 'js.j2' %}
+    const jsonInput = {{json_input}};
+    const MAPBOX_API_KEY = '{{mapbox_key}}';
+    const tooltip = {{tooltip}};
+  
+    const deck = createDeck({
+      mapboxApiKey: MAPBOX_API_KEY, 
+      container: document.getElementById('deck-container'),
+      jsonInput,
+      tooltip
+    });
   </script>
 </html>

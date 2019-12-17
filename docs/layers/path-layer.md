@@ -64,10 +64,10 @@ new PathLayer({});
 To use pre-bundled scripts:
 
 ```html
-<script src="https://unpkg.com/deck.gl@^7.0.0/dist.min.js"></script>
+<script src="https://unpkg.com/deck.gl@^8.0.0/dist.min.js"></script>
 <!-- or -->
-<script src="https://unpkg.com/@deck.gl/core@^7.0.0/dist.min.js"></script>
-<script src="https://unpkg.com/@deck.gl/layers@^7.0.0/dist.min.js"></script>
+<script src="https://unpkg.com/@deck.gl/core@^8.0.0/dist.min.js"></script>
+<script src="https://unpkg.com/@deck.gl/layers@^8.0.0/dist.min.js"></script>
 ```
 
 ```js
@@ -124,11 +124,17 @@ If `false`, the width always faces up.
 The maximum extent of a joint in ratio to the stroke width.
 Only works if `rounded` is `false`.
 
-##### `dashJustified` (Boolean, optional)
+##### `_pathType` (Object, optional)
 
-* Default: `false`
+* Default: `null`
 
-Only effective if `getDashArray` is specified. If `true`, adjust gaps for the dashes to align at both ends.
+> Note: This prop is experimental
+
+One of `null`, `'loop'` or `'open'`.
+
+If `'loop'` or `'open'`, will skip normalizing the coordinates returned by `getPath` and instead assume all paths are to be loops or open paths. Disabling normalization improves performance during data update, but makes the layer prone to error in case the data is malformed. It is only recommended when you use this layer with preprocessed static data or validation on the backend.
+
+When normalization is disabled, paths must be specified in the format of flat array. Open paths must contain at least 2 vertices and closed paths must contain at least 3 vertices. See `getPath` below for details.
 
 ### Data Accessors
 
@@ -169,15 +175,66 @@ The width of each path, in units specified by `widthUnits` (default meters).
 * If a number is provided, it is used as the width for all paths.
 * If a function is provided, it is called on each path to retrieve its width.
 
-##### `getDashArray` ([Function](/docs/developer-guide/using-layers.md#accessors)|Array, optional)
 
-* Default: `null`
+## Use binary attributes
 
-The dash array to draw each path with: `[dashSize, gapSize]` relative to the width of the path.
+This section is about the special requirements when [supplying attributes directly](/docs/developer-guide/performance.md#supply-attributes-directly) to a `PathLayer`.
 
-* If an array is provided, it is used as the dash array for all paths.
-* If a function is provided, it is called on each path to retrieve its dash array. Return `[0, 0]` to draw the path in solid line.
-* If this accessor is not specified, all paths are drawn as solid lines.
+Because each path has a different number of vertices, when `data.attributes.getPath` is supplied, the layer also requires an array `data.startIndices` that describes the vertex index at the start of each path. For example, if there are 3 paths of 2, 3, and 4 vertices each, `startIndices` should be `[0, 2, 5, 9]`.
+
+Additionally, all other attributes (`getColor`, `getWidth`, etc.), if supplied, must contain the same layout (number of vertices) as the `getPath` buffer.
+
+To truly realize the performance gain from using binary data, the app likely wants to skip all data processing in this layer. Specify the `_pathType` prop to skip normalization.
+
+Example use case:
+
+```js
+// USE PLAIN JSON OBJECTS
+const PATH_DATA = [
+  {
+    path: [[-122.4, 37.7], [-122.5, 37.8], [-122.6, 37.85]],
+    name: 'Richmond - Millbrae',
+    color: [255, 0, 0]
+  },
+  ...
+];
+
+new PathLayer({
+  data: PATH_DATA,
+  getPath: d => d.path,
+  getColor: d => d.color
+})
+```
+
+Convert to using binary attributes:
+
+```js
+// USE BINARY
+// Flatten the path vertices
+// [-122.4, 37.7, -122.5, 37.8, -122.6, 37.85, ...]
+const positions = new Float64Array(PATH_DATA.map(d => d.path).flat(2));
+// The color attribute must supply one color for each vertex
+// [255, 0, 0, 255, 0, 0, 255, 0, 0, ...]
+const colors = new Uint8Array(PATH_DATA.map(d => d.path.map(_ => d.color)).flat(2));
+// The "layout" that tells PathLayer where each path starts
+const startIndices = new Uint16Array(PATH_DATA.reduce((acc, d) => {
+  const lastIndex = acc[acc.length - 1];
+  acc.push(lastIndex + d.path.length);
+  return acc;
+}, [0]));
+
+new PathLayer({
+  data: {
+    length: PATH_DATA.length,
+    startIndices: startIndices, // this is required to render the paths correctly!
+    attributes: {
+      getPath: {value: positions, size: 2},
+      getColor: {value: colors, size: 3}
+    }
+  },
+  _pathType: 'open' // this instructs the layer to skip normalization and use the binary as-is
+})
+```
 
 ## Source
 

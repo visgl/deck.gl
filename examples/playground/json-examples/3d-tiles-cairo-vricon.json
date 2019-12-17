@@ -13,14 +13,14 @@
   },
   "views": [
     {
-      "type": "MapView",
+      "@@type": "MapView",
       "mapStyle": "mapbox://styles/mapbox/dark-v9",
       "controller": true
     }
   ],
   "layers": [
     {
-      "type": "Tile3DLayer",
+      "@@type": "Tile3DLayer",
       "id": "tiles-cairo-vricon",
       "DracoLoader": "DracoLoader",
       "_ionAssetId": 29328,

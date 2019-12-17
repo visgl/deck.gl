@@ -30,9 +30,15 @@ struct VertexGeometry {
 `;
 
 const fs = `
+#define SMOOTH_EDGE_RADIUS 0.5
+
 struct FragmentGeometry {
   vec2 uv;
 } geometry;
+
+float smoothedge(float edge, float x) {
+  return smoothstep(edge - SMOOTH_EDGE_RADIUS, edge + SMOOTH_EDGE_RADIUS, x);
+}
 `;
 
 export default {name: 'geometry', vs, fs};

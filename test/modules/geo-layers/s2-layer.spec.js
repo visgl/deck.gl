@@ -21,7 +21,7 @@
 import test from 'tape-catch';
 import {testLayer, generateLayerTests} from '@deck.gl/test-utils';
 import {S2Layer} from '@deck.gl/geo-layers';
-import {getS2QuadKey} from '@deck.gl/geo-layers/s2-layer/s2-utils';
+import {getS2QuadKey, getS2Polygon} from '@deck.gl/geo-layers/s2-layer/s2-utils';
 import data from 'deck.gl-test/data/s2-sf.json';
 
 import {S2} from 's2-geometry';
@@ -70,6 +70,19 @@ test('S2Layer#getS2QuadKey', t => {
       t.is(getS2QuadKey(id), key, 'Id to quad key');
       t.is(getS2QuadKey(token), key, 'Token to quad key');
     }
+  }
+
+  t.end();
+});
+
+test('S2Layer#getS2Polygon', t => {
+  const TEST_TOKENS = ['80858004', '1c', new Long(0, -2138636288, false)];
+
+  for (const token of TEST_TOKENS) {
+    const polygon = getS2Polygon(token);
+    t.ok(polygon instanceof Float64Array, 'polygon is flat array');
+    t.is((polygon.length / 2 - 1) % 4, 0, 'polygon has 4 sides');
+    t.deepEqual(polygon.slice(0, 2), polygon.slice(-2), 'polygon is closed');
   }
 
   t.end();

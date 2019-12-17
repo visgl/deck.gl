@@ -1,12 +1,13 @@
 import GL from '@luma.gl/constants';
 import Pass from './pass';
-import {clear, withParameters, cssToDeviceRatio} from '@luma.gl/core';
+import {clear, setParameters, withParameters, cssToDeviceRatio} from '@luma.gl/core';
 
 export default class LayersPass extends Pass {
   render(props) {
     const gl = this.gl;
 
-    return withParameters(gl, {framebuffer: props.target}, () => this._drawLayers(props));
+    setParameters(gl, {framebuffer: props.target});
+    return this._drawLayers(props);
   }
 
   // PRIVATE
@@ -68,6 +69,8 @@ export default class LayersPass extends Pass {
       pickableCount: 0
     };
 
+    setParameters(gl, {viewport: glViewport});
+
     // render layers in normal colors
     layers.forEach((layer, layerIndex) => {
       // Check if we should draw layer
@@ -87,7 +90,7 @@ export default class LayersPass extends Pass {
 
         const _moduleParameters = this._getModuleParameters(layer, effects, pass, moduleParameters);
         const uniforms = Object.assign({}, layer.context.uniforms, {layerIndex});
-        const layerParameters = this._getLayerParameters(layer, layerIndex, glViewport);
+        const layerParameters = this.getLayerParameters(layer, layerIndex);
 
         layer.drawLayer({
           moduleParameters: _moduleParameters,
@@ -110,7 +113,7 @@ export default class LayersPass extends Pass {
   }
 
   getLayerParameters(layer, layerIndex) {
-    return null;
+    return layer.props.parameters;
   }
 
   /* Private */
@@ -144,14 +147,6 @@ export default class LayersPass extends Pass {
 
     return Object.assign(moduleParameters, this.getModuleParameters(layer, effects), overrides);
   }
-
-  _getLayerParameters(layer, layerIndex, glViewport) {
-    // All parameter resolving is done here instead of the layer
-    // Blend parameters must not be overridden during picking
-    return Object.assign({}, layer.props.parameters, this.getLayerParameters(layer, layerIndex), {
-      viewport: glViewport
-    });
-  }
 }
 
 // Convert viewport top-left CSS coordinates to bottom up WebGL coordinates
@@ -174,7 +169,6 @@ function clearGLCanvas(gl) {
   const width = gl.drawingBufferWidth;
   const height = gl.drawingBufferHeight;
   // clear depth and color buffers, restoring transparency
-  withParameters(gl, {viewport: [0, 0, width, height]}, () => {
-    gl.clear(GL.COLOR_BUFFER_BIT | GL.DEPTH_BUFFER_BIT);
-  });
+  setParameters(gl, {viewport: [0, 0, width, height]});
+  gl.clear(GL.COLOR_BUFFER_BIT | GL.DEPTH_BUFFER_BIT);
 }

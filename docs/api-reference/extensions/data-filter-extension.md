@@ -167,7 +167,20 @@ Enable/disable the data filter. If the data filter is disabled, all objects are 
 
 ## Limitations
 
-The `DataFilterExtension` does not work with any layer from the `@deck.gl/aggregation-layers` module.
+Given data filtering happens on GPU, not all layers of `@deck.gl/aggregation-layers` module, support this feature.
+
+### Always supported:
+* `HeatMapLayer`
+* `GPUGridLayer`
+
+### Supported only when aggregation is performed on GPU:
+* `ScreenGridlayer`
+* `ContourLayer`
+* `GridLayer`
+
+### Not supported:
+* `CPUGridLayer`
+* `HexagonLayer`
 
 
 ## Source

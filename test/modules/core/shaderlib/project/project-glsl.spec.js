@@ -294,7 +294,7 @@ const TEST_CASES = [
     title: 'IDENTITY mode with modelMatrix',
     params: {
       viewport: TEST_VIEWPORT_ORTHO,
-      coordinateSystem: COORDINATE_SYSTEM.IDENTITY,
+      coordinateSystem: COORDINATE_SYSTEM.CARTESIAN,
       modelMatrix: new Matrix4().rotateZ(Math.PI / 2).translate([0, 0, 10])
     },
     tests: [

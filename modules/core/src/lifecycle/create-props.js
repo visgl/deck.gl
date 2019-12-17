@@ -1,50 +1,38 @@
-import {applyPropOverrides} from '../lib/seer-integration';
 import log from '../utils/log';
 import {isAsyncIterable} from '../utils/iterable-utils';
 import {parsePropTypes} from './prop-types';
+import {PROP_SYMBOLS} from './constants';
+
+const {COMPONENT, ASYNC_ORIGINAL, ASYNC_RESOLVED, ASYNC_DEFAULTS} = PROP_SYMBOLS;
 
 // Create a property object
 export function createProps() {
   const component = this; // eslint-disable-line
 
   // Get default prop object (a prototype chain for now)
-  const propTypeDefs = getPropsPrototypeAndTypes(component.constructor);
-  const propsPrototype = propTypeDefs.defaultProps;
+  const propsPrototype = getPropsPrototype(component.constructor);
 
   // Create a new prop object with default props object in prototype chain
-  const propsInstance = Object.create(propsPrototype, {
-    // Props need a back pointer to the owning component
-    _component: {
-      enumerable: false,
-      value: component
-    },
-    // The supplied (original) values for those async props that are set to url strings or Promises.
-    // In this case, the actual (i.e. resolved) values are looked up from component.internalState
-    _asyncPropOriginalValues: {
-      enumerable: false,
-      value: {}
-    },
-    // Note: the actual (resolved) values for props that are NOT set to urls or Promises.
-    // in this case the values are served directly from this map
-    _asyncPropResolvedValues: {
-      enumerable: false,
-      value: {}
-    }
-  });
+  const propsInstance = Object.create(propsPrototype);
+
+  // Props need a back pointer to the owning component
+  propsInstance[COMPONENT] = component;
+  // The supplied (original) values for those async props that are set to url strings or Promises.
+  // In this case, the actual (i.e. resolved) values are looked up from component.internalState
+  propsInstance[ASYNC_ORIGINAL] = {};
+  // Note: the actual (resolved) values for props that are NOT set to urls or Promises.
+  // in this case the values are served directly from this map
+  propsInstance[ASYNC_RESOLVED] = {};
 
   // "Copy" all sync props
   for (let i = 0; i < arguments.length; ++i) {
-    Object.assign(propsInstance, arguments[i]);
+    const props = arguments[i];
+    // Do not use Object.assign here to avoid Symbols in props overwriting our private fields
+    // This might happen if one of the arguments is another props instance
+    for (const key in props) {
+      propsInstance[key] = props[key];
+    }
   }
-
-  const {layerName} = component.constructor;
-  const {deprecatedProps} = propTypeDefs;
-  checkDeprecatedProps(layerName, propsInstance, deprecatedProps);
-  checkDeprecatedProps(layerName, propsInstance.updateTriggers, deprecatedProps);
-  checkDeprecatedProps(layerName, propsInstance.transitions, deprecatedProps);
-
-  // SEER: Apply any overrides from the seer debug extension if it is active
-  applyPropOverrides(propsInstance);
 
   // Props must be immutable
   Object.freeze(propsInstance);
@@ -52,92 +40,61 @@ export function createProps() {
   return propsInstance;
 }
 
-/* eslint-disable max-depth */
-function checkDeprecatedProps(layerName, propsInstance, deprecatedProps) {
-  if (!propsInstance) {
-    return;
-  }
-
-  for (const name in deprecatedProps) {
-    if (hasOwnProperty(propsInstance, name)) {
-      const nameStr = `${layerName || 'Layer'}: ${name}`;
-
-      for (const newPropName of deprecatedProps[name]) {
-        if (!hasOwnProperty(propsInstance, newPropName)) {
-          propsInstance[newPropName] = propsInstance[name];
-        }
-      }
-
-      log.deprecated(nameStr, deprecatedProps[name].join('/'))();
-    }
-  }
-}
-/* eslint-enable max-depth */
-
 // Return precalculated defaultProps and propType objects if available
 // build them if needed
-function getPropsPrototypeAndTypes(componentClass) {
-  const props = getOwnProperty(componentClass, '_mergedDefaultProps');
-  if (props) {
-    return {
-      defaultProps: props,
-      propTypes: getOwnProperty(componentClass, '_propTypes'),
-      deprecatedProps: getOwnProperty(componentClass, '_deprecatedProps')
-    };
+function getPropsPrototype(componentClass) {
+  const defaultProps = getOwnProperty(componentClass, '_mergedDefaultProps');
+  if (!defaultProps) {
+    createPropsPrototypeAndTypes(componentClass);
+    return componentClass._mergedDefaultProps;
   }
-
-  return createPropsPrototypeAndTypes(componentClass);
+  return defaultProps;
 }
 
 // Build defaultProps and propType objects by walking component prototype chain
 function createPropsPrototypeAndTypes(componentClass) {
   const parent = componentClass.prototype;
   if (!parent) {
-    return {
-      defaultProps: {}
-    };
+    return;
   }
 
   const parentClass = Object.getPrototypeOf(componentClass);
-  const parentPropDefs = (parent && getPropsPrototypeAndTypes(parentClass)) || null;
+  const parentDefaultProps = getPropsPrototype(parentClass);
 
   // Parse propTypes from Component.defaultProps
   const componentDefaultProps = getOwnProperty(componentClass, 'defaultProps') || {};
   const componentPropDefs = parsePropTypes(componentDefaultProps);
 
-  // Create a merged type object
-  const propTypes = Object.assign(
-    {},
-    parentPropDefs && parentPropDefs.propTypes,
-    componentPropDefs.propTypes
-  );
-
   // Create any necessary property descriptors and create the default prop object
   // Assign merged default props
   const defaultProps = createPropsPrototype(
     componentPropDefs.defaultProps,
-    parentPropDefs && parentPropDefs.defaultProps,
-    propTypes,
+    parentDefaultProps,
     componentClass
   );
+
+  // Create a merged type object
+  const propTypes = Object.assign({}, parentClass._propTypes, componentPropDefs.propTypes);
+  // Add getters/setters for async props
+  addAsyncPropsToPropPrototype(defaultProps, propTypes);
 
   // Create a map for prop whose default value is a callback
   const deprecatedProps = Object.assign(
     {},
-    parentPropDefs && parentPropDefs.deprecatedProps,
+    parentClass._deprecatedProps,
     componentPropDefs.deprecatedProps
   );
+  // Add setters for deprecated props
+  addDeprecatedPropsToPropPrototype(defaultProps, deprecatedProps);
 
   // Store the precalculated props
   componentClass._mergedDefaultProps = defaultProps;
   componentClass._propTypes = propTypes;
   componentClass._deprecatedProps = deprecatedProps;
-
-  return {propTypes, defaultProps, deprecatedProps};
 }
 
 // Builds a pre-merged default props object that component props can inherit from
-function createPropsPrototype(props, parentProps, propTypes, componentClass) {
+function createPropsPrototype(props, parentProps, componentClass) {
   const defaultProps = Object.create(null);
 
   Object.assign(defaultProps, parentProps, props);
@@ -146,38 +103,43 @@ function createPropsPrototype(props, parentProps, propTypes, componentClass) {
   const id = getComponentName(componentClass);
   delete props.id;
 
-  // Add getters/setters for async prop properties
   Object.defineProperties(defaultProps, {
     // `id` is treated specially because layer might need to override it
     id: {
-      configurable: false,
       writable: true,
       value: id
     }
   });
 
-  // Add getters/setters for async prop properties
-  addAsyncPropsToPropPrototype(defaultProps, propTypes);
-
   return defaultProps;
+}
+
+function addDeprecatedPropsToPropPrototype(defaultProps, deprecatedProps) {
+  for (const propName in deprecatedProps) {
+    /* eslint-disable accessor-pairs */
+    Object.defineProperty(defaultProps, propName, {
+      enumerable: false,
+      set(newValue) {
+        const nameStr = `${this.id}: ${propName}`;
+
+        for (const newPropName of deprecatedProps[propName]) {
+          if (!hasOwnProperty(this, newPropName)) {
+            this[newPropName] = newValue;
+          }
+        }
+
+        log.deprecated(nameStr, deprecatedProps[propName].join('/'))();
+      }
+    });
+    /* eslint-enable accessor-pairs */
+  }
 }
 
 // Create descriptors for overridable props
 function addAsyncPropsToPropPrototype(defaultProps, propTypes) {
   const defaultValues = {};
 
-  const descriptors = {
-    // Default "resolved" values for async props, returned if value not yet resolved/set.
-    _asyncPropDefaultValues: {
-      enumerable: false,
-      value: defaultValues
-    },
-    // Shadowed object, just to make sure "early indexing" into the instance does not fail
-    _asyncPropOriginalValues: {
-      enumerable: false,
-      value: {}
-    }
-  };
+  const descriptors = {};
 
   // Move async props into shadow values
   for (const propName in propTypes) {
@@ -191,13 +153,17 @@ function addAsyncPropsToPropPrototype(defaultProps, propTypes) {
     }
   }
 
+  // Default "resolved" values for async props, returned if value not yet resolved/set.
+  defaultProps[ASYNC_DEFAULTS] = defaultValues;
+  // Shadowed object, just to make sure "early indexing" into the instance does not fail
+  defaultProps[ASYNC_ORIGINAL] = {};
+
   Object.defineProperties(defaultProps, descriptors);
 }
 
 // Helper: Configures getter and setter for one async prop
 function getDescriptorForAsyncProp(name) {
   return {
-    configurable: false,
     enumerable: true,
     // Save the provided value for async props in a special map
     set(newValue) {
@@ -206,29 +172,29 @@ function getDescriptorForAsyncProp(name) {
         newValue instanceof Promise ||
         isAsyncIterable(newValue)
       ) {
-        this._asyncPropOriginalValues[name] = newValue;
+        this[ASYNC_ORIGINAL][name] = newValue;
       } else {
-        this._asyncPropResolvedValues[name] = newValue;
+        this[ASYNC_RESOLVED][name] = newValue;
       }
     },
     // Only the component's state knows the true value of async prop
     get() {
-      if (this._asyncPropResolvedValues) {
+      if (this[ASYNC_RESOLVED]) {
         // Prop value isn't async, so just return it
-        if (name in this._asyncPropResolvedValues) {
-          const value = this._asyncPropResolvedValues[name];
+        if (name in this[ASYNC_RESOLVED]) {
+          const value = this[ASYNC_RESOLVED][name];
 
           // Special handling - components expect null `data` prop expects to be replaced with `[]`
           if (name === 'data') {
-            return value || this._asyncPropDefaultValues[name];
+            return value || this[ASYNC_DEFAULTS][name];
           }
 
           return value;
         }
 
-        if (name in this._asyncPropOriginalValues) {
+        if (name in this[ASYNC_ORIGINAL]) {
           // It's an async prop value: look into component state
-          const state = this._component && this._component.internalState;
+          const state = this[COMPONENT] && this[COMPONENT].internalState;
           if (state && state.hasAsyncProp(name)) {
             return state.getAsyncProp(name);
           }
@@ -237,7 +203,7 @@ function getDescriptorForAsyncProp(name) {
 
       // the prop is not supplied, or
       // component not yet initialized/matched, return the component's default value for the prop
-      return this._asyncPropDefaultValues[name];
+      return this[ASYNC_DEFAULTS][name];
     }
   };
 }

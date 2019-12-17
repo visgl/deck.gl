@@ -70,7 +70,7 @@ export default class SurfaceLayer extends Layer {
         this.setState({
           vertexCount: uCount * vCount
         });
-        this.state.attributeManager.invalidateAll();
+        this.getAttributeManager().invalidateAll();
       }
     }
   }
@@ -207,7 +207,8 @@ export default class SurfaceLayer extends Layer {
   /* eslint-enable max-statements */
 
   calculateColors(attribute) {
-    const {vertexCount, attributeManager} = this.state;
+    const {vertexCount} = this.state;
+    const attributeManager = this.getAttributeManager();
 
     // reuse the calculated [x, y, z] in positions
     const positions = attributeManager.attributes.positions.value;

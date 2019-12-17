@@ -19,10 +19,11 @@
 // THE SOFTWARE.
 
 import {registerLoaders} from '@loaders.gl/core';
-import {HTMLImageLoader} from '@loaders.gl/images';
+import {ImageLoader} from '@loaders.gl/images';
 
-import {global} from '../utils/globals';
+import {global} from 'probe.gl/env';
 import log from '../utils/log';
+import {register} from '../debug';
 import jsonLoader from '../utils/json-loader';
 
 // Version detection using babel plugin
@@ -31,22 +32,28 @@ import jsonLoader from '../utils/json-loader';
 const version =
   typeof __VERSION__ !== 'undefined' ? __VERSION__ : global.DECK_VERSION || 'untranspiled source';
 
-const STARTUP_MESSAGE = 'set deck.log.priority=1 (or higher) to trace attribute updates';
-
 if (global.deck && global.deck.VERSION !== version) {
   throw new Error(`deck.gl - multiple versions detected: ${global.deck.VERSION} vs ${version}`);
 }
 
 if (!global.deck) {
-  log.log(0, `deck.gl ${version} - ${STARTUP_MESSAGE}`)();
+  // eslint-disable-next-line
+  if (process.env.NODE_ENV !== 'production') {
+    log.log(
+      0,
+      `deck.gl ${version} - set deck.log.level=1 (or higher) to trace attribute updates`
+    )();
+  }
 
   global.deck = global.deck || {
     VERSION: version,
     version,
-    log
+    log,
+    // experimental
+    _registerLoggers: register
   };
 
-  registerLoaders([jsonLoader, HTMLImageLoader]);
+  registerLoaders([jsonLoader, ImageLoader]);
 }
 
 export default global.deck;

@@ -1,8 +1,7 @@
 import test from 'tape-catch';
-import {MapView, OrbitView} from 'deck.gl';
+import {MapView, OrbitView, COORDINATE_SYSTEM} from '@deck.gl/core';
 import {shadow, project} from '@deck.gl/core/shaderlib';
 import {Matrix4, Vector3} from 'math.gl';
-import {PROJECT_COORDINATE_SYSTEM} from '@deck.gl/core/shaderlib/project/constants';
 
 const TEST_VIEWPORT1 = new MapView().makeViewport({
   width: 800,
@@ -134,10 +133,7 @@ test('shadow#getUniforms', t => {
       drawToShadowMap: true,
       dummyShadowMaps: [true]
     },
-    {
-      project_uCenter: [0, 0, 0, 0],
-      project_uCoordinateSystem: PROJECT_COORDINATE_SYSTEM.LNG_LAT
-    }
+    project.getUniforms({viewport})
   );
 
   t.equal(uniforms.shadow_uLightCount, 1, `Shadow light count is correct!`);
@@ -195,7 +191,7 @@ test('shadow#getUniforms', t => {
     },
     {
       project_uCenter: [0, 0, 0, 0],
-      project_uCoordinateSystem: PROJECT_COORDINATE_SYSTEM.IDENTITY
+      project_uCoordinateSystem: COORDINATE_SYSTEM.CARTESIAN
     }
   );
 

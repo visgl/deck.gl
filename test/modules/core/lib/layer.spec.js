@@ -266,11 +266,11 @@ test('Layer#use64bitPositions', t => {
   layer = new SubLayer({coordinateSystem: COORDINATE_SYSTEM.LNGLAT});
   t.true(layer.use64bitPositions(), 'returns true for COORDINATE_SYSTEM.LNGLAT');
 
-  layer = new SubLayer({coordinateSystem: COORDINATE_SYSTEM.LNGLAT_DEPRECATED});
-  t.false(layer.use64bitPositions(), 'returns false for COORDINATE_SYSTEM.LNGLAT_DEPRECATED');
+  layer = new SubLayer({coordinateSystem: COORDINATE_SYSTEM.CARTESIAN});
+  t.true(layer.use64bitPositions(), 'returns true for COORDINATE_SYSTEM.CARTESIAN');
 
-  layer = new SubLayer({fp64: true});
-  t.true(layer.use64bitPositions(), 'returns true for fp64: true');
+  layer = new SubLayer({coordinateSystem: COORDINATE_SYSTEM.METER_OFFSETS});
+  t.false(layer.use64bitPositions(), 'returns false for COORDINATE_SYSTEM.METER_OFFSETS');
 
   t.end();
 });
@@ -306,7 +306,7 @@ test('Layer#project', t => {
   );
 
   layer = new SubLayer({
-    coordinateSystem: COORDINATE_SYSTEM.IDENTITY,
+    coordinateSystem: COORDINATE_SYSTEM.CARTESIAN,
     modelMatrix: new Matrix4().rotateZ(Math.PI / 2)
   });
   testInitializeLayer({layer, onError: t.notOk});

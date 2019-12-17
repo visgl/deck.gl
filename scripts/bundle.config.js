@@ -55,7 +55,8 @@ const config = {
   output: {
     libraryTarget: 'umd',
     path: PACKAGE_ROOT,
-    filename: 'dist.min.js'
+    filename: 'dist.min.js',
+    library: 'deck'
   },
 
   resolve: {

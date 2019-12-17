@@ -33,7 +33,7 @@ import GL from '@luma.gl/constants';
 import {
   AnimationLoop,
   createGLContext,
-  trackContextState,
+  instrumentGLContext,
   setParameters,
   Timeline,
   lumaStats
@@ -476,6 +476,7 @@ export default class Deck {
       height,
       useDevicePixels,
       autoResizeDrawingBuffer,
+      autoResizeViewport: false,
       gl,
       onCreateContext: opts =>
         createGLContext(Object.assign({}, glOptions, opts, {canvas: this.canvas, debug})),
@@ -571,7 +572,7 @@ export default class Deck {
     // if external context...
     if (!this.canvas) {
       this.canvas = gl.canvas;
-      trackContextState(gl, {enable: true, copyState: true});
+      instrumentGLContext(gl, {enable: true, copyState: true});
     }
 
     this.tooltip = new Tooltip(this.canvas);
@@ -591,7 +592,7 @@ export default class Deck {
     timeline.play();
     this.animationLoop.attachTimeline(timeline);
 
-    this.eventManager = new EventManager(gl.canvas, {
+    this.eventManager = new EventManager(this.props.parent || gl.canvas, {
       touchAction: this.props.touchAction,
       events: {
         pointerdown: this._onPointerDown,
@@ -616,7 +617,6 @@ export default class Deck {
 
     // viewManager must be initialized before layerManager
     // layerManager depends on viewport created by viewManager.
-    assert(this.viewManager);
     const viewport = this.viewManager.getViewports()[0];
 
     // Note: avoid React setState due GL animation loop / setState timing issue
@@ -678,7 +678,7 @@ export default class Deck {
     if (this._metricsCounter++ % 60 === 0) {
       this._getMetrics();
       this.stats.reset();
-      log.table(3, this.metrics)();
+      log.table(4, this.metrics)();
 
       // Experimental: report metrics
       if (this.props._onMetrics) {
@@ -716,10 +716,10 @@ export default class Deck {
 
     // If initialViewState was set on creation, auto track position
     if (this.viewState) {
-      this.viewState[params.viewId] = viewState;
+      this.viewState = {...this.viewState, [params.viewId]: viewState};
       if (!this.props.viewState) {
         // Apply internal view state
-        this.viewManager.setProps({viewState: {...this.viewState}});
+        this.viewManager.setProps({viewState: this.viewState});
       }
     }
   }

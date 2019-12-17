@@ -37,6 +37,7 @@ const defaultProps = {
   extruded: false,
   // Whether to draw a GL.LINES wireframe of the polygon
   wireframe: false,
+  _normalize: true,
 
   // elevation multiplier
   elevationScale: {type: 'number', min: 0, value: 1},
@@ -97,15 +98,15 @@ export default class SolidPolygonLayer extends Layer {
         noAlloc,
         shaderAttributes: {
           positions: {
-            offset: 0,
+            vertexOffset: 0,
             divisor: 0
           },
           instancePositions: {
-            offset: 0,
+            vertexOffset: 0,
             divisor: 1
           },
           nextPositions: {
-            offset: 12,
+            vertexOffset: 1,
             divisor: 1
           }
         }
@@ -205,7 +206,7 @@ export default class SolidPolygonLayer extends Layer {
     }
 
     if (topModel) {
-      topModel.setVertexCount(polygonTesselator.get('indices').length);
+      topModel.setVertexCount(polygonTesselator.vertexCount);
       topModel.setUniforms(renderUniforms).draw();
     }
   }
@@ -243,8 +244,12 @@ export default class SolidPolygonLayer extends Layer {
     // tessellator needs to be invoked
     if (geometryConfigChanged) {
       const {polygonTesselator} = this.state;
+      const buffers = props.data.attributes || {};
       polygonTesselator.updateGeometry({
         data: props.data,
+        normalize: props._normalize,
+        geometryBuffer: buffers.getPolygon,
+        buffers,
         getGeometry: props.getPolygon,
         positionFormat: props.positionFormat,
         fp64: this.use64bitPositions(),

@@ -10,8 +10,8 @@ const cachedExpressionMap = {
 // Calculates an accessor function from a JSON string
 // '-' : x => x
 // 'a.b.c': x => x.a.b.c
-export default function parseExpressionString(propValue, configuration, isAccessor) {
-  // NOTE: Can be null which represents invalid function. Return null so that prop can be ommitted
+export default function parseExpressionString(propValue, configuration) {
+  // NOTE: Can be null which represents invalid function. Return null so that prop can be omitted
   if (propValue in cachedExpressionMap) {
     return cachedExpressionMap[propValue];
   }
@@ -20,20 +20,22 @@ export default function parseExpressionString(propValue, configuration, isAccess
   // Compile with expression-eval
   const ast = expressionEval.parse(propValue);
   if (!ast.right && !ast.left && ast.type === 'Identifier') {
-    func = row => get(row, propValue);
+    func = row => {
+      return get(row, propValue);
+    };
   } else {
     // NOTE: To avoid security risks, the arguments passed to the
-    // compiled expresion must only give access to pure data (no globals etc)
-    // We disable function call syntax?
+    // compiled expression must only give access to pure data (no globals etc)
+    // We disable function call syntax
     traverse(ast, node => {
       if (node.type === 'CallExpression') {
         throw new Error('Function calls not allowed in JSON expressions');
       }
     });
-    func = isAccessor
-      ? row => expressionEval.eval(ast, row)
-      : // TBD - how do we pass args to general (non-accessor) functions?
-        args => expressionEval.eval(ast, {args});
+    // TODO Something like `expressionEval.eval(ast, {row});` would be useful for unpacking arrays
+    func = row => {
+      return expressionEval.eval(ast, row);
+    };
   }
 
   // Cache the compiled function

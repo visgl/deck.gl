@@ -22,24 +22,17 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {Layer, project32, phongLighting, picking} from '@deck.gl/core';
+import {Layer, project32, phongLighting, picking, COORDINATE_SYSTEM, log} from '@deck.gl/core';
 import GL from '@luma.gl/constants';
 import {Model, Geometry, Texture2D, isWebGL2} from '@luma.gl/core';
 
-import {MATRIX_ATTRIBUTES} from '../utils/matrix';
+import {MATRIX_ATTRIBUTES, shouldComposeModelMatrix} from '../utils/matrix';
 
 // NOTE(Tarek): Should eventually phase out the glsl1 versions.
 import vs1 from './simple-mesh-layer-vertex.glsl1';
 import fs1 from './simple-mesh-layer-fragment.glsl1';
 import vs3 from './simple-mesh-layer-vertex.glsl';
 import fs3 from './simple-mesh-layer-fragment.glsl';
-
-// Replacement for the external assert method to reduce bundle size
-function assert(condition, message) {
-  if (!condition) {
-    throw new Error(`deck.gl: ${message}`);
-  }
-}
 
 /*
  * Convert image data into texture
@@ -53,7 +46,7 @@ function getTextureFromData(gl, data, opts) {
 }
 
 function validateGeometryAttributes(attributes) {
-  assert(
+  log.assert(
     attributes.positions || attributes.POSITION,
     'SimpleMeshLayer requires "postions" or "POSITION" attribute in mesh property.'
   );
@@ -84,7 +77,7 @@ const DEFAULT_COLOR = [0, 0, 0, 255];
 
 const defaultProps = {
   mesh: {value: null, type: 'object', async: true},
-  texture: null,
+  texture: {type: 'object', value: null, async: true},
   sizeScale: {type: 'number', value: 1, min: 0},
   // TODO - parameters should be merged, not completely overridden
   parameters: {
@@ -194,11 +187,13 @@ export default class SimpleMeshLayer extends Layer {
       return;
     }
 
-    const {sizeScale} = this.props;
+    const {viewport} = this.context;
+    const {sizeScale, coordinateSystem} = this.props;
 
     this.state.model.draw({
       uniforms: Object.assign({}, uniforms, {
         sizeScale,
+        composeModelMatrix: shouldComposeModelMatrix(viewport, coordinateSystem),
         flatShade: !this.state.hasNormals
       })
     });

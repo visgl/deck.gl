@@ -305,9 +305,7 @@ export default class DeckPicker {
 
   // returns pickedColor or null if no pickable layers found.
   _drawAndSample({layers, viewports, onViewportActive, deviceRect, pass, redrawReason, pickZ}) {
-    assert(deviceRect);
-    assert(Number.isFinite(deviceRect.width) && deviceRect.width > 0, '`width` must be > 0');
-    assert(Number.isFinite(deviceRect.height) && deviceRect.height > 0, '`height` must be > 0');
+    assert(deviceRect.width > 0 && deviceRect.height > 0);
 
     const pickableLayers = layers.filter(layer => layer.isPickable());
     if (pickableLayers.length < 1) {

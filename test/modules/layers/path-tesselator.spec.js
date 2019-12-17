@@ -188,3 +188,85 @@ test('PathTesselator#partial update', t => {
 
   t.end();
 });
+
+test('PathTesselator#normalize', t => {
+  const sampleData = [
+    {path: [1, 1, 2, 2, 3, 3], id: 'A'},
+    {path: [1, 1, 2, 2, 3, 3, 1, 1], id: 'B'}
+  ];
+  const tesselator = new PathTesselator({
+    data: sampleData,
+    loop: false,
+    normalize: false,
+    getGeometry: d => d.path,
+    positionFormat: 'XY'
+  });
+
+  t.is(tesselator.instanceCount, 7, 'Updated instanceCount as open paths');
+
+  tesselator.updateGeometry({
+    loop: true,
+    normalize: false
+  });
+
+  t.is(tesselator.instanceCount, 11, 'Updated instanceCount as closed loops');
+
+  tesselator.updateGeometry({
+    normalize: true
+  });
+
+  t.is(tesselator.instanceCount, 9, 'Updated instanceCount with normalization');
+
+  t.end();
+});
+
+test('PathTesselator#geometryBuffer', t => {
+  const sampleData = {
+    length: 2,
+    startIndices: [0, 2],
+    attributes: {
+      getPath: new Float64Array([1, 1, 2, 2, 1, 1, 2, 2, 3, 3, 1, 1])
+    }
+  };
+  const tesselator = new PathTesselator({
+    data: sampleData,
+    buffers: sampleData.attributes,
+    geometryBuffer: sampleData.attributes.getPath,
+    positionFormat: 'XY'
+  });
+
+  t.is(tesselator.instanceCount, 8, 'Updated instanceCount from geometryBuffer');
+  t.deepEquals(
+    tesselator.get('positions').slice(0, 24),
+    [1, 1, 0, 2, 2, 0, 1, 1, 0, 2, 2, 0, 3, 3, 0, 1, 1, 0, 2, 2, 0, 3, 3, 0],
+    'positions are populated'
+  );
+  t.deepEquals(
+    tesselator.get('segmentTypes').slice(0, 8),
+    [3, 4, 4, 0, 0, 0, 4, 4],
+    'segmentTypes are populated'
+  );
+
+  tesselator.updateGeometry({
+    normalize: false
+  });
+
+  t.is(tesselator.instanceCount, 6, 'Updated instanceCount from geometryBuffer');
+  t.is(tesselator.vertexStarts, sampleData.startIndices, 'Used external startIndices');
+  t.notOk(tesselator.get('positions'), 'skipped packing positions');
+  t.deepEquals(
+    tesselator.get('segmentTypes').slice(0, 6),
+    [3, 4, 1, 0, 2, 4],
+    'segmentTypes are populated'
+  );
+
+  t.throws(
+    () =>
+      tesselator.updateGeometry({
+        data: {length: 2}
+      }),
+    'throws if missing startIndices'
+  );
+
+  t.end();
+});

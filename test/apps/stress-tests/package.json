@@ -5,6 +5,7 @@
   "scripts": {
     "start": "webpack-dev-server --progress --hot --open",
     "start-local": "webpack-dev-server --env.local --progress --hot --open",
+    "start-luma": "webpack-dev-server --env.local --env.local-luma --progress --hot --open",
     "build": "webpack -p"
   },
   "dependencies": {

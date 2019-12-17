@@ -3,6 +3,7 @@
 import {COORDINATE_SYSTEM, CompositeLayer} from '@deck.gl/core';
 import {PointCloudLayer} from '@deck.gl/layers';
 import {ScenegraphLayer} from '@deck.gl/mesh-layers';
+import {log} from '@deck.gl/core';
 
 import {Tileset3D, _getIonTilesetMetadata} from '@loaders.gl/3d-tiles';
 
@@ -20,11 +21,14 @@ const defaultProps = {
   onTilesetLoad: tileset3d => {},
   onTileLoad: tileHeader => {},
   onTileUnload: tileHeader => {},
-  onTileLoadFail: (tile, message, url) => {}
+  onTileError: (tile, message, url) => {}
 };
 
 export default class Tile3DLayer extends CompositeLayer {
   initializeState() {
+    if ('onTileLoadFail' in this.props) {
+      log.removed('onTileLoadFail', 'onTileError')();
+    }
     this.state = {
       layerMap: {},
       tileset3d: null
@@ -63,7 +67,7 @@ export default class Tile3DLayer extends CompositeLayer {
         this.setNeedsUpdate();
       },
       onTileUnload: this.props.onTileUnload,
-      onTileLoadFail: this.props.onTileLoadFail,
+      onTileLoadFail: this.props.onTileError,
       // TODO: explicit passing should not be needed, registerLoaders should suffice
       fetchOptions,
       ...ionMetadata,
@@ -86,7 +90,7 @@ export default class Tile3DLayer extends CompositeLayer {
     return await this._loadTileset(url, {headers}, ionMetadata);
   }
 
-  _updateTileset(tileset3d) {
+  async _updateTileset(tileset3d) {
     const {timeline, viewport} = this.context;
     if (!timeline || !viewport || !tileset3d) {
       return;
@@ -94,7 +98,7 @@ export default class Tile3DLayer extends CompositeLayer {
 
     // use Date.now() as frame identifier for now and later used to filter layers for rendering
     const frameState = getFrameState(viewport, Date.now());
-    tileset3d.update(frameState);
+    await tileset3d.update(frameState);
     this._updateLayerMap(frameState.frameNumber);
   }
 
@@ -185,7 +189,6 @@ export default class Tile3DLayer extends CompositeLayer {
         coordinateSystem: COORDINATE_SYSTEM.METER_OFFSETS,
         coordinateOrigin: cartographicOrigin,
         modelMatrix,
-        _composeModelMatrix: true,
         getTransformMatrix: instance => instance.modelMatrix,
         getPosition: instance => [0, 0, 0]
       }

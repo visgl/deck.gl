@@ -32,12 +32,18 @@ import {
   Buffer,
   Texture2D,
   Transform,
-  getParameter,
+  getParameters,
   FEATURES,
   hasFeatures,
   isWebGL2
 } from '@luma.gl/core';
-import {AttributeManager, COORDINATE_SYSTEM, log, mergeShaders, project32} from '@deck.gl/core';
+import {
+  AttributeManager,
+  COORDINATE_SYSTEM,
+  log,
+  _mergeShaders as mergeShaders,
+  project32
+} from '@deck.gl/core';
 import TriangleLayer from './triangle-layer';
 import AggregationLayer from '../aggregation-layer';
 import {defaultColorRange, colorRangeToFlatArray} from '../utils/color-utils';
@@ -161,7 +167,9 @@ export default class HeatmapLayer extends AggregationLayer {
     } = this.state;
     const {updateTriggers, intensity, threshold} = this.props;
 
-    return new TriangleLayer(
+    const TriangleLayerClass = this.getSubLayerClass('triangle', TriangleLayer);
+
+    return new TriangleLayerClass(
       this.getSubLayerProps({
         id: 'triangle-layer',
         updateTriggers
@@ -210,9 +218,6 @@ export default class HeatmapLayer extends AggregationLayer {
 
   // PRIVATE
 
-  _getAggregationModel() {
-    return this.state.weightsTransform.model;
-  }
   // override Composite layer private method to create AttributeManager instance
   _getAttributeManager() {
     return new AttributeManager(this.context.gl, {
@@ -223,7 +228,7 @@ export default class HeatmapLayer extends AggregationLayer {
 
   _getChangeFlags(opts) {
     const changeFlags = {};
-    if (this._isAggregationDirty(opts)) {
+    if (this.isAggregationDirty(opts)) {
       changeFlags.dataChanged = true;
     }
     changeFlags.viewportChanged = opts.changeFlags.viewportChanged;
@@ -262,7 +267,7 @@ export default class HeatmapLayer extends AggregationLayer {
 
   _setupTextureParams() {
     const {gl} = this.context;
-    const textureSize = Math.min(SIZE_2K, getParameter(gl, gl.MAX_TEXTURE_SIZE));
+    const textureSize = Math.min(SIZE_2K, getParameters(gl, gl.MAX_TEXTURE_SIZE));
     const floatTargetSupport = hasFeatures(gl, FEATURES.COLOR_ATTACHMENT_RGBA32F);
     const {format, type} = getTextureParams({gl, floatTargetSupport});
     const weightsScale = floatTargetSupport ? 1 : 1 / 255;
@@ -335,7 +340,7 @@ export default class HeatmapLayer extends AggregationLayer {
   }
 
   // overwrite super class method to update transform model
-  _updateShaders(shaderOptions) {
+  updateShaders(shaderOptions) {
     // sahder params (modules, injects) changed, update model object
     this._createWeightsTransform(shaderOptions);
   }

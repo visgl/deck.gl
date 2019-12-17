@@ -16,7 +16,7 @@ export default class BezierGraphLayer extends CompositeLayer {
       new BezierCurveLayer({
         id: 'edges',
         data: edges,
-        coordinateSystem: COORDINATE_SYSTEM.IDENTITY,
+        coordinateSystem: COORDINATE_SYSTEM.CARTESIAN,
         getSourcePosition: e => e.source,
         getTargetPosition: e => e.target,
         getControlPoint: e => e.controlPoint,
@@ -30,7 +30,7 @@ export default class BezierGraphLayer extends CompositeLayer {
       new ScatterplotLayer({
         id: 'nodes',
         data: nodes,
-        coordinateSystem: COORDINATE_SYSTEM.IDENTITY,
+        coordinateSystem: COORDINATE_SYSTEM.CARTESIAN,
         getPosition: d => d.position,
         getRadius: 5,
         getFillColor: [0, 0, 150, 255],

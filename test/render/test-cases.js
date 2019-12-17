@@ -17,9 +17,13 @@ import {
   AmbientLight,
   DirectionalLight
 } from '@deck.gl/core';
-import {noise, vignette} from '@luma.gl/engine';
+import {noise, vignette} from '@luma.gl/shadertools';
+import {CubeGeometry} from '@luma.gl/core';
+const cube = new CubeGeometry();
 
-import {Fp64Extension} from '@deck.gl/extensions';
+import {Fp64Extension, PathStyleExtension} from '@deck.gl/extensions';
+import {SimpleMeshLayer} from '@deck.gl/mesh-layers';
+import {Matrix4} from 'math.gl';
 
 const effect1 = new PostProcessEffect(noise);
 const effect2 = new PostProcessEffect(vignette);
@@ -30,6 +34,7 @@ import {
   ScatterplotLayer,
   BitmapLayer,
   PolygonLayer,
+  SolidPolygonLayer,
   PathLayer,
   ArcLayer,
   LineLayer,
@@ -97,6 +102,8 @@ const HEXAGON_LAYER_INFO = {
   }
 };
 
+const POINTCLOUD = dataSamples.getPointCloud();
+
 function getMean(pts, key) {
   const filtered = pts.filter(pt => Number.isFinite(pt[key]));
 
@@ -116,17 +123,21 @@ function getMax(pts, key) {
 function getColorValue(points) {
   return getMean(points, 'SPACES');
 }
+
 function getColorWeight(point) {
   return point.SPACES;
 }
+
 const colorAggregation = 'mean';
 
 function getElevationValue(points) {
   return getMax(points, 'SPACES');
 }
+
 function getElevationWeight(point) {
   return point.SPACES;
 }
+
 const elevationAggregation = 'max';
 
 export const WIDTH = 800;
@@ -149,6 +160,17 @@ const screenSpaceData = [
   [100, 12],
   [100, 100],
   [110, 90]
+];
+
+// prettier-ignore
+const BINARY_DATA = [
+  0.7, 0.2, 0, 0, 0, 0,
+  0.8, 0.6, 0, 0, 5, 0,
+  0.3, 0.5, 0, 5, 5, 0,
+  0, 0.8, 0.6, 5, 10, 0,
+  0, 0.5, 0.7, 10, 10, 0,
+  0.3, 0, 0.8, 10, 15, 0,
+  0.8, 0, 0.6, 15, 15, 0
 ];
 
 export const TEST_CASES = [
@@ -198,7 +220,7 @@ export const TEST_CASES = [
       new ScatterplotLayer({
         id: 'orthographic-64',
         opacity: 0.1,
-        coordinateSystem: COORDINATE_SYSTEM.IDENTITY,
+        coordinateSystem: COORDINATE_SYSTEM.CARTESIAN,
         data: dataSamples.getPoints100K().map(p => [p[0] + 10000, p[1] + 10000]),
         getPosition: d => d,
         getRadius: 0,
@@ -224,7 +246,7 @@ export const TEST_CASES = [
         id: 'pointcloud-identity',
         data: [{position: [0, 100, 0]}, {position: [-100, -100, 0]}, {position: [100, -100, 0]}],
         opacity: 0.8,
-        coordinateSystem: COORDINATE_SYSTEM.IDENTITY,
+        coordinateSystem: COORDINATE_SYSTEM.CARTESIAN,
         getPosition: d => d.position,
         getNormal: d => [0, 0.5, 0.2],
         getColor: d => [255, 255, 0, 128],
@@ -246,7 +268,7 @@ export const TEST_CASES = [
       new ScreenGridLayer({
         id: 'screengrid-infoviz',
         data: screenSpaceData,
-        coordinateSystem: COORDINATE_SYSTEM.IDENTITY,
+        coordinateSystem: COORDINATE_SYSTEM.CARTESIAN,
         opacity: 0.8,
         getPosition: d => d,
         cellSizePixels: 40,
@@ -270,7 +292,7 @@ export const TEST_CASES = [
         id: 'contour-infoviz',
         data: screenSpaceData,
         getPosition: d => d,
-        coordinateSystem: COORDINATE_SYSTEM.IDENTITY,
+        coordinateSystem: COORDINATE_SYSTEM.CARTESIAN,
         cellSize: 40,
         contours: [
           {threshold: 1, color: [50, 50, 50]},
@@ -296,7 +318,7 @@ export const TEST_CASES = [
         id: 'contour-isobands-infoviz',
         data: screenSpaceData,
         getPosition: d => d,
-        coordinateSystem: COORDINATE_SYSTEM.IDENTITY,
+        coordinateSystem: COORDINATE_SYSTEM.CARTESIAN,
         cellSize: 40,
         contours: [
           {threshold: [1, 2], color: [150, 0, 0]},
@@ -325,12 +347,8 @@ export const TEST_CASES = [
         getPolygon: f => f,
         getFillColor: [200, 0, 0],
         getLineColor: [0, 0, 0],
-        getLineDashArray: [20, 0],
-        getWidth: f => 20,
         opacity: 0.8,
-        pickable: true,
-        lineWidthMinPixels: 1,
-        lineDashJustified: true
+        lineWidthMinPixels: 1
       })
     ],
     goldenImage: './test/render/golden-images/polygon-lnglat.png'
@@ -348,18 +366,41 @@ export const TEST_CASES = [
       new PolygonLayer({
         id: 'polygon-lnglat-64',
         data: dataSamples.polygons,
+        coordinateSystem: COORDINATE_SYSTEM.LNGLAT,
         getPolygon: f => f,
         getFillColor: [200, 0, 0],
         getLineColor: [0, 0, 0],
-        getLineDashArray: [20, 0],
-        getWidth: f => 20,
         opacity: 0.8,
-        pickable: true,
         lineWidthMinPixels: 1,
-        lineDashJustified: true
+        extensions: [new Fp64Extension()]
       })
     ],
     goldenImage: './test/render/golden-images/polygon-lnglat.png'
+  },
+  {
+    name: 'polygon-dash',
+    views: new OrthographicView(),
+    viewState: {
+      target: [0, 0, 0],
+      zoom: 0
+    },
+    layers: [
+      new PolygonLayer({
+        id: 'polygon-lnglat',
+        coordinateSystem: COORDINATE_SYSTEM.CARTESIAN,
+        data: [[[-100, -100], [-100, 100], [100, 100], [100, -100]]],
+        getPolygon: f => f,
+        filled: false,
+        stroked: true,
+        getLineColor: [0, 0, 0],
+        getDashArray: [6, 3],
+        getLineWidth: 10,
+        opacity: 1,
+        dashJustified: true,
+        extensions: [new PathStyleExtension({dash: true})]
+      })
+    ],
+    goldenImage: './test/render/golden-images/polygon-dash.png'
   },
   {
     name: 'path-lnglat',
@@ -380,6 +421,47 @@ export const TEST_CASES = [
         getWidth: f => 100,
         widthMinPixels: 1,
         pickable: true
+      })
+    ],
+    goldenImage: './test/render/golden-images/path-lnglat.png'
+  },
+  {
+    name: 'path-lnglat-binary',
+    viewState: {
+      latitude: 37.751537058389985,
+      longitude: -122.42694203247012,
+      zoom: 11.5,
+      pitch: 0,
+      bearing: 0
+    },
+    layers: [
+      new PathLayer({
+        id: 'path-lnglat',
+        data: {
+          length: dataSamples.zigzag.length,
+          startIndices: dataSamples.zigzag.reduce(
+            (acc, d) => {
+              acc.push(acc[acc.length - 1] + d.path.length);
+              return acc;
+            },
+            [0]
+          ),
+          attributes: {
+            getPath: {
+              value: new Float64Array(dataSamples.zigzag.flatMap(d => d.path.flat())),
+              size: 2
+            },
+            getColor: {
+              value: new Uint8Array(
+                dataSamples.zigzag.flatMap(d => d.path.flatMap(p => [128, 0, 0]))
+              ),
+              size: 3
+            }
+          }
+        },
+        getWidth: 100,
+        opacity: 0.6,
+        widthMinPixels: 1
       })
     ],
     goldenImage: './test/render/golden-images/path-lnglat.png'
@@ -443,7 +525,7 @@ export const TEST_CASES = [
       new ScatterplotLayer({
         id: 'scatterplot-lnglat',
         data: dataSamples.points,
-        coordinateSystem: COORDINATE_SYSTEM.LNGLAT_DEPRECATED,
+        coordinateSystem: COORDINATE_SYSTEM.LNGLAT,
         getPosition: d => d.COORDINATES,
         getFillColor: d => [255, 128, 0],
         getRadius: d => d.SPACES,
@@ -550,7 +632,6 @@ export const TEST_CASES = [
       bearing: 0
     },
     // rendering times
-    renderingTimes: 2,
     layers: [
       new IconLayer({
         id: 'icon-lnglat',
@@ -574,6 +655,50 @@ export const TEST_CASES = [
     goldenImage: './test/render/golden-images/icon-lnglat.png'
   },
   {
+    name: 'icon-lnglat-external-buffer',
+    viewState: {
+      latitude: 37.751537058389985,
+      longitude: -122.42694203247012,
+      zoom: 11.5,
+      pitch: 0,
+      bearing: 0
+    },
+    // rendering times
+    layers: [
+      new IconLayer({
+        id: 'icon-lnglat',
+        data: {
+          length: dataSamples.points.length,
+          attributes: {
+            getPosition: {
+              value: new Float32Array(dataSamples.points.flatMap(d => d.COORDINATES)),
+              size: 2
+            },
+            getSize: new Float32Array(dataSamples.points.flatMap(d => (d.RACKS > 2 ? 2 : 1))),
+            getIcon: {
+              value: new Uint8Array(
+                dataSamples.points.flatMap(d => (d.PLACEMENT === 'SW' ? 1 : 2))
+              ),
+              size: 1
+            }
+          }
+        },
+        iconAtlas: ICON_ATLAS,
+        iconMapping: {1: dataSamples.iconAtlas.marker, 2: dataSamples.iconAtlas['marker-warning']},
+        sizeScale: 12,
+        getColor: [64, 64, 72],
+        opacity: 0.8,
+        pickable: true
+      })
+    ],
+    onAfterRender: ({layers, done}) => {
+      if (layers[0].state.iconManager.getTexture()) {
+        done();
+      }
+    },
+    goldenImage: './test/render/golden-images/icon-lnglat.png'
+  },
+  {
     name: 'icon-lnglat-facing-up',
     viewState: {
       latitude: 37.751537058389985,
@@ -582,8 +707,6 @@ export const TEST_CASES = [
       pitch: 60,
       bearing: 0
     },
-    // rendering times
-    renderingTimes: 2,
     layers: [
       new IconLayer({
         id: 'icon-lnglat',
@@ -624,7 +747,6 @@ export const TEST_CASES = [
           getIcon: 1
         },
         sizeScale: 12,
-        coordinateSystem: COORDINATE_SYSTEM.LNGLAT_DEPRECATED,
         getPosition: d => d.COORDINATES,
         getColor: d => [64, 64, 72],
         getIcon: d => {
@@ -664,7 +786,6 @@ export const TEST_CASES = [
           getIcon: 2
         },
         sizeScale: 12,
-        coordinateSystem: COORDINATE_SYSTEM.LNGLAT_DEPRECATED,
         getPosition: d => d.COORDINATES,
         getColor: d => [64, 64, 72],
         getIcon: d => {
@@ -1119,7 +1240,7 @@ export const TEST_CASES = [
     layers: [
       new PointCloudLayer({
         id: 'pointcloud-lnglat',
-        data: dataSamples.getPointCloud(),
+        data: POINTCLOUD,
         coordinateSystem: COORDINATE_SYSTEM.LNGLAT_OFFSETS,
         coordinateOrigin: dataSamples.positionOrigin,
         getPosition: d => [d.position[0] * 1e-5, d.position[1] * 1e-5, d.position[2]],
@@ -1143,12 +1264,16 @@ export const TEST_CASES = [
     layers: [
       new PointCloudLayer({
         id: 'pointcloud-meter',
-        data: dataSamples.getPointCloud(),
+        data: {
+          length: POINTCLOUD.length,
+          attributes: {
+            getPosition: new Float32Array(POINTCLOUD.flatMap(d => d.position)),
+            getNormal: new Float32Array(POINTCLOUD.flatMap(d => d.normal)),
+            getColor: {value: new Uint8Array(POINTCLOUD.flatMap(d => d.color)), size: 3}
+          }
+        },
         coordinateSystem: COORDINATE_SYSTEM.METER_OFFSETS,
         coordinateOrigin: dataSamples.positionOrigin,
-        getPosition: d => d.position,
-        getNormal: d => d.normal,
-        getColor: d => d.color,
         pointSize: 2,
         pickable: true
       })
@@ -1300,6 +1425,36 @@ export const TEST_CASES = [
     goldenImage: './test/render/golden-images/text-layer-auto-wrapping.png'
   },
   {
+    name: 'text-layer-background',
+    viewState: {
+      latitude: 37.751537058389985,
+      longitude: -122.42694203247012,
+      zoom: 11.5,
+      pitch: 0,
+      bearing: 0
+    },
+    layers: [
+      new TextLayer({
+        id: 'text-layer',
+        data: dataSamples.points.slice(0, 50),
+        opacity: 0.8,
+        fontFamily: 'Arial',
+        backgroundColor: [0.0, 255.0, 0.0, 200.0],
+        getText: x => `${x.PLACEMENT}-${x.YR_INSTALLED}`,
+        getPosition: x => x.COORDINATES,
+        getColor: x => [153, 0, 0],
+        getSize: x => 16,
+        getAngle: x => 0,
+        sizeScale: 21,
+        sizeUnits: 'meters',
+        getTextAnchor: x => 'start',
+        getAlignmentBaseline: x => 'center',
+        getPixelOffset: x => [10, 0]
+      })
+    ],
+    goldenImage: './test/render/golden-images/text-layer-background.png'
+  },
+  {
     name: 'gpu-grid-lnglat',
     viewState: GRID_LAYER_INFO.viewState,
     layers: [
@@ -1307,19 +1462,6 @@ export const TEST_CASES = [
         Object.assign({}, GRID_LAYER_INFO.props, {
           id: 'gpu-grid-lnglat',
           gpuAggregation: true
-        })
-      )
-    ],
-    goldenImage: './test/render/golden-images/gpu-grid-lnglat.png'
-  },
-  {
-    name: 'gpu-grid-lnglat-cpu-aggregation',
-    viewState: GRID_LAYER_INFO.viewState,
-    layers: [
-      new GPUGridLayer(
-        Object.assign({}, GRID_LAYER_INFO.props, {
-          id: 'gpu-grid-lnglat-cpu-aggregation',
-          gpuAggregation: false
         })
       )
     ],
@@ -1498,9 +1640,7 @@ export const TEST_CASES = [
     },
     layers: [
       new H3HexagonLayer({
-        data: h3
-          .polyfill([[-90, -180], [90, -180], [90, 0], [-90, 0]], 0)
-          .concat(h3.polyfill([[-90, 180], [90, 180], [90, 0], [-90, 0]], 0)),
+        data: h3.getRes0Indexes(),
         opacity: 0.8,
         getHexagon: d => d,
         extruded: false,
@@ -1602,7 +1742,7 @@ export const TEST_CASES = [
     goldenImage: './test/render/golden-images/post-process-effects.png'
   },
   {
-    name: 'S2Layer',
+    name: 's2-layer',
     viewState: {
       latitude: 37.75,
       longitude: -122.45,
@@ -1624,7 +1764,7 @@ export const TEST_CASES = [
     goldenImage: './test/render/golden-images/s2-layer.png'
   },
   {
-    name: 'S2Layer',
+    name: 's2-layer-l2',
     viewState: {
       latitude: 40,
       longitude: -100,
@@ -1644,5 +1784,147 @@ export const TEST_CASES = [
       })
     ],
     goldenImage: './test/render/golden-images/s2-layer-l2.png'
+  },
+  {
+    name: 'simple-mesh-layer-lnglat',
+    viewState: {
+      latitude: 37.75,
+      longitude: -122.45,
+      zoom: 14,
+      pitch: 0,
+      bearing: 0
+    },
+    layers: [
+      new SimpleMeshLayer({
+        id: 'simple-mesh-layer-lnglat',
+        data: dataSamples.meshSampleData,
+        mesh: cube,
+        sizeScale: 30,
+        modelMatrix: new Matrix4().translate([0, 0, 1000]),
+        coordinateOrigin: [-122.45, 37.75, 0],
+        coordinateSystem: COORDINATE_SYSTEM.LNGLAT_OFFSETS,
+        getPosition: d => [d.position[0] / 1e5, d.position[1] / 1e5, 10],
+        getColor: d => d.color,
+        getOrientation: d => d.orientation
+      })
+    ],
+    goldenImage: './test/render/golden-images/simple-mesh-layer-lnglat.png'
+  },
+  {
+    name: 'simple-mesh-layer-cartesian',
+    viewState: {
+      target: [0, 0, 0],
+      rotationX: 0,
+      rotationOrbit: 0,
+      orbitAxis: 'Y',
+      fov: 30,
+      zoom: -1.5
+    },
+    views: [
+      new OrbitView({
+        near: 0.1,
+        far: 2
+      })
+    ],
+    layers: [
+      new SimpleMeshLayer({
+        id: 'simple-mesh-layer-cartesian',
+        data: dataSamples.meshSampleData,
+        mesh: cube,
+        sizeScale: 30,
+        coordinateSystem: COORDINATE_SYSTEM.CARTESIAN,
+        modelMatrix: new Matrix4().rotateX((-45 / 180) * Math.PI),
+        getPosition: d => d.position,
+        getColor: d => d.color,
+        getOrientation: d => d.orientation
+      })
+    ],
+    goldenImage: './test/render/golden-images/simple-mesh-layer-cartesian.png'
+  },
+  {
+    name: 'simple-mesh-layer-meter-offsets',
+    viewState: {
+      latitude: 37.75,
+      longitude: -122.45,
+      zoom: 14,
+      pitch: 0,
+      bearing: 0
+    },
+    layers: [
+      new SimpleMeshLayer({
+        id: 'simple-mesh-layer-meter-offsets',
+        data: dataSamples.meshSampleData,
+        mesh: cube,
+        sizeScale: 30,
+        coordinateOrigin: [-122.45, 37.75, 0],
+        coordinateSystem: COORDINATE_SYSTEM.METER_OFFSETS,
+        modelMatrix: new Matrix4().rotateX((-45 / 180) * Math.PI),
+        getPosition: d => d.position,
+        getColor: d => d.color,
+        getOrientation: d => d.orientation
+      })
+    ],
+    goldenImage: './test/render/golden-images/simple-mesh-layer-meter-offsets.png'
+  },
+  {
+    name: 'binary',
+    views: new OrthographicView(),
+    viewState: {
+      target: [7, 7, 0],
+      zoom: 4.5
+    },
+    layers: [
+      new SolidPolygonLayer({
+        id: 'binary-polygons',
+        data: {
+          length: 2,
+          startIndices: [0, 3],
+          attributes: {
+            indices: new Uint16Array([0, 1, 2, 3, 4, 5, 4, 5, 6]),
+            getPolygon: {value: new Float64Array(BINARY_DATA), size: 3, offset: 24, stride: 48},
+            getFillColor: {
+              value: new Float32Array(BINARY_DATA),
+              size: 3,
+              stride: 24,
+              normalized: false
+            }
+          }
+        },
+        _normalize: false,
+        getWidth: 0.5
+      }),
+
+      new PathLayer({
+        id: 'binary-paths',
+        data: {
+          length: 2,
+          startIndices: [0, 3],
+          attributes: {
+            getPath: {value: new Float32Array(BINARY_DATA), size: 3, offset: 12, stride: 24},
+            getColor: {value: new Float32Array(BINARY_DATA), size: 3, stride: 24, normalized: false}
+          }
+        },
+        _pathType: 'open',
+        getWidth: 0.5
+      }),
+
+      new ScatterplotLayer({
+        id: 'binary-points',
+        data: {
+          length: 7,
+          attributes: {
+            getPosition: {value: new Float64Array(BINARY_DATA), size: 3, offset: 24, stride: 48},
+            getFillColor: {
+              value: new Float32Array(BINARY_DATA),
+              size: 3,
+              stride: 24,
+              normalized: false
+            }
+          }
+        },
+        getRadius: 1
+      })
+    ],
+    goldenImage: './test/render/golden-images/binary.png'
   }
 ];

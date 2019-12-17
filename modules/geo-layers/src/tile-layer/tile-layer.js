@@ -1,3 +1,4 @@
+import {log} from '@deck.gl/core';
 import {CompositeLayer} from '@deck.gl/core';
 import {GeoJsonLayer} from '@deck.gl/layers';
 import TileCache from './utils/tile-cache';
@@ -6,7 +7,7 @@ const defaultProps = {
   renderSubLayers: {type: 'function', value: props => new GeoJsonLayer(props)},
   getTileData: {type: 'function', value: ({x, y, z}) => Promise.resolve(null)},
   // TODO - change to onViewportLoad to align with Tile3DLayer
-  onViewportLoaded: {type: 'function', optional: true, value: null},
+  onViewportLoad: {type: 'function', optional: true, value: null},
   // eslint-disable-next-line
   onTileError: {type: 'function', value: err => console.error(err)},
   maxZoom: null,
@@ -16,6 +17,10 @@ const defaultProps = {
 
 export default class TileLayer extends CompositeLayer {
   initializeState() {
+    if ('onViewportLoaded' in this.props) {
+      log.removed('onViewportLoaded', 'onViewportLoad')();
+    }
+
     this.state = {
       tiles: [],
       isLoaded: false
@@ -65,13 +70,13 @@ export default class TileLayer extends CompositeLayer {
   }
 
   _onTileLoad() {
-    const {onViewportLoaded} = this.props;
+    const {onViewportLoad} = this.props;
     const currTiles = this.state.tiles;
     const allCurrTilesLoaded = currTiles.every(tile => tile.isLoaded);
     if (this.state.isLoaded !== allCurrTilesLoaded) {
       this.setState({isLoaded: allCurrTilesLoaded});
-      if (allCurrTilesLoaded && onViewportLoaded) {
-        onViewportLoaded(currTiles.filter(tile => tile._data).map(tile => tile._data));
+      if (allCurrTilesLoaded && onViewportLoad) {
+        onViewportLoad(currTiles.filter(tile => tile._data).map(tile => tile._data));
       }
     }
   }

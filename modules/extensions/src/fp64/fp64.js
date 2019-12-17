@@ -18,12 +18,17 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {LayerExtension, COORDINATE_SYSTEM, project64} from '@deck.gl/core';
+import {LayerExtension, COORDINATE_SYSTEM} from '@deck.gl/core';
+import project64 from './project64';
 
 export default class Fp64Extension extends LayerExtension {
   getShaders(opts) {
-    if (this.props.coordinateSystem !== COORDINATE_SYSTEM.LNGLAT_DEPRECATED) {
-      throw new Error('fp64: coordinateSystem must be LNGLAT_DEPRECATED');
+    const {coordinateSystem} = this.props;
+    if (
+      coordinateSystem !== COORDINATE_SYSTEM.LNGLAT &&
+      coordinateSystem !== COORDINATE_SYSTEM.DEFAULT
+    ) {
+      throw new Error('fp64: coordinateSystem must be LNGLAT');
     }
 
     return {

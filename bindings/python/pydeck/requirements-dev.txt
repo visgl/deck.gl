@@ -12,3 +12,4 @@ flake8
 requests
 sphinx
 recommonmark
+jupyterlab

@@ -60,3 +60,54 @@ export function createIterable(data, startRow = 0, endRow = Infinity) {
 export function isAsyncIterable(data) {
   return data && data[Symbol.asyncIterator];
 }
+
+/*
+ * Create an accessor function from a flat buffer that yields the value at each object index
+ */
+export function getAccessorFromBuffer(typedArray, {size, stride, offset, startIndices, nested}) {
+  const bytesPerElement = typedArray.BYTES_PER_ELEMENT;
+  const elementStride = stride ? stride / bytesPerElement : size;
+  const elementOffset = offset ? offset / bytesPerElement : 0;
+  const vertexCount = Math.floor((typedArray.length - elementOffset) / elementStride);
+
+  return (_, {index, target}) => {
+    if (!startIndices) {
+      const sourceIndex = index * elementStride + elementOffset;
+      for (let j = 0; j < size; j++) {
+        target[j] = typedArray[sourceIndex + j];
+      }
+      return target;
+    }
+    const startIndex = startIndices[index];
+    const endIndex = startIndices[index + 1] || vertexCount;
+    let result;
+
+    if (nested) {
+      result = new Array(endIndex - startIndex);
+      for (let i = startIndex; i < endIndex; i++) {
+        const sourceIndex = i * elementStride + elementOffset;
+        target = new Array(size);
+        for (let j = 0; j < size; j++) {
+          target[j] = typedArray[sourceIndex + j];
+        }
+        result[i - startIndex] = target;
+      }
+    } else if (elementStride === size) {
+      result = typedArray.subarray(
+        startIndex * size + elementOffset,
+        endIndex * size + elementOffset
+      );
+    } else {
+      result = new typedArray.constructor((endIndex - startIndex) * size);
+      let targetIndex = 0;
+      for (let i = startIndex; i < endIndex; i++) {
+        const sourceIndex = i * elementStride + elementOffset;
+        for (let j = 0; j < size; j++) {
+          result[targetIndex++] = typedArray[sourceIndex + j];
+        }
+      }
+    }
+
+    return result;
+  };
+}

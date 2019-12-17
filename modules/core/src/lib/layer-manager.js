@@ -20,26 +20,18 @@
 
 import assert from '../utils/assert';
 import {Timeline} from '@luma.gl/core';
-import seer from 'seer';
 import Layer from './layer';
 import {LIFECYCLE} from '../lifecycle/constants';
 import log from '../utils/log';
+import debug from '../debug';
 import {flatten} from '../utils/flatten';
 import {Stats} from 'probe.gl';
 
 import Viewport from '../viewports/viewport';
 import {createProgramManager} from '../shaderlib';
 
-import {
-  setPropOverrides,
-  layerEditListener,
-  seerInitListener,
-  initLayerInSeer,
-  updateLayerInSeer
-} from './seer-integration';
-
-const LOG_PRIORITY_LIFECYCLE = 2;
-const LOG_PRIORITY_LIFECYCLE_MINOR = 4;
+const TRACE_SET_LAYERS = 'layerManager.setLayers';
+const TRACE_ACTIVATE_VIEWPORT = 'layerManager.activateViewport';
 
 // CONTEXT IS EXPOSED TO LAYERS
 const INITIAL_CONTEXT = Object.seal({
@@ -94,31 +86,32 @@ export default class LayerManager {
 
     this.activateViewport = this.activateViewport.bind(this);
 
-    // Seer integration
-    this._initSeer = this._initSeer.bind(this);
-    this._editSeer = this._editSeer.bind(this);
-
     Object.seal(this);
-
-    seerInitListener(this._initSeer);
-    layerEditListener(this._editSeer);
   }
 
   // Method to call when the layer manager is not needed anymore.
-  // Currently used in the <DeckGL> componentWillUnmount lifecycle to unbind Seer listeners.
   finalize() {
     // Finalize all layers
     for (const layer of this.layers) {
       this._finalizeLayer(layer);
     }
-
-    seer.removeListener(this._initSeer);
-    seer.removeListener(this._editSeer);
   }
 
   // Check if a redraw is needed
   needsRedraw(opts = {clearRedrawFlags: false}) {
-    return this._checkIfNeedsRedraw(opts);
+    let redraw = this._needsRedraw;
+    if (opts.clearRedrawFlags) {
+      this._needsRedraw = false;
+    }
+
+    // This layers list doesn't include sublayers, relying on composite layers
+    for (const layer of this.layers) {
+      // Call every layer to clear their flags
+      const layerNeedsRedraw = layer.getNeedsRedraw(opts);
+      redraw = redraw || layerNeedsRedraw;
+    }
+
+    return redraw;
   }
 
   // Check if a deep update of all layers is needed
@@ -166,8 +159,10 @@ export default class LayerManager {
   // Supply a new layer list, initiating sublayer generation and layer matching
   setLayers(newLayers, forceUpdate = false) {
     // TODO - something is generating state updates that cause rerender of the same
-    if (!forceUpdate && newLayers === this.lastRenderedLayers) {
-      log.log(3, 'Ignoring layer update due to layer array not changed')();
+    const shouldUpdate = forceUpdate || newLayers !== this.lastRenderedLayers;
+    debug(TRACE_SET_LAYERS, this, shouldUpdate, newLayers);
+
+    if (!shouldUpdate) {
       return this;
     }
     this.lastRenderedLayers = newLayers;
@@ -178,17 +173,8 @@ export default class LayerManager {
       layer.context = this.context;
     }
 
-    const {error, generatedLayers} = this._updateLayers({
-      oldLayers: this.layers,
-      newLayers
-    });
+    this._updateLayers(this.layers, newLayers);
 
-    this.layers = generatedLayers;
-
-    // Throw first error found, if any
-    if (error) {
-      throw error;
-    }
     return this;
   }
 
@@ -210,41 +196,26 @@ export default class LayerManager {
   // PRIVATE METHODS
   //
 
-  _checkIfNeedsRedraw(opts) {
-    let redraw = this._needsRedraw;
-    if (opts.clearRedrawFlags) {
-      this._needsRedraw = false;
-    }
-
-    // This layers list doesn't include sublayers, relying on composite layers
-    for (const layer of this.layers) {
-      // Call every layer to clear their flags
-      const layerNeedsRedraw = layer.getNeedsRedraw(opts);
-      redraw = redraw || layerNeedsRedraw;
-    }
-
-    return redraw;
-  }
-
   // Make a viewport "current" in layer context, updating viewportChanged flags
   activateViewport(viewport) {
+    assert(viewport, 'LayerManager: viewport not set');
+
     const oldViewport = this.context.viewport;
     const viewportChanged = !oldViewport || !viewport.equals(oldViewport);
 
     if (viewportChanged) {
-      log.log(4, 'Viewport changed', viewport)();
+      debug(TRACE_ACTIVATE_VIEWPORT, this, viewport);
 
       this.context.viewport = viewport;
+      const changeFlags = {viewportChanged: true};
 
       // Update layers states
       // Let screen space layers update their state based on viewport
       for (const layer of this.layers) {
-        layer.setChangeFlags({viewportChanged: 'Viewport changed'});
+        layer.setChangeFlags(changeFlags);
         this._updateLayer(layer);
       }
     }
-
-    assert(this.context.viewport, 'LayerManager: viewport not set');
 
     return this;
   }
@@ -252,7 +223,7 @@ export default class LayerManager {
   // Match all layers, checking for caught errors
   // To avoid having an exception in one layer disrupt other layers
   // TODO - mark layers with exceptions as bad and remove from rendering cycle?
-  _updateLayers({oldLayers, newLayers}) {
+  _updateLayers(oldLayers, newLayers) {
     // Create old layer map
     const oldLayerMap = {};
     for (const oldLayer of oldLayers) {
@@ -267,24 +238,32 @@ export default class LayerManager {
     const generatedLayers = [];
 
     // Match sublayers
-    const error = this._updateSublayersRecursively({
-      newLayers,
-      oldLayerMap,
-      generatedLayers
-    });
+    const error = this._updateSublayersRecursively(newLayers, oldLayerMap, generatedLayers);
 
     // Finalize unmatched layers
     const error2 = this._finalizeOldLayers(oldLayerMap);
 
-    this._needsUpdate = generatedLayers.some(layer => layer.hasUniformTransition());
+    let needsUpdate = false;
+    for (const layer of generatedLayers) {
+      if (layer.hasUniformTransition()) {
+        needsUpdate = true;
+        break;
+      }
+    }
 
+    this._needsUpdate = needsUpdate;
+    this.layers = generatedLayers;
+
+    // Throw first error found, if any
     const firstError = error || error2;
-    return {error: firstError, generatedLayers};
+    if (firstError) {
+      throw firstError;
+    }
   }
 
   /* eslint-disable complexity,max-statements */
   // Note: adds generated layers to `generatedLayers` array parameter
-  _updateSublayersRecursively({newLayers, oldLayerMap, generatedLayers}) {
+  _updateSublayersRecursively(newLayers, oldLayerMap, generatedLayers) {
     let error = null;
 
     for (const newLayer of newLayers) {
@@ -310,12 +289,10 @@ export default class LayerManager {
         if (!oldLayer) {
           const err = this._initializeLayer(newLayer);
           error = error || err;
-          initLayerInSeer(newLayer); // Initializes layer in seer chrome extension (if connected)
         } else {
           this._transferLayerState(oldLayer, newLayer);
           const err = this._updateLayer(newLayer);
           error = error || err;
-          updateLayerInSeer(newLayer); // Updates layer in seer chrome extension (if connected)
         }
         generatedLayers.push(newLayer);
 
@@ -328,11 +305,7 @@ export default class LayerManager {
       }
 
       if (sublayers) {
-        const err = this._updateSublayersRecursively({
-          newLayers: sublayers,
-          oldLayerMap,
-          generatedLayers
-        });
+        const err = this._updateSublayersRecursively(sublayers, oldLayerMap, generatedLayers);
         error = error || err;
       }
     }
@@ -347,7 +320,8 @@ export default class LayerManager {
     for (const layerId in oldLayerMap) {
       const layer = oldLayerMap[layerId];
       if (layer) {
-        error = error || this._finalizeLayer(layer);
+        const err = this._finalizeLayer(layer);
+        error = error || err;
       }
     }
     return error;
@@ -357,28 +331,16 @@ export default class LayerManager {
 
   // Initializes a single layer, calling layer methods
   _initializeLayer(layer) {
-    log.log(LOG_PRIORITY_LIFECYCLE, `initializing ${layerName(layer)}`)();
-
-    let error = null;
     try {
       layer._initialize();
       layer.lifecycle = LIFECYCLE.INITIALIZED;
     } catch (err) {
       log.warn(`error while initializing ${layerName(layer)}\n`, err)();
-      error = error || err;
+      return err;
       // TODO - what should the lifecycle state be here? LIFECYCLE.INITIALIZATION_FAILED?
     }
 
-    // Set back pointer (used in picking)
-    layer.internalState.layer = layer;
-
-    // Save layer on model for picking purposes
-    // store on model.userData rather than directly on model
-    for (const model of layer.getModels()) {
-      model.userData.layer = layer;
-    }
-
-    return error;
+    return null;
   }
 
   _transferLayerState(oldLayer, newLayer) {
@@ -386,74 +348,35 @@ export default class LayerManager {
     newLayer.lifecycle = LIFECYCLE.MATCHED;
 
     if (newLayer !== oldLayer) {
-      log.log(
-        LOG_PRIORITY_LIFECYCLE_MINOR,
-        `matched ${layerName(newLayer)}`,
-        oldLayer,
-        '->',
-        newLayer
-      )();
       oldLayer.lifecycle = LIFECYCLE.AWAITING_GC;
-    } else {
-      log.log(LOG_PRIORITY_LIFECYCLE_MINOR, `Matching layer is unchanged ${newLayer.id}`)();
     }
   }
 
   // Updates a single layer, cleaning all flags
   _updateLayer(layer) {
-    log.log(
-      LOG_PRIORITY_LIFECYCLE_MINOR,
-      `updating ${layer} because: ${layer.printChangeFlags()}`
-    )();
-    let error = null;
     try {
       layer._update();
     } catch (err) {
       log.warn(`error during update of ${layerName(layer)}`, err)();
       // Save first error
-      error = err;
+      return err;
     }
-    return error;
+    return null;
   }
 
   // Finalizes a single layer
   _finalizeLayer(layer) {
-    assert(layer.lifecycle !== LIFECYCLE.AWAITING_FINALIZATION);
+    this._needsRedraw = this._needsRedraw || `finalized ${layerName(layer)}`;
+
     layer.lifecycle = LIFECYCLE.AWAITING_FINALIZATION;
-    let error = null;
-    this.setNeedsRedraw(`finalized ${layerName(layer)}`);
+
     try {
       layer._finalize();
+      layer.lifecycle = LIFECYCLE.FINALIZED;
     } catch (err) {
       log.warn(`error during finalization of ${layerName(layer)}`, err)();
-      error = err;
+      return err;
     }
-    layer.lifecycle = LIFECYCLE.FINALIZED;
-    log.log(LOG_PRIORITY_LIFECYCLE, `finalizing ${layerName(layer)}`)();
-    return error;
-  }
-
-  // SEER INTEGRATION
-
-  /**
-   * Called upon Seer initialization, manually sends layers data.
-   */
-  _initSeer() {
-    this.layers.forEach(layer => {
-      initLayerInSeer(layer);
-      updateLayerInSeer(layer);
-    });
-  }
-
-  /**
-   * On Seer property edition, set override and update layers.
-   */
-  _editSeer(payload) {
-    if (payload.type !== 'edit' || payload.valuePath[0] !== 'props') {
-      return;
-    }
-
-    setPropOverrides(payload.itemKey, payload.valuePath.slice(1), payload.value);
-    this.updateLayers();
+    return null;
   }
 }

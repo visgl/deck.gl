@@ -68,10 +68,10 @@ new GeoJsonLayer({});
 To use pre-bundled scripts:
 
 ```html
-<script src="https://unpkg.com/deck.gl@^7.0.0/dist.min.js"></script>
+<script src="https://unpkg.com/deck.gl@^8.0.0/dist.min.js"></script>
 <!-- or -->
-<script src="https://unpkg.com/@deck.gl/core@^7.0.0/dist.min.js"></script>
-<script src="https://unpkg.com/@deck.gl/layers@^7.0.0/dist.min.js"></script>
+<script src="https://unpkg.com/@deck.gl/core@^8.0.0/dist.min.js"></script>
+<script src="https://unpkg.com/@deck.gl/layers@^8.0.0/dist.min.js"></script>
 ```
 
 ```js
@@ -199,13 +199,6 @@ The minimum radius in pixels.
 
 The maximum radius in pixels.
 
-##### `lineDashJustified` (Boolean, optional)
-
-* Default: `false`
-
-Justify dashes together.
-Only works if `getLineDashArray` is specified.
-
 ##### `material` (Object, optional)
 
 * Default: `true`
@@ -219,8 +212,7 @@ Check [the lighting guide](/docs/developer-guide/using-lighting.md#constructing-
 
 * Default: `[0, 0, 0, 255]`
 
-The rgba color of line string and/or the outline of polygon for a GeoJson feature, depending on its type.
-Format is `r, g, b, [a]`. Each component is in the 0-255 range.
+The rgba color is in the format of `[r, g, b, [a]]`. Each channel is a number between 0-255 and `a` is 255 if not supplied.
 
 * If an array is provided, it is used as the line color for all features.
 * If a function is provided, it is called on each feature to retrieve its line color.
@@ -230,7 +222,8 @@ Format is `r, g, b, [a]`. Each component is in the 0-255 range.
 * Default: `[0, 0, 0, 255]`
 
 The solid color of the polygon and point features of a GeoJson.
-Format is `r, g, b, [a]`. Each component is in the 0-255 range.
+Format is `[r, g, b, [a]]`. Each channel is a number between 0-255 and `a` is 255 if not supplied.
+
 
 * If an array is provided, it is used as the fill color for all features.
 * If a function is provided, it is called on each feature to retrieve its fill color.
@@ -273,15 +266,6 @@ otherwise will be in unit coordinates.
 
 Note: This accessor is only called for `Polygon` and `MultiPolygon` features.
 
-##### `getLineDashArray` ([Function](/docs/developer-guide/using-layers.md#accessors)|Array, optional)
-
-* Default: `null`
-
-The dash array to draw each outline path with: `[dashSize, gapSize]` relative to the width of the line. (See PathLayer)
-
-* If an array is provided, it is used as the dash array for all paths.
-* If a function is provided, it is called on each path to retrieve its dash array. Return `[0, 0]` to draw the path in solid line.
-* If this accessor is not specified, all paths are drawn as solid lines.
 
 ## Sub Layers
 

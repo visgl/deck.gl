@@ -10,13 +10,13 @@ import labelVertex from './label-vertex.glsl';
 import labelFragment from './label-fragment.glsl';
 
 /* Constants */
-const DEFAULT_FONT_SIZE = 12;
+const DEFAULT_FONT_SIZE = 48;
 const DEFAULT_TICK_COUNT = 6;
 const DEFAULT_TICK_FORMAT = x => x.toFixed(2);
 
 const defaultProps = {
   data: [],
-  fontSize: DEFAULT_FONT_SIZE,
+  fontSize: 12,
   xScale: null,
   yScale: null,
   zScale: null,
@@ -375,13 +375,13 @@ export default class AxesLayer extends Layer {
     }
 
     // attach a 2d texture of all the label texts
-    const textureInfo = textMatrixToTexture(this.context.gl, ticks, DEFAULT_FONT_SIZE * 4);
+    const textureInfo = textMatrixToTexture(this.context.gl, ticks, DEFAULT_FONT_SIZE);
     if (textureInfo) {
       // success
       const {columnWidths, texture} = textureInfo;
 
       return {
-        labelHeight: DEFAULT_FONT_SIZE * 4,
+        labelHeight: DEFAULT_FONT_SIZE,
         labelWidths: columnWidths,
         labelTextureDim: [texture.width, texture.height],
         labelTexture: texture

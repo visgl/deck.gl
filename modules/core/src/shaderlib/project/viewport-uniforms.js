@@ -21,12 +21,10 @@
 import * as mat4 from 'gl-matrix/mat4';
 import * as vec4 from 'gl-matrix/vec4';
 
-import {COORDINATE_SYSTEM} from '../../lib/constants';
+import {COORDINATE_SYSTEM, PROJECTION_MODE} from '../../lib/constants';
 
 import memoize from '../../utils/memoize';
 import assert from '../../utils/assert';
-
-import {PROJECT_COORDINATE_SYSTEM} from './constants';
 
 // To quickly set a vector to zero
 const ZERO_VECTOR = [0, 0, 0, 0];
@@ -41,102 +39,56 @@ export const LNGLAT_AUTO_OFFSET_ZOOM_THRESHOLD = 12;
 
 const getMemoizedViewportUniforms = memoize(calculateViewportUniforms);
 
-function getShaderCoordinateSystem(coordinateSystem) {
-  switch (coordinateSystem) {
-    case COORDINATE_SYSTEM.LNGLAT:
-    default:
-      return PROJECT_COORDINATE_SYSTEM.LNGLAT_AUTO_OFFSET;
-
-    case COORDINATE_SYSTEM.LNGLAT_DEPRECATED:
-      return PROJECT_COORDINATE_SYSTEM.LNG_LAT;
-
-    case COORDINATE_SYSTEM.METER_OFFSETS:
-    case COORDINATE_SYSTEM.METERS:
-      return PROJECT_COORDINATE_SYSTEM.METER_OFFSETS;
-
-    case COORDINATE_SYSTEM.LNGLAT_OFFSETS:
-      return PROJECT_COORDINATE_SYSTEM.LNGLAT_OFFSETS;
-
-    case COORDINATE_SYSTEM.IDENTITY:
-      return PROJECT_COORDINATE_SYSTEM.IDENTITY;
-  }
-}
-
 // The code that utilizes Matrix4 does the same calculation as their mat4 counterparts,
 // has lower performance but provides error checking.
 // Uncomment when debugging
-function calculateMatrixAndOffset({
-  // UNCHANGED
-  viewport,
-  // NEW PARAMS
-  coordinateSystem,
-  coordinateOrigin,
-  coordinateZoom
-}) {
-  const {viewMatrixUncentered} = viewport;
-  let {viewMatrix} = viewport;
-  const {projectionMatrix} = viewport;
-  let {viewProjectionMatrix} = viewport;
+function calculateMatrixAndOffset({viewport, coordinateSystem, coordinateOrigin}) {
+  const {viewMatrixUncentered, projectionMatrix, projectionMode} = viewport;
+  let {viewMatrix, viewProjectionMatrix} = viewport;
 
-  let projectionCenter;
+  let projectionCenter = ZERO_VECTOR;
   let cameraPosCommon = viewport.cameraPosition;
-  let shaderCoordinateSystem = getShaderCoordinateSystem(coordinateSystem);
   let shaderCoordinateOrigin = coordinateOrigin;
+  let offsetMode = true;
 
-  if (shaderCoordinateSystem === PROJECT_COORDINATE_SYSTEM.LNGLAT_AUTO_OFFSET) {
-    if (coordinateZoom < LNGLAT_AUTO_OFFSET_ZOOM_THRESHOLD) {
-      // Use LNG_LAT projection if not zooming
-      shaderCoordinateSystem = PROJECT_COORDINATE_SYSTEM.LNG_LAT;
+  if (coordinateSystem === COORDINATE_SYSTEM.LNGLAT) {
+    if (projectionMode === PROJECTION_MODE.WEB_MERCATOR) {
+      offsetMode = false;
     } else {
-      // Use LNGLAT_AUTO_OFFSET
       shaderCoordinateOrigin = [Math.fround(viewport.longitude), Math.fround(viewport.latitude), 0];
     }
-  }
-  if (shaderCoordinateSystem === PROJECT_COORDINATE_SYSTEM.IDENTITY) {
+  } else if (projectionMode === PROJECTION_MODE.IDENTITY) {
     shaderCoordinateOrigin = viewport.position.map(Math.fround);
   }
 
   shaderCoordinateOrigin[2] = shaderCoordinateOrigin[2] || 0;
 
-  switch (shaderCoordinateSystem) {
-    case PROJECT_COORDINATE_SYSTEM.LNG_LAT:
-      projectionCenter = ZERO_VECTOR;
-      break;
+  if (offsetMode) {
+    // Calculate transformed projectionCenter (using 64 bit precision JS)
+    // This is the key to offset mode precision
+    // (avoids doing this addition in 32 bit precision in GLSL)
+    const positionCommonSpace = viewport.projectPosition(shaderCoordinateOrigin);
 
-    // TODO: make lighting work for meter offset mode
-    case PROJECT_COORDINATE_SYSTEM.LNGLAT_OFFSETS:
-    case PROJECT_COORDINATE_SYSTEM.METER_OFFSETS:
-    case PROJECT_COORDINATE_SYSTEM.LNGLAT_AUTO_OFFSET:
-    case PROJECT_COORDINATE_SYSTEM.IDENTITY:
-      // Calculate transformed projectionCenter (using 64 bit precision JS)
-      // This is the key to offset mode precision
-      // (avoids doing this addition in 32 bit precision in GLSL)
-      const positionCommonSpace = viewport.projectPosition(shaderCoordinateOrigin);
+    cameraPosCommon = [
+      cameraPosCommon[0] - positionCommonSpace[0],
+      cameraPosCommon[1] - positionCommonSpace[1],
+      cameraPosCommon[2] - positionCommonSpace[2]
+    ];
 
-      cameraPosCommon = [
-        cameraPosCommon[0] - positionCommonSpace[0],
-        cameraPosCommon[1] - positionCommonSpace[1],
-        cameraPosCommon[2] - positionCommonSpace[2]
-      ];
+    positionCommonSpace[3] = 1;
 
-      positionCommonSpace[3] = 1;
+    // projectionCenter = new Matrix4(viewProjectionMatrix)
+    //   .transformVector([positionPixels[0], positionPixels[1], 0.0, 1.0]);
+    projectionCenter = vec4.transformMat4([], positionCommonSpace, viewProjectionMatrix);
 
-      // projectionCenter = new Matrix4(viewProjectionMatrix)
-      //   .transformVector([positionPixels[0], positionPixels[1], 0.0, 1.0]);
-      projectionCenter = vec4.transformMat4([], positionCommonSpace, viewProjectionMatrix);
+    // Always apply uncentered projection matrix if available (shader adds center)
+    viewMatrix = viewMatrixUncentered || viewMatrix;
 
-      // Always apply uncentered projection matrix if available (shader adds center)
-      viewMatrix = viewMatrixUncentered || viewMatrix;
-
-      // Zero out 4th coordinate ("after" model matrix) - avoids further translations
-      // viewMatrix = new Matrix4(viewMatrixUncentered || viewMatrix)
-      //   .multiplyRight(VECTOR_TO_POINT_MATRIX);
-      viewProjectionMatrix = mat4.multiply([], projectionMatrix, viewMatrix);
-      viewProjectionMatrix = mat4.multiply([], viewProjectionMatrix, VECTOR_TO_POINT_MATRIX);
-      break;
-
-    default:
-      throw new Error('Unknown projection mode');
+    // Zero out 4th coordinate ("after" model matrix) - avoids further translations
+    // viewMatrix = new Matrix4(viewMatrixUncentered || viewMatrix)
+    //   .multiplyRight(VECTOR_TO_POINT_MATRIX);
+    viewProjectionMatrix = mat4.multiply([], projectionMatrix, viewMatrix);
+    viewProjectionMatrix = mat4.multiply([], viewProjectionMatrix, VECTOR_TO_POINT_MATRIX);
   }
 
   return {
@@ -144,7 +96,6 @@ function calculateMatrixAndOffset({
     viewProjectionMatrix,
     projectionCenter,
     cameraPosCommon,
-    shaderCoordinateSystem,
     shaderCoordinateOrigin
   };
 }
@@ -163,7 +114,7 @@ export function getUniformsFromViewport({
   devicePixelRatio = 1,
   modelMatrix = null,
   // Match Layer.defaultProps
-  coordinateSystem = COORDINATE_SYSTEM.LNGLAT,
+  coordinateSystem = COORDINATE_SYSTEM.DEFAULT,
   coordinateOrigin = DEFAULT_COORDINATE_ORIGIN,
   wrapLongitude = false,
   // Deprecated
@@ -172,43 +123,41 @@ export function getUniformsFromViewport({
 } = {}) {
   assert(viewport);
 
-  return Object.assign(
-    {
-      project_uModelMatrix: modelMatrix || IDENTITY_MATRIX
-    },
-    getMemoizedViewportUniforms({
-      viewport,
-      devicePixelRatio,
-      coordinateSystem,
-      coordinateOrigin,
-      wrapLongitude
-    })
-  );
+  if (coordinateSystem === COORDINATE_SYSTEM.DEFAULT) {
+    coordinateSystem = viewport.isGeospatial
+      ? COORDINATE_SYSTEM.LNGLAT
+      : COORDINATE_SYSTEM.CARTESIAN;
+  }
+
+  const uniforms = getMemoizedViewportUniforms({
+    viewport,
+    devicePixelRatio,
+    coordinateSystem,
+    coordinateOrigin
+  });
+
+  uniforms.project_uWrapLongitude = wrapLongitude;
+  uniforms.project_uModelMatrix = modelMatrix || IDENTITY_MATRIX;
+
+  return uniforms;
 }
 
 function calculateViewportUniforms({
   viewport,
   devicePixelRatio,
   coordinateSystem,
-  coordinateOrigin,
-  wrapLongitude
+  coordinateOrigin
 }) {
-  const coordinateZoom = viewport.zoom;
-
   const {
     projectionCenter,
     viewProjectionMatrix,
     cameraPosCommon,
-    shaderCoordinateSystem,
     shaderCoordinateOrigin
   } = calculateMatrixAndOffset({
     coordinateSystem,
     coordinateOrigin,
-    coordinateZoom,
     viewport
   });
-
-  assert(viewProjectionMatrix, 'Viewport missing modelViewProjectionMatrix');
 
   // Calculate projection pixels per unit
   const distanceScales = viewport.getDistanceScales();
@@ -217,9 +166,10 @@ function calculateViewportUniforms({
 
   const uniforms = {
     // Projection mode values
-    project_uCoordinateSystem: shaderCoordinateSystem,
+    project_uCoordinateSystem: coordinateSystem,
+    project_uProjectionMode: viewport.projectionMode,
+    project_uCoordinateOrigin: shaderCoordinateOrigin,
     project_uCenter: projectionCenter,
-    project_uWrapLongitude: wrapLongitude,
     project_uAntimeridian: (viewport.longitude || 0) - 180,
 
     // Screen size
@@ -240,23 +190,16 @@ function calculateViewportUniforms({
   };
 
   const distanceScalesAtOrigin = viewport.getDistanceScales(shaderCoordinateOrigin);
-  switch (shaderCoordinateSystem) {
-    case PROJECT_COORDINATE_SYSTEM.METER_OFFSETS:
+  switch (coordinateSystem) {
+    case COORDINATE_SYSTEM.METER_OFFSETS:
       uniforms.project_uCommonUnitsPerWorldUnit = distanceScalesAtOrigin.unitsPerMeter;
       uniforms.project_uCommonUnitsPerWorldUnit2 = distanceScalesAtOrigin.unitsPerMeter2;
       break;
 
-    case PROJECT_COORDINATE_SYSTEM.LNGLAT_AUTO_OFFSET:
-      uniforms.project_uCoordinateOrigin = shaderCoordinateOrigin;
-    // eslint-disable-line no-fallthrough
-    case PROJECT_COORDINATE_SYSTEM.LNG_LAT:
-    case PROJECT_COORDINATE_SYSTEM.LNGLAT_OFFSETS:
+    case COORDINATE_SYSTEM.LNGLAT:
+    case COORDINATE_SYSTEM.LNGLAT_OFFSETS:
       uniforms.project_uCommonUnitsPerWorldUnit = distanceScalesAtOrigin.unitsPerDegree;
       uniforms.project_uCommonUnitsPerWorldUnit2 = distanceScalesAtOrigin.unitsPerDegree2;
-      break;
-
-    case PROJECT_COORDINATE_SYSTEM.IDENTITY:
-      uniforms.project_uCoordinateOrigin = shaderCoordinateOrigin;
       break;
 
     default:

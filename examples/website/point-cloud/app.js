@@ -56,8 +56,8 @@ export default class App extends PureComponent {
     this.setState({
       viewState: {
         ...viewState,
-        rotationOrbit: viewState.rotationOrbit + 30,
-        transitionDuration: 600,
+        rotationOrbit: viewState.rotationOrbit + 120,
+        transitionDuration: 2400,
         transitionInterpolator,
         onTransitionEnd: this._rotateCamera
       }
@@ -96,7 +96,7 @@ export default class App extends PureComponent {
         id: 'laz-point-cloud-layer',
         data: LAZ_SAMPLE,
         onDataLoad: this._onLoad,
-        coordinateSystem: COORDINATE_SYSTEM.IDENTITY,
+        coordinateSystem: COORDINATE_SYSTEM.CARTESIAN,
         getNormal: [0, 1, 0],
         getColor: [255, 255, 255],
         opacity: 0.5,

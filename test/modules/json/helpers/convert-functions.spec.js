@@ -75,27 +75,30 @@ const TEST_CASES = [
   {expr: 'this.three', expected: 3}
 ];
 
-test('convertFunctions#get...', t => {
+test('convertFunctions#asStrings', t => {
   const props = {};
   TEST_CASES.forEach((testCase, i) => {
     // Add a mix of function and value props
-    // TODO this is based on `get` heuristic, we have better ideas and will update tests when we address
-    const propName = i % 2 === 0 ? `get-${i}` : `value-${i}`;
-    props[propName] = testCase.expr;
+    props[`value-{i}`] = testCase.expr;
   });
-  const convertedProps = convertFunctions(null, props, {});
+  const convertedProps = convertFunctions(props, {});
   for (const key in convertedProps) {
-    if (key.startsWith('get')) {
-      t.ok(
-        typeof convertedProps[key] === 'function',
-        'convertFunctions converted prop to function'
-      );
-    } else {
-      t.ok(
-        typeof convertedProps[key] !== 'function',
-        'convertFunctions did not converted string to function'
-      );
-    }
+    t.ok(
+      typeof convertedProps[key] !== 'function',
+      'convertFunctions did not convert string to function'
+    );
+  }
+  t.end();
+});
+
+test('convertFunctions#asFunctions', t => {
+  const props = {};
+  TEST_CASES.forEach((testCase, i) => {
+    props[`func-{i}`] = `@@=${testCase.expr}`;
+  });
+  const convertedProps = convertFunctions(props, {});
+  for (const key in convertedProps) {
+    t.ok(typeof convertedProps[key] === 'function', 'convertFunctions converted prop to function');
   }
   t.end();
 });

@@ -4,13 +4,17 @@ from ..data_utils import is_pandas_df
 from .json_tools import JSONMixin
 
 
+TYPE_IDENTIFIER = '@@type'
+FUNCTION_IDENTIFIER = '@@='
+QUOTE_CHARS = {"'", '"', "`"}
+
+
 class Layer(JSONMixin):
     def __init__(
         self,
         type,
         data,
         id=None,
-        get_position='[lng, lat]',
         **kwargs
     ):
         """Configures a deck.gl layer for rendering on a map. Parameters passed
@@ -30,9 +34,6 @@ class Layer(JSONMixin):
             Unique name for layer
         data : str or list of dict of {str: Any} or pandas.DataFrame
             Either a URL of data to load in or an array of data
-        get_position : str, default '[lng, lat]'
-            Name of position field, as a string. If the position field is given by two values,
-            both as a list in a string should be provided.
         **kwargs
             Any of the parameters passable to a deck.gl layer.
 
@@ -76,10 +77,33 @@ class Layer(JSONMixin):
         self.id = id or str(uuid.uuid4())
         self._data = None
         self.data = data.to_dict(orient='records') if is_pandas_df(data) else data
-        self.get_position = get_position
 
         # Add any other kwargs to the JSON output
         if kwargs:
+            for k, v in kwargs.items():
+                # We assume strings and arrays of strings are identifiers
+                # ["lng", "lat"] would be converted to '[lng, lat]'
+                # TODO given that data here is usually a list of records,
+                # we could probably check that the identifier is in the row
+                # Errors on case like get_position='-', however
+
+                if isinstance(v, str) and v[0] in QUOTE_CHARS and v[0] == v[-1]:
+                    # Skip quoted strings
+                    kwargs[k] = v.replace(v[0], '')
+                elif isinstance(v, str):
+                    # Have @deck.gl/json treat strings values as functions
+                    kwargs[k] = FUNCTION_IDENTIFIER + v
+
+                elif isinstance(v, list) and v != [] and isinstance(v[0], str):
+                    # Allows the user to pass lists e.g. to specify coordinates
+                    array_as_str = ''
+                    for i, identifier in enumerate(v):
+                        if i == len(v) - 1:
+                            array_as_str += '{}'.format(identifier)
+                        else:
+                            array_as_str += '{}, '.format(identifier)
+                    kwargs[k] = '{}[{}]'.format(FUNCTION_IDENTIFIER, array_as_str)
+
             self.__dict__.update(kwargs)
 
     @property
@@ -93,3 +117,11 @@ class Layer(JSONMixin):
             self._data = data_set.to_dict(orient='records')
         else:
             self._data = data_set
+
+    @property
+    def type(self):
+        return getattr(self, TYPE_IDENTIFIER)
+
+    @type.setter
+    def type(self, type_name):
+        self.__setattr__(TYPE_IDENTIFIER, type_name)

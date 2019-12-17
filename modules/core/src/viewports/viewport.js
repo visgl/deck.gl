@@ -33,7 +33,7 @@ import {
   pixelsToWorld
 } from '@math.gl/web-mercator';
 
-import assert from '../utils/assert';
+import {PROJECTION_MODE} from '../lib/constants';
 
 const DEGREES_TO_RADIANS = Math.PI / 180;
 
@@ -91,6 +91,15 @@ export default class Viewport {
 
   get metersPerPixel() {
     return this.distanceScales.metersPerUnit[2] / this.scale;
+  }
+
+  get projectionMode() {
+    if (this.isGeospatial) {
+      return this.zoom < 12
+        ? PROJECTION_MODE.WEB_MERCATOR
+        : PROJECTION_MODE.WEB_MERCATOR_AUTO_OFFSET;
+    }
+    return PROJECTION_MODE.IDENTITY;
   }
 
   // Two viewports are equal if width and height are identical, and if
@@ -263,7 +272,6 @@ export default class Viewport {
   // INTERNAL METHODS
 
   _createProjectionMatrix({orthographic, fovyRadians, aspect, focalDistance, near, far}) {
-    assert(Number.isFinite(fovyRadians));
     return orthographic
       ? new Matrix4().orthographic({fovy: fovyRadians, aspect, focalDistance, near, far})
       : new Matrix4().perspective({fovy: fovyRadians, aspect, near, far});
@@ -360,21 +368,17 @@ export default class Viewport {
       // Projection matrix parameters, used if projectionMatrix not supplied
       orthographic = false,
       fovyRadians,
-      fovyDegrees,
-      fovy,
+      fovy = 75,
       near = 0.1, // Distance of near clipping plane
       far = 1000, // Distance of far clipping plane
-      focalDistance = 1, // Only needed for orthographic views
-      orthographicFocalDistance
+      focalDistance = 1
     } = opts;
-
-    const radians = fovyRadians || (fovyDegrees || fovy || 75) * DEGREES_TO_RADIANS;
 
     this.projectionProps = {
       orthographic,
-      fovyRadians: radians,
+      fovyRadians: fovyRadians || fovy * DEGREES_TO_RADIANS,
       aspect: this.width / this.height,
-      focalDistance: orthographicFocalDistance || focalDistance,
+      focalDistance,
       near,
       far
     };

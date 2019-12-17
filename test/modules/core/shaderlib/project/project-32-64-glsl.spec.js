@@ -24,8 +24,8 @@ import GL from '@luma.gl/constants';
 
 // import {COORDINATE_SYSTEM, Viewport, WebMercatorViewport} from 'deck.gl';
 import {COORDINATE_SYSTEM, WebMercatorViewport} from 'deck.gl';
-import project32 from '../../../../../modules/core/src/shaderlib/project32/project32';
-import {project, project64} from '@deck.gl/core/shaderlib';
+import {project, project32} from '@deck.gl/core';
+import {project64} from '@deck.gl/extensions';
 // import {Matrix4, config} from 'math.gl';
 import {config} from 'math.gl';
 import {gl} from '@deck.gl/test-utils';
@@ -157,10 +157,10 @@ const TEST_CASES = [
     ]
   },
   {
-    title: 'LNGLAT_DEPRECATED mode',
+    title: 'LNGLAT mode - high zoom',
     params: {
       viewport: TEST_VIEWPORT_HIGH_ZOOM,
-      coordinateSystem: COORDINATE_SYSTEM.LNGLAT_DEPRECATED
+      coordinateSystem: COORDINATE_SYSTEM.LNGLAT
     },
     tests: [
       {
@@ -174,7 +174,10 @@ const TEST_CASES = [
           [worldPosition] = project_position_to_clipspace.__out__;
           return worldPosition;
         },
-        output: TEST_VIEWPORT_HIGH_ZOOM.projectFlat([-122.05, 37.92]).concat([0, 1]),
+        output: TEST_VIEWPORT_HIGH_ZOOM.projectFlat([-122.05, 37.92])
+          .map((x, i) => x - TEST_VIEWPORT_HIGH_ZOOM.center[i])
+          .concat([0, 1]),
+        output64: TEST_VIEWPORT_HIGH_ZOOM.projectFlat([-122.05, 37.92]).concat([0, 1]),
         precision: PIXEL_TOLERANCE,
         gpu64BitPrecision: 1e-7,
         vs: TRANSFORM_VS.project_position_to_clipspace_world_position(
@@ -250,7 +253,7 @@ test('project32&64#vs', t => {
   [false, true].forEach(usefp64 => {
     /* eslint-disable max-nested-callbacks, complexity */
     TEST_CASES.forEach(testCase => {
-      if (usefp64 && testCase.params.coordinateSystem !== COORDINATE_SYSTEM.LNGLAT_DEPRECATED) {
+      if (usefp64 && testCase.params.coordinateSystem !== COORDINATE_SYSTEM.LNGLAT) {
         // Apply 64 bit projection only for LNGLAT_DEPRECATED
         return;
       }
@@ -262,7 +265,7 @@ test('project32&64#vs', t => {
         uniforms = Object.assign(uniforms, project64.getUniforms(testCase.params, uniforms));
       }
       testCase.tests.forEach(c => {
-        const expected = c.output;
+        const expected = (usefp64 && c.output64) || c.output;
         const skipOnGPU = c.skipGPUs && c.skipGPUs.some(gpu => vendor.indexOf(gpu) >= 0);
 
         if (Transform.isSupported(gl) && !skipOnGPU) {
@@ -284,14 +287,9 @@ test('project32&64#vs', t => {
         } else {
           // TODO - resolve dependencies properly
           // luma's assembleShaders require WebGL context to work
-          const vsSource =
-            []
-              .concat(
-                usefp64 ? project64.dependencies : project32.dependencies,
-                project.dependencies
-              )
-              .map(dep => dep.vs)
-              .join('') + (usefp64 ? project64.vs : project32.vs);
+          const module = usefp64 ? project64 : project32;
+          const dependencies = appendDependencies(module, []).concat(module);
+          const vsSource = dependencies.map(dep => dep.vs).join('');
 
           const projectVS = compileVertexShader(vsSource);
 
@@ -305,9 +303,9 @@ test('project32&64#vs', t => {
             uniforms.project_uViewProjectionMatrixFP64 = normalizedProjectMatrix64;
           }
 
-          const module = projectVS(uniforms);
+          const projectFunc = projectVS(uniforms);
           config.EPSILON = c.precision || 1e-7;
-          let actual = c.func(module);
+          let actual = c.func(projectFunc);
           actual = c.mapResult ? c.mapResult(actual) : actual;
           const name = `CPU: ${usefp64 ? 'project64' : 'project32'} ${c.name}`;
           verifyResult({t, name, actual, expected});
@@ -320,3 +318,14 @@ test('project32&64#vs', t => {
   config.EPSILON = oldEpsilon;
   t.end();
 });
+
+function appendDependencies(module, result) {
+  const dependencies = module.dependencies;
+  if (dependencies && dependencies.length > 0) {
+    for (const dep of dependencies) {
+      result = appendDependencies(dep, result);
+    }
+    result = result.concat(dependencies);
+  }
+  return result;
+}

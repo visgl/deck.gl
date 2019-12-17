@@ -3,10 +3,28 @@ import {DOMWidgetModel, DOMWidgetView} from '@jupyter-widgets/base';
 
 import {MODULE_NAME, MODULE_VERSION} from './version';
 
-import {loadCss, hideMapboxCSSWarning, initDeck, updateDeck} from './utils';
+import {createDeck, updateDeck} from './create-deck';
 
 const MAPBOX_CSS_URL = 'https://api.tiles.mapbox.com/mapbox-gl-js/v1.2.1/mapbox-gl.css';
 const ERROR_BOX_CLASSNAME = 'error-box';
+
+/**
+ * Hides a warning in the mapbox-gl.js library from surfacing in the notebook as text.
+ */
+function hideMapboxCSSWarning() {
+  const missingCssWarning = document.getElementsByClassName('mapboxgl-missing-css')[0];
+  if (missingCssWarning) {
+    missingCssWarning.style.display = 'none';
+  }
+}
+
+function loadCss(url) {
+  const link = document.createElement('link');
+  link.type = 'text/css';
+  link.rel = 'stylesheet';
+  link.href = url;
+  document.getElementsByTagName('head')[0].appendChild(link);
+}
 
 // Note: Variables shared explictly between Python and JavaScript use snake_case
 export class DeckGLModel extends DOMWidgetModel {
@@ -80,23 +98,20 @@ export class DeckGLView extends DOMWidgetView {
     }
 
     loadCss(MAPBOX_CSS_URL);
-    initDeck({
+    this.deck = createDeck({
       mapboxApiKey,
       container,
       jsonInput,
       tooltip,
-      onComplete: ({jsonConverter, deckgl}) => {
-        this.jsonDeck = {jsonConverter, deckgl};
-      },
       handleClick: this.handleClick.bind(this),
       handleWarning: this.handleWarning.bind(this)
     });
   }
 
   remove() {
-    if (this.jsonDeck) {
-      this.jsonDeck.deckgl.finalize();
-      this.jsonDeck = null;
+    if (this.deck) {
+      this.deck.finalize();
+      this.deck = null;
     }
   }
 
@@ -107,7 +122,7 @@ export class DeckGLView extends DOMWidgetView {
   }
 
   valueChanged() {
-    updateDeck(JSON.parse(this.model.get('json_input')), this.jsonDeck);
+    updateDeck(JSON.parse(this.model.get('json_input')), this.deck);
     // Jupyter notebook displays an error that this suppresses
     hideMapboxCSSWarning();
   }

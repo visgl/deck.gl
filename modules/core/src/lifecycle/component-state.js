@@ -21,6 +21,8 @@
 import log from '../utils/log';
 import assert from '../utils/assert';
 import {isAsyncIterable} from '../utils/iterable-utils';
+import {PROP_SYMBOLS} from './constants';
+const {ASYNC_ORIGINAL, ASYNC_RESOLVED, ASYNC_DEFAULTS} = PROP_SYMBOLS;
 
 const EMPTY_PROPS = Object.freeze({});
 
@@ -89,9 +91,9 @@ export default class ComponentState {
   // Checks if urls have changed, starts loading, or removes override
   setAsyncProps(props) {
     // NOTE: prop param and default values are only support for testing
-    const resolvedValues = props._asyncPropResolvedValues || {};
-    const originalValues = props._asyncPropOriginalValues || props;
-    const defaultValues = props._asyncPropDefaultValues || {};
+    const resolvedValues = props[ASYNC_RESOLVED] || {};
+    const originalValues = props[ASYNC_ORIGINAL] || props;
+    const defaultValues = props[ASYNC_DEFAULTS] || {};
 
     // TODO - use async props from the layer's prop types
     for (const propName in resolvedValues) {

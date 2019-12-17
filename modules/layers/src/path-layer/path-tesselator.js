@@ -17,8 +17,7 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
-import {experimental} from '@deck.gl/core';
-const {Tesselator} = experimental;
+import {Tesselator} from '@deck.gl/core';
 
 const START_CAP = 1;
 const END_CAP = 2;
@@ -27,16 +26,22 @@ const INVALID = 4;
 // This class is set up to allow querying one attribute at a time
 // the way the AttributeManager expects it
 export default class PathTesselator extends Tesselator {
-  constructor({data, getGeometry, positionFormat, fp64}) {
+  constructor(opts) {
     super({
-      data,
-      getGeometry,
-      positionFormat,
+      ...opts,
       attributes: {
-        positions: {size: 3, type: fp64 ? Float64Array : Float32Array},
+        positions: {size: 3, type: opts.fp64 ? Float64Array : Float32Array},
         segmentTypes: {size: 1, type: Uint8ClampedArray}
       }
     });
+  }
+
+  getGeometryFromBuffer(buffer) {
+    if (this.normalize) {
+      return super.getGeometryFromBuffer(buffer);
+    }
+    // we don't need to read the positions if no normalization
+    return () => null;
   }
 
   /* Getters */
@@ -46,6 +51,11 @@ export default class PathTesselator extends Tesselator {
 
   /* Implement base Tesselator interface */
   getGeometrySize(path) {
+    if (!this.normalize) {
+      const numPoints = path.length / this.positionSize;
+      return this.opts.loop ? numPoints + 2 : numPoints;
+    }
+
     const numPoints = this.getPathLength(path);
     if (numPoints < 2) {
       // invalid path
@@ -86,6 +96,9 @@ export default class PathTesselator extends Tesselator {
 
   _updatePositions(path, context) {
     const {positions} = this.attributes;
+    if (!positions) {
+      return;
+    }
     const {vertexStart, geometrySize} = context;
 
     // positions   --  A0 A1 B0 B1 B2 B3 B0 B1 B2 --
@@ -130,6 +143,9 @@ export default class PathTesselator extends Tesselator {
   }
 
   isClosed(path) {
+    if (!this.normalize) {
+      return this.opts.loop;
+    }
     const numPoints = this.getPathLength(path);
     const firstPoint = this.getPointOnPath(path, 0);
     const lastPoint = this.getPointOnPath(path, numPoints - 1);

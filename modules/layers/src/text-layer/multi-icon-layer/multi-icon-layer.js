@@ -19,6 +19,7 @@
 // THE SOFTWARE.
 
 import {createIterable} from '@deck.gl/core';
+import GL from '@luma.gl/constants';
 import IconLayer from '../../icon-layer/icon-layer';
 
 import vs from './multi-icon-layer-vertex.glsl';
@@ -29,6 +30,7 @@ const DEFAULT_GAMMA = 0.2;
 const DEFAULT_BUFFER = 192.0 / 256;
 
 const defaultProps = {
+  backgroundColor: {type: 'color', value: null, optional: true},
   // each paragraph can have one or multiple row(s)
   // each row can have one or multiple character(s)
   getRowSize: {type: 'accessor', value: x => x.rowSize || [0, 0]},
@@ -68,13 +70,18 @@ export default class MultiIconLayer extends IconLayer {
         size: 2,
         transition: true,
         accessor: 'getPixelOffset'
+      },
+      instancePickingColors: {
+        type: GL.UNSIGNED_BYTE,
+        size: 3,
+        update: this.calculateInstancePickingColors
       }
     });
   }
 
   updateState(updateParams) {
     super.updateState(updateParams);
-    const {changeFlags} = updateParams;
+    const {changeFlags, oldProps, props} = updateParams;
 
     if (
       changeFlags.updateTriggersChanged &&
@@ -82,17 +89,29 @@ export default class MultiIconLayer extends IconLayer {
     ) {
       this.getAttributeManager().invalidate('instanceOffsets');
     }
+
+    if (props.backgroundColor !== oldProps.backgroundColor) {
+      const backgroundColor = Array.isArray(props.backgroundColor)
+        ? props.backgroundColor.map(c => c / 255.0).slice(0, 3)
+        : null;
+      this.setState({backgroundColor});
+    }
   }
 
   draw({uniforms}) {
     const {sdf} = this.props;
+    const {backgroundColor} = this.state;
+    const shouldDrawBackground = Array.isArray(backgroundColor);
+
     super.draw({
       uniforms: Object.assign({}, uniforms, {
         // Refer the following doc about gamma and buffer
         // https://blog.mapbox.com/drawing-text-with-signed-distance-fields-in-mapbox-gl-b0933af6f817
         buffer: DEFAULT_BUFFER,
         gamma: DEFAULT_GAMMA,
-        sdf: Boolean(sdf)
+        sdf: Boolean(sdf),
+        backgroundColor: backgroundColor || [0, 0, 0],
+        shouldDrawBackground
       })
     });
   }

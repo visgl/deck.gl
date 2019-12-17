@@ -7,6 +7,7 @@
 ##### Defaults
 
 - The `opacity` prop of all layers is now default to `1` (used to be `0.8`).
+- [`SimpleMeshLayer`](/docs/layers/simple-mesh-layer.md) and [`ScenegraphLayer`](/docs/layers/scenegraph-layer.md): `modelMatrix` will be composed to instance transformation matrix (derived from  layer props `getOrientation`, `getScale`, `getTranslation` and `getTransformMatrix`) under `CARTESIAN` and `METER_OFFSETS` [coordinates](/docs/developer-guide/coordinate-systems.md).
 
 ##### Removed
 
@@ -14,8 +15,16 @@
   + `getStrokeWidth`: use `getWidth`
 - `LineLayer` props
   + `getStrokeWidth`: use `getWidth`
+- `PathLayer` props
+  + `getDashArray`: use [PathStyleExtension](/docs/api-reference/extensions/path-style-extension.md)
+- `PolygonLayer` and `GeoJsonLayer` props
+  + `getLineDashArray`: use [PathStyleExtension](/docs/api-reference/extensions/path-style-extension.md)
 - `H3HexagonLayer` props
   + `getColor`: use `getFillColor` and `getLineColor`
+- `Tile3DLayer` props:
+  + `onTileLoadFail`: use `onTileError`
+- `TileLayer` props:
+  + `onViewportLoaded`: use `onViewportLoad`  
 - `project` shader module
   + `project_scale`: use `project_size`
   + `project_to_clipspace`: use `project_position_to_clipspace`
@@ -28,6 +37,18 @@
   + `setLayerNeedsUpdate`: use `setNeedsUpdate`
   + `setUniforms`: use `model.setUniforms`
   + `use64bitProjection`
+  + `projectFlat`: use `projectPosition`
+- `PerspectiveView` class - use `FirstPersonView`
+- `ThirdPersonView` class - use `MapView` (geospatial) or `OrbitView` (info-vis)
+- `COORDINATE_SYSTEM` enum
+  + `LNGLAT_DEPRECATED`: use `LNGLAT`
+  + `METERS`: use `METER_OFFSETS`
+
+
+##### Debugging
+
+deck.gl now removes most logging when bundling under `NODE_ENV=production`.
+
 
 ##### Standalone bundle
 
@@ -35,6 +56,15 @@ The pre-bundled version, a.k.a. the [scripting API](/docs/get-started/using-stan
 
 - Top-level view state props such as `longitude`, `latitude`, `zoom` are no longer supported. To specify the default view state, use `initialViewState`.
 - `controller` is no longer on by default, use `controller: true`.
+
+
+##### Textures
+
+In older versions of deck, we used to set `UNPACK_FLIP_Y_WEBGL` by default when creating textures from images. This is removed in v8.0 to better align with [WebGL best practice](https://github.com/KhronosGroup/WebGL/issues/2577). As a result, the texCoords in the shaders of `BitmapLayer`, `IconLayer` and `TextLayer` are y-flipped. This only affects users who extend these layers.
+
+Users of `SimpleMeshLayer` with texture will need to flip their texture image vertically.
+
+The change has allowed us to support loading textures from `ImageBitmap`, in use cases such as rendering to `OffscreenCanvas` on a web worker. 
 
 ##### projection system
 
@@ -46,6 +76,7 @@ The pre-bundled version, a.k.a. the [scripting API](/docs/get-started/using-stan
   + `project`: `vec3 project_position(vec3 position, vec2 position64xyLow)` is now `vec3 project_position(vec3 position, vec3 position64Low)`.
   + `project`: `vec4 project_position(vec4 position, vec2 position64xyLow)` is now `vec4 project_position(vec4 position, vec3 position64Low)`.
   + `project32` and `project64`: `vec4 project_position_to_clipspace(vec3 position, vec2 position64xyLow, vec3 offset)` is now `vec4 project_position_to_clipspace(vec3 position, vec3 position64Low, vec3 offset)`.
+- The shader module [project64](/docs/shader-modules/project64.md) is no longer included in `@deck.gl/core` and `deck.gl`. You can still import it from `@deck.gl/extensions`.
 
 ##### Shader modules
 

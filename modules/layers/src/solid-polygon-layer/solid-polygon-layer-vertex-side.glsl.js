@@ -26,8 +26,8 @@ export default `\
 
 
 attribute vec3 instancePositions;
-attribute vec3 instancePositions64Low;
 attribute vec3 nextPositions;
+attribute vec3 instancePositions64Low;
 attribute vec3 nextPositions64Low;
 attribute float instanceElevations;
 attribute vec4 instanceFillColors;

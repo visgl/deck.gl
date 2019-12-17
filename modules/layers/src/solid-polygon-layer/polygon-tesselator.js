@@ -24,17 +24,15 @@
 // - 3D surfaces (top and sides only)
 // - 3D wireframes (not yet)
 import * as Polygon from './polygon';
-import {experimental} from '@deck.gl/core';
-const {Tesselator} = experimental;
+import {Tesselator} from '@deck.gl/core';
 
 // This class is set up to allow querying one attribute at a time
 // the way the AttributeManager expects it
 export default class PolygonTesselator extends Tesselator {
-  constructor({data, getGeometry, fp64, positionFormat, IndexType = Uint32Array}) {
+  constructor(opts) {
+    const {fp64, IndexType = Uint32Array} = opts;
     super({
-      data,
-      getGeometry,
-      positionFormat,
+      ...opts,
       attributes: {
         positions: {size: 3, type: fp64 ? Float64Array : Float32Array},
         vertexValid: {type: Uint8ClampedArray, size: 1},
@@ -45,20 +43,41 @@ export default class PolygonTesselator extends Tesselator {
 
   /* Getters */
   get(attributeName) {
+    const {attributes} = this;
     if (attributeName === 'indices') {
-      return this.attributes.indices.subarray(0, this.vertexCount);
+      return attributes.indices && attributes.indices.subarray(0, this.vertexCount);
     }
 
-    return this.attributes[attributeName];
+    return attributes[attributeName];
   }
 
   /* Implement base Tesselator interface */
+  updateGeometry(opts) {
+    super.updateGeometry(opts);
+
+    const externalIndices = this.buffers.indices;
+    if (externalIndices) {
+      this.vertexCount = (externalIndices.value || externalIndices).length;
+    }
+  }
+
   getGeometrySize(polygon) {
-    return Polygon.getVertexCount(polygon, this.positionSize);
+    return Polygon.getVertexCount(polygon, this.positionSize, this.normalize);
+  }
+
+  getGeometryFromBuffer(buffer) {
+    const getGeometry = super.getGeometryFromBuffer(buffer);
+    if (this.normalize || !this.buffers.indices) {
+      return getGeometry;
+    }
+    // we don't need to read the positions if no normalization/tesselation
+    return () => null;
   }
 
   updateGeometryAttributes(polygon, context) {
-    polygon = Polygon.normalize(polygon, this.positionSize, context.geometrySize);
+    if (this.normalize) {
+      polygon = Polygon.normalize(polygon, this.positionSize, context.geometrySize);
+    }
 
     this._updateIndices(polygon, context);
     this._updatePositions(polygon, context);
@@ -70,6 +89,9 @@ export default class PolygonTesselator extends Tesselator {
     const {attributes, indexStarts, typedArrayManager} = this;
 
     let target = attributes.indices;
+    if (!target) {
+      return;
+    }
     let i = indexStart;
 
     // 1. get triangulated indices for the internal areas
@@ -95,7 +117,10 @@ export default class PolygonTesselator extends Tesselator {
       attributes: {positions},
       positionSize
     } = this;
-    const {positions: polygonPositions} = polygon;
+    if (!positions) {
+      return;
+    }
+    const polygonPositions = polygon.positions || polygon;
 
     for (let i = vertexStart, j = 0; j < geometrySize; i++, j++) {
       const x = polygonPositions[j * positionSize];
@@ -113,7 +138,7 @@ export default class PolygonTesselator extends Tesselator {
       attributes: {vertexValid},
       positionSize
     } = this;
-    const {holeIndices} = polygon;
+    const holeIndices = polygon && polygon.holeIndices;
     /* We are reusing the some buffer for `nextPositions` by offseting one vertex
      * to the left. As a result,
      * the last vertex of each ring overlaps with the first vertex of the next ring.

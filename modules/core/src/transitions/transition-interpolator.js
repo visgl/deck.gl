@@ -80,7 +80,7 @@ export default class TransitionInterpolator {
    * @returns {object} - a list of interpolated viewport props
    */
   interpolateProps(startProps, endProps, t) {
-    assert(false, 'interpolateProps is not implemented');
+    return endProps;
   }
 
   /**

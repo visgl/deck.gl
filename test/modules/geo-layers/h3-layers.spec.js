@@ -20,8 +20,7 @@
 
 import test from 'tape-catch';
 import {h3ToGeoBoundary, h3ToGeo} from 'h3-js';
-import {experimental} from '@deck.gl/core';
-const {count} = experimental;
+import {_count as count} from '@deck.gl/core';
 import {testLayer, generateLayerTests} from '@deck.gl/test-utils';
 import {H3HexagonLayer, H3ClusterLayer} from '@deck.gl/geo-layers';
 import {scalePolygon, normalizeLongitudes} from '@deck.gl/geo-layers/h3-layers/h3-hexagon-layer';

@@ -306,7 +306,6 @@ export default class IconManager {
 
   _loadIcons(icons) {
     const ctx = this._canvas.getContext('2d');
-    const canvasHeight = this._texture.height;
 
     for (const icon of icons) {
       loadImage(icon.url).then(imageData => {
@@ -318,12 +317,9 @@ export default class IconManager {
         this._texture.setSubImageData({
           data,
           x,
-          y: canvasHeight - y - height, // flip Y as texture stored as reversed Y
+          y,
           width,
-          height,
-          parameters: Object.assign({}, DEFAULT_TEXTURE_PARAMETERS, {
-            [GL.UNPACK_FLIP_Y_WEBGL]: true
-          })
+          height
         });
 
         // Call to regenerate mipmaps after modifying texture(s)

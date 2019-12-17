@@ -150,9 +150,9 @@ export default class BitmapLayer extends Layer {
     }
 
     /*
-      0,1 --- 1,1
-       |       |
       0,0 --- 1,0
+       |       |
+      0,1 --- 1,1
     */
     return new Model(
       gl,
@@ -162,7 +162,7 @@ export default class BitmapLayer extends Layer {
           drawMode: GL.TRIANGLE_FAN,
           vertexCount: 4,
           attributes: {
-            texCoords: new Float32Array([0, 0, 0, 1, 1, 1, 1, 0])
+            texCoords: new Float32Array([0, 1, 0, 0, 1, 0, 1, 1])
           }
         }),
         isInstanced: false

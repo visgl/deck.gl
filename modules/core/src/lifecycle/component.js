@@ -1,9 +1,7 @@
 import {LIFECYCLE} from '../lifecycle/constants';
-import {createProps} from '../lifecycle/create-props';
-// import {diffProps} from '../lifecycle/props';
-// import log from '../utils/log';
-// import assert from '../utils/assert';
-
+import {createProps} from './create-props';
+import {PROP_SYMBOLS} from './constants';
+const {ASYNC_ORIGINAL, ASYNC_RESOLVED, ASYNC_DEFAULTS} = PROP_SYMBOLS;
 import ComponentState from './component-state';
 
 const defaultProps = {};
@@ -38,11 +36,11 @@ export default class Component {
     const asyncProps = {};
 
     // See async props definition in create-props.js
-    for (const key in props._asyncPropDefaultValues) {
-      if (key in props._asyncPropResolvedValues) {
-        asyncProps[key] = props._asyncPropResolvedValues[key];
-      } else if (key in props._asyncPropOriginalValues) {
-        asyncProps[key] = props._asyncPropOriginalValues[key];
+    for (const key in props[ASYNC_DEFAULTS]) {
+      if (key in props[ASYNC_RESOLVED]) {
+        asyncProps[key] = props[ASYNC_RESOLVED][key];
+      } else if (key in props[ASYNC_ORIGINAL]) {
+        asyncProps[key] = props[ASYNC_ORIGINAL][key];
       }
     }
 

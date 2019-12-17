@@ -2,7 +2,7 @@
   <head>
     <title>deck.gl IconLayer Example</title>
 
-    <script src="https://unpkg.com/deck.gl@^7.0.0/dist.min.js"></script>
+    <script src="https://unpkg.com/deck.gl@^8.0.0/dist.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/rest.js/15.2.6/octokit-rest.min.js"></script>
 
     <style type="text/css">
@@ -43,7 +43,6 @@
 
       const iconLayer = new IconLayer({
         id: 'users',
-        coordinateSystem: COORDINATE_SYSTEM.IDENTITY,
         data,
         getIcon: d => ({
           url: d.avatar_url,
@@ -58,7 +57,6 @@
 
       const lineLayer = new LineLayer({
         id: 'links',
-        coordinateSystem: COORDINATE_SYSTEM.IDENTITY,
         data,
         pickable: true,
         getSourcePosition: d => ORIGIN,
@@ -69,7 +67,6 @@
 
       const scatterPlotLayer = new ScatterplotLayer({
         id: 'deck.gl-circle',
-        coordinateSystem: COORDINATE_SYSTEM.IDENTITY,
         data: [{position: [0, 0]}],
         getPosition: d => d.position,
         getFillColor: [23, 38, 42],
@@ -79,7 +76,6 @@
 
       const textLayer = new TextLayer({
         id: 'deck.gl-label',
-        coordinateSystem: COORDINATE_SYSTEM.IDENTITY,
         data: [{position: [0, 0]}],
         getSize: 15,
         getPosition: d => d.position,

@@ -5,7 +5,7 @@ export async function waitForGLTFAssets(gltfObjects) {
 
   gltfObjects.scenes.forEach(scene => {
     scene.traverse(model => {
-      Object.values(model.model.program.uniforms).forEach(uniform => {
+      Object.values(model.model.getUniforms()).forEach(uniform => {
         if (uniform.loaded === false) {
           remaining.push(uniform);
         }

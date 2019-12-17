@@ -19,8 +19,6 @@
 // THE SOFTWARE.
 /* eslint-disable max-len */
 
-const experimental = {};
-
 //
 // CORE LIBRARY
 //
@@ -37,9 +35,7 @@ export {
   View,
   MapView,
   FirstPersonView,
-  ThirdPersonView,
   OrbitView,
-  PerspectiveView,
   OrthographicView,
   // Viewports
   Viewport,
@@ -47,13 +43,15 @@ export {
   // Controllers
   Controller,
   MapController,
+  OrbitController,
+  FirstPersonController,
+  OrthographicController,
   // For custom layers
   AttributeManager,
   // Shader modules
   picking,
   project,
   project32,
-  project64,
   gouraudLighting,
   phongLighting,
   shadow,
@@ -62,9 +60,6 @@ export {
   DeckRenderer,
   // Logging
   log,
-  // Controllers
-  _OrbitController,
-  _FirstPersonController,
   // Transition bindings
   TRANSITION_EVENTS,
   LinearInterpolator,
@@ -80,45 +75,10 @@ export {
   // Extension
   LayerExtension,
   // Utilities
+  Tesselator,
   fp64LowPart,
-  createIterable,
-  mergeShaders
+  createIterable
 } from '@deck.gl/core';
-
-// EXPERIMENTAL CORE LIB CLASSES (May change in minor version bumps, use at your own risk)
-import {experimental as CoreExperimental} from '@deck.gl/core';
-import {experimental as AggregationExperimental} from '@deck.gl/aggregation-layers';
-
-// Experimental Data Accessor Helpers
-// INTERNAL - TODO remove from experimental exports
-const {
-  // For layers
-  count,
-  flattenVertices,
-  fillArray
-} = CoreExperimental;
-
-const {
-  BinSorter,
-  linearScale,
-  getLinearScale,
-  quantizeScale,
-  getQuantizeScale,
-  defaultColorRange
-} = AggregationExperimental;
-
-Object.assign(experimental, {
-  // For layers
-  BinSorter,
-  linearScale,
-  getLinearScale,
-  quantizeScale,
-  getQuantizeScale,
-  defaultColorRange,
-  count,
-  flattenVertices,
-  fillArray
-});
 
 //
 // LAYERS PACKAGES
@@ -168,9 +128,3 @@ export {SimpleMeshLayer, ScenegraphLayer} from '@deck.gl/mesh-layers';
 //
 
 export {default, DeckGL} from '@deck.gl/react';
-
-//
-// EXPERIMENTAL EXPORTS
-//
-
-export {experimental};

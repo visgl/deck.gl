@@ -1,58 +1,45 @@
 <!DOCTYPE html>
 <html>
+
 <head>
   <style type="text/css">
-    body {padding: 0; margin: 0;}
-    #app {width: 100vw; height: 100vh; overflow: hidden;}
+    body {
+      padding: 0;
+      margin: 0;
+    }
+
+    #app {
+      width: 100vw;
+      height: 100vh;
+      overflow: hidden;
+      background: white;
+    }
   </style>
 </head>
+
 <body>
   <div id="app"></div>
-  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.js"></script>
+  <script type="text/javascript" src="/modules/jupyter-widget/dist/index.js"></script>
   <script type="text/javascript">
+    let deck;
+    window.onmessage = evt => {
+      if (!deck) {
+        deck = createDeck({
+          mapboxApiKey: 'NO_API_KEY',
+          container: document.getElementById('app'),
+          jsonInput: evt.data.json,
+          useTooltip: true
+        });
 
-const DEPENDENCIES = {
-  paths: {
-    '@deck.gl/jupyter-widget': '/modules/jupyter-widget/dist/index',
-    'deck.gl': '/modules/main/dist.min',
-    'mapbox-gl': '/node_modules/mapbox-gl/dist/mapbox-gl',
-    'h3': '/node_modules/h3-js/dist/h3-js.umd',
-    's2Geometry': '/node_modules/s2-geometry/src/s2geometry',
-    'loaders.gl/csv': '/node_modules/@loaders.gl/csv/dist/dist.min'
-  }
-};
-
-define('@jupyter-widgets/base', function() {
-  return {
-    DOMWidgetModel: function() {},
-    DOMWidgetView: function() {}
-  };
-});
-
-requirejs.config(DEPENDENCIES);
-
-function render(jsonInput) {
-  requirejs(['@deck.gl/jupyter-widget'], (root) => {
-    root.initDeck({
-      mapboxApiKey: 'NO_API_KEY', 
-      container: document.getElementById('app'),
-      jsonInput,
-      useTooltip: true,
-      onComplete: ({deckgl}) => {
-        deckgl.setProps({
+        deck.setProps({
           onAfterRender: () => window.top.postMessage('done')
         });
+
+      } else {
+        updateDeck(evt.data.json, deck);
       }
-    });
-  });
-}
-
-window.onmessage = evt => {
-  if (evt.data.json) {
-    render(evt.data.json);
-  }
-};
-
+    }
   </script>
 </body>
+
 </html>

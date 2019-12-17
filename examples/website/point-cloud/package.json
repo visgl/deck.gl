@@ -7,9 +7,9 @@
     "start-local": "webpack-dev-server --env.local --progress --hot --open"
   },
   "dependencies": {
-    "@loaders.gl/las": "^1.3.3",
-    "@loaders.gl/ply": "^1.3.3",
-    "deck.gl": "^7.3.0-beta",
+    "@loaders.gl/las": "^2.0.0-beta.5",
+    "@loaders.gl/ply": "^2.0.0-beta.5",
+    "deck.gl": "^8.0.0-beta",
     "react": "^16.3.0",
     "react-dom": "^16.3.0"
   },

@@ -18,9 +18,8 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {CompositeLayer, AttributeManager, experimental} from '@deck.gl/core';
-import {cssToDeviceRatio, log} from '@luma.gl/core';
-const {compareProps} = experimental;
+import {CompositeLayer, AttributeManager, _compareProps as compareProps} from '@deck.gl/core';
+import {cssToDeviceRatio} from '@luma.gl/core';
 
 // props when changed results in new uniforms that requires re-aggregation
 const UNIFORM_PROPS = [
@@ -48,7 +47,7 @@ export default class AggregationLayer extends CompositeLayer {
       if (shaders && shaders.defines) {
         shaders.defines.NON_INSTANCED_MODEL = 1;
       }
-      this._updateShaders(shaders);
+      this.updateShaders(shaders);
     }
 
     // Explictly call to update attributes as 'CompositeLayer' doesn't call this
@@ -83,7 +82,11 @@ export default class AggregationLayer extends CompositeLayer {
     return moduleSettings;
   }
 
-  _isAggregationDirty(opts) {
+  updateShaders(shaders) {
+    // Default implemention is empty, subclasses can update their Model objects if needed
+  }
+
+  isAggregationDirty(opts) {
     if (this.state.dataChanged || opts.changeFlags.extensionsChanged) {
       return true;
     }
@@ -99,10 +102,7 @@ export default class AggregationLayer extends CompositeLayer {
     );
   }
 
-  _updateShaders(shaders) {
-    // Sublayers should implement this method.
-    log.assert(false);
-  }
+  // Private
 
   // override Composite layer private method to create AttributeManager instance
   _getAttributeManager() {

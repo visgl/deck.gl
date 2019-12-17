@@ -54,65 +54,39 @@ export {default as Viewport} from './viewports/viewport';
 export {default as WebMercatorViewport} from './viewports/web-mercator-viewport';
 
 // Shader modules
-export {
-  picking,
-  project,
-  project32,
-  project64,
-  gouraudLighting,
-  phongLighting,
-  shadow
-} from './shaderlib';
+export {picking, project, project32, gouraudLighting, phongLighting, shadow} from './shaderlib';
 
 export {default as View} from './views/view';
 export {default as MapView} from './views/map-view';
 export {default as FirstPersonView} from './views/first-person-view';
-export {default as ThirdPersonView} from './views/third-person-view';
 export {default as OrbitView} from './views/orbit-view';
-export {default as PerspectiveView} from './views/perspective-view';
 export {default as OrthographicView} from './views/orthographic-view';
 
 // Controllers
 export {default as Controller} from './controllers/controller';
 export {default as MapController} from './controllers/map-controller';
-// Experimental Controllers
-export {default as _FirstPersonController} from './controllers/first-person-controller';
-export {default as _OrbitController} from './controllers/orbit-controller';
-export {default as _OrthographicController} from './controllers/orthographic-controller';
+export {default as FirstPersonController} from './controllers/first-person-controller';
+export {default as OrbitController} from './controllers/orbit-controller';
+export {default as OrthographicController} from './controllers/orthographic-controller';
 
-// EXPERIMENTAL EXPORTS
-
-// Experimental Effects (non-React) bindings
+// Extensions interface
 export {default as Effect} from './lib/effect';
+export {default as LayerExtension} from './lib/layer-extension';
 
-// Eperimental Transitions
+// Transitions
 export {TRANSITION_EVENTS} from './controllers/transition-manager';
 export {default as LinearInterpolator} from './transitions/linear-interpolator';
 export {default as FlyToInterpolator} from './transitions/viewport-fly-to-interpolator';
 
 // Layer utilities
 export {default as log} from './utils/log';
-import {flattenVertices, fillArray} from './utils/flatten'; // Export? move to luma.gl or math.gl?
-
 export {createIterable} from './utils/iterable-utils';
 export {fp64LowPart} from './utils/math-utils';
-import Tesselator from './utils/tesselator'; // Export? move to luma.gl or math.gl?
-import {count} from './utils/count';
-import memoize from './utils/memoize';
-export {mergeShaders} from './utils/shader';
+export {default as Tesselator} from './utils/tesselator'; // Export? move to luma.gl or math.gl?
 
-export {LayerExtension} from './lib/layer-extension';
-
-// props
-import {compareProps} from './lifecycle/props';
-
-// Exports for layers
-// Experimental Features may change in minor version bumps, use at your own risk)
-export const experimental = {
-  Tesselator,
-  flattenVertices,
-  fillArray,
-  count,
-  memoize,
-  compareProps
-};
+// Experimental utilities
+export {fillArray as _fillArray} from './utils/flatten'; // Export? move to luma.gl or math.gl?
+export {count as _count} from './utils/count';
+export {default as _memoize} from './utils/memoize';
+export {mergeShaders as _mergeShaders} from './utils/shader';
+export {compareProps as _compareProps} from './lifecycle/props';

@@ -140,6 +140,15 @@ pip install -r requirements-dev.txt
 pip install -e .
 ```
 
+To enable develop with Jupyter Lab, run:
+
+```bash
+# Execute in deck.gl/modules/jupyter-widget directory
+jupyter labextension install @jupyter-widgets/jupyterlab-manager@1.0.3 --no-build
+jupyter labextension install . --no-build
+jupyter lab build
+```
+
 ### Tests
 
 Tests are handled by pytest. In the top-level pydeck directory, you can type:

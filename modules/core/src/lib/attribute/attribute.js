@@ -1,7 +1,7 @@
 /* eslint-disable complexity */
 import DataColumn from './data-column';
 import assert from '../../utils/assert';
-import {createIterable} from '../../utils/iterable-utils';
+import {createIterable, getAccessorFromBuffer} from '../../utils/iterable-utils';
 import {fillArray} from '../../utils/flatten';
 import * as range from '../../utils/range';
 import {normalizeTransitionSettings} from './attribute-transition-utils';
@@ -23,13 +23,15 @@ export default class Attribute extends DataColumn {
     Object.assign(this.settings, {
       transition,
       noAlloc,
-      update: update || (accessor && this._standardAccessor),
+      update: update || (accessor && this._autoUpdater),
       accessor,
       transform
     });
 
     Object.assign(this.state, {
       lastExternalBuffer: null,
+      binaryValue: null,
+      binaryAccessor: null,
       needsUpdate: true,
       needsRedraw: false,
       updateRanges: range.FULL,
@@ -133,7 +135,7 @@ export default class Attribute extends DataColumn {
     return false;
   }
 
-  updateBuffer({numInstances, startIndices, data, props, context}) {
+  updateBuffer({numInstances, data, props, context}) {
     if (!this.needsUpdate()) {
       return false;
     }
@@ -147,7 +149,7 @@ export default class Attribute extends DataColumn {
     if (update) {
       // Custom updater - typically for non-instanced layers
       for (const [startRow, endRow] of updateRanges) {
-        update.call(context, this, {data, startRow, endRow, props, numInstances, startIndices});
+        update.call(context, this, {data, startRow, endRow, props, numInstances});
       }
       if (!this.value) {
         // no value was assigned during update
@@ -214,11 +216,60 @@ export default class Attribute extends DataColumn {
     state.lastExternalBuffer = buffer;
     this.setNeedsRedraw();
     this.setData(buffer);
-
     return true;
   }
 
-  getVertexOffset(row, startIndices = this.startIndices) {
+  // Binary value is a typed array packed from mapping the source data with the accessor
+  // If the returned value from the accessor is the same as the attribute value, set it directly
+  // Otherwise use the auto updater for transform/normalization
+  setBinaryValue(buffer, startIndices = null) {
+    const {state, settings} = this;
+
+    if (!buffer) {
+      state.binaryValue = null;
+      state.binaryAccessor = null;
+      return false;
+    }
+
+    if (settings.noAlloc) {
+      // Let the layer handle this
+      return false;
+    }
+
+    if (state.binaryValue === buffer) {
+      this.clearNeedsUpdate();
+      return true;
+    }
+    state.binaryValue = buffer;
+    this.setNeedsRedraw();
+
+    if (ArrayBuffer.isView(buffer)) {
+      buffer = {value: buffer};
+    }
+    assert(ArrayBuffer.isView(buffer.value), `invalid ${settings.accessor}`);
+    const needsUpdate = settings.transform || startIndices !== this.startIndices;
+
+    if (needsUpdate) {
+      const needsNormalize = buffer.size && buffer.size !== this.size;
+
+      state.binaryAccessor = getAccessorFromBuffer(buffer.value, {
+        size: buffer.size || this.size,
+        stride: buffer.stride,
+        offset: buffer.offset,
+        startIndices,
+        nested: needsNormalize
+      });
+      // Fall through to auto updater
+      return false;
+    }
+
+    this.clearNeedsUpdate();
+    this.setData(buffer);
+    return true;
+  }
+
+  getVertexOffset(row) {
+    const {startIndices} = this;
     const vertexIndex = startIndices ? startIndices[row] : row;
     return vertexIndex * this.size;
   }
@@ -238,15 +289,16 @@ export default class Attribute extends DataColumn {
   }
 
   /* eslint-disable max-depth, max-statements */
-  _standardAccessor(attribute, {data, startRow, endRow, props, numInstances, startIndices}) {
-    const {settings, value, size} = attribute;
+  _autoUpdater(attribute, {data, startRow, endRow, props, numInstances}) {
+    const {settings, state, value, size, startIndices} = attribute;
 
     const {accessor, transform} = settings;
-    const accessorFunc = typeof accessor === 'function' ? accessor : props[accessor];
+    const accessorFunc =
+      state.binaryAccessor || (typeof accessor === 'function' ? accessor : props[accessor]);
 
     assert(typeof accessorFunc === 'function', `accessor "${accessor}" is not a function`);
 
-    let i = attribute.getVertexOffset(startRow, startIndices);
+    let i = attribute.getVertexOffset(startRow);
     const {iterable, objectInfo} = createIterable(data, startRow, endRow);
     for (const object of iterable) {
       objectInfo.index++;
@@ -270,7 +322,7 @@ export default class Attribute extends DataColumn {
         } else if (objectValue && objectValue.length > size) {
           value.set(objectValue, i);
         } else {
-          attribute._normalizeValue(objectValue, objectInfo.target);
+          attribute._normalizeValue(objectValue, objectInfo.target, 0);
           fillArray({
             target: value,
             source: objectInfo.target,
@@ -285,7 +337,6 @@ export default class Attribute extends DataColumn {
       }
     }
     attribute.constant = false;
-    attribute.startIndices = startIndices;
   }
   /* eslint-enable max-depth, max-statements */
 

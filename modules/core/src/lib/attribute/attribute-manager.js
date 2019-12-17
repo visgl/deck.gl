@@ -21,74 +21,18 @@
 /* eslint-disable guard-for-in */
 import Attribute from './attribute';
 import log from '../../utils/log';
+import debug from '../../debug';
 
 import AttributeTransitionManager from './attribute-transition-manager';
 
-const LOG_START_END_PRIORITY = 2;
-const LOG_DETAIL_PRIORITY = 3;
-
-function noop() {}
-
-// Default loggers
-const logFunctions = {
-  savedMessages: null,
-  timeStart: null,
-  onLog: ({level, message}) => {
-    log.log(level, message)();
-  },
-  onUpdateStart: ({level, numInstances}) => {
-    logFunctions.savedMessages = [];
-    logFunctions.timeStart = new Date();
-  },
-  onUpdate: ({level, message}) => {
-    if (logFunctions.savedMessages) {
-      logFunctions.savedMessages.push(message);
-    }
-  },
-  onUpdateEnd: ({level, id, numInstances}) => {
-    const timeMs = Math.round(new Date() - logFunctions.timeStart);
-    const time = `${timeMs}ms`;
-    log.group(level, `Updated attributes for ${numInstances} instances in ${id} in ${time}`, {
-      collapsed: true
-    })();
-    for (const message of logFunctions.savedMessages) {
-      log.log(level, message)();
-    }
-    log.groupEnd(level, `Updated attributes for ${numInstances} instances in ${id} in ${time}`)();
-    logFunctions.savedMessages = null;
-  }
-};
+const TRACE_INVALIDATE = 'attributeManager.invalidate';
+const TRACE_UPDATE_START = 'attributeManager.updateStart';
+const TRACE_UPDATE_END = 'attributeManager.updateEnd';
+const TRACE_ATTRIBUTE_UPDATE_START = 'attribute.updateStart';
+const TRACE_ATTRIBUTE_ALLOCATE = 'attribute.allocate';
+const TRACE_ATTRIBUTE_UPDATE_END = 'attribute.updateEnd';
 
 export default class AttributeManager {
-  /**
-   * Sets log functions to help trace or time attribute updates.
-   * Default logging uses deck logger.
-   *
-   * `onLog` is called for each attribute.
-   *
-   * To enable detailed control of timming and e.g. hierarchical logging,
-   * hooks are also provided for update start and end.
-   *
-   * @param {Object} [opts]
-   * @param {String} [onLog=] - called to print
-   * @param {String} [onUpdateStart=] - called before update() starts
-   * @param {String} [onUpdateEnd=] - called after update() ends
-   */
-  static setDefaultLogFunctions({onLog, onUpdateStart, onUpdate, onUpdateEnd} = {}) {
-    if (onLog !== undefined) {
-      logFunctions.onLog = onLog || noop;
-    }
-    if (onUpdateStart !== undefined) {
-      logFunctions.onUpdateStart = onUpdateStart || noop;
-    }
-    if (onUpdate !== undefined) {
-      logFunctions.onUpdate = onUpdate || noop;
-    }
-    if (onUpdateEnd !== undefined) {
-      logFunctions.onUpdateEnd = onUpdateEnd || noop;
-    }
-  }
-
   /**
    * @classdesc
    * Automated attribute generation and management. Suitable when a set of
@@ -195,10 +139,7 @@ export default class AttributeManager {
   invalidate(triggerName, dataRange) {
     const invalidatedAttributes = this._invalidateTrigger(triggerName, dataRange);
     // For performance tuning
-    logFunctions.onLog({
-      level: LOG_DETAIL_PRIORITY,
-      message: `invalidated attributes ${invalidatedAttributes} (${triggerName}) for ${this.id}`
-    });
+    debug(TRACE_INVALIDATE, this, triggerName, invalidatedAttributes);
   }
 
   invalidateAll(dataRange) {
@@ -206,17 +147,14 @@ export default class AttributeManager {
       this.attributes[attributeName].setNeedsUpdate(attributeName, dataRange);
     }
     // For performance tuning
-    logFunctions.onLog({
-      level: LOG_DETAIL_PRIORITY,
-      message: `invalidated all attributes for ${this.id}`
-    });
+    debug(TRACE_INVALIDATE, this, 'all');
   }
 
   // Ensure all attribute buffers are updated from props or data.
   update({
     data,
     numInstances,
-    startIndices,
+    startIndices = null,
     transitions,
     props = {},
     buffers = {},
@@ -225,28 +163,34 @@ export default class AttributeManager {
     // keep track of whether some attributes are updated
     let updated = false;
 
-    logFunctions.onUpdateStart({level: LOG_START_END_PRIORITY, id: this.id, numInstances});
+    debug(TRACE_UPDATE_START, this);
     if (this.stats) {
       this.stats.get('Update Attributes').timeStart();
     }
 
     for (const attributeName in this.attributes) {
       const attribute = this.attributes[attributeName];
+      const accessorName = attribute.settings.accessor;
+      attribute.startIndices = startIndices;
 
-      if (
-        attribute.setExternalBuffer(
-          buffers[attributeName] || (data.attributes && data.attributes[attributeName])
-        )
-      ) {
-        // Attribute is using external buffer from the props
-      } else if (attribute.setConstantValue(props[attribute.settings.accessor])) {
-        // Attribute is using generic value from the props
+      if (props[attributeName]) {
+        log.removed(`props.${attributeName}`, `data.attributes.${attributeName}`)();
+      }
+
+      if (attribute.setExternalBuffer(buffers[attributeName])) {
+        // Step 1: try update attribute directly from external buffers
+      } else if (attribute.setBinaryValue(buffers[accessorName], data.startIndices)) {
+        // Step 2: try set packed value from external typed array
+      } else if (!buffers[accessorName] && attribute.setConstantValue(props[accessorName])) {
+        // Step 3: try set constant value from props
+        // Note: if buffers[accessorName] is supplied, ignore props[accessorName]
+        // This may happen when setBinaryValue falls through to use the auto updater
       } else if (attribute.needsUpdate()) {
+        // Step 4: update via updater callback
         updated = true;
         this._updateAttribute({
           attribute,
           numInstances,
-          startIndices,
           data,
           props,
           context
@@ -258,7 +202,7 @@ export default class AttributeManager {
 
     if (updated) {
       // Only initiate alloc/update (and logging) if actually needed
-      logFunctions.onUpdateEnd({level: LOG_START_END_PRIORITY, id: this.id, numInstances});
+      debug(TRACE_UPDATE_END, this, numInstances);
     }
 
     if (this.stats) {
@@ -399,37 +343,23 @@ export default class AttributeManager {
           attribute.setNeedsUpdate(attribute.id, dataRange);
         }
       });
-    } else {
-      let message = `invalidating non-existent trigger ${triggerName} for ${this.id}\n`;
-      message += `Valid triggers: ${Object.keys(attributes).join(', ')}`;
-      log.warn(message, invalidatedAttributes)();
     }
     return invalidatedAttributes;
   }
 
   _updateAttribute(opts) {
     const {attribute, numInstances} = opts;
+    debug(TRACE_ATTRIBUTE_UPDATE_START, attribute);
 
     if (attribute.allocate(numInstances)) {
-      logFunctions.onUpdate({
-        level: LOG_DETAIL_PRIORITY,
-        message: `${attribute.id} allocated ${numInstances}`,
-        id: this.id
-      });
+      debug(TRACE_ATTRIBUTE_ALLOCATE, attribute, numInstances);
     }
 
     // Calls update on any buffers that need update
-    const timeStart = Date.now();
-
     const updated = attribute.updateBuffer(opts);
     if (updated) {
       this.needsRedraw = true;
-
-      const timeMs = Math.round(Date.now() - timeStart);
-      logFunctions.onUpdate({
-        level: LOG_DETAIL_PRIORITY,
-        message: `${attribute.id} updated ${numInstances} in ${timeMs}ms`
-      });
+      debug(TRACE_ATTRIBUTE_UPDATE_END, attribute, numInstances);
     }
   }
 }

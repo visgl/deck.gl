@@ -21,25 +21,42 @@
 // Note: The numeric values here are matched by shader code in the
 // "project" and "project64" shader modules. Both places need to be
 // updated.
+import log from '../utils/log';
 
-// TODO: Maybe "POSITIONS" would be a better name?
+// Describes the format of positions
 export const COORDINATE_SYSTEM = {
+  // `LNGLAT` if rendering into a geospatial viewport, `CARTESIAN` otherwise
+  DEFAULT: -1,
   // Positions are interpreted as [lng, lat, elevation]
   // lng lat are degrees, elevation is meters. distances as meters.
   LNGLAT: 1,
-  LNGLAT_DEPRECATED: 5,
 
   // Positions are interpreted as meter offsets, distances as meters
   METER_OFFSETS: 2,
-  // Planned to deprecate in later versions, in favor of METER_OFFSETS
-  METERS: 2,
 
   // Positions are interpreted as lng lat offsets: [deltaLng, deltaLat, elevation]
   // deltaLng, deltaLat are delta degrees, elevation is meters.
   // distances as meters.
   LNGLAT_OFFSETS: 3,
 
-  // Positions and distances are not transformed: [x, y, z] in unit coordinates
+  // Non-geospatial
+  CARTESIAN: 0
+};
+
+// Deprecated
+/* eslint-disable accessor-pairs */
+Object.defineProperty(COORDINATE_SYSTEM, 'IDENTITY', {
+  get: () => log.deprecated('COORDINATE_SYSTEM.IDENTITY', 'COORDINATE_SYSTEM.CARTESIAN')() || 0
+});
+/* eslint-enable accessor-pairs */
+
+// Describes the common space
+export const PROJECTION_MODE = {
+  WEB_MERCATOR: 1,
+
+  // This is automatically assigned by the project module
+  WEB_MERCATOR_AUTO_OFFSET: 4,
+
   IDENTITY: 0
 };
 

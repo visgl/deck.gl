@@ -594,16 +594,8 @@ export const docPages = generatePath([
             content: getDocUrl('api-reference/first-person-view.md')
           },
           {
-            name: 'ThirdPersonView',
-            content: getDocUrl('api-reference/third-person-view.md')
-          },
-          {
             name: 'OrthographicView',
             content: getDocUrl('api-reference/orthographic-view.md')
-          },
-          {
-            name: 'PerspectiveView',
-            content: getDocUrl('api-reference/perspective-view.md')
           },
           {
             name: 'OrbitView',
@@ -679,6 +671,10 @@ export const docPages = generatePath([
             content: getDocUrl('api-reference/extensions/overview.md')
           },
           {
+            name: 'BrushingExtension',
+            content: getDocUrl('api-reference/extensions/brushing-extension.md')
+          },
+          {
             name: 'DataFilterExtension',
             content: getDocUrl('api-reference/extensions/data-filter-extension.md')
           },
@@ -687,8 +683,8 @@ export const docPages = generatePath([
             content: getDocUrl('api-reference/extensions/fp64-extension.md')
           },
           {
-            name: 'BrushingExtension',
-            content: getDocUrl('api-reference/extensions/brushing-extension.md')
+            name: 'PathStyleExtension',
+            content: getDocUrl('api-reference/extensions/path-style-extension.md')
           }
         ]
       },
