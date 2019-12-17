@@ -115,7 +115,9 @@ export default class TransitionManager {
 
     // update transitionDuration for 'auto' mode
     const {transitionInterpolator} = endProps;
-    const duration = transitionInterpolator.getDuration(startProps, endProps);
+    const duration = transitionInterpolator.getDuration
+      ? transitionInterpolator.getDuration(startProps, endProps)
+      : endProps.transitionDuration;
 
     const initialProps = endProps.transitionInterpolator.initializeProps(
       startProps,
