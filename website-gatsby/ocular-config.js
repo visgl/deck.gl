@@ -199,13 +199,13 @@ based maps.',
       path: 'examples/website/data-filter',
       image: 'images/examples/demo-thumb-data-filter.jpg',
       componentUrl: resolve(__dirname, './src/examples/example-data-filter-demo.jsx')
+    },
+    {
+      title: '3D Surface Explorer',
+      path: 'examples/website/plot',
+      image: 'images/examples/demo-thumb-plot.jpg',
+      componentUrl: resolve(__dirname, './src/examples/example-plot-demo.jsx')
     }
-    // {
-    //   title: '3D Surface Explorer',
-    //   path: 'examples/plot',
-    //   image: 'images/examples/demo-thumb-plot.jpg',
-    //   componentUrl: resolve(__dirname, '../examples/website/plot/app.js')
-    // }
     // {
     //   title: 'Point Clouds & Meshes',
     //   image: 'images/example-pointcloud.png',
