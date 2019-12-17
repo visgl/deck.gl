@@ -54,7 +54,8 @@ export default function positionChildrenUnderViews({children, viewports, deck, C
 
   // Render views
   return Object.keys(views).map(viewId => {
-    const {viewport: {x, y, width, height}} = views[viewId];
+    const {viewport} = views[viewId];
+    const {x, y, width, height} = viewport;
     let viewChildren = views[viewId].children;
     const style = {
       position: 'absolute',
