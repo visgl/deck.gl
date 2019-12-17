@@ -1,5 +1,7 @@
 const blackList = ['coordinateSystem', 'modelMatrix'];
 
+const ASYNC_ORIGINAL = Symbol.for('asyncPropOriginal');
+
 /* eslint-disable complexity */
 /*
  * infer parameter type from a prop
@@ -76,7 +78,7 @@ export function getLayerParams(layer, propParameters = {}) {
       const param = propToParam(
         key,
         LAYER_PROPTYPES,
-        layer.props._asyncPropOriginalValues[key] || layer.props[key]
+        layer.props[ASYNC_ORIGINAL][key] || layer.props[key]
       );
       if (param) {
         paramsArray.push(param);

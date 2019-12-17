@@ -12,8 +12,8 @@ export const LIFECYCLE = {
 // but are copied with Object.assign ¯\_(ツ)_/¯
 // Supported everywhere except IE11, can be polyfilled with core-js
 export const PROP_SYMBOLS = {
-  COMPONENT: Symbol('component'),
-  ASYNC_DEFAULTS: Symbol('asyncPropDefaults'),
-  ASYNC_ORIGINAL: Symbol('asyncPropOriginal'),
-  ASYNC_RESOLVED: Symbol('asyncPropResolved')
+  COMPONENT: Symbol.for('component'),
+  ASYNC_DEFAULTS: Symbol.for('asyncPropDefaults'),
+  ASYNC_ORIGINAL: Symbol.for('asyncPropOriginal'),
+  ASYNC_RESOLVED: Symbol.for('asyncPropResolved')
 };
