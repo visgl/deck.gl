@@ -206,18 +206,6 @@ based maps.',
       image: 'images/examples/demo-thumb-plot.jpg',
       componentUrl: resolve(__dirname, './src/examples/example-plot-demo.jsx')
     }
-    // {
-    //   title: 'Point Clouds & Meshes',
-    //   image: 'images/example-pointcloud.png',
-    //   componentUrl: resolve(__dirname, './examples/pointcloud/app.js')
-    //   path: 'examples/pointcloud'
-    // },
-    // {
-    //   title: 'GLTF',
-    //   image: 'images/example-gltf.jpg',
-    //   componentUrl: resolve(__dirname, './templates/example-gltf.jsx')
-    //   path: 'examples/gltf'
-    // }
   ],
 
   // Avoids duplicate conflicting inputs when importing from examples folders

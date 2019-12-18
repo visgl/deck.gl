@@ -170,22 +170,21 @@ export default class App extends Component {
   }
 }
 
-// Render App as a standalone example, which requires wrapping the root in Styletron and BaseUI provider.
-// Alternatively when App is rendered within the context of the website, these providers are already
-// present at the root.
-function _renderStandalone(container, data) {
-  render(
+// Render App wrapped in Styletron and BaseUI providers. Used when App is rendered within
+// a context where these providers are not already present at the root, such as standalone
+// and legacy(non - gatsby) website.
+export function renderWithProviders(data, ...props) {
+  return (
     <StyletronProvider value={engine}>
       <BaseProvider theme={LightTheme}>
-        <App data={data} />
+        <App data={data} {...props} />
       </BaseProvider>
-    </StyletronProvider>,
-    container
+    </StyletronProvider>
   );
 }
 
 export function renderToDOM(container) {
-  _renderStandalone(container, null);
+  render(renderWithProviders(), container);
   require('d3-request').csv(DATA_URL, (error, response) => {
     if (!error) {
       const data = response.map(row => ({
@@ -195,7 +194,7 @@ export function renderToDOM(container) {
         depth: Number(row.Depth),
         magnitude: Number(row.Magnitude)
       }));
-      _renderStandalone(container, data);
+      render(renderWithProviders(data), container);
     }
   });
 }

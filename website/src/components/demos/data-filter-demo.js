@@ -1,7 +1,7 @@
 import React, {Component} from 'react';
 import {readableInteger} from '../../utils/format-utils';
 import {MAPBOX_STYLES, DATA_URI} from '../../constants/defaults';
-import App from 'website-examples/data-filter/app';
+import {renderWithProviders} from 'website-examples/data-filter/app';
 
 export default class DataFilterDemo extends Component {
   static get data() {
@@ -56,11 +56,7 @@ export default class DataFilterDemo extends Component {
 
   render() {
     const {data, ...otherProps} = this.props;
-
-    return (
-      <div>
-        <App {...otherProps} data={data} />
-      </div>
-    );
+    // renders the data filter demo app wrapped in necessary BaseUI and Styletron providers
+    return renderWithProviders(data, otherProps);
   }
 }
