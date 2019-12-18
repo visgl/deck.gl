@@ -29,7 +29,8 @@ const MS_PER_DAY = 8.64e7; // milliseconds in a day
 
 const dataFilter = new DataFilterExtension({filterSize: 1});
 
-const engine = new Styletron();
+// check if window is defined for server-side rendering, which is required if example is being bundled into the website
+const engine = typeof window !== `undefined` ? new Styletron() : null;
 
 export default class App extends Component {
   constructor(props) {
@@ -169,15 +170,22 @@ export default class App extends Component {
   }
 }
 
-export function renderToDOM(container) {
+// Render App as a standalone example, which requires wrapping the root in Styletron and BaseUI provider.
+// Alternatively when App is rendered within the context of the website, these providers are already
+// present at the root.
+function _renderStandalone(container, data) {
   render(
     <StyletronProvider value={engine}>
       <BaseProvider theme={LightTheme}>
-        <App />
+        <App data={data} />
       </BaseProvider>
     </StyletronProvider>,
     container
   );
+}
+
+export function renderToDOM(container) {
+  _renderStandalone(container, null);
   require('d3-request').csv(DATA_URL, (error, response) => {
     if (!error) {
       const data = response.map(row => ({
@@ -187,14 +195,7 @@ export function renderToDOM(container) {
         depth: Number(row.Depth),
         magnitude: Number(row.Magnitude)
       }));
-      render(
-        <StyletronProvider value={engine}>
-          <BaseProvider theme={LightTheme}>
-            <App data={data} />
-          </BaseProvider>
-        </StyletronProvider>,
-        container
-      );
+      _renderStandalone(container, data);
     }
   });
 }
