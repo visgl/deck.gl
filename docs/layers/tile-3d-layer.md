@@ -1,7 +1,7 @@
 # Tile3DLayer (Experimental)
 
-The `Tile3DLayer` renders tileset data formatted according to the [3D Tiles Category](https://loaders.gl/docs/api-reference/3d-tiles),
-which is supported by the [Tileset3DLoader](https://loaders.gl/docs/api-reference/3d-tiles/tileset-3d-loader).
+The `Tile3DLayer` renders tileset data formatted according to the [3D Tiles Specification](https://www.opengeospatial.org/standards/3DTiles),
+which is supported by the [Tileset3DLoader](https://loaders.gl/modules/3d-tiles/docs/api-reference/tileset-3d-loader).
 
 Tile3DLayer is a [CompositeLayer](/docs/api-reference/composite-layer.md). Base on each tile content [format](https://github.com/AnalyticalGraphicsInc/3d-tiles/tree/master/specification#introduction), it uses either a [PointCloudLayer](/docs/layers/point-cloud-layer.md) or [ScenegraphLayer](/docs/layers/scenegraph-layer.md) to render.
 
@@ -165,7 +165,7 @@ The Tile3DLayer renders the following sublayers based on tile [format](https://g
   - `_lighting` is default to `pbr`.
 * `pointcloud` - a [PointCloudLayer](/docs/layers/point-cloud-layer.md) rendering all the tiles with Point Cloud format (`pnts`).
 
-Follow [CompositeLayer](/docs/layers/composite-layer.md#_subLayerProp) and example in this layer doc to see how to override sub layer props.
+Follow [CompositeLayer](/docs/api-reference/composite-layer.md#_subLayerProp) and example in this layer doc to see how to override sub layer props.
 
 ## Source
 
