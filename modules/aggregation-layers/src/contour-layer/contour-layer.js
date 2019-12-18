@@ -223,12 +223,11 @@ export default class ContourLayer extends GridAggregationLayer {
   _updateAccessors(opts) {
     const {getWeight, aggregation} = opts.props;
     const {count} = this.state.weights;
-    if (this.state.gpuAggregation) {
+    if (count) {
       count.getWeight = getWeight;
       count.operation = AGGREGATION_OPERATION[aggregation];
-    } else {
-      this.setState({getValue: getValueFunc(aggregation, getWeight)});
     }
+    this.setState({getValue: getValueFunc(aggregation, getWeight)});
   }
 
   _resetResults() {
