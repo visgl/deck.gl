@@ -308,6 +308,7 @@ test('GridAggregationLayer#CPUvsGPUAggregation', t => {
       onAfterUpdate({layer, spies}) {
         t.ok(spies.updateAggregationState.called, 'should call updateAggregationState');
         if (GPUGridAggregator.isSupported(layer.context.gl)) {
+          t.comment('GPU Aggregation is supported');
           t.ok(spies._updateAggregation.called, 'should call _updateAggregation');
           t.notOk(
             spies._updateWeightBins.called,
@@ -329,10 +330,13 @@ test('GridAggregationLayer#CPUvsGPUAggregation', t => {
       },
       spies: ['_updateAggregation', '_updateWeightBins', '_uploadAggregationResults'],
       onAfterUpdate({layer, spies}) {
-        t.ok(spies._updateAggregation.called, 'should call _updateAggregation');
-        t.ok(spies._updateWeightBins.called, 'should call _updateWeightBins');
-        t.ok(spies._uploadAggregationResults.called, 'should call _uploadAggregationResults');
-        t.notOk(layer.state.gpuAggregation, 'gpuAggregation should be set to false');
+        // applicable only when switching from GPU to CPU
+        if (GPUGridAggregator.isSupported(layer.context.gl)) {
+          t.ok(spies._updateAggregation.called, 'should call _updateAggregation');
+          t.ok(spies._updateWeightBins.called, 'should call _updateWeightBins');
+          t.ok(spies._uploadAggregationResults.called, 'should call _uploadAggregationResults');
+          t.notOk(layer.state.gpuAggregation, 'gpuAggregation should be set to false');
+        }
       }
     },
     {
@@ -367,6 +371,9 @@ test('GridAggregationLayer#CPUvsGPUAggregation', t => {
           t.ok(spies._updateAggregation.called, 'should not call _updateAggregation');
           t.notOk(spies._updateWeightBins.called, 'should not call _updateWeightBins');
         } else {
+          // weight dimenstion changed while in CPU aggregation
+          t.notOk(spies._updateAggregation.called, 'should not call _updateAggregation');
+          t.ok(spies._updateWeightBins.called, 'should not call _updateWeightBins');
           t.notOk(layer.state.gpuAggregation, 'gpuAggregation should be false when not supported');
         }
       }
