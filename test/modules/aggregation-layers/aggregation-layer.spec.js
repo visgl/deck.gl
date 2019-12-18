@@ -45,6 +45,17 @@ const DIMENSIONS = {
 class TestAggregationLayer extends AggregationLayer {
   initializeState() {
     super.initializeState(DIMENSIONS);
+    const attributeManager = this.getAttributeManager();
+    attributeManager.add({
+      aOne: {
+        size: 1,
+        accessor: 'getAOne'
+      },
+      aTwo: {
+        size: 1,
+        accessor: 'getATwo'
+      }
+    });
   }
 
   renderLayers() {
@@ -63,7 +74,9 @@ class TestAggregationLayer extends AggregationLayer {
       aggregationDirty: this.isAggregationDirty(opts, {
         dimension: this.state.dimensions.data,
         compareAll: true
-      })
+      }),
+      anyAttributeChanged: this.isAttributeChanged(),
+      aOneAttributeChanged: this.isAttributeChanged('aOne')
     });
   }
   updateShaders(shaderOptions) {}
@@ -88,17 +101,25 @@ test('AggregationLayer#updateState', t => {
       {
         props: {
           data: [0, 1],
+          getAOne: x => 1,
+          getATwo: x => 2,
           cellSize: 400,
           prop1: 10
         },
         onAfterUpdate({layer}) {
           t.ok(layer.getAttributeManager(), 'should create AttributeManager');
           t.ok(layer.state.aggregationDirty, 'Aggregation should be dirty on the first update');
+          t.ok(layer.state.anyAttributeChanged, 'All attributes should change on first update');
+          t.ok(layer.state.aOneAttributeChanged, 'Attribute should change on first update');
         }
       },
       {
         updateProps: {
-          prop1: 20
+          prop1: 20,
+          // change attribute two
+          updateTriggers: {
+            getATwo: 1
+          }
         },
         spies: ['updateShaders', 'updateAttributes'],
         onAfterUpdate({spies, layer}) {
@@ -108,6 +129,8 @@ test('AggregationLayer#updateState', t => {
             'should not call updateShaders when extensions not changed'
           );
           t.notOk(layer.state.aggregationDirty, 'Aggregation should not be dirty');
+          t.ok(layer.state.anyAttributeChanged, 'Should change one attribute');
+          t.notOk(layer.state.aOneAttributeChanged, 'Should not update attribute');
         }
       },
       {

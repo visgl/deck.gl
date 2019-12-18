@@ -281,7 +281,7 @@ function getTestCases(t, updateProps) {
   ];
 }
 
-test('GridAggregationLayer#CPUvsGPUAggregation', t => {
+test('GridAggregationLayer#state updates', t => {
   let testCases = [
     {
       props: {
@@ -337,6 +337,35 @@ test('GridAggregationLayer#CPUvsGPUAggregation', t => {
           t.ok(spies._uploadAggregationResults.called, 'should call _uploadAggregationResults');
           t.notOk(layer.state.gpuAggregation, 'gpuAggregation should be set to false');
         }
+      }
+    },
+    {
+      updateProps: {
+        updateTriggers: {
+          all: 1
+        }
+      },
+      spies: ['_updateAggregation', '_updateWeightBins', '_uploadAggregationResults'],
+      onAfterUpdate({layer, spies}) {
+        // Should re do the aggregation.
+        t.ok(spies._updateAggregation.called, 'should call _updateAggregation');
+        t.ok(spies._updateWeightBins.called, 'should call _updateWeightBins');
+        t.ok(spies._uploadAggregationResults.called, 'should call _uploadAggregationResults');
+        t.notOk(layer.state.gpuAggregation, 'gpuAggregation should be set to false');
+      }
+    },
+    {
+      updateProps: {
+        // only chnage weight accessor
+        updateTriggers: {
+          getWeight: 1
+        }
+      },
+      spies: ['_updateAggregation', '_updateWeightBins'],
+      onAfterUpdate({layer, spies}) {
+        t.notOk(spies._updateAggregation.called, 'should not call _updateAggregation');
+        t.ok(spies._updateWeightBins.called, 'should call _updateWeightBins');
+        t.notOk(layer.state.gpuAggregation, 'gpuAggregation should be set to false');
       }
     },
     {

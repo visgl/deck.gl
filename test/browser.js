@@ -50,7 +50,6 @@ test('deck.gl', t => {
   require('./modules/aggregation-layers/utils/gpu-grid-aggregator.spec');
   require('./modules/aggregation-layers/gpu-cpu-aggregator.spec');
   require('./modules/aggregation-layers/gpu-grid-layer/gpu-grid-layer.spec');
-  // require('./modules/aggregation-layers/grid-aggregation-layer.spec');
   require('./modules/aggregation-layers/heatmap-layer/heatmap-layer.spec');
   require('./modules/core/lib/pick-layers.spec');
 
