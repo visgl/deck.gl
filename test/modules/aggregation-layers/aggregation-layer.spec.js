@@ -25,7 +25,7 @@ import {DataFilterExtension} from '@deck.gl/extensions';
 import {testLayer} from '@deck.gl/test-utils';
 
 const BASE_LAYER_ID = 'composite-layer-id';
-const PROPS = {
+const defaultProps = {
   cellSize: 10,
   prop1: 5
 };
@@ -36,11 +36,15 @@ class TestLayer extends Layer {
 
 TestLayer.layerName = 'TestLayer';
 
-const AGGREGATION_PROPS = ['cellSize'];
+const DIMENSIONS = {
+  data: {
+    props: ['cellSize']
+  }
+};
 
 class TestAggregationLayer extends AggregationLayer {
   initializeState() {
-    super.initializeState(AGGREGATION_PROPS);
+    super.initializeState(DIMENSIONS);
   }
 
   renderLayers() {
@@ -55,7 +59,12 @@ class TestAggregationLayer extends AggregationLayer {
     // clear state
     this.setState({aggregationDirty: false});
     super.updateState(opts);
-    this.setState({aggregationDirty: this.isAggregationDirty(opts)});
+    this.setState({
+      aggregationDirty: this.isAggregationDirty(opts, {
+        dimension: this.state.dimensions.data,
+        compareAll: true
+      })
+    });
   }
   updateShaders(shaderOptions) {}
   //
@@ -63,9 +72,10 @@ class TestAggregationLayer extends AggregationLayer {
 }
 
 TestAggregationLayer.layerName = 'TestAggregationLayer';
+TestAggregationLayer.defaultProps = defaultProps;
 
 test('AggregationLayer#constructor', t => {
-  const layer = new TestAggregationLayer(Object.assign({id: BASE_LAYER_ID}, PROPS));
+  const layer = new TestAggregationLayer(Object.assign({id: BASE_LAYER_ID}, defaultProps));
   t.ok(layer, 'AggregationLayer created');
   t.end();
 });
@@ -138,7 +148,7 @@ test('AggregationLayer#updateState', t => {
         onAfterUpdate({layer}) {
           t.ok(
             layer.state.aggregationDirty,
-            'Aggregation should not be dirty when extension prop is changed'
+            'Aggregation should be dirty when extension prop is changed'
           );
         }
       }

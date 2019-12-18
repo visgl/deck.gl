@@ -82,8 +82,11 @@ const REQUIRED_FEATURES = [
   // FEATURES.FLOAT_BLEND, // implictly supported when TEXTURE_FLOAT is supported
 ];
 
-// props , when changed requires re-aggregation
-const AGGREGATION_PROPS = ['radiusPixels'];
+const DIMENSIONS = {
+  data: {
+    props: ['radiusPixels']
+  }
+};
 
 export default class HeatmapLayer extends AggregationLayer {
   initializeState() {
@@ -93,7 +96,7 @@ export default class HeatmapLayer extends AggregationLayer {
       log.error(`HeatmapLayer: ${this.id} is not supported on this browser`)();
       return;
     }
-    super.initializeState(AGGREGATION_PROPS);
+    super.initializeState(DIMENSIONS);
     this.setState({supported: true});
     this._setupTextureParams();
     this._setupAttributes();
@@ -228,9 +231,13 @@ export default class HeatmapLayer extends AggregationLayer {
 
   _getChangeFlags(opts) {
     const changeFlags = {};
-    if (this.isAggregationDirty(opts)) {
-      changeFlags.dataChanged = true;
-    }
+    const {attributesChanged, dimensions} = this.state;
+    changeFlags.dataChanged =
+      attributesChanged ||
+      this.isAggregationDirty(opts, {
+        compareAll: true,
+        dimension: dimensions.data
+      });
     changeFlags.viewportChanged = opts.changeFlags.viewportChanged;
 
     const {zoom} = this.state;
@@ -263,6 +270,7 @@ export default class HeatmapLayer extends AggregationLayer {
       positions: {size: 3, accessor: 'getPosition'},
       weights: {size: 1, accessor: 'getWeight'}
     });
+    this.setState({positionAttributeName: 'positions'});
   }
 
   _setupTextureParams() {

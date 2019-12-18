@@ -111,7 +111,7 @@ function testAggregationOperations(opts) {
       aggregation,
       viewport: fixture.moduleSettings.viewport,
       gridOffset: {xOffset: fixture.cellSize[0], yOffset: fixture.cellSize[1]},
-      cellOffset: [0, 0]
+      translation: [0, 0]
     },
     fixture,
     pointsData,
@@ -129,7 +129,7 @@ function testAggregationOperations(opts) {
       aggregation,
       viewport: fixture.moduleSettings.viewport,
       gridOffset: {xOffset: fixture.cellSize[0], yOffset: fixture.cellSize[1]},
-      cellOffset: [0, 0],
+      posOffset: [0, 0],
       attributes: pointsData.attributes,
       projectPoints: fixture.projectPoints,
       numInstances: pointsData.vertexCount
