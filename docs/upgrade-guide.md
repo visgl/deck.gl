@@ -45,6 +45,18 @@
   + `METERS`: use `METER_OFFSETS`
 
 
+##### React
+
+- `DeckGL` no longer injects its children with view props (`width`, `height`, `viewState` etc.). If your custom component needs these props, consider using the [ContextProvider](/docs/api-reference/react/deckgl.md#react-context) or a render callback:
+
+  ```jsx
+  <DeckGL>
+    {({width, height, viewState}) => (...)}
+  </DeckGL>
+  ```
+
+- The children of `DeckGL` are now placed above the canvas by default (except the react-map-gl base map). Wrap them in e.g. `<div style={{zIndex: -1}}>` if they are intended to be placed behind the canvas.
+
 ##### Debugging
 
 deck.gl now removes most logging when bundling under `NODE_ENV=production`.

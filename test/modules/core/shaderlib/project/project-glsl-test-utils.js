@@ -60,6 +60,7 @@ export function runOnGPU({
 }
 
 export function verifyResult({t, name, actual, expected, sliceActual = false}) {
+  actual = Number.isFinite(actual) ? [actual] : actual;
   expected = Array.isArray(expected) ? expected : [expected];
   // Convert TypedArray to regular array
   // TODO: remove after https://github.com/uber-web/math.gl/pull/29

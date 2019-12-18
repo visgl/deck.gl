@@ -41,6 +41,7 @@ export default class DeckGL extends React.Component {
 
     // Refs
     this._containerRef = React.createRef();
+    this._canvasRef = React.createRef();
 
     // Bind public methods
     this.pickObject = this.pickObject.bind(this);
@@ -63,6 +64,7 @@ export default class DeckGL extends React.Component {
       new DeckClass(
         Object.assign({}, this.props, {
           parent: this._containerRef.current,
+          canvas: this._canvasRef.current,
           style: null,
           width: '100%',
           height: '100%',
@@ -195,8 +197,16 @@ export default class DeckGL extends React.Component {
       this.props.style
     );
 
+    const canvas = createElement('canvas', {
+      key: 'canvas',
+      ref: this._canvasRef
+    });
+
     // Render deck.gl as the last child
-    return createElement('div', {id: 'deckgl-wrapper', ref: this._containerRef, style}, children);
+    return createElement('div', {id: 'deckgl-wrapper', ref: this._containerRef, style}, [
+      canvas,
+      children
+    ]);
   }
 }
 

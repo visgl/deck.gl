@@ -1,5 +1,5 @@
 import {createElement} from 'react';
-import {View, log} from '@deck.gl/core';
+import {View} from '@deck.gl/core';
 import {inheritsFrom} from './inherits-from';
 import evaluateChildren from './evaluate-children';
 
@@ -12,16 +12,11 @@ export default function positionChildrenUnderViews({children, viewports, deck, C
     return [];
   }
 
+  const views = {};
   const defaultViewId = viewManager.views[0].id;
 
-  return children.map((child, i) => {
-    if (child.props.viewportId) {
-      log.removed('viewportId', '<View>')();
-    }
-    if (child.props.viewId) {
-      log.removed('viewId', '<View>')();
-    }
-
+  // Sort children by view id
+  for (const child of children) {
     // Unless child is a View, position / render as part of the default view
     let viewId = defaultViewId;
     let viewChildren = child;
@@ -30,38 +25,47 @@ export default function positionChildrenUnderViews({children, viewports, deck, C
       viewId = child.props.id || defaultViewId;
       viewChildren = child.props.children;
     }
-    const childStyle = viewChildren && viewChildren.props && viewChildren.props.style;
 
     const viewport = viewManager.getViewport(viewId);
     const viewState = viewManager.getViewState(viewId);
 
     // Drop (auto-hide) elements with viewId that are not matched by any current view
-    if (!viewport) {
-      return null;
+    if (viewport) {
+      const {x, y, width, height} = viewport;
+      // Resolve potentially relative dimensions using the deck.gl container size
+      viewChildren = evaluateChildren(viewChildren, {
+        x,
+        y,
+        width,
+        height,
+        viewport,
+        viewState
+      });
+
+      if (!views[viewId]) {
+        views[viewId] = {
+          viewport,
+          children: []
+        };
+      }
+      views[viewId].children.push(viewChildren);
     }
+  }
 
-    // Resolve potentially relative dimensions using the deck.gl container size
+  // Render views
+  return Object.keys(views).map(viewId => {
+    const {viewport} = views[viewId];
     const {x, y, width, height} = viewport;
-
-    viewChildren = evaluateChildren(viewChildren, {
-      x,
-      y,
-      width,
-      height,
-      viewport,
-      viewState
-    });
-
+    let viewChildren = views[viewId].children;
     const style = {
       position: 'absolute',
-      // Use child's z-index for ordering
-      zIndex: childStyle ? childStyle.zIndex : -1,
       left: x,
       top: y,
       width,
       height
     };
-    const key = `view-child-${viewId}-${i}`;
+
+    const key = `view-${viewId}`;
 
     if (ContextProvider) {
       const contextValue = {
