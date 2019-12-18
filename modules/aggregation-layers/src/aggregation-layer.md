@@ -52,13 +52,3 @@ This helper can be used if a dimension is changed. Sublayers can defined custom 
 ### isAttributeChanged()
 
 `AggregationLayer` tracks what attributes are changed in each update cycle. Super classes can use `isAttributeChanged()` method to check if a specific attribute is changed or any attribute is changed.
-
-#### Aggregation State
-
-`AggregationLayer` is responsible for setting following values in `sate` object:
-
-* `positionsChanged` : Set to `true` when the position attribute is changed. Super layers must set `state.positionAttributeName`, to define the name of position attribute, by default `positions` is used as name of position attribute. This flag, can be used to re compute aggregation parameters that depend on position data, such as bounding-box etc.
-
-* `attributesChanged` : Set to `true`, when any of the attributes are changed. This flag can be used to re-trigger aggregation.
-
-It is up to the subclasses how to use these flags, based on aggregation needs. For example, GPU aggregation layer can trigger re aggregation when `attributesChanged`.

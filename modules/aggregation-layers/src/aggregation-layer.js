@@ -80,7 +80,7 @@ export default class AggregationLayer extends CompositeLayer {
    * Checks if aggregation is dirty
    * @param {Object} updateOpts - object {props, oldProps, changeFlags}
    * @param {Object} params - object {dimension, compareAll}
-   * @param {Object} params.dimension - {props, accessors} array of props and/pr accessors
+   * @param {Object} params.dimension - {props, accessors} array of props and/or accessors
    * @param {Boolean} params.compareAll - when `true` it will include non layer props for comparision
    * @returns {Boolean} - returns true if dimensions' prop or accessor is changed
    **/
