@@ -20,9 +20,14 @@
 
 import test from 'tape-catch';
 import GridAggregationLayer from '@deck.gl/aggregation-layers/grid-aggregation-layer';
+import GPUGridAggregator from '@deck.gl/aggregation-layers/utils/gpu-grid-aggregation/gpu-grid-aggregator';
+import {
+  AGGREGATION_OPERATION,
+  getValueFunc
+} from '@deck.gl/aggregation-layers/utils/aggregation-operation-utils';
 import GL from '@luma.gl/constants';
 import {Layer} from 'deck.gl';
-import {testLayer} from '@deck.gl/test-utils';
+import {testLayer, gl} from '@deck.gl/test-utils';
 import {GridAggregationData} from 'deck.gl-test/data';
 import {equals} from 'math.gl';
 import {Buffer} from '@luma.gl/core';
@@ -41,8 +46,7 @@ TestLayer.layerName = 'TestLayer';
 
 const DIMENSIONS = {
   data: {
-    props: ['cellSize'],
-    accessors: ['getPosition']
+    props: ['cellSize']
   },
   weights: {
     props: ['aggregation'],
@@ -50,29 +54,27 @@ const DIMENSIONS = {
   }
 };
 
+// Sample layer to test GridAggregationLayer, performs screen space aggregation
 class TestGridAggregationLayer extends GridAggregationLayer {
   initializeState() {
-    const {gl} = this.context;
     super.initializeState({
       dimensions: DIMENSIONS
     });
     this.setState({
       weights: {
         count: {
-          needMin: true,
           needMax: true,
           size: 1,
-          minBuffer: new Buffer(gl, {
-            byteLength: 4 * 4,
-            accessor: {size: 4, type: GL.FLOAT, divisor: 1}
-          }),
           maxBuffer: new Buffer(gl, {
             byteLength: 4 * 4,
             accessor: {size: 4, type: GL.FLOAT, divisor: 1}
           })
         }
       },
-      screenSpaceAggregation: true
+      positionAttributeName: 'positions',
+      projectPoints: true,
+      posOffset: [0, 0],
+      translation: [1, -1]
     });
     const attributeManager = this.getAttributeManager();
     attributeManager.add({
@@ -82,7 +84,6 @@ class TestGridAggregationLayer extends GridAggregationLayer {
         type: GL.DOUBLE,
         fp64: this.use64bitPositions()
       },
-      // this attribute is used in gpu aggregation path only
       count: {size: 3, accessor: 'getWeight'}
     });
   }
@@ -101,27 +102,40 @@ class TestGridAggregationLayer extends GridAggregationLayer {
 
   finalizeState() {
     super.finalizeState();
-    const {minBuffer, maxBuffer} = this.state.weights.count;
-    minBuffer.delete();
-    maxBuffer.delete();
-  }
 
-  _getGridOffset(opts) {
-    const {cellSize, projectPoints} = this.state;
-    if (!projectPoints) {
-      return super._getGridOffset(opts);
+    const {gpuGridAggregator} = this.state;
+    const {aggregationBuffer, maxBuffer} = this.state.weights.count;
+    gpuGridAggregator.delete();
+    if (aggregationBuffer) {
+      aggregationBuffer.delete();
     }
-    return {xOffset: cellSize, yOffset: cellSize};
+    if (maxBuffer) {
+      maxBuffer.delete();
+    }
   }
 
-  updateAggregationFlags(opts) {
-    const {props, oldProps} = opts;
-    const cellSizeChanged = oldProps.cellSize !== props.cellSize;
-    const gpuAggregation = props.gpuAggregation;
+  // Aggregation Overrides
+
+  updateResults({aggregationData, maxData}) {
+    const {count} = this.state.weights;
+    count.aggregationData = aggregationData;
+    count.maxData = maxData;
+    this.setState({cpuResults: {aggregationData, maxData}});
+  }
+
+  /* eslint-disable complexity, max-statements */
+  updateAggregationState(opts) {
+    const cellSize = opts.props.cellSize;
+    const cellSizeChanged = opts.oldProps.cellSize !== cellSize;
+
+    let gpuAggregation = opts.props.gpuAggregation;
+    if (this.state.gpuAggregation !== opts.props.gpuAggregation) {
+      if (gpuAggregation && !GPUGridAggregator.isSupported(this.context.gl)) {
+        gpuAggregation = false;
+      }
+    }
     const gpuAggregationChanged = gpuAggregation !== this.state.gpuAggregation;
     this.setState({
-      cellSizeChanged,
-      cellSize: props.cellSize,
       gpuAggregation
     });
 
@@ -129,26 +143,67 @@ class TestGridAggregationLayer extends GridAggregationLayer {
     const {data, weights} = dimensions;
     const aggregationDataDirty =
       positionsChanged ||
+      gpuAggregationChanged ||
       this.isAggregationDirty(opts, {
-        dimension: data,
-        compareAll: gpuAggregation // data-filter extension is only supported when using gpu aggregation
+        compareAll: gpuAggregation, // check for all (including extentions props) when using gpu aggregation
+        dimension: data
       });
-    const aggregationWeightsDirty = this.isAggregationDirty(opts, {
-      dimension: weights
-    });
+    const aggregationWeightsDirty = this.isAggregationDirty(opts, {dimension: weights});
 
     this.setState({
-      // Consider switching between CPU and GPU aggregation as data changed as it requires re aggregation.
-      aggregationDataDirty: aggregationDataDirty || gpuAggregationChanged,
+      aggregationDataDirty,
       aggregationWeightsDirty
     });
+
+    const {viewport} = this.context;
+
+    if (cellSizeChanged) {
+      const {width, height} = viewport;
+      const numCol = Math.ceil(width / cellSize);
+      const numRow = Math.ceil(height / cellSize);
+      this.allocateResources(numRow, numCol);
+      this.setState({
+        // transformation from clipspace to screen(pixel) space
+        scaling: [width / 2, -height / 2, 1],
+
+        gridOffset: {xOffset: cellSize, yOffset: cellSize},
+        width,
+        height,
+        numCol,
+        numRow
+      });
+    }
+
+    if (aggregationWeightsDirty) {
+      this._updateAccessors(opts);
+    }
+    if (aggregationDataDirty || aggregationWeightsDirty) {
+      this._resetResults();
+    }
+  }
+  /* eslint-enable complexity, max-statements */
+
+  // Private
+
+  _updateAccessors(opts) {
+    const {getWeight, aggregation} = opts.props;
+    const {count} = this.state.weights;
+    if (count) {
+      count.getWeight = getWeight;
+      count.operation = AGGREGATION_OPERATION[aggregation];
+    }
+    this.setState({getValue: getValueFunc(aggregation, getWeight)});
   }
 
-  // capture results
-  updateResults(results) {
-    this.setState({cpuResults: results});
+  _resetResults() {
+    const {count} = this.state.weights;
+    if (count) {
+      count.aggregationData = null;
+      count.maxData = null;
+    }
   }
 }
+
 TestGridAggregationLayer.defaultProps = {
   cellSize: {type: 'number', min: 1, max: 1000, value: 1000},
   getPosition: {type: 'accessor', value: x => x.position},
@@ -170,10 +225,9 @@ function verifyAggregationResults(t, {layer, gpu}) {
   const {cpuResults} = layer.state;
   let gpuResults;
   if (gpu) {
-    const {aggregationBuffer, minBuffer, maxBuffer} = layer.state.weights.count;
+    const {aggregationBuffer, maxBuffer} = layer.state.weights.count;
     gpuResults = {
       aggregationData: aggregationBuffer.getData(),
-      minData: minBuffer.getData(),
       maxData: maxBuffer.getData()
     };
     layer.setState({gpuResults});
@@ -195,10 +249,6 @@ function compareAggregationResults(t, layer) {
     'aggregationData should match'
   );
   t.ok(
-    equals(filterEmptyChannels(cpuResults.minData), filterEmptyChannels(gpuResults.minData)),
-    'minData should match'
-  );
-  t.ok(
     equals(filterEmptyChannels(cpuResults.maxData), filterEmptyChannels(gpuResults.maxData)),
     'maxData should match'
   );
@@ -206,8 +256,6 @@ function compareAggregationResults(t, layer) {
   // DEBUG
   // logNonZero('cpu : aggregation', cpuResults.aggregationData);
   // logNonZero('gpu : aggregation', gpuResults.aggregationData);
-  // logNonZero('cpu : min', cpuResults.minData);
-  // logNonZero('gpu : min', gpuResults.minData);
   // logNonZero('cpu : max', cpuResults.maxData);
   // logNonZero('gpu : max', gpuResults.maxData);
 
@@ -233,7 +281,7 @@ function getTestCases(t, updateProps) {
   ];
 }
 
-test('GridAggregationLayer#CPUvsGPUAggregation', t => {
+test('GridAggregationLayer#state updates', t => {
   let testCases = [
     {
       props: {
@@ -243,7 +291,7 @@ test('GridAggregationLayer#CPUvsGPUAggregation', t => {
         cellSize: 50,
         gpuAggregation: false
       },
-      onAfterUpdate({layer}) {
+      onAfterUpdate({layer, spies}) {
         verifyAggregationResults(t, {layer, gpu: false});
       }
     },
@@ -251,20 +299,124 @@ test('GridAggregationLayer#CPUvsGPUAggregation', t => {
       updateProps: {
         gpuAggregation: true
       },
-      onAfterUpdate({layer}) {
-        verifyAggregationResults(t, {layer, gpu: true});
-        compareAggregationResults(t, layer);
+      spies: [
+        'updateAggregationState',
+        '_updateAggregation',
+        '_updateWeightBins',
+        '_uploadAggregationResults'
+      ],
+      onAfterUpdate({layer, spies}) {
+        t.ok(spies.updateAggregationState.called, 'should call updateAggregationState');
+        if (GPUGridAggregator.isSupported(layer.context.gl)) {
+          t.comment('GPU Aggregation is supported');
+          t.ok(spies._updateAggregation.called, 'should call _updateAggregation');
+          t.notOk(
+            spies._updateWeightBins.called,
+            'should not call _updateWeightBins for GPU aggregation'
+          );
+          t.ok(layer.state.gpuAggregation, 'should set gpuAggregation');
+
+          verifyAggregationResults(t, {layer, gpu: true});
+          compareAggregationResults(t, layer);
+        } else {
+          t.notOk(layer.state.gpuAggregation, 'gpuAggregation should be false when not supported');
+        }
+      }
+    },
+    {
+      updateProps: {
+        // switch to CPU Aggregation
+        gpuAggregation: false
+      },
+      spies: ['_updateAggregation', '_updateWeightBins', '_uploadAggregationResults'],
+      onAfterUpdate({layer, spies}) {
+        // applicable only when switching from GPU to CPU
+        if (GPUGridAggregator.isSupported(layer.context.gl)) {
+          t.ok(spies._updateAggregation.called, 'should call _updateAggregation');
+          t.ok(spies._updateWeightBins.called, 'should call _updateWeightBins');
+          t.ok(spies._uploadAggregationResults.called, 'should call _uploadAggregationResults');
+          t.notOk(layer.state.gpuAggregation, 'gpuAggregation should be set to false');
+        }
+      }
+    },
+    {
+      updateProps: {
+        updateTriggers: {
+          all: 1
+        }
+      },
+      spies: ['_updateAggregation', '_updateWeightBins', '_uploadAggregationResults'],
+      onAfterUpdate({layer, spies}) {
+        // Should re do the aggregation.
+        t.ok(spies._updateAggregation.called, 'should call _updateAggregation');
+        t.ok(spies._updateWeightBins.called, 'should call _updateWeightBins');
+        t.ok(spies._uploadAggregationResults.called, 'should call _uploadAggregationResults');
+        t.notOk(layer.state.gpuAggregation, 'gpuAggregation should be set to false');
+      }
+    },
+    {
+      updateProps: {
+        // only chnage weight accessor
+        updateTriggers: {
+          getWeight: 1
+        }
+      },
+      spies: ['_updateAggregation', '_updateWeightBins'],
+      onAfterUpdate({layer, spies}) {
+        t.notOk(spies._updateAggregation.called, 'should not call _updateAggregation');
+        t.ok(spies._updateWeightBins.called, 'should call _updateWeightBins');
+        t.notOk(layer.state.gpuAggregation, 'gpuAggregation should be set to false');
+      }
+    },
+    {
+      updateProps: {
+        // while in CPU aggregation change weight prop
+        aggregation: 'MAX'
+      },
+      spies: ['_updateAggregation', '_updateWeightBins', '_uploadAggregationResults'],
+      onAfterUpdate({layer, spies}) {
+        t.notOk(
+          spies._updateAggregation.called,
+          'should not call _updateAggregation when only weight changed'
+        );
+        t.ok(spies._updateWeightBins.called, 'should call _updateWeightBins');
+        t.ok(spies._uploadAggregationResults.called, 'should call _uploadAggregationResults');
+      }
+    },
+    {
+      updateProps: {
+        // switch to GPU aggregation
+        gpuAggregation: true
+      }
+    },
+    {
+      updateProps: {
+        // while in GPU aggregation change weight prop
+        aggregation: 'MEAN'
+      },
+      spies: ['_updateAggregation', '_updateWeightBins', '_uploadAggregationResults'],
+      onAfterUpdate({layer, spies}) {
+        if (GPUGridAggregator.isSupported(layer.context.gl)) {
+          t.ok(spies._updateAggregation.called, 'should not call _updateAggregation');
+          t.notOk(spies._updateWeightBins.called, 'should not call _updateWeightBins');
+        } else {
+          // weight dimenstion changed while in CPU aggregation
+          t.notOk(spies._updateAggregation.called, 'should not call _updateAggregation');
+          t.ok(spies._updateWeightBins.called, 'should not call _updateWeightBins');
+          t.notOk(layer.state.gpuAggregation, 'gpuAggregation should be false when not supported');
+        }
       }
     }
   ];
 
-  testCases = [
-    ...testCases,
-    ...getTestCases(t, {cellSize: 60, aggregation: 'MAX'}),
-    ...getTestCases(t, {aggregation: 'MAX'}),
-    ...getTestCases(t, {aggregation: 'MIN'}),
-    ...getTestCases(t, {aggregation: 'MEAN'})
-  ];
+  if (GPUGridAggregator.isSupported(gl)) {
+    testCases = testCases.concat([
+      ...getTestCases(t, {cellSize: 60, aggregation: 'SUM'}),
+      ...getTestCases(t, {aggregation: 'MAX'}),
+      ...getTestCases(t, {aggregation: 'MIN'}),
+      ...getTestCases(t, {aggregation: 'MEAN'})
+    ]);
+  }
 
   testLayer({
     Layer: TestGridAggregationLayer,

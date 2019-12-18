@@ -93,7 +93,7 @@ export function getGridParams(boundingBox, cellSize, viewport, coordinateSystem)
   const gridOffset = getGridOffset(
     boundingBox,
     cellSize,
-    coordinateSystem !== COORDINATE_SYSTEM.IDENTITY
+    coordinateSystem !== COORDINATE_SYSTEM.CARTESIAN
   );
 
   const boundingBoxAligned = alignBoundingBox(boundingBox, gridOffset, coordinateSystem, viewport);
