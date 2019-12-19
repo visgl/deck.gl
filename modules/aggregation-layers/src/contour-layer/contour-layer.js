@@ -170,11 +170,11 @@ export default class ContourLayer extends GridAggregationLayer {
     let {boundingBox} = this.state;
     if (positionsChanged) {
       boundingBox = getBoundingBox(this.getAttributes(), this.getNumInstances());
+      this.setState({boundingBox});
     }
     if (positionsChanged || cellSizeChanged) {
       const {
         gridOffset,
-        boundingBoxAligned,
         translation,
         width,
         height,
@@ -184,7 +184,7 @@ export default class ContourLayer extends GridAggregationLayer {
       this.allocateResources(numRow, numCol);
       this.setState({
         gridOffset,
-        boundingBox: boundingBoxAligned,
+        boundingBox,
         translation,
         posOffset: translation.slice(), // Used for CPU aggregation, to offset points
         width,

@@ -286,11 +286,11 @@ export default class GPUGridLayer extends GridAggregationLayer {
     let {boundingBox} = this.state;
     if (positionsChanged) {
       boundingBox = getBoundingBox(this.getAttributes(), this.getNumInstances());
+      this.setState({boundingBox});
     }
     if (positionsChanged || cellSizeChanged) {
       const {
         gridOffset,
-        boundingBoxAligned,
         translation,
         width,
         height,
@@ -300,7 +300,6 @@ export default class GPUGridLayer extends GridAggregationLayer {
       this.allocateResources(numRow, numCol);
       this.setState({
         gridOffset,
-        boundingBox: boundingBoxAligned,
         translation,
         width,
         height,
