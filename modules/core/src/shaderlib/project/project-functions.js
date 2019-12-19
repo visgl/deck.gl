@@ -23,13 +23,14 @@ function lngLatZToWorldPosition(lngLatZ, viewport, offsetMode = false) {
 function normalizeParameters(opts) {
   const normalizedParams = Object.assign({}, opts);
 
-  const {
-    viewport,
-    coordinateSystem,
-    coordinateOrigin,
-    fromCoordinateSystem,
-    fromCoordinateOrigin
-  } = opts;
+  let {coordinateSystem} = opts;
+  const {viewport, coordinateOrigin, fromCoordinateSystem, fromCoordinateOrigin} = opts;
+
+  if (coordinateSystem === COORDINATE_SYSTEM.DEFAULT) {
+    coordinateSystem = viewport.isGeospatial
+      ? COORDINATE_SYSTEM.LNGLAT
+      : COORDINATE_SYSTEM.CARTESIAN;
+  }
 
   if (fromCoordinateSystem === undefined) {
     normalizedParams.fromCoordinateSystem = coordinateSystem;
@@ -42,12 +43,13 @@ function normalizeParameters(opts) {
     coordinateSystem === COORDINATE_SYSTEM.LNGLAT &&
     viewport.zoom >= LNGLAT_AUTO_OFFSET_ZOOM_THRESHOLD
   ) {
-    normalizedParams.coordinateSystem = COORDINATE_SYSTEM.LNGLAT_OFFSETS;
+    coordinateSystem = COORDINATE_SYSTEM.LNGLAT_OFFSETS;
     normalizedParams.coordinateOrigin = [
       Math.fround(viewport.longitude),
       Math.fround(viewport.latitude)
     ];
   }
+  normalizedParams.coordinateSystem = coordinateSystem;
 
   return normalizedParams;
 }
@@ -64,7 +66,6 @@ export function getWorldPosition(
 
   switch (coordinateSystem) {
     case COORDINATE_SYSTEM.LNGLAT:
-    case COORDINATE_SYSTEM.LNGLAT_DEPRECATED:
       return lngLatZToWorldPosition([x, y, z], viewport, offsetMode);
 
     case COORDINATE_SYSTEM.LNGLAT_OFFSETS:
@@ -132,7 +133,6 @@ export function projectPosition(position, params) {
     }
 
     case COORDINATE_SYSTEM.LNGLAT:
-    case COORDINATE_SYSTEM.LNGLAT_DEPRECATED:
     case COORDINATE_SYSTEM.CARTESIAN:
     default:
       return getWorldPosition(position, {
