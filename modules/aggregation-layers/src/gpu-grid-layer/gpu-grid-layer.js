@@ -226,7 +226,7 @@ export default class GPUGridLayer extends GridAggregationLayer {
       elevationDomain
     } = this.props;
 
-    const {weights, numRow, numCol, boundingBox, gridOffset} = this.state;
+    const {weights, numRow, numCol, gridOrigin, gridOffset} = this.state;
 
     const colorRange = colorRangeToFlatArray(this.props.colorRange);
 
@@ -235,7 +235,7 @@ export default class GPUGridLayer extends GridAggregationLayer {
     return new SubLayerClass(
       {
         gridSize: [numCol, numRow],
-        gridOrigin: [boundingBox.xMin, boundingBox.yMin],
+        gridOrigin,
         gridOffset: [gridOffset.xOffset, gridOffset.yOffset],
         colorRange,
         elevationRange,
@@ -301,6 +301,7 @@ export default class GPUGridLayer extends GridAggregationLayer {
       this.setState({
         gridOffset,
         translation,
+        gridOrigin: [-1 * translation[0], -1 * translation[1]],
         width,
         height,
         numCol,

@@ -38,7 +38,7 @@ export function getBoundingBox(attributes, vertexCount) {
 }
 /* eslint-enable max-statements */
 
-// Translate bounding box so the grid boundaries match between CPU and GPU
+// Returns XY translation for positions to peform aggregation in +ve sapce
 function getTranslation(boundingBox, gridOffset, coordinateSystem, viewport) {
   const {width, height} = viewport;
 
@@ -56,8 +56,9 @@ function getTranslation(boundingBox, gridOffset, coordinateSystem, viewport) {
 
   const {xMin, yMin} = boundingBox;
   return [
-    -1 * alignToCell(xMin - worldOrigin[0], gridOffset.xOffset) + worldOrigin[0],
-    -1 * alignToCell(yMin - worldOrigin[1], gridOffset.yOffset) + worldOrigin[1]
+    // Align origin to match grid cell boundaries in CPU and GPU aggregations
+    -1 * (alignToCell(xMin - worldOrigin[0], gridOffset.xOffset) + worldOrigin[0]),
+    -1 * (alignToCell(yMin - worldOrigin[1], gridOffset.yOffset) + worldOrigin[1])
   ]
 }
 

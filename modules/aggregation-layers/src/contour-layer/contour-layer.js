@@ -187,6 +187,7 @@ export default class ContourLayer extends GridAggregationLayer {
         boundingBox,
         translation,
         posOffset: translation.slice(), // Used for CPU aggregation, to offset points
+        gridOrigin: [-1 * translation[0], -1 * translation[1]],
         width,
         height,
         numCol,
@@ -240,7 +241,7 @@ export default class ContourLayer extends GridAggregationLayer {
   // Private (Contours)
 
   _generateContours() {
-    const {numCol, numRow, boundingBox, gridOffset, thresholdData} = this.state;
+    const {numCol, numRow, gridOrigin, gridOffset, thresholdData} = this.state;
     const {count} = this.state.weights;
     let {aggregationData} = count;
     if (!aggregationData) {
@@ -253,7 +254,7 @@ export default class ContourLayer extends GridAggregationLayer {
       thresholdData,
       cellWeights,
       gridSize: [numCol, numRow],
-      gridOrigin: [boundingBox.xMin, boundingBox.yMin],
+      gridOrigin,
       cellSize: [gridOffset.xOffset, gridOffset.yOffset]
     });
 
