@@ -90,7 +90,7 @@ export default class Tile3DLayer extends CompositeLayer {
     return await this._loadTileset(url, {headers}, ionMetadata);
   }
 
-  async _updateTileset(tileset3d) {
+  _updateTileset(tileset3d) {
     const {timeline, viewport} = this.context;
     if (!timeline || !viewport || !tileset3d) {
       return;
@@ -98,7 +98,7 @@ export default class Tile3DLayer extends CompositeLayer {
 
     // use Date.now() as frame identifier for now and later used to filter layers for rendering
     const frameState = getFrameState(viewport, Date.now());
-    await tileset3d.update(frameState);
+    tileset3d.update(frameState);
     this._updateLayerMap(frameState.frameNumber);
   }
 
