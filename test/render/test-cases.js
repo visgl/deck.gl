@@ -1248,6 +1248,28 @@ export const TEST_CASES = [
     goldenImage: './test/render/golden-images/heatmap-lnglat.png'
   },
   {
+    name: 'heatmap-lnglat-high-zoom',
+    viewState: {
+      latitude: 37.76,
+      longitude: -122.42,
+      zoom: 14,
+      pitch: 30,
+      bearing: 0
+    },
+    layers: [
+      new HeatmapLayer({
+        id: 'heatmap-lnglat-2',
+        data: dataSamples.points,
+        opacity: 0.8,
+        pickable: false,
+        getPosition: d => d.COORDINATES,
+        radiusPixels: 35,
+        threshold: 0.1
+      })
+    ],
+    goldenImage: './test/render/golden-images/heatmap-lnglat-high-zoom.png'
+  },
+  {
     name: 'pointcloud-lnglat',
     viewState: {
       latitude: 37.751537058389985,
