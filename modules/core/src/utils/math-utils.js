@@ -83,7 +83,7 @@ export function getFrustumPlanes({aspect, near, far, fovyRadians, position, dire
     .add(nearCenter)
     .subtract(cameraPosition)
     .normalize();
-  normal = new Vector3(cameraUp).cross(a).negate();
+  normal = new Vector3(a).cross(cameraUp);
   distance = cameraPosition.dot(normal);
   planes.right = {normal, distance};
 
@@ -92,7 +92,7 @@ export function getFrustumPlanes({aspect, near, far, fovyRadians, position, dire
     .add(nearCenter)
     .subtract(cameraPosition)
     .normalize();
-  normal = new Vector3(a).cross(cameraUp).negate();
+  normal = new Vector3(cameraUp).cross(a);
   distance = cameraPosition.dot(normal);
   planes.left = {normal, distance};
 
@@ -101,7 +101,7 @@ export function getFrustumPlanes({aspect, near, far, fovyRadians, position, dire
     .add(nearCenter)
     .subtract(cameraPosition)
     .normalize();
-  normal = new Vector3(a).cross(cameraRight).negate();
+  normal = new Vector3(cameraRight).cross(a);
   distance = cameraPosition.dot(normal);
   planes.top = {normal, distance};
 
@@ -110,7 +110,7 @@ export function getFrustumPlanes({aspect, near, far, fovyRadians, position, dire
     .add(nearCenter)
     .subtract(cameraPosition)
     .normalize();
-  normal = new Vector3(cameraRight).cross(a).negate();
+  normal = new Vector3(a).cross(cameraRight);
   distance = cameraPosition.dot(normal);
   planes.bottom = {normal, distance};
 
