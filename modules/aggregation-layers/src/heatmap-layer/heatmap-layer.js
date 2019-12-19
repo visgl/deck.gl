@@ -535,19 +535,19 @@ export default class HeatmapLayer extends AggregationLayer {
 
     const size = (textureSize * RESOLUTION) / viewport.scale;
 
-    let topLeftCommon;
-    let bottomRightCommon;
+    let bottomLeftCommon;
+    let topRightCommon;
 
     // Y-axis is flipped between World and Common bounds
     if (useLayerCoordinateSystem) {
-      topLeftCommon = this.projectPosition([minLong, maxLat, 0]);
-      bottomRightCommon = this.projectPosition([maxLong, minLat, 0]);
+      bottomLeftCommon = this.projectPosition([minLong, minLat, 0]);
+      topRightCommon = this.projectPosition([maxLong, maxLat, 0]);
     } else {
-      topLeftCommon = viewport.projectPosition([minLong, maxLat, 0]);
-      bottomRightCommon = viewport.projectPosition([maxLong, minLat, 0]);
+      bottomLeftCommon = viewport.projectPosition([minLong, minLat, 0]);
+      topRightCommon = viewport.projectPosition([maxLong, maxLat, 0]);
     }
     // Ignore z component
-    let commonBounds = topLeftCommon.slice(0, 2).concat(bottomRightCommon.slice(0, 2));
+    let commonBounds = bottomLeftCommon.slice(0, 2).concat(topRightCommon.slice(0, 2));
     commonBounds = scaleToAspectRatio(commonBounds, size, size);
     return commonBounds;
   }
@@ -557,10 +557,10 @@ export default class HeatmapLayer extends AggregationLayer {
   _commonToWorldBounds(commonBounds) {
     const [xMin, yMin, xMax, yMax] = commonBounds;
     const {viewport} = this.context;
-    const topLeftWorld = viewport.unprojectPosition([xMin, yMin]);
-    const bottomRightWorld = viewport.unprojectPosition([xMax, yMax]);
+    const bottomLeftWorld = viewport.unprojectPosition([xMin, yMin]);
+    const topRightWorld = viewport.unprojectPosition([xMax, yMax]);
 
-    return topLeftWorld.slice(0, 2).concat(bottomRightWorld.slice(0, 2));
+    return bottomLeftWorld.slice(0, 2).concat(topRightWorld.slice(0, 2));
   }
 }
 
