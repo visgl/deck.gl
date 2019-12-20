@@ -52,6 +52,7 @@ export default class Tile3DLayer extends CompositeLayer {
 
     const {tileset3d} = this.state;
     await this._updateTileset(tileset3d);
+    console.log('update')
   }
 
   async _loadTileset(tilesetUrl, fetchOptions, ionMetadata) {
@@ -87,7 +88,7 @@ export default class Tile3DLayer extends CompositeLayer {
   async _loadTilesetFromIon(ionAccessToken, ionAssetId) {
     const ionMetadata = await _getIonTilesetMetadata(ionAccessToken, ionAssetId);
     const {url, headers} = ionMetadata;
-    return await this._loadTileset(url, {headers}, ionMetadata);
+    await this._loadTileset(url, {headers}, ionMetadata);
   }
 
   _updateTileset(tileset3d) {
@@ -149,7 +150,8 @@ export default class Tile3DLayer extends CompositeLayer {
       }
     }
 
-    this.setState({layers: Object.values(layerMap).map(layer => layer.layer)});
+    // set layers to state directly to avoid trigger another updateState call which will end up with infinite loop
+    this.state.layers = Object.values(layerMap).map(layer => layer.layer);
   }
 
   _create3DTileLayer(tileHeader) {
