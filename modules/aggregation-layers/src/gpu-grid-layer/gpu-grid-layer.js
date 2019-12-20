@@ -252,9 +252,12 @@ export default class GPUGridLayer extends GridAggregationLayer {
         id: 'gpu-grid-cell'
       }),
       {
-        data: {attributes: {
-          colors: color.aggregationBuffer, elevations: elevation.aggregationBuffer
-        }},
+        data: {
+          attributes: {
+            colors: color.aggregationBuffer,
+            elevations: elevation.aggregationBuffer
+          }
+        },
         colorMaxMinBuffer: color.maxMinBuffer,
         elevationMaxMinBuffer: elevation.maxMinBuffer,
         numInstances: numCol * numRow
@@ -293,14 +296,12 @@ export default class GPUGridLayer extends GridAggregationLayer {
       this.setState({boundingBox});
     }
     if (positionsChanged || cellSizeChanged) {
-      const {
-        gridOffset,
-        translation,
-        width,
-        height,
-        numCol,
-        numRow
-      } = getGridParams(boundingBox, cellSize, viewport, coordinateSystem);
+      const {gridOffset, translation, width, height, numCol, numRow} = getGridParams(
+        boundingBox,
+        cellSize,
+        viewport,
+        coordinateSystem
+      );
       this.allocateResources(numRow, numCol);
       this.setState({
         gridOffset,

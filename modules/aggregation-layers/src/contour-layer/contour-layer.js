@@ -173,14 +173,12 @@ export default class ContourLayer extends GridAggregationLayer {
       this.setState({boundingBox});
     }
     if (positionsChanged || cellSizeChanged) {
-      const {
-        gridOffset,
-        translation,
-        width,
-        height,
-        numCol,
-        numRow
-      } = getGridParams(boundingBox, cellSize, viewport, coordinateSystem);
+      const {gridOffset, translation, width, height, numCol, numRow} = getGridParams(
+        boundingBox,
+        cellSize,
+        viewport,
+        coordinateSystem
+      );
       this.allocateResources(numRow, numCol);
       this.setState({
         gridOffset,

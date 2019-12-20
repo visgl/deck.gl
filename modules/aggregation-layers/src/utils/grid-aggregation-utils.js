@@ -59,7 +59,7 @@ function getTranslation(boundingBox, gridOffset, coordinateSystem, viewport) {
     // Align origin to match grid cell boundaries in CPU and GPU aggregations
     -1 * (alignToCell(xMin - worldOrigin[0], gridOffset.xOffset) + worldOrigin[0]),
     -1 * (alignToCell(yMin - worldOrigin[1], gridOffset.yOffset) + worldOrigin[1])
-  ]
+  ];
 }
 
 // Aligns `inValue` to given `cellSize`
