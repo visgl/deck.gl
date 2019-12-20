@@ -39,20 +39,21 @@ export default class Tile3DLayer extends CompositeLayer {
     return changeFlags.somethingChanged;
   }
 
-  async updateState({props, oldProps}) {
+  updateState({props, oldProps, changeFlags}) {
     if (props.data && props.data !== oldProps.data) {
-      await this._loadTileset(props.data);
+      this._loadTileset(props.data);
     } else if (
       (props._ionAccessToken || props._ionAssetId) &&
       (props._ionAccessToken !== oldProps._ionAccessToken ||
         props._ionAssetId !== oldProps._ionAssetId)
     ) {
-      await this._loadTilesetFromIon(props._ionAccessToken, props._ionAssetId);
+      this._loadTilesetFromIon(props._ionAccessToken, props._ionAssetId);
     }
 
-    const {tileset3d} = this.state;
-    await this._updateTileset(tileset3d);
-    console.log('update')
+    if (changeFlags && changeFlags.viewportChanged) {
+      const {tileset3d} = this.state;
+      this._updateTileset(tileset3d);
+    }
   }
 
   async _loadTileset(tilesetUrl, fetchOptions, ionMetadata) {
@@ -65,7 +66,6 @@ export default class Tile3DLayer extends CompositeLayer {
       onTileLoad: tileHeader => {
         this.props.onTileLoad(tileHeader);
         this._updateTileset(tileset3d);
-        this.setNeedsUpdate();
       },
       onTileUnload: this.props.onTileUnload,
       onTileLoadFail: this.props.onTileError,
@@ -81,6 +81,7 @@ export default class Tile3DLayer extends CompositeLayer {
     });
 
     if (tileset3d) {
+      this._updateTileset(tileset3d);
       this.props.onTilesetLoad(tileset3d);
     }
   }
@@ -150,8 +151,7 @@ export default class Tile3DLayer extends CompositeLayer {
       }
     }
 
-    // set layers to state directly to avoid trigger another updateState call which will end up with infinite loop
-    this.state.layers = Object.values(layerMap).map(layer => layer.layer);
+    this.setState({layers: Object.values(layerMap).map(layer => layer.layer)});
   }
 
   _create3DTileLayer(tileHeader) {
