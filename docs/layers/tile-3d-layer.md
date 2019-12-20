@@ -11,7 +11,7 @@ References
 ```js
 import React, {Component} from 'react';
 import DeckGL from '@deck.gl/react';
-import {Tile3DLayer} from '@deck.gl/tile-layers';
+import {Tile3DLayer} from '@deck.gl/geo-layers';
 
 export default class App extends Component {
 
@@ -49,11 +49,11 @@ To install the dependencies:
 ```bash
 npm install deck.gl
 # or
-npm install @deck.gl/core @deck.gl/tile-layers
+npm install @deck.gl/core @deck.gl/geo-layers
 ```
 
 ```js
-import {Tile3DLayer} from '@deck.gl/tile-layers';
+import {Tile3DLayer} from '@deck.gl/geo-layers';
 new Tile3DLayer({});
 ```
 
@@ -64,6 +64,7 @@ To use pre-bundled scripts:
 <!-- or -->
 <script src="https://unpkg.com/@deck.gl/core@^8.0.0/dist.min.js"></script>
 <script src="https://unpkg.com/@deck.gl/layers@^8.0.0/dist.min.js"></script>
+<script src="https://unpkg.com/@deck.gl/geo-layers@^8.0.0/dist.min.js"></script>
 ```
 
 ```js
@@ -169,4 +170,4 @@ Follow [CompositeLayer](/docs/api-reference/composite-layer.md#_subLayerProp) an
 
 ## Source
 
-[modules/tile-layers/src/tile-3d-layer](https://github.com/uber/deck.gl/tree/master/modules/geo-layers/src/tile-3d-layer)
+[modules/geo-layers/src/tile-3d-layer](https://github.com/uber/deck.gl/tree/master/modules/geo-layers/src/tile-3d-layer)
