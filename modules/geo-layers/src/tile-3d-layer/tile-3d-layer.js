@@ -50,7 +50,7 @@ export default class Tile3DLayer extends CompositeLayer {
       this._loadTilesetFromIon(props._ionAccessToken, props._ionAssetId);
     }
 
-    if (changeFlags && changeFlags.viewportChanged) {
+    if (changeFlags.viewportChanged) {
       const {tileset3d} = this.state;
       this._updateTileset(tileset3d);
     }
