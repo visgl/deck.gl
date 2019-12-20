@@ -19,6 +19,10 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v7.3
 
+#### deck.gl [v7.3.10] - Dec 20 2019
+
+- Support preprojection in PolygonTesselator (#4035)
+
 #### deck.gl [v7.3.9] - Dec 16 2019
 
 - Fix s2 layer polygon generation (#4024)
