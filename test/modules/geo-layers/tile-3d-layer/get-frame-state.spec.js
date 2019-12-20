@@ -21,7 +21,8 @@
 import test from 'tape-catch';
 import {getFrameState} from '@deck.gl/geo-layers/tile-3d-layer/get-frame-state';
 import {Viewport} from 'deck.gl';
-import {equals} from 'math.gl';
+import {equals, Vector3} from 'math.gl';
+import {Ellipsoid} from '@math.gl/geospatial';
 
 const EPSILON = 1e-5;
 const expected = {
@@ -41,6 +42,8 @@ test('getFrameState', t => {
     height: 775,
     latitude: 50.751537058389985,
     longitude: 42.42694203247012,
+    pitch: 30,
+    bearing: -120,
     zoom: 15.5
   });
 
@@ -57,6 +60,17 @@ test('getFrameState', t => {
   );
   t.ok(equals(results.camera.up, expected.camera.up, EPSILON), 'camera.up should match.');
   t.ok(results.cullingVolume.planes.length, 6, 'Should have 6 planes.');
+
+  const viewportCenterCartesian = Ellipsoid.WGS84.cartographicToCartesian(
+    [viewport.longitude, viewport.latitude, 0],
+    new Vector3()
+  );
+  for (const plane of results.cullingVolume.planes) {
+    t.ok(
+      plane.getPointDistance(viewportCenterCartesian) > 0,
+      'viewport center is on the inside of the frustum plane'
+    );
+  }
 
   t.end();
 });

@@ -43,7 +43,7 @@ export function getFrameState(viewport, frameNumber) {
     enuToFixedTransform.transformAsVector(new Vector3(cameraUp).scale(metersPerUnit))
   ).normalize();
 
-  commonSpacePlanesToWGS84(viewport);
+  commonSpacePlanesToWGS84(viewport, viewportCenterCartesian);
 
   // TODO: make a file/class for frameState and document what needs to be attached to this so that traversal can function
   return {
@@ -59,14 +59,8 @@ export function getFrameState(viewport, frameNumber) {
   };
 }
 
-function commonSpacePlanesToWGS84(viewport) {
+function commonSpacePlanesToWGS84(viewport, viewportCenterCartesian) {
   // Extract frustum planes based on current view.
-  const viewportCenterCartographic = [viewport.longitude, viewport.latitude, 0];
-  const viewportCenterCartesian = Ellipsoid.WGS84.cartographicToCartesian(
-    viewportCenterCartographic,
-    new Vector3()
-  );
-
   const frustumPlanes = viewport.getFrustumPlanes();
   let i = 0;
   for (const dir in frustumPlanes) {
