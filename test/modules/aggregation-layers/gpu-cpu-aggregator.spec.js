@@ -111,7 +111,7 @@ test('Aggregation#WorldSpace', t => {
   const {viewport} = moduleSettings;
   const {attributes, vertexCount} = buildAttributes({data, weights});
   const boundingBox = getBoundingBox(attributes, vertexCount);
-  const {gridOffset, boundingBoxAligned, translation, numCol, numRow} = getGridParams(
+  const {gridOffset, translation, numCol, numRow} = getGridParams(
     boundingBox,
     cellSize,
     viewport,
@@ -141,7 +141,7 @@ test('Aggregation#WorldSpace', t => {
         scaling: [0, 0, 0],
         vertexCount,
         moduleSettings,
-        boundingBox: boundingBoxAligned
+        boundingBox
       }
     });
   }

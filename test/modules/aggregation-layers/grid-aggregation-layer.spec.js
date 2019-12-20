@@ -139,10 +139,10 @@ class TestGridAggregationLayer extends GridAggregationLayer {
       gpuAggregation
     });
 
-    const {positionsChanged, dimensions} = this.state;
+    const {dimensions} = this.state;
     const {data, weights} = dimensions;
     const aggregationDataDirty =
-      positionsChanged ||
+      this.isAttributeChanged('positions') ||
       gpuAggregationChanged ||
       this.isAggregationDirty(opts, {
         compareAll: gpuAggregation, // check for all (including extentions props) when using gpu aggregation

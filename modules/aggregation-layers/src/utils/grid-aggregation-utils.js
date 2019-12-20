@@ -38,7 +38,8 @@ export function getBoundingBox(attributes, vertexCount) {
 }
 /* eslint-enable max-statements */
 
-export function alignBoundingBox(boundingBox, gridOffset, coordinateSystem, viewport) {
+// Returns XY translation for positions to peform aggregation in +ve sapce
+function getTranslation(boundingBox, gridOffset, coordinateSystem, viewport) {
   const {width, height} = viewport;
 
   // Origin to define grid
@@ -54,9 +55,11 @@ export function alignBoundingBox(boundingBox, gridOffset, coordinateSystem, view
   );
 
   const {xMin, yMin} = boundingBox;
-  boundingBox.xMin = alignToCell(xMin - worldOrigin[0], gridOffset.xOffset) + worldOrigin[0];
-  boundingBox.yMin = alignToCell(yMin - worldOrigin[1], gridOffset.yOffset) + worldOrigin[1];
-  return boundingBox;
+  return [
+    // Align origin to match grid cell boundaries in CPU and GPU aggregations
+    -1 * (alignToCell(xMin - worldOrigin[0], gridOffset.xOffset) + worldOrigin[0]),
+    -1 * (alignToCell(yMin - worldOrigin[1], gridOffset.yOffset) + worldOrigin[1])
+  ];
 }
 
 // Aligns `inValue` to given `cellSize`
@@ -96,17 +99,16 @@ export function getGridParams(boundingBox, cellSize, viewport, coordinateSystem)
     coordinateSystem !== COORDINATE_SYSTEM.CARTESIAN
   );
 
-  const boundingBoxAligned = alignBoundingBox(boundingBox, gridOffset, coordinateSystem, viewport);
+  const translation = getTranslation(boundingBox, gridOffset, coordinateSystem, viewport);
 
   const {xMin, yMin, xMax, yMax} = boundingBox;
-  const translation = [-1 * xMin, -1 * yMin];
 
   const width = xMax - xMin + gridOffset.xOffset;
   const height = yMax - yMin + gridOffset.yOffset;
 
   const numCol = Math.ceil(width / gridOffset.xOffset);
   const numRow = Math.ceil(height / gridOffset.yOffset);
-  return {gridOffset, boundingBoxAligned, translation, width, height, numCol, numRow};
+  return {gridOffset, translation, width, height, numCol, numRow};
 }
 
 /**

@@ -231,9 +231,9 @@ export default class HeatmapLayer extends AggregationLayer {
 
   _getChangeFlags(opts) {
     const changeFlags = {};
-    const {attributesChanged, dimensions} = this.state;
+    const {dimensions} = this.state;
     changeFlags.dataChanged =
-      attributesChanged ||
+      this.isAttributeChanged() || // if any attribute is changed
       this.isAggregationDirty(opts, {
         compareAll: true,
         dimension: dimensions.data

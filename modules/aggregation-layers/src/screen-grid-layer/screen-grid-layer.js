@@ -180,7 +180,9 @@ export default class ScreenGridLayer extends GridAggregationLayer {
       gpuAggregation
     });
 
-    const {positionsChanged, dimensions} = this.state;
+    const positionsChanged = this.isAttributeChanged(POSITION_ATTRIBUTE_NAME);
+
+    const {dimensions} = this.state;
     const {data, weights} = dimensions;
     const aggregationDataDirty =
       positionsChanged ||

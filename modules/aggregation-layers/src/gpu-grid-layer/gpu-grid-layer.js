@@ -226,8 +226,8 @@ export default class GPUGridLayer extends GridAggregationLayer {
       elevationDomain
     } = this.props;
 
-    const {weights, numRow, numCol, boundingBox, gridOffset} = this.state;
-
+    const {weights, numRow, numCol, gridOrigin, gridOffset} = this.state;
+    const {color, elevation} = weights;
     const colorRange = colorRangeToFlatArray(this.props.colorRange);
 
     const SubLayerClass = this.getSubLayerClass('gpu-grid-cell', GPUGridCellLayer);
@@ -235,7 +235,7 @@ export default class GPUGridLayer extends GridAggregationLayer {
     return new SubLayerClass(
       {
         gridSize: [numCol, numRow],
-        gridOrigin: [boundingBox.xMin, boundingBox.yMin],
+        gridOrigin,
         gridOffset: [gridOffset.xOffset, gridOffset.yOffset],
         colorRange,
         elevationRange,
@@ -252,7 +252,14 @@ export default class GPUGridLayer extends GridAggregationLayer {
         id: 'gpu-grid-cell'
       }),
       {
-        data: weights,
+        data: {
+          attributes: {
+            colors: color.aggregationBuffer,
+            elevations: elevation.aggregationBuffer
+          }
+        },
+        colorMaxMinBuffer: color.maxMinBuffer,
+        elevationMaxMinBuffer: elevation.maxMinBuffer,
         numInstances: numCol * numRow
       }
     );
@@ -286,22 +293,20 @@ export default class GPUGridLayer extends GridAggregationLayer {
     let {boundingBox} = this.state;
     if (positionsChanged) {
       boundingBox = getBoundingBox(this.getAttributes(), this.getNumInstances());
+      this.setState({boundingBox});
     }
     if (positionsChanged || cellSizeChanged) {
-      const {
-        gridOffset,
-        boundingBoxAligned,
-        translation,
-        width,
-        height,
-        numCol,
-        numRow
-      } = getGridParams(boundingBox, cellSize, viewport, coordinateSystem);
+      const {gridOffset, translation, width, height, numCol, numRow} = getGridParams(
+        boundingBox,
+        cellSize,
+        viewport,
+        coordinateSystem
+      );
       this.allocateResources(numRow, numCol);
       this.setState({
         gridOffset,
-        boundingBox: boundingBoxAligned,
         translation,
+        gridOrigin: [-1 * translation[0], -1 * translation[1]],
         width,
         height,
         numCol,
