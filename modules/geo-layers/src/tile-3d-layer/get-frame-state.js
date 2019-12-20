@@ -2,7 +2,7 @@ import {Vector3} from 'math.gl';
 import {CullingVolume, Plane} from '@math.gl/culling';
 import {Ellipsoid} from '@math.gl/geospatial';
 
-const scratchPlane = new Plane();
+const scratchVector = new Vector3();
 const scratchPosition = new Vector3();
 const cullingVolume = new CullingVolume([
   new Plane(),
@@ -43,7 +43,7 @@ export function getFrameState(viewport, frameNumber) {
     enuToFixedTransform.transformAsVector(new Vector3(cameraUp).scale(metersPerUnit))
   ).normalize();
 
-  commonSpacePlanesToWGS84(viewport);
+  commonSpacePlanesToWGS84(viewport, viewportCenterCartesian);
 
   // TODO: make a file/class for frameState and document what needs to be attached to this so that traversal can function
   return {
@@ -59,14 +59,8 @@ export function getFrameState(viewport, frameNumber) {
   };
 }
 
-function commonSpacePlanesToWGS84(viewport) {
+function commonSpacePlanesToWGS84(viewport, viewportCenterCartesian) {
   // Extract frustum planes based on current view.
-  const viewportCenterCartographic = [viewport.longitude, viewport.latitude, 0];
-  const viewportCenterCartesian = Ellipsoid.WGS84.cartographicToCartesian(
-    viewportCenterCartographic,
-    new Vector3()
-  );
-
   const frustumPlanes = viewport.getFrustumPlanes();
   let i = 0;
   for (const dir in frustumPlanes) {
@@ -80,15 +74,10 @@ function commonSpacePlanesToWGS84(viewport) {
 
     const cartesianPos = Ellipsoid.WGS84.cartographicToCartesian(cartographicPos, new Vector3());
 
-    scratchPlane.normal
-      .copy(cartesianPos)
-      .subtract(viewportCenterCartesian)
-      .scale(-1) // Want the normal to point into the frustum since that's what culling expects
-      .normalize();
-    scratchPlane.distance = Math.abs(scratchPlane.normal.dot(cartesianPos));
-
-    cullingVolume.planes[i].normal.copy(scratchPlane.normal);
-    cullingVolume.planes[i].distance = scratchPlane.distance;
-    i = i + 1;
+    cullingVolume.planes[i++].fromPointNormal(
+      cartesianPos,
+      // Want the normal to point into the frustum since that's what culling expects
+      scratchVector.copy(viewportCenterCartesian).subtract(cartesianPos)
+    );
   }
 }
