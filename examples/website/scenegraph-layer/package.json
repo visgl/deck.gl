@@ -8,7 +8,7 @@
   },
   "dependencies": {
     "deck.gl": "^8.0.0-beta",
-    "@loaders.gl/gltf": "^2.0.0-beta.7",
+    "@loaders.gl/gltf": "^2.0.0-beta.8",
     "react": "^16.3.0",
     "react-dom": "^16.3.0",
     "react-map-gl": "^5.0.0"
