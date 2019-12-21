@@ -167,4 +167,4 @@ Returns:
 
 ## Source
 
-[modules/core/src/viewports/viewport.js](https://github.com/uber/deck.gl/blob/master/modules/core/src/viewports/viewport.js)
+[modules/core/src/viewports/viewport.js](https://github.com/uber/deck.gl/tree/8.0-release/modules/core/src/viewports/viewport.js)

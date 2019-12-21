@@ -37,4 +37,4 @@ const pointLight = new PointLight({color, intensity, position});
 
 ## Source
 
-[/modules/core/src/effects/lighting/point-light.js](https://github.com/uber/deck.gl/tree/master/modules/core/src/effects/lighting/point-light.js)
+[/modules/core/src/effects/lighting/point-light.js](https://github.com/uber/deck.gl/tree/8.0-release/modules/core/src/effects/lighting/point-light.js)

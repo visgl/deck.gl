@@ -127,4 +127,4 @@ The rgba color is in the format of `[r, g, b, [a]]`. Each channel is a number be
 
 ## Source
 
-[modules/layers/src/point-cloud-layer](https://github.com/uber/deck.gl/tree/master/modules/layers/src/point-cloud-layer)
+[modules/layers/src/point-cloud-layer](https://github.com/uber/deck.gl/tree/8.0-release/modules/layers/src/point-cloud-layer)

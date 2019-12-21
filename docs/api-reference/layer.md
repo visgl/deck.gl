@@ -707,4 +707,4 @@ Returns:
 
 ## Source
 
-[modules/core/src/lib/layer.js](https://github.com/uber/deck.gl/blob/master/modules/core/src/lib/layer.js)
+[modules/core/src/lib/layer.js](https://github.com/uber/deck.gl/tree/8.0-release/modules/core/src/lib/layer.js)

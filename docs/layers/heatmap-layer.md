@@ -126,4 +126,4 @@ Method called to retrieve weight of each point. By default each point will use a
 
 ## Source
 
-[modules/aggregation-layers/src/heatmap-layer](https://github.com/uber/deck.gl/tree/master/modules/aggregation-layers/src/heatmap-layer)
+[modules/aggregation-layers/src/heatmap-layer](https://github.com/uber/deck.gl/tree/8.0-release/modules/aggregation-layers/src/heatmap-layer)

@@ -7,7 +7,7 @@ function getDocUrl(filename) {
 }
 
 function getCodeUrl(pathname) {
-  return `https://github.com/uber/deck.gl/tree/master/${pathname}`;
+  return `https://github.com/uber/deck.gl/tree/8.0-release/${pathname}`;
 }
 
 // mapping from file path in source to generated page url

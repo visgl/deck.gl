@@ -283,4 +283,4 @@ If `data.attributes.getIcon` is supplied, since its value can only be a typed ar
 
 ## Source
 
-[modules/layers/src/icon-layer](https://github.com/uber/deck.gl/tree/master/modules/layers/src/icon-layer)
+[modules/layers/src/icon-layer](https://github.com/uber/deck.gl/tree/8.0-release/modules/layers/src/icon-layer)

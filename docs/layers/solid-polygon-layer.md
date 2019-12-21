@@ -237,4 +237,4 @@ new SolidPolygonLayer({
 
 ## Source
 
-[modules/layers/src/solid-polygon-layer](https://github.com/uber/deck.gl/tree/master/modules/layers/src/solid-polygon-layer)
+[modules/layers/src/solid-polygon-layer](https://github.com/uber/deck.gl/tree/8.0-release/modules/layers/src/solid-polygon-layer)

@@ -81,4 +81,4 @@ Only effective if `getDashArray` is specified. If `true`, adjust gaps for the da
 
 ## Source
 
-[modules/extensions/src/fp64](https://github.com/uber/deck.gl/tree/master/modules/extensions/src/fp64)
+[modules/extensions/src/fp64](https://github.com/uber/deck.gl/tree/8.0-release/modules/extensions/src/fp64)
