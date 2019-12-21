@@ -7,8 +7,6 @@ import {log} from '@deck.gl/core';
 
 import {Tileset3D, _getIonTilesetMetadata} from '@loaders.gl/3d-tiles';
 
-import {getFrameState} from './get-frame-state';
-
 const defaultProps = {
   getPointColor: [0, 0, 0],
   pointSize: 1.0,
@@ -98,10 +96,8 @@ export default class Tile3DLayer extends CompositeLayer {
       return;
     }
 
-    // use Date.now() as frame identifier for now and later used to filter layers for rendering
-    const frameState = getFrameState(viewport, Date.now());
-    tileset3d.update(frameState);
-    this._updateLayerMap(frameState.frameNumber);
+    const frameNumber = tileset3d.update(viewport);
+    this._updateLayerMap(frameNumber);
   }
 
   // `Layer` instances is created and added to the map if it doesn't exist yet.
