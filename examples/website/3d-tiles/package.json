@@ -5,7 +5,7 @@
     "start-local": "webpack-dev-server --env.local --progress --hot --open"
   },
   "dependencies": {
-    "deck.gl": "^8.0.0-beta",
+    "deck.gl": "^8.0.0",
     "@loaders.gl/draco": "^2.0.0",
     "react": "^16.8.0",
     "react-dom": "^16.8.0",
