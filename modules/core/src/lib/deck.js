@@ -551,7 +551,7 @@ export default class Deck {
         const displayInfo = this.props.getTooltip(pickedInfo);
         this.tooltip.setTooltip(displayInfo, pickedInfo.x, pickedInfo.y);
       }
-      if (_pickRequest.callback) {
+      if (_pickRequest.callback && !pickedInfo.handled) {
         _pickRequest.callback(pickedInfo, _pickRequest.event);
       }
       _pickRequest.mode = null;
