@@ -19,9 +19,23 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v8.0
 
+#### deck.gl [8.0.0] - Dec 21 2019
+
+- set React wrapper's z-index (#4068)
+- Bump dependencies to production versions (#4066)
+- fix 3d tiles culling (#4064)
+- AggregationLayer: various fixes (#4062)
+- Bump loaders and fix infinite updateState calls (#4061)
+- Fix `layer.projectPositions` with default coordinate system (#4056)
+- Fix frustum plane calculation (#4050)
+- fix bundle transpilation (#4048)
+- AggregationLayers: Update and improve unit test coverage. (#4046)
+- AggregationLayer : Improve aggregation state management (#4008)
+- Fix bundle transpilation (#4042)
+
 ### deck.gl v8.0 Prereleases
 
-### deck.gl [8.0.0-beta.2] - Dec 17 2019
+#### deck.gl [8.0.0-beta.2] - Dec 17 2019
 
 - Fix ScenegraphLayer asset wait (#4025)
 - pydeck: Update for new @deck.gl/json API and add additional tes… (#4020)
@@ -35,7 +49,7 @@ Ref: http://keepachangelog.com/en/0.3.0/
 - Fix WebGL BlendEquation warnings (#4037)
 - Layer bug fixes (#4040)
 
-### deck.gl [8.0.0-beta.1] - Dec 13 2019
+#### deck.gl [8.0.0-beta.1] - Dec 13 2019
 
 - bump loaders.gl to beta.5 (#4018)
 - pydeck: Make a single bundle for use in standalone and Jupyter rendering (#4010)
