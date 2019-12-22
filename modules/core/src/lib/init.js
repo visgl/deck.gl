@@ -32,11 +32,14 @@ import jsonLoader from '../utils/json-loader';
 const version =
   typeof __VERSION__ !== 'undefined' ? __VERSION__ : global.DECK_VERSION || 'untranspiled source';
 
-if (global.deck && global.deck.VERSION !== version) {
-  throw new Error(`deck.gl - multiple versions detected: ${global.deck.VERSION} vs ${version}`);
+// Note: a `deck` object not created by deck.gl may exist in the global scope
+const existingVersion = global.deck && global.deck.VERSION;
+
+if (existingVersion && existingVersion !== version) {
+  throw new Error(`deck.gl - multiple versions detected: ${existingVersion} vs ${version}`);
 }
 
-if (!global.deck) {
+if (!existingVersion) {
   // eslint-disable-next-line
   if (process.env.NODE_ENV !== 'production') {
     log.log(
@@ -45,13 +48,13 @@ if (!global.deck) {
     )();
   }
 
-  global.deck = global.deck || {
+  global.deck = Object.assign(global.deck || {}, {
     VERSION: version,
     version,
     log,
     // experimental
     _registerLoggers: register
-  };
+  });
 
   registerLoaders([jsonLoader, ImageLoader]);
 }
