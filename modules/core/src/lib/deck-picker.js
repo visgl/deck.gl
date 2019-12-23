@@ -354,10 +354,9 @@ export default class DeckPicker {
         return;
       }
 
-      let handled = false;
       switch (mode) {
         case 'hover':
-          handled = info.layer.onHover(info, pickingEvent);
+          info.handled = info.layer.onHover(info, pickingEvent);
           break;
         case 'query':
           break;
@@ -365,9 +364,7 @@ export default class DeckPicker {
           throw new Error('unknown pick type');
       }
 
-      if (!handled) {
-        unhandledPickInfos.push(info);
-      }
+      unhandledPickInfos.push(info);
     });
 
     return unhandledPickInfos;
