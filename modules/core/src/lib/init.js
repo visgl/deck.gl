@@ -34,18 +34,21 @@ const version =
 
 const STARTUP_MESSAGE = 'set deck.log.priority=1 (or higher) to trace attribute updates';
 
-if (global.deck && global.deck.VERSION !== version) {
+// Note: a `deck` object not created by deck.gl may exist in the global scope
+const existingVersion = global.deck && global.deck.VERSION;
+
+if (existingVersion && existingVersion !== version) {
   throw new Error(`deck.gl - multiple versions detected: ${global.deck.VERSION} vs ${version}`);
 }
 
-if (!global.deck) {
+if (!existingVersion) {
   log.log(0, `deck.gl ${version} - ${STARTUP_MESSAGE}`)();
 
-  global.deck = global.deck || {
+  global.deck = Object.assign(global.deck || {}, {
     VERSION: version,
     version,
     log
-  };
+  });
 
   registerLoaders([jsonLoader, HTMLImageLoader]);
 
