@@ -404,7 +404,6 @@ export default class Deck {
 
     // TODO EventManager should accept element id
     if (typeof canvas === 'string') {
-      /* global document */
       canvas = document.getElementById(canvas);
       assert(canvas);
     }
