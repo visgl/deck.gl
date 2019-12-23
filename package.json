@@ -20,7 +20,7 @@
     "bootstrap": "PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true yarn && ocular-bootstrap",
     "clean": "ocular-clean",
     "build": "ocular-clean && ocular-build && lerna run build",
-    "version": "ocular-build core,main",
+    "version": "ocular-build core",
     "lint": "ocular-lint",
     "cover": "ocular-test cover",
     "publish": "ocular-publish",
@@ -41,8 +41,8 @@
     "jsdom": false
   },
   "devDependencies": {
-    "@luma.gl/engine": "^8.0.0",
-    "@luma.gl/test-utils": "^8.0.0",
+    "@luma.gl/engine": "^8.0.1",
+    "@luma.gl/test-utils": "^8.0.1",
     "@probe.gl/bench": "^3.2.0",
     "@probe.gl/test-utils": "^3.2.0",
     "@loaders.gl/csv": "^2.0.0",
@@ -60,7 +60,7 @@
     "gl": "^4.3.3",
     "glsl-transpiler": "^1.8.3",
     "jsdom": "^15.0.0",
-    "ocular-dev-tools": "0.0.33",
+    "ocular-dev-tools": "0.1.4",
     "png.js": "^0.1.1",
     "pre-commit": "^1.2.2",
     "pre-push": "^0.1.1",
