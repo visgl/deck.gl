@@ -168,18 +168,15 @@ export function callLayerPickingCallbacks(infos, mode, event) {
       return;
     }
 
-    let handled = false;
     switch (mode) {
       case 'hover':
-        handled = info.layer.onHover(info, event);
+        info.handled = info.layer.onHover(info, event);
         break;
       case 'query':
       default:
     }
 
-    if (!handled) {
-      unhandledPickInfos.push(info);
-    }
+    unhandledPickInfos.push(info);
   });
 
   return unhandledPickInfos;
