@@ -19,6 +19,12 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v8.0
 
+#### deck.gl [8.0.1] - Dec 21 2019
+
+- improve version detection (#4070)
+- Fix hover event bubbling (#4071)
+- Bump dependencies (#4074)
+
 #### deck.gl [8.0.0] - Dec 21 2019
 
 - set React wrapper's z-index (#4068)
