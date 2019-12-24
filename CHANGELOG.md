@@ -19,6 +19,11 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v7.3
 
+#### deck.gl [v7.3.11] - Dec 23 2019
+
+- improve version detection (#4070)
+- Fix hover event bubbling (#4071)
+
 #### deck.gl [v7.3.10] - Dec 20 2019
 
 - Support preprojection in PolygonTesselator (#4035)
