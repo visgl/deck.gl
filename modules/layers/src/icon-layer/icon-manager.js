@@ -178,6 +178,7 @@ export default class IconManager {
   ) {
     this.gl = gl;
     this.onUpdate = onUpdate;
+    this.loaded = false;
 
     this._getIcon = null;
 
@@ -262,6 +263,8 @@ export default class IconManager {
     const icons = Object.values(getDiffIcons(data, this._getIcon, this._mapping) || {});
 
     if (icons.length > 0) {
+      this.loaded = false;
+
       // generate icon mapping
       const {mapping, xOffset, yOffset, rowHeight, canvasHeight} = buildMapping({
         icons,
@@ -304,29 +307,34 @@ export default class IconManager {
     }
   }
 
-  _loadIcons(icons) {
+  async _loadIcons(icons) {
     const ctx = this._canvas.getContext('2d');
 
-    for (const icon of icons) {
-      loadImage(icon.url).then(imageData => {
-        const id = getIconId(icon);
-        const {x, y, width, height} = this._mapping[id];
+    for (let i = 0; i < icons.length; i++) {
+      const icon = icons[i];
+      const imageData = await loadImage(icon.url);
 
-        const data = resizeImage(ctx, imageData, width, height);
+      if (i === icons.length - 1) {
+        this.loaded = true;
+      }
 
-        this._texture.setSubImageData({
-          data,
-          x,
-          y,
-          width,
-          height
-        });
+      const id = getIconId(icon);
+      const {x, y, width, height} = this._mapping[id];
 
-        // Call to regenerate mipmaps after modifying texture(s)
-        this._texture.generateMipmap();
+      const data = resizeImage(ctx, imageData, width, height);
 
-        this.onUpdate();
+      this._texture.setSubImageData({
+        data,
+        x,
+        y,
+        width,
+        height
       });
+
+      // Call to regenerate mipmaps after modifying texture(s)
+      this._texture.generateMipmap();
+
+      this.onUpdate();
     }
   }
 }
