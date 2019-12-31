@@ -127,6 +127,7 @@ const defaultProps = {
 export default class Deck {
   constructor(props) {
     props = Object.assign({}, defaultProps, props);
+    this.props = {};
 
     this.width = 0; // "read-only", auto-updated from canvas
     this.height = 0; // "read-only", auto-updated from canvas
@@ -203,33 +204,22 @@ export default class Deck {
     if (this.layerManager) {
       this.layerManager.finalize();
       this.layerManager = null;
-    }
 
-    if (this.viewManager) {
       this.viewManager.finalize();
       this.viewManager = null;
-    }
 
-    if (this.effectManager) {
       this.effectManager.finalize();
       this.effectManager = null;
-    }
 
-    if (this.deckRenderer) {
       this.deckRenderer.finalize();
       this.deckRenderer = null;
-    }
 
-    if (this.deckPicker) {
       this.deckPicker.finalize();
       this.deckPicker = null;
-    }
 
-    if (this.eventManager) {
       this.eventManager.destroy();
-    }
+      this.eventManager = null;
 
-    if (this.tooltip) {
       this.tooltip.remove();
       this.tooltip = null;
     }
@@ -251,49 +241,31 @@ export default class Deck {
       log.removed('onLayerClick', 'onClick')();
     }
 
-    props = Object.assign({}, this.props, props);
-    this.props = props;
+    // Merge with existing props
+    Object.assign(this.props, props);
 
     // Update CSS size of canvas
-    this._setCanvasSize(props);
+    this._setCanvasSize(this.props);
 
     // We need to overwrite CSS style width and height with actual, numeric values
-    const newProps = Object.assign({}, props, {
-      views: this._getViews(this.props),
+    const resolvedProps = Object.create(this.props);
+    Object.assign(resolvedProps, {
+      views: this._getViews(),
       width: this.width,
-      height: this.height
+      height: this.height,
+      viewState: this._getViewState()
     });
 
-    const viewState = this._getViewState(props);
-    if (viewState) {
-      newProps.viewState = viewState;
-    }
+    // Update the animation loop
+    this.animationLoop.setProps(resolvedProps);
 
-    // Update view manager props
-    if (this.viewManager) {
-      this.viewManager.setProps(newProps);
-    }
-
-    // Update layer manager props (but not size)
+    // If initialized, update sub manager props
     if (this.layerManager) {
-      this.layerManager.setProps(newProps);
-    }
-
-    if (this.effectManager) {
-      this.effectManager.setProps(newProps);
-    }
-
-    // Update animation loop
-    if (this.animationLoop) {
-      this.animationLoop.setProps(newProps);
-    }
-
-    if (this.deckRenderer) {
-      this.deckRenderer.setProps(newProps);
-    }
-
-    if (this.deckPicker) {
-      this.deckPicker.setProps(newProps);
+      this.viewManager.setProps(resolvedProps);
+      this.layerManager.setProps(resolvedProps);
+      this.effectManager.setProps(resolvedProps);
+      this.deckRenderer.setProps(resolvedProps);
+      this.deckPicker.setProps(resolvedProps);
     }
 
     this.stats.get('setProps Time').timeEnd();
@@ -488,18 +460,18 @@ export default class Deck {
 
   // Get the most relevant view state: props.viewState, if supplied, shadows internal viewState
   // TODO: For backwards compatibility ensure numeric width and height is added to the viewState
-  _getViewState(props) {
-    return props.viewState || this.viewState;
+  _getViewState() {
+    return this.props.viewState || this.viewState;
   }
 
   // Get the view descriptor list
-  _getViews(props) {
+  _getViews() {
     // Default to a full screen map view port
-    let views = props.views || [new MapView({id: 'default-view'})];
+    let views = this.props.views || [new MapView({id: 'default-view'})];
     views = Array.isArray(views) ? views : [views];
-    if (views.length && props.controller) {
+    if (views.length && this.props.controller) {
       // Backward compatibility: support controller prop
-      views[0].props.controller = props.controller;
+      views[0].props.controller = this.props.controller;
     }
     return views;
   }
@@ -608,8 +580,8 @@ export default class Deck {
       eventManager: this.eventManager,
       onViewStateChange: this._onViewStateChange,
       onInteractiveStateChange: this._onInteractiveStateChange,
-      views: this._getViews(this.props),
-      viewState: this._getViewState(this.props),
+      views: this._getViews(),
+      viewState: this._getViewState(),
       width: this.width,
       height: this.height
     });
