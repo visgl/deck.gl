@@ -30,7 +30,7 @@ import GL from '@luma.gl/constants';
 import assert from '../utils/assert';
 import PickLayersPass from '../passes/pick-layers-pass';
 import {getClosestObject, getUniqueObjects} from './picking/query-object';
-import {processPickInfo, callLayerPickingCallbacks, getLayerPickingInfo} from './picking/pick-info';
+import {processPickInfo, getLayerPickingInfo} from './picking/pick-info';
 
 export default class DeckPicker {
   constructor(gl) {
@@ -125,7 +125,6 @@ export default class DeckPicker {
     radius = 0,
     depth = 1,
     mode = 'query',
-    event,
     unproject3D,
     onViewportActive
   }) {
@@ -213,10 +212,10 @@ export default class DeckPicker {
         pixelRatio
       });
 
-      const processedPickInfos = callLayerPickingCallbacks(infos, mode, event);
-
-      if (processedPickInfos) {
-        processedPickInfos.forEach(info => result.push(info));
+      for (const info of infos.values()) {
+        if (info.layer) {
+          result.push(info);
+        }
       }
 
       // If no object is picked stop.
