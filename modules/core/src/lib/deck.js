@@ -29,6 +29,7 @@ import Tooltip from './tooltip';
 import log from '../utils/log';
 import deckGlobal from './init';
 
+import {getBrowser} from 'probe.gl/env';
 import GL from '@luma.gl/constants';
 import {
   AnimationLoop,
@@ -43,7 +44,7 @@ import {EventManager} from 'mjolnir.js';
 
 import assert from '../utils/assert';
 import {EVENTS} from './constants';
-/* global window, document */
+/* global document */
 
 function noop() {}
 
@@ -159,7 +160,12 @@ export default class Deck {
     this._onViewStateChange = this._onViewStateChange.bind(this);
     this._onInteractiveStateChange = this._onInteractiveStateChange.bind(this);
 
-    if (isIE11()) {
+    if (props.viewState && props.initialViewState) {
+      log.warn(
+        'View state tracking is disabled. Use either `initialViewState` for auto update or `viewState` for manual update.'
+      )();
+    }
+    if (getBrowser() === 'IE') {
       log.warn('IE 11 support will be deprecated in v8.0')();
     }
 
@@ -815,15 +821,6 @@ export default class Deck {
     metrics.renderbufferMemory = memoryStats.get('Renderbuffer Memory').count;
     metrics.gpuMemory = memoryStats.get('GPU Memory').count;
   }
-}
-
-function isIE11() {
-  if (typeof window === undefined) {
-    return false;
-  }
-  const navigator = window.navigator || {};
-  const userAgent = navigator.userAgent || '';
-  return userAgent.indexOf('Trident/') !== -1;
 }
 
 Deck.getPropTypes = getPropTypes;
