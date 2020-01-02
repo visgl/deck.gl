@@ -41,9 +41,6 @@ npm_path = os.pathsep.join(
 # build_all is read from the command line and uses `yarn bootstrap`
 # for a frontend build instead of using `npm run build` within @deck.gl/jupyter-widget
 build_all = False
-# prod_build is read from the command line and uses the latest CDN-hosted version of the deck.gl libraries
-# rather than a local build
-prod_build = False
 
 
 def update_package_data(distribution):
@@ -188,10 +185,6 @@ if __name__ == "__main__":
     if "--build_all" in sys.argv:
         build_all = True
         sys.argv.remove("--build_all")
-
-    if "--prod_build" in sys.argv:
-        prod_build = True
-        sys.argv.remove("--prod_build")
 
     setup(
         name="pydeck",
