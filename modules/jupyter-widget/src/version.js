@@ -5,5 +5,16 @@
  * The html widget manager assumes that this is the same as the npm package
  * version number.
  */
-export const MODULE_VERSION = __VERSION__;
+let version;
+
+// JupyterLab path
+if (typeof __VERSION__ === 'undefined') {
+  const deck = require('../dist/index');
+  version = deck.version;
+} else {
+  // Standard build
+  version = __VERSION__;
+}
+
+export const MODULE_VERSION = version;
 export const MODULE_NAME = '@deck.gl/jupyter-widget';
