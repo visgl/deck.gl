@@ -19,6 +19,10 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v8.0
 
+#### deck.gl [8.0.2] - Jan 2 2019
+
+- Fix flyToInterpolator crash when transitioning to the same viewport center (#4084)
+
 #### deck.gl [8.0.1] - Dec 21 2019
 
 - improve version detection (#4070)
