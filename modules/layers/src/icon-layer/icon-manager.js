@@ -310,11 +310,13 @@ export default class IconManager {
   async _loadIcons(icons) {
     const ctx = this._canvas.getContext('2d');
 
-    for (let i = 0; i < icons.length; i++) {
-      const icon = icons[i];
+    let loaded = 0;
+    for (const icon of icons) {
       const imageData = await loadImage(icon.url);
+      loaded++;
 
-      if (i === icons.length - 1) {
+      // all the icons are fetched
+      if (loaded === icons.length) {
         this.loaded = true;
       }
 

@@ -768,7 +768,7 @@ export const TEST_CASES = [
             done();
           }
         }
-      }),
+      })
     ],
     goldenImage: './test/render/golden-images/icon-lnglat.png'
   },
