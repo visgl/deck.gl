@@ -22,10 +22,9 @@ environments:
 4) Run the following commands to publish to the test.pypi environment:
 
 ```
+rm dist/*  # If exists, clear out the current dist folder
 pip install -e . --verbose
 python setup.py sdist bdist_wheel
-rm pydeck-0.1.dev4-py2.py3-none-any.whl
-rm dist/*
 pip install twine  # If you have not installed twine
 python -m twine upload --repository-url https://test.pypi.org/legacy/ dist/*
 ```
