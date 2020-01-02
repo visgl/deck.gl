@@ -307,36 +307,36 @@ export default class IconManager {
     }
   }
 
-  async _loadIcons(icons) {
+  _loadIcons(icons) {
     const ctx = this._canvas.getContext('2d');
 
     let loaded = 0;
     for (const icon of icons) {
-      const imageData = await loadImage(icon.url);
-      loaded++;
+      loadImage(icon.url).then(imageData => {
+        loaded++;
 
-      // all the icons are fetched
-      if (loaded === icons.length) {
-        this.loaded = true;
-      }
+        if (loaded === icons.length) {
+          this.loaded = true;
+        }
 
-      const id = getIconId(icon);
-      const {x, y, width, height} = this._mapping[id];
+        const id = getIconId(icon);
+        const {x, y, width, height} = this._mapping[id];
 
-      const data = resizeImage(ctx, imageData, width, height);
+        const data = resizeImage(ctx, imageData, width, height);
 
-      this._texture.setSubImageData({
-        data,
-        x,
-        y,
-        width,
-        height
+        this._texture.setSubImageData({
+          data,
+          x,
+          y,
+          width,
+          height
+        });
+
+        // Call to regenerate mipmaps after modifying texture(s)
+        this._texture.generateMipmap();
+
+        this.onUpdate();
       });
-
-      // Call to regenerate mipmaps after modifying texture(s)
-      this._texture.generateMipmap();
-
-      this.onUpdate();
     }
   }
 }
