@@ -532,7 +532,6 @@ export default class Deck {
       this.layerManager.context.mousePosition = {x: _pickRequest.x, y: _pickRequest.y};
     }
 
-    _pickRequest.callback = this.props.onHover;
     _pickRequest.event = event;
     _pickRequest.mode = 'hover';
   }
@@ -541,19 +540,28 @@ export default class Deck {
   _pickAndCallback() {
     const {_pickRequest} = this;
 
-    if (_pickRequest.mode) {
-      // perform picking
+    if (_pickRequest.event) {
+      // Perform picking
       const {result, emptyInfo} = this._pick('pickObject', 'pickObject Time', _pickRequest);
-      const shouldGenerateInfo = _pickRequest.callback || this.props.getTooltip;
-      const pickedInfo = shouldGenerateInfo && (result.find(info => info.index >= 0) || emptyInfo);
+      const pickedInfo = result[0] || emptyInfo;
+
+      // Update tooltip
       if (this.props.getTooltip) {
         const displayInfo = this.props.getTooltip(pickedInfo);
         this.tooltip.setTooltip(displayInfo, pickedInfo.x, pickedInfo.y);
       }
-      if (_pickRequest.callback && !pickedInfo.handled) {
-        _pickRequest.callback(pickedInfo, _pickRequest.event);
+
+      // Execute callbacks
+      let handled = false;
+      if (pickedInfo.layer) {
+        handled = pickedInfo.layer.onHover(pickedInfo, _pickRequest.event);
       }
-      _pickRequest.mode = null;
+      if (!handled && this.props.onHover) {
+        this.props.onHover(pickedInfo, _pickRequest.event);
+      }
+
+      // Clear pending pickRequest
+      _pickRequest.event = null;
     }
   }
 
