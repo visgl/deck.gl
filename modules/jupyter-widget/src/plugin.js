@@ -6,7 +6,6 @@
 import {IJupyterWidgetRegistry} from '@jupyter-widgets/base';
 // eslint-disable-next-line import/no-unresolved
 import * as widgetExports from '../dist/index';
-import {MODULE_NAME, MODULE_VERSION} from './version';
 
 const EXTENSION_ID = '@deck.gl/jupyter-widget:plugin';
 
@@ -20,8 +19,8 @@ const widgetPlugin = {
 export default widgetPlugin;
 function activateWidgetExtension(app, registry) {
   registry.registerWidget({
-    name: MODULE_NAME,
-    version: MODULE_VERSION,
+    name: widgetExports.MODULE_NAME,
+    version: widgetExports.MODULE_VERSION,
     exports: widgetExports
   });
 }
