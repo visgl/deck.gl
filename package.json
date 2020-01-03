@@ -1,5 +1,5 @@
 {
-  "name": "deck.gl",
+  "name": "deck.gl-monorepo",
   "description": "A suite of 3D-enabled data visualization overlays, suitable for react-map-gl",
   "license": "MIT",
   "private": "true",
