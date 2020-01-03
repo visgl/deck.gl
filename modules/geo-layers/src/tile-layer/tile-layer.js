@@ -38,12 +38,14 @@ export default class TileLayer extends CompositeLayer {
       (changeFlags.updateTriggersChanged &&
         (changeFlags.updateTriggersChanged.all || changeFlags.updateTriggersChanged.getTileData))
     ) {
-      const {getTileData, maxZoom, minZoom, maxCacheSize} = props;
+      const {getTileData, maxZoom, minZoom, maxCacheSize, getTileIndices, tile2boundingBox} = props;
       if (tileCache) {
         tileCache.finalize();
       }
       tileCache = new TileCache({
         getTileData,
+        getTileIndices,
+        tile2boundingBox,
         maxSize: maxCacheSize,
         maxZoom,
         minZoom,

@@ -6,18 +6,20 @@ export function tile2latLng(x, y, z) {
   return [lng, lat];
 }
 
-export function tile2boundingBox(x, y, z) {
+export function tile2geoBoundingBox(x, y, z) {
   const [west, north] = tile2latLng(x, y, z);
   const [east, south] = tile2latLng(x + 1, y + 1, z);
   return {west, north, east, south};
 }
 
 export default class Tile {
-  constructor({getTileData, x, y, z, onTileLoad, onTileError}) {
+  constructor({getTileData, x, y, z, onTileLoad, onTileError, tile2boundingBox}) {
     this.x = x;
     this.y = y;
     this.z = z;
-    this.bbox = tile2boundingBox(this.x, this.y, this.z);
+    this.bbox = tile2boundingBox
+      ? tile2boundingBox(this.x, this.y, this.z)
+      : tile2geoBoundingBox(this.x, this.y, this.z);
     this.isVisible = true;
     this.getTileData = getTileData;
     this._data = null;

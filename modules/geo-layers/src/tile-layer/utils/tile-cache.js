@@ -1,5 +1,5 @@
 import Tile from './tile';
-import {getTileIndices} from './viewport-util';
+import {getGeoTileIndices} from './viewport-util';
 
 /**
  * Manages loading and purging of tiles data. This class caches recently visited tiles
@@ -11,10 +11,11 @@ export default class TileCache {
    * Takes in a function that returns tile data, a cache size, and a max and a min zoom level.
    * Cache size defaults to 5 * number of tiles in the current viewport
    */
-  constructor({getTileData, maxSize, maxZoom, minZoom, onTileLoad, onTileError}) {
+  constructor({getTileData, maxSize, maxZoom, minZoom, onTileLoad, onTileError, getTileIndices}) {
     // TODO: Instead of hardcode size, we should calculate how much memory left
     this._getTileData = getTileData;
     this._maxSize = maxSize;
+    this._getTileIndices = getTileIndices;
     this.onTileError = onTileError;
     this.onTileLoad = onTileLoad;
 
@@ -47,9 +48,19 @@ export default class TileCache {
    * @param {*} onUpdate
    */
   update(viewport) {
-    const {_cache, _getTileData, _maxSize, _maxZoom, _minZoom} = this;
+    const {
+      _cache,
+      _getTileData,
+      _getTileIndices,
+      _tile2boundingBox,
+      _maxSize,
+      _maxZoom,
+      _minZoom
+    } = this;
     this._markOldTiles();
-    const tileIndices = getTileIndices(viewport, _maxZoom, _minZoom);
+    const tileIndices = _getTileIndices
+      ? _getTileIndices(viewport, _maxZoom, _minZoom)
+      : getGeoTileIndices(viewport, _maxZoom, _minZoom);
     if (!tileIndices || tileIndices.length === 0) {
       return;
     }
@@ -69,6 +80,7 @@ export default class TileCache {
       if (!tile) {
         tile = new Tile({
           getTileData: _getTileData,
+          tile2boundingBox: _tile2boundingBox,
           x,
           y,
           z,

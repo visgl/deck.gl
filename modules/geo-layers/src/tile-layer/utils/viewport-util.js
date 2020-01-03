@@ -30,7 +30,7 @@ function getTileIndex(lngLat, scale) {
  * than minZoom, return an empty array. If the current zoom level is greater than maxZoom,
  * return tiles that are on maxZoom.
  */
-export function getTileIndices(viewport, maxZoom, minZoom) {
+export function getGeoTileIndices(viewport, maxZoom, minZoom) {
   const z = Math.floor(viewport.zoom);
   if (minZoom && z < minZoom) {
     return [];
@@ -50,7 +50,7 @@ export function getTileIndices(viewport, maxZoom, minZoom) {
   /*
       |  TILE  |  TILE  |  TILE  |
         |(minPixel)           |(maxPixel)
-      |(minIndex)                |(maxIndex)  
+      |(minIndex)                |(maxIndex)
    */
   minX = Math.max(0, Math.floor(minX));
   maxX = Math.min(viewport.scale, Math.ceil(maxX));
