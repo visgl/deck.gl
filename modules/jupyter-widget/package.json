@@ -18,8 +18,6 @@
   "files": [
     "dist/index.js",
     "dist/index.js.map",
-    "dist/standalone-html-bundle.js",
-    "dist/standalone-html-bundle.js.map",
     "src",
     "README.md"
   ],
