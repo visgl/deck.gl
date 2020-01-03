@@ -98,9 +98,7 @@ const config = {
     // ,new (require('webpack-bundle-analyzer').BundleAnalyzerPlugin)()
   ],
 
-  node: {
-    Buffer: false
-  },
+  node: false,
 
   devtool: false
 };
