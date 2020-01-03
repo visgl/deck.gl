@@ -242,7 +242,7 @@ export default class IconManager {
 
   get loaded() {
     const requestedIcons = Object.keys(this._mapping).length;
-    return this._autoPacking && requestedIcons.length && this._loadedIcons === requestedIcons;
+    return this._autoPacking && requestedIcons && this._loadedIcons === requestedIcons;
   }
 
   _updateIconAtlas(iconAtlas) {
