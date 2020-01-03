@@ -11,7 +11,7 @@ from IPython.display import IFrame
 TEMPLATES_PATH = os.path.join(os.path.dirname(__file__), './templates/')
 j2_env = jinja2.Environment(loader=jinja2.FileSystemLoader(TEMPLATES_PATH),
                             trim_blocks=True)
-
+CDN_URL = 'https://cdn.jsdelivr.net/npm/@deck.gl/jupyter-widget@^8.0.0/dist/index.js'
 
 def render_json_to_html(json_input, mapbox_key=None, tooltip=True):
     js = j2_env.get_template('index.j2')
@@ -20,8 +20,7 @@ def render_json_to_html(json_input, mapbox_key=None, tooltip=True):
     html_str = js.render(
         mapbox_key=mapbox_key,
         json_input=json_input,
-        # TODO change before publication to the NPM-hosted module
-        deckgl_jupyter_widget_bundle='',
+        deckgl_jupyter_widget_bundle=CDN_URL,
         tooltip=tooltip
     )
     return html_str

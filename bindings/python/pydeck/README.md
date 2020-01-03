@@ -116,19 +116,9 @@ git clone https://github.com/uber/deck.gl/
 cd deck.gl
 # Build the entire deck.gl project
 yarn bootstrap
-
-# Optional but recommended: Run a hot reloading development server
-cd modules/jupyter-widget
-yarn watch
 ```
 
-If running a non-default URL for webpack's dev server, change the URL in the `PYDECK_DEV_SERVER` environment variable,
-e.g., `export PYDECK_DEV_SERVER=http://localhost:8081`.
-
-Elsewhere, run:
-
 ```bash
-export PYDECK_DEV_SERVER=http://localhost:8080
 cd deck.gl/bindings/python/pydeck
 
 # Create a virtual environment
@@ -140,7 +130,7 @@ pip install -r requirements-dev.txt
 pip install -e .
 ```
 
-To enable develop with Jupyter Lab, run:
+Jupyter Lab is the recommended environment for development testing with pydeck. To enable development with Jupyter Lab, run:
 
 ```bash
 # Execute in deck.gl/modules/jupyter-widget directory
@@ -148,6 +138,7 @@ jupyter labextension install @jupyter-widgets/jupyterlab-manager@1.0.3 --no-buil
 jupyter labextension install . --no-build
 jupyter lab build
 ```
+
 
 ### Tests
 
