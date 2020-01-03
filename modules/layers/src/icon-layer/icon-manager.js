@@ -184,9 +184,8 @@ export default class IconManager {
     this._texture = null;
     this._externalTexture = null;
     this._mapping = {};
-    this._loaded = false;
-    // a counter which will increase when icon data set change
-    this._iconBatch = 0;
+    // a counter recorded complete loading icons (including failed ones)
+    this._loadedIcons = 0;
 
     this._autoPacking = false;
 
@@ -241,6 +240,11 @@ export default class IconManager {
     }
   }
 
+  get loaded() {
+    const requestedIcons = Object.keys(this._mapping).length;
+    return this._autoPacking && requestedIcons.length && this._loadedIcons === requestedIcons;
+  }
+
   _updateIconAtlas(iconAtlas) {
     if (this._texture) {
       this._texture.delete();
@@ -265,11 +269,6 @@ export default class IconManager {
     const icons = Object.values(getDiffIcons(data, this._getIcon, this._mapping) || {});
 
     if (icons.length > 0) {
-      // increase batch counter
-      ++this._iconBatch;
-
-      this.loaded = false;
-
       // generate icon mapping
       const {mapping, xOffset, yOffset, rowHeight, canvasHeight} = buildMapping({
         icons,
@@ -308,23 +307,16 @@ export default class IconManager {
       this.onUpdate();
 
       // load images
-      this._loadIcons(icons, this._iconBatch);
+      this._loadIcons(icons);
     }
   }
 
-  _loadIcons(icons, iconBatch) {
+  _loadIcons(icons) {
     const ctx = this._canvas.getContext('2d');
 
-    const promises = icons.map(icon => loadImage(icon.url));
-
-    Promise.all(promises)
-      .then(images => {
-        this._loaded = this._iconBatch === iconBatch;
-
-        for (let i = 0; i < images.length; i++) {
-          const icon = icons[i];
-          const imageData = images[i];
-
+    for (const icon of icons) {
+      loadImage(icon.url)
+        .then(imageData => {
           const id = getIconId(icon);
           const {x, y, width, height} = this._mapping[id];
 
@@ -342,11 +334,13 @@ export default class IconManager {
           this._texture.generateMipmap();
 
           this.onUpdate();
-        }
-      })
-      .catch(error => {
-        this.loaded = false;
-        log.error(error)();
-      });
+        })
+        .catch(error => {
+          log.error(error)();
+        })
+        .finally(() => {
+          this._loadedIcons++;
+        });
+    }
   }
 }
