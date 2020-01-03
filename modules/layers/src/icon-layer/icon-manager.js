@@ -184,7 +184,7 @@ export default class IconManager {
     this._texture = null;
     this._externalTexture = null;
     this._mapping = {};
-    // a counter recorded complete loading icons (including failed ones)
+    // count of pending requests to fetch icons
     this._pendingCount = 0;
 
     this._autoPacking = false;
