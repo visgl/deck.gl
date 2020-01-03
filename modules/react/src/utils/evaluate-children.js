@@ -20,6 +20,9 @@ export default function evaluateChildren(children, childProps) {
     childProps.style = MAP_STYLE;
     return cloneElement(children, childProps);
   }
+  if (needsDeckGLViewProps(children)) {
+    return cloneElement(children, childProps);
+  }
   return children;
 }
 
@@ -27,4 +30,9 @@ function isReactMap(child) {
   const componentClass = child && child.type;
   const componentProps = componentClass && componentClass.defaultProps;
   return componentProps && componentProps.mapStyle;
+}
+
+function needsDeckGLViewProps(child) {
+  const componentClass = child && child.type;
+  return componentClass && componentClass.deckGLViewProps;
 }
