@@ -761,7 +761,13 @@ export const TEST_CASES = [
         },
         getSize: d => (d.RACKS > 2 ? 2 : 1),
         opacity: 0.8,
-        pickable: true
+        pickable: true,
+        onAfterRender: ({layers, done}) => {
+          if (layers[0].state.iconManager.loaded) {
+            // data is loaded
+            done();
+          }
+        }
       })
     ],
     goldenImage: './test/render/golden-images/icon-lnglat.png'
@@ -805,6 +811,12 @@ export const TEST_CASES = [
             anchorY: 1024,
             mask: false
           };
+        },
+        onAfterRender: ({layers, done}) => {
+          if (layers[0].state.iconManager.loaded) {
+            // data is loaded
+            done();
+          }
         }
       })
     ],
@@ -1730,6 +1742,11 @@ export const TEST_CASES = [
         image: ICON_ATLAS
       })
     ],
+    onAfterRender: ({layers, done}) => {
+      if (layers[0].state.bitmapTexture) {
+        done();
+      }
+    },
     goldenImage: './test/render/golden-images/bitmap.png'
   },
   {
