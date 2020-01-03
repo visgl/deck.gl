@@ -2,7 +2,7 @@
 
 * **Authors**: Ib Green, Hong Wang
 * **Date**: Aug 2019
-* **Status**: Draft
+* **Status**: Partially Implemented in deck.gl v8
 
 ## Abstract
 
