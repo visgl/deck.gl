@@ -19,6 +19,16 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v8.0
 
+#### deck.gl [8.0.3] - Jan 3 2019
+
+- warn if initialViewState and viewState are both present (#4078)
+- @deck.gl/jupyter-widget: Change version variable for CDN-based Jupyter Lab widget (#4087)
+- Fix inline versioning (#4086)
+- Update bundle config (#4088)
+- pydeck: Add CDN-hosted bundle for standalone HTML rendering (#4003)
+- @deck.gl/jupyter-widget: Read version and module name from bundle for Jupyter Lab (#4089)
+- @deck.gl/react: pass viewports to children with deckGLViewProps (#4092)
+
 #### deck.gl [8.0.2] - Jan 2 2019
 
 - Fix flyToInterpolator crash when transitioning to the same viewport center (#4084)
