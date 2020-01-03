@@ -1,4 +1,4 @@
-# RFC: Syntactic sugar for @deck.gl/json
+# RFC: pydeck dynamic injection of layer modules
 
 * **Authors**: Andrew Duberstein (@ajduberstein), Ib Green (@ibgreen)
 * **Date**: January 3, 2020
@@ -26,7 +26,8 @@ This system could be copied / generalized to deck/pydeck so that a list of addit
 
 Open questions:
 - How would additional modules be specified once pydeck is open? Would pydeck export a python function to "install" additional layers?
-- `JSONConfiguration` may need a method to inject new layers.
+- `JSONConfiguration` may need a method to extend definition.
+- Should dynamic extensibility be built on the pydeck level or the deck.gl or @deck.gl/json level?
 
 Concerns:
 - Security implications would need to be understood and managed.
