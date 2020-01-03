@@ -1742,6 +1742,11 @@ export const TEST_CASES = [
         image: ICON_ATLAS
       })
     ],
+    onAfterRender: ({layers, done}) => {
+      if (layers[0].state.bitmapTexture) {
+        done();
+      }
+    },
     goldenImage: './test/render/golden-images/bitmap.png'
   },
   {

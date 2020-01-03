@@ -185,7 +185,7 @@ export default class IconManager {
     this._externalTexture = null;
     this._mapping = {};
     // a counter recorded complete loading icons (including failed ones)
-    this._loadedIcons = 0;
+    this._pendingCount = 0;
 
     this._autoPacking = false;
 
@@ -241,8 +241,7 @@ export default class IconManager {
   }
 
   get loaded() {
-    const requestedIcons = Object.keys(this._mapping).length;
-    return this._autoPacking && requestedIcons && this._loadedIcons === requestedIcons;
+    return this._pendingCount === 0;
   }
 
   _updateIconAtlas(iconAtlas) {
@@ -315,6 +314,7 @@ export default class IconManager {
     const ctx = this._canvas.getContext('2d');
 
     for (const icon of icons) {
+      this._pendingCount++;
       loadImage(icon.url)
         .then(imageData => {
           const id = getIconId(icon);
@@ -339,7 +339,7 @@ export default class IconManager {
           log.error(error)();
         })
         .finally(() => {
-          this._loadedIcons++;
+          this._pendingCount--;
         });
     }
   }
