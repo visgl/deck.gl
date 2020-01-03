@@ -2,7 +2,7 @@
 import GL from '@luma.gl/constants';
 import {Texture2D, copyToTexture, cloneTextureFrom} from '@luma.gl/core';
 import {loadImage} from '@loaders.gl/images';
-import {createIterable} from '@deck.gl/core';
+import {createIterable, log} from '@deck.gl/core';
 
 const DEFAULT_CANVAS_WIDTH = 1024;
 const DEFAULT_BUFFER = 4;
@@ -178,13 +178,15 @@ export default class IconManager {
   ) {
     this.gl = gl;
     this.onUpdate = onUpdate;
-    this.loaded = false;
 
     this._getIcon = null;
 
     this._texture = null;
     this._externalTexture = null;
     this._mapping = {};
+    this._loaded = false;
+    // a counter which will increase when icon data set change
+    this._iconBatch = 0;
 
     this._autoPacking = false;
 
@@ -263,6 +265,9 @@ export default class IconManager {
     const icons = Object.values(getDiffIcons(data, this._getIcon, this._mapping) || {});
 
     if (icons.length > 0) {
+      // increase batch counter
+      ++this._iconBatch;
+
       this.loaded = false;
 
       // generate icon mapping
@@ -303,40 +308,45 @@ export default class IconManager {
       this.onUpdate();
 
       // load images
-      this._loadIcons(icons);
+      this._loadIcons(icons, this._iconBatch);
     }
   }
 
-  _loadIcons(icons) {
+  _loadIcons(icons, iconBatch) {
     const ctx = this._canvas.getContext('2d');
 
-    let loaded = 0;
-    for (const icon of icons) {
-      loadImage(icon.url).then(imageData => {
-        loaded++;
+    const promises = icons.map(icon => loadImage(icon.url));
 
-        if (loaded === icons.length) {
-          this.loaded = true;
+    Promise.all(promises)
+      .then(images => {
+        this._loaded = this._iconBatch === iconBatch;
+
+        for (let i = 0; i < images.length; i++) {
+          const icon = icons[i];
+          const imageData = images[i];
+
+          const id = getIconId(icon);
+          const {x, y, width, height} = this._mapping[id];
+
+          const data = resizeImage(ctx, imageData, width, height);
+
+          this._texture.setSubImageData({
+            data,
+            x,
+            y,
+            width,
+            height
+          });
+
+          // Call to regenerate mipmaps after modifying texture(s)
+          this._texture.generateMipmap();
+
+          this.onUpdate();
         }
-
-        const id = getIconId(icon);
-        const {x, y, width, height} = this._mapping[id];
-
-        const data = resizeImage(ctx, imageData, width, height);
-
-        this._texture.setSubImageData({
-          data,
-          x,
-          y,
-          width,
-          height
-        });
-
-        // Call to regenerate mipmaps after modifying texture(s)
-        this._texture.generateMipmap();
-
-        this.onUpdate();
+      })
+      .catch(error => {
+        this.loaded = false;
+        log.error(error)();
       });
-    }
   }
 }
