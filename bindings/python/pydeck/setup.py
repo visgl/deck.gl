@@ -196,9 +196,9 @@ if __name__ == "__main__":
         include_package_data=True,
         packages=find_packages(),
         cmdclass={
-            "install": js_prerelease(install),
+            "install": install,
             "develop": js_prerelease(ExitHookDevelop),
-            "build_py": js_prerelease(build_py),
+            "build_py": build_py,
             "egg_info": egg_info,
             "sdist": js_prerelease(sdist, strict=True),
             "jsdeps": FrontendBuild,
