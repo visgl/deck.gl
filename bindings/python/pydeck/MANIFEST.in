@@ -1,9 +1,10 @@
 include LICENSE.txt
 include README.md
 
-include setupbase.py
 include pytest.ini
-include .coverage.rc
+include .coveragerc
+
+include pydeck/io/templates/*.j2
 
 # Examples
 graft examples

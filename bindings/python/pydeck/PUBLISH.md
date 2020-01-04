@@ -22,7 +22,7 @@ environments:
 4) Run the following commands to publish to the test.pypi environment:
 
 ```
-rm dist/*  # If exists, clear out the current dist folder
+rm -r ./dist/*  # If exists, clear out the current dist folder
 pip install -e . --verbose
 python setup.py sdist bdist_wheel
 pip install twine  # If you have not installed twine

@@ -238,8 +238,9 @@ if __name__ == "__main__":
                     "pydeck/nbextension/static/extensionRequires.js",
                     "pydeck/nbextension/static/index.js",
                     "pydeck/nbextension/static/index.js.map",
-                ]),
-            ("etc/jupyter/nbconfig/notebook.d", ["pydeck.json"]),
+                ],
+            ),
+            ("etc/jupyter/nbconfig/notebook.d", ["pydeck.json"])
         ],
         zip_safe=False,
     )

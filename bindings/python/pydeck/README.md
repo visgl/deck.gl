@@ -21,12 +21,18 @@ For __interactive demos__, click the binder logo below:
 pip install pydeck
 ```
 
-If you are installing this for a Jupyter notebook server, you'll have to enable the widget extension.
-To do this, run:
+To install pydeck for Jupyter Notebook, run the following commands on your Jupyter server:
 
 ```bash
 jupyter nbextension install --sys-prefix --symlink --overwrite --py pydeck
 jupyter nbextension enable --sys-prefix --py pydeck
+```
+
+To install pydeck for JupyterLab, run the following:
+
+```bash
+jupyter labextension install @jupyter-widgets/jupyterlab-manager@1.0.3
+jupyter labextension install @deck.gl/jupyter-widget
 ```
 
 ### Mapbox API token
