@@ -43,7 +43,7 @@ matrix:
           sources:
           - ubuntu-toolchain-r-test
       before_install:
-        - cd bindings/python/pydeck
+        - cd bindings/pydeck
       python:
         - "3.5"
         - "2.7"
