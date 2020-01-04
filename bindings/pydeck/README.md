@@ -106,7 +106,7 @@ and include your console output, if any.
 git clone https://github.com/uber/deck.gl/
 
 # Navigate to the pydeck module
-cd deck.gl/bindings/python/pydeck
+cd deck.gl/bindings/pydeck
 
 # Create a virtual environment
 python3 -m venv env3
@@ -125,7 +125,7 @@ yarn bootstrap
 ```
 
 ```bash
-cd deck.gl/bindings/python/pydeck
+cd deck.gl/bindings/pydeck
 
 # Create a virtual environment
 python3 -m venv env3
