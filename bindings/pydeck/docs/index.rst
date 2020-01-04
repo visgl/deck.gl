@@ -1,7 +1,7 @@
 Welcome to pydeck's documentation!
 ==================================
 
-If you have not already, `follow the installation instructions <https://github.com/uber/deck.gl/blob/master/bindings/python/pydeck/README.md>`_
+If you have not already, `follow the installation instructions <https://github.com/uber/deck.gl/blob/master/bindings/pydeck/README.md>`_
 
 .. toctree::
    :maxdepth: 2
