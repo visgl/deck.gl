@@ -24,8 +24,8 @@ def read(*parts):
 log.info("setup.py entered")
 log.info("$PATH=%s" % os.environ["PATH"])
 
-PATH_TO_WIDGET = "../../../modules/jupyter-widget"
-PATH_TO_REPO_ROOT = "../../.."
+PATH_TO_WIDGET = "../../modules/jupyter-widget"
+PATH_TO_REPO_ROOT = "../.."
 
 yarn_root = os.path.join(here, PATH_TO_REPO_ROOT)
 widget_dir = os.path.join(here, PATH_TO_WIDGET)
@@ -196,16 +196,16 @@ if __name__ == "__main__":
         include_package_data=True,
         packages=find_packages(),
         cmdclass={
-            "install": js_prerelease(install),
+            "install": install,
             "develop": js_prerelease(ExitHookDevelop),
-            "build_py": js_prerelease(build_py),
+            "build_py": build_py,
             "egg_info": egg_info,
             "sdist": js_prerelease(sdist, strict=True),
             "jsdeps": FrontendBuild,
         },
         author="Andrew Duberstein",
         author_email="ajduberstein@gmail.com",
-        url="https://github.com/uber/deck.gl/tree/master/bindings/python/pydeck",
+        url="https://github.com/uber/deck.gl/tree/master/bindings/pydeck",
         keywords=["data", "visualization", "graphics", "GIS", "maps"],
         classifiers=[
             "Intended Audience :: Developers",
@@ -225,7 +225,7 @@ if __name__ == "__main__":
         install_requires=[
             'ipykernel>=5.1.2;python_version>="3.4"',
             'ipython>=5.8.0;python_version<"3.4"',
-            "ipywidgets>=7.0.0,<7.5",
+            "ipywidgets>=7.0.0",
             "traitlets>=4.3.2",
             "jinja2>=2.10.1",
         ],
@@ -238,8 +238,9 @@ if __name__ == "__main__":
                     "pydeck/nbextension/static/extensionRequires.js",
                     "pydeck/nbextension/static/index.js",
                     "pydeck/nbextension/static/index.js.map",
-                ]),
-            ("etc/jupyter/nbconfig/notebook.d", ["pydeck.json"]),
+                ],
+            ),
+            ("etc/jupyter/nbconfig/notebook.d", ["pydeck.json"])
         ],
         zip_safe=False,
     )

@@ -22,7 +22,7 @@ environments:
 4) Run the following commands to publish to the test.pypi environment:
 
 ```
-rm dist/*  # If exists, clear out the current dist folder
+rm -r ./dist/*  # If exists, clear out the current dist folder
 pip install -e . --verbose
 python setup.py sdist bdist_wheel
 pip install twine  # If you have not installed twine
@@ -42,7 +42,7 @@ where `{{version}}` is your semantic version.
 7) If everything appears to be working, publish to pypi.
 
 ```
-twine upload dist/
+twine upload dist/*
 ```
 
 8) Verify again the pydeck installed from the main pypi works in the environment above.
