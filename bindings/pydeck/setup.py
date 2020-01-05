@@ -225,7 +225,7 @@ if __name__ == "__main__":
         install_requires=[
             'ipykernel>=5.1.2;python_version>="3.4"',
             'ipython>=5.8.0;python_version<"3.4"',
-            "ipywidgets>=7.0.0,<7.5",
+            "ipywidgets>=7.0.0",
             "traitlets>=4.3.2",
             "jinja2>=2.10.1",
         ],
