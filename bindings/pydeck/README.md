@@ -31,7 +31,7 @@ jupyter nbextension enable --sys-prefix --py pydeck
 To install pydeck for JupyterLab, run the following:
 
 ```bash
-jupyter labextension install @jupyter-widgets/jupyterlab-manager@1.0.3
+jupyter labextension install @jupyter-widgets/jupyterlab-manager
 jupyter labextension install @deck.gl/jupyter-widget
 ```
 
@@ -56,7 +56,7 @@ UK_ACCIDENTS_DATA = ('https://raw.githubusercontent.com/uber-common/'
 layer = pdk.Layer(
     'HexagonLayer',
     UK_ACCIDENTS_DATA,
-    get_position='[lng, lat]',
+    get_position=['lng', 'lat'],
     auto_highlight=True,
     elevation_scale=50,
     pickable=True,
