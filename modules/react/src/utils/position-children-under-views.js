@@ -54,9 +54,8 @@ export default function positionChildrenUnderViews({children, viewports, deck, C
 
   // Render views
   return Object.keys(views).map(viewId => {
-    const {viewport} = views[viewId];
+    const {viewport, children: viewChildren} = views[viewId];
     const {x, y, width, height} = viewport;
-    let viewChildren = views[viewId].children;
     const style = {
       position: 'absolute',
       left: x,
@@ -66,6 +65,9 @@ export default function positionChildrenUnderViews({children, viewports, deck, C
     };
 
     const key = `view-${viewId}`;
+    // If children is passed as an array, React will throw the "each element in a list needs
+    // a key" warning. Sending each child as separate arguments removes this requirement.
+    const viewElement = createElement('div', {key, id: key, style}, ...viewChildren);
 
     if (ContextProvider) {
       const contextValue = {
@@ -77,9 +79,9 @@ export default function positionChildrenUnderViews({children, viewports, deck, C
           deck._onViewStateChange(params);
         }
       };
-      viewChildren = createElement(ContextProvider, {value: contextValue}, viewChildren);
+      return createElement(ContextProvider, {value: contextValue}, viewElement);
     }
 
-    return createElement('div', {key, id: key, style}, viewChildren);
+    return viewElement;
   });
 }

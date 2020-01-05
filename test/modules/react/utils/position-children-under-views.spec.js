@@ -76,7 +76,7 @@ test('positionChildrenUnderViews', t => {
   t.is(wrappedChild[1].props.id, 'element-without-view', 'element child preserves id');
 
   wrappedChild = children[1].props.children;
-  t.is(wrappedChild[0].props.id, 'element-under-view', 'element child preserves id');
+  t.is(wrappedChild.props.id, 'element-under-view', 'element child preserves id');
   t.end();
 });
 
@@ -94,12 +94,10 @@ test('positionChildrenUnderViews#ContextProvider', t => {
 
   t.is(children.length, 2, 'Returns wrapped children');
 
-  let wrappedChild = children[0].props.children;
-  t.is(wrappedChild.type, context.Provider, 'child is wrapped in ContextProvider');
-  t.is(wrappedChild.props.value.viewport, TEST_VIEWPORTS.map, 'Context has viewport');
+  t.is(children[0].type, context.Provider, 'child is wrapped in ContextProvider');
+  t.is(children[0].props.value.viewport, TEST_VIEWPORTS.map, 'Context has viewport');
 
-  wrappedChild = children[1].props.children;
-  t.is(wrappedChild.type, context.Provider, 'child is wrapped in ContextProvider');
-  t.is(wrappedChild.props.value.viewport, TEST_VIEWPORTS.ortho, 'Context has viewport');
+  t.is(children[1].type, context.Provider, 'child is wrapped in ContextProvider');
+  t.is(children[1].props.value.viewport, TEST_VIEWPORTS.ortho, 'Context has viewport');
   t.end();
 });
