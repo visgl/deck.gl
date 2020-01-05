@@ -21,12 +21,18 @@ For __interactive demos__, click the binder logo below:
 pip install pydeck
 ```
 
-If you are installing this for a Jupyter notebook server, you'll have to enable the widget extension.
-To do this, run:
+To install pydeck for Jupyter Notebook, run the following commands on your Jupyter server:
 
 ```bash
 jupyter nbextension install --sys-prefix --symlink --overwrite --py pydeck
 jupyter nbextension enable --sys-prefix --py pydeck
+```
+
+To install pydeck for JupyterLab, run the following:
+
+```bash
+jupyter labextension install @jupyter-widgets/jupyterlab-manager
+jupyter labextension install @deck.gl/jupyter-widget
 ```
 
 ### Mapbox API token
@@ -50,7 +56,7 @@ UK_ACCIDENTS_DATA = ('https://raw.githubusercontent.com/uber-common/'
 layer = pdk.Layer(
     'HexagonLayer',
     UK_ACCIDENTS_DATA,
-    get_position='[lng, lat]',
+    get_position=['lng', 'lat'],
     auto_highlight=True,
     elevation_scale=50,
     pickable=True,
@@ -100,7 +106,7 @@ and include your console output, if any.
 git clone https://github.com/uber/deck.gl/
 
 # Navigate to the pydeck module
-cd deck.gl/bindings/python/pydeck
+cd deck.gl/bindings/pydeck
 
 # Create a virtual environment
 python3 -m venv env3
@@ -119,7 +125,7 @@ yarn bootstrap
 ```
 
 ```bash
-cd deck.gl/bindings/python/pydeck
+cd deck.gl/bindings/pydeck
 
 # Create a virtual environment
 python3 -m venv env3
