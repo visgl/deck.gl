@@ -42,7 +42,7 @@ where `{{version}}` is your semantic version.
 7) If everything appears to be working, publish to pypi.
 
 ```
-twine upload dist/
+twine upload dist/*
 ```
 
 8) Verify again the pydeck installed from the main pypi works in the environment above.
