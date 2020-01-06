@@ -14,6 +14,11 @@ def to_camel_case(snake_case):
     -----------
     snake_case : str
         Snake-cased string (e.g., "snake_cased") to be converted to camel-case (e.g., "camelCase")
+
+    Returns
+    -------
+    str
+        Camel-cased (e.g., "camelCased") version of input string
     """
     output_str = ''
     should_upper_case = False
