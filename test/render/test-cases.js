@@ -9,6 +9,7 @@ import {
 } from '@deck.gl/aggregation-layers';
 import {
   COORDINATE_SYSTEM,
+  MapView,
   OrbitView,
   OrthographicView,
   FirstPersonView,
@@ -1984,5 +1985,25 @@ export const TEST_CASES = [
       })
     ],
     goldenImage: './test/render/golden-images/binary.png'
+  },
+  {
+    name: 'map-repeat',
+    views: new MapView({repeat: true}),
+    viewState: {
+      latitude: 0,
+      longitude: 0,
+      zoom: 0,
+      pitch: 0,
+      bearing: 0
+    },
+    layers: [
+      new ScatterplotLayer({
+        data: h3.getRes0Indexes(),
+        getPosition: d => h3.h3ToGeo(d).reverse(),
+        radiusMinPixels: 4,
+        getFillColor: [255, 0, 0]
+      })
+    ],
+    goldenImage: './test/render/golden-images/map-repeat.png'
   }
 ];

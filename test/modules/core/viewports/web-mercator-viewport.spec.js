@@ -242,6 +242,40 @@ test('WebMercatorViewport.getFrustumPlanes', t => {
   t.end();
 });
 
+test('WebMercatorViewport.subViewports', t => {
+  let viewport = new WebMercatorViewport(TEST_VIEWPORTS[0]);
+  t.deepEqual(viewport.subViewports, null, 'gets correct subViewports');
+
+  viewport = new WebMercatorViewport({...TEST_VIEWPORTS[0], repeat: true});
+  t.deepEqual(viewport.subViewports, [viewport], 'gets correct subViewports');
+
+  viewport = new WebMercatorViewport({
+    width: 800,
+    height: 400,
+    longitude: 0,
+    latitude: 0,
+    zoom: 0,
+    repeat: true
+  });
+  const {subViewports} = viewport;
+  t.is(subViewports.length, 3, 'gets correct subViewports');
+  t.deepEqual(
+    subViewports[0].project([0, 0]),
+    [400 - 512, 200],
+    'center offset in subViewports[0]'
+  );
+  t.deepEqual(subViewports[1].project([0, 0]), [400, 200], 'center offset in subViewports[1]');
+  t.deepEqual(
+    subViewports[2].project([0, 0]),
+    [400 + 512, 200],
+    'center offset in subViewports[2]'
+  );
+
+  t.is(viewport.subViewports, subViewports, 'subViewports are cached');
+
+  t.end();
+});
+
 function getCulling(p, planes) {
   let outDir = null;
   p = new Vector3(p);

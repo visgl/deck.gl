@@ -53,7 +53,8 @@ export default class WebMercatorViewport extends Viewport {
       farZMultiplier = 1.01,
       orthographic = false,
 
-      worldOffset
+      repeat = false,
+      worldOffset = 0
     } = opts;
 
     let {width, height, altitude = 1.5} = opts;
@@ -125,14 +126,16 @@ export default class WebMercatorViewport extends Viewport {
     this.altitude = altitude;
 
     this.orthographic = orthographic;
-    this._subViewports = [];
+
+    this._subViewports = repeat ? [] : null;
 
     Object.freeze(this);
   }
   /* eslint-enable complexity, max-statements */
 
   get subViewports() {
-    if (!this._subViewports.length) {
+    if (this._subViewports && !this._subViewports.length) {
+      // Cache sub viewports so that we only calculate them once
       const topLeft = this.unproject([0, 0]);
       const topRight = this.unproject([this.width, 0]);
       const bottomLeft = this.unproject([0, this.height]);
