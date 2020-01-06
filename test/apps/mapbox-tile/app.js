@@ -1,8 +1,8 @@
-/* global document fetch window */
+/* global document fetch */
 /* eslint-disable no-console */
 import React, {PureComponent} from 'react';
 import {render} from 'react-dom';
-import DeckGL from 'deck.gl';
+import DeckGL from '@deck.gl/react';
 import {TileLayer} from '@deck.gl/geo-layers';
 
 import {decodeTile} from './utils/decode';
@@ -15,15 +15,14 @@ const INITIAL_VIEW_STATE = {
   pitch: 0,
   longitude: -122.45,
   latitude: 37.78,
-  zoom: 12,
-  minZoom: 2,
-  maxZoom: 14,
-  height: window.innerHeight,
-  width: window.innerWidth
+  zoom: 12
 };
 
 const MAP_LAYER_STYLES = {
-  stroked: false,
+  stroked: true,
+  extruded: true,
+
+  getElevation: f => (f.properties.extrude && f.properties.height) || 0,
 
   getLineColor: [192, 192, 192],
 
@@ -61,12 +60,8 @@ const MAP_LAYER_STYLES = {
 function getTileData({x, y, z}) {
   const mapSource = `https://a.tiles.mapbox.com/v4/mapbox.mapbox-streets-v7/${z}/${x}/${y}.vector.pbf?access_token=${MAPBOX_TOKEN}`;
   return fetch(mapSource)
-    .then(response => {
-      return response.arrayBuffer();
-    })
-    .then(buffer => {
-      return decodeTile(x, y, z, buffer);
-    });
+    .then(response => response.arrayBuffer())
+    .then(buffer => decodeTile(x, y, z, buffer));
 }
 
 class Root extends PureComponent {
@@ -79,7 +74,7 @@ class Root extends PureComponent {
   }
 
   _onClick(info) {
-    this.setState({clickedItem: info && info.object});
+    this.setState({clickedItem: info.object});
   }
 
   _renderClickedItem() {
@@ -88,40 +83,26 @@ class Root extends PureComponent {
       return null;
     }
 
-    return (
-      <div
-        style={{
-          position: 'fixed',
-          zIndex: 9,
-          margin: '20px',
-          left: 0,
-          bottom: 0,
-          whiteSpace: 'nowrap',
-          pointerEvents: 'none'
-        }}
-      >
-        {JSON.stringify(clickedItem.properties)}
-      </div>
-    );
+    return <div className="clicked-info">{JSON.stringify(clickedItem.properties)}</div>;
   }
 
   render() {
     return (
-      <div>
-        <DeckGL
-          initialViewState={INITIAL_VIEW_STATE}
-          controller={true}
-          onLayerClick={this._onClick}
-          layers={[
-            new TileLayer({
-              ...MAP_LAYER_STYLES,
-              pickable: true,
-              getTileData
-            })
-          ]}
-        />
+      <DeckGL
+        initialViewState={INITIAL_VIEW_STATE}
+        controller={true}
+        onClick={this._onClick}
+        layers={[
+          new TileLayer({
+            ...MAP_LAYER_STYLES,
+            getPolygonOffset: null,
+            pickable: true,
+            getTileData
+          })
+        ]}
+      >
         {this._renderClickedItem()}
-      </div>
+      </DeckGL>
     );
   }
 }

@@ -1,40 +1,46 @@
 import Protobuf from 'pbf';
 import {VectorTile} from '@mapbox/vector-tile';
-import {worldToLngLat} from 'viewport-mercator-project';
 import {vectorTileFeatureToGeoJSON} from './feature';
 
-const TILE_SIZE = 512;
+const PI = Math.PI;
+const PI_4 = PI / 4;
+const RADIANS_TO_DEGREES_2 = 360 / PI;
 
 export function decodeTile(x, y, z, arrayBuffer) {
   const tile = new VectorTile(new Protobuf(arrayBuffer));
 
   const result = [];
-  const xProj = x * TILE_SIZE;
-  const yProj = y * TILE_SIZE;
-  const scale = Math.pow(2, z);
 
-  const projectFunc = project.bind(null, xProj, yProj, scale);
+  const scale = Math.pow(2, z);
+  const projX = x / scale;
+  const projY = y / scale;
+
+  const projectFunc = project.bind(null, projX, projY, scale);
 
   for (const layerName in tile.layers) {
     const vectorTileLayer = tile.layers[layerName];
     for (let i = 0; i < vectorTileLayer.length; i++) {
       const vectorTileFeature = vectorTileLayer.feature(i);
       const features = vectorTileFeatureToGeoJSON(vectorTileFeature, projectFunc);
-      features.forEach(f => {
+      for (const f of features) {
         f.properties.layer = layerName;
         result.push(f);
-      });
+      }
     }
   }
   return result;
 }
 
 function project(x, y, scale, line, extent) {
-  const sizeToPixel = extent / TILE_SIZE;
+  const pixelToCommon = 1 / extent / scale;
 
-  for (let ii = 0; ii < line.length; ii++) {
-    const p = line[ii];
+  for (let i = 0; i < line.length; i++) {
+    const p = line[i];
+    // common space
+    const cx = x + p[0] * pixelToCommon;
+    const cy = y + p[1] * pixelToCommon;
     // LNGLAT
-    line[ii] = worldToLngLat([x + p[0] / sizeToPixel, y + p[1] / sizeToPixel], scale);
+    p[0] = cx * 360 - 180;
+    p[1] = (Math.atan(Math.exp(PI - cy * 2 * PI)) - PI_4) * RADIANS_TO_DEGREES_2;
   }
 }
