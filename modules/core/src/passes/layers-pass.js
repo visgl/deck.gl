@@ -31,12 +31,16 @@ export default class LayersPass extends Pass {
       // Update context to point to this viewport
       onViewportActive(viewport);
 
-      props.viewport = viewport;
       props.view = view;
 
       // render this viewport
-      const stats = this._drawLayersInViewport(gl, props);
-      renderStats.push(stats);
+      const subViewports = viewport.subViewports || [viewport];
+      for (const subViewport of subViewports) {
+        props.viewport = subViewport;
+
+        const stats = this._drawLayersInViewport(gl, props);
+        renderStats.push(stats);
+      }
     });
     return renderStats;
   }
@@ -92,6 +96,8 @@ export default class LayersPass extends Pass {
         const _moduleParameters = this._getModuleParameters(layer, effects, pass, moduleParameters);
         const uniforms = Object.assign({}, layer.context.uniforms, {layerIndex});
         const layerParameters = this.getLayerParameters(layer, layerIndex);
+        // overwrite layer.context.viewport with the sub viewport
+        _moduleParameters.viewport = viewport;
 
         try {
           layer.drawLayer({
