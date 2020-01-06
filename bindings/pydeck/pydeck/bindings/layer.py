@@ -50,7 +50,7 @@ class Layer(JSONMixin):
           >>> layer = pydeck.Layer(
           >>>     'HexagonLayer',
           >>>     UK_ACCIDENTS_DATA,
-          >>>     get_position='[lng, lat]',
+          >>>     get_position=['lng', 'lat'],
           >>>     auto_highlight=True,
           >>>     elevation_scale=50,
           >>>     pickable=True,
@@ -65,7 +65,7 @@ class Layer(JSONMixin):
           >>> layer = pydeck.Layer(
           >>>     'HexagonLayer',
           >>>     df,
-          >>>     get_position='[lng, lat]',
+          >>>     get_position=['lng', 'lat'],
           >>>     auto_highlight=True,
           >>>     elevation_scale=50,
           >>>     pickable=True,

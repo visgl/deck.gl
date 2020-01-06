@@ -7,9 +7,9 @@ version: 2
 
 # Build documentation in the docs/ directory with Sphinx
 sphinx:
-  configuration: bindings/python/pydeck/docs/conf.py
+  configuration: bindings/pydeck/docs/conf.py
 
 # Optionally set the version of Python and requirements required to build your docs
 python:
   install:
-    - requirements: bindings/python/pydeck/requirements-dev.txt
+    - requirements: bindings/pydeck/requirements-dev.txt

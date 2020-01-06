@@ -41,7 +41,8 @@ def geometric_mean(points):
 
     Returns
     -------
-        tuple : The centroid of a list of points
+    tuple
+        The centroid of a list of points
     """
     avg_x = sum([float(p[0]) for p in points]) / len(points)
     avg_y = sum([float(p[1]) for p in points]) / len(points)
@@ -58,7 +59,8 @@ def get_bbox(points):
 
     Returns
     -------
-        dict: Dictionary containing the top left and bottom right points of a bounding box
+    dict
+        Dictionary containing the top left and bottom right points of a bounding box
     """
     xs = [p[0] for p in points]
     ys = [p[1] for p in points]
@@ -83,7 +85,8 @@ def k_nearest_neighbors(points, center, k):
 
     Returns
     -------
-    list: Index of the k furthest points
+    list
+        Index of the k furthest points
 
     Todo
     ---
@@ -106,7 +109,8 @@ def get_n_pct(points, proportion=1):
 
     Returns
     -------
-        list: k nearest data points
+    list
+        k nearest data points
     """
     if proportion == 1:
         return points
@@ -127,7 +131,8 @@ def bbox_to_zoom_level(bbox):
 
     Returns
     -------
-        int : Zoom level of map in a WGS84 Mercator projection (e.g., like that of Google Maps)
+    int
+        Zoom level of map in a WGS84 Mercator projection (e.g., like that of Google Maps)
     """
     lat_diff = max(bbox[0][0], bbox[1][0]) - min(bbox[0][0], bbox[1][0])
     lng_diff = max(bbox[0][1], bbox[1][1]) - min(bbox[0][1], bbox[1][1])
@@ -158,7 +163,8 @@ def compute_view(points, view_proportion=1, view_type=ViewState):
 
     Returns
     -------
-        pydeck.Viewport : Viewport fitted to the data
+    pydeck.Viewport
+        Viewport fitted to the data
     """
     if is_pandas_df(points):
         points = points.to_records(index=False)
