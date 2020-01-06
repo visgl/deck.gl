@@ -1,5 +1,5 @@
 #!/bin/bash
-IS_PYTHON=$(git diff --cached --name-only | grep "bindings/python/")
+IS_PYTHON=$(git diff --cached --name-only | grep "python/pydeck")
 HAS_PYTEST=$(command -v pytest)
 
 if [[ -n "$IS_PYTHON" ]]; then
