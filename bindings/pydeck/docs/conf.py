@@ -6,7 +6,7 @@ import os
 sys.path.insert(0, os.path.abspath('../'))
 
 project = u'pydeck'
-copyright = u'2019, Uber Technologies, Inc.'
+copyright = u'2020, Uber Technologies, Inc.'
 author = u'Andrew Duberstein'
 # The short X.Y version
 version = u''
@@ -32,7 +32,7 @@ man_pages = [
 ]
 texinfo_documents = [
     (master_doc, 'pydeck', u'pydeck Documentation',
-     author, 'pydeck', 'One line description of project.',
+     author, 'pydeck', 'Python wrapper for deck.gl',
      'Miscellaneous'),
 ]
 epub_title = project

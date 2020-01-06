@@ -7,7 +7,8 @@ def get_random_rgb():
 
     Returns
     -------
-        list of float : Random RGB array
+    list of float
+        Random RGB array
     """
     return [round(random.random()*255) for _ in range(0, 3)]
 
@@ -22,7 +23,8 @@ def assign_random_colors(data_vector):
 
     Returns
     -------
-        collections.OrderedDict : Dictionary of random RGBA value per class, keyed on class
+    collections.OrderedDict
+        Dictionary of random RGBA value per class, keyed on class
     """
     deduped_classes = list(set(data_vector))
     classes = sorted([str(x) for x in deduped_classes])

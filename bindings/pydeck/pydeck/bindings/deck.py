@@ -55,6 +55,7 @@ class Deck(JSONMixin):
             For more advanced usage, the user can pass a dict to configure more custom tooltip features.
             Documentation on this is available `in the hosted pydeck documentation <tooltip.html>`_.
 
+
         .. _Deck:
             https://deck.gl/#/documentation/deckgl-api-reference/deck
         .. _gallery:
@@ -129,7 +130,8 @@ class Deck(JSONMixin):
 
         Returns
         -------
-            str : Returns absolute path of the file
+        str
+            Returns absolute path of the file
         """
         json_blob = self.to_json()
         f = deck_to_html(
