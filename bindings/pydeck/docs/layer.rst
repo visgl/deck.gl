@@ -57,7 +57,7 @@ HexagonLayer <https://deck.gl/#/examples/core-layers/hexagon-layer>`__:
    layer = pdk.Layer(
        'HexagonLayer',  # `type` positional argument is here
        UK_ACCIDENTS_DATA,
-       get_position='[lng, lat]',
+       get_position=['lng', 'lat'],
        auto_highlight=True,
        elevation_scale=50,
        pickable=True,
@@ -91,7 +91,7 @@ Try changing ``type`` above to ``ScatterplotLayer`` and add some
    layer = pdk.Layer(
        'ScatterplotLayer',     # Change the `type` positional argument here
        UK_ACCIDENTS_DATA,
-       get_position='[lng, lat]',
+       get_position=['lng', 'lat'],
        auto_highlight=True,
        get_radius=1000,          # Radius is given in meters
        get_fill_color=[180, 0, 200, 140],  # Set an RGBA value for fill
