@@ -61,9 +61,13 @@ float flipIfTrue(bool flag) {
 // calculate line join positions
 vec3 lineJoin(
   vec3 prevPoint, vec3 currPoint, vec3 nextPoint,
-  float relativePosition, bool isEnd, bool isJoint,
-  vec2 width, vec2 widthPixels
+  vec2 width
 ) {
+  bool isEnd = positions.x > EPSILON;
+  // side of the segment - -1: left, 0: center, 1: right
+  float side = positions.y;
+  float isJoint = positions.z;
+
   vec2 deltaA = (currPoint.xy - prevPoint.xy) / width;
   vec2 deltaB = (nextPoint.xy - currPoint.xy) / width;
 
@@ -82,7 +86,7 @@ vec3 lineJoin(
   vec2 perpB = vec2(-dirB.y, dirB.x);
 
   // tangent of the corner
-  vec2 tangent = vec2(dirA + dirB);
+  vec2 tangent = dirA + dirB;
   tangent = length(tangent) > 0. ? normalize(tangent) : perpA;
   // direction of the corner
   vec2 miterVec = vec2(-tangent.y, tangent.x);
@@ -98,36 +102,39 @@ vec3 lineJoin(
 
   float offsetScale = 1.0 / max(sinHalfA, EPSILON);
 
-  float cornerPosition = isJoint ?
-    0.0 :
-    flipIfTrue(turnsRight == (relativePosition > 0.0));
-
-  // do not bevel if line segment is too short
-  cornerPosition *=
-    float(cornerPosition <= 0.0 || sinHalfA < min(lenA, lenB) * cosHalfA);
+  // relative position to the corner:
+  // -1: inside (smaller side of the angle)
+  // 0: center
+  // 1: outside (bigger side of the angle)
+  float cornerPosition = (1.0 - isJoint) * flipIfTrue(turnsRight == (side > EPSILON));
+  float isCenterOrOutsideCorner = step(0.0, cornerPosition);
+  float isOutsideCorner = step(0.5, cornerPosition);
 
   // trim if inside corner extends further than the line segment
-  if (cornerPosition < 0.0) {
-    offsetScale = min(offsetScale, L / max(cosHalfA, EPSILON));
-  }
-
-  vMiterLength = cornerPosition >= 0.0 ?
-    mix(offsetScale, 0.0, cornerPosition) :
-    offsetScale * cornerPosition;
-  vMiterLength -= sinHalfA * jointType;
-
-  float offsetDirection = mix(
-    positions.y,
-    mix(
-      flipIfTrue(turnsRight),
-      positions.y * flipIfTrue(turnsRight == (positions.x == 1.)),
-      cornerPosition
-    ),
-    step(0.0, cornerPosition)
+  offsetScale = mix(
+    min(offsetScale, max(lenA, lenB) / max(cosHalfA, EPSILON)),
+    offsetScale,
+    isCenterOrOutsideCorner
   );
 
-  vec2 offsetVec = mix(miterVec, -tangent, step(0.5, cornerPosition));
-  offsetScale = mix(offsetScale, 1.0 / max(cosHalfA, 0.001), step(0.5, cornerPosition));
+  vMiterLength = mix(
+    offsetScale * cornerPosition,
+    mix(offsetScale, sinHalfA, cornerPosition),
+    isCenterOrOutsideCorner
+  ) - sinHalfA * jointType;
+
+  float offsetDirection = mix(
+    side,
+    mix(
+      flipIfTrue(turnsRight),
+      side * flipIfTrue(turnsRight == isEnd),
+      cornerPosition
+    ),
+    isCenterOrOutsideCorner
+  );
+
+  vec2 offsetVec = mix(miterVec, perp * flipIfTrue(isEnd == turnsRight), isOutsideCorner);
+  offsetScale = mix(offsetScale, 1.0, isOutsideCorner);
 
   // special treatment for start cap and end cap
   bool isStartCap = lenA == 0.0 || (!isEnd && (instanceTypes == 1.0 || instanceTypes == 3.0));
@@ -135,7 +142,7 @@ vec3 lineJoin(
   bool isCap = isStartCap || isEndCap;
 
   // 0: center, 1: side
-  cornerPosition = isCap ? (1.0 - positions.z) : 0.;
+  cornerPosition = isCap ? (1.0 - isJoint) : 0.;
 
   // start of path: use next - curr
   if (isStartCap) {
@@ -151,54 +158,25 @@ vec3 lineJoin(
   if (isCap) {
     offsetScale = mix(4.0 * jointType, 1.0, cornerPosition);
     vMiterLength = 1.0 - cornerPosition;
-    offsetDirection = mix(flipIfTrue(isStartCap), positions.y, cornerPosition);
+    offsetDirection = mix(flipIfTrue(isStartCap), side, cornerPosition);
   }
 
   vCornerOffset = offsetVec * offsetDirection * offsetScale;
 
   // Generate variables for dash calculation
   vPathLength = L;
-  // vec2 offsetFromStartOfPath = isEnd ? vCornerOffset + deltaA : vCornerOffset;
-  vec2 offsetFromStartOfPath = vCornerOffset;
-  if (isEnd) {
-    offsetFromStartOfPath += deltaA;
-  }
+  vec2 offsetFromStartOfPath = vCornerOffset + deltaA * float(isEnd);
   vec2 dir = isEnd ? dirA : dirB;
   vPathPosition = vec2(
-    positions.y + positions.z * offsetDirection,
+    side + isJoint * offsetDirection,
     dot(offsetFromStartOfPath, dir)
   );
   geometry.uv = vPathPosition;
 
   float isValid = step(instanceTypes, 3.5);
-  vec3 offset = vec3(vCornerOffset * widthPixels * isValid, 0.0);
+  vec3 offset = vec3(vCornerOffset * width * isValid, 0.0);
   DECKGL_FILTER_SIZE(offset, geometry);
-  return currPoint + vec3(offset.xy / widthPixels * width, 0.0);
-}
-
-// calculate line join positions
-// extract params from attributes and uniforms
-vec3 lineJoin(vec3 prevPoint, vec3 currPoint, vec3 nextPoint) {
-
-  // relative position to the corner:
-  // -1: inside (smaller side of the angle)
-  // 0: center
-  // 1: outside (bigger side of the angle)
-
-  float relativePosition = positions.y;
-  bool isEnd = positions.x > EPSILON;
-  bool isJoint = positions.z > EPSILON;
-
-  vec2 widthPixels = vec2(clamp(project_size_to_pixel(instanceStrokeWidths * widthScale),
-    widthMinPixels, widthMaxPixels) / 2.0);
-
-  vec2 width = billboard ? project_pixel_size_to_clipspace(widthPixels) : project_pixel_size(widthPixels);
-
-  return lineJoin(
-    prevPoint, currPoint, nextPoint,
-    relativePosition, isEnd, isJoint,
-    width, widthPixels
-  );
+  return currPoint + offset;
 }
 
 // In clipspace extrusion, if a line extends behind the camera, clip it to avoid visual artifacts
@@ -213,6 +191,9 @@ void main() {
   geometry.worldPosition = instanceStartPositions;
   geometry.worldPositionAlt = instanceEndPositions;
   geometry.pickingColor = instancePickingColors;
+
+  vec2 widthPixels = vec2(clamp(project_size_to_pixel(instanceStrokeWidths * widthScale),
+    widthMinPixels, widthMaxPixels) / 2.0);
 
   vColor = vec4(instanceColors.rgb, instanceColors.a * opacity);
 
@@ -237,10 +218,13 @@ void main() {
     clipLine(nextPositionScreen, currPositionScreen);
     clipLine(currPositionScreen, mix(nextPositionScreen, prevPositionScreen, isEnd));
 
+    vec2 width = project_pixel_size_to_clipspace(widthPixels);
+
     vec3 pos = lineJoin(
       prevPositionScreen.xyz / prevPositionScreen.w,
       currPositionScreen.xyz / currPositionScreen.w,
-      nextPositionScreen.xyz / nextPositionScreen.w
+      nextPositionScreen.xyz / nextPositionScreen.w,
+      width
     );
 
     gl_Position = vec4(pos * currPositionScreen.w, currPositionScreen.w);
@@ -250,8 +234,10 @@ void main() {
     currPosition = project_position(currPosition, currPosition64Low);
     nextPosition = project_position(nextPosition, nextPosition64Low);
 
+    vec2 width = project_pixel_size(widthPixels);
+
     vec4 pos = vec4(
-      lineJoin(prevPosition, currPosition, nextPosition),
+      lineJoin(prevPosition, currPosition, nextPosition, width),
       1.0);
     geometry.position = pos;
     gl_Position = project_common_position_to_clipspace(pos);

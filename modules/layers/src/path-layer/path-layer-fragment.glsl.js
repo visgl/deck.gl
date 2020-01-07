@@ -47,7 +47,7 @@ void main(void) {
     // return;
     discard;
   }
-  if (jointType == 0.0 && vMiterLength > miterLimit) {
+  if (jointType == 0.0 && vMiterLength > miterLimit + 1.0) {
     // Enable to debug joints
     // gl_FragColor = vec4(0., 0., 1., 1.);
     // return;
