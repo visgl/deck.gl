@@ -20,42 +20,58 @@
 
 import test from 'tape-catch';
 import {generateLayerTests, testLayer} from '@deck.gl/test-utils';
-import {TileLayer} from '@deck.gl/geo-layers';
-import {tile2geoBoundingBox} from '@deck.gl/geo-layers/tile-layer/utils/tile-util';
-import {getGeoTileIndices} from '@deck.gl/geo-layers/tile-layer/utils/viewport-util';
+import {BaseTileLayer} from '@deck.gl/layers';
 
-test('TileLayer', t => {
+test('BaseTileLayer', t => {
   const testCases = generateLayerTests({
-    Layer: TileLayer,
+    Layer: BaseTileLayer,
     assert: t.ok,
     onBeforeUpdate: ({testCase}) => t.comment(testCase.title)
   });
-  testLayer({Layer: TileLayer, testCases, onError: t.notOk});
+  testLayer({Layer: BaseTileLayer, testCases, onError: t.notOk});
   t.end();
 });
 
-test('TileLayer#updateTriggers', t => {
+test('BaseTileLayer#updateTriggers', t => {
   const testCases = [
     {
       props: {
         getTileData: 0
       },
-      onAfterUpdate({subLayer}) {
+      onAfterUpdate({layer}) {
+        t.equal(layer.state.tileCache._getTileData, 0, 'Should create a tileCache.');
+      }
+    },
+    {
+      updateProps: {
+        getTileData: 1
+      },
+      onAfterUpdate({layer}) {
         t.equal(
-          subLayer.state.tileCache._tile2boundingBox,
-          tile2geoBoundingBox,
-          'Should create a tileCache with correct tile2boundingBox'
+          layer.state.tileCache._getTileData,
+          0,
+          'Should not create a tileCache when updateTriggers not changed.'
         );
+      }
+    },
+    {
+      updateProps: {
+        getTileData: 2,
+        updateTriggers: {
+          getTileData: 2
+        }
+      },
+      onAfterUpdate({layer}) {
         t.equal(
-          subLayer.state.tileCache._getTileIndices,
-          getGeoTileIndices,
-          'Should create a tileCache with correct _getTileIndices'
+          layer.state.tileCache._getTileData,
+          2,
+          'Should create a new tileCache with updated getTileData.'
         );
       }
     }
   ];
 
-  testLayer({Layer: TileLayer, testCases, onError: t.notOk});
+  testLayer({Layer: BaseTileLayer, testCases, onError: t.notOk});
 
   t.end();
 });

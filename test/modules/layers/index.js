@@ -28,6 +28,8 @@ import './geojson-layer.spec';
 import './point-cloud-layer.spec';
 import './path-layer/path-layer-vertex.spec';
 import './icon-manager.spec';
+import './base-tile-layer/tile-cache.spec';
+import './base-tile-layer/base-tile-layer.spec';
 import './text-layer/utils.spec';
 import './text-layer/lru-cache.spec';
 import './text-layer/text-layer.spec';

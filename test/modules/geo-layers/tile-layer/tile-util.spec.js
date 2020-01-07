@@ -19,7 +19,7 @@
 // THE SOFTWARE.
 
 import test from 'tape-catch';
-import {tile2geoBoundingBox} from '@deck.gl/geo-layers/tile-layer/utils/tile';
+import {tile2geoBoundingBox} from '@deck.gl/geo-layers/tile-layer/utils/tile-util';
 
 test('tile2geoBoundingBox', t => {
   const results = tile2geoBoundingBox(8, 5, 4);
