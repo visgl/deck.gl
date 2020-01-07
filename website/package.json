@@ -9,7 +9,8 @@
   "scripts": {
     "start": "webpack-dev-server --env.local --progress --open",
     "start-local": "yarn start",
-    "build": "scripts/build.sh",
+    "build": "scripts/build.sh prod",
+    "build-staging": "scripts/build.sh staging",
     "lint": "eslint src --ignore-pattern workers"
   },
   "dependencies": {
