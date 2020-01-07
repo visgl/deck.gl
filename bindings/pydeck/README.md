@@ -117,7 +117,7 @@ python3 setup.py install
 
 ## Development
 
-Before 
+Build the deck.gl project at the root of this repository:
 
 ```bash
 git clone https://github.com/uber/deck.gl/
@@ -126,9 +126,9 @@ cd deck.gl
 yarn bootstrap
 ```
 
-```bash
-cd deck.gl/bindings/pydeck
+From the directory of this README, build pydeck:
 
+```bash
 # Create a virtual environment
 python3 -m venv env3
 . env3/bin/activate
@@ -142,7 +142,7 @@ JupyterLab is the recommended environment for development testing with pydeck.
 To develop with JupyterLab, run from this directory:
 
 ```bash
-cd ../../modules/jupyter-widget
+# cd ../../modules/jupyter-widget
 jupyter labextension install @jupyter-widgets/jupyterlab-manager --no-build
 jupyter labextension install . --no-build
 jupyter labextension link .
