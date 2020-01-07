@@ -1,7 +1,5 @@
 import {lngLatToWorld} from '@math.gl/web-mercator';
 
-const TILE_SIZE = 512;
-
 function getBoundingBox(viewport) {
   const corners = [
     viewport.unproject([0, 0]),
@@ -18,10 +16,10 @@ function getBoundingBox(viewport) {
   ];
 }
 
-function getTileIndex(lngLat, scale) {
+function getTileIndex(lngLat, scale, tileSize) {
   let [x, y] = lngLatToWorld(lngLat);
-  x *= scale / TILE_SIZE;
-  y = (1 - y / TILE_SIZE) * scale;
+  x *= scale / tileSize;
+  y = (1 - y / tileSize) * scale;
   return [x, y];
 }
 
@@ -30,7 +28,7 @@ function getTileIndex(lngLat, scale) {
  * than minZoom, return an empty array. If the current zoom level is greater than maxZoom,
  * return tiles that are on maxZoom.
  */
-export function getGeoTileIndices(viewport, maxZoom, minZoom) {
+export function getGeoTileIndices(viewport, maxZoom, minZoom, tileSize) {
   const z = Math.floor(viewport.zoom);
   if (minZoom && z < minZoom) {
     return [];
@@ -44,8 +42,8 @@ export function getGeoTileIndices(viewport, maxZoom, minZoom) {
 
   const bbox = getBoundingBox(viewport);
 
-  let [minX, minY] = getTileIndex([bbox[0], bbox[3]], viewport.scale);
-  let [maxX, maxY] = getTileIndex([bbox[2], bbox[1]], viewport.scale);
+  let [minX, minY] = getTileIndex([bbox[0], bbox[3]], viewport.scale, tileSize);
+  let [maxX, maxY] = getTileIndex([bbox[2], bbox[1]], viewport.scale, tileSize);
 
   /*
       |  TILE  |  TILE  |  TILE  |
