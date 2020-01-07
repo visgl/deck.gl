@@ -25,6 +25,14 @@ deck.log.level = 2
 | 2         | Logs layer updates |
 | 3+        | Additional logging around layer lifecycle, prop diffing etc |
 
+Starting v8.0, deck.gl no longer bundles the debugging module in production mode. This includes the pre-bundled `dist.min.js`, and any bundle built with the environment variable `NODE_ENV=production`. To enable debugging in a production build, you may include the pre-bundled debug module *AFTER* the deck.gl bundle:
+
+```html
+<!-- the bundle that contains deck.gl -->
+<script src="app.js"></script>
+<!-- the debug module -->
+<script src="https://unpkg.com/@deck.gl/core@^8.0.0/debug.min.js"></script>
+```
 
 ## WebGL debugging using luma.gl
 
