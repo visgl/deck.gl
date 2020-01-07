@@ -139,9 +139,8 @@ pip install -e .
 Jupyter Lab is the recommended environment for development testing with pydeck. To enable development with Jupyter Lab, run:
 
 ```bash
-# Execute in deck.gl/modules/jupyter-widget directory
-jupyter labextension install @jupyter-widgets/jupyterlab-manager@1.0.3 --no-build
-jupyter labextension install . --no-build
+jupyter labextension install @jupyter-widgets/jupyterlab-manager --no-build
+jupyter labextension install . --no-build  # NOTE Execute in deck.gl/modules/jupyter-widget directory
 jupyter lab build
 ```
 
