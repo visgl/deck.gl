@@ -117,6 +117,8 @@ python3 setup.py install
 
 ## Development
 
+Before 
+
 ```bash
 git clone https://github.com/uber/deck.gl/
 cd deck.gl
@@ -136,13 +138,19 @@ pip install -r requirements-dev.txt
 pip install -e .
 ```
 
-Jupyter Lab is the recommended environment for development testing with pydeck. To enable development with Jupyter Lab, run:
+JupyterLab is the recommended environment for development testing with pydeck.
+To develop with JupyterLab, run from this directory:
 
 ```bash
+cd ../../modules/jupyter-widget
 jupyter labextension install @jupyter-widgets/jupyterlab-manager --no-build
-jupyter labextension install . --no-build  # NOTE Execute in deck.gl/modules/jupyter-widget directory
+jupyter labextension install . --no-build
+jupyter labextension link .
+cd -
 jupyter lab build
 ```
+
+The `jupyter lab --watch` command can be used to provide hot reloading for development.
 
 
 ### Tests
