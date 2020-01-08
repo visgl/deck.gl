@@ -5,7 +5,7 @@ import {getGeoTileIndices} from './utils/viewport-util';
 
 export default class TileLayer extends CompositeLayer {
   renderLayers() {
-    const tileSize = 512;
+    const tileSize = 256;
     const tile2boundingBox = tile2geoBoundingBox;
     const getTileIndices = getGeoTileIndices;
     const SubLayerClass = this.getSubLayerClass('base-tile-layer', BaseTileLayer);

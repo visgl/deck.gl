@@ -12,11 +12,11 @@ const TEST_CASES = [
       height: 400,
       longitude: -90,
       latitude: 45,
-      zoom: 3.5
+      zoom: 2.5
     }),
     minZoom: undefined,
     maxZoom: undefined,
-    output: ['1,2,3', '1,3,3', '2,2,3', '2,3,3']
+    output: ['0,2,3', '0,3,3', '1,2,3', '1,3,3', '2,2,3', '2,3,3', '3,2,3', '3,3,3']
   },
   {
     title: 'tilted viewport',
@@ -27,11 +27,24 @@ const TEST_CASES = [
       bearing: -25,
       longitude: -90,
       latitude: 45,
-      zoom: 3.5
+      zoom: 2.5
     }),
     minZoom: undefined,
     maxZoom: undefined,
-    output: ['0,1,3', '0,2,3', '0,3,3', '1,1,3', '1,2,3', '1,3,3', '2,1,3', '2,2,3', '2,3,3']
+    output: [
+      '0,1,3',
+      '0,2,3',
+      '0,3,3',
+      '1,1,3',
+      '1,2,3',
+      '1,3,3',
+      '2,1,3',
+      '2,2,3',
+      '2,3,3',
+      '3,1,3',
+      '3,2,3',
+      '3,3,3'
+    ]
   },
   {
     title: 'flat viewport (exact)',

@@ -1,4 +1,14 @@
-import {lngLatToWorld} from '@math.gl/web-mercator';
+const PI = Math.PI;
+const PI_4 = PI / 4;
+const DEGREES_TO_RADIANS = PI / 180;
+
+function lngLatToWorld(lng, lat, tileSize) {
+  const lambda2 = lng * DEGREES_TO_RADIANS;
+  const phi2 = lat * DEGREES_TO_RADIANS;
+  const x = (tileSize * (lambda2 + PI)) / (2 * PI);
+  const y = (tileSize * (PI + Math.log(Math.tan(PI_4 + phi2 * 0.5)))) / (2 * PI);
+  return [x, y];
+}
 
 function getBoundingBox(viewport) {
   const corners = [
@@ -7,7 +17,6 @@ function getBoundingBox(viewport) {
     viewport.unproject([0, viewport.height]),
     viewport.unproject([viewport.width, viewport.height])
   ];
-
   return [
     corners.reduce((minLng, p) => (minLng < p[0] ? minLng : p[0]), 180),
     corners.reduce((minLat, p) => (minLat < p[1] ? minLat : p[1]), 90),
@@ -17,7 +26,7 @@ function getBoundingBox(viewport) {
 }
 
 function getTileIndex(lngLat, scale, tileSize) {
-  let [x, y] = lngLatToWorld(lngLat);
+  let [x, y] = lngLatToWorld(lngLat[0], lngLat[1], tileSize);
   x *= scale / tileSize;
   y = (1 - y / tileSize) * scale;
   return [x, y];
@@ -29,31 +38,24 @@ function getTileIndex(lngLat, scale, tileSize) {
  * return tiles that are on maxZoom.
  */
 export function getGeoTileIndices(viewport, maxZoom, minZoom, tileSize) {
-  const z = Math.floor(viewport.zoom);
+  const z = Math.ceil(viewport.zoom);
   if (minZoom && z < minZoom) {
     return [];
   }
 
-  viewport = new viewport.constructor(
-    Object.assign({}, viewport, {
-      zoom: z
-    })
-  );
-
   const bbox = getBoundingBox(viewport);
-
-  let [minX, minY] = getTileIndex([bbox[0], bbox[3]], viewport.scale, tileSize);
-  let [maxX, maxY] = getTileIndex([bbox[2], bbox[1]], viewport.scale, tileSize);
-
+  const scale = 2 ** z;
+  let [minX, minY] = getTileIndex([bbox[0], bbox[3]], scale, tileSize);
+  let [maxX, maxY] = getTileIndex([bbox[2], bbox[1]], scale, tileSize);
   /*
       |  TILE  |  TILE  |  TILE  |
         |(minPixel)           |(maxPixel)
       |(minIndex)                |(maxIndex)
    */
   minX = Math.max(0, Math.floor(minX));
-  maxX = Math.min(viewport.scale, Math.ceil(maxX));
+  maxX = Math.min(scale, Math.ceil(maxX));
   minY = Math.max(0, Math.floor(minY));
-  maxY = Math.min(viewport.scale, Math.ceil(maxY));
+  maxY = Math.min(scale, Math.ceil(maxY));
 
   const indices = [];
 
@@ -66,6 +68,7 @@ export function getGeoTileIndices(viewport, maxZoom, minZoom, tileSize) {
       }
     }
   }
+
   return indices;
 }
 

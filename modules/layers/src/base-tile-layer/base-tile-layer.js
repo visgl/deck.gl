@@ -115,7 +115,7 @@ export default class BaseTileLayer extends CompositeLayer {
   }
 
   getLayerZoomLevel() {
-    const z = Math.floor(this.context.viewport.zoom);
+    const z = Math.ceil(this.context.viewport.zoom);
     const {maxZoom, minZoom} = this.props;
     if (Number.isFinite(maxZoom) && z > maxZoom) {
       return Math.floor(maxZoom);
