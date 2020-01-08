@@ -6,6 +6,7 @@ const ALIASES = require('ocular-dev-tools/config/ocular.config')({
   root: resolve(__dirname, '../..')
 }).aliases;
 
+const EXTERNALS = ['@jupyter-widgets/base'];
 const PACKAGE_ROOT = resolve('.');
 const PACKAGE_INFO = require(resolve(PACKAGE_ROOT, 'package.json'));
 
@@ -50,9 +51,7 @@ const config = [
     module: {
       rules
     },
-    externals: {
-      '@jupyter-widgets/base': false
-    },
+    externals: EXTERNALS,
     plugins: [
       // Uncomment for bundle size debug
       // new (require('webpack-bundle-analyzer')).BundleAnalyzerPlugin()
