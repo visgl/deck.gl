@@ -246,10 +246,10 @@ export default class Attribute extends DataColumn {
     if (ArrayBuffer.isView(buffer)) {
       buffer = {value: buffer};
     }
-    assert(ArrayBuffer.isView(buffer.value), `invalid ${settings.accessor}`);
     const needsUpdate = settings.transform || startIndices !== this.startIndices;
 
     if (needsUpdate) {
+      assert(ArrayBuffer.isView(buffer.value), `invalid ${settings.accessor}`);
       const needsNormalize = buffer.size && buffer.size !== this.size;
 
       state.binaryAccessor = getAccessorFromBuffer(buffer.value, {

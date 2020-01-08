@@ -726,11 +726,23 @@ test('Attribute#setExternalBuffer', t => {
     }),
     'should set external buffer to attribute descriptor'
   );
-  const attributeAccessor = attribute.getAccessor();
+  let attributeAccessor = attribute.getAccessor();
   t.is(attributeAccessor.offset, 4, 'attribute accessor is updated');
   t.is(attributeAccessor.stride, 8, 'attribute accessor is updated');
   t.is(attribute.value, value1, 'external value is set');
   t.is(attributeAccessor.type, GL.FLOAT, 'attribute type is set correctly');
+
+  t.ok(
+    attribute.setExternalBuffer({
+      offset: 4,
+      stride: 8,
+      value: value1,
+      type: GL.UNSIGNED_BYTE
+    }),
+    'should set external buffer to attribute descriptor'
+  );
+  attributeAccessor = attribute.getAccessor();
+  t.is(attributeAccessor.type, GL.UNSIGNED_BYTE, 'attribute type is set correctly');
 
   buffer.delete();
   attribute.delete();
@@ -831,11 +843,6 @@ test('Attribute#setBinaryValue', t => {
   t.is(spy.callCount, 1, 'setData is called only once on the same data');
   t.notOk(attribute.needsUpdate(), 'attribute is updated');
 
-  t.throws(
-    () => attribute.setBinaryValue([0, 1, 2, 3]),
-    'should throw if external value is invalid'
-  );
-
   spy.reset();
   attribute.delete();
 
@@ -864,6 +871,11 @@ test('Attribute#setBinaryValue', t => {
   t.notOk(attribute.setBinaryValue(value), 'should require update');
   t.ok(attribute.state.binaryAccessor, 'binaryAccessor is assigned');
   t.ok(attribute.needsUpdate(), 'attribute still needs update');
+
+  t.throws(
+    () => attribute.setBinaryValue([0, 1, 2, 3]),
+    'should throw if external value is invalid'
+  );
 
   attribute.delete();
   t.end();
