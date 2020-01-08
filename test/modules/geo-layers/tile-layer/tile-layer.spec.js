@@ -21,8 +21,8 @@
 import test from 'tape-catch';
 import {generateLayerTests, testLayer} from '@deck.gl/test-utils';
 import {TileLayer} from '@deck.gl/geo-layers';
-import {tile2geoBoundingBox} from '@deck.gl/geo-layers/tile-layer/utils/tile-util';
-import {getGeoTileIndices} from '@deck.gl/geo-layers/tile-layer/utils/viewport-util';
+import {tile2boundingBox} from '@deck.gl/geo-layers/tile-layer/utils/tile-util';
+import {getTileIndices} from '@deck.gl/geo-layers/tile-layer/utils/viewport-util';
 
 test('TileLayer', t => {
   const testCases = generateLayerTests({
@@ -43,12 +43,12 @@ test('TileLayer#updateTriggers', t => {
       onAfterUpdate({subLayer}) {
         t.equal(
           subLayer.state.tileCache._tile2boundingBox,
-          tile2geoBoundingBox,
+          tile2boundingBox,
           'Should create a tileCache with correct tile2boundingBox'
         );
         t.equal(
           subLayer.state.tileCache._getTileIndices,
-          getGeoTileIndices,
+          getTileIndices,
           'Should create a tileCache with correct _getTileIndices'
         );
       }

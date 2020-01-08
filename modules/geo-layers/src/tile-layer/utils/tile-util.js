@@ -6,7 +6,7 @@ export function tile2latLng(x, y, z) {
   return [lng, lat];
 }
 
-export function tile2geoBoundingBox(x, y, z) {
+export function tile2boundingBox(x, y, z) {
   const [west, north] = tile2latLng(x, y, z);
   const [east, south] = tile2latLng(x + 1, y + 1, z);
   return {west, north, east, south};

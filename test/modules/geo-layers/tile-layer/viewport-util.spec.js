@@ -1,5 +1,5 @@
 import test from 'tape-catch';
-import {getGeoTileIndices} from '@deck.gl/geo-layers/tile-layer/utils/viewport-util';
+import {getTileIndices} from '@deck.gl/geo-layers/tile-layer/utils/viewport-util';
 import {WebMercatorViewport} from '@deck.gl/core';
 
 const TILE_SIZE = 512;
@@ -103,14 +103,9 @@ function getTileIds(tiles) {
   return Array.from(set).sort();
 }
 
-test('getGeoTileIndices', t => {
+test('getTileIndices', t => {
   for (const testCase of TEST_CASES) {
-    const result = getGeoTileIndices(
-      testCase.viewport,
-      testCase.maxZoom,
-      testCase.minZoom,
-      TILE_SIZE
-    );
+    const result = getTileIndices(testCase.viewport, testCase.maxZoom, testCase.minZoom, TILE_SIZE);
     t.deepEqual(getTileIds(result), testCase.output, testCase.title);
   }
 
