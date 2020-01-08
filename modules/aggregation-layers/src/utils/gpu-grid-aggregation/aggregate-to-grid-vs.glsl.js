@@ -58,5 +58,8 @@ void main(void) {
   pos = pos + offset;
 
   gl_Position = vec4(pos, 0.0, 1.0);
+
+  // Enforce default value for ANGLE issue (https://bugs.chromium.org/p/angleproject/issues/detail?id=3941)
+  gl_PointSize = 1.0;
 }
 `;
