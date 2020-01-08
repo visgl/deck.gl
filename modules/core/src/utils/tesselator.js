@@ -103,7 +103,7 @@ export default class Tesselator {
     const value = geometryBuffer.value || geometryBuffer;
     assert(ArrayBuffer.isView(value), 'cannot read geometries');
 
-    return getAccessorFromBuffer(geometryBuffer.value || geometryBuffer, {
+    return getAccessorFromBuffer(value, {
       size: this.positionSize,
       offset: geometryBuffer.offset,
       stride: geometryBuffer.stride,

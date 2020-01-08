@@ -23,6 +23,9 @@ import test from 'tape-catch';
 import * as Polygon from '@deck.gl/layers/solid-polygon-layer/polygon';
 import PolygonTesselator from '@deck.gl/layers/solid-polygon-layer/polygon-tesselator';
 
+import {Buffer} from '@luma.gl/core';
+import {gl} from '@deck.gl/test-utils';
+
 const SAMPLE_DATA = [
   {polygon: [], name: 'empty array'},
   {polygon: [[1, 1]], name: 'too few points', height: 1, color: [255, 0, 0]},
@@ -330,6 +333,62 @@ test('PolygonTesselator#geometryBuffer', t => {
   tesselator.updateGeometry({
     normalize: false
   });
+  t.notOk(tesselator.get('positions'), 'skipped packing positions');
+  t.notOk(tesselator.get('indices'), 'skipped packing indices');
+  t.deepEquals(
+    tesselator.get('vertexValid').slice(0, 8),
+    [1, 1, 0, 1, 1, 1, 1, 0],
+    'vertexValid are populated'
+  );
+
+  t.end();
+});
+
+test('PolygonTesselator#geometryBuffer#buffer', t => {
+  const buffer = new Buffer(gl, {
+    data: new Float32Array([1, 1, 2, 2, 3, 3, 0, 0, 2, 0, 2, 2, 0, 2, 0, 0])
+  });
+  const sampleData = {
+    length: 2,
+    startIndices: [0, 3],
+    attributes: {
+      getPolygon: {buffer, size: 2}
+    }
+  };
+  t.throws(
+    () =>
+      new PolygonTesselator({
+        data: sampleData,
+        buffers: sampleData.attributes,
+        geometryBuffer: sampleData.attributes.getPolygon,
+        positionFormat: 'XY'
+      }),
+    'throws on invalid options'
+  );
+
+  t.throws(
+    () =>
+      new PolygonTesselator({
+        data: sampleData,
+        buffers: sampleData.attributes,
+        geometryBuffer: sampleData.attributes.getPolygon,
+        normalize: false,
+        positionFormat: 'XY'
+      }),
+    'throws on invalid options'
+  );
+
+  sampleData.attributes.indices = new Uint16Array([0, 1, 2, 3, 4, 5]);
+
+  const tesselator = new PolygonTesselator({
+    data: sampleData,
+    buffers: sampleData.attributes,
+    geometryBuffer: sampleData.attributes.getPolygon,
+    normalize: false,
+    positionFormat: 'XY'
+  });
+
+  t.is(tesselator.instanceCount, 8, 'Updated instanceCount from geometryBuffer');
   t.notOk(tesselator.get('positions'), 'skipped packing positions');
   t.notOk(tesselator.get('indices'), 'skipped packing indices');
   t.deepEquals(
