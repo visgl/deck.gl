@@ -544,8 +544,9 @@ export default class Deck {
   }
 
   _updateCursor() {
-    if (this.canvas) {
-      this.canvas.style.cursor = this.props.getCursor(this.interactiveState);
+    const container = this.props.parent || this.canvas;
+    if (container) {
+      container.style.cursor = this.props.getCursor(this.interactiveState);
     }
   }
 
