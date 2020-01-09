@@ -19,6 +19,11 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v7.3
 
+#### deck.gl [v7.3.13] - Jan 8 2020
+
+- GPUGridAggregator: Add WA for ANGLE specific bug. (#4113)
+- Fix inline versioning (#4086)
+
 #### deck.gl [v7.3.12] - Jan 2 2020
 
 - Fix flyToInterpolator crash when transitioning to the same viewport center
