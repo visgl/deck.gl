@@ -29,6 +29,11 @@ const propTypes = Deck.getPropTypes(PropTypes);
 
 const defaultProps = Deck.defaultProps;
 
+const CANVAS_STYLE = {
+  left: 0,
+  top: 0
+};
+
 export default class DeckGL extends React.Component {
   constructor(props) {
     super(props);
@@ -206,7 +211,8 @@ export default class DeckGL extends React.Component {
 
     const canvas = createElement('canvas', {
       key: 'canvas',
-      ref: this._canvasRef
+      ref: this._canvasRef,
+      style: CANVAS_STYLE
     });
 
     // Render deck.gl as the last child
