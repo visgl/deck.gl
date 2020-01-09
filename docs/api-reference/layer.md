@@ -75,9 +75,11 @@ Each value in `data.attributes` may be one of the following formats:
 - An object containing the following optional fields. For more information, see [WebGL vertex attribute API](https://developer.mozilla.org/en-US/docs/Web/API/WebGLRenderingContext/vertexAttribPointer).
   + `buffer` ([Buffer](https://luma.gl/docs/api-reference/webgl/buffer))
   + `value` (TypedArray)
+  + `type` (GLenum) - A WebGL data type, see [vertexAttribPointer](https://developer.mozilla.org/en-US/docs/Web/API/WebGLRenderingContext/vertexAttribPointer#Parameters).
   + `size` (Number) - the number of elements per vertex attribute.
   + `offset` (Number) - offset of the first vertex attribute into the buffer, in bytes
   + `stride` (Number) - the offset between the beginning of consecutive vertex attributes, in bytes
+  + `normalized` (Boolean) - whether data values should be normalized. Note that all color attributes in deck.gl layers are normalized by default.
 
 **Remarks**
 

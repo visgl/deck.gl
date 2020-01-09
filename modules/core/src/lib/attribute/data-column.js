@@ -216,7 +216,7 @@ export default class DataColumn {
       this.value = opts.value;
 
       // Copy the type of the buffer into the accessor
-      accessor.type = buffer.accessor.type;
+      accessor.type = opts.type || buffer.accessor.type;
       accessor.bytesPerElement = buffer.accessor.BYTES_PER_ELEMENT;
       accessor.stride = getStride(accessor);
     } else if (opts.value) {
@@ -243,7 +243,7 @@ export default class DataColumn {
       // Hack: force Buffer to infer data type
       buffer.setAccessor(null);
       buffer.subData({data: value, offset: byteOffset});
-      accessor.type = buffer.accessor.type;
+      accessor.type = opts.type || buffer.accessor.type;
     }
 
     return true;
