@@ -1,21 +1,17 @@
-import {CompositeLayer} from '@deck.gl/core';
 import {BaseTileLayer} from '@deck.gl/layers';
-import {tile2boundingBox} from './utils/tile-util';
+import {tileToBoundingBox} from './utils/tile-util';
 import {getTileIndices} from './utils/viewport-util';
 
-export default class TileLayer extends CompositeLayer {
-  renderLayers() {
-    const tileSize = 256;
-    const SubLayerClass = this.getSubLayerClass('base-tile-layer', BaseTileLayer);
-    return [
-      new SubLayerClass({
-        tileSize,
-        tile2boundingBox,
-        getTileIndices,
-        ...this.props
-      })
-    ];
-  }
-}
+// Hardcoded to match math.gl:
+// https://github.com/uber-web/math.gl/blob/master/modules/web-mercator/src/web-mercator-utils.js#L15
+const tileSize = 512;
+const defaultProps = Object.assign({}, BaseTileLayer.defaultProps, {
+  tileToBoundingBox,
+  getTileIndices,
+  tileSize
+});
+
+export default class TileLayer extends BaseTileLayer {}
 
 TileLayer.layerName = 'TileLayer';
+TileLayer.defaultProps = defaultProps;

@@ -1,14 +1,4 @@
-const PI = Math.PI;
-const PI_4 = PI / 4;
-const DEGREES_TO_RADIANS = PI / 180;
-
-function lngLatToWorld(lng, lat, tileSize) {
-  const lambda2 = lng * DEGREES_TO_RADIANS;
-  const phi2 = lat * DEGREES_TO_RADIANS;
-  const x = (tileSize * (lambda2 + PI)) / (2 * PI);
-  const y = (tileSize * (PI + Math.log(Math.tan(PI_4 + phi2 * 0.5)))) / (2 * PI);
-  return [x, y];
-}
+import {lngLatToWorld} from '@math.gl/web-mercator';
 
 function getBoundingBox(viewport) {
   const corners = [
@@ -26,7 +16,7 @@ function getBoundingBox(viewport) {
 }
 
 function getTileIndex(lngLat, scale, tileSize) {
-  let [x, y] = lngLatToWorld(lngLat[0], lngLat[1], tileSize);
+  let [x, y] = lngLatToWorld(lngLat);
   x *= scale / tileSize;
   y = (1 - y / tileSize) * scale;
   return [x, y];

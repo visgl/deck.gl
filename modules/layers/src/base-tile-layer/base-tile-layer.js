@@ -6,16 +6,8 @@ import TileCache from './utils/tile-cache';
 const defaultProps = {
   renderSubLayers: {type: 'function', value: props => new GeoJsonLayer(props), compare: false},
   getTileData: {type: 'function', value: ({x, y, z}) => Promise.resolve(null), compare: false},
-  tile2boundingBox: {
-    type: 'function',
-    value: ({x, y, z}) => {
-      return {east: 0, west: 0, north: 0, south: 0};
-    }
-  },
-  getTileIndices: {
-    type: 'function',
-    value: ({viewport, minZoom, maxZoom, tileSize}) => [{x: 0, y: 0, z: 0}]
-  },
+  tileToBoundingBox: {type: 'function', value: () => null, compare: false},
+  getTileIndices: {type: 'function', value: () => null, compare: false},
   // TODO - change to onViewportLoad to align with Tile3DLayer
   onViewportLoad: {type: 'function', optional: true, value: null, compare: false},
   // eslint-disable-next-line
@@ -54,7 +46,7 @@ export default class BaseTileLayer extends CompositeLayer {
         minZoom,
         maxCacheSize,
         getTileIndices,
-        tile2boundingBox,
+        tileToBoundingBox,
         tileSize
       } = props;
       if (tileCache) {
@@ -63,7 +55,7 @@ export default class BaseTileLayer extends CompositeLayer {
       tileCache = new TileCache({
         getTileData,
         getTileIndices,
-        tile2boundingBox,
+        tileToBoundingBox,
         maxSize: maxCacheSize,
         maxZoom,
         minZoom,

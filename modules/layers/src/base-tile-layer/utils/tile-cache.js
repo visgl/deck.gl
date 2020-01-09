@@ -19,13 +19,13 @@ export default class TileCache {
     onTileLoad,
     onTileError,
     getTileIndices,
-    tile2boundingBox
+    tileToBoundingBox
   }) {
     // TODO: Instead of hardcode size, we should calculate how much memory left
     this._getTileData = getTileData;
     this._maxSize = maxSize;
     this._getTileIndices = getTileIndices;
-    this._tile2boundingBox = tile2boundingBox;
+    this._tileToBoundingBox = tileToBoundingBox;
     this._tileSize = tileSize;
     this.onTileError = onTileError;
     this.onTileLoad = onTileLoad;
@@ -61,7 +61,7 @@ export default class TileCache {
     const {
       _cache,
       _getTileData,
-      _tile2boundingBox,
+      _tileToBoundingBox,
       _getTileIndices,
       _maxSize,
       _maxZoom,
@@ -89,7 +89,7 @@ export default class TileCache {
       if (!tile) {
         tile = new Tile({
           getTileData: _getTileData,
-          tile2boundingBox: _tile2boundingBox,
+          tileToBoundingBox: _tileToBoundingBox,
           x,
           y,
           z,

@@ -1,9 +1,9 @@
 export default class Tile {
-  constructor({getTileData, x, y, z, onTileLoad, onTileError, tile2boundingBox}) {
+  constructor({getTileData, x, y, z, onTileLoad, onTileError, tileToBoundingBox}) {
     this.x = x;
     this.y = y;
     this.z = z;
-    this.bbox = tile2boundingBox(this.x, this.y, this.z);
+    this.bbox = tileToBoundingBox(this.x, this.y, this.z);
     this.isVisible = true;
     this.getTileData = getTileData;
     this._data = null;
