@@ -19,6 +19,11 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v8.0
 
+#### deck.gl [8.0.5] - Jan 9 2019
+
+- [react] explicitly set deck canvas position (#4124)
+- Fix support for luma.gl buffers as external attributes (#4121)
+
 #### deck.gl [8.0.4] - Jan 8 2019
 
 - Fix randomly failed icon layer render test (#4079)
