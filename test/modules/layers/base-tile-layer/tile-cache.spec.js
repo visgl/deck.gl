@@ -25,7 +25,6 @@ const testViewport = new WebMercatorViewport(testViewState);
 const cacheMaxSize = 1;
 const maxZoom = 13;
 const minZoom = 11;
-const tileSize = 512;
 
 const getTileData = () => Promise.resolve(null);
 const testTileCacheProps = {
@@ -35,7 +34,6 @@ const testTileCacheProps = {
   maxSize: cacheMaxSize,
   minZoom,
   maxZoom,
-  tileSize,
   onTileLoad: () => {}
 };
 
@@ -145,8 +143,7 @@ test('TileCache#should set isLoaded to true even when loading the tile throws an
     getTileIndices,
     maxSize: cacheMaxSize,
     minZoom,
-    maxZoom,
-    tileSize
+    maxZoom
   });
 
   errorTileCache.update(testViewport);

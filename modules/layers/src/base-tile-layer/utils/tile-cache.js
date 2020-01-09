@@ -15,7 +15,6 @@ export default class TileCache {
     maxSize,
     maxZoom,
     minZoom,
-    tileSize,
     onTileLoad,
     onTileError,
     getTileIndices,
@@ -26,7 +25,6 @@ export default class TileCache {
     this._maxSize = maxSize;
     this._getTileIndices = getTileIndices;
     this._tileToBoundingBox = tileToBoundingBox;
-    this._tileSize = tileSize;
     this.onTileError = onTileError;
     this.onTileLoad = onTileLoad;
     // Maps tile id in string {z}-{x}-{y} to a Tile object
@@ -65,11 +63,10 @@ export default class TileCache {
       _getTileIndices,
       _maxSize,
       _maxZoom,
-      _minZoom,
-      _tileSize
+      _minZoom
     } = this;
     this._markOldTiles();
-    const tileIndices = _getTileIndices(viewport, _maxZoom, _minZoom, _tileSize);
+    const tileIndices = _getTileIndices(viewport, _maxZoom, _minZoom);
     if (!tileIndices || tileIndices.length === 0) {
       return;
     }

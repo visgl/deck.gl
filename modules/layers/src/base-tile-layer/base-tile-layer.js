@@ -46,8 +46,7 @@ export default class BaseTileLayer extends CompositeLayer {
         minZoom,
         maxCacheSize,
         getTileIndices,
-        tileToBoundingBox,
-        tileSize
+        tileToBoundingBox
       } = props;
       if (tileCache) {
         tileCache.finalize();
@@ -59,7 +58,6 @@ export default class BaseTileLayer extends CompositeLayer {
         maxSize: maxCacheSize,
         maxZoom,
         minZoom,
-        tileSize,
         onTileLoad: this._onTileLoad.bind(this),
         onTileError: this._onTileError.bind(this)
       });
