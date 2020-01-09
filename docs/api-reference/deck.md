@@ -127,8 +127,7 @@ Notes:
 
 * The `props.onViewStateChange` callback will still be called, if provided.
 * If `props.viewState` is supplied by the application, the supplied `viewState` will always be used, "shadowing" the `Deck` component's internal `viewState`.
-* In simple applications, use of the `initialViewState` prop can avoid the need track the view state in the application.
-* Any new `initialViewState` value is compared shallowly with the previous value. Therefore, it is especially important for React applications to use a constant or component state as the `initialViewState` value, in order to avoid any unexpected "reset" of the camera.
+* In simple applications, use of the `initialViewState` prop can avoid the need to track the view state in the application.
 * One drawback of using `initialViewState` for reactive/functional applications is that the `Deck` component becomes more stateful.
 
 ##### `controller` (Function | Boolean | Object)

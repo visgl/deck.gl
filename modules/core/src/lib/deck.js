@@ -27,6 +27,7 @@ import DeckRenderer from './deck-renderer';
 import DeckPicker from './deck-picker';
 import Tooltip from './tooltip';
 import log from '../utils/log';
+import {deepEqual} from '../utils/deep-equal';
 import deckGlobal from './init';
 
 import {getBrowser} from 'probe.gl/env';
@@ -237,7 +238,6 @@ export default class Deck {
     }
   }
 
-  /* eslint-disable complexity */
   setProps(props) {
     this.stats.get('setProps Time').timeStart();
 
@@ -247,7 +247,7 @@ export default class Deck {
     if ('onLayerClick' in props) {
       log.removed('onLayerClick', 'onClick')();
     }
-    if (props.initialViewState && this.props.initialViewState !== props.initialViewState) {
+    if (props.initialViewState && !deepEqual(this.props.initialViewState, props.initialViewState)) {
       // Overwrite internal view state
       this.viewState = props.initialViewState;
     }
@@ -281,7 +281,6 @@ export default class Deck {
 
     this.stats.get('setProps Time').timeEnd();
   }
-  /* eslint-enable complexity */
 
   // Public API
   // Check if a redraw is needed
