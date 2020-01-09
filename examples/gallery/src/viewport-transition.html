@@ -56,13 +56,12 @@
     const deckgl = new DeckGL({
       mapboxApiAccessToken: '<mapbox-access-token>',
       mapStyle: 'mapbox://styles/mapbox/light-v9',
-      viewState: {
+      initialViewState: {
         longitude: CITIES[0].longitude,
         latitude: CITIES[0].latitude,
         zoom: 10
       },
       controller: true,
-      onViewStateChange: ({viewState}) => deckgl.setProps({viewState}),
       layers: [
         new ScatterplotLayer({
           data: CITIES,
@@ -84,11 +83,11 @@
       .attr('id', (d, i) => 'city-' + i)
       .on('change', d => {
         deckgl.setProps({
-          viewState: {
+          initialViewState: {
             longitude: d.longitude,
             latitude: d.latitude,
             zoom: 10,
-            transitionInterpolator: new FlyToInterpolator(),
+            transitionInterpolator: new FlyToInterpolator({speed: 1.5}),
             transitionDuration: 'auto'
           }
         })

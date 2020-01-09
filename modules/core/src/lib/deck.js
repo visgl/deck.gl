@@ -27,6 +27,7 @@ import DeckRenderer from './deck-renderer';
 import DeckPicker from './deck-picker';
 import Tooltip from './tooltip';
 import log from '../utils/log';
+import {deepEqual} from '../utils/deep-equal';
 import deckGlobal from './init';
 
 import {getBrowser} from 'probe.gl/env';
@@ -146,7 +147,7 @@ export default class Deck {
     // This object is reused for subsequent `onClick` and `onDrag*` callbacks.
     this._lastPointerDownInfo = null;
 
-    this.viewState = props.initialViewState || null; // Internal view state if no callback is supplied
+    this.viewState = null; // Internal view state if no callback is supplied
     this.interactiveState = {
       isDragging: false // Whether the cursor is down
     };
@@ -245,6 +246,10 @@ export default class Deck {
     }
     if ('onLayerClick' in props) {
       log.removed('onLayerClick', 'onClick')();
+    }
+    if (props.initialViewState && !deepEqual(this.props.initialViewState, props.initialViewState)) {
+      // Overwrite internal view state
+      this.viewState = props.initialViewState;
     }
 
     // Merge with existing props
