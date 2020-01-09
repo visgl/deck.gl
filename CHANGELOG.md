@@ -19,6 +19,15 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v8.0
 
+#### deck.gl [8.0.4] - Jan 8 2019
+
+- Fix randomly failed icon layer render test (#4079)
+- fix react key warning (#4098)
+- fix debug bundle warning (#4107)
+- GPUGridAggregator: Add WA for ANGLE specific bug. (#4113)
+- fix cursor style in React (#4118)
+- Reduce JupyterLab bundle size (#4110)
+
 #### deck.gl [8.0.3] - Jan 3 2019
 
 - warn if initialViewState and viewState are both present (#4078)
