@@ -1503,7 +1503,7 @@
     "@loaders.gl/core" "2.0.0"
     "@loaders.gl/tables" "2.0.0"
 
-"@loaders.gl/gltf@2.0.0", "@loaders.gl/gltf@^2.0.0":
+"@loaders.gl/gltf@2.0.0":
   version "2.0.0"
   resolved "https://registry.yarnpkg.com/@loaders.gl/gltf/-/gltf-2.0.0.tgz#dc7b743118af4956e90719de15f3dd54c37e283b"
   integrity sha512-X0SUoJVEwHj0gTPioohgQuXbSsdMfMzW81GoEG4wdGChf0e6eTMXplIpm+MU2dgo/IBR4n4EhlL4s37LtZtDow==
