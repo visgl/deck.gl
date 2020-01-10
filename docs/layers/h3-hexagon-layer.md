@@ -81,6 +81,7 @@ To use pre-bundled scripts:
 new deck.H3HexagonLayer({});
 ```
 
+Note that `h3-js` must be included before `deck.gl`.
 
 ## Properties
 

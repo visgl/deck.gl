@@ -89,6 +89,7 @@ To use pre-bundled scripts:
 new deck.H3ClusterLayer({});
 ```
 
+Note that `h3-js` must be included before `deck.gl`.
 
 ## Properties
 
