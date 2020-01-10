@@ -99,12 +99,11 @@ export default class LayersPass extends Pass {
             uniforms,
             parameters: layerParameters
           });
-        } catch (error) {
-          log.warn(`error during drawing of ${layer}`, error)();
+        } catch (err) {
           if (onError) {
-            onError(error, layer);
+            onError(err, layer);
           } else {
-            throw error;
+            log.warn(`error during drawing of ${layer}`, err)();
           }
         }
       }

@@ -190,37 +190,22 @@ test('LayerManager#error handling', t => {
   }
 
   const layerManager = new LayerManager(gl);
-
-  // no onError handler
-  t.throws(
-    () => layerManager.setLayers([new BadLayer({id: 'crash-on-init', throw: true})]),
-    'Should throw if onError is missing'
-  );
-
   layerManager.setProps({onError});
 
-  t.doesNotThrow(
-    () =>
-      layerManager.setLayers([
-        new ScatterplotLayer({id: 'scatterplot'}),
-        new BadLayer({id: 'crash-on-init', throw: true}),
-        new BadLayer({id: 'crash-on-update', throw: false})
-      ]),
-    'Should not throw if onError is defined'
-  );
+  layerManager.setLayers([
+    new ScatterplotLayer({id: 'scatterplot'}),
+    new BadLayer({id: 'crash-on-init', throw: true}),
+    new BadLayer({id: 'crash-on-update', throw: false})
+  ]);
 
   t.is(errorArgs.length, 1, 'onError is called');
   t.is(errorArgs[0].layer.id, 'crash-on-init', 'onError is called with correct args');
 
-  t.doesNotThrow(
-    () =>
-      layerManager.setLayers([
-        new ScatterplotLayer({id: 'scatterplot'}),
-        new BadLayer({id: 'crash-on-init', throw: true}),
-        new BadLayer({id: 'crash-on-update', throw: true})
-      ]),
-    'Should not throw if onError is defined'
-  );
+  layerManager.setLayers([
+    new ScatterplotLayer({id: 'scatterplot'}),
+    new BadLayer({id: 'crash-on-init', throw: true}),
+    new BadLayer({id: 'crash-on-update', throw: true})
+  ]);
 
   t.is(errorArgs.length, 3, 'onError is called');
   t.is(errorArgs[1].layer.id, 'crash-on-init', 'onError is called with correct args');

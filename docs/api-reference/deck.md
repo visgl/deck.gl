@@ -387,7 +387,7 @@ Callback arguments:
 
 ##### `onError` (Function, optional)
 
-Called if deck.gl encounters an error. If supplied, deck will attempt to render the rest of the scene instead of crashing.
+Called if deck.gl encounters an error. By default, deck logs the error to console and attempt to continue rendering the rest of the scene.
 
 Callback arguments:
 

@@ -228,10 +228,9 @@ export default class LayerManager {
   _handleError(stage, error, layer) {
     if (this._onError) {
       this._onError(error, layer);
-      return null;
+    } else {
+      log.warn(`error during ${stage} of ${layerName(layer)}`, error)();
     }
-    log.warn(`error during ${stage} of ${layerName(layer)}`, error)();
-    return {error, layer};
   }
 
   // Match all layers, checking for caught errors
@@ -252,10 +251,10 @@ export default class LayerManager {
     const generatedLayers = [];
 
     // Match sublayers
-    const error = this._updateSublayersRecursively(newLayers, oldLayerMap, generatedLayers);
+    this._updateSublayersRecursively(newLayers, oldLayerMap, generatedLayers);
 
     // Finalize unmatched layers
-    const error2 = this._finalizeOldLayers(oldLayerMap);
+    this._finalizeOldLayers(oldLayerMap);
 
     let needsUpdate = false;
     for (const layer of generatedLayers) {
@@ -267,19 +266,11 @@ export default class LayerManager {
 
     this._needsUpdate = needsUpdate;
     this.layers = generatedLayers;
-
-    // Throw first error found, if any
-    const firstError = error || error2;
-    if (firstError) {
-      throw firstError;
-    }
   }
 
   /* eslint-disable complexity,max-statements */
   // Note: adds generated layers to `generatedLayers` array parameter
   _updateSublayersRecursively(newLayers, oldLayerMap, generatedLayers) {
-    let error = null;
-
     for (const newLayer of newLayers) {
       newLayer.context = this.context;
 
@@ -301,12 +292,10 @@ export default class LayerManager {
         }
 
         if (!oldLayer) {
-          const err = this._initializeLayer(newLayer);
-          error = error || err;
+          this._initializeLayer(newLayer);
         } else {
           this._transferLayerState(oldLayer, newLayer);
-          const err = this._updateLayer(newLayer);
-          error = error || err;
+          this._updateLayer(newLayer);
         }
         generatedLayers.push(newLayer);
 
@@ -314,30 +303,24 @@ export default class LayerManager {
         sublayers = newLayer.isComposite && newLayer.getSubLayers();
         // End layer lifecycle method: render sublayers
       } catch (err) {
-        error = error || this._handleError('matching', err, newLayer); // Record first exception
+        this._handleError('matching', err, newLayer); // Record first exception
       }
 
       if (sublayers) {
-        const err = this._updateSublayersRecursively(sublayers, oldLayerMap, generatedLayers);
-        error = error || err;
+        this._updateSublayersRecursively(sublayers, oldLayerMap, generatedLayers);
       }
     }
-
-    return error;
   }
   /* eslint-enable complexity,max-statements */
 
   // Finalize any old layers that were not matched
   _finalizeOldLayers(oldLayerMap) {
-    let error = null;
     for (const layerId in oldLayerMap) {
       const layer = oldLayerMap[layerId];
       if (layer) {
-        const err = this._finalizeLayer(layer);
-        error = error || err;
+        this._finalizeLayer(layer);
       }
     }
-    return error;
   }
 
   // EXCEPTION SAFE LAYER ACCESS
@@ -348,11 +331,9 @@ export default class LayerManager {
       layer._initialize();
       layer.lifecycle = LIFECYCLE.INITIALIZED;
     } catch (err) {
-      return this._handleError('initialization', err, layer);
+      this._handleError('initialization', err, layer);
       // TODO - what should the lifecycle state be here? LIFECYCLE.INITIALIZATION_FAILED?
     }
-
-    return null;
   }
 
   _transferLayerState(oldLayer, newLayer) {
@@ -369,9 +350,8 @@ export default class LayerManager {
     try {
       layer._update();
     } catch (err) {
-      return this._handleError('update', err, layer);
+      this._handleError('update', err, layer);
     }
-    return null;
   }
 
   // Finalizes a single layer
@@ -384,8 +364,7 @@ export default class LayerManager {
       layer._finalize();
       layer.lifecycle = LIFECYCLE.FINALIZED;
     } catch (err) {
-      return this._handleError('finalization', err, layer);
+      this._handleError('finalization', err, layer);
     }
-    return null;
   }
 }
