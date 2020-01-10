@@ -44,11 +44,16 @@ export default class DeckPicker {
       layerId: null,
       info: null
     };
+    this._onError = null;
   }
 
   setProps(props) {
     if ('layerFilter' in props) {
       this.layerFilter = props.layerFilter;
+    }
+
+    if ('onError' in props) {
+      this._onError = props.onError;
     }
   }
 
@@ -316,6 +321,7 @@ export default class DeckPicker {
     this.pickLayersPass.render({
       layers,
       layerFilter: this.layerFilter,
+      onError: this._onError,
       viewports,
       onViewportActive,
       pickingFBO,

@@ -81,6 +81,7 @@ function getPropTypes(PropTypes) {
     onBeforeRender: PropTypes.func,
     onAfterRender: PropTypes.func,
     onLoad: PropTypes.func,
+    onError: PropTypes.func,
 
     // Debug settings
     debug: PropTypes.bool,
@@ -117,6 +118,7 @@ const defaultProps = {
   onBeforeRender: noop,
   onAfterRender: noop,
   onLoad: noop,
+  onError: null,
   _onMetrics: null,
 
   getCursor,

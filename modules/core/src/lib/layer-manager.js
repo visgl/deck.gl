@@ -83,6 +83,7 @@ export default class LayerManager {
     this._needsRedraw = 'Initial render';
     this._needsUpdate = false;
     this._debug = false;
+    this._onError = null;
 
     this.activateViewport = this.activateViewport.bind(this);
 
@@ -154,6 +155,10 @@ export default class LayerManager {
     if ('layers' in props) {
       this.setLayers(props.layers);
     }
+
+    if ('onError' in props) {
+      this._onError = props.onError;
+    }
   }
 
   // Supply a new layer list, initiating sublayer generation and layer matching
@@ -218,6 +223,15 @@ export default class LayerManager {
     }
 
     return this;
+  }
+
+  _handleError(stage, error, layer) {
+    if (this._onError) {
+      this._onError(error, layer);
+      return null;
+    }
+    log.warn(`error during ${stage} of ${layerName(layer)}`, error)();
+    return {error, layer};
   }
 
   // Match all layers, checking for caught errors
@@ -300,8 +314,7 @@ export default class LayerManager {
         sublayers = newLayer.isComposite && newLayer.getSubLayers();
         // End layer lifecycle method: render sublayers
       } catch (err) {
-        log.warn(`error during matching of ${layerName(newLayer)}`, err)();
-        error = error || err; // Record first exception
+        error = error || this._handleError('matching', err, newLayer); // Record first exception
       }
 
       if (sublayers) {
@@ -335,8 +348,7 @@ export default class LayerManager {
       layer._initialize();
       layer.lifecycle = LIFECYCLE.INITIALIZED;
     } catch (err) {
-      log.warn(`error while initializing ${layerName(layer)}\n`, err)();
-      return err;
+      return this._handleError('initialization', err, layer);
       // TODO - what should the lifecycle state be here? LIFECYCLE.INITIALIZATION_FAILED?
     }
 
@@ -357,9 +369,7 @@ export default class LayerManager {
     try {
       layer._update();
     } catch (err) {
-      log.warn(`error during update of ${layerName(layer)}`, err)();
-      // Save first error
-      return err;
+      return this._handleError('update', err, layer);
     }
     return null;
   }
@@ -374,8 +384,7 @@ export default class LayerManager {
       layer._finalize();
       layer.lifecycle = LIFECYCLE.FINALIZED;
     } catch (err) {
-      log.warn(`error during finalization of ${layerName(layer)}`, err)();
-      return err;
+      return this._handleError('finalization', err, layer);
     }
     return null;
   }

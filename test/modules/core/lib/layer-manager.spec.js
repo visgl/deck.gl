@@ -19,7 +19,7 @@
 // THE SOFTWARE.
 /* eslint-disable func-style, no-console, max-len */
 import test from 'tape-catch';
-import {LayerManager, Layer, CompositeLayer} from 'deck.gl';
+import {LayerManager, ScatterplotLayer, Layer, CompositeLayer} from 'deck.gl';
 import {gl} from '@deck.gl/test-utils';
 
 class TestLayer extends Layer {
@@ -171,6 +171,60 @@ test('LayerManager#setLayers', t => {
       `${testCase.finalize ? 'should' : 'shoudl not'} finalize layer`
     );
   });
+
+  t.end();
+});
+
+test('LayerManager#error handling', t => {
+  const errorArgs = [];
+  const onError = (error, layer) => errorArgs.push({error, layer});
+
+  class BadLayer extends Layer {
+    initializeState() {}
+
+    updateState() {
+      if (this.props.throw) {
+        throw new Error();
+      }
+    }
+  }
+
+  const layerManager = new LayerManager(gl);
+
+  // no onError handler
+  t.throws(
+    () => layerManager.setLayers([new BadLayer({id: 'crash-on-init', throw: true})]),
+    'Should throw if onError is missing'
+  );
+
+  layerManager.setProps({onError});
+
+  t.doesNotThrow(
+    () =>
+      layerManager.setLayers([
+        new ScatterplotLayer({id: 'scatterplot'}),
+        new BadLayer({id: 'crash-on-init', throw: true}),
+        new BadLayer({id: 'crash-on-update', throw: false})
+      ]),
+    'Should not throw if onError is defined'
+  );
+
+  t.is(errorArgs.length, 1, 'onError is called');
+  t.is(errorArgs[0].layer.id, 'crash-on-init', 'onError is called with correct args');
+
+  t.doesNotThrow(
+    () =>
+      layerManager.setLayers([
+        new ScatterplotLayer({id: 'scatterplot'}),
+        new BadLayer({id: 'crash-on-init', throw: true}),
+        new BadLayer({id: 'crash-on-update', throw: true})
+      ]),
+    'Should not throw if onError is defined'
+  );
+
+  t.is(errorArgs.length, 3, 'onError is called');
+  t.is(errorArgs[1].layer.id, 'crash-on-init', 'onError is called with correct args');
+  t.is(errorArgs[2].layer.id, 'crash-on-update', 'onError is called with correct args');
 
   t.end();
 });

@@ -384,6 +384,17 @@ Callback arguments:
 * `gl` - the WebGL context.
 
 
+
+##### `onError` (Function, optional)
+
+Called if deck.gl encounters an error. If supplied, deck will attempt to render the rest of the scene instead of crashing.
+
+Callback arguments:
+
+* `error` ([Error](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Error))
+* `source` - the source of the error, likely a Layer instance
+
+
 ##### `_onMetrics` (Function, optional) **Experimental**
 
 Called once every second with performance metrics.

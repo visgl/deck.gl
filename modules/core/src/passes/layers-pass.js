@@ -1,6 +1,7 @@
 import GL from '@luma.gl/constants';
 import Pass from './pass';
 import {clear, setParameters, withParameters, cssToDeviceRatio} from '@luma.gl/core';
+import log from '../utils/log';
 
 export default class LayersPass extends Pass {
   render(props) {
@@ -45,7 +46,7 @@ export default class LayersPass extends Pass {
   // intersect with the picking rect
   _drawLayersInViewport(
     gl,
-    {layers, layerFilter, viewport, view, pass = 'unknown', effects, moduleParameters}
+    {layers, layerFilter, onError, viewport, view, pass = 'unknown', effects, moduleParameters}
   ) {
     const glViewport = getGLViewport(gl, {viewport});
 
@@ -92,11 +93,20 @@ export default class LayersPass extends Pass {
         const uniforms = Object.assign({}, layer.context.uniforms, {layerIndex});
         const layerParameters = this.getLayerParameters(layer, layerIndex);
 
-        layer.drawLayer({
-          moduleParameters: _moduleParameters,
-          uniforms,
-          parameters: layerParameters
-        });
+        try {
+          layer.drawLayer({
+            moduleParameters: _moduleParameters,
+            uniforms,
+            parameters: layerParameters
+          });
+        } catch (error) {
+          log.warn(`error during drawing of ${layer}`, error)();
+          if (onError) {
+            onError(error, layer);
+          } else {
+            throw error;
+          }
+        }
       }
     });
 
