@@ -103,7 +103,7 @@ export default class LayersPass extends Pass {
           if (onError) {
             onError(err, layer);
           } else {
-            log.warn(`error during drawing of ${layer}`, err)();
+            log.error(`error during drawing of ${layer}`, err)();
           }
         }
       }

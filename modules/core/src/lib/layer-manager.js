@@ -229,7 +229,7 @@ export default class LayerManager {
     if (this._onError) {
       this._onError(error, layer);
     } else {
-      log.warn(`error during ${stage} of ${layerName(layer)}`, error)();
+      log.error(`error during ${stage} of ${layerName(layer)}`, error)();
     }
   }
 
