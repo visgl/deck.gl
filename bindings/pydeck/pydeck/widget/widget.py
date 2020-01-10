@@ -3,8 +3,9 @@
 from __future__ import unicode_literals
 
 import ipywidgets as widgets
-from traitlets import Any, Bool, Int, Unicode
+from traitlets import Any, Array, Bool, Int, Unicode
 
+from ..data_utils.binary_transfer import array_seralization
 from ._frontend import module_name, module_version
 
 @widgets.register
@@ -42,6 +43,7 @@ class DeckGLWidget(widgets.DOMWidget):
     _view_module_version = Unicode(module_version).tag(sync=True)
     mapbox_key = Unicode('', allow_none=True).tag(sync=True)
     json_input = Unicode('').tag(sync=True)
+    data = Array(default_value=None, allow_none=True).tag(sync=True, **array_seralization)
     height = Int(500).tag(sync=True)
     width = Any('100%').tag(sync=True)
     selected_data = Unicode('[]').tag(sync=True)
