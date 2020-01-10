@@ -40,6 +40,7 @@ export class DeckGLModel extends DOMWidgetModel {
       json_input: null,
       mapbox_key: null,
       selected_data: [],
+      data: null,
       tooltip: null,
       width: '100%',
       height: 500,
@@ -48,8 +49,11 @@ export class DeckGLModel extends DOMWidgetModel {
   }
 
   static get serializers() {
-    return {...DOMWidgetModel.serializers};
-    // Add any extra serializers here
+    return {
+      ...DOMWidgetModel.serializers,
+      // Add any extra serializers here
+      data: {deserialize: (data, manager) => (data ? new Float64Array(data.buffer) : null)}
+    };
   }
 
   static get model_name() {
