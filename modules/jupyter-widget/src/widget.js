@@ -53,11 +53,11 @@ function dtypeToTypedArray(dtype, data) {
   }
 }
 
-function deserializeArray(data, manager) {
-  if (data && data.data) {
-    return dtypeToTypedArray(data.dtype, data.data.buffer);
+function deserializeMatrix(arr, manager) {
+  if (!arr) {
+    return null;
   }
-  return null;
+  return {data: dtypeToTypedArray(arr.dtype, arr.data.buffer), shape: arr.shape};
 }
 
 // Note: Variables shared explictly between Python and JavaScript use snake_case
@@ -86,7 +86,7 @@ export class DeckGLModel extends DOMWidgetModel {
     return {
       ...DOMWidgetModel.serializers,
       // Add any extra serializers here
-      data_buffer: {deserialize: deserializeArray}
+      data_buffer: {deserialize: deserializeMatrix}
     };
   }
 
@@ -160,7 +160,40 @@ export class DeckGLView extends DOMWidgetView {
     this.model.on('change:data_buffer', this.dataBufferChanged.bind(this), this);
   }
 
-  dataBufferChanged() {}
+  dataBufferChanged() {
+    // Current method for review:
+    // Copy layer configuration
+    if (this.model.get('data_buffer')) {
+      const cleanBuffer = this.model.get('data_buffer');
+      const rowMajorOrderMatrix = cleanBuffer.data;
+      const [h, w] = cleanBuffer.shape;
+
+      // TESTING ONLY
+      const LayerConstructor = this.deck.props.layers[0].__proto__.constructor; // eslint-disable-line
+      const layerProps = this.deck.props.layers[0].props;
+
+      const newDataProps = {
+        // this is required so that the layer knows how many points to draw
+        data: {src: rowMajorOrderMatrix, length: h},
+        getPosition: (object, {index, data, target}) => {
+          target[0] = data.src[index * w];
+          target[1] = data.src[index * w + 1];
+          target[2] = 0; // z-value
+          return target;
+        },
+        getColor: (object, {index, data, target}) => {
+          target[0] = data.src[index * w + 2];
+          target[1] = data.src[index * w + 3];
+          target[2] = data.src[index * w + 4];
+          target[3] = 140; // alpha
+          return target;
+        }
+      };
+
+      const newLayer = new LayerConstructor({...layerProps, ...newDataProps});
+      this.deck.setProps({layers: [newLayer]});
+    }
+  }
 
   valueChanged() {
     updateDeck(JSON.parse(this.model.get('json_input')), this.deck);

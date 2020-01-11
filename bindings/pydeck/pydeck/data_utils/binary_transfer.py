@@ -1,6 +1,6 @@
 import numpy as np
 
-# from .type_checking import is_numpy_array
+from .type_checking import is_pandas_df
 
 # Grafted from
 # https://github.com/maartenbreddels/ipyvolume/blob/d13828dfd8b57739004d5daf7a1d93ad0839ed0f/ipyvolume/serialize.py#L219
@@ -21,4 +21,34 @@ def array_to_binary(ar, obj=None, force_contiguous=True):
     return {"data": memoryview(ar), "dtype": str(ar.dtype), "shape": ar.shape}
 
 
+def binary_to_array(value, obj=None):
+    return np.frombuffer(value['data'], dtype=value['dtype']).reshape(value['shape'])
+
+
+def convert_df_to_matrix(df, obj=None, force_contiguous=True):
+    """
+    Flattens a pandas.DataFrame into a row-major format array
+
+    In this implementation, `position` | `color`
+
+    lng | lat | r | g | b
+    ----+-----+---+---+---
+     0.0  0.0  140   5   5
+    -1.0  1.0  100  10  10
+
+    becomes
+
+    [[0.0, 0.0, 140, 5, 5], [-1.0, 1.0, 100, 10, 10]]
+
+    """
+    if df is None or not is_pandas_df(df):
+        return None
+    matrix = df.values
+    try:
+        return array_to_binary(matrix)
+    except ValueError as e:
+        raise Exception('Binary conversion failed with message:', e)
+
+
 array_seralization = dict(to_json=array_to_binary, from_json=None)
+df_serialization = dict(to_json=convert_df_to_matrix, from_json=None)
