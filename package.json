@@ -24,7 +24,6 @@
     "lint": "ocular-lint",
     "cover": "ocular-test cover",
     "publish": "ocular-publish",
-    "bump": "ocular-bump",
     "start": "open http://uber.github.io/deck.gl/#/documentation/getting-started/installation?section=running-the-examples",
     "test": "ocular-test",
     "test-fast": "ocular-test fast",
