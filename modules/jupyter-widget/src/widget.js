@@ -26,6 +26,40 @@ function loadCss(url) {
   document.getElementsByTagName('head')[0].appendChild(link);
 }
 
+function dtypeToTypedArray(dtype, data) {
+  switch (dtype) {
+    case 'int8':
+      return new Int8Array(data);
+    case 'uint8':
+      return new Uint8Array(data);
+    case 'int16':
+      return new Int16Array(data);
+    case 'uint16':
+      return new Uint16Array(data);
+    case 'float32':
+      return new Float32Array(data);
+    case 'float64':
+      return new Float64Array(data);
+    case 'int32':
+      return new Int32Array(data);
+    case 'uint32':
+      return new Uint32Array(data);
+    case 'int64':
+      return new BigInt64Array(data); // eslint-disable-line no-undef
+    case 'uint64':
+      return new BigUint64Array(data); // eslint-disable-line no-undef
+    default:
+      throw new Error(`Unrecognized dtype ${dtype}`);
+  }
+}
+
+function deserializeArray(data, manager) {
+  if (data && data.data) {
+    return dtypeToTypedArray(data.dtype, data.data.buffer);
+  }
+  return null;
+}
+
 // Note: Variables shared explictly between Python and JavaScript use snake_case
 export class DeckGLModel extends DOMWidgetModel {
   defaults() {
@@ -40,7 +74,7 @@ export class DeckGLModel extends DOMWidgetModel {
       json_input: null,
       mapbox_key: null,
       selected_data: [],
-      data: null,
+      data_buffer: null,
       tooltip: null,
       width: '100%',
       height: 500,
@@ -52,7 +86,7 @@ export class DeckGLModel extends DOMWidgetModel {
     return {
       ...DOMWidgetModel.serializers,
       // Add any extra serializers here
-      data: {deserialize: (data, manager) => (data ? new Float64Array(data.buffer) : null)}
+      data_buffer: {deserialize: deserializeArray}
     };
   }
 
@@ -123,7 +157,10 @@ export class DeckGLView extends DOMWidgetView {
     super.render();
 
     this.model.on('change:json_input', this.valueChanged.bind(this), this);
+    this.model.on('change:data_buffer', this.dataBufferChanged.bind(this), this);
   }
+
+  dataBufferChanged() {}
 
   valueChanged() {
     updateDeck(JSON.parse(this.model.get('json_input')), this.deck);
