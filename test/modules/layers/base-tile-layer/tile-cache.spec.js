@@ -1,5 +1,8 @@
 import test from 'tape-catch';
-import TileCache from '@deck.gl/layers/base-tile-layer/utils/tile-cache';
+import TileCache, {
+  STRATEGY_EXCLUSIVE,
+  STRATEGY_DEFAULT
+} from '@deck.gl/layers/base-tile-layer/utils/tile-cache';
 import Tile from '@deck.gl/layers/base-tile-layer/utils/tile';
 import {tileToBoundingBox} from '@deck.gl/geo-layers/tile-layer/utils/tile-util';
 import {getTileIndices} from '@deck.gl/geo-layers/tile-layer/utils/viewport-util';
@@ -148,3 +151,138 @@ test('TileCache#should set isLoaded to true even when loading the tile throws an
 
   errorTileCache.update(testViewport);
 });
+
+test('TileCache#traversal', t => {
+  const tileCache = new TileCache({
+    tileToBoundingBox,
+    getTileIndices,
+    getTileData: () => sleep(10),
+    onTileLoad: () => {},
+    onTileError: () => {}
+  });
+
+  /*
+    Test tiles:
+                                        +- 2-0-0 (pending) -+- 3-0-0 (pending) -+- 4-0-0 (pending)
+                                        +- 2-0-1 (pending) -+- 3-0-2 (loaded)  -+- 4-0-4 (pending)
+                    +- 1-0-0 (loaded)  -+- 2-1-0 (missing) -+- 3-2-0 (pending)
+                    |                   +- 2-1-1 (missing) -+- 3-2-2 (loaded)
+   0-0-0 (pending) -+
+                    |                   +- 2-2-0 (loaded)  -+- 3-4-0 (pending)
+                    +- 1-1-0 (pending) -+- 2-2-1 (loaded)  -+- 3-4-2 (loaded)
+                                        +- 2-3-0 (pending) -+- 3-6-0 (pending)
+                                        +- 2-3-1 (pending) -+- 3-6-2 (loaded)
+   */
+  const TEST_CASES = [
+    {
+      selectedTiles: ['0-0-0'],
+      visibleTiles: ['1-0-0', '2-2-0', '2-2-1', '3-6-2']
+    },
+    {
+      selectedTiles: ['1-0-0'],
+      visibleTiles: ['1-0-0']
+    },
+    {
+      selectedTiles: ['1-0-0', '1-1-0'],
+      visibleTiles: ['1-0-0', '2-2-0', '2-2-1', '3-6-2']
+    },
+    {
+      selectedTiles: ['2-0-0', '2-0-1'],
+      visibleTiles: ['1-0-0']
+    },
+    {
+      selectedTiles: ['2-2-0', '2-2-1', '2-3-0', '2-3-1'],
+      visibleTiles: ['2-2-0', '2-2-1', '3-6-2']
+    },
+    {
+      selectedTiles: ['3-0-0', '3-2-0'],
+      visibleTiles: ['1-0-0']
+    },
+    {
+      selectedTiles: ['3-0-0', '3-0-2', '3-2-0', '3-2-2'],
+      visibleTiles: {
+        [STRATEGY_DEFAULT]: ['1-0-0', '3-0-2', '3-2-2'],
+        [STRATEGY_EXCLUSIVE]: ['3-0-2', '3-2-2']
+      }
+    },
+    {
+      selectedTiles: ['3-4-0', '3-6-0'],
+      visibleTiles: ['2-2-0']
+    },
+    {
+      selectedTiles: ['3-4-0', '3-4-2', '3-6-0', '3-6-2'],
+      visibleTiles: ['2-2-0', '3-4-2', '3-6-2']
+    },
+    {
+      selectedTiles: ['4-0-0', '4-0-4'],
+      visibleTiles: {
+        [STRATEGY_DEFAULT]: ['1-0-0', '3-0-2'],
+        [STRATEGY_EXCLUSIVE]: ['3-0-2']
+      }
+    }
+  ];
+
+  const tileMap = tileCache._cache;
+  const strategies = [STRATEGY_DEFAULT, STRATEGY_EXCLUSIVE];
+
+  const validateVisibility = visibleTiles => {
+    let allMatched = true;
+    for (const [tileId, tile] of tileMap) {
+      const expected = visibleTiles.includes(tileId);
+      const actual = Boolean(tile.state & 1) && tile.isLoaded;
+      if (expected !== actual) {
+        t.fail(
+          `Tile ${tileId} has state ${tile.state}, expected ${expected ? 'visible' : 'invisible'}`
+        );
+        allMatched = false;
+      }
+    }
+    t.ok(allMatched, 'Tile visibility updated correctly');
+  };
+
+  // Tiles that should be loaded
+  tileCache._getTile(0, 0, 1, true);
+  tileCache._getTile(2, 0, 2, true);
+  tileCache._getTile(2, 1, 2, true);
+  tileCache._getTile(0, 2, 3, true);
+  tileCache._getTile(2, 2, 3, true);
+  tileCache._getTile(4, 2, 3, true);
+  tileCache._getTile(6, 2, 3, true);
+
+  sleep(100).then(() => {
+    // Tiles that should be pending
+    tileCache._getTile(0, 0, 0, true);
+    tileCache._getTile(1, 0, 1, true);
+    tileCache._getTile(0, 0, 2, true);
+    tileCache._getTile(0, 1, 2, true);
+    tileCache._getTile(3, 0, 2, true);
+    tileCache._getTile(3, 1, 2, true);
+    tileCache._getTile(0, 0, 3, true);
+    tileCache._getTile(2, 0, 3, true);
+    tileCache._getTile(4, 0, 3, true);
+    tileCache._getTile(6, 0, 3, true);
+    tileCache._getTile(0, 0, 4, true);
+    tileCache._getTile(0, 4, 4, true);
+
+    tileCache._rebuildTree();
+
+    for (const testCase of TEST_CASES) {
+      const selectedTiles = testCase.selectedTiles.map(id => tileMap.get(id));
+
+      for (const strategy of strategies) {
+        tileCache._strategy = strategy;
+        tileCache._updateTileStates(selectedTiles);
+        validateVisibility(testCase.visibleTiles[strategy] || testCase.visibleTiles);
+      }
+    }
+
+    t.end();
+  });
+});
+
+function sleep(ms) {
+  return new Promise(resolve => {
+    /* global setTimeout */
+    setTimeout(resolve, ms);
+  });
+}

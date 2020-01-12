@@ -31,7 +31,6 @@ To use pre-bundled scripts:
 <!-- or -->
 <script src="https://unpkg.com/@deck.gl/core@^8.0.0/dist.min.js"></script>
 <script src="https://unpkg.com/@deck.gl/layers@^8.0.0/dist.min.js"></script>
-<script src="https://unpkg.com/@deck.gl/geo-layers@^8.0.0/dist.min.js"></script>
 ```
 
 ```js
@@ -80,6 +79,15 @@ Hide tiles when under-zoomed.
 The maximum cache size for a tile layer. If not defined, it is calculated using the number of tiles in the current viewport times constant 5 (5 is picked because it's a common zoom range).
 
 - Default: `null`
+
+##### `strategy` (Enum, optional)
+
+How the tile layer determines the visibility of tiles. One of the following:
+
+* `'default'`: If some tiles in the current viewport are waiting for data to load, aggresively use cached content from other zoom levels to fill the empty space.
+* `'exclusive'`: Avoid showing overlapping tiles when backfilling with cached content.
+
+- Default: `BaseTileLayer.STRATEGY_DEFAULT`
 
 ### Render Options
 

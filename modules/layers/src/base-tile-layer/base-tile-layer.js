@@ -7,14 +7,15 @@ const defaultProps = {
   renderSubLayers: {type: 'function', value: props => new GeoJsonLayer(props), compare: false},
   getTileData: {type: 'function', value: ({x, y, z}) => Promise.resolve(null), compare: false},
   tileToBoundingBox: {type: 'function', value: () => null, compare: false},
-  getTileIndices: {type: 'function', value: () => null, compare: false},
+  getTileIndices: {type: 'function', value: () => [], compare: false},
   // TODO - change to onViewportLoad to align with Tile3DLayer
   onViewportLoad: {type: 'function', optional: true, value: null, compare: false},
   // eslint-disable-next-line
   onTileError: {type: 'function', value: err => console.error(err), compare: false},
   maxZoom: null,
   minZoom: 0,
-  maxCacheSize: null
+  maxCacheSize: null,
+  strategy: 'default'
 };
 
 export default class BaseTileLayer extends CompositeLayer {
@@ -35,16 +36,18 @@ export default class BaseTileLayer extends CompositeLayer {
 
   updateState({props, oldProps, context, changeFlags}) {
     let {tileCache} = this.state;
-    if (
+    const createTileCache =
       !tileCache ||
       (changeFlags.updateTriggersChanged &&
-        (changeFlags.updateTriggersChanged.all || changeFlags.updateTriggersChanged.getTileData))
-    ) {
+        (changeFlags.updateTriggersChanged.all || changeFlags.updateTriggersChanged.getTileData));
+
+    if (createTileCache) {
       const {
         getTileData,
         maxZoom,
         minZoom,
         maxCacheSize,
+        strategy,
         getTileIndices,
         tileToBoundingBox
       } = props;
@@ -58,7 +61,8 @@ export default class BaseTileLayer extends CompositeLayer {
         maxSize: maxCacheSize,
         maxZoom,
         minZoom,
-        onTileLoad: this._onTileLoad.bind(this),
+        strategy,
+        onTileLoad: this._updateTileset.bind(this),
         onTileError: this._onTileError.bind(this)
       });
       this.setState({tileCache});
@@ -69,27 +73,30 @@ export default class BaseTileLayer extends CompositeLayer {
       });
     }
 
-    const {viewport} = context;
-    if (changeFlags.viewportChanged && viewport.id !== 'DEFAULT-INITIAL-VIEWPORT') {
-      const z = this.getLayerZoomLevel();
-      tileCache.update(viewport);
-      // The tiles that should be displayed at this zoom level
-      const currTiles = tileCache.tiles.filter(tile => tile.z === z);
-      this.setState({isLoaded: false, tiles: currTiles});
-      this._onTileLoad();
+    if (createTileCache || changeFlags.viewportChanged) {
+      this._updateTileset();
     }
   }
 
-  _onTileLoad() {
+  _updateTileset() {
+    const {tileCache} = this.state;
     const {onViewportLoad} = this.props;
-    const currTiles = this.state.tiles;
-    const allCurrTilesLoaded = currTiles.every(tile => tile.isLoaded);
-    if (this.state.isLoaded !== allCurrTilesLoaded) {
-      this.setState({isLoaded: allCurrTilesLoaded});
-      if (allCurrTilesLoaded && onViewportLoad) {
-        onViewportLoad(currTiles.filter(tile => tile._data).map(tile => tile._data));
-      }
+    const frameNumber = tileCache.update(this.context.viewport);
+    const {isLoaded} = tileCache;
+
+    const loadingStateChanged = this.state.isLoaded !== isLoaded;
+    const tilesetChanged = this.state.frameNumber !== frameNumber;
+
+    if (isLoaded && onViewportLoad && (loadingStateChanged || tilesetChanged)) {
+      onViewportLoad(tileCache.tiles.filter(tile => tile.isVisible).map(tile => tile.data));
     }
+
+    if (tilesetChanged) {
+      // Save the tileset frame number - trigger a rerender
+      this.setState({frameNumber});
+    }
+    // Save the loaded state - should not trigger a rerender
+    this.state.isLoaded = isLoaded;
   }
 
   _onTileError(error) {
@@ -104,26 +111,13 @@ export default class BaseTileLayer extends CompositeLayer {
     return info;
   }
 
-  getLayerZoomLevel() {
-    const z = Math.ceil(this.context.viewport.zoom);
-    const {maxZoom, minZoom} = this.props;
-    if (Number.isFinite(maxZoom) && z > maxZoom) {
-      return Math.floor(maxZoom);
-    } else if (Number.isFinite(minZoom) && z < minZoom) {
-      return Math.ceil(minZoom);
-    }
-    return z;
-  }
-
   renderLayers() {
     const {renderSubLayers, visible} = this.props;
-    const z = this.getLayerZoomLevel();
     return this.state.tileCache.tiles.map(tile => {
       // For a tile to be visible:
       // - parent layer must be visible
       // - tile must be visible in the current viewport
-      // - if all tiles are loaded, only display the tiles from the current z level
-      const isVisible = visible && tile.isVisible && (!this.state.isLoaded || tile.z === z);
+      const isVisible = visible && tile.isVisible;
       // cache the rendered layer in the tile
       if (!tile.layer) {
         tile.layer = renderSubLayers(

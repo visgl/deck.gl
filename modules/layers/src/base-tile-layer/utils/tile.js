@@ -5,10 +5,13 @@ export default class Tile {
     this.z = z;
     this.bbox = tileToBoundingBox(this.x, this.y, this.z);
     this.isVisible = true;
-    this.getTileData = getTileData;
+    this.parent = null;
+    this.children = [];
+
     this._data = null;
     this._isLoaded = false;
-    this._loader = this._loadData();
+    this._loader = this._loadData(getTileData);
+
     this.onTileLoad = onTileLoad;
     this.onTileError = onTileError;
   }
@@ -21,13 +24,13 @@ export default class Tile {
     return this._isLoaded;
   }
 
-  _loadData() {
+  _loadData(getTileData) {
     const {x, y, z, bbox} = this;
-    if (!this.getTileData) {
+    if (!getTileData) {
       return null;
     }
 
-    return Promise.resolve(this.getTileData({x, y, z, bbox}))
+    return Promise.resolve(getTileData({x, y, z, bbox}))
       .then(buffers => {
         this._data = buffers;
         this._isLoaded = true;
@@ -38,11 +41,5 @@ export default class Tile {
         this._isLoaded = true;
         this.onTileError(err);
       });
-  }
-
-  isOverlapped(tile) {
-    const {x, y, z} = this;
-    const m = Math.pow(2, tile.z - z);
-    return Math.floor(tile.x / m) === x && Math.floor(tile.y / m) === y;
   }
 }

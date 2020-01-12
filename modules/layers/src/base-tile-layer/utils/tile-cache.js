@@ -1,5 +1,33 @@
 import Tile from './tile';
 
+const TILE_STATE_UNKNOWN = 0;
+const TILE_STATE_VISIBLE = 1;
+/*
+   show cached parent tile if children are loading
+   +-----------+       +-----+            +-----+-----+
+   |           |       |     |            |     |     |
+   |           |       |     |            |     |     |
+   |           |  -->  +-----+-----+  ->  +-----+-----+
+   |           |             |     |      |     |     |
+   |           |             |     |      |     |     |
+   +-----------+             +-----+      +-----+-----+
+
+   show cached children tiles when parent is loading
+   +-------+----       +------------
+   |       |           |
+   |       |           |
+   |       |           |
+   +-------+----  -->  |
+   |       |           |
+ */
+const TILE_STATE_PLACEHOLDER = 3;
+const TILE_STATE_HIDDEN = 4;
+// tiles that should be displayed in the current viewport
+const TILE_STATE_SELECTED = 5;
+
+export const STRATEGY_EXCLUSIVE = 'exclusive';
+export const STRATEGY_DEFAULT = 'default';
+
 /**
  * Manages loading and purging of tiles data. This class caches recently visited tiles
  * and only create new tiles if they are present.
@@ -15,6 +43,7 @@ export default class TileCache {
     maxSize,
     maxZoom,
     minZoom,
+    strategy = STRATEGY_DEFAULT,
     onTileLoad,
     onTileError,
     getTileIndices,
@@ -23,6 +52,7 @@ export default class TileCache {
     // TODO: Instead of hardcode size, we should calculate how much memory left
     this._getTileData = getTileData;
     this._maxSize = maxSize;
+    this._strategy = strategy;
     this._getTileIndices = getTileIndices;
     this._tileToBoundingBox = tileToBoundingBox;
     this.onTileError = onTileError;
@@ -30,6 +60,12 @@ export default class TileCache {
     // Maps tile id in string {z}-{x}-{y} to a Tile object
     this._cache = new Map();
     this._tiles = [];
+    this._dirty = false;
+
+    // Cache the last processed viewport
+    this._viewport = null;
+    this._selectedTiles = null;
+    this._frameNumber = 0;
 
     if (Number.isFinite(maxZoom)) {
       this._maxZoom = Math.floor(maxZoom);
@@ -41,6 +77,10 @@ export default class TileCache {
 
   get tiles() {
     return this._tiles;
+  }
+
+  get isLoaded() {
+    return this._selectedTiles.every(tile => tile.isLoaded);
   }
 
   /**
@@ -56,57 +96,93 @@ export default class TileCache {
    * @param {*} onUpdate
    */
   update(viewport) {
-    const {
-      _cache,
-      _getTileData,
-      _tileToBoundingBox,
-      _getTileIndices,
-      _maxSize,
-      _maxZoom,
-      _minZoom
-    } = this;
-    this._markOldTiles();
-    const tileIndices = _getTileIndices(viewport, _maxZoom, _minZoom);
-    if (!tileIndices || tileIndices.length === 0) {
-      return;
-    }
-    _cache.forEach(cachedTile => {
-      if (tileIndices.some(tile => cachedTile.isOverlapped(tile))) {
-        cachedTile.isVisible = true;
+    const {_cache, _getTileIndices, _maxSize, _maxZoom, _minZoom} = this;
+
+    let selectedTiles = this._selectedTiles;
+
+    if (viewport !== this._viewport) {
+      const tileIndices = _getTileIndices(viewport, _maxZoom, _minZoom);
+      selectedTiles = tileIndices.map(({x, y, z}) => this._getTile(x, y, z, true));
+      this._selectedTiles = selectedTiles;
+
+      if (this._dirty) {
+        // Some new tiles are added
+        this._rebuildTree();
       }
-    });
+    }
+
+    // Update tile states
+    this._updateTileStates(selectedTiles);
 
     let changed = false;
-
-    for (let i = 0; i < tileIndices.length; i++) {
-      const tileIndex = tileIndices[i];
-
-      const {x, y, z} = tileIndex;
-      let tile = this._getTile(x, y, z);
-      if (!tile) {
-        tile = new Tile({
-          getTileData: _getTileData,
-          tileToBoundingBox: _tileToBoundingBox,
-          x,
-          y,
-          z,
-          onTileLoad: this.onTileLoad,
-          onTileError: this.onTileError
-        });
-        tile.isVisible = true;
+    for (const tile of _cache.values()) {
+      const isVisible = Boolean(tile.state & TILE_STATE_VISIBLE);
+      if (tile.isVisible !== isVisible) {
         changed = true;
+        tile.isVisible = isVisible;
       }
-      const tileId = this._getTileId(x, y, z);
-      _cache.set(tileId, tile);
+    }
+
+    if (this._dirty) {
+      // cache size is either the user defined maxSize or 5 * number of current tiles in the viewport.
+      const commonZoomRange = 5;
+      this._resizeCache(_maxSize || commonZoomRange * selectedTiles.length);
+      this._dirty = false;
     }
 
     if (changed) {
-      // cache size is either the user defined maxSize or 5 * number of current tiles in the viewport.
-      const commonZoomRange = 5;
-      this._resizeCache(_maxSize || commonZoomRange * tileIndices.length);
-      this._tiles = Array.from(this._cache.values())
-        // sort by zoom level so parents tiles don't show up when children tiles are rendered
-        .sort((t1, t2) => t1.z - t2.z);
+      this._frameNumber++;
+    }
+    return this._frameNumber;
+  }
+
+  // This needs to be called every time some tiles have been added/removed from cache
+  _rebuildTree() {
+    const {_cache} = this;
+
+    // Reset states
+    for (const tile of _cache.values()) {
+      tile.parent = null;
+      tile.children.length = 0;
+    }
+
+    // Rebuild tree
+    for (const tile of _cache.values()) {
+      const parent = this._getNearestAncestor(tile.x, tile.y, tile.z);
+      tile.parent = parent;
+      if (parent) {
+        parent.children.push(tile);
+      }
+    }
+  }
+
+  // A selected tile is always visible.
+  // Never show two overlapping tiles.
+  // If a selected tile is loading, try showing a cached ancester with the closest z
+  // If a selected tile is loading, and no ancester is shown - try showing cached
+  // descendants with the closest z
+  _updateTileStates(selectedTiles) {
+    const {_cache} = this;
+
+    // Reset states
+    for (const tile of _cache.values()) {
+      tile.state = TILE_STATE_UNKNOWN;
+    }
+
+    // For all the selected && pending tiles:
+    // - pick the closest ancestor as placeholder
+    // - if no ancestor is visible, pick the closest children as placeholder
+    for (const tile of selectedTiles) {
+      tile.state = TILE_STATE_SELECTED;
+      getPlaceholderInAncestors(tile, this._strategy);
+    }
+
+    // updateAncestorStates(selectedTiles);
+
+    for (const tile of selectedTiles) {
+      if (needsPlaceholder(tile)) {
+        getPlaceholderInChildren(tile);
+      }
     }
   }
 
@@ -116,32 +192,96 @@ export default class TileCache {
   _resizeCache(maxSize) {
     const {_cache} = this;
     if (_cache.size > maxSize) {
-      const iterator = _cache[Symbol.iterator]();
-      for (const cachedTile of iterator) {
-        if (_cache.size <= maxSize) {
-          break;
-        }
-        const tileId = cachedTile[0];
-        const tile = cachedTile[1];
+      for (const [tileId, tile] of _cache) {
         if (!tile.isVisible) {
           _cache.delete(tileId);
         }
+        if (_cache.size <= maxSize) {
+          break;
+        }
+      }
+      this._rebuildTree();
+    }
+    this._tiles = Array.from(this._cache.values())
+      // sort by zoom level so that smaller tiles are displayed on top
+      .sort((t1, t2) => t1.z - t2.z);
+  }
+
+  _getTile(x, y, z, create) {
+    const tileId = `${z}-${x}-${y}`;
+    let tile = this._cache.get(tileId);
+
+    if (!tile && create) {
+      tile = new Tile({
+        getTileData: this._getTileData,
+        tileToBoundingBox: this._tileToBoundingBox,
+        x,
+        y,
+        z,
+        onTileLoad: this.onTileLoad,
+        onTileError: this.onTileError
+      });
+      this._cache.set(tileId, tile);
+      this._dirty = true;
+    }
+    return tile;
+  }
+
+  _getNearestAncestor(x, y, z) {
+    const {_minZoom = 0} = this;
+
+    while (z > _minZoom) {
+      x = Math.floor(x / 2);
+      y = Math.floor(y / 2);
+      z -= 1;
+      const parent = this._getTile(x, y, z);
+      if (parent) {
+        return parent;
       }
     }
+    return null;
   }
+}
 
-  _markOldTiles() {
-    this._cache.forEach(cachedTile => {
-      cachedTile.isVisible = false;
-    });
+// A selected tile needs placeholder from its children if
+// - it is not loaded
+// - none of its ancestors is visible and loaded
+function needsPlaceholder(tile) {
+  let t = tile;
+  while (t) {
+    if (t.state & (TILE_STATE_VISIBLE === 0)) {
+      return true;
+    }
+    if (t.isLoaded) {
+      return false;
+    }
+    t = t.parent;
   }
+  return true;
+}
 
-  _getTile(x, y, z) {
-    const tileId = this._getTileId(x, y, z);
-    return this._cache.get(tileId);
+function getPlaceholderInAncestors(tile, strategy) {
+  let parent;
+  let state = TILE_STATE_PLACEHOLDER;
+  while ((parent = tile.parent)) {
+    if (tile.isLoaded) {
+      // If a tile is loaded, mark all its ancestors as hidden
+      state = TILE_STATE_HIDDEN;
+      if (strategy === STRATEGY_DEFAULT) {
+        return;
+      }
+    }
+    parent.state = Math.max(parent.state, state);
+    tile = parent;
   }
+}
 
-  _getTileId(x, y, z) {
-    return `${z}-${x}-${y}`;
+// Recursively set children as placeholder
+function getPlaceholderInChildren(tile) {
+  for (const child of tile.children) {
+    child.state = Math.max(child.state, TILE_STATE_PLACEHOLDER);
+    if (!child.isLoaded) {
+      getPlaceholderInChildren(child);
+    }
   }
 }
