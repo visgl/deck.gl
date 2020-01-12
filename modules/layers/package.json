@@ -30,6 +30,7 @@
   },
   "dependencies": {
     "@loaders.gl/images": "^2.0.2",
+    "@loaders.gl/core": "^2.0.2",
     "@mapbox/tiny-sdf": "^1.1.0",
     "earcut": "^2.0.6"
   },
