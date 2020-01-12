@@ -9,7 +9,6 @@ function getBoundingBox(viewport) {
     viewport.unproject([0, viewport.height]),
     viewport.unproject([viewport.width, viewport.height])
   ];
-
   return [
     corners.reduce((minLng, p) => (minLng < p[0] ? minLng : p[0]), 180),
     corners.reduce((minLat, p) => (minLat < p[1] ? minLat : p[1]), 90),
@@ -31,31 +30,24 @@ function getTileIndex(lngLat, scale) {
  * return tiles that are on maxZoom.
  */
 export function getTileIndices(viewport, maxZoom, minZoom) {
-  const z = Math.floor(viewport.zoom);
+  const z = Math.ceil(viewport.zoom);
   if (minZoom && z < minZoom) {
     return [];
   }
 
-  viewport = new viewport.constructor(
-    Object.assign({}, viewport, {
-      zoom: z
-    })
-  );
-
   const bbox = getBoundingBox(viewport);
-
-  let [minX, minY] = getTileIndex([bbox[0], bbox[3]], viewport.scale);
-  let [maxX, maxY] = getTileIndex([bbox[2], bbox[1]], viewport.scale);
-
+  const scale = 2 ** z;
+  let [minX, minY] = getTileIndex([bbox[0], bbox[3]], scale);
+  let [maxX, maxY] = getTileIndex([bbox[2], bbox[1]], scale);
   /*
       |  TILE  |  TILE  |  TILE  |
         |(minPixel)           |(maxPixel)
-      |(minIndex)                |(maxIndex)  
+      |(minIndex)                |(maxIndex)
    */
   minX = Math.max(0, Math.floor(minX));
-  maxX = Math.min(viewport.scale, Math.ceil(maxX));
+  maxX = Math.min(scale, Math.ceil(maxX));
   minY = Math.max(0, Math.floor(minY));
-  maxY = Math.min(viewport.scale, Math.ceil(maxY));
+  maxY = Math.min(scale, Math.ceil(maxY));
 
   const indices = [];
 
@@ -68,6 +60,7 @@ export function getTileIndices(viewport, maxZoom, minZoom) {
       }
     }
   }
+
   return indices;
 }
 

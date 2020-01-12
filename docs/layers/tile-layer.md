@@ -94,33 +94,9 @@ new deck.TileLayer({});
 
 ## Properties
 
-Inherits from all [Base Layer](/docs/api-reference/layer.md) properties, along with the following props. 
-
-##### `maxZoom` (Number|Null, optional)
-
-Use tiles from this level when over-zoomed.
-
-- Default: `null`
-
-##### `minZoom` (Number, optional)
-
-Hide tiles when under-zoomed.
-
-- Default: 0
-
-##### `maxCacheSize` (Number|Null, optional)
-
-The maximum cache size for a tile layer. If not defined, it is calculated using the number of tiles in the current viewport times constant 5 (5 is picked because it's a common zoom range).
-
-- Default: `null`
+It implements geospatial-specific `tileToBoundingBox` and `getTileIndices` functions as props and also inherits all other [BaseTileLayer](/docs/api-reference/base-tile-layer.md) properties
 
 ### Render Options
-
-##### `onViewportLoad` (Function, optional)
-
-`onViewportLoad` is a function that is called when all tiles in the current viewport are loaded. Data in the viewport is passed in as an array to this callback function.
-
-- Default: `onViewportLoad: (data) => null`
 
 ##### `getTileData` (Function,  optional)
 
@@ -135,12 +111,6 @@ Receives arguments:
 - `z` (Number) - Z of [the OSM tile index](https://wiki.openstreetmap.org/wiki/Slippy_map_tilenames)
 - `bbox` (Object) - bounding box of the tile, in the shape of `{west, north, east, south}`.
 
-##### `onTileError` (Function, optional)
-
-`onTileError` called when a tile failed to load.
-
-- Default: `(err) => console.error(err)`
-
 ##### `renderSubLayers` (Function, optional))
 
 Renders one or an array of Layer instances with all the `TileLayer` props and the following props:
@@ -153,4 +123,3 @@ Renders one or an array of Layer instances with all the `TileLayer` props and th
 # Source
 
 [modules/geo-layers/src/tile-layer](https://github.com/uber/deck.gl/tree/master/modules/geo-layers/src/tile-layer)
-

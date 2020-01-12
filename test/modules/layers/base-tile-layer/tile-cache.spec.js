@@ -1,6 +1,8 @@
 import test from 'tape-catch';
-import TileCache from '@deck.gl/geo-layers/tile-layer/utils/tile-cache';
-import Tile from '@deck.gl/geo-layers/tile-layer/utils/tile';
+import TileCache from '@deck.gl/layers/base-tile-layer/utils/tile-cache';
+import Tile from '@deck.gl/layers/base-tile-layer/utils/tile';
+import {tileToBoundingBox} from '@deck.gl/geo-layers/tile-layer/utils/tile-util';
+import {getTileIndices} from '@deck.gl/geo-layers/tile-layer/utils/viewport-util';
 import {WebMercatorViewport} from '@deck.gl/core';
 
 const testViewState = {
@@ -16,7 +18,7 @@ const testViewState = {
 };
 
 // testViewState should load tile 12-1171-1566
-const testTile = new Tile({x: 1171, y: 1566, z: 12});
+const testTile = new Tile({x: 1171, y: 1566, z: 12, tileToBoundingBox});
 
 const testViewport = new WebMercatorViewport(testViewState);
 
@@ -27,6 +29,8 @@ const minZoom = 11;
 const getTileData = () => Promise.resolve(null);
 const testTileCacheProps = {
   getTileData,
+  tileToBoundingBox,
+  getTileIndices,
   maxSize: cacheMaxSize,
   minZoom,
   maxZoom,
@@ -135,6 +139,8 @@ test('TileCache#should set isLoaded to true even when loading the tile throws an
       errorTileCache.finalize();
       t.end();
     },
+    tileToBoundingBox,
+    getTileIndices,
     maxSize: cacheMaxSize,
     minZoom,
     maxZoom
