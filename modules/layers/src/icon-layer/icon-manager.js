@@ -1,7 +1,8 @@
 /* global document */
 import GL from '@luma.gl/constants';
 import {Texture2D, copyToTexture, cloneTextureFrom} from '@luma.gl/core';
-import {loadImage} from '@loaders.gl/images';
+import {ImageLoader} from '@loaders.gl/images';
+import {load} from '@loaders.gl/core';
 import {createIterable, log} from '@deck.gl/core';
 
 const DEFAULT_CANVAS_WIDTH = 1024;
@@ -315,7 +316,7 @@ export default class IconManager {
 
     for (const icon of icons) {
       this._pendingCount++;
-      loadImage(icon.url)
+      load(icon.url, ImageLoader)
         .then(imageData => {
           const id = getIconId(icon);
           const {x, y, width, height} = this._mapping[id];
