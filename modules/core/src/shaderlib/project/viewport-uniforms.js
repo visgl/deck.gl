@@ -17,6 +17,7 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
+/* eslint-disable complexity */
 
 import * as mat4 from 'gl-matrix/mat4';
 import * as vec4 from 'gl-matrix/vec4';
@@ -42,23 +43,58 @@ const getMemoizedViewportUniforms = memoize(calculateViewportUniforms);
 // The code that utilizes Matrix4 does the same calculation as their mat4 counterparts,
 // has lower performance but provides error checking.
 // Uncomment when debugging
-function calculateMatrixAndOffset({viewport, coordinateSystem, coordinateOrigin}) {
+function calculateMatrixAndOffset(viewport, coordinateSystem, coordinateOrigin) {
   const {viewMatrixUncentered, projectionMatrix, projectionMode} = viewport;
   let {viewMatrix, viewProjectionMatrix} = viewport;
 
   let projectionCenter = ZERO_VECTOR;
   let cameraPosCommon = viewport.cameraPosition;
   let shaderCoordinateOrigin = coordinateOrigin;
+  let geospatialOrigin;
   let offsetMode = true;
 
-  if (coordinateSystem === COORDINATE_SYSTEM.LNGLAT) {
-    if (projectionMode === PROJECTION_MODE.WEB_MERCATOR) {
+  if (
+    coordinateSystem === COORDINATE_SYSTEM.LNGLAT_OFFSETS ||
+    coordinateSystem === COORDINATE_SYSTEM.METER_OFFSETS
+  ) {
+    geospatialOrigin = coordinateOrigin;
+  } else {
+    geospatialOrigin = viewport.isGeospatial
+      ? [Math.fround(viewport.longitude), Math.fround(viewport.latitude), 0]
+      : null;
+  }
+
+  switch (projectionMode) {
+    case PROJECTION_MODE.WEB_MERCATOR:
+      if (
+        coordinateSystem === COORDINATE_SYSTEM.LNGLAT ||
+        coordinateSystem === COORDINATE_SYSTEM.CARTESIAN
+      ) {
+        offsetMode = false;
+      }
+      break;
+
+    case PROJECTION_MODE.WEB_MERCATOR_AUTO_OFFSET:
+      if (coordinateSystem === COORDINATE_SYSTEM.LNGLAT) {
+        // viewport center in world space
+        shaderCoordinateOrigin = geospatialOrigin;
+      } else if (coordinateSystem === COORDINATE_SYSTEM.CARTESIAN) {
+        // viewport center in common space
+        shaderCoordinateOrigin = [
+          Math.fround(viewport.center[0]),
+          Math.fround(viewport.center[1]),
+          0
+        ];
+      }
+      break;
+
+    case PROJECTION_MODE.IDENTITY:
+      shaderCoordinateOrigin = viewport.position.map(Math.fround);
+      break;
+
+    default:
+      // Unknown projection mode
       offsetMode = false;
-    } else {
-      shaderCoordinateOrigin = [Math.fround(viewport.longitude), Math.fround(viewport.latitude), 0];
-    }
-  } else if (projectionMode === PROJECTION_MODE.IDENTITY) {
-    shaderCoordinateOrigin = viewport.position.map(Math.fround);
   }
 
   shaderCoordinateOrigin[2] = shaderCoordinateOrigin[2] || 0;
@@ -67,7 +103,9 @@ function calculateMatrixAndOffset({viewport, coordinateSystem, coordinateOrigin}
     // Calculate transformed projectionCenter (using 64 bit precision JS)
     // This is the key to offset mode precision
     // (avoids doing this addition in 32 bit precision in GLSL)
-    const positionCommonSpace = viewport.projectPosition(shaderCoordinateOrigin);
+    const positionCommonSpace = viewport.projectPosition(
+      geospatialOrigin || shaderCoordinateOrigin
+    );
 
     cameraPosCommon = [
       cameraPosCommon[0] - positionCommonSpace[0],
@@ -96,7 +134,8 @@ function calculateMatrixAndOffset({viewport, coordinateSystem, coordinateOrigin}
     viewProjectionMatrix,
     projectionCenter,
     cameraPosCommon,
-    shaderCoordinateOrigin
+    shaderCoordinateOrigin,
+    geospatialOrigin
   };
 }
 
@@ -152,12 +191,9 @@ function calculateViewportUniforms({
     projectionCenter,
     viewProjectionMatrix,
     cameraPosCommon,
-    shaderCoordinateOrigin
-  } = calculateMatrixAndOffset({
-    coordinateSystem,
-    coordinateOrigin,
-    viewport
-  });
+    shaderCoordinateOrigin,
+    geospatialOrigin
+  } = calculateMatrixAndOffset(viewport, coordinateSystem, coordinateOrigin);
 
   // Calculate projection pixels per unit
   const distanceScales = viewport.getDistanceScales();
@@ -189,21 +225,33 @@ function calculateViewportUniforms({
     project_uCameraPosition: cameraPosCommon
   };
 
-  const distanceScalesAtOrigin = viewport.getDistanceScales(shaderCoordinateOrigin);
-  switch (coordinateSystem) {
-    case COORDINATE_SYSTEM.METER_OFFSETS:
-      uniforms.project_uCommonUnitsPerWorldUnit = distanceScalesAtOrigin.unitsPerMeter;
-      uniforms.project_uCommonUnitsPerWorldUnit2 = distanceScalesAtOrigin.unitsPerMeter2;
-      break;
+  if (geospatialOrigin) {
+    const distanceScalesAtOrigin = viewport.getDistanceScales(geospatialOrigin);
+    switch (coordinateSystem) {
+      case COORDINATE_SYSTEM.METER_OFFSETS:
+        uniforms.project_uCommonUnitsPerWorldUnit = distanceScalesAtOrigin.unitsPerMeter;
+        uniforms.project_uCommonUnitsPerWorldUnit2 = distanceScalesAtOrigin.unitsPerMeter2;
+        break;
 
-    case COORDINATE_SYSTEM.LNGLAT:
-    case COORDINATE_SYSTEM.LNGLAT_OFFSETS:
-      uniforms.project_uCommonUnitsPerWorldUnit = distanceScalesAtOrigin.unitsPerDegree;
-      uniforms.project_uCommonUnitsPerWorldUnit2 = distanceScalesAtOrigin.unitsPerDegree2;
-      break;
+      case COORDINATE_SYSTEM.LNGLAT:
+      case COORDINATE_SYSTEM.LNGLAT_OFFSETS:
+        uniforms.project_uCommonUnitsPerWorldUnit = distanceScalesAtOrigin.unitsPerDegree;
+        uniforms.project_uCommonUnitsPerWorldUnit2 = distanceScalesAtOrigin.unitsPerDegree2;
+        break;
 
-    default:
-      break;
+      // a.k.a "preprojected" positions
+      case COORDINATE_SYSTEM.CARTESIAN:
+        uniforms.project_uCommonUnitsPerWorldUnit = [1, 1, distanceScalesAtOrigin.unitsPerMeter[2]];
+        uniforms.project_uCommonUnitsPerWorldUnit2 = [
+          0,
+          0,
+          distanceScalesAtOrigin.unitsPerMeter2[2]
+        ];
+        break;
+
+      default:
+        break;
+    }
   }
 
   return uniforms;

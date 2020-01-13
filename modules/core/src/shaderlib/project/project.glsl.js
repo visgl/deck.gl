@@ -121,7 +121,9 @@ vec4 project_position(vec4 position, vec3 position64Low) {
 
   vec4 position_world = project_uModelMatrix * position;
 
-  if (project_uCoordinateSystem == COORDINATE_SYSTEM_LNGLAT && project_uProjectionMode == PROJECTION_MODE_WEB_MERCATOR_AUTO_OFFSET) {
+  if (project_uProjectionMode == PROJECTION_MODE_WEB_MERCATOR_AUTO_OFFSET &&
+    (project_uCoordinateSystem == COORDINATE_SYSTEM_LNGLAT ||
+     project_uCoordinateSystem == COORDINATE_SYSTEM_CARTESIAN)) {
     // Subtract high part of 64 bit value. Convert remainder to float32, preserving precision.
     position_world.xyz -= project_uCoordinateOrigin;
     position_world.xyz += position64Low;

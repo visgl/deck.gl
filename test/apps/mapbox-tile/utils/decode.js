@@ -2,9 +2,7 @@ import Protobuf from 'pbf';
 import {VectorTile} from '@mapbox/vector-tile';
 import {vectorTileFeatureToGeoJSON} from './feature';
 
-const PI = Math.PI;
-const PI_4 = PI / 4;
-const RADIANS_TO_DEGREES_2 = 360 / PI;
+const TILE_SIZE = 512;
 
 export function decodeTile(x, y, z, arrayBuffer) {
   const tile = new VectorTile(new Protobuf(arrayBuffer));
@@ -12,8 +10,8 @@ export function decodeTile(x, y, z, arrayBuffer) {
   const result = [];
 
   const scale = Math.pow(2, z);
-  const projX = x / scale;
-  const projY = y / scale;
+  const projX = (x * TILE_SIZE) / scale;
+  const projY = (y * TILE_SIZE) / scale;
 
   const projectFunc = project.bind(null, projX, projY, scale);
 
@@ -32,15 +30,12 @@ export function decodeTile(x, y, z, arrayBuffer) {
 }
 
 function project(x, y, scale, line, extent) {
-  const pixelToCommon = 1 / extent / scale;
+  const pixelToCommon = TILE_SIZE / extent / scale;
 
   for (let i = 0; i < line.length; i++) {
     const p = line[i];
-    // common space
-    const cx = x + p[0] * pixelToCommon;
-    const cy = y + p[1] * pixelToCommon;
-    // LNGLAT
-    p[0] = cx * 360 - 180;
-    p[1] = (Math.atan(Math.exp(PI - cy * 2 * PI)) - PI_4) * RADIANS_TO_DEGREES_2;
+    // convert to deck.gl common space
+    p[0] = x + p[0] * pixelToCommon;
+    p[1] = TILE_SIZE - y - p[1] * pixelToCommon;
   }
 }

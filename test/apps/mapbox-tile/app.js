@@ -4,6 +4,7 @@ import React, {PureComponent} from 'react';
 import {render} from 'react-dom';
 import DeckGL from '@deck.gl/react';
 import {TileLayer} from '@deck.gl/geo-layers';
+import {COORDINATE_SYSTEM} from '@deck.gl/core';
 
 import {decodeTile} from './utils/decode';
 
@@ -95,6 +96,7 @@ class Root extends PureComponent {
         layers={[
           new TileLayer({
             ...MAP_LAYER_STYLES,
+            coordinateSystem: COORDINATE_SYSTEM.CARTESIAN,
             getPolygonOffset: null,
             pickable: true,
             getTileData
