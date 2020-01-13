@@ -7,8 +7,8 @@
 This RFC is a component of deck.gl's "binary support roadmap".
 
 This RFC is independent of, but would benefit from:
-* [Texture Attribute RFC](/dev-docs/v7.x/texture-attribute-rfc.md) - Enable _variable-primitive layers_ read "descriptive attributes" from a single column value.
-* [Chunked Data Support](/dev-docs/v7.x/chunked-data-rfc.md) - Proposal for enabling deck.gl to work directly with Chunked Columnar data.
+* [Texture Attribute RFC](/dev-docs/RFCs/proposals/texture-attribute-rfc.md) - Enable _variable-primitive layers_ read "descriptive attributes" from a single column value.
+* [Chunked Data Support](/dev-docs/RFCs/proposals/chunked-data-rfc.md) - Proposal for enabling deck.gl to work directly with Chunked Columnar data.
 
 
 ## Summary
