@@ -19,6 +19,12 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v8.0
 
+#### deck.gl [8.0.6] - Jan 13 2019
+
+- IconLayer: use load instead of loadImage to load icons (#4137)
+- Bump loaders.gl (#4136)
+- Remove unused dependencies from geo-layers (#4127)
+
 #### deck.gl [8.0.5] - Jan 9 2019
 
 - [react] explicitly set deck canvas position (#4124)
