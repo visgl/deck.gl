@@ -735,7 +735,7 @@ export const TEST_CASES = [
     viewState: {
       latitude: 37.751537058389985,
       longitude: -122.42694203247012,
-      zoom: 11.5,
+      zoom: 12,
       pitch: 0,
       bearing: 0
     },
@@ -746,7 +746,7 @@ export const TEST_CASES = [
         updateTriggers: {
           getIcon: 1
         },
-        sizeScale: 12,
+        sizeScale: 24,
         getPosition: d => d.COORDINATES,
         getColor: d => [64, 64, 72],
         getIcon: d => {
@@ -770,7 +770,7 @@ export const TEST_CASES = [
         }
       })
     ],
-    goldenImage: './test/render/golden-images/icon-lnglat.png'
+    goldenImage: './test/render/golden-images/icon-lnglat-large.png'
   },
   // This is based on last test case
   // use the same layer id 'icon-lnglat-auto' as last test case to trigger the layer update and test texture resize logic
@@ -779,7 +779,7 @@ export const TEST_CASES = [
     viewState: {
       latitude: 37.751537058389985,
       longitude: -122.42694203247012,
-      zoom: 11.5,
+      zoom: 12,
       pitch: 0,
       bearing: 0
     },
@@ -791,13 +791,15 @@ export const TEST_CASES = [
         updateTriggers: {
           getIcon: 2
         },
-        sizeScale: 12,
+        sizeScale: 24,
         getPosition: d => d.COORDINATES,
         getColor: d => [64, 64, 72],
+        getSize: d => (d.RACKS > 2 ? 2 : 1),
         getIcon: d => {
           if (d.PLACEMENT === 'SW') {
             return {
-              url: './test/render/golden-images/pointcloud-meter.png',
+              url:
+                'https://raw.githubusercontent.com/uber-common/deck.gl-data/master/images/layers/demo-thumb-wind.jpg',
               width: 256,
               height: 256,
               anchorY: 256,
@@ -805,7 +807,8 @@ export const TEST_CASES = [
             };
           }
           return {
-            url: './test/render/golden-images/h3-hexagon-flat.png',
+            url:
+              'https://raw.githubusercontent.com/uber-common/deck.gl-data/master/images/layers/demo-thumb-geojson.jpg',
             width: 1024,
             height: 1024,
             anchorY: 1024,
