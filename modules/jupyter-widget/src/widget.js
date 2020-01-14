@@ -178,13 +178,13 @@ export class DeckGLView extends DOMWidgetView {
         getPosition: (object, {index, data, target}) => {
           target[0] = data.src[index * w];
           target[1] = data.src[index * w + 1];
-          target[2] = 0; // z-value
+          target[2] = data.src[index * w + 2];
           return target;
         },
         getColor: (object, {index, data, target}) => {
-          target[0] = data.src[index * w + 2];
-          target[1] = data.src[index * w + 3];
-          target[2] = data.src[index * w + 4];
+          target[0] = data.src[index * w + 3];
+          target[1] = data.src[index * w + 4];
+          target[2] = data.src[index * w + 5];
           target[3] = 140; // alpha
           return target;
         }
