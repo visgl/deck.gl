@@ -1,5 +1,4 @@
 /* eslint-disable callback-return */
-/* global window */
 import * as dataSamples from '../../examples/layer-browser/src/data-samples';
 import {parseColor, setOpacity} from '../../examples/layer-browser/src/utils/color';
 import {
@@ -53,8 +52,6 @@ import {
 import {H3HexagonLayer, H3ClusterLayer, S2Layer, TripsLayer} from '@deck.gl/geo-layers';
 
 import * as h3 from 'h3-js';
-
-const IS_HEADLESS = Boolean(window.browserTestDriver_isHeadless);
 
 const MARKER_SIZE_MAP = {
   small: 200,
@@ -605,7 +602,7 @@ export const TEST_CASES = [
       })
     ],
     goldenImage: './test/render/golden-images/arc-lnglat.png',
-    imageDiffOptions: !IS_HEADLESS && {
+    imageDiffOptions: {
       threshold: 0.985
     }
   },
@@ -639,7 +636,7 @@ export const TEST_CASES = [
       })
     ],
     goldenImage: './test/render/golden-images/arc-lnglat-3d.png',
-    imageDiffOptions: !IS_HEADLESS && {
+    imageDiffOptions: {
       threshold: 0.985
     }
   },
@@ -665,6 +662,9 @@ export const TEST_CASES = [
         pickable: true
       })
     ],
+    imageDiffOptions: {
+      threshold: 0.985
+    },
     goldenImage: './test/render/golden-images/line-lnglat.png'
   },
   {
@@ -1410,8 +1410,8 @@ export const TEST_CASES = [
   {
     name: 'text-layer',
     viewState: {
-      latitude: 37.751537058389985,
-      longitude: -122.42694203247012,
+      latitude: 37.751,
+      longitude: -122.427,
       zoom: 11.5,
       pitch: 0,
       bearing: 0
@@ -1437,8 +1437,8 @@ export const TEST_CASES = [
   {
     name: 'text-layer-meters',
     viewState: {
-      latitude: 37.751537058389985,
-      longitude: -122.42694203247012,
+      latitude: 37.751,
+      longitude: -122.427,
       zoom: 11.5,
       pitch: 0,
       bearing: 0
@@ -1465,8 +1465,8 @@ export const TEST_CASES = [
   {
     name: 'text-layer-multi-lines',
     viewState: {
-      latitude: 37.751537058389985,
-      longitude: -122.42694203247012,
+      latitude: 37.75,
+      longitude: -122.44,
       zoom: 11.5,
       pitch: 0,
       bearing: 0
@@ -1475,14 +1475,15 @@ export const TEST_CASES = [
       new TextLayer({
         id: 'text-layer',
         data: dataSamples.points.slice(0, 10),
+        coordinateOrigin: [-122.44, 37.75],
+        coordinateSystem: COORDINATE_SYSTEM.METER_OFFSETS,
         fontFamily: 'Arial',
-        getText: x => `${x.PLACEMENT}\n${x.YR_INSTALLED}`,
-        getPosition: x => x.COORDINATES,
-        getColor: x => [255, 255, 255],
-        getSize: x => 32,
-        getTextAnchor: x => 'middle',
-        getAlignmentBaseline: x => 'center',
-        getPixelOffset: x => [10, 0]
+        getText: x => `${x.ADDRESS}\n${x.SPACES}`,
+        getPosition: (_, {index}) => [0, (index - 5) * 1000],
+        getColor: [255, 0, 0],
+        getSize: 32,
+        getTextAnchor: 'middle',
+        getAlignmentBaseline: 'center'
       })
     ],
     goldenImage: './test/render/golden-images/text-layer-multi-lines.png'
@@ -1490,8 +1491,8 @@ export const TEST_CASES = [
   {
     name: 'text-layer-auto-wrapping',
     viewState: {
-      latitude: 37.751537058389985,
-      longitude: -122.42694203247012,
+      latitude: 37.75,
+      longitude: -122.44,
       zoom: 11.5,
       pitch: 0,
       bearing: 0
@@ -1499,17 +1500,18 @@ export const TEST_CASES = [
     layers: [
       new TextLayer({
         id: 'text-layer',
-        data: dataSamples.points.slice(0, 3),
+        data: dataSamples.points.slice(0, 5),
+        coordinateOrigin: [-122.44, 37.75],
+        coordinateSystem: COORDINATE_SYSTEM.METER_OFFSETS,
         fontFamily: 'Arial',
         wordBreak: 'break-word',
-        width: 1000,
-        getText: x => `${x.LOCATION_NAME}\n${x.ADDRESS}`,
-        getPosition: x => x.COORDINATES,
-        getColor: x => [255, 255, 255],
-        getSize: x => 32,
-        getTextAnchor: x => 'middle',
-        getAlignmentBaseline: x => 'center',
-        getPixelOffset: x => [10, 0]
+        maxWidth: 1000,
+        getText: x => `${x.LOCATION_NAME} ${x.ADDRESS}`,
+        getPosition: (_, {index}) => [0, (index - 2) * 2000],
+        getColor: [255, 0, 0],
+        getSize: 32,
+        getTextAnchor: 'middle',
+        getAlignmentBaseline: 'center'
       })
     ],
     goldenImage: './test/render/golden-images/text-layer-auto-wrapping.png'
@@ -1517,8 +1519,8 @@ export const TEST_CASES = [
   {
     name: 'text-layer-background',
     viewState: {
-      latitude: 37.751537058389985,
-      longitude: -122.42694203247012,
+      latitude: 37.75,
+      longitude: -122.44,
       zoom: 11.5,
       pitch: 0,
       bearing: 0
@@ -1526,16 +1528,17 @@ export const TEST_CASES = [
     layers: [
       new TextLayer({
         id: 'text-layer',
-        data: dataSamples.points.slice(0, 50),
+        data: dataSamples.points.slice(0, 10),
+        coordinateOrigin: [-122.44, 37.75],
+        coordinateSystem: COORDINATE_SYSTEM.METER_OFFSETS,
         fontFamily: 'Arial',
-        backgroundColor: [0, 255, 0, 200],
-        getText: x => `${x.PLACEMENT}-${x.YR_INSTALLED}`,
-        getPosition: x => x.COORDINATES,
-        getColor: x => [0, 0, 0],
-        getSize: x => 32,
-        getTextAnchor: x => 'start',
-        getAlignmentBaseline: x => 'center',
-        getPixelOffset: x => [10, 0]
+        backgroundColor: [255, 255, 0, 200],
+        getText: x => `${x.ADDRESS}-${x.SPACES}`,
+        getPosition: (_, {index}) => [0, (index - 5) * 1000],
+        getColor: [255, 0, 0],
+        getSize: 32,
+        getTextAnchor: 'start',
+        getAlignmentBaseline: 'center'
       })
     ],
     goldenImage: './test/render/golden-images/text-layer-background.png'
@@ -1830,6 +1833,9 @@ export const TEST_CASES = [
         radiusMaxPixels: 30
       })
     ],
+    imageDiffOptions: {
+      threshold: 0.985
+    },
     goldenImage: './test/render/golden-images/post-process-effects.png'
   },
   {
