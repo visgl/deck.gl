@@ -3,7 +3,7 @@ import uuid
 import numpy as np
 
 from ..data_utils import is_pandas_df
-from .json_tools import JSONMixin
+from .json_tools import JSONMixin, camel_and_lower
 
 
 TYPE_IDENTIFIER = "@@type"
@@ -16,7 +16,7 @@ class BinaryTransportException(Exception):
 
 
 class Layer(JSONMixin):
-    def __init__(self, type, data, id=None, **kwargs):
+    def __init__(self, type, data, id=None, binary_transport=False, **kwargs):
         """Configures a deck.gl layer for rendering on a map. Parameters passed
         here will be specific to the particular deck.gl layer that you are choosing to use.
 
@@ -79,6 +79,7 @@ class Layer(JSONMixin):
         self.id = id or str(uuid.uuid4())
 
         # Add any other kwargs to the JSON output
+        self._kwargs = kwargs.copy()
         if kwargs:
             for k, v in kwargs.items():
                 # We assume strings and arrays of strings are identifiers
@@ -107,8 +108,12 @@ class Layer(JSONMixin):
             self.__dict__.update(kwargs)
 
         self._data = None
+        self.binary_transport = binary_transport
         self._binary_data = None
-        self.data = data.to_dict(orient="records") if is_pandas_df(data) else data
+        if not self.binary_transport:
+            self.data = data.to_dict(orient="records") if is_pandas_df(data) else data
+        else:
+            self.data = data
 
     @property
     def data(self):
@@ -116,11 +121,10 @@ class Layer(JSONMixin):
 
     @data.setter
     def data(self, data_set):
-        """Make the data attribute a list no matter the input type"""
-        # Binary format conversion gives a sizable speedup but requires
-        # slightly stricter standards for data input
-        # The data must be a pandas DataFrame and an accessor on the data e.g. getPosition
-        # must be specified as a string that is in the header of the pandas data
+        """Make the data attribute a list no matter the input type, unless
+        binary_transport is specified, which case we circumvent
+        serializing the data to JSON
+        """
         if self.binary_transport:
             self._binary_data = self._prepare_binary_data(data_set)
         elif is_pandas_df(data_set):
@@ -136,29 +140,27 @@ class Layer(JSONMixin):
         return self._binary_data
 
     def _prepare_binary_data(self, data_set):
+        # Binary format conversion gives a sizable speedup but requires
+        # slightly stricter standards for data input
         if not is_pandas_df(data_set):
             raise BinaryTransportException(
                 "Layer data must be a `pandas.DataFrame` type"
             )
-        layer_accessors = frozenset([a for a in dir(self) if not a.startswith("_")])
-        usage_metadata = {}
-        for accessor in layer_accessors:
-            field_name = self.__dict__[accessor]
-            if accessor in data_set.columns and not type(field_name) == str:
-                raise BinaryTransportException(
-                    "Layer property {} must be a string".format(accessor)
-                )
-            usage_metadata[field_name] = accessor
+
+        layer_accessors = self._kwargs
+        inv_map = {v: k for k, v in layer_accessors.items()}
 
         blobs = []
         for column in data_set.columns:
             np_data = np.stack(data_set[column].to_numpy())
-            blobs.append({
-                "layer_id": self.id,
-                "column_name": field_name,
-                "accessor": usage_metadata[column],
-                "np_data": np_data
-            })
+            blobs.append(
+                {
+                    "layer_id": self.id,
+                    "column_name": column,
+                    "accessor": camel_and_lower(inv_map[column]),
+                    "np_data": np_data,
+                }
+            )
         return blobs
 
     @property
