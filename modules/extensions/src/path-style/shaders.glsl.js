@@ -62,32 +62,19 @@ export const offsetShaders = {
   inject: {
     'vs:#decl': `
 attribute float instanceOffsets;
-varying float vOffset;
 `,
     'vs:DECKGL_FILTER_SIZE': `
   float offsetWidth = abs(instanceOffsets * 2.0) + 1.0;
   size *= offsetWidth;
-  vOffset = instanceOffsets;
 `,
-    'vCornerOffset = offset;': `
+    'vCornerOffset = offsetVec;': `
   float offsetWidth = abs(instanceOffsets * 2.0) + 1.0;
-
-  miterVec = isCap ? perp : miterVec;
-  miterSize = isCap ? 1.0 : miterSize;
-  vec2 corner = miterVec * miterSize * instanceOffsets * 2.0;
-  vCornerOffset = vCornerOffset * offsetWidth - corner;
-`,
-    'fs:#decl': `
-varying float vOffset;
+  vec2 offsetCenter = -instanceOffsets * (isCap ? perp : miterVec * miterSize) * 2.0;
+  vCornerOffset = vCornerOffset * offsetWidth - offsetCenter;
 `,
     'fs:#main-start': `
   float isInside;
-  float offsetWidth = (abs(vOffset * 2.0) + 1.0);
-  if (vOffset >= 0.0) {
-    isInside = step(vOffset * 2.0 - 1.0, vPathPosition.x * offsetWidth);
-  } else {
-    isInside = step(vPathPosition.x * offsetWidth, vOffset * 2.0 + 1.0);
-  }
+  isInside = step(-1.0, vPathPosition.x) * step(vPathPosition.x, 1.0);
   if (isInside == 0.0) {
     discard;
   }
