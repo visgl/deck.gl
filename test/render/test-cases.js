@@ -123,26 +123,6 @@ function getMax(pts, key) {
     : null;
 }
 
-function getColorValue(points) {
-  return getMean(points, 'SPACES');
-}
-
-function getColorWeight(point) {
-  return point.SPACES;
-}
-
-const colorAggregation = 'MEAN';
-
-function getElevationValue(points) {
-  return getMax(points, 'SPACES');
-}
-
-function getElevationWeight(point) {
-  return point.SPACES;
-}
-
-const elevationAggregation = 'MAX';
-
 export const WIDTH = 800;
 export const HEIGHT = 450;
 
@@ -1027,8 +1007,8 @@ export const TEST_CASES = [
       new CPUGridLayer(
         Object.assign({}, GRID_LAYER_INFO.props, {
           id: 'cpu-grid-layer:quantile',
-          getColorValue,
-          getElevationValue,
+          getColorValue: points => getMean(points, 'SPACES'),
+          getElevationValue: points => getMax(points, 'SPACES'),
           colorScaleType: 'quantile'
         })
       )
@@ -1042,8 +1022,8 @@ export const TEST_CASES = [
       new CPUGridLayer(
         Object.assign({}, GRID_LAYER_INFO.props, {
           id: 'cpu-grid-layer:ordinal',
-          getColorValue,
-          getElevationValue,
+          getColorValue: points => getMean(points, 'SPACES'),
+          getElevationValue: points => getMax(points, 'SPACES'),
           colorScaleType: 'ordinal'
         })
       )
@@ -1057,8 +1037,8 @@ export const TEST_CASES = [
       new CPUGridLayer(
         Object.assign({}, GRID_LAYER_INFO.props, {
           id: 'cpu-grid-layer:value-accessors',
-          getColorValue,
-          getElevationValue
+          getColorValue: points => getMean(points, 'SPACES'),
+          getElevationValue: points => getMax(points, 'SPACES')
         })
       )
     ],
@@ -1071,10 +1051,10 @@ export const TEST_CASES = [
       new CPUGridLayer(
         Object.assign({}, GRID_LAYER_INFO.props, {
           id: 'cpu-grid-layer:weight-accessors and operation',
-          getColorWeight,
-          colorAggregation,
-          getElevationWeight,
-          elevationAggregation
+          getColorWeight: x => x.SPACES,
+          colorAggregation: 'MEAN',
+          getElevationWeight: x => x.SPACES,
+          elevationAggregation: 'MAX'
         })
       )
     ],
@@ -1260,8 +1240,8 @@ export const TEST_CASES = [
       new HexagonLayer(
         Object.assign({}, HEXAGON_LAYER_INFO.props, {
           id: 'hexagon-lnglat',
-          getColorValue,
-          getElevationValue
+          getColorValue: points => getMean(points, 'SPACES'),
+          getElevationValue: points => getMax(points, 'SPACES')
         })
       )
     ],
@@ -1297,30 +1277,30 @@ export const TEST_CASES = [
     goldenImage: './test/render/golden-images/column-lnglat-stroke.png'
   },
   {
-    name: 'hexagon-lnglat',
+    name: 'hexagon-lnglat:value-accessors',
     viewState: HEXAGON_LAYER_INFO.viewState,
     layers: [
       new HexagonLayer(
         Object.assign({}, HEXAGON_LAYER_INFO.props, {
-          id: 'hexagon-lnglat',
-          getColorValue,
-          getElevationValue
+          id: 'hexagon-lnglat:value-accessors',
+          getColorValue: points => getMean(points, 'SPACES'),
+          getElevationValue: points => getMax(points, 'SPACES')
         })
       )
     ],
     goldenImage: './test/render/golden-images/hexagon-lnglat.png'
   },
   {
-    name: 'hexagon-lnglat-2',
+    name: 'hexagon:weight-accessors and operation',
     viewState: HEXAGON_LAYER_INFO.viewState,
     layers: [
       new HexagonLayer(
         Object.assign({}, HEXAGON_LAYER_INFO.props, {
-          id: 'hexagon-lnglat',
-          getColorWeight,
-          colorAggregation,
-          getElevationWeight,
-          elevationAggregation
+          id: 'hexagon-lnglat:weight-accessors and operation',
+          getColorWeight: x => x.SPACES,
+          colorAggregation: 'MEAN',
+          getElevationWeight: x => x.SPACES,
+          elevationAggregation: 'MAX'
         })
       )
     ],
