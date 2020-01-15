@@ -747,6 +747,9 @@ export const TEST_CASES = [
           getIcon: 1
         },
         sizeScale: 24,
+        opacity: 0.8,
+        pickable: true,
+        getSize: d => (d.RACKS > 2 ? 2 : 1),
         getPosition: d => d.COORDINATES,
         getColor: d => [64, 64, 72],
         getIcon: d => {
@@ -758,10 +761,7 @@ export const TEST_CASES = [
           return Object.assign({}, dataSamples.iconAtlas['marker-warning'], {
             url: './test/render/icon-warning.png'
           });
-        },
-        getSize: d => (d.RACKS > 2 ? 2 : 1),
-        opacity: 0.8,
-        pickable: true
+        }
       })
     ],
     onAfterRender: ({layers, done}) => {
@@ -787,31 +787,30 @@ export const TEST_CASES = [
       new IconLayer({
         id: 'icon-lnglat-auto',
         data: dataSamples.points,
-        opacity: 0.8,
         updateTriggers: {
           getIcon: 2
         },
         sizeScale: 24,
+        opacity: 0.8,
+        pickable: true,
+        getSize: d => (d.RACKS > 2 ? 2 : 1),
         getPosition: d => d.COORDINATES,
         getColor: d => [64, 64, 72],
-        getSize: d => (d.RACKS > 2 ? 2 : 1),
         getIcon: d => {
           if (d.PLACEMENT === 'SW') {
-            return {
-              url: './test/render/golden-images/examples/website_screen-grid.png',
+            return Object.assign({}, dataSamples.iconAtlas.marker, {
+              url: './test/render/icon-marker.png',
+              id: 'marker-large',
               width: 256,
-              height: 256,
-              anchorY: 256,
-              mask: false
-            };
+              height: 256
+            });
           }
-          return {
-            url: './test/render/golden-images/examples/website_geojson.png',
+          return Object.assign({}, dataSamples.iconAtlas['marker-warning'], {
+            id: 'warning-large',
+            url: './test/render/icon-warning.png',
             width: 1024,
-            height: 1024,
-            anchorY: 1024,
-            mask: false
-          };
+            height: 1024
+          });
         }
       })
     ],
