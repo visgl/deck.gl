@@ -1,22 +1,22 @@
 import uuid
 
+import numpy as np
+
 from ..data_utils import is_pandas_df
 from .json_tools import JSONMixin
 
 
-TYPE_IDENTIFIER = '@@type'
-FUNCTION_IDENTIFIER = '@@='
+TYPE_IDENTIFIER = "@@type"
+FUNCTION_IDENTIFIER = "@@="
 QUOTE_CHARS = {"'", '"', "`"}
 
 
+class BinaryTransportException(Exception):
+    pass
+
+
 class Layer(JSONMixin):
-    def __init__(
-        self,
-        type,
-        data,
-        id=None,
-        **kwargs
-    ):
+    def __init__(self, type, data, id=None, **kwargs):
         """Configures a deck.gl layer for rendering on a map. Parameters passed
         here will be specific to the particular deck.gl layer that you are choosing to use.
 
@@ -34,6 +34,8 @@ class Layer(JSONMixin):
             Unique name for layer
         data : str or list of dict of {str: Any} or pandas.DataFrame
             Either a URL of data to load in or an array of data
+        binary_transport : bool
+            Boolean indicating binary data
         **kwargs
             Any of the parameters passable to a deck.gl layer.
 
@@ -75,8 +77,6 @@ class Layer(JSONMixin):
         """
         self.type = type
         self.id = id or str(uuid.uuid4())
-        self._data = None
-        self.data = data.to_dict(orient='records') if is_pandas_df(data) else data
 
         # Add any other kwargs to the JSON output
         if kwargs:
@@ -89,22 +89,26 @@ class Layer(JSONMixin):
 
                 if isinstance(v, str) and v[0] in QUOTE_CHARS and v[0] == v[-1]:
                     # Skip quoted strings
-                    kwargs[k] = v.replace(v[0], '')
+                    kwargs[k] = v.replace(v[0], "")
                 elif isinstance(v, str):
                     # Have @deck.gl/json treat strings values as functions
                     kwargs[k] = FUNCTION_IDENTIFIER + v
 
                 elif isinstance(v, list) and v != [] and isinstance(v[0], str):
                     # Allows the user to pass lists e.g. to specify coordinates
-                    array_as_str = ''
+                    array_as_str = ""
                     for i, identifier in enumerate(v):
                         if i == len(v) - 1:
-                            array_as_str += '{}'.format(identifier)
+                            array_as_str += "{}".format(identifier)
                         else:
-                            array_as_str += '{}, '.format(identifier)
-                    kwargs[k] = '{}[{}]'.format(FUNCTION_IDENTIFIER, array_as_str)
+                            array_as_str += "{}, ".format(identifier)
+                    kwargs[k] = "{}[{}]".format(FUNCTION_IDENTIFIER, array_as_str)
 
             self.__dict__.update(kwargs)
+
+        self._data = None
+        self._binary_data = None
+        self.data = data.to_dict(orient="records") if is_pandas_df(data) else data
 
     @property
     def data(self):
@@ -113,10 +117,49 @@ class Layer(JSONMixin):
     @data.setter
     def data(self, data_set):
         """Make the data attribute a list no matter the input type"""
-        if is_pandas_df(data_set):
-            self._data = data_set.to_dict(orient='records')
+        # Binary format conversion gives a sizable speedup but requires
+        # slightly stricter standards for data input
+        # The data must be a pandas DataFrame and an accessor on the data e.g. getPosition
+        # must be specified as a string that is in the header of the pandas data
+        if self.binary_transport:
+            self._binary_data = self._prepare_binary_data(data_set)
+        elif is_pandas_df(data_set):
+            self._data = data_set.to_dict(orient="records")
         else:
             self._data = data_set
+
+    def get_binary_data(self):
+        if not self.binary_transport:
+            raise BinaryTransportException(
+                "Layer must be flagged with `binary_transport=True`"
+            )
+        return self._binary_data
+
+    def _prepare_binary_data(self, data_set):
+        if not is_pandas_df(data_set):
+            raise BinaryTransportException(
+                "Layer data must be a `pandas.DataFrame` type"
+            )
+        layer_accessors = frozenset([a for a in dir(self) if not a.startswith("_")])
+        usage_metadata = {}
+        for accessor in layer_accessors:
+            field_name = self.__dict__[accessor]
+            if accessor in data_set.columns and not type(field_name) == str:
+                raise BinaryTransportException(
+                    "Layer property {} must be a string".format(accessor)
+                )
+            usage_metadata[field_name] = accessor
+
+        blobs = []
+        for column in data_set.columns:
+            np_data = np.stack(data_set[column].to_numpy())
+            blobs.append({
+                "layer_id": self.id,
+                "column_name": field_name,
+                "accessor": usage_metadata[column],
+                "np_data": np_data
+            })
+        return blobs
 
     @property
     def type(self):

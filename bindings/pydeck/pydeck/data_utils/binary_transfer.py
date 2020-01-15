@@ -21,6 +21,22 @@ def array_to_binary(ar, obj=None, force_contiguous=True):
     return {"data": memoryview(ar), "dtype": str(ar.dtype), "shape": ar.shape}
 
 
+def serialize_columns(col_data, obj=None):
+    if col_data is None:
+        return None
+    bin_data = array_to_binary(col_data["np_data"])
+    return {
+        "layer_id": col_data["layer_id"],
+        "column_name": col_data["column_name"],
+        "accessor": col_data["accessor"],
+        "data": bin_data
+    }
+
+
+def deserialize_columns(value, obj=None):
+    pass
+
+
 def binary_to_array(value, obj=None):
     return np.frombuffer(value['data'], dtype=value['dtype']).reshape(value['shape'])
 
@@ -51,4 +67,4 @@ def convert_df_to_matrix(df, obj=None, force_contiguous=True):
 
 
 array_seralization = dict(to_json=array_to_binary, from_json=None)
-df_serialization = dict(to_json=convert_df_to_matrix, from_json=None)
+data_buffer_serialization = dict(to_json=serialize_columns, from_json=deserialize_columns)
