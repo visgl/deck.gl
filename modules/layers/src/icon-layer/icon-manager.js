@@ -13,7 +13,10 @@ const noop = () => {};
 const DEFAULT_TEXTURE_PARAMETERS = {
   [GL.TEXTURE_MIN_FILTER]: GL.LINEAR_MIPMAP_LINEAR,
   // GL.LINEAR is the default value but explicitly set it here
-  [GL.TEXTURE_MAG_FILTER]: GL.LINEAR
+  [GL.TEXTURE_MAG_FILTER]: GL.LINEAR,
+  // for texture boundary artifact
+  [GL.TEXTURE_WRAP_S]: GL.CLAMP_TO_EDGE,
+  [GL.TEXTURE_WRAP_T]: GL.CLAMP_TO_EDGE
 };
 
 function nextPowOfTwo(number) {
@@ -49,7 +52,7 @@ function resizeTexture(gl, texture, width, height) {
 
   const newTexture = cloneTextureFrom(texture, {width, height});
   copyToTexture(texture, newTexture, {
-    targetY: height - oldHeight,
+    targetY: 0,
     width: oldWidth,
     height: oldHeight
   });
