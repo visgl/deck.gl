@@ -18,16 +18,13 @@ import {
   AmbientLight,
   DirectionalLight
 } from '@deck.gl/core';
-import {noise, vignette} from '@luma.gl/shadertools';
+import {zoomBlur, vignette} from '@luma.gl/shadertools';
 import {CubeGeometry} from '@luma.gl/core';
 const cube = new CubeGeometry();
 
 import {Fp64Extension, PathStyleExtension} from '@deck.gl/extensions';
 import {SimpleMeshLayer} from '@deck.gl/mesh-layers';
 import {Matrix4} from 'math.gl';
-
-const effect1 = new PostProcessEffect(noise);
-const effect2 = new PostProcessEffect(vignette);
 
 const ICON_ATLAS = './test/render/icon-atlas.png';
 
@@ -404,7 +401,7 @@ export const TEST_CASES = [
     goldenImage: './test/render/golden-images/polygon-dash.png'
   },
   {
-    name: 'path-lnglat',
+    name: 'path-miter',
     viewState: {
       latitude: 37.751537058389985,
       longitude: -122.42694203247012,
@@ -418,13 +415,36 @@ export const TEST_CASES = [
         data: dataSamples.zigzag,
         opacity: 0.6,
         getPath: f => f.path,
-        getColor: f => [128, 0, 0],
-        getWidth: f => 100,
-        widthMinPixels: 1,
-        pickable: true
+        getColor: f => [255, 0, 0],
+        getWidth: f => 200,
+        miterLimit: 0,
+        widthMinPixels: 1
       })
     ],
     goldenImage: './test/render/golden-images/path-lnglat.png'
+  },
+  {
+    name: 'path-rounded',
+    viewState: {
+      latitude: 37.751537058389985,
+      longitude: -122.42694203247012,
+      zoom: 11.5,
+      pitch: 0,
+      bearing: 0
+    },
+    layers: [
+      new PathLayer({
+        id: 'path-lnglat',
+        data: dataSamples.zigzag,
+        opacity: 0.6,
+        getPath: f => f.path,
+        getColor: f => [255, 0, 0],
+        getWidth: f => 200,
+        rounded: true,
+        widthMinPixels: 1
+      })
+    ],
+    goldenImage: './test/render/golden-images/path-rounded.png'
   },
   {
     name: 'path-lnglat-binary',
@@ -454,13 +474,14 @@ export const TEST_CASES = [
             },
             getColor: {
               value: new Uint8Array(
-                dataSamples.zigzag.flatMap(d => d.path.flatMap(p => [128, 0, 0]))
+                dataSamples.zigzag.flatMap(d => d.path.flatMap(p => [255, 0, 0]))
               ),
               size: 3
             }
           }
         },
-        getWidth: 100,
+        getWidth: 200,
+        miterLimit: 0,
         opacity: 0.6,
         widthMinPixels: 1
       })
@@ -1399,7 +1420,6 @@ export const TEST_CASES = [
       new TextLayer({
         id: 'text-layer',
         data: dataSamples.points.slice(0, 50),
-        opacity: 0.8,
         fontFamily: 'Arial',
         getText: x => `${x.PLACEMENT}-${x.YR_INSTALLED}`,
         getPosition: x => x.COORDINATES,
@@ -1427,7 +1447,6 @@ export const TEST_CASES = [
       new TextLayer({
         id: 'text-layer',
         data: dataSamples.points.slice(0, 50),
-        opacity: 0.8,
         fontFamily: 'Arial',
         getText: x => `${x.PLACEMENT}-${x.YR_INSTALLED}`,
         getPosition: x => x.COORDINATES,
@@ -1456,14 +1475,11 @@ export const TEST_CASES = [
       new TextLayer({
         id: 'text-layer',
         data: dataSamples.points.slice(0, 10),
-        opacity: 0.8,
         fontFamily: 'Arial',
         getText: x => `${x.PLACEMENT}\n${x.YR_INSTALLED}`,
         getPosition: x => x.COORDINATES,
-        getColor: x => [153, 0, 0],
-        getSize: x => 16,
-        getAngle: x => 0,
-        sizeScale: 1,
+        getColor: x => [255, 255, 255],
+        getSize: x => 32,
         getTextAnchor: x => 'middle',
         getAlignmentBaseline: x => 'center',
         getPixelOffset: x => [10, 0]
@@ -1484,16 +1500,13 @@ export const TEST_CASES = [
       new TextLayer({
         id: 'text-layer',
         data: dataSamples.points.slice(0, 3),
-        opacity: 0.8,
         fontFamily: 'Arial',
         wordBreak: 'break-word',
         width: 1000,
         getText: x => `${x.LOCATION_NAME}\n${x.ADDRESS}`,
         getPosition: x => x.COORDINATES,
-        getColor: x => [153, 0, 0],
-        getSize: x => 16,
-        getAngle: x => 0,
-        sizeScale: 1,
+        getColor: x => [255, 255, 255],
+        getSize: x => 32,
         getTextAnchor: x => 'middle',
         getAlignmentBaseline: x => 'center',
         getPixelOffset: x => [10, 0]
@@ -1514,16 +1527,12 @@ export const TEST_CASES = [
       new TextLayer({
         id: 'text-layer',
         data: dataSamples.points.slice(0, 50),
-        opacity: 0.8,
         fontFamily: 'Arial',
-        backgroundColor: [0.0, 255.0, 0.0, 200.0],
+        backgroundColor: [0, 255, 0, 200],
         getText: x => `${x.PLACEMENT}-${x.YR_INSTALLED}`,
         getPosition: x => x.COORDINATES,
-        getColor: x => [153, 0, 0],
-        getSize: x => 16,
-        getAngle: x => 0,
-        sizeScale: 21,
-        sizeUnits: 'meters',
+        getColor: x => [0, 0, 0],
+        getSize: x => 32,
         getTextAnchor: x => 'start',
         getAlignmentBaseline: x => 'center',
         getPixelOffset: x => [10, 0]
@@ -1800,7 +1809,7 @@ export const TEST_CASES = [
   },
   {
     name: 'post-process-effects',
-    effects: [effect1, effect2],
+    effects: [new PostProcessEffect(zoomBlur, {strength: 0.6}), new PostProcessEffect(vignette)],
     viewState: {
       latitude: 37.751537058389985,
       longitude: -122.42694203247012,
