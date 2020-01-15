@@ -19,6 +19,11 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v8.0
 
+#### deck.gl [8.0.7] - Jan 15 2019
+
+- IconLayer: fix copy texture data when resize (#4151)
+- Bump mjolnir.js dependency (#4141)
+
 #### deck.gl [8.0.6] - Jan 13 2019
 
 - IconLayer: use load instead of loadImage to load icons (#4137)
