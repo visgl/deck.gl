@@ -63,7 +63,7 @@ export function getMin(pts, accessor) {
 
 // Function to convert from aggregation/accessor props (like colorAggregation and getColorWeight) to getValue prop (like getColorValue)
 export function getValueFunc(aggregation, accessor) {
-  const op = AGGREGATION_OPERATION[aggregation.toUpperCase()] || AGGREGATION_OPERATION.SUM;
+  const op = AGGREGATION_OPERATION[aggregation] || AGGREGATION_OPERATION.SUM;
   switch (op) {
     case AGGREGATION_OPERATION.MIN:
       return pts => getMin(pts, accessor);

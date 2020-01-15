@@ -123,7 +123,7 @@ function getColorWeight(point) {
   return point.SPACES;
 }
 
-const colorAggregation = 'mean';
+const colorAggregation = 'MEAN';
 
 function getElevationValue(points) {
   return getMax(points, 'SPACES');
@@ -133,7 +133,7 @@ function getElevationWeight(point) {
   return point.SPACES;
 }
 
-const elevationAggregation = 'max';
+const elevationAggregation = 'MAX';
 
 export const WIDTH = 800;
 export const HEIGHT = 450;
@@ -1043,12 +1043,12 @@ export const TEST_CASES = [
     goldenImage: './test/render/golden-images/cpu-layer-ordinal.png'
   },
   {
-    name: 'grid-lnglat',
+    name: 'cpu-grid-layer:value-accessors',
     viewState: GRID_LAYER_INFO.viewState,
     layers: [
       new CPUGridLayer(
         Object.assign({}, GRID_LAYER_INFO.props, {
-          id: 'grid-lnglat',
+          id: 'cpu-grid-layer:value-accessors',
           getColorValue,
           getElevationValue
         })
@@ -1057,12 +1057,12 @@ export const TEST_CASES = [
     goldenImage: GRID_LAYER_INFO.goldenImage
   },
   {
-    name: 'grid-lnglat-2',
+    name: 'cpu-grid-layer:weight-accessors and operation',
     viewState: GRID_LAYER_INFO.viewState,
     layers: [
       new CPUGridLayer(
         Object.assign({}, GRID_LAYER_INFO.props, {
-          id: 'grid-lnglat',
+          id: 'cpu-grid-layer:weight-accessors and operation',
           getColorWeight,
           colorAggregation,
           getElevationWeight,
@@ -1073,12 +1073,12 @@ export const TEST_CASES = [
     goldenImage: GRID_LAYER_INFO.goldenImage
   },
   {
-    name: 'new-grid-lnglat-cpu',
+    name: 'grid-layer:cpu',
     viewState: GRID_LAYER_INFO.viewState,
     layers: [
       new GridLayer(
         Object.assign({}, GRID_LAYER_INFO.props, {
-          id: 'new-grid-lnglat-cpu',
+          id: 'grid-layer:cpu',
           getColorWeight: x => x.SPACES,
           colorAggregation: 'MEAN',
           getElevationWeight: x => x.SPACES,
@@ -1090,12 +1090,12 @@ export const TEST_CASES = [
     goldenImage: GRID_LAYER_INFO.goldenImage
   },
   {
-    name: 'new-grid-lnglat-gpu',
+    name: 'grid-layer:gpu',
     viewState: GRID_LAYER_INFO.viewState,
     layers: [
       new GridLayer(
         Object.assign({}, GRID_LAYER_INFO.props, {
-          id: 'new-grid-lnglat-gpu',
+          id: 'grid-layer:gpu',
           getColorWeight: x => x.SPACES,
           colorAggregation: 'MEAN',
           getElevationWeight: x => x.SPACES,
