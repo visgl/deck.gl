@@ -67,6 +67,13 @@ const GRID_LAYER_INFO = {
     pitch: 0,
     bearing: 0
   },
+  viewStateSide: {
+    latitude: 37.751537058389985,
+    longitude: -122.42694203247012,
+    zoom: 11.5,
+    pitch: 80,
+    bearing: 0
+  },
   props: {
     data: dataSamples.points,
     cellSize: 200,
@@ -74,7 +81,8 @@ const GRID_LAYER_INFO = {
     pickable: true,
     getPosition: d => d.COORDINATES
   },
-  goldenImage: './test/render/golden-images/grid-lnglat.png'
+  goldenImage: './test/render/golden-images/grid-lnglat.png',
+  goldenImageSide: './test/render/golden-images/grid-lnglat-side.png'
 };
 
 const HEXAGON_LAYER_INFO = {
@@ -1105,6 +1113,42 @@ export const TEST_CASES = [
       )
     ],
     goldenImage: GRID_LAYER_INFO.goldenImage
+  },
+  {
+    name: 'grid-layer:cpu-side',
+    viewState: GRID_LAYER_INFO.viewStateSide,
+    layers: [
+      new GridLayer(
+        Object.assign({}, GRID_LAYER_INFO.props, {
+          id: 'grid-layer:cpu-side',
+          getColorWeight: x => x.SPACES,
+          colorAggregation: 'MEAN',
+          getElevationWeight: x => x.SPACES,
+          elevationAggregation: 'MAX',
+          gpuAggregation: false,
+          elevationScale: 5
+        })
+      )
+    ],
+    goldenImage: GRID_LAYER_INFO.goldenImageSide
+  },
+  {
+    name: 'grid-layer:gpu-side',
+    viewState: GRID_LAYER_INFO.viewStateSide,
+    layers: [
+      new GridLayer(
+        Object.assign({}, GRID_LAYER_INFO.props, {
+          id: 'grid-layer:gpu-side',
+          getColorWeight: x => x.SPACES,
+          colorAggregation: 'MEAN',
+          getElevationWeight: x => x.SPACES,
+          elevationAggregation: 'MAX',
+          gpuAggregation: true,
+          elevationScale: 5
+        })
+      )
+    ],
+    goldenImage: GRID_LAYER_INFO.goldenImageSide
   },
   {
     name: 'screengrid-lnglat-cpu-aggregation',
