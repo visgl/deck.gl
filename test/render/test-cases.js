@@ -735,7 +735,7 @@ export const TEST_CASES = [
     viewState: {
       latitude: 37.751537058389985,
       longitude: -122.42694203247012,
-      zoom: 11.5,
+      zoom: 12,
       pitch: 0,
       bearing: 0
     },
@@ -746,7 +746,10 @@ export const TEST_CASES = [
         updateTriggers: {
           getIcon: 1
         },
-        sizeScale: 12,
+        sizeScale: 24,
+        opacity: 0.8,
+        pickable: true,
+        getSize: d => (d.RACKS > 2 ? 2 : 1),
         getPosition: d => d.COORDINATES,
         getColor: d => [64, 64, 72],
         getIcon: d => {
@@ -758,19 +761,16 @@ export const TEST_CASES = [
           return Object.assign({}, dataSamples.iconAtlas['marker-warning'], {
             url: './test/render/icon-warning.png'
           });
-        },
-        getSize: d => (d.RACKS > 2 ? 2 : 1),
-        opacity: 0.8,
-        pickable: true,
-        onAfterRender: ({layers, done}) => {
-          if (layers[0].state.iconManager.loaded) {
-            // data is loaded
-            done();
-          }
         }
       })
     ],
-    goldenImage: './test/render/golden-images/icon-lnglat.png'
+    onAfterRender: ({layers, done}) => {
+      if (layers[0].state.iconManager.loaded) {
+        // data is loaded
+        done();
+      }
+    },
+    goldenImage: './test/render/golden-images/icon-lnglat-large.png'
   },
   // This is based on last test case
   // use the same layer id 'icon-lnglat-auto' as last test case to trigger the layer update and test texture resize logic
@@ -779,7 +779,7 @@ export const TEST_CASES = [
     viewState: {
       latitude: 37.751537058389985,
       longitude: -122.42694203247012,
-      zoom: 11.5,
+      zoom: 12,
       pitch: 0,
       bearing: 0
     },
@@ -787,39 +787,39 @@ export const TEST_CASES = [
       new IconLayer({
         id: 'icon-lnglat-auto',
         data: dataSamples.points,
-        opacity: 0.8,
         updateTriggers: {
           getIcon: 2
         },
-        sizeScale: 12,
+        sizeScale: 24,
+        opacity: 0.8,
+        pickable: true,
+        getSize: d => (d.RACKS > 2 ? 2 : 1),
         getPosition: d => d.COORDINATES,
         getColor: d => [64, 64, 72],
         getIcon: d => {
           if (d.PLACEMENT === 'SW') {
-            return {
-              url: './test/render/golden-images/pointcloud-meter.png',
+            return Object.assign({}, dataSamples.iconAtlas.marker, {
+              url: './test/render/icon-marker.png',
+              id: 'marker-large',
               width: 256,
-              height: 256,
-              anchorY: 256,
-              mask: false
-            };
+              height: 256
+            });
           }
-          return {
-            url: './test/render/golden-images/h3-hexagon-flat.png',
+          return Object.assign({}, dataSamples.iconAtlas['marker-warning'], {
+            id: 'warning-large',
+            url: './test/render/icon-warning.png',
             width: 1024,
-            height: 1024,
-            anchorY: 1024,
-            mask: false
-          };
-        },
-        onAfterRender: ({layers, done}) => {
-          if (layers[0].state.iconManager.loaded) {
-            // data is loaded
-            done();
-          }
+            height: 1024
+          });
         }
       })
     ],
+    onAfterRender: ({layers, done}) => {
+      if (layers[0].state.iconManager.loaded) {
+        // data is loaded
+        done();
+      }
+    },
     goldenImage: './test/render/golden-images/icon-lnglat-resize-texture.png'
   },
   {

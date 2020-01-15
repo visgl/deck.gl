@@ -273,7 +273,6 @@ The rotating angle  of each object, in degrees.
 - If a number is provided, it is used as the angle for all objects.
 - If a function is provided, it is called on each object to retrieve its angle.
 
-
 ## Use binary attributes
 
 This section is about the special requirements when [supplying attributes directly](/docs/developer-guide/performance.md#supply-attributes-directly) to an `IconLayer`.
