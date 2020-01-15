@@ -36,7 +36,8 @@ test('Render Test', t => {
       onTestFail: (testCase, result) => t.fail(result.error || `match: ${result.matchPercentage}`),
 
       imageDiffOptions: {
-        threshold: 0.99
+        threshold: 0.99,
+        includeEmpty: false
         // uncomment to save screenshot to disk
         // , saveOnFail: true
         // uncomment `saveAs` to overwrite current golden images
