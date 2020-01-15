@@ -40,18 +40,15 @@ varying float vPathLength;
 void main(void) {
   geometry.uv = vPathPosition;
 
-  // if joint is rounded, test distance from the corner
-  if (jointType > 0.0 && vMiterLength > 0.0 && length(vCornerOffset) > 1.0) {
-    // Enable to debug joints
-    // gl_FragColor = vec4(0., 1., 0., 1.);
-    // return;
-    discard;
-  }
-  if (jointType == 0.0 && vMiterLength > miterLimit) {
-    // Enable to debug joints
-    // gl_FragColor = vec4(0., 0., 1., 1.);
-    // return;
-    discard;
+  if (vPathPosition.y < 0.0 || vPathPosition.y > vPathLength) {
+    // if joint is rounded, test distance from the corner
+    if (jointType > 0.0 && length(vCornerOffset) > 1.0) {
+      discard;
+    }
+    // trim miter
+    if (jointType == 0.0 && vMiterLength > miterLimit + 1.0) {
+      discard;
+    }
   }
   gl_FragColor = vColor;
 

@@ -232,33 +232,26 @@ export default class PathLayer extends Layer {
     ];
 
     // [0] position on segment - 0: start, 1: end
-    // [1] side of path - -1: left, 0: center, 1: right
-    // [2] role - 0: offset point 1: joint point
+    // [1] side of path - -1: left, 0: center (joint), 1: right
     const SEGMENT_POSITIONS = [
       // bevel start corner
       0,
       0,
-      1,
       // start inner corner
       0,
       -1,
-      0,
       // start outer corner
       0,
       1,
-      0,
       // end inner corner
       1,
       -1,
-      0,
       // end outer corner
       1,
       1,
-      0,
       // bevel end corner
       1,
-      0,
-      1
+      0
     ];
 
     return new Model(
@@ -269,7 +262,7 @@ export default class PathLayer extends Layer {
           drawMode: GL.TRIANGLES,
           attributes: {
             indices: new Uint16Array(SEGMENT_INDICES),
-            positions: new Float32Array(SEGMENT_POSITIONS)
+            positions: {value: new Float32Array(SEGMENT_POSITIONS), size: 2}
           }
         }),
         isInstanced: true
