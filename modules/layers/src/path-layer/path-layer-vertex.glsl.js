@@ -21,7 +21,7 @@
 export default `\
 #define SHADER_NAME path-layer-vertex-shader
 
-attribute vec3 positions;
+attribute vec2 positions;
 
 attribute float instanceTypes;
 attribute vec3 instanceStartPositions;
@@ -63,21 +63,16 @@ vec3 lineJoin(
   vec3 prevPoint, vec3 currPoint, vec3 nextPoint,
   vec2 width
 ) {
-  bool isEnd = positions.x > EPSILON;
+  bool isEnd = positions.x > 0.0;
   // side of the segment - -1: left, 0: center, 1: right
-  float side = positions.y;
-  float isJoint = positions.z;
+  float sideOfPath = positions.y;
+  float isJoint = float(sideOfPath == 0.0);
 
   vec2 deltaA = (currPoint.xy - prevPoint.xy) / width;
   vec2 deltaB = (nextPoint.xy - currPoint.xy) / width;
 
   float lenA = length(deltaA);
   float lenB = length(deltaB);
-
-  // when two points are closer than PIXEL_EPSILON in pixels,
-  // assume they are the same point to avoid precision issue
-  lenA = lenA > EPSILON ? lenA : 0.0;
-  lenB = lenB > EPSILON ? lenB : 0.0;
 
   vec2 dirA = lenA > 0. ? normalize(deltaA) : vec2(0.0, 0.0);
   vec2 dirB = lenB > 0. ? normalize(deltaB) : vec2(0.0, 0.0);
@@ -90,91 +85,62 @@ vec3 lineJoin(
   tangent = length(tangent) > 0. ? normalize(tangent) : perpA;
   // direction of the corner
   vec2 miterVec = vec2(-tangent.y, tangent.x);
-  // width offset from current position
+  // direction of the segment
+  vec2 dir = isEnd ? dirA : dirB;
+  // direction of the extrusion
   vec2 perp = isEnd ? perpA : perpB;
+  // length of the segment
   float L = isEnd ? lenA : lenB;
 
-  // cap super sharp angles
+  // A = angle of the corner
   float sinHalfA = abs(dot(miterVec, perp));
   float cosHalfA = abs(dot(dirA, miterVec));
 
-  bool turnsRight = dirA.x * dirB.y > dirA.y * dirB.x;
-
-  float offsetScale = 1.0 / max(sinHalfA, EPSILON);
+  // -1: right, 1: left
+  float turnDirection = flipIfTrue(dirA.x * dirB.y > dirA.y * dirB.x);
 
   // relative position to the corner:
   // -1: inside (smaller side of the angle)
   // 0: center
   // 1: outside (bigger side of the angle)
-  float cornerPosition = (1.0 - isJoint) * flipIfTrue(turnsRight == (side > EPSILON));
-  float isCenterOrOutsideCorner = step(0.0, cornerPosition);
-  float isOutsideCorner = step(0.5, cornerPosition);
+  float cornerPosition = sideOfPath * turnDirection;
 
+  float miterSize = 1.0 / max(sinHalfA, EPSILON);
   // trim if inside corner extends further than the line segment
-  offsetScale = mix(
-    min(offsetScale, max(lenA, lenB) / max(cosHalfA, EPSILON)),
-    offsetScale,
-    isCenterOrOutsideCorner
+  miterSize = mix(
+    min(miterSize, max(lenA, lenB) / max(cosHalfA, EPSILON)),
+    miterSize,
+    step(0.0, cornerPosition)
   );
 
-  vMiterLength = mix(
-    offsetScale * cornerPosition,
-    mix(offsetScale, sinHalfA, cornerPosition),
-    isCenterOrOutsideCorner
-  ) - sinHalfA * jointType;
-
-  float offsetDirection = mix(
-    side,
-    mix(
-      flipIfTrue(turnsRight),
-      side * flipIfTrue(turnsRight == isEnd),
-      cornerPosition
-    ),
-    isCenterOrOutsideCorner
-  );
-
-  vec2 offsetVec = mix(miterVec, perp * flipIfTrue(isEnd == turnsRight), isOutsideCorner);
-  offsetScale = mix(offsetScale, 1.0, isOutsideCorner);
+  vec2 offsetVec = mix(miterVec * miterSize, perp, step(0.5, cornerPosition))
+    * (sideOfPath + isJoint * turnDirection);
 
   // special treatment for start cap and end cap
   bool isStartCap = lenA == 0.0 || (!isEnd && (instanceTypes == 1.0 || instanceTypes == 3.0));
   bool isEndCap = lenB == 0.0 || (isEnd && (instanceTypes == 2.0 || instanceTypes == 3.0));
   bool isCap = isStartCap || isEndCap;
 
-  // 0: center, 1: side
-  cornerPosition = isCap ? (1.0 - isJoint) : 0.;
-
-  // start of path: use next - curr
-  if (isStartCap) {
-    offsetVec = mix(dirB, perpB, cornerPosition);
-  }
-
-  // end of path: use curr - prev
-  if (isEndCap) {
-    offsetVec = mix(dirA, perpA, cornerPosition);
-  }
-
   // extend out a triangle to envelope the round cap
   if (isCap) {
-    offsetScale = mix(4.0 * jointType, 1.0, cornerPosition);
-    vMiterLength = 1.0 - cornerPosition;
-    offsetDirection = mix(flipIfTrue(isStartCap), side, cornerPosition);
+    offsetVec = mix(perp * sideOfPath, dir * jointType * 4.0 * flipIfTrue(isStartCap), isJoint);
   }
 
-  vCornerOffset = offsetVec * offsetDirection * offsetScale;
-
-  // Generate variables for dash calculation
+  // Generate variables for fragment shader
   vPathLength = L;
+  vCornerOffset = offsetVec;
+  vMiterLength = dot(vCornerOffset, miterVec * turnDirection);
+  vMiterLength = isCap ? isJoint : vMiterLength;
+
   vec2 offsetFromStartOfPath = vCornerOffset + deltaA * float(isEnd);
-  vec2 dir = isEnd ? dirA : dirB;
   vPathPosition = vec2(
-    side + isJoint * offsetDirection,
+    dot(offsetFromStartOfPath, perp),
     dot(offsetFromStartOfPath, dir)
   );
   geometry.uv = vPathPosition;
 
   float isValid = step(instanceTypes, 3.5);
-  vec3 offset = vec3(vCornerOffset * width * isValid, 0.0);
+  vec3 offset = vec3(offsetVec * width * isValid, 0.0);
   DECKGL_FILTER_SIZE(offset, geometry);
   return currPoint + offset;
 }
