@@ -55,6 +55,7 @@ new PathStyleExtension({dash});
 ```
 
 * `dash` (Boolean) - add capability to render dashed lines. Default `false`.
+* `offset` (Boolean) - add capability to offset lines. Default `false`.
 
 ## Layer Properties
 
@@ -63,7 +64,7 @@ When added to a layer via the `extensions` prop, the `PathStyleExtension` adds t
 
 ##### `getDashArray` ([Function](/docs/developer-guide/using-layers.md#accessors)|Array)
 
-Must be specified if dashed line is enabled.
+Must be specified if the `dash` option is enabled.
 
 The dash array to draw each path with: `[dashSize, gapSize]` relative to the width of the path.
 
@@ -77,6 +78,16 @@ The dash array to draw each path with: `[dashSize, gapSize]` relative to the wid
 * Default: `false`
 
 Only effective if `getDashArray` is specified. If `true`, adjust gaps for the dashes to align at both ends.
+
+
+##### `getOffset` ([Function](/docs/developer-guide/using-layers.md#accessors)|Number)
+
+Must be specified if the `offset` option is enabled.
+
+The offset to draw each path with, relative to the width of the path. Negative offset is to the right hand side, and positive offset is to the left hand side. `0` extrudes the path so that it is centered at the specified coordinates.
+
+* If a number is provided, it is used as the offset for all paths.
+* If a function is provided, it is called on each path to retrieve its offset.
 
 
 ## Source

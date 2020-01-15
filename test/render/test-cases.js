@@ -489,6 +489,29 @@ export const TEST_CASES = [
     goldenImage: './test/render/golden-images/path-billboard.png'
   },
   {
+    name: 'path-offset',
+    viewState: {
+      latitude: 37.71,
+      longitude: -122.405,
+      zoom: 13
+    },
+    layers: [
+      new PathLayer({
+        id: 'path-offset',
+        data: [
+          {path: [[-122.39, 37.7], [-122.42, 37.7], [-122.42, 37.72]], color: [255, 180, 0]},
+          {path: [[-122.42, 37.72], [-122.42, 37.7], [-122.39, 37.7]], color: [80, 0, 255]}
+        ],
+        getPath: f => f.path,
+        getColor: f => f.color,
+        getWidth: 100,
+        getOffset: 1,
+        extensions: [new PathStyleExtension({offset: true})]
+      })
+    ],
+    goldenImage: './test/render/golden-images/path-offset.png'
+  },
+  {
     name: 'scatterplot-lnglat',
     viewState: {
       latitude: 37.751537058389985,
