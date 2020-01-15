@@ -761,15 +761,15 @@ export const TEST_CASES = [
         },
         getSize: d => (d.RACKS > 2 ? 2 : 1),
         opacity: 0.8,
-        pickable: true,
-        onAfterRender: ({layers, done}) => {
-          if (layers[0].state.iconManager.loaded) {
-            // data is loaded
-            done();
-          }
-        }
+        pickable: true
       })
     ],
+    onAfterRender: ({layers, done}) => {
+      if (layers[0].state.iconManager.loaded) {
+        // data is loaded
+        done();
+      }
+    },
     goldenImage: './test/render/golden-images/icon-lnglat-large.png'
   },
   // This is based on last test case
@@ -798,8 +798,7 @@ export const TEST_CASES = [
         getIcon: d => {
           if (d.PLACEMENT === 'SW') {
             return {
-              url:
-                'https://raw.githubusercontent.com/uber-common/deck.gl-data/master/images/layers/demo-thumb-wind.jpg',
+              url: './test/render/golden-images/examples/website_screen-grid.png',
               width: 256,
               height: 256,
               anchorY: 256,
@@ -807,22 +806,21 @@ export const TEST_CASES = [
             };
           }
           return {
-            url:
-              'https://raw.githubusercontent.com/uber-common/deck.gl-data/master/images/layers/demo-thumb-geojson.jpg',
+            url: './test/render/golden-images/examples/website_geojson.png',
             width: 1024,
             height: 1024,
             anchorY: 1024,
             mask: false
           };
-        },
-        onAfterRender: ({layers, done}) => {
-          if (layers[0].state.iconManager.loaded) {
-            // data is loaded
-            done();
-          }
         }
       })
     ],
+    onAfterRender: ({layers, done}) => {
+      if (layers[0].state.iconManager.loaded) {
+        // data is loaded
+        done();
+      }
+    },
     goldenImage: './test/render/golden-images/icon-lnglat-resize-texture.png'
   },
   {
