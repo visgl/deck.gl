@@ -57,3 +57,27 @@ float round(float x) {
 `
   }
 };
+
+export const offsetShaders = {
+  inject: {
+    'vs:#decl': `
+attribute float instanceOffsets;
+`,
+    'vs:DECKGL_FILTER_SIZE': `
+  float offsetWidth = abs(instanceOffsets * 2.0) + 1.0;
+  size *= offsetWidth;
+`,
+    'vCornerOffset = offsetVec;': `
+  float offsetWidth = abs(instanceOffsets * 2.0) + 1.0;
+  vec2 offsetCenter = -instanceOffsets * (isCap ? perp : miterVec * miterSize) * 2.0;
+  vCornerOffset = vCornerOffset * offsetWidth - offsetCenter;
+`,
+    'fs:#main-start': `
+  float isInside;
+  isInside = step(-1.0, vPathPosition.x) * step(vPathPosition.x, 1.0);
+  if (isInside == 0.0) {
+    discard;
+  }
+`
+  }
+};
