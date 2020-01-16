@@ -159,11 +159,16 @@ export default class H3HexagonLayer extends CompositeLayer {
       return;
     }
     const hex = geoToH3(viewport.latitude, viewport.longitude, resolution);
-    if (
-      centerHex === hex ||
-      (centerHex && h3Distance(centerHex, hex) * edgeLengthKM < UPDATE_THRESHOLD_KM)
-    ) {
+    if (centerHex === hex) {
       return;
+    }
+    if (centerHex) {
+      const distance = h3Distance(centerHex, hex);
+      // h3Distance returns a negative number if the distance could not be computed
+      // due to the two indexes very far apart or on opposite sides of a pentagon.
+      if (distance >= 0 && distance * edgeLengthKM < UPDATE_THRESHOLD_KM) {
+        return;
+      }
     }
 
     const {unitsPerMeter} = viewport.distanceScales;
