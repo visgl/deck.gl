@@ -1,7 +1,7 @@
 /* global window,document */
 import test from 'tape-promise/tape';
 
-import {WIDTH, HEIGHT, OS} from './constants';
+import {WIDTH, HEIGHT} from './constants';
 
 const TEST_CASES = [
   {
@@ -24,7 +24,7 @@ const TEST_CASES = [
     },
     goldenImage: './test/render/golden-images/jupyter-widget-scatterplot.png'
   },
-  OS === 'Mac' && {
+  {
     name: 'ScatterplotLayer and TextLayer',
     json: {
       description: 'Test of plotting multiple layers at once',
