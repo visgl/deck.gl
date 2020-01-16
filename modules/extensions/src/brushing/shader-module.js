@@ -44,6 +44,10 @@ const vs = `
     return distance <= brushing_radius;
   }
 
+  bool brushing_arePointsInRange(vec2 sourcePos, vec2 targetPos) {
+    return brushing_isPointInRange(sourcePos) || brushing_isPointInRange(targetPos);
+  }
+
   void brushing_setVisible(bool visible) {
     brushing_isVisible = float(visible);
   }
@@ -57,13 +61,18 @@ const fs = `
 const TARGET = {
   source: 0,
   target: 1,
-  custom: 2
+  custom: 2,
+  source_target: 3
 };
 
 const inject = {
   'vs:DECKGL_FILTER_GL_POSITION': `
     vec2 brushingTarget;
-    if (brushing_target == 0) {
+    vec2 brushingSource;
+    if (brushing_target == 3) {
+      brushingTarget = geometry.worldPositionAlt.xy;
+      brushingSource = geometry.worldPosition.xy;
+    } else if (brushing_target == 0) {
       brushingTarget = geometry.worldPosition.xy;
     } else if (brushing_target == 1) {
       brushingTarget = geometry.worldPositionAlt.xy;
@@ -74,7 +83,13 @@ const inject = {
       brushingTarget = instanceBrushingTargets;
       #endif
     }
-    brushing_setVisible(brushing_isPointInRange(brushingTarget));
+    bool visible;
+    if (brushing_target == 3) {
+      visible = brushing_arePointsInRange(brushingSource, brushingTarget);
+    } else {
+      visible = brushing_isPointInRange(brushingTarget);
+    }
+    brushing_setVisible(visible);
   `,
 
   'fs:DECKGL_FILTER_COLOR': `
