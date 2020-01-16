@@ -156,11 +156,6 @@ vec2 project_position(vec2 position) {
 }
 
 vec4 project_common_position_to_clipspace(vec4 position, mat4 viewProjectionMatrix, vec4 center) {
-  if (project_uCoordinateSystem == COORDINATE_SYSTEM_METER_OFFSETS ||
-    project_uCoordinateSystem == COORDINATE_SYSTEM_LNGLAT_OFFSETS) {
-    // Needs to be divided with project_uCommonUnitsPerMeter
-    position.w *= project_uCommonUnitsPerMeter.z;
-  }
   return viewProjectionMatrix * position + center;
 }
 
