@@ -1,5 +1,6 @@
 import {COORDINATE_SYSTEM, OrthographicView, MapView, FirstPersonView} from '@deck.gl/core';
 import {ScatterplotLayer, GeoJsonLayer} from '@deck.gl/layers';
+import {parseColor} from '../../../examples/layer-browser/src/utils/color';
 
 import * as dataSamples from 'deck.gl-test/data';
 import * as h3 from 'h3-js';
@@ -27,8 +28,8 @@ export default [
         data: dataSamples.geojson,
         opacity: 0.8,
         getRadius: 500,
-        getFillColor: [255, 200, 0],
-        getLineColor: [0, 0, 255],
+        getFillColor: f => parseColor(f.properties.fill),
+        getLineColor: f => parseColor(f.properties.stroke),
         extruded: true,
         wireframe: true,
         getElevation: 500,

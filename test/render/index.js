@@ -17,7 +17,6 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
-/* global document, FontFace */
 import test from 'tape';
 import {TEST_CASES, WIDTH, HEIGHT} from './test-cases';
 import {SnapshotTestRunner} from '@deck.gl/test-utils';
