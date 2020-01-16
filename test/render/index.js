@@ -24,40 +24,26 @@ import {SnapshotTestRunner} from '@deck.gl/test-utils';
 
 import './jupyter-widget';
 
-function loadFont(name, url) {
-  // pass the url to the file in CSS url() notation
-  const font = new FontFace(name, `url(${url})`);
-  // add it to the document's FontFaceSet
-  document.fonts.add(font);
-  // returns a Promise
-  return font.load();
-}
-
 test('Render Test', t => {
   // tape's default timeout is 500ms
   t.timeoutAfter(TEST_CASES.length * 2000);
 
-  const testRunner = new SnapshotTestRunner({width: WIDTH, height: HEIGHT}).add(TEST_CASES);
+  new SnapshotTestRunner({width: WIDTH, height: HEIGHT})
+    .add(TEST_CASES)
+    .run({
+      onTestStart: testCase => t.comment(testCase.name),
+      onTestPass: (testCase, result) => t.pass(`match: ${result.matchPercentage}`),
+      onTestFail: (testCase, result) => t.fail(result.error || `match: ${result.matchPercentage}`),
 
-  // CI does not come with the same default fonts as local dev environment
-  loadFont('Roboto', 'https://fonts.gstatic.com/s/roboto/v20/KFOmCnqEu92Fr1Mu4mxKKTU1Kg.woff2')
-    .then(() =>
-      testRunner.run({
-        onTestStart: testCase => t.comment(testCase.name),
-        onTestPass: (testCase, result) => t.pass(`match: ${result.matchPercentage}`),
-        onTestFail: (testCase, result) =>
-          t.fail(result.error || `match: ${result.matchPercentage}`),
-
-        imageDiffOptions: {
-          threshold: 0.99,
-          includeEmpty: false
-          // uncomment to save screenshot to disk
-          // , saveOnFail: true
-          // uncomment `saveAs` to overwrite current golden images
-          // if left commented will be saved as `[name]-fail.png.` enabling comparison
-          // , saveAs: '[name].png'
-        }
-      })
-    )
+      imageDiffOptions: {
+        threshold: 0.99,
+        includeEmpty: false
+        // uncomment to save screenshot to disk
+        // , saveOnFail: true
+        // uncomment `saveAs` to overwrite current golden images
+        // if left commented will be saved as `[name]-fail.png.` enabling comparison
+        // , saveAs: '[name].png'
+      }
+    })
     .then(() => t.end());
 });
