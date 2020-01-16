@@ -2,12 +2,9 @@ import {COORDINATE_SYSTEM} from '@deck.gl/core';
 import {TextLayer} from '@deck.gl/layers';
 import {points} from 'deck.gl-test/data';
 
-// Different Platforms render text differently. These golden images
-// are currently only valid in mac
-/* global navigator */
-const isMac = navigator.platform.startsWith('Mac');
+import {OS} from '../constants';
 
-export default (isMac
+export default (OS === 'Mac'
   ? [
       {
         name: 'text-layer',

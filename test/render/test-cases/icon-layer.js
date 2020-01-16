@@ -2,7 +2,7 @@
 import {IconLayer} from '@deck.gl/layers';
 import {points, iconAtlas as iconMapping} from 'deck.gl-test/data';
 
-const ICON_ATLAS = './test/render/icon-atlas.png';
+const ICON_ATLAS = './test/data/icon-atlas.png';
 
 export default [
   {
@@ -132,11 +132,11 @@ export default [
         getIcon: d => {
           if (d.PLACEMENT === 'SW') {
             return Object.assign({}, iconMapping.marker, {
-              url: './test/render/icon-marker.png'
+              url: './test/data/icon-marker.png'
             });
           }
           return Object.assign({}, iconMapping['marker-warning'], {
-            url: './test/render/icon-warning.png'
+            url: './test/data/icon-warning.png'
           });
         }
       })
@@ -175,7 +175,7 @@ export default [
         getIcon: d => {
           if (d.PLACEMENT === 'SW') {
             return Object.assign({}, iconMapping.marker, {
-              url: './test/render/icon-marker.png',
+              url: './test/data/icon-marker.png',
               id: 'marker-large',
               width: 256,
               height: 256
@@ -183,7 +183,7 @@ export default [
           }
           return Object.assign({}, iconMapping['marker-warning'], {
             id: 'warning-large',
-            url: './test/render/icon-warning.png',
+            url: './test/data/icon-warning.png',
             width: 1024,
             height: 1024
           });

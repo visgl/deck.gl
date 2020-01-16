@@ -2,7 +2,7 @@ import {OrthographicView, COORDINATE_SYSTEM} from '@deck.gl/core';
 import {ScreenGridLayer} from '@deck.gl/aggregation-layers';
 import {points} from 'deck.gl-test/data';
 
-import {WIDTH, HEIGHT} from './constants';
+import {WIDTH, HEIGHT} from '../constants';
 
 export const screenSpaceData = [
   [0, -100],

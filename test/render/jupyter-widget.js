@@ -1,8 +1,7 @@
 /* global window,document */
 import test from 'tape-promise/tape';
 
-const WIDTH = 800;
-const HEIGHT = 450;
+import {WIDTH, HEIGHT, OS} from './constants';
 
 const TEST_CASES = [
   {
@@ -11,7 +10,7 @@ const TEST_CASES = [
       viewState: {
         longitude: 0,
         latitude: 0,
-        zoom: 12
+        zoom: 13
       },
       layers: [
         {
@@ -25,7 +24,7 @@ const TEST_CASES = [
     },
     goldenImage: './test/render/golden-images/jupyter-widget-scatterplot.png'
   },
-  {
+  OS === 'Mac' && {
     name: 'ScatterplotLayer and TextLayer',
     json: {
       description: 'Test of plotting multiple layers at once',
@@ -74,7 +73,7 @@ const TEST_CASES = [
           getColor: [0, 0, 255],
           getPosition: '@@=position',
           getTextAnchor: 'start',
-          fontFamily: 'Times, Times New Roman, Georgia, serif'
+          fontFamily: 'Times'
         }
       ]
     },
@@ -87,7 +86,7 @@ const TEST_CASES = [
       viewState: {
         longitude: -122.45,
         latitude: 37.8,
-        zoom: 0
+        zoom: 1
       },
       layers: [
         {
@@ -130,9 +129,9 @@ const TEST_CASES = [
       viewState: {
         longitude: 0,
         latitude: 0,
-        zoom: 5,
+        zoom: 6,
         pitch: 40.5,
-        bearing: -27.396674584323023
+        bearing: -27
       },
       views: [
         {
@@ -199,9 +198,9 @@ const TEST_CASES = [
       viewState: {
         longitude: 0,
         latitude: 0,
-        zoom: 5,
+        zoom: 6,
         pitch: 40.5,
-        bearing: -27.396674584323023
+        bearing: -27
       },
       views: [
         {
@@ -287,6 +286,7 @@ const TEST_CASES = [
             {lat: 1.2, lon: 1.2}
           ],
           getPosition: '@@=[lon, lat]',
+          radiusPixels: 100,
           colorRange: [
             [1, 152, 189],
             [73, 227, 206],
@@ -300,7 +300,7 @@ const TEST_CASES = [
     },
     goldenImage: './test/render/golden-images/jupyter-widget-failed-function.png'
   }
-];
+].filter(Boolean);
 
 async function loadPage() {
   const iframe = document.createElement('iframe');
@@ -343,7 +343,7 @@ test('jupyter-widget Render Test', async t => {
 
     const result = await window.browserTestDriver_captureAndDiffScreen({
       // uncomment to save screenshot to disk
-      saveOnFail: true,
+      // saveOnFail: true,
       threshold: 0.99,
       ...testCase.imageDiffOptions,
       region: {

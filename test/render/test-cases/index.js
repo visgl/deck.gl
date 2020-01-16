@@ -23,9 +23,7 @@ import simpleMeshLayerTests from './simple-mesh-layer';
 import viewsTests from './views';
 import effectsTests from './effects';
 
-export {WIDTH, HEIGHT} from './constants';
-
-export const TEST_CASES = [].concat(
+export default [].concat(
   coreLayersTests,
   columnLayerTests,
   geojsonLayerTests,

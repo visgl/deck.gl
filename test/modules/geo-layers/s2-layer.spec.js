@@ -22,7 +22,7 @@ import test from 'tape-catch';
 import {testLayer, generateLayerTests} from '@deck.gl/test-utils';
 import {S2Layer} from '@deck.gl/geo-layers';
 import {getS2QuadKey, getS2Polygon} from '@deck.gl/geo-layers/s2-layer/s2-utils';
-import data from 'deck.gl-test/data/s2-sf.json';
+import {s2cells as data} from 'deck.gl-test/data';
 
 import {S2} from 's2-geometry';
 import Long from 'long';

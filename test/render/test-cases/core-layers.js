@@ -165,7 +165,7 @@ export default [
       new BitmapLayer({
         opacity: 0.8,
         bounds: [-122.45, 37.7, -122.35, 37.8],
-        image: './test/render/icon-atlas.png'
+        image: './test/data/icon-atlas.png'
       })
     ],
     onAfterRender: ({layers, done}) => {

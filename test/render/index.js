@@ -18,7 +18,8 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 import test from 'tape';
-import {TEST_CASES, WIDTH, HEIGHT} from './test-cases';
+import TEST_CASES from './test-cases';
+import {WIDTH, HEIGHT} from './constants';
 import {SnapshotTestRunner} from '@deck.gl/test-utils';
 
 import './jupyter-widget';
