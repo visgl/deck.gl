@@ -308,7 +308,7 @@ async function loadPage() {
   iframe.height = HEIGHT;
   iframe.style.border = 'none';
   Object.assign(iframe.style, {
-    position: 'absolute',
+    position: 'fixed',
     top: 0,
     left: 0
   });
