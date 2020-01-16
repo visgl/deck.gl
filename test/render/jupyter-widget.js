@@ -1,5 +1,5 @@
 /* global window,document */
-import test from 'tape-catch';
+import test from 'tape-promise/tape';
 
 const WIDTH = 800;
 const HEIGHT = 450;
@@ -54,7 +54,7 @@ const TEST_CASES = [
               rgb: [123, 159, 53]
             }
           ],
-          getColor: '@@=rgb',
+          getFillColor: '@@=rgb',
           getPosition: '@@=position',
           getRadius: 100
         },
@@ -302,7 +302,7 @@ const TEST_CASES = [
   }
 ];
 
-test('jupyter-widget Render Test', t => {
+async function loadPage() {
   const iframe = document.createElement('iframe');
   iframe.width = WIDTH;
   iframe.height = HEIGHT;
@@ -312,37 +312,38 @@ test('jupyter-widget Render Test', t => {
     top: 0,
     left: 0
   });
+  document.body.appendChild(iframe);
 
-  let testIndex = 0;
+  return new Promise(resolve => {
+    iframe.onload = () => resolve(iframe);
+    iframe.src = '/test/render/jupyter-widget-test.html';
+  });
+}
 
-  function runTest(testCase) {
-    return new Promise(resolve => {
-      t.comment(testCase.name);
-
-      iframe.contentWindow.postMessage({
-        json: testCase.json
-      });
-
-      window.onmessage = event => {
-        if (event.data === 'done') {
-          resolve();
-        }
-      };
+async function runTest(iframe, testCase) {
+  return new Promise(resolve => {
+    iframe.contentWindow.postMessage({
+      json: testCase.json
     });
-  }
 
-  function nextTest() {
-    const testCase = TEST_CASES[testIndex++];
+    window.onmessage = event => {
+      if (event.data === 'done') {
+        resolve();
+      }
+    };
+  });
+}
 
-    if (!testCase) {
-      iframe.remove();
-      t.end();
-      return;
-    }
+test('jupyter-widget Render Test', async t => {
+  const iframe = await loadPage();
 
-    const diffOptions = {
+  for (const testCase of TEST_CASES) {
+    t.comment(testCase.name);
+    await runTest(iframe, testCase);
+
+    const result = await window.browserTestDriver_captureAndDiffScreen({
       // uncomment to save screenshot to disk
-      // saveOnFail: true,
+      saveOnFail: true,
       threshold: 0.99,
       ...testCase.imageDiffOptions,
       region: {
@@ -352,21 +353,16 @@ test('jupyter-widget Render Test', t => {
         height: HEIGHT
       },
       goldenImage: testCase.goldenImage
-    };
+    });
 
-    runTest(testCase)
-      .then(() => window.browserTestDriver_captureAndDiffScreen(diffOptions))
-      .then(result => {
-        if (result.success) {
-          t.pass(`match: ${result.matchPercentage}`);
-        } else {
-          t.fail(result.error || `match: ${result.matchPercentage}`);
-        }
-        nextTest();
-      });
+    if (result.success) {
+      t.pass(`match: ${result.matchPercentage}`);
+    } else {
+      t.fail(result.error || `match: ${result.matchPercentage}`);
+    }
   }
 
-  iframe.src = '/test/render/jupyter-widget-test.html';
-  iframe.onload = nextTest;
-  document.body.appendChild(iframe);
+  iframe.remove();
+
+  t.end();
 });

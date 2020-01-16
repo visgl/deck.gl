@@ -95,10 +95,7 @@ export default [
         getTargetColor: d => [0, 128, 200]
       })
     ],
-    goldenImage: './test/render/golden-images/arc-lnglat.png',
-    imageDiffOptions: {
-      threshold: 0.985
-    }
+    goldenImage: './test/render/golden-images/arc-lnglat.png'
   },
   {
     name: 'arc-lnglat-3d',
@@ -129,10 +126,7 @@ export default [
         getTargetColor: d => [255, 0, 0]
       })
     ],
-    goldenImage: './test/render/golden-images/arc-lnglat-3d.png',
-    imageDiffOptions: {
-      threshold: 0.985
-    }
+    goldenImage: './test/render/golden-images/arc-lnglat-3d.png'
   },
   {
     name: 'line-lnglat',
@@ -156,9 +150,6 @@ export default [
         pickable: true
       })
     ],
-    imageDiffOptions: {
-      threshold: 0.985
-    },
     goldenImage: './test/render/golden-images/line-lnglat.png'
   },
   {
