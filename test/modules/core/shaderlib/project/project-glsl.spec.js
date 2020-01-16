@@ -29,7 +29,7 @@ const {fp64LowPart} = fp64;
 
 import {compileVertexShader} from '../shaderlib-test-utils';
 import {getPixelOffset, clipspaceToScreen, runOnGPU, verifyResult} from './project-glsl-test-utils';
-const PIXEL_TOLERANCE = 0.01;
+const PIXEL_TOLERANCE = 1e-4;
 
 const TEST_VIEWPORT = new WebMercatorViewport({
   longitude: -122,
