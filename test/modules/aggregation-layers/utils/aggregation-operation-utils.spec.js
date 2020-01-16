@@ -28,19 +28,19 @@ const accessor = x => x;
 const TEST_CASES = [
   {
     name: 'Min Function',
-    op: 'min',
+    op: 'MIN',
     data,
     expected: -3
   },
   {
     name: 'Max Function',
-    op: 'Max',
+    op: 'MAX',
     data,
     expected: 16
   },
   {
     name: 'Sum Function',
-    op: 'sUM',
+    op: 'SUM',
     data,
     expected: 37.2
   },
