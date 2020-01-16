@@ -24,7 +24,6 @@ def array_to_binary(ar, obj=None, force_contiguous=True):
 def serialize_columns(data_set_cols, obj=None):
     if data_set_cols is None:
         return None
-    print(data_set_cols)
     payload = {'payload': []}
     for col in data_set_cols:
         bin_data = array_to_binary(col["np_data"])

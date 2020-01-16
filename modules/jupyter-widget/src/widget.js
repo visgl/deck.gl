@@ -18,6 +18,14 @@ function hideMapboxCSSWarning() {
   }
 }
 
+function getLayer(deckLayers, layerId) {
+  for (const layer of deckLayers) {
+    if (layer.id === layerId) {
+      return layer;
+    }
+  }
+  return null;
+}
 function loadCss(url) {
   const link = document.createElement('link');
   link.type = 'text/css';
@@ -57,7 +65,16 @@ function deserializeMatrix(arr, manager) {
   if (!arr) {
     return null;
   }
-  return {data: dtypeToTypedArray(arr.dtype, arr.data.buffer), shape: arr.shape};
+  const data = [];
+  for (const datum of arr.payload) {
+    data.push({
+      layerId: datum.layer_id,
+      columnName: datum.column_name,
+      accessor: datum.accessor,
+      data: {data: dtypeToTypedArray(datum.data.dtype, datum.data.data), shape: datum.data.shape}
+    });
+  }
+  return data;
 }
 
 // Note: Variables shared explictly between Python and JavaScript use snake_case
@@ -163,35 +180,54 @@ export class DeckGLView extends DOMWidgetView {
   dataBufferChanged() {
     // Current method for review:
     // Copy layer configuration
+    console.log('line 183 in widget.js');
     if (this.model.get('data_buffer')) {
       const cleanBuffer = this.model.get('data_buffer');
-      const rowMajorOrderMatrix = cleanBuffer.data;
-      const [h, w] = cleanBuffer.shape;
+      const updateLayers = {};
 
-      // TESTING ONLY
-      const LayerConstructor = this.deck.props.layers[0].__proto__.constructor; // eslint-disable-line
-      const layerProps = this.deck.props.layers[0].props;
-
-      const newDataProps = {
-        // this is required so that the layer knows how many points to draw
-        data: {src: rowMajorOrderMatrix, length: h},
-        getPosition: (object, {index, data, target}) => {
-          target[0] = data.src[index * w];
-          target[1] = data.src[index * w + 1];
-          target[2] = data.src[index * w + 2];
-          return target;
-        },
-        getColor: (object, {index, data, target}) => {
-          target[0] = data.src[index * w + 3];
-          target[1] = data.src[index * w + 4];
-          target[2] = data.src[index * w + 5];
-          target[3] = 140; // alpha
-          return target;
+      // {
+      //    'layerId': {
+      //      constructor
+      //      props: {}
+      //      data: {
+      //        'accessor': vector
+      //      }
+      //    }
+      // }
+      for (const column of cleanBuffer) {
+        // Get the layer by ID
+        if (!updateLayers[column.layerId]) {
+          const layer = getLayer(this.deck.props.layers, column.layerId);
+          const LayerConstructor = layer.__proto__.constructor; // eslint-disable-line
+          const layerProps = layer.props;
+          updateLayers[column.layerId] = {
+            LayerConstructor,
+            props: layerProps,
+            data: {}
+          };
         }
-      };
-
-      const newLayer = new LayerConstructor({...layerProps, ...newDataProps});
-      this.deck.setProps({layers: [newLayer]});
+        updateLayers[column.layerId].data[column.accessor] = {
+          src: column.data.data,
+          width: column.data.shape[1] || 1
+        };
+        updateLayers[column.layerId].length = column.data.shape[0];
+      }
+      const newDataProps = {};
+      const newLayers = [];
+      for (const layerMeta of updateLayers) {
+        const {LayerConstructor, props, sugaredData} = layerMeta;
+        newDataProps.data = sugaredData;
+        for (const propName of props) {
+          newDataProps[propName] = (object, {index, data, target}) => {
+            for (let i = 0; i < data[propName].width - 1; i++) {
+              target[i] = data[propName].src[index * data[propName].width + i];
+            }
+            return target;
+          };
+        }
+        newLayers.push(new LayerConstructor());
+      }
+      this.deck.setProps({layers: newLayers});
     }
   }
 
