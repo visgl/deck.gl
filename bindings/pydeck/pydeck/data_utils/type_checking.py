@@ -12,14 +12,3 @@ def is_pandas_df(obj):
         Returns True if object is a Pandas DataFrame and False otherwise
     """
     return obj.__class__.__module__ == 'pandas.core.frame' and obj.to_records and obj.to_dict
-
-
-def is_numpy_array(obj):
-    """Check if an object is a numpy array
-
-    Returns
-    -------
-    bool
-        Returns True if object is a numpy array, False otherwise
-    """
-    return 'numpy.ndarray' in str(obj.__class__) and obj.to_list
