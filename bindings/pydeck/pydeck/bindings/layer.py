@@ -16,7 +16,7 @@ class BinaryTransportException(Exception):
 
 
 class Layer(JSONMixin):
-    def __init__(self, type, data, id=None, binary_transport=False, **kwargs):
+    def __init__(self, type, data, id=None, binary_transport=None, **kwargs):
         """Configures a deck.gl layer for rendering on a map. Parameters passed
         here will be specific to the particular deck.gl layer that you are choosing to use.
 
@@ -30,11 +30,11 @@ class Layer(JSONMixin):
 
         type : str
             Type of layer to render, e.g., `HexagonLayer`
-        id : str
+        id : str, default None
             Unique name for layer
         data : str or list of dict of {str: Any} or pandas.DataFrame
             Either a URL of data to load in or an array of data
-        binary_transport : bool
+        binary_transport : bool, default None
             Boolean indicating binary data
         **kwargs
             Any of the parameters passable to a deck.gl layer.
