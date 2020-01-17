@@ -3,8 +3,14 @@ Support serializing objects into JSON
 """
 import json
 
-# Ignore deck_widget and mapbox_key attributes
-IGNORE_KEYS = ['mapbox_key', 'deck_widget']
+# Attributes to ignore during JSON serialization
+IGNORE_KEYS = [
+    "mapbox_key",
+    "deck_widget",
+    "binary_data_sets",
+    "_binary_data",
+    "_kwargs",
+]
 
 
 def to_camel_case(snake_case):
@@ -20,10 +26,10 @@ def to_camel_case(snake_case):
     str
         Camel-cased (e.g., "camelCased") version of input string
     """
-    output_str = ''
+    output_str = ""
     should_upper_case = False
     for c in snake_case:
-        if c == '_':
+        if c == "_":
             should_upper_case = True
             continue
         output_str = output_str + c.upper() if should_upper_case else output_str + c
@@ -32,7 +38,11 @@ def to_camel_case(snake_case):
 
 
 def lower_first_letter(s):
-    return s[:1].lower() + s[1:] if s else ''
+    return s[:1].lower() + s[1:] if s else ""
+
+
+def camel_and_lower(w):
+    return lower_first_letter(to_camel_case(w))
 
 
 def lower_camel_case_keys(attrs):
@@ -44,9 +54,9 @@ def lower_camel_case_keys(attrs):
         Dictionary for which all the keys should be converted to camel-case
     """
     for snake_key in list(attrs.keys()):
-        if '_' not in snake_key:
+        if "_" not in snake_key:
             continue
-        camel_key = lower_first_letter(to_camel_case(snake_key))
+        camel_key = camel_and_lower(snake_key)
         attrs[camel_key] = attrs.pop(snake_key)
 
 
@@ -68,7 +78,6 @@ def serialize(serializable):
 
 
 class JSONMixin(object):
-
     def __repr__(self):
         """
         Override of string representation method to return a JSON-ified version of the
