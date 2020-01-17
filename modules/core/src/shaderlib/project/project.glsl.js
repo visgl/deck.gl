@@ -111,12 +111,15 @@ vec2 project_mercator_(vec2 lnglat) {
 // Projects positions (defined by project_uCoordinateSystem) to common space (defined by project_uProjectionMode)
 //
 vec4 project_position(vec4 position, vec3 position64Low) {
-  if (project_uCoordinateSystem == COORDINATE_SYSTEM_LNGLAT && project_uProjectionMode == PROJECTION_MODE_WEB_MERCATOR) {
-    return project_uModelMatrix * vec4(
-      project_mercator_(position.xy) * WORLD_SCALE,
-      project_size(position.z),
-      position.w
-    );
+  // Work around for a Mac+NVIDIA bug https://github.com/uber/deck.gl/issues/4145
+  if (project_uProjectionMode == PROJECTION_MODE_WEB_MERCATOR) {
+    if (project_uCoordinateSystem == COORDINATE_SYSTEM_LNGLAT) {
+      return project_uModelMatrix * vec4(
+        project_mercator_(position.xy) * WORLD_SCALE,
+        project_size(position.z),
+        position.w
+      );
+    }
   }
 
   vec4 position_world = project_uModelMatrix * position;
