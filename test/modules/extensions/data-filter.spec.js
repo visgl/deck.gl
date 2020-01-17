@@ -7,8 +7,9 @@ test('DataFilterExtension#constructor', t => {
   let extension = new DataFilterExtension();
   t.is(extension.opts.filterSize, 1, 'Extension has filterSize');
 
-  extension = new DataFilterExtension({filterSize: 3, softMargin: true});
+  extension = new DataFilterExtension({filterSize: 3, fp64: true});
   t.is(extension.opts.filterSize, 3, 'Extension has filterSize');
+  t.ok(extension.opts.fp64, 'fp64 is enabled');
 
   t.throws(
     () => new DataFilterExtension({filterSize: 5}),
@@ -55,6 +56,18 @@ test('DataFilterExtension', t => {
         t.deepEqual(uniforms.filter_softMax, [18000, 8000], 'has correct uniforms');
         t.is(uniforms.filter_useSoftMargin, true, 'has correct uniforms');
         t.is(uniforms.filter_transformSize, false, 'has correct uniforms');
+      }
+    },
+    {
+      updateProps: {
+        extensions: [new DataFilterExtension({filterSize: 2, fp64: true})]
+      },
+      onAfterUpdate: ({layer}) => {
+        const {uniforms} = layer.state.model.program;
+        t.deepEqual(uniforms.filter_min64High, [10000, 0], 'has double uniforms');
+        t.deepEqual(uniforms.filter_max64High, [20000, 100000], 'has double uniforms');
+        t.deepEqual(uniforms.filter_min, [0, 0], 'has correct uniforms');
+        t.deepEqual(uniforms.filter_softMax, [-2000, -92000], 'has correct uniforms');
       }
     }
   ];
