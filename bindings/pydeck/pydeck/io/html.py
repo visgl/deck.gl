@@ -5,7 +5,6 @@ import time
 import webbrowser
 
 import jinja2
-from IPython.display import IFrame
 
 
 TEMPLATES_PATH = os.path.join(os.path.dirname(__file__), './templates/')
@@ -82,6 +81,7 @@ def deck_to_html(
     if open_browser:
         display_html(realpath(f.name))
     if notebook_display:
+        from IPython.display import IFrame  # noqa
         notebook_to_html_path = relpath(f.name)
         display(IFrame(os.path.join('./', notebook_to_html_path), width=iframe_width, height=iframe_height))  # noqa
     return realpath(f.name)
