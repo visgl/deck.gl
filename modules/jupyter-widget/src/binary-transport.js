@@ -76,15 +76,14 @@ function deserializeMatrix(arr, manager) {
   return renderable;
 }
 
-function makeLayerAccessorProp({width, accessor}) {
-  const prop = {};
-  prop[accessor] = (object, {index, data, target}) => {
-    for (let j = 0; j < width - 1; j++) {
+function makeLayerAccessorPropFunction({width, accessor}) {
+  /* data.src is a layer-specific data dictionary keyed by accessor */
+  return (object, {index, data, target}) => {
+    for (let j = 0; j < width; j++) {
       target[j] = data.src[accessor][index * width + j];
     }
     return target;
   };
-  return prop;
 }
 
 function getLayer(deckLayers, layerId) {
@@ -127,12 +126,12 @@ function constructData(dataBuffer, layerId) {
 }
 
 function makeBinaryAccessorProps(accessors, layerId, dataBuffer) {
-  let dataAccessorProps = {};
+  const dataAccessorProps = {};
   for (const accessor of accessors) {
     // width of matrix
     const width = dataBuffer[layerId][accessor].matrix.shape[1] || 1;
-    const newAccessor = makeLayerAccessorProp({width, accessor});
-    dataAccessorProps = {...dataAccessorProps, ...newAccessor};
+    const newAccessorFunction = makeLayerAccessorPropFunction({width, accessor});
+    dataAccessorProps[accessor] = newAccessorFunction;
   }
   return dataAccessorProps;
 }
@@ -146,10 +145,9 @@ function processDataBuffer({currentLayers, dataBuffer}) {
     const {LayerConstructor, layerProps} = getCurrentLayerProps(currentLayer);
     const accessors = getAccessorNamesFrom(dataBuffer, layerId);
     const accessorProps = makeBinaryAccessorProps(accessors, layerId, dataBuffer);
-
     const combinedProps = {...layerProps, ...accessorProps};
     combinedProps.data = newLayerData;
-    const layer = new LayerConstructor({props: combinedProps});
+    const layer = new LayerConstructor({...combinedProps});
     updatedLayers.push(layer);
   }
 
