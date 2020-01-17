@@ -19,6 +19,10 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v8.0
 
+#### deck.gl [8.0.8] - Jan 16 2019
+
+- [Extension] Add source_target to brushing mode (#4150)
+
 #### deck.gl [8.0.7] - Jan 15 2019
 
 - IconLayer: fix copy texture data when resize (#4151)
