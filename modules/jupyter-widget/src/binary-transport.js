@@ -1,5 +1,7 @@
 // eslint-disable-next-line complexity
 function dtypeToTypedArray(dtype, data) {
+  // Supports converting a numpy-typed array to a JavaScript-typed array
+  // based on a string value dtype and a DataView `data`
   switch (dtype) {
     case 'int8':
       return new Int8Array(data);
@@ -30,7 +32,7 @@ function deserializeMatrix(arr, manager) {
   /* 
    * Data is sent from the pydeck backend
    * in the following format:
-   *
+   *`
    * {'<layer ID>': 
    *     {'<accessor function name e.g. getPosition>': {
    *        {
@@ -61,23 +63,26 @@ function deserializeMatrix(arr, manager) {
     if (renderable[layerId] === undefined) {
       renderable[layerId] = {};
     }
-    // Columns can be nested
-    const convertedBinary = dtypeToTypedArray(datum.matrix.dtype, datum.matrix.data.buffer);
+    // Creates a typed array of the numpy data as a row-major ordered matrix, with shape specified elsewhere
+    const rowMajorOrderMatrix = dtypeToTypedArray(datum.matrix.dtype, datum.matrix.data.buffer);
     renderable[layerId][accessor] = {
       layerId,
       accessor,
       columnName: datum.column_name,
-      matrix: {data: convertedBinary, shape: datum.matrix.shape}
+      matrix: {data: rowMajorOrderMatrix, shape: datum.matrix.shape}
     };
     if (renderable[layerId][accessor].matrix.data.length === 0) {
       console.warn(`No records in accessor ${accessor} belonging to ${layerId}`); // eslint-disable-line
     }
   }
+  // Becomes the data stored within the widget model at `model.get('data_buffer')`
   return renderable;
 }
 
 function makeLayerAccessorPropFunction({width, accessor}) {
-  /* data.src is a layer-specific data dictionary keyed by accessor */
+  // Given a specific accessor name as a string and width as an integer,
+  // returns a function that can be used for lookups on the data at data.src
+  // data.src is a layer-specific data dictionary keyed by accessor
   return (object, {index, data, target}) => {
     for (let j = 0; j < width; j++) {
       target[j] = data.src[accessor][index * width + j];
@@ -87,6 +92,7 @@ function makeLayerAccessorPropFunction({width, accessor}) {
 }
 
 function getLayer(deckLayers, layerId) {
+  // Given a layer id, returns a deck.gl layer from a list of layers
   for (const layer of deckLayers) {
     if (layer.id === layerId) {
       return layer;
@@ -96,15 +102,16 @@ function getLayer(deckLayers, layerId) {
 }
 
 function getCurrentLayerProps(layer) {
+  // Gets a deck.gl layer's current constructor and props
+  // TODO Uses proto, is there a way around this?
   const LayerConstructor = layer.__proto__.constructor; // eslint-disable-line
   const layerProps = layer.props;
-  return {
-    LayerConstructor,
-    layerProps
-  };
+  return {LayerConstructor, layerProps};
 }
 
 function getAccessorNamesFrom(dataBuffer, layerId) {
+  // Given data transferred from pydeck's backend,
+  // get the names of the accessors using binary data on a particular layer
   return Object.keys(dataBuffer[layerId]);
 }
 
