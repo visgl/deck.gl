@@ -2,7 +2,7 @@
   "name": "@deck.gl/extensions",
   "description": "Plug-and-play functionalities for deck.gl layers",
   "license": "MIT",
-  "version": "7.3.13",
+  "version": "7.3.14",
   "publishConfig": {
     "access": "public"
   },

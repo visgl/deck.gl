@@ -19,6 +19,11 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v7.3
 
+
+#### deck.gl [v7.3.14] - Jan 16 2020
+
+- [Extension] Add source_target to brushing mode (#4150)
+
 #### deck.gl [v7.3.13] - Jan 8 2020
 
 - GPUGridAggregator: Add WA for ANGLE specific bug. (#4113)
