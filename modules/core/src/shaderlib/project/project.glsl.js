@@ -113,12 +113,15 @@ vec2 project_mercator_(vec2 lnglat) {
 vec4 project_position(vec4 position, vec3 position64Low) {
   vec4 position_world = project_uModelMatrix * position;
 
-  if (project_uCoordinateSystem == COORDINATE_SYSTEM_LNGLAT && project_uProjectionMode == PROJECTION_MODE_WEB_MERCATOR) {
-    return vec4(
-      project_mercator_(position_world.xy) * WORLD_SCALE,
-      project_size(position_world.z),
-      position_world.w
-    );
+  // Work around for a Mac+NVIDIA bug https://github.com/uber/deck.gl/issues/4145
+  if (project_uProjectionMode == PROJECTION_MODE_WEB_MERCATOR) {
+    if (project_uCoordinateSystem == COORDINATE_SYSTEM_LNGLAT) {
+      return vec4(
+        project_mercator_(position_world.xy) * WORLD_SCALE,
+        project_size(position_world.z),
+        position_world.w
+      );
+    }
   }
   if (project_uProjectionMode == PROJECTION_MODE_WEB_MERCATOR_AUTO_OFFSET &&
     (project_uCoordinateSystem == COORDINATE_SYSTEM_LNGLAT ||
