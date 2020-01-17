@@ -110,7 +110,7 @@ class Layer(JSONMixin):
         self._data = None
         self.binary_transport = binary_transport
         self._binary_data = None
-        if self.binary_transport is False:
+        if not self.binary_transport:
             self.data = data.to_dict(orient="records") if is_pandas_df(data) else data
         else:
             self.data = data

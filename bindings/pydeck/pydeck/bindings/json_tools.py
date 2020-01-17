@@ -8,7 +8,6 @@ IGNORE_KEYS = [
     "mapbox_key",
     "deck_widget",
     "binary_data_sets",
-    "_data",
     "_binary_data",
     "_kwargs",
 ]
