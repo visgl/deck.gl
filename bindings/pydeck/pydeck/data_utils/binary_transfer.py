@@ -31,7 +31,7 @@ def serialize_columns(data_set_cols, obj=None):
             "layer_id": col["layer_id"],
             "column_name": col["column_name"],
             "accessor": col["accessor"],
-            "data": bin_data,
+            "matrix": bin_data,
         })
     return payload
 

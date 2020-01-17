@@ -4,6 +4,7 @@ import {DOMWidgetModel, DOMWidgetView} from '@jupyter-widgets/base';
 import {MODULE_NAME, MODULE_VERSION} from './version';
 
 import {createDeck, updateDeck} from './create-deck';
+import {deserializeMatrix, processDataBuffer} from './binary-transport';
 
 const MAPBOX_CSS_URL = 'https://api.tiles.mapbox.com/mapbox-gl-js/v1.2.1/mapbox-gl.css';
 const ERROR_BOX_CLASSNAME = 'error-box';
@@ -18,14 +19,6 @@ function hideMapboxCSSWarning() {
   }
 }
 
-function getLayer(deckLayers, layerId) {
-  for (const layer of deckLayers) {
-    if (layer.id === layerId) {
-      return layer;
-    }
-  }
-  return null;
-}
 function loadCss(url) {
   const link = document.createElement('link');
   link.type = 'text/css';
@@ -33,50 +26,6 @@ function loadCss(url) {
   link.href = url;
   document.getElementsByTagName('head')[0].appendChild(link);
 }
-
-function dtypeToTypedArray(dtype, data) {
-  switch (dtype) {
-    case 'int8':
-      return new Int8Array(data);
-    case 'uint8':
-      return new Uint8Array(data);
-    case 'int16':
-      return new Int16Array(data);
-    case 'uint16':
-      return new Uint16Array(data);
-    case 'float32':
-      return new Float32Array(data);
-    case 'float64':
-      return new Float64Array(data);
-    case 'int32':
-      return new Int32Array(data);
-    case 'uint32':
-      return new Uint32Array(data);
-    case 'int64':
-      return new BigInt64Array(data); // eslint-disable-line no-undef
-    case 'uint64':
-      return new BigUint64Array(data); // eslint-disable-line no-undef
-    default:
-      throw new Error(`Unrecognized dtype ${dtype}`);
-  }
-}
-
-function deserializeMatrix(arr, manager) {
-  if (!arr) {
-    return null;
-  }
-  const data = [];
-  for (const datum of arr.payload) {
-    data.push({
-      layerId: datum.layer_id,
-      columnName: datum.column_name,
-      accessor: datum.accessor,
-      data: {data: dtypeToTypedArray(datum.data.dtype, datum.data.data), shape: datum.data.shape}
-    });
-  }
-  return data;
-}
-
 // Note: Variables shared explictly between Python and JavaScript use snake_case
 export class DeckGLModel extends DOMWidgetModel {
   defaults() {
@@ -175,58 +124,16 @@ export class DeckGLView extends DOMWidgetView {
 
     this.model.on('change:json_input', this.valueChanged.bind(this), this);
     this.model.on('change:data_buffer', this.dataBufferChanged.bind(this), this);
+    this.dataBufferChanged();
   }
 
   dataBufferChanged() {
-    // Current method for review:
-    // Copy layer configuration
-    console.log('line 183 in widget.js');
     if (this.model.get('data_buffer')) {
-      const cleanBuffer = this.model.get('data_buffer');
-      const updateLayers = {};
-
-      // {
-      //    'layerId': {
-      //      constructor
-      //      props: {}
-      //      data: {
-      //        'accessor': vector
-      //      }
-      //    }
-      // }
-      for (const column of cleanBuffer) {
-        // Get the layer by ID
-        if (!updateLayers[column.layerId]) {
-          const layer = getLayer(this.deck.props.layers, column.layerId);
-          const LayerConstructor = layer.__proto__.constructor; // eslint-disable-line
-          const layerProps = layer.props;
-          updateLayers[column.layerId] = {
-            LayerConstructor,
-            props: layerProps,
-            data: {}
-          };
-        }
-        updateLayers[column.layerId].data[column.accessor] = {
-          src: column.data.data,
-          width: column.data.shape[1] || 1
-        };
-        updateLayers[column.layerId].length = column.data.shape[0];
-      }
-      const newDataProps = {};
-      const newLayers = [];
-      for (const layerMeta of updateLayers) {
-        const {LayerConstructor, props, sugaredData} = layerMeta;
-        newDataProps.data = sugaredData;
-        for (const propName of props) {
-          newDataProps[propName] = (object, {index, data, target}) => {
-            for (let i = 0; i < data[propName].width - 1; i++) {
-              target[i] = data[propName].src[index * data[propName].width + i];
-            }
-            return target;
-          };
-        }
-        newLayers.push(new LayerConstructor());
-      }
+      const currentLayers = this.deck.props.layers;
+      const newLayers = processDataBuffer({
+        currentLayers,
+        dataBuffer: this.model.get('data_buffer')
+      });
       this.deck.setProps({layers: newLayers});
     }
   }
