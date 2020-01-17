@@ -59,10 +59,11 @@ new deck.DataFilterExtension({});
 ## Constructor
 
 ```js
-new DataFilterExtension({filterSize});
+new DataFilterExtension({filterSize, fp64});
 ```
 
 * `filterSize` (Number) - the size of the filter (number of columns to filter by). The data filter can show/hide data based on 1-4 numeric properties of each object. Default `1`.
+* `fp64` (Boolean) - if `true`, use 64-bit precision instead of 32-bit. Default `false`. See the "remarks" section below for use cases and limitations.
 
 
 ## Layer Properties
@@ -163,6 +164,22 @@ When an object is "faded", manipulate its opacity so that it appears more transl
 * Default: `true`
 
 Enable/disable the data filter. If the data filter is disabled, all objects are rendered.
+
+
+## Remarks
+
+### Filter precision
+
+By default, both the filter values and the filter range are uploaded to the GPU as 32-bit floats. When using very large filter values, most commonly Epoch timestamps, 32-bit float representation could lead to an error margin of >1 minute. Enabling 64-bit precision by setting `fp64: true` would allow the filter range to be evaluated more accurately. However, 64-bit support requires one extra attribute slot, edging closer to the WebGL limit of 16 attributes. Depending on the layer that the `DataFilterExtension` is used with, it may interfere with the layer's ability to use other extensions.
+
+If this becomes an issue, an alternative technique is to transform each filter value by subtracting a fixed "origin" value, thus making the numbers smaller:
+
+```js
+getFilterValue: d => d.timestamp - ORIGIN_TS,
+filterRange: [rangeStart - ORIGIN_TS, rangeEnd - ORIGIN_TS]
+```
+
+32-bit float can accurately represent each second within ~190 days (`2^24`). Unless the filter values require both a large span and fine intervals, 32-bit would be sufficient.
 
 
 ## Limitations

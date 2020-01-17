@@ -31,8 +31,6 @@ const TickBar = styled('div', {
   maxWidth: '80vw'
 });
 
-const ANIMATION_SPEED = 30;
-
 export default class RangeInput extends PureComponent {
   constructor(props) {
     super(props);
@@ -61,9 +59,9 @@ export default class RangeInput extends PureComponent {
   }
 
   _animate() {
-    const {min, max, value} = this.props;
+    const {min, max, value, animationSpeed} = this.props;
     const span = value[1] - value[0];
-    let newValueMin = value[0] + ANIMATION_SPEED;
+    let newValueMin = value[0] + animationSpeed;
     if (newValueMin + span >= max) {
       newValueMin = min;
     }
