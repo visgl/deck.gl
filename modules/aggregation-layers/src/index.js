@@ -31,5 +31,5 @@ export {AGGREGATION_OPERATION} from './utils/aggregation-operation-utils';
 export {default as HeatmapLayer} from './heatmap-layer/heatmap-layer';
 export {default as _GPUGridAggregator} from './utils/gpu-grid-aggregation/gpu-grid-aggregator';
 export {default as _CPUAggregator} from './utils/cpu-aggregator';
-
+export {default as _AggregationLayer} from './aggregation-layer';
 export {default as _BinSorter} from './utils/bin-sorter';

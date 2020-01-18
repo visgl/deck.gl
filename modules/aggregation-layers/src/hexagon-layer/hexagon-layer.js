@@ -66,6 +66,9 @@ const defaultProps = {
 };
 
 export default class HexagonLayer extends AggregationLayer {
+  shouldUpdateState({changeFlags}) {
+    return changeFlags.somethingChanged;
+  }
   initializeState() {
     const cpuAggregator = new CPUAggregator({
       getAggregator: props => props.hexagonAggregator,
@@ -85,9 +88,9 @@ export default class HexagonLayer extends AggregationLayer {
   }
 
   updateState(opts) {
+
     super.updateState(opts);
     const {cpuAggregator} = this.state;
-    const oldLayerData = cpuAggregator.state.layerData;
     this.setState({
       // make a copy of the internal state of cpuAggregator for testing
       aggregatorState: cpuAggregator.updateState(opts, {
@@ -96,10 +99,8 @@ export default class HexagonLayer extends AggregationLayer {
       })
     });
 
-    if (oldLayerData !== cpuAggregator.state.layerData) {
-      const {hexagonVertices} = cpuAggregator.state.layerData;
-      this.updateRadiusAngle(hexagonVertices);
-    }
+    const {hexagonVertices} = cpuAggregator.state.layerData;
+    this.updateRadiusAngle(hexagonVertices);
   }
 
   updateRadiusAngle(vertices) {
