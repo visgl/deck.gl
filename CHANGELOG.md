@@ -19,27 +19,32 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v8.0
 
-#### deck.gl [8.0.8] - Jan 16 2019
+#### deck.gl [8.0.9] - Jan 18 2020
+
+- Fix H3HexagonLayer update when viewport jumps (#4158)
+- Voodoo fix for Mac+NVIDIA bug (#4166)
+
+#### deck.gl [8.0.8] - Jan 16 2020
 
 - [Extension] Add source_target to brushing mode (#4150)
 
-#### deck.gl [8.0.7] - Jan 15 2019
+#### deck.gl [8.0.7] - Jan 15 2020
 
 - IconLayer: fix copy texture data when resize (#4151)
 - Bump mjolnir.js dependency (#4141)
 
-#### deck.gl [8.0.6] - Jan 13 2019
+#### deck.gl [8.0.6] - Jan 13 2020
 
 - IconLayer: use load instead of loadImage to load icons (#4137)
 - Bump loaders.gl (#4136)
 - Remove unused dependencies from geo-layers (#4127)
 
-#### deck.gl [8.0.5] - Jan 9 2019
+#### deck.gl [8.0.5] - Jan 9 2020
 
 - [react] explicitly set deck canvas position (#4124)
 - Fix support for luma.gl buffers as external attributes (#4121)
 
-#### deck.gl [8.0.4] - Jan 8 2019
+#### deck.gl [8.0.4] - Jan 8 2020
 
 - Fix randomly failed icon layer render test (#4079)
 - fix react key warning (#4098)
@@ -48,7 +53,7 @@ Ref: http://keepachangelog.com/en/0.3.0/
 - fix cursor style in React (#4118)
 - Reduce JupyterLab bundle size (#4110)
 
-#### deck.gl [8.0.3] - Jan 3 2019
+#### deck.gl [8.0.3] - Jan 3 2020
 
 - warn if initialViewState and viewState are both present (#4078)
 - @deck.gl/jupyter-widget: Change version variable for CDN-based Jupyter Lab widget (#4087)
@@ -58,7 +63,7 @@ Ref: http://keepachangelog.com/en/0.3.0/
 - @deck.gl/jupyter-widget: Read version and module name from bundle for Jupyter Lab (#4089)
 - @deck.gl/react: pass viewports to children with deckGLViewProps (#4092)
 
-#### deck.gl [8.0.2] - Jan 2 2019
+#### deck.gl [8.0.2] - Jan 2 2020
 
 - Fix flyToInterpolator crash when transitioning to the same viewport center (#4084)
 
