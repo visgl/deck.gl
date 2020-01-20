@@ -89,7 +89,7 @@ export default class HexagonLayer extends AggregationLayer {
 
   updateState(opts) {
     super.updateState(opts);
-    const {cpuAggregator} = this.state;
+    const {cpuAggregator, hexagonVertices} = this.state;
     this.setState({
       // make a copy of the internal state of cpuAggregator for testing
       aggregatorState: cpuAggregator.updateState(opts, {
@@ -97,14 +97,33 @@ export default class HexagonLayer extends AggregationLayer {
         attributes: this.getAttributes()
       })
     });
-
-    const {hexagonVertices} = cpuAggregator.state.layerData;
-    this.updateRadiusAngle(hexagonVertices);
+    // if user provided custom aggregator and returns hexagonVertices,
+    // Need to recalculate radius and angle based on vertices
+    const oldVertices = hexagonVertices;
+    if (cpuAggregator.state.layerData && cpuAggregator.state.layerData.hexagonVertices) {
+      if (oldVertices !== cpuAggregator.state.layerData.hexagonVertices) {
+        this.setState({hexagonVertices});
+        this.updateRadiusAngleFromVertices(hexagonVertices);
+      }
+    } else {
+      // update radius angle by viewport
+      this.updateRadiusAngle();
+    }
   }
 
   updateRadiusAngle(vertices) {
-    let angle = 90;
-    let radius;
+    const {viewport} = this.context;
+    const {unitsPerMeter} = viewport.getDistanceScales();
+
+    const {cpuAggregator} = this.state;
+    const {radiusCommon} = cpuAggregator.state.layerData;
+    const radius = radiusCommon / unitsPerMeter[0];
+
+    // convert radius in common to meter
+    this.setState({angle: 90, radius});
+  }
+
+  updateRadiusAngleFromVertices(vertices) {
     const {viewport} = this.context;
     const {unitsPerMeter} = viewport.getDistanceScales();
 
@@ -128,15 +147,11 @@ export default class HexagonLayer extends AggregationLayer {
       const dxy = Math.sqrt(dx * dx + dy * dy);
 
       // Calculate angle that the perpendicular hexagon vertex axis is tilted
-      angle = ((Math.acos(dx / dxy) * -Math.sign(dy)) / Math.PI) * 180 + 90;
-      radius = dxy / 2 / unitsPerMeter[0];
-    } else {
-      const {cpuAggregator} = this.state;
-      const {radiusCommon} = cpuAggregator.state.layerData;
-      radius = radiusCommon / unitsPerMeter[0];
+      const angle = ((Math.acos(dx / dxy) * -Math.sign(dy)) / Math.PI) * 180 + 90;
+      const radius = dxy / 2 / unitsPerMeter[0];
+
+      this.setState({angle, radius});
     }
-    // convert radius in common to meter
-    this.setState({angle, radius});
   }
 
   getPickingInfo({info}) {

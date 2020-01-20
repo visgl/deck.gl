@@ -86,25 +86,28 @@ export function getPointsCenter(data, aggregationParams) {
   const positions = attributes.positions.value;
   const {size} = attributes.positions.getAccessor();
 
-  const bounds = [
-    [Infinity, -Infinity], // pt[0]
-    [Infinity, -Infinity] // pt[1]
-  ];
+  let minX = Infinity;
+  let minY = Infinity;
+  let maxX = -Infinity;
+  let maxY = -Infinity;
+  let i;
 
-  for (let i = 0; i < size * data.length; i += size) {
-    const arrayIsFinite = Number.isFinite(positions[i]) && Number.isFinite(positions[i + 1]);
+  for (i = 0; i < size * data.length; i += size) {
+    const x = positions[i];
+    const y = positions[i + 1];
+    const arrayIsFinite = Number.isFinite(x) && Number.isFinite(y);
 
     if (arrayIsFinite) {
-      bounds[0][0] = Math.min(positions[i], bounds[0][0]);
-      bounds[0][1] = Math.max(positions[i], bounds[0][1]);
-      bounds[1][0] = Math.min(positions[i + 1], bounds[1][0]);
-      bounds[1][1] = Math.max(positions[i + 1], bounds[1][1]);
+      minX = Math.min(x, minX);
+      maxX = Math.max(x, maxX);
+      minY = Math.min(y, minY);
+      maxY = Math.max(y, maxY);
     }
   }
 
   // return center
-  return bounds.every(b => b.every(Number.isFinite))
-    ? [(bounds[0][0] + bounds[0][1]) / 2, (bounds[1][0] + bounds[1][1]) / 2]
+  return [minX, minY, maxX, maxY].every(Number.isFinite)
+    ? [(minX + maxX) / 2, (minY + maxY) / 2]
     : null;
 }
 
