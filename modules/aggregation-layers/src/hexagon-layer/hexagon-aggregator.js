@@ -34,8 +34,8 @@ export function pointToHexbin(props, aggregationParams) {
   const {data, radius} = props;
   const {viewport, attributes} = aggregationParams;
   // get hexagon radius in mercator world unit
-  const dataCenter = data.length ? getPointsCenter(data, aggregationParams) : null;
-  const radiusCommon = getRadiusInCommon(radius, viewport, dataCenter);
+  const centerLngLat = data.length ? getPointsCenter(data, aggregationParams) : null;
+  const radiusCommon = getRadiusInCommon(radius, viewport, centerLngLat);
 
   // add world space coordinates to points
   const screenPoints = [];
@@ -73,7 +73,8 @@ export function pointToHexbin(props, aggregationParams) {
       position: viewport.unprojectFlat([hex.x, hex.y]),
       points: hex,
       index
-    }))
+    })),
+    radiusCommon
   };
 }
 

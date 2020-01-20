@@ -104,8 +104,10 @@ export default class HexagonLayer extends AggregationLayer {
   }
 
   updateRadiusAngle(vertices) {
-    let {radius} = this.props;
     let angle = 90;
+    let radius;
+    const {viewport} = this.context;
+    const {unitsPerMeter} = viewport.getDistanceScales();
 
     if (Array.isArray(vertices)) {
       if (vertices.length < 6) {
@@ -117,8 +119,7 @@ export default class HexagonLayer extends AggregationLayer {
       const vertex3 = vertices[3];
 
       // transform to space coordinates
-      const {viewport} = this.context;
-      const {unitsPerMeter} = viewport.getDistanceScales();
+
       const spaceCoord0 = this.projectFlat(vertex0);
       const spaceCoord3 = this.projectFlat(vertex3);
 
@@ -130,8 +131,13 @@ export default class HexagonLayer extends AggregationLayer {
       // Calculate angle that the perpendicular hexagon vertex axis is tilted
       angle = ((Math.acos(dx / dxy) * -Math.sign(dy)) / Math.PI) * 180 + 90;
       radius = dxy / 2 / unitsPerMeter[0];
-    }
+    } else {
 
+      const {cpuAggregator} = this.state;
+      const {radiusCommon} = cpuAggregator.state.layerData;
+      radius = radiusCommon / unitsPerMeter[0];
+    }
+    // convert radius in common to meter
     this.setState({angle, radius});
   }
 
