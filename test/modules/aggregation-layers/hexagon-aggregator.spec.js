@@ -104,8 +104,6 @@ test('pointToHexbin#radius', t => {
   const result = pointToHexbin(props, aggregationParams);
   t.ok(typeof result === 'object', 'should work with iterables');
   t.ok(typeof result.radiusCommon === 'number', 'should return radiusCommon');
-  console.log(result);
-
 
   t.end();
 });

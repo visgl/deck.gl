@@ -103,10 +103,9 @@ export function getPointsCenter(data, aggregationParams) {
   }
 
   // return center
-  return bounds.every(b => b.every(Number.isFinite)) ? [
-    (bounds[0][0] + bounds[0][1]) / 2,
-    (bounds[1][0] + bounds[1][1]) / 2
-  ] : null;
+  return bounds.every(b => b.every(Number.isFinite))
+    ? [(bounds[0][0] + bounds[0][1]) / 2, (bounds[1][0] + bounds[1][1]) / 2]
+    : null;
 }
 
 /**

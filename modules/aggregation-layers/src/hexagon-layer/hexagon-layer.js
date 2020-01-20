@@ -88,7 +88,6 @@ export default class HexagonLayer extends AggregationLayer {
   }
 
   updateState(opts) {
-
     super.updateState(opts);
     const {cpuAggregator} = this.state;
     this.setState({
@@ -132,7 +131,6 @@ export default class HexagonLayer extends AggregationLayer {
       angle = ((Math.acos(dx / dxy) * -Math.sign(dy)) / Math.PI) * 180 + 90;
       radius = dxy / 2 / unitsPerMeter[0];
     } else {
-
       const {cpuAggregator} = this.state;
       const {radiusCommon} = cpuAggregator.state.layerData;
       radius = radiusCommon / unitsPerMeter[0];
