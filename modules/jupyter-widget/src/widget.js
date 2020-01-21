@@ -128,13 +128,13 @@ export class DeckGLView extends DOMWidgetView {
   }
 
   dataBufferChanged() {
+    const jsonProps = this.model.get('json_input');
     if (this.model.get('data_buffer')) {
-      const currentLayers = this.deck.props.layers;
-      const newLayers = processDataBuffer({
-        currentLayers,
-        dataBuffer: this.model.get('data_buffer')
+      const convertedJsonProps = processDataBuffer({
+        dataBuffer: this.model.get('data_buffer'),
+        jsonProps
       });
-      this.deck.setProps({layers: newLayers});
+      this.deck.setProps(convertedJsonProps);
     }
   }
 

@@ -37,7 +37,7 @@ const jsonConverterConfiguration = {
 
 registerLoaders([CSVLoader, Tile3DLoader]);
 
-const jsonConverter = new deck.JSONConverter({
+export const jsonConverter = new deck.JSONConverter({
   configuration: jsonConverterConfiguration
 });
 

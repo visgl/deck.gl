@@ -1,3 +1,5 @@
+import {jsonConverter} from './create-deck';
+
 // eslint-disable-next-line complexity
 function dtypeToTypedArray(dtype, data) {
   // Supports converting a numpy-typed array to a JavaScript-typed array
@@ -91,24 +93,6 @@ function makeLayerAccessorPropFunction({width, accessor}) {
   };
 }
 
-function getLayer(deckLayers, layerId) {
-  // Given a layer id, returns a deck.gl layer from a list of layers
-  for (const layer of deckLayers) {
-    if (layer.id === layerId) {
-      return layer;
-    }
-  }
-  return null;
-}
-
-function getCurrentLayerProps(layer) {
-  // Gets a deck.gl layer's current constructor and props
-  // TODO Uses proto, is there a way around this?
-  const LayerConstructor = layer.__proto__.constructor; // eslint-disable-line
-  const layerProps = layer.props;
-  return {LayerConstructor, layerProps};
-}
-
 function getAccessorNamesFrom(dataBuffer, layerId) {
   // Given data transferred from pydeck's backend,
   // get the names of the accessors using binary data on a particular layer
@@ -143,22 +127,19 @@ function makeBinaryAccessorProps(accessors, layerId, dataBuffer) {
   return dataAccessorProps;
 }
 
-function processDataBuffer({currentLayers, dataBuffer}) {
-  const updatedLayers = [];
-  const updateLayerIds = Object.keys(dataBuffer);
-  for (const layerId of updateLayerIds) {
-    const currentLayer = getLayer(currentLayers, layerId);
-    const newLayerData = constructData(dataBuffer, layerId);
-    const {LayerConstructor, layerProps} = getCurrentLayerProps(currentLayer);
-    const accessors = getAccessorNamesFrom(dataBuffer, layerId);
-    const accessorProps = makeBinaryAccessorProps(accessors, layerId, dataBuffer);
-    const combinedProps = {...layerProps, ...accessorProps};
-    combinedProps.data = newLayerData;
-    const layer = new LayerConstructor({...combinedProps});
-    updatedLayers.push(layer);
+function processDataBuffer({dataBuffer, jsonProps}) {
+  const convertedJsonProps = jsonConverter(jsonProps);
+  for (let i = 0; i < convertedJsonProps.layers.length; i++) {
+    const layer = convertedJsonProps.layers[i];
+    layer.data = constructData(dataBuffer, layer.id);
+    // use https://deck.gl/#/documentation/deckgl-api-reference/layers/layer?section=state-object- instead
+    const accessors = getAccessorNamesFrom(dataBuffer, layer.id);
+    const accessorProps = makeBinaryAccessorProps(accessors, layer.id, dataBuffer);
+    for (const accessor of accessors) {
+      layer[accessor] = accessorProps[accessor];
+    }
   }
-
-  return updatedLayers;
+  return convertedJsonProps;
 }
 
 export {deserializeMatrix, processDataBuffer};
