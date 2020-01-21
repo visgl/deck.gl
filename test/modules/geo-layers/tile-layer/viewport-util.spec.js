@@ -110,7 +110,7 @@ function getTileIds(tiles) {
   for (const tile of tiles) {
     ids.push(`${tile.x},${tile.y},${tile.z}`);
   }
-  return Array.from(ids).sort();
+  return ids.sort();
 }
 
 test('getTileIndices', t => {
