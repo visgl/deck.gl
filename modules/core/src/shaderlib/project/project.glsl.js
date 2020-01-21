@@ -22,18 +22,18 @@ import {COORDINATE_SYSTEM, PROJECTION_MODE} from '../../lib/constants';
 
 // We are generating these from the js code in constants.js
 const COORDINATE_SYSTEM_GLSL_CONSTANTS = Object.keys(COORDINATE_SYSTEM)
-  .map(key => `const float COORDINATE_SYSTEM_${key} = ${COORDINATE_SYSTEM[key]}.;`)
+  .map(key => `const int COORDINATE_SYSTEM_${key} = ${COORDINATE_SYSTEM[key]};`)
   .join('');
 const PROJECTION_MODE_GLSL_CONSTANTS = Object.keys(PROJECTION_MODE)
-  .map(key => `const float PROJECTION_MODE_${key} = ${PROJECTION_MODE[key]}.;`)
+  .map(key => `const int PROJECTION_MODE_${key} = ${PROJECTION_MODE[key]};`)
   .join('');
 
 export default `\
 ${COORDINATE_SYSTEM_GLSL_CONSTANTS}
 ${PROJECTION_MODE_GLSL_CONSTANTS}
 
-uniform float project_uCoordinateSystem;
-uniform float project_uProjectionMode;
+uniform int project_uCoordinateSystem;
+uniform int project_uProjectionMode;
 uniform float project_uScale;
 uniform bool project_uWrapLongitude;
 uniform float project_uAntimeridian;
