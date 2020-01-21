@@ -1,4 +1,4 @@
-import {jsonConverter} from './create-deck';
+import jsonConverter from './create-deck';
 
 // eslint-disable-next-line complexity
 function dtypeToTypedArray(dtype, data) {
@@ -31,11 +31,11 @@ function dtypeToTypedArray(dtype, data) {
 }
 
 function deserializeMatrix(arr, manager) {
-  /* 
+  /*
    * Data is sent from the pydeck backend
    * in the following format:
    *`
-   * {'<layer ID>': 
+   * {'<layer ID>':
    *     {'<accessor function name e.g. getPosition>': {
    *        {
    *          layer_id: <duplicate ID of layer as above>
@@ -128,16 +128,17 @@ function makeBinaryAccessorProps(accessors, layerId, dataBuffer) {
 }
 
 function processDataBuffer({dataBuffer, jsonProps}) {
-  const convertedJsonProps = jsonConverter(jsonProps);
+  jsonConverter.convert(jsonProps);
+  const convertedJsonProps = jsonConverter.convertedJson;
   for (let i = 0; i < convertedJsonProps.layers.length; i++) {
     const layer = convertedJsonProps.layers[i];
-    layer.data = constructData(dataBuffer, layer.id);
+    // Replace data on every layer prop
+    const dataProp = constructData(dataBuffer, layer.id);
     // use https://deck.gl/#/documentation/deckgl-api-reference/layers/layer?section=state-object- instead
     const accessors = getAccessorNamesFrom(dataBuffer, layer.id);
     const accessorProps = makeBinaryAccessorProps(accessors, layer.id, dataBuffer);
-    for (const accessor of accessors) {
-      layer[accessor] = accessorProps[accessor];
-    }
+    const clonedLayer = layer.clone({...accessorProps, data: dataProp});
+    convertedJsonProps.layers[i] = clonedLayer;
   }
   return convertedJsonProps;
 }
