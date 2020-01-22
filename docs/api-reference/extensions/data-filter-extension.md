@@ -170,7 +170,7 @@ Enable/disable the data filter. If the data filter is disabled, all objects are 
 
 ### Filter precision
 
-By default, both the filter values and the filter range are uploaded to the GPU as 32-bit floats. When using very large filter values, most commonly Epoch timestamps, 32-bit float representation could lead to an error margin of >1 minute. Enabling 64-bit precision by setting `fp64: true` would allow the filter range to be evaluated more accurately. However, 64-bit support requires one extra attribute slot, edging closer to the WebGL limit of 16 attributes. Depending on the layer that the `DataFilterExtension` is used with, it may interfere with the layer's ability to use other extensions.
+By default, both the filter values and the filter range are uploaded to the GPU as 32-bit floats. When using very large filter values, most commonly Epoch timestamps, 32-bit float representation could lead to an error margin of >1 minute. Enabling 64-bit precision by setting `fp64: true` would allow the filter range to be evaluated more accurately. However, 64-bit support requires one extra attribute slot, which increases the risk of exceeding the hardware limit on vertex attributes. Depending on the layer that the `DataFilterExtension` is used with, it may interfere with the layer's ability to use other extensions.
 
 If this becomes an issue, an alternative technique is to transform each filter value by subtracting a fixed "origin" value, thus making the numbers smaller:
 
@@ -179,7 +179,7 @@ getFilterValue: d => d.timestamp - ORIGIN_TS,
 filterRange: [rangeStart - ORIGIN_TS, rangeEnd - ORIGIN_TS]
 ```
 
-32-bit float can accurately represent each second within ~190 days (`2^24`). Unless the filter values require both a large span and fine intervals, 32-bit would be sufficient.
+32-bit floats can accurately represent each second within ~190 days (`2^24`). Unless the filter values require both a large span and fine granularity, 32-bit floats should be sufficient.
 
 
 ## Limitations

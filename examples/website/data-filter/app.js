@@ -26,7 +26,9 @@ const MS_PER_DAY = 8.64e7;
 
 const dataFilter = new DataFilterExtension({
   filterSize: 1,
-  fp64: false // enable for higher precision
+  // Enable for higher precision, e.g. 1 second granularity
+  // See DataFilterExtension documentation for how to pick precision
+  fp64: false
 });
 
 export default class App extends Component {
