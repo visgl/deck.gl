@@ -106,29 +106,30 @@ vec2 project_mercator_(vec2 lnglat) {
 // Projects lnglats (or meter offsets, depending on mode) to common space
 //
 vec4 project_position(vec4 position, vec2 position64xyLow) {
+  // Apply model matrix
+  vec4 position_world = project_uModelMatrix * position;
+
   // TODO - why not simply subtract center and fall through?
   if (project_uCoordinateSystem == COORDINATE_SYSTEM_LNG_LAT) {
-    return project_uModelMatrix * vec4(
-      project_mercator_(position.xy) * WORLD_SCALE * project_uScale,
-      project_size(position.z),
-      position.w
+    return vec4(
+      project_mercator_(position_world.xy) * WORLD_SCALE * project_uScale,
+      project_size(position_world.z),
+      position_world.w
     );
   }
 
   if (project_uCoordinateSystem == COORDINATE_SYSTEM_LNGLAT_AUTO_OFFSET) {
     // Subtract high part of 64 bit value. Convert remainder to float32, preserving precision.
-    float X = position.x - project_uCoordinateOrigin.x;
-    float Y = position.y - project_uCoordinateOrigin.y;
-    return project_offset_(vec4(X + position64xyLow.x, Y + position64xyLow.y, position.z, position.w));
+    float X = position_world.x - project_uCoordinateOrigin.x;
+    float Y = position_world.y - project_uCoordinateOrigin.y;
+    return project_offset_(vec4(X + position64xyLow.x, Y + position64xyLow.y, position_world.z, position_world.w));
   }
 
   if (project_uCoordinateSystem == COORDINATE_SYSTEM_LNGLAT_OFFSETS) {
-    return project_offset_(position);
+    return project_offset_(position_world);
   }
 
   // METER_OFFSETS or IDENTITY
-  // Apply model matrix
-  vec4 position_world = project_uModelMatrix * position;
   if (project_uCoordinateSystem == COORDINATE_SYSTEM_IDENTITY) {
     position_world.xyz -= project_uCoordinateOrigin;
     // Translation is already added to the high parts
