@@ -22,9 +22,14 @@ const INITIAL_VIEW_STATE = {
   bearing: 0
 };
 
-const MS_PER_DAY = 8.64e7; // milliseconds in a day
+const MS_PER_DAY = 8.64e7;
 
-const dataFilter = new DataFilterExtension({filterSize: 1});
+const dataFilter = new DataFilterExtension({
+  filterSize: 1,
+  // Enable for higher precision, e.g. 1 second granularity
+  // See DataFilterExtension documentation for how to pick precision
+  fp64: false
+});
 
 export default class App extends Component {
   constructor(props) {
@@ -54,7 +59,7 @@ export default class App extends Component {
     }
     return data.reduce(
       (range, d) => {
-        const t = d.timestamp / MS_PER_DAY;
+        const t = d.timestamp;
         range[0] = Math.min(range[0], t);
         range[1] = Math.max(range[1], t);
         return range;
@@ -88,7 +93,7 @@ export default class App extends Component {
             return [255 - r * 15, r * 5, r * 10];
           },
 
-          getFilterValue: d => d.timestamp / MS_PER_DAY, // in days
+          getFilterValue: d => d.timestamp,
           filterRange: [filterValue[0], filterValue[1]],
           filterSoftRange: [
             filterValue[0] * 0.9 + filterValue[1] * 0.1,
@@ -125,7 +130,7 @@ export default class App extends Component {
   }
 
   _formatLabel(t) {
-    const date = new Date(t * MS_PER_DAY);
+    const date = new Date(t);
     return `${date.getUTCFullYear()}/${date.getUTCMonth() + 1}`;
   }
 
@@ -155,6 +160,7 @@ export default class App extends Component {
             min={timeRange[0]}
             max={timeRange[1]}
             value={filterValue}
+            animationSpeed={MS_PER_DAY * 30}
             formatLabel={this._formatLabel}
             onChange={({value}) => this.setState({filterValue: value})}
           />
