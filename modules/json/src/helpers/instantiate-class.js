@@ -1,6 +1,6 @@
 import convertFunctions from './convert-functions';
 
-// This attempts to instantate a class. Eiher as a class or as a react component
+// This attempts to instantate a class. Either as a class or as a react component
 export function instantiateClass(type, props, configuration) {
   // Find the class
   const Class = configuration.classes[type];

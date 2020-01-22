@@ -28,7 +28,7 @@ export default function convertFunctions(props, configuration) {
     }
 
     // Invalid functions return null, show default value instead.
-    if (propValue) {
+    if (propValue !== null) {
       replacedProps[propName] = propValue;
     }
   }
