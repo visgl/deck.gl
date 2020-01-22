@@ -104,7 +104,7 @@ test('convertFunctions#asFunctions', t => {
   t.end();
 });
 
-test.only('convertFunctions#assureAllKeysPresent', t => {
+test('convertFunctions#assureAllKeysPresent', t => {
   const EXAMPLE_PROPS = {
     data: 'shp.geojson',
     stroked: true,
