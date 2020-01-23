@@ -84,6 +84,6 @@ Here are the performance numbers for clipping randomly generated points (same se
 |-|-|-|-|
 |10K|411|6900| <b style="color:green">16X</b> |
 |1M|4|4200| <b style="color:green">1000X</b> |
-|10M|378m|3120| <b style="color:green">8000X</b> |
+|10M|0.378|3120| <b style="color:green">8000X</b> |
 
 Above number are taken on a 'MacbookPro' with '2.6 GHz Intel Core i7' CPU and 'Radeon Pro 560X 4 GB' GPU.
