@@ -185,7 +185,7 @@ export default class HexagonLayer extends AggregationLayer {
     const SubLayerClass = this.getSubLayerClass('hexagon-cell', ColumnLayer);
     const updateTriggers = this._getSublayerUpdateTriggers();
 
-    const geometry = vertices.length ? {vertices, radius: 1} : {radius, angle};
+    const geometry = vertices && vertices.length ? {vertices, radius: 1} : {radius, angle};
     return new SubLayerClass(
       {
         ...geometry,
