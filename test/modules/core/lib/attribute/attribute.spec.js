@@ -424,9 +424,46 @@ test('Attribute#updateBuffer', t => {
         result,
         `${testCase.title} updates attribute buffer`
       );
+
+      attribute.delete();
     }
   }
 
+  t.end();
+});
+
+test('Attribute#updateBuffer#noAlloc', t => {
+  let value;
+  const attribute = new Attribute(gl, {
+    id: 'values',
+    vertexOffset: 1,
+    size: 2,
+    update: (attr, {data}) => {
+      attr.value = data;
+    },
+    noAlloc: true
+  });
+
+  // 1 vertex + 1 vertexOffset => 2 vertices * 2 floats => 16 bytes
+  // overallocation x 2
+  value = new Float32Array([1, 1]);
+  attribute.setNeedsUpdate(true);
+  attribute.updateBuffer({data: value});
+  t.is(attribute.buffer.byteLength, 32, `overallocated buffer for ${value.byteLength} bytes`);
+
+  // 2 vertices + 1 vertexOffset => 3 vertices * 2 floats => 24 bytes
+  value = new Float32Array([1, 1, 2, 2]);
+  attribute.setNeedsUpdate(true);
+  attribute.updateBuffer({data: value});
+  t.is(attribute.buffer.byteLength, 32, `buffer is big enough ${value.byteLength} bytes`);
+
+  // 4 vertices + 1 vertexOffset => 5 vertices * 2 floats => 40 bytes
+  value = new Float32Array([1, 1, 2, 2, 3, 3, 4, 4]);
+  attribute.setNeedsUpdate(true);
+  attribute.updateBuffer({data: value});
+  t.is(attribute.buffer.byteLength, 80, `re-allocated buffer for ${value.byteLength} bytes`);
+
+  attribute.delete();
   t.end();
 });
 
