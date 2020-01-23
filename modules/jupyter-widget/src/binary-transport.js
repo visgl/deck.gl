@@ -85,66 +85,37 @@ function deserializeMatrix(arr, manager) {
   return renderable;
 }
 
-function makeDataLayerAttribute({width, accessor, dataframe}) {
-  // Given a specific accessor name as a string and width as an integer,
-  // returns a function that can be used for lookups on the dataframe
-  // here dataframe.src is a layer-specific data dictionary keyed by accessor
-  const dataPropAttribute = {};
-  dataPropAttribute.size = width;
-  dataPropAttribute.value = dataframe[accessor];
-  return dataPropAttribute;
-}
-
 function getAccessorNamesFrom(dataBuffer, layerId) {
   // Given data transferred from pydeck's backend,
   // get the names of the accessors using binary data on a particular layer
   return Object.keys(dataBuffer[layerId]);
 }
 
-function constructData(dataBuffer, layerId) {
-  const src = {};
-  let length = 0;
+function constructDataProp(dataBuffer, layerId) {
+  const src = {length: 0, attributes: {}};
   const accessors = getAccessorNamesFrom(dataBuffer, layerId);
   // For each accessor, we have a row major ordered matrix of data,
   // represented as a single vector under `src[accessor]`
   for (const accessor of accessors) {
     const currentData = dataBuffer[layerId][accessor];
-    length = Math.max(currentData.matrix.shape[0], length);
-    src[accessor] = currentData.matrix.data;
+    src.length = Math.max(currentData.matrix.shape[0], src.length);
+    src.attributes[accessor] = {
+      size: currentData.matrix.shape[1] || 1, // width
+      value: currentData.matrix.data
+    };
   }
-  return {
-    src,
-    length
-  };
-}
-
-function makeDataAttributeProps({accessors, layerId, dataBuffer, dataframe}) {
-  const dataAccessorProps = {};
-  for (const accessor of accessors) {
-    // width of matrix
-    const width = dataBuffer[layerId][accessor].matrix.shape[1] || 1;
-    const newAccessorFunction = makeDataLayerAttribute({width, accessor, dataframe});
-    dataAccessorProps[accessor] = newAccessorFunction;
-  }
-  return dataAccessorProps;
+  return src;
 }
 
 function processDataBuffer({dataBuffer, jsonProps}) {
+  // Takes JSON props and combines them with the binary data buffer
   jsonConverter.convert(jsonProps);
   const convertedJsonProps = jsonConverter.convertedJson;
   for (let i = 0; i < convertedJsonProps.layers.length; i++) {
     const layer = convertedJsonProps.layers[i];
     // Replace data on every layer prop
-    const dataProp = constructData(dataBuffer, layer.id);
-    // use https://deck.gl/#/documentation/deckgl-api-reference/layers/layer?section=state-object- instead
-    const accessors = getAccessorNamesFrom(dataBuffer, layer.id);
-    dataProp.attributes = makeDataAttributeProps({
-      accessors,
-      layerId: layer.id,
-      dataBuffer,
-      dataframe: dataProp.src
-    });
-    const clonedLayer = layer.clone({data: dataProp});
+    const data = constructDataProp(dataBuffer, layer.id);
+    const clonedLayer = layer.clone({data});
     convertedJsonProps.layers[i] = clonedLayer;
   }
   return convertedJsonProps;
