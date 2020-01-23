@@ -78,4 +78,12 @@ Above proposed GPU Filtering runs in parallel and the number polygons or polygon
 
 Texture sampling is not cheap and it comes with some overhead. But when number of points to be clipped and there are multiple polygons, the overhead could much smaller than the gains.
 
-TODO: performance numbers.
+Here are the performance numbers for clipping randomly generated points (same set of points are used for both CPU and GPU) to a 10 side convex polygon. For CPU clipping, I used [@turf/boolean-within](https://www.npmjs.com/package/@turf/boolean-within)
+
+|#Points| CPU #Iterations/Second | GPU #Iterations/Second | GPU is faster by |
+|-|-|-|-|
+|10K|411|6900| <b style="color:green">16X</b> |
+|1M|4|4200| <b style="color:green">1000X</b> |
+|10M|378m|3120| <b style="color:green">8000X</b> |
+
+Above number are taken on a 'MacbookPro' with '2.6 GHz Intel Core i7' CPU and 'Radeon Pro 560X 4 GB' GPU.
