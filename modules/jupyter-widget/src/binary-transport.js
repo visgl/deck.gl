@@ -5,30 +5,30 @@ import jsonConverter from './create-deck';
 // https://deck.gl/#/documentation/developer-guide/performance-optimization?section=supply-attributes-directly
 
 // eslint-disable-next-line complexity
-function dtypeToTypedArray(dtype, data) {
+function dtypeToTypedArray(dtype) {
   // Supports converting a numpy-typed array to a JavaScript-typed array
   // based on a string value dtype and a DataView `data`
   switch (dtype) {
     case 'int8':
-      return new Int8Array(data);
+      return Int8Array;
     case 'uint8':
-      return new Uint8Array(data);
+      return Uint8Array;
     case 'int16':
-      return new Int16Array(data);
+      return Int16Array;
     case 'uint16':
-      return new Uint16Array(data);
+      return Uint16Array;
     case 'float32':
-      return new Float32Array(data);
+      return Float32Array;
     case 'float64':
-      return new Float64Array(data);
+      return Float64Array;
     case 'int32':
-      return new Int32Array(data);
+      return Int32Array;
     case 'uint32':
-      return new Uint32Array(data);
+      return Uint32Array;
     case 'int64':
-      return new BigInt64Array(data); // eslint-disable-line no-undef
+      return BigInt64Array; // eslint-disable-line no-undef
     case 'uint64':
-      return new BigUint64Array(data); // eslint-disable-line no-undef
+      return BigUint64Array; // eslint-disable-line no-undef
     default:
       throw new Error(`Unrecognized dtype ${dtype}`);
   }
@@ -60,29 +60,29 @@ function deserializeMatrix(arr, manager) {
   if (!arr) {
     return null;
   }
-  const renderable = {};
+  const dataBuffer = {};
   for (const datum of arr.payload) {
     // Each entry here represents a single column in
     // a pandas.DataFrame arriving from the pydeck backend
     const layerId = datum.layer_id;
-    const accessor = datum.accessor;
-    if (renderable[layerId] === undefined) {
-      renderable[layerId] = {};
+    const accessorName = datum.accessor;
+    if (!dataBuffer[layerId]) {
+      dataBuffer[layerId] = {};
     }
     // Creates a typed array of the numpy data as a row-major ordered matrix, with shape specified elsewhere
-    const rowMajorOrderMatrix = dtypeToTypedArray(datum.matrix.dtype, datum.matrix.data.buffer);
-    renderable[layerId][accessor] = {
+    const ArrayType = dtypeToTypedArray(datum.matrix.dtype);
+    dataBuffer[layerId][accessorName] = {
       layerId,
-      accessor,
+      accessorName,
       columnName: datum.column_name,
-      matrix: {data: rowMajorOrderMatrix, shape: datum.matrix.shape}
+      matrix: {data: new ArrayType(datum.matrix.data), shape: datum.matrix.shape}
     };
-    if (renderable[layerId][accessor].matrix.data.length === 0) {
+    if (dataBuffer[layerId][accessorName].matrix.data.length === 0) {
       console.warn(`No records in accessor ${accessor} belonging to ${layerId}`); // eslint-disable-line
     }
   }
   // Becomes the data stored within the widget model at `model.get('data_buffer')`
-  return renderable;
+  return dataBuffer;
 }
 
 function constructDataProp(dataBuffer, layerId) {
