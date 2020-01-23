@@ -91,13 +91,16 @@ export default class HexagonLayer extends AggregationLayer {
   updateState(opts) {
     super.updateState(opts);
     const {cpuAggregator, hexagonVertices: oldVertices} = this.state;
-    this.setState({
-      // make a copy of the internal state of cpuAggregator for testing
-      aggregatorState: cpuAggregator.updateState(opts, {
-        viewport: this.context.viewport,
-        attributes: this.getAttributes()
-      })
-    });
+
+    if (opts.changeFlags.propsOrDataChanged) {
+      this.setState({
+        // make a copy of the internal state of cpuAggregator for testing
+        aggregatorState: cpuAggregator.updateState(opts, {
+          viewport: this.context.viewport,
+          attributes: this.getAttributes()
+        })
+      });
+    }
 
     // if user provided custom aggregator and returns hexagonVertices,
     // Need to recalculate radius and angle based on vertices
