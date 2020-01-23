@@ -19,6 +19,13 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v8.0
 
+#### deck.gl [8.0.10] - Jan 23 2020
+
+- @deck.gl/json: Fix bug dropping props with falsy values (#4185)
+- Fix buffer size check in Attribute.updateBuffer (#4190)
+- Bump luma dependency (#4191)
+- Fix modelMatrix application in the project module (#4182)
+
 #### deck.gl [8.0.9] - Jan 18 2020
 
 - Fix H3HexagonLayer update when viewport jumps (#4158)
