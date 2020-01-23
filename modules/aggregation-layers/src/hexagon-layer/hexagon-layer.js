@@ -133,12 +133,7 @@ export default class HexagonLayer extends AggregationLayer {
 
   convertLatLngToMeterOffset(hexagonVertices) {
     const {viewport} = this.context;
-
-    if (Array.isArray(hexagonVertices)) {
-      if (hexagonVertices.length < 6) {
-        log.error('HexagonCellLayer: hexagonVertices needs to be an array of 6 points')();
-      }
-
+    if (Array.isArray(hexagonVertices) && hexagonVertices.length === 6) {
       // get centroid of hexagons
       const vertex0 = hexagonVertices[0];
       const vertex3 = hexagonVertices[3];
@@ -161,6 +156,7 @@ export default class HexagonLayer extends AggregationLayer {
       return vertices;
     }
 
+    log.error('HexagonLayer: hexagonVertices needs to be an array of 6 points')();
     return null;
   }
 
