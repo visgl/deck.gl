@@ -26,11 +26,7 @@ export default function convertFunctions(props, configuration) {
       propValue = trimFunctionIdentifier(propValue);
       propValue = parseExpressionString(propValue, configuration);
     }
-
-    // Invalid functions return null, show default value instead.
-    if (propValue !== null) {
-      replacedProps[propName] = propValue;
-    }
+    replacedProps[propName] = propValue;
   }
 
   return replacedProps;

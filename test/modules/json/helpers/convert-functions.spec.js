@@ -123,8 +123,10 @@ test('convertFunctions#assureAllKeysPresent', t => {
       );
     } else {
       t.ok(
-        convertedProps[key]({x: 10}) === 100,
-        `convertFunctions converted function ${EXAMPLE_PROPS[key]} to expected value`
+        convertedProps.getElevation({x: 10}) === 100,
+        `convertFunctions converted function ${key} to expected value, ${convertedProps.getElevation(
+          10
+        )}`
       );
     }
   }
