@@ -77,7 +77,8 @@ export default class HexagonLayer extends AggregationLayer {
 
     this.state = {
       cpuAggregator,
-      aggregatorState: cpuAggregator.state
+      aggregatorState: cpuAggregator.state,
+      hexagonVertices: null
     };
     const attributeManager = this.getAttributeManager();
     attributeManager.add({
@@ -89,7 +90,7 @@ export default class HexagonLayer extends AggregationLayer {
 
   updateState(opts) {
     super.updateState(opts);
-    const {cpuAggregator, hexagonVertices} = this.state;
+    const {cpuAggregator, hexagonVertices: oldVertices} = this.state;
     this.setState({
       // make a copy of the internal state of cpuAggregator for testing
       aggregatorState: cpuAggregator.updateState(opts, {
@@ -97,13 +98,18 @@ export default class HexagonLayer extends AggregationLayer {
         attributes: this.getAttributes()
       })
     });
+
     // if user provided custom aggregator and returns hexagonVertices,
     // Need to recalculate radius and angle based on vertices
-    const oldVertices = hexagonVertices;
-    if (cpuAggregator.state.layerData && cpuAggregator.state.layerData.hexagonVertices) {
-      if (oldVertices !== cpuAggregator.state.layerData.hexagonVertices) {
-        this.setState({hexagonVertices});
-        this.convertLatLngToMeterOffset(hexagonVertices);
+    const {hexagonVertices} = cpuAggregator.state.layerData || {};
+
+    if (hexagonVertices && oldVertices !== hexagonVertices) {
+      const vertices = this.convertLatLngToMeterOffset(hexagonVertices);
+      if (vertices) {
+        this.setState({
+          hexagonVertices,
+          vertices
+        })
       }
     } else {
       // update radius angle by viewport
@@ -138,17 +144,24 @@ export default class HexagonLayer extends AggregationLayer {
       const vertex3 = hexagonVertices[3];
 
       const centroid = [(vertex0[0] + vertex3[0]) / 2, (vertex0[1] + vertex3[1]) / 2];
+      const centroidFlat = viewport.projectFlat(centroid);
 
-      const {unitsPerMeter} = viewport.getDistanceScales(centroid);
+      const {metersPerUnit} = viewport.getDistanceScales(centroid);
 
       // offset all points by centroid to meter offset
-      const vertices = hexagonVertices.map(vt => [
-        (vt[0] - centroid[0]) * unitsPerMeter,
-        (vt[1] - centroid[1]) * unitsPerMeter
-      ]);
+      const vertices = hexagonVertices.map(vt => {
+        const vtFlat = viewport.projectFlat(vt);
 
-      this.setState({vertices});
+        return [
+          (vtFlat[0] - centroidFlat[0]) * metersPerUnit[0],
+          (vtFlat[1] - centroidFlat[1]) * metersPerUnit[1]
+        ];
+      });
+
+      return vertices;
     }
+
+    return null;
   }
 
   getPickingInfo({info}) {
@@ -176,13 +189,12 @@ export default class HexagonLayer extends AggregationLayer {
     const SubLayerClass = this.getSubLayerClass('hexagon-cell', ColumnLayer);
     const updateTriggers = this._getSublayerUpdateTriggers();
 
+    const geometry = vertices.length ? {vertices, radius: 1} : {radius, angle};
     return new SubLayerClass(
       {
-        radius,
-        vertices,
+        ...geometry,
         diskResolution: 6,
         elevationScale,
-        angle,
         extruded,
         coverage,
         material,
