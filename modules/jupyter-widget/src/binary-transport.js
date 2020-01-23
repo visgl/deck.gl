@@ -85,18 +85,11 @@ function deserializeMatrix(arr, manager) {
   return renderable;
 }
 
-function getAccessorNamesFrom(dataBuffer, layerId) {
-  // Given data transferred from pydeck's backend,
-  // get the names of the accessors using binary data on a particular layer
-  return Object.keys(dataBuffer[layerId]);
-}
-
 function constructDataProp(dataBuffer, layerId) {
   const src = {length: 0, attributes: {}};
-  const accessors = getAccessorNamesFrom(dataBuffer, layerId);
   // For each accessor, we have a row major ordered matrix of data,
-  // represented as a single vector under `src[accessor]`
-  for (const accessor of accessors) {
+  // represented as a single vector under `[accessor]matrix.data`
+  for (const accessor in dataBuffer[layerId]) {
     const currentData = dataBuffer[layerId][accessor];
     src.length = Math.max(currentData.matrix.shape[0], src.length);
     src.attributes[accessor] = {
