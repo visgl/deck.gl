@@ -109,7 +109,7 @@ export default class HexagonLayer extends AggregationLayer {
         this.setState({
           hexagonVertices,
           vertices
-        })
+        });
       }
     } else {
       // update radius angle by viewport
