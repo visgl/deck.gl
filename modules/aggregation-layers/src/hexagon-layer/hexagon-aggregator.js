@@ -34,7 +34,8 @@ export function pointToHexbin(props, aggregationParams) {
   const {data, radius} = props;
   const {viewport, attributes} = aggregationParams;
   // get hexagon radius in mercator world unit
-  const radiusCommon = getRadiusInCommon(radius, viewport);
+  const centerLngLat = data.length ? getPointsCenter(data, aggregationParams) : null;
+  const radiusCommon = getRadiusInCommon(radius, viewport, centerLngLat);
 
   // add world space coordinates to points
   const screenPoints = [];
@@ -72,20 +73,54 @@ export function pointToHexbin(props, aggregationParams) {
       position: viewport.unprojectFlat([hex.x, hex.y]),
       points: hex,
       index
-    }))
+    })),
+    radiusCommon
   };
+}
+
+/**
+ * Get the bounding box of all data points
+ */
+export function getPointsCenter(data, aggregationParams) {
+  const {attributes} = aggregationParams;
+  const positions = attributes.positions.value;
+  const {size} = attributes.positions.getAccessor();
+
+  let minX = Infinity;
+  let minY = Infinity;
+  let maxX = -Infinity;
+  let maxY = -Infinity;
+  let i;
+
+  for (i = 0; i < size * data.length; i += size) {
+    const x = positions[i];
+    const y = positions[i + 1];
+    const arrayIsFinite = Number.isFinite(x) && Number.isFinite(y);
+
+    if (arrayIsFinite) {
+      minX = Math.min(x, minX);
+      maxX = Math.max(x, maxX);
+      minY = Math.min(y, minY);
+      maxY = Math.max(y, maxY);
+    }
+  }
+
+  // return center
+  return [minX, minY, maxX, maxY].every(Number.isFinite)
+    ? [(minX + maxX) / 2, (minY + maxY) / 2]
+    : null;
 }
 
 /**
  * Get radius in mercator world space coordinates from meter
  * @param {Number} radius - in meter
  * @param {Object} viewport - current viewport object
+ * @param {Array<Number>} center - data center
 
  * @return {Number} radius in mercator world spcae coordinates
  */
-export function getRadiusInCommon(radius, viewport) {
-  const {unitsPerMeter} = viewport.getDistanceScales();
-
+export function getRadiusInCommon(radius, viewport, center) {
+  const {unitsPerMeter} = viewport.getDistanceScales(center);
   // x, y distance should be the same
   return radius * unitsPerMeter[0];
 }
