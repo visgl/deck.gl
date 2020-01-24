@@ -11,7 +11,7 @@ def test_constructor_binary_transport():
         "ScatterplotLayer",
         data=df,
         id="test-layer",
-        binary_transport=True,
+        use_binary_transport=True,
         get_position="position",
         radius=10,
     )
@@ -25,7 +25,7 @@ def test_constructor_binary_transport():
     actual_datum = test_layer.get_binary_data()[0]
 
     assert test_layer.radius == 10
-    assert test_layer.binary_transport == True
+    assert test_layer.use_binary_transport == True
     assert test_layer.data is None
     assert len(test_layer.get_binary_data()) == 1
     assert EXPECTED_DATUM["layer_id"] == actual_datum["layer_id"]

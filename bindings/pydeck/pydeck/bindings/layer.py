@@ -16,7 +16,7 @@ class BinaryTransportException(Exception):
 
 
 class Layer(JSONMixin):
-    def __init__(self, type, data, id=None, binary_transport=None, **kwargs):
+    def __init__(self, type, data, id=None, use_binary_transport=None, **kwargs):
         """Configures a deck.gl layer for rendering on a map. Parameters passed
         here will be specific to the particular deck.gl layer that you are choosing to use.
 
@@ -34,7 +34,7 @@ class Layer(JSONMixin):
             Unique name for layer
         data : str or list of dict of {str: Any} or pandas.DataFrame
             Either a URL of data to load in or an array of data
-        binary_transport : bool, default None
+        use_binary_transport : bool, default None
             Boolean indicating binary data
         **kwargs
             Any of the parameters passable to a deck.gl layer.
@@ -108,9 +108,9 @@ class Layer(JSONMixin):
             self.__dict__.update(kwargs)
 
         self._data = None
-        self.binary_transport = binary_transport
+        self.use_binary_transport = use_binary_transport
         self._binary_data = None
-        if not self.binary_transport:
+        if not self.use_binary_transport:
             self.data = data.to_dict(orient="records") if is_pandas_df(data) else data
         else:
             self.data = data
@@ -122,10 +122,10 @@ class Layer(JSONMixin):
     @data.setter
     def data(self, data_set):
         """Make the data attribute a list no matter the input type, unless
-        binary_transport is specified, which case we circumvent
+        use_binary_transport is specified, which case we circumvent
         serializing the data to JSON
         """
-        if self.binary_transport:
+        if self.use_binary_transport:
             self._binary_data = self._prepare_binary_data(data_set)
         elif is_pandas_df(data_set):
             self._data = data_set.to_dict(orient="records")
@@ -133,9 +133,9 @@ class Layer(JSONMixin):
             self._data = data_set
 
     def get_binary_data(self):
-        if not self.binary_transport:
+        if not self.use_binary_transport:
             raise BinaryTransportException(
-                "Layer must be flagged with `binary_transport=True`"
+                "Layer must be flagged with `use_binary_transport=True`"
             )
         return self._binary_data
 

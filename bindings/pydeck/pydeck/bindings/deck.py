@@ -106,7 +106,7 @@ class Deck(JSONMixin):
         has_binary = False
         binary_data_sets = []
         for layer in self.layers:
-            if layer.binary_transport:
+            if layer.use_binary_transport:
                 binary_data_sets.extend(layer.get_binary_data())
                 has_binary = True
         if has_binary:
