@@ -19,6 +19,9 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v7.3
 
+#### deck.gl [v7.3.15] - Jan 23 2020
+
+- fix modelMatrix in project module (#4183)
 
 #### deck.gl [v7.3.14] - Jan 16 2020
 
