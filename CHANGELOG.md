@@ -19,6 +19,10 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v8.0
 
+#### deck.gl [8.0.11] - Jan 23 2020
+
+- [Bug] Fix hexagon layer projection (#4173)
+
 #### deck.gl [8.0.10] - Jan 23 2020
 
 - @deck.gl/json: Fix bug dropping props with falsy values (#4185)
