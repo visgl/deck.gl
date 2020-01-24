@@ -1,41 +1,56 @@
 import test from 'tape-catch';
 
+function getDataView() {
+  const t = new Uint32Array([0, 10, 2, 20]);
+  const dv = new DataView(t.buffer, t.byteOffset, t.byteLength);
+  return dv;
+}
+
 test('jupyter-widget: binary-transport', t0 => {
   let binaryTransportModule;
   try {
     binaryTransportModule = require('@deck.gl/jupyter-widget/binary-transport');
   } catch (error) {
-    t0.comment('dist mode, skipping tooltip tests');
+    t0.comment('dist mode, skipping binary-transport tests');
     t0.end();
     return;
   }
-  const EXPECTED_DATA_PROP = {length: 5, attributes: {value: new Int32Array(), size: 2}};
+  const EXPECTED_DATA_PROP = {
+    length: 2,
+    attributes: {getPosition: {size: 2, value: new Uint32Array([0, 10, 2, 20])}}
+  };
 
   const EXAMPLE_TRANSFER = {
-    'xxxx-layer-id': {
-      getPosition: {
-        layer_id: 'xxxx-layer-id',
+    payload: [
+      {
+        layer_id: 'testing-layer-id',
         column_name: 'dataVectorName',
+        accessor_name: 'getPosition',
         matrix: {
-          data: DataView(),
-          shape: [5, 2],
-          dtype: 'int32'
+          data: getDataView(),
+          shape: [2, 2],
+          dtype: 'uint32'
+        }
+      }
+    ]
+  };
+
+  const EXPECTED_CONVERSION = {
+    'testing-layer-id': {
+      getPosition: {
+        layerId: 'testing-layer-id',
+        accessorName: 'getPosition',
+        columnName: 'dataVectorName',
+        matrix: {
+          data: new Uint32Array([0, 10, 2, 20]),
+          shape: [2, 2]
         }
       }
     }
   };
 
-  const EXPECTED_CONVERSION = {
-    'xxxx-layer-id': {
-      accessorFuncName: {
-        layer_id: 'xxxx-layer-id',
-        column_name: 'dataVectorName',
-        matrix: {
-          data: new Int32Array(),
-          shape: [5, 2]
-        }
-      }
-    }
+  const DEMO_JSON_PROPS = {
+    layers: [{radius: 100, id: 'testing-layer-id', '@@type': 'ScatterplotLayer'}]
   };
 
   t0.test('deserializeMatrix', t => {
@@ -57,24 +72,21 @@ test('jupyter-widget: binary-transport', t0 => {
     t.end();
   });
 
-  t0.test('constructDataProp', t => {
-    const dataProp = binaryTransportModule.constructDataProp(EXPECTED_CONVERSION, 'xxxx-layer-id');
-    t.deepEquals(dataProp, EXPECTED_DATA_PROP, 'Should create properly shaped data prop');
-    t.end();
-  });
-
   t0.test('processDataBuffer', t => {
-    const DEMO_PROPS = {radius: 100, '@@type': 'ScatterplotLayer'};
     const convertedJsonProps = binaryTransportModule.processDataBuffer({
       dataBuffer: EXPECTED_CONVERSION,
-      jsonProps: DEMO_PROPS
+      jsonProps: DEMO_JSON_PROPS
     });
     t.deepEquals(
-      convertedJsonProps.layers[0].data,
+      convertedJsonProps.layers[0].props.data,
       EXPECTED_DATA_PROP,
       'should convert buffer input and props to new layers'
     );
-    t.deepEquals(convertedJsonProps.layers[0].id, 'xxxx-layer-id', 'should use specified layer ID');
+    t.deepEquals(
+      convertedJsonProps.layers[0].id,
+      'testing-layer-id',
+      'Should create specified layer'
+    );
     t.end();
   });
 });

@@ -65,7 +65,7 @@ function deserializeMatrix(arr, manager) {
     // Each entry here represents a single column in
     // a pandas.DataFrame arriving from the pydeck backend
     const layerId = datum.layer_id;
-    const accessorName = datum.accessor;
+    const accessorName = datum.accessor_name;
     if (!dataBuffer[layerId]) {
       dataBuffer[layerId] = {};
     }
@@ -75,10 +75,10 @@ function deserializeMatrix(arr, manager) {
       layerId,
       accessorName,
       columnName: datum.column_name,
-      matrix: {data: new ArrayType(datum.matrix.data), shape: datum.matrix.shape}
+      matrix: {data: new ArrayType(datum.matrix.data.buffer), shape: datum.matrix.shape}
     };
     if (dataBuffer[layerId][accessorName].matrix.data.length === 0) {
-      console.warn(`No records in accessor ${accessor} belonging to ${layerId}`); // eslint-disable-line
+      console.warn(`No records in accessor ${accessorName} belonging to ${layerId}`); // eslint-disable-line
     }
   }
   // Becomes the data stored within the widget model at `model.get('data_buffer')`
