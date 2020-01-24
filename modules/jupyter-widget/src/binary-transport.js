@@ -1,5 +1,3 @@
-import jsonConverter from './create-deck';
-
 // Functions to wrangle data from pydeck's row major order matrix dataframe to the deck.gl binary data format.
 // The format used is described here:
 // https://deck.gl/#/documentation/developer-guide/performance-optimization?section=supply-attributes-directly
@@ -100,10 +98,8 @@ function constructDataProp(dataBuffer, layerId) {
   return src;
 }
 
-function processDataBuffer({dataBuffer, jsonProps}) {
+function processDataBuffer({dataBuffer, convertedJsonProps}) {
   // Takes JSON props and combines them with the binary data buffer
-  jsonConverter.convert(jsonProps);
-  const convertedJsonProps = jsonConverter.convertedJson;
   for (let i = 0; i < convertedJsonProps.layers.length; i++) {
     const layer = convertedJsonProps.layers[i];
     // Replace data on every layer prop

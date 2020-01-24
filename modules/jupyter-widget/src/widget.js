@@ -4,6 +4,7 @@ import {DOMWidgetModel, DOMWidgetView} from '@jupyter-widgets/base';
 import {MODULE_NAME, MODULE_VERSION} from './version';
 
 import {createDeck, updateDeck} from './create-deck';
+import jsonConverter from './create-deck';
 import {deserializeMatrix, processDataBuffer} from './binary-transport';
 
 const MAPBOX_CSS_URL = 'https://api.tiles.mapbox.com/mapbox-gl-js/v1.2.1/mapbox-gl.css';
@@ -130,11 +131,13 @@ export class DeckGLView extends DOMWidgetView {
   dataBufferChanged() {
     const jsonProps = this.model.get('json_input');
     if (this.model.get('data_buffer')) {
-      const convertedJsonProps = processDataBuffer({
+      jsonConverter.convert(jsonProps);
+      const convertedJsonProps = jsonConverter.convertedJson;
+      const propsWithBinary = processDataBuffer({
         dataBuffer: this.model.get('data_buffer'),
-        jsonProps
+        convertedJsonProps
       });
-      this.deck.setProps(convertedJsonProps);
+      this.deck.setProps(propsWithBinary);
     }
   }
 
