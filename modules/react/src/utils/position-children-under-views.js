@@ -79,7 +79,7 @@ export default function positionChildrenUnderViews({children, viewports, deck, C
           deck._onViewStateChange(params);
         }
       };
-      return createElement(ContextProvider, {value: contextValue}, viewElement);
+      return createElement(ContextProvider, {key, value: contextValue}, viewElement);
     }
 
     return viewElement;
