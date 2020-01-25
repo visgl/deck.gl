@@ -32,82 +32,30 @@ function dtypeToTypedArray(dtype) {
   }
 }
 
-function deserializeMatrix(arr, manager) {
-  /*
-   * Data is sent from the pydeck backend
-   * in the following format:
-   *`
-   * {'<layer ID>':
-   *     {'<accessor function name e.g. getPosition>': {
-   *        {
-   *          layer_id: <duplicate ID of layer as above>
-   *          column_name: <string name of column>
-   *          matrix: {
-   *            data: <binary data, a row major order representation of a matrix>,
-   *            shape: [<height>, <width>],
-   *            dtype: <string representation of typed array data type>
-   *          }
-   *
-   * Multiple layers and multiple accessors are possible.
-   *
-   * Objects at the JSON path `<accessor name>.matrix.data`
-   * are vectors representing a 1 x n matrix,
-   * or they can represent a m x n matrix in row major order form;
-   * shape of the matrix is given at <accessor name>.matrix.data.shape
-   */
-  if (!arr) {
+function deserializeMatrix(obj, manager) {
+  if (!obj) {
     return null;
   }
-  const dataBuffer = {};
-  for (const datum of arr.payload) {
-    // Each entry here represents a single column in
-    // a pandas.DataFrame arriving from the pydeck backend
-    const layerId = datum.layer_id;
-    const accessorName = datum.accessor_name;
-    if (!dataBuffer[layerId]) {
-      dataBuffer[layerId] = {};
-    }
-    // Creates a typed array of the numpy data as a row-major ordered matrix, with shape specified elsewhere
-    const ArrayType = dtypeToTypedArray(datum.matrix.dtype);
-    dataBuffer[layerId][accessorName] = {
-      layerId,
-      accessorName,
-      columnName: datum.column_name,
-      matrix: {data: new ArrayType(datum.matrix.data.buffer), shape: datum.matrix.shape}
-    };
-    if (dataBuffer[layerId][accessorName].matrix.data.length === 0) {
-      console.warn(`No records in accessor ${accessorName} belonging to ${layerId}`); // eslint-disable-line
+  for (const layerId in obj) {
+    for (const accessorName in obj[layerId].attributes) {
+      const {dtype, value} = obj[layerId].attributes[accessorName];
+      const ArrayType = dtypeToTypedArray(dtype);
+      obj[layerId].attributes[accessorName].value = new ArrayType(value.buffer);
+      delete obj[layerId].attributes[accessorName].dtype;
     }
   }
   // Becomes the data stored within the widget model at `model.get('data_buffer')`
-  return dataBuffer;
+  return obj;
 }
 
-function constructDataProp(dataBuffer, layerId) {
-  const src = {length: 0, attributes: {}};
-  // For each accessor, we have a row major ordered matrix of data,
-  // represented as a single vector under `[accessor]matrix.data`
-  for (const accessor in dataBuffer[layerId]) {
-    const currentData = dataBuffer[layerId][accessor];
-    src.length = Math.max(currentData.matrix.shape[0], src.length);
-    src.attributes[accessor] = {
-      size: currentData.matrix.shape[1] || 1, // width
-      value: currentData.matrix.data
-    };
-  }
-  return src;
-}
-
-function processDataBuffer({dataBuffer, convertedJsonProps}) {
+function processDataBuffer({dataBuffer, jsonProps}) {
   // Takes JSON props and combines them with the binary data buffer
-  for (let i = 0; i < convertedJsonProps.layers.length; i++) {
-    const layer = convertedJsonProps.layers[i];
+  for (let i = 0; i < jsonProps.layers.length; i++) {
+    const layerId = jsonProps.layers[i].id;
+    jsonProps.layers[i].data = dataBuffer[layerId];
     // Replace data on every layer prop
-    const data = constructDataProp(dataBuffer, layer.id);
-    const clonedLayer = layer.clone({data});
-    convertedJsonProps.layers[i] = clonedLayer;
   }
-  return convertedJsonProps;
+  return jsonProps;
 }
 
 export {deserializeMatrix, processDataBuffer};
