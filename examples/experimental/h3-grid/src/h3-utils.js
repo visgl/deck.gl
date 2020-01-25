@@ -1,8 +1,9 @@
 import {polyfill, getRes0Indexes, h3GetFaces, geoToH3} from 'h3-js';
 
-// Number of hexagons at resolution 10 in tile x:512 y:512 z:10
-// {west: 0, north: 0, east: 0.35156, south: -0.35156}
-const HEX_COUNT_ZOOM_10_RES_10 = 135439;
+// Number of hexagons at resolution 10 in tile x:497 y:505 z:10
+// This tile is close to the equator and includes a pentagon 8a7400000007fff
+// which makes it denser than other tiles
+const HEX_COUNT_ZOOM_10_RES_10 = 166283;
 // size multiplier when zoom increases by 1
 const ZOOM_FACTOR = 1 / 4;
 // size multiplier when resolution increases by 1
