@@ -104,6 +104,6 @@ def test_serialize_columns():
         for accessor_name in layer_dict['attributes'].keys():
             buf0 = np.frombuffer(layer_dict['attributes'][accessor_name]['value'], layer_dict['attributes'][accessor_name]['dtype'])
             buf1 = np.frombuffer(EXPECTED_OUTPUT[layer_key]['attributes'][accessor_name]['value'], dtype=EXPECTED_OUTPUT[layer_key]['attributes'][accessor_name]['dtype'])
-            assert np.array_equal(buf0, buf1), f'Binary buffer contents differ for {accessor_name} in {layer_key}'
+            assert np.array_equal(buf0, buf1), 'Binary buffer contents differ for {} in {}'.format(accessor_name, layer_key)
             assert layer_dict['attributes'][accessor_name]['size'] == \
-                    EXPECTED_OUTPUT[layer_key]['attributes'][accessor_name]['size'], f'Size differs for {accessor_name} in {layer_key}'
+                    EXPECTED_OUTPUT[layer_key]['attributes'][accessor_name]['size'], 'Size differs for {} in {}'.format(accessor_name, layer_key)
