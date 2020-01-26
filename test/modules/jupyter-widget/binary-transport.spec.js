@@ -2,18 +2,14 @@ import test from 'tape-catch';
 
 const DEMO_ARRAY = new Uint32Array([0, 10, 2, 20]);
 
-function getDataView() {
-  const t = DEMO_ARRAY;
-  const dv = new DataView(t.buffer, t.byteOffset, t.byteLength);
-  return dv;
-}
+const DEMO_VALUE = new DataView(DEMO_ARRAY.buffer, DEMO_ARRAY.byteOffset, DEMO_ARRAY.byteLength);
 
 const EXAMPLE_TRANSFER = {
   'layer-id': {
     length: 2,
     attributes: {
       getPosition: {
-        value: getDataView(),
+        value: DEMO_VALUE,
         size: 2,
         dtype: 'uint32'
       }

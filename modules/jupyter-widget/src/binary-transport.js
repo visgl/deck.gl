@@ -37,11 +37,11 @@ function deserializeMatrix(obj, manager) {
     return null;
   }
   for (const layerId in obj) {
-    for (const accessorName in obj[layerId].attributes) {
-      const {dtype, value} = obj[layerId].attributes[accessorName];
+    const attributes = obj[layerId].attributes;
+    for (const accessorName in attributes) {
+      const {dtype, value} = attributes[accessorName];
       const ArrayType = dtypeToTypedArray(dtype);
       obj[layerId].attributes[accessorName].value = new ArrayType(value.buffer);
-      delete obj[layerId].attributes[accessorName].dtype;
     }
   }
   // Becomes the data stored within the widget model at `model.get('data_buffer')`
