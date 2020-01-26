@@ -1,0 +1,60 @@
+{% set name = "pydeck" %}
+{% set version = "0.2.0" %}
+
+package:
+  name: "{{ name|lower }}"
+  version: "{{ version }}"
+
+source:
+  url: "https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.tar.gz"
+  sha256: "81bdae3e454c166d5c6e188c1d661edcd67a167b9db041ffe720f80d64100a90"
+
+build:
+  number: 0
+  script: "{{ PYTHON }} -m pip install . --no-deps --ignore-installed -vv "
+
+requirements:
+  host:
+    - ipykernel >=5.1.2
+    - ipython >=5.8.0
+    - ipywidgets >=7.0.0
+    - jinja2 >=2.10.1
+    - pip
+    - python
+    - traitlets >=4.3.2
+  run:
+    - ipykernel >=5.1.2
+    - ipython >=5.8.0
+    - ipywidgets >=7.0.0
+    - jinja2 >=2.10.1
+    - python
+    - traitlets >=4.3.2
+
+test:
+  imports:
+    - pydeck
+    - pydeck.bindings
+    - pydeck.data_utils
+    - pydeck.io
+    - pydeck.nbextension
+    - pydeck.widget
+    - tests
+    - tests.bindings
+    - tests.bindings.pydeck_examples
+    - tests.browser
+    - tests.io
+  requires:
+    - pytest
+
+about:
+  home: "https://github.com/uber/deck.gl/tree/master/bindings/pydeck"
+  license: "MIT"
+  license_family: "MIT"
+  license_file: "LICENSE.txt"
+  summary: "Widget for deck.gl maps"
+  doc_url: "https://deckgl.readthedocs.io/en/latest/"
+  dev_url: "https://github.com/uber/deck.gl/tree/master/bindings/pydeck"
+
+extra:
+  recipe-maintainers:
+    - ajduberstein
