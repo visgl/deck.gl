@@ -23,7 +23,8 @@ const EXPECTED_CONVERSION = {
     attributes: {
       getPosition: {
         value: DEMO_ARRAY,
-        size: 2
+        size: 2,
+        dtype: 'uint32'
       }
     }
   }
@@ -42,7 +43,7 @@ const DEMO_JSON_PROPS = {
   ]
 };
 
-test.only('jupyter-widget: binary-transport', t0 => {
+test('jupyter-widget: binary-transport', t0 => {
   let binaryTransportModule;
   try {
     binaryTransportModule = require('@deck.gl/jupyter-widget/binary-transport');
