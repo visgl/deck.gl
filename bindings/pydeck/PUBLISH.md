@@ -60,7 +60,6 @@ where `{{version}}` is your semantic version.
 
 5) If everything appears to be working, you can publish to PyPI and conda-forge.
 
-
 ## Updating documentation
 
 The pydeck documentation has three main components
