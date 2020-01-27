@@ -42,7 +42,7 @@ This will run Python and JS tests and produce a commit with the release version.
 
 ```
 rm -r ./dist/*  # If exists, clear out the current dist folder
-pip install -e . --verbose
+pip install . --verbose
 python setup.py sdist bdist_wheel
 pip install twine  # If you have not installed twine
 python -m twine upload --repository-url https://test.pypi.org/legacy/ dist/*
