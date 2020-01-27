@@ -44,23 +44,81 @@ When rendering user provided data, for each data element, its positions is trans
 
 ### Filtering points
 
-Performing polygon filtering point is straight forward. This can be done in Vertex shader, based on the result if possible objects size can be set to 0 (to reduce number of fragment shader executions) and eventually all resulted fragments can be discarded.
+We can perform a point in polygon test of each object and discard the rendering if test fails. One are more layer can be marked to generate the filter texture and one or more layers can be marked to use this texture as a mask for filtering. In layer's vertex shader, a texture sample is performed to determine if the object is inside or outside.
 
-* API : Layer extension.
+Entire process of filtering can be divided into two steps, 1. Generation of filter texture and 2. performing actual filtering.
 
-(TODO: `uniforms` and `shader hooks`)
+* API : Following new components will be added
 
-Example: ScatterPlotLayer, HexagonLayer, etc.
+#### GeoFilterEffect
+
+This effect generates the required filter texture. Internally it creates a new render pass to render data in world space to a offline texture.
+
+During pre render pass:
+- All layers are processed, and if a layer has 'geoFilterMask' prop set, a bounding box of its data is calculated (optionally can be provided by the layer).
+- All above bounding boxes are merged at each step and used to build the texture mask.
+- This effect class is responsible for providing following uniforms that will be consumed by following shader module 'TextureFilterModule'
+
+1. `textureTransform` (Array, [xTranslation, yTranslation, xScale, yScale]) : used to transform each data point into required clipping space.
+2. `maskTexture` (Texture2D) : texture that is sampled to determine if a given point is inside or outside.
+
+#### TextureFilterModule
+
+A new shader module is added to perform sampling from the texture and filter the points, defines following shader functions:
+
+- `geoFilter_setValue` : Takes, object's world postions, transforms it to mask texture space, performs sampling sets `geoFilter_value`.
+
+- 
+
+
+
+
+Sample code to perform filtering on a `ScatterplotLayer` to a `SolidPolygonLayer` that is rendering a complex polygon.
+
+```js
+import DeckGL from '@deck.gl/react';
+import {GeoFilterEffect} from '@deck.gl/core';
+
+const GEO_FILTER_ID = 'geo-filter-id-1'
+
+const filterEffect = new GeoFilterEffect({id: GEO_FILTER_ID, precession: 0.8});
+
+// ...
+
+const App = (data) => (
+  <DeckGL
+    layers={[
+      // Layer that generates the mask
+      new SolidPolygonLayer({
+        // Complex polygon with one hole
+        data: [
+              [[0, 0], [0, 2], [2, 2], [2, 0], [0, 0]],
+              [[0, 0], [0, 1], [1, 1], [1, 0], [0, 0]]
+            ],
+        visible: false
+        geoFilterMask: GEO_FILTER_ID
+        // ...
+      })
+      // Layer that gets filtered out
+      new ScatterplotLayer({
+        data,
+        geoFilter: GEO_FILTER_ID
+      })
+    ]}
+  >
+  // ... map
+  </DeckGL>
+);
+
+```
+
+This type of filtering is applicable for layers such as `ScatterplotLayer`, `GridLayer`, etc
 
 ### Filtering non point primitives
 
-When filtering non point primitive, such as `lines`, `arcs` and `polygons` etc, filtering can be done at fragment shader. For each vertex, a varying can be define to propagated its texture coordinate to the fragment shader, and texture sampling can be performed in fragment shader to either render or discard each fragment.
+When filtering non point primitive, such as `lines`, `arcs` and `polygons` etc, filtering can be done at fragment shader. API for this featue is same as above, except filtering shader instructions are injected into fragment shader instead of vertex shader. This decession is done at static time, by updating layer's fragment shader with proper shader hooks.
 
-* API : Layer extension.
-
-(TODO: `uniforms` and `shader hooks`)
-
-Examples: `PathLayer`, `PolygonLayer`, etc
+This type of filtering is applicable for layers such as `PathLayer`, `PolygonLayer`, etc
 
 ### Giving filtering results to applications
 
