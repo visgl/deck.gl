@@ -9,6 +9,10 @@
 
 This RFC proposes GPU Accelerated GeoFencing (filtering data to one or more polygons) technique and also explores ways to expose the functionality to deck.gl based applications.
 
+## Use Cases
+
+- Perform filtering of input object's positions, to a geological boundary (for example boundary of US state), and use this filtered data to render a Layer.
+- Perform filtering of input object's positions, to a user provided polygon(s), to highlight (render using a different color) all objects inside this polygon(s).
 
 ## Background
 
@@ -66,11 +70,13 @@ During pre render pass:
 
 A new shader module is added to perform sampling from the texture and filter the points, defines following shader functions:
 
-- `geoFilter_setValue` : Takes, object's world postions, transforms it to mask texture space, performs sampling sets `geoFilter_value`.
+- `geoFilter_setValue` : Takes, object's world positions, transforms it to mask texture space, performs sampling and sets `geoFilter_value` to either 0 (if outside the defined region) or to and id ( >= 1).
 
-- 
+Also this module defined following shader injects/hooks, that can be used by layer shader to perform geo filtering.
 
-
+- `vs:#main-start` : To perform sampling and set `getoFilter_value`.
+- `vs:DECKGL_FILTER_SIZE` : To set object size to 0 if the object is filteredout.
+- `fs:DECKGL_FILTER_COLOR` : To discard the fragments if filter value is 0. This can also be used update the color of the fragment if it is inside the region.
 
 
 Sample code to perform filtering on a `ScatterplotLayer` to a `SolidPolygonLayer` that is rendering a complex polygon.
