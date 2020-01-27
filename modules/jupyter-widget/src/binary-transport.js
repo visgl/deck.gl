@@ -41,7 +41,7 @@ function deserializeMatrix(obj, manager) {
     for (const accessorName in attributes) {
       const {dtype, value} = attributes[accessorName];
       const ArrayType = dtypeToTypedArray(dtype);
-      obj[layerId].attributes[accessorName].value = new ArrayType(value.buffer);
+      attributes[accessorName].value = new ArrayType(value.buffer);
     }
   }
   // Becomes the data stored within the widget model at `model.get('data_buffer')`

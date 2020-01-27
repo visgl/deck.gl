@@ -135,8 +135,8 @@ export class DeckGLView extends DOMWidgetView {
         jsonProps: this.model.get('json_input')
       });
 
-      jsonConverter.convert(propsWithBinary);
-      this.deck.setProps(jsonConverter.convertedJson);
+      const convertedJson = jsonConverter.convert(propsWithBinary);
+      this.deck.setProps(convertedJson);
     }
   }
 
