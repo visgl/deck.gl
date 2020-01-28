@@ -29,7 +29,6 @@ import FontAtlasManager, {
   DEFAULT_RADIUS,
   DEFAULT_CUTOFF
 } from './font-atlas-manager';
-import {replaceInRange} from '../utils';
 import {transformParagraph} from './utils';
 
 const DEFAULT_FONT_SETTINGS = {
@@ -89,45 +88,40 @@ const defaultProps = {
 export default class TextLayer extends CompositeLayer {
   initializeState() {
     this.state = {
+      styleVersion: 0,
       fontAtlasManager: new FontAtlasManager(this.context.gl)
     };
   }
 
   // eslint-disable-next-line complexity
   updateState({props, oldProps, changeFlags}) {
-    const fontChanged = this.fontChanged(oldProps, props);
+    const fontChanged = this._fontChanged(oldProps, props);
 
     if (fontChanged) {
-      this.updateFontAtlas({oldProps, props});
+      this._updateFontAtlas(oldProps, props);
     }
 
     const styleChanged =
+      fontChanged ||
       props.lineHeight !== oldProps.lineHeight ||
       props.wordBreak !== oldProps.wordBreak ||
       props.maxWidth !== oldProps.maxWidth;
 
     const textChanged =
-      fontChanged ||
-      styleChanged ||
       changeFlags.dataChanged ||
       (changeFlags.updateTriggersChanged &&
         (changeFlags.updateTriggersChanged.all || changeFlags.updateTriggersChanged.getText));
 
-    if (textChanged && Array.isArray(changeFlags.dataChanged)) {
-      const data = this.state.data.slice();
-      const dataDiff = changeFlags.dataChanged.map(dataRange =>
-        replaceInRange({
-          data,
-          getIndex: p => p.__source.index,
-          dataRange,
-          replace: this.transformStringToLetters(dataRange)
-        })
-      );
-      this.setState({data, dataDiff});
-    } else if (textChanged) {
+    if (textChanged) {
+      const startIndices = this._getStartIndices();
       this.setState({
-        data: this.transformStringToLetters(),
-        dataDiff: null
+        startIndices,
+        numInstances: startIndices[startIndices.length - 1]
+      });
+    }
+    if (styleChanged) {
+      this.setState({
+        styleVersion: this.state.styleVersion + 1
       });
     }
   }
@@ -138,11 +132,20 @@ export default class TextLayer extends CompositeLayer {
     this.state.fontAtlasManager.finalize();
   }
 
-  updateFontAtlas({oldProps, props}) {
+  getPickingInfo({info}) {
+    // because `TextLayer` assign the same pickingInfoIndex for one text label,
+    // here info.index refers the index of text label in props.data
+    return Object.assign(info, {
+      // override object with original data
+      object: info.index >= 0 ? this.props.data[info.index] : null
+    });
+  }
+
+  _updateFontAtlas(oldProps, props) {
     const {characterSet, fontSettings, fontFamily, fontWeight} = props;
 
     // generate test characterSet
-    const fontAtlasManager = this.state.fontAtlasManager;
+    const {fontAtlasManager} = this.state;
     fontAtlasManager.setProps(
       Object.assign({}, DEFAULT_FONT_SETTINGS, fontSettings, {
         characterSet,
@@ -151,18 +154,10 @@ export default class TextLayer extends CompositeLayer {
       })
     );
 
-    const {scale, texture, mapping} = fontAtlasManager;
-
-    this.setState({
-      scale,
-      iconAtlas: texture,
-      iconMapping: mapping
-    });
-
     this.setNeedsRedraw(true);
   }
 
-  fontChanged(oldProps, props) {
+  _fontChanged(oldProps, props) {
     if (
       oldProps.fontFamily !== props.fontFamily ||
       oldProps.characterSet !== props.characterSet ||
@@ -181,74 +176,82 @@ export default class TextLayer extends CompositeLayer {
     return FONT_SETTINGS_PROPS.some(prop => oldFontSettings[prop] !== fontSettings[prop]);
   }
 
-  getPickingInfo({info}) {
-    // because `TextLayer` assign the same pickingInfoIndex for one text label,
-    // here info.index refers the index of text label in props.data
-    return Object.assign(info, {
-      // override object with original data
-      object: info.index >= 0 ? this.props.data[info.index] : null
-    });
-  }
+  // Text strings are variable width objects
+  // Returns the index at the start of each string (every character is rendered by one instance)
+  _getStartIndices() {
+    const {data, getText} = this.props;
+    const {iterable, objectInfo} = createIterable(data);
+    const startIndices = [0];
 
-  /* eslint-disable no-loop-func */
-  transformStringToLetters(dataRange = {}) {
-    const {data, wordBreak, maxWidth, lineHeight, getText} = this.props;
-    const {iconMapping} = this.state;
-    const {startRow, endRow} = dataRange;
-    const {iterable, objectInfo} = createIterable(data, startRow, endRow);
-
-    const transformedData = [];
-
+    let characterCount = 0;
     for (const object of iterable) {
-      const transformCharacter = transformed => {
-        return this.getSubLayerRow(transformed, object, objectInfo.index);
-      };
-
       objectInfo.index++;
       const text = getText(object, objectInfo);
-      if (text) {
-        transformParagraph(
-          text,
-          lineHeight,
-          wordBreak,
-          maxWidth,
-          iconMapping,
-          transformCharacter,
-          transformedData
-        );
-      }
+      characterCount += text.length;
+      startIndices.push(characterCount);
     }
 
-    return transformedData;
+    return startIndices;
   }
 
-  getAnchorXFromTextAnchor(getTextAnchor) {
-    if (typeof getTextAnchor === 'function') {
-      getTextAnchor = this.getSubLayerAccessor(getTextAnchor);
-      return x => TEXT_ANCHOR[getTextAnchor(x)] || 0;
-    }
-    return () => TEXT_ANCHOR[getTextAnchor] || 0;
-  }
+  // Returns the x, y offsets of each character in a text string
+  getIconOffsets(object, objectInfo) {
+    const iconMapping = this.state.fontAtlasManager.mapping;
+    const {
+      getText,
+      wordBreak,
+      maxWidth,
+      lineHeight,
+      getTextAnchor,
+      getAlignmentBaseline
+    } = this.props;
 
-  getAnchorYFromAlignmentBaseline(getAlignmentBaseline) {
-    if (typeof getAlignmentBaseline === 'function') {
-      getAlignmentBaseline = this.getSubLayerAccessor(getAlignmentBaseline);
-      return x => TEXT_ANCHOR[getAlignmentBaseline(x)] || 0;
+    const paragraph = getText(object, objectInfo);
+    const {
+      characters,
+      size: [width, height]
+    } = transformParagraph(paragraph, lineHeight, wordBreak, maxWidth, iconMapping);
+    const anchorX =
+      TEXT_ANCHOR[
+        typeof getTextAnchor === 'function' ? getTextAnchor(object, objectInfo) : getTextAnchor
+      ];
+    const anchorY =
+      ALIGNMENT_BASELINE[
+        typeof getAlignmentBaseline === 'function'
+          ? getAlignmentBaseline(object, objectInfo)
+          : getAlignmentBaseline
+      ];
+
+    const offsets = new Array(paragraph.length * 2);
+    let index = 0;
+
+    for (const {rowWidth, x, y} of characters) {
+      // For a multi-line object, offset in x-direction needs consider
+      // the row offset in the paragraph and the object offset in the row
+      const rowOffset = ((1 - anchorX) * (width - rowWidth)) / 2;
+      offsets[index++] = ((anchorX - 1) * width) / 2 + rowOffset + x;
+      offsets[index++] = ((anchorY - 1) * height) / 2 + y;
     }
-    return () => ALIGNMENT_BASELINE[getAlignmentBaseline] || 0;
+    return offsets;
   }
 
   renderLayers() {
-    const {data, dataDiff, scale, iconAtlas, iconMapping} = this.state;
+    const {
+      startIndices,
+      numInstances,
+      fontAtlasManager: {scale, texture, mapping},
+      styleVersion
+    } = this.state;
 
     const {
+      data,
+      _dataDiff,
       backgroundColor,
       getPosition,
       getColor,
       getSize,
       getAngle,
-      getTextAnchor,
-      getAlignmentBaseline,
+      getText,
       getPixelOffset,
       billboard,
       sdf,
@@ -260,25 +263,23 @@ export default class TextLayer extends CompositeLayer {
       updateTriggers
     } = this.props;
 
+    const getIconOffsets = this.getIconOffsets.bind(this);
+
     const SubLayerClass = this.getSubLayerClass('characters', MultiIconLayer);
 
     return new SubLayerClass(
       {
         sdf,
-        iconAtlas,
-        iconMapping,
+        iconAtlas: texture,
+        iconMapping: mapping,
         backgroundColor,
 
-        _dataDiff: dataDiff && (() => dataDiff),
+        getPosition,
+        getColor,
+        getSize,
+        getAngle,
+        getPixelOffset,
 
-        getPosition: this.getSubLayerAccessor(getPosition),
-        getColor: this.getSubLayerAccessor(getColor),
-        getSize: this.getSubLayerAccessor(getSize),
-        getAngle: this.getSubLayerAccessor(getAngle),
-        getAnchorX: this.getAnchorXFromTextAnchor(getTextAnchor),
-        getAnchorY: this.getAnchorYFromAlignmentBaseline(getAlignmentBaseline),
-        getPixelOffset: this.getSubLayerAccessor(getPixelOffset),
-        getPickingIndex: obj => obj.__source.index,
         billboard,
         sizeScale: sizeScale * scale,
         sizeUnits,
@@ -301,16 +302,21 @@ export default class TextLayer extends CompositeLayer {
           getColor: updateTriggers.getColor,
           getSize: updateTriggers.getSize,
           getPixelOffset: updateTriggers.getPixelOffset,
-          getAnchorX: updateTriggers.getTextAnchor,
-          getAnchorY: updateTriggers.getAlignmentBaseline
+          getIconOffsets: {
+            getText: updateTriggers.getText,
+            getTextAnchor: updateTriggers.getTextAnchor,
+            getAlignmentBaseline: updateTriggers.getAlignmentBaseline,
+            styleVersion
+          }
         }
       }),
       {
         data,
-        getIcon: d => d.text,
-        getRowSize: d => d.rowSize,
-        getOffsets: d => [d.offsetLeft, d.offsetTop],
-        getParagraphSize: d => d.size
+        _dataDiff,
+        startIndices,
+        numInstances,
+        getIconOffsets,
+        getIcon: getText
       }
     );
   }
