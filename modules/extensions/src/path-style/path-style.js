@@ -19,16 +19,17 @@
 // THE SOFTWARE.
 
 import {LayerExtension, _mergeShaders as mergeShaders} from '@deck.gl/core';
-import {dashShaders} from './shaders.glsl';
+import {dashShaders, offsetShaders} from './shaders.glsl';
 
 const defaultProps = {
   getDashArray: {type: 'accessor', value: [0, 0]},
+  getOffset: {type: 'accessor', value: 0},
   dashJustified: false
 };
 
 export default class PathStyleExtension extends LayerExtension {
-  constructor({dash = false} = {}) {
-    super({dash});
+  constructor({dash = false, offset = false} = {}) {
+    super({dash, offset});
   }
 
   isEnabled(layer) {
@@ -45,6 +46,9 @@ export default class PathStyleExtension extends LayerExtension {
     if (extension.opts.dash) {
       result = mergeShaders(result, dashShaders);
     }
+    if (extension.opts.offset) {
+      result = mergeShaders(result, offsetShaders);
+    }
 
     return result;
   }
@@ -59,8 +63,13 @@ export default class PathStyleExtension extends LayerExtension {
     extension.enabled = true;
 
     if (extension.opts.dash) {
-      attributeManager.add({
+      attributeManager.addInstanced({
         instanceDashArrays: {size: 2, accessor: 'getDashArray'}
+      });
+    }
+    if (extension.opts.offset) {
+      attributeManager.addInstanced({
+        instanceOffsets: {size: 1, accessor: 'getOffset'}
       });
     }
   }

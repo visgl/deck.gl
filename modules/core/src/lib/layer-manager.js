@@ -83,6 +83,7 @@ export default class LayerManager {
     this._needsRedraw = 'Initial render';
     this._needsUpdate = false;
     this._debug = false;
+    this._onError = null;
 
     this.activateViewport = this.activateViewport.bind(this);
 
@@ -154,6 +155,10 @@ export default class LayerManager {
     if ('layers' in props) {
       this.setLayers(props.layers);
     }
+
+    if ('onError' in props) {
+      this._onError = props.onError;
+    }
   }
 
   // Supply a new layer list, initiating sublayer generation and layer matching
@@ -220,6 +225,14 @@ export default class LayerManager {
     return this;
   }
 
+  _handleError(stage, error, layer) {
+    if (this._onError) {
+      this._onError(error, layer);
+    } else {
+      log.error(`error during ${stage} of ${layerName(layer)}`, error)();
+    }
+  }
+
   // Match all layers, checking for caught errors
   // To avoid having an exception in one layer disrupt other layers
   // TODO - mark layers with exceptions as bad and remove from rendering cycle?
@@ -238,10 +251,10 @@ export default class LayerManager {
     const generatedLayers = [];
 
     // Match sublayers
-    const error = this._updateSublayersRecursively(newLayers, oldLayerMap, generatedLayers);
+    this._updateSublayersRecursively(newLayers, oldLayerMap, generatedLayers);
 
     // Finalize unmatched layers
-    const error2 = this._finalizeOldLayers(oldLayerMap);
+    this._finalizeOldLayers(oldLayerMap);
 
     let needsUpdate = false;
     for (const layer of generatedLayers) {
@@ -253,19 +266,11 @@ export default class LayerManager {
 
     this._needsUpdate = needsUpdate;
     this.layers = generatedLayers;
-
-    // Throw first error found, if any
-    const firstError = error || error2;
-    if (firstError) {
-      throw firstError;
-    }
   }
 
   /* eslint-disable complexity,max-statements */
   // Note: adds generated layers to `generatedLayers` array parameter
   _updateSublayersRecursively(newLayers, oldLayerMap, generatedLayers) {
-    let error = null;
-
     for (const newLayer of newLayers) {
       newLayer.context = this.context;
 
@@ -287,12 +292,10 @@ export default class LayerManager {
         }
 
         if (!oldLayer) {
-          const err = this._initializeLayer(newLayer);
-          error = error || err;
+          this._initializeLayer(newLayer);
         } else {
           this._transferLayerState(oldLayer, newLayer);
-          const err = this._updateLayer(newLayer);
-          error = error || err;
+          this._updateLayer(newLayer);
         }
         generatedLayers.push(newLayer);
 
@@ -300,31 +303,24 @@ export default class LayerManager {
         sublayers = newLayer.isComposite && newLayer.getSubLayers();
         // End layer lifecycle method: render sublayers
       } catch (err) {
-        log.warn(`error during matching of ${layerName(newLayer)}`, err)();
-        error = error || err; // Record first exception
+        this._handleError('matching', err, newLayer); // Record first exception
       }
 
       if (sublayers) {
-        const err = this._updateSublayersRecursively(sublayers, oldLayerMap, generatedLayers);
-        error = error || err;
+        this._updateSublayersRecursively(sublayers, oldLayerMap, generatedLayers);
       }
     }
-
-    return error;
   }
   /* eslint-enable complexity,max-statements */
 
   // Finalize any old layers that were not matched
   _finalizeOldLayers(oldLayerMap) {
-    let error = null;
     for (const layerId in oldLayerMap) {
       const layer = oldLayerMap[layerId];
       if (layer) {
-        const err = this._finalizeLayer(layer);
-        error = error || err;
+        this._finalizeLayer(layer);
       }
     }
-    return error;
   }
 
   // EXCEPTION SAFE LAYER ACCESS
@@ -335,12 +331,9 @@ export default class LayerManager {
       layer._initialize();
       layer.lifecycle = LIFECYCLE.INITIALIZED;
     } catch (err) {
-      log.warn(`error while initializing ${layerName(layer)}\n`, err)();
-      return err;
+      this._handleError('initialization', err, layer);
       // TODO - what should the lifecycle state be here? LIFECYCLE.INITIALIZATION_FAILED?
     }
-
-    return null;
   }
 
   _transferLayerState(oldLayer, newLayer) {
@@ -357,11 +350,8 @@ export default class LayerManager {
     try {
       layer._update();
     } catch (err) {
-      log.warn(`error during update of ${layerName(layer)}`, err)();
-      // Save first error
-      return err;
+      this._handleError('update', err, layer);
     }
-    return null;
   }
 
   // Finalizes a single layer
@@ -374,9 +364,7 @@ export default class LayerManager {
       layer._finalize();
       layer.lifecycle = LIFECYCLE.FINALIZED;
     } catch (err) {
-      log.warn(`error during finalization of ${layerName(layer)}`, err)();
-      return err;
+      this._handleError('finalization', err, layer);
     }
-    return null;
   }
 }

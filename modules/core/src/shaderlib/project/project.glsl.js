@@ -22,18 +22,18 @@ import {COORDINATE_SYSTEM, PROJECTION_MODE} from '../../lib/constants';
 
 // We are generating these from the js code in constants.js
 const COORDINATE_SYSTEM_GLSL_CONSTANTS = Object.keys(COORDINATE_SYSTEM)
-  .map(key => `const float COORDINATE_SYSTEM_${key} = ${COORDINATE_SYSTEM[key]}.;`)
+  .map(key => `const int COORDINATE_SYSTEM_${key} = ${COORDINATE_SYSTEM[key]};`)
   .join('');
 const PROJECTION_MODE_GLSL_CONSTANTS = Object.keys(PROJECTION_MODE)
-  .map(key => `const float PROJECTION_MODE_${key} = ${PROJECTION_MODE[key]}.;`)
+  .map(key => `const int PROJECTION_MODE_${key} = ${PROJECTION_MODE[key]};`)
   .join('');
 
 export default `\
 ${COORDINATE_SYSTEM_GLSL_CONSTANTS}
 ${PROJECTION_MODE_GLSL_CONSTANTS}
 
-uniform float project_uCoordinateSystem;
-uniform float project_uProjectionMode;
+uniform int project_uCoordinateSystem;
+uniform int project_uProjectionMode;
 uniform float project_uScale;
 uniform bool project_uWrapLongitude;
 uniform float project_uAntimeridian;
@@ -111,17 +111,21 @@ vec2 project_mercator_(vec2 lnglat) {
 // Projects positions (defined by project_uCoordinateSystem) to common space (defined by project_uProjectionMode)
 //
 vec4 project_position(vec4 position, vec3 position64Low) {
-  if (project_uCoordinateSystem == COORDINATE_SYSTEM_LNGLAT && project_uProjectionMode == PROJECTION_MODE_WEB_MERCATOR) {
-    return project_uModelMatrix * vec4(
-      project_mercator_(position.xy) * WORLD_SCALE,
-      project_size(position.z),
-      position.w
-    );
-  }
-
   vec4 position_world = project_uModelMatrix * position;
 
-  if (project_uCoordinateSystem == COORDINATE_SYSTEM_LNGLAT && project_uProjectionMode == PROJECTION_MODE_WEB_MERCATOR_AUTO_OFFSET) {
+  // Work around for a Mac+NVIDIA bug https://github.com/uber/deck.gl/issues/4145
+  if (project_uProjectionMode == PROJECTION_MODE_WEB_MERCATOR) {
+    if (project_uCoordinateSystem == COORDINATE_SYSTEM_LNGLAT) {
+      return vec4(
+        project_mercator_(position_world.xy) * WORLD_SCALE,
+        project_size(position_world.z),
+        position_world.w
+      );
+    }
+  }
+  if (project_uProjectionMode == PROJECTION_MODE_WEB_MERCATOR_AUTO_OFFSET &&
+    (project_uCoordinateSystem == COORDINATE_SYSTEM_LNGLAT ||
+     project_uCoordinateSystem == COORDINATE_SYSTEM_CARTESIAN)) {
     // Subtract high part of 64 bit value. Convert remainder to float32, preserving precision.
     position_world.xyz -= project_uCoordinateOrigin;
     position_world.xyz += position64Low;
@@ -155,11 +159,6 @@ vec2 project_position(vec2 position) {
 }
 
 vec4 project_common_position_to_clipspace(vec4 position, mat4 viewProjectionMatrix, vec4 center) {
-  if (project_uCoordinateSystem == COORDINATE_SYSTEM_METER_OFFSETS ||
-    project_uCoordinateSystem == COORDINATE_SYSTEM_LNGLAT_OFFSETS) {
-    // Needs to be divided with project_uCommonUnitsPerMeter
-    position.w *= project_uCommonUnitsPerMeter.z;
-  }
   return viewProjectionMatrix * position + center;
 }
 

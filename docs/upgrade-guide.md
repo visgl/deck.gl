@@ -113,7 +113,9 @@ new Model({
 });
 ```
 
-##### Multi-view state handling
+##### Auto view state update
+
+A bug was fixed where initial view state tracking could sometimes overwrite user-provided `viewState` prop. Apps that rely on auto view state update by specifying `initialViewState` should make sure that `viewState` is never assigned. If manual view state update is desired, use `viewState` and `onViewStateChange` instead. See [developer guide](/docs/developer-guide/views.md#using-a-view-class-with-view-state) for examples.
 
 We have fixed a bug when using `initialViewState` with multiple views. In the past, the state change in one view is unintendedly propagated to all views. As a result of this fix, multiple views (e.g. mini map) are no longer synchronized by default. To synchronize them, define the views with an explicit `viewState.id`:
 

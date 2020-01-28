@@ -1,6 +1,7 @@
 import GL from '@luma.gl/constants';
 import Pass from './pass';
 import {clear, setParameters, withParameters, cssToDeviceRatio} from '@luma.gl/core';
+import log from '../utils/log';
 
 export default class LayersPass extends Pass {
   render(props) {
@@ -22,7 +23,7 @@ export default class LayersPass extends Pass {
 
     const renderStats = [];
 
-    viewports.forEach((viewportOrDescriptor, i) => {
+    for (const viewportOrDescriptor of viewports) {
       // Get a viewport from a viewport descriptor (which can be a plain viewport)
       const viewport = viewportOrDescriptor.viewport || viewportOrDescriptor;
       const view = views && views[viewport.id];
@@ -30,22 +31,27 @@ export default class LayersPass extends Pass {
       // Update context to point to this viewport
       onViewportActive(viewport);
 
-      props.viewport = viewport;
       props.view = view;
 
       // render this viewport
-      const stats = this._drawLayersInViewport(gl, props);
-      renderStats.push(stats);
-    });
+      const subViewports = viewport.subViewports || [viewport];
+      for (const subViewport of subViewports) {
+        props.viewport = subViewport;
+
+        const stats = this._drawLayersInViewport(gl, props);
+        renderStats.push(stats);
+      }
+    }
     return renderStats;
   }
 
   // Draws a list of layers in one viewport
   // TODO - when picking we could completely skip rendering viewports that dont
   // intersect with the picking rect
+  /* eslint-disable max-depth */
   _drawLayersInViewport(
     gl,
-    {layers, layerFilter, viewport, view, pass = 'unknown', effects, moduleParameters}
+    {layers, layerFilter, onError, viewport, view, pass = 'unknown', effects, moduleParameters}
   ) {
     const glViewport = getGLViewport(gl, {viewport});
 
@@ -72,7 +78,8 @@ export default class LayersPass extends Pass {
     setParameters(gl, {viewport: glViewport});
 
     // render layers in normal colors
-    layers.forEach((layer, layerIndex) => {
+    for (let layerIndex = 0; layerIndex < layers.length; layerIndex++) {
+      const layer = layers[layerIndex];
       // Check if we should draw layer
       const shouldDrawLayer = this._shouldDrawLayer(layer, viewport, pass, layerFilter);
 
@@ -89,19 +96,29 @@ export default class LayersPass extends Pass {
         renderStatus.visibleCount++;
 
         const _moduleParameters = this._getModuleParameters(layer, effects, pass, moduleParameters);
-        const uniforms = Object.assign({}, layer.context.uniforms, {layerIndex});
         const layerParameters = this.getLayerParameters(layer, layerIndex);
+        // overwrite layer.context.viewport with the sub viewport
+        _moduleParameters.viewport = viewport;
 
-        layer.drawLayer({
-          moduleParameters: _moduleParameters,
-          uniforms,
-          parameters: layerParameters
-        });
+        try {
+          layer.drawLayer({
+            moduleParameters: _moduleParameters,
+            uniforms: {layerIndex},
+            parameters: layerParameters
+          });
+        } catch (err) {
+          if (onError) {
+            onError(err, layer);
+          } else {
+            log.error(`error during drawing of ${layer}`, err)();
+          }
+        }
       }
-    });
+    }
 
     return renderStatus;
   }
+  /* eslint-enable max-depth */
 
   /* Methods for subclass overrides */
   shouldDrawLayer(layer) {

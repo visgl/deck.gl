@@ -4,6 +4,7 @@ import convertFunctions from '@deck.gl/json/helpers/convert-functions';
 
 const TEST_CASES = [
   {expr: 'true', expected: true}, // boolean literal
+  {expr: 'false', expected: false},
 
   // array expression
   {expr: '([1,2,3])[0]', expected: 1},
@@ -99,6 +100,35 @@ test('convertFunctions#asFunctions', t => {
   const convertedProps = convertFunctions(props, {});
   for (const key in convertedProps) {
     t.ok(typeof convertedProps[key] === 'function', 'convertFunctions converted prop to function');
+  }
+  t.end();
+});
+
+test('convertFunctions#assureAllKeysPresent', t => {
+  const EXAMPLE_PROPS = {
+    data: 'shp.geojson',
+    stroked: true,
+    filled: false,
+    lineWidthMinPixels: 2,
+    getElevation: '@@=x * 10',
+    opacity: 0.9
+  };
+
+  const convertedProps = convertFunctions(EXAMPLE_PROPS, {});
+  for (const key in EXAMPLE_PROPS) {
+    if (key !== 'getElevation') {
+      t.ok(
+        EXAMPLE_PROPS[key] === convertedProps[key],
+        `convertFunctions converted prop ${key} input to expected value ${EXAMPLE_PROPS[key]}`
+      );
+    } else {
+      t.ok(
+        convertedProps.getElevation({x: 10}) === 100,
+        `convertFunctions converted function ${key} to expected value, ${convertedProps.getElevation(
+          10
+        )}`
+      );
+    }
   }
   t.end();
 });

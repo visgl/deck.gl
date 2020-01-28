@@ -17,9 +17,9 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
-
 import test from 'tape';
-import {TEST_CASES, WIDTH, HEIGHT} from './test-cases';
+import TEST_CASES from './test-cases';
+import {WIDTH, HEIGHT} from './constants';
 import {SnapshotTestRunner} from '@deck.gl/test-utils';
 
 import './jupyter-widget';
@@ -36,7 +36,8 @@ test('Render Test', t => {
       onTestFail: (testCase, result) => t.fail(result.error || `match: ${result.matchPercentage}`),
 
       imageDiffOptions: {
-        threshold: 0.99
+        threshold: 0.99,
+        includeEmpty: false
         // uncomment to save screenshot to disk
         // , saveOnFail: true
         // uncomment `saveAs` to overwrite current golden images

@@ -1,4 +1,3 @@
-import './tile-cache.spec';
-import './tile.spec';
-import './tile-layer.spec';
+import './tile-util.spec';
 import './viewport-util.spec';
+import './tile-layer.spec';

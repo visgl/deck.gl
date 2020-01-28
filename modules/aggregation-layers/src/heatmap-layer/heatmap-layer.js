@@ -82,8 +82,11 @@ const REQUIRED_FEATURES = [
   // FEATURES.FLOAT_BLEND, // implictly supported when TEXTURE_FLOAT is supported
 ];
 
-// props , when changed requires re-aggregation
-const AGGREGATION_PROPS = ['radiusPixels'];
+const DIMENSIONS = {
+  data: {
+    props: ['radiusPixels']
+  }
+};
 
 export default class HeatmapLayer extends AggregationLayer {
   initializeState() {
@@ -93,7 +96,7 @@ export default class HeatmapLayer extends AggregationLayer {
       log.error(`HeatmapLayer: ${this.id} is not supported on this browser`)();
       return;
     }
-    super.initializeState(AGGREGATION_PROPS);
+    super.initializeState(DIMENSIONS);
     this.setState({supported: true});
     this._setupTextureParams();
     this._setupAttributes();
@@ -228,9 +231,13 @@ export default class HeatmapLayer extends AggregationLayer {
 
   _getChangeFlags(opts) {
     const changeFlags = {};
-    if (this.isAggregationDirty(opts)) {
-      changeFlags.dataChanged = true;
-    }
+    const {dimensions} = this.state;
+    changeFlags.dataChanged =
+      this.isAttributeChanged() || // if any attribute is changed
+      this.isAggregationDirty(opts, {
+        compareAll: true,
+        dimension: dimensions.data
+      });
     changeFlags.viewportChanged = opts.changeFlags.viewportChanged;
 
     const {zoom} = this.state;
@@ -263,6 +270,7 @@ export default class HeatmapLayer extends AggregationLayer {
       positions: {size: 3, accessor: 'getPosition'},
       weights: {size: 1, accessor: 'getWeight'}
     });
+    this.setState({positionAttributeName: 'positions'});
   }
 
   _setupTextureParams() {
@@ -527,19 +535,19 @@ export default class HeatmapLayer extends AggregationLayer {
 
     const size = (textureSize * RESOLUTION) / viewport.scale;
 
-    let topLeftCommon;
-    let bottomRightCommon;
+    let bottomLeftCommon;
+    let topRightCommon;
 
     // Y-axis is flipped between World and Common bounds
     if (useLayerCoordinateSystem) {
-      topLeftCommon = this.projectPosition([minLong, maxLat, 0]);
-      bottomRightCommon = this.projectPosition([maxLong, minLat, 0]);
+      bottomLeftCommon = this.projectPosition([minLong, minLat, 0]);
+      topRightCommon = this.projectPosition([maxLong, maxLat, 0]);
     } else {
-      topLeftCommon = viewport.projectPosition([minLong, maxLat, 0]);
-      bottomRightCommon = viewport.projectPosition([maxLong, minLat, 0]);
+      bottomLeftCommon = viewport.projectPosition([minLong, minLat, 0]);
+      topRightCommon = viewport.projectPosition([maxLong, maxLat, 0]);
     }
     // Ignore z component
-    let commonBounds = topLeftCommon.slice(0, 2).concat(bottomRightCommon.slice(0, 2));
+    let commonBounds = bottomLeftCommon.slice(0, 2).concat(topRightCommon.slice(0, 2));
     commonBounds = scaleToAspectRatio(commonBounds, size, size);
     return commonBounds;
   }
@@ -549,10 +557,10 @@ export default class HeatmapLayer extends AggregationLayer {
   _commonToWorldBounds(commonBounds) {
     const [xMin, yMin, xMax, yMax] = commonBounds;
     const {viewport} = this.context;
-    const topLeftWorld = viewport.unprojectPosition([xMin, yMin]);
-    const bottomRightWorld = viewport.unprojectPosition([xMax, yMax]);
+    const bottomLeftWorld = viewport.unprojectPosition([xMin, yMin]);
+    const topRightWorld = viewport.unprojectPosition([xMax, yMax]);
 
-    return topLeftWorld.slice(0, 2).concat(bottomRightWorld.slice(0, 2));
+    return bottomLeftWorld.slice(0, 2).concat(topRightWorld.slice(0, 2));
   }
 }
 

@@ -126,6 +126,7 @@ The test renderer and each test case may choose to override the default image di
 * `tolerance`
 * `threshold`
 * `includeAA`
+* `includeEmpty`
 * `createDiffImage`
 * `saveOnFail`
 * `saveAs`

@@ -418,7 +418,7 @@ test('HexagonLayer#updateLayer', t => {
       },
       {
         updateProps: {
-          colorAggregation: 'Mean',
+          colorAggregation: 'MEAN',
           getColorValue: null
         },
         onAfterUpdate: getCheckForTriggeredBinUpdate(
@@ -482,7 +482,7 @@ test('HexagonLayer#updateLayer', t => {
       },
       {
         updateProps: {
-          elevationAggregation: 'Mean',
+          elevationAggregation: 'MEAN',
           getElevationValue: null
         },
         onAfterUpdate: getCheckForTriggeredBinUpdate('elevationAggregation', 'elevation')
@@ -572,7 +572,7 @@ test('HexagonLayer#updateTriggers', t => {
       },
       {
         updateProps: {
-          colorAggregation: 'Mean'
+          colorAggregation: 'MEAN'
         },
         onAfterUpdate: getSublayerAttributeUpdateCheck('colorAggregation', {
           color: true,
@@ -677,7 +677,7 @@ test('HexagonLayer#updateTriggers', t => {
       },
       {
         updateProps: {
-          elevationAggregation: 'Mean'
+          elevationAggregation: 'MEAN'
         },
         onAfterUpdate: getSublayerAttributeUpdateCheck('elevationAggregation', {
           color: false,

@@ -21,6 +21,8 @@ import {createIterable, getAccessorFromBuffer} from './iterable-utils';
 import defaultTypedArrayManager from './typed-array-manager';
 import assert from './assert';
 
+import {Buffer} from '@luma.gl/core';
+
 export default class Tesselator {
   constructor(opts = {}) {
     const {attributes = {}} = opts;
@@ -60,10 +62,7 @@ export default class Tesselator {
 
     // Handle external logical value
     if (geometryBuffer) {
-      assert(
-        ArrayBuffer.isView(geometryBuffer.value || geometryBuffer) && data.startIndices,
-        'invalid geometries'
-      );
+      assert(data.startIndices, 'binary data missing startIndices');
       this.getGeometry = this.getGeometryFromBuffer(geometryBuffer);
 
       if (!normalize) {
@@ -101,7 +100,10 @@ export default class Tesselator {
   }
 
   getGeometryFromBuffer(geometryBuffer) {
-    return getAccessorFromBuffer(geometryBuffer.value || geometryBuffer, {
+    const value = geometryBuffer.value || geometryBuffer;
+    assert(ArrayBuffer.isView(value), 'cannot read geometries');
+
+    return getAccessorFromBuffer(value, {
       size: this.positionSize,
       offset: geometryBuffer.offset,
       stride: geometryBuffer.stride,
@@ -151,7 +153,7 @@ export default class Tesselator {
     }
 
     let {indexStarts, vertexStarts, instanceCount} = this;
-    const {geometryBuffer} = this;
+    const {data, geometryBuffer} = this;
     const {startRow = 0, endRow = Infinity} = dataRange || {};
 
     if (!dataRange) {
@@ -169,13 +171,18 @@ export default class Tesselator {
       );
       // count instances
       instanceCount = vertexStarts[vertexStarts.length - 1];
+    } else if (geometryBuffer.buffer instanceof Buffer) {
+      const byteStride = geometryBuffer.stride || this.positionSize * 4;
+      // assume user provided data is already normalized
+      vertexStarts = data.startIndices;
+      instanceCount = vertexStarts[data.length] || geometryBuffer.buffer.byteLength / byteStride;
     } else {
       const bufferValue = geometryBuffer.value || geometryBuffer;
-      const bufferStride =
+      const elementStride =
         geometryBuffer.stride / bufferValue.BYTES_PER_ELEMENT || this.positionSize;
       // assume user provided data is already normalized
-      vertexStarts = this.data.startIndices;
-      instanceCount = bufferValue.length / bufferStride;
+      vertexStarts = data.startIndices;
+      instanceCount = vertexStarts[data.length] || bufferValue.length / elementStride;
     }
 
     // allocate attributes

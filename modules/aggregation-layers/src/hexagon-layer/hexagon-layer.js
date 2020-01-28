@@ -66,6 +66,9 @@ const defaultProps = {
 };
 
 export default class HexagonLayer extends AggregationLayer {
+  shouldUpdateState({changeFlags}) {
+    return changeFlags.somethingChanged;
+  }
   initializeState() {
     const cpuAggregator = new CPUAggregator({
       getAggregator: props => props.hexagonAggregator,
@@ -74,64 +77,90 @@ export default class HexagonLayer extends AggregationLayer {
 
     this.state = {
       cpuAggregator,
-      aggregatorState: cpuAggregator.state
+      aggregatorState: cpuAggregator.state,
+      hexagonVertices: null
     };
     const attributeManager = this.getAttributeManager();
     attributeManager.add({
       positions: {size: 3, accessor: 'getPosition'}
     });
     // color and elevation attributes can't be added as attributes
-    // they are calcualted using 'getValue' accessor that takes an array of pints.
+    // they are calculated using 'getValue' accessor that takes an array of pints.
   }
 
   updateState(opts) {
     super.updateState(opts);
-    const {cpuAggregator} = this.state;
-    const oldLayerData = cpuAggregator.state.layerData;
-    this.setState({
-      // make a copy of the internal state of cpuAggregator for testing
-      aggregatorState: cpuAggregator.updateState(opts, {
-        viewport: this.context.viewport,
-        attributes: this.getAttributes()
-      })
-    });
+    const {cpuAggregator, hexagonVertices: oldVertices} = this.state;
 
-    if (oldLayerData !== cpuAggregator.state.layerData) {
-      const {hexagonVertices} = cpuAggregator.state.layerData;
-      this.updateRadiusAngle(hexagonVertices);
+    if (opts.changeFlags.propsOrDataChanged) {
+      this.setState({
+        // make a copy of the internal state of cpuAggregator for testing
+        aggregatorState: cpuAggregator.updateState(opts, {
+          viewport: this.context.viewport,
+          attributes: this.getAttributes()
+        })
+      });
+    }
+
+    // if user provided custom aggregator and returns hexagonVertices,
+    // Need to recalculate radius and angle based on vertices
+    const {hexagonVertices} = cpuAggregator.state.layerData || {};
+
+    if (hexagonVertices && oldVertices !== hexagonVertices) {
+      const vertices = this.convertLatLngToMeterOffset(hexagonVertices);
+      if (vertices) {
+        this.setState({
+          hexagonVertices,
+          vertices
+        });
+      }
+    } else {
+      // update radius angle by viewport
+      this.updateRadiusAngle();
     }
   }
 
   updateRadiusAngle(vertices) {
-    let {radius} = this.props;
-    let angle = 90;
+    const {viewport} = this.context;
+    const {unitsPerMeter} = viewport.getDistanceScales();
+    const {cpuAggregator} = this.state;
 
-    if (Array.isArray(vertices)) {
-      if (vertices.length < 6) {
-        log.error('HexagonCellLayer: hexagonVertices needs to be an array of 6 points')();
-      }
+    if (cpuAggregator.state.layerData && cpuAggregator.state.layerData.radiusCommon) {
+      const {radiusCommon} = cpuAggregator.state.layerData;
+      const radius = radiusCommon / unitsPerMeter[0];
 
-      // calculate angle and vertices from hexagonVertices if provided
-      const vertex0 = vertices[0];
-      const vertex3 = vertices[3];
+      // convert radius in common to meter
+      this.setState({angle: 90, radius});
+    }
+  }
 
-      // transform to space coordinates
-      const {viewport} = this.context;
-      const {unitsPerMeter} = viewport.getDistanceScales();
-      const spaceCoord0 = this.projectFlat(vertex0);
-      const spaceCoord3 = this.projectFlat(vertex3);
+  convertLatLngToMeterOffset(hexagonVertices) {
+    const {viewport} = this.context;
+    if (Array.isArray(hexagonVertices) && hexagonVertices.length === 6) {
+      // get centroid of hexagons
+      const vertex0 = hexagonVertices[0];
+      const vertex3 = hexagonVertices[3];
 
-      // distance between two close centroids
-      const dx = spaceCoord0[0] - spaceCoord3[0];
-      const dy = spaceCoord0[1] - spaceCoord3[1];
-      const dxy = Math.sqrt(dx * dx + dy * dy);
+      const centroid = [(vertex0[0] + vertex3[0]) / 2, (vertex0[1] + vertex3[1]) / 2];
+      const centroidFlat = viewport.projectFlat(centroid);
 
-      // Calculate angle that the perpendicular hexagon vertex axis is tilted
-      angle = ((Math.acos(dx / dxy) * -Math.sign(dy)) / Math.PI) * 180 + 90;
-      radius = dxy / 2 / unitsPerMeter[0];
+      const {metersPerUnit} = viewport.getDistanceScales(centroid);
+
+      // offset all points by centroid to meter offset
+      const vertices = hexagonVertices.map(vt => {
+        const vtFlat = viewport.projectFlat(vt);
+
+        return [
+          (vtFlat[0] - centroidFlat[0]) * metersPerUnit[0],
+          (vtFlat[1] - centroidFlat[1]) * metersPerUnit[1]
+        ];
+      });
+
+      return vertices;
     }
 
-    this.setState({angle, radius});
+    log.error('HexagonLayer: hexagonVertices needs to be an array of 6 points')();
+    return null;
   }
 
   getPickingInfo({info}) {
@@ -154,17 +183,17 @@ export default class HexagonLayer extends AggregationLayer {
 
   renderLayers() {
     const {elevationScale, extruded, coverage, material, transitions} = this.props;
-    const {angle, radius, cpuAggregator} = this.state;
+    const {angle, radius, cpuAggregator, vertices} = this.state;
 
     const SubLayerClass = this.getSubLayerClass('hexagon-cell', ColumnLayer);
     const updateTriggers = this._getSublayerUpdateTriggers();
 
+    const geometry = vertices && vertices.length ? {vertices, radius: 1} : {radius, angle};
     return new SubLayerClass(
       {
-        radius,
+        ...geometry,
         diskResolution: 6,
         elevationScale,
-        angle,
         extruded,
         coverage,
         material,
