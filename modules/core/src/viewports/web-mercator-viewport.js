@@ -32,6 +32,7 @@ import {
 
 // TODO - import from math.gl
 import * as vec2 from 'gl-matrix/vec2';
+import {Matrix4} from 'math.gl';
 
 export default class WebMercatorViewport extends Viewport {
   /**
@@ -50,7 +51,10 @@ export default class WebMercatorViewport extends Viewport {
       bearing = 0,
       nearZMultiplier = 0.1,
       farZMultiplier = 1.01,
-      orthographic = false
+      orthographic = false,
+
+      repeat = false,
+      worldOffset = 0
     } = opts;
 
     let {width, height, altitude = 1.5} = opts;
@@ -77,13 +81,18 @@ export default class WebMercatorViewport extends Viewport {
     // shader (cheap) which gives a coordinate system that has its center in
     // the layer's center position. This makes rotations and other modelMatrx
     // transforms much more useful.
-    const viewMatrixUncentered = getViewMatrix({
+    let viewMatrixUncentered = getViewMatrix({
       height,
       pitch,
       bearing,
       scale,
       altitude
     });
+
+    if (worldOffset) {
+      const viewOffset = new Matrix4().translate([512 * worldOffset, 0, 0]);
+      viewMatrixUncentered = viewOffset.multiplyLeft(viewMatrixUncentered);
+    }
 
     const viewportOpts = Object.assign({}, opts, {
       // x, y,
@@ -118,9 +127,38 @@ export default class WebMercatorViewport extends Viewport {
 
     this.orthographic = orthographic;
 
+    this._subViewports = repeat ? [] : null;
+
     Object.freeze(this);
   }
   /* eslint-enable complexity, max-statements */
+
+  get subViewports() {
+    if (this._subViewports && !this._subViewports.length) {
+      // Cache sub viewports so that we only calculate them once
+      const topLeft = this.unproject([0, 0]);
+      const topRight = this.unproject([this.width, 0]);
+      const bottomLeft = this.unproject([0, this.height]);
+      const bottomRight = this.unproject([this.width, this.height]);
+
+      const minLon = Math.min(topLeft[0], topRight[0], bottomLeft[0], bottomRight[0]);
+      const maxLon = Math.max(topLeft[0], topRight[0], bottomLeft[0], bottomRight[0]);
+
+      const minOffset = Math.floor((minLon + 180) / 360);
+      const maxOffset = Math.ceil((maxLon - 180) / 360);
+
+      for (let x = minOffset; x <= maxOffset; x++) {
+        const offsetViewport = x
+          ? new WebMercatorViewport({
+              ...this,
+              worldOffset: x
+            })
+          : this;
+        this._subViewports.push(offsetViewport);
+      }
+    }
+    return this._subViewports;
+  }
 
   /**
    * Add a meter delta to a base lnglat coordinate, returning a new lnglat array

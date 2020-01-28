@@ -11,7 +11,9 @@ import {MapView} from '@deck.gl/core';
 const view = new MapView({id, ...});
 ```
 
-`MapView` takes the same parameters as the [View](/docs/api-reference/view.md) superclass constructor.
+`MapView` takes the same parameters as the [View](/docs/api-reference/view.md) superclass constructor, plus the following:
+
+- `repeat` (`Boolean`) - Whether to render multiple copies of the map at low zoom levels. Default `false`.
 
 ## View State
 

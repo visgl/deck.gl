@@ -13,7 +13,8 @@ test('PathStyleExtension#PathLayer', t => {
         data: FIXTURES.zigzag,
         getPath: d => d.path,
         getDashArray: [0, 0],
-        extensions: [new PathStyleExtension({dash: true})]
+        getOffset: 0,
+        extensions: [new PathStyleExtension({dash: true, offset: true})]
       },
       onAfterUpdate: ({layer}) => {
         const uniforms = layer.state.model.getUniforms();
@@ -22,12 +23,17 @@ test('PathStyleExtension#PathLayer', t => {
           layer.getAttributeManager().getAttributes().instanceDashArrays.value,
           'instanceDashArrays attribute is populated'
         );
+        t.ok(
+          layer.getAttributeManager().getAttributes().instanceOffsets.value,
+          'instanceOffsets attribute is populated'
+        );
       }
     },
     {
       updateProps: {
         dashJustified: true,
-        getDashArray: d => [3, 1]
+        getDashArray: d => [3, 1],
+        getOffset: d => 0.5
       },
       onAfterUpdate: ({layer}) => {
         const uniforms = layer.state.model.getUniforms();
@@ -35,6 +41,10 @@ test('PathStyleExtension#PathLayer', t => {
         t.ok(
           layer.getAttributeManager().getAttributes().instanceDashArrays.value,
           'instanceDashArrays attribute is populated'
+        );
+        t.ok(
+          layer.getAttributeManager().getAttributes().instanceOffsets.value,
+          'instanceOffsets attribute is populated'
         );
       }
     }

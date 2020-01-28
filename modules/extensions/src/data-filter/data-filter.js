@@ -19,7 +19,8 @@
 // THE SOFTWARE.
 
 import {LayerExtension} from '@deck.gl/core';
-import shaderModule from './shader-module';
+import {shaderModule, shaderModule64} from './shader-module';
+import GL from '@luma.gl/constants';
 
 const defaultProps = {
   getFilterValue: {type: 'accessor', value: 0},
@@ -39,20 +40,22 @@ const DATA_TYPE_FROM_SIZE = {
 };
 
 export default class DataFilterExtension extends LayerExtension {
-  constructor({filterSize = 1} = {}) {
+  constructor({filterSize = 1, fp64 = false} = {}) {
     if (!DATA_TYPE_FROM_SIZE[filterSize]) {
       throw new Error('filterSize out of range');
     }
 
-    super({filterSize});
+    super({filterSize, fp64});
   }
 
   getShaders(extension) {
-    const {filterSize} = extension.opts;
+    const {filterSize, fp64} = extension.opts;
+
     return {
-      modules: [shaderModule],
+      modules: [fp64 ? shaderModule64 : shaderModule],
       defines: {
-        DATAFILTER_TYPE: DATA_TYPE_FROM_SIZE[filterSize]
+        DATAFILTER_TYPE: DATA_TYPE_FROM_SIZE[filterSize],
+        DATAFILTER_DOUBLE: Boolean(fp64)
       }
     };
   }
@@ -63,6 +66,7 @@ export default class DataFilterExtension extends LayerExtension {
       attributeManager.add({
         filterValues: {
           size: extension.opts.filterSize,
+          type: extension.opts.fp64 ? GL.DOUBLE : GL.FLOAT,
           accessor: 'getFilterValue',
           shaderAttributes: {
             filterValues: {

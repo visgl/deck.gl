@@ -490,7 +490,7 @@ test('CPUGridLayer#updates', t => {
       },
       {
         updateProps: {
-          colorAggregation: 'Mean',
+          colorAggregation: 'MEAN',
           getColorValue: null
         },
         onAfterUpdate: getCheckForTriggeredBinUpdate(
@@ -554,7 +554,7 @@ test('CPUGridLayer#updates', t => {
       },
       {
         updateProps: {
-          elevationAggregation: 'Mean',
+          elevationAggregation: 'MEAN',
           getElevationValue: null
         },
         onAfterUpdate: getCheckForTriggeredBinUpdate('elevationAggregation', 'elevation')
@@ -815,7 +815,7 @@ test('CPUGridLayer#updateTriggers', t => {
       },
       {
         updateProps: {
-          elevationAggregation: 'Mean'
+          elevationAggregation: 'MEAN'
         },
         onAfterUpdate: getSublayerAttributeUpdateCheck('elevationAggregation', {
           color: false,

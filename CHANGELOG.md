@@ -17,9 +17,44 @@ Each version should:
 Ref: http://keepachangelog.com/en/0.3.0/
 -->
 
-## deck.gl v8.0
+## deck.gl v8.1
 
-### deck.gl v8.0 Prereleases
+### deck.gl [8.1.0-alpha.1] - Jan 17 2020
+
+- Voodoo fix for Mac+NVIDIA bug (#4166)
+- Remove unnecessary code from project glsl (#4162)
+- Fix H3HexagonLayer update when viewport jumps (#4158)
+- Refactor render tests; use stricter pass criteria (#4157)
+- [Extension] Add source_target to brushing mode (#4150)
+- Add offset feature to PathStyleExtension (#4126)
+- Project module: support pre-projected positions (#4140)
+- Repeat maps at low zoom levels (#4105)
+- IconLayer: fix copy texture data when resize (#4151)
+- Path layer vertex shader improvements (#4111)
+- Bump mjolnir.js dependency (#4141)
+- Error handling (#4135)
+- IconLayer: use load instead of loadImage to load icons (#4137)
+- Bump loaders.gl (#4136)
+- Non-Geospatial TileLayer (#4117)
+- Remove unused dependencies from geo-layers (#4127)
+- Support initialViewState updates (#4038)
+- Fix support for luma.gl buffers as external attributes (#4121)
+- [react] explicitly set deck canvas position (#4124)
+
+### deck.gl [8.1.0-alpha.0] - Jan 08 2020
+
+- pydeck: Reduce JupyterLab bundle size (#4110)
+- fix cursor style in React (#4118)
+- GPUGridAggregator: Add WA for ANGLE specific bug. (#4113)
+- fix debug bundle warning (#4107)
+- pydeck: Simplify setup.py and add JupyterLab installation instructions (#4096)
+- fix react key warning (#4098)
+- Fix randomly failed icon layer render test (#4079)
+- update evaluate-children to pass deck gl view ports to children with deckGLViewProps (#4092)
+- clean up prop handling (#4080)
+- Clean up hover handling (#4081)
+
+## deck.gl v8.0
 
 ### deck.gl [8.0.0-beta.2] - Dec 17 2019
 

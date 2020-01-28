@@ -2,7 +2,7 @@
   "name": "@deck.gl/google-maps",
   "description": "Use deck.gl as a custom Google Maps overlay",
   "license": "MIT",
-  "version": "8.0.0-beta.2",
+  "version": "8.1.0-alpha.1",
   "publishConfig": {
     "access": "public"
   },
@@ -30,6 +30,6 @@
     "prepublishOnly": "npm run build-bundle && npm run build-bundle -- --env.dev"
   },
   "peerDependencies": {
-    "@deck.gl/core": "^8.0.0-beta"
+    "@deck.gl/core": "^8.0.0"
   }
 }

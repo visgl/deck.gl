@@ -38,12 +38,7 @@ deck.setProps(jsonConverter.convert(json));
 ##### `json` (Object|String)
 
 A JSON string or a parsed JSON structure.
-All properties in this object are passed to `Deck`, after processing, which includes the following fields:
-
-- `views` (Array) - If supplied, used to create `View` instances from JSON descriptors. `{type: MapView, ...props}` will be instantiated to `MapView(...props)`
-- `layers` (Array) - Passes to an instance of [JSONLayer](/docs/api-reference/json/json-layer.md) as the top level layer.
-- `map` (Boolean) - If set to `true` display a base map. See remarks below.
-- `mapStyle` (String) - An optional mapbox-gl compatible style URL.
+All properties in this object, after processing, are passed to a [Deck](/docs/api-reference/deck.md) instance as props.
 
 ## Configuration
 

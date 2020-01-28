@@ -83,12 +83,12 @@
       .attr('id', (d, i) => 'city-' + i)
       .on('change', d => {
         deckgl.setProps({
-          viewState: {
+          initialViewState: {
             longitude: d.longitude,
             latitude: d.latitude,
             zoom: 10,
-            transitionInterpolator: new FlyToInterpolator(),
-            transitionDuration: 5000
+            transitionInterpolator: new FlyToInterpolator({speed: 1.5}),
+            transitionDuration: 'auto'
           }
         })
       });

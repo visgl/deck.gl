@@ -11,10 +11,10 @@ Docs:
 - [Binary Data](/docs/developer-guide/binary-data.md) - Explains considerations when working with binary data.
 
 RFCs:
-- [Binary Data Support RFC](/dev-docs/v7.x/binary-data-rfc.md) - Basic binary array support with deck.gl.
-- [GLSL Accessor RFC](/dev-docs/v7.x/glsl-accessor-rfc.md) - Proposal for
-- [Texture Attribute RFC](/dev-docs/v7.x/texture-attribute-rfc.md) - Enable _variable-primitive layers_ read "descriptive attributes" from a single column value.
-- [Chunked Data Support](/dev-docs/v7.x/chunked-data-rfc.md) - Proposal for enabling deck.gl to work directly with Chunked Columnar data.
+- [Binary Data Support RFC](/dev-docs/v7.2/binary-data-rfc.md) - Basic binary array support with deck.gl.
+- [GLSL Accessor RFC](/dev-docs/proposals/glsl-accessor-rfc.md) - Proposal for
+- [Texture Attribute RFC](/dev-docs/proposals/texture-attribute-rfc.md) - Enable _variable-primitive layers_ read "descriptive attributes" from a single column value.
+- [Chunked Data Support](/dev-docs/proposals/chunked-data-rfc.md) - Proposal for enabling deck.gl to work directly with Chunked Columnar data.
 
 ### Load data in workers/streaming loads
 

@@ -1,7 +1,7 @@
 # Tile3DLayer (Experimental)
 
-The `Tile3DLayer` renders tileset data formatted according to the [3D Tiles Category](https://loaders.gl/docs/api-reference/3d-tiles),
-which is supported by the [Tileset3DLoader](https://loaders.gl/docs/api-reference/3d-tiles/tileset-3d-loader).
+The `Tile3DLayer` renders tileset data formatted according to the [3D Tiles Specification](https://www.opengeospatial.org/standards/3DTiles),
+which is supported by the [Tileset3DLoader](https://loaders.gl/modules/3d-tiles/docs/api-reference/tileset-3d-loader).
 
 Tile3DLayer is a [CompositeLayer](/docs/api-reference/composite-layer.md). Base on each tile content [format](https://github.com/AnalyticalGraphicsInc/3d-tiles/tree/master/specification#introduction), it uses either a [PointCloudLayer](/docs/layers/point-cloud-layer.md) or [ScenegraphLayer](/docs/layers/scenegraph-layer.md) to render.
 
@@ -11,7 +11,7 @@ References
 ```js
 import React, {Component} from 'react';
 import DeckGL from '@deck.gl/react';
-import {Tile3DLayer} from '@deck.gl/tile-layers';
+import {Tile3DLayer} from '@deck.gl/geo-layers';
 
 export default class App extends Component {
 
@@ -49,11 +49,11 @@ To install the dependencies:
 ```bash
 npm install deck.gl
 # or
-npm install @deck.gl/core @deck.gl/tile-layers
+npm install @deck.gl/core @deck.gl/geo-layers
 ```
 
 ```js
-import {Tile3DLayer} from '@deck.gl/tile-layers';
+import {Tile3DLayer} from '@deck.gl/geo-layers';
 new Tile3DLayer({});
 ```
 
@@ -64,6 +64,7 @@ To use pre-bundled scripts:
 <!-- or -->
 <script src="https://unpkg.com/@deck.gl/core@^8.0.0/dist.min.js"></script>
 <script src="https://unpkg.com/@deck.gl/layers@^8.0.0/dist.min.js"></script>
+<script src="https://unpkg.com/@deck.gl/geo-layers@^8.0.0/dist.min.js"></script>
 ```
 
 ```js
@@ -165,8 +166,8 @@ The Tile3DLayer renders the following sublayers based on tile [format](https://g
   - `_lighting` is default to `pbr`.
 * `pointcloud` - a [PointCloudLayer](/docs/layers/point-cloud-layer.md) rendering all the tiles with Point Cloud format (`pnts`).
 
-Follow [CompositeLayer](/docs/layers/composite-layer.md#_subLayerProp) and example in this layer doc to see how to override sub layer props.
+Follow [CompositeLayer](/docs/api-reference/composite-layer.md#_subLayerProp) and example in this layer doc to see how to override sub layer props.
 
 ## Source
 
-[modules/tile-layers/src/tile-3d-layer](https://github.com/uber/deck.gl/tree/master/modules/geo-layers/src/tile-3d-layer)
+[modules/geo-layers/src/tile-3d-layer](https://github.com/uber/deck.gl/tree/master/modules/geo-layers/src/tile-3d-layer)

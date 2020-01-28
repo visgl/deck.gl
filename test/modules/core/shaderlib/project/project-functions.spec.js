@@ -45,7 +45,7 @@ const TEST_CASES = [
     position: [-70, 41, 1000],
     params: {
       viewport: TEST_VIEWPORT_2,
-      coordinateSystem: COORDINATE_SYSTEM.LNGLAT
+      coordinateSystem: COORDINATE_SYSTEM.DEFAULT
     },
     result: [156.44444444444446, 320.0378755678335, 0.01687089818244227]
   },
@@ -54,7 +54,7 @@ const TEST_CASES = [
     position: [-122.46, 37.8, 1000],
     params: {
       viewport: TEST_VIEWPORT,
-      coordinateSystem: COORDINATE_SYSTEM.LNGLAT
+      coordinateSystem: COORDINATE_SYSTEM.DEFAULT
     },
     result: [-0.014226562499999318, 0.03599588695612965, 0.016187212628251565]
   },

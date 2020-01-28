@@ -1,0 +1,25 @@
+include LICENSE.txt
+include README.md
+
+include pytest.ini
+include .coveragerc
+
+include pydeck/io/templates/*.j2
+
+# Examples
+graft examples
+
+# Tests
+graft tests
+prune tests/build
+
+# Javascript files
+graft pydeck/nbextension
+prune setup
+
+# Patterns to exclude from any directory
+global-exclude *~
+global-exclude *.pyc
+global-exclude *.pyo
+global-exclude .git
+global-exclude .ipynb_checkpoints

@@ -25,7 +25,7 @@ import {DataFilterExtension} from '@deck.gl/extensions';
 import {testLayer} from '@deck.gl/test-utils';
 
 const BASE_LAYER_ID = 'composite-layer-id';
-const PROPS = {
+const defaultProps = {
   cellSize: 10,
   prop1: 5
 };
@@ -36,11 +36,26 @@ class TestLayer extends Layer {
 
 TestLayer.layerName = 'TestLayer';
 
-const AGGREGATION_PROPS = ['cellSize'];
+const DIMENSIONS = {
+  data: {
+    props: ['cellSize']
+  }
+};
 
 class TestAggregationLayer extends AggregationLayer {
   initializeState() {
-    super.initializeState(AGGREGATION_PROPS);
+    super.initializeState(DIMENSIONS);
+    const attributeManager = this.getAttributeManager();
+    attributeManager.add({
+      aOne: {
+        size: 1,
+        accessor: 'getAOne'
+      },
+      aTwo: {
+        size: 1,
+        accessor: 'getATwo'
+      }
+    });
   }
 
   renderLayers() {
@@ -55,7 +70,14 @@ class TestAggregationLayer extends AggregationLayer {
     // clear state
     this.setState({aggregationDirty: false});
     super.updateState(opts);
-    this.setState({aggregationDirty: this.isAggregationDirty(opts)});
+    this.setState({
+      aggregationDirty: this.isAggregationDirty(opts, {
+        dimension: this.state.dimensions.data,
+        compareAll: true
+      }),
+      anyAttributeChanged: this.isAttributeChanged(),
+      aOneAttributeChanged: this.isAttributeChanged('aOne')
+    });
   }
   updateShaders(shaderOptions) {}
   //
@@ -63,9 +85,10 @@ class TestAggregationLayer extends AggregationLayer {
 }
 
 TestAggregationLayer.layerName = 'TestAggregationLayer';
+TestAggregationLayer.defaultProps = defaultProps;
 
 test('AggregationLayer#constructor', t => {
-  const layer = new TestAggregationLayer(Object.assign({id: BASE_LAYER_ID}, PROPS));
+  const layer = new TestAggregationLayer(Object.assign({id: BASE_LAYER_ID}, defaultProps));
   t.ok(layer, 'AggregationLayer created');
   t.end();
 });
@@ -78,17 +101,25 @@ test('AggregationLayer#updateState', t => {
       {
         props: {
           data: [0, 1],
+          getAOne: x => 1,
+          getATwo: x => 2,
           cellSize: 400,
           prop1: 10
         },
         onAfterUpdate({layer}) {
           t.ok(layer.getAttributeManager(), 'should create AttributeManager');
           t.ok(layer.state.aggregationDirty, 'Aggregation should be dirty on the first update');
+          t.ok(layer.state.anyAttributeChanged, 'All attributes should change on first update');
+          t.ok(layer.state.aOneAttributeChanged, 'Attribute should change on first update');
         }
       },
       {
         updateProps: {
-          prop1: 20
+          prop1: 20,
+          // change attribute two
+          updateTriggers: {
+            getATwo: 1
+          }
         },
         spies: ['updateShaders', 'updateAttributes'],
         onAfterUpdate({spies, layer}) {
@@ -98,6 +129,8 @@ test('AggregationLayer#updateState', t => {
             'should not call updateShaders when extensions not changed'
           );
           t.notOk(layer.state.aggregationDirty, 'Aggregation should not be dirty');
+          t.ok(layer.state.anyAttributeChanged, 'Should change one attribute');
+          t.notOk(layer.state.aOneAttributeChanged, 'Should not update attribute');
         }
       },
       {
@@ -138,7 +171,7 @@ test('AggregationLayer#updateState', t => {
         onAfterUpdate({layer}) {
           t.ok(
             layer.state.aggregationDirty,
-            'Aggregation should not be dirty when extension prop is changed'
+            'Aggregation should be dirty when extension prop is changed'
           );
         }
       }

@@ -243,21 +243,10 @@ export default class GPUGridAggregator {
 
   _normalizeAggregationParams(opts) {
     const aggregationParams = Object.assign({}, DEFAULT_RUN_PARAMS, opts);
-    const {moduleSettings, weights, cellSize, numCol, numRow} = aggregationParams;
-    const {viewport} = moduleSettings;
-    // validateProps(aggregationParams, opts);
-
+    const {weights} = aggregationParams;
     if (weights) {
       aggregationParams.weights = normalizeWeightParams(weights);
     }
-
-    if (!numCol || !numRow) {
-      const width = opts.width || viewport.width;
-      const height = opts.height || viewport.height;
-      aggregationParams.numCol = numCol || Math.ceil(width / cellSize[0]);
-      aggregationParams.numRow = numRow || Math.ceil(height / cellSize[1]);
-    }
-
     return aggregationParams;
   }
 
@@ -323,8 +312,6 @@ export default class GPUGridAggregator {
       moduleSettings,
       numCol,
       numRow,
-      width,
-      height,
       weights,
       translation,
       scaling
@@ -338,7 +325,6 @@ export default class GPUGridAggregator {
       blendFunc: [GL.ONE, GL.ONE]
     };
     const uniforms = {
-      windowSize: [width, height],
       cellSize,
       gridSize,
       projectPoints,

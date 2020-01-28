@@ -206,6 +206,11 @@ const PathLayerExample = {
       onUpdate: (newValue, newSettings, change) => {
         change('getDashArray', [newValue, 20 - newValue]);
       }
+    },
+    getOffset: {
+      type: 'number',
+      min: -2,
+      max: 2
     }
   },
   props: {
@@ -215,10 +220,11 @@ const PathLayerExample = {
     getColor: f => [128, 0, 0],
     getWidth: f => 10,
     getDashArray: f => [20, 0],
+    getOffset: 0,
     widthMinPixels: 1,
     pickable: true,
     dashJustified: true,
-    extensions: [new PathStyleExtension({dash: true})]
+    extensions: [new PathStyleExtension({dash: true, offset: true})]
   }
 };
 

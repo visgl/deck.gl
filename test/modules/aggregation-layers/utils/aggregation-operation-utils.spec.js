@@ -23,23 +23,24 @@ import test from 'tape-catch';
 import {getValueFunc} from '@deck.gl/aggregation-layers/utils/aggregation-operation-utils';
 
 const data = [10, 'a', null, 14, -3, 16, 0.2];
+const nonFiniteData = ['a', null, {a: 'a'}];
 const accessor = x => x;
 const TEST_CASES = [
   {
     name: 'Min Function',
-    op: 'min',
+    op: 'MIN',
     data,
     expected: -3
   },
   {
     name: 'Max Function',
-    op: 'Max',
+    op: 'MAX',
     data,
     expected: 16
   },
   {
     name: 'Sum Function',
-    op: 'sUM',
+    op: 'SUM',
     data,
     expected: 37.2
   },
@@ -61,6 +62,10 @@ test('GridAggregationOperationUtils#getValueFunc', t => {
   TEST_CASES.forEach(tc => {
     const func = getValueFunc(tc.op, accessor);
     t.ok(func(data) === tc.expected, `${tc.name} should return expected result`);
+    t.ok(
+      func(nonFiniteData) === null,
+      `${tc.name} should return expected result on non-finite data`
+    );
   });
   t.end();
 });
