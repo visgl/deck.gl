@@ -122,6 +122,12 @@ const layer = new Tile3DLayer({
 })
 ```
 
+##### `pickable` (Boolean, Optional)
+
+- Default: false
+
+When enable [`picking`](/docs/developer-guide/custom-layers/picking.md), the picking info will contain the selected [`tile`](https://github.com/uber-web/loaders.gl/blob/master/modules/3d-tiles/docs/api-reference/tileset-3d.md) accessed by`info.object`.
+
 ### Data Accessors
 
 ##### `getPointColor` (Function|Array, Optional)
