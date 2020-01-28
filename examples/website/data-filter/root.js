@@ -11,7 +11,7 @@ const engine = new Styletron();
 const DATA_URL =
   'https://raw.githubusercontent.com/uber-web/kepler.gl-data/master/earthquakes/data.csv'; // eslint-disable-line
 
-function renderWithProviders(data) {
+function Root({data}) {
   return (
     <StyletronProvider value={engine}>
       <BaseProvider theme={LightTheme}>
@@ -22,7 +22,7 @@ function renderWithProviders(data) {
 }
 
 export function renderToDOM(container) {
-  render(renderWithProviders(), container);
+  render(<Root />, container);
   require('d3-request').csv(DATA_URL, (error, response) => {
     if (!error) {
       const data = response.map(row => ({
@@ -32,7 +32,7 @@ export function renderToDOM(container) {
         depth: Number(row.Depth),
         magnitude: Number(row.Magnitude)
       }));
-      render(renderWithProviders(data), container);
+      render(<Root data={data} />, container);
     }
   });
 }
