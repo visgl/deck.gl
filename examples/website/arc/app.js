@@ -84,7 +84,7 @@ export default class App extends Component {
   }
 
   _recalculateArcs(data, selectedCounty = this.state.selectedCounty) {
-    if (!data) {
+    if (!data || !data.length) {
       return;
     }
     if (!selectedCounty) {

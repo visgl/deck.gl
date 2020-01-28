@@ -1,18 +1,12 @@
 import React, {Component, Fragment} from 'react';
-import {render} from 'react-dom';
 import {StaticMap} from 'react-map-gl';
 import DeckGL from '@deck.gl/react';
 import {ScatterplotLayer} from '@deck.gl/layers';
 import {DataFilterExtension} from '@deck.gl/extensions';
-
 import RangeInput from './range-input';
 
 // Set your mapbox token here
 const MAPBOX_TOKEN = process.env.MapboxAccessToken; // eslint-disable-line
-
-// Source data GeoJSON
-const DATA_URL =
-  'https://raw.githubusercontent.com/uber-web/kepler.gl-data/master/earthquakes/data.csv'; // eslint-disable-line
 
 const INITIAL_VIEW_STATE = {
   latitude: 36.5,
@@ -168,20 +162,4 @@ export default class App extends Component {
       </Fragment>
     );
   }
-}
-
-export function renderToDOM(container) {
-  render(<App />, container);
-  require('d3-request').csv(DATA_URL, (error, response) => {
-    if (!error) {
-      const data = response.map(row => ({
-        timestamp: new Date(`${row.DateTime} UTC`).getTime(),
-        latitude: Number(row.Latitude),
-        longitude: Number(row.Longitude),
-        depth: Number(row.Depth),
-        magnitude: Number(row.Magnitude)
-      }));
-      render(<App data={data} />, container);
-    }
-  });
 }
