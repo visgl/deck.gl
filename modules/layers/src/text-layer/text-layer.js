@@ -29,7 +29,7 @@ import FontAtlasManager, {
   DEFAULT_RADIUS,
   DEFAULT_CUTOFF
 } from './font-atlas-manager';
-import {transformParagraph} from './utils';
+import {transformParagraph, getTextFromBuffer} from './utils';
 
 const DEFAULT_FONT_SETTINGS = {
   fontSize: DEFAULT_FONT_SIZE,
@@ -113,11 +113,7 @@ export default class TextLayer extends CompositeLayer {
         (changeFlags.updateTriggersChanged.all || changeFlags.updateTriggersChanged.getText));
 
     if (textChanged) {
-      const startIndices = this._getStartIndices();
-      this.setState({
-        startIndices,
-        numInstances: startIndices[startIndices.length - 1]
-      });
+      this._updateText();
     }
     if (styleChanged) {
       this.setState({
@@ -178,33 +174,42 @@ export default class TextLayer extends CompositeLayer {
 
   // Text strings are variable width objects
   // Returns the index at the start of each string (every character is rendered by one instance)
-  _getStartIndices() {
-    const {data, getText} = this.props;
-    const {iterable, objectInfo} = createIterable(data);
-    const startIndices = [0];
+  _updateText() {
+    const {data} = this.props;
+    const textBuffer = data.attributes && data.attributes.getText;
+    let {getText} = this.props;
+    let {startIndices} = data;
+    let numInstances;
 
-    let characterCount = 0;
-    for (const object of iterable) {
-      objectInfo.index++;
-      const text = getText(object, objectInfo);
-      characterCount += text.length;
-      startIndices.push(characterCount);
+    if (textBuffer && startIndices) {
+      const {texts, characterCount} = getTextFromBuffer({
+        ...(ArrayBuffer.isView(textBuffer) ? {value: textBuffer} : textBuffer),
+        length: data.length,
+        startIndices
+      });
+      numInstances = characterCount;
+      getText = (_, {index}) => texts[index];
+    } else {
+      const {iterable, objectInfo} = createIterable(data);
+      startIndices = [0];
+      numInstances = 0;
+
+      for (const object of iterable) {
+        objectInfo.index++;
+        const text = getText(object, objectInfo) || '';
+        numInstances += text.length;
+        startIndices.push(numInstances);
+      }
     }
 
-    return startIndices;
+    this.setState({getText, startIndices, numInstances});
   }
 
   // Returns the x, y offsets of each character in a text string
   getIconOffsets(object, objectInfo) {
     const iconMapping = this.state.fontAtlasManager.mapping;
-    const {
-      getText,
-      wordBreak,
-      maxWidth,
-      lineHeight,
-      getTextAnchor,
-      getAlignmentBaseline
-    } = this.props;
+    const {getText} = this.state;
+    const {wordBreak, maxWidth, lineHeight, getTextAnchor, getAlignmentBaseline} = this.props;
 
     const paragraph = getText(object, objectInfo);
     const {
@@ -239,6 +244,7 @@ export default class TextLayer extends CompositeLayer {
     const {
       startIndices,
       numInstances,
+      getText,
       fontAtlasManager: {scale, texture, mapping},
       styleVersion
     } = this.state;
@@ -251,7 +257,6 @@ export default class TextLayer extends CompositeLayer {
       getColor,
       getSize,
       getAngle,
-      getText,
       getPixelOffset,
       billboard,
       sdf,

@@ -281,3 +281,30 @@ export function transformParagraph(paragraph, lineHeight, wordBreak, maxWidth, i
   return {characters: result, size};
 }
 /* eslint-enable max-depth, complexity */
+
+export function getTextFromBuffer({value, length, stride, offset, startIndices}) {
+  const bytesPerElement = value.BYTES_PER_ELEMENT;
+  const elementStride = stride ? stride / bytesPerElement : 1;
+  const elementOffset = offset ? offset / bytesPerElement : 0;
+  const characterCount =
+    startIndices[length] ||
+    Math.floor((value.length - elementOffset - bytesPerElement) / elementStride) + 1;
+
+  const texts = new Array(length);
+
+  let codes = value;
+  if (elementStride > 1 || elementOffset > 0) {
+    codes = new value.constructor(characterCount);
+    for (let i = 0; i < characterCount; i++) {
+      codes[i] = value[i * elementStride + elementOffset];
+    }
+  }
+
+  for (let index = 0; index < length; index++) {
+    const startIndex = startIndices[index];
+    const endIndex = startIndices[index + 1] || characterCount;
+    texts[index] = String.fromCharCode.apply(null, codes.subarray(startIndex, endIndex));
+  }
+
+  return {texts, characterCount};
+}

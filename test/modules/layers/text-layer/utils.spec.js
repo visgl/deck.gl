@@ -4,7 +4,8 @@ import {
   nextPowOfTwo,
   buildMapping,
   autoWrapping,
-  transformParagraph
+  transformParagraph,
+  getTextFromBuffer
 } from '@deck.gl/layers/text-layer/utils';
 
 test('TextLayer - utils#nextPowOfTwo', t => {
@@ -334,6 +335,24 @@ test('TextLayer - utils#transformParagraph - autoWrapping', t => {
 
   const transformedData = transformParagraph(text, lineHeight, 'break-word', 12, iconMapping);
   t.deepEqual(transformedData, expected);
+
+  t.end();
+});
+
+test('TextLayer - utils#getTextFromBuffer', t => {
+  const value = new Uint8Array([72, 101, 108, 108, 111, 32, 119, 111, 114, 108, 100, 33]);
+
+  let result = getTextFromBuffer({value, length: 2, startIndices: [0, 6]});
+  t.deepEqual(result.texts, ['Hello ', 'world!'], 'binary converted to text strings');
+  t.is(result.characterCount, 12, 'returns correct character count');
+
+  result = getTextFromBuffer({value, length: 2, offset: 1, startIndices: [0, 6]});
+  t.deepEqual(result.texts, ['ello w', 'orld!'], 'binary converted to text strings');
+  t.is(result.characterCount, 11, 'returns correct character count');
+
+  result = getTextFromBuffer({value, length: 2, stride: 2, offset: 1, startIndices: [0, 3]});
+  t.deepEqual(result.texts, ['el ', 'ol!'], 'binary converted to text strings');
+  t.is(result.characterCount, 6, 'returns correct character count');
 
   t.end();
 });
