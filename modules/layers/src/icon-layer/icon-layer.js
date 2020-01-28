@@ -112,8 +112,7 @@ export default class IconLayer extends Layer {
       instanceAngles: {
         size: 1,
         transition: true,
-        accessor: 'getAngle',
-        defaultValue: 0
+        accessor: 'getAngle'
       },
       instancePixelOffset: {
         size: 2,
