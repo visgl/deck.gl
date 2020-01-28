@@ -15,13 +15,7 @@ test('TextLayer', t => {
     assert: t.ok,
     onBeforeUpdate: ({testCase}) => t.comment(testCase.title),
     onAfterUpdate: ({layer, subLayer}) => {
-      if (layer.props.data.length) {
-        t.ok(layer.state.data.length, 'Creates sublayer data');
-        t.ok(subLayer, 'Renders sublayer');
-      }
-      if (Object.prototype.hasOwnProperty.call(layer.props, '_dataDiff') && layer.props._dataDiff) {
-        t.ok(Array.isArray(layer.state.dataDiff), 'created diff for sublayer');
-      }
+      t.ok(subLayer, 'Renders sublayer');
     }
   });
   testLayer({Layer: TextLayer, testCases, onError: t.notOk});

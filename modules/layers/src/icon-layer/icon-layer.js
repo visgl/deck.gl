@@ -63,7 +63,8 @@ const defaultProps = {
   getIcon: {type: 'accessor', value: x => x.icon},
   getColor: {type: 'accessor', value: DEFAULT_COLOR},
   getSize: {type: 'accessor', value: 1},
-  getAngle: {type: 'accessor', value: 0}
+  getAngle: {type: 'accessor', value: 0},
+  getPixelOffset: {type: 'accessor', value: [0, 0]}
 };
 
 export default class IconLayer extends Layer {
@@ -113,6 +114,11 @@ export default class IconLayer extends Layer {
         transition: true,
         accessor: 'getAngle',
         defaultValue: 0
+      },
+      instancePixelOffset: {
+        size: 2,
+        transition: true,
+        accessor: 'getPixelOffset'
       }
     });
     /* eslint-enable max-len */
