@@ -1,35 +1,37 @@
 /* global requestAnimationFrame, cancelAnimationFrame */
 import React, {PureComponent} from 'react';
-import {Client as Styletron} from 'styletron-engine-atomic';
-import {Provider as StyletronProvider} from 'styletron-react';
-import {LightTheme, BaseProvider, styled} from 'baseui';
+import {styled} from 'baseui';
 import {Slider} from 'baseui/slider';
 import {Button, SHAPE, SIZE} from 'baseui/button';
 import Start from 'baseui/icon/chevron-right';
 import Stop from 'baseui/icon/delete';
 
-const engine = new Styletron();
-
-const Container = styled('div', {
+const PositionContainer = styled('div', ({$theme}) => ({
   position: 'absolute',
+  zIndex: 1,
+  bottom: '40px',
+  width: '100%'
+}));
+
+const CenterContainer = styled('div', ({$theme}) => ({
+  marginLeft: 'auto',
+  marginRight: 'auto',
+  width: '40%',
   display: 'flex',
   justifyContent: 'center',
-  alignItems: 'center',
-  zIndex: 1,
-  bottom: '20px',
-  width: '100%'
-});
+  alignItems: 'center'
+}));
 
-const ThumbValue = styled('div', {
+const ThumbValue = styled('div', ({$theme}) => ({
   position: 'absolute',
   top: '-2em'
-});
+}));
 
-const TickBar = styled('div', {
+const TickBar = styled('div', ({$theme}) => ({
   width: '480px',
   height: '24px',
   maxWidth: '80vw'
-});
+}));
 
 export default class RangeInput extends PureComponent {
   constructor(props) {
@@ -82,27 +84,25 @@ export default class RangeInput extends PureComponent {
     const isButtonEnabled = value[0] > min || value[1] < max;
 
     return (
-      <StyletronProvider value={engine}>
-        <BaseProvider theme={LightTheme}>
-          <Container>
-            <Button
-              shape={SHAPE.round}
-              size={SIZE.compact}
-              disabled={!isButtonEnabled}
-              onClick={this._toggle}
-            >
-              {this.state.isPlaying ? <Stop title="Stop" /> : <Start title="Animate" />}
-            </Button>
-            <Slider
-              {...this.props}
-              overrides={{
-                ThumbValue: this._renderThumbValue,
-                TickBar: () => <TickBar />
-              }}
-            />
-          </Container>
-        </BaseProvider>
-      </StyletronProvider>
+      <PositionContainer>
+        <CenterContainer>
+          <Button
+            shape={SHAPE.round}
+            size={SIZE.compact}
+            disabled={!isButtonEnabled}
+            onClick={this._toggle}
+          >
+            {this.state.isPlaying ? <Stop title="Stop" /> : <Start title="Animate" />}
+          </Button>
+          <Slider
+            {...this.props}
+            overrides={{
+              ThumbValue: this._renderThumbValue,
+              TickBar: () => <TickBar />
+            }}
+          />
+        </CenterContainer>
+      </PositionContainer>
     );
   }
 }

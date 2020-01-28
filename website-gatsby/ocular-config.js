@@ -101,111 +101,111 @@ based maps.',
 
   LINK_TO_GET_STARTED: '/docs',
 
-  INDEX_PAGE_URL: resolve(__dirname, './templates/index.jsx'),
+  INDEX_PAGE_URL: resolve(__dirname, './src/index.jsx'),
 
   EXAMPLES: [
     {
       title: 'LineLayer',
       path: 'examples/website/line',
       image: 'images/examples/demo-thumb-line.jpg',
-      componentUrl: resolve(__dirname, './templates/examples/example-line-layer.jsx')
+      componentUrl: resolve(__dirname, './src/examples/example-line-layer.jsx')
     },
     {
       title: 'HexagonLayer',
-      path: 'examples/heatmap',
-      image: 'images/examples/demo-thumb-heatmap.jpg',
-      componentUrl: resolve(__dirname, '../examples/website/3d-heatmap/app.js')
+      path: 'examples/website/3d-heatmap',
+      image: 'images/examples/demo-thumb-hexagon.jpg',
+      componentUrl: resolve(__dirname, './src/examples/example-hexagon-layer.jsx')
     },
     {
       title: 'IconLayer',
-      path: 'examples/icon',
+      path: 'examples/website/icon',
       image: 'images/examples/demo-thumb-icon.jpg',
-      componentUrl: resolve(__dirname, '../examples/website/icon/app.js')
+      componentUrl: resolve(__dirname, './src/examples/example-icon-layer.jsx')
     },
     {
       title: 'GeoJsonLayer (Polygons)',
-      path: 'examples/geojson',
+      path: 'examples/website/geojson',
       image: 'images/examples/demo-thumb-geojson.jpg',
-      componentUrl: resolve(__dirname, '../examples/website/geojson/app.js')
+      componentUrl: resolve(__dirname, './src/examples/example-geojson-layer.jsx')
     },
     {
       title: 'GeoJsonLayer (Paths)',
-      path: 'examples/highway',
+      path: 'examples/website/highway',
       image: 'images/examples/demo-thumb-highway.jpg',
-      componentUrl: resolve(__dirname, '../examples/website/highway/app.js')
+      componentUrl: resolve(__dirname, './src/examples/example-highway-demo.jsx')
     },
     {
       title: 'ScreenGridLayer',
-      path: 'examples/screengrid',
+      path: 'examples/website/screengrid',
       image: 'images/examples/demo-thumb-screengrid.jpg',
-      componentUrl: resolve(__dirname, '../examples/website/screen-grid/app.js')
+      componentUrl: resolve(__dirname, './src/examples/example-screengrid-layer.jsx')
     },
     {
       title: 'ArcLayer',
-      path: 'examples/arc',
+      path: 'examples/website/arc',
       image: 'images/examples/demo-thumb-arc.jpg',
-      componentUrl: resolve(__dirname, '../examples/website/arc/app.js')
+      componentUrl: resolve(__dirname, './src/examples/example-arc-layer.jsx')
     },
     {
       title: 'ScatterplotLayer',
-      path: 'examples/scatterplot',
+      path: 'examples/website/scatterplot',
       image: 'images/examples/demo-thumb-scatterplot.jpg',
-      componentUrl: resolve(__dirname, '../examples/website/scatterplot/app.js')
+      componentUrl: resolve(__dirname, './src/examples/example-scatterplot-layer.jsx')
     },
     {
       title: 'PointCloudLayer',
-      path: 'examples/pointcloud',
+      path: 'examples/website/pointcloud',
       image: 'images/examples/demo-thumb-point-cloud.jpg',
-      componentUrl: resolve(__dirname, '../examples/website/point-cloud/app.js')
+      componentUrl: resolve(__dirname, './src/examples/example-pointcloud-layer.jsx')
     },
     {
       title: 'TextLayer',
-      path: 'examples/text',
+      path: 'examples/website/text-layer',
       image: 'images/examples/demo-thumb-text.jpg',
-      componentUrl: resolve(__dirname, '../examples/website/tagmap/app.js')
+      componentUrl: resolve(__dirname, './src/examples/example-text-layer.jsx')
     },
     {
       title: 'TileLayer',
-      path: 'examples/maptile',
+      path: 'examples/website/map-tile',
       image: 'images/examples/demo-thumb-tile.jpg',
-      componentUrl: resolve(__dirname, '../examples/website/map-tile/app.js')
+      componentUrl: resolve(__dirname, './src/examples/example-tile-layer.jsx')
     },
     {
       title: 'TripsLayer',
-      path: 'examples/trips',
+      path: 'examples/website/trips',
       image: 'images/examples/demo-thumb-trip.jpg',
-      componentUrl: resolve(__dirname, '../examples/website/trips/app.js')
+      componentUrl: resolve(__dirname, './src/examples/example-trips-layer.jsx')
     },
     {
-      title: 'Brushing Layer',
-      path: 'examples/brushing',
+      title: 'HeatmapLayer',
+      path: 'examples/website/heatmap',
+      image: 'images/examples/demo-thumb-heatmap.jpg',
+      componentUrl: resolve(__dirname, './src/examples/example-heatmap-layer.jsx')
+    },
+    {
+      title: 'Tile3DLayer',
+      path: 'examples/website/3d-tiles',
+      image: 'images/examples/demo-thumb-3d-tiles.jpg',
+      componentUrl: resolve(__dirname, './src/examples/example-tile3d-layer.jsx')
+    },
+    {
+      title: 'Brushing',
+      path: 'examples/website/brushing',
       image: 'images/examples/demo-thumb-brushing.jpg',
-      componentUrl: resolve(__dirname, '../examples/website/brushing/app.js')
+      componentUrl: resolve(__dirname, './src/examples/example-brushing-demo.jsx')
+    },
+    {
+      title: 'Data Filtering',
+      path: 'examples/website/data-filter',
+      image: 'images/examples/demo-thumb-data-filter.jpg',
+      componentUrl: resolve(__dirname, './src/examples/example-data-filter-demo.jsx')
+    },
+    {
+      title: '3D Surface Explorer',
+      path: 'examples/website/plot',
+      image: 'images/examples/demo-thumb-plot.jpg',
+      componentUrl: resolve(__dirname, './src/examples/example-plot-demo.jsx')
     }
-    // {
-    //   title: '3D Surface Explorer',
-    //   path: 'examples/plot',
-    //   image: 'images/examples/demo-thumb-plot.jpg',
-    //   componentUrl: resolve(__dirname, '../examples/website/plot/app.js')
-    // }
-    // {
-    //   title: 'Point Clouds & Meshes',
-    //   image: 'images/example-pointcloud.png',
-    //   componentUrl: resolve(__dirname, './examples/pointcloud/app.js')
-    //   path: 'examples/pointcloud'
-    // },
-    // {
-    //   title: '3D Tiles',
-    //   image: 'images/example-gltf.jpg',
-    //   componentUrl: resolve(__dirname, './examples/3d-tiles/app.js')
-    //   path: 'examples/3d-tiles'
-    // },
-    // {
-    //   title: 'GLTF',
-    //   image: 'images/example-gltf.jpg',
-    //   componentUrl: resolve(__dirname, './templates/example-gltf.jsx')
-    //   path: 'examples/gltf'
-    // }
   ],
 
   // Avoids duplicate conflicting inputs when importing from examples folders
