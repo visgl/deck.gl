@@ -54,8 +54,7 @@ export function buildMapping({
         x: x + buffer,
         y: yOffset + row * (fontHeight + buffer * 2) + buffer,
         width,
-        height: fontHeight,
-        mask: true
+        height: fontHeight
       };
       x += width + buffer * 2;
     }

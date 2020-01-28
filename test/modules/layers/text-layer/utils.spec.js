@@ -45,10 +45,10 @@ test('TextLayer - utils#buildMapping', t => {
     -----------+---------------
    */
   const expected = {
-    a: {x: 2, y: 2, width: 1, height: 4, mask: true},
-    s: {x: 7, y: 2, width: 2, height: 4, mask: true},
-    d: {x: 2, y: 10, width: 3, height: 4, mask: true},
-    f: {x: 9, y: 10, width: 4, height: 4, mask: true}
+    a: {x: 2, y: 2, width: 1, height: 4},
+    s: {x: 7, y: 2, width: 2, height: 4},
+    d: {x: 2, y: 10, width: 3, height: 4},
+    f: {x: 9, y: 10, width: 4, height: 4}
   };
 
   t.deepEqual(mapping, expected, 'mapping should match.');
@@ -64,10 +64,10 @@ test('TextLayer - utils#buildMapping with cache', t => {
     buffer: 2,
     maxCanvasWidth: 16,
     mapping: {
-      a: {x: 2, y: 2, width: 1, height: 4, mask: true},
-      s: {x: 7, y: 2, width: 2, height: 4, mask: true},
-      d: {x: 2, y: 10, width: 3, height: 4, mask: true},
-      f: {x: 9, y: 10, width: 4, height: 4, mask: true}
+      a: {x: 2, y: 2, width: 1, height: 4},
+      s: {x: 7, y: 2, width: 2, height: 4},
+      d: {x: 2, y: 10, width: 3, height: 4},
+      f: {x: 9, y: 10, width: 4, height: 4}
     },
     xOffset: 15,
     yOffset: 8
@@ -80,12 +80,12 @@ test('TextLayer - utils#buildMapping with cache', t => {
   t.equal(canvasHeight, 32, 'canvasHeight should match.');
 
   const expected = {
-    a: {x: 2, y: 2, width: 1, height: 4, mask: true},
-    s: {x: 7, y: 2, width: 2, height: 4, mask: true},
-    d: {x: 2, y: 10, width: 3, height: 4, mask: true},
-    f: {x: 9, y: 10, width: 4, height: 4, mask: true},
-    k: {x: 2, y: 18, width: 1, height: 4, mask: true},
-    l: {x: 7, y: 18, width: 2, height: 4, mask: true}
+    a: {x: 2, y: 2, width: 1, height: 4},
+    s: {x: 7, y: 2, width: 2, height: 4},
+    d: {x: 2, y: 10, width: 3, height: 4},
+    f: {x: 9, y: 10, width: 4, height: 4},
+    k: {x: 2, y: 18, width: 1, height: 4},
+    l: {x: 7, y: 18, width: 2, height: 4}
   };
 
   t.deepEqual(mapping, expected, 'mapping should match.');

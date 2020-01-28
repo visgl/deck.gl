@@ -100,7 +100,7 @@ export default class MultiIconLayer extends IconLayer {
   }
 
   getInstanceColorMode(icons) {
-    return new Array(icons.length).fill(1);
+    return 1; // mask
   }
 
   getInstanceIconFrame(icons) {
