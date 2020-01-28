@@ -1,5 +1,5 @@
 {% set name = "pydeck" %}
-{% set version = "0.2.0" %}
+{% set version = "0.2.1" %}
 
 package:
   name: "{{ name|lower }}"
@@ -7,7 +7,7 @@ package:
 
 source:
   url: "https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.tar.gz"
-  sha256: "81bdae3e454c166d5c6e188c1d661edcd67a167b9db041ffe720f80d64100a90"
+  sha256: "d58bc0a08707a613ccf1aa99ccdab3b040ac6d93c70046ef165cae913b527fd8"
 
 build:
   number: 0
