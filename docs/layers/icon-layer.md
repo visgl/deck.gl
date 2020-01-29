@@ -273,6 +273,16 @@ The rotating angle  of each object, in degrees.
 - If a number is provided, it is used as the angle for all objects.
 - If a function is provided, it is called on each object to retrieve its angle.
 
+##### `getPixelOffset` ([Function](/docs/developer-guide/using-layers.md#accessors)|Array, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
+
+- Default: `[0, 0]`
+
+Screen space offset relative to the `coordinates` in pixel unit.
+
+* If an array is provided, it is used as the offset for all objects.
+* If a function is provided, it is called on each object to retrieve its offset.
+
+
 ## Use binary attributes
 
 This section is about the special requirements when [supplying attributes directly](/docs/developer-guide/performance.md#supply-attributes-directly) to an `IconLayer`.

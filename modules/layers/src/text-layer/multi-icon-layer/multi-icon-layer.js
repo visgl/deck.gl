@@ -18,11 +18,9 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {createIterable} from '@deck.gl/core';
 import GL from '@luma.gl/constants';
 import IconLayer from '../../icon-layer/icon-layer';
 
-import vs from './multi-icon-layer-vertex.glsl';
 import fs from './multi-icon-layer-fragment.glsl';
 
 // TODO expose as layer properties
@@ -31,27 +29,21 @@ const DEFAULT_BUFFER = 192.0 / 256;
 
 const defaultProps = {
   backgroundColor: {type: 'color', value: null, optional: true},
-  // each paragraph can have one or multiple row(s)
-  // each row can have one or multiple character(s)
-  getRowSize: {type: 'accessor', value: x => x.rowSize || [0, 0]},
-  // offset from the left, top position of the paragraph
-  getOffsets: {type: 'accessor', value: x => x.offsets || [0, 0]},
-  // [width, height] of the paragraph
-  getParagraphSize: {type: 'accessor', value: x => x.size || [1, 1]},
-  // 1: left, 0: middle, -1: right
-  getAnchorX: {type: 'accessor', value: x => x.anchorX || 0},
-  // 1: top, 0: center, -1: bottom
-  getAnchorY: {type: 'accessor', value: x => x.anchorY || 0},
-  getPixelOffset: {type: 'accessor', value: [0, 0]},
-
-  // object with the same pickingIndex will be picked when any one of them is being picked
-  getPickingIndex: {type: 'accessor', value: x => x.objectIndex}
+  getIconOffsets: {type: 'accessor', value: x => x.offsets}
 };
 
 export default class MultiIconLayer extends IconLayer {
   getShaders() {
     return Object.assign({}, super.getShaders(), {
-      vs,
+      inject: {
+        'vs:#decl': `
+  uniform float gamma;
+  varying float vGamma;
+`,
+        'vs:#main-end': `
+  vGamma = gamma / (sizeScale * iconSize.y);
+`
+      },
       fs
     });
   }
@@ -63,32 +55,19 @@ export default class MultiIconLayer extends IconLayer {
     attributeManager.addInstanced({
       instanceOffsets: {
         size: 2,
-        accessor: ['getIcon', 'getAnchorX', 'getAnchorY'],
-        update: this.calculateInstanceOffsets
-      },
-      instancePixelOffset: {
-        size: 2,
-        transition: true,
-        accessor: 'getPixelOffset'
+        accessor: 'getIconOffsets'
       },
       instancePickingColors: {
         type: GL.UNSIGNED_BYTE,
         size: 3,
-        update: this.calculateInstancePickingColors
+        accessor: (object, {index, target: value}) => this.encodePickingColor(index, value)
       }
     });
   }
 
   updateState(updateParams) {
     super.updateState(updateParams);
-    const {changeFlags, oldProps, props} = updateParams;
-
-    if (
-      changeFlags.updateTriggersChanged &&
-      (changeFlags.updateTriggersChanged.getAnchorX || changeFlags.updateTriggersChanged.getAnchorY)
-    ) {
-      this.getAttributeManager().invalidate('instanceOffsets');
-    }
+    const {oldProps, props} = updateParams;
 
     if (props.backgroundColor !== oldProps.backgroundColor) {
       const backgroundColor = Array.isArray(props.backgroundColor)
@@ -116,53 +95,16 @@ export default class MultiIconLayer extends IconLayer {
     });
   }
 
-  calculateInstanceOffsets(attribute, {startRow, endRow}) {
-    const {
-      data,
-      iconMapping,
-      getIcon,
-      getAnchorX,
-      getAnchorY,
-      getParagraphSize,
-      getRowSize,
-      getOffsets
-    } = this.props;
-    const {value, size} = attribute;
-    let i = startRow * size;
-    const {iterable} = createIterable(data, startRow, endRow);
-
-    for (const object of iterable) {
-      const icon = getIcon(object);
-      const rect = iconMapping[icon] || {};
-      const [width, height] = getParagraphSize(object);
-      const [rowWidth] = getRowSize(object);
-      const [offsetX, offsetY] = getOffsets(object);
-      const anchorX = getAnchorX(object);
-      const anchorY = getAnchorY(object);
-
-      // For a multi-line object, offset in x-direction needs consider
-      // the row offset in the paragraph and the object offset in the row
-      const rowOffset = ((1 - anchorX) * (width - rowWidth)) / 2;
-      value[i++] = ((anchorX - 1) * width) / 2 + rowOffset + rect.width / 2 + offsetX || 0;
-      value[i++] = ((anchorY - 1) * height) / 2 + rect.height / 2 + offsetY || 0;
-    }
+  getInstanceOffset(icons) {
+    return Array.from(icons).map(icon => super.getInstanceOffset(icon));
   }
 
-  calculateInstancePickingColors(attribute, {startRow, endRow}) {
-    const {data, getPickingIndex} = this.props;
-    const {value, size} = attribute;
-    let i = startRow * size;
-    const pickingColor = [];
-    const {iterable} = createIterable(data, startRow, endRow);
+  getInstanceColorMode(icons) {
+    return 1; // mask
+  }
 
-    for (const point of iterable) {
-      const index = getPickingIndex(point);
-      this.encodePickingColor(index, pickingColor);
-
-      value[i++] = pickingColor[0];
-      value[i++] = pickingColor[1];
-      value[i++] = pickingColor[2];
-    }
+  getInstanceIconFrame(icons) {
+    return Array.from(icons).map(icon => super.getInstanceIconFrame(icon));
   }
 }
 

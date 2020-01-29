@@ -54,8 +54,7 @@ export function buildMapping({
         x: x + buffer,
         y: yOffset + row * (fontHeight + buffer * 2) + buffer,
         width,
-        height: fontHeight,
-        mask: true
+        height: fontHeight
       };
       x += width + buffer * 2;
     }
@@ -79,9 +78,6 @@ function getTextWidth(text, mapping) {
     const frame = mapping && mapping[character];
     if (frame) {
       frameWidth = frame.width;
-    } else {
-      log.warn(`Missing character: ${character}`)();
-      frameWidth = MISSING_CHAR_WIDTH;
     }
 
     width += frameWidth;
@@ -190,36 +186,31 @@ export function autoWrapping(text, wordBreak, maxWidth, iconMapping) {
   return breakWord(text, maxWidth, iconMapping);
 }
 
-export function transformRow(row, iconMapping, lineHeight, rowOffsetTop) {
-  let offsetLeft = 0;
+function transformRow(row, iconMapping) {
+  let x = 0;
   let rowHeight = 0;
 
-  const characters = [];
-  for (const character of row) {
-    const datum = {
-      text: character,
-      offsetTop: rowOffsetTop,
-      offsetLeft
-    };
-
+  const leftOffsets = new Array(row.length);
+  for (let i = 0; i < row.length; i++) {
+    const character = row[i];
     const frame = iconMapping[character];
     if (frame) {
       if (!rowHeight) {
         // frame.height should be a constant
-        rowHeight = frame.height * lineHeight;
+        rowHeight = frame.height;
       }
-      offsetLeft += frame.width;
+      leftOffsets[i] = x + frame.width / 2;
+      x += frame.width;
     } else {
       log.warn(`Missing character: ${character}`)();
-      offsetLeft += MISSING_CHAR_WIDTH;
+      leftOffsets[i] = x;
+      x += MISSING_CHAR_WIDTH;
     }
-
-    characters.push(datum);
   }
 
   return {
-    characters,
-    rowWidth: offsetLeft,
+    leftOffsets,
+    rowWidth: x,
     rowHeight
   };
 }
@@ -228,69 +219,65 @@ export function transformRow(row, iconMapping, lineHeight, rowOffsetTop) {
  * Transform a text paragraph to an array of characters, each character contains
  * @param paragraph: {String}
  * @param iconMapping {Object} character mapping table for retrieving a character from font atlas
- * @param transformCharacter {Function} callback to transform a single character
  * @param lineHeight {Number} css line-height
  * @param wordBreak {String} css word-break option
  * @param maxWidth {number} css max-width
  * @param transformedData {Array} output transformed data array, each datum contains
  *   - text: character
  *   - index: character index in the paragraph
- *   - offsetLeft: x offset in the row,
- *   - offsetTop: y offset in the paragraph
+ *   - x: x offset in the row,
+ *   - y: y offset in the paragraph
  *   - size: [width, height] size of the paragraph
  *   - rowSize: [rowWidth, rowHeight] size of the row
  *   - len: length of the paragraph
  */
-// eslint-disable-next-line max-params
-export function transformParagraph(
-  paragraph,
-  lineHeight,
-  wordBreak,
-  maxWidth,
-  iconMapping,
-  transformCharacter,
-  transformedData = []
-) {
-  if (!paragraph) {
-    return;
-  }
-
+/* eslint-disable max-params, max-depth, complexity */
+export function transformParagraph(paragraph, lineHeight, wordBreak, maxWidth, iconMapping) {
+  const result = new Array(paragraph.length);
   const autoWrappingEnabled =
     (wordBreak === 'break-word' || wordBreak === 'break-all') && isFinite(maxWidth) && maxWidth > 0;
 
   // maxWidth and height of the paragraph
   const size = [0, 0];
   let rowOffsetTop = 0;
+  let lineStartIndex = 0;
 
-  const lines = paragraph.split('\n');
-
-  for (const line of lines) {
-    let rows = [line];
-    if (autoWrappingEnabled) {
-      rows = autoWrapping(line, wordBreak, maxWidth, iconMapping).rows;
+  for (let i = 0; i <= paragraph.length; i++) {
+    const char = paragraph[i];
+    let line;
+    if (char === '\n' || char === undefined) {
+      line = paragraph.slice(lineStartIndex, i);
     }
 
-    for (const row of rows) {
-      const {rowWidth, rowHeight, characters} = transformRow(
-        row,
-        iconMapping,
-        lineHeight,
-        rowOffsetTop
-      );
+    if (line) {
+      const rows = autoWrappingEnabled
+        ? autoWrapping(line, wordBreak, maxWidth, iconMapping).rows
+        : [line];
 
-      const rowSize = [rowWidth, rowHeight];
+      for (const row of rows) {
+        const {rowWidth, rowHeight, leftOffsets} = transformRow(row, iconMapping, lineHeight);
 
-      for (const datum of characters) {
-        datum.size = size;
-        datum.rowSize = rowSize;
-        transformedData.push(transformCharacter(datum));
+        for (const x of leftOffsets) {
+          result[lineStartIndex++] = {
+            x,
+            y: rowOffsetTop + rowHeight / 2,
+            rowWidth
+          };
+        }
+
+        rowOffsetTop = rowOffsetTop + rowHeight * lineHeight;
+        size[0] = autoWrappingEnabled ? maxWidth : Math.max(size[0], rowWidth);
       }
+    }
 
-      rowOffsetTop = rowOffsetTop + rowHeight;
-      size[0] = autoWrappingEnabled ? maxWidth : Math.max(size[0], rowWidth);
+    if (char === '\n') {
+      // Make sure result.length matches paragraph.length
+      result[lineStartIndex++] = {x: 0, y: 0, rowWidth: 0};
     }
   }
 
   // last row
   size[1] = rowOffsetTop;
+  return {characters: result, size};
 }
+/* eslint-enable max-depth, complexity */
