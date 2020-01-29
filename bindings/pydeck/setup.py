@@ -194,7 +194,7 @@ if __name__ == "__main__":
         long_description_content_type="text/markdown",
         license="MIT License",
         include_package_data=True,
-        packages=find_packages(),
+        packages=find_packages(exclude=["test"]),
         cmdclass={
             "install": install,
             "develop": js_prerelease(ExitHookDevelop),
@@ -229,8 +229,8 @@ if __name__ == "__main__":
             "traitlets>=4.3.2",
             "jinja2>=2.10.1",
         ],
-        setup_requires=["pytest-runner", "Jinja2>=2.10.1"],
-        tests_require=["pytest"],
+        setup_requires=["Jinja2>=2.10.1"],
+        tests_require=["pytest>4.0.2", "pandas", "requests"],
         data_files=[
             (
                 "share/jupyter/nbextensions/pydeck",
@@ -240,7 +240,7 @@ if __name__ == "__main__":
                     "pydeck/nbextension/static/index.js.map",
                 ],
             ),
-            ("etc/jupyter/nbconfig/notebook.d", ["pydeck.json"])
+            ("etc/jupyter/nbconfig/notebook.d", ["pydeck.json"]),
         ],
         zip_safe=False,
     )
