@@ -42,8 +42,8 @@ publish-pypi:
 
 bump-and-publish:
 	$(MAKE) bump-version;
-	VERSION=$$(python -c "import pydeck; print(pydeck.__version__)");
 	$(MAKE) test;
+	VERSION=$$(python -c "import pydeck; print(pydeck.__version__)");
 	git commit -am "Release version $$VERSION";
 	$(MAKE) publish-conda;
 	$(MAKE) publish-pypi;
