@@ -90,3 +90,5 @@ function injectFunction(warnFunction, messageHandler) {
     return warnFunction(...args);
   };
 }
+
+export default jsonConverter;
