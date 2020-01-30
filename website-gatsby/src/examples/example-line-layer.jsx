@@ -1,8 +1,8 @@
 import React, {Component} from 'react';
-import InfoPanel from '../../src/components/info-panel';
-import {MAPBOX_STYLES, DATA_URI, GITHUB_TREE} from '../../src/constants/defaults';
-import {loadData} from '../../src/utils/data-utils';
-import {readableInteger} from '../../src/utils/format-utils';
+import InfoPanel from '../components/info-panel';
+import {MAPBOX_STYLES, DATA_URI, GITHUB_TREE} from '../constants/defaults';
+import {loadData} from '../utils/data-utils';
+import {readableInteger} from '../utils/format-utils';
 import App from '../../../examples/website/line/app';
 
 export default class LineDemo extends Component {
@@ -15,7 +15,7 @@ export default class LineDemo extends Component {
       flightDataCount: 0
     };
 
-    this.handleChange = this.handleChange.bind(this);
+    this._handleChange = this._handleChange.bind(this);
   }
 
   componentDidMount() {
@@ -36,7 +36,7 @@ export default class LineDemo extends Component {
     );
   }
 
-  handleChange(event) {
+  _handleChange(event) {
     this.setState({width: parseFloat(event.target.value)});
   }
 
@@ -75,7 +75,7 @@ export default class LineDemo extends Component {
               min="0"
               max="10"
               value={width}
-              onChange={this.handleChange}
+              onChange={this._handleChange}
             />
           </div>
         </InfoPanel>

@@ -2,6 +2,11 @@ import React, {Component} from 'react';
 import {readableInteger} from '../../utils/format-utils';
 import {MAPBOX_STYLES, DATA_URI} from '../../constants/defaults';
 import App from 'website-examples/data-filter/app';
+import {Client as Styletron} from 'styletron-engine-atomic';
+import {Provider as StyletronProvider} from 'styletron-react';
+import {LightTheme, BaseProvider} from 'baseui';
+
+const engine = new Styletron();
 
 export default class DataFilterDemo extends Component {
   static get data() {
@@ -56,11 +61,13 @@ export default class DataFilterDemo extends Component {
 
   render() {
     const {data, ...otherProps} = this.props;
-
+    // renders the data filter demo app wrapped in necessary BaseUI and Styletron providers
     return (
-      <div>
-        <App {...otherProps} data={data} />
-      </div>
+      <StyletronProvider value={engine}>
+        <BaseProvider theme={LightTheme}>
+          <App data={data} {...otherProps} />
+        </BaseProvider>
+      </StyletronProvider>
     );
   }
 }

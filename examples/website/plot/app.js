@@ -13,7 +13,7 @@ const INITIAL_VIEW_STATE = {
   rotationX: 30,
   rotationOrbit: -30,
   /* global window */
-  zoom: Math.log2(window.innerHeight / 3) // fit 3x3x3 box in current viewport
+  zoom: typeof window !== `undefined` ? Math.log2(window.innerHeight / 3) : 1 // fit 3x3x3 box in current viewport
 };
 
 function getScale({min, max}) {

@@ -1,6 +1,6 @@
 import React from 'react';
 import {Home} from 'ocular-gatsby/components';
-import './style.scss';
+import '../stylesheets/main.scss';
 
 if (typeof window !== 'undefined') {
   window.website = true;

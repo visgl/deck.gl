@@ -15,18 +15,22 @@
     "deploy": "NODE_DEBUG=gh-pages gh-pages -d public"
   },
   "dependencies": {
+    "@loaders.gl/draco": "^2.0.2",
     "@loaders.gl/las": "^2.0.2",
-    "@luma.gl/addons": "^8.0.0-beta.2",
-    "@luma.gl/constants": "^8.0.0-beta.2",
-    "@luma.gl/core": "^8.0.0-beta.2",
-    "@luma.gl/webgl": "^8.0.0-beta.2",
+    "@luma.gl/constants": "^8.0.3",
+    "@luma.gl/core": "^8.0.3",
+    "@luma.gl/webgl": "^8.0.3",
     "@probe.gl/stats-widget": "^3.0.1",
+    "baseui": "^9.26.0",
     "d3-color": "^1.4.0",
     "d3-request": "^1.0.6",
     "d3-scale": "^3.0.0",
+    "expr-eval": "^2.0.2",
     "rbush": "^2.0.2",
     "react": "^16.6.0",
     "react-dom": "^16.6.0",
+    "styletron-engine-atomic": "^1.4.4",
+    "styletron-react": "^5.2.6",
     "tagmap.js": "^1.1.1"
   },
   "devDependencies": {

@@ -1,24 +1,5 @@
 @import url('https://api.tiles.mapbox.com/mapbox-gl-js/v1.3.1/mapbox-gl.css');
 
-$primary: #00ADE6;
-$secondary: #05E3D5;
-$black: #041725;
-$black-20: #213746;
-$black-40: #5A666D;
-$white: #EDEDED;
-$white-40: #8D9BA3;
-$topbar-height: 64px;
-
-.banner {
-  .container {
-    background: rgba(0, 0, 0, 0);
-  }
-}
-
-.banner .hero .options-panel {
-  display: none;
-}
-
 .stat {
   text-transform: uppercase;
   font-size: 0.833em;
