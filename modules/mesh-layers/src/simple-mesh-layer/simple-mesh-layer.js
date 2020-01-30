@@ -194,7 +194,7 @@ export default class SimpleMeshLayer extends Layer {
       uniforms: Object.assign({}, uniforms, {
         sizeScale,
         composeModelMatrix: shouldComposeModelMatrix(viewport, coordinateSystem),
-        flatShade: !this.state.hasNormals
+        flatShading: !this.state.hasNormals
       })
     });
   }
