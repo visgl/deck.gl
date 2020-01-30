@@ -1,9 +1,9 @@
-import GL from "@luma.gl/constants";
-import { Geometry } from "@luma.gl/core";
+import GL from '@luma.gl/constants';
+import {Geometry} from '@luma.gl/core';
 
 export default class SquareGridGeometry extends Geometry {
   constructor(opts = {}) {
-    const { id = "sqaure-grid-geometry" } = opts;
+    const {id = 'sqaure-grid-geometry'} = opts;
 
     const indices = calculateIndices(opts);
     const positions = calculatePositions(opts);
@@ -23,7 +23,7 @@ export default class SquareGridGeometry extends Geometry {
   }
 }
 
-function calculateIndices({ xResolution, yResolution }) {
+function calculateIndices({xResolution, yResolution}) {
   // # of squares = (nx - 1) * (ny - 1)
   // # of triangles = squares * 2
   // # of indices = triangles * 3
@@ -59,8 +59,8 @@ function calculateIndices({ xResolution, yResolution }) {
   return indices;
 }
 
-function calculatePositions({ boundingBox, xResolution, yResolution }) {
-  const { minLng, minLat, maxLng, maxLat } = boundingBox;
+function calculatePositions({boundingBox, xResolution, yResolution}) {
+  const {minLng, minLat, maxLng, maxLat} = boundingBox;
 
   // step between samples
   const deltaLng = (maxLng - minLng) / (xResolution - 1);

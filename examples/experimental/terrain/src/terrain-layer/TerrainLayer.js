@@ -1,11 +1,11 @@
-import GL from "@luma.gl/constants";
+import GL from '@luma.gl/constants';
 // import { Layer } from "@deck.gl/core";
-import { Model, Texture2D } from "@luma.gl/core";
+import {Model, Texture2D} from '@luma.gl/core';
 import {picking, project32, gouraudLighting} from '@deck.gl/core';
-import { BitmapLayer } from "@deck.gl/layers";
-import vs from "./terrain-layer-vertex";
-import fs from "./terrain-layer-fragment";
-import SquareGridGeometry from "./square-grid-geometry";
+import {BitmapLayer} from '@deck.gl/layers';
+import vs from './terrain-layer-vertex';
+import fs from './terrain-layer-fragment';
+import SquareGridGeometry from './square-grid-geometry';
 
 const DEFAULT_TEXTURE_PARAMETERS = {
   [GL.TEXTURE_MIN_FILTER]: GL.LINEAR_MIPMAP_LINEAR,
@@ -16,11 +16,11 @@ const DEFAULT_TEXTURE_PARAMETERS = {
 
 const defaultProps = {
   // ...BitmapLayer.defaultProps,
-  images: { type: "object", value: [], async: true },
-  cutoffHeightM: { type: "number", value: 40.0 },
-  peakHeightM: { type: "number", value: 500.0 },
-  lngResolution: { type: "number", value: 200.0 },
-  latResolution: { type: "number", value: 200.0 }
+  images: {type: 'object', value: [], async: true},
+  cutoffHeightM: {type: 'number', value: 40.0},
+  peakHeightM: {type: 'number', value: 500.0},
+  lngResolution: {type: 'number', value: 200.0},
+  latResolution: {type: 'number', value: 200.0}
 };
 
 /*
@@ -45,19 +45,19 @@ export class TerrainLayer extends BitmapLayer {
     return {
       ...super.getShaders(),
       fs,
-      vs,
+      vs
       // modules: [...super.getShaders().modules]
     };
   }
 
-  updateState({ props, oldProps, changeFlags }) {
+  updateState({props, oldProps, changeFlags}) {
     // setup model first
     if (changeFlags.extensionsChanged) {
-      const { gl } = this.context;
+      const {gl} = this.context;
       if (this.state.model) {
         this.state.model.delete();
       }
-      this.setState({ model: this._getModel(gl) });
+      this.setState({model: this._getModel(gl)});
       this.getAttributeManager().invalidateAll();
     }
 
@@ -68,7 +68,7 @@ export class TerrainLayer extends BitmapLayer {
     const attributeManager = this.getAttributeManager();
 
     if (props.bounds !== oldProps.bounds) {
-      attributeManager.invalidate("positions");
+      attributeManager.invalidate('positions');
     }
   }
 
@@ -87,8 +87,8 @@ export class TerrainLayer extends BitmapLayer {
 
   draw(opts) {
     // inject: elevationBitmapTexture
-    const { uniforms } = opts;
-    const { bitmapTexture, elevationBitmapTexture, model } = this.state;
+    const {uniforms} = opts;
+    const {bitmapTexture, elevationBitmapTexture, model} = this.state;
     const {
       images,
       desaturate,
@@ -107,8 +107,7 @@ export class TerrainLayer extends BitmapLayer {
       image.readyState > HTMLVideoElement.HAVE_METADATA
     ) {
       const sizeChanged =
-        bitmapTexture.width !== image.videoWidth ||
-        bitmapTexture.height !== image.videoHeight;
+        bitmapTexture.width !== image.videoWidth || bitmapTexture.height !== image.videoHeight;
       if (sizeChanged) {
         // note clears image and mipmaps when resizing
         bitmapTexture.resize({
@@ -132,7 +131,7 @@ export class TerrainLayer extends BitmapLayer {
     // // TODO fix zFighting
     // Render the image
     if (elevationBitmapTexture && bitmapTexture && model) {
-      const { gl } = this.context;
+      const {gl} = this.context;
       const parameters = {
         depthTest: true,
         depthFunc: gl.LEQUAL,
@@ -163,7 +162,7 @@ export class TerrainLayer extends BitmapLayer {
             tintColor: tintColor.slice(0, 3).map(x => x / 255)
           })
         )
-        .draw({ parameters });
+        .draw({parameters});
     }
   }
 
@@ -172,7 +171,7 @@ export class TerrainLayer extends BitmapLayer {
       return null;
     }
 
-    const { lngResolution, latResolution, bounds } = this.props;
+    const {lngResolution, latResolution, bounds} = this.props;
 
     const b = {
       minLng: bounds[0],
@@ -210,7 +209,7 @@ export class TerrainLayer extends BitmapLayer {
     const image = images[0];
     const elevationImage = images[1];
 
-    const { gl } = this.context;
+    const {gl} = this.context;
 
     if (elevationBitmapTexture) {
       elevationBitmapTexture.delete();
@@ -221,7 +220,7 @@ export class TerrainLayer extends BitmapLayer {
     }
 
     if (elevationImage instanceof Texture2D) {
-      this.setState({ elevationBitmapTexture: elevationImage });
+      this.setState({elevationBitmapTexture: elevationImage});
     } else if (elevationImage) {
       // Browser object: Image, ImageData, HTMLCanvasElement, ImageBitmap
       this.setState({
@@ -233,7 +232,7 @@ export class TerrainLayer extends BitmapLayer {
     }
 
     if (image instanceof Texture2D) {
-      this.setState({ bitmapTexture: image });
+      this.setState({bitmapTexture: image});
     } else if (image instanceof HTMLVideoElement) {
       // Initialize an empty texture while we wait for the video to load
       this.setState({
@@ -257,5 +256,5 @@ export class TerrainLayer extends BitmapLayer {
   }
 }
 
-TerrainLayer.layerName = "TerrainLayer";
+TerrainLayer.layerName = 'TerrainLayer';
 TerrainLayer.defaultProps = defaultProps;
