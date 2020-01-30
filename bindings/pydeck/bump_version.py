@@ -53,4 +53,4 @@ if __name__ == "__main__":
     if response != "Y":
         sys.exit(0)
     rewrite_version_file(bumped_version)
-    print('Updated file at pydeck/_version.py')
+    print(bumped_version)
