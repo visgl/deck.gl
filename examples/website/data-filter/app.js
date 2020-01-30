@@ -3,10 +3,20 @@ import {StaticMap} from 'react-map-gl';
 import DeckGL from '@deck.gl/react';
 import {ScatterplotLayer} from '@deck.gl/layers';
 import {DataFilterExtension} from '@deck.gl/extensions';
+import {MapView} from '@deck.gl/core';
 import RangeInput from './range-input';
 
 // Set your mapbox token here
 const MAPBOX_TOKEN = process.env.MapboxAccessToken; // eslint-disable-line
+
+// This is only needed for this particular dataset - the default view assumes
+// that the furthest geometries are on the ground. Because we are drawing the
+// circles at the depth of the earthquakes, i.e. below sea level, we need to
+// push the far plane away to avoid clipping them.
+const MAP_VIEW = new MapView({
+  // 1 is the distance between the camera and the ground
+  farZMultiplier: 100
+});
 
 const INITIAL_VIEW_STATE = {
   latitude: 36.5,
@@ -135,6 +145,7 @@ export default class App extends Component {
     return (
       <Fragment>
         <DeckGL
+          views={MAP_VIEW}
           layers={this._renderLayers()}
           initialViewState={INITIAL_VIEW_STATE}
           controller={true}
