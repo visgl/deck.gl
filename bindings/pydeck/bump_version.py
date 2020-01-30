@@ -42,15 +42,21 @@ parser = argparse.ArgumentParser(
 parser.add_argument(
     "release_type", action="store", choices=RELEASE_TYPES, help="Release type to bump"
 )
+parser.add_argument(
+    "-y", "--yes", action="store_true", dest="yes", help="Automatically answer yes"
+)
+
 
 if __name__ == "__main__":
     args = parser.parse_args()
+    should_accept_bump = args.yes
     bumped_version = bump(args.release_type)
-    msg = "Raising pydeck {} to {} | Proceed? (Y/n) ".format(
-        __version__, str(bumped_version)
-    )
-    response = input(msg)
-    if response != "Y":
-        sys.exit(0)
+    inform_bump = "Raising pydeck {} to {}".format(__version__, str(bumped_version))
+    print(inform_bump)
+    if not should_accept_bump:
+        prompt = "Proceed? (Y/n) "
+        response = input(prompt)
+        if response != "Y":
+            sys.exit(0)
     rewrite_version_file(bumped_version)
     print(bumped_version)
