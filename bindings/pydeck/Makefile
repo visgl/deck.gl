@@ -1,8 +1,6 @@
 init:
 	# Build deck.gl at the root of this repository
-	cd ../..; \ 
-	yarn bootstrap; \
-	cd -; \
+	cd ../..; yarn bootstrap; cd -; \
 	# Set up the pydeck project
 	pip install -r requirements.txt
 	pip install -r requirements-dev.txt
@@ -15,11 +13,11 @@ prepare-jupyter:
 	jupyter nbextension enable --sys-prefix --py pydeck
 	# Build and install the JS module
 	cd ../../modules/jupyter-widget/; \
-	jupyter labextension install @jupyter-widgets/jupyterlab-manager --no-build
-	jupyter labextension install . --no-build
-	jupyter labextension link .
-	jupyter lab build
-	cd ../../bindings/pydeck
+	  jupyter labextension install @jupyter-widgets/jupyterlab-manager --no-build; \
+	  jupyter labextension install . --no-build; \
+	  jupyter labextension link .; \
+	  jupyter lab build; \
+	  cd ../../bindings/pydeck
 
 test:
 	pytest
