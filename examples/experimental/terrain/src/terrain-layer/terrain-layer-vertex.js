@@ -19,7 +19,7 @@ float compute_height_m(vec4 color) {
   float r = color.r * 256.;
   float g = color.g * 256.;
   float b = color.b * 256.;
-  float height_m = -10000. + ((r * 256. * 256. + g * 256. + b) * 0.1); 
+  float height_m = -10000. + ((r * 256. * 256. + g * 256. + b) * 0.1);
   return height_m;
 }
 
@@ -51,9 +51,9 @@ void main(void) {
   next = project_position(next);
   curr.z = (curr.z + prev.z + next.z) / 3.;
 
-  vec4 position_worldspace = vec4(curr, 1.0);
-  gl_Position = project_position_to_clipspace(position_worldspace);
-  
+  // vec4 position_worldspace = vec4(curr, 1.0);
+  gl_Position = project_position_to_clipspace(positions, positions64xyLow, vec3(0.0,0.0,curr.z), geometry.position);
+
   // vNormal = cross(prev - curr, next - curr);
   // set_normal
   // gl_Position = project_position_to_clipspace(positions, positions64xyLow, vec3(0.0), geometry.position);

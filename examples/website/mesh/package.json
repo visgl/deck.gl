@@ -7,11 +7,12 @@
     "start-local": "webpack-dev-server --env.local --progress --hot --open"
   },
   "dependencies": {
-    "@loaders.gl/obj": "^2.0.2",
+    "@loaders.gl/images": "2.0.2",
+    "@mapbox/martini": "^0.1.0",
     "deck.gl": "^8.0.0",
+    "math.gl": "^3.0.0",
     "react": "^16.3.0",
-    "react-dom": "^16.3.0",
-    "math.gl": "^3.0.0"
+    "react-dom": "^16.3.0"
   },
   "devDependencies": {
     "@babel/core": "^7.4.0",
