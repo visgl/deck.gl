@@ -38,8 +38,8 @@ publish-pypi:
 
 # e.g. `make RELEASE_TYPE=MAJOR bump-and-publish
 bump-and-publish:
-	make bump-version $RELEASE_TYPE
-	git commit -am "Release version $PYDECK_VERSION"
+	make bump-version $RELEASE_TYPE | read $pydeck_version
+	git commit -am "Release version $pydeck_version"
 	make test
 	make publish-conda
 	make publish-pypi
