@@ -13,3 +13,4 @@ requests
 sphinx
 recommonmark
 jupyterlab
+semver
