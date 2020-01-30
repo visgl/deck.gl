@@ -4,6 +4,7 @@ export default `#version 300 es
 // Scale the model
 uniform float sizeScale;
 uniform bool composeModelMatrix;
+// uniform float tileSize;
 
 // Primitive attributes
 in vec3 positions;
@@ -52,5 +53,8 @@ void main(void) {
   DECKGL_FILTER_GL_POSITION(gl_Position, geometry);
 
   DECKGL_FILTER_COLOR(vColor, geometry);
+
+  // geometry.uv = positions.xy / tileSize;
+  // vTexCoord = positions.xy / tileSize;
 }
 `;
