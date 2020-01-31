@@ -16,10 +16,10 @@ import {TileLayer, TileTerrainLayer} from '@deck.gl/geo-layers';
 const MAPBOX_TOKEN = process.env.MapboxAccessToken; // eslint-disable-line
 
 const INITIAL_VIEW_STATE = {
-  longitude: 103.851959,
-  latitude: 1.29027,
+  longitude: 86.922623,
+  latitude: 27.986065,
   zoom: 12,
-  pitch: 0,
+  pitch: 45,
   bearing: 0
 };
 
