@@ -13,4 +13,5 @@ requests
 sphinx
 recommonmark
 jupyterlab
+ipython>=5.8.0;python_version<"3.4"
 semver

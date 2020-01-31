@@ -103,6 +103,14 @@ class Deck(JSONMixin):
         Intended for use in a Jupyter environment.
         """
         self.deck_widget.json_input = self.to_json()
+        has_binary = False
+        binary_data_sets = []
+        for layer in self.layers:
+            if layer.use_binary_transport:
+                binary_data_sets.extend(layer.get_binary_data())
+                has_binary = True
+        if has_binary:
+            self.deck_widget.data_buffer = binary_data_sets
 
     def to_html(
         self,
