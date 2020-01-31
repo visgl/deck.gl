@@ -1636,7 +1636,7 @@
   dependencies:
     "@loaders.gl/core" "2.0.2"
 
-"@luma.gl/constants@8.0.3", "@luma.gl/constants@^8.0.3", "@luma.gl/constants@^8.0.0":
+"@luma.gl/constants@8.0.3", "@luma.gl/constants@^8.0.0", "@luma.gl/constants@^8.0.3":
   version "8.0.3"
   resolved "https://registry.yarnpkg.com/@luma.gl/constants/-/constants-8.0.3.tgz#5418bc121f2d2b477e94df1170702f7563ee1b91"
   integrity sha512-Ps89hhaNGyseXDECnSNWbDARP3n1WOttoUnci2BL3O6Od7IIzkuV4HeoI3wsH5Zyyf9/3UBFaFwDnfnfK7E0TA==
@@ -1739,6 +1739,11 @@
   version "1.4.1"
   resolved "https://registry.yarnpkg.com/@mapbox/mapbox-gl-supported/-/mapbox-gl-supported-1.4.1.tgz#c0a03cf75f8b0ad7b57849d6c7e91b0aec4b640f"
   integrity sha512-yyKza9S6z3ELKuf6w5n6VNUB0Osu6Z93RXPfMHLIlNWohu3KqxewLOq4lMXseYJ92GwkRAxd207Pr/Z98cwmvw==
+
+"@mapbox/martini@^0.1.0":
+  version "0.1.0"
+  resolved "https://unpm.uberinternal.com/@mapbox%2fmartini/-/martini-0.1.0.tgz#1801b9234140e1136f37939157ba647d46f1ea30"
+  integrity sha1-GAG5I0FA4RNvN5ORV7pkfUbx6jA=
 
 "@mapbox/point-geometry@0.1.0", "@mapbox/point-geometry@^0.1.0", "@mapbox/point-geometry@~0.1.0":
   version "0.1.0"
