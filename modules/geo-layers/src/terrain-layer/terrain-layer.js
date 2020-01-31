@@ -12,7 +12,6 @@ const defaultProps = {
 };
 
 export default class TerrainLayer extends CompositeLayer {
-
   // initializeState() {
 
   //   this.setState({
@@ -71,7 +70,7 @@ export default class TerrainLayer extends CompositeLayer {
       positions: {value: positions, size: 3},
       texCoords: {value: texCoords, size: 2}
       // normals: [], - optional, but creates the high poly look with lighting
-    }
+    };
   }
 
   _getMartiniTileMesh(terrainImage, meshMaxError) {
@@ -124,7 +123,7 @@ export default class TerrainLayer extends CompositeLayer {
       getScale,
       getPosition: d => [0, 0, 0],
       getColor: d => [255, 255, 255]
-    })
+    });
   }
 }
 

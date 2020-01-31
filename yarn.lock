@@ -1742,7 +1742,7 @@
 
 "@mapbox/martini@^0.1.0":
   version "0.1.0"
-  resolved "https://unpm.uberinternal.com/@mapbox%2fmartini/-/martini-0.1.0.tgz#1801b9234140e1136f37939157ba647d46f1ea30"
+  resolved "https://registry.yarnpkg.com/@mapbox%2fmartini/-/martini-0.1.0.tgz#1801b9234140e1136f37939157ba647d46f1ea30"
   integrity sha1-GAG5I0FA4RNvN5ORV7pkfUbx6jA=
 
 "@mapbox/point-geometry@0.1.0", "@mapbox/point-geometry@^0.1.0", "@mapbox/point-geometry@~0.1.0":

@@ -1,15 +1,14 @@
 /* eslint-disable max-statements */
-/* global window */
 import React, {PureComponent} from 'react';
 import {render} from 'react-dom';
 import DeckGL from '@deck.gl/react';
 import {StaticMap} from 'react-map-gl';
 import {load} from '@loaders.gl/core';
-import Martini from '@mapbox/martini';
-import {getImageData, getImageSize} from '@loaders.gl/images';
+// import Martini from '@mapbox/martini';
+// import {getImageData, getImageSize} from '@loaders.gl/images';
 
-import {COORDINATE_SYSTEM, WebMercatorViewport} from '@deck.gl/core';
-import {SimpleMeshLayer} from '@deck.gl/mesh-layers';
+// import {COORDINATE_SYSTEM, WebMercatorViewport} from '@deck.gl/core';
+// import {SimpleMeshLayer} from '@deck.gl/mesh-layers';
 import {TileLayer, TileTerrainLayer} from '@deck.gl/geo-layers';
 
 // Set your mapbox token here
@@ -24,8 +23,8 @@ const INITIAL_VIEW_STATE = {
 };
 
 // Constants
-const STREET = 'https://c.tile.openstreetmap.org';
-const SECTIONAL = 'https://wms.chartbundle.com/tms/1.0.0/sec';
+// const STREET = 'https://c.tile.openstreetmap.org';
+// const SECTIONAL = 'https://wms.chartbundle.com/tms/1.0.0/sec';
 const TERRAIN_RGB = 'https://api.mapbox.com/v4/mapbox.terrain-rgb';
 const SATELLITE = 'https://api.mapbox.com/v4/mapbox.satellite';
 
@@ -141,7 +140,7 @@ const getTileData = async ({x, y, z}) => {
   return {
     terrain: await load(terrainTile),
     surface: await load(mapTile)
-  }
+  };
 };
 
 export default class App extends PureComponent {
@@ -185,16 +184,16 @@ export default class App extends PureComponent {
           } = props.tile;
 
           // if (north < 43 && south > 34 && east < -118 && west > -126) {
-          console.log(props);
+          // console.log(props);
           return new TileTerrainLayer({
             id: props.id,
             images: props.data,
-            tile: {x,y,z}
+            tile: {x, y, z}
           });
           // }
         }
       })
-    ]
+    ];
 
     return (
       <DeckGL initialViewState={INITIAL_VIEW_STATE} controller={true} layers={layers}>

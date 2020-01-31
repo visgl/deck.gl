@@ -9,7 +9,6 @@ const defaultProps = {
 };
 
 export default class TileTerrainLayer extends CompositeLayer {
-
   _getTileScale(x, y, z) {
     const [lng, lat] = tile2lngLat(x, y, z);
     const bboxVp = new WebMercatorViewport({
@@ -25,12 +24,12 @@ export default class TileTerrainLayer extends CompositeLayer {
   renderLayers() {
     const {
       id,
-      tile: {x,y,z},
+      tile: {x, y, z},
       images,
       meshMaxError
     } = this.props;
 
-    const isLoading = this.internalState.isAsyncPropLoading('images')
+    const isLoading = this.internalState.isAsyncPropLoading('images');
     const terrainImage = isLoading ? null : images.terrain;
     const surfaceImage = isLoading ? null : images.surface;
 
@@ -41,7 +40,7 @@ export default class TileTerrainLayer extends CompositeLayer {
       meshMaxError,
       terrainImage,
       surfaceImage
-    })
+    });
   }
 }
 
