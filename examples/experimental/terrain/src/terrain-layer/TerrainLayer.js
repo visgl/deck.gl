@@ -1,7 +1,8 @@
+/* global HTMLVideoElement */
 import GL from '@luma.gl/constants';
 // import { Layer } from "@deck.gl/core";
 import {Model, Texture2D} from '@luma.gl/core';
-import {picking, project32, gouraudLighting} from '@deck.gl/core';
+// import {picking, project32, gouraudLighting} from '@deck.gl/core';
 import {BitmapLayer} from '@deck.gl/layers';
 import vs from './terrain-layer-vertex';
 import fs from './terrain-layer-fragment';

@@ -22,7 +22,7 @@ export const INITIAL_VIEW_STATE = {
 const enableSectional = false;
 const getTileData = ({x, y, z}) => {
   // https://wiki.openstreetmap.org/wiki/Slippy_map_tilenames#Tile_servers
-  const street = 'https://c.tile.openstreetmap.org';
+  // const street = 'https://c.tile.openstreetmap.org';
   const sectional = 'https://wms.chartbundle.com/tms/1.0.0/sec';
   const terrainRgb = 'https://api.mapbox.com/v4/mapbox.terrain-rgb';
   const satellite = 'https://api.mapbox.com/v4/mapbox.satellite';
@@ -70,7 +70,7 @@ export class App extends Component {
           } = props.tile;
 
           // if (north < 43 && south > 34 && east < -118 && west > -126) {
-          console.log(props.tile);
+          // console.log(props.tile);
           return new TerrainLayer(props, {
             data: [],
             pickable: false,
