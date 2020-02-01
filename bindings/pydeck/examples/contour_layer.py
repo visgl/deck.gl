@@ -81,7 +81,6 @@ poultry = pydeck.Layer(
 r = pydeck.Deck(
     layers=[cattle, poultry],
     initial_view_state=view,
-    map_style="mapbox://styles/mapbox/satellite-v9",
     tooltip={
         "text": "Concentration of cattle in blue, concentration of poultry in orange"
     },

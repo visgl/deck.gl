@@ -40,5 +40,4 @@ def create_stacked_test_object():
         layers=[scatterplot, text_layer],
         initial_view_state=view_state,
         views=None,
-        map_style=None,
     )

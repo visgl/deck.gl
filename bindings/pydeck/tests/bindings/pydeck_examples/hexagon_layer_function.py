@@ -75,7 +75,6 @@ def create_heatmap_test_object():
                 "bearing": -27.396674584323023,
             }
         ),
-        views=[View(type="MapView", controller=True)],
+        views=[View(type="MapView", controller=True, map_style=None)],
         layers=[failed_hexagon_layer, successful_heatmap_layer],
-        map_style=None,
     )

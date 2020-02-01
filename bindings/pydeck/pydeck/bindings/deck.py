@@ -13,8 +13,13 @@ class Deck(JSONMixin):
     def __init__(
         self,
         layers=[],
-        views=[View(type="MapView", controller=True)],
-        map_style="mapbox://styles/mapbox/dark-v9",
+        views=[
+            View(
+                type="MapView",
+                controller=True,
+                map_style="mapbox://styles/mapbox/dark-v9",
+            )
+        ],
         mapbox_key=None,
         initial_view_state=None,
         width="100%",
@@ -31,11 +36,9 @@ class Deck(JSONMixin):
 
         layers : pydeck.Layer or list of pydeck.Layer, default []
             List of :class:`pydeck.bindings.layer.Layer` layers to render.
-        views : list of pydeck.View, []
+        views : list of pydeck.View, default `[pydeck.bindings.view.View()]`
             List of :class:`pydeck.bindings.view.View` objects to render.
-        map_style : str, default 'mapbox://styles/mapbox/dark-v9'
-            URI for Mapbox basemap style. See Mapbox's `gallery <https://www.mapbox.com/gallery/>`_ for examples.
-            If not using a basemap, you can set this value to to an empty string, `''`.
+            Defaults to using a Mapbox Dark basemap.
         initial_view_state : pydeck.ViewState, default None
             Initial camera angle relative to the map, defaults to a fully zoomed out 0, 0-centered map
             To compute a viewport from data, see :func:`pydeck.data_utils.viewport_helpers.compute_view`
@@ -61,13 +64,15 @@ class Deck(JSONMixin):
         .. _gallery:
             https://www.mapbox.com/gallery/
         """
+        # NOTE It seems that standalone DeckGL insists on only one map style
+        # This PR is blocked until it can support multiple
+        self.map_style = ""
         self.layers = []
         if isinstance(layers, Layer):
             self.layers.append(layers)
         else:
             self.layers = layers
         self.views = views
-        self.map_style = map_style
         # Use passed view state
         self.initial_view_state = initial_view_state
         self.deck_widget = DeckGLWidget()
@@ -77,6 +82,7 @@ class Deck(JSONMixin):
         self.deck_widget.width = width
         self.deck_widget.tooltip = tooltip
         self.description = description
+        # Clobber default map style
         if self.mapbox_key is None:
             warnings.warn(
                 "Mapbox API key is not set. This may impact available features of pydeck.",

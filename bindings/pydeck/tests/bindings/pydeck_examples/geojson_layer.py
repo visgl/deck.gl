@@ -25,7 +25,6 @@ features = {
 def create_geojson_layer_test_object():
     return Deck(
         description="Test of GeoJsonLayer",
-        map_style=None,
         initial_view_state=ViewState(longitude=-122.45, latitude=37.8, zoom=0),
         layers=[
             Layer(
