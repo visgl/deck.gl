@@ -11,24 +11,23 @@ source:
 
 build:
   number: 0
-  script: "{{ PYTHON }} -m pip install . --no-deps --ignore-installed -vv "
+  script: "{{ PYTHON }} -m pip install . --no-deps -vv"
+  noarch: python
 
 requirements:
   host:
-    - ipykernel >=5.1.2
-    - ipython >=5.8.0
-    - ipywidgets >=7.0.0
-    - jinja2 >=2.10.1
+    - ipykernel
+    - ipython
+    - jinja2
     - pip
     - python
-    - traitlets >=4.3.2
+    - traitlets
   run:
-    - ipykernel >=5.1.2
-    - ipython >=5.8.0
-    - ipywidgets >=7.0.0
-    - jinja2 >=2.10.1
+    - ipykernel
+    - ipywidgets
+    - jinja2
     - python
-    - traitlets >=4.3.2
+    - traitlets
 
 test:
   imports:
@@ -38,14 +37,6 @@ test:
     - pydeck.io
     - pydeck.nbextension
     - pydeck.widget
-    - tests
-    - tests.bindings
-    - tests.bindings.pydeck_examples
-    - tests.browser
-    - tests.io
-  requires:
-    - pandas
-    - pytest
 
 about:
   home: "https://github.com/uber/deck.gl/tree/master/bindings/pydeck"
