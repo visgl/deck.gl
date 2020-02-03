@@ -1,5 +1,6 @@
 [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/uber/deck.gl/binder)
 [![Documentation Status](https://readthedocs.org/projects/deckgl/badge/?version=latest)](https://deckgl.readthedocs.io/en/latest/?badge=latest)
+[![Anaconda-Server Badge](https://anaconda.org/conda-forge/pydeck/badges/version.svg)](https://anaconda.org/conda-forge/pydeck)
 
 # pydeck: Large-scale interactive data visualization in Python
 
@@ -19,6 +20,12 @@ For __interactive demos__, click the binder logo below:
 
 ```bash
 pip install pydeck
+```
+
+The library is available via conda as well:
+
+```bash
+conda install -c conda-forge pydeck
 ```
 
 To install pydeck for Jupyter Notebook, run the following commands on your Jupyter server:
