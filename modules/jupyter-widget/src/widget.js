@@ -4,6 +4,8 @@ import {DOMWidgetModel, DOMWidgetView} from '@jupyter-widgets/base';
 import {MODULE_NAME, MODULE_VERSION} from './version';
 
 import {createDeck, updateDeck} from './create-deck';
+import jsonConverter from './create-deck';
+import {deserializeMatrix, processDataBuffer} from './binary-transport';
 
 const MAPBOX_CSS_URL = 'https://api.tiles.mapbox.com/mapbox-gl-js/v1.2.1/mapbox-gl.css';
 const ERROR_BOX_CLASSNAME = 'error-box';
@@ -25,7 +27,6 @@ function loadCss(url) {
   link.href = url;
   document.getElementsByTagName('head')[0].appendChild(link);
 }
-
 // Note: Variables shared explictly between Python and JavaScript use snake_case
 export class DeckGLModel extends DOMWidgetModel {
   defaults() {
@@ -40,6 +41,7 @@ export class DeckGLModel extends DOMWidgetModel {
       json_input: null,
       mapbox_key: null,
       selected_data: [],
+      data_buffer: null,
       tooltip: null,
       width: '100%',
       height: 500,
@@ -48,8 +50,11 @@ export class DeckGLModel extends DOMWidgetModel {
   }
 
   static get serializers() {
-    return {...DOMWidgetModel.serializers};
-    // Add any extra serializers here
+    return {
+      ...DOMWidgetModel.serializers,
+      // Add any extra serializers here
+      data_buffer: {deserialize: deserializeMatrix}
+    };
   }
 
   static get model_name() {
@@ -119,6 +124,20 @@ export class DeckGLView extends DOMWidgetView {
     super.render();
 
     this.model.on('change:json_input', this.valueChanged.bind(this), this);
+    this.model.on('change:data_buffer', this.dataBufferChanged.bind(this), this);
+    this.dataBufferChanged();
+  }
+
+  dataBufferChanged() {
+    if (this.model.get('data_buffer')) {
+      const propsWithBinary = processDataBuffer({
+        dataBuffer: this.model.get('data_buffer'),
+        jsonProps: this.model.get('json_input')
+      });
+
+      const convertedJson = jsonConverter.convert(propsWithBinary);
+      this.deck.setProps(convertedJson);
+    }
   }
 
   valueChanged() {
