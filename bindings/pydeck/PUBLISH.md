@@ -94,4 +94,4 @@ docker run -p 8888:8888 test-binder:latest jupyter notebook --ip 0.0.0.0
 
 This is what Binder will be executing when running the examples.
 
-Verify the current examples work at https://mybinder.org/v2/gh/uber/deck.gl/binder?filepath=examples
+Verify the current examples work at https://mybinder.org/v2/gh/uber/deck.gl/binder
