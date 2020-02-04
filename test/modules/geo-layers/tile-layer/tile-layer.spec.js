@@ -42,12 +42,12 @@ test('TileLayer#updateTriggers', t => {
       },
       onAfterUpdate({layer}) {
         t.equal(
-          layer.state.tileCache._tileToBoundingBox,
+          layer.state.tileset._tileToBoundingBox,
           tileToBoundingBox,
           'Should create a tileCache with correct tileToBoundingBox'
         );
         t.equal(
-          layer.state.tileCache._getTileIndices,
+          layer.state.tileset._getTileIndices,
           getTileIndices,
           'Should create a tileCache with correct _getTileIndices'
         );

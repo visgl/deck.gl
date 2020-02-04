@@ -55,7 +55,6 @@ export function getTileIndices(viewport, maxZoom, minZoom) {
     expected  2  3  0  1  2  3
    */
   let [minX, minY] = getTileIndex([bbox[0], bbox[3]], scale);
-  // eslint-disable-next-line prefer-const
   let [maxX, maxY] = getTileIndex([bbox[2], bbox[1]], scale);
   const indices = [];
 
@@ -65,7 +64,8 @@ export function getTileIndices(viewport, maxZoom, minZoom) {
    */
   minX = Math.floor(minX);
   maxX = Math.min(minX + scale, maxX); // Avoid creating duplicates
-  minY = Math.floor(minY);
+  minY = Math.max(0, Math.floor(minY));
+  maxY = Math.min(scale, maxY);
   for (let x = minX; x < maxX; x++) {
     for (let y = minY; y < maxY; y++) {
       // Cast to valid x between [0, scale]

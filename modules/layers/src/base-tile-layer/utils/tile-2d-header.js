@@ -1,35 +1,38 @@
-export default class Tile {
+export default class Tile2DHeader {
   constructor({getTileData, x, y, z, onTileLoad, onTileError, tileToBoundingBox}) {
     this.x = x;
     this.y = y;
     this.z = z;
     this.bbox = tileToBoundingBox(this.x, this.y, this.z);
-    this.isVisible = true;
-    this.getTileData = getTileData;
-    this._data = null;
+    this.selected = true;
+    this.parent = null;
+    this.children = [];
+
+    this.content = null;
     this._isLoaded = false;
-    this._loader = this._loadData();
+    this._loader = this._loadData(getTileData);
+
     this.onTileLoad = onTileLoad;
     this.onTileError = onTileError;
   }
 
   get data() {
-    return this._data || this._loader;
+    return this.content || this._loader;
   }
 
   get isLoaded() {
     return this._isLoaded;
   }
 
-  _loadData() {
+  _loadData(getTileData) {
     const {x, y, z, bbox} = this;
-    if (!this.getTileData) {
+    if (!getTileData) {
       return null;
     }
 
-    return Promise.resolve(this.getTileData({x, y, z, bbox}))
+    return Promise.resolve(getTileData({x, y, z, bbox}))
       .then(buffers => {
-        this._data = buffers;
+        this.content = buffers;
         this._isLoaded = true;
         this.onTileLoad(this);
         return buffers;
@@ -38,11 +41,5 @@ export default class Tile {
         this._isLoaded = true;
         this.onTileError(err);
       });
-  }
-
-  isOverlapped(tile) {
-    const {x, y, z} = this;
-    const m = Math.pow(2, tile.z - z);
-    return Math.floor(tile.x / m) === x && Math.floor(tile.y / m) === y;
   }
 }
