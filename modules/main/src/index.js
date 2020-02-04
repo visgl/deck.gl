@@ -97,8 +97,7 @@ export {
   PolygonLayer,
   SolidPolygonLayer,
   GeoJsonLayer,
-  TextLayer,
-  BaseTileLayer
+  TextLayer
 } from '@deck.gl/layers';
 
 export {
