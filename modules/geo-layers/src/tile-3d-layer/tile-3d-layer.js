@@ -54,6 +54,19 @@ export default class Tile3DLayer extends CompositeLayer {
     }
   }
 
+  getPickingInfo({info, sourceLayer}) {
+    const {layerMap} = this.state;
+    const layerId = sourceLayer && sourceLayer.id;
+    if (layerId) {
+      // layerId: this.id-[scenegraph|pointcloud]-tileId
+      const substr = layerId.substring(this.id.length + 1);
+      const tileId = substr.substring(substr.indexOf('-') + 1);
+      info.object = layerMap[tileId] && layerMap[tileId].tile;
+    }
+
+    return info;
+  }
+
   async _loadTileset(tilesetUrl, fetchOptions, ionMetadata) {
     const response = await fetch(tilesetUrl, fetchOptions);
     const tilesetJson = await response.json();
@@ -106,13 +119,13 @@ export default class Tile3DLayer extends CompositeLayer {
 
     // create layers for new tiles
     const {selectedTiles} = tileset3d;
-    const tilesWithoutLayer = selectedTiles.filter(tile => !layerMap[tile.fullUri]);
+    const tilesWithoutLayer = selectedTiles.filter(tile => !layerMap[tile.id]);
 
     for (const tile of tilesWithoutLayer) {
       // TODO - why do we call this here? Being "selected" should automatically add it to cache?
       tileset3d.addTileToCache(tile);
 
-      layerMap[tile.fullUri] = {
+      layerMap[tile.id] = {
         layer: this._create3DTileLayer(tile),
         tile
       };
@@ -135,15 +148,15 @@ export default class Tile3DLayer extends CompositeLayer {
         if (layer && layer.props && !layer.props.visible) {
           // Still has GPU resource but visibility is turned off so turn it back on so we can render it.
           layer = layer.clone({visible: true});
-          layerMap[tile.fullUri].layer = layer;
+          layerMap[tile.id].layer = layer;
         }
       } else if (tile.contentUnloaded) {
         // Was cleaned up from tileset cache. We no longer need to track it.
-        delete layerMap[tile.fullUri];
+        delete layerMap[tile.id];
       } else if (layer && layer.props && layer.props.visible) {
         // Still in tileset cache but doesn't need to render this frame. Keep the GPU resource bound but don't render it.
         layer = layer.clone({visible: false});
-        layerMap[tile.fullUri].layer = layer;
+        layerMap[tile.id].layer = layer;
       }
     }
 
@@ -179,7 +192,7 @@ export default class Tile3DLayer extends CompositeLayer {
         id: 'scenegraph'
       }),
       {
-        id: `${this.id}-scenegraph-${tileHeader.fullUri}`,
+        id: `${this.id}-scenegraph-${tileHeader.id}`,
         // Fix for ScenegraphLayer.modelMatrix, under flag in deck 7.3 to avoid breaking existing code
         data: instances || [{}],
         scenegraph: gltf,
@@ -218,7 +231,7 @@ export default class Tile3DLayer extends CompositeLayer {
         id: 'pointcloud'
       }),
       {
-        id: `${this.id}-pointcloud-${tileHeader.fullUri}`,
+        id: `${this.id}-pointcloud-${tileHeader.id}`,
         data: {
           header: {
             vertexCount: pointCount

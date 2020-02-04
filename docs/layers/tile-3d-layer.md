@@ -122,6 +122,12 @@ const layer = new Tile3DLayer({
 })
 ```
 
+##### `pickable` (Boolean, Optional)
+
+- Default: false
+
+When [`picking`](/docs/developer-guide/custom-layers/picking.md) is enabled, `info.object` will be a [Tile3DHeader](https://loaders.gl/docs/specifications/category-3d-tiles#tileheader-fields) object.
+
 ### Data Accessors
 
 ##### `getPointColor` (Function|Array, Optional)
