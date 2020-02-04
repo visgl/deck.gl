@@ -57,20 +57,21 @@ const App = (data) => (
 - `generateMask` : when set, corresponding layer will contribute to the mask texture.
 - `applyMask` : When set, layer data will be filtered out as per the mask.
 - `maskHighlightColor` : Provided `applyMask` is set, by default objects outside of the masked region are discarded, when this prop is set to a RGBA color, instead of discarding the objects, this color is used as highlight color for objects inside the mask.
+- `maskBoundingBox` : Axis aligned bounding box to create the mask texture.
 
 ### MaskEffect
 
 A new effect class, `MaskEffect` will be added. It optionally takes a mask texture, bounding box. If not provided theses are generated based on layers attributes which have `generateMask` prop is set. All layers, which have `applyMask` is set will be masked by the texture mask.
 
 
-This effect operates if two different steps. The constructor, takes `precision` that defines, the size of the texture to be used for generating the mask.
+This `Effect` operates in two different steps. The constructor, takes `precision` that defines the size of the texture to be used for generating the mask.
 
 #### Generating Texture Mask
 
-If the mask texture is not provided, this effect generates the required texture. Internally it creates a new render pass to render data into an offline an Framebuffer.
+If the mask texture is not provided, this `Effect` generates the required texture. Internally it creates a new render pass to render data into an offline an Framebuffer.
 
 During pre render pass:
-- All layers are processed, and if a layer has 'generateMask' prop set, a bounding box of its data is calculated (optionally can be provided by the layer).
+- All layers are processed, and if a layer has `generateMask` prop set, a bounding box of its data is calculated (optionally can be provided by the layer).
 - All above bounding boxes are merged at each step.
 - This bounding box is used to setup Orthographic projection and layers are rendered to an offline Framebuffer.
 
@@ -83,9 +84,9 @@ For all the layers, that have `applyMask` set, mask operation is performed to ei
 
 Above generated `Texture` and `bounding box` are used to perform masking operation. We will define a new shader module `textureMask` that depends on luma.gl's `textureFilter` module. This shader module will be used to process, object's position attribute to identify which objects are inside and which objects are outside of the masked region.
 
-Vertex and Fragment shader parts of the module contain, `maskEffect_value` varying and any uniforms to change layer's attributes (such as color). And following injects will be defined
+Vertex and Fragment shader parts of the module contain, `maskEffect_isMasked` varying and any uniforms to change layer's attributes (such as color). And following injects will be defined
 
-- `vs:#main-start` : To perform sampling and set `maskEffect_value`.
+- `vs:#main-start` : To perform sampling and set `maskEffect_isMasked`.
 - `vs:DECKGL_FILTER_SIZE` : To set object size to 0 if the object is outside.
 - `fs:DECKGL_FILTER_COLOR` : To discard the fragments if filter value is 0. This can also be used update the color of the fragment if it is inside the region.
 
