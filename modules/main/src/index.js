@@ -120,7 +120,6 @@ export {
   TileLayer,
   TripsLayer,
   Tile3DLayer,
-  TileTerrainLayer,
   TerrainLayer
 } from '@deck.gl/geo-layers';
 

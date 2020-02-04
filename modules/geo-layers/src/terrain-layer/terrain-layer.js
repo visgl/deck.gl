@@ -6,21 +6,18 @@ import {SimpleMeshLayer} from '@deck.gl/mesh-layers';
 const MERCATOR_TILE_SIZE = 512; // web mercator projection constant
 
 const defaultProps = {
-  surfaceImage: {type: 'object', value: null},
-  terrainImage: {type: 'object', value: null},
-  meshMaxError: {type: 'number', value: 4.0}
+  // Data API Option A
+  images: {type: 'object', value: null, async: true},
+  // Data API Option B
+  // surfaceImage: {type: 'object', value: null, async: true},
+  // terrainImage: {type: 'object', value: null, async: true},
+
+  meshMaxError: {type: 'number', value: 4.0},
+  bbox: {type: 'object', value: {north: null, south: null, west: null, east: null}},
+  getScale: {type: 'accessor', value: [1, 1, 1]}
 };
 
 export default class TerrainLayer extends CompositeLayer {
-  // initializeState() {
-
-  //   this.setState({
-  //     terrainImage: null,
-  //     surfaceImage: null
-  //   });
-
-  // }
-
   _getTerrain(data, tileSize, gridSize) {
     // From Martini demo
     // https://observablehq.com/@mourner/martin-real-time-rtin-terrain-mesh
@@ -74,6 +71,9 @@ export default class TerrainLayer extends CompositeLayer {
   }
 
   _getMartiniTileMesh(terrainImage, meshMaxError) {
+    if (terrainImage === null) {
+      return null;
+    }
     const data = getImageData(terrainImage);
     const size = getImageSize(terrainImage);
 
@@ -92,26 +92,20 @@ export default class TerrainLayer extends CompositeLayer {
     };
   }
 
-  // updateState({props, oldProps, changeFlags}) {
-  //   // if(this.state.isAsyncPropLoading('images'))
-
-  // }
-
   renderLayers() {
     const {
       id,
-      coordinateOrigin,
+      bbox,
       getScale,
       meshMaxError,
-      // images,
-      terrainImage,
-      surfaceImage
+      images
+      // terrainImage,
+      // surfaceImage
     } = this.props;
 
-    // console.log(images)
-
-    // const terrainImage = images && images.terrain;
-    // const surfaceImage = images && images.surface;
+    const isLoading = this.internalState.isAsyncPropLoading('images');
+    const terrainImage = isLoading ? null : images.terrain;
+    const surfaceImage = isLoading ? null : images.surface;
 
     return new SimpleMeshLayer({
       id: `terrain-${id}`,
@@ -119,7 +113,7 @@ export default class TerrainLayer extends CompositeLayer {
       mesh: this._getMartiniTileMesh(terrainImage, meshMaxError),
       texture: surfaceImage,
       coordinateSystem: COORDINATE_SYSTEM.METER_OFFSETS,
-      coordinateOrigin,
+      coordinateOrigin: [bbox.west, bbox.north],
       getScale,
       getPosition: d => [0, 0, 0],
       getColor: d => [255, 255, 255]
