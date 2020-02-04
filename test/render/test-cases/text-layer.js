@@ -4,6 +4,43 @@ import {points} from 'deck.gl-test/data';
 
 import {OS} from '../constants';
 
+function getBinaryAttributes(data, getText, accessors) {
+  const startIndices = new Uint16Array(
+    data.reduce(
+      (acc, d) => {
+        const lastIndex = acc[acc.length - 1];
+        acc.push(lastIndex + getText(d).length);
+        return acc;
+      },
+      [0]
+    )
+  );
+
+  const attributes = {};
+
+  attributes.getText = {
+    value: new Uint8Array(
+      data.map(d => Array.from(getText(d)).map(char => char.charCodeAt(0))).flat()
+    )
+  };
+  for (const accessorName in accessors) {
+    const {accessor, ...props} = accessors[accessorName];
+    props.value = new Float32Array(
+      data
+        .slice(0, 50)
+        .map(d => Array.from(getText(d)).map(d1 => accessor(d)))
+        .flat(2)
+    );
+    attributes[accessorName] = props;
+  }
+
+  return {
+    length: data.length,
+    startIndices,
+    attributes
+  };
+}
+
 export default (OS === 'Mac'
   ? [
       {
@@ -57,6 +94,37 @@ export default (OS === 'Mac'
             getTextAnchor: x => 'start',
             getAlignmentBaseline: x => 'center',
             getPixelOffset: x => [10, 0]
+          })
+        ],
+        goldenImage: './test/render/golden-images/text-layer.png'
+      },
+      {
+        name: 'text-layer-binary',
+        viewState: {
+          latitude: 37.751,
+          longitude: -122.427,
+          zoom: 11.5,
+          pitch: 0,
+          bearing: 0
+        },
+        layers: [
+          new TextLayer({
+            id: 'text-layer',
+            data: getBinaryAttributes(
+              points.slice(0, 50),
+              x => `${x.PLACEMENT}-${x.YR_INSTALLED}`,
+              {
+                getPosition: {accessor: x => x.COORDINATES, size: 2},
+                getColor: {accessor: x => [1, 0, 0], size: 3, normalized: false}
+              }
+            ),
+            fontFamily: 'Arial',
+            getSize: 32,
+            getAngle: 0,
+            sizeScale: 1,
+            getTextAnchor: 'start',
+            getAlignmentBaseline: 'center',
+            getPixelOffset: [10, 0]
           })
         ],
         goldenImage: './test/render/golden-images/text-layer.png'
