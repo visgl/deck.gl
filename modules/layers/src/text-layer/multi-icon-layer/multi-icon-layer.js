@@ -26,6 +26,7 @@ import fs from './multi-icon-layer-fragment.glsl';
 // TODO expose as layer properties
 const DEFAULT_GAMMA = 0.2;
 const DEFAULT_BUFFER = 192.0 / 256;
+const EMPTY_ARRAY = [];
 
 const defaultProps = {
   backgroundColor: {type: 'color', value: null, optional: true},
@@ -96,7 +97,7 @@ export default class MultiIconLayer extends IconLayer {
   }
 
   getInstanceOffset(icons) {
-    return Array.from(icons).map(icon => super.getInstanceOffset(icon));
+    return icons ? Array.from(icons).map(icon => super.getInstanceOffset(icon)) : EMPTY_ARRAY;
   }
 
   getInstanceColorMode(icons) {
@@ -104,7 +105,7 @@ export default class MultiIconLayer extends IconLayer {
   }
 
   getInstanceIconFrame(icons) {
-    return Array.from(icons).map(icon => super.getInstanceIconFrame(icon));
+    return icons ? Array.from(icons).map(icon => super.getInstanceIconFrame(icon)) : EMPTY_ARRAY;
   }
 }
 

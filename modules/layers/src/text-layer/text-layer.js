@@ -211,7 +211,7 @@ export default class TextLayer extends CompositeLayer {
     const {getText} = this.state;
     const {wordBreak, maxWidth, lineHeight, getTextAnchor, getAlignmentBaseline} = this.props;
 
-    const paragraph = getText(object, objectInfo);
+    const paragraph = getText(object, objectInfo) || '';
     const {
       characters,
       size: [width, height]
