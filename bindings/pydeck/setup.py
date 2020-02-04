@@ -9,16 +9,33 @@ from setuptools.command.develop import develop
 
 import atexit
 from distutils import log
+import json
 import os
 from shutil import copy
 from subprocess import check_call
 import sys
+
+from pydeck.frontend_semver import DECKGL_SEMVER
 
 here = os.path.dirname(os.path.abspath(__file__))
 
 
 def read(*parts):
     return open(os.path.join(here, *parts), "r").read()
+
+
+def check_semver():
+    """Verify that the correct semantic version for deck.gl is being bundled with pydeck"""
+    from semantic_version import Version, NpmSpec  # noqa
+
+    package_json_path = os.path.join(widget_dir, "package.json")
+    with open(package_json_path, encoding="utf-8") as data_file:
+        version = json.loads(data_file.read())["version"]
+        if not Version(version) in NpmSpec(DECKGL_SEMVER):
+            msg = "@deck.gl/jupyter-widget is at {} but valid semver range is {}".format(
+                version, DECKGL_SEMVER
+            )
+            raise Exception(msg)
 
 
 log.info("setup.py entered")
@@ -168,6 +185,9 @@ def js_prerelease(command, strict=False):
 
     class DecoratedCommand(command):
         def run(self):
+            if strict:
+                # Running as sdist
+                check_semver()
             jsdeps = self.distribution.get_command_obj("jsdeps")  # noqa
             self.distribution.run_command("jsdeps")
             command.run(self)
