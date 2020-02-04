@@ -4,8 +4,9 @@ import {render} from 'react-dom';
 import DeckGL from '@deck.gl/react';
 import {StaticMap} from 'react-map-gl';
 import {load} from '@loaders.gl/core';
-import {TileLayer, TerrainLayer} from '@deck.gl/geo-layers';
+import {TileLayer} from '@deck.gl/geo-layers';
 import {WebMercatorViewport} from '@deck.gl/core';
+import TerrainLayer from './terrain-layer/terrain-layer';
 
 // Set your mapbox token here
 const MAPBOX_TOKEN = process.env.MapboxAccessToken; // eslint-disable-line
