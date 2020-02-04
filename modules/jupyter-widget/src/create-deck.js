@@ -7,6 +7,7 @@ import {Tile3DLoader} from '@loaders.gl/3d-tiles';
 import {registerLoaders} from '@loaders.gl/core';
 
 import * as deck from './deck-bundle';
+import loadScript from './dynamic-registration';
 
 import GL from '@luma.gl/constants';
 
@@ -40,6 +41,11 @@ registerLoaders([CSVLoader, Tile3DLoader]);
 const jsonConverter = new deck.JSONConverter({
   configuration: jsonConverterConfiguration
 });
+
+export function updateClasses({className, resourceUri, onComplete}) {
+  // jsonConverter configuration to be updated here
+  loadScript({resourceUri, onComplete, onError: console.error}); // eslint-disable-line
+}
 
 export function updateDeck(inputJSON, deckgl) {
   const results = jsonConverter.convert(inputJSON);

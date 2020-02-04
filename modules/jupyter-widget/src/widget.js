@@ -1,9 +1,9 @@
-/* global document */
+/* global document, console */
 import {DOMWidgetModel, DOMWidgetView} from '@jupyter-widgets/base';
 
 import {MODULE_NAME, MODULE_VERSION} from './version';
 
-import {createDeck, updateDeck} from './create-deck';
+import {createDeck, updateDeck, updateClasses} from './create-deck';
 import jsonConverter from './create-deck';
 import {deserializeMatrix, processDataBuffer} from './binary-transport';
 
@@ -38,6 +38,7 @@ export class DeckGLModel extends DOMWidgetModel {
       _view_name: DeckGLModel.view_name,
       _view_module: DeckGLModel.view_module,
       _view_module_version: DeckGLModel.view_module_version,
+      custom_layers: [],
       json_input: null,
       mapbox_key: null,
       selected_data: [],
@@ -125,7 +126,19 @@ export class DeckGLView extends DOMWidgetView {
 
     this.model.on('change:json_input', this.valueChanged.bind(this), this);
     this.model.on('change:data_buffer', this.dataBufferChanged.bind(this), this);
+    this.model.on('change:custom_layers', this.addNewCustomLayers.bind(this), this);
+    this.addNewCustomLayers();
     this.dataBufferChanged();
+  }
+
+  addNewCustomLayers() {
+    if (this.model.get('custom_layers')) {
+      const customLayers = this.model.get('custom_layers');
+      for (const obj of customLayers) {
+        const [className, resourceUri] = Object.entries(obj)[0];
+        updateClasses({className, resourceUri, onComplete: console.log}); // eslint-disable-line no-console
+      }
+    }
   }
 
   dataBufferChanged() {
