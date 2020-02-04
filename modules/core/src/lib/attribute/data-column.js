@@ -214,10 +214,11 @@ export default class DataColumn {
       state.externalBuffer = buffer;
       state.constant = false;
       this.value = opts.value;
+      const isBuffer64Bit = opts.value instanceof Float64Array;
 
       // Copy the type of the buffer into the accessor
       accessor.type = opts.type || buffer.accessor.type;
-      accessor.bytesPerElement = buffer.accessor.BYTES_PER_ELEMENT;
+      accessor.bytesPerElement = buffer.accessor.BYTES_PER_ELEMENT * (isBuffer64Bit ? 2 : 1);
       accessor.stride = getStride(accessor);
     } else if (opts.value) {
       this._checkExternalBuffer(opts);

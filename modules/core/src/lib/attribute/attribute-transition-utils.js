@@ -110,7 +110,7 @@ export function padBuffer({
   const toData = isConstant
     ? attribute.value
     : attribute.getBuffer().getData({srcByteOffset: byteOffset});
-  if (attribute.settings.normalized) {
+  if (attribute.settings.normalized && !isConstant) {
     const getter = getData;
     getData = (value, chunk) => attribute._normalizeConstant(getter(value, chunk));
   }
