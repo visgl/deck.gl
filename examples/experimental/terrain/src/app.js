@@ -5,18 +5,18 @@ import DeckGL from '@deck.gl/react';
 import {StaticMap} from 'react-map-gl';
 import {load} from '@loaders.gl/core';
 import {TileLayer} from '@deck.gl/geo-layers';
-import {WebMercatorViewport} from '@deck.gl/core';
 import TerrainLayer from './terrain-layer/terrain-layer';
 
 // Set your mapbox token here
 const MAPBOX_TOKEN = process.env.MapboxAccessToken; // eslint-disable-line
 
 const INITIAL_VIEW_STATE = {
-  longitude: 86.922623,
+  longitude: 0,
+  // longitude: 86.922623,
   latitude: 27.986065,
-  zoom: 11.5,
-  pitch: 60,
-  bearing: 240
+  zoom: 3,
+  pitch: 0,
+  bearing: 0
 };
 
 // Constants
@@ -25,54 +25,70 @@ const INITIAL_VIEW_STATE = {
 const TERRAIN_RGB = 'https://api.mapbox.com/v4/mapbox.terrain-rgb';
 const SATELLITE = 'https://api.mapbox.com/v4/mapbox.satellite';
 
-function getTileScale(westLng, northLat, z) {
-  // const [lng, lat] = tile2lngLat(x, y, z); // this can be removed if we provide north, west point.
-  const bboxVp = new WebMercatorViewport({
-    longitude: westLng,
-    latitude: northLat,
-    zoom: z
-  });
-  const metersPerPixel = bboxVp.metersPerPixel;
 
-  return [metersPerPixel, -metersPerPixel, 1];
+
+const getTileData = ({x, y, z}) => {
+  const terrainTile = `${TERRAIN_RGB}/${z}/${x}/${y}.pngraw?access_token=${MAPBOX_TOKEN}`;
+  return load(terrainTile);
+};
+
+const tile = {
+  x: 6,
+  y: 2,
+  z: 3,
+  bbox: {
+    west: 90,
+    north: 66.513260,
+    east: 135,
+    south: 40.979898,
+  }
 }
 
-const getTileData = async ({x, y, z}) => {
-  const mapTile = `${SATELLITE}/${z}/${x}/${y}@2x.png?access_token=${MAPBOX_TOKEN}`;
-  // const mapTile = `${SECTIONAL}/${z}/${x}/${y}.png?origin=nw`;
-  const terrainTile = `${TERRAIN_RGB}/${z}/${x}/${y}.pngraw?access_token=${MAPBOX_TOKEN}`;
-
-  return {
-    terrain: await load(terrainTile),
-    surface: await load(mapTile)
-  };
-};
+// const tile = {
+//   x: 4,
+//   y: 3,
+//   z: 3,
+//   bbox: {
+//     west: 0,
+//     north: 40.979898,
+//     east: 45,
+//     south: 0
+//   }
+// }
 
 export default class App extends PureComponent {
   render() {
+    // const {bbox, x, y, z} = tile;
+    // const mapTile = `${SATELLITE}/${z}/${x}/${y}@2x.png?access_token=${MAPBOX_TOKEN}`;
+
     const layers = [
+      // new TerrainLayer({
+      //   id: 'terrain',
+      //   surfaceImage: load(mapTile),
+      //   terrainImage: getTileData({x, y, z}),
+      //   bbox,
+      //   z,
+      // })
       new TileLayer({
         id: 'loader',
         pickable: false,
-        opacity: 1,
         // https://wiki.openstreetmap.org/wiki/Zoom_levels
         minZoom: 0,
         maxZoom: 23,
         maxCacheSize: 500,
         getTileData,
         renderSubLayers: props => {
-          const {bbox, z} = props.tile;
-
-          // const surfaceImage = null;
-          // const terrainImage = null;
-
+          const {bbox, x, y, z} = props.tile;
+          console.log(props.tile)
+          const mapTile = `${SATELLITE}/${z}/${x}/${y}@2x.png?access_token=${MAPBOX_TOKEN}`;
+          // const mapTile = `${SECTIONAL}/${z}/${x}/${y}.png?origin=nw`;
           return new TerrainLayer({
             id: props.id,
-            images: props.data,
-            // surfaceImage,
-            // terrainImage,
+            surfaceImage: load(mapTile),
+            terrainImage: props.data,
             bbox,
-            getScale: getTileScale(bbox.west, bbox.north, z)
+            z,
+            // getScale: getTileScale(bbox.west, bbox.south, z)
           });
         }
       })
