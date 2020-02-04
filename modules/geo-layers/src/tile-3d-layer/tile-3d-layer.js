@@ -58,7 +58,9 @@ export default class Tile3DLayer extends CompositeLayer {
     const {layerMap} = this.state;
     const layerId = sourceLayer && sourceLayer.id;
     if (layerId) {
-      const tileId = layerId.substring(this.id.length + 1).split('-')[1];
+      // layerId: this.id-[scenegraph|pointcloud]-tileId
+      const substr = layerId.substring(this.id.length + 1);
+      const tileId = substr.substring(substr.indexOf('-') + 1);
       info.object = layerMap[tileId] && layerMap[tileId].tile;
     }
 

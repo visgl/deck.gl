@@ -126,7 +126,7 @@ const layer = new Tile3DLayer({
 
 - Default: false
 
-When enable [`picking`](/docs/developer-guide/custom-layers/picking.md), the picking info will contain the selected [`tile`](https://github.com/uber-web/loaders.gl/blob/master/modules/3d-tiles/docs/api-reference/tileset-3d.md) accessed by`info.object`.
+When [`picking`](/docs/developer-guide/custom-layers/picking.md) is enabled, `info.object` will be a [Tile3DHeader](https://loaders.gl/docs/specifications/category-3d-tiles#tileheader-fields) object.
 
 ### Data Accessors
 
