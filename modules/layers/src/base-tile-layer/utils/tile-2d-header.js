@@ -1,14 +1,14 @@
-export default class Tile {
+export default class Tile2DHeader {
   constructor({getTileData, x, y, z, onTileLoad, onTileError, tileToBoundingBox}) {
     this.x = x;
     this.y = y;
     this.z = z;
     this.bbox = tileToBoundingBox(this.x, this.y, this.z);
-    this.isVisible = true;
+    this.selected = true;
     this.parent = null;
     this.children = [];
 
-    this._data = null;
+    this.content = null;
     this._isLoaded = false;
     this._loader = this._loadData(getTileData);
 
@@ -17,7 +17,7 @@ export default class Tile {
   }
 
   get data() {
-    return this._data || this._loader;
+    return this.content || this._loader;
   }
 
   get isLoaded() {
@@ -32,7 +32,7 @@ export default class Tile {
 
     return Promise.resolve(getTileData({x, y, z, bbox}))
       .then(buffers => {
-        this._data = buffers;
+        this.content = buffers;
         this._isLoaded = true;
         this.onTileLoad(this);
         return buffers;

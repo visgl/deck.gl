@@ -84,10 +84,10 @@ The maximum cache size for a tile layer. If not defined, it is calculated using 
 
 How the tile layer determines the visibility of tiles. One of the following:
 
-* `'default'`: If some tiles in the current viewport are waiting for data to load, aggresively use cached content from other zoom levels to fill the empty space.
-* `'exclusive'`: Avoid showing overlapping tiles when backfilling with cached content.
+* `'best-available'`: If a tile in the current viewport is waiting for its data to load, use cached content from the closest zoom level to fill the empty space. This approach minimizes the visual flashing due to missing content.
+* `'no-overlap'`: Avoid showing overlapping tiles when backfilling with cached content. This is usually favorable when tiles do not have opaque backgrounds.
 
-- Default: `BaseTileLayer.STRATEGY_DEFAULT`
+- Default: `'best-available'`
 
 ### Render Options
 

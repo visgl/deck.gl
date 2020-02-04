@@ -1,9 +1,9 @@
 import test from 'tape-catch';
-import TileCache, {
-  STRATEGY_EXCLUSIVE,
+import Tileset2D, {
+  STRATEGY_REPLACE,
   STRATEGY_DEFAULT
-} from '@deck.gl/layers/base-tile-layer/utils/tile-cache';
-import Tile from '@deck.gl/layers/base-tile-layer/utils/tile';
+} from '@deck.gl/layers/base-tile-layer/utils/tileset-2d';
+import Tile2DHeader from '@deck.gl/layers/base-tile-layer/utils/tile-2d-header';
 import {tileToBoundingBox} from '@deck.gl/geo-layers/tile-layer/utils/tile-util';
 import {getTileIndices} from '@deck.gl/geo-layers/tile-layer/utils/viewport-util';
 import {WebMercatorViewport} from '@deck.gl/core';
@@ -21,7 +21,7 @@ const testViewState = {
 };
 
 // testViewState should load tile 12-1171-1566
-const testTile = new Tile({x: 1171, y: 1566, z: 12, tileToBoundingBox});
+const testTile = new Tile2DHeader({x: 1171, y: 1566, z: 12, tileToBoundingBox});
 
 const testViewport = new WebMercatorViewport(testViewState);
 
@@ -40,33 +40,33 @@ const testTileCacheProps = {
   onTileLoad: () => {}
 };
 
-test('TileCache#TileCache#should clear the cache when finalize is called', t => {
-  const tileCache = new TileCache(testTileCacheProps);
-  tileCache.update(testViewport);
-  t.equal(tileCache._cache.size, 1);
-  tileCache.finalize();
-  t.equal(tileCache._cache.size, 0);
+test('Tileset2D#Tileset2D#should clear the cache when finalize is called', t => {
+  const tileset = new Tileset2D(testTileCacheProps);
+  tileset.update(testViewport);
+  t.equal(tileset._cache.size, 1);
+  tileset.finalize();
+  t.equal(tileset._cache.size, 0);
   t.end();
 });
 
-test('TileCache#should call onUpdate with the expected tiles', t => {
-  const tileCache = new TileCache(testTileCacheProps);
-  tileCache.update(testViewport);
+test('Tileset2D#should call onUpdate with the expected tiles', t => {
+  const tileset = new Tileset2D(testTileCacheProps);
+  tileset.update(testViewport);
 
-  t.equal(tileCache.tiles[0].x, testTile.x);
-  t.equal(tileCache.tiles[0].y, testTile.y);
-  t.equal(tileCache.tiles[0].z, testTile.z);
+  t.equal(tileset.tiles[0].x, testTile.x);
+  t.equal(tileset.tiles[0].y, testTile.y);
+  t.equal(tileset.tiles[0].z, testTile.z);
 
-  tileCache.finalize();
+  tileset.finalize();
   t.end();
 });
 
-test('TileCache#should clear not visible tiles when cache is full', t => {
-  const tileCache = new TileCache(testTileCacheProps);
+test('Tileset2D#should clear not visible tiles when cache is full', t => {
+  const tileset = new Tileset2D(testTileCacheProps);
   // load a viewport to fill the cache
-  tileCache.update(testViewport);
+  tileset.update(testViewport);
   // load another viewport. The previous cached tiles shouldn't be visible
-  tileCache.update(
+  tileset.update(
     new WebMercatorViewport(
       Object.assign({}, testViewState, {
         longitude: -100,
@@ -75,67 +75,67 @@ test('TileCache#should clear not visible tiles when cache is full', t => {
     )
   );
 
-  t.equal(tileCache._cache.size, 1);
-  t.ok(tileCache._cache.get('12-910-459'), 'expected tile is in cache');
+  t.equal(tileset._cache.size, 1);
+  t.ok(tileset._cache.get('12-910-459'), 'expected tile is in cache');
 
-  tileCache.finalize();
+  tileset.finalize();
   t.end();
 });
 
-test('TileCache#should load the cached parent tiles while we are loading the current tiles', t => {
-  const tileCache = new TileCache(testTileCacheProps);
-  tileCache.update(testViewport);
+test('Tileset2D#should load the cached parent tiles while we are loading the current tiles', t => {
+  const tileset = new Tileset2D(testTileCacheProps);
+  tileset.update(testViewport);
 
   const zoomedInViewport = new WebMercatorViewport(
     Object.assign({}, testViewState, {
       zoom: maxZoom
     })
   );
-  tileCache.update(zoomedInViewport);
+  tileset.update(zoomedInViewport);
   t.ok(
-    tileCache.tiles.some(
+    tileset.tiles.some(
       tile => tile.x === testTile.x && tile.y === testTile.y && tile.z === testTile.z
     ),
     'loads cached parent tiles'
   );
 
-  tileCache.finalize();
+  tileset.finalize();
   t.end();
 });
 
-test('TileCache#should try to load the existing zoom levels if we zoom in too far', t => {
-  const tileCache = new TileCache(testTileCacheProps);
+test('Tileset2D#should try to load the existing zoom levels if we zoom in too far', t => {
+  const tileset = new Tileset2D(testTileCacheProps);
   const zoomedInViewport = new WebMercatorViewport(
     Object.assign({}, testViewState, {
       zoom: 20
     })
   );
 
-  tileCache.update(zoomedInViewport);
-  tileCache.tiles.forEach(tile => {
+  tileset.update(zoomedInViewport);
+  tileset.tiles.forEach(tile => {
     t.equal(tile.z, maxZoom);
   });
 
-  tileCache.finalize();
+  tileset.finalize();
   t.end();
 });
 
-test('TileCache#should not display anything if we zoom out too far', t => {
-  const tileCache = new TileCache(testTileCacheProps);
+test('Tileset2D#should not display anything if we zoom out too far', t => {
+  const tileset = new Tileset2D(testTileCacheProps);
   const zoomedOutViewport = new WebMercatorViewport(
     Object.assign({}, testViewState, {
       zoom: 1
     })
   );
 
-  tileCache.update(zoomedOutViewport);
-  t.equal(tileCache.tiles.length, 0);
-  tileCache.finalize();
+  tileset.update(zoomedOutViewport);
+  t.equal(tileset.tiles.length, 0);
+  tileset.finalize();
   t.end();
 });
 
-test('TileCache#should set isLoaded to true even when loading the tile throws an error', t => {
-  const errorTileCache = new TileCache({
+test('Tileset2D#should set isLoaded to true even when loading the tile throws an error', t => {
+  const errorTileCache = new Tileset2D({
     getTileData: () => Promise.reject(null),
     onTileError: () => {
       t.equal(errorTileCache.tiles[0].isLoaded, true);
@@ -152,8 +152,8 @@ test('TileCache#should set isLoaded to true even when loading the tile throws an
   errorTileCache.update(testViewport);
 });
 
-test('TileCache#traversal', t => {
-  const tileCache = new TileCache({
+test('Tileset2D#traversal', t => {
+  const tileset = new Tileset2D({
     tileToBoundingBox,
     getTileIndices,
     getTileData: () => sleep(10),
@@ -202,7 +202,7 @@ test('TileCache#traversal', t => {
       selectedTiles: ['3-0-0', '3-0-2', '3-2-0', '3-2-2'],
       visibleTiles: {
         [STRATEGY_DEFAULT]: ['1-0-0', '3-0-2', '3-2-2'],
-        [STRATEGY_EXCLUSIVE]: ['3-0-2', '3-2-2']
+        [STRATEGY_REPLACE]: ['3-0-2', '3-2-2']
       }
     },
     {
@@ -217,13 +217,13 @@ test('TileCache#traversal', t => {
       selectedTiles: ['4-0-0', '4-0-4'],
       visibleTiles: {
         [STRATEGY_DEFAULT]: ['1-0-0', '3-0-2'],
-        [STRATEGY_EXCLUSIVE]: ['3-0-2']
+        [STRATEGY_REPLACE]: ['3-0-2']
       }
     }
   ];
 
-  const tileMap = tileCache._cache;
-  const strategies = [STRATEGY_DEFAULT, STRATEGY_EXCLUSIVE];
+  const tileMap = tileset._cache;
+  const strategies = [STRATEGY_DEFAULT, STRATEGY_REPLACE];
 
   const validateVisibility = visibleTiles => {
     let allMatched = true;
@@ -232,46 +232,48 @@ test('TileCache#traversal', t => {
       const actual = Boolean(tile.state & 1) && tile.isLoaded;
       if (expected !== actual) {
         t.fail(
-          `Tile ${tileId} has state ${tile.state}, expected ${expected ? 'visible' : 'invisible'}`
+          `Tile2DHeader ${tileId} has state ${tile.state}, expected ${
+            expected ? 'visible' : 'invisible'
+          }`
         );
         allMatched = false;
       }
     }
-    t.ok(allMatched, 'Tile visibility updated correctly');
+    t.ok(allMatched, 'Tile2DHeader visibility updated correctly');
   };
 
   // Tiles that should be loaded
-  tileCache._getTile(0, 0, 1, true);
-  tileCache._getTile(2, 0, 2, true);
-  tileCache._getTile(2, 1, 2, true);
-  tileCache._getTile(0, 2, 3, true);
-  tileCache._getTile(2, 2, 3, true);
-  tileCache._getTile(4, 2, 3, true);
-  tileCache._getTile(6, 2, 3, true);
+  tileset._getTile(0, 0, 1, true);
+  tileset._getTile(2, 0, 2, true);
+  tileset._getTile(2, 1, 2, true);
+  tileset._getTile(0, 2, 3, true);
+  tileset._getTile(2, 2, 3, true);
+  tileset._getTile(4, 2, 3, true);
+  tileset._getTile(6, 2, 3, true);
 
   sleep(100).then(() => {
     // Tiles that should be pending
-    tileCache._getTile(0, 0, 0, true);
-    tileCache._getTile(1, 0, 1, true);
-    tileCache._getTile(0, 0, 2, true);
-    tileCache._getTile(0, 1, 2, true);
-    tileCache._getTile(3, 0, 2, true);
-    tileCache._getTile(3, 1, 2, true);
-    tileCache._getTile(0, 0, 3, true);
-    tileCache._getTile(2, 0, 3, true);
-    tileCache._getTile(4, 0, 3, true);
-    tileCache._getTile(6, 0, 3, true);
-    tileCache._getTile(0, 0, 4, true);
-    tileCache._getTile(0, 4, 4, true);
+    tileset._getTile(0, 0, 0, true);
+    tileset._getTile(1, 0, 1, true);
+    tileset._getTile(0, 0, 2, true);
+    tileset._getTile(0, 1, 2, true);
+    tileset._getTile(3, 0, 2, true);
+    tileset._getTile(3, 1, 2, true);
+    tileset._getTile(0, 0, 3, true);
+    tileset._getTile(2, 0, 3, true);
+    tileset._getTile(4, 0, 3, true);
+    tileset._getTile(6, 0, 3, true);
+    tileset._getTile(0, 0, 4, true);
+    tileset._getTile(0, 4, 4, true);
 
-    tileCache._rebuildTree();
+    tileset._rebuildTree();
 
     for (const testCase of TEST_CASES) {
       const selectedTiles = testCase.selectedTiles.map(id => tileMap.get(id));
 
       for (const strategy of strategies) {
-        tileCache._strategy = strategy;
-        tileCache._updateTileStates(selectedTiles);
+        tileset._strategy = strategy;
+        tileset._updateTileStates(selectedTiles);
         validateVisibility(testCase.visibleTiles[strategy] || testCase.visibleTiles);
       }
     }

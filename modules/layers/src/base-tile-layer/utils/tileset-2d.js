@@ -1,4 +1,4 @@
-import Tile from './tile';
+import Tile2DHeader from './tile-2d-header';
 
 const TILE_STATE_UNKNOWN = 0;
 const TILE_STATE_VISIBLE = 1;
@@ -25,15 +25,15 @@ const TILE_STATE_HIDDEN = 4;
 // tiles that should be displayed in the current viewport
 const TILE_STATE_SELECTED = 5;
 
-export const STRATEGY_EXCLUSIVE = 'exclusive';
-export const STRATEGY_DEFAULT = 'default';
+export const STRATEGY_REPLACE = 'no-overlap';
+export const STRATEGY_DEFAULT = 'best-available';
 
 /**
  * Manages loading and purging of tiles data. This class caches recently visited tiles
  * and only create new tiles if they are present.
  */
 
-export default class TileCache {
+export default class Tileset2D {
   /**
    * Takes in a function that returns tile data, a cache size, and a max and a min zoom level.
    * Cache size defaults to 5 * number of tiles in the current viewport
@@ -77,6 +77,10 @@ export default class TileCache {
 
   get tiles() {
     return this._tiles;
+  }
+
+  get selectedTiles() {
+    return this._selectedTiles;
   }
 
   get isLoaded() {
@@ -212,7 +216,7 @@ export default class TileCache {
     let tile = this._cache.get(tileId);
 
     if (!tile && create) {
-      tile = new Tile({
+      tile = new Tile2DHeader({
         getTileData: this._getTileData,
         tileToBoundingBox: this._tileToBoundingBox,
         x,

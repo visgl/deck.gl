@@ -1,13 +1,13 @@
 import {log} from '@deck.gl/core';
 import {CompositeLayer} from '@deck.gl/core';
 import GeoJsonLayer from '../geojson-layer/geojson-layer';
-import TileCache from './utils/tile-cache';
+import Tileset2D, {STRATEGY_DEFAULT} from './utils/tileset-2d';
 
 const defaultProps = {
   renderSubLayers: {type: 'function', value: props => new GeoJsonLayer(props), compare: false},
   getTileData: {type: 'function', value: ({x, y, z}) => Promise.resolve(null), compare: false},
-  tileToBoundingBox: {type: 'function', value: () => null, compare: false},
-  getTileIndices: {type: 'function', value: () => [], compare: false},
+  tileToBoundingBox: {type: 'function', value: (x, y, z) => null, compare: false},
+  getTileIndices: {type: 'function', value: (viewport, maxZoom, minZoom) => [], compare: false},
   // TODO - change to onViewportLoad to align with Tile3DLayer
   onViewportLoad: {type: 'function', optional: true, value: null, compare: false},
   // eslint-disable-next-line
@@ -15,7 +15,7 @@ const defaultProps = {
   maxZoom: null,
   minZoom: 0,
   maxCacheSize: null,
-  strategy: 'default'
+  strategy: STRATEGY_DEFAULT
 };
 
 export default class BaseTileLayer extends CompositeLayer {
@@ -35,9 +35,9 @@ export default class BaseTileLayer extends CompositeLayer {
   }
 
   updateState({props, oldProps, context, changeFlags}) {
-    let {tileCache} = this.state;
+    let {tileset} = this.state;
     const createTileCache =
-      !tileCache ||
+      !tileset ||
       (changeFlags.updateTriggersChanged &&
         (changeFlags.updateTriggersChanged.all || changeFlags.updateTriggersChanged.getTileData));
 
@@ -51,10 +51,10 @@ export default class BaseTileLayer extends CompositeLayer {
         getTileIndices,
         tileToBoundingBox
       } = props;
-      if (tileCache) {
-        tileCache.finalize();
+      if (tileset) {
+        tileset.finalize();
       }
-      tileCache = new TileCache({
+      tileset = new Tileset2D({
         getTileData,
         getTileIndices,
         tileToBoundingBox,
@@ -65,10 +65,10 @@ export default class BaseTileLayer extends CompositeLayer {
         onTileLoad: this._updateTileset.bind(this),
         onTileError: this._onTileError.bind(this)
       });
-      this.setState({tileCache});
+      this.setState({tileset});
     } else if (changeFlags.propsChanged) {
       // if any props changed, delete the cached layers
-      this.state.tileCache.tiles.forEach(tile => {
+      this.state.tileset.tiles.forEach(tile => {
         tile.layer = null;
       });
     }
@@ -79,16 +79,16 @@ export default class BaseTileLayer extends CompositeLayer {
   }
 
   _updateTileset() {
-    const {tileCache} = this.state;
+    const {tileset} = this.state;
     const {onViewportLoad} = this.props;
-    const frameNumber = tileCache.update(this.context.viewport);
-    const {isLoaded} = tileCache;
+    const frameNumber = tileset.update(this.context.viewport);
+    const {isLoaded} = tileset;
 
     const loadingStateChanged = this.state.isLoaded !== isLoaded;
     const tilesetChanged = this.state.frameNumber !== frameNumber;
 
     if (isLoaded && onViewportLoad && (loadingStateChanged || tilesetChanged)) {
-      onViewportLoad(tileCache.tiles.filter(tile => tile.isVisible).map(tile => tile.data));
+      onViewportLoad(tileset.selectedTiles.map(tile => tile.data));
     }
 
     if (tilesetChanged) {
@@ -102,7 +102,7 @@ export default class BaseTileLayer extends CompositeLayer {
   _onTileError(error) {
     this.props.onTileError(error);
     // errorred tiles should not block rendering, are considered "loaded" with empty data
-    this._onTileLoad();
+    this._updateTileset();
   }
 
   getPickingInfo({info, sourceLayer}) {
@@ -113,7 +113,7 @@ export default class BaseTileLayer extends CompositeLayer {
 
   renderLayers() {
     const {renderSubLayers, visible} = this.props;
-    return this.state.tileCache.tiles.map(tile => {
+    return this.state.tileset.tiles.map(tile => {
       // For a tile to be visible:
       // - parent layer must be visible
       // - tile must be visible in the current viewport

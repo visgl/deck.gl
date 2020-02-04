@@ -39,7 +39,7 @@ test('BaseTileLayer#updateTriggers', t => {
         getTileData: 0
       },
       onAfterUpdate({layer}) {
-        t.equal(layer.state.tileCache._getTileData, 0, 'Should create a tileCache.');
+        t.equal(layer.state.tileset._getTileData, 0, 'Should create a tileset.');
       }
     },
     {
@@ -48,9 +48,9 @@ test('BaseTileLayer#updateTriggers', t => {
       },
       onAfterUpdate({layer}) {
         t.equal(
-          layer.state.tileCache._getTileData,
+          layer.state.tileset._getTileData,
           0,
-          'Should not create a tileCache when updateTriggers not changed.'
+          'Should not create a tileset when updateTriggers not changed.'
         );
       }
     },
@@ -63,9 +63,9 @@ test('BaseTileLayer#updateTriggers', t => {
       },
       onAfterUpdate({layer}) {
         t.equal(
-          layer.state.tileCache._getTileData,
+          layer.state.tileset._getTileData,
           2,
-          'Should create a new tileCache with updated getTileData.'
+          'Should create a new tileset with updated getTileData.'
         );
       }
     }
