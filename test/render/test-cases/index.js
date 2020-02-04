@@ -22,6 +22,7 @@ import simpleMeshLayerTests from './simple-mesh-layer';
 // other
 import viewsTests from './views';
 import effectsTests from './effects';
+import transitionTests from './transitions';
 
 export default [].concat(
   coreLayersTests,
@@ -42,5 +43,6 @@ export default [].concat(
   tripsLayerTests,
   simpleMeshLayerTests,
   viewsTests,
-  effectsTests
+  effectsTests,
+  transitionTests
 );
