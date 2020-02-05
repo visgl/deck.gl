@@ -2,8 +2,8 @@ import test from 'tape-catch';
 import Tileset2D, {
   STRATEGY_REPLACE,
   STRATEGY_DEFAULT
-} from '@deck.gl/layers/base-tile-layer/utils/tileset-2d';
-import Tile2DHeader from '@deck.gl/layers/base-tile-layer/utils/tile-2d-header';
+} from '@deck.gl/geo-layers/tile-layer/utils/tileset-2d';
+import Tile2DHeader from '@deck.gl/geo-layers/tile-layer/utils/tile-2d-header';
 import {tileToBoundingBox} from '@deck.gl/geo-layers/tile-layer/utils/tile-util';
 import {getTileIndices} from '@deck.gl/geo-layers/tile-layer/utils/viewport-util';
 import {WebMercatorViewport} from '@deck.gl/core';
