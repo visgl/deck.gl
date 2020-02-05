@@ -44,7 +44,6 @@ function getTerrain(imageData, tileSize, getElevation) {
   return terrain;
 }
 
-// eslint-disable-next-line max-params
 function getMeshAttributes(vertices, terrain, tileSize, bounds) {
   const gridSize = tileSize + 1;
   const numOfVerticies = vertices.length / 2;
