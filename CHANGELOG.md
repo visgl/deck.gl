@@ -19,6 +19,24 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v8.1
 
+### deck.gl [8.1.0-alpha.2] - Feb 4 2020
+
+- Support binary data in TextLayer (#4206)
+- TileLayer improvements (#4139)
+- tile-3d-layer: expose picked tile when enable picking (#4207)
+- Fix transition for 64bit attributes (#4226)
+- [Binary support, part 1] pydeck: Binary transport (#4167)
+- Fix SimpleMeshLayer shading (#4214)
+- TextLayer improvements (#4205)
+- [React] fix missing key error (#4193)
+- [Bug] Fix hexagon layer projection (#4173)
+- @deck.gl/json: Fix bug dropping props with falsy values (#4185)
+- Fix buffer size check in Attribute.updateBuffer (#4190)
+- Bump luma dependency (#4191)
+- data-filter: support double precision (#4163)
+- Use int type for enum uniforms (#4171)
+- [TileLayer] fix tile indices generation in edge cases (#4170)
+
 ### deck.gl [8.1.0-alpha.1] - Jan 17 2020
 
 - Voodoo fix for Mac+NVIDIA bug (#4166)
