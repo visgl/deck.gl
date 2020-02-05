@@ -2,21 +2,21 @@
 import React, {PureComponent} from 'react';
 import {render} from 'react-dom';
 import DeckGL from '@deck.gl/react';
-import {StaticMap} from 'react-map-gl';
+import {WebMercatorViewport, COORDINATE_SYSTEM} from '@deck.gl/core';
 import {load} from '@loaders.gl/core';
 import {TileLayer} from '@deck.gl/geo-layers';
+
 import TerrainLayer from './terrain-layer/terrain-layer';
 
 // Set your mapbox token here
 const MAPBOX_TOKEN = process.env.MapboxAccessToken; // eslint-disable-line
 
 const INITIAL_VIEW_STATE = {
-  longitude: 0,
-  // longitude: 86.922623,
-  latitude: 27.986065,
-  zoom: 3,
-  pitch: 0,
-  bearing: 0
+  latitude: 46.24,
+  longitude: -122.18,
+  zoom: 11.5,
+  bearing: 140,
+  pitch: 60
 };
 
 // Constants
@@ -25,94 +25,53 @@ const INITIAL_VIEW_STATE = {
 const TERRAIN_RGB = 'https://api.mapbox.com/v4/mapbox.terrain-rgb';
 const SATELLITE = 'https://api.mapbox.com/v4/mapbox.satellite';
 
-
-
-const getTileData = ({x, y, z}) => {
+const getTerrainData = ({x, y, z}) => {
   const terrainTile = `${TERRAIN_RGB}/${z}/${x}/${y}.pngraw?access_token=${MAPBOX_TOKEN}`;
-  return load(terrainTile);
+  // Some tiles over the ocean may not exist
+  // eslint-disable-next-line handle-callback-err
+  return load(terrainTile).catch(err => null);
 };
 
-const tile = {
-  x: 6,
-  y: 2,
-  z: 3,
-  bbox: {
-    west: 90,
-    north: 66.513260,
-    east: 135,
-    south: 40.979898,
-  }
-}
-
-// const tile = {
-//   x: 4,
-//   y: 3,
-//   z: 3,
-//   bbox: {
-//     west: 0,
-//     north: 40.979898,
-//     east: 45,
-//     south: 0
-//   }
-// }
+const getSurfaceImage = ({x, y, z}) => {
+  return `${SATELLITE}/${z}/${x}/${y}@2x.png?access_token=${MAPBOX_TOKEN}`;
+};
 
 export default class App extends PureComponent {
   render() {
-    // const {bbox, x, y, z} = tile;
-    // const mapTile = `${SATELLITE}/${z}/${x}/${y}@2x.png?access_token=${MAPBOX_TOKEN}`;
+    const layer = new TileLayer({
+      id: 'loader',
+      minZoom: 0,
+      maxZoom: 23,
+      maxCacheSize: 100,
+      getTileData: getTerrainData,
+      renderSubLayers: props => {
+        const {bbox, z} = props.tile;
 
-    const layers = [
-      // new TerrainLayer({
-      //   id: 'terrain',
-      //   surfaceImage: load(mapTile),
-      //   terrainImage: getTileData({x, y, z}),
-      //   bbox,
-      //   z,
-      // })
-      new TileLayer({
-        id: 'loader',
-        pickable: false,
-        // https://wiki.openstreetmap.org/wiki/Zoom_levels
-        minZoom: 0,
-        maxZoom: 23,
-        maxCacheSize: 500,
-        getTileData,
-        renderSubLayers: props => {
-          const {bbox, x, y, z} = props.tile;
-          console.log(props.tile)
-          const mapTile = `${SATELLITE}/${z}/${x}/${y}@2x.png?access_token=${MAPBOX_TOKEN}`;
-          // const mapTile = `${SECTIONAL}/${z}/${x}/${y}.png?origin=nw`;
-          return new TerrainLayer({
-            id: props.id,
-            surfaceImage: load(mapTile),
-            terrainImage: props.data,
-            bbox,
-            z,
-            // getScale: getTileScale(bbox.west, bbox.south, z)
-          });
-        }
-      })
-    ];
+        const viewport = new WebMercatorViewport({
+          longitude: (bbox.west + bbox.east) / 2,
+          latitude: (bbox.north + bbox.south) / 2,
+          zoom: z
+        });
+        const bottomLeft = viewport.projectFlat([bbox.west, bbox.south]);
+        const topRight = viewport.projectFlat([bbox.east, bbox.north]);
 
-    return (
-      <DeckGL initialViewState={INITIAL_VIEW_STATE} controller={true} layers={layers}>
-        <StaticMap
-          reuseMaps
-          mapStyle="mapbox://styles/mapbox/dark-v9"
-          mapboxApiAccessToken={MAPBOX_TOKEN}
-        />
-      </DeckGL>
-    );
+        return new TerrainLayer({
+          id: props.id,
+          coordinateSystem: COORDINATE_SYSTEM.CARTESIAN,
+          bounds: [bottomLeft[0], bottomLeft[1], topRight[0], topRight[1]],
+          surfaceImage: getSurfaceImage(props.tile),
+          terrainImage: props.data,
+          // https://docs.mapbox.com/help/troubleshooting/access-elevation-data/#mapbox-terrain-rgb
+          // Note - the elevation rendered by this example is greatly exagerated!
+          getElevation: (r, g, b) => (r * 65536 + g * 256 + b) / 10 - 10000
+        });
+      }
+    });
+
+    return <DeckGL initialViewState={INITIAL_VIEW_STATE} controller={true} layers={[layer]} />;
   }
 }
 
 export function renderToDOM(container) {
   render(<App />, container);
 }
-
-// function tile2lngLat(x, y, z) {
-//   const lng = (x / Math.pow(2, z)) * 360 - 180;
-//   const n = Math.PI - (2 * Math.PI * y) / Math.pow(2, z);
-//   const lat = (180 / Math.PI) * Math.atan(0.5 * (Math.exp(n) - Math.exp(-n)));
-//   return [lng, lat];
-// }
