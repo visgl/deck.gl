@@ -2,11 +2,15 @@
 
 import {COORDINATE_SYSTEM, CompositeLayer} from '@deck.gl/core';
 import {PointCloudLayer} from '@deck.gl/layers';
-import {ScenegraphLayer} from '@deck.gl/mesh-layers';
+import {ScenegraphLayer, SimpleMeshLayer} from '@deck.gl/mesh-layers';
 import {log} from '@deck.gl/core';
+import GL from '@luma.gl/constants';
+import {Geometry} from '@luma.gl/core';
+import {Matrix4, Vector3} from '@math.gl/core';
 
 import {Tileset3D, _getIonTilesetMetadata} from '@loaders.gl/3d-tiles';
 
+const scratchOffset = new Vector3(0, 0, 0);
 const defaultProps = {
   getPointColor: [0, 0, 0],
   pointSize: 1.0,
@@ -125,8 +129,9 @@ export default class Tile3DLayer extends CompositeLayer {
       // TODO - why do we call this here? Being "selected" should automatically add it to cache?
       tileset3d.addTileToCache(tile);
 
+      const layers = this._create3DTileLayer(tile);
       layerMap[tile.id] = {
-        layer: this._create3DTileLayer(tile),
+        layers: Array.isArray(layers) ? layers : [layers],
         tile
       };
     }
@@ -142,25 +147,35 @@ export default class Tile3DLayer extends CompositeLayer {
 
     for (const value of layerMapValues) {
       const {tile} = value;
-      let {layer} = value;
+      let {layers} = value;
 
       if (tile.selectedFrame === frameNumber) {
-        if (layer && layer.props && !layer.props.visible) {
-          // Still has GPU resource but visibility is turned off so turn it back on so we can render it.
-          layer = layer.clone({visible: true});
-          layerMap[tile.id].layer = layer;
+        for (let i = 0; i < layers.length; i++) {
+          let layer = layers[i];
+          if (layer && layer.props && !layer.props.visible) {
+            // Still has GPU resource but visibility is turned off so turn it back on so we can render it.
+            layerMap[tile.id].layers[i] = layer.clone({visible: true});
+          }
         }
       } else if (tile.contentUnloaded) {
         // Was cleaned up from tileset cache. We no longer need to track it.
         delete layerMap[tile.id];
-      } else if (layer && layer.props && layer.props.visible) {
-        // Still in tileset cache but doesn't need to render this frame. Keep the GPU resource bound but don't render it.
-        layer = layer.clone({visible: false});
-        layerMap[tile.id].layer = layer;
+      } else {
+        for (let i = 0; i < layers.length; i++) {
+          let layer = layers[i];
+          if (layer && layer.props && layer.props.visible) {
+            // Still in tileset cache but doesn't need to render this frame. Keep the GPU resource bound but don't render it.
+            layer = layer.clone({visible: false});
+            layerMap[tile.id].layers[i] = layer.clone({visible: false});
+          }
+        }
       }
     }
 
-    this.setState({layers: Object.values(layerMap).map(layer => layer.layer)});
+    let layers = [];
+    Object.values(layerMap).forEach(value => layers = layers.concat(value.layers));
+
+    this.setState({layers});
   }
 
   _create3DTileLayer(tileHeader) {
@@ -169,14 +184,69 @@ export default class Tile3DLayer extends CompositeLayer {
     }
 
     switch (tileHeader.content.type) {
-      case 'pnts':
-        return this._createPointCloudTileLayer(tileHeader);
-      case 'i3dm':
-      case 'b3dm':
-        return this._create3DModelTileLayer(tileHeader);
-      default:
-        throw new Error(`Tile3DLayer: Failed to render layer of type ${tileHeader.content.type}`);
+    case 'pnts':
+      return this._createPointCloudTileLayer(tileHeader);
+    case 'i3dm':
+    case 'b3dm':
+      return this._createMeshLayer(tileHeader);
+    default:
+      throw new Error(`Tile3DLayer: Failed to render layer of type ${tileHeader.content.type}`);
     }
+  }
+
+  _createMeshLayer(tileHeader) {
+    const {viewport} = this.context;
+    if (!viewport) {
+      return null;
+    }
+    const {gltf, cartographicOrigin, modelMatrix} = tileHeader.content;
+    if (!cartographicOrigin) {
+      console.log('no origin', tileHeader);
+      return null;
+    }
+
+    const primitives = gltf.scene.nodes[0].children[0].mesh.primitives;
+    const {matrix} = gltf.scene.nodes[0];
+
+    let composedMatrix = new Matrix4();
+    if (modelMatrix) {
+      composedMatrix = composedMatrix.multiplyRight(modelMatrix);
+    }
+    if (matrix) {
+      composedMatrix = composedMatrix.multiplyRight(matrix);
+    }
+
+    const layers = [];
+    for (const primitive of primitives) {
+      const {attributes, indices} = primitive;
+      const positions = new Float32Array(attributes.POSITION.value.length);
+      for (let i = 0; i < positions.length; i += 3) {
+        scratchOffset.copy(composedMatrix.transform(attributes.POSITION.value.subarray(i, i + 3)));
+        positions.set(viewport.addMetersToLngLat(cartographicOrigin, scratchOffset), i);
+      }
+      const texCoords = attributes.TEXCOORD_0.value;
+
+      const geometry = new Geometry({
+        drawMode: GL.TRIANGLES,
+        attributes: {
+          positions,
+          texCoords,
+          indices
+        }
+      });
+
+      layers.push(new SimpleMeshLayer({
+          id: `mesh-layer-${tileHeader.id}-${layers.length}`,
+          mesh: geometry,
+          data: [{}],
+          getPosition: d => [0, 0, 0],
+          getColor: [255, 255, 255],
+          composeModelMatrix: true,
+          coordinateSystem: COORDINATE_SYSTEM.LNGLAT
+        })
+      );
+    }
+    return layers;
   }
 
   _create3DModelTileLayer(tileHeader) {
@@ -222,7 +292,6 @@ export default class Tile3DLayer extends CompositeLayer {
 
     const {pointSize, getPointColor} = this.props;
     const SubLayerClass = this.getSubLayerClass('pointcloud', PointCloudLayer);
-
     return new SubLayerClass(
       {
         pointSize

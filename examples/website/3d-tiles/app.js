@@ -66,7 +66,7 @@ export default class App extends PureComponent {
   _renderTile3DLayer() {
     return new Tile3DLayer({
       id: 'tile-3d-layer',
-      _ionAssetId: 43978,
+      _ionAssetId: 29328,
       _ionAccessToken: ION_TOKEN,
       pointSize: 2,
       onTilesetLoad: this._onTilesetLoad

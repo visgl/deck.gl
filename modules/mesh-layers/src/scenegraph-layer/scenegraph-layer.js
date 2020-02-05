@@ -116,7 +116,9 @@ export default class ScenegraphLayer extends Layer {
       const gltfObjects = createGLTFObjects(gl, gltf, this.getLoadOptions());
       scenegraphData = Object.assign({gltf}, gltfObjects);
 
-      waitForGLTFAssets(gltfObjects).then(() => this.setNeedsRedraw());
+      waitForGLTFAssets(gltfObjects).then(() => {
+        this.setNeedsRedraw()
+      });
     } else {
       // DEPRECATED PATH: Assumes this data was loaded through GLTFScenegraphLoader
       log.deprecated(
@@ -255,6 +257,7 @@ export default class ScenegraphLayer extends Layer {
     const {sizeScale, sizeMinPixels, sizeMaxPixels, opacity, coordinateSystem} = this.props;
     const numInstances = this.getNumInstances();
     this.state.scenegraph.traverse((model, {worldMatrix}) => {
+      console.log(moduleParameters)
       model.model.setInstanceCount(numInstances);
       model.updateModuleSettings(moduleParameters);
       model.draw({
