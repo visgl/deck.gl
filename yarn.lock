@@ -1636,7 +1636,7 @@
   dependencies:
     "@loaders.gl/core" "2.0.2"
 
-"@luma.gl/constants@8.0.3", "@luma.gl/constants@^8.0.3", "@luma.gl/constants@^8.0.0":
+"@luma.gl/constants@8.0.3", "@luma.gl/constants@^8.0.0", "@luma.gl/constants@^8.0.3":
   version "8.0.3"
   resolved "https://registry.yarnpkg.com/@luma.gl/constants/-/constants-8.0.3.tgz#5418bc121f2d2b477e94df1170702f7563ee1b91"
   integrity sha512-Ps89hhaNGyseXDECnSNWbDARP3n1WOttoUnci2BL3O6Od7IIzkuV4HeoI3wsH5Zyyf9/3UBFaFwDnfnfK7E0TA==
