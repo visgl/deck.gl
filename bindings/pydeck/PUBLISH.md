@@ -42,7 +42,7 @@ This will run Python and JS tests and produce a commit with the release version.
 
 ```
 rm -r ./dist/*  # If exists, clear out the current dist folder
-pip install -e . --verbose
+pip install . --verbose
 python setup.py sdist bdist_wheel
 pip install twine  # If you have not installed twine
 python -m twine upload --repository-url https://test.pypi.org/legacy/ dist/*
@@ -59,7 +59,6 @@ where `{{version}}` is your semantic version.
 4)  Verify that pydeck works from test.pypi in the same environments as above.
 
 5) If everything appears to be working, you can publish to PyPI and conda-forge.
-
 
 ## Updating documentation
 

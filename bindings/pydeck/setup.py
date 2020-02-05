@@ -230,7 +230,7 @@ if __name__ == "__main__":
             "jinja2>=2.10.1",
         ],
         setup_requires=["Jinja2>=2.10.1"],
-        tests_require=["pytest>4.0.2", "pandas", "requests"],
+        tests_require=["pytest>=4.0.2", "pandas", "requests"],
         data_files=[
             (
                 "share/jupyter/nbextensions/pydeck",
