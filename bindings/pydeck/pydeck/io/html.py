@@ -7,27 +7,36 @@ import webbrowser
 import jinja2
 
 
-TEMPLATES_PATH = os.path.join(os.path.dirname(__file__), './templates/')
-j2_env = jinja2.Environment(loader=jinja2.FileSystemLoader(TEMPLATES_PATH),
-                            trim_blocks=True)
-CDN_URL = 'https://cdn.jsdelivr.net/npm/@deck.gl/jupyter-widget@^8.0.0/dist/index.js'
+TEMPLATES_PATH = os.path.join(os.path.dirname(__file__), "./templates/")
+j2_env = jinja2.Environment(
+    loader=jinja2.FileSystemLoader(TEMPLATES_PATH), trim_blocks=True
+)
+CDN_URL = "https://cdn.jsdelivr.net/npm/@deck.gl/jupyter-widget@^8.0.0/dist/index.js"
 
-def render_json_to_html(json_input, mapbox_key=None, tooltip=True):
-    js = j2_env.get_template('index.j2')
-    if type(tooltip) == bool:
-        tooltip = 'true' if tooltip else 'false'
+
+def convert_js_bool(py_bool):
+    if type(py_bool) != bool:
+        return 'false'
+    return 'true' if py_bool else 'false'
+
+
+def render_json_to_html(
+    json_input, mapbox_key=None, tooltip=True, css_background_color=None
+):
+    js = j2_env.get_template("index.j2")
     html_str = js.render(
         mapbox_key=mapbox_key,
         json_input=json_input,
         deckgl_jupyter_widget_bundle=CDN_URL,
-        tooltip=tooltip
+        tooltip=convert_js_bool(tooltip),
+        css_background_color=css_background_color
     )
     return html_str
 
 
 def display_html(filename=None, height=500, width=500):
     """Converts HTML into a temporary file and opens it in the system browser."""
-    url = 'file://{}'.format(filename)
+    url = "file://{}".format(filename)
     # Hack to prevent blank page
     time.sleep(0.5)
     webbrowser.open(url)
@@ -38,12 +47,13 @@ def check_directory_exists(path):
 
 
 def open_named_or_temporary_file(pathname=None):
-    if pathname and not pathname.endswith('/'):
+    if pathname and not pathname.endswith("/"):
         filename = add_html_extension(pathname)
-        return open(filename, 'w+')
+        return open(filename, "w+")
     directory = make_directory_if_not_exists(pathname) or os.path.curdir
     return tempfile.NamedTemporaryFile(
-        prefix='pydeck', mode='w+', suffix='.html', dir=directory, delete=False)
+        prefix="pydeck", mode="w+", suffix=".html", dir=directory, delete=False
+    )
 
 
 def make_directory_if_not_exists(path):
@@ -53,23 +63,30 @@ def make_directory_if_not_exists(path):
 
 
 def add_html_extension(fname):
-    SUFFIX = '.html'
+    SUFFIX = ".html"
     if fname.endswith(SUFFIX):
         return str(fname)
-    return str(fname + '.html')
+    return str(fname + ".html")
 
 
 def deck_to_html(
-        deck_json,
-        mapbox_key=None,
-        filename=None,
-        open_browser=False,
-        notebook_display=False,
-        iframe_height=500,
-        iframe_width=500,
-        tooltip=True):
+    deck_json,
+    mapbox_key=None,
+    filename=None,
+    open_browser=False,
+    notebook_display=False,
+    css_background_color=None,
+    iframe_height=500,
+    iframe_width=500,
+    tooltip=True,
+):
     """Converts deck.gl format JSON to an HTML page"""
-    html = render_json_to_html(deck_json, mapbox_key=mapbox_key, tooltip=tooltip)
+    html = render_json_to_html(
+        deck_json,
+        mapbox_key=mapbox_key,
+        tooltip=tooltip,
+        css_background_color=css_background_color,
+    )
     f = None
     try:
         f = open_named_or_temporary_file(filename)
@@ -82,6 +99,13 @@ def deck_to_html(
         display_html(realpath(f.name))
     if notebook_display:
         from IPython.display import IFrame  # noqa
+
         notebook_to_html_path = relpath(f.name)
-        display(IFrame(os.path.join('./', notebook_to_html_path), width=iframe_width, height=iframe_height))  # noqa
+        display(  # noqa
+            IFrame(
+                os.path.join("./", notebook_to_html_path),
+                width=iframe_width,
+                height=iframe_height,
+            )
+        )
     return realpath(f.name)
