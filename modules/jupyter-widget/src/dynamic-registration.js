@@ -1,6 +1,4 @@
 /* global document, XMLHttpRequest, window */
-import * as deck from './deck-bundle';
-
 function loadScript(resourceUri) {
   const xhr = new XMLHttpRequest();
   const tag = document.createElement('script');
@@ -26,9 +24,11 @@ export default function addClassToConverter({jsonConverter, className, resourceU
     // Opinionated choice, requires that the user load only one layer at a time
     // and that layer must be the sole default export of the library
     // TODO better choice here?
-    jsonConverter.configuration.classes[className] = window[className].default;
-    jsonConverter = new deck.JSONConverter({
-      configuration: jsonConverter.configuration
-    });
+    const classConstructor = window[className].default;
+    const newConfiguration = {
+      classes: {}
+    };
+    newConfiguration.classes[className] = classConstructor;
+    jsonConverter.merge(newConfiguration);
   });
 }
