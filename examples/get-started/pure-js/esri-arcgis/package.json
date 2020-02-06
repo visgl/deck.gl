@@ -30,7 +30,7 @@
   "dependencies": {
     "@arcgis/webpack-plugin": "~4.13.0",
     "deck.gl": "^8.0.5",
-    "@deck.gl/arcgis": "file:../../../../deckglarcgisplugindamix"
+    "@deck.gl/arcgis": "file:../../../../../deckglarcgisplugindamix"
   },
   "arcgis": {
     "type": "jsapi"
