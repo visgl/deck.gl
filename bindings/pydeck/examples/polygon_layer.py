@@ -49,11 +49,10 @@ df["elevation"] = json["features"].apply(
 df["fill_color"] = json["features"].apply(
     lambda row: color_scale(row["properties"]["growth"])
 )
-print(df.head())
 
 # Add sunlight shadow to the polygons
 sunlight = {
-    "@@type": "_SunLight",
+    "@@type": "SunLight",
     "timestamp": 1564696800000,  # Date.UTC(2019, 7, 1, 22),
     "color": [255, 255, 255],
     "intensity": 1.0,
@@ -66,7 +65,7 @@ lighting_effect = {
     "@@type": "LightingEffect",
     "shadowColor": [0, 0, 0, 0.5],
     "ambientLight": ambient_light,
-    "directionalLights": [sunlight]
+    "directionalLights": [sunlight],
 }
 
 view_state = pydeck.ViewState(
@@ -111,14 +110,14 @@ polygon_layer = pydeck.Layer(
 )
 
 tooltip = {
-    "html": "<b> Value per Square Meter: </b> {valuePerSqm} <br /> <b> Growth rate </b>: {growth}"
+    "html": "<b>Value per Square Meter:</b> {valuePerSqm} <br /><b>Growth rate:</b> {growth}"
 }
 
 r = pydeck.Deck(
     polygon_layer,
     initial_view_state=view_state,
     effects=[lighting_effect],
-    map_style='mapbox://styles/mapbox/light-v9',
+    map_style="mapbox://styles/mapbox/light-v9",
     tooltip=tooltip,
 )
 r.to_html("polygon_layer.html", notebook_display=False)
