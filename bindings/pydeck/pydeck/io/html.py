@@ -16,7 +16,7 @@ CDN_URL = "https://cdn.jsdelivr.net/npm/@deck.gl/jupyter-widget@^8.0.0/dist/inde
 
 def convert_js_bool(py_bool):
     if type(py_bool) != bool:
-        return 'false'
+        return py_bool
     return 'true' if py_bool else 'false'
 
 
