@@ -40,7 +40,16 @@ export class Projection {
     this._viewport = new WebMercatorViewport(opts);
   }
 
+  getWorldWidth() {
+    return 512 * this._viewport.scale;
+  }
+
   fromLatLngToDivPixel(latLng) {
+    const p = this._viewport.project([latLng.lng(), latLng.lat()]);
+    return new Point(p[0], p[1]);
+  }
+
+  fromLatLngToContainerPixel(latLng) {
     const p = this._viewport.project([latLng.lng(), latLng.lat()]);
     return new Point(p[0], p[1]);
   }

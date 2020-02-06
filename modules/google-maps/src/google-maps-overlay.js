@@ -79,7 +79,7 @@ export default class GoogleMapsOverlay {
       this._overlay
     );
 
-    const canSyncWithGoogleMaps = zoom >= 0 && pitch === 0;
+    const canSyncWithGoogleMaps = pitch === 0;
 
     deck.canvas.style.left = `${left}px`;
     deck.canvas.style.top = `${top}px`;
@@ -87,7 +87,7 @@ export default class GoogleMapsOverlay {
     deck.setProps({
       width,
       height,
-      viewState: {latitude, longitude, zoom},
+      viewState: {latitude, longitude, zoom, repeat: true},
       // deck.gl cannot sync with the base map with zoom < 0 and/or tilt
       layerFilter: canSyncWithGoogleMaps ? this.props.layerFilter : HIDE_ALL_LAYERS
     });
