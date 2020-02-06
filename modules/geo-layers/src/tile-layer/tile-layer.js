@@ -1,15 +1,12 @@
 import {CompositeLayer} from '@deck.gl/core';
 import {GeoJsonLayer} from '@deck.gl/layers';
 
-import Tileset2D, {STRATEGY_DEFAULT} from './utils/tileset-2d';
-import {tileToBoundingBox as defaultTile2Bbox} from './utils/tile-util';
-import {getTileIndices as defaultGetIndices} from './utils/viewport-util';
+import Tileset2D, {STRATEGY_DEFAULT} from './tileset-2d';
 
 const defaultProps = {
   renderSubLayers: {type: 'function', value: props => new GeoJsonLayer(props), compare: false},
   getTileData: {type: 'function', value: ({x, y, z}) => null, compare: false},
-  tileToBoundingBox: {type: 'function', value: defaultTile2Bbox, compare: false},
-  getTileIndices: {type: 'function', value: defaultGetIndices, compare: false},
+  Tileset: Tileset2D,
   // TODO - change to onViewportLoad to align with Tile3DLayer
   onViewportLoad: {type: 'function', optional: true, value: null, compare: false},
   // eslint-disable-next-line
@@ -17,7 +14,8 @@ const defaultProps = {
   maxZoom: null,
   minZoom: 0,
   maxCacheSize: null,
-  strategy: STRATEGY_DEFAULT
+  maxCacheByteSize: null,
+  refinementStrategy: STRATEGY_DEFAULT
 };
 
 export default class TileLayer extends CompositeLayer {
@@ -36,35 +34,25 @@ export default class TileLayer extends CompositeLayer {
     let {tileset} = this.state;
     const createTileCache =
       !tileset ||
+      props.Tileset !== oldProps.Tileset ||
       (changeFlags.updateTriggersChanged &&
         (changeFlags.updateTriggersChanged.all || changeFlags.updateTriggersChanged.getTileData));
 
     if (createTileCache) {
-      const {
-        getTileData,
-        maxZoom,
-        minZoom,
+      const {Tileset, maxZoom, minZoom, maxCacheSize, maxCacheByteSize, refinementStrategy} = props;
+      tileset = new Tileset({
+        getTileData: props.getTileData,
         maxCacheSize,
-        strategy,
-        getTileIndices,
-        tileToBoundingBox
-      } = props;
-      if (tileset) {
-        tileset.finalize();
-      }
-      tileset = new Tileset2D({
-        getTileData,
-        getTileIndices,
-        tileToBoundingBox,
-        maxSize: maxCacheSize,
+        maxCacheByteSize,
         maxZoom,
         minZoom,
-        strategy,
+        refinementStrategy,
         onTileLoad: this._updateTileset.bind(this),
         onTileError: this._onTileError.bind(this)
       });
       this.setState({tileset});
     } else if (changeFlags.propsChanged) {
+      tileset.setOptions(props);
       // if any props changed, delete the cached layers
       this.state.tileset.tiles.forEach(tile => {
         tile.layer = null;

@@ -1,5 +1,5 @@
 import test from 'tape-catch';
-import {getTileIndices} from '@deck.gl/geo-layers/tile-layer/utils/viewport-util';
+import {getTileIndices, tileToBoundingBox} from '@deck.gl/geo-layers/tile-layer/osm-utils';
 import {WebMercatorViewport} from '@deck.gl/core';
 
 const TEST_CASES = [
@@ -118,6 +118,20 @@ test('getTileIndices', t => {
     const result = getTileIndices(testCase.viewport, testCase.maxZoom, testCase.minZoom);
     t.deepEqual(getTileIds(result), testCase.output, testCase.title);
   }
+
+  t.end();
+});
+
+test('tileToBoundingBox', t => {
+  const results = tileToBoundingBox(8, 5, 4);
+  const expected = {
+    east: 22.5,
+    north: 55.77657301866769,
+    south: 40.97989806962013,
+    west: 0
+  };
+
+  t.deepEqual(results, expected, 'Should match the results.');
 
   t.end();
 });
