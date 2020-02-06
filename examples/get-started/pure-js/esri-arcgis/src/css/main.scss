@@ -1,0 +1,34 @@
+$icomoon-font-path: "~arcgis-js-api/themes/base/icons/fonts" !default;
+
+// Widgets (sorted alphabetically)
+$include_AreaMeasurement3D: false !default;
+$include_Attribution: true !default;
+$include_BasemapGallery: false !default;
+$include_BasemapToggle: false !default;
+$include_Bookmarks: false !default;
+$include_BrowseItems: false !default;
+$include_ColorPicker: false !default;
+$include_Compass: false !default;
+$include_CoordinateConversion: false !default;
+$include_DatePicker: false !default;
+$include_Directions: false !default;
+$include_Expand: true !default;
+$include_Feature: true !default;
+$include_HorizontalSlider: false !default;
+$include_LayerList: false !default;
+$include_Legend: false !default;
+$include_NavigationToggle: false !default;
+$include_Print: false !default;
+$include_DirectLineMeasurement3D: false !default;
+$include_Popup: true !default;
+$include_RasterSymbologyEditor: false !default;
+$include_RendererSlider: false !default;
+$include_ScaleBar: false !default;
+$include_Search: true !default;
+$include_Spinner: true !default;
+$include_Tags: false !default;
+$include_TimePicker: false !default;
+$include_Zoom: true !default;
+
+@import "~arcgis-js-api/themes/light/main.scss";
+@import "index";
