@@ -44,6 +44,14 @@ export default class JSONConverter {
     }
   }
 
+  mergeConfiguration(config) {
+    if (config instanceof JSONConfiguration) {
+      this.configuration.merge(config);
+    } else {
+      this.configuration.merge(new JSONConfiguration(config));
+    }
+  }
+
   convert(json) {
     // Use shallow equality to ensure we only convert same json once
     if (!json || json === this.json) {

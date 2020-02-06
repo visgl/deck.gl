@@ -1,4 +1,4 @@
-/* global document, console */
+/* global document */
 import {DOMWidgetModel, DOMWidgetView} from '@jupyter-widgets/base';
 
 import {MODULE_NAME, MODULE_VERSION} from './version';
@@ -136,7 +136,7 @@ export class DeckGLView extends DOMWidgetView {
       const customLayers = this.model.get('classes');
       for (const obj of customLayers) {
         const [className, resourceUri] = Object.entries(obj)[0];
-        updateClasses({className, resourceUri, onComplete: console.log}); // eslint-disable-line no-console
+        updateClasses({className, resourceUri});
       }
     }
   }

@@ -1,22 +1,12 @@
-/* global document, XMLHttpRequest, window */
+/* global document, fetch, window */
 function loadScript(resourceUri) {
-  const xhr = new XMLHttpRequest();
   const tag = document.createElement('script');
-  return new Promise((onComplete, onError) => {
-    xhr.open('GET', resourceUri, true);
-    xhr.onload = e => {
-      if (xhr.readyState === 4) {
-        if (xhr.status === 200) {
-          tag.text = xhr.response;
-          document.head.appendChild(tag);
-          onComplete();
-        } else {
-          onError(xhr.response);
-        }
-      }
-    };
-    xhr.send();
-  });
+  return fetch(resourceUri)
+    .then(r => r.text())
+    .then(body => {
+      tag.text = body;
+      document.head.appendChild(tag);
+    });
 }
 
 export default function addClassToConverter({jsonConverter, className, resourceUri}) {
@@ -29,6 +19,6 @@ export default function addClassToConverter({jsonConverter, className, resourceU
       classes: {}
     };
     newConfiguration.classes[className] = classConstructor;
-    jsonConverter.merge(newConfiguration);
+    jsonConverter.mergeConfiguration(newConfiguration);
   });
 }

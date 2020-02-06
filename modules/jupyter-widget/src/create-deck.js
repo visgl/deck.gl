@@ -42,8 +42,7 @@ const jsonConverter = new deck.JSONConverter({
   configuration: jsonConverterConfiguration
 });
 
-export function updateClasses({className, resourceUri, onComplete}) {
-  // jsonConverter configuration to be updated here
+export function updateClasses({className, resourceUri}) {
   addClassToConverter({className, resourceUri, jsonConverter}); // eslint-disable-line
 }
 
