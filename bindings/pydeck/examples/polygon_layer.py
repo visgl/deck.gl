@@ -106,6 +106,7 @@ polygon_layer = pydeck.Layer(
     get_elevation="elevation",
     get_fill_color="fill_color",
     get_line_color=[255, 255, 255],
+    auto_highlight=True,
     pickable=True,
 )
 
