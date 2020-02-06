@@ -5,6 +5,7 @@ import warnings
 from .json_tools import JSONMixin
 from .layer import Layer
 from ..io.html import deck_to_html
+from ..settings import settings as pydeck_settings
 from ..widget import DeckGLWidget
 from .view import View
 
@@ -72,11 +73,13 @@ class Deck(JSONMixin):
         # Use passed view state
         self.initial_view_state = initial_view_state
         self.deck_widget = DeckGLWidget()
+        self.deck_widget.classes = pydeck_settings.classes
         self.mapbox_key = mapbox_key or os.getenv("MAPBOX_API_KEY")
         self.deck_widget.mapbox_key = self.mapbox_key
         self.deck_widget.height = height
         self.deck_widget.width = width
         self.deck_widget.tooltip = tooltip
+
         self.description = description
         self.effects = effects
         if self.mapbox_key is None:
