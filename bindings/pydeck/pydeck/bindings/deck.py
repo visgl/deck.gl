@@ -21,7 +21,6 @@ class Deck(JSONMixin):
         height=500,
         tooltip=True,
         description=None,
-        effects=None,
     ):
         """This is the renderer and configuration for a deck.gl visualization, similar to the
         `Deck <https://deck.gl/#/documentation/deckgl-api-reference/deck>`_ class from deck.gl.
@@ -78,7 +77,6 @@ class Deck(JSONMixin):
         self.deck_widget.width = width
         self.deck_widget.tooltip = tooltip
         self.description = description
-        self.effects = effects
         if self.mapbox_key is None:
             warnings.warn(
                 "Mapbox API key is not set. This may impact available features of pydeck.",
@@ -121,7 +119,6 @@ class Deck(JSONMixin):
         notebook_display=True,
         iframe_width=700,
         iframe_height=500,
-        **kwargs
     ):
         """Write a file and loads it to an iframe, if in a Jupyter environment;
         otherwise, write a file and optionally open it in a web browser
@@ -154,6 +151,5 @@ class Deck(JSONMixin):
             iframe_height=iframe_height,
             iframe_width=iframe_width,
             tooltip=self.deck_widget.tooltip,
-            **kwargs
         )
         return f
