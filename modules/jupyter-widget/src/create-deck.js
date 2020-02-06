@@ -17,6 +17,7 @@ function extractClasses() {
   for (const cls of classes) {
     classesDict[cls] = deck[cls];
   }
+  classesDict.SunLight = deck._SunLight;
   return classesDict;
 }
 
