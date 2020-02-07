@@ -4,7 +4,7 @@
   "main": "index.js",
   "license": "Apache-2.0",
   "scripts": {},
-  "dependencies": {
-    "deck.gl": "^8.0.5"
+  "peerDependencies": {
+    "deck.gl": "^8.0.0"
   }
 }
