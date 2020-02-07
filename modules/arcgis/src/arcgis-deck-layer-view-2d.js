@@ -1,5 +1,5 @@
-import { Deck } from '@deck.gl/core';
-import BaseLayerViewGL2D from "esri/views/2d/layers/BaseLayerViewGL2D";
+import {Deck} from '@deck.gl/core';
+import BaseLayerViewGL2D from 'esri/views/2d/layers/BaseLayerViewGL2D';
 
 export default BaseLayerViewGL2D.createSubclass({
   properties: {
@@ -16,26 +16,31 @@ export default BaseLayerViewGL2D.createSubclass({
   },
 
   // Attach is called as soon as the layer view is ready to start rendering.
-  attach: function () {
+  attach: function() {
     // We use a full-screen quad and shaders to composite the frame rendered
     // with deck.gl on top of the MapView. Composition uses the MapView context.
     const gl = this.context;
 
     // Vertex shader
     const vs = gl.createShader(gl.VERTEX_SHADER);
-    gl.shaderSource(vs, `
+    gl.shaderSource(
+      vs,
+      `
     attribute vec2 a_pos;
     varying vec2 v_texcoord;
     void main(void) {
       gl_Position = vec4(a_pos, 0.0, 1.0);
       v_texcoord = (a_pos + 1.0) / 2.0;
     }
-    `);
+    `
+    );
     gl.compileShader(vs);
 
     // Fragment shader
     const fs = gl.createShader(gl.FRAGMENT_SHADER);
-    gl.shaderSource(fs, `
+    gl.shaderSource(
+      fs,
+      `
     precision mediump float;
     uniform sampler2D u_texture;
     varying vec2 v_texcoord;
@@ -44,7 +49,8 @@ export default BaseLayerViewGL2D.createSubclass({
       rgba.rgb *= rgba.a;
       gl_FragColor = rgba;
     }
-    `);
+    `
+    );
     gl.compileShader(fs);
 
     // Shader program
@@ -56,7 +62,7 @@ export default BaseLayerViewGL2D.createSubclass({
     gl.deleteShader(fs);
 
     // Uniform locations
-    this.uTexture = gl.getUniformLocation(this.program, "u_texture");
+    this.uTexture = gl.getUniformLocation(this.program, 'u_texture');
 
     // Full screen quad
     this.vertexBuffer = gl.createBuffer();
@@ -83,7 +89,7 @@ export default BaseLayerViewGL2D.createSubclass({
     // The redraw() request must be forwarded from the layer to the layer view.
     // We listen to the event on the layer and propagate it to the layer view.
     this.handles.add([
-      this.layer.on("redraw", () => {
+      this.layer.on('redraw', () => {
         this.redraw();
       })
     ]);
@@ -92,12 +98,11 @@ export default BaseLayerViewGL2D.createSubclass({
     this.redraw();
   },
 
-  createOrResizeFramebuffer: function (gl, width, height) {
+  createOrResizeFramebuffer: function(gl, width, height) {
     if (!this.deckFbo) {
       this.createFramebuffer(gl, width, height);
       return;
     }
-
 
     if (this.fboWidth === width && this.fboHeight === height) {
       return;
@@ -111,13 +116,23 @@ export default BaseLayerViewGL2D.createSubclass({
     });
   },
 
-  createFramebuffer: function (gl, width, height) {
+  createFramebuffer: function(gl, width, height) {
     // Create offscreen texture
     this.texture = gl.createTexture();
     gl.bindTexture(gl.TEXTURE_2D, this.texture);
     this.fboWidth = width;
     this.fboHeight = height;
-    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, this.fboWidth, this.fboHeight, 0, gl.RGBA, gl.UNSIGNED_BYTE, new Uint8Array(this.fboWidth * this.fboHeight * 4));
+    gl.texImage2D(
+      gl.TEXTURE_2D,
+      0,
+      gl.RGBA,
+      this.fboWidth,
+      this.fboHeight,
+      0,
+      gl.RGBA,
+      gl.UNSIGNED_BYTE,
+      new Uint8Array(this.fboWidth * this.fboHeight * 4)
+    );
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
@@ -131,7 +146,7 @@ export default BaseLayerViewGL2D.createSubclass({
     gl.bindFramebuffer(gl.FRAMEBUFFER, null);
   },
 
-  destroyFramebuffer: function (gl) {
+  destroyFramebuffer: function(gl) {
     gl.deleteFramebuffer(this.deckFbo);
     this.deckFbo = null;
 
@@ -144,7 +159,7 @@ export default BaseLayerViewGL2D.createSubclass({
 
   // This method is called whenever the deck.gl layer changes and must be
   // displayed.
-  redraw: function () {
+  redraw: function() {
     let deckLayer = this.layer.getDeckLayer();
 
     if (!Array.isArray(deckLayer)) {
@@ -160,7 +175,7 @@ export default BaseLayerViewGL2D.createSubclass({
   },
 
   // Called when the layer must be destroyed.
-  detach: function () {
+  detach: function() {
     this.handles.removeAll();
 
     const gl = this.context;
@@ -183,7 +198,7 @@ export default BaseLayerViewGL2D.createSubclass({
   },
 
   // Called every time that the layer view must be rendered.
-  render: function (renderParameters) {
+  render: function(renderParameters) {
     const gl = renderParameters.context;
     const screenFbo = gl.getParameter(gl.FRAMEBUFFER_BINDING);
 
