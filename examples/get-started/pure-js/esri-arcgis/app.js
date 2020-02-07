@@ -1,7 +1,7 @@
-import ArcGISMap from "esri/Map";
-import MapView from "esri/views/MapView";
-import { EsriDeckLayer } from '@deck.gl/arcgis';
-import { GeoJsonLayer, ArcLayer } from '@deck.gl/layers';
+import ArcGISMap from 'esri/Map';
+import MapView from 'esri/views/MapView';
+import {EsriDeckLayer} from '@deck.gl/arcgis';
+import {GeoJsonLayer, ArcLayer} from '@deck.gl/layers';
 
 // source: Natural Earth http://www.naturalearthdata.com/ via geojson.xyz
 const AIR_PORTS =
@@ -9,8 +9,6 @@ const AIR_PORTS =
 
 const layer = new EsriDeckLayer({
   getDeckLayer() {
-    const t = performance.now() / 1000;
-
     return [
       new GeoJsonLayer({
         id: 'airports',
@@ -46,11 +44,15 @@ const layer = new EsriDeckLayer({
 // In the ArcGIS API for JavaScript the MapView is responsible
 // for displaying a Map, which usually contains at least a basemap.
 const view = new MapView({
-  container: "app",
+  container: 'app',
   map: new ArcGISMap({
-    basemap: "dark-gray-vector",
+    basemap: 'dark-gray-vector',
     layers: [layer]
   }),
   center: [0.119167, 52.205276],
-  zoom: 7
+  zoom: 3
+});
+
+view.goTo({
+  zoom: 6
 });
