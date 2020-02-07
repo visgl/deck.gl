@@ -21,6 +21,8 @@
 import test from 'tape-catch';
 import {generateLayerTests, testLayer} from '@deck.gl/test-utils';
 import {TileLayer} from '@deck.gl/geo-layers';
+import {tileToBoundingBox} from '@deck.gl/geo-layers/tile-layer/utils/tile-util';
+import {getTileIndices} from '@deck.gl/geo-layers/tile-layer/utils/viewport-util';
 
 test('TileLayer', t => {
   const testCases = generateLayerTests({
@@ -29,5 +31,31 @@ test('TileLayer', t => {
     onBeforeUpdate: ({testCase}) => t.comment(testCase.title)
   });
   testLayer({Layer: TileLayer, testCases, onError: t.notOk});
+  t.end();
+});
+
+test('TileLayer#updateTriggers', t => {
+  const testCases = [
+    {
+      props: {
+        getTileData: 0
+      },
+      onAfterUpdate({layer}) {
+        t.equal(
+          layer.state.tileset._tileToBoundingBox,
+          tileToBoundingBox,
+          'Should create a tileCache with correct tileToBoundingBox'
+        );
+        t.equal(
+          layer.state.tileset._getTileIndices,
+          getTileIndices,
+          'Should create a tileCache with correct _getTileIndices'
+        );
+      }
+    }
+  ];
+
+  testLayer({Layer: TileLayer, testCases, onError: t.notOk});
+
   t.end();
 });

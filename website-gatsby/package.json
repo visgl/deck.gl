@@ -1,0 +1,44 @@
+{
+  "description": "A website for deck.gl, built with Ocular (Gatsby version)",
+  "license": "MIT",
+  "keywords": [
+    "ocular"
+  ],
+  "main": "index.js",
+  "scripts": {
+    "start": "yarn clean-examples && yarn clean && yarn develop",
+    "clean": "rm -rf ./.cache ./public",
+    "clean-examples": "find ../examples -name node_modules -exec rm -rf {} \\;",
+    "develop": "gatsby develop --port=8001",
+    "build": "yarn clean-examples && gatsby build",
+    "serve": "gatsby serve",
+    "deploy": "NODE_DEBUG=gh-pages gh-pages -d public"
+  },
+  "dependencies": {
+    "@loaders.gl/draco": "^2.0.2",
+    "@loaders.gl/las": "^2.0.2",
+    "@luma.gl/constants": "^8.1.0-alpha.2",
+    "@luma.gl/core": "^8.1.0-alpha.2",
+    "@luma.gl/webgl": "^8.1.0-alpha.2",
+    "@probe.gl/stats-widget": "^3.0.1",
+    "baseui": "^9.26.0",
+    "d3-color": "^1.4.0",
+    "d3-request": "^1.0.6",
+    "d3-scale": "^3.0.0",
+    "expr-eval": "^2.0.2",
+    "rbush": "^2.0.2",
+    "react": "^16.6.0",
+    "react-dom": "^16.6.0",
+    "styletron-engine-atomic": "^1.4.4",
+    "styletron-react": "^5.2.6",
+    "tagmap.js": "^1.1.1"
+  },
+  "devDependencies": {
+    "gatsby": "^2.3.0",
+    "gatsby-plugin-sass": "^2.1.21",
+    "gatsby-plugin-styletron": "^3.0.5",
+    "gh-pages": "^2.0.1",
+    "ocular-gatsby": "1.0.4",
+    "sharp": "0.22.1"
+  }
+}

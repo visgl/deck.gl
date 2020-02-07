@@ -1,17 +1,23 @@
 import {CompositeLayer} from '@deck.gl/core';
 import {GeoJsonLayer} from '@deck.gl/layers';
-import TileCache from './utils/tile-cache';
+
+import Tileset2D, {STRATEGY_DEFAULT} from './utils/tileset-2d';
+import {tileToBoundingBox as defaultTile2Bbox} from './utils/tile-util';
+import {getTileIndices as defaultGetIndices} from './utils/viewport-util';
 
 const defaultProps = {
-  renderSubLayers: {type: 'function', value: props => new GeoJsonLayer(props)},
-  getTileData: {type: 'function', value: ({x, y, z}) => Promise.resolve(null)},
+  renderSubLayers: {type: 'function', value: props => new GeoJsonLayer(props), compare: false},
+  getTileData: {type: 'function', value: ({x, y, z}) => null, compare: false},
+  tileToBoundingBox: {type: 'function', value: defaultTile2Bbox, compare: false},
+  getTileIndices: {type: 'function', value: defaultGetIndices, compare: false},
   // TODO - change to onViewportLoad to align with Tile3DLayer
-  onViewportLoaded: {type: 'function', optional: true, value: null},
+  onViewportLoad: {type: 'function', optional: true, value: null, compare: false},
   // eslint-disable-next-line
-  onTileError: {type: 'function', value: err => console.error(err)},
+  onTileError: {type: 'function', value: err => console.error(err), compare: false},
   maxZoom: null,
   minZoom: 0,
-  maxCacheSize: null
+  maxCacheSize: null,
+  strategy: STRATEGY_DEFAULT
 };
 
 export default class TileLayer extends CompositeLayer {
@@ -27,53 +33,74 @@ export default class TileLayer extends CompositeLayer {
   }
 
   updateState({props, oldProps, context, changeFlags}) {
-    let {tileCache} = this.state;
-    if (
-      !tileCache ||
+    let {tileset} = this.state;
+    const createTileCache =
+      !tileset ||
       (changeFlags.updateTriggersChanged &&
-        (changeFlags.updateTriggersChanged.all || changeFlags.updateTriggersChanged.getTileData))
-    ) {
-      const {getTileData, maxZoom, minZoom, maxCacheSize} = props;
-      if (tileCache) {
-        tileCache.finalize();
-      }
-      tileCache = new TileCache({
+        (changeFlags.updateTriggersChanged.all || changeFlags.updateTriggersChanged.getTileData));
+
+    if (createTileCache) {
+      const {
         getTileData,
+        maxZoom,
+        minZoom,
+        maxCacheSize,
+        strategy,
+        getTileIndices,
+        tileToBoundingBox
+      } = props;
+      if (tileset) {
+        tileset.finalize();
+      }
+      tileset = new Tileset2D({
+        getTileData,
+        getTileIndices,
+        tileToBoundingBox,
         maxSize: maxCacheSize,
         maxZoom,
         minZoom,
-        onTileLoad: this._onTileLoad.bind(this),
+        strategy,
+        onTileLoad: this._updateTileset.bind(this),
         onTileError: this._onTileError.bind(this)
       });
-      this.setState({tileCache});
+      this.setState({tileset});
+    } else if (changeFlags.propsChanged) {
+      // if any props changed, delete the cached layers
+      this.state.tileset.tiles.forEach(tile => {
+        tile.layer = null;
+      });
     }
-    const {viewport} = context;
-    if (changeFlags.viewportChanged && viewport.id !== 'DEFAULT-INITIAL-VIEWPORT') {
-      const z = this.getLayerZoomLevel();
-      tileCache.update(viewport);
-      // The tiles that should be displayed at this zoom level
-      const currTiles = tileCache.tiles.filter(tile => tile.z === z);
-      this.setState({isLoaded: false, tiles: currTiles});
-      this._onTileLoad();
+
+    if (createTileCache || changeFlags.viewportChanged) {
+      this._updateTileset();
     }
   }
 
-  _onTileLoad() {
-    const {onViewportLoaded} = this.props;
-    const currTiles = this.state.tiles;
-    const allCurrTilesLoaded = currTiles.every(tile => tile.isLoaded);
-    if (this.state.isLoaded !== allCurrTilesLoaded) {
-      this.setState({isLoaded: allCurrTilesLoaded});
-      if (allCurrTilesLoaded && onViewportLoaded) {
-        onViewportLoaded(currTiles.filter(tile => tile._data).map(tile => tile._data));
-      }
+  _updateTileset() {
+    const {tileset} = this.state;
+    const {onViewportLoad} = this.props;
+    const frameNumber = tileset.update(this.context.viewport);
+    const {isLoaded} = tileset;
+
+    const loadingStateChanged = this.state.isLoaded !== isLoaded;
+    const tilesetChanged = this.state.frameNumber !== frameNumber;
+
+    if (isLoaded && onViewportLoad && (loadingStateChanged || tilesetChanged)) {
+      onViewportLoad(tileset.selectedTiles.map(tile => tile.data));
     }
+
+    if (tilesetChanged) {
+      // Save the tileset frame number - trigger a rerender
+      this.setState({frameNumber});
+    }
+    // Save the loaded state - should not trigger a rerender
+    this.state.isLoaded = isLoaded;
   }
 
   _onTileError(error) {
     this.props.onTileError(error);
     // errorred tiles should not block rendering, are considered "loaded" with empty data
-    this._onTileLoad();
+    this._updateTileset();
   }
 
   getPickingInfo({info, sourceLayer}) {
@@ -82,26 +109,13 @@ export default class TileLayer extends CompositeLayer {
     return info;
   }
 
-  getLayerZoomLevel() {
-    const z = Math.floor(this.context.viewport.zoom);
-    const {maxZoom, minZoom} = this.props;
-    if (Number.isFinite(maxZoom) && z > maxZoom) {
-      return Math.floor(maxZoom);
-    } else if (Number.isFinite(minZoom) && z < minZoom) {
-      return Math.ceil(minZoom);
-    }
-    return z;
-  }
-
   renderLayers() {
     const {renderSubLayers, visible} = this.props;
-    const z = this.getLayerZoomLevel();
-    return this.state.tileCache.tiles.map(tile => {
+    return this.state.tileset.tiles.map(tile => {
       // For a tile to be visible:
       // - parent layer must be visible
       // - tile must be visible in the current viewport
-      // - if all tiles are loaded, only display the tiles from the current z level
-      const isVisible = visible && tile.isVisible && (!this.state.isLoaded || tile.z === z);
+      const isVisible = visible && tile.isVisible;
       // cache the rendered layer in the tile
       if (!tile.layer) {
         tile.layer = renderSubLayers(

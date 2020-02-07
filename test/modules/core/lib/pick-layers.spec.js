@@ -92,7 +92,8 @@ const NEW_GRID_LAYER_PICK_METHODS = {
     {
       parameters: {
         x: 86,
-        y: 215
+        y: 215,
+        radius: 1
       },
       results: {
         count: 4,
@@ -409,7 +410,7 @@ const TEST_CASES = [
             height: 400
           },
           results: {
-            count: 32
+            count: 34
           }
         },
         {

@@ -30,7 +30,7 @@ import GL from '@luma.gl/constants';
 import assert from '../utils/assert';
 import PickLayersPass from '../passes/pick-layers-pass';
 import {getClosestObject, getUniqueObjects} from './picking/query-object';
-import {processPickInfo, callLayerPickingCallbacks, getLayerPickingInfo} from './picking/pick-info';
+import {processPickInfo, getLayerPickingInfo} from './picking/pick-info';
 
 export default class DeckPicker {
   constructor(gl) {
@@ -44,11 +44,16 @@ export default class DeckPicker {
       layerId: null,
       info: null
     };
+    this._onError = null;
   }
 
   setProps(props) {
     if ('layerFilter' in props) {
       this.layerFilter = props.layerFilter;
+    }
+
+    if ('onError' in props) {
+      this._onError = props.onError;
     }
   }
 
@@ -125,7 +130,6 @@ export default class DeckPicker {
     radius = 0,
     depth = 1,
     mode = 'query',
-    event,
     unproject3D,
     onViewportActive
   }) {
@@ -188,7 +192,7 @@ export default class DeckPicker {
         });
         // picked value is in common space (pixels) from the camera target (viewport.position)
         // convert it to meters from the ground
-        z = zValues[0] * viewports[0].distanceScales.metersPerPixel[2] + viewports[0].position[2];
+        z = zValues[0] * viewports[0].distanceScales.metersPerUnit[2] + viewports[0].position[2];
       }
 
       // Only exclude if we need to run picking again.
@@ -213,10 +217,10 @@ export default class DeckPicker {
         pixelRatio
       });
 
-      const processedPickInfos = callLayerPickingCallbacks(infos, mode, event);
-
-      if (processedPickInfos) {
-        processedPickInfos.forEach(info => result.push(info));
+      for (const info of infos.values()) {
+        if (info.layer) {
+          result.push(info);
+        }
       }
 
       // If no object is picked stop.
@@ -305,9 +309,7 @@ export default class DeckPicker {
 
   // returns pickedColor or null if no pickable layers found.
   _drawAndSample({layers, viewports, onViewportActive, deviceRect, pass, redrawReason, pickZ}) {
-    assert(deviceRect);
-    assert(Number.isFinite(deviceRect.width) && deviceRect.width > 0, '`width` must be > 0');
-    assert(Number.isFinite(deviceRect.height) && deviceRect.height > 0, '`height` must be > 0');
+    assert(deviceRect.width > 0 && deviceRect.height > 0);
 
     const pickableLayers = layers.filter(layer => layer.isPickable());
     if (pickableLayers.length < 1) {
@@ -319,6 +321,7 @@ export default class DeckPicker {
     this.pickLayersPass.render({
       layers,
       layerFilter: this.layerFilter,
+      onError: this._onError,
       viewports,
       onViewportActive,
       pickingFBO,

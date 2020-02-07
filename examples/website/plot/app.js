@@ -13,7 +13,7 @@ const INITIAL_VIEW_STATE = {
   rotationX: 30,
   rotationOrbit: -30,
   /* global window */
-  zoom: Math.log2(window.innerHeight / 3) // fit 3x3x3 box in current viewport
+  zoom: typeof window !== `undefined` ? Math.log2(window.innerHeight / 3) : 1 // fit 3x3x3 box in current viewport
 };
 
 function getScale({min, max}) {
@@ -22,7 +22,7 @@ function getScale({min, max}) {
     .range([0, 1]);
 }
 
-export class App extends Component {
+export default class App extends Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -72,7 +72,6 @@ export class App extends Component {
           drawAxes: showAxis,
           axesPadding: 0.25,
           axesColor: [0, 0, 0, 128],
-          opacity: 1,
           pickable: true,
           onHover: this._onHover,
           updateTriggers: {

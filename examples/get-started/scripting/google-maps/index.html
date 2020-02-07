@@ -1,7 +1,7 @@
 <html>
   <head>
     <!-- deck.gl standalone bundle -->
-    <script src="https://unpkg.com/deck.gl@^7.0.0/dist.min.js"></script>
+    <script src="https://unpkg.com/deck.gl@^8.0.0/dist.min.js"></script>
 
     <!-- Google Maps dependencies -->
     <!-- Replace google_maps_api_key with your API key! -->
@@ -36,7 +36,6 @@ const deckOverlay = new deck.GoogleMapsOverlay({
       // Styles
       filled: true,
       pointRadiusMinPixels: 2,
-      opacity: 1,
       pointRadiusScale: 2000,
       getRadius: f => (11 - f.properties.scalerank),
       getFillColor: [200, 0, 80, 180],

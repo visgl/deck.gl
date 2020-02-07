@@ -19,16 +19,16 @@ For more information consult the [Attribute Management](/docs/developer-guide/cu
 ##### `setDefaultLogFunctions`
 
 Sets log functions to help trace or time attribute updates.
-Default logging uses the luma.gl logger.
+Default logging uses the deck.gl logger.
 
 Note that the app may not be in control of when update is called,
 so hooks are provided for update start and end.
 
 Parameters:
 
-* `opts.onLog` (Function) - callback, called to print
-* `opts.onUpdateStart` (Function) - callback, called before update() starts
-* `opts.onUpdateEnd` (Function) - callback, called after update() ends
+* `opts.onUpdateStart` (Function) - callback, called before an attribute starts updating
+* `opts.onUpdate` (Function) - callback, called when update is performed. Receives an argument `message` detailing the update operation.
+* `opts.onUpdateEnd` (Function) - callback, called after an attribute is updated. Receives an argument `message` detailing the update operation.
 
 
 ## Constructor
@@ -62,9 +62,7 @@ Takes a single parameter as a map of attribute descriptor objects:
 * values are objects with attribute definitions:
   - luma.gl [accessor parameters](https://luma.gl/#/documentation/api-reference/webgl-2-classes/accessor):
     * `type` (Enum, optional) - data type of the attribute, see "Remarks" section below.
-    * `size` (Number) - number of elements per object
-    * `offset` (Number) - default `0`
-    * `stride` (Number) - default `0`
+    * `size` (Number) - number of elements per vertex
     * `normalized` (Boolean) - default `false`
     * `integer` (Boolean) - WebGL2 only, default `false`
     * `divisor` (Boolean, optional) - `1` if this is an instanced attribute
@@ -83,7 +81,12 @@ Takes a single parameter as a map of attribute descriptor objects:
   - `shaderAttributes` (Object, optional) - If this attribute maps to multiple
     attributes in the vertex shader, that mapping can be defined here. All
     `shaderAttributes` will share a single buffer created based on the `size`
-    parameter. This can be used to interleave attributes. Each shader attribute object may contain any of the [accessor parameters](https://luma.gl/#/documentation/api-reference/webgl-2-classes/accessor) to override the parent attribute's with.
+    parameter. This can be used to interleave attributes. Each shader attribute object may contain any of the following:
+    * `size` (Number) - number of elements per vertex
+    * `vertexOffset` (Number) - offset of the attribute by vertex (stride). Default `0`.
+    * `elementOffset` (Number) - offset of the attribute by element. default `0`.
+    * `divisor` (Boolean, optional) - `1` if this is an instanced attribute
+      (a.k.a. divisor). Default to `0`.
 
 ##### `addInstanced`
 
@@ -158,7 +161,7 @@ The following `type` values are supported for attribute definitions:
 | type | value array type | notes |
 | ---- | ---------------- | ----- |
 | `GL.FLOAT` | `Float32Array` | |
-| `GL.DOUBLE` | `Float64Array` | Because 64-bit floats are not supported by WebGL, the value is converted to an interleaved `Float32Array` before uploading to the GPU. It is exposed to the vertex shader as two attributes, `<attribute_name>` and `<attribute_name>64xyLow`, the sum of which is the 64-bit value. |
+| `GL.DOUBLE` | `Float64Array` | Because 64-bit floats are not supported by WebGL, the value is converted to an interleaved `Float32Array` before uploading to the GPU. It is exposed to the vertex shader as two attributes, `<attribute_name>` and `<attribute_name>64Low`, the sum of which is the 64-bit value. |
 | `GL.BYTE` | `Int8Array` | |
 | `GL.SHORT` | `Int16Array` | |
 | `GL.INT` | `Int32Array` | |
@@ -168,4 +171,4 @@ The following `type` values are supported for attribute definitions:
 
 ## Source
 
-[modules/core/src/lib/attribute-manager.js](https://github.com/uber/deck.gl/blob/master/modules/core/src/lib/attribute-manager.js)
+[modules/core/src/lib/attribute-manager.js](https://github.com/uber/deck.gl/blob/master/modules/core/src/lib/attribute/attribute-manager.js)

@@ -20,8 +20,6 @@
 
 import assert from '../utils/assert';
 import {deepEqual} from '../utils/deep-equal';
-import View from '../views/view';
-import Viewport from '../viewports/viewport';
 import log from '../utils/log';
 import {flatten} from '../utils/flatten';
 
@@ -211,10 +209,7 @@ export default class ViewManager {
   // Update the view descriptor list and set change flag if needed
   // Does not actually rebuild the `Viewport`s until `getViewports` is called
   _setViews(views) {
-    // DEPRECATED: Ensure any "naked" Viewports are wrapped in View instances
-    views = flatten(views, {filter: Boolean}).map(
-      view => (view instanceof Viewport ? new View({viewportInstance: view}) : view)
-    );
+    views = flatten(views, {filter: Boolean});
 
     const viewsChanged = this._diffViews(views, this.views);
     if (viewsChanged) {
@@ -234,7 +229,7 @@ export default class ViewManager {
 
       this.viewState = viewState;
     } else {
-      log.warn('setting null viewState')();
+      log.warn('missing `viewState` or `initialViewState`')();
     }
   }
 

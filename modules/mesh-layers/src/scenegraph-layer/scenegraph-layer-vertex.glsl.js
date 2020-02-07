@@ -9,7 +9,7 @@ export default `\
 
 // Instance attributes
 _attribute vec3 instancePositions;
-_attribute vec2 instancePositions64xyLow;
+_attribute vec3 instancePositions64Low;
 _attribute vec4 instanceColors;
 _attribute vec3 instancePickingColors;
 _attribute mat3 instanceModelMatrix;
@@ -17,8 +17,10 @@ _attribute vec3 instanceTranslation;
 
 // Uniforms
 uniform float sizeScale;
+uniform float sizeMinPixels;
+uniform float sizeMaxPixels;
 uniform mat4 sceneModelMatrix;
-uniform bool enableOffsetModelMatrix;
+uniform bool composeModelMatrix;
 
 // Attributes
 _attribute vec4 POSITION;
@@ -68,16 +70,18 @@ void main(void) {
     geometry.uv = pbr_vUV;
   #endif
 
-  vec3 pos = (instanceModelMatrix * (sceneModelMatrix * POSITION).xyz) * sizeScale + instanceTranslation;
+  float originalSize = project_size_to_pixel(sizeScale);
+  float clampedSize = clamp(originalSize, sizeMinPixels, sizeMaxPixels);
 
-  if(enableOffsetModelMatrix) {
+  vec3 pos = (instanceModelMatrix * (sceneModelMatrix * POSITION).xyz) * sizeScale * (clampedSize / originalSize) + instanceTranslation;
+  if(composeModelMatrix) {
     DECKGL_FILTER_SIZE(pos, geometry);
-    gl_Position = project_position_to_clipspace(pos + instancePositions, instancePositions64xyLow, vec3(0.0), geometry.position);
+    gl_Position = project_position_to_clipspace(pos + instancePositions, instancePositions64Low, vec3(0.0), geometry.position);
   }
   else {
     pos = project_size(pos);
     DECKGL_FILTER_SIZE(pos, geometry);
-    gl_Position = project_position_to_clipspace(instancePositions, instancePositions64xyLow, pos, geometry.position);
+    gl_Position = project_position_to_clipspace(instancePositions, instancePositions64Low, pos, geometry.position);
   }
   DECKGL_FILTER_GL_POSITION(gl_Position, geometry);
 

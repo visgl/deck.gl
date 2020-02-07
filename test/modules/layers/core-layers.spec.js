@@ -102,48 +102,6 @@ test('ArcLayer', t => {
   t.end();
 });
 
-test('ArcLayer#non-iterable', t => {
-  const data = FIXTURES.routes;
-
-  testLayer({
-    Layer: ArcLayer,
-    testCases: [
-      {
-        props: {
-          data: {
-            length: data.length
-          },
-          getSourcePosition: (_, {index, target}) => {
-            target[0] = data[index].START[0];
-            target[1] = data[index].START[1];
-            return target;
-          },
-          getTargetPosition: (_, {index, target}) => {
-            target[0] = data[index].END[0];
-            target[1] = data[index].END[1];
-            return target;
-          }
-        },
-        onAfterUpdate: ({layer}) => {
-          const instancePositions = layer.getAttributeManager().attributes.instancePositions.value;
-          t.ok(
-            instancePositions.length > FIXTURES.routes.length * 4,
-            'instancePositions has correct length'
-          );
-          t.deepEquals(
-            instancePositions.slice(0, 4),
-            [data[0].START[0], data[0].START[1], data[0].END[0], data[0].END[1]],
-            'instancePositions has correct content'
-          );
-        }
-      }
-    ],
-    onError: t.notOk
-  });
-
-  t.end();
-});
-
 test('PointCloudLayer', t => {
   const testCases = generateLayerTests({
     Layer: PointCloudLayer,
@@ -261,7 +219,7 @@ test('PathLayer', t => {
         layer.props.widthMinPixels,
         'should update widthMinPixels'
       );
-      t.ok(layer.getBufferLayout(), 'should have buffer layout');
+      t.ok(layer.getStartIndices(), 'should have vertex layout');
     }
   });
 

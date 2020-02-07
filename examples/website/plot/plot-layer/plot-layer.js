@@ -4,31 +4,37 @@ import {scaleLinear} from 'd3-scale';
 import AxesLayer from './axes-layer';
 import SurfaceLayer from './surface-layer';
 
-const DEFAULT_GET_SCALE = () => scaleLinear();
+const DEFAULT_GET_SCALE = {type: 'function', value: () => scaleLinear()};
+const DEFAULT_TICK_FORMAT = {type: 'function', value: x => x.toFixed(2)};
+const DEFAULT_TICK_COUNT = 6;
+const DEFAULT_COLOR = [0, 0, 0, 255];
 
 const defaultProps = {
-  getPosition: SurfaceLayer.defaultProps.getPosition,
-  getColor: SurfaceLayer.defaultProps.getColor,
+  // SurfaceLayer props
+  getPosition: {type: 'accessor', value: (u, v) => [0, 0, 0]},
+  getColor: {type: 'accessor', value: (x, y, z) => DEFAULT_COLOR},
   getXScale: DEFAULT_GET_SCALE,
   getYScale: DEFAULT_GET_SCALE,
   getZScale: DEFAULT_GET_SCALE,
-  uCount: SurfaceLayer.defaultProps.uCount,
-  vCount: SurfaceLayer.defaultProps.vCount,
-  lightStrength: SurfaceLayer.defaultProps.lightStrength,
+  uCount: 100,
+  vCount: 100,
+  lightStrength: 0.1,
+
+  // AxesLayer props
   drawAxes: true,
-  fontSize: AxesLayer.defaultProps.fontSize,
-  xTicks: AxesLayer.defaultProps.xTicks,
-  yTicks: AxesLayer.defaultProps.yTicks,
-  zTicks: AxesLayer.defaultProps.zTicks,
-  xTickFormat: AxesLayer.defaultProps.xTickFormat,
-  yTickFormat: AxesLayer.defaultProps.yTickFormat,
-  zTickFormat: AxesLayer.defaultProps.zTickFormat,
-  xTitle: AxesLayer.defaultProps.xTitle,
-  yTitle: AxesLayer.defaultProps.yTitle,
-  zTitle: AxesLayer.defaultProps.zTitle,
-  axesPadding: AxesLayer.defaultProps.padding,
-  axesColor: AxesLayer.defaultProps.color,
-  coordinateSystem: COORDINATE_SYSTEM.IDENTITY
+  fontSize: 12,
+  xTicks: DEFAULT_TICK_COUNT,
+  yTicks: DEFAULT_TICK_COUNT,
+  zTicks: DEFAULT_TICK_COUNT,
+  xTickFormat: DEFAULT_TICK_FORMAT,
+  yTickFormat: DEFAULT_TICK_FORMAT,
+  zTickFormat: DEFAULT_TICK_FORMAT,
+  xTitle: 'x',
+  yTitle: 'y',
+  zTitle: 'z',
+  axesPadding: 0,
+  axesColor: [0, 0, 0, 255],
+  coordinateSystem: COORDINATE_SYSTEM.CARTESIAN
 };
 
 /*
@@ -105,45 +111,70 @@ export default class PlotLayer extends CompositeLayer {
 
   renderLayers() {
     const {xScale, yScale, zScale} = this.state;
+    const {
+      getPosition,
+      getColor,
+      uCount,
+      vCount,
+      lightStrength,
+      fontSize,
+      xTicks,
+      yTicks,
+      zTicks,
+      xTickFormat,
+      yTickFormat,
+      zTickFormat,
+      xTitle,
+      yTitle,
+      zTitle,
+      axesPadding,
+      axesColor,
+      drawAxes,
+      updateTriggers
+    } = this.props;
 
     return [
       new SurfaceLayer(
-        this.getSubLayerProps({
-          id: 'surface',
-          getPosition: this.props.getPosition,
-          getColor: this.props.getColor,
-          uCount: this.props.uCount,
-          vCount: this.props.vCount,
+        {
+          getPosition,
+          getColor,
+          uCount,
+          vCount,
           xScale,
           yScale,
           zScale,
-          lightStrength: this.props.lightStrength,
-          onHover: this.props.onHover,
-          onClick: this.props.onClick,
-          updateTriggers: this.props.updateTriggers
+          lightStrength
+        },
+        this.getSubLayerProps({
+          id: 'surface',
+          updateTriggers
         })
       ),
       new AxesLayer(
-        this.getSubLayerProps({
-          id: 'axes',
+        {
           xScale,
           yScale,
           zScale,
-          fontSize: this.props.fontSize,
-          xTicks: this.props.xTicks,
-          yTicks: this.props.yTicks,
-          zTicks: this.props.zTicks,
-          xTickFormat: this.props.xTickFormat,
-          yTickFormat: this.props.yTickFormat,
-          zTickFormat: this.props.zTickFormat,
-          xTitle: this.props.xTitle,
-          yTitle: this.props.yTitle,
-          zTitle: this.props.zTitle,
-          padding: this.props.axesPadding,
-          color: this.props.axesColor,
-          visible: this.props.drawAxes,
+          fontSize,
+          xTicks,
+          yTicks,
+          zTicks,
+          xTickFormat,
+          yTickFormat,
+          zTickFormat,
+          xTitle,
+          yTitle,
+          zTitle,
+          padding: axesPadding,
+          color: axesColor
+        },
+        this.getSubLayerProps({
+          id: 'axes'
+        }),
+        {
+          visible: drawAxes,
           pickable: false
-        })
+        }
       )
     ];
   }

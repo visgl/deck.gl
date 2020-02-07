@@ -62,30 +62,21 @@ test('positionChildrenUnderViews', t => {
     children: TEST_CHILDREN,
     deck: {viewManager: dummyViewManager}
   });
-  t.is(children.length, 4, 'Returns wrapped children');
+  t.is(children.length, 2, 'Returns wrapped children');
 
-  t.notOk(children[0], 'Invisible view');
-  t.ok(children[1].key && children[2].key && children[3].key, 'Wrapper components have keys');
-  t.is(children[1].props.style.left, 0, 'Wrapper component has x position');
-  t.is(children[2].props.style.left, 400, 'Wrapper component has x position');
-  t.is(children[2].props.style.zIndex, 1, 'Wrapper component has z-index');
-  t.is(children[3].props.style.zIndex, 2, 'Wrapper component has z-index');
+  t.is(children[0].key, 'view-map', 'Has map view');
+  t.is(children[1].key, 'view-ortho', 'Has orthographic view');
+  t.is(children[0].props.style.left, 0, 'Wrapper component has x position');
+  t.is(children[1].props.style.left, 400, 'Wrapper component has x position');
 
-  let wrappedChild = children[1].props.children;
-  t.is(wrappedChild.props.id, 'function-under-view', 'function child preserves id');
-  t.is(wrappedChild.props.width, 400, 'function child has width');
-  t.is(wrappedChild.props.viewState, TEST_VIEW_STATES.map, 'function child has viewState');
+  let wrappedChild = children[0].props.children;
+  t.is(wrappedChild[0].props.id, 'function-under-view', 'function child preserves id');
+  t.is(wrappedChild[0].props.width, 400, 'function child has width');
+  t.is(wrappedChild[0].props.viewState, TEST_VIEW_STATES.map, 'function child has viewState');
+  t.is(wrappedChild[1].props.id, 'element-without-view', 'element child preserves id');
 
-  wrappedChild = children[2].props.children;
+  wrappedChild = children[1].props.children;
   t.is(wrappedChild.props.id, 'element-under-view', 'element child preserves id');
-  t.is(wrappedChild.props.width, 400, 'element child has width');
-  t.is(wrappedChild.props.viewState, TEST_VIEW_STATES.ortho, 'element child has viewState');
-
-  wrappedChild = children[3].props.children;
-  t.is(wrappedChild.props.id, 'element-without-view', 'element child preserves id');
-  t.is(wrappedChild.props.width, 400, 'element child has width');
-  t.is(wrappedChild.props.viewState, TEST_VIEW_STATES.map, 'element child has viewState');
-
   t.end();
 });
 
@@ -101,14 +92,12 @@ test('positionChildrenUnderViews#ContextProvider', t => {
     ContextProvider: context.Provider
   });
 
-  t.notOk(children[0], 'Invisible view');
+  t.is(children.length, 2, 'Returns wrapped children');
 
-  let wrappedChild = children[1].props.children;
-  t.is(wrappedChild.type, context.Provider, 'child is wrapped in ContextProvider');
-  t.is(wrappedChild.props.value.viewport, TEST_VIEWPORTS.map, 'Context has viewport');
+  t.is(children[0].type, context.Provider, 'child is wrapped in ContextProvider');
+  t.is(children[0].props.value.viewport, TEST_VIEWPORTS.map, 'Context has viewport');
 
-  wrappedChild = children[2].props.children;
-  t.is(wrappedChild.type, context.Provider, 'child is wrapped in ContextProvider');
-  t.is(wrappedChild.props.value.viewport, TEST_VIEWPORTS.ortho, 'Context has viewport');
+  t.is(children[1].type, context.Provider, 'child is wrapped in ContextProvider');
+  t.is(children[1].props.value.viewport, TEST_VIEWPORTS.ortho, 'Context has viewport');
   t.end();
 });

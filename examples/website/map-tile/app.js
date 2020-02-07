@@ -17,7 +17,7 @@ const INITIAL_VIEW_STATE = {
 // https://wiki.openstreetmap.org/wiki/Slippy_map_tilenames#Tile_servers
 const tileServer = 'https://c.tile.openstreetmap.org/';
 
-export class App extends PureComponent {
+export default class App extends PureComponent {
   constructor(props) {
     super(props);
     this.state = {};
@@ -51,7 +51,6 @@ export class App extends PureComponent {
         onHover: this._onHover,
         autoHighlight,
         highlightColor,
-        opacity: 1,
         // https://wiki.openstreetmap.org/wiki/Zoom_levels
         minZoom: 0,
         maxZoom: 19,

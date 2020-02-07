@@ -26,7 +26,6 @@ function XYZToLngLat([x, y, z]) {
 
 /* Adapted from s2-geometry's S2Cell.getCornerLatLngs */
 function getGeoBounds({face, ij, level}) {
-  const result = [];
   const offsets = [[0, 0], [0, 1], [1, 1], [1, 0], [0, 0]];
 
   // The S2 cell edge is curved: http://s2geometry.io/
@@ -34,7 +33,9 @@ function getGeoBounds({face, ij, level}) {
   // resolution is the number of segments to generate per edge.
   // We exponentially reduce resolution as level increases so it doesn't affect perf
   // when there are a large number of cells
-  const resolution = Math.max(1, MAX_RESOLUTION * Math.pow(2, -level));
+  const resolution = Math.max(1, Math.ceil(MAX_RESOLUTION * Math.pow(2, -level)));
+  const result = new Float64Array(4 * resolution * 2 + 2);
+  let ptIndex = 0;
 
   for (let i = 0; i < 4; i++) {
     const offset = offsets[i].slice(0);
@@ -50,10 +51,15 @@ function getGeoBounds({face, ij, level}) {
       const st = S2.IJToST(ij, level, offset);
       const uv = S2.STToUV(st);
       const xyz = S2.FaceUVToXYZ(face, uv);
+      const lngLat = XYZToLngLat(xyz);
 
-      result.push(XYZToLngLat(xyz));
+      result[ptIndex++] = lngLat[0];
+      result[ptIndex++] = lngLat[1];
     }
   }
+  // close the loop
+  result[ptIndex++] = result[0];
+  result[ptIndex++] = result[1];
   return result;
 }
 

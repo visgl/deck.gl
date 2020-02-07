@@ -4,6 +4,7 @@ import convertFunctions from '@deck.gl/json/helpers/convert-functions';
 
 const TEST_CASES = [
   {expr: 'true', expected: true}, // boolean literal
+  {expr: 'false', expected: false},
 
   // array expression
   {expr: '([1,2,3])[0]', expected: 1},
@@ -75,25 +76,57 @@ const TEST_CASES = [
   {expr: 'this.three', expected: 3}
 ];
 
-test('convertFunctions#get...', t => {
+test('convertFunctions#asStrings', t => {
   const props = {};
   TEST_CASES.forEach((testCase, i) => {
     // Add a mix of function and value props
-    // TODO this is based on `get` heuristic, we have better ideas and will update tests when we address
-    const propName = i % 2 === 0 ? `get-${i}` : `value-${i}`;
-    props[propName] = testCase.expr;
+    props[`value-{i}`] = testCase.expr;
   });
-  const convertedProps = convertFunctions(null, props, {});
+  const convertedProps = convertFunctions(props, {});
   for (const key in convertedProps) {
-    if (key.startsWith('get')) {
+    t.ok(
+      typeof convertedProps[key] !== 'function',
+      'convertFunctions did not convert string to function'
+    );
+  }
+  t.end();
+});
+
+test('convertFunctions#asFunctions', t => {
+  const props = {};
+  TEST_CASES.forEach((testCase, i) => {
+    props[`func-{i}`] = `@@=${testCase.expr}`;
+  });
+  const convertedProps = convertFunctions(props, {});
+  for (const key in convertedProps) {
+    t.ok(typeof convertedProps[key] === 'function', 'convertFunctions converted prop to function');
+  }
+  t.end();
+});
+
+test('convertFunctions#assureAllKeysPresent', t => {
+  const EXAMPLE_PROPS = {
+    data: 'shp.geojson',
+    stroked: true,
+    filled: false,
+    lineWidthMinPixels: 2,
+    getElevation: '@@=x * 10',
+    opacity: 0.9
+  };
+
+  const convertedProps = convertFunctions(EXAMPLE_PROPS, {});
+  for (const key in EXAMPLE_PROPS) {
+    if (key !== 'getElevation') {
       t.ok(
-        typeof convertedProps[key] === 'function',
-        'convertFunctions converted prop to function'
+        EXAMPLE_PROPS[key] === convertedProps[key],
+        `convertFunctions converted prop ${key} input to expected value ${EXAMPLE_PROPS[key]}`
       );
     } else {
       t.ok(
-        typeof convertedProps[key] !== 'function',
-        'convertFunctions did not converted string to function'
+        convertedProps.getElevation({x: 10}) === 100,
+        `convertFunctions converted function ${key} to expected value, ${convertedProps.getElevation(
+          10
+        )}`
       );
     }
   }

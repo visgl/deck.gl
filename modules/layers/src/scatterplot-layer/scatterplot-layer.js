@@ -18,7 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {Layer} from '@deck.gl/core';
+import {Layer, project32, picking} from '@deck.gl/core';
 import GL from '@luma.gl/constants';
 import {Model, Geometry} from '@luma.gl/core';
 
@@ -54,7 +54,7 @@ const defaultProps = {
 
 export default class ScatterplotLayer extends Layer {
   getShaders(id) {
-    return super.getShaders({vs, fs, modules: ['project32', 'picking']});
+    return super.getShaders({vs, fs, modules: [project32, picking]});
   }
 
   initializeState() {
@@ -123,22 +123,20 @@ export default class ScatterplotLayer extends Layer {
       lineWidthMaxPixels
     } = this.props;
 
-    const widthMultiplier =
-      lineWidthUnits === 'pixels' ? viewport.distanceScales.metersPerPixel[2] : 1;
+    const widthMultiplier = lineWidthUnits === 'pixels' ? viewport.metersPerPixel : 1;
 
     this.state.model
-      .setUniforms(
-        Object.assign({}, uniforms, {
-          stroked: stroked ? 1 : 0,
-          filled,
-          radiusScale,
-          radiusMinPixels,
-          radiusMaxPixels,
-          lineWidthScale: lineWidthScale * widthMultiplier,
-          lineWidthMinPixels,
-          lineWidthMaxPixels
-        })
-      )
+      .setUniforms(uniforms)
+      .setUniforms({
+        stroked: stroked ? 1 : 0,
+        filled,
+        radiusScale,
+        radiusMinPixels,
+        radiusMaxPixels,
+        lineWidthScale: lineWidthScale * widthMultiplier,
+        lineWidthMinPixels,
+        lineWidthMaxPixels
+      })
       .draw();
   }
 

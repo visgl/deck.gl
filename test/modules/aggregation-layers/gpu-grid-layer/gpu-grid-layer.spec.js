@@ -53,8 +53,7 @@ test('GPUGridLayer', t => {
 test('GPUGridLayer#renderLayers', t => {
   const webgl1Spies = setupSpysForWebGL1(gl);
 
-  makeSpy(GPUGridLayer.prototype, 'getAggregationFlags');
-  makeSpy(GPUGridLayer.prototype, 'getLayerData');
+  makeSpy(GPUGridLayer.prototype, '_updateAggregation');
 
   const layer = new GPUGridLayer(SAMPLE_PROPS);
 
@@ -66,10 +65,8 @@ test('GPUGridLayer#renderLayers', t => {
 
   t.ok(sublayer instanceof GPUGridCellLayer, 'Sublayer GPUGridCellLayer layer rendered');
 
-  t.ok(GPUGridLayer.prototype.getAggregationFlags.called, 'should call getAggregationFlags');
-  t.ok(GPUGridLayer.prototype.getLayerData.called, 'should call getLayerData');
-  GPUGridLayer.prototype.getAggregationFlags.restore();
-  GPUGridLayer.prototype.getLayerData.restore();
+  t.ok(GPUGridLayer.prototype._updateAggregation.called, 'should call _updateAggregation');
+  GPUGridLayer.prototype._updateAggregation.restore();
 
   restoreSpies(webgl1Spies);
   t.end();
@@ -84,21 +81,10 @@ test('GPUGridLayer#updates', t => {
       {
         props: SAMPLE_PROPS,
         onAfterUpdate({layer}) {
-          const {weights, gridSize, gridOrigin, cellSize, boundingBox} = layer.state;
+          const {weights, numCol, numRow, boundingBox} = layer.state;
 
           t.ok(weights.color.aggregationBuffer, 'Data is aggregated');
-          t.ok(
-            Number.isFinite(gridSize[0]) && Number.isFinite(gridSize[1]),
-            'gridSize is calculated'
-          );
-          t.ok(
-            Number.isFinite(gridOrigin[0]) && Number.isFinite(gridOrigin[1]),
-            'gridOrigin is calculated'
-          );
-          t.ok(
-            Number.isFinite(cellSize[0]) && Number.isFinite(cellSize[1]),
-            'cellSize is calculated'
-          );
+          t.ok(numCol && numRow, 'gridSize is calculated');
           t.ok(
             Number.isFinite(boundingBox.xMin) && Number.isFinite(boundingBox.xMax),
             'boundingBox is calculated'
@@ -109,39 +95,33 @@ test('GPUGridLayer#updates', t => {
         updateProps: {
           colorRange: GPUGridLayer.defaultProps.colorRange.slice()
         },
-        spies: ['getAggregationFlags', 'getLayerData'],
+        spies: ['_updateAggregation'],
         onAfterUpdate({layer, subLayers, spies}) {
-          t.ok(spies.getAggregationFlags.called, 'should call getAggregationFlags');
-          t.notOk(spies.getLayerData.called, 'should not call getLayerData');
+          t.notOk(spies._updateAggregation.called, 'should not call _updateAggregation');
 
-          spies.getAggregationFlags.restore();
-          spies.getLayerData.restore();
+          spies._updateAggregation.restore();
         }
       },
       {
         updateProps: {
           cellSize: 10
         },
-        spies: ['getAggregationFlags', 'getLayerData'],
+        spies: ['_updateAggregation'],
         onAfterUpdate({layer, subLayers, spies}) {
-          t.ok(spies.getAggregationFlags.called, 'should call getAggregationFlags');
-          t.ok(spies.getLayerData.called, 'should call getLayerData');
+          t.ok(spies._updateAggregation.called, 'should call _updateAggregation');
 
-          spies.getAggregationFlags.restore();
-          spies.getLayerData.restore();
+          spies._updateAggregation.restore();
         }
       },
       {
         updateProps: {
-          colorAggregation: 3
+          colorAggregation: 'MAX'
         },
-        spies: ['getAggregationFlags', 'getLayerData'],
+        spies: ['_updateAggregation'],
         onAfterUpdate({layer, subLayers, spies}) {
-          t.ok(spies.getAggregationFlags.called, 'should call getAggregationFlags');
-          t.ok(spies.getLayerData.called, 'should call getLayerData');
+          t.ok(spies._updateAggregation.called, 'should call _updateAggregation');
 
-          spies.getAggregationFlags.restore();
-          spies.getLayerData.restore();
+          spies._updateAggregation.restore();
         }
       }
     ]

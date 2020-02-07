@@ -1,7 +1,7 @@
 # Tile3DLayer (Experimental)
 
-The `Tile3DLayer` renders tileset data formatted according to the [3D Tiles Category](https://loaders.gl/docs/api-reference/3d-tiles),
-which is supported by the [Tileset3DLoader](https://loaders.gl/docs/api-reference/3d-tiles/tileset-3d-loader).
+The `Tile3DLayer` renders tileset data formatted according to the [3D Tiles Specification](https://www.opengeospatial.org/standards/3DTiles),
+which is supported by the [Tileset3DLoader](https://loaders.gl/modules/3d-tiles/docs/api-reference/tileset-3d-loader).
 
 Tile3DLayer is a [CompositeLayer](/docs/api-reference/composite-layer.md). Base on each tile content [format](https://github.com/AnalyticalGraphicsInc/3d-tiles/tree/master/specification#introduction), it uses either a [PointCloudLayer](/docs/layers/point-cloud-layer.md) or [ScenegraphLayer](/docs/layers/scenegraph-layer.md) to render.
 
@@ -11,7 +11,7 @@ References
 ```js
 import React, {Component} from 'react';
 import DeckGL from '@deck.gl/react';
-import {Tile3DLayer} from '@deck.gl/tile-layers';
+import {Tile3DLayer} from '@deck.gl/geo-layers';
 
 export default class App extends Component {
 
@@ -49,21 +49,22 @@ To install the dependencies:
 ```bash
 npm install deck.gl
 # or
-npm install @deck.gl/core @deck.gl/tile-layers
+npm install @deck.gl/core @deck.gl/geo-layers
 ```
 
 ```js
-import {Tile3DLayer} from '@deck.gl/tile-layers';
+import {Tile3DLayer} from '@deck.gl/geo-layers';
 new Tile3DLayer({});
 ```
 
 To use pre-bundled scripts:
 
 ```html
-<script src="https://unpkg.com/deck.gl@~7.3.0/dist.min.js"></script>
+<script src="https://unpkg.com/deck.gl@^8.0.0/dist.min.js"></script>
 <!-- or -->
-<script src="https://unpkg.com/@deck.gl/core@~7.3.0/dist.min.js"></script>
-<script src="https://unpkg.com/@deck.gl/layers@~7.3.0/dist.min.js"></script>
+<script src="https://unpkg.com/@deck.gl/core@^8.0.0/dist.min.js"></script>
+<script src="https://unpkg.com/@deck.gl/layers@^8.0.0/dist.min.js"></script>
+<script src="https://unpkg.com/@deck.gl/geo-layers@^8.0.0/dist.min.js"></script>
 ```
 
 ```js
@@ -110,7 +111,7 @@ This value is only applied when [tile format](https://github.com/AnalyticalGraph
 
 - Default: `{throttleRequests: true}`
 
-Tile3DLayer constructs a [`Tileset3D`](https://loaders.gl/modules/3d-tiles/docs/api-reference/tileset-3d) object after fetching tilset json file. `loadOptions` is an experimental prop to provide Tileset options [Tileset3D options](https://loaders.gl/modules/3d-tiles/docs/api-reference/tileset-3d#options). Among these options, `onTileLoad`, `onTileUnload` and `onTileLoadFail` should be passed as layer props.
+Tile3DLayer constructs a [`Tileset3D`](https://loaders.gl/modules/3d-tiles/docs/api-reference/tileset-3d) object after fetching tilset json file. `loadOptions` is an experimental prop to provide Tileset options [Tileset3D options](https://loaders.gl/modules/3d-tiles/docs/api-reference/tileset-3d#options). Among these options, `onTileLoad`, `onTileUnload` and `onTileError` should be passed as layer props.
 
 ```js
 const layer = new Tile3DLayer({
@@ -120,6 +121,12 @@ const layer = new Tile3DLayer({
   }
 })
 ```
+
+##### `pickable` (Boolean, Optional)
+
+- Default: false
+
+When [`picking`](/docs/developer-guide/custom-layers/picking.md) is enabled, `info.object` will be a [Tile3DHeader](https://loaders.gl/docs/specifications/category-3d-tiles#tileheader-fields) object.
 
 ### Data Accessors
 
@@ -149,11 +156,11 @@ const layer = new Tile3DLayer({
 
 - Default: `onTileUnload: (tileHeader) => {}`
 
-##### `onTileLoadFail` (Function, optional)
+##### `onTileError` (Function, optional)
 
-`onTileLoadFail` is a function that is called when a tile failed to load.
+`onTileError` is a function that is called when a tile failed to load.
 
-- Default: `onTileLoadFail: (tileHeader, url, message) => {}`
+- Default: `onTileError: (tileHeader, url, message) => {}`
   - `url`: the url of the failed tile.
   - `message`: the error message.
 
@@ -165,8 +172,8 @@ The Tile3DLayer renders the following sublayers based on tile [format](https://g
   - `_lighting` is default to `pbr`.
 * `pointcloud` - a [PointCloudLayer](/docs/layers/point-cloud-layer.md) rendering all the tiles with Point Cloud format (`pnts`).
 
-Follow [CompositeLayer](/docs/layers/composite-layer.md#_subLayerProp) and example in this layer doc to see how to override sub layer props.
+Follow [CompositeLayer](/docs/api-reference/composite-layer.md#_subLayerProp) and example in this layer doc to see how to override sub layer props.
 
 ## Source
 
-[modules/tile-layers/src/tile-3d-layer](https://github.com/uber/deck.gl/tree/master/modules/geo-layers/src/tile-3d-layer)
+[modules/geo-layers/src/tile-3d-layer](https://github.com/uber/deck.gl/tree/master/modules/geo-layers/src/tile-3d-layer)

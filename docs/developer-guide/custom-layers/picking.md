@@ -99,16 +99,17 @@ By default, the `object` field of the picking `info` object is indexed from the 
 
 ### Model object creation
 
-If your layer creates its own [Model](https://github.com/uber/luma.gl/blob/master/docs/api-reference/core/model.md) object, add picking module to `modules` array.
+If your layer creates its own [Model](https://luma.gl/docs/api-reference/core/model) object, add picking module to `modules` array.
 
 ```js
 import {Model} from '@luma.gl/core';
+import {picking} from '@deck.gl/core';
 
 new Model(gl, {
   ...
   vs: CUSTOM_VS,
   fs: CUSTOM_FS,
-  modules: ['picking', ...]
+  modules: [picking]
 });
 ```
 

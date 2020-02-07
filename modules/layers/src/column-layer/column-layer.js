@@ -18,11 +18,10 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {Layer} from '@deck.gl/core';
+import {Layer, project32, gouraudLighting, picking} from '@deck.gl/core';
 import GL from '@luma.gl/constants';
-import {Model, PhongMaterial} from '@luma.gl/core';
+import {Model} from '@luma.gl/core';
 import ColumnGeometry from './column-geometry';
-const defaultMaterial = new PhongMaterial();
 
 import vs from './column-layer-vertex.glsl';
 import fs from './column-layer-fragment.glsl';
@@ -53,13 +52,13 @@ const defaultProps = {
   getLineColor: {type: 'accessor', value: DEFAULT_COLOR},
   getLineWidth: {type: 'accessor', value: 1},
   getElevation: {type: 'accessor', value: 1000},
-  material: defaultMaterial,
+  material: true,
   getColor: {deprecatedFor: ['getFillColor', 'getLineColor']}
 };
 
 export default class ColumnLayer extends Layer {
   getShaders() {
-    return super.getShaders({vs, fs, modules: ['project32', 'gouraud-lighting', 'picking']});
+    return super.getShaders({vs, fs, modules: [project32, gouraudLighting, picking]});
   }
 
   /**
@@ -196,8 +195,7 @@ export default class ColumnLayer extends Layer {
     } = this.props;
     const {model, fillVertexCount, wireframeVertexCount, edgeDistance} = this.state;
 
-    const widthMultiplier =
-      lineWidthUnits === 'pixels' ? viewport.distanceScales.metersPerPixel[2] : 1;
+    const widthMultiplier = lineWidthUnits === 'pixels' ? viewport.metersPerPixel : 1;
 
     model.setUniforms(
       Object.assign({}, uniforms, {

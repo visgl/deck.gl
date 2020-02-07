@@ -1,11 +1,26 @@
-import {PointLight as BasePointLight} from '@luma.gl/core';
 import {projectPosition} from '../../shaderlib/project/project-functions';
 import {COORDINATE_SYSTEM} from '../../lib';
 
-export default class PointLight extends BasePointLight {
-  constructor(props) {
-    super(props);
-    this.projectedLight = new BasePointLight(props);
+const DEFAULT_LIGHT_COLOR = [255, 255, 255];
+const DEFAULT_LIGHT_INTENSITY = 1.0;
+const DEFAULT_ATTENUATION = [0, 0, 1];
+const DEFAULT_LIGHT_POSITION = [0.0, 0.0, 1.0];
+
+let idCount = 0;
+
+export class PointLight {
+  constructor(props = {}) {
+    const {color = DEFAULT_LIGHT_COLOR} = props;
+    const {intensity = DEFAULT_LIGHT_INTENSITY} = props;
+    const {position = DEFAULT_LIGHT_POSITION} = props;
+
+    this.id = props.id || `point-${idCount++}`;
+    this.color = color;
+    this.intensity = intensity;
+    this.type = 'point';
+    this.position = position;
+    this.attenuation = getAttenuation(props);
+    this.projectedLight = Object.assign({}, this);
   }
 
   getProjectedLight({layer}) {
@@ -18,7 +33,7 @@ export default class PointLight extends BasePointLight {
       coordinateOrigin,
       fromCoordinateSystem: viewport.isGeospatial
         ? COORDINATE_SYSTEM.LNGLAT
-        : COORDINATE_SYSTEM.IDENTITY,
+        : COORDINATE_SYSTEM.CARTESIAN,
       fromCoordinateOrigin: [0, 0, 0]
     });
     projectedLight.color = this.color;
@@ -26,4 +41,14 @@ export default class PointLight extends BasePointLight {
     projectedLight.position = position;
     return projectedLight;
   }
+}
+
+function getAttenuation(props) {
+  if ('attenuation' in props) {
+    return props.attenuation;
+  }
+  if ('intensity' in props) {
+    return [0, 0, props.intensity];
+  }
+  return DEFAULT_ATTENUATION;
 }

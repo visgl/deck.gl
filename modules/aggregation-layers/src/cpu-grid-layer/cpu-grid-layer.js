@@ -18,17 +18,14 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {PhongMaterial} from '@luma.gl/core';
-import {CompositeLayer} from '@deck.gl/core';
 import {GridCellLayer} from '@deck.gl/layers';
 
 import {defaultColorRange} from '../utils/color-utils';
 import {pointToDensityGridDataCPU} from './grid-aggregator';
 import CPUAggregator from '../utils/cpu-aggregator';
+import AggregationLayer from '../aggregation-layer';
 
 function nop() {}
-
-const defaultMaterial = new PhongMaterial();
 
 const defaultProps = {
   // color
@@ -63,10 +60,13 @@ const defaultProps = {
   extruded: false,
 
   // Optional material for 'lighting' shader module
-  material: defaultMaterial
+  material: true,
+
+  // data filter
+  _filterData: {type: 'function', value: null, optional: true}
 };
 
-export default class CPUGridLayer extends CompositeLayer {
+export default class CPUGridLayer extends AggregationLayer {
   initializeState() {
     const cpuAggregator = new CPUAggregator({
       getAggregator: props => props.gridAggregator,
@@ -77,15 +77,23 @@ export default class CPUGridLayer extends CompositeLayer {
       cpuAggregator,
       aggregatorState: cpuAggregator.state
     };
+    const attributeManager = this.getAttributeManager();
+    attributeManager.add({
+      positions: {size: 3, accessor: 'getPosition'}
+    });
+    // color and elevation attributes can't be added as attributes
+    // they are calcualted using 'getValue' accessor that takes an array of pints.
   }
 
-  updateState({oldProps, props, changeFlags}) {
+  updateState(opts) {
+    super.updateState(opts);
     this.setState({
       // make a copy of the internal state of cpuAggregator for testing
-      aggregatorState: this.state.cpuAggregator.updateState(
-        {oldProps, props, changeFlags},
-        this.context.viewport
-      )
+      aggregatorState: this.state.cpuAggregator.updateState(opts, {
+        viewport: this.context.viewport,
+        attributes: this.getAttributes(),
+        numInstances: this.getNumInstances(opts.props)
+      })
     });
   }
 

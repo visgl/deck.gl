@@ -52,17 +52,17 @@ function padArrayChunk({source, target, start = 0, end, getData}) {
 /*
  * The padArray function stretches a source array to the size of a target array.
    The arrays can have internal structures (like the attributes of PathLayer and
-   SolidPolygonLayer), defined by the optional sourceLayout and targetLayout parameters.
+   SolidPolygonLayer), defined by the optional sourceStartIndices and targetStartIndices parameters.
    If the target array is larger, the getData callback is used to fill in the blanks.
  * @params {TypedArray} source - original data
  * @params {TypedArray} target - output data
  * @params {Number} size - length per datum
  * @params {Function} getData - callback to get new data when source is short
- * @params {Array<Number>} [sourceLayout] - subdivision of the original data in [chunkSize0, chunkSize1, ...]
- * @params {Array<Number>} [targetLayout] - subdivision of the output data in [chunkSize0, chunkSize1, ...]
+ * @params {Array<Number>} [sourceStartIndices] - subdivision of the original data in [object0StartIndex, object1StartIndex, ...]
+ * @params {Array<Number>} [targetStartIndices] - subdivision of the output data in [object0StartIndex, object1StartIndex, ...]
  */
-export function padArray({source, target, size, offset = 0, getData, sourceLayout, targetLayout}) {
-  if (!Array.isArray(targetLayout)) {
+export function padArray({source, target, size, getData, sourceStartIndices, targetStartIndices}) {
+  if (!Array.isArray(targetStartIndices)) {
     // Flat arrays
     padArrayChunk({
       source,
@@ -73,26 +73,26 @@ export function padArray({source, target, size, offset = 0, getData, sourceLayou
   }
 
   // Arrays have internal structure
-  let sourceIndex = offset;
-  let targetIndex = offset;
+  let sourceIndex = 0;
+  let targetIndex = 0;
   const getChunkData = getData && ((i, chunk) => getData(i + targetIndex, chunk));
 
-  const n = Math.min(sourceLayout.length, targetLayout.length);
+  const n = Math.min(sourceStartIndices.length, targetStartIndices.length);
 
-  for (let i = 0; i < n; i++) {
-    const sourceChunkLength = sourceLayout[i] * size;
-    const targetChunkLength = targetLayout[i] * size;
+  for (let i = 1; i < n; i++) {
+    const nextSourceIndex = sourceStartIndices[i] * size;
+    const nextTargetIndex = targetStartIndices[i] * size;
 
     padArrayChunk({
-      source: source.subarray(sourceIndex, sourceIndex + sourceChunkLength),
+      source: source.subarray(sourceIndex, nextSourceIndex),
       target,
       start: targetIndex,
-      end: targetIndex + targetChunkLength,
+      end: nextTargetIndex,
       getData: getChunkData
     });
 
-    sourceIndex += sourceChunkLength;
-    targetIndex += targetChunkLength;
+    sourceIndex = nextSourceIndex;
+    targetIndex = nextTargetIndex;
   }
 
   if (targetIndex < target.length) {

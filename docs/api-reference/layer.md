@@ -62,7 +62,26 @@ deck.gl layers typically expect `data` to be one of the following types:
 - `Promise`: the resolved value will be used as the value of the `data` prop.
 - `AsyncIterable`: an [async iterable](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Symbol/asyncIterator) object that yields data in batches. The default implementation expects each batch to be an array of data objects; one may change this behavior by supplying a custom `dataTransform` callback.
 
-Remarks:
+**data.attributes**
+
+When using a non-iterable `data` object, the object may optionally contain a field `attributes`, if the application wishes to supply binary buffers directly to the layer. This use case is discussed in detail in the [performance developer guide](/docs/developer-guide/performance.md#supply-attributes-directly).
+
+The keys in `data.attributes` correspond to the [accessor](/docs/developer-guide/using-layers.md#accessors) name that the binary should replace, for example `getPosition`, `getColor`. See each layer's documentation for available accessor props.
+
+Each value in `data.attributes` may be one of the following formats:
+
+- luma.gl [Buffer](https://luma.gl/docs/api-reference/webgl/buffer) instance
+- A typed array, which will be used to create a `Buffer`
+- An object containing the following optional fields. For more information, see [WebGL vertex attribute API](https://developer.mozilla.org/en-US/docs/Web/API/WebGLRenderingContext/vertexAttribPointer).
+  + `buffer` ([Buffer](https://luma.gl/docs/api-reference/webgl/buffer))
+  + `value` (TypedArray)
+  + `type` (GLenum) - A WebGL data type, see [vertexAttribPointer](https://developer.mozilla.org/en-US/docs/Web/API/WebGLRenderingContext/vertexAttribPointer#Parameters).
+  + `size` (Number) - the number of elements per vertex attribute.
+  + `offset` (Number) - offset of the first vertex attribute into the buffer, in bytes
+  + `stride` (Number) - the offset between the beginning of consecutive vertex attributes, in bytes
+  + `normalized` (Boolean) - whether data values should be normalized. Note that all color attributes in deck.gl layers are normalized by default.
+
+**Remarks**
 
 * Some layers may accept alternative data formats. For example, the [GeoJsonLayer](/docs/layers/geojson-layer.md) supports any valid GeoJSON object as `data`. These exceptions, if any, are documented in each layer's documentation.
 * When an iterable value is passed to `data`, every accessor function receives the current element as the first argument. When a non-iterable value (any object with a `length` field) is passed to `data`, the accessor functions are responsible of interpreting the data format. The latter is often used with binary inputs. Read about this in [accessors](/docs/developer-guide/using-layers.md#accessors).
@@ -95,7 +114,7 @@ In the second example (conditional rendering) the layer state will be destroyed 
 
 ##### `opacity` (Number, optional)
 
-* Default: `0.8`
+* Default: `1`
 
 The opacity of the layer.
 

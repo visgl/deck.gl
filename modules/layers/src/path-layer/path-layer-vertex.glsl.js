@@ -21,21 +21,20 @@
 export default `\
 #define SHADER_NAME path-layer-vertex-shader
 
-attribute vec3 positions;
+attribute vec2 positions;
 
 attribute float instanceTypes;
 attribute vec3 instanceStartPositions;
 attribute vec3 instanceEndPositions;
 attribute vec3 instanceLeftPositions;
 attribute vec3 instanceRightPositions;
-attribute vec2 instanceLeftPositions64xyLow;
-attribute vec2 instanceStartPositions64xyLow;
-attribute vec2 instanceEndPositions64xyLow;
-attribute vec2 instanceRightPositions64xyLow;
+attribute vec3 instanceLeftPositions64Low;
+attribute vec3 instanceStartPositions64Low;
+attribute vec3 instanceEndPositions64Low;
+attribute vec3 instanceRightPositions64Low;
 attribute float instanceStrokeWidths;
 attribute vec4 instanceColors;
 attribute vec3 instancePickingColors;
-attribute vec2 instanceDashArrays;
 
 uniform float widthScale;
 uniform float widthMinPixels;
@@ -49,7 +48,6 @@ uniform float opacity;
 varying vec4 vColor;
 varying vec2 vCornerOffset;
 varying float vMiterLength;
-varying vec2 vDashArray;
 varying vec2 vPathPosition;
 varying float vPathLength;
 
@@ -63,19 +61,18 @@ float flipIfTrue(bool flag) {
 // calculate line join positions
 vec3 lineJoin(
   vec3 prevPoint, vec3 currPoint, vec3 nextPoint,
-  float relativePosition, bool isEnd, bool isJoint,
-  vec2 width, vec2 widthPixels
+  vec2 width
 ) {
+  bool isEnd = positions.x > 0.0;
+  // side of the segment - -1: left, 0: center, 1: right
+  float sideOfPath = positions.y;
+  float isJoint = float(sideOfPath == 0.0);
+
   vec2 deltaA = (currPoint.xy - prevPoint.xy) / width;
   vec2 deltaB = (nextPoint.xy - currPoint.xy) / width;
 
   float lenA = length(deltaA);
   float lenB = length(deltaB);
-
-  // when two points are closer than PIXEL_EPSILON in pixels,
-  // assume they are the same point to avoid precision issue
-  lenA = lenA > EPSILON ? lenA : 0.0;
-  lenB = lenB > EPSILON ? lenB : 0.0;
 
   vec2 dirA = lenA > 0. ? normalize(deltaA) : vec2(0.0, 0.0);
   vec2 dirB = lenB > 0. ? normalize(deltaB) : vec2(0.0, 0.0);
@@ -84,124 +81,68 @@ vec3 lineJoin(
   vec2 perpB = vec2(-dirB.y, dirB.x);
 
   // tangent of the corner
-  vec2 tangent = vec2(dirA + dirB);
+  vec2 tangent = dirA + dirB;
   tangent = length(tangent) > 0. ? normalize(tangent) : perpA;
   // direction of the corner
   vec2 miterVec = vec2(-tangent.y, tangent.x);
-  // width offset from current position
+  // direction of the segment
+  vec2 dir = isEnd ? dirA : dirB;
+  // direction of the extrusion
   vec2 perp = isEnd ? perpA : perpB;
+  // length of the segment
   float L = isEnd ? lenA : lenB;
 
-  // cap super sharp angles
+  // A = angle of the corner
   float sinHalfA = abs(dot(miterVec, perp));
   float cosHalfA = abs(dot(dirA, miterVec));
 
-  bool turnsRight = dirA.x * dirB.y > dirA.y * dirB.x;
+  // -1: right, 1: left
+  float turnDirection = flipIfTrue(dirA.x * dirB.y > dirA.y * dirB.x);
 
-  float offsetScale = 1.0 / max(sinHalfA, EPSILON);
+  // relative position to the corner:
+  // -1: inside (smaller side of the angle)
+  // 0: center
+  // 1: outside (bigger side of the angle)
+  float cornerPosition = sideOfPath * turnDirection;
 
-  float cornerPosition = isJoint ?
-    0.0 :
-    flipIfTrue(turnsRight == (relativePosition > 0.0));
-
-  // do not bevel if line segment is too short
-  cornerPosition *=
-    float(cornerPosition <= 0.0 || sinHalfA < min(lenA, lenB) * cosHalfA);
-
+  float miterSize = 1.0 / max(sinHalfA, EPSILON);
   // trim if inside corner extends further than the line segment
-  if (cornerPosition < 0.0) {
-    offsetScale = min(offsetScale, L / max(cosHalfA, EPSILON));
-  }
-
-  vMiterLength = cornerPosition >= 0.0 ?
-    mix(offsetScale, 0.0, cornerPosition) :
-    offsetScale * cornerPosition;
-  vMiterLength -= sinHalfA * jointType;
-
-  float offsetDirection = mix(
-    positions.y,
-    mix(
-      flipIfTrue(turnsRight),
-      positions.y * flipIfTrue(turnsRight == (positions.x == 1.)),
-      cornerPosition
-    ),
+  miterSize = mix(
+    min(miterSize, max(lenA, lenB) / max(cosHalfA, EPSILON)),
+    miterSize,
     step(0.0, cornerPosition)
   );
 
-  vec2 offsetVec = mix(miterVec, -tangent, step(0.5, cornerPosition));
-  offsetScale = mix(offsetScale, 1.0 / max(cosHalfA, 0.001), step(0.5, cornerPosition));
+  vec2 offsetVec = mix(miterVec * miterSize, perp, step(0.5, cornerPosition))
+    * (sideOfPath + isJoint * turnDirection);
 
   // special treatment for start cap and end cap
   bool isStartCap = lenA == 0.0 || (!isEnd && (instanceTypes == 1.0 || instanceTypes == 3.0));
   bool isEndCap = lenB == 0.0 || (isEnd && (instanceTypes == 2.0 || instanceTypes == 3.0));
   bool isCap = isStartCap || isEndCap;
 
-  // 0: center, 1: side
-  cornerPosition = isCap ? (1.0 - positions.z) : 0.;
-
-  // start of path: use next - curr
-  if (isStartCap) {
-    offsetVec = mix(dirB, perpB, cornerPosition);
-  }
-
-  // end of path: use curr - prev
-  if (isEndCap) {
-    offsetVec = mix(dirA, perpA, cornerPosition);
-  }
-
   // extend out a triangle to envelope the round cap
   if (isCap) {
-    offsetScale = mix(4.0 * jointType, 1.0, cornerPosition);
-    vMiterLength = 1.0 - cornerPosition;
-    offsetDirection = mix(flipIfTrue(isStartCap), positions.y, cornerPosition);
+    offsetVec = mix(perp * sideOfPath, dir * jointType * 4.0 * flipIfTrue(isStartCap), isJoint);
   }
 
-  vCornerOffset = offsetVec * offsetDirection * offsetScale;
-
-  // Generate variables for dash calculation
-  vDashArray = instanceDashArrays;
+  // Generate variables for fragment shader
   vPathLength = L;
-  // vec2 offsetFromStartOfPath = isEnd ? vCornerOffset + deltaA : vCornerOffset;
-  vec2 offsetFromStartOfPath = vCornerOffset;
-  if (isEnd) {
-    offsetFromStartOfPath += deltaA;
-  }
-  vec2 dir = isEnd ? dirA : dirB;
+  vCornerOffset = offsetVec;
+  vMiterLength = dot(vCornerOffset, miterVec * turnDirection);
+  vMiterLength = isCap ? isJoint : vMiterLength;
+
+  vec2 offsetFromStartOfPath = vCornerOffset + deltaA * float(isEnd);
   vPathPosition = vec2(
-    positions.y + positions.z * offsetDirection,
+    dot(offsetFromStartOfPath, perp),
     dot(offsetFromStartOfPath, dir)
   );
   geometry.uv = vPathPosition;
 
   float isValid = step(instanceTypes, 3.5);
-  vec3 offset = vec3(vCornerOffset * widthPixels * isValid, 0.0);
+  vec3 offset = vec3(offsetVec * width * isValid, 0.0);
   DECKGL_FILTER_SIZE(offset, geometry);
-  return currPoint + vec3(offset.xy / widthPixels * width, 0.0);
-}
-
-// calculate line join positions
-// extract params from attributes and uniforms
-vec3 lineJoin(vec3 prevPoint, vec3 currPoint, vec3 nextPoint) {
-
-  // relative position to the corner:
-  // -1: inside (smaller side of the angle)
-  // 0: center
-  // 1: outside (bigger side of the angle)
-
-  float relativePosition = positions.y;
-  bool isEnd = positions.x > EPSILON;
-  bool isJoint = positions.z > EPSILON;
-
-  vec2 widthPixels = vec2(clamp(project_size_to_pixel(instanceStrokeWidths * widthScale),
-    widthMinPixels, widthMaxPixels) / 2.0);
-
-  vec2 width = billboard ? project_pixel_size_to_clipspace(widthPixels) : project_pixel_size(widthPixels);
-
-  return lineJoin(
-    prevPoint, currPoint, nextPoint,
-    relativePosition, isEnd, isJoint,
-    width, widthPixels
-  );
+  return currPoint + offset;
 }
 
 // In clipspace extrusion, if a line extends behind the camera, clip it to avoid visual artifacts
@@ -217,44 +158,52 @@ void main() {
   geometry.worldPositionAlt = instanceEndPositions;
   geometry.pickingColor = instancePickingColors;
 
+  vec2 widthPixels = vec2(clamp(project_size_to_pixel(instanceStrokeWidths * widthScale),
+    widthMinPixels, widthMaxPixels) / 2.0);
+
   vColor = vec4(instanceColors.rgb, instanceColors.a * opacity);
 
   float isEnd = positions.x;
 
   vec3 prevPosition = mix(instanceLeftPositions, instanceStartPositions, isEnd);
-  vec2 prevPosition64xyLow = mix(instanceLeftPositions64xyLow, instanceStartPositions64xyLow, isEnd);
+  vec3 prevPosition64Low = mix(instanceLeftPositions64Low, instanceStartPositions64Low, isEnd);
 
   vec3 currPosition = mix(instanceStartPositions, instanceEndPositions, isEnd);
-  vec2 currPosition64xyLow = mix(instanceStartPositions64xyLow, instanceEndPositions64xyLow, isEnd);
+  vec3 currPosition64Low = mix(instanceStartPositions64Low, instanceEndPositions64Low, isEnd);
 
   vec3 nextPosition = mix(instanceEndPositions, instanceRightPositions, isEnd);
-  vec2 nextPosition64xyLow = mix(instanceEndPositions64xyLow, instanceRightPositions64xyLow, isEnd);
+  vec3 nextPosition64Low = mix(instanceEndPositions64Low, instanceRightPositions64Low, isEnd);
 
   if (billboard) {
     // Extrude in clipspace
-    vec4 prevPositionScreen = project_position_to_clipspace(prevPosition, prevPosition64xyLow, ZERO_OFFSET);
-    vec4 currPositionScreen = project_position_to_clipspace(currPosition, currPosition64xyLow, ZERO_OFFSET, geometry.position);
-    vec4 nextPositionScreen = project_position_to_clipspace(nextPosition, nextPosition64xyLow, ZERO_OFFSET);
+    vec4 prevPositionScreen = project_position_to_clipspace(prevPosition, prevPosition64Low, ZERO_OFFSET);
+    vec4 currPositionScreen = project_position_to_clipspace(currPosition, currPosition64Low, ZERO_OFFSET, geometry.position);
+    vec4 nextPositionScreen = project_position_to_clipspace(nextPosition, nextPosition64Low, ZERO_OFFSET);
 
     clipLine(prevPositionScreen, currPositionScreen);
     clipLine(nextPositionScreen, currPositionScreen);
     clipLine(currPositionScreen, mix(nextPositionScreen, prevPositionScreen, isEnd));
 
+    vec2 width = project_pixel_size_to_clipspace(widthPixels);
+
     vec3 pos = lineJoin(
       prevPositionScreen.xyz / prevPositionScreen.w,
       currPositionScreen.xyz / currPositionScreen.w,
-      nextPositionScreen.xyz / nextPositionScreen.w
+      nextPositionScreen.xyz / nextPositionScreen.w,
+      width
     );
 
     gl_Position = vec4(pos * currPositionScreen.w, currPositionScreen.w);
   } else {
     // Extrude in commonspace
-    prevPosition = project_position(prevPosition, prevPosition64xyLow);
-    currPosition = project_position(currPosition, currPosition64xyLow);
-    nextPosition = project_position(nextPosition, nextPosition64xyLow);
+    prevPosition = project_position(prevPosition, prevPosition64Low);
+    currPosition = project_position(currPosition, currPosition64Low);
+    nextPosition = project_position(nextPosition, nextPosition64Low);
+
+    vec2 width = project_pixel_size(widthPixels);
 
     vec4 pos = vec4(
-      lineJoin(prevPosition, currPosition, nextPosition),
+      lineJoin(prevPosition, currPosition, nextPosition, width),
       1.0);
     geometry.position = pos;
     gl_Position = project_common_position_to_clipspace(pos);

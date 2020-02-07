@@ -27,5 +27,6 @@ varying vec3 vWeights;
 
 void main(void) {
   gl_FragColor = vec4(vWeights, 1.0);
+  DECKGL_FILTER_COLOR(gl_FragColor, geometry);
 }
 `;

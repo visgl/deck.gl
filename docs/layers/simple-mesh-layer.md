@@ -59,10 +59,10 @@ new SimpleMeshLayer({});
 To use pre-bundled scripts:
 
 ```html
-<script src="https://unpkg.com/deck.gl@^7.0.0/dist.min.js"></script>
+<script src="https://unpkg.com/deck.gl@^8.0.0/dist.min.js"></script>
 <!-- or -->
-<script src="https://unpkg.com/@deck.gl/core@^7.0.0/dist.min.js"></script>
-<script src="https://unpkg.com/@deck.gl/mesh-layers@^7.0.0/dist.min.js"></script>
+<script src="https://unpkg.com/@deck.gl/core@^8.0.0/dist.min.js"></script>
+<script src="https://unpkg.com/@deck.gl/mesh-layers@^8.0.0/dist.min.js"></script>
 ```
 
 ```js
@@ -116,10 +116,11 @@ Whether to render the mesh in wireframe mode.
 
 ##### `material` (Object, optional)
 
-* Default: `new PhongMaterial()`
+* Default: `true`
 
 This is an object that contains material props for [lighting effect](/docs/effects/lighting-effect.md) applied on extruded polygons.
-Check [PhongMaterial](https://github.com/uber/luma.gl/tree/7.0-release/docs/api-reference/core/materials/phong-material.md) for more details.
+Check [the lighting guide](/docs/developer-guide/using-lighting.md#constructing-a-material-instance) for configurable settings.
+
 
 ### Data Accessors
 
@@ -135,7 +136,7 @@ Method called to retrieve the center position for each object in the `data` stre
 
 - Default: `[0, 0, 0, 255]`
 
-The color of each object, in `r, g, b, [a]`. Each component is in the 0-255 range. Only used if `texture` is empty.
+The rgba color is in the format of `[r, g, b, [a]]`. Each channel is a number between 0-255 and `a` is 255 if not supplied.. Only used if `texture` is empty.
 
 * If an array is provided, it is used as the color for all objects.
 * If a function is provided, it is called on each object to retrieve its color.
@@ -144,7 +145,7 @@ The color of each object, in `r, g, b, [a]`. Each component is in the 0-255 rang
 
 - Default: `[0, 0, 0]`
 
-Object orientation defined as a vec3 of Euler angles, `[pitch, yaw, roll]` in degrees.
+Object orientation defined as a vec3 of Euler angles, `[pitch, yaw, roll]` in degrees. This will be composed with layer's [modelMatrix](https://github.com/uber/deck.gl/blob/master/docs/api-reference/layer.md#modelmatrix-number16-optional).
 
 * If an array is provided, it is used as the orientation for all objects.
 * If a function is provided, it is called on each object to retrieve its orientation.
@@ -162,7 +163,7 @@ Scaling factor on the mesh along each axis.
 
 - Default: `[0, 0, 0]`
 
-Translation of the mesh along each axis. Offset from the center position given by `getPosition`. `[x, y, z]` in meters.
+Translation of the mesh along each axis. Offset from the center position given by `getPosition`. `[x, y, z]` in meters. This will be composed with layer's [modelMatrix](https://github.com/uber/deck.gl/blob/master/docs/api-reference/layer.md#modelmatrix-number16-optional).
 
 * If an array is provided, it is used as the offset for all objects.
 * If a function is provided, it is called on each object to retrieve its offset.

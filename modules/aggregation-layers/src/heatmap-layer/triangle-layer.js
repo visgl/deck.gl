@@ -20,7 +20,7 @@
 
 import GL from '@luma.gl/constants';
 import {Model, Geometry} from '@luma.gl/core';
-import {Layer} from '@deck.gl/core';
+import {Layer, project32} from '@deck.gl/core';
 import vs from './triangle-layer-vertex.glsl';
 import fs from './triangle-layer-fragment.glsl';
 
@@ -31,7 +31,7 @@ const defaultProps = {
 
 export default class TriangleLayer extends Layer {
   getShaders() {
-    return {vs, fs, modules: ['project32']};
+    return {vs, fs, modules: [project32]};
   }
 
   initializeState() {

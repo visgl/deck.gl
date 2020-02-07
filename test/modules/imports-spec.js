@@ -48,9 +48,7 @@ test('Top-level imports', t0 => {
 
   test('import "deck.gl"', t => {
     t.notOk(hasEmptyExports(deck), 'No empty top-level export in deck.gl');
-    t.notOk(hasEmptyExports(deck.experimental), 'No empty experimental export in deck.gl');
     t.notOk(hasEmptyExports(core), 'No empty top-level export in @deck.gl/core');
-    t.notOk(hasEmptyExports(core.experimental), 'No empty experimental export in @deck.gl/core');
     t.end();
   });
 
@@ -82,8 +80,11 @@ test('Top-level imports', t0 => {
     t.ok(deck.LineLayer, 'LineLayer symbol imported');
 
     t.ok(Number.isFinite(deck.COORDINATE_SYSTEM.LNGLAT), 'COORDINATE_SYSTEM.LNGLAT imported');
-    t.ok(Number.isFinite(deck.COORDINATE_SYSTEM.METERS), 'COORDINATE_SYSTEM.METERS imported');
-    t.ok(Number.isFinite(deck.COORDINATE_SYSTEM.IDENTITY), 'COORDINATE_SYSTEM.IDENTITY imported');
+    t.ok(
+      Number.isFinite(deck.COORDINATE_SYSTEM.METER_OFFSETS),
+      'COORDINATE_SYSTEM.METERS imported'
+    );
+    t.ok(Number.isFinite(deck.COORDINATE_SYSTEM.CARTESIAN), 'COORDINATE_SYSTEM.CARTESIAN imported');
     t.end();
   });
 

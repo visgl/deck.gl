@@ -1,5 +1,3 @@
-import {createModuleInjection} from '@luma.gl/core';
-
 /*
  * data filter shader module
  */
@@ -13,9 +11,19 @@ uniform bool filter_enabled;
 uniform bool filter_transformSize;
 
 #ifdef NON_INSTANCED_MODEL
-attribute DATAFILTER_TYPE filterValues;
+  #define DATAFILTER_ATTRIB filterValues
+  #define DATAFILTER_ATTRIB_64LOW filterValues64Low
 #else
-attribute DATAFILTER_TYPE instanceFilterValues;
+  #define DATAFILTER_ATTRIB instanceFilterValues
+  #define DATAFILTER_ATTRIB_64LOW instanceFilterValues64Low
+#endif
+
+attribute DATAFILTER_TYPE DATAFILTER_ATTRIB;
+#ifdef DATAFILTER_DOUBLE
+  attribute DATAFILTER_TYPE DATAFILTER_ATTRIB_64LOW;
+
+  uniform DATAFILTER_TYPE filter_min64High;
+  uniform DATAFILTER_TYPE filter_max64High;
 #endif
 
 varying float dataFilter_value;
@@ -32,16 +40,16 @@ float dataFilter_reduceValue(vec3 value) {
 float dataFilter_reduceValue(vec4 value) {
   return min(min(value.x, value.y), min(value.z, value.w));
 }
-void dataFilter_setValue(DATAFILTER_TYPE value) {
+void dataFilter_setValue(DATAFILTER_TYPE valueFromMin, DATAFILTER_TYPE valueFromMax) {
   if (filter_enabled) {
     if (filter_useSoftMargin) {
       dataFilter_value = dataFilter_reduceValue(
-        smoothstep(filter_min, filter_softMin, value) *
-        (1.0 - smoothstep(filter_softMax, filter_max, value))
+        smoothstep(filter_min, filter_softMin, valueFromMin) *
+        (1.0 - smoothstep(filter_softMax, filter_max, valueFromMax))
       );
     } else {
       dataFilter_value = dataFilter_reduceValue(
-        step(filter_min, value) * step(value, filter_max)
+        step(filter_min, valueFromMin) * step(valueFromMax, filter_max)
       );
     }
   } else {
@@ -88,42 +96,73 @@ const getUniforms = opts => {
   return uniforms;
 };
 
-// filter_setValue(instanceFilterValue);
-const moduleName = 'data-filter';
+const getUniforms64 = opts => {
+  if (!opts || !opts.extensions) {
+    return {};
+  }
+  const uniforms = getUniforms(opts);
+  if (Number.isFinite(uniforms.filter_min)) {
+    const min64High = Math.fround(uniforms.filter_min);
+    uniforms.filter_min -= min64High;
+    uniforms.filter_softMin -= min64High;
+    uniforms.filter_min64High = min64High;
 
-createModuleInjection(moduleName, {
-  hook: 'vs:#main-start',
-  injection: `
-#ifdef NON_INSTANCED_MODEL
-dataFilter_setValue(filterValues);
-#else
-dataFilter_setValue(instanceFilterValues);
-#endif
+    const max64High = Math.fround(uniforms.filter_max);
+    uniforms.filter_max -= max64High;
+    uniforms.filter_softMax -= max64High;
+    uniforms.filter_max64High = max64High;
+  } else {
+    const min64High = uniforms.filter_min.map(Math.fround);
+    uniforms.filter_min = uniforms.filter_min.map((x, i) => x - min64High[i]);
+    uniforms.filter_softMin = uniforms.filter_softMin.map((x, i) => x - min64High[i]);
+    uniforms.filter_min64High = min64High;
+
+    const max64High = uniforms.filter_max.map(Math.fround);
+    uniforms.filter_max = uniforms.filter_max.map((x, i) => x - max64High[i]);
+    uniforms.filter_softMax = uniforms.filter_softMax.map((x, i) => x - max64High[i]);
+    uniforms.filter_max64High = max64High;
+  }
+  return uniforms;
+};
+
+const inject = {
+  'vs:#main-start': `
+    #ifdef DATAFILTER_DOUBLE
+      dataFilter_setValue(
+        DATAFILTER_ATTRIB - filter_min64High + DATAFILTER_ATTRIB_64LOW,
+        DATAFILTER_ATTRIB - filter_max64High + DATAFILTER_ATTRIB_64LOW
+      );
+    #else
+      dataFilter_setValue(DATAFILTER_ATTRIB, DATAFILTER_ATTRIB);
+    #endif
+  `,
+
+  'vs:DECKGL_FILTER_SIZE': `
+    if (filter_transformSize) {
+      size = size * dataFilter_value;
+    }
+  `,
+
+  'fs:DECKGL_FILTER_COLOR': `
+    if (dataFilter_value == 0.0) discard;
+    if (filter_transformColor) {
+      color.a *= dataFilter_value;
+    }
   `
-});
+};
 
-createModuleInjection(moduleName, {
-  hook: 'vs:DECKGL_FILTER_SIZE',
-  injection: `
-if (filter_transformSize) {
-  size = size * dataFilter_value;
-}
-  `
-});
-
-createModuleInjection(moduleName, {
-  hook: 'fs:DECKGL_FILTER_COLOR',
-  injection: `
-if (dataFilter_value == 0.0) discard;
-if (filter_transformColor) {
-  color.a *= dataFilter_value;
-}
-  `
-});
-
-export default {
-  name: moduleName,
+export const shaderModule = {
+  name: 'data-filter',
   vs,
   fs,
+  inject,
   getUniforms
+};
+
+export const shaderModule64 = {
+  name: 'data-filter-fp64',
+  vs,
+  fs,
+  inject,
+  getUniforms: getUniforms64
 };

@@ -18,7 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {Layer, createIterable} from '@deck.gl/core';
+import {Layer, picking} from '@deck.gl/core';
 
 import GL from '@luma.gl/constants';
 import {Model, Geometry} from '@luma.gl/core';
@@ -40,15 +40,12 @@ const defaultProps = {
   widthUnits: 'pixels',
   widthScale: {type: 'number', value: 1, min: 0},
   widthMinPixels: {type: 'number', value: 0, min: 0},
-  widthMaxPixels: {type: 'number', value: Number.MAX_SAFE_INTEGER, min: 0},
-
-  // Deprecated, remove in v8
-  getStrokeWidth: {deprecatedFor: 'getWidth'}
+  widthMaxPixels: {type: 'number', value: Number.MAX_SAFE_INTEGER, min: 0}
 };
 
 export default class ArcLayer extends Layer {
   getShaders() {
-    return super.getShaders({vs, fs, modules: ['picking']}); // 'project' module added by default.
+    return super.getShaders({vs, fs, modules: [picking]}); // 'project' module added by default.
   }
 
   initializeState() {
@@ -56,13 +53,19 @@ export default class ArcLayer extends Layer {
 
     /* eslint-disable max-len */
     attributeManager.addInstanced({
-      instancePositions: {
-        size: 4,
+      instanceSourcePositions: {
+        size: 3,
         type: GL.DOUBLE,
         fp64: this.use64bitPositions(),
         transition: true,
-        accessor: ['getSourcePosition', 'getTargetPosition'],
-        update: this.calculateInstancePositions
+        accessor: 'getSourcePosition'
+      },
+      instanceTargetPositions: {
+        size: 3,
+        type: GL.DOUBLE,
+        fp64: this.use64bitPositions(),
+        transition: true,
+        accessor: 'getTargetPosition'
       },
       instanceSourceColors: {
         size: this.props.colorFormat.length,
@@ -119,7 +122,7 @@ export default class ArcLayer extends Layer {
     const {viewport} = this.context;
     const {widthUnits, widthScale, widthMinPixels, widthMaxPixels} = this.props;
 
-    const widthMultiplier = widthUnits === 'pixels' ? viewport.distanceScales.metersPerPixel[2] : 1;
+    const widthMultiplier = widthUnits === 'pixels' ? viewport.metersPerPixel : 1;
 
     this.state.model
       .setUniforms(
@@ -163,24 +166,6 @@ export default class ArcLayer extends Layer {
     model.setUniforms({numSegments: NUM_SEGMENTS});
 
     return model;
-  }
-
-  calculateInstancePositions(attribute, {startRow, endRow}) {
-    const {data, getSourcePosition, getTargetPosition} = this.props;
-    const {value, size} = attribute;
-    let i = startRow * size;
-    const {iterable, objectInfo} = createIterable(data, startRow, endRow);
-    for (const object of iterable) {
-      objectInfo.index++;
-      const sourcePosition = getSourcePosition(object, objectInfo);
-      value[i++] = sourcePosition[0];
-      value[i++] = sourcePosition[1];
-      // Call `getTargetPosition` after `sourcePosition` is used in case both accessors write into
-      // the same temp array
-      const targetPosition = getTargetPosition(object, objectInfo);
-      value[i++] = targetPosition[0];
-      value[i++] = targetPosition[1];
-    }
   }
 }
 

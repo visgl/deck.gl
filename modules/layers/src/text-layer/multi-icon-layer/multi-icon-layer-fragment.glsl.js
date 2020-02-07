@@ -27,6 +27,8 @@ uniform sampler2D iconsTexture;
 uniform float buffer;
 uniform bool sdf;
 uniform float alphaCutoff;
+uniform bool shouldDrawBackground;
+uniform vec3 backgroundColor;
 
 varying vec4 vColor;
 varying vec2 vTextureCoords;
@@ -36,23 +38,35 @@ varying vec2 uv;
 void main(void) {
   geometry.uv = uv;
 
-  vec4 texColor = texture2D(iconsTexture, vTextureCoords);
-  
-  float alpha = texColor.a;
-  // if enable sdf (signed distance fields)
-  if (sdf) {
-    float distance = texture2D(iconsTexture, vTextureCoords).a;
-    alpha = smoothstep(buffer - vGamma, buffer + vGamma, distance);
+  if (!picking_uActive) {
+    float alpha = texture2D(iconsTexture, vTextureCoords).a;
+
+    // if enable sdf (signed distance fields)
+    if (sdf) {
+      alpha = smoothstep(buffer - vGamma, buffer + vGamma, alpha);
+    }
+
+    // Take the global opacity and the alpha from vColor into account for the alpha component
+    float a = alpha * vColor.a;
+    
+    if (a < alphaCutoff) {
+      // We are now in the background, let's decide what to draw
+      if (shouldDrawBackground) {
+        // draw background color and return if not picking
+        gl_FragColor = vec4(backgroundColor, vColor.a);
+        return;
+      } else {
+        // no background and no picking
+        discard;
+      }
+    }
+
+    if (shouldDrawBackground) {
+      gl_FragColor = vec4(mix(backgroundColor, vColor.rgb, alpha), vColor.a);
+    } else {
+      gl_FragColor = vec4(vColor.rgb, a);
+    }
   }
-
-  // Take the global opacity and the alpha from vColor into account for the alpha component
-  float a = alpha * vColor.a;
-
-  if (a < alphaCutoff) {
-    discard;
-  }
-
-  gl_FragColor = vec4(vColor.rgb, a);
 
   DECKGL_FILTER_COLOR(gl_FragColor, geometry);
 }

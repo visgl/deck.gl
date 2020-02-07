@@ -32,8 +32,10 @@ import utilsBench from './utils.bench';
 import arrayCopyBench from './array-copy.bench';
 import attributeUpdateBench from './attribute-update.bench';
 import comparePropsBench from './compare-props.bench';
+import createPropsBench from './create-props.bench';
+import textAutoWrappingBench from './text-auto-wrapping.bench';
 
-const suite = new Bench({});
+const suite = new Bench({minIterations: 10});
 
 // add tests
 layerBench(suite);
@@ -47,6 +49,8 @@ gridAggregatorBench(suite);
 arrayCopyBench(suite);
 attributeUpdateBench(suite);
 comparePropsBench(suite);
+createPropsBench(suite);
+textAutoWrappingBench(suite);
 
 // Run the suite
 suite.run();

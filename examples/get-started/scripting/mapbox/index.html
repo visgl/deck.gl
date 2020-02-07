@@ -1,11 +1,11 @@
 <html>
   <head>
     <!-- deck.gl standalone bundle -->
-    <script src="https://unpkg.com/deck.gl@^7.0.0/dist.min.js"></script>
+    <script src="https://unpkg.com/deck.gl@^8.0.0/dist.min.js"></script>
 
     <!-- Mapbox dependencies -->
-    <script src="https://api.tiles.mapbox.com/mapbox-gl-js/v0.53.0/mapbox-gl.js"></script>
-    <link href="https://api.tiles.mapbox.com/mapbox-gl-js/v0.53.0/mapbox-gl.css" rel="stylesheet" />
+    <script src="https://api.tiles.mapbox.com/mapbox-gl-js/v1.4.0/mapbox-gl.js"></script>
+    <link href="https://api.tiles.mapbox.com/mapbox-gl-js/v1.4.0/mapbox-gl.css" rel="stylesheet" />
 
     <style type="text/css">
       body {margin: 0; padding: 0;}
@@ -28,11 +28,14 @@ const deckgl = new deck.DeckGL({
   // Set your Mapbox access token here
   mapboxApiAccessToken: '<your mapbox token>',
 
-  latitude: 51.47,
-  longitude: 0.45,
-  zoom: 4,
-  bearing: 0,
-  pitch: 30,
+  initialViewState: {
+    latitude: 51.47,
+    longitude: 0.45,
+    zoom: 4,
+    bearing: 0,
+    pitch: 30,
+  },
+  controller: true,
 
   layers: [
     new deck.GeoJsonLayer({
@@ -41,7 +44,6 @@ const deckgl = new deck.DeckGL({
       // Styles
       filled: true,
       pointRadiusMinPixels: 2,
-      opacity: 1,
       pointRadiusScale: 2000,
       getRadius: f => (11 - f.properties.scalerank),
       getFillColor: [200, 0, 80, 180],

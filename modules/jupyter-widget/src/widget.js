@@ -3,10 +3,30 @@ import {DOMWidgetModel, DOMWidgetView} from '@jupyter-widgets/base';
 
 import {MODULE_NAME, MODULE_VERSION} from './version';
 
-import {loadCss, hideMapboxCSSWarning, initDeck, updateDeck} from './utils';
+import {createDeck, updateDeck} from './create-deck';
+import jsonConverter from './create-deck';
+import {deserializeMatrix, processDataBuffer} from './binary-transport';
 
 const MAPBOX_CSS_URL = 'https://api.tiles.mapbox.com/mapbox-gl-js/v1.2.1/mapbox-gl.css';
+const ERROR_BOX_CLASSNAME = 'error-box';
 
+/**
+ * Hides a warning in the mapbox-gl.js library from surfacing in the notebook as text.
+ */
+function hideMapboxCSSWarning() {
+  const missingCssWarning = document.getElementsByClassName('mapboxgl-missing-css')[0];
+  if (missingCssWarning) {
+    missingCssWarning.style.display = 'none';
+  }
+}
+
+function loadCss(url) {
+  const link = document.createElement('link');
+  link.type = 'text/css';
+  link.rel = 'stylesheet';
+  link.href = url;
+  document.getElementsByTagName('head')[0].appendChild(link);
+}
 // Note: Variables shared explictly between Python and JavaScript use snake_case
 export class DeckGLModel extends DOMWidgetModel {
   defaults() {
@@ -20,16 +40,21 @@ export class DeckGLModel extends DOMWidgetModel {
       _view_module_version: DeckGLModel.view_module_version,
       json_input: null,
       mapbox_key: null,
-      selected_data: null,
+      selected_data: [],
+      data_buffer: null,
       tooltip: null,
       width: '100%',
-      height: 500
+      height: 500,
+      js_warning: false
     };
   }
 
   static get serializers() {
-    return {...DOMWidgetModel.serializers};
-    // Add any extra serializers here
+    return {
+      ...DOMWidgetModel.serializers,
+      // Add any extra serializers here
+      data_buffer: {deserialize: deserializeMatrix}
+    };
   }
 
   static get model_name() {
@@ -72,46 +97,98 @@ export class DeckGLView extends DOMWidgetView {
     const jsonInput = JSON.parse(this.model.get('json_input'));
     const tooltip = this.model.get('tooltip');
 
+    if (this.model.get('js_warning')) {
+      const errorBox = addErrorBox();
+      container.append(errorBox);
+    }
+
     loadCss(MAPBOX_CSS_URL);
-    initDeck({
+    this.deck = createDeck({
       mapboxApiKey,
       container,
       jsonInput,
       tooltip,
-      onComplete: ({jsonConverter, deckgl}) => {
-        this.jsonDeck = {jsonConverter, deckgl};
-      },
-      handleClick: this.handleClick.bind(this)
+      handleClick: this.handleClick.bind(this),
+      handleWarning: this.handleWarning.bind(this)
     });
   }
 
   remove() {
-    if (this.jsonDeck) {
-      this.jsonDeck.deckgl.finalize();
-      this.jsonDeck = null;
+    if (this.deck) {
+      this.deck.finalize();
+      this.deck = null;
     }
   }
 
   render() {
     super.render();
+
     this.model.on('change:json_input', this.valueChanged.bind(this), this);
+    this.model.on('change:data_buffer', this.dataBufferChanged.bind(this), this);
+    this.dataBufferChanged();
+  }
+
+  dataBufferChanged() {
+    if (this.model.get('data_buffer')) {
+      const propsWithBinary = processDataBuffer({
+        dataBuffer: this.model.get('data_buffer'),
+        jsonProps: this.model.get('json_input')
+      });
+
+      const convertedJson = jsonConverter.convert(propsWithBinary);
+      this.deck.setProps(convertedJson);
+    }
   }
 
   valueChanged() {
-    updateDeck(JSON.parse(this.model.get('json_input')), this.jsonDeck);
+    updateDeck(JSON.parse(this.model.get('json_input')), this.deck);
     // Jupyter notebook displays an error that this suppresses
     hideMapboxCSSWarning();
   }
 
-  handleClick(e) {
-    if (!e) {
+  handleClick(datum, e) {
+    if (!datum || !datum.object) {
+      this.model.set('selected_data', JSON.stringify(''));
+      this.model.save_changes();
       return;
     }
-    if (e.object && e.object.points) {
-      this.model.set('selected_data', e.object.points);
+    const multiselectEnabled = e.srcEvent.metaKey || e.srcEvent.metaKey;
+    const dataPayload = datum.object && datum.object.points ? datum.object.points : datum.object;
+    if (multiselectEnabled) {
+      let selectedData = JSON.parse(this.model.get('selected_data'));
+      if (!Array.isArray(selectedData)) {
+        selectedData = [];
+      }
+      selectedData.push(dataPayload);
+      this.model.set('selected_data', JSON.stringify(selectedData));
     } else {
-      this.model.set('selected_data', e.object);
+      // Single selection
+      this.model.set('selected_data', JSON.stringify(dataPayload));
     }
     this.model.save_changes();
   }
+
+  handleWarning(warningMessage) {
+    const errorBox = this.el.getElementsByClassName(ERROR_BOX_CLASSNAME)[0];
+    if (this.model.get('js_warning') && errorBox) {
+      errorBox.innerText = warningMessage;
+    }
+  }
+}
+
+function addErrorBox() {
+  const errorBox = document.createElement('div');
+  errorBox.className = ERROR_BOX_CLASSNAME;
+  Object.assign(errorBox.style, {
+    width: '100%',
+    height: '20px',
+    position: 'absolute',
+    zIndex: '1000',
+    backgroundColor: 'lemonchiffon',
+    cursor: 'pointer'
+  });
+  errorBox.onclick = e => {
+    errorBox.style.display = 'none';
+  };
+  return errorBox;
 }

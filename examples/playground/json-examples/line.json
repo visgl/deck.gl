@@ -13,29 +13,39 @@
   "pickingRadius": 5,
   "views": [
     {
-      "type": "MapView",
+      "@@type": "MapView",
       "controller": true,
       "mapStyle": "mapbox://styles/mapbox/dark-v9"
     }
   ],
   "layers": [
     {
-      "type": "ScatterplotLayer",
+      "@@type": "ScatterplotLayer",
       "id": "airports",
       "data": "https://raw.githubusercontent.com/uber-common/deck.gl-data/master/examples/line/airports.json",
       "radiusScale": 20,
-      "getPosition": "coordinates",
-      "getFillColor": [255, 140, 0],
+      "getPosition": "@@=coordinates",
+      "getFillColor": [
+        255,
+        140,
+        0
+      ],
       "getRadius": 60
     },
     {
-      "type": "LineLayer",
+      "@@type": "LineLayer",
       "id": "flight-paths",
       "data": "https://raw.githubusercontent.com/uber-common/deck.gl-data/master/examples/line/heathrow-flights.json",
+      "opacity": 0.8,
       "strokeWidth": 3,
-      "getSourcePosition": "start",
-      "getTargetPosition": "end",
-      "getColor": [200, 32, 64, 192]
+      "getSourcePosition": "@@=start",
+      "getTargetPosition": "@@=end",
+      "getColor": [
+        200,
+        32,
+        64,
+        192
+      ]
     }
   ]
 }

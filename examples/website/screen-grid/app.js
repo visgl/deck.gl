@@ -30,14 +30,15 @@ const colorRange = [
   [189, 0, 38, 255]
 ];
 
-export class App extends Component {
+export default class App extends Component {
   _renderLayers() {
-    const {data = DATA_URL, cellSize = 20, gpuAggregation = true, aggregation = 'Sum'} = this.props;
+    const {data = DATA_URL, cellSize = 20, gpuAggregation = true, aggregation = 'SUM'} = this.props;
 
     return [
       new ScreenGridLayer({
         id: 'grid',
         data,
+        opacity: 0.8,
         getPosition: d => [d[0], d[1]],
         getWeight: d => d[2],
         cellSizePixels: cellSize,

@@ -20,8 +20,7 @@
 
 import React, {createElement} from 'react';
 import PropTypes from 'prop-types';
-import {Deck, experimental} from '@deck.gl/core';
-const {memoize} = experimental;
+import {Deck, _memoize as memoize} from '@deck.gl/core';
 
 import extractJSXLayers from './utils/extract-jsx-layers';
 import positionChildrenUnderViews from './utils/position-children-under-views';
@@ -29,6 +28,11 @@ import positionChildrenUnderViews from './utils/position-children-under-views';
 const propTypes = Deck.getPropTypes(PropTypes);
 
 const defaultProps = Deck.defaultProps;
+
+const CANVAS_STYLE = {
+  left: 0,
+  top: 0
+};
 
 export default class DeckGL extends React.Component {
   constructor(props) {
@@ -39,6 +43,10 @@ export default class DeckGL extends React.Component {
 
     // The redraw flag of deck
     this._needsRedraw = null;
+
+    // Refs
+    this._containerRef = React.createRef();
+    this._canvasRef = React.createRef();
 
     // Bind public methods
     this.pickObject = this.pickObject.bind(this);
@@ -60,7 +68,11 @@ export default class DeckGL extends React.Component {
       this.deck ||
       new DeckClass(
         Object.assign({}, this.props, {
-          canvas: this.deckCanvas,
+          parent: this._containerRef.current,
+          canvas: this._canvasRef.current,
+          style: null,
+          width: '100%',
+          height: '100%',
           // The Deck's animation loop is independent from React's render cycle, causing potential
           // synchronization issues. We provide this custom render function to make sure that React
           // and Deck update on the same schedule.
@@ -159,6 +171,9 @@ export default class DeckGL extends React.Component {
     // extract any deck.gl layers masquerading as react elements from props.children
     const {layers, views} = this._parseJSX(props);
     const deckProps = Object.assign({}, props, {
+      style: null,
+      width: '100%',
+      height: '100%',
       layers,
       views
     });
@@ -181,20 +196,30 @@ export default class DeckGL extends React.Component {
       ContextProvider: this.props.ContextProvider
     });
 
-    // TODO - this styling is enforced for correct positioning with children
-    // It can override the styling set by `Deck`, this should be consolidated.
-    // Note that width and height are handled by deck.gl
-    const style = Object.assign({}, {position: 'absolute', left: 0, top: 0}, this.props.style);
+    // This styling is enforced for correct positioning with children
+    const style = Object.assign(
+      {
+        position: 'absolute',
+        zIndex: 0,
+        left: 0,
+        top: 0,
+        width: this.props.width,
+        height: this.props.height
+      },
+      this.props.style
+    );
 
     const canvas = createElement('canvas', {
-      ref: c => (this.deckCanvas = c),
-      key: 'deck-canvas',
-      id: this.props.id,
-      style
+      key: 'canvas',
+      ref: this._canvasRef,
+      style: CANVAS_STYLE
     });
 
     // Render deck.gl as the last child
-    return createElement('div', {id: 'deckgl-wrapper'}, [children, canvas]);
+    return createElement('div', {id: 'deckgl-wrapper', ref: this._containerRef, style}, [
+      canvas,
+      children
+    ]);
   }
 }
 

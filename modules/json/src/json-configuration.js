@@ -2,14 +2,14 @@
 import parseExpressionString from './helpers/parse-expression-string';
 import assert from './utils/assert';
 
-const DEFAULT_TYPE_KEY = 'type';
+import {TYPE_KEY} from './syntactic-sugar';
 
 const isObject = value => value && typeof value === 'object';
 
 export default class JSONConfiguration {
   constructor(...configurations) {
     // Initialize config with default values
-    this.typeKey = DEFAULT_TYPE_KEY;
+    this.typeKey = TYPE_KEY;
     this.log = console; // eslint-disable-line
     this.classes = {};
     this.reactComponents = {};
@@ -50,10 +50,6 @@ export default class JSONConfiguration {
   }
 }
 
-function convertFunction(value, key, configuration) {
-  if (key.startsWith('get')) {
-    const isAccessor = true;
-    return parseExpressionString(value, configuration, isAccessor);
-  }
-  return value;
+function convertFunction(value, configuration) {
+  return parseExpressionString(value, configuration);
 }

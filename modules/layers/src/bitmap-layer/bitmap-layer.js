@@ -20,7 +20,7 @@
 
 /* global HTMLVideoElement */
 import GL from '@luma.gl/constants';
-import {Layer} from '@deck.gl/core';
+import {Layer, project32, picking} from '@deck.gl/core';
 import {Model, Geometry, Texture2D} from '@luma.gl/core';
 
 import vs from './bitmap-layer-vertex';
@@ -53,7 +53,7 @@ const defaultProps = {
  */
 export default class BitmapLayer extends Layer {
   getShaders() {
-    return super.getShaders({vs, fs, modules: ['project32', 'picking']});
+    return super.getShaders({vs, fs, modules: [project32, picking]});
   }
 
   initializeState() {
@@ -150,9 +150,9 @@ export default class BitmapLayer extends Layer {
     }
 
     /*
-      0,1 --- 1,1
-       |       |
       0,0 --- 1,0
+       |       |
+      0,1 --- 1,1
     */
     return new Model(
       gl,
@@ -162,7 +162,7 @@ export default class BitmapLayer extends Layer {
           drawMode: GL.TRIANGLE_FAN,
           vertexCount: 4,
           attributes: {
-            texCoords: new Float32Array([0, 0, 0, 1, 1, 1, 1, 0])
+            texCoords: new Float32Array([0, 1, 0, 0, 1, 0, 1, 1])
           }
         }),
         isInstanced: false

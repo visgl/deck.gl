@@ -17,24 +17,36 @@ const MapboxAccessToken =
 
 const NAVIGATION_CONTROL_STYLES = {
   margin: 10,
-  position: 'absolute',
-  zIndex: 1
+  position: 'absolute'
 };
 
 const VIEW_LABEL_STYLES = {
-  zIndex: 10,
   padding: 5,
   margin: 20,
   fontSize: 12,
   backgroundColor: '#282727',
-  color: '#FFFFFF'
+  color: '#FFFFFF',
+  position: 'absolute'
 };
 
-const ViewportLabel = props => (
-  <div style={{position: 'absolute'}}>
-    <div style={{...VIEW_LABEL_STYLES, display: ''}}>{props.children}</div>
-  </div>
-);
+const INITIAL_VIEW_STATES = {
+  basemap: {
+    latitude: 37.752,
+    longitude: -122.427,
+    zoom: 11.5,
+    pitch: 0,
+    bearing: 0
+  },
+  infovis: {
+    target: [0, 0, 0],
+    zoom: 3,
+    rotationX: -30,
+    rotationOrbit: 30,
+    orbitAxis: 'Y'
+  }
+};
+
+const ViewportLabel = props => <div style={VIEW_LABEL_STYLES}>{props.children}</div>;
 
 export default class Map extends PureComponent {
   constructor(props) {
@@ -42,20 +54,6 @@ export default class Map extends PureComponent {
     autobind(this);
 
     this.state = {
-      mapViewState: {
-        latitude: 37.752,
-        longitude: -122.427,
-        zoom: 11.5,
-        pitch: 0,
-        bearing: 0
-      },
-      orbitViewState: {
-        target: [0, 0, 0],
-        zoom: 3,
-        rotationX: -30,
-        rotationOrbit: 30,
-        orbitAxis: 'Y'
-      },
       hoveredItem: null,
       clickedItem: null,
       queriedItems: null,
@@ -110,17 +108,6 @@ export default class Map extends PureComponent {
     this.setState({metrics: Object.assign({}, metrics)});
   }
 
-  _onViewStateChange({viewState, viewId}) {
-    if (viewId === 'infovis') {
-      this.setState({orbitViewState: viewState});
-      return;
-    }
-    if (viewState.pitch > 60) {
-      viewState.pitch = 60;
-    }
-    this.setState({mapViewState: viewState});
-  }
-
   _onHover(info) {
     this.setState({hoveredItem: info});
   }
@@ -137,17 +124,17 @@ export default class Map extends PureComponent {
   // Only show infovis layers in infovis mode and vice versa
   _layerFilter({layer, renderPass}) {
     const {settings} = this.props;
-    const isIdentity = layer.props.coordinateSystem === COORDINATE_SYSTEM.IDENTITY;
+    const isIdentity = layer.props.coordinateSystem === COORDINATE_SYSTEM.CARTESIAN;
     return settings.infovis ? isIdentity : !isIdentity;
   }
 
   render() {
-    const {orbitViewState, mapViewState, hoveredItem, clickedItem, queriedItems} = this.state;
+    const {hoveredItem, clickedItem, queriedItems} = this.state;
     const {
       layers,
       views,
       effects,
-      settings: {infovis, pickingRadius, drawPickingColors, useDevicePixels}
+      settings: {pickingRadius, drawPickingColors, useDevicePixels}
     } = this.props;
 
     return (
@@ -161,8 +148,7 @@ export default class Map extends PureComponent {
           layers={layers}
           layerFilter={this._layerFilter}
           views={views}
-          viewState={infovis ? orbitViewState : mapViewState}
-          onViewStateChange={this._onViewStateChange}
+          initialViewState={INITIAL_VIEW_STATES}
           effects={effects}
           pickingRadius={pickingRadius}
           onHover={this._onHover}

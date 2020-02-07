@@ -1,5 +1,137 @@
 # Upgrade Guide
 
+## Upgrading from deck.gl v7.x to v8.0
+
+### Breaking Changes
+
+##### Defaults
+
+- The `opacity` prop of all layers is now default to `1` (used to be `0.8`).
+- [`SimpleMeshLayer`](/docs/layers/simple-mesh-layer.md) and [`ScenegraphLayer`](/docs/layers/scenegraph-layer.md): `modelMatrix` will be composed to instance transformation matrix (derived from  layer props `getOrientation`, `getScale`, `getTranslation` and `getTransformMatrix`) under `CARTESIAN` and `METER_OFFSETS` [coordinates](/docs/developer-guide/coordinate-systems.md).
+
+##### Removed
+
+- `ArcLayer` props
+  + `getStrokeWidth`: use `getWidth`
+- `LineLayer` props
+  + `getStrokeWidth`: use `getWidth`
+- `PathLayer` props
+  + `getDashArray`: use [PathStyleExtension](/docs/api-reference/extensions/path-style-extension.md)
+- `PolygonLayer` and `GeoJsonLayer` props
+  + `getLineDashArray`: use [PathStyleExtension](/docs/api-reference/extensions/path-style-extension.md)
+- `H3HexagonLayer` props
+  + `getColor`: use `getFillColor` and `getLineColor`
+- `Tile3DLayer` props:
+  + `onTileLoadFail`: use `onTileError`
+- `TileLayer` props:
+  + `onViewportLoaded`: use `onViewportLoad`  
+- `project` shader module
+  + `project_scale`: use `project_size`
+  + `project_to_clipspace`: use `project_position_to_clipspace`
+  + `project_pixel_to_clipspace`: use `project_pixel_size_to_clipspace`
+- `WebMercatorViewport` class
+  + `getLocationAtPoint`: use `getMapCenterByLngLatPosition`
+  + `lngLatDeltaToMeters`
+  + `metersToLngLatDelta`
+- `Layer` class
+  + `setLayerNeedsUpdate`: use `setNeedsUpdate`
+  + `setUniforms`: use `model.setUniforms`
+  + `use64bitProjection`
+  + `projectFlat`: use `projectPosition`
+- `PerspectiveView` class - use `FirstPersonView`
+- `ThirdPersonView` class - use `MapView` (geospatial) or `OrbitView` (info-vis)
+- `COORDINATE_SYSTEM` enum
+  + `LNGLAT_DEPRECATED`: use `LNGLAT`
+  + `METERS`: use `METER_OFFSETS`
+
+
+##### React
+
+- `DeckGL` no longer injects its children with view props (`width`, `height`, `viewState` etc.). If your custom component needs these props, consider using the [ContextProvider](/docs/api-reference/react/deckgl.md#react-context) or a render callback:
+
+  ```jsx
+  <DeckGL>
+    {({width, height, viewState}) => (...)}
+  </DeckGL>
+  ```
+
+- The children of `DeckGL` are now placed above the canvas by default (except the react-map-gl base map). Wrap them in e.g. `<div style={{zIndex: -1}}>` if they are intended to be placed behind the canvas.
+
+##### Debugging
+
+deck.gl now removes most logging when bundling under `NODE_ENV=production`.
+
+
+##### Standalone bundle
+
+The pre-bundled version, a.k.a. the [scripting API](/docs/get-started/using-standalone.md#using-the-scripting-api) has been aligned with the interface of the core [Deck](/docs/api-reference/deck.md) class.
+
+- Top-level view state props such as `longitude`, `latitude`, `zoom` are no longer supported. To specify the default view state, use `initialViewState`.
+- `controller` is no longer on by default, use `controller: true`.
+
+
+##### Textures
+
+In older versions of deck, we used to set `UNPACK_FLIP_Y_WEBGL` by default when creating textures from images. This is removed in v8.0 to better align with [WebGL best practice](https://github.com/KhronosGroup/WebGL/issues/2577). As a result, the texCoords in the shaders of `BitmapLayer`, `IconLayer` and `TextLayer` are y-flipped. This only affects users who extend these layers.
+
+Users of `SimpleMeshLayer` with texture will need to flip their texture image vertically.
+
+The change has allowed us to support loading textures from `ImageBitmap`, in use cases such as rendering to `OffscreenCanvas` on a web worker. 
+
+##### projection system
+
+- The [common space](/docs/shader-module/project.md) is no longer scaled to the current zoom level. This is part of an effort to make the geometry calculation more consistent and predictable. While one old common unit is equivalent to 1 screen pixel at the viewport center, one new common unit is equivalent to `viewport.scale` pixels at the viewport center.
+- `viewport.distanceScales` keys are renamed:
+  + `pixelsPerMeter` -> `unitsPerMeter`
+  + `metersPerPixel` -> `metersPerUnit`
+- Low part of a `DOUBLE` attribute is renamed from `*64xyLow` to `*64Low` and uses the same size as the high part. This mainly affect position attributes, e.g. all `vec2 positions64xyLow` and `vec2 instancePositions64xyLow` are now `vec3 positions64Low` and `vec3 instancePositions64Low`.
+  + `project`: `vec3 project_position(vec3 position, vec2 position64xyLow)` is now `vec3 project_position(vec3 position, vec3 position64Low)`.
+  + `project`: `vec4 project_position(vec4 position, vec2 position64xyLow)` is now `vec4 project_position(vec4 position, vec3 position64Low)`.
+  + `project32` and `project64`: `vec4 project_position_to_clipspace(vec3 position, vec2 position64xyLow, vec3 offset)` is now `vec4 project_position_to_clipspace(vec3 position, vec3 position64Low, vec3 offset)`.
+- The shader module [project64](/docs/shader-modules/project64.md) is no longer included in `@deck.gl/core` and `deck.gl`. You can still import it from `@deck.gl/extensions`.
+
+##### Shader modules
+
+This change affects custom layers. deck.gl is no longer registering shaders by default. This means any `modules` array defined in `layer.getShaders()` or `new Model()` must now use the full shader module objects, instead of just their names. All supported shader modules can be imported from `@deck.gl/core`.
+
+```js
+/// OLD
+new Model({
+  // ...
+  modules: ['picking', 'project32', 'gouraud-lighting']
+});
+```
+
+Should now become
+
+```js
+import {picking, project32, gouraudLighting} from '@deck.gl/core';
+/// NEW
+new Model({
+  // ...
+  modules: [picking, project32, gouraudLighting]
+});
+```
+
+##### Auto view state update
+
+A bug was fixed where initial view state tracking could sometimes overwrite user-provided `viewState` prop. Apps that rely on auto view state update by specifying `initialViewState` should make sure that `viewState` is never assigned. If manual view state update is desired, use `viewState` and `onViewStateChange` instead. See [developer guide](/docs/developer-guide/views.md#using-a-view-class-with-view-state) for examples.
+
+We have fixed a bug when using `initialViewState` with multiple views. In the past, the state change in one view is unintendedly propagated to all views. As a result of this fix, multiple views (e.g. mini map) are no longer synchronized by default. To synchronize them, define the views with an explicit `viewState.id`:
+
+```js
+new Deck({
+  // ...
+  views: [
+    new MapView({id: 'main'}),
+    new MapView({id: 'minimap', controller: false, viewState: {id: 'main', pitch: 0, zoom: 10}})
+  ]
+})
+```
+
+See [View class](/docs/api-reference/view.md) documentation for details.
+
+
 ## Upgrading from deck.gl v7.2 to v7.3
 
 #### Core

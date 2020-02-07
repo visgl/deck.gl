@@ -27,15 +27,17 @@ import {gl} from '@deck.gl/test-utils';
 const SAMPLE_BUFFER = new Buffer(gl);
 const SAMPLE_PROPS = {
   data: {
-    color: {
-      aggregationBuffer: SAMPLE_BUFFER,
-      maxMinBuffer: SAMPLE_BUFFER
-    },
-    elevation: {
-      aggregationBuffer: SAMPLE_BUFFER,
-      maxMinBuffer: SAMPLE_BUFFER
+    attributes: {
+      color: {
+        aggregationBuffer: SAMPLE_BUFFER
+      },
+      elevation: {
+        aggregationBuffer: SAMPLE_BUFFER
+      }
     }
-  }
+  },
+  colorMaxMinBuffer: SAMPLE_BUFFER,
+  elevationMaxMinBuffer: SAMPLE_BUFFER
 };
 
 test('GPUGridCellLayer#initializeState', t => {
@@ -68,10 +70,7 @@ test('GPUGridCellLayer#updates', t => {
           cellSize: 123
         },
         onAfterUpdate({layer, spies}) {
-          t.ok(
-            layer.state.model.program.uniforms.cellSize === 123,
-            'cellSize unifrom should get updated'
-          );
+          t.equal(layer.state.model.uniforms.cellSize, 123, 'cellSize uniform should get updated');
         }
       }
     ]

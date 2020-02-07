@@ -27,7 +27,7 @@ attribute vec3 normals;
 
 attribute vec3 instancePositions;
 attribute float instanceElevations;
-attribute vec2 instancePositions64xyLow;
+attribute vec3 instancePositions64Low;
 attribute vec4 instanceFillColors;
 attribute vec4 instanceLineColors;
 attribute float instanceStrokeWidths;
@@ -81,11 +81,11 @@ void main(void) {
 
   // project center of column
   vec3 centroidPosition = vec3(instancePositions.xy, instancePositions.z + elevation);
-  vec2 centroidPosition64xyLow = instancePositions64xyLow;
+  vec3 centroidPosition64Low = instancePositions64Low;
   vec3 pos = vec3(project_size(rotationMatrix * positions.xy * strokeOffsetRatio + offset) * dotRadius, 0.);
   DECKGL_FILTER_SIZE(pos, geometry);
 
-  gl_Position = project_position_to_clipspace(centroidPosition, centroidPosition64xyLow, pos, geometry.position);
+  gl_Position = project_position_to_clipspace(centroidPosition, centroidPosition64Low, pos, geometry.position);
   DECKGL_FILTER_GL_POSITION(gl_Position, geometry);
 
   // Light calculations

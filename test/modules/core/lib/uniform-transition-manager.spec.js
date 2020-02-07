@@ -1,6 +1,6 @@
 /* eslint-disable max-statements */
 import test from 'tape-catch';
-import {Timeline} from '@luma.gl/addons';
+import {Timeline} from '@luma.gl/core';
 import UniformTransitionManager from '@deck.gl/core/lib/uniform-transition-manager';
 
 test('UniformTransitionManager#add, remove, clear', t => {

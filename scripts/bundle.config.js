@@ -55,7 +55,8 @@ const config = {
   output: {
     libraryTarget: 'umd',
     path: PACKAGE_ROOT,
-    filename: 'dist.min.js'
+    filename: 'dist.min.js',
+    library: 'deck'
   },
 
   resolve: {
@@ -68,7 +69,7 @@ const config = {
         // Compile ES2015 using babel
         test: /\.js$/,
         loader: 'babel-loader',
-        include: /src/,
+        include: [/src/, /bundle/],
         options: {
           presets: [['@babel/preset-env', {forceAllTransforms: true}]],
           // all of the helpers will reference the module @babel/runtime to avoid duplication
@@ -97,9 +98,7 @@ const config = {
     // ,new (require('webpack-bundle-analyzer').BundleAnalyzerPlugin)()
   ],
 
-  node: {
-    Buffer: false
-  },
+  node: false,
 
   devtool: false
 };

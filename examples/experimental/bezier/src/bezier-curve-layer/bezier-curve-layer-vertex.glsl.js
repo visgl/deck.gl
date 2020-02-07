@@ -43,7 +43,7 @@ vec2 getExtrusionOffset(vec2 line_clipspace, float offset_direction) {
   dir_screenspace = vec2(-dir_screenspace.y, dir_screenspace.x);
 
   vec2 offset_screenspace = dir_screenspace * offset_direction * strokeWidth / 2.0;
-  vec2 offset_clipspace = project_pixel_to_clipspace(offset_screenspace).xy;
+  vec2 offset_clipspace = project_pixel_size_to_clipspace(offset_screenspace).xy;
 
   return offset_clipspace;
 }
@@ -76,9 +76,9 @@ void main(void) {
   vec3 sourcePos = project_position(instanceSourcePositions);
   vec3 targetPos = project_position(instanceTargetPositions);
   vec3 controlPointPos = project_position(instanceControlPoints);
-  vec4 source = project_to_clipspace(vec4(sourcePos, 1.0));
-  vec4 target = project_to_clipspace(vec4(targetPos, 1.0));
-  vec4 controlPoint = project_to_clipspace(vec4(controlPointPos, 1.0));
+  vec4 source = project_common_position_to_clipspace(vec4(sourcePos, 1.0));
+  vec4 target = project_common_position_to_clipspace(vec4(targetPos, 1.0));
+  vec4 controlPoint = project_common_position_to_clipspace(vec4(controlPointPos, 1.0));
 
   // linear interpolation of source & target to pick right coord
   float segmentIndex = positions.x;

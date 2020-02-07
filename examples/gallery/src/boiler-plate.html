@@ -1,8 +1,8 @@
 <html>
   <head>
     <title>Get Started with deck.gl</title>
-    <script src="https://unpkg.com/deck.gl@^7.0.0/dist.min.js"></script>
-    <script src="https://api.tiles.mapbox.com/mapbox-gl-js/v0.50.0/mapbox-gl.js"></script>
+    <script src="https://unpkg.com/deck.gl@^8.0.0/dist.min.js"></script>
+    <script src="https://api.tiles.mapbox.com/mapbox-gl-js/v1.4.0/mapbox-gl.js"></script>
   </head>
 
   <body style="margin:0; width: 100vw; height: 100vh;"></body>
@@ -14,10 +14,13 @@
     new DeckGL({
       mapboxApiAccessToken: '<mapbox-access-token>',
       mapStyle: 'mapbox://styles/mapbox/light-v9',
-      longitude: -122.45,
-      latitude: 37.78,
-      zoom: 11,
-      maxZoom: 16,
+      initialViewState: {
+        longitude: -122.45,
+        latitude: 37.78,
+        zoom: 11,
+        maxZoom: 16
+      },
+      controller: true,
       layers: [
         new ScatterplotLayer({
           data: [

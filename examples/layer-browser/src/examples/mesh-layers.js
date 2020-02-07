@@ -1,7 +1,7 @@
 import {SimpleMeshLayer, ScenegraphLayer} from '@deck.gl/mesh-layers';
 import {registerLoaders} from '@loaders.gl/core';
 import {GLTFLoader} from '@loaders.gl/gltf';
-import {GLTFEnvironment} from '@luma.gl/addons';
+import {GLTFEnvironment} from '@luma.gl/experimental';
 import GL from '@luma.gl/constants';
 
 import * as dataSamples from '../data-samples';
@@ -10,6 +10,9 @@ registerLoaders([GLTFLoader]);
 
 const GLTF_BASE_URL =
   'https://raw.githubusercontent.com/uber-common/deck.gl-data/master/luma.gl/examples/gltf/';
+
+const CUBE_1x1x1 =
+  'https://raw.githubusercontent.com/uber-common/deck.gl-data/master/examples/layer-browser/cube_1x1x1.glb';
 
 const CUBE_FACE_TO_DIRECTION = {
   [GL.TEXTURE_CUBE_MAP_POSITIVE_X]: 'right',
@@ -102,11 +105,29 @@ const ScenegraphLayerPbrIblExample = {
       'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/DamagedHelmet/glTF-Binary/DamagedHelmet.glb',
     getPosition: d => d.COORDINATES,
     getOrientation: [0, 0, 90],
-    getTranslation: [0, 0, 1000],
+    getTranslation: d => [0, 0, 1000],
     getScale: [10, 10, 10],
     _lighting: 'pbr',
     _imageBasedLightingEnvironment: ({gl}) =>
       new GLTFEnvironment(gl, IMAGE_BASED_LIGHTING_ENVIRONMENT)
+  }
+};
+
+const ScenegraphLayerMinMaxExample = {
+  layer: ScenegraphLayer,
+  props: {
+    id: 'scenegraph-layer-minmax',
+    data: dataSamples.points,
+    pickable: true,
+    sizeScale: 80,
+    scenegraph: CUBE_1x1x1,
+    getPosition: d => d.COORDINATES,
+    getOrientation: [0, 0, 0],
+    getTranslation: d => [0, 0, 0],
+    getScale: [1, 1, 1],
+    _lighting: 'pbr',
+    sizeMinPixels: 5,
+    sizeMaxPixels: 50
   }
 };
 
@@ -116,6 +137,7 @@ export default {
     SimpleMeshLayer: SimpleMeshLayerExample,
     ScenegraphLayer: ScenegraphLayerExample,
     'ScenegraphLayer (PBR)': ScenegraphLayerPbrExample,
-    'ScenegraphLayer (PBR+IBL)': ScenegraphLayerPbrIblExample
+    'ScenegraphLayer (PBR+IBL)': ScenegraphLayerPbrIblExample,
+    'ScenegraphLayer Min/Max Pixels': ScenegraphLayerMinMaxExample
   }
 };

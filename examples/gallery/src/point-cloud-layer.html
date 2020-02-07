@@ -2,7 +2,7 @@
   <head>
     <title>deck.gl PointCloudLayer Example</title>
 
-    <script src="https://unpkg.com/deck.gl@^7.0.0/dist.min.js"></script>
+    <script src="https://unpkg.com/deck.gl@^8.0.0/dist.min.js"></script>
 
     <style type="text/css">
       body {
@@ -18,7 +18,7 @@
 
   <script type="text/javascript">
 
-    const {DeckGL, PointCloudLayer, COORDINATE_SYSTEM} = deck;
+    const {DeckGL, OrbitView, PointCloudLayer, COORDINATE_SYSTEM} = deck;
 
     // One million points
     const SAMPLE_SIZE = 1e6;
@@ -64,12 +64,11 @@
 
     new DeckGL({
       views: [new OrbitView()],
-      viewState: {rotationX: -45, rotationOrbit: -45, zoom: 5},
+      initialViewState: {rotationX: 45, rotationOrbit: -45, zoom: 5},
+      controller: true,
       layers: [
         new PointCloudLayer({
           id: 'pointCloud',
-          coordinateSystem: COORDINATE_SYSTEM.IDENTITY,
-          opacity: 1,
           data: points,
           getPosition: d => d.position,
           getNormal: d => d.normal,

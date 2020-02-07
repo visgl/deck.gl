@@ -18,13 +18,15 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {equals} from 'math.gl';
-import {CompositeLayer} from '@deck.gl/core';
+import GL from '@luma.gl/constants';
 import {LineLayer, SolidPolygonLayer} from '@deck.gl/layers';
 import {generateContours} from './contour-utils';
+import {log} from '@deck.gl/core';
 
 import GPUGridAggregator from '../utils/gpu-grid-aggregation/gpu-grid-aggregator';
-import {pointToDensityGridData} from '../utils/gpu-grid-aggregation/grid-aggregation-utils';
+import {AGGREGATION_OPERATION, getValueFunc} from '../utils/aggregation-operation-utils';
+import {getBoundingBox, getGridParams} from '../utils/grid-aggregation-utils';
+import GridAggregationLayer from '../grid-aggregation-layer';
 
 const DEFAULT_COLOR = [255, 255, 255, 255];
 const DEFAULT_STROKE_WIDTH = 1;
@@ -35,239 +37,241 @@ const defaultProps = {
   cellSize: {type: 'number', min: 1, max: 1000, value: 1000},
   getPosition: {type: 'accessor', value: x => x.position},
   getWeight: {type: 'accessor', value: x => 1},
+  gpuAggregation: true,
+  aggregation: 'SUM',
 
   // contour lines
   contours: [{threshold: DEFAULT_THRESHOLD}],
 
-  fp64: false,
   zOffset: 0.005
 };
 
-export default class ContourLayer extends CompositeLayer {
+const POSITION_ATTRIBUTE_NAME = 'positions';
+
+const DIMENSIONS = {
+  data: {
+    props: ['cellSize']
+  },
+  weights: {
+    props: ['aggregation'],
+    accessors: ['getWeight']
+  }
+};
+
+export default class ContourLayer extends GridAggregationLayer {
   initializeState() {
-    const {gl} = this.context;
-    const options = {
-      id: `${this.id}-gpu-aggregator`
-    };
-    this.state = {
+    super.initializeState({
+      dimensions: DIMENSIONS
+    });
+    this.setState({
       contourData: {},
-      gridAggregator: new GPUGridAggregator(gl, options),
-      colorTrigger: 0,
-      strokeWidthTrigger: 0
-    };
+      projectPoints: false,
+      weights: {
+        count: {
+          size: 1,
+          operation: AGGREGATION_OPERATION.SUM
+        }
+      }
+    });
+    const attributeManager = this.getAttributeManager();
+    attributeManager.add({
+      [POSITION_ATTRIBUTE_NAME]: {
+        size: 3,
+        accessor: 'getPosition',
+        type: GL.DOUBLE,
+        fp64: this.use64bitPositions()
+      },
+      // this attribute is used in gpu aggregation path only
+      count: {size: 3, accessor: 'getWeight'}
+    });
   }
 
-  updateState({oldProps, props, changeFlags}) {
-    let dataChanged = false;
+  updateState(opts) {
+    super.updateState(opts);
     let contoursChanged = false;
-    const aggregationFlags = this._getAggregationFlags({oldProps, props, changeFlags});
-    if (aggregationFlags) {
-      dataChanged = true;
-      // Clear countsData cache
-      this.setState({countsData: null});
-      this._aggregateData(aggregationFlags);
-    }
+    const {oldProps, props} = opts;
+    const {aggregationDirty} = this.state;
 
-    if (this._shouldRebuildContours({oldProps, props})) {
+    if (oldProps.contours !== props.contours || oldProps.zOffset !== props.zOffset) {
       contoursChanged = true;
-      this._updateThresholdData(props);
+      this._updateThresholdData(opts.props);
     }
 
-    if (dataChanged || contoursChanged) {
+    if (this.getNumInstances() > 0 && (aggregationDirty || contoursChanged)) {
       this._generateContours();
-    } else {
-      // data for sublayers not changed check if color or strokeWidth need to be updated
-      this._updateSubLayerTriggers(oldProps, props);
     }
-  }
-
-  finalizeState() {
-    super.finalizeState();
-    this.state.gridAggregator.delete();
   }
 
   renderLayers() {
     const {contourSegments, contourPolygons} = this.state.contourData;
-    const hasIsolines = contourSegments && contourSegments.length > 0;
-    const hasIsobands = contourPolygons && contourPolygons.length > 0;
 
-    const lineLayer = hasIsolines && new LineLayer(this._getLineLayerProps());
-    const solidPolygonLayer =
-      hasIsobands && new SolidPolygonLayer(this._getSolidPolygonLayerProps());
-    return [lineLayer, solidPolygonLayer];
+    const LinesSubLayerClass = this.getSubLayerClass('lines', LineLayer);
+    const BandsSubLayerClass = this.getSubLayerClass('bands', SolidPolygonLayer);
+
+    // Contour lines layer
+    const lineLayer =
+      contourSegments &&
+      contourSegments.length > 0 &&
+      new LinesSubLayerClass(
+        this.getSubLayerProps({
+          id: 'lines'
+        }),
+        {
+          data: this.state.contourData.contourSegments,
+          getSourcePosition: d => d.start,
+          getTargetPosition: d => d.end,
+          getColor: d => d.contour.color || DEFAULT_COLOR,
+          getWidth: d => d.contour.strokeWidth || DEFAULT_STROKE_WIDTH
+        }
+      );
+
+    // Contour bands layer
+    const bandsLayer =
+      contourPolygons &&
+      contourPolygons.length > 0 &&
+      new BandsSubLayerClass(
+        this.getSubLayerProps({
+          id: 'bands'
+        }),
+        {
+          data: this.state.contourData.contourPolygons,
+          getPolygon: d => d.vertices,
+          getFillColor: d => d.contour.color || DEFAULT_COLOR
+        }
+      );
+
+    return [lineLayer, bandsLayer];
   }
 
-  // Private
+  // Aggregation Overrides
 
-  _aggregateData(aggregationFlags) {
-    const {
-      data,
-      cellSize: cellSizeMeters,
-      getPosition,
-      getWeight,
-      gpuAggregation,
-      fp64,
-      coordinateSystem
-    } = this.props;
-    const {weights, gridSize, gridOrigin, cellSize, boundingBox} = pointToDensityGridData({
-      data,
-      cellSizeMeters,
-      getPosition,
-      weightParams: {count: {getWeight}},
-      gpuAggregation,
-      gpuGridAggregator: this.state.gridAggregator,
-      fp64,
-      coordinateSystem,
-      viewport: this.context.viewport,
-      boundingBox: this.state.boundingBox, // avoid parsing data when it is not changed.
-      aggregationFlags
-    });
-
+  /* eslint-disable max-statements, complexity */
+  updateAggregationState(opts) {
+    const {props, oldProps} = opts;
+    const {cellSize, coordinateSystem} = props;
+    const {viewport} = this.context;
+    const cellSizeChanged = oldProps.cellSize !== cellSize;
+    let gpuAggregation = props.gpuAggregation;
+    if (this.state.gpuAggregation !== props.gpuAggregation) {
+      if (gpuAggregation && !GPUGridAggregator.isSupported(this.context.gl)) {
+        log.warn('GPU Grid Aggregation not supported, falling back to CPU')();
+        gpuAggregation = false;
+      }
+    }
+    const gpuAggregationChanged = gpuAggregation !== this.state.gpuAggregation;
     this.setState({
-      countsData: weights.count.aggregationData,
-      countsBuffer: weights.count.aggregationBuffer,
-      gridSize,
-      gridOrigin,
-      cellSize,
-      boundingBox
+      gpuAggregation
     });
-  }
 
-  _generateContours() {
-    const {gridSize, gridOrigin, cellSize, thresholdData} = this.state;
-    let {countsData} = this.state;
-    if (!countsData) {
-      const {countsBuffer} = this.state;
-      countsData = countsBuffer.getData();
-      this.setState({countsData});
+    const {dimensions} = this.state;
+    const positionsChanged = this.isAttributeChanged(POSITION_ATTRIBUTE_NAME);
+    const {data, weights} = dimensions;
+
+    let {boundingBox} = this.state;
+    if (positionsChanged) {
+      boundingBox = getBoundingBox(this.getAttributes(), this.getNumInstances());
+      this.setState({boundingBox});
+    }
+    if (positionsChanged || cellSizeChanged) {
+      const {gridOffset, translation, width, height, numCol, numRow} = getGridParams(
+        boundingBox,
+        cellSize,
+        viewport,
+        coordinateSystem
+      );
+      this.allocateResources(numRow, numCol);
+      this.setState({
+        gridOffset,
+        boundingBox,
+        translation,
+        posOffset: translation.slice(), // Used for CPU aggregation, to offset points
+        gridOrigin: [-1 * translation[0], -1 * translation[1]],
+        width,
+        height,
+        numCol,
+        numRow
+      });
     }
 
-    const {cellWeights} = GPUGridAggregator.getCellData({countsData});
-    // const thresholds = this.props.contours.map(x => x.threshold);
+    const aggregationDataDirty =
+      positionsChanged ||
+      gpuAggregationChanged ||
+      this.isAggregationDirty(opts, {
+        dimension: data,
+        compareAll: gpuAggregation // check for all (including extentions props) when using gpu aggregation
+      });
+    const aggregationWeightsDirty = this.isAggregationDirty(opts, {
+      dimension: weights
+    });
+
+    if (aggregationWeightsDirty) {
+      this._updateAccessors(opts);
+    }
+    if (aggregationDataDirty || aggregationWeightsDirty) {
+      this._resetResults();
+    }
+    this.setState({
+      aggregationDataDirty,
+      aggregationWeightsDirty
+    });
+  }
+  /* eslint-enable max-statements, complexity */
+
+  // Private (Aggregation)
+
+  _updateAccessors(opts) {
+    const {getWeight, aggregation} = opts.props;
+    const {count} = this.state.weights;
+    if (count) {
+      count.getWeight = getWeight;
+      count.operation = AGGREGATION_OPERATION[aggregation];
+    }
+    this.setState({getValue: getValueFunc(aggregation, getWeight)});
+  }
+
+  _resetResults() {
+    const {count} = this.state.weights;
+    if (count) {
+      count.aggregationData = null;
+    }
+  }
+
+  // Private (Contours)
+
+  _generateContours() {
+    const {numCol, numRow, gridOrigin, gridOffset, thresholdData} = this.state;
+    const {count} = this.state.weights;
+    let {aggregationData} = count;
+    if (!aggregationData) {
+      aggregationData = count.aggregationBuffer.getData();
+      count.aggregationData = aggregationData;
+    }
+
+    const {cellWeights} = GPUGridAggregator.getCellData({countsData: aggregationData});
     const contourData = generateContours({
       thresholdData,
       cellWeights,
-      gridSize,
+      gridSize: [numCol, numRow],
       gridOrigin,
-      cellSize
+      cellSize: [gridOffset.xOffset, gridOffset.yOffset]
     });
 
     // contourData contains both iso-lines and iso-bands if requested.
     this.setState({contourData});
   }
 
-  _getAggregationFlags({oldProps, props, changeFlags}) {
-    let aggregationFlags = null;
-    if (
-      changeFlags.dataChanged ||
-      oldProps.gpuAggregation !== props.gpuAggregation ||
-      (changeFlags.updateTriggersChanged &&
-        (changeFlags.updateTriggersChanged.all || changeFlags.updateTriggersChanged.getPosition))
-    ) {
-      aggregationFlags = Object.assign({}, aggregationFlags, {dataChanged: true});
-    }
-    if (oldProps.cellSize !== props.cellSize) {
-      aggregationFlags = Object.assign({}, aggregationFlags, {cellSizeChanged: true});
-    }
-    return aggregationFlags;
-  }
-
-  _getLineLayerProps() {
-    const {colorTrigger, strokeWidthTrigger} = this.state;
-
-    return this.getSubLayerProps({
-      id: 'contour-line-layer',
-      data: this.state.contourData.contourSegments,
-      getSourcePosition: d => d.start,
-      getTargetPosition: d => d.end,
-      getColor: this._onGetSublayerColor.bind(this),
-      getWidth: this._onGetSublayerStrokeWidth.bind(this),
-      widthUnits: 'pixels',
-      updateTriggers: {
-        getColor: colorTrigger,
-        getWidth: strokeWidthTrigger
-      }
-    });
-  }
-
-  _getSolidPolygonLayerProps() {
-    const {colorTrigger} = this.state;
-
-    return this.getSubLayerProps({
-      id: 'contour-solid-polygon-layer',
-      data: this.state.contourData.contourPolygons,
-      getPolygon: d => d.vertices,
-      getFillColor: this._onGetSublayerColor.bind(this),
-      updateTriggers: {
-        getFillColor: colorTrigger
-      }
-    });
-  }
-
-  _onGetSublayerColor(element) {
-    // element is either a line segment or polygon
-    const {contours} = this.props;
-    let color = DEFAULT_COLOR;
-    contours.forEach(data => {
-      if (equals(data.threshold, element.threshold)) {
-        color = data.color || DEFAULT_COLOR;
-      }
-    });
-    return color;
-  }
-
-  _onGetSublayerStrokeWidth(segment) {
-    const {contours} = this.props;
-    let strokeWidth = DEFAULT_STROKE_WIDTH;
-    // Linearly searches the contours, but there should only be few contours
-    contours.some(contour => {
-      if (contour.threshold === segment.threshold) {
-        strokeWidth = contour.strokeWidth || DEFAULT_STROKE_WIDTH;
-        return true;
-      }
-      return false;
-    });
-    return strokeWidth;
-  }
-
-  _shouldRebuildContours({oldProps, props}) {
-    if (
-      !oldProps.contours ||
-      !oldProps.zOffset ||
-      oldProps.contours.length !== props.contours.length ||
-      oldProps.zOffset !== props.zOffset
-    ) {
-      return true;
-    }
-    const oldThresholds = oldProps.contours.map(x => x.threshold);
-    const thresholds = props.contours.map(x => x.threshold);
-
-    return thresholds.some((_, i) => !equals(thresholds[i], oldThresholds[i]));
-  }
-
-  _updateSubLayerTriggers(oldProps, props) {
-    if (oldProps && oldProps.contours && props && props.contours) {
-      if (props.contours.some((contour, i) => contour.color !== oldProps.contours[i].color)) {
-        this.state.colorTrigger++;
-      }
-      if (
-        props.contours.some(
-          (contour, i) => contour.strokeWidth !== oldProps.contours[i].strokeWidth
-        )
-      ) {
-        this.state.strokeWidthTrigger++;
-      }
-    }
-  }
-
   _updateThresholdData(props) {
-    const thresholdData = props.contours.map((x, index) => {
-      return {
-        threshold: x.threshold,
-        zIndex: x.zIndex || index,
-        zOffset: props.zOffset
+    const {contours, zOffset} = props;
+    const count = contours.length;
+    const thresholdData = new Array(count);
+    for (let i = 0; i < count; i++) {
+      const contour = contours[i];
+      thresholdData[i] = {
+        contour,
+        zIndex: contour.zIndex || i,
+        zOffset
       };
-    });
+    }
     this.setState({thresholdData});
   }
 }

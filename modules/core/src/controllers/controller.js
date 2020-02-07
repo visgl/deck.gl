@@ -49,7 +49,7 @@ export default class Controller {
     this._state = {
       isDragging: false
     };
-    this.events = [];
+    this._customEvents = [];
     this.onViewStateChange = null;
     this.onStateChange = null;
     this.invertPan = false;
@@ -57,6 +57,14 @@ export default class Controller {
     this.handleEvent = this.handleEvent.bind(this);
 
     this.setProps(options);
+  }
+
+  set events(customEvents) {
+    this.toggleEvents(this._customEvents, false);
+    this.toggleEvents(customEvents, true);
+    this._customEvents = customEvents;
+    // Make sure default events are not overwritten
+    this.setProps(this.controllerStateProps);
   }
 
   finalize() {
@@ -152,7 +160,7 @@ export default class Controller {
       // EventManager has changed
       this.eventManager = props.eventManager;
       this._events = {};
-      this.toggleEvents(this.events, true);
+      this.toggleEvents(this._customEvents, true);
     }
 
     this.transitionManager.processViewStateChange(this.controllerStateProps);
@@ -204,12 +212,6 @@ export default class Controller {
         }
       });
     }
-  }
-
-  // DEPRECATED
-
-  setOptions(props) {
-    return this.setProps(props);
   }
 
   // Private Methods

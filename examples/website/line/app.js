@@ -43,7 +43,7 @@ function getSize(type) {
   return 60;
 }
 
-export class App extends Component {
+export default class App extends Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -90,6 +90,7 @@ export class App extends Component {
       new LineLayer({
         id: 'flight-paths',
         data: flightPaths,
+        opacity: 0.8,
         getSourcePosition: d => d.start,
         getTargetPosition: d => d.end,
         getColor,

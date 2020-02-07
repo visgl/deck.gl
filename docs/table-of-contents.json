@@ -1,0 +1,206 @@
+{
+  "id": "table-of-contents",
+  "chapters": [
+    {
+      "title": "Overview",
+      "entries": [
+        {"entry": "docs/README"},
+        {"entry": "docs/whats-new"},
+        {"entry": "docs/upgrade-guide"},
+        {"entry": "docs/roadmap"},
+        {"entry": "docs/contributing"},
+        {"entry": "docs/faq"}
+      ]
+    },
+    {
+      "title": "Getting Started",
+      "entries": [
+        {"entry": "docs/get-started/getting-started"},
+        {"entry": "docs/get-started/using-standalone"},
+        {"entry": "docs/get-started/using-with-react"},
+        {"entry": "docs/get-started/using-with-map"},
+        {"entry": "docs/get-started/learning-resources"}
+      ]
+    },
+    {
+      "title": "Developer Guide",
+      "chapters": [
+        {
+          "title": "Using the API",
+          "entries": [
+            {"entry": "docs/developer-guide/using-layers"},
+            {"entry": "docs/developer-guide/interactivity"},
+            {"entry": "docs/developer-guide/coordinate-systems"},
+            {"entry": "docs/developer-guide/views"},
+            {"entry": "docs/developer-guide/using-lighting"},
+            {"entry": "docs/developer-guide/performance"},
+            {"entry": "docs/developer-guide/64-bits"},
+            {"entry": "docs/developer-guide/tips-and-tricks"},
+            {"entry": "docs/developer-guide/building-apps"},
+            {"entry": "docs/developer-guide/debugging"},
+            {"entry": "docs/developer-guide/testing"}
+          ]
+        },
+        {
+          "title": "Writing Custom Layers",
+          "entries": [
+            {"entry": "docs/developer-guide/custom-layers/README"},
+            {"entry": "docs/developer-guide/custom-layers/layer-lifecycle"},
+            {"entry": "docs/developer-guide/custom-layers/picking"},
+            {"entry": "docs/developer-guide/custom-layers/composite-layers"},
+            {"entry": "docs/developer-guide/custom-layers/subclassed-layers"},
+            {"entry": "docs/developer-guide/custom-layers/primitive-layers"},
+            {"entry": "docs/developer-guide/custom-layers/prop-types"},
+            {"entry": "docs/developer-guide/custom-layers/attribute-management"},
+            {"entry": "docs/developer-guide/custom-layers/writing-shaders"}
+          ]
+        }
+      ]
+    },
+    {
+      "title": "API Reference",
+      "chapters": [
+        {
+          "title": "Core Classes",
+          "entries": [
+            {"entry": "docs/api-reference/deck"},
+            {"entry": "docs/api-reference/attribute-manager"}
+          ]
+        },
+        {
+          "title": "Layers",
+          "entries": [
+            {"entry": "docs/layers/README"},
+            {"entry": "docs/api-reference/layer"},
+            {"entry": "docs/api-reference/composite-layer"},
+            {"entry": "docs/layers/arc-layer"},
+            {"entry": "docs/layers/bitmap-layer"},
+            {"entry": "docs/layers/column-layer"},
+            {"entry": "docs/layers/contour-layer"},
+            {"entry": "docs/layers/geojson-layer"},
+            {"entry": "docs/layers/icon-layer"},
+            {"entry": "docs/layers/line-layer"},
+            {"entry": "docs/layers/path-layer"},
+            {"entry": "docs/layers/point-cloud-layer"},
+            {"entry": "docs/layers/polygon-layer"},
+            {"entry": "docs/layers/solid-polygon-layer"},
+            {"entry": "docs/layers/scatterplot-layer"},
+            {"entry": "docs/layers/text-layer"},
+            {"entry": "docs/layers/gpu-grid-layer"},
+            {"entry": "docs/layers/great-circle-layer"},
+            {"entry": "docs/layers/grid-layer"},
+            {"entry": "docs/layers/grid-cell-layer"},
+            {"entry": "docs/layers/hexagon-layer"},
+            {"entry": "docs/layers/h3-cluster-layer"},
+            {"entry": "docs/layers/h3-hexagon-layer"},
+            {"entry": "docs/layers/s2-layer"},
+            {"entry": "docs/layers/scenegraph-layer"},
+            {"entry": "docs/layers/screen-grid-layer"},
+            {"entry": "docs/layers/simple-mesh-layer"},
+            {"entry": "docs/layers/tile-layer"},
+            {"entry": "docs/layers/trips-layer"}
+          ]
+        },
+        {
+          "title": "Scripting Interface",
+          "entries": [
+            {"entry": "docs/api-reference/standalone/deckgl"}
+          ]
+        },
+        {
+          "title": "Shader Modules",
+          "entries": [
+            {"entry": "docs/shader-modules/project"},
+            {"entry": "docs/shader-modules/project32"},
+            {"entry": "docs/shader-modules/project64"}
+          ]
+        },
+        {
+          "title": "Viewports",
+          "entries": [
+            {"entry": "docs/api-reference/viewport"},
+            {"entry": "docs/api-reference/web-mercator-viewport"}
+          ]
+        },
+        {
+          "title": "Views",
+          "entries": [
+            {"entry": "docs/api-reference/view"},
+            {"entry": "docs/api-reference/map-view"},
+            {"entry": "docs/api-reference/first-person-view"},
+            {"entry": "docs/api-reference/third-person-view"},
+            {"entry": "docs/api-reference/orthographic-view"},
+            {"entry": "docs/api-reference/perspective-view"},
+            {"entry": "docs/api-reference/orbit-view"},
+            {"entry": "docs/api-reference/view-state-transitions"}
+          ]
+        },
+        {
+          "title": "Controllers",
+          "entries": [
+            {"entry": "docs/api-reference/controller"},
+            {"entry": "docs/api-reference/map-controller"}
+          ]
+        },
+        {
+          "title": "Effects",
+          "entries": [
+            {"entry": "docs/effects/lighting-effect"}
+          ]
+        },
+        {
+          "title": "Lights",
+          "entries": [
+            {"entry": "docs/api-reference/lights/ambient-light"},
+            {"entry": "docs/api-reference/lights/point-light"},
+            {"entry": "docs/api-reference/lights/directional-light"},
+            {"entry": "docs/api-reference/lights/camera-light"},
+            {"entry": "docs/api-reference/lights/sun-light"}
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Submodule API Reference",
+      "chapters": [
+        {
+          "title": "@deck.gl/google-maps",
+          "entries": [
+            {"entry": "docs/api-reference/google-maps/overview"},
+            {"entry": "docs/api-reference/google-maps/google-maps-overlay"}
+          ]
+        },
+        {
+          "title": "@deck.gl/json",
+          "entries": [
+            {"entry": "docs/api-reference/json/overview"},
+            {"entry": "docs/api-reference/json/json-converter"},
+            {"entry": "docs/api-reference/json/json-layer"}
+          ]
+        },
+        {
+          "title": "@deck.gl/mapbox",
+          "entries": [
+            {"entry": "docs/api-reference/mapbox/overview"},
+            {"entry": "docs/api-reference/mapbox/mapbox-layer"}
+          ]
+        },
+        {
+          "title": "@deck.gl/react",
+          "entries": [
+            {"entry": "docs/api-reference/react/deckgl"}
+          ]
+        },
+        {
+          "title": "@deck.gl/test-utils",
+          "entries": [
+            {"entry": "docs/api-reference/test-utils/overview"},
+            {"entry": "docs/api-reference/test-utils/generate-layer-tests"},
+            {"entry": "docs/api-reference/test-utils/test-layer"},
+            {"entry": "docs/api-reference/test-utils/snapshot-test-runner"}
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -2,7 +2,7 @@ import React, {Component} from 'react';
 
 import {MAPBOX_STYLES, DATA_URI} from '../../constants/defaults';
 import {readableInteger} from '../../utils/format-utils';
-import {App, inFlowColors, outFlowColors} from 'website-examples/brushing/app';
+import App, {inFlowColors, outFlowColors} from 'website-examples/brushing/app';
 
 const colorRamp = inFlowColors.slice().reverse().concat(outFlowColors)
   .map(color => `rgb(${color.join(',')})`);

@@ -3,7 +3,8 @@ import TransitionManager from '@deck.gl/core/controllers/transition-manager';
 import FlyToInterpolator from '@deck.gl/core/transitions/viewport-fly-to-interpolator.js';
 import {testExports} from '@deck.gl/core/controllers/map-controller';
 const {MapState} = testExports;
-import {Timeline} from '@luma.gl/addons';
+import {Timeline} from '@luma.gl/core';
+import {config} from 'math.gl';
 
 /* global global, setTimeout, clearTimeout */
 // backfill requestAnimationFrame on Node
@@ -146,6 +147,8 @@ test('TransitionManager#processViewStateChange', t => {
 });
 
 test('TransitionManager#callbacks', t => {
+  const oldEpsilon = config.EPSILON;
+  config.EPSILON = 1e-7;
   const timeline = new Timeline();
   const testCase = TEST_CASES[1];
 
@@ -204,6 +207,8 @@ test('TransitionManager#callbacks', t => {
   t.is(interruptCount, 2, 'onTransitionInterrupt() called once');
   t.is(endCount, 1, 'onTransitionEnd() called once');
   t.is(updateCount, 5, 'onViewStateChange() called');
+
+  config.EPSILON = oldEpsilon;
   t.end();
 });
 

@@ -48,7 +48,7 @@ const INITIAL_VIEW_STATE = {
   maxZoom: 8
 };
 
-export class App extends Component {
+export default class App extends Component {
   constructor(props) {
     super(props);
 
@@ -114,7 +114,6 @@ export class App extends Component {
       new GeoJsonLayer({
         id: 'geojson',
         data: roads,
-        opacity: 1,
         stroked: false,
         filled: false,
         lineWidthMinPixels: 0.5,

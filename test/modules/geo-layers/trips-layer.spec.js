@@ -12,22 +12,7 @@ test('TripsLayer', t => {
       getTimestamps: d => d.map(p => p.begin_time)
     },
     assert: t.ok,
-    onBeforeUpdate: ({testCase}) => t.comment(testCase.title),
-    onAfterUpdate: ({layer}) => {
-      if (layer.props.getTimestamps) {
-        t.notOk(
-          layer.getAttributeManager().getAttributes().instanceTimestamps.constant,
-          'instanceTimestamps populated'
-        );
-        t.ok(layer.state.model.program.uniforms.isPath3D, 'uniform isPath3D set');
-      } else {
-        t.ok(
-          layer.getAttributeManager().getAttributes().instanceTimestamps.constant,
-          'instanceTimestamps ignored'
-        );
-        t.notOk(layer.state.model.program.uniforms.isPath3D, 'uniform isPath3D not set');
-      }
-    }
+    onBeforeUpdate: ({testCase}) => t.comment(testCase.title)
   });
 
   testLayer({Layer: TripsLayer, testCases, onError: t.notOk});

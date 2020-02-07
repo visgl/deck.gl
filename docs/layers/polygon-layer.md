@@ -83,10 +83,10 @@ new PolygonLayer({});
 To use pre-bundled scripts:
 
 ```html
-<script src="https://unpkg.com/deck.gl@^7.0.0/dist.min.js"></script>
+<script src="https://unpkg.com/deck.gl@^8.0.0/dist.min.js"></script>
 <!-- or -->
-<script src="https://unpkg.com/@deck.gl/core@^7.0.0/dist.min.js"></script>
-<script src="https://unpkg.com/@deck.gl/layers@^7.0.0/dist.min.js"></script>
+<script src="https://unpkg.com/@deck.gl/core@^8.0.0/dist.min.js"></script>
+<script src="https://unpkg.com/@deck.gl/layers@^8.0.0/dist.min.js"></script>
 ```
 
 ```js
@@ -177,19 +177,23 @@ Type of joint. If `true`, draw round joints. Otherwise draw miter joints.
 The maximum extent of a joint in ratio to the stroke width.
 Only works if `lineJointRounded` is `false`.
 
-##### `lineDashJustified` (Boolean, optional)
-
-* Default: `false`
-
-Justify dashes together.
-Only works if `getLineDashArray` is specified.
-
 ##### `material` (Object, optional)
 
-* Default: `new PhongMaterial()`
+* Default: `true`
 
 This is an object that contains material props for [lighting effect](/docs/effects/lighting-effect.md) applied on extruded polygons.
-Check [PhongMaterial](https://github.com/uber/luma.gl/tree/7.0-release/docs/api-reference/core/materials/phong-material.md) for more details.
+Check [the lighting guide](/docs/developer-guide/using-lighting.md#constructing-a-material-instance) for configurable settings.
+
+##### `_normalize` (Object, optional)
+
+* Default: `true`
+
+> Note: This prop is experimental
+
+If `false`, will skip normalizing the coordinates returned by `getPolygon`. Disabling normalization improves performance during data update, but makes the layer prone to error in case the data is malformed. It is only recommended when you use this layer with preprocessed static data or validation on the backend.
+
+When normalization is disabled, polygons must be specified in the format of flat array or `{positions, holeIndices}`. Rings must be closed (i.e. the first and last vertices must be identical) and must contain at leat 3 vertices. See `getPolygon` below for details.
+
 
 ### Data Accessors
 
@@ -239,7 +243,7 @@ If the optional third component `z` is supplied for a position, it specifies the
 
 * Default: `[0, 0, 0, 255]`
 
-The rgba fill color of each polygon, in `r, g, b, [a]`. Each component is in the 0-255 range.
+The rgba color is in the format of `[r, g, b, [a]]`. Each channel is a number between 0-255 and `a` is 255 if not supplied.
 
 * If an array is provided, it is used as the fill color for all polygons.
 * If a function is provided, it is called on each polygon to retrieve its fill color.
@@ -248,7 +252,7 @@ The rgba fill color of each polygon, in `r, g, b, [a]`. Each component is in the
 
 * Default: `[0, 0, 0, 255]`
 
-The rgba outline color of each polygon, in `r, g, b, [a]`. Each component is in the 0-255 range.
+The rgba color is in the format of `[r, g, b, [a]]`. Each channel is a number between 0-255 and `a` is 255 if not supplied.
 
 * If an array is provided, it is used as the outline color for all polygons.
 * If a function is provided, it is called on each polygon to retrieve its outline color.
@@ -267,7 +271,7 @@ The width of the outline of the polygon, in units specified by `lineWidthUnits` 
 
 * Default: `1000`
 
-The elevation to extrude each polygon with. 
+The elevation to extrude each polygon with.
 If a cartographic projection mode is used, height will be interpreted as meters,
 otherwise will be in unit coordinates.
 Only applies if `extruded: true`.
@@ -277,15 +281,6 @@ Only applies if `extruded: true`.
 
 **Note:** If 3D positions are returned by `getPolygon`, the extrusion returned by `getElevation` is added to the base altitude of each vertex.
 
-##### `getLineDashArray` ([Function](/docs/developer-guide/using-layers.md#accessors)|Array, optional)
-
-* Default: `null`
-
-The dash array to draw each outline path with: `[dashSize, gapSize]` relative to the width of the line. (See PathLayer)
-
-* If an array is provided, it is used as the dash array for all paths.
-* If a function is provided, it is called on each path to retrieve its dash array. Return `[0, 0]` to draw the path in solid line.
-* If this accessor is not specified, all paths are drawn as solid lines.
 
 ## Sub Layers
 
@@ -308,4 +303,3 @@ The PolygonLayer renders the following sublayers:
 ## Source
 
 [modules/layers/src/polygon-layer](https://github.com/uber/deck.gl/tree/master/modules/layers/src/polygon-layer)
-

@@ -18,7 +18,10 @@ const TYPE_DEFINITIONS = {
   },
   color: {
     validate(value, propType) {
-      return isArray(value) && (value.length === 3 || value.length === 4);
+      return (
+        (propType.optional && !value) ||
+        (isArray(value) && (value.length === 3 || value.length === 4))
+      );
     },
     equal(value1, value2, propType) {
       return arrayEqual(value1, value2);

@@ -7,8 +7,8 @@ import {
   getSourceBufferAttribute,
   getAttributeBufferLength,
   cycleBuffers
-} from '../lib/attribute-transition-utils';
-import Attribute from '../lib/attribute';
+} from '../lib/attribute/attribute-transition-utils';
+import Attribute from '../lib/attribute/attribute';
 import Transition from './transition';
 
 export default class GPUSpringTransition {
@@ -21,8 +21,11 @@ export default class GPUSpringTransition {
     // attribute, it will be converted and returned as a regular attribute
     // `attribute.userData` is the original options passed when constructing the attribute.
     // This ensures that we set the proper `doublePrecision` flag and shader attributes.
-    this.attributeInTransition = new Attribute(gl, attribute.userData);
-    this.currentBufferLayout = attribute.bufferLayout;
+    this.attributeInTransition = new Attribute(
+      gl,
+      Object.assign({}, attribute.settings, {normalized: false})
+    );
+    this.currentStartIndices = attribute.startIndices;
     // storing currentLength because this.buffer may be larger than the actual length we want to use
     // this is because we only reallocate buffers when they grow, not when they shrink,
     // due to performance costs
@@ -49,14 +52,14 @@ export default class GPUSpringTransition {
   // we need to start animating towards the new values
   // this also correctly resizes / pads the transform's buffers
   // in case the attribute's buffer has changed in length or in
-  // bufferLayout
+  // startIndices
   start(transitionSettings, numInstances) {
     const {gl, buffers, attribute} = this;
     const padBufferOpts = {
       numInstances,
       attribute,
       fromLength: this.currentLength,
-      fromBufferLayout: this.currentBufferLayout,
+      fromStartIndices: this.currentStartIndices,
       getData: transitionSettings.enter
     };
 
@@ -64,7 +67,7 @@ export default class GPUSpringTransition {
       padBuffer({buffer, ...padBufferOpts});
     }
 
-    this.currentBufferLayout = attribute.bufferLayout;
+    this.currentStartIndices = attribute.startIndices;
     this.currentLength = getAttributeBufferLength(attribute, numInstances);
     this.attributeInTransition.update({
       buffer: buffers[1],
@@ -121,7 +124,12 @@ export default class GPUSpringTransition {
     });
 
     cycleBuffers(buffers);
-    this.attributeInTransition.update({buffer: buffers[1]});
+    this.attributeInTransition.update({
+      buffer: buffers[1],
+      // Hack: Float64Array is required for double-precision attributes
+      // to generate correct shader attributes
+      value: this.attribute.value
+    });
 
     const isTransitioning = readPixelsToArray(framebuffer)[0] > 0;
 

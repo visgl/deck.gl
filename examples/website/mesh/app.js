@@ -1,3 +1,4 @@
+/* global window */
 import React, {PureComponent} from 'react';
 import {render} from 'react-dom';
 import DeckGL from '@deck.gl/react';
@@ -8,9 +9,10 @@ import {
   LightingEffect,
   AmbientLight
 } from '@deck.gl/core';
-import {SolidPolygonLayer} from 'deck.gl/layers';
+import {SolidPolygonLayer} from '@deck.gl/layers';
 import {SimpleMeshLayer} from '@deck.gl/mesh-layers';
 
+import {Matrix4} from 'math.gl';
 import {OBJLoader} from '@loaders.gl/obj';
 import {registerLoaders} from '@loaders.gl/core';
 
@@ -61,14 +63,44 @@ const background = [
   [[-1000.0, -1000.0, -40], [1000.0, -1000.0, -40], [1000.0, 1000.0, -40], [-1000.0, 1000.0, -40]]
 ];
 
-class Example extends PureComponent {
+export default class App extends PureComponent {
+  constructor(props) {
+    super(props);
+    this.state = {
+      modelMatrix: new Matrix4()
+    };
+    this._frameId = null;
+    this._rotate = this._rotate.bind(this);
+  }
+
+  componentDidMount() {
+    this._frameId = window.requestAnimationFrame(this._rotate);
+  }
+
+  componentWillUnmount() {
+    if (this._frameId) {
+      window.cancelAnimationFrame(this._frameId);
+    }
+  }
+
+  _rotate() {
+    const matrix = new Matrix4(this.state.modelMatrix);
+    matrix.rotateX((0.005 / 180) * Math.PI);
+    this.setState({
+      modelMatrix: matrix
+    });
+    window.requestAnimationFrame(this._rotate);
+  }
+
   render() {
+    const {modelMatrix} = this.state;
     const layers = [
       new SimpleMeshLayer({
         id: 'mini-coopers',
         data: SAMPLE_DATA,
         mesh: MESH_URL,
-        coordinateSystem: COORDINATE_SYSTEM.IDENTITY,
+        modelMatrix,
+        coordinateSystem: COORDINATE_SYSTEM.CARTESIAN,
         getPosition: d => d.position,
         getColor: d => d.color,
         getOrientation: d => d.orientation
@@ -77,9 +109,9 @@ class Example extends PureComponent {
       new SolidPolygonLayer({
         id: 'background',
         data: background,
-        opacity: 1,
         extruded: false,
-        coordinateSystem: COORDINATE_SYSTEM.IDENTITY,
+        modelMatrix,
+        coordinateSystem: COORDINATE_SYSTEM.CARTESIAN,
         getPolygon: f => f,
         getFillColor: [0, 0, 0, 0]
       })
@@ -103,5 +135,5 @@ class Example extends PureComponent {
 }
 
 export function renderToDOM(container) {
-  render(<Example />, container);
+  render(<App />, container);
 }

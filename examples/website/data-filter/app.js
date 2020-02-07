@@ -1,18 +1,22 @@
 import React, {Component, Fragment} from 'react';
-import {render} from 'react-dom';
 import {StaticMap} from 'react-map-gl';
 import DeckGL from '@deck.gl/react';
 import {ScatterplotLayer} from '@deck.gl/layers';
 import {DataFilterExtension} from '@deck.gl/extensions';
-
+import {MapView} from '@deck.gl/core';
 import RangeInput from './range-input';
 
 // Set your mapbox token here
 const MAPBOX_TOKEN = process.env.MapboxAccessToken; // eslint-disable-line
 
-// Source data GeoJSON
-const DATA_URL =
-  'https://raw.githubusercontent.com/uber-web/kepler.gl-data/master/earthquakes/data.csv'; // eslint-disable-line
+// This is only needed for this particular dataset - the default view assumes
+// that the furthest geometries are on the ground. Because we are drawing the
+// circles at the depth of the earthquakes, i.e. below sea level, we need to
+// push the far plane away to avoid clipping them.
+const MAP_VIEW = new MapView({
+  // 1 is the distance between the camera and the ground
+  farZMultiplier: 100
+});
 
 const INITIAL_VIEW_STATE = {
   latitude: 36.5,
@@ -22,11 +26,16 @@ const INITIAL_VIEW_STATE = {
   bearing: 0
 };
 
-const MS_PER_DAY = 8.64e7; // milliseconds in a day
+const MS_PER_DAY = 8.64e7;
 
-const dataFilter = new DataFilterExtension({filterSize: 1});
+const dataFilter = new DataFilterExtension({
+  filterSize: 1,
+  // Enable for higher precision, e.g. 1 second granularity
+  // See DataFilterExtension documentation for how to pick precision
+  fp64: false
+});
 
-export class App extends Component {
+export default class App extends Component {
   constructor(props) {
     super(props);
 
@@ -54,7 +63,7 @@ export class App extends Component {
     }
     return data.reduce(
       (range, d) => {
-        const t = d.timestamp / MS_PER_DAY;
+        const t = d.timestamp;
         range[0] = Math.min(range[0], t);
         range[1] = Math.max(range[1], t);
         return range;
@@ -88,7 +97,7 @@ export class App extends Component {
             return [255 - r * 15, r * 5, r * 10];
           },
 
-          getFilterValue: d => d.timestamp / MS_PER_DAY, // in days
+          getFilterValue: d => d.timestamp,
           filterRange: [filterValue[0], filterValue[1]],
           filterSoftRange: [
             filterValue[0] * 0.9 + filterValue[1] * 0.1,
@@ -125,7 +134,7 @@ export class App extends Component {
   }
 
   _formatLabel(t) {
-    const date = new Date(t * MS_PER_DAY);
+    const date = new Date(t);
     return `${date.getUTCFullYear()}/${date.getUTCMonth() + 1}`;
   }
 
@@ -136,6 +145,7 @@ export class App extends Component {
     return (
       <Fragment>
         <DeckGL
+          views={MAP_VIEW}
           layers={this._renderLayers()}
           initialViewState={INITIAL_VIEW_STATE}
           controller={true}
@@ -155,6 +165,7 @@ export class App extends Component {
             min={timeRange[0]}
             max={timeRange[1]}
             value={filterValue}
+            animationSpeed={MS_PER_DAY * 30}
             formatLabel={this._formatLabel}
             onChange={({value}) => this.setState({filterValue: value})}
           />
@@ -162,20 +173,4 @@ export class App extends Component {
       </Fragment>
     );
   }
-}
-
-export function renderToDOM(container) {
-  render(<App />, container);
-  require('d3-request').csv(DATA_URL, (error, response) => {
-    if (!error) {
-      const data = response.map(row => ({
-        timestamp: new Date(`${row.DateTime} UTC`).getTime(),
-        latitude: Number(row.Latitude),
-        longitude: Number(row.Longitude),
-        depth: Number(row.Depth),
-        magnitude: Number(row.Magnitude)
-      }));
-      render(<App data={data} />, container);
-    }
-  });
 }

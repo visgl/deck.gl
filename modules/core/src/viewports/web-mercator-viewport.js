@@ -28,14 +28,11 @@ import {
   addMetersToLngLat,
   getProjectionParameters,
   fitBounds
-} from 'viewport-mercator-project';
+} from '@math.gl/web-mercator';
 
 // TODO - import from math.gl
 import * as vec2 from 'gl-matrix/vec2';
-
-import assert from '../utils/assert';
-
-const ERR_ARGUMENT = 'Illegal argument to WebMercatorViewport';
+import {Matrix4} from 'math.gl';
 
 export default class WebMercatorViewport extends Viewport {
   /**
@@ -53,11 +50,15 @@ export default class WebMercatorViewport extends Viewport {
       pitch = 0,
       bearing = 0,
       nearZMultiplier = 0.1,
-      farZMultiplier = 10,
-      orthographic = false
+      farZMultiplier = 1.01,
+      orthographic = false,
+
+      repeat = false,
+      worldOffset = 0
     } = opts;
 
     let {width, height, altitude = 1.5} = opts;
+    const scale = Math.pow(2, zoom);
 
     // Silently allow apps to send in 0,0 to facilitate isomorphic render etc
     width = width || 1;
@@ -80,12 +81,18 @@ export default class WebMercatorViewport extends Viewport {
     // shader (cheap) which gives a coordinate system that has its center in
     // the layer's center position. This makes rotations and other modelMatrx
     // transforms much more useful.
-    const viewMatrixUncentered = getViewMatrix({
+    let viewMatrixUncentered = getViewMatrix({
       height,
       pitch,
       bearing,
+      scale,
       altitude
     });
+
+    if (worldOffset) {
+      const viewOffset = new Matrix4().translate([512 * worldOffset, 0, 0]);
+      viewMatrixUncentered = viewOffset.multiplyLeft(viewMatrixUncentered);
+    }
 
     const viewportOpts = Object.assign({}, opts, {
       // x, y,
@@ -103,7 +110,7 @@ export default class WebMercatorViewport extends Viewport {
       fovyRadians: fov,
       aspect,
       // TODO Viewport is already carefully set up to "focus" on ground, so can't use focal distance
-      orthographicFocalDistance: focalDistance,
+      focalDistance: orthographic ? focalDistance : 1,
       near,
       far
     });
@@ -120,51 +127,37 @@ export default class WebMercatorViewport extends Viewport {
 
     this.orthographic = orthographic;
 
-    // Bind methods
-    this.metersToLngLatDelta = this.metersToLngLatDelta.bind(this);
-    this.lngLatDeltaToMeters = this.lngLatDeltaToMeters.bind(this);
+    this._subViewports = repeat ? [] : null;
 
     Object.freeze(this);
   }
   /* eslint-enable complexity, max-statements */
 
-  /**
-   * Converts a meter offset to a lnglat offset
-   *
-   * Note: Uses simple linear approximation around the viewport center
-   * Error increases with size of offset (roughly 1% per 100km)
-   *
-   * @param {[Number,Number]|[Number,Number,Number]) xyz - array of meter deltas
-   * @return {[Number,Number]|[Number,Number,Number]) - array of [lng,lat,z] deltas
-   */
-  metersToLngLatDelta(xyz) {
-    const [x, y, z = 0] = xyz;
-    assert(Number.isFinite(x) && Number.isFinite(y) && Number.isFinite(z), ERR_ARGUMENT);
-    const {pixelsPerMeter, degreesPerPixel} = this.distanceScales;
-    const deltaLng = x * pixelsPerMeter[0] * degreesPerPixel[0];
-    const deltaLat = y * pixelsPerMeter[1] * degreesPerPixel[1];
-    return xyz.length === 2 ? [deltaLng, deltaLat] : [deltaLng, deltaLat, z];
-  }
+  get subViewports() {
+    if (this._subViewports && !this._subViewports.length) {
+      // Cache sub viewports so that we only calculate them once
+      const topLeft = this.unproject([0, 0]);
+      const topRight = this.unproject([this.width, 0]);
+      const bottomLeft = this.unproject([0, this.height]);
+      const bottomRight = this.unproject([this.width, this.height]);
 
-  /**
-   * Converts a lnglat offset to a meter offset
-   *
-   * Note: Uses simple linear approximation around the viewport center
-   * Error increases with size of offset (roughly 1% per 100km)
-   *
-   * @param {[Number,Number]|[Number,Number,Number]) deltaLngLatZ - array of [lng,lat,z] deltas
-   * @return {[Number,Number]|[Number,Number,Number]) - array of meter deltas
-   */
-  lngLatDeltaToMeters(deltaLngLatZ) {
-    const [deltaLng, deltaLat, deltaZ = 0] = deltaLngLatZ;
-    assert(
-      Number.isFinite(deltaLng) && Number.isFinite(deltaLat) && Number.isFinite(deltaZ),
-      ERR_ARGUMENT
-    );
-    const {pixelsPerDegree, metersPerPixel} = this.distanceScales;
-    const deltaX = deltaLng * pixelsPerDegree[0] * metersPerPixel[0];
-    const deltaY = deltaLat * pixelsPerDegree[1] * metersPerPixel[1];
-    return deltaLngLatZ.length === 2 ? [deltaX, deltaY] : [deltaX, deltaY, deltaZ];
+      const minLon = Math.min(topLeft[0], topRight[0], bottomLeft[0], bottomRight[0]);
+      const maxLon = Math.max(topLeft[0], topRight[0], bottomLeft[0], bottomRight[0]);
+
+      const minOffset = Math.floor((minLon + 180) / 360);
+      const maxOffset = Math.ceil((maxLon - 180) / 360);
+
+      for (let x = minOffset; x <= maxOffset; x++) {
+        const offsetViewport = x
+          ? new WebMercatorViewport({
+              ...this,
+              worldOffset: x
+            })
+          : this;
+        this._subViewports.push(offsetViewport);
+      }
+    }
+    return this._subViewports;
   }
 
   /**
@@ -199,11 +192,6 @@ export default class WebMercatorViewport extends Viewport {
     const newCenter = vec2.add([], this.center, translate);
 
     return this.unprojectFlat(newCenter);
-  }
-
-  // Legacy method name
-  getLocationAtPoint({lngLat, pos}) {
-    return this.getMapCenterByLngLatPosition({lngLat, pos});
   }
 
   /**

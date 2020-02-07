@@ -18,8 +18,10 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 import Layer from './layer';
-import log from '../utils/log';
+import debug from '../debug';
 import {flatten} from '../utils/flatten';
+
+const TRACE_RENDER_LAYERS = 'compositeLayer.renderLayers';
 
 export default class CompositeLayer extends Layer {
   get isComposite() {
@@ -118,7 +120,7 @@ export default class CompositeLayer extends Layer {
   }
 
   // Returns sub layer props for a specific sublayer
-  getSubLayerProps(sublayerProps) {
+  getSubLayerProps(sublayerProps = {}) {
     const {
       opacity,
       pickable,
@@ -153,46 +155,47 @@ export default class CompositeLayer extends Layer {
       extensions
     };
 
-    if (sublayerProps) {
-      const overridingSublayerProps = overridingProps && overridingProps[sublayerProps.id];
-      const overridingSublayerTriggers =
-        overridingSublayerProps && overridingSublayerProps.updateTriggers;
+    const overridingSublayerProps = overridingProps && overridingProps[sublayerProps.id];
+    const overridingSublayerTriggers =
+      overridingSublayerProps && overridingSublayerProps.updateTriggers;
+    const sublayerId = sublayerProps.id || 'sublayer';
 
-      if (overridingSublayerProps) {
-        const propTypes = this.constructor._propTypes;
-        for (const key in overridingSublayerProps) {
-          const propType = propTypes[key];
-          // eslint-disable-next-line
-          if (propType && propType.type === 'accessor') {
-            overridingSublayerProps[key] = this.getSubLayerAccessor(overridingSublayerProps[key]);
-          }
+    if (overridingSublayerProps) {
+      const propTypes = this.constructor._propTypes;
+      for (const key in overridingSublayerProps) {
+        const propType = propTypes[key];
+        // eslint-disable-next-line
+        if (propType && propType.type === 'accessor') {
+          overridingSublayerProps[key] = this.getSubLayerAccessor(overridingSublayerProps[key]);
         }
       }
-
-      Object.assign(
-        newProps,
-        sublayerProps,
-        // experimental feature that allows users to override sublayer props via parent layer prop
-        overridingSublayerProps,
-        {
-          id: `${this.props.id}-${sublayerProps.id}`,
-          updateTriggers: Object.assign(
-            {
-              all: this.props.updateTriggers.all
-            },
-            sublayerProps.updateTriggers,
-            overridingSublayerTriggers
-          )
-        }
-      );
     }
+
+    Object.assign(
+      newProps,
+      sublayerProps,
+      // experimental feature that allows users to override sublayer props via parent layer prop
+      overridingSublayerProps,
+      {
+        id: `${this.props.id}-${sublayerId}`,
+        updateTriggers: Object.assign(
+          {
+            all: this.props.updateTriggers.all
+          },
+          sublayerProps.updateTriggers,
+          overridingSublayerTriggers
+        )
+      }
+    );
 
     // Pass through extension props
     for (const extension of extensions) {
       const passThroughProps = extension.getSubLayerProps.call(this, extension);
-      Object.assign(newProps, passThroughProps, {
-        updateTriggers: Object.assign(newProps.updateTriggers, passThroughProps.updateTriggers)
-      });
+      if (passThroughProps) {
+        Object.assign(newProps, passThroughProps, {
+          updateTriggers: Object.assign(newProps.updateTriggers, passThroughProps.updateTriggers)
+        });
+      }
     }
 
     return newProps;
@@ -205,17 +208,16 @@ export default class CompositeLayer extends Layer {
   // Called by layer manager to render subLayers
   _renderLayers() {
     let {subLayers} = this.internalState;
-    if (subLayers && !this.needsUpdate()) {
-      log.log(3, `Composite layer reused subLayers ${this}`, this.internalState.subLayers)();
-    } else {
+    const shouldUpdate = !subLayers || this.needsUpdate();
+    if (shouldUpdate) {
       subLayers = this.renderLayers();
       // Flatten the returned array, removing any null, undefined or false
       // this allows layers to render sublayers conditionally
       // (see CompositeLayer.renderLayers docs)
       subLayers = flatten(subLayers, {filter: Boolean});
       this.internalState.subLayers = subLayers;
-      log.log(2, `Composite layer rendered new subLayers ${this}`, subLayers)();
     }
+    debug(TRACE_RENDER_LAYERS, this, shouldUpdate, subLayers);
 
     // populate reference to parent layer (this layer)
     // NOTE: needs to be done even when reusing layers as the parent may have changed

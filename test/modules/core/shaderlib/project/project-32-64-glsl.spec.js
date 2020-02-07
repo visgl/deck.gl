@@ -24,8 +24,8 @@ import GL from '@luma.gl/constants';
 
 // import {COORDINATE_SYSTEM, Viewport, WebMercatorViewport} from 'deck.gl';
 import {COORDINATE_SYSTEM, WebMercatorViewport} from 'deck.gl';
-import project32 from '../../../../../modules/core/src/shaderlib/project32/project32';
-import {project, project64} from '@deck.gl/core/shaderlib';
+import {project, project32} from '@deck.gl/core';
+import {project64} from '@deck.gl/extensions';
 // import {Matrix4, config} from 'math.gl';
 import {config} from 'math.gl';
 import {gl} from '@deck.gl/test-utils';
@@ -83,24 +83,22 @@ function getVendor() {
 }
 
 const TRANSFORM_VS = {
-  project_position_to_clipspace: (pos, xy64LowPos = [0, 0]) => `\
+  project_position_to_clipspace: (pos, pos64Low = [0, 0, 0]) => `\
 varying vec4 outValue;
 
 void main()
 {
   outValue = project_position_to_clipspace(${toGLSLVec(pos)}, ${toGLSLVec(
-    xy64LowPos
+    pos64Low
   )}, vec3(0, 0, 0));
 }
 `,
-  project_position_to_clipspace_world_position: (pos, xy64LowPos = [0, 0]) => `\
+  project_position_to_clipspace_world_position: (pos, pos64Low = [0, 0, 0]) => `\
 varying vec4 outValue;
 
 void main()
 {
-  project_position_to_clipspace(${toGLSLVec(pos)}, ${toGLSLVec(
-    xy64LowPos
-  )}, vec3(0, 0, 0), outValue);
+  project_position_to_clipspace(${toGLSLVec(pos)}, ${toGLSLVec(pos64Low)}, vec3(0, 0, 0), outValue);
 }
 `
 };
@@ -116,7 +114,7 @@ const TEST_CASES = [
         name: 'project_position_to_clipspace_world_position',
         func: ({project_position_to_clipspace}) => {
           let worldPosition = [];
-          project_position_to_clipspace([-122.45, 37.78, 0], [0, 0], [0, 0, 0], worldPosition);
+          project_position_to_clipspace([-122.45, 37.78, 0], [0, 0, 0], [0, 0, 0], worldPosition);
           [worldPosition] = project_position_to_clipspace.__out__;
           return worldPosition;
         },
@@ -125,44 +123,44 @@ const TEST_CASES = [
         gpu64BitPrecision: 1e-7,
         vs: TRANSFORM_VS.project_position_to_clipspace_world_position(
           [-122.45, 37.78, 0],
-          [fp64LowPart(-122.45), fp64LowPart(37.78)]
+          [fp64LowPart(-122.45), fp64LowPart(37.78), 0]
         )
       },
       {
         name: 'project_position_to_clipspace',
         skipGPUs: ['Intel'],
-        func: ({project_position_to_clipspace_vec3_vec2_vec3}) =>
-          project_position_to_clipspace_vec3_vec2_vec3([-122.45, 37.78, 0], [0, 0], [0, 0, 0]),
+        func: ({project_position_to_clipspace_vec3_vec3_vec3}) =>
+          project_position_to_clipspace_vec3_vec3_vec3([-122.45, 37.78, 0], [0, 0, 0], [0, 0, 0]),
         mapResult: coords => clipspaceToScreen(TEST_VIEWPORT, coords),
         output: TEST_VIEWPORT.project([-122.45, 37.78, 0]),
         precision: PIXEL_TOLERANCE,
         gpu64BitPrecision: 1e-7,
         vs: TRANSFORM_VS.project_position_to_clipspace(
           [-122.45, 37.78, 0],
-          [fp64LowPart(-122.45), fp64LowPart(37.78)]
+          [fp64LowPart(-122.45), fp64LowPart(37.78), 0]
         )
       },
       {
         name: 'project_position_to_clipspace (non-zero Z)',
         skipGPUs: ['Intel'],
-        func: ({project_position_to_clipspace_vec3_vec2_vec3}) =>
-          project_position_to_clipspace_vec3_vec2_vec3([-122.45, 37.78, 100], [0, 0], [0, 0, 0]),
+        func: ({project_position_to_clipspace_vec3_vec3_vec3}) =>
+          project_position_to_clipspace_vec3_vec3_vec3([-122.45, 37.78, 100], [0, 0, 0], [0, 0, 0]),
         mapResult: coords => clipspaceToScreen(TEST_VIEWPORT, coords),
         output: TEST_VIEWPORT.project([-122.45, 37.78, 100]),
         precision: PIXEL_TOLERANCE,
         gpu64BitPrecision: 1e-6, // test fails with 1e-7
         vs: TRANSFORM_VS.project_position_to_clipspace(
           [-122.45, 37.78, 100],
-          [fp64LowPart(-122.45), fp64LowPart(37.78)]
+          [fp64LowPart(-122.45), fp64LowPart(37.78), 0]
         )
       }
     ]
   },
   {
-    title: 'LNGLAT_DEPRECATED mode',
+    title: 'LNGLAT mode - high zoom',
     params: {
       viewport: TEST_VIEWPORT_HIGH_ZOOM,
-      coordinateSystem: COORDINATE_SYSTEM.LNGLAT_DEPRECATED
+      coordinateSystem: COORDINATE_SYSTEM.LNGLAT
     },
     tests: [
       {
@@ -172,31 +170,34 @@ const TEST_CASES = [
 
         func: ({project_position_to_clipspace}) => {
           let worldPosition = [];
-          project_position_to_clipspace([-122.05, 37.92, 0], [0, 0], [0, 0, 0], worldPosition);
+          project_position_to_clipspace([-122.05, 37.92, 0], [0, 0, 0], [0, 0, 0], worldPosition);
           [worldPosition] = project_position_to_clipspace.__out__;
           return worldPosition;
         },
-        output: TEST_VIEWPORT_HIGH_ZOOM.projectFlat([-122.05, 37.92]).concat([0, 1]),
+        output: TEST_VIEWPORT_HIGH_ZOOM.projectFlat([-122.05, 37.92])
+          .map((x, i) => x - TEST_VIEWPORT_HIGH_ZOOM.center[i])
+          .concat([0, 1]),
+        output64: TEST_VIEWPORT_HIGH_ZOOM.projectFlat([-122.05, 37.92]).concat([0, 1]),
         precision: PIXEL_TOLERANCE,
         gpu64BitPrecision: 1e-7,
         vs: TRANSFORM_VS.project_position_to_clipspace_world_position(
           [-122.05, 37.92, 0],
-          [fp64LowPart(-122.05), fp64LowPart(37.92)]
+          [fp64LowPart(-122.05), fp64LowPart(37.92), 0]
         )
       },
       {
         name: 'project_position_to_clipspace',
         skipGPUs: ['Intel'],
 
-        func: ({project_position_to_clipspace_vec3_vec2_vec3}) =>
-          project_position_to_clipspace_vec3_vec2_vec3([-122.05, 37.92, 0], [0, 0], [0, 0, 0]),
+        func: ({project_position_to_clipspace_vec3_vec3_vec3}) =>
+          project_position_to_clipspace_vec3_vec3_vec3([-122.05, 37.92, 0], [0, 0, 0], [0, 0, 0]),
         mapResult: coords => clipspaceToScreen(TEST_VIEWPORT_HIGH_ZOOM, coords),
         output: TEST_VIEWPORT_HIGH_ZOOM.project([-122.05, 37.92, 0]),
         precision: PIXEL_TOLERANCE,
         gpu64BitPrecision: 1e-7,
         vs: TRANSFORM_VS.project_position_to_clipspace(
           [-122.05, 37.92, 0],
-          [fp64LowPart(-122.05), fp64LowPart(37.92)]
+          [fp64LowPart(-122.05), fp64LowPart(37.92), 0]
         )
       }
     ]
@@ -213,7 +214,7 @@ const TEST_CASES = [
         name: 'project_position_to_clipspace_world_position',
         func: ({project_position_to_clipspace}) => {
           let worldPosition = [];
-          project_position_to_clipspace([0.05, 0.08, 0], [0, 0], [0, 0, 0], worldPosition);
+          project_position_to_clipspace([0.05, 0.08, 0], [0, 0, 0], [0, 0, 0], worldPosition);
           [worldPosition] = project_position_to_clipspace.__out__;
           return worldPosition;
         },
@@ -225,21 +226,21 @@ const TEST_CASES = [
         gpu64BitPrecision: 1e-7,
         vs: TRANSFORM_VS.project_position_to_clipspace_world_position(
           [0.05, 0.08, 0],
-          [fp64LowPart(0.05), fp64LowPart(0.08)]
+          [fp64LowPart(0.05), fp64LowPart(0.08), 0]
         )
       },
       {
         name: 'project_position_to_clipspace',
 
-        func: ({project_position_to_clipspace_vec3_vec2_vec3}) =>
-          project_position_to_clipspace_vec3_vec2_vec3([0.05, 0.08, 0], [0, 0], [0, 0, 0]),
+        func: ({project_position_to_clipspace_vec3_vec3_vec3}) =>
+          project_position_to_clipspace_vec3_vec3_vec3([0.05, 0.08, 0], [0, 0, 0], [0, 0, 0]),
         mapResult: coords => clipspaceToScreen(TEST_VIEWPORT, coords),
         output: TEST_VIEWPORT.project([-122, 38, 0]),
         precision: PIXEL_TOLERANCE,
         gpu64BitPrecision: 1e-7,
         vs: TRANSFORM_VS.project_position_to_clipspace(
           [0.05, 0.08, 0],
-          [fp64LowPart(0.05), fp64LowPart(0.08)]
+          [fp64LowPart(0.05), fp64LowPart(0.08), 0]
         )
       }
     ]
@@ -252,7 +253,7 @@ test('project32&64#vs', t => {
   [false, true].forEach(usefp64 => {
     /* eslint-disable max-nested-callbacks, complexity */
     TEST_CASES.forEach(testCase => {
-      if (usefp64 && testCase.params.coordinateSystem !== COORDINATE_SYSTEM.LNGLAT_DEPRECATED) {
+      if (usefp64 && testCase.params.coordinateSystem !== COORDINATE_SYSTEM.LNGLAT) {
         // Apply 64 bit projection only for LNGLAT_DEPRECATED
         return;
       }
@@ -264,7 +265,7 @@ test('project32&64#vs', t => {
         uniforms = Object.assign(uniforms, project64.getUniforms(testCase.params, uniforms));
       }
       testCase.tests.forEach(c => {
-        const expected = c.output;
+        const expected = (usefp64 && c.output64) || c.output;
         const skipOnGPU = c.skipGPUs && c.skipGPUs.some(gpu => vendor.indexOf(gpu) >= 0);
 
         if (Transform.isSupported(gl) && !skipOnGPU) {
@@ -286,14 +287,9 @@ test('project32&64#vs', t => {
         } else {
           // TODO - resolve dependencies properly
           // luma's assembleShaders require WebGL context to work
-          const vsSource =
-            []
-              .concat(
-                usefp64 ? project64.dependencies : project32.dependencies,
-                project.dependencies
-              )
-              .map(dep => dep.vs)
-              .join('') + (usefp64 ? project64.vs : project32.vs);
+          const module = usefp64 ? project64 : project32;
+          const dependencies = appendDependencies(module, []).concat(module);
+          const vsSource = dependencies.map(dep => dep.vs).join('');
 
           const projectVS = compileVertexShader(vsSource);
 
@@ -307,9 +303,9 @@ test('project32&64#vs', t => {
             uniforms.project_uViewProjectionMatrixFP64 = normalizedProjectMatrix64;
           }
 
-          const module = projectVS(uniforms);
+          const projectFunc = projectVS(uniforms);
           config.EPSILON = c.precision || 1e-7;
-          let actual = c.func(module);
+          let actual = c.func(projectFunc);
           actual = c.mapResult ? c.mapResult(actual) : actual;
           const name = `CPU: ${usefp64 ? 'project64' : 'project32'} ${c.name}`;
           verifyResult({t, name, actual, expected});
@@ -322,3 +318,14 @@ test('project32&64#vs', t => {
   config.EPSILON = oldEpsilon;
   t.end();
 });
+
+function appendDependencies(module, result) {
+  const dependencies = module.dependencies;
+  if (dependencies && dependencies.length > 0) {
+    for (const dep of dependencies) {
+      result = appendDependencies(dep, result);
+    }
+    result = result.concat(dependencies);
+  }
+  return result;
+}

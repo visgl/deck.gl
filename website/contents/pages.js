@@ -1,3 +1,5 @@
+const PRE_MATCH_REGEX = /(GeoJson|3D|API|DeckGL|JSON)/g;
+
 function getDocUrl(filename) {
   // DOCS_DIR specified in webpack config file
   // eslint-disable-next-line no-undef
@@ -19,9 +21,15 @@ function generatePath(tree, parentPath = '', depth = 0) {
 
   tree.depth = depth;
   if (tree.name) {
+    // pre-match GeoJson|3D|API|DeckGL|JSON
+    // use `#` to take up pre-matched' space
+    // then replace `#` with pre-match results
+    const matches = tree.name.match(PRE_MATCH_REGEX);
     tree.path = tree.name
-      .match(/(GeoJson|3D|API|DeckGL|JSON|[A-Z]*[a-z'0-9\.]+|\d+)/g)
+      .replace(PRE_MATCH_REGEX, '#')
+      .match(/(#|[A-Z]*[a-z'0-9\.]+|\d+)/g)
       .join('-')
+      .replace('#', _ => matches.shift())
       .toLowerCase()
       .replace(/[^\w-]/g, '');
   }
@@ -180,7 +188,7 @@ export const examplePages = generatePath([
     children: [
       {
         name: 'Playground',
-        external: 'http://deck.gl/json'
+        external: 'http://deck.gl/playground'
       }
     ]
   }
@@ -594,16 +602,8 @@ export const docPages = generatePath([
             content: getDocUrl('api-reference/first-person-view.md')
           },
           {
-            name: 'ThirdPersonView',
-            content: getDocUrl('api-reference/third-person-view.md')
-          },
-          {
             name: 'OrthographicView',
             content: getDocUrl('api-reference/orthographic-view.md')
-          },
-          {
-            name: 'PerspectiveView',
-            content: getDocUrl('api-reference/perspective-view.md')
           },
           {
             name: 'OrbitView',
@@ -679,6 +679,10 @@ export const docPages = generatePath([
             content: getDocUrl('api-reference/extensions/overview.md')
           },
           {
+            name: 'BrushingExtension',
+            content: getDocUrl('api-reference/extensions/brushing-extension.md')
+          },
+          {
             name: 'DataFilterExtension',
             content: getDocUrl('api-reference/extensions/data-filter-extension.md')
           },
@@ -687,8 +691,8 @@ export const docPages = generatePath([
             content: getDocUrl('api-reference/extensions/fp64-extension.md')
           },
           {
-            name: 'BrushingExtension',
-            content: getDocUrl('api-reference/extensions/brushing-extension.md')
+            name: 'PathStyleExtension',
+            content: getDocUrl('api-reference/extensions/path-style-extension.md')
           }
         ]
       },
@@ -715,10 +719,6 @@ export const docPages = generatePath([
           {
             name: 'JSONConverter',
             content: getDocUrl('api-reference/json/json-converter.md')
-          },
-          {
-            name: 'JSONLayer',
-            content: getDocUrl('api-reference/json/json-layer.md')
           }
         ]
       },

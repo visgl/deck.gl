@@ -43,7 +43,7 @@ const INITIAL_VIEW_STATE = {
 };
 
 /* eslint-disable react/no-deprecated */
-export class App extends Component {
+export default class App extends Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -84,7 +84,7 @@ export class App extends Component {
   }
 
   _recalculateArcs(data, selectedCounty = this.state.selectedCounty) {
-    if (!data) {
+    if (!data || !data.length) {
       return;
     }
     if (!selectedCounty) {

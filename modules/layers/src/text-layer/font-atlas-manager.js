@@ -2,7 +2,6 @@
 
 import {Texture2D} from '@luma.gl/core';
 import TinySDF from '@mapbox/tiny-sdf';
-import GL from '@luma.gl/constants';
 
 import {buildMapping} from './utils';
 import LRUCache from './lru-cache';
@@ -188,8 +187,7 @@ export default class FontAtlasManager {
       height,
       parameters: {
         [GL_TEXTURE_WRAP_S]: GL_CLAMP_TO_EDGE,
-        [GL_TEXTURE_WRAP_T]: GL_CLAMP_TO_EDGE,
-        [GL.UNPACK_FLIP_Y_WEBGL]: true
+        [GL_TEXTURE_WRAP_T]: GL_CLAMP_TO_EDGE
       }
     });
 

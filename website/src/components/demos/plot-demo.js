@@ -1,7 +1,6 @@
 import React, {Component} from 'react';
 import {Parser} from 'expr-eval';
-import autobind from 'autobind-decorator';
-import {App} from 'website-examples/plot/app';
+import App from 'website-examples/plot/app';
 
 export default class PlotDemo extends Component {
 

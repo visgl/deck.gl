@@ -8,6 +8,7 @@ import {default as meterTrajectorySmall} from '../data/meter-trajectory-small.js
 
 import {default as choropleths} from '../data/sf.zip.geo.json';
 export {default as geojson} from '../data/sample.geo.json';
+export {default as geojsonLarge} from '../data/canada.geo.json';
 export {default as hexagons} from '../data/hexagons.json';
 export {default as routes} from '../data/sfmta.routes.json';
 export {default as trips} from '../data/trips.json';
@@ -265,3 +266,19 @@ export function getMultiPointFeatures100K() {
   _multiPointFeatures100K = _multiPointFeatures100K || generateMultiPointFeatures(1e5, 10);
   return _multiPointFeatures100K;
 }
+
+function getMeshSampleData([xCount, yCount], spacing) {
+  const data = [];
+  for (let x = 0; x < xCount; x++) {
+    for (let y = 0; y < yCount; y++) {
+      data.push({
+        position: [(x - (xCount - 1) / 2) * spacing, (y - (yCount - 1) / 2) * spacing],
+        color: [(x / (xCount - 1)) * 255, 128, (y / (yCount - 1)) * 255],
+        orientation: [(x / (xCount - 1)) * 60 - 30, 0, -90]
+      });
+    }
+  }
+  return data;
+}
+
+export const meshSampleData = getMeshSampleData([10, 10], 120);

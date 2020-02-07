@@ -1,5 +1,4 @@
 const deck = require('../core/bundle');
-const {experimental} = deck;
 
 Object.assign(
   deck,
@@ -9,11 +8,7 @@ Object.assign(
   require('@deck.gl/geo-layers'),
   require('@deck.gl/google-maps'),
   require('@deck.gl/mesh-layers'),
-  require('@deck.gl/mapbox'),
-  require('@deck.gl/json')
+  require('@deck.gl/mapbox')
 );
-
-// Make sure core exports are preserved
-Object.assign(deck.experimental, experimental);
 
 module.exports = deck;

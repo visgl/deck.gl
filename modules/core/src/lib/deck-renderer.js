@@ -1,9 +1,9 @@
-import log from '../utils/log';
+import debug from '../debug';
 import DrawLayersPass from '../passes/draw-layers-pass';
 import PickLayersPass from '../passes/pick-layers-pass';
 import {Framebuffer} from '@luma.gl/core';
 
-const LOG_PRIORITY_DRAW = 2;
+const TRACE_RENDER_LAYERS = 'deckRenderer.renderLayers';
 
 export default class DeckRenderer {
   constructor(gl) {
@@ -16,6 +16,7 @@ export default class DeckRenderer {
     this._needsRedraw = 'Initial render';
     this.renderBuffers = [];
     this.lastPostProcessEffect = null;
+    this._onError = null;
   }
 
   setProps(props) {
@@ -27,6 +28,10 @@ export default class DeckRenderer {
     if ('drawPickingColors' in props && this.drawPickingColors !== props.drawPickingColors) {
       this.drawPickingColors = props.drawPickingColors;
       this._needsRedraw = 'drawPickingColors changed';
+    }
+
+    if ('onError' in props) {
+      this._onError = props.onError;
     }
   }
 
@@ -46,6 +51,7 @@ export default class DeckRenderer {
     const layerPass = this.drawPickingColors ? this.pickLayersPass : this.drawLayersPass;
 
     opts.layerFilter = this.layerFilter;
+    opts.onError = this._onError;
     opts.effects = opts.effects || [];
     opts.target = opts.target || Framebuffer.getDefaultFramebuffer(this.gl);
 
@@ -58,11 +64,7 @@ export default class DeckRenderer {
 
     this.renderCount++;
 
-    if (log.priority >= LOG_PRIORITY_DRAW) {
-      renderStats.forEach(status => {
-        this._logRenderStats(status, opts.pass, opts.redrawReason, opts.stats, renderStats);
-      });
-    }
+    debug(TRACE_RENDER_LAYERS, this, renderStats, opts);
   }
 
   needsRedraw(opts = {clearRedrawFlags: false}) {
@@ -126,26 +128,6 @@ export default class DeckRenderer {
         params.inputBuffer = buffer;
         params.swapBuffer = buffer === renderBuffers[0] ? renderBuffers[1] : renderBuffers[0];
       }
-    }
-  }
-
-  _logRenderStats(status, pass, redrawReason, stats, renderStats) {
-    const {totalCount, visibleCount, compositeCount, pickableCount} = renderStats;
-    const primitiveCount = totalCount - compositeCount;
-    const hiddenCount = primitiveCount - visibleCount;
-
-    let message = '';
-    message += `RENDER #${this.renderCount} \
-${visibleCount} (of ${totalCount} layers) to ${pass} because ${redrawReason} `;
-    if (log.priority > LOG_PRIORITY_DRAW) {
-      message += `\
-(${hiddenCount} hidden, ${compositeCount} composite ${pickableCount} pickable)`;
-    }
-
-    log.log(LOG_PRIORITY_DRAW, message)();
-
-    if (stats) {
-      stats.get('Redraw Layers').add(visibleCount);
     }
   }
 }

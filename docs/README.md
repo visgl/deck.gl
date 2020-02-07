@@ -1,3 +1,5 @@
+# Introduction
+
 <p align="center">
   These docs are for
   <a href="https://github.com/uber/deck.gl/blob/7.2-release/docs/README.md">
@@ -22,8 +24,6 @@
   </a>
 </p>
 
-# Introduction
-
 deck.gl is designed to make visualization of large data sets simple. It enables users to quickly get impressive visual results with limited effort through composition of existing layers, while offering a complete architecture for packaging advanced WebGL based visualizations as reusable JavaScript layers.
 
 ## Brief Overview
@@ -44,9 +44,9 @@ deck.gl is one of the main frameworks in the [vis.gl](http://vis.gl) framework s
 
 deck.gl has been developed in parallel with a number of companion modules, e.g.:
 
-* [luma.gl](https://uber.github.io/luma.gl/#/) - A general purpose WebGL library designed to be interoperable both with the raw WebGL API and (as far as possible) with other WebGL libraries. In particular, luma.gl does not claim ownership of the WebGL context, and can work with any supplied context, including contexts created by the application or other WebGL libraries.
-* [react-map-gl](https://uber.github.io/react-map-gl/#/) - A React wrapper around Mapbox GL which works seamlessly with deck.gl.
-* [nebula.gl](https://uber.github.io/nebula.gl/#/) - A high-performance feature editing framework for deck.gl.
+* [luma.gl](https://luma.gl/) - A general purpose WebGL library designed to be interoperable both with the raw WebGL API and (as far as possible) with other WebGL libraries. In particular, luma.gl does not claim ownership of the WebGL context, and can work with any supplied context, including contexts created by the application or other WebGL libraries.
+* [react-map-gl](https://uber.github.io/react-map-gl/) - A React wrapper around Mapbox GL which works seamlessly with deck.gl.
+* [nebula.gl](https://nebula.gl/) - A high-performance feature editing framework for deck.gl.
 
 
 ## Learning deck.gl

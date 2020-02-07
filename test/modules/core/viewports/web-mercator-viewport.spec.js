@@ -19,43 +19,40 @@
 // THE SOFTWARE.
 
 import test from 'tape-catch';
-import {equals, config} from 'math.gl';
+import {equals, config, Vector3} from 'math.gl';
 import {WebMercatorViewport} from 'deck.gl';
 
 // Adjust sensitivity of math.gl's equals
 const LNGLAT_TOLERANCE = 1e-6;
 const ALT_TOLERANCE = 1e-5;
+const OFFSET_TOLERANCE = 1e-5;
 
 /* eslint-disable */
 const TEST_VIEWPORTS = [
   {
-    mapState: {
-      width: 793,
-      height: 775,
-      latitude: 37.751537058389985,
-      longitude: -122.42694203247012,
-      zoom: 11.5
-    }
+    width: 800,
+    height: 600,
+    latitude: 38,
+    longitude: -122,
+    zoom: 11
   },
   {
-    mapState: {
-      width: 793,
-      height: 775,
-      latitude: 20.751537058389985,
-      longitude: 22.42694203247012,
-      zoom: 15.5
-    }
+    width: 800,
+    height: 600,
+    latitude: 23,
+    longitude: 20,
+    zoom: 15,
+    pich: 30,
+    bearing: -85
   },
   {
-    mapState: {
-      width: 793,
-      height: 775,
-      latitude: 50.751537058389985,
-      longitude: 42.42694203247012,
-      zoom: 15.5,
-      bearing: -44.48928121059271,
-      pitch: 43.670797287818566
-    }
+    width: 800,
+    height: 600,
+    latitude: 65,
+    longitude: 42,
+    zoom: 16,
+    pitch: 15,
+    bearing: 30
   }
 ];
 
@@ -69,44 +66,43 @@ test('WebMercatorViewport#constructor', t => {
     new WebMercatorViewport() instanceof WebMercatorViewport,
     'Created new WebMercatorViewport with default args'
   );
-  t.end();
-});
 
-test('WebMercatorViewport#constructor - 0 width/height', t => {
-  const viewport = new WebMercatorViewport(
-    Object.assign(TEST_VIEWPORTS[0].mapState, {
-      width: 0,
-      height: 0
-    })
-  );
   t.ok(
-    viewport instanceof WebMercatorViewport,
+    new WebMercatorViewport(
+      Object.assign({}, TEST_VIEWPORTS[0], {
+        width: 0,
+        height: 0
+      })
+    ) instanceof WebMercatorViewport,
     'WebMercatorViewport constructed successfully with 0 width and height'
   );
   t.end();
 });
 
 test('WebMercatorViewport.projectFlat', t => {
+  const oldEpsilon = config.EPSILON;
   config.EPSILON = LNGLAT_TOLERANCE;
 
   for (const vc of TEST_VIEWPORTS) {
-    const viewport = new WebMercatorViewport(vc.mapState);
+    const viewport = new WebMercatorViewport(vc);
     for (const tc of TEST_VIEWPORTS) {
-      const lnglatIn = [tc.mapState.longitude, tc.mapState.latitude];
+      const lnglatIn = [tc.longitude, tc.latitude];
       const xy = viewport.projectFlat(lnglatIn);
       const lnglat = viewport.unprojectFlat(xy);
       t.comment(`Comparing [${lnglatIn}] to [${lnglat}]`);
       t.ok(equals(lnglatIn, lnglat));
     }
   }
+  config.EPSILON = oldEpsilon;
   t.end();
 });
 
 test('WebMercatorViewport.project#3D', t => {
+  const oldEpsilon = config.EPSILON;
   for (const vc of TEST_VIEWPORTS) {
-    const viewport = new WebMercatorViewport(vc.mapState);
+    const viewport = new WebMercatorViewport(vc);
     for (const offset of [0, 0.5, 1.0, 5.0]) {
-      const lnglatIn3 = [vc.mapState.longitude + offset, vc.mapState.latitude + offset, 0];
+      const lnglatIn3 = [vc.longitude + offset, vc.latitude + offset, 0];
       const xyz3 = viewport.project(lnglatIn3);
       const lnglat3 = viewport.unproject(xyz3);
       t.comment(`Project/unproject ${lnglatIn3} => ${xyz3} => ${lnglat3}`);
@@ -116,49 +112,179 @@ test('WebMercatorViewport.project#3D', t => {
       t.ok(equals(lnglatIn3[2], lnglat3[2]), 'Altitude input/output match');
     }
   }
+  config.EPSILON = oldEpsilon;
   t.end();
 });
 
 test('WebMercatorViewport.project#2D', t => {
+  const oldEpsilon = config.EPSILON;
   config.EPSILON = LNGLAT_TOLERANCE;
   // Cross check positions
   for (const vc of TEST_VIEWPORTS) {
-    const viewport = new WebMercatorViewport(vc.mapState);
+    const viewport = new WebMercatorViewport(vc);
     for (const tc of TEST_VIEWPORTS) {
-      const lnglatIn = [tc.mapState.longitude, tc.mapState.latitude];
+      const lnglatIn = [tc.longitude, tc.latitude];
       const xy = viewport.project(lnglatIn);
       const lnglat = viewport.unproject(xy);
       t.comment(`Comparing [${lnglatIn}] to [${lnglat}]`);
       t.ok(equals(lnglatIn, lnglat));
     }
   }
+  config.EPSILON = oldEpsilon;
   t.end();
 });
 
 test('WebMercatorViewport.getScales', t => {
+  const oldEpsilon = config.EPSILON;
+  config.EPSILON = OFFSET_TOLERANCE;
+
   for (const vc of TEST_VIEWPORTS) {
-    const viewport = new WebMercatorViewport(vc.mapState);
+    const viewport = new WebMercatorViewport(vc);
     const distanceScales = viewport.getDistanceScales();
-    t.ok(Array.isArray(distanceScales.metersPerPixel), 'metersPerPixel defined');
-    t.ok(Array.isArray(distanceScales.pixelsPerMeter), 'pixelsPerMeter defined');
-    t.ok(Array.isArray(distanceScales.degreesPerPixel), 'degreesPerPixel defined');
-    t.ok(Array.isArray(distanceScales.pixelsPerDegree), 'pixelsPerDegree defined');
+    t.ok(
+      distanceScales.metersPerUnit &&
+        distanceScales.unitsPerMeter &&
+        distanceScales.degreesPerUnit &&
+        distanceScales.unitsPerDegree,
+      'distanceScales defined'
+    );
+
+    t.ok(
+      equals(distanceScales.metersPerUnit.map((d, i) => d * distanceScales.unitsPerMeter[i]), [
+        1,
+        1,
+        1
+      ]),
+      'metersPerUnit/unitsPerMeter match'
+    );
+
+    t.ok(
+      equals(distanceScales.degreesPerUnit.map((d, i) => d * distanceScales.unitsPerDegree[i]), [
+        1,
+        1,
+        1
+      ]),
+      'degreesPerUnit/unitsPerDegree match'
+    );
+
+    for (const offset of [-0.01, 0.005, 0.01]) {
+      const xyz0 = [
+        viewport.center[0] + distanceScales.unitsPerDegree[0] * offset,
+        viewport.center[1] + distanceScales.unitsPerDegree[1] * offset
+      ];
+      const xyz1 = viewport.projectFlat([vc.longitude + offset, vc.latitude + offset, 0]);
+
+      t.ok(equals(xyz0, xyz1), 'unitsPerDegree matches projection');
+    }
   }
+  config.EPSILON = oldEpsilon;
   t.end();
 });
 
-test('WebMercatorViewport.meterDeltas', t => {
-  config.EPSILON = LNGLAT_TOLERANCE;
+test('WebMercatorViewport.getFrustumPlanes', t => {
+  const CULLING_TEST_CASES = [
+    {
+      pixels: [400, 300],
+      result: null
+    },
+    {
+      pixels: [799, 1],
+      result: null
+    },
+    {
+      pixels: [1, 599],
+      result: null
+    },
+    {
+      pixels: [799, 599],
+      result: null
+    },
+    {
+      pixels: [1, 1],
+      result: null
+    },
+    {
+      pixels: [-1, 300],
+      result: 'left'
+    },
+    {
+      pixels: [801, 300],
+      result: 'right'
+    },
+    {
+      pixels: [400, -1],
+      result: 'top'
+    },
+    {
+      pixels: [400, 601],
+      result: 'bottom'
+    },
+    {
+      pixels: [400, 300, -1.01],
+      result: 'near'
+    },
+    {
+      pixels: [400, 300, 1.01],
+      result: 'far'
+    }
+  ];
 
   for (const vc of TEST_VIEWPORTS) {
-    const viewport = new WebMercatorViewport(vc.mapState);
-    for (const tc of TEST_VIEWPORTS) {
-      const coordinate = [tc.mapState.longitude, tc.mapState.latitude, 0];
-      const deltaLngLat = viewport.metersToLngLatDelta(coordinate);
-      const deltaMeters = viewport.lngLatDeltaToMeters(deltaLngLat);
-      t.comment(`Comparing [${deltaMeters}] to [${coordinate}]`);
-      t.ok(equals(deltaMeters, coordinate), 'deltaLngLat to deltaMeters');
+    const viewport = new WebMercatorViewport(vc);
+    const planes = viewport.getFrustumPlanes();
+
+    for (const tc of CULLING_TEST_CASES) {
+      const lngLat = viewport.unproject(tc.pixels);
+      const commonPosition = viewport.projectPosition(lngLat);
+      t.is(getCulling(commonPosition, planes), tc.result, 'point culled');
     }
   }
   t.end();
 });
+
+test('WebMercatorViewport.subViewports', t => {
+  let viewport = new WebMercatorViewport(TEST_VIEWPORTS[0]);
+  t.deepEqual(viewport.subViewports, null, 'gets correct subViewports');
+
+  viewport = new WebMercatorViewport({...TEST_VIEWPORTS[0], repeat: true});
+  t.deepEqual(viewport.subViewports, [viewport], 'gets correct subViewports');
+
+  viewport = new WebMercatorViewport({
+    width: 800,
+    height: 400,
+    longitude: 0,
+    latitude: 0,
+    zoom: 0,
+    repeat: true
+  });
+  const {subViewports} = viewport;
+  t.is(subViewports.length, 3, 'gets correct subViewports');
+  t.deepEqual(
+    subViewports[0].project([0, 0]),
+    [400 - 512, 200],
+    'center offset in subViewports[0]'
+  );
+  t.deepEqual(subViewports[1].project([0, 0]), [400, 200], 'center offset in subViewports[1]');
+  t.deepEqual(
+    subViewports[2].project([0, 0]),
+    [400 + 512, 200],
+    'center offset in subViewports[2]'
+  );
+
+  t.is(viewport.subViewports, subViewports, 'subViewports are cached');
+
+  t.end();
+});
+
+function getCulling(p, planes) {
+  let outDir = null;
+  p = new Vector3(p);
+  for (const dir in planes) {
+    const plane = planes[dir];
+    if (p.dot(plane.normal) > plane.distance) {
+      outDir = dir;
+      break;
+    }
+  }
+  return outDir;
+}

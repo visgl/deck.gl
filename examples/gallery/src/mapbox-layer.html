@@ -1,8 +1,8 @@
 <html>
   <head>
     <title>Interleaving deck.gl with Mapbox Layers</title>
-    <script src="https://unpkg.com/deck.gl@^7.0.0/dist.min.js"></script>
-    <script src="https://api.tiles.mapbox.com/mapbox-gl-js/v1.0.0/mapbox-gl.js"></script>
+    <script src="https://unpkg.com/deck.gl@^8.0.0/dist.min.js"></script>
+    <script src="https://api.tiles.mapbox.com/mapbox-gl-js/v1.4.0/mapbox-gl.js"></script>
   </head>
 
   <body style="margin:0"></body>
@@ -72,7 +72,7 @@
         getTargetPosition: d => d.target,
         getSourceColor: [255, 208, 0],
         getTargetColor: [0, 128, 255],
-        getStrokeWidth: 8
+        getWidth: 8
       }))
     });
 

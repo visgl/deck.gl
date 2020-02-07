@@ -1,7 +1,7 @@
 import {clamp} from 'math.gl';
 import Controller from './controller';
 import ViewState from './view-state';
-import WebMercatorViewport, {normalizeViewportProps} from 'viewport-mercator-project';
+import WebMercatorViewport, {normalizeViewportProps} from '@math.gl/web-mercator';
 import assert from '../utils/assert';
 import LinearInterpolator from '../transitions/linear-interpolator';
 import {TRANSITION_EVENTS} from './transition-manager';
@@ -226,8 +226,6 @@ class MapState extends ViewState {
    *   relative scale.
    */
   zoom({pos, startPos, scale}) {
-    assert(scale > 0, '`scale` must be a positive number');
-
     // Make sure we zoom around the current mouse position rather than map center
     let {startZoom, startZoomLngLat} = this._interactiveState;
 
@@ -242,17 +240,13 @@ class MapState extends ViewState {
       startZoomLngLat = this._unproject(startPos) || this._unproject(pos);
     }
 
-    // take the start lnglat and put it where the mouse is down.
-    assert(
-      startZoomLngLat,
-      '`startZoomLngLat` prop is required ' +
-        'for zoom behavior to calculate where to position the map.'
-    );
-
     const zoom = this._calculateNewZoom({scale, startZoom});
 
     const zoomedViewport = new WebMercatorViewport(Object.assign({}, this._viewportProps, {zoom}));
-    const [longitude, latitude] = zoomedViewport.getLocationAtPoint({lngLat: startZoomLngLat, pos});
+    const [longitude, latitude] = zoomedViewport.getMapCenterByLngLatPosition({
+      lngLat: startZoomLngLat,
+      pos
+    });
 
     return this._getUpdatedState({
       zoom,

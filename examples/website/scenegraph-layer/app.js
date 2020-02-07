@@ -6,10 +6,10 @@ import {StaticMap} from 'react-map-gl';
 import DeckGL from '@deck.gl/react';
 import {ScenegraphLayer} from '@deck.gl/mesh-layers';
 
-import {GLTFScenegraphLoader} from '@luma.gl/addons';
+import {GLTFLoader} from '@loaders.gl/gltf';
 import {registerLoaders} from '@loaders.gl/core';
 
-registerLoaders([GLTFScenegraphLoader]);
+registerLoaders([GLTFLoader]);
 
 // Set your mapbox token here
 const MAPBOX_TOKEN = process.env.MapboxAccessToken; // eslint-disable-line
@@ -48,7 +48,7 @@ const DATA_INDEX = {
   POSITION_SOURCE: 16
 };
 
-export class App extends Component {
+export default class App extends Component {
   constructor(props) {
     super(props);
     this.state = {};
@@ -102,20 +102,17 @@ export class App extends Component {
           id: 'scenegraph-layer',
           data,
           pickable: true,
-          sizeScale: 500,
+          sizeScale: 250,
           scenegraph: MODEL_URL,
           _animations: ANIMATIONS,
+          sizeMinPixels: 0.1,
+          sizeMaxPixels: 1.5,
           getPosition: d => [
             d[DATA_INDEX.LONGITUDE] || 0,
             d[DATA_INDEX.LATITUDE] || 0,
             d[DATA_INDEX.GEO_ALTITUDE] || 0
           ],
-          getOrientation: d => [
-            this._verticalRateToAngle(d),
-            // TODO: Fix this direction
-            (d[DATA_INDEX.TRUE_TRACK] || 0) - 180,
-            90
-          ],
+          getOrientation: d => [this._verticalRateToAngle(d), -d[DATA_INDEX.TRUE_TRACK] || 0, 90],
           getTranslation: [0, 0, 0],
           getScale: [1, 1, 1],
           transitions: {
@@ -136,6 +133,7 @@ export class App extends Component {
     const track = this.state.hoverObject[DATA_INDEX.TRUE_TRACK] || 0;
     return (
       <Fragment>
+        <div>&nbsp;</div>
         <div>Unique ID: {icao24}</div>
         <div>Call Sign: {callsign}</div>
         <div>Country: {originCountry}</div>
@@ -193,7 +191,7 @@ export class App extends Component {
             mapboxApiAccessToken={MAPBOX_TOKEN}
           />
         </DeckGL>
-        {/* this._renderInfoBox() */}
+        {this._renderInfoBox()}
       </Fragment>
     );
   }

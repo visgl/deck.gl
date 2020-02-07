@@ -24,8 +24,10 @@ export default `\
 attribute vec3 positions;
 attribute vec4 instanceSourceColors;
 attribute vec4 instanceTargetColors;
-attribute vec4 instancePositions;
-attribute vec4 instancePositions64xyLow;
+attribute vec3 instanceSourcePositions;
+attribute vec3 instanceSourcePositions64Low;
+attribute vec3 instanceTargetPositions;
+attribute vec3 instanceTargetPositions64Low;
 attribute vec3 instancePickingColors;
 attribute float instanceWidths;
 attribute float instanceHeights;
@@ -40,14 +42,25 @@ uniform float widthMaxPixels;
 varying vec4 vColor;
 varying vec2 uv;
 
-float paraboloid(vec2 source, vec2 target, float ratio) {
+float paraboloid(vec3 source, vec3 target, float ratio) {
+  // d: distance on the xy plane
+  // r: ratio of the current point
+  // p: ratio of the peak of the arc
+  // h: height multiplier
+  // z = f(r) = sqrt(r * (p * 2 - r)) * d * h
+  // f(0) = 0
+  // f(1) = dz
 
-  vec2 x = mix(source, target, ratio);
-  vec2 center = mix(source, target, 0.5);
+  vec3 delta = target - source;
+  float dh = length(delta.xy) * instanceHeights;
+  float unitZ = delta.z / dh;
+  float p2 = unitZ * unitZ + 1.0;
 
-  float dSourceCenter = distance(source, center);
-  float dXCenter = distance(x, center);
-  return (dSourceCenter + dXCenter) * (dSourceCenter - dXCenter);
+  // sqrt does not deal with negative values, manually flip source and target if delta.z < 0
+  float dir = step(delta.z, 0.0);
+  float z0 = mix(source.z, target.z, dir);
+  float r = mix(ratio, 1.0 - ratio, dir);
+  return sqrt(r * (p2 - r)) * dh + z0;
 }
 
 // offset vector by strokeWidth pixels
@@ -65,25 +78,25 @@ float getSegmentRatio(float index) {
   return smoothstep(0.0, 1.0, index / (numSegments - 1.0));
 }
 
-vec3 getPos(vec2 source, vec2 target, float segmentRatio) {
-  float vertexHeight = sqrt(max(0.0, paraboloid(source, target, segmentRatio))) * instanceHeights;
+vec3 getPos(vec3 source, vec3 target, float segmentRatio) {
+  float z = paraboloid(source, target, segmentRatio);
 
   float tiltAngle = radians(instanceTilts);
-  vec2 tiltDirection = normalize(target - source);
-  vec2 tilt = vec2(-tiltDirection.y, tiltDirection.x) * vertexHeight * sin(tiltAngle);
+  vec2 tiltDirection = normalize(target.xy - source.xy);
+  vec2 tilt = vec2(-tiltDirection.y, tiltDirection.x) * z * sin(tiltAngle);
 
   return vec3(
-    mix(source, target, segmentRatio) + tilt,
-    vertexHeight * cos(tiltAngle)
+    mix(source.xy, target.xy, segmentRatio) + tilt,
+    z * cos(tiltAngle)
   );
 }
 
 void main(void) {
-  geometry.worldPosition = vec3(instancePositions.xy, 0.0);
-  geometry.worldPositionAlt = vec3(instancePositions.zw, 0.0);
+  geometry.worldPosition = instanceSourcePositions;
+  geometry.worldPositionAlt = instanceTargetPositions;
 
-  vec2 source = project_position(geometry.worldPosition, instancePositions64xyLow.xy).xy;
-  vec2 target = project_position(geometry.worldPositionAlt, instancePositions64xyLow.zw).xy;
+  vec3 source = project_position(instanceSourcePositions, instanceSourcePositions64Low);
+  vec3 target = project_position(instanceTargetPositions, instanceTargetPositions64Low);
 
   float segmentIndex = positions.x;
   float segmentRatio = getSegmentRatio(segmentIndex);

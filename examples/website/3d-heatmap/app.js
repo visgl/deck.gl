@@ -1,7 +1,6 @@
 import React, {Component} from 'react';
 import {render} from 'react-dom';
 import {StaticMap} from 'react-map-gl';
-import {PhongMaterial} from '@luma.gl/core';
 import {AmbientLight, PointLight, LightingEffect} from '@deck.gl/core';
 import {HexagonLayer} from '@deck.gl/aggregation-layers';
 import DeckGL from '@deck.gl/react';
@@ -32,12 +31,12 @@ const pointLight2 = new PointLight({
 
 const lightingEffect = new LightingEffect({ambientLight, pointLight1, pointLight2});
 
-const material = new PhongMaterial({
+const material = {
   ambient: 0.64,
   diffuse: 0.6,
   shininess: 32,
   specularColor: [51, 51, 51]
-});
+};
 
 const INITIAL_VIEW_STATE = {
   longitude: -1.4157267858730052,
@@ -61,7 +60,7 @@ const colorRange = [
 const elevationScale = {min: 1, max: 50};
 
 /* eslint-disable react/no-deprecated */
-export class App extends Component {
+export default class App extends Component {
   static get defaultColorRange() {
     return colorRange;
   }
@@ -87,7 +86,6 @@ export class App extends Component {
         extruded: true,
         getPosition: d => d,
         onHover: this.props.onHover,
-        opacity: 1,
         pickable: Boolean(this.props.onHover),
         radius,
         upperPercentile,

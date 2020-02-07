@@ -18,7 +18,7 @@ const INITIAL_VIEW_STATE = {
   bearing: 0
 };
 
-export class App extends PureComponent {
+export default class App extends PureComponent {
   _renderLayers() {
     const {data = DATA_URL, intensity = 1, threshold = 0.03, radiusPixels = 30} = this.props;
 
@@ -26,7 +26,6 @@ export class App extends PureComponent {
       new HeatmapLayer({
         data,
         id: 'heatmp-layer',
-        opacity: 1,
         pickable: false,
         getPosition: d => [d[0], d[1]],
         getWeight: d => d[2],

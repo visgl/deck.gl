@@ -1,7 +1,7 @@
 import React, {Component} from 'react';
 import {MAPBOX_STYLES, DATA_URI} from '../../constants/defaults';
 import {readableInteger} from '../../utils/format-utils';
-import {App} from 'website-examples/scatterplot/app';
+import App from 'website-examples/scatterplot/app';
 
 export default class ScatterPlotDemo extends Component {
 

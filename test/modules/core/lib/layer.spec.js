@@ -23,7 +23,7 @@ import {Layer, AttributeManager, COORDINATE_SYSTEM, MapView, OrbitView} from 'de
 import {testInitializeLayer, testLayer} from '@deck.gl/test-utils';
 import {makeSpy} from '@probe.gl/test-utils';
 import {equals, Matrix4} from 'math.gl';
-import {Timeline} from '@luma.gl/addons';
+import {Timeline} from '@luma.gl/core';
 
 import {sleep, testAsyncData} from './async-iterator-test-utils';
 
@@ -266,11 +266,11 @@ test('Layer#use64bitPositions', t => {
   layer = new SubLayer({coordinateSystem: COORDINATE_SYSTEM.LNGLAT});
   t.true(layer.use64bitPositions(), 'returns true for COORDINATE_SYSTEM.LNGLAT');
 
-  layer = new SubLayer({coordinateSystem: COORDINATE_SYSTEM.LNGLAT_DEPRECATED});
-  t.false(layer.use64bitPositions(), 'returns false for COORDINATE_SYSTEM.LNGLAT_DEPRECATED');
+  layer = new SubLayer({coordinateSystem: COORDINATE_SYSTEM.CARTESIAN});
+  t.true(layer.use64bitPositions(), 'returns true for COORDINATE_SYSTEM.CARTESIAN');
 
-  layer = new SubLayer({fp64: true});
-  t.true(layer.use64bitPositions(), 'returns true for fp64: true');
+  layer = new SubLayer({coordinateSystem: COORDINATE_SYSTEM.METER_OFFSETS});
+  t.false(layer.use64bitPositions(), 'returns false for COORDINATE_SYSTEM.METER_OFFSETS');
 
   t.end();
 });
@@ -283,8 +283,7 @@ test('Layer#project', t => {
     height: 300,
     viewState: {longitude: 0, latitude: 0, zoom: 10}
   });
-
-  t.ok(equals(layer.project([0, 0, 100]), [200, 150, 0.8788028155547649]), 'returns correct value');
+  t.ok(equals(layer.project([0, 0, 100]), [200, 150, 0.9981698636949582]), 'returns correct value');
 
   layer = new SubLayer({
     coordinateSystem: COORDINATE_SYSTEM.METER_OFFSETS,
@@ -301,13 +300,13 @@ test('Layer#project', t => {
     equals(layer.project([100, 100, 100]), [
       215.91962780165122,
       134.08037212774843,
-      0.8788028155547649
+      0.9981698636949582
     ]),
     'returns correct value'
   );
 
   layer = new SubLayer({
-    coordinateSystem: COORDINATE_SYSTEM.IDENTITY,
+    coordinateSystem: COORDINATE_SYSTEM.CARTESIAN,
     modelMatrix: new Matrix4().rotateZ(Math.PI / 2)
   });
   testInitializeLayer({layer, onError: t.notOk});

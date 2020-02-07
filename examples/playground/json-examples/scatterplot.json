@@ -11,19 +11,23 @@
   },
   "views": [
     {
-      "type": "MapView",
+      "@@type": "MapView",
       "controller": true,
       "mapStyle": "mapbox://styles/mapbox/light-v9"
     }
   ],
   "layers": [
     {
-      "type": "ScatterplotLayer",
+      "@@type": "ScatterplotLayer",
       "data": "https://raw.githubusercontent.com/uber-common/deck.gl-data/master/examples/scatterplot/manhattan.json",
       "radiusScale": 30,
       "radiusMinPixels": 0.25,
-      "getPosition": "-",
-      "getFillColor": [0, 128, 255],
+      "getPosition": "@@=-",
+      "getFillColor": [
+        0,
+        128,
+        255
+      ],
       "getRadius": 1
     }
   ]

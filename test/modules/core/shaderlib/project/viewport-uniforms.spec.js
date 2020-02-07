@@ -21,7 +21,8 @@
 import test from 'tape-catch';
 
 import {COORDINATE_SYSTEM, MapView, OrbitView} from 'deck.gl';
-import {project, project64} from '@deck.gl/core/shaderlib';
+import {project} from '@deck.gl/core';
+import {project64} from '@deck.gl/extensions';
 
 const TEST_VIEWPORTS = {
   map: new MapView().makeViewport({
@@ -86,6 +87,8 @@ const UNIFORMS_64 = {
   project64_uScale: Number
 };
 
+const EPSILON = 1e-4;
+
 function getUniformsError(uniforms, formats) {
   for (const name in UNIFORMS) {
     const value = uniforms[name];
@@ -103,11 +106,23 @@ function getUniformsError(uniforms, formats) {
 test('project#getUniforms', t => {
   let uniforms = project.getUniforms({viewport: TEST_VIEWPORTS.map});
   t.notOk(getUniformsError(uniforms, UNIFORMS), 'Uniforms validated');
-  t.notOk(uniforms.project_uCoordinateOrigin, 'Should not return shader coordinate origin');
+  t.deepEqual(uniforms.project_uCenter, [0, 0, 0, 0], 'Returned zero projection center');
+
+  uniforms = project.getUniforms({
+    viewport: TEST_VIEWPORTS.map,
+    coordinateSystem: COORDINATE_SYSTEM.CARTESIAN
+  });
+  t.notOk(getUniformsError(uniforms, UNIFORMS), 'Uniforms validated');
   t.deepEqual(uniforms.project_uCenter, [0, 0, 0, 0], 'Returned zero projection center');
 
   uniforms = project.getUniforms({viewport: TEST_VIEWPORTS.mapHighZoom});
   t.notOk(getUniformsError(uniforms, UNIFORMS), 'Uniforms validated');
+  t.ok(uniforms.project_uCenter.some(x => x), 'Returned non-trivial projection center');
+  t.ok(
+    Math.abs(uniforms.project_uCenter[0]) < EPSILON &&
+      Math.abs(uniforms.project_uCenter[1]) < EPSILON,
+    'project center at center of clipspace'
+  );
   t.deepEqual(
     uniforms.project_uCoordinateOrigin,
     [-122.42694091796875, 37.75153732299805, 0],
@@ -121,12 +136,28 @@ test('project#getUniforms', t => {
     coordinateOrigin: [-122.4, 37.7]
   });
   t.notOk(getUniformsError(uniforms, UNIFORMS), 'Uniforms validated');
-  t.notOk(uniforms.project_uCoordinateOrigin, 'Should not returned shader coordinate origin');
   t.ok(uniforms.project_uCenter.some(x => x), 'Returned non-trivial projection center');
 
   uniforms = project.getUniforms({
+    viewport: TEST_VIEWPORTS.mapHighZoom,
+    coordinateSystem: COORDINATE_SYSTEM.CARTESIAN
+  });
+  t.notOk(getUniformsError(uniforms, UNIFORMS), 'Uniforms validated');
+  t.ok(uniforms.project_uCenter.some(x => x), 'Returned non-trivial projection center');
+  t.ok(
+    Math.abs(uniforms.project_uCenter[0]) < EPSILON &&
+      Math.abs(uniforms.project_uCenter[1]) < EPSILON,
+    'project center at center of clipspace'
+  );
+  t.ok(
+    uniforms.project_uCommonUnitsPerWorldUnit[0] === 1 &&
+      uniforms.project_uCommonUnitsPerWorldUnit[1] === 1,
+    'Returned correct distanceScales'
+  );
+
+  uniforms = project.getUniforms({
     viewport: TEST_VIEWPORTS.infoVis,
-    coordinateSystem: COORDINATE_SYSTEM.IDENTITY
+    coordinateSystem: COORDINATE_SYSTEM.CARTESIAN
   });
   t.notOk(getUniformsError(uniforms, UNIFORMS), 'Uniforms validated');
   t.deepEqual(

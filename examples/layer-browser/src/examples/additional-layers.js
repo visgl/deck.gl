@@ -7,7 +7,6 @@ import {
   // KMLLayer
 } from '@deck.gl/geo-layers';
 
-import {GPUGridLayer, GridLayer, HeatmapLayer} from '@deck.gl/aggregation-layers';
 import * as h3 from 'h3-js';
 
 import {registerLoaders} from '@loaders.gl/core';
@@ -16,56 +15,6 @@ import {PLYLoader} from '@loaders.gl/ply';
 import * as dataSamples from '../data-samples';
 
 registerLoaders([PLYLoader]);
-
-const GRID_LAYER_PROPS_OBJECT = {
-  id: 'grid-layer',
-  cellSize: 200,
-  opacity: 1,
-  extruded: true,
-  pickable: false,
-  getPosition: d => d.COORDINATES
-};
-
-const GPU_GRID_LAYER_PROPS_OBJECT = Object.assign({}, GRID_LAYER_PROPS_OBJECT, {
-  id: 'gpu-grid-layer'
-});
-
-const GRID_LAYER_PROPS = {
-  getData: () => dataSamples.points,
-  props: GRID_LAYER_PROPS_OBJECT
-};
-
-const GPU_GRID_LAYER_PROPS = {
-  getData: () => dataSamples.points,
-  props: GPU_GRID_LAYER_PROPS_OBJECT
-};
-
-const HEAT_LAYER_PROPS = {
-  getData: () => dataSamples.points,
-  props: {
-    id: 'heatmp-layer',
-    opacity: 1,
-    pickable: false,
-    getPosition: d => d.COORDINATES
-  }
-};
-
-const GPUGridLayerExample = Object.assign({}, {layer: GPUGridLayer}, GPU_GRID_LAYER_PROPS);
-const GridLayerExample = Object.assign({}, {layer: GridLayer}, GRID_LAYER_PROPS);
-const HeatmapLayerExample = Object.assign({}, {layer: HeatmapLayer}, HEAT_LAYER_PROPS);
-
-const GPUGridLayerPerfExample = (id, getData) => ({
-  layer: GPUGridLayer,
-  getData,
-  props: {
-    id: `gpuGridLayerPerf-${id}`,
-    cellSize: 200,
-    opacity: 1,
-    extruded: true,
-    pickable: false,
-    getPosition: d => d
-  }
-});
 
 const GreatCircleLayerExample = {
   layer: GreatCircleLayer,
@@ -135,8 +84,8 @@ const TripsLayerExample = {
   props: {
     id: 'trips-layer',
     data: dataSamples.SFTrips,
-    getPath: d =>
-      d.waypoints.map(p => [p.coordinates[0], p.coordinates[1], p.timestamp - 1554772579000]),
+    getPath: d => d.waypoints.map(p => p.coordinates),
+    getTimestamps: d => d.waypoints.map(p => p.timestamp - 1554772579000),
     getColor: [253, 128, 93],
     opacity: 0.8,
     widthMinPixels: 5,
@@ -154,12 +103,5 @@ export default {
     H3HexagonLayer: H3HexagonLayerExample,
     GreatCircleLayer: GreatCircleLayerExample,
     TripsLayer: TripsLayerExample
-  },
-  'Experimental Core Layers': {
-    GPUGridLayer: GPUGridLayerExample,
-    GridLayer: GridLayerExample,
-    HeatmapLayer: HeatmapLayerExample,
-    'GPUGridLayer (1M)': GPUGridLayerPerfExample('1M', dataSamples.getPoints1M),
-    'GPUGridLayer (5M)': GPUGridLayerPerfExample('5M', dataSamples.getPoints5M)
   }
 };

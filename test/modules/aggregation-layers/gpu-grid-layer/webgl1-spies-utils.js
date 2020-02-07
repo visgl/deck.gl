@@ -19,6 +19,7 @@
 // THE SOFTWARE.
 
 import {isWebGL2, fp64 as fp64ShaderModule} from '@luma.gl/core';
+import {project32, gouraudLighting, picking} from '@deck.gl/core';
 import {_GPUGridAggregator as GPUGridAggregator} from '@deck.gl/aggregation-layers';
 import GPUGridCellLayer from '@deck.gl/aggregation-layers/gpu-grid-layer/gpu-grid-cell-layer';
 import {makeSpy} from '@probe.gl/test-utils';
@@ -42,7 +43,7 @@ export function setupSpysForWebGL1(gl) {
     getShadersSpy.returns({
       vs: VS,
       fs: FS,
-      modules: ['project32', 'gouraud-lighting', 'picking', fp64ShaderModule]
+      modules: [project32, gouraudLighting, picking, fp64ShaderModule]
     });
     isSupportedSpy.returns(true);
     setupUniformBufferSpy.returns(null);

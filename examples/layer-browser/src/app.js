@@ -24,7 +24,7 @@ import LayerControls from './components/layer-controls';
 import LAYER_CATEGORIES from './examples';
 import Map from './map';
 
-import {ink} from '@luma.gl/effects';
+import {ink} from '@luma.gl/shadertools';
 
 const AMBIENT_LIGHT = new AmbientLight({
   color: [255, 255, 255],
@@ -197,7 +197,7 @@ export default class App extends PureComponent {
 
     switch (coordinateSystem) {
       case COORDINATE_SYSTEM.METER_OFFSETS:
-      case COORDINATE_SYSTEM.IDENTITY:
+      case COORDINATE_SYSTEM.CARTESIAN:
         const {
           settings: {rotationZ, rotationX}
         } = this.state;
@@ -227,7 +227,11 @@ export default class App extends PureComponent {
       });
     } else if (multiview) {
       views = [
-        new FirstPersonView({id: 'first-person', height: '50%', position: [0, 0, 50]}),
+        new FirstPersonView({
+          id: 'first-person',
+          height: '50%',
+          viewState: {id: 'basemap', position: [0, 0, 50]}
+        }),
         new MapView({
           id: 'basemap',
           controller: true,

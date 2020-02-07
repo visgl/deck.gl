@@ -1,6 +1,7 @@
 import test from 'tape-catch';
 // import VS from '@deck.gl/aggregation-layers/gpu-grid-layer/gpu-grid-cell-layer-vertex.glsl';
 import {getQuantizeScale} from '@deck.gl/aggregation-layers/utils/scale-utils';
+import {project32, gouraudLighting, picking} from '@deck.gl/core';
 import {gl} from '@deck.gl/test-utils';
 import {Transform, Buffer} from '@luma.gl/core';
 import {equals, config} from 'math.gl';
@@ -80,7 +81,7 @@ void main(void) {
       inValue: valueBuffer
     },
     vs,
-    modules: ['project32', 'gouraud-lighting', 'picking', 'fp64'],
+    modules: [project32, gouraudLighting, picking],
     // inject,
     feedbackBuffers: {
       outColor: outBuffer

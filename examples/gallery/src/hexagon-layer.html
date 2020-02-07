@@ -2,10 +2,10 @@
   <head>
     <title>deck.gl HexagonLayer Example</title>
 
-    <script src="https://unpkg.com/deck.gl@^7.0.0/dist.min.js"></script>
+    <script src="https://unpkg.com/deck.gl@^8.0.0/dist.min.js"></script>
     <script src="https://d3js.org/d3.v5.min.js"></script>
 
-    <script src="https://api.tiles.mapbox.com/mapbox-gl-js/v0.50.0/mapbox-gl.js"></script>
+    <script src="https://api.tiles.mapbox.com/mapbox-gl-js/v1.4.0/mapbox-gl.js"></script>
 
     <style type="text/css">
       body {
@@ -63,12 +63,15 @@
     const deckgl = new DeckGL({
       mapboxApiAccessToken: '<mapbox-access-token>',
       mapStyle: 'mapbox://styles/mapbox/dark-v9',
-      longitude: -1.4157,
-      latitude: 52.2324,
-      zoom: 6,
-      minZoom: 5,
-      maxZoom: 15,
-      pitch: 40.5
+      initialViewState: {
+        longitude: -1.4157,
+        latitude: 52.2324,
+        zoom: 6,
+        minZoom: 5,
+        maxZoom: 15,
+        pitch: 40.5
+      },
+      controller: true
     });
 
     let data = null;
@@ -104,7 +107,6 @@
         elevationScale: 250,
         extruded: true,
         getPosition: d => d,
-        opacity: 1,
         ...options
       });
 

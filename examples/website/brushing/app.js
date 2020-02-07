@@ -45,7 +45,7 @@ const INITIAL_VIEW_STATE = {
 const brushingExtension = new BrushingExtension();
 
 /* eslint-disable react/no-deprecated */
-export class App extends Component {
+export default class App extends Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -70,7 +70,7 @@ export class App extends Component {
   }
 
   _getLayerData({data}) {
-    if (!data) {
+    if (!data || !data.length) {
       return null;
     }
     const arcs = [];
@@ -172,7 +172,6 @@ export class App extends Component {
         id: 'sources',
         data: sources,
         brushingRadius: brushRadius,
-        opacity: 1,
         brushingEnabled: enableBrushing,
         pickable: false,
         // only show source points when brushing
@@ -187,7 +186,6 @@ export class App extends Component {
         lineWidthMinPixels: 2,
         stroked: true,
         filled: false,
-        opacity: 1,
         brushingEnabled: enableBrushing,
         // only show rings when brushing
         radiusScale: enableBrushing ? 4000 : 0,
@@ -198,7 +196,6 @@ export class App extends Component {
         id: 'targets',
         data: targets,
         brushingRadius: brushRadius,
-        opacity: 1,
         brushingEnabled: enableBrushing,
         pickable: true,
         radiusScale: 3000,

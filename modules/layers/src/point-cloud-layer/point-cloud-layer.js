@@ -18,16 +18,15 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {Layer} from '@deck.gl/core';
+import {Layer, project32, gouraudLighting, picking} from '@deck.gl/core';
 import GL from '@luma.gl/constants';
-import {Model, Geometry, PhongMaterial} from '@luma.gl/core';
+import {Model, Geometry} from '@luma.gl/core';
 
 import vs from './point-cloud-layer-vertex.glsl';
 import fs from './point-cloud-layer-fragment.glsl';
 
 const DEFAULT_COLOR = [0, 0, 0, 255];
 const DEFAULT_NORMAL = [0, 0, 1];
-const defaultMaterial = new PhongMaterial();
 
 const defaultProps = {
   sizeUnits: 'pixels',
@@ -37,7 +36,7 @@ const defaultProps = {
   getNormal: {type: 'accessor', value: DEFAULT_NORMAL},
   getColor: {type: 'accessor', value: DEFAULT_COLOR},
 
-  material: defaultMaterial,
+  material: true,
 
   // Depreated
   radiusPixels: {deprecatedFor: 'pointSize'}
@@ -65,7 +64,7 @@ function normalizeData(data) {
 
 export default class PointCloudLayer extends Layer {
   getShaders(id) {
-    return super.getShaders({vs, fs, modules: ['project32', 'gouraud-lighting', 'picking']});
+    return super.getShaders({vs, fs, modules: [project32, gouraudLighting, picking]});
   }
 
   initializeState() {

@@ -15,5 +15,6 @@ void main()
   }
   gl_FragColor.rgb = weightsTexture.rgb * gaussianKDE(2. * dist);
   gl_FragColor.a = 1.0;
+  DECKGL_FILTER_COLOR(gl_FragColor, geometry);
 }
 `;

@@ -13,16 +13,15 @@
   },
   "views": [
     {
-      "type": "MapView",
+      "@@type": "MapView",
       "mapStyle": "mapbox://styles/mapbox/dark-v9",
       "controller": true
     }
   ],
   "layers": [
     {
-      "type": "Tile3DLayer",
+      "@@type": "Tile3DLayer",
       "id": "tiles-st-helens",
-      "DracoWorkerLoader": "DracoWorkerLoader",
       "_ionAssetId": 33301,
       "_ionAccessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiIxN2NhMzkwYi0zNWM4LTRjNTYtYWE3Mi1jMDAxYzhlOGVmNTAiLCJpZCI6OTYxOSwic2NvcGVzIjpbImFzbCIsImFzciIsImFzdyIsImdjIl0sImlhdCI6MTU2MjE4MTMxM30.OkgVr6NaKYxabUMIGqPOYFe0V5JifXLVLfpae63x-tA"
     }

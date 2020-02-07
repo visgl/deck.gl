@@ -38,23 +38,12 @@ matrix:
       group: stable
       sudo: required
       dist: trusty
-      env:
-        - CXX=g++-6
       addons:
         apt:
           sources:
           - ubuntu-toolchain-r-test
-          packages:
-          - g++-6
-          - mesa-utils
-          - xvfb
-          - libgl1-mesa-dri
-          - libglapi-mesa
-          - libosmesa6
-          - libxi-dev
       before_install:
-        - cd bindings/python/pydeck
-        - export DISPLAY=:99.0; sh -e /etc/init.d/xvfb start
+        - cd bindings/pydeck
       python:
         - "3.5"
         - "2.7"
@@ -65,5 +54,7 @@ matrix:
       install:
         - pip install -r requirements.txt
         - pip install -r requirements-dev.txt
-        - pip install -e . --install-option "--build_all"
+        - nvm install 10.16.0
+        - nvm use 10.16.0
+        - pip install -e . --install-option "--build_all" --verbose
       script: pytest --cov=pydeck

@@ -24,8 +24,10 @@ export default `\
 attribute vec3 positions;
 attribute vec4 instanceSourceColors;
 attribute vec4 instanceTargetColors;
-attribute vec4 instancePositions;
-attribute vec4 instancePositions64xyLow;
+attribute vec3 instanceSourcePositions;
+attribute vec3 instanceSourcePositions64Low;
+attribute vec3 instanceTargetPositions;
+attribute vec3 instanceTargetPositions64Low;
 attribute vec3 instancePickingColors;
 attribute float instanceWidths;
 
@@ -84,8 +86,8 @@ vec2 interpolate (vec2 source, vec2 target, float angularDist, float t) {
 }
 
 void main(void) {
-  geometry.worldPosition = vec3(instancePositions.xy, 0.0);
-  geometry.worldPositionAlt = vec3(instancePositions.zw, 0.0);
+  geometry.worldPosition = instanceSourcePositions;
+  geometry.worldPositionAlt = instanceTargetPositions;
 
   float segmentIndex = positions.x;
   float segmentRatio = getSegmentRatio(segmentIndex);
@@ -98,16 +100,16 @@ void main(void) {
   float indexDir = mix(-1.0, 1.0, step(segmentIndex, 0.0));
   float nextSegmentRatio = getSegmentRatio(segmentIndex + indexDir);
   
-  vec2 source = radians(instancePositions.xy);
-  vec2 target = radians(instancePositions.zw);
+  vec2 source = radians(instanceSourcePositions.xy);
+  vec2 target = radians(instanceTargetPositions.xy);
   
   float angularDist = getAngularDist(source, target);
 
   vec3 currPos = vec3(degrees(interpolate(source, target, angularDist, segmentRatio)), 0.0);
   vec3 nextPos = vec3(degrees(interpolate(source, target, angularDist, nextSegmentRatio)), 0.0);
 
-  vec2 currPos64Low = mix(instancePositions64xyLow.xy, instancePositions64xyLow.zw, segmentRatio);
-  vec2 nextPos64Low = mix(instancePositions64xyLow.xy, instancePositions64xyLow.zw, nextSegmentRatio);
+  vec3 currPos64Low = mix(instanceSourcePositions64Low, instanceTargetPositions64Low, segmentRatio);
+  vec3 nextPos64Low = mix(instanceSourcePositions64Low, instanceTargetPositions64Low, nextSegmentRatio);
 
   vec4 curr = project_position_to_clipspace(currPos, currPos64Low, vec3(0.0), geometry.position);
   vec4 next = project_position_to_clipspace(nextPos, nextPos64Low, vec3(0.0));

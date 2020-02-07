@@ -1,31 +1,24 @@
-/* global window */
-import Tooltip from '@deck.gl/core/lib/tooltip';
+/* global document */
 import test from 'tape-catch';
 
-let document;
-if (typeof window === undefined || !window.document) {
-  const {JSDOM} = require('jsdom');
-  const dom = new JSDOM(`<!DOCTYPE html>`);
-  document = dom.window.document;
-} else {
-  document = window.document;
-}
+import Tooltip from '@deck.gl/core/lib/tooltip';
 
-const CANVAS_PARENT_CLASS_NAME = 'tooltip-canvas-parent';
 const pickedInfo = {object: {elevationValue: 10}, x: 0, y: 0};
 
-function setup() {
+/* Create a clean canvas and its container testing */
+function setupCanvasTest() {
   const canvas = document.createElement('canvas');
-  const canvasParent = document.createElement('div');
-  canvasParent.className = 'tooltip-canvas-parent';
-  canvasParent.appendChild(canvas);
-  document.body.appendChild(canvasParent);
-  return new Tooltip(canvas);
-}
-
-function teardown() {
-  const el = document.getElementsByClassName(CANVAS_PARENT_CLASS_NAME)[0];
-  el.remove();
+  const canvasContainer = document.createElement('div');
+  canvasContainer.className = 'canvas-parent';
+  canvasContainer.appendChild(canvas);
+  const remove = () => {
+    canvasContainer.remove();
+  };
+  return {
+    canvasContainer,
+    canvas,
+    remove
+  };
 }
 
 function getTooltipFunc(pickedValue) {
@@ -44,61 +37,63 @@ function getTooltipFuncDefault(pickedValue) {
   };
 }
 
-test('Tooltip#constructor', t => {
-  const tooltip = setup(); // eslint-disable-line
-  t.ok(document.getElementsByClassName('deck-tooltip'), 'Tooltip exists in document');
-  t.equals(document.getElementsByClassName('deck-tooltip')[0].style.top, '0px');
-  teardown();
-  t.end();
-});
-
 test('Tooltip#setTooltip', t => {
-  const tooltip = setup();
+  const {canvas, canvasContainer, remove} = setupCanvasTest();
+  const tooltip = new Tooltip(canvas);
   tooltip.setTooltip(getTooltipFunc(pickedInfo), pickedInfo.x, pickedInfo.y);
   t.equals(tooltip.el.style.backgroundColor, 'lemonchiffon');
   t.equals(tooltip.el.innerHTML, '<strong>Number of points:</strong> 10');
   t.equals(tooltip.el.className, 'coolTooltip');
-  teardown();
+  t.equals(canvasContainer.querySelector('.coolTooltip').style.top, '0px');
+  remove();
   t.end();
 });
 
 test('Tooltip#setTooltipWithString', t => {
-  const tooltip = setup();
+  const {canvas, remove} = setupCanvasTest();
+  const tooltip = new Tooltip(canvas);
+
   const pickedInfoFunc = info => `Number of points: ${info.object.elevationValue}`;
   tooltip.setTooltip(pickedInfoFunc(pickedInfo), pickedInfo.x, pickedInfo.y);
   t.equals(tooltip.el.innerText, 'Number of points: 10');
   t.equals(tooltip.el.className, 'deck-tooltip');
-  teardown();
+  remove();
   t.end();
 });
 
 test('Tooltip#setTooltipDefaults', t => {
-  const tooltip = setup();
+  const {canvas, remove} = setupCanvasTest();
+  const tooltip = new Tooltip(canvas);
+
   const tooltipResult = getTooltipFuncDefault(pickedInfo);
   tooltip.setTooltip(tooltipResult, pickedInfo.x, pickedInfo.y);
   t.equals(tooltip.el.innerText, 'Number of points: 10');
   t.equals(tooltip.el.className, 'deck-tooltip');
-  teardown();
+  remove();
   t.end();
 });
 
 test('Tooltip#setTooltipNullCase', t => {
-  const tooltip = setup();
+  const {canvas, remove} = setupCanvasTest();
+  const tooltip = new Tooltip(canvas);
+
   tooltip.setTooltip(null, pickedInfo.x, pickedInfo.y);
   t.equals(tooltip.el.style.display, 'none');
-  teardown();
+  remove();
   t.end();
 });
 
 test('Tooltip#remove', t => {
-  const tooltip = setup();
-  t.equals(document.getElementsByClassName('deck-tooltip').length, 1, 'Tooltip element present');
+  const {canvasContainer, canvas, remove} = setupCanvasTest();
+  const tooltip = new Tooltip(canvas);
+
+  t.equals(canvasContainer.querySelectorAll('.deck-tooltip').length, 1, 'Tooltip element present');
   tooltip.remove();
   t.equals(
-    document.getElementsByClassName('deck-tooltip').length,
+    canvasContainer.querySelectorAll('.deck-tooltip').length,
     0,
     'Tooltip element successfully removed'
   );
-  teardown();
+  remove();
   t.end();
 });

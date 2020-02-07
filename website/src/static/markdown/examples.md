@@ -94,7 +94,7 @@
     </div>
     <div class="thumb">
       <div class="bg-black" data-title="Melbourne Point Cloud" data-name="Tile3DLayer">
-        <a href="#/examples/core-layers/tile3-dlayer">
+        <a href="#/examples/core-layers/tile-3d-layer">
           <img src="images/demo-thumb-3d-tiles.jpg" />
         </a>
       </div>
@@ -132,7 +132,7 @@
 <div>
   <div class="thumb">
     <div data-title="Playground" data-name="@deck.gl/json">
-      <a href="https://deck.gl/json">
+      <a href="https://deck.gl/playground">
         <img src="images/demo-thumb-playground.jpg" />
       </a>
     </div>

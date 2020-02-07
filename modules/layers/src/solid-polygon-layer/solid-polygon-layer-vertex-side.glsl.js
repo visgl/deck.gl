@@ -26,9 +26,9 @@ export default `\
 
 
 attribute vec3 instancePositions;
-attribute vec2 instancePositions64xyLow;
 attribute vec3 nextPositions;
-attribute vec2 nextPositions64xyLow;
+attribute vec3 instancePositions64Low;
+attribute vec3 nextPositions64Low;
 attribute float instanceElevations;
 attribute vec4 instanceFillColors;
 attribute vec4 instanceLineColors;
@@ -40,13 +40,13 @@ void main(void) {
   PolygonProps props;
 
   props.positions = instancePositions;
-  props.positions64xyLow = instancePositions64xyLow;
+  props.positions64Low = instancePositions64Low;
   props.elevations = instanceElevations;
   props.fillColors = instanceFillColors;
   props.lineColors = instanceLineColors;
   props.pickingColors = instancePickingColors;
   props.nextPositions = nextPositions;
-  props.nextPositions64xyLow = nextPositions64xyLow;
+  props.nextPositions64Low = nextPositions64Low;
 
   calculatePosition(props);
 }

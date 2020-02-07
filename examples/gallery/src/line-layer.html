@@ -2,8 +2,8 @@
   <head>
     <title>deck.gl LineLayer Example</title>
 
-    <script src="https://unpkg.com/deck.gl@^7.0.0/dist.min.js"></script>
-    <script src="https://api.tiles.mapbox.com/mapbox-gl-js/v0.50.0/mapbox-gl.js"></script>
+    <script src="https://unpkg.com/deck.gl@^8.0.0/dist.min.js"></script>
+    <script src="https://api.tiles.mapbox.com/mapbox-gl-js/v1.4.0/mapbox-gl.js"></script>
 
     <style type="text/css">
       body {
@@ -33,16 +33,20 @@
     new DeckGL({
       mapboxApiAccessToken: '<mapbox-access-token>',
       mapStyle: 'mapbox://styles/mapbox/dark-v9',
-      latitude: 51.51,
-      longitude: -0.11,
-      zoom: 8,
-      maxZoom: 16,
-      pitch: 50,
-      bearing: 0,
+      initialViewState: {
+        latitude: 51.51,
+        longitude: -0.11,
+        zoom: 8,
+        maxZoom: 16,
+        pitch: 50,
+        bearing: 0
+      },
+      controller: true,
       layers: [
         new LineLayer({
           id: 'line',
           data: 'https://raw.githubusercontent.com/uber-common/deck.gl-data/master/examples/line/heathrow-flights.json',
+          opacity: 0.8,
           pickable: true,
           getSourcePosition: d => d.start,
           getTargetPosition: d => d.end,

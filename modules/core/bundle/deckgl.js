@@ -1,6 +1,6 @@
 /* global window, document */
 /* eslint-disable max-statements */
-import Mapbox from 'react-map-gl/dist/es6/mapbox/mapbox';
+import Mapbox from 'react-map-gl/dist/esm/mapbox/mapbox';
 
 import {Deck} from '../src';
 
@@ -11,16 +11,6 @@ const CANVAS_STYLE = {
   width: '100%',
   height: '100%'
 };
-
-// Supports old "geospatial view state as separate props" style
-// TODO - this should either be moved into the core or deprecated
-function getViewState(props) {
-  if (!props.viewState && 'latitude' in props && 'longitude' in props && 'zoom' in props) {
-    const {latitude, longitude, zoom, pitch = 0, bearing = 0} = props;
-    return {latitude, longitude, zoom, pitch, bearing};
-  }
-  return props.viewState;
-}
 
 // Create canvas elements for map and deck
 function createCanvas(props) {
@@ -54,7 +44,6 @@ function createCanvas(props) {
 /**
  * @params container (Element) - DOM element to add deck.gl canvas to
  * @params map (Object) - map API. Set to falsy to disable
- * @params controller (Object) - Controller options. Leave empty for auto detection
  */
 export default class DeckGL extends Deck {
   constructor(props = {}) {
@@ -65,19 +54,11 @@ export default class DeckGL extends Deck {
 
     const {mapCanvas, deckCanvas} = createCanvas(props);
 
-    const viewState = props.initialViewState || getViewState(props);
-    const isMap = Number.isFinite(viewState.latitude);
-    const {map = window.mapboxgl, controller = true} = props;
+    const viewState = props.viewState || props.initialViewState;
+    const isMap = Number.isFinite(viewState && viewState.latitude);
+    const {map = window.mapboxgl} = props;
 
-    super(
-      Object.assign({}, props, {
-        width: '100%',
-        height: '100%',
-        canvas: deckCanvas,
-        controller,
-        initialViewState: viewState
-      })
-    );
+    super({canvas: deckCanvas, ...props});
 
     if (map && map.Map) {
       // Default create mapbox map

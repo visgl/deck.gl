@@ -2,10 +2,10 @@
   <head>
     <title>deck.gl Viewport Transition Example</title>
 
-    <script src="https://unpkg.com/deck.gl@^7.0.0/dist.min.js"></script>
+    <script src="https://unpkg.com/deck.gl@^8.0.0/dist.min.js"></script>
     <script src="https://d3js.org/d3.v5.min.js"></script>
 
-    <script src="https://api.tiles.mapbox.com/mapbox-gl-js/v0.50.0/mapbox-gl.js"></script>
+    <script src="https://api.tiles.mapbox.com/mapbox-gl-js/v1.4.0/mapbox-gl.js"></script>
 
     <style type="text/css">
       body {
@@ -56,11 +56,12 @@
     const deckgl = new DeckGL({
       mapboxApiAccessToken: '<mapbox-access-token>',
       mapStyle: 'mapbox://styles/mapbox/light-v9',
-      viewState: {
+      initialViewState: {
         longitude: CITIES[0].longitude,
         latitude: CITIES[0].latitude,
         zoom: 10
       },
+      controller: true,
       layers: [
         new ScatterplotLayer({
           data: CITIES,
@@ -82,12 +83,12 @@
       .attr('id', (d, i) => 'city-' + i)
       .on('change', d => {
         deckgl.setProps({
-          viewState: {
+          initialViewState: {
             longitude: d.longitude,
             latitude: d.latitude,
             zoom: 10,
-            transitionInterpolator: new FlyToInterpolator(),
-            transitionDuration: 5000
+            transitionInterpolator: new FlyToInterpolator({speed: 1.5}),
+            transitionDuration: 'auto'
           }
         })
       });

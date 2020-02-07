@@ -1,5 +1,5 @@
 import test from 'tape-catch';
-import {Deck, log} from '@deck.gl/core';
+import {Deck, log, MapView} from '@deck.gl/core';
 import {ScatterplotLayer} from '@deck.gl/layers';
 import {gl} from '@deck.gl/test-utils';
 
@@ -92,6 +92,76 @@ test('Deck#rendering, picking, logging', t => {
 
       deck.finalize();
       log.priority = 0;
+
+      t.end();
+    }
+  });
+});
+
+test('Deck#auto view state', t => {
+  let onViewStateChangeCalled = 0;
+
+  const deck = new Deck({
+    gl,
+    width: 1,
+    height: 1,
+    // This is required because the jsdom canvas does not have client width/height
+    autoResizeDrawingBuffer: gl.canvas.clientWidth > 0,
+
+    views: [
+      new MapView({id: 'default'}),
+      new MapView({id: 'map'}),
+      new MapView({id: 'minimap', viewState: {id: 'map', zoom: 12, pitch: 0, bearing: 0}})
+    ],
+
+    initialViewState: {
+      longitude: 0,
+      latitude: 0,
+      zoom: 12
+    },
+
+    onViewStateChange: ({viewId, viewState}) => {
+      onViewStateChangeCalled++;
+      if (viewId === 'default') {
+        // block view state change from the default view
+        return {longitude: 0, latitude: 0, zoom: 12};
+      }
+      // use default (a.k.a. viewState)
+      return null;
+    },
+
+    onLoad: () => {
+      deck.viewManager._onViewStateChange('default', {
+        viewState: {longitude: 0, latitude: 0, zoom: 11}
+      });
+      t.is(onViewStateChangeCalled, 1, 'onViewStateChange is called');
+      t.is(deck.getViewports()[0].longitude, 0, 'default view state should not change');
+
+      deck.viewManager._onViewStateChange('map', {
+        viewState: {longitude: 1, latitude: 1, zoom: 11}
+      });
+      t.is(onViewStateChangeCalled, 2, 'onViewStateChange is called');
+      t.is(deck.getViewports()[0].longitude, 0, 'default view state should not change');
+      t.is(deck.getViewports()[1].longitude, 1, 'map longitude is updated');
+      t.is(deck.getViewports()[1].zoom, 11, 'map zoom is updated');
+      t.is(deck.getViewports()[2].longitude, 1, 'minimap longitude is updated');
+      t.is(deck.getViewports()[2].zoom, 12, 'minimap zoom should not change');
+
+      deck.viewManager._onViewStateChange('minimap', {
+        viewState: {longitude: 2, latitude: 2, zoom: 12}
+      });
+      t.is(onViewStateChangeCalled, 3, 'onViewStateChange is called');
+      t.is(deck.getViewports()[1].longitude, 1, 'map state should not change');
+      t.is(deck.getViewports()[2].longitude, 1, 'minimap state should not change');
+
+      deck.setProps({viewState: {longitude: 3, latitude: 3, zoom: 12}});
+      deck.viewManager._onViewStateChange('map', {
+        viewState: {longitude: 1, latitude: 1, zoom: 11}
+      });
+      t.is(deck.getViewports()[0].longitude, 3, 'external viewState should override internal');
+      t.is(deck.getViewports()[1].longitude, 3, 'external viewState should override internal');
+
+      deck.finalize();
 
       t.end();
     }

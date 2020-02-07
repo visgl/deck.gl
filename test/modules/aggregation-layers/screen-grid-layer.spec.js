@@ -26,7 +26,7 @@ import {ScreenGridLayer} from '@deck.gl/aggregation-layers';
 const getPosition = d => d.COORDINATES;
 
 test('ScreenGridLayer', t => {
-  const testCases = generateLayerTests({
+  let testCases = generateLayerTests({
     Layer: ScreenGridLayer,
     sampleProps: {
       data: FIXTURES.points.slice(0, 3),
@@ -38,6 +38,29 @@ test('ScreenGridLayer', t => {
       t.ok(layer.state.aggregationResults !== null, 'should update state.aggregationResults');
     }
   });
+
+  testCases = testCases.concat([
+    {
+      updateProps: {
+        gpuAggregation: true
+      }
+    },
+    {
+      updateProps: {
+        gpuAggregation: false
+      },
+      onAfterUpdate({layer, oldState}) {
+        if (oldState.gpuAggregation) {
+          // Under WebGL1 gpuAggregation is always false, this change is a nop
+          const {aggregationDataDirty} = layer.state;
+          t.ok(
+            aggregationDataDirty,
+            'should set aggregationDataDirty when gpuAggregation prop changes'
+          );
+        }
+      }
+    }
+  ]);
 
   testLayer({Layer: ScreenGridLayer, testCases, onError: t.notOk});
 

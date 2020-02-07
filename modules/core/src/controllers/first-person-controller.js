@@ -1,16 +1,17 @@
 import Controller from './controller';
 import ViewState from './view-state';
+import {mod} from '../utils/math-utils';
 
-import {Vector3, clamp} from 'math.gl';
+import {Vector3, _SphericalCoordinates as SphericalCoordinates, clamp} from 'math.gl';
 
-const MOVEMENT_SPEED = 1; // 1 meter per keyboard click
-const ROTATION_STEP_DEGREES = 2;
-
-/* Helpers */
-
-function ensureFinite(value, fallbackValue) {
-  return Number.isFinite(value) ? value : fallbackValue;
-}
+const MOVEMENT_SPEED = 20;
+const DEFAULT_STATE = {
+  position: [0, 0, 0],
+  pitch: 0,
+  bearing: 0,
+  maxPitch: 90,
+  minPitch: -90
+};
 
 class FirstPersonState extends ViewState {
   constructor({
@@ -19,33 +20,22 @@ class FirstPersonState extends ViewState {
     height, // Height of viewport
 
     // Position and orientation
-    position, // typically in meters from anchor point
+    position = DEFAULT_STATE.position, // typically in meters from anchor point
 
-    bearing, // Rotation around y axis
-    pitch, // Rotation around x axis
+    bearing = DEFAULT_STATE.bearing, // Rotation around y axis
+    pitch = DEFAULT_STATE.pitch, // Rotation around x axis
 
     // Geospatial anchor
     longitude,
     latitude,
-    zoom,
 
-    syncBearing = true, // Whether to lock bearing to direction
-
-    // Constraints - simple movement limit
-    // Bounding box of the world, in the shape of {minX, maxX, minY, maxY, minZ, maxZ}
-    bounds,
-
-    /** Interaction states, required to calculate change during transform */
-    // Model state when the pan operation first started
-    startPanEventPosition,
-    startPanPosition,
+    maxPitch = DEFAULT_STATE.maxPitch,
+    minPitch = DEFAULT_STATE.minPitch,
 
     // Model state when the rotate operation first started
-    startRotateCenter,
-    startRotateViewport,
-
-    // Model state when the zoom operation first started
-    startZoomPos,
+    startBearing,
+    startPitch,
+    startZoomPosition,
     startZoom
   }) {
     super({
@@ -56,15 +46,14 @@ class FirstPersonState extends ViewState {
       pitch,
       longitude,
       latitude,
-      zoom
+      maxPitch,
+      minPitch
     });
 
     this._interactiveState = {
-      startPanEventPosition,
-      startPanPosition,
-      startRotateCenter,
-      startRotateViewport,
-      startZoomPos,
+      startBearing,
+      startPitch,
+      startZoomPosition,
       startZoom
     };
   }
@@ -75,43 +64,29 @@ class FirstPersonState extends ViewState {
     return this._interactiveState;
   }
 
+  getDirection(use2D = false) {
+    const spherical = new SphericalCoordinates({
+      bearing: this._viewportProps.bearing,
+      pitch: use2D ? 90 : 90 + this._viewportProps.pitch
+    });
+    const direction = spherical.toVector3().normalize();
+    return direction;
+  }
+
   /**
    * Start panning
    * @param {[Number, Number]} pos - position on screen where the pointer grabs
    */
-  panStart({pos}) {
-    const {translationX, translationY} = this._viewportProps;
-
-    return this._getUpdatedState({
-      startPanPosition: [translationX, translationY],
-      startPanEventPosition: pos
-    });
+  panStart() {
+    return this;
   }
 
   /**
    * Pan
    * @param {[Number, Number]} pos - position on screen where the pointer is
    */
-  pan({pos, startPos}) {
-    const startPanEventPosition = this._interactiveState.startPanEventPosition || startPos;
-
-    // when the mouse starts dragging outside of this viewport, then drags over it.
-    // TODO - use interactionState flag instead
-    if (!startPanEventPosition) {
-      return this;
-    }
-
-    let [translationX, translationY] = this._interactiveState.startPanPosition || [];
-    translationX = ensureFinite(translationX, this._viewportProps.translationX);
-    translationY = ensureFinite(translationY, this._viewportProps.translationY);
-
-    const deltaX = pos[0] - startPanEventPosition[0];
-    const deltaY = pos[1] - startPanEventPosition[1];
-
-    return this._getUpdatedState({
-      translationX: translationX + deltaX,
-      translationY: translationY - deltaY
-    });
+  pan() {
+    return this;
   }
 
   /**
@@ -119,10 +94,7 @@ class FirstPersonState extends ViewState {
    * Must call if `panStart()` was called
    */
   panEnd() {
-    return this._getUpdatedState({
-      startPanPosition: null,
-      startPanPos: null
-    });
+    return this;
   }
 
   /**
@@ -131,8 +103,8 @@ class FirstPersonState extends ViewState {
    */
   rotateStart({pos}) {
     return this._getUpdatedState({
-      startRotateCenter: this._viewportProps.position,
-      startRotateViewport: this._viewportProps
+      startBearing: this._viewportProps.bearing,
+      startPitch: this._viewportProps.pitch
     });
   }
 
@@ -141,17 +113,15 @@ class FirstPersonState extends ViewState {
    * @param {[Number, Number]} pos - position on screen where the pointer is
    */
   rotate({deltaScaleX, deltaScaleY}) {
-    // when the mouse starts dragging outside of this viewport, then drags over it.
-    // TODO - use interactionState flag instead
-    if (!this._interactiveState.startRotateCenter) {
+    const {startBearing, startPitch} = this._interactiveState;
+
+    if (!Number.isFinite(startBearing) || !Number.isFinite(startPitch)) {
       return this;
     }
 
-    const {bearing, pitch} = this._viewportProps;
-
     return this._getUpdatedState({
-      bearing: bearing + deltaScaleX * 10,
-      pitch: pitch - deltaScaleY * 10
+      bearing: startBearing - deltaScaleX * 180,
+      pitch: startPitch - deltaScaleY * 90
     });
   }
 
@@ -161,8 +131,8 @@ class FirstPersonState extends ViewState {
    */
   rotateEnd() {
     return this._getUpdatedState({
-      startRotateCenter: null,
-      startRotateViewport: null
+      startBearing: null,
+      startPitch: null
     });
   }
 
@@ -170,9 +140,9 @@ class FirstPersonState extends ViewState {
    * Start zooming
    * @param {[Number, Number]} pos - position on screen where the pointer grabs
    */
-  zoomStart({pos}) {
+  zoomStart() {
     return this._getUpdatedState({
-      startZoomPos: pos,
+      startZoomPosition: this._viewportProps.position,
       startZoom: this._viewportProps.zoom
     });
   }
@@ -185,31 +155,14 @@ class FirstPersonState extends ViewState {
    * @param {Number} scale - a number between [0, 1] specifying the accumulated
    *   relative scale.
    */
-  zoom({pos, startPos, scale}) {
-    const {zoom, minZoom, maxZoom, width, height, translationX, translationY} = this._viewportProps;
+  zoom({scale}) {
+    let {startZoomPosition} = this._interactiveState;
+    if (!startZoomPosition) {
+      startZoomPosition = this._viewportProps.position;
+    }
 
-    const startZoomPos = this._interactiveState.startZoomPos || startPos || pos;
-
-    const newZoom = clamp(zoom * scale, minZoom, maxZoom);
-    const deltaX = pos[0] - startZoomPos[0];
-    const deltaY = pos[1] - startZoomPos[1];
-
-    // Zoom around the center position
-    const cx = startZoomPos[0] - width / 2;
-    const cy = height / 2 - startZoomPos[1];
-    /* eslint-disable no-unused-vars */
-    const newTranslationX = cx - ((cx - translationX) * newZoom) / zoom + deltaX;
-    const newTranslationY = cy - ((cy - translationY) * newZoom) / zoom - deltaY;
-    /* eslint-enable no-unused-vars */
-
-    // return this._getUpdatedState({
-    //   position
-    //   translationX: newTranslationX,
-    //   translationY: newTranslationY
-    // });
-
-    // TODO HACK
-    return newZoom / zoom < 1 ? this.moveBackward() : this.moveForward();
+    const direction = this.getDirection();
+    return this._move(direction, Math.log2(scale), startZoomPosition);
   }
 
   /**
@@ -218,80 +171,110 @@ class FirstPersonState extends ViewState {
    */
   zoomEnd() {
     return this._getUpdatedState({
-      startZoomPos: null,
+      startZoomPosition: null,
       startZoom: null
     });
   }
 
   moveLeft() {
-    const {bearing} = this._viewportProps;
-    const newBearing = bearing - ROTATION_STEP_DEGREES;
-    return this._getUpdatedState({
-      bearing: newBearing
-    });
+    const direction = this.getDirection(true);
+    return this._move(direction.rotateZ({radians: Math.PI / 2}));
   }
 
   moveRight() {
-    const {bearing} = this._viewportProps;
-    const newBearing = bearing + ROTATION_STEP_DEGREES;
-    return this._getUpdatedState({
-      bearing: newBearing
-    });
+    const direction = this.getDirection(true);
+    return this._move(direction.rotateZ({radians: -Math.PI / 2}));
   }
 
-  moveForward() {
-    const {position} = this._viewportProps;
-    const direction = this.getDirection();
-    const delta = new Vector3(direction).normalize().scale(MOVEMENT_SPEED);
-    return this._getUpdatedState({
-      position: new Vector3(position).add(delta)
-    });
-  }
-
-  moveBackward() {
-    const {position} = this._viewportProps;
-    const direction = this.getDirection();
-    const delta = new Vector3(direction).normalize().scale(-MOVEMENT_SPEED);
-    return this._getUpdatedState({
-      position: new Vector3(position).add(delta)
-    });
-  }
-
+  // forward
   moveUp() {
-    const {position} = this._viewportProps;
-    const delta = [0, 0, 1];
+    const direction = this.getDirection(true);
+    return this._move(direction);
+  }
+
+  // backward
+  moveDown() {
+    const direction = this.getDirection(true);
+    return this._move(direction.negate());
+  }
+
+  rotateLeft() {
     return this._getUpdatedState({
-      position: new Vector3(position).add(delta)
+      bearing: this._viewportProps.bearing - 15
     });
   }
 
-  moveDown() {
-    const {position} = this._viewportProps;
-    const delta = position[2] >= 1 ? [0, 0, -1] : [0, 0, 0];
+  rotateRight() {
     return this._getUpdatedState({
-      position: new Vector3(position).add(delta)
+      bearing: this._viewportProps.bearing + 15
+    });
+  }
+
+  rotateUp() {
+    return this._getUpdatedState({
+      pitch: this._viewportProps.pitch + 10
+    });
+  }
+
+  rotateDown() {
+    return this._getUpdatedState({
+      pitch: this._viewportProps.pitch - 10
     });
   }
 
   zoomIn() {
-    return this._getUpdatedState({
-      zoom: this._viewportProps.zoom + 0.2
-    });
+    return this.zoom({scale: 2});
   }
 
   zoomOut() {
-    return this._getUpdatedState({
-      zoom: this._viewportProps.zoom - 0.2
-    });
+    return this.zoom({scale: 0.5});
+  }
+
+  // shortest path between two view states
+  shortestPathFrom(viewState) {
+    const fromProps = viewState.getViewportProps();
+    const props = Object.assign({}, this._viewportProps);
+    const {bearing, longitude} = props;
+
+    if (Math.abs(bearing - fromProps.bearing) > 180) {
+      props.bearing = bearing < 0 ? bearing + 360 : bearing - 360;
+    }
+    if (Math.abs(longitude - fromProps.longitude) > 180) {
+      props.longitude = longitude < 0 ? longitude + 360 : longitude - 360;
+    }
+    return props;
   }
 
   /* Private methods */
+  _move(direction, speed = 1, fromPosition = this._viewportProps.position) {
+    const delta = direction.scale(speed * MOVEMENT_SPEED);
+    return this._getUpdatedState({
+      position: new Vector3(fromPosition).add(delta)
+    });
+  }
 
   _getUpdatedState(newProps) {
     // Update _viewportProps
     return new FirstPersonState(
       Object.assign({}, this._viewportProps, this._interactiveState, newProps)
     );
+  }
+
+  // Apply any constraints (mathematical or defined by _viewportProps) to map state
+  _applyConstraints(props) {
+    // Ensure pitch and zoom are within specified range
+    const {pitch, maxPitch, minPitch, longitude, bearing} = props;
+    props.pitch = clamp(pitch, minPitch, maxPitch);
+
+    // Normalize degrees
+    if (longitude < -180 || longitude > 180) {
+      props.longitude = mod(longitude + 180, 360) - 180;
+    }
+    if (bearing < -180 || bearing > 180) {
+      props.bearing = mod(bearing + 180, 360) - 180;
+    }
+
+    return props;
   }
 }
 

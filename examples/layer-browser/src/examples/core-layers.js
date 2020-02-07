@@ -1,5 +1,3 @@
-import {experimental} from '@deck.gl/core';
-
 import {
   ScatterplotLayer,
   ArcLayer,
@@ -14,18 +12,12 @@ import {
   TextLayer
 } from '@deck.gl/layers';
 
-import {
-  CPUGridLayer,
-  HexagonLayer,
-  ContourLayer,
-  ScreenGridLayer
-} from '@deck.gl/aggregation-layers';
-
-const {flattenVertices} = experimental;
+import {PathStyleExtension} from '@deck.gl/extensions';
 
 // Demonstrate immutable support
 import * as dataSamples from '../data-samples';
 import {parseColor, setOpacity} from '../utils/color';
+import flattenVertices from '../utils/flatten-vertices';
 
 const MARKER_SIZE_MAP = {
   small: 200,
@@ -114,12 +106,12 @@ const GeoJsonLayerExample = {
   layer: GeoJsonLayer,
   getData: () => dataSamples.geojson,
   propTypes: {
-    getLineDashArray: {type: 'compound', elements: ['lineDashSizeLine']},
-    lineDashSizeLine: {
+    getDashArray: {type: 'compound', elements: ['dashSizeLine']},
+    dashSizeLine: {
       type: 'number',
       max: 20,
       onUpdate: (newValue, newSettings, change) => {
-        change('getLineDashArray', [newValue, 20 - newValue]);
+        change('getDashArray', [newValue, 20 - newValue]);
       }
     }
   },
@@ -136,12 +128,14 @@ const GeoJsonLayerExample = {
       const opacity = (f.properties['stroke-opacity'] || 1) * 255;
       return setOpacity(color, opacity);
     },
-    getLineDashArray: f => [20, 0],
+    getDashArray: f => [20, 0],
     getLineWidth: f => f.properties['stroke-width'],
     getElevation: f => 500,
     lineWidthScale: 10,
     lineWidthMinPixels: 1,
-    pickable: true
+    pickable: true,
+    dashJustified: true,
+    extensions: [new PathStyleExtension({dash: true})]
   }
 };
 
@@ -163,12 +157,12 @@ const PolygonLayerExample = {
   layer: PolygonLayer,
   getData: () => dataSamples.polygons,
   propTypes: {
-    getLineDashArray: {type: 'compound', elements: ['lineDashSizeLine']},
-    lineDashSizeLine: {
+    getDashArray: {type: 'compound', elements: ['dashSizeLine']},
+    dashSizeLine: {
       type: 'number',
       max: 20,
       onUpdate: (newValue, newSettings, change) => {
-        change('getLineDashArray', [newValue, 20 - newValue]);
+        change('getDashArray', [newValue, 20 - newValue]);
       }
     }
   },
@@ -176,13 +170,14 @@ const PolygonLayerExample = {
     getPolygon: f => f,
     getFillColor: f => [200 + Math.random() * 55, 0, 0],
     getLineColor: f => [0, 0, 0, 255],
-    getLineDashArray: f => [20, 0],
+    getDashArray: f => [20, 0],
     getLineWidth: f => 20,
     getElevation: f => Math.random() * 1000,
     opacity: 0.8,
     pickable: true,
-    lineDashJustified: true,
-    elevationScale: 0.6
+    dashJustified: true,
+    elevationScale: 0.6,
+    extensions: [new PathStyleExtension({dash: true})]
   }
 };
 
@@ -211,6 +206,11 @@ const PathLayerExample = {
       onUpdate: (newValue, newSettings, change) => {
         change('getDashArray', [newValue, 20 - newValue]);
       }
+    },
+    getOffset: {
+      type: 'number',
+      min: -2,
+      max: 2
     }
   },
   props: {
@@ -220,33 +220,11 @@ const PathLayerExample = {
     getColor: f => [128, 0, 0],
     getWidth: f => 10,
     getDashArray: f => [20, 0],
+    getOffset: 0,
     widthMinPixels: 1,
-    pickable: true
-  }
-};
-
-const PathLayerBinaryExample = {
-  ...PathLayerExample,
-  getData: () =>
-    dataSamples.zigzag.map(({path}) => {
-      // Convert each path from an array of points to an array of numbers
-      return flattenVertices(path, {dimensions: 2});
-    }),
-  props: {
-    ...PathLayerExample.props,
-    getPath: d => d,
-    positionFormat: 'XY'
-  }
-};
-
-const ScreenGridLayerExample = {
-  layer: ScreenGridLayer,
-  getData: () => dataSamples.points,
-  props: {
-    id: 'screenGridLayer',
-    getPosition: d => d.COORDINATES,
-    cellSizePixels: 40,
-    pickable: false
+    pickable: true,
+    dashJustified: true,
+    extensions: [new PathStyleExtension({dash: true, offset: true})]
   }
 };
 
@@ -293,69 +271,6 @@ const ColumnLayerExample = {
   }
 };
 
-const ContourLayerExample = {
-  layer: ContourLayer,
-  getData: () => dataSamples.points,
-  props: {
-    id: 'contourLayer',
-    cellSize: 200,
-    getPosition: d => d.COORDINATES,
-    gpuAggregation: true,
-    contours: [
-      {threshold: 1, color: [255, 0, 0], strokeWidth: 4},
-      {threshold: 5, color: [0, 255, 0], strokeWidth: 2},
-      {threshold: 15, color: [0, 0, 255]}
-    ]
-  }
-};
-
-const ContourLayerBandsExample = {
-  layer: ContourLayer,
-  getData: () => dataSamples.points,
-  props: {
-    id: 'contourLayer',
-    cellSize: 200,
-    getPosition: d => d.COORDINATES,
-    gpuAggregation: true,
-    contours: [
-      {threshold: [1, 5], color: [255, 0, 0]},
-      {threshold: [5, 15], color: [0, 255, 0]},
-      {threshold: [15, 1000], color: [0, 0, 255]}
-    ]
-  }
-};
-
-function getMean(pts, key) {
-  const filtered = pts.filter(pt => Number.isFinite(pt[key]));
-
-  return filtered.length
-    ? filtered.reduce((accu, curr) => accu + curr[key], 0) / filtered.length
-    : null;
-}
-
-function getMax(pts, key) {
-  const filtered = pts.filter(pt => Number.isFinite(pt[key]));
-
-  return filtered.length
-    ? filtered.reduce((accu, curr) => (curr[key] > accu ? curr[key] : accu), -Infinity)
-    : null;
-}
-
-const CPUGridLayerExample = {
-  layer: CPUGridLayer,
-  props: {
-    id: 'gridLayer',
-    data: dataSamples.points,
-    cellSize: 200,
-    opacity: 1,
-    extruded: true,
-    pickable: true,
-    getPosition: d => d.COORDINATES,
-    getColorValue: points => getMean(points, 'SPACES'),
-    getElevationValue: points => getMax(points, 'SPACES')
-  }
-};
-
 /*
 const ColumnLayerExample = {
   layer: ColumnLayer,
@@ -374,24 +289,6 @@ const ColumnLayerExample = {
   }
 };
 */
-
-const HexagonLayerExample = {
-  layer: HexagonLayer,
-  props: {
-    id: 'HexagonLayer',
-    data: dataSamples.points,
-    extruded: true,
-    pickable: true,
-    radius: 1000,
-    opacity: 1,
-    elevationScale: 1,
-    elevationRange: [0, 3000],
-    coverage: 1,
-    getPosition: d => d.COORDINATES,
-    getColorValue: points => getMean(points, 'SPACES'),
-    getElevationValue: points => getMax(points, 'SPACES')
-  }
-};
 
 const TextLayerExample = {
   layer: TextLayer,
@@ -459,10 +356,20 @@ const TextLayerExample = {
         change('fontSettings', {...newSettings.fontSettings, cutoff: newValue});
       }
     },
+    wordBreak: {
+      name: 'wordBreak',
+      type: 'category',
+      value: ['', 'break-all', 'break-word']
+    },
     getTextAnchor: {
       name: 'textAnchor',
       type: 'category',
       value: ['start', 'middle', 'end']
+    },
+    maxWidth: {
+      name: 'maxWidth',
+      type: 'number',
+      max: 5000
     }
   },
   props: {
@@ -472,12 +379,14 @@ const TextLayerExample = {
     fontSettings: {},
     autoHighlight: true,
     pickable: true,
+    maxWidth: 500,
+    wordBreak: 'break-word',
     highlightColor: [0, 0, 128, 128],
     getText: x => `${x.LOCATION_NAME}\n${x.ADDRESS}`,
     getPosition: x => x.COORDINATES,
     getColor: x => [153, 0, 0],
     getAngle: x => 30,
-    getTextAnchor: x => 'start',
+    getTextAnchor: x => 'middle',
     getAlignmentBaseline: x => 'center',
     getPixelOffset: x => [10, 0]
   }
@@ -500,7 +409,6 @@ export default {
     PolygonLayer: PolygonLayerExample,
     'PolygonLayer (Flat)': PolygonLayerBinaryExample,
     PathLayer: PathLayerExample,
-    'PathLayer (Flat)': PathLayerBinaryExample,
     ScatterplotLayer: ScatterplotLayerExample,
     ArcLayer: ArcLayerExample,
     LineLayer: LineLayerExample,
@@ -508,11 +416,6 @@ export default {
     'IconLayer (auto packing)': IconLayerAutoPackingExample,
     TextLayer: TextLayerExample,
     BitmapLayer: BitmapLayerExample,
-    ColumnLayer: ColumnLayerExample,
-    CPUGridLayer: CPUGridLayerExample,
-    ScreenGridLayer: ScreenGridLayerExample,
-    HexagonLayer: HexagonLayerExample,
-    ContourLayer: ContourLayerExample,
-    'ContourLayer (Bands)': ContourLayerBandsExample
+    ColumnLayer: ColumnLayerExample
   }
 };

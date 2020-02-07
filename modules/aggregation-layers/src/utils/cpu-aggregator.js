@@ -18,7 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 import BinSorter from './bin-sorter';
-import {getQuantizeScale, getLinearScale, getQuantileScale, getOrdinalScale} from './scale-utils';
+import {getScaleFunctionByScaleType} from './scale-utils';
 import {getValueFunc} from './aggregation-operation-utils';
 
 function nop() {}
@@ -41,6 +41,10 @@ const defaultDimensions = [
         },
         aggregation: {
           prop: 'colorAggregation'
+        },
+        filterData: {
+          prop: '_filterData',
+          updateTrigger: '_filterData'
         }
       }
     },
@@ -51,17 +55,19 @@ const defaultDimensions = [
         },
         upperPercentile: {
           prop: 'upperPercentile'
+        },
+        scaleType: {
+          prop: 'colorScaleType'
         }
-      },
-      onSet: {
-        props: 'onSetColorDomain'
       }
     },
     getScaleFunc: {
       triggers: {
         domain: {prop: 'colorDomain'},
-        range: {prop: 'colorRange'},
-        scaleType: {prop: 'colorScaleType'}
+        range: {prop: 'colorRange'}
+      },
+      onSet: {
+        props: 'onSetColorDomain'
       }
     },
     nullValue: [0, 0, 0, 0]
@@ -82,6 +88,10 @@ const defaultDimensions = [
         },
         aggregation: {
           prop: 'elevationAggregation'
+        },
+        filterData: {
+          prop: '_filterData',
+          updateTrigger: '_filterData'
         }
       }
     },
@@ -92,17 +102,19 @@ const defaultDimensions = [
         },
         upperPercentile: {
           prop: 'elevationUpperPercentile'
+        },
+        scaleType: {
+          prop: 'elevationScaleType'
         }
-      },
-      onSet: {
-        props: 'onSetElevationDomain'
       }
     },
     getScaleFunc: {
       triggers: {
         domain: {prop: 'elevationDomain'},
-        range: {prop: 'elevationRange'},
-        scaleType: {prop: 'elevationScaleType'}
+        range: {prop: 'elevationRange'}
+      },
+      onSet: {
+        props: 'onSetElevationDomain'
       }
     },
     nullValue: -1
@@ -140,18 +152,22 @@ export default class CPUAggregator {
     return defaultDimensions;
   }
 
-  updateState({oldProps, props, changeFlags}, viewport) {
+  updateState(opts, aggregationParams) {
+    const {oldProps, props, changeFlags} = opts;
     this.updateGetValueFuncs(oldProps, props, changeFlags);
     const reprojectNeeded = this.needsReProjectPoints(oldProps, props, changeFlags);
-
+    let aggregationDirty = false;
     if (changeFlags.dataChanged || reprojectNeeded) {
-      // project data into hexagons, and get sortedColorBins
-      this.getAggregatedData(props, viewport);
+      // project data into bin and aggregate wegiths per bin
+      this.getAggregatedData(props, aggregationParams);
+      aggregationDirty = true;
     } else {
       const dimensionChanges = this.getDimensionChanges(oldProps, props, changeFlags) || [];
       // this here is layer
       dimensionChanges.forEach(f => typeof f === 'function' && f());
+      aggregationDirty = true;
     }
+    this.setState({aggregationDirty});
 
     return this.state;
   }
@@ -181,12 +197,10 @@ export default class CPUAggregator {
     return result;
   }
 
-  getAggregatedData(props, viewport) {
+  getAggregatedData(props, aggregationParams) {
     const aggregator = this._getAggregator(props);
 
-    // result should contain a data array and other props
-    // result = {data: [], ...other props}
-    const result = aggregator(props, viewport);
+    const result = aggregator(props, aggregationParams);
     this.setState({
       layerData: this.normalizeResult(result)
     });
@@ -354,22 +368,6 @@ export default class CPUAggregator {
     return updateTriggers;
   }
 
-  getScaleFunctionByScaleType(scaleType) {
-    switch (scaleType) {
-      case 'quantize':
-        return getQuantizeScale;
-      case 'linear':
-        return getLinearScale;
-      case 'quantile':
-        return getQuantileScale;
-      case 'ordinal':
-        return getOrdinalScale;
-
-      default:
-        return getQuantizeScale;
-    }
-  }
-
   getSortedBins(props) {
     for (const key in this.dimensionUpdaters) {
       this.getDimensionSortedBins(props, this.dimensionUpdaters[key]);
@@ -377,11 +375,13 @@ export default class CPUAggregator {
   }
 
   getDimensionSortedBins(props, dimensionUpdater) {
-    // const {getColorValue} = this.state;
     const {key} = dimensionUpdater;
     const {getValue} = this.state.dimensions[key];
 
-    const sortedBins = new BinSorter(this.state.layerData.data || [], getValue);
+    const sortedBins = new BinSorter(this.state.layerData.data || [], {
+      getValue,
+      filterData: props._filterData
+    });
     this.setDimensionState(key, {sortedBins});
     this.getDimensionValueDomain(props, dimensionUpdater);
   }
@@ -389,30 +389,30 @@ export default class CPUAggregator {
   getDimensionValueDomain(props, dimensionUpdater) {
     const {getDomain, key} = dimensionUpdater;
     const {
-      triggers: {lowerPercentile, upperPercentile},
-      onSet
+      triggers: {lowerPercentile, upperPercentile, scaleType}
     } = getDomain;
-    const valueDomain = this.state.dimensions[key].sortedBins.getValueRange([
-      props[lowerPercentile.prop],
-      props[upperPercentile.prop]
-    ]);
-
-    if (typeof onSet === 'object' && typeof props[onSet.props] === 'function') {
-      props[onSet.props](valueDomain);
-    }
+    const valueDomain = this.state.dimensions[key].sortedBins.getValueDomainByScale(
+      props[scaleType.prop],
+      [props[lowerPercentile.prop], props[upperPercentile.prop]]
+    );
 
     this.setDimensionState(key, {valueDomain});
     this.getDimensionScale(props, dimensionUpdater);
   }
 
   getDimensionScale(props, dimensionUpdater) {
-    const {key, getScaleFunc} = dimensionUpdater;
-    const {domain, range, scaleType} = getScaleFunc.triggers;
-    // const {colorRange} = key;
+    const {key, getScaleFunc, getDomain} = dimensionUpdater;
+    const {domain, range} = getScaleFunc.triggers;
+    const {scaleType} = getDomain.triggers;
+    const {onSet} = getScaleFunc;
     const dimensionRange = props[range.prop];
     const dimensionDomain = props[domain.prop] || this.state.dimensions[key].valueDomain;
-    const getScaleFunction = this.getScaleFunctionByScaleType(props[scaleType.prop]);
+    const getScaleFunction = getScaleFunctionByScaleType(scaleType && props[scaleType.prop]);
     const scaleFunc = getScaleFunction(dimensionDomain, dimensionRange);
+
+    if (typeof onSet === 'object' && typeof props[onSet.props] === 'function') {
+      props[onSet.props](scaleFunc.domain());
+    }
 
     this.setDimensionState(key, {scaleFunc});
   }
@@ -420,8 +420,13 @@ export default class CPUAggregator {
   getSubLayerDimensionAttribute(key, nullValue) {
     return cell => {
       const {sortedBins, scaleFunc} = this.state.dimensions[key];
+      const bin = sortedBins.binMap[cell.index];
 
-      const cv = sortedBins.binMap[cell.index] && sortedBins.binMap[cell.index].value;
+      if (bin && bin.counts === 0) {
+        // no points left in bin after filtering
+        return nullValue;
+      }
+      const cv = bin && bin.value;
       const domain = scaleFunc.domain();
 
       const isValueInDomain = cv >= domain[0] && cv <= domain[domain.length - 1];
@@ -458,7 +463,9 @@ export default class CPUAggregator {
         binInfo[pickingInfo] = value;
       }
 
-      object = Object.assign(binInfo, cell);
+      object = Object.assign(binInfo, cell, {
+        points: cell.filteredPoints || cell.points
+      });
     }
 
     // add bin colorValue and elevationValue to info

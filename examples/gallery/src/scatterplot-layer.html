@@ -2,9 +2,9 @@
   <head>
     <title>deck.gl ScatterplotLayer Example</title>
 
-    <script src="https://unpkg.com/deck.gl@^7.0.0/dist.min.js"></script>
+    <script src="https://unpkg.com/deck.gl@^8.0.0/dist.min.js"></script>
 
-    <script src="https://api.tiles.mapbox.com/mapbox-gl-js/v0.50.0/mapbox-gl.js"></script>
+    <script src="https://api.tiles.mapbox.com/mapbox-gl-js/v1.4.0/mapbox-gl.js"></script>
 
     <style type="text/css">
       body {
@@ -27,10 +27,13 @@
     new DeckGL({
       mapboxApiAccessToken: '<mapbox-access-token>',
       mapStyle: 'mapbox://styles/mapbox/light-v9',
-      longitude: -74,
-      latitude: 40.76,
-      zoom: 11,
-      maxZoom: 16,
+      initialViewState: {
+        longitude: -74,
+        latitude: 40.76,
+        zoom: 11,
+        maxZoom: 16
+      },
+      controller: true,
       layers: [
         new ScatterplotLayer({
           id: 'scatter-plot',

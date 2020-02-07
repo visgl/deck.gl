@@ -70,10 +70,10 @@ new LineLayer({});
 To use pre-bundled scripts:
 
 ```html
-<script src="https://unpkg.com/deck.gl@^7.0.0/dist.min.js"></script>
+<script src="https://unpkg.com/deck.gl@^8.0.0/dist.min.js"></script>
 <!-- or -->
-<script src="https://unpkg.com/@deck.gl/core@^7.0.0/dist.min.js"></script>
-<script src="https://unpkg.com/@deck.gl/layers@^7.0.0/dist.min.js"></script>
+<script src="https://unpkg.com/@deck.gl/core@^8.0.0/dist.min.js"></script>
+<script src="https://unpkg.com/@deck.gl/layers@^8.0.0/dist.min.js"></script>
 ```
 
 ```js
@@ -131,7 +131,7 @@ Method called to retrieve the target position of each object.
 
 * Default: `[0, 0, 0, 255]`
 
-The rgba color of each object, in `r, g, b, [a]`. Each component is in the 0-255 range.
+The rgba color is in the format of `[r, g, b, [a]]`. Each channel is a number between 0-255 and `a` is 255 if not supplied.
 
 * If an array is provided, it is used as the color for all objects.
 * If a function is provided, it is called on each object to retrieve its color.
@@ -148,4 +148,3 @@ The line width of each object, in units specified by `widthUnits` (default pixel
 ## Source
 
 [modules/layers/src/line-layer](https://github.com/uber/deck.gl/tree/master/modules/layers/src/line-layer)
-

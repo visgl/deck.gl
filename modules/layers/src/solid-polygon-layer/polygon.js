@@ -21,6 +21,10 @@
 /* eslint-disable max-params */
 import earcut from 'earcut';
 
+// For Web Mercator projection
+const PI_4 = Math.PI / 4;
+const DEGREES_TO_RADIANS_HALF = Math.PI / 360;
+
 // 4 data formats are supported:
 // Simple Polygon: an array of points
 // Complex Polygon: an array of array of points (array of rings)
@@ -168,7 +172,12 @@ function getFlatVertexCount(positions, size, startIndex = 0, endIndex) {
  * @param {Number} positionSize - size of a position, 2 (xy) or 3 (xyz)
  * @returns {Number} vertex count
  */
-export function getVertexCount(polygon, positionSize) {
+export function getVertexCount(polygon, positionSize, normalization = true) {
+  if (!normalization) {
+    polygon = polygon.positions || polygon;
+    return polygon.length / positionSize;
+  }
+
   validate(polygon);
 
   if (polygon.positions) {
@@ -255,7 +264,7 @@ export function normalize(polygon, positionSize, vertexCount) {
   if (Number.isFinite(polygon[0])) {
     // simple flat
     copyFlatRing(positions, 0, polygon, positionSize);
-    return {positions, holeIndices: null};
+    return positions;
   }
   if (!isSimple(polygon)) {
     // complex polygon
@@ -272,7 +281,7 @@ export function normalize(polygon, positionSize, vertexCount) {
   }
   // simple polygon
   copyNestedRing(positions, 0, polygon, positionSize);
-  return {positions, holeIndices: null};
+  return positions;
 }
 /* eslint-enable max-statements */
 
@@ -282,12 +291,28 @@ export function normalize(polygon, positionSize, vertexCount) {
  * @param {Number} positionSize - size of a position, 2 (xy) or 3 (xyz)
  * @returns {Array} array of indices
  */
-export function getSurfaceIndices(normalizedPolygon, positionSize) {
+export function getSurfaceIndices(normalizedPolygon, positionSize, preproject) {
   let holeIndices = null;
 
   if (normalizedPolygon.holeIndices) {
     holeIndices = normalizedPolygon.holeIndices.map(positionIndex => positionIndex / positionSize);
   }
+  let positions = normalizedPolygon.positions || normalizedPolygon;
+
+  // TODO - handle other coordinate systems and projection modes
+  if (preproject) {
+    // When tesselating lnglat coordinates, project them to the Web Mercator plane for accuracy
+    const n = positions.length;
+    // Clone the array
+    positions = positions.slice();
+    for (let i = 0; i < n; i += positionSize) {
+      // project points to a scaled version of the web-mercator plane
+      // It doesn't matter if x and y are scaled/translated, but the relationship must be linear
+      const y = positions[i + 1];
+      positions[i + 1] = Math.log(Math.tan(PI_4 + y * DEGREES_TO_RADIANS_HALF));
+    }
+  }
+
   // Let earcut triangulate the polygon
-  return earcut(normalizedPolygon.positions, holeIndices, positionSize);
+  return earcut(positions, holeIndices, positionSize);
 }

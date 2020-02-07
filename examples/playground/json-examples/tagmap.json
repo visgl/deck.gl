@@ -10,28 +10,32 @@
   },
   "views": [
     {
-      "type": "MapView",
+      "@@type": "MapView",
       "controller": true,
       "mapStyle": "https://rivulet-zhang.github.io/dataRepo/mapbox/style/map-style-dark-v9-no-labels.json"
     }
   ],
   "layers": [
     {
-      "type": "TagmapLayer",
+      "@@type": "TagmapLayer",
       "id": "twitter-topics-tagmap",
       "data": "https://rivulet-zhang.github.io/dataRepo/tagmap/hashtags10k.json",
-      "getLabel": "label",
-      "getPosition": "coordinates",
+      "getLabel": "@@=label",
+      "getPosition": "@@=coordinates",
       "minFontSize": 14,
       "maxFontSize": 50
     },
     {
-      "type": "TextLayer",
+      "@@type": "TextLayer",
       "id": "twitter-topics-raw",
       "data": "https://rivulet-zhang.github.io/dataRepo/tagmap/hashtags10k.json",
-      "getText": "label",
-      "getPosition": "coordinates",
-      "getColor": [29, 145, 192],
+      "getText": "@@=label",
+      "getPosition": "@@=coordinates",
+      "getColor": [
+        29,
+        145,
+        192
+      ],
       "getSize": 20,
       "sizeScale": 1.6
     }

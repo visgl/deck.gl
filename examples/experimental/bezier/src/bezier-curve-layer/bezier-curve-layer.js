@@ -18,7 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {Layer, fp64LowPart} from '@deck.gl/core';
+import {Layer, fp64LowPart, picking} from '@deck.gl/core';
 import GL from '@luma.gl/constants';
 import {Model, Geometry} from '@luma.gl/core';
 
@@ -38,11 +38,11 @@ const defaultProps = {
 
 export default class BezierCurveLayer extends Layer {
   getShaders() {
-    return {vs, fs, modules: ['picking']};
+    return {vs, fs, modules: [picking]};
   }
 
   initializeState() {
-    const {attributeManager} = this.state;
+    const attributeManager = this.getAttributeManager();
 
     /* eslint-disable max-len */
     attributeManager.addInstanced({

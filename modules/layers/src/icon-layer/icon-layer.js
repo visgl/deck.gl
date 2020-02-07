@@ -17,7 +17,7 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
-import {Layer} from '@deck.gl/core';
+import {Layer, project32, picking} from '@deck.gl/core';
 import GL from '@luma.gl/constants';
 import {Model, Geometry} from '@luma.gl/core';
 
@@ -63,12 +63,13 @@ const defaultProps = {
   getIcon: {type: 'accessor', value: x => x.icon},
   getColor: {type: 'accessor', value: DEFAULT_COLOR},
   getSize: {type: 'accessor', value: 1},
-  getAngle: {type: 'accessor', value: 0}
+  getAngle: {type: 'accessor', value: 0},
+  getPixelOffset: {type: 'accessor', value: [0, 0]}
 };
 
 export default class IconLayer extends Layer {
   getShaders() {
-    return super.getShaders({vs, fs, modules: ['project32', 'picking']});
+    return super.getShaders({vs, fs, modules: [project32, picking]});
   }
 
   initializeState() {
@@ -111,8 +112,12 @@ export default class IconLayer extends Layer {
       instanceAngles: {
         size: 1,
         transition: true,
-        accessor: 'getAngle',
-        defaultValue: 0
+        accessor: 'getAngle'
+      },
+      instancePixelOffset: {
+        size: 2,
+        transition: true,
+        accessor: 'getPixelOffset'
       }
     });
     /* eslint-enable max-len */
@@ -127,7 +132,7 @@ export default class IconLayer extends Layer {
     const {iconAtlas, iconMapping, data, getIcon} = props;
 
     let iconMappingChanged = false;
-    const prePacked = iconAtlas || this.props._asyncPropOriginalValues.iconAtlas;
+    const prePacked = iconAtlas || this.internalState.isAsyncPropLoading('iconAtlas');
 
     // prepacked iconAtlas from user
     if (prePacked) {
@@ -188,8 +193,7 @@ export default class IconLayer extends Layer {
           Object.assign({}, uniforms, {
             iconsTexture,
             iconsTextureDim: [iconsTexture.width, iconsTexture.height],
-            sizeScale:
-              sizeScale * (sizeUnits === 'pixels' ? viewport.distanceScales.metersPerPixel[2] : 1),
+            sizeScale: sizeScale * (sizeUnits === 'pixels' ? viewport.metersPerPixel : 1),
             sizeMinPixels,
             sizeMaxPixels,
             billboard,
@@ -201,7 +205,9 @@ export default class IconLayer extends Layer {
   }
 
   _getModel(gl) {
-    const positions = [-1, -1, 0, -1, 1, 0, 1, 1, 0, 1, -1, 0];
+    // The icon-layer vertex shader uses 2d positions
+    // specifed via: attribute vec2 positions;
+    const positions = [-1, -1, -1, 1, 1, 1, 1, -1];
 
     return new Model(
       gl,
@@ -210,7 +216,12 @@ export default class IconLayer extends Layer {
         geometry: new Geometry({
           drawMode: GL.TRIANGLE_FAN,
           attributes: {
-            positions: new Float32Array(positions)
+            // The size must be explicitly passed here otherwise luma.gl
+            // will default to assuming that positions are 3D (x,y,z)
+            positions: {
+              size: 2,
+              value: new Float32Array(positions)
+            }
           }
         }),
         isInstanced: true

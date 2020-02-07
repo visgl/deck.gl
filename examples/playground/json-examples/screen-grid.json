@@ -12,26 +12,57 @@
   "map": true,
   "views": [
     {
-      "type": "MapView",
+      "@@type": "MapView",
       "controller": true,
       "mapStyle": "mapbox://styles/mapbox/light-v9"
     }
   ],
   "layers": [
-  	{
-    	"type": "ScreenGridLayer",
+    {
+      "@@type": "ScreenGridLayer",
       "id": "grid",
       "data": "https://raw.githubusercontent.com/uber-common/deck.gl-data/master/examples/screen-grid/ca-transit-stops.json",
+      "opacity": 0.8,
       "cellSizePixels": 20,
       "colorRange": [
-        [255, 255, 178, 25],
-        [254, 217, 118, 85],
-        [254, 178, 76, 127],
-        [253, 141, 60, 170],
-        [240, 59, 32, 212],
-        [189, 0, 38, 255]
+        [
+          255,
+          255,
+          178,
+          25
+        ],
+        [
+          254,
+          217,
+          118,
+          85
+        ],
+        [
+          254,
+          178,
+          76,
+          127
+        ],
+        [
+          253,
+          141,
+          60,
+          170
+        ],
+        [
+          240,
+          59,
+          32,
+          212
+        ],
+        [
+          189,
+          0,
+          38,
+          255
+        ]
       ],
-      "getPosition": "-",
+      "getPosition": "@@=-",
       "gpuAggregation": true
     }
   ]

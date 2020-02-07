@@ -134,7 +134,7 @@ export function getLayerPickingInfo({layer, info, mode}) {
     // layer.pickLayer() function requires a non-null ```layer.state```
     // object to function properly. So the layer referenced here
     // must be the "current" layer, not an "out-dated" / "invalidated" layer
-    info = layer.pickLayer({info, mode, sourceLayer});
+    info = layer.getPickingInfo({info, mode, sourceLayer});
     layer = layer.parent;
   }
   return info;
@@ -148,39 +148,4 @@ export function getLayerPickingInfo({layer, info, mode}) {
 function getViewportFromCoordinates({viewports}) {
   const viewport = viewports[0];
   return viewport;
-}
-
-// Per-layer event handlers (e.g. onClick, onHover) are provided by the
-// user and out of deck.gl's control. It's very much possible that
-// the user calls React lifecycle methods in these function, such as
-// ReactComponent.setState(). React lifecycle methods sometimes induce
-// a re-render and re-generation of props of deck.gl and its layers,
-// which invalidates all layers currently passed to this very function.
-
-// Therefore, per-layer event handlers must be invoked at the end
-// of the picking operation. NO operation that relies on the states of current
-// layers should be called after this code.
-export function callLayerPickingCallbacks(infos, mode, event) {
-  const unhandledPickInfos = [];
-
-  infos.forEach(info => {
-    if (!info.layer) {
-      return;
-    }
-
-    let handled = false;
-    switch (mode) {
-      case 'hover':
-        handled = info.layer.onHover(info, event);
-        break;
-      case 'query':
-      default:
-    }
-
-    if (!handled) {
-      unhandledPickInfos.push(info);
-    }
-  });
-
-  return unhandledPickInfos;
 }

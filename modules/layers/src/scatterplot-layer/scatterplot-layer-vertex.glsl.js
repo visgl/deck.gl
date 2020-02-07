@@ -24,7 +24,7 @@ export default `\
 attribute vec3 positions;
 
 attribute vec3 instancePositions;
-attribute vec2 instancePositions64xyLow;
+attribute vec3 instancePositions64Low;
 attribute float instanceRadius;
 attribute float instanceLineWidths;
 attribute vec4 instanceFillColors;
@@ -45,12 +45,13 @@ varying vec4 vFillColor;
 varying vec4 vLineColor;
 varying vec2 unitPosition;
 varying float innerUnitRadius;
+varying float outerRadiusPixels;
 
 void main(void) {
   geometry.worldPosition = instancePositions;
 
   // Multiply out radius and clamp to limits
-  float outerRadiusPixels = clamp(
+  outerRadiusPixels = clamp(
     project_size_to_pixel(radiusScale * instanceRadius),
     radiusMinPixels, radiusMaxPixels
   );
@@ -73,7 +74,7 @@ void main(void) {
   
   vec3 offset = positions * project_pixel_size(outerRadiusPixels);
   DECKGL_FILTER_SIZE(offset, geometry);
-  gl_Position = project_position_to_clipspace(instancePositions, instancePositions64xyLow, offset, geometry.position);
+  gl_Position = project_position_to_clipspace(instancePositions, instancePositions64Low, offset, geometry.position);
   DECKGL_FILTER_GL_POSITION(gl_Position, geometry);
 
   // Apply opacity to instance color, or return instance picking color

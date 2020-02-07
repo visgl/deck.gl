@@ -17,7 +17,7 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
-import {createModuleInjection} from '@luma.gl/core';
+import {project} from '@deck.gl/core';
 
 const vs = `
   uniform bool brushing_enabled;
@@ -44,6 +44,10 @@ const vs = `
     return distance <= brushing_radius;
   }
 
+  bool brushing_arePointsInRange(vec2 sourcePos, vec2 targetPos) {
+    return brushing_isPointInRange(sourcePos) || brushing_isPointInRange(targetPos);
+  }
+
   void brushing_setVisible(bool visible) {
     brushing_isVisible = float(visible);
   }
@@ -54,48 +58,53 @@ const fs = `
   varying float brushing_isVisible;
 `;
 
-// filter_setValue(instanceFilterValue);
-const moduleName = 'brushing';
-
 const TARGET = {
   source: 0,
   target: 1,
-  custom: 2
+  custom: 2,
+  source_target: 3
 };
 
-createModuleInjection(moduleName, {
-  hook: 'vs:DECKGL_FILTER_GL_POSITION',
-  injection: `
-vec2 brushingTarget;
-if (brushing_target == 0) {
-  brushingTarget = geometry.worldPosition.xy;
-} else if (brushing_target == 1) {
-  brushingTarget = geometry.worldPositionAlt.xy;
-} else {
-  #ifdef NON_INSTANCED_MODEL
-  brushingTarget = brushingTargets;
-  #else
-  brushingTarget = instanceBrushingTargets;
-  #endif
-}
-brushing_setVisible(brushing_isPointInRange(brushingTarget));
-  `
-});
+const inject = {
+  'vs:DECKGL_FILTER_GL_POSITION': `
+    vec2 brushingTarget;
+    vec2 brushingSource;
+    if (brushing_target == 3) {
+      brushingTarget = geometry.worldPositionAlt.xy;
+      brushingSource = geometry.worldPosition.xy;
+    } else if (brushing_target == 0) {
+      brushingTarget = geometry.worldPosition.xy;
+    } else if (brushing_target == 1) {
+      brushingTarget = geometry.worldPositionAlt.xy;
+    } else {
+      #ifdef NON_INSTANCED_MODEL
+      brushingTarget = brushingTargets;
+      #else
+      brushingTarget = instanceBrushingTargets;
+      #endif
+    }
+    bool visible;
+    if (brushing_target == 3) {
+      visible = brushing_arePointsInRange(brushingSource, brushingTarget);
+    } else {
+      visible = brushing_isPointInRange(brushingTarget);
+    }
+    brushing_setVisible(visible);
+  `,
 
-createModuleInjection(moduleName, {
-  hook: 'fs:DECKGL_FILTER_COLOR',
-  injection: `
-if (brushing_enabled && brushing_isVisible < 0.5) {
-  discard;
-}
+  'fs:DECKGL_FILTER_COLOR': `
+    if (brushing_enabled && brushing_isVisible < 0.5) {
+      discard;
+    }
   `
-});
+};
 
 export default {
-  name: moduleName,
-  dependencies: ['project'],
+  name: 'brushing',
+  dependencies: [project],
   vs,
   fs,
+  inject,
   getUniforms: opts => {
     if (!opts || !opts.viewport) {
       return {};

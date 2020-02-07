@@ -2,8 +2,8 @@
   <head>
     <title>deck.gl ColumnLayer Example</title>
 
-    <script src="https://unpkg.com/deck.gl@^7.0.0/dist.min.js"></script>
-    <script src="https://api.tiles.mapbox.com/mapbox-gl-js/v0.50.0/mapbox-gl.js"></script>
+    <script src="https://unpkg.com/deck.gl@^8.0.0/dist.min.js"></script>
+    <script src="https://api.tiles.mapbox.com/mapbox-gl-js/v1.4.0/mapbox-gl.js"></script>
 
     <style type="text/css">
       body {
@@ -21,11 +21,14 @@
     new DeckGL({
       mapboxApiAccessToken: '<mapbox-access-token>',
       mapStyle: 'mapbox://styles/mapbox/dark-v9',
-      longitude: -122.4,
-      latitude: 37.74,
-      zoom: 10,
-      maxZoom: 15,
-      pitch: 30,
+      initialViewState: {
+        longitude: -122.4,
+        latitude: 37.74,
+        zoom: 10,
+        maxZoom: 15,
+        pitch: 30
+      },
+      controller: true,
       layers: [
         new ColumnLayer({
           id: 'column',

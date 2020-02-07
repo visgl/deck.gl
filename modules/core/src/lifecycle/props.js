@@ -1,4 +1,6 @@
-import assert from '../utils/assert';
+import {PROP_SYMBOLS} from './constants';
+
+const {COMPONENT} = PROP_SYMBOLS;
 
 export function validateProps(props) {
   const propTypes = getPropTypes(props);
@@ -81,8 +83,6 @@ export function compareProps({
   propTypes = {},
   triggerName = 'props'
 } = {}) {
-  assert(oldProps !== undefined && newProps !== undefined, 'compareProps args');
-
   // shallow equality => deep equality
   if (oldProps === newProps) {
     return null;
@@ -246,7 +246,7 @@ function diffUpdateTrigger(props, oldProps, triggerName) {
 }
 
 function getPropTypes(props) {
-  const layer = props._component;
+  const layer = props[COMPONENT];
   const LayerType = layer && layer.constructor;
   return LayerType ? LayerType._propTypes : {};
 }

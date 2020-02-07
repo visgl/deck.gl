@@ -13,16 +13,15 @@
   },
   "views": [
     {
-      "type": "MapView",
+      "@@type": "MapView",
       "mapStyle": "mapbox://styles/mapbox/light-v9",
       "controller": true
     }
   ],
   "layers": [
     {
-      "type": "Tile3DLayer",
+      "@@type": "Tile3DLayer",
       "id": "tiles-royal",
-      "DracoWorkerLoader": "DracoWorkerLoader",
       "tilesetUrl": "https://raw.githubusercontent.com/uber-common/deck.gl-data/master/3d-tiles/RoyalExhibitionBuilding/tileset.json"
     }
   ]

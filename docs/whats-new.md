@@ -2,6 +2,82 @@
 
 This page contains highlights of each deck.gl release. Also check our [vis.gl blog](https://medium.com/vis-gl) for news about new releases and features in deck.gl.
 
+## deck.gl v8.0
+
+### Performance
+
+Performance is one of the biggest focus of this update. Layer updates (data change) is 1.5x the speed of the last release, and redraw (viewport change) is 2.5x.
+
+*Benchmark of using 1000 ScatterplotLayers on 2016 Macbook Pro, 2.8 GHz Intel Core i7, 16 GB memory, AMD Radeon R9 M370X 2 GB*
+
+|                   | v7.3  | v8.0  | Change |
+| ----------------- | ----- | ----- | ------ |
+| Initialize        | 298ms | 235ms | -21%   |
+| Update            | 112ms | 72ms  | -36%   |
+| Redraw (CPU Time) | 76ms  | 26ms  | -66%   |
+| Redraw (GPU Time) | 17ms  | 10ms  | -41%   |
+
+In addition to runtime performance, deck.gl also added a production mode to optimize bundle size. The v8.0 minified bundle of `@deck.gl/core` is 50kb lighter than that of v7.3.
+
+### Better Binary Data Support
+
+It is now possible to replace a layer's accessors with binary data attributes. This technique offers the maximum performance in terms of data throughput in applications where a lot of data is loaded and/or frequently updated:
+
+```js
+const data = new Float32Array([
+  0.7, 0.2, 0, 0, 0, 0,
+  0.8, 0.6, 0, 0, 5, 0,
+  0.3, 0.5, 0, 5, 5, 0,
+  0, 0.8, 0.6, 5, 10, 0,
+  0, 0.5, 0.7, 10, 10, 0
+]);
+
+new deck.ScatterplotLayer({
+  id: 'points',
+  data: {
+    length: 5,
+    attributes: {
+      getPosition: {value: data, size: 3, offset: 12, stride: 24},
+      getFillColor: {value: data, size: 3, offset: 0, stride: 24}
+    }
+  }
+  getRadius: 1
+})
+```
+
+This use case is discussed in detail in the [performance developer guide](/docs/developer-guide/performance.md#supply-attributes-directly).
+
+### GPU Data Filter in Aggregation Layers
+
+[DataFilterExtension](/docs/api-reference/extensions/data-filter-extension.md) now supports the following layers from `@deck.gl/aggregation-layers`:
+
+- `HeatMapLayer`
+- `GPUGridLayer`
+- `ScreenGridlayer` (GPU aggregation only)
+- `ContourLayer` (GPU aggregation only)
+- `GridLayer` (GPU aggregation only)
+
+### pydeck
+
+- pydeck now supports JupyterLab.
+- The Jupyter widget now allows users to click multiple objects in a visualization and pass them to the Python backend.
+- JavaScript errors are now surfaced in the Jupyter UI.
+- Support for non-Mercator visualizations.
+- The JSON parser has introduced syntactic identifiers in an effort to become more generic and robust. It is able to work with a wider range of data formats and layer types. See upgrade guide for details.
+
+### Other New Features and Improvements
+
+- Render to a frame buffer by specifying the `_framebuffer` prop of [Deck](/docs/api-reference/deck.md).
+- Pick a 3d surface point in the scene by passing `unproject3D: true` to `deck.pickObject` or `deck.pickMultipleObjects`.
+- [ArcLayer](/docs/layers/arc-layer.md) supports drawing arcs between two 3D positions.
+- [TextLayer](/docs/layers/text-layer.md) adds a new prop `backgroundColor`. Picking works when the cursor is over an empty pixel in the text.
+- [TextLayer](/docs/layers/text-layer.md) adds `maxWidth` and `wordBreak` props to support text wrapping.
+- [ScenegraphLayer](/docs/layers/scenegraph-layer.md) adds props `sizeMinPixels` and `sizeMaxPixels`.
+- 64-bit positions are now 3D instead of 2D. This improves render precision when using `OrbitView`.
+- `FirstPersonView` now supports pitch; controller works more intuitively; graduates from experimental status.
+- `FlyToInterpolator` now supports `duration: 'auto'`.
+
+
 ## deck.gl v7.3
 
 Release Date: Sep xx, 2019
@@ -502,7 +578,7 @@ The projection algorithm used for geospatial coordinates (layers with `coordinat
 
 ### JSON API (Experimental)
 
-A new experimental module `@deck.gl/json` provides a set of classes that allows deck.gl layers and views to be specified using JSON-formatted text files. To facilitate experimentation, a JSON layer browser is available on [http://deck.gl/json](http://deck.gl/json).
+A new experimental module `@deck.gl/json` provides a set of classes that allows deck.gl layers and views to be specified using JSON-formatted text files. To facilitate experimentation, a JSON layer browser is available on [http://deck.gl/playground](http://deck.gl/playground).
 
 
 ### Enhanced Multiview Support

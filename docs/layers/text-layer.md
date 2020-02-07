@@ -67,10 +67,10 @@ new TextLayer({});
 To use pre-bundled scripts:
 
 ```html
-<script src="https://unpkg.com/deck.gl@^7.0.0/dist.min.js"></script>
+<script src="https://unpkg.com/deck.gl@^8.0.0/dist.min.js"></script>
 <!-- or -->
-<script src="https://unpkg.com/@deck.gl/core@^7.0.0/dist.min.js"></script>
-<script src="https://unpkg.com/@deck.gl/layers@^7.0.0/dist.min.js"></script>
+<script src="https://unpkg.com/@deck.gl/core@^8.0.0/dist.min.js"></script>
+<script src="https://unpkg.com/@deck.gl/layers@^8.0.0/dist.min.js"></script>
 ```
 
 ```js
@@ -91,7 +91,7 @@ Text size multiplier.
 
 ##### `sizeUnits` (String, optional)
 
-* Default: `pixels` 
+* Default: `pixels`
 
 The units of the size specified by `getSize`, one of `'meters'`, `'pixels'`. When zooming in and out, meter sizes scale with the base map, and pixel sizes remain the same on screen.
 
@@ -112,6 +112,13 @@ The maximum size in pixels.
 - Default: `true`
 
 If on, the text always faces camera. Otherwise the text faces up (z).
+
+##### `backgroundColor` (Array, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
+
+- Default `null`
+
+The color to use for text background, in `[r, g, b]`. Each component is in the `[0, 255]` range.
+The alpha of the background matches the opacity of each object, controlled by the props `getColor` and `opacity`.
 
 ##### `fontFamily` (String, optional)
 
@@ -149,6 +156,18 @@ Options:
 
 `radius` and `cutoff` will be applied only when `sdf` enabled.
 
+##### `wordBreak` (String, optional)
+
+* Default: `break-word`
+
+Available options are `break-all` and `break-word`. A valid `maxWidth` has to be provided to use `wordBreak`.
+
+##### `maxWidth` (Number, optional)
+
+* Default: `-1`
+
+`maxWidth` is used together with `break-word` for wrapping text. The value of `maxWidth` specifies the width limit to break the text into multiple lines.
+
 ### Data Accessors
 
 ##### `getText` ([Function](/docs/developer-guide/using-layers.md#accessors), optional)
@@ -178,7 +197,7 @@ The font size of each text label, in units specified by `sizeUnits` (default pix
 
 * Default: `[0, 0, 0, 255]`
 
-The rgba color of each text label, in `r, g, b, [a]`. Each component is in the 0-255 range.
+The rgba color is in the format of `[r, g, b, [a]]`. Each channel is a number between 0-255 and `a` is 255 if not supplied.
 
 * If an array is provided, it is used as the color for all objects.
 * If a function is provided, it is called on each object to retrieve its color.
@@ -230,6 +249,76 @@ Screen space offset relative to the `coordinates` in pixel unit.
 The TextLayer renders the following sublayers:
 
 * `characters` - an `IconLayer` rendering all the characters.
+
+
+## Use binary attributes
+
+This section is about the special requirements when [supplying attributes directly](/docs/developer-guide/performance.md#supply-attributes-directly) to a `TextLayer`.
+
+Because each text string has a different number of characters, when `data.attributes.getText` is supplied, the layer also requires an array `data.startIndices` that describes the character index at the start of each text object. For example, if there are 3 text objects of 2, 3, and 4 characters each, `startIndices` should be `[0, 2, 5, 9]`.
+
+Additionally, all other attributes (`getColor`, `getWidth`, etc.), if supplied, must contain the same layout (number of characters) as the `getText` buffer.
+
+Example use case:
+
+```js
+// USE PLAIN JSON OBJECTS
+const TEXT_DATA = [
+  {
+    text: 'Hello',
+    position: [-122.4, 37.7],
+    color: [255, 0, 0]
+  },
+  {
+    text: 'World',
+    position: [-122.5, 37.8],
+    color: [0, 0, 255]
+  }
+  ...
+];
+
+new TextLayer({
+  data: TEXT_DATA,
+  getText: d => d.text,
+  getPosition: d => d.position,
+  getColor: d => d.color
+})
+```
+
+Convert to using binary attributes:
+
+```js
+// USE BINARY
+// Flatten the text by converting to unicode value
+// Non-Latin characters may require Uint16Array
+// [72, 101, 108, 108, 111, ...]
+const texts = new Uint8Array(TEXT_DATA.map(d => Array.from(d.text).map(char => char.charCodeAt(0))).flat());
+// The position attribute must supply one position for each character
+// [-122.4, 37.7, -122.4, 37.7, -122.4, 37.7, ...]
+const positions = new Float64Array(TEXT_DATA.map(d => Array.from(d.text).map(_ => d.position)).flat(2));
+// The color attribute must supply one color for each character
+// [255, 0, 0, 255, 0, 0, 255, 0, 0, ...]
+const colors = new Uint8Array(TEXT_DATA.map(d => Array.from(d.text).map(_ => d.color)).flat(2));
+
+// The "layout" that tells TextLayer where each string starts
+const startIndices = new Uint16Array(TEXT_DATA.reduce((acc, d) => {
+  const lastIndex = acc[acc.length - 1];
+  acc.push(lastIndex + d.text.length);
+  return acc;
+}, [0]));
+
+new TextLayer({
+  data: {
+    length: TEXT_DATA.length,
+    startIndices: startIndices, // this is required to render the texts correctly!
+    attributes: {
+      getText: {value: texts},
+      getPosition: {value: positions, size: 2}
+      getColor: {value: colors, size: 3}
+    }
+  }
+})
+```
 
 
 ## Source

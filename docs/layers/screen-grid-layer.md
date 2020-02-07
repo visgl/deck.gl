@@ -76,11 +76,11 @@ new ScreenGridLayer({});
 To use pre-bundled scripts:
 
 ```html
-<script src="https://unpkg.com/deck.gl@^7.0.0/dist.min.js"></script>
+<script src="https://unpkg.com/deck.gl@^8.0.0/dist.min.js"></script>
 <!-- or -->
-<script src="https://unpkg.com/@deck.gl/core@^7.0.0/dist.min.js"></script>
-<script src="https://unpkg.com/@deck.gl/layers@^7.0.0/dist.min.js"></script>
-<script src="https://unpkg.com/@deck.gl/aggregation-layers@^7.0.0/dist.min.js"></script>
+<script src="https://unpkg.com/@deck.gl/core@^8.0.0/dist.min.js"></script>
+<script src="https://unpkg.com/@deck.gl/layers@^8.0.0/dist.min.js"></script>
+<script src="https://unpkg.com/@deck.gl/aggregation-layers@^8.0.0/dist.min.js"></script>
 ```
 
 ```js
@@ -143,7 +143,7 @@ When set to true and browser supports GPU aggregation, aggregation is performed 
 
 NOTE: GPU Aggregation requires WebGL2 support by the browser. When `gpuAggregation` is set to true and browser doesn't support WebGL2, aggregation falls back to CPU.
 
-##### `aggregation` (String, optional) **EXPERIMENTAL**
+##### `aggregation` (String, optional)
 
 * Default: 'SUM'
 

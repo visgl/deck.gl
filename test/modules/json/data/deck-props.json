@@ -4,34 +4,54 @@
     "latitude": 37.8,
     "zoom": 12
   },
-  "controller": "MapController",
+  "controller": "@@#MapController",
   "mapStyle": {},
   "views": [
     {
-      "type": "MapView",
+      "@@type": "MapView",
       "height": "50%",
       "controller": true
     },
     {
-      "type": "FirstPersonView",
+      "@@type": "FirstPersonView",
       "y": "50%",
       "height": "50%"
     }
   ],
   "layers": [
     {
-      "type": "ScatterplotLayer",
-      "data": [{"position": [-122.45, 37.8]}],
-      "getPosition": "position",
-      "getFillColor": [255, 0, 0, 255],
+      "@@type": "ScatterplotLayer",
+      "data": [
+        {
+          "position": [
+            -122.45,
+            37.8
+          ]
+        }
+      ],
+      "getPosition": "@@=position",
+      "getFillColor": [
+        255,
+        0,
+        0,
+        255
+      ],
       "getRadius": 1000
     },
     {
-      "type": "TextLayer",
-      "data": [[-122.45, 37.8]],
-      "getPosition": "-",
-      "elevationRange": [0, 3000],
-      "getText": "Hello World",
+      "@@type": "TextLayer",
+      "data": [
+        [
+          -122.45,
+          37.8
+        ]
+      ],
+      "getPosition": "@@=-",
+      "elevationRange": [
+        0,
+        3000
+      ],
+      "getText": "@@=Hello World",
       "billboard": false
     }
   ]

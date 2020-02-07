@@ -1,9 +1,8 @@
 import React, {Component} from 'react';
 import {MAPBOX_STYLES, DATA_URI} from '../../constants/defaults';
-import {App} from 'website-examples/trips/app';
+import App from 'website-examples/trips/app'; // eslint-disable-line
 
 import {AmbientLight, DirectionalLight, LightingEffect} from '@deck.gl/core';
-import {PhongMaterial} from '@luma.gl/core';
 
 const EMPTY_ARRAY = [];
 
@@ -46,12 +45,12 @@ export default class HomeDemo extends Component {
   constructor(props) {
     super(props);
 
-    const material = new PhongMaterial({
+    const material = {
       ambient: 0.2,
       diffuse: 0.6,
       shininess: 32,
       specularColor: [232, 232, 247]
-    });
+    };
 
     const lightingEffect = new LightingEffect({
       light1: new AmbientLight({
@@ -78,7 +77,7 @@ export default class HomeDemo extends Component {
   }
 
   render() {
-    const {data, params, ...otherProps} = this.props;
+    const {data, ...otherProps} = this.props;
 
     return (
       <App

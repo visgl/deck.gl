@@ -98,6 +98,8 @@ export default class S2Layer extends CompositeLayer {
       }),
       {
         data,
+        _normalize: false,
+        positionFormat: 'XY',
         getPolygon: (x, objectInfo) => getS2Polygon(getS2Token(x, objectInfo))
       }
     );

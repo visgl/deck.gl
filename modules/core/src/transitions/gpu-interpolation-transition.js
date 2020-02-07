@@ -1,13 +1,13 @@
 import GL from '@luma.gl/constants';
 import {Buffer, Transform} from '@luma.gl/core';
-import Attribute from '../lib/attribute';
+import Attribute from '../lib/attribute/attribute';
 import {
   padBuffer,
   getAttributeTypeFromSize,
   getSourceBufferAttribute,
   getAttributeBufferLength,
   cycleBuffers
-} from '../lib/attribute-transition-utils';
+} from '../lib/attribute/attribute-transition-utils';
 import Transition from './transition';
 
 export default class GPUInterpolationTransition {
@@ -20,8 +20,8 @@ export default class GPUInterpolationTransition {
     // attribute, it will be converted and returned as a regular attribute
     // `attribute.userData` is the original options passed when constructing the attribute.
     // This ensures that we set the proper `doublePrecision` flag and shader attributes.
-    this.attributeInTransition = new Attribute(gl, attribute.userData);
-    this.currentBufferLayout = attribute.bufferLayout;
+    this.attributeInTransition = new Attribute(gl, attribute.settings);
+    this.currentStartIndices = attribute.startIndices;
     // storing currentLength because this.buffer may be larger than the actual length we want to use
     // this is because we only reallocate buffers when they grow, not when they shrink,
     // due to performance costs
@@ -45,7 +45,7 @@ export default class GPUInterpolationTransition {
   // we need to start animating towards the new values
   // this also correctly resizes / pads the transform's buffers
   // in case the attribute's buffer has changed in length or in
-  // bufferLayout
+  // startIndices
   start(transitionSettings, numInstances) {
     if (transitionSettings.duration <= 0) {
       this.transition.cancel();
@@ -62,7 +62,7 @@ export default class GPUInterpolationTransition {
       numInstances,
       attribute,
       fromLength: this.currentLength,
-      fromBufferLayout: this.currentBufferLayout,
+      fromStartIndices: this.currentStartIndices,
       getData: transitionSettings.enter
     };
 
@@ -70,7 +70,7 @@ export default class GPUInterpolationTransition {
       padBuffer({buffer, ...padBufferOpts});
     }
 
-    this.currentBufferLayout = attribute.bufferLayout;
+    this.currentStartIndices = attribute.startIndices;
     this.currentLength = getAttributeBufferLength(attribute, numInstances);
     this.attributeInTransition.update({
       buffer: buffers[1],

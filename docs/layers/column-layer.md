@@ -67,10 +67,10 @@ new ColumnLayer({});
 To use pre-bundled scripts:
 
 ```html
-<script src="https://unpkg.com/deck.gl@^7.0.0/dist.min.js"></script>
+<script src="https://unpkg.com/deck.gl@^8.0.0/dist.min.js"></script>
 <!-- or -->
-<script src="https://unpkg.com/@deck.gl/core@^7.0.0/dist.min.js"></script>
-<script src="https://unpkg.com/@deck.gl/layers@^7.0.0/dist.min.js"></script>
+<script src="https://unpkg.com/@deck.gl/core@^8.0.0/dist.min.js"></script>
+<script src="https://unpkg.com/@deck.gl/layers@^8.0.0/dist.min.js"></script>
 ```
 
 ```js
@@ -180,10 +180,10 @@ The maximum outline width in pixels.
 
 ##### `material` (Object, optional)
 
-* Default: `new PhongMaterial()`
+* Default: `true`
 
-This is an object that contains material props for [lighting effect](/docs/effects/lighting-effect.md) applied on extruded polygons.
-Check [PhongMaterial](https://github.com/uber/luma.gl/tree/7.0-release/docs/api-reference/core/materials/phong-material.md) for more details.
+This is an object that contains material props for [lighting effect](/docs/effects/lighting-effect.md) applied on extruded polygons. Check [the lighting guide](/docs/developer-guide/using-lighting.md#constructing-a-material-instance) for configurable settings.
+
 
 ### Data Accessors
 
@@ -197,7 +197,7 @@ Method called to retrieve the position of each column, in `[x, y]`. An optional 
 
 * Default: `[0, 0, 0, 255]`
 
-The rgba color of each object, in `r, g, b, [a]`. Each component is in the 0-255 range.
+The rgba color is in the format of `[r, g, b, [a]]`. Each channel is a number between 0-255 and `a` is 255 if not supplied.
 
 * If an array is provided, it is used as the color for all objects.
 * If a function is provided, it is called on each object to retrieve its color.
@@ -207,7 +207,7 @@ The rgba color of each object, in `r, g, b, [a]`. Each component is in the 0-255
 
 * Default: `[0, 0, 0, 255]`
 
-The rgba outline color of each object, in `r, g, b, [a]`. Each component is in the 0-255 range.
+The rgba color is in the format of `[r, g, b, [a]]`. Each channel is a number between 0-255 and `a` is 255 if not supplied.
 
 * If an array is provided, it is used as the outline color for all columns.
 * If a function is provided, it is called on each object to retrieve its outline color.
@@ -235,4 +235,3 @@ The width of the outline of the column, in units specified by `lineWidthUnits` (
 ## Source
 
 [modules/layers/src/column-layer](https://github.com/uber/deck.gl/tree/master/modules/layers/src/column-layer)
-

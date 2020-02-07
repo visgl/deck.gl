@@ -1,4 +1,4 @@
-# Guide to Using Lighting Effect
+# Using Lighting
 
 A deck.gl lighting effect is a visual approximation of environment illumination based on simplified models to make rendering appear more realistic.
 
@@ -51,18 +51,15 @@ The `lights` has all the light sources that the lighting effect uses to build th
 
 ## Constructing A Material Instance
 
-A material represents a lighting model specified per layer, a [PhongMaterial](https://github.com/uber/luma.gl/tree/7.0-release/docs/api-reference/core/materials/phong-material.md)
-can be instantiated with model parameters.
+A material is a plain JavaScript object representing a lighting model specified per layer. Properties are `ambient` (number 0-1), `diffuse` (number 0-1), `shininess` (number > 0), `specularColor` (array [0-255, 0-255, 0-255]). Setting a material property to the value `true` will set all properties to their defaults, which are:
 
 ```js
-import {PhongMaterial} from '@luma.gl/core';
-
-const material =  new PhongMaterial({
-  ambient: 0.2,
-  diffuse: 0.5,
+{
+  ambient: 0.35,
+  diffuse: 0.6,
   shininess: 32,
-  specularColor: [255, 255, 255]
-});
+  specularColor: [30, 30, 30]
+}
 ```
 
 

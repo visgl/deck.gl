@@ -17,8 +17,7 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
-import {experimental} from '@deck.gl/core';
-const {Tesselator} = experimental;
+import {Tesselator} from '@deck.gl/core';
 
 const START_CAP = 1;
 const END_CAP = 2;
@@ -27,19 +26,22 @@ const INVALID = 4;
 // This class is set up to allow querying one attribute at a time
 // the way the AttributeManager expects it
 export default class PathTesselator extends Tesselator {
-  constructor({data, getGeometry, positionFormat, fp64}) {
+  constructor(opts) {
     super({
-      data,
-      getGeometry,
-      positionFormat,
+      ...opts,
       attributes: {
-        startPositions: {size: 3, padding: 3, type: fp64 ? Float64Array : Float32Array},
-        endPositions: {size: 3, padding: 3, type: fp64 ? Float64Array : Float32Array},
-        segmentTypes: {size: 1, type: Uint8ClampedArray},
-        startPositions64XyLow: {size: 2, padding: 2, fp64Only: true},
-        endPositions64XyLow: {size: 2, padding: 2, fp64Only: true}
+        positions: {size: 3, type: opts.fp64 ? Float64Array : Float32Array},
+        segmentTypes: {size: 1, type: Uint8ClampedArray}
       }
     });
+  }
+
+  getGeometryFromBuffer(buffer) {
+    if (this.normalize) {
+      return super.getGeometryFromBuffer(buffer);
+    }
+    // we don't need to read the positions if no normalization
+    return () => null;
   }
 
   /* Getters */
@@ -49,6 +51,11 @@ export default class PathTesselator extends Tesselator {
 
   /* Implement base Tesselator interface */
   getGeometrySize(path) {
+    if (!this.normalize) {
+      const numPoints = path.length / this.positionSize;
+      return this.opts.loop ? numPoints + 2 : numPoints;
+    }
+
     const numPoints = this.getPathLength(path);
     if (numPoints < 2) {
       // invalid path
@@ -56,59 +63,53 @@ export default class PathTesselator extends Tesselator {
     }
     if (this.isClosed(path)) {
       // minimum 3 vertices
-      return numPoints < 3 ? 0 : numPoints + 1;
+      return numPoints < 3 ? 0 : numPoints + 2;
     }
-    return numPoints - 1;
+    return numPoints;
   }
 
-  /* eslint-disable max-statements, complexity */
   updateGeometryAttributes(path, context) {
-    const {
-      attributes: {startPositions, endPositions, segmentTypes}
-    } = this;
-
-    const {geometrySize} = context;
-    if (geometrySize === 0) {
+    if (context.geometrySize === 0) {
       return;
     }
+    this._updateSegmentTypes(path, context);
+    this._updatePositions(path, context);
+  }
+
+  _updateSegmentTypes(path, context) {
+    const {segmentTypes} = this.attributes;
     const isPathClosed = this.isClosed(path);
+    const {vertexStart, geometrySize} = context;
 
-    let startPoint;
-    let endPoint;
+    // positions   --  A0 A1 B0 B1 B2 B3 B0 B1 B2 --
+    // segmentTypes     3  4  4  0  0  0  0  4  4
+    segmentTypes.fill(0, vertexStart, vertexStart + geometrySize);
+    if (isPathClosed) {
+      segmentTypes[vertexStart] = INVALID;
+      segmentTypes[vertexStart + geometrySize - 2] = INVALID;
+    } else {
+      segmentTypes[vertexStart] += START_CAP;
+      segmentTypes[vertexStart + geometrySize - 2] += END_CAP;
+    }
+    segmentTypes[vertexStart + geometrySize - 1] = INVALID;
+  }
 
-    // startPositions   --  A0  B0 B1 B2 B3 B0 B1
-    // endPositions         A1  B1 B2 B3 B0 B1 B2  --
-    // segmentTypes         3   4  0  0  0  0  4
-    for (let i = context.vertexStart, ptIndex = 0; ptIndex < geometrySize; i++, ptIndex++) {
-      startPoint = endPoint || this.getPointOnPath(path, 0);
-      endPoint = this.getPointOnPath(path, ptIndex + 1);
+  _updatePositions(path, context) {
+    const {positions} = this.attributes;
+    if (!positions) {
+      return;
+    }
+    const {vertexStart, geometrySize} = context;
 
-      segmentTypes[i] = 0;
-      if (ptIndex === 0) {
-        if (isPathClosed) {
-          segmentTypes[i] += INVALID;
-        } else {
-          segmentTypes[i] += START_CAP;
-        }
-      }
-      if (ptIndex === geometrySize - 1) {
-        if (isPathClosed) {
-          segmentTypes[i] += INVALID;
-        } else {
-          segmentTypes[i] += END_CAP;
-        }
-      }
-
-      startPositions[i * 3 + 3] = startPoint[0];
-      startPositions[i * 3 + 4] = startPoint[1];
-      startPositions[i * 3 + 5] = startPoint[2] || 0;
-
-      endPositions[i * 3] = endPoint[0];
-      endPositions[i * 3 + 1] = endPoint[1];
-      endPositions[i * 3 + 2] = endPoint[2] || 0;
+    // positions   --  A0 A1 B0 B1 B2 B3 B0 B1 B2 --
+    // segmentTypes     3  4  4  0  0  0  0  4  4
+    for (let i = vertexStart, ptIndex = 0; ptIndex < geometrySize; i++, ptIndex++) {
+      const p = this.getPointOnPath(path, ptIndex);
+      positions[i * 3] = p[0];
+      positions[i * 3 + 1] = p[1];
+      positions[i * 3 + 2] = p[2] || 0;
     }
   }
-  /* eslint-enable max-statements, complexity */
 
   /* Utilities */
   getPathLength(path) {
@@ -142,6 +143,9 @@ export default class PathTesselator extends Tesselator {
   }
 
   isClosed(path) {
+    if (!this.normalize) {
+      return this.opts.loop;
+    }
     const numPoints = this.getPathLength(path);
     const firstPoint = this.getPointOnPath(path, 0);
     const lastPoint = this.getPointOnPath(path, numPoints - 1);

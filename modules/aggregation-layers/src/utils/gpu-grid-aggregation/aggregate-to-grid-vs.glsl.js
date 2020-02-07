@@ -21,34 +21,47 @@
 export default `\
 #define SHADER_NAME gpu-aggregation-to-grid-vs
 
-attribute vec2 positions;
+attribute vec3 positions;
+attribute vec3 positions64Low;
 attribute vec3 weights;
-uniform vec2 windowSize;
 uniform vec2 cellSize;
 uniform vec2 gridSize;
-uniform mat4 uProjectionMatrix;
 uniform bool projectPoints;
+uniform vec2 translation;
+uniform vec3 scaling;
 
 varying vec3 vWeights;
 
 vec2 project_to_pixel(vec4 pos) {
-  vec4 result =  uProjectionMatrix * pos;
-  return result.xy/result.w;
+  vec4 result;
+  pos.xy = pos.xy/pos.w;
+  result = pos + vec4(translation, 0., 0.);
+  result.xy = scaling.z > 0. ? result.xy * scaling.xy : result.xy;
+  return result.xy;
 }
 
 void main(void) {
 
   vWeights = weights;
 
-  vec4 windowPos = vec4(positions, 0, 1.);
+  vec4 windowPos = vec4(positions, 1.);
   if (projectPoints) {
-    windowPos = project_position_to_clipspace(vec3(positions, 0), vec2(0, 0), vec3(0, 0, 0));
+    windowPos = project_position_to_clipspace(positions, positions64Low, vec3(0));
   }
 
   vec2 pos = project_to_pixel(windowPos);
 
+  vec2 pixelXY64[2];
+  pixelXY64[0] = vec2(pos.x, 0.);
+  pixelXY64[1] = vec2(pos.y, 0.);
+
   // Transform (0,0):windowSize -> (0, 0): gridSize
-  pos = floor(pos / cellSize);
+  vec2 gridXY64[2];
+  gridXY64[0] = div_fp64(pixelXY64[0], vec2(cellSize.x, 0));
+  gridXY64[1] = div_fp64(pixelXY64[1], vec2(cellSize.y, 0));
+  float x = floor(gridXY64[0].x);
+  float y = floor(gridXY64[1].x);
+  pos = vec2(x, y);
 
   // Transform (0,0):gridSize -> (-1, -1):(1,1)
   pos = (pos * (2., 2.) / (gridSize)) - (1., 1.);
@@ -58,5 +71,8 @@ void main(void) {
   pos = pos + offset;
 
   gl_Position = vec4(pos, 0.0, 1.0);
+
+  // Enforce default value for ANGLE issue (https://bugs.chromium.org/p/angleproject/issues/detail?id=3941)
+  gl_PointSize = 1.0;
 }
 `;

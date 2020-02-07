@@ -20,7 +20,8 @@
 
 import {equals} from 'math.gl';
 import {Transform} from '@luma.gl/core';
-import {project64} from '@deck.gl/core';
+import {project32} from '@deck.gl/core';
+import {project64} from '@deck.gl/extensions';
 
 export function getPixelOffset(p1, p2) {
   return [p1[0] - p2[0], p1[1] - p2[1], p1[2] - p2[2], 1];
@@ -43,7 +44,7 @@ export function runOnGPU({
   elementCount,
   usefp64 = true
 }) {
-  const modules = usefp64 ? [project64] : ['project32'];
+  const modules = usefp64 ? [project64] : [project32];
   // const modules = usefp64 ? ['project64'] : [];
   const transform = new Transform(gl, {
     // TODO: remove sourceBuffers after https://github.com/uber/luma.gl/pull/733
@@ -59,6 +60,7 @@ export function runOnGPU({
 }
 
 export function verifyResult({t, name, actual, expected, sliceActual = false}) {
+  actual = Number.isFinite(actual) ? [actual] : actual;
   expected = Array.isArray(expected) ? expected : [expected];
   // Convert TypedArray to regular array
   // TODO: remove after https://github.com/uber-web/math.gl/pull/29

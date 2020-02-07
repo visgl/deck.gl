@@ -194,7 +194,7 @@ Picking events are triggered based on *pickable objects*:
 * A `click` event is triggered every time the pointer clicked on an object in a pickable layer.
 * A `hover` event is triggered every time the hovered object of a pickable layer changes.
 
-When an event is fired, the `onHover` or `onClick` callback of the affected layer is called first. If the callback returns a truthy value, the event is marked as handled. Otherwise, the event will bubble up to the `DeckGL` canvas and be visible to its `onLayerHover` and `onLayerClick` callbacks.
+When an event is fired, the `onHover` or `onClick` callback of the affected layer is called first. If the callback returns a truthy value, the event is marked as handled. Otherwise, the event will bubble up to the `DeckGL` canvas and be visible to its `onHover` and `onClick` callbacks.
 
 
 ## Under The Hood

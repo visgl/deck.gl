@@ -87,6 +87,7 @@ The position used to filter each object by. One of the following:
 
 - `'source'`: Use the primary position for each object. This can mean different things depending on the layer. It usually refers to the coordinates returned by `getPosition` or `getSourcePosition` accessors.
 - `'target'`: Use the secondary position for each object. This may not be available in some layers. It usually refers to the coordinates returned by `getTargetPosition` accessors.
+- `'source_target'`: Use both the primary position and secondary position for each object. Show objet if either is in brushing range.
 - `'custom'`: Some layers may not describe their data objects with one or two coordinates, for example `PathLayer` and `PolygonLayer`. Use this option with the `getBrushingTarget` prop to provide a custom position that each object should be filtered by.
 
 

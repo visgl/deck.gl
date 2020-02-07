@@ -2,10 +2,10 @@
   <head>
     <title>deck.gl GeoJsonLayer (Path) Example</title>
 
-    <script src="https://unpkg.com/deck.gl@^7.0.0/dist.min.js"></script>
+    <script src="https://unpkg.com/deck.gl@^8.0.0/dist.min.js"></script>
     <script src="https://d3js.org/d3.v5.min.js"></script>
 
-    <script src="https://api.tiles.mapbox.com/mapbox-gl-js/v0.50.0/mapbox-gl.js"></script>
+    <script src="https://api.tiles.mapbox.com/mapbox-gl-js/v1.4.0/mapbox-gl.js"></script>
 
     <style type="text/css">
       body {
@@ -69,7 +69,7 @@
   let year = -1;
 
   const deckgl = new deck.DeckGL({
-    viewState: {
+    initialViewState: {
       longitude: -100,
       latitude: 38,
       zoom: 4,
@@ -77,6 +77,7 @@
       minZoom: 2,
       maxZoom: 8
     },
+    controller: true,
     mapboxApiAccessToken: '<mapbox-access-token>',
     mapStyle: 'mapbox://styles/mapbox/dark-v9',
     pickingRadius: 5,
@@ -112,7 +113,6 @@
       new GeoJsonLayer({
         id: 'geojson',
         data: 'https://raw.githubusercontent.com/uber-common/deck.gl-data/master/examples/highway/roads.json',
-        opacity: 1,
         stroked: false,
         filled: false,
         lineWidthMinPixels: 1,

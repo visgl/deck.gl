@@ -1,5 +1,6 @@
-import {AmbientLight, Texture2D, ProgramManager} from '@luma.gl/core';
-import DirectionalLight from './directional-light';
+import {Texture2D, ProgramManager} from '@luma.gl/core';
+import {AmbientLight} from './ambient-light';
+import {DirectionalLight} from './directional-light';
 import Effect from '../../lib/effect';
 import {Matrix4, Vector3} from 'math.gl';
 import ShadowPass from '../../passes/shadow-pass';
@@ -10,12 +11,12 @@ const DEFAULT_DIRECTIONAL_LIGHT_PROPS = [
   {
     color: [255, 255, 255],
     intensity: 1.0,
-    direction: [-1, -3, -1]
+    direction: [-1, 3, -1]
   },
   {
     color: [255, 255, 255],
     intensity: 0.9,
-    direction: [1, 8, -2.5]
+    direction: [1, -8, -2.5]
   }
 ];
 const DEFAULT_SHADOW_COLOR = [0, 0, 0, 200 / 255];

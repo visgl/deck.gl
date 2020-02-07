@@ -19,23 +19,33 @@
 // THE SOFTWARE.
 
 import {createIterable} from '@deck.gl/core';
-
-const R_EARTH = 6378000;
+import {getGridOffset} from '../utils/grid-aggregation-utils';
 
 /**
  * Calculate density grid from an array of points
- * @param {Iterable} data
- * @param {number} cellSize - cell size in meters
- * @param {function} getPosition - position accessor
+ * @param {Object} props - object containing :
+ * @param {Iterable} [props.data] - data objects to be aggregated
+ * @param {Integer} [props.cellSize] - size of the grid cell
+ *
+ * @param {Object} aggregationParams - object containing :
+ * @param {Object} gridOffset - {xOffset, yOffset} cell size in meters
+ * @param {Integer} width - width of the grid
+ * @param {Integer} height - height of the grid
+ * @param {Boolean} projectPoints - `true` if doing screen space projection, `false` otherwise
+ * @param {Array} attributes - attributes array containing position values
+ * @param {Viewport} viewport - viewport to be used for projection
+ * @param {Array} posOffset - [xOffset, yOffset] offset to be applied to positions to get cell index
+ * @param {Object} boundingBox - {xMin, yMin, xMax, yMax} bounding box of input data
+ *
  * @returns {object} - grid data, cell dimension
  */
-export function pointToDensityGridDataCPU({data, cellSize, getPosition}) {
-  const {gridHash, gridOffset} = _pointsToGridHashing(data, cellSize, getPosition);
-  const result = _getGridLayerDataFromGridHash(gridHash, gridOffset);
+export function pointToDensityGridDataCPU(props, aggregationParams) {
+  const hashInfo = pointsToGridHashing(props, aggregationParams);
+  const result = getGridLayerDataFromGridHash(hashInfo);
 
   return {
-    gridHash,
-    gridOffset,
+    gridHash: hashInfo.gridHash,
+    gridOffset: hashInfo.gridOffset,
     data: result
   };
 }
@@ -47,106 +57,103 @@ export function pointToDensityGridDataCPU({data, cellSize, getPosition}) {
  * @param {function} getPosition - position accessor
  * @returns {object} - grid hash and cell dimension
  */
-/* eslint-disable max-statements */
-function _pointsToGridHashing(points = [], cellSize, getPosition) {
-  // find the geometric center of sample points
-  let latMin = Infinity;
-  let latMax = -Infinity;
-  let pLat;
-
-  const {iterable, objectInfo} = createIterable(points);
-  for (const pt of iterable) {
-    objectInfo.index++;
-    pLat = getPosition(pt, objectInfo)[1];
-    if (Number.isFinite(pLat)) {
-      latMin = pLat < latMin ? pLat : latMin;
-      latMax = pLat > latMax ? pLat : latMax;
-    }
-  }
-
-  const centerLat = (latMin + latMax) / 2;
-
-  const gridOffset = _calculateGridLatLonOffset(cellSize, centerLat);
+/* eslint-disable max-statements, complexity */
+function pointsToGridHashing(props, aggregationParams) {
+  const {data = [], cellSize} = props;
+  const {attributes, viewport, projectPoints, numInstances} = aggregationParams;
+  const positions = attributes.positions.value;
+  const {size} = attributes.positions.getAccessor();
+  const boundingBox =
+    aggregationParams.boundingBox || getPositionBoundingBox(attributes.positions, numInstances);
+  const offsets = aggregationParams.posOffset || [180, 90];
+  const gridOffset = aggregationParams.gridOffset || getGridOffset(boundingBox, cellSize);
 
   if (gridOffset.xOffset <= 0 || gridOffset.yOffset <= 0) {
     return {gridHash: {}, gridOffset};
   }
 
+  const {width, height} = viewport;
+  const numCol = Math.ceil(width / gridOffset.xOffset);
+  const numRow = Math.ceil(height / gridOffset.yOffset);
+
   // calculate count per cell
   const gridHash = {};
 
-  // Iterating over again, reset index
-  objectInfo.index = -1;
+  const {iterable, objectInfo} = createIterable(data);
+  const position = new Array(3);
   for (const pt of iterable) {
     objectInfo.index++;
-    const [lng, lat] = getPosition(pt, objectInfo);
+    position[0] = positions[objectInfo.index * size];
+    position[1] = positions[objectInfo.index * size + 1];
+    position[2] = size >= 3 ? positions[objectInfo.index * size + 2] : 0;
+    const [x, y] = projectPoints ? viewport.project(position) : position;
+    if (Number.isFinite(x) && Number.isFinite(y)) {
+      const yIndex = Math.floor((y + offsets[1]) / gridOffset.yOffset);
+      const xIndex = Math.floor((x + offsets[0]) / gridOffset.xOffset);
+      if (
+        !projectPoints ||
+        // when doing screen space agggregation (projectPoints = true), filter points outside of the viewport range.
+        (xIndex >= 0 && xIndex < numCol && yIndex >= 0 && yIndex < numRow)
+      ) {
+        const key = `${yIndex}-${xIndex}`;
 
-    if (Number.isFinite(lat) && Number.isFinite(lng)) {
-      const latIdx = Math.floor((lat + 90) / gridOffset.yOffset);
-      const lonIdx = Math.floor((lng + 180) / gridOffset.xOffset);
-      const key = `${latIdx}-${lonIdx}`;
-
-      gridHash[key] = gridHash[key] || {count: 0, points: []};
-      gridHash[key].count += 1;
-      gridHash[key].points.push(pt);
+        gridHash[key] = gridHash[key] || {count: 0, points: [], lonIdx: xIndex, latIdx: yIndex};
+        gridHash[key].count += 1;
+        gridHash[key].points.push(pt);
+      }
     }
   }
 
-  return {gridHash, gridOffset};
+  return {gridHash, gridOffset, offsets: [offsets[0] * -1, offsets[1] * -1]};
 }
-/* eslint-enable max-statements */
+/* eslint-enable max-statements, complexity */
 
-function _getGridLayerDataFromGridHash(gridHash, gridOffset) {
-  return Object.keys(gridHash).reduce((accu, key, i) => {
+function getGridLayerDataFromGridHash({gridHash, gridOffset, offsets}) {
+  const data = new Array(Object.keys(gridHash).length);
+  let i = 0;
+  for (const key in gridHash) {
     const idxs = key.split('-');
     const latIdx = parseInt(idxs[0], 10);
     const lonIdx = parseInt(idxs[1], 10);
+    const index = i++;
 
-    accu.push(
-      Object.assign(
-        {
-          index: i,
-          position: [-180 + gridOffset.xOffset * lonIdx, -90 + gridOffset.yOffset * latIdx]
-        },
-        gridHash[key]
-      )
+    data[index] = Object.assign(
+      {
+        index,
+        position: [
+          offsets[0] + gridOffset.xOffset * lonIdx,
+          offsets[1] + gridOffset.yOffset * latIdx
+        ]
+      },
+      gridHash[key]
     );
-
-    return accu;
-  }, []);
+  }
+  return data;
 }
 
-/**
- * calculate grid layer cell size in lat lon based on world unit size
- * and current latitude
- * @param {number} cellSize
- * @param {number} latitude
- * @returns {object} - lat delta and lon delta
- */
-function _calculateGridLatLonOffset(cellSize, latitude) {
-  const yOffset = _calculateLatOffset(cellSize);
-  const xOffset = _calculateLonOffset(latitude, cellSize);
-  return {yOffset, xOffset};
-}
+// Calculate bounding box of position attribute
+function getPositionBoundingBox(positionAttribute, numInstance) {
+  // TODO - value might not exist (e.g. attribute transition)
+  const positions = positionAttribute.value;
+  const {size} = positionAttribute.getAccessor();
 
-/**
- * with a given x-km change, calculate the increment of latitude
- * based on stackoverflow http://stackoverflow.com/questions/7477003
- * @param {number} dy - change in km
- * @return {number} - increment in latitude
- */
-function _calculateLatOffset(dy) {
-  return (dy / R_EARTH) * (180 / Math.PI);
-}
+  let yMin = Infinity;
+  let yMax = -Infinity;
+  let xMin = Infinity;
+  let xMax = -Infinity;
+  let y;
+  let x;
 
-/**
- * with a given x-km change, and current latitude
- * calculate the increment of longitude
- * based on stackoverflow http://stackoverflow.com/questions/7477003
- * @param {number} lat - latitude of current location (based on city)
- * @param {number} dx - change in km
- * @return {number} - increment in longitude
- */
-function _calculateLonOffset(lat, dx) {
-  return ((dx / R_EARTH) * (180 / Math.PI)) / Math.cos((lat * Math.PI) / 180);
+  for (let i = 0; i < numInstance; i++) {
+    x = positions[i * size];
+    y = positions[i * size + 1];
+    if (Number.isFinite(x) && Number.isFinite(y)) {
+      yMin = y < yMin ? y : yMin;
+      yMax = y > yMax ? y : yMax;
+      xMin = x < xMin ? x : xMin;
+      xMax = x > xMax ? x : xMax;
+    }
+  }
+
+  return {xMin, xMax, yMin, yMax};
 }

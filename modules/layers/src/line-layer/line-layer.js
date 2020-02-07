@@ -18,7 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {Layer} from '@deck.gl/core';
+import {Layer, project32, picking} from '@deck.gl/core';
 import GL from '@luma.gl/constants';
 import {Model, Geometry} from '@luma.gl/core';
 
@@ -36,15 +36,12 @@ const defaultProps = {
   widthUnits: 'pixels',
   widthScale: {type: 'number', value: 1, min: 0},
   widthMinPixels: {type: 'number', value: 0, min: 0},
-  widthMaxPixels: {type: 'number', value: Number.MAX_SAFE_INTEGER, min: 0},
-
-  // Deprecated, remove in v8
-  getStrokeWidth: {deprecatedFor: 'getWidth'}
+  widthMaxPixels: {type: 'number', value: Number.MAX_SAFE_INTEGER, min: 0}
 };
 
 export default class LineLayer extends Layer {
   getShaders() {
-    return super.getShaders({vs, fs, modules: ['project32', 'picking']});
+    return super.getShaders({vs, fs, modules: [project32, picking]});
   }
 
   initializeState() {
@@ -101,7 +98,7 @@ export default class LineLayer extends Layer {
     const {viewport} = this.context;
     const {widthUnits, widthScale, widthMinPixels, widthMaxPixels} = this.props;
 
-    const widthMultiplier = widthUnits === 'pixels' ? viewport.distanceScales.metersPerPixel[2] : 1;
+    const widthMultiplier = widthUnits === 'pixels' ? viewport.metersPerPixel : 1;
 
     this.state.model
       .setUniforms(

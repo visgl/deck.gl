@@ -57,11 +57,11 @@ const App = ({data, viewport}) => {
 To use pre-bundled scripts:
 
 ```html
-<script src="https://unpkg.com/deck.gl@^7.0.0/dist.min.js"></script>
+<script src="https://unpkg.com/deck.gl@^8.0.0/dist.min.js"></script>
 <!-- or -->
-<script src="https://unpkg.com/@deck.gl/core@^7.0.0/dist.min.js"></script>
-<script src="https://unpkg.com/@deck.gl/layers@^7.0.0/dist.min.js"></script>
-<script src="https://unpkg.com/@deck.gl/geo-layers@^7.0.0/dist.min.js"></script>
+<script src="https://unpkg.com/@deck.gl/core@^8.0.0/dist.min.js"></script>
+<script src="https://unpkg.com/@deck.gl/layers@^8.0.0/dist.min.js"></script>
+<script src="https://unpkg.com/@deck.gl/geo-layers@^8.0.0/dist.min.js"></script>
 ```
 
 ```js
@@ -103,6 +103,8 @@ Returns an array of navigation points on a single path.
 See [PathLayer](/docs/layers/path-layer.md) documentation for supported path formats.
 
 ##### `getTimestamps` ([Function](/docs/developer-guide/using-layers.md#accessors), optional)
+
+- Default: `d => d.timestamps`
 
 Returns an array of timestamps, one for each navigation point in the geometry returned by `getPath`, representing the time that the point is visited.
 

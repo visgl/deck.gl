@@ -22,7 +22,11 @@
 export {COORDINATE_SYSTEM} from './constants';
 
 // Export core objects
+export {default as Deck} from './deck';
+export {default as DeckRenderer} from './deck-renderer';
+export {default as Effect} from './effect';
 export {default as Layer} from './layer';
 export {default as CompositeLayer} from './composite-layer';
-export {default as AttributeManager} from './attribute-manager';
+export {default as LayerExtension} from './layer-extension';
+export {default as AttributeManager} from './attribute/attribute-manager';
 export {default as LayerManager} from './layer-manager';

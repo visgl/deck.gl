@@ -1,6 +1,6 @@
 build/
 dist/
-dist.min.js
+**/*.min.js
 node_modules/
 coverage/
 test/**/*-failed.png
@@ -29,4 +29,3 @@ package-lock.json
 *.rar
 *.log
 .exit_code
-*.min.js

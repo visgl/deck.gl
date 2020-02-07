@@ -2,8 +2,8 @@
   <head>
     <title>deck.gl BitmapLayer Example</title>
 
-    <script src="https://unpkg.com/deck.gl@^7.0.0/dist.min.js"></script>
-    <script src="https://api.tiles.mapbox.com/mapbox-gl-js/v0.50.0/mapbox-gl.js"></script>
+    <script src="https://unpkg.com/deck.gl@^8.0.0/dist.min.js"></script>
+    <script src="https://api.tiles.mapbox.com/mapbox-gl-js/v1.4.0/mapbox-gl.js"></script>
 
     <style type="text/css">
       body {
@@ -23,10 +23,13 @@
     new DeckGL({
       mapboxApiAccessToken: '<mapbox-access-token>',
       mapStyle: 'mapbox://styles/mapbox/dark-v9',
-      longitude: -75.789,
-      latitude: 41.874,
-      zoom: 5,
-      maxZoom: 9,
+      initialViewState: {
+        longitude: -75.789,
+        latitude: 41.874,
+        zoom: 5,
+        maxZoom: 9
+      },
+      controller: true,
       layers: [
         new BitmapLayer({
           id: 'bitmap-layer',

@@ -2,9 +2,9 @@
   <head>
     <title>deck.gl ScreenGridLayer Example</title>
 
-    <script src="https://unpkg.com/deck.gl@^7.0.0/dist.min.js"></script>
+    <script src="https://unpkg.com/deck.gl@^8.0.0/dist.min.js"></script>
 
-    <script src="https://api.tiles.mapbox.com/mapbox-gl-js/v0.50.0/mapbox-gl.js"></script>
+    <script src="https://api.tiles.mapbox.com/mapbox-gl-js/v1.4.0/mapbox-gl.js"></script>
 
     <style type="text/css">
       body {
@@ -24,14 +24,18 @@
     new DeckGL({
       mapboxApiAccessToken: '<mapbox-access-token>',
       mapStyle: 'mapbox://styles/mapbox/dark-v9',
-      longitude: -119.3,
-      latitude: 35.6,
-      zoom: 6,
-      maxZoom: 20,
+      initialViewState: {
+        longitude: -119.3,
+        latitude: 35.6,
+        zoom: 6,
+        maxZoom: 20
+      },
+      controller: true,
       layers: [
         new ScreenGridLayer({
           id: 'grid',
           data: 'https://raw.githubusercontent.com/uber-common/deck.gl-data/master/examples/screen-grid/ca-transit-stops.json',
+          opacity: 0.8,
           minColor: [0, 0, 0, 0],
           getPosition: d => d,
           cellSizePixels: 20

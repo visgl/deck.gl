@@ -18,6 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
+import {picking, project32} from '@deck.gl/core';
 import {ArcLayer} from '@deck.gl/layers';
 import vs from './great-circle-vertex.glsl';
 
@@ -25,7 +26,7 @@ export default class GreatCircleLayer extends ArcLayer {
   getShaders() {
     const shaders = Object.assign({}, super.getShaders(), {
       vs,
-      modules: ['picking', 'project32']
+      modules: [picking, project32]
     });
     return shaders;
   }
