@@ -15,10 +15,6 @@ export default BaseLayerViewGL2D.createSubclass({
     deckFbo: {}
   },
 
-  constructor () {
-
-  },
-
   // Attach is called as soon as the layer view is ready to start rendering.
   attach: function () {
     // We use a full-screen quad and shaders to composite the frame rendered
@@ -67,7 +63,22 @@ export default BaseLayerViewGL2D.createSubclass({
     gl.bindBuffer(gl.ARRAY_BUFFER, this.vertexBuffer);
     gl.bufferData(gl.ARRAY_BUFFER, new Int8Array([-1, -1, 1, -1, -1, 1, 1, 1]), gl.STATIC_DRAW);
 
-    this.createOrResizeDeckGL(gl, this.view.state.size[0], this.view.state.size[1]);
+    this.createOrResizeFramebuffer(gl, this.view.state.size[0], this.view.state.size[1]);
+
+    // Deck creation
+    this.deckgl = new Deck({
+      // The view state will be set dynamically to track the MapView current extent.
+      initialViewState: {},
+
+      // Input is handled by the ArcGIS API for JavaScript.
+      controller: false,
+
+      // We use the same WebGL context as the ArcGIS API for JavaScript.
+      gl,
+
+      // This deck renders into an auxiliary framebuffer.
+      _framebuffer: this.deckFbo
+    });
 
     // The redraw() request must be forwarded from the layer to the layer view.
     // We listen to the event on the layer and propagate it to the layer view.
@@ -81,9 +92,9 @@ export default BaseLayerViewGL2D.createSubclass({
     this.redraw();
   },
 
-  createOrResizeDeckGL: function (gl, width, height) {
-    if (!this.deckgl) {
-      this.createDeckGL(gl, width, height);
+  createOrResizeFramebuffer: function (gl, width, height) {
+    if (!this.deckFbo) {
+      this.createFramebuffer(gl, width, height);
       return;
     }
 
@@ -92,11 +103,15 @@ export default BaseLayerViewGL2D.createSubclass({
       return;
     }
 
-    this.destroyDeckGL(gl);
-    this.createDeckGL(gl, width, height);
+    this.destroyFramebuffer(gl);
+    this.createFramebuffer(gl, width, height);
+
+    this.deckgl.setProps({
+      _framebuffer: this.deckFbo
+    });
   },
 
-  createDeckGL: function (gl, width, height) {
+  createFramebuffer: function (gl, width, height) {
     // Create offscreen texture
     this.texture = gl.createTexture();
     gl.bindTexture(gl.TEXTURE_2D, this.texture);
@@ -114,26 +129,9 @@ export default BaseLayerViewGL2D.createSubclass({
     gl.bindFramebuffer(gl.FRAMEBUFFER, this.deckFbo);
     gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, this.texture, 0);
     gl.bindFramebuffer(gl.FRAMEBUFFER, null);
-
-    // Deck creation
-    this.deckgl = new Deck({
-      // The view state will be set dynamically to track the MapView current extent.
-      initialViewState: {},
-
-      // Input is handled by the ArcGIS API for JavaScript.
-      controller: false,
-
-      // We use the same WebGL context as the ArcGIS API for JavaScript.
-      gl,
-
-      // This deck renders into an auxiliary framebuffer.
-      _framebuffer: this.deckFbo
-    });
   },
 
-  destroyDeckGL: function (gl) {
-    this.deckgl = null;
-
+  destroyFramebuffer: function (gl) {
     gl.deleteFramebuffer(this.deckFbo);
     this.deckFbo = null;
 
@@ -167,8 +165,10 @@ export default BaseLayerViewGL2D.createSubclass({
 
     const gl = this.context;
 
-    if (this.deckgl) {
-      this.destroyDeckGL(gl);
+    this.deckgl = null;
+
+    if (this.deckFbo) {
+      this.destroyFramebuffer(this.deckFbo);
     }
 
     if (this.program) {
@@ -187,7 +187,7 @@ export default BaseLayerViewGL2D.createSubclass({
     const gl = renderParameters.context;
     const screenFbo = gl.getParameter(gl.FRAMEBUFFER_BINDING);
 
-    this.createOrResizeDeckGL(gl, this.view.state.size[0], this.view.state.size[1]);
+    this.createOrResizeFramebuffer(gl, this.view.state.size[0], this.view.state.size[1]);
 
     // The view state must be kept in-sync with the MapView of the ArcGIS API.
     const state = renderParameters.state;
