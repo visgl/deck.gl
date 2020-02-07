@@ -124,7 +124,8 @@ function getViewport(deck, map, useMapboxProjection = true) {
         x: 0,
         y: 0,
         width: deck.width,
-        height: deck.height
+        height: deck.height,
+        repeat: true
       },
       getViewState(map),
       useMapboxProjection
