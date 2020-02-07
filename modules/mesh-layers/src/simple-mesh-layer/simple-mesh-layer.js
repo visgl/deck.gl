@@ -25,14 +25,12 @@
 import {Layer, project32, phongLighting, picking, COORDINATE_SYSTEM, log} from '@deck.gl/core';
 import GL from '@luma.gl/constants';
 import {Model, Geometry, Texture2D, isWebGL2} from '@luma.gl/core';
+import {hasFeature, FEATURES} from '@luma.gl/webgl';
 
 import {MATRIX_ATTRIBUTES, shouldComposeModelMatrix} from '../utils/matrix';
 
-// NOTE(Tarek): Should eventually phase out the glsl1 versions.
-import vs1 from './simple-mesh-layer-vertex.glsl1';
-import fs1 from './simple-mesh-layer-fragment.glsl1';
-import vs3 from './simple-mesh-layer-vertex.glsl';
-import fs3 from './simple-mesh-layer-fragment.glsl';
+import vs from './simple-mesh-layer-vertex.glsl';
+import fs from './simple-mesh-layer-fragment.glsl';
 
 /*
  * Convert image data into texture
@@ -106,11 +104,21 @@ const defaultProps = {
 
 export default class SimpleMeshLayer extends Layer {
   getShaders() {
-    const gl2 = isWebGL2(this.context.gl);
-    const vs = gl2 ? vs3 : vs1;
-    const fs = gl2 ? fs3 : fs1;
+    const transpileToGLSL100 = !isWebGL2(this.context.gl);
 
-    return super.getShaders({vs, fs, modules: [project32, phongLighting, picking]});
+    const defines = {};
+
+    if (hasFeature(this.context.gl, FEATURES.GLSL_DERIVATIVES)) {
+      defines.DERIVATIVES_AVAILABLE = 1;
+    }
+
+    return super.getShaders({
+      vs,
+      fs,
+      modules: [project32, phongLighting, picking],
+      transpileToGLSL100,
+      defines
+    });
   }
 
   initializeState() {
