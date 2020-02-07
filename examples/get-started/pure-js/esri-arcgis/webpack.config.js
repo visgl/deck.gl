@@ -21,10 +21,10 @@ const CONFIG = {
 
   resolve: {
     modules: [
-      path.resolve(__dirname, "/src"),
-      path.resolve(__dirname, "node_modules/")
+      path.resolve(__dirname, "src"),
+      path.resolve(__dirname, "node_modules")
     ],
-    extensions: [".js", ".scss", ".css"]
+    extensions: [".js"]
   },
 
   node: {
