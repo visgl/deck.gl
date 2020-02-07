@@ -1,5 +1,5 @@
 import Layer from "esri/layers/Layer";
-import ArcGISDeckLayerView2D from './ArcGISDeckLayerView2D';
+import ArcGISDeckLayerView2D from './arcgis-deck-layer-view-2d';
 
 // A layer that displays inside a MapView using an instance
 // of the layer view defined above.

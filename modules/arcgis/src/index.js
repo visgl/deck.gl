@@ -1,5 +1,5 @@
-import EDL from "./ArcGISDeckLayer";
-import EDLV2D from "./ArcGISDeckLayerView2D";
+import EDL from "./arcgis-deck-layer";
+import EDLV2D from "./arcgis-deck-layer-view-2d";
 
 export const ArcGISDeckLayer = EDL;
 export const ArcGISLayerView2D = EDLV2D;
