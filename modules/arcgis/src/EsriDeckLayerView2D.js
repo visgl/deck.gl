@@ -1,7 +1,5 @@
 import { Deck } from '@deck.gl/core';
-import Handles from "esri/core/Handles";
 import BaseLayerViewGL2D from "esri/views/2d/layers/BaseLayerViewGL2D";
-import EsriDeckLayer from './EsriDeckLayer';
 
 export default BaseLayerViewGL2D.createSubclass({
   properties: {
@@ -226,6 +224,6 @@ export default BaseLayerViewGL2D.createSubclass({
     gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
 
     gl.enableVertexAttribArray(0);
-    gl.drawArrays(gl.TRIANGLE_STRIP, 0, 6);
+    gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
   }
 });

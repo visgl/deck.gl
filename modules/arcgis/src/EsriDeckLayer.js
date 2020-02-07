@@ -1,5 +1,4 @@
 import Layer from "esri/layers/Layer";
-import MapView from "esri/views/MapView";
 import EsriDeckLayerView2D from './EsriDeckLayerView2D';
 
 // A layer that displays inside a MapView using an instance
