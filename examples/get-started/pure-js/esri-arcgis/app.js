@@ -1,13 +1,13 @@
 import ArcGISMap from 'esri/Map';
 import MapView from 'esri/views/MapView';
-import {EsriDeckLayer} from '@deck.gl/arcgis';
+import {ArcGISDeckLayer} from '@deck.gl/arcgis';
 import {GeoJsonLayer, ArcLayer} from '@deck.gl/layers';
 
 // source: Natural Earth http://www.naturalearthdata.com/ via geojson.xyz
 const AIR_PORTS =
   'https://d2ad6b4ur7yvpq.cloudfront.net/naturalearth-3.3.0/ne_10m_airports.geojson';
 
-const layer = new EsriDeckLayer({
+const layer = new ArcGISDeckLayer({
   getDeckLayer() {
     return [
       new GeoJsonLayer({

@@ -1,5 +1,5 @@
 import Layer from "esri/layers/Layer";
-import EsriDeckLayerView2D from './EsriDeckLayerView2D';
+import ArcGISDeckLayerView2D from './ArcGISDeckLayerView2D';
 
 // A layer that displays inside a MapView using an instance
 // of the layer view defined above.
@@ -22,7 +22,7 @@ export default Layer.createSubclass({
   // needs to be created for a given layer.
   createLayerView(view) {
     if (view.type === "2d") {
-      return new EsriDeckLayerView2D({
+      return new ArcGISDeckLayerView2D({
         view,
         layer: this
       });
