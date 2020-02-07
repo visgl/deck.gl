@@ -1,5 +1,5 @@
-const EDL = require("./EsriDeckLayer");
-const EDLV2D = require("./EsriDeckLayerView2D");
+import EDL from "./ArcGISDeckLayer";
+import EDLV2D from "./ArcGISDeckLayerView2D";
 
-export const EsriDeckLayer = EDL.default;
-export const EsriDeckLayerView2D = EDLV2D.default;
+export const ArcGISDeckLayer = EDL;
+export const ArcGISLayerView2D = EDLV2D;
