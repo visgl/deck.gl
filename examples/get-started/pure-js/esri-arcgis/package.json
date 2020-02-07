@@ -1,5 +1,5 @@
 {
-  "name": "pure-js-google-maps",
+  "name": "pure-js-esri-arcgis",
   "version": "0.0.0",
   "license": "MIT",
   "scripts": {
@@ -8,8 +8,8 @@
     "build": "webpack -p"
   },
   "dependencies": {
-    "@deck.gl/core": "^7.3.0-beta",
-    "@deck.gl/layers": "^7.3.0-beta",
+    "@deck.gl/core": "^8.0.0",
+    "@deck.gl/layers": "^8.0.0",
     "@arcgis/webpack-plugin": "~4.13.0"
   },
   "devDependencies": {
