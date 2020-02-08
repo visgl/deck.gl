@@ -20,7 +20,7 @@
 
 import {Layer, project32, gouraudLighting, picking, COORDINATE_SYSTEM} from '@deck.gl/core';
 import GL from '@luma.gl/constants';
-import {Model, Geometry, hasFeature, FEATURES} from '@luma.gl/core';
+import {Model, Geometry, hasFeatures, FEATURES} from '@luma.gl/core';
 
 // Polygon geometry generation is managed by the polygon tesselator
 import PolygonTesselator from './polygon-tesselator';
@@ -82,7 +82,7 @@ export default class SolidPolygonLayer extends Layer {
       polygonTesselator: new PolygonTesselator({
         preproject: coordinateSystem === COORDINATE_SYSTEM.LNGLAT,
         fp64: this.use64bitPositions(),
-        IndexType: !gl || hasFeature(gl, FEATURES.ELEMENT_INDEX_UINT32) ? Uint32Array : Uint16Array
+        IndexType: !gl || hasFeatures(gl, FEATURES.ELEMENT_INDEX_UINT32) ? Uint32Array : Uint16Array
       })
     });
 
