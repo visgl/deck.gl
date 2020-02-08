@@ -45,11 +45,7 @@ export default class JSONConverter {
   }
 
   mergeConfiguration(config) {
-    if (config instanceof JSONConfiguration) {
-      this.configuration.merge(config);
-    } else {
-      this.configuration.merge(new JSONConfiguration(config));
-    }
+    this.configuration.merge(config);
   }
 
   convert(json) {

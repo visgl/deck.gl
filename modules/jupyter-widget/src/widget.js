@@ -3,8 +3,7 @@ import {DOMWidgetModel, DOMWidgetView} from '@jupyter-widgets/base';
 
 import {MODULE_NAME, MODULE_VERSION} from './version';
 
-import {createDeck, updateDeck, updateClasses} from './create-deck';
-import jsonConverter from './create-deck';
+import {jsonConverter, createDeck, updateDeck, addResourceToConverter} from './create-deck';
 import {deserializeMatrix, processDataBuffer} from './binary-transport';
 
 const MAPBOX_CSS_URL = 'https://api.tiles.mapbox.com/mapbox-gl-js/v1.2.1/mapbox-gl.css';
@@ -126,17 +125,18 @@ export class DeckGLView extends DOMWidgetView {
 
     this.model.on('change:json_input', this.valueChanged.bind(this), this);
     this.model.on('change:data_buffer', this.dataBufferChanged.bind(this), this);
-    this.model.on('change:clasess', this.addNewCustomLayers.bind(this), this);
+    this.model.on('change:classes', this.addNewCustomLayers.bind(this), this);
+
     this.addNewCustomLayers();
     this.dataBufferChanged();
   }
 
   addNewCustomLayers() {
     if (this.model.get('classes')) {
-      const customLayers = this.model.get('classes');
-      for (const obj of customLayers) {
-        const [className, resourceUri] = Object.entries(obj)[0];
-        updateClasses({className, resourceUri});
+      const customLibraries = this.model.get('classes');
+      for (const obj of customLibraries) {
+        const [libraryName, resourceUri] = Object.entries(obj)[0];
+        addResourceToConverter({libraryName, resourceUri});
       }
     }
   }

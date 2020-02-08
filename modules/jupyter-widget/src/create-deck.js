@@ -7,7 +7,6 @@ import {Tile3DLoader} from '@loaders.gl/3d-tiles';
 import {registerLoaders} from '@loaders.gl/core';
 
 import * as deck from './deck-bundle';
-import addClassToConverter from './dynamic-registration';
 
 import GL from '@luma.gl/constants';
 
@@ -42,23 +41,40 @@ const jsonConverter = new deck.JSONConverter({
   configuration: jsonConverterConfiguration
 });
 
-export function updateClasses({className, resourceUri}) {
-  addClassToConverter({className, resourceUri, jsonConverter}); // eslint-disable-line
+/* global document, fetch, window */
+function loadScript(resourceUri) {
+  const tag = document.createElement('script');
+  return Promise.resolve(
+    fetch(resourceUri)
+      .then(r => r.text())
+      .then(body => {
+        tag.text = body;
+        document.head.appendChild(tag);
+        return 'ok';
+      })
+  );
 }
 
-export function updateDeck(inputJson, deckgl) {
+function addResourceToConverter({libraryName, resourceUri, onComplete}) {
+  loadScript(resourceUri)
+    .then(res => {
+      const module = window[libraryName];
+      const classes = Object.keys(module);
+      const newConfiguration = {classes: {}};
+      for (const c of classes) {
+        newConfiguration.classes[c] = module[c];
+      }
+      jsonConverter.mergeConfiguration(newConfiguration);
+    })
+    .then(onComplete);
+}
+
+function updateDeck(inputJson, deckgl) {
   const results = jsonConverter.convert(inputJson);
   deckgl.setProps(results);
 }
 
-export function createDeck({
-  mapboxApiKey,
-  container,
-  jsonInput,
-  tooltip,
-  handleClick,
-  handleWarning
-}) {
+function createDeck({mapboxApiKey, container, jsonInput, tooltip, handleClick, handleWarning}) {
   let deckgl;
   try {
     const props = jsonConverter.convert(jsonInput);
@@ -96,4 +112,4 @@ function injectFunction(warnFunction, messageHandler) {
   };
 }
 
-export default jsonConverter;
+export {jsonConverter, createDeck, updateDeck, addResourceToConverter};

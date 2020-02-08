@@ -49,7 +49,7 @@ class DeckGLWidget(widgets.DOMWidget):
         sync=True, **data_buffer_serialization
     )
     height = Int(500).tag(sync=True)
-    custom_layers = Any(allow_none=True).tag(sync=True)
+    classes = Any(allow_none=True).tag(sync=True)
     width = Any("100%").tag(sync=True)
     selected_data = Unicode("[]").tag(sync=True)
     tooltip = Any(True).tag(sync=True)
