@@ -48,12 +48,8 @@ const view = new MapView({
     layers: [layer]
   }),
   center: [0.119167, 52.205276],
-  zoom: 1
+  zoom: 5
 });
 
-setTimeout(() => {
-  view.goTo({
-    zoom: 5
-  });
-}, 5000);
-
+function dummyFunction(v) {}
+dummyFunction(view);
