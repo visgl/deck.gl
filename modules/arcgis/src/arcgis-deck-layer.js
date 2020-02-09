@@ -1,21 +1,18 @@
 import Layer from 'esri/layers/Layer';
+import Collection from 'esri/core/Collection';
 import ArcGISDeckLayerView2D from './arcgis-deck-layer-view-2d';
 
 // A layer that displays inside a MapView using an instance
 // of the layer view defined above.
 export default Layer.createSubclass({
   properties: {
-    getDeckLayer: {}
+    deckLayers: {
+      type: Collection
+    }
   },
 
   constructor: function() {
-    this.getDeckLayer = null;
-  },
-
-  // Calling redraw() on the layer causes redraw() to
-  // be called on the layer view.
-  redraw() {
-    this.emit('redraw');
+    this.deckLayers = new Collection();
   },
 
   // Called by the MapView whenever a layer view
@@ -26,6 +23,9 @@ export default Layer.createSubclass({
         view,
         layer: this
       });
+    } else {
+      console.error('ArcGISDeckLayer does not support SceneView at the moment.');
+      return null;
     }
   }
 });

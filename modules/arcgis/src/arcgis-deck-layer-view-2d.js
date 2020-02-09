@@ -86,10 +86,10 @@ export default BaseLayerViewGL2D.createSubclass({
       _framebuffer: this.deckFbo
     });
 
-    // The redraw() request must be forwarded from the layer to the layer view.
-    // We listen to the event on the layer and propagate it to the layer view.
+    // When the layer.layers collection changes, the new list of
+    // layers must be set on the deck.gl instance.
     this.handles.add([
-      this.layer.on('redraw', () => {
+      this.layer.deckLayers.on('change', () => {
         this.redraw();
       })
     ]);
@@ -160,14 +160,10 @@ export default BaseLayerViewGL2D.createSubclass({
   // This method is called whenever the deck.gl layer changes and must be
   // displayed.
   redraw: function() {
-    let deckLayer = this.layer.getDeckLayer();
-
-    if (!Array.isArray(deckLayer)) {
-      deckLayer = [deckLayer];
-    }
+    let deckLayers = this.layer.deckLayers.items;
 
     this.deckgl.setProps({
-      layers: deckLayer
+      layers: deckLayers
     });
 
     // We need to tell the layer view that it must redraw itself.

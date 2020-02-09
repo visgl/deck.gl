@@ -1,6 +1,6 @@
 # ArcGISDeckLayer
 
-This class inherits from the ArcGIS [Layer](https://developers.arcgis.com/javascript/latest/api-reference/esri-layers-Layer.html) class and can be added to ArcGIS API for JavaScript maps.
+This class inherits from the ArcGIS [Layer](https://developers.arcgis.com/javascript/latest/api-reference/esri-layers-Layer.html) class and can be added to maps created with the ArcGIS API for JavaScript.
 
 ## Usage
 

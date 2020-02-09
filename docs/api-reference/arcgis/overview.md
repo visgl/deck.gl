@@ -1,6 +1,6 @@
 # @deck.gl/arcgis
 
-Use deck.gl layers with thw ArcGIS API for JavaScript.
+Use deck.gl layers with the ArcGIS API for JavaScript.
 
 ## Installation
 
