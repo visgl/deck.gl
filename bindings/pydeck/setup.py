@@ -9,33 +9,29 @@ from setuptools.command.develop import develop
 
 import atexit
 from distutils import log
-import json
 import os
 from shutil import copy
-from subprocess import check_call
+from subprocess import check_call, check_output
 import sys
 
-from pydeck.frontend_semver import DECKGL_SEMVER
-
 here = os.path.dirname(os.path.abspath(__file__))
+
+version_ns = {}
+with open(os.path.join(here, "pydeck", "_version.py")) as f:
+    exec(f.read(), {}, version_ns)
 
 
 def read(*parts):
     return open(os.path.join(here, *parts), "r").read()
 
 
-def check_semver():
-    """Verify that the correct semantic version for deck.gl is being bundled with pydeck"""
-    from semantic_version import Version, NpmSpec  # noqa
-
-    package_json_path = os.path.join(widget_dir, "package.json")
-    with open(package_json_path, encoding="utf-8") as data_file:
-        version = json.loads(data_file.read())["version"]
-        if not Version(version) in NpmSpec(DECKGL_SEMVER):
-            msg = "@deck.gl/jupyter-widget is at {} but valid semver range is {}".format(
-                version, DECKGL_SEMVER
-            )
-            raise Exception(msg)
+def assert_prelease_on_master():
+    """Require that prereleases only be from the master branch"""
+    git_branch = check_output('git rev-parse --abbrev-ref HEAD'.split()).strip()
+    is_prerelease = any([c for c in version_ns['__version__'] if c.isalpha()])
+    msg = 'Can only release a prerelease from master, but branch is {} and release version is {}'
+    if is_prerelease:
+        assert git_branch == 'master', msg.format(git_branch, version_ns['__version__'])
 
 
 log.info("setup.py entered")
@@ -187,18 +183,13 @@ def js_prerelease(command, strict=False):
         def run(self):
             if strict:
                 # Running as sdist
-                check_semver()
+                assert_prelease_on_master()
             jsdeps = self.distribution.get_command_obj("jsdeps")  # noqa
             self.distribution.run_command("jsdeps")
             command.run(self)
             update_package_data(self.distribution)
 
     return DecoratedCommand
-
-
-version_ns = {}
-with open(os.path.join(here, "pydeck", "_version.py")) as f:
-    exec(f.read(), {}, version_ns)
 
 
 if __name__ == "__main__":

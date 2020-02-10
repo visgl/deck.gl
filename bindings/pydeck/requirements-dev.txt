@@ -15,4 +15,3 @@ recommonmark
 jupyterlab
 ipython>=5.8.0;python_version<"3.4"
 semver # necessary for PEP440-compliant semantic versions
-semantic-version  # necessary for NPM-style semantic versions
