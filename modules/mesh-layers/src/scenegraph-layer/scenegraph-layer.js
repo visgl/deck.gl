@@ -18,8 +18,9 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {Layer, project32, picking} from '@deck.gl/core';
-import {isWebGL2, pbr, log} from '@luma.gl/core';
+import {Layer, project32, picking, log} from '@deck.gl/core';
+import {isWebGL2} from '@luma.gl/core';
+import {pbr} from '@luma.gl/shadertools';
 import {ScenegraphNode, createGLTFObjects} from '@luma.gl/experimental';
 import GL from '@luma.gl/constants';
 import {waitForGLTFAssets} from './gltf-utils';
@@ -122,7 +123,7 @@ export default class ScenegraphLayer extends Layer {
       log.deprecated(
         'ScenegraphLayer.props.scenegraph',
         'Use GLTFLoader instead of GLTFScenegraphLoader'
-      );
+      )();
       scenegraphData = props.scenegraph;
     }
 
