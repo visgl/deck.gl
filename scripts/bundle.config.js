@@ -31,15 +31,7 @@ function getExternals(packageInfo) {
 
   if (externals['@deck.gl/core']) {
     // Do not bundle luma.gl if `core` is peer dependency
-    externals = [
-      externals,
-      (context, request, callback) => {
-        if (/^@?luma\.gl/.test(request)) {
-          return callback(null, 'luma');
-        }
-        return callback();
-      }
-    ];
+    externals['@luma.gl/core'] = 'luma';
   }
 
   return externals;

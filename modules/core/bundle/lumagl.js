@@ -12,6 +12,13 @@ export {
   getParameters,
   setParameters,
   withParameters,
+  cssToDeviceRatio,
+  // Copy and blit
+  // These are needed by submodules and rely on using the same copy
+  // of Texture2D & Framebuffer
+  readPixelsToBuffer,
+  copyToTexture,
+  cloneTextureFrom,
   // WebGL1 classes
   Buffer,
   Program,
