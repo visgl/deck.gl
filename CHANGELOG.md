@@ -19,6 +19,10 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v8.0
 
+#### deck.gl [8.0.14] - Feb 10 2020
+
+- Fix bundle dependencies (#4255)
+
 #### deck.gl [8.0.13] - Feb 4 2020
 
 - Fix transition for 64bit attributes (#4226)
