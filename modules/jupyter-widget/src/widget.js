@@ -3,7 +3,7 @@ import {DOMWidgetModel, DOMWidgetView} from '@jupyter-widgets/base';
 
 import {MODULE_NAME, MODULE_VERSION} from './version';
 
-import {jsonConverter, createDeck, updateDeck, addResourceToConverter} from './create-deck';
+import {jsonConverter, createDeck, updateDeck, loadExternalClasses} from './create-deck';
 import {deserializeMatrix, processDataBuffer} from './binary-transport';
 
 const MAPBOX_CSS_URL = 'https://api.tiles.mapbox.com/mapbox-gl-js/v1.2.1/mapbox-gl.css';
@@ -137,7 +137,7 @@ export class DeckGLView extends DOMWidgetView {
       for (const obj of customLibraries) {
         // obj is an object of {libraryName: libraryUrl} e.g. {CustomLayersLibrary: 'https://example.com/customLayers.js'}
         const [libraryName, resourceUri] = Object.entries(obj)[0];
-        addResourceToConverter({libraryName, resourceUri});
+        loadExternalClasses({libraryName, resourceUri});
       }
     }
   }

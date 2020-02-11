@@ -13,7 +13,7 @@ if (dataBaseUrl) {
 
 let DeckGLModel;
 let DeckGLView;
-const {createDeck, updateDeck, addResourceToConverter} = require('./create-deck');
+const {createDeck, updateDeck, loadExternalClasses} = require('./create-deck');
 const {MODULE_VERSION, MODULE_NAME} = require('./version');
 
 try {
@@ -32,5 +32,5 @@ module.exports = {
   MODULE_NAME,
   createDeck,
   updateDeck,
-  addResourceToConverter
+  loadExternalClasses
 };

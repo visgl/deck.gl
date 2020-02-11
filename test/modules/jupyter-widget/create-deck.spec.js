@@ -23,7 +23,7 @@ test('jupyter-widget: dynamic-registration', t0 => {
     return;
   }
 
-  t0.test('addResourceToConverter', t => {
+  t0.test('loadExternalClasses', t => {
     const TEST_LIBRARY_NAME = 'DemoLibrary';
     window[TEST_LIBRARY_NAME] = {DemoCompositeLayer};
     const oldFetch = window.fetch;
@@ -41,7 +41,7 @@ test('jupyter-widget: dynamic-registration', t0 => {
       window.fetch = oldFetch;
       t.end();
     };
-    module.addResourceToConverter({libraryName: TEST_LIBRARY_NAME, resourceUri: '', onComplete});
+    module.loadExternalClasses({libraryName: TEST_LIBRARY_NAME, resourceUri: '', onComplete});
   });
 
   t0.end();

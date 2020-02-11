@@ -55,7 +55,7 @@ function loadScript(resourceUri) {
   );
 }
 
-function addResourceToConverter({libraryName, resourceUri, onComplete}) {
+function loadExternalClasses({libraryName, resourceUri, onComplete}) {
   loadScript(resourceUri)
     .then(res => {
       const module = window[libraryName];
@@ -112,4 +112,4 @@ function injectFunction(warnFunction, messageHandler) {
   };
 }
 
-export {jsonConverter, createDeck, updateDeck, addResourceToConverter};
+export {jsonConverter, createDeck, updateDeck, loadExternalClasses};
