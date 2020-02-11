@@ -135,12 +135,7 @@ const App = () => {
 
   return (
     <div>
-      <DeckGL
-        viewState={viewState}
-        controller={true}
-        layers={[layer]}
-        onViewStateChange={e => setViewState(e.viewState)}
-      />
+      <DeckGL initialViewState={viewState} controller={true} layers={[layer]} />
       <div
         style={{
           position: 'absolute'
