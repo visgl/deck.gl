@@ -15,7 +15,9 @@ const defaultProps = {
   // Color to use if surfaceImage is unavailable
   color: {type: 'color', value: [255, 255, 255]},
   // Function to decode height data, from (r, g, b) to height in meters
-  getElevation: {type: 'accessor', value: (r, g, b) => r}
+  getElevation: {type: 'accessor', value: (r, g, b) => r},
+  // Same as SimpleMeshLayer wireframe
+  wireframe: false
 };
 
 function getTerrain(imageData, tileSize, getElevation) {
@@ -100,7 +102,7 @@ function getMartiniTileMesh(terrainImage, getElevation, meshMaxError, bounds) {
 
 export default class TerrainLayer extends CompositeLayer {
   renderLayers() {
-    const {bounds, color, getElevation, meshMaxError, terrainImage, surfaceImage} = this.props;
+    const {bounds, color, getElevation, meshMaxError, terrainImage, surfaceImage, wireframe} = this.props;
 
     return new SimpleMeshLayer(
       this.getSubLayerProps({
@@ -111,7 +113,8 @@ export default class TerrainLayer extends CompositeLayer {
         mesh: getMartiniTileMesh(terrainImage, getElevation, meshMaxError, bounds),
         texture: surfaceImage,
         getPosition: d => [0, 0, 0],
-        getColor: d => color
+        getColor: d => color,
+        wireframe
       }
     );
   }
