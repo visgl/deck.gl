@@ -48,7 +48,6 @@ const config = [
       libraryTarget: 'umd'
     },
     devtool: 'source-map',
-    mode: 'development',
     module: {
       rules
     },

@@ -12,14 +12,6 @@ class DemoCompositeLayer extends CompositeLayer {
 }
 
 // Mock the loading of the script
-const TEST_LIBRARY_NAME = 'DemoLibrary';
-window[TEST_LIBRARY_NAME] = {DemoCompositeLayer};
-const oldFetch = window.fetch;
-window.fetch = url => {
-  return Promise.resolve({
-    text: () => ''
-  });
-};
 
 test('jupyter-widget: dynamic-registration', t0 => {
   let module;
@@ -32,6 +24,14 @@ test('jupyter-widget: dynamic-registration', t0 => {
   }
 
   t0.test('addResourceToConverter', t => {
+    const TEST_LIBRARY_NAME = 'DemoLibrary';
+    window[TEST_LIBRARY_NAME] = {DemoCompositeLayer};
+    const oldFetch = window.fetch;
+    window.fetch = url => {
+      return Promise.resolve({
+        text: () => ''
+      });
+    };
     const onComplete = () => {
       const props = module.jsonConverter.convert({
         layers: [{'@@type': 'DemoCompositeLayer', data: []}]
