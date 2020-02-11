@@ -1,6 +1,9 @@
 /* global document, google */
 import {Deck} from '@deck.gl/core';
 
+// https://en.wikipedia.org/wiki/Web_Mercator_projection#Formulas
+const MAX_LATITUDE = 85.05113;
+
 /**
  * Get a new deck instance
  * @param map (google.maps.Map) - The parent Map instance
@@ -76,6 +79,7 @@ export function destroyDeckInstance(deck) {
   deck.canvas.parentNode.removeChild(deck.canvas);
 }
 
+/* eslint-disable max-statements */
 /**
  * Get the current view state
  * @param map (google.maps.Map) - The parent Map instance
@@ -105,28 +109,44 @@ export function getViewState(map, overlay) {
   const nwContainerPx = new google.maps.Point(0, 0);
   const nw = projection.fromContainerPixelToLatLng(nwContainerPx);
   const nwDivPx = projection.fromLatLngToDivPixel(nw);
+  let leftOffset = nwDivPx.x;
+  let topOffset = nwDivPx.y;
+
+  // Adjust horizontal offset - position the viewport at the map in the center
+  const mapWidth = projection.getWorldWidth();
+  const mapCount = Math.ceil(width / mapWidth);
+  leftOffset -= Math.floor(mapCount / 2) * mapWidth;
 
   // Compute fractional zoom.
-  const scale = (topRight.x - bottomLeft.x) / width;
+  const scale = (bottomLeft.y - topRight.y) / height;
   const zoom = Math.log2(scale) + map.getZoom() - 1;
 
   // Compute fractional center.
-  const centerPx = new google.maps.Point(width / 2, height / 2);
+  let centerPx = new google.maps.Point(width / 2, height / 2);
   const centerContainer = projection.fromContainerPixelToLatLng(centerPx);
-  const latitude = centerContainer.lat();
+  let latitude = centerContainer.lat();
   const longitude = centerContainer.lng();
+
+  // Adjust vertical offset - limit latitude
+  if (Math.abs(latitude) > MAX_LATITUDE) {
+    latitude = latitude > 0 ? MAX_LATITUDE : -MAX_LATITUDE;
+    const center = new google.maps.LatLng(latitude, longitude);
+    centerPx = projection.fromLatLngToContainerPixel(center);
+    topOffset += centerPx.y - height / 2;
+  }
 
   return {
     width,
     height,
-    left: nwDivPx.x,
-    top: nwDivPx.y,
+    left: leftOffset,
+    top: topOffset,
     zoom,
     pitch: map.getTilt(),
     latitude,
     longitude
   };
 }
+/* eslint-enable max-statements */
 
 // Triggers picking on a mouse event
 function handleMouseEvent(deck, type, event) {
