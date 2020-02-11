@@ -10,19 +10,19 @@ import * as deck from './deck-bundle';
 
 import GL from '@luma.gl/constants';
 
-function extractClasses() {
+function extractClasses(library) {
   // Get classes for registration from standalone deck.gl
   const classesDict = {};
-  const classes = Object.keys(deck).filter(x => x.charAt(0) === x.charAt(0).toUpperCase());
+  const classes = Object.keys(library).filter(x => x.charAt(0) === x.charAt(0).toUpperCase());
   for (const cls of classes) {
-    classesDict[cls] = deck[cls];
+    classesDict[cls] = library[cls];
   }
   return classesDict;
 }
 
 // Handle JSONConverter and loaders configuration
 const jsonConverterConfiguration = {
-  classes: extractClasses(),
+  classes: extractClasses(deck),
   // Will be resolved as `<enum-name>.<enum-value>`
   enumerations: {
     COORDINATE_SYSTEM: deck.COORDINATE_SYSTEM,
@@ -56,17 +56,14 @@ function loadScript(resourceUri) {
 }
 
 function loadExternalClasses({libraryName, resourceUri, onComplete}) {
-  loadScript(resourceUri)
-    .then(res => {
-      const module = window[libraryName];
-      const classes = Object.keys(module);
-      const newConfiguration = {classes: {}};
-      for (const c of classes) {
-        newConfiguration.classes[c] = module[c];
-      }
-      jsonConverter.mergeConfiguration(newConfiguration);
-    })
-    .then(onComplete);
+  loadScript(resourceUri).then(res => {
+    const module = window[libraryName];
+    const newConfiguration = {
+      classes: extractClasses(module)
+    };
+    jsonConverter.mergeConfiguration(newConfiguration);
+    if (onComplete) onComplete();
+  });
 }
 
 function updateDeck(inputJson, deckgl) {
