@@ -41,18 +41,17 @@ const jsonConverter = new deck.JSONConverter({
   configuration: jsonConverterConfiguration
 });
 
-/* global document, fetch, window */
-function loadScript(resourceUri) {
-  const tag = document.createElement('script');
-  return Promise.resolve(
-    fetch(resourceUri)
-      .then(r => r.text())
-      .then(body => {
-        tag.text = body;
-        document.head.appendChild(tag);
-        return 'ok';
-      })
-  );
+/* global document, window */
+function loadScript(resourceUri, resolve) {
+  return new Promise((res, rej) => {
+    const tag = document.createElement('script');
+    tag.src = resourceUri;
+    tag.async = true;
+    tag.onload = () => {
+      resolve();
+    };
+    document.head.appendChild(tag);
+  });
 }
 
 function loadExternalClasses({libraryName, resourceUri, onComplete}) {
