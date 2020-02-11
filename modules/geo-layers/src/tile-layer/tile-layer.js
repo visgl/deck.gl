@@ -42,8 +42,10 @@ export default class TileLayer extends CompositeLayer {
       if (tileCache) {
         tileCache.finalize();
       }
-      tileCache = new TileCache({
-        getTileData,
+      tileset = new Tileset2D({
+        getTileData: this.state.getTileData || getTileData,
+        getTileIndices,
+        tileToBoundingBox,
         maxSize: maxCacheSize,
         maxZoom,
         minZoom,
