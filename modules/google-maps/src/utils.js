@@ -1,6 +1,7 @@
 /* global document, google */
 import {Deck} from '@deck.gl/core';
 
+// https://en.wikipedia.org/wiki/Web_Mercator_projection#Formulas
 const MAX_LATITUDE = 85.05113;
 
 /**
