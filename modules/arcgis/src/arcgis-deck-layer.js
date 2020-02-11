@@ -11,7 +11,7 @@ export default Layer.createSubclass({
     }
   },
 
-  constructor: function() {
+  constructor() {
     this.deckLayers = new Collection();
   },
 
@@ -23,9 +23,9 @@ export default Layer.createSubclass({
         view,
         layer: this
       });
-    } else {
-      console.error('ArcGISDeckLayer does not support SceneView at the moment.');
-      return null;
     }
+
+    // ArcGISDeckLayer does not support SceneView at the moment
+    return null;
   }
 });

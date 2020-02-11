@@ -16,7 +16,7 @@ export default BaseLayerViewGL2D.createSubclass({
   },
 
   // Attach is called as soon as the layer view is ready to start rendering.
-  attach: function() {
+  attach() {
     // We use a full-screen quad and shaders to composite the frame rendered
     // with deck.gl on top of the MapView. Composition uses the MapView context.
     const gl = this.context;
@@ -98,7 +98,7 @@ export default BaseLayerViewGL2D.createSubclass({
     this.redraw();
   },
 
-  createOrResizeFramebuffer: function(gl, width, height) {
+  createOrResizeFramebuffer(gl, width, height) {
     if (!this.deckFbo) {
       this.createFramebuffer(gl, width, height);
       return;
@@ -116,7 +116,7 @@ export default BaseLayerViewGL2D.createSubclass({
     });
   },
 
-  createFramebuffer: function(gl, width, height) {
+  createFramebuffer(gl, width, height) {
     // Create offscreen texture
     this.texture = gl.createTexture();
     gl.bindTexture(gl.TEXTURE_2D, this.texture);
@@ -146,7 +146,7 @@ export default BaseLayerViewGL2D.createSubclass({
     gl.bindFramebuffer(gl.FRAMEBUFFER, null);
   },
 
-  destroyFramebuffer: function(gl) {
+  destroyFramebuffer(gl) {
     gl.deleteFramebuffer(this.deckFbo);
     this.deckFbo = null;
 
@@ -159,8 +159,8 @@ export default BaseLayerViewGL2D.createSubclass({
 
   // This method is called whenever the deck.gl layer changes and must be
   // displayed.
-  redraw: function() {
-    let deckLayers = this.layer.deckLayers.items;
+  redraw() {
+    const deckLayers = this.layer.deckLayers.items;
 
     this.deckgl.setProps({
       layers: deckLayers
@@ -171,7 +171,7 @@ export default BaseLayerViewGL2D.createSubclass({
   },
 
   // Called when the layer must be destroyed.
-  detach: function() {
+  detach() {
     this.handles.removeAll();
 
     const gl = this.context;
@@ -194,7 +194,7 @@ export default BaseLayerViewGL2D.createSubclass({
   },
 
   // Called every time that the layer view must be rendered.
-  render: function(renderParameters) {
+  render(renderParameters) {
     const gl = renderParameters.context;
     const screenFbo = gl.getParameter(gl.FRAMEBUFFER_BINDING);
 

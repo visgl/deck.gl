@@ -6,5 +6,8 @@
   "scripts": {},
   "peerDependencies": {
     "deck.gl": "^8.0.0"
+  },
+  "dependencies": {
+    "@deck.gl/core": "^8.0.14"
   }
 }
