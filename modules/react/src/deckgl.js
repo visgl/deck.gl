@@ -24,15 +24,11 @@ import {Deck, _memoize as memoize} from '@deck.gl/core';
 
 import extractJSXLayers from './utils/extract-jsx-layers';
 import positionChildrenUnderViews from './utils/position-children-under-views';
+import extractStyles from './utils/extract-styles';
 
 const propTypes = Deck.getPropTypes(PropTypes);
 
 const defaultProps = Deck.defaultProps;
-
-const CANVAS_STYLE = {
-  left: 0,
-  top: 0
-};
 
 export default class DeckGL extends React.Component {
   constructor(props) {
@@ -56,6 +52,7 @@ export default class DeckGL extends React.Component {
     // Memoized functions
     this._extractJSXLayers = memoize(extractJSXLayers);
     this._positionChildrenUnderViews = memoize(positionChildrenUnderViews);
+    this._extractStyles = memoize(extractStyles);
   }
 
   componentDidMount() {
@@ -171,6 +168,7 @@ export default class DeckGL extends React.Component {
     // extract any deck.gl layers masquerading as react elements from props.children
     const {layers, views} = this._parseJSX(props);
     const deckProps = Object.assign({}, props, {
+      // Override user styling props. We will set the canvas style in render()
       style: null,
       width: '100%',
       height: '100%',
@@ -182,6 +180,7 @@ export default class DeckGL extends React.Component {
   }
 
   render() {
+    const {ContextProvider, width, height, style} = this.props;
     // Save the viewports and children used for this render
     const {viewManager} = this.deck || {};
     this.viewports = viewManager && viewManager.getViewports();
@@ -193,33 +192,23 @@ export default class DeckGL extends React.Component {
       children: this.children,
       viewports: this.viewports,
       deck: this.deck,
-      ContextProvider: this.props.ContextProvider
+      ContextProvider
     });
 
-    // This styling is enforced for correct positioning with children
-    const style = Object.assign(
-      {
-        position: 'absolute',
-        zIndex: 0,
-        left: 0,
-        top: 0,
-        width: this.props.width,
-        height: this.props.height
-      },
-      this.props.style
-    );
+    const {containerStyle, canvasStyle} = this._extractStyles({width, height, style});
 
     const canvas = createElement('canvas', {
       key: 'canvas',
       ref: this._canvasRef,
-      style: CANVAS_STYLE
+      style: canvasStyle
     });
 
     // Render deck.gl as the last child
-    return createElement('div', {id: 'deckgl-wrapper', ref: this._containerRef, style}, [
-      canvas,
-      children
-    ]);
+    return createElement(
+      'div',
+      {id: 'deckgl-wrapper', ref: this._containerRef, style: containerStyle},
+      [canvas, children]
+    );
   }
 }
 
