@@ -5,29 +5,17 @@ const SATELLITE = 'https://api.mapbox.com/v4/mapbox.satellite';
 // Set your mapbox token here
 const MAPBOX_TOKEN = process.env.MapboxAccessToken; // eslint-disable-line
 
-const getStreetSurfaceImage = ({x, y, z}) => {
-  return `${STREET}/${z}/${x}/${y}.png`;
-};
-
-const getSatelliteSurfaceImage = ({x, y, z}) => {
-  return `${SATELLITE}/${z}/${x}/${y}@2x.png?access_token=${MAPBOX_TOKEN}`;
-};
-
-const getSectionalSurfaceImage = ({x, y, z}) => {
-  return `${SECTIONAL}/${z}/${x}/${y}.png?origin=nw`;
-};
-
-export const getSurface = (tile, surface) => {
+export const getSurface = ({x, y, z}, surface) => {
   let surfaceImage = null;
   switch (surface) {
     case 'sectional':
-      surfaceImage = getSectionalSurfaceImage(tile);
+      surfaceImage = `${SECTIONAL}/${z}/${x}/${y}.png?origin=nw`;
       break;
     case 'satellite':
-      surfaceImage = getSatelliteSurfaceImage(tile);
+      surfaceImage = `${SATELLITE}/${z}/${x}/${y}@2x.png?access_token=${MAPBOX_TOKEN}`;
       break;
     case 'street':
-      surfaceImage = getStreetSurfaceImage(tile);
+      surfaceImage = `${STREET}/${z}/${x}/${y}.png`;
       break;
     case 'none':
     default:
