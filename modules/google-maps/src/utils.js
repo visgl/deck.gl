@@ -118,7 +118,7 @@ export function getViewState(map, overlay) {
   leftOffset -= Math.floor(mapCount / 2) * mapWidth;
 
   // Compute fractional zoom.
-  const scale = (bottomLeft.y - topRight.y) / height;
+  const scale = height ? (bottomLeft.y - topRight.y) / height : 1;
   const zoom = Math.log2(scale) + map.getZoom() - 1;
 
   // Compute fractional center.
