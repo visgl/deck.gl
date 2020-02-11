@@ -15,7 +15,7 @@ test('JSONConverter#import', t => {
   t.end();
 });
 
-test.only('JSONConverter#create', t => {
+test('JSONConverter#create', t => {
   const jsonConverter = new JSONConverter({configuration});
   t.ok(jsonConverter, 'JSONConverter created');
   t.end();
@@ -46,11 +46,14 @@ test('JSONConverter#merge', t => {
   jsonConverter.mergeConfiguration({
     classes: {OrbitView}
   });
-  const deckProps = jsonConverter.convert({views: [{'@@type': 'OrbitView'}]});
+  const deckProps = jsonConverter.convert({
+    views: [{'@@type': 'OrbitView'}, {'@@type': 'NoSuchView'}]
+  });
   t.ok(
-    deckProps.views[0] instanceof OrbitView,
+    deckProps.views[0] instanceof OrbitView && deckProps.views[0].id,
     'JSONConverter added a new class to its configuration'
   );
+  t.ok(!deckProps.views[1], 'JSONConverter does not add a class not in its configuration');
 
   t.end();
 });
