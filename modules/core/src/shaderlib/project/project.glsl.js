@@ -123,14 +123,11 @@ vec4 project_position(vec4 position, vec3 position64Low) {
       );
     }
   }
-  if (project_uProjectionMode == PROJECTION_MODE_WEB_MERCATOR_AUTO_OFFSET &&
+  if (project_uProjectionMode == PROJECTION_MODE_IDENTITY ||
+    (project_uProjectionMode == PROJECTION_MODE_WEB_MERCATOR_AUTO_OFFSET &&
     (project_uCoordinateSystem == COORDINATE_SYSTEM_LNGLAT ||
-     project_uCoordinateSystem == COORDINATE_SYSTEM_CARTESIAN)) {
+     project_uCoordinateSystem == COORDINATE_SYSTEM_CARTESIAN))) {
     // Subtract high part of 64 bit value. Convert remainder to float32, preserving precision.
-    position_world.xyz -= project_uCoordinateOrigin;
-    position_world.xyz += position64Low;
-  }
-  if (project_uProjectionMode == PROJECTION_MODE_IDENTITY) {
     position_world.xyz -= project_uCoordinateOrigin;
     // Translation is already added to the high parts
     position_world += project_uModelMatrix * vec4(position64Low, 0.0);
