@@ -19,7 +19,7 @@ const getSectionalSurfaceImage = ({x, y, z}) => {
 
 export const getSurface = (tile, surface) => {
   let surfaceImage = null;
-  switch(surface) {
+  switch (surface) {
     case 'sectional':
       surfaceImage = getSectionalSurfaceImage(tile);
       break;
@@ -35,4 +35,4 @@ export const getSurface = (tile, surface) => {
       break;
   }
   return surfaceImage;
-}
+};

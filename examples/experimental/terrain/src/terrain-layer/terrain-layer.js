@@ -102,7 +102,15 @@ function getMartiniTileMesh(terrainImage, getElevation, meshMaxError, bounds) {
 
 export default class TerrainLayer extends CompositeLayer {
   renderLayers() {
-    const {bounds, color, getElevation, meshMaxError, terrainImage, surfaceImage, wireframe} = this.props;
+    const {
+      bounds,
+      color,
+      getElevation,
+      meshMaxError,
+      terrainImage,
+      surfaceImage,
+      wireframe
+    } = this.props;
 
     return new SimpleMeshLayer(
       this.getSubLayerProps({

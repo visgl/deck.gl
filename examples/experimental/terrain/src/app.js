@@ -1,14 +1,14 @@
 /* eslint-disable max-statements */
-import React, { useState } from 'react';
-import { render } from 'react-dom';
+import React, {useState} from 'react';
+import {render} from 'react-dom';
 import DeckGL from '@deck.gl/react';
-import { WebMercatorViewport, COORDINATE_SYSTEM } from '@deck.gl/core';
-import { load } from '@loaders.gl/core';
-import { TileLayer } from '@deck.gl/geo-layers';
+import {WebMercatorViewport, COORDINATE_SYSTEM} from '@deck.gl/core';
+import {load} from '@loaders.gl/core';
+import {TileLayer} from '@deck.gl/geo-layers';
 
 import TerrainLayer from './terrain-layer/terrain-layer';
-import { getSurface } from './surface';
-import { getViewState } from './locations';
+import {getSurface} from './surface';
+import {getViewState} from './locations';
 
 // Set your mapbox token here
 const MAPBOX_TOKEN = process.env.MapboxAccessToken; // eslint-disable-line
@@ -33,48 +33,43 @@ const getTerrainData = ({x, y, z}) => {
 
 const SurfaceDropdown = ({surface, setSurface}) => {
   return (
-    <select
-    value={surface}
-    onChange={e => setSurface(e.currentTarget.value)}
-    >
+    <select value={surface} onChange={e => setSurface(e.currentTarget.value)}>
       <option value="none">None</option>
-      <option value="sectional">
-        FAA Sectional
-      </option>
+      <option value="sectional">FAA Sectional</option>
       <option value="satellite">Satellite</option>
       <option value="street">OSM Street</option>
     </select>
-  )
-}
+  );
+};
 
 const LocationDropdown = ({location, setLocation}) => {
   return (
-    <select
-    value={location}
-    onChange={e => setLocation(e.currentTarget.value)}
-    >
+    <select value={location} onChange={e => setLocation(e.currentTarget.value)}>
       <option value="helens">St Helens</option>
       <option value="dallas">Dallas</option>
       <option value="la">Los Angeles</option>
-      <option value="melbourne">
-        Melbourne
-      </option>
+      <option value="melbourne">Melbourne</option>
       <option value="nyc">New York City</option>
       <option value="sf">San Francisco</option>
     </select>
-  )
-}
+  );
+};
 
 const WireframeCheckbox = ({wireframe, setWireframe}) => {
   return (
     <div>
-      <input type="checkbox" name="wireframe" checked={wireframe} onChange={e => {
-      setWireframe(!wireframe)
-    }}/>
+      <input
+        type="checkbox"
+        name="wireframe"
+        checked={wireframe}
+        onChange={e => {
+          setWireframe(!wireframe);
+        }}
+      />
       <label htmlFor="wireframe">Wireframe</label>
     </div>
-  )
-}
+  );
+};
 
 const App = () => {
   const [surface, setSurface] = useState('satellite');
@@ -82,11 +77,11 @@ const App = () => {
   const [viewState, setViewState] = useState(INITIAL_VIEW_STATE);
   const [wireframe, setWireframe] = useState(false);
 
-  const setLocationProp = (l) => {
-    const vs = getViewState(l)
-    setLocation(l)
-    setViewState(vs)
-  }
+  const setLocationProp = l => {
+    const vs = getViewState(l);
+    setLocation(l);
+    setViewState(vs);
+  };
 
   const renderSubLayers = props => {
     const {bbox, z} = props.tile;
@@ -109,7 +104,7 @@ const App = () => {
       // https://docs.mapbox.com/help/troubleshooting/access-elevation-data/#mapbox-terrain-rgb
       // Note - the elevation rendered by this example is greatly exagerated!
       getElevation: (r, g, b) => (r * 65536 + g * 256 + b) / 10 - 10000
-    // getElevation: (r, g, b) => -10000 + ((r * 65536 + g * 256 + b) * 0.1)
+      // getElevation: (r, g, b) => -10000 + ((r * 65536 + g * 256 + b) * 0.1)
     });
   };
 
@@ -122,35 +117,42 @@ const App = () => {
     renderSubLayers
   });
 
-  const setSurfaceProp = (val) => {
-    setSurface(val)
+  const setSurfaceProp = val => {
+    setSurface(val);
     layer.setState({
       tileset: null
     });
-  }
+  };
 
-  const setWireframeProp = (wf) => {
-    setWireframe(wf)
+  const setWireframeProp = wf => {
+    setWireframe(wf);
     if (wf) {
-      setSurfaceProp('none')
+      setSurfaceProp('none');
     } else {
-      setSurfaceProp('satellite')
+      setSurfaceProp('satellite');
     }
-  }
+  };
 
   return (
     <div>
-      <DeckGL viewState={viewState} controller={true} layers={[layer]} onViewStateChange={(e) => setViewState(e.viewState)} />
-      <div style={{
-      position: 'absolute'
-    }}>
-        <SurfaceDropdown surface={surface} setSurface={setSurfaceProp}/>
-        <LocationDropdown location={location} setLocation={setLocationProp}/>
-        <WireframeCheckbox wireframe={wireframe} setWireframe={setWireframeProp}/>
+      <DeckGL
+        viewState={viewState}
+        controller={true}
+        layers={[layer]}
+        onViewStateChange={e => setViewState(e.viewState)}
+      />
+      <div
+        style={{
+          position: 'absolute'
+        }}
+      >
+        <SurfaceDropdown surface={surface} setSurface={setSurfaceProp} />
+        <LocationDropdown location={location} setLocation={setLocationProp} />
+        <WireframeCheckbox wireframe={wireframe} setWireframe={setWireframeProp} />
       </div>
     </div>
-    );
-}
+  );
+};
 
 export function renderToDOM(container) {
   render(<App />, container);
