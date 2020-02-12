@@ -42,20 +42,19 @@ const jsonConverter = new deck.JSONConverter({
 });
 
 /* global document, window */
-function loadScript(resourceUri, resolve) {
-  return new Promise((res, rej) => {
-    const tag = document.createElement('script');
-    tag.src = resourceUri;
-    tag.async = true;
-    tag.onload = () => {
-      resolve();
-    };
-    document.head.appendChild(tag);
+function loadScript(url) {
+  const script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src = url;
+  const head = document.querySelector('head');
+  head.appendChild(script);
+  return new Promise(resolve => {
+    script.onload = resolve;
   });
 }
 
-function loadExternalClasses({libraryName, resourceUri, onComplete}) {
-  loadScript(resourceUri).then(res => {
+function loadExternalClasses({libraryName, resourceUri, onComplete}, loadResource = loadScript) {
+  loadResource(resourceUri).then(res => {
     const module = window[libraryName];
     const newConfiguration = {
       classes: extractClasses(module)

@@ -11,8 +11,6 @@ class DemoCompositeLayer extends CompositeLayer {
   }
 }
 
-// Mock the loading of the script
-
 test('jupyter-widget: dynamic-registration', t0 => {
   let module;
   try {
@@ -26,22 +24,23 @@ test('jupyter-widget: dynamic-registration', t0 => {
   t0.test('loadExternalClasses', t => {
     const TEST_LIBRARY_NAME = 'DemoLibrary';
     window[TEST_LIBRARY_NAME] = {DemoCompositeLayer};
-    const oldFetch = window.fetch;
-    window.fetch = url => {
-      return Promise.resolve({
-        text: () => ''
-      });
-    };
     const onComplete = () => {
       const props = module.jsonConverter.convert({
         layers: [{'@@type': 'DemoCompositeLayer', data: []}]
       });
       t.ok(props.layers[0] instanceof DemoCompositeLayer, 'Should add new class to the converter');
+      // cleanup
       delete window[TEST_LIBRARY_NAME];
-      window.fetch = oldFetch;
       t.end();
     };
-    module.loadExternalClasses({libraryName: TEST_LIBRARY_NAME, resourceUri: '', onComplete});
+    module.loadExternalClasses(
+      {
+        libraryName: TEST_LIBRARY_NAME,
+        resourceUri: '/index.js',
+        onComplete
+      },
+      () => Promise.resolve()
+    );
   });
 
   t0.end();
