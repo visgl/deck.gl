@@ -1,33 +1,13 @@
 // NOTE: To use this example standalone (e.g. outside of deck.gl repo)
 // delete the local development overrides at the bottom of this file
 
-const ArcGISPlugin = require('@arcgis/webpack-plugin');
-const path = require('path');
+const webpack = require('webpack');
 
 const CONFIG = {
   mode: 'development',
 
   entry: {
     app: './app.js'
-  },
-
-  plugins: [
-    new ArcGISPlugin({
-      features: {
-        '3d': false
-      }
-    })
-  ],
-
-  resolve: {
-    modules: [path.resolve(__dirname, 'src'), path.resolve(__dirname, 'node_modules')],
-    extensions: ['.js']
-  },
-
-  node: {
-    process: false,
-    global: false,
-    fs: 'empty'
   }
 };
 

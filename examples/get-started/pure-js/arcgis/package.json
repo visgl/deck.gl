@@ -9,8 +9,7 @@
   },
   "dependencies": {
     "@deck.gl/core": "^8.0.0",
-    "@deck.gl/layers": "^8.0.0",
-    "@arcgis/webpack-plugin": "~4.13.0"
+    "@deck.gl/layers": "^8.0.0"
   },
   "devDependencies": {
     "webpack": "^4.20.2",
