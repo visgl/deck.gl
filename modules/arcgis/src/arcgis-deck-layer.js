@@ -1,14 +1,14 @@
 export default function loadArcGISDeckLayer(Layer, Collection, ArcGISDeckLayerView2D) {
   // A layer that displays inside a MapView using an instance
   // of the layer view defined above.
-  return Layer.createSubclass({
+  const ArcGISDeckLayer = Layer.createSubclass({
     properties: {
       deckLayers: {
         type: Collection
       }
     },
 
-    constructor() {
+    constructor: function() {
       this.deckLayers = new Collection();
     },
 
@@ -20,10 +20,12 @@ export default function loadArcGISDeckLayer(Layer, Collection, ArcGISDeckLayerVi
           view,
           layer: this
         });
+      } else {
+        console.error('ArcGISDeckLayer does not support SceneView at the moment. Use ArcGISDeckExternalRenderer instead.');
+        return null;
       }
-
-      // ArcGISDeckLayer does not support SceneView at the moment
-      return null;
     }
   });
+
+  return ArcGISDeckLayer;
 }
