@@ -8,7 +8,6 @@
     "deck.gl": "^8.0.0"
   },
   "dependencies": {
-    "@deck.gl/core": "^8.0.14",
-    "esri-loader": "^2.13.0"
+    "@deck.gl/core": "^8.0.14"
   }
 }
