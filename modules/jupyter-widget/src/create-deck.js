@@ -11,7 +11,7 @@ import * as deck from './deck-bundle';
 import GL from '@luma.gl/constants';
 
 function extractClasses(library) {
-  // Get classes for registration from standalone deck.gl
+  // Extracts exported class constructors as a dictionary from a library
   const classesDict = {};
   const classes = Object.keys(library).filter(x => x.charAt(0) === x.charAt(0).toUpperCase());
   for (const cls of classes) {
@@ -53,7 +53,8 @@ function loadScript(url) {
   });
 }
 
-function loadExternalClasses({libraryName, resourceUri, onComplete}, loadResource = loadScript) {
+function loadExternalLibrary({libraryName, resourceUri, onComplete}, loadResource = loadScript) {
+  // NOTE loadResource is for testing only
   loadResource(resourceUri).then(res => {
     const module = window[libraryName];
     const newConfiguration = {
@@ -107,4 +108,4 @@ function injectFunction(warnFunction, messageHandler) {
   };
 }
 
-export {jsonConverter, createDeck, updateDeck, loadExternalClasses};
+export {jsonConverter, createDeck, updateDeck, loadExternalLibrary};

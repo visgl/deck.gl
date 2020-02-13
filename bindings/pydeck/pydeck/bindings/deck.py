@@ -73,7 +73,7 @@ class Deck(JSONMixin):
         # Use passed view state
         self.initial_view_state = initial_view_state
         self.deck_widget = DeckGLWidget()
-        self.deck_widget.classes = pydeck_settings.classes
+        self.deck_widget.custom_libraries = pydeck_settings.custom_libraries
         self.mapbox_key = mapbox_key or os.getenv("MAPBOX_API_KEY")
         self.deck_widget.mapbox_key = self.mapbox_key
         self.deck_widget.height = height
@@ -157,6 +157,7 @@ class Deck(JSONMixin):
             iframe_height=iframe_height,
             iframe_width=iframe_width,
             tooltip=self.deck_widget.tooltip,
+            custom_libraries=pydeck_settings.custom_libraries,
             **kwargs
         )
         return f

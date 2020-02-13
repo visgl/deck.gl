@@ -21,7 +21,7 @@ test('jupyter-widget: dynamic-registration', t0 => {
     return;
   }
 
-  t0.test('loadExternalClasses', t => {
+  t0.test('loadExternalLibrary', t => {
     const TEST_LIBRARY_NAME = 'DemoLibrary';
     window[TEST_LIBRARY_NAME] = {DemoCompositeLayer};
     const onComplete = () => {
@@ -33,7 +33,7 @@ test('jupyter-widget: dynamic-registration', t0 => {
       delete window[TEST_LIBRARY_NAME];
       t.end();
     };
-    module.loadExternalClasses(
+    module.loadExternalLibrary(
       {
         libraryName: TEST_LIBRARY_NAME,
         resourceUri: '/index.js',
