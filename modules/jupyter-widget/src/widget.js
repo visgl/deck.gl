@@ -98,7 +98,6 @@ export class DeckGLView extends DOMWidgetView {
     const mapboxApiKey = this.model.get('mapbox_key');
     const jsonInput = JSON.parse(this.model.get('json_input'));
     const tooltip = this.model.get('tooltip');
-    const customLibraries = this.model.get('custom_libraries');
 
     if (this.model.get('js_warning')) {
       const errorBox = addErrorBox();
