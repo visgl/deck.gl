@@ -14,29 +14,41 @@ export default function loadArcGISDeckExternalRenderer(externalRenderers, Spatia
   ArcGISDeckExternalRenderer.prototype.setup = function (context) {
     const gl = context.gl;
     this.initializeResources(gl);
-    this.createFramebuffer(gl, this.view.size[0], this.view.size[1]);
+    const dpr = window.devicePixelRatio;
+    this.createFramebuffer(gl, Math.round(this.view.size[0] * dpr), Math.round(this.view.size[1] * dpr));
     this.initializeDeckGL(gl);
   };
   ArcGISDeckExternalRenderer.prototype.render = function (context) {
     const gl = context.gl;
     const screenFbo = gl.getParameter(gl.FRAMEBUFFER_BINDING);
 
-    this.createOrResizeFramebuffer(gl, this.view.size[0], this.view.size[1]);
+    const dpr = window.devicePixelRatio;
+    this.createOrResizeFramebuffer(gl, Math.round(this.view.size[0] * dpr), Math.round(this.view.size[1] * dpr));
 
     // ========== Zurich, we have a problem ==========
     //            V  V  V  V  V  V  V  V  V
-    const cameraPositionGeographic = new Array(3);
-    externalRenderers.fromRenderCoordinates(this.view,
-      context.camera.eye, 0,
-      cameraPositionGeographic, 0, SpatialReference.WGS84,
-    1);
+    // const cameraPositionGeographic = new Array(3);
+    // externalRenderers.fromRenderCoordinates(this.view,
+    //   context.camera.eye, 0,
+    //   cameraPositionGeographic, 0, SpatialReference.WGS84,
+    // 1);
+    // this.deckgl.setProps({
+    //   viewState: {
+    //     latitude: cameraPositionGeographic[0],
+    //     longitude: cameraPositionGeographic[1],
+    //     zoom: 1,
+    //     bearing: 0,
+    //     pitch: 0
+    //   }
+    // });
+    console.log("this.view.camera.pitch", this.view.camera.pitch);
     this.deckgl.setProps({
       viewState: {
-        latitude: cameraPositionGeographic[0],
-        longitude: cameraPositionGeographic[1],
-        zoom: 1,
-        bearing: 0,
-        pitch: 0
+        latitude: this.view.center.latitude,
+        longitude: this.view.center.longitude,
+        zoom: this.view.zoom,
+        bearing: this.view.camera.heading,
+        pitch: this.view.camera.tilt
       }
     });
     //            ^  ^  ^  ^  ^  ^  ^  ^  ^
@@ -54,6 +66,7 @@ export default function loadArcGISDeckExternalRenderer(externalRenderers, Spatia
 
     // We overlay the texture on top of the map using the full-screen quad.
     gl.bindFramebuffer(gl.FRAMEBUFFER, screenFbo);
+    gl.viewport(0, 0, Math.round(this.view.size[0] * dpr), Math.round(this.view.size[1] * dpr));
 
     gl.bindBuffer(gl.ARRAY_BUFFER, this.vertexBuffer);
     gl.vertexAttribPointer(0, 2, gl.BYTE, false, 2, 0);

@@ -83,7 +83,8 @@ loadModules([
       },
 
       tilt: 15
-    }
+    },
+    viewingMode: "local"
   });
 
   const extren = new ArcGISDeckExternalRenderer(sceneView, getConf());

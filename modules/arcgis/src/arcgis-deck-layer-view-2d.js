@@ -29,7 +29,8 @@ export default function loadArcGISDeckLayerView2D(BaseLayerViewGL2D) {
       const gl = this.context;
 
       this.initializeResources(gl);
-      this.createOrResizeFramebuffer(gl, this.view.state.size[0], this.view.state.size[1]);
+      const dpr = window.devicePixelRatio;
+      this.createFramebuffer(gl, Math.round(this.view.state.size[0] * dpr), Math.round(this.view.state.size[1] * dpr));
       this.initializeDeckGL(gl);
 
       // When the layer.layers collection changes, the new list of
@@ -84,8 +85,8 @@ export default function loadArcGISDeckLayerView2D(BaseLayerViewGL2D) {
     render: function(renderParameters) {
       const gl = renderParameters.context;
       const screenFbo = gl.getParameter(gl.FRAMEBUFFER_BINDING);
-
-      this.createOrResizeFramebuffer(gl, this.view.state.size[0], this.view.state.size[1]);
+      const dpr = window.devicePixelRatio;
+      this.createOrResizeFramebuffer(gl, Math.round(this.view.state.size[0] * dpr), Math.round(this.view.state.size[1] * dpr));
 
       // The view state must be kept in-sync with the MapView of the ArcGIS API.
       const state = renderParameters.state;
@@ -108,6 +109,7 @@ export default function loadArcGISDeckLayerView2D(BaseLayerViewGL2D) {
 
       // We overlay the texture on top of the map using the full-screen quad.
       gl.bindFramebuffer(gl.FRAMEBUFFER, screenFbo);
+      gl.viewport(0, 0, Math.round(this.view.state.size[0] * dpr), Math.round(this.view.state.size[1] * dpr));
 
       gl.bindBuffer(gl.ARRAY_BUFFER, this.vertexBuffer);
       gl.vertexAttribPointer(0, 2, gl.BYTE, false, 2, 0);
