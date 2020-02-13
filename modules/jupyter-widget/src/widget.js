@@ -135,9 +135,7 @@ export class DeckGLView extends DOMWidgetView {
     const customLibraries = this.model.get('custom_libraries');
     if (customLibraries) {
       for (const obj of customLibraries) {
-        // obj is an object of {libraryName: <string>, url: <string>}
-        const [libraryName, resourceUri] = Object.entries(obj)[0];
-        loadExternalLibrary({libraryName, resourceUri});
+        loadExternalLibrary({libraryName: obj.libraryName, resourceUri: obj.resourceUri});
       }
     }
   }
