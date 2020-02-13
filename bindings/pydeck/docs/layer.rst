@@ -45,7 +45,7 @@ The ``type`` positional argument
 In the ``pydeck.Layer`` object, ``type`` is a required argument and
 where you pass the desired layer's deck.gl class name–that is, you
 should set it to the deck.gl layer you wish to plot. For example, notice
-how ``type`` below gives you a `deck.gl
+how passing ``"HexagonLayer"`` to``type`` below gives you a `deck.gl
 HexagonLayer <https://deck.gl/#/examples/core-layers/hexagon-layer>`__:
 
 .. code:: python
@@ -119,7 +119,7 @@ To demonstrate the expression parser, change the color input in
    layer = pdk.Layer(
        'ScatterplotLayer',
        UK_ACCIDENTS_DATA,
-       get_position='[lng, lat]',
+       get_position=['lng', 'lat'],
        auto_highlight=True,
        get_radius=1000,
        get_fill_color='[180, 0, 200, 140]',
@@ -143,16 +143,42 @@ variables in your data, so you can pass them from Python for use in deck.gl:
    layer = pdk.Layer(
        'ScatterplotLayer',
        UK_ACCIDENTS_DATA,
-       get_position='[lng, lat]',
+       get_position=['lng', 'lat'],
        auto_highlight=True,
        get_radius=1000,
-       get_fill_color='[255, lng > 0 ? 200 * lng : -200 * lng, lng, 140]',
+       get_fill_color=[255, 'lng > 0 ? 200 * lng : -200 * lng', 'lng', 140],
        pickable=True)
+
+
+Passing string constants
+--------------
+
+Strings most often in pydeck indicate a data set or deck.gl variable name but
+occasionally indicate a constant. In order to indiciate to the library that you're passing a string constant,
+you must quote the string. For example, below
+we plot the mean of the variable ``REVENUE`` by passing ``'"MEAN"'`` to ``aggregation``:
+
+.. code:: python
+
+   DATA_SOURCE = 'https://raw.githubusercontent.com/ajduberstein/geo_datasets/master/fortune_500.csv'
+
+   layer = pydeck.Layer(
+       "HeatmapLayer",
+       DATA_SOURCE,
+       opacity=0.9,
+       get_position=["longitude", "latitude"],
+       aggregation='"MEAN"',
+       get_weight="profit / employees > 0 ? profit / employees : 1")
+
+.. image:: https://imgur.com/a/wIFS9iA.png
+  :width: 500
+  :alt: Fortune 500 example
+
 
 Understanding `get_position`
 ----------------------------
 
-You may have noticed that ``get_position`` takes ``[lng, lat]`` in many of these
+You may have noticed that ``get_position`` takes ``['lng', 'lat']`` in many of these
 examples. This is deck.gl's expression parser reading the data passed to
 pydeck and extracting longitude and latitude as a coordinate pair.
 
