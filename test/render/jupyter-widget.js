@@ -356,7 +356,7 @@ async function runTest(iframe, testCase) {
   });
 }
 
-test.only('jupyter-widget Render Test', async t => {
+test('jupyter-widget Render Test', async t => {
   const iframe = await loadPage();
 
   for (const testCase of TEST_CASES) {
