@@ -103,13 +103,14 @@ Try changing ``type`` above to ``ScatterplotLayer`` and add some
   :alt: New layer and color
 
 
-Expression parsers in pydeck layer arguments
+Expression parsers in pydeck objects
 --------------------------------------------
 
 One particularly powerful feature of pydeck is an in-built Javascript
 expression parser that can process a limited subset of Javascript–no
 functions are allowed, but data accessors, Boolean conditions, inline
 logical statements, arithmetic operations, and arrays are available.
+The full details on the deck.gl expression parser are viewable `here <https://github.com/uber/deck.gl/blob/master/docs/api-reference/json/conversion-reference.md>`__.
 
 To demonstrate the expression parser, change the color input in
 ``get_fill_color`` to a string:
@@ -151,12 +152,13 @@ variables in your data, so you can pass them from Python for use in deck.gl:
 
 
 Passing string constants
---------------
+------------------------
 
 Strings most often in pydeck indicate a data set or deck.gl variable name but
 occasionally indicate a constant. In order to indiciate to the library that you're passing a string constant,
 you must quote the string. For example, below
-we plot the mean of the variable ``REVENUE`` by passing ``'"MEAN"'`` to ``aggregation``:
+we plot the mean of billions of dollars of profit per employee by passing ``'"MEAN"'`` to ``aggregation``,
+giving us the average for that statistic within an area:
 
 .. code:: python
 
@@ -168,11 +170,11 @@ we plot the mean of the variable ``REVENUE`` by passing ``'"MEAN"'`` to ``aggreg
        opacity=0.9,
        get_position=["longitude", "latitude"],
        aggregation='"MEAN"',
-       get_weight="profit / employees > 0 ? profit / employees : 1")
+       get_weight="profit / employees > 0 ? profit / employees : 0")
 
-.. image:: https://imgur.com/a/wIFS9iA.png
-  :width: 500
-  :alt: Fortune 500 example
+.. image:: https://i.imgur.com/vJIfe71.png
+  :width: 600
+  :alt: Profit per employee
 
 
 Understanding `get_position`
