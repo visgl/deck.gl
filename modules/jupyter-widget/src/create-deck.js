@@ -80,10 +80,9 @@ function addCustomLibraries(customLibraries) {
     return;
   }
   for (const obj of customLibraries) {
-    // obj is an object of {libraryName: <string>, url: <string>}
-    const [libraryName, resourceUri] = Object.entries(obj)[0];
-    if (!alreadyLoaded(resourceUri)) {
-      loadExternalLibrary({libraryName, resourceUri});
+    // obj is an object of the form `{libraryName, resourceUri}`
+    if (!alreadyLoaded(obj.resourceUri)) {
+      loadExternalLibrary(obj);
     }
   }
 }
