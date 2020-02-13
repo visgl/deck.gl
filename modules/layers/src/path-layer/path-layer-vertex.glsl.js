@@ -97,7 +97,7 @@ vec3 lineJoin(
   float cosHalfA = abs(dot(dirA, miterVec));
 
   // -1: right, 1: left
-  float turnDirection = flipIfTrue(dirA.x * dirB.y > dirA.y * dirB.x);
+  float turnDirection = flipIfTrue(dirA.x * dirB.y >= dirA.y * dirB.x);
 
   // relative position to the corner:
   // -1: inside (smaller side of the angle)

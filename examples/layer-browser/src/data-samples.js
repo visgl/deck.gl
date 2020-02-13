@@ -104,9 +104,11 @@ export const zigzag = [
       ])
   },
   {
+    // A-B-A
     path: [
       [positionOrigin[0] - 0.005, positionOrigin[1] + 0.005],
-      [positionOrigin[0] - 0.005, positionOrigin[1] - 0.005]
+      [positionOrigin[0] - 0.005, positionOrigin[1] - 0.005],
+      [positionOrigin[0] - 0.005, positionOrigin[1] + 0.005]
     ]
   }
 ];
