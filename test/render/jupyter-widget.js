@@ -307,20 +307,20 @@ const TEST_CASES = [
       viewState: {
         longitude: 0,
         latitude: 0,
-        zoom: 1
+        zoom: 4
       },
       layers: [
         {
           '@@type': 'DemoCompositeLayer',
-          data: [[0, 0], [0, 0.01], [0.01, 0]],
-          getPosition: '-',
-          getLineColor: [255, 100, 100],
-          getFillColor: [200, 160, 0, 180],
-          getRadius: 10000
+          data: [[0, 0], [2, 0], [0, 2], [2, 2], [3, 3], [4, 4]],
+          getPosition: '@@=-',
+          getLineColor: [0, 0, 0],
+          getFillColor: [20, 160, 0, 180],
+          getRadius: 1000000
         }
       ]
     },
-    goldenImage: './test/render/golden-images/jupyter-widget-geojsonlayer.png'
+    goldenImage: './test/render/golden-images/jupyter-widget-custom-layer.png'
   }
 ].filter(Boolean);
 
@@ -356,7 +356,7 @@ async function runTest(iframe, testCase) {
   });
 }
 
-test('jupyter-widget Render Test', async t => {
+test.only('jupyter-widget Render Test', async t => {
   const iframe = await loadPage();
 
   for (const testCase of TEST_CASES) {
@@ -365,7 +365,7 @@ test('jupyter-widget Render Test', async t => {
 
     const result = await window.browserTestDriver_captureAndDiffScreen({
       // uncomment to save screenshot to disk
-      // saveOnFail: true,
+      saveOnFail: true,
       threshold: 0.99,
       ...testCase.imageDiffOptions,
       region: {

@@ -81,6 +81,8 @@ export class DeckGLView extends DOMWidgetView {
   initialize() {
     this.listenTo(this.model, 'destroy', this.remove);
 
+    const customLibraries = this.model.get('custom_libraries');
+
     const container = document.createElement('div');
 
     this.el.appendChild(container);
@@ -126,7 +128,6 @@ export class DeckGLView extends DOMWidgetView {
     super.render();
 
     this.model.on('change:json_input', this.valueChanged.bind(this), this);
-    this.model.on('change:custom_libraries', this.valueChanged.bind(this), this);
     this.model.on('change:data_buffer', this.dataBufferChanged.bind(this), this);
 
     this.dataBufferChanged();
@@ -146,11 +147,7 @@ export class DeckGLView extends DOMWidgetView {
 
   valueChanged() {
     // TODO Side effect issues from inputJson and customLibraries each calling this function?
-    updateDeck({
-      inputJson: JSON.parse(this.model.get('json_input')),
-      deckgl: this.deck,
-      customLibraries: this.model.get('custom_libraries')
-    });
+    updateDeck(JSON.parse(this.model.get('json_input')), this.deck);
     // Jupyter notebook displays an error that this suppresses
     hideMapboxCSSWarning();
   }

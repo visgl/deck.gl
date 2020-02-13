@@ -88,9 +88,8 @@ function addCustomLibraries(customLibraries) {
   }
 }
 
-function updateDeck({inputJson, deckgl, customLibraries}) {
+function updateDeck(inputJson, deckgl) {
   const results = jsonConverter.convert(inputJson);
-  addCustomLibraries(customLibraries);
   deckgl.setProps(results);
 }
 
