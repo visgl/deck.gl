@@ -365,7 +365,7 @@ test('jupyter-widget Render Test', async t => {
 
     const result = await window.browserTestDriver_captureAndDiffScreen({
       // uncomment to save screenshot to disk
-      saveOnFail: true,
+      // saveOnFail: true,
       threshold: 0.99,
       ...testCase.imageDiffOptions,
       region: {

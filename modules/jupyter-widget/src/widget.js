@@ -146,7 +146,6 @@ export class DeckGLView extends DOMWidgetView {
   }
 
   valueChanged() {
-    // TODO Side effect issues from inputJson and customLibraries each calling this function?
     updateDeck(JSON.parse(this.model.get('json_input')), this.deck);
     // Jupyter notebook displays an error that this suppresses
     hideMapboxCSSWarning();
