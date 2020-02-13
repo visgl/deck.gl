@@ -119,7 +119,9 @@ export function getViewState(map, overlay) {
 
   // Compute fractional zoom.
   const scale = height ? (bottomLeft.y - topRight.y) / height : 1;
-  const zoom = Math.log2(scale) + map.getZoom() - 1;
+  // When resizing aggressively, occasionally ne and sw are the same points
+  // See https://github.com/uber/deck.gl/issues/4218
+  const zoom = Math.log2(scale || 1) + map.getZoom() - 1;
 
   // Compute fractional center.
   let centerPx = new google.maps.Point(width / 2, height / 2);
