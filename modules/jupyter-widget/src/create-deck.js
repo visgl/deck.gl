@@ -41,6 +41,16 @@ const jsonConverter = new deck.JSONConverter({
   configuration: jsonConverterConfiguration
 });
 
+function alreadyLoaded(url) {
+  // Save time by not reloading the same URL
+  for (const scriptTag of document.querySelectorAll('script')) {
+    if (scriptTag.src === url) {
+      return true;
+    }
+  }
+  return false;
+}
+
 /* global document, window */
 function loadScript(url) {
   const script = document.createElement('script');
@@ -65,16 +75,39 @@ function loadExternalLibrary({libraryName, resourceUri, onComplete}, loadResourc
   });
 }
 
-function updateDeck(inputJson, deckgl) {
+function addCustomLibraries(customLibraries) {
+  if (!customLibraries) {
+    return;
+  }
+  for (const obj of customLibraries) {
+    // obj is an object of {libraryName: <string>, url: <string>}
+    const [libraryName, resourceUri] = Object.entries(obj)[0];
+    if (!alreadyLoaded(resourceUri)) {
+      loadExternalLibrary({libraryName, resourceUri});
+    }
+  }
+}
+
+function updateDeck({inputJson, deckgl, customLibraries}) {
   const results = jsonConverter.convert(inputJson);
+  addCustomLibraries(customLibraries);
   deckgl.setProps(results);
 }
 
-function createDeck({mapboxApiKey, container, jsonInput, tooltip, handleClick, handleWarning}) {
+function createDeck({
+  mapboxApiKey,
+  container,
+  jsonInput,
+  tooltip,
+  handleClick,
+  handleWarning,
+  customLibraries
+}) {
   let deckgl;
   try {
     const props = jsonConverter.convert(jsonInput);
 
+    addCustomLibraries(customLibraries);
     const getTooltip = makeTooltip(tooltip);
 
     deckgl = new deck.DeckGL({

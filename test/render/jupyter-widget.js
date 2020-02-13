@@ -299,6 +299,28 @@ const TEST_CASES = [
       ]
     },
     goldenImage: './test/render/golden-images/jupyter-widget-failed-function.png'
+  },
+  {
+    name: 'CustomLayer',
+    json: {
+      description: 'Test of custom layer loading',
+      viewState: {
+        longitude: 0,
+        latitude: 0,
+        zoom: 1
+      },
+      layers: [
+        {
+          '@@type': 'DemoCompositeLayer',
+          data: [[0, 0], [0, 0.01], [0.01, 0]],
+          getPosition: '-',
+          getLineColor: [255, 100, 100],
+          getFillColor: [200, 160, 0, 180],
+          getRadius: 10000
+        }
+      ]
+    },
+    goldenImage: './test/render/golden-images/jupyter-widget-geojsonlayer.png'
   }
 ].filter(Boolean);
 

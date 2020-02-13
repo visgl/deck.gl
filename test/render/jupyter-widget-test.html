@@ -28,7 +28,8 @@
           mapboxApiKey: 'NO_API_KEY',
           container: document.getElementById('app'),
           jsonInput: evt.data.json,
-          useTooltip: true
+          useTooltip: true,
+	  customLibraries: [{CustomLayerLibrary: '/test/render/jupyter-widget-custom-layer-bundle.js'}]
         });
 
         deck.setProps({
@@ -36,7 +37,7 @@
         });
 
       } else {
-        updateDeck(evt.data.json, deck);
+        updateDeck({inputJson: evt.data.json, deckgl: deck});
       }
     }
   </script>
