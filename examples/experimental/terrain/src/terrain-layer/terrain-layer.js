@@ -27,6 +27,8 @@ const defaultProps = {
       offset: 0
     }
   },
+  // Supply url to local terrain worker bundle. Only required if running offline and cannot access CDN.
+  workerUrl: {type: 'string', value: null},
   // Same as SimpleMeshLayer wireframe
   wireframe: false
 };
