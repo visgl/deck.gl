@@ -2,10 +2,6 @@
 import React, {useState} from 'react';
 import {render} from 'react-dom';
 import DeckGL from '@deck.gl/react';
-import {WebMercatorViewport, COORDINATE_SYSTEM} from '@deck.gl/core';
-import {load} from '@loaders.gl/core';
-import {TerrainLoader} from '@loaders.gl/terrain';
-import {TileLayer} from '@deck.gl/geo-layers';
 
 import TerrainLayer from './terrain-layer/terrain-layer';
 import {getSurface} from './surface';
@@ -21,41 +17,16 @@ const INITIAL_VIEW_STATE = {
   bearing: 140,
   pitch: 60
 };
-
 // Constants
 const TERRAIN_RGB = 'https://api.mapbox.com/v4/mapbox.terrain-rgb';
 
-const getTerrainData = ({bbox, x, y, z}) => {
-  const terrainImage = `${TERRAIN_RGB}/${z}/${x}/${y}.png?access_token=${MAPBOX_TOKEN}`;
-
-  // https://docs.mapbox.com/help/troubleshooting/access-elevation-data/#mapbox-terrain-rgb
-  // Note - the elevation rendered by this example is greatly exagerated!
-  const elevationDecoder = {
-    rScaler: 6553.6,
-    gScaler: 25.6,
-    bScaler: 0.1,
-    offset: -10000
-  };
-
-  const viewport = new WebMercatorViewport({
-    longitude: (bbox.west + bbox.east) / 2,
-    latitude: (bbox.north + bbox.south) / 2,
-    zoom: z
-  });
-  const bottomLeft = viewport.projectFlat([bbox.west, bbox.south]);
-  const topRight = viewport.projectFlat([bbox.east, bbox.north]);
-  const bounds = [bottomLeft[0], bottomLeft[1], topRight[0], topRight[1]];
-
-  const options = {
-    worker: false,
-    terrain: {
-      bounds,
-      meshMaxError: 4,
-      elevationDecoder
-    }
-  };
-  return load(terrainImage, TerrainLoader, options);
-};
+function getTerrain(tile) {
+  if (tile) {
+    const {x, y, z} = tile;
+    return `${TERRAIN_RGB}/${z}/${x}/${y}.png?access_token=${MAPBOX_TOKEN}`;
+  }
+  return `${TERRAIN_RGB}/{z}/{x}/{y}.png?access_token=${MAPBOX_TOKEN}`;
+}
 
 const SurfaceDropdown = ({surface, setSurface}) => {
   return (
@@ -109,24 +80,25 @@ const App = () => {
     setViewState(vs);
   };
 
-  const renderSubLayers = props => {
-    return new TerrainLayer({
-      id: props.id,
-      wireframe,
-      getPolygonOffset: null,
-      coordinateSystem: COORDINATE_SYSTEM.CARTESIAN,
-      surfaceImage: getSurface(props.tile, surface),
-      terrain: props.data
-    });
+  // https://docs.mapbox.com/help/troubleshooting/access-elevation-data/#mapbox-terrain-rgb
+  // Note - the elevation rendered by this example is greatly exagerated!
+  const elevationDecoder = {
+    rScaler: 6553.6,
+    gScaler: 25.6,
+    bScaler: 0.1,
+    offset: -10000
   };
 
-  const layer = new TileLayer({
+  const layer = new TerrainLayer({
     id: 'loader',
     minZoom: 0,
     maxZoom: 23,
     strategy: 'no-overlap',
-    getTileData: getTerrainData,
-    renderSubLayers
+    elevationDecoder,
+    terrainImage: getTerrain(),
+    surfaceImage: getSurface(surface),
+    wireframe,
+    color: [255, 255, 255]
   });
 
   const setSurfaceProp = val => {
