@@ -1,4 +1,5 @@
 import argparse
+import json
 import sys
 
 import semver
@@ -36,6 +37,15 @@ def rewrite_version_file(semver):
         f.write(contents)
 
 
+def rewrite_frontend_version_file(semver):
+    """Current associated version of NPM modules deck.gl and @deck.gl/jupyter-widget"""
+    lerna_version = json.loads(open('../../lerna.json').read())['version']
+    with open("pydeck/frontend_semver.py", "w+") as f:
+        t = jinja2.Template("DECKGL_SEMVER = '{{semver_str}}'")
+        contents = t.render(semver_str=str(lerna_version))
+        f.write(contents)
+
+
 parser = argparse.ArgumentParser(
     description="Bump semver for pydeck. Modifies pydeck/_version.py directly."
 )
@@ -59,4 +69,5 @@ if __name__ == "__main__":
         if response != "Y":
             sys.exit(0)
     rewrite_version_file(bumped_version)
+    rewrite_frontend_version_file(bumped_version, args.release_type)
     print(bumped_version)

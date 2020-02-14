@@ -19,6 +19,19 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v8.1
 
+### deck.gl [8.1.0-alpha.3] - Feb 11 2020
+
+-  [react] Fix support for mix-blend-mode style (#4260)
+-  Handle edge case in google-maps view state calculation (#4259)
+-  [google-maps] support lower zoom levels (#4247)
+-  Fix bundle dependencies (#4255)
+-  Use luma.gl transpilation to consolidate mesh layer shaders (#4253)
+-  [mapbox] support repeating at low zoom levels (#4248)
+-  Add example: H3GridLayer (#4179)
+-  Bump luma to 8.1.0-alpha.2 (#4240)
+-  Move BaseTileLayer to geo-layers (#4232)
+-  Add Experimental Layer: TerrainLayer (#3984)
+
 ### deck.gl [8.1.0-alpha.2] - Feb 4 2020
 
 - Support binary data in TextLayer (#4206)

@@ -20,7 +20,7 @@ The GeoJSON standard includes type in the top-level JSON, so most GeoJSON data s
 
 ## Prior Art
 
-We should likely avoid conflicting with [JSON pointer syntax](https://www.baeldung.com/json-pointer) and JSON Paths. It seems like `_`, `__`, and `@@` would be acceptable characters. We are already using `__` in deck.gl to represent internal fields, so it seems like the least ambiguity comes from use of `@@`. 
+We should likely avoid conflicting with [JSON pointer syntax](https://www.baeldung.com/json-pointer) and JSON Paths. It seems like `_`, `__`, and `@@` would be acceptable characters. We are already using `__` in deck.gl to represent internal fields, so it seems like the least ambiguity comes from use of `@@`.
 
 ## Proposal
 

@@ -6,30 +6,36 @@ import webbrowser
 
 import jinja2
 
-
-TEMPLATES_PATH = os.path.join(os.path.dirname(__file__), "./templates/")
-j2_env = jinja2.Environment(
-    loader=jinja2.FileSystemLoader(TEMPLATES_PATH), trim_blocks=True
-)
-CDN_URL = "https://cdn.jsdelivr.net/npm/@deck.gl/jupyter-widget@^8.0.0/dist/index.js"
+from ..frontend_semver import DECKGL_SEMVER
 
 
 def convert_js_bool(py_bool):
     if type(py_bool) != bool:
         return py_bool
-    return 'true' if py_bool else 'false'
+    return "true" if py_bool else "false"
+
+
+TEMPLATES_PATH = os.path.join(os.path.dirname(__file__), "./templates/")
+j2_env = jinja2.Environment(
+    loader=jinja2.FileSystemLoader(TEMPLATES_PATH), trim_blocks=True
+)
+CDN_URL = "https://cdn.jsdelivr.net/npm/@deck.gl/jupyter-widget@{}/dist/index.js".format(
+    DECKGL_SEMVER
+)
 
 
 def render_json_to_html(
     json_input, mapbox_key=None, tooltip=True, css_background_color=None
 ):
     js = j2_env.get_template("index.j2")
+    if type(tooltip) == bool:
+        tooltip = "true" if tooltip else "false"
     html_str = js.render(
         mapbox_key=mapbox_key,
         json_input=json_input,
         deckgl_jupyter_widget_bundle=CDN_URL,
         tooltip=convert_js_bool(tooltip),
-        css_background_color=css_background_color
+        css_background_color=css_background_color,
     )
     return html_str
 

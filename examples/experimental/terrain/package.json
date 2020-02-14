@@ -8,7 +8,7 @@
   },
   "dependencies": {
     "@loaders.gl/images": "2.0.2",
-    "@mapbox/martini": "^0.1.0",
+    "@mapbox/martini": "^0.2.0",
     "deck.gl": "^8.1.0-alpha.1",
     "react": "^16.3.0",
     "react-dom": "^16.3.0",
