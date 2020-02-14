@@ -1,15 +1,10 @@
 import {CompositeLayer} from '@deck.gl/core';
 // import {getImageData, getImageSize} from '@loaders.gl/images';
 import {SimpleMeshLayer} from '@deck.gl/mesh-layers';
-import {ImageLoader} from '@loaders.gl/images';
-import {TerrainLoader} from '@loaders.gl/terrain';
-import {load, registerLoaders} from '@loaders.gl/core';
-
-registerLoaders(ImageLoader);
 
 const defaultProps = {
   // Image that encodes height data
-  terrainImage: {type: 'object', value: null, async: true},
+  terrain: {type: 'object', value: null},
   // Image to use as texture
   surfaceImage: {type: 'object', value: null, async: true},
   // Martini error tolerance in meters, smaller number -> more detailed mesh
@@ -32,32 +27,9 @@ const defaultProps = {
   wireframe: false
 };
 
-async function getMesh(terrainImage, elevationDecoder, meshMaxError, bounds) {
-  if (terrainImage === null) {
-    return null;
-  }
-  const options = {
-    terrain: {
-      bounds,
-      meshMaxError,
-      elevationDecoder
-    }
-  };
-  const data = await load(terrainImage, TerrainLoader, options);
-  return data;
-}
-
 export default class TerrainLayer extends CompositeLayer {
   renderLayers() {
-    const {
-      bounds,
-      color,
-      elevationDecoder,
-      meshMaxError,
-      terrainImage,
-      surfaceImage,
-      wireframe
-    } = this.props;
+    const {color, terrain, surfaceImage, wireframe} = this.props;
 
     return new SimpleMeshLayer(
       this.getSubLayerProps({
@@ -65,7 +37,7 @@ export default class TerrainLayer extends CompositeLayer {
       }),
       {
         data: [1],
-        mesh: getMesh(terrainImage, elevationDecoder, meshMaxError, bounds),
+        mesh: terrain,
         texture: surfaceImage,
         getPosition: d => [0, 0, 0],
         getColor: d => color,
