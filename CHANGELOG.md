@@ -19,6 +19,11 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v8.0
 
+#### deck.gl [8.0.15] - Feb 14 2020
+
+- [react] Fix support for mix-blend-mode style (#4260)
+- fix 64-bit precision in low-end GPUs (#4261)
+
 #### deck.gl [8.0.14] - Feb 10 2020
 
 - Fix bundle dependencies (#4255)
