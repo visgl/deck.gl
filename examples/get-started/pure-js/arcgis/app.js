@@ -1,6 +1,5 @@
-import {loadArcGISModule} from '@deck.gl/arcgis';
+import {arcGIS, loadModules} from '@deck.gl/arcgis';
 import {GeoJsonLayer, ArcLayer} from '@deck.gl/layers';
-import {loadModules} from "esri-loader";
 
 // source: Natural Earth http://www.naturalearthdata.com/ via geojson.xyz
 const AIR_PORTS =
@@ -11,14 +10,12 @@ loadModules([
   "esri/views/MapView",
   "esri/views/SceneView",
   "esri/views/3d/externalRenderers"
-]).then(async ([
+]).then(([
   ArcGISMap,
   MapView,
   SceneView,
   externalRenderers
 ]) => {
-  const arcgis = await loadArcGISModule();
-  
   const getConf = () => ({
     deckLayers: [
       new GeoJsonLayer({
@@ -57,7 +54,7 @@ loadModules([
     ]
   });
 
-  const layer = new arcgis.ArcGISDeckLayer(getConf());
+  const layer = new arcGIS.ArcGISDeckLayer(getConf());
 
   const sceneView = new SceneView({
     container: "sceneViewDiv",
@@ -77,7 +74,7 @@ loadModules([
     viewingMode: "local"
   });
 
-  const extren = new arcgis.ArcGISDeckExternalRenderer(sceneView, getConf());
+  const extren = new arcGIS.ArcGISDeckExternalRenderer(sceneView, getConf());
 
   // In the ArcGIS API for JavaScript the MapView is responsible
   // for displaying a Map, which usually contains at least a basemap.

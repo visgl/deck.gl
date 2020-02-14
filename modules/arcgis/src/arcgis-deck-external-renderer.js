@@ -27,21 +27,6 @@ export default function loadArcGISDeckExternalRenderer(externalRenderers, Spatia
 
     // ========== Zurich, we have a problem ==========
     //            V  V  V  V  V  V  V  V  V
-    // const cameraPositionGeographic = new Array(3);
-    // externalRenderers.fromRenderCoordinates(this.view,
-    //   context.camera.eye, 0,
-    //   cameraPositionGeographic, 0, SpatialReference.WGS84,
-    // 1);
-    // this.deckgl.setProps({
-    //   viewState: {
-    //     latitude: cameraPositionGeographic[0],
-    //     longitude: cameraPositionGeographic[1],
-    //     zoom: 1,
-    //     bearing: 0,
-    //     pitch: 0
-    //   }
-    // });
-    console.log("this.view.camera.pitch", this.view.camera.pitch);
     this.deckgl.setProps({
       viewState: {
         latitude: this.view.center.latitude,
