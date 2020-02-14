@@ -1,4 +1,4 @@
-import {initialize, ArcGISDeckLayer, ArcGISDeckExternalRenderer} from '@deck.gl/arcgis';
+import {loadArcGISModule} from '@deck.gl/arcgis';
 import {GeoJsonLayer, ArcLayer} from '@deck.gl/layers';
 import {loadModules} from "esri-loader";
 
@@ -6,28 +6,18 @@ import {loadModules} from "esri-loader";
 const AIR_PORTS =
   'https://d2ad6b4ur7yvpq.cloudfront.net/naturalearth-3.3.0/ne_10m_airports.geojson';
 
-  "esri/layers/Layer", "esri/core/Collection", "esri/views/2d/layers/BaseLayerViewGL2D", "esri/views/3d/externalRenderers", "esri/geometry/SpatialReference"
-
 loadModules([
   "esri/Map",
   "esri/views/MapView",
   "esri/views/SceneView",
-  "esri/layers/Layer",
-  "esri/core/Collection",
-  "esri/views/2d/layers/BaseLayerViewGL2D",
-  "esri/views/3d/externalRenderers",
-  "esri/geometry/SpatialReference"
-]).then(([
+  "esri/views/3d/externalRenderers"
+]).then(async ([
   ArcGISMap,
   MapView,
   SceneView,
-  Layer,
-  Collection,
-  BaseLayerViewGL2D,
-  externalRenderers,
-  SpatialReference
+  externalRenderers
 ]) => {
-  initialize(Layer, Collection, BaseLayerViewGL2D, externalRenderers, SpatialReference);
+  const arcgis = await loadArcGISModule();
   
   const getConf = () => ({
     deckLayers: [
@@ -67,7 +57,7 @@ loadModules([
     ]
   });
 
-  const layer = new ArcGISDeckLayer(getConf());
+  const layer = new arcgis.ArcGISDeckLayer(getConf());
 
   const sceneView = new SceneView({
     container: "sceneViewDiv",
@@ -87,7 +77,7 @@ loadModules([
     viewingMode: "local"
   });
 
-  const extren = new ArcGISDeckExternalRenderer(sceneView, getConf());
+  const extren = new arcgis.ArcGISDeckExternalRenderer(sceneView, getConf());
 
   // In the ArcGIS API for JavaScript the MapView is responsible
   // for displaying a Map, which usually contains at least a basemap.
