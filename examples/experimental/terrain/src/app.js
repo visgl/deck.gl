@@ -103,8 +103,12 @@ const App = () => {
       terrainImage: props.data,
       // https://docs.mapbox.com/help/troubleshooting/access-elevation-data/#mapbox-terrain-rgb
       // Note - the elevation rendered by this example is greatly exagerated!
-      getElevation: (r, g, b) => (r * 65536 + g * 256 + b) / 10 - 10000
-      // getElevation: (r, g, b) => -10000 + ((r * 65536 + g * 256 + b) * 0.1)
+      elevationDecoder: {
+        rScale: 6553.6,
+        gScale: 25.6,
+        bScale: 0.1,
+        offset: -10000
+      }
     });
   };
 
