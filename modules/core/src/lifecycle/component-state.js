@@ -79,7 +79,7 @@ export default class ComponentState {
   }
 
   isAsyncPropLoading(propName) {
-    if (typeof propName === 'string') {
+    if (propName) {
       const asyncProp = this.asyncProps[propName];
       return Boolean(
         asyncProp &&

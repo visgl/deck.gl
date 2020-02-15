@@ -489,6 +489,17 @@ The state object allows a layer to store persistent information cross rendering 
 [Properties](/docs/api-reference/layer.md#constructor) of this layer.
 
 
+## Members
+
+##### `isLoaded`
+
+`true` if all asynchronous assets are loaded.
+
+##### `parent`
+
+A `Layer` instance if this layer is rendered by a [CompositeLayer](/docs/api-reference/composite-layer.md)
+
+
 ## Methods
 
 > Layer methods are designed to support the creation of new layers or layer sub-classing and are NOT intended to be called by applications.
