@@ -175,6 +175,10 @@ export default class IconLayer extends Layer {
   }
   /* eslint-enable max-statements, complexity */
 
+  get isLoaded() {
+    return super.isLoaded && this.state.iconManager.isLoaded;
+  }
+
   finalizeState() {
     super.finalizeState();
     // Release resources held by the icon manager
