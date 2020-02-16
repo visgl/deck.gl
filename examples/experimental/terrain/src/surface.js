@@ -6,7 +6,7 @@ const SATELLITE = 'https://api.mapbox.com/v4/mapbox.satellite';
 const MAPBOX_TOKEN = process.env.MapboxAccessToken; // eslint-disable-line
 
 export const getSurface = (surface, tile) => {
-  let surfaceImage = null;
+  let surfaceImage = 0;
   switch (surface) {
     case 'sectional':
       surfaceImage = `${SECTIONAL}/{z}/{x}/{y}.png?origin=nw`;
@@ -31,7 +31,7 @@ export const getSurface = (surface, tile) => {
       break;
     case 'none':
     default:
-      surfaceImage = null;
+      surfaceImage = 0;
       break;
   }
   return surfaceImage;

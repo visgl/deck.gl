@@ -10,7 +10,7 @@ const defaultProps = {
   // Image url that encodes height data
   terrainImage: {type: 'string', value: null},
   // Image url to use as texture
-  surfaceImage: {type: 'string', value: null},
+  surfaceImage: {type: 'string', value: 0},
   // Martini error tolerance in meters, smaller number -> more detailed mesh
   meshMaxError: {type: 'number', value: 4.0},
   // Bounding box of the terrain image, [minX, minY, maxX, maxY] in world coordinates
@@ -53,19 +53,27 @@ export default class TerrainLayer extends CompositeLayer {
       props.bounds !== oldProps.bounds;
 
     if (!this.state.isTiled && shouldReload) {
-      const options = {
-        terrain: {
-          meshMaxError: props.meshMaxError,
-          elevationDecoder: props.elevationDecoder,
-          bounds: props.bounds
-        }
-      };
-      this.setState({terrain: load(props.terrainImage, TerrainLoader, options)});
+      const terrain = this.loadTerrain(props);
+      this.setState({terrain});
     }
   }
 
-  getTerrainData({bbox, x, y, z}) {
-    const {terrainImage, elevationDecoder, meshMaxError} = this.props;
+  loadTerrain({terrainImage, bounds, elevationDecoder, meshMaxError, workerUrl}) {
+    const options = {
+      terrain: {
+        bounds,
+        meshMaxError,
+        elevationDecoder
+      }
+    };
+    if (workerUrl) {
+      options.terrain.workerUrl = workerUrl;
+    }
+    return load(terrainImage, TerrainLoader, options);
+  }
+
+  getTiledTerrainData({bbox, x, y, z}) {
+    const {terrainImage, elevationDecoder, meshMaxError, workerUrl} = this.props;
     const url = terrainImage
       .replace('{x}', x)
       .replace('{y}', y)
@@ -80,17 +88,13 @@ export default class TerrainLayer extends CompositeLayer {
     const topRight = viewport.projectFlat([bbox.east, bbox.north]);
     const bounds = [bottomLeft[0], bottomLeft[1], topRight[0], topRight[1]];
 
-    const options = {
-      terrain: {
-        bounds,
-        meshMaxError,
-        elevationDecoder
-      }
-    };
-    if (this.props.workerUrl) {
-      options.terrain.workerUrl = this.props.workerUrl;
-    }
-    return load(url, TerrainLoader, options);
+    return this.loadTerrain({
+      terrainImage: url,
+      bounds,
+      elevationDecoder,
+      meshMaxError,
+      workerUrl
+    });
   }
 
   renderSubLayers(props) {
@@ -100,7 +104,7 @@ export default class TerrainLayer extends CompositeLayer {
           .replace('{x}', x)
           .replace('{y}', y)
           .replace('{z}', z)
-      : null;
+      : 0;
 
     return new SimpleMeshLayer({
       id: props.id,
@@ -128,7 +132,7 @@ export default class TerrainLayer extends CompositeLayer {
     if (this.state.isTiled) {
       return new TileLayer(this.props, {
         id: `${this.props.id}-terrain`,
-        getTileData: this.getTerrainData.bind(this),
+        getTileData: this.getTiledTerrainData.bind(this),
         renderSubLayers: this.renderSubLayers,
         updateTriggers: {
           getTileData: {terrainImage, meshMaxError, elevationDecoder}
