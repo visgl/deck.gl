@@ -9,10 +9,13 @@ export const arcGIS = {
   ArcGISDeckExternalRenderer: undefined
 };
 
-export async function loadModules(modules, loadScriptOptions) {
+export async function loadArcGISModules(modules, loadScriptOptions) {
   await loadArcGISModule();
 
-  return esriLoaderLoadModules(modules, loadScriptOptions);
+  return esriLoaderLoadModules(modules, loadScriptOptions).then((array) => {
+    array.unshift(arcGIS);
+    return array;
+  });
 }
 
 export function loadArcGISModule(esri) {

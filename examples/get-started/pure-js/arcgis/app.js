@@ -1,16 +1,17 @@
-import {arcGIS, loadModules} from '@deck.gl/arcgis';
+import {arcGIS, loadArcGISModules} from '@deck.gl/arcgis';
 import {GeoJsonLayer, ArcLayer} from '@deck.gl/layers';
 
 // source: Natural Earth http://www.naturalearthdata.com/ via geojson.xyz
 const AIR_PORTS =
   'https://d2ad6b4ur7yvpq.cloudfront.net/naturalearth-3.3.0/ne_10m_airports.geojson';
 
-loadModules([
+loadArcGISModules([
   "esri/Map",
   "esri/views/MapView",
   "esri/views/SceneView",
   "esri/views/3d/externalRenderers"
 ]).then(([
+  arcGIS,
   ArcGISMap,
   MapView,
   SceneView,
