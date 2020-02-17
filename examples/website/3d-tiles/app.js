@@ -30,7 +30,7 @@ export default class App extends PureComponent {
     super(props);
 
     this.state = {
-      viewState: INITIAL_VIEW_STATE,
+      initialViewState: INITIAL_VIEW_STATE,
       attributions: []
     };
 
@@ -50,8 +50,8 @@ export default class App extends PureComponent {
   _centerViewOnTileset(tileset) {
     const {cartographicCenter, zoom} = tileset;
     this.setState({
-      viewState: {
-        ...this.state.viewState,
+      initialViewState: {
+        ...INITIAL_VIEW_STATE,
 
         // Update deck.gl viewState, moving the camera to the new tileset
         longitude: cartographicCenter[0],
@@ -61,11 +61,6 @@ export default class App extends PureComponent {
         pitch: INITIAL_VIEW_STATE.pitch
       }
     });
-  }
-
-  // Called by DeckGL when user interacts with the map
-  _onViewStateChange({viewState}) {
-    this.setState({viewState});
   }
 
   _renderTile3DLayer() {
@@ -79,19 +74,13 @@ export default class App extends PureComponent {
   }
 
   render() {
-    const {viewState} = this.state;
+    const {initialViewState} = this.state;
     const tile3DLayer = this._renderTile3DLayer();
     const {mapStyle = 'mapbox://styles/uberdata/cive485h000192imn6c6cc8fc'} = this.props;
 
     return (
       <div>
-        <DeckGL
-          layers={[tile3DLayer]}
-          initialViewState={INITIAL_VIEW_STATE}
-          viewState={viewState}
-          onViewStateChange={this._onViewStateChange.bind(this)}
-          controller={true}
-        >
+        <DeckGL layers={[tile3DLayer]} initialViewState={initialViewState} controller={true}>
           <StaticMap mapStyle={mapStyle} mapboxApiAccessToken={MAPBOX_TOKEN} preventStyleDiffing />
         </DeckGL>
       </div>

@@ -251,6 +251,76 @@ The TextLayer renders the following sublayers:
 * `characters` - an `IconLayer` rendering all the characters.
 
 
+## Use binary attributes
+
+This section is about the special requirements when [supplying attributes directly](/docs/developer-guide/performance.md#supply-attributes-directly) to a `TextLayer`.
+
+Because each text string has a different number of characters, when `data.attributes.getText` is supplied, the layer also requires an array `data.startIndices` that describes the character index at the start of each text object. For example, if there are 3 text objects of 2, 3, and 4 characters each, `startIndices` should be `[0, 2, 5, 9]`.
+
+Additionally, all other attributes (`getColor`, `getWidth`, etc.), if supplied, must contain the same layout (number of characters) as the `getText` buffer.
+
+Example use case:
+
+```js
+// USE PLAIN JSON OBJECTS
+const TEXT_DATA = [
+  {
+    text: 'Hello',
+    position: [-122.4, 37.7],
+    color: [255, 0, 0]
+  },
+  {
+    text: 'World',
+    position: [-122.5, 37.8],
+    color: [0, 0, 255]
+  }
+  ...
+];
+
+new TextLayer({
+  data: TEXT_DATA,
+  getText: d => d.text,
+  getPosition: d => d.position,
+  getColor: d => d.color
+})
+```
+
+Convert to using binary attributes:
+
+```js
+// USE BINARY
+// Flatten the text by converting to unicode value
+// Non-Latin characters may require Uint16Array
+// [72, 101, 108, 108, 111, ...]
+const texts = new Uint8Array(TEXT_DATA.map(d => Array.from(d.text).map(char => char.charCodeAt(0))).flat());
+// The position attribute must supply one position for each character
+// [-122.4, 37.7, -122.4, 37.7, -122.4, 37.7, ...]
+const positions = new Float64Array(TEXT_DATA.map(d => Array.from(d.text).map(_ => d.position)).flat(2));
+// The color attribute must supply one color for each character
+// [255, 0, 0, 255, 0, 0, 255, 0, 0, ...]
+const colors = new Uint8Array(TEXT_DATA.map(d => Array.from(d.text).map(_ => d.color)).flat(2));
+
+// The "layout" that tells TextLayer where each string starts
+const startIndices = new Uint16Array(TEXT_DATA.reduce((acc, d) => {
+  const lastIndex = acc[acc.length - 1];
+  acc.push(lastIndex + d.text.length);
+  return acc;
+}, [0]));
+
+new TextLayer({
+  data: {
+    length: TEXT_DATA.length,
+    startIndices: startIndices, // this is required to render the texts correctly!
+    attributes: {
+      getText: {value: texts},
+      getPosition: {value: positions, size: 2}
+      getColor: {value: colors, size: 3}
+    }
+  }
+})
+```
+
+
 ## Source
 
 [modules/layers/src/text-layer](https://github.com/uber/deck.gl/tree/master/modules/layers/src/text-layer)

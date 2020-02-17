@@ -175,9 +175,9 @@ The advantages of this new API include:
 
 Relevant RFCs for full data frame support:
 
-- [**GLSL Accessor RFC**](/dev-docs/v7.x-binary/glsl-accessor-rfc.md)
-- [**Texture Attribute RFC**](/dev-docs/v7.x-binary/texture-attribute-rfc.md)
-- [**GPU Data Frame Support**](/dev-docs/v7.x-binary/gpu-data-frame-rfc.md)
+- [**GLSL Accessor RFC**](/dev-docs/RFCs/proposals/glsl-accessor-rfc.md)
+- [**Texture Attribute RFC**](/dev-docs/RFCs/proposals/texture-attribute-rfc.md)
+- [**GPU Data Frame Support**](/dev-docs/RFCs/proposals/gpu-data-frame-rfc.md)
 
 ## Open Questions
 

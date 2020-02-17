@@ -22,7 +22,6 @@
     {
       "@@type": "Tile3DLayer",
       "id": "tiles-royal",
-      "DracoWorkerLoader": "@@!DracoWorkerLoader",
       "tilesetUrl": "https://raw.githubusercontent.com/uber-common/deck.gl-data/master/3d-tiles/RoyalExhibitionBuilding/tileset.json"
     }
   ]

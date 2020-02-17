@@ -20,7 +20,8 @@
 
 import {Layer, fp64LowPart, project32, gouraudLighting, picking} from '@deck.gl/core';
 import GL from '@luma.gl/constants';
-import {Model, CubeGeometry, fp64 as fp64ShaderModule} from '@luma.gl/core';
+import {Model, CubeGeometry} from '@luma.gl/core';
+import {fp64arithmetic} from '@luma.gl/shadertools';
 import {defaultColorRange, colorRangeToFlatArray} from '../utils/color-utils';
 
 import vs from './gpu-grid-cell-layer-vertex.glsl';
@@ -57,7 +58,7 @@ export default class GPUGridCellLayer extends Layer {
     return super.getShaders({
       vs,
       fs,
-      modules: [project32, gouraudLighting, picking, fp64ShaderModule]
+      modules: [project32, gouraudLighting, picking, fp64arithmetic]
     });
   }
 
@@ -67,12 +68,10 @@ export default class GPUGridCellLayer extends Layer {
     attributeManager.addInstanced({
       colors: {
         size: 4,
-        update: this.calculateColors,
         noAlloc: true
       },
       elevations: {
         size: 4,
-        update: this.calculateElevations,
         noAlloc: true
       }
     });
@@ -94,7 +93,6 @@ export default class GPUGridCellLayer extends Layer {
 
   draw({uniforms}) {
     const {
-      data,
       cellSize,
       offset,
       extruded,
@@ -103,19 +101,16 @@ export default class GPUGridCellLayer extends Layer {
       gridSize,
       gridOrigin,
       gridOffset,
-      elevationRange
+      elevationRange,
+      colorMaxMinBuffer,
+      elevationMaxMinBuffer
     } = this.props;
 
     const gridOriginLow = [fp64LowPart(gridOrigin[0]), fp64LowPart(gridOrigin[1])];
     const gridOffsetLow = [fp64LowPart(gridOffset[0]), fp64LowPart(gridOffset[1])];
     const domainUniforms = this.getDomainUniforms();
-    const uniformBuffers = {
-      colorMaxMinBuffer: data.color.maxMinBuffer,
-      elevationMaxMinBuffer: data.elevation.maxMinBuffer
-    };
     const colorRange = colorRangeToFlatArray(this.props.colorRange);
-
-    this.bindUniformBuffers(uniformBuffers);
+    this.bindUniformBuffers(colorMaxMinBuffer, elevationMaxMinBuffer);
     this.state.model
       .setUniforms(
         Object.assign({}, uniforms, domainUniforms, {
@@ -134,31 +129,17 @@ export default class GPUGridCellLayer extends Layer {
         })
       )
       .draw();
-    this.unbindUniformBuffers(uniformBuffers);
+    this.unbindUniformBuffers(colorMaxMinBuffer, elevationMaxMinBuffer);
   }
 
-  bindUniformBuffers({colorMaxMinBuffer, elevationMaxMinBuffer}) {
+  bindUniformBuffers(colorMaxMinBuffer, elevationMaxMinBuffer) {
     colorMaxMinBuffer.bind({target: GL.UNIFORM_BUFFER, index: COLOR_DATA_UBO_INDEX});
     elevationMaxMinBuffer.bind({target: GL.UNIFORM_BUFFER, index: ELEVATION_DATA_UBO_INDEX});
   }
 
-  unbindUniformBuffers({colorMaxMinBuffer, elevationMaxMinBuffer}) {
+  unbindUniformBuffers(colorMaxMinBuffer, elevationMaxMinBuffer) {
     colorMaxMinBuffer.unbind({target: GL.UNIFORM_BUFFER, index: COLOR_DATA_UBO_INDEX});
     elevationMaxMinBuffer.unbind({target: GL.UNIFORM_BUFFER, index: ELEVATION_DATA_UBO_INDEX});
-  }
-
-  calculateColors(attribute) {
-    const {data} = this.props;
-    attribute.update({
-      buffer: data.color.aggregationBuffer
-    });
-  }
-
-  calculateElevations(attribute) {
-    const {data} = this.props;
-    attribute.update({
-      buffer: data.elevation.aggregationBuffer
-    });
   }
 
   getDomainUniforms() {

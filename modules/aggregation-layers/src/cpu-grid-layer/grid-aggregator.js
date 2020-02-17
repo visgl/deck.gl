@@ -19,8 +19,7 @@
 // THE SOFTWARE.
 
 import {createIterable} from '@deck.gl/core';
-
-const R_EARTH = 6378000;
+import {getGridOffset} from '../utils/grid-aggregation-utils';
 
 /**
  * Calculate density grid from an array of points
@@ -35,7 +34,7 @@ const R_EARTH = 6378000;
  * @param {Boolean} projectPoints - `true` if doing screen space projection, `false` otherwise
  * @param {Array} attributes - attributes array containing position values
  * @param {Viewport} viewport - viewport to be used for projection
- * @param {Array} cellOffset - [xOffset, yOffset] offset to be applied to positions to get cell index
+ * @param {Array} posOffset - [xOffset, yOffset] offset to be applied to positions to get cell index
  * @param {Object} boundingBox - {xMin, yMin, xMax, yMax} bounding box of input data
  *
  * @returns {object} - grid data, cell dimension
@@ -52,21 +51,12 @@ export function pointToDensityGridDataCPU(props, aggregationParams) {
 }
 
 /**
- * Based on geometric center of sample points, calculate cellSize in lng/lat (degree) space
- * @param {object} boundingBox - {xMin, yMin, xMax, yMax} contains bounding box of data
- * @param {number} cellSize - grid cell size in meters
- * @returns {xOffset, yOffset} - cellSize size lng/lat (degree) space.
+ * Project points into each cell, return a hash table of cells
+ * @param {Iterable} points
+ * @param {number} cellSize - unit size in meters
+ * @param {function} getPosition - position accessor
+ * @returns {object} - grid hash and cell dimension
  */
-
-export function getGridOffset(boundingBox, cellSize) {
-  const {yMin, yMax} = boundingBox;
-  const latMin = yMin;
-  const latMax = yMax;
-  const centerLat = (latMin + latMax) / 2;
-
-  return calculateGridLatLonOffset(cellSize, centerLat);
-}
-
 /* eslint-disable max-statements, complexity */
 function pointsToGridHashing(props, aggregationParams) {
   const {data = [], cellSize} = props;
@@ -75,7 +65,7 @@ function pointsToGridHashing(props, aggregationParams) {
   const {size} = attributes.positions.getAccessor();
   const boundingBox =
     aggregationParams.boundingBox || getPositionBoundingBox(attributes.positions, numInstances);
-  const offsets = aggregationParams.cellOffset || [180, 90];
+  const offsets = aggregationParams.posOffset || [180, 90];
   const gridOffset = aggregationParams.gridOffset || getGridOffset(boundingBox, cellSize);
 
   if (gridOffset.xOffset <= 0 || gridOffset.yOffset <= 0) {
@@ -139,41 +129,6 @@ function getGridLayerDataFromGridHash({gridHash, gridOffset, offsets}) {
     );
   }
   return data;
-}
-
-/**
- * calculate grid layer cell size in lat lon based on world unit size
- * and current latitude
- * @param {number} cellSize
- * @param {number} latitude
- * @returns {object} - lat delta and lon delta
- */
-function calculateGridLatLonOffset(cellSize, latitude) {
-  const yOffset = calculateLatOffset(cellSize);
-  const xOffset = calculateLonOffset(latitude, cellSize);
-  return {yOffset, xOffset};
-}
-
-/**
- * with a given x-km change, calculate the increment of latitude
- * based on stackoverflow http://stackoverflow.com/questions/7477003
- * @param {number} dy - change in km
- * @return {number} - increment in latitude
- */
-function calculateLatOffset(dy) {
-  return (dy / R_EARTH) * (180 / Math.PI);
-}
-
-/**
- * with a given x-km change, and current latitude
- * calculate the increment of longitude
- * based on stackoverflow http://stackoverflow.com/questions/7477003
- * @param {number} lat - latitude of current location (based on city)
- * @param {number} dx - change in km
- * @return {number} - increment in longitude
- */
-function calculateLonOffset(lat, dx) {
-  return ((dx / R_EARTH) * (180 / Math.PI)) / Math.cos((lat * Math.PI) / 180);
 }
 
 // Calculate bounding box of position attribute

@@ -31,15 +31,7 @@ function getExternals(packageInfo) {
 
   if (externals['@deck.gl/core']) {
     // Do not bundle luma.gl if `core` is peer dependency
-    externals = [
-      externals,
-      (context, request, callback) => {
-        if (/^@?luma\.gl/.test(request)) {
-          return callback(null, 'luma');
-        }
-        return callback();
-      }
-    ];
+    externals['@luma.gl/core'] = 'luma';
   }
 
   return externals;
@@ -69,7 +61,7 @@ const config = {
         // Compile ES2015 using babel
         test: /\.js$/,
         loader: 'babel-loader',
-        include: /src/,
+        include: [/src/, /bundle/],
         options: {
           presets: [['@babel/preset-env', {forceAllTransforms: true}]],
           // all of the helpers will reference the module @babel/runtime to avoid duplication
@@ -98,9 +90,7 @@ const config = {
     // ,new (require('webpack-bundle-analyzer').BundleAnalyzerPlugin)()
   ],
 
-  node: {
-    Buffer: false
-  },
+  node: false,
 
   devtool: false
 };

@@ -2,6 +2,9 @@ import {lngLatToWorld} from '@math.gl/web-mercator';
 
 const TILE_SIZE = 512;
 
+/**
+ * gets the bounding box of a viewport
+ */
 function getBoundingBox(viewport) {
   const corners = [
     viewport.unproject([0, 0]),
@@ -9,15 +12,18 @@ function getBoundingBox(viewport) {
     viewport.unproject([0, viewport.height]),
     viewport.unproject([viewport.width, viewport.height])
   ];
-
   return [
-    corners.reduce((minLng, p) => (minLng < p[0] ? minLng : p[0]), 180),
-    corners.reduce((minLat, p) => (minLat < p[1] ? minLat : p[1]), 90),
-    corners.reduce((maxLng, p) => (maxLng > p[0] ? maxLng : p[0]), -180),
-    corners.reduce((maxLat, p) => (maxLat > p[1] ? maxLat : p[1]), -90)
+    Math.min(corners[0][0], corners[1][0], corners[2][0], corners[3][0]),
+    Math.min(corners[0][1], corners[1][1], corners[2][1], corners[3][1]),
+    Math.max(corners[0][0], corners[1][0], corners[2][0], corners[3][0]),
+    Math.max(corners[0][1], corners[1][1], corners[2][1], corners[3][1])
   ];
 }
 
+/*
+ * get the OSM tile index at the given location
+ * https://wiki.openstreetmap.org/wiki/Slippy_map_tilenames
+ */
 function getTileIndex(lngLat, scale) {
   let [x, y] = lngLatToWorld(lngLat);
   x *= scale / TILE_SIZE;
@@ -31,54 +37,42 @@ function getTileIndex(lngLat, scale) {
  * return tiles that are on maxZoom.
  */
 export function getTileIndices(viewport, maxZoom, minZoom) {
-  const z = Math.floor(viewport.zoom);
-  if (minZoom && z < minZoom) {
+  let z = Math.ceil(viewport.zoom);
+  if (Number.isFinite(minZoom) && z < minZoom) {
     return [];
   }
-
-  viewport = new viewport.constructor(
-    Object.assign({}, viewport, {
-      zoom: z
-    })
-  );
+  if (Number.isFinite(maxZoom) && z > maxZoom) {
+    z = maxZoom;
+  }
 
   const bbox = getBoundingBox(viewport);
-
-  let [minX, minY] = getTileIndex([bbox[0], bbox[3]], viewport.scale);
-  let [maxX, maxY] = getTileIndex([bbox[2], bbox[1]], viewport.scale);
+  const scale = 2 ** z;
+  /*
+    minX, maxX could be out of bounds if longitude is near the 180 meridian or multiple worlds
+    are shown:
+                |       |
+    actual   -2 -1  0  1  2  3
+    expected  2  3  0  1  2  3
+   */
+  let [minX, minY] = getTileIndex([bbox[0], bbox[3]], scale);
+  let [maxX, maxY] = getTileIndex([bbox[2], bbox[1]], scale);
+  const indices = [];
 
   /*
       |  TILE  |  TILE  |  TILE  |
-        |(minPixel)           |(maxPixel)
-      |(minIndex)                |(maxIndex)  
+        |(minX)            |(maxX)
    */
-  minX = Math.max(0, Math.floor(minX));
-  maxX = Math.min(viewport.scale, Math.ceil(maxX));
+  minX = Math.floor(minX);
+  maxX = Math.min(minX + scale, maxX); // Avoid creating duplicates
   minY = Math.max(0, Math.floor(minY));
-  maxY = Math.min(viewport.scale, Math.ceil(maxY));
-
-  const indices = [];
-
+  maxY = Math.min(scale, maxY);
   for (let x = minX; x < maxX; x++) {
     for (let y = minY; y < maxY; y++) {
-      if (maxZoom && z > maxZoom) {
-        indices.push(getAdjustedTileIndex({x, y, z}, maxZoom));
-      } else {
-        indices.push({x, y, z});
-      }
+      // Cast to valid x between [0, scale]
+      const normalizedX = x - Math.floor(x / scale) * scale;
+      indices.push({x: normalizedX, y, z});
     }
   }
-  return indices;
-}
 
-/**
- * Calculates and returns a new tile index {x, y, z}, with z being the given adjustedZ.
- */
-function getAdjustedTileIndex({x, y, z}, adjustedZ) {
-  const m = Math.pow(2, z - adjustedZ);
-  return {
-    x: Math.floor(x / m),
-    y: Math.floor(y / m),
-    z: adjustedZ
-  };
+  return indices;
 }

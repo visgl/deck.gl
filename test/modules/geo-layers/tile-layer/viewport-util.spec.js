@@ -10,11 +10,11 @@ const TEST_CASES = [
       height: 400,
       longitude: -90,
       latitude: 45,
-      zoom: 3.5
+      zoom: 2.5
     }),
     minZoom: undefined,
     maxZoom: undefined,
-    output: ['1,2,3', '1,3,3', '2,2,3', '2,3,3']
+    output: ['0,2,3', '0,3,3', '1,2,3', '1,3,3', '2,2,3', '2,3,3', '3,2,3', '3,3,3']
   },
   {
     title: 'tilted viewport',
@@ -25,11 +25,24 @@ const TEST_CASES = [
       bearing: -25,
       longitude: -90,
       latitude: 45,
-      zoom: 3.5
+      zoom: 2.5
     }),
     minZoom: undefined,
     maxZoom: undefined,
-    output: ['0,1,3', '0,2,3', '0,3,3', '1,1,3', '1,2,3', '1,3,3', '2,1,3', '2,2,3', '2,3,3']
+    output: [
+      '0,1,3',
+      '0,2,3',
+      '0,3,3',
+      '1,1,3',
+      '1,2,3',
+      '1,3,3',
+      '2,1,3',
+      '2,2,3',
+      '2,3,3',
+      '3,1,3',
+      '3,2,3',
+      '3,3,3'
+    ]
   },
   {
     title: 'flat viewport (exact)',
@@ -69,7 +82,7 @@ const TEST_CASES = [
     title: 'z0 repeat',
     viewport: new WebMercatorViewport({
       width: 800,
-      height: 400,
+      height: 200,
       longitude: -90,
       latitude: 0,
       zoom: 0
@@ -77,15 +90,27 @@ const TEST_CASES = [
     minZoom: undefined,
     maxZoom: undefined,
     output: ['0,0,0']
+  },
+  {
+    title: 'near 180 meridian',
+    viewport: new WebMercatorViewport({
+      width: 800,
+      height: 200,
+      longitude: -152,
+      latitude: 0,
+      zoom: 3
+    }),
+    maxZoom: 2,
+    output: ['0,1,2', '0,2,2', '3,1,2', '3,2,2']
   }
 ];
 
 function getTileIds(tiles) {
-  const set = new Set();
+  const ids = [];
   for (const tile of tiles) {
-    set.add(`${tile.x},${tile.y},${tile.z}`);
+    ids.push(`${tile.x},${tile.y},${tile.z}`);
   }
-  return Array.from(set).sort();
+  return ids.sort();
 }
 
 test('getTileIndices', t => {

@@ -1,6 +1,6 @@
 /* global window, document */
 /* eslint-disable max-statements */
-import Mapbox from 'react-map-gl/dist/es6/mapbox/mapbox';
+import Mapbox from 'react-map-gl/dist/esm/mapbox/mapbox';
 
 import {Deck} from '../src';
 

@@ -1,5 +1,5 @@
 #!/bin/bash
-IS_PYTHON=$(git diff --cached --name-only | grep "bindings/python/")
+IS_PYTHON=$(git diff --cached --name-only | grep "python/pydeck")
 HAS_PYTEST=$(command -v pytest)
 
 if [[ -n "$IS_PYTHON" ]]; then
@@ -10,9 +10,9 @@ if [[ -n "$IS_PYTHON" ]]; then
     exit 1
   fi
 
-  python3 -m pytest bindings/python/pydeck/tests/
+  python3 -m pytest bindings/pydeck/tests/
   echo "Running flake8..."
-  (cd bindings/python/pydeck && python3 -m flake8 pydeck)
+  (cd bindings/pydeck && python3 -m flake8 pydeck)
 fi
 RESULT=$?
 [ $RESULT -ne 0 ] && exit 1

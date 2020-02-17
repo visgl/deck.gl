@@ -1,3 +1,5 @@
+const PRE_MATCH_REGEX = /(GeoJson|3D|API|DeckGL|JSON)/g;
+
 function getDocUrl(filename) {
   // DOCS_DIR specified in webpack config file
   // eslint-disable-next-line no-undef
@@ -19,9 +21,15 @@ function generatePath(tree, parentPath = '', depth = 0) {
 
   tree.depth = depth;
   if (tree.name) {
+    // pre-match GeoJson|3D|API|DeckGL|JSON
+    // use `#` to take up pre-matched' space
+    // then replace `#` with pre-match results
+    const matches = tree.name.match(PRE_MATCH_REGEX);
     tree.path = tree.name
-      .match(/(GeoJson|3D|API|DeckGL|JSON|[A-Z]*[a-z'0-9\.]+|\d+)/g)
+      .replace(PRE_MATCH_REGEX, '#')
+      .match(/(#|[A-Z]*[a-z'0-9\.]+|\d+)/g)
       .join('-')
+      .replace('#', _ => matches.shift())
       .toLowerCase()
       .replace(/[^\w-]/g, '');
   }

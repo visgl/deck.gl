@@ -124,7 +124,12 @@ export default class GPUSpringTransition {
     });
 
     cycleBuffers(buffers);
-    this.attributeInTransition.update({buffer: buffers[1]});
+    this.attributeInTransition.update({
+      buffer: buffers[1],
+      // Hack: Float64Array is required for double-precision attributes
+      // to generate correct shader attributes
+      value: this.attribute.value
+    });
 
     const isTransitioning = readPixelsToArray(framebuffer)[0] > 0;
 

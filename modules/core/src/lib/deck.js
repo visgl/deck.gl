@@ -27,8 +27,10 @@ import DeckRenderer from './deck-renderer';
 import DeckPicker from './deck-picker';
 import Tooltip from './tooltip';
 import log from '../utils/log';
+import {deepEqual} from '../utils/deep-equal';
 import deckGlobal from './init';
 
+import {getBrowser} from 'probe.gl/env';
 import GL from '@luma.gl/constants';
 import {
   AnimationLoop,
@@ -43,7 +45,7 @@ import {EventManager} from 'mjolnir.js';
 
 import assert from '../utils/assert';
 import {EVENTS} from './constants';
-/* global window, document */
+/* global document */
 
 function noop() {}
 
@@ -79,6 +81,7 @@ function getPropTypes(PropTypes) {
     onBeforeRender: PropTypes.func,
     onAfterRender: PropTypes.func,
     onLoad: PropTypes.func,
+    onError: PropTypes.func,
 
     // Debug settings
     debug: PropTypes.bool,
@@ -115,6 +118,7 @@ const defaultProps = {
   onBeforeRender: noop,
   onAfterRender: noop,
   onLoad: noop,
+  onError: null,
   _onMetrics: null,
 
   getCursor,
@@ -127,6 +131,7 @@ const defaultProps = {
 export default class Deck {
   constructor(props) {
     props = Object.assign({}, defaultProps, props);
+    this.props = {};
 
     this.width = 0; // "read-only", auto-updated from canvas
     this.height = 0; // "read-only", auto-updated from canvas
@@ -144,7 +149,7 @@ export default class Deck {
     // This object is reused for subsequent `onClick` and `onDrag*` callbacks.
     this._lastPointerDownInfo = null;
 
-    this.viewState = props.initialViewState || null; // Internal view state if no callback is supplied
+    this.viewState = null; // Internal view state if no callback is supplied
     this.interactiveState = {
       isDragging: false // Whether the cursor is down
     };
@@ -159,7 +164,12 @@ export default class Deck {
     this._onViewStateChange = this._onViewStateChange.bind(this);
     this._onInteractiveStateChange = this._onInteractiveStateChange.bind(this);
 
-    if (isIE11()) {
+    if (props.viewState && props.initialViewState) {
+      log.warn(
+        'View state tracking is disabled. Use either `initialViewState` for auto update or `viewState` for manual update.'
+      )();
+    }
+    if (getBrowser() === 'IE') {
       log.warn('IE 11 support will be deprecated in v8.0')();
     }
 
@@ -203,33 +213,22 @@ export default class Deck {
     if (this.layerManager) {
       this.layerManager.finalize();
       this.layerManager = null;
-    }
 
-    if (this.viewManager) {
       this.viewManager.finalize();
       this.viewManager = null;
-    }
 
-    if (this.effectManager) {
       this.effectManager.finalize();
       this.effectManager = null;
-    }
 
-    if (this.deckRenderer) {
       this.deckRenderer.finalize();
       this.deckRenderer = null;
-    }
 
-    if (this.deckPicker) {
       this.deckPicker.finalize();
       this.deckPicker = null;
-    }
 
-    if (this.eventManager) {
       this.eventManager.destroy();
-    }
+      this.eventManager = null;
 
-    if (this.tooltip) {
       this.tooltip.remove();
       this.tooltip = null;
     }
@@ -250,50 +249,36 @@ export default class Deck {
     if ('onLayerClick' in props) {
       log.removed('onLayerClick', 'onClick')();
     }
+    if (props.initialViewState && !deepEqual(this.props.initialViewState, props.initialViewState)) {
+      // Overwrite internal view state
+      this.viewState = props.initialViewState;
+    }
 
-    props = Object.assign({}, this.props, props);
-    this.props = props;
+    // Merge with existing props
+    Object.assign(this.props, props);
 
     // Update CSS size of canvas
-    this._setCanvasSize(props);
+    this._setCanvasSize(this.props);
 
     // We need to overwrite CSS style width and height with actual, numeric values
-    const newProps = Object.assign({}, props, {
-      views: this._getViews(this.props),
+    const resolvedProps = Object.create(this.props);
+    Object.assign(resolvedProps, {
+      views: this._getViews(),
       width: this.width,
-      height: this.height
+      height: this.height,
+      viewState: this._getViewState()
     });
 
-    const viewState = this._getViewState(props);
-    if (viewState) {
-      newProps.viewState = viewState;
-    }
+    // Update the animation loop
+    this.animationLoop.setProps(resolvedProps);
 
-    // Update view manager props
-    if (this.viewManager) {
-      this.viewManager.setProps(newProps);
-    }
-
-    // Update layer manager props (but not size)
+    // If initialized, update sub manager props
     if (this.layerManager) {
-      this.layerManager.setProps(newProps);
-    }
-
-    if (this.effectManager) {
-      this.effectManager.setProps(newProps);
-    }
-
-    // Update animation loop
-    if (this.animationLoop) {
-      this.animationLoop.setProps(newProps);
-    }
-
-    if (this.deckRenderer) {
-      this.deckRenderer.setProps(newProps);
-    }
-
-    if (this.deckPicker) {
-      this.deckPicker.setProps(newProps);
+      this.viewManager.setProps(resolvedProps);
+      this.layerManager.setProps(resolvedProps);
+      this.effectManager.setProps(resolvedProps);
+      this.deckRenderer.setProps(resolvedProps);
+      this.deckPicker.setProps(resolvedProps);
     }
 
     this.stats.get('setProps Time').timeEnd();
@@ -404,7 +389,6 @@ export default class Deck {
 
     // TODO EventManager should accept element id
     if (typeof canvas === 'string') {
-      /* global document */
       canvas = document.getElementById(canvas);
       assert(canvas);
     }
@@ -489,18 +473,18 @@ export default class Deck {
 
   // Get the most relevant view state: props.viewState, if supplied, shadows internal viewState
   // TODO: For backwards compatibility ensure numeric width and height is added to the viewState
-  _getViewState(props) {
-    return props.viewState || this.viewState;
+  _getViewState() {
+    return this.props.viewState || this.viewState;
   }
 
   // Get the view descriptor list
-  _getViews(props) {
+  _getViews() {
     // Default to a full screen map view port
-    let views = props.views || [new MapView({id: 'default-view'})];
+    let views = this.props.views || [new MapView({id: 'default-view'})];
     views = Array.isArray(views) ? views : [views];
-    if (views.length && props.controller) {
+    if (views.length && this.props.controller) {
       // Backward compatibility: support controller prop
-      views[0].props.controller = props.controller;
+      views[0].props.controller = this.props.controller;
     }
     return views;
   }
@@ -533,7 +517,6 @@ export default class Deck {
       this.layerManager.context.mousePosition = {x: _pickRequest.x, y: _pickRequest.y};
     }
 
-    _pickRequest.callback = this.props.onHover;
     _pickRequest.event = event;
     _pickRequest.mode = 'hover';
   }
@@ -542,25 +525,35 @@ export default class Deck {
   _pickAndCallback() {
     const {_pickRequest} = this;
 
-    if (_pickRequest.mode) {
-      // perform picking
+    if (_pickRequest.event) {
+      // Perform picking
       const {result, emptyInfo} = this._pick('pickObject', 'pickObject Time', _pickRequest);
-      const shouldGenerateInfo = _pickRequest.callback || this.props.getTooltip;
-      const pickedInfo = shouldGenerateInfo && (result.find(info => info.index >= 0) || emptyInfo);
+      const pickedInfo = result[0] || emptyInfo;
+
+      // Update tooltip
       if (this.props.getTooltip) {
         const displayInfo = this.props.getTooltip(pickedInfo);
         this.tooltip.setTooltip(displayInfo, pickedInfo.x, pickedInfo.y);
       }
-      if (_pickRequest.callback) {
-        _pickRequest.callback(pickedInfo, _pickRequest.event);
+
+      // Execute callbacks
+      let handled = false;
+      if (pickedInfo.layer) {
+        handled = pickedInfo.layer.onHover(pickedInfo, _pickRequest.event);
       }
-      _pickRequest.mode = null;
+      if (!handled && this.props.onHover) {
+        this.props.onHover(pickedInfo, _pickRequest.event);
+      }
+
+      // Clear pending pickRequest
+      _pickRequest.event = null;
     }
   }
 
   _updateCursor() {
-    if (this.canvas) {
-      this.canvas.style.cursor = this.props.getCursor(this.interactiveState);
+    const container = this.props.parent || this.canvas;
+    if (container) {
+      container.style.cursor = this.props.getCursor(this.interactiveState);
     }
   }
 
@@ -609,8 +602,8 @@ export default class Deck {
       eventManager: this.eventManager,
       onViewStateChange: this._onViewStateChange,
       onInteractiveStateChange: this._onInteractiveStateChange,
-      views: this._getViews(this.props),
-      viewState: this._getViewState(this.props),
+      views: this._getViews(),
+      viewState: this._getViewState(),
       width: this.width,
       height: this.height
     });
@@ -808,15 +801,6 @@ export default class Deck {
     metrics.renderbufferMemory = memoryStats.get('Renderbuffer Memory').count;
     metrics.gpuMemory = memoryStats.get('GPU Memory').count;
   }
-}
-
-function isIE11() {
-  if (typeof window === undefined) {
-    return false;
-  }
-  const navigator = window.navigator || {};
-  const userAgent = navigator.userAgent || '';
-  return userAgent.indexOf('Trident/') !== -1;
 }
 
 Deck.getPropTypes = getPropTypes;

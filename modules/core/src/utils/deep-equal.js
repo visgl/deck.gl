@@ -1,13 +1,20 @@
-// Compare two objects, partial deep equal
+// Partial deep equal (only recursive on arrays)
 export function deepEqual(a, b) {
   if (a === b) {
     return true;
   }
-  // TODO - implement deep equal on view descriptors
-  return Object.keys(a).every(key => {
-    if (Array.isArray(a[key]) && Array.isArray(b[key])) {
-      return deepEqual(a[key], b[key]);
+  if (!a || !b) {
+    return false;
+  }
+  for (const key in a) {
+    const aValue = a[key];
+    const bValue = b[key];
+    const equals =
+      aValue === bValue ||
+      (Array.isArray(aValue) && Array.isArray(bValue) && deepEqual(aValue, bValue));
+    if (!equals) {
+      return false;
     }
-    return a[key] === b[key];
-  });
+  }
+  return true;
 }

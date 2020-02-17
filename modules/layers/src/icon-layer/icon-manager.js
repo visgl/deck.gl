@@ -1,8 +1,9 @@
 /* global document */
 import GL from '@luma.gl/constants';
 import {Texture2D, copyToTexture, cloneTextureFrom} from '@luma.gl/core';
-import {loadImage} from '@loaders.gl/images';
-import {createIterable} from '@deck.gl/core';
+import {ImageLoader} from '@loaders.gl/images';
+import {load} from '@loaders.gl/core';
+import {createIterable, log} from '@deck.gl/core';
 
 const DEFAULT_CANVAS_WIDTH = 1024;
 const DEFAULT_BUFFER = 4;
@@ -12,7 +13,10 @@ const noop = () => {};
 const DEFAULT_TEXTURE_PARAMETERS = {
   [GL.TEXTURE_MIN_FILTER]: GL.LINEAR_MIPMAP_LINEAR,
   // GL.LINEAR is the default value but explicitly set it here
-  [GL.TEXTURE_MAG_FILTER]: GL.LINEAR
+  [GL.TEXTURE_MAG_FILTER]: GL.LINEAR,
+  // for texture boundary artifact
+  [GL.TEXTURE_WRAP_S]: GL.CLAMP_TO_EDGE,
+  [GL.TEXTURE_WRAP_T]: GL.CLAMP_TO_EDGE
 };
 
 function nextPowOfTwo(number) {
@@ -48,7 +52,7 @@ function resizeTexture(gl, texture, width, height) {
 
   const newTexture = cloneTextureFrom(texture, {width, height});
   copyToTexture(texture, newTexture, {
-    targetY: height - oldHeight,
+    targetY: 0,
     width: oldWidth,
     height: oldHeight
   });
@@ -184,6 +188,8 @@ export default class IconManager {
     this._texture = null;
     this._externalTexture = null;
     this._mapping = {};
+    // count of pending requests to fetch icons
+    this._pendingCount = 0;
 
     this._autoPacking = false;
 
@@ -236,6 +242,10 @@ export default class IconManager {
 
       this._updateAutoPacking(data);
     }
+  }
+
+  get loaded() {
+    return this._pendingCount === 0;
   }
 
   _updateIconAtlas(iconAtlas) {
@@ -308,25 +318,33 @@ export default class IconManager {
     const ctx = this._canvas.getContext('2d');
 
     for (const icon of icons) {
-      loadImage(icon.url).then(imageData => {
-        const id = getIconId(icon);
-        const {x, y, width, height} = this._mapping[id];
+      this._pendingCount++;
+      load(icon.url, ImageLoader)
+        .then(imageData => {
+          const id = getIconId(icon);
+          const {x, y, width, height} = this._mapping[id];
 
-        const data = resizeImage(ctx, imageData, width, height);
+          const data = resizeImage(ctx, imageData, width, height);
 
-        this._texture.setSubImageData({
-          data,
-          x,
-          y,
-          width,
-          height
+          this._texture.setSubImageData({
+            data,
+            x,
+            y,
+            width,
+            height
+          });
+
+          // Call to regenerate mipmaps after modifying texture(s)
+          this._texture.generateMipmap();
+
+          this.onUpdate();
+        })
+        .catch(error => {
+          log.error(error)();
+        })
+        .finally(() => {
+          this._pendingCount--;
         });
-
-        // Call to regenerate mipmaps after modifying texture(s)
-        this._texture.generateMipmap();
-
-        this.onUpdate();
-      });
     }
   }
 }

@@ -1,19 +1,13 @@
 export default `\
-#if (__VERSION__ < 300)
-  #define _attribute attribute
-  #define _varying varying
-#else
-  #define _attribute in
-#define _varying out
-#endif
+#version 300 es
 
 // Instance attributes
-_attribute vec3 instancePositions;
-_attribute vec3 instancePositions64Low;
-_attribute vec4 instanceColors;
-_attribute vec3 instancePickingColors;
-_attribute mat3 instanceModelMatrix;
-_attribute vec3 instanceTranslation;
+in vec3 instancePositions;
+in vec3 instancePositions64Low;
+in vec4 instanceColors;
+in vec3 instancePickingColors;
+in mat3 instanceModelMatrix;
+in vec3 instanceTranslation;
 
 // Uniforms
 uniform float sizeScale;
@@ -23,25 +17,25 @@ uniform mat4 sceneModelMatrix;
 uniform bool composeModelMatrix;
 
 // Attributes
-_attribute vec4 POSITION;
+in vec4 POSITION;
 
 #ifdef HAS_UV
-  _attribute vec2 TEXCOORD_0;
+  in vec2 TEXCOORD_0;
 #endif
 
 #ifdef MODULE_PBR
   #ifdef HAS_NORMALS
-    _attribute vec4 NORMAL;
+    in vec4 NORMAL;
   #endif
 #endif
 
 // Varying
-_varying vec4 vColor;
+out vec4 vColor;
 
 // MODULE_PBR contains all the varying definitions needed
 #ifndef MODULE_PBR
   #ifdef HAS_UV
-    _varying vec2 vTEXCOORD_0;
+    out vec2 vTEXCOORD_0;
   #endif
 #endif
 
@@ -66,7 +60,7 @@ void main(void) {
       pbr_vUV = TEXCOORD_0;
     #else
       pbr_vUV = vec2(0., 0.);
-    #endif    
+    #endif
     geometry.uv = pbr_vUV;
   #endif
 

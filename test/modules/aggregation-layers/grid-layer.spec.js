@@ -119,7 +119,7 @@ test('GridLayer#updates', t => {
       },
       {
         updateProps: {
-          colorAggregation: 'Mean'
+          colorAggregation: 'MEAN'
         },
         onAfterUpdate({layer, subLayers, spies}) {
           t.ok(

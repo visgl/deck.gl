@@ -4,7 +4,7 @@ import mapboxgl from './ssr-safe-mapbox';
 
 import {CSVLoader} from '@loaders.gl/csv';
 import {Tile3DLoader} from '@loaders.gl/3d-tiles';
-import * as loaders from '@loaders.gl/core';
+import {registerLoaders} from '@loaders.gl/core';
 
 import * as deck from './deck-bundle';
 
@@ -35,7 +35,7 @@ const jsonConverterConfiguration = {
   }
 };
 
-loaders.registerLoaders([CSVLoader, Tile3DLoader]);
+registerLoaders([CSVLoader, Tile3DLoader]);
 
 const jsonConverter = new deck.JSONConverter({
   configuration: jsonConverterConfiguration
@@ -90,3 +90,5 @@ function injectFunction(warnFunction, messageHandler) {
     return warnFunction(...args);
   };
 }
+
+export default jsonConverter;

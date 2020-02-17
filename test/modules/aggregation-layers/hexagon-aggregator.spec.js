@@ -19,6 +19,7 @@
 // THE SOFTWARE.
 
 import test from 'tape-catch';
+import {WebMercatorViewport} from 'deck.gl';
 
 import * as FIXTURES from 'deck.gl-test/data';
 
@@ -75,5 +76,34 @@ test('pointToHexbin#invalidData', t => {
   t.ok(log.warn.called, 'should produce a warning message in the presence of non-finite values');
 
   log.warn.restore();
+  t.end();
+});
+
+test('pointToHexbin#radius', t => {
+  // test viewport far away from data center
+  const testViewport = new WebMercatorViewport({
+    width: 1024,
+    height: 768,
+    longitude: 0,
+    latitude: 0,
+    zoom: 11,
+    pitch: 30,
+    bearing: 0
+  });
+
+  const props = {
+    data: iterableData,
+    radius,
+    getPosition
+  };
+  const aggregationParams = {
+    attributes,
+    viewport: testViewport
+  };
+
+  const result = pointToHexbin(props, aggregationParams);
+  t.ok(typeof result === 'object', 'should work with iterables');
+  t.ok(typeof result.radiusCommon === 'number', 'should return radiusCommon');
+
   t.end();
 });

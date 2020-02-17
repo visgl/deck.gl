@@ -616,7 +616,8 @@ export default class Layer extends Component {
 
     const currentProps = this.props;
     // Overwrite this.props during redraw to use in-transition prop values
-    this.props = this.internalState.propsInTransition;
+    // `internalState.propsInTransition` could be missing if `updateState` failed
+    this.props = this.internalState.propsInTransition || currentProps;
 
     const {opacity} = this.props;
     // apply gamma to opacity to make it visually "linear"

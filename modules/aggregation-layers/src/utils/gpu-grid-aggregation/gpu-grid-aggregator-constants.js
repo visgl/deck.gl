@@ -1,13 +1,7 @@
 import GL from '@luma.gl/constants';
 import {AGGREGATION_OPERATION} from '../aggregation-operation-utils';
-export const DEFAULT_CHANGE_FLAGS = {
-  dataChanged: true,
-  viewportChanged: true,
-  cellSizeChanged: true
-};
 
 export const DEFAULT_RUN_PARAMS = {
-  changeFlags: DEFAULT_CHANGE_FLAGS,
   projectPoints: false,
   viewport: null,
   createBufferObjects: true,

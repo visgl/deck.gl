@@ -6,7 +6,7 @@
 
 References:
 
-* [Layer Group Operations RFC](v6.x/layer-and-group-operation-rfc.md)
+* [Layer Group Operations RFC](/dev-docs/RFCs/proposals/layer-and-group-operation-rfc.md)
 
 
 ## Abstract

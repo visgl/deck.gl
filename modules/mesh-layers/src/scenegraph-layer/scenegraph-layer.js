@@ -18,8 +18,9 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {Layer, project32, picking} from '@deck.gl/core';
-import {isWebGL2, pbr, log} from '@luma.gl/core';
+import {Layer, project32, picking, log} from '@deck.gl/core';
+import {isWebGL2} from '@luma.gl/core';
+import {pbr} from '@luma.gl/shadertools';
 import {ScenegraphNode, createGLTFObjects} from '@luma.gl/experimental';
 import GL from '@luma.gl/constants';
 import {waitForGLTFAssets} from './gltf-utils';
@@ -122,7 +123,7 @@ export default class ScenegraphLayer extends Layer {
       log.deprecated(
         'ScenegraphLayer.props.scenegraph',
         'Use GLTFLoader instead of GLTFScenegraphLoader'
-      );
+      )();
       scenegraphData = props.scenegraph;
     }
 
@@ -195,14 +196,6 @@ export default class ScenegraphLayer extends Layer {
     }
   }
 
-  addVersionToShader(source) {
-    if (isWebGL2(this.context.gl)) {
-      return `#version 300 es\n${source}`;
-    }
-
-    return source;
-  }
-
   getLoadOptions() {
     const modules = [project32, picking];
     const {_lighting, _imageBasedLightingEnvironment} = this.props;
@@ -225,10 +218,11 @@ export default class ScenegraphLayer extends Layer {
       waitForFullLoad: true,
       imageBasedLightingEnvironment: env,
       modelOptions: {
-        vs: this.addVersionToShader(vs),
-        fs: this.addVersionToShader(fs),
+        vs,
+        fs,
         modules,
-        isInstanced: true
+        isInstanced: true,
+        transpileToGLSL100: !isWebGL2(this.context.gl)
       },
       // tangents are not supported
       useTangents: false

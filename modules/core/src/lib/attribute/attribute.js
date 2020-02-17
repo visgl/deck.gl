@@ -153,7 +153,10 @@ export default class Attribute extends DataColumn {
       }
       if (!this.value) {
         // no value was assigned during update
-      } else if (this.constant || this.buffer.byteLength < this.value.byteLength) {
+      } else if (
+        this.constant ||
+        this.buffer.byteLength < this.value.byteLength + this.byteOffset
+      ) {
         this.setData({
           value: this.value,
           constant: this.constant
@@ -246,10 +249,10 @@ export default class Attribute extends DataColumn {
     if (ArrayBuffer.isView(buffer)) {
       buffer = {value: buffer};
     }
-    assert(ArrayBuffer.isView(buffer.value), `invalid ${settings.accessor}`);
     const needsUpdate = settings.transform || startIndices !== this.startIndices;
 
     if (needsUpdate) {
+      assert(ArrayBuffer.isView(buffer.value), `invalid ${settings.accessor}`);
       const needsNormalize = buffer.size && buffer.size !== this.size;
 
       state.binaryAccessor = getAccessorFromBuffer(buffer.value, {

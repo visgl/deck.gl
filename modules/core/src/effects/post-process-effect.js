@@ -1,7 +1,6 @@
 import Effect from '../lib/effect';
 import ScreenPass from '../passes/screen-pass';
-/* eslint-disable import/no-extraneous-dependencies */
-import {normalizeShaderModule} from '@luma.gl/shadertools';
+import {normalizeShaderModule} from '@luma.gl/core';
 
 export default class PostProcessEffect extends Effect {
   constructor(module, props = {}) {

@@ -70,7 +70,7 @@ export default class App extends Component {
   }
 
   _getLayerData({data}) {
-    if (!data) {
+    if (!data || !data.length) {
       return null;
     }
     const arcs = [];

@@ -66,9 +66,8 @@ export default class PolygonTesselator extends Tesselator {
   }
 
   getGeometryFromBuffer(buffer) {
-    const getGeometry = super.getGeometryFromBuffer(buffer);
     if (this.normalize || !this.buffers.indices) {
-      return getGeometry;
+      return super.getGeometryFromBuffer(buffer);
     }
     // we don't need to read the positions if no normalization/tesselation
     return () => null;

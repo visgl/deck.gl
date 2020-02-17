@@ -32,6 +32,7 @@ attribute vec3 instancePickingColors;
 attribute vec4 instanceIconFrames;
 attribute float instanceColorModes;
 attribute vec2 instanceOffsets;
+attribute vec2 instancePixelOffset;
 
 uniform float sizeScale;
 uniform vec2 iconsTextureDim;
@@ -73,6 +74,7 @@ void main(void) {
   // scale and rotate vertex in "pixel" value and convert back to fraction in clipspace
   vec2 pixelOffset = positions / 2.0 * iconSize + instanceOffsets;
   pixelOffset = rotate_by_angle(pixelOffset, instanceAngles) * instanceScale;
+  pixelOffset += instancePixelOffset;
   pixelOffset.y *= -1.0;
 
   if (billboard)  {
