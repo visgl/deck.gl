@@ -544,6 +544,10 @@ export const docPages = generatePath([
           {
             name: 'TripsLayer',
             content: getDocUrl('layers/trips-layer.md')
+          },
+          {
+            name: 'TerrainLayer',
+            content: getDocUrl('layers/terrain-layer.md')
           }
         ]
       },

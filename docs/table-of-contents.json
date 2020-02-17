@@ -98,7 +98,8 @@
             {"entry": "docs/layers/screen-grid-layer"},
             {"entry": "docs/layers/simple-mesh-layer"},
             {"entry": "docs/layers/tile-layer"},
-            {"entry": "docs/layers/trips-layer"}
+            {"entry": "docs/layers/trips-layer"},
+            {"entry": "docs/layers/terrain-layer"}
           ]
         },
         {

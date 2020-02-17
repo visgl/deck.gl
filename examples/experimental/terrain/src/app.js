@@ -3,7 +3,7 @@ import React, {useState} from 'react';
 import {render} from 'react-dom';
 import DeckGL from '@deck.gl/react';
 
-import TerrainLayer from './terrain-layer/terrain-layer';
+import TerrainLayer from '@deck.gl/geo-layers';
 import {getSurface} from './surface';
 import {getViewState} from './locations';
 

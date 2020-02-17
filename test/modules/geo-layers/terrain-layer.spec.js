@@ -17,13 +17,17 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
-/* eslint-disable max-len */
 
-export {default as GreatCircleLayer} from './great-circle-layer/great-circle-layer';
-export {default as S2Layer} from './s2-layer/s2-layer';
-export {default as TileLayer} from './tile-layer/tile-layer';
-export {default as TripsLayer} from './trips-layer/trips-layer';
-export {default as H3ClusterLayer} from './h3-layers/h3-cluster-layer';
-export {default as H3HexagonLayer} from './h3-layers/h3-hexagon-layer';
-export {default as Tile3DLayer} from './tile-3d-layer/tile-3d-layer';
-export {default as TerrainLayer} from './terrain-layer/terrain-layer';
+import test from 'tape-catch';
+import {generateLayerTests, testLayer} from '@deck.gl/test-utils';
+import {TerrainLayer} from '@deck.gl/geo-layers';
+
+test('TerrainLayer', t => {
+  const testCases = generateLayerTests({
+    Layer: TerrainLayer,
+    assert: t.ok,
+    onBeforeUpdate: ({testCase}) => t.comment(testCase.title)
+  });
+  testLayer({Layer: TerrainLayer, testCases, onError: t.notOk});
+  t.end();
+});
