@@ -89,6 +89,7 @@ Image url to use as surface texture. Same URL parsing as `terrainImage`.
 
 - Default: `0`
 
+### Mesh Options
 
 ##### `meshMaxError` (Number, optional)
 
@@ -105,10 +106,19 @@ Object to decode height data, from (r, g, b) to height in meters.
 
 ##### `bounds` (Array)
 
-Bounding box of the terrain image, [minX, minY, maxX, maxY] in world coordinates. Must be supplied when using Non-Tiled Mode.
+Bounding box of the terrain image, [minX, minY, maxX, maxY] in world coordinates. Must be supplied when using Non-Tiled Mode, otherwise optional.
 
 - Default: `[0, 0, 1, 1]`
 
+`mixX`, `minY`, `maxX`, `maxY` refers to the coordinate of the `left`, `bottom`, `right`, `top` sides of the image, respectively.
+
+##### `workerUrl` (String, optional)
+
+**Advanced** Supply url to local terrain worker bundle. Only required if running offline and cannot access CDN.
+
+- Default: `null`
+
+### Render Options
 
 ##### `color` (Color, optional)
 
@@ -121,12 +131,6 @@ Color to use if surfaceImage is unavailable.
 Same as SimpleMeshLayer wireframe.
 
 - Default: `false`
-
-##### `workerUrl` (String, optional)
-
-**Advanced** Supply url to local terrain worker bundle. Only required if running offline and cannot access CDN.
-
-- Default: `null`
 
 # Source
 
