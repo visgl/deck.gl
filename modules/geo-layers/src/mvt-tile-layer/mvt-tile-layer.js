@@ -8,19 +8,17 @@ import TileLayer from '../tile-layer/tile-layer';
 
 const defaultProps = Object.assign({}, TileLayer.defaultProps, {
   renderSubLayers: {type: 'function', value: renderSubLayers, compare: false},
-  uniquePropertyName: '',
   urlTemplates: []
 });
 
 export default class MVTTileLayer extends TileLayer {
   initializeState() {
     super.initializeState();
-    const {urlTemplates, uniquePropertyName} = this.props;
+    const {urlTemplates} = this.props;
 
     this.state = {
       ...this.state,
       urlTemplates,
-      uniquePropertyName,
       getTileData: this.getTileData.bind(this)
     };
   }
