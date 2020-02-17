@@ -7,60 +7,32 @@
 
 # TerrainLayer
 
-This TileLayer takes in a function `getTileData` that fetches tiles, and renders it in a GeoJsonLayer or with the layer returned in `renderSubLayers`.
+This TerrainLayer reconstructs mesh surfaces from height map images, e.g. [Mapzen Terrain Tiles](https://github.com/tilezen/joerd/blob/master/docs/formats.md), which encodes elevation into R,G,B values.
+
+When `terrainImage` is supplied with a templated tile server URL, e.g. URL containing "{x}", it renders terrain tiles globally using the TileLayer and SimpleMeshLayer. Otherwise, supply an absolute URL to `terrainImage` and a `bounds` prop to render a any terrain image (e.g. non-Slippy map tiles) with a SimpleMeshLayer.
 
 ```js
 import DeckGL from '@deck.gl/react';
-import {TileLayer} from '@deck.gl/geo-layers';
-import {VectorTile} from '@mapbox/vector-tile';
-import Protobuf from 'pbf';
+import {TerrainLayer} from '@deck.gl/geo-layers';
 
 export const App = ({viewport}) => {
 
-  const layer = new TileLayer({
-    stroked: false,
-
-    getLineColor: [192, 192, 192],
-    getFillColor: [140, 170, 180],
-
-    getLineWidth: f => {
-      if (f.properties.layer === 'transportation') {
-        switch (f.properties.class) {
-        case 'primary':
-          return 12;
-        case 'motorway':
-          return 16;
-        default:
-          return 6;
-        }
-      }
-      return 1;
+  const layer = new TerrainLayer({
+    minZoom: 0,
+    maxZoom: 23,
+    strategy: 'no-overlap',
+    elevationDecoder: {
+      rScaler: 256,
+      gScaler: 1,
+      bScaler: 1/256,
+      offset: -32768
     },
-    lineWidthMinPixels: 1,
-
-    getTileData: ({x, y, z}) => {
-      const mapSource = `https://a.tiles.mapbox.com/v4/mapbox.mapbox-streets-v7/${z}/${x}/${y}.vector.pbf?access_token=${MapboxAccessToken}`;
-      return fetch(mapSource)
-        .then(response => response.arrayBuffer())
-        .then(buffer => {
-          const tile = new VectorTile(new Protobuf(buffer));
-          const features = [];
-          for (const layerName in tile.layers) {
-            const vectorTileLayer = tile.layers[layerName];
-            for (let i = 0; i < vectorTileLayer.length; i++) {
-              const vectorTileFeature = vectorTileLayer.feature(i);
-              const feature = vectorTileFeature.toGeoJSON(x, y, z);
-              features.push(feature);
-            }
-          }
-          return features;
-        });
-    }
+    terrainImage: 'https://s3.amazonaws.com/elevation-tiles-prod/terrarium/{z}/{x}/{y}.png',
+    surfaceImage: 'https://wms.chartbundle.com/tms/1.0.0/sec/{z}/{x}/{y}.png?origin=nw'
   });
   return <DeckGL {...viewport} layers={[layer]} />;
 };
 ```
-
 
 ## Installation
 
@@ -91,114 +63,70 @@ To use pre-bundled scripts:
 new deck.TerrainLayer({});
 ```
 
-
 ## Properties
+
+When in Tiled Mode, inherits from all [Tile Layer](/docs/api-reference/tile-layer.md) properties. Otherwise, inherits from all [Simple Mesh Layer](/docs/api-reference/simple-mesh-layer.md) properties.
 
 ### Data Options
 
-##### `getTileData` (Function)
+##### `terrainImage` (String)
 
-`getTileData` given x, y, z indices of the tile, returns the tile data or a Promise that resolves to the tile data.
-
-- Default: `tile => Promise.resolve(null)`
-
-The `tile` argument contains the following fields:
-
-- `x` (Number) - x index of the tile
-- `y` (Number) - y index of the tile
-- `z` (Number) - z index of the tile
-- `bbox` (Object) - bounding box of the tile, see `tileToBoundingBox`.
-
-By default, the `TileLayer` loads tiles defined by [the OSM tile index](https://wiki.openstreetmap.org/wiki/Slippy_map_tilenames). You may override this by implementing `getTileIndices`.
-
-
-##### `maxZoom` (Number|Null, optional)
-
-Use tiles from this level when over-zoomed.
+Image url that encodes height data.
 
 - Default: `null`
 
+Depending on the `terrainImage` string, this layer renders as a tiled layer composed of a TileLayer of SimpleMeshLayers, or as a single mesh rendered as a SimpleMeshLayer.
 
-##### `minZoom` (Number, optional)
+* Tiled `terrainImage`: https://s3.amazonaws.com/elevation-tiles-prod/terrarium/{z}/{x}/{y}.png
 
-Hide tiles when under-zoomed.
+  * By default, the `TileLayer` loads tiles defined by [the OSM tile index](https://wiki.openstreetmap.org/wiki/Slippy_map_tilenames). You may override this by implementing `getTileIndices`.
 
-- Default: 0
+* Non-Tiled `terrainImage`: https://s3.amazonaws.com/elevation-tiles-prod/terrarium/1/1/0.png
+
+##### `surfaceImage` (String|Null, optional)
+
+Image url to use as surface texture. Same URL parsing as `terrainImage`.
+
+- Default: `0`
 
 
-##### `maxCacheSize` (Number|Null, optional)
+##### `meshMaxError` (Number, optional)
 
-The maximum cache size for a tile layer. If not defined, it is calculated using the number of tiles in the current viewport times multiplied by `5`.
+Martini error tolerance in meters, smaller number -> more detailed mesh.
+
+- Default: `4.0`
+
+##### `elevationDecoder` (Object)
+
+Object to decode height data, from (r, g, b) to height in meters.
+
+- Default: `{rScaler: 1, gScaler: 0, bScaler: 0, offset: 0}`
+
+
+##### `bounds` (Array)
+
+Bounding box of the terrain image, [minX, minY, maxX, maxY] in world coordinates. Must be supplied when using Non-Tiled Mode.
+
+- Default: `[0, 0, 1, 1]`
+
+
+##### `color` (Color, optional)
+
+Color to use if surfaceImage is unavailable.
+
+- Default: `[255, 255, 255]`
+
+##### `wireframe` (Boolean, optional)
+
+Same as SimpleMeshLayer wireframe.
+
+- Default: `false`
+
+##### `workerUrl` (String, optional)
+
+**Advanced** Supply url to local terrain worker bundle. Only required if running offline and cannot access CDN.
 
 - Default: `null`
-
-
-##### `strategy` (Enum, optional)
-
-How the tile layer determines the visibility of tiles. One of the following:
-
-* `'best-available'`: If a tile in the current viewport is waiting for its data to load, use cached content from the closest zoom level to fill the empty space. This approach minimizes the visual flashing due to missing content.
-* `'no-overlap'`: Avoid showing overlapping tiles when backfilling with cached content. This is usually favorable when tiles do not have opaque backgrounds.
-
-- Default: `'best-available'`
-
-
-##### `tileToBoundingBox` (Function, optional)
-
-**Advanced** Converts from `x, y, z` tile indices to a bounding box in the global coordinates. The default implementation converts an OSM tile index to `{west: <longitude>, north: <latitude>, east: <longitude>, south: <latitude>}`.
-
-Receives arguments:
-
-- `x` (Number)
-- `y` (Number)
-- `z` (Number)
-
-The returned value will be available via `tile.bbox`.
-
-
-##### `getTileIndices` (Function, optional)
-
-**Advanced** This function converts a given viewport to the indices needed to fetch tiles contained in the viewport. The default implementation returns visible tiles defined by [the OSM tile index](https://wiki.openstreetmap.org/wiki/Slippy_map_tilenames).
-
-Receives arguments:
-
-- `viewport` (Viewport)
-- `minZoom` (Number) The minimum zoom level
-- `maxZoom` (Number) The maximum zoom level
-
-Returns:
-
-An array of objects in the shape of `{x, y, z}`.
-
-
-### Render Options
-
-##### `renderSubLayers` (Function, optional))
-
-Renders one or an array of Layer instances with all the `TileLayer` props and the following props:
-
-* `id`: An unique id for this sublayer
-* `data`: Resolved from `getTileData`
-* `tile`: An object containing tile index `x`, `y`, `z`, and `bbox` of the tile.
-
-- Default: `props => new GeoJsonLayer(props)`
-
-
-### Callbacks
-
-##### `onViewportLoad` (Function, optional)
-
-`onViewportLoad` is a function that is called when all tiles in the current viewport are loaded. The loaded content (as returned by `getTileData`) for each visible tile is passed as an array to this callback function.
-
-- Default: `data => null`
-
-
-##### `onTileError` (Function, optional)
-
-`onTileError` called when a tile failed to load.
-
-- Default: `console.error`
-
 
 # Source
 
