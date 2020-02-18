@@ -65,7 +65,7 @@ new deck.TerrainLayer({});
 
 ## Properties
 
-When in Tiled Mode, inherits from all [TileLayer](/docs/api-reference/tile-layer.md) properties. Otherwise, inherits from all [SimpleMeshLayer](/docs/api-reference/simple-mesh-layer.md) properties.
+When in Tiled Mode, inherits from all [TileLayer](/docs/api-reference/tile-layer.md) properties. Forwards `wireframe` and `color` (via `getColor`) properties to [SimpleMeshLayer](/docs/api-reference/simple-mesh-layer.md).
 
 
 
