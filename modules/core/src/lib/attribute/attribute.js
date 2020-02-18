@@ -93,6 +93,7 @@ export default class Attribute extends DataColumn {
 
   setNeedsUpdate(reason = this.id, dataRange) {
     this.state.needsUpdate = this.state.needsUpdate || reason;
+    this.setNeedsRedraw(reason);
     if (dataRange) {
       const {startRow = 0, endRow = Infinity} = dataRange;
       this.state.updateRanges = range.add(this.state.updateRanges, [startRow, endRow]);
