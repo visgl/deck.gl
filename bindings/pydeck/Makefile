@@ -22,6 +22,9 @@ prepare-jupyter:
 test:
 	pytest
 
+example:
+	python examples/_update_docs.py
+
 docs:
 	cd docs; \
 	$(MAKE) html
