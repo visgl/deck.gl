@@ -34,7 +34,7 @@ const defaultProps = {
   // Martini error tolerance in meters, smaller number -> more detailed mesh
   meshMaxError: {type: 'number', value: 4.0},
   // Bounding box of the terrain image, [minX, minY, maxX, maxY] in world coordinates
-  bounds: {type: 'array', value: [0, 0, 1, 1], compare: true},
+  bounds: {type: 'array', value: null, optional: true, compare: true},
   // Color to use if surfaceImage is unavailable
   color: {type: 'color', value: [255, 255, 255]},
   // Object to decode height data, from (r, g, b) to height in meters

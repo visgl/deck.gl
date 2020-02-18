@@ -65,7 +65,9 @@ new deck.TerrainLayer({});
 
 ## Properties
 
-When in Tiled Mode, inherits from all [Tile Layer](/docs/api-reference/tile-layer.md) properties. Otherwise, inherits from all [Simple Mesh Layer](/docs/api-reference/simple-mesh-layer.md) properties.
+When in Tiled Mode, inherits from all [TileLayer](/docs/api-reference/tile-layer.md) properties. Otherwise, inherits from all [SimpleMeshLayer](/docs/api-reference/simple-mesh-layer.md) properties.
+
+
 
 ### Data Options
 
@@ -79,8 +81,6 @@ Depending on the `terrainImage` string, this layer renders as a tiled layer comp
 
 * Tiled `terrainImage`: https://s3.amazonaws.com/elevation-tiles-prod/terrarium/{z}/{x}/{y}.png
 
-  * By default, the `TileLayer` loads tiles defined by [the OSM tile index](https://wiki.openstreetmap.org/wiki/Slippy_map_tilenames). You may override this by implementing `getTileIndices`.
-
 * Non-Tiled `terrainImage`: https://s3.amazonaws.com/elevation-tiles-prod/terrarium/1/1/0.png
 
 ##### `surfaceImage` (String|Null, optional)
@@ -93,28 +93,62 @@ Image url to use as surface texture. Same URL parsing as `terrainImage`.
 
 ##### `meshMaxError` (Number, optional)
 
-Martini error tolerance in meters, smaller number -> more detailed mesh.
+Martini error tolerance in meters, smaller number results in more detailed mesh..
 
 - Default: `4.0`
 
 ##### `elevationDecoder` (Object)
 
-Object to decode height data, from (r, g, b) to height in meters.
+Parameters used to convert a pixel to elevation in meters.
+An object containing the following fields:
 
-- Default: `{rScaler: 1, gScaler: 0, bScaler: 0, offset: 0}`
+- `rScale`: Multiplier of the red channel.
+- `gScale`: Multiplier of the green channel.
+- `bScale`: Multiplier of the blue channel.
+- `offset`: Translation of the sum.
+
+Each color channel (r, g, and b) is a number between `[0, 255]`.
+
+For example, the Mapbox terrain service's elevation is [encoded as follows](https://docs.mapbox.com/help/troubleshooting/access-elevation-data/#decode-data):
+
+```
+height = -10000 + ((R * 256 * 256 + G * 256 + B) * 0.1)
+```
+
+The corresponding `elevationDecoder` is:
+
+```
+{
+  "rScale": 6553.6,
+  "gScale": 25.6,
+  "bScale": 0.1,
+  "offset": -10000
+}
+```
+
+The default value of `elevationDecoder` decodes a grayscale image:
+
+```
+{
+  "rScale": 1,
+  "gScale": 0,
+  "bScale": 0,
+  "offset": 0
+}
+```
 
 
-##### `bounds` (Array)
+##### `bounds` (Array, optional)
 
-Bounding box of the terrain image, [minX, minY, maxX, maxY] in world coordinates. Must be supplied when using Non-Tiled Mode, otherwise optional.
+Bounds of the image to fit x,y coordinates into. In [minX, minY, maxX, maxY] world coordinates. Must be supplied when using as a Non-Tiled terrain, otherwise optional.
 
-- Default: `[0, 0, 1, 1]`
+- Default: `null`
 
-`mixX`, `minY`, `maxX`, `maxY` refers to the coordinate of the `left`, `bottom`, `right`, `top` sides of the image, respectively.
+The pixel coordinates start from the top left corner.
 
 ##### `workerUrl` (String, optional)
 
-**Advanced** Supply url to local terrain worker bundle. Only required if running offline and cannot access CDN.
+**Advanced** Supply url to local terrain worker bundle. Custom `workerUrl` may be desirable if the application wishes to serve the worker code itself without relying on `unpkg.com`. The worker bundle can be located in `node_modules/@loaders.gl/terrain/dist/terrain-loader.worker.js`.
 
 - Default: `null`
 
@@ -122,13 +156,13 @@ Bounding box of the terrain image, [minX, minY, maxX, maxY] in world coordinates
 
 ##### `color` (Color, optional)
 
-Color to use if surfaceImage is unavailable.
+Color to use before `surfaceImage` is loaded or if `surfaceImage` is unavailable.
 
 - Default: `[255, 255, 255]`
 
 ##### `wireframe` (Boolean, optional)
 
-Same as SimpleMeshLayer wireframe.
+Same as SimpleMeshLayer `wireframe`.
 
 - Default: `false`
 
