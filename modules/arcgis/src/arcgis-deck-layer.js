@@ -24,6 +24,7 @@ export default function loadArcGISDeckLayer(Layer, Collection, ArcGISDeckLayerVi
         });
       }
 
+      // eslint-disable-next-line
       console.error(
         'ArcGISDeckLayer does not support SceneView at the moment. Use ArcGISDeckExternalRenderer instead.'
       );

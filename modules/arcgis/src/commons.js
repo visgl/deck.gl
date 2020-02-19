@@ -1,3 +1,5 @@
+/* eslint-disable no-invalid-this */
+
 import {Deck} from '@deck.gl/core';
 
 export function initializeResources(gl) {

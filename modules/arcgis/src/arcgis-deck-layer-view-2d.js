@@ -34,6 +34,7 @@ export default function loadArcGISDeckLayerView2D(BaseLayerViewGL2D) {
       const gl = this.context;
 
       this.initializeResources(gl);
+      // eslint-disable-next-line
       const dpr = window.devicePixelRatio;
       this.createFramebuffer(
         gl,
@@ -94,6 +95,7 @@ export default function loadArcGISDeckLayerView2D(BaseLayerViewGL2D) {
     render(renderParameters) {
       const gl = renderParameters.context;
       const screenFbo = gl.getParameter(gl.FRAMEBUFFER_BINDING);
+      // eslint-disable-next-line
       const dpr = window.devicePixelRatio;
       this.createOrResizeFramebuffer(
         gl,

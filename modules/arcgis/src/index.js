@@ -42,8 +42,10 @@ export function loadArcGISModule(esri) {
     });
   }
 
+  // eslint-disable-next-line
   if (window.require && window.require.on) {
     return new Promise(resolve => {
+      // eslint-disable-next-line
       window.require(
         [
           'esri/layers/Layer',
