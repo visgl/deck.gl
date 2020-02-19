@@ -1,4 +1,10 @@
-import {initializeResources, createOrResizeFramebuffer, createFramebuffer, destroyFramebuffer, initializeDeckGL} from './commons';
+import {
+  initializeResources,
+  createOrResizeFramebuffer,
+  createFramebuffer,
+  destroyFramebuffer,
+  initializeDeckGL
+} from './commons';
 
 export default function loadArcGISDeckLayerView2D(BaseLayerViewGL2D) {
   return BaseLayerViewGL2D.createSubclass({
@@ -22,14 +28,18 @@ export default function loadArcGISDeckLayerView2D(BaseLayerViewGL2D) {
     initializeDeckGL,
 
     // Attach is called as soon as the layer view is ready to start rendering.
-    attach: function() {
+    attach() {
       // We use a full-screen quad and shaders to composite the frame rendered
       // with deck.gl on top of the MapView. Composition uses the MapView context.
       const gl = this.context;
 
       this.initializeResources(gl);
       const dpr = window.devicePixelRatio;
-      this.createFramebuffer(gl, Math.round(this.view.state.size[0] * dpr), Math.round(this.view.state.size[1] * dpr));
+      this.createFramebuffer(
+        gl,
+        Math.round(this.view.state.size[0] * dpr),
+        Math.round(this.view.state.size[1] * dpr)
+      );
       this.initializeDeckGL(gl);
 
       // When the layer.layers collection changes, the new list of
@@ -46,8 +56,8 @@ export default function loadArcGISDeckLayerView2D(BaseLayerViewGL2D) {
 
     // This method is called whenever the deck.gl layer changes and must be
     // displayed.
-    redraw: function() {
-      let layers = this.layer.deckLayers.items;
+    redraw() {
+      const layers = this.layer.deckLayers.items;
 
       this.deckgl.setProps({
         layers
@@ -58,7 +68,7 @@ export default function loadArcGISDeckLayerView2D(BaseLayerViewGL2D) {
     },
 
     // Called when the layer must be destroyed.
-    detach: function() {
+    detach() {
       this.handles.removeAll();
 
       const gl = this.context;
@@ -81,11 +91,15 @@ export default function loadArcGISDeckLayerView2D(BaseLayerViewGL2D) {
     },
 
     // Called every time that the layer view must be rendered.
-    render: function(renderParameters) {
+    render(renderParameters) {
       const gl = renderParameters.context;
       const screenFbo = gl.getParameter(gl.FRAMEBUFFER_BINDING);
       const dpr = window.devicePixelRatio;
-      this.createOrResizeFramebuffer(gl, Math.round(this.view.state.size[0] * dpr), Math.round(this.view.state.size[1] * dpr));
+      this.createOrResizeFramebuffer(
+        gl,
+        Math.round(this.view.state.size[0] * dpr),
+        Math.round(this.view.state.size[1] * dpr)
+      );
 
       // The view state must be kept in-sync with the MapView of the ArcGIS API.
       const state = renderParameters.state;
@@ -108,7 +122,12 @@ export default function loadArcGISDeckLayerView2D(BaseLayerViewGL2D) {
 
       // We overlay the texture on top of the map using the full-screen quad.
       gl.bindFramebuffer(gl.FRAMEBUFFER, screenFbo);
-      gl.viewport(0, 0, Math.round(this.view.state.size[0] * dpr), Math.round(this.view.state.size[1] * dpr));
+      gl.viewport(
+        0,
+        0,
+        Math.round(this.view.state.size[0] * dpr),
+        Math.round(this.view.state.size[1] * dpr)
+      );
 
       gl.bindBuffer(gl.ARRAY_BUFFER, this.vertexBuffer);
       gl.vertexAttribPointer(0, 2, gl.BYTE, false, 2, 0);

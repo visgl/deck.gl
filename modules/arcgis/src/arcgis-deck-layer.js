@@ -10,7 +10,7 @@ export default function loadArcGISDeckLayer(Layer, Collection, ArcGISDeckLayerVi
       parameters: {}
     },
 
-    constructor: function() {
+    constructor() {
       this.deckLayers = new Collection();
     },
 
@@ -22,10 +22,13 @@ export default function loadArcGISDeckLayer(Layer, Collection, ArcGISDeckLayerVi
           view,
           layer: this
         });
-      } else {
-        console.error('ArcGISDeckLayer does not support SceneView at the moment. Use ArcGISDeckExternalRenderer instead.');
-        return null;
       }
+
+      console.error(
+        'ArcGISDeckLayer does not support SceneView at the moment. Use ArcGISDeckExternalRenderer instead.'
+      );
+
+      return null;
     }
   });
 

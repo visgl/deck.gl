@@ -4,8 +4,8 @@ export function initializeResources(gl) {
   // Vertex shader
   const vs = gl.createShader(gl.VERTEX_SHADER);
   gl.shaderSource(
-      vs,
-      `
+    vs,
+    `
   attribute vec2 a_pos;
   varying vec2 v_texcoord;
   void main(void) {
@@ -19,8 +19,8 @@ export function initializeResources(gl) {
   // Fragment shader
   const fs = gl.createShader(gl.FRAGMENT_SHADER);
   gl.shaderSource(
-      fs,
-      `
+    fs,
+    `
   precision mediump float;
   uniform sampler2D u_texture;
   varying vec2 v_texcoord;
@@ -112,7 +112,7 @@ export function destroyFramebuffer(gl) {
 export function initializeDeckGL(gl) {
   this.deckgl = new Deck({
     // We need to provide a dummy container or the input controller will block any interaction with the page.
-    container: document.createElement("div"),
+    container: document.createElement('div'),
 
     // The view state will be set dynamically to track the MapView current extent.
     initialViewState: {},

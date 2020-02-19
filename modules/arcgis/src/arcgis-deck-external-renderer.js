@@ -1,28 +1,42 @@
-import {initializeResources, createOrResizeFramebuffer, createFramebuffer, destroyFramebuffer, initializeDeckGL} from './commons';
+import {
+  initializeResources,
+  createOrResizeFramebuffer,
+  createFramebuffer,
+  destroyFramebuffer,
+  initializeDeckGL
+} from './commons';
 
 export default function loadArcGISDeckExternalRenderer(externalRenderers, SpatialReference) {
-  const ArcGISDeckExternalRenderer = function (view, conf) {
+  function ArcGISDeckExternalRenderer(view, conf) {
     this.view = view;
     this.deckLayers = conf.deckLayers;
-  };
+  }
   ArcGISDeckExternalRenderer.prototype.initializeResources = initializeResources;
   ArcGISDeckExternalRenderer.prototype.createOrResizeFramebuffer = createOrResizeFramebuffer;
   ArcGISDeckExternalRenderer.prototype.createFramebuffer = createFramebuffer;
   ArcGISDeckExternalRenderer.prototype.destroyFramebuffer = destroyFramebuffer;
   ArcGISDeckExternalRenderer.prototype.initializeDeckGL = initializeDeckGL;
-  ArcGISDeckExternalRenderer.prototype.setup = function (context) {
+  ArcGISDeckExternalRenderer.prototype.setup = context => {
     const gl = context.gl;
     this.initializeResources(gl);
     const dpr = window.devicePixelRatio;
-    this.createFramebuffer(gl, Math.round(this.view.size[0] * dpr), Math.round(this.view.size[1] * dpr));
+    this.createFramebuffer(
+      gl,
+      Math.round(this.view.size[0] * dpr),
+      Math.round(this.view.size[1] * dpr)
+    );
     this.initializeDeckGL(gl);
   };
-  ArcGISDeckExternalRenderer.prototype.render = function (context) {
+  ArcGISDeckExternalRenderer.prototype.render = context => {
     const gl = context.gl;
     const screenFbo = gl.getParameter(gl.FRAMEBUFFER_BINDING);
 
     const dpr = window.devicePixelRatio;
-    this.createOrResizeFramebuffer(gl, Math.round(this.view.size[0] * dpr), Math.round(this.view.size[1] * dpr));
+    this.createOrResizeFramebuffer(
+      gl,
+      Math.round(this.view.size[0] * dpr),
+      Math.round(this.view.size[1] * dpr)
+    );
 
     this.deckgl.setProps({
       viewState: {
@@ -33,7 +47,7 @@ export default function loadArcGISDeckExternalRenderer(externalRenderers, Spatia
         pitch: this.view.camera.tilt
       }
     });
-    
+
     gl.activeTexture(gl.TEXTURE0 + 0);
     gl.bindTexture(gl.TEXTURE_2D, null);
 
@@ -41,7 +55,7 @@ export default function loadArcGISDeckExternalRenderer(externalRenderers, Spatia
     this.deckgl.setProps({
       layers: this.deckLayers
     });
-    
+
     this.deckgl.redraw(true);
 
     // We overlay the texture on top of the map using the full-screen quad.
