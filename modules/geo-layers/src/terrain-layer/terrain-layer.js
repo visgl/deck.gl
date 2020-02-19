@@ -86,7 +86,7 @@ export default class TerrainLayer extends CompositeLayer {
         elevationDecoder
       }
     };
-    if (workerUrl) {
+    if (workerUrl !== null) {
       options.terrain.workerUrl = workerUrl;
     }
     return load(terrainImage, TerrainLoader, options);

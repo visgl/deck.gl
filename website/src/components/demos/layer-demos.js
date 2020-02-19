@@ -254,6 +254,7 @@ export const TripsLayerDemo = createLayerDemoClass({
 
 export const TerrainLayerDemo = createLayerDemoClass({
   Layer: TerrainLayer,
+  allowMissingData: true,
   propParameters: {
     meshMaxError: {
       displayName: 'meshMaxError',
