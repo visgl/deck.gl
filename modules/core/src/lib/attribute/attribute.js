@@ -355,17 +355,31 @@ export default class Attribute extends DataColumn {
     }
   }
 
+  // check that the first few elements of the attribute are reasonable
+  /* eslint-disable no-fallthrough */
   _checkAttributeArray() {
     const {value} = this;
-    if (value && value.length >= 4) {
-      const valid =
-        Number.isFinite(value[0]) &&
-        Number.isFinite(value[1]) &&
-        Number.isFinite(value[2]) &&
-        Number.isFinite(value[3]);
+    const limit = Math.min(4, this.size);
+    if (value && value.length >= limit) {
+      let valid = true;
+      switch (limit) {
+        case 4:
+          valid = valid && Number.isFinite(value[3]);
+        case 3:
+          valid = valid && Number.isFinite(value[2]);
+        case 2:
+          valid = valid && Number.isFinite(value[1]);
+        case 1:
+          valid = valid && Number.isFinite(value[0]);
+          break;
+        default:
+          valid = false;
+      }
+
       if (!valid) {
         throw new Error(`Illegal attribute generated for ${this.id}`);
       }
     }
   }
+  /* eslint-enable no-fallthrough */
 }
