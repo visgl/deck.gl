@@ -148,7 +148,7 @@ The pixel coordinates start from the top left corner.
 
 ##### `workerUrl` (String, optional)
 
-**Advanced** Supply url to local terrain worker bundle. Custom `workerUrl` may be desirable if the application wishes to serve the worker code itself without relying on `unpkg.com`. The worker bundle can be located in `node_modules/@loaders.gl/terrain/dist/terrain-loader.worker.js`.
+**Advanced** Supply url to local terrain worker bundle. Custom `workerUrl` may be desirable if the application wishes to serve the worker code itself without relying on `unpkg.com`. The worker bundle can be located in `"node_modules/@loaders.gl/terrain/dist/terrain-loader.worker.js"`.
 
 Set `workerUrl` to empty string to disable worker (improves error messages).
 
