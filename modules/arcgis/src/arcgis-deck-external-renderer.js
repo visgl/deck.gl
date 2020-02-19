@@ -16,7 +16,8 @@ export default function loadArcGISDeckExternalRenderer(externalRenderers, Spatia
   ArcGISDeckExternalRenderer.prototype.createFramebuffer = createFramebuffer;
   ArcGISDeckExternalRenderer.prototype.destroyFramebuffer = destroyFramebuffer;
   ArcGISDeckExternalRenderer.prototype.initializeDeckGL = initializeDeckGL;
-  ArcGISDeckExternalRenderer.prototype.setup = context => {
+
+  function setup(context) {
     const gl = context.gl;
     this.initializeResources(gl);
     const dpr = window.devicePixelRatio;
@@ -27,7 +28,10 @@ export default function loadArcGISDeckExternalRenderer(externalRenderers, Spatia
     );
     this.initializeDeckGL(gl);
   };
-  ArcGISDeckExternalRenderer.prototype.render = context => {
+
+  ArcGISDeckExternalRenderer.prototype.setup = setup;
+
+  function render(context) {
     const gl = context.gl;
     const screenFbo = gl.getParameter(gl.FRAMEBUFFER_BINDING);
 
@@ -77,5 +81,8 @@ export default function loadArcGISDeckExternalRenderer(externalRenderers, Spatia
     gl.enableVertexAttribArray(0);
     gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
   };
+
+  ArcGISDeckExternalRenderer.prototype.render = render;
+
   return ArcGISDeckExternalRenderer;
 }

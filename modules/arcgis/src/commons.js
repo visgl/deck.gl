@@ -111,9 +111,6 @@ export function destroyFramebuffer(gl) {
 
 export function initializeDeckGL(gl) {
   this.deckgl = new Deck({
-    // We need to provide a dummy container or the input controller will block any interaction with the page.
-    container: document.createElement('div'),
-
     // The view state will be set dynamically to track the MapView current extent.
     initialViewState: {},
 
