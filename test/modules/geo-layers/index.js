@@ -45,3 +45,4 @@ import './trips-layer.spec';
 import './great-circle-layer.spec';
 import './h3-layers.spec';
 import './tile-3d-layer';
+import './mvt-tile-layer';

@@ -24,18 +24,15 @@ export default class MVTTileLayer extends TileLayer {
   }
 
   async getTileData(tileProperties) {
-    const urlTemplates = this.state.urlTemplates;
+    const {urlTemplates} = this.state;
 
     if (!urlTemplates || !urlTemplates.length) {
       return Promise.reject();
     }
 
     const templateReplacer = (_, property) => tileProperties[property];
-    const tileURLIndex = getTileURLIndex(tileProperties, this.state.urlTemplates.length);
-    const tileURL = this.state.urlTemplates[tileURLIndex].replace(
-      /\{ *([\w_-]+) *\}/g,
-      templateReplacer
-    );
+    const tileURLIndex = getTileURLIndex(tileProperties, urlTemplates.length);
+    const tileURL = urlTemplates[tileURLIndex].replace(/\{ *([\w_-]+) *\}/g, templateReplacer);
 
     return await load(tileURL, MVTLoader);
   }
