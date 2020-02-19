@@ -65,7 +65,7 @@ new deck.TerrainLayer({});
 
 ## Properties
 
-When in Tiled Mode, inherits from all [TileLayer](/docs/api-reference/tile-layer.md) properties. Forwards `wireframe` and `color` (via `getColor`) properties to [SimpleMeshLayer](/docs/api-reference/simple-mesh-layer.md).
+When in Tiled Mode, inherits from all [TileLayer](/docs/api-reference/tile-layer.md) properties. Forwards `wireframe` property to [SimpleMeshLayer](/docs/api-reference/simple-mesh-layer.md).
 
 
 
@@ -158,13 +158,13 @@ Set `workerUrl` to empty string to disable worker (improves error messages).
 
 ##### `color` (Color, optional)
 
-Color to use before `surfaceImage` is loaded or if `surfaceImage` is unavailable.
+Color to use before `surfaceImage` is loaded or if `surfaceImage` is unavailable. Equivalent to setting SimpleMeshLayer `getColor` prop to `d => prop.color`.
 
 - Default: `[255, 255, 255]`
 
 ##### `wireframe` (Boolean, optional)
 
-Same as SimpleMeshLayer `wireframe`.
+Forwarded to SimpleMeshLayer `wireframe` prop.
 
 - Default: `false`
 
