@@ -1,4 +1,3 @@
-import {Deck} from '@deck.gl/core';
 import {initializeResources, createOrResizeFramebuffer, createFramebuffer, destroyFramebuffer, initializeDeckGL} from './commons';
 
 export default function loadArcGISDeckExternalRenderer(externalRenderers, SpatialReference) {
@@ -25,8 +24,6 @@ export default function loadArcGISDeckExternalRenderer(externalRenderers, Spatia
     const dpr = window.devicePixelRatio;
     this.createOrResizeFramebuffer(gl, Math.round(this.view.size[0] * dpr), Math.round(this.view.size[1] * dpr));
 
-    // ========== Zurich, we have a problem ==========
-    //            V  V  V  V  V  V  V  V  V
     this.deckgl.setProps({
       viewState: {
         latitude: this.view.center.latitude,
@@ -36,9 +33,7 @@ export default function loadArcGISDeckExternalRenderer(externalRenderers, Spatia
         pitch: this.view.camera.tilt
       }
     });
-    //            ^  ^  ^  ^  ^  ^  ^  ^  ^
-    // ===============================================
-
+    
     gl.activeTexture(gl.TEXTURE0 + 0);
     gl.bindTexture(gl.TEXTURE_2D, null);
 

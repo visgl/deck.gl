@@ -1,7 +1,7 @@
 import loadArcGISDeckLayer from './arcgis-deck-layer';
 import loadArcGISDeckLayerView2D from './arcgis-deck-layer-view-2d';
 import loadArcGISDeckExternalRenderer from './arcgis-deck-external-renderer';
-import { loadModules as esriLoaderLoadModules } from 'esri-loader';
+import {loadModules as esriLoaderLoadModules} from 'esri-loader';
 
 export const arcGIS = {
   ArcGISDeckLayerView2D: undefined,

@@ -5,7 +5,9 @@ export default function loadArcGISDeckLayer(Layer, Collection, ArcGISDeckLayerVi
     properties: {
       deckLayers: {
         type: Collection
-      }
+      },
+      effects: {},
+      parameters: {}
     },
 
     constructor: function() {

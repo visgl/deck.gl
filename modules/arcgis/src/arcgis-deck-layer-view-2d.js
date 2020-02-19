@@ -1,4 +1,3 @@
-import {Deck} from '@deck.gl/core';
 import {initializeResources, createOrResizeFramebuffer, createFramebuffer, destroyFramebuffer, initializeDeckGL} from './commons';
 
 export default function loadArcGISDeckLayerView2D(BaseLayerViewGL2D) {
@@ -48,10 +47,10 @@ export default function loadArcGISDeckLayerView2D(BaseLayerViewGL2D) {
     // This method is called whenever the deck.gl layer changes and must be
     // displayed.
     redraw: function() {
-      let deckLayers = this.layer.deckLayers.items;
+      let layers = this.layer.deckLayers.items;
 
       this.deckgl.setProps({
-        layers: deckLayers
+        layers
       });
 
       // We need to tell the layer view that it must redraw itself.
