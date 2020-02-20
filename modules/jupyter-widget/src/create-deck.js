@@ -1,3 +1,4 @@
+/* global window */
 import makeTooltip from './widget-tooltip';
 
 import mapboxgl from './ssr-safe-mapbox';
@@ -7,6 +8,8 @@ import {Tile3DLoader} from '@loaders.gl/3d-tiles';
 import {registerLoaders} from '@loaders.gl/core';
 
 import * as deck from './deck-bundle';
+
+import {loadScript, alreadyLoaded} from './script-utils';
 
 import GL from '@luma.gl/constants';
 
@@ -40,28 +43,6 @@ registerLoaders([CSVLoader, Tile3DLoader]);
 const jsonConverter = new deck.JSONConverter({
   configuration: jsonConverterConfiguration
 });
-
-function alreadyLoaded(url) {
-  // Save time by not reloading the same URL
-  for (const scriptTag of document.querySelectorAll('script')) {
-    if (scriptTag.src === url) {
-      return true;
-    }
-  }
-  return false;
-}
-
-/* global document, window */
-function loadScript(url) {
-  const script = document.createElement('script');
-  script.type = 'text/javascript';
-  script.src = url;
-  const head = document.querySelector('head');
-  head.appendChild(script);
-  return new Promise(resolve => {
-    script.onload = resolve;
-  });
-}
 
 function loadExternalLibrary({libraryName, resourceUri, onComplete}, loadResource = loadScript) {
   // NOTE loadResource is for testing only
