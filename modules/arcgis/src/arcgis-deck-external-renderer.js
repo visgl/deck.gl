@@ -14,7 +14,7 @@ export default function loadArcGISDeckExternalRenderer(externalRenderers, Collec
     this.deckLayers = new Collection();
     this.deckLayers.addMany(conf.deckLayers);
     this.deckLayers.on('change', () => {
-      externalRenderers.requestRenderer(this.view);
+      externalRenderers.requestRender(this.view);
     })
   }
   ArcGISDeckExternalRenderer.prototype.initializeResources = initializeResources;
