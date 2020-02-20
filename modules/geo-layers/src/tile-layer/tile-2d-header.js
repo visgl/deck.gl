@@ -1,10 +1,11 @@
+import {log} from '@deck.gl/core';
+
 export default class Tile2DHeader {
-  constructor({getTileData, x, y, z, onTileLoad, onTileError, tileToBoundingBox}) {
+  constructor({getTileData, x, y, z, onTileLoad, onTileError}) {
     this.x = x;
     this.y = y;
     this.z = z;
-    this.bbox = tileToBoundingBox(this.x, this.y, this.z);
-    this.selected = true;
+    this.isVisible = false;
     this.parent = null;
     this.children = [];
 
@@ -17,11 +18,19 @@ export default class Tile2DHeader {
   }
 
   get data() {
-    return this.content || this._loader;
+    return this._isLoaded ? this.content : this._loader;
   }
 
   get isLoaded() {
     return this._isLoaded;
+  }
+
+  get byteLength() {
+    const result = this.content ? this.content.byteLength : 0;
+    if (!Number.isFinite(result)) {
+      log.error('byteLength not defined in tile data')();
+    }
+    return result;
   }
 
   _loadData(getTileData) {
