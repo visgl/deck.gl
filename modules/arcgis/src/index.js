@@ -25,11 +25,10 @@ export function loadArcGISModule(esri) {
       const Collection = esri.core.Collection;
       const BaseLayerViewGL2D = esri.views['2d'].layers.BaseLayerViewGL2D;
       const externalRenderers = esri.views['3d'].externalRenderers;
-      const SpatialReference = esri.geometry.SpatialReference;
 
       const ArcGISDeckLayerView2D = loadArcGISDeckLayerView2D(BaseLayerViewGL2D);
       const ArcGISDeckLayer = loadArcGISDeckLayer(Layer, Collection, ArcGISDeckLayerView2D);
-      const ArcGISDeckExternalRenderer = loadArcGISDeckExternalRenderer(externalRenderers);
+      const ArcGISDeckExternalRenderer = loadArcGISDeckExternalRenderer(externalRenderers, Collection);
 
       arcGIS.ArcGISDeckLayerView2D = ArcGISDeckLayerView2D;
       arcGIS.ArcGISDeckLayer = ArcGISDeckLayer;
@@ -48,16 +47,12 @@ export function loadArcGISModule(esri) {
           'esri/layers/Layer',
           'esri/core/Collection',
           'esri/views/2d/layers/BaseLayerViewGL2D',
-          'esri/views/3d/externalRenderers',
-          'esri/geometry/SpatialReference'
+          'esri/views/3d/externalRenderers'
         ],
-        (Layer, Collection, BaseLayerViewGL2D, externalRenderers, SpatialReference) => {
+        (Layer, Collection, BaseLayerViewGL2D, externalRenderers) => {
           const ArcGISDeckLayerView2D = loadArcGISDeckLayerView2D(BaseLayerViewGL2D);
           const ArcGISDeckLayer = loadArcGISDeckLayer(Layer, Collection, ArcGISDeckLayerView2D);
-          const ArcGISDeckExternalRenderer = loadArcGISDeckExternalRenderer(
-            externalRenderers,
-            SpatialReference
-          );
+          const ArcGISDeckExternalRenderer = loadArcGISDeckExternalRenderer(externalRenderers);
 
           arcGIS.ArcGISDeckLayerView2D = ArcGISDeckLayerView2D;
           arcGIS.ArcGISDeckLayer = ArcGISDeckLayer;
@@ -73,15 +68,11 @@ export function loadArcGISModule(esri) {
     'esri/layers/Layer',
     'esri/core/Collection',
     'esri/views/2d/layers/BaseLayerViewGL2D',
-    'esri/views/3d/externalRenderers',
-    'esri/geometry/SpatialReference'
-  ]).then(([Layer, Collection, BaseLayerViewGL2D, externalRenderers, SpatialReference]) => {
+    'esri/views/3d/externalRenderers'
+  ]).then(([Layer, Collection, BaseLayerViewGL2D, externalRenderers]) => {
     const ArcGISDeckLayerView2D = loadArcGISDeckLayerView2D(BaseLayerViewGL2D);
     const ArcGISDeckLayer = loadArcGISDeckLayer(Layer, Collection, ArcGISDeckLayerView2D);
-    const ArcGISDeckExternalRenderer = loadArcGISDeckExternalRenderer(
-      externalRenderers,
-      SpatialReference
-    );
+    const ArcGISDeckExternalRenderer = loadArcGISDeckExternalRenderer(externalRenderers);
 
     arcGIS.ArcGISDeckLayerView2D = ArcGISDeckLayerView2D;
     arcGIS.ArcGISDeckLayer = ArcGISDeckLayer;

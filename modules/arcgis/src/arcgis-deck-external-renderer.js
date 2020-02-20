@@ -8,10 +8,11 @@ import {
   initializeDeckGL
 } from './commons';
 
-export default function loadArcGISDeckExternalRenderer(externalRenderers) {
+export default function loadArcGISDeckExternalRenderer(externalRenderers, Collection) {
   function ArcGISDeckExternalRenderer(view, conf) {
     this.view = view;
-    this.deckLayers = conf.deckLayers;
+    this.deckLayers = new Collection();
+    this.deckLayers.addMany(conf.deckLayers);
 
     this.deckLayers.on('change', () => {
       externalRenderers.requestRenderer(this.view);
