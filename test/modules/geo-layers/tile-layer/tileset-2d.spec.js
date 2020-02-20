@@ -66,7 +66,7 @@ test('Tileset2D#maxCacheSize', t => {
   // load a viewport to fill the cache
   tileset.update(testViewport);
   t.equal(tileset._cache.size, 1, 'expected cache size');
-  t.ok(tileset._cache.get('12-1171-1566'), 'expected tile is in cache');
+  t.ok(tileset._cache.get('1171,1566,12'), 'expected tile is in cache');
 
   // load another viewport. The previous cached tiles shouldn't be visible
   tileset.update(
@@ -79,7 +79,7 @@ test('Tileset2D#maxCacheSize', t => {
   );
 
   t.equal(tileset._cache.size, 1, 'cache is resized');
-  t.ok(tileset._cache.get('12-910-459'), 'expected tile is in cache');
+  t.ok(tileset._cache.get('910,459,12'), 'expected tile is in cache');
 
   t.end();
 });
@@ -93,7 +93,7 @@ test('Tileset2D#maxCacheByteSize', async t => {
   // load a viewport to fill the cache
   tileset.update(testViewport);
   t.equal(tileset._cache.size, 1, 'expected cache size');
-  t.ok(tileset._cache.get('12-1171-1566'), 'expected tile is in cache');
+  t.ok(tileset._cache.get('1171,1566,12'), 'expected tile is in cache');
 
   // load another viewport. The previous cached tiles shouldn't be visible
   tileset.update(
@@ -110,7 +110,7 @@ test('Tileset2D#maxCacheByteSize', async t => {
   await sleep(100);
 
   t.equal(tileset._cache.size, 1, 'cache is resized after tile data is loaded');
-  t.ok(tileset._cache.get('12-910-459'), 'expected tile is in cache');
+  t.ok(tileset._cache.get('910,459,12'), 'expected tile is in cache');
 
   t.end();
 });
@@ -203,94 +203,94 @@ test('Tileset2D#traversal', async t => {
 
   /*
     Test tiles:
-                                        +- 2-0-0 (pending) -+- 3-0-0 (pending) -+- 4-0-0 (pending)
-                                        +- 2-0-1 (pending) -+- 3-0-2 (loaded)  -+- 4-0-4 (pending)
-                    +- 1-0-0 (loaded)  -+- 2-1-0 (missing) -+- 3-2-0 (pending)
-                    |                   +- 2-1-1 (missing) -+- 3-2-2 (loaded)
-   0-0-0 (pending) -+
-                    |                   +- 2-2-0 (loaded)  -+- 3-4-0 (pending)
-                    +- 1-1-0 (pending) -+- 2-2-1 (loaded)  -+- 3-4-2 (loaded)
-                                        +- 2-3-0 (pending) -+- 3-6-0 (pending)
-                                        +- 2-3-1 (pending) -+- 3-6-2 (loaded)
+                                        +- 0,0,2 (pending) -+- 0,0,3 (pending) -+- 0,0,4 (pending)
+                                        +- 0,1,2 (pending) -+- 0,2,3 (loaded)  -+- 0,4,4 (pending)
+                    +- 0,0,1 (loaded)  -+- 1,0,2 (missing) -+- 2,0,3 (pending)
+                    |                   +- 1,1,2 (missing) -+- 2,2,3 (loaded)
+   0,0,0 (pending) -+
+                    |                   +- 2,0,2 (loaded)  -+- 4,0,3 (pending)
+                    +- 1,0,1 (pending) -+- 2,1,2 (loaded)  -+- 4,2,3 (loaded)
+                                        +- 3,0,2 (pending) -+- 6,0,3 (pending)
+                                        +- 3,1,2 (pending) -+- 6,2,3 (loaded)
    */
   const TEST_CASES = [
     {
-      selectedTiles: ['0-0-0'],
+      selectedTiles: ['0,0,0'],
       visibleTiles: {
-        [STRATEGY_DEFAULT]: ['1-0-0', '2-2-0', '2-2-1', '3-6-2'],
-        [STRATEGY_REPLACE]: ['1-0-0', '2-2-0', '2-2-1', '3-6-2'],
+        [STRATEGY_DEFAULT]: ['0,0,1', '2,0,2', '2,1,2', '6,2,3'],
+        [STRATEGY_REPLACE]: ['0,0,1', '2,0,2', '2,1,2', '6,2,3'],
         [STRATEGY_NEVER]: []
       }
     },
     {
-      selectedTiles: ['1-0-0'],
+      selectedTiles: ['0,0,1'],
       visibleTiles: {
-        [STRATEGY_DEFAULT]: ['1-0-0'],
-        [STRATEGY_REPLACE]: ['1-0-0'],
-        [STRATEGY_NEVER]: ['1-0-0']
+        [STRATEGY_DEFAULT]: ['0,0,1'],
+        [STRATEGY_REPLACE]: ['0,0,1'],
+        [STRATEGY_NEVER]: ['0,0,1']
       }
     },
     {
-      selectedTiles: ['1-0-0', '1-1-0'],
+      selectedTiles: ['0,0,1', '1,0,1'],
       visibleTiles: {
-        [STRATEGY_DEFAULT]: ['1-0-0', '2-2-0', '2-2-1', '3-6-2'],
-        [STRATEGY_REPLACE]: ['1-0-0', '2-2-0', '2-2-1', '3-6-2'],
-        [STRATEGY_NEVER]: ['1-0-0']
+        [STRATEGY_DEFAULT]: ['0,0,1', '2,0,2', '2,1,2', '6,2,3'],
+        [STRATEGY_REPLACE]: ['0,0,1', '2,0,2', '2,1,2', '6,2,3'],
+        [STRATEGY_NEVER]: ['0,0,1']
       }
     },
     {
-      selectedTiles: ['2-0-0', '2-0-1'],
+      selectedTiles: ['0,0,2', '0,1,2'],
       visibleTiles: {
-        [STRATEGY_DEFAULT]: ['1-0-0'],
-        [STRATEGY_REPLACE]: ['1-0-0'],
+        [STRATEGY_DEFAULT]: ['0,0,1'],
+        [STRATEGY_REPLACE]: ['0,0,1'],
         [STRATEGY_NEVER]: []
       }
     },
     {
-      selectedTiles: ['2-2-0', '2-2-1', '2-3-0', '2-3-1'],
+      selectedTiles: ['2,0,2', '2,1,2', '3,0,2', '3,1,2'],
       visibleTiles: {
-        [STRATEGY_DEFAULT]: ['2-2-0', '2-2-1', '3-6-2'],
-        [STRATEGY_REPLACE]: ['2-2-0', '2-2-1', '3-6-2'],
-        [STRATEGY_NEVER]: ['2-2-0', '2-2-1']
+        [STRATEGY_DEFAULT]: ['2,0,2', '2,1,2', '6,2,3'],
+        [STRATEGY_REPLACE]: ['2,0,2', '2,1,2', '6,2,3'],
+        [STRATEGY_NEVER]: ['2,0,2', '2,1,2']
       }
     },
     {
-      selectedTiles: ['3-0-0', '3-2-0'],
+      selectedTiles: ['0,0,3', '2,0,3'],
       visibleTiles: {
-        [STRATEGY_DEFAULT]: ['1-0-0'],
-        [STRATEGY_REPLACE]: ['1-0-0'],
+        [STRATEGY_DEFAULT]: ['0,0,1'],
+        [STRATEGY_REPLACE]: ['0,0,1'],
         [STRATEGY_NEVER]: []
       }
     },
     {
-      selectedTiles: ['3-0-0', '3-0-2', '3-2-0', '3-2-2'],
+      selectedTiles: ['0,0,3', '0,2,3', '2,0,3', '2,2,3'],
       visibleTiles: {
-        [STRATEGY_DEFAULT]: ['1-0-0', '3-0-2', '3-2-2'],
-        [STRATEGY_REPLACE]: ['3-0-2', '3-2-2'],
-        [STRATEGY_NEVER]: ['3-0-2', '3-2-2']
+        [STRATEGY_DEFAULT]: ['0,0,1', '0,2,3', '2,2,3'],
+        [STRATEGY_REPLACE]: ['0,2,3', '2,2,3'],
+        [STRATEGY_NEVER]: ['0,2,3', '2,2,3']
       }
     },
     {
-      selectedTiles: ['3-4-0', '3-6-0'],
+      selectedTiles: ['4,0,3', '6,0,3'],
       visibleTiles: {
-        [STRATEGY_DEFAULT]: ['2-2-0'],
-        [STRATEGY_REPLACE]: ['2-2-0'],
+        [STRATEGY_DEFAULT]: ['2,0,2'],
+        [STRATEGY_REPLACE]: ['2,0,2'],
         [STRATEGY_NEVER]: []
       }
     },
     {
-      selectedTiles: ['3-4-0', '3-4-2', '3-6-0', '3-6-2'],
+      selectedTiles: ['4,0,3', '4,2,3', '6,0,3', '6,2,3'],
       visibleTiles: {
-        [STRATEGY_DEFAULT]: ['2-2-0', '3-4-2', '3-6-2'],
-        [STRATEGY_REPLACE]: ['2-2-0', '3-4-2', '3-6-2'],
-        [STRATEGY_NEVER]: ['3-4-2', '3-6-2']
+        [STRATEGY_DEFAULT]: ['2,0,2', '4,2,3', '6,2,3'],
+        [STRATEGY_REPLACE]: ['2,0,2', '4,2,3', '6,2,3'],
+        [STRATEGY_NEVER]: ['4,2,3', '6,2,3']
       }
     },
     {
-      selectedTiles: ['4-0-0', '4-0-4'],
+      selectedTiles: ['0,0,4', '0,4,4'],
       visibleTiles: {
-        [STRATEGY_DEFAULT]: ['1-0-0', '3-0-2'],
-        [STRATEGY_REPLACE]: ['3-0-2'],
+        [STRATEGY_DEFAULT]: ['0,0,1', '0,2,3'],
+        [STRATEGY_REPLACE]: ['0,2,3'],
         [STRATEGY_NEVER]: []
       }
     }
@@ -298,6 +298,7 @@ test('Tileset2D#traversal', async t => {
 
   const tileMap = tileset._cache;
   const strategies = [STRATEGY_DEFAULT, STRATEGY_REPLACE, STRATEGY_NEVER];
+  tileset._viewport = new WebMercatorViewport({longitude: 0, latitude: 0, zoom: 0});
 
   const validateVisibility = visibleTiles => {
     let allMatched = true;

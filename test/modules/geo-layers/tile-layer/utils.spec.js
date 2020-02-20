@@ -1,6 +1,6 @@
 import test from 'tape-catch';
-import {getTileIndices, tileToBoundingBox} from '@deck.gl/geo-layers/tile-layer/osm-utils';
-import {WebMercatorViewport} from '@deck.gl/core';
+import {getTileIndices, tileToBoundingBox} from '@deck.gl/geo-layers/tile-layer/utils';
+import {WebMercatorViewport, OrthographicView} from '@deck.gl/core';
 
 const TEST_CASES = [
   {
@@ -102,6 +102,18 @@ const TEST_CASES = [
     }),
     maxZoom: 2,
     output: ['0,1,2', '0,2,2', '3,1,2', '3,2,2']
+  },
+  {
+    title: 'non-geospatial',
+    viewport: new OrthographicView().makeViewport({
+      width: 800,
+      height: 400,
+      viewState: {
+        target: [100, 100],
+        zoom: 4
+      }
+    }),
+    output: ['2,2,4', '2,3,4', '3,2,4', '3,3,4']
   }
 ];
 
@@ -122,16 +134,61 @@ test('getTileIndices', t => {
   t.end();
 });
 
-test('tileToBoundingBox', t => {
-  const results = tileToBoundingBox(8, 5, 4);
-  const expected = {
-    east: 22.5,
-    north: 55.77657301866769,
-    south: 40.97989806962013,
-    west: 0
-  };
+test('tileToBoundingBox#Geospatial', t => {
+  const viewport = new WebMercatorViewport({
+    width: 800,
+    height: 400,
+    longitude: -90,
+    latitude: 45,
+    zoom: 2.5
+  });
 
-  t.deepEqual(results, expected, 'Should match the results.');
+  t.deepEqual(
+    tileToBoundingBox(viewport, 0, 0, 0),
+    {
+      west: -180,
+      north: 85.0511287798066,
+      east: 180,
+      south: -85.0511287798066
+    },
+    '0, 0, 0 should match the results'
+  );
+
+  t.deepEqual(
+    tileToBoundingBox(viewport, 8, 5, 4),
+    {
+      east: 22.5,
+      north: 55.77657301866769,
+      south: 40.97989806962013,
+      west: 0
+    },
+    '8,5,4 Should match the results.'
+  );
+
+  t.end();
+});
+
+test('tileToBoundingBox#Infovis', t => {
+  const viewport = new OrthographicView().makeViewport({
+    width: 800,
+    height: 400,
+    viewState: {
+      target: [0, 0, 0],
+      zoom: 1
+    }
+  });
+
+  t.deepEqual(
+    tileToBoundingBox(viewport, 0, 0, 0),
+    {left: 0, top: 0, right: 512, bottom: 512},
+    '0,0,0 Should match the results.'
+  );
+
+  t.deepEqual(
+    tileToBoundingBox(viewport, 4, -1, 2),
+    {left: 512, top: -128, right: 640, bottom: 0},
+    '4,-1,2 Should match the results.'
+  );
 
   t.end();
 });

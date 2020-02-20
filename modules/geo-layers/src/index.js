@@ -26,6 +26,3 @@ export {default as TripsLayer} from './trips-layer/trips-layer';
 export {default as H3ClusterLayer} from './h3-layers/h3-cluster-layer';
 export {default as H3HexagonLayer} from './h3-layers/h3-hexagon-layer';
 export {default as Tile3DLayer} from './tile-3d-layer/tile-3d-layer';
-
-// experimental export
-export {default as _Tileset2D} from './tile-layer/tileset-2d';

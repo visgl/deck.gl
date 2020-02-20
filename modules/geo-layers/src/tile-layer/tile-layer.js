@@ -6,9 +6,9 @@ import Tileset2D, {STRATEGY_DEFAULT} from './tileset-2d';
 const defaultProps = {
   renderSubLayers: {type: 'function', value: props => new GeoJsonLayer(props), compare: false},
   getTileData: {type: 'function', value: ({x, y, z}) => null, compare: false},
-  Tileset: Tileset2D,
   // TODO - change to onViewportLoad to align with Tile3DLayer
   onViewportLoad: {type: 'function', optional: true, value: null, compare: false},
+  onTileLoad: {type: 'function', value: tile => {}, compare: false},
   // eslint-disable-next-line
   onTileError: {type: 'function', value: err => console.error(err), compare: false},
   maxZoom: null,
@@ -34,20 +34,19 @@ export default class TileLayer extends CompositeLayer {
     let {tileset} = this.state;
     const createTileCache =
       !tileset ||
-      props.Tileset !== oldProps.Tileset ||
       (changeFlags.updateTriggersChanged &&
         (changeFlags.updateTriggersChanged.all || changeFlags.updateTriggersChanged.getTileData));
 
     if (createTileCache) {
-      const {Tileset, maxZoom, minZoom, maxCacheSize, maxCacheByteSize, refinementStrategy} = props;
-      tileset = new Tileset({
+      const {maxZoom, minZoom, maxCacheSize, maxCacheByteSize, refinementStrategy} = props;
+      tileset = new Tileset2D({
         getTileData: props.getTileData,
         maxCacheSize,
         maxCacheByteSize,
         maxZoom,
         minZoom,
         refinementStrategy,
-        onTileLoad: this._updateTileset.bind(this),
+        onTileLoad: this._onTileLoad.bind(this),
         onTileError: this._onTileError.bind(this)
       });
       this.setState({tileset});
@@ -85,10 +84,17 @@ export default class TileLayer extends CompositeLayer {
     this.state.isLoaded = isLoaded;
   }
 
+  _onTileLoad(tile) {
+    const layer = this.getCurrentLayer();
+    layer.props.onTileLoad(tile);
+    layer._updateTileset();
+  }
+
   _onTileError(error) {
-    this.props.onTileError(error);
+    const layer = this.getCurrentLayer();
+    layer.props.onTileError(error);
     // errorred tiles should not block rendering, are considered "loaded" with empty data
-    this._updateTileset();
+    layer._updateTileset();
   }
 
   getPickingInfo({info, sourceLayer}) {

@@ -106,12 +106,14 @@ new deck.TileLayer({});
 
 The `tile` argument contains the following fields:
 
-- `x` (Number) - x of [the OSM tile index](https://wiki.openstreetmap.org/wiki/Slippy_map_tilenames)
-- `y` (Number) - y of [the OSM tile index](https://wiki.openstreetmap.org/wiki/Slippy_map_tilenames)
-- `z` (Number) - z of [the OSM tile index](https://wiki.openstreetmap.org/wiki/Slippy_map_tilenames)
-- `bbox` (Object) - bounding box of the tile, in the shape of `{west: <longitude>, north: <latitude>, east: <longitude>, south: <latitude>}`.
+- `x` (Number) - x index of the tile
+- `y` (Number) - y index of the tile
+- `z` (Number) - z index of the tile
+- `bbox` (Object) - bounding box of the tile
+ 
+When used with a geospatial view such as the [MapView](/docs/api-reference/map-view.md), x, y, and z are determined from [the OSM tile index](https://wiki.openstreetmap.org/wiki/Slippy_map_tilenames), and `bbox` is in the shape of `{west: <longitude>, north: <latitude>, east: <longitude>, south: <latitude>}`.
 
-You may also use a different indexing system by implementing your own tiling logic. See the `Tileset2D` documentation below.
+When used with a non-geospatial view such as the [OrthographicView](/docs/api-reference/orthographic-view.md) or the [OrbitView](/docs/api-reference/orbit-view.md), x, y, and z are determined by dividing the view space in to 512 pixel by 512 pixel tiles. `bbox` is in the shape of `{left, top, right, bottom}`.
 
 
 ##### `maxZoom` (Number|Null, optional)
@@ -155,11 +157,6 @@ How the tile layer refines the visibility of tiles. One of the following:
 - Default: `'best-available'`
 
 
-##### `Tileset` (Function, optional)
-
-A custom implemetation of the `Tileset2D` interface. This can be used to override some of the default behaviors of the `TileLayer`. See the `Tileset2D` documentation below.
-
-
 ### Render Options
 
 ##### `renderSubLayers` (Function, optional))
@@ -182,154 +179,25 @@ Renders one or an array of Layer instances with all the `TileLayer` props and th
 - Default: `data => null`
 
 
+##### `onTileLoad` (Function, optional)
+
+`onTileLoad` called when a tile successfully loads.
+
+- Default: `() => {}`
+
+Receives arguments:
+
+- `tile` (Object) - the tile that has been loaded.
+
 ##### `onTileError` (Function, optional)
 
 `onTileError` called when a tile failed to load.
 
 - Default: `console.error`
 
-
-## Tileset2D
-
-> This section describes advanced customization of the TileLayer.
-
-`Tileset2D` is a class that manages the request and traversal of tiles. Based on the current viewport and existing cached tiles, it determines which tiles need to be rendered, whether to fetch new data, and grooms the cache if becomes too big.
-
-```js
-import {TileLayer, _Tileset2D as Tileset2D} from '@deck.gl/geo-layers';
-
-class NonGeospatialTileset extends Tileset2D {
-  // viewport is an OrthographicViewport
-  getTileIndicesInViewport({viewport}) {
-    const z = Math.ceil(viewport);
-    const TILE_SIZE = 256;
-    const scale = Math.pow(2, z);
-    const topLeft = viewport.unproject([0, 0]);
-    const bottomRight = viewport.unproject([viewport.width, viewport.height]);
-
-    const minX = Math.floor(topLeft[0] * scale / TILE_SIZE);
-    const minY = Math.floor(topLeft[1] * scale / TILE_SIZE);
-    const maxX = Math.ceil(bottomRight[0] * scale / TILE_SIZE);
-    const maxY = Math.ceil(bottomRight[1] * scale / TILE_SIZE);
-
-    const result = [];
-    for (let x = minX; x < maxX; x++) {
-      for (let y = minY; y < maxY; y++) {
-        indices.push({x, y, z});
-      }
-    }
-    return result;
-  }
-
-  // Add custom metadata to tiles
-  getTileMetadata({x, y, z}) {
-    const TILE_SIZE = 256;
-    const scale = Math.pow(2, z);
-    return {
-      id: `${x}_${y}_${z}`,
-      bbox: [
-        x * TILE_SIZE / scale,
-        y * TILE_SIZE / scale,
-        (x + 1) * TILE_SIZE / scale,
-        (y + 1) * TILE_SIZE / scale
-      ];
-    }
-  }
-}
-
-new TileLayer({
-  Tileset: NonGeospatialTileset,
-  ...
-});
-```
-
-### Tileset2D:Members
-
-##### `opts` (Object)
-
-User options, contains the following fields:
-
-* `maxCacheSize` (Number, optional)
-* `maxCacheByteSize` (Number, optional)
-* `maxZoom` (Number, optional)
-* `minZoom` (Number, optional)
-* `refinementStrategy` (Enum, optional)
-
-##### `tiles` (Array)
-
-All tiles in the current cache. 
-Each `tile` contains the following properties:
-
-- `x` (Number)
-- `y` (Number)
-- `z` (Number)
-- `parent` (Tile): the parent tile
-- `children` (Array): children tiles
-- `isLoaded` (Boolean): whether the tile's data has been loaded
-- `content` (Any): resolved from `getTileData`
-
-##### `selectedTiles` (Array)
-
-All tiles that should be displayed in the current viewport.
-
-##### `isLoaded` (Boolean)
-
-`true` if all selected tiles are loaded.
-
-### Tileset2D:Methods
-
-The following methods can be overriden by a subclass in order to customize the `TileLayer`'s behavior.
-
-##### `getTileIndices`
-
-`getTileIndices({viewport, maxZoom, minZoom})`
-
-This function converts a given viewport to the indices needed to fetch tiles contained in the viewport. The default implementation returns visible tiles defined by [the OSM tile index](https://wiki.openstreetmap.org/wiki/Slippy_map_tilenames).
-
 Receives arguments:
 
-- `viewport` (Viewport)
-- `minZoom` (Number) The minimum zoom level
-- `maxZoom` (Number) The maximum zoom level
-
-Returns:
-
-An array of objects in the shape of `{x, y, z}`.
-
-
-##### `getTileMetadata`
-
-`getTileMetadata({x, y, z})`
-
-Generates additional metadata for a tile. The metadata is then stored as properties in a `tile` instance. The default implementation adds a `bbox`.
-
-Receives arguments:
-
-- `x` (Number)
-- `y` (Number)
-- `z` (Number)
-
-Returns:
-
-An object that contains the fields that should be added to the `tile` instance.
-
-
-##### `getParentIndex`
-
-`getParentIndex({x, y, z})`
-
-Retrives the parent of a tile. The parent tile is usually a tile in the previous zoom level (`z - 1`) and contains the given tile. This method is called to populate the `parent` and `children` fields of a tile.
-
-Returns:
-
-`{x, y, z}` of the parent tile.
-
-
-##### `updateTileStates`
-
-`updateTileStates()`
-
-Updates the visibility of all tiles. This method is called when the viewport changes, or new tile content has been loaded. It is called after the tiles are selected by `getTileIndicesInViewport`. This method can access all tiles and selected tiles via `this.tiles` and `this.selectedTiles`, and is expected to update the `isVisible` property of each tile.
+- `error` (`Error`)
 
 
 ## Source

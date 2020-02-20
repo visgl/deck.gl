@@ -1,5 +1,5 @@
 import Tile2DHeader from './tile-2d-header';
-import {getTileIndices, tileToBoundingBox} from './osm-utils';
+import {getTileIndices, tileToBoundingBox} from './utils';
 
 const TILE_STATE_UNKNOWN = 0;
 const TILE_STATE_VISIBLE = 1;
@@ -99,6 +99,7 @@ export default class Tileset2D {
    */
   update(viewport) {
     if (viewport !== this._viewport) {
+      this._viewport = viewport;
       const tileIndices = this.getTileIndices({
         viewport,
         maxZoom: this._maxZoom,
@@ -136,7 +137,7 @@ export default class Tileset2D {
   // Add custom metadata to tiles
   getTileMetadata({x, y, z}) {
     return {
-      bbox: tileToBoundingBox(x, y, z)
+      bbox: tileToBoundingBox(this._viewport, x, y, z)
     };
   }
 
@@ -224,6 +225,7 @@ export default class Tileset2D {
   /**
    * Clear tiles that are not visible when the cache is full
    */
+  /* eslint-disable complexity */
   _resizeCache() {
     const {_cache, opts} = this;
 
@@ -237,7 +239,8 @@ export default class Tileset2D {
     if (overflown) {
       for (const [tileId, tile] of _cache) {
         if (!tile.isVisible) {
-          this._cacheByteSize -= tile.byteLength;
+          // delete tile
+          this._cacheByteSize -= opts.maxCacheByteSize ? tile.byteLength : 0;
           _cache.delete(tileId);
         }
         if (_cache.size <= maxCacheSize && this._cacheByteSize <= maxCacheByteSize) {
@@ -255,9 +258,10 @@ export default class Tileset2D {
       this._dirty = false;
     }
   }
+  /* eslint-enable complexity */
 
   _getTile({x, y, z}, create) {
-    const tileId = `${z}-${x}-${y}`;
+    const tileId = `${x},${y},${z}`;
     let tile = this._cache.get(tileId);
 
     if (!tile && create) {
