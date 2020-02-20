@@ -8,10 +8,14 @@ import {
   initializeDeckGL
 } from './commons';
 
-export default function loadArcGISDeckExternalRenderer(externalRenderers, SpatialReference) {
+export default function loadArcGISDeckExternalRenderer(externalRenderers) {
   function ArcGISDeckExternalRenderer(view, conf) {
     this.view = view;
     this.deckLayers = conf.deckLayers;
+
+    this.deckLayers.on('change', () => {
+      externalRenderers.requestRenderer(this.view);
+    })
   }
   ArcGISDeckExternalRenderer.prototype.initializeResources = initializeResources;
   ArcGISDeckExternalRenderer.prototype.createOrResizeFramebuffer = createOrResizeFramebuffer;
@@ -52,17 +56,13 @@ export default function loadArcGISDeckExternalRenderer(externalRenderers, Spatia
         longitude: this.view.center.longitude,
         zoom: this.view.zoom,
         bearing: this.view.camera.heading,
-        pitch: this.view.camera.tilt
+        pitch: this.view.camera.tilt,
+        layers: this.deckLayers
       }
     });
 
     gl.activeTexture(gl.TEXTURE0 + 0);
     gl.bindTexture(gl.TEXTURE_2D, null);
-
-    // We redraw the deck immediately.
-    this.deckgl.setProps({
-      layers: this.deckLayers
-    });
 
     this.deckgl.redraw(true);
 

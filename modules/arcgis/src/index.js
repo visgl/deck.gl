@@ -29,10 +29,7 @@ export function loadArcGISModule(esri) {
 
       const ArcGISDeckLayerView2D = loadArcGISDeckLayerView2D(BaseLayerViewGL2D);
       const ArcGISDeckLayer = loadArcGISDeckLayer(Layer, Collection, ArcGISDeckLayerView2D);
-      const ArcGISDeckExternalRenderer = loadArcGISDeckExternalRenderer(
-        externalRenderers,
-        SpatialReference
-      );
+      const ArcGISDeckExternalRenderer = loadArcGISDeckExternalRenderer(externalRenderers);
 
       arcGIS.ArcGISDeckLayerView2D = ArcGISDeckLayerView2D;
       arcGIS.ArcGISDeckLayer = ArcGISDeckLayer;

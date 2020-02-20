@@ -61,7 +61,7 @@ export default function loadArcGISDeckLayerView2D(BaseLayerViewGL2D) {
       const layers = this.layer.deckLayers.items;
 
       this.deckgl.setProps({
-        layers
+        layers: layers.slice()
       });
 
       // We need to tell the layer view that it must redraw itself.
