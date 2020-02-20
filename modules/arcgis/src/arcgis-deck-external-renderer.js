@@ -13,9 +13,6 @@ export default function loadArcGISDeckExternalRenderer(externalRenderers, Collec
     this.view = view;
     this.deckLayers = new Collection();
     this.deckLayers.addMany(conf.deckLayers);
-    this.deckLayers.on('change', () => {
-      externalRenderers.requestRender(this.view);
-    })
   }
   ArcGISDeckExternalRenderer.prototype.initializeResources = initializeResources;
   ArcGISDeckExternalRenderer.prototype.createOrResizeFramebuffer = createOrResizeFramebuffer;
@@ -34,6 +31,9 @@ export default function loadArcGISDeckExternalRenderer(externalRenderers, Collec
       Math.round(this.view.size[1] * dpr)
     );
     this.initializeDeckGL(gl);
+    this.deckLayers.on('change', () => {
+      externalRenderers.requestRender(this.view);
+    });
   }
 
   ArcGISDeckExternalRenderer.prototype.setup = setup;
@@ -51,13 +51,13 @@ export default function loadArcGISDeckExternalRenderer(externalRenderers, Collec
     );
 
     this.deckgl.setProps({
+      layers: this.deckLayers.items.slice(),
       viewState: {
         latitude: this.view.center.latitude,
         longitude: this.view.center.longitude,
         zoom: this.view.zoom,
         bearing: this.view.camera.heading,
-        pitch: this.view.camera.tilt,
-        layers: this.deckLayers
+        pitch: this.view.camera.tilt
       }
     });
 
