@@ -15,7 +15,8 @@ import {
   PolygonLayer,
   ScatterplotLayer,
   TextLayer,
-  TripsLayer
+  TripsLayer,
+  TerrainLayer
 } from 'deck.gl';
 
 import {colorToRGBArray} from '../../utils/format-utils';
@@ -250,3 +251,31 @@ export const TripsLayerDemo = createLayerDemoClass({
     currentTime: 500
   }
 });
+
+export const TerrainLayerDemo = createLayerDemoClass({
+  Layer: TerrainLayer,
+  allowMissingData: true,
+  propParameters: {
+    meshMaxError: {
+      displayName: 'meshMaxError',
+      type: 'range',
+      value: 4.0,
+      step: 1,
+      min: 1,
+      max: 100
+    }
+  },
+  props: {
+    minZoom: 0,
+    maxZoom: 23,
+    strategy: 'no-overlap',
+    elevationDecoder: {
+      rScaler: 256,
+      gScaler: 1,
+      bScaler: 1 / 256,
+      offset: -32768
+    },
+    terrainImage: 'https://s3.amazonaws.com/elevation-tiles-prod/terrarium/{z}/{x}/{y}.png',
+    surfaceImage: 'https://wms.chartbundle.com/tms/1.0.0/sec/{z}/{x}/{y}.png?origin=nw'
+  }
+})
