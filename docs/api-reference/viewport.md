@@ -77,47 +77,38 @@ Returns:
 
 ##### `project`
 
-Projects latitude, longitude (and altitude) to pixel coordinates in window using
-viewport projection parameters.
+Projects world coordinates to pixel coordinates on screen.
 
 Parameters:
 
-* `coordinates` (Array) - `[lng, lat, altitude]` Passing an altitude is optional.
+* `coordinates` (Array) - `[X, Y, Z]` in world units. `Z` is default to `0` if not supplied.
 * `opts` (Object)
   + `topLeft` (Boolean, optional) - Whether projected coords are top left. Default to `true`.
 
 Returns:
 
 * `[x, y]` or `[x, y, z]` in pixels coordinates. `z` is pixel depth.
-  + If input is `[lng, lat]`: returns `[x, y]`.
-  + If input is `[lng, lat, Z]`: returns `[x, y, z]`.
-
-Note:
-
-* By default, returns top-left coordinates for canvas/SVG type render
+  + If input is `[X, Y]`: returns `[x, y]`.
+  + If input is `[X, Y, Z]`: returns `[x, y, z]`.
 
 
 ##### `unproject`
 
-Unproject pixel coordinates on screen onto [lng, lat, altitude] on map.
+Unproject pixel coordinates on screen into world coordinates.
 
 Parameters:
 
-* `pixels` (Array) - `[x, y, z]` Passing a `z` is optional.
+* `pixels` (Array) - `[x, y, z]` in pixel coordinates. Passing a `z` is optional.
 * `opts` (Object)
   + `topLeft` (Boolean, optional) - Whether projected coords are top left. Default to `true`.
   + `targetZ` (Number, optional) - If pixel depth `z` is not specified in `pixels`, this is used as the elevation plane to unproject onto. Default `0`.
 
 Returns:
 
-* `[lng, lat]` or `[longitude, lat, Z]` in map coordinates. `Z` is elevation in meters.
-  + If input is `[x, y]` without specifying `opts.targetZ`: returns `[lng, lat]`.
-  + If input is `[x, y]` with `opts.targetZ`: returns `[lng, lat, targetZ]`.
-  + If input is `[x, y, z]`: returns `[lng, lat, Z]`.
-
-Note:
-
-* By default, takes top-left coordinates from JavaScript mouse events.
+* `[X, Y]` or `[X, Y, Z]` in world coordinates.
+  + If input is `[x, y]` without specifying `opts.targetZ`: returns `[X, Y]`.
+  + If input is `[x, y]` with `opts.targetZ`: returns `[X, Y, targetZ]`.
+  + If input is `[x, y, z]`: returns `[X, Y, Z]`.
 
 
 ##### `projectPosition`
