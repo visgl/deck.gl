@@ -19,6 +19,11 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v8.0
 
+#### deck.gl [8.0.16] - Feb 20 2020
+
+- Fix attribute check greater than attribute size (#4288)
+- Fix using constant with SimpleMeshLayer's getColor (#4277)
+
 #### deck.gl [8.0.15] - Feb 14 2020
 
 - [react] Fix support for mix-blend-mode style (#4260)
