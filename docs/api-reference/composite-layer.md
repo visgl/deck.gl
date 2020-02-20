@@ -81,6 +81,20 @@ new GeoJsonLayer({
 });
 ```
 
+## Members
+
+##### `isComposite`
+
+Always `true`.
+
+##### `isLoaded`
+
+`true` if all asynchronous assets are loaded, and all sublayers are also loaded.
+
+##### `parent`
+
+A `Layer` instance if this layer is rendered by a [CompositeLayer](/docs/api-reference/composite-layer.md)
+
 
 ## Methods
 

@@ -79,12 +79,20 @@ export default class ComponentState {
   }
 
   isAsyncPropLoading(propName) {
-    const asyncProp = this.asyncProps[propName];
-    return Boolean(
-      asyncProp &&
-        asyncProp.pendingLoadCount > 0 &&
-        asyncProp.pendingLoadCount !== asyncProp.resolvedLoadCount
-    );
+    if (propName) {
+      const asyncProp = this.asyncProps[propName];
+      return Boolean(
+        asyncProp &&
+          asyncProp.pendingLoadCount > 0 &&
+          asyncProp.pendingLoadCount !== asyncProp.resolvedLoadCount
+      );
+    }
+    for (const key in this.asyncProps) {
+      if (this.isAsyncPropLoading(key)) {
+        return true;
+      }
+    }
+    return false;
   }
 
   // Updates all async/overridden props (when new props come in)

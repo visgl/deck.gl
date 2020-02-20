@@ -148,6 +148,10 @@ export default class Layer extends Component {
     return this.internalState.uniformTransitions.active;
   }
 
+  get isLoaded() {
+    return this.internalState && !this.internalState.isAsyncPropLoading();
+  }
+
   // Returns true if the layer is pickable and visible.
   isPickable() {
     return this.props.pickable && this.props.visible;

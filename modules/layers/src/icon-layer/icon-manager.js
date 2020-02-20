@@ -244,7 +244,7 @@ export default class IconManager {
     }
   }
 
-  get loaded() {
+  get isLoaded() {
     return this._pendingCount === 0;
   }
 
