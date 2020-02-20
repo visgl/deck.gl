@@ -60,7 +60,7 @@ export default class GenericInput extends PureComponent {
       <div className="input">
         <label>{displayName}</label>
         <div className="tooltip">
-          {displayName}: {displayValue}
+          {displayName}: {String(displayValue)}
         </div>
         <input {...props} value={displayValue} onChange={this._onChange} />
       </div>
