@@ -2,7 +2,7 @@
   "name": "@deck.gl/geo-layers",
   "description": "deck.gl layers supporting geospatial use cases and GIS formats",
   "license": "MIT",
-  "version": "8.1.0-alpha.3",
+  "version": "8.1.0-alpha.4",
   "publishConfig": {
     "access": "public"
   },
@@ -38,9 +38,9 @@
     "s2-geometry": "^1.2.10"
   },
   "peerDependencies": {
-    "@loaders.gl/core": "^2.1.0-alpha.4",
     "@deck.gl/core": "^8.0.0",
     "@deck.gl/layers": "^8.0.0",
-    "@deck.gl/mesh-layers": "^8.0.0"
+    "@deck.gl/mesh-layers": "^8.0.0",
+    "@loaders.gl/core": "^2.1.0-alpha.4"
   }
 }

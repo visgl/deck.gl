@@ -19,6 +19,18 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v8.1
 
+### deck.gl [8.1.0-alpha.4] - Feb 20 2020
+
+- [google-maps] fix occasional crash during resize (#4269)
+- Fix A-B-A path rendering (#4271)
+- Refactor TerrainLayer for performance and ease of use. (#4275)
+- Fix using constant for SimpleMeshLayer getColor (#4277)
+- Fix attribute check greater than attribute size (#4288)
+- Add layer.isLoaded (#4276)
+- pydeck and @deck.gl/jupyter-widget: Add support for dynamic deck.gl custom Layer registration (#4233)
+- TileLayer API audit (#4246)
+- TerrainLayer integration (#4278)
+
 ### deck.gl [8.1.0-alpha.3] - Feb 11 2020
 
 -  [react] Fix support for mix-blend-mode style (#4260)
