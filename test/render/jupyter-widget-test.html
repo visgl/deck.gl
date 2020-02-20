@@ -22,14 +22,17 @@
   <script type="text/javascript" src="/modules/jupyter-widget/dist/index.js"></script>
   <script type="text/javascript">
     let deck;
+    const customLibraries = [{libraryName: 'CustomLayerLibrary',  resourceUri: '/test/render/jupyter-widget-custom-layer-bundle.js'}];
+
     window.onmessage = evt => {
       if (!deck) {
         deck = createDeck({
           mapboxApiKey: 'NO_API_KEY',
           container: document.getElementById('app'),
           jsonInput: evt.data.json,
-          useTooltip: true
-        });
+          useTooltip: true,
+          customLibraries
+	});
 
         deck.setProps({
           onAfterRender: () => window.top.postMessage('done')

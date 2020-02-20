@@ -3,7 +3,7 @@ import {DOMWidgetModel, DOMWidgetView} from '@jupyter-widgets/base';
 
 import {MODULE_NAME, MODULE_VERSION} from './version';
 
-import {jsonConverter, createDeck, updateDeck, loadExternalLibrary} from './create-deck';
+import {jsonConverter, createDeck, updateDeck} from './create-deck';
 import {deserializeMatrix, processDataBuffer} from './binary-transport';
 
 const MAPBOX_CSS_URL = 'https://api.tiles.mapbox.com/mapbox-gl-js/v1.2.1/mapbox-gl.css';
@@ -37,7 +37,7 @@ export class DeckGLModel extends DOMWidgetModel {
       _view_name: DeckGLModel.view_name,
       _view_module: DeckGLModel.view_module,
       _view_module_version: DeckGLModel.view_module_version,
-      classes: [],
+      custom_libraries: [],
       json_input: null,
       mapbox_key: null,
       selected_data: [],
@@ -81,6 +81,8 @@ export class DeckGLView extends DOMWidgetView {
   initialize() {
     this.listenTo(this.model, 'destroy', this.remove);
 
+    const customLibraries = this.model.get('custom_libraries');
+
     const container = document.createElement('div');
 
     this.el.appendChild(container);
@@ -109,7 +111,8 @@ export class DeckGLView extends DOMWidgetView {
       jsonInput,
       tooltip,
       handleClick: this.handleClick.bind(this),
-      handleWarning: this.handleWarning.bind(this)
+      handleWarning: this.handleWarning.bind(this),
+      customLibraries
     });
   }
 
@@ -125,20 +128,8 @@ export class DeckGLView extends DOMWidgetView {
 
     this.model.on('change:json_input', this.valueChanged.bind(this), this);
     this.model.on('change:data_buffer', this.dataBufferChanged.bind(this), this);
-    this.model.on('change:classes', this.addNewCustomLayers.bind(this), this);
 
-    this.addNewCustomLayers();
     this.dataBufferChanged();
-  }
-
-  addNewCustomLayers() {
-    const customLibraries = this.model.get('custom_libraries');
-    if (customLibraries) {
-      for (const obj of customLibraries) {
-        // obj is an object of the form `{libraryName, resourceUri}`
-        loadExternalLibrary(obj);
-      }
-    }
   }
 
   dataBufferChanged() {
