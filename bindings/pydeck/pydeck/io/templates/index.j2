@@ -28,9 +28,7 @@
     
     #deckgl-overlay {
       z-index: 2;
-{% if css_background_color %}
-      background: {{css_background_color}};
-{% endif %}
+      background: {{css_background_color or 'none'}};
     }
     
     #deck-map-wrapper {
@@ -52,12 +50,15 @@
     const jsonInput = {{json_input}};
     const MAPBOX_API_KEY = '{{mapbox_key}}';
     const tooltip = {{tooltip}};
-  
+    const customLibraries = {{ custom_libraries or 'null' }};
+
     const deck = createDeck({
       mapboxApiKey: MAPBOX_API_KEY, 
       container: document.getElementById('deck-container'),
       jsonInput,
-      tooltip
+      tooltip,
+      customLibraries
     });
+
   </script>
 </html>

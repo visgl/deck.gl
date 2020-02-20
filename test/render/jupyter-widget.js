@@ -299,6 +299,28 @@ const TEST_CASES = [
       ]
     },
     goldenImage: './test/render/golden-images/jupyter-widget-failed-function.png'
+  },
+  {
+    name: 'CustomLayer',
+    json: {
+      description: 'Test of custom layer loading',
+      viewState: {
+        longitude: 0,
+        latitude: 0,
+        zoom: 4
+      },
+      layers: [
+        {
+          '@@type': 'DemoCompositeLayer',
+          data: [[0, 0], [2, 0], [0, 2], [2, 2], [3, 3], [4, 4]],
+          getPosition: '@@=-',
+          getLineColor: [0, 0, 0],
+          getFillColor: [20, 160, 0, 180],
+          getRadius: 1000000
+        }
+      ]
+    },
+    goldenImage: './test/render/golden-images/jupyter-widget-custom-layer.png'
   }
 ].filter(Boolean);
 

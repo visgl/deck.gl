@@ -8,6 +8,8 @@ import configuration, {log} from './json-configuration-for-deck';
 import JSON_DATA from './data/deck-props.json';
 import COMPLEX_JSON from './data/complex-data.json';
 
+import {OrbitView} from '@deck.gl/core';
+
 test('JSONConverter#import', t => {
   t.ok(JSONConverter, 'JSONConverter imported');
   t.end();
@@ -35,6 +37,23 @@ test('JSONConverter#convert', t => {
     COORDINATE_SYSTEM.METER_OFFSETS,
     'Should evaluate enums.'
   );
+
+  t.end();
+});
+
+test('JSONConverter#merge', t => {
+  const jsonConverter = new JSONConverter({configuration});
+  jsonConverter.mergeConfiguration({
+    classes: {OrbitView}
+  });
+  const deckProps = jsonConverter.convert({
+    views: [{'@@type': 'OrbitView'}, {'@@type': 'NoSuchView'}]
+  });
+  t.ok(
+    deckProps.views[0] instanceof OrbitView && deckProps.views[0].id,
+    'JSONConverter added a new class to its configuration'
+  );
+  t.ok(!deckProps.views[1], 'JSONConverter does not add a class not in its configuration');
 
   t.end();
 });

@@ -1,3 +1,4 @@
+/* global window */
 import makeTooltip from './widget-tooltip';
 
 import mapboxgl from './ssr-safe-mapbox';
@@ -8,21 +9,23 @@ import {registerLoaders} from '@loaders.gl/core';
 
 import * as deck from './deck-bundle';
 
+import {loadScript, alreadyLoaded} from './script-utils';
+
 import GL from '@luma.gl/constants';
 
-function extractClasses() {
-  // Get classes for registration from standalone deck.gl
+function extractClasses(library) {
+  // Extracts exported class constructors as a dictionary from a library
   const classesDict = {};
-  const classes = Object.keys(deck).filter(x => x.charAt(0) === x.charAt(0).toUpperCase());
+  const classes = Object.keys(library).filter(x => x.charAt(0) === x.charAt(0).toUpperCase());
   for (const cls of classes) {
-    classesDict[cls] = deck[cls];
+    classesDict[cls] = library[cls];
   }
   return classesDict;
 }
 
 // Handle JSONConverter and loaders configuration
 const jsonConverterConfiguration = {
-  classes: extractClasses(),
+  classes: extractClasses(deck),
   // Will be resolved as `<enum-name>.<enum-value>`
   enumerations: {
     COORDINATE_SYSTEM: deck.COORDINATE_SYSTEM,
@@ -41,23 +44,49 @@ const jsonConverter = new deck.JSONConverter({
   configuration: jsonConverterConfiguration
 });
 
-export function updateDeck(inputJSON, deckgl) {
-  const results = jsonConverter.convert(inputJSON);
+function loadExternalLibrary({libraryName, resourceUri, onComplete}, loadResource = loadScript) {
+  // NOTE loadResource is for testing only
+  loadResource(resourceUri).then(res => {
+    const module = window[libraryName];
+    const newConfiguration = {
+      classes: extractClasses(module)
+    };
+    jsonConverter.mergeConfiguration(newConfiguration);
+    if (onComplete) onComplete();
+  });
+}
+
+function addCustomLibraries(customLibraries) {
+  if (!customLibraries) {
+    return;
+  }
+  for (const obj of customLibraries) {
+    // obj is an object of the form `{libraryName, resourceUri}`
+    if (!alreadyLoaded(obj.resourceUri)) {
+      loadExternalLibrary(obj);
+    }
+  }
+}
+
+function updateDeck(inputJson, deckgl) {
+  const results = jsonConverter.convert(inputJson);
   deckgl.setProps(results);
 }
 
-export function createDeck({
+function createDeck({
   mapboxApiKey,
   container,
   jsonInput,
   tooltip,
   handleClick,
-  handleWarning
+  handleWarning,
+  customLibraries
 }) {
   let deckgl;
   try {
     const props = jsonConverter.convert(jsonInput);
 
+    addCustomLibraries(customLibraries);
     const getTooltip = makeTooltip(tooltip);
 
     deckgl = new deck.DeckGL({
@@ -91,4 +120,4 @@ function injectFunction(warnFunction, messageHandler) {
   };
 }
 
-export default jsonConverter;
+export {jsonConverter, createDeck, updateDeck, loadExternalLibrary};
