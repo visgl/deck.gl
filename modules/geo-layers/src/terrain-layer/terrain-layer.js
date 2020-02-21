@@ -30,7 +30,7 @@ const defaultProps = {
   // Image url that encodes height data
   terrainImage: {type: 'string', value: null},
   // Image url to use as texture
-  surfaceImage: {type: 'string', value: 0},
+  surfaceImage: {type: 'string', value: null, optional: true},
   // Martini error tolerance in meters, smaller number -> more detailed mesh
   meshMaxError: {type: 'number', value: 4.0},
   // Bounding box of the terrain image, [minX, minY, maxX, maxY] in world coordinates
@@ -124,7 +124,7 @@ export default class TerrainLayer extends CompositeLayer {
           .replace('{x}', x)
           .replace('{y}', y)
           .replace('{z}', z)
-      : 0;
+      : false;
 
     return new SimpleMeshLayer({
       id: props.id,
@@ -151,7 +151,7 @@ export default class TerrainLayer extends CompositeLayer {
 
     if (this.state.isTiled) {
       return new TileLayer(this.props, {
-        id: `${this.props.id}-terrain`,
+        id: `${this.props.id}-tiles`,
         getTileData: this.getTiledTerrainData.bind(this),
         renderSubLayers: this.renderSubLayers,
         updateTriggers: {
@@ -161,7 +161,7 @@ export default class TerrainLayer extends CompositeLayer {
     }
     return new SimpleMeshLayer(
       this.getSubLayerProps({
-        id: 'terrain'
+        id: 'mesh'
       }),
       {
         data: [1],

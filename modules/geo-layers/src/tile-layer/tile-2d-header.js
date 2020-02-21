@@ -1,7 +1,7 @@
 import {log} from '@deck.gl/core';
 
 export default class Tile2DHeader {
-  constructor({getTileData, x, y, z, onTileLoad, onTileError}) {
+  constructor({x, y, z, onTileLoad, onTileError}) {
     this.x = x;
     this.y = y;
     this.z = z;
@@ -11,7 +11,6 @@ export default class Tile2DHeader {
 
     this.content = null;
     this._isLoaded = false;
-    this._loader = this._loadData(getTileData);
 
     this.onTileLoad = onTileLoad;
     this.onTileError = onTileError;
@@ -33,13 +32,13 @@ export default class Tile2DHeader {
     return result;
   }
 
-  _loadData(getTileData) {
+  loadData(getTileData) {
     const {x, y, z, bbox} = this;
     if (!getTileData) {
-      return null;
+      return;
     }
 
-    return Promise.resolve(getTileData({x, y, z, bbox}))
+    this._loader = Promise.resolve(getTileData({x, y, z, bbox}))
       .then(buffers => {
         this.content = buffers;
         this._isLoaded = true;
