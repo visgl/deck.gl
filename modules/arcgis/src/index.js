@@ -3,90 +3,54 @@ import loadArcGISDeckLayerView2D from './arcgis-deck-layer-view-2d';
 import loadArcGISDeckExternalRenderer from './arcgis-deck-external-renderer';
 import {loadModules as esriLoaderLoadModules} from 'esri-loader';
 
-export const arcGIS = {
-  ArcGISDeckLayerView2D: undefined,
-  ArcGISDeckLayer: undefined,
-  ArcGISDeckExternalRenderer: undefined
-};
+let arcGIS = null;
 
 export async function loadArcGISModules(modules, loadScriptOptions) {
-  await loadArcGISModule();
+  const namespace = Array.isArray(modules) ? null : modules;
+  await loadArcGISModule(namespace, loadScriptOptions);
 
-  return esriLoaderLoadModules(modules, loadScriptOptions).then(array => {
-    array.unshift(arcGIS);
-    return array;
+  if (Array.isArray(modules)) {
+    return esriLoaderLoadModules(modules, loadScriptOptions).then(array => {
+      return {...arcGIS, modules: array};
+    });
+  }
+  return arcGIS;
+}
+
+function loadArcGISModule(esri, loadScriptOptions) {
+  if (arcGIS) {
+    // Already loaded
+    return arcGIS;
+  }
+  if (esri) {
+    // Using user-provided dependencies
+    // Right now this object has to be manually assembled - let @arcgis/webpack-plugin handle this?
+    const Layer = esri.layers.Layer;
+    const Collection = esri.core.Collection;
+    const BaseLayerViewGL2D = esri.views['2d'].layers.BaseLayerViewGL2D;
+    const externalRenderers = esri.views['3d'].externalRenderers;
+
+    return initialize(Layer, Collection, BaseLayerViewGL2D, externalRenderers);
+  }
+
+  return esriLoaderLoadModules(
+    [
+      'esri/layers/Layer',
+      'esri/core/Collection',
+      'esri/views/2d/layers/BaseLayerViewGL2D',
+      'esri/views/3d/externalRenderers'
+    ],
+    loadScriptOptions
+  ).then(([Layer, Collection, BaseLayerViewGL2D, externalRenderers]) => {
+    return initialize(Layer, Collection, BaseLayerViewGL2D, externalRenderers);
   });
 }
 
-export function loadArcGISModule(esri) {
-  if (esri) {
-    return new Promise(resolve => {
-      const Layer = esri.layers.Layer;
-      const Collection = esri.core.Collection;
-      const BaseLayerViewGL2D = esri.views['2d'].layers.BaseLayerViewGL2D;
-      const externalRenderers = esri.views['3d'].externalRenderers;
+function initialize(Layer, Collection, BaseLayerViewGL2D, externalRenderers) {
+  const ArcGISDeckLayerView2D = loadArcGISDeckLayerView2D(BaseLayerViewGL2D);
+  const ArcGISDeckLayer = loadArcGISDeckLayer(Layer, Collection, ArcGISDeckLayerView2D);
+  const ArcGISDeckExternalRenderer = loadArcGISDeckExternalRenderer(externalRenderers, Collection);
 
-      const ArcGISDeckLayerView2D = loadArcGISDeckLayerView2D(BaseLayerViewGL2D);
-      const ArcGISDeckLayer = loadArcGISDeckLayer(Layer, Collection, ArcGISDeckLayerView2D);
-      const ArcGISDeckExternalRenderer = loadArcGISDeckExternalRenderer(
-        externalRenderers,
-        Collection
-      );
-
-      arcGIS.ArcGISDeckLayerView2D = ArcGISDeckLayerView2D;
-      arcGIS.ArcGISDeckLayer = ArcGISDeckLayer;
-      arcGIS.ArcGISDeckExternalRenderer = ArcGISDeckExternalRenderer;
-
-      resolve(arcGIS);
-    });
-  }
-
-  // eslint-disable-next-line
-  if (window.require && window.require.on) {
-    return new Promise(resolve => {
-      // eslint-disable-next-line
-      window.require(
-        [
-          'esri/layers/Layer',
-          'esri/core/Collection',
-          'esri/views/2d/layers/BaseLayerViewGL2D',
-          'esri/views/3d/externalRenderers'
-        ],
-        (Layer, Collection, BaseLayerViewGL2D, externalRenderers) => {
-          const ArcGISDeckLayerView2D = loadArcGISDeckLayerView2D(BaseLayerViewGL2D);
-          const ArcGISDeckLayer = loadArcGISDeckLayer(Layer, Collection, ArcGISDeckLayerView2D);
-          const ArcGISDeckExternalRenderer = loadArcGISDeckExternalRenderer(
-            externalRenderers,
-            Collection
-          );
-
-          arcGIS.ArcGISDeckLayerView2D = ArcGISDeckLayerView2D;
-          arcGIS.ArcGISDeckLayer = ArcGISDeckLayer;
-          arcGIS.ArcGISDeckExternalRenderer = ArcGISDeckExternalRenderer;
-
-          resolve(arcGIS);
-        }
-      );
-    });
-  }
-
-  return esriLoaderLoadModules([
-    'esri/layers/Layer',
-    'esri/core/Collection',
-    'esri/views/2d/layers/BaseLayerViewGL2D',
-    'esri/views/3d/externalRenderers'
-  ]).then(([Layer, Collection, BaseLayerViewGL2D, externalRenderers]) => {
-    const ArcGISDeckLayerView2D = loadArcGISDeckLayerView2D(BaseLayerViewGL2D);
-    const ArcGISDeckLayer = loadArcGISDeckLayer(Layer, Collection, ArcGISDeckLayerView2D);
-    const ArcGISDeckExternalRenderer = loadArcGISDeckExternalRenderer(
-      externalRenderers,
-      Collection
-    );
-
-    arcGIS.ArcGISDeckLayerView2D = ArcGISDeckLayerView2D;
-    arcGIS.ArcGISDeckLayer = ArcGISDeckLayer;
-    arcGIS.ArcGISDeckExternalRenderer = ArcGISDeckExternalRenderer;
-
-    return arcGIS;
-  });
+  arcGIS = {ArcGISDeckLayer, ArcGISDeckLayerView2D, ArcGISDeckExternalRenderer};
+  return arcGIS;
 }

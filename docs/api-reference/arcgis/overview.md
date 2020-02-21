@@ -6,7 +6,7 @@ The functionality exported by this module must be loaded asynchronously using th
 This function can be used to load any module that ships with the ArcGIS API for JavaScript, plus an additional `arcGIS` module
 that acts as an interface between deck.gl and ArcGIS.
 
-At the moment only 2D integration with `MapView` is supported; it is provided by the `arcGIS.ArcGISDeckLayer` class.
+At the moment only 2D integration with `MapView` is supported; it is provided by the `ArcGISDeckLayer` class.
 
 ## Installation
 
@@ -19,16 +19,7 @@ At the moment only 2D integration with `MapView` is supported; it is provided by
 <script src="https://unpkg.com/@deck.gl/arcgis@^1.0.0/dist.min.js"></script>
 <!-- usage -->
 <script type="text/javascript">
-deck.loadArcGISModules([
-  "esri/Map",
-  "esri/views/MapView"
-]).then(([
-  arcGIS,
-  ArcGISMap,
-  MapView
-]) => {
-  const {ArcGISDeckLayer} = arcGIS;
-  ...
+  const {loadArcGISModules} = deck;
 </script>
 ```
 
@@ -44,16 +35,32 @@ npm install @deck.gl/core @deck.gl/arcgis
 import {loadArcGISModules} from '@deck.gl/arcgis';
 
 loadArcGISModules([
-  "esri/Map",
-  "esri/views/MapView"
-]).then(([
-  arcGIS,
-  ArcGISMap,
-  MapView
-]) => {
-  const {ArcGISDeckLayer} = arcGIS;
-  ...
-</script>
+  'esri/Map',
+  'esri/views/MapView'
+]).then(({ArcGISDeckLayer, modules}) => {
+  const [ArcGISMap, MapView] = modules;
+
+  const layer = new ArcGISDeckLayer({
+    deckLayers: [
+      new GeoJsonLayer({
+        ...
+      }),
+      new ArcLayer({
+        ...
+      })
+    ]
+  });
+
+  const mapView = new MapView({
+    container: "viewDiv",
+    map: new ArcGISMap({
+      basemap: "dark-gray-vector",
+      layers: [layer]
+    }),
+    center: [0.119167, 52.205276],
+    zoom: 5
+  });
+});
 ```
 
 ## Supported Features and Limitations
@@ -63,6 +70,8 @@ Supported deck.gl features:
 - Layers
 - Effects
 - Attribute transitions
+- Auto-highlighting
+- `onHover` and `onClick` callbacks
 
 Not supported features:
 
@@ -70,6 +79,3 @@ Not supported features:
 - Views
 - Controller
 - React integration
-- Gesture event callbacks (e.g. `onDrag*`)
-- Auto-highlighting
-- `onHover` and `onClick` callbacks
