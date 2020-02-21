@@ -6,6 +6,7 @@ export {
   ProgramManager,
   Timeline,
   // Context utilities
+  instrumentGLContext,
   isWebGL2,
   FEATURES,
   hasFeatures,
