@@ -17,6 +17,7 @@ export {default as PointCloudDemo} from './point-cloud-demo';
 export {default as MapTileDemo} from './map-tile-demo';
 export {default as DataFilterDemo} from './data-filter-demo';
 export {default as Tiles3DDemo} from './tiles-3d-demo';
+export {default as TerrainDemo} from './terrain-demo';
 export * from './layer-demos';
 export * from './aggregation-layer-demos';
 export * from './geo-layer-demos';
