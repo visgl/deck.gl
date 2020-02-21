@@ -32,7 +32,6 @@ const defaultProps = {
   radiusMinPixels: {type: 'number', min: 0, value: 0}, //  min point radius in pixels
   radiusMaxPixels: {type: 'number', min: 0, value: Number.MAX_SAFE_INTEGER}, // max point radius in pixels
 
-  lineOpacity: {type: 'number', min: 0, value: 1},
   lineWidthUnits: 'meters',
   lineWidthScale: {type: 'number', min: 0, value: 1},
   lineWidthMinPixels: {type: 'number', min: 0, value: 0},
