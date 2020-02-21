@@ -44,16 +44,16 @@ const LOCATIONS = {
 };
 
 const SURFACE_IMAGES = {
-  sectional: 'https://wms.chartbundle.com/tms/1.0.0/sec/{z}/{x}/{y}.png?origin=nw',
-  satellite: `https://api.mapbox.com/v4/mapbox.satellite/{z}/{x}/{y}@2x.png?access_token=${MAPBOX_TOKEN}`,
-  street: 'https://c.tile.openstreetmap.org/{z}/{x}/{y}.png'
+  Sectional: 'https://wms.chartbundle.com/tms/1.0.0/sec/{z}/{x}/{y}.png?origin=nw',
+  Satellite: `https://api.mapbox.com/v4/mapbox.satellite/{z}/{x}/{y}@2x.png?access_token=${MAPBOX_TOKEN}`,
+  Street: 'https://c.tile.openstreetmap.org/{z}/{x}/{y}.png'
 };
 
-export default class IconDemo extends Component {
+export default class TerrainDemo extends Component {
   static get parameters() {
     return {
       location: {displayName: 'Location', type: 'select', options: Object.keys(LOCATIONS), value: 'Mt. St Helens'},
-      surface: {displayName: 'Surface', type: 'select', options: Object.keys(SURFACE_IMAGES), value: 'satellite'},
+      surface: {displayName: 'Surface', type: 'select', options: Object.keys(SURFACE_IMAGES), value: 'Satellite'},
       wireframe: {displayName: 'Wireframe', type: 'checkbox', value: false}
     };
   }
@@ -71,8 +71,10 @@ export default class IconDemo extends Component {
       <div>
         <h3>Terrains</h3>
         <p>Reconstructed 3D terrain from mapbox's Elevation service.</p>
-        <p>Data source:
-          <a href="https://data.nasa.gov/Space-Science/Meteorite-Landings/gh4g-9sfh"> NASA</a>
+        <p>Data sources:
+          <div>Mapbox <a href="https://docs.mapbox.com/help/troubleshooting/access-elevation-data/">Terrain-RGB</a> and <a href="https://www.mapbox.com/maps/satellite/">Satellite</a></div>
+          <div><a href="http://www.chartbundle.com/charts/">Chartbundle US Sectional</a></div>
+          <div><a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a></div>
         </p>
       </div>
     );
