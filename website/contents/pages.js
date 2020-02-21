@@ -676,6 +676,23 @@ export const docPages = generatePath([
     name: 'Submodule API Reference',
     children: [
       {
+        name: '@deck.gl/arcgis',
+        children: [
+          {
+            name: 'Overview',
+            content: getDocUrl('api-reference/arcgis/overview.md')
+          },
+          {
+            name: 'ArcGISDeckLayer',
+            content: getDocUrl('api-reference/arcgis/arcgis-deck-layer.md')
+          },
+          {
+            name: 'loadArcGISModules',
+            content: getDocUrl('api-reference/arcgis/load-arcgis-modules.md')
+          }
+        ]
+      },
+      {
         name: '@deck.gl/extensions',
         children: [
           {
