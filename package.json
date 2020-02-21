@@ -73,5 +73,8 @@
   "pre-commit": [
     "test-fast",
     "bindings-precommit-tests"
-  ]
+  ],
+  "dependencies": {
+    "esri-loader": "^2.13.0"
+  }
 }

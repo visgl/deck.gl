@@ -1,0 +1,15 @@
+{
+  "name": "@deck.gl/arcgis",
+  "version": "0.0.1",
+  "main": "index.js",
+  "license": "Apache-2.0",
+  "scripts": {
+    "build-bundle": "../../node_modules/.bin/webpack --config ../../scripts/bundle.config.js"
+  },
+  "peerDependencies": {
+    "@deck.gl/core": "^8.0.0"
+  },
+  "dependencies": {
+    "esri-loader": "^2.13.0"
+  }
+}
