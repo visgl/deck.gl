@@ -35,6 +35,7 @@ uniform float opacity;
 uniform float radiusScale;
 uniform float radiusMinPixels;
 uniform float radiusMaxPixels;
+uniform float lineOpacity;
 uniform float lineWidthScale;
 uniform float lineWidthMinPixels;
 uniform float lineWidthMaxPixels;
@@ -55,7 +56,7 @@ void main(void) {
     project_size_to_pixel(radiusScale * instanceRadius),
     radiusMinPixels, radiusMaxPixels
   );
-  
+
   // Multiply out line width and clamp to limits
   float lineWidthPixels = clamp(
     project_size_to_pixel(lineWidthScale * instanceLineWidths),
@@ -71,7 +72,7 @@ void main(void) {
   geometry.pickingColor = instancePickingColors;
 
   innerUnitRadius = 1.0 - stroked * lineWidthPixels / outerRadiusPixels;
-  
+
   vec3 offset = positions * project_pixel_size(outerRadiusPixels);
   DECKGL_FILTER_SIZE(offset, geometry);
   gl_Position = project_position_to_clipspace(instancePositions, instancePositions64Low, offset, geometry.position);
@@ -80,7 +81,7 @@ void main(void) {
   // Apply opacity to instance color, or return instance picking color
   vFillColor = vec4(instanceFillColors.rgb, instanceFillColors.a * opacity);
   DECKGL_FILTER_COLOR(vFillColor, geometry);
-  vLineColor = vec4(instanceLineColors.rgb, instanceLineColors.a * opacity);
+  vLineColor = vec4(instanceLineColors.rgb, instanceLineColors.a * lineOpacity);
   DECKGL_FILTER_COLOR(vLineColor, geometry);
 }
 `;
