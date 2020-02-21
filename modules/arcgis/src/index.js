@@ -28,7 +28,10 @@ export function loadArcGISModule(esri) {
 
       const ArcGISDeckLayerView2D = loadArcGISDeckLayerView2D(BaseLayerViewGL2D);
       const ArcGISDeckLayer = loadArcGISDeckLayer(Layer, Collection, ArcGISDeckLayerView2D);
-      const ArcGISDeckExternalRenderer = loadArcGISDeckExternalRenderer(externalRenderers, Collection);
+      const ArcGISDeckExternalRenderer = loadArcGISDeckExternalRenderer(
+        externalRenderers,
+        Collection
+      );
 
       arcGIS.ArcGISDeckLayerView2D = ArcGISDeckLayerView2D;
       arcGIS.ArcGISDeckLayer = ArcGISDeckLayer;
@@ -52,7 +55,10 @@ export function loadArcGISModule(esri) {
         (Layer, Collection, BaseLayerViewGL2D, externalRenderers) => {
           const ArcGISDeckLayerView2D = loadArcGISDeckLayerView2D(BaseLayerViewGL2D);
           const ArcGISDeckLayer = loadArcGISDeckLayer(Layer, Collection, ArcGISDeckLayerView2D);
-          const ArcGISDeckExternalRenderer = loadArcGISDeckExternalRenderer(externalRenderers, Collection);
+          const ArcGISDeckExternalRenderer = loadArcGISDeckExternalRenderer(
+            externalRenderers,
+            Collection
+          );
 
           arcGIS.ArcGISDeckLayerView2D = ArcGISDeckLayerView2D;
           arcGIS.ArcGISDeckLayer = ArcGISDeckLayer;
@@ -72,7 +78,10 @@ export function loadArcGISModule(esri) {
   ]).then(([Layer, Collection, BaseLayerViewGL2D, externalRenderers]) => {
     const ArcGISDeckLayerView2D = loadArcGISDeckLayerView2D(BaseLayerViewGL2D);
     const ArcGISDeckLayer = loadArcGISDeckLayer(Layer, Collection, ArcGISDeckLayerView2D);
-    const ArcGISDeckExternalRenderer = loadArcGISDeckExternalRenderer(externalRenderers, Collection);
+    const ArcGISDeckExternalRenderer = loadArcGISDeckExternalRenderer(
+      externalRenderers,
+      Collection
+    );
 
     arcGIS.ArcGISDeckLayerView2D = ArcGISDeckLayerView2D;
     arcGIS.ArcGISDeckLayer = ArcGISDeckLayer;
