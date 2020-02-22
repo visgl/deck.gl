@@ -6,19 +6,11 @@
     "start-local": "webpack-dev-server --env.local --progress --hot --open",
     "start": "webpack-dev-server --progress --hot --open"
   },
-  "resolutions": {
-    "@loaders.gl/core": "^2.1.0-alpha.4",
-    "@loaders.gl/images": "^2.1.0-alpha.4",
-    "@loaders.gl/loader-utils": "^2.1.0-alpha.4"
-  },
   "dependencies": {
-    "@loaders.gl/images": "^2.1.0-alpha.4",
-    "@mapbox/martini": "^0.2.0",
     "deck.gl": "^8.1.0-alpha.3",
     "react": "^16.3.0",
     "react-dom": "^16.3.0",
-    "react-map-gl": "^5.0.0",
-    "@loaders.gl/terrain": "^2.1.0-alpha.4"
+    "react-map-gl": "^5.0.0"
   },
   "devDependencies": {
     "@babel/core": "^7.0.0",
