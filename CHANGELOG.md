@@ -19,6 +19,12 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v8.1
 
+### deck.gl [8.1.0-alpha.5] - Feb 22 2020
+
+- ArcGIS module and sample app (#4252)
+- Clean up ArcGIS module API and docs (#4301)
+- TerrainLayer fixes (#4297)
+
 ### deck.gl [8.1.0-alpha.4] - Feb 20 2020
 
 - [google-maps] fix occasional crash during resize (#4269)

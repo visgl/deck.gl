@@ -1,6 +1,6 @@
 {
   "name": "@deck.gl/arcgis",
-  "version": "0.0.1",
+  "version": "8.1.0-alpha.5",
   "main": "index.js",
   "license": "Apache-2.0",
   "scripts": {
