@@ -18,8 +18,7 @@ export default class MVTTileLayer extends TileLayer {
 
     this.state = {
       ...this.state,
-      urlTemplates,
-      getTileData: this.getTileData.bind(this)
+      urlTemplates
     };
   }
 

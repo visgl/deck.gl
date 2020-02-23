@@ -40,20 +40,12 @@ export default class TileLayer extends CompositeLayer {
         (changeFlags.updateTriggersChanged.all || changeFlags.updateTriggersChanged.getTileData));
 
     if (createTileCache) {
-      const {
-        getTileData,
-        maxZoom,
-        minZoom,
-        maxCacheSize,
-        strategy,
-        getTileIndices,
-        tileToBoundingBox
-      } = props;
+      const {maxZoom, minZoom, maxCacheSize, strategy, getTileIndices, tileToBoundingBox} = props;
       if (tileset) {
         tileset.finalize();
       }
       tileset = new Tileset2D({
-        getTileData: this.state.getTileData || getTileData,
+        getTileData: this.getTileData.bind(this),
         getTileIndices,
         tileToBoundingBox,
         maxSize: maxCacheSize,
@@ -101,6 +93,10 @@ export default class TileLayer extends CompositeLayer {
     this.props.onTileError(error);
     // errorred tiles should not block rendering, are considered "loaded" with empty data
     this._updateTileset();
+  }
+
+  getTileData({x, y, z}) {
+    return this.props.getTileData(x, y, z);
   }
 
   getPickingInfo({info, sourceLayer}) {
