@@ -45,21 +45,12 @@ export function createOrResizeFramebuffer(gl, width, height) {
     return;
   }
 
-  this.destroyFramebuffer(gl);
-  this.createFramebuffer(gl, width, height);
+  this.deckFbo.delete();
+  this.deckFbo = new Framebuffer(gl, {width, height});
 
   this.deckgl.setProps({
     _framebuffer: this.deckFbo
   });
-}
-
-export function createFramebuffer(gl, width, height) {
-  // Create auxiliary FBO
-  this.deckFbo = new Framebuffer(gl, {width, height});
-}
-
-export function destroyFramebuffer(gl) {
-  this.deckFbo.delete();
 }
 
 export function initializeDeckGL(gl) {

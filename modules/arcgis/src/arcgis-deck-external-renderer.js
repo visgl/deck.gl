@@ -3,12 +3,10 @@
 import {
   initializeResources,
   createOrResizeFramebuffer,
-  createFramebuffer,
-  destroyFramebuffer,
   initializeDeckGL
 } from './commons';
 
-import {withParameters} from '@luma.gl/core';
+import {withParameters, Framebuffer} from '@luma.gl/core';
 
 export default function loadArcGISDeckExternalRenderer(externalRenderers, Collection) {
   function ArcGISDeckExternalRenderer(view, conf) {
@@ -18,8 +16,6 @@ export default function loadArcGISDeckExternalRenderer(externalRenderers, Collec
   }
   ArcGISDeckExternalRenderer.prototype.initializeResources = initializeResources;
   ArcGISDeckExternalRenderer.prototype.createOrResizeFramebuffer = createOrResizeFramebuffer;
-  ArcGISDeckExternalRenderer.prototype.createFramebuffer = createFramebuffer;
-  ArcGISDeckExternalRenderer.prototype.destroyFramebuffer = destroyFramebuffer;
   ArcGISDeckExternalRenderer.prototype.initializeDeckGL = initializeDeckGL;
 
   function setup(context) {
@@ -27,11 +23,10 @@ export default function loadArcGISDeckExternalRenderer(externalRenderers, Collec
     this.initializeResources(gl);
     // eslint-disable-next-line
     const dpr = window.devicePixelRatio;
-    this.createFramebuffer(
-      gl,
-      Math.round(this.view.size[0] * dpr),
-      Math.round(this.view.size[1] * dpr)
-    );
+    this.deckFbo = new Framebuffer(gl, {
+      width: Math.round(this.view.state.size[0] * dpr),
+      height: Math.round(this.view.state.size[1] * dpr)
+    });
     this.initializeDeckGL(gl);
     this.deckLayers.on('change', () => {
       externalRenderers.requestRender(this.view);

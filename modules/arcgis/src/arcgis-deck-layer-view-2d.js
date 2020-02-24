@@ -1,12 +1,10 @@
 import {
   initializeResources,
   createOrResizeFramebuffer,
-  createFramebuffer,
-  destroyFramebuffer,
   initializeDeckGL
 } from './commons';
 
-import {withParameters} from '@luma.gl/core';
+import {withParameters, Framebuffer} from '@luma.gl/core';
 
 export default function loadArcGISDeckLayerView2D(BaseLayerViewGL2D) {
   return BaseLayerViewGL2D.createSubclass({
@@ -25,8 +23,6 @@ export default function loadArcGISDeckLayerView2D(BaseLayerViewGL2D) {
 
     initializeResources,
     createOrResizeFramebuffer,
-    createFramebuffer,
-    destroyFramebuffer,
     initializeDeckGL,
 
     // Attach is called as soon as the layer view is ready to start rendering.
@@ -38,11 +34,10 @@ export default function loadArcGISDeckLayerView2D(BaseLayerViewGL2D) {
       this.initializeResources(gl);
       // eslint-disable-next-line
       const dpr = window.devicePixelRatio;
-      this.createFramebuffer(
-        gl,
-        Math.round(this.view.state.size[0] * dpr),
-        Math.round(this.view.state.size[1] * dpr)
-      );
+      this.deckFbo = new Framebuffer(gl, {
+        width: Math.round(this.view.state.size[0] * dpr),
+        height: Math.round(this.view.state.size[1] * dpr)
+      });
       this.initializeDeckGL(gl);
 
       // When the layer.layers collection changes, the new list of
@@ -85,7 +80,7 @@ export default function loadArcGISDeckLayerView2D(BaseLayerViewGL2D) {
       }
 
       if (this.deckFbo) {
-        this.destroyFramebuffer(this.deckFbo);
+        this.deckFbo.delete();
       }
     },
 
