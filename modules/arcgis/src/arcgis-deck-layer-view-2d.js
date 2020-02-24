@@ -1,8 +1,4 @@
-import {
-  initializeResources,
-  createOrResizeFramebuffer,
-  initializeDeckGL
-} from './commons';
+import {initializeResources, createOrResizeFramebuffer, initializeDeckGL} from './commons';
 
 import {withParameters, Framebuffer} from '@luma.gl/core';
 

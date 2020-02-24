@@ -1,10 +1,6 @@
 /* eslint-disable no-invalid-this */
 
-import {
-  initializeResources,
-  createOrResizeFramebuffer,
-  initializeDeckGL
-} from './commons';
+import {initializeResources, createOrResizeFramebuffer, initializeDeckGL} from './commons';
 
 import {withParameters, Framebuffer} from '@luma.gl/core';
 
@@ -46,16 +42,14 @@ export default function loadArcGISDeckExternalRenderer(externalRenderers, Collec
       Math.round(this.view.state.size[1] * dpr)
     );
 
-    // The view state must be kept in-sync with the MapView of the ArcGIS API.
-    const state = renderParameters.state;
-
     this.deckgl.setProps({
+      layers: this.deckLayers.items.slice(),
       viewState: {
         latitude: this.view.center.latitude,
         longitude: this.view.center.longitude,
-        zoom: this.view.featuresTilingScheme.scaleToLevel(state.scale),
-        bearing: -state.rotation,
-        pitch: 0
+        zoom: this.view.zoom,
+        bearing: this.view.camera.heading,
+        pitch: this.view.camera.tilt
       }
     });
 
