@@ -10,10 +10,7 @@ init:
 pre-init:
 	# Installs basic Python requirements
 	# Only useful if you're coming from a setup with no Python installed
-	curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py; \
-	python3 get-pip.py; \
-	rm -f get-pip.py; \
-	python3 -m virtualenv env; \
+	python3 -m venv env; \
 	. env/bin/activate; \
 	$(MAKE) init
 
