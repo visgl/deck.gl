@@ -1,10 +1,6 @@
-import {
-  initializeResources,
-  createOrResizeFramebuffer,
-  createFramebuffer,
-  destroyFramebuffer,
-  initializeDeckGL
-} from './commons';
+import {initializeResources, createOrResizeFramebuffer, initializeDeckGL} from './commons';
+
+import {withParameters, Framebuffer} from '@luma.gl/core';
 
 export default function loadArcGISDeckLayerView2D(BaseLayerViewGL2D) {
   return BaseLayerViewGL2D.createSubclass({
@@ -23,8 +19,6 @@ export default function loadArcGISDeckLayerView2D(BaseLayerViewGL2D) {
 
     initializeResources,
     createOrResizeFramebuffer,
-    createFramebuffer,
-    destroyFramebuffer,
     initializeDeckGL,
 
     // Attach is called as soon as the layer view is ready to start rendering.
@@ -36,11 +30,10 @@ export default function loadArcGISDeckLayerView2D(BaseLayerViewGL2D) {
       this.initializeResources(gl);
       // eslint-disable-next-line
       const dpr = window.devicePixelRatio;
-      this.createFramebuffer(
-        gl,
-        Math.round(this.view.state.size[0] * dpr),
-        Math.round(this.view.state.size[1] * dpr)
-      );
+      this.deckFbo = new Framebuffer(gl, {
+        width: Math.round(this.view.state.size[0] * dpr),
+        height: Math.round(this.view.state.size[1] * dpr)
+      });
       this.initializeDeckGL(gl);
 
       // When the layer.layers collection changes, the new list of
@@ -72,22 +65,18 @@ export default function loadArcGISDeckLayerView2D(BaseLayerViewGL2D) {
     detach() {
       this.handles.removeAll();
 
-      const gl = this.context;
-
       this.deckgl = null;
 
+      if (this.model) {
+        this.model.delete();
+      }
+
+      if (this.buffer) {
+        this.buffer.delete();
+      }
+
       if (this.deckFbo) {
-        this.destroyFramebuffer(this.deckFbo);
-      }
-
-      if (this.program) {
-        gl.deleteProgram(this.program);
-        this.program = null;
-      }
-
-      if (this.vertexBuffer) {
-        gl.deleteBuffer(this.vertexBuffer);
-        this.vertexBuffer = null;
+        this.deckFbo.delete();
       }
     },
 
@@ -116,35 +105,27 @@ export default function loadArcGISDeckLayerView2D(BaseLayerViewGL2D) {
         }
       });
 
-      gl.activeTexture(gl.TEXTURE0 + 0);
-      gl.bindTexture(gl.TEXTURE_2D, null);
-
       // We redraw the deck immediately.
       this.deckgl.redraw(true);
 
       // We overlay the texture on top of the map using the full-screen quad.
-      gl.bindFramebuffer(gl.FRAMEBUFFER, screenFbo);
-      gl.viewport(
-        0,
-        0,
-        Math.round(this.view.state.size[0] * dpr),
-        Math.round(this.view.state.size[1] * dpr)
+      withParameters(
+        gl,
+        {
+          blend: true,
+          blendFunc: [gl.ONE, gl.ONE_MINUS_SRC_ALPHA],
+          framebuffer: screenFbo,
+          viewport: [
+            0,
+            0,
+            Math.round(this.view.state.size[0] * dpr),
+            Math.round(this.view.state.size[1] * dpr)
+          ]
+        },
+        () => {
+          this.model.setUniforms({u_texture: this.deckFbo}).draw();
+        }
       );
-
-      gl.bindBuffer(gl.ARRAY_BUFFER, this.vertexBuffer);
-      gl.vertexAttribPointer(0, 2, gl.BYTE, false, 2, 0);
-      gl.bindBuffer(gl.ARRAY_BUFFER, null);
-
-      gl.useProgram(this.program);
-      gl.uniform1i(this.uTexture, 0);
-      gl.activeTexture(gl.TEXTURE0 + 0);
-      gl.bindTexture(gl.TEXTURE_2D, this.texture);
-
-      gl.enable(gl.BLEND);
-      gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
-
-      gl.enableVertexAttribArray(0);
-      gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
     }
   });
 }
