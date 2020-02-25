@@ -15,8 +15,8 @@ POULTRY_DATA = (
 
 
 HEADER = ["lng", "lat", "weight"]
-cattle_df = pd.read_csv(CATTLE_DATA, header=None)
-poultry_df = pd.read_csv(POULTRY_DATA, header=None)
+cattle_df = pd.read_csv(CATTLE_DATA, header=None).sample(frac=0.5)
+poultry_df = pd.read_csv(POULTRY_DATA, header=None).sample(frac=0.5)
 
 cattle_df.columns = HEADER
 poultry_df.columns = HEADER

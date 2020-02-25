@@ -29,8 +29,9 @@ prepare-jupyter:
 test:
 	pytest
 
-example:
-	python examples/_update_docs.py
+screenshot-examples:
+	pip install pyppeteer
+	python examples/scripts/update_docs.py
 
 docs:
 	cd docs; \
