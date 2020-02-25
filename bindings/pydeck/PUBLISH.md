@@ -94,3 +94,16 @@ docker run -p 8888:8888 test-binder:latest jupyter notebook --ip 0.0.0.0
 This is what Binder will be executing when running the examples.
 
 Verify the current examples work at https://mybinder.org/v2/gh/uber/deck.gl/binder
+
+
+### Populating website pydeck.gl (WIP)
+
+```bash
+# If you've never done any Python setup for pydeck
+make pre-init
+# To create static images and .html files associated with the examples in `examples/`
+make screenshot-examples
+# To make markdown documentation
+cd docs
+make markdown
+```
