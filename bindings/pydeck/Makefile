@@ -36,7 +36,7 @@ screenshot-examples:
 docs:
 	cd docs; \
 	$(MAKE) html
-	
+
 bump-version:
 	@read -p "Choose a release type {MAJOR, MINOR, PATCH, BETA, ALPHA, RC}:" choice; \
 	python bump_version.py "$$choice";
