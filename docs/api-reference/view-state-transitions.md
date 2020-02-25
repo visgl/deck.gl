@@ -44,6 +44,7 @@ class App extends Component {
       }
     };
     this._onViewStateChange = this._onViewStateChange.bind(this);
+    this._goToNYC = this._goToNYC.bind(this);
   }
 
   _goToNYC() {
