@@ -158,7 +158,7 @@ Set `workerUrl` to empty string to disable worker (improves error messages).
 
 ##### `color` (Color, optional)
 
-Color to use before `surfaceImage` is loaded or if `surfaceImage` is unavailable. Equivalent to setting SimpleMeshLayer `getColor` prop to `d => prop.color`.
+Color to use if `surfaceImage` is unavailable. Equivalent to setting SimpleMeshLayer `getColor` prop to `d => prop.color`.
 
 - Default: `[255, 255, 255]`
 

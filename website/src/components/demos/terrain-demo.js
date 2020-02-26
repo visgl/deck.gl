@@ -46,7 +46,8 @@ const LOCATIONS = {
 const SURFACE_IMAGES = {
   Sectional: 'https://wms.chartbundle.com/tms/1.0.0/sec/{z}/{x}/{y}.png?origin=nw',
   Satellite: `https://api.mapbox.com/v4/mapbox.satellite/{z}/{x}/{y}@2x.png?access_token=${MAPBOX_TOKEN}`,
-  Street: 'https://c.tile.openstreetmap.org/{z}/{x}/{y}.png'
+  Street: 'https://c.tile.openstreetmap.org/{z}/{x}/{y}.png',
+  None: null
 };
 
 export default class TerrainDemo extends Component {
