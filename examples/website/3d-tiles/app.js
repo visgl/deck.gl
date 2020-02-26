@@ -1,4 +1,4 @@
-import React, {PureComponent} from 'react';
+import React, {Component} from 'react';
 import {render} from 'react-dom';
 import {StaticMap} from 'react-map-gl';
 import DeckGL from '@deck.gl/react';
@@ -7,10 +7,12 @@ import {Tile3DLayer} from '@deck.gl/geo-layers';
 import {registerLoaders} from '@loaders.gl/core';
 // To manage dependencies and bundle size, the app must decide which supporting loaders to bring in
 import {DracoWorkerLoader} from '@loaders.gl/draco';
-
+import {Tiles3DLoader, _getIonTilesetMetadata as getIonTilesetMetadata} from '@loaders.gl/3d-tiles';
 registerLoaders([DracoWorkerLoader]);
 // Set your mapbox token here
 const MAPBOX_TOKEN = process.env.MapboxAccessToken; // eslint-disable-line
+
+const ION_ASSET_ID = 43978;
 const ION_TOKEN =
   'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiJlYWMxMzcyYy0zZjJkLTQwODctODNlNi01MDRkZmMzMjIxOWIiLCJpZCI6OTYyMCwic2NvcGVzIjpbImFzbCIsImFzciIsImdjIl0sImlhdCI6MTU2Mjg2NjI3M30.1FNiClUyk00YH_nWfSGpiQAjR5V2OvREDq1PJ5QMjWQ';
 
@@ -25,24 +27,26 @@ const INITIAL_VIEW_STATE = {
   zoom: 17
 };
 
-export default class App extends PureComponent {
+export default class App extends Component {
   constructor(props) {
     super(props);
-
     this.state = {
       initialViewState: INITIAL_VIEW_STATE,
       attributions: []
     };
-
-    this._onTilesetLoad = this._onTilesetLoad.bind(this);
   }
 
-  // Called by Tile3DLayer when a new tileset is loaded
-  _onTilesetLoad(tileset) {
-    this.setState({attributions: tileset.credits.attributions});
-    this._centerViewOnTileset(tileset);
+  componentDidMount() {
+    this._loadIonData();
+  }
+
+  async _loadIonData() {
+    const ionMetadata = await getIonTilesetMetadata(ION_TOKEN, ION_ASSET_ID);
+    this.setState({
+      ionMetadata
+    });
     if (this.props.updateAttributions) {
-      this.props.updateAttributions(tileset.credits.attributions);
+      this.props.updateAttributions(ionMetadata.attributions);
     }
   }
 
@@ -56,7 +60,7 @@ export default class App extends PureComponent {
         // Update deck.gl viewState, moving the camera to the new tileset
         longitude: cartographicCenter[0],
         latitude: cartographicCenter[1],
-        zoom: zoom + 1.5, // TODO - remove adjustment when Tileset3D calculates correct zoom
+        zoom,
         bearing: INITIAL_VIEW_STATE.bearing,
         pitch: INITIAL_VIEW_STATE.pitch
       }
@@ -64,12 +68,18 @@ export default class App extends PureComponent {
   }
 
   _renderTile3DLayer() {
+    if (!this.state.ionMetadata) {
+      return null;
+    }
+    const {url, headers} = this.state.ionMetadata;
+
     return new Tile3DLayer({
       id: 'tile-3d-layer',
-      _ionAssetId: 43978,
-      _ionAccessToken: ION_TOKEN,
       pointSize: 2,
-      onTilesetLoad: this._onTilesetLoad
+      data: url,
+      loader: Tiles3DLoader,
+      loadOptions: {headers},
+      onTilesetLoad: this._centerViewOnTileset.bind(this)
     });
   }
 

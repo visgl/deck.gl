@@ -4,7 +4,7 @@ import makeTooltip from './widget-tooltip';
 import mapboxgl from './ssr-safe-mapbox';
 
 import {CSVLoader} from '@loaders.gl/csv';
-import {Tile3DLoader} from '@loaders.gl/3d-tiles';
+import {Tiles3DLoader} from '@loaders.gl/3d-tiles';
 import {registerLoaders} from '@loaders.gl/core';
 
 import * as deck from './deck-bundle';
@@ -34,11 +34,11 @@ const jsonConverterConfiguration = {
 
   // Constants that should be resolved with the provided values by JSON converter
   constants: {
-    Tile3DLoader
+    Tiles3DLoader
   }
 };
 
-registerLoaders([CSVLoader, Tile3DLoader]);
+registerLoaders([CSVLoader, Tiles3DLoader]);
 
 const jsonConverter = new deck.JSONConverter({
   configuration: jsonConverterConfiguration

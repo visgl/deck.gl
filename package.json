@@ -41,8 +41,8 @@
     "jsdom": false
   },
   "devDependencies": {
-    "@loaders.gl/csv": "^2.1.0-alpha.4",
-    "@loaders.gl/polyfills": "^2.1.0-alpha.4",
+    "@loaders.gl/csv": "^2.1.0-alpha.7",
+    "@loaders.gl/polyfills": "^2.1.0-alpha.7",
     "@luma.gl/engine": "^8.1.0-alpha.4",
     "@luma.gl/test-utils": "^8.1.0-alpha.4",
     "@probe.gl/bench": "^3.2.1",

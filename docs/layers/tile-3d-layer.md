@@ -1,24 +1,32 @@
 # Tile3DLayer (Experimental)
 
-The `Tile3DLayer` renders tileset data formatted according to the [3D Tiles Specification](https://www.opengeospatial.org/standards/3DTiles),
-which is supported by the [Tileset3DLoader](https://loaders.gl/modules/3d-tiles/docs/api-reference/tileset-3d-loader).
+The `Tile3DLayer` renders 3d tiles data formatted according to the [3D Tiles Specification](https://www.opengeospatial.org/standards/3DTiles) and [`ESRI I3S`](https://github.com/Esri/i3s-spec) ,
+which is supported by the [Tiles3DLoader](https://loaders.gl/modules/3d-tiles/docs/api-reference/tiles-3d-loader).
 
-Tile3DLayer is a [CompositeLayer](/docs/api-reference/composite-layer.md). Base on each tile content [format](https://github.com/AnalyticalGraphicsInc/3d-tiles/tree/master/specification#introduction), it uses either a [PointCloudLayer](/docs/layers/point-cloud-layer.md) or [ScenegraphLayer](/docs/layers/scenegraph-layer.md) to render.
+Tile3DLayer is a [CompositeLayer](/docs/api-reference/composite-layer.md). Base on each tile type, it uses a [PointCloudLayer](/docs/layers/point-cloud-layer.md), a [ScenegraphLayer](/docs/layers/scenegraph-layer.md) or [SimpleMeshLayer](/docs/layers/simple-mesh-layer.md) to render.
 
 References
 - [3D Tiles](https://github.com/AnalyticalGraphicsInc/3d-tiles/tree/master/specification).
+- [ESRI I3S](https://github.com/Esri/i3s-spec)
 
+* Load a 3D tiles dataset from ION server. [Set up Ion account](https://cesium.com/docs/tutorials/getting-started/#your-first-app);
 ```js
 import React, {Component} from 'react';
 import DeckGL from '@deck.gl/react';
+import {Tiles3DLoader} from '@loaders.gl/3d-tiles';
 import {Tile3DLayer} from '@deck.gl/geo-layers';
 
 export default class App extends Component {
-
   render() {
     const layer = new Tile3DLayer({
       id: 'tile-3d-layer',
-      data: '<path-to-your-tileset json file>',
+      data: 'https://api.cesium.com/v1/assets/49378',
+      loader: Tiles3DLoader,
+      // https://cesium.com/docs/rest-api/
+      // @loaders.gl/3d-tiles provide a handy function `getIonTilesetMetadata` (experimental) to resolve accessToken 
+      loadOptions: {
+        headers: {Authentication: `Bearer <ion_access_token_for_your_asset>`} 
+      },
       onTilesetLoad: (tileset) => {
         // Recenter to cover the tileset
         const {cartographicCenter, zoom} = tileset;
@@ -94,18 +102,15 @@ This value is only applied when [tile format](https://github.com/AnalyticalGraph
 
 ### Data Properties
 
-##### `data` (String, optional)
+##### `data` (String)
 
-* Default: null
+- A URL to fetch tiles entry point of `3D Tiles` [Tileset JSON](https://github.com/AnalyticalGraphicsInc/3d-tiles/tree/master/specification#tileset-json) file or `Indexed 3D Scene Layer` file [I3S](https://github.com/Esri/i3s-spec).
 
-- A URL to fetch tiles entry point [Tileset JSON](https://github.com/AnalyticalGraphicsInc/3d-tiles/tree/master/specification#tileset-json) file or json object of tileset.
+##### `loader` (Object)
 
-##### `_ionAssetId` (Number|String, Optional)
-##### `_ionAccessToken` (String, Optional)
+- Default [`Tiles3DLoader`](https://loaders.gl/modules/3d-tiles/docs/api-reference/tile-3d-loader)
 
-- `_ionAssetId` and `_ionAccessToken` are used to fetch ion dataset. They are experimental properties, may change in next releases. 
-
-[Set up Ion account](https://cesium.com/docs/tutorials/getting-started/#your-first-app);
+A loader which is used to decode the fetched tiles. Either a [`Tiles3DLoader`](https://loaders.gl/modules/3d-tiles/docs/api-reference/tile-3d-loader) or `I3SLoader`.
 
 ##### `loadOptions` (Object, Optional)
 
@@ -113,11 +118,14 @@ This value is only applied when [tile format](https://github.com/AnalyticalGraph
 
 Tile3DLayer constructs a [`Tileset3D`](https://loaders.gl/modules/3d-tiles/docs/api-reference/tileset-3d) object after fetching tilset json file. `loadOptions` is an experimental prop to provide Tileset options [Tileset3D options](https://loaders.gl/modules/3d-tiles/docs/api-reference/tileset-3d#options). Among these options, `onTileLoad`, `onTileUnload` and `onTileError` should be passed as layer props.
 
+Note: If `headers` are needed to request data from the server, use `loadOptions.headers`.
+
 ```js
 const layer = new Tile3DLayer({
   data: '<path-to-your-tileset json file>',
   loadOptions: {
-    throttleRequests: false
+    throttleRequests: false,
+    headers: {}
   }
 })
 ```
@@ -146,13 +154,13 @@ When [`picking`](/docs/developer-guide/custom-layers/picking.md) is enabled, `in
 
 ##### `onTileLoad` (Function, optional)
 
-`onTileLoad` is a function that is called when a tile in the tileset hierarchy is loaded. [Tile3DHeader](https://github.com/uber-web/loaders.gl/blob/master/docs/api-reference/3d-tiles/tileset-3d.md#root--tile3dheader) object is passed in the callback.
+`onTileLoad` is a function that is called when a tile in the tileset hierarchy is loaded. [Tile3D](https://github.com/uber-web/loaders.gl/blob/master/docs/api-reference/tiles/tile-3d.md) object is passed in the callback.
 
 - Default: `onTileLoad: (tileHeader) => {}`
 
 ##### `onTileUnload` (Function, optional)
 
-`onTileUnload` is a function that is called when a tile is unloaded. [Tile3DHeader](https://github.com/uber-web/loaders.gl/blob/master/docs/api-reference/3d-tiles/tileset-3d.md#root--tile3dheader) object is passed in the callback.
+`onTileUnload` is a function that is called when a tile is unloaded. [Tile3D](https://github.com/uber-web/loaders.gl/blob/master/docs/api-reference/tiles/tileset-3d.md#root--tile3dheader) object is passed in the callback.
 
 - Default: `onTileUnload: (tileHeader) => {}`
 
@@ -171,6 +179,7 @@ The Tile3DLayer renders the following sublayers based on tile [format](https://g
 * `scenegraph` - a [ScenegraphLayer](/docs/layers/scenegraph-layer.md) rendering all the tiles with Batched 3D Model format (`b3dm`) or Instanced 3D Model format (`i3dm`).
   - `_lighting` is default to `pbr`.
 * `pointcloud` - a [PointCloudLayer](/docs/layers/point-cloud-layer.md) rendering all the tiles with Point Cloud format (`pnts`).
+* `mesh` - a [SimpleMeshLayer](/docs/layers/simple-mesh-layer.md) rendering all the tiles ESRI `MeshPyramids` data.
 
 Follow [CompositeLayer](/docs/api-reference/composite-layer.md#_subLayerProp) and example in this layer doc to see how to override sub layer props.
 
