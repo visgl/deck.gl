@@ -27,7 +27,7 @@ def read(*parts):
 
 def assert_prelease_on_master():
     """Require that prereleases only be from the master branch"""
-    git_branch = check_output('git rev-parse --abbrev-ref HEAD'.split()).strip()
+    git_branch = check_output('git rev-parse --abbrev-ref HEAD'.split()).decode('ascii').strip()
     is_prerelease = any([c for c in version_ns['__version__'] if c.isalpha()])
     msg = 'Can only release a prerelease from master, but branch is {} and release version is {}'
     if is_prerelease:
@@ -182,7 +182,6 @@ def js_prerelease(command, strict=False):
     class DecoratedCommand(command):
         def run(self):
             if strict:
-                # Running as sdist
                 assert_prelease_on_master()
             jsdeps = self.distribution.get_command_obj("jsdeps")  # noqa
             self.distribution.run_command("jsdeps")
@@ -239,6 +238,7 @@ if __name__ == "__main__":
             "ipywidgets>=7.0.0",
             "traitlets>=4.3.2",
             "jinja2>=2.10.1",
+            "numpy>=1.16.4"
         ],
         setup_requires=["Jinja2>=2.10.1"],
         tests_require=["pytest>=4.0.2", "pandas", "requests"],
