@@ -37,7 +37,7 @@ def rewrite_version_file(semver):
         f.write(contents)
 
 
-def rewrite_frontend_version_file(semver):
+def rewrite_frontend_version_file():
     """Current associated version of NPM modules deck.gl and @deck.gl/jupyter-widget"""
     lerna_version = json.loads(open('../../lerna.json').read())['version']
     with open("pydeck/frontend_semver.py", "w+") as f:
@@ -69,5 +69,5 @@ if __name__ == "__main__":
         if response != "Y":
             sys.exit(0)
     rewrite_version_file(bumped_version)
-    rewrite_frontend_version_file(bumped_version, args.release_type)
+    rewrite_frontend_version_file()
     print(bumped_version)
