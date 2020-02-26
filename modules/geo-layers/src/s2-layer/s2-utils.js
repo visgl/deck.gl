@@ -1,6 +1,13 @@
 // s2-geometry is a pure JavaScript port of Google/Niantic's S2 Geometry library
 // which is perfect since it works in the browser.
-import {S2} from 's2-geometry';
+import {
+  toHilbertQuadkey,
+  FromHilbertQuadKey,
+  IJToST,
+  STToUV,
+  FaceUVToXYZ,
+  XYZToLngLat
+} from './s2-geometry';
 import Long from 'long';
 
 /**
@@ -13,16 +20,7 @@ function getIdFromToken(token) {
   return Long.fromString(paddedToken, 16);
 }
 
-const RADIAN_TO_DEGREE = 180 / Math.PI;
 const MAX_RESOLUTION = 100;
-
-/* Adapted from s2-geometry's S2.XYZToLatLng */
-function XYZToLngLat([x, y, z]) {
-  const lat = Math.atan2(z, Math.sqrt(x * x + y * y));
-  const lng = Math.atan2(y, x);
-
-  return [lng * RADIAN_TO_DEGREE, lat * RADIAN_TO_DEGREE];
-}
 
 /* Adapted from s2-geometry's S2Cell.getCornerLatLngs */
 function getGeoBounds({face, ij, level}) {
@@ -48,9 +46,9 @@ function getGeoBounds({face, ij, level}) {
       offset[1] += stepJ;
       // Cell can be represented by coordinates IJ, ST, UV, XYZ
       // http://s2geometry.io/devguide/s2cell_hierarchy#coordinate-systems
-      const st = S2.IJToST(ij, level, offset);
-      const uv = S2.STToUV(st);
-      const xyz = S2.FaceUVToXYZ(face, uv);
+      const st = IJToST(ij, level, offset);
+      const uv = STToUV(st);
+      const xyz = FaceUVToXYZ(face, uv);
       const lngLat = XYZToLngLat(xyz);
 
       result[ptIndex++] = lngLat[0];
@@ -73,7 +71,7 @@ export function getS2QuadKey(token) {
     token = getIdFromToken(token);
   }
   // is Long id
-  return S2.S2Cell.toHilbertQuadkey(token.toString());
+  return toHilbertQuadkey(token.toString());
 }
 
 /**
@@ -85,7 +83,7 @@ export function getS2QuadKey(token) {
  */
 export function getS2Polygon(token) {
   const key = getS2QuadKey(token);
-  const s2cell = S2.S2Cell.FromHilbertQuadKey(key);
+  const s2cell = FromHilbertQuadKey(key);
 
   return getGeoBounds(s2cell);
 }

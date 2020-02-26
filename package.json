@@ -68,7 +68,8 @@
     "react": "^16.2.0",
     "react-dom": "^16.2.0",
     "react-map-gl": "^5.1.0",
-    "reify": "^0.18.1"
+    "reify": "^0.18.1",
+    "s2-geometry": "^1.2.10"
   },
   "pre-commit": [
     "test-fast",
