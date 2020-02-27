@@ -15,7 +15,7 @@ layer = pdk.Layer(
     get_position="coordinates",
     get_text="name",
     get_size=16,
-    get_color = [255, 255, 255],
+    get_color=[255, 255, 255],
     get_angle=0,
     get_text_anchor="'middle'",
     get_alignment_baseline="'center'",
@@ -23,11 +23,7 @@ layer = pdk.Layer(
 
 # Set the viewport location
 view_state = pdk.ViewState(
-    latitude=37.7749295,
-    longitude=-122.4194155,
-    zoom=10,
-    bearing=0,
-    pitch=45
+    latitude=37.7749295, longitude=-122.4194155, zoom=10, bearing=0, pitch=45
 )
 
 # Render

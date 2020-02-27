@@ -24,13 +24,7 @@ layer = pdk.Layer(
 )
 
 # Set the viewport location
-view_state = pdk.ViewState(
-    latitude=50,
-    longitude=-40,
-    zoom=3,
-    bearing=0,
-    pitch=0
-)
+view_state = pdk.ViewState(latitude=50, longitude=-40, zoom=3, bearing=0, pitch=0)
 
 # Render
 r = pdk.Deck(
