@@ -15,7 +15,7 @@ ENV JUPYTER_TOKEN=$JUPYTER_TOKEN
 
 RUN pip install jupyter && \ 
     pip install ipywidgets && \
-    pip install -i $PYPI_INSTALL_URL pydeck==$PYDECK_VERSION && \
+    pip install -i $PYPI_INSTALL_URL --extra-index-url https://pypi.org/simple pydeck==$PYDECK_VERSION --pre && \
     jupyter nbextension install --sys-prefix --symlink --overwrite --py pydeck && \
     jupyter nbextension enable --sys-prefix --py pydeck
 
