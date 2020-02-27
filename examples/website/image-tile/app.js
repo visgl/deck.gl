@@ -7,34 +7,25 @@ import {BitmapLayer} from '@deck.gl/layers';
 import {load} from '@loaders.gl/core';
 
 const INITIAL_VIEW_STATE = {
-  target: [10000, 10000, 0],
-  zoom: 0
+  target: [13000, 13000, 0],
+  zoom: -5
 };
 
-function inTileBounds({x, y, z}) {
-  const xInBounds = x < Math.ceil(31728 / (256 * 2 ** z)) && x >= 0;
-  const yInBounds = y < Math.ceil(51669 / (256 * 2 ** z)) && y >= 0;
-  return xInBounds && yInBounds;
-}
-
-function inImageBounds({top, bottom, left, right}) {
-  const bottomInBounds = bottom <= 51669;
-  const leftInBounds = left >= 0;
-  const rightInBounds = right <= 31728;
-  const topInBounds = top >= 0;
-  return topInBounds && bottomInBounds && leftInBounds && rightInBounds;
-}
-
-function cutOffBounds({left, bottom, right, top}) {
-  return {left, bottom: Math.min(51669, bottom), right: Math.min(31728, right), top};
-}
+const ROOT_URL = 'moon.image';
 
 export default class App extends PureComponent {
   constructor(props) {
     super(props);
-    this.state = {};
+    this.state = {
+      height: null,
+      width: null,
+      tileSize: null
+    };
     this._onHover = this._onHover.bind(this);
     this._renderTooltip = this._renderTooltip.bind(this);
+    this.inTileBounds = this.inTileBounds.bind(this);
+    this.cutOffImageBounds = this.cutOffImageBounds.bind(this);
+    this.fetchDataFromDZI(`${ROOT_URL}/moon.image.dzi`);
   }
 
   _onHover({x, y, sourceLayer, tile}) {
@@ -54,6 +45,40 @@ export default class App extends PureComponent {
     );
   }
 
+  inTileBounds({x, y, z}) {
+    const xInBounds = x < Math.ceil(this.state.width / (512 * 2 ** z)) && x >= 0;
+    const yInBounds = y < Math.ceil(this.state.height / (512 * 2 ** z)) && y >= 0;
+    return xInBounds && yInBounds;
+  }
+
+  cutOffImageBounds({left, bottom, right, top}) {
+    return {
+      left: Math.max(0, left),
+      bottom: Math.max(0, Math.min(this.state.height, bottom)),
+      right: Math.max(0, Math.min(this.state.width, right)),
+      top: Math.max(0, top)
+    };
+  }
+
+  fetchDataFromDZI(dziSource) {
+    return (
+      fetch(dziSource) // eslint-disable-line no-undef
+        .then(response => response.text())
+        // eslint-disable-next-line no-undef
+        .then(str => new window.DOMParser().parseFromString(str, 'text/xml'))
+        .then(dziXML => {
+          if (Number(dziXML.getElementsByTagName('Image')[0].attributes.Overlap.value) !== 0) {
+            throw new Error('Overlap paramter is nonzero and should be 0');
+          }
+          this.setState({
+            height: Number(dziXML.getElementsByTagName('Size')[0].attributes.Height.value),
+            width: Number(dziXML.getElementsByTagName('Size')[0].attributes.Width.value),
+            tileSize: Number(dziXML.getElementsByTagName('Image')[0].attributes.TileSize.value)
+          });
+        })
+    );
+  }
+
   _renderLayers() {
     const {autoHighlight = true, highlightColor = [60, 60, 60, 40]} = this.props;
 
@@ -67,8 +92,8 @@ export default class App extends PureComponent {
         maxZoom: 0,
         coordinateSystem: COORDINATE_SYSTEM.CARTESIAN,
         getTileData: ({x, y, z}) => {
-          if (inTileBounds({x, y, z: -z})) {
-            return load(`sample_image/${16 + z}/${x}_${y}.jpeg`);
+          if (this.inTileBounds({x, y, z: -z})) {
+            return load(`${ROOT_URL}/moon.image_files/${15 + z}/${x}_${y}.jpeg`);
           }
           return null;
         },
@@ -77,15 +102,12 @@ export default class App extends PureComponent {
           const {
             bbox: {left, bottom, right, top}
           } = props.tile;
-          const newBounds = cutOffBounds({left, bottom, right, top});
-          if (inImageBounds(newBounds)) {
-            return new BitmapLayer(props, {
-              data: null,
-              image: props.data,
-              bounds: [newBounds.left, newBounds.bottom, newBounds.right, newBounds.top]
-            });
-          }
-          return null;
+          const newBounds = this.cutOffImageBounds({left, bottom, right, top});
+          return new BitmapLayer(props, {
+            data: null,
+            image: props.data,
+            bounds: [newBounds.left, newBounds.bottom, newBounds.right, newBounds.top]
+          });
         }
       })
     ];
@@ -95,7 +117,7 @@ export default class App extends PureComponent {
     return (
       <DeckGL
         views={[new OrthographicView({id: 'ortho'})]}
-        layers={this._renderLayers()}
+        layers={this.state.tileSize ? this._renderLayers() : []}
         initialViewState={INITIAL_VIEW_STATE}
         controller={true}
       >
