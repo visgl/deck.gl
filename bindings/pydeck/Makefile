@@ -2,10 +2,17 @@ init:
 	# Build deck.gl at the root of this repository
 	cd ../..; yarn bootstrap; cd -; \
 	# Set up the pydeck project
-	pip install -r requirements.txt
-	pip install -r requirements-dev.txt
-	pip install -e .
+	pip install -r requirements.txt; \
+        pip install -r requirements-dev.txt; \
+	pip install -e . ; \
 	$(MAKE) prepare-jupyter
+
+pre-init:
+	# Installs basic Python requirements
+	# Only useful if you're coming from a setup with no Python installed
+	python3 -m venv env; \
+	. env/bin/activate; \
+	$(MAKE) init
 
 prepare-jupyter:
 	# Enable the notebook extension
@@ -22,15 +29,13 @@ prepare-jupyter:
 test:
 	pytest
 
-example:
-	python examples/_update_docs.py
+screenshot-examples:
+	pip install pyppeteer
+	python examples/scripts/update_docs.py
 
 docs:
 	cd docs; \
 	$(MAKE) html
-	
-publish-conda:	
-	echo "NOTE pydeck does not yet publish to conda-forge. Awaiting #4202."
 
 bump-version:
 	@read -p "Choose a release type {MAJOR, MINOR, PATCH, BETA, ALPHA, RC}:" choice; \
