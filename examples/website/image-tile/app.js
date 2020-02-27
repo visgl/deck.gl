@@ -11,7 +11,8 @@ const INITIAL_VIEW_STATE = {
   zoom: -5
 };
 
-const ROOT_URL = 'moon.image';
+const ROOT_URL =
+  'https://raw.githubusercontent.com/uber-common/deck.gl-data/master/website/image-tiles/moon.image';
 
 export default class App extends PureComponent {
   constructor(props) {
