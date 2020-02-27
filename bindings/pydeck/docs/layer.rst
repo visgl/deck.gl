@@ -1,4 +1,4 @@
-pydeck Layer Overview and Examples
+Layer Overview and Examples
 ==================================
 
 :class:`pydeck.bindings.layer.Layer` represents a kind of data visualization, like a scatterplot
@@ -6,7 +6,7 @@ or a hexbin chart.
 The full `deck.gl layer catalog <https://github.com/uber/deck.gl/tree/master/docs/layers#deckgl-layer-catalog-overview>`__ is accessible via pydeck.
 This page will provide more examples of how to utilize the deck.gl catalog in Python via pydeck.
 
-.. warning:: Currently, in its beta version **pydeck will NOT raise an error on
+.. warning:: **pydeck does not currently raise an error on
              incorrect or omitted layer arguments**. If nothing renders in
              your viewport, check your browser's
              `developer console <https://javascript.info/devtools>`__ or review the layer catalog.
