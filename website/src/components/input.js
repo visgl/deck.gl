@@ -3,7 +3,7 @@ import autobind from 'autobind-decorator';
 
 export default class GenericInput extends PureComponent {
   @autobind _onChange(evt) {
-    const {value, type} = evt.target;
+    const {value, type, selectedValue} = evt.target;
     let newValue = value;
     if (type === 'checkbox') {
       newValue = evt.target.checked;
@@ -51,6 +51,16 @@ export default class GenericInput extends PureComponent {
         </div>
       );
     }
+    if (type === 'select') {
+      return (
+        <div className="input">
+          <label>{displayName}</label>
+          <select onChange={this._onChange} value={displayValue}>
+            {props.options.map(((value, i) => <option key={i} value={value}>{value}</option>))}
+          </select>
+        </div>
+      );
+    }
 
     if (type === 'checkbox') {
       props.checked = props.value;
@@ -60,7 +70,7 @@ export default class GenericInput extends PureComponent {
       <div className="input">
         <label>{displayName}</label>
         <div className="tooltip">
-          {displayName}: {displayValue}
+          {displayName}: {String(displayValue)}
         </div>
         <input {...props} value={displayValue} onChange={this._onChange} />
       </div>

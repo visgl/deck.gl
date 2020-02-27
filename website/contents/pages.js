@@ -152,6 +152,13 @@ export const examplePages = generatePath([
           demo: 'Tiles3DDemo',
           code: getCodeUrl('examples/website/3d-tiles')
         }
+      },
+      {
+        name: 'TerrainLayer',
+        content: {
+          demo: 'TerrainDemo',
+          code: getCodeUrl('examples/website/terrain')
+        }
       }
     ]
   },
@@ -544,6 +551,10 @@ export const docPages = generatePath([
           {
             name: 'TripsLayer',
             content: getDocUrl('layers/trips-layer.md')
+          },
+          {
+            name: 'TerrainLayer',
+            content: getDocUrl('layers/terrain-layer.md')
           }
         ]
       },
@@ -671,6 +682,23 @@ export const docPages = generatePath([
   {
     name: 'Submodule API Reference',
     children: [
+      {
+        name: '@deck.gl/arcgis',
+        children: [
+          {
+            name: 'Overview',
+            content: getDocUrl('api-reference/arcgis/overview.md')
+          },
+          {
+            name: 'ArcGISDeckLayer',
+            content: getDocUrl('api-reference/arcgis/arcgis-deck-layer.md')
+          },
+          {
+            name: 'loadArcGISModules',
+            content: getDocUrl('api-reference/arcgis/load-arcgis-modules.md')
+          }
+        ]
+      },
       {
         name: '@deck.gl/extensions',
         children: [

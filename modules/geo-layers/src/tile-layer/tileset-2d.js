@@ -266,7 +266,6 @@ export default class Tileset2D {
 
     if (!tile && create) {
       tile = new Tile2DHeader({
-        getTileData: this._getTileData,
         x,
         y,
         z,
@@ -274,6 +273,7 @@ export default class Tileset2D {
         onTileError: this.onTileError
       });
       Object.assign(tile, this.getTileMetadata(tile));
+      tile.loadData(this._getTileData);
       this._cache.set(tileId, tile);
       this._dirty = true;
     }
