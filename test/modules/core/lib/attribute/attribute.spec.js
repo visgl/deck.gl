@@ -18,7 +18,8 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-/* eslint-disable dot-notation, max-statements, no-unused-vars */
+/* eslint-disable dot-notation, max-statements, no-unused-vars, no-console */
+/* global console */
 import Attribute from '@deck.gl/core/lib/attribute/attribute';
 import GL from '@luma.gl/constants';
 import {Buffer, isWebGL2} from '@luma.gl/core';
@@ -427,6 +428,70 @@ test('Attribute#updateBuffer', t => {
 
       attribute.delete();
     }
+  }
+
+  t.end();
+});
+
+test('Attribute#updateBuffer _checkAttributeArray', t => {
+  // the _checkAttributeArray() is a cheap validation performed after update
+  // This test verifies that we only validate the first entry appropriately based
+  // on attribute size, rather than the length of the 'value' which could have come from
+  // the TypeArrayManager pool
+
+  for (let size = 1; size <= 4; size++) {
+    // Expect the result to be an array with length 'size', each has value 'size'
+    // e.g. [2, 2]
+    const result = new Float32Array(Array(size).fill(size));
+
+    // Attribute.value must be >= Math.min(4, size) to trigger check
+    // Setup attribute value to have length 5, with NaN elements for entries > attribute.size
+    // e.g [2, 2, NaN, NaN, NaN]
+    const attribute = new Attribute(gl, {
+      id: 'values',
+      size,
+      update: attr => {
+        attr.value = new Float32Array(
+          Array(4)
+            .fill(NaN)
+            .fill(size, 0, size)
+        );
+      }
+    });
+
+    attribute.setNeedsUpdate(true);
+    attribute.allocate(1);
+    attribute.updateBuffer({
+      numInstances: 1
+    });
+
+    t.deepEqual(
+      attribute.value.slice(0, result.length),
+      result,
+      `Attribute with size ${size} passed _checkAttributeArray after update`
+    );
+
+    attribute.delete();
+  }
+
+  // Verify it fails appropriately
+  for (let size = 1; size <= 4; size++) {
+    // Attribute.value must be >= Math.min(4, size) to trigger check
+    //
+    // Setup attribute value with NaN elements that trigger an exception
+    const attribute = new Attribute(gl, {
+      id: 'values',
+      size,
+      update: attr => {
+        attr.value = new Float32Array(Array(4).fill(NaN));
+      }
+    });
+
+    attribute.setNeedsUpdate(true);
+    attribute.allocate(1);
+    t.throws(() => attribute.updateBuffer({numInstances: 1}));
+
+    attribute.delete();
   }
 
   t.end();

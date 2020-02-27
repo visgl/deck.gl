@@ -19,18 +19,15 @@
 // THE SOFTWARE.
 
 import test from 'tape-catch';
-import {tileToBoundingBox} from '@deck.gl/geo-layers/tile-layer/utils/tile-util';
+import {generateLayerTests, testLayer} from '@deck.gl/test-utils';
+import {TerrainLayer} from '@deck.gl/geo-layers';
 
-test('tileToBoundingBox', t => {
-  const results = tileToBoundingBox(8, 5, 4);
-  const expected = {
-    east: 22.5,
-    north: 55.77657301866769,
-    south: 40.97989806962013,
-    west: 0
-  };
-
-  t.deepEqual(results, expected, 'Should match the results.');
-
+test('TerrainLayer', t => {
+  const testCases = generateLayerTests({
+    Layer: TerrainLayer,
+    assert: t.ok,
+    onBeforeUpdate: ({testCase}) => t.comment(testCase.title)
+  });
+  testLayer({Layer: TerrainLayer, testCases, onError: t.notOk});
   t.end();
 });

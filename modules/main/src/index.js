@@ -119,6 +119,7 @@ export {
   TileLayer,
   TripsLayer,
   Tile3DLayer,
+  TerrainLayer,
   MVTTileLayer
 } from '@deck.gl/geo-layers';
 

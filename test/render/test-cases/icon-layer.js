@@ -141,12 +141,6 @@ export default [
         }
       })
     ],
-    onAfterRender: ({layers, done}) => {
-      if (layers[0].state.iconManager.loaded) {
-        // data is loaded
-        done();
-      }
-    },
     goldenImage: './test/render/golden-images/icon-lnglat-large.png'
   },
   // This is based on last test case
@@ -190,12 +184,6 @@ export default [
         }
       })
     ],
-    onAfterRender: ({layers, done}) => {
-      if (layers[0].state.iconManager.loaded) {
-        // data is loaded
-        done();
-      }
-    },
     goldenImage: './test/render/golden-images/icon-lnglat-resize-texture.png'
   },
   {

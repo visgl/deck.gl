@@ -20,7 +20,7 @@
 
 import test from 'tape-catch';
 import {LayerManager, CompositeLayer, Layer, COORDINATE_SYSTEM} from 'deck.gl';
-import {gl, testLayer} from '@deck.gl/test-utils';
+import {gl, testLayer, testInitializeLayer} from '@deck.gl/test-utils';
 
 const SUB_LAYER_ID = 'sub-layer-id';
 const BASE_LAYER_ID = 'composite-layer-id';
@@ -338,4 +338,18 @@ test('CompositeLayer#setState', t => {
   layerManager.finalize();
 
   t.end();
+});
+
+test('CompositeLayer#isLoaded', t => {
+  const layer = new TestCompositeLayer({
+    data: Promise.resolve([]),
+    onDataLoad: () => {
+      t.ok(layer.isLoaded, 'data is loaded');
+      t.end();
+    }
+  });
+
+  testInitializeLayer({layer});
+
+  t.notOk(layer.isLoaded, 'is loading data');
 });

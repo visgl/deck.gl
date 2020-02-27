@@ -7,7 +7,9 @@
 
 # TileLayer
 
-This TileLayer takes in a function `getTileData` that fetches tiles, and renders it in a GeoJsonLayer or with the layer returned in `renderSubLayers`.
+The `TileLayer` is a composite layer that makes it possible to visualize very large datasets. Instead of fetching the entire dataset, it only loads and renders what's visible in the current viewport.
+
+To use this layer, the data must be sliced into "tiles". Each tile has a pre-defined bounding box and level of detail. The layer takes in a function `getTileData` that fetches tiles when they are needed, and renders the loaded data in a GeoJsonLayer or with the layer returned in `renderSubLayers`.
 
 ```js
 import DeckGL from '@deck.gl/react';
@@ -107,9 +109,11 @@ The `tile` argument contains the following fields:
 - `x` (Number) - x index of the tile
 - `y` (Number) - y index of the tile
 - `z` (Number) - z index of the tile
-- `bbox` (Object) - bounding box of the tile, see `tileToBoundingBox`.
+- `bbox` (Object) - bounding box of the tile
+ 
+When used with a geospatial view such as the [MapView](/docs/api-reference/map-view.md), x, y, and z are determined from [the OSM tile index](https://wiki.openstreetmap.org/wiki/Slippy_map_tilenames), and `bbox` is in the shape of `{west: <longitude>, north: <latitude>, east: <longitude>, south: <latitude>}`.
 
-By default, the `TileLayer` loads tiles defined by [the OSM tile index](https://wiki.openstreetmap.org/wiki/Slippy_map_tilenames). You may override this by implementing `getTileIndices`.
+When used with a non-geospatial view such as the [OrthographicView](/docs/api-reference/orthographic-view.md) or the [OrbitView](/docs/api-reference/orbit-view.md), x, y, and z are determined by dividing the view space in to 512 pixel by 512 pixel tiles. `bbox` is in the shape of `{left, top, right, bottom}`.
 
 
 ##### `maxZoom` (Number|Null, optional)
@@ -126,49 +130,31 @@ Hide tiles when under-zoomed.
 - Default: 0
 
 
-##### `maxCacheSize` (Number|Null, optional)
+##### `maxCacheSize` (Number, optional)
 
-The maximum cache size for a tile layer. If not defined, it is calculated using the number of tiles in the current viewport times multiplied by `5`.
+The maximum number of tiles that can be cached. The tile cache keeps loaded tiles in memory even if they are no longer visible. It reduces the need to re-download the same data over and over again when the user pan/zooms around the map, providing a smoother experience.
+
+If not supplied, the `maxCacheSize` is calculated as `5` times the number of tiles in the current viewport.
 
 - Default: `null`
 
 
-##### `strategy` (Enum, optional)
+##### `maxCacheByteSize` (Number, optional)
 
-How the tile layer determines the visibility of tiles. One of the following:
+The maximum memory used for caching tiles. If this limit is supplied, `getTileData` must return an object that contains a `byteLength` field.
+
+- Default: `null`
+
+
+##### `refinementStrategy` (Enum, optional)
+
+How the tile layer refines the visibility of tiles. One of the following:
 
 * `'best-available'`: If a tile in the current viewport is waiting for its data to load, use cached content from the closest zoom level to fill the empty space. This approach minimizes the visual flashing due to missing content.
 * `'no-overlap'`: Avoid showing overlapping tiles when backfilling with cached content. This is usually favorable when tiles do not have opaque backgrounds.
+* `'never'`: Do not display any tile that is not selected.
 
 - Default: `'best-available'`
-
-
-##### `tileToBoundingBox` (Function, optional)
-
-**Advanced** Converts from `x, y, z` tile indices to a bounding box in the global coordinates. The default implementation converts an OSM tile index to `{west: <longitude>, north: <latitude>, east: <longitude>, south: <latitude>}`.
-
-Receives arguments:
-
-- `x` (Number)
-- `y` (Number)
-- `z` (Number)
-
-The returned value will be available via `tile.bbox`.
-
-
-##### `getTileIndices` (Function, optional)
-
-**Advanced** This function converts a given viewport to the indices needed to fetch tiles contained in the viewport. The default implementation returns visible tiles defined by [the OSM tile index](https://wiki.openstreetmap.org/wiki/Slippy_map_tilenames).
-
-Receives arguments:
-
-- `viewport` (Viewport)
-- `minZoom` (Number) The minimum zoom level
-- `maxZoom` (Number) The maximum zoom level
-
-Returns:
-
-An array of objects in the shape of `{x, y, z}`.
 
 
 ### Render Options
@@ -193,13 +179,27 @@ Renders one or an array of Layer instances with all the `TileLayer` props and th
 - Default: `data => null`
 
 
+##### `onTileLoad` (Function, optional)
+
+`onTileLoad` called when a tile successfully loads.
+
+- Default: `() => {}`
+
+Receives arguments:
+
+- `tile` (Object) - the tile that has been loaded.
+
 ##### `onTileError` (Function, optional)
 
 `onTileError` called when a tile failed to load.
 
 - Default: `console.error`
 
+Receives arguments:
 
-# Source
+- `error` (`Error`)
+
+
+## Source
 
 [modules/geo-layers/src/tile-layer](https://github.com/uber/deck.gl/tree/master/modules/geo-layers/src/tile-layer)

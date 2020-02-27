@@ -1,36 +1,44 @@
+import {log} from '@deck.gl/core';
+
 export default class Tile2DHeader {
-  constructor({getTileData, x, y, z, onTileLoad, onTileError, tileToBoundingBox}) {
+  constructor({x, y, z, onTileLoad, onTileError}) {
     this.x = x;
     this.y = y;
     this.z = z;
-    this.bbox = tileToBoundingBox(this.x, this.y, this.z);
-    this.selected = true;
+    this.isVisible = false;
     this.parent = null;
     this.children = [];
 
     this.content = null;
     this._isLoaded = false;
-    this._loader = this._loadData(getTileData);
 
     this.onTileLoad = onTileLoad;
     this.onTileError = onTileError;
   }
 
   get data() {
-    return this.content || this._loader;
+    return this._isLoaded ? this.content : this._loader;
   }
 
   get isLoaded() {
     return this._isLoaded;
   }
 
-  _loadData(getTileData) {
+  get byteLength() {
+    const result = this.content ? this.content.byteLength : 0;
+    if (!Number.isFinite(result)) {
+      log.error('byteLength not defined in tile data')();
+    }
+    return result;
+  }
+
+  loadData(getTileData) {
     const {x, y, z, bbox} = this;
     if (!getTileData) {
-      return null;
+      return;
     }
 
-    return Promise.resolve(getTileData({x, y, z, bbox}))
+    this._loader = Promise.resolve(getTileData({x, y, z, bbox}))
       .then(buffers => {
         this.content = buffers;
         this._isLoaded = true;

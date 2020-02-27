@@ -468,3 +468,17 @@ test('Layer#calculateInstancePickingColors', t => {
 
   t.end();
 });
+
+test('Layer#isLoaded', t => {
+  const layer = new SubLayer({
+    data: Promise.resolve([]),
+    onDataLoad: () => {
+      t.ok(layer.isLoaded, 'data is loaded');
+      t.end();
+    }
+  });
+
+  testInitializeLayer({layer});
+
+  t.notOk(layer.isLoaded, 'is loading data');
+});

@@ -21,11 +21,11 @@ export default class JSONConfiguration {
     this.postProcessConvertedJson = json => json;
 
     for (const configuration of configurations) {
-      this._merge(configuration);
+      this.merge(configuration);
     }
   }
 
-  _merge(configuration) {
+  merge(configuration) {
     for (const key in configuration) {
       switch (key) {
         // DEPRECATED = For backwards compatibility, add views and layers to classes;

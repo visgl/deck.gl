@@ -28,6 +28,10 @@ export default class CompositeLayer extends Layer {
     return true;
   }
 
+  get isLoaded() {
+    return super.isLoaded && this.getSubLayers().every(layer => layer.isLoaded);
+  }
+
   getSubLayers() {
     return (this.internalState && this.internalState.subLayers) || [];
   }

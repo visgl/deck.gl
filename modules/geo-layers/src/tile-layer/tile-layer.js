@@ -1,23 +1,21 @@
 import {CompositeLayer} from '@deck.gl/core';
 import {GeoJsonLayer} from '@deck.gl/layers';
 
-import Tileset2D, {STRATEGY_DEFAULT} from './utils/tileset-2d';
-import {tileToBoundingBox as defaultTile2Bbox} from './utils/tile-util';
-import {getTileIndices as defaultGetIndices} from './utils/viewport-util';
+import Tileset2D, {STRATEGY_DEFAULT} from './tileset-2d';
 
 const defaultProps = {
   renderSubLayers: {type: 'function', value: props => new GeoJsonLayer(props), compare: false},
   getTileData: {type: 'function', value: ({x, y, z}) => null, compare: false},
-  tileToBoundingBox: {type: 'function', value: defaultTile2Bbox, compare: false},
-  getTileIndices: {type: 'function', value: defaultGetIndices, compare: false},
   // TODO - change to onViewportLoad to align with Tile3DLayer
   onViewportLoad: {type: 'function', optional: true, value: null, compare: false},
+  onTileLoad: {type: 'function', value: tile => {}, compare: false},
   // eslint-disable-next-line
   onTileError: {type: 'function', value: err => console.error(err), compare: false},
   maxZoom: null,
   minZoom: 0,
   maxCacheSize: null,
-  strategy: STRATEGY_DEFAULT
+  maxCacheByteSize: null,
+  refinementStrategy: STRATEGY_DEFAULT
 };
 
 export default class TileLayer extends CompositeLayer {
@@ -26,6 +24,11 @@ export default class TileLayer extends CompositeLayer {
       tiles: [],
       isLoaded: false
     };
+  }
+
+  get isLoaded() {
+    const {tileset} = this.state;
+    return tileset.selectedTiles.every(tile => tile.layer && tile.layer.isLoaded);
   }
 
   shouldUpdateState({changeFlags}) {
@@ -40,23 +43,28 @@ export default class TileLayer extends CompositeLayer {
         (changeFlags.updateTriggersChanged.all || changeFlags.updateTriggersChanged.getTileData));
 
     if (createTileCache) {
-      const {maxZoom, minZoom, maxCacheSize, strategy, getTileIndices, tileToBoundingBox} = props;
-      if (tileset) {
-        tileset.finalize();
-      }
-      tileset = new Tileset2D({
-        getTileData: this.getTileData.bind(this),
-        getTileIndices,
-        tileToBoundingBox,
-        maxSize: maxCacheSize,
+      const {
         maxZoom,
         minZoom,
-        strategy,
-        onTileLoad: this._updateTileset.bind(this),
+        maxCacheSize,
+        maxCacheByteSize,
+        refinementStrategy,
+        tileToBoundingBox
+      } = props;
+      tileset = new Tileset2D({
+        getTileData: this.getTileData.bind(this),
+        tileToBoundingBox,
+        maxCacheSize,
+        maxCacheByteSize,
+        maxZoom,
+        minZoom,
+        refinementStrategy,
+        onTileLoad: this._onTileLoad.bind(this),
         onTileError: this._onTileError.bind(this)
       });
       this.setState({tileset});
     } else if (changeFlags.propsChanged) {
+      tileset.setOptions(props);
       // if any props changed, delete the cached layers
       this.state.tileset.tiles.forEach(tile => {
         tile.layer = null;
@@ -89,14 +97,21 @@ export default class TileLayer extends CompositeLayer {
     this.state.isLoaded = isLoaded;
   }
 
-  _onTileError(error) {
-    this.props.onTileError(error);
-    // errorred tiles should not block rendering, are considered "loaded" with empty data
-    this._updateTileset();
+  _onTileLoad(tile) {
+    const layer = this.getCurrentLayer();
+    layer.props.onTileLoad(tile);
+    layer._updateTileset();
   }
 
-  getTileData({x, y, z}) {
-    return this.props.getTileData(x, y, z);
+  _onTileError(error) {
+    const layer = this.getCurrentLayer();
+    layer.props.onTileError(error);
+    // errorred tiles should not block rendering, are considered "loaded" with empty data
+    layer._updateTileset();
+  }
+
+  getTileData(tilePosition) {
+    return this.props.getTileData(tilePosition);
   }
 
   getPickingInfo({info, sourceLayer}) {

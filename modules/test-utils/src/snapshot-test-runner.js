@@ -29,7 +29,11 @@ const DEFAULT_TEST_OPTIONS = {
 const DEFAULT_TEST_CASE = {
   name: 'Unnamed snapshot test',
   props: {},
-  onAfterRender: ({deck, layers, done}) => done(),
+  onAfterRender: ({deck, layers, done}) => {
+    if (layers.every(layer => layer.isLoaded)) {
+      done(); // eslint-disable-line
+    }
+  },
   goldenImage: ''
 };
 
