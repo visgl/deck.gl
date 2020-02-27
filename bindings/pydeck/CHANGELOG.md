@@ -1,5 +1,12 @@
 ### pydeck CHANGELOG
 
+0.3.0b1
+=======
+- Add support for dynamic deck.gl custom Layer registration (#4233)
+- Cut unused colors module (#4257)
+- Add support for background colors in standalone HTML renderer (#4242)
+- Support binary data transport (#4167)
+
 0.2.1
 =====
 - Update to 0.2.1 (#4209) by removing deprecated pytest-runner to allow for conda-forge installation
