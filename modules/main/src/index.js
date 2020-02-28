@@ -119,7 +119,8 @@ export {
   TileLayer,
   TripsLayer,
   Tile3DLayer,
-  TerrainLayer
+  TerrainLayer,
+  MVTTileLayer
 } from '@deck.gl/geo-layers';
 
 export {SimpleMeshLayer, ScenegraphLayer} from '@deck.gl/mesh-layers';

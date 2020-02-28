@@ -1558,7 +1558,7 @@
     npmlog "^4.1.2"
     write-file-atomic "^2.3.0"
 
-"@loaders.gl/3d-tiles@^2.1.0-alpha.4":
+"@loaders.gl/3d-tiles@2.1.0-alpha.4", "@loaders.gl/3d-tiles@^2.1.0-alpha.4":
   version "2.1.0-alpha.4"
   resolved "https://registry.yarnpkg.com/@loaders.gl/3d-tiles/-/3d-tiles-2.1.0-alpha.4.tgz#9a94aef87dea86b25ca8a104600214aacb5fa20b"
   integrity sha512-9qqDj2QHO7KiPED77wdIQRhmW+avDy0KaQLcaIAdIk2/HQ0uy90Eb3X7di5Jf/ggRUOs4hFFm+0AQT0PLe6dEQ==
@@ -1579,6 +1579,14 @@
   dependencies:
     "@babel/runtime" "^7.3.1"
     "@loaders.gl/loader-utils" "2.1.0-alpha.4"
+
+"@loaders.gl/core@^2.0.4":
+  version "2.0.4"
+  resolved "https://registry.yarnpkg.com/@loaders.gl/core/-/core-2.0.4.tgz#10f647bf0e10af971a7d4e60031992f54c76a91b"
+  integrity sha512-rBj2QwZh5wUEYblI5tEf0uFRps23Hu/0OM4lA27y+9BUNrT1D4CVBktqsQ6EyMRFWoBGO6Q6G9SEg/49I6MM5w==
+  dependencies:
+    "@babel/runtime" "^7.3.1"
+    "@loaders.gl/loader-utils" "2.0.4"
 
 "@loaders.gl/csv@^2.1.0-alpha.4":
   version "2.1.0-alpha.4"
@@ -1609,6 +1617,13 @@
   resolved "https://registry.yarnpkg.com/@loaders.gl/images/-/images-2.0.2.tgz#546929146b38a428e55905e513b4b9ec7afc58e2"
   integrity sha512-H6xhSvM24CI++P46TZRLX+95mn5B4HaP0jWGSIn2Lo0aBpcI9/T8z2EZhJyihjoR450fph1ER0j+Mnz+ovHEGg==
 
+"@loaders.gl/loader-utils@2.0.4":
+  version "2.0.4"
+  resolved "https://registry.yarnpkg.com/@loaders.gl/loader-utils/-/loader-utils-2.0.4.tgz#de2494f85e6e36fc05ec43ee1d2ada65bcd7f3f6"
+  integrity sha512-e+Grafj+6pk+7WDClWW/OsuTg/wpaJ3+pLX7c+eG3KmcxiLEDoCNWSvQVbR8ALU4Y6m3S32+WlHptBnN1LL48A==
+  dependencies:
+    "@babel/runtime" "^7.3.1"
+
 "@loaders.gl/loader-utils@2.1.0-alpha.4":
   version "2.1.0-alpha.4"
   resolved "https://registry.yarnpkg.com/@loaders.gl/loader-utils/-/loader-utils-2.1.0-alpha.4.tgz#92d623f2edf12084de48ae359958baac95ab8085"
@@ -1623,6 +1638,11 @@
   dependencies:
     "@loaders.gl/images" "2.1.0-alpha.4"
     math.gl "^3.1.2"
+
+"@loaders.gl/mvt@^2.1.0-alpha.5":
+  version "2.1.0-alpha.5"
+  resolved "https://registry.yarnpkg.com/@loaders.gl/mvt/-/mvt-2.1.0-alpha.5.tgz#46ace83d3a143c455f1a45133742f7100937d111"
+  integrity sha512-R5dFyxtyRuA6hJRWlWuo1KAFw/YJm3wMJ0u0H9ZL/v9GfSvgScepThj93uIbxeOAVXn6ZY0JwL3WwGgui2pSLA==
 
 "@loaders.gl/polyfills@^2.1.0-alpha.4":
   version "2.1.0-alpha.4"
@@ -7024,7 +7044,7 @@ mapbox-gl@^1.0.0, mapbox-gl@^1.2.1:
     tinyqueue "^2.0.0"
     vt-pbf "^3.1.1"
 
-math.gl@^3.1.2:
+math.gl@^3.1.2, math.gl@^3.1.3:
   version "3.1.3"
   resolved "https://registry.yarnpkg.com/math.gl/-/math.gl-3.1.3.tgz#1e702df8cba024cc229e18e3c57c60a27943cb95"
   integrity sha512-3OYCtzTOW1wkZufjsxk8g1D77+z+x7QehOZcMFPGgw1QjVEFNcyy3ql6hdrZpUlkyE3pX4lYak7WOIE+n0obYg==
