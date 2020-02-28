@@ -30,5 +30,7 @@ Data must be properly formatted for binary transfer:
 
 Binary transfer only works within Jupyter environments via the ``.show`` function.
 
+TODO finish example
+
 .. literalinclude:: ../examples/graph_example.py
    :language: python
