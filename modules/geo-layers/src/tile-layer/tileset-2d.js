@@ -131,13 +131,13 @@ export default class Tileset2D {
 
   // Returns array of {x, y, z}
   getTileIndices({viewport, maxZoom, minZoom}) {
-    return getTileIndices(viewport, maxZoom, minZoom);
+    return getTileIndices(viewport, maxZoom, minZoom, this.opts.tileSize);
   }
 
   // Add custom metadata to tiles
   getTileMetadata({x, y, z}) {
     return {
-      bbox: tileToBoundingBox(this._viewport, x, y, z)
+      bbox: tileToBoundingBox(this._viewport, x, y, z, this.opts.tileSize)
     };
   }
 

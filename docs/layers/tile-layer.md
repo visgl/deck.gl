@@ -113,7 +113,18 @@ The `tile` argument contains the following fields:
  
 When used with a geospatial view such as the [MapView](/docs/api-reference/map-view.md), x, y, and z are determined from [the OSM tile index](https://wiki.openstreetmap.org/wiki/Slippy_map_tilenames), and `bbox` is in the shape of `{west: <longitude>, north: <latitude>, east: <longitude>, south: <latitude>}`.
 
-When used with a non-geospatial view such as the [OrthographicView](/docs/api-reference/orthographic-view.md) or the [OrbitView](/docs/api-reference/orbit-view.md), x, y, and z are determined by dividing the view space in to 512 pixel by 512 pixel tiles. `bbox` is in the shape of `{left, top, right, bottom}`.
+When used with a non-geospatial view such as the [OrthographicView](/docs/api-reference/orthographic-view.md) or the [OrbitView](/docs/api-reference/orbit-view.md), x, y, and z are determined by dividing the view space in to square tiles (see `tileSize` prop). `bbox` is in the shape of `{left, top, right, bottom}`.
+
+
+##### `tileSize` (Number, optional)
+
+The pixel dimension of the tiles, usually a power of 2.
+
+When using a geospatial view, this prop has no effect.
+
+When using a non-geospatial view, the tile size represents the width and height of each tile in world units at zoom level `0`.
+
+- Default: `512`
 
 
 ##### `maxZoom` (Number|Null, optional)
