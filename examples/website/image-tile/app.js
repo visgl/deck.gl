@@ -69,7 +69,8 @@ export default class App extends PureComponent {
         .then(str => new window.DOMParser().parseFromString(str, 'text/xml'))
         .then(dziXML => {
           if (Number(dziXML.getElementsByTagName('Image')[0].attributes.Overlap.value) !== 0) {
-            throw new Error('Overlap paramter is nonzero and should be 0');
+            // eslint-disable-next-line no-undef, no-console
+            console.warn('Overlap paramter is nonzero and should be 0');
           }
           this.setState({
             height: Number(dziXML.getElementsByTagName('Size')[0].attributes.Height.value),
