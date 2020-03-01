@@ -1,5 +1,9 @@
 require('reify');
 
+// Polyfill for loaders
+// TODO - @loaders.gl/polyfills seems to freeze the tests
+global.fetch = () => Promise.reject('fetch not available in node');
+
 // Polyfill with JSDOM
 const {JSDOM} = require('jsdom');
 const dom = new JSDOM(`<!DOCTYPE html>`);

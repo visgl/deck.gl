@@ -63,7 +63,10 @@ export default class TerrainLayer extends CompositeLayer {
   updateState({props, oldProps}) {
     const terrainImageChanged = props.terrainImage !== oldProps.terrainImage;
     if (terrainImageChanged) {
-      const isTiled = props.terrainImage.includes('{x}') && props.terrainImage.includes('{y}');
+      const isTiled =
+        props.terrainImage &&
+        props.terrainImage.includes('{x}') &&
+        props.terrainImage.includes('{y}');
       this.setState({isTiled});
     }
 
@@ -81,6 +84,9 @@ export default class TerrainLayer extends CompositeLayer {
   }
 
   loadTerrain({terrainImage, bounds, elevationDecoder, meshMaxError, workerUrl}) {
+    if (!terrainImage) {
+      return null;
+    }
     const options = {
       terrain: {
         bounds,
@@ -135,9 +141,9 @@ export default class TerrainLayer extends CompositeLayer {
     return new SimpleMeshLayer({
       id: props.id,
       wireframe: props.wireframe,
-      mesh: props.data.then(([mesh]) => mesh),
+      mesh: props.data.then(result => result && result[0]),
       data: [1],
-      texture: props.data.then(([, texture]) => texture),
+      texture: props.data.then(result => result && result[1]),
       getPolygonOffset: null,
       coordinateSystem: COORDINATE_SYSTEM.CARTESIAN,
       getPosition: d => [0, 0, 0],

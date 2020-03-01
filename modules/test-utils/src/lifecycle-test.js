@@ -35,20 +35,13 @@ function defaultOnError(error, title) {
   }
 }
 
-function safelyCall(title, func, onError) {
-  let error = null;
-  try {
-    func();
-  } catch (e) {
-    error = e;
-  }
-  onError(error, title);
-}
-
 export function testInitializeLayer({layer, viewport = testViewport, onError = defaultOnError}) {
   const layerManager = new LayerManager(gl, {viewport});
+  layerManager.setProps({
+    onError: error => onError(error, `initializing ${layer.id}`)
+  });
 
-  safelyCall(`initializing ${layer.id}`, () => layerManager.setLayers([layer]), onError);
+  layerManager.setLayers([layer]);
 
   return null;
 }
@@ -61,14 +54,12 @@ export function testUpdateLayer({
 }) {
   const layerManager = new LayerManager(gl, {viewport});
 
-  safelyCall(
-    `updating ${layer.id}`,
-    () => {
-      layerManager.setLayers([layer]);
-      layerManager.setLayers([layer.clone(newProps)]);
-    },
-    onError
-  );
+  layerManager.setProps({
+    onError: error => onError(error, `updating ${layer.id}`)
+  });
+
+  layerManager.setLayers([layer]);
+  layerManager.setLayers([layer.clone(newProps)]);
 
   return null;
 }
@@ -81,19 +72,19 @@ export function testDrawLayer({
 }) {
   const layerManager = new LayerManager(gl, {viewport});
   const deckRenderer = new DeckRenderer(gl);
+  const props = {
+    onError: error => onError(error, `drawing ${layer.id}`)
+  };
 
-  safelyCall(
-    `drawing ${layer.id}`,
-    () => {
-      layerManager.setLayers([layer]);
-      deckRenderer.renderLayers({
-        viewports: [viewport],
-        layers: layerManager.getLayers(),
-        onViewportActive: layerManager.activateViewport
-      });
-    },
-    onError
-  );
+  layerManager.setProps(props);
+  deckRenderer.setProps(props);
+
+  layerManager.setLayers([layer]);
+  deckRenderer.renderLayers({
+    viewports: [viewport],
+    layers: layerManager.getLayers(),
+    onViewportActive: layerManager.activateViewport
+  });
 
   return null;
 }
@@ -118,13 +109,19 @@ export function testLayer({
   const initialProps = testCases[0].props;
   const layer = new Layer(initialProps);
 
+  const props = {
+    onError: error => onError(error, `testing ${layer.id}`)
+  };
+  layerManager.setProps(props);
+  deckRenderer.setProps(props);
+
   const oldResourceCounts = getResourceCounts();
 
-  safelyCall(`initializing ${layer.id}`, () => layerManager.setLayers([layer]), onError);
+  layerManager.setLayers([layer]);
 
   runLayerTests(layerManager, deckRenderer, layer, testCases, spies, onError);
 
-  safelyCall(`finalizing ${layer.id}`, () => layerManager.setLayers([]), onError);
+  layerManager.setLayers([]);
 
   const resourceCounts = getResourceCounts();
 
@@ -192,19 +189,14 @@ function runLayerTests(layerManager, deckRenderer, layer, testCases, spies, onEr
     // Create a map of spies that the test case can inspect
     const spyMap = injectSpies(layer, spies);
 
-    safelyCall(`updating ${layer.id}`, () => layerManager.setLayers([layer]), onError);
+    layerManager.setLayers([layer]);
 
     // call draw layer
-    safelyCall(
-      `drawing ${layer.id}`,
-      () =>
-        deckRenderer.renderLayers({
-          viewports: [viewport],
-          layers: layerManager.getLayers(),
-          onViewportActive: layerManager.activateViewport
-        }),
-      onError
-    );
+    deckRenderer.renderLayers({
+      viewports: [viewport],
+      layers: layerManager.getLayers(),
+      onViewportActive: layerManager.activateViewport
+    });
 
     // layer manager should handle match subLayer and tranfer state and props
     // here we assume subLayer matches copy over the new props from a new subLayer

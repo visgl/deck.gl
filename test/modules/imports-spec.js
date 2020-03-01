@@ -46,13 +46,13 @@ test('Top-level imports', t0 => {
     return false;
   };
 
-  test('import "deck.gl"', t => {
+  t0.test('import "deck.gl"', t => {
     t.notOk(hasEmptyExports(deck), 'No empty top-level export in deck.gl');
     t.notOk(hasEmptyExports(core), 'No empty top-level export in @deck.gl/core');
     t.end();
   });
 
-  test('import layers', t => {
+  t0.test('import layers', t => {
     t.notOk(hasEmptyExports(layers), 'No empty top-level export in @deck.gl/layers');
     t.notOk(
       hasEmptyExports(aggregationLayers),
@@ -63,7 +63,7 @@ test('Top-level imports', t0 => {
     t.end();
   });
 
-  test('import utilities', t => {
+  t0.test('import utilities', t => {
     t.notOk(hasEmptyExports(json), 'No empty top-level export in @deck.gl/json');
     t.notOk(hasEmptyExports(googleMaps), 'No empty top-level export in @deck.gl/google-maps');
     t.notOk(hasEmptyExports(mapbox), 'No empty top-level export in @deck.gl/mapbox');
@@ -72,7 +72,7 @@ test('Top-level imports', t0 => {
     t.end();
   });
 
-  test('selected imports', t => {
+  t0.test('selected imports', t => {
     t.ok(deck.Layer, 'Layer symbol imported');
     t.ok(deck.ScatterplotLayer, 'ScatterplotLayer symbol imported');
     t.ok(deck.ScreenGridLayer, 'ScreenGridLayer symbol imported');
@@ -88,7 +88,7 @@ test('Top-level imports', t0 => {
     t.end();
   });
 
-  test('deck.gl default import', t => {
+  t0.test('deck.gl default import', t => {
     t.ok(DeckGL, 'DeckGL symbol imported from /react');
     t.end();
   });
