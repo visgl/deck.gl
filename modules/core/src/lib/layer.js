@@ -641,7 +641,14 @@ export default class Layer extends Component {
 
     // Call subclass lifecycle method
     withParameters(this.context.gl, parameters, () => {
-      this.draw({moduleParameters, uniforms, parameters, context: this.context});
+      const opts = {moduleParameters, uniforms, parameters, context: this.context};
+
+      // extensions
+      for (const extension of this.props.extensions) {
+        extension.draw.call(this, opts, extension);
+      }
+
+      this.draw(opts);
     });
 
     // End lifecycle method

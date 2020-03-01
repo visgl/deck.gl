@@ -64,5 +64,7 @@ export default class LayerExtension {
 
   updateState(params, extension) {}
 
+  draw(params, extension) {}
+
   finalizeState(extension) {}
 }

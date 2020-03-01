@@ -5,6 +5,7 @@ import {COORDINATE_SYSTEM} from '@deck.gl/core';
 import {GeoJsonLayer} from '@deck.gl/layers';
 
 import TileLayer from '../tile-layer/tile-layer';
+import ClipExtension from './clip-extension';
 
 const defaultProps = Object.assign({}, TileLayer.defaultProps, {
   renderSubLayers: {type: 'function', value: renderSubLayers, compare: false},
@@ -27,11 +28,13 @@ export default class MVTTileLayer extends TileLayer {
   }
 }
 
-function renderSubLayers(tileProperties) {
+function renderSubLayers({data, tile, extensions = [], ...otherProperties}) {
   return new GeoJsonLayer({
-    ...tileProperties,
-    modelMatrix: getModelMatrix(tileProperties.tile),
-    coordinateSystem: COORDINATE_SYSTEM.CARTESIAN
+    ...otherProperties,
+    data,
+    modelMatrix: getModelMatrix(tile),
+    coordinateSystem: COORDINATE_SYSTEM.CARTESIAN,
+    extensions: [...extensions, new ClipExtension()]
   });
 }
 

@@ -146,6 +146,19 @@ Arguments:
 * `params` - same object passed to `layer.updateState`.
 * `extension` - the source extension instance.
 
+
+##### `draw`
+
+Called before the layer's own `draw`.
+
+When this method is executed, `this` points to the layer.
+
+Arguments:
+
+* `params` - same object passed to `layer.draw`.
+* `extension` - the source extension instance.
+
+
 ##### `finalizeState`
 
 Called after the layer's own `finalizeState`.
