@@ -20,8 +20,8 @@ export default function loadArcGISDeckExternalRenderer(externalRenderers, Collec
     // eslint-disable-next-line
     const dpr = window.devicePixelRatio;
     this.deckFbo = new Framebuffer(gl, {
-      width: Math.round(this.view.state.size[0] * dpr),
-      height: Math.round(this.view.state.size[1] * dpr)
+      width: Math.round(this.view.size[0] * dpr),
+      height: Math.round(this.view.size[1] * dpr)
     });
     this.initializeDeckGL(gl);
     this.deckLayers.on('change', () => {
@@ -31,15 +31,15 @@ export default function loadArcGISDeckExternalRenderer(externalRenderers, Collec
 
   ArcGISDeckExternalRenderer.prototype.setup = setup;
 
-  function render(renderParameters) {
-    const gl = renderParameters.context;
+  function render(context) {
+    const gl = context.gl;
     const screenFbo = gl.getParameter(gl.FRAMEBUFFER_BINDING);
     // eslint-disable-next-line
     const dpr = window.devicePixelRatio;
     this.createOrResizeFramebuffer(
       gl,
-      Math.round(this.view.state.size[0] * dpr),
-      Math.round(this.view.state.size[1] * dpr)
+      Math.round(this.view.size[0] * dpr),
+      Math.round(this.view.size[1] * dpr)
     );
 
     this.deckgl.setProps({
@@ -66,8 +66,8 @@ export default function loadArcGISDeckExternalRenderer(externalRenderers, Collec
         viewport: [
           0,
           0,
-          Math.round(this.view.state.size[0] * dpr),
-          Math.round(this.view.state.size[1] * dpr)
+          Math.round(this.view.size[0] * dpr),
+          Math.round(this.view.size[1] * dpr)
         ]
       },
       () => {
