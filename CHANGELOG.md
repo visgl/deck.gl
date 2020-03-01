@@ -19,6 +19,15 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v8.1
 
+### deck.gl [8.1.0-alpha.6] - Mar 1 2020
+
+- [test-utils] Fix testLayer (#4334)
+- TileLayer: expose tileSize prop (#4332)
+- MVT Tile Layer (#3935)
+- Improve TerrainLayer loading experience (#4312)
+- Fix package.json for modules/arcgis (#4306)
+- Use luma.gl in arcgis module (#4302)
+
 ### deck.gl [8.1.0-alpha.5] - Feb 22 2020
 
 - ArcGIS module and sample app (#4252)
