@@ -118,9 +118,10 @@ def deck_to_html(
     if open_browser:
         display_html(realpath(f.name))
     if notebook_display:
+        from IPython.display import display  # noqa
 
         if in_google_collab:
-            from IPython.display import HTML, display, Javascript # noqa
+            from IPython.display import HTML, Javascript # noqa
             js_height_snippet = 'google.colab.output.setIframeHeight(0, true, {maxHeight: %s})' % iframe_height
             display(Javascript(js_height_snippet))
             display(HTML(html))
