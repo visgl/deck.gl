@@ -19,7 +19,6 @@
 // THE SOFTWARE.
 
 import log from '../utils/log';
-import assert from '../utils/assert';
 import {isAsyncIterable} from '../utils/iterable-utils';
 import {PROP_SYMBOLS} from './constants';
 const {ASYNC_ORIGINAL, ASYNC_RESOLVED, ASYNC_DEFAULTS} = PROP_SYMBOLS;
@@ -172,9 +171,7 @@ export default class ComponentState {
     // Only update if loadCount is larger or equal to resolvedLoadCount
     // otherwise a more recent load has already completed
     const asyncProp = this.asyncProps[propName];
-    if (asyncProp && loadCount >= asyncProp.resolvedLoadCount) {
-      assert(value !== undefined);
-
+    if (asyncProp && loadCount >= asyncProp.resolvedLoadCount && value !== undefined) {
       // A chance to copy old props before updating
       this.freezeAsyncOldProps();
 

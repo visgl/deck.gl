@@ -20,14 +20,41 @@
 
 import test from 'tape-catch';
 import {generateLayerTests, testLayer} from '@deck.gl/test-utils';
-import {TerrainLayer} from '@deck.gl/geo-layers';
+import {TerrainLayer, TileLayer} from '@deck.gl/geo-layers';
+import {SimpleMeshLayer} from '@deck.gl/mesh-layers';
 
 test('TerrainLayer', t => {
   const testCases = generateLayerTests({
     Layer: TerrainLayer,
+    sampleProps: {
+      terrainImage: 'https://s3.amazonaws.com/elevation-tiles-prod/terrarium/{z}/{x}/{y}.png',
+      surfaceImage: 'https://wms.chartbundle.com/tms/1.0.0/sec/{z}/{x}/{y}.png?origin=nw'
+    },
     assert: t.ok,
-    onBeforeUpdate: ({testCase}) => t.comment(testCase.title)
+    onBeforeUpdate: ({testCase}) => t.comment(testCase.title),
+    onAfterUpdate: ({layer, subLayers}) => {
+      if (layer.props.terrainImage) {
+        t.ok(subLayers[0] instanceof TileLayer, 'rendered TileLayer');
+      }
+    }
   });
   testLayer({Layer: TerrainLayer, testCases, onError: t.notOk});
+
+  const testCasesNonTiled = generateLayerTests({
+    Layer: TerrainLayer,
+    sampleProps: {
+      terrainImage: 'https://s3.amazonaws.com/elevation-tiles-prod/terrarium/1/0/0.png',
+      bounds: [-180, 85, 0, 0]
+    },
+    assert: t.ok,
+    onBeforeUpdate: ({testCase}) => t.comment(testCase.title),
+    onAfterUpdate: ({layer, subLayers}) => {
+      if (layer.props.terrainImage) {
+        t.ok(subLayers[0] instanceof SimpleMeshLayer, 'rendered SimpleMeshLayer');
+      }
+    }
+  });
+  testLayer({Layer: TerrainLayer, testCases: testCasesNonTiled, onError: t.notOk});
+
   t.end();
 });

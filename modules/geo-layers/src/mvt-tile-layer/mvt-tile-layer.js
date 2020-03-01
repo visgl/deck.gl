@@ -8,25 +8,15 @@ import TileLayer from '../tile-layer/tile-layer';
 
 const defaultProps = Object.assign({}, TileLayer.defaultProps, {
   renderSubLayers: {type: 'function', value: renderSubLayers, compare: false},
-  urlTemplates: []
+  urlTemplates: {type: 'array', value: [], compare: true}
 });
 
 export default class MVTTileLayer extends TileLayer {
-  initializeState() {
-    super.initializeState();
-    const {urlTemplates} = this.props;
-
-    this.state = {
-      ...this.state,
-      urlTemplates
-    };
-  }
-
   async getTileData(tileProperties) {
-    const {urlTemplates} = this.state;
+    const {urlTemplates} = this.getCurrentLayer().props;
 
     if (!urlTemplates || !urlTemplates.length) {
-      return Promise.reject();
+      return Promise.reject('Invalid urlTemplates');
     }
 
     const templateReplacer = (_, property) => tileProperties[property];
