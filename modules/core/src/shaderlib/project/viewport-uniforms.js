@@ -35,20 +35,13 @@ const IDENTITY_MATRIX = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1];
 const DEFAULT_PIXELS_PER_UNIT2 = [0, 0, 0];
 const DEFAULT_COORDINATE_ORIGIN = [0, 0, 0];
 
-// Based on viewport-mercator-project/test/fp32-limits.js
-export const LNGLAT_AUTO_OFFSET_ZOOM_THRESHOLD = 12;
-
 const getMemoizedViewportUniforms = memoize(calculateViewportUniforms);
 
-// The code that utilizes Matrix4 does the same calculation as their mat4 counterparts,
-// has lower performance but provides error checking.
-// Uncomment when debugging
-function calculateMatrixAndOffset(viewport, coordinateSystem, coordinateOrigin) {
-  const {viewMatrixUncentered, projectionMatrix, projectionMode} = viewport;
-  let {viewMatrix, viewProjectionMatrix} = viewport;
-
-  let projectionCenter = ZERO_VECTOR;
-  let cameraPosCommon = viewport.cameraPosition;
+export function getOffsetOrigin(
+  viewport,
+  coordinateSystem,
+  coordinateOrigin = DEFAULT_COORDINATE_ORIGIN
+) {
   let shaderCoordinateOrigin = coordinateOrigin;
   let geospatialOrigin;
   let offsetMode = true;
@@ -64,7 +57,7 @@ function calculateMatrixAndOffset(viewport, coordinateSystem, coordinateOrigin) 
       : null;
   }
 
-  switch (projectionMode) {
+  switch (viewport.projectionMode) {
     case PROJECTION_MODE.WEB_MERCATOR:
       if (
         coordinateSystem === COORDINATE_SYSTEM.LNGLAT ||
@@ -98,6 +91,23 @@ function calculateMatrixAndOffset(viewport, coordinateSystem, coordinateOrigin) 
   }
 
   shaderCoordinateOrigin[2] = shaderCoordinateOrigin[2] || 0;
+
+  return {geospatialOrigin, shaderCoordinateOrigin, offsetMode};
+}
+
+// The code that utilizes Matrix4 does the same calculation as their mat4 counterparts,
+// has lower performance but provides error checking.
+function calculateMatrixAndOffset(viewport, coordinateSystem, coordinateOrigin) {
+  const {viewMatrixUncentered, projectionMatrix} = viewport;
+  let {viewMatrix, viewProjectionMatrix} = viewport;
+
+  let projectionCenter = ZERO_VECTOR;
+  let cameraPosCommon = viewport.cameraPosition;
+  const {geospatialOrigin, shaderCoordinateOrigin, offsetMode} = getOffsetOrigin(
+    viewport,
+    coordinateSystem,
+    coordinateOrigin
+  );
 
   if (offsetMode) {
     // Calculate transformed projectionCenter (using 64 bit precision JS)
@@ -154,7 +164,7 @@ export function getUniformsFromViewport({
   modelMatrix = null,
   // Match Layer.defaultProps
   coordinateSystem = COORDINATE_SYSTEM.DEFAULT,
-  coordinateOrigin = DEFAULT_COORDINATE_ORIGIN,
+  coordinateOrigin,
   wrapLongitude = false,
   // Deprecated
   projectionMode,
