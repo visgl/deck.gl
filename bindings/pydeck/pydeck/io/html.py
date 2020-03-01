@@ -1,5 +1,6 @@
 import os
 from os.path import relpath, realpath
+import sys
 import tempfile
 import time
 import webbrowser
@@ -13,6 +14,9 @@ def convert_js_bool(py_bool):
     if type(py_bool) != bool:
         return py_bool
     return "true" if py_bool else "false"
+
+
+in_google_collab = 'google.colab' in sys.modules
 
 
 TEMPLATES_PATH = os.path.join(os.path.dirname(__file__), "./templates/")
@@ -99,8 +103,10 @@ def deck_to_html(
         css_background_color=css_background_color,
         custom_libraries=custom_libraries,
     )
+
     if as_string:
         return html
+
     f = None
     try:
         f = open_named_or_temporary_file(filename)
@@ -112,14 +118,21 @@ def deck_to_html(
     if open_browser:
         display_html(realpath(f.name))
     if notebook_display:
-        from IPython.display import IFrame  # noqa
 
-        notebook_to_html_path = relpath(f.name)
-        display(  # noqa
-            IFrame(
-                os.path.join("./", notebook_to_html_path),
-                width=iframe_width,
-                height=iframe_height,
+        if in_google_collab:
+            from IPython.display import HTML, display, Javascript # noqa
+            js_height_snippet = 'google.colab.output.setIframeHeight(0, true, {maxHeight: %s})' % iframe_height
+            display(Javascript(js_height_snippet))
+            display(HTML(html))
+        else:
+            from IPython.display import IFrame  # noqa
+            notebook_to_html_path = relpath(f.name)
+            display(  # noqa
+                IFrame(
+                    os.path.join("./", notebook_to_html_path),
+                    width=iframe_width,
+                    height=iframe_height,
+                )
             )
-        )
+
     return realpath(f.name)

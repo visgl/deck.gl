@@ -124,6 +124,7 @@ class Deck(JSONMixin):
         notebook_display=True,
         iframe_width=700,
         iframe_height=500,
+        as_string=False,
         **kwargs
     ):
         """Write a file and loads it to an iframe, if in a Jupyter environment;
@@ -141,6 +142,8 @@ class Deck(JSONMixin):
             Height of Jupyter notebook iframe in pixels, if rendered in a Jupyter environment.
         iframe_height : int, default 500
             Width of Jupyter notebook iframe in pixels, if rendered in a Jupyter environment.
+        as_string : bool, default False
+            Whether the HTML should be written as a string rather than to a file. Defaults to writing to a file.
 
         Returns
         -------
