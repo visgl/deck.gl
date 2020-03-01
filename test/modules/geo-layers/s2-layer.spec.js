@@ -76,7 +76,16 @@ test('S2Layer#getS2QuadKey', t => {
 });
 
 test('S2Layer#getS2Polygon', t => {
-  const TEST_TOKENS = ['80858004', '1c', new Long(0, -2138636288, false)];
+  const TEST_TOKENS = [
+    '80858004', // face 4
+    '1c', // face 0
+    '2c', // face 1
+    '5b', // face 2
+    '6b', // face 3
+    'ab', // face 5
+    '4/001003',
+    new Long(0, -2138636288, false)
+  ];
 
   for (const token of TEST_TOKENS) {
     const polygon = getS2Polygon(token);
