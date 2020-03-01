@@ -11,6 +11,7 @@ const defaultProps = {
   onTileLoad: {type: 'function', value: tile => {}, compare: false},
   // eslint-disable-next-line
   onTileError: {type: 'function', value: err => console.error(err), compare: false},
+  tileSize: 512,
   maxZoom: null,
   minZoom: 0,
   maxCacheSize: null,
@@ -46,18 +47,18 @@ export default class TileLayer extends CompositeLayer {
       const {
         maxZoom,
         minZoom,
+        tileSize,
         maxCacheSize,
         maxCacheByteSize,
-        refinementStrategy,
-        tileToBoundingBox
+        refinementStrategy
       } = props;
       tileset = new Tileset2D({
         getTileData: this.getTileData.bind(this),
-        tileToBoundingBox,
         maxCacheSize,
         maxCacheByteSize,
         maxZoom,
         minZoom,
+        tileSize,
         refinementStrategy,
         onTileLoad: this._onTileLoad.bind(this),
         onTileError: this._onTileError.bind(this)

@@ -35,34 +35,38 @@ function getTileIndex([x, y], scale) {
   return [(x * scale) / TILE_SIZE, (y * scale) / TILE_SIZE];
 }
 
+function getScale(z, tileSize = TILE_SIZE) {
+  return (Math.pow(2, z) * TILE_SIZE) / tileSize;
+}
+
 // https://wiki.openstreetmap.org/wiki/Slippy_map_tilenames#Lon..2Flat._to_tile_numbers_2
 function osmTile2lngLat(x, y, z) {
-  const scale = Math.pow(2, z);
+  const scale = getScale(z);
   const lng = (x / scale) * 360 - 180;
   const n = Math.PI - (2 * Math.PI * y) / scale;
   const lat = (180 / Math.PI) * Math.atan(0.5 * (Math.exp(n) - Math.exp(-n)));
   return [lng, lat];
 }
 
-function tile2XY(x, y, z) {
-  const scale = Math.pow(2, z);
+function tile2XY(x, y, z, tileSize) {
+  const scale = getScale(z, tileSize);
   return [(x / scale) * TILE_SIZE, (y / scale) * TILE_SIZE];
 }
 
-export function tileToBoundingBox(viewport, x, y, z) {
+export function tileToBoundingBox(viewport, x, y, z, tileSize = TILE_SIZE) {
   if (viewport.isGeospatial) {
     const [west, north] = osmTile2lngLat(x, y, z);
     const [east, south] = osmTile2lngLat(x + 1, y + 1, z);
     return {west, north, east, south};
   }
-  const [left, top] = tile2XY(x, y, z);
-  const [right, bottom] = tile2XY(x + 1, y + 1, z);
+  const [left, top] = tile2XY(x, y, z, tileSize);
+  const [right, bottom] = tile2XY(x + 1, y + 1, z, tileSize);
   return {left, top, right, bottom};
 }
 
-function getIdentityTileIndices(viewport, z) {
+function getIdentityTileIndices(viewport, z, tileSize) {
   const bbox = getBoundingBox(viewport);
-  const scale = 2 ** z;
+  const scale = getScale(z, tileSize);
 
   const [minX, minY] = getTileIndex([bbox[0], bbox[1]], scale);
   const [maxX, maxY] = getTileIndex([bbox[2], bbox[3]], scale);
@@ -83,7 +87,7 @@ function getIdentityTileIndices(viewport, z) {
 
 function getOSMTileIndices(viewport, z) {
   const bbox = getBoundingBox(viewport);
-  const scale = 2 ** z;
+  const scale = getScale(z);
   /*
     minX, maxX could be out of bounds if longitude is near the 180 meridian or multiple worlds
     are shown:
@@ -119,7 +123,7 @@ function getOSMTileIndices(viewport, z) {
  * than minZoom, return an empty array. If the current zoom level is greater than maxZoom,
  * return tiles that are on maxZoom.
  */
-export function getTileIndices(viewport, maxZoom, minZoom) {
+export function getTileIndices(viewport, maxZoom, minZoom, tileSize = TILE_SIZE) {
   let z = Math.ceil(viewport.zoom);
   if (Number.isFinite(minZoom) && z < minZoom) {
     return [];
@@ -130,5 +134,5 @@ export function getTileIndices(viewport, maxZoom, minZoom) {
 
   return viewport.isGeospatial
     ? getOSMTileIndices(viewport, z)
-    : getIdentityTileIndices(viewport, z);
+    : getIdentityTileIndices(viewport, z, tileSize);
 }

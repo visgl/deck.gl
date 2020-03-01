@@ -89,6 +89,7 @@ const TEST_CASES = [
     }),
     minZoom: undefined,
     maxZoom: undefined,
+    tileSize: 128, // this should have no effect!
     output: ['0,0,0']
   },
   {
@@ -114,6 +115,19 @@ const TEST_CASES = [
       }
     }),
     output: ['2,2,4', '2,3,4', '3,2,4', '3,3,4']
+  },
+  {
+    title: 'non-geospatial with tile size',
+    viewport: new OrthographicView().makeViewport({
+      width: 800,
+      height: 400,
+      viewState: {
+        target: [100, 100],
+        zoom: 3
+      }
+    }),
+    tileSize: 256,
+    output: ['1,2,3', '1,3,3', '2,2,3', '2,3,3', '3,2,3', '3,3,3', '4,2,3', '4,3,3']
   }
 ];
 
@@ -125,10 +139,66 @@ function getTileIds(tiles) {
   return ids.sort();
 }
 
+function mergeBoundingBox(boundingBoxes) {
+  if (boundingBoxes.length === 0) {
+    return null;
+  }
+  const isGeospatial = 'north' in boundingBoxes[0];
+  const result = [Infinity, Infinity, -Infinity, -Infinity];
+  for (const bbox of boundingBoxes) {
+    if (isGeospatial) {
+      // geospatial
+      result[0] = Math.min(result[0], bbox.west);
+      result[1] = Math.min(result[1], bbox.south);
+      result[2] = Math.max(result[2], bbox.east);
+      result[3] = Math.max(result[3], bbox.north);
+    } else {
+      // non-geospatial
+      result[0] = Math.min(result[0], bbox.left);
+      result[1] = Math.min(result[1], bbox.top);
+      result[2] = Math.max(result[2], bbox.right);
+      result[3] = Math.max(result[3], bbox.bottom);
+    }
+  }
+  return result;
+}
+
 test('getTileIndices', t => {
   for (const testCase of TEST_CASES) {
-    const result = getTileIndices(testCase.viewport, testCase.maxZoom, testCase.minZoom);
+    const result = getTileIndices(
+      testCase.viewport,
+      testCase.maxZoom,
+      testCase.minZoom,
+      testCase.tileSize
+    );
     t.deepEqual(getTileIds(result), testCase.output, testCase.title);
+  }
+
+  t.end();
+});
+
+test('tileToBoundingBox', t => {
+  for (const testCase of TEST_CASES) {
+    if (testCase.output.length) {
+      const {viewport, minZoom, maxZoom, tileSize} = testCase;
+      const boundingBoxes = getTileIndices(viewport, maxZoom, minZoom, tileSize).map(tile =>
+        tileToBoundingBox(viewport, tile.x, tile.y, tile.z, tileSize)
+      );
+      const result = mergeBoundingBox(boundingBoxes);
+      const corners = [
+        [result[0], result[1]],
+        [result[0], result[3]],
+        [result[2], result[1]],
+        [result[2], result[3]]
+      ].map(p => viewport.project(p));
+
+      t.ok(
+        corners.every(
+          p => p[0] <= 0 || p[0] >= viewport.width || p[1] <= 0 || p[1] >= viewport.height
+        ),
+        'corners are outside of the viewport'
+      );
+    }
   }
 
   t.end();
@@ -185,9 +255,21 @@ test('tileToBoundingBox#Infovis', t => {
   );
 
   t.deepEqual(
+    tileToBoundingBox(viewport, 0, 0, 0, 256),
+    {left: 0, top: 0, right: 256, bottom: 256},
+    '0,0,0 with custom tileSize Should match the results.'
+  );
+
+  t.deepEqual(
     tileToBoundingBox(viewport, 4, -1, 2),
     {left: 512, top: -128, right: 640, bottom: 0},
     '4,-1,2 Should match the results.'
+  );
+
+  t.deepEqual(
+    tileToBoundingBox(viewport, 4, -1, 2, 256),
+    {left: 256, top: -64, right: 320, bottom: 0},
+    '4,-1,2 with custom tileSize Should match the results.'
   );
 
   t.end();
