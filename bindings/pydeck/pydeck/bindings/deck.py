@@ -161,6 +161,7 @@ class Deck(JSONMixin):
             iframe_width=iframe_width,
             tooltip=self.deck_widget.tooltip,
             custom_libraries=pydeck_settings.custom_libraries,
+            as_string=as_string,
             **kwargs
         )
         return f
