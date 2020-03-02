@@ -1,5 +1,11 @@
 # Upgrade Guide
 
+## Upgrading from deck.gl v8.0 to v8.1
+
+### Breaking Changes
+
+- `s2-geometry` is no longer a dependency of `@deck.gl/geo-layers`.
+
 ## Upgrading from deck.gl v7.x to v8.0
 
 ### Breaking Changes

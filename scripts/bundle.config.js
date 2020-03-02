@@ -17,8 +17,7 @@ const PACKAGE_INFO = require(resolve(PACKAGE_ROOT, 'package.json'));
 function getExternals(packageInfo) {
   let externals = {
     // Hard coded externals
-    'h3-js': 'h3',
-    's2-geometry': 's2Geometry'
+    'h3-js': 'h3'
   };
   const {peerDependencies = {}} = packageInfo;
 
