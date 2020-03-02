@@ -5,7 +5,12 @@ import {GeoJsonLayer, ArcLayer} from '@deck.gl/layers';
 const AIR_PORTS =
   'https://d2ad6b4ur7yvpq.cloudfront.net/naturalearth-3.3.0/ne_10m_airports.geojson';
 
-loadArcGISModules(['esri/Map', 'esri/views/MapView', 'esri/views/SceneView', 'esri/views/3d/externalRenderers']).then(({ArcGISDeckLayer, ArcGISDeckExternalRenderer, modules}) => {
+loadArcGISModules([
+  'esri/Map',
+  'esri/views/MapView',
+  'esri/views/SceneView',
+  'esri/views/3d/externalRenderers'
+]).then(({ArcGISDeckLayer, ArcGISDeckExternalRenderer, modules}) => {
   const [ArcGISMap, MapView, SceneView, externalRenderers] = modules;
 
   const layer = new ArcGISDeckLayer({
@@ -54,9 +59,9 @@ loadArcGISModules(['esri/Map', 'esri/views/MapView', 'esri/views/SceneView', 'es
   });
 
   const sceneView = new SceneView({
-    container: "sceneViewDiv",
+    container: 'sceneViewDiv',
     map: new ArcGISMap({
-      basemap: "dark-gray-vector"
+      basemap: 'dark-gray-vector'
     }),
     environment: {
       atmosphereEnabled: false
@@ -71,7 +76,7 @@ loadArcGISModules(['esri/Map', 'esri/views/MapView', 'esri/views/SceneView', 'es
 
       tilt: 0
     },
-    viewingMode: "local"
+    viewingMode: 'local'
   });
 
   const extren = new ArcGISDeckExternalRenderer(sceneView, {
@@ -105,6 +110,6 @@ loadArcGISModules(['esri/Map', 'esri/views/MapView', 'esri/views/SceneView', 'es
       })
     ]
   });
-  
+
   externalRenderers.add(sceneView, extren);
 });

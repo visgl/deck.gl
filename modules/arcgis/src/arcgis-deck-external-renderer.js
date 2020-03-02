@@ -63,12 +63,7 @@ export default function loadArcGISDeckExternalRenderer(externalRenderers, Collec
         blend: true,
         blendFunc: [gl.ONE, gl.ONE_MINUS_SRC_ALPHA],
         framebuffer: screenFbo,
-        viewport: [
-          0,
-          0,
-          Math.round(this.view.size[0] * dpr),
-          Math.round(this.view.size[1] * dpr)
-        ]
+        viewport: [0, 0, Math.round(this.view.size[0] * dpr), Math.round(this.view.size[1] * dpr)]
       },
       () => {
         this.model.setUniforms({u_texture: this.deckFbo}).draw();
