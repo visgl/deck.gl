@@ -47,8 +47,8 @@ export default class App extends PureComponent {
   }
 
   inTileBounds({x, y, z}) {
-    const xInBounds = x < Math.ceil(this.state.width / (512 * 2 ** z)) && x >= 0;
-    const yInBounds = y < Math.ceil(this.state.height / (512 * 2 ** z)) && y >= 0;
+    const xInBounds = x < Math.ceil(this.state.width / (this.state.tileSize * 2 ** z)) && x >= 0;
+    const yInBounds = y < Math.ceil(this.state.height / (this.state.tileSize * 2 ** z)) && y >= 0;
     return xInBounds && yInBounds;
   }
 
@@ -83,11 +83,12 @@ export default class App extends PureComponent {
 
   _renderLayers() {
     const {autoHighlight = true, highlightColor = [60, 60, 60, 40]} = this.props;
-
+    const {tileSize} = this.state;
     return [
       new TileLayer({
         pickable: true,
         onHover: this._onHover,
+        tileSize,
         autoHighlight,
         highlightColor,
         minZoom: -16,
