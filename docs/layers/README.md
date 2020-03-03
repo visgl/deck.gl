@@ -49,6 +49,7 @@ The [Geo Layers](https://www.npmjs.com/package/@deck.gl/geo-layers) collects lay
   - [TileLayer](/docs/layers/tile-layer.md)
   - [TripsLayer](/docs/layers/trips-layer.md)
   - [TerrainLayer](/docs/layers/terrain-layer.md)
+  - [MVTTileLayer](/docs/layers/mvt-tile-layer.md)
 
 ## Mesh Layers
 

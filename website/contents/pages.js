@@ -555,6 +555,10 @@ export const docPages = generatePath([
           {
             name: 'TerrainLayer',
             content: getDocUrl('layers/terrain-layer.md')
+          },
+          {
+            name: 'MVTTileLayer',
+            content: getDocUrl('layers/mvt-tile-layer.md')
           }
         ]
       },
