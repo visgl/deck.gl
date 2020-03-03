@@ -30,7 +30,9 @@ export default class PathTesselator extends Tesselator {
     super({
       ...opts,
       attributes: {
-        positions: {size: 3, type: opts.fp64 ? Float64Array : Float32Array},
+        // Padding covers shaderAttributes for last segment in largest case fp64
+        // additional vertex + hi & low parts, 3 * 6
+        positions: {size: 3, padding: 18, type: opts.fp64 ? Float64Array : Float32Array},
         segmentTypes: {size: 1, type: Uint8ClampedArray}
       }
     });
