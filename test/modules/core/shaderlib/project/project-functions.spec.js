@@ -20,7 +20,7 @@
 
 import test from 'tape-catch';
 
-import {COORDINATE_SYSTEM, WebMercatorViewport} from 'deck.gl';
+import {COORDINATE_SYSTEM, WebMercatorViewport, OrthographicView} from 'deck.gl';
 import {project} from '@deck.gl/core/shaderlib';
 import {projectPosition} from '@deck.gl/core/shaderlib/project/project-functions';
 import {equals, config} from 'math.gl';
@@ -41,7 +41,7 @@ const TEST_COORDINATE_ORIGIN = [-122.45, 37.78, 0];
 
 const TEST_CASES = [
   {
-    title: 'LNGLAT',
+    title: 'LNGLAT:WEB_MERCATOR',
     position: [-70, 41, 1000],
     params: {
       viewport: TEST_VIEWPORT_2,
@@ -50,13 +50,45 @@ const TEST_CASES = [
     result: [156.44444444444446, 320.0378755678335, 0.01687089818244227]
   },
   {
-    title: 'LNGLAT_AUTO_OFFSET',
+    title: 'LNGLAT:WEB_MERCATOR_AUTO_OFFSET',
     position: [-122.46, 37.8, 1000],
     params: {
       viewport: TEST_VIEWPORT,
       coordinateSystem: COORDINATE_SYSTEM.DEFAULT
     },
     result: [-0.014226562499999318, 0.03599588695612965, 0.016187212628251565]
+  },
+  {
+    title: 'CARTESIAN:IDENTITY',
+    position: [-10, 10, 10],
+    params: {
+      viewport: new OrthographicView().makeViewport({
+        viewState: {
+          target: [3.1416, 2.7183, 0],
+          zoom: 4
+        }
+      }),
+      coordinateSystem: COORDINATE_SYSTEM.DEFAULT
+    },
+    result: [-13.1416, 7.2817, 10]
+  },
+  {
+    title: 'CARTESIAN:WEB_MERCATOR',
+    position: [256, 256, 0],
+    params: {
+      viewport: TEST_VIEWPORT_2,
+      coordinateSystem: COORDINATE_SYSTEM.CARTESIAN
+    },
+    result: [256, 256, 0]
+  },
+  {
+    title: 'CARTESIAN:WEB_MERCATOR_AUTO_OFFSET',
+    position: [256, 256, 0],
+    params: {
+      viewport: TEST_VIEWPORT,
+      coordinateSystem: COORDINATE_SYSTEM.CARTESIAN
+    },
+    result: [174.15111111111113, -58.11045723102637, 0]
   },
   {
     title: 'LNGLAT_OFFSETS',
