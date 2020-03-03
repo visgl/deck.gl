@@ -25,10 +25,10 @@ const defaultProps = {
 };
 
 const shaderFunction = `
-uniform vec4 clipBounds;
+uniform vec4 clip_bounds;
 
 bool clip_isInBounds(vec2 position) {
-  return position.x >= clipBounds[0] && position.y >= clipBounds[1] && position.x < clipBounds[2] && position.y < clipBounds[3];
+  return position.x >= clip_bounds[0] && position.y >= clip_bounds[1] && position.x < clip_bounds[2] && position.y < clip_bounds[3];
 }
 `;
 
@@ -100,7 +100,7 @@ export default class ClipExtension extends LayerExtension {
     const corner0 = this.projectPosition([clipBounds[0], clipBounds[1], 0]);
     const corner1 = this.projectPosition([clipBounds[2], clipBounds[3], 0]);
 
-    uniforms.clipBounds = [
+    uniforms.clip_bounds = [
       Math.min(corner0[0], corner1[0]),
       Math.min(corner0[1], corner1[1]),
       Math.max(corner0[0], corner1[0]),
