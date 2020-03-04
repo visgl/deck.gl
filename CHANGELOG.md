@@ -19,6 +19,10 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v8.0
 
+#### deck.gl [8.0.17] - Mar 03 2020
+
+- PathLayer: Workaround for invalid attribute index access (#4344)
+
 #### deck.gl [8.0.16] - Feb 20 2020
 
 - Fix attribute check greater than attribute size (#4288)
