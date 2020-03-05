@@ -15,7 +15,7 @@ LAB_PLAY_BUTTON_XPATH = '/html/body/div[1]/div[3]/div[2]/div[3]/div[2]/div[1]/di
 async def go_to_page_and_screenshot(url, fname, click_path, output_dir='./screenshots'):
     browser = None
     try:
-        browser = await launch(headless=True, args=['--no-sandbox', '--disable-setuid-sandbox'])
+        browser = await launch(headless=False, args=['--no-sandbox', '--disable-setuid-sandbox'])
         page = await browser.newPage()
         await page.goto(url, waitUntil='networkidle2')
         elements = await page.xpath(click_path)
@@ -40,6 +40,7 @@ async def screenshot():
     # Wait for docker containers to start
     await asyncio.sleep(5)
     await go_to_page_and_screenshot(NOTEBOOK_URL, 'notebook-screenshot.png', NB_PLAY_BUTTON_XPATH)
+    await asyncio.sleep(5)
     await go_to_page_and_screenshot(LAB_URL, 'lab-screenshot.png', LAB_PLAY_BUTTON_XPATH)
 
 
