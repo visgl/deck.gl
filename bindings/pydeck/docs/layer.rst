@@ -177,15 +177,15 @@ giving us the average for that statistic within an area:
   :alt: Profit per employee
 
 
-Understanding `get_position`
-----------------------------
+Understanding ``get_position``
+------------------------------
 
 You may have noticed that ``get_position`` takes ``['lng', 'lat']`` in many of these
 examples. This is deck.gl's expression parser reading the data passed to
 pydeck and extracting longitude and latitude as a coordinate pair.
 
 Suppose you have a CSV as follows, where the location is the first field
-in the CSV (here, `coordinates`)–
+in the CSV (here, ``coordinates``)–
 
 .. code::
 
@@ -197,7 +197,7 @@ in the CSV (here, `coordinates`)–
 
 For this data, ``get_position`` here should be specified as ``get_position='coordinates'``
 
-In many data sets, the coordinates are flattened:
+In many data sets, the coordinates are flattened, with X and Y coordinates specified in separate columns:
 
 .. code::
 
@@ -207,16 +207,16 @@ In many data sets, the coordinates are flattened:
    0.0,1.0,B
    0.0,1.0,C
 
-For the above data, you would specify your position as ``get_position='[lng,lat]'``
+For the above data, you would specify position as ``get_position='[lng,lat]'``
 
-Sometimes your data is a list of x/y pairs. In this case, for convenience, 
-the deck.gl expression parser lets you pass a '-' to `get_position`:
+Sometimes your data is a list of X/Y pairs. In this case, for convenience, 
+the deck.gl expression parser lets you pass a ``'-'`` to ``get_position``:
 
 .. code::
 
   [[0, 0], [0, 0], [0, 1.0], [0, 1.0]]
 
-If your data is shaped as above, `get_position='-'` should correctly parse the input.
+If your data is shaped as above, ``get_position='-'`` should correctly parse the input.
 
 
 Example: Vancouver property values
