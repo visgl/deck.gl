@@ -17,6 +17,7 @@ import hexagonLayerTests from './hexagon-layer';
 import h3LayersTests from './h3-layers';
 import s2LayerTests from './s2-layer';
 import tripsLayerTests from './trips-layer';
+import mvtTileLayerTests from './mvt-tile-layer';
 // mesh-layers
 import simpleMeshLayerTests from './simple-mesh-layer';
 // other
@@ -41,6 +42,7 @@ export default [].concat(
   h3LayersTests,
   s2LayerTests,
   tripsLayerTests,
+  mvtTileLayerTests,
   simpleMeshLayerTests,
   viewsTests,
   effectsTests,

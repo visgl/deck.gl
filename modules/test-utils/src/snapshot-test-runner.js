@@ -65,7 +65,7 @@ export default class SnapshotTestRunner extends TestRunner {
         onAfterRender: () => {
           testCase.onAfterRender({
             deck,
-            layers: deck.layerManager.getLayers(),
+            layers: deck.props.layers,
             done: onDone
           });
         }
