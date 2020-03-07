@@ -16,10 +16,13 @@ import {
   ScatterplotLayer,
   TextLayer,
   TripsLayer,
-  TerrainLayer
+  TerrainLayer,
+  MVTTileLayer
 } from 'deck.gl';
 
 import {colorToRGBArray} from '../../utils/format-utils';
+
+const MAPBOX_TOKEN = process.env.MapboxAccessToken; // eslint-disable-line
 
 export const ArcLayerDemo = createLayerDemoClass({
   Layer: ArcLayer,
@@ -277,5 +280,18 @@ export const TerrainLayerDemo = createLayerDemoClass({
     },
     terrainImage: 'https://s3.amazonaws.com/elevation-tiles-prod/terrarium/{z}/{x}/{y}.png',
     surfaceImage: 'https://wms.chartbundle.com/tms/1.0.0/sec/{z}/{x}/{y}.png?origin=nw'
+  }
+})
+
+export const MVTTileLayerDemo = createLayerDemoClass({
+  Layer: MVTTileLayer,
+  allowMissingData: true,
+  props: {
+    minZoom: 0,
+    maxZoom: 23,
+    getFillColor: [140, 170, 180],
+    urlTemplates: [
+      `https://a.tiles.mapbox.com/v4/mapbox.boundaries-adm0-v3/{z}/{x}/{y}.vector.pbf?access_token=${MAPBOX_TOKEN}`
+    ]
   }
 })
