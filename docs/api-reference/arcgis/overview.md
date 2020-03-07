@@ -41,12 +41,14 @@ loadArcGISModules([
   const [ArcGISMap, MapView] = modules;
 
   const layer = new ArcGISDeckLayer({
-    deckLayers: [
-      new GeoJsonLayer({
-        ...
-      }),
-      new ArcLayer({
-        ...
+    'deck.layers': [
+      new ScatterplotLayer({
+        data: [
+          {position: [0.119167, 52.205276]}
+        ],
+        getPosition: d => d.position,
+        getColor: [255, 0, 0],
+        radiusMinPixels: 5
       })
     ]
   });

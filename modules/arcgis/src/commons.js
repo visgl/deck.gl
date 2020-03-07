@@ -37,26 +37,21 @@ export function initializeResources(gl) {
 
 export function createOrResizeFramebuffer(gl, width, height) {
   if (!this.deckFbo) {
-    this.createFramebuffer(gl, width, height);
+    this.deckFbo = new Framebuffer(gl, {width, height});
+
+    this.deckgl.setProps({
+      _framebuffer: this.deckFbo
+    });
     return;
   }
 
-  if (this.fboWidth === width && this.fboHeight === height) {
-    return;
-  }
-
-  this.deckFbo.delete();
-  this.deckFbo = new Framebuffer(gl, {width, height});
-
-  this.deckgl.setProps({
-    _framebuffer: this.deckFbo
-  });
+  this.deckFbo.resize({width, height});
 }
 
 export function initializeDeckGL(gl) {
   this.deckgl = new Deck({
     // The view state will be set dynamically to track the MapView current extent.
-    initialViewState: {},
+    viewState: {},
 
     // Input is handled by the ArcGIS API for JavaScript.
     controller: false,
@@ -65,6 +60,14 @@ export function initializeDeckGL(gl) {
     gl,
 
     // This deck renders into an auxiliary framebuffer.
-    _framebuffer: this.deckFbo
+    _framebuffer: this.deckFbo,
+
+    _customRender: redrawReason => {
+      if (redrawReason === 'arcgis') {
+        this.deckgl._drawLayers(redrawReason);
+      } else {
+        this.redraw();
+      }
+    }
   });
 }

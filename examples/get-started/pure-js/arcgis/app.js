@@ -8,7 +8,7 @@ const AIR_PORTS =
 loadArcGISModules(['esri/Map', 'esri/views/MapView']).then(({ArcGISDeckLayer, modules}) => {
   const [ArcGISMap, MapView] = modules;
   const layer = new ArcGISDeckLayer({
-    deckLayers: [
+    'deck.layers': [
       new GeoJsonLayer({
         id: 'airports',
         data: AIR_PORTS,

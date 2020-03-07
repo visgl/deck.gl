@@ -14,7 +14,7 @@ loadArcGISModules([
   const [ArcGISMap, MapView, SceneView, externalRenderers] = modules;
 
   const layer = new ArcGISDeckLayer({
-    deckLayers: [
+    'deck.layers': [
       new GeoJsonLayer({
         id: 'airports',
         data: AIR_PORTS,
@@ -80,7 +80,7 @@ loadArcGISModules([
   });
 
   const extren = new ArcGISDeckExternalRenderer(sceneView, {
-    deckLayers: [
+    layers: [
       new GeoJsonLayer({
         id: 'airports',
         data: AIR_PORTS,

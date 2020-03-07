@@ -1,20 +1,14 @@
 import {initializeResources, createOrResizeFramebuffer, initializeDeckGL} from './commons';
 
-import {withParameters, Framebuffer} from '@luma.gl/core';
+import {withParameters} from '@luma.gl/core';
 
 export default function loadArcGISDeckLayerView2D(BaseLayerViewGL2D) {
   return BaseLayerViewGL2D.createSubclass({
     properties: {
-      handles: {},
-      uTexture: {},
-      vertexBuffer: {},
-      indexBuffer: {},
-      program: {},
       deckgl: {},
-      fboWidth: {},
-      fboHeight: {},
-      texture: {},
-      deckFbo: {}
+      deckFbo: {},
+      model: {},
+      buffer: {}
     },
 
     initializeResources,
@@ -28,36 +22,17 @@ export default function loadArcGISDeckLayerView2D(BaseLayerViewGL2D) {
       const gl = this.context;
 
       this.initializeResources(gl);
-      // eslint-disable-next-line
-      const dpr = window.devicePixelRatio;
-      this.deckFbo = new Framebuffer(gl, {
-        width: Math.round(this.view.state.size[0] * dpr),
-        height: Math.round(this.view.state.size[1] * dpr)
-      });
+
       this.initializeDeckGL(gl);
 
-      // When the layer.layers collection changes, the new list of
-      // layers must be set on the deck.gl instance.
-      this.handles.add([
-        this.layer.deckLayers.on('change', () => {
-          this.redraw();
-        })
-      ]);
+      // Update deck props
+      this.layer.on('deckpropchanged', this.deckgl.setProps);
 
       // We need to start drawing the deck.gl layer immediately.
-      this.redraw();
+      this.deckgl.setProps(this.layer.deck.toJSON());
     },
 
-    // This method is called whenever the deck.gl layer changes and must be
-    // displayed.
     redraw() {
-      const layers = this.layer.deckLayers.items;
-
-      this.deckgl.setProps({
-        layers: layers.slice()
-      });
-
-      // We need to tell the layer view that it must redraw itself.
       this.requestRender();
     },
 
@@ -65,6 +40,7 @@ export default function loadArcGISDeckLayerView2D(BaseLayerViewGL2D) {
     detach() {
       this.handles.removeAll();
 
+      this.deckgl.finalize();
       this.deckgl = null;
 
       if (this.model) {
@@ -86,11 +62,9 @@ export default function loadArcGISDeckLayerView2D(BaseLayerViewGL2D) {
       const screenFbo = gl.getParameter(gl.FRAMEBUFFER_BINDING);
       // eslint-disable-next-line
       const dpr = window.devicePixelRatio;
-      this.createOrResizeFramebuffer(
-        gl,
-        Math.round(this.view.state.size[0] * dpr),
-        Math.round(this.view.state.size[1] * dpr)
-      );
+      const width = Math.round(this.view.state.size[0] * dpr);
+      const height = Math.round(this.view.state.size[1] * dpr);
+      this.createOrResizeFramebuffer(gl, width, height);
 
       // The view state must be kept in-sync with the MapView of the ArcGIS API.
       const state = renderParameters.state;
@@ -106,7 +80,7 @@ export default function loadArcGISDeckLayerView2D(BaseLayerViewGL2D) {
       });
 
       // We redraw the deck immediately.
-      this.deckgl.redraw(true);
+      this.deckgl.redraw('arcgis');
 
       // We overlay the texture on top of the map using the full-screen quad.
       withParameters(
@@ -115,12 +89,7 @@ export default function loadArcGISDeckLayerView2D(BaseLayerViewGL2D) {
           blend: true,
           blendFunc: [gl.ONE, gl.ONE_MINUS_SRC_ALPHA],
           framebuffer: screenFbo,
-          viewport: [
-            0,
-            0,
-            Math.round(this.view.state.size[0] * dpr),
-            Math.round(this.view.state.size[1] * dpr)
-          ]
+          viewport: [0, 0, width, height]
         },
         () => {
           this.model.setUniforms({u_texture: this.deckFbo}).draw();

@@ -1,17 +1,19 @@
-export default function loadArcGISDeckLayer(Layer, Collection, ArcGISDeckLayerView2D) {
+export default function loadArcGISDeckLayer(DeckProps, Layer, ArcGISDeckLayerView2D) {
   // A layer that displays inside a MapView using an instance
   // of the layer view defined above.
   const ArcGISDeckLayer = Layer.createSubclass({
     properties: {
-      deckLayers: {
-        type: Collection
-      },
-      effects: {},
-      parameters: {}
+      deck: {}
     },
 
     constructor() {
-      this.deckLayers = new Collection();
+      const deckProps = new DeckProps();
+
+      deckProps.watch(Object.keys(deckProps.properties), (newValue, oldValue, propName) => {
+        this.emit('deckpropchanged', {[propName]: newValue});
+      });
+
+      this.deck = deckProps;
     },
 
     // Called by the MapView whenever a layer view

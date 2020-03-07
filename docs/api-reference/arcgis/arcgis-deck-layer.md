@@ -8,19 +8,20 @@ This class inherits from the ArcGIS [Layer](https://developers.arcgis.com/javasc
 
 ```js
 import {loadArcGISModules} from '@deck.gl/arcgis';
-import {GeoJsonLayer, ArcLayer} from '@deck.gl/layers';
+import {GeoJsonLayer} from '@deck.gl/layers';
 
 loadArcGISModules().then(({ArcGISDeckLayer}) => {
   const layer = new ArcGISDeckLayer({
-    deckLayers: [
-      new GeoJsonLayer({
-        ...
-      }),
-      new ArcLayer({
-        ...
-      })
-    ]
+    'deck.layers': [],
+    'deck.onError': errorHandler
   });
+
+  layer.set('deck.layers', [
+    new GeoJsonLayer({
+      id: 'geojson',
+      data: 'mydata.geojson'
+    })
+  ]);
 });
 ```
 
@@ -31,8 +32,26 @@ loadArcGISModules().then(({ArcGISDeckLayer}) => {
 const layer = new ArcGISDeckLayer(props)
 ```
 
-`props` are forwarded to a `Deck` instance. The following [Deck](/docs/api-reference/deck.md) props are supported:
+Property names that start with `deck.` are forwarded to a `Deck` instance. The following [Deck](/docs/api-reference/deck.md) props are supported:
 
-- `deckLayers` is forwarded to `layers`
-- `effects`
-- `parameters`
+- `deck.layers`
+- `deck.layerFilter`
+- `deck.parameters`
+- `deck.effects`
+- `deck.pickingRadius`
+- `deck.onBeforeRender`
+- `deck.onAfterRender`
+- `deck.onClick`
+- `deck.onHover`
+- `deck.onDragStart`
+- `deck.onDrag`
+- `deck.onDragEnd`
+- `deck.onError`
+- `deck.debug`
+- `deck.drawPickingColors`
+
+## Methods
+
+##### `set(propName, value)`
+
+Update a prop to a new value.
