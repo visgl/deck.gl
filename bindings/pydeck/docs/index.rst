@@ -1,12 +1,11 @@
 pydeck Documentation
 ==================================
 
-If you have not already, `follow the installation instructions <https://github.com/uber/deck.gl/blob/master/bindings/pydeck/README.md>`_
-
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 1
    :caption: Contents:
 
+   installation
    layer
    deck
    data_utils
@@ -73,15 +72,13 @@ Importing custom feature-rich deck.gl layers for use in pydeck.
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 Optimizations for visualizations millions of points within pydeck.
 
-Caveats
-^^^^^^^
+.. note::
+   The pydeck library assumes Internet access. You will need an Internet connection or the visualization will not render.
 
-* Please note that pydeck assumes Internet access. You will need an Internet connection or the visualization will not render.
-
-| Note: Currently, pydeck will NOT raise an error on incorrect or omitted layer arguments.
-| It is intended to be an unopinionated wrapper around deck.gl.
-| If nothing renders in your viewport, check your browser's `developer console <https://javascript.info/devtools>`__
-| or review the layer catalog. If you're still stuck, file an issue by clicking `here <https://github.com/uber/deck.gl/issues/new?assignees=&labels=bug&template=bug-report.md&title=>`__.
+   Currently, pydeck will **not** raise an error on incorrect or omitted Layer arguments.
+   If nothing renders in your viewport, check your browser's `developer console <https://javascript.info/devtools>`__
+   or review the layer catalog. You are encouraged to file an issue by clicking `here <https://github.com/uber/deck.gl/issues/new?assignees=&labels=bug&template=bug-report.md&title=>`__
+   and mention ``pydeck`` in the title.
 
 
 Indices and tables
