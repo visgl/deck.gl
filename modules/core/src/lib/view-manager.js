@@ -209,7 +209,7 @@ export default class ViewManager {
   // Update the view descriptor list and set change flag if needed
   // Does not actually rebuild the `Viewport`s until `getViewports` is called
   _setViews(views) {
-    views = flatten(views, {filter: Boolean});
+    views = flatten(views, Boolean);
 
     const viewsChanged = this._diffViews(views, this.views);
     if (viewsChanged) {
