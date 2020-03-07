@@ -1,4 +1,4 @@
-import {CompositeLayer} from '@deck.gl/core';
+import {CompositeLayer, _flatten as flatten} from '@deck.gl/core';
 import {GeoJsonLayer} from '@deck.gl/layers';
 
 import Tileset2D, {STRATEGY_DEFAULT} from './tileset-2d';
@@ -130,7 +130,7 @@ export default class TileLayer extends CompositeLayer {
       const isVisible = visible && tile.isVisible;
       // cache the rendered layer in the tile
       if (!tile.layer) {
-        tile.layer = renderSubLayers(
+        const layers = renderSubLayers(
           Object.assign({}, this.props, {
             id: `${this.id}-${tile.x}-${tile.y}-${tile.z}`,
             data: tile.data,
@@ -138,8 +138,9 @@ export default class TileLayer extends CompositeLayer {
             tile
           })
         );
-      } else if (tile.layer.props.visible !== isVisible) {
-        tile.layer = tile.layer.clone({visible: isVisible});
+        tile.layer = flatten(layers, Boolean);
+      } else if (tile.layer[0] && tile.layer[0].props.visible !== isVisible) {
+        tile.layer = tile.layer.map(layer => layer.clone({visible: isVisible}));
       }
       return tile.layer;
     });
