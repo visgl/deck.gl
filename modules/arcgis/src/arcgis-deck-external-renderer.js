@@ -28,8 +28,8 @@ export default function loadArcGISDeckExternalRenderer(DeckProps, externalRender
       this.deckgl.setProps(this.deck.toJSON());
     }
 
-    setProps(props) {
-      this.deck.set(props);
+    dispose() {
+      this.deckgl.finalize();
     }
 
     redraw() {

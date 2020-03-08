@@ -1,9 +1,26 @@
 import {loadArcGISModules} from '@deck.gl/arcgis';
-import {GeoJsonLayer, ArcLayer} from '@deck.gl/layers';
+import {TripsLayer} from '@deck.gl/geo-layers';
 
-// source: Natural Earth http://www.naturalearthdata.com/ via geojson.xyz
-const AIR_PORTS =
-  'https://d2ad6b4ur7yvpq.cloudfront.net/naturalearth-3.3.0/ne_10m_airports.geojson';
+const DATA_URL =
+  'https://raw.githubusercontent.com/uber-common/deck.gl-data/master/examples/trips/trips-v7.json';
+
+function renderLayers() {
+  return [
+    new TripsLayer({
+      id: 'trips',
+      data: DATA_URL,
+      getPath: d => d.path,
+      getTimestamps: d => d.timestamps,
+      getColor: d => (d.vendor === 0 ? [253, 128, 93] : [23, 184, 190]),
+      opacity: 1.0,
+      widthMinPixels: 4,
+      rounded: true,
+      trailLength: 180,
+      currentTime: (Date.now() % 10000) / 10,
+      shadowEnabled: false
+    })
+  ];
+}
 
 loadArcGISModules([
   'esri/Map',
@@ -13,37 +30,7 @@ loadArcGISModules([
 ]).then(({ArcGISDeckLayer, ArcGISDeckExternalRenderer, modules}) => {
   const [ArcGISMap, MapView, SceneView, externalRenderers] = modules;
 
-  const layer = new ArcGISDeckLayer({
-    'deck.layers': [
-      new GeoJsonLayer({
-        id: 'airports',
-        data: AIR_PORTS,
-        // Styles
-        filled: true,
-        pointRadiusMinPixels: 2,
-        pointRadiusScale: 2000,
-        getRadius: f => 11 - f.properties.scalerank,
-        getFillColor: [200, 0, 80, 180],
-        // Interactive props
-        pickable: true,
-        autoHighlight: true,
-        onClick: info =>
-          // eslint-disable-next-line
-          info.object && alert(`${info.object.properties.name} (${info.object.properties.abbrev})`)
-      }),
-      new ArcLayer({
-        id: 'arcs',
-        data: AIR_PORTS,
-        dataTransform: d => d.features.filter(f => f.properties.scalerank < 4),
-        // Styles
-        getSourcePosition: f => [-0.4531566, 51.4709959], // London
-        getTargetPosition: f => f.geometry.coordinates,
-        getSourceColor: [0, 128, 200],
-        getTargetColor: [200, 0, 80],
-        getWidth: 1
-      })
-    ]
-  });
+  const layer = new ArcGISDeckLayer({});
 
   // In the ArcGIS API for JavaScript the MapView is responsible
   // for displaying a Map, which usually contains at least a basemap.
@@ -54,24 +41,25 @@ loadArcGISModules([
       basemap: 'dark-gray-vector',
       layers: [layer]
     }),
-    center: [0.119167, 52.205276],
-    zoom: 5
+    center: [-74, 40.72],
+    zoom: 14
   });
 
   const sceneView = new SceneView({
     container: 'sceneViewDiv',
+    qualityProfile: 'high',
     map: new ArcGISMap({
       basemap: 'dark-gray-vector'
     }),
     environment: {
       atmosphereEnabled: false
     },
-    center: [0.1278, 51.5074],
+    center: [-74, 40.72],
     camera: {
       position: {
-        x: 0.1278,
-        y: 30.5074,
-        z: 10000000
+        x: -74,
+        y: 40.65,
+        z: 5000
       },
 
       tilt: 0
@@ -79,37 +67,13 @@ loadArcGISModules([
     viewingMode: 'local'
   });
 
-  const extren = new ArcGISDeckExternalRenderer(sceneView, {
-    layers: [
-      new GeoJsonLayer({
-        id: 'airports',
-        data: AIR_PORTS,
-        // Styles
-        filled: true,
-        pointRadiusMinPixels: 2,
-        pointRadiusScale: 2000,
-        getRadius: f => 11 - f.properties.scalerank,
-        getFillColor: [200, 0, 80, 180],
-        // Interactive props
-        pickable: true,
-        autoHighlight: true,
-        onClick: info =>
-          // eslint-disable-next-line
-          info.object && alert(`${info.object.properties.name} (${info.object.properties.abbrev})`)
-      }),
-      new ArcLayer({
-        id: 'arcs',
-        data: AIR_PORTS,
-        dataTransform: d => d.features.filter(f => f.properties.scalerank < 4),
-        // Styles
-        getSourcePosition: f => [-0.4531566, 51.4709959], // London
-        getTargetPosition: f => f.geometry.coordinates,
-        getSourceColor: [0, 128, 200],
-        getTargetColor: [200, 0, 80],
-        getWidth: 1
-      })
-    ]
-  });
+  const extren = new ArcGISDeckExternalRenderer(sceneView, {});
 
   externalRenderers.add(sceneView, extren);
+
+  /* global setInterval */
+  setInterval(() => {
+    layer.deck.layers = renderLayers();
+    extren.deck.layers = renderLayers();
+  }, 50);
 });
