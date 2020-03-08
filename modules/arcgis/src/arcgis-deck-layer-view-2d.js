@@ -26,7 +26,7 @@ export default function loadArcGISDeckLayerView2D(BaseLayerViewGL2D) {
       this.initializeDeckGL(gl);
 
       // Update deck props
-      this.layer.on('deckpropchanged', this.deckgl.setProps);
+      this.layer.on('deckpropchanged', props => this.deckgl.setProps(props));
 
       // We need to start drawing the deck.gl layer immediately.
       this.deckgl.setProps(this.layer.deck.toJSON());

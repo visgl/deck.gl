@@ -21,7 +21,7 @@ export default function loadArcGISDeckExternalRenderer(DeckProps, externalRender
 
       this.initializeDeckGL(gl);
 
-      this.deck.watch(Object.keys(this.deck), (newValue, oldValue, propName) => {
+      this.deck.watch(Object.keys(this.deck.properties), (newValue, oldValue, propName) => {
         this.deckgl.setProps({[propName]: newValue});
       });
 
