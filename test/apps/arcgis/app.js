@@ -54,7 +54,6 @@ loadArcGISModules([
     environment: {
       atmosphereEnabled: false
     },
-    center: [-74, 40.72],
     camera: {
       position: {
         x: -74,

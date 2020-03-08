@@ -698,6 +698,10 @@ export const docPages = generatePath([
             content: getDocUrl('api-reference/arcgis/arcgis-deck-layer.md')
           },
           {
+            name: 'ArcGISDeckExternalRenderer',
+            content: getDocUrl('api-reference/arcgis/arcgis-deck-external-renderer.md')
+          },
+          {
             name: 'loadArcGISModules',
             content: getDocUrl('api-reference/arcgis/load-arcgis-modules.md')
           }

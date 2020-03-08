@@ -1,27 +1,35 @@
 # ArcGISDeckLayer
 
-This class inherits from the ArcGIS [Layer](https://developers.arcgis.com/javascript/latest/api-reference/esri-layers-Layer.html) class and can be added to maps created with the ArcGIS API for JavaScript. Its content is defined by the `deckLayers` property, which is a collection of deck.gl layers.
+This class inherits from the ArcGIS [Layer](https://developers.arcgis.com/javascript/latest/api-reference/esri-layers-Layer.html) class and can be added to maps created with the ArcGIS API for JavaScript.
 
-`ArcGISDeckLayer` is only available when `loadArcGISModules()` is resolved.
+`ArcGISDeckLayer` is only available when `loadArcGISModules()` is resolved. At the moment, it only supports 2D integration.
 
 ## Usage
 
 ```js
 import {loadArcGISModules} from '@deck.gl/arcgis';
-import {GeoJsonLayer} from '@deck.gl/layers';
 
-loadArcGISModules().then(({ArcGISDeckLayer}) => {
+loadArcGISModules([
+  'esri/Map',
+  'esri/views/MapView'
+]).then(({ArcGISDeckLayer, modules}) => {
+  const [ArcGISMap, MapView] = modules;
+
   const layer = new ArcGISDeckLayer({
-    'deck.layers': [],
-    'deck.onError': errorHandler
+    'deck.layers': [
+      // deck.gl layers
+    ]
   });
 
-  layer.set('deck.layers', [
-    new GeoJsonLayer({
-      id: 'geojson',
-      data: 'mydata.geojson'
-    })
-  ]);
+  const mapView = new MapView({
+    container: "viewDiv",
+    map: new ArcGISMap({
+      basemap: "dark-gray-vector",
+      layers: [layer]
+    }),
+    center: [0.119, 52.205],
+    zoom: 5
+  });
 });
 ```
 
@@ -29,8 +37,10 @@ loadArcGISModules().then(({ArcGISDeckLayer}) => {
 ## Constructor
 
 ```js
-const layer = new ArcGISDeckLayer(props)
+new ArcGISDeckLayer(props);
 ```
+
+Inherits all properties from the base [Layer](https://developers.arcgis.com/javascript/latest/api-reference/esri-layers-Layer.html#properties-summary) class.
 
 Property names that start with `deck.` are forwarded to a `Deck` instance. The following [Deck](/docs/api-reference/deck.md) props are supported:
 
@@ -50,8 +60,20 @@ Property names that start with `deck.` are forwarded to a `Deck` instance. The f
 - `deck.debug`
 - `deck.drawPickingColors`
 
-## Methods
+## Members
 
-##### `set(propName, value)`
+##### `deck`
 
-Update a prop to a new value.
+An ArcGIS [Accessor](https://developers.arcgis.com/javascript/latest/api-reference/esri-core-Accessor.html) that stores Deck props. The props can be updated after the layer construction:
+
+```js
+// Update deck layers
+layer.deck.layers = [...]);
+
+// Update multiple deck props
+layer.deck.set({
+  layers: [...],
+  pickingRadius: 5,
+  ...
+});
+```
