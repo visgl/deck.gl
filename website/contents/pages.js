@@ -694,8 +694,12 @@ export const docPages = generatePath([
             content: getDocUrl('api-reference/arcgis/overview.md')
           },
           {
-            name: 'ArcGISDeckLayer',
-            content: getDocUrl('api-reference/arcgis/arcgis-deck-layer.md')
+            name: 'DeckLayer',
+            content: getDocUrl('api-reference/arcgis/deck-layer.md')
+          },
+          {
+            name: 'DeckRenderer',
+            content: getDocUrl('api-reference/arcgis/deck-renderer.md')
           },
           {
             name: 'loadArcGISModules',

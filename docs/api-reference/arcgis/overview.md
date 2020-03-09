@@ -6,7 +6,9 @@ The functionality exported by this module must be loaded asynchronously using th
 This function can be used to load any module that ships with the ArcGIS API for JavaScript, plus an additional `arcGIS` module
 that acts as an interface between deck.gl and ArcGIS.
 
-At the moment only 2D integration with `MapView` is supported; it is provided by the `ArcGISDeckLayer` class.
+2D integration with `MapView` is supported by the [DeckLayer](/docs/api-reference/deck-layer.md) class.
+
+3D integration with `SceneView` is supported by the [DeckRenderer](/docs/api-reference/deck-renderer.md) class.
 
 ## Installation
 
@@ -37,16 +39,18 @@ import {loadArcGISModules} from '@deck.gl/arcgis';
 loadArcGISModules([
   'esri/Map',
   'esri/views/MapView'
-]).then(({ArcGISDeckLayer, modules}) => {
+]).then(({DeckLayer, modules}) => {
   const [ArcGISMap, MapView] = modules;
 
-  const layer = new ArcGISDeckLayer({
-    deckLayers: [
-      new GeoJsonLayer({
-        ...
-      }),
-      new ArcLayer({
-        ...
+  const layer = new DeckLayer({
+    'deck.layers': [
+      new ScatterplotLayer({
+        data: [
+          {position: [0.119, 52.205]}
+        ],
+        getPosition: d => d.position,
+        getColor: [255, 0, 0],
+        radiusMinPixels: 20
       })
     ]
   });
@@ -57,7 +61,7 @@ loadArcGISModules([
       basemap: "dark-gray-vector",
       layers: [layer]
     }),
-    center: [0.119167, 52.205276],
+    center: [0.119, 52.205],
     zoom: 5
   });
 });
@@ -75,7 +79,6 @@ Supported deck.gl features:
 
 Not supported features:
 
-- Tilting
-- Views
+- Multiple views
 - Controller
 - React integration
