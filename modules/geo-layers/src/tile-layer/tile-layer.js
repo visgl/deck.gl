@@ -16,7 +16,8 @@ const defaultProps = {
   minZoom: 0,
   maxCacheSize: null,
   maxCacheByteSize: null,
-  refinementStrategy: STRATEGY_DEFAULT
+  refinementStrategy: STRATEGY_DEFAULT,
+  getHighlightedObjectIndex: {type: 'function', value: () => -1, compare: false}
 };
 
 export default class TileLayer extends CompositeLayer {
@@ -115,6 +116,10 @@ export default class TileLayer extends CompositeLayer {
     return this.props.getTileData(tilePosition);
   }
 
+  getHighlightedObjectIndex(tile) {
+    return this.props.getHighlightedObjectIndex(tile);
+  }
+
   getPickingInfo({info, sourceLayer}) {
     info.sourceLayer = sourceLayer;
     info.tile = sourceLayer.props.tile;
@@ -128,6 +133,7 @@ export default class TileLayer extends CompositeLayer {
       // - parent layer must be visible
       // - tile must be visible in the current viewport
       const isVisible = visible && tile.isVisible;
+      const highlightedObjectIndex = this.getHighlightedObjectIndex(tile);
       // cache the rendered layer in the tile
       if (!tile.layer) {
         tile.layer = renderSubLayers(
@@ -135,11 +141,18 @@ export default class TileLayer extends CompositeLayer {
             id: `${this.id}-${tile.x}-${tile.y}-${tile.z}`,
             data: tile.data,
             visible: isVisible,
-            tile
+            tile,
+            highlightedObjectIndex
           })
         );
-      } else if (tile.layer.props.visible !== isVisible) {
-        tile.layer = tile.layer.clone({visible: isVisible});
+      } else if (
+        tile.layer.props.visible !== isVisible ||
+        tile.layer.props.highlightedObjectIndex !== highlightedObjectIndex
+      ) {
+        tile.layer = tile.layer.clone({
+          visible: isVisible,
+          highlightedObjectIndex
+        });
       }
       return tile.layer;
     });
