@@ -1,4 +1,4 @@
-import {CompositeLayer} from '@deck.gl/core';
+import {CompositeLayer, _flatten as flatten} from '@deck.gl/core';
 import {GeoJsonLayer} from '@deck.gl/layers';
 
 import Tileset2D, {STRATEGY_DEFAULT} from './tileset-2d';
@@ -29,7 +29,9 @@ export default class TileLayer extends CompositeLayer {
 
   get isLoaded() {
     const {tileset} = this.state;
-    return tileset.selectedTiles.every(tile => tile.layer && tile.layer.isLoaded);
+    return tileset.selectedTiles.every(
+      tile => tile.layers && tile.layers.every(layer => layer.isLoaded)
+    );
   }
 
   shouldUpdateState({changeFlags}) {
@@ -68,7 +70,7 @@ export default class TileLayer extends CompositeLayer {
       tileset.setOptions(props);
       // if any props changed, delete the cached layers
       this.state.tileset.tiles.forEach(tile => {
-        tile.layer = null;
+        tile.layers = null;
       });
     }
 
@@ -129,8 +131,8 @@ export default class TileLayer extends CompositeLayer {
       // - tile must be visible in the current viewport
       const isVisible = visible && tile.isVisible;
       // cache the rendered layer in the tile
-      if (!tile.layer) {
-        tile.layer = renderSubLayers(
+      if (!tile.layers) {
+        const layers = renderSubLayers(
           Object.assign({}, this.props, {
             id: `${this.id}-${tile.x}-${tile.y}-${tile.z}`,
             data: tile.data,
@@ -138,10 +140,11 @@ export default class TileLayer extends CompositeLayer {
             tile
           })
         );
-      } else if (tile.layer.props.visible !== isVisible) {
-        tile.layer = tile.layer.clone({visible: isVisible});
+        tile.layers = flatten(layers, Boolean);
+      } else if (tile.layers[0] && tile.layers[0].props.visible !== isVisible) {
+        tile.layers = tile.layers.map(layer => layer.clone({visible: isVisible}));
       }
-      return tile.layer;
+      return tile.layers;
     });
   }
 }
