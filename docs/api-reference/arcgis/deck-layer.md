@@ -1,8 +1,8 @@
-# ArcGISDeckLayer
+# DeckLayer
 
 This class inherits from the ArcGIS [Layer](https://developers.arcgis.com/javascript/latest/api-reference/esri-layers-Layer.html) class and can be added to maps created with the ArcGIS API for JavaScript.
 
-`ArcGISDeckLayer` is only available when `loadArcGISModules()` is resolved. At the moment, it only supports 2D integration.
+`DeckLayer` is only available when `loadArcGISModules()` is resolved. At the moment, it only supports 2D integration.
 
 ## Usage
 
@@ -12,10 +12,10 @@ import {loadArcGISModules} from '@deck.gl/arcgis';
 loadArcGISModules([
   'esri/Map',
   'esri/views/MapView'
-]).then(({ArcGISDeckLayer, modules}) => {
+]).then(({DeckLayer, modules}) => {
   const [ArcGISMap, MapView] = modules;
 
-  const layer = new ArcGISDeckLayer({
+  const layer = new DeckLayer({
     'deck.layers': [
       // deck.gl layers
     ]
@@ -37,7 +37,7 @@ loadArcGISModules([
 ## Constructor
 
 ```js
-new ArcGISDeckLayer(props);
+new DeckLayer(props);
 ```
 
 Inherits all properties from the base [Layer](https://developers.arcgis.com/javascript/latest/api-reference/esri-layers-Layer.html#properties-summary) class.

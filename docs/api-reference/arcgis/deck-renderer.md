@@ -1,8 +1,8 @@
-# ArcGISDeckExternalRenderer
+# DeckRenderer
 
 This class inherits implements the ArcGIS [ExternalRenderer](https://developers.arcgis.com/javascript/latest/api-reference/esri-views-3d-externalRenderers.html#ExternalRenderer) interface and can be added to maps created with the ArcGIS API for JavaScript.
 
-`ArcGISDeckExternalRenderer` is only available when `loadArcGISModules()` is resolved.
+`DeckRenderer` is only available when `loadArcGISModules()` is resolved.
 
 ## Usage
 
@@ -13,7 +13,7 @@ import {GeoJsonLayer} from '@deck.gl/layers';
 loadArcGISModules([
   'esri/views/SceneView',
   'esri/views/3d/externalRenderers'
-]).then(({ArcGISDeckExternalRenderer, modules}) => {
+]).then(({DeckRenderer, modules}) => {
   const [SceneView, externalRenderers] = modules;
 
   const sceneView = new SceneView({
@@ -29,13 +29,13 @@ loadArcGISModules([
     viewingMode: 'local'
   });
 
-  const extren = new ArcGISDeckExternalRenderer(sceneView, {
+  const renderer = new DeckRenderer(sceneView, {
     layers: [
       // deck.gl layers
     ]
   });
 
-  externalRenderers.add(sceneView, extren);
+  externalRenderers.add(sceneView, renderer);
 });
 ```
 
@@ -43,7 +43,7 @@ loadArcGISModules([
 ## Constructor
 
 ```js
-new ArcGISDeckExternalRenderer(sceneView, props)
+new DeckRenderer(sceneView, props)
 ```
 
 - `sceneView` ([SceneView](https://developers.arcgis.com/javascript/latest/api-reference/esri-views-SceneView.html)) - the view to use this renderer with. `viewingMode` must be set to `'local'`.

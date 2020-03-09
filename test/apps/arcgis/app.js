@@ -27,10 +27,10 @@ loadArcGISModules([
   'esri/views/MapView',
   'esri/views/SceneView',
   'esri/views/3d/externalRenderers'
-]).then(({ArcGISDeckLayer, ArcGISDeckExternalRenderer, modules}) => {
+]).then(({DeckLayer, DeckRenderer, modules}) => {
   const [ArcGISMap, MapView, SceneView, externalRenderers] = modules;
 
-  const layer = new ArcGISDeckLayer({});
+  const layer = new DeckLayer({});
 
   // In the ArcGIS API for JavaScript the MapView is responsible
   // for displaying a Map, which usually contains at least a basemap.
@@ -66,13 +66,13 @@ loadArcGISModules([
     viewingMode: 'local'
   });
 
-  const extren = new ArcGISDeckExternalRenderer(sceneView, {});
+  const renderer = new DeckRenderer(sceneView, {});
 
-  externalRenderers.add(sceneView, extren);
+  externalRenderers.add(sceneView, renderer);
 
   /* global setInterval */
   setInterval(() => {
     layer.deck.layers = renderLayers();
-    extren.deck.layers = renderLayers();
+    renderer.deck.layers = renderLayers();
   }, 50);
 });

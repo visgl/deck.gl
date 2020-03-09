@@ -5,9 +5,9 @@ import {GeoJsonLayer, ArcLayer} from '@deck.gl/layers';
 const AIR_PORTS =
   'https://d2ad6b4ur7yvpq.cloudfront.net/naturalearth-3.3.0/ne_10m_airports.geojson';
 
-loadArcGISModules(['esri/Map', 'esri/views/MapView']).then(({ArcGISDeckLayer, modules}) => {
+loadArcGISModules(['esri/Map', 'esri/views/MapView']).then(({DeckLayer, modules}) => {
   const [ArcGISMap, MapView] = modules;
-  const layer = new ArcGISDeckLayer({
+  const layer = new DeckLayer({
     'deck.layers': [
       new GeoJsonLayer({
         id: 'airports',

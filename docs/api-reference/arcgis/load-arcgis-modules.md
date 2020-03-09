@@ -8,7 +8,7 @@ This utility function initializes the classes in this module by loading ArcGIS d
 import {loadArcGISModules} from '@deck.gl/arcgis';
 
 loadArcGISModules(['esri/Map', 'esri/views/MapView'], {version: '4.14'})
-  .then(({ArcGISDeckLayer, ArcGISDeckExternalRenderer, modules}) => {
+  .then(({DeckLayer, DeckRenderer, modules}) => {
     const [ArcGISMap, MapView] = modules;
 
     // Create map
@@ -26,6 +26,6 @@ loadArcGISModules(modules, loadScriptOptions);
 
 Returns: a promise that resolves to an object with the following fields:
 
-- [ArcGISDeckLayer](/docs/api-reference/arcgis/arcgis-deck-layer.md)
-- [ArcGISDeckExternalRenderer](/docs/api-reference/arcgis-deck-external-renderer.md)
+- [DeckLayer](/docs/api-reference/arcgis/deck-layer.md)
+- [DeckRenderer](/docs/api-reference/deck-renderer.md)
 - `modules` (Array) - if the `modules` argument was specified, will represent an array of the resolved objects

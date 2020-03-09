@@ -1,7 +1,7 @@
-import loadDeckProps from './deck-props';
-import loadArcGISDeckLayer from './arcgis-deck-layer';
-import loadArcGISDeckLayerView2D from './arcgis-deck-layer-view-2d';
-import loadArcGISDeckExternalRenderer from './arcgis-deck-external-renderer';
+import createDeckProps from './deck-props';
+import createDeckLayer from './deck-layer';
+import createDeckLayerView2D from './deck-layer-view-2d';
+import createDeckRenderer from './deck-renderer';
 import {loadModules as esriLoaderLoadModules} from 'esri-loader';
 
 let arcGIS = null;
@@ -48,11 +48,11 @@ function loadArcGISModule(esri, loadScriptOptions) {
 }
 
 function initialize(Layer, Accessor, BaseLayerViewGL2D, externalRenderers) {
-  const DeckProps = loadDeckProps(Accessor);
-  const ArcGISDeckLayerView2D = loadArcGISDeckLayerView2D(BaseLayerViewGL2D);
-  const ArcGISDeckLayer = loadArcGISDeckLayer(DeckProps, Layer, ArcGISDeckLayerView2D);
-  const ArcGISDeckExternalRenderer = loadArcGISDeckExternalRenderer(DeckProps, externalRenderers);
+  const DeckProps = createDeckProps(Accessor);
+  const DeckLayerView2D = createDeckLayerView2D(BaseLayerViewGL2D);
+  const DeckLayer = createDeckLayer(DeckProps, Layer, DeckLayerView2D);
+  const DeckRenderer = createDeckRenderer(DeckProps, externalRenderers);
 
-  arcGIS = {ArcGISDeckLayer, ArcGISDeckLayerView2D, ArcGISDeckExternalRenderer};
+  arcGIS = {DeckLayer, DeckRenderer};
   return arcGIS;
 }
