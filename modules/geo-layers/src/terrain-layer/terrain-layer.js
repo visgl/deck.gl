@@ -25,6 +25,8 @@ import {load} from '@loaders.gl/core';
 import {TerrainLoader} from '@loaders.gl/terrain';
 import TileLayer from '../tile-layer/tile-layer';
 
+const DUMMY_DATA = [1];
+
 const defaultProps = {
   ...TileLayer.defaultProps,
   // Image url that encodes height data
@@ -138,16 +140,26 @@ export default class TerrainLayer extends CompositeLayer {
   }
 
   renderSubLayers(props) {
-    return new SimpleMeshLayer({
-      id: props.id,
-      wireframe: props.wireframe,
-      mesh: props.data.then(result => result && result[0]),
-      data: [1],
-      texture: props.data.then(result => result && result[1]),
+    const {data, color} = props;
+    let mesh = null;
+    let texture = null;
+
+    if (Array.isArray(data)) {
+      mesh = data[0];
+      texture = data[1];
+    } else if (data) {
+      mesh = data.then(result => result && result[0]);
+      texture = data.then(result => result && result[1]);
+    }
+
+    return new SimpleMeshLayer(props, {
+      data: DUMMY_DATA,
+      mesh,
+      texture,
       getPolygonOffset: null,
       coordinateSystem: COORDINATE_SYSTEM.CARTESIAN,
       getPosition: d => [0, 0, 0],
-      getColor: props.color
+      getColor: color
     });
   }
 
@@ -162,21 +174,27 @@ export default class TerrainLayer extends CompositeLayer {
     } = this.props;
 
     if (this.state.isTiled) {
-      return new TileLayer(this.props, {
-        id: `${this.props.id}-tiles`,
-        getTileData: this.getTiledTerrainData.bind(this),
-        renderSubLayers: this.renderSubLayers,
-        updateTriggers: {
-          getTileData: {terrainImage, surfaceImage, meshMaxError, elevationDecoder}
+      return new TileLayer(
+        this.getSubLayerProps({
+          id: 'tiles'
+        }),
+        {
+          wireframe,
+          color,
+          getTileData: this.getTiledTerrainData.bind(this),
+          renderSubLayers: this.renderSubLayers,
+          updateTriggers: {
+            getTileData: {terrainImage, surfaceImage, meshMaxError, elevationDecoder}
+          }
         }
-      });
+      );
     }
     return new SimpleMeshLayer(
       this.getSubLayerProps({
         id: 'mesh'
       }),
       {
-        data: [1],
+        data: DUMMY_DATA,
         mesh: this.state.terrain,
         texture: surfaceImage,
         getPosition: d => [0, 0, 0],
