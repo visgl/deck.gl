@@ -30,24 +30,24 @@
  * @param {Array} result=[] - Optional array to push value into
  * @return {Array} Returns the new flattened array (new array or `result` if provided)
  */
-export function flatten(array, {filter = () => true, map = x => x, result = []} = {}) {
+export function flatten(array, filter = () => true) {
   // Wrap single object in array
   if (!Array.isArray(array)) {
-    return filter(array) ? [map(array)] : [];
+    return filter(array) ? [array] : [];
   }
   // Deep flatten and filter the array
-  return flattenArray(array, filter, map, result);
+  return flattenArray(array, filter, []);
 }
 
 // Deep flattens an array. Helper to `flatten`, see its parameters
-function flattenArray(array, filter, map, result) {
+function flattenArray(array, filter, result) {
   let index = -1;
   while (++index < array.length) {
     const value = array[index];
     if (Array.isArray(value)) {
-      flattenArray(value, filter, map, result);
+      flattenArray(value, filter, result);
     } else if (filter(value)) {
-      result.push(map(value));
+      result.push(value);
     }
   }
   return result;

@@ -172,7 +172,7 @@ export default class LayerManager {
     }
     this.lastRenderedLayers = newLayers;
 
-    newLayers = flatten(newLayers, {filter: Boolean});
+    newLayers = flatten(newLayers, Boolean);
 
     for (const layer of newLayers) {
       layer.context = this.context;

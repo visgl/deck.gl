@@ -49,9 +49,7 @@ const FLATTEN_TEST_CASES = [
   },
   {
     title: 'nested three levels with predicate',
-    opts: {
-      filter: Boolean
-    },
+    opts: Boolean,
     argument: [1, [[2], null], [[4, [null]], 6]],
     result: [1, 2, 4, 6]
   }
