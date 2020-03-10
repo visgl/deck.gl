@@ -9,7 +9,7 @@ import {registerLoaders} from '@loaders.gl/core';
 
 import * as deck from './deck-bundle';
 
-import {loadScript, alreadyLoaded} from './script-utils';
+import {loadScript} from './script-utils';
 
 import GL from '@luma.gl/constants';
 
