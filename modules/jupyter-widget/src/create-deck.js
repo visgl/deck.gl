@@ -83,10 +83,17 @@ function createDeck({
   customLibraries
 }) {
   let deckgl;
+
+  // First add custom libraries (ensure we have any new class defs before converting props!)
+  try {
+    addCustomLibraries(customLibraries);
+  } catch (error) {
+    console.error('pydeck: load of custom library failed', error, customLibraries);
+  }
+
   try {
     const props = jsonConverter.convert(jsonInput);
 
-    addCustomLibraries(customLibraries);
     const getTooltip = makeTooltip(tooltip);
 
     deckgl = new deck.DeckGL({
