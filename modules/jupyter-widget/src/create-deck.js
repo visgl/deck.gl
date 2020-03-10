@@ -88,6 +88,7 @@ function createDeck({
   try {
     addCustomLibraries(customLibraries);
   } catch (error) {
+    // eslint-disable-next-line
     console.error('pydeck: load of custom library failed', error, customLibraries);
   }
 
