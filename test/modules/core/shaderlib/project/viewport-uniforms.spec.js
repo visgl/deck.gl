@@ -144,9 +144,10 @@ test('project#getUniforms', t => {
   });
   t.notOk(getUniformsError(uniforms, UNIFORMS), 'Uniforms validated');
   t.ok(uniforms.project_uCenter.some(x => x), 'Returned non-trivial projection center');
+  // CARTESIAN + WEB_MERCATOR_AUTO_OFFSET is rounded in the common space
   t.ok(
-    Math.abs(uniforms.project_uCenter[0]) < EPSILON &&
-      Math.abs(uniforms.project_uCenter[1]) < EPSILON,
+    Math.abs(uniforms.project_uCenter[0]) < EPSILON * 10 &&
+      Math.abs(uniforms.project_uCenter[1]) < EPSILON * 10,
     'project center at center of clipspace'
   );
   t.ok(

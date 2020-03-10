@@ -78,6 +78,8 @@ export function getOffsetOrigin(
           Math.fround(viewport.center[1]),
           0
         ];
+        // Geospatial origin (wgs84) must match shaderCoordinateOrigin (common)
+        geospatialOrigin = viewport.unprojectPosition(shaderCoordinateOrigin);
       }
       break;
 
