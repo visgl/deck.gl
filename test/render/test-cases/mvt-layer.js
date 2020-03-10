@@ -16,6 +16,13 @@ export default [
         data: ['./test/data/mvt-tiles/{z}/{x}/{y}.mvt'],
         getFillColor: [0, 0, 0, 128],
         getLineColor: [255, 0, 0, 128],
+        onTileError: error => {
+          if (error.message.includes('404')) {
+            // trying to load tiles in the previous viewport, ignore
+          } else {
+            throw error;
+          }
+        },
         lineWidthMinPixels: 1
       })
     ],
