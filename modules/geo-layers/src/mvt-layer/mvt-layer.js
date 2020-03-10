@@ -12,7 +12,7 @@ const defaultProps = Object.assign({}, TileLayer.defaultProps, {
   urlTemplates: {type: 'array', value: [], compare: true}
 });
 
-export default class MVTTileLayer extends TileLayer {
+export default class MVTLayer extends TileLayer {
   async getTileData(tileProperties) {
     const {urlTemplates} = this.getCurrentLayer().props;
 
@@ -55,5 +55,5 @@ function getTileURLIndex({x, y}, templatesLength) {
   return Math.abs(x + y) % templatesLength;
 }
 
-MVTTileLayer.layerName = 'MVTTileLayer';
-MVTTileLayer.defaultProps = defaultProps;
+MVTLayer.layerName = 'MVTLayer';
+MVTLayer.defaultProps = defaultProps;

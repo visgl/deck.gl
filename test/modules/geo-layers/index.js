@@ -48,4 +48,4 @@ import './great-circle-layer.spec';
 import './h3-layers.spec';
 import './tile-3d-layer';
 import './terrain-layer.spec';
-import './mvt-tile-layer.spec';
+import './mvt-layer.spec';
