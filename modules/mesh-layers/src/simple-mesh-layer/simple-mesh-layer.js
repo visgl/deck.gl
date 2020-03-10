@@ -197,7 +197,7 @@ export default class SimpleMeshLayer extends Layer {
 
     const {viewport} = this.context;
     const {sizeScale, coordinateSystem} = this.props;
-    this.project([0, 0, 0]);
+
     this.state.model.draw({
       uniforms: Object.assign({}, uniforms, {
         sizeScale,

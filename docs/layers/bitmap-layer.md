@@ -58,7 +58,7 @@ new deck.BitmapLayer({});
 
 ### Data
 
-##### `bitmap` (String|Texture2D|Image|HTMLCanvasElement|HTMLVideoElement)
+##### `image` (String|Texture2D|Image|HTMLCanvasElement|HTMLVideoElement)
 
 - Default `null`.
 

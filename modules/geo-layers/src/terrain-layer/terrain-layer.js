@@ -143,6 +143,7 @@ export default class TerrainLayer extends CompositeLayer {
   }
 
   renderSubLayers(props) {
+    const SubLayerClass = this.getSubLayerClass('mesh', SimpleMeshLayer);
     const {data, color} = props;
     let mesh = null;
     let texture = null;
@@ -155,7 +156,7 @@ export default class TerrainLayer extends CompositeLayer {
       texture = data.then(result => result && result[1]);
     }
 
-    return new SimpleMeshLayer(props, {
+    return new SubLayerClass(props, {
       data: DUMMY_DATA,
       mesh,
       texture,
@@ -178,7 +179,7 @@ export default class TerrainLayer extends CompositeLayer {
           wireframe,
           color,
           getTileData: this.getTiledTerrainData.bind(this),
-          renderSubLayers: this.renderSubLayers,
+          renderSubLayers: this.renderSubLayers.bind(this),
           updateTriggers: {
             getTileData: {
               elevationData: urlTemplateToUpdateTrigger(elevationData),
@@ -190,7 +191,9 @@ export default class TerrainLayer extends CompositeLayer {
         }
       );
     }
-    return new SimpleMeshLayer(
+
+    const SubLayerClass = this.getSubLayerClass('mesh', SimpleMeshLayer);
+    return new SubLayerClass(
       this.getSubLayerProps({
         id: 'mesh'
       }),
