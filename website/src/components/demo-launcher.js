@@ -27,9 +27,7 @@ class DemoLauncher extends Component {
     const DemoComponent = Demos[demo];
 
     if (DemoComponent) {
-      if (!DemoComponent.allowMissingData) {
-        this.props.loadData(demo, DemoComponent.data);
-      }
+      this.props.loadData(demo, DemoComponent.data);
       this.props.useParams(DemoComponent.parameters);
       this._mapStyle = DemoComponent.mapStyle;
 

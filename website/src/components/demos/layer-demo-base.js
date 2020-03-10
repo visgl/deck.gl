@@ -25,11 +25,14 @@ const TOOLTIP_STYLE = {
 
 export default function createLayerDemoClass(settings) {
   const renderLayer = (data, params, extraProps = {}) => {
-    if (!data && !settings.allowMissingData) {
+    if (settings.dataUrl && !data) {
       return null;
     }
 
-    const props = {...settings.props, ...extraProps, data};
+    const props = {...settings.props, ...extraProps};
+    if (settings.dataUrl) {
+      props.data = data;
+    }
 
     if (params) {
       Object.keys(params).forEach(key => {
@@ -46,9 +49,9 @@ export default function createLayerDemoClass(settings) {
 
   class DemoClass extends Component {
     static get data() {
-      return {
+      return settings.dataUrl ? {
         url: settings.dataUrl
-      };
+      } : [];
     }
 
     static get parameters() {
@@ -81,12 +84,12 @@ export default function createLayerDemoClass(settings) {
     }
 
     _getTooltip(pickedInfo) {
-      if (!pickedInfo.object) {
+      if (!pickedInfo.picked) {
         return null;
       }
       const {formatTooltip} = settings;
       return {
-        text: formatTooltip ? formatTooltip(pickedInfo.object) : pickedInfo.index,
+        text: formatTooltip ? formatTooltip(pickedInfo.object || pickedInfo) : pickedInfo.index,
         style: TOOLTIP_STYLE
       };
     }
@@ -103,7 +106,7 @@ export default function createLayerDemoClass(settings) {
           controller={true}
           layers={layers}
         >
-          <StaticMap reuseMaps mapStyle={MAPBOX_STYLES.LIGHT} preventStyleDiffing={true} />
+          {settings.basemap !== false && <StaticMap reuseMaps mapStyle={MAPBOX_STYLES.LIGHT} preventStyleDiffing={true} />}
         </DeckGL>
       );
     }

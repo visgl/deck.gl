@@ -11,9 +11,7 @@ test('MVTLayer', t => {
     Layer: MVTLayer,
     assert: t.ok,
     sampleProps: {
-      urlTemplates: [
-        'https://a.basemaps.cartocdn.com/rastertiles/voyager_labels_under/{z}/{x}/{y}.png'
-      ]
+      data: 'https://a.basemaps.cartocdn.com/rastertiles/voyager_labels_under/{z}/{x}/{y}.png'
     },
     onBeforeUpdate: ({testCase}) => t.comment(testCase.title)
   });

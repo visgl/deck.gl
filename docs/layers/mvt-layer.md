@@ -9,7 +9,7 @@
 
 `MVTLayer` is a derived `TileLayer` that makes it possible to visualize very large datasets through MVTs ([Mapbox Vector Tiles](https://docs.mapbox.com/vector-tiles/specification/)). Behaving like `TileLayer`, it will only load, decode and render MVTs containing features that are visible within the current viewport.
 
-MVTs are loaded from a network server, so you need to specify your own tile server URLs in `urlTemplates` property. You can provide as many templates as you want for a unique set of tiles. All URL templates will be balanced by [this algorithm](https://github.com/uber/deck.gl/blob/58f8b848f3ccf1676e90c7810e1b6d115a9d53d0/modules/geo-layers/src/mvt-layer/mvt-layer.js#L51-L53), ensuring that tiles will be always requested to the same server depending on their index.
+Data is loaded from URL templates in the `data` property.
 
 This layer also handles feature clipping so that there are no features divided by tile divisions.
 
@@ -19,11 +19,24 @@ import {MVTLayer} from '@deck.gl/geo-layers';
 
 export const App = ({viewport}) => {
   const layer = new MVTLayer({
-    urlTemplates: [
-      `https://a.tiles.mapbox.com/v4/mapbox.boundaries-adm0-v3/{z}/{x}/{y}.vector.pbf?access_token=${MapboxAccessToken}`
-    ],
+    data: `https://a.tiles.mapbox.com/v4/mapbox.mapbox-streets-v7/{z}/{x}/{y}.vector.pbf?access_token=${MAPBOX_TOKEN}`,
 
-    getFillColor: [140, 170, 180]
+    minZoom: 0,
+    maxZoom: 23,
+    getLineColor: [192, 192, 192],
+    getFillColor: [140, 170, 180],
+
+    getLineWidth: f => {
+      switch (f.properties.class) {
+        case 'street':
+          return 6;
+        case 'motorway':
+          return 10;
+        default:
+          return 1;
+      }
+    },
+    lineWidthMinPixels: 1
   });
 
   return <DeckGL {...viewport} layers={[layer]} />;
@@ -63,21 +76,17 @@ new deck.MVTLayer({});
 
 ## Properties
 
-Inherits all properties from [`TileLayer`](/docs/layers/tile-layer.md) and [base `Layer`](/docs/api-reference/layer.md), and you can use [`GeoJSONLayer`](/docs/layers/geojson-layer.md) properties to style features.
+Inherits all properties from [`TileLayer`](/docs/layers/tile-layer.md) and [base `Layer`](/docs/api-reference/layer.md), with exceptions indicated below.
 
-It also adds a custom property:
+If using the default `renderSubLayers`, supports all [`GeoJSONLayer`](/docs/layers/geojson-layer.md) properties to style features.
 
-##### `urlTemplates` (Array)
 
-- Default `[]`
+##### `data` (String|Array)
 
-URL templates to load tiles from network. Templates don't require a specific format. The layer will replace `{x}`, `{y}`, `{z}` ocurrences to the proper tile index before requesting it to the server.
+Required. Either a URL template or an array of URL templates from which the MVT data should be loaded. See `TileLayer`'s `data` prop documentation for the templating syntax.
 
-When specifiying more than one URL template, all templates will be balanced by [this algorithm](https://github.com/uber/deck.gl/blob/58f8b848f3ccf1676e90c7810e1b6d115a9d53d0/modules/geo-layers/src/mvt-layer/mvt-layer.js#L51-L53), ensuring that tiles will be always requested to the same server depending on their index.
+The `getTileData` prop from the `TileLayer` class will not be called.
 
-### Callbacks
-
-Inherits all callbacks from [`TileLayer`](/docs/layers/tile-layer.md) and [base `Layer`](/docs/api-reference/layer.md).
 
 ## Source
 
