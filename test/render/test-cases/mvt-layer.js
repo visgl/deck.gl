@@ -12,7 +12,8 @@ export default [
     },
     layers: [
       new MVTLayer({
-        urlTemplates: ['./test/data/mvt-tiles/{z}/{x}/{y}.mvt'],
+        id: 'mvt-layer',
+        data: ['./test/data/mvt-tiles/{z}/{x}/{y}.mvt'],
         getFillColor: [0, 0, 0, 128],
         getLineColor: [255, 0, 0, 128],
         lineWidthMinPixels: 1

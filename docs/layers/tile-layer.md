@@ -9,54 +9,34 @@
 
 The `TileLayer` is a composite layer that makes it possible to visualize very large datasets. Instead of fetching the entire dataset, it only loads and renders what's visible in the current viewport.
 
-To use this layer, the data must be sliced into "tiles". Each tile has a pre-defined bounding box and level of detail. The layer takes in a function `getTileData` that fetches tiles when they are needed, and renders the loaded data in a GeoJsonLayer or with the layer returned in `renderSubLayers`.
+To use this layer, the data must be sliced into "tiles". Each tile has a pre-defined bounding box and level of detail.
+Users have the option to load each tile from a unique URL, defined by a template in the `data` property.
+The layer can also supply a callback `getTileData` that does custom fetching when a tile is requested.
+The loaded tile data is then rendered with the layer(s) returned by `renderSubLayers`.
 
 ```js
 import DeckGL from '@deck.gl/react';
 import {TileLayer} from '@deck.gl/geo-layers';
-import {VectorTile} from '@mapbox/vector-tile';
-import Protobuf from 'pbf';
 
 export const App = ({viewport}) => {
 
   const layer = new TileLayer({
-    stroked: false,
+    // https://wiki.openstreetmap.org/wiki/Slippy_map_tilenames#Tile_servers
+    data: 'https://c.tile.openstreetmap.org/{z}/{x}/{y}.png',
 
-    getLineColor: [192, 192, 192],
-    getFillColor: [140, 170, 180],
+    minZoom: 0,
+    maxZoom: 19,
 
-    getLineWidth: f => {
-      if (f.properties.layer === 'transportation') {
-        switch (f.properties.class) {
-        case 'primary':
-          return 12;
-        case 'motorway':
-          return 16;
-        default:
-          return 6;
-        }
-      }
-      return 1;
-    },
-    lineWidthMinPixels: 1,
+    renderSubLayers: props => {
+      const {
+        bbox: {west, south, east, north}
+      } = props.tile;
 
-    getTileData: ({x, y, z}) => {
-      const mapSource = `https://a.tiles.mapbox.com/v4/mapbox.mapbox-streets-v7/${z}/${x}/${y}.vector.pbf?access_token=${MapboxAccessToken}`;
-      return fetch(mapSource)
-        .then(response => response.arrayBuffer())
-        .then(buffer => {
-          const tile = new VectorTile(new Protobuf(buffer));
-          const features = [];
-          for (const layerName in tile.layers) {
-            const vectorTileLayer = tile.layers[layerName];
-            for (let i = 0; i < vectorTileLayer.length; i++) {
-              const vectorTileFeature = vectorTileLayer.feature(i);
-              const feature = vectorTileFeature.toGeoJSON(x, y, z);
-              features.push(feature);
-            }
-          }
-          return features;
-        });
+      return new BitmapLayer(props, {
+        data: null,
+        image: props.data,
+        bounds: [west, south, east, north]
+      });
     }
   });
   return <DeckGL {...viewport} layers={[layer]} />;
@@ -93,27 +73,49 @@ To use pre-bundled scripts:
 new deck.TileLayer({});
 ```
 
+## Indexing System
+
+At each integer zoom level (`z`), the XY plane in the view space is divided into square tiles of the same size, each uniquely identified by their `x` and `y` index. When `z` increases by 1, the view space is scaled by 2, meaning that one tile at `z` covers the same area as four tiles at `z+1`.
+
+When the `TileLayer` is used with a geospatial view such as the [MapView](/docs/api-reference/map-view.md), x, y, and z are determined from [the OSM tile index](https://wiki.openstreetmap.org/wiki/Slippy_map_tilenames).
+
+When the `TileLayer` is used used with a non-geospatial view such as the [OrthographicView](/docs/api-reference/orthographic-view.md) or the [OrbitView](/docs/api-reference/orbit-view.md), `x` and `y` increment from the world origin, and each tile's width and height match that defined by the `tileSize` prop. For example, the tile `x: 0, y: 0` occupies the square between `[0, 0]` and `[tileSize, tileSize]`.
+
 
 ## Properties
 
+Inherits all properties from [base `Layer`](/docs/api-reference/layer.md).
+
+If using the default `renderSubLayers`, supports all [`GeoJSONLayer`](/docs/layers/geojson-layer.md) properties to style features.
+
 ### Data Options
 
-##### `getTileData` (Function)
+##### `data` (String|Array, optional)
 
-`getTileData` given x, y, z indices of the tile, returns the tile data or a Promise that resolves to the tile data.
+- Default: `[]`
 
-- Default: `tile => Promise.resolve(null)`
+Either a URL template or an array of URL templates from which the tile data should be loaded.
 
-The `tile` argument contains the following fields:
+If the value is a string: a URL template. Substrings `{x}` `{y}` and `{z}`, if present, will be replaced with a tile's actual index when it is requested.
+
+If the value is an array: multiple URL templates. Each endpoint must return the same content for the same tile index. This can be used to work around [domain sharding](https://developer.mozilla.org/en-US/docs/Glossary/Domain_sharding), allowing browsers to download more resources simultaneously. Requests made are balanced among the endpoints, based on the tile index.
+
+
+##### `getTileData` (Function, optional)
+
+- Default: `tile => load(tile.url)`
+
+If supplied, `getTileData` is called to retrieve the data of each tile. It receives one argument `tile` which contains the following fields:
 
 - `x` (Number) - x index of the tile
 - `y` (Number) - y index of the tile
 - `z` (Number) - z index of the tile
-- `bbox` (Object) - bounding box of the tile
- 
-When used with a geospatial view such as the [MapView](/docs/api-reference/map-view.md), x, y, and z are determined from [the OSM tile index](https://wiki.openstreetmap.org/wiki/Slippy_map_tilenames), and `bbox` is in the shape of `{west: <longitude>, north: <latitude>, east: <longitude>, south: <latitude>}`.
+- `url` (String) - resolved url of the tile if the `data` prop is provided, otherwise `null`
+- `bbox` (Object) - bounding box of the tile. When used with a geospatial view, `bbox` is in the shape of `{west: <longitude>, north: <latitude>, east: <longitude>, south: <latitude>}`. When used used with a non-geospatial view, `bbox` is in the shape of `{left, top, right, bottom}`.
 
-When used with a non-geospatial view such as the [OrthographicView](/docs/api-reference/orthographic-view.md) or the [OrbitView](/docs/api-reference/orbit-view.md), x, y, and z are determined by dividing the view space in to square tiles (see `tileSize` prop). `bbox` is in the shape of `{left, top, right, bottom}`.
+It should return either the tile data or a Promise that resolves to the tile data.
+
+This prop is not required if `data` points to a supported format (JSON or image by default). Additional formats may be added by registering [loaders.gl](https://loaders.gl/modules/core/docs/api-reference/register-loaders) modules.
 
 
 ##### `tileSize` (Number, optional)

@@ -42,7 +42,7 @@ test('TileLayer', t => {
   };
 
   const renderSubLayers = props => {
-    return new ScatterplotLayer(props);
+    return new ScatterplotLayer(props, {id: `${props.id}-fill`});
   };
   const renderNestedSubLayers = props => {
     return [
@@ -69,8 +69,24 @@ test('TileLayer', t => {
   const testCases = [
     {
       props: {
+        data:
+          'https://raw.githubusercontent.com/uber-common/deck.gl-data/master/website/bart.geo.json'
+      },
+      onBeforeUpdate: () => {
+        t.comment('Default getTileData');
+      },
+      onAfterUpdate: ({layer, subLayers}) => {
+        t.is(subLayers.length, 2, 'Rendered sublayers');
+        t.notOk(layer.isLoaded, 'Layer is not loaded');
+      }
+    },
+    {
+      props: {
         getTileData,
         renderSubLayers
+      },
+      onBeforeUpdate: () => {
+        t.comment('Custom getTileData');
       },
       onAfterUpdate: ({layer, subLayers}) => {
         t.is(subLayers.length, 2, 'Rendered sublayers');

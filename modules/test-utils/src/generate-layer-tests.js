@@ -98,7 +98,8 @@ export function generateLayerTests({
       // Default assert
       if (runDefaultAsserts) {
         if (params.layer.isComposite) {
-          if (count(params.layer.props.data)) {
+          const {data} = params.layer.props;
+          if (data && typeof data === 'object' && count(data)) {
             assert(params.subLayers.length, 'Layer should have sublayers');
           }
         } else {

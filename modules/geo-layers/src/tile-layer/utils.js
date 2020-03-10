@@ -2,6 +2,43 @@ import {lngLatToWorld} from '@math.gl/web-mercator';
 
 const TILE_SIZE = 512;
 
+export const urlType = {
+  type: 'url',
+  value: '',
+  validate: value =>
+    typeof value === 'string' ||
+    (Array.isArray(value) && value.every(url => typeof url === 'string')),
+  equals: (value1, value2) => {
+    if (value1 === value2) {
+      return true;
+    }
+    if (!Array.isArray(value1) || !Array.isArray(value2)) {
+      return false;
+    }
+    const len = value1.length;
+    if (len !== value2.length) {
+      return false;
+    }
+    for (let i = 0; i < len; i++) {
+      if (value1[i] !== value2[i]) {
+        return false;
+      }
+    }
+    return true;
+  }
+};
+
+export function getURLFromTemplate(template, properties) {
+  if (!template || !template.length) {
+    return null;
+  }
+  if (Array.isArray(template)) {
+    const index = Math.abs(properties.x + properties.y) % template.length;
+    template = template[index];
+  }
+  return template.replace(/\{ *([\w_-]+) *\}/g, (_, property) => properties[property]);
+}
+
 /**
  * gets the bounding box of a viewport
  */
