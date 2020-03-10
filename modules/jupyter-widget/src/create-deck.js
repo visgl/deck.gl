@@ -60,11 +60,8 @@ function addCustomLibraries(customLibraries) {
   if (!customLibraries) {
     return;
   }
-  for (const obj of customLibraries) {
-    // obj is an object of the form `{libraryName, resourceUri}`
-    if (!alreadyLoaded(obj.resourceUri)) {
-      loadExternalLibrary(obj);
-    }
+  for (const {libraryName, resourceUri} of customLibraries) {
+    loadExternalLibrary({libraryName, resourceUri});
   }
 }
 

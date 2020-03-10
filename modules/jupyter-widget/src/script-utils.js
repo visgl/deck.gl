@@ -1,16 +1,7 @@
 /* global document */
 
+// Ensure we only load a script once
 const scriptLoadPromises = {};
-
-function alreadyLoaded(url) {
-  // Save time by not reloading the same URL
-  for (const scriptTag of document.querySelectorAll('script')) {
-    if (scriptTag.src === url) {
-      return true;
-    }
-  }
-  return false;
-}
 
 function loadScript(url) {
   if (!scriptLoadPromises[url]) {
@@ -27,4 +18,4 @@ function loadScript(url) {
   return scriptLoadPromises[url];
 }
 
-export {loadScript, alreadyLoaded};
+export {loadScript};
