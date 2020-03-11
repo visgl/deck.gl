@@ -18,17 +18,16 @@ import {TerrainLayer} from '@deck.gl/geo-layers';
 export const App = ({viewport}) => {
 
   const layer = new TerrainLayer({
-    minZoom: 0,
-    maxZoom: 23,
-    strategy: 'no-overlap',
     elevationDecoder: {
-      rScaler: 256,
-      gScaler: 1,
-      bScaler: 1/256,
-      offset: -32768
+      rScaler: 2,
+      gScaler: 0,
+      bScaler: 0,
+      offset: 0
     },
-    elevationData: 'https://s3.amazonaws.com/elevation-tiles-prod/terrarium/{z}/{x}/{y}.png',
-    texture: 'https://wms.chartbundle.com/tms/1.0.0/sec/{z}/{x}/{y}.png?origin=nw'
+    // Digital elevation model from https://www.usgs.gov/
+    elevationData: 'https://raw.githubusercontent.com/uber-common/deck.gl-data/master/website/terrain.png',
+    texture: 'https://raw.githubusercontent.com/uber-common/deck.gl-data/master/website/terrain-mask.png',
+    bounds: [-122.5233, 37.6493, -122.3566, 37.8159],
   });
   return <DeckGL {...viewport} layers={[layer]} />;
 };

@@ -196,12 +196,14 @@ export default class SimpleMeshLayer extends Layer {
     }
 
     const {viewport} = this.context;
-    const {sizeScale, coordinateSystem} = this.props;
+    const {sizeScale, coordinateSystem, _instanced} = this.props;
 
     this.state.model.draw({
       uniforms: Object.assign({}, uniforms, {
         sizeScale,
-        composeModelMatrix: shouldComposeModelMatrix(viewport, coordinateSystem),
+        // _instanced is a hack to use world position instead of meter offsets in mesh
+        // TODO - formalize API
+        composeModelMatrix: !_instanced || shouldComposeModelMatrix(viewport, coordinateSystem),
         flatShading: !this.state.hasNormals
       })
     });

@@ -149,17 +149,18 @@ export const TerrainLayerDemo = createLayerDemoClass({
     }
   },
   props: {
-    minZoom: 0,
-    maxZoom: 23,
-    strategy: 'no-overlap',
     elevationDecoder: {
-      rScaler: 256,
-      gScaler: 1,
-      bScaler: 1 / 256,
-      offset: -32768
+      rScaler: 2,
+      gScaler: 0,
+      bScaler: 0,
+      offset: 0
     },
-    terrainImage: 'https://s3.amazonaws.com/elevation-tiles-prod/terrarium/{z}/{x}/{y}.png',
-    surfaceImage: 'https://wms.chartbundle.com/tms/1.0.0/sec/{z}/{x}/{y}.png?origin=nw'
+    elevationData: `${DATA_URI}/terrain.png`,
+    texture: `${DATA_URI}/terrain-mask.png`,
+    bounds: [-122.5233, 37.6493, -122.3566, 37.8159],
+    material: {
+      diffuse: 1
+    }
   }
 })
 
