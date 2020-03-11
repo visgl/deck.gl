@@ -53,7 +53,8 @@ const defaultProps = {
   // Supply url to local terrain worker bundle. Only required if running offline and cannot access CDN.
   workerUrl: {type: 'string', value: null},
   // Same as SimpleMeshLayer wireframe
-  wireframe: false
+  wireframe: false,
+  material: true
 };
 
 // Turns array of templates into a single string to work around shallow change
@@ -168,7 +169,15 @@ export default class TerrainLayer extends CompositeLayer {
   }
 
   renderLayers() {
-    const {color, elevationData, texture, wireframe, meshMaxError, elevationDecoder} = this.props;
+    const {
+      color,
+      material,
+      elevationData,
+      texture,
+      wireframe,
+      meshMaxError,
+      elevationDecoder
+    } = this.props;
 
     if (this.state.isTiled) {
       return new TileLayer(
@@ -178,6 +187,7 @@ export default class TerrainLayer extends CompositeLayer {
         {
           wireframe,
           color,
+          material,
           getTileData: this.getTiledTerrainData.bind(this),
           renderSubLayers: this.renderSubLayers.bind(this),
           updateTriggers: {
@@ -201,8 +211,10 @@ export default class TerrainLayer extends CompositeLayer {
         data: DUMMY_DATA,
         mesh: this.state.terrain,
         texture,
+        _instanced: false,
         getPosition: d => [0, 0, 0],
         getColor: color,
+        material,
         wireframe
       }
     );

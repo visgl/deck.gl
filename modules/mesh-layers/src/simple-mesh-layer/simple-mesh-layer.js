@@ -83,6 +83,9 @@ const defaultProps = {
     depthFunc: GL.LEQUAL
   },
 
+  // _instanced is a hack to use world position instead of meter offsets in mesh
+  // TODO - formalize API
+  _instanced: true,
   // NOTE(Tarek): Quick and dirty wireframe. Just draws
   // the same mesh with LINE_STRIPS. Won't follow edges
   // of the original mesh.
@@ -196,12 +199,12 @@ export default class SimpleMeshLayer extends Layer {
     }
 
     const {viewport} = this.context;
-    const {sizeScale, coordinateSystem} = this.props;
+    const {sizeScale, coordinateSystem, _instanced} = this.props;
 
     this.state.model.draw({
       uniforms: Object.assign({}, uniforms, {
         sizeScale,
-        composeModelMatrix: shouldComposeModelMatrix(viewport, coordinateSystem),
+        composeModelMatrix: !_instanced || shouldComposeModelMatrix(viewport, coordinateSystem),
         flatShading: !this.state.hasNormals
       })
     });
