@@ -19,6 +19,26 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v8.1
 
+### deck.gl [8.1.0-beta.1] - Mar 11 2020
+
+- Fix TerrainLayer support for single mesh (#4378)
+- geo-layers: refactor tile-3d-layer (#4319)
+- Terrain layer API audit (#4377)
+- pydeck: fix repeated script loading (#4376)
+- TileLayer and MVTLayer API audit (#4372)
+- Rename MVTTileLayer to MVTLayer (#4368)
+- Fix jumpy projection using WEB_MERCATOR_AUTO_OFFSET with CARTESIAN coordinates (#4374)
+- Fix TileLayer crash when renderSubLayers returns array (#4362)
+- Clean up ArcGISDeckLayer api (#4363)
+- Terrain layer bug fixes (#4367)
+- Improve flatten perf (#4361)
+- Add clipping to MVTTileLayer (#4336)
+- Fix projectPosition in CARTESIAN coordinate system (#4335)
+- Workaround for invalid attribute index access (#4344)
+- pydeck: Support rendering in Google Collab (#4337)
+- [arcgis] Fix .gl and .state access (#4338)
+- Remove s2-geometry dependency (#4311)
+
 ### deck.gl [8.1.0-alpha.6] - Mar 1 2020
 
 - [test-utils] Fix testLayer (#4334)
