@@ -58,7 +58,7 @@ new deck.BitmapLayer({});
 
 ### Data
 
-##### `bitmap` (String|Texture2D|Image|HTMLCanvasElement|HTMLVideoElement)
+##### `image` (String|Texture2D|Image|HTMLCanvasElement|HTMLVideoElement|ImageBitmap)
 
 - Default `null`.
 
@@ -69,7 +69,9 @@ Supported formats:
 - Coordinates of the bounding box of the bitmap `[left, bottom, right, top]`
 - Coordinates of four corners of the bitmap, should follow the sequence of `[[left, bottom], [left, top], [right, top], [right, bottom]]`. Each position could optionally contain a third component `z`.
 
-`left`, `bottom`, `right`, `top` refers to the coordinate of the corresponding side of the image.
+`left` and `right` refers to the world longitude/x at the corresponding side of the image.
+`top` and `bottom` refers to the world latitude/y at the corresponding side of the image.
+
 
 ### Render Options
 
