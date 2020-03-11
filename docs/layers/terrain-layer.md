@@ -136,11 +136,14 @@ The default value of `elevationDecoder` decodes a grayscale image:
 
 ##### `bounds` (Array, optional)
 
-Bounds of the image to fit x,y coordinates into. In `[left, top, right, bottom]` world coordinates. Must be supplied when using non-tiled elevation data.
+Bounds of the image to fit x,y coordinates into. In `[left, bottom, right, top]`. 
+`left` and `right` refers to the world longitude/x at the corresponding side of the image.
+`top` and `bottom` refers to the world latitude/y at the corresponding side of the image.
+
+Must be supplied when using non-tiled elevation data.
 
 - Default: `null`
 
-`left`, `bottom`, `right`, `top` refers to the coordinate of the corresponding side of the image.
 
 ##### `workerUrl` (String, optional)
 
