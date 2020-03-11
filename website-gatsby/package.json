@@ -15,8 +15,8 @@
     "deploy": "NODE_DEBUG=gh-pages gh-pages -d public"
   },
   "dependencies": {
-    "@loaders.gl/draco": "^2.0.2",
-    "@loaders.gl/las": "^2.0.2",
+    "@loaders.gl/draco": "^2.1.0-alpha.7",
+    "@loaders.gl/las": "^2.1.0-alpha.7",
     "@luma.gl/constants": "^8.1.0-alpha.2",
     "@luma.gl/core": "^8.1.0-alpha.2",
     "@luma.gl/webgl": "^8.1.0-alpha.2",

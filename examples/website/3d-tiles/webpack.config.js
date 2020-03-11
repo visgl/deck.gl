@@ -14,11 +14,6 @@ const CONFIG = {
     library: 'App'
   },
 
-  // this is required by draco
-  node: {
-    fs: 'empty'
-  },
-
   module: {
     rules: [
       {
