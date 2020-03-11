@@ -15,7 +15,7 @@ export default class MVTLayer extends TileLayer {
     if (!url) {
       return Promise.reject('Invalid URL');
     }
-    return load(url, MVTLoader);
+    return load(url, MVTLoader, this.getLoadOptions());
   }
 
   renderSubLayers(props) {

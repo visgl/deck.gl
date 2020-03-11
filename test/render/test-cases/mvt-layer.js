@@ -23,7 +23,12 @@ export default [
             throw error;
           }
         },
-        lineWidthMinPixels: 1
+        lineWidthMinPixels: 1,
+        loadOptions: {
+          mvt: {
+            workerUrl: null
+          }
+        }
       })
     ],
     goldenImage: './test/render/golden-images/mvt-layer.png'
