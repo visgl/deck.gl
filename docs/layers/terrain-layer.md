@@ -156,15 +156,21 @@ Set `workerUrl` to an empty string to disable worker during debugging (improves 
 
 ##### `color` (Color, optional)
 
-Color to use if `texture` is unavailable. Equivalent to setting SimpleMeshLayer's `getColor` prop.
+Color to use if `texture` is unavailable. Forwarded to `SimpleMeshLayer`'s `getColor` prop.
 
 - Default: `[255, 255, 255]`
 
 ##### `wireframe` (Boolean, optional)
 
-Forwarded to SimpleMeshLayer `wireframe` prop.
+Forwarded to `SimpleMeshLayer`'s `wireframe` prop.
 
 - Default: `false`
+
+##### `material` (Object, optional)
+
+Forwarded to `SimpleMeshLayer`'s `material` prop.
+
+- Default: `true`
 
 
 ## Sub Layers
