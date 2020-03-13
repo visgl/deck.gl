@@ -1,5 +1,3 @@
-// TODO delete when deck.gl has a newer version of tile-3d-layer
-
 import {Vector3} from '@math.gl/core';
 import GL from '@luma.gl/constants';
 import {Geometry} from '@luma.gl/core';
@@ -19,7 +17,7 @@ const defaultProps = {
   pointSize: 1.0,
 
   data: null,
-  loadOptions: {throttleRequests: true},
+  loadOptions: {},
   loader: Tiles3DLoader,
 
   onTilesetLoad: tileset3d => {},
@@ -70,13 +68,18 @@ export default class Tile3DLayer extends CompositeLayer {
 
   async _loadTileset(tilesetUrl) {
     const {loader, loadOptions} = this.props;
-    const tilesetJson = await load(tilesetUrl, loader, loadOptions);
+    const options = {...loadOptions};
+    if (loader.preload) {
+      const preloadOptions = await loader.preload(tilesetUrl, loadOptions);
+      Object.assign(options, preloadOptions);
+    }
+    const tilesetJson = await load(tilesetUrl, loader, options);
 
     const tileset3d = new Tileset3D(tilesetJson, {
       onTileLoad: this._onTileLoad.bind(this),
       onTileUnload: this._onTileUnload.bind(this),
       onTileLoadFail: this.props.onTileError,
-      ...loadOptions
+      ...options
     });
 
     this.setState({

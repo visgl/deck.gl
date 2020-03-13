@@ -12,6 +12,7 @@ import GL from '@luma.gl/constants';
 import {registerLoaders} from '@loaders.gl/core';
 import {CSVLoader} from '@loaders.gl/csv';
 import {DracoWorkerLoader} from '@loaders.gl/draco';
+import {Tiles3DLoader, CesiumIonLoader} from '@loaders.gl/3d-tiles';
 
 // Note: deck already registers JSONLoader...
 registerLoaders([CSVLoader, DracoWorkerLoader]);
@@ -38,5 +39,8 @@ export default {
   },
 
   // Constants that should be resolved with the provided values by JSON converter
-  constants: {}
+  constants: {
+    Tiles3DLoader,
+    CesiumIonLoader
+  }
 };

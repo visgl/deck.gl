@@ -8,8 +8,34 @@
 
 ##### Tile3DLayer
 
-- A new prop `loader` need be provided, one of `Tiles3DLoader` (`@loaders.gl/3d-tiles`) or `I3SLoader` (`@loaders.gl/i3s`).
+- A new prop `loader` needs to be provided, one of `CesiumIonLoader`, `Tiles3DLoader` from (`@loaders.gl/3d-tiles`) or `I3SLoader` from (`@loaders.gl/i3s`).
+- Since `Tile3DLayer` uses `load` from [`@loaders.gl/core`](https://loaders.gl/modules/core/docs/api-reference/load) to load a tileset and then construct a `Tileset3D` object. 
+`loadOptions[loader.id]` is used for passing any options available to the `loader`, and if you need forward options to [`Tileset3D`](https://loaders.gl/modules/tiles/docs/api-reference/tileset-3d#constructor-1), use`loadOptions.tileset`
+- `loaderOptions` default to `{}`. used to be `loadOptions: {throttleRequest: true}`
 - `_ionAccessId` and `_ionAccesToken` are removed. To render an ion dataset with `Tile3DLayer`, pass the ion dataset url to prop `data`, and `loadOptions.headers` with Cesium authentication token.
+
+**Code examples**
+
+```js
+import {CesiumIonLoader} from '@loaders.gl/3d-tiles';
+import {Tile3DLayer} from '@deck.gl/geo-layers';
+
+// load 3d tiles from Cesium ion
+const layer = new Tile3DLayer({
+  id: 'tile-3d-layer',
+  // tileset json file url 
+  data: 'https://assets.cesium.com/43978/tileset.json',
+  loader: CesiumIonLoader,
+  // https://cesium.com/docs/rest-api/
+  loadOptions: {
+    // https://loaders.gl/modules/tiles/docs/api-reference/tileset-3d#constructor-1
+    tileset: {
+      throttleRequests: true 
+    },
+    'cesium-ion': {accessToken: '<ion_access_token_for_your_asset>'}
+  }
+});
+```
 
 ## Upgrading from deck.gl v7.x to v8.0
 
