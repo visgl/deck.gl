@@ -22,7 +22,9 @@
     {
       "@@type": "Tile3DLayer",
       "id": "tiles-royal",
-      "tilesetUrl": "https://raw.githubusercontent.com/uber-common/deck.gl-data/master/3d-tiles/RoyalExhibitionBuilding/tileset.json"
+      "loader": "@@#Tiles3DLoader",
+      "getPointColor": [0, 125, 200, 255],
+      "data": "https://raw.githubusercontent.com/uber-common/deck.gl-data/master/3d-tiles/RoyalExhibitionBuilding/tileset.json"
     }
   ]
 }

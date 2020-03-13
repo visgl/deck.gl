@@ -13,19 +13,19 @@ References
 ```js
 import React, {Component} from 'react';
 import DeckGL from '@deck.gl/react';
-import {Tiles3DLoader} from '@loaders.gl/3d-tiles';
+import {CesiumIonLoader} from '@loaders.gl/3d-tiles';
 import {Tile3DLayer} from '@deck.gl/geo-layers';
 
 export default class App extends Component {
   render() {
     const layer = new Tile3DLayer({
       id: 'tile-3d-layer',
-      data: 'https://api.cesium.com/v1/assets/49378',
-      loader: Tiles3DLoader,
+      // tileset json file url 
+      data: 'https://assets.cesium.com/43978/tileset.json',
+      loader: CesiumIonLoader,
       // https://cesium.com/docs/rest-api/
-      // @loaders.gl/3d-tiles provide a handy function `getIonTilesetMetadata` (experimental) to resolve accessToken 
       loadOptions: {
-        headers: {Authentication: `Bearer <ion_access_token_for_your_asset>`} 
+        accessToken: `<ion_access_token_for_your_asset>`
       },
       onTilesetLoad: (tileset) => {
         // Recenter to cover the tileset
@@ -43,6 +43,27 @@ export default class App extends Component {
       _subLayerProps: {
         scenegraph: {_lighting: 'flat'}
       }
+    });
+     
+    return (<DeckGL {...viewport} layers={[layer]} />);
+  }
+}
+```
+
+**Load I3S Tiles**
+```js
+import React, {Component} from 'react';
+import DeckGL from '@deck.gl/react';
+import {I3SLoader} from '@loaders.gl/i3s';
+import {Tile3DLayer} from '@deck.gl/geo-layers';
+
+export default class App extends Component {
+  render() {
+    const layer = new Tile3DLayer({
+      id: 'tile-3d-layer',
+      // tileset json file url 
+      data: 'https://tiles.arcgis.com/tiles/z2tnIkrLQ2BRzr6P/arcgis/rest/services/SanFrancisco_Bldgs/SceneServer/layers/0',
+      loader: I3SLoader
     });
      
     return (<DeckGL {...viewport} layers={[layer]} />);
@@ -110,7 +131,7 @@ This value is only applied when [tile format](https://github.com/AnalyticalGraph
 
 - Default [`Tiles3DLoader`](https://loaders.gl/modules/3d-tiles/docs/api-reference/tile-3d-loader)
 
-A loader which is used to decode the fetched tiles. Either a [`Tiles3DLoader`](https://loaders.gl/modules/3d-tiles/docs/api-reference/tile-3d-loader) or `I3SLoader`.
+A loader which is used to decode the fetched tiles. Available options are [`CesiumIonLoader`,`Tiles3DLoader`](https://loaders.gl/modules/3d-tiles/docs/api-reference/tile-3d-loader), [`I3SLoader`](https://loaders.gl/modules/i3s/docs/api-reference/i3s-loader).
 
 ##### `loadOptions` (Object, Optional)
 

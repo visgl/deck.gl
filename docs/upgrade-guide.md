@@ -8,8 +8,37 @@
 
 ##### Tile3DLayer
 
-- A new prop `loader` need be provided, one of `Tiles3DLoader` (`@loaders.gl/3d-tiles`) or `I3SLoader` (`@loaders.gl/i3s`).
+- Add support for rendering [`i3s`](https://github.com/Esri/i3s-spec) tiles.
+- A new prop `loader` need be provided, one of `CesiumIonLoader`, `Tiles3DLoader` from (`@loaders.gl/3d-tiles`) or `I3SLoader` from (`@loaders.gl/i3s`).
 - `_ionAccessId` and `_ionAccesToken` are removed. To render an ion dataset with `Tile3DLayer`, pass the ion dataset url to prop `data`, and `loadOptions.headers` with Cesium authentication token.
+
+**Code examples**
+
+```js
+import {CesiumIonLoader} from '@loaders.gl/3d-tiles';
+import {I3SLoader} from '@loaders.gl/i3s';
+import {Tile3DLayer} from '@deck.gl/geo-layers';
+
+// load 3d tiles from Cesium ion
+const layer1 = new Tile3DLayer({
+  id: 'tile-3d-layer',
+  // tileset json file url 
+  data: 'https://assets.cesium.com/43978/tileset.json',
+  loader: CesiumIonLoader,
+  // https://cesium.com/docs/rest-api/
+  loadOptions: {
+    accessToken: `<ion_access_token_for_your_asset>`
+  }
+});
+
+// load i3s tiles
+const layer2 = new Tile3DLayer({
+  id: 'tile-3d-layer',
+  // tileset json file url 
+  data: 'https://tiles.arcgis.com/tiles/z2tnIkrLQ2BRzr6P/arcgis/rest/services/SanFrancisco_Bldgs/SceneServer/layers/0',
+  loader: I3SLoader
+});
+```
 
 ## Upgrading from deck.gl v7.x to v8.0
 

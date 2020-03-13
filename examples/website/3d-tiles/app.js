@@ -7,14 +7,17 @@ import {Tile3DLayer} from '@deck.gl/geo-layers';
 import {registerLoaders} from '@loaders.gl/core';
 // To manage dependencies and bundle size, the app must decide which supporting loaders to bring in
 import {DracoWorkerLoader} from '@loaders.gl/draco';
-import {Tiles3DLoader, _getIonTilesetMetadata as getIonTilesetMetadata} from '@loaders.gl/3d-tiles';
+import {CesiumIonLoader} from '@loaders.gl/3d-tiles';
+
 registerLoaders([DracoWorkerLoader]);
+
 // Set your mapbox token here
 const MAPBOX_TOKEN = process.env.MapboxAccessToken; // eslint-disable-line
 
 const ION_ASSET_ID = 43978;
 const ION_TOKEN =
   'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiJlYWMxMzcyYy0zZjJkLTQwODctODNlNi01MDRkZmMzMjIxOWIiLCJpZCI6OTYyMCwic2NvcGVzIjpbImFzbCIsImFzciIsImdjIl0sImlhdCI6MTU2Mjg2NjI3M30.1FNiClUyk00YH_nWfSGpiQAjR5V2OvREDq1PJ5QMjWQ';
+const TILESET_URL = `https://assets.cesium.com/${ION_ASSET_ID}/tileset.json`;
 
 const INITIAL_VIEW_STATE = {
   latitude: 40,
@@ -36,17 +39,10 @@ export default class App extends Component {
     };
   }
 
-  componentDidMount() {
-    this._loadIonData();
-  }
-
-  async _loadIonData() {
-    const ionMetadata = await getIonTilesetMetadata(ION_TOKEN, ION_ASSET_ID);
-    this.setState({
-      ionMetadata
-    });
+  _onTilesetLoad(tileset) {
+    this._centerViewOnTileset(tileset);
     if (this.props.updateAttributions) {
-      this.props.updateAttributions(ionMetadata.attributions);
+      this.props.updateAttributions(tileset.credits && tileset.credits.attributions);
     }
   }
 
@@ -68,18 +64,13 @@ export default class App extends Component {
   }
 
   _renderTile3DLayer() {
-    if (!this.state.ionMetadata) {
-      return null;
-    }
-    const {url, headers} = this.state.ionMetadata;
-
     return new Tile3DLayer({
       id: 'tile-3d-layer',
       pointSize: 2,
-      data: url,
-      loader: Tiles3DLoader,
-      loadOptions: {headers},
-      onTilesetLoad: this._centerViewOnTileset.bind(this)
+      data: TILESET_URL,
+      loader: CesiumIonLoader,
+      loadOptions: {accessToken: ION_TOKEN},
+      onTilesetLoad: this._onTilesetLoad.bind(this)
     });
   }
 
