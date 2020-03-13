@@ -69,7 +69,7 @@ export default class App extends Component {
       pointSize: 2,
       data: TILESET_URL,
       loader: CesiumIonLoader,
-      loadOptions: {accessToken: ION_TOKEN},
+      loadOptions: {'cesium-ion': {accessToken: ION_TOKEN}},
       onTilesetLoad: this._onTilesetLoad.bind(this)
     });
   }

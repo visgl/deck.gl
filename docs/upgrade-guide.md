@@ -8,8 +8,9 @@
 
 ##### Tile3DLayer
 
-- Add support for rendering [`i3s`](https://github.com/Esri/i3s-spec) tiles.
-- A new prop `loader` need be provided, one of `CesiumIonLoader`, `Tiles3DLoader` from (`@loaders.gl/3d-tiles`) or `I3SLoader` from (`@loaders.gl/i3s`).
+- A new prop `loader` needs to be provided, one of `CesiumIonLoader`, `Tiles3DLoader` from (`@loaders.gl/3d-tiles`) or `I3SLoader` from (`@loaders.gl/i3s`).
+- Since `Tile3DLayer` use `load` from [`@loaders.gl/core`](https://loaders.gl/modules/core/docs/api-reference/load) to load a tileset and then construct a `Tileset3D` object. 
+`loadOptions` is now used for passing any options available to the `loader`, and if you need forward options to [`Tileset3D`](https://loaders.gl/modules/tiles/docs/api-reference/tileset-3d#constructor-1), use`tilesetOptions`
 - `_ionAccessId` and `_ionAccesToken` are removed. To render an ion dataset with `Tile3DLayer`, pass the ion dataset url to prop `data`, and `loadOptions.headers` with Cesium authentication token.
 
 **Code examples**
@@ -27,7 +28,11 @@ const layer1 = new Tile3DLayer({
   loader: CesiumIonLoader,
   // https://cesium.com/docs/rest-api/
   loadOptions: {
-    accessToken: `<ion_access_token_for_your_asset>`
+    'cesium-ion': {accessToken: '<ion_access_token_for_your_asset>'}
+  },
+  // https://loaders.gl/modules/tiles/docs/api-reference/tileset-3d#constructor-1
+  tilesetOptions: {
+    throttleRequests: false
   }
 });
 

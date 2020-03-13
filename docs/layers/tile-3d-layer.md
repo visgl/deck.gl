@@ -25,7 +25,7 @@ export default class App extends Component {
       loader: CesiumIonLoader,
       // https://cesium.com/docs/rest-api/
       loadOptions: {
-        accessToken: `<ion_access_token_for_your_asset>`
+        'cesium-ion': {accessToken: '<ion_access_token_for_your_asset>'}
       },
       onTilesetLoad: (tileset) => {
         // Recenter to cover the tileset
@@ -133,22 +133,41 @@ This value is only applied when [tile format](https://github.com/AnalyticalGraph
 
 A loader which is used to decode the fetched tiles. Available options are [`CesiumIonLoader`,`Tiles3DLoader`](https://loaders.gl/modules/3d-tiles/docs/api-reference/tile-3d-loader), [`I3SLoader`](https://loaders.gl/modules/i3s/docs/api-reference/i3s-loader).
 
-##### `loadOptions` (Object, Optional)
+##### `tilesetOptions` (Object, Optional)
 
 - Default: `{throttleRequests: true}`
 
-Tile3DLayer constructs a [`Tileset3D`](https://loaders.gl/modules/3d-tiles/docs/api-reference/tileset-3d) object after fetching tilset json file. `loadOptions` is an experimental prop to provide Tileset options [Tileset3D options](https://loaders.gl/modules/3d-tiles/docs/api-reference/tileset-3d#options). Among these options, `onTileLoad`, `onTileUnload` and `onTileError` should be passed as layer props.
-
-Note: If `headers` are needed to request data from the server, use `loadOptions.headers`.
+`Tile3DLayer` constructs a [`Tileset3D`](https://loaders.gl/modules/3d-tiles/docs/api-reference/tileset-3d) object after fetching tileset entry file. `loadOptions` is an experimental prop to provide Tileset options [Tileset3D options](https://loaders.gl/modules/3d-tiles/docs/api-reference/tileset-3d#options). Among these options, `onTileLoad`, `onTileUnload` and `onTileError` should be passed as layer props.
 
 ```js
 const layer = new Tile3DLayer({
   data: '<path-to-your-tileset json file>',
-  loadOptions: {
-    throttleRequests: false,
-    headers: {}
+  tilesetOptions: {
+    throttleRequests: false
   }
 })
+```
+
+##### `loadOptions` (Object, Optional)
+
+- Default: `null`
+
+Any `options` supported by the `loader` can to be specified in `loaderOptions['loader.id]`, i.e. Using `CesiumIonLoader` to load a tileset from Cesium Ion server, access token should be provided in loadOptions['cesium-ion']
+
+```js
+import {CesiumIonLoader} from '@loaders.gl/3d-tiles';
+import {Tile3DLayer} from '@deck.gl/geo-layers';
+
+const layer = new Tile3DLayer({
+  id: 'tile-3d-layer',
+  // tileset json file url 
+  data: 'https://assets.cesium.com/43978/tileset.json',
+  loader: CesiumIonLoader,
+  // https://cesium.com/docs/rest-api/
+  loadOptions: {
+    'cesium-ion': {accessToken: '<ion_access_token_for_your_asset>'}
+  }
+});
 ```
 
 ##### `pickable` (Boolean, Optional)
