@@ -17,7 +17,7 @@ const defaultProps = {
   pointSize: 1.0,
 
   data: null,
-  loadOptions: {throttleRequests: true},
+  loadOptions: {},
   loader: Tiles3DLoader,
 
   onTilesetLoad: tileset3d => {},
@@ -67,8 +67,8 @@ export default class Tile3DLayer extends CompositeLayer {
   }
 
   async _loadTileset(tilesetUrl) {
-    const {loader, tilesetOptions, loadOptions} = this.props;
-    const options = {...tilesetOptions};
+    const {loader, loadOptions} = this.props;
+    const options = {...loadOptions};
     if (loader.preload) {
       const preloadOptions = await loader.preload(tilesetUrl, loadOptions);
       Object.assign(options, preloadOptions);

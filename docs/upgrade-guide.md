@@ -9,39 +9,30 @@
 ##### Tile3DLayer
 
 - A new prop `loader` needs to be provided, one of `CesiumIonLoader`, `Tiles3DLoader` from (`@loaders.gl/3d-tiles`) or `I3SLoader` from (`@loaders.gl/i3s`).
-- Since `Tile3DLayer` use `load` from [`@loaders.gl/core`](https://loaders.gl/modules/core/docs/api-reference/load) to load a tileset and then construct a `Tileset3D` object. 
-`loadOptions` is now used for passing any options available to the `loader`, and if you need forward options to [`Tileset3D`](https://loaders.gl/modules/tiles/docs/api-reference/tileset-3d#constructor-1), use`tilesetOptions`
+- Since `Tile3DLayer` uses `load` from [`@loaders.gl/core`](https://loaders.gl/modules/core/docs/api-reference/load) to load a tileset and then construct a `Tileset3D` object. 
+`loadOptions[loader.id]` is used for passing any options available to the `loader`, and if you need forward options to [`Tileset3D`](https://loaders.gl/modules/tiles/docs/api-reference/tileset-3d#constructor-1), use`loadOptions.tileset`
 - `_ionAccessId` and `_ionAccesToken` are removed. To render an ion dataset with `Tile3DLayer`, pass the ion dataset url to prop `data`, and `loadOptions.headers` with Cesium authentication token.
 
 **Code examples**
 
 ```js
 import {CesiumIonLoader} from '@loaders.gl/3d-tiles';
-import {I3SLoader} from '@loaders.gl/i3s';
 import {Tile3DLayer} from '@deck.gl/geo-layers';
 
 // load 3d tiles from Cesium ion
-const layer1 = new Tile3DLayer({
+const layer = new Tile3DLayer({
   id: 'tile-3d-layer',
   // tileset json file url 
   data: 'https://assets.cesium.com/43978/tileset.json',
   loader: CesiumIonLoader,
   // https://cesium.com/docs/rest-api/
   loadOptions: {
+    // https://loaders.gl/modules/tiles/docs/api-reference/tileset-3d#constructor-1
+    tileset: {
+      throttleRequests: false
+    },
     'cesium-ion': {accessToken: '<ion_access_token_for_your_asset>'}
-  },
-  // https://loaders.gl/modules/tiles/docs/api-reference/tileset-3d#constructor-1
-  tilesetOptions: {
-    throttleRequests: false
   }
-});
-
-// load i3s tiles
-const layer2 = new Tile3DLayer({
-  id: 'tile-3d-layer',
-  // tileset json file url 
-  data: 'https://tiles.arcgis.com/tiles/z2tnIkrLQ2BRzr6P/arcgis/rest/services/SanFrancisco_Bldgs/SceneServer/layers/0',
-  loader: I3SLoader
 });
 ```
 

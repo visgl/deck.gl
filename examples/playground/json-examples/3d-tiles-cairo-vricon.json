@@ -25,8 +25,11 @@
       "DracoWorkerLoader": "@!DracoWorkerLoader",
       "loader": "@@#CesiumIonLoader",
       "data": "https://assets.cesium.com/44865/tileset.json",
-      "loadOptions": {"accessToken":
-        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiIwOTBkYTA1ZS03NGM5LTQyNTEtOTViOS1hZDFmNDZjZGQ3YTEiLCJpZCI6NDQsInNjb3BlcyI6WyJhc3IiXSwiYXNzZXRzIjpbNDQ4NjVdLCJpYXQiOjE1Njk0MTcwNjh9.zrWE65u2u-TYyTSRKhDl9-yDYrC_qxiJQ-tZFCgMbt0"
+      "loadOptions": {
+        "cesium-ion": {
+          "accessToken":
+            "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiIwOTBkYTA1ZS03NGM5LTQyNTEtOTViOS1hZDFmNDZjZGQ3YTEiLCJpZCI6NDQsInNjb3BlcyI6WyJhc3IiXSwiYXNzZXRzIjpbNDQ4NjVdLCJpYXQiOjE1Njk0MTcwNjh9.zrWE65u2u-TYyTSRKhDl9-yDYrC_qxiJQ-tZFCgMbt0"
+        }
       }
     }
   ]
