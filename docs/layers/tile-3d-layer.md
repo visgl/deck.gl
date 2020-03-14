@@ -9,7 +9,8 @@ References
 - [3D Tiles](https://github.com/AnalyticalGraphicsInc/3d-tiles/tree/master/specification).
 - [ESRI I3S](https://github.com/Esri/i3s-spec)
 
-* Load a 3D tiles dataset from ION server. [Set up Ion account](https://cesium.com/docs/tutorials/getting-started/#your-first-app);
+**Load a 3D tiles dataset from ION server. [Set up Ion account](https://cesium.com/docs/tutorials/getting-started/#your-first-app);**
+
 ```js
 import React, {Component} from 'react';
 import DeckGL from '@deck.gl/react';
