@@ -19,6 +19,10 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v8.1
 
+### deck.gl [8.1.0-beta.3] - Mar 13 2020
+
+- playground: add back Cairo 3d tiles example and bump luma (#4386)
+
 ### deck.gl [8.1.0-beta.2] - Mar 13 2020
 
 - geo-layers: API audit for tile-3d-layer and bump loaders (#4384)
