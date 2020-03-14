@@ -97,7 +97,6 @@ class Root extends PureComponent {
           new TileLayer({
             ...MAP_LAYER_STYLES,
             coordinateSystem: COORDINATE_SYSTEM.CARTESIAN,
-            getPolygonOffset: null,
             pickable: true,
             getTileData
           })
