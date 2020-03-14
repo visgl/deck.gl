@@ -13,7 +13,7 @@ DOC_TEMPLATE = jinja2.Template(
 
 .. raw:: html
 
-    <iframe width="560" height="315" src="{{hosted_html_path}}"></iframe>
+    <iframe width="600" height="500" src="{{hosted_html_path}}"></iframe>
 
 
 Source
