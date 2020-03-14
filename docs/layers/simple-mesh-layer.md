@@ -79,7 +79,7 @@ Inherits from all [Base Layer](/docs/api-reference/layer.md) properties.
 ##### `mesh` (Geometry|Object|Promise)
 
 The geometry to render for each data object.
-Can be a luma.gl [Geometry](http://uber.github.io/luma.gl/#/documentation/api-reference/geometry) instance, or an object of attributes, a `Promise` that resolves to one of the above,
+Can be a luma.gl [Geometry](https://luma.gl/docs/api-reference/engine/geometry) instance, or an object of attributes, a `Promise` that resolves to one of the above,
 or a URL to a mesh description file in a format supported by [loaders.gl](https://github.com/uber-web/loaders.gl) (the appropriate loader will have to be registered via the loaders.gl
 `registerLoaders` function for this usage).
 
@@ -95,7 +95,7 @@ The following attributes are expected:
 - Default `null`.
 
 The texture of the geometries.
-Can be either a luma.gl [Texture2D](http://uber.github.io/luma.gl/#/documentation/api-reference/texture-2) instance, an HTMLImageElement, or a url string to the texture image.
+Can be either a luma.gl [Texture2D](https://luma.gl/docs/api-reference/webgl/texture-2d) instance, an HTMLImageElement, or a url string to the texture image.
 
 If `texture` is supplied, texture is used to render the geometries. Otherwise, object color obtained via the `getColor` accessor is used.
 

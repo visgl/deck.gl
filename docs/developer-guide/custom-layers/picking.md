@@ -99,7 +99,7 @@ By default, the `object` field of the picking `info` object is indexed from the 
 
 ### Model object creation
 
-If your layer creates its own [Model](https://luma.gl/docs/api-reference/core/model) object, add picking module to `modules` array.
+If your layer creates its own [Model](https://luma.gl/docs/api-reference/engine/model) object, add picking module to `modules` array.
 
 ```js
 import {Model} from '@luma.gl/core';
@@ -144,4 +144,4 @@ void main(void) {
 }
 ```
 
-For more details refer to luma.gl's [`Picking Module`](http://uber.github.io/luma.gl/#/documentation/api-reference/shader-module).
+For more details refer to luma.gl's [`Picking Module`](https://luma.gl/docs/api-reference/shadertools/core-shader-modules).

@@ -75,4 +75,4 @@ There is an impressive amount of information (documentation, blog posts, educati
 
 Knowledge of WebGL is only needed if you want to create custom layers in deck.gl. Note that while trying out a new ambitious rendering approach for a new layer will likely require deeper knowledge, it is often possible to modify or extend existing deck.gl layers (including modifying the shader code) with a surprisingly limited amount of WebGL knowledge.
 
-There are many web resources for learning WebGL. [luma.gl](https://uber.github.io/luma.gl/#/) can be a good start.
+There are many web resources for learning WebGL. [luma.gl](https://luma.gl/) can be a good start.
