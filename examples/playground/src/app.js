@@ -3,10 +3,6 @@ import {render} from 'react-dom';
 import AutoSizer from 'react-virtualized-auto-sizer';
 import {StaticMap} from 'react-map-gl';
 import DeckWithMaps from './deck-with-maps';
-import {DracoWorkerLoader} from '@loaders.gl/draco';
-import {registerLoaders} from '@loaders.gl/core';
-
-registerLoaders([DracoWorkerLoader]);
 
 import {FlyToInterpolator} from '@deck.gl/core';
 import {JSONConverter, JSONConfiguration, _shallowEqualObjects} from '@deck.gl/json';
