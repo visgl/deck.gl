@@ -15,7 +15,7 @@ To describe how a layer's properties relate to WebGL attributes and uniforms you
 
 #### Creating The Model
 
-A layer should create its model during this phase. A model is a [luma.gl](https://github.com/uber/luma.gl) [Model](https://github.com/uber/luma.gl/blob/master/docs/api-reference/core/model.md) instance that defines what will be drawn to the WebGL context.
+A layer should create its model during this phase. A model is a [luma.gl](https://github.com/uber/luma.gl) [Model](https://github.com/uber/luma.gl/blob/8.0-release/docs/api-reference/engine/model.md) instance that defines what will be drawn to the WebGL context.
 
 Most layers are **Single-model layers** - this is the predominant form among all core layers that deck.gl currently provides. In these layers, a single geometry model is created for each layer and saved to `state.model` during initialization. The default implementation of the rest of the lifecycle methods will then look for this model for rendering and picking etc., meaning that you don't have to do anything more to get a working layer.
 

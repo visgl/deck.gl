@@ -9,7 +9,7 @@
 ##### Tile3DLayer
 
 - A new prop `loader` needs to be provided, one of `CesiumIonLoader`, `Tiles3DLoader` from (`@loaders.gl/3d-tiles`) or `I3SLoader` from (`@loaders.gl/i3s`).
-- Since `Tile3DLayer` uses `load` from [`@loaders.gl/core`](https://loaders.gl/modules/core/docs/api-reference/load) to load a tileset and then construct a `Tileset3D` object. 
+- Since `Tile3DLayer` uses `load` from [`@loaders.gl/core`](https://loaders.gl/modules/core/docs/api-reference/load) to load a tileset and then construct a `Tileset3D` object.
 `loadOptions[loader.id]` is used for passing any options available to the `loader`, and if you need forward options to [`Tileset3D`](https://loaders.gl/modules/tiles/docs/api-reference/tileset-3d#constructor-1), use`loadOptions.tileset`
 - `loaderOptions` default to `{}`. used to be `loadOptions: {throttleRequest: true}`
 - `_ionAccessId` and `_ionAccesToken` are removed. To render an ion dataset with `Tile3DLayer`, pass the ion dataset url to prop `data`, and `loadOptions.headers` with Cesium authentication token.
@@ -23,14 +23,14 @@ import {Tile3DLayer} from '@deck.gl/geo-layers';
 // load 3d tiles from Cesium ion
 const layer = new Tile3DLayer({
   id: 'tile-3d-layer',
-  // tileset json file url 
+  // tileset json file url
   data: 'https://assets.cesium.com/43978/tileset.json',
   loader: CesiumIonLoader,
   // https://cesium.com/docs/rest-api/
   loadOptions: {
     // https://loaders.gl/modules/tiles/docs/api-reference/tileset-3d#constructor-1
     tileset: {
-      throttleRequests: true 
+      throttleRequests: true
     },
     'cesium-ion': {accessToken: '<ion_access_token_for_your_asset>'}
   }
@@ -61,7 +61,7 @@ const layer = new Tile3DLayer({
 - `Tile3DLayer` props:
   + `onTileLoadFail`: use `onTileError`
 - `TileLayer` props:
-  + `onViewportLoaded`: use `onViewportLoad`  
+  + `onViewportLoaded`: use `onViewportLoad`
 - `project` shader module
   + `project_scale`: use `project_size`
   + `project_to_clipspace`: use `project_position_to_clipspace`
@@ -113,7 +113,7 @@ In older versions of deck, we used to set `UNPACK_FLIP_Y_WEBGL` by default when 
 
 Users of `SimpleMeshLayer` with texture will need to flip their texture image vertically.
 
-The change has allowed us to support loading textures from `ImageBitmap`, in use cases such as rendering to `OffscreenCanvas` on a web worker. 
+The change has allowed us to support loading textures from `ImageBitmap`, in use cases such as rendering to `OffscreenCanvas` on a web worker.
 
 ##### projection system
 
