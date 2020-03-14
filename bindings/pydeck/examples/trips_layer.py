@@ -34,4 +34,4 @@ view_state = pdk.ViewState(
 
 # Render
 r = pdk.Deck(layers=[layer], initial_view_state=view_state)
-r.to_html("trips_layer.html")
+r.to_html("trips_layer.html", notebook_display=False)

@@ -29,4 +29,4 @@ r = pdk.Deck(
     initial_view_state=view_state,
     tooltip={"text": "{position}\nCount: {count}"},
 )
-r.to_html("grid_layer.html")
+r.to_html("grid_layer.html", notebook_display=False)

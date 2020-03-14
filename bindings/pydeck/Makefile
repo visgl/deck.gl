@@ -33,9 +33,8 @@ screenshot-examples:
 	pip install pyppeteer
 	python examples/scripts/update_docs.py
 
-docs:
-	cd docs; \
-	$(MAKE) html
+publish-conda:	
+	echo "NOTE pydeck does not yet publish to conda-forge. Awaiting #4202."
 
 bump-version:
 	@read -p "Choose a release type {MAJOR, MINOR, PATCH, BETA, ALPHA, RC}:" choice; \
