@@ -14,6 +14,7 @@
     "lint": "eslint src --ignore-pattern workers"
   },
   "dependencies": {
+    "@loaders.gl/3d-tiles": "^2.1.0-beta.1",
     "@loaders.gl/csv": "^2.1.0-beta.1",
     "@loaders.gl/core": "^2.1.0-beta.1",
     "@loaders.gl/draco": "^2.1.0-beta.1",
