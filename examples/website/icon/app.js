@@ -2,6 +2,7 @@ import React, {Component} from 'react';
 import {render} from 'react-dom';
 import {StaticMap} from 'react-map-gl';
 import DeckGL from '@deck.gl/react';
+import {MapView} from '@deck.gl/core';
 import {IconLayer} from '@deck.gl/layers';
 
 import IconClusterLayer from './icon-cluster-layer';
@@ -13,6 +14,7 @@ const MAPBOX_TOKEN = process.env.MapboxAccessToken; // eslint-disable-line
 const DATA_URL =
   'https://raw.githubusercontent.com/uber-common/deck.gl-data/master/examples/icon/meteorites.json'; // eslint-disable-line
 
+const MAP_VIEW = new MapView({repeat: true});
 const INITIAL_VIEW_STATE = {
   longitude: -35,
   latitude: 36.7,
@@ -113,7 +115,6 @@ export default class App extends Component {
     const layerProps = {
       data,
       pickable: true,
-      wrapLongitude: true,
       getPosition: d => d.coordinates,
       iconAtlas,
       iconMapping,
@@ -140,6 +141,7 @@ export default class App extends Component {
     return (
       <DeckGL
         layers={this._renderLayers()}
+        views={MAP_VIEW}
         initialViewState={INITIAL_VIEW_STATE}
         controller={{dragRotate: false}}
         onViewStateChange={this._closePopup}
