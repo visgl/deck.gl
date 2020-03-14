@@ -9,8 +9,7 @@ export default {
   'website/TagMap (TextLayer)': require('./tagmap.json'),
   'website/3D Tiles (Tile3DLayer, Royal)': require('./3d-tiles-royal.json'),
   'website/3D Tiles (Tile3DLayer, St Helens)': require('./3d-tiles-st-helens.json'),
-  // TODO restore when luma fix shader assemble
-  // 'website/3D Tiles (Tile3DLayer, Cairo/vricon)': require('./3d-tiles-cairo-vricon.json'),
+  'website/3D Tiles (Tile3DLayer, Cairo/vricon)': require('./3d-tiles-cairo-vricon.json'),
   'website/3D Tiles (Tile3DLayer, New York)': require('./3d-tiles-new-york.json'),
   // GET STARTED EXAMPLES AS JSON PAYLOADS
   'get-started/US map (GeoJsonLayer)': require('./us-map.json'),
