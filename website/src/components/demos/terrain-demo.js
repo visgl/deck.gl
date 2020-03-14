@@ -59,10 +59,6 @@ export default class TerrainDemo extends Component {
     };
   }
 
-  static get allowMissingData() {
-    return true;
-  }
-
   static get mapStyle() {
     return MAPBOX_STYLES.BLANK;
   }
