@@ -10,8 +10,8 @@ import Pass from './pass';
 export default class ScreenPass extends Pass {
   constructor(gl, props = {}) {
     super(gl, props);
-    const {module, fs, id, moduleProps} = props;
-    this.model = this._getModel(gl, module, fs, id, moduleProps);
+    const {module, fs, id} = props;
+    this.model = new ClipSpace(gl, {id, fs, modules: [module]});
   }
 
   render(params) {
@@ -27,16 +27,7 @@ export default class ScreenPass extends Pass {
     this.model = null;
   }
 
-  // Private method
-
-  _getModel(gl, module, fs, id, userProps) {
-    const model = new ClipSpace(gl, {id, fs, modules: [module]});
-
-    const uniforms = Object.assign(module.getUniforms(), module.getUniforms(userProps));
-
-    model.setUniforms(uniforms);
-    return model;
-  }
+  // Private methods
 
   /**
    * Renders the pass.
@@ -47,6 +38,7 @@ export default class ScreenPass extends Pass {
   _renderPass(gl, {inputBuffer, outputBuffer}) {
     clear(gl, {color: true});
     this.model.draw({
+      moduleSettings: this.props.moduleSettings,
       uniforms: {
         texture: inputBuffer,
         texSize: [inputBuffer.width, inputBuffer.height]
