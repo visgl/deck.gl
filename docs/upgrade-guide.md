@@ -4,17 +4,15 @@
 
 ### Breaking Changes
 
-- `s2-geometry` is no longer a dependency of `@deck.gl/geo-layers`.
+- `s2-geometry` is no longer a dependency of `@deck.gl/geo-layers`. If you were using this module in an application, it needs to be explicitly added to package.json.
+- deck.gl no longer crashes if one of the layers encounters an error during update and/or render. By default, errors are now logged to the console. Specify the `onError` callback to manually handle errors in your application.
+- `Deck` now reacts to changes in the `initialViewState` prop. In 8.0 and earlier versions, this prop was not monitored after the deck instance was constructed. Starting 8.1, if `initialViewState` changes deeply, the camera will be reset. It is recommended that you use a constant for `initialViewState` to achieve behavior consistent with the previous versions.
 
 ##### Tile3DLayer
 
 - A new prop `loader` needs to be provided, one of `CesiumIonLoader`, `Tiles3DLoader` from (`@loaders.gl/3d-tiles`) or `I3SLoader` from (`@loaders.gl/i3s`).
-- Since `Tile3DLayer` uses `load` from [`@loaders.gl/core`](https://loaders.gl/modules/core/docs/api-reference/load) to load a tileset and then construct a `Tileset3D` object.
-`loadOptions[loader.id]` is used for passing any options available to the `loader`, and if you need forward options to [`Tileset3D`](https://loaders.gl/modules/tiles/docs/api-reference/tileset-3d#constructor-1), use`loadOptions.tileset`
-- `loaderOptions` default to `{}`. used to be `loadOptions: {throttleRequest: true}`
-- `_ionAccessId` and `_ionAccesToken` are removed. To render an ion dataset with `Tile3DLayer`, pass the ion dataset url to prop `data`, and `loadOptions.headers` with Cesium authentication token.
-
-**Code examples**
+- The `loadOptions` prop is now used for passing all loaders.gl options, not just [`Tileset3D`](https://loaders.gl/modules/tiles/docs/api-reference/tileset-3d#constructor-1). To revert back to the 8.0 behavior, use `{tileset: {throttleRequest: true}}`.
+- `_ionAccessId` and `_ionAccesToken` props are removed. To render an ion dataset with `Tile3DLayer`, follow this example:
 
 ```js
 import {CesiumIonLoader} from '@loaders.gl/3d-tiles';
@@ -24,7 +22,7 @@ import {Tile3DLayer} from '@deck.gl/geo-layers';
 const layer = new Tile3DLayer({
   id: 'tile-3d-layer',
   // tileset json file url
-  data: 'https://assets.cesium.com/43978/tileset.json',
+  data: 'https://assets.cesium.com/<ion_access_id>/tileset.json',
   loader: CesiumIonLoader,
   // https://cesium.com/docs/rest-api/
   loadOptions: {
