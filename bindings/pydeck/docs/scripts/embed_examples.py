@@ -1,3 +1,4 @@
+"""Script to convert pydeck examples into .rst pages with code"""
 import os
 import glob
 import jinja2
@@ -5,9 +6,9 @@ import jinja2
 import subprocess
 
 
-layer_example_template = jinja2.Template(
+DOC_TEMPLATE = jinja2.Template(
     """
-{{ layer_name }}
+{{ layer_name.replace('_').title() }}
 ================================
 
 .. raw:: html
@@ -15,8 +16,8 @@ layer_example_template = jinja2.Template(
     <iframe width="560" height="315" src="{{hosted_html_path}}"></iframe>
 
 
-Source code
-^^^^^^^^^^^^^^^^^^^^^^^^^
+Source
+------
 
 .. code-block:: python
 
@@ -27,8 +28,8 @@ Source code
 
 
 EXAMPLE_GLOB = "../examples/*_layer.py"
-HTML_DIR = "./_build/html/_static/gallery/"
 GALLERY_DIR = "./gallery/"
+HTML_DIR = "./_build/html/_static/gallery/"
 STATIC_PATH = "/_static/gallery"
 
 
@@ -47,7 +48,7 @@ def main():
             shell=True,
         )
         python_code = open(fname, "r").read()
-        doc_source = layer_example_template.render(
+        doc_source = DOC_TEMPLATE.render(
             layer_name=layer_name,
             python_code=python_code,
             hosted_html_path=os.path.join(STATIC_PATH, html_fname),
