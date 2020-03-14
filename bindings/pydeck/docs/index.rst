@@ -15,7 +15,7 @@ pydeck Documentation
    light_settings
    custom_layers
    binary_transfer
-   gallery/scatterplot_layer
+   gallery
 
 .. figure:: https://camo.githubusercontent.com/020e7749ebfb7a8f50403fcbc8650833608c006d/68747470733a2f2f6d7962696e6465722e6f72672f7374617469632f6c6f676f2e7376673f763d6639663064393237623637636339646339396437383863383232636132316330
    :target: https://mybinder.org/v2/gh/uber/deck.gl/binder

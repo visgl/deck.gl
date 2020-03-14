@@ -8,7 +8,7 @@ import subprocess
 
 DOC_TEMPLATE = jinja2.Template(
     """
-{{ layer_name.replace('_').title() }}
+{{ layer_name.replace('_', '').title() }}
 ================================
 
 .. raw:: html
