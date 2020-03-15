@@ -19,7 +19,8 @@ const defaultProps = {
   minZoom: 0,
   maxCacheSize: null,
   maxCacheByteSize: null,
-  refinementStrategy: STRATEGY_DEFAULT
+  refinementStrategy: STRATEGY_DEFAULT,
+  zRange: null
 };
 
 export default class TileLayer extends CompositeLayer {
@@ -85,8 +86,8 @@ export default class TileLayer extends CompositeLayer {
 
   _updateTileset() {
     const {tileset} = this.state;
-    const {onViewportLoad} = this.props;
-    const frameNumber = tileset.update(this.context.viewport);
+    const {onViewportLoad, zRange} = this.props;
+    const frameNumber = tileset.update(this.context.viewport, {zRange});
     const {isLoaded} = tileset;
 
     const loadingStateChanged = this.state.isLoaded !== isLoaded;
