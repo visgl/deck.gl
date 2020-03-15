@@ -20,78 +20,58 @@
 [![docs](http://i.imgur.com/mvfvgf0.jpg)](https://uber.github.io/deck.gl)
 
 
-## Installation
+deck.gl is designed to make visualization of large data sets simple. It enables users to quickly get impressive visual results with limited effort through composition of existing layers, while offering a complete architecture for packaging advanced WebGL based visualizations as reusable JavaScript layers.
 
+The basic idea of using deck.gl is to map **data** (usually an array of JSON objects) into a stack of visual **layers** - e.g. icons, polygons, texts; and look at them with **views**: map, first-person, orthographic, etc.
+
+deck.gl handles a number of challenges out of the box:
+
+* Rendering of large data sets and performant updates
+* Interactive event handling such as picking, highlighting and filtering
+* Cartographic projections and integration with major basemap providers
+* A catalog of proven, well-tested layers
+
+One of deck.gl's philosophies is to be highly customizable. All layers come with flexible APIs to allow programmatic control of every aspect of the rendering. All core classes such as Layer, View, Controller, Effect and Transition are designed to be easily extendable by the users to address custom use cases.
+
+## Flavors
+
+### Script Tag
+
+```html
+<script src="https://unpkg.com/deck.gl@latest/dist.min.js"></script>
 ```
+
+- [Get started](/docs/get-started/using-standalone.md#using-the-scripting-api)
+- [Full examples](https://github.com/uber/deck.gl/tree/master/examples/get-started/scripting)
+
+### NPM Module
+
+```bash
 npm install deck.gl
 ```
 
-## Using deck.gl
+#### Pure JS
 
-deck.gl offers an extensive catalog of pre-packaged visualization "layers", including [ScatterplotLayer](http://deck.gl/#/documentation/deckgl-api-reference/layers/scatterplot-layer), [ArcLayer](http://deck.gl/#/documentation/deckgl-api-reference/layers/arc-layer), [TextLayer](http://deck.gl/#/documentation/deckgl-api-reference/layers/text-layer), [GeoJsonLayer](http://deck.gl/#/documentation/deckgl-api-reference/layers/geojson-layer), etc. The input to a layer is usually an array of JSON objects. Each layer offers a highly-flexible API to customize how the data should be rendered.
+- [Get started](/docs/get-started/using-standalone.md)
+- [Full examples](https://github.com/uber/deck.gl/tree/master/examples/get-started/pure-js)
 
-Example constructing a deck.gl ScatterplotLayer:
+#### React
 
-```js
-import {ScatterplotLayer} from '@deck.gl/layers';
+- [Get started](/docs/get-started/using-with-react.md)
+- [Full examples](https://github.com/uber/deck.gl/tree/master/examples/get-started/react)
 
-/**
- * data is an array of object in the shape of:
- * {
- *   "name":"Montgomery St. (MONT)",
- *   "address":"598 Market Street, San Francisco CA 94104",
- *   "entries":"43430",
- *   "exits":"45128",
- *   "coordinates":[-122.401407,37.789256]
- * }
- */
-const scatterplotLayer = new ScatterplotLayer({
-  id: 'bart-stations',
-  data: 'https://github.com/uber-common/deck.gl-data/blob/master/website/bart-stations.json',
-  getRadius: d => Math.sqrt(d.entries) / 100,
-  getPosition: d => d.coordinates,
-  getFillColor: [255, 228, 0],
-});
+### Python
+
+```bash
+pip install pydeck
 ```
 
-## Using deck.gl with React
+- [Get started](https://github.com/uber/deck.gl/blob/master/bindings/pydeck/README.md)
 
-```js
-import DeckGL from 'deck.gl';
+### Third-Party Bindings
 
-<DeckGL
-  width="100%"
-  height="100%"
-  initialViewState={{longitude: -122.4, latitude: 37.78, zoom: 8}}
-  controller={true}
-  layers={[scatterplotLayer]} />
-```
+- R: [mapdeck](https://symbolixau.github.io/mapdeck/articles/mapdeck.html)
 
-## Using deck.gl with Pure JS
-
-```js
-import {Deck} from '@deck.gl/core';
-
-const deck = new Deck({
-  width: '100vw',
-  height: '100vh',
-  initialViewState: {
-    longitude: -122.4,
-    latitude: 37.78,
-    zoom: 8
-  },
-  controller: true,
-  layers: [scatterplotLayer]
-});
-```
-
-Minimum setups of end-to-end deck.gl usage is also showcased in the [hello-world examples](./examples/get-started), using both [webpack](https://webpack.js.org/) and [browserify](http://browserify.org/), so you can choose which bundler you prefer or are more familiar with.
-
-To learn how to use deck.gl through the many examples that come with the deck.gl repo, please clone the latest **release** branch:
-
-```
-git clone -b 7.3-release --single-branch https://github.com/uber/deck.gl.git
-```
 
 For the most up-to-date information, see our [API documentations](http://deck.gl/#/documentation)
 

@@ -1,13 +1,23 @@
 # Learning Resources
 
-## Vis Academy
+## Technical Deep Dive
 
-In-depth tutorials for how to develop deck.gl applications are available on the [Vis Academy](http://vis.academy/#/) website. Focused on React applications.
+An in-depth view into the technical details and architectural decisions behind deck.gl. [Google Slides](https://docs.google.com/presentation/d/1qtXUQzMuIa8NYIKUa1RKfSwvgpeccY-wrPrYqsb_8rE/edit#slide=id.g7db7fb98fb_0_45)
 
 ## Prototyping & Sharing
 
-PureJS examples in prototyping environments. Great templates for feature testing and bug reporting:
+PureJS examples in prototyping environments. These are great templates for feature testing and bug reporting:
 
 * deck.gl's [Codepen demos](https://codepen.io/vis-gl/)
 * deck.gl's [Observable demos](https://beta.observablehq.com/@pessimistress)
-* [Scripting Gallery](http://deck.gl/showcases/gallery/)
+* [One-page scripting examples](http://deck.gl/showcases/gallery/)
+
+## Vis Academy
+
+In-depth tutorials for how to develop deck.gl React applications are available on the [Vis Academy](http://vis.academy/#/) website.
+
+## Community
+
+[vis.gl's Medium blog](https://medium.com/vis-gl) 
+
+Join our [Slack channel](deckgl.slack.com) for learning and discussions.
