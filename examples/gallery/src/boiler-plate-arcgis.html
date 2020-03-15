@@ -1,0 +1,52 @@
+<html>
+  <head>
+    <title>Get Started with deck.gl and ArcGIS</title>
+    <script src="https://unpkg.com/deck.gl@^8.1.0-beta.3/dist.min.js"></script>
+    <script src="https://unpkg.com/@deck.gl/arcgis@^8.1.0-beta.3/dist.min.js"></script>
+    <script src="https://js.arcgis.com/4.14/"></script>
+    <link rel="stylesheet" href="https://js.arcgis.com/4.14/esri/themes/light/main.css"/>
+  </head>
+
+  <body style="margin:0;">
+    <div id="container" style="width: 100vw; height: 100vh;"></div>
+  </body>
+
+  <script type="text/javascript">
+
+const {loadArcGISModules, ScatterplotLayer, TextLayer} = deck;
+
+loadArcGISModules(['esri/Map', 'esri/views/MapView']).then(({DeckLayer, modules}) => {
+  const [ArcGISMap, MapView] = modules;
+  const layer = new DeckLayer({
+    'deck.layers': [
+      new ScatterplotLayer({
+        data: [
+          {position: [-122.402, 37.79], color: [255, 0, 0], radius: 1000}
+        ],
+        getPosition: d => d.position,
+        getFillColor: d => d.color,
+        getRadius: d => d.radius,
+        opacity: 0.3
+      }),
+      new TextLayer({
+        data: [
+          {position: [-122.402, 37.79], text: 'Hello World'}
+        ],
+        getPosition: d => d.position,
+        getText: d => d.text
+      })
+    ]
+  });
+
+  const mapView = new MapView({
+    container: 'container',
+    map: new ArcGISMap({
+      basemap: 'gray-vector',
+      layers: [layer]
+    }),
+    center: [-122.45, 37.78],
+    zoom: 11
+  });
+});
+  </script>
+</html>

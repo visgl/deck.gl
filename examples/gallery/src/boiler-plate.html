@@ -1,6 +1,6 @@
 <html>
   <head>
-    <title>Get Started with deck.gl</title>
+    <title>Get Started with deck.gl and Mapbox</title>
     <script src="https://unpkg.com/deck.gl@^8.0.0/dist.min.js"></script>
     <script src="https://api.tiles.mapbox.com/mapbox-gl-js/v1.4.0/mapbox-gl.js"></script>
   </head>
@@ -27,7 +27,7 @@
             {position: [-122.402, 37.79], color: [255, 0, 0], radius: 1000}
           ],
           getPosition: d => d.position,
-          getColor: d => d.color,
+          getFillColor: d => d.color,
           getRadius: d => d.radius,
           opacity: 0.3
         }),

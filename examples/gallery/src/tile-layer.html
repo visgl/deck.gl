@@ -1,0 +1,45 @@
+<html>
+  <head>
+    <title>deck.gl TileLayer</title>
+    <script src="https://unpkg.com/deck.gl@^8.0.0/dist.min.js"></script>
+  </head>
+
+  <body style="margin:0; width: 100vw; height: 100vh;"></body>
+
+  <script type="text/javascript">
+
+    const {DeckGL, TileLayer, BitmapLayer} = deck;
+
+    new DeckGL({
+      initialViewState: {
+        longitude: -122.45,
+        latitude: 37.78,
+        zoom: 11,
+        maxZoom: 16
+      },
+      controller: true,
+      layers: [
+        new TileLayer({
+          // https://wiki.openstreetmap.org/wiki/Slippy_map_tilenames#Tile_servers
+          data: 'https://c.tile.openstreetmap.org/{z}/{x}/{y}.png',
+
+          minZoom: 0,
+          maxZoom: 19,
+
+          renderSubLayers: props => {
+            const {
+              bbox: {west, south, east, north}
+            } = props.tile;
+
+            return new BitmapLayer(props, {
+              data: null,
+              image: props.data,
+              bounds: [west, south, east, north]
+            });
+          }
+        })
+      ]
+    });
+
+  </script>
+</html>
