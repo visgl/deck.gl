@@ -67,8 +67,9 @@ pip install pydeck
 
 ### Third-Party Bindings
 
-- R: [mapdeck](https://symbolixau.github.io/mapdeck/articles/mapdeck.html)
-
+- [deckgl-typings](https://github.com/danmarshall/deckgl-typings) (Typescript)
+- [mapdeck](https://symbolixau.github.io/mapdeck/articles/mapdeck.html) (R)
+- [vega-deck.gl](https://github.com/microsoft/SandDance/tree/master/packages/vega-deck.gl) ([Vega](https://vega.github.io/))
 
 ## Ecosystem
 
