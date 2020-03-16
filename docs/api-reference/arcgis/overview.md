@@ -6,9 +6,9 @@ The functionality exported by this module must be loaded asynchronously using th
 This function can be used to load any module that ships with the ArcGIS API for JavaScript, plus an additional `arcGIS` module
 that acts as an interface between deck.gl and ArcGIS.
 
-2D integration with `MapView` is supported by the [DeckLayer](/docs/api-reference/deck-layer.md) class.
+2D integration with `MapView` is supported by the [DeckLayer](/docs/api-reference/arcgis/deck-layer.md) class.
 
-3D integration with `SceneView` is supported by the [DeckRenderer](/docs/api-reference/deck-renderer.md) class.
+3D integration with `SceneView` is experimental: see the [DeckRenderer](/docs/api-reference/arcgis/deck-renderer.md) class.
 
 ## Installation
 
