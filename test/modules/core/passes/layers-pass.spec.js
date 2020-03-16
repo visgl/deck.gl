@@ -116,16 +116,16 @@ test('LayersPass#layerIndexResolver', t => {
           subLayers: [
             {
               id: 'layer-2-1',
-              _index: 0,
+              _offset: 0,
               children: [
-                {id: 'layer-2-1-1', _index: 2},
-                {id: 'layer-2-1-2', _index: 1},
-                {id: 'layer-2-1-3', _index: 0}
+                {id: 'layer-2-1-1', _offset: 2},
+                {id: 'layer-2-1-2', _offset: 1},
+                {id: 'layer-2-1-3', _offset: 0}
               ]
             },
             {
               id: 'layer-2-2',
-              _index: 0,
+              _offset: 0,
               children: [
                 {id: 'layer-2-2-1'},
                 {id: 'layer-2-2-2'},
@@ -142,7 +142,7 @@ test('LayersPass#layerIndexResolver', t => {
             }
           ]
         }),
-        new TestLayer({id: 'layer-3', _index: 0}),
+        new TestLayer({id: 'layer-3', _offset: 0}),
         new TestLayer({id: 'layer-4'})
       ],
       expected: {

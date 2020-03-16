@@ -182,7 +182,7 @@ export function layerIndexResolver(startIndex = 0, layerIndices = {}) {
   const resolvers = {};
 
   return (layer, isDrawn) => {
-    const indexOverride = layer.props._index;
+    const indexOverride = layer.props._offset;
     const layerId = layer.id;
     const parentId = layer.parent && layer.parent.id;
 
