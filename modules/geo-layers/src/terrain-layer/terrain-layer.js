@@ -161,7 +161,6 @@ export default class TerrainLayer extends CompositeLayer {
       data: DUMMY_DATA,
       mesh,
       texture,
-      getPolygonOffset: null,
       coordinateSystem: COORDINATE_SYSTEM.CARTESIAN,
       getPosition: d => [0, 0, 0],
       getColor: color

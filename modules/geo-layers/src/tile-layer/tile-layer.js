@@ -157,6 +157,7 @@ export default class TileLayer extends CompositeLayer {
             id: `${this.id}-${tile.x}-${tile.y}-${tile.z}`,
             data: tile.data,
             visible: isVisible,
+            _offset: 0,
             tile
           })
         );
