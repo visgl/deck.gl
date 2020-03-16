@@ -20,18 +20,18 @@
 [![docs](http://i.imgur.com/mvfvgf0.jpg)](https://uber.github.io/deck.gl)
 
 
-deck.gl is designed to make visualization of large data sets simple. It enables users to quickly get impressive visual results with limited effort through composition of existing layers, while offering a complete architecture for packaging advanced WebGL based visualizations as reusable JavaScript layers.
+deck.gl is designed to simplify high-performance, WebGL-based visualization of large data sets. Users can quickly get impressive visual results with minimal effort by composing existing layers, or leverage deck.gl's extensible architecture to address custom needs.
 
-The basic idea of using deck.gl is to map **data** (usually an array of JSON objects) into a stack of visual **layers** - e.g. icons, polygons, texts; and look at them with **views**: map, first-person, orthographic, etc.
+deck.gl maps **data** (usually an array of JSON objects) into a stack of visual **layers** - e.g. icons, polygons, texts; and look at them with **views**: e.g. map, first-person, orthographic.
 
 deck.gl handles a number of challenges out of the box:
 
-* Rendering of large data sets and performant updates
+* Performant rendering and updating of large data sets
 * Interactive event handling such as picking, highlighting and filtering
 * Cartographic projections and integration with major basemap providers
 * A catalog of proven, well-tested layers
 
-One of deck.gl's philosophies is to be highly customizable. All layers come with flexible APIs to allow programmatic control of every aspect of the rendering. All core classes such as Layer, View, Controller, Effect and Transition are designed to be easily extendable by the users to address custom use cases.
+Deck.gl is designed to be highly customizable. All layers come with flexible APIs to allow programmatic control of each aspect of the rendering. All core classes such are easily extendable by the users to address custom use cases.
 
 ## Flavors
 
@@ -87,7 +87,7 @@ pip install pydeck
 
 ## Contributing
 
-PRs and bug reports are welcome, and we are actively opening up the deck.gl roadmap to facilitate for external contributors. Read the [developement guidelines](/dev-docs) to learn about our dev process.
+Pull requests and bug reports are welcome, and all of deck.gl's roadmaps and feature planning is done openly on GitHub. Read the [developement guidelines](/dev-docs) to learn about our dev process.
 
 Note that once your PR is about to be merged, you will be asked to register as a contributor by filling in a short form.
 

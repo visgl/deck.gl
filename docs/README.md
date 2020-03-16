@@ -17,18 +17,19 @@
   </a>
 </p>
 
-deck.gl is designed to make visualization of large data sets simple. It enables users to quickly get impressive visual results with limited effort through composition of existing layers, while offering a complete architecture for packaging advanced WebGL based visualizations as reusable JavaScript layers.
 
-The basic idea of using deck.gl is to map **data** (usually an array of JSON objects) into a stack of visual **layers** - e.g. icons, polygons, texts; and look at them with **views**: map, first-person, orthographic, etc.
+deck.gl is designed to simplify high-performance, WebGL-based visualization of large data sets. Users can quickly get impressive visual results with minimal effort by composing existing layers, or leverage deck.gl's extensible architecture to address custom needs.
+
+deck.gl maps **data** (usually an array of JSON objects) into a stack of visual **layers** - e.g. icons, polygons, texts; and look at them with **views**: e.g. map, first-person, orthographic.
 
 deck.gl handles a number of challenges out of the box:
 
-* Rendering of large data sets and performant updates
+* Performant rendering and updating of large data sets
 * Interactive event handling such as picking, highlighting and filtering
 * Cartographic projections and integration with major basemap providers
 * A catalog of proven, well-tested layers
 
-One of deck.gl's philosophies is to be highly customizable. All layers come with flexible APIs to allow programmatic control of every aspect of the rendering. All core classes such as Layer, View, Controller, Effect and Transition are designed to be easily extendable by the users to address custom use cases.
+Deck.gl is designed to be highly customizable. All layers come with flexible APIs to allow programmatic control of each aspect of the rendering. All core classes such are easily extendable by the users to address custom use cases.
 
 ## Flavors
 
@@ -75,7 +76,7 @@ pip install pydeck
 
 deck.gl is one of the main frameworks in the [vis.gl](http://vis.gl) framework suite.
 
-deck.gl has been developed in parallel with a number of companion modules, including:
+deck.gl is developed in parallel with a number of companion modules, including:
 
 * [luma.gl](https://luma.gl/) - A general purpose WebGL library designed to be interoperable both with the raw WebGL API and (as far as possible) with other WebGL libraries. In particular, luma.gl does not claim ownership of the WebGL context, and can work with any supplied context, including contexts created by the application or other WebGL libraries.
 * [loaders.gl](https://loaders.gl) - a suite of framework-independent loaders for file formats focused on visualization of big data, including point clouds, 3D geometries, images, geospatial formats as well as tabular data.
