@@ -13,7 +13,6 @@ pydeck Documentation
    view_state
    view
    light_settings
-   custom_layers
    binary_transfer
    gallery
 
@@ -63,11 +62,6 @@ like plotting in flat plane instead of plotting on a mercator projection.
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Configure the lighting within a visualization.
-
-`Custom layers <custom_layers.html>`__
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-Importing custom feature-rich deck.gl layers for use in pydeck.
 
 `Binary transfer <binary_transfer.html>`__
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
