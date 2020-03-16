@@ -97,7 +97,7 @@ export default class Tileset2D {
    * @param {*} viewport
    * @param {*} onUpdate
    */
-  update(viewport, {zRange}) {
+  update(viewport, {zRange} = {}) {
     if (viewport !== this._viewport) {
       this._viewport = viewport;
       const tileIndices = this.getTileIndices({
