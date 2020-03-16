@@ -1,5 +1,9 @@
 ### pydeck CHANGELOG
 
+0.3.0b2 - March 4 2020
+=======
+- Support rendering in Google Collab (#4337)
+
 0.3.0b1
 =======
 - Add support for dynamic deck.gl custom Layer registration (#4233)
