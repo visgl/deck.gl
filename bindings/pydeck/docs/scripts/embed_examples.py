@@ -8,12 +8,12 @@ import subprocess
 
 DOC_TEMPLATE = jinja2.Template(
     """
-{{ layer_name.replace('_', '').title() }}
+{{ layer_name }}
 ================================
 
 .. raw:: html
 
-    <iframe width="600" height="500" src="{{hosted_html_path}}"></iframe>
+    <iframe width="600" height="400" src="{{hosted_html_path}}"></iframe>
 
 
 Source
@@ -49,7 +49,7 @@ def main():
         )
         python_code = open(fname, "r").read()
         doc_source = DOC_TEMPLATE.render(
-            layer_name=layer_name,
+            layer_name=layer_name.replace('_', ' ').title(),
             python_code=python_code,
             hosted_html_path=os.path.join(STATIC_PATH, html_fname),
         )
