@@ -41,14 +41,14 @@ export default class PostProcessEffect extends Effect {
   }
 }
 
-function createPasses(gl, module, id, moduleProps) {
+function createPasses(gl, module, id, moduleSettings) {
   if (module.filter || module.sampler) {
     const fs = getFragmentShaderForRenderPass(module);
     const pass = new ScreenPass(gl, {
       id,
       module,
       fs,
-      moduleProps
+      moduleSettings
     });
     return [pass];
   }
@@ -62,7 +62,7 @@ function createPasses(gl, module, id, moduleProps) {
       id: idn,
       module,
       fs,
-      moduleProps
+      moduleSettings
     });
   });
 }
