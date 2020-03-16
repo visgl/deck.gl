@@ -20,4 +20,4 @@ In-depth tutorials for how to develop deck.gl React applications are available o
 
 [vis.gl's Medium blog](https://medium.com/vis-gl) 
 
-Join our [Slack channel](deckgl.slack.com) for learning and discussions.
+Join our [Slack workspace](https://join.slack.com/t/deckgl/shared_invite/zt-7oeoqie8-NQqzSp5SLTFMDeNSPxi7eg) for learning and discussions.
