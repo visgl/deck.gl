@@ -64,8 +64,7 @@ def main():
     if not candidate_files:
         raise Exception("No files found to convert")
     subprocess.call("mkdir -p %s" % HTML_DIR, shell=True)
-    file_names = sorted(candidate_files)
-    pool.map(create_rst, file_names)
+    pool.map(create_rst, candidate_files)
 
 
 if __name__ == "__main__":
