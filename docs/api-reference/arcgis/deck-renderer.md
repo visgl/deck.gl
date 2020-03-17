@@ -1,6 +1,7 @@
 # DeckRenderer
 
-This class inherits implements the ArcGIS [ExternalRenderer](https://developers.arcgis.com/javascript/latest/api-reference/esri-views-3d-externalRenderers.html#ExternalRenderer) interface and can be added to maps created with the ArcGIS API for JavaScript.
+This class is an experimental implementation of the ArcGIS [ExternalRenderer](https://developers.arcgis.com/javascript/latest/api-reference/esri-views-3d-externalRenderers.html#ExternalRenderer) interface and can be added to 3D views of maps created with the ArcGIS
+API for JavaScript.
 
 `DeckRenderer` is only available when `loadArcGISModules()` is resolved.
 

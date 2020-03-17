@@ -2,15 +2,11 @@ import React, {Component} from 'react';
 import {MAPBOX_STYLES} from '../../constants/defaults';
 import App from 'website-examples/map-tile/app';
 
-export default class LineDemo extends Component {
+export default class MapTileDemo extends Component {
   static get parameters() {
     return {
       autoHighlight: {displayName: 'Highlight on hover', type: 'checkbox', value: true}
     };
-  }
-
-  static get allowMissingData() {
-    return true;
   }
 
   static get mapStyle() {

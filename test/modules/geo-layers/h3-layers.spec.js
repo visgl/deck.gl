@@ -19,7 +19,7 @@
 // THE SOFTWARE.
 
 import test from 'tape-catch';
-import {h3ToGeoBoundary, h3ToGeo} from 'h3-js';
+import {h3ToGeoBoundary, h3ToGeo, kRing, compact} from 'h3-js';
 import {_count as count, WebMercatorViewport} from '@deck.gl/core';
 import {testLayer, generateLayerTests} from '@deck.gl/test-utils';
 import {H3HexagonLayer, H3ClusterLayer} from '@deck.gl/geo-layers';
@@ -49,6 +49,59 @@ test('H3HexagonLayer', t => {
   });
 
   testLayer({Layer: H3HexagonLayer, testCases, onError: t.notOk});
+
+  t.end();
+});
+
+test('H3HexagonLayer#_shouldUseHighPrecision', t => {
+  testLayer({
+    Layer: H3HexagonLayer,
+    onError: t.notOk,
+    testCases: [
+      {
+        props: {
+          data: kRing('882830829bfffff', 4),
+          getHexagon: d => d
+        },
+        onAfterUpdate({layer, subLayer}) {
+          t.equal(
+            layer._shouldUseHighPrecision(),
+            false,
+            'Instanced rendering with standard hexagons'
+          );
+          t.ok(subLayer.constructor.layerName, 'ColumnLayer', 'renders column layer');
+        }
+      },
+      {
+        props: {
+          data: kRing('891c0000003ffff', 4),
+          getHexagon: d => d
+        },
+        onAfterUpdate({layer, subLayer}) {
+          t.equal(
+            layer._shouldUseHighPrecision(),
+            true,
+            'Polygon rendering when input contains a pentagon'
+          );
+          t.ok(subLayer.constructor.layerName, 'PolygonLayer', 'renders polygon layer');
+        }
+      },
+      {
+        props: {
+          data: compact(kRing('882830829bfffff', 6)),
+          getHexagon: d => d
+        },
+        onAfterUpdate({layer, subLayer}) {
+          t.equal(
+            layer._shouldUseHighPrecision(),
+            true,
+            'Polygon rendering when input contains multiple resolutions'
+          );
+          t.ok(subLayer.constructor.layerName, 'PolygonLayer', 'renders polygon layer');
+        }
+      }
+    ]
+  });
 
   t.end();
 });

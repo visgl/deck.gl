@@ -94,13 +94,19 @@ Inherits from all [Base Layer](/docs/api-reference/layer.md), [CompositeLayer](/
 
 * Default: `false`
 
-Each hexagon in the H3 indexing system is [slightly different in shape](https://uber.github.io/h3/#/documentation/core-library/coordinate-systems).
-To draw a large number of hexagons efficiently, the `H3HexagonLayer` may choose to use instanced drawing by assuming that all hexagons within the current viewport have the same shape as the one at the center of the current viewport. The discrepancy is usually too small to be visible.
+Each hexagon in the H3 indexing system is [slightly different in shape](https://uber.github.io/h3/#/documentation/core-library/coordinate-systems). To draw a large number of hexagons efficiently, the `H3HexagonLayer` may choose to use instanced drawing by assuming that all hexagons within the current viewport have the same shape as the one at the center of the current viewport. The discrepancy is usually too small to be visible.
 
-However, there are 12 pentagons world wide at each resolution. The hexagons at and around these odd geolocations cannot be correctly rendered using the above approximation. In this case, `H3HexagonLayer` may choose to switch to high-precision mode, where it trades performance for accuracy.
+There are several cases in which high-precision mode is required. In these cases, `H3HexagonLayer` may choose to switch to high-precision mode, where it trades performance for accuracy:
 
-* if `false`, the layer chooses the mode automatically. High-precision rendering is only used if resolution is at or below `5`, or if a pentagon is found in the data.
-* if `true`, always use high-precision rendering.
+* The input set contains a pentagon. There are 12 pentagons world wide at each resolution, and these cells and their immediate neighbors have significant differences in shape.
+* The input set is at a coarse resolution (res `0` through res `5`). These cells have larger differences in shape, particularly when using a Mercator projection.
+* The input set contains hexagons with different resolutions.
+
+Possible values:
+
+* `false`: The layer chooses the mode automatically. High-precision rendering is only used if an edge case is encountered in the data.
+* `true`: always use high-precision rendering.
+
 
 ##### `coverage` (Number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
 
