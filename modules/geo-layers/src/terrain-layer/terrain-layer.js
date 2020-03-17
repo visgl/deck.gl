@@ -65,18 +65,6 @@ function urlTemplateToUpdateTrigger(template) {
   return template;
 }
 
-// Get [min, max] elevation range of terrain mesh
-function getZRange(positions) {
-  let min = Infinity;
-  let max = -Infinity;
-  for (let i = 2; i < positions.length; i += 3) {
-    const ele = positions[i];
-    min = ele < min ? ele : min;
-    max = ele > max ? ele : max;
-  }
-  return [min, max];
-}
-
 /**
  * state: {
  *   isTiled: True renders TileLayer of many SimpleMeshLayers, false renders one SimpleMeshLayer
@@ -182,12 +170,17 @@ export default class TerrainLayer extends CompositeLayer {
 
   // Update zRange of viewport
   onViewportLoad(data) {
+    const {zRange} = this.state;
     const ranges = data.map(arr => {
-      return getZRange(arr[0].attributes.POSITION.value);
+      const bounds = arr[0].header.boundingBox;
+      return bounds.map(bound => bound[2]);
     });
-    const minZ = Math.min(...ranges.flatMap(x => x[0]));
-    const maxZ = Math.max(...ranges.flatMap(x => x[1]));
-    this.setState({zRange: [minZ, maxZ]});
+    const minZ = Math.min(...ranges.map(x => x[0]));
+    const maxZ = Math.max(...ranges.map(x => x[1]));
+
+    if (minZ < zRange[0] || maxZ > zRange[1]) {
+      this.setState({zRange: [minZ, maxZ]});
+    }
   }
 
   renderLayers() {
