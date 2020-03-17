@@ -125,12 +125,18 @@ export default class H3HexagonLayer extends CompositeLayer {
     ) {
       let resolution = -1;
       let hasPentagon = false;
+      let hasMultipleRes = false;
       const {iterable, objectInfo} = createIterable(props.data);
       for (const object of iterable) {
         objectInfo.index++;
         const hexId = props.getHexagon(object, objectInfo);
         // Take the resolution of the first hex
-        resolution = resolution < 0 ? h3GetResolution(hexId) : resolution;
+        const hexResolution = h3GetResolution(hexId);
+        if (resolution < 0) resolution = hexResolution;
+        else if (resolution !== hexResolution) {
+          hasMultipleRes = true;
+          break;
+        }
         if (h3IsPentagon(hexId)) {
           hasPentagon = true;
           break;
@@ -139,6 +145,7 @@ export default class H3HexagonLayer extends CompositeLayer {
       this.setState({
         resolution,
         edgeLengthKM: resolution >= 0 ? edgeLength(resolution, UNITS.km) : 0,
+        hasMultipleRes,
         hasPentagon
       });
     }
@@ -147,8 +154,13 @@ export default class H3HexagonLayer extends CompositeLayer {
   }
 
   _shouldUseHighPrecision() {
-    const {resolution, hasPentagon} = this.state;
-    return this.props.highPrecision || hasPentagon || (resolution >= 0 && resolution <= 5);
+    const {resolution, hasPentagon, hasMultipleRes} = this.state;
+    return (
+      this.props.highPrecision ||
+      hasMultipleRes ||
+      hasPentagon ||
+      (resolution >= 0 && resolution <= 5)
+    );
   }
 
   _updateVertices(viewport) {
