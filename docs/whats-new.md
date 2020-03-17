@@ -4,6 +4,8 @@ This page contains highlights of each deck.gl release. Also check our [vis.gl bl
 
 ## deck.gl v8.1
 
+Release Date: Mar 17, 2020
+
 ### Growing Tile Solutions
 
 <table style="border: 0;" align="center">
@@ -107,6 +109,8 @@ pydeck now supports external layer modules via a new `custom_libraries` setting.
 
 ## deck.gl v8.0
 
+Release Date: Dec 20, 2019
+
 ### Performance
 
 Performance is one of the biggest focus of this update. Layer updates (data change) is 1.5x the speed of the last release, and redraw (viewport change) is 2.5x.
@@ -183,7 +187,7 @@ This use case is discussed in detail in the [performance developer guide](/docs/
 
 ## deck.gl v7.3
 
-Release Date: Sep xx, 2019
+Release Date: Sep 26, 2019
 
 <table style="border: 0;" align="center">
   <tbody>
