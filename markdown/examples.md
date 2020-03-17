@@ -99,6 +99,13 @@
         </a>
       </div>
     </div>
+    <div class="thumb">
+      <div class="bg-black" data-title="3D Terrain" data-name="TerrainLayer">
+        <a href="#/examples/core-layers/terrain-layer">
+          <img src="images/demo-thumb-terrain.jpg" />
+        </a>
+      </div>
+    </div>
 </div>
 
 ### Custom Layers
