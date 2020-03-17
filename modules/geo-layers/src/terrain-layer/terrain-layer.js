@@ -177,7 +177,7 @@ export default class TerrainLayer extends CompositeLayer {
     const minZ = Math.min(...ranges.map(x => x[0]));
     const maxZ = Math.max(...ranges.map(x => x[1]));
 
-    if (minZ < zRange[0] || maxZ > zRange[1]) {
+    if (!zRange || minZ < zRange[0] || maxZ > zRange[1]) {
       this.setState({zRange: [minZ, maxZ]});
     }
   }
