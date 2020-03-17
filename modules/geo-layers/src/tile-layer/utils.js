@@ -43,39 +43,36 @@ export function getURLFromTemplate(template, properties) {
  * gets the bounding box of a viewport
  */
 function getBoundingBox(viewport, zRange) {
+  let corners;
   if (zRange && zRange.length === 2) {
-    const corners = [
+    const [minZ, maxZ] = zRange;
+    corners = [
       // Lower zRange
-      viewport.unproject([0, 0], {targetZ: zRange[0]}),
-      viewport.unproject([viewport.width, 0], {targetZ: zRange[0]}),
-      viewport.unproject([0, viewport.height], {targetZ: zRange[0]}),
-      viewport.unproject([viewport.width, viewport.height], {targetZ: zRange[0]}),
+      viewport.unproject([0, 0], {targetZ: minZ}),
+      viewport.unproject([viewport.width, 0], {targetZ: minZ}),
+      viewport.unproject([0, viewport.height], {targetZ: minZ}),
+      viewport.unproject([viewport.width, viewport.height], {targetZ: minZ}),
 
       // Upper zRange
-      viewport.unproject([0, 0], {targetZ: zRange[1]}),
-      viewport.unproject([viewport.width, 0], {targetZ: zRange[1]}),
-      viewport.unproject([0, viewport.height], {targetZ: zRange[1]}),
-      viewport.unproject([viewport.width, viewport.height], {targetZ: zRange[1]})
+      viewport.unproject([0, 0], {targetZ: maxZ}),
+      viewport.unproject([viewport.width, 0], {targetZ: maxZ}),
+      viewport.unproject([0, viewport.height], {targetZ: maxZ}),
+      viewport.unproject([viewport.width, viewport.height], {targetZ: maxZ})
     ];
-    return [
-      Math.min(...corners.flatMap(arr => arr[0])),
-      Math.min(...corners.flatMap(arr => arr[1])),
-      Math.max(...corners.flatMap(arr => arr[0])),
-      Math.max(...corners.flatMap(arr => arr[1]))
+  } else {
+    corners = [
+      viewport.unproject([0, 0]),
+      viewport.unproject([viewport.width, 0]),
+      viewport.unproject([0, viewport.height]),
+      viewport.unproject([viewport.width, viewport.height])
     ];
   }
 
-  const corners = [
-    viewport.unproject([0, 0]),
-    viewport.unproject([viewport.width, 0]),
-    viewport.unproject([0, viewport.height]),
-    viewport.unproject([viewport.width, viewport.height])
-  ];
   return [
-    Math.min(corners[0][0], corners[1][0], corners[2][0], corners[3][0]),
-    Math.min(corners[0][1], corners[1][1], corners[2][1], corners[3][1]),
-    Math.max(corners[0][0], corners[1][0], corners[2][0], corners[3][0]),
-    Math.max(corners[0][1], corners[1][1], corners[2][1], corners[3][1])
+    Math.min(...corners.map(arr => arr[0])),
+    Math.min(...corners.map(arr => arr[1])),
+    Math.max(...corners.map(arr => arr[0])),
+    Math.max(...corners.map(arr => arr[1]))
   ];
 }
 
