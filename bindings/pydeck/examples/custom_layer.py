@@ -2,25 +2,28 @@ import pydeck
 
 pydeck.settings.custom_libraries = [
     {
-        "libraryName": "FilterExtensionLib",  # TODO change
-        "resourceUri": "http://localhost:3000/dist/bundle.js",  # TODO change
+        "libraryName": "LabeledGeoJsonLayer",
+        "resourceUri": "https://raw.githubusercontent.com/ajduberstein/pydeck_custom_layer/master/dist/bundle.js",
     }
 ]
 
+DATA_URL = "https://raw.githubusercontent.com/johan/world.geo.json/master/countries.geo.json"
+
 custom_layer = pydeck.Layer(
-    "ScatterplotFilterLayer",
-    data="https://duberste.in/sf_growth/data/business.csv",
-    get_position=["lng", "lat"],
-    get_fill_color=[160, 160, 180],
-    get_line_color=[0, 0, 0],
-    get_line_width=2,
-    get_filter_value="start_date",
-    filter_range=[1967, 1986],
-    filter_soft_range=[1966, 1985],
+    "LabeledGeoJsonLayer",
+    data=DATA_URL,
+    filled=False,
+    billboard=False,
+    get_line_color=[180, 180, 180],
+    get_label="f.properties.name",
+    get_label_size=20,
+    get_label_color=[0, 64, 128],
+    label_size_units='"meters"',
+    line_width_min_pixels=1,
 )
 
 view_state = pydeck.ViewState(
-    latitude=37.7576171, longitude=-122.5776844, zoom=10, bearing=-45, pitch=60,
+    latitude=0, longitude=0, zoom=10, bearing=-45, pitch=60,
 )
 
 r = pydeck.Deck(
