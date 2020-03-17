@@ -169,6 +169,10 @@ export default class TerrainLayer extends CompositeLayer {
 
   // Update zRange of viewport
   onViewportLoad(data) {
+    if (!data || data.length === 0 || data.every(x => !x)) {
+      return;
+    }
+
     const {zRange} = this.state;
     const ranges = data.map(arr => {
       const bounds = arr[0].header.boundingBox;
