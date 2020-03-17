@@ -23,9 +23,15 @@ TEMPLATES_PATH = os.path.join(os.path.dirname(__file__), "./templates/")
 j2_env = jinja2.Environment(
     loader=jinja2.FileSystemLoader(TEMPLATES_PATH), trim_blocks=True
 )
-CDN_URL = "https://cdn.jsdelivr.net/npm/@deck.gl/jupyter-widget@{}/dist/index.js".format(
-    DECKGL_SEMVER
-)
+
+def cdn_picker(offline=False):
+    if offline:
+        CDN_URL = os.path.abspath('../nbextension/static/index.js')
+    else:
+        CDN_URL = "https://cdn.jsdelivr.net/npm/@deck.gl/jupyter-widget@{}/dist/index.js".format(
+            DECKGL_SEMVER
+        )
+    return CDN_URL
 
 
 def render_json_to_html(
@@ -34,12 +40,13 @@ def render_json_to_html(
     tooltip=True,
     css_background_color=None,
     custom_libraries=None,
+    offline=False
 ):
     js = j2_env.get_template("index.j2")
     html_str = js.render(
         mapbox_key=mapbox_key,
         json_input=json_input,
-        deckgl_jupyter_widget_bundle=CDN_URL,
+        deckgl_jupyter_widget_bundle=cdn_picker(offline),
         tooltip=convert_js_bool(tooltip),
         css_background_color=css_background_color,
         custom_libraries=custom_libraries
@@ -93,7 +100,8 @@ def deck_to_html(
     iframe_width=500,
     tooltip=True,
     custom_libraries=None,
-    as_string=False
+    as_string=False,
+    offline=False
 ):
     """Converts deck.gl format JSON to an HTML page"""
     html = render_json_to_html(
@@ -102,6 +110,7 @@ def deck_to_html(
         tooltip=tooltip,
         css_background_color=css_background_color,
         custom_libraries=custom_libraries,
+        offline=False
     )
 
     if as_string:
