@@ -42,4 +42,4 @@ const deckgl = new Deck({
 
 ## Source
 
-[/modules/core/src/effects/post-process-effect.js](https://github.com/uber/deck.gl/tree/master/modules/core/src/effects/post-process-effect.js)
+[/modules/core/src/effects/post-process-effect.js](https://github.com/uber/deck.gl/tree/8.1-release/modules/core/src/effects/post-process-effect.js)

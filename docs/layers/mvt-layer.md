@@ -90,4 +90,4 @@ The `getTileData` prop from the `TileLayer` class will not be called.
 
 ## Source
 
-[modules/geo-layers/src/mvt-layer/mvt-layer.js](https://github.com/uber/deck.gl/tree/master/modules/geo-layers/src/mvt-layer/mvt-layer.js)
+[modules/geo-layers/src/mvt-layer/mvt-layer.js](https://github.com/uber/deck.gl/tree/8.1-release/modules/geo-layers/src/mvt-layer/mvt-layer.js)

@@ -37,4 +37,4 @@ const directionalLight = new DirectionalLight({color, intensity, direction});
 
 ## Source
 
-[/modules/core/src/effects/lighting/directional-light.js](https://github.com/uber/deck.gl/tree/master/modules/core/src/effects/lighting/directional-light.js)
+[/modules/core/src/effects/lighting/directional-light.js](https://github.com/uber/deck.gl/tree/8.1-release/modules/core/src/effects/lighting/directional-light.js)

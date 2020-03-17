@@ -323,4 +323,4 @@ new TextLayer({
 
 ## Source
 
-[modules/layers/src/text-layer](https://github.com/uber/deck.gl/tree/master/modules/layers/src/text-layer)
+[modules/layers/src/text-layer](https://github.com/uber/deck.gl/tree/8.1-release/modules/layers/src/text-layer)

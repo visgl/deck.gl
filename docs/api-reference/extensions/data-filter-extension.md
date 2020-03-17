@@ -202,4 +202,4 @@ Given data filtering happens on GPU, not all layers of `@deck.gl/aggregation-lay
 
 ## Source
 
-[modules/extensions/src/data-filter](https://github.com/uber/deck.gl/tree/master/modules/extensions/src/data-filter)
+[modules/extensions/src/data-filter](https://github.com/uber/deck.gl/tree/8.1-release/modules/extensions/src/data-filter)

@@ -40,7 +40,7 @@ Deck.gl is designed to be highly customizable. All layers come with flexible API
 ```
 
 - [Get started](/docs/get-started/using-standalone.md#using-the-scripting-api)
-- [Full examples](https://github.com/uber/deck.gl/tree/master/examples/get-started/scripting)
+- [Full examples](https://github.com/uber/deck.gl/tree/8.1-release/examples/get-started/scripting)
 
 ### NPM Module
 
@@ -51,12 +51,12 @@ npm install deck.gl
 #### Pure JS
 
 - [Get started](/docs/get-started/using-standalone.md)
-- [Full examples](https://github.com/uber/deck.gl/tree/master/examples/get-started/pure-js)
+- [Full examples](https://github.com/uber/deck.gl/tree/8.1-release/examples/get-started/pure-js)
 
 #### React
 
 - [Get started](/docs/get-started/using-with-react.md)
-- [Full examples](https://github.com/uber/deck.gl/tree/master/examples/get-started/react)
+- [Full examples](https://github.com/uber/deck.gl/tree/8.1-release/examples/get-started/react)
 
 ### Python
 

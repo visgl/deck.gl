@@ -132,4 +132,4 @@ Returns:
 
 ## Source
 
-[modules/core/src/viewports/web-mercator-viewport.js](https://github.com/uber/deck.gl/blob/master/modules/core/src/viewports/web-mercator-viewport.js)
+[modules/core/src/viewports/web-mercator-viewport.js](https://github.com/uber/deck.gl/tree/8.1-release/modules/core/src/viewports/web-mercator-viewport.js)

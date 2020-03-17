@@ -184,4 +184,4 @@ Returns an object containing the following fields:
 
 ## Source
 
-[modules/core/src/views/view.js](https://github.com/uber/deck.gl/blob/master/modules/core/src/views/view.js)
+[modules/core/src/views/view.js](https://github.com/uber/deck.gl/tree/8.1-release/modules/core/src/views/view.js)

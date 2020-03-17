@@ -183,4 +183,4 @@ We do recommend you to use the pure JavaScript version of deck.gl if you are mor
 
 ## Source
 
-[modules/react/src/deckgl.js](https://github.com/uber/deck.gl/blob/master/modules/react/src/deckgl.js)
+[modules/react/src/deckgl.js](https://github.com/uber/deck.gl/tree/8.1-release/modules/react/src/deckgl.js)

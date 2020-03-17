@@ -198,4 +198,4 @@ The maximum size in pixels for one unit of the scene.
 
 ## Source
 
-[modules/mesh-layers/src/scenegraph-layer](https://github.com/uber/deck.gl/tree/master/modules/mesh-layers/src/scenegraph-layer)
+[modules/mesh-layers/src/scenegraph-layer](https://github.com/uber/deck.gl/tree/8.1-release/modules/mesh-layers/src/scenegraph-layer)

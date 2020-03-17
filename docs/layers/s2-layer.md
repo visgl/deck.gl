@@ -114,5 +114,5 @@ The `S2Layer` renders the following sublayers:
 
 ## Source
 
-[modules/geo-layers/src/s2-layer](https://github.com/uber/deck.gl/tree/master/modules/geo-layers/src/s2-layer)
+[modules/geo-layers/src/s2-layer](https://github.com/uber/deck.gl/tree/8.1-release/modules/geo-layers/src/s2-layer)
 

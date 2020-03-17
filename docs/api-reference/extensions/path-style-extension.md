@@ -92,4 +92,4 @@ The offset to draw each path with, relative to the width of the path. Negative o
 
 ## Source
 
-[modules/extensions/src/path-style](https://github.com/uber/deck.gl/tree/master/modules/extensions/src/path-style)
+[modules/extensions/src/path-style](https://github.com/uber/deck.gl/tree/8.1-release/modules/extensions/src/path-style)
