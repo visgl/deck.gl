@@ -21,3 +21,5 @@ help:
 html-embeds:
 	echo "Producing embedded HTML examples"
 	python scripts/embed_examples.py
+
+html: html-embeds
