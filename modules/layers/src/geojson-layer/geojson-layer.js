@@ -188,7 +188,8 @@ export default class GeoJsonLayer extends CompositeLayer {
         }),
         {
           data: polygonFeatures,
-          getPolygon: getCoordinates
+          getPolygon: getCoordinates,
+          highlightedObjectIndex: this._getHighlightedIndex(polygonFeatures)
         }
       );
 
@@ -229,7 +230,8 @@ export default class GeoJsonLayer extends CompositeLayer {
         }),
         {
           data: polygonOutlineFeatures,
-          getPath: getCoordinates
+          getPath: getCoordinates,
+          highlightedObjectIndex: this._getHighlightedIndex(polygonOutlineFeatures)
         }
       );
 
@@ -267,7 +269,8 @@ export default class GeoJsonLayer extends CompositeLayer {
         }),
         {
           data: lineFeatures,
-          getPath: getCoordinates
+          getPath: getCoordinates,
+          highlightedObjectIndex: this._getHighlightedIndex(lineFeatures)
         }
       );
 
@@ -311,7 +314,8 @@ export default class GeoJsonLayer extends CompositeLayer {
         }),
         {
           data: pointFeatures,
-          getPosition: getCoordinates
+          getPosition: getCoordinates,
+          highlightedObjectIndex: this._getHighlightedIndex(pointFeatures)
         }
       );
 
@@ -326,6 +330,13 @@ export default class GeoJsonLayer extends CompositeLayer {
     ];
   }
   /* eslint-enable complexity */
+
+  _getHighlightedIndex(data) {
+    const {highlightedObjectIndex} = this.props;
+    return Number.isFinite(highlightedObjectIndex)
+      ? data.findIndex(d => d.__source.index === highlightedObjectIndex)
+      : null;
+  }
 }
 
 GeoJsonLayer.layerName = 'GeoJsonLayer';
