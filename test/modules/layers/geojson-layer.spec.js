@@ -44,9 +44,23 @@ test('GeoJsonLayer#tests', t => {
     }
   });
 
+  testCases.push({
+    title: 'GeoJsonLayer#highlightedObjectIndex',
+    onBeforeUpdate: ({testCase}) => t.comment(testCase.title),
+    onAfterUpdate: ({layer, subLayers}) => {
+      t.ok(
+        subLayers.every(l => Number.isFinite(l.props.highlightedObjectIndex)),
+        "sublayers' highlightedObjectIndex prop is populated"
+      );
+    },
+    updateProps: {
+      highlightedObjectIndex: 5
+    }
+  });
+
   // Add partial update test case
   testCases.push({
-    title: 'GeoJsonLayer#',
+    title: 'GeoJsonLayer#partial update',
     onBeforeUpdate: ({testCase}) => t.comment(testCase.title),
     onAfterUpdate: ({layer, subLayers}) => {
       const {featuresDiff} = layer.state;
