@@ -183,6 +183,8 @@ export default class IconManager {
     this.gl = gl;
     this.onUpdate = onUpdate;
 
+    // load options used for loading images
+    this._loadOptions = null;
     this._getIcon = null;
 
     this._texture = null;
@@ -220,7 +222,11 @@ export default class IconManager {
     return this._mapping[id] || {};
   }
 
-  setProps({autoPacking, iconAtlas, iconMapping, data, getIcon}) {
+  setProps({loadOptions, autoPacking, iconAtlas, iconMapping, data, getIcon}) {
+    if (loadOptions) {
+      this._loadOptions = loadOptions;
+    }
+
     if (autoPacking !== undefined) {
       this._autoPacking = autoPacking;
     }
@@ -319,7 +325,7 @@ export default class IconManager {
 
     for (const icon of icons) {
       this._pendingCount++;
-      load(icon.url, ImageLoader)
+      load(icon.url, ImageLoader, this._loadOptions)
         .then(imageData => {
           const id = getIconId(icon);
           const {x, y, width, height} = this._mapping[id];
