@@ -48,6 +48,8 @@ export function propToParam(key, propType, value) {
     }
     case 'color':
       return {...param, type: 'color'};
+    case 'url':
+      return {...param, type: 'link'};
     case 'object':
       if (/mapping|domain|range/i.test(key)) {
         return {...param, type: 'json'};

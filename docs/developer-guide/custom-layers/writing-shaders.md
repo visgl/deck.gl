@@ -1,6 +1,6 @@
 # Writing Shaders
 
-A shader library facilitates creating shaders that work seamlessly with deck.gl. The `modules` parameter passed to the [Model](https://github.com/uber/luma.gl/blob/master/docs/api-reference/core/model.md) class can dynamically include parts from this library into your own GLSL code:
+A shader library facilitates creating shaders that work seamlessly with deck.gl. The `modules` parameter passed to the [Model](https://github.com/uber/luma.gl/blob/8.0-release/docs/api-reference/engine/model.md) class can dynamically include parts from this library into your own GLSL code:
 
 ```js
 import {picking, project32, gouraudLighting} from '@deck.gl/core';
@@ -14,7 +14,7 @@ const model = new Model(gl, {
 
 ## Shader Assembly
 
-Your shaders will be run through the luma.gl [shader assembler](https://github.com/uber/luma.gl/blob/master/docs/api-reference/shadertools/assemble-shaders.md), which injects code from various module dependencies, The generated shader always contains a prologue of platform defines, and then the modules (see below), and finally your shader code is added.
+Your shaders will be run through the luma.gl [shader assembler](https://github.com/uber/luma.gl/blob/8.0-release/docs/api-reference/shadertools/assemble-shaders.md), which injects code from various module dependencies, The generated shader always contains a prologue of platform defines, and then the modules (see below), and finally your shader code is added.
 
 ### Platform defines
 
@@ -34,8 +34,8 @@ The `project` module also has two extensions, [project32](/docs/shader-modules/p
 
 A simple lighting package is provided in deck.gl, supporting a single directional light in addition to ambient light. Turning on lighting requires normals to be provided for each vertex. There are two flavors:
 
-- [gouraudLighting](https://github.com/uber/luma.gl/blob/master/modules/shadertools/src/modules/phong-lighting/phong-lighting.js) - for lighting calculated in the vertex shader
-- [phongLighting](https://github.com/uber/luma.gl/blob/master/modules/shadertools/src/modules/phong-lighting/phong-lighting.js) - for lighting calculated in the fragment shader
+- [gouraudLighting] - for lighting calculated in the vertex shader
+- [phongLighting] - for lighting calculated in the fragment shader
 
 
 #### fp64
@@ -46,7 +46,7 @@ Note that for geospatial projection, deck.gl v6.1 introduced a "hybrid" 32-bit p
 
 #### picking
 
-Picking is supported using luma.gl [picking shader module](https://github.com/uber/luma.gl/blob/master/docs/api-reference/shadertools/shader-module-picking.md).
+Picking is supported using luma.gl [picking shader module](https://github.com/uber/luma.gl/blob/8.0-release/docs/api-reference/shadertools/core-shader-modules.md#picking).
 
 
 ### Standard Shader Hooks

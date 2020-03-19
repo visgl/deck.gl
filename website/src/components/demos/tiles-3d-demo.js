@@ -3,7 +3,7 @@ import autobind from 'autobind-decorator';
 import {MAPBOX_STYLES} from '../../constants/defaults';
 import App from 'website-examples/3d-tiles/app';
 
-export default class GeoJsonDemo extends Component {
+export default class Tiles3DDemo extends Component {
   static get data() {
     return [];
   }

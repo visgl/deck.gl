@@ -1,8 +1,8 @@
 import createLayerDemoClass from './layer-demo-base';
 import {DATA_URI} from '../../constants/defaults';
 
+import {COORDINATE_SYSTEM} from '@deck.gl/core';
 import {
-  COORDINATE_SYSTEM,
   ArcLayer,
   BitmapLayer,
   ColumnLayer,
@@ -14,15 +14,10 @@ import {
   PointCloudLayer,
   PolygonLayer,
   ScatterplotLayer,
-  TextLayer,
-  TripsLayer,
-  TerrainLayer,
-  MVTTileLayer
-} from 'deck.gl';
+  TextLayer
+} from '@deck.gl/layers';
 
 import {colorToRGBArray} from '../../utils/format-utils';
-
-const MAPBOX_TOKEN = process.env.MapboxAccessToken; // eslint-disable-line
 
 export const ArcLayerDemo = createLayerDemoClass({
   Layer: ArcLayer,
@@ -215,83 +210,8 @@ export const TextLayerDemo = createLayerDemoClass({
 
 export const BitmapLayerDemo = createLayerDemoClass({
   Layer: BitmapLayer,
-  allowMissingData: true,
   props: {
     bounds: [-122.519, 37.7045, -122.355, 37.829],
     image: `${DATA_URI}/sf-districts.png`
   }
 });
-
-export const TripsLayerDemo = createLayerDemoClass({
-  Layer: TripsLayer,
-  dataUrl: `${DATA_URI}/sf.trips.json`,
-  propParameters: {
-    currentTime: {
-      displayName: 'currentTime',
-      type: 'range',
-      value: 500,
-      step: 12,
-      min: 0,
-      max: 1200
-    },
-    trailLength: {
-      displayName: 'trailLength',
-      type: 'range',
-      value: 600,
-      step: 12,
-      min: 0,
-      max: 1200
-    }
-  },
-  props: {
-    getPath: d => d.waypoints.map(p => p.coordinates),
-    getTimestamps: d => d.waypoints.map(p => p.timestamp - 1554772579000),
-    getColor: [253, 128, 93],
-    opacity: 0.8,
-    widthMinPixels: 8,
-    rounded: true,
-    trailLength: 600,
-    currentTime: 500
-  }
-});
-
-export const TerrainLayerDemo = createLayerDemoClass({
-  Layer: TerrainLayer,
-  allowMissingData: true,
-  propParameters: {
-    meshMaxError: {
-      displayName: 'meshMaxError',
-      type: 'range',
-      value: 4.0,
-      step: 1,
-      min: 1,
-      max: 100
-    }
-  },
-  props: {
-    minZoom: 0,
-    maxZoom: 23,
-    strategy: 'no-overlap',
-    elevationDecoder: {
-      rScaler: 256,
-      gScaler: 1,
-      bScaler: 1 / 256,
-      offset: -32768
-    },
-    terrainImage: 'https://s3.amazonaws.com/elevation-tiles-prod/terrarium/{z}/{x}/{y}.png',
-    surfaceImage: 'https://wms.chartbundle.com/tms/1.0.0/sec/{z}/{x}/{y}.png?origin=nw'
-  }
-})
-
-export const MVTTileLayerDemo = createLayerDemoClass({
-  Layer: MVTTileLayer,
-  allowMissingData: true,
-  props: {
-    minZoom: 0,
-    maxZoom: 23,
-    getFillColor: [140, 170, 180],
-    urlTemplates: [
-      `https://a.tiles.mapbox.com/v4/mapbox.boundaries-adm0-v3/{z}/{x}/{y}.vector.pbf?access_token=${MAPBOX_TOKEN}`
-    ]
-  }
-})

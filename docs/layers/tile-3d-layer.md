@@ -1,24 +1,33 @@
 # Tile3DLayer (Experimental)
 
-The `Tile3DLayer` renders tileset data formatted according to the [3D Tiles Specification](https://www.opengeospatial.org/standards/3DTiles),
-which is supported by the [Tileset3DLoader](https://loaders.gl/modules/3d-tiles/docs/api-reference/tileset-3d-loader).
+The `Tile3DLayer` renders 3d tiles data formatted according to the [3D Tiles Specification](https://www.opengeospatial.org/standards/3DTiles) and [`ESRI I3S`](https://github.com/Esri/i3s-spec) ,
+which is supported by the [Tiles3DLoader](https://loaders.gl/modules/3d-tiles/docs/api-reference/tiles-3d-loader).
 
-Tile3DLayer is a [CompositeLayer](/docs/api-reference/composite-layer.md). Base on each tile content [format](https://github.com/AnalyticalGraphicsInc/3d-tiles/tree/master/specification#introduction), it uses either a [PointCloudLayer](/docs/layers/point-cloud-layer.md) or [ScenegraphLayer](/docs/layers/scenegraph-layer.md) to render.
+Tile3DLayer is a [CompositeLayer](/docs/api-reference/composite-layer.md). Base on each tile type, it uses a [PointCloudLayer](/docs/layers/point-cloud-layer.md), a [ScenegraphLayer](/docs/layers/scenegraph-layer.md) or [SimpleMeshLayer](/docs/layers/simple-mesh-layer.md) to render.
 
 References
 - [3D Tiles](https://github.com/AnalyticalGraphicsInc/3d-tiles/tree/master/specification).
+- [ESRI I3S](https://github.com/Esri/i3s-spec)
+
+**Load a 3D tiles dataset from ION server. [Set up Ion account](https://cesium.com/docs/tutorials/getting-started/#your-first-app);**
 
 ```js
 import React, {Component} from 'react';
 import DeckGL from '@deck.gl/react';
+import {CesiumIonLoader} from '@loaders.gl/3d-tiles';
 import {Tile3DLayer} from '@deck.gl/geo-layers';
 
 export default class App extends Component {
-
   render() {
     const layer = new Tile3DLayer({
       id: 'tile-3d-layer',
-      data: '<path-to-your-tileset json file>',
+      // tileset json file url 
+      data: 'https://assets.cesium.com/43978/tileset.json',
+      loader: CesiumIonLoader,
+      // https://cesium.com/docs/rest-api/
+      loadOptions: {
+        'cesium-ion': {accessToken: '<ion_access_token_for_your_asset>'}
+      },
       onTilesetLoad: (tileset) => {
         // Recenter to cover the tileset
         const {cartographicCenter, zoom} = tileset;
@@ -35,6 +44,27 @@ export default class App extends Component {
       _subLayerProps: {
         scenegraph: {_lighting: 'flat'}
       }
+    });
+     
+    return (<DeckGL {...viewport} layers={[layer]} />);
+  }
+}
+```
+
+**Load I3S Tiles**
+```js
+import React, {Component} from 'react';
+import DeckGL from '@deck.gl/react';
+import {I3SLoader} from '@loaders.gl/i3s';
+import {Tile3DLayer} from '@deck.gl/geo-layers';
+
+export default class App extends Component {
+  render() {
+    const layer = new Tile3DLayer({
+      id: 'tile-3d-layer',
+      // Tileset entry point: Indexed 3D layer file url 
+      data: 'https://tiles.arcgis.com/tiles/z2tnIkrLQ2BRzr6P/arcgis/rest/services/SanFrancisco_Bldgs/SceneServer/layers/0',
+      loader: I3SLoader
     });
      
     return (<DeckGL {...viewport} layers={[layer]} />);
@@ -94,30 +124,40 @@ This value is only applied when [tile format](https://github.com/AnalyticalGraph
 
 ### Data Properties
 
-##### `data` (String, optional)
+##### `data` (String)
 
-* Default: null
+- A URL to fetch tiles entry point of `3D Tiles` [Tileset JSON](https://github.com/AnalyticalGraphicsInc/3d-tiles/tree/master/specification#tileset-json) file or `Indexed 3D Scene Layer` file [I3S](https://github.com/Esri/i3s-spec).
 
-- A URL to fetch tiles entry point [Tileset JSON](https://github.com/AnalyticalGraphicsInc/3d-tiles/tree/master/specification#tileset-json) file or json object of tileset.
+##### `loader` (Object)
 
-##### `_ionAssetId` (Number|String, Optional)
-##### `_ionAccessToken` (String, Optional)
+- Default [`Tiles3DLoader`](https://loaders.gl/modules/3d-tiles/docs/api-reference/tile-3d-loader)
 
-- `_ionAssetId` and `_ionAccessToken` are used to fetch ion dataset. They are experimental properties, may change in next releases. 
-
-[Set up Ion account](https://cesium.com/docs/tutorials/getting-started/#your-first-app);
+A loader which is used to decode the fetched tiles. Available options are [`CesiumIonLoader`,`Tiles3DLoader`](https://loaders.gl/modules/3d-tiles/docs/api-reference/tile-3d-loader), [`I3SLoader`](https://loaders.gl/modules/i3s/docs/api-reference/i3s-loader).
 
 ##### `loadOptions` (Object, Optional)
 
-- Default: `{throttleRequests: true}`
+- Default: `{}`
 
-Tile3DLayer constructs a [`Tileset3D`](https://loaders.gl/modules/3d-tiles/docs/api-reference/tileset-3d) object after fetching tilset json file. `loadOptions` is an experimental prop to provide Tileset options [Tileset3D options](https://loaders.gl/modules/3d-tiles/docs/api-reference/tileset-3d#options). Among these options, `onTileLoad`, `onTileUnload` and `onTileError` should be passed as layer props.
+`Tile3DLayer` uses [`load`](https://loaders.gl/modules/core/docs/api-reference/load) provided by `@loaders.gl/core` to load a tileset and then constructs a [`Tileset3D`](https://loaders.gl/modules/3d-tiles/docs/api-reference/tileset-3d) object after fetching the tileset entry file.
+`loadOptions` is an experimental nested prop to forward options to the loaders and tileset object, 
+
+- `loadOptions[loader.id]` is used for passing any options available to the `loader`.
+- If you need forward options to [`Tileset3D`](https://loaders.gl/modules/tiles/docs/api-reference/tileset-3d#constructor-1), use`loadOptions.tileset`. Among these options, `onTileLoad`, `onTileUnload` and `onTileError` should be passed as layer props.
 
 ```js
+import {CesiumIonLoader} from '@loaders.gl/3d-tiles';
+import {Tile3DLayer} from '@deck.gl/geo-layers';
+
 const layer = new Tile3DLayer({
-  data: '<path-to-your-tileset json file>',
+  id: 'tile-3d-layer',
+  // tileset json file url 
+  data: 'https://assets.cesium.com/43978/tileset.json',
+  loader: CesiumIonLoader,
   loadOptions: {
-    throttleRequests: false
+    tileset: {
+      throttleRequests: false,
+    },
+    'cesium-ion': {accessToken: '<ion_access_token_for_your_asset>'} 
   }
 })
 ```
@@ -146,13 +186,13 @@ When [`picking`](/docs/developer-guide/custom-layers/picking.md) is enabled, `in
 
 ##### `onTileLoad` (Function, optional)
 
-`onTileLoad` is a function that is called when a tile in the tileset hierarchy is loaded. [Tile3DHeader](https://github.com/uber-web/loaders.gl/blob/master/docs/api-reference/3d-tiles/tileset-3d.md#root--tile3dheader) object is passed in the callback.
+`onTileLoad` is a function that is called when a tile in the tileset hierarchy is loaded. [Tile3D](https://github.com/uber-web/loaders.gl/blob/master/docs/api-reference/tiles/tile-3d.md) object is passed in the callback.
 
 - Default: `onTileLoad: (tileHeader) => {}`
 
 ##### `onTileUnload` (Function, optional)
 
-`onTileUnload` is a function that is called when a tile is unloaded. [Tile3DHeader](https://github.com/uber-web/loaders.gl/blob/master/docs/api-reference/3d-tiles/tileset-3d.md#root--tile3dheader) object is passed in the callback.
+`onTileUnload` is a function that is called when a tile is unloaded. [Tile3D](https://github.com/uber-web/loaders.gl/blob/master/docs/api-reference/tiles/tileset-3d.md#root--tile3dheader) object is passed in the callback.
 
 - Default: `onTileUnload: (tileHeader) => {}`
 
@@ -171,6 +211,7 @@ The Tile3DLayer renders the following sublayers based on tile [format](https://g
 * `scenegraph` - a [ScenegraphLayer](/docs/layers/scenegraph-layer.md) rendering all the tiles with Batched 3D Model format (`b3dm`) or Instanced 3D Model format (`i3dm`).
   - `_lighting` is default to `pbr`.
 * `pointcloud` - a [PointCloudLayer](/docs/layers/point-cloud-layer.md) rendering all the tiles with Point Cloud format (`pnts`).
+* `mesh` - a [SimpleMeshLayer](/docs/layers/simple-mesh-layer.md) rendering all the tiles ESRI `MeshPyramids` data.
 
 Follow [CompositeLayer](/docs/api-reference/composite-layer.md#_subLayerProp) and example in this layer doc to see how to override sub layer props.
 

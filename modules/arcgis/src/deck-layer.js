@@ -1,24 +1,20 @@
-export default function loadArcGISDeckLayer(Layer, Collection, ArcGISDeckLayerView2D) {
+export default function createDeckLayer(DeckProps, Layer, DeckLayerView2D) {
   // A layer that displays inside a MapView using an instance
   // of the layer view defined above.
-  const ArcGISDeckLayer = Layer.createSubclass({
+  return Layer.createSubclass({
     properties: {
-      deckLayers: {
-        type: Collection
-      },
-      effects: {},
-      parameters: {}
+      deck: {}
     },
 
     constructor() {
-      this.deckLayers = new Collection();
+      this.deck = new DeckProps();
     },
 
     // Called by the MapView whenever a layer view
     // needs to be created for a given layer.
     createLayerView(view) {
       if (view.type === '2d') {
-        return new ArcGISDeckLayerView2D({
+        return new DeckLayerView2D({
           view,
           layer: this
         });
@@ -26,12 +22,10 @@ export default function loadArcGISDeckLayer(Layer, Collection, ArcGISDeckLayerVi
 
       // eslint-disable-next-line
       console.error(
-        'ArcGISDeckLayer does not support SceneView at the moment. Use ArcGISDeckExternalRenderer instead.'
+        'DeckLayer does not support SceneView at the moment. Use DeckRenderer instead.'
       );
 
       return null;
     }
   });
-
-  return ArcGISDeckLayer;
 }

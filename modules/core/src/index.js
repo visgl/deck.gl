@@ -85,7 +85,7 @@ export {fp64LowPart} from './utils/math-utils';
 export {default as Tesselator} from './utils/tesselator'; // Export? move to luma.gl or math.gl?
 
 // Experimental utilities
-export {fillArray as _fillArray} from './utils/flatten'; // Export? move to luma.gl or math.gl?
+export {fillArray as _fillArray, flatten as _flatten} from './utils/flatten'; // Export? move to luma.gl or math.gl?
 export {count as _count} from './utils/count';
 export {default as _memoize} from './utils/memoize';
 export {mergeShaders as _mergeShaders} from './utils/shader';

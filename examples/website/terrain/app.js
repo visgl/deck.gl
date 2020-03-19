@@ -29,7 +29,7 @@ const ELEVATION_DECODER = {
 };
 
 export default function App({
-  surfaceImage = SURFACE_IMAGE,
+  texture = SURFACE_IMAGE,
   wireframe = false,
   initialViewState = INITIAL_VIEW_STATE
 }) {
@@ -39,8 +39,8 @@ export default function App({
     maxZoom: 23,
     strategy: 'no-overlap',
     elevationDecoder: ELEVATION_DECODER,
-    terrainImage: TERRAIN_IMAGE,
-    surfaceImage,
+    elevationData: TERRAIN_IMAGE,
+    texture,
     wireframe,
     color: [255, 255, 255]
   });

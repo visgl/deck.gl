@@ -250,7 +250,7 @@ Expects an object with WebGL settings. This object will be passed to luma.gl's `
 
 The `parameters` will be set before each frame is rendered. Naturally, any WebGL `parameters` prop supplied to individual layers will still override global parameters for that layer.
 
-To get access to static parameter values, applications can `import GL from 'luma.gl'`. Please refer to the luma.gl [setParameters](http://uber.github.io/luma.gl/#/documentation/api-reference/get-parameter) API for documentation on supported parameters and values.
+To get access to static parameter values, applications can `import GL from 'luma.gl'`. Please refer to the luma.gl [setParameters](https://luma.gl/docs/api-reference/gltools/parameter-setting) API for documentation on supported parameters and values.
 
 An alternative way to set `parameters`  is to instead define the `onWebGLInitialized` callback (it receives the `gl` context as parameter) and call the luma.gl `setParameters` method inside it.
 

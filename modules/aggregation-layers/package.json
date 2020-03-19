@@ -2,7 +2,7 @@
   "name": "@deck.gl/aggregation-layers",
   "description": "deck.gl layers that aggregate the input data into alternative representations",
   "license": "MIT",
-  "version": "8.1.0-alpha.6",
+  "version": "8.1.0-beta.3",
   "publishConfig": {
     "access": "public"
   },
@@ -30,7 +30,7 @@
     "prepublishOnly": "npm run build-bundle && npm run build-bundle -- --env.dev"
   },
   "dependencies": {
-    "@luma.gl/shadertools": "^8.1.0-alpha.4",
+    "@luma.gl/shadertools": "^8.1.0",
     "@math.gl/web-mercator": "^3.1.3",
     "d3-hexbin": "^0.2.1"
   },

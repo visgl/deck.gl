@@ -59,10 +59,6 @@ export default class TerrainDemo extends Component {
     };
   }
 
-  static get allowMissingData() {
-    return true;
-  }
-
   static get mapStyle() {
     return MAPBOX_STYLES.BLANK;
   }
@@ -94,7 +90,7 @@ export default class TerrainDemo extends Component {
           {...otherProps}
           data={data}
           initialViewState={initialViewState}
-          surfaceImage={SURFACE_IMAGES[surface.value]}
+          texture={SURFACE_IMAGES[surface.value]}
           wireframe={wireframe.value} />
       </div>
     );

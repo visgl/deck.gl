@@ -2,7 +2,7 @@
   "name": "@deck.gl/google-maps",
   "description": "Use deck.gl as a custom Google Maps overlay",
   "license": "MIT",
-  "version": "8.1.0-alpha.6",
+  "version": "8.1.0-beta.3",
   "publishConfig": {
     "access": "public"
   },

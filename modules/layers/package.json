@@ -2,7 +2,7 @@
   "name": "@deck.gl/layers",
   "description": "deck.gl core layers",
   "license": "MIT",
-  "version": "8.1.0-alpha.6",
+  "version": "8.1.0-beta.3",
   "publishConfig": {
     "access": "public"
   },
@@ -29,8 +29,8 @@
     "prepublishOnly": "npm run build-bundle && npm run build-bundle -- --env.dev"
   },
   "dependencies": {
-    "@loaders.gl/core": "^2.1.0-alpha.4",
-    "@loaders.gl/images": "^2.1.0-alpha.4",
+    "@loaders.gl/core": "^2.1.1",
+    "@loaders.gl/images": "^2.1.1",
     "@mapbox/tiny-sdf": "^1.1.0",
     "earcut": "^2.0.6"
   },

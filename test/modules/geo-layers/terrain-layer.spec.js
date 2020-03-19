@@ -27,13 +27,13 @@ test('TerrainLayer', t => {
   const testCases = generateLayerTests({
     Layer: TerrainLayer,
     sampleProps: {
-      terrainImage: 'https://s3.amazonaws.com/elevation-tiles-prod/terrarium/{z}/{x}/{y}.png',
-      surfaceImage: 'https://wms.chartbundle.com/tms/1.0.0/sec/{z}/{x}/{y}.png?origin=nw'
+      elevationData: 'https://s3.amazonaws.com/elevation-tiles-prod/terrarium/{z}/{x}/{y}.png',
+      texture: 'https://wms.chartbundle.com/tms/1.0.0/sec/{z}/{x}/{y}.png?origin=nw'
     },
     assert: t.ok,
     onBeforeUpdate: ({testCase}) => t.comment(testCase.title),
     onAfterUpdate: ({layer, subLayers}) => {
-      if (layer.props.terrainImage) {
+      if (layer.props.elevationData) {
         t.ok(subLayers[0] instanceof TileLayer, 'rendered TileLayer');
       }
     }
@@ -43,13 +43,13 @@ test('TerrainLayer', t => {
   const testCasesNonTiled = generateLayerTests({
     Layer: TerrainLayer,
     sampleProps: {
-      terrainImage: 'https://s3.amazonaws.com/elevation-tiles-prod/terrarium/1/0/0.png',
+      elevationData: 'https://s3.amazonaws.com/elevation-tiles-prod/terrarium/1/0/0.png',
       bounds: [-180, 85, 0, 0]
     },
     assert: t.ok,
     onBeforeUpdate: ({testCase}) => t.comment(testCase.title),
     onAfterUpdate: ({layer, subLayers}) => {
-      if (layer.props.terrainImage) {
+      if (layer.props.elevationData) {
         t.ok(subLayers[0] instanceof SimpleMeshLayer, 'rendered SimpleMeshLayer');
       }
     }

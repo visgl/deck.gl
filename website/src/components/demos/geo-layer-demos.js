@@ -1,10 +1,21 @@
 /* global fetch */
-import {VectorTile} from '@mapbox/vector-tile';
-import Protobuf from 'pbf';
 import createLayerDemoClass from './layer-demo-base';
 import {DATA_URI} from '../../constants/defaults';
 
-import {GreatCircleLayer, S2Layer, TileLayer, H3HexagonLayer, H3ClusterLayer} from 'deck.gl';
+import {BitmapLayer} from '@deck.gl/layers';
+
+import {
+  GreatCircleLayer,
+  S2Layer,
+  TileLayer,
+  TripsLayer,
+  TerrainLayer,
+  MVTLayer,
+  H3HexagonLayer,
+  H3ClusterLayer
+} from '@deck.gl/geo-layers';
+
+const MAPBOX_TOKEN = process.env.MapboxAccessToken; // eslint-disable-line
 
 export const GreatCircleLayerDemo = createLayerDemoClass({
   Layer: GreatCircleLayer,
@@ -70,48 +81,112 @@ export const H3ClusterLayerDemo = createLayerDemoClass({
 
 export const TileLayerDemo = createLayerDemoClass({
   Layer: TileLayer,
-  formatTooltip: f => JSON.stringify(f.properties),
-  allowMissingData: true,
+  formatTooltip: ({tile}) => `x:${tile.x}, y:${tile.y}, z:${tile.z}`,
+  basemap: false,
   props: {
-    stroked: false,
+    data: 'https://c.tile.openstreetmap.org/{z}/{x}/{y}.png',
+    pickable: true,
+    minZoom: 0,
+    maxZoom: 19,
 
+    renderSubLayers: props => {
+      const {
+        bbox: {west, south, east, north}
+      } = props.tile;
+
+      return new BitmapLayer(props, {
+        data: null,
+        image: props.data,
+        bounds: [west, south, east, north]
+      });
+    }
+  }
+});
+
+export const TripsLayerDemo = createLayerDemoClass({
+  Layer: TripsLayer,
+  dataUrl: `${DATA_URI}/sf.trips.json`,
+  propParameters: {
+    currentTime: {
+      displayName: 'currentTime',
+      type: 'range',
+      value: 500,
+      step: 12,
+      min: 0,
+      max: 1200
+    },
+    trailLength: {
+      displayName: 'trailLength',
+      type: 'range',
+      value: 600,
+      step: 12,
+      min: 0,
+      max: 1200
+    }
+  },
+  props: {
+    getPath: d => d.waypoints.map(p => p.coordinates),
+    getTimestamps: d => d.waypoints.map(p => p.timestamp - 1554772579000),
+    getColor: [253, 128, 93],
+    opacity: 0.8,
+    widthMinPixels: 8,
+    rounded: true,
+    trailLength: 600,
+    currentTime: 500
+  }
+});
+
+export const TerrainLayerDemo = createLayerDemoClass({
+  Layer: TerrainLayer,
+  propParameters: {
+    meshMaxError: {
+      displayName: 'meshMaxError',
+      type: 'range',
+      value: 4.0,
+      step: 1,
+      min: 1,
+      max: 100
+    }
+  },
+  props: {
+    elevationDecoder: {
+      rScaler: 2,
+      gScaler: 0,
+      bScaler: 0,
+      offset: 0
+    },
+    elevationData: `${DATA_URI}/terrain.png`,
+    texture: `${DATA_URI}/terrain-mask.png`,
+    bounds: [-122.5233, 37.6493, -122.3566, 37.8159],
+    material: {
+      diffuse: 1
+    }
+  }
+})
+
+export const MVTLayerDemo = createLayerDemoClass({
+  Layer: MVTLayer,
+  basemap: false,
+  props: {
+    data: [
+      `https://a.tiles.mapbox.com/v4/mapbox.mapbox-streets-v7/{z}/{x}/{y}.vector.pbf?access_token=${MAPBOX_TOKEN}`
+    ],
+
+    minZoom: 0,
+    maxZoom: 23,
     getLineColor: [192, 192, 192],
     getFillColor: [140, 170, 180],
 
     getLineWidth: f => {
-      if (f.properties.layer === 'transportation') {
-        switch (f.properties.class) {
-          case 'primary':
-            return 12;
-          case 'motorway':
-            return 16;
-          default:
-            return 6;
-        }
+      switch (f.properties.class) {
+        case 'street':
+          return 6;
+        case 'motorway':
+          return 10;
+        default:
+          return 1;
       }
-      return 1;
     },
-    lineWidthMinPixels: 1,
-
-    getTileData: ({x, y, z}) => {
-      const mapSource = `https://a.tiles.mapbox.com/v4/mapbox.mapbox-streets-v7/${z}/${x}/${y}.vector.pbf?access_token=${
-        process.env.MapboxAccessToken // eslint-disable-line
-      }`;
-      return fetch(mapSource)
-        .then(response => response.arrayBuffer())
-        .then(buffer => {
-          const tile = new VectorTile(new Protobuf(buffer));
-          const features = [];
-          for (const layerName in tile.layers) {
-            const vectorTileLayer = tile.layers[layerName];
-            for (let i = 0; i < vectorTileLayer.length; i++) {
-              const vectorTileFeature = vectorTileLayer.feature(i);
-              const feature = vectorTileFeature.toGeoJSON(x, y, z);
-              features.push(feature);
-            }
-          }
-          return features;
-        });
-    }
+    lineWidthMinPixels: 1
   }
-});
+})

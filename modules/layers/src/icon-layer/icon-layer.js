@@ -128,8 +128,10 @@ export default class IconLayer extends Layer {
     super.updateState({props, oldProps, changeFlags});
 
     const attributeManager = this.getAttributeManager();
-    const {iconManager} = this.state;
     const {iconAtlas, iconMapping, data, getIcon} = props;
+    const {iconManager} = this.state;
+
+    iconManager.setProps({loadOptions: props.loadOptions});
 
     let iconMappingChanged = false;
     const prePacked = iconAtlas || this.internalState.isAsyncPropLoading('iconAtlas');

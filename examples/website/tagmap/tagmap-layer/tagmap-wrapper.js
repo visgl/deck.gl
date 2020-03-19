@@ -3,7 +3,7 @@
 /* global document */
 import TagMap from 'tagmap.js';
 import rbush from 'rbush';
-import {lngLatToWorld, worldToLngLat} from 'viewport-mercator-project';
+import {lngLatToWorld, worldToLngLat} from '@math.gl/web-mercator';
 
 function getDrawingContext() {
   const canvas = document.createElement('canvas');
@@ -41,7 +41,12 @@ export default class TagMapWrapper {
   }
 
   extractCluster({scale, weightThreshold}) {
-    const project = lngLat => lngLatToWorld(lngLat, scale);
+    const project = lngLat => {
+      const p = lngLatToWorld(lngLat);
+      p[0] *= scale;
+      p[1] *= scale;
+      return p;
+    };
 
     const tagList = this.tagMap.extractCluster({project, weightThreshold});
 
@@ -68,7 +73,7 @@ export default class TagMapWrapper {
 
     // transform tags to the format that are used to be visualized as icons in the deckgl layer
     tags.forEach(tag => {
-      tag.position = worldToLngLat(tag.center, scale);
+      tag.position = worldToLngLat([tag.center[0] / scale, tag.center[1] / scale]);
     });
 
     return tags;
@@ -87,13 +92,13 @@ export default class TagMapWrapper {
 
     let tagList;
     if (bbox) {
-      const sw = lngLatToWorld([bbox.minX, bbox.minY], scale);
-      const ne = lngLatToWorld([bbox.maxX, bbox.maxY], scale);
+      const sw = lngLatToWorld([bbox.minX, bbox.minY]);
+      const ne = lngLatToWorld([bbox.maxX, bbox.maxY]);
       tagList = cluster.search({
-        minX: sw[0],
-        minY: ne[1],
-        maxX: ne[0],
-        maxY: sw[1]
+        minX: sw[0] * scale,
+        minY: sw[1] * scale,
+        maxX: ne[0] * scale,
+        maxY: ne[1] * scale
       });
     } else {
       tagList = cluster.all();

@@ -4,7 +4,36 @@
 
 ### Breaking Changes
 
-- `s2-geometry` is no longer a dependency of `@deck.gl/geo-layers`.
+- `s2-geometry` is no longer a dependency of `@deck.gl/geo-layers`. If you were using this module in an application, it needs to be explicitly added to package.json.
+- deck.gl no longer crashes if one of the layers encounters an error during update and/or render. By default, errors are now logged to the console. Specify the `onError` callback to manually handle errors in your application.
+- `Deck` now reacts to changes in the `initialViewState` prop. In 8.0 and earlier versions, this prop was not monitored after the deck instance was constructed. Starting 8.1, if `initialViewState` changes deeply, the camera will be reset. It is recommended that you use a constant for `initialViewState` to achieve behavior consistent with the previous versions.
+
+##### Tile3DLayer
+
+- A new prop `loader` needs to be provided, one of `CesiumIonLoader`, `Tiles3DLoader` from (`@loaders.gl/3d-tiles`) or `I3SLoader` from (`@loaders.gl/i3s`).
+- The `loadOptions` prop is now used for passing all loaders.gl options, not just [`Tileset3D`](https://loaders.gl/modules/tiles/docs/api-reference/tileset-3d#constructor-1). To revert back to the 8.0 behavior, use `{tileset: {throttleRequest: true}}`.
+- `_ionAccessId` and `_ionAccesToken` props are removed. To render an ion dataset with `Tile3DLayer`, follow this example:
+
+```js
+import {CesiumIonLoader} from '@loaders.gl/3d-tiles';
+import {Tile3DLayer} from '@deck.gl/geo-layers';
+
+// load 3d tiles from Cesium ion
+const layer = new Tile3DLayer({
+  id: 'tile-3d-layer',
+  // tileset json file url
+  data: 'https://assets.cesium.com/<ion_access_id>/tileset.json',
+  loader: CesiumIonLoader,
+  // https://cesium.com/docs/rest-api/
+  loadOptions: {
+    // https://loaders.gl/modules/tiles/docs/api-reference/tileset-3d#constructor-1
+    tileset: {
+      throttleRequests: true
+    },
+    'cesium-ion': {accessToken: '<ion_access_token_for_your_asset>'}
+  }
+});
+```
 
 ## Upgrading from deck.gl v7.x to v8.0
 
@@ -30,7 +59,7 @@
 - `Tile3DLayer` props:
   + `onTileLoadFail`: use `onTileError`
 - `TileLayer` props:
-  + `onViewportLoaded`: use `onViewportLoad`  
+  + `onViewportLoaded`: use `onViewportLoad`
 - `project` shader module
   + `project_scale`: use `project_size`
   + `project_to_clipspace`: use `project_position_to_clipspace`
@@ -82,7 +111,7 @@ In older versions of deck, we used to set `UNPACK_FLIP_Y_WEBGL` by default when 
 
 Users of `SimpleMeshLayer` with texture will need to flip their texture image vertically.
 
-The change has allowed us to support loading textures from `ImageBitmap`, in use cases such as rendering to `OffscreenCanvas` on a web worker. 
+The change has allowed us to support loading textures from `ImageBitmap`, in use cases such as rendering to `OffscreenCanvas` on a web worker.
 
 ##### projection system
 

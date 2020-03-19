@@ -7,8 +7,8 @@
     "start": "webpack-dev-server --progress --hot --open"
   },
   "dependencies": {
-    "deck.gl": "^8.0.0",
-    "@loaders.gl/gltf": "^2.0.2",
+    "deck.gl": "^8.1.0",
+    "@loaders.gl/gltf": "^2.1.1",
     "react": "^16.3.0",
     "react-dom": "^16.3.0",
     "react-map-gl": "^5.0.0"

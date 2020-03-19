@@ -1,11 +1,14 @@
-import {CompositeLayer} from '@deck.gl/core';
+import {CompositeLayer, _flatten as flatten} from '@deck.gl/core';
 import {GeoJsonLayer} from '@deck.gl/layers';
 
 import Tileset2D, {STRATEGY_DEFAULT} from './tileset-2d';
+import {urlType, getURLFromTemplate} from './utils';
 
 const defaultProps = {
+  data: [],
+  dataComparator: urlType.equals,
   renderSubLayers: {type: 'function', value: props => new GeoJsonLayer(props), compare: false},
-  getTileData: {type: 'function', value: ({x, y, z}) => null, compare: false},
+  getTileData: {type: 'function', optional: true, value: null, compare: false},
   // TODO - change to onViewportLoad to align with Tile3DLayer
   onViewportLoad: {type: 'function', optional: true, value: null, compare: false},
   onTileLoad: {type: 'function', value: tile => {}, compare: false},
@@ -30,7 +33,9 @@ export default class TileLayer extends CompositeLayer {
 
   get isLoaded() {
     const {tileset} = this.state;
-    return tileset.selectedTiles.every(tile => tile.layer && tile.layer.isLoaded);
+    return tileset.selectedTiles.every(
+      tile => tile.layers && tile.layers.every(layer => layer.isLoaded)
+    );
   }
 
   shouldUpdateState({changeFlags}) {
@@ -41,6 +46,7 @@ export default class TileLayer extends CompositeLayer {
     let {tileset} = this.state;
     const createTileCache =
       !tileset ||
+      changeFlags.dataChanged ||
       (changeFlags.updateTriggersChanged &&
         (changeFlags.updateTriggersChanged.all || changeFlags.updateTriggersChanged.getTileData));
 
@@ -69,7 +75,7 @@ export default class TileLayer extends CompositeLayer {
       tileset.setOptions(props);
       // if any props changed, delete the cached layers
       this.state.tileset.tiles.forEach(tile => {
-        tile.layer = null;
+        tile.layers = null;
       });
     }
 
@@ -112,8 +118,24 @@ export default class TileLayer extends CompositeLayer {
     layer._updateTileset();
   }
 
-  getTileData(tilePosition) {
-    return this.props.getTileData(tilePosition);
+  // Methods for subclass to override
+
+  getTileData(tile) {
+    const {getTileData, fetch, data} = this.props;
+
+    tile.url = getURLFromTemplate(data, tile);
+
+    if (getTileData) {
+      return getTileData(tile);
+    }
+    if (tile.url) {
+      return fetch(tile.url, {layer: this});
+    }
+    return null;
+  }
+
+  renderSubLayers(props) {
+    return this.props.renderSubLayers(props);
   }
 
   getHighlightedObjectIndex(tile) {
@@ -127,7 +149,7 @@ export default class TileLayer extends CompositeLayer {
   }
 
   renderLayers() {
-    const {renderSubLayers, visible} = this.props;
+    const {visible} = this.props;
     return this.state.tileset.tiles.map(tile => {
       // For a tile to be visible:
       // - parent layer must be visible
@@ -135,26 +157,28 @@ export default class TileLayer extends CompositeLayer {
       const isVisible = visible && tile.isVisible;
       const highlightedObjectIndex = this.getHighlightedObjectIndex(tile);
       // cache the rendered layer in the tile
-      if (!tile.layer) {
-        tile.layer = renderSubLayers(
+      if (!tile.layers) {
+        const layers = this.renderSubLayers(
           Object.assign({}, this.props, {
             id: `${this.id}-${tile.x}-${tile.y}-${tile.z}`,
             data: tile.data,
             visible: isVisible,
+            _offset: 0,
             tile,
             highlightedObjectIndex
           })
         );
+        tile.layers = flatten(layers, Boolean);
       } else if (
-        tile.layer.props.visible !== isVisible ||
-        tile.layer.props.highlightedObjectIndex !== highlightedObjectIndex
+        tile.layers[0] &&
+        (tile.layers[0].props.visible !== isVisible ||
+          tile.layers[0].props.highlightedObjectIndex !== highlightedObjectIndex)
       ) {
-        tile.layer = tile.layer.clone({
-          visible: isVisible,
-          highlightedObjectIndex
-        });
+        tile.layers = tile.layers.map(layer =>
+          layer.clone({visible: isVisible, highlightedObjectIndex})
+        );
       }
-      return tile.layer;
+      return tile.layers;
     });
   }
 }

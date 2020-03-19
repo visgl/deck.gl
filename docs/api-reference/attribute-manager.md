@@ -60,7 +60,7 @@ Takes a single parameter as a map of attribute descriptor objects:
 
 * keys are attribute names
 * values are objects with attribute definitions:
-  - luma.gl [accessor parameters](https://luma.gl/#/documentation/api-reference/webgl-2-classes/accessor):
+  - luma.gl [accessor parameters](https://luma.gl/docs/api-reference/webgl/accessor):
     * `type` (Enum, optional) - data type of the attribute, see "Remarks" section below.
     * `size` (Number) - number of elements per vertex
     * `normalized` (Boolean) - default `false`

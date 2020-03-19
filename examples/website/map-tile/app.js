@@ -4,7 +4,6 @@ import {render} from 'react-dom';
 import DeckGL from '@deck.gl/react';
 import {TileLayer} from '@deck.gl/geo-layers';
 import {BitmapLayer} from '@deck.gl/layers';
-import {load} from '@loaders.gl/core';
 
 const INITIAL_VIEW_STATE = {
   latitude: 47.65,
@@ -13,9 +12,6 @@ const INITIAL_VIEW_STATE = {
   maxZoom: 20,
   bearing: 0
 };
-
-// https://wiki.openstreetmap.org/wiki/Slippy_map_tilenames#Tile_servers
-const tileServer = 'https://c.tile.openstreetmap.org/';
 
 export default class App extends PureComponent {
   constructor(props) {
@@ -47,6 +43,9 @@ export default class App extends PureComponent {
 
     return [
       new TileLayer({
+        // https://wiki.openstreetmap.org/wiki/Slippy_map_tilenames#Tile_servers
+        data: 'https://c.tile.openstreetmap.org/{z}/{x}/{y}.png',
+
         pickable: true,
         onHover: this._onHover,
         autoHighlight,
@@ -54,8 +53,6 @@ export default class App extends PureComponent {
         // https://wiki.openstreetmap.org/wiki/Zoom_levels
         minZoom: 0,
         maxZoom: 19,
-
-        getTileData: ({x, y, z}) => load(`${tileServer}/${z}/${x}/${y}.png`),
 
         renderSubLayers: props => {
           const {

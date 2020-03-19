@@ -15,11 +15,11 @@
     "deploy": "NODE_DEBUG=gh-pages gh-pages -d public"
   },
   "dependencies": {
-    "@loaders.gl/draco": "^2.0.2",
-    "@loaders.gl/las": "^2.0.2",
-    "@luma.gl/constants": "^8.1.0-alpha.2",
-    "@luma.gl/core": "^8.1.0-alpha.2",
-    "@luma.gl/webgl": "^8.1.0-alpha.2",
+    "@loaders.gl/draco": "^2.1.0-beta.2",
+    "@loaders.gl/las": "^2.1.1",
+    "@luma.gl/constants": "^8.1.0",
+    "@luma.gl/core": "^8.1.0",
+    "@luma.gl/webgl": "^8.1.0",
     "@probe.gl/stats-widget": "^3.0.1",
     "baseui": "^9.26.0",
     "d3-color": "^1.4.0",

@@ -41,10 +41,10 @@
     "jsdom": false
   },
   "devDependencies": {
-    "@loaders.gl/csv": "^2.1.0-alpha.4",
-    "@loaders.gl/polyfills": "^2.1.0-alpha.4",
-    "@luma.gl/engine": "^8.1.0-alpha.4",
-    "@luma.gl/test-utils": "^8.1.0-alpha.4",
+    "@loaders.gl/csv": "^2.1.1",
+    "@loaders.gl/polyfills": "^2.1.1",
+    "@luma.gl/engine": "^8.1.0",
+    "@luma.gl/test-utils": "^8.1.0",
     "@probe.gl/bench": "^3.2.1",
     "@probe.gl/test-utils": "^3.2.1",
     "babel-loader": "^8.0.0",

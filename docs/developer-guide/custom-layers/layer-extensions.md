@@ -116,7 +116,7 @@ When a layer extension is used, it injects itself into a layer. This means that 
 
 ##### `getShaders`
 
-Called to retrieve the *additional* shader parameters. Returns an object that will be merged with the layer's own `getShaders` result before sending to luma.gl's [shader assembly](https://github.com/uber/luma.gl/blob/master/docs/api-reference/shadertools/assemble-shaders.md#assembleshaders). See [writing shaders](/docs/developer-guide/custom-layers/writing-shaders.md) for deck.gl-specific modules and hooks.
+Called to retrieve the *additional* shader parameters. Returns an object that will be merged with the layer's own `getShaders` result before sending to luma.gl's [shader assembly](https://github.com/uber/luma.gl/blob/8.0-release/docs/api-reference/shadertools/assemble-shaders.md#assembleshaders). See [writing shaders](/docs/developer-guide/custom-layers/writing-shaders.md) for deck.gl-specific modules and hooks.
 
 When this method is executed, `this` points to the layer.
 
@@ -205,14 +205,14 @@ class RedFilter extends LayerExtension {
       }
     };
   }
-  
+
   updateState(params) {
     const {highlightRed = true} = params.props;
     for (const model of this.getModels()) {
       model.setUniforms({highlightRed});
     }
   }
-  
+
   getSubLayerProps() {
     const {highlightRed = true} = params.props;
     return {

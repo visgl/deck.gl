@@ -218,7 +218,7 @@ export default class CompositeLayer extends Layer {
       // Flatten the returned array, removing any null, undefined or false
       // this allows layers to render sublayers conditionally
       // (see CompositeLayer.renderLayers docs)
-      subLayers = flatten(subLayers, {filter: Boolean});
+      subLayers = flatten(subLayers, Boolean);
       this.internalState.subLayers = subLayers;
     }
     debug(TRACE_RENDER_LAYERS, this, shouldUpdate, subLayers);

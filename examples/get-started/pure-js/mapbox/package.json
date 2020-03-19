@@ -8,8 +8,8 @@
     "build": "webpack -p"
   },
   "dependencies": {
-    "@deck.gl/core": "^8.0.0",
-    "@deck.gl/layers": "^8.0.0",
+    "@deck.gl/core": "^8.1.0",
+    "@deck.gl/layers": "^8.1.0",
     "mapbox-gl": "^1.0.0"
   },
   "devDependencies": {

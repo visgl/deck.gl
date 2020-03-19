@@ -39,7 +39,7 @@ test('ShadowPass#render', t => {
   layerManager.setLayers([layer]);
 
   const shadowPass = new ShadowPass(gl, {pixelRatio: 1.0});
-  shadowPass.render(gl, {
+  shadowPass.render({
     viewports: [viewport],
     layers: layerManager.getLayers(),
     onViewportActive: layerManager.activateViewport,
@@ -64,7 +64,7 @@ test('ShadowPass#getModuleParameters', t => {
   const shadowPass = new ShadowPass(gl, {pixelRatio: 1.0});
   const moduleParameters = shadowPass.getModuleParameters(layer);
 
-  t.equal(moduleParameters.pickingActive, 0, `ShadowPass has no active picking module`);
+  t.equal(moduleParameters.drawToShadowMap, true, `ShadowPass has module parameters`);
   shadowPass.delete();
   t.end();
 });

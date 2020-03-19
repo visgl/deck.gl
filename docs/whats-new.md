@@ -2,7 +2,114 @@
 
 This page contains highlights of each deck.gl release. Also check our [vis.gl blog](https://medium.com/vis-gl) for news about new releases and features in deck.gl.
 
+## deck.gl v8.1
+
+Release Date: Mar 17, 2020
+
+### Growing Tile Solutions
+
+<table style="border: 0;" align="center">
+  <tbody>
+    <tr>
+      <td>
+        <img style="max-height:200px" src="https://raw.github.com/uber-common/deck.gl-data/master/images/whats-new/tile-2d.gif" />
+        <p><i>Non-geospatial TileLayer</i></p>
+      </td>
+      <td>
+        <img style="max-height:200px" src="https://raw.github.com/uber-common/deck.gl-data/master/images/whats-new/mvt-layer.jpg" />
+        <p><i>MVTLayer</i></p>
+      </td>
+      <td>
+        <img style="max-height:200px" src="https://raw.github.com/uber-common/deck.gl-data/master/images/whats-new/terrain.jpg" />
+        <p><i>TerrainLayer</i></p>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+
+The `@deck.gl/geo-layers` module added many new features to address popular tiled data use cases.
+
+#### TileLayer
+
+Multiple bugs have been fixed in the [TileLayer](/docs/layers/tile-layer.md) regarding data fetching and tree traversal.
+
+The layer now supports non-geospatial views. Check out this [example](https://github.com/uber/deck.gl/tree/master/examples/website/image-tile) by [@ilan-gold](https://github.com/ilan-gold) that renders a 576 Megapixel image of the moon.
+
+New props are added to better control the layer's behavior:
+
+- `maxCacheByteSize`: for precise management of memory usage
+- `refinementStrategy`: to reduce flashing/overlapping during loading
+- `tileSize` (non-geospatial only)
+
+#### MVTTileLayer
+
+Based on the `TileLayer`, [MVTTileLayer](/docs/layers/mvt-layer.md) loads and renders tiles in the [Mapbox Vector Tiles specification](https://github.com/mapbox/vector-tile-spec). This new layer make it easier to leverage the many great [open source tools](https://github.com/mapbox/awesome-vector-tiles) in use with deck.gl.
+
+This effort is led by contributors from [CARTO](https://carto.com/).
+
+#### TerrainLayer
+
+[TerrainLayer](/docs/layers/terrain-layer.md) loads color-encoded heightmap and reconstructs 3D mesh surfaces. Check out our [example](https://github.com/uber/deck.gl/tree/master/examples/website/terrain).
+
+### ESRI + deck.gl
+
+
+<table style="border: 0;" align="center">
+  <tbody>
+    <tr>
+      <td>
+        <img style="max-height:200px" src="https://raw.github.com/uber-common/deck.gl-data/master/images/whats-new/arcgis.jpg" />
+        <p><i>deck.gl + ArcGIS basemap</i></p>
+      </td>
+      <td>
+        <img style="max-height:200px" src="https://raw.github.com/uber-common/deck.gl-data/master/images/whats-new/esri-i3s.gif" />
+        <p><i>Tile3DLayer + I3S</i></p>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+In collaboration with GIS industry leader [ESRI](https://www.esri.com), we are releasing new experimental features that work with ArcGIS basemap and I3S tiles.
+
+#### @deck.gl/arcgis
+
+You can now use ArcGIS basemaps with deck.gl. This new module lets apps render deck.gl layers into the WebGL context of [ArcGIS API for JavaScript](https://developers.arcgis.com/javascript/). 3D scene view support is experimental in this initial release. To get started, check out [the example](https://deck.gl/gallery/boiler-plate-arcgis) and [the documentation](/docs/api-reference/arcgis/overview.md).
+
+#### Tile3DLayer and I3S format
+
+`Tile3DLayer` is adding preliminary support for the [OGC Indexed 3d Scene (I3S)](https://docs.opengeospatial.org/cs/17-014r5/17-014r5.html) format. See [documentation](/docs/layers/tile-3d-layer.md) for details.
+
+### World Repeating in Web Mercator Maps
+
+![Repeating worlds at low zoom levels](https://user-images.githubusercontent.com/2059298/71849768-b397a700-3087-11ea-8c48-93d8bb9188db.gif)
+
+The `MapView` now supports repeating worlds at low zoom levels. For backward compatibility, this feature is opt-in. Apps may turn it on by setting `views: new MapView({repeat: true})` on `Deck` or `DeckGL`.
+
+Repeating is always on when using [MapboxLayer](/docs/api-reference/mapbox/mapbox-layer.md) and [GoogleMapsOverlay](/docs/api-reference/google-maps/google-maps-overlay.md).
+
+As a result, `GoogleMapsOverlay` now supports all Google Maps zoom levels.
+
+### pydeck 0.3.0
+
+pydeck now uses the [binary attribute API](/docs/developer-guide/performance.md#supply-attributes-directly) to communicate between Python and JavaScript. This greatly increases the speed and the amount of data that it can render.
+
+pydeck now supports external layer modules via a new `custom_libraries` setting.
+
+### Other Improvements
+
+- When using `Deck` as a stateful component, you can now update its `initialViewState` prop to reset the camera.
+- A new prop `onError` is added to `Deck` to handle errors, instead of crashing the app.
+- `Layer` instances now expose a new member `isLoaded`.
+- `PathLayer`'s joint calculation is improved when using with short line segments and extreme angles.
+- `BrushingExtension` supports a new `brushingTarget` mode `source_target`.
+- `PathStyleExtension` now has a new mode `offset`. This feature can be used for positioning polygon strokes inside/outside, or rendering overlapped paths in opposite directions.
+- `TextLayer` now supports [binary attributes](/docs/layers/text-layer.md#use-binary-attributes).
+
+
 ## deck.gl v8.0
+
+Release Date: Dec 20, 2019
 
 ### Performance
 
@@ -80,7 +187,7 @@ This use case is discussed in detail in the [performance developer guide](/docs/
 
 ## deck.gl v7.3
 
-Release Date: Sep xx, 2019
+Release Date: Sep 26, 2019
 
 <table style="border: 0;" align="center">
   <tbody>

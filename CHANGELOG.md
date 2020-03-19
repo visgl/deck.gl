@@ -19,7 +19,45 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v8.1
 
-### deck.gl [8.1.0-alpha.6] - Mar 1 2020
+#### deck.gl [8.1.0] - Mar 17 2020
+
+- Bump loaders.gl; fix website build (#4391)
+- Fix PostProcessEffect settings (#4389)
+- Fix polygon offset calculation in TileLayer (#4388)
+- Add support for multiple H3 resolutions to H3HexagonLayer (#4381)
+- Bump luma.gl and loaders.gl dependencies (#4402)
+
+### deck.gl v8.1 Prereleases
+
+#### deck.gl [8.1.0-beta.3] - Mar 13 2020
+
+- playground: add back Cairo 3d tiles example and bump luma (#4386)
+
+#### deck.gl [8.1.0-beta.2] - Mar 13 2020
+
+- geo-layers: API audit for tile-3d-layer and bump loaders (#4384)
+
+#### deck.gl [8.1.0-beta.1] - Mar 11 2020
+
+- Fix TerrainLayer support for single mesh (#4378)
+- geo-layers: refactor tile-3d-layer (#4319)
+- Terrain layer API audit (#4377)
+- pydeck: fix repeated script loading (#4376)
+- TileLayer and MVTLayer API audit (#4372)
+- Rename MVTTileLayer to MVTLayer (#4368)
+- Fix jumpy projection using WEB_MERCATOR_AUTO_OFFSET with CARTESIAN coordinates (#4374)
+- Fix TileLayer crash when renderSubLayers returns array (#4362)
+- Clean up ArcGISDeckLayer api (#4363)
+- Terrain layer bug fixes (#4367)
+- Improve flatten perf (#4361)
+- Add clipping to MVTTileLayer (#4336)
+- Fix projectPosition in CARTESIAN coordinate system (#4335)
+- Workaround for invalid attribute index access (#4344)
+- pydeck: Support rendering in Google Collab (#4337)
+- [arcgis] Fix .gl and .state access (#4338)
+- Remove s2-geometry dependency (#4311)
+
+#### deck.gl [8.1.0-alpha.6] - Mar 1 2020
 
 - [test-utils] Fix testLayer (#4334)
 - TileLayer: expose tileSize prop (#4332)
@@ -28,13 +66,13 @@ Ref: http://keepachangelog.com/en/0.3.0/
 - Fix package.json for modules/arcgis (#4306)
 - Use luma.gl in arcgis module (#4302)
 
-### deck.gl [8.1.0-alpha.5] - Feb 22 2020
+#### deck.gl [8.1.0-alpha.5] - Feb 22 2020
 
 - ArcGIS module and sample app (#4252)
 - Clean up ArcGIS module API and docs (#4301)
 - TerrainLayer fixes (#4297)
 
-### deck.gl [8.1.0-alpha.4] - Feb 20 2020
+#### deck.gl [8.1.0-alpha.4] - Feb 20 2020
 
 - [google-maps] fix occasional crash during resize (#4269)
 - Fix A-B-A path rendering (#4271)
@@ -46,7 +84,7 @@ Ref: http://keepachangelog.com/en/0.3.0/
 - TileLayer API audit (#4246)
 - TerrainLayer integration (#4278)
 
-### deck.gl [8.1.0-alpha.3] - Feb 11 2020
+#### deck.gl [8.1.0-alpha.3] - Feb 11 2020
 
 -  [react] Fix support for mix-blend-mode style (#4260)
 -  Handle edge case in google-maps view state calculation (#4259)
@@ -59,7 +97,7 @@ Ref: http://keepachangelog.com/en/0.3.0/
 -  Move BaseTileLayer to geo-layers (#4232)
 -  Add Experimental Layer: TerrainLayer (#3984)
 
-### deck.gl [8.1.0-alpha.2] - Feb 4 2020
+#### deck.gl [8.1.0-alpha.2] - Feb 4 2020
 
 - Support binary data in TextLayer (#4206)
 - TileLayer improvements (#4139)
@@ -77,7 +115,7 @@ Ref: http://keepachangelog.com/en/0.3.0/
 - Use int type for enum uniforms (#4171)
 - [TileLayer] fix tile indices generation in edge cases (#4170)
 
-### deck.gl [8.1.0-alpha.1] - Jan 17 2020
+#### deck.gl [8.1.0-alpha.1] - Jan 17 2020
 
 - Voodoo fix for Mac+NVIDIA bug (#4166)
 - Remove unnecessary code from project glsl (#4162)
@@ -99,7 +137,7 @@ Ref: http://keepachangelog.com/en/0.3.0/
 - Fix support for luma.gl buffers as external attributes (#4121)
 - [react] explicitly set deck canvas position (#4124)
 
-### deck.gl [8.1.0-alpha.0] - Jan 08 2020
+#### deck.gl [8.1.0-alpha.0] - Jan 08 2020
 
 - pydeck: Reduce JupyterLab bundle size (#4110)
 - fix cursor style in React (#4118)
@@ -114,7 +152,114 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v8.0
 
-### deck.gl [8.0.0-beta.2] - Dec 17 2019
+#### deck.gl [8.0.17] - Mar 03 2020
+
+- PathLayer: Workaround for invalid attribute index access (#4344)
+
+#### deck.gl [8.0.16] - Feb 20 2020
+
+- Fix attribute check greater than attribute size (#4288)
+- Fix using constant with SimpleMeshLayer's getColor (#4277)
+
+#### deck.gl [8.0.15] - Feb 14 2020
+
+- [react] Fix support for mix-blend-mode style (#4260)
+- fix 64-bit precision in low-end GPUs (#4261)
+
+#### deck.gl [8.0.14] - Feb 10 2020
+
+- Fix bundle dependencies (#4255)
+
+#### deck.gl [8.0.13] - Feb 4 2020
+
+- Fix transition for 64bit attributes (#4226)
+
+#### deck.gl [8.0.12] - Jan 30 2020
+
+- Fix SimpleMeshLayer shading (#4214)
+
+#### deck.gl [8.0.11] - Jan 23 2020
+
+- [Bug] Fix hexagon layer projection (#4173)
+
+#### deck.gl [8.0.10] - Jan 23 2020
+
+- @deck.gl/json: Fix bug dropping props with falsy values (#4185)
+- Fix buffer size check in Attribute.updateBuffer (#4190)
+- Bump luma dependency (#4191)
+- Fix modelMatrix application in the project module (#4182)
+
+#### deck.gl [8.0.9] - Jan 18 2020
+
+- Fix H3HexagonLayer update when viewport jumps (#4158)
+- Voodoo fix for Mac+NVIDIA bug (#4166)
+
+#### deck.gl [8.0.8] - Jan 16 2020
+
+- [Extension] Add source_target to brushing mode (#4150)
+
+#### deck.gl [8.0.7] - Jan 15 2020
+
+- IconLayer: fix copy texture data when resize (#4151)
+- Bump mjolnir.js dependency (#4141)
+
+#### deck.gl [8.0.6] - Jan 13 2020
+
+- IconLayer: use load instead of loadImage to load icons (#4137)
+- Bump loaders.gl (#4136)
+- Remove unused dependencies from geo-layers (#4127)
+
+#### deck.gl [8.0.5] - Jan 9 2020
+
+- [react] explicitly set deck canvas position (#4124)
+- Fix support for luma.gl buffers as external attributes (#4121)
+
+#### deck.gl [8.0.4] - Jan 8 2020
+
+- Fix randomly failed icon layer render test (#4079)
+- fix react key warning (#4098)
+- fix debug bundle warning (#4107)
+- GPUGridAggregator: Add WA for ANGLE specific bug. (#4113)
+- fix cursor style in React (#4118)
+- Reduce JupyterLab bundle size (#4110)
+
+#### deck.gl [8.0.3] - Jan 3 2020
+
+- warn if initialViewState and viewState are both present (#4078)
+- @deck.gl/jupyter-widget: Change version variable for CDN-based Jupyter Lab widget (#4087)
+- Fix inline versioning (#4086)
+- Update bundle config (#4088)
+- pydeck: Add CDN-hosted bundle for standalone HTML rendering (#4003)
+- @deck.gl/jupyter-widget: Read version and module name from bundle for Jupyter Lab (#4089)
+- @deck.gl/react: pass viewports to children with deckGLViewProps (#4092)
+
+#### deck.gl [8.0.2] - Jan 2 2020
+
+- Fix flyToInterpolator crash when transitioning to the same viewport center (#4084)
+
+#### deck.gl [8.0.1] - Dec 21 2019
+
+- improve version detection (#4070)
+- Fix hover event bubbling (#4071)
+- Bump dependencies (#4074)
+
+#### deck.gl [8.0.0] - Dec 21 2019
+
+- set React wrapper's z-index (#4068)
+- Bump dependencies to production versions (#4066)
+- fix 3d tiles culling (#4064)
+- AggregationLayer: various fixes (#4062)
+- Bump loaders and fix infinite updateState calls (#4061)
+- Fix `layer.projectPositions` with default coordinate system (#4056)
+- Fix frustum plane calculation (#4050)
+- fix bundle transpilation (#4048)
+- AggregationLayers: Update and improve unit test coverage. (#4046)
+- AggregationLayer : Improve aggregation state management (#4008)
+- Fix bundle transpilation (#4042)
+
+### deck.gl v8.0 Prereleases
+
+#### deck.gl [8.0.0-beta.2] - Dec 17 2019
 
 - Fix ScenegraphLayer asset wait (#4025)
 - pydeck: Update for new @deck.gl/json API and add additional tes… (#4020)
@@ -128,7 +273,7 @@ Ref: http://keepachangelog.com/en/0.3.0/
 - Fix WebGL BlendEquation warnings (#4037)
 - Layer bug fixes (#4040)
 
-### deck.gl [8.0.0-beta.1] - Dec 13 2019
+#### deck.gl [8.0.0-beta.1] - Dec 13 2019
 
 - bump loaders.gl to beta.5 (#4018)
 - pydeck: Make a single bundle for use in standalone and Jupyter rendering (#4010)

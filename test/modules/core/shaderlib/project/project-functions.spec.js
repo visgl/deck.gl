@@ -88,7 +88,7 @@ const TEST_CASES = [
       viewport: TEST_VIEWPORT,
       coordinateSystem: COORDINATE_SYSTEM.CARTESIAN
     },
-    result: [174.15111111111113, -58.11045723102637, 0]
+    result: [174.15110778808594, -58.11044311523443, 0]
   },
   {
     title: 'LNGLAT_OFFSETS',

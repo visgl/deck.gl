@@ -48,7 +48,7 @@ export default class LayersPass extends Pass {
   // Draws a list of layers in one viewport
   // TODO - when picking we could completely skip rendering viewports that dont
   // intersect with the picking rect
-  /* eslint-disable max-depth */
+  /* eslint-disable max-depth, max-statements */
   _drawLayersInViewport(
     gl,
     {layers, layerFilter, onError, viewport, view, pass = 'unknown', effects, moduleParameters}
@@ -77,11 +77,17 @@ export default class LayersPass extends Pass {
 
     setParameters(gl, {viewport: glViewport});
 
+    const indexResolver = layerIndexResolver();
     // render layers in normal colors
     for (let layerIndex = 0; layerIndex < layers.length; layerIndex++) {
       const layer = layers[layerIndex];
       // Check if we should draw layer
       const shouldDrawLayer = this._shouldDrawLayer(layer, viewport, pass, layerFilter);
+
+      // This is the "logical" index for ordering this layer in the stack
+      // used to calculate polygon offsets
+      // It can be the same as another layer
+      const layerRenderIndex = indexResolver(layer, shouldDrawLayer);
 
       // Calculate stats
       if (shouldDrawLayer && layer.props.pickable) {
@@ -103,7 +109,7 @@ export default class LayersPass extends Pass {
         try {
           layer.drawLayer({
             moduleParameters: _moduleParameters,
-            uniforms: {layerIndex},
+            uniforms: {layerIndex: layerRenderIndex},
             parameters: layerParameters
           });
         } catch (err) {
@@ -118,7 +124,7 @@ export default class LayersPass extends Pass {
 
     return renderStatus;
   }
-  /* eslint-enable max-depth */
+  /* eslint-enable max-depth, max-statements */
 
   /* Methods for subclass overrides */
   shouldDrawLayer(layer) {
@@ -164,6 +170,45 @@ export default class LayersPass extends Pass {
 
     return Object.assign(moduleParameters, this.getModuleParameters(layer, effects), overrides);
   }
+}
+
+// If the _index prop is defined, return a layer index that's relative to its parent
+// Otherwise return the index of the layer among all rendered layers
+// This is done recursively, i.e. if the user overrides a layer's default index,
+// all its descendants will be resolved relative to that index.
+// This implementation assumes that parent layers always appear before its children
+// which is true if the layer array comes from the LayerManager
+export function layerIndexResolver(startIndex = 0, layerIndices = {}) {
+  const resolvers = {};
+
+  return (layer, isDrawn) => {
+    const indexOverride = layer.props._offset;
+    const layerId = layer.id;
+    const parentId = layer.parent && layer.parent.id;
+
+    let index;
+
+    if (parentId in resolvers) {
+      const resolver = (resolvers[parentId] =
+        resolvers[parentId] || layerIndexResolver(layerIndices[parentId], layerIndices));
+      index = resolver(layer, isDrawn);
+      resolvers[layerId] = resolver;
+    } else if (Number.isFinite(indexOverride)) {
+      index = indexOverride + (layerIndices[parentId] || 0);
+      // Mark layer as needing its own resolver
+      // We don't actually create it until it's used for the first time
+      resolvers[layerId] = null;
+    } else {
+      index = startIndex;
+    }
+
+    if (isDrawn && index >= startIndex) {
+      startIndex = index + 1;
+    }
+
+    layerIndices[layerId] = index;
+    return index;
+  };
 }
 
 // Convert viewport top-left CSS coordinates to bottom up WebGL coordinates

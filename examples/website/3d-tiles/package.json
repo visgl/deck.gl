@@ -5,19 +5,20 @@
     "start-local": "webpack-dev-server --env.local --progress --hot --open"
   },
   "dependencies": {
-    "deck.gl": "^8.0.0",
-    "@loaders.gl/draco": "^2.0.2",
+    "deck.gl": "^8.1.0",
+    "@loaders.gl/core": "^2.1.1",
+    "@loaders.gl/draco": "^2.1.1",
+    "@loaders.gl/3d-tiles": "^2.1.1",
     "react": "^16.8.0",
     "react-dom": "^16.8.0",
     "react-map-gl": "^5.0.0"
   },
   "devDependencies": {
-    "@babel/cli": "^7.0.0",
-    "@babel/core": "^7.4.0",
-    "@babel/preset-react": "^7.0.0",
-    "babel-loader": "^8.0.5",
-    "webpack": "^4.39.1",
+    "@babel/core": "^7.8.7",
+    "@babel/preset-react": "^7.8.3",
+    "babel-loader": "^8.0.6",
+    "webpack": "^4.20.2",
     "webpack-cli": "^3.1.2",
-    "webpack-dev-server": "^3.1.11"
+    "webpack-dev-server": "^3.1.1"
   }
 }

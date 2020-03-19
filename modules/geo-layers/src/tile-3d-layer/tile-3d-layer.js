@@ -1,20 +1,24 @@
-/* global fetch */
-
+import {Vector3} from '@math.gl/core';
+import GL from '@luma.gl/constants';
+import {Geometry} from '@luma.gl/core';
 import {COORDINATE_SYSTEM, CompositeLayer} from '@deck.gl/core';
 import {PointCloudLayer} from '@deck.gl/layers';
-import {ScenegraphLayer} from '@deck.gl/mesh-layers';
+import {ScenegraphLayer, SimpleMeshLayer} from '@deck.gl/mesh-layers';
 import {log} from '@deck.gl/core';
 
-import {Tileset3D, _getIonTilesetMetadata} from '@loaders.gl/3d-tiles';
+import {load} from '@loaders.gl/core';
+import {Tileset3D, TILE_TYPE} from '@loaders.gl/tiles';
+import {Tiles3DLoader} from '@loaders.gl/3d-tiles';
+
+const scratchOffset = new Vector3();
 
 const defaultProps = {
   getPointColor: [0, 0, 0],
   pointSize: 1.0,
 
   data: null,
-  _ionAssetId: null,
-  _ionAccessToken: null,
-  loadOptions: {throttleRequests: true},
+  loadOptions: {},
+  loader: Tiles3DLoader,
 
   onTilesetLoad: tileset3d => {},
   onTileLoad: tileHeader => {},
@@ -27,6 +31,7 @@ export default class Tile3DLayer extends CompositeLayer {
     if ('onTileLoadFail' in this.props) {
       log.removed('onTileLoadFail', 'onTileError')();
     }
+    // prop verification
     this.state = {
       layerMap: {},
       tileset3d: null
@@ -40,12 +45,6 @@ export default class Tile3DLayer extends CompositeLayer {
   updateState({props, oldProps, changeFlags}) {
     if (props.data && props.data !== oldProps.data) {
       this._loadTileset(props.data);
-    } else if (
-      (props._ionAccessToken || props._ionAssetId) &&
-      (props._ionAccessToken !== oldProps._ionAccessToken ||
-        props._ionAssetId !== oldProps._ionAssetId)
-    ) {
-      this._loadTilesetFromIon(props._ionAccessToken, props._ionAssetId);
     }
 
     if (changeFlags.viewportChanged) {
@@ -67,23 +66,20 @@ export default class Tile3DLayer extends CompositeLayer {
     return info;
   }
 
-  async _loadTileset(tilesetUrl, fetchOptions, ionMetadata) {
-    const response = await fetch(tilesetUrl, fetchOptions);
-    const tilesetJson = await response.json();
+  async _loadTileset(tilesetUrl) {
+    const {loader, loadOptions} = this.props;
+    const options = {...loadOptions};
+    if (loader.preload) {
+      const preloadOptions = await loader.preload(tilesetUrl, loadOptions);
+      Object.assign(options, preloadOptions);
+    }
+    const tilesetJson = await load(tilesetUrl, loader, options);
 
-    const loadOptions = this.getLoadOptions();
-
-    const tileset3d = new Tileset3D(tilesetJson, tilesetUrl, {
-      onTileLoad: tileHeader => {
-        this.props.onTileLoad(tileHeader);
-        this._updateTileset(tileset3d);
-      },
-      onTileUnload: this.props.onTileUnload,
+    const tileset3d = new Tileset3D(tilesetJson, {
+      onTileLoad: this._onTileLoad.bind(this),
+      onTileUnload: this._onTileUnload.bind(this),
       onTileLoadFail: this.props.onTileError,
-      // TODO: explicit passing should not be needed, registerLoaders should suffice
-      fetchOptions,
-      ...ionMetadata,
-      ...loadOptions
+      ...options
     });
 
     this.setState({
@@ -91,16 +87,20 @@ export default class Tile3DLayer extends CompositeLayer {
       layerMap: {}
     });
 
-    if (tileset3d) {
-      this._updateTileset(tileset3d);
-      this.props.onTilesetLoad(tileset3d);
-    }
+    this._updateTileset(tileset3d);
+    this.props.onTilesetLoad(tileset3d);
   }
 
-  async _loadTilesetFromIon(ionAccessToken, ionAssetId) {
-    const ionMetadata = await _getIonTilesetMetadata(ionAccessToken, ionAssetId);
-    const {url, headers} = ionMetadata;
-    await this._loadTileset(url, {headers}, ionMetadata);
+  _onTileLoad(tileHeader) {
+    this.props.onTileLoad(tileHeader);
+    this._updateTileset(this.state.tileset3d);
+    this.setNeedsUpdate();
+  }
+
+  _onTileUnload(tileHeader) {
+    // Was cleaned up from tileset cache. We no longer need to track it.
+    delete this.state.layerMap[tileHeader.id];
+    this.props.onTileUnload(tileHeader);
   }
 
   _updateTileset(tileset3d) {
@@ -108,59 +108,11 @@ export default class Tile3DLayer extends CompositeLayer {
     if (!timeline || !viewport || !tileset3d) {
       return;
     }
-
     const frameNumber = tileset3d.update(viewport);
-    this._updateLayerMap(frameNumber);
-  }
-
-  // `Layer` instances is created and added to the map if it doesn't exist yet.
-  _updateLayerMap(frameNumber) {
-    const {tileset3d, layerMap} = this.state;
-
-    // create layers for new tiles
-    const {selectedTiles} = tileset3d;
-    const tilesWithoutLayer = selectedTiles.filter(tile => !layerMap[tile.id]);
-
-    for (const tile of tilesWithoutLayer) {
-      // TODO - why do we call this here? Being "selected" should automatically add it to cache?
-      tileset3d.addTileToCache(tile);
-
-      layerMap[tile.id] = {
-        layer: this._create3DTileLayer(tile),
-        tile
-      };
+    const tilesetChanged = this.state.frameNumber !== frameNumber;
+    if (tilesetChanged) {
+      this.setState({frameNumber});
     }
-
-    // update layer visibility
-    this._selectLayers(frameNumber);
-  }
-
-  // Grab only those layers who were selected this frame.
-  _selectLayers(frameNumber) {
-    const {layerMap} = this.state;
-    const layerMapValues = Object.values(layerMap);
-
-    for (const value of layerMapValues) {
-      const {tile} = value;
-      let {layer} = value;
-
-      if (tile.selectedFrame === frameNumber) {
-        if (layer && layer.props && !layer.props.visible) {
-          // Still has GPU resource but visibility is turned off so turn it back on so we can render it.
-          layer = layer.clone({visible: true});
-          layerMap[tile.id].layer = layer;
-        }
-      } else if (tile.contentUnloaded) {
-        // Was cleaned up from tileset cache. We no longer need to track it.
-        delete layerMap[tile.id];
-      } else if (layer && layer.props && layer.props.visible) {
-        // Still in tileset cache but doesn't need to render this frame. Keep the GPU resource bound but don't render it.
-        layer = layer.clone({visible: false});
-        layerMap[tile.id].layer = layer;
-      }
-    }
-
-    this.setState({layers: Object.values(layerMap).map(layer => layer.layer)});
   }
 
   _create3DTileLayer(tileHeader) {
@@ -168,42 +120,16 @@ export default class Tile3DLayer extends CompositeLayer {
       return null;
     }
 
-    switch (tileHeader.content.type) {
-      case 'pnts':
+    switch (tileHeader.type) {
+      case TILE_TYPE.POINTCLOUD:
         return this._createPointCloudTileLayer(tileHeader);
-      case 'i3dm':
-      case 'b3dm':
+      case TILE_TYPE.SCENEGRAPH:
         return this._create3DModelTileLayer(tileHeader);
+      case TILE_TYPE.MESH:
+        return this._createSimpleMeshLayer(tileHeader);
       default:
         throw new Error(`Tile3DLayer: Failed to render layer of type ${tileHeader.content.type}`);
     }
-  }
-
-  _create3DModelTileLayer(tileHeader) {
-    const {gltf, instances, cartographicOrigin, modelMatrix} = tileHeader.content;
-
-    const SubLayerClass = this.getSubLayerClass('scenegraph', ScenegraphLayer);
-
-    return new SubLayerClass(
-      {
-        _lighting: 'pbr'
-      },
-      this.getSubLayerProps({
-        id: 'scenegraph'
-      }),
-      {
-        id: `${this.id}-scenegraph-${tileHeader.id}`,
-        // Fix for ScenegraphLayer.modelMatrix, under flag in deck 7.3 to avoid breaking existing code
-        data: instances || [{}],
-        scenegraph: gltf,
-
-        coordinateSystem: COORDINATE_SYSTEM.METER_OFFSETS,
-        coordinateOrigin: cartographicOrigin,
-        modelMatrix,
-        getTransformMatrix: instance => instance.modelMatrix,
-        getPosition: instance => [0, 0, 0]
-      }
-    );
   }
 
   _createPointCloudTileLayer(tileHeader) {
@@ -222,7 +148,6 @@ export default class Tile3DLayer extends CompositeLayer {
 
     const {pointSize, getPointColor} = this.props;
     const SubLayerClass = this.getSubLayerClass('pointcloud', PointCloudLayer);
-
     return new SubLayerClass(
       {
         pointSize
@@ -251,8 +176,105 @@ export default class Tile3DLayer extends CompositeLayer {
     );
   }
 
+  _create3DModelTileLayer(tileHeader) {
+    const {gltf, instances, cartographicOrigin, modelMatrix} = tileHeader.content;
+
+    const SubLayerClass = this.getSubLayerClass('scenegraph', ScenegraphLayer);
+
+    return new SubLayerClass(
+      {
+        _lighting: 'pbr'
+      },
+      this.getSubLayerProps({
+        id: 'scenegraph'
+      }),
+      {
+        id: `${this.id}-scenegraph-${tileHeader.id}`,
+        data: instances || [{}],
+        scenegraph: gltf,
+
+        coordinateSystem: COORDINATE_SYSTEM.METER_OFFSETS,
+        coordinateOrigin: cartographicOrigin,
+        modelMatrix,
+        getTransformMatrix: instance => instance.modelMatrix,
+        getPosition: instance => [0, 0, 0]
+      }
+    );
+  }
+
+  _createSimpleMeshLayer(tileHeader) {
+    const content = tileHeader.content;
+    const {attributes, modelMatrix, cartographicOrigin, texture} = content;
+    const {normals, texCoords} = attributes;
+    const positions = new Float32Array(attributes.positions.value.length);
+    for (let i = 0; i < positions.length; i += 3) {
+      scratchOffset.copy(attributes.positions.value.subarray(i, i + 3));
+      positions.set(scratchOffset, i);
+    }
+
+    const geometry = new Geometry({
+      drawMode: GL.TRIANGLES,
+      attributes: {
+        positions,
+        normals,
+        texCoords
+      }
+    });
+
+    const SubLayerClass = this.getSubLayerClass('mesh', SimpleMeshLayer);
+
+    return new SubLayerClass(
+      this.getSubLayerProps({
+        id: 'mesh'
+      }),
+      {
+        id: `${this.id}-mesh-${tileHeader.id}`,
+        mesh: geometry,
+        data: [{}],
+        getPosition: [0, 0, 0],
+        getColor: [255, 255, 255],
+        texture,
+        modelMatrix,
+        coordinateOrigin: cartographicOrigin,
+        coordinateSystem: COORDINATE_SYSTEM.METER_OFFSETS
+      }
+    );
+  }
+
   renderLayers() {
-    return this.state.layers;
+    const {tileset3d, layerMap} = this.state;
+    if (!tileset3d) {
+      return null;
+    }
+
+    return tileset3d.tiles
+      .map(tile => {
+        let layer = layerMap[tile.id] && layerMap[tile.id].layer;
+        // render selected tiles
+        if (tile.selected) {
+          // create layer
+          if (!layer) {
+            layer = this._create3DTileLayer(tile);
+            layerMap[tile.id] = {layer, tile};
+          }
+          // update layer visibility
+          if (layer && layer.props && !layer.props.visible) {
+            // Still has GPU resource but visibility is turned off so turn it back on so we can render it.
+            layer = layer.clone({visible: true});
+            layerMap[tile.id].layer = layer;
+          }
+          return layer;
+        }
+
+        // hide non-selected tiles
+        if (layer && layer.props && layer.props.visible) {
+          // Still in tileset cache but doesn't need to render this frame. Keep the GPU resource bound but don't render it.
+          layer = layer.clone({visible: false});
+          layerMap[tile.id].layer = layer;
+        }
+        return layer;
+      })
+      .filter(Boolean);
   }
 }
 

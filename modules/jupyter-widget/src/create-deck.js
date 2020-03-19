@@ -4,12 +4,12 @@ import makeTooltip from './widget-tooltip';
 import mapboxgl from './ssr-safe-mapbox';
 
 import {CSVLoader} from '@loaders.gl/csv';
-import {Tile3DLoader} from '@loaders.gl/3d-tiles';
+import {Tiles3DLoader, CesiumIonLoader} from '@loaders.gl/3d-tiles';
 import {registerLoaders} from '@loaders.gl/core';
 
 import * as deck from './deck-bundle';
 
-import {loadScript, alreadyLoaded} from './script-utils';
+import {loadScript} from './script-utils';
 
 import GL from '@luma.gl/constants';
 
@@ -34,11 +34,12 @@ const jsonConverterConfiguration = {
 
   // Constants that should be resolved with the provided values by JSON converter
   constants: {
-    Tile3DLoader
+    Tiles3DLoader,
+    CesiumIonLoader
   }
 };
 
-registerLoaders([CSVLoader, Tile3DLoader]);
+registerLoaders([CSVLoader, Tiles3DLoader]);
 
 const jsonConverter = new deck.JSONConverter({
   configuration: jsonConverterConfiguration
@@ -60,11 +61,8 @@ function addCustomLibraries(customLibraries) {
   if (!customLibraries) {
     return;
   }
-  for (const obj of customLibraries) {
-    // obj is an object of the form `{libraryName, resourceUri}`
-    if (!alreadyLoaded(obj.resourceUri)) {
-      loadExternalLibrary(obj);
-    }
+  for (const {libraryName, resourceUri} of customLibraries) {
+    loadExternalLibrary({libraryName, resourceUri});
   }
 }
 

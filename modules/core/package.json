@@ -2,7 +2,7 @@
   "name": "@deck.gl/core",
   "description": "deck.gl core library",
   "license": "MIT",
-  "version": "8.1.0-alpha.6",
+  "version": "8.1.0-beta.3",
   "publishConfig": {
     "access": "public"
   },
@@ -32,9 +32,9 @@
     "prepublishOnly": "npm run build-debugger && npm run build-bundle && npm run build-bundle -- --env.dev"
   },
   "dependencies": {
-    "@loaders.gl/core": "^2.1.0-alpha.4",
-    "@loaders.gl/images": "^2.1.0-alpha.4",
-    "@luma.gl/core": "^8.1.0-alpha.4",
+    "@loaders.gl/core": "^2.1.1",
+    "@loaders.gl/images": "^2.1.1",
+    "@luma.gl/core": "^8.1.0",
     "@math.gl/web-mercator": "^3.1.3",
     "gl-matrix": "^3.0.0",
     "math.gl": "^3.1.2",

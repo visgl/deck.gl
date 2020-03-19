@@ -1,7 +1,7 @@
 /* eslint-disable no-invalid-this */
 
 import {Deck} from '@deck.gl/core';
-import {Model, Buffer, Framebuffer, instrumentGLContext} from '@luma.gl/core';
+import {Model, Buffer, Framebuffer, instrumentGLContext, withParameters} from '@luma.gl/core';
 
 export function initializeResources(gl) {
   instrumentGLContext(gl);
@@ -33,30 +33,12 @@ export function initializeResources(gl) {
     vertexCount: 4,
     drawMode: gl.TRIANGLE_STRIP
   });
-}
 
-export function createOrResizeFramebuffer(gl, width, height) {
-  if (!this.deckFbo) {
-    this.createFramebuffer(gl, width, height);
-    return;
-  }
+  this.deckFbo = new Framebuffer(gl, {width: 1, height: 1});
 
-  if (this.fboWidth === width && this.fboHeight === height) {
-    return;
-  }
-
-  this.deckFbo.delete();
-  this.deckFbo = new Framebuffer(gl, {width, height});
-
-  this.deckgl.setProps({
-    _framebuffer: this.deckFbo
-  });
-}
-
-export function initializeDeckGL(gl) {
-  this.deckgl = new Deck({
+  this.deckInstance = new Deck({
     // The view state will be set dynamically to track the MapView current extent.
-    initialViewState: {},
+    viewState: {},
 
     // Input is handled by the ArcGIS API for JavaScript.
     controller: false,
@@ -65,6 +47,62 @@ export function initializeDeckGL(gl) {
     gl,
 
     // This deck renders into an auxiliary framebuffer.
-    _framebuffer: this.deckFbo
+    _framebuffer: this.deckFbo,
+
+    _customRender: redrawReason => {
+      if (redrawReason === 'arcgis') {
+        this.deckInstance._drawLayers(redrawReason);
+      } else {
+        this.redraw();
+      }
+    }
   });
+}
+
+export function render({gl, width, height, viewState}) {
+  const screenFbo = gl.getParameter(gl.FRAMEBUFFER_BINDING);
+
+  /* global window */
+  const dpr = window.devicePixelRatio;
+  width = Math.round(width * dpr);
+  height = Math.round(height * dpr);
+
+  this.deckFbo.resize({width, height});
+
+  this.deckInstance.setProps({viewState});
+  // redraw deck immediately into deckFbo
+  this.deckInstance.redraw('arcgis');
+
+  // We overlay the texture on top of the map using the full-screen quad.
+  withParameters(
+    gl,
+    {
+      blend: true,
+      blendFunc: [gl.ONE, gl.ONE_MINUS_SRC_ALPHA],
+      framebuffer: screenFbo,
+      viewport: [0, 0, width, height]
+    },
+    () => {
+      this.model.setUniforms({u_texture: this.deckFbo}).draw();
+    }
+  );
+}
+
+export function finalizeResources() {
+  if (this.deckInstance) {
+    this.deckInstance.finalize();
+    this.deckInstance = null;
+  }
+
+  if (this.model) {
+    this.model.delete();
+  }
+
+  if (this.buffer) {
+    this.buffer.delete();
+  }
+
+  if (this.deckFbo) {
+    this.deckFbo.delete();
+  }
 }

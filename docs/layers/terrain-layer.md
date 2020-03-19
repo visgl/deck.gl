@@ -7,9 +7,9 @@
 
 # TerrainLayer
 
-This TerrainLayer reconstructs mesh surfaces from height map images, e.g. [Mapzen Terrain Tiles](https://github.com/tilezen/joerd/blob/master/docs/formats.md), which encodes elevation into R,G,B values.
+The `TerrainLayer` reconstructs mesh surfaces from height map images, e.g. [Mapzen Terrain Tiles](https://github.com/tilezen/joerd/blob/master/docs/formats.md), which encodes elevation into R,G,B values.
 
-When `terrainImage` is supplied with a templated tile server URL, e.g. URL containing "{x}", it renders terrain tiles globally using the TileLayer and SimpleMeshLayer. Otherwise, supply an absolute URL to `terrainImage` and a `bounds` prop to render a any terrain image (e.g. non-Slippy map tiles) with a SimpleMeshLayer.
+When `elevationData` is supplied with a URL template, i.e. a string containing `'{x}'` and `'{y}'`, it loads terrain tiles on demand using a `TileLayer` and renders a mesh for each tile. If `elevationData` is an absolute URL, a single mesh is used, and the `bounds` prop is required to position it into the world space.
 
 ```js
 import DeckGL from '@deck.gl/react';
@@ -18,17 +18,16 @@ import {TerrainLayer} from '@deck.gl/geo-layers';
 export const App = ({viewport}) => {
 
   const layer = new TerrainLayer({
-    minZoom: 0,
-    maxZoom: 23,
-    strategy: 'no-overlap',
     elevationDecoder: {
-      rScaler: 256,
-      gScaler: 1,
-      bScaler: 1/256,
-      offset: -32768
+      rScaler: 2,
+      gScaler: 0,
+      bScaler: 0,
+      offset: 0
     },
-    terrainImage: 'https://s3.amazonaws.com/elevation-tiles-prod/terrarium/{z}/{x}/{y}.png',
-    surfaceImage: 'https://wms.chartbundle.com/tms/1.0.0/sec/{z}/{x}/{y}.png?origin=nw'
+    // Digital elevation model from https://www.usgs.gov/
+    elevationData: 'https://raw.githubusercontent.com/uber-common/deck.gl-data/master/website/terrain.png',
+    texture: 'https://raw.githubusercontent.com/uber-common/deck.gl-data/master/website/terrain-mask.png',
+    bounds: [-122.5233, 37.6493, -122.3566, 37.8159],
   });
   return <DeckGL {...viewport} layers={[layer]} />;
 };
@@ -71,25 +70,21 @@ When in Tiled Mode, inherits from all [TileLayer](/docs/api-reference/tile-layer
 
 ### Data Options
 
-##### `terrainImage` (String)
+##### `elevationData` (String|Array, required)
 
-Image url that encodes height data.
+Image URL that encodes height data.
+
+- If the value is a valid URL, this layer will render a single mesh.
+- If the value is a string, and contains substrings `{x}` and `{y}`, it is considered a URL template. This layer will render a `TileLayer` of meshes. `{x}` `{y}` and `{z}` will be replaced with a tile's actual index when it is requested.
+- If the value is an array: multiple URL templates. See `TileLayer`'s `data` prop documentation for use cases.
+
+
+##### `texture` (String|Null, optional)
+
+Image URL to use as the surface texture. Same schema as `elevationData`.
 
 - Default: `null`
 
-Depending on the `terrainImage` string, this layer renders as a tiled layer composed of a TileLayer of SimpleMeshLayers, or as a single mesh rendered as a SimpleMeshLayer.
-
-* Tiled `terrainImage`: https://s3.amazonaws.com/elevation-tiles-prod/terrarium/{z}/{x}/{y}.png
-
-* Non-Tiled `terrainImage`: https://s3.amazonaws.com/elevation-tiles-prod/terrarium/1/1/0.png
-
-##### `surfaceImage` (String|Null, optional)
-
-Image url to use as surface texture. Same URL parsing as `terrainImage`.
-
-- Default: `0`
-
-### Mesh Options
 
 ##### `meshMaxError` (Number, optional)
 
@@ -140,17 +135,20 @@ The default value of `elevationDecoder` decodes a grayscale image:
 
 ##### `bounds` (Array, optional)
 
-Bounds of the image to fit x,y coordinates into. In [minX, minY, maxX, maxY] world coordinates. Must be supplied when using as a Non-Tiled terrain, otherwise optional.
+Bounds of the image to fit x,y coordinates into. In `[left, bottom, right, top]`. 
+`left` and `right` refers to the world longitude/x at the corresponding side of the image.
+`top` and `bottom` refers to the world latitude/y at the corresponding side of the image.
+
+Must be supplied when using non-tiled elevation data.
 
 - Default: `null`
 
-The pixel coordinates start from the top left corner.
 
 ##### `workerUrl` (String, optional)
 
-**Advanced** Supply url to local terrain worker bundle. Custom `workerUrl` may be desirable if the application wishes to serve the worker code itself without relying on `unpkg.com`. The worker bundle can be located in `"node_modules/@loaders.gl/terrain/dist/terrain-loader.worker.js"`.
+**Advanced** Supply url to local terrain worker bundle. By default, it points to the latest published `@loaders.gl/terrain` NPM module on [unpkg.com](unpkg.com). Custom `workerUrl` may be desirable if the application wishes to serve the worker code itself without relying on the CDN. The worker bundle can be located locally in `"node_modules/@loaders.gl/terrain/dist/terrain-loader.worker.js"`.
 
-Set `workerUrl` to empty string to disable worker (improves error messages).
+Set `workerUrl` to an empty string to disable worker during debugging (improves error messages).
 
 - Default: `null`
 
@@ -158,15 +156,31 @@ Set `workerUrl` to empty string to disable worker (improves error messages).
 
 ##### `color` (Color, optional)
 
-Color to use if `surfaceImage` is unavailable. Equivalent to setting SimpleMeshLayer `getColor` prop to `d => prop.color`.
+Color to use if `texture` is unavailable. Forwarded to `SimpleMeshLayer`'s `getColor` prop.
 
 - Default: `[255, 255, 255]`
 
 ##### `wireframe` (Boolean, optional)
 
-Forwarded to SimpleMeshLayer `wireframe` prop.
+Forwarded to `SimpleMeshLayer`'s `wireframe` prop.
 
 - Default: `false`
+
+##### `material` (Object, optional)
+
+Forwarded to `SimpleMeshLayer`'s `material` prop.
+
+- Default: `true`
+
+
+## Sub Layers
+
+The `TerrainLayer` renders the following sublayers:
+
+* `tiles` - a [TileLayer](/docs/layers/tile-layer.md). Only rendered if `elevationData` is a URL template.
+* `mesh` - a [SimpleMeshLayer](/docs/layers/simple-mesh-layer.md) rendering the terrain mesh.
+
+
 
 # Source
 
