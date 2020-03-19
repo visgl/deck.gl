@@ -46,18 +46,20 @@ function getBoundingBox(viewport, zRange) {
   let corners;
   if (zRange && zRange.length === 2) {
     const [minZ, maxZ] = zRange;
+    const minTargetZ = {targetZ: minZ};
+    const maxTargetZ = {targetZ: maxZ};
     corners = [
       // Lower zRange
-      viewport.unproject([0, 0], {targetZ: minZ}),
-      viewport.unproject([viewport.width, 0], {targetZ: minZ}),
-      viewport.unproject([0, viewport.height], {targetZ: minZ}),
-      viewport.unproject([viewport.width, viewport.height], {targetZ: minZ}),
+      viewport.unproject([0, 0], minTargetZ),
+      viewport.unproject([viewport.width, 0], minTargetZ),
+      viewport.unproject([0, viewport.height], minTargetZ),
+      viewport.unproject([viewport.width, viewport.height], minTargetZ),
 
       // Upper zRange
-      viewport.unproject([0, 0], {targetZ: maxZ}),
-      viewport.unproject([viewport.width, 0], {targetZ: maxZ}),
-      viewport.unproject([0, viewport.height], {targetZ: maxZ}),
-      viewport.unproject([viewport.width, viewport.height], {targetZ: maxZ})
+      viewport.unproject([0, 0], maxTargetZ),
+      viewport.unproject([viewport.width, 0], maxTargetZ),
+      viewport.unproject([0, viewport.height], maxTargetZ),
+      viewport.unproject([viewport.width, viewport.height], maxTargetZ)
     ];
   } else {
     corners = [
