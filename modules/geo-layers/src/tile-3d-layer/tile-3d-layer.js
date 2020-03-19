@@ -73,12 +73,14 @@ export default class Tile3DLayer extends CompositeLayer {
       const preloadOptions = await loader.preload(tilesetUrl, loadOptions);
       Object.assign(options, preloadOptions);
     }
+
     const tilesetJson = await load(tilesetUrl, loader, options);
 
     const tileset3d = new Tileset3D(tilesetJson, {
       onTileLoad: this._onTileLoad.bind(this),
       onTileUnload: this._onTileUnload.bind(this),
       onTileLoadFail: this.props.onTileError,
+      ...loadOptions.tileset,
       ...options
     });
 
