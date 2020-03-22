@@ -3,7 +3,7 @@
 // Ensure we only load a script once
 const scriptLoadPromises = {};
 
-function loadScript(url) {
+export function loadScript(url) {
   if (!scriptLoadPromises[url]) {
     const script = document.createElement('script');
     script.type = 'text/javascript';
@@ -17,5 +17,3 @@ function loadScript(url) {
   }
   return scriptLoadPromises[url];
 }
-
-export {loadScript};

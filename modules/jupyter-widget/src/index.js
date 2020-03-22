@@ -4,33 +4,39 @@
 // Entry point for the Jupyter Notebook bundle containing custom Backbone model and view definitions.
 
 // Some static assets may be required by the custom widget javascript. The base
-// url for the notebook is not known at build time and is therefore computed
-// dynamically.
+// url for the notebook is not known at build time and is therefore computed dynamically.
 const dataBaseUrl = document.body && document.body.getAttribute('data-base-url');
 if (dataBaseUrl) {
   window.__webpack_public_path__ = `${dataBaseUrl}nbextensions/pydeck/nb_extension`;
 }
 
-let DeckGLModel;
-let DeckGLView;
-const {createDeck, updateDeck, loadExternalClasses} = require('./create-deck');
+const {createDeck, updateDeck, loadExternalClasses} = require('./lib/create-deck');
 const {MODULE_VERSION, MODULE_NAME} = require('./version');
 
+// Initialize the
+
+// TODO - rename these exports to DeckWidgetModel and DeckWidgetView...
+let TransportModel = null;
+let TransportView = null;
 try {
-  const widgetClasses = require('./widget');
-  DeckGLView = widgetClasses.DeckGLView;
-  DeckGLModel = widgetClasses.DeckGLModel;
+  TransportModel = require('./transports/jupyter-widget/transport-widget-model');
+  TransportView = require('./transports/jupyter-widget/transport-widget-view');
 } catch (err) {
-  DeckGLModel = null;
-  DeckGLView = null;
+  // TODO - when does this happen? Not even a console warning?
 }
 
 module.exports = {
-  DeckGLView,
-  DeckGLModel,
+  TransportModel,
+  TransportView,
   MODULE_VERSION,
   MODULE_NAME,
+
+  // DEPRECATED: Backwards compatibility
+  DeckGLView: TransportView,
+  DeckGLModel: TransportModel,
+
+  // FOR TESTING ONLY?
   createDeck,
   updateDeck,
-  loadExternalClasses
+  loadExternalClasses // TODO - unused
 };
