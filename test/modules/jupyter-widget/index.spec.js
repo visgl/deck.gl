@@ -3,10 +3,10 @@ import test from 'tape-catch';
 function getDeckModel(state) {
   // Require at runtime, after the environment is polyfilled
   try {
-    const {DeckGLModel} = require('@deck.gl/jupyter-widget');
+    const {JupyterTransportModel} = require('@deck.gl/jupyter-widget');
     const {createTestModel} = require('./mock-widget-base');
 
-    const model = createTestModel(DeckGLModel, state);
+    const model = createTestModel(JupyterTransportModel, state);
     return model;
   } catch (error) {
     // Work around: jupyter-widget is built as an AMD module
