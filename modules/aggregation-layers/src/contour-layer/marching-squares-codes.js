@@ -1,4 +1,4 @@
-// Code to Offsets Map needed to implement Marching Squres algorithm
+// Code to Offsets Map needed to implement Marching Squares algorithm
 // Ref: https://en.wikipedia.org/wiki/Marching_squares
 
 // Table to map code to the intersection offsets
@@ -157,7 +157,7 @@ export const ISOBANDS_CODE_OFFSET_MAP = {
   // Below list of cases, follow the same order as in above mentioned wiki page.
   // Each case has its code on first commented line // T,TR,R,C
   // where T: Top, TR: Top-right, R: Right and C: current, each will be either 0, 1 or 2
-  // final code is binary represenation of above code , where takes 2 digits
+  // final code is binary representation of above code , where takes 2 digits
   // for example:  code 2-2-2-1 => 10-10-10-01 => 10101001 => 169
 
   // no contours
