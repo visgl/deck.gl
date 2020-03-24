@@ -148,7 +148,7 @@ class Layer(JSONMixin):
             )
 
         layer_accessors = self._kwargs
-        inverted_accessor_map = {v: k for k, v in layer_accessors.items()}
+        inverted_accessor_map = {v: k for k, v in layer_accessors.items() if type(v) not in [list, dict, set]}
 
         binary_transmission = []
         # Loop through data columns and convert them to numpy arrays

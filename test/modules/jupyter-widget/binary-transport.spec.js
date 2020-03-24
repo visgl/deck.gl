@@ -30,19 +30,6 @@ const EXPECTED_CONVERSION = {
   }
 };
 
-// Test deck.gl JSON configuration
-const DEMO_JSON_PROPS = {
-  viewport: null,
-  description: 'test json config',
-  layers: [
-    {
-      radius: 100,
-      id: 'layer-id',
-      '@@type': 'ScatterplotLayer'
-    }
-  ]
-};
-
 test('jupyter-widget: binary-transport', t0 => {
   let binaryTransportModule;
   let widgetCreateDeckModule;
@@ -75,14 +62,27 @@ test('jupyter-widget: binary-transport', t0 => {
     t.end();
   });
 
+  // Test deck.gl JSON configuration
+  const DEMO_JSON_PROPS = {
+    viewport: null,
+    description: 'Test JSON config, converted into a deck.gl Layer before testing',
+    layers: [
+      {
+        radius: 100,
+        id: 'layer-id',
+        '@@type': 'ScatterplotLayer'
+      }
+    ]
+  };
+
   t0.test('processDataBuffer', t => {
-    const newProps = binaryTransportModule.processDataBuffer({
+    const newDeckProps = binaryTransportModule.processDataBuffer({
       dataBuffer: EXPECTED_CONVERSION,
       convertedJson: widgetCreateDeckModule.jsonConverter.convert(DEMO_JSON_PROPS)
     });
 
     t.deepEquals(
-      newProps.layers[0].state.data,
+      newDeckProps.layers[0].props.data,
       EXPECTED_CONVERSION['layer-id'],
       'should convert buffer input and props to new layers'
     );
