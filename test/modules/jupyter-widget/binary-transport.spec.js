@@ -82,8 +82,8 @@ test('jupyter-widget: binary-transport', t0 => {
     });
 
     t.deepEquals(
+      newProps.layers[0].state.data,
       EXPECTED_CONVERSION['layer-id'],
-      newProps.layers[0].data,
       'should convert buffer input and props to new layers'
     );
     t.end();
