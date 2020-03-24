@@ -45,8 +45,12 @@ const DEMO_JSON_PROPS = {
 
 test('jupyter-widget: binary-transport', t0 => {
   let binaryTransportModule;
+  let jsonModule;
+  let deckJsonConverter;
   try {
     binaryTransportModule = require('@deck.gl/jupyter-widget/binary-transport');
+    jsonModule = require('@deck.gl/json');
+    deckJsonConverter = jsonModule.jsonConverter;
   } catch (error) {
     t0.comment('dist mode, skipping binary-transport tests');
     t0.end();
@@ -76,7 +80,7 @@ test('jupyter-widget: binary-transport', t0 => {
   t0.test('processDataBuffer', t => {
     const newProps = binaryTransportModule.processDataBuffer({
       dataBuffer: EXPECTED_CONVERSION,
-      jsonProps: DEMO_JSON_PROPS
+      convertedJson: deckJsonConverter(DEMO_JSON_PROPS)
     });
 
     t.deepEquals(
