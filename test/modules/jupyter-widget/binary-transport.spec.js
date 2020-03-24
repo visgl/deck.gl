@@ -80,7 +80,7 @@ test('jupyter-widget: binary-transport', t0 => {
   t0.test('processDataBuffer', t => {
     const newProps = binaryTransportModule.processDataBuffer({
       dataBuffer: EXPECTED_CONVERSION,
-      convertedJson: deckJsonConverter(DEMO_JSON_PROPS)
+      convertedJson: deckJsonConverter.convert(DEMO_JSON_PROPS)
     });
 
     t.deepEquals(
