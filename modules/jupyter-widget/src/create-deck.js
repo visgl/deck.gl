@@ -49,17 +49,22 @@ function addCustomLibraries(customLibraries, onComplete) {
   if (!customLibraries) {
     return;
   }
+
   const loaded = {};
 
   function onEachFinish() {
-    if (Object.keys(loaded).length === customLibraries.length) {
+    if (Object.values(loaded).every(f => f)) {
       // when all libraries loaded
       if (typeof onComplete === 'function') onComplete();
     }
   }
 
   customLibraries.forEach(({libraryName, resourceUri}) => {
-    if (window[libraryName]) {
+    // set loaded to be false, even if addCustomLibraries is called multiple times
+    // with the same parameters
+    loaded[libraryName] = false;
+
+    if (libraryName in window) {
       // do not redefine
       loaded[libraryName] = window[libraryName];
       onEachFinish();
@@ -93,7 +98,7 @@ function updateDeck(inputJson, deckgl) {
 }
 
 function missingLayers(oldLayers, newLayers) {
-  return oldLayers.filter(ol => !newLayers.find(nl => nl.id === ol.id));
+  return oldLayers.filter(ol => ol && ol.id && !newLayers.find(nl => nl.id === ol.id));
 }
 
 function createDeck({
@@ -110,8 +115,10 @@ function createDeck({
     const oldLayers = jsonInput.layers || [];
     const props = jsonConverter.convert(jsonInput);
 
-    const newLayers = props.layers.filter(l => l) || [];
-    const layerToLoad = missingLayers(oldLayers, newLayers);
+    const convertedLayers = (props.layers || []).filter(l => l);
+
+    // loading custom library is async, some layers might not be convertable before custom library loads
+    const layerToLoad = missingLayers(oldLayers, convertedLayers);
     const getTooltip = makeTooltip(tooltip);
 
     deckgl = new deck.DeckGL({
@@ -124,10 +131,15 @@ function createDeck({
     });
 
     const onComplete = () => {
-      const newProps = jsonConverter.convert({layers: layerToLoad});
-      const mergeLayers = [...props.layers, ...newProps.layers].filter(l => l);
-      if (mergeLayers.length) {
-        deckgl.setProps({layers: mergeLayers});
+      if (layerToLoad.length) {
+        // convert input layer again to presist layer order
+        const newProps = jsonConverter.convert({layers: jsonInput.layers});
+        const newLayers = (newProps.layers || []).filter(l => l);
+
+        if (newLayers.length > convertedLayers.length) {
+          // if more layers are converted
+          deckgl.setProps({layers: newLayers});
+        }
       }
     };
 
