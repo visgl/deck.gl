@@ -27,7 +27,7 @@ def generate_graph_data(num_nodes, random_seed):
     return force_layout_df, edge_df
 
 
-def make_renderer(nodes, edges):
+def make_renderer(nodes, edges, use_binary_transport=False):
     """Creates the pydeck visualization for rendering"""
     view_state = pydeck.ViewState(
         offset=[0, 0], latitude=None, longitude=None, bearing=None, pitch=None, zoom=1,
@@ -38,13 +38,14 @@ def make_renderer(nodes, edges):
     nodes_layer = pydeck.Layer(
         "PointCloudLayer",
         nodes,
-        get_position=["x", "y", "z"],
+        get_position="position",
         get_normal=[10, 100, 10],
         get_color="color",
         pickable=True,
+        use_binary_transport=use_binary_transport,
         auto_highlight=True,
         highlight_color=[255, 255, 0],
-        radius=5
+        radius=50
     )
 
     edges_layer = pydeck.Layer(
@@ -53,6 +54,7 @@ def make_renderer(nodes, edges):
         get_path="path",
         get_width=1,
         rounded=True,
+        use_binary_transport=use_binary_transport,
         width_units='"pixels"',
         width_max_pixels=2,
         get_color=[40, 40, 40, 110],
@@ -75,21 +77,33 @@ def get_path(datum, nodes):
     return path
 
 
+r = None
+
 def generate_vis(notebook_display=False):
-    edges = pd.read_csv(EDGES_URL).head(2000)
+    global r
+    edges = pd.read_csv(EDGES_URL)
     nodes = pd.read_csv(NODES_URL)
+
+    colors = pydeck.data_utils.assign_random_colors(nodes["group"])
+    nodes["color"] = nodes.apply(lambda row: [c / 255 for c in colors.get(row["group"])], axis=1)
+    nodes["position"] = nodes.apply(lambda row: [row['x'], row['y'], row['z']], axis=1)
 
     edges["path"] = edges.apply(lambda d: get_path(d, nodes), axis=1)
 
-    colors = pydeck.data_utils.assign_random_colors(nodes["group"])
-    nodes["color"] = nodes.apply(lambda row: colors.get(row["group"]), axis=1)
-    r = make_renderer(nodes, edges)
+    del nodes["x"]
+    del nodes["y"]
+    del nodes["z"]
+    del nodes["group"]
+    del edges["u"]
+    del edges["v"]
+
     if not notebook_display:
+        r = make_renderer(nodes, edges, use_binary_transport=False)
         r.to_html("graph_example.html", notebook_display=notebook_display)
     else:
-        r.layers[0].use_binary_transport = True
-        r.layers[1].use_binary_transport = True
-        r.show()
+        display(edges)  # noqa
+        r = make_renderer(nodes, edges, use_binary_transport=True)
+        display(r.show())  # noqa
 
 
 if __name__ == "__main__":
