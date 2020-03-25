@@ -167,4 +167,4 @@ function injectFunction(warnFunction, messageHandler) {
   };
 }
 
-export {jsonConverter, createDeck, updateDeck};
+export {jsonConverter, createDeck, updateDeck, addCustomLibraries};
