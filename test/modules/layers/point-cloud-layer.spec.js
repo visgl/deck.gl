@@ -1,5 +1,6 @@
 import test from 'tape-catch';
 import {testLayer} from '@deck.gl/test-utils';
+import {equals} from 'math.gl';
 
 import {PointCloudLayer} from '@deck.gl/layers';
 
@@ -31,6 +32,27 @@ test('PointCloudLayer#loaders.gl support', t => {
           layer.props.data.attributes.POSITION.value,
           'used external attribute'
         );
+      }
+    },
+    {
+      updateProps: {
+        sizeUnits: 'meters'
+      },
+      onAfterUpdate: ({layer}) => {
+        const uniforms = layer.state.model.getUniforms();
+        t.ok(
+          equals(uniforms.radiusPixels, 0.000255808143),
+          'radiusPixels correct for sizeUnits "meters"'
+        );
+      }
+    },
+    {
+      updateProps: {
+        sizeUnits: 'pixels'
+      },
+      onAfterUpdate: ({layer}) => {
+        const uniforms = layer.state.model.getUniforms();
+        t.is(uniforms.radiusPixels, 10, 'radiusPixels is correct for sizeUnits "pixels"');
       }
     }
   ];
