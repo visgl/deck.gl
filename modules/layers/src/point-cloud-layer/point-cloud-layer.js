@@ -114,7 +114,7 @@ export default class PointCloudLayer extends Layer {
     const {viewport} = this.context;
     const {pointSize, sizeUnits} = this.props;
 
-    const sizeMultiplier = sizeUnits === 'meters' ? viewport.distanceScales.pixelsPerMeter[2] : 1;
+    const sizeMultiplier = sizeUnits === 'meters' ? 1 / viewport.metersPerPixel : 1;
 
     this.state.model
       .setUniforms(
