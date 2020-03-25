@@ -125,6 +125,7 @@ class Deck(JSONMixin):
         iframe_width=700,
         iframe_height=500,
         as_string=False,
+        offline=False,
         **kwargs
     ):
         """Write a file and loads it to an iframe, if in a Jupyter environment;
@@ -162,6 +163,7 @@ class Deck(JSONMixin):
             tooltip=self.deck_widget.tooltip,
             custom_libraries=pydeck_settings.custom_libraries,
             as_string=as_string,
+            offline=offline,
             **kwargs
         )
         return f

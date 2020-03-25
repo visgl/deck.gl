@@ -1,5 +1,5 @@
 import os
-from os.path import relpath, realpath
+from os.path import relpath, realpath, join, dirname
 import sys
 import tempfile
 import time
@@ -27,6 +27,13 @@ CDN_URL = "https://cdn.jsdelivr.net/npm/@deck.gl/jupyter-widget@{}/dist/index.js
     DECKGL_SEMVER
 )
 
+def cdn_picker(offline=False):
+    if offline:
+        with open(join(dirname(__file__),'./static/index.js'), 'r') as file:
+            js = file.read()
+        return "<script type=text/javascript>" + js + "</script>"
+
+    return "<script src=" + CDN_URL + "></script>"
 
 def render_json_to_html(
     json_input,
@@ -34,12 +41,13 @@ def render_json_to_html(
     tooltip=True,
     css_background_color=None,
     custom_libraries=None,
+    offline=False
 ):
     js = j2_env.get_template("index.j2")
     html_str = js.render(
         mapbox_key=mapbox_key,
         json_input=json_input,
-        deckgl_jupyter_widget_bundle=CDN_URL,
+        deckgl_jupyter_widget_bundle=cdn_picker(offline=offline),
         tooltip=convert_js_bool(tooltip),
         css_background_color=css_background_color,
         custom_libraries=custom_libraries
@@ -93,7 +101,8 @@ def deck_to_html(
     iframe_width=500,
     tooltip=True,
     custom_libraries=None,
-    as_string=False
+    as_string=False,
+    offline=False
 ):
     """Converts deck.gl format JSON to an HTML page"""
     html = render_json_to_html(
@@ -102,6 +111,7 @@ def deck_to_html(
         tooltip=tooltip,
         css_background_color=css_background_color,
         custom_libraries=custom_libraries,
+        offline=offline
     )
 
     if as_string:
