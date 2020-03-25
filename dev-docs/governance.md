@@ -19,16 +19,24 @@ The list of current steering committee members and committers should be document
 
 ## The Steering Committee
 
-### 1a. The steering committee’s responsibilities
+### 1a. A steering committee member’s privileges
 
-- Manage project members and privileges;
+All of a committer's privileges (2a), and the following:
+
+- Voting right on the admittance/removal of steering committee members and committers
+- Admin permission to the repo, and owner to the NPM organization
+- Final veto power in roadmap planning
+
+### 1b. A steering committee member’s responsibilities
+
+- Manage project members and privileges according to the governance guidelines;
 - Ensure that the dev tools of the repo work consistently and as expected;
-- Organize and moderate community discussions;
-- Ensure that the dev process is followed by all collaborators;
+- Organize and moderate community discussions, enforce the code of conduct;
+- Ensure that the dev process is followed by all contributors;
 - Ensure the consistency and quality of the documentation;
 - Manage blog posts, material for conference and meetup talks, and other brand presence.
 
-### 1b. Becoming a steering committee member
+### 1c. Becoming a steering committee member
 
 A steering committee member should be
 
@@ -36,16 +44,16 @@ A steering committee member should be
 - Recognized by the community for their depth of knowledge and community engagement;
 - Agrees to dedicate time to perform their committee duties.
 
-An existing committer can be nominated to join the steering committee by other steering committee members. The nomination is formally submitted as a PR to update the contribution guide. Nominations are approved by the steering committee.
+An existing committer can be nominated to join the steering committee by other steering committee members. The nomination is formally submitted as a PR to update the [developer guide](/dev-docs/README.md#governance). Nominations are approved by the steering committee.
 
-###  1c. Leaving the steering committee
+###  1d. Leaving the steering committee
 
 If a steering committee member can/will no longer perform their duties, they can be removed from the steering committee by the consensus of the rest of the steering committee members.
 
 
 ## Committer
 
-### 2a. A committer's previledges
+### 2a. A committer's privileges
 
 - Roadmap planning
   + Submit, approve and comment on RFCs.
@@ -69,19 +77,19 @@ If a steering committee member can/will no longer perform their duties, they can
 
 ### 2c. Becoming a committer
 
-Any contributor of the project can self-nominate to become a committer, if they:
+Any contributor to the project can self-nominate to become a committer if they:
 
 - Demonstrate familiarity with the project and expertise in the relevant domain (e.g. WebGL, 3D tiles, Google Maps, React, etc.):
   + Obtain the endorsement by an existing committer, or
   + Have submitted at least one substantial PR (a complete feature or major bug fix) and remained active for more than 3 months in online discussions and relevant projects
 - Agree to the continuous maintenance of the self-declared feature area(s).
 
-The nomination is formally submitted as a PR to update the contribution guide, with self-declared ownership of one or more feature areas. Nominations are approved by the steering committee.
+The nomination is formally submitted as a PR to update the [developer guide](/dev-docs/README.md#governance), with self-declared ownership of one or more feature areas. Nominations are approved by the steering committee.
 
 
 ### 2d. Removal of the committer status
 
-A committer can be removed of their previledges if they:
+A committer can be removed of their privileges if they:
 
 - Resigns; or
 - Repeatedly fails to perform their responsibilities (2b); or
@@ -114,4 +122,4 @@ A PR must request the code review from all feature owners whose codebase is dire
 
 ### 3d. Coordination
 
-Dedicated Slack channels will be established for the project's committers. Slack communication is encouraged for the casual coordination and the sharing of business-sensitive information.
+Dedicated Slack channels will be established for the project's committers. Slack communication is encouraged for casual coordination and the sharing of business-sensitive information.
