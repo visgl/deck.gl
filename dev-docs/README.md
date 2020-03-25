@@ -24,7 +24,7 @@ The section tracks the current governing body of the community. For their respon
 - [Tarek Sherif](https://github.com/tsherif)
 - [Ravi Akkenapally](https://github.com/1chandu)
 
-### Committers
+### Maintainers
 
 TBD
 
