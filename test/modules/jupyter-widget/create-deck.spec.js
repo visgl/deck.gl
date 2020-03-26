@@ -37,11 +37,10 @@ test('jupyter-widget: dynamic-registration', t0 => {
       [
         {
           libraryName: TEST_LIBRARY_NAME,
-          resourceUri: '/index.js',
-          onComplete
+          resourceUri: '/index.js'
         }
       ],
-      () => Promise.resolve()
+      onComplete
     );
   });
 

@@ -45,6 +45,13 @@ const jsonConverter = new deck.JSONConverter({
   configuration: jsonConverterConfiguration
 });
 
+function addModuleToConverter(module, converter) {
+  const newConfiguration = {
+    classes: extractClasses(module)
+  };
+  converter.mergeConfiguration(newConfiguration);
+}
+
 function addCustomLibraries(customLibraries, onComplete) {
   if (!customLibraries) {
     return;
@@ -59,6 +66,12 @@ function addCustomLibraries(customLibraries, onComplete) {
     }
   }
 
+  function onModuleLoaded(libraryName, module) {
+    addModuleToConverter(module, jsonConverter);
+    loaded[libraryName] = module;
+    onEachFinish();
+  }
+
   customLibraries.forEach(({libraryName, resourceUri}) => {
     // set loaded to be false, even if addCustomLibraries is called multiple times
     // with the same parameters
@@ -66,8 +79,7 @@ function addCustomLibraries(customLibraries, onComplete) {
 
     if (libraryName in window) {
       // do not redefine
-      loaded[libraryName] = window[libraryName];
-      onEachFinish();
+      onModuleLoaded(libraryName, window[libraryName]);
       return;
     }
 
@@ -75,14 +87,7 @@ function addCustomLibraries(customLibraries, onComplete) {
     // the only way we can listen on its execution complete is to observe on the
     // window.libraryName property
     Object.defineProperty(window, libraryName, {
-      set: module => {
-        const newConfiguration = {
-          classes: extractClasses(module)
-        };
-        jsonConverter.mergeConfiguration(newConfiguration);
-        loaded[libraryName] = module;
-        onEachFinish();
-      },
+      set: module => onModuleLoaded(libraryName, module),
       get: () => {
         return loaded[libraryName];
       }
