@@ -174,6 +174,7 @@ test('getTileIndices', t => {
       testCase.viewport,
       testCase.maxZoom,
       testCase.minZoom,
+      testCase.zRange,
       testCase.tileSize
     );
     t.deepEqual(getTileIds(result), testCase.output, testCase.title);
@@ -185,8 +186,8 @@ test('getTileIndices', t => {
 test('tileToBoundingBox', t => {
   for (const testCase of TEST_CASES) {
     if (testCase.output.length) {
-      const {viewport, minZoom, maxZoom, tileSize} = testCase;
-      const boundingBoxes = getTileIndices(viewport, maxZoom, minZoom, tileSize).map(tile =>
+      const {viewport, minZoom, maxZoom, tileSize, zRange} = testCase;
+      const boundingBoxes = getTileIndices(viewport, maxZoom, minZoom, zRange, tileSize).map(tile =>
         tileToBoundingBox(viewport, tile.x, tile.y, tile.z, tileSize)
       );
       const result = mergeBoundingBox(boundingBoxes);
