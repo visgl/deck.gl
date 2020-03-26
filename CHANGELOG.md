@@ -19,6 +19,12 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v8.1
 
+#### deck.gl [8.1.1] - Mar 25 2020
+
+- Fix PointCloud sizeUnits as "meters" (#4421)
+- Fix GeoJsonLayer's handling of highlightedObjectIndex (#4403)
+- layers: pass loadOptoins to IconManager from IconLayer (#4404)
+
 #### deck.gl [8.1.0] - Mar 17 2020
 
 - Bump loaders.gl; fix website build (#4391)
