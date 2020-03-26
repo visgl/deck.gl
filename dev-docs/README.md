@@ -13,6 +13,21 @@ Some of these documents may also be referenced by other repositories in the stac
 
 For instructions to set up the dev environment, see [developing deck.gl](../docs/contributing.md).
 
+## Governance
+
+The section tracks the current governing body of the community. For their responsibilities and the decision-making process, see [Community Governance Guidelines](./governance.md).
+
+### Steering Committee Members
+
+- [Ib Green](https://github.com/ibgreen)
+- [Xiaoji Chen](https://github.com/Pessimistress)
+- [Tarek Sherif](https://github.com/tsherif)
+- [Ravi Akkenapally](https://github.com/1chandu)
+
+### Maintainers
+
+TBD
+
 ## Development Process
 
 ### Feature Proposal
