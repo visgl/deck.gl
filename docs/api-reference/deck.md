@@ -399,7 +399,7 @@ Callback arguments:
 
 Called once every second with performance metrics.
 
-Callback argument is specified [here](#metrics).
+Callback argument is an object with fields specified [here](#metrics).
 
 ## Methods
 
