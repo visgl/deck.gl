@@ -109,7 +109,8 @@ export default class PathLayer extends Layer {
       instancePickingColors: {
         size: 3,
         type: GL.UNSIGNED_BYTE,
-        accessor: (object, {index, target: value}) => this.encodePickingColor(object.__source ? object.__source.index : index, value)
+        accessor: (object, {index, target: value}) =>
+          this.encodePickingColor(object && object.__source ? object.__source.index : index, value)
       }
     });
     /* eslint-enable max-len */
@@ -169,13 +170,12 @@ export default class PathLayer extends Layer {
     }
   }
 
-
-  getPickingInfo(info) {
+  getPickingInfo({info}) {
     if (info.picked && this.parent) {
       const {data} = this.props;
       const isDataWrapped = data[0] && data[0].__source;
       if (isDataWrapped) {
-        info.object = data.findIndex(d => d.__source.index === info.index);
+        info.object = data.find(d => d.__source.index === info.index);
       }
     }
     return info;

@@ -188,8 +188,7 @@ export default class GeoJsonLayer extends CompositeLayer {
         }),
         {
           data: polygonFeatures,
-          getPolygon: getCoordinates,
-          highlightedObjectIndex: this._getHighlightedIndex(polygonFeatures)
+          getPolygon: getCoordinates
         }
       );
 
@@ -230,8 +229,7 @@ export default class GeoJsonLayer extends CompositeLayer {
         }),
         {
           data: polygonOutlineFeatures,
-          getPath: getCoordinates,
-          highlightedObjectIndex: this._getHighlightedIndex(polygonOutlineFeatures)
+          getPath: getCoordinates
         }
       );
 
@@ -269,8 +267,7 @@ export default class GeoJsonLayer extends CompositeLayer {
         }),
         {
           data: lineFeatures,
-          getPath: getCoordinates,
-          highlightedObjectIndex: this._getHighlightedIndex(lineFeatures)
+          getPath: getCoordinates
         }
       );
 
