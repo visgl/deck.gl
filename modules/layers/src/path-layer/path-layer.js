@@ -170,13 +170,13 @@ export default class PathLayer extends Layer {
     }
   }
 
-  getPickingInfo({info}) {
-    if (info.picked && this.parent) {
-      const {data} = this.props;
-      const isDataWrapped = data[0] && data[0].__source;
-      if (isDataWrapped) {
-        info.object = data.find(d => d.__source.index === info.index);
-      }
+  getPickingInfo(params) {
+    const info = super.getPickingInfo(params);
+    const {object, index} = info;
+
+    if (object && object.__source) {
+      // data is wrapped
+      info.object = this.props.data.find(d => d.__source.index === index);
     }
     return info;
   }
