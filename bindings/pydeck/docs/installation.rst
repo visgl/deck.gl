@@ -1,11 +1,11 @@
 Installing pydeck
 =================
 
-Generally, there are three steps before using pydeck:
+There are three steps before using pydeck:
 
         1. Install the library via pip or conda
         2. Get a Mapbox API token
-        3. Enable it for Jupyter Lab or Jupyter Notebook
+        3. Enable pydeck for Jupyter Lab or Jupyter Notebook
 
 Via pip
 ^^^^^^^
@@ -31,7 +31,7 @@ To add basemap tiles, you must get a Mapbox API key, which you can do by
 registering for Mapbox via `this link <https://account.mapbox.com/auth/signup/>`_. 
 You should then create a `new public API token <https://account.mapbox.com/access-tokens/>`_.
 
-Mapbox tiles are free to use for a rather high level of usage. You can learn more about
+Mapbox tiles are free for a rather high level of usage. You can learn more about
 Mapbox tokens via their `documentation <https://docs.mapbox.com/help/how-mapbox-works/access-tokens/#how-access-tokens-work>`_.
 
 If you set a ``MAPBOX_API_KEY`` environment variable, pydeck will detect it. This way, you do not
@@ -81,7 +81,7 @@ Development notes
 ^^^^^^^^^^^^^^^^^
 
 Please note that if you are installing a pydeck prerelease, you may have to specify a specific version
-of @deck.gl/jupyter-widget to install for JupyterLab. You can read this version from pydeck itself.
+of ``@deck.gl/jupyter-widget`` to install for JupyterLab. You can read this version from pydeck itself.
 
 .. code-block:: bash
 
