@@ -10,7 +10,6 @@ import ClipExtension from './clip-extension';
 const WORLD_SIZE = 512;
 
 const defaultProps = {
-  ...TileLayer.defaultProps,
   uniquePropertyId: {type: 'string', value: '', compare: false}
 };
 
@@ -46,32 +45,35 @@ export default class MVTLayer extends TileLayer {
     const {highlightedFeatureId} = this.state;
     const {uniquePropertyId} = this.props;
     const hoveredFeature = info.object;
+    let hoveredFeatureId;
 
     if (hoveredFeature) {
-      const hoveredFeatureId = hoveredFeature.properties[uniquePropertyId] || hoveredFeature.id;
+      hoveredFeatureId = hoveredFeature
+        ? hoveredFeature.properties[uniquePropertyId]
+        : hoveredFeature.id;
+    }
 
-      if (hoveredFeatureId !== highlightedFeatureId) {
-        this.setState({hoveredFeatureId});
-      }
+    if (hoveredFeatureId !== highlightedFeatureId) {
+      this.setState({highlightedFeatureId: hoveredFeatureId});
     }
 
     return super.onHover(info, pickingEvent);
   }
 
   getHighlightedObjectIndex(tile) {
-    const {hoveredFeatureId} = this.state;
+    const {highlightedFeatureId} = this.state;
     const {uniquePropertyId} = this.props;
     const {data} = tile;
 
-    if (!Array.isArray(data)) {
+    if (!highlightedFeatureId || !Array.isArray(data)) {
       return -1;
     }
 
     return data.findIndex(
       feature =>
         feature.id
-          ? feature.id === hoveredFeatureId
-          : feature.properties[uniquePropertyId] === hoveredFeatureId
+          ? feature.id === highlightedFeatureId
+          : feature.properties[uniquePropertyId] === highlightedFeatureId
     );
   }
 }
