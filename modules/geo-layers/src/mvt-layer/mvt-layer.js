@@ -34,6 +34,7 @@ export default class MVTLayer extends TileLayer {
 
     const modelMatrix = new Matrix4().translate([xOffset, yOffset, 0]).scale([xScale, yScale, 1]);
 
+    props.autoHighlight = false;
     props.modelMatrix = modelMatrix;
     props.coordinateSystem = COORDINATE_SYSTEM.CARTESIAN;
     props.extensions = [...(props.extensions || []), new ClipExtension()];
@@ -42,19 +43,22 @@ export default class MVTLayer extends TileLayer {
   }
 
   onHover(info, pickingEvent) {
-    const {highlightedFeatureId} = this.state;
-    const {uniquePropertyId} = this.props;
-    const hoveredFeature = info.object;
-    let hoveredFeatureId;
+    const {uniquePropertyId, autoHighlight} = this.props;
 
-    if (hoveredFeature) {
-      hoveredFeatureId = hoveredFeature
-        ? hoveredFeature.properties[uniquePropertyId]
-        : hoveredFeature.id;
-    }
+    if (autoHighlight) {
+      const {highlightedFeatureId} = this.state;
+      const hoveredFeature = info.object;
+      let hoveredFeatureId;
 
-    if (hoveredFeatureId !== highlightedFeatureId) {
-      this.setState({highlightedFeatureId: hoveredFeatureId});
+      if (hoveredFeature) {
+        hoveredFeatureId = hoveredFeature
+          ? hoveredFeature.properties[uniquePropertyId]
+          : hoveredFeature.id;
+      }
+
+      if (hoveredFeatureId !== highlightedFeatureId) {
+        this.setState({highlightedFeatureId: hoveredFeatureId});
+      }
     }
 
     return super.onHover(info, pickingEvent);
@@ -62,8 +66,12 @@ export default class MVTLayer extends TileLayer {
 
   getHighlightedObjectIndex(tile) {
     const {highlightedFeatureId} = this.state;
-    const {uniquePropertyId} = this.props;
+    const {uniquePropertyId, highlightedObjectIndex: highlightedIndexProp} = this.props;
     const {data} = tile;
+
+    if (highlightedIndexProp && highlightedIndexProp > -1) {
+      return highlightedIndexProp;
+    }
 
     if (!highlightedFeatureId || !Array.isArray(data)) {
       return -1;
