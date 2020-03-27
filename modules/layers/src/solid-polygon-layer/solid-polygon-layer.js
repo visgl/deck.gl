@@ -174,7 +174,7 @@ export default class SolidPolygonLayer extends Layer {
       pickingColors: {
         size: 3,
         type: GL.UNSIGNED_BYTE,
-        accessor: (object, {index, target: value}) => this.encodePickingColor(index, value),
+        accessor: (object, {index, target: value}) => this.encodePickingColor(object.__source ? object.__source.index : index, value),
         shaderAttributes: {
           pickingColors: {
             divisor: 0
@@ -186,6 +186,17 @@ export default class SolidPolygonLayer extends Layer {
       }
     });
     /* eslint-enable max-len */
+  }
+
+  getPickingInfo(info) {
+    if (info.picked && this.parent) {
+      const {data} = this.props;
+      const isDataWrapped = data[0] && data[0].__source;
+      if (isDataWrapped) {
+        info.object = data.findIndex(d => d.__source.index === info.index);
+      }
+    }
+    return info;
   }
 
   draw({uniforms}) {
