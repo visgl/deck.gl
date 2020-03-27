@@ -296,7 +296,7 @@ function updateData(index, item) {
   const layer = new ScatterplotLayer({
     data,
     // Only update the attributes at `index``
-    _dataDiff: (oldData, newData) => [{startRow: index, endRow: index + 1}],
+    _dataDiff: (newData, oldData) => [{startRow: index, endRow: index + 1}],
     ...
   });
   deck.setProps({layers: [layer]});
