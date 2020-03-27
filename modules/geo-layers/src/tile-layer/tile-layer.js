@@ -139,7 +139,13 @@ export default class TileLayer extends CompositeLayer {
   }
 
   getHighlightedObjectIndex(tile) {
-    return this.props.getHighlightedObjectIndex(tile);
+    const {getHighlightedObjectIndex, highlightedObjectIndex} = this.props;
+
+    if (highlightedObjectIndex && highlightedObjectIndex > -1) {
+      return highlightedObjectIndex;
+    }
+
+    return getHighlightedObjectIndex(tile);
   }
 
   getPickingInfo({info, sourceLayer}) {
