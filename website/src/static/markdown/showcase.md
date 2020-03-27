@@ -1,6 +1,23 @@
 *Would you like us to feature your project? [Let us know](https://github.com/uber/deck.gl/issues)!*
 
 <div>
+
+  <div class="thumb">
+    <div data-title="Flowmap.blue" >
+      <a href="https://flowmap.blue/">
+        <img src="images/showcase-flowmap.jpg" />
+      </a>
+    </div>
+  </div>
+
+  <div class="thumb-desc">
+    <div>
+      <a href="http://pessimistress.github.io/isochronic-map/" target="_blank" rel="noopener noreferrer"><h2>Flowmap.blue</h2></a>
+      <p class="credit"><a href="https://github.com/ilyabo/flowmap.blue">Source code</a> by <a href="https://ilya.boyandin.me/">Ilya Boyandin</a></p>
+      <p>Flowmap.blue is a free and open source flow map visualization tool. It is designed for representing aggregated numbers of movements between geographic locations. The tool makes it very easy to produce interactive flow maps from data uploaded to Google Sheets. Since the tool has been released, people from different parts of the world have been using it to visualize data on urban mobility, commuting behavior, bus and subway travels, bicycle and scooter sharing, air travels, human and bird migration, refugee flows, human trafficking, trade flows, freight transportation, livestock movements, fishery, epidemiology, drug flows, scientific collaboration, sewer systems, supply chains, historical data and other topics.</p>
+    </div>
+  </div>
+
   <div class="thumb">
     <div data-title="Isochronic Map" >
       <a href="http://pessimistress.github.io/isochronic-map/">
