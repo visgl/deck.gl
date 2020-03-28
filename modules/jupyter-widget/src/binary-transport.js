@@ -48,14 +48,15 @@ function deserializeMatrix(obj, manager) {
   return obj;
 }
 
-function processDataBuffer({dataBuffer, jsonProps}) {
+function processDataBuffer({dataBuffer, convertedJson}) {
   // Takes JSON props and combines them with the binary data buffer
-  for (let i = 0; i < jsonProps.layers.length; i++) {
-    const layerId = jsonProps.layers[i].id;
-    jsonProps.layers[i].data = dataBuffer[layerId];
+  for (let i = 0; i < convertedJson.layers.length; i++) {
+    const layerId = convertedJson.layers[i].id;
+    const layer = convertedJson.layers[i];
     // Replace data on every layer prop
+    convertedJson.layers[i] = layer.clone({data: dataBuffer[layerId]});
   }
-  return jsonProps;
+  return convertedJson;
 }
 
 export {deserializeMatrix, processDataBuffer};

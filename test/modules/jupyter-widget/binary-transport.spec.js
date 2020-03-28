@@ -30,23 +30,12 @@ const EXPECTED_CONVERSION = {
   }
 };
 
-// Test deck.gl JSON configuration
-const DEMO_JSON_PROPS = {
-  viewport: null,
-  description: 'test json config',
-  layers: [
-    {
-      radius: 100,
-      id: 'layer-id',
-      '@@type': 'ScatterplotLayer'
-    }
-  ]
-};
-
 test('jupyter-widget: binary-transport', t0 => {
   let binaryTransportModule;
+  let widgetCreateDeckModule;
   try {
     binaryTransportModule = require('@deck.gl/jupyter-widget/binary-transport');
+    widgetCreateDeckModule = require('@deck.gl/jupyter-widget/create-deck');
   } catch (error) {
     t0.comment('dist mode, skipping binary-transport tests');
     t0.end();
@@ -73,15 +62,28 @@ test('jupyter-widget: binary-transport', t0 => {
     t.end();
   });
 
+  // Test deck.gl JSON configuration
+  const DEMO_JSON_PROPS = {
+    viewport: null,
+    description: 'Test JSON config, converted into a deck.gl Layer before testing',
+    layers: [
+      {
+        radius: 100,
+        id: 'layer-id',
+        '@@type': 'ScatterplotLayer'
+      }
+    ]
+  };
+
   t0.test('processDataBuffer', t => {
-    const newProps = binaryTransportModule.processDataBuffer({
+    const newDeckProps = binaryTransportModule.processDataBuffer({
       dataBuffer: EXPECTED_CONVERSION,
-      jsonProps: DEMO_JSON_PROPS
+      convertedJson: widgetCreateDeckModule.jsonConverter.convert(DEMO_JSON_PROPS)
     });
 
     t.deepEquals(
+      newDeckProps.layers[0].props.data,
       EXPECTED_CONVERSION['layer-id'],
-      newProps.layers[0].data,
       'should convert buffer input and props to new layers'
     );
     t.end();
