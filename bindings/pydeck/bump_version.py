@@ -44,6 +44,7 @@ def rewrite_frontend_version_file():
         t = jinja2.Template("DECKGL_SEMVER = '{{semver_str}}'")
         contents = t.render(semver_str=str(lerna_version))
         f.write(contents)
+    return lerna_version
 
 
 parser = argparse.ArgumentParser(
@@ -69,5 +70,6 @@ if __name__ == "__main__":
         if response != "Y":
             sys.exit(0)
     rewrite_version_file(bumped_version)
-    rewrite_frontend_version_file()
+    deckgl_version = rewrite_frontend_version_file()
+    print("Locked to deck.gl@{}".format(deckgl_version))
     print(bumped_version)
