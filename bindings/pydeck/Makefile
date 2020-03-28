@@ -1,3 +1,11 @@
+help:
+	@echo "pre-init - Set up a virtual environment and activate it"
+	@echo "init - Build deck.gl, install all requirements, and activate the plugin for Jupyter"
+	@echo "test - Run pytest tests"
+	@echo "bump-version - Bump the version files for the pydeck frontend and backend"
+	@echo "release - package and upload a release"
+	@echo "prepare-jupyter - initiate pydeck-related extensions in JupyterLab and Jupyter Notebook"
+
 init:
 	# Build deck.gl at the root of this repository
 	cd ../..; yarn bootstrap; cd -; \
@@ -8,11 +16,8 @@ init:
 	$(MAKE) prepare-jupyter
 
 pre-init:
-	# Installs basic Python requirements
-	# Only useful if you're coming from a setup with no Python installed
 	python3 -m venv env; \
-	. env/bin/activate; \
-	$(MAKE) init
+	. env/bin/activate
 
 prepare-jupyter:
 	# Enable the notebook extension
@@ -29,13 +34,8 @@ prepare-jupyter:
 test:
 	pytest
 
-screenshot-examples:
-	pip install pyppeteer
-	python examples/scripts/update_docs.py
-
-docs:
-	cd docs; \
-	$(MAKE) html
+publish-conda:	
+	@echo "NOTE pydeck does not yet publish to conda-forge. Awaiting #4202."
 
 bump-version:
 	@read -p "Choose a release type {MAJOR, MINOR, PATCH, BETA, ALPHA, RC}:" choice; \
@@ -55,7 +55,7 @@ publish-test-pypi:
 	pip install twine
 	python -m twine upload --repository-url https://test.pypi.org/legacy/ dist/*
 
-bump-and-publish:
+release:
 	$(MAKE) bump-version;
 	$(MAKE) test;
 	VERSION=$$(python -c "import pydeck; print(pydeck.__version__)");

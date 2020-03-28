@@ -33,7 +33,15 @@ v = ViewState(latitude=0, longitude=0, zoom=15)
 d.initial_view_state = v
 
 
-@pytest.mark.skipif(os.environ.get('TRAVIS') == 'true', reason='Skipping this test on Travis CI.')
+def has_pyppeteer():
+    try:
+        import pyppeteer  # noqa
+        return True
+    except ImportError:
+        return False
+
+
+@pytest.mark.skipif(os.environ.get('TRAVIS') == 'true' or not has_pyppeteer(), reason='Skipping Python screenshot tests')
 @pytest.mark.asyncio
 async def test_standalone_rendering(tmp_path):
     from .screenshot_utils import go_to_page_and_screenshot  # noqa

@@ -33,4 +33,4 @@ view_state = pdk.ViewState(
 
 # Render
 r = pdk.Deck(layers=[layer], initial_view_state=view_state)
-r.to_html("screengrid_layer.html")
+r.to_html("screengrid_layer.html", notebook_display=False)

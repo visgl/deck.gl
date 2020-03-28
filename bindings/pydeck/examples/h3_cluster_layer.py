@@ -31,4 +31,4 @@ view_state = pdk.ViewState(
 r = pdk.Deck(
     layers=[layer], initial_view_state=view_state, tooltip={"text": "Density: {mean}"}
 )
-r.to_html("h3_cluster_layer.html")
+r.to_html("h3_cluster_layer.html", notebook_display=False)
