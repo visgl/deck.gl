@@ -19,7 +19,11 @@ help:
 	@$(SPHINXBUILD) -M $@ "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O)
 
 html-embeds:
-	echo "Producing embedded HTML examples"
+	@echo "Producing embedded HTML examples"
 	python scripts/embed_examples.py
+
+html-thumbnails:
+	@echo "Producing HTML thumbnail assets"
+	python scripts/snap_thumbnails.py
 
 html: html-embeds
