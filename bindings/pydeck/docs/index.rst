@@ -1,12 +1,11 @@
-Welcome to pydeck's documentation!
+pydeck Documentation
 ==================================
 
-If you have not already, `follow the installation instructions <https://github.com/uber/deck.gl/blob/master/bindings/pydeck/README.md>`_
-
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 1
    :caption: Contents:
 
+   installation
    layer
    deck
    data_utils
@@ -14,6 +13,8 @@ If you have not already, `follow the installation instructions <https://github.c
    view_state
    view
    light_settings
+   binary_transfer
+   gallery
 
 .. figure:: https://camo.githubusercontent.com/020e7749ebfb7a8f50403fcbc8650833608c006d/68747470733a2f2f6d7962696e6465722e6f72672f7374617469632f6c6f676f2e7376673f763d6639663064393237623637636339646339396437383863383232636132316330
    :target: https://mybinder.org/v2/gh/uber/deck.gl/binder
@@ -62,15 +63,17 @@ like plotting in flat plane instead of plotting on a mercator projection.
 
 Configure the lighting within a visualization.
 
+`Binary transfer <binary_transfer.html>`__
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Optimizations for visualizations millions of points within pydeck.
 
-Caveats
-^^^^^^^
+.. note::
+   The pydeck library assumes Internet access. You will need an Internet connection or the visualization will not render.
 
-* Please note that pydeck assumes Internet access. You will need an Internet connection or the visualization will not render.
-
-* | Currently, in its beta version **pydeck will NOT raise an error on incorrect or omitted layer arguments**.
-  | If nothing renders in your viewport, check your browser's `developer console <https://javascript.info/devtools>`__
-  | or review the layer catalog. If you're still stuck, file an issue by clicking `here <https://github.com/uber/deck.gl/issues/new?assignees=&labels=bug&template=bug-report.md&title=>`__.
+   Currently, pydeck will **not** raise an error on incorrect or omitted Layer arguments.
+   If nothing renders in your viewport, check your browser's `developer console <https://javascript.info/devtools>`__
+   or review the layer catalog. You are encouraged to file an issue by clicking `here <https://github.com/uber/deck.gl/issues/new?assignees=&labels=bug&template=bug-report.md&title=>`__
+   and mention ``pydeck`` in the title.
 
 
 Indices and tables

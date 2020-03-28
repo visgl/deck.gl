@@ -1,14 +1,17 @@
 import asyncio
 import glob
 import os
+import sys
 
-from pyppeteer import launch
+try:
+    from pyppeteer import launch
+except ImportError:
+    print("Please install pyppeteer before running this script")
+    sys.exit(1)
 
 
 here = os.path.dirname(os.path.abspath(__file__))
-parent_directory = os.path.join(here, "..")
-os.chdir(here)
-example_glob = os.path.join(parent_directory, "*_layer.py")
+EXAMPLE_GLOB = "../examples/*_layer.py"
 
 
 async def run(cmd):
@@ -27,7 +30,7 @@ async def run(cmd):
 
 
 async def main():
-    for fname in glob.glob(example_glob):
+    for fname in glob.glob(EXAMPLE_GLOB):
         browser = await launch(
             autoClose=False,
             headless=False,

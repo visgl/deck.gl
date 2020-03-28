@@ -154,5 +154,9 @@ $RECYCLE.BIN/
 **/pydeck/nbextension/static/index.js.map
 **/_build
 **/pydeck/frontend_semver.py
+# Docs and examples html pages
 **/examples/scripts/*.html
 **/examples/*.png
+**/examples/*.html
+**/docs/embeds/*.py
+**/docs/gallery/*.rst

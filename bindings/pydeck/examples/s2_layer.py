@@ -32,4 +32,4 @@ r = pdk.Deck(
     initial_view_state=view_state,
     tooltip={"text": "{token} value: {value}"},
 )
-r.to_html("s2_layer.html")
+r.to_html("s2_layer.html", notebook_display=False)
