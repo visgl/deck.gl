@@ -57,7 +57,9 @@ To enable pydeck for Jupyter Lab:
 .. code-block:: bash
 
         jupyter labextension install @jupyter-widgets/jupyterlab-manager
-        jupyter labextension install @deck.gl/jupyter-widget
+        DECKGL_SEMVER=`python -c "import pydeck; print(pydeck.frontend_semver.DECKGL_SEMVER)"`
+        jupyter labextension install @deck.gl/jupyter-widget@$DECKGL_SEMVER
+
 
 Currently while you can install pydeck in Google Collab via pip, it is not enabled for server use there.
 
