@@ -133,14 +133,13 @@ export class DeckGLView extends DOMWidgetView {
   }
 
   dataBufferChanged() {
-    if (this.model.get('data_buffer')) {
+    if (this.model.get('data_buffer') && this.model.get('json_input')) {
+      const convertedJson = jsonConverter.convert(this.model.get('json_input'));
       const propsWithBinary = processDataBuffer({
         dataBuffer: this.model.get('data_buffer'),
-        jsonProps: this.model.get('json_input')
+        convertedJson
       });
-
-      const convertedJson = jsonConverter.convert(propsWithBinary);
-      this.deck.setProps(convertedJson);
+      this.deck.setProps(propsWithBinary);
     }
   }
 
