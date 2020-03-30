@@ -1,4 +1,5 @@
 help:
+	@echo "Please use `make target' where target is one of"
 	@echo "pre-init - Set up a virtual environment and activate it"
 	@echo "init - Build deck.gl, install all requirements, and activate the plugin for Jupyter"
 	@echo "test - Run pytest tests"
