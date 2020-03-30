@@ -28,6 +28,9 @@ view_state = pdk.ViewState(
 
 # Render
 r = pdk.Deck(
-    layers=[layer], initial_view_state=view_state, tooltip={"text": "{name}\n{address}"}
+    layers=[layer],
+    initial_view_state=view_state,
+    tooltip={"text": "{name}\n{address}"},
+    map_style="mapbox://styles/mapbox/satellite-v9",
 )
 r.to_html("text_layer.html", notebook_display=False)

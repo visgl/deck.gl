@@ -39,12 +39,12 @@ async def _snap(fname):
     page = await browser.newPage()
     print("[info] Converting %s to an image" % fname)
     await run(" ".join(["python", fname]))
-    png_fname = os.path.splitext(fname)[0] + ".png"
     html_fname = os.path.join(
         here, '..', os.path.splitext(os.path.basename(fname))[0] + ".html"
     )
+    png_fname = os.path.join(here, '../gallery', os.path.splitext(os.path.basename(fname))[0] + ".png")
     fpath = "file://%s" % html_fname
-    if "bitmap_layer" in html_fname or "icon_layer" in html_fname:
+    if "bitmap_layer" in html_fname or "icon_layer" in html_fname or "gpu" in html_fname:
         await page.goto(fpath)
         await asyncio.sleep(10)
     else:
@@ -67,10 +67,16 @@ async def snap(fname, retries=3):
         except (NetworkError, TimeoutError):
             retries -= 1
 
-async def main():
-    for fname in glob.glob(EXAMPLE_GLOB):
+async def main(fname_arg=None):
+    fnames = [fname_arg] if fname_arg else glob.glob(EXAMPLE_GLOB)
+    for fname in fnames:
         await snap(fname)
 
 
 if __name__ == "__main__":
-    asyncio.get_event_loop().run_until_complete(main())
+    if len(sys.argv) > 1:
+        input_fname = sys.argv[1]
+        print("Snapping .png of", input_fname)
+        asyncio.get_event_loop().run_until_complete(main(input_fname))
+    else:
+        asyncio.get_event_loop().run_until_complete(main())
