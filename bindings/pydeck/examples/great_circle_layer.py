@@ -21,10 +21,11 @@ layer = pdk.Layer(
     get_target_position="to.coordinates",
     get_source_color=[64, 255, 0],
     get_target_color=[0, 128, 200],
+    auto_highlight=True,
 )
 
 # Set the viewport location
-view_state = pdk.ViewState(latitude=50, longitude=-40, zoom=3, bearing=0, pitch=0)
+view_state = pdk.ViewState(latitude=50, longitude=-40, zoom=1, bearing=0, pitch=0)
 
 # Render
 r = pdk.Deck(
@@ -32,4 +33,6 @@ r = pdk.Deck(
     initial_view_state=view_state,
     tooltip={"text": "{from_name} to {to_name}"},
 )
-r.to_html("great_circle_layer.html")
+r.picking_radius = 10
+
+r.to_html("great_circle_layer.html", notebook_display=False)

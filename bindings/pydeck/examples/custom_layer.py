@@ -34,4 +34,4 @@ r = pydeck.Deck(
     map_style="mapbox://styles/mapbox/satellite-v9",
 )
 
-r.show()
+r.to_html("custom_layer.html", notebook_display=False)

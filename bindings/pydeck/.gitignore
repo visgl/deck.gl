@@ -158,5 +158,6 @@ $RECYCLE.BIN/
 **/examples/scripts/*.html
 **/examples/*.png
 **/examples/*.html
+**/docs/*.html
 **/docs/embeds/*.py
 **/docs/gallery/*.rst
