@@ -17,9 +17,10 @@ HTML_TEMPLATE = jinja2.Template(
 .wrapper {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  grid-gap: 1px;
+  grid-gap: 20px;
 }
 .grid-cell {
+  margin: 0;
   min-height: 60px;
   position: relative;
 
