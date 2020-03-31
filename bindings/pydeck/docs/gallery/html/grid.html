@@ -1,35 +1,191 @@
+
 <style>
 .wrapper {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   grid-gap: 1px;
 }
-.gv {
-  height: 60px;
-  width: 80px;
+.grid-cell {
+  min-height: 60px;
+  position: relative;
+
 }
+.thumb-text {
+  z-index: 1;
+  bottom: 0;
+  left: 0;
+  position: absolute;
+  font-weight: 100;
+  color: white;
+}
+
+.grid-cell:hover {
+  filter: hue-rotate(3.142rad);
+}
+
 </style>
 
 <div class='wrapper'>
-  <div class='gv' style='background-image: url("/_static/arc_layer.png")'>ArcLayer</div>
-  <div class='gv' style='background-image: url("/_static/bitmap_layer.png")'>BitmapLayer</div>
-  <div class='gv' style='background-image: url("/_static/column_layer.png")'>ColumnLayer</div>
-  <div class='gv' style='background-image: url("/_static/contour_layer.png")'>ContourLayer</div>
-  <div class='gv' style='background-image: url("/_static/geojson_layer.png")'>GeoJsonLayer</div>
-  <div class='gv' style='background-image: url("/_static/great_circle_layer.png")'>GreatCircleLayer</div>
-  <div class='gv' style='background-image: url("/_static/grid_layer.png")'>GridLayer</div>
-  <div class='gv' style='background-image: url("/_static/h3_cluster_layer.png")'>H3ClusterLayer</div>
-  <div class='gv' style='background-image: url("/_static/h3_hexagon_layer.png")'>H3HexagonLayer</div>
-  <div class='gv' style='background-image: url("/_static/heatmap_layer.png")'>HeatmapLayer</div>
-  <div class='gv' style='background-image: url("/_static/hexagon_layer.png")'>HexagonLayer</div>
-  <div class='gv' style='background-image: url("/_static/icon_layer.png")'>IconLayer</div>
-  <div class='gv' style='background-image: url("/_static/line_layer.png")'>LineLayer</div>
-  <div class='gv' style='background-image: url("/_static/path_later.png")'>PathLayer</div>
-  <div class='gv' style='background-image: url("/_static/point_cloud_layer.png")'>PointCloudLayer</div>
-  <div class='gv' style='background-image: url("/_static/polygon_layer.png")'>PolygonLayer</div>
-  <div class='gv' style='background-image: url("/_static/s2_layer.png")'>S2Layer</div>
-  <div class='gv' style='background-image: url("/_static/scatterplot_layer.png")'>ScatterplotLayer</div>
-  <div class='gv' style='background-image: url("/_static/screengrid_layer.png")'>ScreengridLayer</div>
-  <div class='gv' style='background-image: url("/_static/text_layer.png")'>TextLayer</div>
-  <div class='gv' style='background-image: url("/_static/trips_layer.png")'>TripsLayer</div>
+
+  
+  <div class='grid-cell'>
+      <a href="/arc_layer.html">
+    <img width="200" src="/_images/arc_layer.png"></img>
+      <div class='thumb-text'>Arc Layer</div></a>
+  </div>
+
+  
+  <div class='grid-cell'>
+      <a href="/bitmap_layer.html">
+    <img width="200" src="/_images/bitmap_layer.png"></img>
+      <div class='thumb-text'>Bitmap Layer</div></a>
+  </div>
+
+  
+  <div class='grid-cell'>
+      <a href="/column_layer.html">
+    <img width="200" src="/_images/column_layer.png"></img>
+      <div class='thumb-text'>Column Layer</div></a>
+  </div>
+
+  
+  <div class='grid-cell'>
+      <a href="/contour_layer.html">
+    <img width="200" src="/_images/contour_layer.png"></img>
+      <div class='thumb-text'>Contour Layer</div></a>
+  </div>
+
+  
+  <div class='grid-cell'>
+      <a href="/custom_layer.html">
+    <img width="200" src="/_images/custom_layer.png"></img>
+      <div class='thumb-text'>Custom Layer</div></a>
+  </div>
+
+  
+  <div class='grid-cell'>
+      <a href="/geojson_layer.html">
+    <img width="200" src="/_images/geojson_layer.png"></img>
+      <div class='thumb-text'>GeoJson Layer</div></a>
+  </div>
+
+  
+  <div class='grid-cell'>
+      <a href="/gpu_grid_layer.html">
+    <img width="200" src="/_images/gpu_grid_layer.png"></img>
+      <div class='thumb-text'>Gpu Grid Layer</div></a>
+  </div>
+
+  
+  <div class='grid-cell'>
+      <a href="/great_circle_layer.html">
+    <img width="200" src="/_images/great_circle_layer.png"></img>
+      <div class='thumb-text'>Great Circle Layer</div></a>
+  </div>
+
+  
+  <div class='grid-cell'>
+      <a href="/grid_layer.html">
+    <img width="200" src="/_images/grid_layer.png"></img>
+      <div class='thumb-text'>Grid Layer</div></a>
+  </div>
+
+  
+  <div class='grid-cell'>
+      <a href="/h3_cluster_layer.html">
+    <img width="200" src="/_images/h3_cluster_layer.png"></img>
+      <div class='thumb-text'>H3 Cluster Layer</div></a>
+  </div>
+
+  
+  <div class='grid-cell'>
+      <a href="/h3_hexagon_layer.html">
+    <img width="200" src="/_images/h3_hexagon_layer.png"></img>
+      <div class='thumb-text'>H3 Hexagon Layer</div></a>
+  </div>
+
+  
+  <div class='grid-cell'>
+      <a href="/heatmap_layer.html">
+    <img width="200" src="/_images/heatmap_layer.png"></img>
+      <div class='thumb-text'>Heatmap Layer</div></a>
+  </div>
+
+  
+  <div class='grid-cell'>
+      <a href="/hexagon_layer.html">
+    <img width="200" src="/_images/hexagon_layer.png"></img>
+      <div class='thumb-text'>Hexagon Layer</div></a>
+  </div>
+
+  
+  <div class='grid-cell'>
+      <a href="/icon_layer.html">
+    <img width="200" src="/_images/icon_layer.png"></img>
+      <div class='thumb-text'>Icon Layer</div></a>
+  </div>
+
+  
+  <div class='grid-cell'>
+      <a href="/line_layer.html">
+    <img width="200" src="/_images/line_layer.png"></img>
+      <div class='thumb-text'>Line Layer</div></a>
+  </div>
+
+  
+  <div class='grid-cell'>
+      <a href="/path_layer.html">
+    <img width="200" src="/_images/path_layer.png"></img>
+      <div class='thumb-text'>Path Layer</div></a>
+  </div>
+
+  
+  <div class='grid-cell'>
+      <a href="/point_cloud_layer.html">
+    <img width="200" src="/_images/point_cloud_layer.png"></img>
+      <div class='thumb-text'>Point Cloud Layer</div></a>
+  </div>
+
+  
+  <div class='grid-cell'>
+      <a href="/polygon_layer.html">
+    <img width="200" src="/_images/polygon_layer.png"></img>
+      <div class='thumb-text'>Polygon Layer</div></a>
+  </div>
+
+  
+  <div class='grid-cell'>
+      <a href="/s2_layer.html">
+    <img width="200" src="/_images/s2_layer.png"></img>
+      <div class='thumb-text'>S2 Layer</div></a>
+  </div>
+
+  
+  <div class='grid-cell'>
+      <a href="/scatterplot_layer.html">
+    <img width="200" src="/_images/scatterplot_layer.png"></img>
+      <div class='thumb-text'>Scatterplot Layer</div></a>
+  </div>
+
+  
+  <div class='grid-cell'>
+      <a href="/screengrid_layer.html">
+    <img width="200" src="/_images/screengrid_layer.png"></img>
+      <div class='thumb-text'>Screengrid Layer</div></a>
+  </div>
+
+  
+  <div class='grid-cell'>
+      <a href="/text_layer.html">
+    <img width="200" src="/_images/text_layer.png"></img>
+      <div class='thumb-text'>Text Layer</div></a>
+  </div>
+
+  
+  <div class='grid-cell'>
+      <a href="/trips_layer.html">
+    <img width="200" src="/_images/trips_layer.png"></img>
+      <div class='thumb-text'>Trips Layer</div></a>
+  </div>
+
 </div>
