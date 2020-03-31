@@ -15,8 +15,10 @@ DOC_TEMPLATE = jinja2.Template(
 
 .. raw:: html
 
-    <iframe width="600" height="400" src="{{hosted_html_path}}"></iframe>
+    <iframe width="650" height="400" src="{{hosted_html_path}}"></iframe>
 
+.. raw :: html
+    <a href="{{hosted_html_path}}">Full screen example</a>
 
 Source
 ------
@@ -31,8 +33,8 @@ Source
 
 EXAMPLE_GLOB = "../examples/*_layer.py"
 GALLERY_DIR = "./gallery/"
-HTML_DIR = "./_build/html/_static/gallery/"
-STATIC_PATH = "/_static/gallery"
+HTML_DIR = "./gallery/html/"
+STATIC_PATH = "/_static/"
 
 
 def create_rst(fname):

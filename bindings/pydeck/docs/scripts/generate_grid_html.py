@@ -39,9 +39,9 @@ HTML_TEMPLATE = jinja2.Template(
 
 <div class='wrapper'>
 {% for layer_name in layer_names %}
-  {# Sphinx decides where these files get hosted but it's by default the directroy in the src tag #}
+  {# Sphinx decides where these files get hosted but it's /_images #}
   <div class='grid-cell'>
-      <a href="/{{layer_name}}.html">
+      <a href="/gallery/{{layer_name}}.html">
     <img width="200" src="/_images/{{layer_name}}.png"></img>
       <div class='thumb-text'>{{ make_presentable(layer_name) }}</div></a>
   </div>
