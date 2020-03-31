@@ -19,19 +19,18 @@ DOC_TEMPLATE = jinja2.Template(
 
     <iframe width="650" height="400" src="{{hosted_html_path}}"></iframe>
 
-.. raw :: html
-
-    <br />
-    <a target="_blank" href="{{hosted_html_path}}">Full screen example</a>
-    <br />
-    <a target="_blank" href="{{deckgl_doc_url}}">deck.gl docs</a>
-
 Source
 ------
 
 .. code-block:: python
 
 {{ python_code|indent(4, True) }}
+
+.. raw:: html
+
+    <br />
+    <a style="float:left;" target="_blank" href="{{hosted_html_path}}">Full screen example</a>
+    <a style="float:right;" target="_blank" href="{{deckgl_doc_url}}">deck.gl docs</a>
 
 """
 )
