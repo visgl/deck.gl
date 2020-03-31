@@ -4,7 +4,6 @@ import makeTooltip from './widget-tooltip';
 import mapboxgl from './ssr-safe-mapbox';
 
 import {CSVLoader} from '@loaders.gl/csv';
-import {Tiles3DLoader, CesiumIonLoader} from '@loaders.gl/3d-tiles';
 import {registerLoaders} from '@loaders.gl/core';
 
 import * as deck from './deck-bundle';
@@ -30,16 +29,10 @@ const jsonConverterConfiguration = {
   enumerations: {
     COORDINATE_SYSTEM: deck.COORDINATE_SYSTEM,
     GL
-  },
-
-  // Constants that should be resolved with the provided values by JSON converter
-  constants: {
-    Tiles3DLoader,
-    CesiumIonLoader
   }
 };
 
-registerLoaders([CSVLoader, Tiles3DLoader]);
+registerLoaders([CSVLoader]);
 
 const jsonConverter = new deck.JSONConverter({
   configuration: jsonConverterConfiguration
