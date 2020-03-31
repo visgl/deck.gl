@@ -3,10 +3,12 @@ import os
 import glob
 import jinja2
 
+from utils import to_presentation_name, to_snake_case_layer_name
+
 
 here = os.path.dirname(os.path.abspath(__file__))
 EXAMPLE_GLOB = "../examples/*_layer.py"
-layer_names = sorted([os.path.basename(layer_name).replace('.py', '') for layer_name in glob.glob(EXAMPLE_GLOB)])
+layer_names = sorted([to_snake_case_layer_name(layer_name) for layer_name in glob.glob(EXAMPLE_GLOB)])
 
 
 HTML_TEMPLATE = jinja2.Template(
@@ -43,21 +45,17 @@ HTML_TEMPLATE = jinja2.Template(
   <div class='grid-cell'>
       <a href="/gallery/{{layer_name}}.html">
     <img width="200" src="/_images/{{layer_name}}.png"></img>
-      <div class='thumb-text'>{{ make_presentable(layer_name) }}</div></a>
+      <div class='thumb-text'>{{ to_presentation_name(layer_name) }}</div></a>
   </div>
 {% endfor %}
 </div>
 """)
 
 
-def make_presentable(s):
-    return s.replace('_', ' ').title().replace('json', 'Json')
-
-
 def main():
     doc_source = HTML_TEMPLATE.render(
         layer_names=layer_names,
-        make_presentable=make_presentable
+        to_presentation_name=to_presentation_name
     )
     with open(os.path.join(here, '../gallery/html/grid.html'), 'w+') as f:
         f.write(doc_source)

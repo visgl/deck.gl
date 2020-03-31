@@ -1,3 +1,4 @@
+"""Script to generate thumbnails viewable in the pydeck docs"""
 import asyncio
 import glob
 import os
@@ -80,6 +81,3 @@ if __name__ == "__main__":
         asyncio.get_event_loop().run_until_complete(main(input_fname))
     else:
         asyncio.get_event_loop().run_until_complete(main())
-    # output_dir = os.path.join(here, '../_build/html/_static/')
-    # for fname in glob.glob(os.path.join(here, '../gallery/*_layer.png')):
-    #     subprocess.call(f"mv {fname} {output_dir}", shell=True)
