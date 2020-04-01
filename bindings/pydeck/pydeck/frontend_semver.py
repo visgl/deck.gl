@@ -1,1 +1,0 @@
-DECKGL_SEMVER = '8.1.0-beta.3'
