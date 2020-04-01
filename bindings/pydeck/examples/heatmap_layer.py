@@ -1,10 +1,17 @@
+"""
+HeatmapLayer
+===========
+
+Location of livestock raised in New Mexico in the United States in 2006,
+via the United Nations and FAOSTAT, with the source data viewable here: http://www.fao.org/faostat/en/
+
+Locations for poultry are viewable in blue and cattle are in orange.
+
+Overlaid with the satellite imagery from Mapbox to highlight the how terrain affects agriculture.
+"""
+
 import pandas as pd
 import pydeck
-
-# Data source: New Mexico livestock data from 2006 from FAOSTAT
-"""
-Map of livestock locations in the state of New Mexico
-"""
 
 CATTLE_DATA = (
     "https://raw.githubusercontent.com/ajduberstein/geo_datasets/master/nm_cattle.csv"

@@ -1,3 +1,10 @@
+"""
+BitmapLayer
+===========
+
+A 1906 Britton & Rey's map of San Francisco's 1906 fire, overlaid on
+an interactive map of San Francisco.
+"""
 import pydeck
 
 

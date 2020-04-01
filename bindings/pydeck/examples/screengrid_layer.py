@@ -1,10 +1,15 @@
+"""
+ScreenGridLayer
+===============
+
+Locations of bike parking within San Francisco. Aggregation level varies depending on the viewport of the user.
+
+Adapted from the deck.gl documentation.
+"""
 import pydeck as pdk
 import pandas as pd
 
-SCREEN_GRID_LAYER_DATA = (
-    "https://raw.githubusercontent.com/uber-common/"
-    "deck.gl-data/master/website/sf-bike-parking.json"
-)
+SCREEN_GRID_LAYER_DATA = "https://raw.githubusercontent.com/uber-common/deck.gl-data/master/website/sf-bike-parking.json"  # noqa
 df = pd.read_json(SCREEN_GRID_LAYER_DATA)
 
 # Define a layer to display on a map

@@ -1,6 +1,16 @@
-import pydeck
+"""
+CustomLayer
+===========
 
-# See https://github.com/ajduberstein/pydeck_custom_layer for a minimal example layer
+A custom layer named LabeledGeoJsonLayer from copied from this Observable Notebook for use in pydeck:
+
+https://observablehq.com/@pessimistress/deck-gl-custom-layer-tutorial
+
+Registering a custom layer requires some knowledge of JavaScript and bundling.
+See https://github.com/ajduberstein/pydeck_custom_layer for a minimal example layer.
+
+"""
+import pydeck
 
 pydeck.settings.custom_libraries = [
     {

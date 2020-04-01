@@ -2,9 +2,6 @@
 ScatterplotLayer
 ================
 
-Plot of the number of exits for various subway stops within San Francisco, California.
-
-Adapted from the deck.gl documentation.
 """
 import pydeck as pdk
 import pandas as pd

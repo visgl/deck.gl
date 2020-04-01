@@ -1,4 +1,9 @@
-"""Corresponds to https://deck.gl/#/examples/core-layers/line-layer"""
+"""
+LineLayer
+=========
+
+Flights from Heathrow around Europe, adapted from the deck.gl documentation.
+"""
 import pydeck
 
 DATA_URL = {
