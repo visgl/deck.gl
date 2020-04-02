@@ -1,13 +1,19 @@
+"""
+PathLayer
+=========
+
+Locations of the Bay Area Rapid Transit lines.
+"""
+
 import pydeck
 import pandas as pd
-
 
 DATA_URL = "https://raw.githubusercontent.com/uber-common/deck.gl-data/master/website/bart-lines.json"
 df = pd.read_json(DATA_URL)
 
 def hex_to_rgb(h):
     h = h.lstrip('#')
-    return tuple(int(h[i:i+2], 16) for i in (0, 2, 4))
+    return tuple(int(h[i:i + 2], 16) for i in (0, 2, 4))
 
 
 df['color'] = df['color'].apply(hex_to_rgb)

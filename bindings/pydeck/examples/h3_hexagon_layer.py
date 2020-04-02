@@ -1,11 +1,23 @@
+"""
+H3HexagonLayer
+==============
+
+Plot of values for a particular hex ID in the H3 geohashing scheme.
+
+This example is adapted from the deck.gl documentation.
+"""
+
 import pydeck as pdk
+import pandas as pd
 
 H3_HEX_DATA = "https://raw.githubusercontent.com/uber-common/deck.gl-data/master/website/sf.h3cells.json"
+
+df = pd.read_json(H3_HEX_DATA)
 
 # Define a layer to display on a map
 layer = pdk.Layer(
     "H3HexagonLayer",
-    H3_HEX_DATA,
+    df,
     pickable=True,
     stroked=True,
     filled=True,
@@ -18,7 +30,7 @@ layer = pdk.Layer(
 
 # Set the viewport location
 view_state = pdk.ViewState(
-    latitude=37.7749295, longitude=-122.4194155, zoom=11, bearing=0, pitch=30
+    latitude=37.7749295, longitude=-122.4194155, zoom=14, bearing=0, pitch=30
 )
 
 

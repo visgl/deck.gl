@@ -1,10 +1,14 @@
+"""
+TextLayer
+========
+
+Names of various public transit stops within San Francisco, plotted at the location of that stop
+"""
+
 import pydeck as pdk
 import pandas as pd
 
-TEXT_LAYER_DATA = (
-    "https://raw.githubusercontent.com/uber-common/"
-    "deck.gl-data/master/website/bart-stations.json"
-)
+TEXT_LAYER_DATA = "https://raw.githubusercontent.com/uber-common/deck.gl-data/master/website/bart-stations.json"  # noqa
 df = pd.read_json(TEXT_LAYER_DATA)
 
 # Define a layer to display on a map
@@ -17,6 +21,8 @@ layer = pdk.Layer(
     get_size=16,
     get_color=[255, 255, 255],
     get_angle=0,
+    # Note that string constants in pydeck are explicitly passed as strings
+    # This distinguishes them from columns in a data set
     get_text_anchor="'middle'",
     get_alignment_baseline="'center'",
 )
@@ -28,6 +34,9 @@ view_state = pdk.ViewState(
 
 # Render
 r = pdk.Deck(
-    layers=[layer], initial_view_state=view_state, tooltip={"text": "{name}\n{address}"}
+    layers=[layer],
+    initial_view_state=view_state,
+    tooltip={"text": "{name}\n{address}"},
+    map_style="mapbox://styles/mapbox/satellite-v9",
 )
 r.to_html("text_layer.html", notebook_display=False)

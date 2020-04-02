@@ -1,3 +1,10 @@
+"""
+GeoJsonLayer
+===========
+
+Property values in Vancouver, Canada, adapted from the deck.gl example pages. Input data is in a GeoJSON format.
+"""
+
 import pydeck
 
 DATA_URL = "https://raw.githubusercontent.com/uber-common/deck.gl-data/master/examples/geojson/vancouver-blocks.json"
