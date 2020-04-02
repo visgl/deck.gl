@@ -1,11 +1,17 @@
+"""
+ScatterplotLayer
+================
+
+Plot of the number of exits for various subway stops within San Francisco, California.
+
+Adapted from the deck.gl documentation.
+"""
+
 import pydeck as pdk
 import pandas as pd
 import math
 
-SCATTERPLOT_LAYER_DATA = (
-    "https://raw.githubusercontent.com/uber-common/"
-    "deck.gl-data/master/website/bart-stations.json"
-)
+SCATTERPLOT_LAYER_DATA = "https://raw.githubusercontent.com/uber-common/deck.gl-data/master/website/bart-stations.json"
 df = pd.read_json(SCATTERPLOT_LAYER_DATA)
 
 # Use pandas to calculate additional data

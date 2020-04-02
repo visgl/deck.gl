@@ -1,9 +1,17 @@
+"""
+HexagonLayer
+==============
+
+Personal injury road accidents in GB from 1979.
+
+The layer aggregates data within the boundary of each hexagon cell.
+
+This example is adapted from the deck.gl documentation.
+"""
+
 import pydeck as pdk
 
-HEXAGON_LAYER_DATA = (
-    "https://raw.githubusercontent.com/uber-common/"
-    "deck.gl-data/master/examples/3d-heatmap/heatmap-data.csv"
-)
+HEXAGON_LAYER_DATA = "https://raw.githubusercontent.com/uber-common/deck.gl-data/master/examples/3d-heatmap/heatmap-data.csv"  # noqa
 
 # Define a layer to display on a map
 layer = pdk.Layer(

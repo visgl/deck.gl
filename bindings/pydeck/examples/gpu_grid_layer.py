@@ -1,10 +1,16 @@
+"""
+GPUGridLayer
+============
+
+Locations of bike parking within San Francisco, with the data aggregated on the client's GPU.
+
+Adapted from the deck.gl documentation.
+"""
+
 import pydeck as pdk
 import pandas as pd
 
-GPU_GRID_LAYER_DATA = (
-    "https://raw.githubusercontent.com/uber-common/"
-    "deck.gl-data/master/website/sf-bike-parking.json"
-)
+GPU_GRID_LAYER_DATA = "https://raw.githubusercontent.com/uber-common/deck.gl-data/master/website/sf-bike-parking.json"  # noqa
 df = pd.read_json(GPU_GRID_LAYER_DATA)
 
 # Define a layer to display on a map

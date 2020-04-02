@@ -1,31 +1,90 @@
-pydeck Documentation
+pydeck
 ==================================
 
-.. toctree::
-   :maxdepth: 1
-   :caption: Contents:
+High scale spatial rendering in Python, powered by `deck.gl <https://deck.gl/#/>`__   
 
-   installation
-   layer
-   deck
-   data_utils
-   tooltip
-   view_state
-   view
-   light_settings
-   binary_transfer
-   gallery
 
-.. figure:: https://camo.githubusercontent.com/020e7749ebfb7a8f50403fcbc8650833608c006d/68747470733a2f2f6d7962696e6465722e6f72672f7374617469632f6c6f676f2e7376673f763d6639663064393237623637636339646339396437383863383232636132316330
-   :target: https://mybinder.org/v2/gh/uber/deck.gl/binder
-   :alt: Hosted Jupyter notebook examples
-   :align: left
+.. raw:: html
+   :file: gallery/html/grid.html
 
-   `See hosted examples on mybinder.org <https://mybinder.org/v2/gh/uber/deck.gl/binder>`_
+.. image:: gallery/images/arc_layer.png
+   :width: 0
+
+.. image:: gallery/images/bitmap_layer.png
+   :width: 0
+
+.. image:: gallery/images/column_layer.png
+   :width: 0
+
+.. image:: gallery/images/contour_layer.png
+   :width: 0
+
+.. image:: gallery/images/custom_layer.png
+   :width: 0
+
+.. image:: gallery/images/geojson_layer.png
+   :width: 0
+
+.. image:: gallery/images/gpu_grid_layer.png
+   :width: 0
+
+.. image:: gallery/images/great_circle_layer.png
+   :width: 0
+
+.. image:: gallery/images/grid_layer.png
+   :width: 0
+
+.. image:: gallery/images/h3_cluster_layer.png
+   :width: 0
+
+.. image:: gallery/images/h3_hexagon_layer.png
+   :width: 0
+
+.. image:: gallery/images/heatmap_layer.png
+   :width: 0
+
+.. image:: gallery/images/hexagon_layer.png
+   :width: 0
+
+.. image:: gallery/images/icon_layer.png
+   :width: 0
+
+.. image:: gallery/images/line_layer.png
+   :width: 0
+
+.. image:: gallery/images/path_layer.png
+   :width: 0
+
+.. image:: gallery/images/point_cloud_layer.png
+   :width: 0
+
+.. image:: gallery/images/polygon_layer.png
+   :width: 0
+
+.. image:: gallery/images/s2_layer.png
+   :width: 0
+
+.. image:: gallery/images/scatterplot_layer.png
+   :width: 0
+
+.. image:: gallery/images/screengrid_layer.png
+   :width: 0
+
+.. image:: gallery/images/text_layer.png
+   :width: 0
+
+.. image:: gallery/images/trips_layer.png
+   :width: 0
 
 .. figure:: https://i.imgur.com/qenLNEf.gif
    
    `Conway's Game of Life <https://en.wikipedia.org/wiki/Conway%27s_Game_of_Life>`_ in pydeck
+
+.. figure:: https://camo.githubusercontent.com/020e7749ebfb7a8f50403fcbc8650833608c006d/68747470733a2f2f6d7962696e6465722e6f72672f7374617469632f6c6f676f2e7376673f763d6639663064393237623637636339646339396437383863383232636132316330
+   :target: https://mybinder.org/v2/gh/uber/deck.gl/binder
+   :alt: Hosted Jupyter notebook examples
+
+   `See hosted examples on mybinder.org <https://mybinder.org/v2/gh/uber/deck.gl/binder>`_
 
 `Layers <layer.html>`__
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -74,6 +133,22 @@ Optimizations for visualizations millions of points within pydeck.
    If nothing renders in your viewport, check your browser's `developer console <https://javascript.info/devtools>`__
    or review the layer catalog. You are encouraged to file an issue by clicking `here <https://github.com/uber/deck.gl/issues/new?assignees=&labels=bug&template=bug-report.md&title=>`__
    and mention ``pydeck`` in the title.
+
+
+.. toctree::
+   :maxdepth: 1
+   :caption: Contents:
+
+   installation
+   layer
+   deck
+   data_utils
+   tooltip
+   view_state
+   view
+   light_settings
+   binary_transfer
+
 
 
 Indices and tables

@@ -1,10 +1,16 @@
+"""
+TripsLayer
+==========
+
+Plot of a single vehicle trip within San Francisco, fading in from the origin.
+
+Adapted from a deck.gl documentation example.
+"""
+
 import pydeck as pdk
 import pandas as pd
 
-TRIPS_LAYER_DATA = (
-    "https://raw.githubusercontent.com/uber-common"
-    "/deck.gl-data/master/website/sf.trips.json"
-)
+TRIPS_LAYER_DATA = "https://raw.githubusercontent.com/uber-common/deck.gl-data/master/website/sf.trips.json"  # noqa
 
 df = pd.read_json(TRIPS_LAYER_DATA)
 
