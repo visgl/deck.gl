@@ -5,7 +5,6 @@ PathLayer
 Locations of the Bay Area Rapid Transit lines.
 """
 
-
 import pydeck
 import pandas as pd
 

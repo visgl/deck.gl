@@ -4,6 +4,7 @@ IconLayer
 
 Location of biergartens in Germany listed on OpenStreetMap as of early 2020.
 """
+
 import pydeck
 import pandas as pd
 

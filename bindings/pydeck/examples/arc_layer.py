@@ -8,6 +8,7 @@ Green indicates a start point, and red indicates the destination.
 
 The data is collected by the US Census Bureau and viewable in the 2017 LODES data set: https://lehd.ces.census.gov/data/
 """
+
 import pydeck
 import pandas as pd
 

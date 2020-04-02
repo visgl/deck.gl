@@ -40,6 +40,7 @@ If you'd simply like to plot a value at an H3 hex ID, see the H3HexagonLayer.
 
 This example is adapted from the deck.gl documentation.
 """
+
 import pydeck as pdk
 import pandas as pd
 

@@ -4,6 +4,7 @@ LineLayer
 
 Flights from Heathrow around Europe, adapted from the deck.gl documentation.
 """
+
 import pydeck
 
 DATA_URL = {

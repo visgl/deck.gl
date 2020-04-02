@@ -6,6 +6,7 @@ Plot of a single vehicle trip within San Francisco, fading in from the origin.
 
 Adapted from a deck.gl documentation example.
 """
+
 import pydeck as pdk
 import pandas as pd
 

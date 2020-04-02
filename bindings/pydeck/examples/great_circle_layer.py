@@ -8,6 +8,7 @@ Origin is in green; destinations are in blue.
 
 Adapted from the deck.gl documentation.
 """
+
 import pydeck as pdk
 import pandas as pd
 

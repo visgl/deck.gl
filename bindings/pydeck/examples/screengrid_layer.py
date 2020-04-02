@@ -6,6 +6,7 @@ Locations of bike parking within San Francisco. Aggregation level varies dependi
 
 Adapted from the deck.gl documentation.
 """
+
 import pydeck as pdk
 import pandas as pd
 

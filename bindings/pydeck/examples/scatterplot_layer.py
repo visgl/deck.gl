@@ -6,6 +6,7 @@ Plot of the number of exits for various subway stops within San Francisco, Calif
 
 Adapted from the deck.gl documentation.
 """
+
 import pydeck as pdk
 import pandas as pd
 import math
