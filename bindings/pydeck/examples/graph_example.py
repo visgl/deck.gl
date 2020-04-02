@@ -1,4 +1,10 @@
-"""Making network graphs in pydeck"""
+"""
+Binary Transport
+================
+
+Example of binary transport in pydeck. This notebook renders 10k points via the web sockets within
+a Jupyter notebook if you run the ``generate_vis()`` function
+"""
 import pydeck
 
 import pandas as pd

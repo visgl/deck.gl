@@ -1,7 +1,17 @@
+"""
+ArcLayer
+========
+
+Map of commutes to work within a segment of downtown San Francisco using a deck.gl ArcLayer.
+
+Green indicates a start point, and red indicates the destination.
+
+The data is collected by the US Census Bureau and viewable in the 2017 LODES data set: https://lehd.ces.census.gov/data/
+"""
+
 import pydeck
 import pandas as pd
 
-# Map of commutes to work within downtown San Francisco, from the US Census LODES data set
 DATA_URL = "https://raw.githubusercontent.com/ajduberstein/sf_public_data/master/bay_area_commute_routes.csv"
 DOWNTOWN_BOUNDING_BOX = [
     -122.43135291617365,
