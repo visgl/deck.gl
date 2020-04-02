@@ -207,6 +207,10 @@ export const showcasePages = generatePath([
     content: 'markdown/showcase.md'
   },
   {
+    name: 'Flowmap.blue',
+    external: 'https://flowmap.blue/'
+  },
+  {
     name: 'Isochronic Map',
     external: 'http://pessimistress.github.io/isochronic-map/'
   },

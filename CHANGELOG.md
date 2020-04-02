@@ -17,6 +17,20 @@ Each version should:
 Ref: http://keepachangelog.com/en/0.3.0/
 -->
 
+## deck.gl v8.2
+
+#### deck.gl [8.2.0-alpha.0] - Apr 1 2020
+
+- Fix GeoJSON multi-geometry highlighting (#4426)
+- Add flowmap to showcases (#4430)
+- @deck.gl/jupyter-widget: Remove Tile3DLoader (#4438)
+- @deck.gl/jupyter-widget and pydeck: Fix binary data bug (#4416)
+- pydeck/jupyter-widget: Call mergeConfiguration again after addCustomLibraries complete (#4413)
+- Add zRange prop to TileLayer for use with TerrainLayer (#4397)
+- Fix PointCloud sizeUnits as "meters" (#4421)
+- Fix GeoJsonLayer's handling of highlightedObjectIndex (#4403)
+- layers: pass loadOptoins to IconManager from IconLayer (#4404)
+
 ## deck.gl v8.1
 
 #### deck.gl [8.1.0] - Mar 17 2020

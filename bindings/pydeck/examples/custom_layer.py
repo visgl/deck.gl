@@ -14,8 +14,8 @@ import pydeck
 
 pydeck.settings.custom_libraries = [
     {
-        "libraryName": "LabeledGeoJsonLayer",
-        "resourceUri": "https://raw.githubusercontent.com/ajduberstein/pydeck_custom_layer/master/dist/bundle.js",
+        "libraryName": "LabeledGeoJsonLayerLibrary",
+        "resourceUri": "https://unpkg.com/pydeck-custom-layer-demo@0.0.1/dist/bundle.js",
     }
 ]
 
@@ -29,19 +29,19 @@ custom_layer = pydeck.Layer(
     filled=False,
     billboard=False,
     get_line_color=[180, 180, 180],
-    get_label="f.properties.name",
-    get_label_size=20,
+    get_label="properties.name",
+    get_label_size=200000,
     get_label_color=[0, 64, 128],
     label_size_units='"meters"',
     line_width_min_pixels=1,
 )
 
-view_state = pydeck.ViewState(latitude=0, longitude=0, zoom=10, bearing=-45, pitch=60,)
+view_state = pydeck.ViewState(latitude=0, longitude=0, zoom=1, bearing=-45, pitch=60,)
 
 r = pydeck.Deck(
     custom_layer,
     initial_view_state=view_state,
-    map_style="mapbox://styles/mapbox/satellite-v9",
+    map_style="",
 )
 
-r.to_html("custom_layer.html", notebook_display=False)
+r.to_html("custom_layer.html", css_background_color="#333", notebook_display=False)
