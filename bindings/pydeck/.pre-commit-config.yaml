@@ -12,3 +12,9 @@ repos:
     hooks:
       - id: flake8
         files: '\.py$'
+  - repo: local
+    hooks:
+    - id: pytest
+      name: pytest
+      entry: pytest
+      language: system
