@@ -1,0 +1,42 @@
+[project]
+name = "pydeck"
+version = "0.3.0"
+description = "Create a pyproject.toml file for an existing project."
+authors = [
+    "Martin Thoma <info@martin-thoma.de>"
+]
+license = "MIT"
+readme = "README.md"
+python = "^3.6"
+homepage = "https://github.com/MartinThoma/infer_pyproject"
+repository = "https://github.com/MartinThoma/infer_pyproject"
+documentation = "https://github.com/MartinThoma/infer_pyproject"
+
+requires = [
+    "setuptools",
+    "wheel",
+]
+
+[tool.black]
+line-length = 120
+target-version = ['py37']
+include = '\.pyi?$'
+exclude = '''
+
+(
+  /(
+      \.eggs         # exclude a few common directories in the
+    | \.git          # root of the project
+    | \.hg
+    | \.mypy_cache
+    | \.tox
+    | \.venv
+    | _build
+    | buck-out
+    | build
+    | dist
+  )/
+  | foo.py           # also separately exclude a file named foo.py in
+                     # the root of the project
+)
+'''
