@@ -8,7 +8,9 @@ from .json_tools import JSONMixin, camel_and_lower
 
 TYPE_IDENTIFIER = "@@type"
 FUNCTION_IDENTIFIER = "@@="
+CONSTANT_IDENTIFIER = "@@#"
 QUOTE_CHARS = {"'", '"', "`"}
+IDENTIFIERS = {"@@#", "@@=", "@@!"}
 
 
 class BinaryTransportException(Exception):
@@ -91,6 +93,9 @@ class Layer(JSONMixin):
                 if isinstance(v, str) and v[0] in QUOTE_CHARS and v[0] == v[-1]:
                     # Skip quoted strings
                     kwargs[k] = v.replace(v[0], "")
+                elif isinstance(v, str) and v[0:3] in IDENTIFIERS:
+                    # Pass anything with a known identifier as-is
+                    kwargs[k] = v
                 elif isinstance(v, str):
                     # Have @deck.gl/json treat strings values as functions
                     kwargs[k] = FUNCTION_IDENTIFIER + v

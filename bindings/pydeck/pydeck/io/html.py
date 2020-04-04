@@ -24,12 +24,17 @@ j2_env = jinja2.Environment(loader=jinja2.FileSystemLoader(TEMPLATES_PATH), trim
 CDN_URL = "https://cdn.jsdelivr.net/npm/@deck.gl/jupyter-widget@{}/dist/index.js".format(DECKGL_SEMVER)
 
 
+def produce_script_tag(destination):
+    with open(join(dirname(__file__), destination), "r") as f:
+        js = f.read()
+    return "<script type=text/javascript>" + js + "</script>"
+
+
 def cdn_picker(offline=False):
     if offline:
-        with open(join(dirname(__file__), "./static/index.js"), "r") as file:
-            js = file.read()
-        return "<script type=text/javascript>" + js + "</script>"
-
+        index_tag = produce_script_tag("./static/index.js")
+        index_map_tag = produce_script_tag("./static/index.map.js")
+        return "{}\n{}".format(index_tag, index_map_tag)
     return "<script src=" + CDN_URL + "></script>"
 
 

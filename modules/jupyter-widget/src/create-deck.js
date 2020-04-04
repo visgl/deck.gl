@@ -8,6 +8,8 @@ import {registerLoaders} from '@loaders.gl/core';
 
 import * as deck from './deck-bundle';
 
+import {CesiumIonLoader} from '@loaders.gl/3d-tiles';
+
 import {loadScript} from './script-utils';
 
 import GL from '@luma.gl/constants';
@@ -29,6 +31,9 @@ const jsonConverterConfiguration = {
   enumerations: {
     COORDINATE_SYSTEM: deck.COORDINATE_SYSTEM,
     GL
+  },
+  constants: {
+    CesiumIonLoader
   }
 };
 
