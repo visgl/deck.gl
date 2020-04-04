@@ -1,16 +1,6 @@
 [project]
 name = "pydeck"
 version = "0.3.0"
-description = "Create a pyproject.toml file for an existing project."
-authors = [
-    "Martin Thoma <info@martin-thoma.de>"
-]
-license = "MIT"
-readme = "README.md"
-python = "^3.6"
-homepage = "https://github.com/MartinThoma/infer_pyproject"
-repository = "https://github.com/MartinThoma/infer_pyproject"
-documentation = "https://github.com/MartinThoma/infer_pyproject"
 
 requires = [
     "setuptools",
