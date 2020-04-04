@@ -32,8 +32,8 @@ def produce_script_tag(destination):
 
 def cdn_picker(offline=False):
     if offline:
-        index_tag = produce_script_tag("./static/index.js")
-        index_map_tag = produce_script_tag("./static/index.map.js")
+        index_tag = produce_script_tag("../nbextension/static/index.js")
+        index_map_tag = produce_script_tag("../nbextension/static/index.js.map")
         return "{}\n{}".format(index_tag, index_map_tag)
     return "<script src=" + CDN_URL + "></script>"
 
