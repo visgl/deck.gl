@@ -16,7 +16,7 @@ repos:
     hooks:
     - id: pytest
       name: pytest
-      entry: pytest
+      entry: pytest bindings/pydeck/tests
       language: system
 cache:
   directories:
