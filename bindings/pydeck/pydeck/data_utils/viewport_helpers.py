@@ -6,6 +6,7 @@ import math
 from ..bindings.view_state import ViewState
 from .type_checking import is_pandas_df
 
+
 def _squared_diff(x, x0):
     return (x0 - x) * (x0 - x)
 
@@ -27,7 +28,7 @@ def euclidean(y, y1):
     True
     """
     if not len(y) == len(y1):
-        raise Exception('Input coordinates must be of the same length')
+        raise Exception("Input coordinates must be of the same length")
     return math.sqrt(sum([_squared_diff(x, x0) for x, x0 in zip(y, y1)]))
 
 
@@ -94,7 +95,7 @@ def k_nearest_neighbors(points, center, k):
     """
     pts_with_distance = [(pt, euclidean(pt, center)) for pt in points]
     sorted_pts = sorted(pts_with_distance, key=lambda x: x[1])
-    return [x[0] for x in sorted_pts][:int(k)]
+    return [x[0] for x in sorted_pts][: int(k)]
 
 
 def get_n_pct(points, proportion=1):
@@ -142,8 +143,8 @@ def bbox_to_zoom_level(bbox):
     if max_diff < (360.0 / math.pow(2, 20)):
         zoom_level = 21
     else:
-        zoom_level = int(-1*((math.log(max_diff)/math.log(2.0)) - (math.log(360.0)/math.log(2))))
-        if (zoom_level < 1):
+        zoom_level = int(-1 * ((math.log(max_diff) / math.log(2.0)) - (math.log(360.0) / math.log(2))))
+        if zoom_level < 1:
             zoom_level = 1
     return zoom_level
 

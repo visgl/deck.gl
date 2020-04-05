@@ -29,13 +29,9 @@ layer = pdk.Layer(
 )
 
 # Set the viewport location
-view_state = pdk.ViewState(
-    latitude=37.7749295, longitude=-122.4194155, zoom=14, bearing=0, pitch=30
-)
+view_state = pdk.ViewState(latitude=37.7749295, longitude=-122.4194155, zoom=14, bearing=0, pitch=30)
 
 
 # Render
-r = pdk.Deck(
-    layers=[layer], initial_view_state=view_state, tooltip={"text": "Count: {count}"}
-)
+r = pdk.Deck(layers=[layer], initial_view_state=view_state, tooltip={"text": "Count: {count}"})
 r.to_html("h3_hexagon_layer.html", notebook_display=False)

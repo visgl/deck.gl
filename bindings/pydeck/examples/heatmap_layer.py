@@ -13,12 +13,8 @@ Overlaid with the satellite imagery from Mapbox to highlight the how terrain aff
 import pandas as pd
 import pydeck
 
-CATTLE_DATA = (
-    "https://raw.githubusercontent.com/ajduberstein/geo_datasets/master/nm_cattle.csv"
-)
-POULTRY_DATA = (
-    "https://raw.githubusercontent.com/ajduberstein/geo_datasets/master/nm_chickens.csv"
-)
+CATTLE_DATA = "https://raw.githubusercontent.com/ajduberstein/geo_datasets/master/nm_cattle.csv"
+POULTRY_DATA = "https://raw.githubusercontent.com/ajduberstein/geo_datasets/master/nm_chickens.csv"
 
 
 HEADER = ["lng", "lat", "weight"]
@@ -69,9 +65,7 @@ r = pydeck.Deck(
     layers=[cattle, poultry],
     initial_view_state=view,
     map_style="mapbox://styles/mapbox/dark-v9",
-    tooltip={
-        "text": "Concentration of cattle in blue, concentration of poultry in orange"
-    },
+    tooltip={"text": "Concentration of cattle in blue, concentration of poultry in orange"},
 )
 
 r.to_html("heatmap_layer.html", notebook_display=False)

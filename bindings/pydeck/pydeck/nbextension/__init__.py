@@ -9,9 +9,6 @@ def _jupyter_nbextension_paths():
     # noqa
     _ https://testnb.readthedocs.io/en/latest/examples/Notebook/Distributing%20Jupyter%20Extensions%20as%20Python%20Packages.html#Defining-the-server-extension-and-nbextension
     """
-    return [{
-        'section': 'notebook',
-        'src': 'nbextension/static',
-        'dest': 'pydeck',
-        'require': 'pydeck/extensionRequires'
-    }]
+    return [
+        {"section": "notebook", "src": "nbextension/static", "dest": "pydeck", "require": "pydeck/extensionRequires"}
+    ]

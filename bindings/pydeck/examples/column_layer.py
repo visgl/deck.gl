@@ -13,9 +13,7 @@ https://archive.ics.uci.edu/ml/datasets/Real+estate+valuation+data+set
 import pydeck
 import pandas as pd
 
-DATA_URL = (
-    "https://raw.githubusercontent.com/ajduberstein/geo_datasets/master/housing.csv"
-)
+DATA_URL = "https://raw.githubusercontent.com/ajduberstein/geo_datasets/master/housing.csv"
 df = pd.read_csv(DATA_URL)
 
 view = pydeck.data_utils.compute_view(df[["lng", "lat"]])
@@ -36,19 +34,11 @@ column_layer = pydeck.Layer(
 
 tooltip = {
     "html": "<b>{mrt_distance}</b> meters away from an MRT station, costs <b>{price_per_unit_area}</b> NTD/sqm",
-    "style": {
-        "background": "grey",
-        "color": "white",
-        "font-family": '"Helvetica Neue", Arial',
-        "z-index": "10000",
-    },
+    "style": {"background": "grey", "color": "white", "font-family": '"Helvetica Neue", Arial', "z-index": "10000",},
 }
 
 r = pydeck.Deck(
-    column_layer,
-    initial_view_state=view,
-    tooltip=tooltip,
-    map_style="mapbox://styles/mapbox/satellite-v9",
+    column_layer, initial_view_state=view, tooltip=tooltip, map_style="mapbox://styles/mapbox/satellite-v9",
 )
 
 r.to_html("column_layer.html", notebook_display=False)
