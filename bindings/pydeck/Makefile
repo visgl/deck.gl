@@ -17,7 +17,7 @@ init:
 	$(MAKE) prepare-jupyter
 
 pre-commit:
-	black . --target-version py35 && $(MAKE) test
+	black . --target-version py34 && $(MAKE) test
 
 pre-init:
 	python3 -m venv env; \
