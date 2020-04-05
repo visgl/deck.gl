@@ -8,7 +8,12 @@ import {registerLoaders} from '@loaders.gl/core';
 
 import * as deck from './deck-bundle';
 
-import {CesiumIonLoader} from '@loaders.gl/3d-tiles';
+// See https://github.com/uber/deck.gl/blob/d74e375ddef5e2ac222641a2b93e1f4287d668f1/examples/playground/src/configuration.js#L14
+import {DracoWorkerLoader} from '@loaders.gl/draco';
+import {Tiles3DLoader, CesiumIonLoader} from '@loaders.gl/3d-tiles';
+
+// Note: deck already registers JSONLoader...
+registerLoaders([CSVLoader, DracoWorkerLoader]);
 
 import {loadScript} from './script-utils';
 
@@ -33,7 +38,8 @@ const jsonConverterConfiguration = {
     GL
   },
   constants: {
-    CesiumIonLoader
+    CesiumIonLoader,
+    Tiles3DLoader
   }
 };
 
