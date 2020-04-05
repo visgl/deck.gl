@@ -4,9 +4,6 @@ pydeck
 High-scale spatial rendering in Python, powered by `deck.gl <https://deck.gl/#/>`__.
 Get started by `installing pydeck <installation.html>`__.
 
-`Gallery <gallery/html/grid.html>`__
-^^^^^^^^^^^^^^^^^^^^^^^^
-
 .. raw:: html
    :file: gallery/html/grid.html
 
@@ -79,8 +76,8 @@ Get started by `installing pydeck <installation.html>`__.
 `pydeck in Jupyter <jupyter.html>`__
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Uniquely integrated with the Jupyter ecosystem, pydeck supports having interactions in a visualization communicate
-back to the Jupyter kernel. Read more about usage in Jupyter `here <jupyter.html>`__.
+Uniquely integrated with the Jupyter ecosystem, pydeck supports interactions in a visualization that communicate
+with the Jupyter kernel. Read more about usage in Jupyter `here <jupyter.html>`__.
 
 .. figure:: https://i.imgur.com/qenLNEf.gif
    
@@ -145,6 +142,7 @@ Configure the lighting within a visualization.
 .. toctree::
    :maxdepth: 1
    :caption: Usage
+
    layer
    deck
    data_utils
@@ -155,12 +153,14 @@ Configure the lighting within a visualization.
 .. toctree::
    :maxdepth: 1
    :caption: Jupyter
+
    jupyter
    binary_transfer
 
 .. toctree::
    :maxdepth: 1
    :caption: Further customization
+
    tooltip
    custom_layers
 
