@@ -40,8 +40,8 @@ CONTOURS_0 = [
 p75, p90, p99 = poultry_df["weight"].quantile([0.75, 0.9, 0.99])
 
 CONTOURS_1 = [
-    {"threshold": p75, "color": [245, 245, 0], "strokeWidth": STROKE_WIDTH, "zIndex": 1,},
-    {"threshold": p99, "color": [247, 150, 0], "strokeWidth": STROKE_WIDTH, "zIndex": 10,},
+    {"threshold": p75, "color": [245, 245, 0], "strokeWidth": STROKE_WIDTH, "zIndex": 1},
+    {"threshold": p99, "color": [247, 150, 0], "strokeWidth": STROKE_WIDTH, "zIndex": 10},
 ]
 
 

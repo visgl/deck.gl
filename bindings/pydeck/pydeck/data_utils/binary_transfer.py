@@ -2,6 +2,7 @@ from collections import defaultdict
 
 import numpy as np
 
+
 # Grafted from
 # https://github.com/maartenbreddels/ipyvolume/blob/d13828dfd8b57739004d5daf7a1d93ad0839ed0f/ipyvolume/serialize.py#L219
 def array_to_binary(ar, obj=None, force_contiguous=True):

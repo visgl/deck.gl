@@ -44,7 +44,7 @@ yarn_root = os.path.join(here, PATH_TO_REPO_ROOT)
 widget_dir = os.path.join(here, PATH_TO_WIDGET)
 
 npm_path = os.pathsep.join(
-    [os.path.join(PATH_TO_REPO_ROOT, "node_modules", ".bin"), os.environ.get("PATH", os.defpath),]
+    [os.path.join(PATH_TO_REPO_ROOT, "node_modules", ".bin"), os.environ.get("PATH", os.defpath)]
 )
 
 
@@ -115,8 +115,8 @@ class FrontendBuild(Command):
         js_dist_dir = os.path.join(widget_dir, "dist")
         nbextension_folder = os.path.join(here, "pydeck", "nbextension", "static")
         js_files = [
-            {"source": os.path.join(js_dist_dir, "index.js"), "destination": nbextension_folder,},
-            {"source": os.path.join(js_dist_dir, "index.js.map"), "destination": nbextension_folder,},
+            {"source": os.path.join(js_dist_dir, "index.js"), "destination": nbextension_folder},
+            {"source": os.path.join(js_dist_dir, "index.js.map"), "destination": nbextension_folder},
         ]
         for js_file in js_files:
             log.debug("Copying %s to %s" % (js_file["source"], js_file["destination"]))
