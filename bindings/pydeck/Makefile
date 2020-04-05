@@ -17,8 +17,8 @@ init:
 	$(MAKE) prepare-jupyter
 
 pre-commit:
-	black . ; \
-	flake8 {pydeck,tests,*.py,examples} ; \
+	black . &&
+	flake8 {pydeck,tests,*.py,examples} && \
 	pytest --cov=pydeck 
 
 pre-init:
