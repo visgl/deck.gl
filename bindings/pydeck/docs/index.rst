@@ -2,7 +2,14 @@ pydeck
 ==================================
 
 High-scale spatial rendering in Python, powered by `deck.gl <https://deck.gl/#/>`__.
+
 Get started by `installing pydeck <installation.html>`__.
+
+Gallery
+^^^^^^^
+..
+  These image tags are manually added to include these images in the _static directory
+  TODO this should be automated in the future.
 
 .. raw:: html
    :file: gallery/html/grid.html
@@ -73,6 +80,9 @@ Get started by `installing pydeck <installation.html>`__.
 .. image:: gallery/images/trips_layer.png
    :width: 0
 
+Documentation
+^^^^^^^^^^^^^
+
 `pydeck in Jupyter <jupyter.html>`__
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -136,12 +146,14 @@ Configure the lighting within a visualization.
 .. toctree::
    :maxdepth: 1
    :caption: Getting started
+   :hidden:
 
    installation
 
 .. toctree::
    :maxdepth: 1
    :caption: Usage
+   :hidden:
 
    layer
    deck
@@ -153,6 +165,7 @@ Configure the lighting within a visualization.
 .. toctree::
    :maxdepth: 1
    :caption: Jupyter
+   :hidden:
 
    jupyter
    binary_transfer
@@ -160,14 +173,7 @@ Configure the lighting within a visualization.
 .. toctree::
    :maxdepth: 1
    :caption: Further customization
+   :hidden:
 
    tooltip
    custom_layers
-
-
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
