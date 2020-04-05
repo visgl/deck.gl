@@ -18,8 +18,8 @@ init:
 
 pre-commit:
 	black . ; \
-	git diff upstream/master -u -- "*.py" | flake8 --diff; \
-	pytest --cov=pydeck; 
+	flake8 {pydeck,tests,*.py,examples} ; \
+	pytest --cov=pydeck 
 
 pre-init:
 	python3 -m venv env; \
