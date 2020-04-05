@@ -13,9 +13,13 @@ init:
 	# Set up the pydeck project
 	pip install -r requirements.txt; \
 	pip install -r requirements-dev.txt; \
-	pre-commit install; \
 	pip install -e . ; \
 	$(MAKE) prepare-jupyter
+
+pre-commit:
+	black . ; \
+	git diff upstream/master -u -- "*.py" | flake8 --diff; \
+	pytest --cov=pydeck; 
 
 pre-init:
 	python3 -m venv env; \
