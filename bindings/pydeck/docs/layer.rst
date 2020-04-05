@@ -220,7 +220,7 @@ If your data is shaped as above, ``get_position='-'`` should correctly parse the
 
 
 Example: Vancouver property values
-==================================
+----------------------------------
 
 Below, an example combining the expression parser with multiple layers, based on the deck.gl
 `Vancouver property values example <https://deck.gl/#/examples/core-layers/geojson-layer-polygons>`_.
