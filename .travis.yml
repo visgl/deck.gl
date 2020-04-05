@@ -56,6 +56,5 @@ matrix:
         - pip install -r requirements-dev.txt
         - nvm install 10.16.0
         - nvm use 10.16.0
-        - pre-commit install
         - pip install -e . --install-option "--build_all" --verbose
-      script: pre-commit run --all-files
+      script: make test
