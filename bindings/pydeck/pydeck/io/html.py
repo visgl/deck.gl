@@ -27,7 +27,7 @@ CDN_URL = "https://cdn.jsdelivr.net/npm/@deck.gl/jupyter-widget@{}/dist/index.js
 def produce_script_tag(destination):
     with open(join(dirname(__file__), destination), "r") as f:
         js = f.read()
-    return "<script type=text/javascript>" + js + "</script>"
+    return "<script type='text/javascript'>" + js + "</script>"
 
 
 def cdn_picker(offline=False):
