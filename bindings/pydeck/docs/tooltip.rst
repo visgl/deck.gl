@@ -1,6 +1,6 @@
 .. _tooltip-overview:
 
-Configuring the pydeck tooltip
+Configuring tooltips
 ===============================
 
 While you can get a tooltip in pydeck by simply setting ``Deck(tooltip=True)`` in the 

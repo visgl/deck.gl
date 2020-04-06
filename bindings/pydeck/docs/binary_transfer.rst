@@ -49,9 +49,9 @@ Binary transport will only work if the following requirements are met:
     | [0, 5]     | [255, 0, 0]   |
     +------------+---------------+
     | [5, 1]     | [255, 255, 0] |
-    +----------------------------+
+    +------------+---------------+
 
-- Binary transfer only works within Jupyter environments via the ``.show`` function. It relies on the socket-level
+- Binary transfer only works within Jupyter environments via :meth:`pydeck.bindings.deck.Deck.show`. It relies on the socket-level
   communication built into the Jupyter environment.
 
 Example

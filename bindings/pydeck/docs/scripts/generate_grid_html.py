@@ -27,13 +27,14 @@ HTML_TEMPLATE = jinja2.Template(
 }
 .thumb-text {
   z-index: 1;
+  margin-left: 2px;
   bottom: 0;
   left: 0;
   position: absolute;
   font-weight: 100;
   color: white;
+  background: charcoal;
 }
-
 .grid-cell:hover {
   filter: hue-rotate(3.142rad);
 }

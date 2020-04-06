@@ -71,9 +71,7 @@ def create_rst(fname):
 
 def main():
     pool = Pool(processes=4)
-    # Note: Ignore the custom layer text for now
-    # Also GPUGridLayer
-    candidate_files = [f for f in glob.glob(EXAMPLE_GLOB) if 'custom' not in f and 'gpu' not in f]
+    candidate_files = [f for f in glob.glob(EXAMPLE_GLOB)]
     if not candidate_files:
         raise Exception("No files found to convert")
     subprocess.call("mkdir -p %s" % HTML_DIR, shell=True)
