@@ -32,9 +32,7 @@ def generate_graph_data(num_nodes, random_seed):
 
 def make_renderer(nodes, use_binary_transport=False):
     """Creates the pydeck visualization for rendering"""
-    view_state = pydeck.ViewState(
-        offset=[0, 0], latitude=None, longitude=None, bearing=None, pitch=None, zoom=1,
-    )
+    view_state = pydeck.ViewState(offset=[0, 0], latitude=None, longitude=None, bearing=None, pitch=None, zoom=1,)
 
     views = [pydeck.View(type="OrbitView", controller=True)]
 
@@ -52,12 +50,7 @@ def make_renderer(nodes, use_binary_transport=False):
         radius=50,
     )
 
-    return pydeck.Deck(
-        layers=[nodes_layer],
-        initial_view_state=view_state,
-        views=views,
-        map_style=None,
-    )
+    return pydeck.Deck(layers=[nodes_layer], initial_view_state=view_state, views=views, map_style=None,)
 
 
 r = None
@@ -70,9 +63,7 @@ def generate_vis(notebook_display=False):
     colors = pydeck.data_utils.assign_random_colors(nodes["group"])
     # Divide by 255 to normalize the colors
     # Specify positions and colors as columns of lists
-    nodes["color"] = nodes.apply(
-        lambda row: [c / 255 for c in colors.get(row["group"])], axis=1
-    )
+    nodes["color"] = nodes.apply(lambda row: [c / 255 for c in colors.get(row["group"])], axis=1)
     nodes["position"] = nodes.apply(lambda row: [row["x"], row["y"], row["z"]], axis=1)
 
     # Remove all unused columns

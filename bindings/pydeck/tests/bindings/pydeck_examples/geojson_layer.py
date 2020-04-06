@@ -30,7 +30,7 @@ def create_geojson_layer_test_object():
         layers=[
             Layer(
                 "GeoJsonLayer",
-                id='geojson-layer',
+                id="geojson-layer",
                 data=features,
                 stroked=True,
                 filled=True,
@@ -40,4 +40,5 @@ def create_geojson_layer_test_object():
                 get_fill_color=[200, 160, 0, 180],
             )
         ],
-        views=None)
+        views=None,
+    )

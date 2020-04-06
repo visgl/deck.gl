@@ -27,10 +27,7 @@ def create_multi_layer_test_object():
                 {
                     "type": "Feature",
                     "properties": {},
-                    "geometry": {
-                        "type": "Point",
-                        "coordinates": [-122.42923736572264, 37.80544394934271],
-                    },
+                    "geometry": {"type": "Point", "coordinates": [-122.42923736572264, 37.80544394934271],},
                 }
             ],
         },
@@ -41,6 +38,4 @@ def create_multi_layer_test_object():
         get_line_color=[255, 100, 100],
         get_fill_color=[200, 160, 0, 180],
     )
-    return Deck(
-        layers=[scatterplot, text_layer, geojson_layer], initial_view_state=view_state
-    )
+    return Deck(layers=[scatterplot, text_layer, geojson_layer], initial_view_state=view_state)

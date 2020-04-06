@@ -134,18 +134,14 @@ class Layer(JSONMixin):
 
     def get_binary_data(self):
         if not self.use_binary_transport:
-            raise BinaryTransportException(
-                "Layer must be flagged with `use_binary_transport=True`"
-            )
+            raise BinaryTransportException("Layer must be flagged with `use_binary_transport=True`")
         return self._binary_data
 
     def _prepare_binary_data(self, data_set):
         # Binary format conversion gives a sizable speedup but requires
         # slightly stricter standards for data input
         if not is_pandas_df(data_set):
-            raise BinaryTransportException(
-                "Layer data must be a `pandas.DataFrame` type"
-            )
+            raise BinaryTransportException("Layer data must be a `pandas.DataFrame` type")
 
         layer_accessors = self._kwargs
         inverted_accessor_map = {v: k for k, v in layer_accessors.items() if type(v) not in [list, dict, set]}

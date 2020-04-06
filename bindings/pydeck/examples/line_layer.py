@@ -12,9 +12,7 @@ DATA_URL = {
     "FLIGHT_PATHS": "https://raw.githubusercontent.com/uber-common/deck.gl-data/master/examples/line/heathrow-flights.json",  # noqa
 }
 
-INITIAL_VIEW_STATE = pydeck.ViewState(
-    latitude=47.65, longitude=7, zoom=4.5, max_zoom=16, pitch=50, bearing=0
-)
+INITIAL_VIEW_STATE = pydeck.ViewState(latitude=47.65, longitude=7, zoom=4.5, max_zoom=16, pitch=50, bearing=0)
 
 # RGBA value generated in Javascript by deck.gl's Javascript expression parser
 GET_COLOR_JS = [
@@ -50,4 +48,4 @@ line_layer = pydeck.Layer(
 layers = [scatterplot, line_layer]
 
 r = pydeck.Deck(layers=layers, initial_view_state=INITIAL_VIEW_STATE)
-r.to_html('line_layer.html', notebook_display=False)
+r.to_html("line_layer.html", notebook_display=False)

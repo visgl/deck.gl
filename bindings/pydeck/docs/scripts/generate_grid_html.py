@@ -51,15 +51,13 @@ HTML_TEMPLATE = jinja2.Template(
   </div>
 {% endfor %}
 </div>
-""")
+"""
+)
 
 
 def main():
-    doc_source = HTML_TEMPLATE.render(
-        layer_names=layer_names,
-        to_presentation_name=to_presentation_name
-    )
-    with open(os.path.join(here, '../gallery/html/grid.html'), 'w+') as f:
+    doc_source = HTML_TEMPLATE.render(layer_names=layer_names, to_presentation_name=to_presentation_name)
+    with open(os.path.join(here, "../gallery/html/grid.html"), "w+") as f:
         f.write(doc_source)
 
 

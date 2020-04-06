@@ -84,8 +84,7 @@ class Deck(JSONMixin):
         self.effects = effects
         if self.mapbox_key is None:
             warnings.warn(
-                "Mapbox API key is not set. This may impact available features of pydeck.",
-                UserWarning,
+                "Mapbox API key is not set. This may impact available features of pydeck.", UserWarning,
             )
 
     @property

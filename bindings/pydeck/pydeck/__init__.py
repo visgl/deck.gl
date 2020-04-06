@@ -4,13 +4,7 @@
 # Copyright (c) Uber Technologies, Inc.
 # Distributed under the terms of the Modified BSD License.
 
-from .bindings import (  # noqa
-    Deck,
-    Layer,
-    LightSettings,
-    View,
-    ViewState
-)
+from .bindings import Deck, Layer, LightSettings, View, ViewState  # noqa
 
 from .widget import DeckGLWidget  # noqa
 

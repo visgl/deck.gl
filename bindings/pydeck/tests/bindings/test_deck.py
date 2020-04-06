@@ -34,12 +34,12 @@ def test_json_output():
     in the root of the deck.gl repo.
     """
     TEST_CASES = [
-        (pydeck_examples.create_minimal_test_object(), fixtures["minimal"], 'minimal'),
-        (pydeck_examples.create_heatmap_test_object(), fixtures["heatmap-layer-function"], 'heatmap-layer-function'),
-        (pydeck_examples.create_geojson_layer_test_object(), fixtures["geojson-layer"], 'geojson-layer'),
-        (pydeck_examples.create_multi_layer_test_object(), fixtures['multilayers'], 'multilayers'),
-        (pydeck_examples.create_scatterplot_test_object(), fixtures['scatterplot'], 'scatterplot'),
-        (pydeck_examples.create_stacked_test_object(), fixtures['stacked'], 'stacked')
+        (pydeck_examples.create_minimal_test_object(), fixtures["minimal"], "minimal"),
+        (pydeck_examples.create_heatmap_test_object(), fixtures["heatmap-layer-function"], "heatmap-layer-function"),
+        (pydeck_examples.create_geojson_layer_test_object(), fixtures["geojson-layer"], "geojson-layer"),
+        (pydeck_examples.create_multi_layer_test_object(), fixtures["multilayers"], "multilayers"),
+        (pydeck_examples.create_scatterplot_test_object(), fixtures["scatterplot"], "scatterplot"),
+        (pydeck_examples.create_stacked_test_object(), fixtures["stacked"], "stacked"),
     ]
     for t in TEST_CASES:
         actual, expected = t[0], t[1]

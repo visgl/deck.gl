@@ -40,12 +40,12 @@ EXAMPLE_GLOB = "../examples/*_layer.py"
 GALLERY_DIR = "./gallery/"
 HTML_DIR = "./gallery/html/"
 STATIC_PATH = "/_static/"
-DECKGL_URL_BASE = 'https://deck.gl/#/documentation/deckgl-api-reference/layers/'
+DECKGL_URL_BASE = "https://deck.gl/#/documentation/deckgl-api-reference/layers/"
 
 
 def create_rst(fname):
     layer_name = to_snake_case_layer_name(fname)
-    deckgl_docs_layer_name = layer_name.replace('_', '-')
+    deckgl_docs_layer_name = layer_name.replace("_", "-")
     deckgl_doc_url = DECKGL_URL_BASE + deckgl_docs_layer_name
     # Create new .html examples
     html_fname = os.path.basename(fname).replace(".py", ".html")
@@ -60,7 +60,7 @@ def create_rst(fname):
         layer_name=to_presentation_name(layer_name),
         python_code=python_code,
         hosted_html_path=os.path.join(STATIC_PATH, html_fname),
-        deckgl_doc_url=deckgl_doc_url
+        deckgl_doc_url=deckgl_doc_url,
     )
     rst_path = os.path.join(GALLERY_DIR, layer_name + ".rst")
     f = open(rst_path, "w+")

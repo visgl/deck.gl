@@ -16,32 +16,25 @@ def convert_js_bool(py_bool):
     return "true" if py_bool else "false"
 
 
-in_google_collab = 'google.colab' in sys.modules
+in_google_collab = "google.colab" in sys.modules
 
 
 TEMPLATES_PATH = os.path.join(os.path.dirname(__file__), "./templates/")
-j2_env = jinja2.Environment(
-    loader=jinja2.FileSystemLoader(TEMPLATES_PATH), trim_blocks=True
-)
-CDN_URL = "https://cdn.jsdelivr.net/npm/@deck.gl/jupyter-widget@{}/dist/index.js".format(
-    DECKGL_SEMVER
-)
+j2_env = jinja2.Environment(loader=jinja2.FileSystemLoader(TEMPLATES_PATH), trim_blocks=True)
+CDN_URL = "https://cdn.jsdelivr.net/npm/@deck.gl/jupyter-widget@{}/dist/index.js".format(DECKGL_SEMVER)
+
 
 def cdn_picker(offline=False):
     if offline:
-        with open(join(dirname(__file__),'./static/index.js'), 'r') as file:
+        with open(join(dirname(__file__), "./static/index.js"), "r") as file:
             js = file.read()
         return "<script type=text/javascript>" + js + "</script>"
 
     return "<script src=" + CDN_URL + "></script>"
 
+
 def render_json_to_html(
-    json_input,
-    mapbox_key=None,
-    tooltip=True,
-    css_background_color=None,
-    custom_libraries=None,
-    offline=False
+    json_input, mapbox_key=None, tooltip=True, css_background_color=None, custom_libraries=None, offline=False
 ):
     js = j2_env.get_template("index.j2")
     html_str = js.render(
@@ -50,7 +43,7 @@ def render_json_to_html(
         deckgl_jupyter_widget_bundle=cdn_picker(offline=offline),
         tooltip=convert_js_bool(tooltip),
         css_background_color=css_background_color,
-        custom_libraries=custom_libraries
+        custom_libraries=custom_libraries,
     )
     return html_str
 
@@ -72,9 +65,7 @@ def open_named_or_temporary_file(pathname=None):
         filename = add_html_extension(pathname)
         return open(filename, "w+")
     directory = make_directory_if_not_exists(pathname) or os.path.curdir
-    return tempfile.NamedTemporaryFile(
-        prefix="pydeck", mode="w+", suffix=".html", dir=directory, delete=False
-    )
+    return tempfile.NamedTemporaryFile(prefix="pydeck", mode="w+", suffix=".html", dir=directory, delete=False)
 
 
 def make_directory_if_not_exists(path):
@@ -102,7 +93,7 @@ def deck_to_html(
     tooltip=True,
     custom_libraries=None,
     as_string=False,
-    offline=False
+    offline=False,
 ):
     """Converts deck.gl format JSON to an HTML page"""
     html = render_json_to_html(
@@ -111,7 +102,7 @@ def deck_to_html(
         tooltip=tooltip,
         css_background_color=css_background_color,
         custom_libraries=custom_libraries,
-        offline=offline
+        offline=offline,
     )
 
     if as_string:
@@ -131,19 +122,17 @@ def deck_to_html(
         from IPython.display import display  # noqa
 
         if in_google_collab:
-            from IPython.display import HTML, Javascript # noqa
-            js_height_snippet = 'google.colab.output.setIframeHeight(0, true, {maxHeight: %s})' % iframe_height
+            from IPython.display import HTML, Javascript  # noqa
+
+            js_height_snippet = "google.colab.output.setIframeHeight(0, true, {maxHeight: %s})" % iframe_height
             display(Javascript(js_height_snippet))
             display(HTML(html))
         else:
             from IPython.display import IFrame  # noqa
+
             notebook_to_html_path = relpath(f.name)
             display(  # noqa
-                IFrame(
-                    os.path.join("./", notebook_to_html_path),
-                    width=iframe_width,
-                    height=iframe_height,
-                )
+                IFrame(os.path.join("./", notebook_to_html_path), width=iframe_width, height=iframe_height,)
             )
 
     return realpath(f.name)

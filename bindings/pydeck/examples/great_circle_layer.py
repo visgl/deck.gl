@@ -12,7 +12,9 @@ Adapted from the deck.gl documentation.
 import pydeck as pdk
 import pandas as pd
 
-GREAT_CIRCLE_LAYER_DATA = "https://raw.githubusercontent.com/uber-common/deck.gl-data/master/website/flights.json"  # noqa
+GREAT_CIRCLE_LAYER_DATA = (
+    "https://raw.githubusercontent.com/uber-common/deck.gl-data/master/website/flights.json"  # noqa
+)
 
 df = pd.read_json(GREAT_CIRCLE_LAYER_DATA)
 
@@ -37,11 +39,7 @@ layer = pdk.Layer(
 view_state = pdk.ViewState(latitude=50, longitude=-40, zoom=1, bearing=0, pitch=0)
 
 # Render
-r = pdk.Deck(
-    layers=[layer],
-    initial_view_state=view_state,
-    tooltip={"text": "{from_name} to {to_name}"},
-)
+r = pdk.Deck(layers=[layer], initial_view_state=view_state, tooltip={"text": "{from_name} to {to_name}"},)
 r.picking_radius = 10
 
 r.to_html("great_circle_layer.html", notebook_display=False)

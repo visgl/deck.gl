@@ -19,9 +19,7 @@ pydeck.settings.custom_libraries = [
     }
 ]
 
-DATA_URL = (
-    "https://raw.githubusercontent.com/johan/world.geo.json/master/countries.geo.json"
-)
+DATA_URL = "https://raw.githubusercontent.com/johan/world.geo.json/master/countries.geo.json"
 
 custom_layer = pydeck.Layer(
     "LabeledGeoJsonLayer",
@@ -38,10 +36,6 @@ custom_layer = pydeck.Layer(
 
 view_state = pydeck.ViewState(latitude=0, longitude=0, zoom=1)
 
-r = pydeck.Deck(
-    custom_layer,
-    initial_view_state=view_state,
-    map_style="",
-)
+r = pydeck.Deck(custom_layer, initial_view_state=view_state, map_style="",)
 
 r.to_html("custom_layer.html", css_background_color="#333", notebook_display=False)
