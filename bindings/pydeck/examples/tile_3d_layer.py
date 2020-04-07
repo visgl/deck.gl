@@ -29,7 +29,7 @@ layer = pydeck.Layer(
     loader="@@#CesiumIonLoader",
     loadOptions={
         "cesium-ion": {
-            "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiIxN2NhMzkwYi0zNWM4LTRjNTYtYWE3Mi1jMDAxYzhlOGVmNTAiLCJpZCI6OTYxOSwic2NvcGVzIjpbImFzbCIsImFzciIsImFzdyIsImdjIl0sImlhdCI6MTU2MjE4MTMxM30.OkgVr6NaKYxabUMIGqPOYFe0V5JifXLVLfpae63x-tA"   # noqa
+            "accessToken": os.environ('CESIUM_API_KEY'),  # noqa
         }
     },
 )
