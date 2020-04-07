@@ -1,5 +1,6 @@
 from .json_tools import JSONMixin
 
+
 class ViewState(JSONMixin):
     """An object that represents where the state of a viewport, essentially where the screen is focused.
 
@@ -27,15 +28,7 @@ class ViewState(JSONMixin):
     """
 
     def __init__(
-        self,
-        longitude=None,
-        latitude=None,
-        zoom=None,
-        min_zoom=None,
-        max_zoom=None,
-        pitch=None,
-        bearing=None,
-        **kwargs
+        self, longitude=None, latitude=None, zoom=None, min_zoom=None, max_zoom=None, pitch=None, bearing=None, **kwargs
     ):
         self.longitude = longitude
         self.latitude = latitude

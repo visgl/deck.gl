@@ -11,7 +11,9 @@ This example is adapted from the deck.gl documentation.
 
 import pydeck as pdk
 
-HEXAGON_LAYER_DATA = "https://raw.githubusercontent.com/uber-common/deck.gl-data/master/examples/3d-heatmap/heatmap-data.csv"  # noqa
+HEXAGON_LAYER_DATA = (
+    "https://raw.githubusercontent.com/uber-common/deck.gl-data/master/examples/3d-heatmap/heatmap-data.csv"  # noqa
+)
 
 # Define a layer to display on a map
 layer = pdk.Layer(
@@ -28,13 +30,7 @@ layer = pdk.Layer(
 
 # Set the viewport location
 view_state = pdk.ViewState(
-    longitude=-1.415,
-    latitude=52.2323,
-    zoom=6,
-    min_zoom=5,
-    max_zoom=15,
-    pitch=40.5,
-    bearing=-27.36,
+    longitude=-1.415, latitude=52.2323, zoom=6, min_zoom=5, max_zoom=15, pitch=40.5, bearing=-27.36,
 )
 
 # Render

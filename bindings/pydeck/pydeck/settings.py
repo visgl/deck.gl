@@ -27,7 +27,7 @@ class Settings:
     """
 
     def __init__(self, custom_libraries=None):
-        assert not settings, 'Cannot instantiate more than one Settings object'
+        assert not settings, "Cannot instantiate more than one Settings object"
         self.custom_libraries = custom_libraries
 
 

@@ -18,3 +18,4 @@ semver # necessary for PEP440-compliant semantic versions
 sphinx-markdown-builder
 wheel
 sphinx_rtd_theme
+black;python_version>="3.6"

@@ -12,9 +12,12 @@ init:
 	cd ../..; yarn bootstrap; cd -; \
 	# Set up the pydeck project
 	pip install -r requirements.txt; \
-        pip install -r requirements-dev.txt; \
+	pip install -r requirements-dev.txt; \
 	pip install -e . ; \
 	$(MAKE) prepare-jupyter
+
+pre-commit:
+	black . --target-version py34 && $(MAKE) test
 
 pre-init:
 	python3 -m venv env; \
@@ -33,7 +36,8 @@ prepare-jupyter:
 	  cd ../../bindings/pydeck
 
 test:
-	pytest
+	flake8 {pydeck,tests,*.py,examples} && \
+	pytest --cov=pydeck 
 
 publish-conda:	
 	@echo "NOTE pydeck does not yet publish to conda-forge. Awaiting #4202."

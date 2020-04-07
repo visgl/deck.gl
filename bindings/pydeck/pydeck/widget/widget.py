@@ -45,9 +45,7 @@ class DeckGLWidget(widgets.DOMWidget):
     _view_module_version = Unicode(module_version).tag(sync=True)
     mapbox_key = Unicode("", allow_none=True).tag(sync=True)
     json_input = Unicode("").tag(sync=True)
-    data_buffer = Any(default_value=None, allow_none=True).tag(
-        sync=True, **data_buffer_serialization
-    )
+    data_buffer = Any(default_value=None, allow_none=True).tag(sync=True, **data_buffer_serialization)
     height = Int(500).tag(sync=True)
     custom_libraries = Any(allow_none=True).tag(sync=True)
     width = Any("100%").tag(sync=True)

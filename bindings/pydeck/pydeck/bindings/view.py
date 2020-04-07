@@ -1,6 +1,7 @@
 from .json_tools import JSONMixin
 
-TYPE_IDENTIFIER = '@@type'
+TYPE_IDENTIFIER = "@@type"
+
 
 class View(JSONMixin):
     """
@@ -13,11 +14,8 @@ class View(JSONMixin):
     controller : bool, default None
         If enabled, camera becomes interactive.
     """
-    def __init__(
-        self,
-        type=None,
-        controller=None
-    ):
+
+    def __init__(self, type=None, controller=None):
         self.type = type
         self.controller = controller
 

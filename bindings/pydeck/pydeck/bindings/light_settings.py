@@ -1,5 +1,6 @@
 from .json_tools import JSONMixin
 
+
 class LightSettings(JSONMixin):
     """
     Configuration of lights on the plane
@@ -17,6 +18,7 @@ class LightSettings(JSONMixin):
         number_of_lights : int, default None
             Number of lights in visualization
     """
+
     def __init__(
         self,
         number_of_lights=2,
@@ -24,7 +26,7 @@ class LightSettings(JSONMixin):
         diffuse_ratio=None,
         specular_ratio=None,
         lights_strength=None,
-        ambient_ratio=None
+        ambient_ratio=None,
     ):
         self.ambient_ratio = ambient_ratio
         self.diffuse_ratio = diffuse_ratio

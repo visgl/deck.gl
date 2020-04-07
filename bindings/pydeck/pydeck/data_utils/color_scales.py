@@ -10,7 +10,7 @@ def get_random_rgb():
     list of float
         Random RGB array
     """
-    return [round(random.random()*255) for _ in range(0, 3)]
+    return [round(random.random() * 255) for _ in range(0, 3)]
 
 
 def assign_random_colors(data_vector):

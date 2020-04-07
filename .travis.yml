@@ -57,4 +57,4 @@ matrix:
         - nvm install 10.16.0
         - nvm use 10.16.0
         - pip install -e . --install-option "--build_all" --verbose
-      script: pytest --cov=pydeck
+      script: make test

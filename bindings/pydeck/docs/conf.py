@@ -5,35 +5,27 @@ import os
 
 sys.path.insert(0, os.path.abspath("../"))
 
-project = u"pydeck"
-copyright = u"2020, Uber Technologies, Inc."
-author = u"Andrew Duberstein"
+project = "pydeck"
+copyright = "2020, Uber Technologies, Inc."
+author = "Andrew Duberstein"
 # The short X.Y version
-version = u"0.3"
+version = "0.3"
 # The full version, including alpha/beta/rc tags
-release = u"0.3.0"
+release = "0.3.0"
 # Extensions to generate documents from our docstrings here
 extensions = ["sphinx.ext.autodoc", "sphinx.ext.napoleon", "sphinx_rtd_theme"]
 templates_path = ["_templates"]
 source_suffix = ".rst"
 master_doc = "index"
 language = None
-exclude_patterns = [u"_build"]
+exclude_patterns = ["_build"]
 pygments_style = None
 html_theme = "sphinx_rtd_theme"
 html_static_path = ["_static", "css/custom.css", "gallery/html"]
 htmlhelp_basename = "pydeckdoc"
-man_pages = [(master_doc, "pydeck", u"pydeck Documentation", [author], 1)]
+man_pages = [(master_doc, "pydeck", "pydeck Documentation", [author], 1)]
 texinfo_documents = [
-    (
-        master_doc,
-        "pydeck",
-        u"pydeck Documentation",
-        author,
-        "pydeck",
-        "Python wrapper for deck.gl",
-        "Miscellaneous",
-    ),
+    (master_doc, "pydeck", "pydeck Documentation", author, "pydeck", "Python wrapper for deck.gl", "Miscellaneous",),
 ]
 epub_title = project
 epub_exclude_files = ["search.html"]

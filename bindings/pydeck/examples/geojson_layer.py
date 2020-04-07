@@ -8,13 +8,9 @@ Property values in Vancouver, Canada, adapted from the deck.gl example pages. In
 import pydeck
 
 DATA_URL = "https://raw.githubusercontent.com/uber-common/deck.gl-data/master/examples/geojson/vancouver-blocks.json"
-LAND_COVER = [
-    [[-123.0, 49.196], [-123.0, 49.324], [-123.306, 49.324], [-123.306, 49.196]]
-]
+LAND_COVER = [[[-123.0, 49.196], [-123.0, 49.324], [-123.306, 49.324], [-123.306, 49.196]]]
 
-INITIAL_VIEW_STATE = pydeck.ViewState(
-    latitude=49.254, longitude=-123.13, zoom=11, max_zoom=16, pitch=45, bearing=0
-)
+INITIAL_VIEW_STATE = pydeck.ViewState(latitude=49.254, longitude=-123.13, zoom=11, max_zoom=16, pitch=45, bearing=0)
 
 polygon = pydeck.Layer(
     "PolygonLayer",

@@ -8,12 +8,7 @@ df = pd.DataFrame({"position": [[0, 0], [0, 0]]})
 
 def test_constructor_binary_transport():
     test_layer = Layer(
-        "ScatterplotLayer",
-        data=df,
-        id="test-layer",
-        use_binary_transport=True,
-        get_position="position",
-        radius=10,
+        "ScatterplotLayer", data=df, id="test-layer", use_binary_transport=True, get_position="position", radius=10,
     )
     EXPECTED_DATUM = {
         "layer_id": "test-layer",
@@ -32,4 +27,4 @@ def test_constructor_binary_transport():
     assert EXPECTED_DATUM["column_name"] == actual_datum["column_name"]
     assert EXPECTED_DATUM["accessor"] == actual_datum["accessor"]
     assert np.array_equal(EXPECTED_DATUM["np_data"], actual_datum["np_data"])
-    assert '0, 0' not in Deck(test_layer).to_json(), 'Should not write data to JSON output'
+    assert "0, 0" not in Deck(test_layer).to_json(), "Should not write data to JSON output"
