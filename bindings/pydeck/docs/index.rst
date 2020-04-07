@@ -177,3 +177,4 @@ Configure the lighting within a visualization.
 
    tooltip
    custom_layers
+

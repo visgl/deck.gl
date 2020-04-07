@@ -39,7 +39,7 @@ Source
 EXAMPLE_GLOB = "../examples/*_layer.py"
 GALLERY_DIR = "./gallery/"
 HTML_DIR = "./gallery/html/"
-STATIC_PATH = "/_static/"
+STATIC_PATH = "../_static/"
 DECKGL_URL_BASE = "https://deck.gl/#/documentation/deckgl-api-reference/layers/"
 
 
