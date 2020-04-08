@@ -33,9 +33,7 @@ texinfo_documents = [
 epub_title = project
 epub_exclude_files = ["search.html"]
 autoclass_content = "both"
-html_theme_options = {
-    "includehidden": False
-}
+html_theme_options = {"includehidden": False}
 add_module_names = False
 
 
