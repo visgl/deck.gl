@@ -1,13 +1,17 @@
 """Script to convert pydeck examples into .rst pages with code"""
-import os
 import glob
 import jinja2
-
 from multiprocessing import Pool
-
+import os
 import subprocess
+import sys
 
-from utils import to_presentation_name, to_snake_case_layer_name
+from .utils import to_presentation_name, to_snake_case_layer_name
+
+
+if not os.environ.get("MAPBOX_API_KEY"):
+    # If running for rtfd.io, set this variable from the Admin panel
+    raise Exception("MAPBOX_API_KEY not set")
 
 
 DOC_TEMPLATE = jinja2.Template(
@@ -63,8 +67,8 @@ def create_rst(fname):
     # Create new .html examples
     html_fname = os.path.basename(fname).replace(".py", ".html")
     subprocess.call(
-        "source activate ../env; python {fname}; mv {html_src} {html_dest}".format(
-            fname=fname, html_src=html_fname, html_dest=HTML_DIR,
+        "{python} {fname}; mv {html_src} {html_dest}".format(
+            python=sys.executable, fname=fname, html_src=html_fname, html_dest=HTML_DIR,
         ),
         shell=True,
     )

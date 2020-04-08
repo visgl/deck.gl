@@ -1,7 +1,9 @@
 # -*- coding: utf-8 -*-
 # Point Sphinx autodoc at our source
-import sys
 import os
+import sys
+
+from docs.scripts import embed_examples
 
 sys.path.insert(0, os.path.abspath("../"))
 
@@ -30,6 +32,9 @@ texinfo_documents = [
 epub_title = project
 epub_exclude_files = ["search.html"]
 autoclass_content = "both"
-html_theme_options = {
-    "includehidden": False
-}
+html_theme_options = {"includehidden": False}
+add_module_names = False
+
+
+def setup(app):
+    embed_examples.main()
