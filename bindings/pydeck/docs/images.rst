@@ -76,7 +76,6 @@
    gallery/bitmap_layer
    gallery/column_layer
    gallery/contour_layer
-   gallery/custom_layer.png
    gallery/custom_layer
    gallery/geojson_layer
    gallery/great_circle_layer

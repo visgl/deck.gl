@@ -79,14 +79,12 @@ Configure the lighting within a visualization.
 .. toctree::
    :maxdepth: 1
    :caption: Getting started
-   :hidden:
 
    installation
 
 .. toctree::
    :maxdepth: 1
    :caption: Usage
-   :hidden:
 
    layer
    deck
@@ -98,7 +96,6 @@ Configure the lighting within a visualization.
 .. toctree::
    :maxdepth: 1
    :caption: Jupyter
-   :hidden:
 
    jupyter
    binary_transfer
@@ -106,7 +103,6 @@ Configure the lighting within a visualization.
 .. toctree::
    :maxdepth: 1
    :caption: Further customization
-   :hidden:
 
    tooltip
    custom_layers
