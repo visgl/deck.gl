@@ -30,5 +30,3 @@ html-grid-page:
 	@echo "Producing examples grid"
 	$(MAKE) html-embeds
 	python scripts/generate_grid_html.py
-
-html: html-grid-page
