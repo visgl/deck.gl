@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 # Point Sphinx autodoc at our source
 import os
-import subprocess
 import sys
 
 from docs.scripts import embed_examples
