@@ -13,7 +13,7 @@ from utils import to_presentation_name, to_snake_case_layer_name
 DOC_TEMPLATE = jinja2.Template(
     """
 {{ layer_name }}
-================================
+^^^^^^^^^^^^^^^^
 
 .. raw:: html
 

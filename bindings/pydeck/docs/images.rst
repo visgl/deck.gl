@@ -67,3 +67,32 @@
 
 .. image:: gallery/images/trips_layer.png
    :width: 0
+
+.. toctree::
+   :hidden:
+   :maxdepth: 0
+
+   gallery/arc_layer
+   gallery/bitmap_layer
+   gallery/column_layer
+   gallery/contour_layer
+   gallery/custom_layer.png
+   gallery/custom_layer
+   gallery/geojson_layer
+   gallery/great_circle_layer
+   gallery/grid_layer
+   gallery/h3_cluster_layer
+   gallery/h3_hexagon_layer
+   gallery/heatmap_layer
+   gallery/hexagon_layer
+   gallery/icon_layer
+   gallery/line_layer
+   gallery/path_layer
+   gallery/point_cloud_layer
+   gallery/polygon_layer
+   gallery/s2_layer
+   gallery/scatterplot_layer
+   gallery/screengrid_layer
+   gallery/text_layer
+   gallery/tile_3d_layer
+   gallery/trips_layer
