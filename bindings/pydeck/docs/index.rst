@@ -7,80 +7,13 @@ Get started by `installing pydeck <installation.html>`__.
 
 Gallery
 ^^^^^^^
-..
-  These image tags are manually added to include these images in the _static directory
-  TODO this should be automated in the future.
 
 .. raw:: html
    :file: gallery/html/grid.html
 
-.. image:: gallery/images/arc_layer.png
-   :width: 0
+.. include:: images.rst
 
-.. image:: gallery/images/bitmap_layer.png
-   :width: 0
-
-.. image:: gallery/images/column_layer.png
-   :width: 0
-
-.. image:: gallery/images/contour_layer.png
-   :width: 0
-
-.. image:: gallery/images/custom_layer.png
-   :width: 0
-
-.. image:: gallery/images/geojson_layer.png
-   :width: 0
-
-.. image:: gallery/images/great_circle_layer.png
-   :width: 0
-
-.. image:: gallery/images/grid_layer.png
-   :width: 0
-
-.. image:: gallery/images/h3_cluster_layer.png
-   :width: 0
-
-.. image:: gallery/images/h3_hexagon_layer.png
-   :width: 0
-
-.. image:: gallery/images/heatmap_layer.png
-   :width: 0
-
-.. image:: gallery/images/hexagon_layer.png
-   :width: 0
-
-.. image:: gallery/images/icon_layer.png
-   :width: 0
-
-.. image:: gallery/images/line_layer.png
-   :width: 0
-
-.. image:: gallery/images/path_layer.png
-   :width: 0
-
-.. image:: gallery/images/point_cloud_layer.png
-   :width: 0
-
-.. image:: gallery/images/polygon_layer.png
-   :width: 0
-
-.. image:: gallery/images/s2_layer.png
-   :width: 0
-
-.. image:: gallery/images/scatterplot_layer.png
-   :width: 0
-
-.. image:: gallery/images/screengrid_layer.png
-   :width: 0
-
-.. image:: gallery/images/text_layer.png
-   :width: 0
-
-.. image:: gallery/images/trips_layer.png
-   :width: 0
-
-Documentation
+API reference
 ^^^^^^^^^^^^^
 
 `pydeck in Jupyter <jupyter.html>`__
@@ -146,14 +79,12 @@ Configure the lighting within a visualization.
 .. toctree::
    :maxdepth: 1
    :caption: Getting started
-   :hidden:
 
    installation
 
 .. toctree::
    :maxdepth: 1
    :caption: Usage
-   :hidden:
 
    layer
    deck
@@ -165,7 +96,6 @@ Configure the lighting within a visualization.
 .. toctree::
    :maxdepth: 1
    :caption: Jupyter
-   :hidden:
 
    jupyter
    binary_transfer
@@ -173,7 +103,6 @@ Configure the lighting within a visualization.
 .. toctree::
    :maxdepth: 1
    :caption: Further customization
-   :hidden:
 
    tooltip
    custom_layers

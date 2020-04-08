@@ -13,11 +13,30 @@ from utils import to_presentation_name, to_snake_case_layer_name
 DOC_TEMPLATE = jinja2.Template(
     """
 {{ layer_name }}
-================================
+^^^^^^^^^^^^^^^^
 
 .. raw:: html
 
-    <iframe width="650" height="400" src="{{hosted_html_path}}"></iframe>
+    <a id="deck-link" target="_blank" href="{{deckgl_doc_url}}">deck.gl docs</a>
+    <br />
+
+.. raw:: html
+   :file: ./html/{{ snake_name }}.html
+
+.. raw:: html
+
+    <style>
+    #deck-container {
+        height: 50vh;
+        max-width: 650px;
+        width: 100%;
+    }
+    #deck-link {
+        float: right;
+        position: relative;
+        top: -20px;
+    }
+    </style>
 
 Source
 ------
@@ -25,12 +44,6 @@ Source
 .. code-block:: python
 
 {{ python_code|indent(4, True) }}
-
-.. raw:: html
-
-    <br />
-    <a style="float:left;" target="_blank" href="{{hosted_html_path}}">Full screen example</a>
-    <a style="float:right;" target="_blank" href="{{deckgl_doc_url}}">deck.gl docs</a>
 
 """
 )
@@ -58,6 +71,7 @@ def create_rst(fname):
     python_code = open(fname, "r").read()
     doc_source = DOC_TEMPLATE.render(
         layer_name=to_presentation_name(layer_name),
+        snake_name=layer_name,
         python_code=python_code,
         hosted_html_path=os.path.join(STATIC_PATH, html_fname),
         deckgl_doc_url=deckgl_doc_url,

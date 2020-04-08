@@ -6,7 +6,7 @@ import os
 sys.path.insert(0, os.path.abspath("../"))
 
 project = "pydeck"
-copyright = "2020, Uber Technologies, Inc."
+copyright = "2020, MIT License"
 author = "Andrew Duberstein"
 # The short X.Y version
 version = "0.3"
@@ -21,7 +21,7 @@ language = None
 exclude_patterns = ["_build"]
 pygments_style = None
 html_theme = "sphinx_rtd_theme"
-html_static_path = ["css/custom.css", "gallery/html"]
+html_static_path = ["gallery/html"]
 htmlhelp_basename = "pydeckdoc"
 man_pages = [(master_doc, "pydeck", "pydeck Documentation", [author], 1)]
 texinfo_documents = [
@@ -30,3 +30,6 @@ texinfo_documents = [
 epub_title = project
 epub_exclude_files = ["search.html"]
 autoclass_content = "both"
+html_theme_options = {
+    "includehidden": False
+}
