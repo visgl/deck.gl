@@ -4,7 +4,7 @@ import os
 import subprocess
 import sys
 
-from .scripts import embed_examples
+from docs.scripts import embed_examples
 
 sys.path.insert(0, os.path.abspath("../"))
 
