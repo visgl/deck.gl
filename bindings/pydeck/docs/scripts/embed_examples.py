@@ -17,7 +17,7 @@ DOC_TEMPLATE = jinja2.Template(
 
 .. raw:: html
 
-    <a style="float:right;" target="_blank" href="{{deckgl_doc_url}}">deck.gl docs</a>
+    <a id="deck-link" target="_blank" href="{{deckgl_doc_url}}">deck.gl docs</a>
     <br />
 
 .. raw:: html
@@ -29,6 +29,12 @@ DOC_TEMPLATE = jinja2.Template(
     #deck-container {
         height: 50vh;
         max-width: 650px;
+        width: 100%;
+    }
+    #deck-link {
+        float: right;
+        position: relative;
+        top: -20px;
     }
     </style>
 
