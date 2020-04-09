@@ -13,8 +13,8 @@ Gallery
 
 .. include:: images.rst
 
-API reference
-^^^^^^^^^^^^^
+Overview
+^^^^^^^^
 
 `pydeck in Jupyter <jupyter.html>`__
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -76,6 +76,9 @@ Configure the lighting within a visualization.
    and mention ``pydeck`` in the title.
 
 
+Index
+^^^^^
+
 .. toctree::
    :maxdepth: 1
    :caption: Getting started
@@ -84,7 +87,7 @@ Configure the lighting within a visualization.
 
 .. toctree::
    :maxdepth: 1
-   :caption: Usage
+   :caption: API documentation
 
    layer
    deck
@@ -107,3 +110,6 @@ Configure the lighting within a visualization.
    tooltip
    custom_layers
 
+.. toctree::
+   :maxdepth: 1
+   CHANGELOG
