@@ -1,9 +1,8 @@
 # -*- coding: utf-8 -*-
 # Point Sphinx autodoc at our source
 import os
+import subprocess
 import sys
-
-from docs.scripts import embed_examples
 
 sys.path.insert(0, os.path.abspath("../"))
 
@@ -37,4 +36,12 @@ add_module_names = False
 
 
 def setup(app):
-    embed_examples.main()
+    if os.environ.get("READTHEDOCS"):
+        print("RTD running in the following directory:", os.getcwd())
+        subprocess.call(
+            "{python} bindings/pydeck/docs/scripts/embed_examples.py".format(python=sys.executable), shell=True,
+        )
+    else:
+        from docs.scripts import embed_examples  # noqa
+
+        embed_examples.main()
