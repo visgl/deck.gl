@@ -14,6 +14,5 @@ python:
   version: 3.7
   install:
     - requirements: bindings/pydeck/requirements/requirements-dev.txt
-    - requirements: bindings/pydeck/requirements/requirements-docs.txt
-    - requirements: bindings/pydeck/requirements/requirements.txt
+    - requirements: bindings/pydeck/requirements/requirements-rtd.txt
   system_packages: true
