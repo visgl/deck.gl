@@ -11,5 +11,10 @@ sphinx:
 
 # Optionally set the version of Python and requirements required to build your docs
 python:
+  version: 3.7
   install:
     - requirements: bindings/pydeck/requirements-dev.txt
+    - requirements: bindings/pydeck/requirements.txt
+    - method: pip
+      path: bindings/pydeck
+  system_packages: true
