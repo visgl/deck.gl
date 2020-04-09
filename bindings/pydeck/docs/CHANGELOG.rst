@@ -1,9 +1,9 @@
-pydeck CHANGELOG
+CHANGELOG
 ================
 
 0.3.0b4 - Apr 1 2020
 ^^^^^^^^^^^^^^^^^^^^
-- Lock to deck.gl@8.2.0-alpha.1
+- Lock to deck.gl v8.2.0-alpha.1
 
 0.3.0b3 - Mar 28 2020
 ^^^^^^^^^^^^^^^^^^^^^

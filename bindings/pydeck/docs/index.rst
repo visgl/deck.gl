@@ -81,6 +81,13 @@ Index
 
 .. toctree::
    :maxdepth: 1
+   :titlesonly:
+
+   Home <self>
+   
+
+.. toctree::
+   :maxdepth: 1
    :caption: Getting started
 
    installation
@@ -112,4 +119,14 @@ Index
 
 .. toctree::
    :maxdepth: 1
+   :caption: Development
+
    CHANGELOG
+
+.. raw:: html
+
+   <style>
+     .section #index {
+       display: none;
+     }
+   </style>
