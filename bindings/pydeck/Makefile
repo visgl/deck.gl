@@ -11,8 +11,8 @@ init:
 	# Build deck.gl at the root of this repository
 	cd ../..; yarn bootstrap; cd -; \
 	# Set up the pydeck project
-	pip install -r requirements.txt; \
-	pip install -r requirements-dev.txt; \
+	pip install -r requirements/requirements.txt; \
+	pip install -r requirements/requirements-dev.txt; \
 	pip install -e . ; \
 	$(MAKE) prepare-jupyter
 
