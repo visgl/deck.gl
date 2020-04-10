@@ -39,9 +39,5 @@ def setup(app):
     if os.environ.get("READTHEDOCS"):
         print("RTD running in the following directory:", os.getcwd())
         subprocess.call(
-            "{python} bindings/pydeck/docs/scripts/embed_examples.py".format(python=sys.executable), shell=True,
+            "{python} embed_examples.py".format(python=sys.executable), shell=True,
         )
-    else:
-        from docs.scripts import embed_examples  # noqa
-
-        embed_examples.main()
