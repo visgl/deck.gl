@@ -108,7 +108,7 @@ Returns:
 
 * An object with precalculated distance scales allowing conversion between lnglat deltas, meters and pixels.
 
- 
+
 ##### `addMetersToLngLat`
 
 Add a meter delta to a base lnglat coordinate using linear approximation. For information on numerical precision, see remarks on [`getDistanceScales`](#-getdistancescales-).
