@@ -3,6 +3,13 @@ CHANGELOG
 
 Releases and associated GitHub PRs for pydeck are documented here.
 
+0.3 Releases
+-----------------
+
+0.3.0 - Apr 9 2020
+^^^^^^^^^^^^^^^^^^
+- Add Black formatter to pydeck (#4453)
+
 0.3.0b4 - Apr 1 2020
 ^^^^^^^^^^^^^^^^^^^^
 - Lock to deck.gl v8.2.0-alpha.1
@@ -22,6 +29,9 @@ Releases and associated GitHub PRs for pydeck are documented here.
 - Add support for background colors in standalone HTML renderer (#4242)
 - Support binary data transport (#4167)
 
+0.2 Releases
+---------------
+
 0.2.1 - Jan 28 2020
 ^^^^^^^^^^^^^^^^^^^
 - Update to 0.2.1 (#4209) by removing deprecated pytest-runner to allow for conda-forge installation
@@ -39,6 +49,9 @@ Releases and associated GitHub PRs for pydeck are documented here.
 - Set fewer defaults within Python API (#3960)
 - Enable JupyterLab (#3638)
 - Optionally surface pydeck warnings in widget UI (#3785)
+
+0.1 Releases
+---------------
 
 0.1.dev5 - Sep 26 2019
 ^^^^^^^^^^^^^^^^^^^^^^
