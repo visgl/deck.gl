@@ -108,7 +108,7 @@ Returns:
 
 * An object with precalculated distance scales allowing conversion between lnglat deltas, meters and pixels.
 
-
+ 
 ##### `addMetersToLngLat`
 
 Add a meter delta to a base lnglat coordinate using linear approximation. For information on numerical precision, see remarks on [`getDistanceScales`](#-getdistancescales-).
@@ -121,6 +121,21 @@ Parameters:
 Returns:
 
 * New coordinate array in `[longitude, latitude]` or `[longitude, latitude, altitude]` if `z` is provided.
+
+##### `fitBounds`
+
+Returns a new viewport that fit around the given bounding box. Only supports non-perspective mode.
+
+Parameters:
+
+* `bounds` (Array) - Bounding box in `[[longitude, latitude], [longitude, latitude]]`.
+* `opts` (Object)
+  + `padding` (Number) - The amount of padding in pixels to add to the given bounds.
+  + `offset` (Array) - The center in `[x, y]` of the given bounds relative to the map's center measured in pixels.
+  
+Returns: 
+
+* New `WebMercatorViewport` fit around the gven bounding box.
 
 ## Remarks
 
