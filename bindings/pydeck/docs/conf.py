@@ -36,8 +36,12 @@ add_module_names = False
 
 
 def setup(app):
-    if os.environ.get("READTHEDOCS"):
+    if os.environ.get("READTHEDOCS") and os.environ.get("READTHEDOCS_VERSION") == "stable":
+        global master_doc
+        master_doc = "pydeck_redirect"
+    elif os.environ.get("READTHEDOCS"):
         print("RTD running in the following directory:", os.getcwd())
+        print("Files in directory:", os.listdir())
         subprocess.call(
             "{python} embed_examples.py".format(python=sys.executable), shell=True,
         )
