@@ -6,7 +6,7 @@ import os
 import subprocess
 import sys
 
-from .utils import to_presentation_name, to_snake_case_layer_name
+from utils import to_presentation_name, to_snake_case_layer_name
 
 
 if not os.environ.get("MAPBOX_API_KEY"):
