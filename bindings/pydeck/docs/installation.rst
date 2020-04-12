@@ -45,14 +45,14 @@ Jupyter allows for more complex server/client interactions. You or your system a
 must enable pydeck for use in Jupyter. Binary data transportation, data selection, and updating data over time
 interactively only work if pydeck is enabled for use in a Jupyter environments.
 
-To enable pydeck for Jupyter Notebook:
+To enable pydeck for `Jupyter Notebook <https://jupyter-notebook.readthedocs.io>`_:
 
 .. code-block:: bash
 
         jupyter nbextension install --sys-prefix --symlink --overwrite --py pydeck
         jupyter nbextension enable --sys-prefix --py pydeck
 
-To enable pydeck for Jupyter Lab:
+To enable pydeck for `JupyterLab <https://jupyterlab.readthedocs.io>`_:
 
 .. code-block:: bash
 
@@ -61,7 +61,7 @@ To enable pydeck for Jupyter Lab:
         jupyter labextension install @deck.gl/jupyter-widget@$DECKGL_SEMVER
 
 
-Currently while you can install pydeck in Google Collab via pip, it is not enabled for server use there.
+Currently while you can install pydeck in `Google Colab <https://colab.research.google.com>`_ via pip, it is not enabled for server use there.
 
 Installing from source
 ^^^^^^^^^^^^^^^^^^^^^^
