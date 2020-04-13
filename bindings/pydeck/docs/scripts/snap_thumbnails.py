@@ -4,11 +4,13 @@ import glob
 import os
 import sys
 
+
 try:
     from pyppeteer import launch
     from pyppeteer.errors import NetworkError, TimeoutError
+    from PIL import Image
 except ImportError:
-    print("Please install pyppeteer before running this script")
+    print("Please install pyppeteer and Pillow before running this script")
     sys.exit(1)
 
 
@@ -59,10 +61,21 @@ async def snap(fname, retries=3):
             retries -= 1
 
 
+def shrink_image(fname):
+    SIZE = 200, 150
+    try:
+        im = Image.open(fname)
+        im.thumbnail(SIZE, Image.ANTIALIAS)
+        im.save(fname, "PNG")
+    except IOError:
+        print("[error] cannot create thumbnail for", fname)
+
+
 async def main(fname_arg=None):
     fnames = [fname_arg] if fname_arg else glob.glob(EXAMPLE_GLOB)
     for fname in fnames:
         await snap(fname)
+        shrink_image(fname)
 
 
 if __name__ == "__main__":
