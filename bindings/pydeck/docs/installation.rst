@@ -61,7 +61,7 @@ To enable pydeck for JupyterLab:
         jupyter labextension install @deck.gl/jupyter-widget@$DECKGL_SEMVER
 
 
-Currently while you can install pydeck in Google Collab via pip, it is not enabled for server use there.
+Currently while you can install pydeck in Google Colab via pip, it is not enabled for server use there.
 
 Installing from source
 ^^^^^^^^^^^^^^^^^^^^^^
