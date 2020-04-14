@@ -5,7 +5,7 @@ There are three steps before using pydeck:
 
         1. Install the library via pip or conda
         2. Get a Mapbox API token
-        3. Enable pydeck for Jupyter Lab or Jupyter Notebook
+        3. Enable pydeck for JupyterLab or Jupyter Notebook
 
 Via pip
 ^^^^^^^
@@ -52,7 +52,7 @@ To enable pydeck for Jupyter Notebook:
         jupyter nbextension install --sys-prefix --symlink --overwrite --py pydeck
         jupyter nbextension enable --sys-prefix --py pydeck
 
-To enable pydeck for Jupyter Lab:
+To enable pydeck for JupyterLab:
 
 .. code-block:: bash
 
@@ -61,7 +61,7 @@ To enable pydeck for Jupyter Lab:
         jupyter labextension install @deck.gl/jupyter-widget@$DECKGL_SEMVER
 
 
-Currently while you can install pydeck in Google Collab via pip, it is not enabled for server use there.
+Currently while you can install pydeck in Google Colab via pip, it is not enabled for server use there.
 
 Installing from source
 ^^^^^^^^^^^^^^^^^^^^^^
