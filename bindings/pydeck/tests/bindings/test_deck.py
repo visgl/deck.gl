@@ -27,6 +27,14 @@ def test_warning():
         os.environ.update(_environ)
 
 
+def test_deck_layer_args():
+    """Verify layer argument null cases"""
+    CASES = [({"layers": None}, []), ({"layers": []}, [])]
+    for [args, expected_output] in CASES:
+        r = Deck(**args)
+        assert r.layers == expected_output
+
+
 def test_json_output():
     """Verify that the JSON rendering produces an @deck.gl/json library-compliant JSON object
 
