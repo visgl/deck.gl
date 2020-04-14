@@ -303,7 +303,7 @@ export function getTextFromBuffer({value, length, stride, offset, startIndices})
   for (let index = 0; index < length; index++) {
     const startIndex = startIndices[index];
     const endIndex = startIndices[index + 1] || characterCount;
-    texts[index] = String.fromCharCode.apply(null, codes.subarray(startIndex, endIndex));
+    texts[index] = String.fromCodePoint.apply(null, codes.subarray(startIndex, endIndex));
   }
 
   return {texts, characterCount};
