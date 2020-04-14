@@ -2,13 +2,15 @@
 import asyncio
 import glob
 import os
+from pathlib import Path
 import sys
 
 try:
     from pyppeteer import launch
     from pyppeteer.errors import NetworkError, TimeoutError
+    from PIL import Image
 except ImportError:
-    print("Please install pyppeteer before running this script")
+    print("Please install pyppeteer and Pillow before running this script")
     sys.exit(1)
 
 
@@ -37,7 +39,7 @@ async def _snap(fname):
     html_fname = os.path.join(here, "..", os.path.splitext(os.path.basename(fname))[0] + ".html")
     png_fname = os.path.join(here, "../gallery", os.path.splitext(os.path.basename(fname))[0] + ".png")
     fpath = "file://%s" % html_fname
-    if "bitmap_layer" in html_fname or "icon_layer" in html_fname or "gpu" in html_fname:
+    if "bitmap_layer" in html_fname or "icon_layer" in html_fname or "heatmap_layer" in html_fname:
         await page.goto(fpath)
         await asyncio.sleep(10)
     else:
@@ -47,22 +49,40 @@ async def _snap(fname):
     await page.screenshot({"path": png_fname})
     print("[info] Sucessfully converted %s to a png at %s" % (fname, png_fname))
     await browser.close()
+    return png_fname
 
 
 async def snap(fname, retries=3):
     while retries:
         try:
-            await _snap(fname)
+            output_fname = await _snap(fname)
+            if output_fname:
+                return output_fname
             retries = 0
         # Repeat if failed
         except (NetworkError, TimeoutError):
             retries -= 1
 
 
+def shrink_image(fname):
+    print("[info] Shrinking the image at", fname)
+    SIZE = 400, 300
+    try:
+        im = Image.open(fname)
+        im.thumbnail(SIZE, Image.ANTIALIAS)
+        im.save(fname, "PNG")
+    except IOError:
+        print("[error] Cannot create thumbnail for", fname)
+
+
 async def main(fname_arg=None):
     fnames = [fname_arg] if fname_arg else glob.glob(EXAMPLE_GLOB)
     for fname in fnames:
-        await snap(fname)
+        png_fname = await snap(fname)
+        try:
+            shrink_image(png_fname)
+        except Exception:
+            continue
 
 
 if __name__ == "__main__":
