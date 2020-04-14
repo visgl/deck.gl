@@ -67,7 +67,7 @@ class Deck(JSONMixin):
         if isinstance(layers, Layer):
             self.layers.append(layers)
         else:
-            self.layers = layers
+            self.layers = layers or []
         self.views = views
         self.map_style = map_style
         # Use passed view state
