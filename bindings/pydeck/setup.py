@@ -181,7 +181,7 @@ if __name__ == "__main__":
         description="Widget for deck.gl maps",
         long_description="{}".format(read("README.md")),
         long_description_content_type="text/markdown",
-        license="MIT License",
+        license="Apache 2.0 License",
         include_package_data=True,
         packages=find_packages(exclude=["test"]),
         cmdclass={
@@ -200,7 +200,7 @@ if __name__ == "__main__":
             "Intended Audience :: Developers",
             "Intended Audience :: Science/Research",
             "Topic :: Multimedia :: Graphics",
-            "License :: OSI Approved :: MIT License",
+            "OSI Approved :: Apache Software License",
             "Programming Language :: Python :: 2.7",
             "Programming Language :: Python :: 3",
             "Programming Language :: Python :: 3.3",

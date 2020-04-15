@@ -7,7 +7,7 @@ import sys
 sys.path.insert(0, os.path.abspath("../"))
 
 project = "pydeck"
-copyright = "2020, MIT License"
+copyright = "2020, vis.gl, a Series of LF Projects, LLC"
 author = "Andrew Duberstein"
 # The short X.Y version
 version = "0.3"
