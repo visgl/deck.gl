@@ -70,7 +70,7 @@ If you want to install the library from its source:
 
 .. code-block:: bash
 
-        git clone https://github.com/uber/deck.gl
+        git clone https://github.com/visgl/deck.gl
         cd deck.gl/bindings/pydeck
         make pre-init
         . env/bin/activate

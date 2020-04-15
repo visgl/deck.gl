@@ -18,7 +18,7 @@ One of the major advantages of deck.gl is that it is a toolbox on top of which a
 
 ## Background
 
-Layer injection in pydeck is currently done [here](https://github.com/uber/deck.gl/blob/master/modules/jupyter-widget/src/create-deck.js). As can be seen it is a static process that depends on the layer modules being bundled during the pydeck build process.
+Layer injection in pydeck is currently done [here](https://github.com/visgl/deck.gl/blob/master/modules/jupyter-widget/src/create-deck.js). As can be seen it is a static process that depends on the layer modules being bundled during the pydeck build process.
 
 ## Prior Art
 

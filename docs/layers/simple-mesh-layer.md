@@ -145,7 +145,7 @@ The rgba color is in the format of `[r, g, b, [a]]`. Each channel is a number be
 
 - Default: `[0, 0, 0]`
 
-Object orientation defined as a vec3 of Euler angles, `[pitch, yaw, roll]` in degrees. This will be composed with layer's [modelMatrix](https://github.com/uber/deck.gl/blob/master/docs/api-reference/layer.md#modelmatrix-number16-optional).
+Object orientation defined as a vec3 of Euler angles, `[pitch, yaw, roll]` in degrees. This will be composed with layer's [modelMatrix](https://github.com/visgl/deck.gl/blob/master/docs/api-reference/layer.md#modelmatrix-number16-optional).
 
 * If an array is provided, it is used as the orientation for all objects.
 * If a function is provided, it is called on each object to retrieve its orientation.
@@ -163,7 +163,7 @@ Scaling factor on the mesh along each axis.
 
 - Default: `[0, 0, 0]`
 
-Translation of the mesh along each axis. Offset from the center position given by `getPosition`. `[x, y, z]` in meters. This will be composed with layer's [modelMatrix](https://github.com/uber/deck.gl/blob/master/docs/api-reference/layer.md#modelmatrix-number16-optional).
+Translation of the mesh along each axis. Offset from the center position given by `getPosition`. `[x, y, z]` in meters. This will be composed with layer's [modelMatrix](https://github.com/visgl/deck.gl/blob/master/docs/api-reference/layer.md#modelmatrix-number16-optional).
 
 * If an array is provided, it is used as the offset for all objects.
 * If a function is provided, it is called on each object to retrieve its offset.
@@ -180,4 +180,4 @@ Explicitly define a 4x4 column-major model matrix for the mesh. If provided, wil
 
 ## Source
 
-[modules/mesh-layers/src/simple-mesh-layer](https://github.com/uber/deck.gl/tree/master/modules/mesh-layers/src/simple-mesh-layer)
+[modules/mesh-layers/src/simple-mesh-layer](https://github.com/visgl/deck.gl/tree/master/modules/mesh-layers/src/simple-mesh-layer)

@@ -124,7 +124,7 @@ test('Aggregation#WorldSpace', t => {
       aggregation,
       op: AGGREGATION_OPERATION[aggregation],
       // TODO - This is failing in headless browser test. Might be related to
-      // https://github.com/uber/deck.gl/issues/3156
+      // https://github.com/visgl/deck.gl/issues/3156
       skipTotalCount: true,
       params: {
         data,

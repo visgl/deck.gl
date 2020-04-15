@@ -64,7 +64,7 @@ The overriding props supplied by the user can be merged inside `compositeLayer.g
 
 **getSubLayerClass**
 
-A new CompositeLayer class method that extracts the `type` field from `subLayerProps`, if any. This will replace the ad-hoc implementations in e.g. [HexagonLayer](https://github.com/uber/deck.gl/blob/6.3-release/modules/layers/src/hexagon-layer/hexagon-layer.js#L396) and [GeoJsonLayer](https://github.com/uber/deck.gl/blob/6.3-release/modules/layers/src/geojson-layer/geojson-layer.js#L71).
+A new CompositeLayer class method that extracts the `type` field from `subLayerProps`, if any. This will replace the ad-hoc implementations in e.g. [HexagonLayer](https://github.com/visgl/deck.gl/blob/6.3-release/modules/layers/src/hexagon-layer/hexagon-layer.js#L396) and [GeoJsonLayer](https://github.com/visgl/deck.gl/blob/6.3-release/modules/layers/src/geojson-layer/geojson-layer.js#L71).
 
 
 #### Open Questions

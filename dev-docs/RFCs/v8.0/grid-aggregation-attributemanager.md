@@ -3,7 +3,7 @@
 * Authors: Ravi Akkenapally
 * Date: October 22, 2019
 * Status: **Draft**
-* POC: https://github.com/uber/deck.gl/pull/3777
+* POC: https://github.com/visgl/deck.gl/pull/3777
 
 > I am currently experimenting with all required integrations with `Layer` and `AttributeManager` and it is likely some of these proposed solutions could change.
 

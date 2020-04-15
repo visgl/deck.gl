@@ -2,7 +2,7 @@
 
 ## Motivation
 
-A [large share](https://stateofjs.com/2017/front-end/results) of the visualization community do not use React. Every now and then we get inquiries on Github for using deck.gl with other frameworks, e.g. [#694](https://github.com/uber/deck.gl/issues/694) [#576](https://github.com/uber/deck.gl/issues/576), and there is a third-party [Polymer port](https://github.com/PolymerVis/deck-gl).
+A [large share](https://stateofjs.com/2017/front-end/results) of the visualization community do not use React. Every now and then we get inquiries on Github for using deck.gl with other frameworks, e.g. [#694](https://github.com/visgl/deck.gl/issues/694) [#576](https://github.com/visgl/deck.gl/issues/576), and there is a third-party [Polymer port](https://github.com/PolymerVis/deck-gl).
 
 Moreover, not all potential users of deck.gl have knowledge about package management, bundling, or the Reactive programming paradigm. In several deck.gl workshops that we have hosted, we must give participants instructions for installing node.js, installing npm packages, troubleshoot over version incompatibilities, and copying an "hello world" example with more than 50 lines of code with a fairly intimidating webpack configuration.
 
@@ -10,8 +10,8 @@ We know that almost all creative coders are comfortable with the [d3.js](d3js.or
 
 This RFC proposes a "standalone" flavor of deck.gl. This version pre-bundles all dependencies, and hides away the complexity of state management for using the viewport controllers. It will make life much easier in the following scenarios:
 - Introducing casual developers to prototyping with deck.gl
-- Sharing code snippets and proof-of-concepts, e.g. [#1171](https://github.com/uber/deck.gl/pull/1171)
-- Reporting issues, e.g. [#1071](https://github.com/uber/deck.gl/issues/1071)
+- Sharing code snippets and proof-of-concepts, e.g. [#1171](https://github.com/visgl/deck.gl/pull/1171)
+- Reporting issues, e.g. [#1071](https://github.com/visgl/deck.gl/issues/1071)
 
 
 ## Proposed API

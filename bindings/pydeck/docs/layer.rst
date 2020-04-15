@@ -3,14 +3,14 @@ Layer Overview and Examples
 
 :class:`pydeck.bindings.layer.Layer` represents a kind of data visualization, like a scatterplot
 or a hexbin chart.
-The full `deck.gl layer catalog <https://github.com/uber/deck.gl/tree/master/docs/layers#deckgl-layer-catalog-overview>`__ is accessible via pydeck.
+The full `deck.gl layer catalog <https://github.com/visgl/deck.gl/tree/master/docs/layers#deckgl-layer-catalog-overview>`__ is accessible via pydeck.
 This page will provide more examples of how to utilize the deck.gl catalog in Python via pydeck.
 
 .. warning:: **pydeck does not currently raise an error on
              incorrect or omitted layer arguments**. If nothing renders in
              your viewport, check your browser's
              `developer console <https://javascript.info/devtools>`__ or review the layer catalog.
-             If you're still stuck, file an issue with clicking `here <https://github.com/uber/deck.gl/issues/new?assignees=&labels=bug&template=bug-report.md&title=>`__.
+             If you're still stuck, file an issue with clicking `here <https://github.com/visgl/deck.gl/issues/new?assignees=&labels=bug&template=bug-report.md&title=>`__.
 
 .. autoclass:: pydeck.bindings.layer.Layer
 
@@ -20,7 +20,7 @@ Understanding keyword arguments in pydeck layers
 
 Keyword arguments vary by layer. A catalog of available layers in
 deck.gl is viewable
-`in the deck.gl layer catalog <https://github.com/uber/deck.gl/tree/master/docs/layers#deckgl-layer-catalog-overview>`__.
+`in the deck.gl layer catalog <https://github.com/visgl/deck.gl/tree/master/docs/layers#deckgl-layer-catalog-overview>`__.
 
 A few important observations:
 
@@ -110,7 +110,7 @@ One particularly powerful feature of pydeck is an in-built Javascript
 expression parser that can process a limited subset of Javascript–no
 functions are allowed, but data accessors, Boolean conditions, inline
 logical statements, arithmetic operations, and arrays are available.
-The full details on the deck.gl expression parser are viewable `here <https://github.com/uber/deck.gl/blob/master/docs/api-reference/json/conversion-reference.md>`__.
+The full details on the deck.gl expression parser are viewable `here <https://github.com/visgl/deck.gl/blob/master/docs/api-reference/json/conversion-reference.md>`__.
 
 To demonstrate the expression parser, change the color input in
 ``get_fill_color`` to a string:

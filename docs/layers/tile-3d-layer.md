@@ -217,4 +217,4 @@ Follow [CompositeLayer](/docs/api-reference/composite-layer.md#_subLayerProp) an
 
 ## Source
 
-[modules/geo-layers/src/tile-3d-layer](https://github.com/uber/deck.gl/tree/master/modules/geo-layers/src/tile-3d-layer)
+[modules/geo-layers/src/tile-3d-layer](https://github.com/visgl/deck.gl/tree/master/modules/geo-layers/src/tile-3d-layer)

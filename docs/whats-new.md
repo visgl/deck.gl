@@ -34,7 +34,7 @@ The `@deck.gl/geo-layers` module added many new features to address popular tile
 
 Multiple bugs have been fixed in the [TileLayer](/docs/layers/tile-layer.md) regarding data fetching and tree traversal.
 
-The layer now supports non-geospatial views. Check out this [example](https://github.com/uber/deck.gl/tree/master/examples/website/image-tile) by [@ilan-gold](https://github.com/ilan-gold) that renders a 576 Megapixel image of the moon.
+The layer now supports non-geospatial views. Check out this [example](https://github.com/visgl/deck.gl/tree/master/examples/website/image-tile) by [@ilan-gold](https://github.com/ilan-gold) that renders a 576 Megapixel image of the moon.
 
 New props are added to better control the layer's behavior:
 
@@ -50,7 +50,7 @@ This effort is led by contributors from [CARTO](https://carto.com/).
 
 #### TerrainLayer
 
-[TerrainLayer](/docs/layers/terrain-layer.md) loads color-encoded heightmap and reconstructs 3D mesh surfaces. Check out our [example](https://github.com/uber/deck.gl/tree/master/examples/website/terrain).
+[TerrainLayer](/docs/layers/terrain-layer.md) loads color-encoded heightmap and reconstructs 3D mesh surfaces. Check out our [example](https://github.com/visgl/deck.gl/tree/master/examples/website/terrain).
 
 ### ESRI + deck.gl
 
@@ -223,7 +223,7 @@ We have released a python module `pydeck` for Python developers to interact with
 pip install pydeck
 ```
 
-`pydeck` is also integrated with Jupyter Notebook, enabling you to interactively create deck.gl visualizations right in your notebooks. See [documentation](https://github.com/uber/deck.gl/blob/master/bindings/python/pydeck/README.md) for details.
+`pydeck` is also integrated with Jupyter Notebook, enabling you to interactively create deck.gl visualizations right in your notebooks. See [documentation](https://github.com/visgl/deck.gl/blob/master/bindings/python/pydeck/README.md) for details.
 
 ### Transition System Improvements
 
@@ -508,7 +508,7 @@ As the number of deck.gl layers grow, we are splitting existing and new layers i
 
 The new [ScenegraphLayer](/docs/layers/scenegraph-layer.md) and [SimpleMeshLayer](/docs/layers/simple-mesh-layer.md) support loading 3D models and scenegraphs in the popular [glTF™](https://www.khronos.org/gltf/) asset format.  glTF is a royalty-free specification for the efficient transmission and loading of 3D assets, with a rich ecosystem of tools and extensions.  All variants of glTF 2.0 are supported, including binary `.glb` files as well as JSON `.gltf` files with binary assets in base64 encoding or in separate files.
 
-We are releasing [loaders.gl](https://uber-web.github.io/loaders.gl/) as a major new companion framework to deck.gl and luma.gl. Loaders.gl provides a suite of 3D file format loaders.  See [What's New in luma.gl v7.0](https://github.com/uber/luma.gl/blob/master/docs/whats-new.md) for more details.
+We are releasing [loaders.gl](https://uber-web.github.io/loaders.gl/) as a major new companion framework to deck.gl and luma.gl. Loaders.gl provides a suite of 3D file format loaders.  See [What's New in luma.gl v7.0](https://github.com/visgl/luma.gl/blob/master/docs/whats-new.md) for more details.
 
 ### New Effects System
 
@@ -1393,7 +1393,7 @@ Release date: May 2016
 * Performance: Huge under the hood refactor of layer update logic
 * Automatic attribute management (`AttributeManager` class)
 * Linux fixes - deck.gl and luma.gl now work on Linux.
-* Adopts [luma.gl](https://github.com/uber/luma.gl) as default WebGL framework.
+* Adopts [luma.gl](https://github.com/visgl/luma.gl) as default WebGL framework.
 * Retina display support
 * Support for disabling mercator project (experimental)
 

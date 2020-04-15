@@ -7,8 +7,8 @@
 References:
 - [deck.gl Transport protocol](https://docs.google.com/presentation/d/1fzSHJxstSfNQe8VCtLLZvQ8D3OuJAfS7_LqPg0QPPvc)
 - [ipywidgets.observe()](https://ipywidgets.readthedocs.io/en/latest/examples/Widget%20Events.html)
-- [pydeck example: reading back selection](https://github.com/uber/deck.gl/blob/master/bindings/pydeck/examples/03%20-%20Using%20pydeck%20to%20manipulate%20data.ipynb)
-- [deck.gl Feature Request: Add onClick event listener in pydeck](https://github.com/uber/deck.gl/issues/3864)
+- [pydeck example: reading back selection](https://github.com/visgl/deck.gl/blob/master/bindings/pydeck/examples/03%20-%20Using%20pydeck%20to%20manipulate%20data.ipynb)
+- [deck.gl Feature Request: Add onClick event listener in pydeck](https://github.com/visgl/deck.gl/issues/3864)
 
 ## Overview
 

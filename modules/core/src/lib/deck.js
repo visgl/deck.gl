@@ -807,5 +807,5 @@ Deck.getPropTypes = getPropTypes;
 Deck.defaultProps = defaultProps;
 
 // This is used to defeat tree shaking of init.js
-// https://github.com/uber/deck.gl/issues/3213
+// https://github.com/visgl/deck.gl/issues/3213
 Deck.VERSION = deckGlobal.VERSION;

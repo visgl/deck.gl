@@ -82,7 +82,7 @@ export function processPickInfo({
 
   // Use a Map to store all picking infos.
   // The following two forEach loops are the result of
-  // https://github.com/uber/deck.gl/issues/443
+  // https://github.com/visgl/deck.gl/issues/443
   // Please be very careful when changing this pattern
   const infos = new Map();
 
