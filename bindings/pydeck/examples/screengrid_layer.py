@@ -11,7 +11,7 @@ import pydeck as pdk
 import pandas as pd
 
 SCREEN_GRID_LAYER_DATA = (
-    "https://raw.githubusercontent.com/uber-common/deck.gl-data/master/website/sf-bike-parking.json"  # noqa
+    "https://raw.githubusercontent.com/visgl/deck.gl-data/master/website/sf-bike-parking.json"  # noqa
 )
 df = pd.read_json(SCREEN_GRID_LAYER_DATA)
 

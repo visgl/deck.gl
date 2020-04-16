@@ -13,7 +13,7 @@ When using deck.gl and Mapbox, there are two options you can choose from:
 - Using the Deck canvas as a overlay on top of the Mapbox map, in [pure JS](https://github.com/visgl/deck.gl/tree/master/examples/get-started/pure-js/mapbox) or [React](https://github.com/visgl/deck.gl/tree/master/examples/get-started/react/mapbox). This is the most tested and robust use case.
 - Using deck.gl layers as custom Mapbox layers, using the [@deck.gl/mapbox](/docs/api-reference/mapbox/overview.md) module. This allows you to interleave deck.gl layers with base map layers, e.g. below text labels or occlude each other correctly in 3D. Be cautious that this feature is experimental: we are working closely with Mapbox to evolve the API.
 
-<img src="https://raw.github.com/uber-common/deck.gl-data/master/images/whats-new/mapbox-layers.jpg" />
+<img src="https://raw.github.com/visgl/deck.gl-data/master/images/whats-new/mapbox-layers.jpg" />
 
 
 ### react-map-gl
@@ -54,7 +54,7 @@ Some useful resources for creating your own map service:
 
 Starting v7.0, deck.gl has experimental support for Google Maps with the [@deck.gl/google-maps](/docs/api-reference/google-maps/overview.md) module. It allows you to construct a Deck instance as a custom Google Maps [OverlayView](https://developers.google.com/maps/documentation/javascript/reference/#OverlayView).
 
-<img src="https://raw.github.com/uber-common/deck.gl-data/master/images/whats-new/google-maps.jpg" />
+<img src="https://raw.github.com/visgl/deck.gl-data/master/images/whats-new/google-maps.jpg" />
 
 The Deck canvas can only be used as a overlay on top of Google Maps, see [pure JS example](https://github.com/visgl/deck.gl/tree/master/examples/get-started/pure-js/google-maps). Tilting is not supported due to Google Maps API restrictions. See module documentation page for a full list of features.
 

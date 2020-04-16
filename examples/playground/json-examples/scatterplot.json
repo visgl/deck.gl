@@ -19,7 +19,7 @@
   "layers": [
     {
       "@@type": "ScatterplotLayer",
-      "data": "https://raw.githubusercontent.com/uber-common/deck.gl-data/master/examples/scatterplot/manhattan.json",
+      "data": "https://raw.githubusercontent.com/visgl/deck.gl-data/master/examples/scatterplot/manhattan.json",
       "radiusScale": 30,
       "radiusMinPixels": 0.25,
       "getPosition": "@@=-",

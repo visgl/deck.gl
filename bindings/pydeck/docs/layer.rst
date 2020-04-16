@@ -52,7 +52,7 @@ HexagonLayer <https://deck.gl/#/examples/core-layers/hexagon-layer>`__:
 
    import pydeck as pdk
 
-   UK_ACCIDENTS_DATA = 'https://raw.githubusercontent.com/uber-common/deck.gl-data/master/examples/3d-heatmap/heatmap-data.csv'
+   UK_ACCIDENTS_DATA = 'https://raw.githubusercontent.com/visgl/deck.gl-data/master/examples/3d-heatmap/heatmap-data.csv'
 
    layer = pdk.Layer(
        'HexagonLayer',  # `type` positional argument is here
@@ -229,7 +229,7 @@ Below, an example combining the expression parser with multiple layers, based on
 
    import pydeck
 
-   DATA_URL = "https://raw.githubusercontent.com/uber-common/deck.gl-data/master/examples/geojson/vancouver-blocks.json"
+   DATA_URL = "https://raw.githubusercontent.com/visgl/deck.gl-data/master/examples/geojson/vancouver-blocks.json"
    LAND_COVER = [[[-123.0, 49.196], [-123.0, 49.324], [-123.306, 49.324], [-123.306, 49.196]]]
 
    INITIAL_VIEW_STATE = pydeck.ViewState(

@@ -8,7 +8,7 @@ Locations of the Bay Area Rapid Transit lines.
 import pydeck
 import pandas as pd
 
-DATA_URL = "https://raw.githubusercontent.com/uber-common/deck.gl-data/master/website/bart-lines.json"
+DATA_URL = "https://raw.githubusercontent.com/visgl/deck.gl-data/master/website/bart-lines.json"
 df = pd.read_json(DATA_URL)
 
 

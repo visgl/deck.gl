@@ -17,7 +17,7 @@ const App = ({data, viewport}) => {
   const layer = new BitmapLayer({
     id: 'bitmap-layer',
     bounds: [-122.5190, 37.7045, -122.355, 37.829],
-    image: 'https://raw.githubusercontent.com/uber-common/deck.gl-data/master/website/sf-districts.png'
+    image: 'https://raw.githubusercontent.com/visgl/deck.gl-data/master/website/sf-districts.png'
   });
 
   return (<DeckGL {...viewport} layers={[layer]} />);

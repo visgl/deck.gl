@@ -25,8 +25,8 @@ export const App = ({viewport}) => {
       offset: 0
     },
     // Digital elevation model from https://www.usgs.gov/
-    elevationData: 'https://raw.githubusercontent.com/uber-common/deck.gl-data/master/website/terrain.png',
-    texture: 'https://raw.githubusercontent.com/uber-common/deck.gl-data/master/website/terrain-mask.png',
+    elevationData: 'https://raw.githubusercontent.com/visgl/deck.gl-data/master/website/terrain.png',
+    texture: 'https://raw.githubusercontent.com/visgl/deck.gl-data/master/website/terrain-mask.png',
     bounds: [-122.5233, 37.6493, -122.3566, 37.8159],
   });
   return <DeckGL {...viewport} layers={[layer]} />;

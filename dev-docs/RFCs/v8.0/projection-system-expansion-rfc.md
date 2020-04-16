@@ -15,7 +15,7 @@ deck.gl started as an overlay component for Mapbox. Initially, it only supported
 
 The current data flow and interaction between components:
 
-![projection system](https://raw.github.com/uber-common/deck.gl-data/master/images/dev-docs/projection-rfc.png)
+![projection system](https://raw.github.com/visgl/deck.gl-data/master/images/dev-docs/projection-rfc.png)
 
 ## Problems and Proposals
 

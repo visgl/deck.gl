@@ -70,7 +70,7 @@ test('TileLayer', t => {
     {
       props: {
         data:
-          'https://raw.githubusercontent.com/uber-common/deck.gl-data/master/website/bart.geo.json'
+          'https://raw.githubusercontent.com/visgl/deck.gl-data/master/website/bart.geo.json'
       },
       onBeforeUpdate: () => {
         t.comment('Default getTileData');

@@ -10,7 +10,7 @@ This example is adapted from the deck.gl documentation.
 import pydeck as pdk
 import pandas as pd
 
-S2_LAYER_DATA = "https://raw.githubusercontent.com/uber-common/deck.gl-data/master/website/sf.s2cells.json"  # noqa
+S2_LAYER_DATA = "https://raw.githubusercontent.com/visgl/deck.gl-data/master/website/sf.s2cells.json"  # noqa
 
 df = pd.read_json(S2_LAYER_DATA)
 

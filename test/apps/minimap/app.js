@@ -13,9 +13,9 @@ const MAPBOX_TOKEN = process.env.MapboxAccessToken; // eslint-disable-line
 // Source data CSV
 const DATA_URL = {
   BUILDINGS:
-    'https://raw.githubusercontent.com/uber-common/deck.gl-data/master/examples/trips/buildings.json', // eslint-disable-line
+    'https://raw.githubusercontent.com/visgl/deck.gl-data/master/examples/trips/buildings.json', // eslint-disable-line
   TRIPS:
-    'https://raw.githubusercontent.com/uber-common/deck.gl-data/master/examples/trips/trips.json' // eslint-disable-line
+    'https://raw.githubusercontent.com/visgl/deck.gl-data/master/examples/trips/trips.json' // eslint-disable-line
 };
 
 const VIEWS = [

@@ -4,7 +4,7 @@ Create a directional light source which emits from a specific direction.A direct
 
 <div align="center">
   <div>
-    <img src="https://raw.github.com/uber-common/deck.gl-data/master/images/whats-new/directional-light.gif" />
+    <img src="https://raw.github.com/visgl/deck.gl-data/master/images/whats-new/directional-light.gif" />
     <p><i>Two spheres with directional light</i></p>
   </div>
 </div>

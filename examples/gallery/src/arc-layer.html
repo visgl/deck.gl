@@ -117,7 +117,7 @@
       deckgl.setProps({ layers: [countyLayer, arcLayer] });
     }
 
-    fetch('https://raw.githubusercontent.com/uber-common/deck.gl-data/master/examples/arc/counties.json')
+    fetch('https://raw.githubusercontent.com/visgl/deck.gl-data/master/examples/arc/counties.json')
     .then(res => res.json())
     .then(data => renderLayers(data))
 

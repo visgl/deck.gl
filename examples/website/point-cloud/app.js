@@ -16,10 +16,10 @@ registerLoaders(LASWorkerLoader);
 
 // Data source: kaarta.com
 const LAZ_SAMPLE =
-  'https://raw.githubusercontent.com/uber-common/deck.gl-data/master/examples/point-cloud-laz/indoor.0.1.laz';
+  'https://raw.githubusercontent.com/visgl/deck.gl-data/master/examples/point-cloud-laz/indoor.0.1.laz';
 // Data source: The Stanford 3D Scanning Repository
 // const PLY_SAMPLE =
-//   'https://raw.githubusercontent.com/uber-common/deck.gl-data/master/examples/point-cloud-ply/lucy800k.ply';
+//   'https://raw.githubusercontent.com/visgl/deck.gl-data/master/examples/point-cloud-ply/lucy800k.ply';
 
 const INITIAL_VIEW_STATE = {
   target: [0, 0, 0],

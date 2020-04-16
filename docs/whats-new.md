@@ -12,15 +12,15 @@ Release Date: Mar 17, 2020
   <tbody>
     <tr>
       <td>
-        <img style="max-height:200px" src="https://raw.github.com/uber-common/deck.gl-data/master/images/whats-new/tile-2d.gif" />
+        <img style="max-height:200px" src="https://raw.github.com/visgl/deck.gl-data/master/images/whats-new/tile-2d.gif" />
         <p><i>Non-geospatial TileLayer</i></p>
       </td>
       <td>
-        <img style="max-height:200px" src="https://raw.github.com/uber-common/deck.gl-data/master/images/whats-new/mvt-layer.jpg" />
+        <img style="max-height:200px" src="https://raw.github.com/visgl/deck.gl-data/master/images/whats-new/mvt-layer.jpg" />
         <p><i>MVTLayer</i></p>
       </td>
       <td>
-        <img style="max-height:200px" src="https://raw.github.com/uber-common/deck.gl-data/master/images/whats-new/terrain.jpg" />
+        <img style="max-height:200px" src="https://raw.github.com/visgl/deck.gl-data/master/images/whats-new/terrain.jpg" />
         <p><i>TerrainLayer</i></p>
       </td>
     </tr>
@@ -59,11 +59,11 @@ This effort is led by contributors from [CARTO](https://carto.com/).
   <tbody>
     <tr>
       <td>
-        <img style="max-height:200px" src="https://raw.github.com/uber-common/deck.gl-data/master/images/whats-new/arcgis.jpg" />
+        <img style="max-height:200px" src="https://raw.github.com/visgl/deck.gl-data/master/images/whats-new/arcgis.jpg" />
         <p><i>deck.gl + ArcGIS basemap</i></p>
       </td>
       <td>
-        <img style="max-height:200px" src="https://raw.github.com/uber-common/deck.gl-data/master/images/whats-new/esri-i3s.gif" />
+        <img style="max-height:200px" src="https://raw.github.com/visgl/deck.gl-data/master/images/whats-new/esri-i3s.gif" />
         <p><i>Tile3DLayer + I3S</i></p>
       </td>
     </tr>
@@ -193,15 +193,15 @@ Release Date: Sep 26, 2019
   <tbody>
     <tr>
       <td>
-        <img style="max-height:200px" src="https://raw.github.com/uber-common/deck.gl-data/master/images/whats-new/tile-3d-layer.gif" />
+        <img style="max-height:200px" src="https://raw.github.com/visgl/deck.gl-data/master/images/whats-new/tile-3d-layer.gif" />
         <p><i>Tile3DLayer</i></p>
       </td>
       <td>
-        <img style="max-height:200px" src="https://raw.github.com/uber-common/deck.gl-data/master/images/whats-new/jupyter-integration.gif" />
+        <img style="max-height:200px" src="https://raw.github.com/visgl/deck.gl-data/master/images/whats-new/jupyter-integration.gif" />
         <p><i>Jupyter Widget</i></p>
       </td>
       <td>
-        <img style="max-height:200px" src="https://raw.github.com/uber-common/deck.gl-data/master/images/whats-new/spring-transition.gif" />
+        <img style="max-height:200px" src="https://raw.github.com/visgl/deck.gl-data/master/images/whats-new/spring-transition.gif" />
         <p><i>Spring Transition</i></p>
       </td>
     </tr>
@@ -274,15 +274,15 @@ For instructions on authoring your own layer extensions, visit [developer guide]
   <tbody>
     <tr>
       <td>
-        <img style="max-height:200px" src="https://raw.github.com/uber-common/deck.gl-data/master/images/whats-new/heatmap-layer.gif" />
+        <img style="max-height:200px" src="https://raw.github.com/visgl/deck.gl-data/master/images/whats-new/heatmap-layer.gif" />
         <p><i>HeatmapLayer</i></p>
       </td>
       <td>
-        <img style="max-height:200px" src="https://raw.github.com/uber-common/deck.gl-data/master/images/whats-new/shadow-nyc.jpg" />
+        <img style="max-height:200px" src="https://raw.github.com/visgl/deck.gl-data/master/images/whats-new/shadow-nyc.jpg" />
         <p><i>GeoJsonLayer with shadow</i></p>
       </td>
       <td>
-        <img style="max-height:200px" src="https://raw.github.com/uber-common/deck.gl-data/master/images/whats-new/shadow-uk.jpg" />
+        <img style="max-height:200px" src="https://raw.github.com/visgl/deck.gl-data/master/images/whats-new/shadow-uk.jpg" />
         <p><i>HexagonLayer with shadow</i></p>
       </td>
     </tr>
@@ -333,21 +333,21 @@ A new [PostProcessEffect](/docs/effects/post-process-effect.md) class, working w
   <tbody>
     <tr>
       <td>
-        <img style="max-height:240px" src="https://raw.github.com/uber-common/deck.gl-data/master/images/samples/post-processing/noise.jpg" />
+        <img style="max-height:240px" src="https://raw.github.com/visgl/deck.gl-data/master/images/samples/post-processing/noise.jpg" />
         <p><i>noise effect</i></p>
       </td>
       <td>
-        <img style="max-height:240px" src="https://raw.github.com/uber-common/deck.gl-data/master/images/samples/post-processing/colorhalftone.gif" />
+        <img style="max-height:240px" src="https://raw.github.com/visgl/deck.gl-data/master/images/samples/post-processing/colorhalftone.gif" />
         <p><i>colorHalftone effect</i></p>
       </td>
     </tr>
     <tr>
       <td>
-        <img style="max-height:240px" src="https://raw.github.com/uber-common/deck.gl-data/master/images/samples/post-processing/tiltshift.jpg" />
+        <img style="max-height:240px" src="https://raw.github.com/visgl/deck.gl-data/master/images/samples/post-processing/tiltshift.jpg" />
         <p><i>tiltShift effect</i></p>
       </td>
       <td>
-        <img style="max-height:240px" src="https://raw.github.com/uber-common/deck.gl-data/master/images/samples/post-processing/zoomblur.jpg" />
+        <img style="max-height:240px" src="https://raw.github.com/visgl/deck.gl-data/master/images/samples/post-processing/zoomblur.jpg" />
         <p><i>zoomBlur effect</i></p>
       </td>
     </tr>
@@ -426,43 +426,43 @@ Release Date: April 19, 2019
   <tbody>
     <tr>
       <td>
-        <img style="max-height:200px" src="https://raw.github.com/uber-common/deck.gl-data/master/images/whats-new/bitmap-layer.png" />
+        <img style="max-height:200px" src="https://raw.github.com/visgl/deck.gl-data/master/images/whats-new/bitmap-layer.png" />
         <p><i>BitmapLayer</i></p>
       </td>
       <td>
-        <img style="max-height:200px" src="https://raw.github.com/uber-common/deck.gl-data/master/images/whats-new/column-layer.png" />
+        <img style="max-height:200px" src="https://raw.github.com/visgl/deck.gl-data/master/images/whats-new/column-layer.png" />
         <p><i>ColumnLayer</i></p>
       </td>
       <td>
-        <img style="max-height:200px" src="https://raw.github.com/uber-common/deck.gl-data/master/images/whats-new/tile-layer.gif" />
+        <img style="max-height:200px" src="https://raw.github.com/visgl/deck.gl-data/master/images/whats-new/tile-layer.gif" />
         <p><i>TileLayer</i></p>
       </td>
     </tr>
     <tr>
       <td>
-        <img style="max-height:200px" src="https://raw.github.com/uber-common/deck.gl-data/master/images/whats-new/s2-layer.png" />
+        <img style="max-height:200px" src="https://raw.github.com/visgl/deck.gl-data/master/images/whats-new/s2-layer.png" />
         <p><i>S2Layer</i></p>
       </td>
       <td>
-        <img style="max-height:200px" src="https://raw.github.com/uber-common/deck.gl-data/master/images/whats-new/h3-layer.png" />
+        <img style="max-height:200px" src="https://raw.github.com/visgl/deck.gl-data/master/images/whats-new/h3-layer.png" />
         <p><i>H3HexagonLayer</i></p>
       </td>
       <td>
-        <img style="max-height:200px" src="https://raw.github.com/uber-common/deck.gl-data/master/images/whats-new/h3-cluster-layer.png" />
+        <img style="max-height:200px" src="https://raw.github.com/visgl/deck.gl-data/master/images/whats-new/h3-cluster-layer.png" />
         <p><i>H3ClusterLayer</i></p>
       </td>
     </tr>
     <tr>
       <td>
-        <img style="max-height:200px" src="https://raw.github.com/uber-common/deck.gl-data/master/images/whats-new/trips-layer.gif" />
+        <img style="max-height:200px" src="https://raw.github.com/visgl/deck.gl-data/master/images/whats-new/trips-layer.gif" />
         <p><i>TripsLayer</i></p>
       </td>
       <td>
-        <img style="max-height:200px" src="https://raw.github.com/uber-common/deck.gl-data/master/images/whats-new/mesh-layer.gif" />
+        <img style="max-height:200px" src="https://raw.github.com/visgl/deck.gl-data/master/images/whats-new/mesh-layer.gif" />
         <p><i>ScenegraphLayer</i></p>
       </td>
       <td>
-        <img style="max-height:200px" src="https://raw.github.com/uber-common/deck.gl-data/master/images/whats-new/great-circle-layer.png" />
+        <img style="max-height:200px" src="https://raw.github.com/visgl/deck.gl-data/master/images/whats-new/great-circle-layer.png" />
         <p><i>GreatCircleLayer</i></p>
       </td>
     </tr>
@@ -504,7 +504,7 @@ As the number of deck.gl layers grow, we are splitting existing and new layers i
 
 ### glTF Support and Loaders.gl
 
-<img height=150 src="https://raw.github.com/uber-common/deck.gl-data/master/images/gltf.png" />
+<img height=150 src="https://raw.github.com/visgl/deck.gl-data/master/images/gltf.png" />
 
 The new [ScenegraphLayer](/docs/layers/scenegraph-layer.md) and [SimpleMeshLayer](/docs/layers/simple-mesh-layer.md) support loading 3D models and scenegraphs in the popular [glTF™](https://www.khronos.org/gltf/) asset format.  glTF is a royalty-free specification for the efficient transmission and loading of 3D assets, with a rich ecosystem of tools and extensions.  All variants of glTF 2.0 are supported, including binary `.glb` files as well as JSON `.gltf` files with binary assets in base64 encoding or in separate files.
 
@@ -516,21 +516,21 @@ We are releasing [loaders.gl](https://uber-web.github.io/loaders.gl/) as a major
   <tbody>
     <tr>
       <td>
-        <img style="max-height:200px" src="https://raw.github.com/uber-common/deck.gl-data/master/images/whats-new/ambient-light.gif" />
+        <img style="max-height:200px" src="https://raw.github.com/visgl/deck.gl-data/master/images/whats-new/ambient-light.gif" />
         <p><i>Ambient Light</i></p>
       </td>
       <td>
-        <img style="max-height:200px" src="https://raw.github.com/uber-common/deck.gl-data/master/images/whats-new/point-light.gif" />
+        <img style="max-height:200px" src="https://raw.github.com/visgl/deck.gl-data/master/images/whats-new/point-light.gif" />
         <p><i>Point Light</i></p>
       </td>
     </tr>
     <tr>
       <td>
-        <img style="max-height:200px" src="https://raw.github.com/uber-common/deck.gl-data/master/images/whats-new/directional-light.gif" />
+        <img style="max-height:200px" src="https://raw.github.com/visgl/deck.gl-data/master/images/whats-new/directional-light.gif" />
         <p><i>Directional Light</i></p>
       </td>
       <td>
-        <img style="max-height:200px" src="https://raw.github.com/uber-common/deck.gl-data/master/images/whats-new/camera-light.gif" />
+        <img style="max-height:200px" src="https://raw.github.com/visgl/deck.gl-data/master/images/whats-new/camera-light.gif" />
         <p><i>Camera Light</i></p>
       </td>
     </tr>
@@ -548,7 +548,7 @@ A new effects system is written from the ground up for v7.0. This opens the poss
 
 Starting v7.0, deck.gl has experimental support for Google Maps with the [@deck.gl/google-maps](/docs/api-reference/google-maps/overview.md) module. It allows you to construct a Deck instance as a custom Google Maps [OverlayView](https://developers.google.com/maps/documentation/javascript/reference/#OverlayView). See module documentation page for a full list of supported features.
 
-<img height="300" src="https://raw.github.com/uber-common/deck.gl-data/master/images/whats-new/google-maps.jpg" />
+<img height="300" src="https://raw.github.com/visgl/deck.gl-data/master/images/whats-new/google-maps.jpg" />
 <p><i>GoogleMapsOverlay</i></p>
 
 ### Improved Test Utilities
@@ -567,15 +567,15 @@ Release Date: Jan 29, 2019
   <tbody>
     <tr>
       <td>
-        <img style="max-height:200px" src="https://raw.github.com/uber-common/deck.gl-data/master/images/whats-new/deck64-sdf.gif" />
+        <img style="max-height:200px" src="https://raw.github.com/visgl/deck.gl-data/master/images/whats-new/deck64-sdf.gif" />
         <p><i>SDF font in TextLayer</i></p>
       </td>
       <td>
-        <img style="max-height:200px" src="https://raw.github.com/uber-common/deck.gl-data/master/images/whats-new/deck64-scatterplot.jpg" />
+        <img style="max-height:200px" src="https://raw.github.com/visgl/deck.gl-data/master/images/whats-new/deck64-scatterplot.jpg" />
         <p><i>Stroke and fill in ScatterplotLayer</i></p>
       </td>
       <td>
-        <img style="max-height:200px" src="https://raw.github.com/uber-common/deck.gl-data/master/images/whats-new/deck64-isoband.jpg" />
+        <img style="max-height:200px" src="https://raw.github.com/visgl/deck.gl-data/master/images/whats-new/deck64-isoband.jpg" />
         <p><i>Isoband in ContourLayer</i></p>
       </td>
     </tr>
@@ -625,11 +625,11 @@ Release Date: Oct 15, 2018
   <tbody>
     <tr>
       <td>
-        <img style="max-height:200px" src="https://raw.github.com/uber-common/deck.gl-data/master/images/whats-new/new-projection-mode.gif" />
+        <img style="max-height:200px" src="https://raw.github.com/visgl/deck.gl-data/master/images/whats-new/new-projection-mode.gif" />
         <p><i>32-bit High-Precision Projection</i></p>
       </td>
       <td>
-        <img style="max-height:200px" src="https://raw.github.com/uber-common/deck.gl-data/master/images/whats-new/mapbox-layers.jpg" />
+        <img style="max-height:200px" src="https://raw.github.com/visgl/deck.gl-data/master/images/whats-new/mapbox-layers.jpg" />
         <p><i>Mixing Mapbox and deck.gl Layers</i></p>
       </td>
     </tr>
@@ -657,15 +657,15 @@ Release date: Sep 7, 2018
   <tbody>
     <tr>
       <td>
-        <img style="max-height:200px" src="https://raw.github.com/uber-common/deck.gl-data/master/images/whats-new/json-layers-thumb.gif" />
+        <img style="max-height:200px" src="https://raw.github.com/visgl/deck.gl-data/master/images/whats-new/json-layers-thumb.gif" />
         <p><i>JSON API</i></p>
       </td>
       <td>
-        <img style="max-height:200px" src="https://raw.github.com/uber-common/deck.gl-data/master/images/whats-new/minimap-thumb.gif" />
+        <img style="max-height:200px" src="https://raw.github.com/visgl/deck.gl-data/master/images/whats-new/minimap-thumb.gif" />
         <p><i>Enhanced Multi-View API</i></p>
       </td>
       <td>
-        <img style="max-height:200px" src="https://raw.github.com/uber-common/deck.gl-data/master/images/whats-new/contour-layer-cell-resize.gif" />
+        <img style="max-height:200px" src="https://raw.github.com/visgl/deck.gl-data/master/images/whats-new/contour-layer-cell-resize.gif" />
         <p><i>ContourLayer</i></p>
       </td>
     </tr>
@@ -716,15 +716,15 @@ Release date: July 18, 2018
   <tbody>
     <tr>
       <td>
-        <img style="max-height:200px" src="https://raw.github.com/uber-common/deck.gl-data/master/images/attribute-transition.gif" />
+        <img style="max-height:200px" src="https://raw.github.com/visgl/deck.gl-data/master/images/attribute-transition.gif" />
         <p><i>GeoJson Transition</i></p>
       </td>
       <td>
-        <img style="max-height:200px" src="https://raw.github.com/uber-common/deck.gl-data/master/images/whats-new/viewstateTransitionsFlyTo.gif" />
+        <img style="max-height:200px" src="https://raw.github.com/visgl/deck.gl-data/master/images/whats-new/viewstateTransitionsFlyTo.gif" />
         <p><i>ViewState flyTo Transitions</i></p>
       </td>
       <td>
-        <img style="max-height:200px" src="https://raw.github.com/uber-common/deck.gl-data/master/images/whats-new/GPUAcceleratedScreenGridAggregation.gif" />
+        <img style="max-height:200px" src="https://raw.github.com/visgl/deck.gl-data/master/images/whats-new/GPUAcceleratedScreenGridAggregation.gif" />
         <p><i>GPU Accelerated ScreenGrid Layer</i></p>
       </td>
     </tr>
@@ -781,7 +781,7 @@ Release date: June 01, 2018
   <tbody>
     <tr>
       <td>
-        <img height=150 src="https://raw.github.com/uber-common/deck.gl-data/master/images/whats-new/orthographic.gif" />
+        <img height=150 src="https://raw.github.com/visgl/deck.gl-data/master/images/whats-new/orthographic.gif" />
         <p><i>Orthographic Mode</i></p>
       </td>
     </tr>
@@ -832,15 +832,15 @@ Release date: April 24, 2018
   <tbody>
     <tr>
       <td>
-        <img height=150 src="https://raw.github.com/uber-common/deck.gl-data/master/images/whats-new/text-layer.gif" />
+        <img height=150 src="https://raw.github.com/visgl/deck.gl-data/master/images/whats-new/text-layer.gif" />
         <p><i>New TextLayer</i></p>
       </td>
       <td>
-        <img height=150 src="https://raw.github.com/uber-common/deck.gl-data/master/images/whats-new/screenGrid-colorRangeDomain.gif" />
+        <img height=150 src="https://raw.github.com/visgl/deck.gl-data/master/images/whats-new/screenGrid-colorRangeDomain.gif" />
         <p><i>ScreenGridLayer Color Scale</i></p>
       </td>
       <td>
-        <img height=150 src="https://raw.github.com/uber-common/deck.gl-data/master/images/whats-new/test-utils.gif" />
+        <img height=150 src="https://raw.github.com/visgl/deck.gl-data/master/images/whats-new/test-utils.gif" />
         <p><i>Automated Render Tests</i></p>
       </td>
     </tr>
@@ -944,11 +944,11 @@ Release date: Feb 16, 2018
   <tbody>
     <tr>
       <td>
-        <img height=150 src="https://raw.github.com/uber-common/deck.gl-data/master/images/whats-new/transitions.gif" />
+        <img height=150 src="https://raw.github.com/visgl/deck.gl-data/master/images/whats-new/transitions.gif" />
         <p><i>Layer Transitions</i></p>
       </td>
       <td>
-        <img height=150 src="https://raw.github.com/uber-common/deck.gl-data/master/images/whats-new/jsx-layers.png" />
+        <img height=150 src="https://raw.github.com/visgl/deck.gl-data/master/images/whats-new/jsx-layers.png" />
         <p><i>JSX Layers</i></p>
       </td>
     </tr>
@@ -988,15 +988,15 @@ Release date: Dec 21, 2017
   <tbody>
     <tr>
       <td>
-        <img height=150 src="https://raw.github.com/uber-common/deck.gl-data/master/images/whats-new/object-highlighting.gif" />
+        <img height=150 src="https://raw.github.com/visgl/deck.gl-data/master/images/whats-new/object-highlighting.gif" />
         <p><i>GPU-based Highlighting</i></p>
       </td>
       <td>
-        <img height=150 src="https://raw.github.com/uber-common/deck.gl-data/master/images/whats-new/path-dashes.png" />
+        <img height=150 src="https://raw.github.com/visgl/deck.gl-data/master/images/whats-new/path-dashes.png" />
         <p><i>Dashes in GeoJson</i></p>
       </td>
       <td>
-        <img height=150 src="https://raw.github.com/uber-common/deck.gl-data/master/images/whats-new/react-16.png" />
+        <img height=150 src="https://raw.github.com/visgl/deck.gl-data/master/images/whats-new/react-16.png" />
         <p><i>React 16 Support</i></p>
       </td>
     </tr>
@@ -1084,11 +1084,11 @@ Release date: July 27th, 2017
   <tbody>
     <tr>
       <td>
-        <img height=150 src="https://raw.github.com/uber-common/deck.gl-data/master/images/whats-new/webgl2.jpg" />
+        <img height=150 src="https://raw.github.com/visgl/deck.gl-data/master/images/whats-new/webgl2.jpg" />
         <p><i>WebGL 2</i></p>
       </td>
       <td>
-        <img height=150 src="https://raw.github.com/uber-common/deck.gl-data/master/images/whats-new/seer.png" />
+        <img height=150 src="https://raw.github.com/visgl/deck.gl-data/master/images/whats-new/seer.png" />
         <p><i>Seer Extension</i></p>
       </td>
     </tr>

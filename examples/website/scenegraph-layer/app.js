@@ -19,7 +19,7 @@ const MAPBOX_STYLE =
 
 const DATA_URL = 'https://opensky-network.org/api/states/all';
 const MODEL_URL =
-  'https://raw.githubusercontent.com/uber-common/deck.gl-data/master/examples/scenegraph-layer/airplane.glb';
+  'https://raw.githubusercontent.com/visgl/deck.gl-data/master/examples/scenegraph-layer/airplane.glb';
 const REFRESH_TIME = 30000;
 
 const ANIMATIONS = {

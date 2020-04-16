@@ -115,7 +115,7 @@
       });
     }
 
-    d3.csv('https://raw.githubusercontent.com/uber-common/deck.gl-data/master/examples/3d-heatmap/heatmap-data.csv')
+    d3.csv('https://raw.githubusercontent.com/visgl/deck.gl-data/master/examples/3d-heatmap/heatmap-data.csv')
       .then(response => {
       data = response.map(d => [Number(d.lng), Number(d.lat)]);
       renderLayer();

@@ -14,7 +14,7 @@ This RFC proposes to extend the functionality of `View` class hinted at in the o
 
 <div align="center">
   <div>
-    <img src="https://raw.github.com/uber-common/deck.gl-data/master/images/docs/minimap.gif" />
+    <img src="https://raw.github.com/visgl/deck.gl-data/master/images/docs/minimap.gif" />
     <p><i>PoC: Minimap implemented declaratively using the enhanced View Class API</i></p>
   </div>
 </div>

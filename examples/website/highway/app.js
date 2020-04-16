@@ -11,9 +11,9 @@ const MAPBOX_TOKEN = process.env.MapboxAccessToken; // eslint-disable-line
 // Source data GeoJSON
 const DATA_URL = {
   ACCIDENTS:
-    'https://raw.githubusercontent.com/uber-common/deck.gl-data/master/examples/highway/accidents.csv',
+    'https://raw.githubusercontent.com/visgl/deck.gl-data/master/examples/highway/accidents.csv',
   ROADS:
-    'https://raw.githubusercontent.com/uber-common/deck.gl-data/master/examples/highway/roads.json'
+    'https://raw.githubusercontent.com/visgl/deck.gl-data/master/examples/highway/roads.json'
 };
 
 function getKey({state, type, id}) {

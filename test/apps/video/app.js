@@ -5,7 +5,7 @@ import {OrthographicView, COORDINATE_SYSTEM} from '@deck.gl/core';
 import {BitmapLayer} from '@deck.gl/layers';
 
 const DATA_URL =
-  'https://raw.githubusercontent.com/uber-common/deck.gl-data/master/examples/ascii/Felix_BoldKingCole.mp4';
+  'https://raw.githubusercontent.com/visgl/deck.gl-data/master/examples/ascii/Felix_BoldKingCole.mp4';
 
 const INITIAL_VIEW_STATE = {
   target: [0, 0, 0],

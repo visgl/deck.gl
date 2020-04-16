@@ -24,7 +24,7 @@
 5. Update CHANGELOG.md, making sure all commits and PRs merged after release are recorded properly:
 <div align="center">
   <div>
-    <img src="https://raw.github.com/uber-common/deck.gl-data/master/images/dev-docs/publish-guideline/image4.png" />
+    <img src="https://raw.github.com/visgl/deck.gl-data/master/images/dev-docs/publish-guideline/image4.png" />
     <p><i>Image Text</i></p>
   </div>
 </div>
