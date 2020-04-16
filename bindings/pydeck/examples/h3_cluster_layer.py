@@ -45,7 +45,7 @@ import pydeck as pdk
 import pandas as pd
 
 H3_CLUSTER_LAYER_DATA = (
-    "https://raw.githubusercontent.com/uber-common/deck.gl-data/master/website/sf.h3clusters.json"  # noqa
+    "https://raw.githubusercontent.com/visgl/deck.gl-data/master/website/sf.h3clusters.json"  # noqa
 )
 
 df = pd.read_json(H3_CLUSTER_LAYER_DATA)

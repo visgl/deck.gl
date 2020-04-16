@@ -7,7 +7,7 @@
 References:
 * The initial [Infovis Viewport RFC](../v4.0/non-geospatial-viewports-rfc.md) for deck.gl v4.
 * Controller Changes [Controller Architecture RFC](./controller-architecture-rfc.md)
-* Initial review in [PR](https://github.com/uber/deck.gl/pull/838)
+* Initial review in [PR](https://github.com/visgl/deck.gl/pull/838)
 
 
 ## Overview

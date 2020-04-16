@@ -4,7 +4,7 @@
 * **Date**: Sep, 2017
 * **Status**: Proposal
 
-* See [Issue](https://github.com/uber/deck.gl/issues/908)
+* See [Issue](https://github.com/visgl/deck.gl/issues/908)
 
 
 ## Motivation

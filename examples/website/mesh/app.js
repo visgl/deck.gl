@@ -18,7 +18,7 @@ import {registerLoaders} from '@loaders.gl/core';
 registerLoaders([OBJLoader]);
 
 const MESH_URL =
-  'https://raw.githubusercontent.com/uber-common/deck.gl-data/master/examples/mesh/minicooper.obj';
+  'https://raw.githubusercontent.com/visgl/deck.gl-data/master/examples/mesh/minicooper.obj';
 
 const INITIAL_VIEW_STATE = {
   target: [0, 0, 0],

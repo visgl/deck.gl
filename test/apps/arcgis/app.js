@@ -2,7 +2,7 @@ import {loadArcGISModules} from '@deck.gl/arcgis';
 import {TripsLayer} from '@deck.gl/geo-layers';
 
 const DATA_URL =
-  'https://raw.githubusercontent.com/uber-common/deck.gl-data/master/examples/trips/trips-v7.json';
+  'https://raw.githubusercontent.com/visgl/deck.gl-data/master/examples/trips/trips-v7.json';
 
 function renderLayers() {
   return [

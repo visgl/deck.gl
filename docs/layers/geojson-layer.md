@@ -289,4 +289,4 @@ The GeoJsonLayer renders the following sublayers:
 
 ## Source
 
-[modules/layers/src/geojson-layer](https://github.com/uber/deck.gl/tree/master/modules/layers/src/geojson-layer)
+[modules/layers/src/geojson-layer](https://github.com/visgl/deck.gl/tree/master/modules/layers/src/geojson-layer)

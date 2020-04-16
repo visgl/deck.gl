@@ -10,7 +10,7 @@ This example is adapted from the deck.gl documentation.
 import pydeck as pdk
 import pandas as pd
 
-H3_HEX_DATA = "https://raw.githubusercontent.com/uber-common/deck.gl-data/master/website/sf.h3cells.json"
+H3_HEX_DATA = "https://raw.githubusercontent.com/visgl/deck.gl-data/master/website/sf.h3cells.json"
 
 df = pd.read_json(H3_HEX_DATA)
 

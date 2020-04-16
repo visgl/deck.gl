@@ -9,7 +9,7 @@
 This RFC proposes to move Buffer creation from luma.gl into AttributeManager.
 
 Related discussions:
-[#1527](https://github.com/uber/deck.gl/pull/1527)
+[#1527](https://github.com/visgl/deck.gl/pull/1527)
 
 
 ## Background

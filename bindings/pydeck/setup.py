@@ -194,7 +194,7 @@ if __name__ == "__main__":
         },
         author="Andrew Duberstein",
         author_email="ajduberstein@gmail.com",
-        url="https://github.com/uber/deck.gl/tree/master/bindings/pydeck",
+        url="https://github.com/visgl/deck.gl/tree/master/bindings/pydeck",
         keywords=["data", "visualization", "graphics", "GIS", "maps"],
         classifiers=[
             "Intended Audience :: Developers",

@@ -5,7 +5,7 @@
 Extend the Deck and DeckGL component APIs with a new prop that provides a stateful alternative to the normal stateless `viewState` handling in deck.gl. The intention is that no callback should need to be specified when using deck.gl in simple apps.
 
 ## References
-* [PR #1662](https://github.com/uber/deck.gl/pull/1662/files) - Auto Controls: Automatic Event Handling if no callback is specified
+* [PR #1662](https://github.com/visgl/deck.gl/pull/1662/files) - Auto Controls: Automatic Event Handling if no callback is specified
 
 ## Design Goals
 This RFC shoulds NOT change semantics of existing API or apps.

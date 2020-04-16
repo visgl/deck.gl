@@ -11,7 +11,7 @@ const FEMALE_COLOR = [255, 0, 128];
 
 // Source data CSV
 const DATA_URL =
-  'https://raw.githubusercontent.com/uber-common/deck.gl-data/master/examples/scatterplot/manhattan.json'; // eslint-disable-line
+  'https://raw.githubusercontent.com/visgl/deck.gl-data/master/examples/scatterplot/manhattan.json'; // eslint-disable-line
 
 const INITIAL_VIEW_STATE = {
   longitude: -74,
