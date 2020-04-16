@@ -12,8 +12,7 @@ const MAPBOX_TOKEN = process.env.MapboxAccessToken; // eslint-disable-line
 const DATA_URL = {
   ACCIDENTS:
     'https://raw.githubusercontent.com/visgl/deck.gl-data/master/examples/highway/accidents.csv',
-  ROADS:
-    'https://raw.githubusercontent.com/visgl/deck.gl-data/master/examples/highway/roads.json'
+  ROADS: 'https://raw.githubusercontent.com/visgl/deck.gl-data/master/examples/highway/roads.json'
 };
 
 function getKey({state, type, id}) {
