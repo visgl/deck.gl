@@ -284,7 +284,7 @@ export const docPages = generatePath([
       },
       {
         name: 'Contributing',
-        content: getDocUrl('contributing.md')
+        content: getDocUrl('../CONTRIBUTING.md')
       },
       {
         name: 'Frequently Asked Questions',
