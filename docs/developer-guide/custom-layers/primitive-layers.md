@@ -15,7 +15,7 @@ To describe how a layer's properties relate to WebGL attributes and uniforms you
 
 #### Creating The Model
 
-A layer should create its model during this phase. A model is a [luma.gl](https://github.com/uber/luma.gl) [Model](https://github.com/uber/luma.gl/blob/8.0-release/docs/api-reference/engine/model.md) instance that defines what will be drawn to the WebGL context.
+A layer should create its model during this phase. A model is a [luma.gl](https://github.com/visgl/luma.gl) [Model](https://github.com/visgl/luma.gl/blob/8.0-release/docs/api-reference/engine/model.md) instance that defines what will be drawn to the WebGL context.
 
 Most layers are **Single-model layers** - this is the predominant form among all core layers that deck.gl currently provides. In these layers, a single geometry model is created for each layer and saved to `state.model` during initialization. The default implementation of the rest of the lifecycle methods will then look for this model for rendering and picking etc., meaning that you don't have to do anything more to get a working layer.
 
@@ -78,7 +78,7 @@ export default class MyLayer extends Layer {
 }
 ```
 
-It is sometimes desirable to have a single layer render using multiple geometry primitives (e.g both circles and lines, or triangles and textured meshes etc), rather than creating separate layers. The custom [AxesLayer example](https://github.com/uber/deck.gl/tree/8.1-release/examples/website/plot/plot-layer/axes-layer.js) uses this technique to share attributes between grids and labels.
+It is sometimes desirable to have a single layer render using multiple geometry primitives (e.g both circles and lines, or triangles and textured meshes etc), rather than creating separate layers. The custom [AxesLayer example](https://github.com/visgl/deck.gl/tree/8.1-release/examples/website/plot/plot-layer/axes-layer.js) uses this technique to share attributes between grids and labels.
 
 
 #### Defining Attributes

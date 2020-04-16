@@ -108,7 +108,7 @@ When not specified, maximum weight (`maxWeight`) is auto calculated and domain w
 
 NOTES:
 - It is recommend to use default value for regular use cases.
-- On `Windows` browsers due to an ANGLE [issue](https://github.com/uber/deck.gl/issues/3554), auto calculation of maximum weight doesn't work, hence on `Windows`, `colorDomain` should be used with a non zero maximum value.
+- On `Windows` browsers due to an ANGLE [issue](https://github.com/visgl/deck.gl/issues/3554), auto calculation of maximum weight doesn't work, hence on `Windows`, `colorDomain` should be used with a non zero maximum value.
 
 ### Data Accessors
 
@@ -126,4 +126,4 @@ Method called to retrieve weight of each point. By default each point will use a
 
 ## Source
 
-[modules/aggregation-layers/src/heatmap-layer](https://github.com/uber/deck.gl/tree/8.1-release/modules/aggregation-layers/src/heatmap-layer)
+[modules/aggregation-layers/src/heatmap-layer](https://github.com/visgl/deck.gl/tree/8.1-release/modules/aggregation-layers/src/heatmap-layer)

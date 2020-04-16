@@ -64,4 +64,4 @@ See the documentation of [Controller](/docs/api-reference/controller.md) for imp
 
 ## Source
 
-[modules/core/src/views/orbit-view.js](https://github.com/uber/deck.gl/tree/8.1-release/modules/core/src/views/orbit-view.js)
+[modules/core/src/views/orbit-view.js](https://github.com/visgl/deck.gl/tree/8.1-release/modules/core/src/views/orbit-view.js)

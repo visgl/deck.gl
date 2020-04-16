@@ -27,7 +27,7 @@ npm start
 ```
 
 ## Data format
-Sample datasets are stored in [deck.gl Example Data](https://github.com/uber-common/deck.gl-data/tree/master/examples/graph).
+Sample datasets are stored in [deck.gl Example Data](https://github.com/visgl/deck.gl-data/tree/master/examples/graph).
 
 
 ## Attribution

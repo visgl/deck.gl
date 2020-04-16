@@ -2395,7 +2395,7 @@ haders
 
 #### [4.1.0] - 2017-7-27 Minor deck.gl Release
 
-For details see [What's New](https://github.com/uber/deck.gl/blob/5.0-release/docs/whats-new.md)
+For details see [What's New](https://github.com/visgl/deck.gl/blob/5.0-release/docs/whats-new.md)
 
 
 ### deck.gl v4.1 Beta Releases
@@ -3081,7 +3081,7 @@ For details see [What's New](docs/whats-new.md)
 - Retina display support
 - Performance refactoring
 - Switched the underlying rendering framework to
-  [luma.gl](https://github.com/uber/luma.gl)
+  [luma.gl](https://github.com/visgl/luma.gl)
 - Fixed picking on retina/regular display
 
 ## deck.gl v1

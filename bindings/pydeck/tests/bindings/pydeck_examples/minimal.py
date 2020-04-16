@@ -8,7 +8,7 @@ def create_minimal_test_object():
     )
     layer = Layer(
         "HexagonLayer",
-        "https://raw.githubusercontent.com/uber-common/deck.gl-data/master/examples/3d-heatmap/heatmap-data.csv",
+        "https://raw.githubusercontent.com/visgl/deck.gl-data/master/examples/3d-heatmap/heatmap-data.csv",
         id="heatmap",
         elevation_scale=50,
         elevation_range=[0, 3000],

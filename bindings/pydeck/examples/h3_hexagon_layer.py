@@ -1,6 +1,6 @@
 import pydeck as pdk
 
-H3_HEX_DATA = "https://raw.githubusercontent.com/uber-common/deck.gl-data/master/website/sf.h3cells.json"
+H3_HEX_DATA = "https://raw.githubusercontent.com/visgl/deck.gl-data/master/website/sf.h3cells.json"
 
 # Define a layer to display on a map
 layer = pdk.Layer(

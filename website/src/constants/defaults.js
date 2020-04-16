@@ -32,4 +32,4 @@ export const DEFAULT_APP_STATE = {
   isMenuOpen: false
 };
 
-export const DATA_URI = 'https://raw.githubusercontent.com/uber-common/deck.gl-data/master/website';
+export const DATA_URI = 'https://raw.githubusercontent.com/visgl/deck.gl-data/master/website';

@@ -85,7 +85,7 @@
     getTooltip
   });
 
-  d3.csv('https://raw.githubusercontent.com/uber-common/deck.gl-data/master/examples/highway/accidents.csv')
+  d3.csv('https://raw.githubusercontent.com/visgl/deck.gl-data/master/examples/highway/accidents.csv')
     .then(accidents => {
 
     // sort accident data
@@ -112,7 +112,7 @@
     const layers = [
       new GeoJsonLayer({
         id: 'geojson',
-        data: 'https://raw.githubusercontent.com/uber-common/deck.gl-data/master/examples/highway/roads.json',
+        data: 'https://raw.githubusercontent.com/visgl/deck.gl-data/master/examples/highway/roads.json',
         stroked: false,
         filled: false,
         lineWidthMinPixels: 1,

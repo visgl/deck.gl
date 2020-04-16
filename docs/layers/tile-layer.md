@@ -111,7 +111,7 @@ If supplied, `getTileData` is called to retrieve the data of each tile. It recei
 - `y` (Number) - y index of the tile
 - `z` (Number) - z index of the tile
 - `url` (String) - resolved url of the tile if the `data` prop is provided, otherwise `null`
-- `bbox` (Object) - bounding box of the tile. When used with a geospatial view, `bbox` is in the shape of `{west: <longitude>, north: <latitude>, east: <longitude>, south: <latitude>}`. When used with a non-geospatial view, `bbox` is in the shape of `{left, top, right, bottom}`.
+- `bbox` (Object) - bounding box of the tile. When used with a geospatial view, `bbox` is in the shape of `{west: <longitude>, north: <latitude>, east: <longitude>, south: <latitude>}`. When used used with a non-geospatial view, `bbox` is in the shape of `{left, top, right, bottom}`.
 
 It should return either the tile data or a Promise that resolves to the tile data.
 
@@ -215,4 +215,4 @@ Receives arguments:
 
 ## Source
 
-[modules/geo-layers/src/tile-layer](https://github.com/uber/deck.gl/tree/8.1-release/modules/geo-layers/src/tile-layer)
+[modules/geo-layers/src/tile-layer](https://github.com/visgl/deck.gl/tree/8.1-release/modules/geo-layers/src/tile-layer)

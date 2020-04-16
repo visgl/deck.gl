@@ -4,7 +4,7 @@ import pydeck
 import pandas as pd
 
 # Load in the JSON data
-DATA_URL = "https://raw.githubusercontent.com/uber-common/deck.gl-data/master/examples/geojson/vancouver-blocks.json"
+DATA_URL = "https://raw.githubusercontent.com/visgl/deck.gl-data/master/examples/geojson/vancouver-blocks.json"
 json = pd.read_json(DATA_URL)
 df = pd.DataFrame()
 

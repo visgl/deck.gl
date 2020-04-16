@@ -242,4 +242,4 @@ Returns:
 
 ## Source
 
-[modules/core/src/lib/composite-layer.js](https://github.com/uber/deck.gl/tree/8.1-release/modules/core/src/lib/composite-layer.js)
+[modules/core/src/lib/composite-layer.js](https://github.com/visgl/deck.gl/tree/8.1-release/modules/core/src/lib/composite-layer.js)

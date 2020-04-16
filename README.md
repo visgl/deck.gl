@@ -42,7 +42,7 @@ Deck.gl is designed to be highly customizable. All layers come with flexible API
 ```
 
 - [Get started](/docs/get-started/using-standalone.md#using-the-scripting-api)
-- [Full examples](https://github.com/uber/deck.gl/tree/master/examples/get-started/scripting)
+- [Full examples](https://github.com/visgl/deck.gl/tree/master/examples/get-started/scripting)
 
 ### NPM Module
 

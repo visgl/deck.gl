@@ -21,7 +21,7 @@
     {
       "@@type": "HexagonLayer",
       "id": "heatmap",
-      "data": "https://raw.githubusercontent.com/uber-common/deck.gl-data/master/examples/3d-heatmap/heatmap-data.csv",
+      "data": "https://raw.githubusercontent.com/visgl/deck.gl-data/master/examples/3d-heatmap/heatmap-data.csv",
       "loadOptions": {
         "header": false
       },

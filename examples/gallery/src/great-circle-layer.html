@@ -32,7 +32,7 @@
     const greatCircleLayer = new GreatCircleLayer({
       id: 'great-circle',
       data:
-        'https://raw.githubusercontent.com/uber-common/deck.gl-data/master/website/flights.json',
+        'https://raw.githubusercontent.com/visgl/deck.gl-data/master/website/flights.json',
       getSourcePosition: d => d.from.coordinates,
       getTargetPosition: d => d.to.coordinates,
       getSourceColor: [64, 255, 0],

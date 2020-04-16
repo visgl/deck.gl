@@ -11,7 +11,7 @@ This RFC proposes adding adaptor classes that accept JSON descriptions of views 
 
 <div align="center">
   <div>
-    <img src="https://raw.github.com/uber-common/deck.gl-data/master/images/docs/json-layers.gif" />
+    <img src="https://raw.github.com/visgl/deck.gl-data/master/images/docs/json-layers.gif" />
     <p><i>PoC: JSON layer browser built on new @deck.gl/json module.</i></p>
   </div>
 </div>

@@ -4,7 +4,7 @@ Create a point light source which emits from a point in all directions.Point lig
 
 <div align="center">
   <div>
-    <img src="https://raw.github.com/uber-common/deck.gl-data/master/images/whats-new/point-light.gif" />
+    <img src="https://raw.github.com/visgl/deck.gl-data/master/images/whats-new/point-light.gif" />
     <p><i>Two spheres with point light</i></p>
   </div>
 </div>
@@ -37,4 +37,4 @@ const pointLight = new PointLight({color, intensity, position});
 
 ## Source
 
-[/modules/core/src/effects/lighting/point-light.js](https://github.com/uber/deck.gl/tree/8.1-release/modules/core/src/effects/lighting/point-light.js)
+[/modules/core/src/effects/lighting/point-light.js](https://github.com/visgl/deck.gl/tree/8.1-release/modules/core/src/effects/lighting/point-light.js)

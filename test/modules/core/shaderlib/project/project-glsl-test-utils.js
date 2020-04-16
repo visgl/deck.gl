@@ -47,7 +47,7 @@ export function runOnGPU({
   const modules = usefp64 ? [project64] : [project32];
   // const modules = usefp64 ? ['project64'] : [];
   const transform = new Transform(gl, {
-    // TODO: remove sourceBuffers after https://github.com/uber/luma.gl/pull/733
+    // TODO: remove sourceBuffers after https://github.com/visgl/luma.gl/pull/733
     sourceBuffers,
     feedbackBuffers,
     vs,

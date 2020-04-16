@@ -14,7 +14,7 @@ new PostProcessEffect(shaderModule, props);
 ```
 
 Parameters:
-* `shaderModule`(Object) - a shader module wraps a screen space effect. For supported effects see [luma.gl shader modules](https://github.com/uber/luma.gl/tree/8.0-release/modules/shadertools/src/modules).
+* `shaderModule`(Object) - a shader module wraps a screen space effect. For supported effects see [luma.gl shader modules](https://github.com/visgl/luma.gl/tree/8.0-release/modules/shadertools/src/modules).
 * `props`(Object) - parameters to replace the default values in shader module.
 
 ## Example
@@ -42,4 +42,4 @@ const deckgl = new Deck({
 
 ## Source
 
-[/modules/core/src/effects/post-process-effect.js](https://github.com/uber/deck.gl/tree/8.1-release/modules/core/src/effects/post-process-effect.js)
+[/modules/core/src/effects/post-process-effect.js](https://github.com/visgl/deck.gl/tree/8.1-release/modules/core/src/effects/post-process-effect.js)

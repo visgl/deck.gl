@@ -44,7 +44,7 @@ export default class ControlPanel extends PureComponent {
         <p>Smooth animate of the viewport.</p>
         <div className="source-link">
           <a
-            href="https://github.com/uber/react-map-gl/tree/master/examples/viewport-animation"
+            href="https://github.com/visgl/react-map-gl/tree/master/examples/viewport-animation"
             target="_new"
           >
             View Code ↗

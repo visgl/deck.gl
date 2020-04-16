@@ -4,7 +4,7 @@ CameraLight is a special [point light](/docs/api-reference/lights/point-light.md
 
 <div align="center">
   <div>
-    <img src="https://raw.github.com/uber-common/deck.gl-data/master/images/whats-new/camera-light.gif" />
+    <img src="https://raw.github.com/visgl/deck.gl-data/master/images/whats-new/camera-light.gif" />
     <p><i>Two spheres with camera light</i></p>
   </div>
 </div>
@@ -35,4 +35,4 @@ const cameraLight = new CameraLight({color, intensity});
 
 ## Source
 
-[/modules/core/src/effects/lighting/camera-light.js](https://github.com/uber/deck.gl/tree/8.1-release/modules/core/src/effects/lighting/camera-light.js)
+[/modules/core/src/effects/lighting/camera-light.js](https://github.com/visgl/deck.gl/tree/8.1-release/modules/core/src/effects/lighting/camera-light.js)

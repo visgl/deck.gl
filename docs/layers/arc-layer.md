@@ -167,4 +167,4 @@ In degrees, can be positive or negative (`-90 to +90`).
 
 ## Source
 
-[modules/layers/src/arc-layer](https://github.com/uber/deck.gl/tree/8.1-release/modules/layers/src/arc-layer)
+[modules/layers/src/arc-layer](https://github.com/visgl/deck.gl/tree/8.1-release/modules/layers/src/arc-layer)

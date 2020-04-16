@@ -151,7 +151,7 @@ The rgba color is in the format of `[r, g, b, [a]]`. Each channel is a number be
 
 - Default: `[0, 0, 0]`
 
-Object orientation defined as a vec3 of Euler angles, `[pitch, yaw, roll]` in degrees. This will be composed with layer's [`modelMatrix`](https://github.com/uber/deck.gl/blob/master/docs/api-reference/layer.md#modelmatrix-number16-optional).
+Object orientation defined as a vec3 of Euler angles, `[pitch, yaw, roll]` in degrees. This will be composed with layer's [`modelMatrix`](https://github.com/visgl/deck.gl/blob/master/docs/api-reference/layer.md#modelmatrix-number16-optional).
 
 * If an array is provided, it is used as the orientation for all objects.
 * If a function is provided, it is called on each object to retrieve its orientation.
@@ -179,7 +179,7 @@ Translation of the mesh along each axis. Offset from the center position given b
 - Default: `null`
 
 Explicitly define a 4x4 column-major model matrix for the mesh. If provided, will override
-`getOrientation`, `getScale`, `getTranslation`. This will be composed with layer's [`modelMatrix`](https://github.com/uber/deck.gl/blob/master/docs/api-reference/layer.md#modelmatrix-number16-optional).
+`getOrientation`, `getScale`, `getTranslation`. This will be composed with layer's [`modelMatrix`](https://github.com/visgl/deck.gl/blob/master/docs/api-reference/layer.md#modelmatrix-number16-optional).
 
 * If an array is provided, it is used as the transform matrix for all objects.
 * If a function is provided, it is called on each object to retrieve its transform matrix.
@@ -198,4 +198,4 @@ The maximum size in pixels for one unit of the scene.
 
 ## Source
 
-[modules/mesh-layers/src/scenegraph-layer](https://github.com/uber/deck.gl/tree/8.1-release/modules/mesh-layers/src/scenegraph-layer)
+[modules/mesh-layers/src/scenegraph-layer](https://github.com/visgl/deck.gl/tree/8.1-release/modules/mesh-layers/src/scenegraph-layer)

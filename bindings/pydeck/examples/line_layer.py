@@ -2,8 +2,8 @@
 import pydeck
 
 DATA_URL = {
-    "AIRPORTS": "https://raw.githubusercontent.com/uber-common/deck.gl-data/master/examples/line/airports.json",
-    "FLIGHT_PATHS": "https://raw.githubusercontent.com/uber-common/deck.gl-data/master/examples/line/heathrow-flights.json",  # noqa
+    "AIRPORTS": "https://raw.githubusercontent.com/visgl/deck.gl-data/master/examples/line/airports.json",
+    "FLIGHT_PATHS": "https://raw.githubusercontent.com/visgl/deck.gl-data/master/examples/line/heathrow-flights.json",  # noqa
 }
 
 INITIAL_VIEW_STATE = pydeck.ViewState(
