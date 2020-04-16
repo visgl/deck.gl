@@ -186,13 +186,13 @@ When [`picking`](/docs/developer-guide/custom-layers/picking.md) is enabled, `in
 
 ##### `onTileLoad` (Function, optional)
 
-`onTileLoad` is a function that is called when a tile in the tileset hierarchy is loaded. [Tile3D](https://https://github.com/visgl/loaders.gl/blob/master/docs/api-reference/tiles/tile-3d.md) object is passed in the callback.
+`onTileLoad` is a function that is called when a tile in the tileset hierarchy is loaded. [Tile3D](https://github.com/visgl/loaders.gl/blob/master/docs/api-reference/tiles/tile-3d.md) object is passed in the callback.
 
 - Default: `onTileLoad: (tileHeader) => {}`
 
 ##### `onTileUnload` (Function, optional)
 
-`onTileUnload` is a function that is called when a tile is unloaded. [Tile3D](https://https://github.com/visgl/loaders.gl/blob/master/docs/api-reference/tiles/tileset-3d.md#root--tile3dheader) object is passed in the callback.
+`onTileUnload` is a function that is called when a tile is unloaded. [Tile3D](https://github.com/visgl/loaders.gl/blob/master/docs/api-reference/tiles/tileset-3d.md#root--tile3dheader) object is passed in the callback.
 
 - Default: `onTileUnload: (tileHeader) => {}`
 

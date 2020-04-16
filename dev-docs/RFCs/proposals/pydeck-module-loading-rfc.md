@@ -29,7 +29,7 @@ commonjs and AMD are two ways to package up JS modules so that they can be impor
 
 ### Dynamic script loading
 
-loaders.gl has implemented a [dynamic script loading system](https://https://github.com/visgl/loaders.gl/tree/master/modules/loader-utils/src/lib/library-utils) to support optional, on-demand loading of large loader libraries and worker threads.
+loaders.gl has implemented a [dynamic script loading system](https://github.com/visgl/loaders.gl/tree/master/modules/loader-utils/src/lib/library-utils) to support optional, on-demand loading of large loader libraries and worker threads.
 
 This system could be copied / generalized to deck/pydeck so that a list of additional layer module URLs could be provided to pydeck and loaded dynamically.
 
