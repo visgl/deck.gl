@@ -54,7 +54,7 @@ matrix:
       install:
         - pip install -r requirements/requirements.txt
         - pip install -r requirements/requirements-dev.txt
-        - nvm install 10.16.0
-        - nvm use 10.16.0
+        - nvm install 12.12.0
+        - nvm use 12.12.0
         - pip install -e . --install-option "--build_all" --verbose
       script: make test
