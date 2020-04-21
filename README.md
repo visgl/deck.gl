@@ -87,9 +87,8 @@ pip install pydeck
 
 ## Contributing
 
-Pull requests and bug reports are welcome, and all of deck.gl's roadmaps and feature planning is done openly on GitHub. Read the [developement guidelines](/dev-docs) to learn about our dev process.
+deck.gl is part of vis.gl, a [Urban Computing Foundation](https://uc.foundation/) project. Read the [contribution guidelines](/CONTRIBUTING.md) if you are intrested in contributing.
 
-Note that once your PR is about to be merged, you will be asked to register as a contributor by filling in a short form.
 
 ## Attributions
 
