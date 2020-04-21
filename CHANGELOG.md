@@ -19,6 +19,12 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v8.1
 
+#### deck.gl [8.1.2] - Apr 20 2020
+
+-  @deck.gl/jupyter-widget: Remove Tile3DLoader (#4438)
+-  @deck.gl/jupyter-widget: Fix binary data bug (#4416)
+-  @deck.gl/jupyter-widget: Call mergeConfiguration again after addCustomLibraries complete (#4413)
+
 #### deck.gl [8.1.1] - Mar 25 2020
 
 - Fix PointCloud sizeUnits as "meters" (#4421)
