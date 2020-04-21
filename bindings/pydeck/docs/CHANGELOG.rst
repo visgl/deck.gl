@@ -6,6 +6,10 @@ Releases and associated GitHub PRs for pydeck are documented here.
 0.3 Releases
 -----------------
 
+0.3.1 - Apr 20 2020
+^^^^^^^^^^^^^^^^^^
+- Lock pydeck to deck.gl ~8.1.*
+
 0.3.0 - Apr 9 2020
 ^^^^^^^^^^^^^^^^^^
 - Add Black formatter to pydeck (#4453)
