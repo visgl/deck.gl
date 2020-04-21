@@ -59,7 +59,7 @@ Maintainers of deck.gl have commit access to this GitHub repository, and take pa
 
 If you are interested in becoming a maintainer, read the [governance guidelines](https://github.com/visgl/tsc/tree/master/developer-process/governance.md).
 
-The vis.gl TSC meets monthly and publishes meeting notes via a [mailing list]().
+The vis.gl TSC meets monthly and publishes meeting notes via a [mailing list](https://lists.uc.foundation/g/visgl).
 This mailing list can also be utilized to reach out to the TSC.  
 
 
