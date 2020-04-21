@@ -26,7 +26,7 @@ yarn
 yarn start-local
 ```
 
-If you consider opening a PR, here are some documentations to get you started:
+If you consider opening a PR, here is some documentation to get you started:
 
 - vis.gl [developer process](https://www.github.com/visgl/tsc/tree/master/developer-process)
 - [deck.gl API design guidelines](/dev-docs/deckgl-api-guidelines.md)
@@ -42,7 +42,7 @@ vis.gl is part of the [Urban Computing Foundation](https://uc.foundation/). See 
 deck.gl development is governed by the vis.gl Technical Steering Committee (TSC). Current members:
 
 - [Ib Green](https://github.com/ibgreen)
-- [Xiaoji Chen](https://github.com/Pessimistress) - chairman
+- [Xiaoji Chen](https://github.com/Pessimistress) - chairperson
 - [Tarek Sherif](https://github.com/tsherif)
 - [Ravi Akkenapally](https://github.com/1chandu)
 
