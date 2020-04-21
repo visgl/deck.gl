@@ -1,5 +1,9 @@
 ### pydeck CHANGELOG
 
+0.3.1 - April 20 2020
+=====
+- Lock pydeck to `@deck.gl/jupyter-widget` semver `~8.1.*`
+
 0.3.0b2 - March 4 2020
 =======
 - Support rendering in Google Collab (#4337)
