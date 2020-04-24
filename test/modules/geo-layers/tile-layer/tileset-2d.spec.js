@@ -143,14 +143,15 @@ test('Tileset2D#under-zoomed', t => {
     maxZoom: 13,
     onTileLoad: () => {}
   });
-  const zoomedOutViewport = new WebMercatorViewport(
+  const zoomedInViewport = new WebMercatorViewport(
     Object.assign({}, testViewState, {
-      zoom: 1
+      zoom: 10
     })
   );
 
-  tileset.update(zoomedOutViewport);
-  t.equal(tileset.tiles.length, 0);
+  tileset.update(zoomedInViewport);
+  const tileZoomLevels = tileset.tiles.map(tile => tile.z);
+  t.assert(tileZoomLevels[0] === 11);
   t.end();
 });
 

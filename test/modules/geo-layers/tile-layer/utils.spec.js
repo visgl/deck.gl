@@ -68,7 +68,7 @@ const TEST_CASES = [
     viewport: new WebMercatorViewport({longitude: -90, latitude: 45, zoom: 3}),
     minZoom: 4,
     maxZoom: undefined,
-    output: []
+    output: ['3,5,4', '4,5,4']
   },
   {
     title: 'over zoom',
@@ -107,7 +107,7 @@ const TEST_CASES = [
       zoom: 3
     }),
     maxZoom: 2,
-    output: ['0,1,2', '0,2,2', '3,1,2', '3,2,2']
+    output: ['0,1,2', '0,2,2']
   },
   {
     title: 'non-geospatial',
@@ -170,13 +170,14 @@ function mergeBoundingBox(boundingBoxes) {
 
 test('getTileIndices', t => {
   for (const testCase of TEST_CASES) {
-    const result = getTileIndices(
-      testCase.viewport,
-      testCase.maxZoom,
-      testCase.minZoom,
-      testCase.zRange,
-      testCase.tileSize
-    );
+    const {viewport, maxZoom, minZoom, zRange, tileSize} = testCase;
+    const result = getTileIndices({
+      viewport,
+      maxZoom,
+      minZoom,
+      zRange,
+      tileSize
+    });
     t.deepEqual(getTileIds(result), testCase.output, testCase.title);
   }
 
@@ -187,8 +188,8 @@ test('tileToBoundingBox', t => {
   for (const testCase of TEST_CASES) {
     if (testCase.output.length) {
       const {viewport, minZoom, maxZoom, tileSize, zRange} = testCase;
-      const boundingBoxes = getTileIndices(viewport, maxZoom, minZoom, zRange, tileSize).map(tile =>
-        tileToBoundingBox(viewport, tile.x, tile.y, tile.z, tileSize)
+      const boundingBoxes = getTileIndices({viewport, maxZoom, minZoom, zRange, tileSize}).map(
+        tile => tileToBoundingBox(viewport, tile.x, tile.y, tile.z, tileSize)
       );
       const result = mergeBoundingBox(boundingBoxes);
       const corners = [
