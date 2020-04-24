@@ -397,7 +397,7 @@ The following table compares the performance between CPU and GPU aggregations us
 
 ### Use react-map-gl Components with DeckGL
 
-For React users, it is now easy to use [react-map-gl](https://visgl.github.io/react-map-gl/) components with DeckGL, including DOM-based [marker and popups](https://visgl.github.io/react-map-gl/examples/draggable-markers), [popup](https://visgl.github.io/react-map-gl/#/Documentation/api-reference/popup), [navigation control](https://visgl.github.io/react-map-gl/#/Documentation/api-reference/navigation-control), [fullscreen control](https://visgl.github.io/react-map-gl/#/Documentation/api-reference/fullscreen-control) and [geolocate control](https://visgl.github.io/react-map-gl/#/Documentation/api-reference/geolocate-control). This can be done by supplying the `ContextProvider` prop on `DeckGL`:
+For React users, it is now easy to use [react-map-gl](https://visgl.github.io/react-map-gl/examples/controls) components with DeckGL, including DOM-based [marker](https://visgl.github.io/react-map-gl/docs/api-reference/marker), [popup](https://visgl.github.io/react-map-gl/docs/api-reference/popup), [navigation control](https://visgl.github.io/react-map-gl/docs/api-reference/navigation-control) and [fullscreen control](https://visgl.github.io/react-map-gl/docs/api-reference/fullscreen-control). This can be done by supplying the `ContextProvider` prop on `DeckGL`:
 
 ```jsx
 /// Example using react-map-gl controls with deck.gl
