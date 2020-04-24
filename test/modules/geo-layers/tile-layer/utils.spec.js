@@ -68,7 +68,7 @@ const TEST_CASES = [
     viewport: new WebMercatorViewport({longitude: -90, latitude: 45, zoom: 3}),
     minZoom: 4,
     maxZoom: undefined,
-    output: ['3,5,4', '4,5,4']
+    output: []
   },
   {
     title: 'over zoom',

@@ -91,7 +91,7 @@ export default class App extends PureComponent {
         tileSize,
         autoHighlight,
         highlightColor,
-        minZoom: -5,
+        minZoom: -7,
         maxZoom: 0,
         coordinateSystem: COORDINATE_SYSTEM.CARTESIAN,
         maxBoundingBox: [0, 0, height, width],

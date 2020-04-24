@@ -141,6 +141,7 @@ test('Tileset2D#under-zoomed', t => {
     getTileData,
     minZoom: 11,
     maxZoom: 13,
+    maxBoundingBox: [-180, -85.05113, 180, 85.05113],
     onTileLoad: () => {}
   });
   const zoomedInViewport = new WebMercatorViewport(

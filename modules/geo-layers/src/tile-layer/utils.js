@@ -190,6 +190,9 @@ export function getTileIndices({
 }) {
   let z = Math.ceil(viewport.zoom);
   if (Number.isFinite(minZoom) && z < minZoom) {
+    if (!maxBoundingBox) {
+      return [];
+    }
     z = minZoom;
   }
   if (Number.isFinite(maxZoom) && z > maxZoom) {

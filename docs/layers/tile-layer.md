@@ -142,6 +142,12 @@ Hide tiles when under-zoomed.
 
 - Default: 0
 
+##### `maxBoundingBox` (Array, optional)
+
+By providing this, the layer can be aware of what should be rendered when the viewport goes past `minZoom`.
+
+- Default: null
+
 
 ##### `maxCacheSize` (Number, optional)
 
