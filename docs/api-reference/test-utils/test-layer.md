@@ -85,4 +85,4 @@ A test case is an object with the following fields:
 
 ## Source
 
-[modules/test-utils/src/lifecycle-test.js](https://github.com/uber/deck.gl/blob/master/modules/test-utils/src/lifecycle-test.js)
+[modules/test-utils/src/lifecycle-test.js](https://github.com/visgl/deck.gl/blob/master/modules/test-utils/src/lifecycle-test.js)

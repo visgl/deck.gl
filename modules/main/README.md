@@ -34,7 +34,7 @@ import {ScatterplotLayer} from '@deck.gl/layers';
  */
 const scatterplotLayer = new ScatterplotLayer({
   id: 'bart-stations',
-  data: 'https://github.com/uber-common/deck.gl-data/blob/master/website/bart-stations.json',
+  data: 'https://github.com/visgl/deck.gl-data/blob/master/website/bart-stations.json',
   getRadius: d => Math.sqrt(d.entries) / 100,
   getPosition: d => d.coordinates,
   getColor: [255, 228, 0],

@@ -49,7 +49,7 @@ To consolidate these two modules and still provide their respective functionalit
 
 ## AttributeManager Integration
 
-CPU Grid/Hexagon aggregation methods should consume data from `attributes` returned by `AttributeManager` instead of directly parsing the `data` prop. As part of `AttributeManager Integration for GPU Aggregation` (https://github.com/uber/deck.gl/pull/3777) most of the aggregation layers updated to achieve this, similar changes will be done for `CPUGridLayer` and `HexagonLayer`.
+CPU Grid/Hexagon aggregation methods should consume data from `attributes` returned by `AttributeManager` instead of directly parsing the `data` prop. As part of `AttributeManager Integration for GPU Aggregation` (https://github.com/visgl/deck.gl/pull/3777) most of the aggregation layers updated to achieve this, similar changes will be done for `CPUGridLayer` and `HexagonLayer`.
 
 In addition to changes to layers, Grid and Hexagon aggregation methods must also be updated to consume `attributes` instead of `data` prop.
 

@@ -8,8 +8,8 @@ Flights from Heathrow around Europe, adapted from the deck.gl documentation.
 import pydeck
 
 DATA_URL = {
-    "AIRPORTS": "https://raw.githubusercontent.com/uber-common/deck.gl-data/master/examples/line/airports.json",
-    "FLIGHT_PATHS": "https://raw.githubusercontent.com/uber-common/deck.gl-data/master/examples/line/heathrow-flights.json",  # noqa
+    "AIRPORTS": "https://raw.githubusercontent.com/visgl/deck.gl-data/master/examples/line/airports.json",
+    "FLIGHT_PATHS": "https://raw.githubusercontent.com/visgl/deck.gl-data/master/examples/line/heathrow-flights.json",  # noqa
 }
 
 INITIAL_VIEW_STATE = pydeck.ViewState(latitude=47.65, longitude=7, zoom=4.5, max_zoom=16, pitch=50, bearing=0)

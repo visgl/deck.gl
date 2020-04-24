@@ -72,7 +72,7 @@ Configure the lighting within a visualization.
 
    Currently, pydeck will **not** raise an error on incorrect or omitted Layer arguments.
    If nothing renders in your viewport, check your browser's `developer console <https://javascript.info/devtools>`__
-   or review the layer catalog. You are encouraged to file an issue by clicking `here <https://github.com/uber/deck.gl/issues/new?assignees=&labels=bug&template=bug-report.md&title=pydeck:>`__
+   or review the layer catalog. You are encouraged to file an issue by clicking `here <https://github.com/visgl/deck.gl/issues/new?assignees=&labels=bug&template=bug-report.md&title=pydeck:>`__
    and mention ``pydeck`` in the title.
 
 

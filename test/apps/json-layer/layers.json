@@ -1,7 +1,7 @@
 [
   {
     "type": "GeoJsonLayer",
-    "data": "https://raw.githubusercontent.com/uber-common/deck.gl-data/master/examples/geojson/vancouver-blocks.json",
+    "data": "https://raw.githubusercontent.com/visgl/deck.gl-data/master/examples/geojson/vancouver-blocks.json",
     "opacity": 0.8,
     "stroked": false,
     "filled": true,

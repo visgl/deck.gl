@@ -2,7 +2,7 @@
 
 Use deck.gl layers as custom mapbox layers, enabling seamless interleaving of mapbox and deck.gl layers.
 
-<img src="https://raw.github.com/uber-common/deck.gl-data/master/images/whats-new/mapbox-layers.jpg" />
+<img src="https://raw.github.com/visgl/deck.gl-data/master/images/whats-new/mapbox-layers.jpg" />
 
 
 ## Advantages and Limitations

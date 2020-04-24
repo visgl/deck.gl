@@ -9,10 +9,10 @@ import * as dataSamples from '../data-samples';
 registerLoaders([GLTFLoader]);
 
 const GLTF_BASE_URL =
-  'https://raw.githubusercontent.com/uber-common/deck.gl-data/master/luma.gl/examples/gltf/';
+  'https://raw.githubusercontent.com/visgl/deck.gl-data/master/luma.gl/examples/gltf/';
 
 const CUBE_1x1x1 =
-  'https://raw.githubusercontent.com/uber-common/deck.gl-data/master/examples/layer-browser/cube_1x1x1.glb';
+  'https://raw.githubusercontent.com/visgl/deck.gl-data/master/examples/layer-browser/cube_1x1x1.glb';
 
 const CUBE_FACE_TO_DIRECTION = {
   [GL.TEXTURE_CUBE_MAP_POSITIVE_X]: 'right',

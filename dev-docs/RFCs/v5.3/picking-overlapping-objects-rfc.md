@@ -5,9 +5,9 @@
 * **Status**: **Implemented**
 
 References:
-* [luma.gl issue #432](https://github.com/uber/luma.gl/issues/432) - Support for picking overlapping objects.
-* [luma.gl PR #509](https://github.com/uber/luma.gl/pull/509) - Add discard to `picking` module fragment shader
-* [deck.gl PR #1730](https://github.com/uber/deck.gl/pull/1730) - Picking overlapping objects RFC implementation
+* [luma.gl issue #432](https://github.com/visgl/luma.gl/issues/432) - Support for picking overlapping objects.
+* [luma.gl PR #509](https://github.com/visgl/luma.gl/pull/509) - Add discard to `picking` module fragment shader
+* [deck.gl PR #1730](https://github.com/visgl/deck.gl/pull/1730) - Picking overlapping objects RFC implementation
 
 
 ## Summary

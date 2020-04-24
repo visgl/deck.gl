@@ -128,7 +128,7 @@ If Touch handlers not provided, touch events will call Mouse event handlers, sim
 ## Remarks
 
 * It is possible that there is an existing npm event handling module on just the right abstraction level that we could use. But we seem to already have implemented what we need several times over so maybe we should just keep ownership of this important piece of the stack, unless integrating with the module in question has a value to developers (familiarity etc)...
-* An experiment replacing our EventManager with hammer.js: https://github.com/uber/react-map-gl/compare/hammer?expand=1
+* An experiment replacing our EventManager with hammer.js: https://github.com/visgl/react-map-gl/compare/hammer?expand=1
 * hammer.js handles pointer events perfectly but is missing wheel and keyboard input. In the above code I extended the built-in PointerEventInput class to add mouse wheel event handler.
 * EventManager should use the Factory pattern. Note that neither of the following conditions may end up as requirements, but implementing EventManager as a factory rather than just instantiating each use directly gives us flexibility to handle these and other cases:
 * It can maintain a Singleton if necessary, e.g. to manage conflicts that might arise from multiple EventManager instances each attaching handlers to Window for some event types (mousemove, keydown, etc)

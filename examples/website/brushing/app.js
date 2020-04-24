@@ -23,7 +23,7 @@ const TOOLTIP_STYLE = {
 
 // Source data GeoJSON
 const DATA_URL =
-  'https://raw.githubusercontent.com/uber-common/deck.gl-data/master/examples/arc/counties.json'; // eslint-disable-line
+  'https://raw.githubusercontent.com/visgl/deck.gl-data/master/examples/arc/counties.json'; // eslint-disable-line
 
 export const inFlowColors = [[35, 181, 184]];
 export const outFlowColors = [[166, 3, 3]];

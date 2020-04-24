@@ -1,4 +1,4 @@
-*Would you like us to feature your project? [Let us know](https://github.com/uber/deck.gl/issues)!*
+*Would you like us to feature your project? [Let us know](https://github.com/visgl/deck.gl/issues)!*
 
 <div>
 
@@ -169,7 +169,7 @@
     <div>
       <a href="https://uber.github.io/deck.gl/showcases/ascii" target="_blank" rel="noopener noreferrer"><h2>Ascii Video Player</h2></a>
       <p>Uses the TextLayer API to convert pixels into characters on the fly. WebGL2 compatible browser is required.</p>
-      <p class="credit"><a href="https://github.com/uber/deck.gl/tree/6.4-release/showcases/ascii" target="_blank" rel="noopener noreferrer">Source code</a></p>
+      <p class="credit"><a href="https://github.com/visgl/deck.gl/tree/6.4-release/showcases/ascii" target="_blank" rel="noopener noreferrer">Source code</a></p>
     </div>
   </div>
 
@@ -184,7 +184,7 @@
     <div>
       <a href="https://uber.github.io/deck.gl/showcases/wind" target="_blank" rel="noopener noreferrer"><h2>Wind Map</h2></a>
       <p>GPU-based data interpolation and partical effects.</p>
-      <p class="credit"><a href="https://github.com/uber/deck.gl/tree/6.4-release/showcases/wind" target="_blank" rel="noopener noreferrer">Source code</a> | <a href="https://medium.com/vis-gl/wind-map-a58575f87fe3" target="_blank" rel="noopener noreferrer">Blog post</a></p>
+      <p class="credit"><a href="https://github.com/visgl/deck.gl/tree/6.4-release/showcases/wind" target="_blank" rel="noopener noreferrer">Source code</a> | <a href="https://medium.com/vis-gl/wind-map-a58575f87fe3" target="_blank" rel="noopener noreferrer">Blog post</a></p>
     </div>
   </div>
 

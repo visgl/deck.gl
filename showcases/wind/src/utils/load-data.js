@@ -3,9 +3,9 @@ import {voronoi} from 'd3-voronoi';
 import DelaunayInterpolation from '../layers/delaunay-interpolation/delaunay-interpolation';
 
 const STATIONS_DATA_URL =
-  'https://raw.githubusercontent.com/uber-common/deck.gl-data/master/examples/wind/stations.json'; // eslint-disable-line
+  'https://raw.githubusercontent.com/visgl/deck.gl-data/master/examples/wind/stations.json'; // eslint-disable-line
 const WEATHER_DATA_URL =
-  'https://raw.githubusercontent.com/uber-common/deck.gl-data/master/examples/wind/weather.bin'; // eslint-disable-line
+  'https://raw.githubusercontent.com/visgl/deck.gl-data/master/examples/wind/weather.bin'; // eslint-disable-line
 
 export function loadData() {
   return Promise.all([loadStations(), loadWeatherData()]).then(([stations, weather]) => {

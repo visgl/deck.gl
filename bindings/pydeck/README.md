@@ -103,7 +103,7 @@ Error handling will be expanded in future versions of pydeck.
 
 ### Issues
 
-If you encounter an issue, file it in the [deck.gl issues page](https://github.com/uber/deck.gl/issues/new?assignees=&labels=question&template=question.md&title=)
+If you encounter an issue, file it in the [deck.gl issues page](https://github.com/visgl/deck.gl/issues/new?assignees=&labels=question&template=question.md&title=)
 and include your browser's console output, if any.
 
 
@@ -111,7 +111,7 @@ and include your browser's console output, if any.
 
 ```bash
 # Clone the deck.gl repo
-git clone https://github.com/uber/deck.gl/
+git clone https://github.com/visgl/deck.gl/
 
 # Navigate to the pydeck module
 cd deck.gl/bindings/pydeck

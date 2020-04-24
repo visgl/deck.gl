@@ -12,7 +12,7 @@ const INITIAL_VIEW_STATE = {
 };
 
 const ROOT_URL =
-  'https://raw.githubusercontent.com/uber-common/deck.gl-data/master/website/image-tiles/moon.image';
+  'https://raw.githubusercontent.com/visgl/deck.gl-data/master/website/image-tiles/moon.image';
 
 export default class App extends PureComponent {
   constructor(props) {

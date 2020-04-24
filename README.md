@@ -2,22 +2,22 @@
   <a href="https://npmjs.org/package/deck.gl">
     <img src="https://img.shields.io/npm/v/deck.gl.svg?style=flat-square" alt="version" />
   </a>
-  <a href="https://travis-ci.com/uber/deck.gl">
-    <img src="https://api.travis-ci.com/uber/deck.gl.svg?branch=master" alt="build" />
+  <a href="https://travis-ci.com/visgl/deck.gl">
+    <img src="https://api.travis-ci.com/visgl/deck.gl.svg?branch=master" alt="build" />
   </a>
   <a href="https://npmjs.org/package/deck.gl">
     <img src="https://img.shields.io/npm/dm/deck.gl.svg?style=flat-square" alt="downloads" />
   </a>
-  <a href='https://coveralls.io/github/uber/deck.gl?branch=master'>
-    <img src='https://img.shields.io/coveralls/uber/deck.gl.svg?style=flat-square' alt='Coverage Status' />
+  <a href='https://coveralls.io/github/visgl/deck.gl?branch=master'>
+    <img src='https://img.shields.io/coveralls/visgl/deck.gl.svg?style=flat-square' alt='Coverage Status' />
   </a>
 </p>
 
-<h1 align="center">deck.gl | <a href="https://uber.github.io/deck.gl">Website</a></h1>
+<h1 align="center">deck.gl | <a href="https://visgl.github.io/deck.gl">Website</a></h1>
 
 <h5 align="center"> WebGL2-powered, highly performant large-scale data visualization</h5>
 
-[![docs](http://i.imgur.com/mvfvgf0.jpg)](https://uber.github.io/deck.gl)
+[![docs](http://i.imgur.com/mvfvgf0.jpg)](https://visgl.github.io/deck.gl)
 
 
 deck.gl is designed to simplify high-performance, WebGL-based visualization of large data sets. Users can quickly get impressive visual results with minimal effort by composing existing layers, or leverage deck.gl's extensible architecture to address custom needs.
@@ -42,7 +42,7 @@ Deck.gl is designed to be highly customizable. All layers come with flexible API
 ```
 
 - [Get started](/docs/get-started/using-standalone.md#using-the-scripting-api)
-- [Full examples](https://github.com/uber/deck.gl/tree/master/examples/get-started/scripting)
+- [Full examples](https://github.com/visgl/deck.gl/tree/master/examples/get-started/scripting)
 
 ### NPM Module
 
@@ -87,9 +87,8 @@ pip install pydeck
 
 ## Contributing
 
-Pull requests and bug reports are welcome, and all of deck.gl's roadmaps and feature planning is done openly on GitHub. Read the [developement guidelines](/dev-docs) to learn about our dev process.
+deck.gl is part of vis.gl, a [Urban Computing Foundation](https://uc.foundation/) project. Read the [contribution guidelines](/CONTRIBUTING.md) if you are intrested in contributing.
 
-Note that once your PR is about to be merged, you will be asked to register as a contributor by filling in a short form.
 
 ## Attributions
 
