@@ -397,7 +397,7 @@ The following table compares the performance between CPU and GPU aggregations us
 
 ### Use react-map-gl Components with DeckGL
 
-For React users, it is now easy to use [react-map-gl](http://uber.github.io/react-map-gl/#/Examples/markers-popups) components with DeckGL, including DOM-based [marker](https://uber.github.io/react-map-gl/#/Documentation/api-reference/marker), [popup](https://uber.github.io/react-map-gl/#/Documentation/api-reference/popup), [navigation control](https://uber.github.io/react-map-gl/#/Documentation/api-reference/navigation-control), [fullscreen control](https://uber.github.io/react-map-gl/#/Documentation/api-reference/fullscreen-control) and [geolocate control](https://uber.github.io/react-map-gl/#/Documentation/api-reference/geolocate-control). This can be done by supplying the `ContextProvider` prop on `DeckGL`:
+For React users, it is now easy to use [react-map-gl](https://visgl.github.io/react-map-gl/examples/controls) components with DeckGL, including DOM-based [marker](https://visgl.github.io/react-map-gl/docs/api-reference/marker), [popup](https://visgl.github.io/react-map-gl/docs/api-reference/popup), [navigation control](https://visgl.github.io/react-map-gl/docs/api-reference/navigation-control) and [fullscreen control](https://visgl.github.io/react-map-gl/docs/api-reference/fullscreen-control). This can be done by supplying the `ContextProvider` prop on `DeckGL`:
 
 ```jsx
 /// Example using react-map-gl controls with deck.gl
@@ -1109,11 +1109,11 @@ In addition, the `queryObject` offers a much requested `radius` parameter, allow
 
 ### Shader Assembly
 
-For developers that write their own custom layers, the `shadertools` shader assembly system is now in place to replace the existing `assembleShaders` function in deck.gl. The new shader assembler system supports organizing shader code into modules and is integrated with luma.gl's [`Model`](http://uber.github.io/luma.gl/#/documentation/api-reference/model) so users no longer need to call `assembleShaders` before creating the `Model` for the layer.
+For developers that write their own custom layers, the `shadertools` shader assembly system is now in place to replace the existing `assembleShaders` function in deck.gl. The new shader assembler system supports organizing shader code into modules and is integrated with luma.gl's [`Model`](https://luma.gl/docs/api-reference/engine/model) so users no longer need to call `assembleShaders` before creating the `Model` for the layer.
 
 ### Per-Layer Control of WebGL Parameters
 
-The base `Layer` class (which is inherited by all layers) supports a new property `parameters` that allows applications to specify the state of WebGL parameters such as blending mode, depth testing etc. This provides applications with significant control over the detailed rendering of layers. Note that the new `parameters` prop directly leverages the luma.gl v4 [setParameters](http://uber.github.io/luma.gl/#/documentation/api-reference/get-parameter) API, which allows all WebGL parameters to be specified as keys in a single parameter object.
+The base `Layer` class (which is inherited by all layers) supports a new property `parameters` that allows applications to specify the state of WebGL parameters such as blending mode, depth testing etc. This provides applications with significant control over the detailed rendering of layers. Note that the new `parameters` prop directly leverages the luma.gl v4 [setParameters](https://luma.gl/docs/api-reference/gltools/parameter-setting#setparameters) API, which allows all WebGL parameters to be specified as keys in a single parameter object.
 
 
 ### Layer Attribute Control

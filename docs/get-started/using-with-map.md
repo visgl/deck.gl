@@ -20,7 +20,7 @@ When using deck.gl and Mapbox, there are two options you can choose from:
 
 [react-map-gl](https://github.com/visgl/react-map-gl) is a React wrapper around mapbox-gl. If you'd like to use deck.gl with React, this component is the recommended companion.
 
-All the [examples on this website](https://github.com/visgl/deck.gl/tree/8.1-release/examples/website) are implemented using the React integration. The `DeckGL` React component works especially well as the parent of a react-map-gl [StaticMap](https://uber.github.io/react-map-gl/#/Documentation/api-reference/static-map), which automatically interprets the deck.gl view state (i.e. latitude, longitude, zoom etc). In this configuration your deck.gl layers will render as a perfectly synchronized geospatial overlay over the underlying map.
+All the [examples on this website](https://github.com/visgl/deck.gl/tree/8.1-release/examples/website) are implemented using the React integration. The `DeckGL` React component works especially well as the parent of a react-map-gl [StaticMap](https://visgl.github.io/react-map-gl/#/Documentation/api-reference/static-map), which automatically interprets the deck.gl view state (i.e. latitude, longitude, zoom etc). In this configuration your deck.gl layers will render as a perfectly synchronized geospatial overlay over the underlying map.
 
 ### About Mapbox Tokens
 

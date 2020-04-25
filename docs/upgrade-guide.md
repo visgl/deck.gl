@@ -172,7 +172,7 @@ See [View class](/docs/api-reference/view.md) documentation for details.
 #### Core
 
 - `layer.setLayerNeedsUpdate` is renamed to `layer.setNeedsUpdate()` and the old name will be removed in the next major release.
-- Previously deprecated `Layer` class method, `screenToDevicePixels`, is removed. Use luma.gl [utility methods](https://luma.gl/#/documentation/api-reference/webgl-2-classes/device-pixels) instead.
+- Previously deprecated `Layer` class method, `screenToDevicePixels`, is removed. Use luma.gl [utility methods](https://luma.gl/docs/api-reference/webgl-2-classes/device-pixels) instead.
 
 #### Layers
 
@@ -450,7 +450,7 @@ The default coordinate system `COORDINATE_SYSTEM.LNGLAT` is upgraded to offer hi
 
 #### luma.gl v6.0
 
-deck.gl v6.0 brings in luma.gl v6.0 which is a major release with a few breaking changes. The change that is most likely to affect deck.gl applications is probably that the way the `GL` constant is imported has changed. For details, see to the luma.gl [Upgrade Guide](https://luma.gl/#/documentation/overview/upgrade-guide).
+deck.gl v6.0 brings in luma.gl v6.0 which is a major release with a few breaking changes. The change that is most likely to affect deck.gl applications is probably that the way the `GL` constant is imported has changed. For details, see to the luma.gl [Upgrade Guide](https://luma.gl/docs/overview/upgrade-guide).
 
 
 #### Pixel sizes

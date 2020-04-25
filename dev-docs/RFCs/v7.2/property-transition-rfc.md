@@ -55,7 +55,7 @@ In deck.gl v7.2:
 
 The idea here is that setting a new value on an "interpolatable" props would not immediately make the layer take the new value, but would instead slowly animate the value from it's current state to its new.
 
-This way this would work is similar to how the current deck.gl [HexagonLayer demo](https://uber.github.io/deck.gl/#/examples/core-layers/hexagon-layer) on startup slowly increases elevation of the hexagon from zero. Except there would be no application code necessary to achieve this. The layer would be set in interpolation mode, and would start rendering
+This way this would work is similar to how the current deck.gl [HexagonLayer demo](https://visgl.github.io/deck.gl/#/examples/core-layers/hexagon-layer) on startup slowly increases elevation of the hexagon from zero. Except there would be no application code necessary to achieve this. The layer would be set in interpolation mode, and would start rendering
 
 ### Issue: Speed of Interpolation
 
