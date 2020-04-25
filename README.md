@@ -13,7 +13,7 @@
   </a>
 </p>
 
-<h1 align="center">deck.gl | <a href="https://visgl.github.io/deck.gl">Website</a></h1>
+<h1 align="center">deck.gl | <a href="https://deck.gl">Website</a></h1>
 
 <h5 align="center"> WebGL2-powered, highly performant large-scale data visualization</h5>
 
@@ -82,7 +82,7 @@ pip install pydeck
 * [Interactive playground](https://deck.gl/playground)
 * [deck.gl Codepen demos](https://codepen.io/vis-gl/)
 * [deck.gl Observable demos](https://beta.observablehq.com/@pessimistress)
-* [vis.gl Medium blog](https://medium.com/vis-gl) 
+* [vis.gl Medium blog](https://medium.com/vis-gl)
 * [deck.gl Slack workspace](https://join.slack.com/t/deckgl/shared_invite/zt-7oeoqie8-NQqzSp5SLTFMDeNSPxi7eg)
 
 ## Contributing
@@ -102,4 +102,3 @@ Data sources are listed in each example.
 <a href="https://www.browserstack.com/">
  <img src="https://d98b8t1nnulk5.cloudfront.net/production/images/static/logo.svg" alt="BrowserStack" width="200" />
 </a>
-

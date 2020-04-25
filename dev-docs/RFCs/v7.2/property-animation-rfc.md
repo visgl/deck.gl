@@ -70,7 +70,7 @@ Animation can benefit from the prop type system. The following Property Types su
 
 To make time-based animation work, the idea is that individual props could be set to "updater functions" in addition to constant values. The functions would be called every time the layer is updated (whether through a render or a time-based update).
 
-The updated functions would take a context parameter (see the luma.gl [AnimationLoop](https://uber.github.io/luma.gl/#/documentation/api-reference/animation-loop) for a good reference on how this would work).
+The updated functions would take a context parameter (see the luma.gl [AnimationLoop](https://visgl.github.io/luma.gl/docs/api-reference/animation-loop) for a good reference on how this would work).
 
 ```js
 const layer = new Layer {

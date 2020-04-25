@@ -249,7 +249,7 @@ export const showcasePages = generatePath([
   },
   {
     name: 'Wind Map',
-    external: 'http://uber.github.io/deck.gl/examples/wind'
+    external: 'http://visgl.github.io/deck.gl/examples/wind'
   },
   {
     name: 'Ascii Video Player',

@@ -140,7 +140,7 @@ x* We do not currently publish the JSON module as part of the standalone bundle 
 
 ### kepler.gl Jupyter Integration
 
-* [RFC](https://github.com/uber/kepler.gl/issues/331)
+* [RFC](https://github.com/keplergl/kepler.gl/issues/331)
 
 
 ### Mapbox Jupyter Integration
@@ -167,4 +167,3 @@ Minimal integrations for other languages? Especially languages that run in Noteb
 ### R
 
 See the [mapdeck](https://symbolixau.github.io/mapdeck/articles/mapdeck.html) integration for R.
-
