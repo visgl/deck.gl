@@ -2,7 +2,7 @@
   "name": "@deck.gl/arcgis",
   "description": "Use deck.gl as a custom ArcGIS API for JavaScript layer",
   "license": "MIT",
-  "version": "8.1.2",
+  "version": "8.1.3",
   "publishConfig": {
     "access": "public"
   },
@@ -34,5 +34,6 @@
   },
   "dependencies": {
     "esri-loader": "^2.13.0"
-  }
+  },
+  "gitHead": "99cefc1c1a40ec33da73fd362e9ecc349c0bee6c"
 }

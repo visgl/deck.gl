@@ -19,6 +19,12 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v8.1
 
+#### deck.gl [8.1.3] - Apr 25 2020
+
+- Add zRange prop to TileLayer for use with TerrainLayer (#4397)
+- Fix GeoJSON multi-geometry highlighting (#4426)
+- TextLayer binary: support UTF-32 characters (#4487)
+
 #### deck.gl [8.1.2] - Apr 20 2020
 
 -  @deck.gl/jupyter-widget: Remove Tile3DLoader (#4438)
