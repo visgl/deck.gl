@@ -24,5 +24,5 @@ npm start
 ```
 
 ### Data format
-Mapbox's [terrain API](https://docs.mapbox.com/help/troubleshooting/access-elevation-data/#mapbox-terrain-rgb) encodes elevation data in raster tiles. To use other data sources, checkout
+Mapbox's [terrain API](https://docs.mapbox.com/help/troubleshooting/access-elevation-data/#mapbox-terrain-rgb) encodes elevation data in raster tiles. To use other data sources, check out
 the [documentation of TerrainLayer](../../../docs/layers/terrain-layer.md).
