@@ -759,6 +759,14 @@ export const docPages = generatePath([
           {
             name: 'JSONConverter',
             content: getDocUrl('api-reference/json/json-converter.md')
+          },
+          {
+            name: 'JSONConfiguration',
+            content: getDocUrl('api-reference/json/json-configuration.md')
+          },
+          {
+            name: 'Conversion Reference',
+            content: getDocUrl('api-reference/json/conversion-reference.md')
           }
         ]
       },
