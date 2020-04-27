@@ -9,15 +9,15 @@ View classes enable applications to specify one or more rectangular viewports an
   <tbody>
     <tr>
       <td style="vertical-align: top">
-        <img height=200 src="https://raw.github.com/uber-common/deck.gl-data/master/images/docs/minimap.gif" />
+        <img height=200 src="https://raw.github.com/visgl/deck.gl-data/master/images/docs/minimap.gif" />
         <p><i>A "minimap" app, implemented as two overlapping, partially synchronized MapViews</i></p>
       </td>
       <td style="vertical-align: top">
-        <img height=200 src="https://raw.github.com/uber-common/deck.gl-data/master/images/docs/first-person-view.gif" />
+        <img height=200 src="https://raw.github.com/visgl/deck.gl-data/master/images/docs/first-person-view.gif" />
         <p><i>A vehicle log rendered from the driver's perspective, implemented with FirstPersonView</i></p>
       </td>
       <td style="vertical-align: top">
-        <img height=200 src="https://raw.github.com/uber-common/deck.gl-data/master/images/docs/orthographic-view.gif" />
+        <img height=200 src="https://raw.github.com/visgl/deck.gl-data/master/images/docs/orthographic-view.gif" />
         <p><i>A graph, implemented with OrthographicView</i></p>
       </td>
     </tr>

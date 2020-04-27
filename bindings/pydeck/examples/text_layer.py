@@ -8,7 +8,7 @@ Names of various public transit stops within San Francisco, plotted at the locat
 import pydeck as pdk
 import pandas as pd
 
-TEXT_LAYER_DATA = "https://raw.githubusercontent.com/uber-common/deck.gl-data/master/website/bart-stations.json"  # noqa
+TEXT_LAYER_DATA = "https://raw.githubusercontent.com/visgl/deck.gl-data/master/website/bart-stations.json"  # noqa
 df = pd.read_json(TEXT_LAYER_DATA)
 
 # Define a layer to display on a map

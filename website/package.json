@@ -3,7 +3,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/uber/deck.gl.git"
+    "url": "https://github.com/visgl/deck.gl.git"
   },
   "main": "index.js",
   "scripts": {

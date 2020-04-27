@@ -113,7 +113,7 @@ vec2 project_mercator_(vec2 lnglat) {
 vec4 project_position(vec4 position, vec3 position64Low) {
   vec4 position_world = project_uModelMatrix * position;
 
-  // Work around for a Mac+NVIDIA bug https://github.com/uber/deck.gl/issues/4145
+  // Work around for a Mac+NVIDIA bug https://github.com/visgl/deck.gl/issues/4145
   if (project_uProjectionMode == PROJECTION_MODE_WEB_MERCATOR) {
     if (project_uCoordinateSystem == COORDINATE_SYSTEM_LNGLAT) {
       return vec4(

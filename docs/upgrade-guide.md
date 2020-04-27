@@ -172,7 +172,7 @@ See [View class](/docs/api-reference/view.md) documentation for details.
 #### Core
 
 - `layer.setLayerNeedsUpdate` is renamed to `layer.setNeedsUpdate()` and the old name will be removed in the next major release.
-- Previously deprecated `Layer` class method, `screenToDevicePixels`, is removed. Use luma.gl [utility methods](https://luma.gl/#/documentation/api-reference/webgl-2-classes/device-pixels) instead.
+- Previously deprecated `Layer` class method, `screenToDevicePixels`, is removed. Use luma.gl [utility methods](https://luma.gl/docs/api-reference/webgl-2-classes/device-pixels) instead.
 
 #### Layers
 
@@ -269,7 +269,7 @@ The `project64` shader module is no longer registered by default. If you were pr
   ```
 #### CPU Grid layer and Hexagon layer updateTriggers
 
-`getElevationValue`, `getElevationWeight` and `getColorValue`, `getColorWeight` are now compared using `updateTriggers` like other layer [accessors](https://github.com/uber/deck.gl/blob/master/docs/developer-guide/using-layers.md#accessors). Update them without passing updateTriggers will no longer trigger layer update.
+`getElevationValue`, `getElevationWeight` and `getColorValue`, `getColorWeight` are now compared using `updateTriggers` like other layer [accessors](https://github.com/visgl/deck.gl/blob/master/docs/developer-guide/using-layers.md#accessors). Update them without passing updateTriggers will no longer trigger layer update.
 
 #### Deprecations
 
@@ -341,7 +341,7 @@ Breaking Changes:
 
 #### Lighting
 
-The old experimental prop `lightSettings` in many 3D layers is no longer supported. The new and improved settings are split into two places: a [material](https://github.com/uber/luma.gl/tree/master/docs/api-reference/core/materials) prop for each 3D layer and a shared set of lights specified by [LightingEffect](/docs/effects/lighting-effect.md) with the [effects prop of Deck](/docs/api-reference/deck.md#effects).
+The old experimental prop `lightSettings` in many 3D layers is no longer supported. The new and improved settings are split into two places: a [material](https://github.com/visgl/luma.gl/tree/master/docs/api-reference/core/materials) prop for each 3D layer and a shared set of lights specified by [LightingEffect](/docs/effects/lighting-effect.md) with the [effects prop of Deck](/docs/api-reference/deck.md#effects).
 Check [Using Lighting](/docs/developer-guide/using-lighting.md) in developer guide for more details.
 
 #### Views
@@ -450,7 +450,7 @@ The default coordinate system `COORDINATE_SYSTEM.LNGLAT` is upgraded to offer hi
 
 #### luma.gl v6.0
 
-deck.gl v6.0 brings in luma.gl v6.0 which is a major release with a few breaking changes. The change that is most likely to affect deck.gl applications is probably that the way the `GL` constant is imported has changed. For details, see to the luma.gl [Upgrade Guide](https://luma.gl/#/documentation/overview/upgrade-guide).
+deck.gl v6.0 brings in luma.gl v6.0 which is a major release with a few breaking changes. The change that is most likely to affect deck.gl applications is probably that the way the `GL` constant is imported has changed. For details, see to the luma.gl [Upgrade Guide](https://luma.gl/docs/overview/upgrade-guide).
 
 
 #### Pixel sizes
@@ -578,12 +578,12 @@ Following methods and props have been renamed for clarity. The semantics are unc
 
 | Removed uniform       | Comment |
 | ---                   | ---     |
-| renderPickingBuffer   |[picking shader module](https://github.com/uber/luma.gl/tree/5.0-release/src/shadertools/modules/picking)|
-| pickingEnabled        |[picking shader module](https://github.com/uber/luma.gl/tree/5.0-release/src/shadertools/modules/picking)|
-| selectedPickingColor  |[picking shader module](https://github.com/uber/luma.gl/tree/5.0-release/src/shadertools/modules/picking)|
+| renderPickingBuffer   |[picking shader module](https://github.com/visgl/luma.gl/tree/5.0-release/src/shadertools/modules/picking)|
+| pickingEnabled        |[picking shader module](https://github.com/visgl/luma.gl/tree/5.0-release/src/shadertools/modules/picking)|
+| selectedPickingColor  |[picking shader module](https://github.com/visgl/luma.gl/tree/5.0-release/src/shadertools/modules/picking)|
 
 
-The shader uniforms are used for implementing picking in custom shaders, these uniforms are no longer set by the deck.gl. Custom shaders can now use luma.gl [picking shader module](https://github.com/uber/luma.gl/tree/5.0-release/src/shadertools/modules/picking).
+The shader uniforms are used for implementing picking in custom shaders, these uniforms are no longer set by the deck.gl. Custom shaders can now use luma.gl [picking shader module](https://github.com/visgl/luma.gl/tree/5.0-release/src/shadertools/modules/picking).
 
 
 ### Initial WebGL State
@@ -608,7 +608,7 @@ The `assembleShaders` function was moved to luma.gl in v4.1 and is no longer re-
 
 ### Removed Immutable support
 
-`ScatterplotLayer` and `PolygonLayer` supported immutable/ES6 containers using [`get`](https://github.com/uber/deck.gl/blob/5.0-release/src/core/utils/get.js) method, due to performance reasons this support has been dropped.
+`ScatterplotLayer` and `PolygonLayer` supported immutable/ES6 containers using [`get`](https://github.com/visgl/deck.gl/blob/5.0-release/src/core/utils/get.js) method, due to performance reasons this support has been dropped.
 
 
 ## Upgrading from deck.gl v4 to v4.1

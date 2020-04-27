@@ -16,8 +16,7 @@ export const mapboxBuildingLayer = {
 export const deckPoiLayer = {
   id: 'deckgl-pois',
   type: ScatterplotLayer,
-  data:
-    'https://raw.githubusercontent.com/uber-common/deck.gl-data/master/examples/trips/pois.json',
+  data: 'https://raw.githubusercontent.com/visgl/deck.gl-data/master/examples/trips/pois.json',
   pickable: true,
   autoHighlight: true,
   radiusMinPixels: 0.25,

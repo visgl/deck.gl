@@ -2,17 +2,17 @@
 
 <p align="center">
   These docs are for
-  <a href="https://github.com/uber/deck.gl/blob/8.1-release/docs/README.md">
+  <a href="https://github.com/visgl/deck.gl/blob/8.1-release/docs/README.md">
     <img src="https://img.shields.io/badge/deck.gl-v8.1-brightgreen.svg?style=flat-square" />
   </a>
   Looking for an old version?
-  <a href="https://github.com/uber/deck.gl/blob/8.0-release/docs/README.md">
+  <a href="https://github.com/visgl/deck.gl/blob/8.0-release/docs/README.md">
     <img src="https://img.shields.io/badge/deck.gl-v8.0-green.svg?style=flat-square" />
   </a>
-  <a href="https://github.com/uber/deck.gl/blob/7.3-release/docs/README.md">
+  <a href="https://github.com/visgl/deck.gl/blob/7.3-release/docs/README.md">
     <img src="https://img.shields.io/badge/deck.gl-v7.3-green.svg?style=flat-square" />
   </a>
-  <a href="https://github.com/uber/deck.gl/blob/6.4-release/docs/README.md">
+  <a href="https://github.com/visgl/deck.gl/blob/6.4-release/docs/README.md">
     <img src="https://img.shields.io/badge/deck.gl-v6.4-green.svg?style=flat-square" />
   </a>
 </p>
@@ -40,7 +40,7 @@ Deck.gl is designed to be highly customizable. All layers come with flexible API
 ```
 
 - [Get started](/docs/get-started/using-standalone.md#using-the-scripting-api)
-- [Full examples](https://github.com/uber/deck.gl/tree/master/examples/get-started/scripting)
+- [Full examples](https://github.com/visgl/deck.gl/tree/master/examples/get-started/scripting)
 
 ### NPM Module
 
@@ -51,12 +51,12 @@ npm install deck.gl
 #### Pure JS
 
 - [Get started](/docs/get-started/using-standalone.md)
-- [Full examples](https://github.com/uber/deck.gl/tree/master/examples/get-started/pure-js)
+- [Full examples](https://github.com/visgl/deck.gl/tree/master/examples/get-started/pure-js)
 
 #### React
 
 - [Get started](/docs/get-started/using-with-react.md)
-- [Full examples](https://github.com/uber/deck.gl/tree/master/examples/get-started/react)
+- [Full examples](https://github.com/visgl/deck.gl/tree/master/examples/get-started/react)
 
 ### Python
 
@@ -64,7 +64,7 @@ npm install deck.gl
 pip install pydeck
 ```
 
-- [Get started](https://github.com/uber/deck.gl/blob/master/bindings/pydeck/README.md)
+- [Get started](https://github.com/visgl/deck.gl/blob/master/bindings/pydeck/README.md)
 
 ### Third-Party Bindings
 
@@ -80,7 +80,7 @@ deck.gl is developed in parallel with a number of companion modules, including:
 
 * [luma.gl](https://luma.gl/) - A general purpose WebGL library designed to be interoperable both with the raw WebGL API and (as far as possible) with other WebGL libraries. In particular, luma.gl does not claim ownership of the WebGL context, and can work with any supplied context, including contexts created by the application or other WebGL libraries.
 * [loaders.gl](https://loaders.gl) - a suite of framework-independent loaders for file formats focused on visualization of big data, including point clouds, 3D geometries, images, geospatial formats as well as tabular data.
-* [react-map-gl](https://uber.github.io/react-map-gl/) - A React wrapper around Mapbox GL which works seamlessly with deck.gl.
+* [react-map-gl](https://visgl.github.io/react-map-gl/) - A React wrapper around Mapbox GL which works seamlessly with deck.gl.
 * [nebula.gl](https://nebula.gl/) - A high-performance feature editing framework for deck.gl.
 
 

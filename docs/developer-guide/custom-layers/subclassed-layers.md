@@ -62,7 +62,7 @@ export default class MultiColorPathLayer extends PathLayer {
 }
 ```
 
-*[Courtesy](https://github.com/uber/deck.gl/pull/336) of [@dcposch](https://github.com/dcposch).*
+*[Courtesy](https://github.com/visgl/deck.gl/pull/336) of [@dcposch](https://github.com/dcposch).*
 
 ## Overriding Shaders
 

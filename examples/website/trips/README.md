@@ -25,5 +25,5 @@ npm start
 ```
 
 ### Data format
-Sample data is stored in [deck.gl Example Data](https://github.com/uber-common/deck.gl-data/tree/master/examples/trips). To use your own data, checkout
-the [documentation of TripsLayer](https://github.com/visgl/deck.gl/blob/master/docs/layers/trips-layer.md).
+Sample data is stored in [deck.gl Example Data](https://github.com/visgl/deck.gl-data/tree/master/examples/trips). To use your own data, checkout
+the [documentation of TripsLayer](../../../docs/layers/trips-layer.md).

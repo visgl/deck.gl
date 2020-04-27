@@ -5,8 +5,8 @@
 * **Status**: Draft
 
 Notes:
-* See discussions at end of [Issue 677](https://github.com/uber/deck.gl/issues/677)
-* Also see [PR 904](https://github.com/uber/deck.gl/pull/904)
+* See discussions at end of [Issue 677](https://github.com/visgl/deck.gl/issues/677)
+* Also see [PR 904](https://github.com/visgl/deck.gl/pull/904)
 
 
 ## Summary

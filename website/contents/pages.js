@@ -7,7 +7,7 @@ function getDocUrl(filename) {
 }
 
 function getCodeUrl(pathname) {
-  return `https://github.com/uber/deck.gl/tree/master/${pathname}`;
+  return `https://github.com/visgl/deck.gl/tree/master/${pathname}`;
 }
 
 // mapping from file path in source to generated page url
@@ -249,7 +249,7 @@ export const showcasePages = generatePath([
   },
   {
     name: 'Wind Map',
-    external: 'http://uber.github.io/deck.gl/examples/wind'
+    external: 'http://visgl.github.io/deck.gl/examples/wind'
   },
   {
     name: 'Ascii Video Player',
@@ -284,7 +284,7 @@ export const docPages = generatePath([
       },
       {
         name: 'Contributing',
-        content: getDocUrl('contributing.md')
+        content: getDocUrl('../CONTRIBUTING.md')
       },
       {
         name: 'Frequently Asked Questions',
@@ -759,6 +759,14 @@ export const docPages = generatePath([
           {
             name: 'JSONConverter',
             content: getDocUrl('api-reference/json/json-converter.md')
+          },
+          {
+            name: 'JSONConfiguration',
+            content: getDocUrl('api-reference/json/json-configuration.md')
+          },
+          {
+            name: 'Conversion Reference',
+            content: getDocUrl('api-reference/json/conversion-reference.md')
           }
         ]
       },

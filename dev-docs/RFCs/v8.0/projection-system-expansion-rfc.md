@@ -15,7 +15,7 @@ deck.gl started as an overlay component for Mapbox. Initially, it only supported
 
 The current data flow and interaction between components:
 
-![projection system](https://raw.github.com/uber-common/deck.gl-data/master/images/dev-docs/projection-rfc.png)
+![projection system](https://raw.github.com/visgl/deck.gl-data/master/images/dev-docs/projection-rfc.png)
 
 ## Problems and Proposals
 
@@ -27,7 +27,7 @@ The current common space is defined such that 1 common unit is equal to 1 screen
 
 For legacy reasons, the Web Mercator space is left-handed while the identity space is right-handed. Both are scaled to the zoom level of the current viewport. At a pre-determined zoom level, both spaces could switch to a dynamic offset mode to compensate for float32 precision loss.
 
-This has traditionally created much complexity and confusion when it comes to calculating the common space positions and sizes (e.g. [PR2230](https://github.com/uber/deck.gl/pull/2230), [PR2844](https://github.com/uber/deck.gl/pull/2844)).
+This has traditionally created much complexity and confusion when it comes to calculating the common space positions and sizes (e.g. [PR2230](https://github.com/visgl/deck.gl/pull/2230), [PR2844](https://github.com/visgl/deck.gl/pull/2844)).
 
 The proposal is to move the common space to a fixed scale and orientation. All coordinate systems will project to a right-handed common space. The scale is determined so that 1 common unit is equal to 1 screen pixel at the viewport center at zoom level `0`.
 

@@ -7,14 +7,14 @@
 
 ## Overview
 
-With the new [shader hooks](https://github.com/uber/luma.gl/blob/7.1-release/docs/api-reference/shadertools/assemble-shaders.md#createshaderhookhook-opts) system in luma.gl v7.1, it is now possible to create public APIs for shaders. This RFC proposes adding a set of standard shader hooks to the official deck.gl layers.
+With the new [shader hooks](https://github.com/visgl/luma.gl/blob/7.1-release/docs/api-reference/shadertools/assemble-shaders.md#createshaderhookhook-opts) system in luma.gl v7.1, it is now possible to create public APIs for shaders. This RFC proposes adding a set of standard shader hooks to the official deck.gl layers.
 
 ## Background
 
 One of the biggest pain points in subclassing a layer is injecting custom code into its shaders. Currently, this is done in one of two ways:
 
-- Our [developer guide](https://github.com/uber/deck.gl/blob/7.1-release/docs/developer-guide/custom-layers/subclassed-layers.md) instructs users to copy and modify the entire shader. This is very fragile because every future change we make to this layer's shaders, which is considered private API, will break the custom layer.
-- Our [brushing example](https://github.com/uber/deck.gl/tree/7.1-release/examples/website/brushing/brushing-layers) and [TripsLayer](https://github.com/uber/deck.gl/blob/7.1-release/modules/geo-layers/src/trips-layer/trips-layer.js) use shader injection.
+- Our [developer guide](https://github.com/visgl/deck.gl/blob/7.1-release/docs/developer-guide/custom-layers/subclassed-layers.md) instructs users to copy and modify the entire shader. This is very fragile because every future change we make to this layer's shaders, which is considered private API, will break the custom layer.
+- Our [brushing example](https://github.com/visgl/deck.gl/tree/7.1-release/examples/website/brushing/brushing-layers) and [TripsLayer](https://github.com/visgl/deck.gl/blob/7.1-release/modules/geo-layers/src/trips-layer/trips-layer.js) use shader injection.
  
 While the second approach is a little more robust by dynamically adding custom code to the base shader, the following issues remain:
 

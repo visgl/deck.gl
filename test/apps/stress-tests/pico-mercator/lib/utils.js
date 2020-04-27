@@ -47,7 +47,7 @@
       }
     },
 
-    // From deck.gl: https://github.com/uber/deck.gl/blob/master/examples/layer-browser/src/utils/grid-aggregator.js
+    // From deck.gl: https://github.com/visgl/deck.gl/blob/master/examples/layer-browser/src/utils/grid-aggregator.js
     // Used under MIT license
     pointsToWorldGrid(points, cellSize) {
       let numPoints = points.length;
@@ -126,7 +126,7 @@
       return points;
     },
 
-    // From deck.gl: https://github.com/uber/deck.gl/blob/master/modules/layers/src/column-layer/column-geometry.js
+    // From deck.gl: https://github.com/visgl/deck.gl/blob/master/modules/layers/src/column-layer/column-geometry.js
     // Used under MIT license
     createColumn(radius = 1, height = 1, nradial = 10) {
       const vertsAroundEdge = nradial + 1; // loop

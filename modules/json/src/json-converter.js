@@ -1,6 +1,6 @@
 // Converts JSON to props ("hydrating" classes, resolving enums and functions etc).
 // Lightly processes `json` props, transform string values, and extract `views` and `layers`
-// See: https://github.com/uber/deck.gl/blob/master/dev-docs/RFCs/v6.1/json-layers-rfc.md
+// See: https://github.com/visgl/deck.gl/blob/master/dev-docs/RFCs/v6.1/json-layers-rfc.md
 //
 // NOTES:
 // * This is intended to provide minimal necessary processing required to support

@@ -25,14 +25,14 @@ The key problems with these system are the following:
 
 ## Implementation
 
-The problem of a left-handed common space is easily remedied by modifying the relevant parts of the mercator projection and view matrix calculations. This simply amounts to changing the mercator projection in [project.glsl.js](https://github.com/uber/deck.gl/blob/master/modules/core/src/shaderlib/project/project.glsl.js#L99-L102) to:
+The problem of a left-handed common space is easily remedied by modifying the relevant parts of the mercator projection and view matrix calculations. This simply amounts to changing the mercator projection in [project.glsl.js](https://github.com/visgl/deck.gl/blob/master/modules/core/src/shaderlib/project/project.glsl.js#L99-L102) to:
 ```c
 return vec2(
   radians(x) + PI,
   PI + log(tan_fp32(PI * 0.25 + radians(lnglat.y) * 0.5)) // Note it's now `PI + ...`
 );
 ```
-and removing -y scaling in the initialization of the view matrix in [viewport.js](https://github.com/uber/deck.gl/blob/master/modules/core/src/viewports/viewport.js#L354).
+and removing -y scaling in the initialization of the view matrix in [viewport.js](https://github.com/visgl/deck.gl/blob/master/modules/core/src/viewports/viewport.js#L354).
 
 The issue of scaling the z-axis is also easily resolved by removing [that scaling](https://github.com/uber-common/viewport-mercator-project/blob/master/src/web-mercator-utils.js#L195) from the view matrix calculation and adjusting the [near and far planes](https://github.com/uber-common/viewport-mercator-project/blob/master/src/web-mercator-utils.js#L236-L237) accordingly.
 

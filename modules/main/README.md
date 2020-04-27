@@ -5,7 +5,7 @@ A WebGL2-powered, highly performant framework for large-scale data visualization
 
 [API Documentation](http://deck.gl/#/documentation)
 
-[![docs](http://i.imgur.com/mvfvgf0.jpg)](https://uber.github.io/deck.gl)
+[![docs](http://i.imgur.com/mvfvgf0.jpg)](https://visgl.github.io/deck.gl)
 
 ## Installation
 
@@ -34,7 +34,7 @@ import {ScatterplotLayer} from '@deck.gl/layers';
  */
 const scatterplotLayer = new ScatterplotLayer({
   id: 'bart-stations',
-  data: 'https://github.com/uber-common/deck.gl-data/blob/master/website/bart-stations.json',
+  data: 'https://github.com/visgl/deck.gl-data/blob/master/website/bart-stations.json',
   getRadius: d => Math.sqrt(d.entries) / 100,
   getPosition: d => d.coordinates,
   getColor: [255, 228, 0],

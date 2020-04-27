@@ -12,7 +12,7 @@ This example is adapted from the deck.gl documentation.
 import pydeck as pdk
 
 HEXAGON_LAYER_DATA = (
-    "https://raw.githubusercontent.com/uber-common/deck.gl-data/master/examples/3d-heatmap/heatmap-data.csv"  # noqa
+    "https://raw.githubusercontent.com/visgl/deck.gl-data/master/examples/3d-heatmap/heatmap-data.csv"  # noqa
 )
 
 # Define a layer to display on a map
