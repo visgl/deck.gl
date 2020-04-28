@@ -142,9 +142,9 @@ Hide tiles when under-zoomed.
 
 - Default: 0
 
-##### `maxBoundingBox` (Array, optional)
+##### `extent` (Array, optional)
 
-By providing this, the layer can be aware of what should be rendered when the viewport goes past `minZoom`.
+If provided, the layer will load and render the tiles at the in this box when underzoomed.  The box is of the form [left, top, right, bottom]
 
 - Default: null
 

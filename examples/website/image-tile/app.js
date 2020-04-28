@@ -94,7 +94,7 @@ export default class App extends PureComponent {
         minZoom: -7,
         maxZoom: 0,
         coordinateSystem: COORDINATE_SYSTEM.CARTESIAN,
-        maxBoundingBox: [0, 0, height, width],
+        extent: [0, 0, width, height],
         getTileData: ({x, y, z}) => {
           if (this.inTileBounds({x, y, z: -z})) {
             return load(`${ROOT_URL}/moon.image_files/${15 + z}/${x}_${y}.jpeg`);
