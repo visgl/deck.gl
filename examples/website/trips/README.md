@@ -1,4 +1,4 @@
-This is a minimal standalone version of the [TripsLayer example](https://deck.gl/#/examples/custom-layers/trip-routes)
+This is a minimal standalone version of the [TripsLayer example](https://deck.gl/#/examples/core-layers/trips-layer)
 on [deck.gl](http://deck.gl) website.
 
 ### Usage
@@ -26,4 +26,4 @@ npm start
 
 ### Data format
 Sample data is stored in [deck.gl Example Data](https://github.com/visgl/deck.gl-data/tree/master/examples/trips). To use your own data, check out
-the [documentation of TripsLayer](https://github.com/visgl/deck.gl/tree/master/modules/experimental-layers/src/trips-layer).
+the [documentation of TripsLayer](../../../docs/layers/trips-layer.md).
