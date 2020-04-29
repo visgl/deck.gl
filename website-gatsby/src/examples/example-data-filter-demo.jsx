@@ -32,7 +32,7 @@ export default class DataFilterDemo extends Component {
         <InfoPanel sourceLink={`${GITHUB_TREE}/${this.props.path}`}>
           <h3>40 Years of Earthquakes</h3>
           <p>
-            Earthquakes of manitude 4.5 and above
+            Earthquakes of magnitude 4.5 and above
             <br />
             (1979 - 2019)
           </p>
