@@ -9,7 +9,10 @@ You can get access to a Cesium token here:
 https://cesium.com/docs/tutorials/getting-started/#your-first-app
 """
 
+import os
+
 import pydeck
+
 
 initial_view_state = pydeck.ViewState(
     **{
@@ -29,9 +32,9 @@ layer = pydeck.Layer(
     data="https://assets.cesium.com/33301/tileset.json",
     id="tiles-st-helens",
     loader="@@#CesiumIonLoader",
-    loadOptions={"cesium-ion": {"accessToken": os.environ("CESIUM_API_KEY"),}},  # noqa
+    loadOptions={"cesium-ion": {"accessToken": os.environ("CESIUM_API_KEY")}},  # noqa
 )
 
 
-r = pydeck.Deck(layers=[layer], initial_view_state=initial_view_state,)
+r = pydeck.Deck(layers=[layer], initial_view_state=initial_view_state)
 r.to_html("tile_3d_layer.html", notebook_display=False, offline=True)
