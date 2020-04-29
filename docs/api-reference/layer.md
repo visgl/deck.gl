@@ -194,11 +194,14 @@ If this callback returns a truthy value, the `dragend` event is marked as handle
 
 Requires `pickable` to be true.
 
-##### `highlightColor` (Array, optional)
+##### `highlightColor` (Array|Function, optional)
 
 * Default: `[0, 0, 128, 128]`
 
-RGBA color to be used to render highlighted object. When 3 component (RGB) array is specified, a default value of 255 is used for alpha.
+RGBA color to blend with the highlighted object (either the hovered over object if `autoHighlight: true`, or the object at the index specified by `highlightedObjectIndex`). When the value is a 3 component (RGB) array, a default alpha of 255 is applied.
+
+- If an array is supplied, it is used for the object that is currently highlighted.
+- If a function is supplied, it is called with a [pickingInfo](/docs/developer-guide/interactivity.md#the-picking-info-object) object when the hovered object changes. The return value is used as the highlight color for the picked object. Only works with `autoHighlight: true`.
 
 ##### `highlightedObjectIndex` (Integer, optional)
 

@@ -97,7 +97,7 @@ const defaultProps = {
   // Selection/Highlighting
   highlightedObjectIndex: null,
   autoHighlight: false,
-  highlightColor: {type: 'color', value: [0, 0, 128, 128]}
+  highlightColor: {type: 'accessor', value: [0, 0, 128, 128]}
 };
 
 export default class Layer extends Component {
@@ -757,9 +757,9 @@ export default class Layer extends Component {
       if (!autoHighlight) {
         parameters.pickingSelectedColor = null;
       }
-      // TODO - fix in luma?
-      highlightColor[3] = highlightColor[3] || 255;
-      parameters.pickingHighlightColor = highlightColor;
+      if (Array.isArray(highlightColor)) {
+        parameters.pickingHighlightColor = highlightColor;
+      }
 
       // highlightedObjectIndex will overwrite any settings from auto highlighting.
       if (Number.isInteger(highlightedObjectIndex)) {
