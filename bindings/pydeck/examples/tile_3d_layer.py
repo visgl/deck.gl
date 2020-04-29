@@ -32,7 +32,7 @@ layer = pydeck.Layer(
     data="https://assets.cesium.com/33301/tileset.json",
     id="tiles-st-helens",
     loader="@@#CesiumIonLoader",
-    loadOptions={"cesium-ion": {"accessToken": os.environ("CESIUM_API_KEY")}},  # noqa
+    loadOptions={"cesium-ion": {"accessToken": os.environ.get("CESIUM_API_KEY")}},  # noqa
 )
 
 
