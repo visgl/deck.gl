@@ -65,6 +65,9 @@
 .. image:: gallery/images/text_layer.png
    :width: 0
 
+.. image:: gallery/images/tile_3d_layer.png
+   :width: 0
+
 .. image:: gallery/images/trips_layer.png
    :width: 0
 
