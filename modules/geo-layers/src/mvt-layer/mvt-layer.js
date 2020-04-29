@@ -10,7 +10,7 @@ import ClipExtension from './clip-extension';
 const WORLD_SIZE = 512;
 
 const defaultProps = {
-  uniquePropertyId: {type: 'string', value: '', compare: false}
+  uniqueIdProperty: {type: 'string', value: '', compare: false}
 };
 
 export default class MVTLayer extends TileLayer {
@@ -43,7 +43,7 @@ export default class MVTLayer extends TileLayer {
   }
 
   onHover(info, pickingEvent) {
-    const {uniquePropertyId, autoHighlight} = this.props;
+    const {uniqueIdProperty, autoHighlight} = this.props;
 
     if (autoHighlight) {
       const {highlightedFeatureId} = this.state;
@@ -51,7 +51,7 @@ export default class MVTLayer extends TileLayer {
       let hoveredFeatureId;
 
       if (hoveredFeature) {
-        hoveredFeatureId = getFeatureUniqueId(hoveredFeature, uniquePropertyId);
+        hoveredFeatureId = getFeatureUniqueId(hoveredFeature, uniqueIdProperty);
       }
 
       if (hoveredFeatureId !== highlightedFeatureId) {

@@ -3,9 +3,11 @@ import {InteractionTestRunner} from '@deck.gl/test-utils';
 
 import MapControllerTests from './map-controller';
 import PickingTests from './picking';
+import MVTLayerPickingTests from './mvt-layer-picking';
 
 runTest(MapControllerTests);
 runTest(PickingTests);
+runTest(MVTLayerPickingTests);
 
 function runTest({title, props, getTestCases, only = false}) {
   (only ? test.only : test)(`Interaction Test#${title}`, t => {
