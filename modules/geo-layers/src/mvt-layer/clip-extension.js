@@ -46,7 +46,7 @@ const injectionVs = {
 varying float clip_isVisible;
 `,
   'vs:DECKGL_FILTER_GL_POSITION': `
-  clip_isVisible = float(clip_isInBounds(geometry.position.xy));
+  clip_isVisible = float(clip_isInBounds(geometry.worldPosition.xy));
 `,
   'fs:#decl': `
 varying float clip_isVisible;
@@ -81,8 +81,9 @@ varying vec2 clip_commonPosition;
 };
 
 export default class ClipExtension extends LayerExtension {
-  getShaders(opts) {
+  getShaders() {
     const hasAnchor = 'instancePositions' in this.getAttributeManager().attributes;
+    this.state.clippingAnchor = hasAnchor;
 
     return hasAnchor
       ? {
@@ -97,15 +98,19 @@ export default class ClipExtension extends LayerExtension {
 
   draw({uniforms}) {
     const {clipBounds = defaultProps.clipBounds} = this.props;
-    const corner0 = this.projectPosition([clipBounds[0], clipBounds[1], 0]);
-    const corner1 = this.projectPosition([clipBounds[2], clipBounds[3], 0]);
+    if (this.state.clippingAnchor) {
+      uniforms.clip_bounds = defaultProps.clipBounds;
+    } else {
+      const corner0 = this.projectPosition([clipBounds[0], clipBounds[1], 0]);
+      const corner1 = this.projectPosition([clipBounds[2], clipBounds[3], 0]);
 
-    uniforms.clip_bounds = [
-      Math.min(corner0[0], corner1[0]),
-      Math.min(corner0[1], corner1[1]),
-      Math.max(corner0[0], corner1[0]),
-      Math.max(corner0[1], corner1[1])
-    ];
+      uniforms.clip_bounds = [
+        Math.min(corner0[0], corner1[0]),
+        Math.min(corner0[1], corner1[1]),
+        Math.max(corner0[0], corner1[0]),
+        Math.max(corner0[1], corner1[1])
+      ];
+    }
   }
 }
 
