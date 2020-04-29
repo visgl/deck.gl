@@ -12,9 +12,6 @@ import * as deck from './deck-bundle';
 import {DracoWorkerLoader} from '@loaders.gl/draco';
 import {Tiles3DLoader, CesiumIonLoader} from '@loaders.gl/3d-tiles';
 
-// Note: deck already registers JSONLoader...
-registerLoaders([CSVLoader, DracoWorkerLoader]);
-
 import {loadScript} from './script-utils';
 
 import GL from '@luma.gl/constants';
@@ -43,7 +40,8 @@ const jsonConverterConfiguration = {
   }
 };
 
-registerLoaders([CSVLoader]);
+// Note: deck already registers JSONLoader...
+registerLoaders([CSVLoader, DracoWorkerLoader]);
 
 const jsonConverter = new deck.JSONConverter({
   configuration: jsonConverterConfiguration
