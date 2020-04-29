@@ -1,7 +1,17 @@
+"""
+ArcLayer
+========
+
+Map of commutes to work within a segment of downtown San Francisco using a deck.gl ArcLayer.
+
+Green indicates a start point, and red indicates the destination.
+
+The data is collected by the US Census Bureau and viewable in the 2017 LODES data set: https://lehd.ces.census.gov/data/
+"""
+
 import pydeck
 import pandas as pd
 
-# Map of commutes to work within downtown San Francisco, from the US Census LODES data set
 DATA_URL = "https://raw.githubusercontent.com/ajduberstein/sf_public_data/master/bay_area_commute_routes.csv"
 DOWNTOWN_BOUNDING_BOX = [
     -122.43135291617365,
@@ -35,16 +45,12 @@ arc_layer = pydeck.Layer(
     get_source_color=RED_RGB,
     get_target_color=GREEN_RGB,
     pickable=True,
-    auto_highlight=True
+    auto_highlight=True,
 )
 
-view_state = pydeck.ViewState(
-    latitude=37.7576171, longitude=-122.5776844, bearing=45, pitch=50, zoom=8,
-)
+view_state = pydeck.ViewState(latitude=37.7576171, longitude=-122.5776844, bearing=45, pitch=50, zoom=8,)
 
 
-TOOLTIP_TEXT = {
-    "html": "{S000} jobs <br /> Home of commuter in red; work location in green"
-}
+TOOLTIP_TEXT = {"html": "{S000} jobs <br /> Home of commuter in red; work location in green"}
 r = pydeck.Deck(arc_layer, initial_view_state=view_state, tooltip=TOOLTIP_TEXT)
 r.to_html("arc_layer.html", notebook_display=False)

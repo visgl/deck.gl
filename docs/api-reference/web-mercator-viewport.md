@@ -122,6 +122,21 @@ Returns:
 
 * New coordinate array in `[longitude, latitude]` or `[longitude, latitude, altitude]` if `z` is provided.
 
+##### `fitBounds`
+
+Returns a new viewport that fit around the given bounding box. Only supports non-perspective mode.
+
+Parameters:
+
+* `bounds` (Array) - Bounding box in `[[longitude, latitude], [longitude, latitude]]`.
+* `opts` (Object)
+  + `padding` (Number) - The amount of padding in pixels to add to the given bounds.
+  + `offset` (Array) - The center in `[x, y]` of the given bounds relative to the map's center measured in pixels.
+  
+Returns: 
+
+* New `WebMercatorViewport` fit around the gven bounding box.
+
 ## Remarks
 
 * Because `WebMercatorViewport` a subclass of `Viewport`, an application can implement support for generic 3D `Viewport`s and automatically get the ability to accept web mercator style map coordinates.
@@ -132,4 +147,4 @@ Returns:
 
 ## Source
 
-[modules/core/src/viewports/web-mercator-viewport.js](https://github.com/uber/deck.gl/blob/master/modules/core/src/viewports/web-mercator-viewport.js)
+[modules/core/src/viewports/web-mercator-viewport.js](https://github.com/visgl/deck.gl/blob/master/modules/core/src/viewports/web-mercator-viewport.js)

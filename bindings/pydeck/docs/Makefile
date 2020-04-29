@@ -17,3 +17,16 @@ help:
 # "make mode" option.  $(O) is meant as a shortcut for $(SPHINXOPTS).
 %: Makefile
 	@$(SPHINXBUILD) -M $@ "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O)
+
+html-embeds:
+	@echo "Producing embedded HTML examples"
+	python scripts/embed_examples.py
+
+html-thumbnails:
+	@echo "Producing HTML thumbnail assets"
+	python scripts/snap_thumbnails.py
+
+html-grid-page:
+	@echo "Producing examples grid"
+	$(MAKE) html-embeds
+	python scripts/generate_grid_html.py

@@ -1,4 +1,4 @@
-// All utility mehtods needed to implement Marching Squres algorithm
+// All utility methods needed to implement Marching Squares algorithm
 // Ref: https://en.wikipedia.org/wiki/Marching_squares
 
 import {log} from '@deck.gl/core';
@@ -109,7 +109,7 @@ export function getCode(opts) {
 /* eslint-enable complexity, max-statements*/
 
 // Returns intersection vertices for given cellindex
-// [x, y] refers current marchng cell, reference vertex is always top-right corner
+// [x, y] refers current marching cell, reference vertex is always top-right corner
 export function getVertices(opts) {
   const {gridOrigin, cellSize, x, y, code, meanCode, type = CONTOUR_TYPE.ISO_LINES} = opts;
   const thresholdData = Object.assign({}, DEFAULT_THRESHOLD_DATA, opts.thresholdData);

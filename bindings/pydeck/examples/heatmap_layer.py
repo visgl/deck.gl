@@ -1,17 +1,20 @@
+"""
+HeatmapLayer
+===========
+
+Location of livestock raised in New Mexico in the United States in 2006,
+via the United Nations and FAOSTAT, with the source data viewable here: http://www.fao.org/faostat/en/
+
+Locations for poultry are viewable in blue and cattle are in orange.
+
+Overlaid with the satellite imagery from Mapbox to highlight the how terrain affects agriculture.
+"""
+
 import pandas as pd
 import pydeck
 
-# Data source: New Mexico livestock data from 2006 from FAOSTAT
-"""
-Map of livestock locations in the state of New Mexico
-"""
-
-CATTLE_DATA = (
-    "https://raw.githubusercontent.com/ajduberstein/geo_datasets/master/nm_cattle.csv"
-)
-POULTRY_DATA = (
-    "https://raw.githubusercontent.com/ajduberstein/geo_datasets/master/nm_chickens.csv"
-)
+CATTLE_DATA = "https://raw.githubusercontent.com/ajduberstein/geo_datasets/master/nm_cattle.csv"
+POULTRY_DATA = "https://raw.githubusercontent.com/ajduberstein/geo_datasets/master/nm_chickens.csv"
 
 
 HEADER = ["lng", "lat", "weight"]
@@ -62,9 +65,7 @@ r = pydeck.Deck(
     layers=[cattle, poultry],
     initial_view_state=view,
     map_style="mapbox://styles/mapbox/dark-v9",
-    tooltip={
-        "text": "Concentration of cattle in blue, concentration of poultry in orange"
-    },
+    tooltip={"text": "Concentration of cattle in blue, concentration of poultry in orange"},
 )
 
 r.to_html("heatmap_layer.html", notebook_display=False)

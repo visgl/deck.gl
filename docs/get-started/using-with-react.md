@@ -132,7 +132,7 @@ For more information on this syntax, see [DeckGL API](/docs/api-reference/react/
 ## Remarks
 
 * The `DeckGL` component is typically rendered as a child of a
-  map component like [react-map-gl](https://uber.github.io/react-map-gl/#/),
+  map component like [react-map-gl](https://visgl.github.io/react-map-gl),
   but could be rendered as a child of any React component that you want to
   overlay your layers on top of.
 

@@ -1,6 +1,6 @@
 .. _tooltip-overview:
 
-Configuring the pydeck tooltip
+Configuring tooltips
 ===============================
 
 While you can get a tooltip in pydeck by simply setting ``Deck(tooltip=True)`` in the 
@@ -8,17 +8,17 @@ While you can get a tooltip in pydeck by simply setting ``Deck(tooltip=True)`` i
 
 To achieve this, :class:`pydeck.bindings.deck.Deck` ``tooltip`` parameter can take a dictionary with the following keys:
 
-- ``html``: Set the innerHTML_ of the tooltip.
-- ``text``: Set the innerText_ of the tooltip.
-- ``style``: A dictionary of CSS styles that will modify the default style of the tooltip.
+- ``html`` - Set the innerHTML_ of the tooltip.
+- ``text`` - Set the innerText_ of the tooltip.
+- ``style`` - A dictionary of CSS styles that will modify the default style of the tooltip.
 
-Note that you should only provide either `html` or `text`, but not both.
+Note that you should only provide either ``html`` or ``text``, but not both.
 
 Templating syntax
 -----------------
 
-A lightweight template syntax is available to both the `text` and `html` keys,
-using similar conventions as Python's `.format` syntax with variable names.
+A lightweight template syntax is available to both the ``text`` and ``html`` keys,
+using similar conventions as Python's ``.format`` syntax with variable names.
 
 .. code-block:: python
 
@@ -108,7 +108,7 @@ A full demo is below:
     r.to_html()
 
 .. _pickingInfo.object:
-    https://github.com/uber/deck.gl/blob/master/docs/developer-guide/interactivity.md#the-picking-info-object
+    https://github.com/visgl/deck.gl/blob/master/docs/developer-guide/interactivity.md#the-picking-info-object
 .. _innerHTML:
     https://developer.mozilla.org/en-US/docs/Web/API/Element/innerHTML
 .. _innerText:

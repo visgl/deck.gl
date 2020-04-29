@@ -21,7 +21,7 @@ test('jupyter-widget: dynamic-registration', t0 => {
     return;
   }
 
-  t0.test('loadExternalLibrary', t => {
+  t0.test('addCustomLibraries', t => {
     const TEST_LIBRARY_NAME = 'DemoLibrary';
     window[TEST_LIBRARY_NAME] = {DemoCompositeLayer};
     const onComplete = () => {
@@ -33,13 +33,14 @@ test('jupyter-widget: dynamic-registration', t0 => {
       delete window[TEST_LIBRARY_NAME];
       t.end();
     };
-    module.loadExternalLibrary(
-      {
-        libraryName: TEST_LIBRARY_NAME,
-        resourceUri: '/index.js',
-        onComplete
-      },
-      () => Promise.resolve()
+    module.addCustomLibraries(
+      [
+        {
+          libraryName: TEST_LIBRARY_NAME,
+          resourceUri: '/index.js'
+        }
+      ],
+      onComplete
     );
   });
 

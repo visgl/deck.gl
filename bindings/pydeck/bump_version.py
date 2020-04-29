@@ -25,9 +25,7 @@ def bump(release_type):
     elif release_type == "RC":
         return version_info.bump_prerelease(token="rc")
     else:
-        raise Exception(
-            "Release type must be one of the following:", ", ".join(RELEASE_TYPES)
-        )
+        raise Exception("Release type must be one of the following:", ", ".join(RELEASE_TYPES))
 
 
 def rewrite_version_file(semver):
@@ -39,22 +37,17 @@ def rewrite_version_file(semver):
 
 def rewrite_frontend_version_file():
     """Current associated version of NPM modules deck.gl and @deck.gl/jupyter-widget"""
-    lerna_version = json.loads(open('../../lerna.json').read())['version']
+    lerna_version = json.loads(open("../../lerna.json").read())["version"]
     with open("pydeck/frontend_semver.py", "w+") as f:
         t = jinja2.Template("DECKGL_SEMVER = '{{semver_str}}'")
         contents = t.render(semver_str=str(lerna_version))
         f.write(contents)
+    return lerna_version
 
 
-parser = argparse.ArgumentParser(
-    description="Bump semver for pydeck. Modifies pydeck/_version.py directly."
-)
-parser.add_argument(
-    "release_type", action="store", choices=RELEASE_TYPES, help="Release type to bump"
-)
-parser.add_argument(
-    "-y", "--yes", action="store_true", dest="yes", help="Automatically answer yes"
-)
+parser = argparse.ArgumentParser(description="Bump semver for pydeck. Modifies pydeck/_version.py directly.")
+parser.add_argument("release_type", action="store", choices=RELEASE_TYPES, help="Release type to bump")
+parser.add_argument("-y", "--yes", action="store_true", dest="yes", help="Automatically answer yes")
 
 
 if __name__ == "__main__":
@@ -69,5 +62,6 @@ if __name__ == "__main__":
         if response != "Y":
             sys.exit(0)
     rewrite_version_file(bumped_version)
-    rewrite_frontend_version_file()
+    deckgl_version = rewrite_frontend_version_file()
+    print("Locked to deck.gl@{}".format(deckgl_version))
     print(bumped_version)

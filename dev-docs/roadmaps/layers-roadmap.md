@@ -51,7 +51,7 @@ A layer that also renders a 3D scene with our custom scene graph solutions. Comp
 
 ### TopoJSONLayer
 
-People would like us to support more standard data format so they could simply plug their data in and expect to have something rendered on their screen. TopoJSON has been requested by our users (https://github.com/uber/deck.gl/issues/591)
+People would like us to support more standard data format so they could simply plug their data in and expect to have something rendered on their screen. TopoJSON has been requested by our users (https://github.com/visgl/deck.gl/issues/591)
 
 ## Trips Layer Catalog
 

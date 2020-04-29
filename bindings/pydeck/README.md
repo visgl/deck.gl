@@ -1,5 +1,5 @@
 [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/uber/deck.gl/binder)
-[![Documentation Status](https://readthedocs.org/projects/deckgl/badge/?version=latest)](https://deckgl.readthedocs.io/en/latest/?badge=latest)
+[![Documentation Status](https://readthedocs.org/projects/deckgl/badge/?version=latest)](https://pydeck.gl)
 [![Anaconda-Server Badge](https://anaconda.org/conda-forge/pydeck/badges/version.svg)](https://anaconda.org/conda-forge/pydeck)
 
 # pydeck: Large-scale interactive data visualization in Python
@@ -14,7 +14,7 @@ For __interactive demos__, click the binder logo below:
 [![Binder](https://mybinder.org/static/logo.svg?v=f9f0d927b67cc9dc99d788c822ca21c0)](https://mybinder.org/v2/gh/uber/deck.gl/binder)
 
 
-[See further documentation here.](https://deckgl.readthedocs.io/en/latest/)
+See the documentation at the [pydeck website](https://pydeck.gl)
 
 ## Installation
 
@@ -39,7 +39,8 @@ To install pydeck for JupyterLab, run the following:
 
 ```bash
 jupyter labextension install @jupyter-widgets/jupyterlab-manager
-jupyter labextension install @deck.gl/jupyter-widget
+DECKGL_SEMVER=`python -c "import pydeck; print(pydeck.frontend_semver.DECKGL_SEMVER)"`
+jupyter labextension install @deck.gl/jupyter-widget@$DECKGL_SEMVER
 ```
 
 ### Mapbox API token
@@ -102,7 +103,7 @@ Error handling will be expanded in future versions of pydeck.
 
 ### Issues
 
-If you encounter an issue, file it in the [deck.gl issues page](https://github.com/uber/deck.gl/issues/new?assignees=&labels=question&template=question.md&title=)
+If you encounter an issue, file it in the [deck.gl issues page](https://github.com/visgl/deck.gl/issues/new?assignees=&labels=question&template=question.md&title=)
 and include your browser's console output, if any.
 
 
@@ -110,7 +111,7 @@ and include your browser's console output, if any.
 
 ```bash
 # Clone the deck.gl repo
-git clone https://github.com/uber/deck.gl/
+git clone https://github.com/visgl/deck.gl/
 
 # Navigate to the pydeck module
 cd deck.gl/bindings/pydeck

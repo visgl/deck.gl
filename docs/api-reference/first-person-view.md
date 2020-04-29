@@ -24,8 +24,8 @@ To render, a `FirstPersonView` needs to be combined with a `viewState` object wi
 * `position` (`Number[3]`, optional) - meter offsets of the camera from the lng-lat anchor point. Default `[0, 0, 0]`.
 * `bearing` (`Number`, optional) - bearing angle in degrees. Default `0` (north).
 * `pitch` (`Number`, optional) - pitch angle in degrees. Default `0` (horizontal).
-- `maxPitch` (`Number`, optional) - max pitch angle. Default `90` (up).
-- `minPitch` (`Number`, optional) - min pitch angle. Default `-90` (down).
+- `maxPitch` (`Number`, optional) - max pitch angle. Default `90` (down).
+- `minPitch` (`Number`, optional) - min pitch angle. Default `-90` (up).
 
 
 ## FirstPersonController
@@ -60,4 +60,4 @@ See the documentation of [Controller](/docs/api-reference/controller.md) for imp
 
 ## Source
 
-[modules/core/src/views/first-person-view.js](https://github.com/uber/deck.gl/blob/master/modules/core/src/views/first-person-view.js)
+[modules/core/src/views/first-person-view.js](https://github.com/visgl/deck.gl/blob/master/modules/core/src/views/first-person-view.js)

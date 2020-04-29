@@ -1,11 +1,17 @@
+"""
+ScatterplotLayer
+================
+
+Plot of the number of exits for various subway stops within San Francisco, California.
+
+Adapted from the deck.gl documentation.
+"""
+
 import pydeck as pdk
 import pandas as pd
 import math
 
-SCATTERPLOT_LAYER_DATA = (
-    "https://raw.githubusercontent.com/uber-common/"
-    "deck.gl-data/master/website/bart-stations.json"
-)
+SCATTERPLOT_LAYER_DATA = "https://raw.githubusercontent.com/visgl/deck.gl-data/master/website/bart-stations.json"
 df = pd.read_json(SCATTERPLOT_LAYER_DATA)
 
 # Use pandas to calculate additional data
@@ -30,12 +36,8 @@ layer = pdk.Layer(
 )
 
 # Set the viewport location
-view_state = pdk.ViewState(
-    latitude=37.7749295, longitude=-122.4194155, zoom=10, bearing=0, pitch=45
-)
+view_state = pdk.ViewState(latitude=37.7749295, longitude=-122.4194155, zoom=10, bearing=0, pitch=0)
 
 # Render
-r = pdk.Deck(
-    layers=[layer], initial_view_state=view_state, tooltip={"text": "{name}\n{address}"}
-)
-r.to_html("scatterplot_layer.html")
+r = pdk.Deck(layers=[layer], initial_view_state=view_state, tooltip={"text": "{name}\n{address}"})
+r.to_html("scatterplot_layer.html", notebook_display=False)

@@ -6,8 +6,8 @@ import LayerDebugger from './layer-debugger';
 /* eslint-disable */
 const DATA_URL = {
   stations:
-    'https://raw.githubusercontent.com/uber-common/deck.gl-data/master/website/bart-stations.json',
-  lines: 'https://raw.githubusercontent.com/uber-common/deck.gl-data/master/website/bart-lines.json'
+    'https://raw.githubusercontent.com/visgl/deck.gl-data/master/website/bart-stations.json',
+  lines: 'https://raw.githubusercontent.com/visgl/deck.gl-data/master/website/bart-lines.json'
 };
 /* eslint-enable */
 

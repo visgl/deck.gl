@@ -67,7 +67,7 @@ class Deck(JSONMixin):
         if isinstance(layers, Layer):
             self.layers.append(layers)
         else:
-            self.layers = layers
+            self.layers = layers or []
         self.views = views
         self.map_style = map_style
         # Use passed view state
@@ -84,8 +84,7 @@ class Deck(JSONMixin):
         self.effects = effects
         if self.mapbox_key is None:
             warnings.warn(
-                "Mapbox API key is not set. This may impact available features of pydeck.",
-                UserWarning,
+                "Mapbox API key is not set. This may impact available features of pydeck.", UserWarning,
             )
 
     @property
@@ -125,6 +124,7 @@ class Deck(JSONMixin):
         iframe_width=700,
         iframe_height=500,
         as_string=False,
+        offline=False,
         **kwargs
     ):
         """Write a file and loads it to an iframe, if in a Jupyter environment;
@@ -162,6 +162,7 @@ class Deck(JSONMixin):
             tooltip=self.deck_widget.tooltip,
             custom_libraries=pydeck_settings.custom_libraries,
             as_string=as_string,
+            offline=offline,
             **kwargs
         )
         return f

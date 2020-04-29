@@ -11,4 +11,4 @@ def is_pandas_df(obj):
     bool
         Returns True if object is a Pandas DataFrame and False otherwise
     """
-    return obj.__class__.__module__ == 'pandas.core.frame' and obj.to_records and obj.to_dict
+    return obj.__class__.__module__ == "pandas.core.frame" and obj.to_records and obj.to_dict

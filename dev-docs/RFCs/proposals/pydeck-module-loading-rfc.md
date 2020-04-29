@@ -18,7 +18,7 @@ One of the major advantages of deck.gl is that it is a toolbox on top of which a
 
 ## Background
 
-Layer injection in pydeck is currently done [here](https://github.com/uber/deck.gl/blob/master/modules/jupyter-widget/src/create-deck.js). As can be seen it is a static process that depends on the layer modules being bundled during the pydeck build process.
+Layer injection in pydeck is currently done [here](https://github.com/visgl/deck.gl/blob/master/modules/jupyter-widget/src/create-deck.js). As can be seen it is a static process that depends on the layer modules being bundled during the pydeck build process.
 
 ## Prior Art
 
@@ -29,7 +29,7 @@ commonjs and AMD are two ways to package up JS modules so that they can be impor
 
 ### Dynamic script loading
 
-loaders.gl has implemented a [dynamic script loading system](https://github.com/uber-web/loaders.gl/tree/master/modules/loader-utils/src/lib/library-utils) to support optional, on-demand loading of large loader libraries and worker threads.
+loaders.gl has implemented a [dynamic script loading system](https://github.com/visgl/loaders.gl/tree/master/modules/loader-utils/src/lib/library-utils) to support optional, on-demand loading of large loader libraries and worker threads.
 
 This system could be copied / generalized to deck/pydeck so that a list of additional layer module URLs could be provided to pydeck and loaded dynamically.
 

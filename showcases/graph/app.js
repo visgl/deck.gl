@@ -49,21 +49,21 @@ class Root extends Component {
     const dataConfig = [
       {
         data:
-          'https://raw.githubusercontent.com/uber-common/deck.gl-data/master/examples/graph/sample-graph.json',
+          'https://raw.githubusercontent.com/visgl/deck.gl-data/master/examples/graph/sample-graph.json',
         loader: requestJSON,
         adaptor: GraphBasic,
         hasNodeTypes: true
       },
       {
         data:
-          'https://raw.githubusercontent.com/uber-common/deck.gl-data/master/examples/graph/flare.json',
+          'https://raw.githubusercontent.com/visgl/deck.gl-data/master/examples/graph/flare.json',
         loader: requestJSON,
         adaptor: GraphFlare,
         hasNodeTypes: false
       },
       {
         data:
-          'https://raw.githubusercontent.com/uber-common/deck.gl-data/master/examples/graph/facebook-SNAP.csv',
+          'https://raw.githubusercontent.com/visgl/deck.gl-data/master/examples/graph/facebook-SNAP.csv',
         loader: requestCSV,
         adaptor: GraphSNAP,
         hasNodeTypes: false

@@ -9,7 +9,7 @@
 When `TextLayer` generates shared `fontAtlas` for required `characterSet`, it applied default settings, like 
 `fontSize`, `buffer`(Whitespace surround each character), etc.. However one setting can not be suitable for 
 all the different fonts. For example, [Cinzel](https://fonts.google.com/specimen/Cinzel) has a special shape 
-of `Q` character, which requires a big buffer [See detail](https://github.com/uber/deck.gl/pull/2609). Big buffer around each character can be very expensive 
+of `Q` character, which requires a big buffer [See detail](https://github.com/visgl/deck.gl/pull/2609). Big buffer around each character can be very expensive 
 if the target `characterSet` is considerably large, which is not necessary for other fonts.
 
 `TextLayer` needs expose the settings related to `fontAtlas` generation for users to manipulate when needed.

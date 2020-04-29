@@ -5,13 +5,13 @@ The GraphLayer example lays out and renders a force-directed network graph.
 Two primary layers are implemented in this example:
 
 ### `graph-layer`
-A ["collection layer"](http://uber.github.io/deck.gl/#/documentation/custom-layers/composite-layers) that delegates rendering to:
-- a [ScatterplotLayer](http://uber.github.io/deck.gl/#/documentation/layer-catalog/scatterplot-layer)
-- a [LineLayer](http://uber.github.io/deck.gl/#/documentation/layer-catalog/line-layer)
-- (_optional_) a [IconLayer](http://uber.github.io/deck.gl/#/documentation/layer-catalog/icon-layer)
+A ["collection layer"](http://visgl.github.io/deck.gl/#/documentation/custom-layers/composite-layers) that delegates rendering to:
+- a [ScatterplotLayer](http://visgl.github.io/deck.gl/#/documentation/layer-catalog/scatterplot-layer)
+- a [LineLayer](http://visgl.github.io/deck.gl/#/documentation/layer-catalog/line-layer)
+- (_optional_) a [IconLayer](http://visgl.github.io/deck.gl/#/documentation/layer-catalog/icon-layer)
 
 ### `graph-layout-layer`
-An ["adaptor layer"](http://uber.github.io/deck.gl/#/documentation/custom-layers/composite-layers) that links a layout (by default, `graph-simulation`, which uses [d3-force](https://github.com/d3/d3-force)) to the renderer.
+An ["adaptor layer"](http://visgl.github.io/deck.gl/#/documentation/custom-layers/composite-layers) that links a layout (by default, `graph-simulation`, which uses [d3-force](https://github.com/d3/d3-force)) to the renderer.
 
 To parse data into the format required by your layout, and to manage addition / removal of graph elements, use or write a graph "adaptor".
 Currently, all three of [the existing adaptors](./graph-layer/adaptor) parse data into an array of `nodes` and `links`, but none yet offer support for addition/removal of nodes/links.
@@ -27,7 +27,7 @@ npm start
 ```
 
 ## Data format
-Sample datasets are stored in [deck.gl Example Data](https://github.com/uber-common/deck.gl-data/tree/master/examples/graph).
+Sample datasets are stored in [deck.gl Example Data](https://github.com/visgl/deck.gl-data/tree/master/examples/graph).
 
 
 ## Attribution

@@ -42,18 +42,39 @@ export function getURLFromTemplate(template, properties) {
 /**
  * gets the bounding box of a viewport
  */
-function getBoundingBox(viewport) {
-  const corners = [
-    viewport.unproject([0, 0]),
-    viewport.unproject([viewport.width, 0]),
-    viewport.unproject([0, viewport.height]),
-    viewport.unproject([viewport.width, viewport.height])
-  ];
+function getBoundingBox(viewport, zRange) {
+  let corners;
+  if (zRange && zRange.length === 2) {
+    const [minZ, maxZ] = zRange;
+    const minTargetZ = {targetZ: minZ};
+    const maxTargetZ = {targetZ: maxZ};
+    corners = [
+      // Lower zRange
+      viewport.unproject([0, 0], minTargetZ),
+      viewport.unproject([viewport.width, 0], minTargetZ),
+      viewport.unproject([0, viewport.height], minTargetZ),
+      viewport.unproject([viewport.width, viewport.height], minTargetZ),
+
+      // Upper zRange
+      viewport.unproject([0, 0], maxTargetZ),
+      viewport.unproject([viewport.width, 0], maxTargetZ),
+      viewport.unproject([0, viewport.height], maxTargetZ),
+      viewport.unproject([viewport.width, viewport.height], maxTargetZ)
+    ];
+  } else {
+    corners = [
+      viewport.unproject([0, 0]),
+      viewport.unproject([viewport.width, 0]),
+      viewport.unproject([0, viewport.height]),
+      viewport.unproject([viewport.width, viewport.height])
+    ];
+  }
+
   return [
-    Math.min(corners[0][0], corners[1][0], corners[2][0], corners[3][0]),
-    Math.min(corners[0][1], corners[1][1], corners[2][1], corners[3][1]),
-    Math.max(corners[0][0], corners[1][0], corners[2][0], corners[3][0]),
-    Math.max(corners[0][1], corners[1][1], corners[2][1], corners[3][1])
+    Math.min(...corners.map(arr => arr[0])),
+    Math.min(...corners.map(arr => arr[1])),
+    Math.max(...corners.map(arr => arr[0])),
+    Math.max(...corners.map(arr => arr[1]))
   ];
 }
 
@@ -122,8 +143,8 @@ function getIdentityTileIndices(viewport, z, tileSize) {
   return indices;
 }
 
-function getOSMTileIndices(viewport, z) {
-  const bbox = getBoundingBox(viewport);
+function getOSMTileIndices(viewport, z, zRange) {
+  const bbox = getBoundingBox(viewport, zRange);
   const scale = getScale(z);
   /*
     minX, maxX could be out of bounds if longitude is near the 180 meridian or multiple worlds
@@ -160,7 +181,7 @@ function getOSMTileIndices(viewport, z) {
  * than minZoom, return an empty array. If the current zoom level is greater than maxZoom,
  * return tiles that are on maxZoom.
  */
-export function getTileIndices(viewport, maxZoom, minZoom, tileSize = TILE_SIZE) {
+export function getTileIndices(viewport, maxZoom, minZoom, zRange, tileSize = TILE_SIZE) {
   let z = Math.ceil(viewport.zoom);
   if (Number.isFinite(minZoom) && z < minZoom) {
     return [];
@@ -170,6 +191,6 @@ export function getTileIndices(viewport, maxZoom, minZoom, tileSize = TILE_SIZE)
   }
 
   return viewport.isGeospatial
-    ? getOSMTileIndices(viewport, z)
+    ? getOSMTileIndices(viewport, z, zRange)
     : getIdentityTileIndices(viewport, z, tileSize);
 }

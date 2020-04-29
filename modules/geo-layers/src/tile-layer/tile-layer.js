@@ -20,6 +20,7 @@ const defaultProps = {
   maxCacheSize: null,
   maxCacheByteSize: null,
   refinementStrategy: STRATEGY_DEFAULT,
+  zRange: null,
   getHighlightedObjectIndex: {type: 'function', value: () => -1, compare: false}
 };
 
@@ -86,8 +87,8 @@ export default class TileLayer extends CompositeLayer {
 
   _updateTileset() {
     const {tileset} = this.state;
-    const {onViewportLoad} = this.props;
-    const frameNumber = tileset.update(this.context.viewport);
+    const {onViewportLoad, zRange} = this.props;
+    const frameNumber = tileset.update(this.context.viewport, {zRange});
     const {isLoaded} = tileset;
 
     const loadingStateChanged = this.state.isLoaded !== isLoaded;
@@ -139,13 +140,7 @@ export default class TileLayer extends CompositeLayer {
   }
 
   getHighlightedObjectIndex(tile) {
-    const {getHighlightedObjectIndex, highlightedObjectIndex} = this.props;
-
-    if (highlightedObjectIndex && highlightedObjectIndex > -1) {
-      return highlightedObjectIndex;
-    }
-
-    return getHighlightedObjectIndex(tile);
+    return this.props.getHighlightedObjectIndex(tile);
   }
 
   getPickingInfo({info, sourceLayer}) {

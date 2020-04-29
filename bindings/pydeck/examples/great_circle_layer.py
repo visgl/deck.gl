@@ -1,10 +1,21 @@
+"""
+GreatCircleLayer
+================
+
+Plot of direct flights to and from San Francisco International Airport.
+
+Origin is in green; destinations are in blue.
+
+Adapted from the deck.gl documentation.
+"""
+
 import pydeck as pdk
 import pandas as pd
 
 GREAT_CIRCLE_LAYER_DATA = (
-    "https://raw.githubusercontent.com/uber-common/"
-    "deck.gl-data/master/website/flights.json"
+    "https://raw.githubusercontent.com/visgl/deck.gl-data/master/website/flights.json"  # noqa
 )
+
 df = pd.read_json(GREAT_CIRCLE_LAYER_DATA)
 
 # Use pandas to prepare data for tooltip
@@ -21,15 +32,14 @@ layer = pdk.Layer(
     get_target_position="to.coordinates",
     get_source_color=[64, 255, 0],
     get_target_color=[0, 128, 200],
+    auto_highlight=True,
 )
 
 # Set the viewport location
-view_state = pdk.ViewState(latitude=50, longitude=-40, zoom=3, bearing=0, pitch=0)
+view_state = pdk.ViewState(latitude=50, longitude=-40, zoom=1, bearing=0, pitch=0)
 
 # Render
-r = pdk.Deck(
-    layers=[layer],
-    initial_view_state=view_state,
-    tooltip={"text": "{from_name} to {to_name}"},
-)
-r.to_html("great_circle_layer.html")
+r = pdk.Deck(layers=[layer], initial_view_state=view_state, tooltip={"text": "{from_name} to {to_name}"},)
+r.picking_radius = 10
+
+r.to_html("great_circle_layer.html", notebook_display=False)

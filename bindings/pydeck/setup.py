@@ -27,11 +27,11 @@ def read(*parts):
 
 def assert_prelease_on_master():
     """Require that prereleases only be from the master branch"""
-    git_branch = check_output('git rev-parse --abbrev-ref HEAD'.split()).decode('ascii').strip()
-    is_prerelease = any([c for c in version_ns['__version__'] if c.isalpha()])
-    msg = 'Can only release a prerelease from master, but branch is {} and release version is {}'
+    git_branch = check_output("git rev-parse --abbrev-ref HEAD".split()).decode("ascii").strip()
+    is_prerelease = any([c for c in version_ns["__version__"] if c.isalpha()])
+    msg = "Can only release a prerelease from master, but branch is {} and release version is {}"
     if is_prerelease:
-        assert git_branch == 'master', msg.format(git_branch, version_ns['__version__'])
+        assert git_branch == "master", msg.format(git_branch, version_ns["__version__"])
 
 
 log.info("setup.py entered")
@@ -44,10 +44,7 @@ yarn_root = os.path.join(here, PATH_TO_REPO_ROOT)
 widget_dir = os.path.join(here, PATH_TO_WIDGET)
 
 npm_path = os.pathsep.join(
-    [
-        os.path.join(PATH_TO_REPO_ROOT, "node_modules", ".bin"),
-        os.environ.get("PATH", os.defpath),
-    ]
+    [os.path.join(PATH_TO_REPO_ROOT, "node_modules", ".bin"), os.environ.get("PATH", os.defpath)]
 )
 
 
@@ -118,14 +115,8 @@ class FrontendBuild(Command):
         js_dist_dir = os.path.join(widget_dir, "dist")
         nbextension_folder = os.path.join(here, "pydeck", "nbextension", "static")
         js_files = [
-            {
-                "source": os.path.join(js_dist_dir, "index.js"),
-                "destination": nbextension_folder,
-            },
-            {
-                "source": os.path.join(js_dist_dir, "index.js.map"),
-                "destination": nbextension_folder,
-            },
+            {"source": os.path.join(js_dist_dir, "index.js"), "destination": nbextension_folder},
+            {"source": os.path.join(js_dist_dir, "index.js.map"), "destination": nbextension_folder},
         ]
         for js_file in js_files:
             log.debug("Copying %s to %s" % (js_file["source"], js_file["destination"]))
@@ -134,32 +125,20 @@ class FrontendBuild(Command):
     def run(self):
         has_build_utilities = self.has_build_utilities()
         if not has_build_utilities:
-            log.error(
-                "`yarn` and/or `npm` are unavailable but are necessary for this build."
-            )
+            log.error("`yarn` and/or `npm` are unavailable but are necessary for this build.")
 
         env = os.environ.copy()
         env["PATH"] = npm_path
 
         if build_all:
-            log.info(
-                "Installing build dependencies with yarn. This may take a while..."
-            )
+            log.info("Installing build dependencies with yarn. This may take a while...")
             check_call(
-                ["yarn", "bootstrap"],
-                cwd=yarn_root,
-                stdout=sys.stdout,
-                stderr=sys.stderr,
-                env=env,
+                ["yarn", "bootstrap"], cwd=yarn_root, stdout=sys.stdout, stderr=sys.stderr, env=env,
             )
         else:
             log.info("Installing build dependencies with `npm run build`.")
             check_call(
-                ["npm", "run", "build"],
-                cwd=widget_dir,
-                stdout=sys.stdout,
-                stderr=sys.stderr,
-                env=env,
+                ["npm", "run", "build"], cwd=widget_dir, stdout=sys.stdout, stderr=sys.stderr, env=env,
             )
 
         self.clean_frontend_build()
@@ -202,7 +181,7 @@ if __name__ == "__main__":
         description="Widget for deck.gl maps",
         long_description="{}".format(read("README.md")),
         long_description_content_type="text/markdown",
-        license="MIT License",
+        license="Apache 2.0 License",
         include_package_data=True,
         packages=find_packages(exclude=["test"]),
         cmdclass={
@@ -215,13 +194,13 @@ if __name__ == "__main__":
         },
         author="Andrew Duberstein",
         author_email="ajduberstein@gmail.com",
-        url="https://github.com/uber/deck.gl/tree/master/bindings/pydeck",
+        url="https://github.com/visgl/deck.gl/tree/master/bindings/pydeck",
         keywords=["data", "visualization", "graphics", "GIS", "maps"],
         classifiers=[
             "Intended Audience :: Developers",
             "Intended Audience :: Science/Research",
             "Topic :: Multimedia :: Graphics",
-            "License :: OSI Approved :: MIT License",
+            "OSI Approved :: Apache Software License",
             "Programming Language :: Python :: 2.7",
             "Programming Language :: Python :: 3",
             "Programming Language :: Python :: 3.3",
@@ -238,7 +217,7 @@ if __name__ == "__main__":
             "ipywidgets>=7.0.0",
             "traitlets>=4.3.2",
             "jinja2>=2.10.1",
-            "numpy>=1.16.4"
+            "numpy>=1.16.4",
         ],
         setup_requires=["Jinja2>=2.10.1"],
         tests_require=["pytest>=4.0.2", "pandas", "requests"],

@@ -2,7 +2,7 @@
   "name": "@deck.gl/arcgis",
   "description": "Use deck.gl as a custom ArcGIS API for JavaScript layer",
   "license": "MIT",
-  "version": "8.1.0-beta.3",
+  "version": "8.2.0-alpha.1",
   "publishConfig": {
     "access": "public"
   },
@@ -14,7 +14,7 @@
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/uber/deck.gl.git"
+    "url": "https://github.com/visgl/deck.gl.git"
   },
   "main": "dist/es5/index.js",
   "module": "dist/esm/index.js",

@@ -1,6 +1,6 @@
 import React from 'react';
 
-const DATA_URL = 'https://raw.githubusercontent.com/uber-common/deck.gl-data/master/examples/ascii';
+const DATA_URL = 'https://raw.githubusercontent.com/visgl/deck.gl-data/master/examples/ascii';
 
 /* global window */
 function getWebcamStream(callback) {

@@ -56,4 +56,4 @@ See the documentation of [Controller](/docs/api-reference/controller.md) for imp
 
 ## Source
 
-[modules/core/src/views/orthographic-view.js](https://github.com/uber/deck.gl/blob/master/modules/core/src/views/orthographic-view.js)
+[modules/core/src/views/orthographic-view.js](https://github.com/visgl/deck.gl/blob/master/modules/core/src/views/orthographic-view.js)

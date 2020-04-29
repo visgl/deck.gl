@@ -6,7 +6,7 @@ def create_scatterplot_test_object():
     layers = [
         Layer(
             "ScatterplotLayer",
-            id='scatterplot',
+            id="scatterplot",
             data=[[0, 0], [0.01, 0.01]],
             get_position="-",
             get_radius=500,

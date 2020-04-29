@@ -4,7 +4,6 @@ import makeTooltip from './widget-tooltip';
 import mapboxgl from './ssr-safe-mapbox';
 
 import {CSVLoader} from '@loaders.gl/csv';
-import {Tiles3DLoader, CesiumIonLoader} from '@loaders.gl/3d-tiles';
 import {registerLoaders} from '@loaders.gl/core';
 
 import * as deck from './deck-bundle';
@@ -13,7 +12,7 @@ import {loadScript} from './script-utils';
 
 import GL from '@luma.gl/constants';
 
-function extractClasses(library) {
+function extractClasses(library = {}) {
   // Extracts exported class constructors as a dictionary from a library
   const classesDict = {};
   const classes = Object.keys(library).filter(x => x.charAt(0) === x.charAt(0).toUpperCase());
@@ -30,45 +29,74 @@ const jsonConverterConfiguration = {
   enumerations: {
     COORDINATE_SYSTEM: deck.COORDINATE_SYSTEM,
     GL
-  },
-
-  // Constants that should be resolved with the provided values by JSON converter
-  constants: {
-    Tiles3DLoader,
-    CesiumIonLoader
   }
 };
 
-registerLoaders([CSVLoader, Tiles3DLoader]);
+registerLoaders([CSVLoader]);
 
 const jsonConverter = new deck.JSONConverter({
   configuration: jsonConverterConfiguration
 });
 
-function loadExternalLibrary({libraryName, resourceUri, onComplete}, loadResource = loadScript) {
-  // NOTE loadResource is for testing only
-  loadResource(resourceUri).then(res => {
-    const module = window[libraryName];
-    const newConfiguration = {
-      classes: extractClasses(module)
-    };
-    jsonConverter.mergeConfiguration(newConfiguration);
-    if (onComplete) onComplete();
-  });
+function addModuleToConverter(module, converter) {
+  const newConfiguration = {
+    classes: extractClasses(module)
+  };
+  converter.mergeConfiguration(newConfiguration);
 }
 
-function addCustomLibraries(customLibraries) {
+function addCustomLibraries(customLibraries, onComplete) {
   if (!customLibraries) {
     return;
   }
-  for (const {libraryName, resourceUri} of customLibraries) {
-    loadExternalLibrary({libraryName, resourceUri});
+
+  const loaded = {};
+
+  function onEachFinish() {
+    if (Object.values(loaded).every(f => f)) {
+      // when all libraries loaded
+      if (typeof onComplete === 'function') onComplete();
+    }
   }
+
+  function onModuleLoaded(libraryName, module) {
+    addModuleToConverter(module, jsonConverter);
+    loaded[libraryName] = module;
+    onEachFinish();
+  }
+
+  customLibraries.forEach(({libraryName, resourceUri}) => {
+    // set loaded to be false, even if addCustomLibraries is called multiple times
+    // with the same parameters
+    loaded[libraryName] = false;
+
+    if (libraryName in window) {
+      // do not redefine
+      onModuleLoaded(libraryName, window[libraryName]);
+      return;
+    }
+
+    // because loadscript is async and scipt execution is untraceble
+    // the only way we can listen on its execution complete is to observe on the
+    // window.libraryName property
+    Object.defineProperty(window, libraryName, {
+      set: module => onModuleLoaded(libraryName, module),
+      get: () => {
+        return loaded[libraryName];
+      }
+    });
+
+    loadScript(resourceUri);
+  });
 }
 
 function updateDeck(inputJson, deckgl) {
   const results = jsonConverter.convert(inputJson);
   deckgl.setProps(results);
+}
+
+function missingLayers(oldLayers, newLayers) {
+  return oldLayers.filter(ol => ol && ol.id && !newLayers.find(nl => nl.id === ol.id));
 }
 
 function createDeck({
@@ -82,9 +110,13 @@ function createDeck({
 }) {
   let deckgl;
   try {
+    const oldLayers = jsonInput.layers || [];
     const props = jsonConverter.convert(jsonInput);
 
-    addCustomLibraries(customLibraries);
+    const convertedLayers = (props.layers || []).filter(l => l);
+
+    // loading custom library is async, some layers might not be convertable before custom library loads
+    const layerToLoad = missingLayers(oldLayers, convertedLayers);
     const getTooltip = makeTooltip(tooltip);
 
     deckgl = new deck.DeckGL({
@@ -95,6 +127,21 @@ function createDeck({
       getTooltip,
       container
     });
+
+    const onComplete = () => {
+      if (layerToLoad.length) {
+        // convert input layer again to presist layer order
+        const newProps = jsonConverter.convert({layers: jsonInput.layers});
+        const newLayers = (newProps.layers || []).filter(l => l);
+
+        if (newLayers.length > convertedLayers.length) {
+          // if more layers are converted
+          deckgl.setProps({layers: newLayers});
+        }
+      }
+    };
+
+    addCustomLibraries(customLibraries, onComplete);
 
     // TODO overrride console.warn instead
     // Right now this isn't doable (in a Notebook at least)
@@ -118,4 +165,4 @@ function injectFunction(warnFunction, messageHandler) {
   };
 }
 
-export {jsonConverter, createDeck, updateDeck, loadExternalLibrary};
+export {jsonConverter, createDeck, updateDeck, addCustomLibraries};

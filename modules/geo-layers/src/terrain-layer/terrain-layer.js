@@ -167,6 +167,25 @@ export default class TerrainLayer extends CompositeLayer {
     });
   }
 
+  // Update zRange of viewport
+  onViewportLoad(data) {
+    if (!data || data.length === 0 || data.every(x => !x)) {
+      return;
+    }
+
+    const {zRange} = this.state;
+    const ranges = data.map(arr => {
+      const bounds = arr[0].header.boundingBox;
+      return bounds.map(bound => bound[2]);
+    });
+    const minZ = Math.min(...ranges.map(x => x[0]));
+    const maxZ = Math.max(...ranges.map(x => x[1]));
+
+    if (!zRange || minZ < zRange[0] || maxZ > zRange[1]) {
+      this.setState({zRange: [minZ, maxZ]});
+    }
+  }
+
   renderLayers() {
     const {
       color,
@@ -196,7 +215,9 @@ export default class TerrainLayer extends CompositeLayer {
               meshMaxError,
               elevationDecoder
             }
-          }
+          },
+          onViewportLoad: this.onViewportLoad.bind(this),
+          zRange: this.state.zRange || null
         }
       );
     }

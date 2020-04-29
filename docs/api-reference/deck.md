@@ -399,13 +399,7 @@ Callback arguments:
 
 Called once every second with performance metrics.
 
-Callback arguments:
-
-* `stats` (Object)
-  + `fps` (Number)
-  + `redraw` (Number) - number of times the WebGLContext was rerendered.
-  + `deck.setProps` (Number) - number of times `setProps` was called.
-
+Callback argument is an object with fields specified [here](#metrics).
 
 ## Methods
 
@@ -536,4 +530,4 @@ A map of various performance statistics for the last 60 frames of rendering. Met
 
 ## Source
 
-[modules/core/src/lib/deck.js](https://github.com/uber/deck.gl/blob/master/modules/core/src/lib/deck.js)
+[modules/core/src/lib/deck.js](https://github.com/visgl/deck.gl/blob/master/modules/core/src/lib/deck.js)

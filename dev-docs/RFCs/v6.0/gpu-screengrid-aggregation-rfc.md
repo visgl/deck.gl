@@ -234,7 +234,7 @@ Picking information is not available. CPU aggregation maintains list of all aggr
 
 ### Shader Module integration (Solvable)
 
-“GPUGridAggregator” returns it results in form of Buffers, one Buffer is used as attribute to provide vertex data and another Buffer is used as Uniform Buffer Object (UBO) to provide uniforms. UBO is supported only in Shading Language version 3.0, and layers shaders have to be upgraded to this version. When that is done, existing Shader Modules (like, “picking” , “projection” etc) can not be used due to incompatibility between 1.0 and 3.0 Shading Language versions. (https://github.com/uber/deck.gl/issues/1592). This is not a limitation if we make color not depend on maxCount/maxWeight values (by using ‘colorRange’ and ‘colorDomain’ instead of ‘minColor’ and ‘maxColor’);
+“GPUGridAggregator” returns it results in form of Buffers, one Buffer is used as attribute to provide vertex data and another Buffer is used as Uniform Buffer Object (UBO) to provide uniforms. UBO is supported only in Shading Language version 3.0, and layers shaders have to be upgraded to this version. When that is done, existing Shader Modules (like, “picking” , “projection” etc) can not be used due to incompatibility between 1.0 and 3.0 Shading Language versions. (https://github.com/visgl/deck.gl/issues/1592). This is not a limitation if we make color not depend on maxCount/maxWeight values (by using ‘colorRange’ and ‘colorDomain’ instead of ‘minColor’ and ‘maxColor’);
 
 ### “lowerPercentile” and “upperPercentile” (Should fallback to CPU)
 

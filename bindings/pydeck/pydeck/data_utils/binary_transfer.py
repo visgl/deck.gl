@@ -2,6 +2,7 @@ from collections import defaultdict
 
 import numpy as np
 
+
 # Grafted from
 # https://github.com/maartenbreddels/ipyvolume/blob/d13828dfd8b57739004d5daf7a1d93ad0839ed0f/ipyvolume/serialize.py#L219
 def array_to_binary(ar, obj=None, force_contiguous=True):
@@ -38,22 +39,22 @@ def serialize_columns(data_set_cols, obj=None):
     length = {}
     for col in data_set_cols:
         accessor_attribute = array_to_binary(col["np_data"])
-        if length.get(col['layer_id']):
-            length[col['layer_id']] = max(length[col['layer_id']], accessor_attribute['length'])
+        if length.get(col["layer_id"]):
+            length[col["layer_id"]] = max(length[col["layer_id"]], accessor_attribute["length"])
         else:
-            length[col['layer_id']] = accessor_attribute['length']
+            length[col["layer_id"]] = accessor_attribute["length"]
         # attributes is deck.gl's expected argument name for
         # binary data transfer
-        if not layers[col['layer_id']].get('attributes'):
-            layers[col['layer_id']]['attributes'] = {}
+        if not layers[col["layer_id"]].get("attributes"):
+            layers[col["layer_id"]]["attributes"] = {}
         # Add new accessor
-        layers[col['layer_id']]['attributes'][col['accessor']] = {
-            'value': accessor_attribute['value'],
-            'dtype': accessor_attribute['dtype'],
-            'size': accessor_attribute['size']
+        layers[col["layer_id"]]["attributes"][col["accessor"]] = {
+            "value": accessor_attribute["value"],
+            "dtype": accessor_attribute["dtype"],
+            "size": accessor_attribute["size"],
         }
     for layer_key, _ in layers.items():
-        layers[layer_key]['length'] = length[layer_key]
+        layers[layer_key]["length"] = length[layer_key]
     return layers
 
 

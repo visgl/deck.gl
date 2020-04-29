@@ -186,13 +186,13 @@ When [`picking`](/docs/developer-guide/custom-layers/picking.md) is enabled, `in
 
 ##### `onTileLoad` (Function, optional)
 
-`onTileLoad` is a function that is called when a tile in the tileset hierarchy is loaded. [Tile3D](https://github.com/uber-web/loaders.gl/blob/master/docs/api-reference/tiles/tile-3d.md) object is passed in the callback.
+`onTileLoad` is a function that is called when a tile in the tileset hierarchy is loaded. [Tile3D](https://github.com/visgl/loaders.gl/blob/master/docs/api-reference/tiles/tile-3d.md) object is passed in the callback.
 
 - Default: `onTileLoad: (tileHeader) => {}`
 
 ##### `onTileUnload` (Function, optional)
 
-`onTileUnload` is a function that is called when a tile is unloaded. [Tile3D](https://github.com/uber-web/loaders.gl/blob/master/docs/api-reference/tiles/tileset-3d.md#root--tile3dheader) object is passed in the callback.
+`onTileUnload` is a function that is called when a tile is unloaded. [Tile3D](https://github.com/visgl/loaders.gl/blob/master/docs/api-reference/tiles/tileset-3d.md#root--tile3dheader) object is passed in the callback.
 
 - Default: `onTileUnload: (tileHeader) => {}`
 
@@ -217,4 +217,4 @@ Follow [CompositeLayer](/docs/api-reference/composite-layer.md#_subLayerProp) an
 
 ## Source
 
-[modules/geo-layers/src/tile-3d-layer](https://github.com/uber/deck.gl/tree/master/modules/geo-layers/src/tile-3d-layer)
+[modules/geo-layers/src/tile-3d-layer](https://github.com/visgl/deck.gl/tree/master/modules/geo-layers/src/tile-3d-layer)

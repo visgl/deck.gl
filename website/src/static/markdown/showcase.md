@@ -1,6 +1,23 @@
-*Would you like us to feature your project? [Let us know](https://github.com/uber/deck.gl/issues)!*
+*Would you like us to feature your project? [Let us know](https://github.com/visgl/deck.gl/issues)!*
 
 <div>
+
+  <div class="thumb">
+    <div data-title="Flowmap.blue" >
+      <a href="https://flowmap.blue/">
+        <img src="images/showcase-flowmap.jpg" />
+      </a>
+    </div>
+  </div>
+
+  <div class="thumb-desc">
+    <div>
+      <a href="http://pessimistress.github.io/isochronic-map/" target="_blank" rel="noopener noreferrer"><h2>Flowmap.blue</h2></a>
+      <p class="credit"><a href="https://github.com/ilyabo/flowmap.blue">Source code</a> by <a href="https://ilya.boyandin.me/">Ilya Boyandin</a></p>
+      <p>Flowmap.blue is a free and open source flow map visualization tool. It is designed for representing aggregated numbers of movements between geographic locations. The tool makes it very easy to produce interactive flow maps from data uploaded to Google Sheets. Since the tool has been released, people from different parts of the world have been using it to visualize data on urban mobility, commuting behavior, bus and subway travels, bicycle and scooter sharing, air travels, human and bird migration, refugee flows, human trafficking, trade flows, freight transportation, livestock movements, fishery, epidemiology, drug flows, scientific collaboration, sewer systems, supply chains, historical data and other topics.</p>
+    </div>
+  </div>
+
   <div class="thumb">
     <div data-title="Isochronic Map" >
       <a href="http://pessimistress.github.io/isochronic-map/">
@@ -137,37 +154,37 @@
     <div>
       <a href="https://kepler.gl/" target="_blank" rel="noopener noreferrer"><h2>Kepler.gl</h2></a>
       <p>Kepler.gl is a powerful web-based geospatial data analysis tool. Built on a high performance rendering engine and designed for large-scale data sets.</p>
-      <p class="credit"><a href="https://github.com/uber/kepler.gl" target="_blank" rel="noopener noreferrer">GitHub</a> | <a href="https://kepler.gl/demo/sfcontour" target="_blank" rel="noopener noreferrer">Example Map</a></p>
+      <p class="credit"><a href="https://github.com/keplergl/kepler.gl" target="_blank" rel="noopener noreferrer">GitHub</a> | <a href="https://kepler.gl/demo/sfcontour" target="_blank" rel="noopener noreferrer">Example Map</a></p>
     </div>
   </div>
 
   <div class="thumb">
     <div data-title="Ascii Video Player">
-      <a href="https://uber.github.io/deck.gl/showcases/ascii" target="_blank" rel="noopener noreferrer">
+      <a href="https://visgl.github.io/deck.gl/showcases/ascii" target="_blank" rel="noopener noreferrer">
         <img src="images/showcase-ascii.jpg" />
       </a>
     </div>
   </div>
   <div class="thumb-desc">
     <div>
-      <a href="https://uber.github.io/deck.gl/showcases/ascii" target="_blank" rel="noopener noreferrer"><h2>Ascii Video Player</h2></a>
+      <a href="https://visgl.github.io/deck.gl/showcases/ascii" target="_blank" rel="noopener noreferrer"><h2>Ascii Video Player</h2></a>
       <p>Uses the TextLayer API to convert pixels into characters on the fly. WebGL2 compatible browser is required.</p>
-      <p class="credit"><a href="https://github.com/uber/deck.gl/tree/6.4-release/showcases/ascii" target="_blank" rel="noopener noreferrer">Source code</a></p>
+      <p class="credit"><a href="https://github.com/visgl/deck.gl/tree/6.4-release/showcases/ascii" target="_blank" rel="noopener noreferrer">Source code</a></p>
     </div>
   </div>
 
   <div class="thumb">
     <div class="bg-black" data-title="Wind Map">
-      <a href="https://uber.github.io/deck.gl/showcases/wind" target="_blank" rel="noopener noreferrer">
+      <a href="https://visgl.github.io/deck.gl/showcases/wind" target="_blank" rel="noopener noreferrer">
         <img src="images/showcase-wind.jpg" />
       </a>
     </div>
   </div>
   <div class="thumb-desc">
     <div>
-      <a href="https://uber.github.io/deck.gl/showcases/wind" target="_blank" rel="noopener noreferrer"><h2>Wind Map</h2></a>
+      <a href="https://visgl.github.io/deck.gl/showcases/wind" target="_blank" rel="noopener noreferrer"><h2>Wind Map</h2></a>
       <p>GPU-based data interpolation and partical effects.</p>
-      <p class="credit"><a href="https://github.com/uber/deck.gl/tree/6.4-release/showcases/wind" target="_blank" rel="noopener noreferrer">Source code</a> | <a href="https://medium.com/vis-gl/wind-map-a58575f87fe3" target="_blank" rel="noopener noreferrer">Blog post</a></p>
+      <p class="credit"><a href="https://github.com/visgl/deck.gl/tree/6.4-release/showcases/wind" target="_blank" rel="noopener noreferrer">Source code</a> | <a href="https://medium.com/vis-gl/wind-map-a58575f87fe3" target="_blank" rel="noopener noreferrer">Blog post</a></p>
     </div>
   </div>
 

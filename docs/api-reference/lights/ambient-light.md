@@ -4,7 +4,7 @@ Create an ambient light source which illuminates all the objects equally. Ambien
 
 <div align="center">
   <div>
-    <img src="https://raw.github.com/uber-common/deck.gl-data/master/images/whats-new/ambient-light.gif" />
+    <img src="https://raw.github.com/visgl/deck.gl-data/master/images/whats-new/ambient-light.gif" />
     <p><i>Two spheres with ambient light</i></p>
   </div>
 </div>

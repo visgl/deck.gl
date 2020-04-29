@@ -1,17 +1,21 @@
+"""
+TripsLayer
+==========
+
+Plot of a single vehicle trip within San Francisco, fading in from the origin.
+
+Adapted from a deck.gl documentation example.
+"""
+
 import pydeck as pdk
 import pandas as pd
 
-TRIPS_LAYER_DATA = (
-    "https://raw.githubusercontent.com/uber-common"
-    "/deck.gl-data/master/website/sf.trips.json"
-)
+TRIPS_LAYER_DATA = "https://raw.githubusercontent.com/visgl/deck.gl-data/master/website/sf.trips.json"  # noqa
 
 df = pd.read_json(TRIPS_LAYER_DATA)
 
 df["coordinates"] = df["waypoints"].apply(lambda f: [item["coordinates"] for item in f])
-df["timestamps"] = df["waypoints"].apply(
-    lambda f: [item["timestamp"] - 1554772579000 for item in f]
-)
+df["timestamps"] = df["waypoints"].apply(lambda f: [item["timestamp"] - 1554772579000 for item in f])
 
 df.drop(["waypoints"], axis=1, inplace=True)
 
@@ -28,10 +32,8 @@ layer = pdk.Layer(
     current_time=500,
 )
 
-view_state = pdk.ViewState(
-    latitude=37.7749295, longitude=-122.4194155, zoom=11, bearing=0, pitch=45
-)
+view_state = pdk.ViewState(latitude=37.7749295, longitude=-122.4194155, zoom=11, bearing=0, pitch=45)
 
 # Render
 r = pdk.Deck(layers=[layer], initial_view_state=view_state)
-r.to_html("trips_layer.html")
+r.to_html("trips_layer.html", notebook_display=False)

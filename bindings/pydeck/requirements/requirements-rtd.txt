@@ -1,0 +1,2 @@
+# Requirements to support ReadTheDocs.io
+pydeck>=0.0.dev0

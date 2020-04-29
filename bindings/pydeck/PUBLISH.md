@@ -19,8 +19,8 @@ environments:
 
 - `.show()` in a Jupyter Notebook
 - `.to_html()` in a Jupyter Notebook
-- `.show()` in Jupyter Lab
-- `.to_html()` in Jupyter Lab
+- `.show()` in JupyterLab
+- `.to_html()` in JupyterLab
 - `.to_html()` in a Python REPL
 
 2) Run `make bump-and-publish` and select the kind of release at the prompt.

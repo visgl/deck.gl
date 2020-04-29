@@ -1,10 +1,18 @@
+"""
+GeoJsonLayer
+===========
+
+Property values in Vancouver, Canada, adapted from the deck.gl example pages.
+"""
+
+
 import math
 
 import pydeck
 import pandas as pd
 
 # Load in the JSON data
-DATA_URL = "https://raw.githubusercontent.com/uber-common/deck.gl-data/master/examples/geojson/vancouver-blocks.json"
+DATA_URL = "https://raw.githubusercontent.com/visgl/deck.gl-data/master/examples/geojson/vancouver-blocks.json"
 json = pd.read_json(DATA_URL)
 df = pd.DataFrame()
 
@@ -43,12 +51,8 @@ def calculate_elevation(val):
 df["coordinates"] = json["features"].apply(lambda row: row["geometry"]["coordinates"])
 df["valuePerSqm"] = json["features"].apply(lambda row: row["properties"]["valuePerSqm"])
 df["growth"] = json["features"].apply(lambda row: row["properties"]["growth"])
-df["elevation"] = json["features"].apply(
-    lambda row: calculate_elevation(row["properties"]["valuePerSqm"])
-)
-df["fill_color"] = json["features"].apply(
-    lambda row: color_scale(row["properties"]["growth"])
-)
+df["elevation"] = json["features"].apply(lambda row: calculate_elevation(row["properties"]["valuePerSqm"]))
+df["fill_color"] = json["features"].apply(lambda row: color_scale(row["properties"]["growth"]))
 
 # Add sunlight shadow to the polygons
 sunlight = {
@@ -69,19 +73,10 @@ lighting_effect = {
 }
 
 view_state = pydeck.ViewState(
-    **{
-        "latitude": 49.254,
-        "longitude": -123.13,
-        "zoom": 11,
-        "maxZoom": 16,
-        "pitch": 45,
-        "bearing": 0,
-    }
+    **{"latitude": 49.254, "longitude": -123.13, "zoom": 11, "maxZoom": 16, "pitch": 45, "bearing": 0}
 )
 
-LAND_COVER = [
-    [[-123.0, 49.196], [-123.0, 49.324], [-123.306, 49.324], [-123.306, 49.196]]
-]
+LAND_COVER = [[[-123.0, 49.196], [-123.0, 49.324], [-123.306, 49.324], [-123.306, 49.196]]]
 
 polygon_layer = pydeck.Layer(
     "PolygonLayer",
@@ -109,9 +104,7 @@ polygon_layer = pydeck.Layer(
     pickable=True,
 )
 
-tooltip = {
-    "html": "<b>Value per Square Meter:</b> {valuePerSqm} <br /><b>Growth rate:</b> {growth}"
-}
+tooltip = {"html": "<b>Value per Square Meter:</b> {valuePerSqm} <br /><b>Growth rate:</b> {growth}"}
 
 r = pydeck.Deck(
     polygon_layer,
