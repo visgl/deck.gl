@@ -28,4 +28,4 @@ npm start
 
 ### Data format
 
-Sample data is stored in Cesium ion server. To use your own data, checkout the [documentation of Tile3DLayer](../../../docs/layers/tile-3d-layer.md)
+Sample data is stored in Cesium ion server. To use your own data, check out the [documentation of Tile3DLayer](../../../docs/layers/tile-3d-layer.md)

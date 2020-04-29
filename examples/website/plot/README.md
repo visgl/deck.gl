@@ -15,5 +15,5 @@ npm start
 ```
 
 ### Data format
-Sample data is stored in the `data` folder. To use your own data, checkout
+Sample data is stored in the `data` folder. To use your own data, check out
 the [documentation of PlotLayer](./plot-layer/README.md).
