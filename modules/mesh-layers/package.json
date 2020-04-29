@@ -33,8 +33,8 @@
     "@deck.gl/core": "^8.0.0"
   },
   "dependencies": {
-    "@luma.gl/experimental": "^8.1.0",
-    "@luma.gl/shadertools": "^8.1.0"
+    "@luma.gl/experimental": "^8.1.2",
+    "@luma.gl/shadertools": "^8.1.2"
   },
   "gitHead": "99cefc1c1a40ec33da73fd362e9ecc349c0bee6c"
 }
