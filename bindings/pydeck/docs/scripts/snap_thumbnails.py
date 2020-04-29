@@ -37,9 +37,9 @@ async def _snap(fname):
     print("[info] Converting %s to an image" % fname)
     await run(" ".join(["python", fname]))
     html_fname = os.path.join(here, "..", os.path.splitext(os.path.basename(fname))[0] + ".html")
-    png_fname = os.path.join(here, "../gallery", os.path.splitext(os.path.basename(fname))[0] + ".png")
+    png_fname = os.path.join(here, "../gallery/images", os.path.splitext(os.path.basename(fname))[0] + ".png")
     fpath = "file://%s" % html_fname
-    if "bitmap_layer" in html_fname or "icon_layer" in html_fname or "heatmap_layer" in html_fname:
+    if "bitmap_layer" in html_fname or "icon_layer" in html_fname or "3d" in html_fname:
         await page.goto(fpath)
         await asyncio.sleep(10)
     else:

@@ -11,10 +11,75 @@ Gallery
 .. raw:: html
    :file: gallery/html/grid.html
 
-.. include:: images.rst
+.. image:: gallery/images/bitmap_layer.png
+   :width: 0
 
-Overview
-^^^^^^^^
+.. image:: gallery/images/column_layer.png
+   :width: 0
+
+.. image:: gallery/images/contour_layer.png
+   :width: 0
+
+.. image:: gallery/images/custom_layer.png
+   :width: 0
+
+.. image:: gallery/images/geojson_layer.png
+   :width: 0
+
+.. image:: gallery/images/great_circle_layer.png
+   :width: 0
+
+.. image:: gallery/images/grid_layer.png
+   :width: 0
+
+.. image:: gallery/images/h3_cluster_layer.png
+   :width: 0
+
+.. image:: gallery/images/h3_hexagon_layer.png
+   :width: 0
+
+.. image:: gallery/images/heatmap_layer.png
+   :width: 0
+
+.. image:: gallery/images/hexagon_layer.png
+   :width: 0
+
+.. image:: gallery/images/icon_layer.png
+   :width: 0
+
+.. image:: gallery/images/line_layer.png
+   :width: 0
+
+.. image:: gallery/images/path_layer.png
+   :width: 0
+
+.. image:: gallery/images/point_cloud_layer.png
+   :width: 0
+
+.. image:: gallery/images/polygon_layer.png
+   :width: 0
+
+.. image:: gallery/images/s2_layer.png
+   :width: 0
+
+.. image:: gallery/images/scatterplot_layer.png
+   :width: 0
+
+.. image:: gallery/images/screengrid_layer.png
+   :width: 0
+
+.. image:: gallery/images/text_layer.png
+   :width: 0
+
+.. image:: gallery/images/tile_3d_layer.png
+   :width: 0
+
+.. image:: gallery/images/trips_layer.png
+   :width: 0
+
+Documentation
+^^^^^^^^^^^^^
+>>>>>>> f7efbcc8b... Update docs for tile layer
 
 `pydeck in Jupyter <jupyter.html>`__
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
