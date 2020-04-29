@@ -51,9 +51,7 @@ export default class MVTLayer extends TileLayer {
       let hoveredFeatureId;
 
       if (hoveredFeature) {
-        hoveredFeatureId = hoveredFeature
-          ? hoveredFeature.properties[uniquePropertyId]
-          : hoveredFeature.id;
+        hoveredFeatureId = getFeatureUniqueId(hoveredFeature, uniquePropertyId);
       }
 
       if (hoveredFeatureId !== highlightedFeatureId) {
@@ -66,24 +64,37 @@ export default class MVTLayer extends TileLayer {
 
   getHighlightedObjectIndex(tile) {
     const {highlightedFeatureId} = this.state;
-    const {uniquePropertyId, highlightedObjectIndex: highlightedIndexProp} = this.props;
+    const {uniquePropertyId, highlightedObjectIndex: highlightedFeatureProp} = this.props;
     const {data} = tile;
 
-    if (highlightedIndexProp && highlightedIndexProp > -1) {
-      return highlightedIndexProp;
-    }
-
-    if (!highlightedFeatureId || !Array.isArray(data)) {
+    if ((!highlightedFeatureId && !highlightedFeatureProp) || !Array.isArray(data)) {
       return -1;
     }
+
+    const featureIdToHighlight = highlightedFeatureProp || highlightedFeatureId;
 
     return data.findIndex(
       feature =>
         feature.id
-          ? feature.id === highlightedFeatureId
-          : feature.properties[uniquePropertyId] === highlightedFeatureId
+          ? feature.id === featureIdToHighlight
+          : feature.properties[uniquePropertyId] === featureIdToHighlight
     );
   }
+}
+
+function getFeatureUniqueId(feature, uniquePropertyId) {
+  const hasFeatureId = Boolean(feature.id);
+  const hasUniquePropertyId = Boolean(uniquePropertyId);
+
+  if (hasFeatureId) {
+    return feature.id;
+  }
+
+  if (hasUniquePropertyId) {
+    return feature.properties[uniquePropertyId];
+  }
+
+  return -1;
 }
 
 MVTLayer.layerName = 'MVTLayer';
