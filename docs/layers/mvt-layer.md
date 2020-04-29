@@ -81,12 +81,23 @@ Inherits all properties from [`TileLayer`](/docs/layers/tile-layer.md) and [base
 If using the default `renderSubLayers`, supports all [`GeoJSONLayer`](/docs/layers/geojson-layer.md) properties to style features.
 
 
-##### `data` (String|Array)
+##### `data` (String | Array)
 
 Required. Either a URL template or an array of URL templates from which the MVT data should be loaded. See `TileLayer`'s `data` prop documentation for the templating syntax.
 
 The `getTileData` prop from the `TileLayer` class will not be called.
 
+##### `uniqueIdProperty` (String)
+
+Optional. Needed for highlighting a feature split across two or more tiles if no [feature id](https://github.com/mapbox/vector-tile-spec/tree/master/2.1#42-features) is provided.
+
+An string pointing to a tile attribute containing a unique identifier for features across tiles.
+
+##### `highlightedObjectIndex` (Number)
+
+* Default: `-1`
+
+When provided, a feature with id corresponding to the supplied value will be highlighted with `highlightColor`
 
 ## Source
 
