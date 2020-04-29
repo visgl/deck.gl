@@ -19,6 +19,12 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v8.1
 
+#### deck.gl [8.1.4] - Apr 29 2020
+
+- Fix DeckPicker.resize crash when float FBO is not supported (#4544)
+- Fix picking info population (#4543)
+- Support per-object highlightColor (#4546)
+
 #### deck.gl [8.1.3] - Apr 25 2020
 
 - Add zRange prop to TileLayer for use with TerrainLayer (#4397)
