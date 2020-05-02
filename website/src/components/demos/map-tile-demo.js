@@ -5,7 +5,7 @@ import App from 'website-examples/map-tile/app';
 export default class MapTileDemo extends Component {
   static get parameters() {
     return {
-      autoHighlight: {displayName: 'Highlight on hover', type: 'checkbox', value: true}
+      showBorder: {displayName: 'Show tile borders', type: 'checkbox', value: false}
     };
   }
 
@@ -29,6 +29,6 @@ export default class MapTileDemo extends Component {
   render() {
     // eslint-disable-next-line no-unused-vars
     const {params, data, ...otherProps} = this.props;
-    return <App {...otherProps} autoHighlight={params.autoHighlight.value} />;
+    return <App {...otherProps} showBorder={params.showBorder.value} />;
   }
 }

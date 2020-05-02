@@ -35,33 +35,53 @@ const TEST_CASES = [
     minZoom: undefined,
     maxZoom: undefined,
     output: [
-      '0,1,3',
       '0,2,3',
       '0,3,3',
-      '1,1,3',
       '1,2,3',
       '1,3,3',
       '2,1,3',
       '2,2,3',
       '2,3,3',
-      '3,1,3',
       '3,2,3',
-      '3,3,3'
+      '3,3,3',
+      '7,2,3'
     ]
   },
   {
-    title: 'flat viewport (exact)',
+    title: 'extreme pitch',
     viewport: new WebMercatorViewport({
-      width: 1024,
-      height: 1024,
+      width: 800,
+      height: 400,
+      pitch: 75,
+      bearing: 0,
       longitude: 0,
       latitude: 0,
-      orthographic: true,
-      zoom: 2
+      zoom: 4
     }),
     minZoom: undefined,
     maxZoom: undefined,
-    output: ['1,1,2', '1,2,2', '2,1,2', '2,2,2']
+    output: [
+      '0,0,2',
+      '1,0,2',
+      '2,0,2',
+      '2,2,3',
+      '2,3,3',
+      '3,0,2',
+      '3,2,3',
+      '4,2,3',
+      '5,2,3',
+      '5,3,3',
+      '6,6,4',
+      '6,7,4',
+      '7,6,4',
+      '7,7,4',
+      '7,8,4',
+      '8,6,4',
+      '8,7,4',
+      '8,8,4',
+      '9,6,4',
+      '9,7,4'
+    ]
   },
   {
     title: 'under zoom',
