@@ -14,7 +14,7 @@ const defaultProps = {
   onTileLoad: {type: 'function', value: tile => {}, compare: false},
   // eslint-disable-next-line
   onTileError: {type: 'function', value: err => console.error(err), compare: false},
-  extent: {type: 'array', optional: true, value: null, compare: false},
+  extent: {type: 'array', optional: true, value: null, compare: true},
   tileSize: 512,
   maxZoom: null,
   minZoom: 0,
