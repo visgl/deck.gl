@@ -82,10 +82,18 @@ varying vec2 clip_commonPosition;
 
 export default class ClipExtension extends LayerExtension {
   getShaders() {
-    const hasAnchor = 'instancePositions' in this.getAttributeManager().attributes;
-    this.state.clippingAnchor = hasAnchor;
+    // If `clipByInstance: true`, the entire object is shown/hidden based on its anchor position (done by vertex shader)
+    // Otherwise, the object is trimmed by the clip bounds (done by fragment shader)
 
-    return hasAnchor
+    // Default behavior: consider a layer instanced if it has attribute `instancePositions`
+    let clipByInstance = 'instancePositions' in this.getAttributeManager().attributes;
+    // Users can override by setting the `clipByInstance` prop
+    if ('clipByInstance' in this.props) {
+      clipByInstance = this.props.clipByInstance;
+    }
+    this.state.clipByInstance = clipByInstance;
+
+    return clipByInstance
       ? {
           modules: [shaderModuleVs],
           inject: injectionVs
@@ -98,8 +106,8 @@ export default class ClipExtension extends LayerExtension {
 
   draw({uniforms}) {
     const {clipBounds = defaultProps.clipBounds} = this.props;
-    if (this.state.clippingAnchor) {
-      uniforms.clip_bounds = defaultProps.clipBounds;
+    if (this.state.clipByInstance) {
+      uniforms.clip_bounds = clipBounds;
     } else {
       const corner0 = this.projectPosition([clipBounds[0], clipBounds[1], 0]);
       const corner1 = this.projectPosition([clipBounds[2], clipBounds[3], 0]);
