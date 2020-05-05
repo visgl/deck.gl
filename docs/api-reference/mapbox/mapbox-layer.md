@@ -150,7 +150,7 @@ export default class Map extends React.Component {
         layers={layers}
         initialViewState={initialViewState}
         controller
-        // To render vector tile polygons correctly
+        {/* To render vector tile polygons correctly */}
         glOptions={{stencil: true}}
         onWebGLInitialized={this._onWebGLInitialized}
       >
