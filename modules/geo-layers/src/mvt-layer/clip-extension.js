@@ -46,7 +46,7 @@ const injectionVs = {
 varying float clip_isVisible;
 `,
   'vs:DECKGL_FILTER_GL_POSITION': `
-  clip_isVisible = float(clip_isInBounds(geometry.position.xy));
+  clip_isVisible = float(clip_isInBounds(geometry.worldPosition.xy));
 `,
   'fs:#decl': `
 varying float clip_isVisible;
@@ -81,10 +81,19 @@ varying vec2 clip_commonPosition;
 };
 
 export default class ClipExtension extends LayerExtension {
-  getShaders(opts) {
-    const hasAnchor = 'instancePositions' in this.getAttributeManager().attributes;
+  getShaders() {
+    // If `clipByInstance: true`, the entire object is shown/hidden based on its anchor position (done by vertex shader)
+    // Otherwise, the object is trimmed by the clip bounds (done by fragment shader)
 
-    return hasAnchor
+    // Default behavior: consider a layer instanced if it has attribute `instancePositions`
+    let clipByInstance = 'instancePositions' in this.getAttributeManager().attributes;
+    // Users can override by setting the `clipByInstance` prop
+    if ('clipByInstance' in this.props) {
+      clipByInstance = this.props.clipByInstance;
+    }
+    this.state.clipByInstance = clipByInstance;
+
+    return clipByInstance
       ? {
           modules: [shaderModuleVs],
           inject: injectionVs
@@ -97,15 +106,19 @@ export default class ClipExtension extends LayerExtension {
 
   draw({uniforms}) {
     const {clipBounds = defaultProps.clipBounds} = this.props;
-    const corner0 = this.projectPosition([clipBounds[0], clipBounds[1], 0]);
-    const corner1 = this.projectPosition([clipBounds[2], clipBounds[3], 0]);
+    if (this.state.clipByInstance) {
+      uniforms.clip_bounds = clipBounds;
+    } else {
+      const corner0 = this.projectPosition([clipBounds[0], clipBounds[1], 0]);
+      const corner1 = this.projectPosition([clipBounds[2], clipBounds[3], 0]);
 
-    uniforms.clip_bounds = [
-      Math.min(corner0[0], corner1[0]),
-      Math.min(corner0[1], corner1[1]),
-      Math.max(corner0[0], corner1[0]),
-      Math.max(corner0[1], corner1[1])
-    ];
+      uniforms.clip_bounds = [
+        Math.min(corner0[0], corner1[0]),
+        Math.min(corner0[1], corner1[1]),
+        Math.max(corner0[0], corner1[0]),
+        Math.max(corner0[1], corner1[1])
+      ];
+    }
   }
 }
 
