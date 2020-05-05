@@ -14,7 +14,7 @@
     <div>
       <a href="http://pessimistress.github.io/isochronic-map/" target="_blank" rel="noopener noreferrer"><h2>Flowmap.blue</h2></a>
       <p class="credit"><a href="https://github.com/ilyabo/flowmap.blue">Source code</a> by <a href="https://ilya.boyandin.me/">Ilya Boyandin</a></p>
-      <p>Flowmap.blue is a free and open source flow map visualization tool. It is designed for representing aggregated numbers of movements between geographic locations. The tool makes it very easy to produce interactive flow maps from data uploaded to Google Sheets. Since the tool has been released, people from different parts of the world have been using it to visualize data on urban mobility, commuting behavior, bus and subway travels, bicycle and scooter sharing, air travels, human and bird migration, refugee flows, human trafficking, trade flows, freight transportation, livestock movements, fishery, epidemiology, drug flows, scientific collaboration, sewer systems, supply chains, historical data and other topics.</p>
+      <p>Flowmap.blue is a free tool for representing aggregated numbers of movements between geographic locations as flow maps. It is used to visualize urban mobility, commuting behavior, bus, subway and air travels, bicycle sharing, human and bird migration, refugee flows, freight transportation, trade, supply chains, scientific collaboration, epidemiological and historical data and many other topics.</p>
     </div>
   </div>
 
