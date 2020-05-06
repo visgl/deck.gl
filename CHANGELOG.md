@@ -19,7 +19,7 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v8.1
 
-#### deck.gl [8.1.4] - May 6 2020
+#### deck.gl [8.1.5] - May 6 2020
 
 - Fix MVT clipping for ScatterplotLayer (#4557)
 - Fix transition start time (#4570)
