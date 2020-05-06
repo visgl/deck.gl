@@ -108,7 +108,13 @@ export class App extends React.Component {
     const map = this._map;
     const deck = this._deck;
 
-    map.addLayer(new MapboxLayer({id: 'my-scatterplot', deck}));
+    // You must initialize an empty deck.gl layer to prevent flashing
+    map.addLayer(
+      // This id has to match the id of the deck.gl layer
+      new MapboxLayer({ id: "my-scatterplot", deck }),
+      // Optionally define id from Mapbox layer stack under which to add deck layer
+      'beforeId'
+    );
   }
 
   render() {
@@ -135,7 +141,7 @@ export class App extends React.Component {
         initialViewState={INITIAL_VIEW_STATE}
         controller={true}
         onWebGLInitialized={this._onWebGLInitialized}
-        // To render vector tile polygons correctly
+        {/* To render vector tile polygons correctly */}
         glOptions={{stencil: true}}
       >
         {gl && (
