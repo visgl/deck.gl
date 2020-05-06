@@ -39,7 +39,7 @@
     "@loaders.gl/core": "^2.1.1",
     "@loaders.gl/csv": "^2.1.1",
     "@loaders.gl/draco": "^2.1.1",
-    "@luma.gl/constants": "^8.1.0",
+    "@luma.gl/constants": "^8.1.2",
     "mapbox-gl": "^1.2.1"
   },
   "jupyterlab": {

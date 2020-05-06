@@ -116,7 +116,9 @@ export default class DeckPicker {
     }
     // Resize it to current canvas size (this is a noop if size hasn't changed)
     this.pickingFBO.resize({width: gl.canvas.width, height: gl.canvas.height});
-    this.depthFBO.resize({width: gl.canvas.width, height: gl.canvas.height});
+    if (this.depthFBO) {
+      this.depthFBO.resize({width: gl.canvas.width, height: gl.canvas.height});
+    }
     return this.pickingFBO;
   }
 

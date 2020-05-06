@@ -191,11 +191,12 @@ export default class SolidPolygonLayer extends Layer {
 
   getPickingInfo(params) {
     const info = super.getPickingInfo(params);
-    const {object, index} = info;
+    const {index} = info;
+    const {data} = this.props;
 
-    if (object && object.__source) {
+    if (data[0] && data[0].__source) {
       // data is wrapped
-      info.object = this.props.data.find(d => d.__source.index === index);
+      info.object = data.find(d => d.__source.index === index);
     }
     return info;
   }

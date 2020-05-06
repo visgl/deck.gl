@@ -1,12 +1,9 @@
-/* global document fetch */
+/* global document */
 /* eslint-disable no-console */
 import React, {PureComponent} from 'react';
 import {render} from 'react-dom';
 import DeckGL from '@deck.gl/react';
-import {TileLayer} from '@deck.gl/geo-layers';
-import {COORDINATE_SYSTEM} from '@deck.gl/core';
-
-import {decodeTile} from './utils/decode';
+import {MVTLayer} from '@deck.gl/geo-layers';
 
 // Set your mapbox token here
 const MAPBOX_TOKEN = process.env.MapboxAccessToken; // eslint-disable-line
@@ -54,16 +51,8 @@ const MAP_LAYER_STYLES = {
   lineWidthMinPixels: 1,
 
   getPointRadius: 100,
-  pointRadiusMinPixels: 2,
-  opacity: 1
+  pointRadiusMinPixels: 2
 };
-
-function getTileData({x, y, z}) {
-  const mapSource = `https://a.tiles.mapbox.com/v4/mapbox.mapbox-streets-v7/${z}/${x}/${y}.vector.pbf?access_token=${MAPBOX_TOKEN}`;
-  return fetch(mapSource)
-    .then(response => response.arrayBuffer())
-    .then(buffer => decodeTile(x, y, z, buffer));
-}
 
 class Root extends PureComponent {
   constructor(props) {
@@ -94,11 +83,10 @@ class Root extends PureComponent {
         controller={true}
         onClick={this._onClick}
         layers={[
-          new TileLayer({
+          new MVTLayer({
             ...MAP_LAYER_STYLES,
-            coordinateSystem: COORDINATE_SYSTEM.CARTESIAN,
-            pickable: true,
-            getTileData
+            data: `https://a.tiles.mapbox.com/v4/mapbox.mapbox-streets-v7/{z}/{x}/{y}.vector.pbf?access_token=${MAPBOX_TOKEN}`,
+            pickable: true
           })
         ]}
       >

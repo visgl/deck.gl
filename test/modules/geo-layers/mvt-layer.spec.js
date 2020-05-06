@@ -33,7 +33,14 @@ test('ClipExtension', t => {
       onAfterUpdate: ({subLayers}) => {
         for (const layer of subLayers) {
           const uniforms = layer.getModels()[0].getUniforms();
-          t.ok(uniforms.clip_bounds && uniforms.clip_bounds[0] === 256, 'has clip_bounds uniform');
+          if (layer.id.endsWith('points')) {
+            t.ok(uniforms.clip_bounds && uniforms.clip_bounds[0] === 0, 'has clip_bounds uniform');
+          } else {
+            t.ok(
+              uniforms.clip_bounds && uniforms.clip_bounds[0] === 256,
+              'has clip_bounds uniform'
+            );
+          }
         }
       }
     }
