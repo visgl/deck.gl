@@ -33,13 +33,7 @@ export default class Transition {
     this.cancel();
     this.settings = Object.assign({}, DEFAULT_SETTINGS, props);
     this._inProgress = true;
-
-    const {timeline, settings} = this;
-    this._handle = timeline.addChannel({
-      delay: timeline.getTime(),
-      duration: settings.duration
-    });
-    settings.onStart(this);
+    this.settings.onStart(this);
   }
 
   /**
@@ -72,6 +66,18 @@ export default class Transition {
   update() {
     if (!this._inProgress) {
       return false;
+    }
+
+    // It is important to initialize the handle during `update` instead of `start`.
+    // The CPU time that the `start` frame takes should not be counted towards the duration.
+    // On the other hand, `update` always happens during a render cycle. The clock starts when the
+    // transition is rendered for the first time.
+    if (this._handle === null) {
+      const {timeline, settings} = this;
+      this._handle = timeline.addChannel({
+        delay: timeline.getTime(),
+        duration: settings.duration
+      });
     }
 
     this.time = this.timeline.getTime(this._handle);
