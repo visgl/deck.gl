@@ -1,6 +1,6 @@
 # @deck.gl/mapbox
 
-Use deck.gl layers as custom mapbox layers, enabling seamless interleaving of mapbox and deck.gl layers.
+Use deck.gl layers as custom Mapbox layers, enabling seamless interleaving of Mapbox and deck.gl layers.
 
 <img src="https://raw.github.com/visgl/deck.gl-data/master/images/whats-new/mapbox-layers.jpg" />
 
@@ -9,8 +9,8 @@ Use deck.gl layers as custom mapbox layers, enabling seamless interleaving of ma
 
 ### Advantages
 
-* mapbox and deck.gl layers can be freely "interleaved", enabling a number of layer mixing effects, such as drawing behind map labels, z-occlusion between deck.gl 3D objects and Mapbox buildings, etc.
-* mapbox and deck.gl will share a single canvas and WebGL context, saving system resources.
+* Mapbox and deck.gl layers can be freely "interleaved", enabling a number of layer mixing effects, such as drawing behind map labels, z-occlusion between deck.gl 3D objects and Mapbox buildings, etc.
+* Mapbox and deck.gl will share a single canvas and WebGL context, saving system resources.
 
 ### Limitations
 
@@ -22,8 +22,8 @@ Use deck.gl layers as custom mapbox layers, enabling seamless interleaving of ma
 ### Include the Standalone Bundle
 
 ```html
-<script src="https://unpkg.com/deck.gl@^7.0.0/dist.min.js"></script>
-<script src='https://api.tiles.mapbox.com/mapbox-gl-js/v0.53.0/mapbox-gl.js'></script>
+<script src="https://unpkg.com/deck.gl@^8.1.0/dist.min.js"></script>
+<script src='https://api.tiles.mapbox.com/mapbox-gl-js/v1.10.0/mapbox-gl.js'></script>
 <script type="text/javascript">
   const {MapboxLayer} = deck;
 </script>
@@ -44,7 +44,7 @@ import {MapboxLayer} from '@deck.gl/mapbox';
 
 ### Using with Pure JS
 
-To create a mapbox-compatible deck.gl layer:
+To create a Mapbox-compatible deck.gl layer:
 
 ```js
 import {ScatterplotLayer} from '@deck.gl/layers';
@@ -62,7 +62,7 @@ const myDeckLayer = new MapboxLayer({
 });
 ```
 
-To add the layer to mapbox:
+To add the layer to Mapbox:
 
 ```js
 import mapboxgl from 'mapbox-gl';
@@ -108,7 +108,13 @@ export class App extends React.Component {
     const map = this._map;
     const deck = this._deck;
 
-    map.addLayer(new MapboxLayer({id: 'my-scatterplot', deck}));
+    // You must initialize an empty deck.gl layer to prevent flashing
+    map.addLayer(
+      // This id has to match the id of the deck.gl layer
+      new MapboxLayer({ id: "my-scatterplot", deck }),
+      // Optionally define id from Mapbox layer stack under which to add deck layer
+      'beforeId'
+    );
   }
 
   render() {
@@ -135,6 +141,8 @@ export class App extends React.Component {
         initialViewState={INITIAL_VIEW_STATE}
         controller={true}
         onWebGLInitialized={this._onWebGLInitialized}
+        {/* To render vector tile polygons correctly */}
+        glOptions={{stencil: true}}
       >
         {gl && (
           <StaticMap
@@ -160,13 +168,13 @@ export class App extends React.Component {
 
 ### Adding a 3D deck layer
 
-In this cases, the application wants to add a deck.gl 3D layer (e.g. ArcLayer, HexagonLayer, GeoJsonLayer) on top of a mapbox basemap, while seemlessly blend into the z-buffer. This will interleave the useful visualization layers from both the deck.gl and mapbox layer catalogs. In this case, the mapbox [`map.addLayer(layer)`](https://www.mapbox.com/mapbox-gl-js/api/#map#addlayer) API method can be used to add a mix of deck.gl and mapbox layers to the top of the layer stack from the currently loaded mapbox style.
+In this cases, the application wants to add a deck.gl 3D layer (e.g. ArcLayer, HexagonLayer, GeoJsonLayer) on top of a Mapbox basemap, while seemlessly blend into the z-buffer. This will interleave the useful visualization layers from both the deck.gl and Mapbox layer catalogs. In this case, the Mapbox [`map.addLayer(layer)`](https://www.mapbox.com/mapbox-gl-js/api/#map#addlayer) API method can be used to add a mix of deck.gl and Mapbox layers to the top of the layer stack from the currently loaded Mapbox style.
 
 
-### Inserting a 2D deck layer before an existing mapbox layer
+### Inserting a 2D deck layer before an existing Mapbox layer
 
-One major use case for mixing deck.gl and mapbox layers is that some important information in the mapbox map is hidden by a deck.gl visualization layer, and controlling opacity is not enough. A typical example of this is labels and roads, where it is desirable to have a deck.gl visualization layer render on top of the mapbox geography, but where one might still want to see e.g. labels and/or roads. Alternatively, the deck.gl visualization should cover the ground, but not the roads and labels.
+One major use case for mixing deck.gl and Mapbox layers is that some important information in the Mapbox map is hidden by a deck.gl visualization layer, and controlling opacity is not enough. A typical example of this is labels and roads, where it is desirable to have a deck.gl visualization layer render on top of the Mapbox geography, but where one might still want to see e.g. labels and/or roads. Alternatively, the deck.gl visualization should cover the ground, but not the roads and labels.
 
-A bit more control is provided by the optional `before` parameter of the mapbox [`map.addLayer(layer, before?)`](https://www.mapbox.com/mapbox-gl-js/api/#map#addlayer) API. Using this parameter, it is possible to inject a `MapboxLayer` instance just before any existing mapbox layer in the layer stack of the currently loaded style.
+A bit more control is provided by the optional `before` parameter of the Mapbox [`map.addLayer(layer, before?)`](https://www.mapbox.com/mapbox-gl-js/api/#map#addlayer) API. Using this parameter, it is possible to inject a `MapboxLayer` instance just before any existing Mapbox layer in the layer stack of the currently loaded style.
 
-Mapbox provides an example of [finding the first label layer](https://www.mapbox.com/mapbox-gl-js/example/geojson-layer-in-stack/). For more sophisticated injection point lookups, refer to Mapbox' documentation on the format of mapbox style layers, see [Mapbox Style Spec](https://www.mapbox.com/mapbox-gl-js/style-spec/#layers).
+Mapbox provides an example of [finding the first label layer](https://www.mapbox.com/mapbox-gl-js/example/geojson-layer-in-stack/). For more sophisticated injection point lookups, refer to Mapbox' documentation on the format of Mapbox style layers, see [Mapbox Style Spec](https://www.mapbox.com/mapbox-gl-js/style-spec/#layers).

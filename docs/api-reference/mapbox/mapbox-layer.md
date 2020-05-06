@@ -89,7 +89,6 @@ map.on('load', () => {
 }
 ```
 
-
 ## Constructor
 
 ```js
