@@ -21,7 +21,6 @@ test('Transition#start', t => {
     customAttribute: 'custom value'
   });
   t.ok(transition.inProgress, 'Transition is in progress');
-  t.ok(transition._handle, 'Sub-timeline is created');
   t.is(
     transition.settings.customAttribute,
     'custom value',
@@ -53,24 +52,26 @@ test('Transition#update', t => {
     duration: 1,
     easing: time => time * time
   });
+  t.notOk(transition._handle, 'No timeline handle yet');
 
-  transition.update();
+  t.ok(transition.update(), 'transition updated');
+  t.ok(transition._handle, 'Timeline handle is created');
   t.ok(transition.inProgress, 'Transition is in progress');
   t.is(transition.time, 0, 'time is correct');
 
   timeline.setTime(0.5);
-  transition.update();
+  t.ok(transition.update(), 'transition updated');
   t.ok(transition.inProgress, 'Transition is in progress');
   t.is(transition.time, 0.5, 'time is correct');
 
   timeline.setTime(1.5);
-  transition.update();
+  t.ok(transition.update(), 'transition updated');
   t.notOk(transition.inProgress, 'Transition has ended');
+  t.notOk(transition._handle, 'Timeline handle is cleared');
   t.is(transition.time, 1, 'time is correct');
 
   timeline.setTime(2);
-  transition.update();
-  t.notOk(transition.inProgress, 'Transition has ended');
+  t.notOk(transition.update(), 'transition is not updated');
 
   t.is(onUpdateCallCount, 3, 'onUpdate is called 3 times');
   t.is(onEndCallCount, 1, 'onEnd is called once');
