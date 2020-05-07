@@ -241,7 +241,7 @@ export default class ScenegraphLayer extends Layer {
   draw({moduleParameters = null, parameters = {}, context}) {
     if (!this.state.scenegraph) return;
 
-    if (this.props._animations && this.state.animator) {
+    if (this.props._animations && this.state.animator && context.deck) {
       this.state.animator.animate(context.deck.animationLoop.animationProps.time);
     }
 
