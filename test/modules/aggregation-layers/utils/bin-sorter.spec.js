@@ -89,7 +89,7 @@ test('BinSorter', t => {
   t.end();
 });
 
-test.only('BinSorter.getValueDomain', t => {
+test('BinSorter.getValueDomain', t => {
   let sortedBins = new BinSorter([]);
   const domainEmpty = sortedBins.getValueDomainByScale('quantize');
   t.deepEqual(domainEmpty, [], 'should create correct domain if bins are empty');
