@@ -89,7 +89,7 @@ test('BinSorter', t => {
   t.end();
 });
 
-test('BinSorter.getValueDomain', t => {
+test.only('BinSorter.getValueDomain', t => {
   let sortedBins = new BinSorter([]);
   const domainEmpty = sortedBins.getValueDomainByScale('quantize');
   t.deepEqual(domainEmpty, [], 'should create correct domain if bins are empty');
@@ -109,10 +109,10 @@ test('BinSorter.getValueDomain', t => {
   const quantileDomain = sortedBins.getValueDomainByScale('quantile');
   t.deepEqual(quantileDomain, [1, 2, 3], 'should create correct quantileDomain');
 
-  sortedBins = new BinSorter(mockBins, {getValue: points => 'a'});
+  sortedBins = new BinSorter(mockBins, {getValue: points => ['b', 'c', 'a'][points.length % 3]});
 
   const ordinalDomain = sortedBins.getValueDomainByScale('ordinal');
-  t.deepEqual(ordinalDomain, ['a'], 'should create correct ordinalDomain');
+  t.deepEqual(ordinalDomain, ['a', 'b', 'c'], 'should create correct ordinalDomain');
 
   t.end();
 });
