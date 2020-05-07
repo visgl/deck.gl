@@ -144,7 +144,7 @@ Hide tiles when under-zoomed.
 
 ##### `extent` (Array, optional)
 
-If provided, the layer will load and render the tiles in this box when underzoomed.  The box is of the form [left, top, right, bottom]
+If provided, the layer will load and render the tiles in this box when underzoomed.  The box is of the form `[minX, minY, maxX, maxY]`.
 
 - Default: null
 
