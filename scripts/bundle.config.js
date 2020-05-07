@@ -37,7 +37,7 @@ function getExternals(packageInfo) {
 }
 
 const config = {
-  mode: 'production',
+  mode: 'development',
 
   entry: {
     main: resolve('./bundle')

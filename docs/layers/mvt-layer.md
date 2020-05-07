@@ -93,11 +93,13 @@ Optional. Needed for highlighting a feature split across two or more tiles if no
 
 An string pointing to a tile attribute containing a unique identifier for features across tiles.
 
-##### `highlightedObjectIndex` (Number)
+##### `highlightedFeatureId` (Number)
 
 * Default: `-1`
 
-When provided, a feature with id corresponding to the supplied value will be highlighted with `highlightColor`
+Optional. When provided, a feature with ID corresponding to the supplied value will be highlighted with `highlightColor`.
+
+If `uniqueIdProperty` is provided, value within that feature property will be used for ID comparison. If not, [feature id](https://github.com/mapbox/vector-tile-spec/tree/master/2.1#42-features) will be used.
 
 ## Source
 

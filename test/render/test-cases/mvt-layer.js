@@ -48,8 +48,8 @@ export default [
         data: ['./test/data/mvt-tiles/{z}/{x}/{y}.mvt'],
         getFillColor: [0, 0, 0, 128],
         getLineColor: [255, 0, 0, 128],
-        highlightedObjectIndex: 1862,
-        uniquePropertyId: 'cartodb_id',
+        highlightedFeatureId: 1862,
+        uniqueIdProperty: 'cartodb_id',
         onTileError: error => {
           if (error.message.includes('404')) {
             // trying to load tiles in the previous viewport, ignore

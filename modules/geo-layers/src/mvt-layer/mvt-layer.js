@@ -10,7 +10,8 @@ import ClipExtension from './clip-extension';
 const WORLD_SIZE = 512;
 
 const defaultProps = {
-  uniqueIdProperty: {type: 'string', value: '', compare: false}
+  uniqueIdProperty: {type: 'string', value: ''},
+  highlightedFeatureId: {type: 'number', value: -1}
 };
 
 export default class MVTLayer extends TileLayer {
@@ -46,16 +47,16 @@ export default class MVTLayer extends TileLayer {
     const {uniqueIdProperty, autoHighlight} = this.props;
 
     if (autoHighlight) {
-      const {highlightedFeatureId} = this.state;
+      const {hoveredFeatureId} = this.state;
       const hoveredFeature = info.object;
-      let hoveredFeatureId;
+      let newHoveredFeatureId;
 
       if (hoveredFeature) {
-        hoveredFeatureId = getFeatureUniqueId(hoveredFeature, uniqueIdProperty);
+        newHoveredFeatureId = getFeatureUniqueId(hoveredFeature, uniqueIdProperty);
       }
 
-      if (hoveredFeatureId !== highlightedFeatureId) {
-        this.setState({highlightedFeatureId: hoveredFeatureId});
+      if (hoveredFeatureId !== newHoveredFeatureId) {
+        this.setState({hoveredFeatureId: newHoveredFeatureId});
       }
     }
 
@@ -63,35 +64,31 @@ export default class MVTLayer extends TileLayer {
   }
 
   getHighlightedObjectIndex(tile) {
-    const {highlightedFeatureId} = this.state;
-    const {uniquePropertyId, highlightedObjectIndex: highlightedFeatureProp} = this.props;
+    const {hoveredFeatureId} = this.state;
+    const {uniqueIdProperty, highlightedFeatureId} = this.props;
     const {data} = tile;
 
-    if ((!highlightedFeatureId && !highlightedFeatureProp) || !Array.isArray(data)) {
+    const isFeatureIdPresent = hoveredFeatureId >= 0 || highlightedFeatureId >= 0;
+    if (!isFeatureIdPresent || !Array.isArray(data)) {
       return -1;
     }
 
-    const featureIdToHighlight = highlightedFeatureProp || highlightedFeatureId;
+    const featureIdToHighlight =
+      highlightedFeatureId >= 0 ? highlightedFeatureId : hoveredFeatureId;
 
     return data.findIndex(
-      feature =>
-        feature.id
-          ? feature.id === featureIdToHighlight
-          : feature.properties[uniquePropertyId] === featureIdToHighlight
+      feature => getFeatureUniqueId(feature, uniqueIdProperty) === featureIdToHighlight
     );
   }
 }
 
-function getFeatureUniqueId(feature, uniquePropertyId) {
-  const hasFeatureId = Boolean(feature.id);
-  const hasUniquePropertyId = Boolean(uniquePropertyId);
-
-  if (hasFeatureId) {
-    return feature.id;
+function getFeatureUniqueId(feature, uniqueIdProperty) {
+  if (uniqueIdProperty) {
+    return feature.properties[uniqueIdProperty];
   }
 
-  if (hasUniquePropertyId) {
-    return feature.properties[uniquePropertyId];
+  if (feature.id) {
+    return feature.id;
   }
 
   return -1;

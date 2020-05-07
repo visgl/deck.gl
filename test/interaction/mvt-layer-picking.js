@@ -45,7 +45,7 @@ export default {
       onBeforeEvents,
       onAfterEvents: ({deck, layers}) => {
         t.is(hoverEvents.length, 1, 'onHover is called');
-        t.is(layers[0].state.highlightedFeatureId, 1862, 'highlighted feature is saved in state');
+        t.is(layers[0].state.hoveredFeatureId, 1862, 'highlighted feature is saved in state');
       }
     }
   ]

@@ -20,8 +20,7 @@ const defaultProps = {
   maxCacheSize: null,
   maxCacheByteSize: null,
   refinementStrategy: STRATEGY_DEFAULT,
-  zRange: null,
-  getHighlightedObjectIndex: {type: 'function', value: () => -1, compare: false}
+  zRange: null
 };
 
 export default class TileLayer extends CompositeLayer {
@@ -139,8 +138,8 @@ export default class TileLayer extends CompositeLayer {
     return this.props.renderSubLayers(props);
   }
 
-  getHighlightedObjectIndex(tile) {
-    return this.props.getHighlightedObjectIndex(tile);
+  getHighlightedObjectIndex() {
+    return -1;
   }
 
   getPickingInfo({info, sourceLayer}) {
