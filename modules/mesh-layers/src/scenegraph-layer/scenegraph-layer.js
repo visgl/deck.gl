@@ -242,7 +242,7 @@ export default class ScenegraphLayer extends Layer {
     if (!this.state.scenegraph) return;
 
     if (this.props._animations && this.state.animator && context.deck) {
-      this.state.animator.animate(context.deck.animationLoop.animationProps.time);
+      this.state.animator.animate(context.deck.animationLoop.timeline.time);
     }
 
     const {viewport} = this.context;
