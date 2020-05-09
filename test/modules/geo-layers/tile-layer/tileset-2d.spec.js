@@ -143,14 +143,26 @@ test('Tileset2D#under-zoomed', t => {
     maxZoom: 13,
     onTileLoad: () => {}
   });
-  const zoomedOutViewport = new WebMercatorViewport(
-    Object.assign({}, testViewState, {
-      zoom: 1
-    })
-  );
+  const zoomedOutViewport = new WebMercatorViewport(Object.assign({}, testViewState, {zoom: 1}));
 
   tileset.update(zoomedOutViewport);
   t.equal(tileset.tiles.length, 0);
+  t.end();
+});
+
+test('Tileset2D#under-zoomed-with-extent', t => {
+  const tileset = new Tileset2D({
+    getTileData,
+    minZoom: 11,
+    maxZoom: 13,
+    extent: [-180, -85.05113, 180, 85.05113],
+    onTileLoad: () => {}
+  });
+  const zoomedOutViewport = new WebMercatorViewport(Object.assign({}, testViewState, {zoom: 1}));
+
+  tileset.update(zoomedOutViewport);
+  const tileZoomLevels = tileset.tiles.map(tile => tile.z);
+  t.assert(tileZoomLevels[0] === 11);
   t.end();
 });
 
