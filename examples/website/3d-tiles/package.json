@@ -6,9 +6,9 @@
   },
   "dependencies": {
     "deck.gl": "^8.1.0",
-    "@loaders.gl/core": "^2.1.1",
-    "@loaders.gl/draco": "^2.1.1",
-    "@loaders.gl/3d-tiles": "^2.1.1",
+    "@loaders.gl/core": "^2.1.5",
+    "@loaders.gl/draco": "^2.1.5",
+    "@loaders.gl/3d-tiles": "^2.1.5",
     "react": "^16.8.0",
     "react-dom": "^16.8.0",
     "react-map-gl": "^5.0.0"
