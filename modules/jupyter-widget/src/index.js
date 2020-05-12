@@ -10,10 +10,9 @@ if (dataBaseUrl) {
   window.__webpack_public_path__ = `${dataBaseUrl}nbextensions/pydeck/nb_extension`;
 }
 
-const {createDeck, updateDeck, loadExternalClasses} = require('./lib/create-deck');
-const {MODULE_VERSION, MODULE_NAME} = require('./version');
-
 // Initialize the
+const Transport = require('./transports/transport').default;
+const {jupyterKernelTransport} = require('./transports/jupyter/jupyter-kernel-transport').default;
 
 // TODO - rename these exports to DeckWidgetModel and DeckWidgetView...
 let TransportModel = null;
@@ -25,7 +24,15 @@ try {
   // TODO - when does this happen? Not even a console warning?
 }
 
+const {createDeck, updateDeck, loadExternalClasses} = require('./lib/create-deck');
+const {MODULE_VERSION, MODULE_NAME} = require('./version');
+
 module.exports = {
+  // Transports
+  Transport,
+  jupyterKernelTransport,
+
+  // Jupyter Hooks
   TransportModel,
   TransportView,
   MODULE_VERSION,
