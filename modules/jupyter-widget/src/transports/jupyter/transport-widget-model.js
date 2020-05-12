@@ -36,9 +36,7 @@ export class TransportWidgetModel extends DOMWidgetModel {
   }
 
   static get model_name() {
-    // TODO - does this need to be changed on Python side as well
-    // return 'TransportWidgetModel';
-    return 'DeckWidgetModel';
+    return 'TransportWidgetModel';
   }
   static get model_module() {
     return MODULE_NAME;
@@ -47,9 +45,7 @@ export class TransportWidgetModel extends DOMWidgetModel {
     return MODULE_VERSION;
   }
   static get view_name() {
-    // TODO - does this need to be changed on Python side as well
-    // return 'TransportView';
-    return 'DeckGLView';
+    return 'TransportWidgetView';
   }
   static get view_module() {
     return MODULE_NAME;

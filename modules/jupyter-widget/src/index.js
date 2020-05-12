@@ -16,24 +16,24 @@ const {MODULE_VERSION, MODULE_NAME} = require('./version');
 // Initialize the
 
 // TODO - rename these exports to DeckWidgetModel and DeckWidgetView...
-let TransportModel = null;
-let TransportView = null;
+let TransportWidgetModel = null;
+let TransportWidgetView = null;
 try {
-  TransportModel = require('./transports/jupyter-widget/transport-widget-model');
-  TransportView = require('./transports/jupyter-widget/transport-widget-view');
+  TransportWidgetModel = require('./transports/jupyter/transport-widget-model');
+  TransportWidgetView = require('./transports/jupyter/transport-widget-view');
 } catch (err) {
   // TODO - when does this happen? Not even a console warning?
 }
 
 module.exports = {
-  TransportModel,
-  TransportView,
+  TransportWidgetModel,
+  TransportWidgetView,
   MODULE_VERSION,
   MODULE_NAME,
 
   // DEPRECATED: Backwards compatibility
-  DeckGLView: TransportView,
-  DeckGLModel: TransportModel,
+  DeckGLView: TransportWidgetView,
+  DeckGLModel: TransportWidgetModel,
 
   // FOR TESTING ONLY?
   createDeck,
