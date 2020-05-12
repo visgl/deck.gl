@@ -1,21 +1,21 @@
 import {DOMWidgetView} from '@jupyter-widgets/base';
-import {jupyterWidgetTransport} from './jupyter-widget-transport';
+import {jupyterKernelTransport} from './jupyter-kernel-transport';
 
 export class TransportWidgetView extends DOMWidgetView {
   initialize() {
     this.listenTo(this.model, 'destroy', this.remove);
 
-    this.transport = jupyterWidgetTransport;
+    this.transport = jupyterKernelTransport;
 
-    this.transport.initialize({
-      // TODO - temporary hack, exposes Jupyter internals
-      model: this.model
-    });
+    // Expose Jupyter internals to enable work-arounds
+    this.transport._jupyterModel = this.model;
+    this.transport._initialize();
   }
 
   remove() {
     if (this.transport) {
-      this.transport.finalize({model: this.model});
+      this.transport._finalize();
+      this.transport._jupyterModel = null;
       this.transport = null;
     }
   }
@@ -23,7 +23,8 @@ export class TransportWidgetView extends DOMWidgetView {
   render() {
     super.render();
 
-    // TODO - looks like bind(this) is not needed here...
+    // TODO - looks like bind(this) is not needed here, it is already passed as 3rd arg...
+    // TODO - remove and test
     this.model.on('change:json_input', this.onJsonChanged.bind(this), this);
     this.model.on('change:data_buffer', this.onDataBufferChanged.bind(this), this);
 

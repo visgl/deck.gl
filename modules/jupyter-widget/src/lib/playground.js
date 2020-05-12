@@ -1,13 +1,12 @@
-import {jupyterWidgetTransport} from '../transports/jupyter/jupyter-widget-transport';
+import {jupyterKernelTransport} from '../transports/jupyter/jupyter-kernel-transport';
 
-import {processDataBuffer} from './utils/deserialize-matrix';
 import {loadMapboxCSS, hideMapboxCSSWarning} from './utils/mapbox-utils';
 import {createContainer, createErrorBox} from './utils/css-utils';
 
 import {jsonConverter, createDeck} from './create-deck';
 
 export function initPlayground() {
-  jupyterWidgetTransport.setCallbacks({
+  jupyterKernelTransport.setCallbacks({
     onInitialize({transport}) {
       // Extract "deck.gl playground" props
       const {
@@ -34,7 +33,7 @@ export function initPlayground() {
 
       const jsonProps = JSON.parse(jsonInput);
 
-      transport.userData.deck = createDeck({
+      const deck = createDeck({
         mapboxApiKey,
         container,
         jsonInput: jsonProps,
@@ -43,17 +42,22 @@ export function initPlayground() {
         handleWarning: message => handleWarning(this.transport, message),
         customLibraries
       });
+
+      transport.userData.deck = deck;
     },
 
-    onFinalize() {
-      this.deck.finalize();
+    onFinalize({transport}) {
+      const {deck} = transport.userData;
+      deck.finalize();
     },
 
     onMessage({transport, type, json, binary}) {
+      const {deck} = transport.userData;
+
       switch (type) {
         case 'json':
           let convertedJson = jsonConverter.convert(json);
-          this.deck.setProps(convertedJson);
+          deck.setProps(convertedJson);
 
           // Jupyter notebook displays an error that this suppresses
           hideMapboxCSSWarning();
@@ -65,7 +69,7 @@ export function initPlayground() {
             binary,
             convertedJson
           });
-          transport.userData.deck.setProps(propsWithBinary);
+          deck.setProps(propsWithBinary);
           break;
 
         default:
@@ -77,6 +81,18 @@ export function initPlayground() {
 
 // HELPER FUNCTIONS
 
+// Takes JSON props and combines them with the binary data buffer
+function processDataBuffer({dataBuffer, convertedJson}) {
+  for (let i = 0; i < convertedJson.layers.length; i++) {
+    const layerId = convertedJson.layers[i].id;
+    const layer = convertedJson.layers[i];
+    // Replace data on every layer prop
+    convertedJson.layers[i] = layer.clone({data: dataBuffer[layerId]});
+  }
+  return convertedJson;
+}
+
+// Handles a click event
 function handleClick(transport, datum, e) {
   if (!datum || !datum.object) {
     transport.model.set('selected_data', JSON.stringify(''));
@@ -100,6 +116,7 @@ function handleClick(transport, datum, e) {
   transport.model.save_changes();
 }
 
+// Handles a warning event
 function handleWarning(transport, warningMessage) {
   const errorBox = createErrorBox();
   if (transport.model.get('js_warning') && errorBox) {
