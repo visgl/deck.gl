@@ -37,10 +37,10 @@ class DeckGLWidget(widgets.DOMWidget):
             Whether the string message from deck.gl should be rendered, defaults to False
     """
 
-    _model_name = Unicode("TransportWidgetModel").tag(sync=True)
+    _model_name = Unicode("TransportModel").tag(sync=True)
     _model_module = Unicode(module_name).tag(sync=True)
     _model_module_version = Unicode(module_version).tag(sync=True)
-    _view_name = Unicode("TransportWidgetView").tag(sync=True)
+    _view_name = Unicode("TransportView").tag(sync=True)
     _view_module = Unicode(module_name).tag(sync=True)
     _view_module_version = Unicode(module_version).tag(sync=True)
     mapbox_key = Unicode("", allow_none=True).tag(sync=True)
