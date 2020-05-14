@@ -36,7 +36,7 @@ prepare-jupyter:
 	  cd ../../bindings/pydeck
 
 test:
-	flake8 {pydeck,tests,*.py,examples} && \
+	flake8 . && \
 	pytest --cov=pydeck 
 
 publish-conda:	
