@@ -135,6 +135,9 @@ export default class DeckPicker {
     unproject3D,
     onViewportActive
   }) {
+    // picking can only hanle up to 255 items in `layers`. Drop non-pickable layers from the list.
+    layers = layers.filter(layer => this.pickLayersPass._shouldDrawLayer(layer));
+
     this._resizeBuffer();
     // Convert from canvas top-left to WebGL bottom-left coordinates
     // Top-left coordinates [x, y] to bottom-left coordinates [deviceX, deviceY]
@@ -250,6 +253,9 @@ export default class DeckPicker {
     mode = 'query',
     onViewportActive
   }) {
+    // picking can only hanle up to 255 items in `layers`. Drop non-pickable layers from the list.
+    layers = layers.filter(layer => this.pickLayersPass._shouldDrawLayer(layer));
+
     this._resizeBuffer();
     // Convert from canvas top-left to WebGL bottom-left coordinates
     // And compensate for pixelRatio
