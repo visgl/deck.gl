@@ -12,9 +12,7 @@ Adapted from the deck.gl documentation.
 import pydeck as pdk
 import pandas as pd
 
-GREAT_CIRCLE_LAYER_DATA = (
-    "https://raw.githubusercontent.com/visgl/deck.gl-data/master/website/flights.json"  # noqa
-)
+GREAT_CIRCLE_LAYER_DATA = "https://raw.githubusercontent.com/visgl/deck.gl-data/master/website/flights.json"  # noqa
 
 df = pd.read_json(GREAT_CIRCLE_LAYER_DATA)
 

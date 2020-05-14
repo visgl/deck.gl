@@ -17,9 +17,9 @@ def test_warning():
         if os.environ.get("MAPBOX_API_KEY"):
             del os.environ["MAPBOX_API_KEY"]
         with pytest.warns(UserWarning) as record:
-            d = Deck()
+            d = Deck()  # noqa: F841
             os.environ["MAPBOX_API_KEY"] = "pk.xx"
-            d = Deck()
+            d = Deck()  # noqa: F841
         # Assert that only one warning has been raised
         assert len(record) == 1
     finally:

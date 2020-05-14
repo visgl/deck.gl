@@ -61,11 +61,3 @@ async def test_standalone_rendering(tmp_path):
 @pytest.mark.asyncio
 async def test_notebook_iframe_rendering():
     pass
-
-
-def main():
-    asyncio.get_event_loop().run_until_complete(run_html())
-
-
-if __name__ == "__main__":
-    main()
