@@ -40,6 +40,9 @@
   "browser": {
     "jsdom": false
   },
+  "resolutions": {
+    "math.gl": "3.2.0-alpha.3"
+  },
   "devDependencies": {
     "@loaders.gl/csv": "^2.1.5",
     "@loaders.gl/polyfills": "^2.1.5",

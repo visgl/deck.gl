@@ -44,38 +44,25 @@ export function getURLFromTemplate(template, properties) {
  * gets the bounding box of a viewport
  */
 function getBoundingBox(viewport, zRange, extent) {
-  let corners;
+  let bounds;
   if (zRange && zRange.length === 2) {
     const [minZ, maxZ] = zRange;
-    const minTargetZ = {targetZ: minZ};
-    const maxTargetZ = {targetZ: maxZ};
-    corners = [
-      // Lower zRange
-      viewport.unproject([0, 0], minTargetZ),
-      viewport.unproject([viewport.width, 0], minTargetZ),
-      viewport.unproject([0, viewport.height], minTargetZ),
-      viewport.unproject([viewport.width, viewport.height], minTargetZ),
-
-      // Upper zRange
-      viewport.unproject([0, 0], maxTargetZ),
-      viewport.unproject([viewport.width, 0], maxTargetZ),
-      viewport.unproject([0, viewport.height], maxTargetZ),
-      viewport.unproject([viewport.width, viewport.height], maxTargetZ)
+    const bounds0 = viewport.getBounds({z: minZ});
+    const bounds1 = viewport.getBounds({z: maxZ});
+    bounds = [
+      Math.min(bounds0[0], bounds1[0], extent[0]),
+      Math.min(bounds0[1], bounds1[1], extent[1]),
+      Math.max(bounds0[2], bounds1[2], extent[2]),
+      Math.max(bounds0[3], bounds1[3], extent[3])
     ];
   } else {
-    corners = [
-      viewport.unproject([0, 0]),
-      viewport.unproject([viewport.width, 0]),
-      viewport.unproject([0, viewport.height]),
-      viewport.unproject([viewport.width, viewport.height])
-    ];
+    bounds = viewport.getBounds();
   }
-
   return [
-    Math.max(Math.min(...corners.map(arr => arr[0])), extent[0]),
-    Math.max(Math.min(...corners.map(arr => arr[1])), extent[1]),
-    Math.min(Math.max(...corners.map(arr => arr[0])), extent[2]),
-    Math.min(Math.max(...corners.map(arr => arr[1])), extent[3])
+    Math.max(bounds[0], extent[0]),
+    Math.max(bounds[1], extent[1]),
+    Math.min(bounds[2], extent[2]),
+    Math.min(bounds[3], extent[3])
   ];
 }
 

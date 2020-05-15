@@ -2,6 +2,7 @@ import React, {PureComponent} from 'react';
 import {render} from 'react-dom';
 
 import DeckGL from '@deck.gl/react';
+import {MapView} from '@deck.gl/core';
 import {TileLayer} from '@deck.gl/geo-layers';
 import {BitmapLayer} from '@deck.gl/layers';
 
@@ -71,7 +72,12 @@ export default class App extends PureComponent {
 
   render() {
     return (
-      <DeckGL layers={this._renderLayers()} initialViewState={INITIAL_VIEW_STATE} controller={true}>
+      <DeckGL
+        layers={this._renderLayers()}
+        views={new MapView({repeat: true})}
+        initialViewState={INITIAL_VIEW_STATE}
+        controller={true}
+      >
         {this._renderTooltip}
       </DeckGL>
     );

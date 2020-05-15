@@ -210,6 +210,22 @@ export default class Viewport {
     return xyz;
   }
 
+  getBounds(options = {}) {
+    const unprojectOption = {targetZ: options.z || 0};
+
+    const topLeft = this.unproject([0, 0], unprojectOption);
+    const topRight = this.unproject([this.width, 0], unprojectOption);
+    const bottomLeft = this.unproject([0, this.height], unprojectOption);
+    const bottomRight = this.unproject([this.width, this.height], unprojectOption);
+
+    return [
+      Math.min(topLeft[0], topRight[0], bottomLeft[0], bottomRight[0]),
+      Math.min(topLeft[1], topRight[1], bottomLeft[1], bottomRight[1]),
+      Math.max(topLeft[0], topRight[0], bottomLeft[0], bottomRight[0]),
+      Math.max(topLeft[1], topRight[1], bottomLeft[1], bottomRight[1])
+    ];
+  }
+
   getDistanceScales(coordinateOrigin = null) {
     if (coordinateOrigin) {
       return getDistanceScales({
