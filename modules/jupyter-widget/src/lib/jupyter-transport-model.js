@@ -1,20 +1,20 @@
 import {DOMWidgetModel} from '@jupyter-widgets/base';
-import {MODULE_NAME, MODULE_VERSION} from '../../version';
-import {deserializeMatrix} from '../../lib/utils/deserialize-matrix';
+import {MODULE_NAME, MODULE_VERSION} from '../version';
+import {deserializeMatrix} from './utils/deserialize-matrix';
 /**
  *
  * Note: Variables shared explictly between Python and JavaScript use snake_case
  */
-export class TransportWidgetModel extends DOMWidgetModel {
+export default class JupyterTransportModel extends DOMWidgetModel {
   defaults() {
     return {
       ...super.defaults(),
-      _model_name: TransportWidgetModel.model_name,
-      _model_module: TransportWidgetModel.model_module,
-      _model_module_version: TransportWidgetModel.model_module_version,
-      _view_name: TransportWidgetModel.view_name,
-      _view_module: TransportWidgetModel.view_module,
-      _view_module_version: TransportWidgetModel.view_module_version,
+      _model_name: JupyterTransportModel.model_name,
+      _model_module: JupyterTransportModel.model_module,
+      _model_module_version: JupyterTransportModel.model_module_version,
+      _view_name: JupyterTransportModel.view_name,
+      _view_module: JupyterTransportModel.view_module,
+      _view_module_version: JupyterTransportModel.view_module_version,
       custom_libraries: [],
       json_input: null,
       mapbox_key: null,
@@ -37,7 +37,7 @@ export class TransportWidgetModel extends DOMWidgetModel {
 
   static get model_name() {
     // TODO - does this need to be changed on Python side as well
-    // return 'TransportWidgetModel';
+    // return 'JupyterTransportModel';
     return 'DeckWidgetModel';
   }
   static get model_module() {

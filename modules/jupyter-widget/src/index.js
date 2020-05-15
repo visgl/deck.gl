@@ -10,40 +10,42 @@ if (dataBaseUrl) {
   window.__webpack_public_path__ = `${dataBaseUrl}nbextensions/pydeck/nb_extension`;
 }
 
-// Initialize the
-const Transport = require('./transports/transport').default;
-const {jupyterKernelTransport} = require('./transports/jupyter/jupyter-kernel-transport').default;
+// Initialize the transport
+const {jupyterTransport} = require('./lib/jupyter-transport').default;
 
-// TODO - rename these exports to DeckWidgetModel and DeckWidgetView...
 let TransportModel = null;
 let TransportView = null;
 try {
-  TransportModel = require('./transports/jupyter-widget/transport-widget-model');
-  TransportView = require('./transports/jupyter-widget/transport-widget-view');
+  TransportModel = require('./lib/jupyter-transport-model').default;
+  TransportView = require('./lib/jupyter-transport-view').default;
 } catch (err) {
   // TODO - when does this happen? Not even a console warning?
 }
 
-const {createDeck, updateDeck, loadExternalClasses} = require('./lib/create-deck');
 const {MODULE_VERSION, MODULE_NAME} = require('./version');
+
+// TODO - this should be placed in a separate module `@deck.gl/playground`
+const {createDeck, updateDeck} = require('./playground/create-deck');
+const {initPlayground} = require('./playground');
+initPlayground();
 
 module.exports = {
   // Transports
-  Transport,
-  jupyterKernelTransport,
+  jupyterTransport,
 
   // Jupyter Hooks
-  TransportModel,
-  TransportView,
   MODULE_VERSION,
   MODULE_NAME,
+  TransportModel,
+  TransportView,
+
+  // For to_html()...
+  initPlayground,
+  // TODO - use playground?
+  createDeck,
+  updateDeck,
 
   // DEPRECATED: Backwards compatibility
   DeckGLView: TransportView,
-  DeckGLModel: TransportModel,
-
-  // FOR TESTING ONLY?
-  createDeck,
-  updateDeck,
-  loadExternalClasses // TODO - unused
+  DeckGLModel: TransportModel
 };

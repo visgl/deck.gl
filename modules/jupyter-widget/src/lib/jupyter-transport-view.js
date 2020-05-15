@@ -1,21 +1,23 @@
 import {DOMWidgetView} from '@jupyter-widgets/base';
-import {jupyterKernelTransport} from './jupyter-kernel-transport';
+import {jupyterTransport} from './jupyter-transport';
 
-export class TransportWidgetView extends DOMWidgetView {
+export default class JupyterTransportView extends DOMWidgetView {
   initialize() {
     this.listenTo(this.model, 'destroy', this.remove);
 
-    this.transport = jupyterKernelTransport;
+    this.transport = jupyterTransport;
 
     // Expose Jupyter internals to enable work-arounds
-    this.transport._jupyterModel = this.model;
+    this.transport.jupyterModel = this.model;
+    this.transport.jupyterView = this;
     this.transport._initialize();
   }
 
   remove() {
     if (this.transport) {
       this.transport._finalize();
-      this.transport._jupyterModel = null;
+      this.transport.jupyterModel = null;
+      this.transport.jupyterView = null;
       this.transport = null;
     }
   }
@@ -28,12 +30,12 @@ export class TransportWidgetView extends DOMWidgetView {
     this.model.on('change:json_input', this.onJsonChanged.bind(this), this);
     this.model.on('change:data_buffer', this.onDataBufferChanged.bind(this), this);
 
-    this.dataBufferChanged();
+    this.onDataBufferChanged();
   }
 
   onJsonChanged() {
     const json = JSON.parse(this.model.get('json_input'));
-    this.transport.onMessage({type: 'json', data: json});
+    this.transport._messageReceived({type: 'json', json});
   }
 
   onDataBufferChanged() {
@@ -41,12 +43,13 @@ export class TransportWidgetView extends DOMWidgetView {
     const dataBuffer = this.model.get('data_buffer');
 
     if (json && dataBuffer) {
-      this.transport.onMessage({
-        transport: this.transport,
+      this.transport._messageReceived({
         type: 'json-with-binary',
         json,
-        dataBuffer
+        binary: dataBuffer
       });
+    } else {
+      this.transport._messageReceived({type: 'json', json});
     }
   }
 }
