@@ -50,10 +50,10 @@ function getBoundingBox(viewport, zRange, extent) {
     const bounds0 = viewport.getBounds({z: minZ});
     const bounds1 = viewport.getBounds({z: maxZ});
     bounds = [
-      Math.min(bounds0[0], bounds1[0], extent[0]),
-      Math.min(bounds0[1], bounds1[1], extent[1]),
-      Math.max(bounds0[2], bounds1[2], extent[2]),
-      Math.max(bounds0[3], bounds1[3], extent[3])
+      Math.min(bounds0[0], bounds1[0]),
+      Math.min(bounds0[1], bounds1[1]),
+      Math.max(bounds0[2], bounds1[2]),
+      Math.max(bounds0[3], bounds1[3])
     ];
   } else {
     bounds = viewport.getBounds();
