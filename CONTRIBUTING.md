@@ -92,4 +92,4 @@ Next, install [headless-gl dependencies](https://github.com/stackgl/headless-gl#
 sudo apt-get install -y build-essential libxi-dev libglu1-mesa-dev libglew-dev pkg-config
 ```
 
-Verify that everything works by running `yarn test`.
+Verify that everything works by running `yarn test node`.
