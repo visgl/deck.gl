@@ -79,8 +79,6 @@ To get OpenGL support, install [VcXsrv](https://sourceforge.net/projects/vcxsrv/
 
 ```bash
 sudo apt-get update
-
-# Install OpenGL
 sudo apt install mesa-utils
 export DISPLAY=localhost:0
 glxgears
