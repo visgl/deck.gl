@@ -18,6 +18,8 @@ yarn bootstrap
 yarn test
 ```
 
+Additional instructions for [Windows](/CONTRIBUTING.md#develop-on-windows).
+
 Run the layer browser application:
 
 ```bash
@@ -66,3 +68,28 @@ This mailing list can also be utilized to reach out to the TSC.
 ## Code of Conduct
 
 Please be mindful of and adhere to the Linux Foundation's [Code of Conduct](https://lfprojects.org/policies/code-of-conduct/) when contributing to deck.gl.
+
+## Troubleshooting
+
+### Develop on Windows
+
+It's possible to set up the dev environment in [Windows Subsystem for Linux](https://docs.microsoft.com/en-us/windows/wsl/install-win10).
+
+To get OpenGL support, install [VcXsrv](https://sourceforge.net/projects/vcxsrv/). In xlaunch.exe, choose multiple windows, display 0, start no client, disable native opengl. ([source](https://github.com/Microsoft/WSL/issues/2855#issuecomment-358861903))
+
+```bash
+sudo apt-get update
+sudo apt install mesa-utils
+export DISPLAY=localhost:0
+glxgears
+```
+
+If successful, you should see a window open with gears turning.
+
+Next, install [headless-gl dependencies](https://github.com/stackgl/headless-gl#system-dependencies):
+
+```bash
+sudo apt-get install -y build-essential libxi-dev libglu1-mesa-dev libglew-dev pkg-config
+```
+
+Verify that everything works by running `yarn test node`.
