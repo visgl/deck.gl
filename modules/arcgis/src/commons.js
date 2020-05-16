@@ -51,6 +51,7 @@ export function initializeResources(gl) {
 
     _customRender: redrawReason => {
       if (redrawReason === 'arcgis') {
+        gl.enable(gl.DEPTH_TEST);
         this.deckInstance._drawLayers(redrawReason);
       } else {
         this.redraw();
