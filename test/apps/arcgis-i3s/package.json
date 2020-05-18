@@ -1,0 +1,18 @@
+{
+  "scripts": {
+    "start": "webpack-dev-server --progress --hot --open",
+    "start-local": "webpack-dev-server --env.local --progress --hot --open",
+    "build": "webpack -p"
+  },
+  "dependencies": {
+    "@deck.gl/core": "^8.1.0",
+    "@deck.gl/layers": "^8.1.0",
+    "@loaders.gl/i3s": "^2.1.6",
+    "loaders.gl": "^0.3.5"
+  },
+  "devDependencies": {
+    "webpack": "^4.20.2",
+    "webpack-cli": "^3.1.2",
+    "webpack-dev-server": "^3.1.1"
+  }
+}
