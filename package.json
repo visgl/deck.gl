@@ -1,8 +1,8 @@
 {
   "name": "deck.gl-monorepo",
-  "description": "A suite of 3D-enabled data visualization overlays, suitable for react-map-gl",
+  "description": "WebGL-powered visualization framework for large-scale datasets",
   "license": "MIT",
-  "private": "true",
+  "private": true,
   "keywords": [
     "webgl",
     "visualization",
@@ -74,8 +74,5 @@
   "pre-commit": [
     "test-fast",
     "bindings-precommit-tests"
-  ],
-  "dependencies": {
-    "esri-loader": "^2.13.0"
-  }
+  ]
 }
