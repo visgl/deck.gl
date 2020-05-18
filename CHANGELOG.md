@@ -19,6 +19,11 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v8.1
 
+#### deck.gl [8.1.7] - May 18 2020
+
+- Depth testing in @deck.gl/arcgis 3D mode (#4597)
+- Bump loaders.gl to 2.1.6
+
 #### deck.gl [8.1.6] - May 14 2020
 
 - Workaround for picking index overflow (#4586)
