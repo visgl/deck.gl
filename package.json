@@ -1,6 +1,6 @@
 {
   "name": "deck.gl-monorepo",
-  "description": "WebGL-powered visualization framework for large-scale dataset",
+  "description": "WebGL-powered visualization framework for large-scale datasets",
   "license": "MIT",
   "private": true,
   "keywords": [
