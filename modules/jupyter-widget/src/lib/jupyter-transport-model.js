@@ -36,9 +36,7 @@ export default class JupyterTransportModel extends DOMWidgetModel {
   }
 
   static get model_name() {
-    // TODO - does this need to be changed on Python side as well
-    // return 'JupyterTransportModel';
-    return 'DeckWidgetModel';
+    return 'JupyterTransportModel';
   }
   static get model_module() {
     return MODULE_NAME;
@@ -47,9 +45,7 @@ export default class JupyterTransportModel extends DOMWidgetModel {
     return MODULE_VERSION;
   }
   static get view_name() {
-    // TODO - does this need to be changed on Python side as well
-    // return 'TransportView';
-    return 'DeckGLView';
+    return 'JupyterTransportView';
   }
   static get view_module() {
     return MODULE_NAME;

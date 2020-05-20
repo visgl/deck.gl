@@ -19,7 +19,7 @@ try {
   TransportModel = require('./lib/jupyter-transport-model').default;
   TransportView = require('./lib/jupyter-transport-view').default;
 } catch (err) {
-  // TODO - when does this happen? Not even a console warning?
+  // Note: Happens in the to_html() case
 }
 
 const {MODULE_VERSION, MODULE_NAME} = require('./version');
@@ -43,9 +43,5 @@ module.exports = {
   initPlayground,
   // TODO - use playground?
   createDeck,
-  updateDeck,
-
-  // DEPRECATED: Backwards compatibility
-  DeckGLView: TransportView,
-  DeckGLModel: TransportModel
+  updateDeck
 };
