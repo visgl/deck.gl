@@ -8,7 +8,6 @@ import {mod} from '../utils/math-utils';
 const MOVEMENT_SPEED = 50; // per keyboard click
 
 const DEFAULT_STATE = {
-  orbitAxis: 'Z',
   rotationX: 0,
   rotationOrbit: 0,
   zoom: 0,
@@ -37,7 +36,7 @@ export class OrbitState extends ViewState {
     /* Viewport arguments */
     width, // Width of viewport
     height, // Height of viewport
-    orbitAxis = DEFAULT_STATE.orbitAxis,
+    orbitAxis,
     rotationX = DEFAULT_STATE.rotationX, // Rotation around x axis
     rotationOrbit = DEFAULT_STATE.rotationOrbit, // Rotation around orbit axis
     target = DEFAULT_STATE.target,
