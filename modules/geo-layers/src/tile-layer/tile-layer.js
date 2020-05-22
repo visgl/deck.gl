@@ -79,7 +79,7 @@ export default class TileLayer extends CompositeLayer {
       // if any props changed, delete the cached layers
       this.state.tileset.tiles.forEach(tile => {
         tile.layers = null;
-      })
+      });
     }
 
     if (createTileCache || changeFlags.viewportChanged) {
