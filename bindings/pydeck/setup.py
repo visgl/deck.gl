@@ -27,6 +27,10 @@ def read(*parts):
 
 def assert_prelease_on_master():
     """Require that prereleases only be from the master branch"""
+    if is_integration_build:
+        log.warn("Creating a pydeck pre-release outside of master branch. Only do this for Jupyter integration testing.")
+        return True
+
     git_branch = check_output("git rev-parse --abbrev-ref HEAD".split()).decode("ascii").strip()
     is_prerelease = any([c for c in version_ns["__version__"] if c.isalpha()])
     msg = "Can only release a prerelease from master, but branch is {} and release version is {}"
@@ -174,6 +178,10 @@ if __name__ == "__main__":
     if "--build_all" in sys.argv:
         build_all = True
         sys.argv.remove("--build_all")
+
+    if "--is-integration-build" in sys.argv:
+        is_integration_build = True
+        sys.argv.remove("--is-integration-build")
 
     setup(
         name="pydeck",
