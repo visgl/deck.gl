@@ -43,5 +43,8 @@
   },
   "jupyterlab": {
     "extension": "src/plugin"
+  },
+  "peerDependencies": {
+    "@jupyter-widgets/base": "^2 || ^3"
   }
 }
