@@ -43,8 +43,5 @@
   },
   "jupyterlab": {
     "extension": "src/plugin"
-  },
-  "devDependencies": {
-    "webpack-cli": "^3.3.11"
   }
 }
