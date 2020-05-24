@@ -25,12 +25,8 @@ function cleanup {
   if [ -n "$PYPISERVER_PID" ]; then
     kill $PYPISERVER_PID
   fi
-  if [ -n "$JL_PID" ]; then
-    kill $JL_PID
-  fi
-  if [ -n "$JN_PID" ]; then
-    kill $JN_PID
-  fi
+  jupyter notebook stop 8888
+  jupyter notebook stop 8889
 }
 trap cleanup EXIT
 
@@ -103,6 +99,8 @@ else
   log_info "Building pydeck distribution from current branch..."
   ./env/bin/python -m pip install .
   ./env/bin/python setup.py sdist bdist_wheel --is-integration-build &> /dev/null
+  export PYDECK_VERSION=`./env/bin/python -c "import pydeck; print(pydeck.__version__)"`
+  export DECKGL_VERSION=`./env/bin/python -c "import pydeck; print(pydeck.frontend_semver.DECKGL_SEMVER)"`
   popd
 fi
 
@@ -110,8 +108,6 @@ fi
 pypi-server -p $PYPI_PORT ../../dist/ &
 export PYPISERVER_PID=$!
 
-export PYDECK_VERSION=`python -c "import pydeck; print(pydeck.__version__)"`
-export DECKGL_VERSION=`python -c "import pydeck; print(pydeck.frontend_semver.DECKGL_SEMVER)"`
 export PYPI_INSTALL_URL=http://localhost:$PYPI_PORT
 export LOCAL_NPM_REGISTRY=filesystem
 
@@ -129,8 +125,6 @@ function jupyterlab_setup {
   # TODO This command takes a very long time for some reason, would be great to understand why
   jupyter labextension install ../../../../modules/jupyter-widget
   jupyter lab --no-browser --port 8888 &
-  PID=$!
-  return $PID
 }
 
 function jupyter_notebook_setup {
@@ -140,8 +134,6 @@ function jupyter_notebook_setup {
   jupyter nbextension install --sys-prefix --symlink --overwrite --py pydeck
   jupyter nbextension enable --sys-prefix --py pydeck
   jupyter notebook --no-browser --port 8889 &
-  PID=$!
-  return $PID
 }
 
 function activate {
@@ -158,23 +150,29 @@ function fresh_env {
   python3 -m venv env
 }
 
+function build_jupyterlab {
+  if $SKIP_JUPYTERLAB; then
+    log_info "Skipping JupyterLab build"
+  else
+    log_info "Running JupyterLab build"
+    log_info "Please note: This currently takes 1-2 minutes"
+    jupyterlab_setup
+  fi
+}
+
+function build_jupyter_notebook {
+  if $SKIP_JUPYTER_NOTEBOOK; then
+    log_info "Skipping Jupyter Notebook build"
+  else
+    log_info "Running Jupyter Notebook build"
+    jupyter_notebook_setup
+  fi
+}
+
 fresh_env
 activate
-
-if $SKIP_JUPYTERLAB; then
-  log_info "Skipping JupyterLab build"
-else
-  log_info "Running JupyterLab build"
-  log_info "Please note: This currently takes 1-2 minutes"
-  export JL_PID=`jupyterlab_setup`
-fi
-
-if $SKIP_JUPYTER_NOTEBOOK; then
-  log_info "Skipping Jupyter Notebook build"
-else
-  log_info "Running Jupyter Notebook build"
-  export JN_PID=`jupyter_notebook_setup`
-fi
+build_jupyterlab
+build_jupyter_notebook
 
 
 log_info "JupyterLab will be running at http://localhost:8888"
