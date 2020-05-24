@@ -3,7 +3,7 @@
 # Ignore pip upgrade warnings
 PIP_DISABLE_PIP_VERSION_CHECK=1
 
-USAGE="$(basename "$0") [-h] [--port=] [--skip-dist-build] \
+USAGE="$(basename "$0") [-h] [--pypi-port=] [--skip-dist-build] \
 [--skip-jupyterlab] \
 [--skip-jupyter-notebook] \
 [--skip-deckgl-build]
@@ -11,7 +11,7 @@ USAGE="$(basename "$0") [-h] [--port=] [--skip-dist-build] \
 
 where:
     -h                       show this text
-    --port                   port on which to run local Python package index (default: 8080)
+    --pypi-port              port on which to run local Python package index (default: 8080)
     --skip-jupyterlab        skip JupyterLab build (default: false)
     --skip-jupyter-notebook  skip Jupyter Notebook build (default: false)
     --skip-deckgl-build      cancels \`yarn bootstrap\`, not rebuilding deck.gl (default: false)
@@ -21,6 +21,27 @@ YELLOW='\033[1;33m'
 RED='\033[1;31m'
 NC='\033[0m' # No Color
 
+function cleanup {
+  if [ -n "$PYPISERVER_PID" ]; then
+    kill $PYPISERVER_PID
+  fi
+  if [ -n "$JL_PID" ]; then
+    kill $JL_PID
+  fi
+  if [ -n "$JN_PID" ]; then
+    kill $JN_PID
+  fi
+}
+trap cleanup EXIT
+
+
+function ctrlc {
+  cleanup
+  exit 0
+}
+
+trap ctrlc SIGINT
+
 for ARGUMENT in "$@"
 do
 
@@ -29,23 +50,23 @@ do
 
   case "$KEY" in
     -h)                       echo "$USAGE" && exit ;;
-    -port)                    PORT=${VALUE} ;;
-    -skip-dist-build)         SKIP_DIST_BUILD=true ;;     
-    -skip-jupyterlab)         SKIP_JUPYTERLAB=true ;;     
-    -skip-deckgl-build)       SKIP_DECKGL_BUILD=true ;;     
-    -skip-jupyter-notebook)   SKIP_JUPYTER_NOTEBOOK=true ;;     
+    --pypi-port)               PYPI_PORT=${VALUE} ;;
+    --skip-dist-build)         SKIP_DIST_BUILD=true ;;     
+    --skip-jupyterlab)         SKIP_JUPYTERLAB=true ;;     
+    --skip-deckgl-build)       SKIP_DECKGL_BUILD=true ;;     
+    --skip-jupyter-notebook)   SKIP_JUPYTER_NOTEBOOK=true ;;     
     *)                        echo "invalid argument $KEY" && echo "$USAGE" && exit ;;
   esac    
 done
 
-PORT=${PORT:-8080}
+PYPI_PORT=${PYPI_PORT:-8080}
 SKIP_DIST_BUILD=${SKIP_DIST_BUILD:-false}
 SKIP_DECKGL_BUILD=${SKIP_DECKGL_BUILD:-false}
 SKIP_JUPYTERLAB=${SKIP_JUPYTERLAB:-false}
 SKIP_JUPYTER_NOTEBOOK=${SKIP_JUPYTER_NOTEBOOK:-false}
 
 function log_info {
-  printf "[`date`] $YELLOW$1$NC\n"
+  printf "[`date`]$YELLOW- build-and-screenshot.sh - $1$NC\n"
 }
 
 function log_error {
@@ -58,16 +79,11 @@ if [[ -z `pip list | grep pypiserver` ]]; then
   pip install pypiserver
 fi
 
-if [[ -z `npm list -g | grep verdaccio` ]]; then
-  log_info "Installing verdaccio..."
-  npm install -g verdaccio
-fi
-
 function check_port {
-  nc -z -v -G5 localhost $PORT &> /dev/null
+  nc -z -v -G5 localhost $PYPI_PORT &> /dev/null
   result=$?
   if [ "$result" == 0 ]; then
-    log_error "Port $PORT occupied. Specify another or free this one."
+    log_error "Port $PYPI_PORT occupied. Specify another or free this one."
     exit 1
   fi
 }
@@ -85,54 +101,47 @@ if $SKIP_DIST_BUILD; then
 else
   pushd ../..
   log_info "Building pydeck distribution from current branch..."
-  python setup.py sdist bdist_wheel --is-integration-build
+  ./env/bin/python -m pip install .
+  ./env/bin/python setup.py sdist bdist_wheel --is-integration-build &> /dev/null
   popd
 fi
 
 # Starts a local pypi server
-pypi-server -p $PORT ./dist/ &
+pypi-server -p $PYPI_PORT ../../dist/ &
 export PYPISERVER_PID=$!
-
-function cleanup {
-  if [ -n "$PYPISERVER_PID" ]; then
-    kill $PYPISERVER_PID
-  fi
-  if [ -n "$JL_PID" ]; then
-    kill $JL_PID
-  fi
-  if [ -n "$JN_PID" ]; then
-    kill $JN_PID
-  fi
-}
-trap cleanup EXIT
 
 export PYDECK_VERSION=`python -c "import pydeck; print(pydeck.__version__)"`
 export DECKGL_VERSION=`python -c "import pydeck; print(pydeck.frontend_semver.DECKGL_SEMVER)"`
-export PYPI_INSTALL_URL=http://localhost:$PORT
+export PYPI_INSTALL_URL=http://localhost:$PYPI_PORT
+export LOCAL_NPM_REGISTRY=filesystem
+
+log_info "Installing pydeck==$PYDECK_VERSION with @deck.gl/jupyter-widget@$DECKGL_VERSION"
+log_info "from $PYPI_INSTALL_URL and $LOCAL_NPM_REGISTRY respectively"
+
 
 function jupyterlab_setup {
   pip install jupyterlab
   pip install ipywidgets
   pip install numpy
   jupyter serverextension enable --py jupyterlab --sys-prefix
-  pip install -i $PYPI_INSTALL_URL --extra-index-url https://pypi.org/simple pydeck==$PYDECK_VERSION --pre
+  pip install -i $PYPI_INSTALL_URL https://pypi.org/simple pydeck==$PYDECK_VERSION
   jupyter labextension install @jupyter-widgets/jupyterlab-manager
   # TODO This command takes a very long time for some reason, would be great to understand why
-  jupyter labextension install @deck.gl/jupyter-widget@$DECKGL_VERSION
-  jupyter lab --no-browser &
+  jupyter labextension install ../../../../modules/jupyter-widget
+  jupyter lab --no-browser --port 8888 &
   PID=$!
-  return PID
+  return $PID
 }
 
 function jupyter_notebook_setup {
   pip install jupyter
   pip install ipywidgets
-  pip install -i $PYPI_INSTALL_URL --extra-index-url https://pypi.org/simple pydeck==$PYDECK_VERSION --pre
+  pip install -i $PYPI_INSTALL_URL --extra-index-url https://pypi.org/simple pydeck==$PYDECK_VERSION
   jupyter nbextension install --sys-prefix --symlink --overwrite --py pydeck
   jupyter nbextension enable --sys-prefix --py pydeck
-  jupyter notebook --no-browser &
+  jupyter notebook --no-browser --port 8889 &
   PID=$!
-  return PID
+  return $PID
 }
 
 function activate {
@@ -167,14 +176,8 @@ else
   export JN_PID=`jupyter_notebook_setup`
 fi
 
-function ctrlc {
-  cleanup
-  exit 0
-}
 
-trap ctrlc SIGINT
-
-log_info "JupyterLab will be running at http://locahost:8888"
-log_info "Jupyter Notebook will be running at http://locahost:8889"
+log_info "JupyterLab will be running at http://localhost:8888"
+log_info "Jupyter Notebook will be running at http://localhost:8889"
 log_info "Ctrl+C to Exit"
 read -r -d '' _ </dev/tty
