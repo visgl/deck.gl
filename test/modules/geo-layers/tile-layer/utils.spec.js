@@ -170,13 +170,14 @@ function mergeBoundingBox(boundingBoxes) {
 
 test('getTileIndices', t => {
   for (const testCase of TEST_CASES) {
-    const result = getTileIndices(
-      testCase.viewport,
-      testCase.maxZoom,
-      testCase.minZoom,
-      testCase.zRange,
-      testCase.tileSize
-    );
+    const {viewport, maxZoom, minZoom, zRange, tileSize} = testCase;
+    const result = getTileIndices({
+      viewport,
+      maxZoom,
+      minZoom,
+      zRange,
+      tileSize
+    });
     t.deepEqual(getTileIds(result), testCase.output, testCase.title);
   }
 
@@ -187,8 +188,8 @@ test('tileToBoundingBox', t => {
   for (const testCase of TEST_CASES) {
     if (testCase.output.length) {
       const {viewport, minZoom, maxZoom, tileSize, zRange} = testCase;
-      const boundingBoxes = getTileIndices(viewport, maxZoom, minZoom, zRange, tileSize).map(tile =>
-        tileToBoundingBox(viewport, tile.x, tile.y, tile.z, tileSize)
+      const boundingBoxes = getTileIndices({viewport, maxZoom, minZoom, zRange, tileSize}).map(
+        tile => tileToBoundingBox(viewport, tile.x, tile.y, tile.z, tileSize)
       );
       const result = mergeBoundingBox(boundingBoxes);
       const corners = [

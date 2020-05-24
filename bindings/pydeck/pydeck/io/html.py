@@ -26,7 +26,7 @@ CDN_URL = "https://cdn.jsdelivr.net/npm/@deck.gl/jupyter-widget@{}/dist/index.js
 
 def cdn_picker(offline=False):
     if offline:
-        with open(join(dirname(__file__), "./static/index.js"), "r") as file:
+        with open(join(dirname(__file__), "./static/index.js"), "r", encoding="utf-8") as file:
             js = file.read()
         return "<script type=text/javascript>" + js + "</script>"
 

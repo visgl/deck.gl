@@ -1,6 +1,7 @@
 import {lngLatToWorld} from '@math.gl/web-mercator';
 
 const TILE_SIZE = 512;
+const DEFAULT_EXTENT = [-Infinity, -Infinity, Infinity, Infinity];
 
 export const urlType = {
   type: 'url',
@@ -42,7 +43,7 @@ export function getURLFromTemplate(template, properties) {
 /**
  * gets the bounding box of a viewport
  */
-function getBoundingBox(viewport, zRange) {
+function getBoundingBox(viewport, zRange, extent) {
   let corners;
   if (zRange && zRange.length === 2) {
     const [minZ, maxZ] = zRange;
@@ -71,10 +72,10 @@ function getBoundingBox(viewport, zRange) {
   }
 
   return [
-    Math.min(...corners.map(arr => arr[0])),
-    Math.min(...corners.map(arr => arr[1])),
-    Math.max(...corners.map(arr => arr[0])),
-    Math.max(...corners.map(arr => arr[1]))
+    Math.max(Math.min(...corners.map(arr => arr[0])), extent[0]),
+    Math.max(Math.min(...corners.map(arr => arr[1])), extent[1]),
+    Math.min(Math.max(...corners.map(arr => arr[0])), extent[2]),
+    Math.min(Math.max(...corners.map(arr => arr[1])), extent[3])
   ];
 }
 
@@ -122,8 +123,8 @@ export function tileToBoundingBox(viewport, x, y, z, tileSize = TILE_SIZE) {
   return {left, top, right, bottom};
 }
 
-function getIdentityTileIndices(viewport, z, tileSize) {
-  const bbox = getBoundingBox(viewport);
+function getIdentityTileIndices(viewport, z, tileSize, extent) {
+  const bbox = getBoundingBox(viewport, null, extent);
   const scale = getScale(z, tileSize);
 
   const [minX, minY] = getTileIndex([bbox[0], bbox[1]], scale);
@@ -139,12 +140,11 @@ function getIdentityTileIndices(viewport, z, tileSize) {
       indices.push({x, y, z});
     }
   }
-
   return indices;
 }
 
-function getOSMTileIndices(viewport, z, zRange) {
-  const bbox = getBoundingBox(viewport, zRange);
+function getOSMTileIndices(viewport, z, zRange, extent) {
+  const bbox = getBoundingBox(viewport, zRange, extent);
   const scale = getScale(z);
   /*
     minX, maxX could be out of bounds if longitude is near the 180 meridian or multiple worlds
@@ -181,16 +181,18 @@ function getOSMTileIndices(viewport, z, zRange) {
  * than minZoom, return an empty array. If the current zoom level is greater than maxZoom,
  * return tiles that are on maxZoom.
  */
-export function getTileIndices(viewport, maxZoom, minZoom, zRange, tileSize = TILE_SIZE) {
+export function getTileIndices({viewport, maxZoom, minZoom, zRange, extent, tileSize = TILE_SIZE}) {
   let z = Math.ceil(viewport.zoom);
   if (Number.isFinite(minZoom) && z < minZoom) {
-    return [];
+    if (!extent) {
+      return [];
+    }
+    z = minZoom;
   }
   if (Number.isFinite(maxZoom) && z > maxZoom) {
     z = maxZoom;
   }
-
   return viewport.isGeospatial
-    ? getOSMTileIndices(viewport, z, zRange)
-    : getIdentityTileIndices(viewport, z, tileSize);
+    ? getOSMTileIndices(viewport, z, zRange, extent || DEFAULT_EXTENT)
+    : getIdentityTileIndices(viewport, z, tileSize, extent || DEFAULT_EXTENT);
 }

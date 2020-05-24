@@ -28,6 +28,7 @@ import {
 } from '@luma.gl/core';
 import GL from '@luma.gl/constants';
 import assert from '../utils/assert';
+import log from '../utils/log';
 import PickLayersPass from '../passes/pick-layers-pass';
 import {getClosestObject, getUniqueObjects} from './picking/query-object';
 import {processPickInfo, getLayerPickingInfo} from './picking/pick-info';
@@ -122,6 +123,16 @@ export default class DeckPicker {
     return this.pickingFBO;
   }
 
+  // picking can only handle up to 255 layers. Drop non-pickable/invisible layers from the list.
+  _getPickable(layers) {
+    const pickableLayers = layers.filter(layer => layer.isPickable() && !layer.isComposite);
+    if (pickableLayers.length > 255) {
+      log.warn('Too many pickable layers, only picking the first 255')();
+      return pickableLayers.slice(0, 255);
+    }
+    return pickableLayers;
+  }
+
   // Pick the closest object at the given (x,y) coordinate
   // eslint-disable-next-line max-statements,complexity
   _pickClosestObject({
@@ -135,6 +146,8 @@ export default class DeckPicker {
     unproject3D,
     onViewportActive
   }) {
+    layers = this._getPickable(layers);
+
     this._resizeBuffer();
     // Convert from canvas top-left to WebGL bottom-left coordinates
     // Top-left coordinates [x, y] to bottom-left coordinates [deviceX, deviceY]
@@ -250,6 +263,8 @@ export default class DeckPicker {
     mode = 'query',
     onViewportActive
   }) {
+    layers = this._getPickable(layers);
+
     this._resizeBuffer();
     // Convert from canvas top-left to WebGL bottom-left coordinates
     // And compensate for pixelRatio
@@ -313,8 +328,7 @@ export default class DeckPicker {
   _drawAndSample({layers, viewports, onViewportActive, deviceRect, pass, redrawReason, pickZ}) {
     assert(deviceRect.width > 0 && deviceRect.height > 0);
 
-    const pickableLayers = layers.filter(layer => layer.isPickable());
-    if (pickableLayers.length < 1) {
+    if (layers.length < 1) {
       return null;
     }
 

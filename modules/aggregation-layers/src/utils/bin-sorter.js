@@ -33,6 +33,9 @@ const defaultGetPoints = bin => bin.points;
 // access index of each bin
 const defaultGetIndex = bin => bin.index;
 
+// d3-scending
+const ascending = (a, b) => (a < b ? -1 : a > b ? 1 : a >= b ? 0 : NaN);
+
 const defaultProps = {
   getValue: defaultGetValue,
   getPoints: defaultGetPoints,
@@ -150,7 +153,7 @@ export default class BinSorter {
    */
   getValueRange(percentileRange) {
     if (!this.sortedBins) {
-      this.sortedBins = this.aggregatedBins.sort((a, b) => a.value - b.value);
+      this.sortedBins = this.aggregatedBins.sort((a, b) => ascending(a.value, b.value));
     }
     if (!this.sortedBins.length) {
       return [];
@@ -169,7 +172,7 @@ export default class BinSorter {
 
   getValueDomainByScale(scale, [lower = 0, upper = 100] = []) {
     if (!this.sortedBins) {
-      this.sortedBins = this.aggregatedBins.sort((a, b) => a.value - b.value);
+      this.sortedBins = this.aggregatedBins.sort((a, b) => ascending(a.value, b.value));
     }
     if (!this.sortedBins.length) {
       return [];

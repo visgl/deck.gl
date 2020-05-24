@@ -8,7 +8,7 @@ import {load} from '@loaders.gl/core';
 
 const INITIAL_VIEW_STATE = {
   target: [13000, 13000, 0],
-  zoom: -5
+  zoom: -7
 };
 
 const ROOT_URL =
@@ -83,7 +83,7 @@ export default class App extends PureComponent {
 
   _renderLayers() {
     const {autoHighlight = true, highlightColor = [60, 60, 60, 40]} = this.props;
-    const {tileSize} = this.state;
+    const {tileSize, height, width} = this.state;
     return [
       new TileLayer({
         pickable: true,
@@ -91,9 +91,10 @@ export default class App extends PureComponent {
         tileSize,
         autoHighlight,
         highlightColor,
-        minZoom: -16,
+        minZoom: -7,
         maxZoom: 0,
         coordinateSystem: COORDINATE_SYSTEM.CARTESIAN,
+        extent: [0, 0, width, height],
         getTileData: ({x, y, z}) => {
           if (this.inTileBounds({x, y, z: -z})) {
             return load(`${ROOT_URL}/moon.image_files/${15 + z}/${x}_${y}.jpeg`);

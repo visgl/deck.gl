@@ -109,10 +109,10 @@ test('BinSorter.getValueDomain', t => {
   const quantileDomain = sortedBins.getValueDomainByScale('quantile');
   t.deepEqual(quantileDomain, [1, 2, 3], 'should create correct quantileDomain');
 
-  sortedBins = new BinSorter(mockBins, {getValue: points => 'a'});
+  sortedBins = new BinSorter(mockBins, {getValue: points => ['b', 'c', 'a'][points.length % 3]});
 
   const ordinalDomain = sortedBins.getValueDomainByScale('ordinal');
-  t.deepEqual(ordinalDomain, ['a'], 'should create correct ordinalDomain');
+  t.deepEqual(ordinalDomain, ['a', 'b', 'c'], 'should create correct ordinalDomain');
 
   t.end();
 });
