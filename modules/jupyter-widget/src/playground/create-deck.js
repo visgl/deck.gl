@@ -1,16 +1,14 @@
 /* global window */
-import makeTooltip from './widget-tooltip';
-
-import mapboxgl from './ssr-safe-mapbox';
-
 import {CSVLoader} from '@loaders.gl/csv';
 import {registerLoaders} from '@loaders.gl/core';
-
-import * as deck from './deck-bundle';
-
-import {loadScript} from './script-utils';
-
 import GL from '@luma.gl/constants';
+
+import makeTooltip from './widget-tooltip';
+
+import mapboxgl from './utils/mapbox-utils';
+import {loadScript} from './utils/script-utils';
+
+import * as deck from '../deck-bundle';
 
 function extractClasses(library = {}) {
   // Extracts exported class constructors as a dictionary from a library
