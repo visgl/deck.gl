@@ -137,6 +137,17 @@ Returns:
 * `[longitude, latitude, altitude]`
 
 
+##### `getBounds`
+
+Extracts the axis-aligned bounding box of the current visible area.
+
+* `options` (Object, optional)
+  + `options.z` (Number, optional) - To calculate a bounding volume for fetching 3D data, this option can be used to get the bounding box at a specific elevation. Default `0`.
+
+Returns:
+* `[minX, minY, maxX, maxY]` that defines the smallest orthogonal bounds that encompasses the visible region.
+
+
 ##### `getFrustumPlanes`
 
 Extract view frustum planes of the current camera. Each plane is defined by its normal `normal` and distance from
