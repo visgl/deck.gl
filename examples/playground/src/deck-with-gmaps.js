@@ -5,6 +5,11 @@ import {GoogleMapsOverlay} from '@deck.gl/google-maps';
 const HOST = 'https://maps.googleapis.com/maps/api/js';
 const LOADING_GIF = 'https://upload.wikimedia.org/wikipedia/commons/d/de/Ajax-loader.gif';
 
+const style = {
+  height: 1000,
+  width: 1000
+};
+
 function injectScript(src) {
   return new Promise((resolve, reject) => {
     const script = document.createElement('script');
@@ -13,6 +18,15 @@ function injectScript(src) {
     script.addEventListener('error', e => reject(e.error));
     document.head.appendChild(script);
   });
+}
+
+function deepEqual(x, y) {
+  const ok = Object.keys;
+  const tx = typeof x;
+  const ty = typeof y;
+  return x && y && tx === 'object' && tx === ty
+    ? ok(x).length === ok(y).length && ok(x).every(key => deepEqual(x[key], y[key]))
+    : x === y;
 }
 
 function loadGoogleMapApi(apiKey, onComplete) {
@@ -27,7 +41,7 @@ export default class DeckWithGoogleMaps extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      gmapsLoaded: false
+      gmapsLoaded: window.google !== undefined
     };
   }
 
@@ -54,9 +68,7 @@ export default class DeckWithGoogleMaps extends Component {
       return <img src={LOADING_GIF} alt="Loading Google Maps overlay..." />;
     }
 
-    // const {view = []} = this.props;
-
-    return <DeckOverlayWrapper />;
+    return <DeckOverlayWrapper layers={this.props.layers} />;
   }
 }
 
@@ -66,33 +78,31 @@ class DeckOverlayWrapper extends Component {
     this.state = {
       hasBasemap: false
     };
-    this.DeckOverlay = new GoogleMapsOverlay();
+    this.DeckOverlay = new GoogleMapsOverlay({layers: []});
     this.containerRef = React.createRef();
   }
 
   componentDidMount() {
     const view = {
-      center: {lat: 48.868, lng: 2.312},
+      center: new window.google.maps.LatLng(48.868, 2.312),
+      mapTypeId: 'satellite',
       zoom: 15
     };
 
-    const map = new window.google.maps.Map(this.containerRef, view);
+    const map = new window.google.maps.Map(this.containerRef.current, view);
     this.DeckOverlay.setMap(map);
+    // this.DeckOverlay.setProps({layers: this.props.layers});
     // eslint-disable-next-line react/no-did-mount-set-state
-    this.DeckOverlay.setProps(this.props.layers);
     this.setState({hasBasemap: true});
   }
 
   componentDidUpdate(prevProps, prevState, snapshot) {
-    if (prevProps !== this.props) {
-      this.DeckOverlay.setProps(this.props);
+    if (!deepEqual(prevProps, this.props)) {
+      this.DeckOverlay.setProps({layers: this.props.layers});
     }
   }
 
   render() {
-    if (!this.state.hasBasemap) {
-      return <div ref={this.containerRef}>No map</div>;
-    }
-    return <div ref={this.containerRef}>Map</div>;
+    return <div ref={this.containerRef} style={style} />;
   }
 }
