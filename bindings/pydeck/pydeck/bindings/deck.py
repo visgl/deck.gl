@@ -23,6 +23,7 @@ class Deck(JSONMixin):
         tooltip=True,
         description=None,
         effects=None,
+        google_maps_key=None,
     ):
         """This is the renderer and configuration for a deck.gl visualization, similar to the
         `Deck <https://deck.gl/#/documentation/deckgl-api-reference/deck>`_ class from deck.gl.
@@ -42,11 +43,15 @@ class Deck(JSONMixin):
             Initial camera angle relative to the map, defaults to a fully zoomed out 0, 0-centered map
             To compute a viewport from data, see :func:`pydeck.data_utils.viewport_helpers.compute_view`
         mapbox_key : str, default None
-            Read on initialization from the MAPBOX_API_KEY environment variable. Defaults to None if not set.
+            Read on initialization from the ``MAPBOX_API_KEY`` environment variable. Defaults to None if not set.
             See your Mapbox
             `dashboard <https://docs.mapbox.com/help/how-mapbox-works/access-tokens/#mapbox-account-dashboard>`_
             to get an API token.
             If not using a basemap, you can set this value to `''`.
+        google_maps_key : str, default None
+            Read on initialization from the ``GOOGLE_MAPS_API_KEY`` environment variable if not set.
+            Defaults to None if the environment variable is also not set.
+            Not used on all layers.
         height : int, default 500
             Height of Jupyter notebook cell, in pixels.
         width : int` or string, default '100%'
@@ -74,8 +79,12 @@ class Deck(JSONMixin):
         self.initial_view_state = initial_view_state
         self.deck_widget = DeckGLWidget()
         self.deck_widget.custom_libraries = pydeck_settings.custom_libraries
+
         self.mapbox_key = mapbox_key or os.getenv("MAPBOX_API_KEY")
         self.deck_widget.mapbox_key = self.mapbox_key
+        self.google_maps_key = google_maps_key or os.getenv("GOOGLE_MAPS_API_KEY")
+        self.deck_widget.google_maps_key = self.google_maps_key
+
         self.deck_widget.height = height
         self.deck_widget.width = width
         self.deck_widget.tooltip = tooltip
@@ -155,6 +164,7 @@ class Deck(JSONMixin):
             json_blob,
             self.mapbox_key,
             filename,
+            google_maps_key=self.google_maps_key,
             open_browser=open_browser,
             notebook_display=notebook_display,
             iframe_height=iframe_height,

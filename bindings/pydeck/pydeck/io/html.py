@@ -34,7 +34,7 @@ def cdn_picker(offline=False):
 
 
 def render_json_to_html(
-    json_input, mapbox_key=None, tooltip=True, css_background_color=None, custom_libraries=None, offline=False
+    json_input, mapbox_key=None, tooltip=True, css_background_color=None, custom_libraries=None, offline=False, google_maps_key=None
 ):
     js = j2_env.get_template("index.j2")
     html_str = js.render(
@@ -44,6 +44,7 @@ def render_json_to_html(
         tooltip=convert_js_bool(tooltip),
         css_background_color=css_background_color,
         custom_libraries=custom_libraries,
+        google_maps_key=google_maps_key
     )
     return html_str
 
@@ -85,6 +86,7 @@ def deck_to_html(
     deck_json,
     mapbox_key=None,
     filename=None,
+    google_maps_key=None,
     open_browser=False,
     notebook_display=False,
     css_background_color=None,
@@ -103,6 +105,7 @@ def deck_to_html(
         css_background_color=css_background_color,
         custom_libraries=custom_libraries,
         offline=offline,
+        google_maps_key=google_maps_key
     )
 
     if as_string:

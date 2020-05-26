@@ -35,6 +35,8 @@ class DeckGLWidget(widgets.DOMWidget):
             See the ``Deck`` constructor.
         js_warning : bool, default False
             Whether the string message from deck.gl should be rendered, defaults to False
+        google_maps_key : str, default ''
+            API key for Google Maps, used on some map layers
     """
 
     _model_name = Unicode("TransportModel").tag(sync=True)
@@ -52,3 +54,4 @@ class DeckGLWidget(widgets.DOMWidget):
     selected_data = Unicode("[]").tag(sync=True)
     tooltip = Any(True).tag(sync=True)
     js_warning = Bool(False).tag(sync=True)
+    google_maps_key = Unicode("", allow_none=True).tag(sync=True)
