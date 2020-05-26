@@ -34,18 +34,7 @@ const TEST_CASES = [
     }),
     minZoom: undefined,
     maxZoom: undefined,
-    output: [
-      '0,2,3',
-      '0,3,3',
-      '1,2,3',
-      '1,3,3',
-      '2,1,3',
-      '2,2,3',
-      '2,3,3',
-      '3,2,3',
-      '3,3,3',
-      '7,2,3'
-    ]
+    output: ['0,2,3', '0,3,3', '1,2,3', '1,3,3', '2,1,3', '2,2,3', '2,3,3', '3,2,3', '3,3,3']
   },
   {
     title: 'extreme pitch',
@@ -124,7 +113,8 @@ const TEST_CASES = [
       height: 200,
       longitude: -152,
       latitude: 0,
-      zoom: 3
+      zoom: 3,
+      repeat: true
     }),
     maxZoom: 2,
     output: ['0,1,2', '0,2,2', '3,1,2', '3,2,2']

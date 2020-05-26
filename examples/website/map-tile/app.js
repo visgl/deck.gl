@@ -41,7 +41,7 @@ export default class App extends PureComponent {
   }
 
   _renderLayers() {
-    const {showBorder = false} = this.props;
+    const {showBorder = false, onTilesLoad = null} = this.props;
 
     return [
       new TileLayer({
@@ -50,6 +50,7 @@ export default class App extends PureComponent {
 
         pickable: true,
         onHover: this._onHover,
+        onViewportLoad: onTilesLoad,
         autoHighlight: showBorder,
         highlightColor: [60, 60, 60, 40],
         // https://wiki.openstreetmap.org/wiki/Zoom_levels

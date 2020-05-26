@@ -1,3 +1,4 @@
+/* eslint-disable complexity */
 import {CullingVolume, Plane, AxisAlignedBoundingBox} from '@math.gl/culling';
 
 const TILE_SIZE = 512;
@@ -40,7 +41,8 @@ class OSMNode {
     if (!this.childVisible) {
       let {z} = this;
       if (z < maxZ && z >= minZ) {
-        // Adjust LOD by distance to camera
+        // Adjust LOD
+        // If the tile is far enough from the camera, accept a lower zoom level
         const distance =
           (boundingVolume.distanceTo(viewport.cameraPosition) * viewport.scale) / viewport.height;
         z += Math.floor(Math.log2(distance));
@@ -109,22 +111,25 @@ export function getOSMTileIndices(viewport, maxZ, zRange) {
     elevationBounds: [elevationMin, elevationMax],
     minZ,
     maxZ,
+    // num. of worlds from the center. For repeated maps
     offset: 0
   };
 
   root.update(traversalParams);
 
-  // Check worlds in repeated maps
-  traversalParams.offset = -1;
-  while (root.update(traversalParams)) {
-    if (--traversalParams.offset < -MAX_MAPS) {
-      break;
+  if (viewport.subViewports && viewport.subViewports.length > 1) {
+    // Check worlds in repeated maps
+    traversalParams.offset = -1;
+    while (root.update(traversalParams)) {
+      if (--traversalParams.offset < -MAX_MAPS) {
+        break;
+      }
     }
-  }
-  traversalParams.offset = 1;
-  while (root.update(traversalParams)) {
-    if (++traversalParams.offset > -MAX_MAPS) {
-      break;
+    traversalParams.offset = 1;
+    while (root.update(traversalParams)) {
+      if (++traversalParams.offset > MAX_MAPS) {
+        break;
+      }
     }
   }
 
