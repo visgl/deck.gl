@@ -3,6 +3,7 @@ import {render} from 'react-dom';
 import AutoSizer from 'react-virtualized-auto-sizer';
 import {StaticMap} from 'react-map-gl';
 import DeckWithMaps from './deck-with-maps';
+import DeckWithGoogleMaps from './deck-with-gmaps';
 
 import {FlyToInterpolator} from '@deck.gl/core';
 import {JSONConverter, JSONConfiguration, _shallowEqualObjects} from '@deck.gl/json';
@@ -18,6 +19,7 @@ const INITIAL_TEMPLATE = Object.keys(JSON_TEMPLATES)[0];
 
 // Set your mapbox token here
 const MAPBOX_TOKEN = process.env.MapboxAccessToken; // eslint-disable-line
+const GOOGLE_MAPS_TOKEN = process.env.googleMapsApiKey; // eslint-disable-line
 
 export class App extends Component {
   constructor(props) {
@@ -128,6 +130,24 @@ export class App extends Component {
 
   render() {
     const {jsonProps, initialViewState} = this.state;
+
+    let deckMap;
+    if (jsonProps.google === true) {
+      deckMap = (
+        <DeckWithGoogleMaps id="json-deck" {...jsonProps} googleMapsApiKey={GOOGLE_MAPS_TOKEN} />
+      );
+    } else {
+      deckMap = (
+        <DeckWithMaps
+          id="json-deck"
+          {...jsonProps}
+          initialViewState={initialViewState}
+          Map={StaticMap}
+          mapboxApiAccessToken={MAPBOX_TOKEN}
+        />
+      );
+    }
+
     return (
       <Fragment>
         {/* Left Pane: Ace Editor and Template Selector */}
@@ -156,15 +176,7 @@ export class App extends Component {
         </div>
 
         {/* Right Pane: DeckGL */}
-        <div id="right-pane">
-          <DeckWithMaps
-            id="json-deck"
-            {...jsonProps}
-            initialViewState={initialViewState}
-            Map={StaticMap}
-            mapboxApiAccessToken={MAPBOX_TOKEN}
-          />
-        </div>
+        <div id="right-pane">{deckMap}</div>
       </Fragment>
     );
   }
