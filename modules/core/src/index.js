@@ -75,6 +75,7 @@ export {default as LayerExtension} from './lib/layer-extension';
 
 // Transitions
 export {TRANSITION_EVENTS} from './controllers/transition-manager';
+export {default as TransitionInterpolator} from './transitions/transition-interpolator';
 export {default as LinearInterpolator} from './transitions/linear-interpolator';
 export {default as FlyToInterpolator} from './transitions/viewport-fly-to-interpolator';
 
