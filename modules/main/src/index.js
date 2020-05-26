@@ -62,6 +62,7 @@ export {
   log,
   // Transition bindings
   TRANSITION_EVENTS,
+  TransitionInterpolator,
   LinearInterpolator,
   FlyToInterpolator,
   // Effects
