@@ -1,4 +1,4 @@
-import {lngLatToWorld} from '@math.gl/web-mercator';
+import {getOSMTileIndices} from './tile-2d-traversal';
 
 const TILE_SIZE = 512;
 const DEFAULT_EXTENT = [-Infinity, -Infinity, Infinity, Infinity];
@@ -66,17 +66,6 @@ function getBoundingBox(viewport, zRange, extent) {
   ];
 }
 
-/*
- * get the OSM tile index at the given location
- * https://wiki.openstreetmap.org/wiki/Slippy_map_tilenames
- */
-function getOSMTileIndex(lngLat, scale) {
-  let [x, y] = lngLatToWorld(lngLat);
-  x *= scale / TILE_SIZE;
-  y = (1 - y / TILE_SIZE) * scale;
-  return [x, y];
-}
-
 function getTileIndex([x, y], scale) {
   return [(x * scale) / TILE_SIZE, (y * scale) / TILE_SIZE];
 }
@@ -127,39 +116,6 @@ function getIdentityTileIndices(viewport, z, tileSize, extent) {
       indices.push({x, y, z});
     }
   }
-  return indices;
-}
-
-function getOSMTileIndices(viewport, z, zRange, extent) {
-  const bbox = getBoundingBox(viewport, zRange, extent);
-  const scale = getScale(z);
-  /*
-    minX, maxX could be out of bounds if longitude is near the 180 meridian or multiple worlds
-    are shown:
-                |       |
-    actual   -2 -1  0  1  2  3
-    expected  2  3  0  1  2  3
-   */
-  let [minX, minY] = getOSMTileIndex([bbox[0], bbox[3]], scale);
-  let [maxX, maxY] = getOSMTileIndex([bbox[2], bbox[1]], scale);
-  const indices = [];
-
-  /*
-      |  TILE  |  TILE  |  TILE  |
-        |(minX)            |(maxX)
-   */
-  minX = Math.floor(minX);
-  maxX = Math.min(minX + scale, maxX); // Avoid creating duplicates
-  minY = Math.max(0, Math.floor(minY));
-  maxY = Math.min(scale, maxY);
-  for (let x = minX; x < maxX; x++) {
-    for (let y = minY; y < maxY; y++) {
-      // Cast to valid x between [0, scale]
-      const normalizedX = x - Math.floor(x / scale) * scale;
-      indices.push({x: normalizedX, y, z});
-    }
-  }
-
   return indices;
 }
 
