@@ -89,7 +89,7 @@ function getFeatureUniqueId(feature, uniqueIdProperty) {
     return feature.properties[uniqueIdProperty];
   }
 
-  if (feature.id) {
+  if ('id' in feature) {
     return feature.id;
   }
 
