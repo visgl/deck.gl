@@ -68,7 +68,7 @@ export default class DeckWithGoogleMaps extends Component {
       return <img src={LOADING_GIF} alt="Loading Google Maps overlay..." />;
     }
 
-    return <DeckOverlayWrapper layers={this.props.layers} />;
+    return <DeckOverlayWrapper {...this.props} />;
   }
 }
 
@@ -76,24 +76,25 @@ class DeckOverlayWrapper extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      hasBasemap: false
+      isOverlayConfigured: false
     };
     this.DeckOverlay = new GoogleMapsOverlay({layers: []});
     this.containerRef = React.createRef();
   }
 
   componentDidMount() {
+    const {initialViewState} = this.props;
     const view = {
-      center: new window.google.maps.LatLng(48.868, 2.312),
+      center: {lat: initialViewState.latitude, lng: initialViewState.longitude},
       mapTypeId: 'satellite',
-      zoom: 15
+      zoom: initialViewState.zoom
     };
 
     const map = new window.google.maps.Map(this.containerRef.current, view);
     this.DeckOverlay.setMap(map);
-    // this.DeckOverlay.setProps({layers: this.props.layers});
+    this.DeckOverlay.setProps({layers: this.props.layers});
     // eslint-disable-next-line react/no-did-mount-set-state
-    this.setState({hasBasemap: true});
+    this.setState({isOverlayConfigured: true});
   }
 
   componentDidUpdate(prevProps, prevState, snapshot) {

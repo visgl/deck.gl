@@ -134,7 +134,12 @@ export class App extends Component {
     let deckMap;
     if (jsonProps.google === true) {
       deckMap = (
-        <DeckWithGoogleMaps id="json-deck" {...jsonProps} googleMapsApiKey={GOOGLE_MAPS_TOKEN} />
+        <DeckWithGoogleMaps
+          initialViewState={initialViewState}
+          id="json-deck"
+          {...jsonProps}
+          googleMapsApiKey={GOOGLE_MAPS_TOKEN}
+        />
       );
     } else {
       deckMap = (
