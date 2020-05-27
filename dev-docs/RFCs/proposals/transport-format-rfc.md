@@ -23,88 +23,122 @@ A hybrid transport format of both JSON and binary will help address these issues
 
 ## Proposal
 
+### Deck-level data manager
+
+deck.gl's existing data management model is per-layer. This makes it difficult for 1) multiple layers to share the same data (URL/arraybuffer), and 2) updating data separately from the visualization.
+
+The proposal is to add a Deck-level `DataManager` that is shared and referenced by all layers.
+
+- A "resource" in the data manager can be any of:
+  + String: representing the URL that should be loaded by a registered loader
+  + JavaScript Array
+  + TypedArray: converted to a luma.gl Buffer object
+  + Promise
+  + luma.gl Buffer/Texture2D
+- Layers can reference a shared resource by its local url (see below)
+- The `DataManager` handles:
+  + loading async resources
+  + tracking the consumer of each resource
+  + updating the consumer if a resource is updated
+
+Registering a resource:
+
+```js
+// declarative
+<DeckGL
+  resources={{
+    'airports': 'https://raw.githubusercontent.com/../airports.geojson',
+    'binary': float32Array
+  }} />
+
+// imperative
+deck.addResources({
+  'airports': 'https://raw.githubusercontent.com/../airports.geojson',
+  'binary': float32Array
+});
+```
+
+Update a resource:
+
+```js
+// declarative
+<DeckGL
+  resources={{
+    // `airports` is removed because it is no longer referenced
+    'binary': float32Array.slice()  // a shalow change is required to signal updates
+  }} />
+
+// imperative
+deck.addResources({
+  'binary': float32Array
+}, {
+  update: true // indicate that the data has been mutated
+});
+deck.removeResources('airports');
+```
+
+Reference a resource:
+
+```js
+const layers = [
+  // Multiple layers sharing the same dataset
+  new ScatterplotLayer({data: 'deck://airports', ...}),
+  new ColumnLayer({data: 'deck://airports', ...}),
+  
+  // Interleaved binary
+  new PointCloudLayer({
+    data: {
+      length: 1e6,
+      attributes: {
+        positions: {buffer: 'deck://binary', size: 3, stride: 24},
+        colors: {buffer: 'deck://binary', size: 4, stride: 24, offset: 12, type: GL.UNSIGNED_BYTE},
+      }
+    },
+  }),
+
+  // Populate arbitrary async prop
+  new SimpleMeshLayer({mesh: 'deck://mesh', ...})
+]
+```
+
+### JSONConverter API
+
 Expand the `JSONConverter.convert` API to accept a second argument:
 
 ```js
-converter.convert(json, buffers);
+converter.convert(json, resources);
 ```
 
-Where `buffers` is a list/map of ArrayBuffers.
+Where `resources` is a map of resources.
+This allows the application to update resources incrementally, from e.g. binary payloads:
 
-In `json`, binary data can be referenced using the following syntax:
+```js
+let json;
+let resouces = {};
 
+function onServerMessage({type, id, payload}) {
+  if (type === 'json') {
+    json = payload;
+  } else if (type === 'binary') {
+    resources[id] = payload;
+  }
+  const deckProps = converter.convert(json, resources);
+  // update
+}
 ```
-@@binary[<id>]/<type>/<offset>/<length>
-```
 
-- `id`: key in `buffers`
-- `type`: one of `int8`, `uint8`, `int16`, `uint16`, `int32`, `uint32`, `float32`, `float64`
-- `offset` (optional): byte offset into the buffer, default `0`
-- `length` (optional): byte length of the data, default to end of buffer
-
-For example:
+In the JSON payload, layers can reference binary data like this:
 
 ```json
 {
   "@@type": "PointCloudLayer",
   "data": {
-    "length": 10000,
+    "length": 1e6,
     "attributes": {
-      "getPosition": "@@binary[0]/float64",
-      "getColor": "@@binary[1]/uint8>"
+      "positions": {"buffer": "deck://binary", "size": 3, "stride": 24},
+      "colors": {"buffer": "deck://binary", "size": 4, "stride": 24, "offset": 12, "type": "uint8"},
+    }
   }
 }
 ```
 
-### Use Case: get layer config and data separately from server
-
-Pseudo messages from the server:
-
-```
-type: json
-id: 1000
-----
-{
-  "data": "@@binary[1001]/float64"
-}
-```
-
-```
-type: binary
-id: 1001
-----
-<binary>
-```
-
-```
-type: json
-id: 1002
-----
-{
-  "data": "@@binary[1003]/float64"
-}
-```
-
-Client side:
-
-```js
-let json;
-let dataBuffer = <ring buffer>;
-
-function onMessage({data}) {
-  if (data.type === 'json') {
-    json = data.data;
-  } else if (data.type === 'binary') {
-    dataBuffer.push(data);
-  }
-
-  try {
-    const buffers = {};
-    dataBuffer.forEach(item => buffers[item.id] = item.data);
-    const deckProps = converter.convert(json, buffers);
-    deck.setProps(deckProps);
-  } catch (err) {
-    // Not fully loaded
-  }
-}
-```
