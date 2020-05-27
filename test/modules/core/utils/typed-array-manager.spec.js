@@ -37,6 +37,25 @@ test('TypedArrayManager#allocate', t => {
   t.end();
 });
 
+test('TypedArrayManager#initialize', t => {
+  const typedArrayManager = new TypedArrayManager({overAlloc: 1, poolSize: 1});
+
+  let array = typedArrayManager.allocate(null, 32, {size: 1, type: Uint8Array});
+  array.fill(255);
+  typedArrayManager.release(array);
+
+  array = typedArrayManager.allocate(null, 2, {
+    size: 3,
+    padding: 2,
+    type: Float32Array,
+    initialize: true
+  });
+
+  t.ok(array.every(Number.isFinite), 'The array is initialized');
+
+  t.end();
+});
+
 test('TypedArrayManager#release', t => {
   const typedArrayManager = new TypedArrayManager({overAlloc: 1, poolSize: 2});
 
