@@ -6,7 +6,6 @@ export class TypedArrayManager {
     this._pool = [];
   }
 
-  // eslint-disable-next-line complexity
   allocate(typedArray, count, {size = 1, type, padding = 0, copy = false, initialize = false}) {
     const Type = type || (typedArray && typedArray.constructor) || Float32Array;
 
