@@ -125,7 +125,7 @@ function getIdentityTileIndices(viewport, z, tileSize, extent) {
  * return tiles that are on maxZoom.
  */
 export function getTileIndices({viewport, maxZoom, minZoom, zRange, extent, tileSize = TILE_SIZE}) {
-  let z = Math.ceil(viewport.zoom);
+  let z = Math.round(viewport.zoom);
   if (Number.isFinite(minZoom) && z < minZoom) {
     if (!extent) {
       return [];
