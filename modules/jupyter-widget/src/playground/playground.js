@@ -39,8 +39,8 @@ export function initPlayground() {
         container,
         jsonInput: jsonProps,
         tooltip,
-        handleClick: (datum, event) => handleClick(this.transport, datum, event),
-        handleWarning: message => handleWarning(this.transport, message),
+        handleClick: (datum, event) => handleClick(transport, datum, event),
+        handleWarning: message => handleWarning(transport, message),
         customLibraries
       });
 
