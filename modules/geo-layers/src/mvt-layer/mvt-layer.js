@@ -11,7 +11,7 @@ const WORLD_SIZE = 512;
 
 const defaultProps = {
   uniqueIdProperty: {type: 'string', value: ''},
-  highlightedFeatureId: {type: 'number', value: -1}
+  highlightedFeatureId: null
 };
 
 export default class MVTLayer extends TileLayer {
@@ -68,13 +68,15 @@ export default class MVTLayer extends TileLayer {
     const {uniqueIdProperty, highlightedFeatureId} = this.props;
     const {data} = tile;
 
-    const isFeatureIdPresent = hoveredFeatureId >= 0 || highlightedFeatureId >= 0;
+    const isFeatureIdPresent = isFeatureIdDefined(hoveredFeatureId) || isFeatureIdDefined(highlightedFeatureId);
+
     if (!isFeatureIdPresent || !Array.isArray(data)) {
       return -1;
     }
 
-    const featureIdToHighlight =
-      highlightedFeatureId >= 0 ? highlightedFeatureId : hoveredFeatureId;
+    const featureIdToHighlight = isFeatureIdDefined(highlightedFeatureId)
+        ? highlightedFeatureId
+        : hoveredFeatureId;
 
     return data.findIndex(
       feature => getFeatureUniqueId(feature, uniqueIdProperty) === featureIdToHighlight
@@ -92,6 +94,10 @@ function getFeatureUniqueId(feature, uniqueIdProperty) {
   }
 
   return -1;
+}
+
+function isFeatureIdDefined(value) {
+  return value !== undefined && value !== null && value !== '';
 }
 
 MVTLayer.layerName = 'MVTLayer';
