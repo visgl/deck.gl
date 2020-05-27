@@ -68,15 +68,16 @@ export default class MVTLayer extends TileLayer {
     const {uniqueIdProperty, highlightedFeatureId} = this.props;
     const {data} = tile;
 
-    const isFeatureIdPresent = isFeatureIdDefined(hoveredFeatureId) || isFeatureIdDefined(highlightedFeatureId);
+    const isFeatureIdPresent =
+      isFeatureIdDefined(hoveredFeatureId) || isFeatureIdDefined(highlightedFeatureId);
 
     if (!isFeatureIdPresent || !Array.isArray(data)) {
       return -1;
     }
 
     const featureIdToHighlight = isFeatureIdDefined(highlightedFeatureId)
-        ? highlightedFeatureId
-        : hoveredFeatureId;
+      ? highlightedFeatureId
+      : hoveredFeatureId;
 
     return data.findIndex(
       feature => getFeatureUniqueId(feature, uniqueIdProperty) === featureIdToHighlight

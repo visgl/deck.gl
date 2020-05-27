@@ -93,9 +93,9 @@ Optional. Needed for highlighting a feature split across two or more tiles if no
 
 An string pointing to a tile attribute containing a unique identifier for features across tiles.
 
-##### `highlightedFeatureId` (Number)
+##### `highlightedFeatureId` (Number | String)
 
-* Default: `-1`
+* Default: `null`
 
 Optional. When provided, a feature with ID corresponding to the supplied value will be highlighted with `highlightColor`.
 
