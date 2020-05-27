@@ -19,6 +19,12 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v8.1
 
+#### deck.gl [8.1.8] - May 27 2020
+
+- Fix: OrbitView's orbitAxis prop is not used by OrbitController (#4606)
+- Export TransitionInterpolator (#4607)
+- Fix NaN values in recycled typedarray for PathLayer (#4614)
+
 #### deck.gl [8.1.7] - May 18 2020
 
 - Depth testing in @deck.gl/arcgis 3D mode (#4597)
