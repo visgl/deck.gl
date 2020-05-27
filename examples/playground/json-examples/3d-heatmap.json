@@ -1,5 +1,4 @@
 {
-  "google": true,
   "description": "The deck.gl website hexagonlayer example in JSON format",
   "websiteUrl": "https://deck.gl/#/examples/core-layers/hexagon-layer",
   "initialViewState": {

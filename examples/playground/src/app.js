@@ -2,8 +2,8 @@ import React, {Component, Fragment} from 'react';
 import {render} from 'react-dom';
 import AutoSizer from 'react-virtualized-auto-sizer';
 import {StaticMap} from 'react-map-gl';
-import DeckWithMaps from './deck-with-maps';
-import DeckWithGoogleMaps from './deck-with-gmaps';
+import DeckWithMapboxMaps from './deck-with-mapbox-maps';
+import DeckWithGoogleMaps from './deck-with-google-maps';
 
 import {FlyToInterpolator} from '@deck.gl/core';
 import {JSONConverter, JSONConfiguration, _shallowEqualObjects} from '@deck.gl/json';
@@ -19,7 +19,7 @@ const INITIAL_TEMPLATE = Object.keys(JSON_TEMPLATES)[0];
 
 // Set your mapbox token here
 const MAPBOX_TOKEN = process.env.MapboxAccessToken; // eslint-disable-line
-const GOOGLE_MAPS_TOKEN = process.env.googleMapsApiKey; // eslint-disable-line
+const GOOGLE_MAPS_TOKEN = process.env.GoogleMapsToken; // eslint-disable-line
 
 export class App extends Component {
   constructor(props) {
@@ -138,12 +138,12 @@ export class App extends Component {
           initialViewState={initialViewState}
           id="json-deck"
           {...jsonProps}
-          googleMapsApiKey={GOOGLE_MAPS_TOKEN}
+          googleMapsToken={GOOGLE_MAPS_TOKEN}
         />
       );
     } else {
       deckMap = (
-        <DeckWithMaps
+        <DeckWithMapboxMaps
           id="json-deck"
           {...jsonProps}
           initialViewState={initialViewState}

@@ -41,30 +41,22 @@ export default class DeckWithGoogleMaps extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      gmapsLoaded: window.google !== undefined
+      googleMapsLoaded: window.google && window.google.maps
     };
   }
 
   componentDidMount() {
-    const {googleMapsApiKey} = this.props;
-    if (!window.google) {
-      loadGoogleMapApi(googleMapsApiKey, () => {
-        this.setState({fetchGMapsScript: true});
+    const {googleMapsToken} = this.props;
+    if (!window.google || (window.google && !window.google.maps)) {
+      loadGoogleMapApi(googleMapsToken, () => {
+        this.setState({googleMapsLoaded: true});
       });
     }
   }
 
-  componentDidUpdate(prevProps, prevState, snapshot) {
-    // Loaded
-    if (window.google && this.state.fetchGMapsScript) {
-      // eslint-disable-next-line react/no-did-update-set-state
-      this.setState({fetchGMapsScript: false, gmapsLoaded: true});
-    }
-  }
-
   render() {
-    const {gmapsLoaded} = this.state;
-    if (!gmapsLoaded) {
+    const {googleMapsLoaded} = this.state;
+    if (!googleMapsLoaded) {
       return <img src={LOADING_GIF} alt="Loading Google Maps overlay..." />;
     }
 
@@ -86,7 +78,7 @@ class DeckOverlayWrapper extends Component {
     const {initialViewState} = this.props;
     const view = {
       center: {lat: initialViewState.latitude, lng: initialViewState.longitude},
-      mapTypeId: 'satellite',
+      mapTypeId: this.props.mapTypeId || 'satellite',
       zoom: initialViewState.zoom
     };
 
@@ -98,9 +90,11 @@ class DeckOverlayWrapper extends Component {
   }
 
   componentDidUpdate(prevProps, prevState, snapshot) {
-    if (!deepEqual(prevProps, this.props)) {
-      this.DeckOverlay.setProps({layers: this.props.layers});
-    }
+    this.DeckOverlay.setProps({layers: this.props.layers});
+  }
+
+  componentWillUnmount() {
+    delete this.DeckOverlay;
   }
 
   render() {
