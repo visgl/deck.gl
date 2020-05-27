@@ -6,7 +6,7 @@ export class TypedArrayManager {
     this._pool = [];
   }
 
-  allocate(typedArray, count, {size = 1, type, padding = 0, copy = false}) {
+  allocate(typedArray, count, {size = 1, type, padding = 0, copy = false, initialize = false}) {
     const Type = type || (typedArray && typedArray.constructor) || Float32Array;
 
     const newSize = count * size + padding;
@@ -19,13 +19,12 @@ export class TypedArrayManager {
       }
     }
 
-    const newArray = this._allocate(Type, newSize);
+    const newArray = this._allocate(Type, newSize, initialize);
 
     if (typedArray && copy) {
       newArray.set(typedArray);
-    } else {
-      // Hack - viewing a buffer with a different type may create NaNs
-      // which crashes the Attribute validation
+    } else if (!initialize) {
+      // Hack - always initialize the first 4 elements. NaNs crashe the Attribute validation
       newArray.fill(0, 0, 4);
     }
 
@@ -37,7 +36,7 @@ export class TypedArrayManager {
     this._release(typedArray);
   }
 
-  _allocate(Type, size) {
+  _allocate(Type, size, initialize) {
     // Allocate at least one element to ensure a valid buffer
     size = Math.max(Math.ceil(size * this.overAlloc), 1);
 
@@ -47,7 +46,12 @@ export class TypedArrayManager {
     const i = pool.findIndex(b => b.byteLength >= byteLength);
     if (i >= 0) {
       // Create a new array using an existing buffer
-      return new Type(pool.splice(i, 1)[0], 0, size);
+      const array = new Type(pool.splice(i, 1)[0], 0, size);
+      if (initialize) {
+        // Viewing a buffer with a different type may create NaNs
+        array.fill(0);
+      }
+      return array;
     }
     return new Type(size);
   }
