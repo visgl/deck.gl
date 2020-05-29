@@ -181,7 +181,7 @@ Elevation multiplier. The final elevation is calculated by
   `elevationScale * getElevation(d)`. `elevationScale` is a handy property to scale
 all polygon elevation without updating the data.
 
-##### `radiusUnits` (String, optional)
+##### `pointRadiusUnits` (String, optional)
 
 * Default: `'meters'`
 
@@ -240,7 +240,7 @@ Note: This accessor is only called for `Polygon` and `MultiPolygon` and `Point` 
 
 * Default: `1`
 
-The radius of `Point` and `MultiPoint` feature. In units specified by `radiusUnits` (default meters).
+The radius of `Point` and `MultiPoint` feature. In units specified by `pointRadiusUnits` (default meters).
 
 * If a number is provided, it is used as the radius for all point features.
 * If a function is provided, it is called on each point feature to retrieve its radius.

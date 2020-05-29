@@ -11,7 +11,7 @@ test('ScatterplotLayer points size by radiusUnits prop', t => {
       props: {
         data: FIXTURES.geojson,
         getSize: SIZE,
-        radiusUnits: 'meters'
+        pointRadiusUnits: 'meters'
       },
       onAfterUpdate: ({subLayers}) => {
         const filteredLayers = subLayers.filter(l => l.id === 'GeoJsonLayer-points');
@@ -26,7 +26,7 @@ test('ScatterplotLayer points size by radiusUnits prop', t => {
       props: {
         data: FIXTURES.geojson,
         getSize: SIZE,
-        radiusUnits: 'pixels'
+        pointRadiusUnits: 'pixels'
       },
       onAfterUpdate: ({subLayers}) => {
         const filteredLayers = subLayers.filter(l => l.id === 'GeoJsonLayer-points');
