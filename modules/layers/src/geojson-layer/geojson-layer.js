@@ -45,6 +45,7 @@ const defaultProps = {
 
   elevationScale: 1,
 
+  radiusUnits: 'meters',
   pointRadiusScale: 1,
   pointRadiusMinPixels: 0, //  min point radius in pixels
   pointRadiusMaxPixels: Number.MAX_SAFE_INTEGER, // max point radius in pixels
@@ -132,6 +133,7 @@ export default class GeoJsonLayer extends CompositeLayer {
       lineWidthMaxPixels,
       lineJointRounded,
       lineMiterLimit,
+      radiusUnits,
       pointRadiusScale,
       pointRadiusMinPixels,
       pointRadiusMaxPixels,
@@ -279,6 +281,7 @@ export default class GeoJsonLayer extends CompositeLayer {
 
           stroked,
           filled,
+          radiusUnits,
           radiusScale: pointRadiusScale,
           radiusMinPixels: pointRadiusMinPixels,
           radiusMaxPixels: pointRadiusMaxPixels,
