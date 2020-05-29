@@ -122,7 +122,7 @@ This prop is not required if `data` points to a supported format (JSON or image 
 
 The pixel dimension of the tiles, usually a power of 2.
 
-The tile size represents the target pixel width and height of each tile when rendered. Smaller tile sizes mean that the layer needs to load more tiles to fill the same viewport.
+The tile size represents the target pixel width and height of each tile when rendered. Smaller tile sizes display the content at higher resolution, while the layer needs to load more tiles to fill the same viewport.
 
 - Default: `512`
 
