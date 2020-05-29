@@ -181,6 +181,12 @@ Elevation multiplier. The final elevation is calculated by
   `elevationScale * getElevation(d)`. `elevationScale` is a handy property to scale
 all polygon elevation without updating the data.
 
+##### `radiusUnits` (String, optional)
+
+* Default: `'meters'`
+
+The units of the point radius, one of `'meters'`, `'pixels'`. When zooming in and out, meter sizes scale with the base map, and pixel sizes remain the same on screen.
+
 ##### `pointRadiusScale` (Number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
 
 * Default: `1`
@@ -234,7 +240,7 @@ Note: This accessor is only called for `Polygon` and `MultiPolygon` and `Point` 
 
 * Default: `1`
 
-The radius of `Point` and `MultiPoint` feature, in meters.
+The radius of `Point` and `MultiPoint` feature. In units specified by `radiusUnits` (default meters).
 
 * If a number is provided, it is used as the radius for all point features.
 * If a function is provided, it is called on each point feature to retrieve its radius.
