@@ -1,4 +1,4 @@
-# RFC: Transport Format RFC
+# RFC: Data Manager
 
 * Authors: Xiaoji Chen
 * Date: Jan, 2020
@@ -48,13 +48,13 @@ Registering a resource:
 <DeckGL
   resources={{
     'airports': 'https://raw.githubusercontent.com/../airports.geojson',
-    'binary': float32Array
+    'interleaved-pointcloud-date': float32Array
   }} />
 
 // imperative
 deck.addResources({
   'airports': 'https://raw.githubusercontent.com/../airports.geojson',
-  'binary': float32Array
+  'interleaved-pointcloud-date': float32Array
 });
 ```
 
@@ -65,12 +65,12 @@ Update a resource:
 <DeckGL
   resources={{
     // `airports` is removed because it is no longer referenced
-    'binary': float32Array.slice()  // a shalow change is required to signal updates
+    'interleaved-pointcloud-date': float32Array.slice()  // a shalow change is required to signal updates
   }} />
 
 // imperative
 deck.addResources({
-  'binary': float32Array
+  'interleaved-pointcloud-date': float32Array
 }, {
   update: true // indicate that the data has been mutated
 });
@@ -90,16 +90,31 @@ const layers = [
     data: {
       length: 1e6,
       attributes: {
-        positions: {buffer: 'deck://binary', size: 3, stride: 24},
-        colors: {buffer: 'deck://binary', size: 4, stride: 24, offset: 12, type: GL.UNSIGNED_BYTE},
+        positions: {buffer: 'deck://interleaved-pointcloud-date', size: 3, stride: 24},
+        colors: {buffer: 'deck://interleaved-pointcloud-date', size: 4, stride: 24, offset: 12, type: GL.UNSIGNED_BYTE},
       }
-    },
+    }
   }),
 
   // Populate arbitrary async prop
-  new SimpleMeshLayer({mesh: 'deck://mesh', ...})
+  new SimpleMeshLayer({mesh: 'deck://car-mesh', ...})
 ]
 ```
+
+A compound resource (i.e. an Arrow table) can be destructed like this:
+
+```js
+new ScatterplotLayer({
+  data: {
+    length: 1e5,
+    attributes: {
+      getPosition: {buffer: 'deck://scatterplot-data-arrow/coordinate', size: 2},
+      getRadius: {buffer: 'deck://scatterplot-data-arrow/radius', size: 1}
+    }
+  }
+})
+```
+
 
 ### JSONConverter API
 
@@ -135,8 +150,8 @@ In the JSON payload, layers can reference binary data like this:
   "data": {
     "length": 1e6,
     "attributes": {
-      "positions": {"buffer": "deck://binary", "size": 3, "stride": 24},
-      "colors": {"buffer": "deck://binary", "size": 4, "stride": 24, "offset": 12, "type": "uint8"},
+      "positions": {"buffer": "deck://interleaved-pointcloud-date", "size": 3, "stride": 24},
+      "colors": {"buffer": "deck://interleaved-pointcloud-date", "size": 4, "stride": 24, "offset": 12, "type": "uint8"},
     }
   }
 }
