@@ -15,11 +15,11 @@ const TEST_CASES = [
       height: 400,
       longitude: -90,
       latitude: 45,
-      zoom: 2.5
+      zoom: 3.5
     }),
     minZoom: undefined,
     maxZoom: undefined,
-    output: ['0,2,3', '0,3,3', '1,2,3', '1,3,3', '2,2,3', '2,3,3', '3,2,3', '3,3,3']
+    output: ['1,2,3', '1,3,3', '2,2,3', '2,3,3']
   },
   {
     title: 'tilted viewport',
@@ -30,11 +30,11 @@ const TEST_CASES = [
       bearing: -25,
       longitude: -90,
       latitude: 45,
-      zoom: 2.5
+      zoom: 3.5
     }),
     minZoom: undefined,
     maxZoom: undefined,
-    output: ['0,2,3', '0,3,3', '1,2,3', '1,3,3', '2,1,3', '2,2,3', '2,3,3', '3,2,3', '3,3,3']
+    output: ['0,2,3', '1,2,3', '1,3,3', '2,1,3', '2,2,3', '2,3,3']
   },
   {
     title: 'extreme pitch',
@@ -103,7 +103,6 @@ const TEST_CASES = [
     }),
     minZoom: undefined,
     maxZoom: undefined,
-    tileSize: 128, // this should have no effect!
     output: ['0,0,0']
   },
   {
@@ -142,7 +141,7 @@ const TEST_CASES = [
       }
     }),
     tileSize: 256,
-    output: ['1,2,3', '1,3,3', '2,2,3', '2,3,3', '3,2,3', '3,3,3', '4,2,3', '4,3,3']
+    output: ['1,2,4', '1,3,4', '2,2,4', '2,3,4', '3,2,4', '3,3,4', '4,2,4', '4,3,4']
   }
 ];
 
@@ -199,7 +198,7 @@ test('tileToBoundingBox', t => {
     if (testCase.output.length) {
       const {viewport, minZoom, maxZoom, tileSize, zRange} = testCase;
       const boundingBoxes = getTileIndices({viewport, maxZoom, minZoom, zRange, tileSize}).map(
-        tile => tileToBoundingBox(viewport, tile.x, tile.y, tile.z, tileSize)
+        tile => tileToBoundingBox(viewport, tile.x, tile.y, tile.z)
       );
       const result = mergeBoundingBox(boundingBoxes);
       const corners = [
@@ -272,9 +271,9 @@ test('tileToBoundingBox#Infovis', t => {
   );
 
   t.deepEqual(
-    tileToBoundingBox(viewport, 0, 0, 0, 256),
+    tileToBoundingBox(viewport, 0, 0, 1),
     {left: 0, top: 0, right: 256, bottom: 256},
-    '0,0,0 with custom tileSize Should match the results.'
+    '0,0,1 Should match the results.'
   );
 
   t.deepEqual(
@@ -284,9 +283,9 @@ test('tileToBoundingBox#Infovis', t => {
   );
 
   t.deepEqual(
-    tileToBoundingBox(viewport, 4, -1, 2, 256),
+    tileToBoundingBox(viewport, 4, -1, 3),
     {left: 256, top: -64, right: 320, bottom: 0},
-    '4,-1,2 with custom tileSize Should match the results.'
+    '4,-1,3 Should match the results.'
   );
 
   t.end();
