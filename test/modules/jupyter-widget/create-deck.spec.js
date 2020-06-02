@@ -11,21 +11,15 @@ class DemoCompositeLayer extends CompositeLayer {
   }
 }
 
-test('jupyter-widget: dynamic-registration', t0 => {
-  let module;
-  try {
-    module = require('@deck.gl/jupyter-widget/create-deck');
-  } catch (error) {
-    t0.comment('dist mode, skipping dynamic registration tests');
-    t0.end();
-    return;
-  }
+test('jupyter-widget: dynamic-registration', t => {
+  const jupyterWidgetModule = require('@deck.gl/jupyter-widget');
 
-  t0.test('addCustomLibraries', t => {
+  t.test('addCustomLibraries', () => {
     const TEST_LIBRARY_NAME = 'DemoLibrary';
     window[TEST_LIBRARY_NAME] = {DemoCompositeLayer};
+
     const onComplete = () => {
-      const props = module.jsonConverter.convert({
+      const props = jupyterWidgetModule.jsonConverter.convert({
         layers: [{'@@type': 'DemoCompositeLayer', data: []}]
       });
       t.ok(props.layers[0] instanceof DemoCompositeLayer, 'Should add new class to the converter');
@@ -33,7 +27,8 @@ test('jupyter-widget: dynamic-registration', t0 => {
       delete window[TEST_LIBRARY_NAME];
       t.end();
     };
-    module.addCustomLibraries(
+
+    jupyterWidgetModule.addCustomLibraries(
       [
         {
           libraryName: TEST_LIBRARY_NAME,
@@ -43,6 +38,4 @@ test('jupyter-widget: dynamic-registration', t0 => {
       onComplete
     );
   });
-
-  t0.end();
 });

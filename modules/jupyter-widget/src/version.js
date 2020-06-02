@@ -6,5 +6,6 @@
  * version number.
  */
 
-export const MODULE_VERSION = __VERSION__;
+export const MODULE_VERSION =
+  typeof __VERSION__ === 'undefined' ? 'untranspiled source' : __VERSION__;
 export const MODULE_NAME = '@deck.gl/jupyter-widget';
