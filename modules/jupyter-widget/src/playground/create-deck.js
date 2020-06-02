@@ -7,6 +7,7 @@ import makeTooltip from './widget-tooltip';
 
 import mapboxgl from './utils/mapbox-utils';
 import {loadScript} from './utils/script-utils';
+import {createGoogleMapsDeckOverlay} from './utils/google-maps-utils';
 
 import * as deck from '../deck-bundle';
 
@@ -99,6 +100,7 @@ function missingLayers(oldLayers, newLayers) {
 
 function createDeck({
   mapboxApiKey,
+  googleMapsKey,
   container,
   jsonInput,
   tooltip,
@@ -116,15 +118,34 @@ function createDeck({
     // loading custom library is async, some layers might not be convertable before custom library loads
     const layerToLoad = missingLayers(oldLayers, convertedLayers);
     const getTooltip = makeTooltip(tooltip);
-
-    deckgl = new deck.DeckGL({
-      ...props,
-      map: mapboxgl,
-      mapboxApiAccessToken: mapboxApiKey,
-      onClick: handleClick,
-      getTooltip,
-      container
-    });
+    const {mapProvider} = props;
+    if (mapProvider === 'mapbox') {
+      deckgl = new deck.DeckGL({
+        ...props,
+        map: mapboxgl,
+        mapboxApiAccessToken: mapboxApiKey,
+        onClick: handleClick,
+        getTooltip,
+        container
+      });
+    } else if (mapProvider === 'google_maps') {
+      deckgl = createGoogleMapsDeckOverlay({
+        props,
+        googleMapsKey,
+        onClick: handleClick,
+        getTooltip,
+        container
+      });
+    } else {
+      deckgl = new deck.DeckGL({
+        ...props,
+        map: null,
+        mapboxApiAccessToken: null,
+        onClick: handleClick,
+        getTooltip,
+        container
+      });
+    }
 
     const onComplete = () => {
       if (layerToLoad.length) {

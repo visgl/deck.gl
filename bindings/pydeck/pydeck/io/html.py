@@ -25,10 +25,17 @@ CDN_URL = "https://cdn.jsdelivr.net/npm/@deck.gl/jupyter-widget@{}/dist/index.js
 
 
 def cdn_picker(offline=False):
+    # Support hot-reloading
+    dev_port = os.getenv('PYDECK_DEV_PORT')
+    if dev_port:
+        return (
+            "<script type='text/javascript' src='http://localhost:{dev_port}/dist/index.js'></script>\n"
+            "<script type='text/javascript' src='http://localhost:{dev_port}/dist/index.js.map'></script>\n"
+        ).format(dev_port=dev_port)
     if offline:
         with open(join(dirname(__file__), "./static/index.js"), "r", encoding="utf-8") as file:
             js = file.read()
-        return "<script type=text/javascript>" + js + "</script>"
+        return "<script type='text/javascript'>" + js + "</script>"
 
     return "<script src=" + CDN_URL + "></script>"
 
@@ -36,21 +43,21 @@ def cdn_picker(offline=False):
 def render_json_to_html(
     json_input,
     mapbox_key=None,
+    google_maps_key=None,
     tooltip=True,
     css_background_color=None,
     custom_libraries=None,
     offline=False,
-    google_maps_key=None,
 ):
     js = j2_env.get_template("index.j2")
     html_str = js.render(
         mapbox_key=mapbox_key,
+        google_maps_key=google_maps_key,
         json_input=json_input,
         deckgl_jupyter_widget_bundle=cdn_picker(offline=offline),
         tooltip=convert_js_bool(tooltip),
         css_background_color=css_background_color,
         custom_libraries=custom_libraries,
-        google_maps_key=google_maps_key,
     )
     return html_str
 
@@ -91,8 +98,8 @@ def add_html_extension(fname):
 def deck_to_html(
     deck_json,
     mapbox_key=None,
-    filename=None,
     google_maps_key=None,
+    filename=None,
     open_browser=False,
     notebook_display=False,
     css_background_color=None,
@@ -107,11 +114,11 @@ def deck_to_html(
     html = render_json_to_html(
         deck_json,
         mapbox_key=mapbox_key,
+        google_maps_key=google_maps_key,
         tooltip=tooltip,
         css_background_color=css_background_color,
         custom_libraries=custom_libraries,
         offline=offline,
-        google_maps_key=google_maps_key,
     )
 
     if as_string:

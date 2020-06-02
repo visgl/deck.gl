@@ -8,6 +8,7 @@ from ..io.html import deck_to_html
 from ..settings import settings as pydeck_settings
 from ..widget import DeckGLWidget
 from .view import View
+from .providers import Providers
 
 
 class Deck(JSONMixin):
@@ -17,13 +18,14 @@ class Deck(JSONMixin):
         views=[View(type="MapView", controller=True)],
         map_style="mapbox://styles/mapbox/dark-v9",
         mapbox_key=None,
+        google_maps_key=None,
         initial_view_state=None,
         width="100%",
         height=500,
         tooltip=True,
         description=None,
         effects=None,
-        google_maps_key=None,
+        map_provider='mapbox'
     ):
         """This is the renderer and configuration for a deck.gl visualization, similar to the
         `Deck <https://deck.gl/#/documentation/deckgl-api-reference/deck>`_ class from deck.gl.
@@ -38,7 +40,7 @@ class Deck(JSONMixin):
             List of :class:`pydeck.bindings.view.View` objects to render.
         map_style : str, default 'mapbox://styles/mapbox/dark-v9'
             URI for Mapbox basemap style. See Mapbox's `gallery <https://www.mapbox.com/gallery/>`_ for examples.
-            If not using a basemap, you can set this value to to an empty string, `''`.
+            If not using a basemap, you can set this value to to an empty string, ``''``.
         initial_view_state : pydeck.ViewState, default None
             Initial camera angle relative to the map, defaults to a fully zoomed out 0, 0-centered map
             To compute a viewport from data, see :func:`pydeck.data_utils.viewport_helpers.compute_view`
@@ -52,6 +54,9 @@ class Deck(JSONMixin):
             Read on initialization from the ``GOOGLE_MAPS_API_KEY`` environment variable if not set.
             Defaults to None if the environment variable is also not set.
             Not used on all layers.
+        map_provider : str, default 'mapbox'
+            If multiple API keys are set (e.g., both Mapbox and Google Maps), inform pydeck which
+            basemap provider to prefer. Currently the other alternative value is ``'google_maps'``.
         height : int, default 500
             Height of Jupyter notebook cell, in pixels.
         width : int` or string, default '100%'
@@ -91,7 +96,10 @@ class Deck(JSONMixin):
 
         self.description = description
         self.effects = effects
-        if self.mapbox_key is None:
+
+        self.map_provider = str(map_provider).lower() if map_provider else None
+        self.deck_widget.map_provider = map_provider
+        if self.mapbox_key is None and self.map_provider == Providers.MAPBOX:
             warnings.warn(
                 "Mapbox API key is not set. This may impact available features of pydeck.", UserWarning,
             )
@@ -159,12 +167,12 @@ class Deck(JSONMixin):
         str
             Returns absolute path of the file
         """
-        json_blob = self.to_json()
+        deck_json = self.to_json()
         f = deck_to_html(
-            json_blob,
-            self.mapbox_key,
-            filename,
+            deck_json,
+            mapbox_key=self.mapbox_key,
             google_maps_key=self.google_maps_key,
+            filename=filename,
             open_browser=open_browser,
             notebook_display=notebook_display,
             iframe_height=iframe_height,

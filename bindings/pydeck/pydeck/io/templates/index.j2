@@ -2,6 +2,9 @@
   <head>
     <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
     <title>pydeck</title>
+{% if google_maps_key %}
+    <script src=https://maps.googleapis.com/maps/api/js?key={{google_maps_key}}&libraries=places'></script>
+{% endif %}
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap-theme.min.css" />
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.3/css/font-awesome.min.css" />
     {{deckgl_jupyter_widget_bundle}}
@@ -56,6 +59,7 @@
     // TODO get google maps API key into this function
     const deck = createDeck({
       mapboxApiKey: MAPBOX_API_KEY,
+      googleMapsKey: GOOGLE_MAPS_API_KEY,
       container: document.getElementById('deck-container'),
       jsonInput,
       tooltip,

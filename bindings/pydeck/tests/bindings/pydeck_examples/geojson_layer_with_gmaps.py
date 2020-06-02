@@ -22,10 +22,11 @@ features = {
 }
 
 
-def create_geojson_layer_test_object():
+def create_geojson_layer_with_gmaps_test_object():
     return Deck(
-        description="Test of GeoJsonLayer",
-        map_style=None,
+        description="Test of GeoJsonLayer, with Google Maps basemap",
+        map_style='satellite',
+        map_provider='google_maps',
         initial_view_state=ViewState(longitude=-122.45, latitude=37.8, zoom=0),
         layers=[
             Layer(
@@ -40,6 +41,5 @@ def create_geojson_layer_test_object():
                 get_fill_color=[200, 160, 0, 180],
             )
         ],
-        map_provider=None,
         views=None,
     )
