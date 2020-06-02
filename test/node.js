@@ -23,6 +23,9 @@ const moduleAlias = require('module-alias');
 moduleAlias.addAlias('@jupyter-widgets/base', (fromPath, request, alias) => {
   return `${__dirname}/modules/jupyter-widget/mock-widget-base.js`;
 });
+moduleAlias.addAlias('react-map-gl/dist/esm/mapbox/mapbox', (fromPath, request, alias) => {
+  return `${__dirname}/../../../node_modules/react-map-gl/dist/es5/mapbox/mapbox`;
+});
 
 const {gl} = require('@deck.gl/test-utils');
 // Create a dummy canvas for the headless gl context
