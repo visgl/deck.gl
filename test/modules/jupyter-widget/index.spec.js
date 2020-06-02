@@ -1,8 +1,8 @@
 import test from 'tape-catch';
 
 const moduleAlias = require('module-alias');
-moduleAlias.addAlias('react-map-gl', (fromPath, request, alias) => {
-  return `${__dirname}/modules/jupyter-widget/mock-react-map-gl.js`;
+moduleAlias.addAlias('react-map-gl/dist/esm/mapbox/mapbox', (fromPath, request, alias) => {
+  return `${__dirname}/../../../node_modules/react-map-gl/dist/es5/mapbox/mapbox`;
 });
 
 function getDeckModel(state) {
