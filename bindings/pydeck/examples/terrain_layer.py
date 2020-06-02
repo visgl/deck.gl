@@ -17,7 +17,8 @@ TERRAIN_IMAGE = '"https://s3.amazonaws.com/elevation-tiles-prod/terrarium/{z}/{x
 # Define how to parse elevation tiles
 ELEVATION_DECODER = {"rScaler": 256, "gScaler": 1, "bScaler": 1 / 256, "offset": -32768}
 
-SURFACE_IMAGE = f'"https://api.mapbox.com/v4/mapbox.satellite/{{z}}/{{x}}/{{y}}@2x.png?access_token={MAPBOX_API_KEY}"'
+SURFACE_IMAGE = '"https://api.mapbox.com/v4/mapbox.satellite/{{z}}/{{x}}/{{y}}@2x.png?access_token={}"'.format(
+    MAPBOX_API_KEY)
 
 terrain_layer = pydeck.Layer(
     "TerrainLayer", data=None, elevation_decoder=ELEVATION_DECODER, texture=SURFACE_IMAGE, elevation_data=TERRAIN_IMAGE
