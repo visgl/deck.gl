@@ -1,6 +1,6 @@
 // eslint-disable-next-line
 /* global document */
-import {testOp} from './index';
+import test from 'tape-catch';
 
 const pickedInfo = {object: {elevationValue: 10, position: [0, 0]}, x: 0, y: 0, picked: true};
 
@@ -22,7 +22,7 @@ const TOOLTIP_HTML = {
   }
 };
 
-testOp('jupyter-widget: tooltip', t0 => {
+test('jupyter-widget: tooltip', t0 => {
   let widgetTooltipModule;
   try {
     widgetTooltipModule = require('@deck.gl/jupyter-widget/widget-tooltip');

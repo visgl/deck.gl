@@ -1,6 +1,6 @@
 // eslint-disable-next-line
 /* global document, window, global */
-import {testOp} from './index';
+import test from 'tape-catch';
 
 import {CompositeLayer} from '@deck.gl/core';
 import {ScatterplotLayer} from '@deck.gl/layers';
@@ -11,7 +11,7 @@ class DemoCompositeLayer extends CompositeLayer {
   }
 }
 
-testOp('jupyter-widget: dynamic-registration', t => {
+test('jupyter-widget: dynamic-registration', t => {
   const jupyterWidgetModule = require('@deck.gl/jupyter-widget');
 
   t.test('addCustomLibraries', () => {

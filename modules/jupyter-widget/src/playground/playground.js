@@ -83,7 +83,7 @@ export function initPlayground() {
 // HELPER FUNCTIONS
 
 // Takes JSON props and combines them with the binary data buffer
-function processDataBuffer({dataBuffer, convertedJson}) {
+export function processDataBuffer({dataBuffer, convertedJson}) {
   for (let i = 0; i < convertedJson.layers.length; i++) {
     const layerId = convertedJson.layers[i].id;
     const layer = convertedJson.layers[i];

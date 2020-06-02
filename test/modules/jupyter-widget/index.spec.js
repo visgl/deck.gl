@@ -1,4 +1,4 @@
-import {testOp} from './index';
+import test from 'tape-catch';
 
 function getDeckModel(state) {
   // Require at runtime, after the environment is polyfilled
@@ -18,7 +18,7 @@ function getDeckModel(state) {
   }
 }
 
-testOp('jupyter-widget getters should be properly configured', t => {
+test('jupyter-widget getters should be properly configured', t => {
   const JupyterTransportModel = require('@deck.gl/jupyter-widget');
   t.equal(JupyterTransportModel.TransportModel.model_module, '@deck.gl/jupyter-widget');
   t.equal(JupyterTransportModel.TransportModel.model_module_version, 'untranspiled source');
@@ -27,7 +27,7 @@ testOp('jupyter-widget getters should be properly configured', t => {
   t.end();
 });
 
-testOp('jupyter-widget should be createable', t => {
+test('jupyter-widget should be createable', t => {
   const model = getDeckModel({});
   t.deepEquals(model.get('json_input'), null, 'json_input should be null');
   t.deepEquals(model.get('data_buffer'), null, 'data buffer should be null');
@@ -38,7 +38,7 @@ testOp('jupyter-widget should be createable', t => {
   t.end();
 });
 
-testOp('jupyter-widget should be creatable with a value', t => {
+test('jupyter-widget should be creatable with a value', t => {
   const state = {
     mapbox_key: 'fake-key',
     json_input: '{mock_input: 1}'

@@ -20,11 +20,12 @@ global.HTMLVideoElement = dom.window.HTMLVideoElement;
 
 const moduleAlias = require('module-alias');
 
+const path = require('path');
 moduleAlias.addAlias('@jupyter-widgets/base', (fromPath, request, alias) => {
   return `${__dirname}/modules/jupyter-widget/mock-widget-base.js`;
 });
 moduleAlias.addAlias('react-map-gl/dist/esm/mapbox/mapbox', (fromPath, request, alias) => {
-  return `${__dirname}/../../../node_modules/react-map-gl/dist/es5/mapbox/mapbox`;
+  return path.resolve(`${__dirname}/../node_modules/react-map-gl/dist/es5/mapbox/mapbox`);
 });
 
 const {gl} = require('@deck.gl/test-utils');
