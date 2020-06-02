@@ -25,7 +25,7 @@ class Deck(JSONMixin):
         tooltip=True,
         description=None,
         effects=None,
-        map_provider='mapbox'
+        map_provider="mapbox",
     ):
         """This is the renderer and configuration for a deck.gl visualization, similar to the
         `Deck <https://deck.gl/#/documentation/deckgl-api-reference/deck>`_ class from deck.gl.

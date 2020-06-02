@@ -56,8 +56,8 @@ async def test_standalone_rendering(tmp_path):
     filename = d.to_html(str(tmp_path) + "/", open_browser=False, offline=True, notebook_display=False)
     await go_to_page_and_screenshot("file://" + filename, filename, output_dir=tmp_path)
 
-    d.map_provider = 'google_maps'
-    d.map_style = 'satellite'
+    d.map_provider = "google_maps"
+    d.map_style = "satellite"
     filename = d.to_html(str(tmp_path) + "/", open_browser=False, offline=True, notebook_display=False)
     await go_to_page_and_screenshot("file://" + filename, filename, output_dir=tmp_path)
 

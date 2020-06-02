@@ -26,7 +26,7 @@ CDN_URL = "https://cdn.jsdelivr.net/npm/@deck.gl/jupyter-widget@{}/dist/index.js
 
 def cdn_picker(offline=False):
     # Support hot-reloading
-    dev_port = os.getenv('PYDECK_DEV_PORT')
+    dev_port = os.getenv("PYDECK_DEV_PORT")
     if dev_port:
         return (
             "<script type='text/javascript' src='http://localhost:{dev_port}/dist/index.js'></script>\n"
@@ -147,8 +147,6 @@ def deck_to_html(
             from IPython.display import IFrame  # noqa
 
             notebook_to_html_path = relpath(f.name)
-            display(  # noqa
-                IFrame(os.path.join("./", notebook_to_html_path), width=iframe_width, height=iframe_height)
-            )
+            display(IFrame(os.path.join("./", notebook_to_html_path), width=iframe_width, height=iframe_height))  # noqa
 
     return realpath(f.name)
