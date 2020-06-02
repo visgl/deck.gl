@@ -1,9 +1,4 @@
-import test from 'tape-catch';
-
-const moduleAlias = require('module-alias');
-moduleAlias.addAlias('react-map-gl/dist/esm/mapbox/mapbox', (fromPath, request, alias) => {
-  return `${__dirname}/../../../node_modules/react-map-gl/dist/es5/mapbox/mapbox`;
-});
+import {testOp} from './index';
 
 function getDeckModel(state) {
   // Require at runtime, after the environment is polyfilled
@@ -23,7 +18,7 @@ function getDeckModel(state) {
   }
 }
 
-test('jupyter-widget getters should be properly configured', t => {
+testOp('jupyter-widget getters should be properly configured', t => {
   const JupyterTransportModel = require('@deck.gl/jupyter-widget');
   t.equal(JupyterTransportModel.TransportModel.model_module, '@deck.gl/jupyter-widget');
   t.equal(JupyterTransportModel.TransportModel.model_module_version, 'untranspiled source');
@@ -32,7 +27,7 @@ test('jupyter-widget getters should be properly configured', t => {
   t.end();
 });
 
-test('jupyter-widget should be createable', t => {
+testOp('jupyter-widget should be createable', t => {
   const model = getDeckModel({});
   t.deepEquals(model.get('json_input'), null, 'json_input should be null');
   t.deepEquals(model.get('data_buffer'), null, 'data buffer should be null');
@@ -43,7 +38,7 @@ test('jupyter-widget should be createable', t => {
   t.end();
 });
 
-test('jupyter-widget should be creatable with a value', t => {
+testOp('jupyter-widget should be creatable with a value', t => {
   const state = {
     mapbox_key: 'fake-key',
     json_input: '{mock_input: 1}'

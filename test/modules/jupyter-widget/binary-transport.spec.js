@@ -1,4 +1,4 @@
-import test from 'tape-catch';
+import {testOp} from './index';
 
 const DEMO_ARRAY = new Uint32Array([0, 10, 2, 20]);
 
@@ -30,7 +30,7 @@ const EXPECTED_CONVERSION = {
   }
 };
 
-test('jupyter-widget: binary-transport', t0 => {
+testOp('jupyter-widget: binary-transport', t0 => {
   let binaryTransportModule;
   let widgetCreateDeckModule;
   try {
