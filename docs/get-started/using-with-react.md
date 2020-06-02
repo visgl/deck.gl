@@ -1,11 +1,11 @@
 # Using deck.gl with React
 
-While not directly based on React, deck.gl is designed from ground up to work with [React](https://facebook.github.io/react/)-based applications. deck.gl layers fit naturally into React's component render flow and flux/redux based appications. deck.gl layers will be performantly rerendered whenever you rerender your normal JSX or React components.
+While not directly based on React, deck.gl is designed from ground up to work with [React](https://facebook.github.io/react/) based applications. deck.gl layers fit naturally into React's component render flow and flux/redux based appications. deck.gl layers will be *performantly rerendered* whenever you rerender your normal JSX or React components.
 
 
 ## The DeckGL React Component
 
-To use deck.gl with React, simply import the `DeckGL` React component and render it as a child of another component, passing in your list of deck.gl layers as a property.
+To use deck.gl with React, import `DeckGL` from `@deck.gl/react` and create a DeckGL component, passing in your list of deck.gl layers as a property.
 
 ```jsx
 /// app.js
@@ -14,7 +14,7 @@ import DeckGL from '@deck.gl/react';
 import {LineLayer} from '@deck.gl/layers';
 
 // Viewport settings
-const viewState = {
+const initialViewState = {
   longitude: -122.41669,
   latitude: 37.7853,
   zoom: 13,
@@ -33,7 +33,7 @@ class App extends React.Component {
     ];
 
     return (
-      <DeckGL viewState={viewState} layers={layers} />
+      <DeckGL initialViewState={initialViewState} layers={layers} />
     );
   }
 }

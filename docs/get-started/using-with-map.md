@@ -1,6 +1,6 @@
 # Using deck.gl with a Base Map
 
-While deck.gl works independently without any map component, when visualizing geographic datasets, a base map could offer the invaluable context for understanding the overlay layers.
+While deck.gl works independently without any map component, when visualizing geospatial datasets, a base map can offer invaluable context for understanding the overlay layers.
 
 deck.gl has been designed to work in tandem with popular JavaScript base map providers, especially Mapbox. Depending on your tech stack, deck.gl's support for a particular base map solution may come with different level of compatibility and limitations.
 
@@ -24,7 +24,7 @@ All the [examples on this website](https://github.com/visgl/deck.gl/tree/master/
 
 ### About Mapbox Tokens
 
-The mapbox-gl library is open source and free to use. However, to load the map styles and tiles from Mapbox's data service, you will need to register on their website in order to retrieve an [access token](https://docs.mapbox.com/help/how-mapbox-works/access-tokens/) required by the map component, which will be used to identify you and start serving up map tiles. The service will be free until a certain level of traffic is exceeded.
+The mapbox-gl library is open source and free to use. However, to load the map styles and tiles from Mapbox's data service, you will need to register on their website in order to retrieve an [access token](https://docs.mapbox.com/help/how-mapbox-works/access-tokens/) required by the map component, which will be used to identify you and start serving up map tiles. The service will be free until a [certain level](https://docs.mapbox.com/api/#rate-limits) of traffic is exceeded.
 
 If you are using mapbox-gl without React, check out [Mapbox GL JS API](https://docs.mapbox.com/mapbox-gl-js/api/#accesstoken) for how to apply the token.
 

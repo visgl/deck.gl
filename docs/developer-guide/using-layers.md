@@ -1,13 +1,13 @@
 # Using Layers
 
-The "Layer" is a core concept of deck.gl. A deck.gl layer is a packaged visualization type that takes a collection of datums, associate each with positions, colors, extrusions, etc., and renders them on a map.
+The "Layer" is a core concept of deck.gl. A deck.gl layer is a packaged visualization type that takes a dataset, associate each item with positions, colors, extrusions, etc. and renders them on a map.
 
 deck.gl provides an extensive [layer catalog](/docs/layers/README.md) and is designed to compose many layers together to form complex visuals.
 
 
 ## Constructing a Layer Instance
 
-A layer can be instantiated with an `properties` object:
+A layer is instantiated with a `properties` object:
 
 ```js
 import {ScatterplotLayer} from 'deck.gl';
@@ -111,7 +111,7 @@ deck.gl's architecture is based on the reactive programming paradigm:
 
 #### Creating Layer Instances Is Cheap
 
-The deck.gl model means that applications are expected to create a new set of on layers every time application state changes, which can seem surprisingly inefficient to someone who hasn't done reactive programming before. The trick is that layers are just descriptor objects that are very cheap to instantiate, and internally, the new layers are efficiently matched against existing layers so that no updates are performed unless actually needed.
+The deck.gl model means that applications are expected to create a new set of layers every time application state changes, which can seem surprisingly inefficient to someone who hasn't done reactive programming before. The trick is that layers are just descriptor objects that are very cheap to instantiate, and internally, the new layers are efficiently matched against existing layers so that no updates are performed unless actually needed.
 
 So, even though the application creates new "layers", those layers are only "descriptors" containing props that specify what needs to be rendered and how. All calculated state (WebGL "programs", "vertex attributes" etc) are stored in a state object and this state object is moved forward to the newly matched layer on every render cycle.  The new layer ends up with the state of the old layer (and the props of the new layer), while the old layer is simply discarded for garbage collecion.
 

@@ -1,8 +1,70 @@
 # Adding Interactivity
 
-> This article discusses interacting with data (i.e. selecting, or picking objects). Viewport controls (panning, zooming etc) are discussed in [Controllers](/docs/api-reference/map-controller.md).
+## Controlling the camera
 
-## Overview
+In its basic form, deck.gl maintains its own camera state and the keyboard or mouse are used to pan/zoom/tilt layers along with any underlying map or imagery.
+
+To define the initial camera view, set the `initialViewState` property to define the initial camera position. 
+
+For more flexibility you can maintain the view state yourself and pass it in to deck.gl via the `viewState` parameter. This allows you to perform  fly to transitions to a new location, set pitch, zoom or any other property of the viewState.
+
+*Note : Do not combine initialViewState and viewState parameters*
+
+The following example demonstrates the viewState being controlled outside of deck.gl using a setInterval. it also demonstrates the ability to smoothly transition the camera by using the FlyToInterpolator. 
+
+### Using React
+
+```js
+import React from 'react';
+import {DeckGL, ScatterplotLayer} from 'deck.gl';
+import {FlyToInterpolator} from '@deck.gl/core';
+import * as d3 from "d3";
+
+class App extends React.Component {
+
+   state = {
+            zoomedOut : false,
+            viewState : {longitude: -122.45, latitude: 37.78, zoom: 12}
+           }
+      
+   componentDidMount() {
+          window.setInterval(() => {
+              this.setState({ zoomedOut : !this.state.zoomedOut,
+                              transitionDuration : 1000,
+                              transitionEasing: d3.easeCubic,
+                              transitionInterpolator: new FlyToInterpolator(),
+                              viewState : { ...this.state.viewState, 
+                                            zoom : this.state.zoomedOut ? 12 : 10}});
+          }, 1000)
+      }
+      
+  render() {
+    const layers = [
+      new ScatterplotLayer({
+        data: [
+                { position: [-122.45, 37.78] }
+            ],
+        getPosition: d => d.position,
+        getRadius: 1000,
+        getFillColor: [255, 255, 0],
+      })
+    ];
+
+    return (
+      <DeckGL 
+          viewState={this.state.viewState}
+          onViewStateChange={({viewState}) => this.setState({viewState : viewState})}
+          controller={true}
+          layers={layers} >
+      </DeckGL>
+    );
+  }
+}
+```
+
+
+
+## Picking
 
 deck.gl includes a powerful picking engine that enables the application to precisely determine what object and layer is rendered on a certain pixel on the screen. This picking engine can either be called directly by an application (which is then typically implementing its own event handling), or it can be called automatically by the basic built-in event handling in deck.gl
 
@@ -35,7 +97,6 @@ The picking engine returns "picking info" objects which contains a variety of fi
 ### Using Pure JS
 
 ```js
-<canvas id="deck-canvas"></canvas>
 <div id="tooltip" style="position: absolute; z-index: 1; pointer-events: none;"></div>
 ```
 
@@ -44,7 +105,6 @@ import {Deck} from '@deck.gl/core';
 import {ScatterplotLayer} from '@deck.gl/layers';
 
 const deck = new Deck({
-  canvas: 'deck-canvas',
   initialViewState: {longitude: -122.45, latitude: 37.78, zoom: 12},
   controller: true,
   layers: [
