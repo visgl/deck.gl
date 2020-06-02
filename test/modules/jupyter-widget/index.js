@@ -9,7 +9,7 @@ let testOp = test;
 
 // Skip tests if in browser mode
 try {
-  // TODO detect browser test
+  require('@deck.gl/jupyter-widget/binary-transport');
 } catch (err) {
   testOp = test.skip;
   // eslint-disable-next-line no-console,no-undef
