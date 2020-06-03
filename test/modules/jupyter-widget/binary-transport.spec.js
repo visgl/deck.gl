@@ -32,7 +32,7 @@ const EXPECTED_CONVERSION = {
 
 test('jupyter-widget: binary-transport', t0 => {
   const binaryTransportModule = require('@deck.gl/jupyter-widget/lib/utils/deserialize-matrix');
-  const jupyterWidgetModule = require('@deck.gl/jupyter-widget');
+  const jupyterWidgetModule = require('@deck.gl/jupyter-widget/playground/create-deck');
 
   t0.test('deserializeMatrix', t => {
     const TEST_TABLE = [

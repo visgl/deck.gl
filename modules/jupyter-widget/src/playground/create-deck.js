@@ -32,7 +32,7 @@ const jsonConverterConfiguration = {
 
 registerLoaders([CSVLoader]);
 
-export const jsonConverter = new deck.JSONConverter({
+const jsonConverter = new deck.JSONConverter({
   configuration: jsonConverterConfiguration
 });
 
@@ -163,4 +163,4 @@ function injectFunction(warnFunction, messageHandler) {
   };
 }
 
-export {createDeck, updateDeck};
+export {createDeck, updateDeck, jsonConverter};
