@@ -25,7 +25,7 @@ viewport.project([-122.45, 37.78]);
 ## Constructor
 
 ```js
-new WebMercatorViewport({width, height, longitude, latitude, zoom});
+new GlobeViewport({width, height, longitude, latitude, zoom});
 ```
 
 Parameters:
