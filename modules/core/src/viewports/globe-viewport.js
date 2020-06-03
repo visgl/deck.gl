@@ -18,9 +18,9 @@ function getDistanceScales() {
     unitsPerMeter: [unitsPerMeter, unitsPerMeter, unitsPerMeter],
     unitsPerMeter2: [0, 0, 0],
     metersPerUnit: [1 / unitsPerMeter, 1 / unitsPerMeter, 1 / unitsPerMeter],
-    unitsPerDegree: [unitsPerDegree, unitsPerDegree, unitsPerDegree],
+    unitsPerDegree: [unitsPerDegree, unitsPerDegree, unitsPerMeter],
     unitsPerDegree2: [0, 0, 0],
-    degreesPerUnit: [1 / unitsPerDegree, 1 / unitsPerDegree, 1 / unitsPerDegree]
+    degreesPerUnit: [1 / unitsPerDegree, 1 / unitsPerDegree, 1 / unitsPerMeter]
   };
 }
 
@@ -75,7 +75,7 @@ export default class GlobeViewport extends Viewport {
   }
 
   get projectionMode() {
-    return this.zoom < 12 ? PROJECTION_MODE.GLOBE : PROJECTION_MODE.GLOBE_AUTO_OFFSET;
+    return PROJECTION_MODE.GLOBE;
   }
 
   getDistanceScales() {
