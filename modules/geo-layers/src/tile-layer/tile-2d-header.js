@@ -4,13 +4,14 @@ import RequestScheduler from '@loaders.gl/loader-utils';
 const requestScheduler = new RequestScheduler({maxRequests: 1});
 
 export default class Tile2DHeader {
-  constructor({x, y, z, onTileLoad, onTileError}) {
+  constructor({x, y, z, onTileLoad, onTileError, layerId}) {
     this.x = x;
     this.y = y;
     this.z = z;
     this.isVisible = false;
     this.parent = null;
     this.children = [];
+    this.layerId = layerId;
 
     this.content = null;
     this._isLoaded = false;
@@ -36,11 +37,10 @@ export default class Tile2DHeader {
   }
 
   async _loadData(getTileData) {
-    const {x, y, z, bbox} = this;
+    const {x, y, z, bbox, layerId} = this;
 
-    // Todo: Unique identifier
-    // Don't have a pre-defined url to pass to scheduleRequest
-    const id = `${x}-${y}-${z}`;
+    // Construct unique identifier for request scheduler handle
+    const id = `${layerId}-${x}-${y}-${z}`;
     const requestToken = await requestScheduler.scheduleRequest(id, () => this.isVisible === true);
 
     let result;

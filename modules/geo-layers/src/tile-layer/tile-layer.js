@@ -53,6 +53,7 @@ export default class TileLayer extends CompositeLayer {
 
     if (createTileCache) {
       const {
+        id,
         maxZoom,
         minZoom,
         tileSize,
@@ -62,6 +63,7 @@ export default class TileLayer extends CompositeLayer {
         extent
       } = props;
       tileset = new Tileset2D({
+        layerId: id,
         getTileData: this.getTileData.bind(this),
         maxCacheSize,
         maxCacheByteSize,

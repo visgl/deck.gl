@@ -263,6 +263,7 @@ export default class Tileset2D {
   _getTile({x, y, z}, create) {
     const tileId = `${x},${y},${z}`;
     let tile = this._cache.get(tileId);
+    const {layerId} = this.opts;
 
     if (!tile && create) {
       tile = new Tile2DHeader({
@@ -270,7 +271,8 @@ export default class Tileset2D {
         y,
         z,
         onTileLoad: this.onTileLoad,
-        onTileError: this.onTileError
+        onTileError: this.onTileError,
+        layerId
       });
       Object.assign(tile, this.getTileMetadata(tile));
       tile.loadData(this._getTileData);
