@@ -32,7 +32,7 @@ const jsonConverterConfiguration = {
 
 registerLoaders([CSVLoader]);
 
-const jsonConverter = new deck.JSONConverter({
+export const jsonConverter = new deck.JSONConverter({
   configuration: jsonConverterConfiguration
 });
 
@@ -43,7 +43,7 @@ function addModuleToConverter(module, converter) {
   converter.mergeConfiguration(newConfiguration);
 }
 
-function addCustomLibraries(customLibraries, onComplete) {
+export function addCustomLibraries(customLibraries, onComplete) {
   if (!customLibraries) {
     return;
   }
@@ -163,4 +163,4 @@ function injectFunction(warnFunction, messageHandler) {
   };
 }
 
-export {jsonConverter, createDeck, updateDeck, addCustomLibraries};
+export {createDeck, updateDeck};

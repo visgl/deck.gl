@@ -12,7 +12,7 @@ class DemoCompositeLayer extends CompositeLayer {
 }
 
 test('jupyter-widget: dynamic-registration', t => {
-  const jupyterWidgetModule = require('@deck.gl/jupyter-widget');
+  const jupyterWidgetModule = require('@deck.gl/jupyter-widget/playground/create-deck');
 
   t.test('addCustomLibraries', () => {
     const TEST_LIBRARY_NAME = 'DemoLibrary';

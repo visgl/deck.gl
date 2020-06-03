@@ -25,12 +25,7 @@ try {
 const {MODULE_VERSION, MODULE_NAME} = require('./version');
 
 // TODO - this should be placed in a separate module `@deck.gl/playground`
-const {
-  createDeck,
-  updateDeck,
-  jsonConverter,
-  addCustomLibraries
-} = require('./playground/create-deck');
+const {createDeck, updateDeck} = require('./playground/create-deck');
 const {initPlayground} = require('./playground');
 initPlayground();
 
@@ -43,10 +38,6 @@ module.exports = {
   MODULE_NAME,
   TransportModel,
   TransportView,
-  // TODO PR reviewers, is there another way to test these
-  // functions aside from exporting them?
-  jsonConverter,
-  addCustomLibraries,
 
   // For to_html()...
   initPlayground,
