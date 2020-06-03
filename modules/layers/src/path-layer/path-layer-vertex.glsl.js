@@ -68,8 +68,22 @@ vec3 lineJoin(
   float sideOfPath = positions.y;
   float isJoint = float(sideOfPath == 0.0);
 
-  vec2 deltaA = (currPoint.xy - prevPoint.xy) / width;
-  vec2 deltaB = (nextPoint.xy - currPoint.xy) / width;
+  vec3 deltaA3 = (currPoint - prevPoint);
+  vec3 deltaB3 = (nextPoint - currPoint);
+  vec2 deltaA;
+  vec2 deltaB;
+
+  mat3 rotationMatrix;
+  if (project_uProjectionMode == PROJECTION_MODE_GLOBE && !billboard) {
+    rotationMatrix = project_get_orientation_matrix(currPoint);
+    deltaA = vec2(dot(deltaA3, rotationMatrix[0]), dot(deltaA3, rotationMatrix[1]));
+    deltaB = vec2(dot(deltaB3, rotationMatrix[0]), dot(deltaB3, rotationMatrix[1]));
+  } else {
+    deltaA = deltaA3.xy;
+    deltaB = deltaB3.xy;
+  }
+  deltaA /= width;
+  deltaB /= width;
 
   float lenA = length(deltaA);
   float lenB = length(deltaB);
@@ -142,6 +156,10 @@ vec3 lineJoin(
   float isValid = step(instanceTypes, 3.5);
   vec3 offset = vec3(offsetVec * width * isValid, 0.0);
   DECKGL_FILTER_SIZE(offset, geometry);
+
+  if (project_uProjectionMode == PROJECTION_MODE_GLOBE && !billboard) {
+    offset = rotationMatrix * offset;
+  }
   return currPoint + offset;
 }
 

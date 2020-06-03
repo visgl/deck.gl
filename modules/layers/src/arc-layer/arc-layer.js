@@ -146,7 +146,7 @@ export default class ArcLayer extends Layer {
      *   (0, 1)"-------------(1, 1)
      */
     for (let i = 0; i < NUM_SEGMENTS; i++) {
-      positions = positions.concat([i, -1, 0, i, 1, 0]);
+      positions = positions.concat([i, 1, 0, i, -1, 0]);
     }
 
     const model = new Model(

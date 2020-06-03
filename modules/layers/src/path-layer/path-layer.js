@@ -229,19 +229,19 @@ export default class PathLayer extends Layer {
     const SEGMENT_INDICES = [
       // start corner
       0,
-      2,
       1,
+      2,
       // body
       1,
+      4,
       2,
-      4,
       1,
-      4,
       3,
+      4,
       // end corner
       3,
-      4,
-      5
+      5,
+      4
     ];
 
     // [0] position on segment - 0: start, 1: end
