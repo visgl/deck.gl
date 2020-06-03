@@ -22,43 +22,45 @@ import * as d3 from "d3";
 
 class App extends React.Component {
 
-   state = {
-            zoomedOut : false,
-            viewState : {longitude: -122.45, latitude: 37.78, zoom: 12}
-           }
-      
-   componentDidMount() {
-          window.setInterval(() => {
-              this.setState({ zoomedOut : !this.state.zoomedOut,
-                              transitionDuration : 1000,
-                              transitionEasing: d3.easeCubic,
-                              transitionInterpolator: new FlyToInterpolator(),
-                              viewState : { ...this.state.viewState, 
-                                            zoom : this.state.zoomedOut ? 12 : 10}});
-          }, 1000)
-      }
-      
-  render() {
-    const layers = [
-      new ScatterplotLayer({
-        data: [
-                { position: [-122.45, 37.78] }
-            ],
-        getPosition: d => d.position,
-        getRadius: 1000,
-        getFillColor: [255, 255, 0],
-      })
-    ];
+    state = {
+        zoomedOut: false,
+        viewState: {longitude: -122.45, latitude: 37.78, zoom: 12}
+    }
 
-    return (
-      <DeckGL 
-          viewState={this.state.viewState}
-          onViewStateChange={({viewState}) => this.setState({viewState : viewState})}
-          controller={true}
-          layers={layers} >
-      </DeckGL>
-    );
-  }
+    componentDidMount() {
+        window.setInterval(() => {
+            this.setState({
+                zoomedOut: !this.state.zoomedOut,
+                transitionDuration: 1000,
+                transitionEasing: d3.easeCubic,
+                transitionInterpolator: new FlyToInterpolator(),
+                viewState: {
+                    ...this.state.viewState,
+                    zoom: this.state.zoomedOut ? 12 : 10
+                }
+            });
+        }, 1000)
+    }
+
+    render() {
+        const layers = [
+            new ScatterplotLayer({
+                data: [{position: [-122.45, 37.78]}],
+                getPosition: d => d.position,
+                getRadius: 1000,
+                getFillColor: [255, 255, 0],
+            })
+        ];
+
+        return (
+            <DeckGL
+                viewState={this.state.viewState}
+                onViewStateChange={({viewState}) => this.setState({viewState: viewState})}
+                controller={true}
+                layers={layers}>
+            </DeckGL>
+        );
+    }
 }
 ```
 
