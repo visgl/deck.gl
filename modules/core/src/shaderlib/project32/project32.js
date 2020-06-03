@@ -25,6 +25,10 @@ vec4 project_position_to_clipspace(
   vec3 position, vec3 position64Low, vec3 offset, out vec4 commonPosition
 ) {
   vec3 projectedPosition = project_position(position, position64Low);
+  if (project_uProjectionMode == PROJECTION_MODE_GLOBE) {
+    mat3 rotation = project_get_orientation_matrix(projectedPosition);
+    offset = rotation * offset;
+  }
   commonPosition = vec4(projectedPosition + offset, 1.0);
   return project_common_position_to_clipspace(commonPosition);
 }

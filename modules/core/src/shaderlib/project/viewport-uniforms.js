@@ -87,6 +87,14 @@ export function getOffsetOrigin(
       shaderCoordinateOrigin = viewport.position.map(Math.fround);
       break;
 
+    case PROJECTION_MODE.GLOBE:
+      offsetMode = false;
+      break;
+
+    case PROJECTION_MODE.GLOBE_AUTO_OFFSET:
+      shaderCoordinateOrigin = geospatialOrigin;
+      break;
+
     default:
       // Unknown projection mode
       offsetMode = false;

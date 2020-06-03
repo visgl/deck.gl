@@ -53,6 +53,8 @@ const float TILE_SIZE = 512.0;
 const float PI = 3.1415926536;
 const float WORLD_SCALE = TILE_SIZE / (PI * 2.0);
 const vec3 ZERO_64_LOW = vec3(0.0);
+const float EARTH_RADIUS = 6370972.0;
+const float GLOBE_RADIUS = 256.0;
 
 //
 // Scaling offsets - scales meters to "world distance"
@@ -107,6 +109,19 @@ vec2 project_mercator_(vec2 lnglat) {
   );
 }
 
+vec3 project_globe_(vec3 lnglatz) {
+  float lambda = radians(lnglatz.x);
+  float phi = radians(lnglatz.y);
+  float cosPhi = cos(phi);
+  float D = (lnglatz.z / EARTH_RADIUS + 1.0) * GLOBE_RADIUS;
+
+  return vec3(
+    sin(lambda) * cosPhi,
+    -cos(lambda) * cosPhi,
+    sin(phi)
+  ) * D;
+}
+
 //
 // Projects positions (defined by project_uCoordinateSystem) to common space (defined by project_uProjectionMode)
 //
@@ -119,6 +134,14 @@ vec4 project_position(vec4 position, vec3 position64Low) {
       return vec4(
         project_mercator_(position_world.xy) * WORLD_SCALE,
         project_size(position_world.z),
+        position_world.w
+      );
+    }
+  }
+  if (project_uProjectionMode == PROJECTION_MODE_GLOBE) {
+    if (project_uCoordinateSystem == COORDINATE_SYSTEM_LNGLAT) {
+      return vec4(
+        project_globe_(position_world.xyz),
         position_world.w
       );
     }
@@ -181,5 +204,14 @@ float project_pixel_size(float pixels) {
 }
 vec2 project_pixel_size(vec2 pixels) {
   return pixels / project_uScale;
+}
+
+// Get rotation matrix that aligns the z axis with the given up vector
+mat3 project_get_orientation_matrix(vec3 up) {
+  vec3 nz = normalize(up);
+  // Tangent on XY plane
+  vec3 nx = nz.z == 1.0 ? vec3(1.0, 0.0, 0.0) : normalize(vec3(nz.y, -nz.x, 0));
+  vec3 ny = cross(nz, nx);
+  return mat3(nx, ny, nz);
 }
 `;

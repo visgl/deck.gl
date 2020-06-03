@@ -137,6 +137,15 @@ vec4 project_common_position_to_clipspace(vec4 position)
 Converts the coordinates of a point from the common space to the clip space, which can be assigned to `gl_Position` as the "return value" from the vertex shader.
 
 
+### project_get_orientation_matrix
+
+```glsl
+mat3 project_get_orientation_matrix(vec3 up)
+```
+
+Returns a matrix that rotates any vector defined in the default common space to a new orientation, such that `vec3(0, 0, 1)` is aligned with `up`.
+
+
 ## Remarks
 
 * For consistent results, the screen space pixels are logical pixels, not device pixels, i.e. functions in the project module multiply `pixels` with `project_uDevicePixelRatio`.
