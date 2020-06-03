@@ -1,4 +1,7 @@
 import {log} from '@deck.gl/core';
+import RequestScheduler from '@loaders.gl/loader-utils';
+
+const requestScheduler = new RequestScheduler({maxRequests: 1});
 
 export default class Tile2DHeader {
   constructor({x, y, z, onTileLoad, onTileError}) {
@@ -32,13 +35,28 @@ export default class Tile2DHeader {
     return result;
   }
 
-  loadData(getTileData) {
+  async _loadData(getTileData) {
     const {x, y, z, bbox} = this;
+    
+    // Todo: Unique identifier
+    // Don't have a pre-defined url to pass to scheduleRequest
+    const id = `${x}-${y}-${z}`
+    const requestToken = await requestScheduler.scheduleRequest(id);
+    
+    let result;
+    if (requestToken) {
+      result = getTileData({x, y, z, bbox});
+      requestToken.done();
+    }
+    return result;
+  }
+
+  loadData(getTileData) {
     if (!getTileData) {
       return;
     }
 
-    this._loader = Promise.resolve(getTileData({x, y, z, bbox}))
+    this._loader = Promise.resolve(this._loadData(getTileData))
       .then(buffers => {
         this.content = buffers;
         this._isLoaded = true;
