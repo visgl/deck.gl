@@ -1,4 +1,5 @@
-/* global window */
+/* global console, window */
+/* eslint-disable no-console */
 import {CSVLoader} from '@loaders.gl/csv';
 import {registerLoaders} from '@loaders.gl/core';
 import GL from '@luma.gl/constants';
@@ -104,6 +105,7 @@ function createStandaloneFromProvider(
 ) {
   switch (mapProvider) {
     case 'mapbox':
+      console.debug('Using Mapbox base maps');
       return new deck.DeckGL({
         ...props,
         map: mapboxgl,
@@ -113,6 +115,7 @@ function createStandaloneFromProvider(
         container
       });
     case 'google_maps':
+      console.debug('Using Google Maps base maps');
       return createGoogleMapsDeckOverlay({
         props,
         googleMapsKey,
@@ -121,6 +124,7 @@ function createStandaloneFromProvider(
         container
       });
     default:
+      console.debug('No recognized map provider specified');
       return new deck.DeckGL({
         ...props,
         map: null,

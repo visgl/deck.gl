@@ -43,3 +43,7 @@ def create_geojson_layer_with_gmaps_test_object():
         ],
         views=None,
     )
+
+
+if __name__ == '__main__':
+    create_geojson_layer_with_gmaps_test_object().to_html('test.html', offline=True)

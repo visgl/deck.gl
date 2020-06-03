@@ -39,6 +39,7 @@ const config = [
      *
      */
     entry: './src/index.js',
+    mode: 'development',
     resolve: {
       alias: ALIASES
     },
