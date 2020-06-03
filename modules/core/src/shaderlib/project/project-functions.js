@@ -4,6 +4,7 @@
  */
 import {COORDINATE_SYSTEM} from '../../lib/constants';
 import {getOffsetOrigin} from './viewport-uniforms';
+import WebMercatorViewport from '../../viewports/web-mercator-viewport';
 
 import * as vec4 from 'gl-matrix/vec4';
 import * as vec3 from 'gl-matrix/vec3';
@@ -13,11 +14,14 @@ import {addMetersToLngLat} from '@math.gl/web-mercator';
 // offset modes apply the y adjustment (unitsPerMeter2) when projecting z
 // LNG_LAT mode only use the linear scale.
 function lngLatZToWorldPosition(lngLatZ, viewport, offsetMode = false) {
-  const [longitude, latitude, z = 0] = lngLatZ;
-  const [X, Y] = viewport.projectFlat(lngLatZ);
-  const distanceScales = viewport.getDistanceScales(offsetMode && [longitude, latitude]);
-  const Z = z * distanceScales.unitsPerMeter[2];
-  return [X, Y, Z];
+  const p = viewport.projectPosition(lngLatZ);
+
+  if (offsetMode && viewport instanceof WebMercatorViewport) {
+    const [longitude, latitude, z = 0] = lngLatZ;
+    const distanceScales = viewport.getDistanceScales([longitude, latitude]);
+    p[2] = z * distanceScales.unitsPerMeter[2];
+  }
+  return p;
 }
 
 function normalizeParameters(opts) {

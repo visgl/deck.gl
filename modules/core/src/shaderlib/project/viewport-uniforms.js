@@ -91,10 +91,6 @@ export function getOffsetOrigin(
       offsetMode = false;
       break;
 
-    case PROJECTION_MODE.GLOBE_AUTO_OFFSET:
-      shaderCoordinateOrigin = geospatialOrigin;
-      break;
-
     default:
       // Unknown projection mode
       offsetMode = false;
