@@ -32,6 +32,7 @@ test('jupyter-widget should be createable', t => {
   if (!model) {
     // Skip browser test
     t.end();
+    return;
   }
   t.deepEquals(model.get('json_input'), null, 'json_input should be null');
   t.deepEquals(model.get('data_buffer'), null, 'data buffer should be null');
@@ -51,6 +52,7 @@ test('jupyter-widget should be creatable with a value', t => {
   if (!model) {
     // Skip browser test
     t.end();
+    return;
   }
   t.equal(model.get('json_input'), state.json_input, 'json_input should be pre-configured');
   t.equal(model.get('mapbox_key'), state.mapbox_key, 'mapbox_key should be pre-configured');
