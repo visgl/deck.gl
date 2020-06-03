@@ -98,6 +98,40 @@ function missingLayers(oldLayers, newLayers) {
   return oldLayers.filter(ol => ol && ol.id && !newLayers.find(nl => nl.id === ol.id));
 }
 
+function createStandaloneFromProvider(
+  mapProvider,
+  {props, mapboxApiKey, googleMapsKey, handleClick, getTooltip, container}
+) {
+  switch (mapProvider) {
+    case 'mapbox':
+      return new deck.DeckGL({
+        ...props,
+        map: mapboxgl,
+        mapboxApiAccessToken: mapboxApiKey,
+        onClick: handleClick,
+        getTooltip,
+        container
+      });
+    case 'google_maps':
+      return createGoogleMapsDeckOverlay({
+        props,
+        googleMapsKey,
+        onClick: handleClick,
+        getTooltip,
+        container
+      });
+    default:
+      return new deck.DeckGL({
+        ...props,
+        map: null,
+        mapboxApiAccessToken: null,
+        onClick: handleClick,
+        getTooltip,
+        container
+      });
+  }
+}
+
 function createDeck({
   mapboxApiKey,
   googleMapsKey,
@@ -119,33 +153,10 @@ function createDeck({
     const layerToLoad = missingLayers(oldLayers, convertedLayers);
     const getTooltip = makeTooltip(tooltip);
     const {mapProvider} = props;
-    if (mapProvider === 'mapbox') {
-      deckgl = new deck.DeckGL({
-        ...props,
-        map: mapboxgl,
-        mapboxApiAccessToken: mapboxApiKey,
-        onClick: handleClick,
-        getTooltip,
-        container
-      });
-    } else if (mapProvider === 'google_maps') {
-      deckgl = createGoogleMapsDeckOverlay({
-        props,
-        googleMapsKey,
-        onClick: handleClick,
-        getTooltip,
-        container
-      });
-    } else {
-      deckgl = new deck.DeckGL({
-        ...props,
-        map: null,
-        mapboxApiAccessToken: null,
-        onClick: handleClick,
-        getTooltip,
-        container
-      });
-    }
+
+    const standaloneArgs = {props, mapboxApiKey, googleMapsKey, handleClick, getTooltip, container};
+
+    deckgl = createStandaloneFromProvider(mapProvider, standaloneArgs);
 
     const onComplete = () => {
       if (layerToLoad.length) {
