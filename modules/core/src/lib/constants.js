@@ -57,6 +57,7 @@ export const PROJECTION_MODE = {
 
   // This is automatically assigned by the project module
   WEB_MERCATOR_AUTO_OFFSET: 4,
+  GLOBE_AUTO_OFFSET: 6,
 
   IDENTITY: 0
 };
