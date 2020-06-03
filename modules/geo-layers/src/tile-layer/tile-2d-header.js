@@ -37,12 +37,12 @@ export default class Tile2DHeader {
 
   async _loadData(getTileData) {
     const {x, y, z, bbox} = this;
-    
+
     // Todo: Unique identifier
     // Don't have a pre-defined url to pass to scheduleRequest
-    const id = `${x}-${y}-${z}`
-    const requestToken = await requestScheduler.scheduleRequest(id);
-    
+    const id = `${x}-${y}-${z}`;
+    const requestToken = await requestScheduler.scheduleRequest(id, () => this.isVisible === true);
+
     let result;
     if (requestToken) {
       result = getTileData({x, y, z, bbox});
