@@ -8,3 +8,4 @@ import './json-configuration.spec';
 import './json-converter.spec';
 
 import './json-render.spec';
+import './transports/transport.spec';

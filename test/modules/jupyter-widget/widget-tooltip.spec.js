@@ -23,15 +23,7 @@ const TOOLTIP_HTML = {
 };
 
 test('jupyter-widget: tooltip', t0 => {
-  let widgetTooltipModule;
-  try {
-    widgetTooltipModule = require('@deck.gl/jupyter-widget/widget-tooltip');
-  } catch (error) {
-    t0.comment('dist mode, skipping tooltip tests');
-    t0.end();
-    return;
-  }
-
+  const widgetTooltipModule = require('@deck.gl/jupyter-widget/playground/widget-tooltip');
   t0.test('getDefaultTooltip', t => {
     Object.assign(pickedInfo, {picked: false});
     t.equal(
