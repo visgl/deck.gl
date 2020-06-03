@@ -1,5 +1,13 @@
 import test from 'tape-catch';
-import {View, Viewport, MapView, OrbitView, OrthographicView, FirstPersonView} from 'deck.gl';
+import {
+  View,
+  Viewport,
+  MapView,
+  OrbitView,
+  OrthographicView,
+  FirstPersonView,
+  _GlobeView as GlobeView
+} from 'deck.gl';
 import {equals} from 'math.gl';
 
 test('View#imports', t => {
@@ -82,6 +90,27 @@ test('FirstPersonView', t => {
   t.is(viewport.id, view.id, 'Viewport has correct id');
   t.ok(viewport.width === 100 && viewport.height === 100, 'Viewport has correct size');
   t.ok(viewport.zoom, 'Viewport zoom is populated');
+
+  t.end();
+});
+
+test('GlobeView', t => {
+  const view = new GlobeView();
+  const viewport = view.makeViewport({
+    width: 100,
+    height: 100,
+    viewState: {
+      longitude: -122.4,
+      latitude: 37.8,
+      zoom: 12,
+      width: 200,
+      height: 200
+    }
+  });
+  t.ok(viewport instanceof Viewport, 'Mapview.makeViewport returns valid viewport');
+  t.is(viewport.id, view.id, 'Viewport has correct id');
+  t.ok(viewport.width === 100 && viewport.height === 100, 'Viewport has correct size');
+  t.is(viewport.zoom, 12, 'Viewport has correct parameters');
 
   t.end();
 });

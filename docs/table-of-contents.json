@@ -121,6 +121,7 @@
           "title": "Viewports",
           "entries": [
             {"entry": "docs/api-reference/viewport"},
+            {"entry": "docs/api-reference/globe-viewport"},
             {"entry": "docs/api-reference/web-mercator-viewport"}
           ]
         },
@@ -129,8 +130,8 @@
           "entries": [
             {"entry": "docs/api-reference/view"},
             {"entry": "docs/api-reference/map-view"},
+            {"entry": "docs/api-reference/globe-view"},
             {"entry": "docs/api-reference/first-person-view"},
-            {"entry": "docs/api-reference/third-person-view"},
             {"entry": "docs/api-reference/orthographic-view"},
             {"entry": "docs/api-reference/perspective-view"},
             {"entry": "docs/api-reference/orbit-view"},

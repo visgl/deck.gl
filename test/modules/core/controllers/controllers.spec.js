@@ -1,5 +1,11 @@
 import test from 'tape-catch';
-import {MapView, OrbitView, OrthographicView, FirstPersonView} from '@deck.gl/core';
+import {
+  MapView,
+  OrbitView,
+  OrthographicView,
+  FirstPersonView,
+  _GlobeView as GlobeView
+} from '@deck.gl/core';
 
 import testController from './test-controller';
 
@@ -11,6 +17,22 @@ test('MapController', t => {
     pitch: 30,
     bearing: -45
   });
+
+  t.end();
+});
+
+test('GlobeController', t => {
+  testController(
+    t,
+    GlobeView,
+    {
+      longitude: -122.45,
+      latitude: 37.78,
+      zoom: 0
+    },
+    // GlobeView cannot be rotated
+    ['pan#function key', 'pinch']
+  );
 
   t.end();
 });

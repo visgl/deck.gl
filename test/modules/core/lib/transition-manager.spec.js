@@ -1,8 +1,7 @@
 import test from 'tape-catch';
 import TransitionManager from '@deck.gl/core/controllers/transition-manager';
 import FlyToInterpolator from '@deck.gl/core/transitions/viewport-fly-to-interpolator.js';
-import {testExports} from '@deck.gl/core/controllers/map-controller';
-const {MapState} = testExports;
+import {MapState} from '@deck.gl/core/controllers/map-controller';
 import {Timeline} from '@luma.gl/core';
 import {config} from 'math.gl';
 
