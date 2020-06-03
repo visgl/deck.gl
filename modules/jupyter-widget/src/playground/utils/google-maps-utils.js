@@ -11,7 +11,8 @@ export function createGoogleMapsDeckOverlay({
 }) {
   googleMapsKey = props.googleMapsKey || googleMapsKey;
   if (!googleMapsKey) {
-    deck.log.warn('No Google Maps API key set');
+    deck.log.warn('No Google Maps API key set')();
+    return null;
   }
   const {
     mapStyle = 'satellite',

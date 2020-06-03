@@ -105,7 +105,7 @@ function createStandaloneFromProvider(
 ) {
   switch (mapProvider) {
     case 'mapbox':
-      console.debug('Using Mapbox base maps');
+      deck.log.info('Using Mapbox base maps')();
       return new deck.DeckGL({
         ...props,
         map: mapboxgl,
@@ -115,7 +115,7 @@ function createStandaloneFromProvider(
         container
       });
     case 'google_maps':
-      console.debug('Using Google Maps base maps');
+      deck.log.info('Using Google Maps base maps')();
       return createGoogleMapsDeckOverlay({
         props,
         googleMapsKey,
@@ -124,7 +124,7 @@ function createStandaloneFromProvider(
         container
       });
     default:
-      console.debug('No recognized map provider specified');
+      deck.log.info('No recognized map provider specified')();
       return new deck.DeckGL({
         ...props,
         map: null,
