@@ -276,7 +276,7 @@ export default class Tileset2D {
         y,
         z,
         onTileLoad: this.onTileLoad,
-        onTileError: this.onTileError,
+        onTileError: this.onTileError
       });
       Object.assign(tile, this.getTileMetadata(tile));
       tile.loadData(this._getTileData, this._requestScheduler);
