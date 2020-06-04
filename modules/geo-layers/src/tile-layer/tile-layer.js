@@ -21,7 +21,10 @@ const defaultProps = {
   maxCacheSize: null,
   maxCacheByteSize: null,
   refinementStrategy: STRATEGY_DEFAULT,
-  zRange: null
+  zRange: null,
+  throttleRequests: true,
+  // Todo: set to an optimal value
+  maxRequests: 1
 };
 
 export default class TileLayer extends CompositeLayer {
@@ -53,17 +56,17 @@ export default class TileLayer extends CompositeLayer {
 
     if (createTileCache) {
       const {
-        id,
         maxZoom,
         minZoom,
         tileSize,
         maxCacheSize,
         maxCacheByteSize,
         refinementStrategy,
-        extent
+        extent,
+        throttleRequests,
+        maxRequests
       } = props;
       tileset = new Tileset2D({
-        layerId: id,
         getTileData: this.getTileData.bind(this),
         maxCacheSize,
         maxCacheByteSize,
@@ -73,7 +76,9 @@ export default class TileLayer extends CompositeLayer {
         refinementStrategy,
         extent,
         onTileLoad: this._onTileLoad.bind(this),
-        onTileError: this._onTileError.bind(this)
+        onTileError: this._onTileError.bind(this),
+        throttleRequests,
+        maxRequests
       });
       this.setState({tileset});
     } else if (changeFlags.propsChanged || changeFlags.updateTriggersChanged) {

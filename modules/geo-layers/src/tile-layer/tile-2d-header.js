@@ -1,7 +1,4 @@
 import {log} from '@deck.gl/core';
-import RequestScheduler from '@loaders.gl/loader-utils';
-
-const requestScheduler = new RequestScheduler({maxRequests: 1});
 
 export default class Tile2DHeader {
   constructor({x, y, z, onTileLoad, onTileError, layerId}) {
@@ -36,12 +33,13 @@ export default class Tile2DHeader {
     return result;
   }
 
-  async _loadData(getTileData) {
-    const {x, y, z, bbox, layerId} = this;
+  async _loadData(getTileData, requestScheduler) {
+    const {x, y, z, bbox} = this;
 
-    // Construct unique identifier for request scheduler handle
-    const id = `${layerId}-${x}-${y}-${z}`;
-    const requestToken = await requestScheduler.scheduleRequest(id, () => this.isVisible === true);
+    const requestToken = await requestScheduler.scheduleRequest(
+      this,
+      () => (this.isVisible ? 1 : -1)
+    );
 
     let result;
     if (requestToken) {
@@ -51,12 +49,12 @@ export default class Tile2DHeader {
     return result;
   }
 
-  loadData(getTileData) {
+  loadData(getTileData, requestScheduler) {
     if (!getTileData) {
       return;
     }
 
-    this._loader = Promise.resolve(this._loadData(getTileData))
+    this._loader = Promise.resolve(this._loadData(getTileData, requestScheduler))
       .then(buffers => {
         this.content = buffers;
         this._isLoaded = true;

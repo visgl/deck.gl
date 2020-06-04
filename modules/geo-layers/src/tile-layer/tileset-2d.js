@@ -1,5 +1,6 @@
 import Tile2DHeader from './tile-2d-header';
 import {getTileIndices, tileToBoundingBox} from './utils';
+import {RequestScheduler} from '@loaders.gl/loader-utils';
 
 const TILE_STATE_UNKNOWN = 0;
 const TILE_STATE_VISIBLE = 1;
@@ -54,6 +55,11 @@ export default class Tileset2D {
         this._resizeCache();
       }
     };
+
+    this._requestScheduler = new RequestScheduler({
+      maxRequests: opts.maxRequests,
+      throttleRequests: opts.throttleRequests
+    });
 
     // Maps tile id in string {z}-{x}-{y} to a Tile object
     this._cache = new Map();
@@ -263,7 +269,6 @@ export default class Tileset2D {
   _getTile({x, y, z}, create) {
     const tileId = `${x},${y},${z}`;
     let tile = this._cache.get(tileId);
-    const {layerId} = this.opts;
 
     if (!tile && create) {
       tile = new Tile2DHeader({
@@ -272,10 +277,9 @@ export default class Tileset2D {
         z,
         onTileLoad: this.onTileLoad,
         onTileError: this.onTileError,
-        layerId
       });
       Object.assign(tile, this.getTileMetadata(tile));
-      tile.loadData(this._getTileData);
+      tile.loadData(this._getTileData, this._requestScheduler);
       this._cache.set(tileId, tile);
       this._dirty = true;
     }
