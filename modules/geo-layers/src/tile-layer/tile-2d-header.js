@@ -41,7 +41,7 @@ export default class Tile2DHeader {
       () => (this.isVisible ? 1 : -1)
     );
 
-    let result;
+    let result = null;
     if (requestToken) {
       result = getTileData({x, y, z, bbox});
       requestToken.done();
