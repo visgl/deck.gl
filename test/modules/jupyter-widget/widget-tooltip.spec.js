@@ -1,6 +1,7 @@
 // eslint-disable-next-line
 /* global document */
 import test from 'tape-catch';
+import {getTooltipDefault} from '@deck.gl/jupyter-widget/playground/widget-tooltip';
 
 const pickedInfo = {object: {elevationValue: 10, position: [0, 0]}, x: 0, y: 0, picked: true};
 
@@ -23,18 +24,13 @@ const TOOLTIP_HTML = {
 };
 
 test('jupyter-widget: tooltip', t0 => {
-  const widgetTooltipModule = require('@deck.gl/jupyter-widget/playground/widget-tooltip');
-  t0.test('getDefaultTooltip', t => {
+  t0.test('getTooltipDefault', t => {
     Object.assign(pickedInfo, {picked: false});
-    t.equal(
-      widgetTooltipModule.getTooltipDefault(pickedInfo),
-      null,
-      'should return null if nothing picked'
-    );
+    t.equal(getTooltipDefault(pickedInfo), null, 'should return null if nothing picked');
     Object.assign(pickedInfo, {picked: true});
-    const tooltip = widgetTooltipModule.getTooltipDefault(pickedInfo);
+    const tooltip = getTooltipDefault(pickedInfo);
     t.deepEquals(tooltip, TOOLTIP_HTML, 'tooltip is expected result');
-    const tooltipCached = widgetTooltipModule.getTooltipDefault(pickedInfo);
+    const tooltipCached = getTooltipDefault(pickedInfo);
     t.deepEquals(tooltipCached, TOOLTIP_HTML, 'tooltip called twice hits its cached value');
     t.end();
   });
