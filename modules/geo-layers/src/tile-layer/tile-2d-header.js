@@ -54,7 +54,7 @@ export default class Tile2DHeader {
       return;
     }
 
-    this._loader = Promise.resolve(this._loadData(getTileData, requestScheduler))
+    this._loader = this._loadData(getTileData, requestScheduler)
       .then(buffers => {
         this.content = buffers;
         this._isLoaded = true;
