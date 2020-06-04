@@ -46,7 +46,11 @@ export default class App extends PureComponent {
     return [
       new TileLayer({
         // https://wiki.openstreetmap.org/wiki/Slippy_map_tilenames#Tile_servers
-        data: 'https://c.tile.openstreetmap.org/{z}/{x}/{y}.png',
+        data: [
+          'https://a.tile.openstreetmap.org/{z}/{x}/{y}.png',
+          'https://b.tile.openstreetmap.org/{z}/{x}/{y}.png',
+          'https://c.tile.openstreetmap.org/{z}/{x}/{y}.png'
+        ],
 
         pickable: true,
         onHover: this._onHover,
