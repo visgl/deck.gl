@@ -19,6 +19,11 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v8.1
 
+#### deck.gl [8.1.9] - June 4 2020
+
+- Wipe the current cached layers when updateTrigger variables are updated (#4609)
+- Fix TextLayer support for opacity (#4649)
+
 #### deck.gl [8.1.8] - May 27 2020
 
 - Fix: OrbitView's orbitAxis prop is not used by OrbitController (#4606)
