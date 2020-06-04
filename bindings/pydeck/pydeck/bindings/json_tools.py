@@ -6,6 +6,7 @@ import json
 # Attributes to ignore during JSON serialization
 IGNORE_KEYS = [
     "mapbox_key",
+    "google_maps_key",
     "deck_widget",
     "binary_data_sets",
     "_binary_data",

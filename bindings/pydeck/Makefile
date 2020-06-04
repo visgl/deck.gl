@@ -13,8 +13,11 @@ init:
 	# Set up the pydeck project
 	pip install -r requirements/requirements.txt; \
 	pip install -r requirements/requirements-dev.txt; \
-	pip install -e . ; \
-	$(MAKE) prepare-jupyter
+	pip install -e .
+
+fast-build:
+	cd ../../modules/jupyter-widget; webpack; cd -; \
+	pip install -e .
 
 pre-commit:
 	black . --target-version py34 && $(MAKE) test

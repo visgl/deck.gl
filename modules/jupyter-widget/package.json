@@ -32,6 +32,7 @@
     "@deck.gl/aggregation-layers": "8.2.0-alpha.1",
     "@deck.gl/geo-layers": "8.2.0-alpha.1",
     "@deck.gl/json": "8.2.0-alpha.1",
+    "@deck.gl/google-maps": "8.2.0-alpha.1",
     "@deck.gl/layers": "8.2.0-alpha.1",
     "@deck.gl/mesh-layers": "8.2.0-alpha.1",
     "@jupyter-widgets/base": "^2",
