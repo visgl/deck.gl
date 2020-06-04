@@ -1,7 +1,11 @@
 // eslint-disable-next-line
 /* global document */
 import test from 'tape-catch';
-import {getTooltipDefault} from '@deck.gl/jupyter-widget/playground/widget-tooltip';
+import makeTooltip, {
+  getTooltipDefault,
+  substituteIn,
+  toText
+} from '@deck.gl/jupyter-widget/playground/widget-tooltip';
 
 const pickedInfo = {object: {elevationValue: 10, position: [0, 0]}, x: 0, y: 0, picked: true};
 
@@ -71,14 +75,14 @@ test('jupyter-widget: tooltip', t0 => {
       }
     ];
     for (const kv of TESTING_TABLE) {
-      t.equal(widgetTooltipModule.toText(kv.input), kv.expected, kv.message);
+      t.equal(toText(kv.input), kv.expected, kv.message);
     }
     t.end();
   });
 
   t0.test('substituteIn', t => {
     t.equal(
-      widgetTooltipModule.substituteIn('"{quote}" - {origin}', {
+      substituteIn('"{quote}" - {origin}', {
         quote: "Be an optimist. There's not much use being anything else.",
         origin: 'Winston Churchill'
       }),
@@ -88,7 +92,6 @@ test('jupyter-widget: tooltip', t0 => {
   });
 
   t0.test('makeTooltip', t => {
-    const makeTooltip = widgetTooltipModule.default;
     t.equal(makeTooltip(null), null, 'If no tooltip JSON passed, return null');
     const htmlTooltip = {
       html: '<b>Elevation Value:</b> {elevationValue}',
