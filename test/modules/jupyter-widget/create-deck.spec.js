@@ -4,6 +4,7 @@ import test from 'tape-catch';
 
 import {CompositeLayer} from '@deck.gl/core';
 import {ScatterplotLayer} from '@deck.gl/layers';
+import {addCustomLibraries, jsonConverter} from '@deck.gl/jupyter-widget/playground/create-deck';
 
 class DemoCompositeLayer extends CompositeLayer {
   renderLayers() {
@@ -12,9 +13,8 @@ class DemoCompositeLayer extends CompositeLayer {
 }
 
 test('jupyter-widget: dynamic-registration', t => {
-  const jupyterWidgetModule = require('@deck.gl/jupyter-widget/playground/create-deck');
   t.test('null customLibrares', t0 => {
-    const returnValue = jupyterWidgetModule.addCustomLibraries(null, () => {});
+    const returnValue = addCustomLibraries(null, () => {});
     t0.ok(!returnValue, 'No custom libraries returns null');
     t0.end();
   });
@@ -24,7 +24,7 @@ test('jupyter-widget: dynamic-registration', t => {
     window[TEST_LIBRARY_NAME] = {DemoCompositeLayer};
 
     const onComplete = () => {
-      const props = jupyterWidgetModule.jsonConverter.convert({
+      const props = jsonConverter.convert({
         layers: [{'@@type': 'DemoCompositeLayer', data: []}]
       });
       t1.ok(props.layers[0] instanceof DemoCompositeLayer, 'Should add new class to the converter');
@@ -33,7 +33,7 @@ test('jupyter-widget: dynamic-registration', t => {
       t1.end();
     };
 
-    jupyterWidgetModule.addCustomLibraries(
+    addCustomLibraries(
       [
         {
           libraryName: TEST_LIBRARY_NAME,
