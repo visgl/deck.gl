@@ -19,17 +19,30 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v8.2
 
-#### deck.gl [8.2.0-alpha.0] - Apr 1 2020
+#### deck.gl [8.2.0-alpha.2] - June 4 2020
+
+- pydeck: Add Google Maps base maps to pydeck (#4632)
+- @deck.gl/json and @deck.gl/jupyter-widget: Increase test coverage (#4636)
+- TileLayer: adjust zoom by tileSize (#4616)
+- Adding points by pixels to ScatterplotLayer (#4624)
+- Use frustum culling in OSM tile traversal (#4593)
+- pydeck + @deck.gl/jupyter-widget: Support bidirectional communication with new transport abstraction (#4613)
+- Add viewport.getBounds (#4592)
+- jupyter widget transport refactor (#4572)
+- pydeck: Update @jupyter-widgets/base to support JupyterLab v2 (#4573)
+- Add extent prop to TileLayer (#4526)
+- [bin-sortor] correctly sort all values (#4528)
+
+#### deck.gl [8.2.0-alpha.1] - Apr 1 2020
 
 - Fix GeoJSON multi-geometry highlighting (#4426)
-- Add flowmap to showcases (#4430)
 - @deck.gl/jupyter-widget: Remove Tile3DLoader (#4438)
 - @deck.gl/jupyter-widget and pydeck: Fix binary data bug (#4416)
 - pydeck/jupyter-widget: Call mergeConfiguration again after addCustomLibraries complete (#4413)
 - Add zRange prop to TileLayer for use with TerrainLayer (#4397)
 - Fix PointCloud sizeUnits as "meters" (#4421)
 - Fix GeoJsonLayer's handling of highlightedObjectIndex (#4403)
-- layers: pass loadOptoins to IconManager from IconLayer (#4404)
+- layers: pass loadOptions to IconManager from IconLayer (#4404)
 
 ## deck.gl v8.1
 
