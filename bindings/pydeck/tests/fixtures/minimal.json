@@ -41,5 +41,6 @@
       "@@type": "MapView",
       "controller": true
     }
-  ]
+  ],
+  "mapProvider": "mapbox"
 }

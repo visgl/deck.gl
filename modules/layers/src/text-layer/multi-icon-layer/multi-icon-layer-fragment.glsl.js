@@ -23,6 +23,7 @@ export default `\
 
 precision highp float;
 
+uniform float opacity;
 uniform sampler2D iconsTexture;
 uniform float buffer;
 uniform bool sdf;
@@ -62,9 +63,9 @@ void main(void) {
     }
 
     if (shouldDrawBackground) {
-      gl_FragColor = vec4(mix(backgroundColor, vColor.rgb, alpha), vColor.a);
+      gl_FragColor = vec4(mix(backgroundColor, vColor.rgb, alpha), vColor.a * opacity);
     } else {
-      gl_FragColor = vec4(vColor.rgb, a);
+      gl_FragColor = vec4(vColor.rgb, a * opacity);
     }
   }
 

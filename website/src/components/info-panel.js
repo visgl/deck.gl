@@ -35,7 +35,6 @@ class InfoPanel extends Component {
     const {demo, params, owner, meta} = this.props;
     const {hasFocus} = this.state;
     const DemoComponent = Demos[demo];
-    const metaLoaded = owner === demo ? meta : {};
 
     return (
       <div
@@ -44,7 +43,7 @@ class InfoPanel extends Component {
         onFocus={this._onFocus}
         onBlur={this._onBlur}
       >
-        {DemoComponent.renderInfo(metaLoaded)}
+        {DemoComponent.renderInfo(meta)}
 
         {Object.keys(params).length > 0 && <hr />}
 
@@ -61,7 +60,7 @@ class InfoPanel extends Component {
 
         {this.props.children}
 
-        <Spinner meta={metaLoaded} />
+        <Spinner meta={meta} />
       </div>
     );
   }

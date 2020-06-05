@@ -33,6 +33,14 @@ const testLayer = new ScatterplotLayer({
   autoHighlight: true
 });
 
+const testLayerWithCallback = new ScatterplotLayer({
+  id: 'test-layer-with-callback',
+  data: ['a', 'b'],
+  getPosition: d => [0, 0],
+  autoHighlight: true,
+  highlightColor: ({object}) => (object === 'b' ? [255, 0, 0] : [0, 255, 0])
+});
+
 const testCompositeLayer = new GeoJsonLayer({
   id: 'test-composite-layer',
   data: [{type: 'Feature', geometry: {type: 'Point', coordinates: [0, 0]}}]
@@ -49,7 +57,7 @@ const parameters = {
       height: 200
     })
   ],
-  layers: [testLayer, testCompositeLayer],
+  layers: [testLayer, testLayerWithCallback, testCompositeLayer],
   x: 100,
   y: 100,
   deviceX: 200,
@@ -57,8 +65,19 @@ const parameters = {
   pixelRatio: 2
 };
 
+function validateUniforms(actual, expected) {
+  for (const key in expected) {
+    if (!equals(actual[key], expected[key])) {
+      return {key, expected: expected[key], actual: actual[key]};
+    }
+  }
+  return null;
+}
+
+/* eslint-disable max-statements */
 test('processPickInfo', t => {
   testInitializeLayer({layer: testLayer});
+  testInitializeLayer({layer: testLayerWithCallback});
   testInitializeLayer({layer: testCompositeLayer});
 
   const TEST_CASES = [
@@ -98,6 +117,45 @@ test('processPickInfo', t => {
     {
       pickInfo: {
         pickedColor: [1, 0, 0, 0],
+        pickedLayer: testLayerWithCallback,
+        pickedObjectIndex: 0
+      },
+      size: 3,
+      info: {
+        layer: testLayerWithCallback,
+        object: 'a',
+        index: 0,
+        picked: true,
+        x: 100,
+        coordinate: [-122, 38]
+      },
+      lastPickedInfo: {layerId: 'test-layer-with-callback', index: 0},
+      testLayerUniforms: {picking_uSelectedColorValid: 0},
+      currentLayerUniforms: {
+        picking_uSelectedColorValid: 1,
+        picking_uSelectedColor: [1, 0, 0],
+        picking_uHighlightColor: [0, 1, 0, 1]
+      }
+    },
+    {
+      pickInfo: {
+        pickedColor: [2, 0, 0, 0],
+        pickedLayer: testLayerWithCallback,
+        pickedObjectIndex: 1
+      },
+      size: 2,
+      info: {layer: testLayerWithCallback, object: 'b'},
+      lastPickedInfo: {layerId: 'test-layer-with-callback', index: 1},
+      testLayerUniforms: {picking_uSelectedColorValid: 0},
+      currentLayerUniforms: {
+        picking_uSelectedColorValid: 1,
+        picking_uSelectedColor: [2, 0, 0],
+        picking_uHighlightColor: [1, 0, 0, 1]
+      }
+    },
+    {
+      pickInfo: {
+        pickedColor: [1, 0, 0, 0],
         pickedLayer: testCompositeLayer.getSubLayers()[0],
         pickedObjectIndex: 0
       },
@@ -115,6 +173,7 @@ test('processPickInfo', t => {
   parameters.lastPickedInfo = lastPickedInfo;
 
   const testLayerUniforms = testLayer.getModels()[0].getUniforms();
+  let currentLayerUniforms;
 
   for (const testCase of TEST_CASES) {
     parameters.pickInfo = testCase.pickInfo;
@@ -134,16 +193,18 @@ test('processPickInfo', t => {
     for (const key in testCase.lastPickedInfo) {
       t.deepEqual(lastPickedInfo[key], testCase.lastPickedInfo[key], `lastPickedInfo.${key}`);
     }
-    for (const key in testCase.testLayerUniforms) {
-      t.deepEqual(
-        testLayerUniforms[key],
-        testCase.testLayerUniforms[key],
-        `testLayerUniforms.${key}`
+    t.notOk(validateUniforms(testLayerUniforms, testCase.testLayerUniforms), 'testLayerUniforms');
+    if (testCase.currentLayerUniforms) {
+      currentLayerUniforms = testCase.pickInfo.pickedLayer.getModels()[0].getUniforms();
+      t.notOk(
+        validateUniforms(currentLayerUniforms, testCase.currentLayerUniforms),
+        'currentLayerUniforms'
       );
     }
   }
 
   testLayer._finalize();
+  testLayerWithCallback._finalize();
   testCompositeLayer._finalize();
 
   t.end();

@@ -600,6 +600,10 @@ export const docPages = generatePath([
             content: getDocUrl('api-reference/viewport.md')
           },
           {
+            name: 'GlobeViewport',
+            content: getDocUrl('api-reference/globe-viewport.md')
+          },
+          {
             name: 'WebMercatorViewport',
             content: getDocUrl('api-reference/web-mercator-viewport.md')
           }
@@ -615,6 +619,10 @@ export const docPages = generatePath([
           {
             name: 'MapView',
             content: getDocUrl('api-reference/map-view.md')
+          },
+          {
+            name: 'GlobeView',
+            content: getDocUrl('api-reference/globe-view.md')
           },
           {
             name: 'FirstPersonView',

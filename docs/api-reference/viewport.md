@@ -137,6 +137,17 @@ Returns:
 * `[longitude, latitude, altitude]`
 
 
+##### `getBounds`
+
+Extracts the axis-aligned bounding box of the current visible area.
+
+* `options` (Object, optional)
+  + `options.z` (Number, optional) - To calculate a bounding volume for fetching 3D data, this option can be used to get the bounding box at a specific elevation. Default `0`.
+
+Returns:
+* `[minX, minY, maxX, maxY]` that defines the smallest orthogonal bounds that encompasses the visible region.
+
+
 ##### `getFrustumPlanes`
 
 Extract view frustum planes of the current camera. Each plane is defined by its normal `normal` and distance from
@@ -146,6 +157,30 @@ Returns:
 
 * `{near: {normal, distance}, far: {normal, distance}, left: {normal, distance}, right: {normal, distance}, top: {normal, distance}, bottom: {normal, distance}}`
 
+```js
+import {Vector3} from 'math.gl';
+
+// Culling tests must be done in common space
+const commonPosition = new Vector3(viewport.projectPosition(point));
+
+// Extract frustum planes based on current view.
+const frustumPlanes = viewport.getFrustumPlanes();
+let outDir = null;
+
+// Check position against each plane
+for (const dir in frustumPlanes) {
+  const plane = frustumPlanes[dir];
+  if (commonPosition.dot(plane.normal) > plane.distance) {
+    outDir = dir;
+    break;
+  }
+}
+if (outDir) {
+  console.log(`Point is outside of the ${outDir} plane`);
+} else {
+  console.log('Point is visible');
+}
+```
 
 ## Remarks
 

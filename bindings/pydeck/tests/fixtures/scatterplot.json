@@ -13,5 +13,6 @@
       "id": "scatterplot",
       "getFillColor": [255, 0, 0]
     }
-  ]
+  ],
+  "mapProvider": "mapbox"
 }

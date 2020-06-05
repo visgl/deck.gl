@@ -59,8 +59,12 @@ const loadDataSuccess = (context, index, data, meta) => {
  */
 export const loadData = (owner, source) => {
   return (dispatch, getState) => {
-    if (getState().vis.owner === owner || !source) {
+    if (getState().vis.owner === owner) {
       // already loading / loaded
+      return;
+    }
+    dispatch(loadDataStart(owner));
+    if (!source) {
       return;
     }
 

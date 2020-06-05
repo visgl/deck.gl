@@ -27,7 +27,7 @@ def create_multi_layer_test_object():
                 {
                     "type": "Feature",
                     "properties": {},
-                    "geometry": {"type": "Point", "coordinates": [-122.42923736572264, 37.80544394934271],},
+                    "geometry": {"type": "Point", "coordinates": [-122.42923736572264, 37.80544394934271]},
                 }
             ],
         },

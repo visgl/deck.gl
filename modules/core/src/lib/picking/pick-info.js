@@ -111,9 +111,14 @@ export function processPickInfo({
     }
 
     if (mode === 'hover' && layer.props.autoHighlight) {
-      layer.setModuleParameters({
+      const pickingModuleParameters = {
         pickingSelectedColor: pickedLayer === layer ? pickedColor : null
-      });
+      };
+      const {highlightColor} = layer.props;
+      if (pickedLayer === layer && typeof highlightColor === 'function') {
+        pickingModuleParameters.pickingHighlightColor = highlightColor(info);
+      }
+      layer.setModuleParameters(pickingModuleParameters);
       // setModuleParameters does not trigger redraw
       layer.setNeedsRedraw();
     }

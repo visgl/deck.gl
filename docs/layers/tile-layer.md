@@ -122,9 +122,7 @@ This prop is not required if `data` points to a supported format (JSON or image 
 
 The pixel dimension of the tiles, usually a power of 2.
 
-When using a geospatial view, this prop has no effect.
-
-When using a non-geospatial view, the tile size represents the width and height of each tile in world units at zoom level `0`.
+The tile size represents the target pixel width and height of each tile when rendered. Smaller tile sizes display the content at higher resolution, while the layer needs to load more tiles to fill the same viewport.
 
 - Default: `512`
 
@@ -141,6 +139,12 @@ Use tiles from this level when over-zoomed.
 Hide tiles when under-zoomed.
 
 - Default: 0
+
+##### `extent` (Array, optional)
+
+If provided, the layer will load and render the tiles in this box when underzoomed.  The box is of the form `[minX, minY, maxX, maxY]`.
+
+- Default: null
 
 
 ##### `maxCacheSize` (Number, optional)

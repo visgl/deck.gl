@@ -2,14 +2,16 @@ import React, {PureComponent} from 'react';
 import {render} from 'react-dom';
 
 import DeckGL from '@deck.gl/react';
+import {MapView} from '@deck.gl/core';
 import {TileLayer} from '@deck.gl/geo-layers';
-import {BitmapLayer} from '@deck.gl/layers';
+import {BitmapLayer, PathLayer} from '@deck.gl/layers';
 
 const INITIAL_VIEW_STATE = {
   latitude: 47.65,
   longitude: 7,
   zoom: 4.5,
   maxZoom: 20,
+  maxPitch: 89,
   bearing: 0
 };
 
@@ -39,17 +41,22 @@ export default class App extends PureComponent {
   }
 
   _renderLayers() {
-    const {autoHighlight = true, highlightColor = [60, 60, 60, 40]} = this.props;
+    const {showBorder = false, onTilesLoad = null} = this.props;
 
     return [
       new TileLayer({
         // https://wiki.openstreetmap.org/wiki/Slippy_map_tilenames#Tile_servers
-        data: 'https://c.tile.openstreetmap.org/{z}/{x}/{y}.png',
+        data: [
+          'https://a.tile.openstreetmap.org/{z}/{x}/{y}.png',
+          'https://b.tile.openstreetmap.org/{z}/{x}/{y}.png',
+          'https://c.tile.openstreetmap.org/{z}/{x}/{y}.png'
+        ],
 
         pickable: true,
         onHover: this._onHover,
-        autoHighlight,
-        highlightColor,
+        onViewportLoad: onTilesLoad,
+        autoHighlight: showBorder,
+        highlightColor: [60, 60, 60, 40],
         // https://wiki.openstreetmap.org/wiki/Zoom_levels
         minZoom: 0,
         maxZoom: 19,
@@ -59,11 +66,21 @@ export default class App extends PureComponent {
             bbox: {west, south, east, north}
           } = props.tile;
 
-          return new BitmapLayer(props, {
-            data: null,
-            image: props.data,
-            bounds: [west, south, east, north]
-          });
+          return [
+            new BitmapLayer(props, {
+              data: null,
+              image: props.data,
+              bounds: [west, south, east, north]
+            }),
+            showBorder &&
+              new PathLayer({
+                id: `${props.id}-border`,
+                data: [[[west, north], [west, south], [east, south], [east, north], [west, north]]],
+                getPath: d => d,
+                getColor: [255, 0, 0],
+                widthMinPixels: 4
+              })
+          ];
         }
       })
     ];
@@ -71,7 +88,12 @@ export default class App extends PureComponent {
 
   render() {
     return (
-      <DeckGL layers={this._renderLayers()} initialViewState={INITIAL_VIEW_STATE} controller={true}>
+      <DeckGL
+        layers={this._renderLayers()}
+        views={new MapView({repeat: true})}
+        initialViewState={INITIAL_VIEW_STATE}
+        controller={true}
+      >
         {this._renderTooltip}
       </DeckGL>
     );

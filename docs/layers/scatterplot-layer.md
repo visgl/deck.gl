@@ -83,6 +83,12 @@ Inherits from all [Base Layer](/docs/api-reference/layer.md) properties.
 
 ### Render Options
 
+##### `radiusUnits` (String, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
+
+* Default: `'meters'`
+
+The units of the point radius, one of `'meters'`, `'pixels'`. When zooming in and out, meter sizes scale with the base map, and pixel sizes remain the same on screen.
+
 ##### `radiusScale` (Number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
 
 * Default: `1`
@@ -150,7 +156,7 @@ Method called to retrieve the position of each object.
 
 * Default: `1`
 
-The radius of each object, in meters.
+The radius of each object, in units specified by `radiusUnits` (default meters).
 
 * If a number is provided, it is used as the radius for all objects.
 * If a function is provided, it is called on each object to retrieve its radius.

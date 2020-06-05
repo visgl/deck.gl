@@ -98,7 +98,7 @@ export default class Tileset2D {
    * @param {*} onUpdate
    */
   update(viewport, {zRange} = {}) {
-    if (viewport !== this._viewport) {
+    if (!viewport.equals(this._viewport)) {
       this._viewport = viewport;
       const tileIndices = this.getTileIndices({
         viewport,
@@ -132,14 +132,13 @@ export default class Tileset2D {
 
   // Returns array of {x, y, z}
   getTileIndices({viewport, maxZoom, minZoom, zRange}) {
-    return getTileIndices(viewport, maxZoom, minZoom, zRange, this.opts.tileSize);
+    const {tileSize, extent} = this.opts;
+    return getTileIndices({viewport, maxZoom, minZoom, zRange, tileSize, extent});
   }
 
   // Add custom metadata to tiles
   getTileMetadata({x, y, z}) {
-    return {
-      bbox: tileToBoundingBox(this._viewport, x, y, z, this.opts.tileSize)
-    };
+    return {bbox: tileToBoundingBox(this._viewport, x, y, z)};
   }
 
   // Returns {x, y, z} of the parent tile

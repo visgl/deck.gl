@@ -1,8 +1,8 @@
 {
   "name": "deck.gl-monorepo",
-  "description": "A suite of 3D-enabled data visualization overlays, suitable for react-map-gl",
+  "description": "WebGL-powered visualization framework for large-scale datasets",
   "license": "MIT",
-  "private": "true",
+  "private": true,
   "keywords": [
     "webgl",
     "visualization",
@@ -40,11 +40,14 @@
   "browser": {
     "jsdom": false
   },
+  "resolutions": {
+    "math.gl": "3.2.0-alpha.3"
+  },
   "devDependencies": {
-    "@loaders.gl/csv": "^2.1.1",
-    "@loaders.gl/polyfills": "^2.1.1",
-    "@luma.gl/engine": "^8.1.0",
-    "@luma.gl/test-utils": "^8.1.0",
+    "@loaders.gl/csv": "^2.1.5",
+    "@loaders.gl/polyfills": "^2.1.5",
+    "@luma.gl/engine": "^8.1.2",
+    "@luma.gl/test-utils": "^8.1.2",
     "@probe.gl/bench": "^3.2.1",
     "@probe.gl/test-utils": "^3.2.1",
     "babel-loader": "^8.0.0",
@@ -74,8 +77,5 @@
   "pre-commit": [
     "test-fast",
     "bindings-precommit-tests"
-  ],
-  "dependencies": {
-    "esri-loader": "^2.13.0"
-  }
+  ]
 }
