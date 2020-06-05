@@ -113,8 +113,8 @@ vec3 interpolateGreatCircle(vec3 source, vec3 target, vec3 source3D, vec3 target
   if(abs(angularDist - PI) < 0.001) {
     lngLat = (1.0 - t) * source.xy + t * target.xy;
   } else {
-    float a = sin((1.0 - t) * angularDist) / sin(angularDist);
-    float b = sin(t * angularDist) / sin(angularDist);
+    float a = sin((1.0 - t) * angularDist);
+    float b = sin(t * angularDist);
     vec3 p = source3D.yxz * a + target3D.yxz * b;
     lngLat = degrees(vec2(atan(p.y, -p.x), atan(p.z, length(p.xy))));
   }
