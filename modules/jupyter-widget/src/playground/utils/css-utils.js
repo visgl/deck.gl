@@ -1,6 +1,7 @@
 /* global document */
 const ERROR_BOX_CLASSNAME = 'error-box';
 
+// TODO - make sure this can be called multiple times without adding elements
 export function loadCSS(url) {
   const link = document.createElement('link');
   link.type = 'text/css';

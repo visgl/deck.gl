@@ -17,3 +17,19 @@ Longer term goals:
 - Binary data
 - Back-channel: Events
 - Back-channel: Errors
+
+## Static Members
+
+### Transport.setConnectionCallbacks(callbacks: object): void
+
+The following callbacks can be set:
+
+- `callbacks.onInitialize`
+- `callbacks.onMessage`
+- `callbacks.onFinalize`
+
+## Methods
+
+### constructor
+
+> Note: The `Transport` class should not be instantiated explicitly by JavaScript applications. `Transport` instances are automatically created.
