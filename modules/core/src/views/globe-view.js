@@ -4,11 +4,7 @@ import GlobeController from '../controllers/globe-controller';
 
 export default class GlobeView extends View {
   constructor(props) {
-    super(
-      Object.assign({}, props, {
-        type: GlobeViewport
-      })
-    );
+    super({...props, type: GlobeViewport});
   }
 
   get controller() {
