@@ -20,13 +20,11 @@ Longer term goals:
 
 ## Static Members
 
-### Transport.setConnectionCallbacks(callbacks: object): void
+### Transport.setConnectionCallbacks(callback: (transport: Transport, nessage: object): void):
 
-The following callbacks can be set:
+- `callback` will be called with a transport and a message object.
 
-- `callbacks.onInitialize`
-- `callbacks.onMessage`
-- `callbacks.onFinalize`
+The message object will have a type field that can be `initialize`, `finalize`, ...
 
 ## Methods
 
