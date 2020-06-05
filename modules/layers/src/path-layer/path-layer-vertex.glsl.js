@@ -70,20 +70,15 @@ vec3 lineJoin(
 
   vec3 deltaA3 = (currPoint - prevPoint);
   vec3 deltaB3 = (nextPoint - currPoint);
-  vec2 deltaA;
-  vec2 deltaB;
 
   mat3 rotationMatrix;
   if (project_uProjectionMode == PROJECTION_MODE_GLOBE && !billboard) {
     rotationMatrix = project_get_orientation_matrix(currPoint);
-    deltaA = vec2(dot(deltaA3, rotationMatrix[0]), dot(deltaA3, rotationMatrix[1]));
-    deltaB = vec2(dot(deltaB3, rotationMatrix[0]), dot(deltaB3, rotationMatrix[1]));
-  } else {
-    deltaA = deltaA3.xy;
-    deltaB = deltaB3.xy;
+    deltaA3 = deltaA3 * rotationMatrix;
+    deltaB3 = deltaB3 * rotationMatrix;
   }
-  deltaA /= width;
-  deltaB /= width;
+  vec2 deltaA = deltaA3.xy / width;
+  vec2 deltaB = deltaB3.xy / width;
 
   float lenA = length(deltaA);
   float lenB = length(deltaB);
