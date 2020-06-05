@@ -28,15 +28,16 @@ pre-init:
 
 prepare-jupyter:
 	# Enable the notebook extension
-	jupyter nbextension install --sys-prefix --symlink --overwrite --py pydeck
-	jupyter nbextension enable --sys-prefix --py pydeck
+	. env/bin/activate; \
+	jupyter nbextension install --sys-prefix --symlink --overwrite --py pydeck; \
+	jupyter nbextension enable --sys-prefix --py pydeck; \
 	# Build and install the JS module
 	cd ../../modules/jupyter-widget/; \
-	  jupyter labextension install @jupyter-widgets/jupyterlab-manager --no-build; \
-	  jupyter labextension install . --no-build; \
-	  jupyter labextension link .; \
-	  jupyter lab build; \
-	  cd ../../bindings/pydeck
+	jupyter labextension install @jupyter-widgets/jupyterlab-manager --no-build; \
+	jupyter labextension install . --no-build; \
+	jupyter labextension link .; \
+	jupyter lab build; \
+	cd ../../bindings/pydeck
 
 test:
 	flake8 . && \
