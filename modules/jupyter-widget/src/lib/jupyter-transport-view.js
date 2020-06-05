@@ -1,11 +1,13 @@
 import {DOMWidgetView} from '@jupyter-widgets/base';
-import {jupyterTransport} from './jupyter-transport';
+import JupyterTransport from './jupyter-transport';
 
 export default class JupyterTransportView extends DOMWidgetView {
   initialize() {
     this.listenTo(this.model, 'destroy', this.remove);
 
-    this.transport = jupyterTransport;
+    // TODO - is there any variable information on the model we can use to
+    // give an interesting name or id to this instance?
+    this.transport = new JupyterTransport();
 
     // Expose Jupyter internals to enable work-arounds
     this.transport.jupyterModel = this.model;
