@@ -4,6 +4,21 @@ The [`GlobeView`] class is a subclass of [View](/docs/api-reference/view.md). Th
 
 It's recommended that you read the [Views and Projections guide](/docs/developer-guide/views.md) before using this class.
 
+## Limitations
+
+> This class is experimental, which means it does not provide the compatibility and stability that one would typically expect from other `View` classes. Use with caution and report any issues that you find on GitHub.
+
+The goal of `GlobeView` is to provide a generic solution to rendering and navigating data in the 3D space.
+In the initial release, this class mainly addresses the need to render an overview of the entire globe. The following limitations apply, as features are still under development: 
+
+- No support for rotation (`pitch` or `bearing`). The camera always points towards the center of the earth, with north up.
+- No high-precision rendering at high zoom levels (> 12). Features at the city-block scale may not be rendered accurately.
+- Only supports `COORDINATE_SYSTEM.LNGLAT`.
+- These layers currently do not work in this view:
+  + Aggregation layers: `HeatmapLayer`, `ContourLayer`
+  + Tiled layers: `TerrainLayer`, `MVTLayer`
+
+
 ## Constructor
 
 ```js
