@@ -37,15 +37,18 @@ export {
   FirstPersonView,
   OrbitView,
   OrthographicView,
+  _GlobeView,
   // Viewports
   Viewport,
   WebMercatorViewport,
+  _GlobeViewport,
   // Controllers
   Controller,
   MapController,
   OrbitController,
   FirstPersonController,
   OrthographicController,
+  _GlobeController,
   // For custom layers
   AttributeManager,
   // Shader modules
