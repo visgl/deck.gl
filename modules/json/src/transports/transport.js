@@ -5,7 +5,7 @@ const state = {
 };
 
 export default class Transport {
-  static setConnectionCallback({onInitialize, onFinalize, onMessage}) {
+  static setCallbacks({onInitialize, onFinalize, onMessage}) {
     if (onInitialize) {
       state.onInitialize = onInitialize;
     }
