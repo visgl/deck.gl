@@ -1,11 +1,13 @@
 import {Deck, _GlobeView as GlobeView} from '@deck.gl/core';
-import {GeoJsonLayer, ArcLayer, ColumnLayer} from '@deck.gl/layers';
+import {GeoJsonLayer, ArcLayer, ColumnLayer, BitmapLayer} from '@deck.gl/layers';
 
 // source: Natural Earth http://www.naturalearthdata.com/ via geojson.xyz
 const COUNTRIES =
   'https://d2ad6b4ur7yvpq.cloudfront.net/naturalearth-3.3.0/ne_50m_admin_0_scale_rank.geojson'; //eslint-disable-line
 const AIR_PORTS =
   'https://d2ad6b4ur7yvpq.cloudfront.net/naturalearth-3.3.0/ne_10m_airports.geojson';
+// source: https://commons.wikimedia.org/wiki/File:PathfinderMap_hires_(4996917742).jpg
+const WORLD_MAP = './map.jpg';
 
 const INITIAL_VIEW_STATE = {
   latitude: 51.47,
@@ -21,6 +23,11 @@ export const deck = new Deck({
     cull: true
   },
   layers: [
+    new BitmapLayer({
+      id: 'base-map-raster',
+      image: WORLD_MAP,
+      bounds: [-180, -90, 180, 90]
+    }),
     new GeoJsonLayer({
       id: 'base-map',
       data: COUNTRIES,
