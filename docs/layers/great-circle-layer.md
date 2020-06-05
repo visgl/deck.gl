@@ -9,6 +9,9 @@
 The `GreatCircleLayer` is a variation of the [ArcLayer](/docs/layers/arc-layer.md). It renders flat arcs along the great circle joining pairs of source and target points,
 specified as latitude/longitude coordinates.
 
+> Starting v8.2, using this layer is identical to using the `ArcLayer` with props `greatCircle: true` and `getHeight: 0`.
+
+
 ```js
 import DeckGL, {GreatCircleLayer} from 'deck.gl';
 
