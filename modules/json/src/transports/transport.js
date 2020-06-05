@@ -1,5 +1,3 @@
-const registeredTransports = [];
-
 const state = {
   onIninitialize: _ => _,
   onFinalize: _ => _,
@@ -7,7 +5,7 @@ const state = {
 };
 
 export default class Transport {
-  static setConnectionCallback(onMessage) {
+  static setConnectionCallback({onInitialize, onFinalize, onMessage}) {
     if (onInitialize) {
       state.onInitialize = onInitialize;
     }
@@ -42,7 +40,7 @@ export default class Transport {
   //
 
   _initialize(options = {}) {
-    message = {transport: this, ...options};
+    const message = {transport: this, ...options};
     state.onInitialize(message);
 
     // console.debug('Resolving init promise', options); // eslint-disable-line
@@ -50,7 +48,7 @@ export default class Transport {
   }
 
   _finalize(options = {}) {
-    message = {transport: this, ...options};
+    const message = {transport: this, ...options};
 
     // TODO - could potentially be called without Initialize being called
     state.onFinalize(message);
