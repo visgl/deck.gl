@@ -6,6 +6,27 @@ import {GeoJsonLayer} from '@deck.gl/layers';
 
 import * as FIXTURES from 'deck.gl-test/data';
 
+const geoJSONData = [
+  {
+    id: 1,
+    type: 'Feature',
+    geometry: {
+      type: 'Polygon',
+      coordinates: [
+        [
+          [0.80908203125, 0.8935546875],
+          [0.8095703125, 0.89404296875],
+          [0.80908203125, 0.89404296875],
+          [0.80908203125, 0.8935546875]
+        ]
+      ]
+    },
+    properties: {
+      cartodb_id: 148
+    }
+  }
+];
+
 test('MVTLayer', t => {
   const testCases = generateLayerTests({
     Layer: MVTLayer,
@@ -40,6 +61,38 @@ test('ClipExtension', t => {
   ];
 
   testLayer({Layer: GeoJsonLayer, testCases, onError: t.notOk});
+
+  t.end();
+});
+
+test.skip('MVT Highlight', t => {
+  class TestMVTLayer extends MVTLayer {
+    getTileData() {
+      return geoJSONData;
+    }
+  }
+
+  const testCases = [
+    {
+      props: {
+        data: ['https://a.basemaps.cartocdn.com/rastertiles/voyager_labels_under/{z}/{x}/{y}.png'],
+        id: 'mvt-highlight-test',
+        filled: true,
+        pickable: true,
+        autoHighlight: true,
+        highlightedFeatureId: 1
+      },
+      onAfterUpdate: ({subLayers}) => {
+        for (const layer of subLayers) {
+          t.ok(layer.props.pickable, 'MVT Sublayer is pickable');
+          t.ok(layer.props.autoHighlight, 'AutoHighlight should be disabled');
+          t.equal(layer.props.highlightedObjectIndex, 0, 'Feature highlighted has index 0');
+        }
+      }
+    }
+  ];
+
+  testLayer({Layer: TestMVTLayer, testCases, onError: t.notOk});
 
   t.end();
 });
