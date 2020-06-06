@@ -112,6 +112,10 @@ export default class TileLayer extends CompositeLayer {
     const layer = this.getCurrentLayer();
     layer.props.onTileLoad(tile);
     layer._updateTileset();
+
+    if (tile.isVisible) {
+      this.setNeedsUpdate();
+    }
   }
 
   _onTileError(error) {
@@ -153,7 +157,6 @@ export default class TileLayer extends CompositeLayer {
 
   renderLayers() {
     const {visible} = this.props;
-    let allLoaded = true;
     const renderedLayers = this.state.tileset.tiles.map(tile => {
       // For a tile to be visible:
       // - parent layer must be visible
@@ -162,7 +165,7 @@ export default class TileLayer extends CompositeLayer {
       const highlightedObjectIndex = this.getHighlightedObjectIndex(tile);
       // cache the rendered layer in the tile
       if (!tile.isLoaded) {
-        allLoaded = false;
+        // no op
       } else if (!tile.layers) {
         const layers = this.renderSubLayers(
           Object.assign({}, this.props, {
@@ -187,13 +190,6 @@ export default class TileLayer extends CompositeLayer {
       return tile.layers;
     });
 
-    if (!allLoaded) {
-      const {tileset} = this.state;
-      const {zRange} = this.props;
-      const frameNumber = tileset.update(this.context.viewport, {zRange});
-
-      this.setState({frameNumber, isLoaded: false});
-    }
     return renderedLayers;
   }
 }
