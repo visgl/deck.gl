@@ -157,7 +157,7 @@ export default class TileLayer extends CompositeLayer {
 
   renderLayers() {
     const {visible} = this.props;
-    const renderedLayers = this.state.tileset.tiles.map(tile => {
+    return this.state.tileset.tiles.map(tile => {
       // For a tile to be visible:
       // - parent layer must be visible
       // - tile must be visible in the current viewport
@@ -189,8 +189,6 @@ export default class TileLayer extends CompositeLayer {
       }
       return tile.layers;
     });
-
-    return renderedLayers;
   }
 }
 
