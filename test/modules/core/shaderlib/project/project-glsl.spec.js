@@ -22,7 +22,7 @@ import test from 'tape-catch';
 
 import {COORDINATE_SYSTEM, WebMercatorViewport, OrthographicView} from 'deck.gl';
 import {project} from '@deck.gl/core/shaderlib';
-import {Matrix4, Matrix3, config, equals} from 'math.gl';
+import {Matrix4, Matrix3, Vector3, config, equals} from 'math.gl';
 import {gl} from '@deck.gl/test-utils';
 import {Transform, Buffer, fp64} from '@luma.gl/core';
 const {fp64LowPart} = fp64;
@@ -364,40 +364,36 @@ test('project#vs#project_get_orientation_matrix', t => {
   const projectVS = compileVertexShader(vsSource);
   const getOrientationMatrix = projectVS({}).project_get_orientation_matrix;
 
-  const oldEpsilon = config.EPSILON;
-  config.EPSILON = 1e-9;
-  const testCases = [
-    {
-      up: [0, 0, 1],
-      testVectors: [{from: [0, 0, 1], to: [0, 0, 1]}, {from: [3, 4, 5], to: [3, 4, 5]}]
-    },
-    {
-      up: [0, 0, -1],
-      testVectors: [{from: [0, 0, 1], to: [0, 0, -1]}, {from: [3, 4, 5], to: [3, -4, -5]}]
-    },
-    {
-      up: [1, 0, 0],
-      testVectors: [{from: [0, 0, 1], to: [1, 0, 0]}, {from: [3, 4, 5], to: [5, -3, -4]}]
-    },
-    {
-      up: [3, 4, 12],
-      testVectors: [
-        {from: [0, 0, 1], to: [3 / 13, 4 / 13, 12 / 13]},
-        {from: [3, 4, 5], to: [5.769230769, 2.6923076923, 3.0769230769]}
-      ]
-    }
-  ];
+  const testCases = [[0, 0, 1], [0, 0, -1], [3, 0, 0], [0, 4, 0], [3, 4, 12]];
 
-  for (const testCase of testCases) {
-    const matrix = new Matrix3(getOrientationMatrix(testCase.up));
-    for (const vector of testCase.testVectors) {
-      const result = matrix.transform(vector.from);
-      t.comment(`result: ${result.join(',')}`);
-      t.comment(`expected: ${vector.to.join(',')}`);
-      t.ok(equals(result, vector.to), 'Transformed vector matches expectation');
-    }
+  const vectorA = new Vector3([-3, -4, 12]);
+  const vectorB = new Vector3([-1, 1, 1]);
+  const angleAB = vectorA
+    .clone()
+    .normalize()
+    .dot(vectorB.clone().normalize());
+
+  for (const testVector of testCases) {
+    const matrix = new Matrix3(getOrientationMatrix(testVector));
+
+    const result = matrix.transform([0, 0, 1]);
+    const expected = new Vector3(testVector).normalize();
+    t.comment(`result: ${result.join(',')}`);
+    t.comment(`expected: ${expected.join(',')}`);
+    t.ok(equals(result, expected), 'Transformed unit vector as expected');
+
+    const result2 = new Vector3(matrix.transform(vectorA));
+    t.is(result2.len(), 13, 'Vector length is preserved');
+
+    const result3 = new Vector3(matrix.transform(vectorB));
+    t.is(result3.len(), Math.sqrt(3), 'Vector length is preserved');
+
+    t.is(
+      result2.normalize().dot(result3.normalize()),
+      angleAB,
+      'Angle between vectors is preserved'
+    );
   }
 
-  config.EPSILON = oldEpsilon;
   t.end();
 });

@@ -143,7 +143,7 @@ Converts the coordinates of a point from the common space to the clip space, whi
 mat3 project_get_orientation_matrix(vec3 up)
 ```
 
-Returns a matrix that rotates any vector defined in the default common space to a new orientation, such that `vec3(0, 0, 1)` is aligned with `up`.
+Returns a matrix that rotates any vector defined in the default common space to a new orientation, such that `vec3(0, 0, 1)` is aligned with `up`. `up` is a normal in common space.
 
 
 ## Remarks

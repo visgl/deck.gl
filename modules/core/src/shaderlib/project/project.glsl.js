@@ -53,7 +53,7 @@ const float TILE_SIZE = 512.0;
 const float PI = 3.1415926536;
 const float WORLD_SCALE = TILE_SIZE / (PI * 2.0);
 const vec3 ZERO_64_LOW = vec3(0.0);
-const float EARTH_RADIUS = 6370972.0;
+const float EARTH_RADIUS = 6370972.0; // meters
 const float GLOBE_RADIUS = 256.0;
 
 //
@@ -207,11 +207,12 @@ vec2 project_pixel_size(vec2 pixels) {
 }
 
 // Get rotation matrix that aligns the z axis with the given up vector
+// Find 3 unit vectors ux, uy, uz that are perpendicular to each other and uz == up
 mat3 project_get_orientation_matrix(vec3 up) {
-  vec3 nz = normalize(up);
+  vec3 uz = normalize(up);
   // Tangent on XY plane
-  vec3 nx = abs(nz.z) == 1.0 ? vec3(1.0, 0.0, 0.0) : normalize(vec3(nz.y, -nz.x, 0));
-  vec3 ny = cross(nz, nx);
-  return mat3(nx, ny, nz);
+  vec3 ux = abs(uz.z) == 1.0 ? vec3(1.0, 0.0, 0.0) : normalize(vec3(uz.y, -uz.x, 0));
+  vec3 uy = cross(uz, ux);
+  return mat3(ux, uy, uz);
 }
 `;

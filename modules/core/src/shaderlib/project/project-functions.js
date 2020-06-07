@@ -16,6 +16,7 @@ import {addMetersToLngLat} from '@math.gl/web-mercator';
 function lngLatZToWorldPosition(lngLatZ, viewport, offsetMode = false) {
   const p = viewport.projectPosition(lngLatZ);
 
+  // TODO - avoid using instanceof
   if (offsetMode && viewport instanceof WebMercatorViewport) {
     const [longitude, latitude, z = 0] = lngLatZ;
     const distanceScales = viewport.getDistanceScales([longitude, latitude]);

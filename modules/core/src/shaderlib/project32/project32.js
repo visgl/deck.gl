@@ -26,6 +26,8 @@ vec4 project_position_to_clipspace(
 ) {
   vec3 projectedPosition = project_position(position, position64Low);
   if (project_uProjectionMode == PROJECTION_MODE_GLOBE) {
+    // offset is specified as ENU
+    // when in globe projection, rotate offset so that the ground alighs with the surface of the globe
     mat3 rotation = project_get_orientation_matrix(projectedPosition);
     offset = rotation * offset;
   }
