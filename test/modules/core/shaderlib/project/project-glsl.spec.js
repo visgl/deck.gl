@@ -22,7 +22,7 @@ import test from 'tape-catch';
 
 import {COORDINATE_SYSTEM, WebMercatorViewport, OrthographicView} from 'deck.gl';
 import {project} from '@deck.gl/core/shaderlib';
-import {Matrix4, config} from 'math.gl';
+import {Matrix4, Matrix3, config, equals} from 'math.gl';
 import {gl} from '@deck.gl/test-utils';
 import {Transform, Buffer, fp64} from '@luma.gl/core';
 const {fp64LowPart} = fp64;
@@ -354,6 +354,49 @@ test('project#vs', t => {
       }
     });
   });
+
+  config.EPSILON = oldEpsilon;
+  t.end();
+});
+
+test('project#vs#project_get_orientation_matrix', t => {
+  const vsSource = project.dependencies.map(dep => dep.vs).join('') + project.vs;
+  const projectVS = compileVertexShader(vsSource);
+  const getOrientationMatrix = projectVS({}).project_get_orientation_matrix;
+
+  const oldEpsilon = config.EPSILON;
+  config.EPSILON = 1e-9;
+  const testCases = [
+    {
+      up: [0, 0, 1],
+      testVectors: [{from: [0, 0, 1], to: [0, 0, 1]}, {from: [3, 4, 5], to: [3, 4, 5]}]
+    },
+    {
+      up: [0, 0, -1],
+      testVectors: [{from: [0, 0, 1], to: [0, 0, -1]}, {from: [3, 4, 5], to: [3, -4, -5]}]
+    },
+    {
+      up: [1, 0, 0],
+      testVectors: [{from: [0, 0, 1], to: [1, 0, 0]}, {from: [3, 4, 5], to: [5, -3, -4]}]
+    },
+    {
+      up: [3, 4, 12],
+      testVectors: [
+        {from: [0, 0, 1], to: [3 / 13, 4 / 13, 12 / 13]},
+        {from: [3, 4, 5], to: [5.769230769, 2.6923076923, 3.0769230769]}
+      ]
+    }
+  ];
+
+  for (const testCase of testCases) {
+    const matrix = new Matrix3(getOrientationMatrix(testCase.up));
+    for (const vector of testCase.testVectors) {
+      const result = matrix.transform(vector.from);
+      t.comment(`result: ${result.join(',')}`);
+      t.comment(`expected: ${vector.to.join(',')}`);
+      t.ok(equals(result, vector.to), 'Transformed vector matches expectation');
+    }
+  }
 
   config.EPSILON = oldEpsilon;
   t.end();

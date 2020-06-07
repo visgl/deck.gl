@@ -210,7 +210,7 @@ vec2 project_pixel_size(vec2 pixels) {
 mat3 project_get_orientation_matrix(vec3 up) {
   vec3 nz = normalize(up);
   // Tangent on XY plane
-  vec3 nx = nz.z == 1.0 ? vec3(1.0, 0.0, 0.0) : normalize(vec3(nz.y, -nz.x, 0));
+  vec3 nx = abs(nz.z) == 1.0 ? vec3(1.0, 0.0, 0.0) : normalize(vec3(nz.y, -nz.x, 0));
   vec3 ny = cross(nz, nx);
   return mat3(nx, ny, nz);
 }
