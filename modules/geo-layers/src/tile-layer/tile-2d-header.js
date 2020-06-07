@@ -17,7 +17,7 @@ export default class Tile2DHeader {
   }
 
   get data() {
-    return this._isLoaded ? this.content : this._loader;
+    return this._isLoaded && this.content;
   }
 
   get isLoaded() {
@@ -38,7 +38,7 @@ export default class Tile2DHeader {
       return;
     }
 
-    this._loader = Promise.resolve(getTileData({x, y, z, bbox}))
+    Promise.resolve(getTileData({x, y, z, bbox}))
       .then(buffers => {
         this.content = buffers;
         this._isLoaded = true;
