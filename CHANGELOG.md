@@ -19,6 +19,16 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v8.2
 
+#### deck.gl [8.2.0-alpha.3] - June 8 2020
+
+-  BitmapLayer supports globe projection (#4655)
+-  Merge ArcLayer and GreatCircleLayer (#4650)
+-  Globe Projection (PR3) (#4641)
+-  Globe Projection (PR2) (#4640)
+-  deck.gl transport: Support multiple connections (#4654)
+-  Highlight features spread across tiles (#4365)
+-  Globe Projection (PR 1) (#4639)
+
 #### deck.gl [8.2.0-alpha.2] - June 4 2020
 
 - pydeck: Add Google Maps base maps to pydeck (#4632)
