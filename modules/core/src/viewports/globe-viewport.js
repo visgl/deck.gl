@@ -31,7 +31,8 @@ export default class GlobeViewport extends Viewport {
       longitude = 0,
       zoom = 11,
       nearZMultiplier = 0.1,
-      farZMultiplier = 1
+      farZMultiplier = 1,
+      resolution = 10
     } = opts;
 
     let {width, height, altitude = 1.5} = opts;
@@ -71,6 +72,7 @@ export default class GlobeViewport extends Viewport {
 
     super(viewportOpts);
 
+    this.resolution = resolution;
     this.distanceScales = getDistanceScales();
   }
 

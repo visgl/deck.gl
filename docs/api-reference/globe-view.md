@@ -37,6 +37,7 @@ To render, `GlobeView` needs to be used together with a `viewState` with the fol
 - `zoom` (`Number`) - zoom level
 - `maxZoom` (`Number`, optional) - max zoom level. Default `20`.
 - `minZoom` (`Number`, optional) - min zoom level. Default `0`.
+- `resolution` (`Number`, optional) - the resolution at which to turn flat features into 3D meshes, in degrees. Default `10`.
 
 
 ## GlobeController
