@@ -215,4 +215,12 @@ mat3 project_get_orientation_matrix(vec3 up) {
   vec3 uy = cross(uz, ux);
   return mat3(ux, uy, uz);
 }
+
+bool project_needs_rotation(vec3 commonPosition, out mat3 transform) {
+  if (project_uProjectionMode == PROJECTION_MODE_GLOBE) {
+    transform = project_get_orientation_matrix(commonPosition);
+    return true;
+  }
+  return false;
+}
 `;

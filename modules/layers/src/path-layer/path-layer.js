@@ -226,45 +226,33 @@ export default class PathLayer extends Layer {
      *                                   /     :     o
      */
 
+    // prettier-ignore
     const SEGMENT_INDICES = [
       // start corner
-      0,
-      2,
-      1,
+      0, 1, 2,
       // body
-      1,
-      2,
-      4,
-      1,
-      4,
-      3,
+      1, 4, 2,
+      1, 3, 4,
       // end corner
-      3,
-      4,
-      5
+      3, 5, 4
     ];
 
     // [0] position on segment - 0: start, 1: end
     // [1] side of path - -1: left, 0: center (joint), 1: right
+    // prettier-ignore
     const SEGMENT_POSITIONS = [
       // bevel start corner
-      0,
-      0,
+      0, 0,
       // start inner corner
-      0,
-      -1,
+      0, -1,
       // start outer corner
-      0,
-      1,
+      0, 1,
       // end inner corner
-      1,
-      -1,
+      1, -1,
       // end outer corner
-      1,
-      1,
+      1, 1,
       // bevel end corner
-      1,
-      0
+      1, 0
     ];
 
     return new Model(
