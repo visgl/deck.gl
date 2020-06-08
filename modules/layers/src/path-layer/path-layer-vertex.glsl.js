@@ -72,8 +72,8 @@ vec3 lineJoin(
   vec3 deltaB3 = (nextPoint - currPoint);
 
   mat3 rotationMatrix;
-  if (project_uProjectionMode == PROJECTION_MODE_GLOBE && !billboard) {
-    rotationMatrix = project_get_orientation_matrix(currPoint);
+  bool needsRotation = !billboard && project_needs_rotation(currPoint, rotationMatrix);
+  if (needsRotation) {
     deltaA3 = deltaA3 * rotationMatrix;
     deltaB3 = deltaB3 * rotationMatrix;
   }
@@ -152,7 +152,7 @@ vec3 lineJoin(
   vec3 offset = vec3(offsetVec * width * isValid, 0.0);
   DECKGL_FILTER_SIZE(offset, geometry);
 
-  if (project_uProjectionMode == PROJECTION_MODE_GLOBE && !billboard) {
+  if (needsRotation) {
     offset = rotationMatrix * offset;
   }
   return currPoint + offset;
