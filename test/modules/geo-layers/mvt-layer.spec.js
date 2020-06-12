@@ -1,5 +1,5 @@
 import test from 'tape-catch';
-import {generateLayerTests, testLayer, testLayerAsync} from '@deck.gl/test-utils';
+import {testLayer} from '@deck.gl/test-utils';
 import {MVTLayer} from '@deck.gl/geo-layers';
 import ClipExtension from '@deck.gl/geo-layers/mvt-layer/clip-extension';
 import {GeoJsonLayer} from '@deck.gl/layers';

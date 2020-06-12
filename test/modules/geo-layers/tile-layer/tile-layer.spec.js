@@ -21,20 +21,20 @@
 import test from 'tape-catch';
 import {WebMercatorViewport} from '@deck.gl/core';
 import {ScatterplotLayer} from '@deck.gl/layers';
-import {generateLayerTests, testLayer} from '@deck.gl/test-utils';
+import {generateLayerTests, testLayerAsync} from '@deck.gl/test-utils';
 import {TileLayer} from '@deck.gl/geo-layers';
 
-test('TileLayer', t => {
+test('TileLayer', async t => {
   const testCases = generateLayerTests({
     Layer: TileLayer,
     assert: t.ok,
     onBeforeUpdate: ({testCase}) => t.comment(testCase.title)
   });
-  testLayer({Layer: TileLayer, testCases, onError: t.notOk});
+  await testLayerAsync({Layer: TileLayer, testCases, onError: t.notOk});
   t.end();
 });
 
-test('TileLayer', t => {
+test('TileLayer', async t => {
   let getTileDataCalled = 0;
   const getTileData = () => {
     getTileDataCalled++;
@@ -144,6 +144,6 @@ test('TileLayer', t => {
       }
     }
   ];
-  testLayer({Layer: TileLayer, viewport: testViewport1, testCases, onError: t.notOk});
+  await testLayerAsync({Layer: TileLayer, viewport: testViewport1, testCases, onError: t.notOk});
   t.end();
 });
