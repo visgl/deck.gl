@@ -39,7 +39,15 @@ export default class Tile2DHeader {
       return;
     }
 
-    const tileData = getTileData({x, y, z, bbox});
+    let tileData;
+    try {
+      tileData = getTileData({x, y, z, bbox});
+    } catch (err) {
+      this._isLoaded = true;
+      this.onTileError(err);
+      return;
+    }
+
     if (!isPromise(tileData)) {
       this.content = tileData;
       this._isLoaded = true;

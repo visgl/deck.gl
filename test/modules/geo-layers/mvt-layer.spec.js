@@ -1,5 +1,5 @@
 import test from 'tape-catch';
-import {generateLayerTests, testLayer} from '@deck.gl/test-utils';
+import {generateLayerTests, testLayer, testLayerAsync} from '@deck.gl/test-utils';
 import {MVTLayer} from '@deck.gl/geo-layers';
 import ClipExtension from '@deck.gl/geo-layers/mvt-layer/clip-extension';
 import {GeoJsonLayer} from '@deck.gl/layers';
@@ -27,7 +27,7 @@ const geoJSONData = [
   }
 ];
 
-test('MVTLayer', t => {
+test('MVTLayer', async t => {
   const testCases = generateLayerTests({
     Layer: MVTLayer,
     assert: t.ok,
@@ -36,7 +36,7 @@ test('MVTLayer', t => {
     },
     onBeforeUpdate: ({testCase}) => t.comment(testCase.title)
   });
-  testLayer({Layer: MVTLayer, testCases, onError: t.notOk});
+  await testLayerAsync({Layer: MVTLayer, testCases, onError: t.notOk});
   t.end();
 });
 
