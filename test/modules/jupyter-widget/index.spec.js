@@ -1,12 +1,12 @@
 import test from 'tape-catch';
 
-import {TransportModel} from '@deck.gl/jupyter-widget';
+import {JupyterTransportModel} from '@deck.gl/jupyter-widget';
 import {createTestModel} from './mock-widget-base';
 
 function getDeckModel(state) {
   // Require at runtime, after the environment is polyfilled
   try {
-    const model = createTestModel(TransportModel, state);
+    const model = createTestModel(JupyterTransportModel, state);
     return model;
   } catch (error) {
     // Work around: jupyter-widget is built as an AMD module
@@ -19,10 +19,12 @@ function getDeckModel(state) {
 }
 
 test('jupyter-widget getters should be properly configured', t => {
-  t.equal(TransportModel.model_module, '@deck.gl/jupyter-widget');
-  t.equal(TransportModel.model_module_version, 'untranspiled source');
-  t.equal(TransportModel.view_module, '@deck.gl/jupyter-widget');
-  t.equal(TransportModel.view_module_version, 'untranspiled source');
+  t.equal(JupyterTransportModel.model_module, '@deck.gl/jupyter-widget');
+  t.equal(JupyterTransportModel.model_module_version, 'untranspiled source');
+  t.equal(JupyterTransportModel.view_module, '@deck.gl/jupyter-widget');
+  t.equal(JupyterTransportModel.view_module_version, 'untranspiled source');
+  t.equal(JupyterTransportModel.model_name, 'JupyterTransportModel');
+  t.equal(JupyterTransportModel.view_name, 'JupyterTransportView');
   t.end();
 });
 
