@@ -20,7 +20,7 @@
 
 import test from 'tape-catch';
 import {Layer, AttributeManager, COORDINATE_SYSTEM, MapView, OrbitView} from 'deck.gl';
-import {testInitializeLayer, testLayer} from '@deck.gl/test-utils';
+import {testInitializeLayer, testLayer, testLayerAsync} from '@deck.gl/test-utils';
 import {makeSpy} from '@probe.gl/test-utils';
 import {equals, Matrix4} from 'math.gl';
 import {Timeline} from '@luma.gl/core';
@@ -469,16 +469,30 @@ test('Layer#calculateInstancePickingColors', t => {
   t.end();
 });
 
-test('Layer#isLoaded', t => {
-  const layer = new SubLayer({
-    data: Promise.resolve([]),
-    onDataLoad: () => {
-      t.ok(layer.isLoaded, 'data is loaded');
-      t.end();
-    }
+test('Layer#isLoaded', async t => {
+  let updateCount = 0;
+
+  await testLayerAsync({
+    Layer: SubLayer,
+    testCases: [
+      {
+        props: {
+          data: Promise.resolve([])
+        },
+
+        onAfterUpdate: ({layer}) => {
+          updateCount++;
+          if (updateCount === 1) {
+            t.is(layer.isLoaded, false, 'first update: layer is not loaded');
+          }
+          if (updateCount === 2) {
+            t.is(layer.isLoaded, true, 'second update: layer is loaded');
+          }
+        }
+      }
+    ],
+    onError: t.notOk
   });
 
-  testInitializeLayer({layer});
-
-  t.notOk(layer.isLoaded, 'is loading data');
+  t.end();
 });

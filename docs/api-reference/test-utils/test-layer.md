@@ -1,6 +1,8 @@
 # testLayer (Test Function)
 
-This utility initializes a layer, test layer updates and draw calls on a series of new props, and allow test suites to inspect the result.
+The `testLayer` utility initializes a layer, test layer updates and draw calls on a series of new props, and allow test suites to inspect the result.
+
+The `testLayerAsync` utility is like `testLayer`, but designed for layers that need to resolve resources asynchronously.
 
 ## Example
 
@@ -8,7 +10,7 @@ Example of layer unit tests using `tape`. The test utility itself is test framew
 
 ```js
 import test from 'tape-catch';
-import {testLayer} from '@deck.gl/test-utils';
+import {testLayer, testLayerAsync} from '@deck.gl/test-utils';
 import {GeoJsonLayer} from '@deck.gl/layers';
 
 test('GeoJsonLayer#tests', t => {
@@ -49,6 +51,7 @@ test('GeoJsonLayer#tests', t => {
 
 ```js
 testLayer({Layer, spies, testCases, onError});
+await testLayerAsync({Layer, spies, testCases, onError});
 ```
 
 * `Layer` (Object) - the layer component class to test
@@ -74,13 +77,18 @@ A test case is an object with the following fields:
   - `info.testCase` (Object) - the current test case
   - `info.layer` (`Layer`) - the old layer
 * `onAfterUpdate` (Function, Optional) - callback invoked after the layer props have been updated. This allows the test case to verify that the layer's state has been correctly updated, or that certain functions (spies) have been called etc. Receives a single argument `info`:
-{layer, oldState, subLayers, subLayer, spies: spyMap}
+`{layer, oldState, subLayers, subLayer, spies: spyMap}`.
   - `info.testCase` (Object) - the current test case
   - `info.layer` (`Layer`) - the updated layer
   - `info.oldState` (Object) - layer state before the update
   - `info.subLayers` (Array) - sub layers rendered, if the layer is composite
   - `info.subLayer` (`Layer`) - the first sub layer rendered, if the layer is composite
   - `info.spies` (Object) - key are layer method names and values are [spies](https://github.com/uber-web/probe.gl/blob/master/docs/api-reference/test-utils/make-spy.md#methods-and-fields-on-the-wrapped-function).
+
+
+Note that `onAfterUpdate` is called immediately after the props are updated. If the layer contains asynchronous props, they may not have been loaded at this point.
+
+When using `TestLayerAsync`, `onAfterUpdate` is called multiple times until all resources are loaded.
 
 
 ## Source
