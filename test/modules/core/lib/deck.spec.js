@@ -2,6 +2,7 @@ import test from 'tape-catch';
 import {Deck, log, MapView} from '@deck.gl/core';
 import {ScatterplotLayer} from '@deck.gl/layers';
 import {gl} from '@deck.gl/test-utils';
+import {sleep} from './async-iterator-test-utils';
 
 test('Deck#constructor', t => {
   const callbacks = {
@@ -166,4 +167,74 @@ test('Deck#auto view state', t => {
       t.end();
     }
   });
+});
+
+test('Deck#dataManager', async t => {
+  const deck = new Deck({
+    gl,
+    width: 1,
+    height: 1,
+    // This is required because the jsdom canvas does not have client width/height
+    autoResizeDrawingBuffer: gl.canvas.clientWidth > 0,
+
+    viewState: {
+      longitude: 0,
+      latitude: 0,
+      zoom: 0
+    },
+    onError: () => null
+  });
+
+  function update(props) {
+    return new Promise(resolve => {
+      deck.setProps({
+        ...props,
+        onAfterRender: resolve
+      });
+    });
+  }
+
+  await update();
+  const {dataManager} = deck;
+
+  const layer1 = new ScatterplotLayer({
+    id: 'scatterplot-global-data',
+    data: 'deck://pins',
+    getPosition: d => d.position
+  });
+  const layer2 = new ScatterplotLayer({
+    id: 'scatterplot-shared-data-A',
+    data: 'cities.json',
+    getPosition: d => d.position
+  });
+  const layer3 = new ScatterplotLayer({
+    id: 'scatterplot-shared-data-B',
+    data: 'cities.json',
+    getPosition: d => d.position
+  });
+
+  deck._addResources({
+    pins: [{position: [1, 0, 0]}]
+  });
+  await update({
+    layers: [layer1, layer2, layer3]
+  });
+  t.is(layer1.getNumInstances(), 1, 'layer subscribes to global data resource');
+  t.ok(dataManager.contains('cities.json'), 'data url is cached');
+
+  deck._addResources({
+    pins: [{position: [1, 0, 0]}, {position: [0, 2, 0]}]
+  });
+  await update();
+  t.is(layer1.getNumInstances(), 2, 'layer data is updated');
+
+  await update({layers: []});
+  await sleep(300);
+  t.notOk(dataManager.contains('cities.json'), 'cached data is purged');
+
+  deck._removeResources(['pins']);
+  t.notOk(dataManager.contains('pins'), 'data resource is removed');
+
+  deck.finalize();
+  t.end();
 });

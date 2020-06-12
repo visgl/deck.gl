@@ -36,6 +36,7 @@ const TRACE_ACTIVATE_VIEWPORT = 'layerManager.activateViewport';
 // CONTEXT IS EXPOSED TO LAYERS
 const INITIAL_CONTEXT = Object.seal({
   layerManager: null,
+  dataManager: null,
   deck: null,
   gl: null,
 
@@ -55,7 +56,7 @@ const layerName = layer => (layer instanceof Layer ? `${layer}` : !layer ? 'null
 
 export default class LayerManager {
   // eslint-disable-next-line
-  constructor(gl, {deck, stats, viewport = null, timeline = null} = {}) {
+  constructor(gl, context = {}) {
     // Currently deck.gl expects the DeckGL.layers array to be different
     // whenever React rerenders. If the same layers array is used, the
     // LayerManager's diffing algorithm will generate a fatal error and
@@ -68,9 +69,10 @@ export default class LayerManager {
     this.lastRenderedLayers = [];
     this.layers = [];
 
-    this.context = Object.assign({}, INITIAL_CONTEXT, {
+    const {stats, viewport, timeline} = context;
+
+    this.context = Object.assign({}, INITIAL_CONTEXT, context, {
       layerManager: this,
-      deck,
       gl,
       // Enabling luma.gl Program caching using private API (_cachePrograms)
       programManager: gl && createProgramManager(gl),

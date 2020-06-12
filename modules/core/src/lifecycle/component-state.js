@@ -94,6 +94,11 @@ export default class ComponentState {
     return false;
   }
 
+  // Without changing the original prop value, swap out the data resolution under the hood
+  reloadAsyncProp(propName, value) {
+    this._watchPromise(propName, Promise.resolve(value));
+  }
+
   // Updates all async/overridden props (when new props come in)
   // Checks if urls have changed, starts loading, or removes override
   setAsyncProps(props) {

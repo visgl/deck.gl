@@ -19,6 +19,7 @@
 // THE SOFTWARE.
 
 import './attribute';
+import './data';
 import './deck.spec';
 import './deck-picker.spec';
 import './layer.spec';

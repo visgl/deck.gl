@@ -59,7 +59,28 @@ const defaultProps = {
   onDataLoad: {type: 'function', value: null, compare: false, optional: true},
   fetch: {
     type: 'function',
-    value: (url, {layer}) => load(url, layer.getLoadOptions()),
+    value: (url, {propName, layer}) => {
+      const {dataManager} = layer.context;
+      const loadOptions = layer.getLoadOptions();
+
+      if (dataManager) {
+        if (!loadOptions && !dataManager.contains(url)) {
+          // If there is no layer-specific load options, then attempt to cache this resource in the data manager
+          dataManager.add(url, url, {persistent: false});
+        }
+        const resource = dataManager.subscribe(
+          url,
+          data => layer.internalState.reloadAsyncProp(propName, data),
+          layer.id,
+          propName
+        );
+        if (resource) {
+          return resource;
+        }
+      }
+
+      return load(url, loadOptions);
+    },
     compare: false
   },
   updateTriggers: {}, // Update triggers: a core change detection mechanism in deck.gl
@@ -312,6 +333,10 @@ export default class Layer extends Component {
     const attributeManager = this.getAttributeManager();
     if (attributeManager) {
       attributeManager.finalize();
+    }
+    const {dataManager} = this.context;
+    if (dataManager) {
+      dataManager.unsubscribe(this.id);
     }
     this.internalState.uniformTransitions.clear();
   }
