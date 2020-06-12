@@ -41,7 +41,7 @@
     "jsdom": false
   },
   "resolutions": {
-    "math.gl": "3.2.0-alpha.3"
+    "@math.gl/core": "3.2.0-alpha.3"
   },
   "devDependencies": {
     "@loaders.gl/csv": "^2.1.5",

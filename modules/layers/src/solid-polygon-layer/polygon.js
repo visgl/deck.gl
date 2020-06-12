@@ -21,10 +21,6 @@
 /* eslint-disable max-params */
 import earcut from 'earcut';
 
-// For Web Mercator projection
-const PI_4 = Math.PI / 4;
-const DEGREES_TO_RADIANS_HALF = Math.PI / 360;
-
 // 4 data formats are supported:
 // Simple Polygon: an array of points
 // Complex Polygon: an array of array of points (array of rings)
@@ -139,85 +135,6 @@ function copyFlatRing(target, targetStartIndex, positions, size, srcStartIndex =
 }
 
 /**
- * Counts the number of vertices in a simple polygon, closes the polygon if needed.
- * @param {Array} simplePolygon - array of points
- * @returns {Number} vertex count
- */
-function getNestedVertexCount(simplePolygon) {
-  return (isNestedRingClosed(simplePolygon) ? 0 : 1) + simplePolygon.length;
-}
-
-/**
- * Counts the number of vertices in a simple flat array, closes the polygon if needed.
- * @param {Array} positions - array of numbers
- * @param {Number} size - size of a position, 2 (xy) or 3 (xyz)
- * @param {Number} [startIndex] - start index of the path in the positions array
- * @param {Number} [endIndex] - end index of the path in the positions array
- * @returns {Number} vertex count
- */
-function getFlatVertexCount(positions, size, startIndex = 0, endIndex) {
-  endIndex = endIndex || positions.length;
-  if (startIndex >= endIndex) {
-    return 0;
-  }
-  return (
-    (isFlatRingClosed(positions, size, startIndex, endIndex) ? 0 : 1) +
-    (endIndex - startIndex) / size
-  );
-}
-
-/**
- * Counts the number of vertices in any polygon representation.
- * @param {Array|Object} polygon
- * @param {Number} positionSize - size of a position, 2 (xy) or 3 (xyz)
- * @returns {Number} vertex count
- */
-export function getVertexCount(polygon, positionSize, normalization = true) {
-  if (!normalization) {
-    polygon = polygon.positions || polygon;
-    return polygon.length / positionSize;
-  }
-
-  validate(polygon);
-
-  if (polygon.positions) {
-    // complex flat
-    const {positions, holeIndices} = polygon;
-
-    if (holeIndices) {
-      let vertexCount = 0;
-      // split the positions array into `holeIndices.length + 1` rings
-      // holeIndices[-1] falls back to 0
-      // holeIndices[holeIndices.length] falls back to positions.length
-      for (let i = 0; i <= holeIndices.length; i++) {
-        vertexCount += getFlatVertexCount(
-          polygon.positions,
-          positionSize,
-          holeIndices[i - 1],
-          holeIndices[i]
-        );
-      }
-      return vertexCount;
-    }
-    polygon = positions;
-  }
-  if (Number.isFinite(polygon[0])) {
-    // simple flat
-    return getFlatVertexCount(polygon, positionSize);
-  }
-  if (!isSimple(polygon)) {
-    // complex polygon
-    let vertexCount = 0;
-    for (const simplePolygon of polygon) {
-      vertexCount += getNestedVertexCount(simplePolygon);
-    }
-    return vertexCount;
-  }
-  // simple polygon
-  return getNestedVertexCount(polygon);
-}
-
-/**
  * Normalize any polygon representation into the "complex flat" format
  * @param {Array|Object} polygon
  * @param {Number} positionSize - size of a position, 2 (xy) or 3 (xyz)
@@ -226,12 +143,10 @@ export function getVertexCount(polygon, positionSize, normalization = true) {
  * @return {Object} - {positions: <Float64Array>, holeIndices: <Array|null>}
  */
 /* eslint-disable max-statements */
-export function normalize(polygon, positionSize, vertexCount) {
+export function normalize(polygon, positionSize) {
   validate(polygon);
 
-  vertexCount = vertexCount || getVertexCount(polygon, positionSize);
-
-  const positions = new Float64Array(vertexCount * positionSize);
+  const positions = [];
   const holeIndices = [];
 
   if (polygon.positions) {
@@ -297,19 +212,22 @@ export function getSurfaceIndices(normalizedPolygon, positionSize, preproject) {
   if (normalizedPolygon.holeIndices) {
     holeIndices = normalizedPolygon.holeIndices.map(positionIndex => positionIndex / positionSize);
   }
-  let positions = normalizedPolygon.positions || normalizedPolygon;
+  const positions = normalizedPolygon.positions || normalizedPolygon;
 
-  // TODO - handle other coordinate systems and projection modes
   if (preproject) {
     // When tesselating lnglat coordinates, project them to the Web Mercator plane for accuracy
     const n = positions.length;
     // Clone the array
-    positions = positions.slice();
+    const projectedPositions = new Array(positions.length);
+    const p = [];
     for (let i = 0; i < n; i += positionSize) {
       // project points to a scaled version of the web-mercator plane
       // It doesn't matter if x and y are scaled/translated, but the relationship must be linear
-      const y = positions[i + 1];
-      positions[i + 1] = Math.log(Math.tan(PI_4 + y * DEGREES_TO_RADIANS_HALF));
+      p[0] = positions[i];
+      p[1] = positions[i + 1];
+      const xy = preproject(p);
+      projectedPositions[i] = xy[0];
+      projectedPositions[i + 1] = xy[1];
     }
   }
 

@@ -80,7 +80,7 @@ export default class SolidPolygonLayer extends Layer {
     this.setState({
       numInstances: 0,
       polygonTesselator: new PolygonTesselator({
-        preproject: coordinateSystem === COORDINATE_SYSTEM.LNGLAT,
+        preproject: coordinateSystem === COORDINATE_SYSTEM.LNGLAT && viewport.projectFlat,
         fp64: this.use64bitPositions(),
         IndexType: !gl || hasFeatures(gl, FEATURES.ELEMENT_INDEX_UINT32) ? Uint32Array : Uint16Array
       })
@@ -271,6 +271,7 @@ export default class SolidPolygonLayer extends Layer {
         buffers,
         getGeometry: props.getPolygon,
         positionFormat: props.positionFormat,
+        resolution: this.context.viewport.resolution,
         fp64: this.use64bitPositions(),
         dataChanged: changeFlags.dataChanged
       });
@@ -327,7 +328,7 @@ export default class SolidPolygonLayer extends Layer {
               // top right - top left - bootom left - bottom right
               vertexPositions: {
                 size: 2,
-                value: new Float32Array([1, 1, 0, 1, 0, 0, 1, 0])
+                value: new Float32Array([0, 0, 0, 1, 1, 1, 1, 0])
               }
             }
           }),

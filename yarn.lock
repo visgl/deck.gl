@@ -1968,15 +1968,7 @@
   resolved "https://registry.yarnpkg.com/@mapbox/whoots-js/-/whoots-js-3.1.0.tgz#497c67a1cef50d1a2459ba60f315e448d2ad87fe"
   integrity sha512-Es6WcD0nO5l+2BOQS4uLfNPYQaNDfbot3X1XUoloz+x0mPDS3eeORZJl06HXjwBG1fOGwCRnzK88LMdxKRrd6Q==
 
-"@math.gl/core@3.1.3", "@math.gl/core@^3.1.3":
-  version "3.1.3"
-  resolved "https://registry.yarnpkg.com/@math.gl/core/-/core-3.1.3.tgz#70b0349708d170325eecf043b6840029bc57cda5"
-  integrity sha512-vpYyUYaE9h5KhJC4BJp4CeWThB7rrfs40d36dKkn45Vgzuj2lVCJ8FeU0S5XWYa495DLxxECED0IZt9ROvlwcg==
-  dependencies:
-    "@babel/runtime" "^7.0.0"
-    gl-matrix "^3.0.0"
-
-"@math.gl/core@3.2.0-alpha.3", "@math.gl/core@^3.2.0-alpha.3":
+"@math.gl/core@3.1.3", "@math.gl/core@3.1.5", "@math.gl/core@3.2.0-alpha.3", "@math.gl/core@^3.1.3", "@math.gl/core@^3.2.0-alpha.3":
   version "3.2.0-alpha.3"
   resolved "https://registry.yarnpkg.com/@math.gl/core/-/core-3.2.0-alpha.3.tgz#ea9b7b8f37c6186c05b77e9c2e34bd52e31c8f18"
   integrity sha512-5rmBHggjMx7FwTBNmOSj3mo7Oxv0n+ZRR4Cg0Ikmg2Eb1wHFCOrejm15P0paOVyQuMiZ5KwWqPnNqxQoC46fUw==
@@ -2010,6 +2002,13 @@
     "@babel/runtime" "^7.0.0"
     "@math.gl/core" "3.1.3"
     gl-matrix "^3.0.0"
+
+"@math.gl/polygon@^3.2.0-alpha.3":
+  version "3.2.0-alpha.4"
+  resolved "https://registry.yarnpkg.com/@math.gl/polygon/-/polygon-3.2.0-alpha.4.tgz#72a5aebbad10cb4a702425f04c5359c576336a61"
+  integrity sha512-LJUbw+FS587VoyEYEGNwR/87YPwR0DEbIuDCirthj6iMDcvpzcXLm7mEl+h65SJ89Pi1+yIveMZXAmR6pbWDYQ==
+  dependencies:
+    "@math.gl/core" "3.1.3"
 
 "@math.gl/web-mercator@^3.1.3":
   version "3.1.3"
@@ -7131,7 +7130,14 @@ mapbox-gl@^1.0.0, mapbox-gl@^1.2.1:
     tinyqueue "^2.0.0"
     vt-pbf "^3.1.1"
 
-math.gl@3.2.0-alpha.3, math.gl@^3.1.3, math.gl@^3.2.0-alpha.3:
+math.gl@^3.1.3:
+  version "3.1.5"
+  resolved "https://registry.yarnpkg.com/math.gl/-/math.gl-3.1.5.tgz#fd8572f5843499a4383d9c3e6151a4008c403f76"
+  integrity sha512-vRDoifQTcEn2uBGJvxNxCkiphUMD40Ti/kJuGRjEWD1OiHpX9L+66ovEU3KpQ3lCwaLaIxPQcPWEOMiAn7NqIg==
+  dependencies:
+    "@math.gl/core" "3.1.5"
+
+math.gl@^3.2.0-alpha.3:
   version "3.2.0-alpha.3"
   resolved "https://registry.yarnpkg.com/math.gl/-/math.gl-3.2.0-alpha.3.tgz#b922257fab423717de54a0abf6e63fd3973bf62c"
   integrity sha512-LHzjYRXORQGoMOI6bNv7C61VE5fwGWUnNFHm5/O9oYEEj14ilAG1HhgXf6sMYleGjNNYmuPF8S14cP1bafUA8Q==
