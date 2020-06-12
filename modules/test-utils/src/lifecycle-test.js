@@ -86,11 +86,12 @@ export async function testLayerAsync(opts) {
 
     const {layer: newLayer, spyMap} = runLayerTestUpdate(testCase, resources, layer, spies);
 
+    runLayerTestPostUpdateCheck(testCase, newLayer, oldState, spyMap);
+
     while (!newLayer.isLoaded) {
       await update(resources);
+      runLayerTestPostUpdateCheck(testCase, newLayer, oldState, spyMap);
     }
-
-    runLayerTestPostUpdateCheck(testCase, newLayer, oldState, spyMap);
 
     // Remove spies
     Object.keys(spyMap).forEach(k => spyMap[k].reset());

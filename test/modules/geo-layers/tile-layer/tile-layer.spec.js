@@ -75,8 +75,10 @@ test('TileLayer', async t => {
         t.comment('Default getTileData');
       },
       onAfterUpdate: ({layer, subLayers}) => {
-        t.is(subLayers.length, 2, 'Rendered sublayers');
-        t.notOk(layer.isLoaded, 'Layer is not loaded');
+        if (layer.isLoaded) {
+          t.is(subLayers.length, 2, 'Rendered sublayers');
+          t.ok(layer.isLoaded, 'Layer is loaded');
+        }
       }
     },
     {
@@ -88,10 +90,12 @@ test('TileLayer', async t => {
         t.comment('Custom getTileData');
       },
       onAfterUpdate: ({layer, subLayers}) => {
-        t.is(subLayers.length, 2, 'Rendered sublayers');
-        t.is(getTileDataCalled, 2, 'Fetched tile data');
-        t.notOk(layer.isLoaded, 'Layer is not loaded');
-        t.ok(subLayers.every(l => l.props.visible), 'Sublayers at z=2 are visible');
+        if (layer.isLoaded) {
+          t.is(subLayers.length, 2, 'Rendered sublayers');
+          t.is(getTileDataCalled, 2, 'Fetched tile data');
+          t.ok(layer.isLoaded, 'Layer is loaded');
+          t.ok(subLayers.every(l => l.props.visible), 'Sublayers at z=2 are visible');
+        }
       }
     },
     {
