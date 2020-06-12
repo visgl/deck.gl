@@ -82,9 +82,7 @@ export default class TileLayer extends CompositeLayer {
       });
     }
 
-    if (createTileCache || changeFlags.viewportChanged) {
-      this._updateTileset();
-    }
+    this._updateTileset();
   }
 
   _updateTileset() {
@@ -111,7 +109,6 @@ export default class TileLayer extends CompositeLayer {
   _onTileLoad(tile) {
     const layer = this.getCurrentLayer();
     layer.props.onTileLoad(tile);
-    layer._updateTileset();
 
     if (tile.isVisible) {
       this.setNeedsUpdate();
