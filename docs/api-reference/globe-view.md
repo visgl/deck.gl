@@ -13,10 +13,12 @@ In the initial release, this class mainly addresses the need to render an overvi
 
 - No support for rotation (`pitch` or `bearing`). The camera always points towards the center of the earth, with north up.
 - No high-precision rendering at high zoom levels (> 12). Features at the city-block scale may not be rendered accurately.
-- Only supports `COORDINATE_SYSTEM.LNGLAT`.
+- Only supports `COORDINATE_SYSTEM.LNGLAT` (default of the `coordinateSystem` prop).
 - These layers currently do not work in this view:
   + Aggregation layers: `HeatmapLayer`, `ContourLayer`
   + Tiled layers: `TerrainLayer`, `MVTLayer`
+
+When GeoJson paths and polygons are rendered with this view, the straight lines and flat surfaces are warped to the surface of the globe. Note that the warped edges still correspond to straight lines in the Mercator projection. To draw lines along the shortest distance on the globe, use the [GreatCircleLayer](/docs/layers/great-circle-layer.md).
 
 
 ## Constructor
@@ -37,7 +39,7 @@ To render, `GlobeView` needs to be used together with a `viewState` with the fol
 - `zoom` (`Number`) - zoom level
 - `maxZoom` (`Number`, optional) - max zoom level. Default `20`.
 - `minZoom` (`Number`, optional) - min zoom level. Default `0`.
-- `resolution` (`Number`, optional) - the resolution at which to turn flat features into 3D meshes, in degrees. Default `10`.
+- `resolution` (`Number`, optional) - the resolution at which to turn flat features into 3D meshes, in degrees. Smaller numbers will generate more detailed mesh. Default `10`.
 
 
 ## GlobeController

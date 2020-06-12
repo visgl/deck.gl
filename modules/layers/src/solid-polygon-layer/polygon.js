@@ -212,22 +212,20 @@ export function getSurfaceIndices(normalizedPolygon, positionSize, preproject) {
   if (normalizedPolygon.holeIndices) {
     holeIndices = normalizedPolygon.holeIndices.map(positionIndex => positionIndex / positionSize);
   }
-  const positions = normalizedPolygon.positions || normalizedPolygon;
+  let positions = normalizedPolygon.positions || normalizedPolygon;
 
   if (preproject) {
-    // When tesselating lnglat coordinates, project them to the Web Mercator plane for accuracy
+    // When tesselating lnglat coordinates, project them to the common space for accuracy
     const n = positions.length;
     // Clone the array
-    const projectedPositions = new Array(positions.length);
+    positions = positions.slice();
     const p = [];
     for (let i = 0; i < n; i += positionSize) {
-      // project points to a scaled version of the web-mercator plane
-      // It doesn't matter if x and y are scaled/translated, but the relationship must be linear
       p[0] = positions[i];
       p[1] = positions[i + 1];
       const xy = preproject(p);
-      projectedPositions[i] = xy[0];
-      projectedPositions[i + 1] = xy[1];
+      positions[i] = xy[0];
+      positions[i + 1] = xy[1];
     }
   }
 

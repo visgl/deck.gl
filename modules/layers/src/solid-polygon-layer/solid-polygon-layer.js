@@ -328,7 +328,7 @@ export default class SolidPolygonLayer extends Layer {
               // top right - top left - bootom left - bottom right
               vertexPositions: {
                 size: 2,
-                value: new Float32Array([0, 0, 0, 1, 1, 1, 1, 0])
+                value: new Float32Array([1, 0, 0, 0, 0, 1, 1, 1])
               }
             }
           }),
