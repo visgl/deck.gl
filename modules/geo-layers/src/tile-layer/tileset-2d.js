@@ -25,7 +25,7 @@ const TILE_STATE_VISIBLE = 1;
 const TILE_STATE_PLACEHOLDER = 3;
 const TILE_STATE_HIDDEN = 4;
 // tiles that should be displayed in the current viewport
-const TILE_STATE_SELECTED = 5;
+export const TILE_STATE_SELECTED = 5;
 
 export const STRATEGY_NEVER = 'never';
 export const STRATEGY_REPLACE = 'no-overlap';
