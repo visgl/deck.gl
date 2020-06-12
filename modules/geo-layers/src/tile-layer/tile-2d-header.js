@@ -43,7 +43,7 @@ export default class Tile2DHeader {
 
     let result = null;
     if (requestToken) {
-      result = await Promise.resolve(getTileData({x, y, z, bbox}));
+      result = await getTileData({x, y, z, bbox});
       requestToken.done();
     }
     return result;
