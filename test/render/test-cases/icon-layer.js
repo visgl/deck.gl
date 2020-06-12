@@ -30,7 +30,7 @@ export default [
       })
     ],
     onAfterRender: ({layers, done}) => {
-      if (layers[0].state.iconManager.getTexture()) {
+      if (layers[0].isLoaded) {
         done();
       }
     },
@@ -213,7 +213,7 @@ export default [
       })
     ],
     onAfterRender: ({layers, done}) => {
-      if (layers[0].state.iconManager.getTexture()) {
+      if (layers[0].isLoaded) {
         done();
       }
     },
