@@ -146,16 +146,7 @@ export default class TerrainLayer extends CompositeLayer {
   renderSubLayers(props) {
     const SubLayerClass = this.getSubLayerClass('mesh', SimpleMeshLayer);
     const {data, color} = props;
-    let mesh = null;
-    let texture = null;
-
-    if (Array.isArray(data)) {
-      mesh = data[0];
-      texture = data[1];
-    } else if (data) {
-      mesh = data.then(result => result && result[0]);
-      texture = data.then(result => result && result[1]);
-    }
+    const [mesh, texture] = data;
 
     return new SubLayerClass(props, {
       data: DUMMY_DATA,
