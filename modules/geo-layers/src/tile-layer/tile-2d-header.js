@@ -44,7 +44,7 @@ export default class Tile2DHeader {
       tileData = getTileData({x, y, z, bbox});
     } catch (err) {
       this._isLoaded = true;
-      this.onTileError(err);
+      this.onTileError(err, this);
       return;
     }
 
@@ -64,7 +64,7 @@ export default class Tile2DHeader {
       })
       .catch(err => {
         this._isLoaded = true;
-        this.onTileError(err);
+        this.onTileError(err, this);
       });
   }
 }

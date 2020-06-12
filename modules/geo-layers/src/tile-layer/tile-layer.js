@@ -115,11 +115,15 @@ export default class TileLayer extends CompositeLayer {
     }
   }
 
-  _onTileError(error) {
+  _onTileError(error, tile) {
     const layer = this.getCurrentLayer();
     layer.props.onTileError(error);
     // errorred tiles should not block rendering, are considered "loaded" with empty data
     layer._updateTileset();
+
+    if (tile.isVisible) {
+      this.setNeedsUpdate();
+    }
   }
 
   // Methods for subclass to override
