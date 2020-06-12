@@ -86,6 +86,12 @@ Inherits from all [Base Layer](/docs/api-reference/layer.md) properties.
 
 ### Render Options
 
+##### `greatCircle` (Boolean, optional)
+
+* Default: `false`
+
+If `true`, create the arc along the shortest path on the earth surface. This option is only effective with data in the `LNGLAT` coordinate system.
+
 ##### `widthUnits` (String, optional)
 
 * Default: `'pixels'`
