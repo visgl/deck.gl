@@ -34,9 +34,7 @@ export default class TileLayer extends CompositeLayer {
 
   get isLoaded() {
     const {tileset} = this.state;
-    return tileset.selectedTiles.every(
-      tile => tile.layers && tile.layers.every(layer => layer.isLoaded)
-    );
+    return tileset.isLoaded;
   }
 
   shouldUpdateState({changeFlags}) {
