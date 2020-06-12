@@ -27,19 +27,6 @@ const geoJSONData = [
   }
 ];
 
-test('MVTLayer', async t => {
-  const testCases = generateLayerTests({
-    Layer: MVTLayer,
-    assert: t.ok,
-    sampleProps: {
-      data: ['https://a.basemaps.cartocdn.com/rastertiles/voyager_labels_under/{z}/{x}/{y}.png']
-    },
-    onBeforeUpdate: ({testCase}) => t.comment(testCase.title)
-  });
-  await testLayerAsync({Layer: MVTLayer, testCases, onError: t.notOk});
-  t.end();
-});
-
 test('ClipExtension', t => {
   const testCases = [
     {
