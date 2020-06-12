@@ -71,7 +71,8 @@ export default class DataManager {
     if (resourceId.startsWith(protocol)) {
       resourceId = resourceId.replace(protocol, '');
       if (!resources[resourceId]) {
-        throw new Error(`${resourceId} not found`);
+        // Add placeholder. When this resource becomes available, the consumer will be notified.
+        this.add(resourceId, null, {persistent: false});
       }
     }
     const res = resources[resourceId];

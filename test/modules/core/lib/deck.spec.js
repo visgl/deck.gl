@@ -170,33 +170,6 @@ test('Deck#auto view state', t => {
 });
 
 test('Deck#dataManager', async t => {
-  const deck = new Deck({
-    gl,
-    width: 1,
-    height: 1,
-    // This is required because the jsdom canvas does not have client width/height
-    autoResizeDrawingBuffer: gl.canvas.clientWidth > 0,
-
-    viewState: {
-      longitude: 0,
-      latitude: 0,
-      zoom: 0
-    },
-    onError: () => null
-  });
-
-  function update(props) {
-    return new Promise(resolve => {
-      deck.setProps({
-        ...props,
-        onAfterRender: resolve
-      });
-    });
-  }
-
-  await update();
-  const {dataManager} = deck;
-
   const layer1 = new ScatterplotLayer({
     id: 'scatterplot-global-data',
     data: 'deck://pins',
@@ -213,14 +186,43 @@ test('Deck#dataManager', async t => {
     getPosition: d => d.position
   });
 
+  const deck = new Deck({
+    gl,
+    width: 1,
+    height: 1,
+    // This is required because the jsdom canvas does not have client width/height
+    autoResizeDrawingBuffer: gl.canvas.clientWidth > 0,
+
+    viewState: {
+      longitude: 0,
+      latitude: 0,
+      zoom: 0
+    },
+
+    layers: [layer1, layer2, layer3],
+
+    onError: () => null
+  });
+
+  function update(props) {
+    return new Promise(resolve => {
+      deck.setProps({
+        ...props,
+        onAfterRender: resolve
+      });
+    });
+  }
+
+  await update();
+  const {dataManager} = deck;
+  t.is(layer1.getNumInstances(), 0, 'layer subscribes to global data resource');
+  t.ok(dataManager.contains('cities.json'), 'data url is cached');
+
   deck._addResources({
     pins: [{position: [1, 0, 0]}]
   });
-  await update({
-    layers: [layer1, layer2, layer3]
-  });
+  await update();
   t.is(layer1.getNumInstances(), 1, 'layer subscribes to global data resource');
-  t.ok(dataManager.contains('cities.json'), 'data url is cached');
 
   deck._addResources({
     pins: [{position: [1, 0, 0]}, {position: [0, 2, 0]}]
