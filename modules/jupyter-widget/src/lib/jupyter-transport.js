@@ -18,7 +18,3 @@ export default class JupyterTransport extends Transport {
     // this.jupyterModel. ...
   }
 }
-
-export const jupyterTransport = new JupyterTransport();
-
-Transport.registerTransport(jupyterTransport);

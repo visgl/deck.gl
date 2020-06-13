@@ -3,6 +3,15 @@ CHANGELOG
 
 Releases and associated GitHub PRs for pydeck are documented here.
 
+0.4 Releases
+------------
+
+0.4.0b1 - Jun 4 2020
+^^^^^^^^^^^^^^^^^^^^
+- Add Google Maps base maps (#4632)
+- Support JupyterLab v2 (#4573)
+- Write offline JS bundle with UTF-8 encoding (#4577)
+
 0.3 Releases
 -----------------
 

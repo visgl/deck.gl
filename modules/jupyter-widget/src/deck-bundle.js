@@ -10,6 +10,7 @@ Object.assign(
   require('@deck.gl/aggregation-layers'),
   require('@deck.gl/geo-layers'),
   require('@deck.gl/mesh-layers'),
+  require('@deck.gl/google-maps'),
   require('@deck.gl/json')
 );
 

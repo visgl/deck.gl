@@ -53,6 +53,7 @@ Object.defineProperty(COORDINATE_SYSTEM, 'IDENTITY', {
 // Describes the common space
 export const PROJECTION_MODE = {
   WEB_MERCATOR: 1,
+  GLOBE: 2,
 
   // This is automatically assigned by the project module
   WEB_MERCATOR_AUTO_OFFSET: 4,

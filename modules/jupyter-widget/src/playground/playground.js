@@ -6,8 +6,7 @@ import {createContainer, createErrorBox} from './utils/css-utils';
 import {jsonConverter, createDeck} from './create-deck';
 
 export function initPlayground() {
-  const defaultTransport = Transport.getDefaultTransport();
-  defaultTransport.setCallbacks({
+  Transport.setCallbacks({
     onInitialize({transport}) {
       // Extract "deck.gl playground" props
       const {

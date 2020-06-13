@@ -363,8 +363,7 @@ export default class Viewport {
     const {meterOffset, distanceScales} = this;
 
     // Make a centered version of the matrix for projection modes without an offset
-    const center2d = this.projectFlat([longitude, latitude]);
-    const center = new Vector3(center2d[0], center2d[1], 0);
+    const center = new Vector3(this.projectPosition([longitude, latitude, 0]));
 
     if (meterOffset) {
       const commonPosition = new Vector3(meterOffset)

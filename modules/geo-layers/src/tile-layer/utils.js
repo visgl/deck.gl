@@ -37,7 +37,9 @@ export function getURLFromTemplate(template, properties) {
     const index = Math.abs(properties.x + properties.y) % template.length;
     template = template[index];
   }
-  return template.replace(/\{ *([\w_-]+) *\}/g, (_, property) => properties[property]);
+  return template.replace
+    ? template.replace(/\{ *([\w_-]+) *\}/g, (_, property) => properties[property])
+    : null;
 }
 
 /**

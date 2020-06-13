@@ -89,9 +89,7 @@ export default class TileLayer extends CompositeLayer {
       });
     }
 
-    if (createTileCache || changeFlags.viewportChanged) {
-      this._updateTileset();
-    }
+    this._updateTileset();
   }
 
   _updateTileset() {
@@ -118,14 +116,21 @@ export default class TileLayer extends CompositeLayer {
   _onTileLoad(tile) {
     const layer = this.getCurrentLayer();
     layer.props.onTileLoad(tile);
-    layer._updateTileset();
+
+    if (tile.isVisible) {
+      this.setNeedsUpdate();
+    }
   }
 
-  _onTileError(error) {
+  _onTileError(error, tile) {
     const layer = this.getCurrentLayer();
     layer.props.onTileError(error);
     // errorred tiles should not block rendering, are considered "loaded" with empty data
     layer._updateTileset();
+
+    if (tile.isVisible) {
+      this.setNeedsUpdate();
+    }
   }
 
   // Methods for subclass to override
@@ -148,6 +153,10 @@ export default class TileLayer extends CompositeLayer {
     return this.props.renderSubLayers(props);
   }
 
+  getHighlightedObjectIndex() {
+    return -1;
+  }
+
   getPickingInfo({info, sourceLayer}) {
     info.sourceLayer = sourceLayer;
     info.tile = sourceLayer.props.tile;
@@ -161,20 +170,30 @@ export default class TileLayer extends CompositeLayer {
       // - parent layer must be visible
       // - tile must be visible in the current viewport
       const isVisible = visible && tile.isVisible;
+      const highlightedObjectIndex = this.getHighlightedObjectIndex(tile);
       // cache the rendered layer in the tile
-      if (!tile.layers) {
+      if (!tile.isLoaded) {
+        // no op
+      } else if (!tile.layers) {
         const layers = this.renderSubLayers(
           Object.assign({}, this.props, {
             id: `${this.id}-${tile.x}-${tile.y}-${tile.z}`,
             data: tile.data,
             visible: isVisible,
             _offset: 0,
-            tile
+            tile,
+            highlightedObjectIndex
           })
         );
         tile.layers = flatten(layers, Boolean);
-      } else if (tile.layers[0] && tile.layers[0].props.visible !== isVisible) {
-        tile.layers = tile.layers.map(layer => layer.clone({visible: isVisible}));
+      } else if (
+        tile.layers[0] &&
+        (tile.layers[0].props.visible !== isVisible ||
+          tile.layers[0].props.highlightedObjectIndex !== highlightedObjectIndex)
+      ) {
+        tile.layers = tile.layers.map(layer =>
+          layer.clone({visible: isVisible, highlightedObjectIndex})
+        );
       }
       return tile.layers;
     });

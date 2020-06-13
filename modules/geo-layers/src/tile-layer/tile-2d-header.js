@@ -1,5 +1,6 @@
 import {log} from '@deck.gl/core';
 import {TILE_STATE_SELECTED} from './tileset-2d';
+import {isPromise} from '@loaders.gl/core';
 
 export default class Tile2DHeader {
   constructor({x, y, z, onTileLoad, onTileError, layerId}) {
@@ -57,6 +58,23 @@ export default class Tile2DHeader {
       return;
     }
 
+    // let tileData;
+    // try {
+    //   tileData = getTileData({x, y, z, bbox});
+    // } catch (err) {
+    //   this._isLoaded = true;
+    //   this.onTileError(err, this);
+    //   return;
+    // }
+    //
+    // if (!isPromise(tileData)) {
+    //   this.content = tileData;
+    //   this._isLoaded = true;
+    //   this.onTileLoad(this);
+    //   return;
+    // }
+    //
+    // this._loader = tileData
     this._loader = this._loadData(getTileData, requestScheduler)
       .then(buffers => {
         this.content = buffers;
@@ -66,7 +84,7 @@ export default class Tile2DHeader {
       })
       .catch(err => {
         this._isLoaded = true;
-        this.onTileError(err);
+        this.onTileError(err, this);
       });
   }
 }

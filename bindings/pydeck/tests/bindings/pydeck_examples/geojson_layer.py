@@ -40,5 +40,6 @@ def create_geojson_layer_test_object():
                 get_fill_color=[200, 160, 0, 180],
             )
         ],
+        map_provider=None,
         views=None,
     )

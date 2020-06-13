@@ -1,4 +1,7 @@
 import test from 'tape-catch';
+import {deserializeMatrix} from '@deck.gl/jupyter-widget/lib/utils/deserialize-matrix';
+import {jsonConverter} from '@deck.gl/jupyter-widget/playground/create-deck';
+import {processDataBuffer} from '@deck.gl/jupyter-widget/playground/playground';
 
 const DEMO_ARRAY = new Uint32Array([0, 10, 2, 20]);
 
@@ -31,9 +34,6 @@ const EXPECTED_CONVERSION = {
 };
 
 test('jupyter-widget: binary-transport', t0 => {
-  const binaryTransportModule = require('@deck.gl/jupyter-widget/lib/utils/deserialize-matrix');
-  const jupyterWidgetModule = require('@deck.gl/jupyter-widget/playground/create-deck');
-
   t0.test('deserializeMatrix', t => {
     const TEST_TABLE = [
       {input: null, expected: null, msg: 'Null arr should produce null output'},
@@ -46,7 +46,7 @@ test('jupyter-widget: binary-transport', t0 => {
 
     for (const testCase of TEST_TABLE) {
       t.deepEquals(
-        binaryTransportModule.deserializeMatrix(testCase.input),
+        deserializeMatrix(testCase.input),
         testCase.expected,
         `deserializeMatrix: ${testCase.msg}`
       );
@@ -68,10 +68,9 @@ test('jupyter-widget: binary-transport', t0 => {
   };
 
   t0.test('processDataBuffer', t => {
-    const playgroundModule = require('@deck.gl/jupyter-widget/playground/playground');
-    const newDeckProps = playgroundModule.processDataBuffer({
+    const newDeckProps = processDataBuffer({
       dataBuffer: EXPECTED_CONVERSION,
-      convertedJson: jupyterWidgetModule.jsonConverter.convert(DEMO_JSON_PROPS)
+      convertedJson: jsonConverter.convert(DEMO_JSON_PROPS)
     });
 
     t.deepEquals(

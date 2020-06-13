@@ -1,6 +1,6 @@
 /* global console, document, window */
 import React, {Component} from 'react';
-import {GoogleMapsOverlay} from '@deck.gl/google-maps';
+import {GoogleMapsOverlay} from 'deck.gl';
 
 const HOST = 'https://maps.googleapis.com/maps/api/js';
 const LOADING_GIF = 'https://upload.wikimedia.org/wikipedia/commons/d/de/Ajax-loader.gif';
