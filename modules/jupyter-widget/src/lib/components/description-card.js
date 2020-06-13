@@ -1,15 +1,17 @@
+/* global document */
+
 import {BOX_STYLE} from './component-css';
 
 class DescriptionCard {
   constructor({container, props}) {
     const {description} = props;
 
-    const div = this.document.createElement('div');
+    const div = document.createElement('div');
     div.className = 'deck-json-description-box';
     Object.assign(div.style, BOX_STYLE);
     this.el = div;
 
-    const textContainer = this.document.createElement('div');
+    const textContainer = document.createElement('div');
     textContainer.innerHTML = description;
 
     div.appendChild(textContainer);

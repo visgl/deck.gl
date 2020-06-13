@@ -1,7 +1,7 @@
 export const BOX_STYLE = {
   position: 'absolute',
-  top: 0,
-  right: 0,
+  top: '0px',
+  left: '0px',
   width: 344,
   padding: '12px 24px',
   margin: 24,
@@ -10,7 +10,7 @@ export const BOX_STYLE = {
   outline: 'none',
   maxHeight: '94%',
   boxSizing: 'border-box',
-  backgroundColor: 'rgb(255, 255, 255)',
+  backgroundColor: 'rgb(0, 255, 255)',
   fontFamily: '"Fira Sans", sans-serif',
   zIndex: 1
 };
