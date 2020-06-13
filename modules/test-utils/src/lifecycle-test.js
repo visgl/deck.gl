@@ -212,7 +212,7 @@ function runLayerTestUpdate(testCase, {layerManager, deckRenderer}, layer, spies
   return {layer, spyMap};
 }
 
-/* global requestAnimationFrame */
+/* global setTimeout */
 function update({layerManager, deckRenderer}) {
   return new Promise(resolve => {
     const onAnimationFrame = () => {
@@ -228,7 +228,7 @@ function update({layerManager, deckRenderer}) {
         return;
       }
 
-      requestAnimationFrame(onAnimationFrame);
+      setTimeout(onAnimationFrame, 50);
     };
 
     onAnimationFrame();

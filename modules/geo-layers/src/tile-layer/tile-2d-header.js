@@ -1,4 +1,5 @@
 import {log} from '@deck.gl/core';
+import {isPromise} from '@loaders.gl/core';
 
 export default class Tile2DHeader {
   constructor({x, y, z, onTileLoad, onTileError}) {
@@ -38,7 +39,23 @@ export default class Tile2DHeader {
       return;
     }
 
-    this._loader = Promise.resolve(getTileData({x, y, z, bbox}))
+    let tileData;
+    try {
+      tileData = getTileData({x, y, z, bbox});
+    } catch (err) {
+      this._isLoaded = true;
+      this.onTileError(err, this);
+      return;
+    }
+
+    if (!isPromise(tileData)) {
+      this.content = tileData;
+      this._isLoaded = true;
+      this.onTileLoad(this);
+      return;
+    }
+
+    this._loader = tileData
       .then(buffers => {
         this.content = buffers;
         this._isLoaded = true;
@@ -47,7 +64,7 @@ export default class Tile2DHeader {
       })
       .catch(err => {
         this._isLoaded = true;
-        this.onTileError(err);
+        this.onTileError(err, this);
       });
   }
 }
