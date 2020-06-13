@@ -1,10 +1,7 @@
 import {BOX_STYLE} from './component-css';
 
-import BaseElement from './base-element';
-
-class DescriptionCard extends BaseElement {
+class DescriptionCard {
   constructor({container, props}) {
-    super({container, props});
     const {description} = props;
 
     const div = this.document.createElement('div');

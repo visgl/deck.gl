@@ -1,18 +1,21 @@
 /* global document  */
-import getComponentByName from './get-component-by-name';
+import DescriptionCard from './description-card';
 
-export function addSupportComponents(container, props) {
+export function addSupportComponents(parentContainer, props) {
   const uiElementsOverlay = document.createElement('div');
   uiElementsOverlay.className = 'deckgl-ui-elements-overlay';
   uiElementsOverlay.style.zIndex = 1;
-  container.insertAdjacentElement('beforebegin', uiElementsOverlay);
+  parentContainer.insertAdjacentElement('beforebegin', uiElementsOverlay);
 
   const components = [];
   for (const key of Object.keys(props)) {
-    const ElementConstructor = getComponentByName(key);
-    if (ElementConstructor) {
-      const el = new ElementConstructor({container: uiElementsOverlay, props});
-      components.push(el);
+    switch (key) {
+      case 'description':
+        const el = new DescriptionCard({container: uiElementsOverlay, props});
+        components.push(el);
+        break;
+      default:
+        break;
     }
   }
   return components;
