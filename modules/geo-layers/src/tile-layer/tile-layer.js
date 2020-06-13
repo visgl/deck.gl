@@ -82,9 +82,7 @@ export default class TileLayer extends CompositeLayer {
       });
     }
 
-    if (createTileCache || changeFlags.viewportChanged) {
-      this._updateTileset();
-    }
+    this._updateTileset();
   }
 
   _updateTileset() {
@@ -111,14 +109,21 @@ export default class TileLayer extends CompositeLayer {
   _onTileLoad(tile) {
     const layer = this.getCurrentLayer();
     layer.props.onTileLoad(tile);
-    layer._updateTileset();
+
+    if (tile.isVisible) {
+      this.setNeedsUpdate();
+    }
   }
 
-  _onTileError(error) {
+  _onTileError(error, tile) {
     const layer = this.getCurrentLayer();
     layer.props.onTileError(error);
     // errorred tiles should not block rendering, are considered "loaded" with empty data
     layer._updateTileset();
+
+    if (tile.isVisible) {
+      this.setNeedsUpdate();
+    }
   }
 
   // Methods for subclass to override
@@ -160,7 +165,9 @@ export default class TileLayer extends CompositeLayer {
       const isVisible = visible && tile.isVisible;
       const highlightedObjectIndex = this.getHighlightedObjectIndex(tile);
       // cache the rendered layer in the tile
-      if (!tile.layers) {
+      if (!tile.isLoaded) {
+        // no op
+      } else if (!tile.layers) {
         const layers = this.renderSubLayers(
           Object.assign({}, this.props, {
             id: `${this.id}-${tile.x}-${tile.y}-${tile.z}`,
