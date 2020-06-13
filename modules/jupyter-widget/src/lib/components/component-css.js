@@ -10,7 +10,7 @@ export const BOX_STYLE = {
   outline: 'none',
   maxHeight: '94%',
   boxSizing: 'border-box',
-  backgroundColor: 'rgb(0, 255, 255)',
+  backgroundColor: 'rgb(255, 255, 255)',
   fontFamily: '"Fira Sans", sans-serif',
   zIndex: 1
 };
