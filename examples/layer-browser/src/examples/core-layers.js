@@ -12,7 +12,7 @@ import {
   TextLayer
 } from '@deck.gl/layers';
 
-import {PathStyleExtension} from '@deck.gl/extensions';
+import {PathStyleExtension, FillStyleExtension} from '@deck.gl/extensions';
 
 // Demonstrate immutable support
 import * as dataSamples from '../data-samples';
@@ -191,7 +191,15 @@ const PolygonLayerBinaryExample = {
   props: {
     ...PolygonLayerExample.props,
     getPolygon: d => d,
-    positionFormat: 'XY'
+    positionFormat: 'XY',
+
+    fillPatternAtlas: 'data/pattern.png',
+    fillPatternMapping: 'data/pattern.json',
+    getFillPattern: f =>
+      ['hatch-1x', 'hatch-2x', 'hatch-cross', 'dots'][Math.floor(Math.random() * 4)],
+    getFillPatternOffset: [0, 0],
+    getFillPatternScale: 5,
+    extensions: [new FillStyleExtension({pattern: true})]
   }
 };
 
