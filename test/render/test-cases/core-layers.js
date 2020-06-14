@@ -129,6 +129,31 @@ export default [
     goldenImage: './test/render/golden-images/arc-lnglat-3d.png'
   },
   {
+    name: 'great-circle',
+    viewState: {
+      latitude: 0,
+      longitude: 0,
+      zoom: 0,
+      pitch: 0,
+      bearing: 0,
+      repeat: true
+    },
+    layers: [
+      new ArcLayer({
+        id: 'great-circle',
+        data: dataSamples.greatCircles,
+        getWidth: 5,
+        getHeight: 0,
+        greatCircle: true,
+        getSourcePosition: d => d.source,
+        getTargetPosition: d => d.target,
+        getSourceColor: d => [64, 255, 0],
+        getTargetColor: d => [0, 128, 200]
+      })
+    ],
+    goldenImage: './test/render/golden-images/great-circle.png'
+  },
+  {
     name: 'line-lnglat',
     viewState: {
       latitude: 37.751537058389985,
