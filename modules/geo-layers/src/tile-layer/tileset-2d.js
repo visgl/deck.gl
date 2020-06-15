@@ -282,7 +282,7 @@ export default class Tileset2D {
       tile.loadData(this._getTileData, this._requestScheduler);
       this._cache.set(tileId, tile);
       this._dirty = true;
-    } else if (tile.isCancelled) {
+    } else if (tile && tile.isCancelled) {
       tile.loadData(this._getTileData, this._requestScheduler);
     }
 
