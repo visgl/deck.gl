@@ -25,7 +25,7 @@ const TILE_STATE_VISIBLE = 1;
 const TILE_STATE_PLACEHOLDER = 3;
 const TILE_STATE_HIDDEN = 4;
 // tiles that should be displayed in the current viewport
-export const TILE_STATE_SELECTED = 5;
+const TILE_STATE_SELECTED = 5;
 
 export const STRATEGY_NEVER = 'never';
 export const STRATEGY_REPLACE = 'no-overlap';
@@ -167,6 +167,9 @@ export default class Tileset2D {
         changed = true;
         tile.isVisible = isVisible;
       }
+
+      // isSelected used in request scheduler
+      tile.isSelected = Boolean(tile.state === TILE_STATE_SELECTED);
     }
 
     return changed;

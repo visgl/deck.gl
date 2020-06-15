@@ -1,5 +1,4 @@
 import {log} from '@deck.gl/core';
-import {TILE_STATE_SELECTED} from './tileset-2d';
 
 export default class Tile2DHeader {
   constructor({x, y, z, onTileLoad, onTileError}) {
@@ -7,6 +6,7 @@ export default class Tile2DHeader {
     this.y = y;
     this.z = z;
     this.isVisible = false;
+    this.isSelected = false;
     this.parent = null;
     this.children = [];
 
@@ -42,7 +42,7 @@ export default class Tile2DHeader {
     const {x, y, z, bbox} = this;
 
     const requestToken = await requestScheduler.scheduleRequest(this, tile => {
-      return tile.state === TILE_STATE_SELECTED ? 1 : -1;
+      return tile.isSelected;
     });
 
     if (!requestToken) {
