@@ -23,8 +23,7 @@ const defaultProps = {
   refinementStrategy: STRATEGY_DEFAULT,
   zRange: null,
   throttleRequests: true,
-  // Todo: set to an optimal value
-  maxRequests: 1
+  maxRequests: 8
 };
 
 export default class TileLayer extends CompositeLayer {
