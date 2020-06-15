@@ -148,6 +148,7 @@ export default class PathLayer extends Layer {
         loop: props._pathType === 'loop',
         getGeometry: props.getPath,
         positionFormat: props.positionFormat,
+        // TODO - move the flag out of the viewport
         resolution: this.context.viewport.resolution,
         dataChanged: changeFlags.dataChanged
       });

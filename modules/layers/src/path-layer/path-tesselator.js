@@ -123,10 +123,12 @@ export default class PathTesselator extends Tesselator {
   }
 
   /* Utilities */
+  // Returns the number of points in the path
   getPathLength(path) {
     return path.length / this.positionSize;
   }
 
+  // Returns a point on the path at the specified index
   getPointOnPath(path, index, target = []) {
     const {positionSize} = this;
     if (index * positionSize >= path.length) {
@@ -140,6 +142,7 @@ export default class PathTesselator extends Tesselator {
     return target;
   }
 
+  // Returns true if the first and last points are identical
   isClosed(path) {
     if (!this.normalize) {
       return this.opts.loop;

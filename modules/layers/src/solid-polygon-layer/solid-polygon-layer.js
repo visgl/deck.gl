@@ -80,6 +80,8 @@ export default class SolidPolygonLayer extends Layer {
     this.setState({
       numInstances: 0,
       polygonTesselator: new PolygonTesselator({
+        // Lnglat coordinates are usually projected non-linearly, which affects tesselation results
+        // Provide a preproject function if the coordinates are in lnglat
         preproject: coordinateSystem === COORDINATE_SYSTEM.LNGLAT && viewport.projectFlat,
         fp64: this.use64bitPositions(),
         IndexType: !gl || hasFeatures(gl, FEATURES.ELEMENT_INDEX_UINT32) ? Uint32Array : Uint16Array
@@ -271,6 +273,7 @@ export default class SolidPolygonLayer extends Layer {
         buffers,
         getGeometry: props.getPolygon,
         positionFormat: props.positionFormat,
+        // TODO - move the flag out of the viewport
         resolution: this.context.viewport.resolution,
         fp64: this.use64bitPositions(),
         dataChanged: changeFlags.dataChanged

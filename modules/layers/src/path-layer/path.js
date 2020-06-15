@@ -1,6 +1,9 @@
 import {cutPolylineByGrid} from '@math.gl/polygon';
 
-// Returns: a flat array of path positions
+/** Returns a flat array of path positions
+ * Flattens a nested path object
+ * Cut the feature if needed (globe projection, wrap longitude, etc.)
+ */
 export function normalizePath(path, size, gridResolution) {
   let flatPath = path;
   if (Array.isArray(path[0])) {

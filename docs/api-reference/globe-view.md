@@ -14,6 +14,7 @@ In the initial release, this class mainly addresses the need to render an overvi
 - No support for rotation (`pitch` or `bearing`). The camera always points towards the center of the earth, with north up.
 - No high-precision rendering at high zoom levels (> 12). Features at the city-block scale may not be rendered accurately.
 - Only supports `COORDINATE_SYSTEM.LNGLAT` (default of the `coordinateSystem` prop).
+- Known rendering issues when using multiple views mixing `GlobeView` and `MapView`, or switching between the two.
 - These layers currently do not work in this view:
   + Aggregation layers: `HeatmapLayer`, `ContourLayer`
   + Tiled layers: `TerrainLayer`, `MVTLayer`
@@ -28,7 +29,10 @@ import {_GlobeView as GlobeView} from '@deck.gl/core';
 const view = new GlobeView({id, ...});
 ```
 
-`GlobeView` takes the same parameters as the [View](/docs/api-reference/view.md) superclass constructor.
+`GlobeView` takes the same parameters as the [View](/docs/api-reference/view.md) superclass constructor, plus the following:
+
+- `resolution` (`Number`, optional) - the resolution at which to turn flat features into 3D meshes, in degrees. Smaller numbers will generate more detailed mesh. Default `10`.
+
 
 ## View State
 
@@ -39,8 +43,6 @@ To render, `GlobeView` needs to be used together with a `viewState` with the fol
 - `zoom` (`Number`) - zoom level
 - `maxZoom` (`Number`, optional) - max zoom level. Default `20`.
 - `minZoom` (`Number`, optional) - min zoom level. Default `0`.
-- `resolution` (`Number`, optional) - the resolution at which to turn flat features into 3D meshes, in degrees. Smaller numbers will generate more detailed mesh. Default `10`.
-
 
 ## GlobeController
 
