@@ -13,6 +13,7 @@ export default class Tile2DHeader {
 
     this.content = null;
     this._isLoaded = false;
+    this._isCancelled = false;
 
     this.onTileLoad = onTileLoad;
     this.onTileError = onTileError;
@@ -24,6 +25,10 @@ export default class Tile2DHeader {
 
   get isLoaded() {
     return this._isLoaded;
+  }
+
+  get isCancelled() {
+    return this._isCancelled;
   }
 
   get byteLength() {
@@ -53,6 +58,8 @@ export default class Tile2DHeader {
         this._isLoaded = true;
         this.onTileError(err, this);
       }
+    } else {
+      this._isCancelled = true;
     }
   }
 
