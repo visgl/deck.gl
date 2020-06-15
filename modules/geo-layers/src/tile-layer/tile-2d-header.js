@@ -47,6 +47,7 @@ export default class Tile2DHeader {
     });
 
     if (requestToken) {
+      this._isCancelled = false;
       try {
         const tileData = await getTileData({x, y, z, bbox});
         requestToken.done();
