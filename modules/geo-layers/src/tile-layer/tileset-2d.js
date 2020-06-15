@@ -270,7 +270,7 @@ export default class Tileset2D {
     const tileId = `${x},${y},${z}`;
     let tile = this._cache.get(tileId);
 
-    if ((!tile || tile.isCancelled) && create) {
+    if (!tile && create) {
       tile = new Tile2DHeader({
         x,
         y,
@@ -282,7 +282,10 @@ export default class Tileset2D {
       tile.loadData(this._getTileData, this._requestScheduler);
       this._cache.set(tileId, tile);
       this._dirty = true;
+    } else if (tile.isCancelled) {
+      tile.loadData(this._getTileData, this._requestScheduler);
     }
+
     return tile;
   }
 
