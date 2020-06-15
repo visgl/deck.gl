@@ -104,24 +104,28 @@ test('TileLayer', async t => {
     },
     {
       viewport: testViewport2,
-      onAfterUpdate: ({subLayers}) => {
-        t.is(subLayers.length, 4, 'Rendered new sublayers');
-        t.is(getTileDataCalled, 4, 'Fetched tile data');
-        t.ok(
-          subLayers.filter(l => l.props.tile.z === 3).every(l => l.props.visible),
-          'Sublayers at z=3 are visible'
-        );
+      onAfterUpdate: ({layer, subLayers}) => {
+        if (layer.isLoaded) {
+          t.is(subLayers.length, 4, 'Rendered new sublayers');
+          t.is(getTileDataCalled, 4, 'Fetched tile data');
+          t.ok(
+            subLayers.filter(l => l.props.tile.z === 3).every(l => l.props.visible),
+            'Sublayers at z=3 are visible'
+          );
+        }
       }
     },
     {
       viewport: testViewport1,
-      onAfterUpdate: ({subLayers}) => {
-        t.is(subLayers.length, 4, 'Rendered cached sublayers');
-        t.is(getTileDataCalled, 4, 'Used cached data');
-        t.ok(
-          subLayers.filter(l => l.props.tile.z === 3).every(l => !l.props.visible),
-          'Sublayers at z=3 are hidden'
-        );
+      onAfterUpdate: ({layer, subLayers}) => {
+        if (layer.isLoaded) {
+          t.is(subLayers.length, 4, 'Rendered cached sublayers');
+          t.is(getTileDataCalled, 4, 'Used cached data');
+          t.ok(
+            subLayers.filter(l => l.props.tile.z === 3).every(l => !l.props.visible),
+            'Sublayers at z=3 are hidden'
+          );
+        }
       }
     },
     {
@@ -146,9 +150,11 @@ test('TileLayer', async t => {
           getTileData: 1
         }
       },
-      onAfterUpdate: ({subLayers}) => {
-        t.is(getTileDataCalled, 6, 'Refetched tile data');
-        t.is(subLayers.length, 4, 'Invalidated cached sublayers with prop change');
+      onAfterUpdate: ({layer, subLayers}) => {
+        if (layer.isLoaded) {
+          t.is(getTileDataCalled, 6, 'Refetched tile data');
+          t.is(subLayers.length, 4, 'Invalidated cached sublayers with prop change');
+        }
       }
     }
   ];
