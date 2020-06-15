@@ -171,7 +171,7 @@ export default class TileLayer extends CompositeLayer {
       const isVisible = visible && tile.isVisible;
       const highlightedObjectIndex = this.getHighlightedObjectIndex(tile);
       // cache the rendered layer in the tile
-      if (!tile.isLoaded || tile.isCancelled) {
+      if (!tile.isLoaded) {
         // no op
       } else if (!tile.layers) {
         const layers = this.renderSubLayers(
