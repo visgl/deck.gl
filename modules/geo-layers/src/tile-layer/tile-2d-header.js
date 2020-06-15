@@ -56,7 +56,7 @@ export default class Tile2DHeader {
     try {
       tileData = await getTileData({x, y, z, bbox});
     } catch (err) {
-      error = err;
+      error = err || true;
     } finally {
       requestToken.done();
       this._isLoaded = true;
