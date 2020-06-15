@@ -42,6 +42,7 @@ uniform float widthMaxPixels;
 
 varying vec4 vColor;
 varying vec2 uv;
+varying float isValid;
 
 float paraboloid(float distance, float sourceZ, float targetZ, float ratio) {
   // d: distance on the xy plane
@@ -135,7 +136,7 @@ void main(void) {
   // if it's the first point, use next - current as direction
   // otherwise use current - prev
   float indexDir = mix(-1.0, 1.0, step(segmentIndex, 0.0));
-  float nextSegmentRatio = getSegmentRatio(segmentIndex + indexDir);
+  isValid = 1.0;
 
   uv = vec2(segmentRatio, positions.y);
   geometry.uv = uv;
@@ -149,8 +150,31 @@ void main(void) {
     vec3 target = project_globe_(vec3(instanceTargetPositions.xy, 0.0));
     float angularDist = getAngularDist(instanceSourcePositions.xy, instanceTargetPositions.xy);
   
+    float prevSegmentRatio = getSegmentRatio(max(0.0, segmentIndex - 1.0));
+    float nextSegmentRatio = getSegmentRatio(min(numSegments, segmentIndex + 1.0));
+
+    vec3 prevPos = interpolateGreatCircle(instanceSourcePositions, instanceTargetPositions, source, target, angularDist, prevSegmentRatio);
     vec3 currPos = interpolateGreatCircle(instanceSourcePositions, instanceTargetPositions, source, target, angularDist, segmentRatio);
     vec3 nextPos = interpolateGreatCircle(instanceSourcePositions, instanceTargetPositions, source, target, angularDist, nextSegmentRatio);
+
+    if (abs(currPos.x - prevPos.x) > 180.0) {
+      indexDir = -1.0;
+      isValid = 0.0;
+    } else if (abs(currPos.x - nextPos.x) > 180.0) {
+      indexDir = 1.0;
+      isValid = 0.0;
+    }
+    nextPos = indexDir < 0.0 ? prevPos : nextPos;
+    nextSegmentRatio = indexDir < 0.0 ? prevSegmentRatio : nextSegmentRatio;
+
+    if (isValid == 0.0) {
+      // split at the 180th meridian
+      nextPos.x += nextPos.x > 0.0 ? -360.0 : 360.0;
+      float t = ((currPos.x > 0.0 ? 180.0 : -180.0) - currPos.x) / (nextPos.x - currPos.x);
+      currPos = mix(currPos, nextPos, t);
+      segmentRatio = mix(segmentRatio, nextSegmentRatio, t);
+    }
+
     vec3 currPos64Low = mix(instanceSourcePositions64Low, instanceTargetPositions64Low, segmentRatio);
     vec3 nextPos64Low = mix(instanceSourcePositions64Low, instanceTargetPositions64Low, nextSegmentRatio);
   
@@ -161,6 +185,7 @@ void main(void) {
     vec3 source = project_position(instanceSourcePositions, instanceSourcePositions64Low);
     vec3 target = project_position(instanceTargetPositions, instanceTargetPositions64Low);
 
+    float nextSegmentRatio = getSegmentRatio(segmentIndex + indexDir);
     vec3 currPos = interpolateFlat(source, target, segmentRatio);
     vec3 nextPos = interpolateFlat(source, target, nextSegmentRatio);
     curr = project_common_position_to_clipspace(vec4(currPos, 1.0));
