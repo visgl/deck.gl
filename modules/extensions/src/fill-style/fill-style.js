@@ -66,6 +66,7 @@ export default class FillStyleExtension extends LayerExtension {
         fillPatternScales: {
           size: 1,
           accessor: 'getFillPatternScale',
+          defaultValue: 1,
           shaderAttributes: {
             fillPatternScales: {
               divisor: 0

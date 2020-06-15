@@ -1,7 +1,7 @@
 import {project} from '@deck.gl/core';
 
 /*
- * data filter shader module
+ * fill pattern shader module
  */
 const patternVs = `
 #ifdef NON_INSTANCED_MODEL
@@ -100,7 +100,7 @@ function getPatternUniforms(opts = {}, uniforms) {
 }
 
 export const patternShaders = {
-  name: 'fill-style-pattern',
+  name: 'fill-pattern',
   vs: patternVs,
   fs: patternFs,
   inject,

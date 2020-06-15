@@ -19,7 +19,9 @@ const layer = new GeoJsonLayer({
   // props added by FillStyleExtension
   fillPatternAtlas: './pattern.png',
   fillPatternMapping: './pattern.json',
-  getFillPattern: f => 'hatch'
+  getFillPattern: f => 'hatch',
+  getFillPatternScale: 1,
+  getFillPatternOffset: [0, 0],
 
   // Define extensions
   extensions: [new FillStyleExtension({pattern: true})]
