@@ -2,14 +2,13 @@ import {log} from '@deck.gl/core';
 import {TILE_STATE_SELECTED} from './tileset-2d';
 
 export default class Tile2DHeader {
-  constructor({x, y, z, onTileLoad, onTileError, layerId}) {
+  constructor({x, y, z, onTileLoad, onTileError}) {
     this.x = x;
     this.y = y;
     this.z = z;
     this.isVisible = false;
     this.parent = null;
     this.children = [];
-    this.layerId = layerId;
 
     this.content = null;
     this._isLoaded = false;
