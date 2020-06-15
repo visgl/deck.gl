@@ -169,7 +169,7 @@ export default class Tileset2D {
       }
 
       // isSelected used in request scheduler
-      tile.isSelected = Boolean(tile.state === TILE_STATE_SELECTED);
+      tile.isSelected = tile.state === TILE_STATE_SELECTED;
     }
 
     return changed;
