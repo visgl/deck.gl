@@ -45,21 +45,28 @@ export default class Tile2DHeader {
       return tile.state === TILE_STATE_SELECTED ? 1 : -1;
     });
 
-    if (requestToken) {
-      this._isCancelled = false;
-      try {
-        const tileData = await getTileData({x, y, z, bbox});
-        requestToken.done();
-        this.content = tileData;
-        this._isLoaded = true;
-        this.onTileLoad(this);
-      } catch (err) {
-        requestToken.done();
-        this._isLoaded = true;
-        this.onTileError(err, this);
-      }
-    } else {
+    if (!requestToken) {
       this._isCancelled = true;
+      return;
+    }
+
+    this._isCancelled = false;
+    let tileData;
+    let error;
+    try {
+      tileData = await getTileData({x, y, z, bbox});
+    } catch (err) {
+      error = err;
+    } finally {
+      requestToken.done();
+      this._isLoaded = true;
+    }
+
+    if (error) {
+      this.onTileError(error, this);
+    } else {
+      this.content = tileData;
+      this.onTileLoad(this);
     }
   }
 
