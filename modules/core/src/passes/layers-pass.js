@@ -156,6 +156,7 @@ export default class LayersPass extends Pass {
 
   _getModuleParameters(layer, effects, pass, overrides) {
     const moduleParameters = Object.assign(Object.create(layer.props), {
+      autoWrapLongitude: layer.wrapLongitude,
       viewport: layer.context.viewport,
       mousePosition: layer.context.mousePosition,
       pickingActive: 0,

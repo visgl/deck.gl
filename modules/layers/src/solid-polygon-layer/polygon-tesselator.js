@@ -25,7 +25,7 @@
 // - 3D wireframes (not yet)
 import * as Polygon from './polygon';
 import {Tesselator} from '@deck.gl/core';
-import {cutPolygonByGrid} from '@math.gl/polygon';
+import {cutPolygonByGrid, cutPolygonByMercatorBounds} from '@math.gl/polygon';
 
 // This class is set up to allow querying one attribute at a time
 // the way the AttributeManager expects it
@@ -69,6 +69,13 @@ export default class PolygonTesselator extends Tesselator {
         return cutPolygonByGrid(polygon.positions || polygon, polygon.holeIndices, {
           size: this.positionSize,
           gridResolution: this.opts.resolution,
+          edgeTypes: true
+        });
+      }
+      if (this.opts.wrapLongitude) {
+        return cutPolygonByMercatorBounds(polygon.positions || polygon, polygon.holeIndices, {
+          size: this.positionSize,
+          maxLatitude: 86,
           edgeTypes: true
         });
       }

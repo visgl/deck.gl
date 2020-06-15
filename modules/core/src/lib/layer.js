@@ -152,6 +152,10 @@ export default class Layer extends Component {
     return this.internalState && !this.internalState.isAsyncPropLoading();
   }
 
+  get wrapLongitude() {
+    return this.props.wrapLongitude;
+  }
+
   // Returns true if the layer is pickable and visible.
   isPickable() {
     return this.props.pickable && this.props.visible;
