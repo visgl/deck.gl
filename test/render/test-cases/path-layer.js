@@ -1,4 +1,4 @@
-import {COORDINATE_SYSTEM} from '@deck.gl/core';
+import {COORDINATE_SYSTEM, _GlobeView as GlobeView} from '@deck.gl/core';
 import {PathLayer} from '@deck.gl/layers';
 import {PathStyleExtension} from '@deck.gl/extensions';
 import {zigzag, zigzag3D, meterPaths, positionOrigin} from 'deck.gl-test/data';
@@ -160,5 +160,45 @@ export default [
       })
     ],
     goldenImage: './test/render/golden-images/path-offset.png'
+  },
+  {
+    name: 'path-globe',
+    views: [new GlobeView()],
+    viewState: {
+      latitude: 0,
+      longitude: 0,
+      zoom: 0
+    },
+    layers: [
+      new PathLayer({
+        id: 'path-globe',
+        data: getGraticules(30),
+        getPath: d => d,
+        widthMinPixels: 2
+      })
+    ],
+    goldenImage: './test/render/golden-images/path-globe.png'
   }
 ];
+
+function getGraticules(resolution) {
+  const graticules = [];
+  for (let lat = 0; lat < 90; lat += resolution) {
+    const path1 = [];
+    const path2 = [];
+    for (let lon = -180; lon <= 180; lon += 90) {
+      path1.push([lon, lat]);
+      path2.push([lon, -lat]);
+    }
+    graticules.push(path1);
+    graticules.push(path2);
+  }
+  for (let lon = -180; lon < 180; lon += resolution) {
+    const path = [];
+    for (let lat = -90; lat <= 90; lat += 90) {
+      path.push([lon, lat]);
+    }
+    graticules.push(path);
+  }
+  return graticules;
+}

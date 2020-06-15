@@ -1,5 +1,5 @@
 import {Deck, _GlobeView as GlobeView} from '@deck.gl/core';
-import {GeoJsonLayer, ArcLayer, ColumnLayer, BitmapLayer} from '@deck.gl/layers';
+import {GeoJsonLayer, ArcLayer, ColumnLayer, BitmapLayer, PathLayer} from '@deck.gl/layers';
 
 // source: Natural Earth http://www.naturalearthdata.com/ via geojson.xyz
 const COUNTRIES =
@@ -15,6 +15,8 @@ const INITIAL_VIEW_STATE = {
   zoom: 0
 };
 
+const GRATICULES = getGraticules(30);
+
 export const deck = new Deck({
   views: new GlobeView(),
   initialViewState: INITIAL_VIEW_STATE,
@@ -27,6 +29,13 @@ export const deck = new Deck({
       id: 'base-map-raster',
       image: WORLD_MAP,
       bounds: [-180, -90, 180, 90]
+    }),
+    new PathLayer({
+      id: 'graticules',
+      data: GRATICULES,
+      getPath: d => d,
+      widthMinPixels: 1,
+      getColor: [128, 128, 128]
     }),
     new GeoJsonLayer({
       id: 'base-map',
@@ -79,6 +88,28 @@ export const deck = new Deck({
     })
   ]
 });
+
+function getGraticules(resolution) {
+  const graticules = [];
+  for (let lat = 0; lat < 90; lat += resolution) {
+    const path1 = [];
+    const path2 = [];
+    for (let lon = -180; lon <= 180; lon += 90) {
+      path1.push([lon, lat]);
+      path2.push([lon, -lat]);
+    }
+    graticules.push(path1);
+    graticules.push(path2);
+  }
+  for (let lon = -180; lon < 180; lon += resolution) {
+    const path = [];
+    for (let lat = -90; lat <= 90; lat += 90) {
+      path.push([lon, lat]);
+    }
+    graticules.push(path);
+  }
+  return graticules;
+}
 
 // For automated test cases
 /* global document */

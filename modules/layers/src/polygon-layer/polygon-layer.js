@@ -113,10 +113,7 @@ export default class PolygonLayer extends CompositeLayer {
         // holeIndices[-1] falls back to 0
         // holeIndices[holeIndices.length] falls back to positions.length
         for (let i = 0; i <= holeIndices.length; i++) {
-          const path = positions.subarray(
-            holeIndices[i - 1] || 0,
-            holeIndices[i] || positions.length
-          );
+          const path = positions.slice(holeIndices[i - 1] || 0, holeIndices[i] || positions.length);
           paths.push(this.getSubLayerRow({path}, object, objectInfo.index));
         }
       } else {

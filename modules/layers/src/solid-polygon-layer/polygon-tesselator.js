@@ -25,6 +25,7 @@
 // - 3D wireframes (not yet)
 import * as Polygon from './polygon';
 import {Tesselator} from '@deck.gl/core';
+import {cutPolygonByGrid} from '@math.gl/polygon';
 
 // This class is set up to allow querying one attribute at a time
 // the way the AttributeManager expects it
@@ -61,8 +62,29 @@ export default class PolygonTesselator extends Tesselator {
     }
   }
 
+  normalizeGeometry(polygon) {
+    if (this.normalize) {
+      polygon = Polygon.normalize(polygon, this.positionSize);
+      if (this.opts.resolution) {
+        return cutPolygonByGrid(polygon.positions || polygon, polygon.holeIndices, {
+          size: this.positionSize,
+          gridResolution: this.opts.resolution,
+          edgeTypes: true
+        });
+      }
+    }
+    return polygon;
+  }
+
   getGeometrySize(polygon) {
-    return Polygon.getVertexCount(polygon, this.positionSize, this.normalize);
+    if (Array.isArray(polygon) && !Number.isFinite(polygon[0])) {
+      let size = 0;
+      for (const subPolygon of polygon) {
+        size += this.getGeometrySize(subPolygon);
+      }
+      return size;
+    }
+    return (polygon.positions || polygon).length / this.positionSize;
   }
 
   getGeometryFromBuffer(buffer) {
@@ -74,13 +96,19 @@ export default class PolygonTesselator extends Tesselator {
   }
 
   updateGeometryAttributes(polygon, context) {
-    if (this.normalize) {
-      polygon = Polygon.normalize(polygon, this.positionSize, context.geometrySize);
+    if (Array.isArray(polygon) && !Number.isFinite(polygon[0])) {
+      for (const subPolygon of polygon) {
+        const geometrySize = this.getGeometrySize(subPolygon);
+        context.geometrySize = geometrySize;
+        this.updateGeometryAttributes(subPolygon, context);
+        context.vertexStart += geometrySize;
+        context.indexStart = this.indexStarts[context.geometryIndex + 1];
+      }
+    } else {
+      this._updateIndices(polygon, context);
+      this._updatePositions(polygon, context);
+      this._updateVertexValid(polygon, context);
     }
-
-    this._updateIndices(polygon, context);
-    this._updatePositions(polygon, context);
-    this._updateVertexValid(polygon, context);
   }
 
   // Flatten the indices array
@@ -147,7 +175,11 @@ export default class PolygonTesselator extends Tesselator {
       nextPositions  A1 A2 A3 A4 B0 B1 B2 C0 C1 ...
       vertexValid    1  1  1  1  0  1  1  0  1 ...
      */
-    vertexValid.fill(1, vertexStart, vertexStart + geometrySize);
+    if (polygon && polygon.edgeTypes) {
+      vertexValid.set(polygon.edgeTypes, vertexStart);
+    } else {
+      vertexValid.fill(1, vertexStart, vertexStart + geometrySize);
+    }
     if (holeIndices) {
       for (let j = 0; j < holeIndices.length; j++) {
         vertexValid[vertexStart + holeIndices[j] / positionSize - 1] = 0;

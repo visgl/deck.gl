@@ -102,7 +102,6 @@ const TEST_CASES = [
 
 test('polygon#imports', t => {
   t.ok(typeof Polygon.normalize === 'function', 'Polygon.normalize imported');
-  t.ok(typeof Polygon.getVertexCount === 'function', 'Polygon.getVertexCount imported');
   t.ok(typeof Polygon.getSurfaceIndices === 'function', 'Polygon.getSurfaceIndices imported');
   t.end();
 });
@@ -113,7 +112,7 @@ test('polygon#fuctions', t => {
 
     const complexPolygon = Polygon.normalize(object.polygon, 2);
     t.ok(
-      ArrayBuffer.isView(complexPolygon.positions || complexPolygon),
+      (complexPolygon.positions || complexPolygon).every(Number.isFinite),
       'Polygon.normalize flattens positions'
     );
     if (complexPolygon.holeIndices) {
@@ -122,14 +121,6 @@ test('polygon#fuctions', t => {
         'Polygon.normalize returns starting indices of rings'
       );
     }
-
-    const vertexCount = Polygon.getVertexCount(object.polygon, 2);
-    t.ok(Number.isFinite(vertexCount), 'Polygon.getVertexCount');
-    t.is(
-      vertexCount,
-      Polygon.getVertexCount(complexPolygon, 2),
-      'Polygon.getVertexCount returns consistent result'
-    );
 
     const indices = Polygon.getSurfaceIndices(complexPolygon, 2);
     t.ok(Array.isArray(indices), 'Polygon.getSurfaceIndices');
