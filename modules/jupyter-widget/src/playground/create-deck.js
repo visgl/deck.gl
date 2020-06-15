@@ -10,6 +10,8 @@ import mapboxgl from './utils/mapbox-utils';
 import {loadScript} from './utils/script-utils';
 import {createGoogleMapsDeckOverlay} from './utils/google-maps-utils';
 
+import {addSupportComponents} from '../lib/components/index';
+
 import * as deck from '../deck-bundle';
 
 function extractClasses(library = {}) {
@@ -150,6 +152,8 @@ function createDeck({
   try {
     const oldLayers = jsonInput.layers || [];
     const props = jsonConverter.convert(jsonInput);
+
+    addSupportComponents(container, props);
 
     const convertedLayers = (props.layers || []).filter(l => l);
 

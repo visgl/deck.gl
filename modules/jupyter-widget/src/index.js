@@ -13,11 +13,11 @@ if (dataBaseUrl) {
 // Initialize the transport
 const {jupyterTransport} = require('./lib/jupyter-transport').default;
 
-let TransportModel = null;
-let TransportView = null;
+let JupyterTransportModel = null;
+let JupyterTransportView = null;
 try {
-  TransportModel = require('./lib/jupyter-transport-model').default;
-  TransportView = require('./lib/jupyter-transport-view').default;
+  JupyterTransportModel = require('./lib/jupyter-transport-model').default;
+  JupyterTransportView = require('./lib/jupyter-transport-view').default;
 } catch (err) {
   // Note: Happens in the to_html() case
 }
@@ -36,8 +36,8 @@ module.exports = {
   // Jupyter Hooks
   MODULE_VERSION,
   MODULE_NAME,
-  TransportModel,
-  TransportView,
+  JupyterTransportModel,
+  JupyterTransportView,
 
   // For to_html()...
   initPlayground,
