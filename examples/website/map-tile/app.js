@@ -60,6 +60,7 @@ export default class App extends PureComponent {
         // https://wiki.openstreetmap.org/wiki/Zoom_levels
         minZoom: 0,
         maxZoom: 19,
+        tileSize: 256,
 
         renderSubLayers: props => {
           const {
