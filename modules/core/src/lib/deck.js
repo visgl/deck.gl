@@ -275,6 +275,8 @@ export default class Deck {
     // If initialized, update sub manager props
     if (this.layerManager) {
       this.viewManager.setProps(resolvedProps);
+      // Make sure that any new layer gets initialized with the current viewport
+      this.layerManager.activateViewport(this.getViewports()[0]);
       this.layerManager.setProps(resolvedProps);
       this.effectManager.setProps(resolvedProps);
       this.deckRenderer.setProps(resolvedProps);

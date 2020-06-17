@@ -142,6 +142,14 @@ export default class GlobeViewport extends Viewport {
     return [lng, lat, Z];
   }
 
+  projectFlat(xyz) {
+    return xyz;
+  }
+
+  unprojectFlat(xyz) {
+    return xyz;
+  }
+
   getMapCenterByLngLatPosition({lngLat, pos}) {
     const fromPosition = this.unproject(pos);
     return [

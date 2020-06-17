@@ -137,38 +137,20 @@ export const zigzag3D = [
 ];
 
 export const greatCircles = [
-  {source: [120, 0], target: [-60, 0]},
-  {source: [120, 10], target: [-60, -10]},
-  {source: [120, -10], target: [-60, 10]},
-  {source: [-120, 0], target: [60, 0]},
-  {source: [-120, 10], target: [60, -10]},
-  {source: [-120, -10], target: [60, 10]},
-  {source: [-40, 10], target: [-140, 10]},
-  {source: [-40, 20], target: [-140, 20]},
-  {source: [-40, 30], target: [-140, 30]},
-  {source: [-40, 40], target: [-140, 40]},
-  {source: [-40, 50], target: [-140, 50]},
-  {source: [-40, 60], target: [-140, 60]},
-  {source: [-40, 70], target: [-140, 70]},
-  {source: [10, 80], target: [20, 30]},
-  {source: [20, 80], target: [40, 30]},
-  {source: [30, 80], target: [60, 30]},
-  {source: [40, 80], target: [80, 30]},
-  {source: [50, 80], target: [100, 30]},
-  {source: [60, 80], target: [120, 30]},
-  {source: [70, 80], target: [140, 30]},
-  {source: [-40, -10], target: [-140, -10]},
-  {source: [-40, -20], target: [-140, -30]},
-  {source: [-40, -30], target: [-140, -60]},
-  {source: [-40, -40], target: [-140, -80]},
-  {source: [20, -30], target: [20, -80]},
-  {source: [40, -30], target: [40, -80]},
-  {source: [60, -30], target: [60, -80]},
-  {source: [80, -30], target: [80, -80]},
-  {source: [100, -30], target: [100, -80]},
-  {source: [120, -30], target: [120, -80]},
-  {source: [140, -30], target: [140, -80]}
-];
+  {source: [0, 10], target: [180, 10]},
+  {source: [180, -10], target: [-120, -10]},
+  {source: [120, 30], target: [-120, -10]},
+  {source: [120, 30], target: [-140, 50]},
+  {source: [120, 70], target: [-140, 50]},
+  {source: [120, 70], target: [60, -50]},
+  {source: [0, 10], target: [60, -50]},
+  {source: [-60, 30], target: [60, 30]},
+  {source: [60, 30], target: [180, 30]},
+  {source: [180, 30], target: [-60, 30]},
+  {source: [-60, 80], target: [60, 80]},
+  {source: [60, 80], target: [180, 80]},
+  {source: [180, 80], target: [-60, 80]}
+].flatMap(p => [p, {source: [-p.target[0], -p.target[1]], target: [-p.source[0], -p.source[1]]}]);
 
 // Extract simple/complex polygons arrays from geojson
 export const polygons = choropleths.features.map(choropleth => choropleth.geometry.coordinates);
