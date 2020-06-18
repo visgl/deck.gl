@@ -146,7 +146,12 @@ export default class TerrainLayer extends CompositeLayer {
   renderSubLayers(props) {
     const SubLayerClass = this.getSubLayerClass('mesh', SimpleMeshLayer);
     const {data, color} = props;
-    const [mesh, texture] = data || [];
+
+    if (!data) {
+      return null;
+    }
+
+    const [mesh, texture] = data;
 
     return new SubLayerClass(props, {
       data: DUMMY_DATA,
@@ -165,7 +170,7 @@ export default class TerrainLayer extends CompositeLayer {
     }
 
     const {zRange} = this.state;
-    const ranges = data.map(arr => {
+    const ranges = data.filter(arr => arr).map(arr => {
       const bounds = arr[0].header.boundingBox;
       return bounds.map(bound => bound[2]);
     });
