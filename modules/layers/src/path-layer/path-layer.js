@@ -56,6 +56,10 @@ export default class PathLayer extends Layer {
     return super.getShaders({vs, fs, modules: [project32, picking]}); // 'project' module added by default.
   }
 
+  get wrapLongitude() {
+    return false;
+  }
+
   initializeState() {
     const noAlloc = true;
     const attributeManager = this.getAttributeManager();
@@ -148,6 +152,7 @@ export default class PathLayer extends Layer {
         loop: props._pathType === 'loop',
         getGeometry: props.getPath,
         positionFormat: props.positionFormat,
+        wrapLongitude: props.wrapLongitude,
         // TODO - move the flag out of the viewport
         resolution: this.context.viewport.resolution,
         dataChanged: changeFlags.dataChanged

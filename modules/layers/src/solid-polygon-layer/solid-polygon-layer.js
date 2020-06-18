@@ -70,6 +70,10 @@ export default class SolidPolygonLayer extends Layer {
     });
   }
 
+  get wrapLongitude() {
+    return false;
+  }
+
   initializeState() {
     const {gl, viewport} = this.context;
     let {coordinateSystem} = this.props;
@@ -273,6 +277,7 @@ export default class SolidPolygonLayer extends Layer {
         buffers,
         getGeometry: props.getPolygon,
         positionFormat: props.positionFormat,
+        wrapLongitude: props.wrapLongitude,
         // TODO - move the flag out of the viewport
         resolution: this.context.viewport.resolution,
         fp64: this.use64bitPositions(),
