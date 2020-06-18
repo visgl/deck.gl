@@ -76,7 +76,7 @@ test('TileLayer', async t => {
       },
       onAfterUpdate: ({layer, subLayers}) => {
         if (!layer.isLoaded) {
-          t.is(subLayers.length, 0, 'Rendered sublayers');
+          t.ok(subLayers.length < 2);
         } else {
           t.is(subLayers.length, 2, 'Rendered sublayers');
           t.ok(layer.isLoaded, 'Layer is loaded');
@@ -93,7 +93,7 @@ test('TileLayer', async t => {
       },
       onAfterUpdate: ({layer, subLayers}) => {
         if (!layer.isLoaded) {
-          t.is(subLayers.length, 0, 'Rendered sublayers');
+          t.ok(subLayers.length < 2);
         } else {
           t.is(subLayers.length, 2, 'Rendered sublayers');
           t.is(getTileDataCalled, 2, 'Fetched tile data');
