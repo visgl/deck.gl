@@ -171,7 +171,7 @@ export function getUniformsFromViewport({
   // Match Layer.defaultProps
   coordinateSystem = COORDINATE_SYSTEM.DEFAULT,
   coordinateOrigin,
-  wrapLongitude = false,
+  autoWrapLongitude = false,
   // Deprecated
   projectionMode,
   positionOrigin
@@ -191,7 +191,7 @@ export function getUniformsFromViewport({
     coordinateOrigin
   });
 
-  uniforms.project_uWrapLongitude = wrapLongitude;
+  uniforms.project_uWrapLongitude = autoWrapLongitude;
   uniforms.project_uModelMatrix = modelMatrix || IDENTITY_MATRIX;
 
   return uniforms;
