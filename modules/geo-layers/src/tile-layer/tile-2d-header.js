@@ -1,5 +1,4 @@
 import {log} from '@deck.gl/core';
-import {isPromise} from '@loaders.gl/core';
 
 export default class Tile2DHeader {
   constructor({x, y, z, onTileLoad, onTileError}) {
@@ -7,11 +6,13 @@ export default class Tile2DHeader {
     this.y = y;
     this.z = z;
     this.isVisible = false;
+    this.isSelected = false;
     this.parent = null;
     this.children = [];
 
     this.content = null;
     this._isLoaded = false;
+    this._isCancelled = false;
 
     this.onTileLoad = onTileLoad;
     this.onTileError = onTileError;
@@ -25,6 +26,10 @@ export default class Tile2DHeader {
     return this._isLoaded;
   }
 
+  get isCancelled() {
+    return this._isCancelled;
+  }
+
   get byteLength() {
     const result = this.content ? this.content.byteLength : 0;
     if (!Number.isFinite(result)) {
@@ -33,38 +38,43 @@ export default class Tile2DHeader {
     return result;
   }
 
-  loadData(getTileData) {
+  async _loadData(getTileData, requestScheduler) {
     const {x, y, z, bbox} = this;
+
+    const requestToken = await requestScheduler.scheduleRequest(this, tile => {
+      return tile.isSelected;
+    });
+
+    if (!requestToken) {
+      this._isCancelled = true;
+      return;
+    }
+
+    this._isCancelled = false;
+    let tileData;
+    let error;
+    try {
+      tileData = await getTileData({x, y, z, bbox});
+    } catch (err) {
+      error = err || true;
+    } finally {
+      requestToken.done();
+      this._isLoaded = true;
+    }
+
+    if (error) {
+      this.onTileError(error, this);
+    } else {
+      this.content = tileData;
+      this.onTileLoad(this);
+    }
+  }
+
+  loadData(getTileData, requestScheduler) {
     if (!getTileData) {
       return;
     }
 
-    let tileData;
-    try {
-      tileData = getTileData({x, y, z, bbox});
-    } catch (err) {
-      this._isLoaded = true;
-      this.onTileError(err, this);
-      return;
-    }
-
-    if (!isPromise(tileData)) {
-      this.content = tileData;
-      this._isLoaded = true;
-      this.onTileLoad(this);
-      return;
-    }
-
-    this._loader = tileData
-      .then(buffers => {
-        this.content = buffers;
-        this._isLoaded = true;
-        this.onTileLoad(this);
-        return buffers;
-      })
-      .catch(err => {
-        this._isLoaded = true;
-        this.onTileError(err, this);
-      });
+    this._loader = this._loadData(getTileData, requestScheduler);
   }
 }

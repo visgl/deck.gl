@@ -1,6 +1,6 @@
 /* eslint-disable no-unused-vars */
 import test from 'tape-catch';
-import React, {createElement} from 'react';
+import React, {createElement, Fragment} from 'react';
 
 import {View, MapView, FirstPersonView, ScatterplotLayer, LineLayer} from 'deck.gl';
 import extractJSXLayers from '@deck.gl/react/utils/extract-jsx-layers';
@@ -144,6 +144,45 @@ const TEST_CASES = [
       layers: [lineLayer, scatterplotLayer]
     },
     title: 'JSX layers with layers prop'
+  },
+  {
+    input: {
+      children: [reactMapView, createElement(Fragment, {}, reactLineLayer), noop],
+      views: null,
+      layers: []
+    },
+    output: {
+      children: [reactMapView, createElement(View, {}, noop)],
+      views: [new MapView(reactMapView.props)],
+      layers: [lineLayer]
+    },
+    title: 'fragment with single child'
+  },
+  {
+    input: {
+      children: [createElement(Fragment, {}, reactMapView, reactLineLayer), noop],
+      views: null,
+      layers: []
+    },
+    output: {
+      children: [reactMapView, createElement(View, {}, noop)],
+      views: [new MapView(reactMapView.props)],
+      layers: [lineLayer]
+    },
+    title: 'fragment with statically known children'
+  },
+  {
+    input: {
+      children: [createElement(Fragment, {}, [reactMapView, reactLineLayer]), noop],
+      views: null,
+      layers: []
+    },
+    output: {
+      children: [reactMapView, createElement(View, {}, noop)],
+      views: [new MapView(reactMapView.props)],
+      layers: [lineLayer]
+    },
+    title: 'fragment with dynamic children'
   },
   {
     input: {
