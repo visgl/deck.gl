@@ -242,28 +242,25 @@ export default class ViewManager {
     this._eventCallbacks.onViewStateChange(event);
   }
 
-  _createController(props) {
+  _createController(view, props) {
     const Controller = props.type;
 
-    const controller = new Controller(
-      Object.assign(
-        {
-          timeline: this.timeline,
-          eventManager: this._eventManager,
-          // Set an internal callback that calls the prop callback if provided
-          onViewStateChange: this._onViewStateChange.bind(this, props.id),
-          onStateChange: this._eventCallbacks.onInteractiveStateChange
-        },
-        props
-      )
-    );
+    const controller = new Controller({
+      timeline: this.timeline,
+      eventManager: this._eventManager,
+      // Set an internal callback that calls the prop callback if provided
+      onViewStateChange: this._onViewStateChange.bind(this, props.id),
+      onStateChange: this._eventCallbacks.onInteractiveStateChange,
+      makeViewport: view._getViewport.bind(view),
+      ...props
+    });
 
     return controller;
   }
 
   _updateController(view, viewState, viewport, controller) {
     if (view.controller) {
-      const controllerProps = Object.assign({}, view.controller, viewState, {
+      const controllerProps = Object.assign({}, viewState, view.props, view.controller, {
         id: view.id,
         x: viewport.x,
         y: viewport.y,
@@ -275,7 +272,7 @@ export default class ViewManager {
       if (controller) {
         controller.setProps(controllerProps);
       } else {
-        controller = this._createController(controllerProps);
+        controller = this._createController(view, controllerProps);
       }
       return controller;
     }

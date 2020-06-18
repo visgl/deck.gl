@@ -80,7 +80,7 @@ export default class View {
 
     // Resolve relative viewport dimensions
     const viewportDimensions = this.getDimensions({width, height});
-    const props = Object.assign({viewState}, viewState, this.props, viewportDimensions);
+    const props = Object.assign({}, viewState, this.props, viewportDimensions);
     return this._getViewport(props);
   }
 
