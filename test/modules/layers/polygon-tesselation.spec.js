@@ -390,3 +390,31 @@ test('PolygonTesselator#geometryBuffer#buffer', t => {
 
   t.end();
 });
+
+test('PolygonTesselator#normalizeGeometry', t => {
+  const sampleData = [[[150, 30], [-150, 30], [-150, -30], [150, -30], [150, 30]]];
+  const tesselator = new PolygonTesselator({
+    data: sampleData,
+    getGeometry: d => d
+  });
+
+  t.is(tesselator.instanceCount, 5, 'Updated instanceCount from input');
+
+  tesselator.updateGeometry({
+    resolution: 30,
+    wrapLongitude: false
+  });
+
+  // subdivide into smaller segments
+  t.is(tesselator.instanceCount, 90, 'Updated instanceCount from input');
+
+  tesselator.updateGeometry({
+    resolution: null,
+    wrapLongitude: true
+  });
+
+  // split at 180th meridian
+  t.is(tesselator.instanceCount, 9, 'Updated instanceCount from input');
+
+  t.end();
+});
