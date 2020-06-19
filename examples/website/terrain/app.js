@@ -13,7 +13,8 @@ const INITIAL_VIEW_STATE = {
   longitude: -122.18,
   zoom: 11.5,
   bearing: 140,
-  pitch: 60
+  pitch: 60,
+  maxPitch: 89
 };
 
 const TERRAIN_IMAGE = `https://api.mapbox.com/v4/mapbox.terrain-rgb/{z}/{x}/{y}.png?access_token=${MAPBOX_TOKEN}`;
