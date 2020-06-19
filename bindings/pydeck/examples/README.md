@@ -35,6 +35,7 @@ All .py files are meant for individual execution and review, to be hosted on the
 - ScenegraphLayer
 - ScreenGridLayer
 - SimpleMeshLayer
+- TerrainLayer
 - TileLayer
 - Tile3DLayer
 - TripsLayer
