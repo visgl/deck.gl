@@ -25,7 +25,8 @@ function nextPowOfTwo(number) {
 
 // update comment to create a new texture and copy original data.
 function resizeImage(ctx, imageData, width, height) {
-  const {naturalWidth, naturalHeight} = imageData;
+  const naturalWidth = imageData.naturalWidth || imageData.width;
+  const naturalHeight = imageData.naturalHeight || imageData.height;
   if (width === naturalWidth && height === naturalHeight) {
     return imageData;
   }
