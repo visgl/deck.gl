@@ -137,6 +137,9 @@ vec4 project_position(vec4 position, vec3 position64Low) {
         position_world.w
       );
     }
+    if (project_uCoordinateSystem == COORDINATE_SYSTEM_CARTESIAN) {
+      position_world.xyz += project_uCoordinateOrigin;
+    }
   }
   if (project_uProjectionMode == PROJECTION_MODE_GLOBE) {
     if (project_uCoordinateSystem == COORDINATE_SYSTEM_LNGLAT) {

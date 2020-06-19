@@ -79,7 +79,9 @@ export function getWorldPosition(
 
     case COORDINATE_SYSTEM.CARTESIAN:
     default:
-      return viewport.isGeospatial ? [x, y, z] : viewport.projectPosition([x, y, z]);
+      return viewport.isGeospatial
+        ? [x + coordinateOrigin[0], y + coordinateOrigin[1], z + coordinateOrigin[2]]
+        : viewport.projectPosition([x, y, z]);
   }
 }
 
