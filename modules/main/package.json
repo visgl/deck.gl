@@ -2,7 +2,7 @@
   "name": "deck.gl",
   "description": "A suite of 3D-enabled data visualization overlays, suitable for react-map-gl",
   "license": "MIT",
-  "version": "8.1.9",
+  "version": "8.1.10",
   "keywords": [
     "webgl",
     "visualization",
@@ -28,16 +28,16 @@
     "prepublishOnly": "npm run build-bundle && npm run build-bundle -- --env.dev"
   },
   "dependencies": {
-    "@deck.gl/aggregation-layers": "8.1.9",
-    "@deck.gl/core": "8.1.9",
-    "@deck.gl/extensions": "8.1.9",
-    "@deck.gl/geo-layers": "8.1.9",
-    "@deck.gl/google-maps": "8.1.9",
-    "@deck.gl/json": "8.1.9",
-    "@deck.gl/layers": "8.1.9",
-    "@deck.gl/mapbox": "8.1.9",
-    "@deck.gl/mesh-layers": "8.1.9",
-    "@deck.gl/react": "8.1.9"
+    "@deck.gl/aggregation-layers": "8.1.10",
+    "@deck.gl/core": "8.1.10",
+    "@deck.gl/extensions": "8.1.10",
+    "@deck.gl/geo-layers": "8.1.10",
+    "@deck.gl/google-maps": "8.1.10",
+    "@deck.gl/json": "8.1.10",
+    "@deck.gl/layers": "8.1.10",
+    "@deck.gl/mapbox": "8.1.10",
+    "@deck.gl/mesh-layers": "8.1.10",
+    "@deck.gl/react": "8.1.10"
   },
   "gitHead": "99cefc1c1a40ec33da73fd362e9ecc349c0bee6c"
 }

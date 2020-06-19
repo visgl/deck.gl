@@ -19,6 +19,12 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v8.1
 
+#### deck.gl [8.1.10] - June 18 2020
+
+- Fix IconManager for loaders 2.2.0 (#4694)
+- Extract children from Fragment too (#4681)
+- Fix onHover/tooltip flickering (#4685)
+
 #### deck.gl [8.1.9] - June 4 2020
 
 - Wipe the current cached layers when updateTrigger variables are updated (#4609)
