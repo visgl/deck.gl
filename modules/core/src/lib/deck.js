@@ -25,7 +25,6 @@ import EffectManager from './effect-manager';
 import Effect from './effect';
 import DeckRenderer from './deck-renderer';
 import DeckPicker from './deck-picker';
-import DataManager from './data/data-manager';
 import Tooltip from './tooltip';
 import log from '../utils/log';
 import {deepEqual} from '../utils/deep-equal';
@@ -230,9 +229,6 @@ export default class Deck {
       this.eventManager.destroy();
       this.eventManager = null;
 
-      this.dataManager.finalize();
-      this.dataManager = null;
-
       this.tooltip.remove();
       this.tooltip = null;
     }
@@ -369,13 +365,13 @@ export default class Deck {
 
   _addResources(resources, forceUpdate = false) {
     for (const id in resources) {
-      this.dataManager.add(id, resources[id], {forceUpdate});
+      this.layerManager.resourceManager.add({resourceId: id, data: resources[id], forceUpdate});
     }
   }
 
   _removeResources(resourceIds) {
     for (const id of resourceIds) {
-      this.dataManager.remove(id);
+      this.layerManager.resourceManager.remove(id);
     }
   }
 
@@ -628,8 +624,6 @@ export default class Deck {
       height: this.height
     });
 
-    this.dataManager = new DataManager({gl, protocol: 'deck://', onError: this.props.onError});
-
     // viewManager must be initialized before layerManager
     // layerManager depends on viewport created by viewManager.
     const viewport = this.viewManager.getViewports()[0];
@@ -637,7 +631,6 @@ export default class Deck {
     // Note: avoid React setState due GL animation loop / setState timing issue
     this.layerManager = new LayerManager(gl, {
       deck: this,
-      dataManager: this.dataManager,
       stats: this.stats,
       viewport,
       timeline

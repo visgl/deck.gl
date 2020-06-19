@@ -169,7 +169,7 @@ test('Deck#auto view state', t => {
   });
 });
 
-test('Deck#dataManager', async t => {
+test('Deck#resourceManager', async t => {
   const layer1 = new ScatterplotLayer({
     id: 'scatterplot-global-data',
     data: 'deck://pins',
@@ -214,9 +214,9 @@ test('Deck#dataManager', async t => {
   }
 
   await update();
-  const {dataManager} = deck;
+  const {resourceManager} = deck.layerManager;
   t.is(layer1.getNumInstances(), 0, 'layer subscribes to global data resource');
-  t.ok(dataManager.contains('cities.json'), 'data url is cached');
+  t.ok(resourceManager.contains('cities.json'), 'data url is cached');
 
   deck._addResources({
     pins: [{position: [1, 0, 0]}]
@@ -232,10 +232,10 @@ test('Deck#dataManager', async t => {
 
   await update({layers: []});
   await sleep(300);
-  t.notOk(dataManager.contains('cities.json'), 'cached data is purged');
+  t.notOk(resourceManager.contains('cities.json'), 'cached data is purged');
 
   deck._removeResources(['pins']);
-  t.notOk(dataManager.contains('pins'), 'data resource is removed');
+  t.notOk(resourceManager.contains('pins'), 'data resource is removed');
 
   deck.finalize();
   t.end();

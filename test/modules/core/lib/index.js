@@ -19,7 +19,7 @@
 // THE SOFTWARE.
 
 import './attribute';
-import './data';
+import './resource';
 import './deck.spec';
 import './deck-picker.spec';
 import './layer.spec';

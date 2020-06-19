@@ -1,15 +1,17 @@
 import {load} from '@loaders.gl/core';
 
-export default class DataResource {
+export default class Resource {
   constructor(id, data, context) {
     this.id = id;
     this.context = context;
 
+    this._loadCount = 0;
     this._subscribers = new Set();
 
     this.setData(data);
   }
 
+  // consumer: {onChange: Function}
   subscribe(consumer) {
     this._subscribers.add(consumer);
   }
@@ -27,7 +29,11 @@ export default class DataResource {
   }
 
   getData() {
-    return this.isLoaded ? this._content : this._loader;
+    return this.isLoaded
+      ? this._error
+        ? Promise.reject(this._error)
+        : this._content
+      : this._loader.then(() => this.getData());
   }
 
   setData(data, forceUpdate) {
@@ -35,6 +41,7 @@ export default class DataResource {
       return;
     }
     this._data = data;
+    const loadCount = ++this._loadCount;
 
     let loader = data;
     if (typeof data === 'string') {
@@ -44,30 +51,27 @@ export default class DataResource {
       this.isLoaded = false;
       this._loader = loader
         .then(result => {
-          if (this._data === data) {
-            // check if source has changed
-            this._onDataLoad(result);
+          // check if source has changed
+          if (this._loadCount === loadCount) {
+            this.isLoaded = true;
+            this._error = null;
+            this._content = result;
           }
         })
         .catch(error => {
-          this.context.onError(error);
-          if (this._data === data) {
-            this._onDataLoad(null);
+          if (this._loadCount === loadCount) {
+            this.isLoaded = true;
+            this._error = error || true;
           }
-        })
-        .then(() => this.getData());
+        });
     } else {
-      this._onDataLoad(data);
+      this.isLoaded = true;
+      this._error = null;
+      this._content = data;
     }
 
     for (const subscriber of this._subscribers) {
       subscriber.onChange(this.getData());
     }
-  }
-
-  _onDataLoad(data) {
-    this.isLoaded = true;
-    this._content = data;
-    return data;
   }
 }

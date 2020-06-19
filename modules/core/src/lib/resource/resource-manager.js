@@ -1,19 +1,13 @@
-/* global requestAnimationFrame */
-import DataResource from './data-resource';
-import log from '../../utils/log';
+/* global setTimeout */
+import Resource from './resource';
 
-const DEFAULT_ERROR_HANDLER = error => {
-  log.error(error.message)();
-};
-
-export default class DataManager {
-  constructor({gl, protocol, onError}) {
+export default class ResourceManager {
+  constructor({gl, protocol}) {
     this.protocol = protocol || 'resource://';
 
     this._context = {
       gl,
-      dataManager: this,
-      onError: onError || DEFAULT_ERROR_HANDLER
+      resourceManager: this
     };
     this._resources = {};
     this._consumers = {};
@@ -28,14 +22,13 @@ export default class DataManager {
     return resourceId in this._resources;
   }
 
-  add(resourceId, data, opts = {}) {
-    const {forceUpdate = false, persistent = true} = opts;
+  add({resourceId, data, forceUpdate = false, persistent = true}) {
     let res = this._resources[resourceId];
 
     if (res) {
       res.setData(data, forceUpdate);
     } else {
-      res = new DataResource(resourceId, data, this._context);
+      res = new Resource(resourceId, data, this._context);
       this._resources[resourceId] = res;
     }
     // persistent resources can only be removed by calling `remove`
@@ -52,7 +45,7 @@ export default class DataManager {
     }
   }
 
-  unsubscribe(consumerId) {
+  unsubscribe({consumerId}) {
     const consumer = this._consumers[consumerId];
     if (consumer) {
       for (const requestId in consumer) {
@@ -66,13 +59,13 @@ export default class DataManager {
     }
   }
 
-  subscribe(resourceId, onChange, consumerId, requestId = 'default') {
+  subscribe({resourceId, onChange, consumerId, requestId = 'default'}) {
     const {_resources: resources, protocol} = this;
     if (resourceId.startsWith(protocol)) {
       resourceId = resourceId.replace(protocol, '');
       if (!resources[resourceId]) {
         // Add placeholder. When this resource becomes available, the consumer will be notified.
-        this.add(resourceId, null, {persistent: false});
+        this.add({resourceId, data: null, persistent: false});
       }
     }
     const res = resources[resourceId];
@@ -81,13 +74,14 @@ export default class DataManager {
       return res.getData();
     }
 
-    return null;
+    return undefined;
   }
 
   prune() {
     if (!this._pruneRequest) {
-      // Perf: batch multiple requests together
-      this._pruneRequest = requestAnimationFrame(() => this._prune());
+      // prune() may be called multiple times in the same animation frame.
+      // Batch multiple requests together
+      this._pruneRequest = setTimeout(() => this._prune(), 0);
     }
   }
 

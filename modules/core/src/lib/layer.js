@@ -60,23 +60,22 @@ const defaultProps = {
   fetch: {
     type: 'function',
     value: (url, {propName, layer}) => {
-      const {dataManager} = layer.context;
+      const {resourceManager} = layer.context;
       const loadOptions = layer.getLoadOptions();
+      let inResourceManager = resourceManager.contains(url);
 
-      if (dataManager) {
-        if (!loadOptions && !dataManager.contains(url)) {
-          // If there is no layer-specific load options, then attempt to cache this resource in the data manager
-          dataManager.add(url, url, {persistent: false});
-        }
-        const resource = dataManager.subscribe(
-          url,
-          data => layer.internalState.reloadAsyncProp(propName, data),
-          layer.id,
-          propName
-        );
-        if (resource) {
-          return resource;
-        }
+      if (!inResourceManager && !loadOptions) {
+        // If there is no layer-specific load options, then attempt to cache this resource in the data manager
+        resourceManager.add({resourceId: url, data: url, persistent: false});
+        inResourceManager = true;
+      }
+      if (inResourceManager) {
+        return resourceManager.subscribe({
+          resourceId: url,
+          onChange: data => layer.internalState.reloadAsyncProp(propName, data),
+          consumerId: layer.id,
+          requestId: propName
+        });
       }
 
       return load(url, loadOptions);
@@ -334,10 +333,7 @@ export default class Layer extends Component {
     if (attributeManager) {
       attributeManager.finalize();
     }
-    const {dataManager} = this.context;
-    if (dataManager) {
-      dataManager.unsubscribe(this.id);
-    }
+    this.context.resourceManager.unsubscribe({consumerId: this.id});
     this.internalState.uniformTransitions.clear();
   }
 
