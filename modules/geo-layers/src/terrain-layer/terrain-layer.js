@@ -170,7 +170,7 @@ export default class TerrainLayer extends CompositeLayer {
     }
 
     const {zRange} = this.state;
-    const ranges = data.filter(arr => arr).map(arr => {
+    const ranges = data.filter(Boolean).map(arr => {
       const bounds = arr[0].header.boundingBox;
       return bounds.map(bound => bound[2]);
     });
