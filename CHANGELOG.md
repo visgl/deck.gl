@@ -19,6 +19,10 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v8.1
 
+#### deck.gl [8.1.11] - June 19 2020
+
+- Call onHover on all affected layers (#4697)
+
 #### deck.gl [8.1.10] - June 18 2020
 
 - Fix IconManager for loaders 2.2.0 (#4694)
