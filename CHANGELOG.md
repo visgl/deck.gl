@@ -19,6 +19,10 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v8.1
 
+#### deck.gl [8.1.12] - June 19 2020
+
+- Upgrade loaders.gl in bundles
+
 #### deck.gl [8.1.11] - June 19 2020
 
 - Call onHover on all affected layers (#4697)
