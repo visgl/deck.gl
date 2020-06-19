@@ -528,21 +528,32 @@ export default class Deck {
     if (_pickRequest.event) {
       // Perform picking
       const {result, emptyInfo} = this._pick('pickObject', 'pickObject Time', _pickRequest);
-      const pickedInfo = result.find(info => info.picked) || emptyInfo;
+
+      // There are 4 possible scenarios:
+      // result is [outInfo, pickedInfo] (moved from one pickable layer to another)
+      // result is [outInfo] (moved outside of a pickable layer)
+      // result is [pickedInfo] (moved into or over a pickable layer)
+      // result is [] (nothing is or was picked)
+      //
+      // `layer.props.onHover` should be called on all affected layers (out/over)
+      // `deck.props.onHover` should be called with the picked info if any, or empty info otherwise
+      // `deck.props.getTooltip` should be called with the picked info if any, or empty info otherwise
+
+      // Execute callbacks
+      let pickedInfo = emptyInfo;
+      let handled = false;
+      for (const info of result) {
+        pickedInfo = info;
+        handled = info.layer.onHover(info, _pickRequest.event);
+      }
+      if (!handled && this.props.onHover) {
+        this.props.onHover(pickedInfo, _pickRequest.event);
+      }
 
       // Update tooltip
       if (this.props.getTooltip) {
         const displayInfo = this.props.getTooltip(pickedInfo);
         this.tooltip.setTooltip(displayInfo, pickedInfo.x, pickedInfo.y);
-      }
-
-      // Execute callbacks
-      let handled = false;
-      if (pickedInfo.layer) {
-        handled = pickedInfo.layer.onHover(pickedInfo, _pickRequest.event);
-      }
-      if (!handled && this.props.onHover) {
-        this.props.onHover(pickedInfo, _pickRequest.event);
       }
 
       // Clear pending pickRequest
