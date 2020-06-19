@@ -26,6 +26,7 @@ import log from '../utils/log';
 import debug from '../debug';
 import {flatten} from '../utils/flatten';
 import {Stats} from 'probe.gl';
+import ResourceManager from './resource/resource-manager';
 
 import Viewport from '../viewports/viewport';
 import {createProgramManager} from '../shaderlib';
@@ -36,6 +37,7 @@ const TRACE_ACTIVATE_VIEWPORT = 'layerManager.activateViewport';
 // CONTEXT IS EXPOSED TO LAYERS
 const INITIAL_CONTEXT = Object.seal({
   layerManager: null,
+  resourceManager: null,
   deck: null,
   gl: null,
 
@@ -55,7 +57,7 @@ const layerName = layer => (layer instanceof Layer ? `${layer}` : !layer ? 'null
 
 export default class LayerManager {
   // eslint-disable-next-line
-  constructor(gl, {deck, stats, viewport = null, timeline = null} = {}) {
+  constructor(gl, {deck, stats, viewport, timeline} = {}) {
     // Currently deck.gl expects the DeckGL.layers array to be different
     // whenever React rerenders. If the same layers array is used, the
     // LayerManager's diffing algorithm will generate a fatal error and
@@ -67,17 +69,19 @@ export default class LayerManager {
     // will be skipped.
     this.lastRenderedLayers = [];
     this.layers = [];
+    this.resourceManager = new ResourceManager({gl, protocol: 'deck://'});
 
     this.context = Object.assign({}, INITIAL_CONTEXT, {
       layerManager: this,
-      deck,
       gl,
+      deck,
       // Enabling luma.gl Program caching using private API (_cachePrograms)
       programManager: gl && createProgramManager(gl),
       stats: stats || new Stats({id: 'deck.gl'}),
       // Make sure context.viewport is not empty on the first layer initialization
       viewport: viewport || new Viewport({id: 'DEFAULT-INITIAL-VIEWPORT'}), // Current viewport, exposed to layers for project* function
-      timeline: timeline || new Timeline()
+      timeline: timeline || new Timeline(),
+      resourceManager: this.resourceManager
     });
 
     this._needsRedraw = 'Initial render';
@@ -92,6 +96,7 @@ export default class LayerManager {
 
   // Method to call when the layer manager is not needed anymore.
   finalize() {
+    this.resourceManager.finalize();
     // Finalize all layers
     for (const layer of this.layers) {
       this._finalizeLayer(layer);

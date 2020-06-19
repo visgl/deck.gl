@@ -361,6 +361,20 @@ export default class Deck {
     return this._pick('pickObjects', 'pickObjects Time', opts);
   }
 
+  // Experimental
+
+  _addResources(resources, forceUpdate = false) {
+    for (const id in resources) {
+      this.layerManager.resourceManager.add({resourceId: id, data: resources[id], forceUpdate});
+    }
+  }
+
+  _removeResources(resourceIds) {
+    for (const id of resourceIds) {
+      this.layerManager.resourceManager.remove(id);
+    }
+  }
+
   // Private Methods
 
   _pick(method, statKey, opts) {

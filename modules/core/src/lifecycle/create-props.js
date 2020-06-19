@@ -184,19 +184,14 @@ function getDescriptorForAsyncProp(name) {
         if (name in this[ASYNC_RESOLVED]) {
           const value = this[ASYNC_RESOLVED][name];
 
-          // Special handling - components expect null `data` prop expects to be replaced with `[]`
-          if (name === 'data') {
-            return value || this[ASYNC_DEFAULTS][name];
-          }
-
-          return value;
+          return value || this[ASYNC_DEFAULTS][name];
         }
 
         if (name in this[ASYNC_ORIGINAL]) {
           // It's an async prop value: look into component state
           const state = this[COMPONENT] && this[COMPONENT].internalState;
           if (state && state.hasAsyncProp(name)) {
-            return state.getAsyncProp(name);
+            return state.getAsyncProp(name) || this[ASYNC_DEFAULTS][name];
           }
         }
       }
