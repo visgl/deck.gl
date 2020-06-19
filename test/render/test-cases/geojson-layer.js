@@ -1,5 +1,6 @@
 import {GeoJsonLayer} from '@deck.gl/layers';
 import {geojson, geojsonLarge} from 'deck.gl-test/data';
+import antarctica from 'deck.gl-test/data/antarctica.geo.json';
 import {parseColor, setOpacity} from '../../../examples/layer-browser/src/utils/color';
 
 const MARKER_SIZE_MAP = {
@@ -97,5 +98,45 @@ export default [
       })
     ],
     goldenImage: './test/render/golden-images/geojson-large.png'
+  },
+  {
+    name: 'geojson-wrap-longitude',
+    viewState: {
+      longitude: 0,
+      latitude: 0,
+      zoom: -0.3,
+      repeat: true
+    },
+    layers: [
+      new GeoJsonLayer({
+        id: 'geojson-layer-wrap-longitude',
+        data: antarctica,
+        stroked: true,
+        filled: true,
+        getLineColor: [0, 0, 0],
+        getFillColor: [255, 255, 0],
+        lineWidthMinPixels: 2,
+        wrapLongitude: true
+      }),
+      new GeoJsonLayer({
+        id: 'arctic-circle',
+        data: {
+          type: 'Feature',
+          geometry: {
+            type: 'Polygon',
+            coordinates: [
+              [[0, 66.56333], [90, 66.56333], [180, 66.56333], [-90, 66.56333], [0, 66.56333]]
+            ]
+          }
+        },
+        stroked: true,
+        filled: true,
+        getLineColor: [0, 0, 0],
+        getFillColor: [255, 255, 0],
+        lineWidthMinPixels: 2,
+        wrapLongitude: true
+      })
+    ],
+    goldenImage: './test/render/golden-images/geojson-wrap-longitude.png'
   }
 ];

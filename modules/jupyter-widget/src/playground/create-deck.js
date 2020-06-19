@@ -1,4 +1,5 @@
-/* global window */
+/* global console, window */
+/* eslint-disable no-console */
 import {CSVLoader} from '@loaders.gl/csv';
 import {registerLoaders} from '@loaders.gl/core';
 import GL from '@luma.gl/constants';
@@ -7,6 +8,9 @@ import makeTooltip from './widget-tooltip';
 
 import mapboxgl from './utils/mapbox-utils';
 import {loadScript} from './utils/script-utils';
+import {createGoogleMapsDeckOverlay} from './utils/google-maps-utils';
+
+import {addSupportComponents} from '../lib/components/index';
 
 import * as deck from '../deck-bundle';
 
@@ -97,8 +101,46 @@ function missingLayers(oldLayers, newLayers) {
   return oldLayers.filter(ol => ol && ol.id && !newLayers.find(nl => nl.id === ol.id));
 }
 
+function createStandaloneFromProvider(
+  mapProvider,
+  {props, mapboxApiKey, googleMapsKey, handleClick, getTooltip, container}
+) {
+  switch (mapProvider) {
+    case 'mapbox':
+      deck.log.info('Using Mapbox base maps')();
+      return new deck.DeckGL({
+        ...props,
+        map: mapboxgl,
+        mapboxApiAccessToken: mapboxApiKey,
+        onClick: handleClick,
+        getTooltip,
+        container
+      });
+    case 'google_maps':
+      deck.log.info('Using Google Maps base maps')();
+      return createGoogleMapsDeckOverlay({
+        props,
+        googleMapsKey,
+        onClick: handleClick,
+        getTooltip,
+        container
+      });
+    default:
+      deck.log.info('No recognized map provider specified')();
+      return new deck.DeckGL({
+        ...props,
+        map: null,
+        mapboxApiAccessToken: null,
+        onClick: handleClick,
+        getTooltip,
+        container
+      });
+  }
+}
+
 function createDeck({
   mapboxApiKey,
+  googleMapsKey,
   container,
   jsonInput,
   tooltip,
@@ -111,20 +153,18 @@ function createDeck({
     const oldLayers = jsonInput.layers || [];
     const props = jsonConverter.convert(jsonInput);
 
+    addSupportComponents(container, props);
+
     const convertedLayers = (props.layers || []).filter(l => l);
 
     // loading custom library is async, some layers might not be convertable before custom library loads
     const layerToLoad = missingLayers(oldLayers, convertedLayers);
     const getTooltip = makeTooltip(tooltip);
+    const {mapProvider} = props;
 
-    deckgl = new deck.DeckGL({
-      ...props,
-      map: mapboxgl,
-      mapboxApiAccessToken: mapboxApiKey,
-      onClick: handleClick,
-      getTooltip,
-      container
-    });
+    const standaloneArgs = {props, mapboxApiKey, googleMapsKey, handleClick, getTooltip, container};
+
+    deckgl = createStandaloneFromProvider(mapProvider, standaloneArgs);
 
     const onComplete = () => {
       if (layerToLoad.length) {

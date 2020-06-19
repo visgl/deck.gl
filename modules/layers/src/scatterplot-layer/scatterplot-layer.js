@@ -145,7 +145,7 @@ export default class ScatterplotLayer extends Layer {
 
   _getModel(gl) {
     // a square that minimally cover the unit circle
-    const positions = [-1, -1, 0, -1, 1, 0, 1, 1, 0, 1, -1, 0];
+    const positions = [-1, -1, 0, 1, -1, 0, 1, 1, 0, -1, 1, 0];
 
     return new Model(
       gl,

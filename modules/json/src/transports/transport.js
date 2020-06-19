@@ -1,66 +1,27 @@
-const registeredTransports = [];
+const state = {
+  onIninitialize: _ => _,
+  onFinalize: _ => _,
+  onMessage: null
+};
 
 export default class Transport {
-  static registerTransport(transport) {
-    registeredTransports.push(transport);
-  }
-
-  static getDefaultTransport() {
-    if (registeredTransports.length === 0) {
-      throw new Error('No JSON transport registered');
+  static setCallbacks({onInitialize, onFinalize, onMessage}) {
+    if (onInitialize) {
+      state.onInitialize = onInitialize;
     }
-    return registeredTransports[0];
-  }
-
-  static getTransport(name, fallback = true) {
-    let transport = registeredTransports.find(transport_ => transport_.name.startsWith(name));
-    if (!transport && fallback) {
-      transport = Transport.getDefaultTransport();
+    if (onFinalize) {
+      state.onFinalize = onFinalize;
     }
-    return transport;
+    if (onMessage) {
+      state.onMessage = onMessage;
+    }
+    // this._flushQueuedConnections();
   }
 
   constructor(name = 'Transport') {
     this.name = name;
-
-    // Set up an initialization  promise, so that we can defer the call of onInitialize
-    this._initPromise = new Promise((resolve, reject) => {
-      this._initResolvers = {resolve, reject};
-    });
     this._messageQueue = [];
-
     this.userData = {};
-
-    this.onIninitialize = _ => _;
-    this.onFinalize = _ => _;
-    this.onMessage = null;
-  }
-
-  setCallbacks({onInitialize, onFinalize, onMessage}) {
-    if (onInitialize) {
-      this.onInitialize = onInitialize;
-    }
-    if (onFinalize) {
-      this._onFinalize = onFinalize;
-    }
-    if (onMessage) {
-      this._onMessage = onMessage;
-    }
-
-    if (onInitialize) {
-      this._initPromise.then(initArgs => {
-        onInitialize(initArgs);
-
-        if (this._onMessage) {
-          // Send any queued messages
-          let message;
-          while ((message = this._messageQueue.pop())) {
-            console.debug('Delivering queued transport message', message); // eslint-disable-line
-            this._onMessage(message);
-          }
-        }
-      });
-    }
   }
 
   // Back-channel messaging
@@ -79,27 +40,54 @@ export default class Transport {
   //
 
   _initialize(options = {}) {
-    console.debug('Resolving init promise', options); // eslint-disable-line
-    this._initResolvers.resolve({transport: this, ...options});
+    const message = {transport: this, ...options};
+    state.onInitialize(message);
+
+    // console.debug('Resolving init promise', options); // eslint-disable-line
+    // this._initResolvers.resolve(message);
   }
 
   _finalize(options = {}) {
+    const message = {transport: this, ...options};
+
     // TODO - could potentially be called without Initialize being called
-    this.onFinalize({transport: this, ...options});
+    state.onFinalize(message);
     this._destroyed = true;
   }
 
   _messageReceived(message = {}) {
     message = {transport: this, ...message};
 
-    // TODO - could potentially be called without Initialize being called
-    if (!this.onMessage) {
-      console.debug('Queueing transport message', message); // eslint-disable-line
-      this._messageQueue.push(message);
-      return;
-    }
+    // TODO - this function could potentially be called before callback registered/ Initialize called
+    // if (!state.onMessage) {
+    //   console.error('Queueing transport message', message); // eslint-disable-line
+    //   this._messageQueue.push(message);
+    //   return;
+    // }
 
     console.debug('Delivering transport message', message); // eslint-disable-line
-    this.onMessage(message);
+    state.onMessage(message);
   }
+
+  /*
+  // This tries to handle the case that a transport connection initializes before the application
+  // has set the callbacks.
+  // Note: It is not clear that this can actually happen in the in initial Jupyter widget transport
+  _flushQueuedConnections() {
+    if (onInitialize) {
+      state._initPromise.then(initArgs => {
+        onInitialize(initArgs);
+
+        if (state._onMessage) {
+          // Send any queued messages
+          let message;
+          while ((message = this._messageQueue.pop())) {
+            console.debug('Delivering queued transport message', message); // eslint-disable-line
+            this._onMessage(message);
+          }
+        }
+      });
+    }
+  }
+  */
 }

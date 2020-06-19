@@ -275,6 +275,8 @@ export default class Deck {
     // If initialized, update sub manager props
     if (this.layerManager) {
       this.viewManager.setProps(resolvedProps);
+      // Make sure that any new layer gets initialized with the current viewport
+      this.layerManager.activateViewport(this.getViewports()[0]);
       this.layerManager.setProps(resolvedProps);
       this.effectManager.setProps(resolvedProps);
       this.deckRenderer.setProps(resolvedProps);
@@ -528,7 +530,7 @@ export default class Deck {
     if (_pickRequest.event) {
       // Perform picking
       const {result, emptyInfo} = this._pick('pickObject', 'pickObject Time', _pickRequest);
-      const pickedInfo = result[0] || emptyInfo;
+      const pickedInfo = result.find(info => info.picked) || emptyInfo;
 
       // Update tooltip
       if (this.props.getTooltip) {

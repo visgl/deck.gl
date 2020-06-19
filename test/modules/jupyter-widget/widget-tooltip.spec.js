@@ -1,6 +1,11 @@
 // eslint-disable-next-line
 /* global document */
 import test from 'tape-catch';
+import makeTooltip, {
+  getTooltipDefault,
+  substituteIn,
+  toText
+} from '@deck.gl/jupyter-widget/playground/widget-tooltip';
 
 const pickedInfo = {object: {elevationValue: 10, position: [0, 0]}, x: 0, y: 0, picked: true};
 
@@ -23,18 +28,13 @@ const TOOLTIP_HTML = {
 };
 
 test('jupyter-widget: tooltip', t0 => {
-  const widgetTooltipModule = require('@deck.gl/jupyter-widget/playground/widget-tooltip');
-  t0.test('getDefaultTooltip', t => {
+  t0.test('getTooltipDefault', t => {
     Object.assign(pickedInfo, {picked: false});
-    t.equal(
-      widgetTooltipModule.getTooltipDefault(pickedInfo),
-      null,
-      'should return null if nothing picked'
-    );
+    t.equal(getTooltipDefault(pickedInfo), null, 'should return null if nothing picked');
     Object.assign(pickedInfo, {picked: true});
-    const tooltip = widgetTooltipModule.getTooltipDefault(pickedInfo);
+    const tooltip = getTooltipDefault(pickedInfo);
     t.deepEquals(tooltip, TOOLTIP_HTML, 'tooltip is expected result');
-    const tooltipCached = widgetTooltipModule.getTooltipDefault(pickedInfo);
+    const tooltipCached = getTooltipDefault(pickedInfo);
     t.deepEquals(tooltipCached, TOOLTIP_HTML, 'tooltip called twice hits its cached value');
     t.end();
   });
@@ -75,14 +75,14 @@ test('jupyter-widget: tooltip', t0 => {
       }
     ];
     for (const kv of TESTING_TABLE) {
-      t.equal(widgetTooltipModule.toText(kv.input), kv.expected, kv.message);
+      t.equal(toText(kv.input), kv.expected, kv.message);
     }
     t.end();
   });
 
   t0.test('substituteIn', t => {
     t.equal(
-      widgetTooltipModule.substituteIn('"{quote}" - {origin}', {
+      substituteIn('"{quote}" - {origin}', {
         quote: "Be an optimist. There's not much use being anything else.",
         origin: 'Winston Churchill'
       }),
@@ -92,7 +92,6 @@ test('jupyter-widget: tooltip', t0 => {
   });
 
   t0.test('makeTooltip', t => {
-    const makeTooltip = widgetTooltipModule.default;
     t.equal(makeTooltip(null), null, 'If no tooltip JSON passed, return null');
     const htmlTooltip = {
       html: '<b>Elevation Value:</b> {elevationValue}',

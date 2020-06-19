@@ -1,15 +1,14 @@
 import test from 'tape-catch';
+import Transport from '@deck.gl/json/transports/transport';
 
 test('delayed onInitialized()', t => {
-  const transportModule = require('@deck.gl/json/transports/transport');
-  const Transport = transportModule.default; // eslint-disable-line no-console,no-undef
-  const transport = new Transport();
-
-  transport.setCallbacks({
+  Transport.setCallbacks({
     onInitialize: () => {
       t.ok(true, 'onInitialize called');
       t.end();
     }
   });
+
+  const transport = new Transport();
   transport._initialize();
 });

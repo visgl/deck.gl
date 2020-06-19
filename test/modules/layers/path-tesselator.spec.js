@@ -132,43 +132,20 @@ test('PathTesselator#partial update', t => {
   t.is(tesselator.instanceCount, 12, 'Updated instance count');
   t.deepEquals(
     positions,
+    // prettier-ignore
     [
-      1,
-      1,
-      0,
-      2,
-      2,
-      0,
-      3,
-      3,
-      0,
-      1,
-      1,
-      0,
-      2,
-      2,
-      0,
-      3,
-      3,
-      0,
-      1,
-      1,
-      0,
-      2,
-      2,
-      0,
-      3,
-      3,
-      0,
-      4,
-      4,
-      0,
-      5,
-      5,
-      0,
-      6,
-      6,
-      0
+      1, 1, 0,
+      2, 2, 0,
+      3, 3, 0,
+      1, 1, 0,
+      2, 2, 0,
+      3, 3, 0,
+      1, 1, 0,
+      2, 2, 0,
+      3, 3, 0,
+      4, 4, 0,
+      5, 5, 0,
+      6, 6, 0
     ],
     'positions'
   );
@@ -267,6 +244,34 @@ test('PathTesselator#geometryBuffer', t => {
       }),
     'throws if missing startIndices'
   );
+
+  t.end();
+});
+
+test('PathTesselator#normalizeGeometry', t => {
+  const sampleData = [[[150, 0], [-150, 0]]];
+  const tesselator = new PathTesselator({
+    data: sampleData,
+    getGeometry: d => d
+  });
+
+  t.is(tesselator.instanceCount, 2, 'Updated instanceCount from input');
+
+  tesselator.updateGeometry({
+    resolution: 30,
+    wrapLongitude: false
+  });
+
+  // subdivide into smaller segments
+  t.is(tesselator.instanceCount, 11, 'Updated instanceCount from input');
+
+  tesselator.updateGeometry({
+    resolution: null,
+    wrapLongitude: true
+  });
+
+  // split at 180th meridian
+  t.is(tesselator.instanceCount, 4, 'Updated instanceCount from input');
 
   t.end();
 });

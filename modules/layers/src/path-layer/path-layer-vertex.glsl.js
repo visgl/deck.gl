@@ -68,8 +68,17 @@ vec3 lineJoin(
   float sideOfPath = positions.y;
   float isJoint = float(sideOfPath == 0.0);
 
-  vec2 deltaA = (currPoint.xy - prevPoint.xy) / width;
-  vec2 deltaB = (nextPoint.xy - currPoint.xy) / width;
+  vec3 deltaA3 = (currPoint - prevPoint);
+  vec3 deltaB3 = (nextPoint - currPoint);
+
+  mat3 rotationMatrix;
+  bool needsRotation = !billboard && project_needs_rotation(currPoint, rotationMatrix);
+  if (needsRotation) {
+    deltaA3 = deltaA3 * rotationMatrix;
+    deltaB3 = deltaB3 * rotationMatrix;
+  }
+  vec2 deltaA = deltaA3.xy / width;
+  vec2 deltaB = deltaB3.xy / width;
 
   float lenA = length(deltaA);
   float lenB = length(deltaB);
@@ -142,6 +151,10 @@ vec3 lineJoin(
   float isValid = step(instanceTypes, 3.5);
   vec3 offset = vec3(offsetVec * width * isValid, 0.0);
   DECKGL_FILTER_SIZE(offset, geometry);
+
+  if (needsRotation) {
+    offset = rotationMatrix * offset;
+  }
   return currPoint + offset;
 }
 
