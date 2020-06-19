@@ -50,7 +50,7 @@ export default class ResourceManager {
     if (consumer) {
       for (const requestId in consumer) {
         const request = consumer[requestId];
-        if (request) {
+        if (request.resource) {
           request.resource.unsubscribe(request);
         }
       }
@@ -98,7 +98,7 @@ export default class ResourceManager {
 
     if (request.resource) {
       request.resource.unsubscribe(request);
-      request.resources = null;
+      request.resource = null;
       this.prune();
     }
     if (resource) {
