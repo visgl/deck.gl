@@ -40,15 +40,11 @@
   "browser": {
     "jsdom": false
   },
-  "resolutions": {
-    "@loaders.gl/loader-utils": "^2.2.0-alpha.3",
-    "@math.gl/core": "3.2.0-alpha.5"
-  },
   "devDependencies": {
-    "@loaders.gl/csv": "^2.1.5",
-    "@loaders.gl/polyfills": "^2.1.5",
-    "@luma.gl/engine": "^8.1.2",
-    "@luma.gl/test-utils": "^8.1.2",
+    "@loaders.gl/csv": "^2.2.0",
+    "@loaders.gl/polyfills": "^2.2.0",
+    "@luma.gl/engine": "^8.2.0-beta",
+    "@luma.gl/test-utils": "^8.2.0-beta",
     "@probe.gl/bench": "^3.2.1",
     "@probe.gl/test-utils": "^3.2.1",
     "babel-loader": "^8.0.0",
