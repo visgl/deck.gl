@@ -54,7 +54,7 @@ export default class PathTesselator extends Tesselator {
 
   normalizeGeometry(path) {
     if (this.normalize) {
-      return normalizePath(path, this.positionSize, this.opts.resolution);
+      return normalizePath(path, this.positionSize, this.opts.resolution, this.opts.wrapLongitude);
     }
     return path;
   }
@@ -66,6 +66,13 @@ export default class PathTesselator extends Tesselator {
 
   /* Implement base Tesselator interface */
   getGeometrySize(path) {
+    if (Array.isArray(path[0])) {
+      let size = 0;
+      for (const subPath of path) {
+        size += this.getGeometrySize(subPath);
+      }
+      return size;
+    }
     const numPoints = this.getPathLength(path);
     if (numPoints < 2) {
       // invalid path
@@ -82,8 +89,17 @@ export default class PathTesselator extends Tesselator {
     if (context.geometrySize === 0) {
       return;
     }
-    this._updateSegmentTypes(path, context);
-    this._updatePositions(path, context);
+    if (path && Array.isArray(path[0])) {
+      for (const subPath of path) {
+        const geometrySize = this.getGeometrySize(subPath);
+        context.geometrySize = geometrySize;
+        this.updateGeometryAttributes(subPath, context);
+        context.vertexStart += geometrySize;
+      }
+    } else {
+      this._updateSegmentTypes(path, context);
+      this._updatePositions(path, context);
+    }
   }
 
   _updateSegmentTypes(path, context) {

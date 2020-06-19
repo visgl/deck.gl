@@ -15,6 +15,9 @@ function wrapInView(node) {
   if (Array.isArray(node)) {
     return node.map(wrapInView);
   }
+  if (node.type === React.Fragment) {
+    return wrapInView(node.props.children);
+  }
   if (inheritsFrom(node.type, View)) {
     return node;
   }
