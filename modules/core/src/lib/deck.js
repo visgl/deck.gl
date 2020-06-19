@@ -544,21 +544,22 @@ export default class Deck {
     if (_pickRequest.event) {
       // Perform picking
       const {result, emptyInfo} = this._pick('pickObject', 'pickObject Time', _pickRequest);
-      const pickedInfo = result.find(info => info.picked) || emptyInfo;
+
+      // Execute callbacks
+      let pickedInfo = emptyInfo;
+      let handled = false;
+      for (const info of result) {
+        pickedInfo = info;
+        handled = info.layer.onHover(info, _pickRequest.event);
+      }
+      if (!handled && this.props.onHover) {
+        this.props.onHover(pickedInfo, _pickRequest.event);
+      }
 
       // Update tooltip
       if (this.props.getTooltip) {
         const displayInfo = this.props.getTooltip(pickedInfo);
         this.tooltip.setTooltip(displayInfo, pickedInfo.x, pickedInfo.y);
-      }
-
-      // Execute callbacks
-      let handled = false;
-      if (pickedInfo.layer) {
-        handled = pickedInfo.layer.onHover(pickedInfo, _pickRequest.event);
-      }
-      if (!handled && this.props.onHover) {
-        this.props.onHover(pickedInfo, _pickRequest.event);
       }
 
       // Clear pending pickRequest
