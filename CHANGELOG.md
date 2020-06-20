@@ -19,6 +19,26 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v8.2
 
+#### deck.gl [8.2.0-beta.1] - June 20 2020
+
+- Fix MVTLayer projection precision (#4699)
+- Bump loaders.gl to 2.2.2 (#4700)
+- Call onHover on all affected layers (#4697)
+- Initial DataManager (#4670)
+- Bump math.gl and loaders.gl (#4693)
+- Relax maxPitch in terrain example (#4686)
+- Fix onHover/tooltip flickering (#4685)
+- wrapLongitude support for GeoJSON (#4684)
+- Extract children from Fragment too (#4681)
+- TileLayer Request scheduler (#4645)
+- PathLayer and SolidPolygonLayer support globe projection (#4674)
+- Initialize new layers with the current viewport (#4673)
+- Add FillStyleExtension (#4676)
+- Fix GreatCircleLayer rendering bug (#4677)
+- pydeck: Support description card UI element (#4656)
+- Resolve promise before calling renderSubLayers in TileLayer (#4658)
+- [test-utils] Add testLayerAsync (#4659)
+
 #### deck.gl [8.2.0-alpha.3] - June 8 2020
 
 -  BitmapLayer supports globe projection (#4655)
