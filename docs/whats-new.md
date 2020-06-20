@@ -2,6 +2,54 @@
 
 This page contains highlights of each deck.gl release. Also check our [vis.gl blog](https://medium.com/vis-gl) for news about new releases and features in deck.gl.
 
+## deck.gl v8.2
+
+Release Data: TBD, 2020
+
+(Need screenshots: globe view, pattern fill, MVT cross-tile highlight)
+
+### Tiled Layers
+
+Many new features are added to `TileLayer`, `MVTLayer` and `TerrainLayer` to improve correctness, performance and ease of use.
+
+- `MVTLayer` projects more accurately at high zoom levels.
+- `autoHighlight` in the `MVTLayer` now works on features that are split across multiple tiles, identified by the new `uniqueIdProperty` prop.
+- All geospatially tiled layers now handle high pitch angles better. Far away tiles from the camera are loaded at lower zoom levels, avoiding loading too many tiles.
+- Tiled layers now use a request scheduler to prioritize loading the most recently visible tiles during viewport navigation. See the new `throttleRequests` and `maxRequests` props.
+- `TileLayer` may continue to display tiles when underzoomed. See the new `extent` prop.
+- Fine-tune the tiles displayed by the `TileLayer` with the new `zRange` prop when dealing with 3D content. This is used by the `TerrainLayer` when viewing high-altitude regions.
+- `TileLayer`'s `tileSize` prop can be used to fine-tune the zoom level at which tiles are loaded.
+- `TileLayer`'s `renderSubLayers` is now always called after the tile layer is loaded, i.e. `props.data` is never a Promise.
+
+
+### GlobeView
+
+For geospatial data, a new projection mode -- globe projection is now available alongside Web Mercator projection. In this release, the feature is exposed via the experimental `GlobeView` class.
+
+Currently there is no base map provider under this view. You may use the `BitmapLayer` or `GeoJsonLayer` to render a backdrop for your data.
+
+See [documentation](/docs/api-reference/globe-view.md) and [example](/examples/get-started/pure-js/globe/) for instructions and limitaions.
+
+
+### Antimeridian Handling
+
+- `GreatCircleLayer` now renders correctly across the 180th meridian.
+- The `PathLayer`, `PolygonLayer` and `GeoJsonLayer` now supports the `wrapLongitude` prop.When enabled, the connection between any two neighboring vertices is drawn on the shorter side of the world, and split into two if it crosses the 180th meridian. Note that this introduces CPU overhead at runtime.
+
+### Pydeck
+
+Pydeck 0.4.0 introduces support for JupyterLab 2.0, support for a Google Maps base map, a new UI element for providing text descriptions of a map, and many of the new features of deck.gl 8.4, like the ability to render data to either a globe or a Mercator projection. See the new [website](https://pydeck.gl/) for documentation and examples.
+
+### Miscellaneous
+
+- Multiple layers that share the same `data` URL now only download the data once.
+- `ScatterplotLayer` added `radiusUnits` prop
+- New `FillStyleExtension` fills polygons with repeated pattern from a sprite image.
+- `ArcLayer` added `greatCircle` prop. `GreatCircleLayer` is now a special case of the `ArcLayer` and support rendering an elevated curve by supplying `getHeight`.
+- `@deck.gl/test-utils` added new `testLayerAsync` API.
+- When using auto-highlight, `highlightColor` now accepts a callback that returns a color based on which object is picked.
+
+
 ## deck.gl v8.1
 
 Release Date: Mar 17, 2020
