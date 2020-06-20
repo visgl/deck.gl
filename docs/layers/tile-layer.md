@@ -195,7 +195,7 @@ The maximum number of concurrent `getTileData` calls. Only takes effect if `thro
 Renders one or an array of Layer instances with all the `TileLayer` props and the following props:
 
 * `id`: An unique id for this sublayer
-* `data`: Resolved from `getTileData`
+* `data`: Resolved from `getTileData`. As of deck.gl 8.2, this prop is always the data resolved from the Promise and is never a Promise itself.
 * `tile`: An object containing tile index `x`, `y`, `z`, and `bbox` of the tile.
 
 - Default: `props => new GeoJsonLayer(props)`
