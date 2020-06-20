@@ -33,10 +33,11 @@ export default class MVTLayer extends TileLayer {
     const xOffset = (WORLD_SIZE * tile.x) / worldScale;
     const yOffset = WORLD_SIZE * (1 - tile.y / worldScale);
 
-    const modelMatrix = new Matrix4().translate([xOffset, yOffset, 0]).scale([xScale, yScale, 1]);
+    const modelMatrix = new Matrix4().scale([xScale, yScale, 1]);
 
     props.autoHighlight = false;
     props.modelMatrix = modelMatrix;
+    props.coordinateOrigin = [xOffset, yOffset, 0];
     props.coordinateSystem = COORDINATE_SYSTEM.CARTESIAN;
     props.extensions = [...(props.extensions || []), new ClipExtension()];
 

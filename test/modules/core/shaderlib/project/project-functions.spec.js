@@ -77,16 +77,18 @@ const TEST_CASES = [
     position: [256, 256, 0],
     params: {
       viewport: TEST_VIEWPORT_2,
-      coordinateSystem: COORDINATE_SYSTEM.CARTESIAN
+      coordinateSystem: COORDINATE_SYSTEM.CARTESIAN,
+      coordinateOrigin: [0, 0, 0]
     },
     result: [256, 256, 0]
   },
   {
     title: 'CARTESIAN:WEB_MERCATOR_AUTO_OFFSET',
-    position: [256, 256, 0],
+    position: [0, 0, 0],
     params: {
       viewport: TEST_VIEWPORT,
-      coordinateSystem: COORDINATE_SYSTEM.CARTESIAN
+      coordinateSystem: COORDINATE_SYSTEM.CARTESIAN,
+      coordinateOrigin: [256, 256, 0]
     },
     result: [174.15110778808594, -58.11044311523443, 0]
   },
