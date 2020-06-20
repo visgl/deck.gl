@@ -1,5 +1,19 @@
 # Upgrade Guide
 
+## Upgrading from deck.gl v8.1 to v8.2
+
+- The `TileLayer` now rounds the current `zoom` to determine the `z` at which to load tiles. This will load less tiles than the previous version. You can adjust the `tileSize` prop to modify this behavior.
+- Image URLs are now by default loaded in the `ImageBitmap` format, versus `Image` in the previous version. This improves the performance of loading textures. You may override this by supplying the `loadOptions` prop of a layer:
+
+```js
+loadOptions: {
+  image: {type: 'image'}
+}
+```
+
+See [ImageLoader options](https://loaders.gl/modules/images/docs/api-reference/image-loader#options);
+
+
 ## Upgrading from deck.gl v8.0 to v8.1
 
 ### Breaking Changes
