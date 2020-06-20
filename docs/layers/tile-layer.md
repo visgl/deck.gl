@@ -26,6 +26,7 @@ export const App = ({viewport}) => {
 
     minZoom: 0,
     maxZoom: 19,
+    tileSize: 256,
 
     renderSubLayers: props => {
       const {
@@ -173,10 +174,23 @@ How the tile layer refines the visibility of tiles. One of the following:
 
 - Default: `'best-available'`
 
+##### `throttleRequests` (Boolean, optional)
+
+Whether to throttle `getTileData` requests.
+
+If `true`, a maximum of `maxRequests` instances of `getTileData` will be called concurrently. Additionally, for requests that are throttled, if the tile is no longer visible in the viewport when a request slot opens up, that request will be cancelled. When requests are not throttled, `getTileData` will be called for all visible tiles, regardless of how long that tile is or was visible.
+
+- Default: `true`
+
+##### `maxRequests` (Number, optional)
+
+The maximum number of concurrent `getTileData` calls. Only takes effect if `throttleRequests` is `true`. 
+
+- Default: `8`
 
 ### Render Options
 
-##### `renderSubLayers` (Function, optional))
+##### `renderSubLayers` (Function, optional)
 
 Renders one or an array of Layer instances with all the `TileLayer` props and the following props:
 
@@ -186,6 +200,11 @@ Renders one or an array of Layer instances with all the `TileLayer` props and th
 
 - Default: `props => new GeoJsonLayer(props)`
 
+##### `zRange` (Array, optional)
+
+An array representing the range of minimum and maximum heights in the tile. This is designed to support extruded layers, such as the TerrainLayer, ensuring the right tiles are loaded and rendered. This prop currently only has effect when used with a geospatial view.
+
+- Default: `null` (interpreted as `[0, 0]`)
 
 ### Callbacks
 
