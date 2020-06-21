@@ -1,80 +1,63 @@
-// NOTE: It is possible to override the ocular-provided callbacks
-// and this take control any aspect of gatsby:
+const resolve = require('path').resolve;
+const getOcularConfig = require('ocular-dev-tools/config/ocular.config');
+const webpack = require('webpack');
 
-// exports.onCreateNode = ({ node, actions, getNode }) =>
-//   ocular.onCreateNode({ node, actions, getNode });
-
-// exports.setFieldsOnGraphQLNodeType = ({ type, actions }) =>
-//   ocular.setFieldsOnGraphQLNodeType({ type, actions });
-
-// // This is a main gatsby entry point
-// // Here we get to programmatically create pages after all nodes are created
-// // by gatsby.
-// // We use graphgl to query for nodes and iterate
-// exports.createPages = ({ graphql, actions }) =>
-//   ocular.createPages({ graphql, actions });
-
-const ocularConfig = require('./ocular-config');
-const getGatsbyNodeCallbacks = require('ocular-gatsby/gatsby-node');
-
-const callbacks = getGatsbyNodeCallbacks(ocularConfig);
-
-module.exports = callbacks;
-
-const onCreateWebpackConfig = callbacks.onCreateWebpackConfig;
-
-callbacks.onCreateWebpackConfig = function onCreateWebpackConfigOverride(opts) {
-  onCreateWebpackConfig(opts);
-
+module.exports.onCreateWebpackConfig = function onCreateWebpackConfigOverride(opts) {
   const {
-    // stage, // build stage: ‘develop’, ‘develop-html’, ‘build-javascript’, or ‘build-html’
+    stage, // build stage: ‘develop’, ‘develop-html’, ‘build-javascript’, or ‘build-html’
     // rules, // Object (map): set of preconfigured webpack config rules
     // plugins, // Object (map): A set of preconfigured webpack config plugins
-    // getConfig, // Function that returns the current webpack config
-    loaders, // Object (map): set of preconfigured webpack config loaders
+    getConfig, // Function that returns the current webpack config
+    // loaders, // Object (map): set of preconfigured webpack config loaders
     actions
   } = opts;
 
-  console.log(`App rewriting gatsby webpack config`); // eslint-disable-line
+  console.log(`App rewriting gatsby webpack config ${stage}`); // eslint-disable-line
 
-  // Recreate it with custom exclude filter
-  // Called without any arguments, `loaders.js` will return an
-  // object like:
-  // {
-  //   options: undefined,
-  //   loader: '/path/to/node_modules/gatsby/dist/utils/babel-loader.js',
-  // }
-  // Unless you're replacing Babel with a different transpiler, you probably
-  // want this so that Gatsby will apply its required Babel
-  // presets/plugins.  This will also merge in your configuration from
-  // `babel.config.js`.
-  const newJSRule = loaders.js();
+  const ALIASES = getOcularConfig({root: resolve(__dirname, '..')}).aliases;
 
-  Object.assign(newJSRule, {
-    // JS and JSX
-    test: /\.jsx?$/,
+  const config = getConfig();
+  config.resolve = config.resolve || {};
+  config.resolve.alias = Object.assign({
+    'website-examples': resolve('../examples/website'),
+    react: resolve('node_modules/react'),
+    'react-dom': resolve('node_modules/react-dom'),
 
-    // Exclude all node_modules from transpilation, except for ocular
-    exclude: modulePath =>
-      /node_modules/.test(modulePath) &&
-      !/node_modules\/(ocular|ocular-gatsby|gatsby-plugin-ocular)/.test(modulePath)
+    '@luma.gl/constants': resolve('../node_modules/@luma.gl/constants'),
+    '@luma.gl/core': resolve('../node_modules/@luma.gl/core'),
+    '@luma.gl/engine': resolve('../node_modules/@luma.gl/engine'),
+    '@luma.gl/webgl': resolve('../node_modules/@luma.gl/webgl'),
+    '@luma.gl/gltools': resolve('../node_modules/@luma.gl/gltools'),
+    '@luma.gl/shadertools': resolve('../node_modules/@luma.gl/shadertools'),
+    '@luma.gl/experimental': resolve('../node_modules/@luma.gl/experimental'),
+
+    '@loaders.gl/core': resolve('../node_modules/@loaders.gl/core'),
+    '@loaders.gl/images': resolve('../node_modules/@loaders.gl/images')
+  }, config.resolve.alias, ALIASES);
+
+  config.module.rules.push({
+    test: /\.scss$/,
+    use: [
+      // style-loader
+      {loader: 'style-loader'},
+      // css-loader
+      {
+        loader: 'css-loader',
+        options: {
+          url: false
+        }
+      },
+      // sass-loader
+      {loader: 'sass-loader'}
+    ]
   });
 
-  const newConfig = {
-    module: {
-      rules: [
-        // Omit the default rule where test === '\.jsx?$'
-        newJSRule
-      ]
-    },
-    node: {
-      fs: 'empty'
-    },
-    resolve: {
-      alias: Object.assign(ocularConfig.webpack.resolve.alias)
-    }
-  };
+  config.plugins = config.plugins || [];
+  config.plugins.push(new webpack.EnvironmentPlugin(['MapboxAccessToken']));
 
-  // Merges into the webpack config
-  actions.setWebpackConfig(newConfig);
+  // Completely replace the webpack config for the current stage.
+  // This can be dangerous and break Gatsby if certain configuration options are changed.
+  // Generally only useful for cases where you need to handle config merging logic yourself,
+  // in which case consider using webpack-merge.
+  actions.replaceWebpackConfig(config);
 };

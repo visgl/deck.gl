@@ -1,9 +1,74 @@
-.banner {
-  .container {
-    background: rgba(0, 0, 0, 0);
+
+#features {
+  font-size: 14px;
+
+  .texts >div {
+    max-width: 50%;
+    width: 480px;
+  }
+  .image {
+    position: absolute;
+    height: 110%;
+    width: 50%;
+    top: 0;
+    right: 0;
+    z-index: -1;
+    border-top: solid 200px transparent;
+    background-image: url('../images/maps.jpg');
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: right top;
+  }
+
+  h2, h3 {
+    color: $black-20;
+    position: relative;
+  }
+  h3 > img {
+    position: absolute;
+    top: -4px;
+    width: 36px;
+    left: -48px;
+  }
+  .buttons {
+    margin-top: 48px;
+
+    .btn .icon {
+      font-size: 20px;
+      margin-left: 4px;
+      opacity: 0.5;
+      vertical-align: middle;
+    }
+    .btn:hover .icon {
+      opacity: 1;
+    }
+  }
+  .btn {
+    border-color: $black;
+    margin: 12px;
+    min-width: 214px;
+    color: $black;
+  }
+  .btn:hover {
+    background: $black;
+    color: $white;
   }
 }
-
-.banner .hero .options-panel {
-  display: none;
+@media screen and (max-width: 768px) {
+  #features {
+    .container >div {
+      max-width: 100%;
+      width: 100%;
+    }
+    .image {
+      display: none;
+    }
+    .btn {
+      padding: 0 24px;
+      width: auto;
+    }
+  }
+  .floater {
+    display: none;
+  }
 }

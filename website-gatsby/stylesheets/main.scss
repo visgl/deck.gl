@@ -7,8 +7,16 @@ $white: #EDEDED;
 $white-40: #8D9BA3;
 $topbar-height: 64px;
 
+@import 'fontface';
 @import 'home';
 @import 'gallery';
+
+body {
+  font-family: "UberMove", "Helvetica Neue", Helvetica, sans-serif !important;
+  font-size: 12px;
+  line-height: 1.833;
+  overflow-y: auto;
+}
 
 button:focus, input:focus {
   outline: none;
