@@ -22,6 +22,8 @@ module.exports.onCreateWebpackConfig = function onCreateWebpackConfigOverride(op
     'website-examples': resolve('../examples/website'),
     react: resolve('node_modules/react'),
     'react-dom': resolve('node_modules/react-dom'),
+    'styletron-engine-atomic': resolve('node_modules/styletron-engine-atomic'),
+    'styletron-react': resolve('node_modules/styletron-react'),
 
     '@luma.gl/constants': resolve('../node_modules/@luma.gl/constants'),
     '@luma.gl/core': resolve('../node_modules/@luma.gl/core'),
@@ -34,23 +36,6 @@ module.exports.onCreateWebpackConfig = function onCreateWebpackConfigOverride(op
     '@loaders.gl/core': resolve('../node_modules/@loaders.gl/core'),
     '@loaders.gl/images': resolve('../node_modules/@loaders.gl/images')
   }, config.resolve.alias, ALIASES);
-
-  config.module.rules.push({
-    test: /\.scss$/,
-    use: [
-      // style-loader
-      {loader: 'style-loader'},
-      // css-loader
-      {
-        loader: 'css-loader',
-        options: {
-          url: false
-        }
-      },
-      // sass-loader
-      {loader: 'sass-loader'}
-    ]
-  });
 
   config.plugins = config.plugins || [];
   config.plugins.push(new webpack.EnvironmentPlugin(['MapboxAccessToken']));

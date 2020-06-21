@@ -11,6 +11,7 @@
     "start": "yarn clean && yarn develop",
     "build": "yarn clean && gatsby build",
     "clean": "rm -rf ./.cache ./public",
+    "install-examples": "find ../examples/website -name package.json -depth 2 -execdir yarn \\;",
     "develop": "yarn clean && gatsby develop",
     "serve": "gatsby serve",
     "deploy": "NODE_DEBUG=gh-pages gh-pages -d public"
@@ -19,16 +20,18 @@
     "d3-color": "^1.4.1",
     "d3-request": "^1.0.6",
     "d3-scale": "^3.2.1",
-    "expr-eval": "^2.0.2"
+    "expr-eval": "^2.0.2",
+    "react-jss": "^10.3.0"
   },
   "devDependencies": {
     "gatsby": "^2.20.0",
+    "gatsby-plugin-jss": "^2.3.4",
     "gatsby-plugin-no-sourcemaps": "^2.1.2",
+    "gatsby-plugin-sass": "^2.3.4",
     "gatsby-theme-ocular": "^1.2.0-beta.8",
     "gh-pages": "^2.2.0",
-    "node-sass": "^4.13.0",
+    "node-sass": "^4.14.1",
     "react": "^16.8.6",
-    "react-dom": "^16.8.6",
-    "sass-loader": "^7.0.0"
+    "react-dom": "^16.8.6"
   }
 }

@@ -3,10 +3,6 @@ import {Home} from 'gatsby-theme-ocular/components';
 import HeroExample from './examples/home-demo';
 import '../stylesheets/main.scss';
 
-if (typeof window !== 'undefined') {
-  window.website = true;
-}
-
 export default class IndexPage extends React.Component {
   render() {
     return (

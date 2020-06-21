@@ -1,5 +1,5 @@
 /* eslint import/namespace: ['error', { allowComputed: true }] */
-/* global window */
+/* global setTimeout, clearTimeout */
 import React, {Component} from 'react';
 
 import GenericInput from './input';
@@ -13,14 +13,14 @@ export default class InfoPanel extends Component {
   }
 
   _onFocus() {
-    window.clearTimeout(this._blurTimer);
+    clearTimeout(this._blurTimer);
     this.setState({hasFocus: true});
   }
 
   _onBlur() {
     // New focus is not yet available when blur event fires.
     // Wait a bit and if no onfocus event is fired, remove focus
-    this._blurTimer = window.setTimeout(() => {
+    this._blurTimer = setTimeout(() => {
       this.setState({hasFocus: false});
     }, 1);
   }

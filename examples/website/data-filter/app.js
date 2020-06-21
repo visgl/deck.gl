@@ -1,10 +1,6 @@
 import React, {Component} from 'react';
 import {render} from 'react-dom';
 
-import {Client as Styletron} from 'styletron-engine-atomic';
-import {Provider as StyletronProvider} from 'styletron-react';
-import {LightTheme, BaseProvider} from 'baseui';
-
 import {StaticMap} from 'react-map-gl';
 import DeckGL from '@deck.gl/react';
 import {ScatterplotLayer} from '@deck.gl/layers';
@@ -19,8 +15,6 @@ const MAPBOX_TOKEN = process.env.MapboxAccessToken; // eslint-disable-line
 // Source data GeoJSON
 const DATA_URL =
   'https://raw.githubusercontent.com/uber-web/kepler.gl-data/master/earthquakes/data.csv'; // eslint-disable-line
-
-const engine = new Styletron();
 
 // This is only needed for this particular dataset - the default view assumes
 // that the furthest geometries are on the ground. Because we are drawing the
@@ -147,36 +141,34 @@ export default class App extends Component {
     const filterValue = this.state.filterValue || timeRange;
 
     return (
-      <StyletronProvider value={engine}>
-        <BaseProvider theme={LightTheme}>
-          <DeckGL
-            views={MAP_VIEW}
-            layers={this._renderLayers()}
-            initialViewState={INITIAL_VIEW_STATE}
-            controller={true}
-          >
-            <StaticMap
-              reuseMaps
-              mapStyle={mapStyle}
-              preventStyleDiffing={true}
-              mapboxApiAccessToken={MAPBOX_TOKEN}
-            />
+      <>
+        <DeckGL
+          views={MAP_VIEW}
+          layers={this._renderLayers()}
+          initialViewState={INITIAL_VIEW_STATE}
+          controller={true}
+        >
+          <StaticMap
+            reuseMaps
+            mapStyle={mapStyle}
+            preventStyleDiffing={true}
+            mapboxApiAccessToken={MAPBOX_TOKEN}
+          />
 
-            {this._renderTooltip}
-          </DeckGL>
+          {this._renderTooltip}
+        </DeckGL>
 
-          {timeRange && (
-            <RangeInput
-              min={timeRange[0]}
-              max={timeRange[1]}
-              value={filterValue}
-              animationSpeed={MS_PER_DAY * 30}
-              formatLabel={this._formatLabel}
-              onChange={({value}) => this.setState({filterValue: value})}
-            />
-          )}
-        </BaseProvider>
-      </StyletronProvider>
+        {timeRange && (
+          <RangeInput
+            min={timeRange[0]}
+            max={timeRange[1]}
+            value={filterValue}
+            animationSpeed={MS_PER_DAY * 30}
+            formatLabel={this._formatLabel}
+            onChange={value => this.setState({filterValue: value})}
+          />
+        )}
+      </>
     );
   }
 }

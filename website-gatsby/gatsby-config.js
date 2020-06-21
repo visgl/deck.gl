@@ -60,6 +60,8 @@ module.exports = {
         GITHUB_KEY: null
       }
     },
-    {resolve: 'gatsby-plugin-no-sourcemaps'}
+    `gatsby-plugin-jss`,
+    `gatsby-plugin-sass`,
+    `gatsby-plugin-no-sourcemaps`
   ]
 };
