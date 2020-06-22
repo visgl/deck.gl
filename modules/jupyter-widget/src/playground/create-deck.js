@@ -103,7 +103,7 @@ function missingLayers(oldLayers, newLayers) {
 
 function createStandaloneFromProvider(
   mapProvider,
-  {props, mapboxApiKey, googleMapsKey, handleClick, getTooltip, container}
+  {props, mapboxApiKey, googleMapsKey, onClick, getTooltip, container}
 ) {
   switch (mapProvider) {
     case 'mapbox':
@@ -112,7 +112,7 @@ function createStandaloneFromProvider(
         ...props,
         map: mapboxgl,
         mapboxApiAccessToken: mapboxApiKey,
-        onClick: handleClick,
+        onClick,
         getTooltip,
         container
       });
@@ -121,7 +121,7 @@ function createStandaloneFromProvider(
       return createGoogleMapsDeckOverlay({
         props,
         googleMapsKey,
-        onClick: handleClick,
+        onClick,
         getTooltip,
         container
       });
@@ -131,7 +131,7 @@ function createStandaloneFromProvider(
         ...props,
         map: null,
         mapboxApiAccessToken: null,
-        onClick: handleClick,
+        onClick,
         getTooltip,
         container
       });
@@ -144,7 +144,7 @@ function createDeck({
   container,
   jsonInput,
   tooltip,
-  handleClick,
+  onClick,
   handleWarning,
   customLibraries
 }) {
@@ -162,7 +162,7 @@ function createDeck({
     const getTooltip = makeTooltip(tooltip);
     const {mapProvider} = props;
 
-    const standaloneArgs = {props, mapboxApiKey, googleMapsKey, handleClick, getTooltip, container};
+    const standaloneArgs = {props, mapboxApiKey, googleMapsKey, onClick, getTooltip, container};
 
     deckgl = createStandaloneFromProvider(mapProvider, standaloneArgs);
 

@@ -5,6 +5,8 @@ import {createContainer, createErrorBox} from './utils/css-utils';
 
 import {jsonConverter, createDeck} from './create-deck';
 
+import {selectData} from './select-data';
+
 export function initPlayground() {
   Transport.setCallbacks({
     onInitialize({transport}) {
@@ -38,7 +40,8 @@ export function initPlayground() {
         container,
         jsonInput: jsonProps,
         tooltip,
-        handleClick: (datum, event) => handleClick(transport, datum, event),
+        onClick: (datum, event) => selectData(transport, datum, event),
+        // onViewportChange: ({viewState}) => handleViewStateChange(transport, viewState),
         handleWarning: message => handleWarning(transport, message),
         customLibraries
       });
@@ -92,29 +95,12 @@ export function processDataBuffer({dataBuffer, convertedJson}) {
   return convertedJson;
 }
 
-// Handles a click event
-function handleClick(transport, datum, e) {
-  if (!datum || !datum.object) {
-    transport.jupyterModel.set('selected_data', JSON.stringify(''));
-    transport.jupyterModel.save_changes();
-    return;
-  }
-
-  const multiselectEnabled = e.srcEvent.metaKey || e.srcEvent.metaKey;
-  const dataPayload = datum.object && datum.object.points ? datum.object.points : datum.object;
-  if (multiselectEnabled) {
-    let selectedData = JSON.parse(transport.jupyterModel.get('selected_data'));
-    if (!Array.isArray(selectedData)) {
-      selectedData = [];
-    }
-    selectedData.push(dataPayload);
-    transport.jupyterModel.set('selected_data', JSON.stringify(selectedData));
-  } else {
-    // Single selection
-    transport.jupyterModel.set('selected_data', JSON.stringify(dataPayload));
-  }
-  transport.jupyterModel.save_changes();
-}
+// function handleViewStateChange(transport, viewport) {
+//   console.log('seeing viewport', viewport);
+//   transport.jupyterModel.set('viewport', JSON.stringify(''));
+//   transport.jupyterModel.save_changes();
+//   return viewport;
+// }
 
 // Handles a warning event
 function handleWarning(transport, warningMessage) {

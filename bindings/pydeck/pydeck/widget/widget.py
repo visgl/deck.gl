@@ -52,6 +52,7 @@ class DeckGLWidget(widgets.DOMWidget):
     custom_libraries = Any(allow_none=True).tag(sync=True)
     width = Any("100%").tag(sync=True)
     selected_data = Unicode("[]").tag(sync=True)
+    viewport = Any(default_value=None, allow_none=True).tag(sync=True)
     tooltip = Any(True).tag(sync=True)
     js_warning = Bool(False).tag(sync=True)
     google_maps_key = Unicode("", allow_none=True).tag(sync=True)
