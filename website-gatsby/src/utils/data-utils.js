@@ -1,4 +1,5 @@
 import {request, json, text} from 'd3-request';
+import {withPrefix} from 'gatsby';
 
 import {StreamParser} from './worker-utils';
 
@@ -6,7 +7,7 @@ export function loadData(url, worker, onSuccess) {
   if (worker) {
     const req = request(url);
     // use a web worker to parse data
-    const dataParser = new StreamParser(worker, (data, meta) => {
+    const dataParser = new StreamParser(withPrefix(worker), (data, meta) => {
       onSuccess(data, meta);
     });
 

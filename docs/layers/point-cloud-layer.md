@@ -1,4 +1,6 @@
-<!-- INJECT:"PointCloudLayerDemo" -->
+import {PointCloudLayerDemo} from 'website-components/doc-demos/layers';
+
+<PointCloudLayerDemo />
 
 <p class="badges">
   <img src="https://img.shields.io/badge/@deck.gl/layers-lightgrey.svg?style=flat-square" alt="@deck.gl/layers" />

@@ -20,6 +20,7 @@ module.exports.onCreateWebpackConfig = function onCreateWebpackConfigOverride(op
   config.resolve = config.resolve || {};
   config.resolve.alias = Object.assign({
     'website-examples': resolve('../examples/website'),
+    'website-components': resolve('./src'),
     react: resolve('node_modules/react'),
     'react-dom': resolve('node_modules/react-dom'),
     'styletron-engine-atomic': resolve('node_modules/styletron-engine-atomic'),

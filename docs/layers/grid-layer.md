@@ -1,4 +1,6 @@
-<!-- INJECT:"GridLayerDemo" -->
+import {GridLayerDemo} from 'website-components/doc-demos/aggregation-layers';
+
+<GridLayerDemo />
 
 <p class="badges">
   <img src="https://img.shields.io/badge/@deck.gl/aggregation--layers-lightgrey.svg?style=flat-square" alt="@deck.gl/aggregation-layers" />
@@ -100,7 +102,7 @@ Color scale domain, default is set to the range of point counts in each cell.
 
 ##### `colorRange` (Array, optional)
 
-* Default: <img src="/website/src/static/images/colorbrewer_YlOrRd_6.png"/></a>
+* Default: <img src="/website/src/static/images/colorbrewer_YlOrRd_6.png"/>
 
 Specified as an array of 6 colors [color1, color2, ... color6]. Each color is an array of 3 or 4 values [R, G, B] or [R, G, B, A], representing intensities of Red, Green, Blue and Alpha channels.  Each intensity is a value between 0 and 255. When Alpha not provided a value of 255 is used. By default `colorRange` is set to
 [colorbrewer](http://colorbrewer2.org/#type=sequential&scheme=YlOrRd&n=6) `6-class YlOrRd`.

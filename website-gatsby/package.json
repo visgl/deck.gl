@@ -8,10 +8,11 @@
   ],
   "main": "gatsby-config.js",
   "scripts": {
+    "install-deps": "yarn && find ../examples/website -name package.json -depth 2 -execdir yarn \\;",
     "start": "yarn clean && yarn develop",
     "build": "yarn clean && gatsby build",
+    "build-staging": "yarn clean && gatsby build --prefix-paths",
     "clean": "rm -rf ./.cache ./public",
-    "install-examples": "find ../examples/website -name package.json -depth 2 -execdir yarn \\;",
     "develop": "yarn clean && gatsby develop",
     "serve": "gatsby serve",
     "deploy": "NODE_DEBUG=gh-pages gh-pages -d public"
@@ -29,6 +30,9 @@
     "gatsby-plugin-no-sourcemaps": "^2.1.2",
     "gatsby-plugin-sass": "^2.3.4",
     "gatsby-theme-ocular": "^1.2.0-beta.8",
+    "@mdx-js/mdx": "^1.6.6",
+    "@mdx-js/react": "^1.6.6",
+    "gatsby-plugin-mdx": "^1.2.16",
     "gh-pages": "^2.2.0",
     "node-sass": "^4.14.1",
     "react": "^16.8.6",

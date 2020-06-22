@@ -179,30 +179,36 @@ code {
   height: 100%;
   transition: height 600ms ease-in;
 }
-.markdown {
-  height: 100%;
-  overflow-y: auto;
-  -webkit-overflow-scrolling: touch;
-}
-.markdown .demo {
-  height: 80vh;
+.markdown-demo-container {
+  height: 30vh;
+  min-height: 200px;
+  transition: height 300ms;
+  pointer-events: none;
 
-  >div:first-child {
-    margin-top: 0;
-    transition: margin-top 600ms ease-in;
+  &:hover {
+    height: 80vh;
   }
 
-  &:not(:hover) {
+  .demo {
     height: 30vh;
     min-height: 200px;
     transition: height 300ms;
+    position: absolute;
+    width: 100%;
+    left: 0;
+    top: 0;
+    pointer-events: all;
 
-    >div:first-child {
-      margin-top: -20vh;
-      transition: margin-top 300ms;
-    }
     .options-panel {
       overflow-y: hidden;
+    }
+
+    &:hover {
+      height: 80vh;
+
+      .options-panel {
+        overflow-y: auto;
+      }
     }
   }
 }

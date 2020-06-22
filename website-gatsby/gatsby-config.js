@@ -1,5 +1,7 @@
 const {resolve} = require('path');
 
+const ROOT_DIR = resolve('..');
+
 module.exports = {
   plugins: [
     {
@@ -9,16 +11,16 @@ module.exports = {
 
         // Folders
         DIR_NAME: __dirname,
-        ROOT_FOLDER: `${__dirname}/../`,
+        ROOT_FOLDER: ROOT_DIR,
 
         DOCS: require('../docs/table-of-contents.json'),
         DOC_FOLDERS: [
-          `${__dirname}/../docs/`,
-          `${__dirname}/../modules/`
+          resolve(ROOT_DIR, 'docs'),
+          resolve(ROOT_DIR, 'modules')
         ],
         SOURCE: [
-          `${__dirname}/static`,
-          `${__dirname}/src`
+          resolve('./static'),
+          resolve('./src')
         ],
 
         PROJECT_TYPE: 'github',
@@ -26,9 +28,11 @@ module.exports = {
         PROJECT_NAME: 'deck.gl',
         PROJECT_ORG: 'visgl',
         PROJECT_ORG_LOGO: 'images/visgl-logo.png',
-        PROJECT_URL: 'https://github.com/visgl/deck.gl',
+        PROJECT_URL: 'https://github.com/visgl/',
         PROJECT_DESC: 'WebGL-powered visualization framework for large-scale datasets',
-        PATH_PREFIX: '/',
+
+        // This is only activated in staging, with `gatsby build --prefix-paths`
+        PATH_PREFIX: '/deck.gl',
 
         GA_TRACKING: null,
 
@@ -38,7 +42,7 @@ module.exports = {
 
         HOME_PATH: '/',
         LINK_TO_GET_STARTED: '/docs',
-        INDEX_PAGE_URL: resolve(__dirname, './src/index.jsx'),
+        INDEX_PAGE_URL: resolve('./src/index.jsx'),
 
         PROJECTS: [
           {name: 'deck.gl', url: 'https://deck.gl'},

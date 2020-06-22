@@ -1,5 +1,7 @@
 import React from 'react';
 import {Home} from 'gatsby-theme-ocular/components';
+import {withPrefix} from 'gatsby';
+
 import HeroExample from './examples/home-demo';
 import '../stylesheets/main.scss';
 
@@ -19,19 +21,19 @@ export default class IndexPage extends React.Component {
               <hr className="short" />
 
               <h3>
-                <img src="/images/icon-layers.svg" />
+                <img src={withPrefix('/images/icon-layers.svg')} />
                 A Layered Approach to Data Visualization
               </h3>
               <p>
               deck.gl allows complex visualizations to be constructed by
               composing existing layers, and makes it easy to package and
               share new visualizations as reusable layers. We already offer
-              a <a href="#/documentation/layer-catalog">catalog of proven layers</a> and
+              a <a href={withPrefix('/docs/api-reference/layers')}>catalog of proven layers</a> and
               we have many more in the works.
               </p>
 
               <h3>
-                <img src="images/icon-high-precision.svg" />
+                <img src={withPrefix('/images/icon-high-precision.svg')} />
                 High-Precision Computations in the GPU
               </h3>
               <p>
@@ -41,7 +43,7 @@ export default class IndexPage extends React.Component {
               </p>
 
               <h3>
-                <img src="images/icon-react.svg" />
+                <img src={withPrefix('/images/icon-react.svg')} />
                 React and Mapbox GL Integrations
               </h3>
               <p>

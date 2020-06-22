@@ -1,6 +1,6 @@
 const blackList = ['coordinateSystem', 'modelMatrix'];
 
-const ASYNC_ORIGINAL = Symbol.for('asyncPropOriginal');
+export const ASYNC_ORIGINAL = Symbol.for('asyncPropOriginal');
 
 /* eslint-disable complexity */
 /*

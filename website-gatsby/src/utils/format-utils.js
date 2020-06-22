@@ -52,6 +52,9 @@ export function rgbToHex(rgbArr) {
 }
 
 export function colorToRGBArray(color) {
+  if (!color) {
+    return [255, 255, 255, 0];
+  }
   if (Array.isArray(color)) {
     return color.slice(0, 4);
   }
