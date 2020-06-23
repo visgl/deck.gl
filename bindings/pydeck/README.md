@@ -1,7 +1,7 @@
 [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/uber/deck.gl/binder)
 [![Documentation Status](https://readthedocs.org/projects/deckgl/badge/?version=latest)](https://pydeck.gl)
 [![Anaconda-Server Badge](https://anaconda.org/conda-forge/pydeck/badges/version.svg)](https://anaconda.org/conda-forge/pydeck)
-[![Downloads](https://pepy.tech/badge/pydeck)](https://pepy.tech/project/pydeck)
+[![Downloads](https://pepy.tech/badge/pydeck/week)](https://pepy.tech/project/pydeck/week)
 
 # pydeck: Large-scale interactive data visualization in Python
 
