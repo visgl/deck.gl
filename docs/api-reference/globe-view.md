@@ -82,22 +82,19 @@ In the MapView, it is often sufficient to provide a solid background color where
 - Render a polygon that represents the surface of the earth:
 
 ```js
-layers: [
-  new SolidPolygonLayer({
-    id: 'background',
-    data: [
-      [[-180, 90], [0, 90], [180, 90], [180, -90], [0, -90], [-180, -90]]
-    ],
-    getPolygon: d => d,
-    stroked: false,
-    filled: true,
-    getFillColor: [40, 40, 40]
-  }),
-  ...
-]
+new SolidPolygonLayer({
+  id: 'background',
+  data: [
+    [[-180, 90], [0, 90], [180, 90], [180, -90], [0, -90], [-180, -90]]
+  ],
+  getPolygon: d => d,
+  stroked: false,
+  filled: true,
+  getFillColor: [40, 40, 40]
+})
 ```
 
-- Discard all surfaces that face away from the camera:
+- Discard all surfaces that face away from the camera by passing the following prop to `Deck`:
 
 ```js
 parameters: {
