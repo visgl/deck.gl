@@ -1,13 +1,20 @@
-import React, {Component, Fragment} from 'react';
+import React, {Component} from 'react';
+import {render} from 'react-dom';
+
 import {StaticMap} from 'react-map-gl';
 import DeckGL from '@deck.gl/react';
 import {ScatterplotLayer} from '@deck.gl/layers';
 import {DataFilterExtension} from '@deck.gl/extensions';
 import {MapView} from '@deck.gl/core';
 import RangeInput from './range-input';
+import memoizeOne from 'memoize-one';
 
 // Set your mapbox token here
 const MAPBOX_TOKEN = process.env.MapboxAccessToken; // eslint-disable-line
+
+// Source data GeoJSON
+const DATA_URL =
+  'https://raw.githubusercontent.com/uber-web/kepler.gl-data/master/earthquakes/data.csv'; // eslint-disable-line
 
 // This is only needed for this particular dataset - the default view assumes
 // that the furthest geometries are on the ground. Because we are drawing the
@@ -35,41 +42,31 @@ const dataFilter = new DataFilterExtension({
   fp64: false
 });
 
+const getTimeRange = memoizeOne(data => {
+  if (!data) {
+    return null;
+  }
+  return data.reduce(
+    (range, d) => {
+      const t = d.timestamp;
+      range[0] = Math.min(range[0], t);
+      range[1] = Math.max(range[1], t);
+      return range;
+    },
+    [Infinity, -Infinity]
+  );
+});
+
 export default class App extends Component {
   constructor(props) {
     super(props);
 
-    const timeRange = this._getTimeRange(props.data);
-
     this.state = {
-      timeRange,
-      filterValue: timeRange,
+      filterValue: null,
       hoveredObject: null
     };
     this._onHover = this._onHover.bind(this);
     this._renderTooltip = this._renderTooltip.bind(this);
-  }
-
-  componentWillReceiveProps(nextProps) {
-    if (nextProps.data !== this.props.data) {
-      const timeRange = this._getTimeRange(nextProps.data);
-      this.setState({timeRange, filterValue: timeRange});
-    }
-  }
-
-  _getTimeRange(data) {
-    if (!data) {
-      return null;
-    }
-    return data.reduce(
-      (range, d) => {
-        const t = d.timestamp;
-        range[0] = Math.min(range[0], t);
-        range[1] = Math.max(range[1], t);
-        return range;
-      },
-      [Infinity, -Infinity]
-    );
   }
 
   _onHover({x, y, object}) {
@@ -78,7 +75,7 @@ export default class App extends Component {
 
   _renderLayers() {
     const {data} = this.props;
-    const {filterValue} = this.state;
+    const filterValue = this.state.filterValue || getTimeRange(data);
 
     return [
       data &&
@@ -139,11 +136,12 @@ export default class App extends Component {
   }
 
   render() {
-    const {mapStyle = 'mapbox://styles/mapbox/light-v9'} = this.props;
-    const {timeRange, filterValue} = this.state;
+    const {mapStyle = 'mapbox://styles/mapbox/light-v9', data} = this.props;
+    const timeRange = getTimeRange(data);
+    const filterValue = this.state.filterValue || timeRange;
 
     return (
-      <Fragment>
+      <>
         <DeckGL
           views={MAP_VIEW}
           layers={this._renderLayers()}
@@ -167,10 +165,26 @@ export default class App extends Component {
             value={filterValue}
             animationSpeed={MS_PER_DAY * 30}
             formatLabel={this._formatLabel}
-            onChange={({value}) => this.setState({filterValue: value})}
+            onChange={value => this.setState({filterValue: value})}
           />
         )}
-      </Fragment>
+      </>
     );
   }
+}
+
+export function renderToDOM(container) {
+  render(<App />, container);
+  require('d3-request').csv(DATA_URL, (error, response) => {
+    if (!error) {
+      const data = response.map(row => ({
+        timestamp: new Date(`${row.DateTime} UTC`).getTime(),
+        latitude: Number(row.Latitude),
+        longitude: Number(row.Longitude),
+        depth: Number(row.Depth),
+        magnitude: Number(row.Magnitude)
+      }));
+      render(<App data={data} />, container);
+    }
+  });
 }

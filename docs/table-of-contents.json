@@ -8,7 +8,7 @@
         {"entry": "docs/whats-new"},
         {"entry": "docs/upgrade-guide"},
         {"entry": "docs/roadmap"},
-        {"entry": "CONTRIBUTING"},
+        {"entry": "docs/CONTRIBUTING"},
         {"entry": "docs/faq"}
       ]
     },
@@ -78,29 +78,29 @@
             {"entry": "docs/layers/column-layer"},
             {"entry": "docs/layers/contour-layer"},
             {"entry": "docs/layers/geojson-layer"},
+            {"entry": "docs/layers/gpu-grid-layer"},
+            {"entry": "docs/layers/great-circle-layer"},
+            {"entry": "docs/layers/grid-cell-layer"},
+            {"entry": "docs/layers/grid-layer"},
+            {"entry": "docs/layers/h3-cluster-layer"},
+            {"entry": "docs/layers/h3-hexagon-layer"},
+            {"entry": "docs/layers/hexagon-layer"},
             {"entry": "docs/layers/icon-layer"},
             {"entry": "docs/layers/line-layer"},
+            {"entry": "docs/layers/mvt-layer"},
             {"entry": "docs/layers/path-layer"},
             {"entry": "docs/layers/point-cloud-layer"},
             {"entry": "docs/layers/polygon-layer"},
-            {"entry": "docs/layers/solid-polygon-layer"},
-            {"entry": "docs/layers/scatterplot-layer"},
-            {"entry": "docs/layers/text-layer"},
-            {"entry": "docs/layers/gpu-grid-layer"},
-            {"entry": "docs/layers/great-circle-layer"},
-            {"entry": "docs/layers/grid-layer"},
-            {"entry": "docs/layers/grid-cell-layer"},
-            {"entry": "docs/layers/hexagon-layer"},
-            {"entry": "docs/layers/h3-cluster-layer"},
-            {"entry": "docs/layers/h3-hexagon-layer"},
             {"entry": "docs/layers/s2-layer"},
+            {"entry": "docs/layers/scatterplot-layer"},
             {"entry": "docs/layers/scenegraph-layer"},
             {"entry": "docs/layers/screen-grid-layer"},
             {"entry": "docs/layers/simple-mesh-layer"},
-            {"entry": "docs/layers/tile-layer"},
-            {"entry": "docs/layers/trips-layer"},
+            {"entry": "docs/layers/solid-polygon-layer"},
             {"entry": "docs/layers/terrain-layer"},
-            {"entry": "docs/layers/mvt-layer"}
+            {"entry": "docs/layers/text-layer"},
+            {"entry": "docs/layers/tile-layer"},
+            {"entry": "docs/layers/trips-layer"}
           ]
         },
         {
@@ -133,7 +133,6 @@
             {"entry": "docs/api-reference/globe-view"},
             {"entry": "docs/api-reference/first-person-view"},
             {"entry": "docs/api-reference/orthographic-view"},
-            {"entry": "docs/api-reference/perspective-view"},
             {"entry": "docs/api-reference/orbit-view"},
             {"entry": "docs/api-reference/view-state-transitions"}
           ]
@@ -178,7 +177,8 @@
           "entries": [
             {"entry": "docs/api-reference/json/overview"},
             {"entry": "docs/api-reference/json/json-converter"},
-            {"entry": "docs/api-reference/json/json-layer"}
+            {"entry": "docs/api-reference/json/json-configuration"},
+            {"entry": "docs/api-reference/json/conversion-reference"}
           ]
         },
         {

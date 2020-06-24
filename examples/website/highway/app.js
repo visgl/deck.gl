@@ -4,6 +4,7 @@ import {StaticMap} from 'react-map-gl';
 import DeckGL from '@deck.gl/react';
 import {GeoJsonLayer} from '@deck.gl/layers';
 import {scaleLinear, scaleThreshold} from 'd3-scale';
+import memoizeOne from 'memoize-one';
 
 // Set your mapbox token here
 const MAPBOX_TOKEN = process.env.MapboxAccessToken; // eslint-disable-line
@@ -47,40 +48,31 @@ const INITIAL_VIEW_STATE = {
   maxZoom: 8
 };
 
+const aggregateAccidents = memoizeOne(accidents => {
+  const incidents = {};
+  const fatalities = {};
+
+  if (accidents) {
+    accidents.forEach(a => {
+      const r = (incidents[a.year] = incidents[a.year] || {});
+      const f = (fatalities[a.year] = fatalities[a.year] || {});
+      const key = getKey(a);
+      r[key] = a.incidents;
+      f[key] = a.fatalities;
+    });
+  }
+  return {incidents, fatalities};
+});
+
 export default class App extends Component {
   constructor(props) {
     super(props);
 
     this.state = {
-      hoveredObject: null,
-      ...this._aggregateAccidents(props.accidents)
+      hoveredObject: null
     };
     this._onHover = this._onHover.bind(this);
     this._renderTooltip = this._renderTooltip.bind(this);
-  }
-
-  componentWillReceiveProps(nextProps) {
-    if (nextProps.accidents !== this.props.accidents) {
-      this.setState({
-        ...this._aggregateAccidents(nextProps.accidents)
-      });
-    }
-  }
-
-  _aggregateAccidents(accidents) {
-    const incidents = {};
-    const fatalities = {};
-
-    if (accidents) {
-      accidents.forEach(a => {
-        const r = (incidents[a.year] = incidents[a.year] || {});
-        const f = (fatalities[a.year] = fatalities[a.year] || {});
-        const key = getKey(a);
-        r[key] = a.incidents;
-        f[key] = a.fatalities;
-      });
-    }
-    return {incidents, fatalities};
   }
 
   _getLineColor(f, fatalities) {
@@ -106,8 +98,8 @@ export default class App extends Component {
   }
 
   _renderLayers() {
-    const {roads = DATA_URL.ROADS, year} = this.props;
-    const {incidents, fatalities} = this.state;
+    const {roads = DATA_URL.ROADS, year, accidents} = this.props;
+    const {incidents, fatalities} = aggregateAccidents(accidents);
 
     return [
       new GeoJsonLayer({
@@ -140,12 +132,14 @@ export default class App extends Component {
   }
 
   _renderTooltip() {
-    const {hoveredObject, x, y, fatalities, incidents} = this.state;
-    const {year} = this.props;
+    const {hoveredObject, x, y} = this.state;
+    const {year, accidents} = this.props;
 
     if (!hoveredObject) {
       return null;
     }
+
+    const {incidents, fatalities} = aggregateAccidents(accidents);
 
     const props = hoveredObject.properties;
     const key = getKey(props);
