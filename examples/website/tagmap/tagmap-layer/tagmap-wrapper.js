@@ -2,7 +2,7 @@
 /* eslint-disable max-len */
 /* global document */
 import TagMap from 'tagmap.js';
-import rbush from 'rbush';
+import RBush from 'rbush';
 import {lngLatToWorld, worldToLngLat} from '@math.gl/web-mercator';
 
 function getDrawingContext() {
@@ -56,7 +56,7 @@ export default class TagMapWrapper {
       tag.maxX = tag.center[0];
       tag.maxY = tag.center[1];
     });
-    const cluster = rbush();
+    const cluster = new RBush();
     cluster.load(tagList);
 
     return cluster;

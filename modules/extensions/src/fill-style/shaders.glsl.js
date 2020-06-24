@@ -1,4 +1,4 @@
-import {project} from '@deck.gl/core';
+import {project, COORDINATE_SYSTEM} from '@deck.gl/core';
 
 /*
  * fill pattern shader module
@@ -73,27 +73,25 @@ const inject = {
 
 function getPatternUniforms(opts = {}, uniforms) {
   if ('fillPatternTexture' in opts) {
-    const {fillPatternTexture, fillPatternTextureSize, fillPatternMapping} = opts;
-    return fillPatternTextureSize && fillPatternMapping
-      ? {
-          fill_patternTexture: fillPatternTexture,
-          fill_patternTextureSize: fillPatternTextureSize,
-          fill_patternEnabled: true
-        }
-      : {
-          fill_patternTexture: fillPatternTexture,
-          fill_patternEnabled: false
-        };
+    const {fillPatternTexture} = opts;
+    return {
+      fill_patternTexture: fillPatternTexture,
+      fill_patternTextureSize: [fillPatternTexture.width, fillPatternTexture.height]
+    };
   }
   if (opts.viewport) {
-    const {viewport, fillPatternMask = true} = opts;
-    const {project_uCoordinateOrigin} = uniforms;
+    const {viewport, fillPatternMask = true, fillPatternEnabled = true} = opts;
+    const {project_uCoordinateOrigin, project_uCoordinateSystem} = uniforms;
 
-    const coordinateOriginCommon = viewport.projectPosition(project_uCoordinateOrigin);
+    const coordinateOriginCommon =
+      project_uCoordinateSystem === COORDINATE_SYSTEM.CARTESIAN
+        ? project_uCoordinateOrigin
+        : viewport.projectPosition(project_uCoordinateOrigin);
 
     return {
       fill_uvCoordinateOrigin: coordinateOriginCommon.slice(0, 2),
-      fill_patternMask: fillPatternMask
+      fill_patternMask: fillPatternMask,
+      fill_patternEnabled: fillPatternEnabled
     };
   }
   return {};

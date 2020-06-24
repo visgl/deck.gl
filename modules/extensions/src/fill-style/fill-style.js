@@ -5,6 +5,7 @@ import GL from '@luma.gl/constants';
 import {patternShaders} from './shaders.glsl';
 
 const defaultProps = {
+  fillPatternEnabled: true,
   fillPatternAtlas: null,
   fillPatternMapping: null,
   fillPatternMask: true,
@@ -117,11 +118,9 @@ export default class FillStyleExtension extends LayerExtension {
       return;
     }
 
-    const {patternTexture, patternMapping} = this.state;
+    const {patternTexture} = this.state;
     this.setModuleParameters({
-      fillPatternTexture: patternTexture || this.state.emptyTexture,
-      fillPatternTextureSize: patternTexture ? [patternTexture.width, patternTexture.height] : null,
-      fillPatternMapping: patternMapping
+      fillPatternTexture: patternTexture || this.state.emptyTexture
     });
   }
 

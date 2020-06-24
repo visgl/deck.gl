@@ -1,4 +1,6 @@
-<!-- INJECT:"MVTLayerDemo" -->
+import {MVTLayerDemo} from 'website-components/doc-demos/geo-layers';
+
+<MVTLayerDemo />
 
 <p class="badges">
   <img src="https://img.shields.io/badge/@deck.gl/geo--layers-lightgrey.svg?style=flat-square" alt="@deck.gl/geo-layers" />

@@ -1,4 +1,6 @@
-<!-- INJECT:"H3ClusterLayerDemo" -->
+import {H3ClusterLayerDemo} from 'website-components/doc-demos/geo-layers';
+
+<H3ClusterLayerDemo />
 
 <p class="badges">
   <img src="https://img.shields.io/badge/@deck.gl/geo--layers-lightgrey.svg?style=flat-square" alt="@deck.gl/geo-layers" />

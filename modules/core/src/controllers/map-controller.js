@@ -1,7 +1,7 @@
 import {clamp} from 'math.gl';
 import Controller from './controller';
 import ViewState from './view-state';
-import WebMercatorViewport, {normalizeViewportProps} from '@math.gl/web-mercator';
+import {normalizeViewportProps} from '@math.gl/web-mercator';
 import assert from '../utils/assert';
 import LinearInterpolator from '../transitions/linear-interpolator';
 import {TRANSITION_EVENTS} from './transition-manager';
@@ -38,7 +38,7 @@ const DEFAULT_STATE = {
 
 export class MapState extends ViewState {
   constructor({
-    ViewportType = WebMercatorViewport,
+    makeViewport,
 
     /** Mapbox viewport properties */
     /** The width of the viewport */
@@ -107,7 +107,7 @@ export class MapState extends ViewState {
       startZoom
     };
 
-    this.ViewportType = ViewportType;
+    this.makeViewport = makeViewport;
   }
 
   /* Public API */
@@ -246,7 +246,7 @@ export class MapState extends ViewState {
 
     const zoom = this._calculateNewZoom({scale, startZoom});
 
-    const zoomedViewport = new this.ViewportType(Object.assign({}, this._viewportProps, {zoom}));
+    const zoomedViewport = this.makeViewport({...this._viewportProps, zoom});
     const [longitude, latitude] = zoomedViewport.getMapCenterByLngLatPosition({
       lngLat: startZoomLngLat,
       pos
@@ -353,9 +353,12 @@ export class MapState extends ViewState {
 
   _getUpdatedState(newProps) {
     // Update _viewportProps
-    return new this.constructor(
-      Object.assign({}, this._viewportProps, this._interactiveState, newProps)
-    );
+    return new this.constructor({
+      makeViewport: this.makeViewport,
+      ...this._viewportProps,
+      ...this._interactiveState,
+      ...newProps
+    });
   }
 
   // Apply any constraints (mathematical or defined by _viewportProps) to map state
@@ -374,13 +377,13 @@ export class MapState extends ViewState {
   }
 
   _unproject(pos) {
-    const viewport = new this.ViewportType(this._viewportProps);
+    const viewport = this.makeViewport(this._viewportProps);
     return pos && viewport.unproject(pos);
   }
 
   // Calculate a new lnglat based on pixel dragging position
   _calculateNewLngLat({startPanLngLat, pos}) {
-    const viewport = new this.ViewportType(this._viewportProps);
+    const viewport = this.makeViewport(this._viewportProps);
     return viewport.getMapCenterByLngLatPosition({lngLat: startPanLngLat, pos});
   }
 

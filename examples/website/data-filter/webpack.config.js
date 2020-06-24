@@ -7,7 +7,7 @@ const CONFIG = {
   mode: 'development',
 
   entry: {
-    app: './root.js'
+    app: './app.js'
   },
 
   output: {
