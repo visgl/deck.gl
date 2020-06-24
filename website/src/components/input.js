@@ -1,9 +1,73 @@
 import React, {PureComponent} from 'react';
-import autobind from 'autobind-decorator';
+import styled from 'styled-components';
+
+const InputContainer = styled.div`
+position: relative;
+width: 100%;
+
+&:last-child {
+  margin-bottom: 20px;
+}
+
+>* {
+  vertical-align: middle;
+  white-space: nowrap;
+}
+label {
+  display: inline-block;
+  width: 40%;
+  margin-right: 10%;
+  margin-top: 2px;
+  margin-bottom: 2px;
+}
+input, a, button {
+  background: #fff;
+  font-size: 0.9em;
+  text-transform: none;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  display: inline-block;
+  padding: 0 4px;
+  margin: 0;
+  width: 50%;
+  height: 20px;
+  line-height: 1.833;
+  text-align: left;
+}
+button {
+  color: initial;
+}
+button:disabled {
+  color: #aaa;
+  cursor: default;
+  background: #eee;
+}
+input {
+  border: solid 1px #ccc;
+
+  &:disabled {
+    background: ${props => props.theme.colors.white};;
+  }
+  &[type="checkbox"] {
+    height: auto;
+  }
+}
+
+.tooltip {
+  left: 50%;
+  top: 24px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 200ms;
+}
+&:hover .tooltip {
+  opacity: 1;
+}
+`;
 
 export default class GenericInput extends PureComponent {
-  @autobind _onChange(evt) {
-    const {value, type, selectedValue} = evt.target;
+  _onChange(evt) {
+    const {value, type} = evt.target;
     let newValue = value;
     if (type === 'checkbox') {
       newValue = evt.target.checked;
@@ -20,7 +84,7 @@ export default class GenericInput extends PureComponent {
     return this.props.onChange(this.props.name, newValue);
   }
 
-  @autobind _resetFunction() {
+  _resetFunction() {
     return this.props.onChange(this.props.name, this.props.altValue);
   }
 
@@ -47,7 +111,7 @@ export default class GenericInput extends PureComponent {
       return (
         <div className="input">
           <label>{displayName}</label>
-          <button type="text" disabled={!editable} onClick={ this._resetFunction }>{displayValue}</button>
+          <button type="text" disabled={!editable} onClick={ this._resetFunction.bind(this) }>{displayValue}</button>
         </div>
       );
     }
@@ -55,7 +119,7 @@ export default class GenericInput extends PureComponent {
       return (
         <div className="input">
           <label>{displayName}</label>
-          <select onChange={this._onChange} value={displayValue}>
+          <select onChange={this._onChange.bind(this)} value={displayValue}>
             {props.options.map(((value, i) => <option key={i} value={value}>{value}</option>))}
           </select>
         </div>
@@ -67,13 +131,13 @@ export default class GenericInput extends PureComponent {
     }
 
     return (
-      <div className="input">
+      <InputContainer>
         <label>{displayName}</label>
         <div className="tooltip">
           {displayName}: {String(displayValue)}
         </div>
-        <input {...props} value={displayValue} onChange={this._onChange} />
-      </div>
+        <input {...props} value={displayValue} onChange={this._onChange.bind(this)} />
+      </InputContainer>
     );
   }
 }

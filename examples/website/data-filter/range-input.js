@@ -1,37 +1,33 @@
 /* global requestAnimationFrame, cancelAnimationFrame */
 import React, {PureComponent} from 'react';
-import {styled} from 'baseui';
-import {Slider} from 'baseui/slider';
-import {Button, SHAPE, SIZE} from 'baseui/button';
-import Start from 'baseui/icon/chevron-right';
-import Stop from 'baseui/icon/delete';
+import {styled, withStyles} from '@material-ui/core/styles';
+import Slider from '@material-ui/core/Slider';
+import Button from '@material-ui/core/IconButton';
+import PlayIcon from '@material-ui/icons/PlayArrow';
+import PauseIcon from '@material-ui/icons/Pause';
 
-const PositionContainer = styled('div', ({$theme}) => ({
+const PositionContainer = styled('div')({
   position: 'absolute',
   zIndex: 1,
   bottom: '40px',
-  width: '100%'
-}));
-
-const CenterContainer = styled('div', ({$theme}) => ({
-  marginLeft: 'auto',
-  marginRight: 'auto',
-  width: '40%',
+  width: '100%',
   display: 'flex',
   justifyContent: 'center',
   alignItems: 'center'
-}));
+});
 
-const ThumbValue = styled('div', ({$theme}) => ({
-  position: 'absolute',
-  top: '-2em'
-}));
-
-const TickBar = styled('div', ({$theme}) => ({
-  width: '480px',
-  height: '24px',
-  maxWidth: '80vw'
-}));
+const SliderInput = withStyles({
+  root: {
+    marginLeft: 12,
+    width: '40%'
+  },
+  valueLabel: {
+    '& span': {
+      background: 'none',
+      color: '#000'
+    }
+  }
+})(Slider);
 
 export default class RangeInput extends PureComponent {
   constructor(props) {
@@ -41,7 +37,6 @@ export default class RangeInput extends PureComponent {
       isPlaying: false
     };
 
-    this._renderThumbValue = this._renderThumbValue.bind(this);
     this._animate = this._animate.bind(this);
     this._toggle = this._toggle.bind(this);
     this._animationFrame = null;
@@ -67,41 +62,28 @@ export default class RangeInput extends PureComponent {
     if (newValueMin + span >= max) {
       newValueMin = min;
     }
-    this.props.onChange({
-      value: [newValueMin, newValueMin + span]
-    });
+    this.props.onChange([newValueMin, newValueMin + span]);
 
     this._animationFrame = requestAnimationFrame(this._animate);
   }
 
-  _renderThumbValue({$thumbIndex, $value}) {
-    const value = $value[$thumbIndex];
-    return <ThumbValue>{this.props.formatLabel(value)}</ThumbValue>;
-  }
-
   render() {
-    const {value, min, max} = this.props;
+    const {value, min, max, onChange, formatLabel} = this.props;
     const isButtonEnabled = value[0] > min || value[1] < max;
 
     return (
       <PositionContainer>
-        <CenterContainer>
-          <Button
-            shape={SHAPE.round}
-            size={SIZE.compact}
-            disabled={!isButtonEnabled}
-            onClick={this._toggle}
-          >
-            {this.state.isPlaying ? <Stop title="Stop" /> : <Start title="Animate" />}
-          </Button>
-          <Slider
-            {...this.props}
-            overrides={{
-              ThumbValue: this._renderThumbValue,
-              TickBar: () => <TickBar />
-            }}
-          />
-        </CenterContainer>
+        <Button color="primary" disabled={!isButtonEnabled} onClick={this._toggle}>
+          {this.state.isPlaying ? <PauseIcon title="Stop" /> : <PlayIcon title="Animate" />}
+        </Button>
+        <SliderInput
+          min={min}
+          max={max}
+          value={value}
+          onChange={(event, newValue) => onChange(newValue)}
+          valueLabelDisplay="auto"
+          valueLabelFormat={formatLabel}
+        />
       </PositionContainer>
     );
   }

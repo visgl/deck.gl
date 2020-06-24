@@ -5,6 +5,7 @@ import {StaticMap} from 'react-map-gl';
 import DeckGL from '@deck.gl/react';
 import {GeoJsonLayer, ArcLayer} from '@deck.gl/layers';
 import {scaleQuantile} from 'd3-scale';
+import memoizeOne from 'memoize-one';
 
 // Set your mapbox token here
 const MAPBOX_TOKEN = process.env.MapboxAccessToken; // eslint-disable-line
@@ -42,6 +43,36 @@ const INITIAL_VIEW_STATE = {
   bearing: 30
 };
 
+const calculateArcs = memoizeOne((data, selectedCounty) => {
+  if (!data || !data.length) {
+    return null;
+  }
+  if (!selectedCounty) {
+    selectedCounty = data.find(f => f.properties.name === 'Los Angeles, CA');
+  }
+  const {flows, centroid} = selectedCounty.properties;
+
+  const arcs = Object.keys(flows).map(toId => {
+    const f = data[toId];
+    return {
+      source: centroid,
+      target: f.properties.centroid,
+      value: flows[toId]
+    };
+  });
+
+  const scale = scaleQuantile()
+    .domain(arcs.map(a => Math.abs(a.value)))
+    .range(inFlowColors.map((c, i) => i));
+
+  arcs.forEach(a => {
+    a.gain = Math.sign(a.value);
+    a.quantile = scale(Math.abs(a.value));
+  });
+
+  return arcs;
+});
+
 /* eslint-disable react/no-deprecated */
 export default class App extends Component {
   constructor(props) {
@@ -54,14 +85,6 @@ export default class App extends Component {
     this._onHoverCounty = this._onHoverCounty.bind(this);
     this._onSelectCounty = this._onSelectCounty.bind(this);
     this._renderTooltip = this._renderTooltip.bind(this);
-
-    this._recalculateArcs(this.props.data);
-  }
-
-  componentWillReceiveProps(nextProps) {
-    if (nextProps.data !== this.props.data) {
-      this._recalculateArcs(nextProps.data);
-    }
   }
 
   _onHoverCounty({x, y, object}) {
@@ -69,7 +92,11 @@ export default class App extends Component {
   }
 
   _onSelectCounty({object}) {
-    this._recalculateArcs(this.props.data, object);
+    this.setState({selectedCounty: object});
+
+    if (this.props.onSelectCounty) {
+      this.props.onSelectCounty(object);
+    }
   }
 
   _renderTooltip() {
@@ -83,42 +110,9 @@ export default class App extends Component {
     );
   }
 
-  _recalculateArcs(data, selectedCounty = this.state.selectedCounty) {
-    if (!data || !data.length) {
-      return;
-    }
-    if (!selectedCounty) {
-      selectedCounty = data.find(f => f.properties.name === 'Los Angeles, CA');
-    }
-    const {flows, centroid} = selectedCounty.properties;
-
-    const arcs = Object.keys(flows).map(toId => {
-      const f = data[toId];
-      return {
-        source: centroid,
-        target: f.properties.centroid,
-        value: flows[toId]
-      };
-    });
-
-    const scale = scaleQuantile()
-      .domain(arcs.map(a => Math.abs(a.value)))
-      .range(inFlowColors.map((c, i) => i));
-
-    arcs.forEach(a => {
-      a.gain = Math.sign(a.value);
-      a.quantile = scale(Math.abs(a.value));
-    });
-
-    if (this.props.onSelectCounty) {
-      this.props.onSelectCounty(selectedCounty);
-    }
-
-    this.setState({arcs, selectedCounty});
-  }
-
   _renderLayers() {
     const {data, strokeWidth = 2} = this.props;
+    const arcs = calculateArcs(data, this.state.selectedCounty);
 
     return [
       new GeoJsonLayer({
@@ -133,7 +127,7 @@ export default class App extends Component {
       }),
       new ArcLayer({
         id: 'arc',
-        data: this.state.arcs,
+        data: arcs,
         getSourcePosition: d => d.source,
         getTargetPosition: d => d.target,
         getSourceColor: d => (d.gain > 0 ? inFlowColors : outFlowColors)[d.quantile],
