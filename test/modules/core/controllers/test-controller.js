@@ -178,9 +178,12 @@ export default function testController(t, ViewClass, defaultProps, blackList = [
   let affectedStates = null;
 
   const timeline = new Timeline();
-  const controllerProps = new ViewClass({controller: true}).controller;
-  Object.assign(defaultProps, BASE_PROPS, controllerProps, {timeline});
-  const ControllerClass = controllerProps.type;
+  const view = new ViewClass({controller: true});
+  Object.assign(defaultProps, BASE_PROPS, view.controller, {
+    timeline,
+    makeViewport: view.makeViewport.bind(view)
+  });
+  const ControllerClass = defaultProps.type;
   const controller = new ControllerClass(defaultProps);
 
   for (const testCase of TEST_CASES) {

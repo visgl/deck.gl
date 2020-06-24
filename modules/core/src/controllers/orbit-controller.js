@@ -8,6 +8,7 @@ import {mod} from '../utils/math-utils';
 const MOVEMENT_SPEED = 50; // per keyboard click
 
 const DEFAULT_STATE = {
+  orbitAxis: 'Z',
   rotationX: 0,
   rotationOrbit: 0,
   zoom: 0,
@@ -31,12 +32,12 @@ const zoom2Scale = zoom => Math.pow(2, zoom);
 
 export class OrbitState extends ViewState {
   constructor({
-    ViewportType,
+    makeViewport,
 
     /* Viewport arguments */
     width, // Width of viewport
     height, // Height of viewport
-    orbitAxis,
+    orbitAxis = DEFAULT_STATE.orbitAxis,
     rotationX = DEFAULT_STATE.rotationX, // Rotation around x axis
     rotationOrbit = DEFAULT_STATE.rotationOrbit, // Rotation around orbit axis
     target = DEFAULT_STATE.target,
@@ -82,7 +83,7 @@ export class OrbitState extends ViewState {
       startZoom
     };
 
-    this.ViewportType = ViewportType;
+    this.makeViewport = makeViewport;
   }
 
   /* Public API */
@@ -334,7 +335,7 @@ export class OrbitState extends ViewState {
     if (startTarget) {
       viewportProps.target = startTarget;
     }
-    const viewport = new this.ViewportType(viewportProps);
+    const viewport = this.makeViewport(viewportProps);
     const center = viewport.project(viewportProps.target);
     return viewport.unproject([center[0] - pixelOffset[0], center[1] - pixelOffset[1], center[2]]);
   }

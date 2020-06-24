@@ -91,9 +91,7 @@ export default class OrbitView extends View {
 
   get controller() {
     return this._getControllerProps({
-      orbitAxis: this.props.orbitAxis || 'Z',
-      type: OrbitController,
-      ViewportType: OrbitViewport
+      type: OrbitController
     });
   }
 }

@@ -9,8 +9,7 @@ export default class GlobeView extends View {
 
   get controller() {
     return this._getControllerProps({
-      type: GlobeController,
-      ViewportType: GlobeViewport
+      type: GlobeController
     });
   }
 }
