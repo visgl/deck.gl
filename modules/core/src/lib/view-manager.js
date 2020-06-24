@@ -259,14 +259,18 @@ export default class ViewManager {
   }
 
   _updateController(view, viewState, viewport, controller) {
-    if (view.controller) {
-      const controllerProps = Object.assign({}, viewState, view.props, view.controller, {
+    let controllerProps = view.controller;
+    if (controllerProps) {
+      controllerProps = {
+        ...viewState,
+        ...view.props,
+        ...controllerProps,
         id: view.id,
         x: viewport.x,
         y: viewport.y,
         width: viewport.width,
         height: viewport.height
-      });
+      };
 
       // TODO - check if view / controller type has changed, and replace the controller
       if (controller) {
