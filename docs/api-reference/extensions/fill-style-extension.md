@@ -80,6 +80,11 @@ The following properties are available if the `pattern` option is enabled.
 Sprite image url or texture that packs all your patterns into one layout.
 You can create sprite images with tools such as [TexturePacker](https://www.codeandweb.com/texturepacker).
 
+##### `fillPatternEnabled` (Boolean)
+
+- Default: `true`
+
+Whether to use pattern fill. If `false`, then the extension has no effect.
 
 ##### `fillPatternMapping` (Object | String)
 
