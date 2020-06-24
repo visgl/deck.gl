@@ -45,6 +45,6 @@
     "@deck.gl/core": "^8.0.0",
     "@deck.gl/layers": "^8.0.0",
     "@deck.gl/mesh-layers": "^8.0.0",
-    "@loaders.gl/core": "^2.2.3"
+    "@loaders.gl/core": "^2.2.0"
   }
 }
