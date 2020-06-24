@@ -123,8 +123,8 @@ export default class ScreenGridLayer extends GridAggregationLayer {
   finalizeState() {
     super.finalizeState();
 
-    const {aggregationBuffer, maxBuffer, gpuGridAggregator, maxTexture} = this.state;
-    gpuGridAggregator.delete();
+    const {aggregationBuffer, maxBuffer, maxTexture} = this.state;
+
     if (aggregationBuffer) {
       aggregationBuffer.delete();
     }
