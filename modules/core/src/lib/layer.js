@@ -29,6 +29,7 @@ import debug from '../debug';
 import GL from '@luma.gl/constants';
 import {withParameters, setParameters} from '@luma.gl/core';
 import assert from '../utils/assert';
+import memoize from '../utils/memoize';
 import {mergeShaders} from '../utils/shader';
 import {projectPosition, getWorldPosition} from '../shaderlib/project/project-functions';
 import typedArrayManager from '../utils/typed-array-manager';
@@ -47,6 +48,11 @@ const TRACE_FINALIZE = 'layer.finalize';
 const TRACE_MATCHED = 'layer.matched';
 
 const EMPTY_ARRAY = Object.freeze([]);
+
+// Only compare the same two viewports once
+const areViewportsEqual = memoize(({oldViewport, viewport}) => {
+  return oldViewport.equals(viewport);
+});
 
 let pickingColorCache = new Uint8ClampedArray(0);
 
@@ -363,6 +369,15 @@ export default class Layer extends Component {
   // //////////////////////////////////////////////////
 
   // INTERNAL METHODS
+  activateViewport(viewport) {
+    const oldViewport = this.internalState.viewport;
+
+    if (!oldViewport || !areViewportsEqual({oldViewport, viewport})) {
+      this.internalState.viewport = viewport;
+      this.setChangeFlags({viewportChanged: true});
+      this._update();
+    }
+  }
 
   // Default implementation of attribute invalidation, can be redefined
   invalidateAttribute(name = 'all', diffReason = '') {
@@ -581,8 +596,13 @@ export default class Layer extends Component {
   // Common code for _initialize and _update
   _updateState() {
     const currentProps = this.props;
+    const currentViewport = this.context.viewport;
     const propsInTransition = this._updateUniformTransition();
     this.internalState.propsInTransition = propsInTransition;
+    // Overwrite this.context.viewport during update to use the last activated viewport on this layer
+    // In multi-view applications, a layer may only be drawn in one of the views
+    // Which would make the "active" viewport different from the shared context
+    this.context.viewport = this.internalState.viewport || currentViewport;
     // Overwrite this.props during update to use in-transition prop values
     this.props = propsInTransition;
 
@@ -619,6 +639,8 @@ export default class Layer extends Component {
       }
     }
 
+    // Restore shared context
+    this.context.viewport = currentViewport;
     this.props = currentProps;
     this.clearChangeFlags();
     this.internalState.needsUpdate = false;

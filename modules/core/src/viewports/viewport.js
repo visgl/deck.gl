@@ -108,6 +108,9 @@ export default class Viewport {
     if (!(viewport instanceof Viewport)) {
       return false;
     }
+    if (this === viewport) {
+      return true;
+    }
 
     return (
       viewport.width === this.width &&
