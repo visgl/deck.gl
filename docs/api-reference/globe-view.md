@@ -73,6 +73,40 @@ const view = new GlobeView({id: 'globe', controller: MyGlobeController});
 See the documentation of [Controller](/docs/api-reference/controller.md) for implementation details.
 
 
+# Remarks
+
+## Occlusion
+
+In the MapView, it is often sufficient to provide a solid background color where there is no geometry. In the GlobeView, the user can "see through" to the other side of the earth. There are two ways to fix this:
+
+- Render a polygon that represents the surface of the earth:
+
+```js
+layers: [
+  new SolidPolygonLayer({
+    id: 'background',
+    data: [
+      [[-180, 90], [0, 90], [180, 90], [180, -90], [0, -90], [-180, -90]]
+    ],
+    getPolygon: d => d,
+    stroked: false,
+    filled: true,
+    getFillColor: [40, 40, 40]
+  }),
+  ...
+]
+```
+
+- Discard all surfaces that face away from the camera:
+
+```js
+parameters: {
+  cull: true
+}
+```
+
+
+
 ## Source
 
 [modules/core/src/views/globe-view.js](https://github.com/visgl/deck.gl/blob/master/modules/core/src/views/globe-view.js)
