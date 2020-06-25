@@ -19,8 +19,7 @@ TextLayer is a [CompositeLayer](/docs/api-reference/composite-layer.md).
 import DeckGL from '@deck.gl/react';
 import {TextLayer} from '@deck.gl/layers';
 
-const App = ({data, viewport}) => {
-  /**
+function App({data, viewState}) {  /**
    * Data format:
    * [
    *   {name: 'Colma (COLM)', address: '365 D Street, Colma CA 94014', coordinates: [-122.466233, 37.684638]},
@@ -37,17 +36,13 @@ const App = ({data, viewport}) => {
     getSize: 32,
     getAngle: 0,
     getTextAnchor: 'middle',
-    getAlignmentBaseline: 'center',
-    onHover: ({object, x, y}) => {
-      const tooltip = `${object.name}\n${object.address}`;
-      /* Update tooltip
-         http://deck.gl/#/documentation/developer-guide/adding-interactivity?section=example-display-a-tooltip-for-hovered-object
-      */
-    }
+    getAlignmentBaseline: 'center'
   });
 
-  return <DeckGL {...viewport} layers={[layer]} />;
-};
+  return <DeckGL viewState={viewState}
+    layers={[layer]}
+    getTooltip={({object}) => object && `${object.name}\n${object.address}`} />;
+}
 ```
 
 

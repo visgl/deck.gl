@@ -1,5 +1,5 @@
 /* global document */
-import React, {Component} from 'react';
+import React, {useState, useRef, useCallback} from 'react';
 import {render} from 'react-dom';
 import DeckGL, {ScatterplotLayer, ArcLayer} from 'deck.gl';
 import {StaticMap} from 'react-map-gl';
@@ -32,60 +32,43 @@ function getFirstTextLayerId(style) {
   return firstSymbolId;
 }
 
-/* eslint-disable react/no-deprecated */
-export class App extends Component {
-  constructor(props) {
-    super(props);
-    this.state = {};
+function App() {
+  // DeckGL and mapbox will both draw into this WebGL context
+  const [glContext, setGLContext] = useState();
+  const deckRef = useRef(null);
+  const mapRef = useRef(null);
 
-    this._onWebGLInitialized = this._onWebGLInitialized.bind(this);
-    this._onMapLoad = this._onMapLoad.bind(this);
-  }
-
-  _renderLayers() {
-    return [new ScatterplotLayer(deckPoiLayer), new ArcLayer(deckRouteLayer)];
-  }
-
-  _onWebGLInitialized(gl) {
-    this.setState({gl});
-  }
-
-  _onMapLoad() {
-    const map = this._map;
-    const deck = this._deck;
+  const onMapLoad = useCallback(() => {
+    const map = mapRef.current.getMap();
+    const deck = deckRef.current.deck;
 
     map.addLayer(mapboxBuildingLayer);
     map.addLayer(new MapboxLayer({id: 'deckgl-pois', deck}), getFirstTextLayerId(map.getStyle()));
     map.addLayer(new MapboxLayer({id: 'deckgl-tour-route', deck}));
-  }
+  }, []);
 
-  render() {
-    const {gl} = this.state;
+  const layers = [new ScatterplotLayer(deckPoiLayer), new ArcLayer(deckRouteLayer)];
 
-    return (
-      <DeckGL
-        ref={ref => {
-          this._deck = ref && ref.deck;
-        }}
-        layers={this._renderLayers()}
-        initialViewState={INITIAL_VIEW_STATE}
-        controller={true}
-        onWebGLInitialized={this._onWebGLInitialized}
-      >
-        {gl && (
-          <StaticMap
-            ref={ref => {
-              this._map = ref && ref.getMap();
-            }}
-            gl={gl}
-            mapStyle="mapbox://styles/mapbox/light-v9"
-            mapboxApiAccessToken={MAPBOX_TOKEN}
-            onLoad={this._onMapLoad}
-          />
-        )}
-      </DeckGL>
-    );
-  }
+  return (
+    <DeckGL
+      ref={deckRef}
+      layers={layers}
+      initialViewState={INITIAL_VIEW_STATE}
+      controller={true}
+      onWebGLInitialized={setGLContext}
+      glOptions={{stencil: true}}
+    >
+      {glContext && (
+        <StaticMap
+          ref={mapRef}
+          gl={glContext}
+          mapStyle="mapbox://styles/mapbox/light-v9"
+          mapboxApiAccessToken={MAPBOX_TOKEN}
+          onLoad={onMapLoad}
+        />
+      )}
+    </DeckGL>
+  );
 }
 
 render(<App />, document.body.appendChild(document.createElement('div')));

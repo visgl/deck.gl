@@ -1,4 +1,4 @@
-# Viewport Class
+# Viewport
 
 > Read the article detailing deck.gl's [Views and Projections](/docs/developer-guide/views.md) system.
 

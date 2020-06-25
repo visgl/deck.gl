@@ -170,37 +170,30 @@ The performance of a deck.gl application can be greately improved by limiting th
 ```jsx
 import React from 'react';
 
-export class App extends React.Component {
-  state = {
-    viewState: {
-      latitude: 49.254,
-      longitude: -123.13,
-      zoom: 11
-    }
-  };
+function App() {
+  const layers = [
+    new GeoJsonLayer({
+      id: 'geojson',
+      data: DATA_URL,
+      extruded: true,
+      wireframe: true,
+      getElevation: f => ELEVATION_SCALE(f.properties.population),
+      getFillColor: f => COLOR_SCALE(f.properties.income),
+      getLineColor: [255, 255, 255]
+    })
+  ];
 
-  render() {
-    const layers = [
-      new GeoJsonLayer({
-        id: 'geojson',
-        data: DATA_URL,
-        extruded: true,
-        wireframe: true,
-        getElevation: f => ELEVATION_SCALE(f.properties.population),
-        getFillColor: f => COLOR_SCALE(f.properties.income),
-        getLineColor: [255, 255, 255]
-      })
-    ];
-
-    return (
-      <DeckGL
-        layers={layers}
-        viewState={this.state.viewState}
-        onViewStateChange={({viewState}) => this.setState({viewState})}
-        controller={true}
-      />
-    );
-  }
+  return (
+    <DeckGL
+      layers={layers}
+      initialViewState={{
+        latitude: 49.254,
+        longitude: -123.13,
+        zoom: 11
+      }}
+      controller={true}
+    />
+  );
 }
 ```
 

@@ -1,4 +1,4 @@
-# MapView Class
+# MapView
 
 The [`MapView`] class is a subclass of [View](/docs/api-reference/view.md). This viewport creates a camera that looks at a geospatial location on a map from a certain direction. The behavior of `MapView` is generally modeled after that of Mapbox GL JS.
 

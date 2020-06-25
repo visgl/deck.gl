@@ -1,4 +1,4 @@
-# OrbitView Class
+# OrbitView
 
 The [OrbitView] class is a subclass of [View](/docs/api-reference/view.md) that creates a 3D camera that rotates around a target position. It is usually used for the examination of a 3D scene in non-geospatial use cases.
 

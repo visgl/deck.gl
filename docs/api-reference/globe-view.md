@@ -1,12 +1,12 @@
-# GlobeView Class (Experimental)
+# GlobeView (Experimental)
+
+> This class is experimental, which means it does not provide the compatibility and stability that one would typically expect from other `View` classes. Use with caution and report any issues that you find on GitHub.
 
 The [`GlobeView`] class is a subclass of [View](/docs/api-reference/view.md). This view projects the earth into a 3D globe.
 
 It's recommended that you read the [Views and Projections guide](/docs/developer-guide/views.md) before using this class.
 
 ## Limitations
-
-> This class is experimental, which means it does not provide the compatibility and stability that one would typically expect from other `View` classes. Use with caution and report any issues that you find on GitHub.
 
 The goal of `GlobeView` is to provide a generic solution to rendering and navigating data in the 3D space.
 In the initial release, this class mainly addresses the need to render an overview of the entire globe. The following limitations apply, as features are still under development: 

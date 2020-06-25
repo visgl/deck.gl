@@ -22,8 +22,7 @@ const CONTOURS = [
   {threshold: [6, 10], color: [0, 0, 255, 128]} // => Isoband for threshold range [6, 10)
 ];
 
-const App = ({data, viewport}) => {
-
+function App({data, viewState}) {
   /**
    * Data format:
    * [
@@ -39,8 +38,10 @@ const App = ({data, viewport}) => {
     getPosition: d => d.COORDINATES,
   });
 
-  return (<DeckGL {...viewport} layers={[layer]} />);
-};
+  return <DeckGL viewState={viewState}
+    layers={[layer]}
+    getTooltip={({object}) => object && } />;
+}
 ```
 
 
