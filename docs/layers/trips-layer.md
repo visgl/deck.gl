@@ -1,4 +1,7 @@
-<!-- INJECT:"TripsLayerDemo" -->
+import {TripsLayerDemo} from 'website-components/doc-demos/geo-layers';
+
+<TripsLayerDemo />
+
 <p class="badges">
   <img src="https://img.shields.io/badge/@deck.gl/geo--layers-lightgrey.svg?style=flat-square" alt="@deck.gl/geo-layers" />
 </p>

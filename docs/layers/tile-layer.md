@@ -1,4 +1,6 @@
-<!-- INJECT:"TileLayerDemo" -->
+import {TileLayerDemo} from 'website-components/doc-demos/geo-layers';
+
+<TileLayerDemo />
 
 <p class="badges">
   <img src="https://img.shields.io/badge/@deck.gl/geo--layers-lightgrey.svg?style=flat-square" alt="@deck.gl/geo-layers" />
@@ -143,7 +145,9 @@ Hide tiles when under-zoomed.
 
 ##### `extent` (Array, optional)
 
-If provided, the layer will load and render the tiles in this box when underzoomed.  The box is of the form `[minX, minY, maxX, maxY]`.
+If provided, the layer will load and render the tiles in this box at `minZoom` when underzoomed (i.e. `zoom < minZoom`).  The box is of the form `[minX, minY, maxX, maxY]`.
+
+If `null`, the layer will not display any tiles when underzoomed to avoid issuing too many tile requests.
 
 - Default: null
 

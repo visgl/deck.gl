@@ -6,6 +6,7 @@ import DeckGL from '@deck.gl/react';
 import {ScatterplotLayer, ArcLayer} from '@deck.gl/layers';
 import {BrushingExtension} from '@deck.gl/extensions';
 import {scaleLinear} from 'd3-scale';
+import memoizeOne from 'memoize-one';
 
 // Set your mapbox token here
 const MAPBOX_TOKEN = process.env.MapboxAccessToken; // eslint-disable-line
@@ -44,98 +45,86 @@ const INITIAL_VIEW_STATE = {
 
 const brushingExtension = new BrushingExtension();
 
+/* eslint-disable  max-nested-callbacks */
+const getLayerData = memoizeOne(data => {
+  if (!data || !data.length) {
+    return {};
+  }
+  const arcs = [];
+  const targets = [];
+  const sources = [];
+  const pairs = {};
+
+  data.forEach((county, i) => {
+    const {flows, centroid: targetCentroid} = county.properties;
+    const value = {gain: 0, loss: 0};
+
+    Object.keys(flows).forEach(toId => {
+      value[flows[toId] > 0 ? 'gain' : 'loss'] += flows[toId];
+
+      // if number too small, ignore it
+      if (Math.abs(flows[toId]) < 50) {
+        return;
+      }
+      const pairKey = [i, Number(toId)].sort((a, b) => a - b).join('-');
+      const sourceCentroid = data[toId].properties.centroid;
+      const gain = Math.sign(flows[toId]);
+
+      // add point at arc source
+      sources.push({
+        position: sourceCentroid,
+        target: targetCentroid,
+        name: data[toId].properties.name,
+        radius: 3,
+        gain: -gain
+      });
+
+      // eliminate duplicates arcs
+      if (pairs[pairKey]) {
+        return;
+      }
+
+      pairs[pairKey] = true;
+
+      arcs.push({
+        target: gain > 0 ? targetCentroid : sourceCentroid,
+        source: gain > 0 ? sourceCentroid : targetCentroid,
+        value: flows[toId]
+      });
+    });
+
+    // add point at arc target
+    targets.push({
+      ...value,
+      position: [targetCentroid[0], targetCentroid[1], 10],
+      net: value.gain + value.loss,
+      name: county.properties.name
+    });
+  });
+
+  // sort targets by radius large -> small
+  targets.sort((a, b) => Math.abs(b.net) - Math.abs(a.net));
+  const sizeScale = scaleLinear()
+    .domain([0, Math.abs(targets[0].net)])
+    .range([36, 400]);
+
+  targets.forEach(pt => {
+    pt.radius = Math.sqrt(sizeScale(Math.abs(pt.net)));
+  });
+
+  return {arcs, targets, sources};
+});
+
 /* eslint-disable react/no-deprecated */
 export default class App extends Component {
   constructor(props) {
     super(props);
-    this.state = {
-      arcs: [],
-      targets: [],
-      sources: [],
-      ...this._getLayerData(props)
-    };
+    this.state = {};
     this._onHover = this._onHover.bind(this);
-  }
-
-  componentWillReceiveProps(nextProps) {
-    if (nextProps.data !== this.props.data) {
-      this.setState({
-        ...this._getLayerData(nextProps)
-      });
-    }
   }
 
   _onHover({x, y, object}) {
     this.setState({x, y, hoveredObject: object});
-  }
-
-  _getLayerData({data}) {
-    if (!data || !data.length) {
-      return null;
-    }
-    const arcs = [];
-    const targets = [];
-    const sources = [];
-    const pairs = {};
-
-    data.forEach((county, i) => {
-      const {flows, centroid: targetCentroid} = county.properties;
-      const value = {gain: 0, loss: 0};
-
-      Object.keys(flows).forEach(toId => {
-        value[flows[toId] > 0 ? 'gain' : 'loss'] += flows[toId];
-
-        // if number too small, ignore it
-        if (Math.abs(flows[toId]) < 50) {
-          return;
-        }
-        const pairKey = [i, Number(toId)].sort((a, b) => a - b).join('-');
-        const sourceCentroid = data[toId].properties.centroid;
-        const gain = Math.sign(flows[toId]);
-
-        // add point at arc source
-        sources.push({
-          position: sourceCentroid,
-          target: targetCentroid,
-          name: data[toId].properties.name,
-          radius: 3,
-          gain: -gain
-        });
-
-        // eliminate duplicates arcs
-        if (pairs[pairKey]) {
-          return;
-        }
-
-        pairs[pairKey] = true;
-
-        arcs.push({
-          target: gain > 0 ? targetCentroid : sourceCentroid,
-          source: gain > 0 ? sourceCentroid : targetCentroid,
-          value: flows[toId]
-        });
-      });
-
-      // add point at arc target
-      targets.push({
-        ...value,
-        position: [targetCentroid[0], targetCentroid[1], 10],
-        net: value.gain + value.loss,
-        name: county.properties.name
-      });
-    });
-
-    // sort targets by radius large -> small
-    targets.sort((a, b) => Math.abs(b.net) - Math.abs(a.net));
-    const sizeScale = scaleLinear()
-      .domain([0, Math.abs(targets[0].net)])
-      .range([36, 400]);
-
-    targets.forEach(pt => {
-      pt.radius = Math.sqrt(sizeScale(Math.abs(pt.net)));
-    });
-
-    return {arcs, targets, sources};
   }
 
   _renderTooltip() {
@@ -161,7 +150,7 @@ export default class App extends Component {
       opacity = 0.7
     } = this.props;
 
-    const {arcs, targets, sources} = this.state;
+    const {arcs, targets, sources} = getLayerData(this.props.data);
 
     if (!arcs || !targets) {
       return null;

@@ -95,10 +95,8 @@ export default class LayersPass extends Pass {
       }
       if (layer.isComposite) {
         renderStatus.compositeCount++;
-      }
-
-      // Draw the layer
-      if (shouldDrawLayer) {
+      } else if (shouldDrawLayer) {
+        // Draw the layer
         renderStatus.visibleCount++;
 
         const _moduleParameters = this._getModuleParameters(layer, effects, pass, moduleParameters);
@@ -141,7 +139,7 @@ export default class LayersPass extends Pass {
 
   /* Private */
   _shouldDrawLayer(layer, viewport, pass, layerFilter) {
-    let shouldDrawLayer = this.shouldDrawLayer(layer) && !layer.isComposite && layer.props.visible;
+    let shouldDrawLayer = this.shouldDrawLayer(layer) && layer.props.visible;
 
     if (shouldDrawLayer && layerFilter) {
       shouldDrawLayer = layerFilter({
@@ -151,6 +149,11 @@ export default class LayersPass extends Pass {
         renderPass: pass
       });
     }
+    if (shouldDrawLayer) {
+      // If a layer is drawn, update its viewportChanged flag
+      layer.activateViewport(viewport);
+    }
+
     return shouldDrawLayer;
   }
 

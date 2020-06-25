@@ -93,13 +93,11 @@ export default class App extends Component {
 
     return hoveredObject.cluster ? (
       <div className="tooltip" style={{left: x, top: y}}>
-        <h5>{hoveredObject.point_count} records</h5>
+        {hoveredObject.point_count} records
       </div>
     ) : (
       <div className="tooltip" style={{left: x, top: y}}>
-        <h5>
-          {hoveredObject.name} {hoveredObject.year ? `(${hoveredObject.year})` : ''}
-        </h5>
+        {hoveredObject.name} {hoveredObject.year ? `(${hoveredObject.year})` : ''}
       </div>
     );
   }

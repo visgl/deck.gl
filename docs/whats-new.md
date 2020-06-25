@@ -2,6 +2,74 @@
 
 This page contains highlights of each deck.gl release. Also check our [vis.gl blog](https://medium.com/vis-gl) for news about new releases and features in deck.gl.
 
+## deck.gl v8.2
+
+Release Data: TBD, 2020
+
+<table style="border: 0;" align="center">
+  <tbody>
+    <tr>
+      <td>
+        <img style="max-height:200px" src="https://user-images.githubusercontent.com/2059298/84559353-a9d93600-acee-11ea-89ff-b404d798ba17.gif" />
+        <p><i>FillStyleExtension</i></p>
+      </td>
+      <td>
+        <img style="max-height:200px" src="https://user-images.githubusercontent.com/4319728/85549259-183bc380-b620-11ea-83c8-8f4abec732f6.gif" />
+        <p><i>MVTLayer highlight - v8.1</i></p>
+      </td>
+      <td>
+        <img style="max-height:200px" src="https://user-images.githubusercontent.com/4319728/85549267-1a9e1d80-b620-11ea-9aa4-3ec108d08db7.gif" />
+        <p><i>MVTLayer highlight - v8.2</i></p>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+### Tiled Layers
+
+Many new features are added to `TileLayer`, `MVTLayer` and `TerrainLayer` to improve correctness, performance and ease of use.
+
+- `MVTLayer` projects more accurately at high zoom levels.
+- `autoHighlight` in the `MVTLayer` now works on features that are split across multiple tiles, identified by the new `uniqueIdProperty` prop.
+- All geospatially tiled layers now handle high pitch angles better. Far away tiles from the camera are loaded at lower zoom levels, avoiding loading too many tiles.
+- Tiled layers now use a request scheduler to prioritize loading the most recently visible tiles during viewport navigation. See the new `throttleRequests` and `maxRequests` props.
+- `TileLayer` may continue to display tiles when underzoomed. See the new `extent` prop.
+- Fine-tune the tiles displayed by the `TileLayer` with the new `zRange` prop when dealing with 3D content. This is used by the `TerrainLayer` when viewing high-altitude regions.
+- `TileLayer`'s `tileSize` prop can be used to fine-tune the zoom level at which tiles are loaded.
+- `TileLayer`'s `renderSubLayers` is now always called after the tile layer is loaded, i.e. `props.data` is never a Promise.
+- `TileLayer` can now be used in multi-view applications, as long as each `TileLayer` instance is rendered into one view. See [documentation](/docs/developer-guide/views.md#rendering-layers-in-multiple-views) for an example.
+
+
+### GlobeView
+
+<img style="max-height:400px" src="https://raw.github.com/visgl/deck.gl-data/master/images/whats-new/globe.gif" />
+
+For geospatial data, a new projection mode -- globe projection is now available alongside Web Mercator projection. In this release, the feature is exposed via the experimental `GlobeView` class.
+
+Currently there is no base map provider under this view. You may use the `BitmapLayer` or `GeoJsonLayer` to render a backdrop for your data.
+
+Before getting started with [this example](/examples/get-started/pure-js/globe/), make sure you check out the [docs](/docs/api-reference/globe-view.md) for the limitaions of the current implementation.
+
+
+### Antimeridian Handling
+
+- `GreatCircleLayer` now renders correctly across the 180th meridian.
+- The `PathLayer`, `PolygonLayer` and `GeoJsonLayer` now support the `wrapLongitude` prop.When enabled, the connection between any two neighboring vertices is drawn on the shorter side of the world, and split into two if it crosses the 180th meridian. Note that this introduces CPU overhead at runtime.
+
+### Pydeck
+
+Pydeck 0.4.0 introduces support for JupyterLab 2.0, support for a Google Maps base map, a new UI element for providing text descriptions of a map, and many of the new features of deck.gl 8.2, like the ability to render data to either a globe or a Mercator projection. See the new [website](https://pydeck.gl/) for documentation and examples.
+
+### Miscellaneous
+
+- Multiple layers that share the same `data` URL now only download the data once.
+- `ScatterplotLayer` added `radiusUnits` prop
+- New `FillStyleExtension` fills polygons with repeated pattern from a sprite image.
+- `ArcLayer` added `greatCircle` prop. `GreatCircleLayer` is now a special case of the `ArcLayer` and support rendering an elevated curve by supplying `getHeight`.
+- `@deck.gl/test-utils` added new `testLayerAsync` API.
+- When using auto-highlight, `highlightColor` now accepts a callback that returns a color based on which object is picked.
+
+
 ## deck.gl v8.1
 
 Release Date: Mar 17, 2020
@@ -504,7 +572,7 @@ As the number of deck.gl layers grow, we are splitting existing and new layers i
 
 ### glTF Support and Loaders.gl
 
-<img height=150 src="https://raw.github.com/visgl/deck.gl-data/master/images/gltf.png" />
+<img height="150" src="https://raw.github.com/visgl/deck.gl-data/master/images/gltf.png" />
 
 The new [ScenegraphLayer](/docs/layers/scenegraph-layer.md) and [SimpleMeshLayer](/docs/layers/simple-mesh-layer.md) support loading 3D models and scenegraphs in the popular [glTF™](https://www.khronos.org/gltf/) asset format.  glTF is a royalty-free specification for the efficient transmission and loading of 3D assets, with a rich ecosystem of tools and extensions.  All variants of glTF 2.0 are supported, including binary `.glb` files as well as JSON `.gltf` files with binary assets in base64 encoding or in separate files.
 
@@ -781,7 +849,7 @@ Release date: June 01, 2018
   <tbody>
     <tr>
       <td>
-        <img height=150 src="https://raw.github.com/visgl/deck.gl-data/master/images/whats-new/orthographic.gif" />
+        <img height="150" src="https://raw.github.com/visgl/deck.gl-data/master/images/whats-new/orthographic.gif" />
         <p><i>Orthographic Mode</i></p>
       </td>
     </tr>
@@ -832,15 +900,15 @@ Release date: April 24, 2018
   <tbody>
     <tr>
       <td>
-        <img height=150 src="https://raw.github.com/visgl/deck.gl-data/master/images/whats-new/text-layer.gif" />
+        <img height="150" src="https://raw.github.com/visgl/deck.gl-data/master/images/whats-new/text-layer.gif" />
         <p><i>New TextLayer</i></p>
       </td>
       <td>
-        <img height=150 src="https://raw.github.com/visgl/deck.gl-data/master/images/whats-new/screenGrid-colorRangeDomain.gif" />
+        <img height="150" src="https://raw.github.com/visgl/deck.gl-data/master/images/whats-new/screenGrid-colorRangeDomain.gif" />
         <p><i>ScreenGridLayer Color Scale</i></p>
       </td>
       <td>
-        <img height=150 src="https://raw.github.com/visgl/deck.gl-data/master/images/whats-new/test-utils.gif" />
+        <img height="150" src="https://raw.github.com/visgl/deck.gl-data/master/images/whats-new/test-utils.gif" />
         <p><i>Automated Render Tests</i></p>
       </td>
     </tr>
@@ -944,11 +1012,11 @@ Release date: Feb 16, 2018
   <tbody>
     <tr>
       <td>
-        <img height=150 src="https://raw.github.com/visgl/deck.gl-data/master/images/whats-new/transitions.gif" />
+        <img height="150" src="https://raw.github.com/visgl/deck.gl-data/master/images/whats-new/transitions.gif" />
         <p><i>Layer Transitions</i></p>
       </td>
       <td>
-        <img height=150 src="https://raw.github.com/visgl/deck.gl-data/master/images/whats-new/jsx-layers.png" />
+        <img height="150" src="https://raw.github.com/visgl/deck.gl-data/master/images/whats-new/jsx-layers.png" />
         <p><i>JSX Layers</i></p>
       </td>
     </tr>
@@ -988,15 +1056,15 @@ Release date: Dec 21, 2017
   <tbody>
     <tr>
       <td>
-        <img height=150 src="https://raw.github.com/visgl/deck.gl-data/master/images/whats-new/object-highlighting.gif" />
+        <img height="150" src="https://raw.github.com/visgl/deck.gl-data/master/images/whats-new/object-highlighting.gif" />
         <p><i>GPU-based Highlighting</i></p>
       </td>
       <td>
-        <img height=150 src="https://raw.github.com/visgl/deck.gl-data/master/images/whats-new/path-dashes.png" />
+        <img height="150" src="https://raw.github.com/visgl/deck.gl-data/master/images/whats-new/path-dashes.png" />
         <p><i>Dashes in GeoJson</i></p>
       </td>
       <td>
-        <img height=150 src="https://raw.github.com/visgl/deck.gl-data/master/images/whats-new/react-16.png" />
+        <img height="150" src="https://raw.github.com/visgl/deck.gl-data/master/images/whats-new/react-16.png" />
         <p><i>React 16 Support</i></p>
       </td>
     </tr>
@@ -1084,11 +1152,11 @@ Release date: July 27th, 2017
   <tbody>
     <tr>
       <td>
-        <img height=150 src="https://raw.github.com/visgl/deck.gl-data/master/images/whats-new/webgl2.jpg" />
+        <img height="150" src="https://raw.github.com/visgl/deck.gl-data/master/images/whats-new/webgl2.jpg" />
         <p><i>WebGL 2</i></p>
       </td>
       <td>
-        <img height=150 src="https://raw.github.com/visgl/deck.gl-data/master/images/whats-new/seer.png" />
+        <img height="150" src="https://raw.github.com/visgl/deck.gl-data/master/images/whats-new/seer.png" />
         <p><i>Seer Extension</i></p>
       </td>
     </tr>

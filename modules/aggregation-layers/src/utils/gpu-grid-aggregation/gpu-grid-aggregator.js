@@ -384,20 +384,26 @@ export default class GPUGridAggregator {
     const {framebuffers} = this.state;
     const {gl, allAggregationModel} = this;
 
-    minOrMaxFb.bind();
-    gl.viewport(0, 0, gridSize[0], gridSize[1]);
-    withParameters(gl, clearParams, () => {
-      gl.clear(gl.COLOR_BUFFER_BIT);
-    });
-    allAggregationModel.draw({
-      parameters,
-      uniforms: {
-        uSampler: framebuffers[id].texture,
-        gridSize,
-        combineMaxMin
+    withParameters(
+      gl,
+      {
+        ...clearParams,
+        framebuffer: minOrMaxFb,
+        viewport: [0, 0, gridSize[0], gridSize[1]]
+      },
+      () => {
+        gl.clear(gl.COLOR_BUFFER_BIT);
+
+        allAggregationModel.draw({
+          parameters,
+          uniforms: {
+            uSampler: framebuffers[id].texture,
+            gridSize,
+            combineMaxMin
+          }
+        });
       }
-    });
-    minOrMaxFb.unbind();
+    );
   }
 
   // render all data points to aggregate weights
@@ -407,24 +413,29 @@ export default class GPUGridAggregator {
     const {gl, gridAggregationModel} = this;
     const {operation} = weights[id];
 
-    framebuffers[id].bind();
-    gl.viewport(0, 0, gridSize[0], gridSize[1]);
     const clearColor =
       operation === AGGREGATION_OPERATION.MIN
         ? [MAX_32_BIT_FLOAT, MAX_32_BIT_FLOAT, MAX_32_BIT_FLOAT, 0]
         : [0, 0, 0, 0];
-    withParameters(gl, {clearColor}, () => {
-      gl.clear(gl.COLOR_BUFFER_BIT);
-    });
+    withParameters(
+      gl,
+      {
+        framebuffer: framebuffers[id],
+        viewport: [0, 0, gridSize[0], gridSize[1]],
+        clearColor
+      },
+      () => {
+        gl.clear(gl.COLOR_BUFFER_BIT);
 
-    const attributes = {weights: weightAttributes[id]};
-    gridAggregationModel.draw({
-      parameters: Object.assign({}, parameters, {blendEquation: equations[id]}),
-      moduleSettings,
-      uniforms,
-      attributes
-    });
-    framebuffers[id].unbind();
+        const attributes = {weights: weightAttributes[id]};
+        gridAggregationModel.draw({
+          parameters: Object.assign({}, parameters, {blendEquation: equations[id]}),
+          moduleSettings,
+          uniforms,
+          attributes
+        });
+      }
+    );
 
     if (operation === AGGREGATION_OPERATION.MEAN) {
       const {meanTextures, textures} = this.state;

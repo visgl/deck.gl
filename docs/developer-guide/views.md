@@ -9,15 +9,15 @@ View classes enable applications to specify one or more rectangular viewports an
   <tbody>
     <tr>
       <td style="vertical-align: top">
-        <img height=200 src="https://raw.github.com/visgl/deck.gl-data/master/images/docs/minimap.gif" />
+        <img height="200" src="https://raw.github.com/visgl/deck.gl-data/master/images/docs/minimap.gif" />
         <p><i>A "minimap" app, implemented as two overlapping, partially synchronized MapViews</i></p>
       </td>
       <td style="vertical-align: top">
-        <img height=200 src="https://raw.github.com/visgl/deck.gl-data/master/images/docs/first-person-view.gif" />
+        <img height="200" src="https://raw.github.com/visgl/deck.gl-data/master/images/docs/first-person-view.gif" />
         <p><i>A vehicle log rendered from the driver's perspective, implemented with FirstPersonView</i></p>
       </td>
       <td style="vertical-align: top">
-        <img height=200 src="https://raw.github.com/visgl/deck.gl-data/master/images/docs/orthographic-view.gif" />
+        <img height="200" src="https://raw.github.com/visgl/deck.gl-data/master/images/docs/orthographic-view.gif" />
         <p><i>A graph, implemented with OrthographicView</i></p>
       </td>
     </tr>
@@ -317,6 +317,29 @@ const deck = new Deck({
   ]
 });
 ```
+
+Some layers, including `TileLayer`, `Tile3DLayer`, `HeatmapLayer` and `ScreenGridLayer`, perform expensive operations (data fetching/aggregation) on viewport change. Therefore, it is generally NOT recommended to render them into multiple views. If you do need to show e.g. tiled base map in multiple views, create one layer instance for each view and limit their rendering with `layerFilter`:
+
+```js
+const deck = new Deck({
+  ...
+  views: [
+    new MapView({id: 'main', ...}),
+    new MapView({id: 'mini-map', ...})
+  ],
+  layers: [
+    new TileLayer({id: 'tiles-for-main', ...}),
+    new TileLayer({id: 'tiles-for-mini-map', ...})
+  ],
+  layerFilter: ({layer, viewport} => {
+    if (layer.id.startsWith('tiles-for')) {
+      return layer.id.startsWith(`tiles-for-${viewport.id}`);
+    }
+    return true;
+  });
+});
+```
+
 
 ### Picking in Multiple Views
 

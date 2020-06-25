@@ -44,7 +44,7 @@ export default [
     },
     layers: [
       new MVTLayer({
-        id: 'mvt-layer',
+        id: 'mvt-layer-highlight',
         data: ['./test/data/mvt-tiles/{z}/{x}/{y}.mvt'],
         getFillColor: [0, 0, 0, 128],
         getLineColor: [255, 0, 0, 128],

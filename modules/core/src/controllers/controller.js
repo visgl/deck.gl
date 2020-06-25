@@ -19,7 +19,6 @@
 // THE SOFTWARE.
 
 import TransitionManager from './transition-manager';
-import log from '../utils/log';
 import assert from '../utils/assert';
 
 const NO_TRANSITION_PROPS = {
@@ -82,9 +81,11 @@ export default class Controller {
    */
   handleEvent(event) {
     const {ControllerState} = this;
-    this.controllerState = new ControllerState(
-      Object.assign({}, this.controllerStateProps, this._state)
-    );
+    this.controllerState = new ControllerState({
+      makeViewport: this.makeViewport,
+      ...this.controllerStateProps,
+      ...this._state
+    });
 
     switch (event.type) {
       case 'panstart':
@@ -145,14 +146,14 @@ export default class Controller {
    */
   /* eslint-disable complexity, max-statements */
   setProps(props) {
-    if ('onViewportChange' in props) {
-      log.removed('onViewportChange')();
-    }
     if ('onViewStateChange' in props) {
       this.onViewStateChange = props.onViewStateChange;
     }
     if ('onStateChange' in props) {
       this.onStateChange = props.onStateChange;
+    }
+    if ('makeViewport' in props) {
+      this.makeViewport = props.makeViewport;
     }
     this.controllerStateProps = props;
 

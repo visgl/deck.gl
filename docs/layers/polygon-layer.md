@@ -1,4 +1,6 @@
-<!-- INJECT:"PolygonLayerDemo" -->
+import {PolygonLayerDemo} from 'website-components/doc-demos/layers';
+
+<PolygonLayerDemo />
 
 <p class="badges">
   <img src="https://img.shields.io/badge/@deck.gl/layers-lightgrey.svg?style=flat-square" alt="@deck.gl/layers" />

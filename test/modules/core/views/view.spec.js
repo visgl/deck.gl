@@ -137,19 +137,6 @@ test('OrbitView', t => {
   t.end();
 });
 
-test('OrbitController#orbitAxis', t => {
-  let view = new OrbitView();
-  t.is(view.controller, null, 'controller is disabled');
-
-  view = new OrbitView({controller: true});
-  t.is(view.controller.orbitAxis, 'Z', 'controller.orbitAxis is populated with default value');
-
-  view = new OrbitView({orbitAxis: 'Y', controller: {panRotate: false}});
-  t.is(view.controller.orbitAxis, 'Y', 'controller.orbitAxis is set to user value');
-
-  t.end();
-});
-
 // eslint-disable-next-line complexity
 test('OrbitView#project', t => {
   const view = new OrbitView({id: '3d-view'});

@@ -134,7 +134,7 @@ export default class App extends Component {
 
   render() {
     const {
-      viewState,
+      initialViewState = INITIAL_VIEW_STATE,
       mapStyle = 'mapbox://styles/mapbox/dark-v9',
       theme = DEFAULT_THEME
     } = this.props;
@@ -143,8 +143,7 @@ export default class App extends Component {
       <DeckGL
         layers={this._renderLayers()}
         effects={theme.effects}
-        initialViewState={INITIAL_VIEW_STATE}
-        viewState={viewState}
+        initialViewState={initialViewState}
         controller={true}
       >
         <StaticMap

@@ -1,4 +1,4 @@
-# deck.gl Layer Catalog Overview
+# Layer Catalog Overview
 
 For first-time deck.gl developers, it is helpful to read the following pages before jumping into the layer catalog:
 

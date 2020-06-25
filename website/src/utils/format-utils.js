@@ -48,15 +48,12 @@ export const readableInteger = x => {
 };
 
 export function rgbToHex(rgbArr) {
-  if (!rgbArr) {
-    return null;
-  }
   return rgbArr.slice(0, 3).reduce((acc, v) => `${acc}${v < 16 ? '0' : ''}${v.toString(16)}`, '#');
 }
 
 export function colorToRGBArray(color) {
   if (!color) {
-    return null;
+    return [255, 255, 255, 0];
   }
   if (Array.isArray(color)) {
     return color.slice(0, 4);
