@@ -5,7 +5,7 @@ import {RequestScheduler} from '@loaders.gl/loader-utils';
 test('Tile2DHeader', async t => {
   let onTileErrorCalled = false;
 
-  const requestScheduler = new RequestScheduler({throttleRequests: false});
+  const requestScheduler = new RequestScheduler({maxRequests: -1});
   const getTileData = () => {
     throw new Error('getTileData with error');
   };
