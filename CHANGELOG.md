@@ -19,6 +19,13 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v8.2
 
+#### deck.gl [8.2.0-beta.2] - June 25 2020
+
+- Improve the consistency of controller behavior (#4692)
+- FillStyleExtension supports MVTLayer (#4720)
+- Bump loaders.gl to 2.2.3 (#4710)
+- Set per-layer viewportChanged flag (#4722)
+
 #### deck.gl [8.2.0-beta.1] - June 20 2020
 
 - Fix MVTLayer projection precision (#4699)
