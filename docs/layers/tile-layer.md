@@ -178,17 +178,13 @@ How the tile layer refines the visibility of tiles. One of the following:
 
 - Default: `'best-available'`
 
-##### `throttleRequests` (Boolean, optional)
-
-Whether to throttle `getTileData` requests.
-
-If `true`, a maximum of `maxRequests` instances of `getTileData` will be called concurrently. Additionally, for requests that are throttled, if the tile is no longer visible in the viewport when a request slot opens up, that request will be cancelled. When requests are not throttled, `getTileData` will be called for all visible tiles, regardless of how long that tile is or was visible.
-
-- Default: `true`
-
 ##### `maxRequests` (Number, optional)
 
-The maximum number of concurrent `getTileData` calls. Only takes effect if `throttleRequests` is `true`. 
+The maximum number of concurrent `getTileData` calls. 
+
+If `<= 0`, no throttling will occur, and `getTileData` may be called an unlimited number of times concurrently.
+
+If `> 0`, a maximum of `maxRequests` instances of `getTileData` will be called concurrently. Additionally, for requests that are throttled, if the tile is no longer visible in the viewport when a request slot opens up, that request will be cancelled. When requests are not throttled, `getTileData` will be called for all visible tiles, regardless of how long that tile is or was visible.
 
 - Default: `8`
 
