@@ -371,9 +371,9 @@ export default class Layer extends Component {
   // INTERNAL METHODS
   activateViewport(viewport) {
     const oldViewport = this.internalState.viewport;
+    this.internalState.viewport = viewport;
 
     if (!oldViewport || !areViewportsEqual({oldViewport, viewport})) {
-      this.internalState.viewport = viewport;
       this.setChangeFlags({viewportChanged: true});
       this._update();
     }
