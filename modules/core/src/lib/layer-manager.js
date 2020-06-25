@@ -210,22 +210,9 @@ export default class LayerManager {
   activateViewport(viewport) {
     assert(viewport, 'LayerManager: viewport not set');
 
-    const oldViewport = this.context.viewport;
-    const viewportChanged = !oldViewport || !viewport.equals(oldViewport);
+    debug(TRACE_ACTIVATE_VIEWPORT, this, viewport);
 
-    if (viewportChanged) {
-      debug(TRACE_ACTIVATE_VIEWPORT, this, viewport);
-
-      this.context.viewport = viewport;
-      const changeFlags = {viewportChanged: true};
-
-      // Update layers states
-      // Let screen space layers update their state based on viewport
-      for (const layer of this.layers) {
-        layer.setChangeFlags(changeFlags);
-        this._updateLayer(layer);
-      }
-    }
+    this.context.viewport = viewport;
 
     return this;
   }

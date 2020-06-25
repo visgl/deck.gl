@@ -318,6 +318,29 @@ const deck = new Deck({
 });
 ```
 
+Some layers, including `TileLayer`, `Tile3DLayer`, `HeatmapLayer` and `ScreenGridLayer`, perform expensive operations (data fetching/aggregation) on viewport change. Therefore, it is generally NOT recommended to render them into multiple views. If you do need to show e.g. tiled base map in multiple views, create one layer instance for each view and limit their rendering with `layerFilter`:
+
+```js
+const deck = new Deck({
+  ...
+  views: [
+    new MapView({id: 'main', ...}),
+    new MapView({id: 'mini-map', ...})
+  ],
+  layers: [
+    new TileLayer({id: 'tiles-for-main', ...}),
+    new TileLayer({id: 'tiles-for-mini-map', ...})
+  ],
+  layerFilter: ({layer, viewport} => {
+    if (layer.id.startsWith('tiles-for')) {
+      return layer.id.startsWith(`tiles-for-${viewport.id}`);
+    }
+    return true;
+  });
+});
+```
+
+
 ### Picking in Multiple Views
 
 deck.gl's built-in picking support extends naturally to multiple viewports. The picking process renders all viewports.
