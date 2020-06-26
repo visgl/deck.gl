@@ -140,7 +140,7 @@ class LabeledIconLayer extends CompositeLayer {
 
 Something that needs special attention is that all layer ids must be unique, no matter whether they are nested inside other layers. This means the sublayer ids must be generated dynamically based on the id of their parent, otherwise when there are multiple instances of `LabeledIconLayer`s their sublayer ids will collide.
 
-Finally, to make [updateTriggers](/docs/api-reference/layer.md#-updatetriggers-object-optional-) work when accessors need to be recalculated, we need to remap the user's `updateTriggers` from the parent layer's prop names to the sublayers' prop names.
+Finally, to make [updateTriggers](/docs/api-reference/layer.md#updatetriggers) work when accessors need to be recalculated, we need to remap the user's `updateTriggers` from the parent layer's prop names to the sublayers' prop names.
 
 ```js
 class LabeledIconLayer extends CompositeLayer {

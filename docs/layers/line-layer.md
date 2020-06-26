@@ -15,8 +15,7 @@ specified as latitude/longitude coordinates.
 import DeckGL from '@deck.gl/react';
 import {LineLayer} from '@deck.gl/layers';
 
-const App = ({data, viewport}) => {
-
+function App({data, viewState}) {
   /**
    * Data format:
    * [
@@ -41,17 +40,13 @@ const App = ({data, viewport}) => {
     getWidth: 50,
     getSourcePosition: d => d.from.coordinates,
     getTargetPosition: d => d.to.coordinates,
-    getColor: d => [Math.sqrt(d.inbound + d.outbound), 140, 0],
-    onHover: ({object, x, y}) => {
-      const tooltip = `${object.from.name} to ${object.to.name}`;
-      /* Update tooltip
-         http://deck.gl/#/documentation/developer-guide/adding-interactivity?section=example-display-a-tooltip-for-hovered-object
-      */
-    }
+    getColor: d => [Math.sqrt(d.inbound + d.outbound), 140, 0]
   });
 
-  return (<DeckGL {...viewport} layers={[layer]} />);
-};
+  return <DeckGL viewState={viewState}
+    layers={[layer]}
+    getTooltip={({object}) => object && `${object.from.name} to ${object.to.name}`} />;
+}
 ```
 
 ## Installation

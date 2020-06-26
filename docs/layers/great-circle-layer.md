@@ -17,8 +17,7 @@ specified as latitude/longitude coordinates.
 ```js
 import DeckGL, {GreatCircleLayer} from 'deck.gl';
 
-const App = ({data, viewport}) => {
-
+function App({data, viewState}) {
   /**
    * Data format:
    * [
@@ -52,17 +51,13 @@ const App = ({data, viewport}) => {
     getSourcePosition: d => d.from.coordinates,
     getTargetPosition: d => d.to.coordinates,
     getSourceColor: [64, 255, 0],
-    getTargetColor: [0, 128, 200],
-    onHover: ({object, x, y}) => {
-      const tooltip = `${object.from.name} to ${object.to.name}`;
-      /* Update tooltip
-         http://deck.gl/#/documentation/developer-guide/adding-interactivity?section=example-display-a-tooltip-for-hovered-object
-      */
-    }
+    getTargetColor: [0, 128, 200]
   });
 
-  return (<DeckGL {...viewport} layers={[layer]} />);
-};
+  return <DeckGL viewState={viewState}
+    layers={[layer]}
+    getTooltip={({object}) => object && `${object.from.name} to ${object.to.name}`} />;
+}
 ```
 
 ## Properties

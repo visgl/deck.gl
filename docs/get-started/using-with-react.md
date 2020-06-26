@@ -14,7 +14,7 @@ import DeckGL from '@deck.gl/react';
 import {LineLayer} from '@deck.gl/layers';
 
 // Viewport settings
-const viewState = {
+const INITIAL_VIEW_STATE = {
   longitude: -122.41669,
   latitude: 37.7853,
   zoom: 13,
@@ -23,19 +23,20 @@ const viewState = {
 };
 
 // Data to be used by the LineLayer
-const data = [{sourcePosition: [-122.41669, 37.7853], targetPosition: [-122.41669, 37.781]}];
+const data = [
+  {sourcePosition: [-122.41669, 37.7853], targetPosition: [-122.41669, 37.781]}
+];
 
 // DeckGL react component
-class App extends React.Component {
-  render() {
-    const layers = [
-      new LineLayer({id: 'line-layer', data})
-    ];
+function App() {
+  const layers = [
+    new LineLayer({id: 'line-layer', data})
+  ];
 
-    return (
-      <DeckGL viewState={viewState} layers={layers} />
-    );
-  }
+  return <DeckGL
+      initialViewState={INITIAL_VIEW_STATE}
+      controller={true}
+      layers={layers} />;
 }
 
 ```
@@ -52,10 +53,10 @@ import {LineLayer} from '@deck.gl/layers';
 import {StaticMap} from 'react-map-gl';
 
 // Set your mapbox access token here
-const MAPBOX_ACCESS_TOKEN = 'MAPBOX_ACCESS_TOKEN';
+const MAPBOX_ACCESS_TOKEN = 'your_mapbox_token';
 
-// Initial viewport settings
-const initialViewState = {
+// Viewport settings
+const INITIAL_VIEW_STATE = {
   longitude: -122.41669,
   latitude: 37.7853,
   zoom: 13,
@@ -64,24 +65,24 @@ const initialViewState = {
 };
 
 // Data to be used by the LineLayer
-const data = [{sourcePosition: [-122.41669, 37.7853], targetPosition: [-122.41669, 37.781]}];
+const data = [
+  {sourcePosition: [-122.41669, 37.7853], targetPosition: [-122.41669, 37.781]}
+];
 
-class App extends React.Component {
-  render() {
-    const layers = [
-      new LineLayer({id: 'line-layer', data})
-    ];
+function App({data}) {
+  const layers = [
+    new LineLayer({id: 'line-layer', data})
+  ];
 
-    return (
-      <DeckGL
-        initialViewState={initialViewState}
-        controller={true}
-        layers={layers}
-      >
-        <StaticMap mapboxApiAccessToken={MAPBOX_ACCESS_TOKEN} />
-      </DeckGL>
-    );
-  }
+  return (
+    <DeckGL
+      initialViewState={INITIAL_VIEW_STATE}
+      controller={true}
+      layers={layers}
+    >
+      <StaticMap mapboxApiAccessToken={MAPBOX_ACCESS_TOKEN} />
+    </DeckGL>
+  );
 }
 
 ```
@@ -91,13 +92,15 @@ class App extends React.Component {
 It is possible to use JSX syntax to create deck.gl layers as React children of the `DeckGL` React components, instead of providing them as ES6 class instances to the `layers` prop. There are no performance advantages to this syntax but it can allow for a more consistent, React-like coding style.
 
 ```jsx
-  render() {
-    return (
-      <DeckGL {...viewState}>
-        <LineLayer id="line-layer" data={data} />
-      </DeckGL>
-    );
-  }
+function App() {
+  return (
+    <DeckGL
+      initialViewState={INITIAL_VIEW_STATE}
+      controller={true} >
+      <LineLayer id="line-layer" data={data} />
+    </DeckGL>
+  );
+}
 ```
 
 For more information on this syntax and its limitations, see [DeckGL API](/docs/api-reference/react/deckgl.md).
@@ -110,20 +113,25 @@ It is possible to use JSX syntax to create deck.gl views as React children of th
 The following code renders the same set of layers in two viewports, splitting the canvas into two columns:
 
 ```jsx
-  render() {
-    const layers = [
-      new LineLayer({id: 'line-layer', data})
-    ];
+import {MapView, FirstPersonView} from '@deck.gl/core';
 
-    return (
-      <DeckGL initialViewState={initialViewState} layers={layers} >
-        <MapView id="map" width="50%" controller={true}>
-          <StaticMap mapboxApiAccessToken={MAPBOX_ACCESS_TOKEN} />
-        </MapView>
-        <FirstPersonView width="50%" x="50%" fovy={50} />
-      </DeckGL>
-    );
-  }
+function App() {
+  const layers = [
+    new LineLayer({id: 'line-layer', data})
+  ];
+
+  return (
+    <DeckGL
+      initialViewState={INITIAL_VIEW_STATE}
+      controller={true}
+      layers={layers} >
+      <MapView id="map" width="50%" controller={true}>
+        <StaticMap mapboxApiAccessToken={MAPBOX_ACCESS_TOKEN} />
+      </MapView>
+      <FirstPersonView width="50%" x="50%" fovy={50} />
+    </DeckGL>
+  );
+}
 ```
 
 For more information on this syntax, see [DeckGL API](/docs/api-reference/react/deckgl.md).

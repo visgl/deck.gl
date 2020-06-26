@@ -19,7 +19,7 @@ This layer also handles feature clipping so that there are no features divided b
 import DeckGL from '@deck.gl/react';
 import {MVTLayer} from '@deck.gl/geo-layers';
 
-export const App = ({viewport}) => {
+function App({viewState}) {
   const layer = new MVTLayer({
     data: `https://a.tiles.mapbox.com/v4/mapbox.mapbox-streets-v7/{z}/{x}/{y}.vector.pbf?access_token=${MAPBOX_TOKEN}`,
 
@@ -41,8 +41,8 @@ export const App = ({viewport}) => {
     lineWidthMinPixels: 1
   });
 
-  return <DeckGL {...viewport} layers={[layer]} />;
-};
+  return <DeckGL viewState={viewState} layers={[layer]} />;
+}
 ```
 
 

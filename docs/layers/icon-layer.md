@@ -25,11 +25,10 @@ import DeckGL from '@deck.gl/react';
 import {IconLayer} from '@deck.gl/layers';
 
 const ICON_MAPPING = {
-  marker: {x: 0, y: 0, width: 32, height: 32, mask: true}
+  marker: {x: 0, y: 0, width: 128, height: 128, mask: true}
 };
 
-const App = ({data, viewport}) => {
-
+function App({data, viewState}) {
   /**
    * Data format:
    * [
@@ -43,24 +42,20 @@ const App = ({data, viewport}) => {
     pickable: true,
     // iconAtlas and iconMapping are required
     // getIcon: return a string
-    iconAtlas: 'images/icon-atlas.png',
+    iconAtlas: 'https://raw.githubusercontent.com/visgl/deck.gl-data/master/website/icon-atlas.png',
     iconMapping: ICON_MAPPING,
     getIcon: d => 'marker',
 
     sizeScale: 15,
     getPosition: d => d.coordinates,
     getSize: d => 5,
-    getColor: d => [Math.sqrt(d.exits), 140, 0],
-    onHover: ({object, x, y}) => {
-      const tooltip = `${object.name}\n${object.address}`;
-      /* Update tooltip
-         http://deck.gl/#/documentation/developer-guide/adding-interactivity?section=example-display-a-tooltip-for-hovered-object
-      */
-    }
+    getColor: d => [Math.sqrt(d.exits), 140, 0]
   });
 
-  return (<DeckGL {...viewport} layers={[layer]} />);
-};
+  return <DeckGL viewState={viewState}
+    layers={[layer]}
+    getTooltip={({object}) => object && `${object.name}\n${object.address}`} />;
+}
 ```
 
 ## Example: auto packing iconAtlas
@@ -75,8 +70,7 @@ import DeckGL, {IconLayer} from 'deck.gl';
 import Octokit from '@octokit/rest';
 const octokit = new Octokit()
 
-const App = ({data, viewport}) => {
-
+function App({data, viewState}) {
   /**
    * Data format:
    * [
@@ -108,17 +102,13 @@ const App = ({data, viewport}) => {
     getSize: d => Math.max(2, Math.min(d.contributions / 1000 * 25, 25)),
     pickable: true,
     sizeScale: 15,
-    getPosition: d => d.coordinates,
-    onHover: ({object, x, y}) => {
-      const tooltip = `${object.login}\n${object.contributions}`;
-      /* Update tooltip
-         http://deck.gl/#/documentation/developer-guide/adding-interactivity?section=example-display-a-tooltip-for-hovered-object
-      */
-    }
+    getPosition: d => d.coordinates
   });
 
-  return (<DeckGL {...viewport} layers={[layer]} />);
-};
+  return <DeckGL viewState={viewState}
+    layers={[layer]}
+    getTooltip={({object}) => object && `${object.login}\n${object.contributions}`} />;
+}
 ```
 
 

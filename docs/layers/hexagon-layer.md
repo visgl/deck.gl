@@ -19,8 +19,7 @@ HexagonLayer is a [CompositeLayer](/docs/api-reference/composite-layer.md) and a
 import DeckGL from '@deck.gl/react';
 import {HexagonLayer} from '@deck.gl/aggregation-layers';
 
-const App = ({data, viewport}) => {
-
+function App({data, viewState}) {
   /**
    * Data format:
    * [
@@ -35,17 +34,13 @@ const App = ({data, viewport}) => {
     extruded: true,
     radius: 200,
     elevationScale: 4,
-    getPosition: d => d.COORDINATES,
-    onHover: ({object, x, y}) => {
-      const tooltip = `${object.centroid.join(', ')}\nCount: ${object.points.length}`;
-      /* Update tooltip
-         http://deck.gl/#/documentation/developer-guide/adding-interactivity?section=example-display-a-tooltip-for-hovered-object
-      */
-    }
+    getPosition: d => d.COORDINATES
   });
 
-  return (<DeckGL {...viewport} layers={[layer]} />);
-};
+  return <DeckGL viewState={viewState}
+    layers={[layer]}
+    getTooltip={({object}) => object && `${object.centroid.join(', ')}\nCount: ${object.points.length}`} />;
+}
 ```
 
 

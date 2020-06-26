@@ -16,8 +16,7 @@ renders as a grid. By default aggregation happens on GPU, aggregation falls back
 import DeckGL from '@deck.gl/react';
 import {ScreenGridLayer} from '@deck.gl/aggregation-layers';
 
-const App = ({data, viewport}) => {
-
+function App({data, viewState}) {
   /**
    * Data format:
    * [
@@ -40,17 +39,13 @@ const App = ({data, viewport}) => {
       [0, 255, 0, 255]
     ],
     getPosition: d => d.COORDINATES,
-    getWeight: d => d.SPACES,
-    onHover: ({object, x, y}) => {
-      const tooltip = 'aggregated cell';
-      /* Update tooltip
-         http://deck.gl/#/documentation/developer-guide/adding-interactivity?section=example-display-a-tooltip-for-hovered-object
-      */
-    }
+    getWeight: d => d.SPACES
   });
 
-  return (<DeckGL {...viewport} layers={[layer]} />);
-};
+  return <DeckGL viewState={viewState}
+    layers={[layer]}
+    getTooltip={({object}) => object && 'aggregated cell'} />;
+}
 ```
 
 **Note:** The aggregation is done in screen space, so the data prop

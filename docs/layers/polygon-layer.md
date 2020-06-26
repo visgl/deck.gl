@@ -17,8 +17,7 @@ PolygonLayer is a [CompositeLayer](/docs/api-reference/composite-layer.md).
 import DeckGL from '@deck.gl/react';
 import {PolygonLayer} from '@deck.gl/layers';
 
-const App = ({data, viewport}) => {
-
+function App({data, viewState}) {
   /**
    * Data format:
    * [
@@ -54,17 +53,13 @@ const App = ({data, viewport}) => {
     getElevation: d => d.population / d.area / 10,
     getFillColor: d => [d.population / d.area / 60, 140, 0],
     getLineColor: [80, 80, 80],
-    getLineWidth: 1,
-    onHover: ({object, x, y}) => {
-      const tooltip = `${object.zipcode}\nPopulation: ${object.population}`;
-      /* Update tooltip
-         http://deck.gl/#/documentation/developer-guide/adding-interactivity?section=example-display-a-tooltip-for-hovered-object
-      */
-    }
+    getLineWidth: 1
   });
 
-  return (<DeckGL {...viewport} layers={[layer]} />);
-};
+  return <DeckGL viewState={viewState}
+    layers={[layer]}
+    getTooltip={({object}) => object && `${object.zipcode}\nPopulation: ${object.population}`} />;
+}
 ```
 
 ## Installation

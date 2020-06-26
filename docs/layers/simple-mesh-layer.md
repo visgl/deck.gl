@@ -12,8 +12,7 @@ import DeckGL from '@deck.gl/react';
 import {SimpleMeshLayer} from '@deck.gl/mesh-layers';
 import {CubeGeometry} from 'luma.gl'
 
-const App = ({data, viewport}) => {
-
+function App({data, viewState}) {
   /**
    * Data format:
    * [
@@ -37,8 +36,8 @@ const App = ({data, viewport}) => {
     mesh: new CubeGeometry()
   });
 
-  return (<DeckGL {...viewport} layers={[layer]} />);
-};
+  return <DeckGL viewState={viewState} layers={[layer]} />;
+}
 ```
 
 ## Installation

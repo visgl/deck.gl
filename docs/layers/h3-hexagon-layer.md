@@ -17,8 +17,7 @@ The `H3HexagonLayer` renders hexagons from the [H3](https://uber.github.io/h3/) 
 import DeckGL from '@deck.gl/react';
 import {H3HexagonLayer} from '@deck.gl/geo-layers';
 
-const App = ({data, viewport}) => {
-
+function App({data, viewState}) {
   /**
    * Data format:
    * [
@@ -39,17 +38,13 @@ const App = ({data, viewport}) => {
     elevationScale: 20,
     getHexagon: d => d.hex,
     getFillColor: d => [255, (1 - d.count / 500) * 255, 0],
-    getElevation: d => d.count,
-    onHover: ({object, x, y}) => {
-      const tooltip = `${object.hex} count: ${object.count}`;
-      /* Update tooltip
-         http://deck.gl/#/documentation/developer-guide/adding-interactivity?section=example-display-a-tooltip-for-hovered-object
-      */
-    }
+    getElevation: d => d.count
   });
 
-  return (<DeckGL {...viewport} layers={[layer]} />);
-};
+  return <DeckGL viewState={viewState}
+    layers={[layer]}
+    getTooltip={({object}) => object && `${object.hex} count: ${object.count}`} />;
+}
 ```
 
 
@@ -96,7 +91,7 @@ Inherits from all [Base Layer](/docs/api-reference/layer.md), [CompositeLayer](/
 
 * Default: `false`
 
-Each hexagon in the H3 indexing system is [slightly different in shape](https://uber.github.io/h3/#/documentation/core-library/coordinate-systems). To draw a large number of hexagons efficiently, the `H3HexagonLayer` may choose to use instanced drawing by assuming that all hexagons within the current viewport have the same shape as the one at the center of the current viewport. The discrepancy is usually too small to be visible.
+Each hexagon in the H3 indexing system is [slightly different in shape](https://h3geo.org/docs/core-library/coordsystems). To draw a large number of hexagons efficiently, the `H3HexagonLayer` may choose to use instanced drawing by assuming that all hexagons within the current viewport have the same shape as the one at the center of the current viewport. The discrepancy is usually too small to be visible.
 
 There are several cases in which high-precision mode is required. In these cases, `H3HexagonLayer` may choose to switch to high-precision mode, where it trades performance for accuracy:
 
@@ -123,7 +118,7 @@ Hexagon radius multiplier, between 0 - 1. When `coverage` = 1, hexagon is render
 
 * Default: `object => object.hexagon`
 
-Method called to retrieve the [H3](https://uber.github.io/h3/) hexagon index of each object. Note that all hexagons within one `H3HexagonLayer` must use the same [resolution](https://uber.github.io/h3/#/documentation/core-library/resolution-table).
+Method called to retrieve the [H3](https://uber.github.io/h3/) hexagon index of each object. Note that all hexagons within one `H3HexagonLayer` must use the same [resolution](https://h3geo.org/docs/core-library/restable).
 
 
 ## Sub Layers

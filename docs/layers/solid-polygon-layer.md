@@ -11,18 +11,26 @@ The SolidPolygon Layer renders filled polygons.
 import DeckGL from '@deck.gl/react';
 import {SolidPolygonLayer} from '@deck.gl/layers';
 
-new SolidPolygonLayer({
-  data: [
-    [[0, 0], [0, 1], [1, 1], [1, 0], [0, 0]],   // Simple polygon (array of coords)
-    [                                           // Complex polygon with one hole
-      [[0, 0], [0, 2], [2, 2], [2, 0], [0, 0]], // (array of array of coords)
-      [[0, 0], [0, 1], [1, 1], [1, 0], [0, 0]]
-    ]
-  ],
-  getPolygon: d => d,
-  getColor: [255, 0, 0],
-  extruded: false
-});
+function App({data, viewState}) {
+  const layer = new SolidPolygonLayer({
+    /*
+     * Data format:
+     * [
+     *   {polygon: [[0, 0], [0, 1], [1, 1], [1, 0], [0, 0]]},   // Simple polygon (array of coords)
+     *   {polygon: [                                            // Complex polygon with one hole
+     *     [[0, 0], [0, 2], [2, 2], [2, 0], [0, 0]],            // (array of array of coords)
+     *     [[0, 0], [0, 1], [1, 1], [1, 0], [0, 0]]
+     *   ]}
+     * ]
+     */
+    data,
+    getPolygon: d => d.polygon,
+    getColor: [255, 0, 0],
+    extruded: false
+  });
+
+  return <DeckGL viewState={viewState} layers={[layer]} />;
+}
 ```
 
 

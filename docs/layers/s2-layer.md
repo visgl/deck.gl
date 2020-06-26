@@ -7,7 +7,7 @@ import {S2LayerDemo} from 'website-components/doc-demos/geo-layers';
   <img src="https://img.shields.io/badge/lighting-yes-blue.svg?style=flat-square" alt="lighting" />
 </p>
 
-# S2Layer (Experimental)
+# S2Layer
 
 The S2Layer renders filled and/or stroked polygons, with geometry automatically calculated based on an S2 token (geospatial index). It uses Uses the [`s2-geometry`](http://s2geometry.io/) library for S2 polygon calculations.
 
@@ -17,8 +17,7 @@ The S2Layer renders filled and/or stroked polygons, with geometry automatically 
 import DeckGL from '@deck.gl/react';
 import {S2Layer} from '@deck.gl/geo-layers';
 
-const App = ({data, viewport}) => {
-
+function App({data, viewState}) {
   /**
    * Data format:
    * [
@@ -44,17 +43,13 @@ const App = ({data, viewport}) => {
     elevationScale: 1000,
     getS2Token: d => d.token,
     getFillColor: d => [d.value * 255, (1 - d.value) * 255, (1 - d.value) * 128],
-    getElevation: d => d.value,
-    onHover: ({object, x, y}) => {
-      const tooltip = `${object.token} value: ${object.value}`;
-      /* Update tooltip
-         http://deck.gl/#/documentation/developer-guide/adding-interactivity?section=example-display-a-tooltip-for-hovered-object
-      */
-    }
+    getElevation: d => d.value
   });
 
-  return (<DeckGL {...viewport} layers={[layer]} />);
-};
+  return <DeckGL viewState={viewState}
+    layers={[layer]}
+    getTooltip={({object}) => object && `${object.token} value: ${object.value}`} />;
+}
 ```
 
 

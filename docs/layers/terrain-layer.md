@@ -17,8 +17,7 @@ When `elevationData` is supplied with a URL template, i.e. a string containing `
 import DeckGL from '@deck.gl/react';
 import {TerrainLayer} from '@deck.gl/geo-layers';
 
-export const App = ({viewport}) => {
-
+function App({viewState}) {
   const layer = new TerrainLayer({
     elevationDecoder: {
       rScaler: 2,
@@ -31,8 +30,9 @@ export const App = ({viewport}) => {
     texture: 'https://raw.githubusercontent.com/visgl/deck.gl-data/master/website/terrain-mask.png',
     bounds: [-122.5233, 37.6493, -122.3566, 37.8159],
   });
-  return <DeckGL {...viewport} layers={[layer]} />;
-};
+
+  return <DeckGL viewState={viewState} layers={[layer]} />;
+}
 ```
 
 ## Installation
