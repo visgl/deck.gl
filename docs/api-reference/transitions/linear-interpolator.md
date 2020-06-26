@@ -1,6 +1,6 @@
 # LinearInterpolator
 
-Performs simple linear interpolation between two view states. Impliments [TransitionInterpolator](/docs/api-reference/transitions/transition-interpolator.md).
+Performs simple linear interpolation between two view states. Implements [TransitionInterpolator](/docs/api-reference/transitions/transition-interpolator.md).
 
 See [View State Transitions](/docs/developer-guide/view-state-transitions.md) for usage examples.
 

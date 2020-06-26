@@ -116,7 +116,7 @@ You can also implement a custom interpolator. See [TransitionInterpolator](/docs
 
 ## Remarks
 
-Deck's tranition model is "set and forget": the values of the following props at the start of a transition carry through the entire duration of the transition:
+Deck's transition model is "set and forget": the values of the following props at the start of a transition carry through the entire duration of the transition:
 
 + `transitionDuration`
 + `transitionInterpolator`
