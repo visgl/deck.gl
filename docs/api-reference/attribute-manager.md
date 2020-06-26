@@ -1,4 +1,4 @@
-# AttributeManager Class (Advanced)
+# AttributeManager
 
 > The `AttributeManager` is used internally by deck.gl layers. Unless you are writing custom deck.gl layers, or you are working with some very narrow advanced performance optimization use cases, you do not need to use this class.
 
@@ -72,7 +72,7 @@ Takes a single parameter as a map of attribute descriptor objects:
       (a.k.a. indices). Default to `false`.
     * `accessor` (String | Array of strings | Function) - accessor name(s) that will
       trigger an update of this attribute when changed. Used with
-      [`updateTriggers`](/docs/api-reference/layer.md#-updatetriggers-object-optional-).
+      [`updateTriggers`](/docs/api-reference/layer.md#updatetriggers).
     * `transform` (Function, optional) - callback to process the result returned by `accessor`.
     * `update` (Function, optional) - the function to be called when data changes. If not supplied, the attribute will be auto-filled with `accessor`.
     * `defaultValue` (Number | Array of numbers, optional) - Default `[0, 0, 0, 0]`.

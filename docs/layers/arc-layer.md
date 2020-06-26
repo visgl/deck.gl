@@ -14,8 +14,7 @@ The Arc Layer renders raised arcs joining pairs of source and target points.
 import DeckGL from '@deck.gl/react';
 import {ArcLayer} from '@deck.gl/layers';
 
-const App = ({data, viewport}) => {
-
+function App({data, viewState}) {
   /**
    * Data format:
    * [
@@ -42,16 +41,12 @@ const App = ({data, viewport}) => {
     getTargetPosition: d => d.to.coordinates,
     getSourceColor: d => [Math.sqrt(d.inbound), 140, 0],
     getTargetColor: d => [Math.sqrt(d.outbound), 140, 0],
-    onHover: ({object, x, y}) => {
-      const tooltip = `${object.from.name} to ${object.to.name}`;
-      /* Update tooltip
-         http://deck.gl/#/documentation/developer-guide/adding-interactivity?section=example-display-a-tooltip-for-hovered-object
-      */
-    }
   });
 
-  return (<DeckGL {...viewport} layers={[layer]} />);
-};
+  return <DeckGL viewState={viewState}
+    layers={[layer]}
+    getTooltip={({object}) => object && `${object.from.name} to ${object.to.name}`} />;
+}
 ```
 
 ## Installation

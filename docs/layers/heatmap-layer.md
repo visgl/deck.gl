@@ -15,8 +15,7 @@ import {HeatmapLayerDemo} from 'website-components/doc-demos/aggregation-layers'
 import DeckGL from '@deck.gl/react';
 import {HeatmapLayer} from '@deck.gl/aggregation-layers';
 
-const App = ({data, viewport}) => {
-
+function App({data, viewState}) {
   /**
    * Data format:
    * [
@@ -30,8 +29,8 @@ const App = ({data, viewport}) => {
     getWeight: d => d.WEIGHT    
   });
 
-  return (<DeckGL {...viewport} layers={[layer]} />);
-};
+  return <DeckGL viewState={viewState} layers={[layer]} />;
+}
 ```
 
 

@@ -39,7 +39,7 @@ It is recommend that this prop is set explicitly to avoid collision.
 
 The `data` prop specifies data source of this layer's visualization. The value is expected to be a collection (typically a JavaScript array) of data objects with similar structure, such as rows in a table. deck.gl layers are able to handle millions of data objects very efficiently.
 
-The value of this prop can be `Array`, `Map`, `Set`, any object that contains a `length` field, a `Promise` that resolves to any of the above, or an URL to a JSON array. See [data prop](/docs/api-reference/layer.md#data-iterable--string--promise--object-optional) documentation for details.
+The value of this prop can be `Array`, `Map`, `Set`, any object that contains a `length` field, a `Promise` that resolves to any of the above, or an URL to a JSON array. See [data prop](/docs/api-reference/layer.md#data) documentation for details.
 
 ### Accessors
 
@@ -163,6 +163,6 @@ function render() {
 
 There is no way for deck.gl to know what the programmer intended just by looking at or comparing the functions that are supplied to a `Layer`s accessor props. Because recalculating attributes can be potentially expensive, deck.gl by default ignores shallow changes in accessor props. This is designed to provide the best performance to the most common use cases without compromising convenience.
 
-Instead, the [`updateTriggers`](/docs/api-reference/layer.md#updatetriggers-object-optional) property gives you fine grained control, enabling you to tell deck.gl exactly which attributes need to change, and when.
+Instead, the [`updateTriggers`](/docs/api-reference/layer.md#updatetriggers) property gives you fine grained control, enabling you to tell deck.gl exactly which attributes need to change, and when.
 
 Read more about this behavior in [Performance Optimization](/docs/developer-guide/performance.md).

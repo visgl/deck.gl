@@ -1,4 +1,4 @@
-# GlobeViewport Class (Experimental)
+# GlobeViewport (Experimental)
 
 The `GlobeViewport` class takes globe view states (`latitude`, `longitude`, and `zoom`), and performs projections between world and screen coordinates. It is a helper class for visualizing the earth as a 3D globe.
 

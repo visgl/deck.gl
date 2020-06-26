@@ -18,9 +18,7 @@ GeoJsonLayer is a [CompositeLayer](/docs/api-reference/composite-layer.md).
 import DeckGL from '@deck.gl/react';
 import {GeoJsonLayer} from '@deck.gl/layers';
 
-const App = ({data, viewport}) => {
-  const {data, viewport} = this.props;
-
+function App({data, viewState}) {
   /**
    * Data format:
    * Valid GeoJSON object
@@ -38,17 +36,13 @@ const App = ({data, viewport}) => {
     getLineColor: d => colorToRGBArray(d.properties.color),
     getRadius: 100,
     getLineWidth: 1,
-    getElevation: 30,
-    onHover: ({object, x, y}) => {
-      const tooltip = object.properties.name || object.properties.station;
-      /* Update tooltip
-         http://deck.gl/#/documentation/developer-guide/adding-interactivity?section=example-display-a-tooltip-for-hovered-object
-      */
-    }
+    getElevation: 30
   });
 
-  return (<DeckGL {...viewport} layers={[layer]} />);
-};
+  return <DeckGL viewState={viewState}
+    layers={[layer]}
+    getTooltip={({object}) => object && (object.properties.name || object.properties.station)} />;
+}
 ```
 
 

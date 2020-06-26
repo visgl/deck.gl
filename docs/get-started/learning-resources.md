@@ -2,7 +2,7 @@
 
 ## API Documentation
 
-The documentation for the latest release can be found on deck.gl's [website](https://deck.gl/#/documentation).
+The documentation for the latest release can be found on deck.gl's [website](https://deck.gl/docs).
 
 The documentation for previous releases are in the *docs* directory on the `<version-release>` branch in this repo.
 
@@ -12,7 +12,7 @@ An in-depth view into the technical details and architectural decisions behind d
 
 ## Live Demos
 
-The sources of deck.gl's [website demos](https://deck.gl/#/examples) can be found in the repo's [examples](https://github.com/visgl/deck.gl/tree/master/examples) directory. Most of the applications use React, although non-React templates are provided for developers from other ecosystems.
+The sources of deck.gl's [website demos](https://deck.gl/examples) can be found in the repo's [examples](https://github.com/visgl/deck.gl/tree/master/examples) directory. Most of the applications use React, although non-React templates are provided for developers from other ecosystems.
 
 ## Prototyping & Sharing
 

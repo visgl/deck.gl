@@ -111,7 +111,7 @@ Some good places to check for performance improvements are:
   }
   ```
 
-  In this case, it is more efficient to use [`updateTriggers`](/docs/api-reference/layer.md#updatetriggers-object-optional) to invalidate only the selected attributes:
+  In this case, it is more efficient to use [`updateTriggers`](/docs/api-reference/layer.md#updatetriggers) to invalidate only the selected attributes:
 
   ```js
   // Good
@@ -247,7 +247,7 @@ Some good places to check for performance improvements are:
   }
   ```
 
-  The [`visible`](/docs/api-reference/layer.md#visible-boolean-optional) prop is a cheap way to temporarily disable a layer:
+  The [`visible`](/docs/api-reference/layer.md#visible) prop is a cheap way to temporarily disable a layer:
 
   ```js
   // Good

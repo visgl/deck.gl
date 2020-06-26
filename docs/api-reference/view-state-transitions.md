@@ -26,139 +26,81 @@ When using `FlyToInterpolator`, it can also be set to `'auto'` where actual dura
 Sample code that provides `flyTo` style transition to move camera from current location to NewYork city.
 
 ```js
+import React, {useState, useCallback} from 'react';
 import DeckGL, {FlyToInterpolator} from 'deck.gl';
 import {StaticMap} from 'react-map-gl';
 
-class App extends Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      viewState: {
-        latitude: 37.7751,
-        longitude: -122.4193,
-        zoom: 11,
-        bearing: 0,
-        pitch: 0,
-        width: 500,
-        height: 500
-      }
-    };
-    this._onViewStateChange = this._onViewStateChange.bind(this);
-    this._goToNYC = this._goToNYC.bind(this);
-  }
+function App() {
+  const [initialViewState, setInitialViewState] = useState({
+    latitude: 37.7751,
+    longitude: -122.4193,
+    zoom: 11,
+    bearing: 0,
+    pitch: 0,
+  });
 
-  _goToNYC() {
-    this.setState({
-      viewState: {
-        ...this.state.viewState,
-        longitude: -74.1,
-        latitude: 40.7,
-        zoom: 14,
-        pitch: 0,
-        bearing: 0,
-        transitionDuration: 8000,
-        transitionInterpolator: new FlyToInterpolator()
-      }
-    });
-  }
+  const goToNYC = useCallback(() => {
+    setInitialViewState({
+      longitude: -74.1,
+      latitude: 40.7,
+      zoom: 14,
+      pitch: 0,
+      bearing: 0,
+      transitionDuration: 8000,
+      transitionInterpolator: new FlyToInterpolator()
+    })
+  }, []);
 
-  _onViewStateChange({viewState}) {
-    this.setState({viewState});
-  }
+  return (
+    <div>
+      <DeckGL
+        initialViewState={initialViewState}
+        controller={true}
+      >
+        <StaticMap />
+      </DeckGL>
 
-  render() {
-    const {viewState} = this.state;
-
-    return (
-      <div>
-        <DeckGL
-          viewState={viewState}
-          controller={MapController}
-          onViewStateChange={this._onViewStateChange}
-        >
-          <StaticMap
-            // props
-            ...
-          />
-        </DeckGL>
-
-        <button onClick={this._goToNYC}>New York City</button>
-      </div>
-    );
-  }
+      <button onClick={goToNYC}>New York City</button>
+    </div>
+  );
 }
 ```
 
 Sample code to get continuous rotations along vertical axis until user interrupts by rotating the map by mouse interaction. It uses `LinearInterpolator` and restricts transitions for `bearing` prop. Continuous transitions are achieved by triggering new transitions using `onTranstionEnd` callback.
 
 ```js
+import React, {useState, useCallback} from 'react';
 import DeckGL from 'deck.gl';
 import {StaticMap} from 'react-map-gl';
 
 const transitionInterpolator = new LinearInterpolator(['bearing']);
 
-const INITIAL_VIEW_STATE = {
-  // set to required initial view state
-...
-};
+function App() {
+  const [initialViewState, setInitialViewState] = useState({
+    longitude: -122.45,
+    latitude: 37.78,
+    zoom: 12
+  });
 
-class App extends Component {
-  constructor(props) {
-    super(props);
-    this.rotationStep = 0;
-    this.state = {
-      viewState: INITIAL_VIEW_STATE
-    };
+  const rotateCamera = useCallback(() => {
+    setInitialViewState(viewState => ({
+      ...viewState,
+      bearing: viewState.bearing + 120,
+      transitionDuration: 1000,
+      transitionInterpolator,
+      onTransitionEnd: rotateCamera
+    }))
+  }, []);
 
-    this._onLoad = this._onLoad.bind(this);
-    this._onViewStateChange = this._onViewStateChange.bind(this);
-    this._rotateCamera = this._rotateCamera.bind(this);
-  }
-
-  _onLoad() {
-    this._rotateCamera();
-  }
-
-  _onViewStateChange({viewState}) {
-    this.setState({viewState});
-  }
-
-  _rotateCamera() {
-    // change bearing by 120 degrees.
-    const bearing = this.state.viewState.bearing + 120;
-    this.setState({
-      viewState: {
-        ...this.state.viewState,
-        bearing,
-        transitionDuration: 1000,
-        transitionInterpolator,
-        onTransitionEnd: this._rotateCamera
-      }
-    });
-  }
-
-  _renderLayers() {
-    // render any deck.gl layers
-    ...
-  }
-
-  render() {
-    const {viewState} = this.state;
-    return (
-      <DeckGL
-        layers={this._renderLayers()}
-        viewState={viewState}
-        onLoad={this._onLoad}
-        onViewStateChange={this._onViewStateChange}
-        controller={true}
-      >
-        <StaticMap
-          // props
-          ...
-        />
-      </DeckGL>
-    );
-  }
+  return (
+    <DeckGL
+      initialViewState={initialViewState}
+      controller={true}
+      onLoad={rotateCamera}
+    >
+      <StaticMap />
+    </DeckGL>
+  );
 }
 ```
 

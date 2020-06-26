@@ -1,4 +1,4 @@
-# OrthographicView Class
+# OrthographicView
 
 The [`OrthographicView`] class is a subclass of [View](/docs/api-reference/view.md) that creates a top-down view of the XY plane. It is usually used for rendering 2D charts in non-geospatial use cases.
 

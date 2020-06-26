@@ -20,8 +20,7 @@ This layer renders either a [GPUGridLayer](/docs/layers/gpu-grid-layer.md) or a 
 import DeckGL from '@deck.gl/react';
 import {GridLayer} from '@deck.gl/aggregation-layers';
 
-const App = ({data, viewport}) => {
-
+function App({data, viewState}) {
   /**
    * Data format:
    * [
@@ -36,17 +35,13 @@ const App = ({data, viewport}) => {
     extruded: true,
     cellSize: 200,
     elevationScale: 4,
-    getPosition: d => d.COORDINATES,
-    onHover: ({object, x, y}) => {
-      const tooltip = `${object.position.join(', ')}\nCount: ${object.count}`;
-      /* Update tooltip
-         http://deck.gl/#/documentation/developer-guide/adding-interactivity?section=example-display-a-tooltip-for-hovered-object
-      */
-    }
+    getPosition: d => d.COORDINATES
   });
 
-  return (<DeckGL {...viewport} layers={[layer]} />);
-};
+  return <DeckGL viewState={viewState}
+    layers={[layer]}
+    getTooltip={({object}) => object && `${object.position.join(', ')}\nCount: ${object.count}`} />;
+}
 ```
 
 **Note:** The `GridLayer` at the moment only works with `COORDINATE_SYSTEM.LNGLAT`.

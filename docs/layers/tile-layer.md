@@ -20,8 +20,7 @@ The loaded tile data is then rendered with the layer(s) returned by `renderSubLa
 import DeckGL from '@deck.gl/react';
 import {TileLayer} from '@deck.gl/geo-layers';
 
-export const App = ({viewport}) => {
-
+function App({viewState}) {
   const layer = new TileLayer({
     // https://wiki.openstreetmap.org/wiki/Slippy_map_tilenames#Tile_servers
     data: 'https://c.tile.openstreetmap.org/{z}/{x}/{y}.png',
@@ -42,8 +41,9 @@ export const App = ({viewport}) => {
       });
     }
   });
-  return <DeckGL {...viewport} layers={[layer]} />;
-};
+
+  return <DeckGL viewState={viewState} layers={[layer]} />;
+}
 ```
 
 

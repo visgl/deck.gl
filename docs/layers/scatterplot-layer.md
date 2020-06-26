@@ -15,8 +15,7 @@ points and renders them as circles with a certain radius.
 import DeckGL from '@deck.gl/react';
 import {ScatterplotLayer} from '@deck.gl/layers';
 
-const App = ({data, viewport}) => {
-
+function App({data, viewState}) {
   /**
    * Data format:
    * [
@@ -38,17 +37,13 @@ const App = ({data, viewport}) => {
     getPosition: d => d.coordinates,
     getRadius: d => Math.sqrt(d.exits),
     getFillColor: d => [255, 140, 0],
-    getLineColor: d => [0, 0, 0],
-    onHover: ({object, x, y}) => {
-      const tooltip = `${object.name}\n${object.address}`;
-      /* Update tooltip
-         http://deck.gl/#/documentation/developer-guide/adding-interactivity?section=example-display-a-tooltip-for-hovered-object
-      */
-    }
+    getLineColor: d => [0, 0, 0]
   });
 
-  return (<DeckGL {...viewport} layers={[layer]} />);
-};
+  return <DeckGL viewState={viewState}
+    layers={[layer]}
+    getTooltip={({object}) => object && `${object.name}\n${object.address}`} />;
+}
 ```
 
 ## Installation

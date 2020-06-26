@@ -16,8 +16,7 @@ import {GLTFScenegraphLoader} from '@luma.gl/experimental';
 // Register the proper loader for scenegraph.gltf
 registerLoaders([GLTFScenegraphLoader]);
 
-const App = ({data, viewport}) => {
-
+function App({data, viewState}) {
   /**
    * Data format:
    * [
@@ -39,8 +38,8 @@ const App = ({data, viewport}) => {
       'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/Duck/glTF-Binary/Duck.glb'
   });
 
-  return (<DeckGL {...viewport} layers={[layer]} />);
-};
+  return <DeckGL viewState={viewState} layers={[layer]} />;
+}
 ```
 
 ## Installation
