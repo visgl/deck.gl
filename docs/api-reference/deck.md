@@ -1,4 +1,4 @@
-# Deck Class
+# Deck
 
 `Deck` is a class that takes deck.gl layer instances and viewport parameters, renders those layers as a transparent overlay, and handles events.
 

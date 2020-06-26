@@ -16,8 +16,7 @@ and renders them as spheres with a certain radius.
 import DeckGL from '@deck.gl/react';
 import {PointCloudLayer} from '@deck.gl/layers';
 
-const App = ({data, viewport}) => {
-
+function App({data, viewState}) {
   /**
    * Data format:
    * [
@@ -34,17 +33,13 @@ const App = ({data, viewport}) => {
     radiusPixels: 4,
     getPosition: d => d.position,
     getNormal: d => d.normal,
-    getColor: d => d.color,
-    onHover: ({object, x, y}) => {
-      const tooltip = object.position.join(', ');
-      /* Update tooltip
-         http://deck.gl/#/documentation/developer-guide/adding-interactivity?section=example-display-a-tooltip-for-hovered-object
-      */
-    }
+    getColor: d => d.color
   });
 
-  return (<DeckGL {...viewport} layers={[layer]} />);
-};
+  return <DeckGL viewState={viewState}
+    layers={[layer]}
+    getTooltip={({object}) => object && object.position.join(', ')} />;
+}
 ```
 
 ## Installation

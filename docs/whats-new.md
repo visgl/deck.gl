@@ -296,7 +296,7 @@ pip install pydeck
 ### Transition System Improvements
 
 - Generic prop transition: the layer `transitions` prop now supports many more props than just accessors! Any prop of type `number` or `array` can now also use the built-in transition system.
-- New transition type: spring-based transition support is added to the transition settings. See [documentation](/docs/api-reference/layer.md#transitions-object-optional) for details.
+- New transition type: spring-based transition support is added to the transition settings. See [documentation](/docs/api-reference/layer.md#transitions) for details.
 
 ### @deck.gl/json
 
@@ -312,7 +312,7 @@ For custom layer authors: the attribute system is simplified. One may now use `t
 
 ### Auto Tooltip
 
-A new prop [getTooltip](/docs/api-reference/deck.md#gettooltip-function-optional) is added to the `Deck` class. By supplying this callback, an app may specify the content and styling of a built-in tooltip.
+A new prop [getTooltip](/docs/api-reference/deck.md#gettooltip) is added to the `Deck` class. By supplying this callback, an app may specify the content and styling of a built-in tooltip.
 
 ### Other Features/Improvements
 

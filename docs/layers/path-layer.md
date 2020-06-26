@@ -14,8 +14,7 @@ The Path Layer takes in lists of coordinate points and renders them as extruded 
 import DeckGL from '@deck.gl/react';
 import {PathLayer} from '@deck.gl/layers';
 
-const App = ({data, viewport}) => {
-
+function App({data, viewState}) {
   /**
    * Data format:
    * [
@@ -35,17 +34,13 @@ const App = ({data, viewport}) => {
     widthMinPixels: 2,
     getPath: d => d.path,
     getColor: d => colorToRGBArray(d.color),
-    getWidth: d => 5,
-    onHover: ({object, x, y}) => {
-      const tooltip = object.name;
-      /* Update tooltip
-         http://deck.gl/#/documentation/developer-guide/adding-interactivity?section=example-display-a-tooltip-for-hovered-object
-      */
-    }
+    getWidth: d => 5
   });
 
-  return (<DeckGL {...viewport} layers={[layer]} />);
-};
+  return <DeckGL viewState={viewState}
+    layers={[layer]}
+    getTooltip={({object}) => object && object.name} />;
+}
 ```
 
 ## Installation

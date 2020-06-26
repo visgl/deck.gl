@@ -12,63 +12,57 @@ References
 **Load a 3D tiles dataset from ION server. [Set up Ion account](https://cesium.com/docs/tutorials/getting-started/#your-first-app);**
 
 ```js
-import React, {Component} from 'react';
 import DeckGL from '@deck.gl/react';
 import {CesiumIonLoader} from '@loaders.gl/3d-tiles';
 import {Tile3DLayer} from '@deck.gl/geo-layers';
 
-export default class App extends Component {
-  render() {
-    const layer = new Tile3DLayer({
-      id: 'tile-3d-layer',
-      // tileset json file url 
-      data: 'https://assets.cesium.com/43978/tileset.json',
-      loader: CesiumIonLoader,
-      // https://cesium.com/docs/rest-api/
-      loadOptions: {
-        'cesium-ion': {accessToken: '<ion_access_token_for_your_asset>'}
-      },
-      onTilesetLoad: (tileset) => {
-        // Recenter to cover the tileset
-        const {cartographicCenter, zoom} = tileset;
-        this.setState({
-           viewState: {
-             ...this.state.viewState,
-             longitude: cartographicCenter[0],
-             latitude: cartographicCenter[1],
-             zoom
-           }
-        });
-      },
-      // override scenegraph subLayer prop
-      _subLayerProps: {
-        scenegraph: {_lighting: 'flat'}
-      }
-    });
-     
-    return (<DeckGL {...viewport} layers={[layer]} />);
-  }
+function App({viewState}) {
+  const layer = new Tile3DLayer({
+    id: 'tile-3d-layer',
+    // tileset json file url 
+    data: 'https://assets.cesium.com/43978/tileset.json',
+    loader: CesiumIonLoader,
+    // https://cesium.com/docs/rest-api/
+    loadOptions: {
+      'cesium-ion': {accessToken: '<ion_access_token_for_your_asset>'}
+    },
+    onTilesetLoad: (tileset) => {
+      // Recenter to cover the tileset
+      const {cartographicCenter, zoom} = tileset;
+      this.setState({
+          viewState: {
+            ...this.state.viewState,
+            longitude: cartographicCenter[0],
+            latitude: cartographicCenter[1],
+            zoom
+          }
+      });
+    },
+    // override scenegraph subLayer prop
+    _subLayerProps: {
+      scenegraph: {_lighting: 'flat'}
+    }
+  });
+
+  return <DeckGL viewState={viewState} layers={[layer]} />;
 }
 ```
 
 **Load I3S Tiles**
 ```js
-import React, {Component} from 'react';
 import DeckGL from '@deck.gl/react';
 import {I3SLoader} from '@loaders.gl/i3s';
 import {Tile3DLayer} from '@deck.gl/geo-layers';
 
-export default class App extends Component {
-  render() {
-    const layer = new Tile3DLayer({
-      id: 'tile-3d-layer',
-      // Tileset entry point: Indexed 3D layer file url 
-      data: 'https://tiles.arcgis.com/tiles/z2tnIkrLQ2BRzr6P/arcgis/rest/services/SanFrancisco_Bldgs/SceneServer/layers/0',
-      loader: I3SLoader
-    });
+function App({viewState}) {
+  const layer = new Tile3DLayer({
+    id: 'tile-3d-layer',
+    // Tileset entry point: Indexed 3D layer file url 
+    data: 'https://tiles.arcgis.com/tiles/z2tnIkrLQ2BRzr6P/arcgis/rest/services/SanFrancisco_Bldgs/SceneServer/layers/0',
+    loader: I3SLoader
+  });
      
-    return (<DeckGL {...viewport} layers={[layer]} />);
-  }
+  return <DeckGL viewState={viewState} layers={[layer]} />;
 }
 ```
 
@@ -130,9 +124,9 @@ This value is only applied when [tile format](https://github.com/AnalyticalGraph
 
 ##### `loader` (Object)
 
-- Default [`Tiles3DLoader`](https://loaders.gl/modules/3d-tiles/docs/api-reference/tile-3d-loader)
+- Default [`Tiles3DLoader`](https://loaders.gl/modules/3d-tiles/docs/api-reference/tiles-3d-loader)
 
-A loader which is used to decode the fetched tiles. Available options are [`CesiumIonLoader`,`Tiles3DLoader`](https://loaders.gl/modules/3d-tiles/docs/api-reference/tile-3d-loader), [`I3SLoader`](https://loaders.gl/modules/i3s/docs/api-reference/i3s-loader).
+A loader which is used to decode the fetched tiles. Available options are [`CesiumIonLoader`,`Tiles3DLoader`](https://loaders.gl/modules/3d-tiles/docs/api-reference/tiles-3d-loader), [`I3SLoader`](https://loaders.gl/modules/i3s/docs/api-reference/i3s-loader).
 
 ##### `loadOptions` (Object, Optional)
 
@@ -186,13 +180,13 @@ When [`picking`](/docs/developer-guide/custom-layers/picking.md) is enabled, `in
 
 ##### `onTileLoad` (Function, optional)
 
-`onTileLoad` is a function that is called when a tile in the tileset hierarchy is loaded. [Tile3D](https://github.com/visgl/loaders.gl/blob/master/docs/api-reference/tiles/tile-3d.md) object is passed in the callback.
+`onTileLoad` is a function that is called when a tile in the tileset hierarchy is loaded. [Tile3D](https://loaders.gl/modules/3d-tiles/modules/3d-tiles/docs/api-reference/tile-3d) object is passed in the callback.
 
 - Default: `onTileLoad: (tileHeader) => {}`
 
 ##### `onTileUnload` (Function, optional)
 
-`onTileUnload` is a function that is called when a tile is unloaded. [Tile3D](https://github.com/visgl/loaders.gl/blob/master/docs/api-reference/tiles/tileset-3d.md#root--tile3dheader) object is passed in the callback.
+`onTileUnload` is a function that is called when a tile is unloaded. [Tile3D](https://loaders.gl/modules/3d-tiles/modules/3d-tiles/docs/api-reference/tile-3d) object is passed in the callback.
 
 - Default: `onTileUnload: (tileHeader) => {}`
 

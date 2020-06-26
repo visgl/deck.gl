@@ -24,8 +24,7 @@ npm install @deck.gl/core @deck.gl/layers @deck.gl/geo-layers
 ```js
 import {TripsLayer} from '@deck.gl/geo-layers';
 
-const App = ({data, viewport}) => {
-
+function App({data, viewState}) {
   /**
    * Data format:
    * [
@@ -53,8 +52,8 @@ const App = ({data, viewport}) => {
     currentTime: 100
   });
 
-  return (<DeckGL {...viewport} layers={[layer]} />);
-};
+  return <DeckGL viewState={viewState} layers={[layer]} />;
+}
 ```
 
 To use pre-bundled scripts:

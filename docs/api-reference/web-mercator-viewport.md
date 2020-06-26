@@ -1,4 +1,4 @@
-# WebMercatorViewport Class
+# WebMercatorViewport
 
 The `WebMercatorViewport` class takes map view states (`latitude`, `longitude`, `zoom`, `pitch`, `bearing` etc.), and performs projections between world and screen coordinates. It is tuned to work in synchronization with `mapbox-gl`'s projection matrix.
 

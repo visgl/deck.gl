@@ -10,7 +10,7 @@ To describe how a layer's properties relate to WebGL attributes and uniforms you
 
 ### Initializing Layer
 
-[`initializeState()`](/docs/api-reference/layer.md#-initializestate-) - This is the one method that you must implement to create any WebGL resources you need for rendering your layer.
+[`initializeState()`](/docs/api-reference/layer.md#initializestate) - This is the one method that you must implement to create any WebGL resources you need for rendering your layer.
 
 
 #### Creating The Model
@@ -85,7 +85,7 @@ It is sometimes desirable to have a single layer render using multiple geometry 
 
 A layer should also define its attributes during initialization. This allows the [`attribute manager`](/docs/api-reference/attribute-manager.md) to do the heavy lifting for [Attribute Management](/docs/developer-guide/custom-layers/attribute-management.md).
 
-Define attributes by calling [`attributeManager.add`](/docs/api-reference/attribute-manager.md#-add-):
+Define attributes by calling [`attributeManager.add`](/docs/api-reference/attribute-manager.md#add):
 
 ```js
 initializeState() {
@@ -105,7 +105,7 @@ initializeState() {
 
 ### Handling property updates
 
-[`updateState()`](/docs/api-reference/layer.md#-updatestate-) - This is the method that you may want to implement to handle property changes.
+[`updateState()`](/docs/api-reference/layer.md#updatestate) - This is the method that you may want to implement to handle property changes.
 
 The key to writing good, performant deck.gl layers lies in understanding how to minimize updates of any calculated data, such as WebGL.
 
@@ -120,14 +120,14 @@ The ideas used here are very similar to (and directly inspired by) those used in
 
 ### Rendering Layer
 
-[`draw()`](/docs/api-reference/layer.md#-draw-) - If you want to use custom uniforms or settings when drawing, you would typically implement the `draw` method and pass those to your render call. Note that `draw` is called with viewport uniforms that you need to pass to your shader, but you can of course add any layer specific uniforms to that.
+[`draw()`](/docs/api-reference/layer.md#draw) - If you want to use custom uniforms or settings when drawing, you would typically implement the `draw` method and pass those to your render call. Note that `draw` is called with viewport uniforms that you need to pass to your shader, but you can of course add any layer specific uniforms to that.
 
 Note: the reason that the supplied uniforms need to be passed on to your shaders is to enable your shader to use deck.gl's GLSL shaderlibs (such as `project` or `project64` etc.). If you don't use these shaderlibs, you would obviously not need to supply these uniforms, but you would have to implement features like cartographic projection etc. on your own.
 
 
 ### Destroying Layer
 
-[`finalizeState()`](/docs/api-reference/layer.md#-finalizestate-) - If implemented, this method is called when your layer state is discarded. This is a good time to destroy non-shared WebGL resources directly, rather than waiting for the garbage collector to do it.
+[`finalizeState()`](/docs/api-reference/layer.md#finalizestate) - If implemented, this method is called when your layer state is discarded. This is a good time to destroy non-shared WebGL resources directly, rather than waiting for the garbage collector to do it.
 
 
 ## Handling Coordinate Systems
@@ -136,7 +136,7 @@ While you have the freedom to create any type of layer you want, with any type o
 
 ### Making Shaders Work with deck.gl's Coordinate Systems
 
-By supplying the `modules: ['project']` parameter when you create your layer's luma.gl `Model` you get access to deck.gl's [family of GLSL projection methods](/docs/developer-guide/custom-layers/writing-shaders.md#projection-vertex-shader-) that support all three deck.gl projection modes: latlon (default), meters and neutral.
+By supplying the `modules: ['project']` parameter when you create your layer's luma.gl `Model` you get access to deck.gl's [family of GLSL projection methods](/docs/developer-guide/custom-layers/writing-shaders.md#projection) that support all three deck.gl projection modes: latlon (default), meters and neutral.
 
 By always using the following shader functions for handling projections and scaling, a single layer class can support all projection modes for free:
 

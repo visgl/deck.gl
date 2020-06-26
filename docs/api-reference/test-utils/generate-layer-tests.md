@@ -1,4 +1,4 @@
-# generateLayerTests (Test Function)
+# generateLayerTests
 
 This utility generates a series of test cases to be used with [testLayer](/docs/api-reference/test-utils/test-layer.md) that checks the conformance of a layer class.
 

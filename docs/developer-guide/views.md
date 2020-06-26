@@ -131,45 +131,31 @@ const deck = new Deck({
 If you need to manage and manipulate the view state outside of deck.gl, you may do so by providing an external `viewState` prop (used as a "stateless" component). In this case, you also need to listen to the `onViewStateChange` callback and update the `viewState` object yourself:
 
 ```js
-import React from 'react';
+import React, {useState, useCallback} from 'react';
 import DeckGL from '@deck.gl/react';
 import {OrthographicView} from '@deck.gl/core';
 
-const INITIAL_VIEW_STATE = {
-  target: [0, 0, 0],
-  rotationX: 0,
-  rotationOrbit: 0,
-  zoom: 1
-};
+function App() {
+  const [viewState, setViewState] = useState({
+    target: [0, 0, 0],
+    rotationX: 0,
+    rotationOrbit: 0,
+    zoom: 1
+  })
 
-class App extends React.Component {
-  state = {
-    // Default view state
-    viewState: INITIAL_VIEW_STATE
-  };
-
-  _onViewStateChange = ({viewState}) => {
+  const onViewStateChange = useCallback(({viewState}) => {
     // Manipulate view state
     viewState.target[0] = Math.min(viewState.target[0], 10);
     // Save the view state and trigger rerender
-    this.setState({viewState});
-  };
+    setViewState(viewState);
+  }, []);
 
-  _reset = () => {
-    this.setState({
-      viewState: INITIAL_VIEW_STATE
-    });
-  }
-
-  render() {
-    return <DeckGL
-      ...
-      views={new OrthographicView()}
-      controller={true}
-      viewState={this.state.viewState}
-      onViewStateChange={this._onViewStateChange}
-    />;
-  }
+  return <DeckGL
+    views={new OrthographicView()}
+    controller={true}
+    viewState={viewState}
+    onViewStateChange={onViewStateChange}
+  />;
 }
 ```
 
@@ -241,46 +227,49 @@ const deck = new Deck({
 When using multiple views, each `View` can either have its own independent view state, or share the same view state as other views. To define the view state of a specific view, add a key to the `viewState` object that matches its view id:
 
 ```js
-import React from 'react';
+import React, {useState, useCallback} from 'react';
 import DeckGL from '@deck.gl/react';
 import {FirstPersonView, MapView} from '@deck.gl/core';
 
-const INITIAL_VIEW_STATE = {
-  longitude: -122.4,
-  latitude: 37.8,
-  pitch: 0,
-  bearing: 0,
-  zoom: 10
-};
+function App() {
+  const [viewStates, setViewStates] = useState({
+    longitude: -122.4,
+    latitude: 37.8,
+    pitch: 0,
+    bearing: 0,
+    zoom: 10
+  });
 
-class App extends React.Component {
-  state = {
-    // Default view state
-    viewStates: INITIAL_VIEW_STATE,
-  };
-
-  _onViewStateChange = ({viewId, viewState}) => {
-    const viewStates = {...this.state.viewStates};
-
-    // Update a single view
-    viewStates[viewId] = viewState;
-    // Or update both
-    viewStates['first-person'] = viewState;
-    viewStates.minimap = {...viewState, pitch: 0};
-
-    // Save the view state and trigger rerender
-    this.setState({viewStates});
-  };
+  const onViewStateChange = useCallback(({viewId, viewState}) => {
+    if (viewId === 'main') {
+      setViewStates(currentViewStates => ({
+        main: viewState,
+        minimap: {
+          ...currentViewStates.minimap,
+          longitude: viewState.longitude,
+          latitude: viewState.latitude
+        }
+      }));
+    } else {
+      setViewStates(currentViewStates => ({
+        main: {
+          ...currentViewStates.main,
+          longitude: viewState.longitude,
+          latitude: viewState.latitude
+        },
+        minimap: viewState
+      }));
+    }
+  }, []);
 
   render() {
     return <DeckGL
-      ...
       views={views: [
-        new FirstPersonView({id: 'first-person', controller: true}),
-        new MapView({id: 'mini-map', ..., controller: true}})
+        new MapView({id: 'main', controller: true}),
+        new MapView({id: 'minimap', x: 10, y: 10, width: '20%', height: '20%', controller: true}})
       ]}
-      viewState={this.state.viewStates}
-      onViewStateChange={this._onViewStateChange}
+      viewState={viewStates}
+      onViewStateChange={onViewStateChange}
     />;
   }
 }

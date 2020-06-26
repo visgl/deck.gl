@@ -146,7 +146,7 @@ This callback will be called when the mouse enters/leaves an object of this deck
 * [`info`](/docs/developer-guide/interactivity.md#the-picking-info-object)
 * `event` - the source event
 
-If this callback returns a truthy value, the `hover` event is marked as handled and will not bubble up to the [`onHover`](/docs/api-reference/react/deckgl.md#-onhover-function-optional-) callback of the `DeckGL` canvas.
+If this callback returns a truthy value, the `hover` event is marked as handled and will not bubble up to the [`onHover`](/docs/api-reference/react/deckgl.md#onhover) callback of the `DeckGL` canvas.
 
 Requires `pickable` to be true.
 
@@ -157,7 +157,7 @@ This callback will be called when the mouse clicks over an object of this deck.g
 * [`info`](/docs/developer-guide/interactivity.md#the-picking-info-object)
 * `event` - the source event
 
-If this callback returns a truthy value, the `click` event is marked as handled and will not bubble up to the [`onClick`](/docs/api-reference/react/deckgl.md#-onclick-function-optional-) callback of the `DeckGL` canvas.
+If this callback returns a truthy value, the `click` event is marked as handled and will not bubble up to the [`onClick`](/docs/api-reference/react/deckgl.md#onclick) callback of the `DeckGL` canvas.
 
 Requires `pickable` to be true.
 
@@ -168,7 +168,7 @@ This callback will be called when the mouse starts dragging an object of this de
 * [`info`](/docs/developer-guide/interactivity.md#the-picking-info-object)
 * `event` - the source event
 
-If this callback returns a truthy value, the `dragstart` event is marked as handled and will not bubble up to the [`onDragStart`](/docs/api-reference/react/deckgl.md#-ondragstart-function-optional-) callback of the `DeckGL` canvas.
+If this callback returns a truthy value, the `dragstart` event is marked as handled and will not bubble up to the [`onDragStart`](/docs/api-reference/react/deckgl.md#ondragstart) callback of the `DeckGL` canvas.
 
 Requires `pickable` to be true.
 
@@ -179,7 +179,7 @@ This callback will be called when the mouse drags an object of this deck.gl laye
 * [`info`](/docs/developer-guide/interactivity.md#the-picking-info-object)
 * `event` - the source event
 
-If this callback returns a truthy value, the `drag` event is marked as handled and will not bubble up to the [`onDrag`](/docs/api-reference/react/deckgl.md#-ondrag-function-optional-) callback of the `DeckGL` canvas.
+If this callback returns a truthy value, the `drag` event is marked as handled and will not bubble up to the [`onDrag`](/docs/api-reference/react/deckgl.md#ondrag) callback of the `DeckGL` canvas.
 
 Requires `pickable` to be true.
 
@@ -190,7 +190,7 @@ This callback will be called when the mouse releases an object of this deck.gl l
 * [`info`](/docs/developer-guide/interactivity.md#the-picking-info-object)
 * `event` - the source event
 
-If this callback returns a truthy value, the `dragend` event is marked as handled and will not bubble up to the [`onDragEnd`](/docs/api-reference/react/deckgl.md#-ondragend-function-optional-) callback of the `DeckGL` canvas.
+If this callback returns a truthy value, the `dragend` event is marked as handled and will not bubble up to the [`onDragEnd`](/docs/api-reference/react/deckgl.md#ondragend) callback of the `DeckGL` canvas.
 
 Requires `pickable` to be true.
 
@@ -375,7 +375,7 @@ The variables may be numbers, strings, objects or functions. During each renderi
 
 Note:
 
-* change of the `data` prop has higher priority than the `updateTriggers`. If the app supplies a new `data` object, then all attributes will be automatically updated, even if the updateTriggers have not changed. To block excessive attribute updates, set the [`dataComparator`](/docs/api-reference/layer.md#-datacomparator-function-optional-) prop.
+* change of the `data` prop has higher priority than the `updateTriggers`. If the app supplies a new `data` object, then all attributes will be automatically updated, even if the updateTriggers have not changed. To block excessive attribute updates, set the [`dataComparator`](/docs/api-reference/layer.md#datacomparator) prop.
 
 
 ##### `onDataLoad` (Function, optional)
@@ -524,7 +524,7 @@ Arguments:
 
 ##### `setState`
 
-Used to update the layers [`state`](/docs/api-reference/layer.md#-state-object-) object. Calling this method will also cause the layer to rerender.
+Used to update the layers [`state`](/docs/api-reference/layer.md#state) object. Calling this method will also cause the layer to rerender.
 
 ##### `setModuleParameters`
 
@@ -548,7 +548,7 @@ deck.gl will already have created the `state` object at this time, and added the
 
 ##### `shouldUpdateState`
 
-Called during each rendering cycle when layer [properties](/docs/api-reference/layer.md#constructor) or [context](/docs/api-reference/layer.md#-context-object-) has been updated and before layers are drawn.
+Called during each rendering cycle when layer [properties](/docs/api-reference/layer.md#constructor) or [context](/docs/api-reference/layer.md#context) has been updated and before layers are drawn.
 
 `shouldUpdateState({props, oldProps, context, oldContext, changeFlags})`
 
@@ -569,7 +569,7 @@ Returns:
 Remarks:
 
 * Prop change is determined by shallow comparison.
-* Data change is determined by shallow comparison of `props.data` unless [`dataComparator`](/docs/api-reference/layer.md#-datacomparator-function-optional-) is supplied.
+* Data change is determined by shallow comparison of `props.data` unless [`dataComparator`](/docs/api-reference/layer.md#datacomparator) is supplied.
 * The default implementation returns `true` if any change has been detected in data or props, but **ignores viewport changes**.
 
 ##### `updateState`
@@ -619,9 +619,9 @@ Parameters:
 
     + `x` (Number) - Mouse position x relative to the viewport.
     + `y` (Number) - Mouse position y relative to the viewport.
-    + `coordinate` ([Number, Number]) - Mouse position in world coordinates. Only applies if [`coordinateSystem`](/docs/api-reference/layer.md#-projectionmode-number-optional-) is `COORDINATE_SYSTEM.LNGLAT`.
-    + `color` (Number[4]) - The color of the pixel that is being picked. It represents a "picking color" that is encoded by [`layer.encodePickingColor()`](/docs/api-reference/layer.md#-encodepickingcolor-).
-    + `index` (Number) - The index of the object that is being picked. It is the returned value of [`layer.decodePickingColor()`](/docs/api-reference/layer.md#-decodepickingcolor-).
+    + `coordinate` ([Number, Number]) - Mouse position in world coordinates. Only applies if [`coordinateSystem`](/docs/api-reference/layer.md#coordinatesystem) is `COORDINATE_SYSTEM.LNGLAT`.
+    + `color` (Number[4]) - The color of the pixel that is being picked. It represents a "picking color" that is encoded by [`layer.encodePickingColor()`](/docs/api-reference/layer.md#encodepickingcolor).
+    + `index` (Number) - The index of the object that is being picked. It is the returned value of [`layer.decodePickingColor()`](/docs/api-reference/layer.md#decodepickingcolor).
     + `picked` (Boolean) - `true` if `index` is not `-1`.
   - `pickParams.mode` (String) - One of `hover` and `click`
 

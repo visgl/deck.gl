@@ -17,8 +17,7 @@ The `H3ClusterLayer` renders regions represented by hexagon sets from the [H3](h
 import DeckGL from '@deck.gl/react';
 import {H3ClusterLayer} from '@deck.gl/geo-layers';
 
-const App = ({data, viewport}) => {
-
+function App({data, viewState}) {
   /**
    * Data format:
    * [
@@ -47,17 +46,13 @@ const App = ({data, viewport}) => {
     getHexagons: d => d.hexIds,
     getFillColor: d => [255, (1 - d.mean / 500) * 255, 0],
     getLineColor: [255, 255, 255],
-    lineWidthMinPixels: 2,
-    onHover: ({object, x, y}) => {
-      const tooltip = `density: ${object.mean}`;
-      /* Update tooltip
-         http://deck.gl/#/documentation/developer-guide/adding-interactivity?section=example-display-a-tooltip-for-hovered-object
-      */
-    }
+    lineWidthMinPixels: 2
   });
 
-  return (<DeckGL {...viewport} layers={[layer]} />);
-};
+  return <DeckGL viewState={viewState}
+    layers={[layer]}
+    getTooltip={({object}) => object && `density: ${object.mean}`} />;
+}
 ```
 
 

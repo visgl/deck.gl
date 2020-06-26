@@ -1,4 +1,4 @@
-# testLayer (Test Function)
+# testLayer
 
 The `testLayer` utility initializes a layer, test layer updates and draw calls on a series of new props, and allow test suites to inspect the result.
 

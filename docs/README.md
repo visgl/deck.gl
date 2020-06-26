@@ -92,7 +92,7 @@ Getting familiar with the various layers and their props, and reading the basic 
 
 Exploring the deck.gl examples is a good starting point.
 
-In-depth tutorials for how to develop deck.gl applications are available on the [Vis Academy](http://vis.academy/#/) website.
+In-depth tutorials for how to develop deck.gl applications are available on the [Vis Academy](http://vis.academy/) website.
 
 And our [blog](https://medium.com/vis-gl) contains a lot of additional information that might be helpful.
 
