@@ -119,6 +119,10 @@ export default class TransitionManager {
       ? transitionInterpolator.getDuration(startProps, endProps)
       : endProps.transitionDuration;
 
+    if (duration === 0) {
+      return;
+    }
+
     const initialProps = endProps.transitionInterpolator.initializeProps(
       startProps,
       endViewStateProps
