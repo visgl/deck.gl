@@ -58,7 +58,7 @@ export default class Tileset2D {
 
     this._requestScheduler = new RequestScheduler({
       maxRequests: opts.maxRequests,
-      throttleRequests: opts.throttleRequests && opts.maxRequests > 0
+      throttleRequests: opts.maxRequests > 0
     });
 
     // Maps tile id in string {z}-{x}-{y} to a Tile object
