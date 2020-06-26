@@ -27,6 +27,7 @@ function App({viewState}) {
 
     minZoom: 0,
     maxZoom: 19,
+    tileSize: 256,
 
     renderSubLayers: props => {
       const {
@@ -177,19 +178,33 @@ How the tile layer refines the visibility of tiles. One of the following:
 
 - Default: `'best-available'`
 
+##### `maxRequests` (Number, optional)
+
+The maximum number of concurrent `getTileData` calls. 
+
+If `<= 0`, no throttling will occur, and `getTileData` may be called an unlimited number of times concurrently.
+
+If `> 0`, a maximum of `maxRequests` instances of `getTileData` will be called concurrently. Additionally, for requests that are throttled, if the tile is no longer visible in the viewport when a request slot opens up, that request will be cancelled. When requests are not throttled, `getTileData` will be called for all visible tiles, regardless of how long that tile is or was visible.
+
+- Default: `8`
 
 ### Render Options
 
-##### `renderSubLayers` (Function, optional))
+##### `renderSubLayers` (Function, optional)
 
 Renders one or an array of Layer instances with all the `TileLayer` props and the following props:
 
 * `id`: An unique id for this sublayer
-* `data`: Resolved from `getTileData`
+* `data`: Resolved from `getTileData`. As of deck.gl 8.2, this prop is always the data resolved from the Promise and is never a Promise itself.
 * `tile`: An object containing tile index `x`, `y`, `z`, and `bbox` of the tile.
 
 - Default: `props => new GeoJsonLayer(props)`
 
+##### `zRange` (Array, optional)
+
+An array representing the range of minimum and maximum heights in the tile. This is designed to support extruded layers, such as the TerrainLayer, ensuring the right tiles are loaded and rendered. This prop currently only has effect when used with a geospatial view.
+
+- Default: `null` (interpreted as `[0, 0]`)
 
 ### Callbacks
 
