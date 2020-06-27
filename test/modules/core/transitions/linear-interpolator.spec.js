@@ -17,9 +17,21 @@ const TEST_CASES = [
   },
   {
     title: 'throw for missing prop',
-    startProps: {longitude: -122.45, latitude: 37.78, zoom: 12},
-    endProps: {longitude: -74, latitude: 40.7, zoom: 11},
+    startProps: {longitude: -122.45, latitude: 37.78},
+    endProps: {longitude: -74, latitude: 40.7},
     shouldThrow: true
+  },
+  {
+    title: 'fallback on missing props',
+    startProps: {longitude: -122.45, latitude: 37.78, zoom: 12, pitch: 0},
+    endProps: {longitude: -74, latitude: 40.7, zoom: 11, bearing: 10},
+    expect: {
+      start: {longitude: -122.45, latitude: 37.78, zoom: 12, pitch: 0, bearing: undefined},
+      end: {longitude: -74, latitude: 40.7, zoom: 11, pitch: undefined, bearing: 10}
+    },
+    transition: {
+      0.5: {longitude: -98.225, latitude: 39.24, zoom: 11.5, pitch: 0, bearing: 5}
+    }
   },
   {
     title: 'array prop',
