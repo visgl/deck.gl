@@ -66,14 +66,16 @@ npm install deck.gl
 pip install pydeck
 ```
 
-- [Get started](/bindings/pydeck/README.md)
+- [Get started](https://pydeck.gl/installation.html)
+- [Examples](https://pydeck.gl/)
 
 ### Third-Party Bindings
 
 - [deckgl-typings](https://github.com/danmarshall/deckgl-typings) (Typescript)
 - [mapdeck](https://symbolixau.github.io/mapdeck/articles/mapdeck.html) (R)
 - [vega-deck.gl](https://github.com/microsoft/SandDance/tree/master/packages/vega-deck.gl) ([Vega](https://vega.github.io/))
-
+- [earthengine-ayers](https://earthengine-layers.com/) ([Google Earth Engine](https://earthengine.google.com/))
+- [deck.gl-native](https://github.com/UnfoldedInc/deck.gl-native) (C++)
 
 ## Learning Resources
 
