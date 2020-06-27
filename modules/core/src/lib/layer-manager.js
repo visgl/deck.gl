@@ -18,7 +18,6 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import assert from '../utils/assert';
 import {Timeline} from '@luma.gl/core';
 import Layer from './layer';
 import {LIFECYCLE} from '../lifecycle/constants';
@@ -208,12 +207,10 @@ export default class LayerManager {
 
   // Make a viewport "current" in layer context, updating viewportChanged flags
   activateViewport(viewport) {
-    assert(viewport, 'LayerManager: viewport not set');
-
     debug(TRACE_ACTIVATE_VIEWPORT, this, viewport);
-
-    this.context.viewport = viewport;
-
+    if (viewport) {
+      this.context.viewport = viewport;
+    }
     return this;
   }
 
