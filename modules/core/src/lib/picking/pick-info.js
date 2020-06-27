@@ -63,7 +63,7 @@ export function processPickInfo({
   }
 
   const viewport = getViewportFromCoordinates({viewports}); // TODO - add coords
-  const coordinate = viewport && viewport.unproject([x, y], {targetZ: z});
+  const coordinate = viewport && viewport.unproject([x - viewport.x, y - viewport.y], {targetZ: z});
 
   const baseInfo = {
     color: null,
