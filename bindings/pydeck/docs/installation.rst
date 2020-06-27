@@ -72,18 +72,30 @@ If you want to install the library from its source:
 
         git clone https://github.com/visgl/deck.gl
         cd deck.gl/bindings/pydeck
+        yarn bootstrap
+        pip install .
+
+You can run the local tests to verify that the installation worked via ``make test``.
+
+Development
+^^^^^^^^^^^
+
+If you want to install pydeck for development, you may want to use the ``make`` commands:
+
+.. code-block:: bash
+
+        git clone https://github.com/visgl/deck.gl
+        cd deck.gl/bindings/pydeck
         make pre-init
         . env/bin/activate
         make init
         make prepare-jupyter
 
-You can run the local tests to verify that the installation worked via ``make test``.
+Note on pre-releases
+^^^^^^^^^^^^^^^^^^^^
 
-Development notes
-^^^^^^^^^^^^^^^^^
-
-Please note that if you are installing a pydeck prerelease, you may have to specify a specific version
-of ``@deck.gl/jupyter-widget`` to install for JupyterLab. You can read this version from pydeck itself.
+If you are installing a pydeck prerelease and using JupyterLab, you must install an exact version
+of ``@deck.gl/jupyter-widget``. You can read this version from pydeck itself:
 
 .. code-block:: bash
 
