@@ -1,6 +1,6 @@
 # Adding Interactivity
 
-> This article discusses interacting with data (i.e. selecting, or picking objects). Viewport controls (panning, zooming etc) are discussed in [Controllers](/docs/api-reference/map-controller.md).
+> This article discusses interacting with data (i.e. selecting, or picking objects). Viewport controls (panning, zooming etc) are discussed in [Controllers](/docs/api-reference/core/map-controller.md).
 
 ## Overview
 
@@ -8,11 +8,11 @@ deck.gl includes a powerful picking engine that enables the application to preci
 
 ### What can be Picked?
 
-The "picking engine" identifies which object in which layer is at the given coordinates. While usually intuitive, what constitutes a pickable "object" is defined by each layer. Typically, it corresponds to one of the data entries that is passed in via `prop.data`. For example, in [Scatterplot Layer](/docs/layers/scatterplot-layer.md), an object is an element in the `props.data` array that is used to render one circle. In [GeoJson Layer](/docs/layers/geojson-layer.md), an object is a GeoJSON feature in the `props.data` feature collection that is used to render one point, path or polygon.
+The "picking engine" identifies which object in which layer is at the given coordinates. While usually intuitive, what constitutes a pickable "object" is defined by each layer. Typically, it corresponds to one of the data entries that is passed in via `prop.data`. For example, in [Scatterplot Layer](/docs/api-reference/layers/scatterplot-layer.md), an object is an element in the `props.data` array that is used to render one circle. In [GeoJson Layer](/docs/api-reference/layers/geojson-layer.md), an object is a GeoJSON feature in the `props.data` feature collection that is used to render one point, path or polygon.
 
 ### Enabling Picking
 
-Picking can be enabled or disabled on a layer-by-layer basis. To enable picking on a layer, set its [`pickable`](/docs/api-reference/layer.md#pickable) prop to `true`. This value is `false` by default.
+Picking can be enabled or disabled on a layer-by-layer basis. To enable picking on a layer, set its [`pickable`](/docs/api-reference/core/layer.md#pickable) prop to `true`. This value is `false` by default.
 
 ### The Picking Info Object
 
@@ -74,7 +74,7 @@ It receives a picking info object and returns the content of the tooltip. To cus
   }
 ```
 
-For a range of options, see [getTooltip](/docs/api-reference/deck.md#gettooltip) documentation.
+For a range of options, see [getTooltip](/docs/api-reference/core/deck.md#gettooltip) documentation.
 
 ### Using React
 
@@ -118,7 +118,7 @@ function App() {
 
 ## Calling the Picking Engine Directly
 
-The picking engine is exposed through the [`Deck.pickObject`](/docs/api-reference/deck.md) and [`Deck.pickObjects`](/docs/api-reference/deck.md) methods. These methods allow you to query what layers and objects within those layers are under a specific point or within a specified rectangle. They return `Picking Info` objects as described below.
+The picking engine is exposed through the [`Deck.pickObject`](/docs/api-reference/core/deck.md) and [`Deck.pickObjects`](/docs/api-reference/core/deck.md) methods. These methods allow you to query what layers and objects within those layers are under a specific point or within a specified rectangle. They return `Picking Info` objects as described below.
 
 `pickObject` allows an application to define its own event handling. When it comes to how to actually do event handling in a browser, there are many options. In a React application, perhaps the simplest is to just use React's "synthetic" event handling together with `pickObject`:
 
@@ -163,7 +163,7 @@ A event handler function is called with two parameters: `info` that contains the
 
 There are two ways to subscribe to the built-in picking event handling:
 
-* Specify callbacks for each pickable layer by passing [event handler props](/docs/api-reference/layer.md#interaction-properties):
+* Specify callbacks for each pickable layer by passing [event handler props](/docs/api-reference/core/layer.md#interaction-properties):
 
 ```js
 const layer = new ScatterplotLayer({

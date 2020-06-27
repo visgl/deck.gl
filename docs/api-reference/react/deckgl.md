@@ -45,7 +45,7 @@ const App = (data) => (
 
 ## Properties
 
-`DeckGL` accepts all [Deck](/docs/api-reference/deck.md#properties) properties, with these additional semantics:
+`DeckGL` accepts all [Deck](/docs/api-reference/core/deck.md#properties) properties, with these additional semantics:
 
 ### React Context
 
@@ -53,9 +53,9 @@ const App = (data) => (
 
 A [Context.Provider](https://reactjs.org/docs/context.html#contextprovider) component. If supplied, will be rendered as the ancester to all children. The passed through context contains the following values:
 
-- `viewport` ([Viewport](/docs/api-reference/viewport.md)) - the current viewport
+- `viewport` ([Viewport](/docs/api-reference/core/viewport.md)) - the current viewport
 - `container` (DOMElement) - the DOM element containing the deck canvas
-- `eventManager` ([EventManager](https://github.com/uber-web/mjolnir.js/blob/master/docs/api-reference/event-manager.md))
+- `eventManager` ([EventManager](https://github.com/uber-web/mjolnir.js/blob/master/docs/api-reference/core/event-manager.md))
 
 ```jsx
 /// Example using react-map-gl controls with deck.gl
@@ -171,7 +171,7 @@ Additional Notes:
 
 ## Methods
 
-All [Deck](/docs/api-reference/deck.md#methods) methods are available on the `DeckGL` component, but not all of them can be explicitly called. For example, to rerender your component, you can pass updated props to `DeckGL` component directly, while you should call `setProps` with new props in `Deck`. 
+All [Deck](/docs/api-reference/core/deck.md#methods) methods are available on the `DeckGL` component, but not all of them can be explicitly called. For example, to rerender your component, you can pass updated props to `DeckGL` component directly, while you should call `setProps` with new props in `Deck`. 
 
 The public methods you can call explicitly list below:
 
