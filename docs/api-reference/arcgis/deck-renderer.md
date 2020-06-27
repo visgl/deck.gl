@@ -48,7 +48,7 @@ new DeckRenderer(sceneView, props)
 ```
 
 - `sceneView` ([SceneView](https://developers.arcgis.com/javascript/latest/api-reference/esri-views-SceneView.html)) - the view to use this renderer with. `viewingMode` must be set to `'local'`.
-- `props` (Object) - forwarded to a `Deck` instance. The following [Deck](/docs/api-reference/deck.md) props are supported:
+- `props` (Object) - forwarded to a `Deck` instance. The following [Deck](/docs/api-reference/core/deck.md) props are supported:
 
 - `layers`
 - `layerFilter`

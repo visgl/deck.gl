@@ -108,10 +108,10 @@ function App() {
 
 The following interpolator classes are available out-of-the-box:
 
-- [LinearInterpolator](/docs/api-reference/transitions/linear-interpolator.md) - a generic interpolator that works with all view types.
-- [FlyToInterpolator](/docs/api-reference/transitions/fly-to-interpolator.md) - a "fly to" style camera transition for geospatial views.
+- [LinearInterpolator](/docs/api-reference/core/linear-interpolator.md) - a generic interpolator that works with all view types.
+- [FlyToInterpolator](/docs/api-reference/core/fly-to-interpolator.md) - a "fly to" style camera transition for geospatial views.
 
-You can also implement a custom interpolator. See [TransitionInterpolator](/docs/api-reference/transitions/transition-interpolator.md).
+You can also implement a custom interpolator. See [TransitionInterpolator](/docs/api-reference/core/transition-interpolator.md).
 
 
 ## Remarks

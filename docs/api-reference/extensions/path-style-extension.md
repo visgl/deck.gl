@@ -1,7 +1,7 @@
 
 # PathStyleExtension
 
-The `PathStyleExtension` adds selected features to the [PathLayer](/docs/layers/path-layer.md) and composite layers that render the `PathLayer`, e.g. [PolygonLayer](/docs/layers/polygon-layer.md) and [GeoJsonLayer](/docs/layers/geojson-layer.md).
+The `PathStyleExtension` adds selected features to the [PathLayer](/docs/api-reference/layers/path-layer.md) and composite layers that render the `PathLayer`, e.g. [PolygonLayer](/docs/api-reference/layers/polygon-layer.md) and [GeoJsonLayer](/docs/api-reference/layers/geojson-layer.md).
 
 > Note: In v8.0, the `getDashArray` and `dashJustified` props are removed from the `PathLayer` and moved into this extension.
 
