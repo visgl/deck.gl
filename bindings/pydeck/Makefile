@@ -1,17 +1,19 @@
 help:
-	@echo "Please use `make target` where target is one of"
+	@echo "\nPlease use `make target` where target is one of\n"
 	@echo "init - build deck.gl and install all requirements for development"
 	@echo "test - run tests"
-	@echo "fast-build - rebuild only @deck.gl/jupyter-widget"
 	@echo "prepare-jupyter - initiate pydeck-related extensions in JupyterLab and Jupyter Notebook"
 	@echo "bump-version - bump the version files for the pydeck frontend and backend"
 	@echo "publish-pypi - prepare pydeck for publication to PyPI"
 	@echo "publish-test-pypi - prepare pydeck for publication to the test.pypi.org"
-	@echo "docs - builds the docs/ folder"
 	@echo "release - package and upload a release"
+	@echo "fast-build - rebuild @deck.gl/jupyter-widget"
+	@echo "setup-env - detect basic requirements for building the library and set up a virtualenv"
+	@echo "pre-commit - run pre-commit hook for pydeck"
 
 init:
 	# Build deck.gl at the root of this repository
+	. env/bin/activate; \
 	cd ../..; yarn bootstrap; cd -; \
 	# Set up the pydeck project
 	pip install -r requirements/requirements.txt; \
@@ -23,11 +25,13 @@ fast-build:
 	pip install -e .
 
 pre-commit:
-	python -m black . --target-version py34 && $(MAKE) test
+	. env/bin/activate && python -m black . --target-version py34 && $(MAKE) test
 
-pre-init:
-	python3 -m venv env; \
-	. env/bin/activate
+setup-env:
+	test `command -v python3` || echo Please install python3
+	test `command -v yarn` || echo Please install yarn
+	test `command -v python3` && test `command -v yarn`
+	python3 -m venv env
 
 prepare-jupyter:
 	# Enable the notebook extension
@@ -71,6 +75,3 @@ release:
 	VERSION=$$(python -c "import pydeck; print(pydeck.__version__)");
 	git commit -am "pydeck $$VERSION";
 	$(MAKE) publish-pypi;
-
-docs:
-	cd docs/ && $(MAKE) docs
