@@ -1,5 +1,5 @@
 help:
-	@echo "Please use `make target' where target is one of"
+	@echo "Please use `make target` where target is one of"
 	@echo "init - build deck.gl and install all requirements for development"
 	@echo "test - run tests"
 	@echo "fast-build - rebuild only @deck.gl/jupyter-widget"
