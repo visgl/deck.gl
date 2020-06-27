@@ -13,7 +13,7 @@ There are a couple of ways to build a layer in deck.gl, and it is helpful to con
 
 ## Creating The Layer class
 
-Your layer class must be a subclass of [Layer](/docs/api-reference/layer.md).
+Your layer class must be a subclass of [Layer](/docs/api-reference/core/layer.md).
 
 ```js
 import {Layer} from 'deck.gl';
@@ -53,5 +53,5 @@ AwesomeLayer.defaultProps = {
 };
 ```
 
-Also consider the properties of the base [Layer](/docs/api-reference/layer.md) class,
+Also consider the properties of the base [Layer](/docs/api-reference/core/layer.md) class,
 as well as any other inherited properties if you are deriving.

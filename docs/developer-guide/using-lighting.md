@@ -13,7 +13,7 @@ To enable lighting in deck.gl, it is required that both the lighting effect and 
 
 ## Constructing A Lighting Effect Instance
 
-A [LightingEffect](/docs/effects/lighting-effect.md) can be instantiated with a `lights` object:
+A [LightingEffect](/docs/api-reference/core/lighting-effect.md) can be instantiated with a `lights` object:
 
 ```js
 import {AmbientLight, PointLight, DirectionalLight, LightingEffect} from '@deck.gl/core';
@@ -42,11 +42,11 @@ const lightingEffect = new LightingEffect({ambientLight, pointLight, directional
 
 The `lights` has all the light sources that the lighting effect uses to build the visualization. Users typically specify the following types of light sources:
 
-* [AmbientLight](/docs/api-reference/lights/ambient-light.md)
-* [PointLight](/docs/api-reference/lights/point-light.md)
-* [DirectionalLight](/docs/api-reference/lights/directional-light.md)
-* [CameraLight](/docs/api-reference/lights/camera-light.md)
-* [SunLight](/docs/api-reference/lights/sun-light.md)
+* [AmbientLight](/docs/api-reference/core/ambient-light.md)
+* [PointLight](/docs/api-reference/core/point-light.md)
+* [DirectionalLight](/docs/api-reference/core/directional-light.md)
+* [CameraLight](/docs/api-reference/core/camera-light.md)
+* [SunLight](/docs/api-reference/core/sun-light.md)
 
 
 ## Constructing A Material Instance
@@ -76,7 +76,7 @@ new GeoJsonLayer({
   material
 });
 ```
-Refer to each layer's [documentation](/docs/layers/README.md) to see if the material prop is supported.
+Refer to each layer's [documentation](/docs/api-reference/geo-layers/README.md) to see if the material prop is supported.
 
 ## Using Effects
 
