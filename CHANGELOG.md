@@ -19,6 +19,14 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v8.2
 
+#### deck.gl [8.2.0-beta.3] - June 27 2020
+
+- Safe guard viewport activation (#4732)
+- Fix coordinate when picking in multiple views (#4730)
+- Fix transition bugs (#4729)
+- Remove throttleRequests TileLayer prop (#4727)
+- Fix bundle config (#4725)
+
 #### deck.gl [8.2.0-beta.2] - June 25 2020
 
 - Improve the consistency of controller behavior (#4692)
