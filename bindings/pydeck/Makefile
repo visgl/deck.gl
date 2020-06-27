@@ -1,6 +1,7 @@
 help:
 	@echo "\nPlease use `make target` where target is one of\n"
-	@echo "init - build deck.gl and install all requirements for development"
+	@echo "init - build pydeck from source, which builds deck.gl and installs all requirements"
+	@echo "dev-init - build deck.gl and install all pydeck requirements for development"
 	@echo "test - run tests"
 	@echo "prepare-jupyter - initiate pydeck-related extensions in JupyterLab and Jupyter Notebook"
 	@echo "bump-version - bump the version files for the pydeck frontend and backend"
@@ -12,10 +13,15 @@ help:
 	@echo "pre-commit - run pre-commit hook for pydeck"
 
 init:
-	# Build deck.gl at the root of this repository
+	cd ../..; yarn bootstrap; cd -; \
+	pip install -r requirements/requirements.txt; \
+	# Dev requirements are used in testing
+	pip install -r requirements/requirements-dev.txt; \
+	pip install .
+
+dev-init:
 	. env/bin/activate; \
 	cd ../..; yarn bootstrap; cd -; \
-	# Set up the pydeck project
 	pip install -r requirements/requirements.txt; \
 	pip install -r requirements/requirements-dev.txt; \
 	pip install -e .
