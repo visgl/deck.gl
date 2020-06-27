@@ -97,7 +97,7 @@ Disk radius in meters.
 
 * Default: `0`
 
-Disk rotation, counter-clockwise in degrees.
+Disk rotation, counter-clockwise in radians.
 
 ##### `vertices` (Array, optional)
 

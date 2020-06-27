@@ -32,6 +32,7 @@
             {"entry": "docs/developer-guide/interactivity"},
             {"entry": "docs/developer-guide/coordinate-systems"},
             {"entry": "docs/developer-guide/views"},
+            {"entry": "docs/developer-guide/view-state-transitions"},
             {"entry": "docs/developer-guide/using-lighting"},
             {"entry": "docs/developer-guide/performance"},
             {"entry": "docs/developer-guide/64-bits"},
@@ -133,8 +134,7 @@
             {"entry": "docs/api-reference/globe-view"},
             {"entry": "docs/api-reference/first-person-view"},
             {"entry": "docs/api-reference/orthographic-view"},
-            {"entry": "docs/api-reference/orbit-view"},
-            {"entry": "docs/api-reference/view-state-transitions"}
+            {"entry": "docs/api-reference/orbit-view"}
           ]
         },
         {
@@ -142,6 +142,14 @@
           "entries": [
             {"entry": "docs/api-reference/controller"},
             {"entry": "docs/api-reference/map-controller"}
+          ]
+        },
+        {
+          "title": "Transitions",
+          "entries": [
+            {"entry": "docs/api-reference/transitions/linear-interpolator"},
+            {"entry": "docs/api-reference/transitions/fly-to-interpolator"},
+            {"entry": "docs/api-reference/transitions/transition-interpolator"}
           ]
         },
         {
