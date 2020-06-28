@@ -73,7 +73,7 @@ module.exports = {
 
         EXAMPLES: require('./examples.js'),
 
-        GA_TRACKING: null,
+        GA_TRACKING_ID: 'UA-74374017-2',
 
         // For showing star counts and contributors.
         // Should be like btoa('YourUsername:YourKey') and should be readonly.
