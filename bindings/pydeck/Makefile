@@ -22,7 +22,7 @@ fast-build:
 	pip install -e .
 
 pre-commit:
-	. env/bin/activate && python -m black . --target-version py34 && $(MAKE) test
+	python -m black . --target-version py34 && $(MAKE) test
 
 setup-env:
 	test `command -v python3` || echo Please install python3
@@ -32,7 +32,6 @@ setup-env:
 
 prepare-jupyter:
 	# Enable the notebook extension
-	. env/bin/activate; \
 	python -m jupyter nbextension install --sys-prefix --symlink --overwrite --py pydeck; \
 	python -m jupyter nbextension enable --sys-prefix --py pydeck; \
 	# Build and install the JS module
@@ -44,7 +43,6 @@ prepare-jupyter:
 	cd ../../bindings/pydeck
 
 test:
-	. env/bin/activate; \
 	python -m flake8 . && \
 	python -m pytest --cov=pydeck 
 
