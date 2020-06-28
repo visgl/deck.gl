@@ -185,7 +185,7 @@ if __name__ == "__main__":
         include_package_data=True,
         packages=find_packages(exclude=["test"]),
         cmdclass={
-            "install": js_prerelease(install),
+            "install": install,
             "develop": js_prerelease(ExitHookDevelop),
             "build_py": build_py,
             "egg_info": egg_info,
