@@ -1,3 +1,4 @@
+/* global window */
 import React, {PureComponent} from 'react';
 import {render} from 'react-dom';
 
@@ -60,7 +61,7 @@ export default class App extends PureComponent {
         // https://wiki.openstreetmap.org/wiki/Zoom_levels
         minZoom: 0,
         maxZoom: 19,
-        tileSize: 256,
+        tileSize: 512 / (window.devicePixelRatio || 1),
 
         renderSubLayers: props => {
           const {
