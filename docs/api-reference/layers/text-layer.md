@@ -316,4 +316,4 @@ new TextLayer({
 
 ## Source
 
-[modules/layers/src/text-layer](https://github.com/visgl/deck.gl/tree/master/modules/layers/src/text-layer)
+[modules/layers/src/text-layer](https://github.com/visgl/deck.gl/tree/8.2-release/modules/layers/src/text-layer)

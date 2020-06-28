@@ -102,7 +102,7 @@ The `@deck.gl/geo-layers` module added many new features to address popular tile
 
 Multiple bugs have been fixed in the [TileLayer](/docs/api-reference/geo-layers/tile-layer.md) regarding data fetching and tree traversal.
 
-The layer now supports non-geospatial views. Check out this [example](https://github.com/visgl/deck.gl/tree/master/examples/website/image-tile) by [@ilan-gold](https://github.com/ilan-gold) that renders a 576 Megapixel image of the moon.
+The layer now supports non-geospatial views. Check out this [example](https://github.com/visgl/deck.gl/tree/8.2-release/examples/website/image-tile) by [@ilan-gold](https://github.com/ilan-gold) that renders a 576 Megapixel image of the moon.
 
 New props are added to better control the layer's behavior:
 
@@ -118,7 +118,7 @@ This effort is led by contributors from [CARTO](https://carto.com/).
 
 #### TerrainLayer
 
-[TerrainLayer](/docs/api-reference/geo-layers/terrain-layer.md) loads color-encoded heightmap and reconstructs 3D mesh surfaces. Check out our [example](https://github.com/visgl/deck.gl/tree/master/examples/website/terrain).
+[TerrainLayer](/docs/api-reference/geo-layers/terrain-layer.md) loads color-encoded heightmap and reconstructs 3D mesh surfaces. Check out our [example](https://github.com/visgl/deck.gl/tree/8.2-release/examples/website/terrain).
 
 ### ESRI + deck.gl
 
