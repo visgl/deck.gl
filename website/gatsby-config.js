@@ -35,6 +35,8 @@ module.exports = {
         // This is only activated in staging, with `gatsby build --prefix-paths`
         PATH_PREFIX: '/deck.gl',
 
+        THEME_OVERRIDES: require('./src/theme.json'),
+
         GA_TRACKING: null,
 
         // For showing star counts and contributors.
