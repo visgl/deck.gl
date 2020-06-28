@@ -17,7 +17,10 @@ case $MODE in
 esac
 
 # transpile workers
-BABEL_ENV=es5 babel --config-file ../babel.config.js ./static/workers --out-dir public/workers
+(
+  cd ..
+  BABEL_ENV=es5 npx babel ./website/static/workers --out-dir ./website/public/workers
+)
 
 # build script
 webpack -p --env.prod
