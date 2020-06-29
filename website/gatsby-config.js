@@ -28,17 +28,14 @@ module.exports = {
         PROJECT_NAME: 'deck.gl',
         PROJECT_ORG: 'visgl',
         PROJECT_ORG_LOGO: 'images/visgl-logo.png',
-        PROJECT_URL: 'https://github.com/visgl/',
+        PROJECT_URL: 'https://deck.gl/',
         PROJECT_DESC: 'WebGL-powered visualization framework for large-scale datasets',
+        PROJECT_IMAGE: 'images/trips-layer-unfurl-4.0.jpg',
 
         // This is only activated in staging, with `gatsby build --prefix-paths`
         PATH_PREFIX: '/deck.gl',
 
-        GA_TRACKING: null,
-
-        // For showing star counts and contributors.
-        // Should be like btoa('YourUsername:YourKey') and should be readonly.
-        GITHUB_KEY: null,
+        THEME_OVERRIDES: require('./src/theme.json'),
 
         HOME_PATH: '/',
         LINK_TO_GET_STARTED: '/docs',
@@ -49,6 +46,7 @@ module.exports = {
             content: ''
           },
           {
+            title: 'Showcase',
             path: '/showcase',
             componentUrl: resolve('./src/showcase.js'),
           }
@@ -70,14 +68,13 @@ module.exports = {
 
         EXAMPLES: require('./examples.js'),
 
-        GA_TRACKING: null,
+        GA_TRACKING_ID: 'UA-74374017-2',
 
         // For showing star counts and contributors.
         // Should be like btoa('YourUsername:YourKey') and should be readonly.
         GITHUB_KEY: null
       }
     },
-    // `gatsby-plugin-jss`,
     `gatsby-plugin-no-sourcemaps`
   ]
 };

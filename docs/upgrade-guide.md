@@ -56,7 +56,7 @@ const layer = new Tile3DLayer({
 ##### Defaults
 
 - The `opacity` prop of all layers is now default to `1` (used to be `0.8`).
-- [`SimpleMeshLayer`](/docs/layers/simple-mesh-layer.md) and [`ScenegraphLayer`](/docs/layers/scenegraph-layer.md): `modelMatrix` will be composed to instance transformation matrix (derived from  layer props `getOrientation`, `getScale`, `getTranslation` and `getTransformMatrix`) under `CARTESIAN` and `METER_OFFSETS` [coordinates](/docs/developer-guide/coordinate-systems.md).
+- [`SimpleMeshLayer`](/docs/api-reference/mesh-layers/simple-mesh-layer.md) and [`ScenegraphLayer`](/docs/api-reference/mesh-layers/scenegraph-layer.md): `modelMatrix` will be composed to instance transformation matrix (derived from  layer props `getOrientation`, `getScale`, `getTranslation` and `getTransformMatrix`) under `CARTESIAN` and `METER_OFFSETS` [coordinates](/docs/developer-guide/coordinate-systems.md).
 
 ##### Removed
 
@@ -113,7 +113,7 @@ deck.gl now removes most logging when bundling under `NODE_ENV=production`.
 
 ##### Standalone bundle
 
-The pre-bundled version, a.k.a. the [scripting API](/docs/get-started/using-standalone.md#using-the-scripting-api) has been aligned with the interface of the core [Deck](/docs/api-reference/deck.md) class.
+The pre-bundled version, a.k.a. the [scripting API](/docs/get-started/using-standalone.md#using-the-scripting-api) has been aligned with the interface of the core [Deck](/docs/api-reference/core/deck.md) class.
 
 - Top-level view state props such as `longitude`, `latitude`, `zoom` are no longer supported. To specify the default view state, use `initialViewState`.
 - `controller` is no longer on by default, use `controller: true`.
@@ -137,7 +137,7 @@ The change has allowed us to support loading textures from `ImageBitmap`, in use
   + `project`: `vec3 project_position(vec3 position, vec2 position64xyLow)` is now `vec3 project_position(vec3 position, vec3 position64Low)`.
   + `project`: `vec4 project_position(vec4 position, vec2 position64xyLow)` is now `vec4 project_position(vec4 position, vec3 position64Low)`.
   + `project32` and `project64`: `vec4 project_position_to_clipspace(vec3 position, vec2 position64xyLow, vec3 offset)` is now `vec4 project_position_to_clipspace(vec3 position, vec3 position64Low, vec3 offset)`.
-- The shader module [project64](/docs/shader-modules/project64.md) is no longer included in `@deck.gl/core` and `deck.gl`. You can still import it from `@deck.gl/extensions`.
+- The shader module [project64](/docs/api-reference/core/project64.md) is no longer included in `@deck.gl/core` and `deck.gl`. You can still import it from `@deck.gl/extensions`.
 
 ##### Shader modules
 
@@ -178,7 +178,7 @@ new Deck({
 })
 ```
 
-See [View class](/docs/api-reference/view.md) documentation for details.
+See [View class](/docs/api-reference/core/view.md) documentation for details.
 
 
 ## Upgrading from deck.gl v7.2 to v7.3
@@ -345,22 +345,22 @@ Deprecations:
 
 Breaking Changes:
 
-- `HexagonCellLayer` is removed. Use [ColumnLayer](/docs/layers/column-layer.md) with `diskResolution: 6` instead.
+- `HexagonCellLayer` is removed. Use [ColumnLayer](/docs/api-reference/layers/column-layer.md) with `diskResolution: 6` instead.
 - A bug in projecting elevation was fixed in `HexagonLayer`, `GridLayer` and `GridCellLayer`. The resulting heights of extruded grids/hexagons have changed. You may adjust them to match previous behavior by tweaking `elevationScale`.
 - The following former experimental layers' APIs are redesigned as they graduate to official layers. Refer to their documentations for details:
-  - [BitmapLayer](/docs/layers/column-layer.md)
-  - [SimpleMeshLayer](/docs/layers/simple-mesh-layer.md)
-  - [TileLayer](/docs/layers/tile-layer.md)
-  - [TripsLayer](/docs/layers/trips-layer.md)
+  - [BitmapLayer](/docs/api-reference/layers/column-layer.md)
+  - [SimpleMeshLayer](/docs/api-reference/mesh-layers/simple-mesh-layer.md)
+  - [TileLayer](/docs/api-reference/geo-layers/tile-layer.md)
+  - [TripsLayer](/docs/api-reference/geo-layers/trips-layer.md)
 
 #### Lighting
 
-The old experimental prop `lightSettings` in many 3D layers is no longer supported. The new and improved settings are split into two places: a [material](https://github.com/visgl/luma.gl/tree/master/docs/api-reference/core/materials) prop for each 3D layer and a shared set of lights specified by [LightingEffect](/docs/effects/lighting-effect.md) with the [effects prop of Deck](/docs/api-reference/deck.md#effects).
+The old experimental prop `lightSettings` in many 3D layers is no longer supported. The new and improved settings are split into two places: a [material](https://github.com/visgl/luma.gl/tree/master/docs/api-reference/core/materials) prop for each 3D layer and a shared set of lights specified by [LightingEffect](/docs/api-reference/core/lighting-effect.md) with the [effects prop of Deck](/docs/api-reference/core/deck.md#effects).
 Check [Using Lighting](/docs/developer-guide/using-lighting.md) in developer guide for more details.
 
 #### Views
 
-v7.0 includes major bug fixes for [OrbitView](/docs/api-reference/orbit-view.md) and [OrthographicView](/docs/api-reference/orthographic-view.md). Their APIs are also changed for better clarity and consistency.
+v7.0 includes major bug fixes for [OrbitView](/docs/api-reference/core/orbit-view.md) and [OrthographicView](/docs/api-reference/core/orthographic-view.md). Their APIs are also changed for better clarity and consistency.
 
 Breaking Changes:
 
@@ -502,7 +502,7 @@ Some previously deprecated `project_` module GLSL functions have now been remove
 
 #### Attribute
 
-`isGeneric` field of attribute object returned by `AttributeManager`'s update callbacks is replaced by `constant`. For more details check [`attribute manager`](/docs/api-reference/attribute-manager.md).
+`isGeneric` field of attribute object returned by `AttributeManager`'s update callbacks is replaced by `constant`. For more details check [`attribute manager`](/docs/api-reference/core/attribute-manager.md).
 
 ## Upgrading from deck.gl v5.2 to v5.3
 

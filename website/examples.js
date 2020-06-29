@@ -1,6 +1,16 @@
 const {resolve} = require('path');
 
-const EXAMPLES = {
+function makeExampleEntries(data, category) {
+  return Object.keys(data).map(name => ({
+    title: name,
+    category,
+    path: `examples/${data[name]}/`,
+    image: `images/examples/${data[name]}.jpg`,
+    componentUrl: resolve(`./src/examples/${data[name]}.js`)
+  }));
+}
+
+const LAYER_EXAMPLES = {
   'ArcLayer': 'arc-layer',
   'GeoJsonLayer (Polygons)': 'geojson-layer-polygons',
   'GeoJsonLayer (Paths)': 'geojson-layer-paths',
@@ -16,24 +26,21 @@ const EXAMPLES = {
   'TileLayer': 'tile-layer',
   'Tile3DLayer': 'tile-3d-layer',
   'TripsLayer': 'trips-layer',
-  'BrusingExtension': 'brushing-extension',
-  'DataFilterExtension': 'data-filter-extension',
   '3D Plot': 'plot'
 };
 
-const standaloneExamples = Object.keys(EXAMPLES).map(name => ({
-  title: name,
-  path: `examples/${EXAMPLES[name]}/`,
-  image: `images/examples/${EXAMPLES[name]}.jpg`,
-  componentUrl: resolve(`./src/examples/${EXAMPLES[name]}.js`)
-}));
+const EXTENSION_EXAMPLES = {
+  'BrushingExtension': 'brushing-extension',
+  'DataFilterExtension': 'data-filter-extension'
+};
 
-const externalExamples = [
+module.exports = [].concat(
+  makeExampleEntries(LAYER_EXAMPLES, 'Layers'),
+  makeExampleEntries(EXTENSION_EXAMPLES, 'Extensions'),
   {
     title: 'Playground',
+    category: 'Declarative',
     path: 'playground',
     image: 'images/examples/playground.jpg'
   }
-];
-
-module.exports = standaloneExamples.concat(externalExamples);
+);
