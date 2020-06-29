@@ -46,6 +46,7 @@ module.exports = {
             content: ''
           },
           {
+            title: 'Showcase',
             path: '/showcase',
             componentUrl: resolve('./src/showcase.js'),
           }
@@ -74,7 +75,6 @@ module.exports = {
         GITHUB_KEY: null
       }
     },
-    // `gatsby-plugin-jss`,
     `gatsby-plugin-no-sourcemaps`
   ]
 };

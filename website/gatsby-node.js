@@ -23,19 +23,11 @@ module.exports.onCreateWebpackConfig = function onCreateWebpackConfigOverride(op
     'website-components': resolve('./src'),
     react: resolve('node_modules/react'),
     'react-dom': resolve('node_modules/react-dom'),
-    'styletron-engine-atomic': resolve('node_modules/styletron-engine-atomic'),
-    'styletron-react': resolve('node_modules/styletron-react'),
-
-    '@luma.gl/constants': resolve('../node_modules/@luma.gl/constants'),
-    '@luma.gl/core': resolve('../node_modules/@luma.gl/core'),
-    '@luma.gl/engine': resolve('../node_modules/@luma.gl/engine'),
-    '@luma.gl/webgl': resolve('../node_modules/@luma.gl/webgl'),
-    '@luma.gl/gltools': resolve('../node_modules/@luma.gl/gltools'),
-    '@luma.gl/shadertools': resolve('../node_modules/@luma.gl/shadertools'),
-    '@luma.gl/experimental': resolve('../node_modules/@luma.gl/experimental'),
-
+    '@luma.gl': resolve('../node_modules/@luma.gl'),
+    '@math.gl': resolve('../node_modules/@math.gl'),
     '@loaders.gl/core': resolve('../node_modules/@loaders.gl/core'),
-    '@loaders.gl/images': resolve('../node_modules/@loaders.gl/images')
+    '@loaders.gl/images': resolve('../node_modules/@loaders.gl/images'),
+    '@loaders.gl/loader-utils': resolve('../node_modules/@loaders.gl/loader-utils')
   }, config.resolve.alias, ALIASES);
 
   config.plugins = config.plugins || [];

@@ -7,7 +7,7 @@
         {"entry": "docs/README"},
         {"entry": "docs/whats-new"},
         {"entry": "docs/upgrade-guide"},
-        {"entry": "docs/CONTRIBUTING"},
+        {"entry": "docs/contributing"},
         {"entry": "docs/faq"}
       ]
     },

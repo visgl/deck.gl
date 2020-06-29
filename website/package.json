@@ -21,14 +21,12 @@
     "d3-color": "^1.4.1",
     "d3-request": "^1.0.6",
     "d3-scale": "^3.2.1",
-    "expr-eval": "^2.0.2",
-    "react-jss": "^10.3.0"
+    "expr-eval": "^2.0.2"
   },
   "devDependencies": {
     "gatsby": "^2.20.0",
-    "gatsby-plugin-jss": "^2.3.4",
     "gatsby-plugin-no-sourcemaps": "^2.1.2",
-    "gatsby-theme-ocular": "^1.2.0-beta.13",
+    "gatsby-theme-ocular": "^1.2.0",
     "gh-pages": "^2.2.0",
     "react": "^16.8.6",
     "react-dom": "^16.8.6"
