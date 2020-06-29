@@ -11,6 +11,16 @@ import jinja2
 from ..frontend_semver import DECKGL_SEMVER
 
 
+def in_jupyter():
+    try:
+        ip = get_ipython()  # noqa
+
+        if ip.has_trait('kernel'):
+            return True
+    except NameError:
+        return False
+
+
 def convert_js_bool(py_bool):
     if type(py_bool) != bool:
         return py_bool
@@ -65,7 +75,7 @@ def render_json_to_html(
     return html_str
 
 
-def display_html(filename, height=500, width=500):
+def display_html(filename):
     """Converts HTML into a temporary file and opens it in the system browser."""
     url = "file://{}".format(filename)
     # Hack to prevent blank page
@@ -74,8 +84,10 @@ def display_html(filename, height=500, width=500):
 
 
 def iframe_with_srcdoc(html_str, width="100%", height=500):
+    width = f'"{width}"' if type(width) == str else width
     iframe = f"""<iframe src="about:blank" srcdoc="{html.escape(html_str)}" width={width} height={height}></iframe>"""
     from IPython.display import HTML  # noqa
+
     return HTML(iframe)
 
 
@@ -91,10 +103,10 @@ def deck_to_html(
     google_maps_key=None,
     filename=None,
     open_browser=False,
-    jupyter_display=False,
+    notebook_display=in_jupyter(),
     css_background_color=None,
     iframe_height=500,
-    iframe_width='100%',
+    iframe_width="100%",
     tooltip=True,
     custom_libraries=None,
     as_string=True,
@@ -111,24 +123,22 @@ def deck_to_html(
         offline=offline,
     )
 
-    if not filename and jupyter_display:
+    if not filename and notebook_display and in_google_collab:
+        render_for_collab(html_str, iframe_height)
+        return
+
+    elif not filename and notebook_display:
         return iframe_with_srcdoc(html_str, iframe_width, iframe_height)
 
     elif not filename and as_string:
         return html_str
 
     elif not filename:
-        raise TypeError("To save to a file, provide a file path. To get an HTML string, set as_string=True. To render a visual in Jupyter, set jupyter_display=True")
+        raise TypeError(
+            "To save to a file, provide a file path. To get an HTML string, set as_string=True. To render a visual in Jupyter, set jupyter_display=True"
+        )
 
-    if jupyter_display and in_google_collab:
-        render_for_collab(html_str, iframe_height)
-
-    try:
-        f = open(filename, "w+")
-        f.write(html)
-    finally:
-        if f is None:
-            raise Exception("pydeck could not write a file")
-        f.close()
+    with open(filename, "w+") as f:
+        f.write(html_str)
     if open_browser:
         display_html(realpath(f.name))

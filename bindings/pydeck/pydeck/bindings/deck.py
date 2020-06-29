@@ -9,7 +9,7 @@ from ..settings import settings as pydeck_settings
 from ..widget import DeckGLWidget
 from .view import View
 from .providers import Providers
-from .map_styles import LIGHT
+from .map_styles import DARK
 
 
 class Deck(JSONMixin):
@@ -17,7 +17,7 @@ class Deck(JSONMixin):
         self,
         layers=[],
         views=[View(type="MapView", controller=True)],
-        map_style=LIGHT,
+        map_style=DARK,
         mapbox_key=None,
         google_maps_key=None,
         initial_view_state=None,
@@ -138,7 +138,7 @@ class Deck(JSONMixin):
         self,
         filename=None,
         open_browser=False,
-        notebook_display=True,
+        notebook_display=None,
         iframe_width=700,
         iframe_height=500,
         as_string=False,
@@ -151,17 +151,19 @@ class Deck(JSONMixin):
         Parameters
         ----------
         filename : str, default None
-            Name of the file. If no name is provided, a randomly named file will be written locally.
+            Name of the file.
         open_browser : bool, default False
-            Whether a browser window will open or not after write
-        notebook_display : bool, default True
-            Attempts to display the HTML output in an iframe if True. Only works in a Jupyter environment.
-        iframe_width : int, default 700
-            Height of Jupyter notebook iframe in pixels, if rendered in a Jupyter environment.
-        iframe_height : int, default 500
+            Whether a browser window will open or not after write.
+        notebook_display : bool, default None
+            Display the HTML output in an iframe if True. Set to True automatically if rendering in Jupyter.
+        iframe_width : str or int, default '100%'
             Width of Jupyter notebook iframe in pixels, if rendered in a Jupyter environment.
+        iframe_heigth : int, default 500
+            Height of Jupyter notebook iframe in pixels, if rendered in Jupyter or Colab.
         as_string : bool, default False
-            Whether the HTML should be written as a string rather than to a file. Defaults to writing to a file.
+            Returns HTML as a string, if True and ``filename`` is None.
+        css_background_color : str, default None
+            Background color for visualization, specified as a string in any format accepted for CSS colors.
 
         Returns
         -------
