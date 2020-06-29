@@ -22,9 +22,6 @@ esac
   BABEL_ENV=es5 npx babel ./website/static/workers --out-dir ./website/public/workers
 )
 
-# build script
-webpack -p --env.prod
-
 # build gallery (scripting) examples
 (
   cd ../examples/gallery

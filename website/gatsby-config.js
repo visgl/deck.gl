@@ -37,12 +37,6 @@ module.exports = {
 
         THEME_OVERRIDES: require('./src/theme.json'),
 
-        GA_TRACKING: null,
-
-        // For showing star counts and contributors.
-        // Should be like btoa('YourUsername:YourKey') and should be readonly.
-        GITHUB_KEY: null,
-
         HOME_PATH: '/',
         LINK_TO_GET_STARTED: '/docs',
         PAGES: [
@@ -52,6 +46,7 @@ module.exports = {
             content: ''
           },
           {
+            title: 'Showcase',
             path: '/showcase',
             componentUrl: resolve('./src/showcase.js'),
           }
@@ -80,7 +75,6 @@ module.exports = {
         GITHUB_KEY: null
       }
     },
-    // `gatsby-plugin-jss`,
     `gatsby-plugin-no-sourcemaps`
   ]
 };
