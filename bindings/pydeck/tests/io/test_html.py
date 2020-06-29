@@ -14,14 +14,7 @@ try:
 except ImportError:
     from mock import MagicMock
 
-from pydeck.io.html import (
-    cdn_picker,
-    display_html,
-    iframe_with_srcdoc,
-    in_jupyter,
-    render_json_to_html,
-    CDN_URL
-)
+from pydeck.io.html import cdn_picker, display_html, iframe_with_srcdoc, in_jupyter, render_json_to_html, CDN_URL
 
 from ..fixtures import fixtures
 
@@ -42,7 +35,7 @@ def test_cdn_picker(monkeypatch):
     assert len(cdn_picker(offline=True)) > 1000
     PORT = 8080
     monkeypatch.setenv("PYDECK_DEV_PORT", PORT)
-    assert f'localhost:{PORT}' in cdn_picker()
+    assert f"localhost:{PORT}" in cdn_picker()
     monkeypatch.delenv("PYDECK_DEV_PORT", raising=False)
     assert CDN_URL in cdn_picker()
 

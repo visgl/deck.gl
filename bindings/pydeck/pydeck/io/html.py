@@ -15,7 +15,7 @@ def in_jupyter():
     try:
         ip = get_ipython()  # noqa
 
-        if ip.has_trait('kernel'):
+        if ip.has_trait("kernel"):
             return True
     except NameError:
         return False
