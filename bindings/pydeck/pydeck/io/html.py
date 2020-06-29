@@ -85,7 +85,8 @@ def display_html(filename):
 
 def iframe_with_srcdoc(html_str, width="100%", height=500):
     width = f'"{width}"' if type(width) == str else width
-    iframe = f"""<iframe src="about:blank" srcdoc="{html.escape(html_str)}" width={width} height={height}></iframe>"""
+    iframe = """<iframe src="about:blank" srcdoc="{}" width={} height={}></iframe>""".format(
+        html.escape(html_str), width, height)
     from IPython.display import HTML  # noqa
 
     return HTML(iframe)

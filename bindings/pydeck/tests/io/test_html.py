@@ -35,7 +35,7 @@ def test_cdn_picker(monkeypatch):
     assert len(cdn_picker(offline=True)) > 1000
     PORT = 8080
     monkeypatch.setenv("PYDECK_DEV_PORT", PORT)
-    assert f"localhost:{PORT}" in cdn_picker()
+    assert "localhost:{}".format(PORT) in cdn_picker()
     monkeypatch.delenv("PYDECK_DEV_PORT", raising=False)
     assert CDN_URL in cdn_picker()
 
