@@ -15,6 +15,9 @@ const INITIAL_VIEW_STATE = {
   bearing: 0
 };
 
+/* global window */
+const devicePixelRatio = (typeof window !== 'undefined' && window.devicePixelRatio) || 1;
+
 export default class App extends PureComponent {
   constructor(props) {
     super(props);
@@ -60,7 +63,7 @@ export default class App extends PureComponent {
         // https://wiki.openstreetmap.org/wiki/Zoom_levels
         minZoom: 0,
         maxZoom: 19,
-        tileSize: 256,
+        tileSize: 512 / devicePixelRatio,
 
         renderSubLayers: props => {
           const {
