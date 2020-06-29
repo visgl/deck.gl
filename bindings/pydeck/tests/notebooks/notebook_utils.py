@@ -4,7 +4,7 @@ import os
 
 def nbconvert(notebook_path):
     if not os.path.exists(os.path.exists(notebook_path)):
-        raise Exception('Invalid path %s' % notebook_path)
+        raise Exception("Invalid path %s" % notebook_path)
     CMD = (
         "jupyter nbconvert --to=html --ExecutePreprocessor.timeout=600 "
         "--ExecutePreprocessor.kernel_name='python3' "

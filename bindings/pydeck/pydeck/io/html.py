@@ -28,7 +28,7 @@ def cdn_picker(offline=False):
     # Support hot-reloading
     dev_port = os.getenv("PYDECK_DEV_PORT")
     if dev_port:
-        print('pydeck running in development mode, expecting @deck.gl/jupyter-widget served at {}'.format(dev_port))
+        print("pydeck running in development mode, expecting @deck.gl/jupyter-widget served at {}".format(dev_port))
         return (
             "<script type='text/javascript' src='http://localhost:{dev_port}/dist/index.js'></script>\n"
             "<script type='text/javascript' src='http://localhost:{dev_port}/dist/index.js.map'></script>\n"
