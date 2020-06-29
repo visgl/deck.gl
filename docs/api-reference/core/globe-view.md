@@ -2,7 +2,7 @@
 
 > This class is experimental, which means it does not provide the compatibility and stability that one would typically expect from other `View` classes. Use with caution and report any issues that you find on GitHub.
 
-The [`GlobeView`] class is a subclass of [View](/docs/api-reference/core/view.md). This view projects the earth into a 3D globe.
+The `GlobeView` class is a subclass of [View](/docs/api-reference/core/view.md). This view projects the earth into a 3D globe.
 
 It's recommended that you read the [Views and Projections guide](/docs/developer-guide/views.md) before using this class.
 
