@@ -22,6 +22,6 @@ def records_from_geo_interface(data):
         geom = d.get("geometry")
         for k in properties.keys():
             record[k] = properties[k]
-            record["geometry"] = geom
+        record["geometry"] = geom
         flattened_records.append(record)
     return flattened_records
