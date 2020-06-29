@@ -110,10 +110,7 @@ class Layer(JSONMixin):
         self._data = None
         self.use_binary_transport = use_binary_transport
         self._binary_data = None
-        if not self.use_binary_transport:
-            self.data = data.to_dict(orient="records") if is_pandas_df(data) else data
-        else:
-            self.data = data
+        self.data = data
 
     @property
     def data(self):
@@ -127,7 +124,7 @@ class Layer(JSONMixin):
         """
         if self.use_binary_transport:
             self._binary_data = self._prepare_binary_data(data_set)
-        elif is_geopandas_df(data_set):
+        elif is_geopandas_df(data_set) and self.type == "GeoJsonLayer":
             self._data = data_set.__geo_interface__
         elif is_pandas_df(data_set):
             self._data = data_set.to_dict(orient="records")
