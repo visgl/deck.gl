@@ -13,7 +13,7 @@ layers = [
     pydeck.Layer(
         'GeoJsonLayer',
         data=world,
-        get_fill_color=[255, 255, 0],
+        get_fill_color=[0, 0, 0],
     ),
     pydeck.Layer(
         'TextLayer',
