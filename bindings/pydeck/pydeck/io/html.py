@@ -27,7 +27,7 @@ def convert_js_bool(py_bool):
     return "true" if py_bool else "false"
 
 
-in_google_collab = "google.colab" in sys.modules
+in_google_colab = "google.colab" in sys.modules
 
 
 TEMPLATES_PATH = os.path.join(os.path.dirname(__file__), "./templates/")
@@ -92,7 +92,7 @@ def iframe_with_srcdoc(html_str, width="100%", height=500):
     return HTML(iframe)
 
 
-def render_for_collab(html_str, iframe_height):
+def render_for_colab(html_str, iframe_height):
     js_height_snippet = "google.colab.output.setIframeHeight(0, true, {maxHeight: %s})" % iframe_height
     display(Javascript(js_height_snippet))  # noqa
     display(HTML(html_str))  # noqa
@@ -124,8 +124,8 @@ def deck_to_html(
         offline=offline,
     )
 
-    if not filename and notebook_display and in_google_collab:
-        render_for_collab(html_str, iframe_height)
+    if not filename and notebook_display and in_google_colab:
+        render_for_colab(html_str, iframe_height)
         return
 
     elif not filename and notebook_display:
