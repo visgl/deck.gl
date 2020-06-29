@@ -30,7 +30,7 @@ const LAYER_EXAMPLES = {
 };
 
 const EXTENSION_EXAMPLES = {
-  'BrusingExtension': 'brushing-extension',
+  'BrushingExtension': 'brushing-extension',
   'DataFilterExtension': 'data-filter-extension'
 };
 
