@@ -9,6 +9,7 @@ from ..settings import settings as pydeck_settings
 from ..widget import DeckGLWidget
 from .view import View
 from .providers import Providers
+from .map_styles import LIGHT
 
 
 class Deck(JSONMixin):
@@ -16,7 +17,7 @@ class Deck(JSONMixin):
         self,
         layers=[],
         views=[View(type="MapView", controller=True)],
-        map_style="mapbox://styles/mapbox/dark-v9",
+        map_style=LIGHT,
         mapbox_key=None,
         google_maps_key=None,
         initial_view_state=None,
@@ -51,7 +52,7 @@ class Deck(JSONMixin):
             to get an API token.
             If not using a basemap, you can set this value to `''`.
         google_maps_key : str, default None
-            Read on initialization from the ``GOOGLE_MAPS_API_KEY`` environment variable if not set.
+            Read on initialization from the ``PYDECK_GOOGLE_MAPS_API_KEY`` environment variable if not set.
             Defaults to None if the environment variable is also not set.
             Not used on all layers.
         map_provider : str, default 'mapbox'
@@ -87,7 +88,7 @@ class Deck(JSONMixin):
 
         self.mapbox_key = mapbox_key or os.getenv("MAPBOX_API_KEY")
         self.deck_widget.mapbox_key = self.mapbox_key
-        self.google_maps_key = google_maps_key or os.getenv("GOOGLE_MAPS_API_KEY")
+        self.google_maps_key = google_maps_key or os.getenv("PYDECK_GOOGLE_MAPS_API_KEY")
         self.deck_widget.google_maps_key = self.google_maps_key
 
         self.deck_widget.height = height
