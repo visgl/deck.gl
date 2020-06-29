@@ -42,7 +42,7 @@ export default class Tile2DHeader {
     const {x, y, z, bbox} = this;
 
     const requestToken = await requestScheduler.scheduleRequest(this, tile => {
-      return tile.isSelected;
+      return tile.isSelected ? 1 : -1;
     });
 
     if (!requestToken) {
