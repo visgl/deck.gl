@@ -158,7 +158,7 @@ class Deck(JSONMixin):
             Display the HTML output in an iframe if True. Set to True automatically if rendering in Jupyter.
         iframe_width : str or int, default '100%'
             Width of Jupyter notebook iframe in pixels, if rendered in a Jupyter environment.
-        iframe_heigth : int, default 500
+        iframe_height : int, default 500
             Height of Jupyter notebook iframe in pixels, if rendered in Jupyter or Colab.
         as_string : bool, default False
             Returns HTML as a string, if True and ``filename`` is None.
