@@ -35,8 +35,11 @@ test('Tile2DHeader#Cancel request if not selected', async t => {
   tile1.isSelected = true;
   tile2.isSelected = false;
 
-  await tile1._loadData(getTileData, requestScheduler);
-  await tile2._loadData(getTileData, requestScheduler);
+  // Await later so that request scheduler has both queued at the same time
+  const loader1 = tile1._loadData(getTileData, requestScheduler);
+  const loader2 = tile2._loadData(getTileData, requestScheduler);
+  await loader1;
+  await loader2;
 
   t.equals(tileRequestCount, 1, 'One successful request');
   t.notOk(tile1.isCancelled, 'First request was not cancelled');
