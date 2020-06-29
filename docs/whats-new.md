@@ -32,7 +32,7 @@ Many new features are added to `TileLayer`, `MVTLayer` and `TerrainLayer` to imp
 - `MVTLayer` projects more accurately at high zoom levels.
 - `autoHighlight` in the `MVTLayer` now works on features that are split across multiple tiles, identified by the new `uniqueIdProperty` prop.
 - All geospatially tiled layers now handle high pitch angles better. Far away tiles from the camera are loaded at lower zoom levels, avoiding loading too many tiles.
-- Tiled layers now use a request scheduler to prioritize loading the most recently visible tiles during viewport navigation. See the new `throttleRequests` and `maxRequests` props.
+- Tiled layers now use a request scheduler to prioritize loading the most recently visible tiles during viewport navigation. See the new `maxRequests` prop.
 - `TileLayer` may continue to display tiles when underzoomed. See the new `extent` prop.
 - Fine-tune the tiles displayed by the `TileLayer` with the new `zRange` prop when dealing with 3D content. This is used by the `TerrainLayer` when viewing high-altitude regions.
 - `TileLayer`'s `tileSize` prop can be used to fine-tune the zoom level at which tiles are loaded.
