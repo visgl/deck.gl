@@ -4,7 +4,7 @@ This page contains highlights of each deck.gl release. Also check our [vis.gl bl
 
 ## deck.gl v8.2
 
-Release Data: TBD, 2020
+Release Data: June 28, 2020
 
 <table style="border: 0;" align="center">
   <tbody>
@@ -48,7 +48,7 @@ For geospatial data, a new projection mode -- globe projection is now available 
 
 Currently there is no base map provider under this view. You may use the `BitmapLayer` or `GeoJsonLayer` to render a backdrop for your data.
 
-Before getting started with [this example](/examples/get-started/pure-js/globe/), make sure you check out the [docs](/docs/api-reference/core/globe-view.md) for the limitaions of the current implementation.
+Before getting started with [this example](https://github.com/visgl/deck.gl/tree/master/examples/get-started/pure-js/globe), make sure you check out the [docs](/docs/api-reference/core/globe-view.md) for the limitaions of the current implementation.
 
 
 ### Antimeridian Handling
