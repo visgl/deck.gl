@@ -109,7 +109,7 @@ def deck_to_html(
     iframe_width="100%",
     tooltip=True,
     custom_libraries=None,
-    as_string=True,
+    as_string=False,
     offline=False,
 ):
     """Converts deck.gl format JSON to an HTML page"""
