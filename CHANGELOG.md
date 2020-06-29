@@ -19,6 +19,14 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v8.2
 
+#### deck.gl [8.2.0] - June 28 2020
+
+- Upgrade luma.gl dependencies to 8.2.0 (#4736)
+- Fix request scheduler not cancelling deselected tiles (#4739)
+
+
+### deck.gl v8.2 Prereleases
+
 #### deck.gl [8.2.0-beta.3] - June 27 2020
 
 - Safe guard viewport activation (#4732)
