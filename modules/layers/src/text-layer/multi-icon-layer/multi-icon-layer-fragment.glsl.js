@@ -55,20 +55,20 @@ void main(void) {
       if (shouldDrawBackground) {
         // draw background color and return if not picking
         gl_FragColor = vec4(backgroundColor, vColor.a);
-        return;
       } else {
         // no background and no picking
         discard;
       }
-    }
-
-    if (shouldDrawBackground) {
-      gl_FragColor = vec4(mix(backgroundColor, vColor.rgb, alpha), vColor.a * opacity);
     } else {
-      gl_FragColor = vec4(vColor.rgb, a * opacity);
+      if (shouldDrawBackground) {
+        gl_FragColor = vec4(mix(backgroundColor, vColor.rgb, alpha), vColor.a * opacity);
+      } else {
+        gl_FragColor = vec4(vColor.rgb, a * opacity);
+      }
+      DECKGL_FILTER_COLOR(gl_FragColor, geometry);
     }
+  } else {
+    DECKGL_FILTER_COLOR(gl_FragColor, geometry);
   }
-
-  DECKGL_FILTER_COLOR(gl_FragColor, geometry);
 }
 `;
