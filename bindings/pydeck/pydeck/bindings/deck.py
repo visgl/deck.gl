@@ -8,6 +8,7 @@ from ..io.html import deck_to_html
 from ..settings import settings as pydeck_settings
 from ..widget import DeckGLWidget
 from .view import View
+from .view_state import ViewState
 from .providers import Providers
 from .map_styles import DARK
 
@@ -20,7 +21,7 @@ class Deck(JSONMixin):
         map_style=DARK,
         mapbox_key=None,
         google_maps_key=None,
-        initial_view_state=None,
+        initial_view_state=ViewState(latitude=0, longitude=0, zoom=1),
         width="100%",
         height=500,
         tooltip=True,
@@ -37,12 +38,12 @@ class Deck(JSONMixin):
 
         layers : pydeck.Layer or list of pydeck.Layer, default []
             List of :class:`pydeck.bindings.layer.Layer` layers to render.
-        views : list of pydeck.View, []
+        views : list of pydeck.View, default ``[pydeck.View(type="MapView", controller=True)]``
             List of :class:`pydeck.bindings.view.View` objects to render.
         map_style : str, default 'mapbox://styles/mapbox/dark-v9'
             URI for Mapbox basemap style. See Mapbox's `gallery <https://www.mapbox.com/gallery/>`_ for examples.
             If not using a basemap, you can set this value to to an empty string, ``''``.
-        initial_view_state : pydeck.ViewState, default None
+        initial_view_state : pydeck.ViewState, default ``pydeck.ViewState(latitude=0, longitude=0, zoom=1)``
             Initial camera angle relative to the map, defaults to a fully zoomed out 0, 0-centered map
             To compute a viewport from data, see :func:`pydeck.data_utils.viewport_helpers.compute_view`
         mapbox_key : str, default None
