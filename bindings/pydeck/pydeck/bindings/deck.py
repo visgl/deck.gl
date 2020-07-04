@@ -10,6 +10,7 @@ from ..widget import DeckGLWidget
 from .view import View
 from .view_state import ViewState
 from .providers import Providers
+from .map_styles import DARK
 
 
 class Deck(JSONMixin):
@@ -17,7 +18,7 @@ class Deck(JSONMixin):
         self,
         layers=[],
         views=[View(type="MapView", controller=True)],
-        map_style="mapbox://styles/mapbox/dark-v9",
+        map_style=DARK,
         mapbox_key=None,
         google_maps_key=None,
         initial_view_state=ViewState(latitude=0, longitude=0, zoom=1),
@@ -52,7 +53,7 @@ class Deck(JSONMixin):
             to get an API token.
             If not using a basemap, you can set this value to `''`.
         google_maps_key : str, default None
-            Read on initialization from the ``GOOGLE_MAPS_API_KEY`` environment variable if not set.
+            Read on initialization from the ``PYDECK_GOOGLE_MAPS_API_KEY`` environment variable if not set.
             Defaults to None if the environment variable is also not set.
             Not used on all layers.
         map_provider : str, default 'mapbox'
@@ -88,7 +89,7 @@ class Deck(JSONMixin):
 
         self.mapbox_key = mapbox_key or os.getenv("MAPBOX_API_KEY")
         self.deck_widget.mapbox_key = self.mapbox_key
-        self.google_maps_key = google_maps_key or os.getenv("GOOGLE_MAPS_API_KEY")
+        self.google_maps_key = google_maps_key or os.getenv("PYDECK_GOOGLE_MAPS_API_KEY")
         self.deck_widget.google_maps_key = self.google_maps_key
 
         self.deck_widget.height = height
@@ -138,7 +139,7 @@ class Deck(JSONMixin):
         self,
         filename=None,
         open_browser=False,
-        notebook_display=True,
+        notebook_display=None,
         iframe_width=700,
         iframe_height=500,
         as_string=False,
@@ -151,17 +152,19 @@ class Deck(JSONMixin):
         Parameters
         ----------
         filename : str, default None
-            Name of the file. If no name is provided, a randomly named file will be written locally.
+            Name of the file.
         open_browser : bool, default False
-            Whether a browser window will open or not after write
-        notebook_display : bool, default True
-            Attempts to display the HTML output in an iframe if True. Only works in a Jupyter environment.
-        iframe_width : int, default 700
-            Height of Jupyter notebook iframe in pixels, if rendered in a Jupyter environment.
-        iframe_height : int, default 500
+            Whether a browser window will open or not after write.
+        notebook_display : bool, default None
+            Display the HTML output in an iframe if True. Set to True automatically if rendering in Jupyter.
+        iframe_width : str or int, default '100%'
             Width of Jupyter notebook iframe in pixels, if rendered in a Jupyter environment.
+        iframe_height : int, default 500
+            Height of Jupyter notebook iframe in pixels, if rendered in Jupyter or Colab.
         as_string : bool, default False
-            Whether the HTML should be written as a string rather than to a file. Defaults to writing to a file.
+            Returns HTML as a string, if True and ``filename`` is None.
+        css_background_color : str, default None
+            Background color for visualization, specified as a string in any format accepted for CSS colors.
 
         Returns
         -------
