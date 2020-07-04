@@ -1,3 +1,4 @@
+import html
 import os
 from os.path import relpath, realpath, join, dirname
 import sys
@@ -10,13 +11,22 @@ import jinja2
 from ..frontend_semver import DECKGL_SEMVER
 
 
+def in_jupyter():
+    try:
+        ip = get_ipython()  # noqa
+
+        return ip.has_trait("kernel")
+    except NameError:
+        return False
+
+
 def convert_js_bool(py_bool):
     if type(py_bool) != bool:
         return py_bool
     return "true" if py_bool else "false"
 
 
-in_google_collab = "google.colab" in sys.modules
+in_google_colab = "google.colab" in sys.modules
 
 
 TEMPLATES_PATH = os.path.join(os.path.dirname(__file__), "./templates/")
@@ -64,7 +74,7 @@ def render_json_to_html(
     return html_str
 
 
-def display_html(filename=None, height=500, width=500):
+def display_html(filename):
     """Converts HTML into a temporary file and opens it in the system browser."""
     url = "file://{}".format(filename)
     # Hack to prevent blank page
@@ -72,29 +82,19 @@ def display_html(filename=None, height=500, width=500):
     webbrowser.open(url)
 
 
-def check_directory_exists(path):
-    return os.path.isdir(path) and os.path.exists(path)
+def iframe_with_srcdoc(html_str, width="100%", height=500):
+    width = '"{}"'.format(width) if type(width) == str else width
+    iframe = """<iframe src="about:blank" srcdoc="{}" width={} height={}></iframe>""".format(
+        html.escape(html_str), width, height)
+    from IPython.display import HTML  # noqa
+
+    return HTML(iframe)
 
 
-def open_named_or_temporary_file(pathname=None):
-    if pathname and not pathname.endswith("/"):
-        filename = add_html_extension(pathname)
-        return open(filename, "w+")
-    directory = make_directory_if_not_exists(pathname) or os.path.curdir
-    return tempfile.NamedTemporaryFile(prefix="pydeck", mode="w+", suffix=".html", dir=directory, delete=False)
-
-
-def make_directory_if_not_exists(path):
-    if path and not os.path.exists(path):
-        os.makedirs(path)
-    return path
-
-
-def add_html_extension(fname):
-    SUFFIX = ".html"
-    if fname.endswith(SUFFIX):
-        return str(fname)
-    return str(fname + ".html")
+def render_for_colab(html_str, iframe_height):
+    js_height_snippet = "google.colab.output.setIframeHeight(0, true, {maxHeight: %s})" % iframe_height
+    display(Javascript(js_height_snippet))  # noqa
+    display(HTML(html_str))  # noqa
 
 
 def deck_to_html(
@@ -103,17 +103,17 @@ def deck_to_html(
     google_maps_key=None,
     filename=None,
     open_browser=False,
-    notebook_display=False,
+    notebook_display=in_jupyter(),
     css_background_color=None,
     iframe_height=500,
-    iframe_width=500,
+    iframe_width="100%",
     tooltip=True,
     custom_libraries=None,
     as_string=False,
     offline=False,
 ):
     """Converts deck.gl format JSON to an HTML page"""
-    html = render_json_to_html(
+    html_str = render_json_to_html(
         deck_json,
         mapbox_key=mapbox_key,
         google_maps_key=google_maps_key,
@@ -123,32 +123,22 @@ def deck_to_html(
         offline=offline,
     )
 
-    if as_string:
-        return html
+    if not filename and notebook_display and in_google_colab:
+        render_for_colab(html_str, iframe_height)
+        return
 
-    f = None
-    try:
-        f = open_named_or_temporary_file(filename)
-        f.write(html)
-    finally:
-        if f is None:
-            raise Exception("pydeck could not write a file")
-        f.close()
+    elif not filename and notebook_display:
+        return iframe_with_srcdoc(html_str, iframe_width, iframe_height)
+
+    elif not filename and as_string:
+        return html_str
+
+    elif not filename:
+        raise TypeError(
+            "To save to a file, provide a file path. To get an HTML string, set as_string=True. To render a visual in Jupyter, set jupyter_display=True"
+        )
+
+    with open(filename, "w+") as f:
+        f.write(html_str)
     if open_browser:
         display_html(realpath(f.name))
-    if notebook_display:
-        from IPython.display import display  # noqa
-
-        if in_google_collab:
-            from IPython.display import HTML, Javascript  # noqa
-
-            js_height_snippet = "google.colab.output.setIframeHeight(0, true, {maxHeight: %s})" % iframe_height
-            display(Javascript(js_height_snippet))
-            display(HTML(html))
-        else:
-            from IPython.display import IFrame  # noqa
-
-            notebook_to_html_path = relpath(f.name)
-            display(IFrame(os.path.join("./", notebook_to_html_path), width=iframe_width, height=iframe_height))  # noqa
-
-    return realpath(f.name)
