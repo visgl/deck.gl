@@ -19,6 +19,10 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v8.2
 
+#### deck.gl [8.2.1] - July 6 2020
+
+- Fix TextLayer fragment shader in Edge Legacy browser (#4750)
+
 #### deck.gl [8.2.0] - June 28 2020
 
 - Upgrade luma.gl dependencies to 8.2.0 (#4736)
