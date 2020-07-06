@@ -16,7 +16,7 @@ import DeckGL, {MapController} from 'deck.gl';
 <DeckGL
 controller={{type: MapController, dragRotate: false}}
 viewState={viewState}
-onViewportChange={v => this.setState({viewport: v})}
+onViewStateChange={v => this.setState({viewState: v.viewState})}
 />
 ```
 
@@ -32,7 +32,7 @@ views={[
   })
 ]}
 viewState={viewState}
-onViewportChange={v => this.setState({viewport: v})}
+onViewStateChange={v => this.setState({viewState: v.viewState})}
 />
 ```
 
