@@ -69,7 +69,7 @@ test('TileLayer', async t => {
   const testCases = [
     {
       props: {
-        data: 'https://raw.githubusercontent.com/visgl/deck.gl-data/master/website/bart.geo.json'
+        data: 'http://echo.jsontest.com/key/value'
       },
       onBeforeUpdate: () => {
         t.comment('Default getTileData');
@@ -159,5 +159,40 @@ test('TileLayer', async t => {
     }
   ];
   await testLayerAsync({Layer: TileLayer, viewport: testViewport1, testCases, onError: t.notOk});
+  t.end();
+});
+
+test('TileLayer#MapView:repeat', async t => {
+  const renderSubLayers = props => {
+    return new ScatterplotLayer(props);
+  };
+
+  const testViewport = new WebMercatorViewport({
+    width: 1200,
+    height: 400,
+    longitude: 0,
+    latitude: 0,
+    zoom: 1,
+    repeat: true
+  });
+
+  t.is(testViewport.subViewports.length, 3, 'Viewport has more than one sub viewports');
+
+  const testCases = [
+    {
+      props: {
+        data: 'http://echo.jsontest.com/key/value',
+        renderSubLayers
+      },
+      onAfterUpdate: ({layer, subLayers}) => {
+        if (layer.isLoaded) {
+          t.is(subLayers.filter(l => l.props.visible).length, 4, 'Should contain 4 visible tiles');
+        }
+      }
+    }
+  ];
+
+  await testLayerAsync({Layer: TileLayer, viewport: testViewport, testCases, onError: t.notOk});
+
   t.end();
 });
