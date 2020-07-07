@@ -11,13 +11,13 @@ overflow: hidden !important;
 height: 100%;
 transition: height 600ms ease-in;
 
-.tooltip {
+.tooltip, .deck-tooltip {
   position: absolute;
   padding: 4px 12px;
   background: rgba(0, 0, 0, 0.8);
   color: #fff;
   max-width: 300px;
-  font-size: 10px;
+  font-size: 12px;
   z-index: 9;
   pointer-events: none;
 }

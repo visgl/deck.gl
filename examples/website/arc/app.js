@@ -1,11 +1,10 @@
 /* global fetch */
-import React, {Component} from 'react';
+import React, {useState, useMemo} from 'react';
 import {render} from 'react-dom';
 import {StaticMap} from 'react-map-gl';
 import DeckGL from '@deck.gl/react';
 import {GeoJsonLayer, ArcLayer} from '@deck.gl/layers';
 import {scaleQuantile} from 'd3-scale';
-import memoizeOne from 'memoize-one';
 
 // Set your mapbox token here
 const MAPBOX_TOKEN = process.env.MapboxAccessToken; // eslint-disable-line
@@ -43,7 +42,7 @@ const INITIAL_VIEW_STATE = {
   bearing: 30
 };
 
-const calculateArcs = memoizeOne((data, selectedCounty) => {
+function calculateArcs(data, selectedCounty) {
   if (!data || !data.length) {
     return null;
   }
@@ -71,88 +70,54 @@ const calculateArcs = memoizeOne((data, selectedCounty) => {
   });
 
   return arcs;
-});
+}
+
+function getTooltip({object}) {
+  return object && object.properties.name;
+}
 
 /* eslint-disable react/no-deprecated */
-export default class App extends Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      hoveredCounty: null,
-      // Set default selection to San Francisco
-      selectedCounty: null
-    };
-    this._onHoverCounty = this._onHoverCounty.bind(this);
-    this._onSelectCounty = this._onSelectCounty.bind(this);
-    this._renderTooltip = this._renderTooltip.bind(this);
-  }
+export default function App({data, strokeWidth = 2, mapStyle = 'mapbox://styles/mapbox/light-v9'}) {
+  const [selectedCounty, selectCounty] = useState(null);
 
-  _onHoverCounty({x, y, object}) {
-    this.setState({x, y, hoveredCounty: object});
-  }
+  const arcs = useMemo(() => calculateArcs(data, selectedCounty), [data, selectedCounty]);
 
-  _onSelectCounty({object}) {
-    this.setState({selectedCounty: object});
+  const layers = [
+    new GeoJsonLayer({
+      id: 'geojson',
+      data,
+      stroked: false,
+      filled: true,
+      getFillColor: [0, 0, 0, 0],
+      onClick: ({object}) => selectCounty(object),
+      pickable: true
+    }),
+    new ArcLayer({
+      id: 'arc',
+      data: arcs,
+      getSourcePosition: d => d.source,
+      getTargetPosition: d => d.target,
+      getSourceColor: d => (d.gain > 0 ? inFlowColors : outFlowColors)[d.quantile],
+      getTargetColor: d => (d.gain > 0 ? outFlowColors : inFlowColors)[d.quantile],
+      getWidth: strokeWidth
+    })
+  ];
 
-    if (this.props.onSelectCounty) {
-      this.props.onSelectCounty(object);
-    }
-  }
-
-  _renderTooltip() {
-    const {x, y, hoveredCounty} = this.state;
-    return (
-      hoveredCounty && (
-        <div className="tooltip" style={{left: x, top: y}}>
-          {hoveredCounty.properties.name}
-        </div>
-      )
-    );
-  }
-
-  _renderLayers() {
-    const {data, strokeWidth = 2} = this.props;
-    const arcs = calculateArcs(data, this.state.selectedCounty);
-
-    return [
-      new GeoJsonLayer({
-        id: 'geojson',
-        data,
-        stroked: false,
-        filled: true,
-        getFillColor: [0, 0, 0, 0],
-        onHover: this._onHoverCounty,
-        onClick: this._onSelectCounty,
-        pickable: true
-      }),
-      new ArcLayer({
-        id: 'arc',
-        data: arcs,
-        getSourcePosition: d => d.source,
-        getTargetPosition: d => d.target,
-        getSourceColor: d => (d.gain > 0 ? inFlowColors : outFlowColors)[d.quantile],
-        getTargetColor: d => (d.gain > 0 ? outFlowColors : inFlowColors)[d.quantile],
-        getWidth: strokeWidth
-      })
-    ];
-  }
-
-  render() {
-    const {mapStyle = 'mapbox://styles/mapbox/light-v9'} = this.props;
-
-    return (
-      <DeckGL layers={this._renderLayers()} initialViewState={INITIAL_VIEW_STATE} controller={true}>
-        <StaticMap
-          reuseMaps
-          mapStyle={mapStyle}
-          preventStyleDiffing={true}
-          mapboxApiAccessToken={MAPBOX_TOKEN}
-        />
-
-        {this._renderTooltip}
-      </DeckGL>
-    );
-  }
+  return (
+    <DeckGL
+      layers={layers}
+      initialViewState={INITIAL_VIEW_STATE}
+      controller={true}
+      getTooltip={getTooltip}
+    >
+      <StaticMap
+        reuseMaps
+        mapStyle={mapStyle}
+        preventStyleDiffing={true}
+        mapboxApiAccessToken={MAPBOX_TOKEN}
+      />
+    </DeckGL>
+  );
 }
 
 export function renderToDOM(container) {

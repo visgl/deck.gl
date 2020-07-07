@@ -1,4 +1,4 @@
-import React, {PureComponent} from 'react';
+import React from 'react';
 import {render} from 'react-dom';
 
 import DeckGL from '@deck.gl/react';
@@ -18,90 +18,60 @@ const INITIAL_VIEW_STATE = {
 /* global window */
 const devicePixelRatio = (typeof window !== 'undefined' && window.devicePixelRatio) || 1;
 
-export default class App extends PureComponent {
-  constructor(props) {
-    super(props);
-    this.state = {};
-    this._onHover = this._onHover.bind(this);
-    this._renderTooltip = this._renderTooltip.bind(this);
-  }
+function getTooltip({tile}) {
+  return tile && `tile: x: ${tile.x}, y: ${tile.y}, z: ${tile.z}`;
+}
 
-  _onHover({x, y, sourceLayer, tile}) {
-    this.setState({x, y, hoveredObject: {sourceLayer, tile}});
-  }
+export default function App({showBorder = false, onTilesLoad = null}) {
+  const tileLayer = new TileLayer({
+    // https://wiki.openstreetmap.org/wiki/Slippy_map_tilenames#Tile_servers
+    data: [
+      'https://a.tile.openstreetmap.org/{z}/{x}/{y}.png',
+      'https://b.tile.openstreetmap.org/{z}/{x}/{y}.png',
+      'https://c.tile.openstreetmap.org/{z}/{x}/{y}.png'
+    ],
 
-  _renderTooltip() {
-    const {x, y, hoveredObject} = this.state;
-    const {sourceLayer, tile} = hoveredObject || {};
-    return (
-      sourceLayer &&
-      tile && (
-        <div className="tooltip" style={{left: x, top: y}}>
-          tile: x: {tile.x}, y: {tile.y}, z: {tile.z}
-        </div>
-      )
-    );
-  }
+    pickable: true,
+    onViewportLoad: onTilesLoad,
+    autoHighlight: showBorder,
+    highlightColor: [60, 60, 60, 40],
+    // https://wiki.openstreetmap.org/wiki/Zoom_levels
+    minZoom: 0,
+    maxZoom: 19,
+    tileSize: 512 / devicePixelRatio,
 
-  _renderLayers() {
-    const {showBorder = false, onTilesLoad = null} = this.props;
+    renderSubLayers: props => {
+      const {
+        bbox: {west, south, east, north}
+      } = props.tile;
 
-    return [
-      new TileLayer({
-        // https://wiki.openstreetmap.org/wiki/Slippy_map_tilenames#Tile_servers
-        data: [
-          'https://a.tile.openstreetmap.org/{z}/{x}/{y}.png',
-          'https://b.tile.openstreetmap.org/{z}/{x}/{y}.png',
-          'https://c.tile.openstreetmap.org/{z}/{x}/{y}.png'
-        ],
+      return [
+        new BitmapLayer(props, {
+          data: null,
+          image: props.data,
+          bounds: [west, south, east, north]
+        }),
+        showBorder &&
+          new PathLayer({
+            id: `${props.id}-border`,
+            data: [[[west, north], [west, south], [east, south], [east, north], [west, north]]],
+            getPath: d => d,
+            getColor: [255, 0, 0],
+            widthMinPixels: 4
+          })
+      ];
+    }
+  });
 
-        pickable: true,
-        onHover: this._onHover,
-        onViewportLoad: onTilesLoad,
-        autoHighlight: showBorder,
-        highlightColor: [60, 60, 60, 40],
-        // https://wiki.openstreetmap.org/wiki/Zoom_levels
-        minZoom: 0,
-        maxZoom: 19,
-        tileSize: 512 / devicePixelRatio,
-
-        renderSubLayers: props => {
-          const {
-            bbox: {west, south, east, north}
-          } = props.tile;
-
-          return [
-            new BitmapLayer(props, {
-              data: null,
-              image: props.data,
-              bounds: [west, south, east, north]
-            }),
-            showBorder &&
-              new PathLayer({
-                id: `${props.id}-border`,
-                data: [[[west, north], [west, south], [east, south], [east, north], [west, north]]],
-                getPath: d => d,
-                getColor: [255, 0, 0],
-                widthMinPixels: 4
-              })
-          ];
-        }
-      })
-    ];
-  }
-
-  render() {
-    return (
-      <DeckGL
-        layers={this._renderLayers()}
-        views={new MapView({repeat: true})}
-        initialViewState={INITIAL_VIEW_STATE}
-        controller={true}
-      >
-        {this._renderTooltip}
-      </DeckGL>
-    );
-  }
+  return (
+    <DeckGL
+      layers={[tileLayer]}
+      views={new MapView({repeat: true})}
+      initialViewState={INITIAL_VIEW_STATE}
+      controller={true}
+      getTooltip={getTooltip}
+    />
+  );
 }
 
 export function renderToDOM(container) {

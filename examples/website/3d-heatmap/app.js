@@ -1,4 +1,4 @@
-import React, {Component} from 'react';
+import React from 'react';
 import {render} from 'react-dom';
 import {StaticMap} from 'react-map-gl';
 import {AmbientLight, PointLight, LightingEffect} from '@deck.gl/core';
@@ -39,16 +39,16 @@ const material = {
 };
 
 const INITIAL_VIEW_STATE = {
-  longitude: -1.4157267858730052,
-  latitude: 52.232395363869415,
+  longitude: -1.415727,
+  latitude: 52.232395,
   zoom: 6.6,
   minZoom: 5,
   maxZoom: 15,
   pitch: 40.5,
-  bearing: -27.396674584323023
+  bearing: -27
 };
 
-const colorRange = [
+export const colorRange = [
   [1, 152, 189],
   [73, 227, 206],
   [216, 254, 181],
@@ -57,66 +57,65 @@ const colorRange = [
   [209, 55, 78]
 ];
 
-const elevationScale = {min: 1, max: 50};
+function getTooltip({object}) {
+  if (!object) {
+    return null;
+  }
+  const lat = object.position[1];
+  const lng = object.position[0];
+  const count = object.points.length;
+
+  return `\
+    latitude: ${Number.isFinite(lat) ? lat.toFixed(6) : ''}
+    longitude: ${Number.isFinite(lng) ? lng.toFixed(6) : ''}
+    ${count} Accidents`;
+}
 
 /* eslint-disable react/no-deprecated */
-export default class App extends Component {
-  static get defaultColorRange() {
-    return colorRange;
-  }
+export default function App({
+  data,
+  mapStyle = 'mapbox://styles/mapbox/dark-v9',
+  radius = 1000,
+  upperPercentile = 100,
+  coverage = 1
+}) {
+  const layers = [
+    new HexagonLayer({
+      id: 'heatmap',
+      colorRange,
+      coverage,
+      data,
+      elevationRange: [0, 3000],
+      elevationScale: data && data.length ? 50 : 0,
+      extruded: true,
+      getPosition: d => d,
+      pickable: true,
+      radius,
+      upperPercentile,
+      material,
 
-  constructor(props) {
-    super(props);
-    this.state = {
-      elevationScale: elevationScale.min
-    };
-  }
+      transitions: {
+        elevationScale: 3000
+      }
+    })
+  ];
 
-  _renderLayers() {
-    const {data, radius = 1000, upperPercentile = 100, coverage = 1} = this.props;
-
-    return [
-      new HexagonLayer({
-        id: 'heatmap',
-        colorRange,
-        coverage,
-        data,
-        elevationRange: [0, 3000],
-        elevationScale: data && data.length ? 50 : 0,
-        extruded: true,
-        getPosition: d => d,
-        onHover: this.props.onHover,
-        pickable: Boolean(this.props.onHover),
-        radius,
-        upperPercentile,
-        material,
-
-        transitions: {
-          elevationScale: 3000
-        }
-      })
-    ];
-  }
-
-  render() {
-    const {mapStyle = 'mapbox://styles/mapbox/dark-v9'} = this.props;
-
-    return (
-      <DeckGL
-        layers={this._renderLayers()}
-        effects={[lightingEffect]}
-        initialViewState={INITIAL_VIEW_STATE}
-        controller={true}
-      >
-        <StaticMap
-          reuseMaps
-          mapStyle={mapStyle}
-          preventStyleDiffing={true}
-          mapboxApiAccessToken={MAPBOX_TOKEN}
-        />
-      </DeckGL>
-    );
-  }
+  return (
+    <DeckGL
+      layers={layers}
+      effects={[lightingEffect]}
+      initialViewState={INITIAL_VIEW_STATE}
+      controller={true}
+      getTooltip={getTooltip}
+    >
+      <StaticMap
+        reuseMaps
+        mapStyle={mapStyle}
+        preventStyleDiffing={true}
+        mapboxApiAccessToken={MAPBOX_TOKEN}
+      />
+    </DeckGL>
+  );
 }
 
 export function renderToDOM(container) {
