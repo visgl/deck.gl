@@ -47,7 +47,7 @@ export default class LayersPass extends Pass {
     return renderStats;
   }
 
-  // Resolve the paramters needed to draw each layer
+  // Resolve the parameters needed to draw each layer
   // When a viewport contains multiple subviewports (e.g. repeated web mercator map),
   // this is only done once for the parent viewport
   _getDrawLayerParams(
