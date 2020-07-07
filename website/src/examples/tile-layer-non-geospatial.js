@@ -38,7 +38,10 @@ class ImageTileDemo extends Component {
   }
 
   _onTilesLoad = (tiles) => {
-    this.props.onStateChange({tileCount: tiles.length});
+    // onViewportLoad is called during tileLayer.updateState
+    // Updating React state here may trigger another round of layer updates and create a racing condition
+    // TODO - Fix this in TileLayer
+    requestAnimationFrame(() => this.props.onStateChange({tileCount: tiles.length}));
   };
 
   render() {
