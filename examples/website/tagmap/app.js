@@ -1,5 +1,5 @@
 /* eslint-disable max-len */
-import React, {Component} from 'react';
+import React from 'react';
 import {render} from 'react-dom';
 import {StaticMap} from 'react-map-gl';
 import DeckGL from '@deck.gl/react';
@@ -25,50 +25,45 @@ const INITIAL_VIEW_STATE = {
   bearing: 0
 };
 
-export default class App extends Component {
-  _renderLayers() {
-    const {data = DATA_URL, cluster = true, fontSize = 32} = this.props;
+export default function App({
+  data = DATA_URL,
+  cluster = true,
+  fontSize = 32,
+  mapStyle = MAPBOX_STYLE
+}) {
+  const textLayer = cluster
+    ? new TagmapLayer({
+        id: 'twitter-topics-tagmap',
+        data,
+        getLabel: x => x.label,
+        getPosition: x => x.coordinates,
+        minFontSize: 14,
+        maxFontSize: fontSize * 2 - 14
+      })
+    : new TextLayer({
+        id: 'twitter-topics-raw',
+        data,
+        getText: d => d.label,
+        getPosition: x => x.coordinates,
+        getColor: d => DEFAULT_COLOR,
+        getSize: d => 20,
+        sizeScale: fontSize / 20
+      });
 
-    return [
-      cluster
-        ? new TagmapLayer({
-            id: 'twitter-topics-tagmap',
-            data,
-            getLabel: x => x.label,
-            getPosition: x => x.coordinates,
-            minFontSize: 14,
-            maxFontSize: fontSize * 2 - 14
-          })
-        : new TextLayer({
-            id: 'twitter-topics-raw',
-            data,
-            getText: d => d.label,
-            getPosition: x => x.coordinates,
-            getColor: d => DEFAULT_COLOR,
-            getSize: d => 20,
-            sizeScale: fontSize / 20
-          })
-    ];
-  }
-
-  render() {
-    const {mapStyle = MAPBOX_STYLE} = this.props;
-
-    return (
-      <DeckGL
-        layers={this._renderLayers()}
-        initialViewState={INITIAL_VIEW_STATE}
-        controller={{dragRotate: false}}
-      >
-        <StaticMap
-          reuseMaps
-          mapStyle={mapStyle}
-          preventStyleDiffing={true}
-          mapboxApiAccessToken={MAPBOX_TOKEN}
-        />
-      </DeckGL>
-    );
-  }
+  return (
+    <DeckGL
+      layers={[textLayer]}
+      initialViewState={INITIAL_VIEW_STATE}
+      controller={{dragRotate: false}}
+    >
+      <StaticMap
+        reuseMaps
+        mapStyle={mapStyle}
+        preventStyleDiffing={true}
+        mapboxApiAccessToken={MAPBOX_TOKEN}
+      />
+    </DeckGL>
+  );
 }
 
 export function renderToDOM(container) {

@@ -1,26 +1,14 @@
 /* global fetch */
-import React, {Component} from 'react';
+import React, {useMemo} from 'react';
 import {render} from 'react-dom';
 import {StaticMap} from 'react-map-gl';
 import DeckGL from '@deck.gl/react';
 import {ScatterplotLayer, ArcLayer} from '@deck.gl/layers';
 import {BrushingExtension} from '@deck.gl/extensions';
 import {scaleLinear} from 'd3-scale';
-import memoizeOne from 'memoize-one';
 
 // Set your mapbox token here
 const MAPBOX_TOKEN = process.env.MapboxAccessToken; // eslint-disable-line
-
-const TOOLTIP_STYLE = {
-  position: 'absolute',
-  padding: '4px',
-  background: 'rgba(0, 0, 0, 0.8)',
-  color: '#fff',
-  maxWidth: '300px',
-  fontSize: '10px',
-  zIndex: 9,
-  pointerEvents: 'none'
-};
 
 // Source data GeoJSON
 const DATA_URL =
@@ -46,7 +34,7 @@ const INITIAL_VIEW_STATE = {
 const brushingExtension = new BrushingExtension();
 
 /* eslint-disable  max-nested-callbacks */
-const getLayerData = memoizeOne(data => {
+function getLayerData(data) {
   if (!data || !data.length) {
     return {};
   }
@@ -113,56 +101,35 @@ const getLayerData = memoizeOne(data => {
   });
 
   return {arcs, targets, sources};
-});
+}
+
+function getTooltip({object}) {
+  return (
+    object &&
+    `\
+    ${object.name}
+    Net gain: ${object.net}`
+  );
+}
 
 /* eslint-disable react/no-deprecated */
-export default class App extends Component {
-  constructor(props) {
-    super(props);
-    this.state = {};
-    this._onHover = this._onHover.bind(this);
-  }
+export default function App({
+  data,
+  enableBrushing = true,
+  brushRadius = 100000,
+  strokeWidth = 2,
+  opacity = 0.7,
+  mapStyle = 'mapbox://styles/mapbox/light-v9'
+}) {
+  const {arcs, targets, sources} = useMemo(() => getLayerData(data), [data]);
 
-  _onHover({x, y, object}) {
-    this.setState({x, y, hoveredObject: object});
-  }
-
-  _renderTooltip() {
-    const {x, y, hoveredObject} = this.state;
-
-    if (!hoveredObject) {
-      return null;
-    }
-
-    return (
-      <div style={{...TOOLTIP_STYLE, left: x, top: y}}>
-        <div>{hoveredObject.name}</div>
-        <div>{`Net gain: ${hoveredObject.net}`}</div>
-      </div>
-    );
-  }
-
-  _renderLayers() {
-    const {
-      enableBrushing = true,
-      brushRadius = 100000,
-      strokeWidth = 2,
-      opacity = 0.7
-    } = this.props;
-
-    const {arcs, targets, sources} = getLayerData(this.props.data);
-
-    if (!arcs || !targets) {
-      return null;
-    }
-
-    return [
+  const layers = arcs &&
+    targets && [
       new ScatterplotLayer({
         id: 'sources',
         data: sources,
         brushingRadius: brushRadius,
         brushingEnabled: enableBrushing,
-        pickable: false,
         // only show source points when brushing
         radiusScale: enableBrushing ? 3000 : 0,
         getFillColor: d => (d.gain > 0 ? TARGET_COLOR : SOURCE_COLOR),
@@ -188,7 +155,6 @@ export default class App extends Component {
         brushingEnabled: enableBrushing,
         pickable: true,
         radiusScale: 3000,
-        onHover: this._onHover,
         getFillColor: d => (d.net > 0 ? TARGET_COLOR : SOURCE_COLOR),
         extensions: [brushingExtension]
       }),
@@ -206,29 +172,22 @@ export default class App extends Component {
         extensions: [brushingExtension]
       })
     ];
-  }
 
-  render() {
-    const {mapStyle = 'mapbox://styles/mapbox/light-v9'} = this.props;
-
-    return (
-      <DeckGL
-        ref={this._deckRef}
-        layers={this._renderLayers()}
-        initialViewState={INITIAL_VIEW_STATE}
-        controller={true}
-      >
-        <StaticMap
-          reuseMaps
-          mapStyle={mapStyle}
-          preventStyleDiffing={true}
-          mapboxApiAccessToken={MAPBOX_TOKEN}
-        />
-
-        {this._renderTooltip()}
-      </DeckGL>
-    );
-  }
+  return (
+    <DeckGL
+      layers={layers}
+      initialViewState={INITIAL_VIEW_STATE}
+      controller={true}
+      getTooltip={getTooltip}
+    >
+      <StaticMap
+        reuseMaps
+        mapStyle={mapStyle}
+        preventStyleDiffing={true}
+        mapboxApiAccessToken={MAPBOX_TOKEN}
+      />
+    </DeckGL>
+  );
 }
 
 export function renderToDOM(container) {

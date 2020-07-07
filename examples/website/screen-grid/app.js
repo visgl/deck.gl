@@ -1,4 +1,4 @@
-import React, {Component} from 'react';
+import React from 'react';
 import {render} from 'react-dom';
 import {StaticMap} from 'react-map-gl';
 import DeckGL from '@deck.gl/react';
@@ -30,53 +30,52 @@ const colorRange = [
   [189, 0, 38, 255]
 ];
 
-export default class App extends Component {
-  _renderLayers() {
-    const {data = DATA_URL, cellSize = 20, gpuAggregation = true, aggregation = 'SUM'} = this.props;
+export default function App({
+  data = DATA_URL,
+  cellSize = 20,
+  gpuAggregation = true,
+  aggregation = 'SUM',
+  disableGPUAggregation,
+  mapStyle = 'mapbox://styles/mapbox/dark-v9'
+}) {
+  const layers = [
+    new ScreenGridLayer({
+      id: 'grid',
+      data,
+      opacity: 0.8,
+      getPosition: d => [d[0], d[1]],
+      getWeight: d => d[2],
+      cellSizePixels: cellSize,
+      colorRange,
+      gpuAggregation,
+      aggregation
+    })
+  ];
 
-    return [
-      new ScreenGridLayer({
-        id: 'grid',
-        data,
-        opacity: 0.8,
-        getPosition: d => [d[0], d[1]],
-        getWeight: d => d[2],
-        cellSizePixels: cellSize,
-        colorRange,
-        gpuAggregation,
-        aggregation
-      })
-    ];
-  }
-
-  _onInitialized(gl) {
+  const onInitialized = gl => {
     if (!isWebGL2(gl)) {
       console.warn('GPU aggregation is not supported'); // eslint-disable-line
-      if (this.props.disableGPUAggregation) {
-        this.props.disableGPUAggregation();
+      if (disableGPUAggregation) {
+        disableGPUAggregation();
       }
     }
-  }
+  };
 
-  render() {
-    const {mapStyle = 'mapbox://styles/mapbox/dark-v9'} = this.props;
-
-    return (
-      <DeckGL
-        layers={this._renderLayers()}
-        initialViewState={INITIAL_VIEW_STATE}
-        onWebGLInitialized={this._onInitialized.bind(this)}
-        controller={true}
-      >
-        <StaticMap
-          reuseMaps
-          mapStyle={mapStyle}
-          preventStyleDiffing={true}
-          mapboxApiAccessToken={MAPBOX_TOKEN}
-        />
-      </DeckGL>
-    );
-  }
+  return (
+    <DeckGL
+      layers={layers}
+      initialViewState={INITIAL_VIEW_STATE}
+      onWebGLInitialized={onInitialized}
+      controller={true}
+    >
+      <StaticMap
+        reuseMaps
+        mapStyle={mapStyle}
+        preventStyleDiffing={true}
+        mapboxApiAccessToken={MAPBOX_TOKEN}
+      />
+    </DeckGL>
+  );
 }
 
 export function renderToDOM(container) {

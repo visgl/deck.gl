@@ -1,5 +1,5 @@
 /* global requestAnimationFrame, cancelAnimationFrame */
-import React, {PureComponent} from 'react';
+import React, {useEffect, useState} from 'react';
 import {styled, withStyles} from '@material-ui/core/styles';
 import Slider from '@material-ui/core/Slider';
 import Button from '@material-ui/core/IconButton';
@@ -29,62 +29,42 @@ const SliderInput = withStyles({
   }
 })(Slider);
 
-export default class RangeInput extends PureComponent {
-  constructor(props) {
-    super(props);
+export default function RangeInput({min, max, value, animationSpeed, onChange, formatLabel}) {
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [animation] = useState({});
 
-    this.state = {
-      isPlaying: false
-    };
+  // prettier-ignore
+  useEffect(() => {
+    return () => animation.id && cancelAnimationFrame(animation.id);
+  }, [animation]);
 
-    this._animate = this._animate.bind(this);
-    this._toggle = this._toggle.bind(this);
-    this._animationFrame = null;
-  }
-
-  componentWillUnmount() {
-    cancelAnimationFrame(this._animationFrame);
-  }
-
-  _toggle() {
-    cancelAnimationFrame(this._animationFrame);
-    const {isPlaying} = this.state;
-    if (!isPlaying) {
-      this._animate();
-    }
-    this.setState({isPlaying: !isPlaying});
-  }
-
-  _animate() {
-    const {min, max, value, animationSpeed} = this.props;
+  if (isPlaying && !animation.id) {
     const span = value[1] - value[0];
-    let newValueMin = value[0] + animationSpeed;
-    if (newValueMin + span >= max) {
-      newValueMin = min;
+    let nextValueMin = value[0] + animationSpeed;
+    if (nextValueMin + span >= max) {
+      nextValueMin = min;
     }
-    this.props.onChange([newValueMin, newValueMin + span]);
-
-    this._animationFrame = requestAnimationFrame(this._animate);
+    animation.id = requestAnimationFrame(() => {
+      animation.id = 0;
+      onChange([nextValueMin, nextValueMin + span]);
+    });
   }
 
-  render() {
-    const {value, min, max, onChange, formatLabel} = this.props;
-    const isButtonEnabled = value[0] > min || value[1] < max;
+  const isButtonEnabled = value[0] > min || value[1] < max;
 
-    return (
-      <PositionContainer>
-        <Button color="primary" disabled={!isButtonEnabled} onClick={this._toggle}>
-          {this.state.isPlaying ? <PauseIcon title="Stop" /> : <PlayIcon title="Animate" />}
-        </Button>
-        <SliderInput
-          min={min}
-          max={max}
-          value={value}
-          onChange={(event, newValue) => onChange(newValue)}
-          valueLabelDisplay="auto"
-          valueLabelFormat={formatLabel}
-        />
-      </PositionContainer>
-    );
-  }
+  return (
+    <PositionContainer>
+      <Button color="primary" disabled={!isButtonEnabled} onClick={() => setIsPlaying(!isPlaying)}>
+        {isPlaying ? <PauseIcon title="Stop" /> : <PlayIcon title="Animate" />}
+      </Button>
+      <SliderInput
+        min={min}
+        max={max}
+        value={value}
+        onChange={(event, newValue) => onChange(newValue)}
+        valueLabelDisplay="auto"
+        valueLabelFormat={formatLabel}
+      />
+    </PositionContainer>
+  );
 }

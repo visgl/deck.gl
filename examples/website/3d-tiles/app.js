@@ -1,15 +1,10 @@
-import React, {Component} from 'react';
+import React, {useState} from 'react';
 import {render} from 'react-dom';
 import {StaticMap} from 'react-map-gl';
 import DeckGL from '@deck.gl/react';
 import {Tile3DLayer} from '@deck.gl/geo-layers';
 
-import {registerLoaders} from '@loaders.gl/core';
-// To manage dependencies and bundle size, the app must decide which supporting loaders to bring in
-import {DracoWorkerLoader} from '@loaders.gl/draco';
 import {CesiumIonLoader} from '@loaders.gl/3d-tiles';
-
-registerLoaders([DracoWorkerLoader]);
 
 // Set your mapbox token here
 const MAPBOX_TOKEN = process.env.MapboxAccessToken; // eslint-disable-line
@@ -30,63 +25,46 @@ const INITIAL_VIEW_STATE = {
   zoom: 17
 };
 
-export default class App extends Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      initialViewState: INITIAL_VIEW_STATE,
-      attributions: []
-    };
-  }
+export default function App({
+  mapStyle = 'mapbox://styles/uberdata/cive485h000192imn6c6cc8fc',
+  updateAttributions
+}) {
+  const [initialViewState, setInitialViewState] = useState(INITIAL_VIEW_STATE);
 
-  _onTilesetLoad(tileset) {
-    this._centerViewOnTileset(tileset);
-    if (this.props.updateAttributions) {
-      this.props.updateAttributions(tileset.credits && tileset.credits.attributions);
-    }
-  }
-
-  // Recenter view to cover the new tileset, with a fly-to transition
-  _centerViewOnTileset(tileset) {
+  const onTilesetLoad = tileset => {
+    // Recenter view to cover the new tileset
     const {cartographicCenter, zoom} = tileset;
-    this.setState({
-      initialViewState: {
-        ...INITIAL_VIEW_STATE,
-
-        // Update deck.gl viewState, moving the camera to the new tileset
-        longitude: cartographicCenter[0],
-        latitude: cartographicCenter[1],
-        zoom,
-        bearing: INITIAL_VIEW_STATE.bearing,
-        pitch: INITIAL_VIEW_STATE.pitch
-      }
+    setInitialViewState({
+      ...INITIAL_VIEW_STATE,
+      longitude: cartographicCenter[0],
+      latitude: cartographicCenter[1],
+      zoom
     });
-  }
 
-  _renderTile3DLayer() {
-    return new Tile3DLayer({
-      id: 'tile-3d-layer',
-      pointSize: 2,
-      data: TILESET_URL,
-      loader: CesiumIonLoader,
-      loadOptions: {'cesium-ion': {accessToken: ION_TOKEN}},
-      onTilesetLoad: this._onTilesetLoad.bind(this)
-    });
-  }
+    if (updateAttributions) {
+      updateAttributions(tileset.credits && tileset.credits.attributions);
+    }
+  };
 
-  render() {
-    const {initialViewState} = this.state;
-    const tile3DLayer = this._renderTile3DLayer();
-    const {mapStyle = 'mapbox://styles/uberdata/cive485h000192imn6c6cc8fc'} = this.props;
+  const tile3DLayer = new Tile3DLayer({
+    id: 'tile-3d-layer',
+    pointSize: 2,
+    data: TILESET_URL,
+    loader: CesiumIonLoader,
+    loadOptions: {'cesium-ion': {accessToken: ION_TOKEN}},
+    onTilesetLoad
+  });
 
-    return (
-      <div>
-        <DeckGL layers={[tile3DLayer]} initialViewState={initialViewState} controller={true}>
-          <StaticMap mapStyle={mapStyle} mapboxApiAccessToken={MAPBOX_TOKEN} preventStyleDiffing />
-        </DeckGL>
-      </div>
-    );
-  }
+  return (
+    <DeckGL layers={[tile3DLayer]} initialViewState={initialViewState} controller={true}>
+      <StaticMap
+        reuseMaps
+        mapStyle={mapStyle}
+        mapboxApiAccessToken={MAPBOX_TOKEN}
+        preventStyleDiffing
+      />
+    </DeckGL>
+  );
 }
 
 export function renderToDOM(container) {
