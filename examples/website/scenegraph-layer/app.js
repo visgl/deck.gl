@@ -1,5 +1,5 @@
 /* global fetch, setTimeout, clearTimeout */
-import React, {Component, Fragment} from 'react';
+import React, {useEffect, useState} from 'react';
 import {render} from 'react-dom';
 
 import {StaticMap} from 'react-map-gl';
@@ -17,6 +17,7 @@ const MAPBOX_TOKEN = process.env.MapboxAccessToken; // eslint-disable-line
 const MAPBOX_STYLE =
   'https://rivulet-zhang.github.io/dataRepo/mapbox/style/map-style-dark-v9-no-labels.json';
 
+// Data provided by the OpenSky Network, http://www.opensky-network.org
 const DATA_URL = 'https://opensky-network.org/api/states/all';
 const MODEL_URL =
   'https://raw.githubusercontent.com/visgl/deck.gl-data/master/examples/scenegraph-layer/airplane.glb';
@@ -37,6 +38,7 @@ const INITIAL_VIEW_STATE = {
 
 const DATA_INDEX = {
   UNIQUE_ID: 0,
+  CALL_SIGN: 1,
   ORIGIN_COUNTRY: 2,
   LONGITUDE: 5,
   LATITUDE: 6,
@@ -48,153 +50,101 @@ const DATA_INDEX = {
   POSITION_SOURCE: 16
 };
 
-export default class App extends Component {
-  constructor(props) {
-    super(props);
-    this.state = {};
-    this._loadData();
+function verticalRateToAngle(object) {
+  // Return: -90 looking up, +90 looking down
+  const verticalRate = object[DATA_INDEX.VERTICAL_RATE] || 0;
+  const velocity = object[DATA_INDEX.VELOCITY] || 0;
+  return (-Math.atan2(verticalRate, velocity) * 180) / Math.PI;
+}
+
+function getTooltip({object}) {
+  if (!object) {
+    return null;
   }
 
-  componentWillUnmount() {
-    this.unmounted = true;
-    if (this.state.nextTimeoutId) {
-      clearTimeout(this.state.nextTimeoutId);
-    }
-  }
+  return {
+    className: 'tooltip',
+    text: `\
+    Call Sign: ${object[DATA_INDEX.CALL_SIGN] || ''}
+    Country: ${object[DATA_INDEX.ORIGIN_COUNTRY] || ''}
+    Vertical Rate: ${object[DATA_INDEX.VERTICAL_RATE] || 0} m/s
+    Velocity: ${object[DATA_INDEX.VELOCITY] || 0} m/s
+    Direction: ${object[DATA_INDEX.TRUE_TRACK] || 0}`
+  };
+}
 
-  _sort(data, oldData) {
-    // In order to keep the animation smooth we need to always return the same
-    // objects in the exact same order. This function will discard new objects
-    // and only update existing ones.
-    if (!oldData) {
-      return data;
-    }
+export default function App({mapStyle = MAPBOX_STYLE}) {
+  const [data, setData] = useState(null);
+  const [timer, setTimer] = useState({});
 
-    const dataAsObj = {};
-    data.forEach(entry => (dataAsObj[entry[DATA_INDEX.UNIQUE_ID]] = entry));
-    return oldData.map(entry => dataAsObj[entry[DATA_INDEX.UNIQUE_ID]] || entry);
-  }
+  useEffect(
+    () => {
+      fetch(DATA_URL)
+        .then(resp => resp.json())
+        .then(resp => {
+          if (resp && resp.states && timer.id !== null) {
+            // In order to keep the animation smooth we need to always return the same
+            // objects in the exact same order. This function will discard new objects
+            // and only update existing ones.
+            let sortedData = resp.states;
+            if (data) {
+              const dataAsObj = {};
+              sortedData.forEach(entry => (dataAsObj[entry[DATA_INDEX.UNIQUE_ID]] = entry));
+              sortedData = data.map(entry => dataAsObj[entry[DATA_INDEX.UNIQUE_ID]] || entry);
+            }
 
-  _loadData() {
-    fetch(DATA_URL)
-      .then(resp => resp.json())
-      .then(resp => {
-        if (resp && resp.states && !this.unmounted) {
-          const nextTimeoutId = setTimeout(() => this._loadData(), REFRESH_TIME);
-          this.setState({data: this._sort(resp.states, this.state.data), nextTimeoutId});
-        }
-      });
-  }
-
-  _verticalRateToAngle(object) {
-    // Return: -90 looking up, +90 looking down
-    const verticalRate = object[DATA_INDEX.VERTICAL_RATE] || 0;
-    const velocity = object[DATA_INDEX.VELOCITY] || 0;
-    return (-Math.atan2(verticalRate, velocity) * 180) / Math.PI;
-  }
-
-  _renderLayers() {
-    const {data} = this.state;
-
-    if (Array.isArray(data)) {
-      return [
-        new ScenegraphLayer({
-          id: 'scenegraph-layer',
-          data,
-          pickable: true,
-          sizeScale: 250,
-          scenegraph: MODEL_URL,
-          _animations: ANIMATIONS,
-          sizeMinPixels: 0.1,
-          sizeMaxPixels: 1.5,
-          getPosition: d => [
-            d[DATA_INDEX.LONGITUDE] || 0,
-            d[DATA_INDEX.LATITUDE] || 0,
-            d[DATA_INDEX.GEO_ALTITUDE] || 0
-          ],
-          getOrientation: d => [this._verticalRateToAngle(d), -d[DATA_INDEX.TRUE_TRACK] || 0, 90],
-          getTranslation: [0, 0, 0],
-          getScale: [1, 1, 1],
-          transitions: {
-            getPosition: REFRESH_TIME * 0.9
-          },
-          onHover: ({object}) => this.setState({hoverObject: object})
+            setData(sortedData);
+          }
         })
-      ];
-    }
+        .finally(() => {
+          timer.nextTimeoutId = setTimeout(() => setTimer({id: timer.nextTimeoutId}), REFRESH_TIME);
+        });
 
-    return [];
-  }
+      return () => {
+        clearTimeout(timer.nextTimeoutId);
+        timer.id = null;
+      };
+    },
+    [timer]
+  );
 
-  _renderHoverObject() {
-    const [icao24 = '', callsign = '', originCountry = ''] = this.state.hoverObject;
-    const verticalRate = this.state.hoverObject[DATA_INDEX.VERTICAL_RATE] || 0;
-    const velocity = this.state.hoverObject[DATA_INDEX.VELOCITY] || 0;
-    const track = this.state.hoverObject[DATA_INDEX.TRUE_TRACK] || 0;
-    return (
-      <Fragment>
-        <div>&nbsp;</div>
-        <div>Unique ID: {icao24}</div>
-        <div>Call Sign: {callsign}</div>
-        <div>Country: {originCountry}</div>
-        <div>Vertical Rate: {verticalRate} m/s</div>
-        <div>Velocity: {velocity} m/s</div>
-        <div>Direction: {track}</div>
-      </Fragment>
-    );
-  }
+  const layer =
+    data &&
+    new ScenegraphLayer({
+      id: 'scenegraph-layer',
+      data,
+      pickable: true,
+      sizeScale: 25,
+      scenegraph: MODEL_URL,
+      _animations: ANIMATIONS,
+      sizeMinPixels: 0.1,
+      sizeMaxPixels: 1.5,
+      getPosition: d => [
+        d[DATA_INDEX.LONGITUDE] || 0,
+        d[DATA_INDEX.LATITUDE] || 0,
+        d[DATA_INDEX.GEO_ALTITUDE] || 0
+      ],
+      getOrientation: d => [verticalRateToAngle(d), -d[DATA_INDEX.TRUE_TRACK] || 0, 90],
+      transitions: {
+        getPosition: REFRESH_TIME * 0.9
+      }
+    });
 
-  _renderInfoBox() {
-    return (
-      <div
-        style={{
-          position: 'fixed',
-          right: 8,
-          top: 8,
-          width: 140,
-          background: 'rgba(0,0,255,0.3)',
-          borderRadius: 8,
-          color: 'white',
-          padding: 8,
-          fontSize: 12
-        }}
-      >
-        Data provided by{' '}
-        <a
-          style={{color: 'white'}}
-          href="http://www.opensky-network.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          The OpenSky Network, http://www.opensky-network.org
-        </a>
-        {this.state.hoverObject && this._renderHoverObject()}
-      </div>
-    );
-  }
-
-  render() {
-    const {mapStyle = MAPBOX_STYLE} = this.props;
-
-    return (
-      <Fragment>
-        <DeckGL
-          layers={this._renderLayers()}
-          initialViewState={INITIAL_VIEW_STATE}
-          controller={true}
-          _animate
-        >
-          <StaticMap
-            reuseMaps
-            mapStyle={mapStyle}
-            preventStyleDiffing={true}
-            mapboxApiAccessToken={MAPBOX_TOKEN}
-          />
-        </DeckGL>
-        {this._renderInfoBox()}
-      </Fragment>
-    );
-  }
+  return (
+    <DeckGL
+      layers={[layer]}
+      initialViewState={INITIAL_VIEW_STATE}
+      controller={true}
+      getTooltip={getTooltip}
+    >
+      <StaticMap
+        reuseMaps
+        mapStyle={mapStyle}
+        preventStyleDiffing={true}
+        mapboxApiAccessToken={MAPBOX_TOKEN}
+      />
+    </DeckGL>
+  );
 }
 
 export function renderToDOM(container) {
