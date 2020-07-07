@@ -65,13 +65,10 @@ function getTooltip({object}) {
   const lng = object.position[0];
   const count = object.points.length;
 
-  return {
-    className: 'tooltip',
-    text: `\
+  return `\
     latitude: ${Number.isFinite(lat) ? lat.toFixed(6) : ''}
     longitude: ${Number.isFinite(lng) ? lng.toFixed(6) : ''}
-    ${count} Accidents`
-  };
+    ${count} Accidents`;
 }
 
 /* eslint-disable react/no-deprecated */

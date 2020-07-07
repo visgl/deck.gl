@@ -104,14 +104,12 @@ function getLayerData(data) {
 }
 
 function getTooltip({object}) {
-  return object
-    ? {
-        className: 'tooltip',
-        text: `\
+  return (
+    object &&
+    `\
     ${object.name}
     Net gain: ${object.net}`
-      }
-    : null;
+  );
 }
 
 /* eslint-disable react/no-deprecated */

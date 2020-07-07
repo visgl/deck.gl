@@ -56,18 +56,17 @@ const dirLight = new SunLight({
 const landCover = [[[-123.0, 49.196], [-123.0, 49.324], [-123.306, 49.324], [-123.306, 49.196]]];
 
 function getTooltip({object}) {
-  return object
-    ? {
-        className: 'tooltip',
-        html: `\
-    <div><b>Average Property Value</b></div>
-    <div>${object.properties.valuePerParcel} / parcel</div>
-    <div>${object.properties.valuePerSqm} / m<sup>2</sup></div>
-    <div><b>Growth</b></div>
-    <div>${Math.round(object.properties.growth * 100)}%</div>
-    `
-      }
-    : null;
+  return (
+    object && {
+      html: `\
+  <div><b>Average Property Value</b></div>
+  <div>${object.properties.valuePerParcel} / parcel</div>
+  <div>${object.properties.valuePerSqm} / m<sup>2</sup></div>
+  <div><b>Growth</b></div>
+  <div>${Math.round(object.properties.growth * 100)}%</div>
+  `
+    }
+  );
 }
 
 export default function App({data = DATA_URL, mapStyle = 'mapbox://styles/mapbox/light-v9'}) {

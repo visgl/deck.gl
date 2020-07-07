@@ -63,16 +63,14 @@ function getTimeRange(data) {
 }
 
 function getTooltip({object}) {
-  return object
-    ? {
-        className: 'tooltip',
-        text: `\
+  return (
+    object &&
+    `\
     Time: ${new Date(object.timestamp).toUTCString()}
     Magnitude: ${object.magnitude}
     Depth: ${object.depth}
     `
-      }
-    : null;
+  );
 }
 
 export default function App({data, mapStyle = 'mapbox://styles/mapbox/light-v9'}) {

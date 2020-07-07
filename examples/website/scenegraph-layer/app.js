@@ -58,19 +58,15 @@ function verticalRateToAngle(object) {
 }
 
 function getTooltip({object}) {
-  if (!object) {
-    return null;
-  }
-
-  return {
-    className: 'tooltip',
-    text: `\
+  return (
+    object &&
+    `\
     Call Sign: ${object[DATA_INDEX.CALL_SIGN] || ''}
     Country: ${object[DATA_INDEX.ORIGIN_COUNTRY] || ''}
     Vertical Rate: ${object[DATA_INDEX.VERTICAL_RATE] || 0} m/s
     Velocity: ${object[DATA_INDEX.VELOCITY] || 0} m/s
     Direction: ${object[DATA_INDEX.TRUE_TRACK] || 0}`
-  };
+  );
 }
 
 export default function App({mapStyle = MAPBOX_STYLE}) {

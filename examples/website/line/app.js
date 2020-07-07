@@ -44,14 +44,12 @@ function getSize(type) {
 }
 
 function getTooltip({object}) {
-  return object
-    ? {
-        className: 'tooltip',
-        text: `\
-    ${object.country || object.abbrev || ''}
-    ${object.name.indexOf('0x') >= 0 ? '' : object.name}`
-      }
-    : null;
+  return (
+    object &&
+    `\
+  ${object.country || object.abbrev || ''}
+  ${object.name.indexOf('0x') >= 0 ? '' : object.name}`
+  );
 }
 
 export default function App({

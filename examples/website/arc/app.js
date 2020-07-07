@@ -73,12 +73,7 @@ function calculateArcs(data, selectedCounty) {
 }
 
 function getTooltip({object}) {
-  return object
-    ? {
-        className: 'tooltip',
-        text: object.properties.name
-      }
-    : null;
+  return object && object.properties.name;
 }
 
 /* eslint-disable react/no-deprecated */

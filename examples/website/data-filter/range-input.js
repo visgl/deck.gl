@@ -33,15 +33,10 @@ export default function RangeInput({min, max, value, animationSpeed, onChange, f
   const [isPlaying, setIsPlaying] = useState(false);
   const [animation] = useState({});
 
-  useEffect(
-    () => {
-      if (animation.id) {
-        cancelAnimationFrame(animation.id);
-      }
-      return () => animation.id && cancelAnimationFrame(animation.id);
-    },
-    [animation]
-  );
+  // prettier-ignore
+  useEffect(() => {
+    return () => animation.id && cancelAnimationFrame(animation.id);
+  }, [animation]);
 
   if (isPlaying && !animation.id) {
     const span = value[1] - value[0];

@@ -19,12 +19,7 @@ const INITIAL_VIEW_STATE = {
 const devicePixelRatio = (typeof window !== 'undefined' && window.devicePixelRatio) || 1;
 
 function getTooltip({tile}) {
-  return tile
-    ? {
-        className: 'tooltip',
-        text: `tile: x: ${tile.x}, y: ${tile.y}, z: ${tile.z}`
-      }
-    : null;
+  return tile && `tile: x: ${tile.x}, y: ${tile.y}, z: ${tile.z}`;
 }
 
 export default function App({showBorder = false, onTilesLoad = null}) {

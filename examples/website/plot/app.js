@@ -23,12 +23,7 @@ function getScale({min, max}) {
 }
 
 function getTooltip({sample}) {
-  return sample
-    ? {
-        className: 'tooltip',
-        text: sample.map(x => x.toFixed(3)).join(', ')
-      }
-    : null;
+  return sample && sample.map(x => x.toFixed(3)).join(', ');
 }
 
 export default function App({resolution = 200, showAxis = true, equation = EQUATION}) {
