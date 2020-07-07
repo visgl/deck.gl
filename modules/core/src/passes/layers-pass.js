@@ -31,6 +31,8 @@ export default class LayersPass extends Pass {
       // Update context to point to this viewport
       onViewportActive(viewport);
 
+      const drawLayerParams = this._getDrawLayerParams(viewport, props);
+
       props.view = view;
 
       // render this viewport
@@ -38,21 +40,56 @@ export default class LayersPass extends Pass {
       for (const subViewport of subViewports) {
         props.viewport = subViewport;
 
-        const stats = this._drawLayersInViewport(gl, props);
+        const stats = this._drawLayersInViewport(gl, props, drawLayerParams);
         renderStats.push(stats);
       }
     }
     return renderStats;
   }
 
+  // Resolve the paramters needed to draw each layer
+  // When a viewport contains multiple subviewports (e.g. repeated web mercator map),
+  // this is only done once for the parent viewport
+  _getDrawLayerParams(
+    viewport,
+    {layers, pass = 'unknown', layerFilter, effects, moduleParameters}
+  ) {
+    const drawLayerParams = [];
+    const indexResolver = layerIndexResolver();
+    for (let layerIndex = 0; layerIndex < layers.length; layerIndex++) {
+      const layer = layers[layerIndex];
+      // Check if we should draw layer
+      const shouldDrawLayer = this._shouldDrawLayer(layer, viewport, pass, layerFilter);
+
+      // This is the "logical" index for ordering this layer in the stack
+      // used to calculate polygon offsets
+      // It can be the same as another layer
+      const layerRenderIndex = indexResolver(layer, shouldDrawLayer);
+
+      const layerParam = {
+        shouldDrawLayer,
+        layerRenderIndex
+      };
+
+      if (shouldDrawLayer) {
+        layerParam.moduleParameters = this._getModuleParameters(
+          layer,
+          effects,
+          pass,
+          moduleParameters
+        );
+        layerParam.layerParameters = this.getLayerParameters(layer, layerIndex);
+      }
+      drawLayerParams[layerIndex] = layerParam;
+    }
+    return drawLayerParams;
+  }
+
   // Draws a list of layers in one viewport
   // TODO - when picking we could completely skip rendering viewports that dont
   // intersect with the picking rect
   /* eslint-disable max-depth, max-statements */
-  _drawLayersInViewport(
-    gl,
-    {layers, layerFilter, onError, viewport, view, pass = 'unknown', effects, moduleParameters}
-  ) {
+  _drawLayersInViewport(gl, {layers, onError, viewport, view}, drawLayerParams) {
     const glViewport = getGLViewport(gl, {viewport});
 
     if (view && view.props.clear) {
@@ -77,17 +114,15 @@ export default class LayersPass extends Pass {
 
     setParameters(gl, {viewport: glViewport});
 
-    const indexResolver = layerIndexResolver();
     // render layers in normal colors
     for (let layerIndex = 0; layerIndex < layers.length; layerIndex++) {
       const layer = layers[layerIndex];
-      // Check if we should draw layer
-      const shouldDrawLayer = this._shouldDrawLayer(layer, viewport, pass, layerFilter);
-
-      // This is the "logical" index for ordering this layer in the stack
-      // used to calculate polygon offsets
-      // It can be the same as another layer
-      const layerRenderIndex = indexResolver(layer, shouldDrawLayer);
+      const {
+        shouldDrawLayer,
+        layerRenderIndex,
+        moduleParameters,
+        layerParameters
+      } = drawLayerParams[layerIndex];
 
       // Calculate stats
       if (shouldDrawLayer && layer.props.pickable) {
@@ -99,14 +134,12 @@ export default class LayersPass extends Pass {
         // Draw the layer
         renderStatus.visibleCount++;
 
-        const _moduleParameters = this._getModuleParameters(layer, effects, pass, moduleParameters);
-        const layerParameters = this.getLayerParameters(layer, layerIndex);
         // overwrite layer.context.viewport with the sub viewport
-        _moduleParameters.viewport = viewport;
+        moduleParameters.viewport = viewport;
 
         try {
           layer.drawLayer({
-            moduleParameters: _moduleParameters,
+            moduleParameters,
             uniforms: {layerIndex: layerRenderIndex},
             parameters: layerParameters
           });
