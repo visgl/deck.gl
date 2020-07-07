@@ -1,4 +1,4 @@
-import React, {Component} from 'react';
+import React from 'react';
 import {render} from 'react-dom';
 import {StaticMap} from 'react-map-gl';
 import DeckGL, {GeoJsonLayer, ArcLayer} from 'deck.gl';
@@ -18,49 +18,47 @@ const INITIAL_VIEW_STATE = {
   pitch: 30
 };
 
-class Root extends Component {
-  _onClick(info) {
+function Root() {
+  const onClick = info => {
     if (info.object) {
       // eslint-disable-next-line
       alert(`${info.object.properties.name} (${info.object.properties.abbrev})`);
     }
-  }
+  };
 
-  render() {
-    const layers = [
-      new GeoJsonLayer({
-        id: 'airports',
-        data: AIR_PORTS,
-        // Styles
-        filled: true,
-        pointRadiusMinPixels: 2,
-        pointRadiusScale: 2000,
-        getRadius: f => 11 - f.properties.scalerank,
-        getFillColor: [200, 0, 80, 180],
-        // Interactive props
-        pickable: true,
-        autoHighlight: true,
-        onClick: this._onClick
-      }),
-      new ArcLayer({
-        id: 'arcs',
-        data: AIR_PORTS,
-        dataTransform: d => d.features.filter(f => f.properties.scalerank < 4),
-        // Styles
-        getSourcePosition: f => [-0.4531566, 51.4709959], // London
-        getTargetPosition: f => f.geometry.coordinates,
-        getSourceColor: [0, 128, 200],
-        getTargetColor: [200, 0, 80],
-        getWidth: 1
-      })
-    ];
+  const layers = [
+    new GeoJsonLayer({
+      id: 'airports',
+      data: AIR_PORTS,
+      // Styles
+      filled: true,
+      pointRadiusMinPixels: 2,
+      pointRadiusScale: 2000,
+      getRadius: f => 11 - f.properties.scalerank,
+      getFillColor: [200, 0, 80, 180],
+      // Interactive props
+      pickable: true,
+      autoHighlight: true,
+      onClick
+    }),
+    new ArcLayer({
+      id: 'arcs',
+      data: AIR_PORTS,
+      dataTransform: d => d.features.filter(f => f.properties.scalerank < 4),
+      // Styles
+      getSourcePosition: f => [-0.4531566, 51.4709959], // London
+      getTargetPosition: f => f.geometry.coordinates,
+      getSourceColor: [0, 128, 200],
+      getTargetColor: [200, 0, 80],
+      getWidth: 1
+    })
+  ];
 
-    return (
-      <DeckGL initialViewState={INITIAL_VIEW_STATE} controller={true} layers={layers}>
-        <StaticMap mapboxApiAccessToken={MAPBOX_TOKEN} mapStyle="mapbox://styles/mapbox/light-v9" />
-      </DeckGL>
-    );
-  }
+  return (
+    <DeckGL initialViewState={INITIAL_VIEW_STATE} controller={true} layers={layers}>
+      <StaticMap mapboxApiAccessToken={MAPBOX_TOKEN} mapStyle="mapbox://styles/mapbox/light-v9" />
+    </DeckGL>
+  );
 }
 
 /* global document */
