@@ -34,7 +34,7 @@ class MapTileDemo extends Component {
 
   render() {
     // eslint-disable-next-line no-unused-vars
-    const {params, data, ...otherProps} = this.props;
+    const {params, ...otherProps} = this.props;
     return <App {...otherProps} showBorder={params.showBorder.value} onTilesLoad={this._onTilesLoad} />;
   }
 }

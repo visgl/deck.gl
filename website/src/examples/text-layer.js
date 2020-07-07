@@ -43,13 +43,11 @@ class TextDemo extends Component {
     const {params, data} = this.props;
 
     return (
-      <div className="text-demo">
-        <App
-          {...this.props}
-          data={data}
-          cluster={params.cluster.value}
-          fontSize={params.fontSize.value} />
-      </div>
+      <App
+        {...this.props}
+        data={data}
+        cluster={params.cluster.value}
+        fontSize={params.fontSize.value} />
     );
   }
 }

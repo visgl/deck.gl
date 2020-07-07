@@ -69,7 +69,7 @@ function getTooltip({object}) {
   );
 }
 
-export default function App({mapStyle = MAPBOX_STYLE}) {
+export default function App({sizeScale = 25, onDataLoad, mapStyle = MAPBOX_STYLE}) {
   const [data, setData] = useState(null);
   const [timer, setTimer] = useState({});
 
@@ -90,6 +90,10 @@ export default function App({mapStyle = MAPBOX_STYLE}) {
             }
 
             setData(sortedData);
+
+            if (onDataLoad) {
+              onDataLoad(sortedData.length);
+            }
           }
         })
         .finally(() => {
@@ -110,7 +114,7 @@ export default function App({mapStyle = MAPBOX_STYLE}) {
       id: 'scenegraph-layer',
       data,
       pickable: true,
-      sizeScale: 25,
+      sizeScale,
       scenegraph: MODEL_URL,
       _animations: ANIMATIONS,
       sizeMinPixels: 0.1,
