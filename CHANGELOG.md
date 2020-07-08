@@ -19,6 +19,10 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v8.2
 
+#### deck.gl [8.2.2] - July 8 2020
+
+- Fix constant update when using TileLayer with repeated maps (#4753)
+
 #### deck.gl [8.2.1] - July 6 2020
 
 - Fix TextLayer fragment shader in Edge Legacy browser (#4750)
