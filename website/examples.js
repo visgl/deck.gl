@@ -20,10 +20,12 @@ const LAYER_EXAMPLES = {
   'LineLayer': 'line-layer',
   'PointCloudLayer': 'point-cloud-layer',
   'ScatterplotLayer': 'scatterplot-layer',
+  'ScenegraphLayer': 'scenegraph-layer',
   'ScreenGridLayer': 'screen-grid-layer',
   'TerrainLayer': 'terrain-layer',
   'TextLayer': 'text-layer',
   'TileLayer': 'tile-layer',
+  'TileLayer (Non-geospatial)': 'tile-layer-non-geospatial',
   'Tile3DLayer': 'tile-3d-layer',
   'TripsLayer': 'trips-layer',
   '3D Plot': 'plot'

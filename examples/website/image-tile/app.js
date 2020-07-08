@@ -20,7 +20,7 @@ function getTooltip({tile}) {
   return tile && `tile: x: ${tile.x}, y: ${tile.y}, z: ${tile.z}`;
 }
 
-export default function App({autoHighlight = true}) {
+export default function App({autoHighlight = true, onTilesLoad}) {
   const [dimensions, setDimensions] = useState(null);
 
   useEffect(async () => {
@@ -43,7 +43,7 @@ export default function App({autoHighlight = true}) {
   const tileLayer =
     dimensions &&
     new TileLayer({
-      pickable: true,
+      pickable: autoHighlight,
       tileSize: dimensions.tileSize,
       autoHighlight,
       highlightColor: [60, 60, 60, 100],
@@ -54,6 +54,7 @@ export default function App({autoHighlight = true}) {
       getTileData: ({x, y, z}) => {
         return load(`${ROOT_URL}/moon.image_files/${15 + z}/${x}_${y}.jpeg`);
       },
+      onViewportLoad: onTilesLoad,
 
       renderSubLayers: props => {
         const {

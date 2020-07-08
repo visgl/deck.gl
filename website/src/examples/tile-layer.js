@@ -29,12 +29,15 @@ class MapTileDemo extends Component {
   }
 
   _onTilesLoad = (tiles) => {
-    this.props.onStateChange({tileCount: tiles.length});
+    // onViewportLoad is called during tileLayer.updateState
+    // Updating React state here may trigger another round of layer updates and create a racing condition
+    // TODO - Fix this in TileLayer
+    requestAnimationFrame(() => this.props.onStateChange({tileCount: tiles.length}));
   };
 
   render() {
     // eslint-disable-next-line no-unused-vars
-    const {params, data, ...otherProps} = this.props;
+    const {params, ...otherProps} = this.props;
     return <App {...otherProps} showBorder={params.showBorder.value} onTilesLoad={this._onTilesLoad} />;
   }
 }
