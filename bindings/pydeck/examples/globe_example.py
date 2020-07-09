@@ -18,7 +18,7 @@ df["color"] = df["primary_fuel"].apply(is_green)
 view_state = pydeck.ViewState(latitude=51.47, longitude=0.45, zoom=4)
 
 layers = []
-# Setting height and width variables
+# Set height and width variables
 view = pydeck.View(type="_GlobeView", controller=True, width=1000, height=700)
 
 
@@ -51,9 +51,8 @@ deck = pydeck.Deck(
     initial_view_state=view_state,
     tooltip={"text": "{name}, {primary_fuel} plant, {country}"},
     layers=layers,
+    # Note that this must be set for the globe to be opaque
+    parameters={"cull": True}
 )
-# Note that this must be set for the globe to be opaque
-deck.parameters = {"cull": True}
-
 
 deck.to_html("pydeck_globe.html", css_background_color="black")
