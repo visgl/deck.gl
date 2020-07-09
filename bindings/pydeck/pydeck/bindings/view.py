@@ -15,9 +15,11 @@ class View(JSONMixin):
         If enabled, camera becomes interactive.
     """
 
-    def __init__(self, type=None, controller=None):
+    def __init__(self, type=None, controller=None, width=None, height=None):
         self.type = type
         self.controller = controller
+        self.width = width
+        self.height = height
 
     @property
     def type(self):

@@ -28,6 +28,7 @@ class Deck(JSONMixin):
         description=None,
         effects=None,
         map_provider="mapbox",
+        parameters=None
     ):
         """This is the renderer and configuration for a deck.gl visualization, similar to the
         `Deck <https://deck.gl/#/documentation/deckgl-api-reference/deck>`_ class from deck.gl.
@@ -67,7 +68,7 @@ class Deck(JSONMixin):
             If ``True``/``False``, toggles a default tooltip on visualization hover.
             Layers must have ``pickable=True`` set in order to display a tooltip.
             For more advanced usage, the user can pass a dict to configure more custom tooltip features.
-            Documentation on this is available `in the hosted pydeck documentation <tooltip.html>`_.
+            Further documentation is `here <tooltip.html>`_.
 
 
         .. _Deck:
@@ -105,6 +106,7 @@ class Deck(JSONMixin):
             warnings.warn(
                 "Mapbox API key is not set. This may impact available features of pydeck.", UserWarning,
             )
+        self.parameters = parameters
 
     @property
     def selected_data(self):
