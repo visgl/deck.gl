@@ -142,7 +142,7 @@ class Deck(JSONMixin):
         filename=None,
         open_browser=False,
         notebook_display=None,
-        iframe_width=700,
+        iframe_width='100%',
         iframe_height=500,
         as_string=False,
         offline=False,
