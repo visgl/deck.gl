@@ -1,5 +1,5 @@
 
-# DataFilterExtension (experimental)
+# DataFilterExtension
 
 The `DataFilterExtension` adds GPU-based data filtering functionalities to layers. It allows the layer to show/hide objects based on user-defined properties. This extension provides a significantly more performant alternative to filtering the data array on the CPU.
 

@@ -1,5 +1,5 @@
 
-# BrushingExtension (experimental)
+# BrushingExtension
 
 The `BrushingExtension` adds GPU-based data brushing functionalities to layers. It allows the layer to show/hide objects based on the current pointer position.
 
