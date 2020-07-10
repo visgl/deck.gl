@@ -1,5 +1,5 @@
 
-# FillStyleExtension (experimental)
+# FillStyleExtension
 
 The `FillStyleExtension` adds selected features to layers that render a "fill", such as the `PolygonLayer` and `ScatterplotLayer`.
 
