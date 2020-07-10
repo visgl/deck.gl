@@ -55,7 +55,9 @@ export function getDeckInstance({map, gl, deck}) {
   }
   deck.props.userData.mapboxVersion = getMapboxVersion(map);
   map.__deck = deck;
-  map.on('render', () => if (deck.layerManager) afterRender(deck, map));
+  map.on('render', () => {
+    if (deck.layerManager) afterRender(deck, map)
+  });
 
   return deck;
 }
