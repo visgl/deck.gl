@@ -91,8 +91,7 @@ def iframe_with_srcdoc(html_str, width="100%", height=500):
     from IPython.display import HTML  # noqa
 
     with warnings.catch_warnings():
-        warnings.simplefilter("ignore")
-        warnings.filterwarnings("Consider using IPython.display.iframe instead")
+        warnings.filterwarnings("ignore", message="Consider using IPython.display.iframe instead")
         return HTML(iframe)
 
 
@@ -145,6 +144,3 @@ def deck_to_html(
         return html_str
     elif notebook_display:
         return iframe_with_srcdoc(html_str, iframe_width, iframe_height)
-    raise TypeError(
-        "To save to a file, provide a file path. To get an HTML string, set as_string=True. To render a visual in Jupyter, set notebook_display=True"
-    )
