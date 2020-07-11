@@ -89,9 +89,10 @@ def iframe_with_srcdoc(html_str, width="100%", height=500):
         html.escape(html_str), width, height
     )
     from IPython.display import HTML  # noqa
+
     with warnings.catch_warnings():
         warnings.simplefilter("ignore")
-        warnings.filterwarnings('Consider using IPython.display.iframe instead')
+        warnings.filterwarnings("Consider using IPython.display.iframe instead")
         return HTML(iframe)
 
 
