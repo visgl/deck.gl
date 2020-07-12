@@ -61,7 +61,7 @@ To build the documentation locally, run the following:
 .. code-block:: bash
 
         cd deck.gl/bindings/pydeck/docs
-        make docs
+        make html
 
 You can find the homepage at `pydeck/docs/_build/index.html`.
 Running `python3 -m http.server` from `pydeck/docs/_build` will serve the documentation locally.
