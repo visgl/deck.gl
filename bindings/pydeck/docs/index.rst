@@ -1,6 +1,8 @@
 pydeck
 ==================================
 
+.. image:: logo.svg
+   
 High-scale spatial rendering in Python, powered by `deck.gl <https://deck.gl/#/>`__.
 
 Get started by `installing pydeck <installation.html>`__.
@@ -84,6 +86,7 @@ Index
    :titlesonly:
 
    Home <self>
+
    
 
 .. toctree::
