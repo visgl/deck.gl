@@ -34,7 +34,6 @@ autoclass_content = "both"
 html_theme_options = {"includehidden": False}
 add_module_names = False
 html_favicon = 'favicon.png'
-html_logo = 'logo.svg'
 
 
 def setup(app):
@@ -44,3 +43,4 @@ def setup(app):
     subprocess.call(
         "{python} scripts/embed_examples.py".format(python=sys.executable), shell=True,
     )
+    app.add_stylesheet("css/custom.css")
