@@ -33,6 +33,6 @@ export function modifyMapboxElements() {
   const footer = document.getElementsByClassName('mapboxgl-ctrl-attrib')[0];
   const aTag = document.createElement('a');
   aTag.href = 'https://pydeck.gl';
-  aTag.innerText = '© pydeck';
+  aTag.innerText = 'pydeck | ';
   footer.prepend(aTag);
 }
