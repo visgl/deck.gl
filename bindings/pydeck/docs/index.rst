@@ -91,6 +91,7 @@ Index
    :caption: Getting started
 
    installation
+   contributing
 
 .. toctree::
    :maxdepth: 1
