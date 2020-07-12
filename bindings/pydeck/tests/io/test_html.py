@@ -45,8 +45,9 @@ def test_iframe_with_srcdoc():
     html_str = "<html></html>"
     iframe_with_srcdoc(html_str)
     escaped_html_str = html.escape("<html></html>")
-    iframe = """<iframe src="about:blank" srcdoc="{escaped_html_str}" width="100%" height=500></iframe>"""\
-        .format(escaped_html_str=escaped_html_str)
+    iframe = """<iframe src="about:blank" frameborder="0" srcdoc="{escaped_html_str}" width="100%" height=500></iframe>""".format(
+        escaped_html_str=escaped_html_str
+    )
     IPython.display.HTML.assert_called_once_with(iframe)
 
 

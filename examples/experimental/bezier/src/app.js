@@ -1,4 +1,4 @@
-import React, {Component} from 'react';
+import React from 'react';
 import {render} from 'react-dom';
 import DeckGL from '@deck.gl/react';
 import {OrthographicView} from '@deck.gl/core';
@@ -11,21 +11,17 @@ const INITIAL_VIEW_STATE = {
   zoom: 1
 };
 
-export default class App extends Component {
-  render() {
-    const {data = SAMPLE_GRAPH} = this.props;
-
-    return (
-      <DeckGL
-        width="100%"
-        height="100%"
-        initialViewState={INITIAL_VIEW_STATE}
-        controller={true}
-        views={new OrthographicView()}
-        layers={[new BezierGraphLayer({data})]}
-      />
-    );
-  }
+export default function App({data = SAMPLE_GRAPH}) {
+  return (
+    <DeckGL
+      width="100%"
+      height="100%"
+      initialViewState={INITIAL_VIEW_STATE}
+      controller={true}
+      views={new OrthographicView()}
+      layers={[new BezierGraphLayer({data})]}
+    />
+  );
 }
 
 /* global document */

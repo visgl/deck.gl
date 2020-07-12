@@ -1,4 +1,4 @@
-import React, {Component} from 'react';
+import React, {useState} from 'react';
 import {render} from 'react-dom';
 
 import {StaticMap} from 'react-map-gl';
@@ -7,7 +7,7 @@ import {ScatterplotLayer} from '@deck.gl/layers';
 import {DataFilterExtension} from '@deck.gl/extensions';
 import {MapView} from '@deck.gl/core';
 import RangeInput from './range-input';
-import memoizeOne from 'memoize-one';
+import {useMemo} from 'react';
 
 // Set your mapbox token here
 const MAPBOX_TOKEN = process.env.MapboxAccessToken; // eslint-disable-line
@@ -42,7 +42,12 @@ const dataFilter = new DataFilterExtension({
   fp64: false
 });
 
-const getTimeRange = memoizeOne(data => {
+function formatLabel(t) {
+  const date = new Date(t);
+  return `${date.getUTCFullYear()}/${date.getUTCMonth() + 1}`;
+}
+
+function getTimeRange(data) {
   if (!data) {
     return null;
   }
@@ -55,122 +60,83 @@ const getTimeRange = memoizeOne(data => {
     },
     [Infinity, -Infinity]
   );
-});
+}
 
-export default class App extends Component {
-  constructor(props) {
-    super(props);
+function getTooltip({object}) {
+  return (
+    object &&
+    `\
+    Time: ${new Date(object.timestamp).toUTCString()}
+    Magnitude: ${object.magnitude}
+    Depth: ${object.depth}
+    `
+  );
+}
 
-    this.state = {
-      filterValue: null,
-      hoveredObject: null
-    };
-    this._onHover = this._onHover.bind(this);
-    this._renderTooltip = this._renderTooltip.bind(this);
-  }
+export default function App({data, mapStyle = 'mapbox://styles/mapbox/light-v9'}) {
+  const [filter, setFilter] = useState(null);
 
-  _onHover({x, y, object}) {
-    this.setState({x, y, hoveredObject: object});
-  }
+  const timeRange = useMemo(() => getTimeRange(data), [data]);
+  const filterValue = filter || timeRange;
 
-  _renderLayers() {
-    const {data} = this.props;
-    const filterValue = this.state.filterValue || getTimeRange(data);
+  const layers = [
+    data &&
+      new ScatterplotLayer({
+        id: 'earthquakes',
+        data,
+        opacity: 0.8,
+        radiusScale: 100,
+        radiusMinPixels: 1,
+        wrapLongitude: true,
 
-    return [
-      data &&
-        new ScatterplotLayer({
-          id: 'earthquakes',
-          data,
-          opacity: 0.8,
-          radiusScale: 100,
-          radiusMinPixels: 1,
-          wrapLongitude: true,
+        getPosition: d => [d.longitude, d.latitude, -d.depth * 1000],
+        getRadius: d => Math.pow(2, d.magnitude),
+        getFillColor: d => {
+          const r = Math.sqrt(Math.max(d.depth, 0));
+          return [255 - r * 15, r * 5, r * 10];
+        },
 
-          getPosition: d => [d.longitude, d.latitude, -d.depth * 1000],
-          getRadius: d => Math.pow(2, d.magnitude),
-          getFillColor: d => {
-            const r = Math.sqrt(Math.max(d.depth, 0));
-            return [255 - r * 15, r * 5, r * 10];
-          },
+        getFilterValue: d => d.timestamp,
+        filterRange: [filterValue[0], filterValue[1]],
+        filterSoftRange: [
+          filterValue[0] * 0.9 + filterValue[1] * 0.1,
+          filterValue[0] * 0.1 + filterValue[1] * 0.9
+        ],
+        extensions: [dataFilter],
 
-          getFilterValue: d => d.timestamp,
-          filterRange: [filterValue[0], filterValue[1]],
-          filterSoftRange: [
-            filterValue[0] * 0.9 + filterValue[1] * 0.1,
-            filterValue[0] * 0.1 + filterValue[1] * 0.9
-          ],
-          extensions: [dataFilter],
+        pickable: true
+      })
+  ];
 
-          pickable: true,
-          onHover: this._onHover
-        })
-    ];
-  }
+  return (
+    <>
+      <DeckGL
+        views={MAP_VIEW}
+        layers={layers}
+        initialViewState={INITIAL_VIEW_STATE}
+        controller={true}
+        getTooltip={getTooltip}
+      >
+        <StaticMap
+          reuseMaps
+          mapStyle={mapStyle}
+          preventStyleDiffing={true}
+          mapboxApiAccessToken={MAPBOX_TOKEN}
+        />
+      </DeckGL>
 
-  _renderTooltip() {
-    const {x, y, hoveredObject} = this.state;
-    return (
-      hoveredObject && (
-        <div className="tooltip" style={{top: y, left: x}}>
-          <div>
-            <b>Time: </b>
-            <span>{new Date(hoveredObject.timestamp).toUTCString()}</span>
-          </div>
-          <div>
-            <b>Magnitude: </b>
-            <span>{hoveredObject.magnitude}</span>
-          </div>
-          <div>
-            <b>Depth: </b>
-            <span>{hoveredObject.depth} km</span>
-          </div>
-        </div>
-      )
-    );
-  }
-
-  _formatLabel(t) {
-    const date = new Date(t);
-    return `${date.getUTCFullYear()}/${date.getUTCMonth() + 1}`;
-  }
-
-  render() {
-    const {mapStyle = 'mapbox://styles/mapbox/light-v9', data} = this.props;
-    const timeRange = getTimeRange(data);
-    const filterValue = this.state.filterValue || timeRange;
-
-    return (
-      <>
-        <DeckGL
-          views={MAP_VIEW}
-          layers={this._renderLayers()}
-          initialViewState={INITIAL_VIEW_STATE}
-          controller={true}
-        >
-          <StaticMap
-            reuseMaps
-            mapStyle={mapStyle}
-            preventStyleDiffing={true}
-            mapboxApiAccessToken={MAPBOX_TOKEN}
-          />
-
-          {this._renderTooltip}
-        </DeckGL>
-
-        {timeRange && (
-          <RangeInput
-            min={timeRange[0]}
-            max={timeRange[1]}
-            value={filterValue}
-            animationSpeed={MS_PER_DAY * 30}
-            formatLabel={this._formatLabel}
-            onChange={value => this.setState({filterValue: value})}
-          />
-        )}
-      </>
-    );
-  }
+      {timeRange && (
+        <RangeInput
+          min={timeRange[0]}
+          max={timeRange[1]}
+          value={filterValue}
+          animationSpeed={MS_PER_DAY * 30}
+          formatLabel={formatLabel}
+          onChange={setFilter}
+        />
+      )}
+    </>
+  );
 }
 
 export function renderToDOM(container) {

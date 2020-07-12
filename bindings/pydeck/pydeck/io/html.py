@@ -4,6 +4,7 @@ from os.path import relpath, realpath, join, dirname
 import sys
 import tempfile
 import time
+import warnings
 import webbrowser
 
 import jinja2
@@ -84,11 +85,14 @@ def display_html(filename):
 
 def iframe_with_srcdoc(html_str, width="100%", height=500):
     width = '"{}"'.format(width) if type(width) == str else width
-    iframe = """<iframe src="about:blank" srcdoc="{}" width={} height={}></iframe>""".format(
-        html.escape(html_str), width, height)
+    iframe = """<iframe src="about:blank" frameborder="0" srcdoc="{}" width={} height={}></iframe>""".format(
+        html.escape(html_str), width, height
+    )
     from IPython.display import HTML  # noqa
 
-    return HTML(iframe)
+    with warnings.catch_warnings():
+        warnings.filterwarnings("ignore", message="Consider using IPython.display.iframe instead")
+        return HTML(iframe)
 
 
 def render_for_colab(html_str, iframe_height):
@@ -103,7 +107,7 @@ def deck_to_html(
     google_maps_key=None,
     filename=None,
     open_browser=False,
-    notebook_display=in_jupyter(),
+    notebook_display=None,
     css_background_color=None,
     iframe_height=500,
     iframe_width="100%",
@@ -123,22 +127,20 @@ def deck_to_html(
         offline=offline,
     )
 
-    if not filename and notebook_display and in_google_colab:
+    if filename:
+        with open(filename, "w+") as f:
+            f.write(html_str)
+
+        if open_browser:
+            display_html(realpath(f.name))
+
+    if notebook_display is None:
+        notebook_display = in_jupyter()
+
+    if notebook_display and in_google_colab:
         render_for_colab(html_str, iframe_height)
         return
-
-    elif not filename and notebook_display:
-        return iframe_with_srcdoc(html_str, iframe_width, iframe_height)
-
     elif not filename and as_string:
         return html_str
-
-    elif not filename:
-        raise TypeError(
-            "To save to a file, provide a file path. To get an HTML string, set as_string=True. To render a visual in Jupyter, set jupyter_display=True"
-        )
-
-    with open(filename, "w+") as f:
-        f.write(html_str)
-    if open_browser:
-        display_html(realpath(f.name))
+    elif notebook_display:
+        return iframe_with_srcdoc(html_str, iframe_width, iframe_height)

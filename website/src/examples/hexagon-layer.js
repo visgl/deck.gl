@@ -1,6 +1,6 @@
 import React, {Component} from 'react';
 import {readableInteger} from '../utils/format-utils';
-import App from 'website-examples/3d-heatmap/app';
+import App, {colorRange} from 'website-examples/3d-heatmap/app';
 
 import {MAPBOX_STYLES, DATA_URI, GITHUB_TREE} from '../constants/defaults';
 
@@ -32,7 +32,7 @@ class HexagonDemo extends Component {
   static mapStyle = MAPBOX_STYLES.DARK;
 
   static renderInfo(meta) {
-    const colorRamp = App.defaultColorRange.slice().map(color => `rgb(${color.join(',')})`);
+    const colorRamp = colorRange.slice().map(color => `rgb(${color.join(',')})`);
 
     return (
       <div>
@@ -67,53 +67,17 @@ class HexagonDemo extends Component {
     );
   }
 
-  constructor(props) {
-    super(props);
-
-    this.state = {
-      hoveredObject: null
-    };
-  }
-
-  _onHover({x, y, object}) {
-    this.setState({x, y, hoveredObject: object});
-  }
-
-  _renderTooltip() {
-    const {x, y, hoveredObject} = this.state;
-
-    if (!hoveredObject) {
-      return null;
-    }
-
-    const lat = hoveredObject.position[1];
-    const lng = hoveredObject.position[0];
-    const count = hoveredObject.points.length;
-
-    return (
-      <div className="tooltip" style={{left: x, top: y}}>
-        <div>{`latitude: ${Number.isFinite(lat) ? lat.toFixed(6) : ''}`}</div>
-        <div>{`longitude: ${Number.isFinite(lng) ? lng.toFixed(6) : ''}`}</div>
-        <div>{`${count} Accidents`}</div>
-      </div>
-    );
-  }
-
   render() {
     const {data, params} = this.props;
 
     return (
-      <div>
-        {this._renderTooltip()}
-        <App
-          {...this.props}
-          data={data}
-          radius={params.radius.value}
-          upperPercentile={params.upperPercentile.value}
-          coverage={params.coverage.value}
-          onHover={this._onHover.bind(this)}
-        />
-      </div>
+      <App
+        {...this.props}
+        data={data}
+        radius={params.radius.value}
+        upperPercentile={params.upperPercentile.value}
+        coverage={params.coverage.value}
+      />
     );
   }
 }

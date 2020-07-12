@@ -67,13 +67,11 @@ class HighwayDemo extends Component {
     const {data, params, ...otherProps} = this.props;
 
     return (
-      <div>
-        <App
-          {...otherProps}
-          year={params.year.value}
-          accidents={data && data[0]}
-          roads={data && data[1]} />
-      </div>
+      <App
+        {...otherProps}
+        year={params.year.value}
+        accidents={data && data[0]}
+        roads={data && data[1]} />
     );
   }
 }
