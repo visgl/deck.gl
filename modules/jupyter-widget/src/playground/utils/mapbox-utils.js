@@ -29,7 +29,8 @@ export function modifyMapboxElements() {
       el.style.display = 'none';
     }
   }
-  const footer = document.getElementsByClassName('mapbox-ctrl-mapboxgl-ctrl-attrib');
+
+  const footer = document.getElementsByClassName('mapboxgl-ctrl-attrib')[0];
   const aTag = document.createElement('a');
   aTag.href = 'https://pydeck.gl';
   aTag.innerText = '© pydeck';

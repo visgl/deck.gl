@@ -6,7 +6,7 @@ import GL from '@luma.gl/constants';
 
 import makeTooltip from './widget-tooltip';
 
-import mapboxgl from './utils/mapbox-utils';
+import mapboxgl, {loadMapboxCSS, modifyMapboxElements} from './utils/mapbox-utils';
 import {loadScript} from './utils/script-utils';
 import {createGoogleMapsDeckOverlay} from './utils/google-maps-utils';
 
@@ -148,6 +148,7 @@ function createDeck({
   handleWarning,
   customLibraries
 }) {
+  loadMapboxCSS();
   let deckgl;
   try {
     const oldLayers = jsonInput.layers || [];
@@ -193,6 +194,7 @@ function createDeck({
     // eslint-disable-next-line
     console.error(err);
   }
+  modifyMapboxElements();
   return deckgl;
 }
 

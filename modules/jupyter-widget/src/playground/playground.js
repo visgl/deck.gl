@@ -1,6 +1,5 @@
 import {Transport} from '@deck.gl/json';
 
-import {loadMapboxCSS, modifyMapboxElements} from './utils/mapbox-utils';
 import {createContainer, createErrorBox} from './utils/css-utils';
 
 import {jsonConverter, createDeck} from './create-deck';
@@ -20,7 +19,6 @@ export function initPlayground() {
       } = getPlaygroundProps(transport);
 
       // Load mapbox CSS
-      loadMapboxCSS();
 
       // Create container div for deck.gl
       const container = createContainer(width, height);
@@ -60,7 +58,6 @@ export function initPlayground() {
           deck.setProps(convertedJson);
 
           // Jupyter notebook displays an error that this suppresses
-          modifyMapboxElements();
           break;
 
         case 'json-with-binary':
