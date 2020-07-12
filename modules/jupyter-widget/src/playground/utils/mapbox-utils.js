@@ -22,7 +22,7 @@ export function loadMapboxCSS(url = MAPBOX_CSS_URL) {
  * Hides elements in the mapbox-gl.js library and adds pydeck tag
  */
 export function modifyMapboxElements() {
-  const classes = ['mapboxgl-ctrl-bottom-left', 'mapboxgl-missing-css', 'mapbox-improve-map'];
+  const classes = ['mapboxgl-missing-css'];
   for (const c of classes) {
     const el = document.getElementsByClassName(c)[0];
     if (el) {
