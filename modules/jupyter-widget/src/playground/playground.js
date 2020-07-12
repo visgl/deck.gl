@@ -2,6 +2,8 @@ import {Transport} from '@deck.gl/json';
 
 import {createContainer, createErrorBox} from './utils/css-utils';
 
+import {loadMapboxCSS} from './utils/mapbox-utils';
+
 import {jsonConverter, createDeck} from './create-deck';
 
 export function initPlayground() {
@@ -19,7 +21,7 @@ export function initPlayground() {
       } = getPlaygroundProps(transport);
 
       // Load mapbox CSS
-
+      loadMapboxCSS();
       // Create container div for deck.gl
       const container = createContainer(width, height);
       transport.jupyterView.el.appendChild(container);
@@ -56,8 +58,6 @@ export function initPlayground() {
         case 'json':
           let convertedJson = jsonConverter.convert(json);
           deck.setProps(convertedJson);
-
-          // Jupyter notebook displays an error that this suppresses
           break;
 
         case 'json-with-binary':
