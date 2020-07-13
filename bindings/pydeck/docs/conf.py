@@ -34,13 +34,16 @@ autoclass_content = "both"
 html_theme_options = {"includehidden": False}
 add_module_names = False
 html_favicon = 'favicon.png'
+html_logo = 'toctree-logo.svg'
 
 
 def setup(app):
     if os.environ.get("READTHEDOCS") and os.environ.get("READTHEDOCS_VERSION") == "stable":
         global master_doc
         master_doc = "pydeck_redirect"
-    subprocess.call(
-        "{python} scripts/embed_examples.py".format(python=sys.executable), shell=True,
-    )
-    app.add_stylesheet("css/custom.css")
+    if not os.environ.get("PYDECK_DEV_PORT"):
+        subprocess.call(
+            "{python} scripts/embed_examples.py".format(python=sys.executable), shell=True,
+        )
+    else:
+        print("PYDECK_DEV_PORT is set, skipping layer.rst conversions")

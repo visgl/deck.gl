@@ -1,7 +1,7 @@
 .. figure:: logo.svg
    :class: logo
-   :target: https://pydeck.gl
-   
+   :target: /
+
 | High-scale spatial rendering in Python, powered by `deck.gl <https://deck.gl/#/>`__.
 
 Get started by `installing pydeck <installation.html>`__.
@@ -25,13 +25,13 @@ with the Jupyter kernel. Read more about usage in Jupyter `here <jupyter.html>`_
 
 .. figure:: https://i.imgur.com/qenLNEf.gif
    
-   `Conway's Game of Life <https://en.wikipedia.org/wiki/Conway%27s_Game_of_Life>`_ in pydeck
+   `Conway's Game of Life <https://en.wikipedia.org/wiki/Conway%27s_Game_of_Life>`__ in pydeck
 
 .. figure:: https://camo.githubusercontent.com/020e7749ebfb7a8f50403fcbc8650833608c006d/68747470733a2f2f6d7962696e6465722e6f72672f7374617469632f6c6f676f2e7376673f763d6639663064393237623637636339646339396437383863383232636132316330
    :target: https://mybinder.org/v2/gh/uber/deck.gl/binder
    :alt: Hosted Jupyter notebook examples
 
-   `See hosted examples on mybinder.org <https://mybinder.org/v2/gh/uber/deck.gl/binder>`_
+   `See hosted examples on mybinder.org <https://mybinder.org/v2/gh/uber/deck.gl/binder>`__
 
 `Layers <layer.html>`__
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -47,7 +47,6 @@ tooltip.
 
 `Data utilities <data_utils.html>`__
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
 A handful of functions to make certain common data exercises easier,
 like automatically fitting a viewport to data on a map or quickly coloring categorical data
 
@@ -127,5 +126,8 @@ Index
    <style>
      .section #index {
        display: none;
+     }
+     .logo {
+       width: 320px;
      }
    </style>
