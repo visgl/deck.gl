@@ -111,6 +111,7 @@ function createStandaloneFromProvider(
       return new deck.DeckGL({
         ...props,
         map: mapboxgl,
+        onLoad: modifyMapboxElements,
         mapboxApiAccessToken: mapboxApiKey,
         onClick: handleClick,
         getTooltip,
@@ -193,7 +194,6 @@ function createDeck({
     // eslint-disable-next-line
     console.error(err);
   }
-  modifyMapboxElements();
   return deckgl;
 }
 
