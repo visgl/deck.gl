@@ -23,21 +23,24 @@ function getTooltip({tile}) {
 export default function App({autoHighlight = true, onTilesLoad}) {
   const [dimensions, setDimensions] = useState(null);
 
-  useEffect(async () => {
-    const dziSource = `${ROOT_URL}/moon.image.dzi`;
-    const response = await fetch(dziSource);
-    const xmlText = await response.text();
-    const dziXML = new DOMParser().parseFromString(xmlText, 'text/xml');
+  useEffect(() => {
+    const getMetaData = async () => {
+      const dziSource = `${ROOT_URL}/moon.image.dzi`;
+      const response = await fetch(dziSource);
+      const xmlText = await response.text();
+      const dziXML = new DOMParser().parseFromString(xmlText, 'text/xml');
 
-    if (Number(dziXML.getElementsByTagName('Image')[0].attributes.Overlap.value) !== 0) {
-      // eslint-disable-next-line no-undef, no-console
-      console.warn('Overlap paramter is nonzero and should be 0');
-    }
-    setDimensions({
-      height: Number(dziXML.getElementsByTagName('Size')[0].attributes.Height.value),
-      width: Number(dziXML.getElementsByTagName('Size')[0].attributes.Width.value),
-      tileSize: Number(dziXML.getElementsByTagName('Image')[0].attributes.TileSize.value)
-    });
+      if (Number(dziXML.getElementsByTagName('Image')[0].attributes.Overlap.value) !== 0) {
+        // eslint-disable-next-line no-undef, no-console
+        console.warn('Overlap parameter is nonzero and should be 0');
+      }
+      setDimensions({
+        height: Number(dziXML.getElementsByTagName('Size')[0].attributes.Height.value),
+        width: Number(dziXML.getElementsByTagName('Size')[0].attributes.Width.value),
+        tileSize: Number(dziXML.getElementsByTagName('Image')[0].attributes.TileSize.value)
+      });
+    };
+    getMetaData();
   }, []);
 
   const tileLayer =

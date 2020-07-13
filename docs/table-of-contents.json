@@ -174,10 +174,30 @@
       "title": "Submodule API Reference",
       "chapters": [
         {
+          "title": "@deck.gl/arcgis",
+          "entries": [
+            {"entry": "docs/api-reference/arcgis/overview"},
+            {"entry": "docs/api-reference/arcgis/deck-layer"},
+            {"entry": "docs/api-reference/arcgis/deck-renderer"},
+            {"entry": "docs/api-reference/arcgis/load-arcgis-modules"}
+          ]
+        },
+        {
           "title": "@deck.gl/google-maps",
           "entries": [
             {"entry": "docs/api-reference/google-maps/overview"},
             {"entry": "docs/api-reference/google-maps/google-maps-overlay"}
+          ]
+        },
+        {
+          "title": "@deck.gl/extensions",
+          "entries": [
+            {"entry": "docs/api-reference/extensions/overview"},
+            {"entry": "docs/api-reference/extensions/brushing-extension"},
+            {"entry": "docs/api-reference/extensions/data-filter-extension"},
+            {"entry": "docs/api-reference/extensions/fill-style-extension"},
+            {"entry": "docs/api-reference/extensions/fp64-extension"},
+            {"entry": "docs/api-reference/extensions/path-style-extension"}
           ]
         },
         {
