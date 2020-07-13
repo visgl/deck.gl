@@ -23,7 +23,7 @@ export function loadMapboxCSS(url = MAPBOX_CSS_URL) {
  */
 export function modifyMapboxElements() {
   if (!document) return;
-  const classes = ['mapboxgl-missing-css'];
+  const classes = ['mapboxgl-missing-css', 'mapbox-improve-map'];
   for (const c of classes) {
     const el = document.getElementsByClassName(c)[0];
     if (el && el.style) {
