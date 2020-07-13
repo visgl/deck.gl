@@ -86,7 +86,7 @@ If you want to install pydeck for development, you may want to use the ``make`` 
 
         git clone https://github.com/visgl/deck.gl
         cd deck.gl/bindings/pydeck
-        make pre-init
+        make setup-env
         . env/bin/activate
         make init
         make prepare-jupyter
