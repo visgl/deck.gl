@@ -267,7 +267,7 @@ Notes:
 * Enabling debug mode also requires an extra luma.gl import:
 
 ```js
-import 'luma.gl/debug'
+import '@luma.gl/debug'
 ```
 
 ##### `_animate` (Experimental)
