@@ -1,5 +1,6 @@
 import React, {Component} from 'react';
 import {readableInteger} from '../utils/format-utils';
+import {GITHUB_TREE} from '../constants/defaults';
 import App from 'website-examples/point-cloud/app';
 
 import makeExample from '../components/example';
