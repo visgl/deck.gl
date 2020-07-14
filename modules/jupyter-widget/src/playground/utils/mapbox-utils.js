@@ -19,11 +19,23 @@ export function loadMapboxCSS(url = MAPBOX_CSS_URL) {
 }
 
 /**
- * Hides a warning in the mapbox-gl.js library from surfacing in the notebook as text.
+ * Hides elements in the mapbox-gl.js library and adds pydeck tag
  */
-export function hideMapboxCSSWarning() {
-  const missingCssWarning = document.getElementsByClassName('mapboxgl-missing-css')[0];
-  if (missingCssWarning) {
-    missingCssWarning.style.display = 'none';
+export function modifyMapboxElements() {
+  const classes = ['mapboxgl-missing-css'];
+  for (const c of classes) {
+    const el = document.getElementsByClassName(c)[0];
+    if (el && el.style) {
+      el.style.display = 'none';
+    }
+  }
+
+  const footer = document.getElementsByClassName('mapboxgl-ctrl-attrib-inner');
+  if (footer && footer[0]) {
+    const aTag = document.createElement('a');
+    aTag.href = 'https://pydeck.gl';
+    aTag.innerText = 'pydeck | ';
+    aTag.target = '_blank';
+    footer[0].prepend(aTag);
   }
 }
