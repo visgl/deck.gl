@@ -44,6 +44,9 @@ function getTextureFromData(gl, data, opts) {
 }
 
 function validateGeometryAttributes(attributes) {
+  if (!attributes.COLOR_0 && !attributes.colors) {
+    attributes.colors = {constant: true, value: new Float32Array([1, 1, 1])};
+  }
   log.assert(
     attributes.positions || attributes.POSITION,
     'SimpleMeshLayer requires "postions" or "POSITION" attribute in mesh property.'
