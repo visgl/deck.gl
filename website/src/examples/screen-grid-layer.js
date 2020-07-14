@@ -8,6 +8,8 @@ import makeExample from '../components/example';
 class ScreenGridDemo extends Component {
   static title = 'Uber Pickup Locations In NewYork City';
 
+  static code = `${GITHUB_TREE}/examples/website/screen-grid`;
+
   static data = {
     url: `${DATA_URI}/screen-grid-data-uber-pickups-nyc.txt`,
     worker: '/workers/screen-grid-data-decoder.js'
