@@ -7,6 +7,8 @@ import makeExample from '../components/example';
 class PointCloudDemo extends Component {
   static title = '3D Indoor Scan';
 
+  static code = `${GITHUB_TREE}/examples/website/point-cloud`;
+
   static renderInfo(meta) {
     return (
       <div>
