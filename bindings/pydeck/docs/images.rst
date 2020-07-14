@@ -1,11 +1,13 @@
 ..
   These image tags are manually added to include these images in the _static directory
-  TODO this should be automated in the future.
 
 .. image:: gallery/images/arc_layer.png
    :width: 0
 
 .. image:: gallery/images/bitmap_layer.png
+   :width: 0
+
+.. image:: gallery/images/binary_transport.png
    :width: 0
 
 .. image:: gallery/images/column_layer.png
@@ -66,6 +68,9 @@
    :width: 0
 
 .. image:: gallery/images/screengrid_layer.png
+   :width: 0
+
+.. image:: gallery/images/terrain_layer.png
    :width: 0
 
 .. image:: gallery/images/text_layer.png

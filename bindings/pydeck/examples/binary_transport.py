@@ -36,7 +36,7 @@ def generate_graph_data(num_nodes, random_seed):
 
 def make_renderer(nodes, use_binary_transport=False):
     """Creates the pydeck visualization for rendering"""
-    view_state = pydeck.ViewState(offset=[0, 0], latitude=None, longitude=None, bearing=None, pitch=None, zoom=4,)
+    view_state = pydeck.ViewState(offset=[0, 0], latitude=None, longitude=None, bearing=None, pitch=None, zoom=14,)
 
     views = [pydeck.View(type="OrbitView", controller=True)]
 
@@ -78,7 +78,7 @@ def generate_vis(notebook_display=False):
 
     if not notebook_display:
         r = make_renderer(nodes, use_binary_transport=False)
-        r.to_html("binary_transport.html", notebook_display=notebook_display)
+        r.to_html("binary_transport.html", css_background_color='charcoal', notebook_display=notebook_display)
     else:
         r = make_renderer(nodes, use_binary_transport=True)
         display(r.show())  # noqa
