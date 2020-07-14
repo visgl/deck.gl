@@ -9,13 +9,13 @@ df = pd.read_csv(POWER_PLANTS)
 
 def is_green(fuel_type):
     if fuel_type.lower() in ("nuclear", "water", "wind", "hydro", "biomass", "solar", "geothermal"):
-        return [0, 255, 0]
-    return [255, 255, 0]
+        return [10, 230, 120]
+    return [230, 158, 10]
 
 
 df["color"] = df["primary_fuel"].apply(is_green)
 
-view_state = pydeck.ViewState(latitude=51.47, longitude=0.45, zoom=4)
+view_state = pydeck.ViewState(latitude=51.47, longitude=0.45, zoom=2)
 
 layers = []
 # Set height and width variables
@@ -41,7 +41,7 @@ layers = [
         elevation_scale=100,
         pickable=True,
         auto_highlight=True,
-        radius=40000,
+        radius=20000,
         get_fill_color="color",
     ),
 ]
@@ -55,4 +55,4 @@ deck = pydeck.Deck(
     parameters={"cull": True}
 )
 
-deck.to_html("pydeck_globe.html", css_background_color="black")
+deck.to_html("globe_view.html", css_background_color="black")

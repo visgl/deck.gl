@@ -34,4 +34,4 @@ layer = pydeck.Layer(
 )
 
 r = pydeck.Deck(layers=[layer], initial_view_state=view_state, tooltip={"text": "{name}"})
-r.to_html("path_layer.html", notebook_display=False)
+r.to_html("path_layer.html")

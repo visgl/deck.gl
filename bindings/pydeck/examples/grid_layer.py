@@ -25,4 +25,4 @@ view_state = pdk.ViewState(latitude=37.7749295, longitude=-122.4194155, zoom=11,
 
 # Render
 r = pdk.Deck(layers=[layer], initial_view_state=view_state, tooltip={"text": "{position}\nCount: {count}"},)
-r.to_html("grid_layer.html", notebook_display=False)
+r.to_html("grid_layer.html")

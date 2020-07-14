@@ -68,4 +68,4 @@ r = pydeck.Deck(
     tooltip={"text": "Concentration of cattle in blue, concentration of poultry in orange"},
 )
 
-r.to_html("heatmap_layer.html", notebook_display=False)
+r.to_html("heatmap_layer.html")

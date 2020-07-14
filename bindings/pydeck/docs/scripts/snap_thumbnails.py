@@ -15,7 +15,7 @@ except ImportError:
 
 
 here = os.path.dirname(os.path.abspath(__file__))
-EXAMPLE_GLOB = "../examples/*_layer.py"
+EXAMPLE_GLOB = "../examples/*.py"
 
 
 async def run(cmd):
@@ -39,7 +39,7 @@ async def _snap(fname):
     html_fname = os.path.join(here, "..", os.path.splitext(os.path.basename(fname))[0] + ".html")
     png_fname = os.path.join(here, "../gallery", os.path.splitext(os.path.basename(fname))[0] + ".png")
     fpath = "file://%s" % html_fname
-    if "bitmap_layer" in html_fname or "icon_layer" in html_fname or "heatmap_layer" in html_fname:
+    if html_fname.replace(".html", "") in ("bitmap_layer", "icon_layer", "heatmap_layer", "terrain_layer"):
         await page.goto(fpath)
         await asyncio.sleep(10)
     else:

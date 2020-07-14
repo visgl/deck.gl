@@ -48,4 +48,4 @@ line_layer = pydeck.Layer(
 layers = [scatterplot, line_layer]
 
 r = pydeck.Deck(layers=layers, initial_view_state=INITIAL_VIEW_STATE)
-r.to_html("line_layer.html", notebook_display=False)
+r.to_html("line_layer.html")

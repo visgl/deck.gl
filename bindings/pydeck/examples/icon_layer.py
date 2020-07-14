@@ -40,4 +40,4 @@ icon_layer = pydeck.Layer(
 )
 
 r = pydeck.Deck(layers=[icon_layer], initial_view_state=view_state, tooltip={"text": "{tags}"})
-r.to_html("icon_layer.html", notebook_display=False)
+r.to_html("icon_layer.html")

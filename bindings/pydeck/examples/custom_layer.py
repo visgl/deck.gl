@@ -38,4 +38,4 @@ view_state = pydeck.ViewState(latitude=0, longitude=0, zoom=1)
 
 r = pydeck.Deck(custom_layer, initial_view_state=view_state, map_style="")
 
-r.to_html("custom_layer.html", css_background_color="#333", notebook_display=False)
+r.to_html("custom_layer.html", css_background_color="#333")

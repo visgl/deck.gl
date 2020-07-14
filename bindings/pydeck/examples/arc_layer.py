@@ -53,4 +53,4 @@ view_state = pydeck.ViewState(latitude=37.7576171, longitude=-122.5776844, beari
 
 TOOLTIP_TEXT = {"html": "{S000} jobs <br /> Home of commuter in red; work location in green"}
 r = pydeck.Deck(arc_layer, initial_view_state=view_state, tooltip=TOOLTIP_TEXT)
-r.to_html("arc_layer.html", notebook_display=False)
+r.to_html("arc_layer.html")

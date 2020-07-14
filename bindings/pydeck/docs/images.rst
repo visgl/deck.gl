@@ -20,6 +20,12 @@
 .. image:: gallery/images/geojson_layer.png
    :width: 0
 
+.. image:: gallery/images/geopandas_integration.png
+   :width: 0
+
+.. image:: gallery/images/globe_view.png
+   :width: 0
+
 .. image:: gallery/images/great_circle_layer.png
    :width: 0
 
@@ -78,6 +84,8 @@
    gallery/contour_layer
    gallery/custom_layer
    gallery/geojson_layer
+   gallery/geopandas_integration
+   gallery/globe_view
    gallery/great_circle_layer
    gallery/grid_layer
    gallery/h3_cluster_layer
@@ -92,6 +100,7 @@
    gallery/s2_layer
    gallery/scatterplot_layer
    gallery/screengrid_layer
+   gallery/terrain_layer
    gallery/text_layer
    gallery/tile_3d_layer
    gallery/trips_layer

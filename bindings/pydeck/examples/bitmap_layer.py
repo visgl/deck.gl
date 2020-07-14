@@ -25,4 +25,4 @@ view_state = pydeck.ViewState(latitude=37.7576171, longitude=-122.5776844, zoom=
 
 r = pydeck.Deck(bitmap_layer, initial_view_state=view_state, map_style="mapbox://styles/mapbox/satellite-v9",)
 
-r.to_html("bitmap_layer.html", notebook_display=False)
+r.to_html("bitmap_layer.html")

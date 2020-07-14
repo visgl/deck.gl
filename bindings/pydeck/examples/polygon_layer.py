@@ -113,4 +113,4 @@ r = pydeck.Deck(
     map_style="mapbox://styles/mapbox/light-v9",
     tooltip=tooltip,
 )
-r.to_html("polygon_layer.html", notebook_display=False)
+r.to_html("polygon_layer.html")

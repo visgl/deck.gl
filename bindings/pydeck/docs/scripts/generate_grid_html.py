@@ -7,7 +7,7 @@ from utils import to_presentation_name, to_snake_case_layer_name
 
 
 here = os.path.dirname(os.path.abspath(__file__))
-EXAMPLE_GLOB = "../examples/*_layer.py"
+EXAMPLE_GLOB = "../examples/*.py"
 layer_names = sorted([to_snake_case_layer_name(layer_name) for layer_name in glob.glob(EXAMPLE_GLOB)])
 
 
