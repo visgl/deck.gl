@@ -8,6 +8,8 @@ import makeExample from '../components/example';
 class ScatterPlotDemo extends Component {
   static title = 'Every Person in New York City';
 
+  static code = `${GITHUB_TREE}/examples/website/scatterplot`;
+
   static data = {
     url: `${DATA_URI}/scatterplot-data.txt`,
     worker: '/workers/scatterplot-data-decoder.js'
