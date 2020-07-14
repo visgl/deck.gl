@@ -34,7 +34,7 @@ void main(void) {
   vTexCoord = texCoords;
   cameraPosition = project_uCameraPosition;
   normals_commonspace = project_normal(instanceModelMatrix * normals);
-  vColor = vec4(colors + instanceColors.rgb, instanceColors.a);
+  vColor = vec4(colors * instanceColors.rgb, instanceColors.a);
   geometry.normal = normals_commonspace;
 
   vec3 pos = (instanceModelMatrix * positions) * sizeScale + instanceTranslation;
