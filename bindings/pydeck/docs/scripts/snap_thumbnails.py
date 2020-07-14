@@ -1,9 +1,10 @@
 """Script to generate thumbnails viewable in the pydeck docs"""
 import asyncio
-import glob
 import os
 from pathlib import Path
 import sys
+
+from const import EXAMPLE_GLOB, HTML_DIR, LOCAL_IMAGE_DIR
 
 try:
     from pyppeteer import launch
@@ -14,8 +15,8 @@ except ImportError:
     sys.exit(1)
 
 
-here = os.path.dirname(os.path.abspath(__file__))
-EXAMPLE_GLOB = "../examples/*.py"
+# LARGE_EXAMPLES have longer loading times for their data sets than most
+LARGE_EXAMPLES = ("bitmap_layer", "icon_layer", "heatmap_layer", "terrain_layer")
 
 
 async def run(cmd):
@@ -31,15 +32,15 @@ async def run(cmd):
         print(f"[stderr]\n{stderr.decode()}")
 
 
-async def _snap(fname):
+async def snap(fname):
     browser = await launch(autoClose=False, headless=False, args=["--no-sandbox", "--disable-web-security"],)
     page = await browser.newPage()
     print("[info] Converting %s to an image" % fname)
     await run(" ".join(["python", fname]))
-    html_fname = os.path.join(here, "..", os.path.splitext(os.path.basename(fname))[0] + ".html")
-    png_fname = os.path.join(here, "../gallery", os.path.splitext(os.path.basename(fname))[0] + ".png")
+    html_fname = os.path.join(HTML_DIR, os.path.splitext(os.path.basename(fname))[0] + ".html")
+    png_fname = os.path.join(LOCAL_IMAGE_DIR, os.path.splitext(os.path.basename(fname))[0] + ".png")
     fpath = "file://%s" % html_fname
-    if html_fname.replace(".html", "") in ("bitmap_layer", "icon_layer", "heatmap_layer", "terrain_layer"):
+    if html_fname.replace(".html", "") in LARGE_EXAMPLES:
         await page.goto(fpath)
         await asyncio.sleep(10)
     else:
@@ -52,10 +53,10 @@ async def _snap(fname):
     return png_fname
 
 
-async def snap(fname, retries=3):
+async def snap_with_retries(fname, retries=3):
     while retries:
         try:
-            output_fname = await _snap(fname)
+            output_fname = await snap(fname)
             if output_fname:
                 return output_fname
             retries = 0
@@ -76,9 +77,9 @@ def shrink_image(fname):
 
 
 async def main(fname_arg=None):
-    fnames = [fname_arg] if fname_arg else glob.glob(EXAMPLE_GLOB)
+    fnames = [fname_arg] if fname_arg else EXAMPLE_GLOB
     for fname in fnames:
-        png_fname = await snap(fname)
+        png_fname = await snap_with_retries(fname)
         try:
             shrink_image(png_fname)
         except Exception:

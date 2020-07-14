@@ -1,12 +1,23 @@
-"""Script to convert pydeck examples into .rst pages with code"""
-import glob
-import jinja2
+"""Script to embed pydeck examples into .rst pages with code
+
+These populate the files you see once you click into a grid cell
+on the pydeck gallery page
+"""
 from multiprocessing import Pool
 import os
 import subprocess
 import sys
 
-from utils import to_presentation_name, to_snake_case_layer_name
+from const import (
+    DECKGL_URL_BASE,
+    EXAMPLE_GLOB,
+    GALLERY_DIR,
+    HTML_DIR,
+    HOSTED_STATIC_PATH,
+)
+
+from utils import to_presentation_name, to_snake_case_string
+from templates import DOC_TEMPLATE
 
 
 if not os.environ.get("MAPBOX_API_KEY"):
@@ -14,86 +25,41 @@ if not os.environ.get("MAPBOX_API_KEY"):
     raise Exception("MAPBOX_API_KEY not set")
 
 
-DOC_TEMPLATE = jinja2.Template(
-    """
-{{ page_title }}
-^^^^^^^^^^^^^^^^
-
-.. raw:: html
-
-    {% if deckgl_doc_url %}
-    <a id="deck-link" target="_blank" href="{{deckgl_doc_url}}">deck.gl docs</a>
-    {% endif %}
-    <br />
-
-.. raw:: html
-   :file: ./html/{{ snake_name }}.html
-
-.. raw:: html
-
-    <style>
-    #deck-container {
-        height: 50vh;
-        max-width: 650px;
-        width: 100%;
-    }
-    #deck-link {
-        float: right;
-        position: relative;
-        top: -20px;
-    }
-    </style>
-
-Source
-------
-
-.. code-block:: python
-
-{{ python_code|indent(4, True) }}
-
-"""
-)
-
-
-EXAMPLE_GLOB = "../examples/*.py"
-GALLERY_DIR = "./gallery/"
-HTML_DIR = "./gallery/html/"
-STATIC_PATH = "../_static/"
-DECKGL_URL_BASE = "https://deck.gl/docs/api-reference/layers/"
-
-
-def create_rst(fname):
-    asset_name = to_snake_case_layer_name(fname)
+def create_rst(pydeck_example_file_name):
+    asset_name = to_snake_case_string(file_name=pydeck_example_file_name)
     deckgl_docs_layer_name = asset_name.replace("_", "-")
     deckgl_doc_url = None
     if 'layer' not in deckgl_docs_layer_name:
+        # Don't add a deck.gl docs link if we're not referencing a layer
+        # Obviously very rough, should change this eventually to handle views etc
         deckgl_doc_url = DECKGL_URL_BASE + deckgl_docs_layer_name
     # Create new .html examples
-    html_fname = os.path.basename(fname).replace(".py", ".html")
+    html_fname = os.path.basename(pydeck_example_file_name).replace(".py", ".html")
+    # Run the pydeck example and move the .html output
     subprocess.call(
         "{python} {fname}; mv {html_src} {html_dest}".format(
-            python=sys.executable, fname=fname, html_src=html_fname, html_dest=HTML_DIR,
+            python=sys.executable, fname=pydeck_example_file_name, html_src=html_fname, html_dest=HTML_DIR,
         ),
         shell=True,
     )
-    python_code = open(fname, "r").read()
+    python_code = open(pydeck_example_file_name, "r").read()
     doc_source = DOC_TEMPLATE.render(
         page_title=to_presentation_name(asset_name),
         snake_name=asset_name,
         python_code=python_code,
-        hosted_html_path=os.path.join(STATIC_PATH, html_fname),
+        hosted_html_path=os.path.join(HOSTED_STATIC_PATH, html_fname),
         deckgl_doc_url=deckgl_doc_url,
     )
     rst_path = os.path.join(GALLERY_DIR, asset_name + ".rst")
     f = open(rst_path, "w+")
-    print("* Converted %s to %s" % (fname, rst_path))
+    print("* Converted %s to %s" % (pydeck_example_file_name, rst_path))
     f.write(doc_source)
     f.close()
 
 
 def main():
     pool = Pool(processes=4)
-    candidate_files = [f for f in glob.glob(EXAMPLE_GLOB)]
+    candidate_files = [f for f in EXAMPLE_GLOB]
     if not candidate_files:
         raise Exception("No files found to convert")
     subprocess.call("mkdir -p %s" % HTML_DIR, shell=True)

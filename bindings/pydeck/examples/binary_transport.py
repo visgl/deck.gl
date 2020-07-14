@@ -3,7 +3,11 @@ Binary Transport
 ================
 
 Example of binary transport in pydeck. This notebook renders 10k points via the web sockets within
-a Jupyter notebook if you run the ``generate_vis()`` function
+a Jupyter notebook if you run with ``generate_vis(notebook_display=True)``
+
+Since binary transfer relies on Jupyter's kernel communication,
+note that the .html in the pydeck documentation does not use binary transfer
+and is just for illustration.
 """
 import pydeck
 
@@ -32,7 +36,7 @@ def generate_graph_data(num_nodes, random_seed):
 
 def make_renderer(nodes, use_binary_transport=False):
     """Creates the pydeck visualization for rendering"""
-    view_state = pydeck.ViewState(offset=[0, 0], latitude=None, longitude=None, bearing=None, pitch=None, zoom=1,)
+    view_state = pydeck.ViewState(offset=[0, 0], latitude=None, longitude=None, bearing=None, pitch=None, zoom=4,)
 
     views = [pydeck.View(type="OrbitView", controller=True)]
 
@@ -63,7 +67,7 @@ def generate_vis(notebook_display=False):
     colors = pydeck.data_utils.assign_random_colors(nodes["group"])
     # Divide by 255 to normalize the colors
     # Specify positions and colors as columns of lists
-    nodes["color"] = nodes.apply(lambda row: [c / 255 for c in colors.get(row["group"])], axis=1)
+    nodes["color"] = nodes.apply(lambda row: [c / 255 if notebook_display else c for c in colors.get(row["group"])], axis=1)
     nodes["position"] = nodes.apply(lambda row: [row["x"], row["y"], row["z"]], axis=1)
 
     # Remove all unused columns
@@ -74,7 +78,7 @@ def generate_vis(notebook_display=False):
 
     if not notebook_display:
         r = make_renderer(nodes, use_binary_transport=False)
-        r.to_html("graph_example.html", notebook_display=notebook_display)
+        r.to_html("binary_transport.html", notebook_display=notebook_display)
     else:
         r = make_renderer(nodes, use_binary_transport=True)
         display(r.show())  # noqa
