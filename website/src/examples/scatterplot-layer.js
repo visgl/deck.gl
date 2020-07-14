@@ -1,5 +1,5 @@
 import React, {Component} from 'react';
-import {MAPBOX_STYLES, DATA_URI} from '../constants/defaults';
+import {MAPBOX_STYLES, DATA_URI, GITHUB_TREE} from '../constants/defaults';
 import {readableInteger} from '../utils/format-utils';
 import App from 'website-examples/scatterplot/app';
 
@@ -7,6 +7,8 @@ import makeExample from '../components/example';
 
 class ScatterPlotDemo extends Component {
   static title = 'Every Person in New York City';
+
+  static code = `${GITHUB_TREE}/examples/website/scatterplot`;
 
   static data = {
     url: `${DATA_URI}/scatterplot-data.txt`,

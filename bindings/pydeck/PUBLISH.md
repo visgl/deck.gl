@@ -28,8 +28,8 @@ This will run Python and JS tests and produce a commit with the release version.
 
 3) Verify that your publications are successful:
 
-- https://pypi.org/project/pydeck/
-- Conda-forge URL TBD
+- [pydeck](https://pypi.org/project/pydeck/)
+- [Conda-forge](https://anaconda.org/conda-forge/pydeck)
 
 4) Inform the deck.gl Slack channel that a new version of pydeck has been published.
 
