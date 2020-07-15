@@ -11,7 +11,7 @@ Overlaid with the satellite imagery from Mapbox to highlight the how terrain aff
 """
 
 import pandas as pd
-import pydeck
+import pydeck as pdk
 
 CATTLE_DATA = "https://raw.githubusercontent.com/ajduberstein/geo_datasets/master/nm_cattle.csv"
 POULTRY_DATA = "https://raw.githubusercontent.com/ajduberstein/geo_datasets/master/nm_chickens.csv"
@@ -34,10 +34,10 @@ COLOR_BREWER_BLUE_SCALE = [
 ]
 
 
-view = pydeck.data_utils.compute_view(cattle_df[["lng", "lat"]])
+view = pdk.data_utils.compute_view(cattle_df[["lng", "lat"]])
 view.zoom = 6
 
-cattle = pydeck.Layer(
+cattle = pdk.Layer(
     "HeatmapLayer",
     data=cattle_df,
     opacity=0.9,
@@ -49,7 +49,7 @@ cattle = pydeck.Layer(
     pickable=True,
 )
 
-poultry = pydeck.Layer(
+poultry = pdk.Layer(
     "HeatmapLayer",
     data=poultry_df,
     opacity=0.9,
@@ -61,10 +61,9 @@ poultry = pydeck.Layer(
 )
 
 
-r = pydeck.Deck(
+r = pdk.Deck(
     layers=[cattle, poultry],
     initial_view_state=view,
-    map_style="mapbox://styles/mapbox/dark-v9",
     tooltip={"text": "Concentration of cattle in blue, concentration of poultry in orange"},
 )
 

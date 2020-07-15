@@ -11,7 +11,7 @@ Overlaid with the satellite imagery from Mapbox to highlight the how terrain aff
 """
 
 import pandas as pd
-import pydeck
+import pydeck as pdk
 
 CATTLE_DATA = "https://raw.githubusercontent.com/ajduberstein/geo_datasets/master/nm_cattle.csv"
 POULTRY_DATA = "https://raw.githubusercontent.com/ajduberstein/geo_datasets/master/nm_chickens.csv"
@@ -25,7 +25,7 @@ cattle_df.columns = HEADER
 poultry_df.columns = HEADER
 
 
-view = pydeck.data_utils.compute_view(cattle_df[["lng", "lat"]])
+view = pdk.data_utils.compute_view(cattle_df[["lng", "lat"]])
 
 p75, p90, p99 = cattle_df["weight"].quantile([0.75, 0.9, 0.99])
 
@@ -48,7 +48,7 @@ CONTOURS_1 = [
 # in meters
 CELL_SIZE = 3000
 
-cattle = pydeck.Layer(
+cattle = pdk.Layer(
     "ContourLayer",
     data=cattle_df,
     get_position=["lng", "lat"],
@@ -59,7 +59,7 @@ cattle = pydeck.Layer(
     pickable=True,
 )
 
-poultry = pydeck.Layer(
+poultry = pdk.Layer(
     "ContourLayer",
     data=poultry_df,
     get_position=["lng", "lat"],
@@ -71,10 +71,10 @@ poultry = pydeck.Layer(
 )
 
 
-r = pydeck.Deck(
+r = pdk.Deck(
     layers=[cattle, poultry],
     initial_view_state=view,
-    map_style="mapbox://styles/mapbox/satellite-v9",
+    map_style=pdk.map_styles.SATELLITE,
     tooltip={"text": "Concentration of cattle in blue, concentration of poultry in orange"},
 )
 

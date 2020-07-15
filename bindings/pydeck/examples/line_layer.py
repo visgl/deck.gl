@@ -5,14 +5,14 @@ LineLayer
 Flights from Heathrow around Europe, adapted from the deck.gl documentation.
 """
 
-import pydeck
+import pydeck as pdk
 
 DATA_URL = {
     "AIRPORTS": "https://raw.githubusercontent.com/visgl/deck.gl-data/master/examples/line/airports.json",
     "FLIGHT_PATHS": "https://raw.githubusercontent.com/visgl/deck.gl-data/master/examples/line/heathrow-flights.json",  # noqa
 }
 
-INITIAL_VIEW_STATE = pydeck.ViewState(latitude=47.65, longitude=7, zoom=4.5, max_zoom=16, pitch=50, bearing=0)
+INITIAL_VIEW_STATE = pdk.ViewState(latitude=47.65, longitude=7, zoom=4.5, max_zoom=16, pitch=50, bearing=0)
 
 # RGBA value generated in Javascript by deck.gl's Javascript expression parser
 GET_COLOR_JS = [
@@ -22,7 +22,7 @@ GET_COLOR_JS = [
     "255 * (1 - (start[2] / 10000))",
 ]
 
-scatterplot = pydeck.Layer(
+scatterplot = pdk.Layer(
     "ScatterplotLayer",
     DATA_URL["AIRPORTS"],
     radius_scale=20,
@@ -32,7 +32,7 @@ scatterplot = pydeck.Layer(
     pickable=True,
 )
 
-line_layer = pydeck.Layer(
+line_layer = pdk.Layer(
     "LineLayer",
     DATA_URL["FLIGHT_PATHS"],
     get_source_position="start",
@@ -47,5 +47,5 @@ line_layer = pydeck.Layer(
 
 layers = [scatterplot, line_layer]
 
-r = pydeck.Deck(layers=layers, initial_view_state=INITIAL_VIEW_STATE)
+r = pdk.Deck(layers=layers, initial_view_state=INITIAL_VIEW_STATE)
 r.to_html("line_layer.html")

@@ -8,8 +8,8 @@ Property values in Vancouver, Canada, adapted from the deck.gl example pages.
 
 import math
 
-import pydeck
 import pandas as pd
+import pydeck as pdk
 
 # Load in the JSON data
 DATA_URL = "https://raw.githubusercontent.com/visgl/deck.gl-data/master/examples/geojson/vancouver-blocks.json"
@@ -72,13 +72,13 @@ lighting_effect = {
     "directionalLights": [sunlight],
 }
 
-view_state = pydeck.ViewState(
+view_state = pdk.ViewState(
     **{"latitude": 49.254, "longitude": -123.13, "zoom": 11, "maxZoom": 16, "pitch": 45, "bearing": 0}
 )
 
 LAND_COVER = [[[-123.0, 49.196], [-123.0, 49.324], [-123.306, 49.324], [-123.306, 49.196]]]
 
-polygon_layer = pydeck.Layer(
+polygon_layer = pdk.Layer(
     "PolygonLayer",
     LAND_COVER,
     stroked=False,
@@ -87,7 +87,7 @@ polygon_layer = pydeck.Layer(
     get_fill_color=[0, 0, 0, 20],
 )
 
-polygon_layer = pydeck.Layer(
+polygon_layer = pdk.Layer(
     "PolygonLayer",
     df,
     id="geojson",
@@ -106,11 +106,11 @@ polygon_layer = pydeck.Layer(
 
 tooltip = {"html": "<b>Value per Square Meter:</b> {valuePerSqm} <br /><b>Growth rate:</b> {growth}"}
 
-r = pydeck.Deck(
+r = pdk.Deck(
     polygon_layer,
     initial_view_state=view_state,
     effects=[lighting_effect],
-    map_style="mapbox://styles/mapbox/light-v9",
+    map_style=pdk.map_styles.LIGHT,
     tooltip=tooltip,
 )
 r.to_html("polygon_layer.html")

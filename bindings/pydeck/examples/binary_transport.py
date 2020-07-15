@@ -54,7 +54,7 @@ def make_renderer(nodes, use_binary_transport=False):
         radius=50,
     )
 
-    return pydeck.Deck(layers=[nodes_layer], initial_view_state=view_state, views=views, map_style=None,)
+    return pydeck.Deck(layers=[nodes_layer], initial_view_state=view_state, views=views, map_provider=None)
 
 
 r = None

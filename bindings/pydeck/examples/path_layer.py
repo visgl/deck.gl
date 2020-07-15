@@ -5,8 +5,8 @@ PathLayer
 Locations of the Bay Area Rapid Transit lines.
 """
 
-import pydeck
 import pandas as pd
+import pydeck as pdk
 
 DATA_URL = "https://raw.githubusercontent.com/visgl/deck.gl-data/master/website/bart-lines.json"
 df = pd.read_json(DATA_URL)
@@ -20,9 +20,9 @@ def hex_to_rgb(h):
 df["color"] = df["color"].apply(hex_to_rgb)
 
 
-view_state = pydeck.ViewState(latitude=37.782556, longitude=-122.3484867, zoom=10)
+view_state = pdk.ViewState(latitude=37.782556, longitude=-122.3484867, zoom=10)
 
-layer = pydeck.Layer(
+layer = pdk.Layer(
     type="PathLayer",
     data=df,
     pickable=True,
@@ -33,5 +33,5 @@ layer = pydeck.Layer(
     get_width=5,
 )
 
-r = pydeck.Deck(layers=[layer], initial_view_state=view_state, tooltip={"text": "{name}"})
+r = pdk.Deck(layers=[layer], initial_view_state=view_state, tooltip={"text": "{name}"})
 r.to_html("path_layer.html")

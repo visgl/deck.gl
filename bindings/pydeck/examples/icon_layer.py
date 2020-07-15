@@ -5,7 +5,7 @@ IconLayer
 Location of biergartens in Germany listed on OpenStreetMap as of early 2020.
 """
 
-import pydeck
+import pydeck as pdk
 import pandas as pd
 
 
@@ -27,9 +27,9 @@ data["icon_data"] = None
 for i in data.index:
     data["icon_data"][i] = icon_data
 
-view_state = pydeck.data_utils.compute_view(data[["lon", "lat"]], 0.1)
+view_state = pdk.data_utils.compute_view(data[["lon", "lat"]], 0.1)
 
-icon_layer = pydeck.Layer(
+icon_layer = pdk.Layer(
     type="IconLayer",
     data=data,
     get_icon="icon_data",
@@ -39,5 +39,5 @@ icon_layer = pydeck.Layer(
     pickable=True,
 )
 
-r = pydeck.Deck(layers=[icon_layer], initial_view_state=view_state, tooltip={"text": "{tags}"})
+r = pdk.Deck(layers=[icon_layer], initial_view_state=view_state, tooltip={"text": "{tags}"})
 r.to_html("icon_layer.html")
