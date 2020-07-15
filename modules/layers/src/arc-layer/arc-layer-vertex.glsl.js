@@ -144,10 +144,12 @@ void main(void) {
 
   vec4 curr;
   vec4 next;
+  vec3 source;
+  vec3 target;
 
   if ((greatCircle || project_uProjectionMode == PROJECTION_MODE_GLOBE) && project_uCoordinateSystem == COORDINATE_SYSTEM_LNGLAT) {
-    vec3 source = project_globe_(vec3(instanceSourcePositions.xy, 0.0));
-    vec3 target = project_globe_(vec3(instanceTargetPositions.xy, 0.0));
+    source = project_globe_(vec3(instanceSourcePositions.xy, 0.0));
+    target = project_globe_(vec3(instanceTargetPositions.xy, 0.0));
     float angularDist = getAngularDist(instanceSourcePositions.xy, instanceTargetPositions.xy);
   
     float prevSegmentRatio = getSegmentRatio(max(0.0, segmentIndex - 1.0));
@@ -182,8 +184,8 @@ void main(void) {
     next = project_position_to_clipspace(nextPos, nextPos64Low, vec3(0.0));
   
   } else {
-    vec3 source = project_position(instanceSourcePositions, instanceSourcePositions64Low);
-    vec3 target = project_position(instanceTargetPositions, instanceTargetPositions64Low);
+    source = project_position(instanceSourcePositions, instanceSourcePositions64Low);
+    target = project_position(instanceTargetPositions, instanceTargetPositions64Low);
 
     float nextSegmentRatio = getSegmentRatio(segmentIndex + indexDir);
     vec3 currPos = interpolateFlat(source, target, segmentRatio);
