@@ -29,7 +29,7 @@ def create_rst(pydeck_example_file_name):
     asset_name = to_snake_case_string(file_name=pydeck_example_file_name)
     deckgl_docs_layer_name = asset_name.replace("_", "-")
     deckgl_doc_url = None
-    if 'layer' not in deckgl_docs_layer_name:
+    if 'layer' in deckgl_docs_layer_name:
         # Don't add a deck.gl docs link if we're not referencing a layer
         # Obviously very rough, should change this eventually to handle views etc
         deckgl_doc_url = DECKGL_URL_BASE + deckgl_docs_layer_name

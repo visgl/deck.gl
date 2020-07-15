@@ -16,12 +16,8 @@ HTML_TEMPLATE = jinja2.Template(
 }
 .thumb-text {
   z-index: 1;
-  margin-left: 2px;
-  bottom: 0;
-  left: 0;
-  position: absolute;
+  margin: 5px;
   font-weight: 100;
-  color: white;
   background: charcoal;
 }
 .grid-cell:hover {
@@ -32,7 +28,6 @@ HTML_TEMPLATE = jinja2.Template(
 
 <div class='wrapper'>
 {% for gallery_example in gallery_examples %}
-  {# Sphinx decides where these files get hosted but it's /_images #}
   <div class='grid-cell'>
       <a href="./gallery/{{gallery_example}}.html">
     <img width="200" src="./_images/{{gallery_example}}.png"></img>
