@@ -67,7 +67,9 @@ def generate_vis(notebook_display=False):
     colors = pydeck.data_utils.assign_random_colors(nodes["group"])
     # Divide by 255 to normalize the colors
     # Specify positions and colors as columns of lists
-    nodes["color"] = nodes.apply(lambda row: [c / 255 if notebook_display else c for c in colors.get(row["group"])], axis=1)
+    nodes["color"] = nodes.apply(
+        lambda row: [c / 255 if notebook_display else c for c in colors.get(row["group"])], axis=1
+    )
     nodes["position"] = nodes.apply(lambda row: [row["x"], row["y"], row["z"]], axis=1)
 
     # Remove all unused columns
@@ -78,7 +80,7 @@ def generate_vis(notebook_display=False):
 
     if not notebook_display:
         r = make_renderer(nodes, use_binary_transport=False)
-        r.to_html("binary_transport.html", css_background_color='charcoal', notebook_display=notebook_display)
+        r.to_html("binary_transport.html", css_background_color="charcoal", notebook_display=notebook_display)
     else:
         r = make_renderer(nodes, use_binary_transport=True)
         display(r.show())  # noqa

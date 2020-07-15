@@ -52,7 +52,7 @@ deck = pydeck.Deck(
     tooltip={"text": "{name}, {primary_fuel} plant, {country}"},
     layers=layers,
     # Note that this must be set for the globe to be opaque
-    parameters={"cull": True}
+    parameters={"cull": True},
 )
 
 deck.to_html("globe_view.html", css_background_color="black")

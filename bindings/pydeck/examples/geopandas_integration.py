@@ -15,11 +15,8 @@ layers = [
         get_position="geometry.coordinates",
         get_size=16,
         get_color=[255, 255, 255],
-        get_text="name"
+        get_text="name",
     ),
 ]
 
-pdk.Deck(layers, map_provider=None).to_html(
-    "geopandas_integration.html",
-    css_background_color='cornflowerblue'
-)
+pdk.Deck(layers, map_provider=None).to_html("geopandas_integration.html", css_background_color="cornflowerblue")
