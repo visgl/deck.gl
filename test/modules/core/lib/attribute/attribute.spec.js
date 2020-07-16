@@ -535,6 +535,7 @@ test('Attribute#updateBuffer#noAlloc', t => {
 test('Attribute#standard accessor - variable width', t => {
   const TEST_PROPS = {
     data: [
+      {id: 'Empty', value: [], color: [0, 255, 0]},
       {id: 'A', value: [10, 11], color: [[255, 0, 0], [255, 255, 0]]},
       {id: 'B', value: [20], color: [[128, 128, 128], [128, 128, 128]]},
       {id: 'C', value: [30, 31, 32], color: [255, 255, 255]}
@@ -561,31 +562,14 @@ test('Attribute#standard accessor - variable width', t => {
         defaultValue: [0, 0, 0, 255],
         accessor: 'getColor'
       }),
+      // prettier-ignore
       result: [
-        255,
-        0,
-        0,
-        255,
-        255,
-        255,
-        0,
-        255,
-        128,
-        128,
-        128,
-        255,
-        255,
-        255,
-        255,
-        255,
-        255,
-        255,
-        255,
-        255,
-        255,
-        255,
-        255,
-        255
+        255, 0, 0, 255,
+        255, 255, 0, 255,
+        128, 128, 128, 255,
+        255, 255, 255, 255,
+        255, 255, 255, 255,
+        255, 255, 255, 255
       ]
     }
   ];
@@ -593,7 +577,7 @@ test('Attribute#standard accessor - variable width', t => {
   for (const testCase of TEST_CASES) {
     const {attribute, result} = testCase;
     attribute.setNeedsUpdate(true);
-    attribute.startIndices = [0, 2, 3];
+    attribute.startIndices = [0, 0, 2, 3];
     attribute.allocate(10);
     attribute.updateBuffer({
       numInstances: 6,
