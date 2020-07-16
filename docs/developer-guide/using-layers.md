@@ -2,7 +2,7 @@
 
 The "Layer" is a core concept of deck.gl. A deck.gl layer is a packaged visualization type that takes a collection of datums, associate each with positions, colors, extrusions, etc., and renders them on a map.
 
-deck.gl provides an extensive [layer catalog](/docs/api-reference/geo-layers/README.md) and is designed to compose many layers together to form complex visuals.
+deck.gl provides an extensive [layer catalog](/docs/api-reference/layers/README.md) and is designed to compose many layers together to form complex visuals.
 
 
 ## Constructing a Layer Instance
