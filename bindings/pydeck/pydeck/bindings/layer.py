@@ -21,7 +21,7 @@ class Layer(JSONMixin):
         here will be specific to the particular deck.gl layer that you are choosing to use.
 
         Please see the deck.gl
-        `Layer catalog <https://deck.gl/#/documentation/deckgl-api-reference/layers/overview>`_
+        `Layer catalog <https://deck.gl/docs/api-reference/layers>`_
         to determine the particular parameters of your layer. You are highly encouraged to look
         at the examples in the pydeck documentation.
 
