@@ -35,6 +35,8 @@ test('UniformTransitionManager#interpolation#update', t => {
   const manager1 = new UniformTransitionManager(timeline);
   const manager2 = new UniformTransitionManager(timeline);
 
+  manager1.add('A', 0, 2, 1000);
+  // Tests that calling `add` consecutively does not crash the transition
   manager1.add('A', 0, 1, 1000);
 
   timeline.setTime(0);
@@ -110,6 +112,8 @@ test('UniformTransitionManager#spring#update', t => {
   const manager = new UniformTransitionManager(timeline);
 
   timeline.setTime(0);
+  manager.add('A', 1, 3, {type: 'spring', stiffness: 0.5});
+  // Tests that calling `add` consecutively does not crash the transition
   manager.add('A', 1, 2, {type: 'spring', stiffness: 0.5});
   manager.add('B', [4, 4], [12, 12], {type: 'spring', stiffness: 0.25, damping: 0.5});
 
