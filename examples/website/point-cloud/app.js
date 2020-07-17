@@ -57,11 +57,9 @@ export default function App({onLoad}) {
     [isLoaded]
   );
 
-  const onDataLoad = ({header, loaderData}) => {
-    // metadata from LAZ file header
-    const {mins, maxs} = loaderData.header;
-
-    if (mins && maxs) {
+  const onDataLoad = ({header}) => {
+    if (header.boundingBox) {
+      const [mins, maxs] = header.boundingBox;
       // File contains bounding box info
       updateViewState({
         ...INITIAL_VIEW_STATE,
