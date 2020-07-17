@@ -19,6 +19,13 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v8.2
 
+#### deck.gl [8.2.3] - July 8 2020
+
+- Fix MapboxLayer error after Deck is finalized (#4782)
+- ArcLayer: Make source and target available for injection (#4788)
+- Fix bug in variable width attribute generation when first element has length 0 (#4790)
+- Make sure uniform transition fromValue is defined (#4786)
+
 #### deck.gl [8.2.2] - July 8 2020
 
 - Fix constant update when using TileLayer with repeated maps (#4753)
