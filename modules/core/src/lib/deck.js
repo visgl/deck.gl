@@ -28,6 +28,7 @@ import DeckPicker from './deck-picker';
 import Tooltip from './tooltip';
 import log from '../utils/log';
 import {deepEqual} from '../utils/deep-equal';
+import typedArrayManager from '../utils/typed-array-manager';
 import deckGlobal from './init';
 
 import {getBrowser} from 'probe.gl/env';
@@ -90,7 +91,20 @@ function getPropTypes(PropTypes) {
     // Experimental props
     _framebuffer: PropTypes.object,
     // Forces a redraw every animation frame
-    _animate: PropTypes.bool
+    _animate: PropTypes.bool,
+
+    // UNSAFE options - not exhaustively tested, not guaranteed to work in all cases, use at your own risk
+
+    // Force disable picking buffer creation, can save memory, e.g. for mobile web browsers
+    _createPickingFBO: PropTypes.bool,
+
+    // Adjust parameters of typed array manager, can save memory e.g. for mobile web browsers
+    _typedArrayManagerProps: PropTypes.object
+    //  overAlloc: number
+    //  poolSize: number
+    //  _discardCPUArrays: false
+    // `_discardCPUArrays` disables CPU copies of GPU attributes, can save memory, e.g. for mobile web browsers
+    // UNSAFE: Enabling `_discardCPUArrays` breaks attribute transitions, deep picking, incremental updates
   };
 }
 
@@ -111,6 +125,9 @@ const defaultProps = {
   touchAction: 'none',
   _framebuffer: null,
   _animate: false,
+  _typedArrayManagerProps: {},
+  _keepCPUAttributes: true,
+  _createPickingFBO: true,
 
   onWebGLInitialized: noop,
   onResize: noop,
@@ -252,6 +269,11 @@ export default class Deck {
     if (props.initialViewState && !deepEqual(this.props.initialViewState, props.initialViewState)) {
       // Overwrite internal view state
       this.viewState = props.initialViewState;
+    }
+
+    // UNSAFE/experimental props
+    if (props._typedArrayManagerProps) {
+      typedArrayManager.setProps(props._typedArrayManagerProps);
     }
 
     // Merge with existing props
