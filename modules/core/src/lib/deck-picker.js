@@ -57,8 +57,8 @@ export default class DeckPicker {
       this._onError = props.onError;
     }
 
-    if ('_picking' in props) {
-      this._picking = props._picking;
+    if ('_pickable' in props) {
+      this._pickable = props._pickable;
     }
   }
 
@@ -107,7 +107,7 @@ export default class DeckPicker {
   _resizeBuffer() {
     const {gl} = this;
 
-    if (this._picking === false) {
+    if (this._pickable === false) {
       return null;
     }
 

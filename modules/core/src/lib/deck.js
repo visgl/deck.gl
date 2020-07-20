@@ -96,7 +96,7 @@ function getPropTypes(PropTypes) {
     // UNSAFE options - not exhaustively tested, not guaranteed to work in all cases, use at your own risk
 
     // Set to false to disable picking - avoiding picking buffer creation can save memory for mobile web browsers
-    _picking: PropTypes.bool,
+    _pickable: PropTypes.bool,
 
     // Adjust parameters of typed array manager, can save memory e.g. for mobile web browsers
     _typedArrayManagerProps: PropTypes.object //  {overAlloc: number, poolSize: number, _discardCPUArrays: boolean}
@@ -122,7 +122,7 @@ const defaultProps = {
   touchAction: 'none',
   _framebuffer: null,
   _animate: false,
-  _picking: true, // Set to false to disable picking and prevent
+  _pickable: true,
   _typedArrayManagerProps: {},
 
   onWebGLInitialized: noop,
