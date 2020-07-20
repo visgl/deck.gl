@@ -215,6 +215,11 @@ export default class Deck {
 
     this.setProps(props);
 
+    // UNSAFE/experimental prop: only set at initialization to avoid performance hit
+    if (props._typedArrayManagerProps) {
+      typedArrayManager.setProps(props._typedArrayManagerProps);
+    }
+
     this.animationLoop.start();
   }
 
@@ -265,11 +270,6 @@ export default class Deck {
     if (props.initialViewState && !deepEqual(this.props.initialViewState, props.initialViewState)) {
       // Overwrite internal view state
       this.viewState = props.initialViewState;
-    }
-
-    // UNSAFE/experimental props
-    if (props._typedArrayManagerProps) {
-      typedArrayManager.setProps(props._typedArrayManagerProps);
     }
 
     // Merge with existing props
