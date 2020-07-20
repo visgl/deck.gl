@@ -46,7 +46,6 @@ export default class DeckPicker {
       info: null
     };
     this._onError = null;
-    this.props = {};
   }
 
   setProps(props) {
@@ -58,7 +57,9 @@ export default class DeckPicker {
       this._onError = props.onError;
     }
 
-    Object.assign(this.props, props);
+    if ('_picking' in props) {
+      this._picking = props._picking;
+    }
   }
 
   finalize() {
@@ -104,9 +105,9 @@ export default class DeckPicker {
 
   // Private
   _resizeBuffer() {
-    const {gl, props} = this;
+    const {gl} = this;
 
-    if (props._createPickingFBO === false) {
+    if (this._picking === false) {
       return null;
     }
 

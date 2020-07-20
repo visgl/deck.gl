@@ -95,15 +95,12 @@ function getPropTypes(PropTypes) {
 
     // UNSAFE options - not exhaustively tested, not guaranteed to work in all cases, use at your own risk
 
-    // Force disable picking buffer creation, can save memory, e.g. for mobile web browsers
-    _createPickingFBO: PropTypes.bool,
+    // Set to false to disable picking - avoiding picking buffer creation can save memory for mobile web browsers
+    _picking: PropTypes.bool,
 
     // Adjust parameters of typed array manager, can save memory e.g. for mobile web browsers
-    _typedArrayManagerProps: PropTypes.object
-    //  overAlloc: number
-    //  poolSize: number
-    //  _discardCPUArrays: false
-    // `_discardCPUArrays` disables CPU copies of GPU attributes, can save memory, e.g. for mobile web browsers
+    _typedArrayManagerProps: PropTypes.object //  {overAlloc: number, poolSize: number, _discardCPUArrays: boolean}
+    // disables CPU copies of GPU attributes to save memory for mobile web browsers
     // UNSAFE: Enabling `_discardCPUArrays` breaks attribute transitions, deep picking, incremental updates
   };
 }
@@ -125,9 +122,8 @@ const defaultProps = {
   touchAction: 'none',
   _framebuffer: null,
   _animate: false,
+  _picking: true, // Set to false to disable picking and prevent
   _typedArrayManagerProps: {},
-  _keepCPUAttributes: true,
-  _createPickingFBO: true,
 
   onWebGLInitialized: noop,
   onResize: noop,
