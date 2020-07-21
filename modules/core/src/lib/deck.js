@@ -28,6 +28,7 @@ import DeckPicker from './deck-picker';
 import Tooltip from './tooltip';
 import log from '../utils/log';
 import {deepEqual} from '../utils/deep-equal';
+import typedArrayManager from '../utils/typed-array-manager';
 import deckGlobal from './init';
 
 import {getBrowser} from 'probe.gl/env';
@@ -90,7 +91,15 @@ function getPropTypes(PropTypes) {
     // Experimental props
     _framebuffer: PropTypes.object,
     // Forces a redraw every animation frame
-    _animate: PropTypes.bool
+    _animate: PropTypes.bool,
+
+    // UNSAFE options - not exhaustively tested, not guaranteed to work in all cases, use at your own risk
+
+    // Set to false to disable picking - avoiding picking buffer creation can save memory for mobile web browsers
+    _pickable: PropTypes.bool,
+
+    // Adjust parameters of typed array manager, can save memory e.g. for mobile web browsers
+    _typedArrayManagerProps: PropTypes.object //  {overAlloc: number, poolSize: number}
   };
 }
 
@@ -111,6 +120,8 @@ const defaultProps = {
   touchAction: 'none',
   _framebuffer: null,
   _animate: false,
+  _pickable: true,
+  _typedArrayManagerProps: {},
 
   onWebGLInitialized: noop,
   onResize: noop,
@@ -201,6 +212,11 @@ export default class Deck {
     this._metricsCounter = 0;
 
     this.setProps(props);
+
+    // UNSAFE/experimental prop: only set at initialization to avoid performance hit
+    if (props._typedArrayManagerProps) {
+      typedArrayManager.setProps(props._typedArrayManagerProps);
+    }
 
     this.animationLoop.start();
   }
