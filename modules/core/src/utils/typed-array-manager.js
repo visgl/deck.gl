@@ -1,9 +1,12 @@
 export class TypedArrayManager {
-  constructor({overAlloc = 2, poolSize = 100} = {}) {
-    this.overAlloc = overAlloc;
-    this.poolSize = poolSize;
-
+  constructor(props) {
     this._pool = [];
+    this.props = {overAlloc: 2, poolSize: 100};
+    this.setProps(props);
+  }
+
+  setProps(props) {
+    Object.assign(this.props, props);
   }
 
   allocate(typedArray, count, {size = 1, type, padding = 0, copy = false, initialize = false}) {
@@ -38,7 +41,7 @@ export class TypedArrayManager {
 
   _allocate(Type, size, initialize) {
     // Allocate at least one element to ensure a valid buffer
-    size = Math.max(Math.ceil(size * this.overAlloc), 1);
+    size = Math.max(Math.ceil(size * this.props.overAlloc), 1);
 
     // Check if available in pool
     const pool = this._pool;
@@ -69,10 +72,10 @@ export class TypedArrayManager {
     const i = pool.findIndex(b => b.byteLength >= byteLength);
     if (i < 0) {
       pool.push(buffer);
-    } else if (i > 0 || pool.length < this.poolSize) {
+    } else if (i > 0 || pool.length < this.props.poolSize) {
       pool.splice(i, 0, buffer);
     }
-    if (pool.length > this.poolSize) {
+    if (pool.length > this.props.poolSize) {
       // Drop the smallest one
       pool.shift();
     }
