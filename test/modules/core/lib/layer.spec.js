@@ -425,6 +425,21 @@ test('Layer#calculateInstancePickingColors', t => {
       },
       onAfterUpdate: ({layer}) => {
         const {instancePickingColors} = layer.getAttributeManager().getAttributes();
+        t.ok(instancePickingColors.state.constant, 'instancePickingColors is set to constant');
+        t.deepEquals(
+          instancePickingColors.value,
+          [0, 0, 0],
+          'instancePickingColors is set to constant'
+        );
+      }
+    },
+    {
+      updateProps: {
+        pickable: true
+      },
+      onAfterUpdate: ({layer}) => {
+        const {instancePickingColors} = layer.getAttributeManager().getAttributes();
+        t.notOk(instancePickingColors.state.constant, 'instancePickingColors is enabled');
         t.deepEquals(
           instancePickingColors.value.subarray(0, 6),
           [1, 0, 0, 2, 0, 0],
@@ -434,7 +449,9 @@ test('Layer#calculateInstancePickingColors', t => {
     },
     {
       updateProps: {
-        data: new Array(3).fill(0)
+        data: new Array(3).fill(0),
+        // If a layer has been pickable once, picking colors attribute is always populated
+        pickable: false
       },
       onAfterUpdate: ({layer}) => {
         const {instancePickingColors} = layer.getAttributeManager().getAttributes();
