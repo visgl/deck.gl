@@ -56,6 +56,10 @@ export default class DeckPicker {
     if ('onError' in props) {
       this._onError = props.onError;
     }
+
+    if ('_pickable' in props) {
+      this._pickable = props._pickable;
+    }
   }
 
   finalize() {
@@ -102,6 +106,11 @@ export default class DeckPicker {
   // Private
   _resizeBuffer() {
     const {gl} = this;
+
+    if (this._pickable === false) {
+      return null;
+    }
+
     // Create a frame buffer if not already available
     if (!this.pickingFBO) {
       this.pickingFBO = new Framebuffer(gl);
@@ -148,7 +157,10 @@ export default class DeckPicker {
   }) {
     layers = this._getPickable(layers);
 
-    this._resizeBuffer();
+    if (!this._resizeBuffer()) {
+      return {result: [], emptyInfo: null};
+    }
+
     // Convert from canvas top-left to WebGL bottom-left coordinates
     // Top-left coordinates [x, y] to bottom-left coordinates [deviceX, deviceY]
     // And compensate for pixelRatio
