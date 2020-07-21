@@ -294,6 +294,9 @@ export default class Attribute extends DataColumn {
 
   /* eslint-disable max-depth, max-statements */
   _autoUpdater(attribute, {data, startRow, endRow, props, numInstances}) {
+    if (attribute.constant) {
+      return;
+    }
     const {settings, state, value, size, startIndices} = attribute;
 
     const {accessor, transform} = settings;
@@ -342,7 +345,6 @@ export default class Attribute extends DataColumn {
         i += size;
       }
     }
-    attribute.constant = false;
   }
   /* eslint-enable max-depth, max-statements */
 
