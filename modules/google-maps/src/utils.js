@@ -1,4 +1,4 @@
-/* global document, google */
+/* global google */
 import {Deck} from '@deck.gl/core';
 
 // https://en.wikipedia.org/wiki/Web_Mercator_projection#Formulas
@@ -10,7 +10,7 @@ const MAX_LATITUDE = 85.05113;
  * @param overlay (google.maps.OverlayView) - A maps Overlay instance
  * @param [deck] (Deck) - a previously created instances
  */
-export function createDeckInstance(map, overlay, deck) {
+export function createDeckInstance(map, overlay, deck, props) {
   if (deck) {
     if (deck.props.userData._googleMap === map) {
       return deck;
@@ -26,7 +26,8 @@ export function createDeckInstance(map, overlay, deck) {
   };
 
   deck = new Deck({
-    canvas: createDeckCanvas(overlay),
+    ...props,
+    parent: getContainer(overlay),
     initialViewState: {
       longitude: 0,
       latitude: 0,
@@ -49,16 +50,8 @@ export function createDeckInstance(map, overlay, deck) {
   return deck;
 }
 
-function createDeckCanvas(overlay) {
-  const container = overlay.getPanes().overlayLayer;
-  const deckCanvas = document.createElement('canvas');
-  Object.assign(deckCanvas.style, {
-    // map container position is always non-static
-    position: 'absolute'
-  });
-
-  container.appendChild(deckCanvas);
-  return deckCanvas;
+function getContainer(overlay) {
+  return overlay.getPanes().overlayLayer;
 }
 
 /**
@@ -74,9 +67,6 @@ export function destroyDeckInstance(deck) {
   }
 
   deck.finalize();
-
-  // Remove canvas
-  deck.canvas.parentNode.removeChild(deck.canvas);
 }
 
 /* eslint-disable max-statements */
