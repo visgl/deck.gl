@@ -277,10 +277,8 @@ export default class DataColumn {
       copy
     });
 
-    // Hack - Using typed array manager props to let app pass this prop here
-    if (!typedArrayManager.props._discardCPUArrays) {
-      this.value = value;
-    }
+    this.value = value;
+
     const {buffer, byteOffset} = this;
 
     if (buffer.byteLength < value.byteLength + byteOffset) {

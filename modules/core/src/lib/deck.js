@@ -99,9 +99,7 @@ function getPropTypes(PropTypes) {
     _pickable: PropTypes.bool,
 
     // Adjust parameters of typed array manager, can save memory e.g. for mobile web browsers
-    _typedArrayManagerProps: PropTypes.object //  {overAlloc: number, poolSize: number, _discardCPUArrays: boolean}
-    // disables CPU copies of GPU attributes to save memory for mobile web browsers
-    // UNSAFE: Enabling `_discardCPUArrays` breaks attribute transitions, deep picking, incremental updates
+    _typedArrayManagerProps: PropTypes.object //  {overAlloc: number, poolSize: number}
   };
 }
 
