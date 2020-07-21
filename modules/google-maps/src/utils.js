@@ -21,6 +21,7 @@ export function createDeckInstance(map, overlay, deck) {
 
   const eventListeners = {
     click: null,
+    dblclick: null,
     mousemove: null,
     mouseout: null
   };
@@ -165,33 +166,37 @@ function getEventPixel(event, deck) {
 
 // Triggers picking on a mouse event
 function handleMouseEvent(deck, type, event) {
-  let callback;
-  const pixel = getEventPixel(event, deck);
+  const mockEvent = {
+    type,
+    offsetCenter: getEventPixel(event, deck),
+    srcEvent: event
+  };
 
   switch (type) {
     case 'click':
       // Hack: because we do not listen to pointer down, perform picking now
-      deck._lastPointerDownInfo = deck.pickObject(pixel);
-      callback = deck._onEvent;
+      deck._lastPointerDownInfo = deck.pickObject(mockEvent.offsetCenter);
+      mockEvent.tapCount = 1;
+      deck._onEvent(mockEvent);
+      break;
+
+    case 'dblclick':
+      mockEvent.type = 'click';
+      mockEvent.tapCount = 2;
+      deck._onEvent(mockEvent);
       break;
 
     case 'mousemove':
-      type = 'pointermove';
-      callback = deck._onPointerMove;
+      mockEvent.type = 'pointermove';
+      deck._onPointerMove(mockEvent);
       break;
 
     case 'mouseout':
-      type = 'pointerleave';
-      callback = deck._onPointerMove;
+      mockEvent.type = 'pointerleave';
+      deck._onPointerMove(mockEvent);
       break;
 
     default:
       return;
   }
-
-  callback({
-    type,
-    offsetCenter: pixel,
-    srcEvent: event
-  });
 }
