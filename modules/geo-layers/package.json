@@ -31,6 +31,7 @@
   },
   "dependencies": {
     "@loaders.gl/3d-tiles": "^2.2.3",
+    "@loaders.gl/core": "^2.2.3",
     "@loaders.gl/loader-utils": "^2.2.3",
     "@loaders.gl/mvt": "^2.2.3",
     "@loaders.gl/terrain": "^2.2.3",
