@@ -124,9 +124,6 @@ Index
 .. raw:: html
 
    <style>
-     .section #index {
-       display: none;
-     }
      .logo {
        width: 320px;
      }

@@ -36,4 +36,4 @@ geojson = pydeck.Layer(
 
 r = pydeck.Deck(layers=[polygon, geojson], initial_view_state=INITIAL_VIEW_STATE)
 
-r.to_html("geojson_layer.html", notebook_display=False)
+r.to_html("geojson_layer.html")

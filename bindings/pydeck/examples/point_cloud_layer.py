@@ -31,4 +31,4 @@ view_state = pydeck.ViewState(target=target, controller=True, rotation_x=15, rot
 view = pydeck.View(type="OrbitView", controller=True)
 
 r = pydeck.Deck(point_cloud_layer, initial_view_state=view_state, views=[view])
-r.to_html("point_cloud_layer.html", css_background_color="#add8e6", notebook_display=False)
+r.to_html("point_cloud_layer.html", css_background_color="#add8e6")
