@@ -150,16 +150,28 @@ export function getViewState(map, overlay) {
 }
 /* eslint-enable max-statements */
 
+function getEventPixel(event, deck) {
+  if (event.pixel) {
+    return event.pixel;
+  }
+  // event.pixel may not exist when clicking on a POI
+  // https://developers.google.com/maps/documentation/javascript/reference/map#MouseEvent
+  const point = deck.getViewports()[0].project([event.latLng.lng(), event.latLng.lat()]);
+  return {
+    x: point[0],
+    y: point[1]
+  };
+}
+
 // Triggers picking on a mouse event
 function handleMouseEvent(deck, type, event) {
   let callback;
+  const pixel = getEventPixel(event, deck);
+
   switch (type) {
     case 'click':
       // Hack: because we do not listen to pointer down, perform picking now
-      deck._lastPointerDownInfo = deck.pickObject({
-        x: event.pixel.x,
-        y: event.pixel.y
-      });
+      deck._lastPointerDownInfo = deck.pickObject(pixel);
       callback = deck._onEvent;
       break;
 
@@ -179,7 +191,7 @@ function handleMouseEvent(deck, type, event) {
 
   callback({
     type,
-    offsetCenter: event.pixel,
+    offsetCenter: pixel,
     srcEvent: event
   });
 }
