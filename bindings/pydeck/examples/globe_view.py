@@ -42,7 +42,7 @@ layers = [
     pydeck.Layer(
         "ColumnLayer",
         id="power-plant",
-        data=POWER_PLANTS,
+        data=df,
         get_elevation="capacity_mw",
         get_position=["longitude", "latitude"],
         elevation_scale=100,
@@ -65,7 +65,8 @@ deck = pydeck.Deck(
     views=[view],
     initial_view_state=view_state,
     tooltip={"text": "{name}, {primary_fuel} plant, {country}"},
-    layers=layers
+    layers=layers,
+    parameters={"cull": True}
 )
 
 deck.to_html("globe_view.html", css_background_color="black")
