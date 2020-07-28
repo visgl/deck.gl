@@ -69,7 +69,7 @@ test('jupyter-widget: binary-transport', t0 => {
 
   t0.test('processDataBuffer', t => {
     const newDeckProps = processDataBuffer({
-      dataBuffer: EXPECTED_CONVERSION,
+      binary: EXPECTED_CONVERSION,
       convertedJson: jsonConverter.convert(DEMO_JSON_PROPS)
     });
 

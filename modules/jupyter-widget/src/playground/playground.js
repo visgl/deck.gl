@@ -53,17 +53,18 @@ export function initPlayground() {
 
     onMessage({transport, type, json, binary}) {
       const {deck} = transport.userData;
-
+      let convertedJson;
       switch (type) {
         case 'json':
-          let convertedJson = jsonConverter.convert(json);
+          convertedJson = jsonConverter.convert(json);
           deck.setProps(convertedJson);
           break;
 
         case 'json-with-binary':
           convertedJson = jsonConverter.convert(json);
+          const binaryData = transport.jupyterModel.get('data_buffer');
           const propsWithBinary = processDataBuffer({
-            binary,
+            binary: binaryData,
             convertedJson
           });
           deck.setProps(propsWithBinary);
@@ -79,12 +80,12 @@ export function initPlayground() {
 // HELPER FUNCTIONS
 
 // Takes JSON props and combines them with the binary data buffer
-export function processDataBuffer({dataBuffer, convertedJson}) {
+export function processDataBuffer({binary, convertedJson}) {
   for (let i = 0; i < convertedJson.layers.length; i++) {
     const layerId = convertedJson.layers[i].id;
     const layer = convertedJson.layers[i];
     // Replace data on every layer prop
-    convertedJson.layers[i] = layer.clone({data: dataBuffer[layerId]});
+    convertedJson.layers[i] = layer.clone({data: binary[layerId]});
   }
   return convertedJson;
 }
@@ -116,7 +117,8 @@ function handleClick(transport, datum, e) {
 // Handles a warning event
 function handleWarning(transport, warningMessage) {
   const errorBox = createErrorBox();
-  if (transport.jupyterModel.get('js_warning') && errorBox) {
+  const model = transport.jupyterModel;
+  if (model && model.attributes.js_warning && errorBox) {
     errorBox.innerText = warningMessage;
   }
 }
