@@ -6,6 +6,18 @@ Releases and associated GitHub PRs for pydeck are documented here.
 0.4 Releases
 ------------
 
+0.4.0 - Jun 23 2020
+^^^^^^^^^^^^^^^^^^
+- Lock to @deck.gl/jupyter-widget@~8.2.*
+- Suppress warning for IFrame usage (#4775)
+- Fix iframe rendering width's default value (#4764)
+- Simplify API for Deck.to_html() (#4743)
+- Improve integration for GeoPandas (#4744)
+
+0.4.0b2 - Jun 8 2020
+^^^^^^^^^^^^^^^^^^^^
+- Fix JupyterLab 2 bug (#4652)
+
 0.4.0b1 - Jun 4 2020
 ^^^^^^^^^^^^^^^^^^^^
 - Add Google Maps base maps (#4632)

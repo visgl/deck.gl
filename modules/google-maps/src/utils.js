@@ -21,6 +21,7 @@ export function createDeckInstance(map, overlay, deck, props) {
 
   const eventListeners = {
     click: null,
+    dblclick: null,
     mousemove: null,
     mouseout: null
   };
@@ -140,36 +141,52 @@ export function getViewState(map, overlay) {
 }
 /* eslint-enable max-statements */
 
+function getEventPixel(event, deck) {
+  if (event.pixel) {
+    return event.pixel;
+  }
+  // event.pixel may not exist when clicking on a POI
+  // https://developers.google.com/maps/documentation/javascript/reference/map#MouseEvent
+  const point = deck.getViewports()[0].project([event.latLng.lng(), event.latLng.lat()]);
+  return {
+    x: point[0],
+    y: point[1]
+  };
+}
+
 // Triggers picking on a mouse event
 function handleMouseEvent(deck, type, event) {
-  let callback;
+  const mockEvent = {
+    type,
+    offsetCenter: getEventPixel(event, deck),
+    srcEvent: event
+  };
+
   switch (type) {
     case 'click':
       // Hack: because we do not listen to pointer down, perform picking now
-      deck._lastPointerDownInfo = deck.pickObject({
-        x: event.pixel.x,
-        y: event.pixel.y
-      });
-      callback = deck._onEvent;
+      deck._lastPointerDownInfo = deck.pickObject(mockEvent.offsetCenter);
+      mockEvent.tapCount = 1;
+      deck._onEvent(mockEvent);
+      break;
+
+    case 'dblclick':
+      mockEvent.type = 'click';
+      mockEvent.tapCount = 2;
+      deck._onEvent(mockEvent);
       break;
 
     case 'mousemove':
-      type = 'pointermove';
-      callback = deck._onPointerMove;
+      mockEvent.type = 'pointermove';
+      deck._onPointerMove(mockEvent);
       break;
 
     case 'mouseout':
-      type = 'pointerleave';
-      callback = deck._onPointerMove;
+      mockEvent.type = 'pointerleave';
+      deck._onPointerMove(mockEvent);
       break;
 
     default:
       return;
   }
-
-  callback({
-    type,
-    offsetCenter: event.pixel,
-    srcEvent: event
-  });
 }

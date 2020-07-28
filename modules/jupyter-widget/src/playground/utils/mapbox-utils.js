@@ -29,13 +29,4 @@ export function modifyMapboxElements() {
       el.style.display = 'none';
     }
   }
-
-  const footer = document.getElementsByClassName('mapboxgl-ctrl-attrib-inner');
-  if (footer && footer[0]) {
-    const aTag = document.createElement('a');
-    aTag.href = 'https://pydeck.gl';
-    aTag.innerText = 'pydeck | ';
-    aTag.target = '_blank';
-    footer[0].prepend(aTag);
-  }
 }
