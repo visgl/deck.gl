@@ -63,8 +63,7 @@ export default class GoogleMapsOverlay {
 
   /* Private API */
   _onAdd() {
-    this._deck = createDeckInstance(this._map, this._overlay, this._deck);
-    this._deck.setProps(this.props);
+    this._deck = createDeckInstance(this._map, this._overlay, this._deck, this.props);
   }
 
   _onRemove() {
