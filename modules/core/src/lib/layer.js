@@ -121,7 +121,7 @@ const defaultProps = {
   },
 
   // Selection/Highlighting
-  highlightedObjectIndex: null,
+  highlightedObjectIndex: -1,
   autoHighlight: false,
   highlightColor: {type: 'accessor', value: [0, 0, 128, 128]}
 };
@@ -327,6 +327,23 @@ export default class Layer extends Component {
         attributeManager.invalidateAll();
       }
     }
+
+    const neededPickingBuffer = oldProps.highlightedObjectIndex >= 0 || oldProps.pickable;
+    const needPickingBuffer = props.highlightedObjectIndex >= 0 || props.pickable;
+    if (neededPickingBuffer !== needPickingBuffer && attributeManager) {
+      const {pickingColors, instancePickingColors} = attributeManager.attributes;
+      const pickingColorsAttribute = pickingColors || instancePickingColors;
+      if (pickingColorsAttribute) {
+        if (needPickingBuffer && pickingColorsAttribute.constant) {
+          pickingColorsAttribute.constant = false;
+          attributeManager.invalidate(pickingColorsAttribute.id);
+        }
+        if (!pickingColorsAttribute.value && !needPickingBuffer) {
+          pickingColorsAttribute.constant = true;
+          pickingColorsAttribute.value = [0, 0, 0];
+        }
+      }
+    }
   }
 
   // Called once when layer is no longer matched and state will be discarded
@@ -450,6 +467,10 @@ export default class Layer extends Component {
   }
 
   calculateInstancePickingColors(attribute, {numInstances}) {
+    if (attribute.constant) {
+      return;
+    }
+
     // calculateInstancePickingColors always generates the same sequence.
     // pickingColorCache saves the largest generated sequence for reuse
     const cacheSize = pickingColorCache.length / 3;

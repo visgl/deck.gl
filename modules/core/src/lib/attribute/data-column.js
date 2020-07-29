@@ -276,7 +276,9 @@ export default class DataColumn {
       type: this.defaultType,
       copy
     });
+
     this.value = value;
+
     const {buffer, byteOffset} = this;
 
     if (buffer.byteLength < value.byteLength + byteOffset) {
