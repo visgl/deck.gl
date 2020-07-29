@@ -10,7 +10,6 @@ import pandas as pd
 
 COUNTRIES = "https://d2ad6b4ur7yvpq.cloudfront.net/naturalearth-3.3.0/ne_50m_admin_0_scale_rank.geojson"
 POWER_PLANTS = "https://raw.githubusercontent.com/ajduberstein/geo_datasets/master/global_power_plant_database.csv"
-OCEANS = "https://unpkg.com/@geo-maps/earth-waterbodies-10km@0.6.0/map.geo.json"
 
 df = pd.read_csv(POWER_PLANTS)
 
