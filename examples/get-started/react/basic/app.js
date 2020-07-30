@@ -1,7 +1,7 @@
 /* eslint-env browser */
 import React from 'react';
-import { render } from 'react-dom';
-import DeckGL, { GeoJsonLayer, ArcLayer, TileLayer, PathLayer } from 'deck.gl';
+import {render} from 'react-dom';
+import DeckGL, {GeoJsonLayer, ArcLayer, TileLayer, PathLayer} from 'deck.gl';
 
 // source: Natural Earth http://www.naturalearthdata.com/ via geojson.xyz
 const COUNTRIES =
@@ -18,7 +18,7 @@ const INITIAL_VIEW_STATE = {
 };
 
 function mid(a, b, portion) {
-  return a + (portion * (b - a));
+  return a + portion * (b - a);
 }
 
 function Root() {
@@ -44,7 +44,12 @@ function Root() {
       <TileLayer
         // tileSize={128}
         getTileData={async tile => {
-          const { x, y, bbox: { north, east, south, west }, signal } = tile;
+          const {
+            x,
+            y,
+            bbox: {north, east, south, west},
+            signal
+          } = tile;
           const wait = 2000;
           // Math.round((Math.random() * 8) + 2);
           // console.log("waiting", wait); // eslint-disable-line no-console
@@ -52,7 +57,10 @@ function Root() {
           // return new Promise(resolve => setInterval(resolve, wait));
 
           // docker run --rm -it -p 7000:80 ealen/echo-server
-          await fetch(`http://localhost:7000?echo_header=Access-Control-Allow-Origin:*&echo_time=${wait}&echo_body=x:${x},y=${y}`, { signal });
+          await fetch(
+            `http://localhost:7000?echo_header=Access-Control-Allow-Origin:*&echo_time=${wait}&echo_body=x:${x},y=${y}`,
+            {signal}
+          );
 
           return {
             type: 'FeatureCollection',
@@ -67,23 +75,23 @@ function Root() {
                   coordinates: [
                     // top
                     [
-                      [mid(west, east, .1), mid(north, south, .1)],
-                      [mid(west, east, .9), mid(north, south, .1)]
+                      [mid(west, east, 0.1), mid(north, south, 0.1)],
+                      [mid(west, east, 0.9), mid(north, south, 0.1)]
                     ],
                     // right
                     [
-                      [mid(west, east, .9), mid(north, south, .1)],
-                      [mid(west, east, .9), mid(north, south, .9)]
+                      [mid(west, east, 0.9), mid(north, south, 0.1)],
+                      [mid(west, east, 0.9), mid(north, south, 0.9)]
                     ],
                     // bottom
                     [
-                      [mid(west, east, .1), mid(north, south, .9)],
-                      [mid(west, east, .9), mid(north, south, .9)]
+                      [mid(west, east, 0.1), mid(north, south, 0.9)],
+                      [mid(west, east, 0.9), mid(north, south, 0.9)]
                     ],
                     // left
                     [
-                      [mid(west, east, .1), mid(north, south, .1)],
-                      [mid(west, east, .1), mid(north, south, .9)]
+                      [mid(west, east, 0.1), mid(north, south, 0.1)],
+                      [mid(west, east, 0.1), mid(north, south, 0.9)]
                     ]
 
                     //   [west, south],
@@ -95,12 +103,11 @@ function Root() {
                 }
               }
             ]
-          }
+          };
         }}
-
-        renderSubLayers={(props) => {
+        renderSubLayers={props => {
           const {
-            bbox: { west, south, east, north },
+            bbox: {west, south, east, north}
           } = props.tile;
 
           return [
@@ -112,29 +119,19 @@ function Root() {
               getLineColor: [0, 0, 255],
               getFillColor: [0, 0, 255],
               getLineWidth: 2,
-              lineWidthUnits: 'pixels',
+              lineWidthUnits: 'pixels'
             }),
             new PathLayer({
               id: `${props.id}-border`,
-              data: [
-                [
-                  [west, north],
-                  [west, south],
-                  [east, south],
-                  [east, north],
-                  [west, north],
-                ],
-              ],
-              getPath: (d) => d,
+              data: [[[west, north], [west, south], [east, south], [east, north], [west, north]]],
+              getPath: d => d,
               getColor: [255, 0, 0],
               getWidth: 3,
-              widthUnits: 'pixels',
-
-            }),
+              widthUnits: 'pixels'
+            })
           ];
         }}
       />
-
     </DeckGL>
   );
 }

@@ -1,20 +1,20 @@
-import { CompositeLayer, _flatten as flatten } from '@deck.gl/core';
-import { GeoJsonLayer } from '@deck.gl/layers';
+import {CompositeLayer, _flatten as flatten} from '@deck.gl/core';
+import {GeoJsonLayer} from '@deck.gl/layers';
 
-import Tileset2D, { STRATEGY_DEFAULT } from './tileset-2d';
-import { urlType, getURLFromTemplate } from './utils';
+import Tileset2D, {STRATEGY_DEFAULT} from './tileset-2d';
+import {urlType, getURLFromTemplate} from './utils';
 
 const defaultProps = {
   data: [],
   dataComparator: urlType.equals,
-  renderSubLayers: { type: 'function', value: props => new GeoJsonLayer(props), compare: false },
-  getTileData: { type: 'function', optional: true, value: null, compare: false },
+  renderSubLayers: {type: 'function', value: props => new GeoJsonLayer(props), compare: false},
+  getTileData: {type: 'function', optional: true, value: null, compare: false},
   // TODO - change to onViewportLoad to align with Tile3DLayer
-  onViewportLoad: { type: 'function', optional: true, value: null, compare: false },
-  onTileLoad: { type: 'function', value: tile => { }, compare: false },
+  onViewportLoad: {type: 'function', optional: true, value: null, compare: false},
+  onTileLoad: {type: 'function', value: tile => {}, compare: false},
   // eslint-disable-next-line
-  onTileError: { type: 'function', value: err => console.error(err), compare: false },
-  extent: { type: 'array', optional: true, value: null, compare: true },
+  onTileError: {type: 'function', value: err => console.error(err), compare: false},
+  extent: {type: 'array', optional: true, value: null, compare: true},
   tileSize: 512,
   maxZoom: null,
   minZoom: 0,
@@ -34,18 +34,18 @@ export default class TileLayer extends CompositeLayer {
   }
 
   get isLoaded() {
-    const { tileset } = this.state;
+    const {tileset} = this.state;
     return tileset.selectedTiles.every(
       tile => tile.layers && tile.layers.every(layer => layer.isLoaded)
     );
   }
 
-  shouldUpdateState({ changeFlags }) {
+  shouldUpdateState({changeFlags}) {
     return changeFlags.somethingChanged;
   }
 
-  updateState({ props, oldProps, context, changeFlags }) {
-    let { tileset } = this.state;
+  updateState({props, oldProps, context, changeFlags}) {
+    let {tileset} = this.state;
     const createTileCache =
       !tileset ||
       changeFlags.dataChanged ||
@@ -76,7 +76,7 @@ export default class TileLayer extends CompositeLayer {
         onTileError: this._onTileError.bind(this),
         maxRequests
       });
-      this.setState({ tileset });
+      this.setState({tileset});
     } else if (changeFlags.propsChanged || changeFlags.updateTriggersChanged) {
       tileset.setOptions(props);
       // if any props changed, delete the cached layers
@@ -89,10 +89,10 @@ export default class TileLayer extends CompositeLayer {
   }
 
   _updateTileset() {
-    const { tileset } = this.state;
-    const { onViewportLoad, zRange } = this.props;
-    const frameNumber = tileset.update(this.context.viewport, { zRange });
-    const { isLoaded } = tileset;
+    const {tileset} = this.state;
+    const {onViewportLoad, zRange} = this.props;
+    const frameNumber = tileset.update(this.context.viewport, {zRange});
+    const {isLoaded} = tileset;
 
     const loadingStateChanged = this.state.isLoaded !== isLoaded;
     const tilesetChanged = this.state.frameNumber !== frameNumber;
@@ -103,7 +103,7 @@ export default class TileLayer extends CompositeLayer {
 
     if (tilesetChanged) {
       // Save the tileset frame number - trigger a rerender
-      this.setState({ frameNumber });
+      this.setState({frameNumber});
     }
     // Save the loaded state - should not trigger a rerender
     this.state.isLoaded = isLoaded;
@@ -132,8 +132,8 @@ export default class TileLayer extends CompositeLayer {
   // Methods for subclass to override
 
   getTileData(tile) {
-    const { getTileData, fetch, data } = this.props;
-    const { signal } = tile;
+    const {getTileData, fetch, data} = this.props;
+    const {signal} = tile;
 
     tile.url = getURLFromTemplate(data, tile);
 
@@ -141,7 +141,7 @@ export default class TileLayer extends CompositeLayer {
       return getTileData(tile);
     }
     if (tile.url) {
-      return fetch(tile.url, { layer: this, signal });
+      return fetch(tile.url, {layer: this, signal});
     }
     return null;
   }
@@ -154,14 +154,14 @@ export default class TileLayer extends CompositeLayer {
     return -1;
   }
 
-  getPickingInfo({ info, sourceLayer }) {
+  getPickingInfo({info, sourceLayer}) {
     info.sourceLayer = sourceLayer;
     info.tile = sourceLayer.props.tile;
     return info;
   }
 
   renderLayers() {
-    const { visible } = this.props;
+    const {visible} = this.props;
     return this.state.tileset.tiles.map(tile => {
       // For a tile to be visible:
       // - parent layer must be visible
@@ -189,7 +189,7 @@ export default class TileLayer extends CompositeLayer {
           tile.layers[0].props.highlightedObjectIndex !== highlightedObjectIndex)
       ) {
         tile.layers = tile.layers.map(layer =>
-          layer.clone({ visible: isVisible, highlightedObjectIndex })
+          layer.clone({visible: isVisible, highlightedObjectIndex})
         );
       }
       return tile.layers;

@@ -1,6 +1,6 @@
 import Tile2DHeader from './tile-2d-header';
-import { getTileIndices, tileToBoundingBox } from './utils';
-import { RequestScheduler } from '@loaders.gl/loader-utils';
+import {getTileIndices, tileToBoundingBox} from './utils';
+import {RequestScheduler} from '@loaders.gl/loader-utils';
 
 const TILE_STATE_UNKNOWN = 0;
 const TILE_STATE_VISIBLE = 1;
@@ -103,7 +103,7 @@ export default class Tileset2D {
    * @param {*} viewport
    * @param {*} onUpdate
    */
-  update(viewport, { zRange } = {}) {
+  update(viewport, {zRange} = {}) {
     const tiles = [...this._cache.values()];
     const total = tiles.length;
     const loaded = tiles.filter(t => t.isLoaded).length;
@@ -146,14 +146,14 @@ export default class Tileset2D {
   /* Public interface for subclassing */
 
   // Returns array of {x, y, z}
-  getTileIndices({ viewport, maxZoom, minZoom, zRange }) {
-    const { tileSize, extent } = this.opts;
-    return getTileIndices({ viewport, maxZoom, minZoom, zRange, tileSize, extent });
+  getTileIndices({viewport, maxZoom, minZoom, zRange}) {
+    const {tileSize, extent} = this.opts;
+    return getTileIndices({viewport, maxZoom, minZoom, zRange, tileSize, extent});
   }
 
   // Add custom metadata to tiles
-  getTileMetadata({ x, y, z }) {
-    return { bbox: tileToBoundingBox(this._viewport, x, y, z) };
+  getTileMetadata({x, y, z}) {
+    return {bbox: tileToBoundingBox(this._viewport, x, y, z)};
   }
 
   // Returns {x, y, z} of the parent tile
@@ -188,7 +188,7 @@ export default class Tileset2D {
 
   // This needs to be called every time some tiles have been added/removed from cache
   _rebuildTree() {
-    const { _cache } = this;
+    const {_cache} = this;
 
     // Reset states
     for (const tile of _cache.values()) {
@@ -212,7 +212,7 @@ export default class Tileset2D {
   // If a selected tile is loading, and no ancester is shown - try showing cached
   // descendants with the closest z
   _updateTileStates(selectedTiles) {
-    const { _cache } = this;
+    const {_cache} = this;
     const refinementStrategy = this.opts.refinementStrategy || STRATEGY_DEFAULT;
 
     // Reset states
@@ -245,7 +245,7 @@ export default class Tileset2D {
    */
   /* eslint-disable complexity */
   _resizeCache() {
-    const { _cache, opts } = this;
+    const {_cache, opts} = this;
 
     const maxCacheSize =
       opts.maxCacheSize ||
@@ -288,7 +288,7 @@ export default class Tileset2D {
     }
   }
 
-  _getTile({ x, y, z }, create) {
+  _getTile({x, y, z}, create) {
     const tileId = `${x},${y},${z}`;
     let tile = this._cache.get(tileId);
 
@@ -314,8 +314,8 @@ export default class Tileset2D {
   }
 
   _getNearestAncestor(x, y, z) {
-    const { _minZoom = 0 } = this;
-    let index = { x, y, z };
+    const {_minZoom = 0} = this;
+    let index = {x, y, z};
 
     while (index.z > _minZoom) {
       index = this.getParentIndex(index);
