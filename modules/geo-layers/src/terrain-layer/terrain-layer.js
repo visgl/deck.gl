@@ -190,7 +190,12 @@ export default class TerrainLayer extends CompositeLayer {
       texture,
       wireframe,
       meshMaxError,
-      elevationDecoder
+      elevationDecoder,
+      tileSize,
+      maxZoom,
+      minZoom,
+      extent,
+      maxRequests
     } = this.props;
 
     if (this.state.isTiled) {
@@ -213,7 +218,12 @@ export default class TerrainLayer extends CompositeLayer {
             }
           },
           onViewportLoad: this.onViewportLoad.bind(this),
-          zRange: this.state.zRange || null
+          zRange: this.state.zRange || null,
+          tileSize,
+          maxZoom,
+          minZoom,
+          extent,
+          maxRequests
         }
       );
     }
