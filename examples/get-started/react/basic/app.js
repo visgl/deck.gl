@@ -1,13 +1,11 @@
 /* eslint-env browser */
 import React from 'react';
 import {render} from 'react-dom';
-import DeckGL, {GeoJsonLayer, ArcLayer, TileLayer, PathLayer} from 'deck.gl';
+import DeckGL, {GeoJsonLayer, TileLayer, PathLayer} from 'deck.gl';
 
 // source: Natural Earth http://www.naturalearthdata.com/ via geojson.xyz
 const COUNTRIES =
   'https://d2ad6b4ur7yvpq.cloudfront.net/naturalearth-3.3.0/ne_50m_admin_0_scale_rank.geojson'; //eslint-disable-line
-const AIR_PORTS =
-  'https://d2ad6b4ur7yvpq.cloudfront.net/naturalearth-3.3.0/ne_10m_airports.geojson';
 
 const INITIAL_VIEW_STATE = {
   latitude: 51.47,
@@ -22,13 +20,6 @@ function mid(a, b, portion) {
 }
 
 function Root() {
-  const onClick = info => {
-    if (info.object) {
-      // eslint-disable-next-line
-      alert(`${info.object.properties.name} (${info.object.properties.abbrev})`);
-    }
-  };
-
   return (
     <DeckGL controller={true} initialViewState={INITIAL_VIEW_STATE}>
       <GeoJsonLayer
@@ -136,5 +127,4 @@ function Root() {
   );
 }
 
-/* global document */
 render(<Root />, document.body.appendChild(document.createElement('div')));
