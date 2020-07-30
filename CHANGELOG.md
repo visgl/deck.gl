@@ -19,6 +19,14 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v8.2
 
+#### deck.gl [8.2.4] - July 29 2020
+
+- [jupyter-widget] Modify Mapbox warning suppression logic (#4776)
+- [google-maps] fix error when click on POI marker (#4810)
+- [google-maps] Support dblclick event (#4811)
+- Forward more props from TerrainLayer to TileLayer (#4805)
+- [jupyter-widget] Correct data buffer issue (#4832)
+
 #### deck.gl [8.2.3] - July 8 2020
 
 - Fix MapboxLayer error after Deck is finalized (#4782)
