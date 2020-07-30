@@ -612,7 +612,6 @@ export default class Layer extends Component {
       this._updateState();
     }
   }
-  /* eslint-enable max-statements */
 
   // Common code for _initialize and _update
   _updateState() {
@@ -628,6 +627,7 @@ export default class Layer extends Component {
     this.props = propsInTransition;
 
     const updateParams = this._getUpdateParams();
+    const oldModels = this.getModels();
 
     // Safely call subclass lifecycle methods
     if (this.context.gl) {
@@ -643,7 +643,9 @@ export default class Layer extends Component {
     for (const extension of this.props.extensions) {
       extension.updateState.call(this, updateParams, extension);
     }
-    this._updateModules(updateParams);
+
+    const modelChanged = this.getModels()[0] !== oldModels[0];
+    this._updateModules(updateParams, modelChanged);
     // End subclass lifecycle methods
 
     if (this.isComposite) {
@@ -667,6 +669,7 @@ export default class Layer extends Component {
     this.internalState.needsUpdate = false;
     this.internalState.resetOldProps();
   }
+  /* eslint-enable max-statements */
 
   // Called by manager when layer is about to be disposed
   // Note: not guaranteed to be called on application shutdown
@@ -813,10 +816,11 @@ export default class Layer extends Component {
   }
 
   // PRIVATE METHODS
-  _updateModules({props, oldProps}) {
+  _updateModules({props, oldProps}, forceUpdate) {
     // Picking module parameters
     const {autoHighlight, highlightedObjectIndex, highlightColor} = props;
     if (
+      forceUpdate ||
       oldProps.autoHighlight !== autoHighlight ||
       oldProps.highlightedObjectIndex !== highlightedObjectIndex ||
       oldProps.highlightColor !== highlightColor
