@@ -19,11 +19,18 @@
 // THE SOFTWARE.
 
 import test from 'tape-catch';
-import {Layer, AttributeManager, COORDINATE_SYSTEM, MapView, OrbitView} from 'deck.gl';
+import {
+  Layer,
+  AttributeManager,
+  COORDINATE_SYSTEM,
+  MapView,
+  OrbitView,
+  picking
+} from '@deck.gl/core';
 import {testInitializeLayer, testLayer, testLayerAsync} from '@deck.gl/test-utils';
 import {makeSpy} from '@probe.gl/test-utils';
 import {equals, Matrix4} from 'math.gl';
-import {Timeline} from '@luma.gl/core';
+import {Timeline, Model} from '@luma.gl/core';
 
 import {sleep, testAsyncData} from './async-iterator-test-utils';
 
@@ -505,6 +512,114 @@ test('Layer#isLoaded', async t => {
           if (updateCount === 2) {
             t.is(layer.isLoaded, true, 'second update: layer is loaded');
           }
+        }
+      }
+    ],
+    onError: t.notOk
+  });
+
+  t.end();
+});
+
+test('Layer#updateModules', async t => {
+  class LayerWithModel extends Layer {
+    initializeState() {}
+
+    updateState(params) {
+      super.updateState(params);
+
+      const {props, oldProps} = params;
+      if (props.modelId !== oldProps.modelId) {
+        this.setState({model: this._getModel()});
+      }
+    }
+
+    _getModel() {
+      return new Model(this.context.gl, {
+        vs: `\
+  void main() {
+    gl_Position = vec4(0.0, 0.0, 0.0, 1.0);
+  }
+        `,
+        fs: `\
+  precision highp float;
+  void main(void) {
+    gl_FragColor = vec4(1.0);
+  }
+        `,
+        modules: [picking]
+      });
+    }
+  }
+
+  const HALF_BYTE = 128 / 255;
+
+  await testLayerAsync({
+    Layer: LayerWithModel,
+    testCases: [
+      {
+        props: {
+          data: null,
+          modelId: 0
+        },
+
+        onAfterUpdate: ({layer}) => {
+          const modelUniforms = layer.state.model.getUniforms();
+          t.deepEqual(
+            modelUniforms.picking_uHighlightColor,
+            [0, 0, HALF_BYTE, HALF_BYTE],
+            'model highlightColor uniform is populated'
+          );
+          t.notOk(
+            modelUniforms.picking_uSelectedColorValid,
+            'model selectedColor uniform is populated'
+          );
+        }
+      },
+      {
+        updateProps: {
+          highlightColor: [255, 0, 0, 128]
+        },
+
+        onAfterUpdate: ({layer}) => {
+          const modelUniforms = layer.state.model.getUniforms();
+          t.deepEqual(
+            modelUniforms.picking_uHighlightColor,
+            [1, 0, 0, HALF_BYTE],
+            'model highlightColor uniform is populated'
+          );
+        }
+      },
+      {
+        updateProps: {
+          autoHighlight: true,
+          highlightedObjectIndex: 1
+        },
+
+        onAfterUpdate: ({layer}) => {
+          const modelUniforms = layer.state.model.getUniforms();
+          t.ok(
+            modelUniforms.picking_uSelectedColorValid,
+            'model selectedColor uniform is populated'
+          );
+        }
+      },
+      {
+        updateProps: {
+          modelId: 1
+        },
+
+        onAfterUpdate: ({layer}) => {
+          const modelUniforms = layer.state.model.getUniforms();
+          t.deepEqual(
+            modelUniforms.picking_uHighlightColor,
+            [1, 0, 0, HALF_BYTE],
+            'model highlightColor uniform is populated'
+          );
+          t.ok(
+            modelUniforms.picking_uSelectedColorValid,
+            'model selectedColor uniform is populated'
+          );
         }
       }
     ],
