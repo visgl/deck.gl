@@ -1,6 +1,6 @@
 import Tile2DHeader from './tile-2d-header';
-import {getTileIndices, tileToBoundingBox} from './utils';
-import {RequestScheduler} from '@loaders.gl/loader-utils';
+import { getTileIndices, tileToBoundingBox } from './utils';
+import { RequestScheduler } from '@loaders.gl/loader-utils';
 
 const TILE_STATE_UNKNOWN = 0;
 const TILE_STATE_VISIBLE = 1;
@@ -103,7 +103,14 @@ export default class Tileset2D {
    * @param {*} viewport
    * @param {*} onUpdate
    */
-  update(viewport, {zRange} = {}) {
+  update(viewport, { zRange } = {}) {
+    const tiles = [...this._cache.values()];
+    const total = tiles.length;
+    const loaded = tiles.filter(t => t.isLoaded).length;
+    const cancelled = tiles.filter(t => t.isCancelled).length;
+    const data = tiles.map(t => t.data.type || t.data);
+    console.log(`updating tiles=${total} (${loaded}+${cancelled})`, data);
+
     if (!viewport.equals(this._viewport)) {
       this._viewport = viewport;
       const tileIndices = this.getTileIndices({
@@ -128,6 +135,8 @@ export default class Tileset2D {
       this._resizeCache();
     }
 
+    this._abortUnselectedTileRequests();
+
     if (changed) {
       this._frameNumber++;
     }
@@ -137,14 +146,14 @@ export default class Tileset2D {
   /* Public interface for subclassing */
 
   // Returns array of {x, y, z}
-  getTileIndices({viewport, maxZoom, minZoom, zRange}) {
-    const {tileSize, extent} = this.opts;
-    return getTileIndices({viewport, maxZoom, minZoom, zRange, tileSize, extent});
+  getTileIndices({ viewport, maxZoom, minZoom, zRange }) {
+    const { tileSize, extent } = this.opts;
+    return getTileIndices({ viewport, maxZoom, minZoom, zRange, tileSize, extent });
   }
 
   // Add custom metadata to tiles
-  getTileMetadata({x, y, z}) {
-    return {bbox: tileToBoundingBox(this._viewport, x, y, z)};
+  getTileMetadata({ x, y, z }) {
+    return { bbox: tileToBoundingBox(this._viewport, x, y, z) };
   }
 
   // Returns {x, y, z} of the parent tile
@@ -179,7 +188,7 @@ export default class Tileset2D {
 
   // This needs to be called every time some tiles have been added/removed from cache
   _rebuildTree() {
-    const {_cache} = this;
+    const { _cache } = this;
 
     // Reset states
     for (const tile of _cache.values()) {
@@ -203,7 +212,7 @@ export default class Tileset2D {
   // If a selected tile is loading, and no ancester is shown - try showing cached
   // descendants with the closest z
   _updateTileStates(selectedTiles) {
-    const {_cache} = this;
+    const { _cache } = this;
     const refinementStrategy = this.opts.refinementStrategy || STRATEGY_DEFAULT;
 
     // Reset states
@@ -236,7 +245,7 @@ export default class Tileset2D {
    */
   /* eslint-disable complexity */
   _resizeCache() {
-    const {_cache, opts} = this;
+    const { _cache, opts } = this;
 
     const maxCacheSize =
       opts.maxCacheSize ||
@@ -269,11 +278,22 @@ export default class Tileset2D {
   }
   /* eslint-enable complexity */
 
-  _getTile({x, y, z}, create) {
+  _abortUnselectedTileRequests() {
+    for (const tile of this._cache.values()) {
+      // Abort ongoing requests for tiles that are no longer visible
+      // TODO: Make this based on max outstanding requests rather than immediately aborting off-screen requests
+      if (!tile.isVisible && !tile.isLoaded) {
+        tile.abort();
+      }
+    }
+  }
+
+  _getTile({ x, y, z }, create) {
     const tileId = `${x},${y},${z}`;
     let tile = this._cache.get(tileId);
 
     if (!tile && create) {
+      console.log(`Requesting new tile x=${x}, y=${y}, z=${z}`);
       tile = new Tile2DHeader({
         x,
         y,
@@ -286,6 +306,7 @@ export default class Tileset2D {
       this._cache.set(tileId, tile);
       this._dirty = true;
     } else if (tile && tile.isCancelled) {
+      console.log(`Re-requesting cancelled tile x=${x}, y=${y}, z=${z}`);
       tile.loadData(this._getTileData, this._requestScheduler);
     }
 
@@ -293,8 +314,8 @@ export default class Tileset2D {
   }
 
   _getNearestAncestor(x, y, z) {
-    const {_minZoom = 0} = this;
-    let index = {x, y, z};
+    const { _minZoom = 0 } = this;
+    let index = { x, y, z };
 
     while (index.z > _minZoom) {
       index = this.getParentIndex(index);

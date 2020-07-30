@@ -1,7 +1,7 @@
-import {log} from '@deck.gl/core';
+import { log } from '@deck.gl/core';
 
 export default class Tile2DHeader {
-  constructor({x, y, z, onTileLoad, onTileError}) {
+  constructor({ x, y, z, onTileLoad, onTileError }) {
     this.x = x;
     this.y = y;
     this.z = z;
@@ -38,14 +38,19 @@ export default class Tile2DHeader {
     return result;
   }
 
+  /* eslint-disable max-statements */
   async _loadData(getTileData, requestScheduler) {
-    const {x, y, z, bbox} = this;
+    const { x, y, z, bbox } = this;
+
+    this._abortController = new AbortController(); // eslint-disable-line no-undef
+    const { signal } = this._abortController;
 
     const requestToken = await requestScheduler.scheduleRequest(this, tile => {
       return tile.isSelected ? 1 : -1;
     });
 
     if (!requestToken) {
+      console.log(`Cancelling tile x=${x}, y=${y}, z=${z}`);
       this._isCancelled = true;
       return;
     }
@@ -54,12 +59,18 @@ export default class Tile2DHeader {
     let tileData;
     let error;
     try {
-      tileData = await getTileData({x, y, z, bbox});
+      console.log(`Requesting data for tile x=${x}, y=${y}, z=${z}`);
+      tileData = await getTileData({ x, y, z, bbox, signal });
     } catch (err) {
       error = err || true;
     } finally {
       requestToken.done();
-      this._isLoaded = true;
+      this._isLoaded = !this._isCancelled;
+    }
+
+    if (this._isCancelled) {
+      console.log(`cancelled ${error}`);
+      return;
     }
 
     if (error) {
@@ -69,6 +80,7 @@ export default class Tile2DHeader {
       this.onTileLoad(this);
     }
   }
+  /* eslint-enable max-statements */
 
   loadData(getTileData, requestScheduler) {
     if (!getTileData) {
@@ -76,5 +88,14 @@ export default class Tile2DHeader {
     }
 
     this._loader = this._loadData(getTileData, requestScheduler);
+  }
+
+  abort() {
+    if (this.isLoaded) {
+      return;
+    }
+
+    this._abortController.abort();
+    this._isCancelled = true;
   }
 }
