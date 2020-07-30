@@ -1,7 +1,7 @@
 /* eslint-env browser */
 import React from 'react';
-import {render} from 'react-dom';
-import DeckGL, {GeoJsonLayer, TileLayer, PathLayer} from 'deck.gl';
+import { render } from 'react-dom';
+import DeckGL, { GeoJsonLayer, TileLayer, PathLayer } from 'deck.gl';
 
 // source: Natural Earth http://www.naturalearthdata.com/ via geojson.xyz
 const COUNTRIES =
@@ -38,30 +38,27 @@ function Root() {
           const {
             x,
             y,
-            bbox: {north, east, south, west},
+            bbox: { north, east, south, west },
             signal
           } = tile;
           const wait = 2000;
-          // Math.round((Math.random() * 8) + 2);
           // console.log("waiting", wait); // eslint-disable-line no-console
           // return fetch(`https://cors-anywhere.herokuapp.com/https://postman-echo.com/delay/${wait}`);
-          // return new Promise(resolve => setInterval(resolve, wait));
 
+          // Simulate a slow fetch
           // docker run --rm -it -p 7000:80 ealen/echo-server
           await fetch(
             `http://localhost:7000?echo_header=Access-Control-Allow-Origin:*&echo_time=${wait}&echo_body=x:${x},y=${y}`,
-            {signal}
+            { signal }
           );
 
+          // Return a rectangle just inside the bounds of the tile
           return {
             type: 'FeatureCollection',
             features: [
               {
                 type: 'Feature',
                 geometry: {
-                  // type: 'Point',
-                  // coordinates: [(east + west) / 2, (north + south) / 2]
-
                   type: 'MultiLineString',
                   coordinates: [
                     // top
@@ -84,12 +81,6 @@ function Root() {
                       [mid(west, east, 0.1), mid(north, south, 0.1)],
                       [mid(west, east, 0.1), mid(north, south, 0.9)]
                     ]
-
-                    //   [west, south],
-                    //   [east, south],
-                    //   [east, north],
-                    //   [west, north],
-                    // ]
                   ]
                 }
               }
@@ -98,7 +89,7 @@ function Root() {
         }}
         renderSubLayers={props => {
           const {
-            bbox: {west, south, east, north}
+            bbox: { west, south, east, north }
           } = props.tile;
 
           return [
