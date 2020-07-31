@@ -1,3 +1,5 @@
+/* eslint-env browser */
+/* eslint-disable no-console */
 import {log} from '@deck.gl/core';
 
 export default class Tile2DHeader {
@@ -45,12 +47,13 @@ export default class Tile2DHeader {
     this._abortController = new AbortController(); // eslint-disable-line no-undef
     const {signal} = this._abortController;
 
+    console.log(`ZZ Scheduling request x=${x}, y=${y}, z=${z}`);
     const requestToken = await requestScheduler.scheduleRequest(this, tile => {
       return tile.isSelected ? 1 : -1;
     });
 
     if (!requestToken) {
-      console.log(`Cancelling tile x=${x}, y=${y}, z=${z}`);
+      console.log(`ZZ Cancelling tile x=${x}, y=${y}, z=${z}`);
       this._isCancelled = true;
       return;
     }
@@ -59,8 +62,9 @@ export default class Tile2DHeader {
     let tileData;
     let error;
     try {
-      console.log(`Requesting data for tile x=${x}, y=${y}, z=${z}`);
+      console.log(`ZZ Requesting data for tile x=${x}, y=${y}, z=${z}`);
       tileData = await getTileData({x, y, z, bbox, signal});
+      console.log(`ZZ Got data for tile x=${x}, y=${y}, z=${z}`);
     } catch (err) {
       error = err || true;
     } finally {
@@ -95,7 +99,7 @@ export default class Tile2DHeader {
       return;
     }
 
-    this._abortController.abort();
     this._isCancelled = true;
+    this._abortController.abort();
   }
 }

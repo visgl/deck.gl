@@ -1,3 +1,6 @@
+/* eslint-env browser */
+/* eslint-disable no-console */
+
 import Tile2DHeader from './tile-2d-header';
 import {getTileIndices, tileToBoundingBox} from './utils';
 import {RequestScheduler} from '@loaders.gl/loader-utils';
@@ -104,13 +107,6 @@ export default class Tileset2D {
    * @param {*} onUpdate
    */
   update(viewport, {zRange} = {}) {
-    const tiles = [...this._cache.values()];
-    const total = tiles.length;
-    const loaded = tiles.filter(t => t.isLoaded).length;
-    const cancelled = tiles.filter(t => t.isCancelled).length;
-    const data = tiles.map(t => t.data.type || t.data);
-    console.log(`updating tiles=${total} (${loaded}+${cancelled})`, data);
-
     if (!viewport.equals(this._viewport)) {
       this._viewport = viewport;
       const tileIndices = this.getTileIndices({
@@ -135,11 +131,23 @@ export default class Tileset2D {
       this._resizeCache();
     }
 
-    this._abortUnselectedTileRequests();
-
     if (changed) {
       this._frameNumber++;
     }
+
+    const tiles = [...this._cache.values()];
+    const total = tiles.length;
+    const loaded = tiles.filter(t => t.isLoaded).length;
+    const cancelled = tiles.filter(t => t.isCancelled).length;
+    const visible = tiles.filter(t => t.isVisible).length;
+    const selected = tiles.filter(t => t.isSelected).length;
+    // const data = tiles.map(t => t.data && (t.data.type || t.data));
+    const data = tiles.map(t => t.state);
+    console.info(
+      `updated cancelled=${cancelled}, loaded=${loaded}, visible=${visible}, selected=${selected}, total=${total}`,
+      data
+    );
+
     return this._frameNumber;
   }
 
@@ -169,6 +177,10 @@ export default class Tileset2D {
   updateTileStates() {
     this._updateTileStates(this.selectedTiles);
 
+    const {maxOngoingRequests} = this.opts;
+
+    const unselectedOngoingTiles = [];
+    let ongoingRequestCount = 0;
     let changed = false;
     for (const tile of this._cache.values()) {
       const isVisible = Boolean(tile.state & TILE_STATE_VISIBLE);
@@ -179,6 +191,34 @@ export default class Tileset2D {
 
       // isSelected used in request scheduler
       tile.isSelected = tile.state === TILE_STATE_SELECTED;
+
+      // Keep track of all the ongoing requests
+      if (!tile.isLoaded && !tile.isCancelled) {
+        ongoingRequestCount++;
+        if (!tile.isSelected) {
+          unselectedOngoingTiles.push(tile);
+        }
+      }
+    }
+
+    if (ongoingRequestCount > maxOngoingRequests) {
+      // There are too many ongoing requests, see if any can be aborted
+      console.warn(
+        `Too many requests ongoingRequestCount=${ongoingRequestCount}>maxOngoingRequests=${maxOngoingRequests}, unselectedOngoingTiles=${
+          unselectedOngoingTiles.length
+        }`
+      );
+      const tilesToAbort = unselectedOngoingTiles.slice(
+        0,
+        ongoingRequestCount - maxOngoingRequests
+      );
+      if (tilesToAbort.length > 0) {
+        console.warn(`Aborting ${tilesToAbort.length} tiles`);
+      }
+      // There are too many pending requests, so abort some that are unselected
+      for (const tile of tilesToAbort) {
+        tile.abort();
+      }
     }
 
     return changed;
@@ -277,16 +317,6 @@ export default class Tileset2D {
     }
   }
   /* eslint-enable complexity */
-
-  _abortUnselectedTileRequests() {
-    for (const tile of this._cache.values()) {
-      // Abort ongoing requests for tiles that are no longer visible
-      // TODO: Make this based on max outstanding requests rather than immediately aborting off-screen requests
-      if (!tile.isVisible && !tile.isLoaded) {
-        tile.abort();
-      }
-    }
-  }
 
   _getTile({x, y, z}, create) {
     const tileId = `${x},${y},${z}`;
