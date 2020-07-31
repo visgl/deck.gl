@@ -27,10 +27,8 @@ export default class JupyterTransportView extends DOMWidgetView {
   render() {
     super.render();
 
-    // TODO - looks like bind(this) is not needed here, it is already passed as 3rd arg...
-    // TODO - remove and test
-    this.model.on('change:json_input', this.onJsonChanged.bind(this), this);
-    this.model.on('change:data_buffer', this.onDataBufferChanged.bind(this), this);
+    this.model.on('change:json_input', this.onJsonChanged.bind(this));
+    this.model.on('change:data_buffer', this.onDataBufferChanged.bind(this));
 
     this.onDataBufferChanged();
   }

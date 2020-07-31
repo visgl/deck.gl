@@ -35,6 +35,7 @@ const overlay = new GoogleMapsOverlay(props)
 
 `props` are forwarded to a `Deck` instance. The following [Deck](/docs/api-reference/core/deck.md) props are supported:
 
+- `styles`
 - `layers`
 - `effects`
 - `parameters`
