@@ -403,6 +403,7 @@ export default class Deck {
       Object.assign(
         {
           layers: this.layerManager.getLayers(opts),
+          views: this.viewManager.getViews(),
           viewports: this.getViewports(opts),
           onViewportActive: this.layerManager.activateViewport
         },
