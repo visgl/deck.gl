@@ -6,7 +6,11 @@ Releases and associated GitHub PRs for pydeck are documented here.
 0.4 Releases
 ------------
 
-0.4.0 - Jun 23 2020
+0.4.1 - Aug 3 2020
+^^^^^^^^^^^^^^^^^^
+- Correct data buffer issue (#4832)
+
+0.4.0 - Jul 23 2020
 ^^^^^^^^^^^^^^^^^^
 - Lock to @deck.gl/jupyter-widget@~8.2.*
 - Suppress warning for IFrame usage (#4775)
