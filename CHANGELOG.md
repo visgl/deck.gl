@@ -19,6 +19,11 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v8.2
 
+#### deck.gl [8.2.5] - Aug 3 2020
+
+- Fix module parameters on newly created model (#4835)
+- Fix picking with multiple views (#4842)
+
 #### deck.gl [8.2.4] - July 29 2020
 
 - [jupyter-widget] Modify Mapbox warning suppression logic (#4776)
