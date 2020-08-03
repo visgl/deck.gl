@@ -137,6 +137,7 @@ export default class DeckPicker {
   // eslint-disable-next-line max-statements,complexity
   _pickClosestObject({
     layers,
+    views,
     viewports,
     x,
     y,
@@ -178,6 +179,7 @@ export default class DeckPicker {
         deviceRect &&
         this._drawAndSample({
           layers,
+          views,
           viewports,
           onViewportActive,
           deviceRect,
@@ -198,6 +200,7 @@ export default class DeckPicker {
       if (pickInfo.pickedLayer && unproject3D && this.depthFBO) {
         const zValues = this._drawAndSample({
           layers: [pickInfo.pickedLayer],
+          views,
           viewports,
           onViewportActive,
           deviceRect: {x: pickInfo.pickedX, y: pickInfo.pickedY, width: 1, height: 1},
@@ -255,6 +258,7 @@ export default class DeckPicker {
   // Pick all objects within the given bounding box
   _pickVisibleObjects({
     layers,
+    views,
     viewports,
     x,
     y,
@@ -290,6 +294,7 @@ export default class DeckPicker {
 
     const pickedColors = this._drawAndSample({
       layers,
+      views,
       viewports,
       onViewportActive,
       deviceRect,
@@ -325,7 +330,16 @@ export default class DeckPicker {
   }
 
   // returns pickedColor or null if no pickable layers found.
-  _drawAndSample({layers, viewports, onViewportActive, deviceRect, pass, redrawReason, pickZ}) {
+  _drawAndSample({
+    layers,
+    views,
+    viewports,
+    onViewportActive,
+    deviceRect,
+    pass,
+    redrawReason,
+    pickZ
+  }) {
     assert(deviceRect.width > 0 && deviceRect.height > 0);
 
     if (layers.length < 1) {
@@ -338,6 +352,7 @@ export default class DeckPicker {
       layers,
       layerFilter: this.layerFilter,
       onError: this._onError,
+      views,
       viewports,
       onViewportActive,
       pickingFBO,

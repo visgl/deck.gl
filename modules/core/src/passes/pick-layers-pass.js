@@ -22,6 +22,7 @@ export default class PickLayersPass extends LayersPass {
   _drawPickingBuffer({
     layers,
     layerFilter,
+    views,
     viewports,
     onViewportActive,
     pickingFBO,
@@ -60,6 +61,7 @@ export default class PickLayersPass extends LayersPass {
           target: pickingFBO,
           layers,
           layerFilter,
+          views,
           viewports,
           onViewportActive,
           pass,
