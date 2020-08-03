@@ -3,7 +3,7 @@ Layer Overview and Examples
 
 :class:`pydeck.bindings.layer.Layer` represents a kind of data visualization, like a scatterplot
 or a hexbin chart.
-The full `deck.gl layer catalog <https://deck.gl/docs/api-reference/layers>`__ is accessible via pydeck.
+The full `deck.gl layer catalog </docs/api-reference/layers/README.md>`__ is accessible via pydeck.
 This page will provide more examples of how to utilize the deck.gl catalog in Python via pydeck.
 
 .. warning:: **pydeck does not currently raise an error on
