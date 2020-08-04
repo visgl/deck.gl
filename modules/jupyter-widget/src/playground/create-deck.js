@@ -101,40 +101,51 @@ function missingLayers(oldLayers, newLayers) {
   return oldLayers.filter(ol => ol && ol.id && !newLayers.find(nl => nl.id === ol.id));
 }
 
-function createStandaloneFromProvider(
+function createStandaloneFromProvider({
   mapProvider,
-  {props, mapboxApiKey, googleMapsKey, handleClick, getTooltip, container}
-) {
+  props,
+  mapboxApiKey,
+  googleMapsKey,
+  handleClick,
+  handleEvent,
+  getTooltip,
+  container
+}) {
+  // Common deck.gl props for all basemaos
+  const deckProps = {
+    onClick: handleClick,
+    onHover: info => handleEvent('hover', info),
+    onResize: size => handleEvent('resize', size),
+    onViewStateChange: ({viewState, interactionState, oldViewState}) =>
+      handleEvent('view-state-change', viewState),
+    getTooltip,
+    container
+  };
+
   switch (mapProvider) {
     case 'mapbox':
       deck.log.info('Using Mapbox base maps')();
       return new deck.DeckGL({
+        ...deckProps,
         ...props,
         map: mapboxgl,
-        onLoad: modifyMapboxElements,
         mapboxApiAccessToken: mapboxApiKey,
-        onClick: handleClick,
-        getTooltip,
-        container
+        onLoad: modifyMapboxElements
       });
     case 'google_maps':
       deck.log.info('Using Google Maps base maps')();
       return createGoogleMapsDeckOverlay({
-        props,
-        googleMapsKey,
-        onClick: handleClick,
-        getTooltip,
-        container
+        ...deckProps,
+        props, // TODO not ...props?
+        googleMapsKey
       });
     default:
       deck.log.info('No recognized map provider specified')();
       return new deck.DeckGL({
+        ...deckProps,
         ...props,
         map: null,
-        mapboxApiAccessToken: null,
-        onClick: handleClick,
-        getTooltip,
-        container
+        mapboxApiAccessToken: null
       });
   }
 }
@@ -146,6 +157,7 @@ function createDeck({
   jsonInput,
   tooltip,
   handleClick,
+  handleEvent,
   handleWarning,
   customLibraries
 }) {
@@ -163,9 +175,16 @@ function createDeck({
     const getTooltip = makeTooltip(tooltip);
     const {mapProvider} = props;
 
-    const standaloneArgs = {props, mapboxApiKey, googleMapsKey, handleClick, getTooltip, container};
-
-    deckgl = createStandaloneFromProvider(mapProvider, standaloneArgs);
+    deckgl = createStandaloneFromProvider({
+      mapProvider,
+      props,
+      mapboxApiKey,
+      googleMapsKey,
+      handleClick,
+      handleEvent,
+      getTooltip,
+      container
+    });
 
     const onComplete = () => {
       if (layerToLoad.length) {

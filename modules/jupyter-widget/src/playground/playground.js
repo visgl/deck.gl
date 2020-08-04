@@ -38,6 +38,7 @@ export function initPlayground() {
         container,
         jsonInput: jsonProps,
         tooltip,
+        handleEvent: (name, payload) => sendEventViaTransport(transport, name, payload),
         handleClick: (datum, event) => handleClick(transport, datum, event),
         handleWarning: message => handleWarning(transport, message),
         customLibraries
@@ -90,10 +91,17 @@ export function processDataBuffer({binary, convertedJson}) {
   return convertedJson;
 }
 
+// Handles a general event
+function sendEventViaTransport(transport, name, data) {
+  transport.jupyterModel.set('deck_event', JSON.stringify({name, data}));
+  transport.jupyterModel.save_changes();
+}
+
 // Handles a click event
+// TODO - integrate as extra processing for click events in sendEventViaTransport
 function handleClick(transport, datum, e) {
   if (!datum || !datum.object) {
-    transport.jupyterModel.set('selected_data', JSON.stringify(''));
+    transport.jupyterModel.set('deck_event', JSON.stringify(''));
     transport.jupyterModel.save_changes();
     return;
   }
@@ -101,15 +109,15 @@ function handleClick(transport, datum, e) {
   const multiselectEnabled = e.srcEvent.metaKey || e.srcEvent.metaKey;
   const dataPayload = datum.object && datum.object.points ? datum.object.points : datum.object;
   if (multiselectEnabled) {
-    let selectedData = JSON.parse(transport.jupyterModel.get('selected_data'));
+    let selectedData = JSON.parse(transport.jupyterModel.get('deck_event'));
     if (!Array.isArray(selectedData)) {
       selectedData = [];
     }
     selectedData.push(dataPayload);
-    transport.jupyterModel.set('selected_data', JSON.stringify(selectedData));
+    transport.jupyterModel.set('deck_event', JSON.stringify(selectedData));
   } else {
     // Single selection
-    transport.jupyterModel.set('selected_data', JSON.stringify(dataPayload));
+    transport.jupyterModel.set('deck_event', JSON.stringify(dataPayload));
   }
   transport.jupyterModel.save_changes();
 }
