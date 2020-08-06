@@ -91,9 +91,17 @@ export function processDataBuffer({binary, convertedJson}) {
   return convertedJson;
 }
 
+// Skips keys in a Deck layer that induce a circular reference on JSON serialization
+function filterJsonValue(key, value) {
+  if (value instanceof 'Layer') {
+    return value.id;
+  }
+  return value;
+}
+
 // Handles a general event
 function sendEventViaTransport(transport, name, data) {
-  transport.jupyterModel.set('deck_event', JSON.stringify({name, data}));
+  transport.jupyterModel.set('deck_event', JSON.stringify({name, data}, filterJsonValue));
   transport.jupyterModel.save_changes();
 }
 
@@ -101,7 +109,7 @@ function sendEventViaTransport(transport, name, data) {
 // TODO - integrate as extra processing for click events in sendEventViaTransport
 function handleClick(transport, datum, e) {
   if (!datum || !datum.object) {
-    transport.jupyterModel.set('deck_event', JSON.stringify(''));
+    transport.jupyterModel.set('selected_data', JSON.stringify(''));
     transport.jupyterModel.save_changes();
     return;
   }
@@ -109,15 +117,15 @@ function handleClick(transport, datum, e) {
   const multiselectEnabled = e.srcEvent.metaKey || e.srcEvent.metaKey;
   const dataPayload = datum.object && datum.object.points ? datum.object.points : datum.object;
   if (multiselectEnabled) {
-    let selectedData = JSON.parse(transport.jupyterModel.get('deck_event'));
+    let selectedData = JSON.parse(transport.jupyterModel.get('selected_data'));
     if (!Array.isArray(selectedData)) {
       selectedData = [];
     }
     selectedData.push(dataPayload);
-    transport.jupyterModel.set('deck_event', JSON.stringify(selectedData));
+    transport.jupyterModel.set('selected_data', JSON.stringify(selectedData));
   } else {
     // Single selection
-    transport.jupyterModel.set('deck_event', JSON.stringify(dataPayload));
+    transport.jupyterModel.set('selected_data', JSON.stringify(dataPayload));
   }
   transport.jupyterModel.save_changes();
 }
