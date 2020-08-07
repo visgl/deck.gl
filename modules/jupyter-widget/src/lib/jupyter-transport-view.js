@@ -13,6 +13,7 @@ export default class JupyterTransportView extends DOMWidgetView {
     this.transport.jupyterModel = this.model;
     this.transport.jupyterView = this;
     this.transport._initialize();
+    super.initialize.apply(this, arguments);
   }
 
   remove() {

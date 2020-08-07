@@ -1,3 +1,5 @@
+import * as deckBundle from '../deck-bundle';
+
 import {Transport} from '@deck.gl/json';
 
 import {createContainer, createErrorBox} from './utils/css-utils';
@@ -91,18 +93,23 @@ export function processDataBuffer({binary, convertedJson}) {
   return convertedJson;
 }
 
-// Skips keys in a Deck layer that induce a circular reference on JSON serialization
+// Filters circular references on JSON string conversion
 function filterJsonValue(key, value) {
-  if (value instanceof 'Layer') {
+  if (value instanceof deckBundle.Layer) {
     return value.id;
   }
   return value;
 }
 
 // Handles a general event
-function sendEventViaTransport(transport, name, data) {
-  transport.jupyterModel.set('deck_event', JSON.stringify({name, data}, filterJsonValue));
-  transport.jupyterModel.save_changes();
+function sendEventViaTransport(transport, event, data) {
+  if (event === 'hover' && !data.picked && data.index === -1) {
+    // TODO handle background hover events, for now we'll skip them
+    return;
+  }
+  // TODO Remove circular references without converting to a string
+  const deckEvent = JSON.parse(JSON.stringify({event, data}, filterJsonValue));
+  transport.jupyterModel.send(deckEvent);
 }
 
 // Handles a click event
