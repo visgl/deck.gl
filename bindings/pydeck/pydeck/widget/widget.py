@@ -1,12 +1,25 @@
 #!/usr/bin/env python
 # coding: utf-8
 from __future__ import unicode_literals
+from ast import literal_eval
 
 from ipywidgets import register, CallbackDispatcher, DOMWidget
 from traitlets import Any, Bool, Int, Unicode
 
 from ..data_utils.binary_transfer import data_buffer_serialization
 from ._frontend import module_name, module_version
+
+
+def store_selection(widget_instance, payload):
+    try:
+        if payload.get('data') and payload['data'].get('object'):
+            datum = payload['data']['object']
+            widget_instance.selected_data.append(datum)
+        else:
+            widget_instance.selected_data = []
+            return
+    except Exception as e:
+        widget_instance.handler_exception = e
 
 
 @register
@@ -16,8 +29,6 @@ class DeckGLWidget(DOMWidget):
     renders a deck.gl visualization based on provided properties.
 
     You may set a Mapbox API key as an environment variable to use Mapbox maps in your visualization
-
-    A pydeck user should be interfacing with this class only via the Deck object
 
     Attributes
     ----------
@@ -32,7 +43,9 @@ class DeckGLWidget(DOMWidget):
         tooltip : bool or dict of {str: str}, default True
             See the ``Deck`` constructor.
         google_maps_key : str, default ''
-            API key for Google Maps, used on some map layers
+            API key for Google Maps
+        selected_data : list of dict, default []
+            Data selected on click, if the pydeck Jupyter widget is enabled for server use
     """
 
     _model_name = Unicode("JupyterTransportModel").tag(sync=True)
@@ -41,15 +54,14 @@ class DeckGLWidget(DOMWidget):
     _view_name = Unicode("JupyterTransportView").tag(sync=True)
     _view_module = Unicode(module_name).tag(sync=True)
     _view_module_version = Unicode(module_version).tag(sync=True)
+    google_maps_key = Unicode("", allow_none=True).tag(sync=True)
     mapbox_key = Unicode("", allow_none=True).tag(sync=True)
     json_input = Unicode("").tag(sync=True)
     data_buffer = Any(default_value=None, allow_none=True).tag(sync=True, **data_buffer_serialization)
-    height = Int(500).tag(sync=True)
     custom_libraries = Any(allow_none=True).tag(sync=True)
-    width = Any("100%").tag(sync=True)
     tooltip = Any(True).tag(sync=True)
-    js_warning = Bool(False).tag(sync=True)
-    google_maps_key = Unicode("", allow_none=True).tag(sync=True)
+    height = Int(500).tag(sync=True)
+    width = Any("100%").tag(sync=True)
 
     def __init__(self, **kwargs):
         super(DeckGLWidget, self).__init__(**kwargs)
@@ -58,6 +70,9 @@ class DeckGLWidget(DOMWidget):
         self._resize_handlers = CallbackDispatcher()
         self._view_state_handlers = CallbackDispatcher()
         self.on_msg(self._handle_custom_msgs)
+
+        self.on_click = store_selection
+        self.handler_exception = None
 
     def on_hover(self, callback, remove=False):
         self._hover_handlers.register_callback(callback, remove=remove)
