@@ -65,9 +65,9 @@ const defaultProps = {
   onDataLoad: {type: 'function', value: null, compare: false, optional: true},
   fetch: {
     type: 'function',
-    value: (url, {propName, layer}) => {
+    value: (url, {propName, layer, signal}) => {
       const {resourceManager} = layer.context;
-      const loadOptions = layer.getLoadOptions();
+      const loadOptions = {...layer.getLoadOptions(), signal};
       let inResourceManager = resourceManager.contains(url);
 
       if (!inResourceManager && !loadOptions) {
