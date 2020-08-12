@@ -67,7 +67,7 @@ const defaultProps = {
     type: 'function',
     value: (url, {propName, layer, signal}) => {
       const {resourceManager} = layer.context;
-      const loadOptions = {...layer.getLoadOptions(), signal};
+      const loadOptions = signal ? {...layer.getLoadOptions(), signal} : layer.getLoadOptions();
       let inResourceManager = resourceManager.contains(url);
 
       if (!inResourceManager && !loadOptions) {
