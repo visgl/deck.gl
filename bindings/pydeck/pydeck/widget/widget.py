@@ -17,7 +17,6 @@ def store_selection(widget_instance, payload):
             widget_instance.selected_data.append(datum)
         else:
             widget_instance.selected_data = []
-            return
     except Exception as e:
         widget_instance.handler_exception = e
 
@@ -71,8 +70,8 @@ class DeckGLWidget(DOMWidget):
         self._view_state_handlers = CallbackDispatcher()
         self.on_msg(self._handle_custom_msgs)
 
-        self.on_click = store_selection
         self.handler_exception = None
+        self.on_click(store_selection)
 
     def on_hover(self, callback, remove=False):
         self._hover_handlers.register_callback(callback, remove=remove)
