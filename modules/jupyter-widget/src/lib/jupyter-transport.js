@@ -21,7 +21,7 @@ export default class JupyterTransport extends Transport {
    * back-channel messaging for event handling etc
    */
   sendJSONMessage(type, data) {
-    const string = Transport._stringifyJsonSafe({type, data});
+    const string = Transport._stringifyJSONSafe({type, data});
     this.jupyterModel.send(string);
   }
 }

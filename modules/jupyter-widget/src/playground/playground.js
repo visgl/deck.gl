@@ -88,15 +88,17 @@ function filterJsonValue(key, value) {
 }
 
 // Handles a general event
-function sendEventViaTransport(transport, event, data) {
-  if (event === 'hover' && !data.picked && data.index === -1) {
+function sendEventViaTransport(transport, eventName, data) {
+  if (eventName === 'hover' && !data.picked && data.index === -1) {
     // TODO handle background hover events, for now we'll skip them
     return;
   }
-  // TODO Remove circular references without converting to a string
-  const deckEvent = JSON.parse(JSON.stringify({event, data}, filterJsonValue));
 
-  transport.sendJSONMessage('deck-event', deckEvent);
+  // TODO Remove circular references without converting to a string
+  const deckEvent = JSON.parse(JSON.stringify(data, filterJsonValue));
+
+  // Note: transport.sendJSONMessage now filters circular references
+  transport.sendJSONMessage(eventName, deckEvent);
 }
 
 // Get non-deck "playground" props
