@@ -293,7 +293,7 @@ export default class Tileset2D {
   }
   /* eslint-enable complexity */
 
-  _getTile({x, y, z, selected}, create) {
+  _getTile({x, y, z}, create) {
     const tileId = `${x},${y},${z}`;
     let tile = this._cache.get(tileId);
 
