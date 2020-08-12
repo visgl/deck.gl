@@ -60,7 +60,7 @@ export default class Tileset2D {
     };
 
     this._requestScheduler = new RequestScheduler({
-      maxRequests: opts.maxRequests,
+      maxRequests: opts.maxRequests * 2,
       throttleRequests: opts.maxRequests > 0
     });
 
@@ -115,6 +115,7 @@ export default class Tileset2D {
         minZoom: this._minZoom,
         zRange
       });
+      // console.log('indices', JSON.stringify(tileIndices));
       this._selectedTiles = tileIndices.map(index => this._getTile(index, true));
 
       if (this._dirty) {
@@ -177,7 +178,7 @@ export default class Tileset2D {
   updateTileStates() {
     this._updateTileStates(this.selectedTiles);
 
-    const {maxOngoingRequests} = this.opts;
+    const {maxRequests} = this.opts;
 
     const unselectedOngoingTiles = [];
     let ongoingRequestCount = 0;
@@ -193,25 +194,27 @@ export default class Tileset2D {
       tile.isSelected = tile.state === TILE_STATE_SELECTED;
 
       // Keep track of all the ongoing requests
-      if (!tile.isLoaded && !tile.isCancelled) {
+      if (tile.isLoading) {
         ongoingRequestCount++;
         if (!tile.isSelected) {
           unselectedOngoingTiles.push(tile);
         }
       }
     }
+    console.log(
+      `ongoingRequestCount=${ongoingRequestCount}, unselectedOngoingTiles=${
+        unselectedOngoingTiles.length
+      }`
+    );
 
-    if (ongoingRequestCount > maxOngoingRequests) {
+    if (ongoingRequestCount > maxRequests) {
       // There are too many ongoing requests, see if any can be aborted
       console.warn(
-        `Too many requests ongoingRequestCount=${ongoingRequestCount}>maxOngoingRequests=${maxOngoingRequests}, unselectedOngoingTiles=${
+        `Too many requests ongoingRequestCount=${ongoingRequestCount}>maxRequests=${maxRequests}, unselectedOngoingTiles=${
           unselectedOngoingTiles.length
         }`
       );
-      const tilesToAbort = unselectedOngoingTiles.slice(
-        0,
-        ongoingRequestCount - maxOngoingRequests
-      );
+      const tilesToAbort = unselectedOngoingTiles.slice(0, ongoingRequestCount - maxRequests);
       if (tilesToAbort.length > 0) {
         console.warn(`Aborting ${tilesToAbort.length} tiles`);
       }
@@ -318,12 +321,12 @@ export default class Tileset2D {
   }
   /* eslint-enable complexity */
 
-  _getTile({x, y, z}, create) {
+  _getTile({x, y, z, selected}, create) {
     const tileId = `${x},${y},${z}`;
     let tile = this._cache.get(tileId);
 
     if (!tile && create) {
-      console.log(`Requesting new tile x=${x}, y=${y}, z=${z}`);
+      console.log(`Requesting new tile ${z},${x},${y}`);
       tile = new Tile2DHeader({
         x,
         y,
@@ -335,8 +338,8 @@ export default class Tileset2D {
       tile.loadData(this._getTileData, this._requestScheduler);
       this._cache.set(tileId, tile);
       this._dirty = true;
-    } else if (tile && tile.isCancelled) {
-      console.log(`Re-requesting cancelled tile x=${x}, y=${y}, z=${z}`);
+    } else if (tile && tile.isCancelled && selected) {
+      console.log(`Re-requesting cancelled tile ${z},${x},${y}`);
       tile.loadData(this._getTileData, this._requestScheduler);
     }
 

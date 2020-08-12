@@ -35,22 +35,23 @@ function Root() {
       <TileLayer
         // tileSize={128}
         // maxRequests={2}
-        maxOngoingRequests={2}
+        maxRequests={6}
         getTileData={async tile => {
           const {
             x,
             y,
+            z,
             bbox: {north, east, south, west},
             signal
           } = tile;
-          const wait = 5000;
+          const wait = 10000;
           // console.log("waiting", wait); // eslint-disable-line no-console
           // return fetch(`https://cors-anywhere.herokuapp.com/https://postman-echo.com/delay/${wait}`);
 
           // Simulate a slow fetch
           // docker run --rm -it -p 7000:80 ealen/echo-server
           await fetch(
-            `http://localhost:7000?echo_header=Access-Control-Allow-Origin:*&echo_time=${wait}&echo_body=x:${x},y=${y}`,
+            `http://localhost:7000?echo_header=Access-Control-Allow-Origin:*&echo_time=${wait}&echo_body=${z},${x},${y}`,
             {signal}
           );
 
