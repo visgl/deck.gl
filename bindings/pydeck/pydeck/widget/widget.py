@@ -8,6 +8,7 @@ from traitlets import Any, Bool, Int, Unicode
 
 from ..data_utils.binary_transfer import data_buffer_serialization
 from ._frontend import module_name, module_version
+from .debounce import debounce
 
 
 def store_selection(widget_instance, payload):
@@ -80,7 +81,8 @@ class DeckGLWidget(DOMWidget):
     def on_resize(self, callback, remove=False):
         self._resize_handlers.register_callback(callback, remove=remove)
 
-    def on_view_state_change(self, callback, remove=False):
+    def on_view_state_change(self, callback, debouce_seconds=0.2, remove=False):
+        callback = debounce(debouce_seconds)(callback) if debouce_seconds > 0 else callback
         self._view_state_handlers.register_callback(callback, remove=remove)
 
     def on_click(self, callback, remove=False):

@@ -111,12 +111,22 @@ function createStandaloneFromProvider({
   container
 }) {
   // Common deck.gl props for all basemaos
-  const commonProps = {
-    onClick: info => handleEvent('click', info),
-    onHover: info => handleEvent('hover', info),
-    onResize: size => handleEvent('resize', size),
-    onViewStateChange: ({viewState, interactionState, oldViewState}) =>
-      handleEvent('view-state-change', viewState),
+  const handlers = handleEvent
+    ? {
+        onClick: info => handleEvent('click', info),
+        onHover: info => handleEvent('hover', info),
+        onResize: size => handleEvent('resize', size),
+        onViewStateChange: ({viewState, interactionState, oldViewState}) => {
+          const viewport = new deck.WebMercatorViewport(viewState);
+          viewState.nw = viewport.unproject([0, 0]);
+          viewState.se = viewport.unproject([viewport.width, viewport.height]);
+          handleEvent('view-state-change', viewState);
+        }
+      }
+    : null;
+
+  const sharedProps = {
+    ...handlers,
     getTooltip,
     container
   };
@@ -125,7 +135,7 @@ function createStandaloneFromProvider({
     case 'mapbox':
       deck.log.info('Using Mapbox base maps')();
       return new deck.DeckGL({
-        ...commonProps,
+        ...sharedProps,
         ...props,
         map: mapboxgl,
         mapboxApiAccessToken: mapboxApiKey,
@@ -134,14 +144,14 @@ function createStandaloneFromProvider({
     case 'google_maps':
       deck.log.info('Using Google Maps base maps')();
       return createGoogleMapsDeckOverlay({
-        ...commonProps,
+        ...sharedProps,
         props, // TODO not ...props?
         googleMapsKey
       });
     default:
       deck.log.info('No recognized map provider specified')();
       return new deck.DeckGL({
-        ...commonProps,
+        ...sharedProps,
         ...props,
         map: null,
         mapboxApiAccessToken: null
