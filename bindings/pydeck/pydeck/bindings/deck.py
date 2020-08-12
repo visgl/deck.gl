@@ -1,4 +1,3 @@
-from ast import literal_eval
 import os
 import warnings
 
@@ -112,7 +111,7 @@ class Deck(JSONMixin):
     def selected_data(self):
         if not self.deck_widget.selected_data:
             return None
-        return literal_eval(self.deck_widget.selected_data)
+        return self.deck_widget.selected_data
 
     def show(self):
         """Display current Deck object for a Jupyter notebook"""
