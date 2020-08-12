@@ -72,6 +72,7 @@ class DeckGLWidget(DOMWidget):
 
         self.handler_exception = None
         self.on_click(store_selection)
+        self.selected_data = []
 
     def on_hover(self, callback, remove=False):
         self._hover_handlers.register_callback(callback, remove=remove)

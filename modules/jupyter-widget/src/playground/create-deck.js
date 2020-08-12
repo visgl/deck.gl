@@ -111,7 +111,7 @@ function createStandaloneFromProvider({
   container
 }) {
   // Common deck.gl props for all basemaos
-  const deckProps = {
+  const commonProps = {
     onClick: info => handleEvent('click', info),
     onHover: info => handleEvent('hover', info),
     onResize: size => handleEvent('resize', size),
@@ -125,7 +125,7 @@ function createStandaloneFromProvider({
     case 'mapbox':
       deck.log.info('Using Mapbox base maps')();
       return new deck.DeckGL({
-        ...deckProps,
+        ...commonProps,
         ...props,
         map: mapboxgl,
         mapboxApiAccessToken: mapboxApiKey,
@@ -134,14 +134,14 @@ function createStandaloneFromProvider({
     case 'google_maps':
       deck.log.info('Using Google Maps base maps')();
       return createGoogleMapsDeckOverlay({
-        ...deckProps,
+        ...commonProps,
         props, // TODO not ...props?
         googleMapsKey
       });
     default:
       deck.log.info('No recognized map provider specified')();
       return new deck.DeckGL({
-        ...deckProps,
+        ...commonProps,
         ...props,
         map: null,
         mapboxApiAccessToken: null
