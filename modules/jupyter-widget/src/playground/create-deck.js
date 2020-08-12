@@ -101,40 +101,60 @@ function missingLayers(oldLayers, newLayers) {
   return oldLayers.filter(ol => ol && ol.id && !newLayers.find(nl => nl.id === ol.id));
 }
 
-function createStandaloneFromProvider(
+function createStandaloneFromProvider({
   mapProvider,
-  {props, mapboxApiKey, googleMapsKey, handleClick, getTooltip, container}
-) {
+  props,
+  mapboxApiKey,
+  googleMapsKey,
+  handleEvent,
+  getTooltip,
+  container
+}) {
+  // Common deck.gl props for all basemaos
+  const handlers = handleEvent
+    ? {
+        onClick: info => handleEvent('click', info),
+        onHover: info => handleEvent('hover', info),
+        onResize: size => handleEvent('resize', size),
+        onViewStateChange: ({viewState, interactionState, oldViewState}) => {
+          const viewport = new deck.WebMercatorViewport(viewState);
+          viewState.nw = viewport.unproject([0, 0]);
+          viewState.se = viewport.unproject([viewport.width, viewport.height]);
+          handleEvent('view-state-change', viewState);
+        }
+      }
+    : null;
+
+  const sharedProps = {
+    ...handlers,
+    getTooltip,
+    container
+  };
+
   switch (mapProvider) {
     case 'mapbox':
       deck.log.info('Using Mapbox base maps')();
       return new deck.DeckGL({
+        ...sharedProps,
         ...props,
         map: mapboxgl,
-        onLoad: modifyMapboxElements,
         mapboxApiAccessToken: mapboxApiKey,
-        onClick: handleClick,
-        getTooltip,
-        container
+        onLoad: modifyMapboxElements
       });
     case 'google_maps':
       deck.log.info('Using Google Maps base maps')();
       return createGoogleMapsDeckOverlay({
-        props,
-        googleMapsKey,
-        onClick: handleClick,
-        getTooltip,
-        container
+        ...sharedProps,
+        props, // TODO not ...props?
+        googleMapsKey
       });
     default:
       deck.log.info('No recognized map provider specified')();
       return new deck.DeckGL({
+        ...sharedProps,
         ...props,
         map: null,
-        mapboxApiAccessToken: null,
-        onClick: handleClick,
-        getTooltip,
-        container
+        mapboxApiAccessToken: null
       });
   }
 }
@@ -145,8 +165,7 @@ function createDeck({
   container,
   jsonInput,
   tooltip,
-  handleClick,
-  handleWarning,
+  handleEvent,
   customLibraries
 }) {
   let deckgl;
@@ -163,9 +182,15 @@ function createDeck({
     const getTooltip = makeTooltip(tooltip);
     const {mapProvider} = props;
 
-    const standaloneArgs = {props, mapboxApiKey, googleMapsKey, handleClick, getTooltip, container};
-
-    deckgl = createStandaloneFromProvider(mapProvider, standaloneArgs);
+    deckgl = createStandaloneFromProvider({
+      mapProvider,
+      props,
+      mapboxApiKey,
+      googleMapsKey,
+      handleEvent,
+      getTooltip,
+      container
+    });
 
     const onComplete = () => {
       if (layerToLoad.length) {
@@ -181,27 +206,12 @@ function createDeck({
     };
 
     addCustomLibraries(customLibraries, onComplete);
-
-    // TODO overrride console.warn instead
-    // Right now this isn't doable (in a Notebook at least)
-    // because the widget loads in deck.gl (and its logger) before @deck.gl/jupyter-widget
-    if (handleWarning) {
-      const warn = deck.log.warn;
-      deck.log.warn = injectFunction(warn, handleWarning);
-    }
   } catch (err) {
     // This will fail in node tests
     // eslint-disable-next-line
     console.error(err);
   }
   return deckgl;
-}
-
-function injectFunction(warnFunction, messageHandler) {
-  return (...args) => {
-    messageHandler(...args);
-    return warnFunction(...args);
-  };
 }
 
 export {createDeck, updateDeck, jsonConverter};

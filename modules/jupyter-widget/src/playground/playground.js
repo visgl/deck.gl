@@ -1,6 +1,8 @@
+import * as deckBundle from '../deck-bundle';
+
 import {Transport} from '@deck.gl/json';
 
-import {createContainer, createErrorBox} from './utils/css-utils';
+import {createContainer} from './utils/css-utils';
 
 import {loadMapboxCSS} from './utils/mapbox-utils';
 
@@ -10,26 +12,15 @@ export function initPlayground() {
   Transport.setCallbacks({
     onInitialize({transport}) {
       // Extract "deck.gl playground" props
-      const {
-        width,
-        height,
-        customLibraries,
-        mapboxApiKey,
-        jsonInput,
-        tooltip,
-        jsWarning
-      } = getPlaygroundProps(transport);
+      const {width, height, customLibraries, mapboxApiKey, jsonInput, tooltip} = getPlaygroundProps(
+        transport
+      );
 
       // Load mapbox CSS
       loadMapboxCSS();
       // Create container div for deck.gl
       const container = createContainer(width, height);
       transport.jupyterView.el.appendChild(container);
-
-      if (jsWarning) {
-        const errorBox = createErrorBox(jsWarning);
-        container.append(errorBox);
-      }
 
       const jsonProps = JSON.parse(jsonInput);
 
@@ -38,8 +29,7 @@ export function initPlayground() {
         container,
         jsonInput: jsonProps,
         tooltip,
-        handleClick: (datum, event) => handleClick(transport, datum, event),
-        handleWarning: message => handleWarning(transport, message),
+        handleEvent: (name, payload) => sendEventViaTransport(transport, name, payload),
         customLibraries
       });
 
@@ -90,37 +80,23 @@ export function processDataBuffer({binary, convertedJson}) {
   return convertedJson;
 }
 
-// Handles a click event
-function handleClick(transport, datum, e) {
-  if (!datum || !datum.object) {
-    transport.jupyterModel.set('selected_data', JSON.stringify(''));
-    transport.jupyterModel.save_changes();
-    return;
+// Filters circular references on JSON string conversion
+function filterJsonValue(key, value) {
+  if (value instanceof deckBundle.Layer) {
+    return value.id;
   }
-
-  const multiselectEnabled = e.srcEvent.metaKey || e.srcEvent.metaKey;
-  const dataPayload = datum.object && datum.object.points ? datum.object.points : datum.object;
-  if (multiselectEnabled) {
-    let selectedData = JSON.parse(transport.jupyterModel.get('selected_data'));
-    if (!Array.isArray(selectedData)) {
-      selectedData = [];
-    }
-    selectedData.push(dataPayload);
-    transport.jupyterModel.set('selected_data', JSON.stringify(selectedData));
-  } else {
-    // Single selection
-    transport.jupyterModel.set('selected_data', JSON.stringify(dataPayload));
-  }
-  transport.jupyterModel.save_changes();
+  return value;
 }
 
-// Handles a warning event
-function handleWarning(transport, warningMessage) {
-  const errorBox = createErrorBox();
-  const model = transport.jupyterModel;
-  if (model && model.attributes.js_warning && errorBox) {
-    errorBox.innerText = warningMessage;
+// Handles a general event
+function sendEventViaTransport(transport, event, data) {
+  if (event === 'hover' && !data.picked && data.index === -1) {
+    // TODO handle background hover events, for now we'll skip them
+    return;
   }
+  // TODO Remove circular references without converting to a string
+  const deckEvent = JSON.parse(JSON.stringify({event, data}, filterJsonValue));
+  transport.jupyterModel.send(deckEvent);
 }
 
 // Get non-deck "playground" props
@@ -136,13 +112,9 @@ function getPlaygroundProps(transport) {
   return {
     width: jupyterModel.get('width'),
     height: jupyterModel.get('height'),
-
     customLibraries: jupyterModel.get('custom_libraries'),
-
     mapboxApiKey: jupyterModel.get('mapbox_key'),
     jsonInput: jupyterModel.get('json_input'),
-    tooltip: jupyterModel.get('tooltip'),
-
-    jsWarning: jupyterModel.get('js_warning')
+    tooltip: jupyterModel.get('tooltip')
   };
 }
