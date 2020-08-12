@@ -17,8 +17,11 @@ export default class JupyterTransport extends Transport {
     return this.jupyterView.el;
   }
 
-  // TODO - implement back-channel messaging for event handling etc
-  sendJsonMessage({json, type}) {
-    // this.jupyterModel. ...
+  /**
+   * back-channel messaging for event handling etc
+   */
+  sendJSONMessage(type, data) {
+    const string = Transport._stringifyJsonSafe({type, data});
+    this.jupyterModel.send(string);
   }
 }

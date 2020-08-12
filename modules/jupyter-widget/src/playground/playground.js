@@ -84,10 +84,7 @@ export function processDataBuffer({binary, convertedJson}) {
 
 // Filters circular references on JSON string conversion
 function filterJsonValue(key, value) {
-  if (value instanceof deckBundle.Layer) {
-    return value.id;
-  }
-  return value;
+  return value instanceof deckBundle.Layer ? value.id : value;
 }
 
 // Handles a general event
@@ -98,7 +95,8 @@ function sendEventViaTransport(transport, event, data) {
   }
   // TODO Remove circular references without converting to a string
   const deckEvent = JSON.parse(JSON.stringify({event, data}, filterJsonValue));
-  transport.jupyterModel.send(deckEvent);
+
+  transport.sendJSONMessage('deck-event', deckEvent);
 }
 
 // Get non-deck "playground" props
