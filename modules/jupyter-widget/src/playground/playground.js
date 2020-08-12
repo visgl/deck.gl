@@ -2,7 +2,7 @@ import * as deckBundle from '../deck-bundle';
 
 import {Transport} from '@deck.gl/json';
 
-import {createContainer, createErrorBox} from './utils/css-utils';
+import {createContainer} from './utils/css-utils';
 
 import {loadMapboxCSS} from './utils/mapbox-utils';
 
@@ -12,26 +12,15 @@ export function initPlayground() {
   Transport.setCallbacks({
     onInitialize({transport}) {
       // Extract "deck.gl playground" props
-      const {
-        width,
-        height,
-        customLibraries,
-        mapboxApiKey,
-        jsonInput,
-        tooltip,
-        jsWarning
-      } = getPlaygroundProps(transport);
+      const {width, height, customLibraries, mapboxApiKey, jsonInput, tooltip} = getPlaygroundProps(
+        transport
+      );
 
       // Load mapbox CSS
       loadMapboxCSS();
       // Create container div for deck.gl
       const container = createContainer(width, height);
       transport.jupyterView.el.appendChild(container);
-
-      if (jsWarning) {
-        const errorBox = createErrorBox(jsWarning);
-        container.append(errorBox);
-      }
 
       const jsonProps = JSON.parse(jsonInput);
 
@@ -41,8 +30,6 @@ export function initPlayground() {
         jsonInput: jsonProps,
         tooltip,
         handleEvent: (name, payload) => sendEventViaTransport(transport, name, payload),
-        handleClick: (datum, event) => handleClick(transport, datum, event),
-        handleWarning: message => handleWarning(transport, message),
         customLibraries
       });
 
@@ -112,40 +99,6 @@ function sendEventViaTransport(transport, event, data) {
   transport.jupyterModel.send(deckEvent);
 }
 
-// Handles a click event
-// TODO - integrate as extra processing for click events in sendEventViaTransport
-function handleClick(transport, datum, e) {
-  if (!datum || !datum.object) {
-    transport.jupyterModel.set('selected_data', JSON.stringify(''));
-    transport.jupyterModel.save_changes();
-    return;
-  }
-
-  const multiselectEnabled = e.srcEvent.metaKey || e.srcEvent.metaKey;
-  const dataPayload = datum.object && datum.object.points ? datum.object.points : datum.object;
-  if (multiselectEnabled) {
-    let selectedData = JSON.parse(transport.jupyterModel.get('selected_data'));
-    if (!Array.isArray(selectedData)) {
-      selectedData = [];
-    }
-    selectedData.push(dataPayload);
-    transport.jupyterModel.set('selected_data', JSON.stringify(selectedData));
-  } else {
-    // Single selection
-    transport.jupyterModel.set('selected_data', JSON.stringify(dataPayload));
-  }
-  transport.jupyterModel.save_changes();
-}
-
-// Handles a warning event
-function handleWarning(transport, warningMessage) {
-  const errorBox = createErrorBox();
-  const model = transport.jupyterModel;
-  if (model && model.attributes.js_warning && errorBox) {
-    errorBox.innerText = warningMessage;
-  }
-}
-
 // Get non-deck "playground" props
 // TODO: hack we are accessing model directly
 // TODO - these inputs can be passed as top-level JSON props, no need to add custom model fields
@@ -159,13 +112,9 @@ function getPlaygroundProps(transport) {
   return {
     width: jupyterModel.get('width'),
     height: jupyterModel.get('height'),
-
     customLibraries: jupyterModel.get('custom_libraries'),
-
     mapboxApiKey: jupyterModel.get('mapbox_key'),
     jsonInput: jupyterModel.get('json_input'),
-    tooltip: jupyterModel.get('tooltip'),
-
-    jsWarning: jupyterModel.get('js_warning')
+    tooltip: jupyterModel.get('tooltip')
   };
 }

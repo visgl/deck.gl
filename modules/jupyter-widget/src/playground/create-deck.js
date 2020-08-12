@@ -106,14 +106,13 @@ function createStandaloneFromProvider({
   props,
   mapboxApiKey,
   googleMapsKey,
-  handleClick,
   handleEvent,
   getTooltip,
   container
 }) {
   // Common deck.gl props for all basemaos
   const deckProps = {
-    onClick: handleClick,
+    onClick: info => handleEvent('click', info),
     onHover: info => handleEvent('hover', info),
     onResize: size => handleEvent('resize', size),
     onViewStateChange: ({viewState, interactionState, oldViewState}) =>
@@ -156,9 +155,7 @@ function createDeck({
   container,
   jsonInput,
   tooltip,
-  handleClick,
   handleEvent,
-  handleWarning,
   customLibraries
 }) {
   let deckgl;
@@ -180,7 +177,6 @@ function createDeck({
       props,
       mapboxApiKey,
       googleMapsKey,
-      handleClick,
       handleEvent,
       getTooltip,
       container
@@ -200,27 +196,12 @@ function createDeck({
     };
 
     addCustomLibraries(customLibraries, onComplete);
-
-    // TODO overrride console.warn instead
-    // Right now this isn't doable (in a Notebook at least)
-    // because the widget loads in deck.gl (and its logger) before @deck.gl/jupyter-widget
-    if (handleWarning) {
-      const warn = deck.log.warn;
-      deck.log.warn = injectFunction(warn, handleWarning);
-    }
   } catch (err) {
     // This will fail in node tests
     // eslint-disable-next-line
     console.error(err);
   }
   return deckgl;
-}
-
-function injectFunction(warnFunction, messageHandler) {
-  return (...args) => {
-    messageHandler(...args);
-    return warnFunction(...args);
-  };
 }
 
 export {createDeck, updateDeck, jsonConverter};

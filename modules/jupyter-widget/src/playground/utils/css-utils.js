@@ -1,6 +1,4 @@
 /* global document */
-const ERROR_BOX_CLASSNAME = 'error-box';
-
 // TODO - make sure this can be called multiple times without adding elements
 export function loadCSS(url) {
   const link = document.createElement('link');
@@ -17,23 +15,3 @@ export function createContainer(width, height) {
   container.style.position = 'relative';
   return container;
 }
-
-// TODO - add message?
-export function createErrorBox() {
-  const errorBox = document.createElement('div');
-  errorBox.className = ERROR_BOX_CLASSNAME;
-  Object.assign(errorBox.style, {
-    width: '100%',
-    height: '20px',
-    position: 'absolute',
-    zIndex: '1000',
-    backgroundColor: 'lemonchiffon',
-    cursor: 'pointer'
-  });
-  errorBox.onclick = e => {
-    errorBox.style.display = 'none';
-  };
-  return errorBox;
-}
-
-export function getErrorBox() {}
