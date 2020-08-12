@@ -114,6 +114,7 @@ If supplied, `getTileData` is called to retrieve the data of each tile. It recei
 - `z` (Number) - z index of the tile
 - `url` (String) - resolved url of the tile if the `data` prop is provided, otherwise `null`
 - `bbox` (Object) - bounding box of the tile. When used with a geospatial view, `bbox` is in the shape of `{west: <longitude>, north: <latitude>, east: <longitude>, south: <latitude>}`. When used with a non-geospatial view, `bbox` is in the shape of `{left, top, right, bottom}`.
+- `signal` (Object) - an [AbortSignal](https://developer.mozilla.org/en-US/docs/Web/API/AbortSignal) that may be signalled if there are too many ongoing requests.
 
 It should return either the tile data or a Promise that resolves to the tile data.
 
@@ -179,13 +180,15 @@ How the tile layer refines the visibility of tiles. One of the following:
 
 ##### `maxRequests` (Number, optional)
 
-The maximum number of concurrent `getTileData` calls. 
+The maximum number of concurrent `getTileData` calls.
 
-If `<= 0`, no throttling will occur, and `getTileData` may be called an unlimited number of times concurrently.
+If `<= 0`, no throttling will occur, and `getTileData` may be called an unlimited number of times concurrently regardless of how long that tile is or was visible.
 
-If `> 0`, a maximum of `maxRequests` instances of `getTileData` will be called concurrently. Additionally, for requests that are throttled, if the tile is no longer visible in the viewport when a request slot opens up, that request will be cancelled. When requests are not throttled, `getTileData` will be called for all visible tiles, regardless of how long that tile is or was visible.
+If `> 0`, a maximum of `maxRequests` instances of `getTileData` will be called concurrently. Requests may never be called if the tile wasn't visible long enough to be scheduled and started. Requests may also be aborted (through the `signal` passed to `getTileData`) if there are more than `maxRequests` ongoing requests and some of those are for tiles that are no longer visible.
 
-- Default: `8`
+If `getTileData` makes `fetch` requests, then `maxRequests` should correlate to the browser's maximum number of concurrent `fetch` requests. For Chrome, the max is 6.
+
+- Default: `6`
 
 ### Render Options
 

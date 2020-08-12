@@ -187,7 +187,7 @@ export default class Tileset2D {
       }
     }
 
-    if (ongoingRequestCount > maxRequests) {
+    if (maxRequests > 0 && ongoingRequestCount > maxRequests) {
       // There are too many ongoing requests, see if any can be aborted
       const tilesToAbort = abortCandidates.slice(0, ongoingRequestCount - maxRequests);
       // There are too many pending requests, so abort some that are unselected
