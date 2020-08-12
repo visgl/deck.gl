@@ -56,7 +56,8 @@ export default class Tile2DHeader {
       return tile.isSelected ? 1 : -1;
     });
 
-    if (!requestToken) {
+    // A tile can be cancelled while being scheduled
+    if (!requestToken || this._isCancelled) {
       console.log(`Cancelling tile ${z},${x},${y}`);
       this._isCancelled = true;
       return;
@@ -95,8 +96,8 @@ export default class Tile2DHeader {
       return;
     }
 
-    this._loader = this._loadData(getTileData, requestScheduler);
     this._isCancelled = false;
+    this._loader = this._loadData(getTileData, requestScheduler);
     this._loader.finally(() => {
       this._loader = undefined;
     });

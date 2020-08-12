@@ -60,7 +60,7 @@ export default class Tileset2D {
     };
 
     this._requestScheduler = new RequestScheduler({
-      maxRequests: opts.maxRequests * 2,
+      maxRequests: opts.maxRequests,
       throttleRequests: opts.maxRequests > 0
     });
 
