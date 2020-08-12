@@ -1,5 +1,4 @@
 /* eslint-env browser */
-/* eslint-disable no-console */
 
 import Tile2DHeader from './tile-2d-header';
 import {getTileIndices, tileToBoundingBox} from './utils';
@@ -115,7 +114,6 @@ export default class Tileset2D {
         minZoom: this._minZoom,
         zRange
       });
-      // console.log('indices', JSON.stringify(tileIndices));
       this._selectedTiles = tileIndices.map(index => this._getTile(index, true));
 
       if (this._dirty) {
@@ -135,19 +133,6 @@ export default class Tileset2D {
     if (changed) {
       this._frameNumber++;
     }
-
-    const tiles = [...this._cache.values()];
-    const total = tiles.length;
-    const loaded = tiles.filter(t => t.isLoaded).length;
-    const cancelled = tiles.filter(t => t.isCancelled).length;
-    const visible = tiles.filter(t => t.isVisible).length;
-    const selected = tiles.filter(t => t.isSelected).length;
-    // const data = tiles.map(t => t.data && (t.data.type || t.data));
-    const data = tiles.map(t => t.state);
-    console.info(
-      `updated cancelled=${cancelled}, loaded=${loaded}, visible=${visible}, selected=${selected}, total=${total}`,
-      data
-    );
 
     return this._frameNumber;
   }
@@ -180,7 +165,7 @@ export default class Tileset2D {
 
     const {maxRequests} = this.opts;
 
-    const unselectedOngoingTiles = [];
+    const abortCandidates = [];
     let ongoingRequestCount = 0;
     let changed = false;
     for (const tile of this._cache.values()) {
@@ -197,27 +182,14 @@ export default class Tileset2D {
       if (tile.isLoading) {
         ongoingRequestCount++;
         if (!tile.isSelected) {
-          unselectedOngoingTiles.push(tile);
+          abortCandidates.push(tile);
         }
       }
     }
-    console.log(
-      `ongoingRequestCount=${ongoingRequestCount}, unselectedOngoingTiles=${
-        unselectedOngoingTiles.length
-      }`
-    );
 
     if (ongoingRequestCount > maxRequests) {
       // There are too many ongoing requests, see if any can be aborted
-      console.warn(
-        `Too many requests ongoingRequestCount=${ongoingRequestCount}>maxRequests=${maxRequests}, unselectedOngoingTiles=${
-          unselectedOngoingTiles.length
-        }`
-      );
-      const tilesToAbort = unselectedOngoingTiles.slice(0, ongoingRequestCount - maxRequests);
-      if (tilesToAbort.length > 0) {
-        console.warn(`Aborting ${tilesToAbort.length} tiles`);
-      }
+      const tilesToAbort = abortCandidates.slice(0, ongoingRequestCount - maxRequests);
       // There are too many pending requests, so abort some that are unselected
       for (const tile of tilesToAbort) {
         tile.abort();
@@ -326,7 +298,6 @@ export default class Tileset2D {
     let tile = this._cache.get(tileId);
 
     if (!tile && create) {
-      console.log(`Requesting new tile ${z},${x},${y}`);
       tile = new Tile2DHeader({
         x,
         y,
@@ -338,8 +309,7 @@ export default class Tileset2D {
       tile.loadData(this._getTileData, this._requestScheduler);
       this._cache.set(tileId, tile);
       this._dirty = true;
-    } else if (tile && tile.isCancelled && selected) {
-      console.log(`Re-requesting cancelled tile ${z},${x},${y}`);
+    } else if (tile && tile.isCancelled && !tile.isLoading) {
       tile.loadData(this._getTileData, this._requestScheduler);
     }
 
