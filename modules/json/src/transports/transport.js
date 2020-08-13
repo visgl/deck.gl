@@ -1,3 +1,4 @@
+/* global document */
 const state = {
   onIninitialize: _ => _,
   onFinalize: _ => _,
@@ -24,12 +25,26 @@ export default class Transport {
     this.userData = {};
   }
 
-  // Back-channel messaging
+  /**
+   * Return a root DOM element for this transport connection
+   * @return {HTMLElement} default implementation returns document.body
+   * Jupyter Notebook transports will return an element associated with the notebook cell
+   */
+  getRootDOMElement() {
+    return typeof document !== 'undefined' ? document.body : null;
+  }
+
+  /**
+   * Back-channel messaging
+   */
   sendJSONMessage() {
     // eslint-disable-next-line
     console.error('Back-channel not implemented for this transport');
   }
 
+  /**
+   * Back-channel messaging
+   */
   sendBinaryMessage() {
     // eslint-disable-next-line
     console.error('Back-channel not implemented for this transport');
