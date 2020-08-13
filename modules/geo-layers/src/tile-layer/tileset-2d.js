@@ -1,5 +1,3 @@
-/* eslint-env browser */
-
 import Tile2DHeader from './tile-2d-header';
 import {getTileIndices, tileToBoundingBox} from './utils';
 import {RequestScheduler} from '@loaders.gl/loader-utils';

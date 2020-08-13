@@ -114,7 +114,7 @@ If supplied, `getTileData` is called to retrieve the data of each tile. It recei
 - `z` (Number) - z index of the tile
 - `url` (String) - resolved url of the tile if the `data` prop is provided, otherwise `null`
 - `bbox` (Object) - bounding box of the tile. When used with a geospatial view, `bbox` is in the shape of `{west: <longitude>, north: <latitude>, east: <longitude>, south: <latitude>}`. When used with a non-geospatial view, `bbox` is in the shape of `{left, top, right, bottom}`.
-- `signal` (Object) - an [AbortSignal](https://developer.mozilla.org/en-US/docs/Web/API/AbortSignal) that may be signalled if there are too many ongoing requests.
+- `signal` (Object) - an [AbortSignal](https://developer.mozilla.org/en-US/docs/Web/API/AbortSignal) that may be signalled if there are too many ongoing requests. Note: only tiles that aren't visible will be aborted.
 
 It should return either the tile data or a Promise that resolves to the tile data.
 
@@ -186,7 +186,7 @@ If `<= 0`, no throttling will occur, and `getTileData` may be called an unlimite
 
 If `> 0`, a maximum of `maxRequests` instances of `getTileData` will be called concurrently. Requests may never be called if the tile wasn't visible long enough to be scheduled and started. Requests may also be aborted (through the `signal` passed to `getTileData`) if there are more than `maxRequests` ongoing requests and some of those are for tiles that are no longer visible.
 
-If `getTileData` makes `fetch` requests, then `maxRequests` should correlate to the browser's maximum number of concurrent `fetch` requests. For Chrome, the max is 6.
+If `getTileData` makes `fetch` requests, then `maxRequests` should correlate to the browser's maximum number of concurrent `fetch` requests. For Chrome, the max is 6 per domain. If you use the `data` prop and specify multiple domains, you can increase this limit. For example, with Chrome and 3 domains specified, you can set `maxRequests=18`.
 
 - Default: `6`
 
