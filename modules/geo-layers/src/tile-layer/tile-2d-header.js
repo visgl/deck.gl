@@ -70,10 +70,17 @@ export default class Tile2DHeader {
       error = err || true;
     } finally {
       requestToken.done();
-      this._isLoaded = !this._isCancelled;
+
+      if (this._isCancelled && !tileData) {
+        this._isLoaded = false;
+      } else {
+        // Consider it loaded if we tried to cancel but `getTileData` still returned data
+        this._isLoaded = true;
+        this._isCancelled = false;
+      }
     }
 
-    if (this._isCancelled) {
+    if (!this._isLoaded) {
       return;
     }
 

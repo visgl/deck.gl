@@ -120,6 +120,18 @@ It should return either the tile data or a Promise that resolves to the tile dat
 
 This prop is not required if `data` points to a supported format (JSON or image by default). Additional formats may be added by registering [loaders.gl](https://loaders.gl/modules/core/docs/api-reference/register-loaders) modules.
 
+It is recommended to pass `signal` to any `fetch` calls and check its `aborted` property before doing any expensive computation.
+
+```js
+const {signal} = tile;
+const data = fetch(url, {signal});
+
+if (signal.aborted) {
+   return null;
+}
+// Expensive computation on returned data
+```
+
 
 ##### `tileSize` (Number, optional)
 
