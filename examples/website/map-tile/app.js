@@ -30,7 +30,9 @@ export default function App({showBorder = false, onTilesLoad = null}) {
       'https://b.tile.openstreetmap.org/{z}/{x}/{y}.png',
       'https://c.tile.openstreetmap.org/{z}/{x}/{y}.png'
     ],
-    maxRequests: 18,
+
+    // Allow unlimited concurrent requests since these OSM tiles support HTTP 2
+    maxRequests: -1,
 
     pickable: true,
     onViewportLoad: onTilesLoad,
