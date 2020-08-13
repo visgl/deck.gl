@@ -114,7 +114,7 @@ If supplied, `getTileData` is called to retrieve the data of each tile. It recei
 - `z` (Number) - z index of the tile
 - `url` (String) - resolved url of the tile if the `data` prop is provided, otherwise `null`
 - `bbox` (Object) - bounding box of the tile. When used with a geospatial view, `bbox` is in the shape of `{west: <longitude>, north: <latitude>, east: <longitude>, south: <latitude>}`. When used with a non-geospatial view, `bbox` is in the shape of `{left, top, right, bottom}`.
-- `signal` (Object) - an [AbortSignal](https://developer.mozilla.org/en-US/docs/Web/API/AbortSignal) that may be signalled if there are too many ongoing requests. Note: only tiles that aren't visible will be aborted.
+- `signal` (Object) - an [AbortSignal](https://developer.mozilla.org/en-US/docs/Web/API/AbortSignal) that may be signalled if there are too many queued requests. Note: only tiles that aren't visible will be aborted.
 
 It should return either the tile data or a Promise that resolves to the tile data.
 
