@@ -30,6 +30,7 @@ export default function App({showBorder = false, onTilesLoad = null}) {
       'https://b.tile.openstreetmap.org/{z}/{x}/{y}.png',
       'https://c.tile.openstreetmap.org/{z}/{x}/{y}.png'
     ],
+    maxRequests: 18,
 
     pickable: true,
     onViewportLoad: onTilesLoad,
