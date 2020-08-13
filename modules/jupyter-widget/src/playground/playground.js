@@ -18,15 +18,17 @@ export function initPlayground() {
 
       // Load mapbox CSS
       loadMapboxCSS();
+
       // Create container div for deck.gl
-      const container = createContainer(width, height);
-      transport.jupyterView.el.appendChild(container);
+      const transportRootElement = transport.getRootDOMElement();
+      const deckContainer = createContainer(width, height);
+      transportRootElement.appendChild(deckContainer);
 
       const jsonProps = JSON.parse(jsonInput);
 
       const deck = createDeck({
         mapboxApiKey,
-        container,
+        container: deckContainer,
         jsonInput: jsonProps,
         tooltip,
         handleEvent: (name, payload) => sendEventViaTransport(transport, name, payload),

@@ -13,6 +13,10 @@ export default class JupyterTransport extends Transport {
     this.jupyterView = null; // Set manually by the Jupyter Widget View
   }
 
+  getRootDOMElement() {
+    return this.jupyterView.el;
+  }
+
   // TODO - implement back-channel messaging for event handling etc
   sendJsonMessage({json, type}) {
     // this.jupyterModel. ...
