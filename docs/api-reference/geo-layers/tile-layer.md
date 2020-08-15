@@ -200,7 +200,7 @@ If `> 0`, a maximum of `maxRequests` instances of `getTileData` will be called c
 
 If `getTileData` makes `fetch` requests against an HTTP 1 web server, then `maxRequests` should correlate to the browser's maximum number of concurrent `fetch` requests. For Chrome, the max is 6 per domain. If you use the `data` prop and specify multiple domains, you can increase this limit. For example, with Chrome and 3 domains specified, you can set `maxRequests=18`.
 
-If the web server supports HTTP 2 (Open Chrome dev tools and look for "h2" in the Protocol column), then you can make an unlimited number of concurrent requests (and can set `maxRequests=-1`).
+If the web server supports HTTP/2 (Open Chrome dev tools and look for "h2" in the Protocol column), then you can make an unlimited number of concurrent requests (and can set `maxRequests=-1`).
 
 - Default: `6`
 

@@ -31,7 +31,8 @@ export default function App({showBorder = false, onTilesLoad = null}) {
       'https://c.tile.openstreetmap.org/{z}/{x}/{y}.png'
     ],
 
-    // Allow unlimited concurrent requests since these OSM tiles support HTTP 2
+    // Since these OSM tiles support HTTP/2, we can make many concurrent requests
+    // and we aren't limited by the browser to a certain number per domain.
     maxRequests: 20,
 
     pickable: true,
