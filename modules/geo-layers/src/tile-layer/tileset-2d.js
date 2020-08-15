@@ -185,12 +185,12 @@ export default class Tileset2D {
       }
     }
 
-    if (maxRequests > 0 && ongoingRequestCount > maxRequests) {
-      // There are too many ongoing requests, see if any can be aborted
-      const tilesToAbort = abortCandidates.slice(0, ongoingRequestCount - maxRequests);
-      // There are too many pending requests, so abort some that are unselected
-      for (const tile of tilesToAbort) {
+    if (maxRequests > 0) {
+      while (ongoingRequestCount > maxRequests && abortCandidates.length > 0) {
+        // There are too many ongoing requests, so abort some that are unselected
+        const tile = abortCandidates.shift();
         tile.abort();
+        ongoingRequestCount--;
       }
     }
 

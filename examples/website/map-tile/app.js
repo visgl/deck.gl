@@ -32,7 +32,7 @@ export default function App({showBorder = false, onTilesLoad = null}) {
     ],
 
     // Allow unlimited concurrent requests since these OSM tiles support HTTP 2
-    maxRequests: -1,
+    maxRequests: 20,
 
     pickable: true,
     onViewportLoad: onTilesLoad,
