@@ -90,11 +90,11 @@ class DeckGLWidget(DOMWidget):
 
     def _handle_custom_msgs(self, _, content, buffers=None):
         event_type = content.get('event', '')
-        if event_type == 'hover':
+        if event_type == 'deck-hover-event':
             self._hover_handlers(self, content)
-        elif event_type == 'resize':
+        elif event_type == 'deck-resize-event':
             self._resize_handlers(self, content)
-        elif event_type == 'view-state-change':
+        elif event_type == 'deck-view-state-change-event':
             self._view_state_handlers(self, content)
-        elif event_type == 'click':
+        elif event_type == 'deck-click-event':
             self._click_handlers(self, content)
