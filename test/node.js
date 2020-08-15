@@ -1,5 +1,4 @@
 require('reify');
-require('abortcontroller-polyfill');
 
 // Polyfill for loaders
 // TODO - @loaders.gl/polyfills seems to freeze the tests
