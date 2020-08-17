@@ -18,6 +18,9 @@ global.Image = dom.window.Image;
 global.HTMLCanvasElement = dom.window.HTMLCanvasElement;
 global.HTMLVideoElement = dom.window.HTMLVideoElement;
 
+// Polyfill AbortController
+require('abortcontroller-polyfill');
+
 const moduleAlias = require('module-alias');
 
 const path = require('path');

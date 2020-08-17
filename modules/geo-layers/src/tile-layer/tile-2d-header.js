@@ -1,6 +1,5 @@
 /* eslint-env browser */
 import {log} from '@deck.gl/core';
-import 'abortcontroller-polyfill';
 
 export default class Tile2DHeader {
   constructor({x, y, z, onTileLoad, onTileError}) {
