@@ -120,7 +120,7 @@ It should return either the tile data or a Promise that resolves to the tile dat
 
 This prop is not required if `data` points to a supported format (JSON or image by default). Additional formats may be added by registering [loaders.gl](https://loaders.gl/modules/core/docs/api-reference/register-loaders) modules.
 
-It is recommended to pass `signal` to any `fetch` calls and check its `aborted` property before doing any expensive computation.
+It is recommended to pass `signal` to any `fetch` calls and check its `aborted` property before doing any expensive computation. If `signal` is aborted, then throw or return falsy from `getTileData` so the data is not cached; do not return incomplete data. If `signal` is aborted, but `getTileData` still returns a truthy response, then its data will be cached.
 
 ```js
 const {signal} = tile;
@@ -200,7 +200,7 @@ If `> 0`, a maximum of `maxRequests` instances of `getTileData` will be called c
 
 If `getTileData` makes `fetch` requests against an HTTP 1 web server, then `maxRequests` should correlate to the browser's maximum number of concurrent `fetch` requests. For Chrome, the max is 6 per domain. If you use the `data` prop and specify multiple domains, you can increase this limit. For example, with Chrome and 3 domains specified, you can set `maxRequests=18`.
 
-If the web server supports HTTP/2 (Open Chrome dev tools and look for "h2" in the Protocol column), then you can make an unlimited number of concurrent requests (and can set `maxRequests=-1`).
+If the web server supports HTTP/2 (Open Chrome dev tools and look for "h2" in the Protocol column), then you can make an unlimited number of concurrent requests (and can set `maxRequests=-1`). Note that this will request data for every tile, no matter how long the tile was visible, and may increase server load.
 
 - Default: `6`
 
