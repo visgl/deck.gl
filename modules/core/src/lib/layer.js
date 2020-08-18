@@ -741,6 +741,11 @@ export default class Layer extends Component {
       if (flags[key] && !changeFlags[key]) {
         changeFlags[key] = flags[key];
         debug(TRACE_CHANGE_FLAG, this, key, flags);
+      } else if (flags[key] && key === 'dataChanged' && Array.isArray(changeFlags[key])) {
+        changeFlags[key] = Array.isArray(flags[key])
+          ? changeFlags[key].concat(flags[key])
+          : flags[key];
+        debug(TRACE_CHANGE_FLAG, this, key, flags);
       }
     }
 
