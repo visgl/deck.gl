@@ -24,7 +24,15 @@ const defaultProps = {
   refinementStrategy: STRATEGY_DEFAULT,
   zRange: null,
   // Use load directly so we don't use ResourceManager
-  fetch: load,
+  fetch: {
+    type: 'function',
+    value: (url, {layer, signal}) => {
+      const loadOptions = { signal, ...(layer.getLoadOptions() || {}) };
+
+      return load(url, loadOptions);
+    },
+    compare: false
+  },
   maxRequests: 6
 };
 
