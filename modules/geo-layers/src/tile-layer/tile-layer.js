@@ -27,7 +27,7 @@ const defaultProps = {
   fetch: {
     type: 'function',
     value: (url, {layer, signal}) => {
-      const loadOptions = { signal, ...(layer.getLoadOptions() || {}) };
+      const loadOptions = {signal, ...(layer.getLoadOptions() || {})};
 
       return load(url, loadOptions);
     },
