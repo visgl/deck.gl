@@ -119,6 +119,14 @@ Whether to render the mesh in wireframe mode.
 This is an object that contains material props for [lighting effect](/docs/api-reference/core/lighting-effect.md) applied on extruded polygons.
 Check [the lighting guide](/docs/developer-guide/using-lighting.md#constructing-a-material-instance) for configurable settings.
 
+##### `_useMeshColors` (Boolean, optional)
+
+- Default: `false`
+
+Whether to color pixels using vertex colors supplied in the mesh (the `COLOR_0` or `colors` attribute). If set to `true`, vertex colors will be used. If set to `false` (default) vertex colors will be ignored.
+
+Remarks:
+- In the next major release of deck.gl, vertex colors are expected to always be used when supplied with a mesh. This property will then likely be removed and effectively default to true.
 
 ### Data Accessors
 
@@ -134,7 +142,9 @@ Method called to retrieve the center position for each object in the `data` stre
 
 - Default: `[0, 0, 0, 255]`
 
-The rgba color is in the format of `[r, g, b, [a]]`. Each channel is a number between 0-255 and `a` is 255 if not supplied.. Only used if `texture` is empty.
+If `mesh` does not contain vertex colors, use this color to render each object. If `mesh` contains vertex colors, then the two colors are mixed together. Use `[255, 255, 255]` to use the original mesh colors. If `texture` is assigned, then both colors will be ignored.
+
+The color is in the format of `[r, g, b, [a]]`. Each channel is a number between 0-255 and `a` is 255 if not supplied.
 
 * If an array is provided, it is used as the color for all objects.
 * If a function is provided, it is called on each object to retrieve its color.
