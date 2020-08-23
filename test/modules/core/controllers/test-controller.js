@@ -149,25 +149,25 @@ const TEST_CASES = [
     title: 'keyboard',
     props: {},
     events: () =>
-      makeEvents(['keydown'], {keyCode: 189})
-        .concat(makeEvents(['keydown'], {keyCode: 189, shiftKey: true}))
-        .concat(makeEvents(['keydown'], {keyCode: 187}))
-        .concat(makeEvents(['keydown'], {keyCode: 187, shiftKey: true}))
-        .concat(makeEvents(['keydown'], {keyCode: 37}))
-        .concat(makeEvents(['keydown'], {keyCode: 37, shiftKey: true}))
-        .concat(makeEvents(['keydown'], {keyCode: 38}))
-        .concat(makeEvents(['keydown'], {keyCode: 38, shiftKey: true}))
-        .concat(makeEvents(['keydown'], {keyCode: 39}))
-        .concat(makeEvents(['keydown'], {keyCode: 39, shiftKey: true}))
-        .concat(makeEvents(['keydown'], {keyCode: 40}))
-        .concat(makeEvents(['keydown'], {keyCode: 40, shiftKey: true})),
+      makeEvents(['keydown'], {code: 'Minus'})
+        .concat(makeEvents(['keydown'], {code: 'Minus', shiftKey: true}))
+        .concat(makeEvents(['keydown'], {code: 'Equal'}))
+        .concat(makeEvents(['keydown'], {code: 'Equal', shiftKey: true}))
+        .concat(makeEvents(['keydown'], {code: 'ArrowLeft'}))
+        .concat(makeEvents(['keydown'], {code: 'ArrowLeft', shiftKey: true}))
+        .concat(makeEvents(['keydown'], {code: 'ArrowUp'}))
+        .concat(makeEvents(['keydown'], {code: 'ArrowUp', shiftKey: true}))
+        .concat(makeEvents(['keydown'], {code: 'ArrowRight'}))
+        .concat(makeEvents(['keydown'], {code: 'ArrowRight', shiftKey: true}))
+        .concat(makeEvents(['keydown'], {code: 'ArrowDown'}))
+        .concat(makeEvents(['keydown'], {code: 'ArrowDown', shiftKey: true})),
     viewStateChanges: 12,
     interactionStates: 3
   },
   {
     title: 'keyboard#disabled',
     props: {keyboard: false},
-    events: () => makeEvents(['keydown'], {keyCode: 189}),
+    events: () => makeEvents(['keydown'], {code: 'Minus'}),
     viewStateChanges: 0,
     interactionStates: 0
   }
