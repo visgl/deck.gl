@@ -428,18 +428,18 @@ export default class Controller {
     let newControllerState;
     const interactionState = {};
 
-    switch (event.srcEvent.keyCode) {
-      case 189: // -
+    switch (event.srcEvent.code) {
+      case 'Minus':
         newControllerState = funcKey
           ? controllerState.zoomOut().zoomOut()
           : controllerState.zoomOut();
         interactionState.isZooming = true;
         break;
-      case 187: // +
+      case 'Equal':
         newControllerState = funcKey ? controllerState.zoomIn().zoomIn() : controllerState.zoomIn();
         interactionState.isZooming = true;
         break;
-      case 37: // left
+      case 'ArrowLeft':
         if (funcKey) {
           newControllerState = controllerState.rotateLeft();
           interactionState.isRotating = true;
@@ -448,7 +448,7 @@ export default class Controller {
           interactionState.isPanning = true;
         }
         break;
-      case 39: // right
+      case 'ArrowRight':
         if (funcKey) {
           newControllerState = controllerState.rotateRight();
           interactionState.isRotating = true;
@@ -457,7 +457,7 @@ export default class Controller {
           interactionState.isPanning = true;
         }
         break;
-      case 38: // up
+      case 'ArrowUp':
         if (funcKey) {
           newControllerState = controllerState.rotateUp();
           interactionState.isRotating = true;
@@ -466,7 +466,7 @@ export default class Controller {
           interactionState.isPanning = true;
         }
         break;
-      case 40: // down
+      case 'ArrowDown':
         if (funcKey) {
           newControllerState = controllerState.rotateDown();
           interactionState.isRotating = true;
