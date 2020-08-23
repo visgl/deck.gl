@@ -550,14 +550,13 @@ deck.gl will already have created the `state` object at this time, and added the
 
 Called during each rendering cycle when layer [properties](/docs/api-reference/core/layer.md#constructor) or [context](/docs/api-reference/core/layer.md#context) has been updated and before layers are drawn.
 
-`shouldUpdateState({props, oldProps, context, oldContext, changeFlags})`
+`shouldUpdateState({props, oldProps, context, changeFlags})`
 
 Parameters:
 
 * `props` (Object) - Layer properties from the current rendering cycle.
 * `oldProps` (Object) - Layer properties from the previous rendering cycle.
 * `context` (Object) - Layer context from the current rendering cycle.
-* `oldContext` (Object) - Layer context from the previous rendering cycle.
 * `changeFlags`:
   - an object that contains the following boolean flags:
   - `dataChanged`, `propsChanged`, `viewportChanged`, `somethingChanged`, `propsOrDataChanged`, `stateChanged`, `updateTriggersChanged`, `viewportChanged`
@@ -576,14 +575,13 @@ Remarks:
 
 Called when a layer needs to be updated.
 
-`updateState({props, oldProps, context, oldContext, changeFlags})`
+`updateState({props, oldProps, context, changeFlags})`
 
 Parameters:
 
 * `props` (Object) - Layer properties from the current rendering cycle.
 * `oldProps` (Object) - Layer properties from the previous rendering cycle.
 * `context` (Object) - Layer context from the current rendering cycle.
-* `oldContext` (Object) - Layer context from the previous rendering cycle.
 * `changeFlags`:
   - an object that contains the following boolean flags:
   - `dataChanged`, `propsChanged`, `viewportChanged`, `somethingChanged`, `propsOrDataChanged`, `stateChanged`, `updateTriggersChanged`, `viewportChanged`
