@@ -716,12 +716,32 @@ export default class Layer extends Component {
   setChangeFlags(flags) {
     const {changeFlags} = this.internalState;
 
-    for (const key in changeFlags) {
-      if (flags[key] && !changeFlags[key]) {
-        changeFlags[key] = flags[key];
-        debug(TRACE_CHANGE_FLAG, this, key, flags);
+    /* eslint-disable no-fallthrough, max-depth */
+    for (const key in flags) {
+      if (flags[key]) {
+        let flagChanged = false;
+        switch (key) {
+          case 'dataChanged':
+            // changeFlags.dataChanged may be `false`, a string (reason) or an array of ranges
+            if (Array.isArray(changeFlags[key])) {
+              changeFlags[key] = Array.isArray(flags[key])
+                ? changeFlags[key].concat(flags[key])
+                : flags[key];
+              flagChanged = true;
+            }
+
+          default:
+            if (!changeFlags[key]) {
+              changeFlags[key] = flags[key];
+              flagChanged = true;
+            }
+        }
+        if (flagChanged) {
+          debug(TRACE_CHANGE_FLAG, this, key, flags);
+        }
       }
     }
+    /* eslint-enable no-fallthrough, max-depth */
 
     // Update composite flags
     const propsOrDataChanged =
