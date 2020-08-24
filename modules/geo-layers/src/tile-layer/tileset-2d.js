@@ -131,6 +131,7 @@ export default class Tileset2D {
     if (changed) {
       this._frameNumber++;
     }
+
     return this._frameNumber;
   }
 
@@ -160,6 +161,10 @@ export default class Tileset2D {
   updateTileStates() {
     this._updateTileStates(this.selectedTiles);
 
+    const {maxRequests} = this.opts;
+
+    const abortCandidates = [];
+    let ongoingRequestCount = 0;
     let changed = false;
     for (const tile of this._cache.values()) {
       const isVisible = Boolean(tile.state & TILE_STATE_VISIBLE);
@@ -170,6 +175,23 @@ export default class Tileset2D {
 
       // isSelected used in request scheduler
       tile.isSelected = tile.state === TILE_STATE_SELECTED;
+
+      // Keep track of all the ongoing requests
+      if (tile.isLoading) {
+        ongoingRequestCount++;
+        if (!tile.isSelected) {
+          abortCandidates.push(tile);
+        }
+      }
+    }
+
+    if (maxRequests > 0) {
+      while (ongoingRequestCount > maxRequests && abortCandidates.length > 0) {
+        // There are too many ongoing requests, so abort some that are unselected
+        const tile = abortCandidates.shift();
+        tile.abort();
+        ongoingRequestCount--;
+      }
     }
 
     return changed;
@@ -285,7 +307,7 @@ export default class Tileset2D {
       tile.loadData(this._getTileData, this._requestScheduler);
       this._cache.set(tileId, tile);
       this._dirty = true;
-    } else if (tile && tile.isCancelled) {
+    } else if (tile && tile.isCancelled && !tile.isLoading) {
       tile.loadData(this._getTileData, this._requestScheduler);
     }
 
