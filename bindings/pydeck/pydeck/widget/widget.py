@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
-from __future__ import unicode_literals
 from ast import literal_eval
+import json
 
 from ipywidgets import register, CallbackDispatcher, DOMWidget
 from traitlets import Any, Bool, Int, Unicode
@@ -12,6 +12,7 @@ from .debounce import debounce
 
 
 def store_selection(widget_instance, payload):
+    """Callback for storing data on click"""
     try:
         if payload.get('data') and payload['data'].get('object'):
             datum = payload['data']['object']
@@ -89,7 +90,8 @@ class DeckGLWidget(DOMWidget):
         self._click_handlers.register_callback(callback, remove=remove)
 
     def _handle_custom_msgs(self, _, content, buffers=None):
-        event_type = content.get('event', '')
+        content = json.loads(content)
+        event_type = content.get('type', '')
         if event_type == 'deck-hover-event':
             self._hover_handlers(self, content)
         elif event_type == 'deck-resize-event':
