@@ -25,15 +25,6 @@ def read(*parts):
     return open(os.path.join(here, *parts), "r").read()
 
 
-def assert_prelease_on_master():
-    """Require that prereleases only be from the master branch"""
-    git_branch = check_output("git rev-parse --abbrev-ref HEAD".split()).decode("ascii").strip()
-    is_prerelease = any([c for c in version_ns["__version__"] if c.isalpha()])
-    msg = "Can only release a prerelease from master, but branch is {} and release version is {}"
-    if is_prerelease:
-        assert git_branch == "master", msg.format(git_branch, version_ns["__version__"])
-
-
 log.info("setup.py entered")
 log.info("$PATH=%s" % os.environ["PATH"])
 
@@ -160,8 +151,6 @@ def js_prerelease(command, strict=False):
 
     class DecoratedCommand(command):
         def run(self):
-            if strict:
-                assert_prelease_on_master()
             jsdeps = self.distribution.get_command_obj("jsdeps")  # noqa
             self.distribution.run_command("jsdeps")
             command.run(self)
