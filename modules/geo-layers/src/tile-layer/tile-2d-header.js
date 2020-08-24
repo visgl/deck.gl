@@ -1,3 +1,4 @@
+/* eslint-env browser */
 import {log} from '@deck.gl/core';
 
 export default class Tile2DHeader {
@@ -26,6 +27,10 @@ export default class Tile2DHeader {
     return this._isLoaded;
   }
 
+  get isLoading() {
+    return Boolean(this._loader);
+  }
+
   get isCancelled() {
     return this._isCancelled;
   }
@@ -38,14 +43,19 @@ export default class Tile2DHeader {
     return result;
   }
 
+  /* eslint-disable max-statements */
   async _loadData(getTileData, requestScheduler) {
     const {x, y, z, bbox} = this;
+
+    this._abortController = new AbortController(); // eslint-disable-line no-undef
+    const {signal} = this._abortController;
 
     const requestToken = await requestScheduler.scheduleRequest(this, tile => {
       return tile.isSelected ? 1 : -1;
     });
 
-    if (!requestToken) {
+    // A tile can be cancelled while being scheduled
+    if (!requestToken || this._isCancelled) {
       this._isCancelled = true;
       return;
     }
@@ -54,12 +64,23 @@ export default class Tile2DHeader {
     let tileData;
     let error;
     try {
-      tileData = await getTileData({x, y, z, bbox});
+      tileData = await getTileData({x, y, z, bbox, signal});
     } catch (err) {
       error = err || true;
     } finally {
       requestToken.done();
-      this._isLoaded = true;
+
+      if (this._isCancelled && !tileData) {
+        this._isLoaded = false;
+      } else {
+        // Consider it loaded if we tried to cancel but `getTileData` still returned data
+        this._isLoaded = true;
+        this._isCancelled = false;
+      }
+    }
+
+    if (!this._isLoaded) {
+      return;
     }
 
     if (error) {
@@ -69,12 +90,26 @@ export default class Tile2DHeader {
       this.onTileLoad(this);
     }
   }
+  /* eslint-enable max-statements */
 
   loadData(getTileData, requestScheduler) {
     if (!getTileData) {
       return;
     }
 
+    this._isCancelled = false;
     this._loader = this._loadData(getTileData, requestScheduler);
+    this._loader.finally(() => {
+      this._loader = undefined;
+    });
+  }
+
+  abort() {
+    if (this.isLoaded) {
+      return;
+    }
+
+    this._isCancelled = true;
+    this._abortController.abort();
   }
 }
