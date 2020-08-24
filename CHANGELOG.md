@@ -19,6 +19,13 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v8.2
 
+#### deck.gl [8.2.6] - Aug 16 2020
+
+- Ability to use mesh color in SimpleMeshLayer (#4868)
+- Fix async iterable data diff handling (#4875)
+- Avoid using deprecated KeyboardEvent.keycode (#4885)
+- Support changing mapStyle in standalone bundle (#4886)
+
 #### deck.gl [8.2.5] - Aug 3 2020
 
 - Fix module parameters on newly created model (#4835)
