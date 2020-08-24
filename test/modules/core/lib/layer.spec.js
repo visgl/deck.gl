@@ -346,8 +346,9 @@ test('Layer#Async Iterable Data', async t => {
     yield [0, 1, 2];
     await sleep(50);
     yield [3, 4];
+    yield [5];
     await sleep(50);
-    yield [5, 6, 7];
+    yield [6, 7];
   }
 
   let data = await testAsyncData(t, getData());
