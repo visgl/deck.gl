@@ -114,6 +114,9 @@ export default class DeckGL extends Deck {
       this.onBeforeRender = props.onBeforeRender;
       props.onBeforeRender = this._onBeforeRender;
     }
+    if ('mapStyle' in props && this._map) {
+      this._map._map.setStyle(props.mapStyle);
+    }
 
     super.setProps(props);
   }
