@@ -3,6 +3,13 @@ CHANGELOG
 
 Releases and associated GitHub PRs for pydeck are documented here.
 
+0.5 Releases
+------------
+
+0.5.0b1 - Aug 23 2020
+^^^^^^^^^^^^^^^^^^^^
+- Add generic event handling (#4848)
+
 0.4 Releases
 ------------
 
