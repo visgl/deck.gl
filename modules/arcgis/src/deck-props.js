@@ -13,7 +13,8 @@ const properties = {
   onDragEnd: {},
   onError: {},
   debug: {},
-  drawPickingColors: {}
+  drawPickingColors: {},
+  getCursor: {}
 };
 
 /* eslint-disable callback-return */
