@@ -113,14 +113,14 @@ function createStandaloneFromProvider({
   // Common deck.gl props for all basemaos
   const handlers = handleEvent
     ? {
-        onClick: info => handleEvent('click', info),
-        onHover: info => handleEvent('hover', info),
-        onResize: size => handleEvent('resize', size),
+        onClick: info => handleEvent('deck-click-event', info),
+        onHover: info => handleEvent('deck-hover-event', info),
+        onResize: size => handleEvent('deck-resize-event', size),
         onViewStateChange: ({viewState, interactionState, oldViewState}) => {
           const viewport = new deck.WebMercatorViewport(viewState);
           viewState.nw = viewport.unproject([0, 0]);
           viewState.se = viewport.unproject([viewport.width, viewport.height]);
-          handleEvent('view-state-change', viewState);
+          handleEvent('deck-view-state-change-event', viewState);
         }
       }
     : null;
