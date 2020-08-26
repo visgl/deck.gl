@@ -107,14 +107,18 @@ If the value is an array: multiple URL templates. Each endpoint must return the 
 
 - Default: `tile => load(tile.url)`
 
-If supplied, `getTileData` is called to retrieve the data of each tile. It receives one argument `tile` which contains the following fields:
+If supplied, `getTileData` is called to retrieve the data of each tile. It receives two arguments
 
-- `x` (Number) - x index of the tile
-- `y` (Number) - y index of the tile
-- `z` (Number) - z index of the tile
-- `url` (String) - resolved url of the tile if the `data` prop is provided, otherwise `null`
-- `bbox` (Object) - bounding box of the tile. When used with a geospatial view, `bbox` is in the shape of `{west: <longitude>, north: <latitude>, east: <longitude>, south: <latitude>}`. When used with a non-geospatial view, `bbox` is in the shape of `{left, top, right, bottom}`.
-- `signal` (Object) - an [AbortSignal](https://developer.mozilla.org/en-US/docs/Web/API/AbortSignal) that may be signalled if there are too many queued requests. Note: only tiles that aren't visible will be aborted.
+- `tile` (Object) - contains the following fields:
+
+  * `x` (Number) - x index of the tile
+  * `y` (Number) - y index of the tile
+  * `z` (Number) - z index of the tile
+  * `url` (String) - resolved url of the tile if the `data` prop is provided, otherwise `null`
+  * `bbox` (Object) - bounding box of the tile. When used with a geospatial view, `bbox` is in the shape of `{west: <longitude>, north: <latitude>, east: <longitude>, south: <latitude>}`. When used with a non-geospatial view, `bbox` is in the shape of `{left, top, right, bottom}`.
+  * `signal` (Object) - an [AbortSignal](https://developer.mozilla.org/en-US/docs/Web/API/AbortSignal) that may be signalled if there are too many queued requests. Note: only tiles that aren't visible will be aborted.
+
+- `layer` the layer making the request for the tile
 
 It should return either the tile data or a Promise that resolves to the tile data.
 
