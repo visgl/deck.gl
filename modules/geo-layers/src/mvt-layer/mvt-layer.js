@@ -16,7 +16,8 @@ const defaultProps = {
 
 export default class MVTLayer extends TileLayer {
   getTileData(tile) {
-    const url = getURLFromTemplate(this.props.data, tile);
+    const { props } = this.getCurrentLayer();
+    const url = getURLFromTemplate(props.data, tile);
     if (!url) {
       return Promise.reject('Invalid URL');
     }
