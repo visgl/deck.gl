@@ -114,7 +114,7 @@ export default class TerrainLayer extends CompositeLayer {
   }
 
   getTiledTerrainData(tile) {
-    const { props } = this.getCurrentLayer();
+    const {props} = this.getCurrentLayer();
     const {elevationData, texture, elevationDecoder, meshMaxError, workerUrl} = props;
     const dataUrl = getURLFromTemplate(elevationData, tile);
     const textureUrl = getURLFromTemplate(texture, tile);
