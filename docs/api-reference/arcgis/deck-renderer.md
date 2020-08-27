@@ -65,7 +65,7 @@ new DeckRenderer(sceneView, props)
 - `onError`
 - `debug`
 - `drawPickingColors`
-
+- `getCursor`
 
 ## Members
 

@@ -59,6 +59,7 @@ Property names that start with `deck.` are forwarded to a `Deck` instance. The f
 - `deck.onError`
 - `deck.debug`
 - `deck.drawPickingColors`
+- `deck.getCursor`
 
 ## Members
 
