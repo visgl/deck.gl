@@ -31,12 +31,7 @@ view = pdk.View(type="_GlobeView", controller=True, width=1000, height=700)
 
 layers = [
     pdk.Layer(
-        "GeoJsonLayer",
-        id="base-map",
-        data=COUNTRIES,
-        stroked=False,
-        filled=True,
-        get_fill_color=[200, 200, 200],
+        "GeoJsonLayer", id="base-map", data=COUNTRIES, stroked=False, filled=True, get_fill_color=[200, 200, 200],
     ),
     pdk.Layer(
         "ColumnLayer",
@@ -58,7 +53,7 @@ deck = pdk.Deck(
     tooltip={"text": "{name}, {primary_fuel} plant, {country}"},
     layers=layers,
     # Note that this must be set for the globe to be opaque
-    parameters={"cull": True}
+    parameters={"cull": True},
 )
 
 deck.to_html("globe_view.html", css_background_color="black")
