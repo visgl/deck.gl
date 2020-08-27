@@ -27,7 +27,7 @@ class Deck(JSONMixin):
         description=None,
         effects=None,
         map_provider="mapbox",
-        parameters=None
+        parameters=None,
     ):
         """This is the renderer and configuration for a deck.gl visualization, similar to the
         `Deck <https://deck.gl/#/documentation/deckgl-api-reference/deck>`_ class from deck.gl.
@@ -141,7 +141,7 @@ class Deck(JSONMixin):
         filename=None,
         open_browser=False,
         notebook_display=None,
-        iframe_width='100%',
+        iframe_width="100%",
         iframe_height=500,
         as_string=False,
         offline=False,

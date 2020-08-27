@@ -33,7 +33,7 @@ epub_exclude_files = ["search.html"]
 autoclass_content = "both"
 html_theme_options = {"includehidden": False}
 add_module_names = False
-html_favicon = 'favicon.png'
+html_favicon = "favicon.png"
 
 
 def setup(app):
