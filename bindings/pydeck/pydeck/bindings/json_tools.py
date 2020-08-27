@@ -3,6 +3,8 @@ Support serializing objects into JSON
 """
 import json
 
+from .types import Type
+
 # Attributes to ignore during JSON serialization
 IGNORE_KEYS = [
     "mapbox_key",
@@ -60,16 +62,25 @@ def lower_camel_case_keys(attrs):
         camel_key = camel_and_lower(snake_key)
         attrs[camel_key] = attrs.pop(snake_key)
 
+    return attrs
+
 
 def default_serialize(o, remap_function=lower_camel_case_keys):
     """Default method for rendering JSON from a dictionary"""
     attrs = vars(o)
+
+    # Remove keys where value is None
     attrs = {k: v for k, v in attrs.items() if v is not None}
     for ignore_attr in IGNORE_KEYS:
         if attrs.get(ignore_attr):
             del attrs[ignore_attr]
+
+    # For each object of type pydeck.Type, call .json
+    attrs = {k: v.json() if isinstance(v, Type) else v for k, v in attrs.items()}
+
     if remap_function:
-        remap_function(attrs)
+        attrs = remap_function(attrs)
+
     return attrs
 
 
