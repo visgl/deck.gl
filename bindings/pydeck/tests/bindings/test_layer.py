@@ -8,7 +8,12 @@ df = pd.DataFrame({"position": [[0, 0], [0, 0]]})
 
 def test_constructor_binary_transport():
     test_layer = Layer(
-        "ScatterplotLayer", data=df, id="test-layer", use_binary_transport=True, get_position="position", radius=10,
+        "ScatterplotLayer",
+        data=df,
+        id="test-layer",
+        use_binary_transport=True,
+        get_position="position",
+        radius=10,
     )
     EXPECTED_DATUM = {
         "layer_id": "test-layer",

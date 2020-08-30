@@ -33,7 +33,11 @@ async def run(cmd):
 
 
 async def snap(fname):
-    browser = await launch(autoClose=False, headless=False, args=["--no-sandbox", "--disable-web-security"],)
+    browser = await launch(
+        autoClose=False,
+        headless=False,
+        args=["--no-sandbox", "--disable-web-security"],
+    )
     page = await browser.newPage()
     print("[info] Converting %s to an image" % fname)
     await run(" ".join(["python", fname]))
@@ -45,7 +49,9 @@ async def snap(fname):
         await asyncio.sleep(10)
     else:
         await page.goto(
-            fpath, waitUntil=["load", "networkidle2", "networkidle0"], timeout=30000,
+            fpath,
+            waitUntil=["load", "networkidle2", "networkidle0"],
+            timeout=30000,
         )
     await page.screenshot({"path": png_fname})
     print("[info] Sucessfully converted %s to a png at %s" % (fname, png_fname))

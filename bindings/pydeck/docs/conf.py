@@ -26,7 +26,15 @@ html_static_path = ["gallery/html"]
 htmlhelp_basename = "pydeckdoc"
 man_pages = [(master_doc, "pydeck", "pydeck Documentation", [author], 1)]
 texinfo_documents = [
-    (master_doc, "pydeck", "pydeck Documentation", author, "pydeck", "Python wrapper for deck.gl", "Miscellaneous",),
+    (
+        master_doc,
+        "pydeck",
+        "pydeck Documentation",
+        author,
+        "pydeck",
+        "Python wrapper for deck.gl",
+        "Miscellaneous",
+    ),
 ]
 epub_title = project
 epub_exclude_files = ["search.html"]
@@ -42,7 +50,8 @@ def setup(app):
         master_doc = "pydeck_redirect"
     if not os.environ.get("PYDECK_DEV_PORT"):
         subprocess.call(
-            "{python} scripts/embed_examples.py".format(python=sys.executable), shell=True,
+            "{python} scripts/embed_examples.py".format(python=sys.executable),
+            shell=True,
         )
     else:
         print("PYDECK_DEV_PORT is set, skipping layer.rst conversions")
