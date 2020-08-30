@@ -23,7 +23,6 @@ class Deck(JSONMixin):
         mapbox_key=None,
         google_maps_key=None,
         initial_view_state=ViewState(latitude=0, longitude=0, zoom=1),
-        center=None,
         width="100%",
         height=500,
         tooltip=True,
@@ -46,9 +45,6 @@ class Deck(JSONMixin):
         map_style : str, default 'mapbox://styles/mapbox/dark-v9'
             URI for Mapbox basemap style. See Mapbox's `gallery <https://www.mapbox.com/gallery/>`_ for examples.
             If not using a basemap, you can set this value to to an empty string, ``''``.
-        center : pydeck.ViewState, default ``pydeck.ViewState(latitude=0, longitude=0, zoom=1)``
-            Alias for the ``initial_view_state`` parameter.
-            Center is a more intuitive name, whereas ``initial_view_state`` is used by deck.gl's parent library.
         initial_view_state : pydeck.ViewState, default ``pydeck.ViewState(latitude=0, longitude=0, zoom=1)``
             Initial camera angle relative to the map, defaults to a fully zoomed out 0, 0-centered map
             To compute a viewport from data, see :func:`pydeck.data_utils.viewport_helpers.compute_view`
