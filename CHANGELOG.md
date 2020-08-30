@@ -19,6 +19,10 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v8.2
 
+#### deck.gl [8.2.7] - Aug 29 2020
+
+- Support getCursor in ArcGIS integration (#4896)
+
 #### deck.gl [8.2.6] - Aug 16 2020
 
 - Ability to use mesh color in SimpleMeshLayer (#4868)
