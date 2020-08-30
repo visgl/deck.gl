@@ -63,6 +63,7 @@ class DeckGLWidget(DOMWidget):
     tooltip = Any(True).tag(sync=True)
     height = Int(500).tag(sync=True)
     width = Any("100%").tag(sync=True)
+    is_widget_enabled = Bool(False).tag(sync=True)
 
     def __init__(self, **kwargs):
         super(DeckGLWidget, self).__init__(**kwargs)

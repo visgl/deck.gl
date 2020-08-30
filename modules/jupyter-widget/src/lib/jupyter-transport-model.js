@@ -23,7 +23,7 @@ export default class JupyterTransportModel extends DOMWidgetModel {
       tooltip: null,
       width: '100%',
       height: 500,
-      js_warning: false
+      is_widget_enabled: true
     };
   }
 

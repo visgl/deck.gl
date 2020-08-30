@@ -14,6 +14,7 @@ export default class JupyterTransportView extends DOMWidgetView {
     this.transport.jupyterView = this;
     this.transport._initialize();
     super.initialize.apply(this, arguments);
+    this.model.set('is_widget_enabled', true);
   }
 
   remove() {

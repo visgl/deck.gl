@@ -10,6 +10,8 @@ from .view import View
 from .view_state import ViewState
 from .providers import Providers
 from .map_styles import DARK
+from .exceptions import IPythonEnvironmentException, WidgetNotEnabledException
+from .warnings import warn_for_mapbox_key
 
 
 class Deck(JSONMixin):
@@ -21,6 +23,7 @@ class Deck(JSONMixin):
         mapbox_key=None,
         google_maps_key=None,
         initial_view_state=ViewState(latitude=0, longitude=0, zoom=1),
+        center=None,
         width="100%",
         height=500,
         tooltip=True,
@@ -43,6 +46,9 @@ class Deck(JSONMixin):
         map_style : str, default 'mapbox://styles/mapbox/dark-v9'
             URI for Mapbox basemap style. See Mapbox's `gallery <https://www.mapbox.com/gallery/>`_ for examples.
             If not using a basemap, you can set this value to to an empty string, ``''``.
+        center : pydeck.ViewState, default ``pydeck.ViewState(latitude=0, longitude=0, zoom=1)``
+            Alias for the ``initial_view_state`` parameter.
+            Center is a more intuitive name, whereas ``initial_view_state`` is used by deck.gl's parent library.
         initial_view_state : pydeck.ViewState, default ``pydeck.ViewState(latitude=0, longitude=0, zoom=1)``
             Initial camera angle relative to the map, defaults to a fully zoomed out 0, 0-centered map
             To compute a viewport from data, see :func:`pydeck.data_utils.viewport_helpers.compute_view`
@@ -102,9 +108,7 @@ class Deck(JSONMixin):
         self.map_provider = str(map_provider).lower() if map_provider else None
         self.deck_widget.map_provider = map_provider
         if self.mapbox_key is None and self.map_provider == Providers.MAPBOX:
-            warnings.warn(
-                "Mapbox API key is not set. This may impact available features of pydeck.", UserWarning,
-            )
+            warn_for_mapbox_key()
         self.parameters = parameters
 
     @property
@@ -116,7 +120,11 @@ class Deck(JSONMixin):
     def show(self):
         """Display current Deck object for a Jupyter notebook"""
         self.update()
-        return self.deck_widget
+        if not display:  # noqa
+            raise IPythonEnvironmentException()
+        display(self.deck_widget)  # noqa
+        if not self.deck_widget.is_widget_enabled:
+            raise WidgetNotEnabledException()
 
     def update(self):
         """Update a deck.gl map to reflect the current configuration
