@@ -31,9 +31,15 @@ setup-env:
 	python3 -m venv env
 
 prepare-jupyter:
+	$(MAKE) prepare-jupyter-notebook
+	$(MAKE) prepare-jupyter-lab
+
+prepare-jupyter-notebook:
 	# Enable the notebook extension
 	python -m jupyter nbextension install --sys-prefix --symlink --overwrite --py pydeck; \
-	python -m jupyter nbextension enable --sys-prefix --py pydeck; \
+	python -m jupyter nbextension enable --sys-prefix --py pydeck
+
+prepare-jupyter-lab:
 	# Build and install the JS module
 	cd ../../modules/jupyter-widget/; \
 	python -m jupyter labextension install @jupyter-widgets/jupyterlab-manager --no-build; \
