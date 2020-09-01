@@ -259,7 +259,7 @@ export default class TextLayer extends CompositeLayer {
       getAngle,
       getPixelOffset,
       billboard,
-      sdf,
+      fontSettings,
       sizeScale,
       sizeUnits,
       sizeMinPixels,
@@ -274,7 +274,7 @@ export default class TextLayer extends CompositeLayer {
 
     return new SubLayerClass(
       {
-        sdf,
+        sdf: fontSettings.sdf,
         iconAtlas: texture,
         iconMapping: mapping,
         backgroundColor,
