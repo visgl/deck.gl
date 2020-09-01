@@ -14,8 +14,8 @@ from .debounce import debounce
 def store_selection(widget_instance, payload):
     """Callback for storing data on click"""
     try:
-        if payload.get('data') and payload['data'].get('object'):
-            datum = payload['data']['object']
+        if payload.get("data") and payload["data"].get("object"):
+            datum = payload["data"]["object"]
             widget_instance.selected_data.append(datum)
         else:
             widget_instance.selected_data = []
@@ -91,12 +91,12 @@ class DeckGLWidget(DOMWidget):
 
     def _handle_custom_msgs(self, _, content, buffers=None):
         content = json.loads(content)
-        event_type = content.get('type', '')
-        if event_type == 'deck-hover-event':
+        event_type = content.get("type", "")
+        if event_type == "deck-hover-event":
             self._hover_handlers(self, content)
-        elif event_type == 'deck-resize-event':
+        elif event_type == "deck-resize-event":
             self._resize_handlers(self, content)
-        elif event_type == 'deck-view-state-change-event':
+        elif event_type == "deck-view-state-change-event":
             self._view_state_handlers(self, content)
-        elif event_type == 'deck-click-event':
+        elif event_type == "deck-click-event":
             self._click_handlers(self, content)

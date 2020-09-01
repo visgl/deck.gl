@@ -24,8 +24,11 @@ def debounce(wait):
 
             def call_it():
                 fn(*args, **kwargs)
+
             if timer is not None:
                 timer.cancel()
             timer = Timer(wait, call_it)
+
         return debounced
+
     return decorator

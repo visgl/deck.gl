@@ -79,7 +79,8 @@ Source
 """
 )
 
-IMAGES_RST_TEMPLATE = jinja2.Template('''
+IMAGES_RST_TEMPLATE = jinja2.Template(
+    """
 
 {% for image_basename in assets %}
 .. image:: gallery/images/{{ image_basename }}.png
@@ -93,4 +94,5 @@ IMAGES_RST_TEMPLATE = jinja2.Template('''
 {% for rst_name in assets %}
    gallery/{{rst_name}}
 {% endfor %}
-''')
+"""
+)
