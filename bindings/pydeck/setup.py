@@ -180,7 +180,7 @@ if __name__ == "__main__":
         long_description_content_type="text/markdown",
         license="Apache 2.0 License",
         include_package_data=True,
-        packages=find_packages(exclude=["test"]),
+        packages=find_packages(exclude=["tests*"]),
         cmdclass={
             "install": install,
             "develop": js_prerelease(ExitHookDevelop),
