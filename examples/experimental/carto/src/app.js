@@ -11,6 +11,10 @@ const INITIAL_VIEW_STATE = {
 
 export default function App() {
   const layer = new CartoLayer({
+    data: `SELECT * FROM world_population_2015 WHERE continent_name='Africa'`, // world_population_2015 | `SELECT * FROM world_population_2015 WHERE continent_name='Africa'`,
+    credentials: {
+      username: 'public' // cartovl --> taxi_50k
+    },
     minZoom: 0,
     maxZoom: 23,
     getLineColor: [192, 192, 192],
