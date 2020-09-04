@@ -11,24 +11,12 @@ const INITIAL_VIEW_STATE = {
 
 export default function App() {
   const layer = new CartoLayer({
-    data: [`https://tiles-d.basemaps.cartocdn.com/vectortiles/carto.streets/v1/{z}/{x}/{y}.mvt`],
-
     minZoom: 0,
     maxZoom: 23,
     getLineColor: [192, 192, 192],
-    getFillColor: [140, 170, 180],
-
-    getLineWidth: f => {
-      switch (f.properties.class) {
-        case 'street':
-          return 6;
-        case 'motorway':
-          return 10;
-        default:
-          return 1;
-      }
-    },
-    lineWidthMinPixels: 1
+    getFillColor: [255, 0, 0, 50],
+    getRadius: 100,
+    pointRadiusMinPixels: 6
   });
 
   return (
