@@ -8,13 +8,22 @@ let test;
 export default class CartoLayer extends CompositeLayer {
 
   initializeState() {
-    // super.initializeState();
-    test = instantiate('select * from populated_places');
+    super.initializeState();
+    this._instantiate();
+  }
+
+  async _instantiate() {
+    const r = await instantiate('select * from populated_places');
+    this.setState({ data: r });
   }
 
   renderLayers() {
+    if (!this.state.data)
+      return;
+
     return new MVTLayer({
-      data: test
+      ...this.props,
+      data: this.state.data 
     });
   }
 }
