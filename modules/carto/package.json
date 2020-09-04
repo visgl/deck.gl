@@ -1,0 +1,31 @@
+{
+  "name": "@carto/deck.gl-carto",
+  "description": "Use deck.gl with CARTO Platform",
+  "license": "MIT",
+  "version": "8.2.0-beta.3",
+  "publishConfig": {
+    "access": "public"
+  },
+  "keywords": [
+    "carto",
+    "visualization"
+  ],
+  "main": "dist/es5/index.js",
+  "module": "dist/esm/index.js",
+  "esnext": "dist/es6/index.js",
+  "files": [
+    "dist",
+    "src",
+    "dist.min.js"
+  ],
+  "scripts": {
+    "build-bundle": "webpack --config ../../scripts/bundle.config.js",
+    "prepublishOnly": "npm run build-bundle && npm run build-bundle -- --env.dev"
+  },
+  "peerDependencies": {
+    "@deck.gl/core": "^8.2.7"
+  },
+  "dependencies": {
+    "@deck.gl/geo-layers": "^8.2.7"
+  }
+}
