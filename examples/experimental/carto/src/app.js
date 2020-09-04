@@ -10,7 +10,6 @@ const INITIAL_VIEW_STATE = {
 };
 
 export default function App() {
-
   const layer = new CartoLayer({
     data: [`https://tiles-d.basemaps.cartocdn.com/vectortiles/carto.streets/v1/{z}/{x}/{y}.mvt`],
 
