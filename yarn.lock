@@ -912,6 +912,22 @@
     lodash "^4.17.19"
     to-fast-properties "^2.0.0"
 
+"@deck.gl/geo-layers@^8.2.7":
+  version "8.2.7"
+  resolved "https://registry.yarnpkg.com/@deck.gl/geo-layers/-/geo-layers-8.2.7.tgz#f214b22420bb067c13a6ef558a90b9695eff9a8d"
+  integrity sha512-C7lsPrMf9MM5I4fKGmHF3EW75GDxUbcxhy6wCOf4Hj4ItzalBxyqhy8vjhx0ZBxmEzQsiDM1XFk+Xp1U/Z3GCQ==
+  dependencies:
+    "@loaders.gl/3d-tiles" "^2.2.3"
+    "@loaders.gl/loader-utils" "^2.2.3"
+    "@loaders.gl/mvt" "^2.2.3"
+    "@loaders.gl/terrain" "^2.2.3"
+    "@loaders.gl/tiles" "^2.2.3"
+    "@math.gl/culling" "^3.2.1"
+    "@math.gl/web-mercator" "^3.2.1"
+    h3-js "^3.6.0"
+    long "^3.2.0"
+    math.gl "^3.2.1"
+
 "@evocateur/libnpmaccess@^3.1.2":
   version "3.1.2"
   resolved "https://registry.yarnpkg.com/@evocateur/libnpmaccess/-/libnpmaccess-3.1.2.tgz#ecf7f6ce6b004e9f942b098d92200be4a4b1c845"
