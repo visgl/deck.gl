@@ -31,7 +31,12 @@ view = pdk.View(type="_GlobeView", controller=True, width=1000, height=700)
 
 layers = [
     pdk.Layer(
-        "GeoJsonLayer", id="base-map", data=COUNTRIES, stroked=False, filled=True, get_fill_color=[200, 200, 200],
+        "GeoJsonLayer",
+        id="base-map",
+        data=COUNTRIES,
+        stroked=False,
+        filled=True,
+        get_fill_color=[200, 200, 200],
     ),
     pdk.Layer(
         "ColumnLayer",
