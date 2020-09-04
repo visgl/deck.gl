@@ -1,30 +1,45 @@
 import {CompositeLayer} from '@deck.gl/core';
 import {MVTLayer} from '@deck.gl/geo-layers';
-import {instantiate} from './api/maps-api-client'
+import {instantiateMap} from './api/maps-api-client';
 
-const defaultProps = {};
-let test;
+const defaultProps = {
+  // source-props
+  data: null,
+  credentials: {
+    username: 'public',
+    apiKey: 'default_public',
+    serverUrlTemplate: 'https://{user}.carto.com'
+  }
+  // style-props
+  // ...GeoJsonLayer.defaultProps
+};
 
 export default class CartoLayer extends CompositeLayer {
-
   initializeState() {
-    super.initializeState();
-    this._instantiate();
+    this.state = {
+      mapInstance: null
+    };
+    this._instantiateMap();
   }
 
-  async _instantiate() {
-    const r = await instantiate('select * from populated_places');
-    this.setState({ data: r });
+  async _instantiateMap() {
+    const {data} = this.props;
+    const isSQL = data.search(' ') > -1;
+    const sql = isSQL ? data : `SELECT * FROM ${data}`;
+
+    const credentials = {...defaultProps.credentials, ...this.props.credentials};
+    const instance = await instantiateMap(credentials, sql);
+    this.setState({mapInstance: instance});
   }
 
   renderLayers() {
-    if (!this.state.data)
-      return;
+    if (!this.state.mapInstance) return [];
 
-    return new MVTLayer({
+    const props = {
       ...this.props,
-      data: this.state.data 
-    });
+      data: this.state.mapInstance
+    };
+    return new MVTLayer(props);
   }
 }
 
