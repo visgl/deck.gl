@@ -16,7 +16,12 @@ df = pd.DataFrame([{"position": [0, 0], "text": "Test"}, {"position": [0.002, 0]
 def create_stacked_test_object():
     view_state = ViewState(max_zoom=20, zoom=15)
     scatterplot = Layer(
-        "ScatterplotLayer", data=data, get_position="position", get_radius=100, id="first", getColor="rgb",
+        "ScatterplotLayer",
+        data=data,
+        get_position="position",
+        get_radius=100,
+        id="first",
+        getColor="rgb",
     )
     text_layer = Layer(
         "TextLayer",

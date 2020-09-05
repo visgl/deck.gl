@@ -38,7 +38,10 @@ def create_rst(pydeck_example_file_name):
     # Run the pydeck example and move the .html output
     subprocess.call(
         "{python} {fname}; mv {html_src} {html_dest}".format(
-            python=sys.executable, fname=pydeck_example_file_name, html_src=html_fname, html_dest=HTML_DIR,
+            python=sys.executable,
+            fname=pydeck_example_file_name,
+            html_src=html_fname,
+            html_dest=HTML_DIR,
         ),
         shell=True,
     )

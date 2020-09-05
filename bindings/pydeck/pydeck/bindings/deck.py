@@ -103,7 +103,8 @@ class Deck(JSONMixin):
         self.deck_widget.map_provider = map_provider
         if self.mapbox_key is None and self.map_provider == Providers.MAPBOX:
             warnings.warn(
-                "Mapbox API key is not set. This may impact available features of pydeck.", UserWarning,
+                "Mapbox API key is not set. This may impact available features of pydeck.",
+                UserWarning,
             )
         self.parameters = parameters
 
