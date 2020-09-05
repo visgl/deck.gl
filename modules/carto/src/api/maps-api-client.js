@@ -1,9 +1,9 @@
-// const REQUEST_GET_MAX_URL_LENGTH = 2048;
+import {getDefaultCredentials} from '../auth';
 const VECTOR_EXTENT = 2048;
 const VECTOR_SIMPLIFY_EXTENT = 2048;
 const DEFAULT_USER_COMPONENT_IN_URL = '{user}';
 
-export async function instantiateMap(credentials, sql) {
+export async function instantiateMap(sql, credentials) {
   const mapConfig = {
     version: '1.3.1',
     buffersize: {mvt: 1},
@@ -19,11 +19,11 @@ export async function instantiateMap(credentials, sql) {
     ]
   };
 
-  const encodedApiKey = encodeParameter('api_key', credentials.apiKey);
+  const creds = {...getDefaultCredentials(), ...credentials};
+  const encodedApiKey = encodeParameter('api_key', creds.apiKey);
   const encodedClient = encodeParameter('client', 'deck-gl-carto');
   const parameters = [encodedApiKey, encodedClient];
-
-  const url = generateMapsApiUrl(credentials, parameters);
+  const url = `${serverURL(creds)}api/v1/map?${parameters.join('&')}`;
 
   const opts = {
     method: 'POST',
@@ -34,15 +34,11 @@ export async function instantiateMap(credentials, sql) {
   /* global fetch */
   /* eslint no-undef: "error" */
   const response = await fetch(url, opts);
-  const layergroup = await response.json();
-  return layergroup.metadata.tilejson.vector.tiles;
-
-  // return layergroup;
+  return await response.json();
 }
 
-function generateMapsApiUrl(credentials, parameters) {
-  const base = `${serverURL(credentials)}api/v1/map`;
-  return `${base}?${parameters.join('&')}`;
+export function getTilesFromInstance(mapInstance) {
+  return mapInstance.metadata.tilejson.vector.tiles;
 }
 
 function serverURL(credentials) {
