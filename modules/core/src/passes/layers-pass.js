@@ -218,12 +218,17 @@ export default class LayersPass extends Pass {
 export function layerIndexResolver(startIndex = 0, layerIndices = {}) {
   const resolvers = {};
 
-  return (layer, isDrawn) => {
+  const resolveLayerIndex = (layer, isDrawn) => {
     const indexOverride = layer.props._offset;
     const layerId = layer.id;
     const parentId = layer.parent && layer.parent.id;
 
     let index;
+
+    if (parentId && !(parentId in layerIndices)) {
+      // Populate layerIndices with the parent layer's index
+      resolveLayerIndex(layer.parent, false);
+    }
 
     if (parentId in resolvers) {
       const resolver = (resolvers[parentId] =
@@ -246,6 +251,7 @@ export function layerIndexResolver(startIndex = 0, layerIndices = {}) {
     layerIndices[layerId] = index;
     return index;
   };
+  return resolveLayerIndex;
 }
 
 // Convert viewport top-left CSS coordinates to bottom up WebGL coordinates
