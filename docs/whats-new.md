@@ -38,6 +38,8 @@ Many new features are added to `TileLayer`, `MVTLayer` and `TerrainLayer` to imp
 - `TileLayer`'s `tileSize` prop can be used to fine-tune the zoom level at which tiles are loaded.
 - `TileLayer`'s `renderSubLayers` is now always called after the tile layer is loaded, i.e. `props.data` is never a Promise.
 - `TileLayer` can now be used in multi-view applications, as long as each `TileLayer` instance is rendered into one view. See [documentation](/docs/developer-guide/views.md#rendering-layers-in-multiple-views) for an example.
+- `TileLayer`'s tile requests may now be aborted if there are too many queued or ongoing requests. Note: only tiles that aren't visible will be aborted.
+- `TileLayer` will call the `getTileData` function passed in to the current layer instance rather than the first layer instance (e.g. when using React).
 
 
 ### GlobeView

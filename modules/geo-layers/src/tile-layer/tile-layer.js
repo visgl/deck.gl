@@ -132,8 +132,8 @@ export default class TileLayer extends CompositeLayer {
   // Methods for subclass to override
 
   getTileData(tile) {
-    const {getTileData, fetch, data} = this.props;
-
+    const {data} = this.props;
+    const {getTileData, fetch} = this.getCurrentLayer().props;
     tile.url = getURLFromTemplate(data, tile);
 
     if (getTileData) {
