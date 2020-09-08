@@ -19,6 +19,12 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v8.2
 
+#### deck.gl [8.2.8] - Sep 8 2020
+
+- Fix TextLayer sdf mode (#4911)
+- Fix layer index resolution in picking (#4915)
+- Get current layer instance for TileLayer (#4901)
+
 #### deck.gl [8.2.7] - Aug 29 2020
 
 - Support getCursor in ArcGIS integration (#4896)
