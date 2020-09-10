@@ -251,6 +251,15 @@ Receives arguments:
 
 - `error` (`Error`)
 
+##### `onTilePurged` (Function, optional)
+
+`onTilePurged` called when a tile is cleared from cache.
+
+- Default: `() => {}`
+
+Receives arguments:
+
+- `tile` (Object) - the tile that has been cleared from cache.
 
 ## Source
 

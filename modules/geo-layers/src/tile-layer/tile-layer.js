@@ -13,6 +13,7 @@ const defaultProps = {
   // TODO - change to onViewportLoad to align with Tile3DLayer
   onViewportLoad: {type: 'function', optional: true, value: null, compare: false},
   onTileLoad: {type: 'function', value: tile => {}, compare: false},
+  onTilePurged: {type: 'function', value: tile => {}, compare: false},
   // eslint-disable-next-line
   onTileError: {type: 'function', value: err => console.error(err), compare: false},
   extent: {type: 'array', optional: true, value: null, compare: true},
@@ -85,6 +86,7 @@ export default class TileLayer extends CompositeLayer {
         extent,
         onTileLoad: this._onTileLoad.bind(this),
         onTileError: this._onTileError.bind(this),
+        onTilePurged: this._onTilePurged.bind(this),
         maxRequests
       });
       this.setState({tileset});
@@ -138,6 +140,11 @@ export default class TileLayer extends CompositeLayer {
     if (tile.isVisible) {
       this.setNeedsUpdate();
     }
+  }
+
+  _onTilePurged(tile) {
+    const layer = this.getCurrentLayer();
+    layer.props.onTilePurged(tile);
   }
 
   // Methods for subclass to override
