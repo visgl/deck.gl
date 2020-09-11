@@ -251,9 +251,9 @@ Receives arguments:
 
 - `error` (`Error`)
 
-##### `onTilePurged` (Function, optional)
+##### `onTileUnload` (Function, optional)
 
-`onTilePurged` called when a tile is cleared from cache.
+`onTileUnload` called when a tile is cleared from cache.
 
 - Default: `() => {}`
 
