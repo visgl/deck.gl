@@ -67,7 +67,6 @@ function makeLocalDevConfig(EXAMPLE_DIR = LIB_DIR, linkToLuma) {
         // Versions will be controlled by the deck.gl top level package.json
         'math.gl': resolve(LIB_DIR, './node_modules/math.gl'),
         'viewport-mercator-project': resolve(LIB_DIR, './node_modules/viewport-mercator-project'),
-        seer: resolve(LIB_DIR, './node_modules/seer'),
         react: resolve(LIB_DIR, './node_modules/react')
       })
     },

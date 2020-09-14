@@ -43,7 +43,7 @@ Every time you change your layer, you create a new layer and pass it to Deck or 
 
 ## How do I **debug** deck.gl applications?
 
-Both deck.gl and luma.gl have powerful logging capabilities, as well as the `seer` Chrome extension.
+Both deck.gl and luma.gl have powerful logging capabilities.
 
 See the article about [debugging](/docs/developer-guide/debugging.md).
 
