@@ -86,17 +86,20 @@ export default class DataFilterExtension extends LayerExtension {
     const {gl} = this.context;
     if (attributeManager && extension.opts.countItems) {
       if (aggregator.isSupported(gl)) {
-        attributeManager.addInstanced({
+        // This attribute is needed for variable-width data, e.g. Path, SolidPolygon, Text
+        // The vertex shader checks if a vertex has the same "index" as the previous vertex
+        // so that we only write one count cross multiple vertices of the same object
+        attributeManager.add({
           filterIndices: {
             size: 1,
             vertexOffset: 1,
             type: GL.UNSIGNED_BYTE,
             accessor: (_, {index}) => (index + 1) % 2,
             shaderAttributes: {
-              instanceFilterPrevIndex: {
+              filterPrevIndices: {
                 vertexOffset: 0
               },
-              instanceFilterIndex: {
+              filterIndices: {
                 vertexOffset: 1
               }
             }
@@ -129,15 +132,11 @@ export default class DataFilterExtension extends LayerExtension {
   draw(params, extension) {
     const {filterFBO, filterModel, filterNeedsUpdate} = this.state;
     const {onFilteredItemsChange} = this.props;
-    if (
-      filterNeedsUpdate &&
-      onFilteredItemsChange &&
-      filterModel
-    ) {
+    if (filterNeedsUpdate && onFilteredItemsChange && filterModel) {
       const {
         attributes: {filterValues, filterIndices}
       } = this.getAttributeManager();
-      filterModel.setInstanceCount(this.getNumInstances());
+      filterModel.setVertexCount(this.getNumInstances());
 
       const {gl} = this.context;
       clear(gl, {framebuffer: filterFBO, color: [0, 0, 0, 0]});
@@ -149,14 +148,8 @@ export default class DataFilterExtension extends LayerExtension {
           ...(filterIndices && filterIndices.getShaderAttributes())
         })
         .draw({
-          parameters: {
-            viewport: [0, 0, 1, 1],
-            framebuffer: filterFBO,
-            blend: true,
-            blendFunc: [GL.ONE, GL.ONE, GL.ONE, GL.ONE],
-            blendEquation: [GL.FUNC_ADD, GL.FUNC_ADD],
-            depthTest: false
-          }
+          framebuffer: filterFBO,
+          parameters: aggregator.parameters
         });
 
       const color = readPixelsToArray(filterFBO);
