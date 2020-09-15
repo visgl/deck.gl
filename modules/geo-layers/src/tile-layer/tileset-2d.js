@@ -55,6 +55,7 @@ export default class Tileset2D {
         this._resizeCache();
       }
     };
+    this.onTileUnload = opts.onTileUnload;
 
     this._requestScheduler = new RequestScheduler({
       maxRequests: opts.maxRequests,
@@ -273,6 +274,7 @@ export default class Tileset2D {
           // delete tile
           this._cacheByteSize -= opts.maxCacheByteSize ? tile.byteLength : 0;
           _cache.delete(tileId);
+          this.onTileUnload(tile);
         }
         if (_cache.size <= maxCacheSize && this._cacheByteSize <= maxCacheByteSize) {
           break;
