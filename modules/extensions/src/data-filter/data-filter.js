@@ -18,7 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {LayerExtension, log} from '@deck.gl/core';
+import {LayerExtension} from '@deck.gl/core';
 import {shaderModule, shaderModule64} from './shader-module';
 import * as aggregator from './aggregator';
 import {readPixelsToArray, clear} from '@luma.gl/core';
@@ -85,33 +85,34 @@ export default class DataFilterExtension extends LayerExtension {
 
     const {gl} = this.context;
     if (attributeManager && extension.opts.countItems) {
-      if (aggregator.isSupported(gl)) {
-        // This attribute is needed for variable-width data, e.g. Path, SolidPolygon, Text
-        // The vertex shader checks if a vertex has the same "index" as the previous vertex
-        // so that we only write one count cross multiple vertices of the same object
-        attributeManager.add({
-          filterIndices: {
-            size: 1,
-            vertexOffset: 1,
-            type: GL.UNSIGNED_BYTE,
-            accessor: (_, {index}) => (index + 1) % 2,
-            shaderAttributes: {
-              filterPrevIndices: {
-                vertexOffset: 0
-              },
-              filterIndices: {
-                vertexOffset: 1
-              }
+      const useFloatTarget = aggregator.supportsFloatTarget(gl);
+      // This attribute is needed for variable-width data, e.g. Path, SolidPolygon, Text
+      // The vertex shader checks if a vertex has the same "index" as the previous vertex
+      // so that we only write one count cross multiple vertices of the same object
+      attributeManager.add({
+        filterIndices: {
+          size: useFloatTarget ? 1 : 2,
+          vertexOffset: 1,
+          type: GL.UNSIGNED_BYTE,
+          normalized: true,
+          accessor: (object, {index}) => {
+            const i = object && object.__source ? object.__source.index : index;
+            return useFloatTarget ? (i + 1) % 255 : [(i + 1) % 255, Math.floor(i / 255) % 255];
+          },
+          shaderAttributes: {
+            filterPrevIndices: {
+              vertexOffset: 0
+            },
+            filterIndices: {
+              vertexOffset: 1
             }
           }
-        });
+        }
+      });
 
-        const filterFBO = aggregator.getFramebuffer(gl);
-        const filterModel = aggregator.getModel(gl, extension.getShaders(extension));
-        this.setState({filterFBO, filterModel});
-      } else {
-        log.warn('DataFilterExtension: countItems not supported by browser')();
-      }
+      const filterFBO = aggregator.getFramebuffer(gl, useFloatTarget);
+      const filterModel = aggregator.getModel(gl, extension.getShaders(extension), useFloatTarget);
+      this.setState({filterFBO, filterModel});
     }
   }
 
@@ -149,11 +150,17 @@ export default class DataFilterExtension extends LayerExtension {
         })
         .draw({
           framebuffer: filterFBO,
-          parameters: aggregator.parameters
+          parameters: {
+            ...aggregator.parameters,
+            viewport: [0, 0, filterFBO.width, filterFBO.height]
+          }
         });
-
       const color = readPixelsToArray(filterFBO);
-      onFilteredItemsChange({id: this.id, count: color[0]});
+      let count = 0;
+      for (let i = 0; i < color.length; i++) {
+        count += color[i];
+      }
+      onFilteredItemsChange({id: this.id, count});
 
       this.state.filterNeedsUpdate = false;
     }

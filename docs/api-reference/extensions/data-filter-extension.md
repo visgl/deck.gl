@@ -64,7 +64,7 @@ new DataFilterExtension({filterSize, fp64});
 
 * `filterSize` (Number) - the size of the filter (number of columns to filter by). The data filter can show/hide data based on 1-4 numeric properties of each object. Default `1`.
 * `fp64` (Boolean) - if `true`, use 64-bit precision instead of 32-bit. Default `false`. See the "remarks" section below for use cases and limitations.
-* `countItems` (Boolean) - if `true`, reports the number of filtered objects with the `onFilteredItemsChange` callback. Default `false`. This option requires [WebGL features](https://developer.mozilla.org/en-US/docs/Web/API/OES_texture_float#Browser_compatibility) that are not supported by all browsers.
+* `countItems` (Boolean) - if `true`, reports the number of filtered objects with the `onFilteredItemsChange` callback. Default `false`.
 
 
 ## Layer Properties
