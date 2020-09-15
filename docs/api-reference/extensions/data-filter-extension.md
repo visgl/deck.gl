@@ -64,6 +64,7 @@ new DataFilterExtension({filterSize, fp64});
 
 * `filterSize` (Number) - the size of the filter (number of columns to filter by). The data filter can show/hide data based on 1-4 numeric properties of each object. Default `1`.
 * `fp64` (Boolean) - if `true`, use 64-bit precision instead of 32-bit. Default `false`. See the "remarks" section below for use cases and limitations.
+* `countItems` (Boolean) - if `true`, reports the number of filtered objects with the `onFilteredItemsChange` callback. Default `false`. This option requires [WebGL features](https://developer.mozilla.org/en-US/docs/Web/API/OES_texture_float#Browser_compatibility) that are not supported by all browsers.
 
 
 ## Layer Properties
@@ -165,6 +166,13 @@ When an object is "faded", manipulate its opacity so that it appears more transl
 
 Enable/disable the data filter. If the data filter is disabled, all objects are rendered.
 
+##### `onFilteredItemsChange` (Function, optional)
+
+Only used if the `countItems` option is enabled. Called with the following arguments when the filter changes:
+
+- `event` (Object)
+  + `id` (String) - the id of the source layer. Note when this prop is specified on a [CompositeLayer](/docs/api-reference/composite-layer.md), such as `GeoJsonLayer`, the callback is called once by each sub layer.
+  + `count` (Number) - the number of data objects that pass the filter.
 
 ## Remarks
 

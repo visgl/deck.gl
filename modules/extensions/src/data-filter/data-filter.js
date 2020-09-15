@@ -18,12 +18,15 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {LayerExtension} from '@deck.gl/core';
+import {LayerExtension, log} from '@deck.gl/core';
 import {shaderModule, shaderModule64} from './shader-module';
+import * as aggregator from './aggregator';
+import {readPixelsToArray, clear} from '@luma.gl/core';
 import GL from '@luma.gl/constants';
 
 const defaultProps = {
   getFilterValue: {type: 'accessor', value: 0},
+  onFilteredItemsChange: {type: 'function', value: null, compare: false},
 
   filterEnabled: true,
   filterRange: [-1, 1],
@@ -40,12 +43,12 @@ const DATA_TYPE_FROM_SIZE = {
 };
 
 export default class DataFilterExtension extends LayerExtension {
-  constructor({filterSize = 1, fp64 = false} = {}) {
+  constructor({filterSize = 1, fp64 = false, countItems = false} = {}) {
     if (!DATA_TYPE_FROM_SIZE[filterSize]) {
       throw new Error('filterSize out of range');
     }
 
-    super({filterSize, fp64});
+    super({filterSize, fp64, countItems});
   }
 
   getShaders(extension) {
@@ -78,6 +81,97 @@ export default class DataFilterExtension extends LayerExtension {
           }
         }
       });
+    }
+
+    const {gl} = this.context;
+    if (attributeManager && extension.opts.countItems) {
+      if (aggregator.isSupported(gl)) {
+        attributeManager.addInstanced({
+          filterIndices: {
+            size: 1,
+            vertexOffset: 1,
+            type: GL.UNSIGNED_BYTE,
+            accessor: (_, {index}) => (index + 1) % 2,
+            shaderAttributes: {
+              instanceFilterPrevIndex: {
+                vertexOffset: 0
+              },
+              instanceFilterIndex: {
+                vertexOffset: 1
+              }
+            }
+          }
+        });
+
+        const filterFBO = aggregator.getFramebuffer(gl);
+        const filterModel = aggregator.getModel(gl, extension.getShaders(extension));
+        this.setState({filterFBO, filterModel});
+      } else {
+        log.warn('DataFilterExtension: countItems not supported by browser')();
+      }
+    }
+  }
+
+  updateState({props, oldProps}) {
+    if (this.state.filterModel) {
+      const attributeManager = this.getAttributeManager();
+      const filterNeedsUpdate =
+        attributeManager.attributes.filterValues.needsUpdate() ||
+        props.filterEnabled !== oldProps.filterEnabled ||
+        props.filterRange !== oldProps.filterRange ||
+        props.filterSoftRange !== oldProps.filterSoftRange;
+      if (filterNeedsUpdate) {
+        this.setState({filterNeedsUpdate});
+      }
+    }
+  }
+
+  draw(params, extension) {
+    const {filterFBO, filterModel, filterNeedsUpdate} = this.state;
+    const {onFilteredItemsChange} = this.props;
+    if (
+      filterNeedsUpdate &&
+      onFilteredItemsChange &&
+      filterModel
+    ) {
+      const {
+        attributes: {filterValues, filterIndices}
+      } = this.getAttributeManager();
+      filterModel.setInstanceCount(this.getNumInstances());
+
+      const {gl} = this.context;
+      clear(gl, {framebuffer: filterFBO, color: [0, 0, 0, 0]});
+
+      filterModel
+        .updateModuleSettings(params.moduleParameters)
+        .setAttributes({
+          ...filterValues.getShaderAttributes(),
+          ...(filterIndices && filterIndices.getShaderAttributes())
+        })
+        .draw({
+          parameters: {
+            viewport: [0, 0, 1, 1],
+            framebuffer: filterFBO,
+            blend: true,
+            blendFunc: [GL.ONE, GL.ONE, GL.ONE, GL.ONE],
+            blendEquation: [GL.FUNC_ADD, GL.FUNC_ADD],
+            depthTest: false
+          }
+        });
+
+      const color = readPixelsToArray(filterFBO);
+      onFilteredItemsChange({id: this.id, count: color[0]});
+
+      this.state.filterNeedsUpdate = false;
+    }
+  }
+
+  finalizeState() {
+    const {filterFBO, filterModel} = this.state;
+    if (filterFBO) {
+      filterFBO.color.delete();
+      filterFBO.delete();
+      filterModel.delete();
     }
   }
 }

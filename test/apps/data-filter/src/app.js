@@ -7,7 +7,11 @@ import {DataFilterExtension} from '@deck.gl/extensions';
 
 import DATA from './data-sample';
 
-const dataFilterExtension = new DataFilterExtension({filterSize: 2, softMargin: true});
+const dataFilterExtension = new DataFilterExtension({
+  filterSize: 2,
+  softMargin: true,
+  countItems: true
+});
 
 const INITIAL_VIEW_STATE = {
   longitude: -122.45,
@@ -58,6 +62,8 @@ class Root extends Component {
         getLineWidth: 10,
         getRadius: f => f.properties.radius,
         getFilterValue: f => f.properties.centroid,
+
+        onFilteredItemsChange: console.log, // eslint-disable-line
 
         // Filter
         filterRange,
