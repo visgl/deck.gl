@@ -76,3 +76,47 @@ test('DataFilterExtension', t => {
 
   t.end();
 });
+
+test('DataFilterExtension#countItems', t => {
+  let cbCalled = 0;
+
+  // TODO - counter does not seem to work in headless-gl
+  const testCases = [
+    {
+      props: {
+        data: [
+          {position: [-122.453, 37.782], timestamp: 120},
+          {position: [-122.454, 37.781], timestamp: 140}
+        ],
+        getPosition: d => d.position,
+        getFilterValue: d => d.timestamp,
+        onFilteredItemsChange: () => cbCalled++,
+        filterRange: [80, 160],
+        extensions: [new DataFilterExtension({filterSize: 1, countItems: true})]
+      },
+      onAfterUpdate: () => {
+        t.is(cbCalled, 1, 'onFilteredItemsChange is called');
+      }
+    },
+    {
+      updateProps: {
+        radiusMinPixels: 10
+      },
+      onAfterUpdate: () => {
+        t.is(cbCalled, 1, 'onFilteredItemsChange should not be called without filter change');
+      }
+    },
+    {
+      updateProps: {
+        filterRange: [80, 100]
+      },
+      onAfterUpdate: () => {
+        t.is(cbCalled, 2, 'onFilteredItemsChange is called');
+      }
+    }
+  ];
+
+  testLayer({Layer: ScatterplotLayer, testCases, onError: t.notOk});
+
+  t.end();
+});
