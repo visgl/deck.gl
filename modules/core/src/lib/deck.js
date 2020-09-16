@@ -274,9 +274,7 @@ export default class Deck {
     Object.assign(this.props, props);
 
     // Update CSS size of canvas
-    if (!this.props || !this.props._framebuffer) {
-      this._setCanvasSize(this.props);
-    }
+    this._setCanvasSize(this.props);
 
     // We need to overwrite CSS style width and height with actual, numeric values
     const resolvedProps = Object.create(this.props);
