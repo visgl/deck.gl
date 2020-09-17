@@ -105,7 +105,8 @@ export default class PathStyleExtension extends LayerExtension {
     const isNested = Array.isArray(path[0]);
     const geometrySize = isNested ? path.length : path.length / positionSize;
 
-    let p; let prevP;
+    let p;
+    let prevP;
     for (let i = 0; i < geometrySize - 1; i++) {
       p = isNested ? path[i] : path.slice(i * positionSize, i * positionSize + positionSize);
       p = viewport.projectPosition(p);
