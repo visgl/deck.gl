@@ -20,6 +20,7 @@
 
 import {LayerExtension, _mergeShaders as mergeShaders} from '@deck.gl/core';
 import {dashShaders, offsetShaders} from './shaders.glsl';
+import {dist} from 'gl-matrix/vec3';
 
 const defaultProps = {
   getDashArray: {type: 'accessor', value: [0, 0]},
@@ -28,8 +29,8 @@ const defaultProps = {
 };
 
 export default class PathStyleExtension extends LayerExtension {
-  constructor({dash = false, offset = false} = {}) {
-    super({dash, offset});
+  constructor({dash = false, offset = false, highPrecisionDash = false} = {}) {
+    super({dash, offset, highPrecisionDash});
   }
 
   isEnabled(layer) {
@@ -67,6 +68,15 @@ export default class PathStyleExtension extends LayerExtension {
         instanceDashArrays: {size: 2, accessor: 'getDashArray'}
       });
     }
+    if (extension.opts.highPrecisionDash) {
+      attributeManager.addInstanced({
+        instanceDashOffsets: {
+          size: 1,
+          accessor: 'getPath',
+          transform: extension.getDashOffsets.bind(this)
+        }
+      });
+    }
     if (extension.opts.offset) {
       attributeManager.addInstanced({
         instanceOffsets: {size: 1, accessor: 'getOffset'}
@@ -86,6 +96,27 @@ export default class PathStyleExtension extends LayerExtension {
     }
 
     this.state.model.setUniforms(uniforms);
+  }
+
+  getDashOffsets(path) {
+    const result = [0];
+    const {viewport} = this.context;
+    const positionSize = this.props.positionFormat === 'XY' ? 2 : 3;
+    const isNested = Array.isArray(path[0]);
+    const geometrySize = isNested ? path.length : path.length / positionSize;
+
+    let p; let prevP;
+    for (let i = 0; i < geometrySize - 1; i++) {
+      p = isNested ? path[i] : path.slice(i * positionSize, i * positionSize + positionSize);
+      p = viewport.projectPosition(p);
+
+      if (i > 0) {
+        result[i] = result[i - 1] + dist(prevP, p);
+      }
+
+      prevP = p;
+    }
+    return result;
   }
 }
 
