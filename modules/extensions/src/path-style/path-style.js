@@ -30,7 +30,7 @@ const defaultProps = {
 
 export default class PathStyleExtension extends LayerExtension {
   constructor({dash = false, offset = false, highPrecisionDash = false} = {}) {
-    super({dash, offset, highPrecisionDash});
+    super({dash: dash || highPrecisionDash, offset, highPrecisionDash});
   }
 
   isEnabled(layer) {
