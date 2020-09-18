@@ -100,7 +100,6 @@ export default class PathStyleExtension extends LayerExtension {
 
   getDashOffsets(path) {
     const result = [0];
-    const {viewport} = this.context;
     const positionSize = this.props.positionFormat === 'XY' ? 2 : 3;
     const isNested = Array.isArray(path[0]);
     const geometrySize = isNested ? path.length : path.length / positionSize;
@@ -109,7 +108,7 @@ export default class PathStyleExtension extends LayerExtension {
     let prevP;
     for (let i = 0; i < geometrySize - 1; i++) {
       p = isNested ? path[i] : path.slice(i * positionSize, i * positionSize + positionSize);
-      p = viewport.projectPosition(p);
+      p = this.projectPosition(p);
 
       if (i > 0) {
         result[i] = result[i - 1] + dist(prevP, p);
