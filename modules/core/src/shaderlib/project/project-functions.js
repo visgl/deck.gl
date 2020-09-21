@@ -53,7 +53,7 @@ export function getWorldPosition(
   position,
   {viewport, modelMatrix, coordinateSystem, coordinateOrigin, offsetMode}
 ) {
-  let [x, y, z] = position;
+  let [x, y, z = 0] = position;
 
   if (modelMatrix) {
     [x, y, z] = vec4.transformMat4([], [x, y, z, 1.0], modelMatrix);
