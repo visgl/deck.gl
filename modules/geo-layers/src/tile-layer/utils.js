@@ -1,3 +1,4 @@
+/* eslint-disable */
 import {getOSMTileIndices} from './tile-2d-traversal';
 
 const TILE_SIZE = 512;
@@ -29,7 +30,7 @@ export const urlType = {
   }
 };
 
-export function getURLFromTemplate(template, properties) {
+export function getURLFromTemplate(template, properties, indexing) {
   if (!template || !template.length) {
     return null;
   }
@@ -37,9 +38,17 @@ export function getURLFromTemplate(template, properties) {
     const index = Math.abs(properties.x + properties.y) % template.length;
     template = template[index];
   }
-  return template.replace
-    ? template.replace(/\{ *([\w_-]+) *\}/g, (_, property) => properties[property])
-    : null;
+
+  let {x, y, z} = properties;
+  if (indexing === 'tms') {
+    y = Math.pow(2, z) - y - 1;
+  }
+
+  return template
+    .replace('{x}', x)
+    .replace('{y}', y)
+    .replace('{z}', z)
+    .replace('{-y}', Math.pow(2, z) - y - 1);
 }
 
 /**
