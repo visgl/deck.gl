@@ -102,6 +102,14 @@ If the value is a string: a URL template. Substrings `{x}` `{y}` and `{z}`, if p
 
 If the value is an array: multiple URL templates. Each endpoint must return the same content for the same tile index. This can be used to work around [domain sharding](https://developer.mozilla.org/en-US/docs/Glossary/Domain_sharding), allowing browsers to download more resources simultaneously. Requests made are balanced among the endpoints, based on the tile index.
 
+##### `tileJSON` (String|JSON, optional)
+
+A URL template which a valid TileJSON should be loaded or a valid TileJSON object (https://github.com/mapbox/tilejson-spec/tree/master/2.2.0).
+
+if this property is set, the data property will be ignored and the URL tiles templates will be read from TileJSON template. The same will happen with minZoom and maxZoom properties.
+
+- Default: `null`
+
 
 ##### `getTileData` (Function, optional)
 
@@ -260,6 +268,13 @@ Receives arguments:
 Receives arguments:
 
 - `tile` (Object) - the tile that has been cleared from cache.
+
+##### `onTileJSONLoad` (Function, optional)
+
+`onTileJSONLoad` is a function that is called when tileJSON is a URL template and it has been loaded. The loaded content is passed as a json to this callback function.
+
+- Default: `data => null`
+
 
 ## Source
 

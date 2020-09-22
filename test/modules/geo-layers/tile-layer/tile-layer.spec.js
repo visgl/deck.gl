@@ -196,3 +196,97 @@ test('TileLayer#MapView:repeat', async t => {
 
   t.end();
 });
+
+test('TileLayer#TileJSON', async t => {
+  const testViewport = new WebMercatorViewport({
+    width: 100,
+    height: 100,
+    longitude: 0,
+    latitude: 60,
+    zoom: 2
+  });
+
+  const renderSubLayers = props => {
+    return new ScatterplotLayer(props, {id: `${props.id}-fill`});
+  };
+
+  const getTileData = () => {
+    return [];
+  };
+
+  const tileJSON = {
+    tilejson: '2.2.0',
+    name: 'OpenStreetMap',
+    description: 'A free editable map of the whole world.',
+    version: '1.0.0',
+    attribution: '(c) OpenStreetMap contributors, CC-BY-SA',
+    scheme: 'xyz',
+    tiles: [
+      'https://a.tile.openstreetmap.org/{z}/{x}/{y}.png',
+      'https://b.tile.openstreetmap.org/{z}/{x}/{y}.png',
+      'https://c.tile.openstreetmap.org/{z}/{x}/{y}.png'
+    ],
+    minzoom: 0,
+    maxzoom: 18,
+    bounds: [-180, -85, 180, 85]
+  };
+
+  // polyfill/hijack fetch
+  /* global global, window */
+  const _global = typeof global !== 'undefined' ? global : window;
+  const fetch = _global.fetch;
+
+  _global.fetch = url => {
+    return Promise.resolve(JSON.stringify(tileJSON));
+  };
+
+  const testCases = [
+    {
+      props: {
+        tileJSON,
+        getTileData,
+        renderSubLayers
+      },
+      onBeforeUpdate: () => {
+        t.comment('Default getTileData');
+      },
+      onAfterUpdate: ({layer, subLayers}) => {
+        if (!layer.isLoaded) {
+          t.ok(subLayers.length < 2);
+        } else {
+          t.is(subLayers.length, 2, 'Rendered sublayers');
+          t.is(layer.state.data.length, 3, 'Data is loaded');
+          t.is(layer.state.tileset.minZoom, tileJSON.minZoom, 'Min zoom layer is correct');
+          t.is(layer.state.tileset.minZoom, tileJSON.maxZoom, 'Max zoom layer is correct');
+          t.ok(layer.isLoaded, 'Layer is loaded');
+        }
+      }
+    },
+    {
+      props: {
+        tileJSON: 'http://echo.jsontest.com/key/value',
+        getTileData,
+        renderSubLayers
+      },
+      onBeforeUpdate: () => {
+        t.comment('Default getTileData');
+      },
+      onAfterUpdate: ({layer, subLayers}) => {
+        if (!layer.isLoaded) {
+          t.ok(subLayers.length < 2);
+        } else {
+          t.is(subLayers.length, 2, 'Rendered sublayers');
+          t.is(layer.state.data.length, 3, 'Data is loaded');
+          t.is(layer.state.tileset.minZoom, tileJSON.minZoom, 'Min zoom layer is correct');
+          t.is(layer.state.tileset.minZoom, tileJSON.maxZoom, 'Max zoom layer is correct');
+          t.ok(layer.isLoaded, 'Layer is loaded');
+        }
+      }
+    }
+  ];
+  await testLayerAsync({Layer: TileLayer, viewport: testViewport, testCases, onError: t.notOk});
+  t.end();
+
+  // restore fetcch
+  _global.fetch = fetch;
+});
