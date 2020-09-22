@@ -12,6 +12,7 @@ const defaultProps = {
   getTileData: {type: 'function', optional: true, value: null, compare: false},
   // TODO - change to onViewportLoad to align with Tile3DLayer
   onViewportLoad: {type: 'function', optional: true, value: null, compare: false},
+  onViewportChange: {type: 'function', optional: true, value: null, compare: false},
   onTileLoad: {type: 'function', value: tile => {}, compare: false},
   onTileUnload: {type: 'function', value: tile => {}, compare: false},
   // eslint-disable-next-line
@@ -34,7 +35,8 @@ const defaultProps = {
     },
     compare: false
   },
-  maxRequests: 6
+  maxRequests: 6,
+  maxFeatures: {type: 'number', value: 0, min: 0}
 };
 
 export default class TileLayer extends CompositeLayer {
@@ -58,6 +60,7 @@ export default class TileLayer extends CompositeLayer {
 
   updateState({props, oldProps, context, changeFlags}) {
     let {tileset} = this.state;
+    const {onViewportChange} = this.props;
     const createTileCache =
       !tileset ||
       changeFlags.dataChanged ||
@@ -96,6 +99,12 @@ export default class TileLayer extends CompositeLayer {
       this.state.tileset.tiles.forEach(tile => {
         tile.layers = null;
       });
+    } else if (changeFlags.viewportChanged) {
+      if (tileset.isLoaded && onViewportChange) {
+        onViewportChange(tileset.selectedTiles.map(tile => tile.data), {
+          getRenderedFeatures: this.getRenderedFeatures.bind(this)
+        });
+      }
     }
     this._updateTileset();
   }
@@ -110,7 +119,9 @@ export default class TileLayer extends CompositeLayer {
     const tilesetChanged = this.state.frameNumber !== frameNumber;
 
     if (isLoaded && onViewportLoad && (loadingStateChanged || tilesetChanged)) {
-      onViewportLoad(tileset.selectedTiles.map(tile => tile.data));
+      onViewportLoad(tileset.selectedTiles.map(tile => tile.data), {
+        getRenderedFeatures: this.getRenderedFeatures.bind(this)
+      });
     }
 
     if (tilesetChanged) {
@@ -212,6 +223,22 @@ export default class TileLayer extends CompositeLayer {
       }
       return tile.layers;
     });
+  }
+
+  getPickObjects() {
+    const {deck} = this.context;
+    const width = deck.canvas.width;
+    const height = deck.canvas.height;
+    const layerIds = [this.id];
+    const x = 0;
+    const y = 0;
+    return deck.pickObjects({x, y, width, height, layerIds});
+  }
+
+  getRenderedFeatures() {
+    const {maxFeatures} = this.props;
+    const features = this.getPickObjects();
+    return maxFeatures ? features.splice(0, maxFeatures) : features;
   }
 }
 

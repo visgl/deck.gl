@@ -1,5 +1,3 @@
-/* global setTimeout clearTimeout */
-
 import {Matrix4} from 'math.gl';
 import {MVTLoader} from '@loaders.gl/mvt';
 import {load} from '@loaders.gl/core';
@@ -10,7 +8,6 @@ import {getURLFromTemplate, isURLTemplate} from '../tile-layer/utils';
 import ClipExtension from './clip-extension';
 
 const WORLD_SIZE = 512;
-const VIEWPORT_CHANGE_DEBOUNCE = 500; // milliseconds
 
 const defaultProps = {
   uniqueIdProperty: {type: 'string', value: ''},
@@ -118,12 +115,19 @@ export default class MVTLayer extends TileLayer {
     const modelMatrix = new Matrix4().scale([xScale, yScale, 1]);
 
     props.autoHighlight = false;
+<<<<<<< HEAD
     if (!this.context.viewport.resolution) {
       props.modelMatrix = modelMatrix;
       props.coordinateOrigin = [xOffset, yOffset, 0];
       props.coordinateSystem = COORDINATE_SYSTEM.CARTESIAN;
       props.extensions = [...(props.extensions || []), new ClipExtension()];
     }
+=======
+    props.modelMatrix = modelMatrix;
+    props.coordinateOrigin = [xOffset, yOffset, 0];
+    props.coordinateSystem = COORDINATE_SYSTEM.CARTESIAN;
+    props.extensions = [...(props.extensions || []), new ClipExtension()];
+>>>>>>> replace math by deck.pickObjects to get rendered features in tile-layer
 
     return super.renderSubLayers(props);
   }
@@ -169,108 +173,24 @@ export default class MVTLayer extends TileLayer {
     );
   }
 
-  updateState({props, oldProps, context, changeFlags}) {
-    super.updateState({props, oldProps, context, changeFlags});
-    this._debouncedGetViewportFeatures();
-  }
-
-  _getModelMatrixScale(tile) {
-    const worldScale = Math.pow(2, tile.z);
-    const xScale = WORLD_SIZE / worldScale;
-    const yScale = -xScale;
-
-    return [xScale, yScale, 1];
-  }
-
-  _getCoordinateOrigin(tile) {
-    const worldScale = Math.pow(2, tile.z);
-    const xOffset = (WORLD_SIZE * tile.x) / worldScale;
-    const yOffset = WORLD_SIZE * (1 - tile.y / worldScale);
-
-    return [xOffset, yOffset, 0];
-  }
-
-  _debouncedGetViewportFeatures() {
-    const {onViewportFeatures} = this.props;
-
-    if (onViewportFeatures) {
-      let {viewportChangeTimer} = this.state;
-      clearTimeout(viewportChangeTimer);
-
-      viewportChangeTimer = setTimeout(() => {
-        const {tileset} = this.state;
-        const {isLoaded} = tileset;
-
-        if (isLoaded) {
-          this._getViewportFeatures();
-        }
-      }, VIEWPORT_CHANGE_DEBOUNCE);
-
-      this.setState({viewportChangeTimer});
-    }
-  }
-
-  async _getViewportFeatures() {
-    const {tileset} = this.state;
-    const {onViewportFeatures} = this.props;
+  getRenderedFeatures() {
+    const features = this.getPickObjects();
+    const maxFeatures = this.props.maxFeatures || features.length;
     const featureCache = new Set();
-    const currentFrustumPlanes = this.context.viewport.getFrustumPlanes();
-    let viewportFeatures = [];
+    const renderedFeatures = [];
 
-    await tileset.selectedTiles.forEach(async tile => {
-      const features = (await tile.data) || [];
-      const transformationMatrix = new Matrix4()
-        .translate(this._getCoordinateOrigin(tile))
-        .scale(this._getModelMatrixScale(tile));
-
-      viewportFeatures = viewportFeatures.concat(
-        features.filter(f => {
-          const featureId = getFeatureUniqueId(f, this.props.uniqueIdProperty);
-          if (
-            !featureCache.has(featureId) &&
-            this._checkIfCoordinatesIsInsideFrustum(
-              transformationMatrix,
-              currentFrustumPlanes,
-              f.geometry.coordinates
-            )
-          ) {
-            featureCache.add(featureId);
-            return true;
-          }
-          return false;
-        })
-      );
-    });
-
-    onViewportFeatures(viewportFeatures);
-  }
-
-  _checkIfCoordinatesIsInsideFrustum(matrix, frustumPlanes, coordinates) {
-    if (Array.isArray(coordinates) && coordinates.length && typeof coordinates[0] === 'number') {
-      return this._coordinateInPlanes(frustumPlanes, matrix.transform(coordinates).concat(0));
+    for (const f of features) {
+      const featureId = getFeatureUniqueId(f.object, this.props.uniqueIdProperty);
+      if (!featureCache.has(featureId)) {
+        featureCache.add(featureId);
+        renderedFeatures.push(f);
+      }
+      if (renderedFeatures.length === maxFeatures) {
+        break;
+      }
     }
 
-    return coordinates.some(c => {
-      if (Array.isArray(c) && Array.isArray(c[0])) {
-        return this._checkIfCoordinatesIsInsideFrustum(matrix, frustumPlanes, c);
-      }
-      return this._coordinateInPlanes(frustumPlanes, matrix.transform(c).concat(0));
-    });
-  }
-
-  _coordinateInPlanes(frustumPlanes, coordinates) {
-    return Object.keys(frustumPlanes).every(plane => {
-      const {normal, distance} = frustumPlanes[plane];
-      return normal.dot(coordinates) < distance;
-    });
-  }
-
-  finalizeState() {
-    super.finalizeState();
-    const {viewportChangeTimer} = this.state;
-    /* eslint-disable no-unused-expressions */
-    viewportChangeTimer && clearTimeout(viewportChangeTimer);
-    /* eslint-enable no-unused-expressions */
+    return renderedFeatures;
   }
 }
 
