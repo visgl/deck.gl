@@ -157,6 +157,16 @@ export default class TileLayer extends CompositeLayer {
     layer.props.onTileUnload(tile);
   }
 
+  _pickObjects() {
+    const {deck, viewport} = this.context;
+    const width = viewport.width;
+    const height = viewport.height;
+    const x = viewport.x;
+    const y = viewport.y;
+    const layerIds = [this.id];
+    return deck.pickObjects({x, y, width, height, layerIds});
+  }
+
   // Methods for subclass to override
 
   getTileData(tile) {
@@ -225,19 +235,9 @@ export default class TileLayer extends CompositeLayer {
     });
   }
 
-  getPickObjects() {
-    const {deck} = this.context;
-    const width = deck.canvas.width;
-    const height = deck.canvas.height;
-    const layerIds = [this.id];
-    const x = 0;
-    const y = 0;
-    return deck.pickObjects({x, y, width, height, layerIds});
-  }
-
   getRenderedFeatures() {
     const {maxFeatures} = this.props;
-    const features = this.getPickObjects();
+    const features = this._pickObjects();
     return maxFeatures ? features.splice(0, maxFeatures) : features;
   }
 }

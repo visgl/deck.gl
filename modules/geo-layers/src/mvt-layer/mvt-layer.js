@@ -174,7 +174,7 @@ export default class MVTLayer extends TileLayer {
   }
 
   getRenderedFeatures() {
-    const features = this.getPickObjects();
+    const features = this._pickObjects();
     const maxFeatures = this.props.maxFeatures || features.length;
     const featureCache = new Set();
     const renderedFeatures = [];
