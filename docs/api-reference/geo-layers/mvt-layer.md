@@ -88,6 +88,14 @@ Required. Either a URL template or an array of URL templates from which the MVT 
 
 The `getTileData` prop from the `TileLayer` class will not be called.
 
+##### `tileJSON` (String|JSON, optional)
+
+A URL template which a valid TileJSON should be loaded or a valid TileJSON object (https://github.com/mapbox/tilejson-spec/tree/master/2.2.0).
+
+if this property is set, the data property will be ignored and the URL tiles will be read from TileJSON template. The same will happen with minZoom and maxZoom properties.
+
+- Default: `null`
+
 ##### `uniqueIdProperty` (String)
 
 Optional. Needed for highlighting a feature split across two or more tiles if no [feature id](https://github.com/mapbox/vector-tile-spec/tree/master/2.1#42-features) is provided.
@@ -101,6 +109,12 @@ An string pointing to a tile attribute containing a unique identifier for featur
 Optional. When provided, a feature with ID corresponding to the supplied value will be highlighted with `highlightColor`.
 
 If `uniqueIdProperty` is provided, value within that feature property will be used for ID comparison. If not, [feature id](https://github.com/mapbox/vector-tile-spec/tree/master/2.1#42-features) will be used.
+
+##### `onTileJSONLoad` (Function, optional)
+
+`onTileJSONLoad` is a function that is called when tileJSON is a URL template and it has been loaded. The loaded content is passed as a JSON to this callback function.
+
+- Default: `data => null`
 
 ## Source
 

@@ -1,7 +1,6 @@
 import {CompositeLayer, _flatten as flatten} from '@deck.gl/core';
 import {GeoJsonLayer} from '@deck.gl/layers';
 import {load} from '@loaders.gl/core';
-import {JSONLoader} from '@loaders.gl/json';
 
 import Tileset2D, {STRATEGY_DEFAULT} from './tileset-2d';
 import {urlType, getURLFromTemplate} from './utils';
@@ -35,27 +34,21 @@ const defaultProps = {
     },
     compare: false
   },
-  maxRequests: 6,
-  tileJSON: null,
-  onTileJSONLoad: {type: 'function', optional: true, value: null, compare: false}
+  maxRequests: 6
 };
 
 export default class TileLayer extends CompositeLayer {
   initializeState() {
     this.state = {
       tiles: [],
-      isLoaded: false,
-      data: null,
-      tileJSON: null,
-      fetchingTileJSON: false
+      isLoaded: false
     };
   }
 
   get isLoaded() {
-    const {tileset, fetchingTileJSON} = this.state;
-    return (
-      !fetchingTileJSON &&
-      tileset.selectedTiles.every(tile => tile.layers && tile.layers.every(layer => layer.isLoaded))
+    const {tileset} = this.state;
+    return tileset.selectedTiles.every(
+      tile => tile.layers && tile.layers.every(layer => layer.isLoaded)
     );
   }
 
@@ -65,11 +58,9 @@ export default class TileLayer extends CompositeLayer {
 
   updateState({props, oldProps, context, changeFlags}) {
     let {tileset} = this.state;
-
     const createTileCache =
       !tileset ||
       changeFlags.dataChanged ||
-      props.tileJSON !== oldProps.tileJSON ||
       (changeFlags.updateTriggersChanged &&
         (changeFlags.updateTriggersChanged.all || changeFlags.updateTriggersChanged.getTileData));
 
@@ -99,7 +90,6 @@ export default class TileLayer extends CompositeLayer {
         maxRequests
       });
       this.setState({tileset});
-      this._updateTileData({props, tileset});
     } else if (changeFlags.propsChanged || changeFlags.updateTriggersChanged) {
       tileset.setOptions(props);
       // if any props changed, delete the cached layers
@@ -108,37 +98,7 @@ export default class TileLayer extends CompositeLayer {
       });
     }
 
-    if (!this.state.fetchingTileJSON) {
-      this._updateTileset();
-    }
-  }
-
-  async _updateTileData({props, tileset}) {
-    const {onTileJSONLoad} = this.props;
-    let {data, tileJSON, minZoom, maxZoom} = props;
-
-    if (tileJSON) {
-      if (typeof tileJSON === 'string') {
-        this.setState({fetchingTileJSON: true});
-        try {
-          tileJSON = await load(tileJSON, JSONLoader);
-        } catch (error) {
-          this.setState({fetchingTileJSON: false});
-          throw new Error(`An error occurred fetching Tilejson: ${error}`);
-        }
-
-        if (onTileJSONLoad) {
-          onTileJSONLoad(tileJSON);
-        }
-      }
-
-      data = tileJSON.tiles;
-      minZoom = tileJSON.minzoom || minZoom;
-      maxZoom = tileJSON.maxzoom || maxZoom;
-    }
-
-    tileset.setOptions({minZoom, maxZoom});
-    this.setState({data, tileJSON, fetchingTileJSON: false});
+    this._updateTileset();
   }
 
   _updateTileset() {
@@ -190,7 +150,7 @@ export default class TileLayer extends CompositeLayer {
   // Methods for subclass to override
 
   getTileData(tile) {
-    const {data} = this.state;
+    const {data} = this.props;
     const {getTileData, fetch} = this.getCurrentLayer().props;
     const {signal} = tile;
 

@@ -1,6 +1,7 @@
 import {Matrix4} from 'math.gl';
 import {MVTLoader} from '@loaders.gl/mvt';
 import {load} from '@loaders.gl/core';
+import {JSONLoader} from '@loaders.gl/json';
 import {COORDINATE_SYSTEM} from '@deck.gl/core';
 
 import TileLayer from '../tile-layer/tile-layer';
@@ -11,10 +12,76 @@ const WORLD_SIZE = 512;
 
 const defaultProps = {
   uniqueIdProperty: {type: 'string', value: ''},
-  highlightedFeatureId: null
+  highlightedFeatureId: null,
+  tileJSON: null,
+  onTileJSONLoad: {type: 'function', optional: true, value: null, compare: false}
 };
 
 export default class MVTLayer extends TileLayer {
+  initializeState() {
+    super.initializeState();
+    this.setState({
+      data: null,
+      tileJSON: null,
+      fetchingTileJSON: false
+    });
+  }
+
+  get isLoaded() {
+    const {fetchingTileJSON} = this.state;
+    return !fetchingTileJSON && super.isLoaded;
+  }
+
+  updateState({props, oldProps, context, changeFlags}) {
+    changeFlags.dataChanged = changeFlags.dataChanged || props.tileJSON !== oldProps.tileJSON;
+
+    if (changeFlags.dataChanged) {
+      // Save the fetchingTileJSON state - should not trigger a rerender
+      this.state.fetchingTileJSON = changeFlags.dataChanged;
+    }
+
+    super.updateState({props, oldProps, context, changeFlags});
+
+    if (changeFlags.dataChanged) {
+      this._updateTileData({props});
+    }
+  }
+
+  async _updateTileData({props}) {
+    const {onTileJSONLoad} = this.props;
+    const {tileset} = this.state;
+    let {data, tileJSON, minZoom, maxZoom} = props;
+
+    if (tileJSON) {
+      if (typeof tileJSON === 'string') {
+        this.setState({fetchingTileJSON: true});
+        try {
+          tileJSON = await load(tileJSON, JSONLoader);
+        } catch (error) {
+          this.setState({fetchingTileJSON: false});
+          throw new Error(`An error occurred fetching Tilejson: ${error}`);
+        }
+
+        if (onTileJSONLoad) {
+          onTileJSONLoad(tileJSON);
+        }
+      }
+
+      data = tileJSON.tiles;
+      minZoom = tileJSON.minzoom || minZoom;
+      maxZoom = tileJSON.maxzoom || maxZoom;
+    }
+
+    tileset.setOptions({minZoom, maxZoom});
+    this.setState({data, tileJSON, fetchingTileJSON: false});
+  }
+
+  _updateTileset() {
+    if (!this.state.fetchingTileJSON) {
+      super._updateTileset();
+    }
+  }
+
   getTileData(tile) {
     const url = getURLFromTemplate(this.state.data, tile);
     if (!url) {
