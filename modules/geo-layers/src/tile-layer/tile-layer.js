@@ -60,7 +60,6 @@ export default class TileLayer extends CompositeLayer {
 
   updateState({props, oldProps, context, changeFlags}) {
     let {tileset} = this.state;
-    const {onViewportChange} = this.props;
     const createTileCache =
       !tileset ||
       changeFlags.dataChanged ||
@@ -99,12 +98,8 @@ export default class TileLayer extends CompositeLayer {
       this.state.tileset.tiles.forEach(tile => {
         tile.layers = null;
       });
-    } else if (changeFlags.viewportChanged) {
-      if (tileset.isLoaded && onViewportChange) {
-        onViewportChange(tileset.selectedTiles.map(tile => tile.data), {
-          getRenderedFeatures: this.getRenderedFeatures.bind(this)
-        });
-      }
+    } else if (changeFlags.viewportChanged && tileset.isLoaded) {
+      this._onViewportChange();
     }
     this._updateTileset();
   }
@@ -118,10 +113,11 @@ export default class TileLayer extends CompositeLayer {
     const loadingStateChanged = this.state.isLoaded !== isLoaded;
     const tilesetChanged = this.state.frameNumber !== frameNumber;
 
-    if (isLoaded && onViewportLoad && (loadingStateChanged || tilesetChanged)) {
-      onViewportLoad(tileset.selectedTiles.map(tile => tile.data), {
-        getRenderedFeatures: this.getRenderedFeatures.bind(this)
-      });
+    if (isLoaded && (loadingStateChanged || tilesetChanged)) {
+      if (onViewportLoad) {
+        onViewportLoad(tileset.selectedTiles.map(tile => tile.data));
+      }
+      this._onViewportChange();
     }
 
     if (tilesetChanged) {
@@ -130,6 +126,13 @@ export default class TileLayer extends CompositeLayer {
     }
     // Save the loaded state - should not trigger a rerender
     this.state.isLoaded = isLoaded;
+  }
+
+  _onViewportChange() {
+    const {onViewportChange} = this.props;
+    if (onViewportChange) {
+      onViewportChange({getRenderedFeatures: this.getRenderedFeatures.bind(this)});
+    }
   }
 
   _onTileLoad(tile) {
