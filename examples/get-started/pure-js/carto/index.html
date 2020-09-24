@@ -1,0 +1,58 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset='UTF-8' />
+    <title>CARTO deck.gl example</title>
+    <style>
+    body {margin: 0; padding: 0; font-family: UberMove, Helvetica, Arial, sans-serif;}
+    #container {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+    }
+    #container > * {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+    }
+    .layer-selector {
+      position: absolute;
+      z-index: 1;
+      top: 0;
+      right: 0;
+      background-color: #FFF;
+      margin: 24px;
+      padding: 10px 24px;
+      box-shadow: rgba(0, 0, 0, 0.16) 0px 1px 4px;
+      min-width: 300px;
+    }
+    .layer-selector h3 { font-size: 16px; margin: 8px 0; }
+    .layer-selector .input { display: flex; align-items: center; margin-top: 8px;}
+    .layer-selector .input input { margin: 0 4px 0 0; }
+    .layer-selector label { font-size: 14px; }
+    </style>
+    <link href='https://api.tiles.mapbox.com/mapbox-gl-js/v1.4.0/mapbox-gl.css' rel='stylesheet' />
+  </head>
+  <body>
+    <div id="container">
+      <div id="map"></div>
+      <canvas id="deck-canvas"></canvas>
+    </div>
+    <div class="layer-selector">
+     <h3>Layer selector</h3>
+     <div  class="input">
+       <input type="radio" id="airports" name="layer-visibility" value="airports" checked>
+       <label for="airports">Airports scale rank</label><br>
+     </div>
+     <div class="input">
+       <input type="radio" id="building" name="layer-visibility" value="building">
+       <label for="building">Building density</label><br>
+     </div>
+   </div>
+    <script src='app.js'></script>
+  </body>
+</html>

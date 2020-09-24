@@ -1,0 +1,136 @@
+<html>
+  <head>
+    <!-- deck.gl standalone bundle -->
+    <script src="https://unpkg.com/deck.gl@^8.1.0/dist.min.js"></script>
+    <script src="https://unpkg.com/@deck.gl/carto@^8.1.0/dist.min.js"></script>
+
+    <!-- Mapbox dependencies -->
+    <script src="https://api.tiles.mapbox.com/mapbox-gl-js/v1.4.0/mapbox-gl.js"></script>
+    <link href="https://api.tiles.mapbox.com/mapbox-gl-js/v1.4.0/mapbox-gl.css" rel="stylesheet" />
+
+    <style type="text/css">
+      body {margin: 0; padding: 0; font-family: UberMove, Helvetica, Arial, sans-serif;}
+      #map {width: 100vw; height: 100vh;}
+      .layer-selector {
+        position: absolute;
+        z-index: 1;
+        top: 0;
+        right: 0;
+        background-color: #FFF;
+        margin: 24px;
+        padding: 10px 24px;
+        box-shadow: rgba(0, 0, 0, 0.16) 0px 1px 4px;
+        min-width: 300px;
+      }
+      .layer-selector h3 { font-size: 16px; margin: 8px 0; }
+      .layer-selector .input { display: flex; align-items: center; margin-top: 8px;}
+      .layer-selector .input input { margin: 0 4px 0 0; }
+      .layer-selector label { font-size: 14px; }
+    </style>
+  </head>
+
+  <body>
+    <div id="map"></div>
+
+    <div class="layer-selector">
+     <h3>Layer selector</h3>
+     <div  class="input">
+       <input type="radio" id="airports" name="layer-visibility" value="airports" checked onclick="setLayerVisibility(this.value)">
+       <label for="airports">Airports scale rank</label><br>
+     </div>
+     <div class="input">
+       <input type="radio" id="building" name="layer-visibility" value="building" onclick="setLayerVisibility(this.value)">
+       <label for="building">Building density</label><br>
+     </div>
+   </div>
+  </body>
+
+  <script type="text/javascript">
+
+    deck.carto.setDefaultCredentials({
+      username: 'public',
+      apiKey: 'default_public'
+    });
+
+    // Define color breaks for CartoBQTilerLayer
+    const BUILDINGS_COLORS = {
+      ONE_MILLION: [207, 89, 126],
+      HUNDRED_THOUSAND: [232, 133, 113],
+      TEN_THOUSAND: [238, 180, 121],
+      THOUSAND: [233, 226, 156],
+      HUNDRED: [156, 203, 134],
+      TEN: [57, 177, 133],
+      OTHER: [0, 147, 146]
+    };
+
+    // Set the default visible layer
+    let visibleLayer = 'airports';
+
+    // Create Deck.GL map
+    const deckgl = new deck.DeckGL({
+      container: 'map',
+      mapStyle: 'https://basemaps.cartocdn.com/gl/positron-gl-style/style.json',
+
+      initialViewState: {
+        latitude: 0,
+        longitude: 0,
+        zoom: 1
+      },
+      controller: true
+    });
+
+    render();
+
+    // Change the visible layer
+    function setLayerVisibility(value) {
+      visibleLayer = value;
+      render();
+    }
+
+    // Function to render the layers. Will be invoked any time visibility changes.
+    function render() {
+      const layers = [
+        new deck.carto.CartoSQLLayer({
+          id: 'airports',
+          data: 'SELECT * FROM ne_10m_airports',
+          visible: visibleLayer === 'airports',
+          filled: true,
+          pointRadiusMinPixels: 2,
+          pointRadiusScale: 2000,
+          getRadius: f => 11 - f.properties.scalerank,
+          getFillColor: [200, 0, 80, 180],
+          autoHighlight: true
+        }),
+        new deck.carto.CartoBQTilerLayer({
+          id: 'osm_buildings',
+          data: 'cartobq.maps.osm_buildings',
+          visible: visibleLayer === 'building',
+          getFillColor: object => {
+            // Apply color based on an attribute
+            if (object.properties.aggregated_total > 1000000) {
+              return BUILDINGS_COLORS.ONE_MILLION;
+            } else if (object.properties.aggregated_total > 100000) {
+              return BUILDINGS_COLORS.HUNDRED_THOUSAND;
+            } else if (object.properties.aggregated_total > 10000) {
+              return BUILDINGS_COLORS.TEN_THOUSAND;
+            } else if (object.properties.aggregated_total > 1000) {
+              return BUILDINGS_COLORS.THOUSAND;
+            } else if (object.properties.aggregated_total > 100) {
+              return BUILDINGS_COLORS.HUNDRED;
+            } else if (object.properties.aggregated_total > 10) {
+              return BUILDINGS_COLORS.TEN;
+            }
+            return BUILDINGS_COLORS.OTHER;
+          },
+          pointRadiusMinPixels: 2,
+          stroked: false
+        })
+      ];
+
+      // update layers in deck.gl.
+      deckgl.setProps({layers});
+    }
+
+
+  </script>
+</html>
