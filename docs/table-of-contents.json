@@ -183,6 +183,14 @@
           ]
         },
         {
+          "title": "@deck.gl/carto",
+          "entries": [
+            {"entry": "docs/api-reference/carto/overview"},
+            {"entry": "docs/api-reference/carto/carto-sql-layer"},
+            {"entry": "docs/api-reference/carto/carto-bqtiler-layer"}
+          ]
+        },
+        {
           "title": "@deck.gl/google-maps",
           "entries": [
             {"entry": "docs/api-reference/google-maps/overview"},

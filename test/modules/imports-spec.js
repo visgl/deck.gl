@@ -26,6 +26,7 @@ import * as deck from 'deck.gl';
 
 import * as layers from '@deck.gl/layers';
 import * as aggregationLayers from '@deck.gl/aggregation-layers';
+import * as carto from '@deck.gl/carto';
 import * as geoLayers from '@deck.gl/geo-layers';
 import * as meshLayers from '@deck.gl/mesh-layers';
 
@@ -58,6 +59,7 @@ test('Top-level imports', t0 => {
       hasEmptyExports(aggregationLayers),
       'No empty top-level export in @deck.gl/aggregation-layers'
     );
+    t.notOk(hasEmptyExports(carto), 'No empty top-level export in @deck.gl/carto');
     t.notOk(hasEmptyExports(geoLayers), 'No empty top-level export in @deck.gl/geo-layers');
     t.notOk(hasEmptyExports(meshLayers), 'No empty top-level export in @deck.gl/mesh-layers');
     t.end();
