@@ -30,7 +30,7 @@ export const urlType = {
   }
 };
 
-export function getURLFromTemplate(template, properties, indexing) {
+export function getURLFromTemplate(template, properties, indexingScheme) {
   if (!template || !template.length) {
     return null;
   }
@@ -40,7 +40,7 @@ export function getURLFromTemplate(template, properties, indexing) {
   }
 
   let {x, y, z} = properties;
-  if (indexing === 'tms') {
+  if (indexingScheme === 'tms') {
     y = Math.pow(2, z) - y - 1;
   }
 
