@@ -4,27 +4,49 @@ const DEFAULT_USER_COMPONENT_IN_URL = '{user}';
 const REQUEST_GET_MAX_URL_LENGTH = 2048;
 
 /**
- * Obtain a TileJson from Maps API v1
+ * Obtain a TileJson from Maps API v1 and v2
  */
 export async function getMapTileJSON(props) {
   const {data, bufferSize, version, tileExtent, credentials} = props;
   const creds = {...getDefaultCredentials(), ...credentials};
+  const majorVersion = getMajorVersion(version);
+  let mapConfig
 
-  const mapConfig = createMapConfig({data, bufferSize, version, tileExtent});
-  const layergroup = await instantiateMap({mapConfig, credentials: creds});
+  switch (majorVersion) {
+    case 1:
+      mapConfig = createMapConfigV1({data, bufferSize, version, tileExtent});
+      const layergroup = await instantiateMap({majorVersion, mapConfig, credentials: creds});
 
-  const tiles = layergroup.metadata.tilejson.vector;
-  return tiles;
+      const tiles = layergroup.metadata.tilejson.vector;
+      return tiles;
+
+    case 2:
+      mapConfig = createMapConfigV2({data, bufferSize, version, tileExtent});
+      return await instantiateMap({majorVersion, mapConfig, credentials: creds});
+
+    default:
+      throw new Error('Invalid maps API version. It shoud be 1.X.X or 2.X.X'); 
+
+  }
+}
+
+function getMajorVersion(mapsAPIVersion) {
+  try {
+    const v = mapsAPIVersion.split('.');
+    return parseInt(v[0], 10);
+  } catch (error) {
+    throw new Error('Invalid maps API version. It shoud be 1.X.X or 2.X.X');
+  }
 }
 
 /**
  * Create a mapConfig for Maps API
  */
-function createMapConfig({data, bufferSize, version, tileExtent}) {
+function createMapConfigV1({data, bufferSize, version, tileExtent}) {
   const isSQL = data.search(' ') > -1;
   const sql = isSQL ? data : `SELECT * FROM ${data}`;
 
-  const mapConfig = {
+  return {
     version,
     buffersize: {
       mvt: bufferSize
@@ -39,18 +61,40 @@ function createMapConfig({data, bufferSize, version, tileExtent}) {
       }
     ]
   };
-  return mapConfig;
+
+}
+
+/**
+ * Create a mapConfig for Maps API
+ */
+function createMapConfigV2({data, bufferSize, version, tileExtent}) {
+  const isSQL = data.search(' ') > -1;
+  const sql = isSQL ? data : `SELECT * FROM ${data}`;
+
+  return {
+    version,
+    buffer_size: bufferSize,
+    tile_extent: tileExtent,
+    layers: [
+      {
+        type: 'query',
+        options: {
+          sql: sql.trim(),
+          vector_extent: tileExtent
+        }
+      }
+    ]
+  };
 }
 
 /**
  * Instantiate a map, either by GET or POST, using Maps API
  */
-async function instantiateMap({mapConfig, credentials}) {
+async function instantiateMap({majorVersion, mapConfig, credentials}) {
   let response;
 
   try {
-    const config = JSON.stringify(mapConfig);
-    const request = createMapsApiRequest({config, credentials});
+    const request = createMapsApiRequest({majorVersion, mapConfig, credentials});
     /* global fetch */
     /* eslint no-undef: "error" */
     response = await fetch(request);
@@ -58,19 +102,19 @@ async function instantiateMap({mapConfig, credentials}) {
     throw new Error(`Failed to connect to Maps API: ${error}`);
   }
 
-  const layergroup = await response.json();
+  const jsonResponse = await response.json();
 
   if (!response.ok) {
-    dealWithWindshaftError({response, layergroup, credentials});
+    dealWithError({majorVersion, response, jsonResponse, credentials});
   }
 
-  return layergroup;
+  return jsonResponse;
 }
 
 /**
  * Display proper message from Maps API error
  */
-function dealWithWindshaftError({response, layergroup, credentials}) {
+function dealWithError({majorVersion, response, jsonResponse, credentials}) {
   switch (response.status) {
     case 401:
       throw new Error(
@@ -84,20 +128,25 @@ function dealWithWindshaftError({response, layergroup, credentials}) {
           credentials.apiKey
         }') doesn't provide access to the requested data`
       );
+      
     default:
-      throw new Error(`${JSON.stringify(layergroup.errors)}`);
+      const e = majorVersion === 1 ?
+                  JSON.stringify(jsonResponse.errors) : 
+                  jsonResponse.error;
+      throw new Error(e);
   }
 }
 
 /**
  * Create a GET or POST request, with all required parameters
  */
-function createMapsApiRequest({config, credentials}) {
+function createMapsApiRequest({majorVersion, mapConfig, credentials}) {
+  const config = JSON.stringify(mapConfig);
   const encodedApiKey = encodeParameter('api_key', credentials.apiKey);
   const encodedClient = encodeParameter('client', `deck-gl-carto`);
   const parameters = [encodedApiKey, encodedClient];
-  const url = generateMapsApiUrl(parameters, credentials);
-
+  const url = generateMapsApiUrl(majorVersion, parameters, credentials);
+  
   const getUrl = `${url}&${encodeParameter('config', config)}`;
   if (getUrl.length < REQUEST_GET_MAX_URL_LENGTH) {
     return getRequest(getUrl);
@@ -109,8 +158,8 @@ function createMapsApiRequest({config, credentials}) {
 /**
  * Generate a Maps API url for the request
  */
-function generateMapsApiUrl(parameters, credentials) {
-  const base = `${serverURL(credentials)}api/v1/map`;
+function generateMapsApiUrl(majorVersion, parameters, credentials) {
+  const base = `${serverURL(credentials)}api/v${majorVersion}/map`;
   return `${base}?${parameters.join('&')}`;
 }
 
