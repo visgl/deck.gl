@@ -10,7 +10,7 @@ export async function getMapTileJSON(props) {
   const {data, bufferSize, version, tileExtent, credentials} = props;
   const creds = {...getDefaultCredentials(), ...credentials};
   const majorVersion = getMajorVersion(version);
-  let mapConfig
+  let mapConfig;
 
   switch (majorVersion) {
     case 1:
@@ -25,8 +25,7 @@ export async function getMapTileJSON(props) {
       return await instantiateMap({majorVersion, mapConfig, credentials: creds});
 
     default:
-      throw new Error('Invalid maps API version. It shoud be 1.X.X or 2.X.X'); 
-
+      throw new Error('Invalid maps API version. It shoud be 1.X.X or 2.X.X');
   }
 }
 
@@ -61,7 +60,6 @@ function createMapConfigV1({data, bufferSize, version, tileExtent}) {
       }
     ]
   };
-
 }
 
 /**
@@ -128,11 +126,9 @@ function dealWithError({majorVersion, response, jsonResponse, credentials}) {
           credentials.apiKey
         }') doesn't provide access to the requested data`
       );
-      
+
     default:
-      const e = majorVersion === 1 ?
-                  JSON.stringify(jsonResponse.errors) : 
-                  jsonResponse.error;
+      const e = majorVersion === 1 ? JSON.stringify(jsonResponse.errors) : jsonResponse.error;
       throw new Error(e);
   }
 }
@@ -146,7 +142,7 @@ function createMapsApiRequest({majorVersion, mapConfig, credentials}) {
   const encodedClient = encodeParameter('client', `deck-gl-carto`);
   const parameters = [encodedApiKey, encodedClient];
   const url = generateMapsApiUrl(majorVersion, parameters, credentials);
-  
+
   const getUrl = `${url}&${encodeParameter('config', config)}`;
   if (getUrl.length < REQUEST_GET_MAX_URL_LENGTH) {
     return getRequest(getUrl);

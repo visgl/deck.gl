@@ -5,7 +5,7 @@ const defaultProps = {
   version: '2.0.0', // MapConfig Version (Maps API)
   bufferSize: 1, // MVT buffersize in pixels,
   tileExtent: 4096, // Tile extent in tile coordinate space (MVT spec.)
-  uniqueIdProperty: 'cartodb_id',
+  uniqueIdProperty: 'cartodb_id'
 };
 
 export default class CartoSQLLayer extends CartoLayer {
