@@ -173,6 +173,7 @@ void main() {
 
   vec2 widthPixels = vec2(clamp(project_size_to_pixel(instanceStrokeWidths * widthScale),
     widthMinPixels, widthMaxPixels) / 2.0);
+  vec2 width;
 
   vColor = vec4(instanceColors.rgb, instanceColors.a * opacity);
 
@@ -197,7 +198,7 @@ void main() {
     clipLine(nextPositionScreen, currPositionScreen);
     clipLine(currPositionScreen, mix(nextPositionScreen, prevPositionScreen, isEnd));
 
-    vec2 width = project_pixel_size_to_clipspace(widthPixels);
+    width = project_pixel_size_to_clipspace(widthPixels);
 
     vec3 pos = lineJoin(
       prevPositionScreen.xyz / prevPositionScreen.w,
@@ -213,7 +214,7 @@ void main() {
     currPosition = project_position(currPosition, currPosition64Low);
     nextPosition = project_position(nextPosition, nextPosition64Low);
 
-    vec2 width = project_pixel_size(widthPixels);
+    width = project_pixel_size(widthPixels);
 
     vec4 pos = vec4(
       lineJoin(prevPosition, currPosition, nextPosition, width),

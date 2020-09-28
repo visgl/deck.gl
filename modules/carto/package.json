@@ -1,15 +1,17 @@
 {
-  "name": "@deck.gl/mesh-layers",
-  "description": "deck.gl layers that loads 3D meshes or scene graphs",
+  "name": "@deck.gl/carto",
+  "description": "CARTO official integration with Deck.gl. Build geospatial applications using CARTO and Deck.gl.",
   "license": "MIT",
   "version": "8.3.0-alpha.1",
   "publishConfig": {
     "access": "public"
   },
   "keywords": [
-    "webgl",
+    "carto",
+    "cartodb",
+    "mvt",
     "visualization",
-    "glTF",
+    "geospatial",
     "layer"
   ],
   "repository": {
@@ -29,11 +31,16 @@
     "build-bundle": "webpack --config ../../scripts/bundle.config.js",
     "prepublishOnly": "npm run build-bundle && npm run build-bundle -- --env.dev"
   },
-  "peerDependencies": {
-    "@deck.gl/core": "^8.0.0"
-  },
   "dependencies": {
-    "@luma.gl/experimental": "^8.2.0",
-    "@luma.gl/shadertools": "^8.2.0"
+    "@loaders.gl/loader-utils": "^2.3.0-beta.1",
+    "@loaders.gl/mvt": "^2.3.0-beta.1",
+    "@loaders.gl/tiles": "^2.3.0-beta.1",
+    "@math.gl/web-mercator": "^3.3.0-beta.1"
+  },
+  "peerDependencies": {
+    "@deck.gl/core": "^8.0.0",
+    "@deck.gl/geo-layers": "^8.2.7",
+    "@deck.gl/layers": "^8.0.0",
+    "@loaders.gl/core": "^2.2.0"
   }
 }

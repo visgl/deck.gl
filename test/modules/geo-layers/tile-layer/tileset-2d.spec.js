@@ -89,7 +89,8 @@ test('Tileset2D#maxCacheByteSize', async t => {
   const tileset = new Tileset2D({
     getTileData: () => Promise.resolve({byteLength: 100}),
     maxCacheByteSize: 150,
-    onTileLoad: () => {}
+    onTileLoad: () => {},
+    onTileUnload: () => {}
   });
   // load a viewport to fill the cache
   tileset.update(testViewport);

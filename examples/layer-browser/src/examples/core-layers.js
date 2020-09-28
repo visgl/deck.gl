@@ -232,7 +232,7 @@ const PathLayerExample = {
     widthMinPixels: 1,
     pickable: true,
     dashJustified: true,
-    extensions: [new PathStyleExtension({dash: true, offset: true})]
+    extensions: [new PathStyleExtension({dash: true, offset: true, highPrecisionDash: true})]
   }
 };
 
