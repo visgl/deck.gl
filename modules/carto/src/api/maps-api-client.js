@@ -14,13 +14,13 @@ export async function getMapTileJSON(props) {
 
   switch (majorVersion) {
     case 1:
+      // Maps API v1
       mapConfig = createMapConfigV1({data, bufferSize, version, tileExtent});
       const layergroup = await instantiateMap({majorVersion, mapConfig, credentials: creds});
-
-      const tiles = layergroup.metadata.tilejson.vector;
-      return tiles;
+      return layergroup.metadata.tilejson.vector;
 
     case 2:
+      // Maps API v2
       mapConfig = createMapConfigV2({data, bufferSize, version, tileExtent});
       return await instantiateMap({majorVersion, mapConfig, credentials: creds});
 
