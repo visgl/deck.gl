@@ -39,14 +39,10 @@ export function getURLFromTemplate(template, properties, indexingScheme) {
     template = template[index];
   }
 
-  let {x, y, z} = properties;
-  if (indexingScheme === 'tms') {
-    y = Math.pow(2, z) - y - 1;
-  }
-
+  const {x, y, z} = properties;
   return template
     .replace('{x}', x)
-    .replace('{y}', y)
+    .replace('{y}', indexingScheme === 'tms' ? Math.pow(2, z) - y - 1 : y)
     .replace('{z}', z);
 }
 
