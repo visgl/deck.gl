@@ -47,8 +47,7 @@ export function getURLFromTemplate(template, properties, indexingScheme) {
   return template
     .replace('{x}', x)
     .replace('{y}', y)
-    .replace('{z}', z)
-    .replace('{-y}', Math.pow(2, z) - y - 1);
+    .replace('{z}', z);
 }
 
 /**
