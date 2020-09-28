@@ -17,7 +17,81 @@ Each version should:
 Ref: http://keepachangelog.com/en/0.3.0/
 -->
 
+## deck.gl v8.3
+
+#### deck.gl [8.3.0-alpha.1] - Sep 27 2020
+
+- Bump loaders.gl and math.gl dependencies (#4972)
+- Add @deck.gl/carto module (#4925)
+- Add high precision mode to PathStyleExtension (#4951)
+- Avoid canvas resizing when not owned by deck.gl (#4949)
+- Add GPU-based counter to DataFilterExtension (#4942)
+- Add onTileUnload callback for TileLayer (#4936)
+- jupyter-widget: event-handling via transport (#4859)
+- Ability to abort ongoing tile requests if there are too many (#4838)
+- mesh-layers: SimpleMeshLayer.props._useMeshColors (#4871)
+- jupyter-widget: playground no longer directly accessed jupyterWidget (#4860)
+- jupyter-widget:  generic event handling (#4848)
+- [google-maps] support styles prop (#4812)
+- Do not create unnecessary picking colors buffer (#4807)
+- core: Add experimental optimization options (#4803)
+- bump babel dependencies (#4801)
+- Use mesh color in SimpleMeshLayer (#4769)
+
 ## deck.gl v8.2
+
+#### deck.gl [8.2.8] - Sep 8 2020
+
+- Fix TextLayer sdf mode (#4911)
+- Fix layer index resolution in picking (#4915)
+- Get current layer instance for TileLayer (#4901)
+
+#### deck.gl [8.2.7] - Aug 29 2020
+
+- Support getCursor in ArcGIS integration (#4896)
+
+#### deck.gl [8.2.6] - Aug 16 2020
+
+- Ability to use mesh color in SimpleMeshLayer (#4868)
+- Fix async iterable data diff handling (#4875)
+- Avoid using deprecated KeyboardEvent.keycode (#4885)
+- Support changing mapStyle in standalone bundle (#4886)
+
+#### deck.gl [8.2.5] - Aug 3 2020
+
+- Fix module parameters on newly created model (#4835)
+- Fix picking with multiple views (#4842)
+
+#### deck.gl [8.2.4] - July 29 2020
+
+- [jupyter-widget] Modify Mapbox warning suppression logic (#4776)
+- [google-maps] fix error when click on POI marker (#4810)
+- [google-maps] Support dblclick event (#4811)
+- Forward more props from TerrainLayer to TileLayer (#4805)
+- [jupyter-widget] Correct data buffer issue (#4832)
+
+#### deck.gl [8.2.3] - July 8 2020
+
+- Fix MapboxLayer error after Deck is finalized (#4782)
+- ArcLayer: Make source and target available for injection (#4788)
+- Fix bug in variable width attribute generation when first element has length 0 (#4790)
+- Make sure uniform transition fromValue is defined (#4786)
+
+#### deck.gl [8.2.2] - July 8 2020
+
+- Fix constant update when using TileLayer with repeated maps (#4753)
+
+#### deck.gl [8.2.1] - July 6 2020
+
+- Fix TextLayer fragment shader in Edge Legacy browser (#4750)
+
+#### deck.gl [8.2.0] - June 28 2020
+
+- Upgrade luma.gl dependencies to 8.2.0 (#4736)
+- Fix request scheduler not cancelling deselected tiles (#4739)
+
+
+### deck.gl v8.2 Prereleases
 
 #### deck.gl [8.2.0-beta.3] - June 27 2020
 

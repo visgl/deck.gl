@@ -2148,7 +2148,7 @@
   resolved "https://registry.yarnpkg.com/@mapbox/whoots-js/-/whoots-js-3.1.0.tgz#497c67a1cef50d1a2459ba60f315e448d2ad87fe"
   integrity sha512-Es6WcD0nO5l+2BOQS4uLfNPYQaNDfbot3X1XUoloz+x0mPDS3eeORZJl06HXjwBG1fOGwCRnzK88LMdxKRrd6Q==
 
-"@math.gl/core@3.2.1", "@math.gl/core@3.3.0-beta.1", "@math.gl/core@^3.2.0":
+"@math.gl/core@3.2.1", "@math.gl/core@3.2.2", "@math.gl/core@3.3.0-beta.1", "@math.gl/core@^3.2.0":
   version "3.3.0-beta.1"
   resolved "https://registry.yarnpkg.com/@math.gl/core/-/core-3.3.0-beta.1.tgz#615070972cfc810500a5e8eb7f7a35901438c2c2"
   integrity sha512-zjB9QvObJAAJZ72hHMG2uNX+tixKOR3F2259GTi6nB/a046kEnNuF4MWuVWS/hl85p28X/ANRURVRjcXhNvYmw==
@@ -2156,7 +2156,16 @@
     "@babel/runtime" "^7.0.0"
     gl-matrix "^3.0.0"
 
-"@math.gl/culling@3.3.0-beta.1", "@math.gl/culling@^3.2.0", "@math.gl/culling@^3.3.0-beta.1":
+"@math.gl/culling@^3.2.0":
+  version "3.2.2"
+  resolved "https://registry.yarnpkg.com/@math.gl/culling/-/culling-3.2.2.tgz#8eaf51de5c409635d2a29b051a97ad81da2d55c0"
+  integrity sha512-j3Y0FLqyk0FKmL7JX8zONP2jdhG6KAPLcipnAfwVKMfDsbAHddbMm7iUNqWsXy9txd8k3KUs/TgFz3xDIz/KBQ==
+  dependencies:
+    "@babel/runtime" "^7.0.0"
+    "@math.gl/core" "3.2.2"
+    gl-matrix "^3.0.0"
+
+"@math.gl/culling@^3.3.0-beta.1":
   version "3.3.0-beta.1"
   resolved "https://registry.yarnpkg.com/@math.gl/culling/-/culling-3.3.0-beta.1.tgz#742d62a18f3b11f3217b7fff522b7ef7b0414c4a"
   integrity sha512-mMT57mZR1r03Q832qjJNC9KYed2MdfahEg1Ym0IaL2gL5KqOoU1Ug0PLT6U0cSW6zH74Xh3rxeYmTAcYggeckw==
@@ -2181,7 +2190,15 @@
   dependencies:
     "@math.gl/core" "3.3.0-beta.1"
 
-"@math.gl/web-mercator@3.3.0-beta.1", "@math.gl/web-mercator@^3.1.3", "@math.gl/web-mercator@^3.2.0", "@math.gl/web-mercator@^3.3.0-beta.1":
+"@math.gl/web-mercator@^3.1.3", "@math.gl/web-mercator@^3.2.0":
+  version "3.2.2"
+  resolved "https://registry.yarnpkg.com/@math.gl/web-mercator/-/web-mercator-3.2.2.tgz#93e66ded7f3004b92bc931da3e32ef244189679b"
+  integrity sha512-uZbLlST7gbfJV227Ev1oShpYQGon9Nk/i0AoM81mVoEYtd+XxKuoDBYaRIdPNVkkALwF9xFG1lwxHqblrs3v5w==
+  dependencies:
+    "@babel/runtime" "^7.0.0"
+    gl-matrix "^3.0.0"
+
+"@math.gl/web-mercator@^3.3.0-beta.1":
   version "3.3.0-beta.1"
   resolved "https://registry.yarnpkg.com/@math.gl/web-mercator/-/web-mercator-3.3.0-beta.1.tgz#306d18090034045a781ece27800a54de6c4f5631"
   integrity sha512-ulnNR6djHKrWzfE9rYvqgl/E1JzM64+9h1t6ngbGr7JDyP7yd/3iEZMa254x4rNM0cusSbVJUjWpEcsVnwnOFg==
