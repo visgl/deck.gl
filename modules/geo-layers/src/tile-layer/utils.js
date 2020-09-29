@@ -30,7 +30,7 @@ export const urlType = {
   }
 };
 
-export function getURLFromTemplate(template, properties, indexingScheme) {
+export function getURLFromTemplate(template, properties) {
   if (!template || !template.length) {
     return null;
   }
@@ -42,8 +42,9 @@ export function getURLFromTemplate(template, properties, indexingScheme) {
   const {x, y, z} = properties;
   return template
     .replace('{x}', x)
-    .replace('{y}', indexingScheme === 'tms' ? Math.pow(2, z) - y - 1 : y)
-    .replace('{z}', z);
+    .replace('{y}', y)
+    .replace('{z}', z)
+    .replace('{-y}', Math.pow(2, z) - y - 1);
 }
 
 /**

@@ -24,7 +24,6 @@ const defaultProps = {
   maxCacheByteSize: null,
   refinementStrategy: STRATEGY_DEFAULT,
   zRange: null,
-  indexingScheme: 'xyz',
   // Use load directly so we don't use ResourceManager
   fetch: {
     type: 'function',
@@ -151,11 +150,11 @@ export default class TileLayer extends CompositeLayer {
   // Methods for subclass to override
 
   getTileData(tile) {
-    const {data, indexingScheme} = this.props;
+    const {data} = this.props;
     const {getTileData, fetch} = this.getCurrentLayer().props;
     const {signal} = tile;
 
-    tile.url = getURLFromTemplate(data, tile, indexingScheme);
+    tile.url = getURLFromTemplate(data, tile);
 
     if (getTileData) {
       return getTileData(tile);
