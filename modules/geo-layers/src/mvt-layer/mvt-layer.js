@@ -20,7 +20,16 @@ export default class MVTLayer extends TileLayer {
     if (!url) {
       return Promise.reject('Invalid URL');
     }
-    return load(url, MVTLoader, this.getLoadOptions());
+    let options = this.getLoadOptions();
+    options = {
+      ...options,
+      mvt: {
+        ...(options && options.mvt),
+        coordinates: this.context.viewport.resolution ? 'wgs84' : 'local',
+        tileIndex: {x: tile.x, y: tile.y, z: tile.z}
+      }
+    };
+    return load(url, MVTLoader, options);
   }
 
   renderSubLayers(props) {
@@ -36,10 +45,12 @@ export default class MVTLayer extends TileLayer {
     const modelMatrix = new Matrix4().scale([xScale, yScale, 1]);
 
     props.autoHighlight = false;
-    props.modelMatrix = modelMatrix;
-    props.coordinateOrigin = [xOffset, yOffset, 0];
-    props.coordinateSystem = COORDINATE_SYSTEM.CARTESIAN;
-    props.extensions = [...(props.extensions || []), new ClipExtension()];
+    if (!this.context.viewport.resolution) {
+      props.modelMatrix = modelMatrix;
+      props.coordinateOrigin = [xOffset, yOffset, 0];
+      props.coordinateSystem = COORDINATE_SYSTEM.CARTESIAN;
+      props.extensions = [...(props.extensions || []), new ClipExtension()];
+    }
 
     return super.renderSubLayers(props);
   }

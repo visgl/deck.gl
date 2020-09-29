@@ -31,7 +31,7 @@ export default class GlobeViewport extends Viewport {
       longitude = 0,
       zoom = 11,
       nearZMultiplier = 0.1,
-      farZMultiplier = 1,
+      farZMultiplier = 2,
       resolution = 10
     } = opts;
 
@@ -82,6 +82,25 @@ export default class GlobeViewport extends Viewport {
 
   getDistanceScales() {
     return this.distanceScales;
+  }
+
+  getBounds(options = {}) {
+    const unprojectOption = {targetZ: options.z || 0};
+
+    const left = this.unproject([0, this.height / 2], unprojectOption);
+    const top = this.unproject([this.width / 2, 0], unprojectOption);
+    const right = this.unproject([this.width, this.height / 2], unprojectOption);
+    const bottom = this.unproject([this.width / 2, this.height], unprojectOption);
+
+    if (right[0] < this.longitude) right[0] += 360;
+    if (left[0] > this.longitude) left[0] -= 360;
+
+    return [
+      Math.min(left[0], right[0], top[0], bottom[0]),
+      Math.min(left[1], right[1], top[1], bottom[1]),
+      Math.max(left[0], right[0], top[0], bottom[0]),
+      Math.max(left[1], right[1], top[1], bottom[1])
+    ];
   }
 
   unproject(xyz, {topLeft = true, targetZ} = {}) {
