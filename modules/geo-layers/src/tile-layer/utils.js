@@ -1,4 +1,3 @@
-/* eslint-disable */
 import {getOSMTileIndices} from './tile-2d-traversal';
 
 const TILE_SIZE = 512;
