@@ -37,9 +37,13 @@ export function getURLFromTemplate(template, properties) {
     const index = Math.abs(properties.x + properties.y) % template.length;
     template = template[index];
   }
-  return template.replace
-    ? template.replace(/\{ *([\w_-]+) *\}/g, (_, property) => properties[property])
-    : null;
+
+  const {x, y, z} = properties;
+  return template
+    .replace('{x}', x)
+    .replace('{y}', y)
+    .replace('{z}', z)
+    .replace('{-y}', Math.pow(2, z) - y - 1);
 }
 
 /**
