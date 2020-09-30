@@ -1,5 +1,7 @@
 /* eslint-disable complexity */
 import {CullingVolume, Plane, AxisAlignedBoundingBox} from '@math.gl/culling';
+import {WebMercatorViewport} from '@deck.gl/core';
+import {fitBounds} from '@math.gl/web-mercator';
 
 const TILE_SIZE = 512;
 // number of world copies to check
@@ -90,6 +92,26 @@ class OSMNode {
 }
 
 export function getOSMTileIndices(viewport, maxZ, zRange) {
+  if (!(viewport instanceof WebMercatorViewport)) {
+    const bbox = viewport.getBounds();
+    // The width and height here are arbitrary - they just need to form a reasonable aspect ratio
+    // so that we don't get too many world copies
+    const {longitude, latitude, zoom} = fitBounds({
+      width: 100,
+      height: 100,
+      bounds: [[bbox[0], bbox[1]], [bbox[2], bbox[3]]]
+    });
+
+    viewport = new WebMercatorViewport({
+      width: 100,
+      height: 100,
+      longitude,
+      latitude,
+      zoom,
+      repeat: true
+    });
+  }
+
   // Get the culling volume of the current camera
   const planes = Object.values(viewport.getFrustumPlanes()).map(
     ({normal, distance}) => new Plane(normal.clone().negate(), distance)

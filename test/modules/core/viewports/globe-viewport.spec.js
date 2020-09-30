@@ -172,3 +172,13 @@ test('GlobeViewport#project, unproject', t => {
   config.EPSILON = oldEpsilon;
   t.end();
 });
+
+test('GlobeViewport#getBounds', t => {
+  for (const testCase of TEST_VIEWPORTS) {
+    const bounds = new GlobeViewport(testCase).getBounds();
+
+    t.ok(bounds[0] < testCase.longitude && bounds[2] > testCase.longitude);
+  }
+
+  t.end();
+});

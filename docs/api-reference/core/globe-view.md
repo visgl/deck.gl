@@ -15,9 +15,10 @@ In the initial release, this class mainly addresses the need to render an overvi
 - No high-precision rendering at high zoom levels (> 12). Features at the city-block scale may not be rendered accurately.
 - Only supports `COORDINATE_SYSTEM.LNGLAT` (default of the `coordinateSystem` prop).
 - Known rendering issues when using multiple views mixing `GlobeView` and `MapView`, or switching between the two.
+- Support for `TileLayer` and `MVTLayer` is experimental.
 - These layers currently do not work in this view:
   + Aggregation layers: `HeatmapLayer`, `ContourLayer`
-  + Tiled layers: `TerrainLayer`, `MVTLayer`
+  + `TerrainLayer`
 
 When GeoJson paths and polygons are rendered with this view, the straight lines and flat surfaces are warped to the surface of the globe. Note that the warped edges still correspond to straight lines in the Mercator projection. To draw lines along the shortest distance on the globe, use the [GreatCircleLayer](/docs/api-reference/geo-layers/great-circle-layer.md).
 
@@ -43,6 +44,11 @@ To render, `GlobeView` needs to be used together with a `viewState` with the fol
 - `zoom` (`Number`) - zoom level
 - `maxZoom` (`Number`, optional) - max zoom level. Default `20`.
 - `minZoom` (`Number`, optional) - min zoom level. Default `0`.
+
+Additional projection matrix arguments:
+
++ `nearZMultiplier` (Number, optional) - Scaler for the near plane, 1 unit equals to the height of the viewport. Default to `0.1`.
++ `farZMultiplier` (Number, optional) - Scaler for the far plane, 1 unit equals to the distance from the camera to the edge of the screen. Default to `2`.
 
 ## GlobeController
 
