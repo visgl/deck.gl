@@ -19,6 +19,10 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v8.2
 
+#### deck.gl [8.2.9] - Sep 8 2020
+
+- Fix TextLayer getText update trigger (#4988)
+
 #### deck.gl [8.2.8] - Sep 8 2020
 
 - Fix TextLayer sdf mode (#4911)
