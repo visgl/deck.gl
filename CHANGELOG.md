@@ -19,6 +19,12 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v8.3
 
+#### deck.gl [8.3.0-beta.1] - Sep 27 2020
+
+- Support TMS (flipped-y) indexing in TileLayer (#4958)
+- MVTLayer: support globe view (#4961)
+- Fix TextLayer getText update trigger (#4988)
+
 #### deck.gl [8.3.0-alpha.1] - Sep 27 2020
 
 - Bump loaders.gl and math.gl dependencies (#4972)

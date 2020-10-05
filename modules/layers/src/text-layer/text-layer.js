@@ -302,6 +302,7 @@ export default class TextLayer extends CompositeLayer {
       this.getSubLayerProps({
         id: 'characters',
         updateTriggers: {
+          getIcon: updateTriggers.getText,
           getPosition: updateTriggers.getPosition,
           getAngle: updateTriggers.getAngle,
           getColor: updateTriggers.getColor,
