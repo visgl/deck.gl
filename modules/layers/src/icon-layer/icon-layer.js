@@ -157,7 +157,6 @@ export default class IconLayer extends Layer {
         (changeFlags.updateTriggersChanged.all || changeFlags.updateTriggersChanged.getIcon))
     ) {
       iconManager.setProps({data, getIcon});
-      iconMappingChanged = true;
     }
 
     if (iconMappingChanged) {
