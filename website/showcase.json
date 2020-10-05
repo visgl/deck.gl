@@ -1,5 +1,15 @@
 [
   {
+    "name": "Viv",
+    "url": "http://avivator.gehlenborglab.org/?image_url=https://viv-demo.storage.googleapis.com/Vanderbilt-Spraggins-Kidney-MxIF.ome.tif",
+    "image": "/images/showcase/viv.jpg",
+    "links": {
+      "Source code": "https://github.com/hms-dbmi/viv",
+      "By Gehlenborg Lab/Harvard Medical School": "http://gehlenborglab.org/"
+    },
+    "description": "Viv is a library for multiscale visualization of high-resolution, highly multiplexed bioimaging data on the web. It directly renders data in Bio-Formats-compatible Zarr and OME-TIFF formats. Avivator is a lightweight image viewer that showcases the capabilities of Viv. The development of Viv and Avivator was supported with funding from the National Institutes of Health and Harvard University."
+  },
+  {
     "name": "Flowmap.blue",
     "url": "https://flowmap.blue/",
     "image": "/images/showcase/flowmap.jpg",
