@@ -46,7 +46,7 @@ export default function loadDeckProps(Accessor) {
 
     toJSON() {
       const result = {};
-      for (const key in properties) {
+      for (const key of this.keys()) {
         if (this[key] !== undefined) {
           result[key] = this[key];
         }
