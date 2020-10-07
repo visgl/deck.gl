@@ -56,7 +56,7 @@ if (!existingVersion) {
     _registerLoggers: register
   });
 
-  registerLoaders([jsonLoader, ImageLoader]);
+  registerLoaders([jsonLoader, [ImageLoader, {imagebitmap: {premultiplyAlpha: 'none'}}]]);
 }
 
 export default global.deck;
