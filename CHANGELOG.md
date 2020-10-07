@@ -19,7 +19,12 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v8.2
 
-#### deck.gl [8.2.9] - Sep 8 2020
+#### deck.gl [8.2.10] - Oct 6 2020
+
+- Fix IconLayer handling of dataDiff (#4990)
+- [arcgis] Fix rendering in the latest esri release (#4994)
+
+#### deck.gl [8.2.9] - Oct 4 2020
 
 - Fix TextLayer getText update trigger (#4988)
 
