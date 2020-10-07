@@ -36,7 +36,7 @@ export function getEmptyInfo({pickInfo, viewports, pixelRatio, x, y, z}) {
     coordinate,
     // TODO remove the lngLat prop after compatibility check
     lngLat: coordinate,
-    devicePixel: [pickInfo.pickedX, pickInfo.pickedY],
+    devicePixel: pickInfo && [pickInfo.pickedX, pickInfo.pickedY],
     pixelRatio
   };
 }

@@ -155,19 +155,12 @@ export default class DeckPicker {
     unproject3D,
     onViewportActive
   }) {
-    const pixelRatio = cssToDeviceRatio(this.gl);
     layers = this._getPickable(layers);
 
     if (!layers) {
       return {
         result: [],
-        emptyInfo: getEmptyInfo({
-          pickInfo: {},
-          viewports,
-          x,
-          y,
-          pixelRatio
-        })
+        emptyInfo: getEmptyInfo({viewports, x, y})
       };
     }
 
@@ -176,6 +169,7 @@ export default class DeckPicker {
     // Convert from canvas top-left to WebGL bottom-left coordinates
     // Top-left coordinates [x, y] to bottom-left coordinates [deviceX, deviceY]
     // And compensate for pixelRatio
+    const pixelRatio = cssToDeviceRatio(this.gl);
     const devicePixelRange = cssToDevicePixels(this.gl, [x, y], true);
     const devicePixel = [
       devicePixelRange.x + Math.floor(devicePixelRange.width / 2),
