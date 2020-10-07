@@ -108,6 +108,25 @@ Optional. Tile extent in tile coordinate space as defined by MVT specification.
 
 * Default: `4096`
 
+### Callbacks
+
+#### `onLoad` (Function, optional)
+
+`onLoad` is called when the request to the CARTO tiler was completed successfully.
+
+- Default: `() => {}`
+
+
+##### `onError` (Function, optional)
+
+`onError` is called when the request to the CARTO tiler failed.
+
+- Default: `console.error`
+
+Receives arguments:
+
+- `error` (`Error`)
+
 
 ## Source
 
