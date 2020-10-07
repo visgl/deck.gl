@@ -18,10 +18,9 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-// TODO - break this monster function into 3+ parts
-/* eslint-disable max-depth, max-statements */
-
-export function getEmptyInfo({pickInfo, viewports, pixelRatio, x, y, z}) {
+// Even if nothing gets picked, we need to expose some information of the picking action:
+// x, y, coordinates etc.
+export function getEmptyPickingInfo({pickInfo, viewports, pixelRatio, x, y, z}) {
   const viewport = getViewportFromCoordinates({viewports}); // TODO - add coords
   const coordinate = viewport && viewport.unproject([x - viewport.x, y - viewport.y], {targetZ: z});
 
@@ -41,6 +40,7 @@ export function getEmptyInfo({pickInfo, viewports, pixelRatio, x, y, z}) {
   };
 }
 
+/* eslint-disable max-depth */
 export function processPickInfo(opts) {
   const {pickInfo, lastPickedInfo, mode, layers} = opts;
   const {pickedColor, pickedLayer, pickedObjectIndex} = pickInfo;
@@ -73,7 +73,7 @@ export function processPickInfo(opts) {
     }
   }
 
-  const baseInfo = getEmptyInfo(opts);
+  const baseInfo = getEmptyPickingInfo(opts);
 
   // Use a Map to store all picking infos.
   // The following two forEach loops are the result of

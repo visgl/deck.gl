@@ -31,7 +31,7 @@ import assert from '../utils/assert';
 import log from '../utils/log';
 import PickLayersPass from '../passes/pick-layers-pass';
 import {getClosestObject, getUniqueObjects} from './picking/query-object';
-import {processPickInfo, getLayerPickingInfo, getEmptyInfo} from './picking/pick-info';
+import {processPickInfo, getLayerPickingInfo, getEmptyPickingInfo} from './picking/pick-info';
 
 export default class DeckPicker {
   constructor(gl) {
@@ -160,7 +160,7 @@ export default class DeckPicker {
     if (!layers) {
       return {
         result: [],
-        emptyInfo: getEmptyInfo({viewports, x, y})
+        emptyInfo: getEmptyPickingInfo({viewports, x, y})
       };
     }
 
