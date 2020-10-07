@@ -1,4 +1,6 @@
 import test from 'tape-catch';
+import {LayerManager, MapView} from '@deck.gl/core';
+import {ScatterplotLayer} from '@deck.gl/layers';
 import DeckPicker from '@deck.gl/core/lib/deck-picker';
 import {gl} from '@deck.gl/test-utils';
 
@@ -40,6 +42,62 @@ test('DeckPicker#getPickingRect', t => {
       `${testCase.title}: returns correct result`
     );
   }
+
+  t.end();
+});
+
+/* eslint-disable max-statements */
+test('DeckPicker#pick empty', t => {
+  const deckPicker = new DeckPicker(gl);
+  const view = new MapView();
+  const viewport = view.makeViewport({
+    width: 100,
+    height: 100,
+    viewState: {longitude: 0, latitude: 0, zoom: 1}
+  });
+  const layerManager = new LayerManager(gl, {viewport});
+
+  const opts = {
+    layers: [],
+    views: [view],
+    viewports: [viewport],
+    onViewportActive: layerManager.activateViewport,
+    x: 1,
+    y: 1
+  };
+
+  const layer = new ScatterplotLayer({
+    data: [{position: [0, 0]}, {position: [0, 0]}],
+    radiusMinPixels: 100,
+    pickable: true
+  });
+  layerManager.setLayers([layer]);
+
+  let output = deckPicker.pickObject(opts);
+  t.deepEqual(output.result, [], 'No layer is picked');
+  t.ok(output.emptyInfo.x, 'emptyInfo.x is populated');
+  t.ok(output.emptyInfo.coordinate[0], 'emptyInfo.coordinate is populated');
+
+  output = deckPicker.pickObjects(opts);
+  t.deepEqual(output, [], 'No layer is picked');
+
+  t.notOk(deckPicker.pickingFBO, 'pickingFBO is not generated');
+
+  opts.layers = [layer];
+  deckPicker.setProps({_pickable: false});
+  output = deckPicker.pickObject(opts);
+  t.deepEqual(output.result, [], 'No layer is picked');
+
+  t.notOk(deckPicker.pickingFBO, 'pickingFBO is not generated');
+
+  deckPicker.setProps({_pickable: true});
+  output = deckPicker.pickObject(opts);
+  t.is(output.result[0].layer, layer, 'Layer is picked');
+
+  t.ok(deckPicker.pickingFBO, 'pickingFBO is generated');
+
+  layerManager.finalize();
+  deckPicker.finalize();
 
   t.end();
 });
