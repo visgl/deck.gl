@@ -52,3 +52,29 @@ If this is an issue, set the `isolation` CSS prop on the `DeckGL` parent element
   isolation: 'isolate';
 }
 ```
+
+## Optimization for Mobile
+
+### Experimental Memory Usage Controls
+
+The `Deck` class supports the following experimental props to aggressively reduce memory usage on memory-restricted devices:
+
+##### `_pickable` (Boolean)
+
+- Default `true`
+
+If set to `false`, force disables all picking features (overrides `layer.props.pickable`).
+
+##### `_typedArrayManagerProps` (Object)
+
+- `overAlloc` (Number) - Default `2`. By default, attributes are allocated twice the memory than they actually need (on both CPU and GPU). Must be larger than `1`.
+- `poolSize` (Number) - Default `100`. When memory reallocation is needed, old chunks are held on to and recycled. Smaller number usese less CPU memory. Can be any number `>=0`.
+
+The above default settings make data updates faster, at the price of using more memory. If the app does not anticipate frequent data changes, they may be aggressively reduced:
+
+```js
+new Deck({
+  ...
+  _typedArrayManagerProps: isMobile ? {overAlloc: 1, poolSize: 0} : null
+})
+```
