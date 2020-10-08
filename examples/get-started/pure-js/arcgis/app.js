@@ -22,8 +22,9 @@ loadArcGISModules(['esri/Map', 'esri/views/MapView']).then(({DeckLayer, modules}
         pickable: true,
         autoHighlight: true,
         onClick: info =>
+          info.object &&
           // eslint-disable-next-line
-          info.object && alert(`${info.object.properties.name} (${info.object.properties.abbrev})`)
+          alert(`${info.object.properties.name} (${info.object.properties.abbrev})`)
       }),
       new ArcLayer({
         id: 'arcs',
