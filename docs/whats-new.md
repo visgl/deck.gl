@@ -47,9 +47,9 @@ If no layer is pickable, deck no longer creates the picking FrameBuffer to save 
 
 `Deck` also added some experimental [optimization options](/docs/developer-guide/tips-and-tricks.md#optimization-for-mobile) to allow more fine-grained control of memory usage on memory-restricted devices.
 
-### pydeck
+### pydeck 0.5
 
-TODO
+pydeck 0.5 includes new event handlers — `on_hover`, `on_click`, `on_view_state_change`, and `on_resize` — which can be used to create rich interactive applications in Jupyter. This release works in sync with deck.gl 8.3.
 
 <table style="border: 0;" align="center">
   <tbody>
