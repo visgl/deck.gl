@@ -23,12 +23,11 @@ export default class CartoLayer extends CompositeLayer {
   }
 
   async _updateData () {
-    const { onError, onLoad } = this.props;
     try {
       await this._updateTileJSON();
-      onLoad();
+      this.props.onLoad();
     } catch (err) {
-      onError(err);
+      this.props.onError(err);
     }
   }
 
