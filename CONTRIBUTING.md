@@ -45,8 +45,7 @@ deck.gl development is governed by the vis.gl Technical Steering Committee (TSC)
 
 - [Ib Green](https://github.com/ibgreen)
 - [Xiaoji Chen](https://github.com/Pessimistress) - chairperson
-- [Tarek Sherif](https://github.com/tsherif)
-- [Ravi Akkenapally](https://github.com/1chandu)
+- [Alberto Asuero](https://github.com/alasarr)
 
 
 ### Maintainers
@@ -54,6 +53,8 @@ deck.gl development is governed by the vis.gl Technical Steering Committee (TSC)
 - [Andrew Duberstein](https://github.com/ajduberstein) - pydeck, json
 - [Xintong Xia](https://github.com/xintongxia) - layers
 - [Georgios Karnas](https://github.com/georgios-uber) - glTF
+- [Kyle Barron](https://github.com/kylebarron) - tiles
+- [Chris Gervang](https://github.com/chrisgervang) - terrain
 - [Dario D'Amico](https://github.com/damix911) - ArcGIS
 - [Jesús Botella](https://github.com/jesusbotella) - MVT
 
@@ -62,7 +63,7 @@ Maintainers of deck.gl have commit access to this GitHub repository, and take pa
 If you are interested in becoming a maintainer, read the [governance guidelines](https://github.com/visgl/tsc/tree/master/developer-process/governance.md).
 
 The vis.gl TSC meets monthly and publishes meeting notes via a [mailing list](https://lists.uc.foundation/g/visgl).
-This mailing list can also be utilized to reach out to the TSC.  
+This mailing list can also be utilized to reach out to the TSC.
 
 
 ## Code of Conduct
