@@ -8,6 +8,19 @@ Release Date: TBD
 
 ### New module: @deck.gl/carto
 
+<table style="border: 0;" align="center">
+  <tbody>
+    <tr>
+      <td>
+        <img style="max-height:200px" src="https://github.com/visgl/deck.gl-data/blob/master/images/whats-new/carto-01.gif?raw=true" />
+      </td>
+      <td>
+        <img style="max-height:200px" src="https://github.com/visgl/deck.gl-data/blob/master/images/whats-new/carto-02.gif?raw=true" />
+      </td>
+    </tr>
+  </tbody>
+</table>
+
 Integration with the powerful geospatial analytics platform [CARTO](https://carto.com).
 
 This new modules makes it easy to visualize regular Tables and vector tilesets in CARTO. It offers two new layers:
@@ -37,6 +50,21 @@ If no layer is pickable, deck no longer creates the picking FrameBuffer to save 
 ### pydeck
 
 TODO
+
+<table style="border: 0;" align="center">
+  <tbody>
+    <tr>
+      <td>
+        <img style="max-height:200px" src="https://github.com/visgl/deck.gl-data/blob/master/images/whats-new/pydeck-event-handling.gif?raw=true" />
+        <p><i>Event handling in pydeck</i></p>
+      </td>
+      <td>
+        <img style="max-height:200px" src="https://github.com/visgl/deck.gl-data/blob/master/images/whats-new/high-precision-dash.png?raw=true" />
+        <p><i>highPrecisionDash in PathStyleExtension</i></p>
+      </td>
+    </tr>
+  </tbody>
+</table>
 
 ### Other Improvements
 
