@@ -53,9 +53,7 @@ const deck = new Deck({
       getRadius: 1000,
       getFillColor: [255, 255, 0],
       // Enable picking
-      pickable: true,
-      // Update tooltip
-      onHover: info => setTooltip(info.object, info.x, info.y)
+      pickable: true
     })
   ],
   getTooltip: ({object}) => object && object.message

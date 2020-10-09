@@ -31,7 +31,7 @@ import assert from '../utils/assert';
 import log from '../utils/log';
 import PickLayersPass from '../passes/pick-layers-pass';
 import {getClosestObject, getUniqueObjects} from './picking/query-object';
-import {processPickInfo, getLayerPickingInfo} from './picking/pick-info';
+import {processPickInfo, getLayerPickingInfo, getEmptyPickingInfo} from './picking/pick-info';
 
 export default class DeckPicker {
   constructor(gl) {
@@ -107,10 +107,6 @@ export default class DeckPicker {
   _resizeBuffer() {
     const {gl} = this;
 
-    if (this._pickable === false) {
-      return null;
-    }
-
     // Create a frame buffer if not already available
     if (!this.pickingFBO) {
       this.pickingFBO = new Framebuffer(gl);
@@ -134,12 +130,15 @@ export default class DeckPicker {
 
   // picking can only handle up to 255 layers. Drop non-pickable/invisible layers from the list.
   _getPickable(layers) {
+    if (this._pickable === false) {
+      return null;
+    }
     const pickableLayers = layers.filter(layer => layer.isPickable() && !layer.isComposite);
     if (pickableLayers.length > 255) {
       log.warn('Too many pickable layers, only picking the first 255')();
       return pickableLayers.slice(0, 255);
     }
-    return pickableLayers;
+    return pickableLayers.length ? pickableLayers : null;
   }
 
   // Pick the closest object at the given (x,y) coordinate
@@ -158,9 +157,14 @@ export default class DeckPicker {
   }) {
     layers = this._getPickable(layers);
 
-    if (!this._resizeBuffer()) {
-      return {result: [], emptyInfo: null};
+    if (!layers) {
+      return {
+        result: [],
+        emptyInfo: getEmptyPickingInfo({viewports, x, y})
+      };
     }
+
+    this._resizeBuffer();
 
     // Convert from canvas top-left to WebGL bottom-left coordinates
     // Top-left coordinates [x, y] to bottom-left coordinates [deviceX, deviceY]
@@ -280,6 +284,10 @@ export default class DeckPicker {
     onViewportActive
   }) {
     layers = this._getPickable(layers);
+
+    if (!layers) {
+      return [];
+    }
 
     this._resizeBuffer();
     // Convert from canvas top-left to WebGL bottom-left coordinates
