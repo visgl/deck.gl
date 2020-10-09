@@ -41,11 +41,11 @@
     "jsdom": false
   },
   "resolutions": {
-    "@math.gl/core": "3.3.0-beta.1"
+    "@math.gl/core": "3.3.0-beta.2"
   },
   "devDependencies": {
-    "@loaders.gl/csv": "^2.3.0-beta.1",
-    "@loaders.gl/polyfills": "^2.3.0-beta.1",
+    "@loaders.gl/csv": "^2.3.0-beta.3",
+    "@loaders.gl/polyfills": "^2.3.0-beta.3",
     "@luma.gl/engine": "^8.2.0",
     "@luma.gl/test-utils": "^8.2.0",
     "@probe.gl/bench": "^3.2.1",

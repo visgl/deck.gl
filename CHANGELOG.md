@@ -19,6 +19,13 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v8.3
 
+#### deck.gl [8.3.0-beta.2] - Oct 8 2020
+
+- Fix IconLayer handling of dataDiff (#4990)
+- [arcgis] Fix rendering in the latest esri release (#4994)
+- Change ImageLoader default option (#4999)
+- Picking optimization (#5000)
+
 #### deck.gl [8.3.0-beta.1] - Sep 27 2020
 
 - Support TMS (flipped-y) indexing in TileLayer (#4958)
