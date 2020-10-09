@@ -2,9 +2,80 @@
 
 This page contains highlights of each deck.gl release. Also check our [vis.gl blog](https://medium.com/vis-gl) for news about new releases and features in deck.gl.
 
+## deck.gl v8.3
+
+Release Date: TBD
+
+### New module: @deck.gl/carto
+
+<table style="border: 0;" align="center">
+  <tbody>
+    <tr>
+      <td>
+        <img style="max-height:200px" src="https://github.com/visgl/deck.gl-data/blob/master/images/whats-new/carto-01.gif?raw=true" />
+      </td>
+      <td>
+        <img style="max-height:200px" src="https://github.com/visgl/deck.gl-data/blob/master/images/whats-new/carto-02.gif?raw=true" />
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+Integration with the powerful geospatial analytics platform [CARTO](https://carto.com).
+
+This new modules makes it easy to visualize regular Tables and vector tilesets in CARTO. It offers two new layers:
+
+- [CartoSQLLayer](/docs/api-reference/carto/carto-sql-layer.md): a layer to visualize data hosted in your CARTO account and to apply custom SQL.
+- [CartoBQTilerLayer](/docs/api-reference/carto/carto-bqtiler-layer.md): a layer to visualize large datasets (millions or billions of rows) directly from [Google BigQuery](https://cloud.google.com/bigquery).
+
+This effort enables applications to leverage CARTO's smart back-end capabilities, dynamic queries and much more. Visit the module's [documentation](/docs/api-reference/carto/overview.md) to get started.
+
+### TileLayer
+
+- `getTileData` now receives an additional argument `signal` that implements [AbortSignal](https://developer.mozilla.org/en-US/docs/Web/API/AbortSignal). Tile requests may now be aborted if there are too many queued or ongoing requests.
+- The `getTileData` function passed in to the current layer instance will be called rather than the first layer instance. This allows applications to progressively adjust loading behavior without having to reload all tiles.
+- New `onTileUnload` callback
+- URL templates now support `{-y}` for TMS indexing
+- Experimental support for `GlobeView` in `TileLayer` and `MVTLayer`
+- Improved memory usage in tile caching
+
+### General Performance
+
+Layers with `pickable` disabled (the default) skip generating picking attributes. This can improve initial loading time and memory usage if a large layer does not have to be interactive.
+
+If no layer is pickable, deck no longer creates the picking FrameBuffer to save memory.
+
+`Deck` also added some experimental [optimization options](/docs/developer-guide/tips-and-tricks.md#optimization-for-mobile) to allow more fine-grained control of memory usage on memory-restricted devices.
+
+### pydeck 0.5
+
+pydeck 0.5 includes new event handlers — `on_hover`, `on_click`, `on_view_state_change`, and `on_resize` — which can be used to create rich interactive applications in Jupyter. This release works in sync with deck.gl 8.3.
+
+<table style="border: 0;" align="center">
+  <tbody>
+    <tr>
+      <td>
+        <img style="max-height:200px" src="https://github.com/visgl/deck.gl-data/blob/master/images/whats-new/pydeck-event-handling.gif?raw=true" />
+        <p><i>Event handling in pydeck</i></p>
+      </td>
+      <td>
+        <img style="max-height:200px" src="https://github.com/visgl/deck.gl-data/blob/master/images/whats-new/high-precision-dash.png?raw=true" />
+        <p><i>highPrecisionDash in PathStyleExtension</i></p>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+### Other Improvements
+
+- `SimpleMeshLayer` adds `_useMeshColors` prop to use vertex colors from `mesh` instead of `getColor`
+- `DataFilterExtension` adds a `countItems` option. It enables the GPU to report the number of objects that pass the filter criteria via the `onFilteredItemsChange` callback.
+- `PathStyleExtension` adds a `highPrecisionDash` option. It creates nicer dashes when used with small path segments, at the price of some CPU overhead.
+- `IconLayer` fixed an issue of visual artifacts rendering anti-aliased borders
+
 ## deck.gl v8.2
 
-Release Data: June 28, 2020
+Release Date: June 28, 2020
 
 <table style="border: 0;" align="center">
   <tbody>
@@ -38,8 +109,6 @@ Many new features are added to `TileLayer`, `MVTLayer` and `TerrainLayer` to imp
 - `TileLayer`'s `tileSize` prop can be used to fine-tune the zoom level at which tiles are loaded.
 - `TileLayer`'s `renderSubLayers` is now always called after the tile layer is loaded, i.e. `props.data` is never a Promise.
 - `TileLayer` can now be used in multi-view applications, as long as each `TileLayer` instance is rendered into one view. See [documentation](/docs/developer-guide/views.md#rendering-layers-in-multiple-views) for an example.
-- `TileLayer`'s tile requests may now be aborted if there are too many queued or ongoing requests. Note: only tiles that aren't visible will be aborted.
-- `TileLayer` will call the `getTileData` function passed in to the current layer instance rather than the first layer instance (e.g. when using React).
 
 
 ### GlobeView
