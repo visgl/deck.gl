@@ -97,9 +97,9 @@ export default function App({
     if (!object) return false;
     const {geoid, index} = object.properties;
 
-    return {
-      html: `Geo ID: ${geoid} <br/>Index: ${index.toFixed(2)}`
-    };
+return `\
+  Geo ID: ${geoid}
+  Index: ${index.toFixed(2)}`;
   };
 
   return (
