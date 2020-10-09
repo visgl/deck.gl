@@ -14,7 +14,8 @@ const properties = {
   onError: {},
   debug: {},
   drawPickingColors: {},
-  getCursor: {}
+  getCursor: {},
+  getTooltip: {}
 };
 
 /* eslint-disable callback-return */
