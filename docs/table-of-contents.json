@@ -76,6 +76,7 @@
             {"entry": "docs/api-reference/layers/arc-layer"},
             {"entry": "docs/api-reference/layers/bitmap-layer"},
             {"entry": "docs/api-reference/layers/column-layer"},
+            {"entry": "docs/api-reference/aggregation-layers/cpu-grid-layer"},
             {"entry": "docs/api-reference/aggregation-layers/contour-layer"},
             {"entry": "docs/api-reference/layers/geojson-layer"},
             {"entry": "docs/api-reference/aggregation-layers/gpu-grid-layer"},
@@ -84,6 +85,7 @@
             {"entry": "docs/api-reference/aggregation-layers/grid-layer"},
             {"entry": "docs/api-reference/geo-layers/h3-cluster-layer"},
             {"entry": "docs/api-reference/geo-layers/h3-hexagon-layer"},
+            {"entry": "docs/api-reference/aggregation-layers/heatmap-layer"},
             {"entry": "docs/api-reference/aggregation-layers/hexagon-layer"},
             {"entry": "docs/api-reference/layers/icon-layer"},
             {"entry": "docs/api-reference/layers/line-layer"},
@@ -100,6 +102,7 @@
             {"entry": "docs/api-reference/geo-layers/terrain-layer"},
             {"entry": "docs/api-reference/layers/text-layer"},
             {"entry": "docs/api-reference/geo-layers/tile-layer"},
+            {"entry": "docs/api-reference/geo-layers/tile-3d-layer"},
             {"entry": "docs/api-reference/geo-layers/trips-layer"}
           ]
         },

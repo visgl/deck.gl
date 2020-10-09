@@ -2,10 +2,16 @@
 
 <p align="center">
   These docs are for
+  <a href="https://github.com/visgl/deck.gl/blob/8.3-release/docs/README.md">
+    <img src="https://img.shields.io/badge/deck.gl-v8.3-brightgreen.svg?style=flat-square" />
+  </a>
+  Looking for an old version?
+  <a href="https://github.com/visgl/deck.gl/blob/8.2-release/docs/README.md">
+    <img src="https://img.shields.io/badge/deck.gl-v8.2-brightgreen.svg?style=flat-square" />
+  </a>
   <a href="https://github.com/visgl/deck.gl/blob/8.1-release/docs/README.md">
     <img src="https://img.shields.io/badge/deck.gl-v8.1-brightgreen.svg?style=flat-square" />
   </a>
-  Looking for an old version?
   <a href="https://github.com/visgl/deck.gl/blob/8.0-release/docs/README.md">
     <img src="https://img.shields.io/badge/deck.gl-v8.0-green.svg?style=flat-square" />
   </a>
