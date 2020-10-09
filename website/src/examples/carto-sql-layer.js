@@ -43,7 +43,8 @@ class CartoSQLDemo extends Component {
   static renderInfo() {
     return (
       <div>
-        <p>Mastercard Index January 2020 using a z18 QuadGrid. A locations’s  index shows how it ranks against all the other locations in the area. The number represents the percentile, for example, a 900 spend index means a location has higher spend than 90% of locations.</p>
+        <p>Mastercard Index January 2020 using a z18 QuadGrid.</p> 
+        <p>A locations’s index shows how it ranks against all the other locations in the area. The number represents the percentile, for example, a 900 spend index means a location has higher spend than 90% of locations.</p>
         <div style={{height: 8, width: '100%', display: 'flex', flexDirection: 'row'}}>
           <div style={{flex: '0 0 14.28%', background: 'rgb(254, 246, 181)'}}></div>
           <div style={{flex: '0 0 14.28%', background: 'rgb(255, 221, 154)'}}></div>
