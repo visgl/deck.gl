@@ -41,7 +41,7 @@ This effort enables applications to leverage CARTO's smart back-end capabilities
 
 ### General Performance
 
-Layers with `pickable` disabled (the default) skip generating picking attributes. This can greatly improve initial loading time and memory usage if a large layer does not have to be interactive.
+Layers with `pickable` disabled (the default) skip generating picking attributes. This can improve initial loading time and memory usage if a large layer does not have to be interactive.
 
 If no layer is pickable, deck no longer creates the picking FrameBuffer to save memory.
 
