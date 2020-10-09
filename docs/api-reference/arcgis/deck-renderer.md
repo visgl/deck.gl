@@ -66,6 +66,7 @@ new DeckRenderer(sceneView, props)
 - `debug`
 - `drawPickingColors`
 - `getCursor`
+- `getTooltip`
 
 ## Members
 
