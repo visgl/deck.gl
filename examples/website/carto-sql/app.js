@@ -42,18 +42,18 @@ export default function App({
   const rotateCamera = useCallback(() => {
     updateViewState(v => ({
       ...v,
-      bearing: v.bearing + 0.3,
+      bearing: v.bearing + 0.5,
       transitionDuration: 1000,
       transitionInterpolator,
       onTransitionEnd: rotateCamera
     }));
   }, []);
 
-  const SQL = `SELECT geoid, the_geom_webmercator, avg(${mrliIndex}) as index
+  const SQL = `SELECT the_geom_webmercator, avg(${mrliIndex}) as index
             FROM mrli_ny_jan WHERE industry ='${industry}' AND timeinstant BETWEEN '${
     week[0]
   }' AND '${week[1]}'
-            GROUP BY geoid, the_geom_webmercator`;
+            GROUP BY the_geom_webmercator`;
 
   const layers = [
     new CartoSQLLayer({
@@ -95,11 +95,9 @@ export default function App({
 
   const getTooltip = ({object}) => {
     if (!object) return false;
-    const {geoid, index} = object.properties;
+    const {index} = object.properties;
 
-return `\
-  Geo ID: ${geoid}
-  Index: ${index.toFixed(2)}`;
+    return `Index: ${index.toFixed(2)}`;
   };
 
   return (
