@@ -12,6 +12,7 @@ function makeExampleEntries(data, category) {
 
 const LAYER_EXAMPLES = {
   'ArcLayer': 'arc-layer',
+  'CartoSQLLayer': 'carto-sql-layer',
   'GeoJsonLayer (Polygons)': 'geojson-layer-polygons',
   'GeoJsonLayer (Paths)': 'geojson-layer-paths',
   'HeatmapLayer': 'heatmap-layer',
