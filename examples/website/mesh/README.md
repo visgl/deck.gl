@@ -15,7 +15,7 @@ npm start
 
 ### Data format
 
-This example generates an arbitrary set of data points.
+This example OBJ model is from John Burkardt's [data sample collection](https://people.sc.fsu.edu/~jburkardt/data/data.html).
 
-To use your own data, check out
-the [documentation of SimpleMeshLayer](../../../docs/layers/simple-mesh-layer.md).
+[loaders.gl](https://loaders.gl) offers loaders for a variety of common 3D formats that work seamlessly with this layer. To use your own data, check out
+the [documentation of SimpleMeshLayer](../../../docs/api-reference/mesh-layers/simple-mesh-layer.md).

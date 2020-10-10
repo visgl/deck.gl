@@ -17,3 +17,6 @@ npm start
 ### Data Source
 
 The sample tiles are loaded from [OpenStreetMap](https://www.openstreetmap.org).
+
+To use your own data, check out
+the [documentation of TileLayer](../../../docs/api-reference/geo-layers/tile-layer.md).

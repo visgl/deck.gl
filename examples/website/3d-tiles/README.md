@@ -1,4 +1,4 @@
-This is a minimal standalone version of the 3D Tile example
+This is a minimal standalone version of the Tile3DLayer example
 on [deck.gl](http://deck.gl) website.
 
 ### Usage
@@ -28,4 +28,6 @@ npm start
 
 ### Data format
 
-Sample data is stored in Cesium ion server. To use your own data, check out the [documentation of Tile3DLayer](../../../docs/layers/tile-3d-layer.md)
+Sample data is served by [Cesium ion](https://cesium.com/cesium-ion/).
+
+To use your own data, check out the [documentation of Tile3DLayer](../../../docs/api-reference/geo-layers/tile-3d-layer.md)

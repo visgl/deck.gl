@@ -1,4 +1,4 @@
-This is a minimal standalone version of the [TripsLayer example](https://deck.gl/#/examples/core-layers/trips-layer)
+This is a minimal standalone version of the TripsLayer example
 on [deck.gl](http://deck.gl) website.
 
 ### Usage
@@ -25,5 +25,8 @@ npm start
 ```
 
 ### Data format
-Sample data is stored in [deck.gl Example Data](https://github.com/visgl/deck.gl-data/tree/master/examples/trips). To use your own data, check out
-the [documentation of TripsLayer](../../../docs/layers/trips-layer.md).
+
+Sample data is stored in [deck.gl Example Data](https://github.com/visgl/deck.gl-data/tree/master/examples/trips), showing taxi trips in Manhattan. [Source](http://www.nyc.gov/html/tlc/html/about/trip_record_data.shtml)
+
+To use your own data, check out
+the [documentation of TripsLayer](../../../docs/api-reference/geo-layers/trips-layer.md).

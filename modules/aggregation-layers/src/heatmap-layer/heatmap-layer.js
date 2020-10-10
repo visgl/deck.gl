@@ -28,15 +28,7 @@ import {
   getTextureCoordinates,
   getTextureParams
 } from './heatmap-layer-utils';
-import {
-  Buffer,
-  Texture2D,
-  Transform,
-  getParameters,
-  FEATURES,
-  hasFeatures,
-  isWebGL2
-} from '@luma.gl/core';
+import {Buffer, Texture2D, Transform, getParameters, FEATURES, hasFeatures} from '@luma.gl/core';
 import {
   AttributeManager,
   COORDINATE_SYSTEM,
@@ -438,7 +430,7 @@ export default class HeatmapLayer extends AggregationLayer {
   _updateColorTexture(opts) {
     const {colorRange} = opts.props;
     let {colorTexture} = this.state;
-    const colors = colorRangeToFlatArray(colorRange, true);
+    const colors = colorRangeToFlatArray(colorRange, false, Uint8Array);
 
     if (colorTexture) {
       colorTexture.setImageData({
@@ -450,8 +442,6 @@ export default class HeatmapLayer extends AggregationLayer {
         data: colors,
         width: colorRange.length,
         height: 1,
-        format: isWebGL2(this.context.gl) ? GL.RGBA32F : GL.RGBA,
-        type: GL.FLOAT,
         ...TEXTURE_OPTIONS
       });
     }

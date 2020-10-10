@@ -1,4 +1,4 @@
-This is a minimal standalone version of the Graph Explorer example
+This is a minimal standalone version of the 3D Plot example
 on [deck.gl](http://deck.gl) website.
 
 ### Usage
@@ -15,5 +15,5 @@ npm start
 ```
 
 ### Data format
-Sample data is stored in the `data` folder. To use your own data, check out
-the [documentation of PlotLayer](./plot-layer/README.md).
+
+Check out the [documentation of PlotLayer](./plot-layer/README.md).

@@ -28,7 +28,7 @@ class TextDemo extends Component {
       <div>
         <p>Data set from Twitter showing hashtags with geolocation.</p>
         <p>Data source:
-          <a href="">Twitter</a>
+          <a href="https://developer.twitter.com/">Twitter</a>
         </p>
         <div className="layout">
           <div className="stat col-1-2">No. of Tweets
