@@ -25,5 +25,8 @@ npm start
 ```
 
 ### Data format
-Sample data is stored in [deck.gl Example Data](https://github.com/visgl/deck.gl-data/tree/master/examples/screen-grid). To use your own data, check out
-the [documentation of ScreenGridLayer](../../../docs/layers/screen-grid-layer.md).
+
+Sample data is stored in [deck.gl Example Data](https://github.com/visgl/deck.gl-data/tree/master/examples/screen-grid), showing Uber pickup locations in NYC. [Source](https://github.com/fivethirtyeight/uber-tlc-foil-response).
+
+To use your own data, check out
+the [documentation of ScreenGridLayer](../../../docs/api-reference/aggregation-layers/screen-grid-layer.md).

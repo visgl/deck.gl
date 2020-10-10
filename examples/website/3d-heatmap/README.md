@@ -1,4 +1,4 @@
-This is a minimal standalone version of the 3DHeatmap example
+This is a minimal standalone version of the HexagonLayer example
 on [deck.gl](http://deck.gl) website.
 
 ### Usage
@@ -26,5 +26,7 @@ npm start
 
 ### Data format
 
-Sample data is stored in [deck.gl Example Data](https://github.com/visgl/deck.gl-data/tree/master/examples/3d-heatmap). To use your own data, check out
-the [documentation of HexagonLayer](../../../docs/layers/hexagon-layer.md)
+Sample data is stored in [deck.gl Example Data](https://github.com/visgl/deck.gl-data/tree/master/examples/3d-heatmap), showing personal injury from road accidents in the UK. [Source](https://data.gov.uk)
+
+To use your own data, check out
+the [documentation of HexagonLayer](../../../docs/api-/reference/aggregation-layers/hexagon-layer.md)

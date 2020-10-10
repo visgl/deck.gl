@@ -26,5 +26,8 @@ npm start
 
 
 ### Data format
-Sample data is stored in [deck.gl Example Data](https://github.com/visgl/deck.gl-data/tree/master/examples/icon). To use your own data, check out
+
+Sample data is stored in [deck.gl Example Data](https://github.com/visgl/deck.gl-data/tree/master/examples/icon), showing information of meteorite landings. [Source](https://data.nasa.gov/Space-Science/Meteorite-Landings/gh4g-9sfh) 
+
+To use your own data, check out
 the [documentation of IconLayer](../../../docs/api-reference/layers/icon-layer.md).

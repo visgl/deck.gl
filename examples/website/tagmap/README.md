@@ -1,4 +1,4 @@
-This is a standalone version of the TagMap example built upon [deck.gl](http://deck.gl).
+This is a standalone version of the TextLayer example on [deck.gl](http://deck.gl) website.
 
 ![tagmap](https://raw.githubusercontent.com/rivulet-zhang/rivulet-zhang.github.io/master/dataRepo/static/tagmap.png)
 
@@ -26,4 +26,8 @@ npm start
 ```
 
 ### Data format
-Sample data can be found [here](https://rivulet-zhang.github.io/dataRepo/tagmap/hashtags10k.json).
+
+Sample data can be found [here](https://rivulet-zhang.github.io/dataRepo/tagmap/hashtags10k.json), showing [Twitter](https://developer.twitter.com/) hashtags with geolocations.
+
+To use your own data, check out
+the [documentation of TextLayer](../../../docs/api-reference/layers/text-layer.md).
