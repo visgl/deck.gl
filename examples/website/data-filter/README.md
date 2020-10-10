@@ -25,5 +25,8 @@ npm start
 ```
 
 ### Data format
-Sample data is stored in [kepler.gl Example Data](https://raw.githubusercontent.com/uber-web/kepler.gl-data/master/earthquakes/). To use your own data, check out
-the [documentation of DataFilterExtension](../../../docs/extensions/data-filter-extension.md).
+
+Sample data is stored in [kepler.gl Example Data](https://raw.githubusercontent.com/uber-web/kepler.gl-data/master/earthquakes/), showing significant earthquakes in California.
+
+To use your own data, check out
+the [documentation of DataFilterExtension](../../../docs/api-reference/extensions/data-filter-extension.md).

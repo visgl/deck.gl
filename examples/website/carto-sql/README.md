@@ -1,4 +1,4 @@
-This is a minimal standalone version of the CartoSQLLayer example
+This is a minimal standalone version of the Carto Integration example
 on [deck.gl](http://deck.gl) website.
 
 ### Usage
@@ -41,4 +41,4 @@ setDefaultCredentials({
 
 ### API documentation
 
-For more info check the [documentation of CartoSQLLayer](../../../docs/carto/carto-sql-layer.md).
+For more info check the [documentation of CartoSQLLayer](../../../docs/api-reference/carto/carto-sql-layer.md).

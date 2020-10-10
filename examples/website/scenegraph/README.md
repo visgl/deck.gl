@@ -1,4 +1,5 @@
-This is a standalone demo of the [scenegraph layer](./scenegraph-layer) built upon [deck.gl](http://deck.gl). This example illustrates the scenegraph layer features.
+This is a minimal standalone version of the ScenegraphLayer example
+on [deck.gl](http://deck.gl) website.
 
 ### Usage
 
@@ -23,14 +24,13 @@ yarn
 npm start
 ```
 
-### Model
-
-Model by `manilov.ap`, modified for the application.
-
-Original: https://sketchfab.com/3d-models/boeing747-1a75633f5737462ebc1c7879869f6229
-
-[CC Attribution](https://creativecommons.org/licenses/by/4.0/)
-
 ### Data source
 
-The data is from [Opensky Network](https://opensky-network.org).
+The 3D model is created by `manilov.ap`, modified for this application.
+See [profile page on sketchfab](https://sketchfab.com/3d-models/boeing747-1a75633f5737462ebc1c7879869f6229),
+licensed under [Creative Commons](https://creativecommons.org/licenses/by/4.0/).
+
+The real-time flight information is from [Opensky Network](https://opensky-network.org).
+
+To use your own data, check out
+the [documentation of ScenegraphLayer](../../../docs/api-reference/mesh-layers/scenegraph-layer.md).

@@ -25,5 +25,8 @@ npm start
 ```
 
 ### Data format
-Sample data is stored in [deck.gl Example Data](https://github.com/visgl/deck.gl-data/tree/master/examples/line). To use your own data, check out
-the [documentation of LineLayer](../../../docs/layers/line-layer.md).
+
+Sample data is stored in [deck.gl Example Data](https://github.com/visgl/deck.gl-data/tree/master/examples/line), showing flight paths near the Heathrow Airport, captured via [the OpenSky Network](https://opensky-network.org/). [Airports data source](http://www.naturalearthdata.com/)
+
+To use your own data, check out
+the [documentation of LineLayer](../../../docs/api-reference/layers/line-layer.md).

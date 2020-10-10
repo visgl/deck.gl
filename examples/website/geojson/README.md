@@ -1,4 +1,4 @@
-This is a minimal standalone version of the GeoJsonLayer example
+This is a minimal standalone version of the GeoJsonLayer (Polygons) example
 on [deck.gl](http://deck.gl) website.
 
 ### Usage
@@ -25,5 +25,8 @@ npm start
 ```
 
 ### Data format
-Sample data is stored in [deck.gl Example Data](https://github.com/visgl/deck.gl-data/tree/master/examples/geojson). To use your own data, check out
-the [documentation of GeoJsonLayer](../../../docs/layers/geojson-layer.md).
+
+Sample data is stored in [deck.gl Example Data](https://github.com/visgl/deck.gl-data/tree/master/examples/geojson), showing the property values of Vancouver. [Source](http://data.vancouver.ca/)
+
+To use your own data, check out
+the [documentation of GeoJsonLayer](../../../docs/api-reference/layers/geojson-layer.md).

@@ -25,5 +25,8 @@ npm start
 ```
 
 ### Data format
-Sample data is stored in [deck.gl Example Data](https://github.com/visgl/deck.gl-data/tree/master/examples/scatterplot). To use your own data, check out
-the [documentation of ScatterplotLayer](../../../docs/layers/scatterplot-layer.md).
+
+Sample data is stored in [deck.gl Example Data](https://github.com/visgl/deck.gl-data/tree/master/examples/scatterplot), showing the population distribution in Manhattan. [Source](http://www.census.gov)
+
+To use your own data, check out
+the [documentation of ScatterplotLayer](../../../docs/api-reference/layers/scatterplot-layer.md).
