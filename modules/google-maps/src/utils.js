@@ -1,4 +1,4 @@
-/* global google */
+/* global google, document */
 import {Deck} from '@deck.gl/core';
 
 // https://en.wikipedia.org/wiki/Web_Mercator_projection#Formulas
@@ -28,7 +28,8 @@ export function createDeckInstance(map, overlay, deck, props) {
 
   deck = new Deck({
     ...props,
-    parent: getContainer(overlay),
+    style: null,
+    parent: getContainer(overlay, props.style),
     initialViewState: {
       longitude: 0,
       latitude: 0,
@@ -51,8 +52,13 @@ export function createDeckInstance(map, overlay, deck, props) {
   return deck;
 }
 
-function getContainer(overlay) {
-  return overlay.getPanes().overlayLayer;
+// Create a container that will host the deck canvas and tooltip
+function getContainer(overlay, style) {
+  const container = document.createElement('div');
+  container.style.position = 'absolute';
+  Object.assign(container.style, style);
+  overlay.getPanes().overlayLayer.appendChild(container);
+  return container;
 }
 
 /**
