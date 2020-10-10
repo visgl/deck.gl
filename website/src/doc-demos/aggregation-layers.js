@@ -12,7 +12,7 @@ import makeLayerDemo from './layer-demo';
 import {DATA_URI} from '../constants/defaults';
 
 export const ContourLayerDemo = makeLayerDemo({
-  getTooltip: ({object}) => `threshold: ${object.threshold}`,
+  getTooltip: ({object}) => `threshold: ${object.contour.threshold}`,
   layer: new ContourLayer({
     data: `${DATA_URI}/sf-bike-parking.json`,
     pickable: true,

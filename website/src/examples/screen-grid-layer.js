@@ -59,7 +59,7 @@ class ScreenGridDemo extends Component {
   }
 
   _disableGPUAggregation = () => {
-    this.props.useParams({
+    this.props.useParam({
       gpuAggregation: {displayName: 'GPU Acceleration (not supported)', type: 'checkbox', value: false, disabled: true},
       cellSize: {displayName: 'Cell Size', type: 'range', value: 5, step: 1, min: 1, max: 20}
     });
