@@ -20,6 +20,7 @@ transition: height 600ms ease-in;
   font-size: 12px;
   z-index: 9;
   pointer-events: none;
+  white-space: nowrap;
 }
 `;
 
