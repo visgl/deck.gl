@@ -12,6 +12,7 @@ export default class CartoSQLLayer extends CartoLayer {
   async _updateTileJSON() {
     const tilejson = await getMapTileJSON(this.props);
     this.setState({tilejson});
+    return tilejson;
   }
 }
 

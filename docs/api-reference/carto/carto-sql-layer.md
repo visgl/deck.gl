@@ -114,7 +114,7 @@ Optional. Tile extent in tile coordinate space as defined by MVT specification.
 
 `onLoad` is called when the request to the CARTO tiler was completed successfully.
 
-- Default: `() => {}`
+- Default: `tilejson => {}`
 
 
 ##### `onError` (Function, optional)

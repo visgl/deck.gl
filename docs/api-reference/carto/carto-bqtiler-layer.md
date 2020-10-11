@@ -76,16 +76,16 @@ A string pointing to a tile attribute containing a unique identifier for feature
 
 ### Callbacks
 
-#### `onLoad` (Function, optional)
+#### `onDataLoad` (Function, optional)
 
-`onLoad` is called when the request to the CARTO tiler was completed successfully.
+`onDataLoad` is called when the request to the CARTO tiler was completed successfully.
 
-- Default: `() => {}`
+- Default: `tilejson => {}`
 
 
-##### `onError` (Function, optional)
+##### `onDataLoadError` (Function, optional)
 
-`onError` is called when the request to the CARTO tiler failed.
+`onDataLoadError` is called when the request to the CARTO tiler failed.
 
 - Default: `console.error`
 
