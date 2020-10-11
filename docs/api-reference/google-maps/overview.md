@@ -38,6 +38,7 @@ Supported deck.gl features:
 - Auto-highlighting
 - Attribute transitions
 - `onHover` and `onClick` callbacks
+- Tooltip
 
 Not supported features:
 

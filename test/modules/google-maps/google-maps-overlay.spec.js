@@ -41,6 +41,37 @@ test('GoogleMapsOverlay#constructor', t => {
   t.end();
 });
 
+test('GoogleMapsOverlay#style', t => {
+  const map = new mapsApi.Map({
+    width: 1,
+    height: 1,
+    longitude: 0,
+    latitude: 0,
+    zoom: 1
+  });
+
+  const overlay = new GoogleMapsOverlay({
+    style: {zIndex: 10},
+    layers: []
+  });
+
+  overlay.setMap(map);
+  const deck = overlay._deck;
+
+  t.is(deck.props.parent.style.zIndex, '10', 'parent zIndex is set');
+  t.is(deck.canvas.style.zIndex, '', 'canvas zIndex is not set');
+
+  overlay.setProps({
+    style: {zIndex: 5}
+  });
+  t.is(deck.props.parent.style.zIndex, '5', 'parent zIndex is set');
+  t.is(deck.canvas.style.zIndex, '', 'canvas zIndex is not set');
+
+  overlay.finalize();
+
+  t.end();
+});
+
 test('GoogleMapsOverlay#draw, pick', t => {
   const map = new mapsApi.Map({
     width: 800,
