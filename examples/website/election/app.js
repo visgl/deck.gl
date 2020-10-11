@@ -42,7 +42,10 @@ export async function renderToDOM(container, options = {}) {
     center: {lat: 40, lng: -100},
     zoom: 5,
     styles: mapStyle,
-    // mapTypeControl: false,
+    mapTypeId: 'terrain',
+    mapTypeControlOptions: {
+      mapTypeIds: ['roadmap', 'terrain']
+    },
     streetViewControl: false
   });
 
