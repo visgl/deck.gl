@@ -17,7 +17,7 @@ class MapboxDemo extends Component {
   static renderInfo(meta) {
     return (
       <div>
-        <p>Visitors to San Francisco businesses and destinations, grouped by their home census block, during the first week of Feb 2020.</p>
+        <p>Visitors to San Francisco businesses, grouped by their home census block group, during the first week of Feb 2020.</p>
         <p>Click on a region to see where its visitors come from.</p>
         <p>Data source: <a href="https://docs.safegraph.com/docs/weekly-patterns">SafeGraph</a></p>
       </div>

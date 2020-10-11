@@ -35,7 +35,7 @@ class GoogleMapsDemo extends Component {
           <span className="col-1-2 text-right">100% Republican</span>
         </p>
 
-        <p>Data source: <a href="https://www.fec.gov/">Federal Election Commission</a></p>
+        <p>Data source: <a href="http://dataverse.harvard.edu/">Harvard Dataverse</a></p>
       </div>
     );
   }
