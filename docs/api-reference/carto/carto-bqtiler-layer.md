@@ -82,6 +82,9 @@ A string pointing to a tile attribute containing a unique identifier for feature
 
 - Default: `tilejson => {}`
 
+Receives arguments:
+
+- `tilejson` (Object) - the response from the tiler service
 
 ##### `onDataLoadError` (Function, optional)
 

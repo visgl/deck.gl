@@ -116,6 +116,9 @@ Optional. Tile extent in tile coordinate space as defined by MVT specification.
 
 - Default: `tilejson => {}`
 
+Receives arguments:
+
+- `tilejson` (Object) - the response from the tiler service
 
 ##### `onError` (Function, optional)
 
