@@ -53,6 +53,9 @@ hr {
   .col-1-2 {
     width: 50%;
   }
+  .text-right {
+    text-align: right;
+  }
 }
 `;
 

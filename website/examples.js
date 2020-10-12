@@ -12,7 +12,6 @@ function makeExampleEntries(data, category) {
 
 const LAYER_EXAMPLES = {
   'ArcLayer': 'arc-layer',
-  'CartoSQLLayer': 'carto-sql-layer',
   'GeoJsonLayer (Polygons)': 'geojson-layer-polygons',
   'GeoJsonLayer (Paths)': 'geojson-layer-paths',
   'HeatmapLayer': 'heatmap-layer',
@@ -32,6 +31,13 @@ const LAYER_EXAMPLES = {
   '3D Plot': 'plot'
 };
 
+const INTEGRATION_EXAMPLES = {
+  'ArcGIS': 'arcgis',
+  'CARTO': 'carto',
+  'Google Maps': 'google-maps',
+  'Mapbox': 'mapbox'
+};
+
 const EXTENSION_EXAMPLES = {
   'BrushingExtension': 'brushing-extension',
   'DataFilterExtension': 'data-filter-extension'
@@ -39,6 +45,7 @@ const EXTENSION_EXAMPLES = {
 
 module.exports = [].concat(
   makeExampleEntries(LAYER_EXAMPLES, 'Layers'),
+  makeExampleEntries(INTEGRATION_EXAMPLES, 'Integrations'),
   makeExampleEntries(EXTENSION_EXAMPLES, 'Extensions'),
   {
     title: 'Playground',
