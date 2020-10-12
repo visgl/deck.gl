@@ -1,0 +1,29 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset='UTF-8' />
+    <title>mapbox-custom-layer-example</title>
+    <link href="https://api.mapbox.com/mapbox-gl-js/v1.12.0/mapbox-gl.css" rel="stylesheet" />
+    <style>
+      body {
+        font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+        font-size: 13px;
+        -webkit-font-smoothing: antialiased;
+        margin:0;
+        padding:0;
+        overflow:hidden;
+      }
+      #app {
+        width: 100vw;
+        height: 100vh;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="app"></div>
+    <script src='app.js'></script>
+  </body>
+  <script type="text/javascript">
+    App.loadAndRender(document.getElementById('app'));
+  </script>
+</html>
