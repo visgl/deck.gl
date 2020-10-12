@@ -31,7 +31,7 @@ module.exports.onCreateWebpackConfig = function onCreateWebpackConfigOverride(op
   }, config.resolve.alias, ALIASES);
 
   config.plugins = config.plugins || [];
-  config.plugins.push(new webpack.EnvironmentPlugin(['MapboxAccessToken']));
+  config.plugins.push(new webpack.EnvironmentPlugin(['MapboxAccessToken', 'GoogleMapsAPIKey']));
 
   // Completely replace the webpack config for the current stage.
   // This can be dangerous and break Gatsby if certain configuration options are changed.
