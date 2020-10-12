@@ -150,7 +150,6 @@ vec3 lineJoin(
 
   float isValid = step(instanceTypes, 3.5);
   vec3 offset = vec3(offsetVec * width * isValid, 0.0);
-  DECKGL_FILTER_SIZE(offset, geometry);
 
   if (needsRotation) {
     offset = rotationMatrix * offset;
@@ -173,7 +172,7 @@ void main() {
 
   vec2 widthPixels = vec2(clamp(project_size_to_pixel(instanceStrokeWidths * widthScale),
     widthMinPixels, widthMaxPixels) / 2.0);
-  vec2 width;
+  vec3 width;
 
   vColor = vec4(instanceColors.rgb, instanceColors.a * opacity);
 
@@ -198,13 +197,14 @@ void main() {
     clipLine(nextPositionScreen, currPositionScreen);
     clipLine(currPositionScreen, mix(nextPositionScreen, prevPositionScreen, isEnd));
 
-    width = project_pixel_size_to_clipspace(widthPixels);
+    width = vec3(widthPixels, 0.0);
+    DECKGL_FILTER_SIZE(width, geometry);
 
     vec3 pos = lineJoin(
       prevPositionScreen.xyz / prevPositionScreen.w,
       currPositionScreen.xyz / currPositionScreen.w,
       nextPositionScreen.xyz / nextPositionScreen.w,
-      width
+      project_pixel_size_to_clipspace(width.xy)
     );
 
     gl_Position = vec4(pos * currPositionScreen.w, currPositionScreen.w);
@@ -214,10 +214,11 @@ void main() {
     currPosition = project_position(currPosition, currPosition64Low);
     nextPosition = project_position(nextPosition, nextPosition64Low);
 
-    width = project_pixel_size(widthPixels);
+    width = vec3(project_pixel_size(widthPixels), 0.0);
+    DECKGL_FILTER_SIZE(width, geometry);
 
     vec4 pos = vec4(
-      lineJoin(prevPosition, currPosition, nextPosition, width),
+      lineJoin(prevPosition, currPosition, nextPosition, width.xy),
       1.0);
     geometry.position = pos;
     gl_Position = project_common_position_to_clipspace(pos);
