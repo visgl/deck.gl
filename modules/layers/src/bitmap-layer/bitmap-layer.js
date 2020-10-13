@@ -188,7 +188,7 @@ export default class BitmapLayer extends Layer {
         bitmapTexture.resize({width: image.videoWidth, height: image.videoHeight, mipmaps: true});
         bitmapTexture.setSubImageData({
           data: image,
-          paramters: DEFAULT_TEXTURE_PARAMETERS
+          parameters: DEFAULT_TEXTURE_PARAMETERS
         });
       } else {
         bitmapTexture.setSubImageData({
