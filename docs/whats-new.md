@@ -4,7 +4,7 @@ This page contains highlights of each deck.gl release. Also check our [vis.gl bl
 
 ## deck.gl v8.3
 
-Release Date: TBD
+Release Date: Oct 12, 2020
 
 ### New module: @deck.gl/carto
 
