@@ -26,7 +26,8 @@ import fs from './triangle-layer-fragment.glsl';
 
 const defaultProps = {
   count: 0, // number of triangles to be rendered
-  texture: null
+  texture: null,
+  onRedraw: {type: 'function', value: null, compare: false}
 };
 
 export default class TriangleLayer extends Layer {
@@ -64,7 +65,20 @@ export default class TriangleLayer extends Layer {
   draw({uniforms}) {
     const {model} = this.state;
 
-    const {texture, maxTexture, colorTexture, intensity, threshold, colorDomain} = this.props;
+    const {
+      texture,
+      maxTexture,
+      colorTexture,
+      intensity,
+      threshold,
+      colorDomain,
+      onRedraw
+    } = this.props;
+
+    if (onRedraw) {
+      onRedraw();
+    }
+
     model
       .setUniforms({
         ...uniforms,
