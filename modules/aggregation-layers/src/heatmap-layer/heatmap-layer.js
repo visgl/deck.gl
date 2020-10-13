@@ -111,20 +111,17 @@ export default class HeatmapLayer extends AggregationLayer {
 
     if (changeFlags.viewportChanged) {
       changeFlags.boundsChanged = this._updateBounds();
+      this._updateTextureRenderingBounds();
     }
 
     if (changeFlags.dataChanged || changeFlags.boundsChanged) {
-      this._updateWeightmap();
+      this.setState({isWeightMapDirty: true});
     } else if (changeFlags.viewportZoomChanged) {
       this._debouncedUpdateWeightmap();
     }
 
     if (props.colorRange !== oldProps.colorRange) {
       this._updateColorTexture(opts);
-    }
-
-    if (changeFlags.viewportChanged) {
-      this._updateTextureRenderingBounds();
     }
 
     if (oldProps.colorDomain !== props.colorDomain || changeFlags.viewportChanged) {
@@ -174,6 +171,11 @@ export default class HeatmapLayer extends AggregationLayer {
           attributes: {
             positions: triPositionBuffer,
             texCoords: triTexCoordBuffer
+          }
+        },
+        onRedraw: () => {
+          if (this.state.isWeightMapDirty) {
+            this._updateWeightmap();
           }
         },
         vertexCount: 4,
@@ -451,6 +453,7 @@ export default class HeatmapLayer extends AggregationLayer {
   _updateWeightmap() {
     const {radiusPixels} = this.props;
     const {weightsTransform, worldBounds, textureSize, weightsTexture, weightsScale} = this.state;
+    this.state.isWeightMapDirty = false;
 
     // #5: convert world bounds to common using Layer's coordiante system and origin
     const commonBounds = this._worldToCommonBounds(worldBounds, {
@@ -487,28 +490,21 @@ export default class HeatmapLayer extends AggregationLayer {
       [GL.TEXTURE_MAG_FILTER]: GL.LINEAR,
       [GL.TEXTURE_MIN_FILTER]: GL.LINEAR
     });
-
-    this.setState({lastUpdate: Date.now()});
   }
 
   _debouncedUpdateWeightmap(fromTimer = false) {
     let {updateTimer} = this.state;
-    const timeSinceLastUpdate = Date.now() - this.state.lastUpdate;
 
     if (fromTimer) {
       updateTimer = null;
-    }
-
-    if (timeSinceLastUpdate >= ZOOM_DEBOUNCE) {
       // update
       this._updateBounds(true);
-      this._updateWeightmap();
       this._updateTextureRenderingBounds();
-    } else if (!updateTimer) {
-      updateTimer = setTimeout(
-        this._debouncedUpdateWeightmap.bind(this, true),
-        ZOOM_DEBOUNCE - timeSinceLastUpdate
-      );
+      this.setState({isWeightMapDirty: true});
+    } else {
+      this.setState({isWeightMapDirty: false});
+      clearTimeout(updateTimer);
+      updateTimer = setTimeout(this._debouncedUpdateWeightmap.bind(this, true), ZOOM_DEBOUNCE);
     }
 
     this.setState({updateTimer});
