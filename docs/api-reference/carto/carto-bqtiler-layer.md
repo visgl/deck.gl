@@ -86,9 +86,9 @@ Receives arguments:
 
 - `tilejson` (Object) - the response from the tiler service
 
-##### `onDataLoadError` (Function, optional)
+##### `onDataError` (Function, optional)
 
-`onDataLoadError` is called when the request to the CARTO tiler failed.
+`onDataError` is called when the request to the CARTO tiler failed.
 
 - Default: `console.error`
 

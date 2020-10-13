@@ -110,9 +110,9 @@ Optional. Tile extent in tile coordinate space as defined by MVT specification.
 
 ### Callbacks
 
-#### `onLoad` (Function, optional)
+#### `onDataLoad` (Function, optional)
 
-`onLoad` is called when the request to the CARTO tiler was completed successfully.
+`onDataLoad` is called when the request to the CARTO tiler was completed successfully.
 
 - Default: `tilejson => {}`
 
@@ -120,9 +120,9 @@ Receives arguments:
 
 - `tilejson` (Object) - the response from the tiler service
 
-##### `onError` (Function, optional)
+##### `onDataError` (Function, optional)
 
-`onError` is called when the request to the CARTO tiler failed.
+`onDataError` is called when the request to the CARTO tiler failed.
 
 - Default: `console.error`
 
