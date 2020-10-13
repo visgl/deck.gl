@@ -132,4 +132,4 @@ The offset of the pattern, relative to the original size. Offset `[0.5, 0.5]` sh
 
 ## Source
 
-[modules/extensions/src/fill-style](https://github.com/visgl/deck.gl/tree/master/modules/extensions/src/fill-style)
+[modules/extensions/src/fill-style](https://github.com/visgl/deck.gl/tree/8.3-release/modules/extensions/src/fill-style)

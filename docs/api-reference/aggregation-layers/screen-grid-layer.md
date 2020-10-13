@@ -164,4 +164,4 @@ Method called to retrieve the weight of each object.
 
 ## Source
 
-[modules/aggregation-layers/src/screen-grid-layer](https://github.com/visgl/deck.gl/tree/master/modules/aggregation-layers/src/screen-grid-layer)
+[modules/aggregation-layers/src/screen-grid-layer](https://github.com/visgl/deck.gl/tree/8.3-release/modules/aggregation-layers/src/screen-grid-layer)

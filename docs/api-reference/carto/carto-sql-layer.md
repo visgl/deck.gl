@@ -111,4 +111,4 @@ Optional. Tile extent in tile coordinate space as defined by MVT specification.
 
 ## Source
 
-[modules/carto/src/layers/carto-sql-layer.js](https://github.com/visgl/deck.gl/tree/master/modules/carto/src/layers/carto-sql-layer.js)
+[modules/carto/src/layers/carto-sql-layer.js](https://github.com/visgl/deck.gl/tree/8.3-release/modules/carto/src/layers/carto-sql-layer.js)

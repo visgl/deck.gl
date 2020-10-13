@@ -40,4 +40,4 @@ For a list of supported options, see [Controller](/docs/api-reference/core/contr
 
 ## Source
 
-[modules/core/src/controllers/map-controller.js](https://github.com/visgl/deck.gl/blob/master/modules/core/src/controllers/map-controller.js)
+[modules/core/src/controllers/map-controller.js](https://github.com/visgl/deck.gl/tree/8.3-release/modules/core/src/controllers/map-controller.js)

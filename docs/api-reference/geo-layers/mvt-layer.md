@@ -104,4 +104,4 @@ If `uniqueIdProperty` is provided, value within that feature property will be us
 
 ## Source
 
-[modules/geo-layers/src/mvt-layer/mvt-layer.js](https://github.com/visgl/deck.gl/tree/master/modules/geo-layers/src/mvt-layer/mvt-layer.js)
+[modules/geo-layers/src/mvt-layer/mvt-layer.js](https://github.com/visgl/deck.gl/tree/8.3-release/modules/geo-layers/src/mvt-layer/mvt-layer.js)

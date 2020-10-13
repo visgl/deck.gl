@@ -77,4 +77,4 @@ A string pointing to a tile attribute containing a unique identifier for feature
 
 ## Source
 
-[modules/carto/src/layers/carto-bqtiler-layer.js](https://github.com/visgl/deck.gl/tree/master/modules/carto/src/layers/carto-bqtiler-layer.js)
+[modules/carto/src/layers/carto-bqtiler-layer.js](https://github.com/visgl/deck.gl/tree/8.3-release/modules/carto/src/layers/carto-bqtiler-layer.js)
