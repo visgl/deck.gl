@@ -5,6 +5,7 @@ const defaultProps = {
   data: null,
   credentials: null,
   onDataLoad: {type: 'function', value: tilejson => {}, compare: false},
+  // eslint-disable-next-line
   onDataLoadError: {type: 'function', value: err => console.error(err), compare: false}
 };
 
@@ -22,7 +23,7 @@ export default class CartoLayer extends CompositeLayer {
     }
   }
 
-  async _updateData () {
+  async _updateData() {
     try {
       const tilejson = await this._updateTileJSON();
       this.setState({tilejson});
