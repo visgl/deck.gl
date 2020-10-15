@@ -32,7 +32,7 @@ export default class CartoLayer extends CompositeLayer {
   renderLayers() {
     if (!this.state.tilejson) return null;
 
-    const { updateTriggers } = this.props;
+    const {updateTriggers} = this.props;
 
     return new MVTLayer(
       this.props,
