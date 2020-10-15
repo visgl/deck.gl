@@ -43,7 +43,9 @@ const defaultProps = {
   // alpha is not effective when blending the bitmap layers with the base map.
   // Instead we need to manually dim/blend rgb values with a background color.
   transparentColor: {type: 'color', value: [0, 0, 0, 0]},
-  tintColor: {type: 'color', value: [255, 255, 255]}
+  tintColor: {type: 'color', value: [255, 255, 255]},
+
+  textureParameters: null
 };
 
 /*
@@ -97,7 +99,7 @@ export default class BitmapLayer extends Layer {
     }
 
     if (props.image !== oldProps.image) {
-      this.loadTexture(props.image);
+      this.loadTexture(props.image, {...DEFAULT_TEXTURE_PARAMETERS, ...props.textureParameters});
     }
 
     const attributeManager = this.getAttributeManager();
@@ -188,7 +190,7 @@ export default class BitmapLayer extends Layer {
         bitmapTexture.resize({width: image.videoWidth, height: image.videoHeight, mipmaps: true});
         bitmapTexture.setSubImageData({
           data: image,
-          parameters: DEFAULT_TEXTURE_PARAMETERS
+          parameters: {...DEFAULT_TEXTURE_PARAMETERS, ...this.props.textureParameters}
         });
       } else {
         bitmapTexture.setSubImageData({
@@ -215,7 +217,7 @@ export default class BitmapLayer extends Layer {
     }
   }
 
-  loadTexture(image) {
+  loadTexture(image, textureParameters) {
     const {gl} = this.context;
 
     if (this.state.bitmapTexture) {
@@ -230,7 +232,7 @@ export default class BitmapLayer extends Layer {
         bitmapTexture: new Texture2D(gl, {
           width: 1,
           height: 1,
-          parameters: DEFAULT_TEXTURE_PARAMETERS,
+          parameters: textureParameters,
           mipmaps: false
         })
       });
@@ -239,7 +241,7 @@ export default class BitmapLayer extends Layer {
       this.setState({
         bitmapTexture: new Texture2D(gl, {
           data: image,
-          parameters: DEFAULT_TEXTURE_PARAMETERS
+          parameters: textureParameters
         })
       });
     }

@@ -59,6 +59,8 @@ new deck.BitmapLayer({});
 
 - Default `null`.
 
+The image to display. If a string is supplied, it is interpreted as a URL or a [Data URL](https://developer.mozilla.org/en-US/docs/Web/HTTP/Basics_of_HTTP/Data_URIs).
+
 ##### `bounds` (Array)
 
 Supported formats:
@@ -69,6 +71,36 @@ Supported formats:
 `left` and `right` refers to the world longitude/x at the corresponding side of the image.
 `top` and `bottom` refers to the world latitude/y at the corresponding side of the image.
 
+##### `textureParameters` (Object)
+
+Customize the [texture parameters](https://developer.mozilla.org/en-US/docs/Web/API/WebGLRenderingContext/texParameter).
+
+If not specified, the layer uses the following defaults to create a linearly smoothed texture from `image`:
+
+```js
+{
+  [GL.TEXTURE_MIN_FILTER]: GL.LINEAR_MIPMAP_LINEAR,
+  [GL.TEXTURE_MAG_FILTER]: GL.LINEAR,
+  [GL.TEXTURE_WRAP_S]: GL.CLAMP_TO_EDGE,
+  [GL.TEXTURE_WRAP_T]: GL.CLAMP_TO_EDGE
+}
+```
+
+For example, to remove smoothing and achieve a pixelated appearance:
+
+```js
+import GL from '@luma.gl/constants';
+
+new BitmapLayer({
+  ...
+  textureParameters: {
+    [GL.TEXTURE_MIN_FILTER]: GL.NEAREST,
+    [GL.TEXTURE_MAG_FILTER]: GL.NEAREST
+  }
+})
+```
+
+This prop is only used when `image` initially loads or changes.
 
 ### Render Options
 
