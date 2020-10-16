@@ -19,6 +19,12 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v8.3
 
+#### deck.gl [8.3.1] - Oct 16 2020
+
+- Fix video texture in BitmapLayer (#5030)
+- [ScenegraphLayer] Fix context.animationProps undefined (#4574)
+- [CartoLayer] remap the user's updateTriggers from the parent layer (#5035)
+
 #### deck.gl [8.3.0] - Oct 12 2020
 
 - Add support for getTooltip to @deck.gl/arcgis (#5006)
