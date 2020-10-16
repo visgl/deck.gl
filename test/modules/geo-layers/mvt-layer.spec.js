@@ -141,7 +141,7 @@ test('MVTLayer#TileJSON', async t => {
   const testCases = [
     {
       props: {
-        tileJSON
+        data: tileJSON
       },
       onAfterUpdate: ({layer, subLayers}) => {
         if (!layer.isLoaded) {
@@ -157,7 +157,7 @@ test('MVTLayer#TileJSON', async t => {
     },
     {
       props: {
-        tileJSON: 'http://echo.jsontest.com/key/value'
+        data: 'http://echo.jsontest.com/key/value'
       },
       onAfterUpdate: ({layer, subLayers}) => {
         if (!layer.isLoaded) {

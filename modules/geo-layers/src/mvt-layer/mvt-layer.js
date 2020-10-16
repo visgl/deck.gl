@@ -13,7 +13,6 @@ const WORLD_SIZE = 512;
 const defaultProps = {
   uniqueIdProperty: {type: 'string', value: ''},
   highlightedFeatureId: null,
-  tileJSON: null,
   onTileJSONLoad: {type: 'function', optional: true, value: null, compare: false}
 };
 
@@ -22,62 +21,49 @@ export default class MVTLayer extends TileLayer {
     super.initializeState();
     this.setState({
       data: null,
-      tileJSON: null,
-      fetchingTileJSON: false
+      tileJSON: null
     });
   }
 
   get isLoaded() {
-    const {fetchingTileJSON} = this.state;
-    return !fetchingTileJSON && super.isLoaded;
+    return this.state.data && super.isLoaded;
   }
 
   updateState({props, oldProps, context, changeFlags}) {
-    changeFlags.dataChanged = changeFlags.dataChanged || props.tileJSON !== oldProps.tileJSON;
-
-    if (changeFlags.dataChanged) {
-      // Save the fetchingTileJSON state - should not trigger a rerender
-      this.state.fetchingTileJSON = changeFlags.dataChanged;
-    }
-
-    super.updateState({props, oldProps, context, changeFlags});
-
     if (changeFlags.dataChanged) {
       this._updateTileData({props});
     }
+    super.updateState({props, oldProps, context, changeFlags});
   }
 
   async _updateTileData({props}) {
     const {onTileJSONLoad} = this.props;
-    const {tileset} = this.state;
-    let {data, tileJSON, minZoom, maxZoom} = props;
+    let {data} = props;
+    let tileJSON = null;
 
-    if (tileJSON) {
-      if (typeof tileJSON === 'string') {
-        this.setState({fetchingTileJSON: true});
-        try {
-          tileJSON = await load(tileJSON, JSONLoader);
-        } catch (error) {
-          this.setState({fetchingTileJSON: false});
-          throw new Error(`An error occurred fetching Tilejson: ${error}`);
-        }
-
+    if (typeof data === 'string' && !data.match(/\{ *([\w_-]+) *\}/g)) {
+      try {
+        this.setState({data: null, tileJSON: null});
+        tileJSON = await load(data, JSONLoader);
         if (onTileJSONLoad) {
           onTileJSONLoad(tileJSON);
         }
+      } catch (error) {
+        throw new Error(`An error occurred fetching TileJSON: ${error}`);
       }
-
-      data = tileJSON.tiles;
-      minZoom = tileJSON.minzoom || minZoom;
-      maxZoom = tileJSON.maxzoom || maxZoom;
+    } else if (data.tilejson) {
+      tileJSON = data;
     }
 
-    tileset.setOptions({minZoom, maxZoom});
-    this.setState({data, tileJSON, fetchingTileJSON: false});
+    if (tileJSON) {
+      data = tileJSON.tiles;
+    }
+
+    this.setState({data, tileJSON});
   }
 
   _updateTileset() {
-    if (!this.state.fetchingTileJSON) {
+    if (this.state.data) {
       super._updateTileset();
     }
   }
