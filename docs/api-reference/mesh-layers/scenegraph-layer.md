@@ -1,3 +1,6 @@
+import {ScenegraphLayerDemo} from 'website-components/doc-demos/mesh-layers';
+
+<ScenegraphLayerDemo />
 
 <p class="badges">
   <img src="https://img.shields.io/badge/lighting-yes-blue.svg?style=flat-square" alt="lighting" />
@@ -11,34 +14,36 @@ The `ScenegraphLayer` renders a number of instances of a complete luma.gl sceneg
 import DeckGL from '@deck.gl/react';
 import {ScenegraphLayer} from '@deck.gl/mesh-layers';
 import {registerLoaders} from '@loaders.gl/core';
-import {GLTFScenegraphLoader} from '@luma.gl/experimental';
+import {GLTFLoader} from '@loaders.gl/gltf';
 
 // Register the proper loader for scenegraph.gltf
-registerLoaders([GLTFScenegraphLoader]);
+registerLoaders(GLTFLoader);
 
 function App({data, viewState}) {
   /**
    * Data format:
    * [
-   *   {
-   *     position: [-122.45, 37.7],
-   *     color: [255, 0, 0]
-   *   },
-   *   {
-   *     position: [-122.46, 37.73],
-   *     color: [0, 255, 0]
-   *   },
+   *   {name: 'Colma (COLM)', address: '365 D Street, Colma CA 94014', exits: 4214, coordinates: [-122.466233, 37.684638]},
    *   ...
    * ]
    */
   const layer = new ScenegraphLayer({
     id: 'scenegraph-layer',
     data,
-    scenegraph:
-      'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/Duck/glTF-Binary/Duck.glb'
+    pickable: true,
+    scenegraph: 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/BoxAnimated/glTF-Binary/BoxAnimated.glb',
+    getPosition: d => d.coordinates,
+    getOrientation: d => [0, Math.random() * 180, 90],
+    _animations: {
+      '*': {speed: 5}
+    },
+    sizeScale: 500,
+    _lighting: 'pbr'
   });
 
-  return <DeckGL viewState={viewState} layers={[layer]} />;
+  return <DeckGL viewState={viewState}
+    layers={[layer]}
+    getTooltip={({object}) => object && `${object.name}\n${object.address}`} />;
 }
 ```
 
