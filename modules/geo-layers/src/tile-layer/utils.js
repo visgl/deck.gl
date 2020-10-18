@@ -145,3 +145,10 @@ export function getTileIndices({viewport, maxZoom, minZoom, zRange, extent, tile
     ? getOSMTileIndices(viewport, z, zRange, extent || DEFAULT_EXTENT)
     : getIdentityTileIndices(viewport, z, extent || DEFAULT_EXTENT);
 }
+
+/**
+ * Returns true if s is a valid URL template
+ */
+export function isURLTemplate(s) {
+  return Boolean(s.match(/(?=.*{z})(?=.*{x})(?=.*({y}|{-y}))/));
+}

@@ -1,19 +1,17 @@
 import {Matrix4} from 'math.gl';
 import {MVTLoader} from '@loaders.gl/mvt';
 import {load} from '@loaders.gl/core';
-import {JSONLoader} from '@loaders.gl/json';
 import {COORDINATE_SYSTEM} from '@deck.gl/core';
 
 import TileLayer from '../tile-layer/tile-layer';
-import {getURLFromTemplate} from '../tile-layer/utils';
+import {getURLFromTemplate, isURLTemplate} from '../tile-layer/utils';
 import ClipExtension from './clip-extension';
 
 const WORLD_SIZE = 512;
 
 const defaultProps = {
   uniqueIdProperty: {type: 'string', value: ''},
-  highlightedFeatureId: null,
-  onTileJSONLoad: {type: 'function', optional: true, value: null, compare: false}
+  highlightedFeatureId: null
 };
 
 export default class MVTLayer extends TileLayer {
@@ -37,16 +35,16 @@ export default class MVTLayer extends TileLayer {
   }
 
   async _updateTileData({props}) {
-    const {onTileJSONLoad} = this.props;
+    const {onDataLoad} = this.props;
     let {data} = props;
     let tileJSON = null;
 
-    if (typeof data === 'string' && !data.match(/\{ *([\w_-]+) *\}/g)) {
+    if (typeof data === 'string' && !isURLTemplate(data)) {
       try {
         this.setState({data: null, tileJSON: null});
-        tileJSON = await load(data, JSONLoader);
-        if (onTileJSONLoad) {
-          onTileJSONLoad(tileJSON);
+        tileJSON = await load(data);
+        if (onDataLoad) {
+          onDataLoad(tileJSON);
         }
       } catch (error) {
         throw new Error(`An error occurred fetching TileJSON: ${error}`);

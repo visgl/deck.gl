@@ -82,19 +82,19 @@ Inherits all properties from [`TileLayer`](/docs/api-reference/geo-layers/tile-l
 If using the default `renderSubLayers`, supports all [`GeoJSONLayer`](/docs/api-reference/layers/geojson-layer.md) properties to style features.
 
 
-##### `data` (String | Array)
+##### `data` (String | Array | JSON)
 
-Required. Either a URL template or an array of URL templates from which the MVT data should be loaded. See `TileLayer`'s `data` prop documentation for the templating syntax.
+Required. It defines the remote data for the MVT layer.
+
+- String: Either a URL template or a [TileJSON](https://github.com/mapbox/tilejson-spec) URL. 
+
+- Array: an array of URL templates. It allows to balance the requests across different tile endpoints. For example, if you've an array with 4 urls and 16 tiles need to be loaded, each endpoint is responsible to server 16/4 tiles.
+
+- JSON: A valid [TileJSON object](https://github.com/mapbox/tilejson-spec/tree/master/2.2.0).
+
+See `TileLayer`'s `data` prop documentation for the templating syntax.
 
 The `getTileData` prop from the `TileLayer` class will not be called.
-
-##### `tileJSON` (String|JSON, optional)
-
-A URL template which a valid TileJSON should be loaded or a valid TileJSON object (https://github.com/mapbox/tilejson-spec/tree/master/2.2.0).
-
-if this property is set, the data property will be ignored and the URL tiles will be read from TileJSON template. The same will happen with minZoom and maxZoom properties.
-
-- Default: `null`
 
 ##### `uniqueIdProperty` (String)
 
@@ -110,11 +110,13 @@ Optional. When provided, a feature with ID corresponding to the supplied value w
 
 If `uniqueIdProperty` is provided, value within that feature property will be used for ID comparison. If not, [feature id](https://github.com/mapbox/vector-tile-spec/tree/master/2.1#42-features) will be used.
 
-##### `onTileJSONLoad` (Function, optional)
+##### `onDataLoad` (Function, optional)
 
-`onTileJSONLoad` is a function that is called when tileJSON is a URL template and it has been loaded. The loaded content is passed as a JSON to this callback function.
+`onDataLoad` called when a tileJSON is successfully fetched
 
-- Default: `data => null`
+Receives arguments:
+
+tileJSON (Object) - the tileJSON fetched
 
 ## Source
 
