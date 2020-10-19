@@ -82,9 +82,17 @@ Inherits all properties from [`TileLayer`](/docs/api-reference/geo-layers/tile-l
 If using the default `renderSubLayers`, supports all [`GeoJSONLayer`](/docs/api-reference/layers/geojson-layer.md) properties to style features.
 
 
-##### `data` (String | Array)
+##### `data` (String | Array | JSON)
 
-Required. Either a URL template or an array of URL templates from which the MVT data should be loaded. See `TileLayer`'s `data` prop documentation for the templating syntax.
+Required. It defines the remote data for the MVT layer.
+
+- String: Either a URL template or a [TileJSON](https://github.com/mapbox/tilejson-spec) URL. 
+
+- Array: an array of URL templates. It allows to balance the requests across different tile endpoints. For example, if you define an array with 4 urls and 16 tiles need to be loaded, each endpoint is responsible to server 16/4 tiles.
+
+- JSON: A valid [TileJSON object](https://github.com/mapbox/tilejson-spec/tree/master/2.2.0).
+
+See `TileLayer`'s `data` prop documentation for the URL template syntax.
 
 The `getTileData` prop from the `TileLayer` class will not be called.
 
@@ -101,6 +109,14 @@ An string pointing to a tile attribute containing a unique identifier for featur
 Optional. When provided, a feature with ID corresponding to the supplied value will be highlighted with `highlightColor`.
 
 If `uniqueIdProperty` is provided, value within that feature property will be used for ID comparison. If not, [feature id](https://github.com/mapbox/vector-tile-spec/tree/master/2.1#42-features) will be used.
+
+##### `onDataLoad` (Function, optional)
+
+`onDataLoad` called when a tileJSON is successfully fetched
+
+Receives arguments:
+
+tileJSON (Object) - the tileJSON fetched
 
 ## Source
 
