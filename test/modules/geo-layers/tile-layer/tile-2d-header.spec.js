@@ -50,11 +50,12 @@ test('Tile2DHeader#Cancel request if not selected', async t => {
 test('Tile2DHeader#Abort quickly', async t => {
   const requestScheduler = new RequestScheduler({throttleRequests: true, maxRequests: 1});
 
-  const getTileData = () => null;
+  const getTileData = await new Promise(resolve => setTimeout(resolve, 0)); // eslint-disable-line no-undef
   const onTileLoad = () => null;
   const onTileError = () => null;
 
   const tile = new Tile2DHeader({onTileLoad, onTileError});
+  tile.isSelected = true;
 
   // Await later so that the abort could go off before the getTileData call.
   const loader = tile._loadData(getTileData, requestScheduler);
