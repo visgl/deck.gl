@@ -50,7 +50,7 @@ test('Tile2DHeader#Cancel request if not selected', async t => {
 test('Tile2DHeader#Abort quickly', async t => {
   const requestScheduler = new RequestScheduler({throttleRequests: true, maxRequests: 1});
 
-  const getTileData = await new Promise(resolve => setTimeout(resolve, 0)); // eslint-disable-line no-undef
+  const getTileData = () => null;
   const onTileLoad = () => null;
   const onTileError = () => null;
 
