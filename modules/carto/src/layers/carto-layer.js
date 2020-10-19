@@ -3,7 +3,10 @@ import {MVTLayer} from '@deck.gl/geo-layers';
 
 const defaultProps = {
   data: null,
-  credentials: null
+  credentials: null,
+  onDataLoad: {type: 'function', value: tilejson => {}, compare: false},
+  // eslint-disable-next-line
+  onDataLoadError: {type: 'function', value: err => console.error(err), compare: false}
 };
 
 export default class CartoLayer extends CompositeLayer {
@@ -16,7 +19,17 @@ export default class CartoLayer extends CompositeLayer {
   updateState({changeFlags}) {
     const {data} = this.props;
     if (changeFlags.dataChanged && data) {
-      this._updateTileJSON();
+      this._updateData();
+    }
+  }
+
+  async _updateData() {
+    try {
+      const tilejson = await this._updateTileJSON();
+      this.setState({tilejson});
+      this.props.onDataLoad(tilejson);
+    } catch (err) {
+      this.props.onDataError(err);
     }
   }
 

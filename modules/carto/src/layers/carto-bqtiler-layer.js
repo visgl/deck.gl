@@ -13,7 +13,7 @@ export default class CartoBQTilerLayer extends CartoLayer {
       }
     });
     const tilejson = await response.json();
-    this.setState({tilejson});
+    return tilejson;
   }
 }
 

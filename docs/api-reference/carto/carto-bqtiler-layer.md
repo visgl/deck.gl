@@ -74,6 +74,28 @@ Optional. Needed for highlighting a feature split across two or more tiles if no
 
 A string pointing to a tile attribute containing a unique identifier for features across tiles.
 
+### Callbacks
+
+#### `onDataLoad` (Function, optional)
+
+`onDataLoad` is called when the request to the CARTO tiler was completed successfully.
+
+- Default: `tilejson => {}`
+
+Receives arguments:
+
+- `tilejson` (Object) - the response from the tiler service
+
+##### `onDataError` (Function, optional)
+
+`onDataError` is called when the request to the CARTO tiler failed.
+
+- Default: `console.error`
+
+Receives arguments:
+
+- `error` (`Error`)
+
 
 ## Source
 
