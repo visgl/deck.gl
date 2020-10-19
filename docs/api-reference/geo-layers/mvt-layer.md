@@ -88,11 +88,11 @@ Required. It defines the remote data for the MVT layer.
 
 - String: Either a URL template or a [TileJSON](https://github.com/mapbox/tilejson-spec) URL. 
 
-- Array: an array of URL templates. It allows to balance the requests across different tile endpoints. For example, if you've an array with 4 urls and 16 tiles need to be loaded, each endpoint is responsible to server 16/4 tiles.
+- Array: an array of URL templates. It allows to balance the requests across different tile endpoints. For example, if you define an array with 4 urls and 16 tiles need to be loaded, each endpoint is responsible to server 16/4 tiles.
 
 - JSON: A valid [TileJSON object](https://github.com/mapbox/tilejson-spec/tree/master/2.2.0).
 
-See `TileLayer`'s `data` prop documentation for the templating syntax.
+See `TileLayer`'s `data` prop documentation for the URL template syntax.
 
 The `getTileData` prop from the `TileLayer` class will not be called.
 

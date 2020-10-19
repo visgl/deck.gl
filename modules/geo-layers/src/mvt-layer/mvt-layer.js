@@ -14,6 +14,14 @@ const defaultProps = {
   highlightedFeatureId: null
 };
 
+async function fetchTileJSON(url) {
+  try {
+    return await load(url);
+  } catch (error) {
+    throw new Error(`An error occurred fetching TileJSON: ${error}`);
+  }
+}
+
 export default class MVTLayer extends TileLayer {
   initializeState() {
     super.initializeState();
@@ -24,30 +32,39 @@ export default class MVTLayer extends TileLayer {
   }
 
   get isLoaded() {
-    return this.state.data && super.isLoaded;
+    return this.state.data && this.state.tileset && super.isLoaded;
   }
 
   updateState({props, oldProps, context, changeFlags}) {
     if (changeFlags.dataChanged) {
       this._updateTileData({props});
     }
-    super.updateState({props, oldProps, context, changeFlags});
+
+    if (this.state.data) {
+      super.updateState({props, oldProps, context, changeFlags});
+    }
   }
 
   async _updateTileData({props}) {
     const {onDataLoad} = this.props;
     let {data} = props;
     let tileJSON = null;
+    let {minZoom, maxZoom} = props;
 
     if (typeof data === 'string' && !isURLTemplate(data)) {
-      try {
-        this.setState({data: null, tileJSON: null});
-        tileJSON = await load(data);
-        if (onDataLoad) {
-          onDataLoad(tileJSON);
-        }
-      } catch (error) {
-        throw new Error(`An error occurred fetching TileJSON: ${error}`);
+      this.setState({data: null, tileJSON: null});
+      tileJSON = await fetchTileJSON(data);
+
+      if (tileJSON.minzoom && tileJSON.minzoom > minZoom) {
+        minZoom = tileJSON.minzoom;
+      }
+
+      if (tileJSON.maxzoom && (!maxZoom || tileJSON.maxzoom < maxZoom)) {
+        maxZoom = tileJSON.maxzoom;
+      }
+
+      if (onDataLoad) {
+        onDataLoad(tileJSON);
       }
     } else if (data.tilejson) {
       tileJSON = data;
@@ -57,13 +74,12 @@ export default class MVTLayer extends TileLayer {
       data = tileJSON.tiles;
     }
 
-    this.setState({data, tileJSON});
+    this.setState({data, tileJSON, minZoom, maxZoom});
   }
 
-  _updateTileset() {
-    if (this.state.data) {
-      super._updateTileset();
-    }
+  renderLayers() {
+    if (!this.state.data) return null;
+    return super.renderLayers();
   }
 
   getTileData(tile) {

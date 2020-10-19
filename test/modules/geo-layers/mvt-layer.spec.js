@@ -95,7 +95,7 @@ test.skip('MVT Highlight', t => {
   t.end();
 });
 
-test('MVTLayer#TileJSON', async t => {
+test.only('TileJSON', async t => {
   class TestMVTLayer extends MVTLayer {
     getTileData() {
       return [];
@@ -109,24 +109,18 @@ test('MVTLayer#TileJSON', async t => {
     height: 100,
     longitude: 0,
     latitude: 60,
-    zoom: 2
+    zoom: 3
   });
 
   const tileJSON = {
     tilejson: '2.2.0',
-    name: 'OpenStreetMap',
-    description: 'A free editable map of the whole world.',
-    version: '1.0.0',
-    attribution: '(c) OpenStreetMap contributors, CC-BY-SA',
-    scheme: 'xyz',
     tiles: [
-      'https://a.tile.openstreetmap.org/{z}/{x}/{y}.png',
-      'https://b.tile.openstreetmap.org/{z}/{x}/{y}.png',
-      'https://c.tile.openstreetmap.org/{z}/{x}/{y}.png'
+      'https://a.server/{z}/{x}/{y}.mvt',
+      'https://b.server/{z}/{x}/{y}.mvt',
+      'https://c.server/{z}/{x}/{y}.mvt'
     ],
-    minzoom: 0,
-    maxzoom: 18,
-    bounds: [-180, -85, 180, 85]
+    minzoom: 3,
+    maxzoom: 10
   };
 
   // polyfill/hijack fetch
@@ -138,38 +132,30 @@ test('MVTLayer#TileJSON', async t => {
     return Promise.resolve(JSON.stringify(tileJSON));
   };
 
+  const onAfterUpdate = ({layer, subLayers}) => {
+    if (!layer.isLoaded) {
+      t.is(subLayers.length, 0);
+    } else {
+      t.is(subLayers.length, 2, 'Rendered sublayers');
+      t.is(layer.state.data.length, 3, 'Data is loaded');
+      t.is(layer.state.tileset.minZoom, tileJSON.minZoom, 'Min zoom layer is correct');
+      t.is(layer.state.tileset.minZoom, tileJSON.maxZoom, 'Max zoom layer is correct');
+      t.ok(layer.isLoaded, 'Layer is loaded');
+    }
+  };
+
   const testCases = [
-    {
-      props: {
-        data: tileJSON
-      },
-      onAfterUpdate: ({layer, subLayers}) => {
-        if (!layer.isLoaded) {
-          t.ok(subLayers.length < 2);
-        } else {
-          t.is(subLayers.length, 2, 'Rendered sublayers');
-          t.is(layer.state.data.length, 3, 'Data is loaded');
-          t.is(layer.state.tileset.minZoom, tileJSON.minZoom, 'Min zoom layer is correct');
-          t.is(layer.state.tileset.minZoom, tileJSON.maxZoom, 'Max zoom layer is correct');
-          t.ok(layer.isLoaded, 'Layer is loaded');
-        }
-      }
-    },
     {
       props: {
         data: 'http://echo.jsontest.com/key/value'
       },
-      onAfterUpdate: ({layer, subLayers}) => {
-        if (!layer.isLoaded) {
-          t.ok(subLayers.length < 2);
-        } else {
-          t.is(subLayers.length, 2, 'Rendered sublayers');
-          t.is(layer.state.data.length, 3, 'Data is loaded');
-          t.is(layer.state.tileset.minZoom, tileJSON.minZoom, 'Min zoom layer is correct');
-          t.is(layer.state.tileset.minZoom, tileJSON.maxZoom, 'Max zoom layer is correct');
-          t.ok(layer.isLoaded, 'Layer is loaded');
-        }
-      }
+      onAfterUpdate
+    },
+    {
+      props: {
+        data: tileJSON
+      },
+      onAfterUpdate
     }
   ];
   await testLayerAsync({Layer: TestMVTLayer, viewport: testViewport, testCases, onError: t.notOk});
