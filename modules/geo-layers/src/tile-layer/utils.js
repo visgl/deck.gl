@@ -150,5 +150,5 @@ export function getTileIndices({viewport, maxZoom, minZoom, zRange, extent, tile
  * Returns true if s is a valid URL template
  */
 export function isURLTemplate(s) {
-  return Boolean(s.match(/(?=.*{z})(?=.*{x})(?=.*({y}|{-y}))/));
+  return /(?=.*{z})(?=.*{x})(?=.*({y}|{-y}))/.test(s);
 }

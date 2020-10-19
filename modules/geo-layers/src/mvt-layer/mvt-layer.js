@@ -55,11 +55,14 @@ export default class MVTLayer extends TileLayer {
       this.setState({data: null, tileJSON: null});
       tileJSON = await fetchTileJSON(data);
 
-      if (tileJSON.minzoom && tileJSON.minzoom > minZoom) {
+      if (Number.isFinite(tileJSON.minzoom) && tileJSON.minzoom > minZoom) {
         minZoom = tileJSON.minzoom;
       }
 
-      if (tileJSON.maxzoom && (!maxZoom || tileJSON.maxzoom < maxZoom)) {
+      if (
+        Number.isFinite(tileJSON.maxzoom) &&
+        (!Number.isFinite(maxZoom) || tileJSON.maxzoom < maxZoom)
+      ) {
         maxZoom = tileJSON.maxzoom;
       }
 
