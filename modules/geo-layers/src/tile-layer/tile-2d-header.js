@@ -55,7 +55,11 @@ export default class Tile2DHeader {
     });
 
     // A tile can be cancelled while being scheduled
-    if (!requestToken || this._isCancelled) {
+    if (this._isCancelled) {
+      requestToken && requestToken.done(); // eslint-disable-line no-unused-expressions
+      return;
+    }
+    if (!requestToken) {
       this._isCancelled = true;
       return;
     }

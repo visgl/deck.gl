@@ -46,3 +46,21 @@ test('Tile2DHeader#Cancel request if not selected', async t => {
   t.ok(tile2.isCancelled, 'Second request was cancelled');
   t.end();
 });
+
+test('Tile2DHeader#Abort quickly', async t => {
+  const requestScheduler = new RequestScheduler({throttleRequests: true, maxRequests: 1});
+
+  const getTileData = () => null;
+  const onTileLoad = () => null;
+  const onTileError = () => null;
+
+  const tile = new Tile2DHeader({onTileLoad, onTileError});
+
+  // Await later so that request scheduler the abort could go off before the getTileData call.
+  const loader = tile._loadData(getTileData, requestScheduler);
+  tile.abort();
+  await loader;
+
+  t.notOk(requestScheduler.requestMap.has(tile), 'Scheduler deletes tile on abort');
+  t.end();
+});
