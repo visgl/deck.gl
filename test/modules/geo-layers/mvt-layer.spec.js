@@ -95,7 +95,7 @@ test.skip('MVT Highlight', t => {
   t.end();
 });
 
-test.only('TileJSON', async t => {
+test('TileJSON', async t => {
   class TestMVTLayer extends MVTLayer {
     getTileData() {
       return [];
