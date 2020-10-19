@@ -56,7 +56,7 @@ test('Tile2DHeader#Abort quickly', async t => {
 
   const tile = new Tile2DHeader({onTileLoad, onTileError});
 
-  // Await later so that request scheduler the abort could go off before the getTileData call.
+  // Await later so that the abort could go off before the getTileData call.
   const loader = tile._loadData(getTileData, requestScheduler);
   tile.abort();
   await loader;
