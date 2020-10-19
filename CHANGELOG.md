@@ -19,6 +19,11 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v8.3
 
+#### deck.gl [8.3.2] - Oct 19 2020
+
+- Improve precision of polygon normal calculation (#5043)
+- Fix Quickly Aborted Tiles (#5044)
+
 #### deck.gl [8.3.1] - Oct 16 2020
 
 - Fix video texture in BitmapLayer (#5030)
