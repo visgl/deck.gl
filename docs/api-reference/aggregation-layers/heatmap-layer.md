@@ -22,7 +22,8 @@ function App({data, viewState}) {
   const layer = new HeatmapLayer({
     id: 'heatmapLayer',
     getPosition: d => d.COORDINATES,
-    getWeight: d => d.WEIGHT    
+    getWeight: d => d.WEIGHT,
+    aggregation: 'SUM'
   });
 
   return <DeckGL viewState={viewState} layers={[layer]} />;
@@ -106,6 +107,12 @@ When not specified, maximum weight (`maxWeight`) is auto calculated and domain w
 NOTES:
 - It is recommend to use default value for regular use cases.
 - On `Windows` browsers due to an ANGLE [issue](https://github.com/visgl/deck.gl/issues/3554), auto calculation of maximum weight doesn't work, hence on `Windows`, `colorDomain` should be used with a non zero maximum value.
+
+##### `aggregation` (String, optional)
+
+* Default: `'SUM'`
+
+Operation used to aggregate all data point weights to calculate a pixel's color value. One of `'SUM'` or `'MEAN'`. `'SUM'` is used when an invalid value is provided.
 
 ### Data Accessors
 

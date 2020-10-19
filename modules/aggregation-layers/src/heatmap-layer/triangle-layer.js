@@ -71,6 +71,7 @@ export default class TriangleLayer extends Layer {
       colorTexture,
       intensity,
       threshold,
+      aggregationMode,
       colorDomain,
       onRedraw
     } = this.props;
@@ -87,6 +88,7 @@ export default class TriangleLayer extends Layer {
         colorTexture,
         intensity,
         threshold,
+        aggregationMode,
         colorDomain
       })
       .draw();

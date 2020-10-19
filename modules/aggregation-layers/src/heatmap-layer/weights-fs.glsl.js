@@ -13,8 +13,7 @@ void main()
   if (dist > 0.5) {
     discard;
   }
-  gl_FragColor.rgb = weightsTexture.rgb * gaussianKDE(2. * dist);
-  gl_FragColor.a = 1.0;
+  gl_FragColor = weightsTexture * gaussianKDE(2. * dist);
   DECKGL_FILTER_COLOR(gl_FragColor, geometry);
 }
 `;
