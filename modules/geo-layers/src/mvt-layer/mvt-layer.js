@@ -4,7 +4,7 @@ import {load} from '@loaders.gl/core';
 import {COORDINATE_SYSTEM} from '@deck.gl/core';
 
 import TileLayer from '../tile-layer/tile-layer';
-import {getURLFromTemplate} from '../tile-layer/utils';
+import {getURLFromTemplate, isURLTemplate} from '../tile-layer/utils';
 import ClipExtension from './clip-extension';
 
 const WORLD_SIZE = 512;
@@ -14,9 +14,79 @@ const defaultProps = {
   highlightedFeatureId: null
 };
 
+async function fetchTileJSON(url) {
+  try {
+    return await load(url);
+  } catch (error) {
+    throw new Error(`An error occurred fetching TileJSON: ${error}`);
+  }
+}
+
 export default class MVTLayer extends TileLayer {
+  initializeState() {
+    super.initializeState();
+    this.setState({
+      data: null,
+      tileJSON: null
+    });
+  }
+
+  get isLoaded() {
+    return this.state.data && this.state.tileset && super.isLoaded;
+  }
+
+  updateState({props, oldProps, context, changeFlags}) {
+    if (changeFlags.dataChanged) {
+      this._updateTileData({props});
+    }
+
+    if (this.state.data) {
+      super.updateState({props, oldProps, context, changeFlags});
+    }
+  }
+
+  async _updateTileData({props}) {
+    const {onDataLoad} = this.props;
+    let {data} = props;
+    let tileJSON = null;
+    let {minZoom, maxZoom} = props;
+
+    if (typeof data === 'string' && !isURLTemplate(data)) {
+      this.setState({data: null, tileJSON: null});
+      tileJSON = await fetchTileJSON(data);
+
+      if (Number.isFinite(tileJSON.minzoom) && tileJSON.minzoom > minZoom) {
+        minZoom = tileJSON.minzoom;
+      }
+
+      if (
+        Number.isFinite(tileJSON.maxzoom) &&
+        (!Number.isFinite(maxZoom) || tileJSON.maxzoom < maxZoom)
+      ) {
+        maxZoom = tileJSON.maxzoom;
+      }
+
+      if (onDataLoad) {
+        onDataLoad(tileJSON);
+      }
+    } else if (data.tilejson) {
+      tileJSON = data;
+    }
+
+    if (tileJSON) {
+      data = tileJSON.tiles;
+    }
+
+    this.setState({data, tileJSON, minZoom, maxZoom});
+  }
+
+  renderLayers() {
+    if (!this.state.data) return null;
+    return super.renderLayers();
+  }
+
   getTileData(tile) {
-    const url = getURLFromTemplate(this.props.data, tile);
+    const url = getURLFromTemplate(this.state.data, tile);
     if (!url) {
       return Promise.reject('Invalid URL');
     }

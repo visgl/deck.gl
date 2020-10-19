@@ -4,6 +4,10 @@ import {MVTLayer} from '@deck.gl/geo-layers';
 import ClipExtension from '@deck.gl/geo-layers/mvt-layer/clip-extension';
 import {GeoJsonLayer} from '@deck.gl/layers';
 
+import {ScatterplotLayer} from '@deck.gl/layers';
+import {WebMercatorViewport} from '@deck.gl/core';
+import {testLayerAsync} from '@deck.gl/test-utils';
+
 import * as FIXTURES from 'deck.gl-test/data';
 
 const geoJSONData = [
@@ -89,4 +93,74 @@ test.skip('MVT Highlight', t => {
   testLayer({Layer: TestMVTLayer, testCases, onError: t.notOk});
 
   t.end();
+});
+
+test('TileJSON', async t => {
+  class TestMVTLayer extends MVTLayer {
+    getTileData() {
+      return [];
+    }
+    renderSubLayers(props) {
+      return new ScatterplotLayer(props, {id: `${props.id}-fill`});
+    }
+  }
+  const testViewport = new WebMercatorViewport({
+    width: 100,
+    height: 100,
+    longitude: 0,
+    latitude: 60,
+    zoom: 3
+  });
+
+  const tileJSON = {
+    tilejson: '2.2.0',
+    tiles: [
+      'https://a.server/{z}/{x}/{y}.mvt',
+      'https://b.server/{z}/{x}/{y}.mvt',
+      'https://c.server/{z}/{x}/{y}.mvt'
+    ],
+    minzoom: 3,
+    maxzoom: 10
+  };
+
+  // polyfill/hijack fetch
+  /* global global, window */
+  const _global = typeof global !== 'undefined' ? global : window;
+  const fetch = _global.fetch;
+
+  _global.fetch = url => {
+    return Promise.resolve(JSON.stringify(tileJSON));
+  };
+
+  const onAfterUpdate = ({layer, subLayers}) => {
+    if (!layer.isLoaded) {
+      t.is(subLayers.length, 0);
+    } else {
+      t.is(subLayers.length, 2, 'Rendered sublayers');
+      t.is(layer.state.data.length, 3, 'Data is loaded');
+      t.is(layer.state.tileset.minZoom, tileJSON.minZoom, 'Min zoom layer is correct');
+      t.is(layer.state.tileset.minZoom, tileJSON.maxZoom, 'Max zoom layer is correct');
+      t.ok(layer.isLoaded, 'Layer is loaded');
+    }
+  };
+
+  const testCases = [
+    {
+      props: {
+        data: 'http://echo.jsontest.com/key/value'
+      },
+      onAfterUpdate
+    },
+    {
+      props: {
+        data: tileJSON
+      },
+      onAfterUpdate
+    }
+  ];
+  await testLayerAsync({Layer: TestMVTLayer, viewport: testViewport, testCases, onError: t.notOk});
+  t.end();
+
+  // restore fetcch
+  _global.fetch = fetch;
 });

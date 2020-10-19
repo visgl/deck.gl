@@ -65,9 +65,9 @@ export default class TileLayer extends CompositeLayer {
         (changeFlags.updateTriggersChanged.all || changeFlags.updateTriggersChanged.getTileData));
 
     if (createTileCache) {
+      const maxZoom = Number.isFinite(this.state.maxZoom) ? this.state.maxZoom : props.maxZoom;
+      const minZoom = Number.isFinite(this.state.minZoom) ? this.state.minZoom : props.minZoom;
       const {
-        maxZoom,
-        minZoom,
         tileSize,
         maxCacheSize,
         maxCacheByteSize,
