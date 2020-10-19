@@ -5,7 +5,7 @@ import {HeatmapLayerDemo} from 'website-components/doc-demos/aggregation-layers'
 
 # HeatmapLayer
 
-`HeatmapLayer` can be used to visualize spatial distribution of data. It internally implements [Gaussian Kernel Density Estimation](https://en.wikipedia.org/wiki/Kernel_(statistics%29#Kernel_functions_in_common_use) to render heatmaps.
+`HeatmapLayer` can be used to visualize spatial distribution of data. It internally implements [Gaussian Kernel Density Estimation](https://en.wikipedia.org/wiki/Kernel_(statistics%29#Kernel_functions_in_common_use) to render heatmaps. Note that this layer does not support all platforms; see "limitations" section below.
 
 ```js
 import DeckGL from '@deck.gl/react';
@@ -127,6 +127,10 @@ Method called to retrieve the position of each point.
 * Default: `1`
 
 Method called to retrieve weight of each point. By default each point will use a weight of `1`.
+
+## Limitations
+
+The `HeatmapLayer` performs aggregation on the GPU. It requires the WebGL context to support rendering to a float texture. This feature is generally supported in evergreen desktop browsers, but not iOS Safari. On iOS, the layer falls back to a low-precision mode.
 
 ## Source
 
