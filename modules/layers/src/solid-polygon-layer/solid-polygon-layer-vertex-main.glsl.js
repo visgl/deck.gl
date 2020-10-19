@@ -73,9 +73,12 @@ void calculatePosition(PolygonProps props) {
 
   if (extruded) {
     pos.z += props.elevations * vertexPositions.y * elevationScale;
-    
+
 #ifdef IS_SIDE_VERTEX
-    normal = vec3(props.positions.y - props.nextPositions.y, props.nextPositions.x - props.positions.x, 0.0);
+    normal = vec3(
+      props.positions.y - props.nextPositions.y + (props.positions64Low.y - props.nextPositions64Low.y),
+      props.nextPositions.x - props.positions.x + (props.nextPositions64Low.x - props.positions64Low.x),
+      0.0);
     normal = project_offset_normal(normal);
 #else
     normal = vec3(0.0, 0.0, 1.0);
