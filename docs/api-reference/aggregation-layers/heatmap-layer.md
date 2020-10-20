@@ -5,7 +5,7 @@ import {HeatmapLayerDemo} from 'website-components/doc-demos/aggregation-layers'
 
 # HeatmapLayer
 
-`HeatmapLayer` can be used to visualize spatial distribution of data. It internally implements [Gaussian Kernel Density Estimation](https://en.wikipedia.org/wiki/Kernel_(statistics%29#Kernel_functions_in_common_use) to render heatmaps.
+`HeatmapLayer` can be used to visualize spatial distribution of data. It internally implements [Gaussian Kernel Density Estimation](https://en.wikipedia.org/wiki/Kernel_(statistics%29#Kernel_functions_in_common_use) to render heatmaps. Note that this layer does not support all platforms; see "limitations" section below.
 
 ```js
 import DeckGL from '@deck.gl/react';
@@ -22,7 +22,8 @@ function App({data, viewState}) {
   const layer = new HeatmapLayer({
     id: 'heatmapLayer',
     getPosition: d => d.COORDINATES,
-    getWeight: d => d.WEIGHT    
+    getWeight: d => d.WEIGHT,
+    aggregation: 'SUM'
   });
 
   return <DeckGL viewState={viewState} layers={[layer]} />;
@@ -103,9 +104,11 @@ Weight of each data object is distributed to to all the pixels in a circle cente
 
 When not specified, maximum weight (`maxWeight`) is auto calculated and domain will be set to [`maxWeight * threshold`, `maxWeight`].
 
-NOTES:
-- It is recommend to use default value for regular use cases.
-- On `Windows` browsers due to an ANGLE [issue](https://github.com/visgl/deck.gl/issues/3554), auto calculation of maximum weight doesn't work, hence on `Windows`, `colorDomain` should be used with a non zero maximum value.
+##### `aggregation` (String, optional)
+
+* Default: `'SUM'`
+
+Operation used to aggregate all data point weights to calculate a pixel's color value. One of `'SUM'` or `'MEAN'`. `'SUM'` is used when an invalid value is provided.
 
 ### Data Accessors
 
@@ -120,6 +123,12 @@ Method called to retrieve the position of each point.
 * Default: `1`
 
 Method called to retrieve weight of each point. By default each point will use a weight of `1`.
+
+## Limitations
+
+The `HeatmapLayer` performs aggregation on the GPU. This feature is fully supported in evergreen desktop browsers, but limited in the following platforms due to partial WebGL support:
+
+- iOS Safari: WebGL context does not support rendering to a float texture. The layer therefore falls back to an 8-bit low-precision mode, where weights must be integers and the accumulated weights in any pixel cannot exceed 255.
 
 ## Source
 

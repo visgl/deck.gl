@@ -42,6 +42,7 @@ import {defaultColorRange, colorRangeToFlatArray} from '../utils/color-utils';
 import weights_vs from './weights-vs.glsl';
 import weights_fs from './weights-fs.glsl';
 import vs_max from './max-vs.glsl';
+import fs_max from './max-fs.glsl';
 
 const RESOLUTION = 2; // (number of common space pixels) / (number texels)
 const SIZE_2K = 2048;
@@ -57,6 +58,10 @@ const TEXTURE_OPTIONS = {
   dataFormat: GL.RGBA
 };
 const DEFAULT_COLOR_DOMAIN = [0, 0];
+const AGGREGATION_MODE = {
+  SUM: 0,
+  MEAN: 1
+};
 
 const defaultProps = {
   getPosition: {type: 'accessor', value: x => x.position},
@@ -65,7 +70,9 @@ const defaultProps = {
   radiusPixels: {type: 'number', min: 1, max: 100, value: 50},
   colorRange: defaultColorRange,
   threshold: {type: 'number', min: 0, max: 1, value: 0.05},
-  colorDomain: {type: 'array', value: null, optional: true}
+  colorDomain: {type: 'array', value: null, optional: true},
+  // 'SUM' or 'MEAN'
+  aggregation: 'SUM'
 };
 
 const REQUIRED_FEATURES = [
@@ -157,7 +164,7 @@ export default class HeatmapLayer extends AggregationLayer {
       colorTexture,
       colorDomain
     } = this.state;
-    const {updateTriggers, intensity, threshold} = this.props;
+    const {updateTriggers, intensity, threshold, aggregation} = this.props;
 
     const TriangleLayerClass = this.getSubLayerClass('triangle', TriangleLayer);
 
@@ -181,6 +188,7 @@ export default class HeatmapLayer extends AggregationLayer {
         vertexCount: 4,
         maxTexture: maxWeightsTexture,
         colorTexture,
+        aggregationMode: AGGREGATION_MODE[aggregation] || 0,
         texture: weightsTexture,
         intensity,
         threshold,
@@ -322,6 +330,7 @@ export default class HeatmapLayer extends AggregationLayer {
       _targetTexture: maxWeightsTexture,
       _targetTextureVarying: 'outTexture',
       vs: vs_max,
+      _fs: fs_max,
       elementCount: textureSize * textureSize
     });
 
