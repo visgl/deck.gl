@@ -43,7 +43,7 @@ void main(void) {
   vec4 weights = texture2D(texture, vTexCoords);
   float weight = weights.r;
 
-  if (aggregationMode == 1.0) {
+  if (aggregationMode > 0.5) {
     weight /= max(1.0, weights.a);
   }
 

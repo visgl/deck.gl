@@ -40,10 +40,7 @@ void main(void) {
   gl_Position = project_position_to_clipspace(positions, vec3(0.0), vec3(0.0));
   vTexCoords = texCoords;
   vec4 maxTexture = texture2D(maxTexture, vec2(0.5));
-  float maxValue = maxTexture.r;
-  if (aggregationMode == 1.0) {
-    maxValue = maxTexture.g;
-  }
+  float maxValue = aggregationMode < 0.5 ? maxTexture.r : maxTexture.g;
   float minValue = maxValue * threshold;
   if (colorDomain[1] > 0.) {
     // if user specified custom domain use it.

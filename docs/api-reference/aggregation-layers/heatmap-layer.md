@@ -104,10 +104,6 @@ Weight of each data object is distributed to to all the pixels in a circle cente
 
 When not specified, maximum weight (`maxWeight`) is auto calculated and domain will be set to [`maxWeight * threshold`, `maxWeight`].
 
-NOTES:
-- It is recommend to use default value for regular use cases.
-- On `Windows` browsers due to an ANGLE [issue](https://github.com/visgl/deck.gl/issues/3554), auto calculation of maximum weight doesn't work, hence on `Windows`, `colorDomain` should be used with a non zero maximum value.
-
 ##### `aggregation` (String, optional)
 
 * Default: `'SUM'`
@@ -130,7 +126,9 @@ Method called to retrieve weight of each point. By default each point will use a
 
 ## Limitations
 
-The `HeatmapLayer` performs aggregation on the GPU. It requires the WebGL context to support rendering to a float texture. This feature is generally supported in evergreen desktop browsers, but not iOS Safari. On iOS, the layer falls back to a low-precision mode.
+The `HeatmapLayer` performs aggregation on the GPU. This feature is fully supported in evergreen desktop browsers, but limited in the following platforms due to partial WebGL support:
+
+- iOS Safari: WebGL context does not support rendering to a float texture. The layer therefore falls back to an 8-bit low-precision mode, where weights must be integers and the accumulated weights in any pixel cannot exceed 255.
 
 ## Source
 
