@@ -1,118 +1,67 @@
-import {getDefaultCredentials} from '../auth';
+import {getDefaultCredentials, getMapsVersion} from '../config';
 
 const DEFAULT_USER_COMPONENT_IN_URL = '{user}';
-const REQUEST_GET_MAX_URL_LENGTH = 2048;
+const DEFAULT_REGION_COMPONENT_IN_URL = '{region}';
 
 /**
  * Obtain a TileJson from Maps API v1 and v2
  */
-export async function getMapTileJSON(props) {
-  const {data, bufferSize, version, tileExtent, credentials} = props;
+export async function getTileJSON(mapConfig, credentials) {
   const creds = {...getDefaultCredentials(), ...credentials};
-  const majorVersion = getMajorVersion(version);
-  let mapConfig;
-
-  switch (majorVersion) {
-    case 1:
+  switch (getMapsVersion(creds)) {
+    case 'v1':
       // Maps API v1
-      mapConfig = createMapConfigV1({data, bufferSize, version, tileExtent});
-      const layergroup = await instantiateMap({majorVersion, mapConfig, credentials: creds});
+      // The following if statement will be deprecated really soon when we'll make v2 the default
+      // We need it to bypass request to the google cloud function
+      if (mapConfig.layers[0].type === 'tileset' && mapConfig.layers[0].source === 'bigquery') {
+        return await getTileJSONBigQueryCloudFunction(mapConfig);
+      }
+
+      const layergroup = await instantiateMap({mapConfig, credentials: creds});
       return layergroup.metadata.tilejson.vector;
 
-    case 2:
+    case 'v2':
       // Maps API v2
-      mapConfig = createMapConfigV2({data, bufferSize, version, tileExtent});
-      return await instantiateMap({majorVersion, mapConfig, credentials: creds});
+      return await instantiateMap({mapConfig, credentials: creds});
 
     default:
-      throw new Error('Invalid maps API version. It shoud be 1.X.X or 2.X.X');
-  }
-}
-
-function getMajorVersion(mapsAPIVersion) {
-  try {
-    const v = mapsAPIVersion.split('.');
-    return parseInt(v[0], 10);
-  } catch (error) {
-    throw new Error('Invalid maps API version. It shoud be 1.X.X or 2.X.X');
+      throw new Error('Invalid maps API version. It shoud be v1 or v2');
   }
 }
 
 /**
- * Create a mapConfig for Maps API
+ * Instantiate a map using Maps API
  */
-function createMapConfigV1({data, bufferSize, version, tileExtent}) {
-  const isSQL = data.search(' ') > -1;
-  const sql = isSQL ? data : `SELECT * FROM ${data}`;
+async function instantiateMap({mapConfig, credentials}) {
+  const url = buildURL({mapConfig, credentials});
 
-  return {
-    version,
-    buffersize: {
-      mvt: bufferSize
-    },
-    layers: [
-      {
-        type: 'mapnik',
-        options: {
-          sql: sql.trim(),
-          vector_extent: tileExtent
-        }
-      }
-    ]
-  };
-}
-
-/**
- * Create a mapConfig for Maps API
- */
-function createMapConfigV2({data, bufferSize, version, tileExtent}) {
-  const isSQL = data.search(' ') > -1;
-  const sql = isSQL ? data : `SELECT * FROM ${data}`;
-
-  return {
-    version,
-    buffer_size: bufferSize,
-    tile_extent: tileExtent,
-    layers: [
-      {
-        type: 'query',
-        options: {
-          sql: sql.trim(),
-          vector_extent: tileExtent
-        }
-      }
-    ]
-  };
-}
-
-/**
- * Instantiate a map, either by GET or POST, using Maps API
- */
-async function instantiateMap({majorVersion, mapConfig, credentials}) {
   let response;
 
   try {
-    const request = createMapsApiRequest({majorVersion, mapConfig, credentials});
     /* global fetch */
     /* eslint no-undef: "error" */
-    response = await fetch(request);
+    response = await fetch(url, {
+      headers: {
+        Accept: 'application/json'
+      }
+    });
   } catch (error) {
     throw new Error(`Failed to connect to Maps API: ${error}`);
   }
 
-  const jsonResponse = await response.json();
+  const json = await response.json();
 
   if (!response.ok) {
-    dealWithError({majorVersion, response, jsonResponse, credentials});
+    dealWithError({response, json, credentials});
   }
 
-  return jsonResponse;
+  return json;
 }
 
 /**
  * Display proper message from Maps API error
  */
-function dealWithError({majorVersion, response, jsonResponse, credentials}) {
+function dealWithError({response, json, credentials}) {
   switch (response.status) {
     case 401:
       throw new Error(
@@ -128,79 +77,29 @@ function dealWithError({majorVersion, response, jsonResponse, credentials}) {
       );
 
     default:
-      const e = majorVersion === 1 ? JSON.stringify(jsonResponse.errors) : jsonResponse.error;
+      const e = getMapsVersion() === 'v1' ? JSON.stringify(json.errors) : json.error;
       throw new Error(e);
   }
 }
 
 /**
- * Create a GET or POST request, with all required parameters
+ * Build a URL all required parameters
  */
-function createMapsApiRequest({majorVersion, mapConfig, credentials}) {
-  const config = JSON.stringify(mapConfig);
+function buildURL({mapConfig, credentials}) {
+  const cfg = JSON.stringify(mapConfig);
   const encodedApiKey = encodeParameter('api_key', credentials.apiKey);
   const encodedClient = encodeParameter('client', `deck-gl-carto`);
   const parameters = [encodedApiKey, encodedClient];
-  const url = generateMapsApiUrl(majorVersion, parameters, credentials);
-
-  const getUrl = `${url}&${encodeParameter('config', config)}`;
-  if (getUrl.length < REQUEST_GET_MAX_URL_LENGTH) {
-    return getRequest(getUrl);
-  }
-
-  return postRequest(url, config);
-}
-
-/**
- * Generate a Maps API url for the request
- */
-function generateMapsApiUrl(majorVersion, parameters, credentials) {
-  const base = `${serverURL(credentials)}api/v${majorVersion}/map`;
-  return `${base}?${parameters.join('&')}`;
+  return `${mapsUrl(credentials)}?${parameters.join('&')}&${encodeParameter('config', cfg)}`;
 }
 
 /**
  * Prepare a url valid for the specified user
  */
-function serverURL(credentials) {
-  let url = credentials.serverUrlTemplate.replace(
-    DEFAULT_USER_COMPONENT_IN_URL,
-    credentials.username
-  );
-
-  if (!url.endsWith('/')) {
-    url += '/';
-  }
-
-  return url;
-}
-
-/**
- * Simple GET request
- */
-function getRequest(url) {
-  /* global Request */
-  /* eslint no-undef: "error" */
-  return new Request(url, {
-    method: 'GET',
-    headers: {
-      Accept: 'application/json'
-    }
-  });
-}
-
-/**
- * Simple POST request
- */
-function postRequest(url, payload) {
-  return new Request(url, {
-    method: 'POST',
-    headers: {
-      Accept: 'application/json',
-      'Content-Type': 'application/json'
-    },
-    body: payload
-  });
+function mapsUrl(credentials) {
+  return credentials.mapsUrl
+    .replace(DEFAULT_USER_COMPONENT_IN_URL, credentials.username)
+    .replace(DEFAULT_REGION_COMPONENT_IN_URL, credentials.region);
 }
 
 /**
@@ -208,4 +107,18 @@ function postRequest(url, payload) {
  */
 function encodeParameter(name, value) {
   return `${name}=${encodeURIComponent(value)}`;
+}
+
+/**
+ *  This function will be deprecated really soon when we'll make v2 the default
+ */
+async function getTileJSONBigQueryCloudFunction(mapConfig) {
+  const BQ_TILEJSON_ENDPOINT = 'https://us-central1-cartobq.cloudfunctions.net/tilejson';
+  const response = await fetch(`${BQ_TILEJSON_ENDPOINT}?t=${mapConfig.layers[0].options.tileset}`, {
+    headers: {
+      'Content-Type': 'application/json'
+    }
+  });
+  const tilejson = await response.json();
+  return tilejson;
 }

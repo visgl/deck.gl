@@ -84,8 +84,7 @@ Optional. Object with the credentials to connect with CARTO.
 ```js
 {
   username: 'public',
-  apiKey: 'default_public',
-  serverUrlTemplate: 'https://{user}.carto.com'
+  apiKey: 'default_public'
 }
 ```
 
@@ -94,12 +93,6 @@ Optional. Object with the credentials to connect with CARTO.
 Optional. MVT BufferSize in pixels
 
 * Default: `1`
-
-##### `version` (String)
-
-Optional. MapConfig version
-
-* Default: `1.3.1`
 
 
 ##### `tileExtent` (String)
