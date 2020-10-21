@@ -57,7 +57,7 @@ You can see real examples for the following:
 
 ### CARTO credentials
 
-CARTO credentials is an object to define the connection credentials:
+This is an object to define the connection to CARTO, including the credentials (and optionally the parameters to point to specific api endpoints):
 
 * username (required): unique username in the platform
 * apiKey (optional): api key. default to `public_user`

@@ -83,7 +83,7 @@ function dealWithError({response, json, credentials}) {
 }
 
 /**
- * Build a URL all required parameters
+ * Build a URL with all required parameters
  */
 function buildURL({mapConfig, credentials}) {
   const cfg = JSON.stringify(mapConfig);
