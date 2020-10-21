@@ -24,7 +24,7 @@ export default [
     },
     layers: [
       new ScenegraphLayer({
-        id: 'scenegraph-layer-frame-1',
+        id: 'scenegraph-layer',
         data: meshSampleData,
         scenegraph: './test/data/BoxAnimated.glb',
         coordinateOrigin: [-122.45, 37.75, 0],
@@ -55,7 +55,7 @@ export default [
     },
     layers: [
       new ScenegraphLayer({
-        id: 'scenegraph-layer-frame-2',
+        id: 'scenegraph-layer',
         data: meshSampleData,
         scenegraph: './test/data/BoxAnimated.glb',
         coordinateOrigin: [-122.45, 37.75, 0],
@@ -86,7 +86,7 @@ export default [
     },
     layers: [
       new ScenegraphLayer({
-        id: 'scenegraph-layer-frame-3',
+        id: 'scenegraph-layer',
         data: meshSampleData,
         scenegraph: './test/data/BoxAnimated.glb',
         coordinateOrigin: [-122.45, 37.75, 0],
