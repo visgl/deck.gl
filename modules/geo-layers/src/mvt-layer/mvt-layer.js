@@ -1,6 +1,7 @@
 import {Matrix4} from 'math.gl';
 import {MVTLoader} from '@loaders.gl/mvt';
 import {load} from '@loaders.gl/core';
+import {JSONLoader} from '@loaders.gl/json';
 import {COORDINATE_SYSTEM} from '@deck.gl/core';
 
 import TileLayer from '../tile-layer/tile-layer';
@@ -16,7 +17,7 @@ const defaultProps = {
 
 async function fetchTileJSON(url) {
   try {
-    return await load(url);
+    return await load(url, JSONLoader);
   } catch (error) {
     throw new Error(`An error occurred fetching TileJSON: ${error}`);
   }
