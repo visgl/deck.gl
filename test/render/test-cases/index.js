@@ -20,6 +20,7 @@ import tripsLayerTests from './trips-layer';
 import mvtLayerTests from './mvt-layer';
 // mesh-layers
 import simpleMeshLayerTests from './simple-mesh-layer';
+import scenegraphLayerTests from './scenegraph-layer';
 // other
 import viewsTests from './views';
 import effectsTests from './effects';
@@ -44,6 +45,7 @@ export default [].concat(
   tripsLayerTests,
   mvtLayerTests,
   simpleMeshLayerTests,
+  scenegraphLayerTests,
   viewsTests,
   effectsTests,
   transitionTests
