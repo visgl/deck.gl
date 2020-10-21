@@ -20,31 +20,33 @@ import tripsLayerTests from './trips-layer';
 import mvtLayerTests from './mvt-layer';
 // mesh-layers
 import simpleMeshLayerTests from './simple-mesh-layer';
+import scenegraphLayerTests from './scenegraph-layer';
 // other
 import viewsTests from './views';
 import effectsTests from './effects';
 import transitionTests from './transitions';
 
 export default [].concat(
-  coreLayersTests,
-  columnLayerTests,
-  geojsonLayerTests,
-  pathLayerTests,
-  pointCloudLayerTests,
-  polygonLayerTests,
-  iconLayerTests,
-  textLayerTests,
-  contourLayerTests,
-  gridLayerTests,
-  hexagonLayerTests,
-  screenGridLayerTests,
-  heatmapLayerTests,
-  h3LayersTests,
-  s2LayerTests,
-  tripsLayerTests,
-  mvtLayerTests,
+  // coreLayersTests,
+  // columnLayerTests,
+  // geojsonLayerTests,
+  // pathLayerTests,
+  // pointCloudLayerTests,
+  // polygonLayerTests,
+  // iconLayerTests,
+  // textLayerTests,
+  // contourLayerTests,
+  // gridLayerTests,
+  // hexagonLayerTests,
+  // screenGridLayerTests,
+  // heatmapLayerTests,
+  // h3LayersTests,
+  // s2LayerTests,
+  // tripsLayerTests,
+  // mvtLayerTests,
   simpleMeshLayerTests,
-  viewsTests,
-  effectsTests,
-  transitionTests
+  scenegraphLayerTests,
+  // viewsTests,
+  // effectsTests,
+  // transitionTests
 );

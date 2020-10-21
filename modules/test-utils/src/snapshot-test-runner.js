@@ -29,6 +29,9 @@ const DEFAULT_TEST_OPTIONS = {
 const DEFAULT_TEST_CASE = {
   name: 'Unnamed snapshot test',
   props: {},
+  onBeforeRender: ({deck, layers}) => {
+    // eslint-disable-line
+  },
   onAfterRender: ({deck, layers, done}) => {
     if (layers.every(layer => layer.isLoaded)) {
       done(); // eslint-disable-line
@@ -62,6 +65,12 @@ export default class SnapshotTestRunner extends TestRunner {
 
     deck.setProps(
       Object.assign({}, this.props, testCase, {
+        onBeforeRender: () => {
+          testCase.onBeforeRender({
+            deck,
+            layers: deck.props.layers
+          });
+        },
         onAfterRender: () => {
           testCase.onAfterRender({
             deck,
