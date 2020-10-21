@@ -1,6 +1,4 @@
-import {
-  COORDINATE_SYSTEM
-} from '@deck.gl/core';
+import {COORDINATE_SYSTEM} from '@deck.gl/core';
 import {ScenegraphLayer} from '@deck.gl/mesh-layers';
 import {registerLoaders} from '@loaders.gl/core';
 import {GLTFLoader} from '@loaders.gl/gltf';
@@ -20,9 +18,9 @@ export default [
       pitch: 30,
       bearing: 0
     },
-    onBeforeUpdate: ({deck, layers}) => {
-      deck.animationLoop.timeline.pause()
-      deck.animationLoop.timeline.setTime(0)
+    onBeforeRender: ({deck, layers}) => {
+      deck.animationLoop.timeline.pause();
+      deck.animationLoop.timeline.setTime(0);
     },
     layers: [
       new ScenegraphLayer({
@@ -51,9 +49,9 @@ export default [
       pitch: 30,
       bearing: 0
     },
-    onBeforeUpdate: ({deck, layers}) => {
-      deck.animationLoop.timeline.pause()
-      deck.animationLoop.timeline.setTime(400)
+    onBeforeRender: ({deck, layers}) => {
+      deck.animationLoop.timeline.pause();
+      deck.animationLoop.timeline.setTime(400);
     },
     layers: [
       new ScenegraphLayer({
@@ -82,9 +80,9 @@ export default [
       pitch: 30,
       bearing: 0
     },
-    onBeforeUpdate: ({deck, layers}) => {
-      deck.animationLoop.timeline.pause()
-      deck.animationLoop.timeline.setTime(1000)
+    onBeforeRender: ({deck, layers}) => {
+      deck.animationLoop.timeline.pause();
+      deck.animationLoop.timeline.setTime(1000);
     },
     layers: [
       new ScenegraphLayer({
