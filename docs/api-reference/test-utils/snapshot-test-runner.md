@@ -89,6 +89,9 @@ Add one or a list of test cases. Each test case may contain the following fields
 * `goldenImage` (String) - path to the golden image, relative to the root where the node script is executed.
 * `timeout` (Number) - time to wait for this test case to resolve (by calling the `done` callback) before aborting, in milliseconds. If not provided, fallback to the shared option that is passed to `SnapshotTestRunner.run`.
 * `imageDiffOptions` (Object, optional) - image diffing options for this test case. See "Image Diff Options" section below.
+* `onBeforeRender` (Function, optional) - callback before each time deck rerenders. Receives the following arguments:
+  - `deck` (Deck) - the `Deck` instance.
+  - `layers` (Array) - the list of layers that were rendered.
 * `onAfterRender` (Function, optional) - callback after each time deck rerenders. Receives the following arguments:
   - `deck` (Deck) - the `Deck` instance.
   - `layers` (Array) - the list of layers that were rendered.
