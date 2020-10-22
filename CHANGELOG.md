@@ -17,7 +17,44 @@ Each version should:
 Ref: http://keepachangelog.com/en/0.3.0/
 -->
 
+## deck.gl v8.4
+
+### deck.gl v8.4 Prereleases
+
+#### deck.gl [8.4.0-alpha.1] - Oct 22 2020
+
+- Fix project precision on iOS 14 (#5056)
+- Fix MEAN aggregation on Windows (#5052)
+- Add aggregation mode to HeatmapLayer (#5046)
+- add onDataLoad and onDataError callbacks to CARTO layers (#5010)
+- TileJSON support to the MVTLayer (#4967)
+- Add textureParameters prop to BitmapLayer (#5031)
+
 ## deck.gl v8.3
+
+#### deck.gl [8.3.2] - Oct 19 2020
+
+- Improve precision of polygon normal calculation (#5043)
+- Fix Quickly Aborted Tiles (#5044)
+
+#### deck.gl [8.3.1] - Oct 16 2020
+
+- Fix video texture in BitmapLayer (#5030)
+- [ScenegraphLayer] Fix context.animationProps undefined (#4574)
+- [CartoLayer] remap the user's updateTriggers from the parent layer (#5035)
+
+#### deck.gl [8.3.0] - Oct 12 2020
+
+- Add support for getTooltip to @deck.gl/arcgis (#5006)
+- Fix HeatmapLayer on iOS 14 (#5013)
+- Fix built-in tooltip in GoogleMapsOverlay (#5016)
+- Fix FILTER_SIZE hook in PathLayer vertex shader (#5023)
+- Bump dependencies (#5026)
+- Fix heatmap debounce (#5025)
+
+
+### deck.gl v8.3 Prereleases
+
 
 #### deck.gl [8.3.0-beta.2] - Oct 8 2020
 
