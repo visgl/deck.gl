@@ -14,7 +14,10 @@ test('config#getDefaultCredentials', t => {
   let credentials = getDefaultCredentials();
   t.ok(credentials.username === 'a-new-username', 'user update');
   t.ok(credentials.apiKey === 'default_public', 'keep default apiKey');
-  t.ok(credentials.mapsUrl === 'https://{user}.carto.com/api/v1/map', 'keep default mapsUrl');
+  t.ok(
+    credentials.mapsUrl === 'https://maps-api-v2.{region}.carto.com/user/{user}/api/v2/map',
+    'keep default mapsUrl'
+  );
   t.ok(credentials.sqlUrl === 'https://{user}.carto.com/api/v2/sql', 'keep default sqlUrl');
 
   const baseUrl = 'https://a-custom-{user}.carto.com';

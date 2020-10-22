@@ -6,8 +6,8 @@ const defaultCredentials = {
   mapsVersion: null,
   // SQL API URL
   sqlUrl: 'https://{user}.carto.com/api/v2/sql',
-  // Maps API URL - v1 endpoint
-  mapsUrl: 'https://{user}.carto.com/api/v1/map'
+  // Maps API URL
+  mapsUrl: 'https://maps-api-v2.{region}.carto.com/user/{user}/api/v2/map'
 };
 
 let credentials = defaultCredentials;

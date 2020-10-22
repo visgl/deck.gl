@@ -11,12 +11,6 @@ export async function getTileJSON(mapConfig, credentials) {
   switch (getMapsVersion(creds)) {
     case 'v1':
       // Maps API v1
-      // The following if statement will be deprecated really soon when we'll make v2 the default
-      // We need it to bypass request to the google cloud function
-      if (mapConfig.layers[0].type === 'tileset' && mapConfig.layers[0].source === 'bigquery') {
-        return await getTileJSONBigQueryCloudFunction(mapConfig);
-      }
-
       const layergroup = await instantiateMap({mapConfig, credentials: creds});
       return layergroup.metadata.tilejson.vector;
 
@@ -107,18 +101,4 @@ function mapsUrl(credentials) {
  */
 function encodeParameter(name, value) {
   return `${name}=${encodeURIComponent(value)}`;
-}
-
-/**
- *  This function will be deprecated really soon when we'll make v2 the default
- */
-async function getTileJSONBigQueryCloudFunction(mapConfig) {
-  const BQ_TILEJSON_ENDPOINT = 'https://us-central1-cartobq.cloudfunctions.net/tilejson';
-  const response = await fetch(`${BQ_TILEJSON_ENDPOINT}?t=${mapConfig.layers[0].options.tileset}`, {
-    headers: {
-      'Content-Type': 'application/json'
-    }
-  });
-  const tilejson = await response.json();
-  return tilejson;
 }
