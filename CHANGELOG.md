@@ -19,6 +19,11 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v8.3
 
+#### deck.gl [8.3.3] - Oct 22 2020
+
+- Fix project precision on iOS 14 (#5056)
+- Fix MEAN aggregation on Windows (#5052)
+
 #### deck.gl [8.3.2] - Oct 19 2020
 
 - Improve precision of polygon normal calculation (#5043)
