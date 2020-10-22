@@ -155,11 +155,10 @@ vec4 project_position(vec4 position, vec3 position64Low) {
      project_uCoordinateSystem == COORDINATE_SYSTEM_CARTESIAN))) {
     // Subtract high part of 64 bit value. Convert remainder to float32, preserving precision.
     position_world.xyz -= project_uCoordinateOrigin;
-    // Translation is already added to the high parts
-    position_world += project_uModelMatrix * vec4(position64Low, 0.0);
   }
 
-  return project_offset_(position_world);
+  // Translation is already added to the high parts
+  return project_offset_(position_world + project_uModelMatrix * vec4(position64Low, 0.0));
 }
 
 vec4 project_position(vec4 position) {
