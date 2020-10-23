@@ -1,4 +1,4 @@
-# Basemap
+# BASEMAP
 
 [CARTO basemaps](https://carto.com/basemaps/) are available and they can be used without a token.
 
