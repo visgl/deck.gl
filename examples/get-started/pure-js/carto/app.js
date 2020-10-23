@@ -1,6 +1,6 @@
 import mapboxgl from 'mapbox-gl';
 import {Deck} from '@deck.gl/core';
-import {CartoSQLLayer, CartoBQTilerLayer, setDefaultCredentials} from '@deck.gl/carto';
+import {CartoSQLLayer, CartoBQTilerLayer, setDefaultCredentials, BASEMAP} from '@deck.gl/carto';
 
 const INITIAL_VIEW_STATE = {
   latitude: 0,
@@ -16,7 +16,7 @@ setDefaultCredentials({
 // Add Mapbox GL for the basemap. It's not a requirement if you don't need a basemap.
 const map = new mapboxgl.Map({
   container: 'map',
-  style: 'https://basemaps.cartocdn.com/gl/voyager-gl-style/style.json',
+  style: BASEMAP.VOYAGER,
   interactive: false,
   center: [INITIAL_VIEW_STATE.longitude, INITIAL_VIEW_STATE.latitude],
   zoom: INITIAL_VIEW_STATE.zoom
