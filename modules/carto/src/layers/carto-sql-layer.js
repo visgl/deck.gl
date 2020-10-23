@@ -2,7 +2,7 @@ import CartoLayer from './carto-layer';
 import {getMapsVersion} from '../config';
 
 const defaultProps = {
-  bufferSize: 1, // MVT buffersize in pixels,
+  bufferSize: 16, // MVT buffersize in pixels,
   tileExtent: 4096, // Tile extent in tile coordinate space (MVT spec.)
   uniqueIdProperty: 'cartodb_id'
 };
