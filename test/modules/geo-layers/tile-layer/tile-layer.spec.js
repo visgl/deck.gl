@@ -69,7 +69,7 @@ test('TileLayer', async t => {
   const testCases = [
     {
       props: {
-        data: 'http://echo.jsontest.com/key/value'
+        data: 'http://echo.jsontest.com/type/Point'
       },
       onBeforeUpdate: () => {
         t.comment('Default getTileData');
