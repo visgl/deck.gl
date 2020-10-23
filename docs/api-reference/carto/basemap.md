@@ -13,6 +13,8 @@ npm install @deck.gl/core @deck.gl/layers @deck.gl/carto
 ```
 
 ```js
+import {DeckGL} from '@deck.gl/react';
+import {StaticMap} from 'react-map-gl';
 import {BASEMAP} from '@deck.gl/carto';
 <DeckGL initialViewState={INITIAL_VIEW_STATE} controller={true} layers={layers}>
   <StaticMap mapStyle={BASEMAP.POSITRON} />
