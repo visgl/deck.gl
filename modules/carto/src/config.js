@@ -7,7 +7,7 @@ const defaultCredentials = {
   // SQL API URL
   sqlUrl: 'https://{user}.carto.com/api/v2/sql',
   // Maps API URL
-  mapsUrl: 'https://maps-api-v2.{region}.carto.com/user/{user}/api/v2/map'
+  mapsUrl: 'https://maps-api-v2.{region}.carto.com/user/{user}/map'
 };
 
 let credentials = defaultCredentials;
