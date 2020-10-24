@@ -11,19 +11,19 @@
     {
       "@@type": "MapView",
       "controller": true,
-      "mapStyle": "https://basemaps.cartocdn.com/gl/positron-gl-style/style.json"
+      "mapStyle": "@@#CARTO_BASEMAP.POSITRON"
     }
   ],
   "layers": [
     {
       "@@type": "CartoSQLLayer",
-      "data": "SELECT the_geom_webmercator FROM populated_places",
+      "data": "SELECT the_geom_webmercator, gn_pop FROM populated_places",
       "credentials": {
         "username": "public",
         "apiKey": "default_public"
       },
       "getLineColor": [255, 255, 255],
-      "getFillColor": [238, 77, 90],
+      "getFillColor": "@@= properties.gn_pop > 10000 ? [225, 83, 131] : [255, 221, 154]",
       "pointRadiusMinPixels": 5,
       "lineWidthMinPixels": 1
     }

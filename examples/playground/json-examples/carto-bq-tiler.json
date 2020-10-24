@@ -11,7 +11,7 @@
     {
       "@@type": "MapView",
       "controller": true,
-      "mapStyle": "https://basemaps.cartocdn.com/gl/positron-gl-style/style.json"
+      "mapStyle": "@@#CARTO_BASEMAP.POSITRON"    
     }
   ],
   "layers": [

@@ -21,6 +21,24 @@ const INITIAL_TEMPLATE = Object.keys(JSON_TEMPLATES)[0];
 const MAPBOX_TOKEN = process.env.MapboxAccessToken; // eslint-disable-line
 const GOOGLE_MAPS_TOKEN = process.env.GoogleMapsToken; // eslint-disable-line
 
+function addUpdateTriggersForAccesors(json) {
+  if (!json || !json.layers) return;
+
+  for (const layer of json.layers) {
+    const updateTriggers = {};
+    for (const [key, value] of Object.entries(layer)) {
+      if (key.startsWith('get') && typeof value === 'string') {
+        // it's an accesor and it's a string
+        // we add the value of the accesor to update trigger to refresh when it changes
+        updateTriggers[key] = value;
+      }
+    }
+    if (Object.keys(updateTriggers).length) {
+      layer.updateTriggers = updateTriggers;
+    }
+  }
+}
+
 export class App extends Component {
   constructor(props) {
     super(props);
@@ -59,6 +77,7 @@ export class App extends Component {
   }
 
   _setJSON(json) {
+    addUpdateTriggersForAccesors(json);
     const jsonProps = this.jsonConverter.convert(json);
     this._updateViewState(jsonProps);
     this.setState({jsonProps});
