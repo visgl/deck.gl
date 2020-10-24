@@ -1,76 +1,61 @@
-import {getDefaultCredentials} from '../auth';
+import {getDefaultCredentials, getMapsVersion} from '../config';
 
 const DEFAULT_USER_COMPONENT_IN_URL = '{user}';
-const REQUEST_GET_MAX_URL_LENGTH = 2048;
+const DEFAULT_REGION_COMPONENT_IN_URL = '{region}';
 
 /**
- * Obtain a TileJson from Maps API v1
+ * Obtain a TileJson from Maps API v1 and v2
  */
-export async function getMapTileJSON(props) {
-  const {data, bufferSize, version, tileExtent, credentials} = props;
+export async function getTileJSON(mapConfig, credentials) {
   const creds = {...getDefaultCredentials(), ...credentials};
+  switch (getMapsVersion(creds)) {
+    case 'v1':
+      // Maps API v1
+      const layergroup = await instantiateMap({mapConfig, credentials: creds});
+      return layergroup.metadata.tilejson.vector;
 
-  const mapConfig = createMapConfig({data, bufferSize, version, tileExtent});
-  const layergroup = await instantiateMap({mapConfig, credentials: creds});
+    case 'v2':
+      // Maps API v2
+      return await instantiateMap({mapConfig, credentials: creds});
 
-  const tiles = layergroup.metadata.tilejson.vector;
-  return tiles;
+    default:
+      throw new Error('Invalid maps API version. It shoud be v1 or v2');
+  }
 }
 
 /**
- * Create a mapConfig for Maps API
- */
-function createMapConfig({data, bufferSize, version, tileExtent}) {
-  const isSQL = data.search(' ') > -1;
-  const sql = isSQL ? data : `SELECT * FROM ${data}`;
-
-  const mapConfig = {
-    version,
-    buffersize: {
-      mvt: bufferSize
-    },
-    layers: [
-      {
-        type: 'mapnik',
-        options: {
-          sql: sql.trim(),
-          vector_extent: tileExtent
-        }
-      }
-    ]
-  };
-  return mapConfig;
-}
-
-/**
- * Instantiate a map, either by GET or POST, using Maps API
+ * Instantiate a map using Maps API
  */
 async function instantiateMap({mapConfig, credentials}) {
+  const url = buildURL({mapConfig, credentials});
+
   let response;
 
   try {
-    const config = JSON.stringify(mapConfig);
-    const request = createMapsApiRequest({config, credentials});
     /* global fetch */
     /* eslint no-undef: "error" */
-    response = await fetch(request);
+    response = await fetch(url, {
+      headers: {
+        Accept: 'application/json'
+      }
+    });
   } catch (error) {
     throw new Error(`Failed to connect to Maps API: ${error}`);
   }
 
-  const layergroup = await response.json();
+  const json = await response.json();
 
   if (!response.ok) {
-    dealWithWindshaftError({response, layergroup, credentials});
+    dealWithError({response, json, credentials});
   }
 
-  return layergroup;
+  return json;
 }
 
 /**
  * Display proper message from Maps API error
  */
-function dealWithWindshaftError({response, layergroup, credentials}) {
+function dealWithError({response, json, credentials}) {
   switch (response.status) {
     case 401:
       throw new Error(
@@ -84,78 +69,31 @@ function dealWithWindshaftError({response, layergroup, credentials}) {
           credentials.apiKey
         }') doesn't provide access to the requested data`
       );
+
     default:
-      throw new Error(`${JSON.stringify(layergroup.errors)}`);
+      const e = getMapsVersion() === 'v1' ? JSON.stringify(json.errors) : json.error;
+      throw new Error(e);
   }
 }
 
 /**
- * Create a GET or POST request, with all required parameters
+ * Build a URL with all required parameters
  */
-function createMapsApiRequest({config, credentials}) {
+function buildURL({mapConfig, credentials}) {
+  const cfg = JSON.stringify(mapConfig);
   const encodedApiKey = encodeParameter('api_key', credentials.apiKey);
   const encodedClient = encodeParameter('client', `deck-gl-carto`);
   const parameters = [encodedApiKey, encodedClient];
-  const url = generateMapsApiUrl(parameters, credentials);
-
-  const getUrl = `${url}&${encodeParameter('config', config)}`;
-  if (getUrl.length < REQUEST_GET_MAX_URL_LENGTH) {
-    return getRequest(getUrl);
-  }
-
-  return postRequest(url, config);
-}
-
-/**
- * Generate a Maps API url for the request
- */
-function generateMapsApiUrl(parameters, credentials) {
-  const base = `${serverURL(credentials)}api/v1/map`;
-  return `${base}?${parameters.join('&')}`;
+  return `${mapsUrl(credentials)}?${parameters.join('&')}&${encodeParameter('config', cfg)}`;
 }
 
 /**
  * Prepare a url valid for the specified user
  */
-function serverURL(credentials) {
-  let url = credentials.serverUrlTemplate.replace(
-    DEFAULT_USER_COMPONENT_IN_URL,
-    credentials.username
-  );
-
-  if (!url.endsWith('/')) {
-    url += '/';
-  }
-
-  return url;
-}
-
-/**
- * Simple GET request
- */
-function getRequest(url) {
-  /* global Request */
-  /* eslint no-undef: "error" */
-  return new Request(url, {
-    method: 'GET',
-    headers: {
-      Accept: 'application/json'
-    }
-  });
-}
-
-/**
- * Simple POST request
- */
-function postRequest(url, payload) {
-  return new Request(url, {
-    method: 'POST',
-    headers: {
-      Accept: 'application/json',
-      'Content-Type': 'application/json'
-    },
-    body: payload
-  });
+function mapsUrl(credentials) {
+  return credentials.mapsUrl
+    .replace(DEFAULT_USER_COMPONENT_IN_URL, credentials.username)
+    .replace(DEFAULT_REGION_COMPONENT_IN_URL, credentials.region);
 }
 
 /**

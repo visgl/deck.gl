@@ -84,22 +84,15 @@ Optional. Object with the credentials to connect with CARTO.
 ```js
 {
   username: 'public',
-  apiKey: 'default_public',
-  serverUrlTemplate: 'https://{user}.carto.com'
+  apiKey: 'default_public'
 }
 ```
 
 ##### `bufferSize` (Number)
 
-Optional. MVT BufferSize in pixels
+Optional. MVT BufferSize in tile coordinate space as defined by MVT specification
 
-* Default: `1`
-
-##### `version` (String)
-
-Optional. MapConfig version
-
-* Default: `1.3.1`
+* Default: `16`
 
 
 ##### `tileExtent` (String)
@@ -114,21 +107,21 @@ Optional. Tile extent in tile coordinate space as defined by MVT specification.
 
 `onDataLoad` is called when the request to the CARTO tiler was completed successfully.
 
-- Default: `tilejson => {}`
+* Default: `tilejson => {}`
 
 Receives arguments:
 
-- `tilejson` (Object) - the response from the tiler service
+* `tilejson` (Object) - the response from the tiler service
 
 ##### `onDataError` (Function, optional)
 
 `onDataError` is called when the request to the CARTO tiler failed.
 
-- Default: `console.error`
+* Default: `console.error`
 
 Receives arguments:
 
-- `error` (`Error`)
+* `error` (`Error`)
 
 
 ## Source
