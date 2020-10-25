@@ -22,7 +22,7 @@ import {CompositeLayer} from '@deck.gl/core';
 import {SimpleMeshLayer} from '@deck.gl/mesh-layers';
 import {WebMercatorViewport, COORDINATE_SYSTEM} from '@deck.gl/core';
 import {load} from '@loaders.gl/core';
-import {TerrainLoader} from '@loaders.gl/terrain';
+import {TerrainLoader, QuantizedMeshLoader} from '@loaders.gl/terrain';
 import TileLayer from '../tile-layer/tile-layer';
 import {urlType, getURLFromTemplate} from '../tile-layer/utils';
 
@@ -105,12 +105,16 @@ export default class TerrainLayer extends CompositeLayer {
         bounds,
         meshMaxError,
         elevationDecoder
+      },
+      'quantized-mesh': {
+        bounds
       }
     };
     if (workerUrl !== null) {
       options.terrain.workerUrl = workerUrl;
+      options['quantized-mesh'].workerUrl = workerUrl;
     }
-    return load(elevationData, TerrainLoader, options);
+    return load(elevationData, [TerrainLoader, QuantizedMeshLoader], options);
   }
 
   getTiledTerrainData(tile) {
@@ -126,7 +130,7 @@ export default class TerrainLayer extends CompositeLayer {
     });
     const bottomLeft = viewport.projectFlat([bbox.west, bbox.south]);
     const topRight = viewport.projectFlat([bbox.east, bbox.north]);
-    const bounds = [bottomLeft[0], bottomLeft[1], topRight[0], topRight[1]];
+    const bounds = [bottomLeft[0], topRight[1], topRight[0], bottomLeft[1]];
 
     const terrain = this.loadTerrain({
       elevationData: dataUrl,
