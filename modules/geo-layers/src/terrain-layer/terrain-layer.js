@@ -107,7 +107,7 @@ export default class TerrainLayer extends CompositeLayer {
         elevationDecoder
       },
       'quantized-mesh': {
-        bounds
+        bounds: [bounds[0], bounds[3], bounds[2], bounds[1]]
       }
     };
     if (workerUrl !== null) {
@@ -130,7 +130,7 @@ export default class TerrainLayer extends CompositeLayer {
     });
     const bottomLeft = viewport.projectFlat([bbox.west, bbox.south]);
     const topRight = viewport.projectFlat([bbox.east, bbox.north]);
-    const bounds = [bottomLeft[0], topRight[1], topRight[0], bottomLeft[1]];
+    const bounds = [bottomLeft[0], bottomLeft[1], topRight[0], topRight[1]];
 
     const terrain = this.loadTerrain({
       elevationData: dataUrl,
