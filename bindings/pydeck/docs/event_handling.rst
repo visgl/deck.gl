@@ -1,4 +1,4 @@
-Event Handling
+Event handling
 ^^^^^^^^^^^^^^
 
 pydeck provides bidirectional interactions in Jupyter via event handlers,
