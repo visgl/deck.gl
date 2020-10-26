@@ -2,6 +2,7 @@
 
 import {initializeResources, render, finalizeResources} from './commons';
 
+// ArcGIS fov is corner-to-corner
 function arcgisFOVToDeckAltitude(fov, aspectRatio) {
   const D = Math.sqrt(1 + aspectRatio ** 2);
   const halfFOV = (fov / 2 / 180) * Math.PI;
