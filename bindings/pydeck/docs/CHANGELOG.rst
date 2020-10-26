@@ -6,6 +6,10 @@ Releases and associated GitHub PRs for pydeck are documented here.
 0.5 Releases
 ------------
 
+0.5.0 - Oct 23 2020
+^^^^^^^^^^^^^^^^^^^
+- Lock to @deck.gl/jupyter-widget@~8.3.*
+
 0.5.0b1 - Aug 23 2020
 ^^^^^^^^^^^^^^^^^^^^
 - Add generic event handling (#4848)
@@ -18,7 +22,7 @@ Releases and associated GitHub PRs for pydeck are documented here.
 - Correct data buffer issue (#4832)
 
 0.4.0 - Jul 23 2020
-^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^
 - Lock to @deck.gl/jupyter-widget@~8.2.*
 - Suppress warning for IFrame usage (#4775)
 - Fix iframe rendering width's default value (#4764)
