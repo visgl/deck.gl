@@ -11,7 +11,7 @@ Releases and associated GitHub PRs for pydeck are documented here.
 - Lock to @deck.gl/jupyter-widget@~8.3.*
 
 0.5.0b1 - Aug 23 2020
-^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^
 - Add generic event handling (#4848)
 
 0.4 Releases
