@@ -1,1 +1,1 @@
-DECKGL_SEMVER = "~8.2.*"
+DECKGL_SEMVER = "~8.3.*"

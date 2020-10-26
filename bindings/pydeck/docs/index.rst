@@ -105,6 +105,7 @@ Index
    :caption: Jupyter
 
    jupyter
+   event_handling
    binary_transfer
 
 .. toctree::
