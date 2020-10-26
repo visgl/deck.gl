@@ -1,20 +1,23 @@
 Event Handling
 ^^^^^^^^^^^^^^
 
-pydeck provides two-way interactions in Jupyter via four handlers,
-``on_hover``, ``on_resize``, ``on_view_state_change``, and ``on_click``, and correspond
-to the same events
-`the cursor <https://deck.gl/docs/developer-guide/interactivity#using-the-built-in-event-handling>`__
+pydeck provides bidirectional interactions in Jupyter via event handlers,
+``on_hover``, ``on_resize``, ``on_view_state_change``, and ``on_click``. Each corresponds
+to the 
+`cursor <https://deck.gl/docs/developer-guide/interactivity#using-the-built-in-event-handling>`__
 and `view state <https://deck.gl/docs/api-reference/core/deck#onviewstatechange>`__ events in the deck.gl
 documentation.
 
-When an event triggers these callbacks, like a click on the visualization, data is sent from the frontend
+When an event triggers these callbacks (like a click on the visualization), data is sent from the frontend
 to the Jupyter kernel. The data structure varies slightly by handler.
+
+To inspect the payload of a handler, you can print the result to an `ipywidgets HTML <https://ipywidgets.readthedocs.io/en/latest/examples/Widget%20List.html#HTML>`__ object.
 
 For a live demo of the handlers, see `03 - Event handlers and data selection in pydeck <https://mybinder.org/v2/gh/uber/deck.gl/binder>`__
 or run the `Jupyter demo locally <https://github.com/visgl/deck.gl/blob/master/bindings/pydeck/examples/03%20-%20Event%20handlers%20and%20data%20selection%20in%20pydeck.ipynb>`__.
 
-To inspect the payload of a handler, you can print the result to an `ipywidgets HTML <https://ipywidgets.readthedocs.io/en/latest/examples/Widget%20List.html#HTML>`__ object.
+The following code is a snippet from the notebook above, where a view state change triggers
+a count of visible points.
 
 .. code-block:: python
 
@@ -87,7 +90,7 @@ The ``on_hover`` events are nearly identical in content, with the``type`` value 
 Only hovering over a layer will fire an event and hovering over the basemap alone will not.
 
 .. image:: https://i.giphy.com/media/NUAAe4uewDjncNlwYQ/source.gif
-  :width: 400
+  :width: 600
   :alt: pydeck on_click handler
 
 View state change events with ``on_view_state_change``
@@ -120,7 +123,7 @@ A view state change event sends a dictionary with the following information as t
 Here ``nw`` and ``se`` represent the northwest and southeast corners of the current viewport.
 
 .. image:: https://i.giphy.com/media/6rVa9CcA8suplaDEpi/giphy.gif
-  :width: 400
+  :width: 600
   :alt: pydeck on_view_state_change handler
 
 Resize events with ``on_resize``
@@ -140,5 +143,5 @@ the ``payload`` object:
         }
 
 .. image:: https://i.giphy.com/media/sD2SzoPs7p1uBzcmRf/source.gif
-  :width: 400
+  :width: 600
   :alt: pydeck on_resize handler
