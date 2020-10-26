@@ -2,6 +2,12 @@
 
 import {initializeResources, render, finalizeResources} from './commons';
 
+function arcgisFOVToDeckAltitude(fov, aspectRatio) {
+  const D = Math.sqrt(1 + aspectRatio ** 2);
+  const halfFOV = fov / 2 / 180 * Math.PI;
+  return D / 2 / Math.tan(halfFOV);
+}
+
 export default function createDeckRenderer(DeckProps, externalRenderers) {
   class DeckRenderer {
     constructor(view, props) {
@@ -36,6 +42,7 @@ export default function createDeckRenderer(DeckProps, externalRenderers) {
         viewState: {
           latitude: this.view.center.latitude,
           longitude: this.view.center.longitude,
+          altitude: arcgisFOVToDeckAltitude(this.view.camera.fov, width / height),
           zoom: this.view.zoom,
           bearing: this.view.camera.heading,
           pitch: this.view.camera.tilt
