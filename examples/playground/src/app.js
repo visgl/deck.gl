@@ -77,7 +77,7 @@ export class App extends Component {
   }
 
   _setJSON(json) {
-    addUpdateTriggersForAccesors(json);
+    addUpdateTriggersForAccessors(json);
     const jsonProps = this.jsonConverter.convert(json);
     this._updateViewState(jsonProps);
     this.setState({jsonProps});

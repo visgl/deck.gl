@@ -5,7 +5,7 @@ import * as Layers from '@deck.gl/layers';
 import * as AggregationLayers from '@deck.gl/aggregation-layers';
 import * as GeoLayers from '@deck.gl/geo-layers';
 import * as MeshLayers from '@deck.gl/mesh-layers';
-import {CartoSQLLayer, CartoBQTilerLayer, BASEMAP} from '@deck.gl/carto';
+import {CartoSQLLayer, CartoBQTilerLayer} from '@deck.gl/carto';
 
 import {COORDINATE_SYSTEM} from '@deck.gl/core';
 import GL from '@luma.gl/constants';
@@ -37,8 +37,7 @@ export default {
   // Will be resolved as `<enum-name>.<enum-value>`
   enumerations: {
     COORDINATE_SYSTEM,
-    GL,
-    CARTO_BASEMAP: BASEMAP
+    GL
   },
 
   // Constants that should be resolved with the provided values by JSON converter
