@@ -73,7 +73,8 @@ export default class TileLayer extends CompositeLayer {
         maxCacheByteSize,
         refinementStrategy,
         extent,
-        maxRequests
+        maxRequests,
+        modelMatrix
       } = props;
       tileset = new Tileset2D({
         getTileData: this.getTileData.bind(this),
@@ -87,7 +88,8 @@ export default class TileLayer extends CompositeLayer {
         onTileLoad: this._onTileLoad.bind(this),
         onTileError: this._onTileError.bind(this),
         onTileUnload: this._onTileUnload.bind(this),
-        maxRequests
+        maxRequests,
+        modelMatrix
       });
       this.setState({tileset});
     } else if (changeFlags.propsChanged || changeFlags.updateTriggersChanged) {

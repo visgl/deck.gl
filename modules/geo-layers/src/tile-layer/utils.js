@@ -1,3 +1,4 @@
+import {Matrix4} from 'math.gl';
 import {getOSMTileIndices} from './tile-2d-traversal';
 
 const TILE_SIZE = 512;
@@ -72,8 +73,11 @@ function getBoundingBox(viewport, zRange, extent) {
   ];
 }
 
-function getTileIndex([x, y], scale) {
-  return [(x * scale) / TILE_SIZE, (y * scale) / TILE_SIZE];
+function getTileIndex([x, y], scale, modelMatrix) {
+  modelMatrix.invert();
+  const [xScaled, yScaled] = modelMatrix.transformPoint([x, y]);
+  modelMatrix.invert();
+  return [(xScaled * scale) / TILE_SIZE, (yScaled * scale) / TILE_SIZE];
 }
 
 function getScale(z) {
@@ -105,12 +109,11 @@ export function tileToBoundingBox(viewport, x, y, z) {
   return {left, top, right, bottom};
 }
 
-function getIdentityTileIndices(viewport, z, extent) {
+function getIdentityTileIndices(viewport, z, extent, modelMatrix) {
   const bbox = getBoundingBox(viewport, null, extent);
   const scale = getScale(z);
-
-  const [minX, minY] = getTileIndex([bbox[0], bbox[1]], scale);
-  const [maxX, maxY] = getTileIndex([bbox[2], bbox[3]], scale);
+  const [minX, minY] = getTileIndex([bbox[0], bbox[1]], scale, modelMatrix);
+  const [maxX, maxY] = getTileIndex([bbox[2], bbox[3]], scale, modelMatrix);
   const indices = [];
 
   /*
@@ -130,7 +133,15 @@ function getIdentityTileIndices(viewport, z, extent) {
  * than minZoom, return an empty array. If the current zoom level is greater than maxZoom,
  * return tiles that are on maxZoom.
  */
-export function getTileIndices({viewport, maxZoom, minZoom, zRange, extent, tileSize = TILE_SIZE}) {
+export function getTileIndices({
+  viewport,
+  maxZoom,
+  minZoom,
+  zRange,
+  extent,
+  tileSize = TILE_SIZE,
+  modelMatrix = new Matrix4()
+}) {
   let z = Math.round(viewport.zoom + Math.log2(TILE_SIZE / tileSize));
   if (Number.isFinite(minZoom) && z < minZoom) {
     if (!extent) {
@@ -143,7 +154,7 @@ export function getTileIndices({viewport, maxZoom, minZoom, zRange, extent, tile
   }
   return viewport.isGeospatial
     ? getOSMTileIndices(viewport, z, zRange, extent || DEFAULT_EXTENT)
-    : getIdentityTileIndices(viewport, z, extent || DEFAULT_EXTENT);
+    : getIdentityTileIndices(viewport, z, extent || DEFAULT_EXTENT, modelMatrix);
 }
 
 /**

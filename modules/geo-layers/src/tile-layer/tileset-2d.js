@@ -140,8 +140,8 @@ export default class Tileset2D {
 
   // Returns array of {x, y, z}
   getTileIndices({viewport, maxZoom, minZoom, zRange}) {
-    const {tileSize, extent} = this.opts;
-    return getTileIndices({viewport, maxZoom, minZoom, zRange, tileSize, extent});
+    const {tileSize, extent, modelMatrix} = this.opts;
+    return getTileIndices({viewport, maxZoom, minZoom, zRange, tileSize, extent, modelMatrix});
   }
 
   // Add custom metadata to tiles
