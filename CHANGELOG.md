@@ -19,6 +19,11 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v8.3
 
+#### deck.gl [8.3.4] - Oct 26 2020
+
+- MimeTypes in JSONLoader (#5054)
+- ArcGIS 3D altitude fix (#5066)
+
 #### deck.gl [8.3.3] - Oct 22 2020
 
 - Fix project precision on iOS 14 (#5056)
