@@ -21,7 +21,7 @@ const INITIAL_TEMPLATE = Object.keys(JSON_TEMPLATES)[0];
 const MAPBOX_TOKEN = process.env.MapboxAccessToken; // eslint-disable-line
 const GOOGLE_MAPS_TOKEN = process.env.GoogleMapsToken; // eslint-disable-line
 
-function addUpdateTriggersForAccesors(json) {
+function addUpdateTriggersForAccessors(json) {
   if (!json || !json.layers) return;
 
   for (const layer of json.layers) {
