@@ -8,7 +8,6 @@ const IMAGE_DIR = 'images';
 const MAPBOX_TOKEN = process.env.MapboxAccessToken;
 if (!MAPBOX_TOKEN) {
   console.log('Missing environment variable: MapboxAccessToken');
-  process.exit(1);
 }
 /* eslint-enable */
 
