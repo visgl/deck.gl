@@ -98,7 +98,12 @@ function getBoundingBox(viewport, zRange, extent) {
       Math.min(Math.max(bounds[3], extent[1]), extent[3])
     ];
   }
-  return bounds;
+  return [
+    Math.max(bounds[0], extent[0]),
+    Math.max(bounds[1], extent[1]),
+    Math.min(bounds[2], extent[2]),
+    Math.min(bounds[3], extent[3])
+  ];
 }
 
 function getIndexingCoords(bbox, scale, modelMatrix) {
