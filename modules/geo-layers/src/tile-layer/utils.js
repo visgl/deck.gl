@@ -73,11 +73,30 @@ function getBoundingBox(viewport, zRange, extent) {
   ];
 }
 
-function getTileIndex([x, y], scale, modelMatrix) {
+function getIndexingCoords(bbox, scale, modelMatrix) {
   modelMatrix.invert();
-  const [xScaled, yScaled] = modelMatrix.transformPoint([x, y]);
+  const transformedCoords = [
+    // top-left
+    modelMatrix.transformPoint([bbox[0], bbox[1]]),
+    // top-right
+    modelMatrix.transformPoint([bbox[2], bbox[1]]),
+    // bottom-left
+    modelMatrix.transformPoint([bbox[0], bbox[3]]),
+    // bottom-right
+    modelMatrix.transformPoint([bbox[2], bbox[3]])
+  ];
+  const transformedTileIndex = [
+    // Minimum x coord
+    (Math.min(...transformedCoords.map(i => i[0])) * scale) / TILE_SIZE,
+    // Minimum y coord
+    (Math.min(...transformedCoords.map(i => i[1])) * scale) / TILE_SIZE,
+    // Max x coord
+    (Math.max(...transformedCoords.map(i => i[0])) * scale) / TILE_SIZE,
+    // Max y coord
+    (Math.max(...transformedCoords.map(i => i[1])) * scale) / TILE_SIZE
+  ];
   modelMatrix.invert();
-  return [(xScaled * scale) / TILE_SIZE, (yScaled * scale) / TILE_SIZE];
+  return transformedTileIndex;
 }
 
 function getScale(z) {
@@ -112,8 +131,7 @@ export function tileToBoundingBox(viewport, x, y, z) {
 function getIdentityTileIndices(viewport, z, extent, modelMatrix) {
   const bbox = getBoundingBox(viewport, null, extent);
   const scale = getScale(z);
-  const [minX, minY] = getTileIndex([bbox[0], bbox[1]], scale, modelMatrix);
-  const [maxX, maxY] = getTileIndex([bbox[2], bbox[3]], scale, modelMatrix);
+  const [minX, minY, maxX, maxY] = getIndexingCoords(bbox, scale, modelMatrix);
   const indices = [];
 
   /*
@@ -133,6 +151,7 @@ function getIdentityTileIndices(viewport, z, extent, modelMatrix) {
  * than minZoom, return an empty array. If the current zoom level is greater than maxZoom,
  * return tiles that are on maxZoom.
  */
+// eslint-disable-next-line complexity
 export function getTileIndices({
   viewport,
   maxZoom,
@@ -140,7 +159,7 @@ export function getTileIndices({
   zRange,
   extent,
   tileSize = TILE_SIZE,
-  modelMatrix = new Matrix4()
+  modelMatrix
 }) {
   let z = Math.round(viewport.zoom + Math.log2(TILE_SIZE / tileSize));
   if (Number.isFinite(minZoom) && z < minZoom) {
@@ -152,9 +171,37 @@ export function getTileIndices({
   if (Number.isFinite(maxZoom) && z > maxZoom) {
     z = maxZoom;
   }
+  let transformedExtent = extent;
+  if (modelMatrix && extent) {
+    const transformedCoords = [
+      // top-left
+      modelMatrix.transformPoint([extent[0], extent[1]]),
+      // top-right
+      modelMatrix.transformPoint([extent[2], extent[1]]),
+      // bottom-left
+      modelMatrix.transformPoint([extent[0], extent[3]]),
+      // bottom-right
+      modelMatrix.transformPoint([extent[2], extent[3]])
+    ];
+    transformedExtent = [
+      // Minimum x coord
+      Math.min(...transformedCoords.map(i => i[0])),
+      // Minimum y coord
+      Math.min(...transformedCoords.map(i => i[1])),
+      // Max x coord
+      Math.max(...transformedCoords.map(i => i[0])),
+      // Max y coord
+      Math.max(...transformedCoords.map(i => i[1]))
+    ];
+  }
   return viewport.isGeospatial
     ? getOSMTileIndices(viewport, z, zRange, extent || DEFAULT_EXTENT)
-    : getIdentityTileIndices(viewport, z, extent || DEFAULT_EXTENT, modelMatrix);
+    : getIdentityTileIndices(
+        viewport,
+        z,
+        transformedExtent || DEFAULT_EXTENT,
+        modelMatrix || new Matrix4()
+      );
 }
 
 /**
