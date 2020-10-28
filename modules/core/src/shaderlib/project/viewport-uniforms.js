@@ -92,6 +92,7 @@ export function getOffsetOrigin(
 
     case PROJECTION_MODE.GLOBE:
       offsetMode = false;
+      geospatialOrigin = null;
       break;
 
     default:
