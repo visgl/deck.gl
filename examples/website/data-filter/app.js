@@ -9,9 +9,6 @@ import {MapView} from '@deck.gl/core';
 import RangeInput from './range-input';
 import {useMemo} from 'react';
 
-// Set your mapbox token here
-const MAPBOX_TOKEN = process.env.MapboxAccessToken; // eslint-disable-line
-
 // Source data GeoJSON
 const DATA_URL =
   'https://raw.githubusercontent.com/uber-web/kepler.gl-data/master/earthquakes/data.csv'; // eslint-disable-line
@@ -32,6 +29,9 @@ const INITIAL_VIEW_STATE = {
   pitch: 0,
   bearing: 0
 };
+
+const MAP_STYLE =
+  'https://gist.githubusercontent.com/Josmorsot/9001e0dbb01a61a2ddd5dbc1a6c18392/raw/7c273769b2dcd69f1a25f8799373a3d1826df33e/positron-no-labels.json';
 
 const MS_PER_DAY = 8.64e7;
 
@@ -73,7 +73,7 @@ function getTooltip({object}) {
   );
 }
 
-export default function App({data, mapStyle = 'mapbox://styles/mapbox/light-v9'}) {
+export default function App({data, mapStyle = MAP_STYLE}) {
   const [filter, setFilter] = useState(null);
 
   const timeRange = useMemo(() => getTimeRange(data), [data]);
@@ -117,12 +117,7 @@ export default function App({data, mapStyle = 'mapbox://styles/mapbox/light-v9'}
         controller={true}
         getTooltip={getTooltip}
       >
-        <StaticMap
-          reuseMaps
-          mapStyle={mapStyle}
-          preventStyleDiffing={true}
-          mapboxApiAccessToken={MAPBOX_TOKEN}
-        />
+        <StaticMap reuseMaps mapStyle={mapStyle} preventStyleDiffing={true} />
       </DeckGL>
 
       {timeRange && (

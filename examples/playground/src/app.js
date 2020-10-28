@@ -18,7 +18,6 @@ import JSON_TEMPLATES from '../json-examples';
 const INITIAL_TEMPLATE = Object.keys(JSON_TEMPLATES)[0];
 
 // Set your mapbox token here
-const MAPBOX_TOKEN = process.env.MapboxAccessToken; // eslint-disable-line
 const GOOGLE_MAPS_TOKEN = process.env.GoogleMapsToken; // eslint-disable-line
 
 export class App extends Component {
@@ -148,7 +147,6 @@ export class App extends Component {
           {...jsonProps}
           initialViewState={initialViewState}
           Map={StaticMap}
-          mapboxApiAccessToken={MAPBOX_TOKEN}
         />
       );
     }
