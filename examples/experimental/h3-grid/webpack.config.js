@@ -36,7 +36,6 @@ const CONFIG = {
   },
 
   plugins: [
-    new webpack.EnvironmentPlugin(['MapboxAccessToken']),
     new HtmlWebpackPlugin({title: 'deck.gl example'})
   ]
 };
