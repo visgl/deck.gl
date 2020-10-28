@@ -30,6 +30,30 @@ export const urlType = {
   }
 };
 
+function transformBox(bbox, modelMatrix) {
+  const transformedCoords = [
+    // top-left
+    modelMatrix.transformPoint([bbox[0], bbox[1]]),
+    // top-right
+    modelMatrix.transformPoint([bbox[2], bbox[1]]),
+    // bottom-left
+    modelMatrix.transformPoint([bbox[0], bbox[3]]),
+    // bottom-right
+    modelMatrix.transformPoint([bbox[2], bbox[3]])
+  ];
+  const transformedBox = [
+    // Minimum x coord
+    Math.min(...transformedCoords.map(i => i[0])),
+    // Minimum y coord
+    Math.min(...transformedCoords.map(i => i[1])),
+    // Max x coord
+    Math.max(...transformedCoords.map(i => i[0])),
+    // Max y coord
+    Math.max(...transformedCoords.map(i => i[1]))
+  ];
+  return transformedBox;
+}
+
 export function getURLFromTemplate(template, properties) {
   if (!template || !template.length) {
     return null;
@@ -75,26 +99,7 @@ function getBoundingBox(viewport, zRange, extent) {
 
 function getIndexingCoords(bbox, scale, modelMatrix) {
   modelMatrix.invert();
-  const transformedCoords = [
-    // top-left
-    modelMatrix.transformPoint([bbox[0], bbox[1]]),
-    // top-right
-    modelMatrix.transformPoint([bbox[2], bbox[1]]),
-    // bottom-left
-    modelMatrix.transformPoint([bbox[0], bbox[3]]),
-    // bottom-right
-    modelMatrix.transformPoint([bbox[2], bbox[3]])
-  ];
-  const transformedTileIndex = [
-    // Minimum x coord
-    (Math.min(...transformedCoords.map(i => i[0])) * scale) / TILE_SIZE,
-    // Minimum y coord
-    (Math.min(...transformedCoords.map(i => i[1])) * scale) / TILE_SIZE,
-    // Max x coord
-    (Math.max(...transformedCoords.map(i => i[0])) * scale) / TILE_SIZE,
-    // Max y coord
-    (Math.max(...transformedCoords.map(i => i[1])) * scale) / TILE_SIZE
-  ];
+  const transformedTileIndex = transformBox(bbox, modelMatrix).map(i => (i * scale) / TILE_SIZE);
   modelMatrix.invert();
   return transformedTileIndex;
 }
@@ -172,27 +177,8 @@ export function getTileIndices({
     z = maxZoom;
   }
   let transformedExtent = extent;
-  if (modelMatrix && extent) {
-    const transformedCoords = [
-      // top-left
-      modelMatrix.transformPoint([extent[0], extent[1]]),
-      // top-right
-      modelMatrix.transformPoint([extent[2], extent[1]]),
-      // bottom-left
-      modelMatrix.transformPoint([extent[0], extent[3]]),
-      // bottom-right
-      modelMatrix.transformPoint([extent[2], extent[3]])
-    ];
-    transformedExtent = [
-      // Minimum x coord
-      Math.min(...transformedCoords.map(i => i[0])),
-      // Minimum y coord
-      Math.min(...transformedCoords.map(i => i[1])),
-      // Max x coord
-      Math.max(...transformedCoords.map(i => i[0])),
-      // Max y coord
-      Math.max(...transformedCoords.map(i => i[1]))
-    ];
+  if (modelMatrix && extent && !viewport.isGeospatial) {
+    transformedExtent = transformBox(extent, modelMatrix);
   }
   return viewport.isGeospatial
     ? getOSMTileIndices(viewport, z, zRange, extent || DEFAULT_EXTENT)
