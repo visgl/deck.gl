@@ -38,7 +38,7 @@ class CartoSQLDemo extends Component {
     week: {displayName: 'Week', type: 'select', options: Object.keys(WEEKS), value: 'Week 1'},
   };
 
-  static mapStyle = 'http://bmp-01.stag.cartodb.net/gl/dark-matter-nolabels-gl-style/style.json';
+  static mapStyle = 'https://basemaps.cartocdn.com/gl/dark-matter-nolabels-gl-style/style.json';
 
   static renderInfo() {
     return (

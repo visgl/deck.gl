@@ -75,7 +75,7 @@ class Root extends Component {
       <div>
         <MapGL
           {...viewport}
-          mapStyle="http://bmp-01.stag.cartodb.net/gl/dark-matter-nolabels-gl-style/style.json"
+          mapStyle="https://basemaps.cartocdn.com/gl/dark-matter-nolabels-gl-style/style.json"
           dragRotate
           onViewportChange={this._updateViewport}
         >

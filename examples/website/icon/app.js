@@ -22,7 +22,7 @@ const INITIAL_VIEW_STATE = {
 };
 
 const MAP_STYLE =
-  'http://bmp-01.stag.cartodb.net/gl/dark-matter-nolabels-gl-style/style.json';
+  'https://basemaps.cartocdn.com/gl/dark-matter-nolabels-gl-style/style.json';
 
 function renderTooltip(info) {
   const {object, x, y} = info;
