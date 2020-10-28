@@ -86,8 +86,9 @@ function getBoundingBox(viewport, zRange, extent) {
       Math.max(bounds0[2], bounds1[2]),
       Math.max(bounds0[3], bounds1[3])
     ];
+  } else {
+    bounds = viewport.getBounds();
   }
-  bounds = viewport.getBounds();
   if (!viewport.isGeospatial) {
     return [
       // Top corner should not be more then bottom corner in either direction
