@@ -6,13 +6,8 @@ import DeckGL from '@deck.gl/react';
 import {TextLayer} from '@deck.gl/layers';
 import TagmapLayer from './tagmap-layer';
 
-// Set your mapbox token here
-const MAPBOX_TOKEN = process.env.MapboxAccessToken; // eslint-disable-line
 // sample data
 const DATA_URL = 'https://rivulet-zhang.github.io/dataRepo/tagmap/hashtags10k.json';
-// mapbox style file path
-const MAPBOX_STYLE =
-  'https://rivulet-zhang.github.io/dataRepo/mapbox/style/map-style-dark-v9-no-labels.json';
 
 const DEFAULT_COLOR = [29, 145, 192];
 
@@ -25,11 +20,14 @@ const INITIAL_VIEW_STATE = {
   bearing: 0
 };
 
+const MAP_STYLE =
+  'https://gist.githubusercontent.com/Josmorsot/36354c7fe0e847a559affde83ba36889/raw/6846e70b77c655f516965623d4620505491ad43e/dark-matter-no-labels.json';
+
 export default function App({
   data = DATA_URL,
   cluster = true,
   fontSize = 32,
-  mapStyle = MAPBOX_STYLE
+  mapStyle = MAP_STYLE
 }) {
   const textLayer = cluster
     ? new TagmapLayer({
@@ -56,12 +54,7 @@ export default function App({
       initialViewState={INITIAL_VIEW_STATE}
       controller={{dragRotate: false}}
     >
-      <StaticMap
-        reuseMaps
-        mapStyle={mapStyle}
-        preventStyleDiffing={true}
-        mapboxApiAccessToken={MAPBOX_TOKEN}
-      />
+      <StaticMap reuseMaps mapStyle={mapStyle} preventStyleDiffing={true} />
     </DeckGL>
   );
 }

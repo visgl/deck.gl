@@ -7,6 +7,7 @@ import {Tile3DLayer} from '@deck.gl/geo-layers';
 import {CesiumIonLoader} from '@loaders.gl/3d-tiles';
 
 // Set your mapbox token here
+// ASK FOR DELETE CONFIRMATION
 const MAPBOX_TOKEN = process.env.MapboxAccessToken; // eslint-disable-line
 
 const ION_ASSET_ID = 43978;

@@ -5,9 +5,6 @@ import DeckGL from '@deck.gl/react';
 import {GeoJsonLayer} from '@deck.gl/layers';
 import {scaleLinear, scaleThreshold} from 'd3-scale';
 
-// Set your mapbox token here
-const MAPBOX_TOKEN = process.env.MapboxAccessToken; // eslint-disable-line
-
 // Source data GeoJSON
 const DATA_URL = {
   ACCIDENTS:
@@ -46,6 +43,9 @@ const INITIAL_VIEW_STATE = {
   minZoom: 2,
   maxZoom: 8
 };
+
+const MAP_STYLE =
+  'https://gist.githubusercontent.com/Josmorsot/36354c7fe0e847a559affde83ba36889/raw/6846e70b77c655f516965623d4620505491ad43e/dark-matter-no-labels.json';
 
 function aggregateAccidents(accidents) {
   const incidents = {};
@@ -96,12 +96,7 @@ function renderTooltip({fatalities, incidents, year, hoverInfo}) {
   );
 }
 
-export default function App({
-  roads = DATA_URL.ROADS,
-  year,
-  accidents,
-  mapStyle = 'mapbox://styles/mapbox/dark-v9'
-}) {
+export default function App({roads = DATA_URL.ROADS, year, accidents, mapStyle = MAP_STYLE}) {
   const [hoverInfo, setHoverInfo] = useState({});
   const {incidents, fatalities} = useMemo(() => aggregateAccidents(accidents), [accidents]);
 
@@ -159,12 +154,7 @@ export default function App({
       initialViewState={INITIAL_VIEW_STATE}
       controller={true}
     >
-      <StaticMap
-        reuseMaps
-        mapStyle={mapStyle}
-        preventStyleDiffing={true}
-        mapboxApiAccessToken={MAPBOX_TOKEN}
-      />
+      <StaticMap reuseMaps mapStyle={mapStyle} preventStyleDiffing={true} />
 
       {renderTooltip({incidents, fatalities, year, hoverInfo})}
     </DeckGL>
