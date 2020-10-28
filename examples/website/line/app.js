@@ -6,9 +6,6 @@ import DeckGL from '@deck.gl/react';
 import {LineLayer, ScatterplotLayer} from '@deck.gl/layers';
 import GL from '@luma.gl/constants';
 
-// Set your mapbox token here
-const MAPBOX_TOKEN = process.env.MapboxAccessToken; // eslint-disable-line
-
 // Source data CSV
 const DATA_URL = {
   AIRPORTS:
@@ -25,6 +22,9 @@ const INITIAL_VIEW_STATE = {
   pitch: 50,
   bearing: 0
 };
+
+const MAP_STYLE =
+  'https://gist.githubusercontent.com/Josmorsot/36354c7fe0e847a559affde83ba36889/raw/6846e70b77c655f516965623d4620505491ad43e/dark-matter-no-labels.json';
 
 function getColor(d) {
   const z = d.start[2];
@@ -56,7 +56,7 @@ export default function App({
   airports = DATA_URL.AIRPORTS,
   flightPaths = DATA_URL.FLIGHT_PATHS,
   getWidth = 3,
-  mapStyle = 'mapbox://styles/mapbox/dark-v9'
+  mapStyle = MAP_STYLE
 }) {
   const layers = [
     new ScatterplotLayer({
@@ -92,12 +92,7 @@ export default function App({
       }}
       getTooltip={getTooltip}
     >
-      <StaticMap
-        reuseMaps
-        mapStyle={mapStyle}
-        preventStyleDiffing={true}
-        mapboxApiAccessToken={MAPBOX_TOKEN}
-      />
+      <StaticMap reuseMaps mapStyle={mapStyle} preventStyleDiffing={true} />
     </DeckGL>
   );
 }
