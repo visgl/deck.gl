@@ -18,7 +18,7 @@ const CONTROL_PANEL_STYLE = {
 };
 
 const MAP_STYLE =
-  'https://gist.githubusercontent.com/Josmorsot/9001e0dbb01a61a2ddd5dbc1a6c18392/raw/7c273769b2dcd69f1a25f8799373a3d1826df33e/positron-no-labels.json';
+  'https://basemaps.cartocdn.com/gl/positron-nolabels-gl-style/style.json';
 // `repeat` will draw multiple copies of the map at low zoom leveles
 const MAP_VIEW = new MapView({repeat: true});
 // hexagon per tile at minZoom
