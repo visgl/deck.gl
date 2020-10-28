@@ -11,12 +11,6 @@ import {registerLoaders} from '@loaders.gl/core';
 
 registerLoaders([GLTFLoader]);
 
-// Set your mapbox token here
-const MAPBOX_TOKEN = process.env.MapboxAccessToken; // eslint-disable-line
-// mapbox style file path
-const MAPBOX_STYLE =
-  'https://rivulet-zhang.github.io/dataRepo/mapbox/style/map-style-dark-v9-no-labels.json';
-
 // Data provided by the OpenSky Network, http://www.opensky-network.org
 const DATA_URL = 'https://opensky-network.org/api/states/all';
 const MODEL_URL =
@@ -35,6 +29,9 @@ const INITIAL_VIEW_STATE = {
   pitch: 0,
   bearing: 0
 };
+
+const MAP_STYLE =
+  'https://gist.githubusercontent.com/Josmorsot/36354c7fe0e847a559affde83ba36889/raw/6846e70b77c655f516965623d4620505491ad43e/dark-matter-no-labels.json';
 
 const DATA_INDEX = {
   UNIQUE_ID: 0,
@@ -69,7 +66,7 @@ function getTooltip({object}) {
   );
 }
 
-export default function App({sizeScale = 25, onDataLoad, mapStyle = MAPBOX_STYLE}) {
+export default function App({sizeScale = 25, onDataLoad, mapStyle = MAP_STYLE}) {
   const [data, setData] = useState(null);
   const [timer, setTimer] = useState({});
 
@@ -141,7 +138,7 @@ export default function App({sizeScale = 25, onDataLoad, mapStyle = MAPBOX_STYLE
         reuseMaps
         mapStyle={mapStyle}
         preventStyleDiffing={true}
-        mapboxApiAccessToken={MAPBOX_TOKEN}
+        mapboxApiAccessToken={MAP_STYLE}
       />
     </DeckGL>
   );
