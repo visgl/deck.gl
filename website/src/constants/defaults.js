@@ -1,8 +1,8 @@
 export const MAPBOX_STYLES = {
-  LIGHT: 'mapbox://styles/uberdata/cive48w2e001a2imn5mcu2vrs',
-  DARK: 'mapbox://styles/uberdata/cive485h000192imn6c6cc8fc',
+  LIGHT: 'https://gist.githubusercontent.com/Josmorsot/9001e0dbb01a61a2ddd5dbc1a6c18392/raw/7c273769b2dcd69f1a25f8799373a3d1826df33e/positron-no-labels.json',
+  DARK: 'https://gist.githubusercontent.com/Josmorsot/36354c7fe0e847a559affde83ba36889/raw/6846e70b77c655f516965623d4620505491ad43e/dark-matter-no-labels.json',
   BLANK: {
-    version: 8,
+    version: 8, 
     sources: {},
     layers: []
   }
