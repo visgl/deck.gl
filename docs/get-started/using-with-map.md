@@ -39,6 +39,26 @@ If you are using react-map-gl, there are several ways to provide a token to your
 
 It is possible to use the map component without the Mapbox service, if you use another tile source (for example, if you host your own map tiles). You will need a custom Mapbox GL style that points to your own [vector tile source](https://www.mapbox.com/mapbox-gl-js/style-spec/), and pass it to `ReactMapGL` using the `mapStyle` prop. This custom style must match the schema of your tile source. 
 
+Existing free vector tile services: 
+
+- [CARTO free basemaps](https://carto.com/basemaps) for non commercial applications:
+
+
+| POSITRON | DARK MATTER | VOYAGER  |
+| -------- |-------------| -------- |
+|<img src="https://carto.com/help/images/building-maps/basemaps/positron_labels.png"  /> | <img src="https://carto.com/help/images/building-maps/basemaps/dark_labels.png" /> | <img src="https://carto.com/help/images/building-maps/basemaps/voyager_labels.png" /> 
+| https://basemaps.cartocdn.com/gl/positron-gl-style/style.json|https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json|https://basemaps.cartocdn.com/gl/voyager-gl-style/style.json
+
+
+| POSITRON NO LABELS     | DARK MATTER NO LABELS         | VOYAGER NO LABELS |
+| --------------- |---------------------   | -------- |
+|<img src="https://carto.com/help/images/building-maps/basemaps/positron_no_labels.png"  /> | <img src="https://carto.com/help/images/building-maps/basemaps/dark_no_labels.png" /> | <img src="https://carto.com/help/images/building-maps/basemaps/voyager_no_labels.png" /> 
+| https://basemaps.cartocdn.com/gl/positron-nolabels--gl-style/style.json|https://basemaps.cartocdn.com/gl/dark-matter-nolabels-gl-style/style.json|https://basemaps.cartocdn.com/gl/voyager-nolabels-gl-style/style.json
+|
+
+Ensure you follow the [Terms and Conditions](https://drive.google.com/file/d/0B3OBExqwT6KJNHp3U3VUamx6U1U/view) when using them.
+
+
 Open source tile schemas include: 
 
 - [TileZen schema](https://tilezen.readthedocs.io/en/latest/layers/)
@@ -48,7 +68,7 @@ Some useful resources for creating your own map service:
 
 - [Mapbox Vector Tile Spec](https://www.mapbox.com/developers/vector-tiles/)
 - [Open source tools](https://github.com/mapbox/awesome-vector-tiles)
-
+- [Maputnik Style editor](https://maputnik.github.io)
 
 ## Using deck.gl with Google Maps
 
