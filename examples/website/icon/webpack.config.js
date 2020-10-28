@@ -27,10 +27,7 @@ const CONFIG = {
         }
       }
     ]
-  },
-
-  // Optional: Enables reading mapbox token from environment variable
-  plugins: [new webpack.EnvironmentPlugin(['MapboxAccessToken'])]
+  }
 };
 
 // This line enables bundling against src in this repo rather than installed module
