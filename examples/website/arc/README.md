@@ -20,3 +20,7 @@ Sample data is stored in [deck.gl Example Data](https://github.com/visgl/deck.gl
 
 To use your own data, check out
 the [documentation of ArcLayer](../../../docs/api-reference/layers/arc-layer.md).
+
+### Basemap
+
+The basemap in this example is provided by [CARTO free basemap service](https://carto.com/basemaps). To use an alternative base map solution, visit [this guide](https://github.com/visgl/deck.gl/blob/master/docs/get-started/using-with-map.md#display-maps-without-a-mapbox-token)
