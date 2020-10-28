@@ -86,15 +86,19 @@ function getBoundingBox(viewport, zRange, extent) {
       Math.max(bounds0[2], bounds1[2]),
       Math.max(bounds0[3], bounds1[3])
     ];
-  } else {
-    bounds = viewport.getBounds();
   }
-  return [
-    Math.max(bounds[0], extent[0]),
-    Math.max(bounds[1], extent[1]),
-    Math.min(bounds[2], extent[2]),
-    Math.min(bounds[3], extent[3])
-  ];
+  bounds = viewport.getBounds();
+  if (!viewport.isGeospatial) {
+    return [
+      // Top corner should not be more then bottom corner in either direction
+      Math.max(Math.min(bounds[0], extent[2]), extent[0]),
+      Math.max(Math.min(bounds[1], extent[3]), extent[1]),
+      // Bottom corner should not be less then top corner in either direction
+      Math.min(Math.max(bounds[2], extent[0]), extent[2]),
+      Math.min(Math.max(bounds[3], extent[1]), extent[3])
+    ];
+  }
+  return bounds;
 }
 
 function getIndexingCoords(bbox, scale, modelMatrix) {
