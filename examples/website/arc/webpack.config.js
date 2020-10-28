@@ -26,7 +26,6 @@ const CONFIG = {
       }
     ]
   }
-
 };
 
 // This line enables bundling against src in this repo rather than installed module
