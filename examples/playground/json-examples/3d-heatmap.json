@@ -14,7 +14,7 @@
     {
       "@@type": "MapView",
       "controller": true,
-      "mapStyle": "http://bmp-01.stag.cartodb.net/gl/dark-matter-nolabels-gl-style/style.json"
+      "mapStyle": "https://basemaps.cartocdn.com/gl/dark-matter-nolabels-gl-style/style.json"
     }
   ],
   "layers": [

@@ -14,7 +14,7 @@ const INITIAL_VIEW_STATE = {
   pitch: 30
 };
 
-const MAP_STYLE = 'https://gist.githubusercontent.com/Josmorsot/9001e0dbb01a61a2ddd5dbc1a6c18392/raw/7c273769b2dcd69f1a25f8799373a3d1826df33e/positron-no-labels.json'
+const MAP_STYLE = 'https://basemaps.cartocdn.com/gl/positron-nolabels-gl-style/style.json'
 
 const map = new mapboxgl.Map({
   container: 'map',
