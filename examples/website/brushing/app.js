@@ -7,9 +7,6 @@ import {ScatterplotLayer, ArcLayer} from '@deck.gl/layers';
 import {BrushingExtension} from '@deck.gl/extensions';
 import {scaleLinear} from 'd3-scale';
 
-// Set your mapbox token here
-const MAPBOX_TOKEN = process.env.MapboxAccessToken; // eslint-disable-line
-
 // Source data GeoJSON
 const DATA_URL =
   'https://raw.githubusercontent.com/visgl/deck.gl-data/master/examples/arc/counties.json'; // eslint-disable-line
@@ -30,6 +27,9 @@ const INITIAL_VIEW_STATE = {
   pitch: 0,
   bearing: 0
 };
+
+const MAP_STYLE =
+  'https://gist.githubusercontent.com/Josmorsot/9001e0dbb01a61a2ddd5dbc1a6c18392/raw/7c273769b2dcd69f1a25f8799373a3d1826df33e/positron-no-labels.json';
 
 const brushingExtension = new BrushingExtension();
 
@@ -119,7 +119,7 @@ export default function App({
   brushRadius = 100000,
   strokeWidth = 2,
   opacity = 0.7,
-  mapStyle = 'mapbox://styles/mapbox/light-v9'
+  mapStyle = MAP_STYLE
 }) {
   const {arcs, targets, sources} = useMemo(() => getLayerData(data), [data]);
 
@@ -180,12 +180,7 @@ export default function App({
       controller={true}
       getTooltip={getTooltip}
     >
-      <StaticMap
-        reuseMaps
-        mapStyle={mapStyle}
-        preventStyleDiffing={true}
-        mapboxApiAccessToken={MAPBOX_TOKEN}
-      />
+      <StaticMap reuseMaps mapStyle={mapStyle} preventStyleDiffing={true} />
     </DeckGL>
   );
 }

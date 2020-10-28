@@ -8,9 +8,6 @@ import {StaticMap} from 'react-map-gl';
 import H3GridLayer from './h3-grid-layer';
 import {getMinZoom} from './h3-utils';
 
-// Set your mapbox token here
-const MAPBOX_TOKEN = process.env.MapboxAccessToken; // eslint-disable-line
-
 const CONTROL_PANEL_STYLE = {
   position: 'fixed',
   top: 20,
@@ -20,6 +17,8 @@ const CONTROL_PANEL_STYLE = {
   background: '#fff'
 };
 
+const MAP_STYLE =
+  'https://gist.githubusercontent.com/Josmorsot/9001e0dbb01a61a2ddd5dbc1a6c18392/raw/7c273769b2dcd69f1a25f8799373a3d1826df33e/positron-no-labels.json';
 // `repeat` will draw multiple copies of the map at low zoom leveles
 const MAP_VIEW = new MapView({repeat: true});
 // hexagon per tile at minZoom
@@ -76,7 +75,7 @@ export default function App() {
         onViewStateChange={onViewStateChange}
         getTooltip={info => info.object}
       >
-        <StaticMap mapStyle="mapbox://styles/mapbox/light-v9" mapboxApiAccessToken={MAPBOX_TOKEN} />
+        <StaticMap mapStyle={MAP_STYLE} />
       </DeckGL>
       <div style={CONTROL_PANEL_STYLE}>
         <div>Resolution: {resolution}</div>

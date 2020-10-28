@@ -6,9 +6,6 @@ import DeckGL from '@deck.gl/react';
 import {GeoJsonLayer, ArcLayer} from '@deck.gl/layers';
 import {scaleQuantile} from 'd3-scale';
 
-// Set your mapbox token here
-const MAPBOX_TOKEN = process.env.MapboxAccessToken; // eslint-disable-line
-
 // Source data GeoJSON
 const DATA_URL =
   'https://raw.githubusercontent.com/visgl/deck.gl-data/master/examples/arc/counties.json'; // eslint-disable-line
@@ -41,6 +38,9 @@ const INITIAL_VIEW_STATE = {
   pitch: 30,
   bearing: 30
 };
+
+const MAP_STYLE =
+  'https://gist.githubusercontent.com/Josmorsot/9001e0dbb01a61a2ddd5dbc1a6c18392/raw/7c273769b2dcd69f1a25f8799373a3d1826df33e/positron-no-labels.json';
 
 function calculateArcs(data, selectedCounty) {
   if (!data || !data.length) {
@@ -77,7 +77,7 @@ function getTooltip({object}) {
 }
 
 /* eslint-disable react/no-deprecated */
-export default function App({data, strokeWidth = 2, mapStyle = 'mapbox://styles/mapbox/light-v9'}) {
+export default function App({data, strokeWidth = 2, mapStyle = MAP_STYLE}) {
   const [selectedCounty, selectCounty] = useState(null);
 
   const arcs = useMemo(() => calculateArcs(data, selectedCounty), [data, selectedCounty]);
@@ -110,12 +110,7 @@ export default function App({data, strokeWidth = 2, mapStyle = 'mapbox://styles/
       controller={true}
       getTooltip={getTooltip}
     >
-      <StaticMap
-        reuseMaps
-        mapStyle={mapStyle}
-        preventStyleDiffing={true}
-        mapboxApiAccessToken={MAPBOX_TOKEN}
-      />
+      <StaticMap reuseMaps mapStyle={mapStyle} preventStyleDiffing={true} />
     </DeckGL>
   );
 }
