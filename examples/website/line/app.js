@@ -24,7 +24,7 @@ const INITIAL_VIEW_STATE = {
 };
 
 const MAP_STYLE =
-  'https://gist.githubusercontent.com/Josmorsot/36354c7fe0e847a559affde83ba36889/raw/6846e70b77c655f516965623d4620505491ad43e/dark-matter-no-labels.json';
+  'http://bmp-01.stag.cartodb.net/gl/dark-matter-nolabels-gl-style/style.json';
 
 function getColor(d) {
   const z = d.start[2];

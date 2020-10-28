@@ -15,7 +15,7 @@
     {
       "@@type": "MapView",
       "controller": true,
-      "mapStyle": "https://gist.githubusercontent.com/Josmorsot/36354c7fe0e847a559affde83ba36889/raw/6846e70b77c655f516965623d4620505491ad43e/dark-matter-no-labels.json"
+      "mapStyle": "http://bmp-01.stag.cartodb.net/gl/dark-matter-nolabels-gl-style/style.json"
     }
   ],
   "layers": [
