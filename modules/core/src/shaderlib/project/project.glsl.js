@@ -103,9 +103,10 @@ vec2 project_mercator_(vec2 lnglat) {
   if (project_uWrapLongitude) {
     x = mod(x - project_uAntimeridian, 360.0) + project_uAntimeridian;
   }
+  float y = clamp(lnglat.y, -89.9, 89.9);
   return vec2(
     radians(x) + PI,
-    PI + log(tan_fp32(PI * 0.25 + radians(lnglat.y) * 0.5))
+    PI + log(tan_fp32(PI * 0.25 + radians(y) * 0.5))
   );
 }
 
