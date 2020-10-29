@@ -156,6 +156,7 @@ const TEST_CASES = [
     }),
     tileSize: 512,
     modelMatrix: new Matrix4().identity(),
+    modelMatrixInverse: new Matrix4().identity().invert(),
     output: ['0,0,0', '0,1,0', '1,0,0', '1,1,0']
   },
   {
@@ -170,6 +171,7 @@ const TEST_CASES = [
     }),
     tileSize: 512,
     modelMatrix: new Matrix4().scale(2),
+    modelMatrixInverse: new Matrix4().scale(2).invert(),
     output: ['0,0,0']
   },
   {
@@ -184,6 +186,7 @@ const TEST_CASES = [
     }),
     tileSize: 512,
     modelMatrix: new Matrix4().translate([300, 300, 0]),
+    modelMatrixInverse: new Matrix4().translate([300, 300, 0]).invert(),
     output: ['0,0,0']
   },
   {
@@ -198,6 +201,10 @@ const TEST_CASES = [
     }),
     tileSize: 512,
     modelMatrix: new Matrix4().translate([1024, 1024, 0]).scale(2),
+    modelMatrixInverse: new Matrix4()
+      .translate([1024, 1024, 0])
+      .scale(2)
+      .invert(),
     output: ['-1,-1,0']
   },
   {
@@ -213,6 +220,10 @@ const TEST_CASES = [
     tileSize: 512,
     extent: [0, 0, 2048, 2048],
     modelMatrix: new Matrix4().translate([1024, 1024, 0]).scale(2),
+    modelMatrixInverse: new Matrix4()
+      .translate([1024, 1024, 0])
+      .scale(2)
+      .invert(),
     output: []
   }
 ];
@@ -251,7 +262,16 @@ function mergeBoundingBox(boundingBoxes) {
 
 test('getTileIndices', t => {
   for (const testCase of TEST_CASES) {
-    const {viewport, maxZoom, minZoom, zRange, tileSize, modelMatrix, extent} = testCase;
+    const {
+      viewport,
+      maxZoom,
+      minZoom,
+      zRange,
+      tileSize,
+      modelMatrix,
+      extent,
+      modelMatrixInverse
+    } = testCase;
     const result = getTileIndices({
       viewport,
       maxZoom,
@@ -259,6 +279,7 @@ test('getTileIndices', t => {
       zRange,
       tileSize,
       modelMatrix,
+      modelMatrixInverse,
       extent
     });
     t.deepEqual(getTileIds(result), testCase.output, testCase.title);

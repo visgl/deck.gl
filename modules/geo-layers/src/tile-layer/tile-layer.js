@@ -39,9 +39,11 @@ const defaultProps = {
 
 export default class TileLayer extends CompositeLayer {
   initializeState() {
+    const {modelMatrix} = this.props;
     this.state = {
       tiles: [],
-      isLoaded: false
+      isLoaded: false,
+      modelMatrixInverse: modelMatrix && modelMatrix.clone().invert()
     };
   }
 
@@ -56,6 +58,7 @@ export default class TileLayer extends CompositeLayer {
     return changeFlags.somethingChanged;
   }
 
+  // eslint-disable-next-line complexity
   updateState({props, oldProps, context, changeFlags}) {
     let {tileset} = this.state;
     const createTileCache =
@@ -73,8 +76,7 @@ export default class TileLayer extends CompositeLayer {
         maxCacheByteSize,
         refinementStrategy,
         extent,
-        maxRequests,
-        modelMatrix
+        maxRequests
       } = props;
       tileset = new Tileset2D({
         getTileData: this.getTileData.bind(this),
@@ -88,8 +90,7 @@ export default class TileLayer extends CompositeLayer {
         onTileLoad: this._onTileLoad.bind(this),
         onTileError: this._onTileError.bind(this),
         onTileUnload: this._onTileUnload.bind(this),
-        maxRequests,
-        modelMatrix
+        maxRequests
       });
       this.setState({tileset});
     } else if (changeFlags.propsChanged || changeFlags.updateTriggersChanged) {
@@ -99,14 +100,27 @@ export default class TileLayer extends CompositeLayer {
         tile.layers = null;
       });
     }
-
+    if (
+      typeof changeFlags.propsChanged === 'string' &&
+      changeFlags.propsChanged.includes('props.modelMatrix')
+    ) {
+      const {modelMatrix} = this.props;
+      this.setState({
+        modelMatrixInverse: modelMatrix && modelMatrix.clone().invert()
+      });
+    }
     this._updateTileset();
   }
 
   _updateTileset() {
-    const {tileset} = this.state;
-    const {onViewportLoad, zRange} = this.props;
-    const frameNumber = tileset.update(this.context.viewport, {zRange});
+    const {tileset, modelMatrixInverse} = this.state;
+    const {onViewportLoad, zRange, modelMatrix} = this.props;
+    const frameNumber = tileset.update(
+      this.context.viewport,
+      {zRange},
+      modelMatrix,
+      modelMatrixInverse
+    );
     const {isLoaded} = tileset;
 
     const loadingStateChanged = this.state.isLoaded !== isLoaded;

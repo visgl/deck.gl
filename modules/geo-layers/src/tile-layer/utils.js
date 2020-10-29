@@ -1,4 +1,3 @@
-import {Matrix4} from 'math.gl';
 import {getOSMTileIndices} from './tile-2d-traversal';
 
 const TILE_SIZE = 512;
@@ -107,11 +106,14 @@ function getBoundingBox(viewport, zRange, extent) {
   ];
 }
 
-function getIndexingCoords(bbox, scale, modelMatrix) {
-  modelMatrix.invert();
-  const transformedTileIndex = transformBox(bbox, modelMatrix).map(i => (i * scale) / TILE_SIZE);
-  modelMatrix.invert();
-  return transformedTileIndex;
+function getIndexingCoords(bbox, scale, modelMatrixInverse) {
+  if (modelMatrixInverse) {
+    const transformedTileIndex = transformBox(bbox, modelMatrixInverse).map(
+      i => (i * scale) / TILE_SIZE
+    );
+    return transformedTileIndex;
+  }
+  return bbox.map(i => (i * scale) / TILE_SIZE);
 }
 
 function getScale(z) {
@@ -143,10 +145,10 @@ export function tileToBoundingBox(viewport, x, y, z) {
   return {left, top, right, bottom};
 }
 
-function getIdentityTileIndices(viewport, z, extent, modelMatrix) {
+function getIdentityTileIndices(viewport, z, extent, modelMatrixInverse) {
   const bbox = getBoundingBox(viewport, null, extent);
   const scale = getScale(z);
-  const [minX, minY, maxX, maxY] = getIndexingCoords(bbox, scale, modelMatrix);
+  const [minX, minY, maxX, maxY] = getIndexingCoords(bbox, scale, modelMatrixInverse);
   const indices = [];
 
   /*
@@ -174,7 +176,8 @@ export function getTileIndices({
   zRange,
   extent,
   tileSize = TILE_SIZE,
-  modelMatrix
+  modelMatrix,
+  modelMatrixInverse
 }) {
   let z = Math.round(viewport.zoom + Math.log2(TILE_SIZE / tileSize));
   if (Number.isFinite(minZoom) && z < minZoom) {
@@ -187,17 +190,12 @@ export function getTileIndices({
     z = maxZoom;
   }
   let transformedExtent = extent;
-  if (modelMatrix && extent && !viewport.isGeospatial) {
+  if (modelMatrix && modelMatrixInverse && extent && !viewport.isGeospatial) {
     transformedExtent = transformBox(extent, modelMatrix);
   }
   return viewport.isGeospatial
     ? getOSMTileIndices(viewport, z, zRange, extent || DEFAULT_EXTENT)
-    : getIdentityTileIndices(
-        viewport,
-        z,
-        transformedExtent || DEFAULT_EXTENT,
-        modelMatrix || new Matrix4()
-      );
+    : getIdentityTileIndices(viewport, z, transformedExtent || DEFAULT_EXTENT, modelMatrixInverse);
 }
 
 /**

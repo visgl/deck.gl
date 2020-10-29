@@ -104,14 +104,17 @@ export default class Tileset2D {
    * @param {*} viewport
    * @param {*} onUpdate
    */
-  update(viewport, {zRange} = {}) {
-    if (!viewport.equals(this._viewport)) {
+  update(viewport, {zRange} = {}, modelMatrix, modelMatrixInverse) {
+    if (!viewport.equals(this._viewport) || modelMatrixInverse !== this._modelMatrixInverse) {
       this._viewport = viewport;
+      this._modelMatrixInverse = modelMatrixInverse;
       const tileIndices = this.getTileIndices({
         viewport,
         maxZoom: this._maxZoom,
         minZoom: this._minZoom,
-        zRange
+        zRange,
+        modelMatrix,
+        modelMatrixInverse
       });
       this._selectedTiles = tileIndices.map(index => this._getTile(index, true));
 
@@ -139,9 +142,18 @@ export default class Tileset2D {
   /* Public interface for subclassing */
 
   // Returns array of {x, y, z}
-  getTileIndices({viewport, maxZoom, minZoom, zRange}) {
-    const {tileSize, extent, modelMatrix} = this.opts;
-    return getTileIndices({viewport, maxZoom, minZoom, zRange, tileSize, extent, modelMatrix});
+  getTileIndices({viewport, maxZoom, minZoom, zRange, modelMatrix, modelMatrixInverse}) {
+    const {tileSize, extent} = this.opts;
+    return getTileIndices({
+      viewport,
+      maxZoom,
+      minZoom,
+      zRange,
+      tileSize,
+      extent,
+      modelMatrix,
+      modelMatrixInverse
+    });
   }
 
   // Add custom metadata to tiles
