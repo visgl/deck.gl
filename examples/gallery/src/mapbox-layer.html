@@ -9,11 +9,13 @@
 
   <script type="text/javascript">
 
-    const {MapboxLayer, ScatterplotLayer} = deck;
+    const {MapboxLayer, ScatterplotLayer, ArcLayer} = deck;
+
+    mapboxgl.accessToken = '<mapbox-access-token>';
 
     const map = new mapboxgl.Map({
       container: document.body,
-      style: 'https://basemaps.cartocdn.com/gl/positron-nolabels-gl-style/style.json',
+      style: 'mapbox://styles/mapbox/light-v9',
       center: [-122.4, 37.79],
       zoom: 15,
       pitch: 60
