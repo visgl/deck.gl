@@ -41,8 +41,7 @@ const INITIAL_VIEW_STATES = {
   }
 };
 
-const MAP_STYLE =
-  'https://basemaps.cartocdn.com/gl/positron-nolabels-gl-style/style.json';
+const MAP_STYLE = 'https://basemaps.cartocdn.com/gl/positron-nolabels-gl-style/style.json';
 
 const ViewportLabel = props => <div style={VIEW_LABEL_STYLES}>{props.children}</div>;
 

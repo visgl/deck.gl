@@ -17,8 +17,7 @@ const CONTROL_PANEL_STYLE = {
   background: '#fff'
 };
 
-const MAP_STYLE =
-  'https://basemaps.cartocdn.com/gl/positron-nolabels-gl-style/style.json';
+const MAP_STYLE = 'https://basemaps.cartocdn.com/gl/positron-nolabels-gl-style/style.json';
 // `repeat` will draw multiple copies of the map at low zoom leveles
 const MAP_VIEW = new MapView({repeat: true});
 // hexagon per tile at minZoom
