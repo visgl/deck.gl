@@ -30,8 +30,7 @@ const INITIAL_VIEW_STATE = {
   bearing: 0
 };
 
-const MAP_STYLE =
-  'https://basemaps.cartocdn.com/gl/positron-nolabels-gl-style/style.json';
+const MAP_STYLE = 'https://basemaps.cartocdn.com/gl/positron-nolabels-gl-style/style.json';
 
 const MS_PER_DAY = 8.64e7;
 

@@ -15,7 +15,7 @@ const INITIAL_VIEW_STATE = {
   pitch: 30
 };
 
-const MAP_STYLE = 'https://basemaps.cartocdn.com/gl/positron-nolabels-gl-style/style.json'
+const MAP_STYLE = 'https://basemaps.cartocdn.com/gl/positron-nolabels-gl-style/style.json';
 
 function Root() {
   const onClick = info => {

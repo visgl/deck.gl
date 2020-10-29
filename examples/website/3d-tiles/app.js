@@ -54,11 +54,7 @@ export default function App({
 
   return (
     <DeckGL layers={[tile3DLayer]} initialViewState={initialViewState} controller={true}>
-      <StaticMap
-        reuseMaps
-        mapStyle={mapStyle}
-        preventStyleDiffing
-      />
+      <StaticMap reuseMaps mapStyle={mapStyle} preventStyleDiffing />
     </DeckGL>
   );
 }

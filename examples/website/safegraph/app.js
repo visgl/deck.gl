@@ -15,8 +15,7 @@ const colorScale = scaleLog()
 export function renderToDOM(container, data) {
   const map = new mapboxgl.Map({
     container,
-    style:
-      'https://basemaps.cartocdn.com/gl/positron-nolabels-gl-style/style.json',
+    style: 'https://basemaps.cartocdn.com/gl/positron-nolabels-gl-style/style.json',
     antialias: true,
     center: [-122.4034, 37.7845],
     zoom: 15.5,

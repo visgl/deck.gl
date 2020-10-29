@@ -38,8 +38,7 @@ const INITIAL_VIEW_STATE = {
   bearing: 0
 };
 
-const MAP_STYLE =
-  'https://basemaps.cartocdn.com/gl/positron-nolabels-gl-style/style.json';
+const MAP_STYLE = 'https://basemaps.cartocdn.com/gl/positron-nolabels-gl-style/style.json';
 
 const ambientLight = new AmbientLight({
   color: [255, 255, 255],
