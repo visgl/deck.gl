@@ -2,7 +2,6 @@
 // delete the local development overrides at the bottom of this file
 
 const {resolve} = require('path');
-const webpack = require('webpack');
 
 const CONFIG = {
   mode: 'development',

@@ -39,8 +39,7 @@ const INITIAL_VIEW_STATE = {
   bearing: 30
 };
 
-const MAP_STYLE =
-  'https://basemaps.cartocdn.com/gl/positron-nolabels-gl-style/style.json';
+const MAP_STYLE = 'https://basemaps.cartocdn.com/gl/positron-nolabels-gl-style/style.json';
 
 function calculateArcs(data, selectedCounty) {
   if (!data || !data.length) {
