@@ -49,16 +49,13 @@ const deckgl = new deck.DeckGL({
 
 ## Supported basemaps
 
-There are three basemaps available today:
-
-* POSITRON
-* DARK_MATTER
-* VOYAGER
-
-| POSITRON        | DARK_MATTER           | VOYAGER  |
-| --------------- |:---------------------:| --------:|
-|![Positron](https://carto.com/help/images/building-maps/basemaps/positron_labels.png "Positron") | ![Dark-matter](https://carto.com/help/images/building-maps/basemaps/dark_labels.png "Dark-matter") | ![Voyager](https://carto.com/help/images/building-maps/basemaps/voyager_labels.png "Voyager") 
-
-Ensure you follow the [Terms and Conditions](https://drive.google.com/file/d/0B3OBExqwT6KJNHp3U3VUamx6U1U/view) when using them
+| NAME | PREVIEW | STYLE URL  |
+| -------- |-------------| -------- |
+| Positron | <img src="https://carto.com/help/images/building-maps/basemaps/positron_labels.png"  /> | https://basemaps.cartocdn.com/gl/positron-gl-style/style.json |
+| Dark Matter | <img src="https://carto.com/help/images/building-maps/basemaps/dark_labels.png"  /> | https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json |
+| Voyager | <img src="https://carto.com/help/images/building-maps/basemaps/voyager_labels.png"  /> | https://basemaps.cartocdn.com/gl/voyager-gl-style/style.json |
+| Positron (no labels) | <img src="https://carto.com/help/images/building-maps/basemaps/positron_no_labels.png"  /> | https://basemaps.cartocdn.com/gl/positron-nolabels-gl-style/style.json |
+| Dark Matter (no labels) | <img src="https://carto.com/help/images/building-maps/basemaps/dark_no_labels.png"  /> | https://basemaps.cartocdn.com/gl/dark-matter-nolabels-gl-style/style.json |
+| Voyager (no labels) | <img src="https://carto.com/help/images/building-maps/basemaps/voyager_no_labels.png"  /> | https://basemaps.cartocdn.com/gl/voyager-nolabels-gl-style/style.json |
 
 
