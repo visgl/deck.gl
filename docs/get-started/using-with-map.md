@@ -42,13 +42,13 @@ If you are using react-map-gl, there are several ways to provide a token to your
 
 ### Using other basemap services, or your own
 
-It is possible to use the map component without the Mapbox service, if you use another tile source (for example, if you host your own map tiles). You will need a custom Mapbox GL style that points to your own [vector tile source](https://www.mapbox.com/mapbox-gl-js/style-spec/), and pass it to `ReactMapGL` using the `mapStyle` prop. This custom style must match the schema of your tile source. 
+It is possible to use the map component without the Mapbox service, you need a URL that conforms to the [Mapbox Style Specification](https://www.mapbox.com/mapbox-gl-js/style-spec) and pass it to `ReactMapGL` using the `mapStyle` prop.
 
-- [CARTO free basemaps](https://carto.com/basemaps) for non commercial applications. There are 3 basemaps available [Positron, Voyager and Dark Matter](/docs/api-reference/carto/basemap)
+You can use existing free vector tile services:
 
+- [CARTO free basemaps](https://carto.com/basemaps) for non commercial applications. Checkout [this guide](/docs/api-reference/carto/basemap.md) to start using it.
 
-Ensure you follow the [Terms and Conditions](https://drive.google.com/file/d/0B3OBExqwT6KJNHp3U3VUamx6U1U/view) when using them.
-
+Or if you use another tile source (for example, if you host your own map tiles), you will need a custom Mapbox GL style that points to your own [vector tile source](https://www.mapbox.com/mapbox-gl-js/style-spec/), this custom style must match the schema of your tile source. 
 
 Open source tile schemas include: 
 
