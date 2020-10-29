@@ -21,3 +21,7 @@ Sample data can be found [here](https://rivulet-zhang.github.io/dataRepo/tagmap/
 
 To use your own data, check out
 the [documentation of TextLayer](../../../docs/api-reference/layers/text-layer.md).
+
+### Basemap
+
+The basemap in this example is provided by [CARTO free basemap service](https://carto.com/basemaps). To use an alternative base map solution, visit [this guide](https://deck.gl/docs/get-started/using-with-map#display-maps-without-a-mapbox-token)
