@@ -49,17 +49,17 @@ Existing free vector tile services:
 - [CARTO free basemaps](https://carto.com/basemaps) for non commercial applications:
 
 
-| POSITRON | DARK MATTER | VOYAGER  |
+
+| NAME | PREVIEW | LINK  |
 | -------- |-------------| -------- |
-|<img src="https://carto.com/help/images/building-maps/basemaps/positron_labels.png"  /> | <img src="https://carto.com/help/images/building-maps/basemaps/dark_labels.png" /> | <img src="https://carto.com/help/images/building-maps/basemaps/voyager_labels.png" /> 
-| https://basemaps.cartocdn.com/gl/positron-gl-style/style.json|https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json|https://basemaps.cartocdn.com/gl/voyager-gl-style/style.json
+| Positron | <img src="https://carto.com/help/images/building-maps/basemaps/positron_labels.png"  /> | https://basemaps.cartocdn.com/gl/positron-gl-style/style.json |
+| Dark Matter | <img src="https://carto.com/help/images/building-maps/basemaps/dark_labels.png"  /> | https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json |
+| Voyager | <img src="https://carto.com/help/images/building-maps/basemaps/voyager_labels.png"  /> | https://basemaps.cartocdn.com/gl/voyager-gl-style/style.json |
+| Positron (no labels) | <img src="https://carto.com/help/images/building-maps/basemaps/positron_no_labels.png"  /> | https://basemaps.cartocdn.com/gl/positron-nolabels-gl-style/style.json |
+| Dark Matter (no labels) | <img src="https://carto.com/help/images/building-maps/basemaps/dark_no_labels.png"  /> | https://basemaps.cartocdn.com/gl/dark-matter-nolabels-gl-style/style.json |
+| Voyager (no labels) | <img src="https://carto.com/help/images/building-maps/basemaps/voyager_no_labels.png"  /> | https://basemaps.cartocdn.com/gl/voyager-nolabels-gl-style/style.json |
 
 
-| POSITRON NO LABELS     | DARK MATTER NO LABELS         | VOYAGER NO LABELS |
-| --------------- |---------------------   | -------- |
-|<img src="https://carto.com/help/images/building-maps/basemaps/positron_no_labels.png"  /> | <img src="https://carto.com/help/images/building-maps/basemaps/dark_no_labels.png" /> | <img src="https://carto.com/help/images/building-maps/basemaps/voyager_no_labels.png" /> 
-| https://basemaps.cartocdn.com/gl/positron-nolabels--gl-style/style.json|https://basemaps.cartocdn.com/gl/dark-matter-nolabels-gl-style/style.json|https://basemaps.cartocdn.com/gl/voyager-nolabels-gl-style/style.json
-|
 
 Ensure you follow the [Terms and Conditions](https://drive.google.com/file/d/0B3OBExqwT6KJNHp3U3VUamx6U1U/view) when using them.
 
