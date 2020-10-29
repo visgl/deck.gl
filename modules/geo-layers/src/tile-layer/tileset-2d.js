@@ -105,9 +105,14 @@ export default class Tileset2D {
    * @param {*} onUpdate
    */
   update(viewport, {zRange} = {}, modelMatrix, modelMatrixInverse) {
-    if (!viewport.equals(this._viewport) || modelMatrixInverse !== this._modelMatrixInverse) {
+    if (
+      !viewport.equals(this._viewport) ||
+      modelMatrixInverse !== this._modelMatrixInverse ||
+      modelMatrix !== this._modelMatrix
+    ) {
       this._viewport = viewport;
       this._modelMatrixInverse = modelMatrixInverse;
+      this._modelMatrix = modelMatrix;
       const tileIndices = this.getTileIndices({
         viewport,
         maxZoom: this._maxZoom,
