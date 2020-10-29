@@ -9,16 +9,6 @@ with [webpack-dev-server](https://webpack.js.org/guides/development/#webpack-dev
 
 ## Usage
 
-To run this example, you need a [Mapbox access token](https://docs.mapbox.com/help/how-mapbox-works/access-tokens/). You can either set an environment variable:
-
-```bash
-export MapboxAccessToken=<mapbox_access_token>
-```
-
-Or set `mapboxgl.accessToken` directly in `app.js`.
-
-Other options can be found at [using with Mapbox GL](../../../../docs/get-started/using-with-mapbox-gl.md).
-
 To install dependencies:
 
 ```bash
