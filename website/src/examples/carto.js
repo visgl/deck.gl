@@ -27,6 +27,8 @@ const WEEKS = {
   'Week 6': ['2020-01-27', '2020-01-31'],
 };
 
+const MAPBOX_STYLES = 'https://basemaps.cartocdn.com/gl/dark-matter-nolabels-gl-style/style.json';
+
 class CartoSQLDemo extends Component {
   static title = 'Mastercard Index In NewYork';
   
@@ -38,7 +40,7 @@ class CartoSQLDemo extends Component {
     week: {displayName: 'Week', type: 'select', options: Object.keys(WEEKS), value: 'Week 1'},
   };
 
-  static mapStyle = 'https://basemaps.cartocdn.com/gl/dark-matter-nolabels-gl-style/style.json';
+  static mapStyle = MAPBOX_STYLES;
 
   static renderInfo() {
     return (
