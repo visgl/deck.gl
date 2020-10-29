@@ -35,7 +35,6 @@ Although props such as `width`, `height`, `views`, `viewState`, `onViewStateChan
     viewId="map"
     {...this.state.viewState}
     mapStyle={mapStyle}
-    mapboxApiAccessToken={mapboxApiAccessToken}
   />
 </DeckGL>
 ```
@@ -73,7 +72,6 @@ Although props such as `width`, `height`, `views`, `viewState`, `onViewStateChan
     height={height}
     viewState={this.state.viewState}
     mapStyle={mapStyle}
-    mapboxApiAccessToken={mapboxApiAccessToken}
   />}
 </DeckGL>
 ```
@@ -92,7 +90,6 @@ Although props such as `width`, `height`, `views`, `viewState`, `onViewStateChan
     height={height}
     viewState={viewState}
     mapStyle={mapStyle}
-    mapboxApiAccessToken={mapboxApiAccessToken}
   />}
 </DeckGL>
 ```
