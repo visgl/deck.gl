@@ -5,8 +5,7 @@ import {ContourLayer} from '@deck.gl/aggregation-layers';
 import DeckGL from '@deck.gl/react';
 import RangeSlider from './rangeSlider';
 
-// Set your mapbox token here
-const MAPBOX_TOKEN = process.env.MapboxAccessToken; // eslint-disable-line
+const MAP_STYLE = 'https://basemaps.cartocdn.com/gl/dark-matter-nolabels-gl-style/style.json';
 
 // Source data CSV
 const DATA_URL =
@@ -70,7 +69,7 @@ export class App extends PureComponent {
   }
 
   render() {
-    const {mapStyle = 'mapbox://styles/mapbox/dark-v9'} = this.props;
+    const {mapStyle = MAP_STYLE} = this.props;
     return (
       <Fragment>
         <DeckGL
@@ -78,12 +77,7 @@ export class App extends PureComponent {
           initialViewState={INITIAL_VIEW_STATE}
           controller={true}
         >
-          <StaticMap
-            reuseMaps
-            mapStyle={mapStyle}
-            preventStyleDiffing={true}
-            mapboxApiAccessToken={MAPBOX_TOKEN}
-          />
+          <StaticMap reuseMaps mapStyle={mapStyle} preventStyleDiffing={true} />
         </DeckGL>
         <div id="control-panel">
           <div className="input-group">

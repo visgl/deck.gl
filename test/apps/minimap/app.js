@@ -7,9 +7,6 @@ import {View, MapView} from '@deck.gl/core';
 import {PolygonLayer} from '@deck.gl/layers';
 import {TripsLayer} from '@deck.gl/geo-layers';
 
-// Set your mapbox token here
-const MAPBOX_TOKEN = process.env.MapboxAccessToken; // eslint-disable-line
-
 // Source data CSV
 const DATA_URL = {
   BUILDINGS:
@@ -157,16 +154,14 @@ export class App extends Component {
       >
         <StaticMap
           reuseMaps
-          mapStyle="mapbox://styles/mapbox/dark-v9"
+          mapStyle="https://basemaps.cartocdn.com/gl/dark-matter-nolabels-gl-style/style.json"
           preventStyleDiffing={true}
-          mapboxApiAccessToken={MAPBOX_TOKEN}
         />
         <View id="minimap">
           <StaticMap
             reuseMaps
-            mapStyle="mapbox://styles/mapbox/light-v9"
+            mapStyle="https://basemaps.cartocdn.com/gl/positron-nolabels-gl-style/style.json"
             preventStyleDiffing={true}
-            mapboxApiAccessToken={MAPBOX_TOKEN}
           />
         </View>
       </DeckGL>
