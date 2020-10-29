@@ -24,4 +24,4 @@ the [documentation of IconLayer](../../../docs/api-reference/layers/icon-layer.m
 
 ### Basemap
 
-The basemap in this example is provided by [CARTO free basemap service](https://carto.com/basemaps). To use an alternative base map solution, visit [this guide](https://deck.gl/docs/get-started/using-with-map#display-maps-without-a-mapbox-token)
+The basemap in this example is provided by [CARTO free basemap service](https://carto.com/basemaps). To use an alternative base map solution, visit [this guide](https://deck.gl/docs/get-started/using-with-map#using-other-basemap-services-or-your-own)
