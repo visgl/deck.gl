@@ -1,6 +1,7 @@
 import Tile2DHeader from './tile-2d-header';
 import {getTileIndices, tileToBoundingBox} from './utils';
 import {RequestScheduler} from '@loaders.gl/loader-utils';
+import {Matrix4} from 'math.gl';
 
 const TILE_STATE_UNKNOWN = 0;
 const TILE_STATE_VISIBLE = 1;
@@ -100,18 +101,27 @@ export default class Tileset2D {
   }
 
   /**
-   * Update the cache with the given viewport and triggers callback onUpdate.
+   * Update the cache with the given viewport and model matrix and triggers callback onUpdate.
    * @param {*} viewport
    * @param {*} onUpdate
+   * @param {*} modelMatrix
    */
-  update(viewport, {zRange} = {}) {
-    if (!viewport.equals(this._viewport)) {
+  update(viewport, {zRange, modelMatrix} = {}) {
+    const modelMatrixAsMatrix4 = new Matrix4(modelMatrix);
+    const isModelMatrixNew = !modelMatrixAsMatrix4.equals(this._modelMatrix);
+    if (!viewport.equals(this._viewport) || isModelMatrixNew) {
+      if (isModelMatrixNew) {
+        this._modelMatrixInverse = modelMatrix && modelMatrixAsMatrix4.clone().invert();
+        this._modelMatrix = modelMatrix && modelMatrixAsMatrix4;
+      }
       this._viewport = viewport;
       const tileIndices = this.getTileIndices({
         viewport,
         maxZoom: this._maxZoom,
         minZoom: this._minZoom,
-        zRange
+        zRange,
+        modelMatrix: this._modelMatrix,
+        modelMatrixInverse: this._modelMatrixInverse
       });
       this._selectedTiles = tileIndices.map(index => this._getTile(index, true));
 
@@ -139,9 +149,18 @@ export default class Tileset2D {
   /* Public interface for subclassing */
 
   // Returns array of {x, y, z}
-  getTileIndices({viewport, maxZoom, minZoom, zRange}) {
+  getTileIndices({viewport, maxZoom, minZoom, zRange, modelMatrix, modelMatrixInverse}) {
     const {tileSize, extent} = this.opts;
-    return getTileIndices({viewport, maxZoom, minZoom, zRange, tileSize, extent});
+    return getTileIndices({
+      viewport,
+      maxZoom,
+      minZoom,
+      zRange,
+      tileSize,
+      extent,
+      modelMatrix,
+      modelMatrixInverse
+    });
   }
 
   // Add custom metadata to tiles

@@ -29,6 +29,30 @@ export const urlType = {
   }
 };
 
+function transformBox(bbox, modelMatrix) {
+  const transformedCoords = [
+    // top-left
+    modelMatrix.transformPoint([bbox[0], bbox[1]]),
+    // top-right
+    modelMatrix.transformPoint([bbox[2], bbox[1]]),
+    // bottom-left
+    modelMatrix.transformPoint([bbox[0], bbox[3]]),
+    // bottom-right
+    modelMatrix.transformPoint([bbox[2], bbox[3]])
+  ];
+  const transformedBox = [
+    // Minimum x coord
+    Math.min(...transformedCoords.map(i => i[0])),
+    // Minimum y coord
+    Math.min(...transformedCoords.map(i => i[1])),
+    // Max x coord
+    Math.max(...transformedCoords.map(i => i[0])),
+    // Max y coord
+    Math.max(...transformedCoords.map(i => i[1]))
+  ];
+  return transformedBox;
+}
+
 export function getURLFromTemplate(template, properties) {
   if (!template || !template.length) {
     return null;
@@ -64,6 +88,16 @@ function getBoundingBox(viewport, zRange, extent) {
   } else {
     bounds = viewport.getBounds();
   }
+  if (!viewport.isGeospatial) {
+    return [
+      // Top corner should not be more then bottom corner in either direction
+      Math.max(Math.min(bounds[0], extent[2]), extent[0]),
+      Math.max(Math.min(bounds[1], extent[3]), extent[1]),
+      // Bottom corner should not be less then top corner in either direction
+      Math.min(Math.max(bounds[2], extent[0]), extent[2]),
+      Math.min(Math.max(bounds[3], extent[1]), extent[3])
+    ];
+  }
   return [
     Math.max(bounds[0], extent[0]),
     Math.max(bounds[1], extent[1]),
@@ -72,8 +106,14 @@ function getBoundingBox(viewport, zRange, extent) {
   ];
 }
 
-function getTileIndex([x, y], scale) {
-  return [(x * scale) / TILE_SIZE, (y * scale) / TILE_SIZE];
+function getIndexingCoords(bbox, scale, modelMatrixInverse) {
+  if (modelMatrixInverse) {
+    const transformedTileIndex = transformBox(bbox, modelMatrixInverse).map(
+      i => (i * scale) / TILE_SIZE
+    );
+    return transformedTileIndex;
+  }
+  return bbox.map(i => (i * scale) / TILE_SIZE);
 }
 
 function getScale(z) {
@@ -105,12 +145,10 @@ export function tileToBoundingBox(viewport, x, y, z) {
   return {left, top, right, bottom};
 }
 
-function getIdentityTileIndices(viewport, z, extent) {
+function getIdentityTileIndices(viewport, z, extent, modelMatrixInverse) {
   const bbox = getBoundingBox(viewport, null, extent);
   const scale = getScale(z);
-
-  const [minX, minY] = getTileIndex([bbox[0], bbox[1]], scale);
-  const [maxX, maxY] = getTileIndex([bbox[2], bbox[3]], scale);
+  const [minX, minY, maxX, maxY] = getIndexingCoords(bbox, scale, modelMatrixInverse);
   const indices = [];
 
   /*
@@ -130,7 +168,17 @@ function getIdentityTileIndices(viewport, z, extent) {
  * than minZoom, return an empty array. If the current zoom level is greater than maxZoom,
  * return tiles that are on maxZoom.
  */
-export function getTileIndices({viewport, maxZoom, minZoom, zRange, extent, tileSize = TILE_SIZE}) {
+// eslint-disable-next-line complexity
+export function getTileIndices({
+  viewport,
+  maxZoom,
+  minZoom,
+  zRange,
+  extent,
+  tileSize = TILE_SIZE,
+  modelMatrix,
+  modelMatrixInverse
+}) {
   let z = Math.round(viewport.zoom + Math.log2(TILE_SIZE / tileSize));
   if (Number.isFinite(minZoom) && z < minZoom) {
     if (!extent) {
@@ -141,9 +189,13 @@ export function getTileIndices({viewport, maxZoom, minZoom, zRange, extent, tile
   if (Number.isFinite(maxZoom) && z > maxZoom) {
     z = maxZoom;
   }
+  let transformedExtent = extent;
+  if (modelMatrix && modelMatrixInverse && extent && !viewport.isGeospatial) {
+    transformedExtent = transformBox(extent, modelMatrix);
+  }
   return viewport.isGeospatial
     ? getOSMTileIndices(viewport, z, zRange, extent || DEFAULT_EXTENT)
-    : getIdentityTileIndices(viewport, z, extent || DEFAULT_EXTENT);
+    : getIdentityTileIndices(viewport, z, transformedExtent || DEFAULT_EXTENT, modelMatrixInverse);
 }
 
 /**

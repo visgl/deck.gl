@@ -6,6 +6,7 @@ import {
   getURLFromTemplate
 } from '@deck.gl/geo-layers/tile-layer/utils';
 import {WebMercatorViewport, OrthographicView} from '@deck.gl/core';
+import {Matrix4} from 'math.gl';
 
 const TEST_CASES = [
   {
@@ -142,6 +143,88 @@ const TEST_CASES = [
     }),
     tileSize: 256,
     output: ['1,2,4', '1,3,4', '2,2,4', '2,3,4', '3,2,4', '3,3,4', '4,2,4', '4,3,4']
+  },
+  {
+    title: 'non-geospatial modelMatrix identity',
+    viewport: new OrthographicView().makeViewport({
+      width: 100,
+      height: 100,
+      viewState: {
+        target: [512, 512],
+        zoom: 0
+      }
+    }),
+    tileSize: 512,
+    modelMatrix: new Matrix4().identity(),
+    modelMatrixInverse: new Matrix4().identity().invert(),
+    output: ['0,0,0', '0,1,0', '1,0,0', '1,1,0']
+  },
+  {
+    title: 'non-geospatial modelMatrix scaling',
+    viewport: new OrthographicView().makeViewport({
+      width: 100,
+      height: 100,
+      viewState: {
+        target: [512, 512],
+        zoom: 0
+      }
+    }),
+    tileSize: 512,
+    modelMatrix: new Matrix4().scale(2),
+    modelMatrixInverse: new Matrix4().scale(2).invert(),
+    output: ['0,0,0']
+  },
+  {
+    title: 'non-geospatial modelMatrix translation',
+    viewport: new OrthographicView().makeViewport({
+      width: 100,
+      height: 100,
+      viewState: {
+        target: [512, 512],
+        zoom: 0
+      }
+    }),
+    tileSize: 512,
+    modelMatrix: new Matrix4().translate([300, 300, 0]),
+    modelMatrixInverse: new Matrix4().translate([300, 300, 0]).invert(),
+    output: ['0,0,0']
+  },
+  {
+    title: 'non-geospatial modelMatrix translation & scaling',
+    viewport: new OrthographicView().makeViewport({
+      width: 100,
+      height: 100,
+      viewState: {
+        target: [512, 512],
+        zoom: 0
+      }
+    }),
+    tileSize: 512,
+    modelMatrix: new Matrix4().translate([1024, 1024, 0]).scale(2),
+    modelMatrixInverse: new Matrix4()
+      .translate([1024, 1024, 0])
+      .scale(2)
+      .invert(),
+    output: ['-1,-1,0']
+  },
+  {
+    title: 'non-geospatial modelMatrix with extent prop',
+    viewport: new OrthographicView().makeViewport({
+      width: 100,
+      height: 100,
+      viewState: {
+        target: [512, 512],
+        zoom: 0
+      }
+    }),
+    tileSize: 512,
+    extent: [0, 0, 2048, 2048],
+    modelMatrix: new Matrix4().translate([1024, 1024, 0]).scale(2),
+    modelMatrixInverse: new Matrix4()
+      .translate([1024, 1024, 0])
+      .scale(2)
+      .invert(),
+    output: []
   }
 ];
 
@@ -179,13 +262,25 @@ function mergeBoundingBox(boundingBoxes) {
 
 test('getTileIndices', t => {
   for (const testCase of TEST_CASES) {
-    const {viewport, maxZoom, minZoom, zRange, tileSize} = testCase;
+    const {
+      viewport,
+      maxZoom,
+      minZoom,
+      zRange,
+      tileSize,
+      modelMatrix,
+      extent,
+      modelMatrixInverse
+    } = testCase;
     const result = getTileIndices({
       viewport,
       maxZoom,
       minZoom,
       zRange,
-      tileSize
+      tileSize,
+      modelMatrix,
+      modelMatrixInverse,
+      extent
     });
     t.deepEqual(getTileIds(result), testCase.output, testCase.title);
   }

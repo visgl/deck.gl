@@ -97,14 +97,13 @@ export default class TileLayer extends CompositeLayer {
         tile.layers = null;
       });
     }
-
     this._updateTileset();
   }
 
   _updateTileset() {
     const {tileset} = this.state;
-    const {onViewportLoad, zRange} = this.props;
-    const frameNumber = tileset.update(this.context.viewport, {zRange});
+    const {onViewportLoad, zRange, modelMatrix} = this.props;
+    const frameNumber = tileset.update(this.context.viewport, {zRange, modelMatrix});
     const {isLoaded} = tileset;
 
     const loadingStateChanged = this.state.isLoaded !== isLoaded;
