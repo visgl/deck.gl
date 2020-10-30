@@ -11,6 +11,8 @@
 
     const {MapboxLayer, ScatterplotLayer, ArcLayer} = deck;
 
+    mapboxgl.accessToken = '<mapbox-access-token>';
+
     const map = new mapboxgl.Map({
       container: document.body,
       style: 'mapbox://styles/mapbox/light-v9',
