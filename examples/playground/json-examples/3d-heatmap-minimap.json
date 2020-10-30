@@ -15,13 +15,13 @@
     {
       "@@type": "MapView",
       "id": "main",
-      "mapStyle": "mapbox://styles/mapbox/dark-v9",
+      "mapStyle": "https://basemaps.cartocdn.com/gl/dark-matter-nolabels-gl-style/style.json",
       "controller": true
     },
     {
       "@@type": "MapView",
       "id": "minimap",
-      "mapStyle": "mapbox://styles/mapbox/light-v9",
+      "mapStyle": "https://basemaps.cartocdn.com/gl/positron-nolabels-gl-style/style.json",
       "width": "40%",
       "height": "40%",
       "x": "55%",

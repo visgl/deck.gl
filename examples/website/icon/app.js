@@ -7,9 +7,6 @@ import {IconLayer} from '@deck.gl/layers';
 
 import IconClusterLayer from './icon-cluster-layer';
 
-// Set your mapbox token here
-const MAPBOX_TOKEN = process.env.MapboxAccessToken; // eslint-disable-line
-
 // Source data CSV
 const DATA_URL =
   'https://raw.githubusercontent.com/visgl/deck.gl-data/master/examples/icon/meteorites.json'; // eslint-disable-line
@@ -23,6 +20,8 @@ const INITIAL_VIEW_STATE = {
   pitch: 0,
   bearing: 0
 };
+
+const MAP_STYLE = 'https://basemaps.cartocdn.com/gl/dark-matter-nolabels-gl-style/style.json';
 
 function renderTooltip(info) {
   const {object, x, y} = info;
@@ -65,7 +64,7 @@ export default function App({
   iconMapping = 'data/location-icon-mapping.json',
   iconAtlas = 'data/location-icon-atlas.png',
   showCluster = true,
-  mapStyle = 'mapbox://styles/mapbox/dark-v9'
+  mapStyle = MAP_STYLE
 }) {
   const [hoverInfo, setHoverInfo] = useState({});
 
@@ -109,12 +108,7 @@ export default function App({
       onViewStateChange={hideTooltip}
       onClick={expandTooltip}
     >
-      <StaticMap
-        reuseMaps
-        mapStyle={mapStyle}
-        preventStyleDiffing={true}
-        mapboxApiAccessToken={MAPBOX_TOKEN}
-      />
+      <StaticMap reuseMaps mapStyle={mapStyle} preventStyleDiffing={true} />
 
       {renderTooltip(hoverInfo)}
     </DeckGL>

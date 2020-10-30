@@ -59,8 +59,7 @@ The scripting API's [DeckGL](/docs/api-reference/core/deckgl.md) class extends t
 
 ```js
 new deck.DeckGL({
-  mapboxApiAccessToken: '<your_token_here>',
-  mapStyle: 'mapbox://styles/mapbox/light-v9',
+  mapStyle: 'https://basemaps.cartocdn.com/gl/positron-nolabels-gl-style/style.json',
   initialViewState: {
     longitude: -122.45,
     latitude: 37.8,

@@ -31,11 +31,7 @@ const CONFIG = {
     ]
   },
 
-  plugins: [
-    // Optional: Enables reading mapbox token from environment variable
-    new webpack.EnvironmentPlugin(['MapboxAccessToken']),
-    new webpack.EnvironmentPlugin(['GoogleMapsToken'])
-  ],
+  plugins: [new webpack.EnvironmentPlugin(['GoogleMapsToken'])],
 
   node: {fs: 'empty'}
 };
