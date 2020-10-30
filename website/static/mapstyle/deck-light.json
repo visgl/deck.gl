@@ -2391,6 +2391,7 @@
       ],
       "type": "line",
       "source": "carto",
+      "minzoom": 5,
       "id": "road-motorway-case",
       "paint": {
         "line-width": {
@@ -3106,6 +3107,7 @@
       "interactive": true,
       "metadata": {
       },
+      "minzoom": 5,
       "id": "road-motorway",
       "paint": {
         "line-width": {
