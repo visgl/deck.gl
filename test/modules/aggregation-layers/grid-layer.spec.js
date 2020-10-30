@@ -168,3 +168,73 @@ test('GridLayer#updates', t => {
   });
   t.end();
 });
+
+test('GridLayer#non-iterable data', t => {
+  const dataNonIterable = {
+    length: 3,
+    positions: FIXTURES.points.slice(0, 3).flatMap(d => d.COORDINATES),
+    weights: FIXTURES.points.slice(0, 3).map(d => d.SPACES)
+  };
+
+  testLayer({
+    Layer: GridLayer,
+    onError: t.notOk,
+    testCases: [
+      {
+        props: {
+          data: dataNonIterable,
+          radius: 400,
+          getPosition: (_, {index, data}) => [
+            data.positions[index * 2],
+            data.positions[index * 2 + 1]
+          ],
+          getColorWeight: 1,
+          getElevationWeight: 1
+        },
+        onAfterUpdate: ({subLayer}) => {
+          t.pass('Layer updated with constant get*Weight accessors');
+        }
+      },
+      {
+        updateProps: {
+          getColorWeight: (_, {index, data}) => {
+            t.ok(Number.isFinite(index) && data, 'point index and context are populated');
+            return data.weights[index * 2];
+          },
+          getElevationWeight: (_, {index, data}) => {
+            t.ok(Number.isFinite(index) && data, 'point index and context are populated');
+            return data.weights[index * 2];
+          },
+          updateTriggers: {
+            getColorWeight: 1,
+            getElevationWeight: 1
+          }
+        },
+        onAfterUpdate: ({subLayer}) => {
+          t.pass('Layer updated with get*Weight accessors and non-iterable data');
+        }
+      },
+      {
+        updateProps: {
+          getColorValue: (points, {data}) => {
+            t.ok(Number.isFinite(points[0].index) && data, 'point index and context are populated');
+            return points.length;
+          },
+          getElevationValue: (points, {data}) => {
+            t.ok(Number.isFinite(points[0].index) && data, 'point index and context are populated');
+            return points.length;
+          },
+          updateTriggers: {
+            getColorValue: 1,
+            getElevationValue: 1
+          }
+        },
+        onAfterUpdate: ({subLayer}) => {
+          t.pass('Layer updated with get*Value accessors and non-iterable data');
+        }
+      }
+    ]
+  });
+
+  t.end();
+});

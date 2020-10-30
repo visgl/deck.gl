@@ -141,6 +141,25 @@ Whether to enable cell elevation. Cell elevation scale by count of points in eac
 This is an object that contains material props for [lighting effect](/docs/api-reference/core/lighting-effect.md) applied on extruded polygons.
 Check [the lighting guide](/docs/developer-guide/using-lighting.md#constructing-a-material-instance) for configurable settings.
 
+
+
+##### `colorAggregation` (String, optional)
+
+* Default: 'SUM'
+
+Defines the operation used to aggregate all data point weights to calculate a cell's color value. Valid values are 'SUM', 'MEAN', 'MIN' and 'MAX'. 'SUM' is used when an invalid value is provided.
+
+`getColorWeight` and `colorAggregation` together determine the elevation value of each cell.
+
+##### `elevationAggregation` (String, optional)
+
+* Default: 'SUM'
+
+Defines the operation used to aggregate all data point weights to calculate a cell's elevation value. Valid values are 'SUM', 'MEAN', 'MIN' and 'MAX'. 'SUM' is used when an invalid value is provided.
+
+`getElevationWeight` and `elevationAggregation` together determine the elevation value of each cell.
+
+
 ### Data Accessors
 
 ##### `getPosition` ([Function](/docs/developer-guide/using-layers.md#accessors), optional)
@@ -149,44 +168,25 @@ Check [the lighting guide](/docs/developer-guide/using-lighting.md#constructing-
 
 Method called to retrieve the position of each point.
 
+
 ##### `getColorWeight` (Function, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
 
-* Default: `point => 1`
+* Default: `1`
 
-`getColorWeight` is the accessor function to get the weight of a point used to calcuate the color value for a cell.
-It takes the data prop array element and returns the weight, for example, to use `SPACE` field, `getColorWeight` should be set to `point => point.SPACES`.
-By default `getColorWeight` returns `1`.
+The weight of a data point used to calculate the color value for a cell.
 
-Note: similar to `getColorValue`, grid layer compares whether `getColorWeight` has changed to recalculate the value for each bin that its color based on.
-
-
-##### `colorAggregation` (String, optional)
-
-* Default: 'SUM'
-
-`colorAggregation` defines, operation used to aggregate all data point weights to calculate a cell's color value. Valid values are 'SUM', 'MEAN', 'MIN' and 'MAX'. 'SUM' is used when an invalid value is provided.
-
-Note: `getColorWeight` and `colorAggregation` together define how color value of cell is determined, same can be done by setting `getColorValue` prop. But to enable gpu aggregation, former props must be provided instead of later.
+* If a number is provided, it is used as the weight for all objects.
+* If a function is provided, it is called on each object to retrieve its weight.
 
 
 ##### `getElevationWeight` (Function, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
 
-* Default: `point => 1`
+* Default: `1`
 
-`getElevationWeight` is the accessor function to get the weight of a point used to calcuate the elevation value for a cell.
-It takes the data prop array element and returns the weight, for example, to use `SPACE` field, `getElevationWeight` should be set to `point => point.SPACES`.
-By default `getElevationWeight` returns `1`.
+The weight of a data point used to calculate the elevation value for a cell.
 
-Note: similar to `getElevationValue`, grid layer compares whether `getElevationWeight` has changed to recalculate the value for each bin that its color based on.
-
-
-##### `elevationAggregation` (String, optional)
-
-* Default: 'SUM'
-
-`elevationAggregation` defines, operation used to aggregate all data point weights to calculate a cell's elevation value. Valid values are 'SUM', 'MEAN', 'MIN' and 'MAX'. 'SUM' is used when an invalid value is provided.
-
-Note: `getElevationWeight` and `elevationAggregation` together define how elevation value of cell is determined, same can be done by setting `getColorValue` prop. But to enable gpu aggregation, former props must be provided instead of later.
+* If a number is provided, it is used as the weight for all objects.
+* If a function is provided, it is called on each object to retrieve its weight.
 
 
 ## Differences compared to CPUGridLayer

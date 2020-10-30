@@ -862,3 +862,79 @@ test('HexagonLayer#renderSubLayer', t => {
 
   t.end();
 });
+
+test('HexagonLayer#non-iterable data', t => {
+  const dataNonIterable = {
+    length: 3,
+    positions: data.points.slice(0, 3).flatMap(d => d.COORDINATES),
+    weights: data.points.slice(0, 3).map(d => d.SPACES)
+  };
+
+  testLayer({
+    Layer: HexagonLayer,
+    onError: t.notOk,
+    testCases: [
+      {
+        props: {
+          data: dataNonIterable,
+          radius: 400,
+          getPosition: (_, {index, data: {positions}}) => [
+            positions[index * 2],
+            positions[index * 2 + 1]
+          ],
+          getColorWeight: 1,
+          getElevationWeight: 1
+        },
+        onAfterUpdate: ({subLayer}) => {
+          t.pass('Layer updated with constant get*Weight accessors');
+        }
+      },
+      {
+        updateProps: {
+          getColorWeight: (_, {index, data: {weights}}) => {
+            t.ok(Number.isFinite(index) && weights, 'point index and context are populated');
+            return weights[index * 2];
+          },
+          getElevationWeight: (_, {index, data: {weights}}) => {
+            t.ok(Number.isFinite(index) && weights, 'point index and context are populated');
+            return weights[index * 2];
+          },
+          updateTriggers: {
+            getColorWeight: 1,
+            getElevationWeight: 1
+          }
+        },
+        onAfterUpdate: ({subLayer}) => {
+          t.pass('Layer updated with get*Weight accessors and non-iterable data');
+        }
+      },
+      {
+        updateProps: {
+          getColorValue: (points, {data: {weights}}) => {
+            t.ok(
+              Number.isFinite(points[0].index) && weights,
+              'point index and context are populated'
+            );
+            return points.length;
+          },
+          getElevationValue: (points, {data: {weights}}) => {
+            t.ok(
+              Number.isFinite(points[0].index) && weights,
+              'point index and context are populated'
+            );
+            return points.length;
+          },
+          updateTriggers: {
+            getColorValue: 1,
+            getElevationValue: 1
+          }
+        },
+        onAfterUpdate: ({subLayer}) => {
+          t.pass('Layer updated with get*Value accessors and non-iterable data');
+        }
+      }
+    ]
+  });
+
+  t.end();
+});
