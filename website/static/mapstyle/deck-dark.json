@@ -398,11 +398,6 @@
       "interactive": true,
       "minzoom": 15,
       "layout": {},
-      "filter": [
-        "==",
-        "underground",
-        "false"
-      ],
       "type": "fill",
       "source": "carto",
       "id": "building",
@@ -1785,23 +1780,11 @@
       },
       "filter": [
         "all",
-        [
-          "==",
-          "$type",
-          "LineString"
-        ],
+        ["==", "$type", "LineString"],
         [
           "all",
-          [
-            "==",
-            "class",
-            "street"
-          ],
-          [
-            "==",
-            "structure",
-            "none"
-          ]
+          ["==", "class", "minor"],
+          ["!has", "brunnel"]
         ]
       ],
       "type": "line",

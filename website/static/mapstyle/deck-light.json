@@ -401,11 +401,6 @@
       "interactive": true,
       "minzoom": 15,
       "layout": {},
-      "filter": [
-        "==",
-        "underground",
-        "false"
-      ],
       "type": "fill",
       "source": "carto",
       "id": "building",
@@ -413,16 +408,7 @@
         "fill-color": "#DDE3E5",
         "fill-opacity": {
           "base": 1,
-          "stops": [
-            [
-              15.5,
-              0
-            ],
-            [
-              16,
-              1
-            ]
-          ]
+          "stops": [[15.5, 0], [16, 1]]
         },
         "fill-outline-color": "hsl(55, 3%, 87%)",
         "fill-antialias": true
@@ -1835,33 +1821,19 @@
       "source-layer": "transportation"
     },
     {
-      "interactive": true,
       "minzoom": 11,
       "layout": {
         "line-cap": "round",
         "line-join": "round"
       },
-      "metadata": {
-      },
+      "metadata": {},
       "filter": [
         "all",
-        [
-          "==",
-          "$type",
-          "LineString"
-        ],
+        ["==", "$type", "LineString"],
         [
           "all",
-          [
-            "==",
-            "class",
-            "street"
-          ],
-          [
-            "==",
-            "structure",
-            "none"
-          ]
+          ["==", "class", "minor"],
+          ["!has", "brunnel"]
         ]
       ],
       "type": "line",
@@ -1871,22 +1843,16 @@
         "line-width": {
           "base": 1.5,
           "stops": [
-            [
-              12.5,
-              0.5
-            ],
-            [
-              14,
-              2
-            ],
-            [
-              18,
-              18
-            ]
+            [12.5, 0.5],
+            [14, 2],
+            [18, 18]
           ]
         },
-        "line-color": "#dcdcdc",
-        "line-opacity": 0
+        "line-opacity": {
+          "base": 1,
+          "stops": [[15.5, 0], [16, 1]]
+        },
+        "line-color": "#F6FBFB"
       },
       "source-layer": "transportation"
     },
