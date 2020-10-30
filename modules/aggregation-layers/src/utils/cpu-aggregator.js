@@ -19,7 +19,7 @@
 // THE SOFTWARE.
 import BinSorter from './bin-sorter';
 import {getScaleFunctionByScaleType} from './scale-utils';
-import {getValueFunc} from './aggregation-operation-utils';
+import {getValueFunc, wrapGetValueFunc} from './aggregation-operation-utils';
 
 function nop() {}
 
@@ -221,9 +221,13 @@ export default class CPUAggregator {
         changeFlags
       );
 
-      if (getValueChanged && getValue === null) {
-        // If `getValue` is not provided from props, build it with aggregation and weight.
-        getValue = getValueFunc(props[aggregation.prop], props[weight.prop]);
+      if (getValueChanged) {
+        if (getValue) {
+          getValue = wrapGetValueFunc(getValue, {data: props.data});
+        } else {
+          // If `getValue` is not provided from props, build it with aggregation and weight.
+          getValue = getValueFunc(props[aggregation.prop], props[weight.prop], {data: props.data});
+        }
       }
 
       if (getValue) {
@@ -382,8 +386,7 @@ export default class CPUAggregator {
 
     const sortedBins = new BinSorter(this.state.layerData.data || [], {
       getValue,
-      filterData: props._filterData,
-      context: {data: props.data}
+      filterData: props._filterData
     });
     this.setDimensionState(key, {sortedBins});
     this.getDimensionValueDomain(props, dimensionUpdater);

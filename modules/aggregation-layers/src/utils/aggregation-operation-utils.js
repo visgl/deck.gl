@@ -37,66 +37,73 @@ function minReducer(accu, cur) {
   return cur < accu ? cur : accu;
 }
 
-function wrapAccessor(accessor, context) {
-  return pt => {
-    context.index = pt.index;
-    return accessor(pt.source, context);
-  };
-}
-
-export function getMean(pts, accessor, context) {
+export function getMean(pts, accessor) {
   if (Number.isFinite(accessor)) {
     return pts.length ? accessor : null;
   }
-  accessor = wrapAccessor(accessor, context);
   const filtered = pts.map(accessor).filter(Number.isFinite);
 
   return filtered.length ? filtered.reduce(sumReducer, 0) / filtered.length : null;
 }
 
-export function getSum(pts, accessor, context) {
+export function getSum(pts, accessor) {
   if (Number.isFinite(accessor)) {
     return pts.length ? pts.length * accessor : null;
   }
-  accessor = wrapAccessor(accessor, context);
   const filtered = pts.map(accessor).filter(Number.isFinite);
 
   return filtered.length ? filtered.reduce(sumReducer, 0) : null;
 }
 
-export function getMax(pts, accessor, context) {
+export function getMax(pts, accessor) {
   if (Number.isFinite(accessor)) {
     return pts.length ? accessor : null;
   }
-  accessor = wrapAccessor(accessor, context);
   const filtered = pts.map(accessor).filter(Number.isFinite);
 
   return filtered.length ? filtered.reduce(maxReducer, -Infinity) : null;
 }
 
-export function getMin(pts, accessor, context) {
+export function getMin(pts, accessor) {
   if (Number.isFinite(accessor)) {
     return pts.length ? accessor : null;
   }
-  accessor = wrapAccessor(accessor, context);
   const filtered = pts.map(accessor).filter(Number.isFinite);
 
   return filtered.length ? filtered.reduce(minReducer, Infinity) : null;
 }
 
 // Function to convert from aggregation/accessor props (like colorAggregation and getColorWeight) to getValue prop (like getColorValue)
-export function getValueFunc(aggregation, accessor) {
+export function getValueFunc(aggregation, accessor, context) {
   const op = AGGREGATION_OPERATION[aggregation] || AGGREGATION_OPERATION.SUM;
+  accessor = wrapAccessor(accessor, context);
   switch (op) {
     case AGGREGATION_OPERATION.MIN:
-      return (pts, context) => getMin(pts, accessor, context);
+      return pts => getMin(pts, accessor);
     case AGGREGATION_OPERATION.SUM:
-      return (pts, context) => getSum(pts, accessor, context);
+      return pts => getSum(pts, accessor);
     case AGGREGATION_OPERATION.MEAN:
-      return (pts, context) => getMean(pts, accessor, context);
+      return pts => getMean(pts, accessor);
     case AGGREGATION_OPERATION.MAX:
-      return (pts, context) => getMax(pts, accessor, context);
+      return pts => getMax(pts, accessor);
     default:
       return null;
   }
+}
+
+function wrapAccessor(accessor, context = {}) {
+  if (Number.isFinite(accessor)) {
+    return accessor;
+  }
+  return pt => {
+    context.index = pt.index;
+    return accessor(pt.source, context);
+  };
+}
+
+export function wrapGetValueFunc(getValue, context = {}) {
+  return pts => {
+    context.indices = pts.map(pt => pt.index);
+    return getValue(pts.map(pt => pt.source), context);
+  };
 }

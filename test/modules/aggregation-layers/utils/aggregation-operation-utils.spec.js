@@ -20,7 +20,10 @@
 
 import test from 'tape-catch';
 
-import {getValueFunc} from '@deck.gl/aggregation-layers/utils/aggregation-operation-utils';
+import {
+  getValueFunc,
+  wrapGetValueFunc
+} from '@deck.gl/aggregation-layers/utils/aggregation-operation-utils';
 
 const data = [
   {source: 10, index: 0},
@@ -105,10 +108,21 @@ const TEST_CASES = [
 test('GridAggregationOperationUtils#getValueFunc', t => {
   TEST_CASES.forEach(tc => {
     const func = getValueFunc(tc.op, tc.accessor);
-    t.is(func(data, {}), tc.expected, `${tc.name} should return expected result`);
+    t.is(func(data), tc.expected, `${tc.name} should return expected result`);
 
     const altData = typeof accessor === 'function' ? nonFiniteData : [];
-    t.is(func(altData, {}), null, `${tc.name} should return expected result on non-finite data`);
+    t.is(func(altData), null, `${tc.name} should return expected result on non-finite data`);
   });
+  t.end();
+});
+
+test('GridAggregationOperationUtils#wrapGetValueFunc', t => {
+  const func = wrapGetValueFunc((values, {indices}) => {
+    t.deepEqual(indices, [0, 1, 2, 3, 4, 5, 6], 'indices are populated');
+    return Math.max.apply(null, values.filter(Number.isFinite));
+  });
+
+  t.is(func(data), 16, 'returns expected result');
+
   t.end();
 });

@@ -216,12 +216,12 @@ test('GridLayer#non-iterable data', t => {
       },
       {
         updateProps: {
-          getColorValue: (points, {data}) => {
-            t.ok(Number.isFinite(points[0].index) && data, 'point index and context are populated');
+          getColorValue: (points, {indices, data: {weights}}) => {
+            t.ok(indices && weights, 'context is populated');
             return points.length;
           },
-          getElevationValue: (points, {data}) => {
-            t.ok(Number.isFinite(points[0].index) && data, 'point index and context are populated');
+          getElevationValue: (points, {indices, data: {weights}}) => {
+            t.ok(indices && weights, 'context is populated');
             return points.length;
           },
           updateTriggers: {

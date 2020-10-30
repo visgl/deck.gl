@@ -346,11 +346,10 @@ After data points are aggregated into bins, this accessor is called on each bin 
 
 Arguments:
 
-- `points` (Array) - a list of objects whose positions fall inside this bin. Each element contains the following fields:
-  + `source` (Object) - the original data object
-  + `index` (Number) - the index of the object in `data`
-- `context` (Object) - contains the following fields:
-  + `data` - the value of the `data` prop. This is useful when data is non-iterable, such as [binary blobs](/docs/developer-guide/performance.md#supply-binary-blobs-to-the-data-prop).
+- `objects` (Array) - a list of objects whose positions fall inside this cell.
+- `objectInfo` (Object) - contains the following fields:
+  + `indices` (Array) - the indices of `objects` in the original data
+  + `data` - the value of the `data` prop.
 
 
 ##### `getElevationWeight` (Function, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
@@ -371,11 +370,10 @@ After data points are aggregated into bins, this accessor is called on each bin 
 
 Arguments:
 
-- `points` (Array) - a list of objects whose positions fall inside this bin. Each element contains the following fields:
-  + `source` (Object) - the original data object
-  + `index` (Number) - the index of the object in `data`
-- `context` (Object) - contains the following fields:
-  + `data` - the value of the `data` prop. This is useful when data is non-iterable, such as [binary blobs](/docs/developer-guide/performance.md#supply-binary-blobs-to-the-data-prop).
+- `objects` (Array) - a list of objects whose positions fall inside this cell.
+- `objectInfo` (Object) - contains the following fields:
+  + `indices` (Array) - the indices of `objects` in the original data
+  + `data` - the value of the `data` prop.
 
 
 ### Callbacks

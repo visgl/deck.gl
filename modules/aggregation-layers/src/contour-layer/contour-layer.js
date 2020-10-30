@@ -220,13 +220,13 @@ export default class ContourLayer extends GridAggregationLayer {
   // Private (Aggregation)
 
   _updateAccessors(opts) {
-    const {getWeight, aggregation} = opts.props;
+    const {getWeight, aggregation, data} = opts.props;
     const {count} = this.state.weights;
     if (count) {
       count.getWeight = getWeight;
       count.operation = AGGREGATION_OPERATION[aggregation];
     }
-    this.setState({getValue: getValueFunc(aggregation, getWeight)});
+    this.setState({getValue: getValueFunc(aggregation, getWeight, {data})});
   }
 
   _resetResults() {

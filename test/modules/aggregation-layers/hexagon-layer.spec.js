@@ -910,18 +910,12 @@ test('HexagonLayer#non-iterable data', t => {
       },
       {
         updateProps: {
-          getColorValue: (points, {data: {weights}}) => {
-            t.ok(
-              Number.isFinite(points[0].index) && weights,
-              'point index and context are populated'
-            );
+          getColorValue: (points, {indices, data: {weights}}) => {
+            t.ok(indices && weights, 'context is populated');
             return points.length;
           },
-          getElevationValue: (points, {data: {weights}}) => {
-            t.ok(
-              Number.isFinite(points[0].index) && weights,
-              'point index and context are populated'
-            );
+          getElevationValue: (points, {indices, data: {weights}}) => {
+            t.ok(indices && weights, 'context is populated');
             return points.length;
           },
           updateTriggers: {

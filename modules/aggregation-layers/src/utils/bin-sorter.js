@@ -62,8 +62,7 @@ export default class BinSorter {
       getValue = defaultGetValue,
       getPoints = defaultGetPoints,
       getIndex = defaultGetIndex,
-      filterData,
-      context = {}
+      filterData
     } = props;
 
     const hasFilter = typeof filterData === 'function';
@@ -80,7 +79,7 @@ export default class BinSorter {
 
       bin.filteredPoints = hasFilter ? filteredPoints : null;
 
-      const value = filteredPoints.length ? getValue(filteredPoints, context) : null;
+      const value = filteredPoints.length ? getValue(filteredPoints) : null;
 
       if (value !== null && value !== undefined) {
         // filter bins if value is null or undefined

@@ -90,6 +90,9 @@ export default class AggregationLayer extends CompositeLayer {
     const {ignoreProps} = this.state;
     const {props: dataProps, accessors = []} = dimension;
     const {updateTriggersChanged} = changeFlags;
+    if (changeFlags.dataChanged) {
+      return true;
+    }
     if (updateTriggersChanged) {
       if (updateTriggersChanged.all) {
         return true;
