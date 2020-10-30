@@ -101,9 +101,10 @@ export default class Tileset2D {
   }
 
   /**
-   * Update the cache with the given viewport and triggers callback onUpdate.
+   * Update the cache with the given viewport and model matrix and triggers callback onUpdate.
    * @param {*} viewport
    * @param {*} onUpdate
+   * @param {*} modelMatrix
    */
   update(viewport, {zRange} = {}, modelMatrix) {
     const modelMatrixAsMatrix4 = new Matrix4(modelMatrix);

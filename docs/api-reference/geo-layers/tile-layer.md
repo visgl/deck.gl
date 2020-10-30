@@ -222,6 +222,12 @@ An array representing the range of minimum and maximum heights in the tile. This
 
 - Default: `null` (interpreted as `[0, 0]`)
 
+##### `modelMatrix` (Matrix4, optional)
+
+Affects both rendering and tile fetching to produce a transformed tile layer.  Note that this can result in tiles being fetched outside the `extent` prop, for example if the `modelMatrix` defines a rotation.
+
+- Default: `null`
+
 ### Callbacks
 
 ##### `onViewportLoad` (Function, optional)
