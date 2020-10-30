@@ -52,7 +52,7 @@ const deckgl = new deck.DeckGL({
 
 ## Supported basemaps
 
-There are the basemaps available today:
+There are several basemaps available today:
 
 * POSITRON
 * DARK_MATTER
