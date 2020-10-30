@@ -22,50 +22,93 @@ import test from 'tape-catch';
 
 import {getValueFunc} from '@deck.gl/aggregation-layers/utils/aggregation-operation-utils';
 
-const data = [10, 'a', null, 14, -3, 16, 0.2];
-const nonFiniteData = ['a', null, {a: 'a'}];
-const accessor = x => x;
+const data = [
+  {source: 10, index: 0},
+  {source: 'a', index: 1},
+  {source: null, index: 2},
+  {source: 14, index: 3},
+  {source: -3, index: 4},
+  {source: 16, index: 5},
+  {source: 0.2, index: 6}
+];
+const nonFiniteData = [
+  {source: 'a', index: 0},
+  {source: null, index: 1},
+  {source: {a: 'a'}, index: 2}
+];
 const TEST_CASES = [
   {
     name: 'Min Function',
     op: 'MIN',
     data,
+    accessor: x => x,
     expected: -3
   },
   {
     name: 'Max Function',
     op: 'MAX',
     data,
+    accessor: x => x,
     expected: 16
   },
   {
     name: 'Sum Function',
     op: 'SUM',
     data,
+    accessor: x => x,
     expected: 37.2
   },
   {
     name: 'Mean Function',
     op: 'MEAN',
     data,
+    accessor: x => x,
     expected: 37.2 / 5
   },
   {
     name: 'Invalid(should default to SUM)',
     op: 'Invalid',
     data,
+    accessor: x => x,
     expected: 37.2
+  },
+  {
+    name: 'Constant accessor/SUM',
+    op: 'SUM',
+    data,
+    accessor: 1,
+    expected: data.length
+  },
+  {
+    name: 'Constant accessor/MEAN',
+    op: 'MEAN',
+    data,
+    accessor: 1,
+    expected: 1
+  },
+  {
+    name: 'Constant accessor/MAX',
+    op: 'MAX',
+    data,
+    accessor: 1,
+    expected: 1
+  },
+  {
+    name: 'Constant accessor/MIN',
+    op: 'MIN',
+    data,
+    accessor: 1,
+    expected: 1
   }
 ];
 
 test('GridAggregationOperationUtils#getValueFunc', t => {
   TEST_CASES.forEach(tc => {
-    const func = getValueFunc(tc.op, accessor);
-    t.ok(func(data) === tc.expected, `${tc.name} should return expected result`);
-    t.ok(
-      func(nonFiniteData) === null,
-      `${tc.name} should return expected result on non-finite data`
-    );
+    const func = getValueFunc(tc.op, tc.accessor);
+    t.is(func(data, {}), tc.expected, `${tc.name} should return expected result`);
+
+    const altData = typeof accessor === 'function' ? nonFiniteData : [];
+    t.is(func(altData, {}), null, `${tc.name} should return expected result on non-finite data`);
   });
   t.end();
 });

@@ -93,6 +93,13 @@ Inherits from all [Base Layer](/docs/api-reference/core/layer.md) and [Composite
 
 Size of each cell in meters. Must be greater than `0`.
 
+##### `colorDomain` (Array, optional)
+
+* Default: `[min(count), max(count)]`
+
+Color scale domain, default is set to the range of point counts in each cell.
+
+
 ##### `colorRange` (Array, optional)
 
 * Default: <img src="/website/src/static/images/colorbrewer_YlOrRd_6.png"/>

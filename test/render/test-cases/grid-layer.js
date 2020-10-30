@@ -28,7 +28,7 @@ const GOLDEN_IMAGE = './test/render/golden-images/grid-lnglat.png';
 const GOLDEN_IMAGE_SIDE = './test/render/golden-images/grid-lnglat-side.png';
 
 export function getMean(pts, key) {
-  const filtered = pts.filter(pt => Number.isFinite(pt[key]));
+  const filtered = pts.filter(pt => Number.isFinite(pt.source[key]));
 
   return filtered.length
     ? filtered.reduce((accu, curr) => accu + curr[key], 0) / filtered.length
@@ -36,7 +36,7 @@ export function getMean(pts, key) {
 }
 
 export function getMax(pts, key) {
-  const filtered = pts.filter(pt => Number.isFinite(pt[key]));
+  const filtered = pts.filter(pt => Number.isFinite(pt.source[key]));
 
   return filtered.length
     ? filtered.reduce((accu, curr) => (curr[key] > accu ? curr[key] : accu), -Infinity)

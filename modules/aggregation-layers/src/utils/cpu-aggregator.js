@@ -292,10 +292,12 @@ export default class CPUAggregator {
     return Object.values(dimensionStep.triggers).some(item => {
       if (item.updateTrigger) {
         // check based on updateTriggers change first
+        // if data has changed, always update value
         return (
-          changeFlags.updateTriggersChanged &&
-          (changeFlags.updateTriggersChanged.all ||
-            changeFlags.updateTriggersChanged[item.updateTrigger])
+          changeFlags.dataChanged ||
+          (changeFlags.updateTriggersChanged &&
+            (changeFlags.updateTriggersChanged.all ||
+              changeFlags.updateTriggersChanged[item.updateTrigger]))
         );
       }
       // fallback to direct comparison
