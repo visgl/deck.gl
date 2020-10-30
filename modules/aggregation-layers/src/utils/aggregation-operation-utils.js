@@ -37,25 +37,49 @@ function minReducer(accu, cur) {
   return cur < accu ? cur : accu;
 }
 
-export function getMean(pts, accessor) {
+function wrapAccessor(accessor, context) {
+  return pt => {
+    const d = pt && pt.source;
+    context.index = pt && pt.index;
+    return accessor(d, context);
+  };
+}
+
+export function getMean(pts, accessor, context) {
+  if (Number.isFinite(accessor)) {
+    return pts.length ? accessor : null;
+  }
+  accessor = wrapAccessor(accessor, context);
   const filtered = pts.map(accessor).filter(Number.isFinite);
 
   return filtered.length ? filtered.reduce(sumReducer, 0) / filtered.length : null;
 }
 
-export function getSum(pts, accessor) {
+export function getSum(pts, accessor, context) {
+  if (Number.isFinite(accessor)) {
+    return pts.length ? pts.length * accessor : null;
+  }
+  accessor = wrapAccessor(accessor, context);
   const filtered = pts.map(accessor).filter(Number.isFinite);
 
   return filtered.length ? filtered.reduce(sumReducer, 0) : null;
 }
 
-export function getMax(pts, accessor) {
+export function getMax(pts, accessor, context) {
+  if (Number.isFinite(accessor)) {
+    return pts.length ? accessor : null;
+  }
+  accessor = wrapAccessor(accessor, context);
   const filtered = pts.map(accessor).filter(Number.isFinite);
 
   return filtered.length ? filtered.reduce(maxReducer, -Infinity) : null;
 }
 
-export function getMin(pts, accessor) {
+export function getMin(pts, accessor, context) {
+  if (Number.isFinite(accessor)) {
+    return pts.length ? accessor : null;
+  }
+  accessor = wrapAccessor(accessor, context);
   const filtered = pts.map(accessor).filter(Number.isFinite);
 
   return filtered.length ? filtered.reduce(minReducer, Infinity) : null;
@@ -66,13 +90,13 @@ export function getValueFunc(aggregation, accessor) {
   const op = AGGREGATION_OPERATION[aggregation] || AGGREGATION_OPERATION.SUM;
   switch (op) {
     case AGGREGATION_OPERATION.MIN:
-      return pts => getMin(pts, accessor);
+      return (pts, context) => getMin(pts, accessor, context);
     case AGGREGATION_OPERATION.SUM:
-      return pts => getSum(pts, accessor);
+      return (pts, context) => getSum(pts, accessor, context);
     case AGGREGATION_OPERATION.MEAN:
-      return pts => getMean(pts, accessor);
+      return (pts, context) => getMean(pts, accessor, context);
     case AGGREGATION_OPERATION.MAX:
-      return pts => getMax(pts, accessor);
+      return (pts, context) => getMax(pts, accessor, context);
     default:
       return null;
   }
