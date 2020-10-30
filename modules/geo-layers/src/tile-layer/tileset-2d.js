@@ -106,7 +106,7 @@ export default class Tileset2D {
    * @param {*} onUpdate
    * @param {*} modelMatrix
    */
-  update(viewport, {zRange} = {}, modelMatrix) {
+  update(viewport, {zRange, modelMatrix} = {}) {
     const modelMatrixAsMatrix4 = new Matrix4(modelMatrix);
     const isModelMatrixNew = !modelMatrixAsMatrix4.equals(this._modelMatrix);
     if (!viewport.equals(this._viewport) || isModelMatrixNew) {
