@@ -56,7 +56,6 @@ export default class TileLayer extends CompositeLayer {
     return changeFlags.somethingChanged;
   }
 
-  // eslint-disable-next-line complexity
   updateState({props, oldProps, context, changeFlags}) {
     let {tileset} = this.state;
     const createTileCache =
