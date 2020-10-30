@@ -8,9 +8,6 @@ import {h3ToGeo} from 'h3-js';
 import {load} from '@loaders.gl/core';
 import {CSVLoader} from '@loaders.gl/csv';
 
-// Set your mapbox token here
-mapboxgl.accessToken = process.env.MapboxAccessToken; // eslint-disable-line
-
 const colorScale = scaleLog()
   .domain([10, 100, 1000, 10000])
   .range([[255, 255, 178], [254, 204, 92], [253, 141, 60], [227, 26, 28]]);
@@ -18,7 +15,7 @@ const colorScale = scaleLog()
 export function renderToDOM(container, data) {
   const map = new mapboxgl.Map({
     container,
-    style: 'mapbox://styles/mapbox/light-v9',
+    style: 'https://basemaps.cartocdn.com/gl/positron-nolabels-gl-style/style.json',
     antialias: true,
     center: [-122.4034, 37.7845],
     zoom: 15.5,

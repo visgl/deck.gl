@@ -20,9 +20,6 @@ const DATA_URL = {
   TRIPS: 'https://raw.githubusercontent.com/visgl/deck.gl-data/master/examples/trips/trips.json' // eslint-disable-line
 };
 
-// Set your mapbox token here
-const MAPBOX_TOKEN = process.env.MapboxAccessToken; // eslint-disable-line
-
 const LIGHT_SETTINGS = {
   lightsPosition: [-74.05, 40.7, 8000, -73.5, 41, 5000],
   ambientRatio: 0.05,
@@ -128,8 +125,7 @@ class Root extends Component {
         {...viewState}
         width={width}
         height={height}
-        mapStyle="mapbox://styles/mapbox/dark-v9"
-        mapboxApiAccessToken={MAPBOX_TOKEN}
+        mapStyle="https://basemaps.cartocdn.com/gl/dark-matter-nolabels-gl-style/style.json"
       />
     );
   }

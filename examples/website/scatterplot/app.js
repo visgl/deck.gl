@@ -4,8 +4,6 @@ import {StaticMap} from 'react-map-gl';
 import DeckGL from '@deck.gl/react';
 import {ScatterplotLayer} from '@deck.gl/layers';
 
-// Set your mapbox token here
-const MAPBOX_TOKEN = process.env.MapboxAccessToken; // eslint-disable-line
 const MALE_COLOR = [0, 128, 255];
 const FEMALE_COLOR = [255, 0, 128];
 
@@ -27,7 +25,7 @@ export default function App({
   radius = 30,
   maleColor = MALE_COLOR,
   femaleColor = FEMALE_COLOR,
-  mapStyle = 'mapbox://styles/mapbox/light-v9'
+  mapStyle = 'https://basemaps.cartocdn.com/gl/positron-nolabels-gl-style/style.json'
 }) {
   const layers = [
     new ScatterplotLayer({
@@ -46,12 +44,7 @@ export default function App({
 
   return (
     <DeckGL layers={layers} initialViewState={INITIAL_VIEW_STATE} controller={true}>
-      <StaticMap
-        reuseMaps
-        mapStyle={mapStyle}
-        preventStyleDiffing={true}
-        mapboxApiAccessToken={MAPBOX_TOKEN}
-      />
+      <StaticMap reuseMaps mapStyle={mapStyle} preventStyleDiffing={true} />
     </DeckGL>
   );
 }

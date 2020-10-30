@@ -2,7 +2,6 @@
 // delete the local development overrides at the bottom of this file
 
 // avoid destructuring for older Node version support
-const webpack = require('webpack');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 
 const CONFIG = {
@@ -32,10 +31,7 @@ const CONFIG = {
   },
 
   // Optional: Enables reading mapbox token from environment variable
-  plugins: [
-    new HtmlWebpackPlugin({title: 'deck.gl example'}),
-    new webpack.EnvironmentPlugin(['MapboxAccessToken'])
-  ]
+  plugins: [new HtmlWebpackPlugin({title: 'deck.gl example'})]
 };
 
 // This line enables bundling against src in this repo rather than installed module

@@ -5,14 +5,13 @@ on [deck.gl](http://deck.gl) website.
 
 Copy the content of this folder to your project. 
 
-To load the terrain tiles, you need a [Mapbox access token](https://docs.mapbox.com/help/how-mapbox-works/access-tokens/). You can either set an environment variable:
+To load the terrain tiles, you need a [Mapbox access token](https://docs.mapbox.com/help/how-mapbox-works/access-tokens/). You can either set an environment variable:	
 
-```bash
-export MapboxAccessToken=<mapbox_access_token>
-```
+```bash	
+export MapboxAccessToken=<mapbox_access_token>	
+```	
 
 Or set `MAPBOX_TOKEN` directly in `app.js`.
-
 
 ```bash
 # install dependencies

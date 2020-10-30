@@ -6,9 +6,6 @@ import {Tile3DLayer} from '@deck.gl/geo-layers';
 
 import {CesiumIonLoader} from '@loaders.gl/3d-tiles';
 
-// Set your mapbox token here
-const MAPBOX_TOKEN = process.env.MapboxAccessToken; // eslint-disable-line
-
 const ION_ASSET_ID = 43978;
 const ION_TOKEN =
   'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiJlYWMxMzcyYy0zZjJkLTQwODctODNlNi01MDRkZmMzMjIxOWIiLCJpZCI6OTYyMCwic2NvcGVzIjpbImFzbCIsImFzciIsImdjIl0sImlhdCI6MTU2Mjg2NjI3M30.1FNiClUyk00YH_nWfSGpiQAjR5V2OvREDq1PJ5QMjWQ';
@@ -26,7 +23,7 @@ const INITIAL_VIEW_STATE = {
 };
 
 export default function App({
-  mapStyle = 'mapbox://styles/uberdata/cive485h000192imn6c6cc8fc',
+  mapStyle = 'https://basemaps.cartocdn.com/gl/dark-matter-nolabels-gl-style/style.json',
   updateAttributions
 }) {
   const [initialViewState, setInitialViewState] = useState(INITIAL_VIEW_STATE);
@@ -57,12 +54,7 @@ export default function App({
 
   return (
     <DeckGL layers={[tile3DLayer]} initialViewState={initialViewState} controller={true}>
-      <StaticMap
-        reuseMaps
-        mapStyle={mapStyle}
-        mapboxApiAccessToken={MAPBOX_TOKEN}
-        preventStyleDiffing
-      />
+      <StaticMap reuseMaps mapStyle={mapStyle} preventStyleDiffing />
     </DeckGL>
   );
 }

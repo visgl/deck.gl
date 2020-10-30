@@ -26,8 +26,7 @@
   const {I3SLoader} = loaders;
 
   const deckgl = new DeckGL({
-    mapboxApiAccessToken: '<mapbox-access-token>',
-    mapStyle: 'mapbox://styles/mapbox/dark-v9',
+    mapStyle: 'https://basemaps.cartocdn.com/gl/dark-matter-nolabels-gl-style/style.json',
     initialViewState: INITIAL_VIEW_STATE,
     controller: true,
     layers: [

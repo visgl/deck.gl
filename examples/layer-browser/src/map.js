@@ -10,11 +10,6 @@ import {COORDINATE_SYSTEM, View} from '@deck.gl/core';
 import LayerInfo from './components/layer-info';
 import {RenderMetrics} from './render-metrics';
 
-/* eslint-disable no-process-env */
-const MapboxAccessToken =
-  process.env.MapboxAccessToken || // eslint-disable-line
-  'Set MapboxAccessToken environment variable or put your token here.';
-
 const NAVIGATION_CONTROL_STYLES = {
   margin: 10,
   position: 'absolute'
@@ -45,6 +40,8 @@ const INITIAL_VIEW_STATES = {
     orbitAxis: 'Y'
   }
 };
+
+const MAP_STYLE = 'https://basemaps.cartocdn.com/gl/positron-nolabels-gl-style/style.json';
 
 const ViewportLabel = props => <div style={VIEW_LABEL_STYLES}>{props.children}</div>;
 
@@ -160,11 +157,7 @@ export default class Map extends PureComponent {
           _onMetrics={this._onMetrics}
         >
           <View id="basemap">
-            <StaticMap
-              key="map"
-              mapStyle="mapbox://styles/mapbox/light-v9"
-              mapboxApiAccessToken={MapboxAccessToken || 'no_token'}
-            />
+            <StaticMap key="map" mapStyle={MAP_STYLE} />
             <ViewportLabel key="label">Map View</ViewportLabel>
           </View>
 

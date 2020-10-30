@@ -7,9 +7,6 @@ import DeckGL from '@deck.gl/react';
 import {PolygonLayer} from '@deck.gl/layers';
 import {TripsLayer} from '@deck.gl/geo-layers';
 
-// Set your mapbox token here
-const MAPBOX_TOKEN = process.env.MapboxAccessToken; // eslint-disable-line
-
 // Source data CSV
 const DATA_URL = {
   BUILDINGS:
@@ -53,6 +50,8 @@ const INITIAL_VIEW_STATE = {
   bearing: 0
 };
 
+const MAP_STYLE = 'https://basemaps.cartocdn.com/gl/dark-matter-nolabels-gl-style/style.json';
+
 const landCover = [[[-74.0, 40.7], [-74.02, 40.7], [-74.02, 40.72], [-74.0, 40.72]]];
 
 export default function App({
@@ -60,7 +59,7 @@ export default function App({
   trips = DATA_URL.TRIPS,
   trailLength = 180,
   initialViewState = INITIAL_VIEW_STATE,
-  mapStyle = 'mapbox://styles/mapbox/dark-v9',
+  mapStyle = MAP_STYLE,
   theme = DEFAULT_THEME,
   loopLength = 1800, // unit corresponds to the timestamp in source data
   animationSpeed = 1
@@ -124,12 +123,7 @@ export default function App({
       initialViewState={initialViewState}
       controller={true}
     >
-      <StaticMap
-        reuseMaps
-        mapStyle={mapStyle}
-        preventStyleDiffing={true}
-        mapboxApiAccessToken={MAPBOX_TOKEN}
-      />
+      <StaticMap reuseMaps mapStyle={mapStyle} preventStyleDiffing={true} />
     </DeckGL>
   );
 }

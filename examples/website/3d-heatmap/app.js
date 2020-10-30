@@ -5,9 +5,6 @@ import {AmbientLight, PointLight, LightingEffect} from '@deck.gl/core';
 import {HexagonLayer} from '@deck.gl/aggregation-layers';
 import DeckGL from '@deck.gl/react';
 
-// Set your mapbox token here
-const MAPBOX_TOKEN = process.env.MapboxAccessToken; // eslint-disable-line
-
 // Source data CSV
 const DATA_URL =
   'https://raw.githubusercontent.com/visgl/deck.gl-data/master/examples/3d-heatmap/heatmap-data.csv'; // eslint-disable-line
@@ -48,6 +45,8 @@ const INITIAL_VIEW_STATE = {
   bearing: -27
 };
 
+const MAP_STYLE = 'https://basemaps.cartocdn.com/gl/dark-matter-nolabels-gl-style/style.json';
+
 export const colorRange = [
   [1, 152, 189],
   [73, 227, 206],
@@ -74,7 +73,7 @@ function getTooltip({object}) {
 /* eslint-disable react/no-deprecated */
 export default function App({
   data,
-  mapStyle = 'mapbox://styles/mapbox/dark-v9',
+  mapStyle = MAP_STYLE,
   radius = 1000,
   upperPercentile = 100,
   coverage = 1
@@ -108,12 +107,7 @@ export default function App({
       controller={true}
       getTooltip={getTooltip}
     >
-      <StaticMap
-        reuseMaps
-        mapStyle={mapStyle}
-        preventStyleDiffing={true}
-        mapboxApiAccessToken={MAPBOX_TOKEN}
-      />
+      <StaticMap reuseMaps mapStyle={mapStyle} preventStyleDiffing={true} />
     </DeckGL>
   );
 }

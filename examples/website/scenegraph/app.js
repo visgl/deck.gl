@@ -11,12 +11,6 @@ import {registerLoaders} from '@loaders.gl/core';
 
 registerLoaders([GLTFLoader]);
 
-// Set your mapbox token here
-const MAPBOX_TOKEN = process.env.MapboxAccessToken; // eslint-disable-line
-// mapbox style file path
-const MAPBOX_STYLE =
-  'https://rivulet-zhang.github.io/dataRepo/mapbox/style/map-style-dark-v9-no-labels.json';
-
 // Data provided by the OpenSky Network, http://www.opensky-network.org
 const DATA_URL = 'https://opensky-network.org/api/states/all';
 const MODEL_URL =
@@ -35,6 +29,8 @@ const INITIAL_VIEW_STATE = {
   pitch: 0,
   bearing: 0
 };
+
+const MAP_STYLE = 'https://basemaps.cartocdn.com/gl/dark-matter-nolabels-gl-style/style.json';
 
 const DATA_INDEX = {
   UNIQUE_ID: 0,
@@ -69,7 +65,7 @@ function getTooltip({object}) {
   );
 }
 
-export default function App({sizeScale = 25, onDataLoad, mapStyle = MAPBOX_STYLE}) {
+export default function App({sizeScale = 25, onDataLoad, mapStyle = MAP_STYLE}) {
   const [data, setData] = useState(null);
   const [timer, setTimer] = useState({});
 
@@ -137,12 +133,7 @@ export default function App({sizeScale = 25, onDataLoad, mapStyle = MAPBOX_STYLE
       controller={true}
       getTooltip={getTooltip}
     >
-      <StaticMap
-        reuseMaps
-        mapStyle={mapStyle}
-        preventStyleDiffing={true}
-        mapboxApiAccessToken={MAPBOX_TOKEN}
-      />
+      <StaticMap reuseMaps mapStyle={mapStyle} preventStyleDiffing={true} mapStyle={MAP_STYLE} />
     </DeckGL>
   );
 }
