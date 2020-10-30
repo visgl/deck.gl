@@ -1,7 +1,6 @@
 import {CompositeLayer, _flatten as flatten} from '@deck.gl/core';
 import {GeoJsonLayer} from '@deck.gl/layers';
 import {load} from '@loaders.gl/core';
-import {Matrix4} from 'math.gl';
 
 import Tileset2D, {STRATEGY_DEFAULT} from './tileset-2d';
 import {urlType, getURLFromTemplate} from './utils';
@@ -42,9 +41,7 @@ export default class TileLayer extends CompositeLayer {
   initializeState() {
     this.state = {
       tiles: [],
-      isLoaded: false,
-      modelMatrixInverse: null,
-      modelMatrix: null
+      isLoaded: false
     };
   }
 
@@ -101,33 +98,13 @@ export default class TileLayer extends CompositeLayer {
         tile.layers = null;
       });
     }
-    if (changeFlags.propsChanged && props.modelMatrix !== oldProps.modelMatrix) {
-      const {modelMatrix} = this.props;
-      if (modelMatrix) {
-        const recastModelMatrix = new Matrix4(modelMatrix);
-        this.setState({
-          modelMatrixInverse: recastModelMatrix.clone().invert(),
-          modelMatrix: recastModelMatrix
-        });
-      } else {
-        this.setState({
-          modelMatrixInverse: null,
-          modelMatrix: null
-        });
-      }
-    }
     this._updateTileset();
   }
 
   _updateTileset() {
-    const {tileset, modelMatrixInverse, modelMatrix} = this.state;
-    const {onViewportLoad, zRange} = this.props;
-    const frameNumber = tileset.update(
-      this.context.viewport,
-      {zRange},
-      modelMatrix,
-      modelMatrixInverse
-    );
+    const {tileset} = this.state;
+    const {onViewportLoad, zRange, modelMatrix} = this.props;
+    const frameNumber = tileset.update(this.context.viewport, {zRange}, modelMatrix);
     const {isLoaded} = tileset;
 
     const loadingStateChanged = this.state.isLoaded !== isLoaded;

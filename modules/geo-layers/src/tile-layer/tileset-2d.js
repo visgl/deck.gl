@@ -1,6 +1,7 @@
 import Tile2DHeader from './tile-2d-header';
 import {getTileIndices, tileToBoundingBox} from './utils';
 import {RequestScheduler} from '@loaders.gl/loader-utils';
+import {Matrix4} from 'math.gl';
 
 const TILE_STATE_UNKNOWN = 0;
 const TILE_STATE_VISIBLE = 1;
@@ -104,22 +105,22 @@ export default class Tileset2D {
    * @param {*} viewport
    * @param {*} onUpdate
    */
-  update(viewport, {zRange} = {}, modelMatrix, modelMatrixInverse) {
-    if (
-      !viewport.equals(this._viewport) ||
-      modelMatrixInverse !== this._modelMatrixInverse ||
-      modelMatrix !== this._modelMatrix
-    ) {
+  update(viewport, {zRange} = {}, modelMatrix) {
+    const modelMatrixAsMatrix4 = new Matrix4(modelMatrix);
+    const isModelMatrixNew = !modelMatrixAsMatrix4.equals(this._modelMatrix);
+    if (!viewport.equals(this._viewport) || isModelMatrixNew) {
+      if (isModelMatrixNew) {
+        this._modelMatrixInverse = modelMatrix && modelMatrixAsMatrix4.clone().invert();
+        this._modelMatrix = modelMatrix && modelMatrixAsMatrix4;
+      }
       this._viewport = viewport;
-      this._modelMatrixInverse = modelMatrixInverse;
-      this._modelMatrix = modelMatrix;
       const tileIndices = this.getTileIndices({
         viewport,
         maxZoom: this._maxZoom,
         minZoom: this._minZoom,
         zRange,
-        modelMatrix,
-        modelMatrixInverse
+        modelMatrix: this._modelMatrix,
+        modelMatrixInverse: this._modelMatrixInverse
       });
       this._selectedTiles = tileIndices.map(index => this._getTile(index, true));
 
