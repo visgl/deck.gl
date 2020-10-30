@@ -74,7 +74,7 @@
       "layout": {},
       "metadata": {
       },
-      "maxzoom": 14,
+      "minzoom": 11,
       "filter": [
         "==",
         "class",
@@ -84,9 +84,8 @@
       "source": "carto",
       "id": "landcover_grass",
       "paint": {
-        "fill-color": "hsl(0, 0%, 89%)",
-        "fill-opacity": 0,
-        "fill-antialias": false
+        "fill-color": "hsl(160, 10%, 91%)",
+        "fill-opacity": 1
       },
       "source-layer": "landcover"
     },
@@ -172,22 +171,6 @@
       "paint": {
         "fill-color": "#e4e4e4",
         "fill-opacity": 0
-      },
-      "source-layer": "landuse"
-    },
-    {
-      "interactive": true,
-      "layout": {},
-      "filter": [
-        "==",
-        "class",
-        "industrial"
-      ],
-      "type": "fill",
-      "source": "carto",
-      "id": "industrial",
-      "paint": {
-        "fill-color": "#D9DEDE"
       },
       "source-layer": "landuse"
     },
@@ -317,7 +300,7 @@
       "source": "carto",
       "id": "aeroway-polygon",
       "paint": {
-        "fill-color": "hsl(0, 0%, 97%)",
+        "fill-color": "#D9DEDE",
         "fill-opacity": {
           "base": 1,
           "stops": [
