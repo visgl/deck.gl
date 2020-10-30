@@ -28,7 +28,7 @@ import {getFloatTexture} from '../utils/resource-utils.js';
 
 const defaultProps = Object.assign({}, ScreenGridCellLayer.defaultProps, {
   getPosition: {type: 'accessor', value: d => d.position},
-  getWeight: {type: 'accessor', value: d => 1},
+  getWeight: {type: 'accessor', value: 1},
 
   gpuAggregation: true,
   aggregation: 'SUM'

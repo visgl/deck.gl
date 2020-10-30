@@ -158,9 +158,13 @@ Method called to retrieve the position of each object.
 
 ##### `getWeight` ([Function](/docs/developer-guide/using-layers.md#accessors), optional)
 
-* Default: `object => 1`
+* Default: `1`
 
-Method called to retrieve the weight of each object.
+The weight of each object.
+
+* If a number is provided, it is used as the weight for all objects.
+* If a function is provided, it is called on each object to retrieve its weight.
+
 
 ## Source
 

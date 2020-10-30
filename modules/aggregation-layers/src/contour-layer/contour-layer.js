@@ -36,7 +36,7 @@ const defaultProps = {
   // grid aggregation
   cellSize: {type: 'number', min: 1, max: 1000, value: 1000},
   getPosition: {type: 'accessor', value: x => x.position},
-  getWeight: {type: 'accessor', value: x => 1},
+  getWeight: {type: 'accessor', value: 1},
   gpuAggregation: true,
   aggregation: 'SUM',
 

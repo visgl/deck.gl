@@ -134,13 +134,16 @@ A very small z offset that is added for each vertex of a contour (Isoline or Iso
 
 * Default: `object => object.position`
 
-Method called to retrieve the position of each point.
+Method called to retrieve the position of each object.
 
 ##### `getWeight` ([Function](/docs/developer-guide/using-layers.md#accessors), optional)
 
-* Default: `object => 1`
+* Default: `1`
 
-Method called to retrieve weight of each point. By default each point will use a weight of `1`.
+The weight of each object.
+
+* If a number is provided, it is used as the weight for all objects.
+* If a function is provided, it is called on each object to retrieve its weight.
 
 
 ## Sub Layers
