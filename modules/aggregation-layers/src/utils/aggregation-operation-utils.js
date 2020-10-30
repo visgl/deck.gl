@@ -39,9 +39,8 @@ function minReducer(accu, cur) {
 
 function wrapAccessor(accessor, context) {
   return pt => {
-    const d = pt && pt.source;
-    context.index = pt && pt.index;
-    return accessor(d, context);
+    context.index = pt.index;
+    return accessor(pt.source, context);
   };
 }
 
