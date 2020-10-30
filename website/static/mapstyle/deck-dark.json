@@ -96,8 +96,8 @@
       "source": "carto",
       "id": "landcover_grass",
       "paint": {
-        "fill-color": "hsl(55, 1%, 20%)",
-        "fill-opacity": 0,
+        "fill-color": "#051622",
+        "fill-opacity": 1,
         "fill-antialias": false
       },
       "source-layer": "landcover"
@@ -135,20 +135,8 @@
       "source": "carto",
       "id": "national_park",
       "paint": {
-        "fill-color": "#00141B",
-        "fill-opacity": {
-          "base": 1,
-          "stops": [
-            [
-              5,
-              0
-            ],
-            [
-              6,
-              0.5
-            ]
-          ]
-        }
+        "fill-color": "#051622",
+        "fill-opacity": 0.65
       },
       "source-layer": "park"
     },
@@ -183,22 +171,6 @@
       "paint": {
         "fill-color": "#212121",
         "fill-opacity": 0
-      },
-      "source-layer": "landuse"
-    },
-    {
-      "interactive": true,
-      "layout": {},
-      "filter": [
-        "==",
-        "class",
-        "industrial"
-      ],
-      "type": "fill",
-      "source": "carto",
-      "id": "industrial",
-      "paint": {
-        "fill-color": "#101520"
       },
       "source-layer": "landuse"
     },
