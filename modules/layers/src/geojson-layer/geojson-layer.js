@@ -187,7 +187,6 @@ export default class GeoJsonLayer extends CompositeLayer {
           updateTriggers: {
             getElevation: updateTriggers.getElevation,
             getFillColor: updateTriggers.getFillColor,
-            getLineColor: updateTriggers.getLineColor,
             // using a legacy API to invalid lineColor attributes
             // if (extruded && wireframe) has changed
             lineColors: extruded && wireframe,
