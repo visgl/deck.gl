@@ -5963,35 +5963,6 @@
         "line-opacity": 1
       },
       "source-layer": "boundary"
-    },
-    {
-      "id": "lagos-routes-2pjyce",
-      "type": "line",
-      "source": "carto",
-      "source-layer": "lagos_routes-2pjyce",
-      "interactive": true,
-      "layout": {
-        "visibility": "visible",
-        "line-join": "round",
-        "line-cap": "round"
-      },
-      "paint": {
-        "line-color": "#31A1A5",
-        "line-opacity": 0.1,
-        "line-width": {
-          "base": 1.33,
-          "stops": [
-            [
-              8,
-              0.5
-            ],
-            [
-              22,
-              15
-            ]
-          ]
-        }
-      }
     }
   ],
   "id": "cive48w2e001a2imn5mcu2vrs",
