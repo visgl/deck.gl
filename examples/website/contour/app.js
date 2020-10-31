@@ -22,11 +22,22 @@ export const BANDS = [
   {threshold: [500, 2000], color: [189, 0, 38]},
   {threshold: [2000, 10000], color: [159, 0, 80]}
 ];
+
+export const LINES = [
+  {threshold: 1, color: [255, 255, 178], strokeWidth: 2},
+  {threshold: 10, color: [254, 204, 92], strokeWidth: 2},
+  {threshold: 100, color: [253, 141, 60], strokeWidth: 2},
+  {threshold: 500, color: [240, 59, 32], strokeWidth: 2},
+  {threshold: 2000, color: [189, 0, 38], strokeWidth: 2},
+  {threshold: 10000, color: [159, 0, 80], strokeWidth: 2}
+];
+
 const MS_PER_WEEK = 1000 * 60 * 60 * 24 * 7;
 
 export default function App({
   data = DATA_URL,
   week = 35,
+  contours = BANDS,
   cellSize = 60000,
   mapStyle = 'https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json'
 }) {
@@ -41,7 +52,7 @@ export default function App({
       },
       pickable: true,
       aggregation: 'MAX',
-      contours: BANDS,
+      contours,
       cellSize
     })
   ];
