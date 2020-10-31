@@ -141,7 +141,7 @@ export default function makeLayerDemo({layer, getTooltip, parameters, mapStyle =
           controller={true}
           layers={layers}
         >
-          {mapStyle && <StaticMap reuseMaps mapStyle={mapStyle.LIGHT} preventStyleDiffing={true} />}
+          {mapStyle && <StaticMap reuseMaps mapStyle={mapStyle} preventStyleDiffing={true} />}
         </DeckGL>
       );
     }
