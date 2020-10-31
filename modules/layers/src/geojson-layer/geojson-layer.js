@@ -171,7 +171,9 @@ export default class GeoJsonLayer extends CompositeLayer {
           material,
           getElevation: this.getSubLayerAccessor(getElevation),
           getFillColor: this.getSubLayerAccessor(getFillColor),
-          getLineColor: this.getSubLayerAccessor(extruded && wireframe ? getLineColor : defaultLineColor),
+          getLineColor: this.getSubLayerAccessor(
+            extruded && wireframe ? getLineColor : defaultLineColor
+          ),
 
           transitions: transitions && {
             getPolygon: transitions.geometry,
