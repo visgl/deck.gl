@@ -19,6 +19,12 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v8.3
 
+#### deck.gl [8.3.5] - Oct 30 2020
+
+- Fix using CARTESIAN coordinates in GlobeView (#5078)
+- Shader support for extreme latitude coordinates (#5081)
+- Fix a bug polygon fill layer updates when line color changes (#5082)
+
 #### deck.gl [8.3.4] - Oct 26 2020
 
 - MimeTypes in JSONLoader (#5054)
