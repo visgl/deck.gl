@@ -195,7 +195,7 @@ export default class PolygonLayer extends CompositeLayer {
             getFillColor: updateTriggers.getFillColor,
             // using a legacy API to invalid lineColor attributes
             // if (extruded && wireframe) has changed
-            lineColor: extruded && wireframe,
+            lineColors: extruded && wireframe,
             getLineColor: updateTriggers.getLineColor
           }
         }),

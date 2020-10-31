@@ -171,7 +171,7 @@ export default class GeoJsonLayer extends CompositeLayer {
           material,
           getElevation: this.getSubLayerAccessor(getElevation),
           getFillColor: this.getSubLayerAccessor(getFillColor),
-          getLineColor: this.getSubLayerAccessor(getLineColor),
+          getLineColor: this.getSubLayerAccessor(extruded && wireframe ? getLineColor : defaultLineColor),
 
           transitions: transitions && {
             getPolygon: transitions.geometry,
@@ -185,6 +185,10 @@ export default class GeoJsonLayer extends CompositeLayer {
           updateTriggers: {
             getElevation: updateTriggers.getElevation,
             getFillColor: updateTriggers.getFillColor,
+            getLineColor: updateTriggers.getLineColor,
+            // using a legacy API to invalid lineColor attributes
+            // if (extruded && wireframe) has changed
+            lineColors: extruded && wireframe,
             getLineColor: updateTriggers.getLineColor
           }
         }),
