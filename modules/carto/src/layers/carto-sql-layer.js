@@ -42,7 +42,7 @@ export default class CartoSQLLayer extends CartoLayer {
           tile_extent: tileExtent,
           layers: [
             {
-              type: 'query',
+              type: 'sql',
               source: 'postgres',
               options: {
                 sql: sql.trim(),
