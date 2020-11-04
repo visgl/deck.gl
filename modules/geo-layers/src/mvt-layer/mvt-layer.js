@@ -11,7 +11,9 @@ const WORLD_SIZE = 512;
 
 const defaultProps = {
   uniqueIdProperty: {type: 'string', value: ''},
-  highlightedFeatureId: null
+  highlightedFeatureId: null,
+  maxFeatures: {type: 'number', value: 10000, min: 0},
+  onViewportChange: {type: 'function', optional: true, value: null, compare: false}
 };
 
 async function fetchTileJSON(url) {
@@ -42,6 +44,10 @@ export default class MVTLayer extends TileLayer {
 
     if (this.state.data) {
       super.updateState({props, oldProps, context, changeFlags});
+      const {tileset} = this.state;
+      if (changeFlags.viewportChanged && tileset.isLoaded) {
+        this._onViewportChange();
+      }
     }
   }
 
@@ -115,19 +121,13 @@ export default class MVTLayer extends TileLayer {
     const modelMatrix = new Matrix4().scale([xScale, yScale, 1]);
 
     props.autoHighlight = false;
-<<<<<<< HEAD
+
     if (!this.context.viewport.resolution) {
       props.modelMatrix = modelMatrix;
       props.coordinateOrigin = [xOffset, yOffset, 0];
       props.coordinateSystem = COORDINATE_SYSTEM.CARTESIAN;
       props.extensions = [...(props.extensions || []), new ClipExtension()];
     }
-=======
-    props.modelMatrix = modelMatrix;
-    props.coordinateOrigin = [xOffset, yOffset, 0];
-    props.coordinateSystem = COORDINATE_SYSTEM.CARTESIAN;
-    props.extensions = [...(props.extensions || []), new ClipExtension()];
->>>>>>> replace math by deck.pickObjects to get rendered features in tile-layer
 
     return super.renderSubLayers(props);
   }
@@ -173,24 +173,54 @@ export default class MVTLayer extends TileLayer {
     );
   }
 
-  getRenderedFeatures() {
+  _pickObjects() {
+    const {deck, viewport} = this.context;
+    const {maxFeatures: depth} = this.props;
+    const width = viewport.width;
+    const height = viewport.height;
+    const x = viewport.x;
+    const y = viewport.y;
+    const layerIds = [this.id];
+    return deck.pickObjects({x, y, width, height, layerIds, depth});
+  }
+
+  getRenderedFeatures(format = 'json') {
     const features = this._pickObjects();
-    const maxFeatures = this.props.maxFeatures || features.length;
     const featureCache = new Set();
     const renderedFeatures = [];
 
     for (const f of features) {
       const featureId = getFeatureUniqueId(f.object, this.props.uniqueIdProperty);
-      if (!featureCache.has(featureId)) {
+
+      if (featureId === -1) {
+        // we have no id for the feature, we just add to the list
+        renderedFeatures.push(getFeatureByFormat(f.object, format));
+      } else if (!featureCache.has(featureId) && featureId !== -1) {
+        // Add removing duplicates
         featureCache.add(featureId);
-        renderedFeatures.push(f);
-      }
-      if (renderedFeatures.length === maxFeatures) {
-        break;
+        renderedFeatures.push(getFeatureByFormat(f.object, format));
       }
     }
 
     return renderedFeatures;
+  }
+
+  _onViewportChange() {
+    const {onViewportChange} = this.props;
+    if (onViewportChange) {
+      onViewportChange({getRenderedFeatures: this.getRenderedFeatures.bind(this)});
+    }
+  }
+}
+
+function getFeatureByFormat(object, format) {
+  switch (format) {
+    case 'json':
+      return object.properties;
+    case 'geojson':
+      return object;
+    default:
+      throw Error(`Unsupported format ${format}`);
   }
 }
 

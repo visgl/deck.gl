@@ -12,7 +12,6 @@ const defaultProps = {
   getTileData: {type: 'function', optional: true, value: null, compare: false},
   // TODO - change to onViewportLoad to align with Tile3DLayer
   onViewportLoad: {type: 'function', optional: true, value: null, compare: false},
-  onViewportChange: {type: 'function', optional: true, value: null, compare: false},
   onTileLoad: {type: 'function', value: tile => {}, compare: false},
   onTileUnload: {type: 'function', value: tile => {}, compare: false},
   // eslint-disable-next-line
@@ -35,8 +34,7 @@ const defaultProps = {
     },
     compare: false
   },
-  maxRequests: 6,
-  maxFeatures: {type: 'number', value: 0, min: 0}
+  maxRequests: 6
 };
 
 export default class TileLayer extends CompositeLayer {
@@ -98,9 +96,8 @@ export default class TileLayer extends CompositeLayer {
       this.state.tileset.tiles.forEach(tile => {
         tile.layers = null;
       });
-    } else if (changeFlags.viewportChanged && tileset.isLoaded) {
-      this._onViewportChange();
     }
+
     this._updateTileset();
   }
 
@@ -129,10 +126,7 @@ export default class TileLayer extends CompositeLayer {
   }
 
   _onViewportChange() {
-    const {onViewportChange} = this.props;
-    if (onViewportChange) {
-      onViewportChange({getRenderedFeatures: this.getRenderedFeatures.bind(this)});
-    }
+    // Need by MVTLayer and viewport features
   }
 
   _onTileLoad(tile) {
@@ -158,16 +152,6 @@ export default class TileLayer extends CompositeLayer {
   _onTileUnload(tile) {
     const layer = this.getCurrentLayer();
     layer.props.onTileUnload(tile);
-  }
-
-  _pickObjects() {
-    const {deck, viewport} = this.context;
-    const width = viewport.width;
-    const height = viewport.height;
-    const x = viewport.x;
-    const y = viewport.y;
-    const layerIds = [this.id];
-    return deck.pickObjects({x, y, width, height, layerIds});
   }
 
   // Methods for subclass to override
@@ -236,12 +220,6 @@ export default class TileLayer extends CompositeLayer {
       }
       return tile.layers;
     });
-  }
-
-  getRenderedFeatures() {
-    const {maxFeatures} = this.props;
-    const features = this._pickObjects();
-    return maxFeatures ? features.splice(0, maxFeatures) : features;
   }
 }
 

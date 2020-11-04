@@ -267,34 +267,6 @@ Receives arguments:
 
 - `tile` (Object) - the tile that has been cleared from cache.
 
-
-##### `onViewportChange` (Function, optional)
-
-`onViewportChange` is a function that is called when the viewport changes or all tiles in the current viewport have been loaded. A function (`getRenderedFeatures`) to calculate the features rendered in the current viewport is passed as a JSON to this callback function.
-
-`getRenderedFeatures` only works if pickable property is true.
-
-It is not recommended to call `getRenderedFeatures` every time `onViewportChange` is executed, instead, better use `getRenderedFeatures` inside a debounce function.
-
-```
-let timeout;
-function yourDebouncedFunction(func) {
-  clearTimeout(timeout)
-  timeout = setTimeout(() => {
-    const features = func.apply();
-    ...
-  }, 500);
-};
-
-new TileLayer({
-  ...
-  pickable: true,
-  onViewportLoad: (evt) => yourDebouncedFunction(evt.getRenderedFeatures)
-})
-```
-
-- Default: `data => null`
-
 ## Source
 
 [modules/geo-layers/src/tile-layer](https://github.com/visgl/deck.gl/tree/master/modules/geo-layers/src/tile-layer)
