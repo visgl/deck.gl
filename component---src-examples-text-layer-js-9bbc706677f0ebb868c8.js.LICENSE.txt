@@ -1,0 +1,16 @@
+/*! Hammer.JS - v2.0.7 - 2016-04-22
+ * http://hammerjs.github.io/
+ *
+ * Copyright (c) 2016 Jorik Tangelder;
+ * Licensed under the MIT license */
+
+/*! geolib 2.0.21 by Manuel Bieh
+* Library to provide geo functions like distance calculation,
+* conversion of decimal coordinates to sexagesimal and vice versa, etc.
+* WGS 84 (World Geodetic System 1984)
+* 
+* @author Manuel Bieh
+* @url http://www.manuelbieh.com/
+* @version 2.0.21
+* @license MIT 
+**/
