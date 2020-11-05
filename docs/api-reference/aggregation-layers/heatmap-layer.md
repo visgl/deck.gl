@@ -21,6 +21,7 @@ function App({data, viewState}) {
    */
   const layer = new HeatmapLayer({
     id: 'heatmapLayer',
+    data,
     getPosition: d => d.COORDINATES,
     getWeight: d => d.WEIGHT    
   });
