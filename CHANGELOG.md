@@ -19,6 +19,10 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v8.3
 
+#### deck.gl [8.3.6] - Nov 5 2020
+
+- Basemap module for @deck.gl/carto (#5055)
+
 #### deck.gl [8.3.5] - Oct 30 2020
 
 - Fix using CARTESIAN coordinates in GlobeView (#5078)
