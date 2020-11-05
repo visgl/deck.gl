@@ -133,7 +133,7 @@ export default function App({sizeScale = 25, onDataLoad, mapStyle = MAP_STYLE}) 
       controller={true}
       getTooltip={getTooltip}
     >
-      <StaticMap reuseMaps mapStyle={mapStyle} preventStyleDiffing={true} mapStyle={MAP_STYLE} />
+      <StaticMap reuseMaps mapStyle={mapStyle} preventStyleDiffing={true} />
     </DeckGL>
   );
 }

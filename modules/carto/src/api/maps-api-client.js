@@ -84,7 +84,10 @@ function buildURL({mapConfig, credentials}) {
   const encodedApiKey = encodeParameter('api_key', credentials.apiKey);
   const encodedClient = encodeParameter('client', `deck-gl-carto`);
   const parameters = [encodedApiKey, encodedClient];
-  return `${mapsUrl(credentials)}?${parameters.join('&')}&${encodeParameter('config', cfg)}`;
+  return `${mapsUrl(credentials)}/tilejson?${parameters.join('&')}&${encodeParameter(
+    'config',
+    cfg
+  )}`;
 }
 
 /**
