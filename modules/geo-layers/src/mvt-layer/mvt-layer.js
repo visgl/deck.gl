@@ -179,7 +179,7 @@ export default class MVTLayer extends TileLayer {
     const x = viewport.x;
     const y = viewport.y;
     const layerIds = [this.id];
-    return deck.pickObjects({x, y, width, height, layerIds, depth: maxFeatures});
+    return deck.pickObjects({x, y, width, height, layerIds, maxFeatures});
   }
 
   getRenderedFeatures({format = 'json', maxFeatures = null}) {
