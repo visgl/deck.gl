@@ -103,7 +103,7 @@ export default class TileLayer extends CompositeLayer {
 
   _updateTileset() {
     const {tileset} = this.state;
-    const {onViewportLoad, zRange, modelMatrix} = this.props;
+    const {zRange, modelMatrix} = this.props;
     const frameNumber = tileset.update(this.context.viewport, {zRange, modelMatrix});
     const {isLoaded} = tileset;
 
@@ -111,10 +111,7 @@ export default class TileLayer extends CompositeLayer {
     const tilesetChanged = this.state.frameNumber !== frameNumber;
 
     if (isLoaded && (loadingStateChanged || tilesetChanged)) {
-      if (onViewportLoad) {
-        onViewportLoad(tileset.selectedTiles.map(tile => tile.data));
-      }
-      this._onViewportChange();
+      this._onViewportLoad();
     }
 
     if (tilesetChanged) {
@@ -125,8 +122,13 @@ export default class TileLayer extends CompositeLayer {
     this.state.isLoaded = isLoaded;
   }
 
-  _onViewportChange() {
-    // Need by MVTLayer and viewport features
+  _onViewportLoad() {
+    const {tileset} = this.state;
+    const {onViewportLoad} = this.props;
+
+    if (onViewportLoad) {
+      onViewportLoad(tileset.selectedTiles.map(tile => tile.data));
+    }
   }
 
   _onTileLoad(tile) {

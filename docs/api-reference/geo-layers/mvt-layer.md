@@ -111,13 +111,6 @@ Optional. When provided, a feature with ID corresponding to the supplied value w
 If `uniqueIdProperty` is provided, value within that feature property will be used for ID comparison. If not, [feature id](https://github.com/mapbox/vector-tile-spec/tree/master/2.1#42-features) will be used.
 
 
-
-##### `maxFeatures` (Number )
-
-* Default: 10000
-
-Optional. Max number of features to retrieve when getRenderedFeatures is called.
-
 ### Callbacks
 
 ##### `onDataLoad` (Function, optional)
@@ -128,7 +121,6 @@ Receives arguments:
 
 tileJSON (Object) - the tileJSON fetched
 
-
 ##### `onViewportChange` (Function, optional)
 
 `onViewportChange` called when the viewport changes or all tiles in the current viewport have been loaded. A function (`getRenderedFeatures`) to calculate the features rendered in the current viewport is passed as a JSON to this callback function.
@@ -136,22 +128,22 @@ tileJSON (Object) - the tileJSON fetched
 
 Receives arguments:
 
-`getRenderedFeatures` (Function)
+* `getRenderedFeatures` (Function)
 
-Parameters:
+  + format: Optional. Posible values are `json` or `geojson` (geometries are returned in [GeoJSON](https://tools.ietf.org/html/rfc7946)). Default to `json`. 
 
-* format: Optional. Posible values are `json` or `geojson` (geometries are returned in [GeoJSON](https://tools.ietf.org/html/rfc7946)). Default to `json`. 
+  + maxFeatures: Optional. Max number of features to retrieve when getRenderedFeatures is called. Default to `null`.
 
-Requires `pickable` to be true.
+  Requires `pickable` to be true.
 
-It is not recommended to call `getRenderedFeatures` every time `onViewportChange` is executed, instead, use a debounce function.
+  It is not recommended to call `getRenderedFeatures` every time `onViewportChange` is executed, instead, use a debounce function.
 
-If a `uniqueIdProperty` is provided only unique properties are returned.
+  If a `uniqueIdProperty` is provided only unique properties are returned.
 
 ```javascript
 const onViewportChange =  e => {
   const features = e.getRenderedFeatures();
-  // ...
+  // ... or  e.getRenderedFeatures({format: 'geojson', maxFeatures: 1000});
 };
 
 new MVTLayer({

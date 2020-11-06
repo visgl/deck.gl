@@ -12,7 +12,6 @@ const WORLD_SIZE = 512;
 const defaultProps = {
   uniqueIdProperty: {type: 'string', value: ''},
   highlightedFeatureId: null,
-  maxFeatures: {type: 'number', value: 10000, min: 0},
   onViewportChange: {type: 'function', optional: true, value: null, compare: false}
 };
 
@@ -173,19 +172,18 @@ export default class MVTLayer extends TileLayer {
     );
   }
 
-  _pickObjects() {
+  _pickObjects(maxFeatures) {
     const {deck, viewport} = this.context;
-    const {maxFeatures: depth} = this.props;
     const width = viewport.width;
     const height = viewport.height;
     const x = viewport.x;
     const y = viewport.y;
     const layerIds = [this.id];
-    return deck.pickObjects({x, y, width, height, layerIds, depth});
+    return deck.pickObjects({x, y, width, height, layerIds, depth: maxFeatures});
   }
 
-  getRenderedFeatures(format = 'json') {
-    const features = this._pickObjects();
+  getRenderedFeatures({format = 'json', maxFeatures = null}) {
+    const features = this._pickObjects(maxFeatures);
     const featureCache = new Set();
     const renderedFeatures = [];
 
@@ -208,8 +206,17 @@ export default class MVTLayer extends TileLayer {
   _onViewportChange() {
     const {onViewportChange} = this.props;
     if (onViewportChange) {
-      onViewportChange({getRenderedFeatures: this.getRenderedFeatures.bind(this)});
+      const {viewport} = this.context;
+      onViewportChange({
+        getRenderedFeatures: this.getRenderedFeatures.bind(this),
+        viewport
+      });
     }
+  }
+
+  _onViewportLoad() {
+    super._onViewportLoad();
+    this._onViewportChange();
   }
 }
 
