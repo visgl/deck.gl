@@ -3,7 +3,7 @@ import GL from '@luma.gl/constants';
 import {Texture2D, copyToTexture, cloneTextureFrom} from '@luma.gl/core';
 import {ImageLoader} from '@loaders.gl/images';
 import {load} from '@loaders.gl/core';
-import {createIterable, log} from '@deck.gl/core';
+import {createIterable} from '@deck.gl/core';
 
 const DEFAULT_CANVAS_WIDTH = 1024;
 const DEFAULT_BUFFER = 4;
@@ -166,7 +166,7 @@ export function getDiffIcons(data, getIcon, cachedIcons) {
     }
 
     if (!icons[id] && (!cachedIcons[id] || icon.url !== cachedIcons[id].url)) {
-      icons[id] = icon;
+      icons[id] = {...icon, source: object, sourceIndex: objectInfo.index};
     }
   }
   return icons;
@@ -176,11 +176,13 @@ export default class IconManager {
   constructor(
     gl,
     {
-      onUpdate = noop // notify IconLayer when icon texture update
+      onUpdate = noop, // notify IconLayer when icon texture update
+      onError = noop
     }
   ) {
     this.gl = gl;
     this.onUpdate = onUpdate;
+    this.onError = onError;
 
     // load options used for loading images
     this._loadOptions = null;
@@ -345,7 +347,13 @@ export default class IconManager {
           this.onUpdate();
         })
         .catch(error => {
-          log.error(error)();
+          this.onError({
+            url: icon.url,
+            source: icon.source,
+            sourceIndex: icon.sourceIndex,
+            loadOptions: this._loadOptions,
+            error
+          });
         })
         .finally(() => {
           this._pendingCount--;
