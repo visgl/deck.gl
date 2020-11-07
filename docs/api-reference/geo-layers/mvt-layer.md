@@ -110,6 +110,9 @@ Optional. When provided, a feature with ID corresponding to the supplied value w
 
 If `uniqueIdProperty` is provided, value within that feature property will be used for ID comparison. If not, [feature id](https://github.com/mapbox/vector-tile-spec/tree/master/2.1#42-features) will be used.
 
+
+### Callbacks
+
 ##### `onDataLoad` (Function, optional)
 
 `onDataLoad` called when a tileJSON is successfully fetched
@@ -117,6 +120,39 @@ If `uniqueIdProperty` is provided, value within that feature property will be us
 Receives arguments:
 
 tileJSON (Object) - the tileJSON fetched
+
+##### `onViewportChange` (Function, optional)
+
+`onViewportChange` called when the viewport changes or all tiles in the current viewport have been loaded. A function (`getRenderedFeatures`) to calculate the features rendered in the current viewport is passed as a JSON to this callback function.
+
+
+Receives arguments:
+
+* `getRenderedFeatures` (Function)
+
+  + maxFeatures: Optional. Max number of features to retrieve when getRenderedFeatures is called. Default to `null`.
+
+  Requires `pickable` to be true.
+
+  It is not recommended to call `getRenderedFeatures` every time `onViewportChange` is executed, instead, use a debounce function.
+
+  If a `uniqueIdProperty` is provided only unique properties are returned.
+
+* `viewport` (Object). A instance of the current [`Viewport`](/docs/api-reference/core/viewport.md).
+
+```javascript
+const onViewportChange =  e => {
+  const features = e.getRenderedFeatures();
+};
+
+new MVTLayer({
+  id: "..."
+  data: "..."
+  pickable: true
+  onViewportChange: debounce(onViewportChange, 500)
+  uniqueIdProperty: 'geoid'
+})
+```
 
 ## Source
 

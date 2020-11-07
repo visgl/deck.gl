@@ -281,6 +281,7 @@ export default class DeckPicker {
     width = 1,
     height = 1,
     mode = 'query',
+    maxObjects = null,
     onViewportActive
   }) {
     layers = this._getPickable(layers);
@@ -327,7 +328,13 @@ export default class DeckPicker {
     // Only return unique infos, identified by info.object
     const uniqueInfos = new Map();
 
-    pickInfos.forEach(pickInfo => {
+    const isMaxObjects = Number.isFinite(maxObjects);
+
+    for (let i = 0; i < pickInfos.length; i++) {
+      if (isMaxObjects && uniqueInfos.size >= maxObjects) {
+        break;
+      }
+      const pickInfo = pickInfos[i];
       let info = {
         color: pickInfo.pickedColor,
         layer: null,
@@ -344,7 +351,7 @@ export default class DeckPicker {
       if (!uniqueInfos.has(info.object)) {
         uniqueInfos.set(info.object, info);
       }
-    });
+    }
 
     return Array.from(uniqueInfos.values());
   }
