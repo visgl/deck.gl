@@ -172,17 +172,17 @@ export default class MVTLayer extends TileLayer {
     );
   }
 
-  _pickObjects(maxFeatures) {
+  _pickObjects(maxObjects) {
     const {deck, viewport} = this.context;
     const width = viewport.width;
     const height = viewport.height;
     const x = viewport.x;
     const y = viewport.y;
     const layerIds = [this.id];
-    return deck.pickObjects({x, y, width, height, layerIds, maxFeatures});
+    return deck.pickObjects({x, y, width, height, layerIds, maxObjects});
   }
 
-  getRenderedFeatures({format = 'json', maxFeatures = null}) {
+  getRenderedFeatures(maxFeatures = null) {
     const features = this._pickObjects(maxFeatures);
     const featureCache = new Set();
     const renderedFeatures = [];
@@ -192,11 +192,11 @@ export default class MVTLayer extends TileLayer {
 
       if (featureId === -1) {
         // we have no id for the feature, we just add to the list
-        renderedFeatures.push(getFeatureByFormat(f.object, format));
-      } else if (!featureCache.has(featureId) && featureId !== -1) {
+        renderedFeatures.push(f.object);
+      } else if (!featureCache.has(featureId)) {
         // Add removing duplicates
         featureCache.add(featureId);
-        renderedFeatures.push(getFeatureByFormat(f.object, format));
+        renderedFeatures.push(f.object);
       }
     }
 
@@ -217,17 +217,6 @@ export default class MVTLayer extends TileLayer {
   _onViewportLoad() {
     super._onViewportLoad();
     this._onViewportChange();
-  }
-}
-
-function getFeatureByFormat(object, format) {
-  switch (format) {
-    case 'json':
-      return object.properties;
-    case 'geojson':
-      return object;
-    default:
-      throw Error(`Unsupported format ${format}`);
   }
 }
 

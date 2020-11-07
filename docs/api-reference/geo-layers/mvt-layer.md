@@ -130,8 +130,6 @@ Receives arguments:
 
 * `getRenderedFeatures` (Function)
 
-  + format: Optional. Posible values are `json` or `geojson` (geometries are returned in [GeoJSON](https://tools.ietf.org/html/rfc7946)). Default to `json`. 
-
   + maxFeatures: Optional. Max number of features to retrieve when getRenderedFeatures is called. Default to `null`.
 
   Requires `pickable` to be true.
@@ -140,10 +138,11 @@ Receives arguments:
 
   If a `uniqueIdProperty` is provided only unique properties are returned.
 
+* `viewport` (Object). A instance of the current [`Viewport`](/docs/api-reference/core/viewport.md).
+
 ```javascript
 const onViewportChange =  e => {
   const features = e.getRenderedFeatures();
-  // ... or  e.getRenderedFeatures({format: 'geojson', maxFeatures: 1000});
 };
 
 new MVTLayer({
