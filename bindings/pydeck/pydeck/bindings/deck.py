@@ -102,8 +102,8 @@ class Deck(JSONMixin):
     def _set_api_keys(self, api_keys: dict):
         for k in api_keys:
             k and Providers.in_list_or_raise(k)
-            attr_name = f'{k}_key'
-            attr_env_value = f'{k}_API_KEY'.upper()
+            attr_name = f"{k}_key"
+            attr_env_value = f"{k}_API_KEY".upper()
             attr_value = api_keys.get(k) or os.getenv(attr_env_value)
             setattr(self, attr_name, attr_value)
             setattr(self.deck_widget, attr_name, attr_value)
