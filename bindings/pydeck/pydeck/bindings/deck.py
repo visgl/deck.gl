@@ -1,5 +1,4 @@
 import os
-import warnings
 
 from .json_tools import JSONMixin
 from .layer import Layer
@@ -9,7 +8,7 @@ from ..widget import DeckGLWidget
 from .view import View
 from .view_state import ViewState
 from .providers import Providers
-from .map_styles import DARK
+from .map_styles import DARK, get_from_map_identifier
 
 
 class Deck(JSONMixin):
@@ -18,15 +17,14 @@ class Deck(JSONMixin):
         layers=[],
         views=[View(type="MapView", controller=True)],
         map_style=DARK,
-        mapbox_key=None,
-        google_maps_key=None,
+        api_keys={},
         initial_view_state=ViewState(latitude=0, longitude=0, zoom=1),
         width="100%",
         height=500,
         tooltip=True,
         description=None,
         effects=None,
-        map_provider="mapbox",
+        map_provider="carto",
         parameters=None,
     ):
         """This is the renderer and configuration for a deck.gl visualization, similar to the
@@ -40,27 +38,21 @@ class Deck(JSONMixin):
             List of :class:`pydeck.bindings.layer.Layer` layers to render.
         views : list of pydeck.View, default ``[pydeck.View(type="MapView", controller=True)]``
             List of :class:`pydeck.bindings.view.View` objects to render.
-        map_style : str, default 'mapbox://styles/mapbox/dark-v9'
-            URI for Mapbox basemap style. See Mapbox's `gallery <https://www.mapbox.com/gallery/>`_ for examples.
-            If not using a basemap, you can set this value to to an empty string, ``''``.
+        api_keys : dict, default {}
+            Dictionary of geospatial API service providers, where the keys are ``mapbox``, ``google_maps``, or ``carto``
+            and the values are the API key. Defaults to None if not set. Any of the environment variables
+            ``MAPBOX_API_KEY``, ``GOOGLE_MAPS_API_KEY``, and ``CARTO_API_KEY`` can be set instead of hardcoding the key here.
+        map_provider : str, default 'carto'
+            If multiple API keys are set (e.g., both Mapbox and Google Maps), inform pydeck which basemap provider to prefer. Values can be ``carto``, ``mapbox`` or ``google_maps``.  height : int, default 500
+            Height of Jupyter notebook cell, in pixels.
+        map_style : str, default 'dark'
+            One of 'light', 'dark', 'road', 'satellite', 'dark_no_labels', and 'light_no_labels', or
+            URI for basemap style, which varies by provider. The default is Carto's Dark Matter map.
+            For Mapbox examples, see  Mapbox's `gallery <https://www.mapbox.com/gallery/>`_.
+            If not using a basemap, set ``map_provider=None``.
         initial_view_state : pydeck.ViewState, default ``pydeck.ViewState(latitude=0, longitude=0, zoom=1)``
             Initial camera angle relative to the map, defaults to a fully zoomed out 0, 0-centered map
             To compute a viewport from data, see :func:`pydeck.data_utils.viewport_helpers.compute_view`
-        mapbox_key : str, default None
-            Read on initialization from the ``MAPBOX_API_KEY`` environment variable. Defaults to None if not set.
-            See your Mapbox
-            `dashboard <https://docs.mapbox.com/help/how-mapbox-works/access-tokens/#mapbox-account-dashboard>`_
-            to get an API token.
-            If not using a basemap, you can set this value to `''`.
-        google_maps_key : str, default None
-            Read on initialization from the ``PYDECK_GOOGLE_MAPS_API_KEY`` environment variable if not set.
-            Defaults to None if the environment variable is also not set.
-            Not used on all layers.
-        map_provider : str, default 'mapbox'
-            If multiple API keys are set (e.g., both Mapbox and Google Maps), inform pydeck which
-            basemap provider to prefer. Currently the other alternative value is ``'google_maps'``.
-        height : int, default 500
-            Height of Jupyter notebook cell, in pixels.
         width : int` or string, default '100%'
             Width of visualization, in pixels (if a number) or as a CSS value string.
         tooltip : bool or dict of {str: str}, default True
@@ -68,7 +60,6 @@ class Deck(JSONMixin):
             Layers must have ``pickable=True`` set in order to display a tooltip.
             For more advanced usage, the user can pass a dict to configure more custom tooltip features.
             Further documentation is `here <tooltip.html>`_.
-
 
         .. _Deck:
             https://deck.gl/#/documentation/deckgl-api-reference/deck
@@ -81,16 +72,12 @@ class Deck(JSONMixin):
         else:
             self.layers = layers or []
         self.views = views
-        self.map_style = map_style
         # Use passed view state
         self.initial_view_state = initial_view_state
         self.deck_widget = DeckGLWidget()
         self.deck_widget.custom_libraries = pydeck_settings.custom_libraries
 
-        self.mapbox_key = mapbox_key or os.getenv("MAPBOX_API_KEY")
-        self.deck_widget.mapbox_key = self.mapbox_key
-        self.google_maps_key = google_maps_key or os.getenv("PYDECK_GOOGLE_MAPS_API_KEY")
-        self.deck_widget.google_maps_key = self.google_maps_key
+        self._set_api_keys(api_keys)
 
         self.deck_widget.height = height
         self.deck_widget.width = width
@@ -101,11 +88,9 @@ class Deck(JSONMixin):
 
         self.map_provider = str(map_provider).lower() if map_provider else None
         self.deck_widget.map_provider = map_provider
-        if self.mapbox_key is None and self.map_provider == Providers.MAPBOX:
-            warnings.warn(
-                "Mapbox API key is not set. This may impact available features of pydeck.",
-                UserWarning,
-            )
+
+        self.map_style = get_from_map_identifier(map_style, map_provider)
+
         self.parameters = parameters
 
     @property
@@ -113,6 +98,15 @@ class Deck(JSONMixin):
         if not self.deck_widget.selected_data:
             return None
         return self.deck_widget.selected_data
+
+    def _set_api_keys(self, api_keys: dict):
+        for k in api_keys:
+            k and Providers.in_list_or_raise(k)
+            attr_name = f'{k}_key'
+            attr_env_value = f'{k}_API_KEY'.upper()
+            attr_value = api_keys.get(k) or os.getenv(attr_env_value)
+            setattr(self, attr_name, attr_value)
+            setattr(self.deck_widget, attr_name, attr_value)
 
     def show(self):
         """Display current Deck object for a Jupyter notebook"""
