@@ -76,10 +76,11 @@ Radius of the circle in pixels, to which the weight of an object is distributed.
 
 ##### `colorRange` (Array, optional)
 
-* Default: <img src="/website/src/static/images/colorbrewer_YlOrRd_6.png"/>
+* Default: [colorbrewer](http://colorbrewer2.org/#type=sequential&scheme=YlOrRd&n=6) `6-class YlOrRd` <img src="https://deck.gl/images/colorbrewer_YlOrRd_6.png"/>
 
-Specified as an array of colors [color1, color2, ... color6]. Each color is an array of 3 or 4 values [R, G, B] or [R, G, B, A], representing Red, Green, Blue and Alpha channels.  Each channel is a value between 0 and 255. When Alpha is not provided, a value of 255 is used. By default `colorRange` is set to
-[colorbrewer](http://colorbrewer2.org/#type=sequential&scheme=YlOrRd&n=6) `6-class YlOrRd`.
+Specified as an array of colors [color1, color2, ...]. Each color is an array of 3 or 4 values [R, G, B] or [R, G, B, A], representing intensities of Red, Green, Blue and Alpha channels.  Each intensity is a value between 0 and 255. When Alpha not provided a value of 255 is used.
+
+`colorDomain` is divided into `colorRange.length` equal segments, each mapped to one color in `colorRange`.
 
 ##### `intensity` (Number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
 
