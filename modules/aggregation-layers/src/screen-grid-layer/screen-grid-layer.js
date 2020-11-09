@@ -28,7 +28,7 @@ import {getFloatTexture} from '../utils/resource-utils.js';
 
 const defaultProps = Object.assign({}, ScreenGridCellLayer.defaultProps, {
   getPosition: {type: 'accessor', value: d => d.position},
-  getWeight: {type: 'accessor', value: d => 1},
+  getWeight: {type: 'accessor', value: 1},
 
   gpuAggregation: true,
   aggregation: 'SUM'
@@ -230,13 +230,13 @@ export default class ScreenGridLayer extends GridAggregationLayer {
   // Private
 
   _updateAccessors(opts) {
-    const {getWeight, aggregation} = opts.props;
+    const {getWeight, aggregation, data} = opts.props;
     const {count} = this.state.weights;
     if (count) {
       count.getWeight = getWeight;
       count.operation = AGGREGATION_OPERATION[aggregation];
     }
-    this.setState({getValue: getValueFunc(aggregation, getWeight)});
+    this.setState({getValue: getValueFunc(aggregation, getWeight, {data})});
   }
 
   _resetResults() {

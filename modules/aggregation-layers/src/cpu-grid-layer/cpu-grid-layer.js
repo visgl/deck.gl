@@ -32,7 +32,7 @@ const defaultProps = {
   colorDomain: null,
   colorRange: defaultColorRange,
   getColorValue: {type: 'accessor', value: null}, // default value is calculated from `getColorWeight` and `colorAggregation`
-  getColorWeight: {type: 'accessor', value: x => 1},
+  getColorWeight: {type: 'accessor', value: 1},
   colorAggregation: 'SUM',
   lowerPercentile: {type: 'number', min: 0, max: 100, value: 0},
   upperPercentile: {type: 'number', min: 0, max: 100, value: 100},
@@ -43,7 +43,7 @@ const defaultProps = {
   elevationDomain: null,
   elevationRange: [0, 1000],
   getElevationValue: {type: 'accessor', value: null}, // default value is calculated from `getElevationWeight` and `elevationAggregation`
-  getElevationWeight: {type: 'accessor', value: x => 1},
+  getElevationWeight: {type: 'accessor', value: 1},
   elevationAggregation: 'SUM',
   elevationLowerPercentile: {type: 'number', min: 0, max: 100, value: 0},
   elevationUpperPercentile: {type: 'number', min: 0, max: 100, value: 100},

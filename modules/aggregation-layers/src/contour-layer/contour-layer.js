@@ -36,7 +36,7 @@ const defaultProps = {
   // grid aggregation
   cellSize: {type: 'number', min: 1, max: 1000, value: 1000},
   getPosition: {type: 'accessor', value: x => x.position},
-  getWeight: {type: 'accessor', value: x => 1},
+  getWeight: {type: 'accessor', value: 1},
   gpuAggregation: true,
   aggregation: 'SUM',
 
@@ -220,13 +220,13 @@ export default class ContourLayer extends GridAggregationLayer {
   // Private (Aggregation)
 
   _updateAccessors(opts) {
-    const {getWeight, aggregation} = opts.props;
+    const {getWeight, aggregation, data} = opts.props;
     const {count} = this.state.weights;
     if (count) {
       count.getWeight = getWeight;
       count.operation = AGGREGATION_OPERATION[aggregation];
     }
-    this.setState({getValue: getValueFunc(aggregation, getWeight)});
+    this.setState({getValue: getValueFunc(aggregation, getWeight, {data})});
   }
 
   _resetResults() {

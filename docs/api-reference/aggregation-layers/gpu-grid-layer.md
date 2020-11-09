@@ -8,9 +8,9 @@ import {GPUGridLayerDemo} from 'website-components/doc-demos/aggregation-layers'
 
 # GPUGridLayer (WebGL2)
 
-The `GPUGridLayer` renders a grid heatmap based on an array of points.
-It takes the constant cell size, aggregates input points into cells. This layer performs aggregation on GPU hence not supported in non WebGL2 browsers. The color
-and height of the cell is scaled by number of points it contains.
+The `GPUGridLayer` renders a grid heatmap based on an array of inputs.
+It takes the constant cell size and aggregates input objects into cells. The color
+and height of a cell are determined based on the objects it contains. This layer performs aggregation on GPU hence not supported in non WebGL2 browsers.
 
 `GPUGridLayer` is one of the sublayers for [GridLayer](/docs/api-reference/aggregation-layers/grid-layer.md) and is only supported when using `WebGL2` enabled browsers. It is provided to customize GPU Aggregation for advanced use cases. For any regular use case, [GridLayer](/docs/api-reference/aggregation-layers/grid-layer.md) is recommended.
 
@@ -46,7 +46,7 @@ function App({data, viewState}) {
 
 **Note:** The `GPUGridLayer` at the moment only works with `COORDINATE_SYSTEM.LNGLAT`.
 
-**Note:** GPU Aggregation is faster only when using large data sets (point count is more than 500K), for smaller data sets GPU Aggregation could be potentially slower than CPU Aggregation.
+**Note:** GPU Aggregation is faster only when using large data sets (data size is more than 500K), for smaller data sets GPU Aggregation could be potentially slower than CPU Aggregation.
 
 **Note:** This layer is similar to [CPUGridLayer](/docs/api-reference/aggregation-layers/cpu-grid-layer.md) but performs aggregation on GPU. Check below for more detailed differences of this layer compared to `CPUGridLayer`.
 
@@ -93,6 +93,15 @@ Inherits from all [Base Layer](/docs/api-reference/core/layer.md) and [Composite
 
 Size of each cell in meters. Must be greater than `0`.
 
+##### `colorDomain` (Array, optional)
+
+* Default: `[min(colorWeight), max(colorWeight)]`
+
+Color scale domain, default is set to the extent of aggregated weights in each cell.
+You can control how the colors of cells are mapped to weights by passing in an arbitrary color domain.
+This is useful when you want to render different data input with the same color mapping for comparison.
+
+
 ##### `colorRange` (Array, optional)
 
 * Default: <img src="/website/src/static/images/colorbrewer_YlOrRd_6.png"/>
@@ -104,15 +113,16 @@ Specified as an array of 6 colors [color1, color2, ... color6]. Each color is an
 
 * Default: `1`
 
-Cell size multiplier, clamped between 0 - 1. The final size of cell
-is calculated by `coverage * cellSize`. Note: coverage does not affect how points
-are binned. Coverage are linear based.
+Cell size multiplier, clamped between 0 - 1. The displayed size of cell is calculated by `coverage * cellSize`.
+Note: coverage does not affect how objects are binned.
 
 ##### `elevationDomain` (Array, optional)
 
-* Default: `[0, max(count)]`
+* Default: `[0, max(elevationWeight)]`
 
-Elevation scale input domain, default is set to the extent of point counts in each cell.
+Elevation scale input domain, default is set to between 0 and the max of aggregated weights in each cell.
+You can control how the elevations of cells are mapped to weights by passing in an arbitrary elevation domain.
+This is useful when you want to render different data input with the same elevation scale for comparison.
 
 ##### `elevationRange` (Array, optional)
 
@@ -124,15 +134,14 @@ Elevation scale output range
 
 * Default: `1`
 
-Cell elevation multiplier. The elevation of cell is calculated by
-`elevationScale * getElevation(d)`.
-`elevationScale` is a handy property to scale all cells without updating the data.
+Cell elevation multiplier.
+This is a handy property to scale the height of all cells without updating the data.
 
 ##### `extruded` (Boolean, optional)
 
 * Default: `true`
 
-Whether to enable cell elevation. Cell elevation scale by count of points in each cell. If set to false, all cell will be flat.
+Whether to enable cell elevation. If set to false, all cell will be flat.
 
 ##### `material` (Object, optional)
 
@@ -141,52 +150,52 @@ Whether to enable cell elevation. Cell elevation scale by count of points in eac
 This is an object that contains material props for [lighting effect](/docs/api-reference/core/lighting-effect.md) applied on extruded polygons.
 Check [the lighting guide](/docs/developer-guide/using-lighting.md#constructing-a-material-instance) for configurable settings.
 
-### Data Accessors
-
-##### `getPosition` ([Function](/docs/developer-guide/using-layers.md#accessors), optional)
-
-* Default: `object => object.position`
-
-Method called to retrieve the position of each point.
-
-##### `getColorWeight` (Function, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
-
-* Default: `point => 1`
-
-`getColorWeight` is the accessor function to get the weight of a point used to calcuate the color value for a cell.
-It takes the data prop array element and returns the weight, for example, to use `SPACE` field, `getColorWeight` should be set to `point => point.SPACES`.
-By default `getColorWeight` returns `1`.
-
-Note: similar to `getColorValue`, grid layer compares whether `getColorWeight` has changed to recalculate the value for each bin that its color based on.
 
 
 ##### `colorAggregation` (String, optional)
 
 * Default: 'SUM'
 
-`colorAggregation` defines, operation used to aggregate all data point weights to calculate a cell's color value. Valid values are 'SUM', 'MEAN', 'MIN' and 'MAX'. 'SUM' is used when an invalid value is provided.
+Defines the operation used to aggregate all data object weights to calculate a cell's color value. Valid values are 'SUM', 'MEAN', 'MIN' and 'MAX'. 'SUM' is used when an invalid value is provided.
 
-Note: `getColorWeight` and `colorAggregation` together define how color value of cell is determined, same can be done by setting `getColorValue` prop. But to enable gpu aggregation, former props must be provided instead of later.
-
-
-##### `getElevationWeight` (Function, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
-
-* Default: `point => 1`
-
-`getElevationWeight` is the accessor function to get the weight of a point used to calcuate the elevation value for a cell.
-It takes the data prop array element and returns the weight, for example, to use `SPACE` field, `getElevationWeight` should be set to `point => point.SPACES`.
-By default `getElevationWeight` returns `1`.
-
-Note: similar to `getElevationValue`, grid layer compares whether `getElevationWeight` has changed to recalculate the value for each bin that its color based on.
-
+`getColorWeight` and `colorAggregation` together determine the elevation value of each cell.
 
 ##### `elevationAggregation` (String, optional)
 
 * Default: 'SUM'
 
-`elevationAggregation` defines, operation used to aggregate all data point weights to calculate a cell's elevation value. Valid values are 'SUM', 'MEAN', 'MIN' and 'MAX'. 'SUM' is used when an invalid value is provided.
+Defines the operation used to aggregate all data object weights to calculate a cell's elevation value. Valid values are 'SUM', 'MEAN', 'MIN' and 'MAX'. 'SUM' is used when an invalid value is provided.
 
-Note: `getElevationWeight` and `elevationAggregation` together define how elevation value of cell is determined, same can be done by setting `getColorValue` prop. But to enable gpu aggregation, former props must be provided instead of later.
+`getElevationWeight` and `elevationAggregation` together determine the elevation value of each cell.
+
+
+### Data Accessors
+
+##### `getPosition` ([Function](/docs/developer-guide/using-layers.md#accessors), optional)
+
+* Default: `object => object.position`
+
+Method called to retrieve the position of each object.
+
+
+##### `getColorWeight` (Function, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
+
+* Default: `1`
+
+The weight of a data object used to calculate the color value for a cell.
+
+* If a number is provided, it is used as the weight for all objects.
+* If a function is provided, it is called on each object to retrieve its weight.
+
+
+##### `getElevationWeight` (Function, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
+
+* Default: `1`
+
+The weight of a data object used to calculate the elevation value for a cell.
+
+* If a number is provided, it is used as the weight for all objects.
+* If a function is provided, it is called on each object to retrieve its weight.
 
 
 ## Differences compared to CPUGridLayer
@@ -201,7 +210,7 @@ Instead of `getColorValue`, `getColorWeight` and `colorAggregation` should be us
 
 ### Picking
 
-When picking mode is `hover`, only the elevation value, color value of selected cell are included in picking result. Array of all points that aggregated into that cell is not provided. For all other modes, picking results match with `CPUGridLayer`, for these cases data is aggregated on CPU to provide array of all points that aggregated to the cell.
+When picking mode is `hover`, only the elevation value, color value of selected cell are included in picking result. Array of all objects that aggregated into that cell is not provided. For all other modes, picking results match with `CPUGridLayer`, for these cases data is aggregated on CPU to provide array of all objects that aggregated to the cell.
 
 
 ## Source
