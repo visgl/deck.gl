@@ -11,7 +11,8 @@ const WORLD_SIZE = 512;
 
 const defaultProps = {
   uniqueIdProperty: {type: 'string', value: ''},
-  highlightedFeatureId: null
+  highlightedFeatureId: null,
+  onViewportChange: {type: 'function', optional: true, value: null, compare: false}
 };
 
 async function fetchTileJSON(url) {
@@ -42,6 +43,10 @@ export default class MVTLayer extends TileLayer {
 
     if (this.state.data) {
       super.updateState({props, oldProps, context, changeFlags});
+      const {tileset} = this.state;
+      if (changeFlags.viewportChanged && tileset.isLoaded) {
+        this._onViewportChange();
+      }
     }
   }
 
@@ -115,6 +120,7 @@ export default class MVTLayer extends TileLayer {
     const modelMatrix = new Matrix4().scale([xScale, yScale, 1]);
 
     props.autoHighlight = false;
+
     if (!this.context.viewport.resolution) {
       props.modelMatrix = modelMatrix;
       props.coordinateOrigin = [xOffset, yOffset, 0];
@@ -164,6 +170,53 @@ export default class MVTLayer extends TileLayer {
     return data.findIndex(
       feature => getFeatureUniqueId(feature, uniqueIdProperty) === featureIdToHighlight
     );
+  }
+
+  _pickObjects(maxObjects) {
+    const {deck, viewport} = this.context;
+    const width = viewport.width;
+    const height = viewport.height;
+    const x = viewport.x;
+    const y = viewport.y;
+    const layerIds = [this.id];
+    return deck.pickObjects({x, y, width, height, layerIds, maxObjects});
+  }
+
+  getRenderedFeatures(maxFeatures = null) {
+    const features = this._pickObjects(maxFeatures);
+    const featureCache = new Set();
+    const renderedFeatures = [];
+
+    for (const f of features) {
+      const featureId = getFeatureUniqueId(f.object, this.props.uniqueIdProperty);
+
+      if (featureId === -1) {
+        // we have no id for the feature, we just add to the list
+        renderedFeatures.push(f.object);
+      } else if (!featureCache.has(featureId)) {
+        // Add removing duplicates
+        featureCache.add(featureId);
+        renderedFeatures.push(f.object);
+      }
+    }
+
+    return renderedFeatures;
+  }
+
+  _onViewportChange() {
+    const {onViewportChange} = this.props;
+    if (onViewportChange) {
+      const {viewport} = this.context;
+      onViewportChange({
+        getRenderedFeatures: this.getRenderedFeatures.bind(this),
+        viewport
+      });
+    }
+  }
+
+  _onViewportLoad() {
+    super._onViewportLoad();
+    this._onViewportChange();
   }
 }
 

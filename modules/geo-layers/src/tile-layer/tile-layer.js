@@ -97,20 +97,21 @@ export default class TileLayer extends CompositeLayer {
         tile.layers = null;
       });
     }
+
     this._updateTileset();
   }
 
   _updateTileset() {
     const {tileset} = this.state;
-    const {onViewportLoad, zRange, modelMatrix} = this.props;
+    const {zRange, modelMatrix} = this.props;
     const frameNumber = tileset.update(this.context.viewport, {zRange, modelMatrix});
     const {isLoaded} = tileset;
 
     const loadingStateChanged = this.state.isLoaded !== isLoaded;
     const tilesetChanged = this.state.frameNumber !== frameNumber;
 
-    if (isLoaded && onViewportLoad && (loadingStateChanged || tilesetChanged)) {
-      onViewportLoad(tileset.selectedTiles.map(tile => tile.data));
+    if (isLoaded && (loadingStateChanged || tilesetChanged)) {
+      this._onViewportLoad();
     }
 
     if (tilesetChanged) {
@@ -119,6 +120,15 @@ export default class TileLayer extends CompositeLayer {
     }
     // Save the loaded state - should not trigger a rerender
     this.state.isLoaded = isLoaded;
+  }
+
+  _onViewportLoad() {
+    const {tileset} = this.state;
+    const {onViewportLoad} = this.props;
+
+    if (onViewportLoad) {
+      onViewportLoad(tileset.selectedTiles.map(tile => tile.data));
+    }
   }
 
   _onTileLoad(tile) {
