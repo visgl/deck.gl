@@ -8,9 +8,9 @@ import {HexagonLayerDemo} from 'website-components/doc-demos/aggregation-layers'
 
 # HexagonLayer
 
-The Hexagon Layer renders a hexagon heatmap based on an array of points.
-It takes the radius of hexagon bin, projects points into hexagon bins. The color
-and height of the hexagon is scaled by number of points it contains.
+The Hexagon Layer renders a hexagon heatmap based on an array of inputs.
+It takes the radius of hexagon bin and aggregates input objects into hexagon bins. The color
+and height of a hexagon are determined based on the objects it contains.
 
 HexagonLayer is a [CompositeLayer](/docs/api-reference/core/composite-layer.md) and at the moment only works with `COORDINATE_SYSTEM.LNGLAT`.
 
@@ -102,12 +102,13 @@ see `modules/layers/src/point-density-hexagon-layer/hexagon-aggregator`
 
 ##### `colorDomain` (Array, optional)
 
-* Default: `[min(count), max(count)]`
+* Default: `[min(colorWeight), max(colorWeight)]`
 
 Color scale input domain. The color scale maps continues numeric domain into
 discrete color range. If not provided, the layer will set `colorDomain` to the
-range of counts in each hexagon. You can control how the color of hexagons mapped
-to number of counts by passing in an arbitrary color domain. This property is extremely handy when you want to render different data input with the same color mapping for comparison.
+extent of aggregated weights in each hexagon.
+You can control how the colors of hexagons are mapped to weights by passing in an arbitrary color domain.
+This is useful when you want to render different data input with the same color mapping for comparison.
 
 ##### `colorRange` (Array, optional)
 
@@ -120,18 +121,18 @@ Specified as an array of 6 colors [color1, color2, ... color6]. Each color is an
 
 * Default: `1`
 
-Hexagon radius multiplier, clamped between 0 - 1. The final radius of hexagon
-is calculated by `coverage * radius`. Note: coverage does not affect how points
-are binned. The radius of the bin is determined only by the `radius` property.
+Hexagon radius multiplier, clamped between 0 - 1. The displayed radius of hexagon is calculated by `coverage * radius`.
+Note: coverage does not affect how objects are binned.
 
 ##### `elevationDomain` (Array, optional)
 
-* Default: `[0, max(count)]`
+* Default: `[0, max(elevationWeight)]`
 
 Elevation scale input domain. The elevation scale is a linear scale that
 maps number of counts to elevation. By default it is set to between
-0 and max of point counts in each hexagon.
-This property is extremely handy when you want to render different data input
+0 and the max of aggregated weights in each hexagon.
+You can control how the elevations of hexagons are mapped to weights by passing in an arbitrary elevation domain.
+This property is useful when you want to render different data input
 with the same elevation scale for comparison.
 
 ##### `elevationRange` (Array, optional)
@@ -152,7 +153,7 @@ all hexagons without updating the data.
 
 * Default: `false`
 
-Whether to enable cell elevation. Cell elevation scale by count of points in each cell. If set to false, all cells will be flat.
+Whether to enable cell elevation. If set to false, all cells will be flat.
 
 ##### `upperPercentile` (Number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
 
@@ -194,11 +195,11 @@ Check [the lighting guide](/docs/developer-guide/using-lighting.md#constructing-
 
 * Default: 'SUM'
 
-Defines the operation used to aggregate all data point weights to calculate a bin's color value. Valid values are 'SUM', 'MEAN', 'MIN' and 'MAX'. 'SUM' is used when an invalid value is provided.
+Defines the operation used to aggregate all data object weights to calculate a bin's color value. Valid values are 'SUM', 'MEAN', 'MIN' and 'MAX'. 'SUM' is used when an invalid value is provided.
 
 `getColorWeight` and `colorAggregation` together determine the elevation value of each bin. If the `getColorValue` prop is supplied, they will be ignored.
 
-###### Example1 : Using count of data elements that fall into a bin to encode the its color
+###### Example 1 : Using count of data elements that fall into a bin to encode the its color
 
 * Using `getColorValue`
 ```js
@@ -223,7 +224,7 @@ const layer = new HexagonLayer({
 });
 ```
 
-###### Example2 : Using mean value of 'SPACES' field of data elements to encode the color of the bin
+###### Example 2 : Using mean value of 'SPACES' field of data elements to encode the color of the bin
 
 * Using `getColorValue`
 ```js
@@ -258,11 +259,11 @@ If your use case requires aggregating using an operation that is not one of 'SUM
 
 * Default: 'SUM'
 
-Defines the operation used to aggregate all data point weights to calculate a bin's elevation value. Valid values are 'SUM', 'MEAN', 'MIN' and 'MAX'. 'SUM' is used when an invalid value is provided.
+Defines the operation used to aggregate all data object weights to calculate a bin's elevation value. Valid values are 'SUM', 'MEAN', 'MIN' and 'MAX'. 'SUM' is used when an invalid value is provided.
 
 `getElevationWeight` and `elevationAggregation` together determine the elevation value of each bin. If the `getElevationValue` prop is supplied, they will be ignored.
 
-###### Example1 : Using count of data elements that fall into a bin to encode the its elevation
+###### Example 1 : Using count of data elements that fall into a bin to encode the its elevation
 
 * Using `getElevationValue`
 
@@ -288,7 +289,7 @@ const layer = new HexagonLayer({
 });
 ```
 
-###### Example2 : Using maximum value of 'SPACES' field of data elements to encode the elevation of the bin
+###### Example 2 : Using maximum value of 'SPACES' field of data elements to encode the elevation of the bin
 
 * Using `getElevationValue`
 ```js
@@ -325,14 +326,14 @@ If your use case requires aggregating using an operation that is not one of 'SUM
 
 * Default: `object => object.position`
 
-Method called to retrieve the position of each point.
+Method called to retrieve the position of each object.
 
 
 ##### `getColorWeight` (Function, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
 
 * Default: `1`
 
-The weight of a data point used to calculate the color value for a bin.
+The weight of a data object used to calculate the color value for a bin.
 
 * If a number is provided, it is used as the weight for all objects.
 * If a function is provided, it is called on each object to retrieve its weight.
@@ -342,7 +343,7 @@ The weight of a data point used to calculate the color value for a bin.
 
 * Default: `null`
 
-After data points are aggregated into bins, this accessor is called on each bin to get the value that its color is based on. If supplied, this will override the effect of `getColorWeight` and `colorAggregation` props.
+After data objects are aggregated into bins, this accessor is called on each bin to get the value that its color is based on. If supplied, this will override the effect of `getColorWeight` and `colorAggregation` props.
 
 Arguments:
 
@@ -356,7 +357,7 @@ Arguments:
 
 * Default: `1`
 
-The weight of a data point used to calculate the elevation value for a bin.
+The weight of a data object used to calculate the elevation value for a bin.
 
 * If a number is provided, it is used as the weight for all objects.
 * If a function is provided, it is called on each object to retrieve its weight.
@@ -366,7 +367,7 @@ The weight of a data point used to calculate the elevation value for a bin.
 
 * Default: `null`
 
-After data points are aggregated into bins, this accessor is called on each bin to get the value that its elevation is based on. If supplied, this will override the effect of `getElevationWeight` and `elevationAggregation` props.
+After data objects are aggregated into bins, this accessor is called on each bin to get the value that its elevation is based on. If supplied, this will override the effect of `getElevationWeight` and `elevationAggregation` props.
 
 Arguments:
 
