@@ -1,4 +1,4 @@
-from exceptions import PydeckException
+from pydeck.exceptions import PydeckException
 
 
 class Providers:
@@ -10,7 +10,7 @@ class Providers:
 
     @classmethod
     def as_list(cls):
-        return [a for a in dir(cls) if not a.startswith("__") and not callable(getattr(cls, a))]
+        return [getattr(cls, a) for a in dir(cls) if not a.startswith("__") and not callable(getattr(cls, a))]
 
     @classmethod
     def in_list_or_raise(cls, value):

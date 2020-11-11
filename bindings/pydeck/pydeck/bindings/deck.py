@@ -24,7 +24,7 @@ class Deck(JSONMixin):
         tooltip=True,
         description=None,
         effects=None,
-        map_provider="carto",
+        map_provider=Providers.CARTO,
         parameters=None,
     ):
         """This is the renderer and configuration for a deck.gl visualization, similar to the
@@ -43,8 +43,8 @@ class Deck(JSONMixin):
             and the values are the API key. Defaults to None if not set. Any of the environment variables
             ``MAPBOX_API_KEY``, ``GOOGLE_MAPS_API_KEY``, and ``CARTO_API_KEY`` can be set instead of hardcoding the key here.
         map_provider : str, default 'carto'
-            If multiple API keys are set (e.g., both Mapbox and Google Maps), inform pydeck which basemap provider to prefer. Values can be ``carto``, ``mapbox`` or ``google_maps``.  height : int, default 500
-            Height of Jupyter notebook cell, in pixels.
+            If multiple API keys are set (e.g., both Mapbox and Google Maps), inform pydeck which basemap provider to prefer.
+            Values can be ``carto``, ``mapbox`` or ``google_maps``
         map_style : str, default 'dark'
             One of 'light', 'dark', 'road', 'satellite', 'dark_no_labels', and 'light_no_labels', or
             URI for basemap style, which varies by provider. The default is Carto's Dark Matter map.
@@ -53,6 +53,8 @@ class Deck(JSONMixin):
         initial_view_state : pydeck.ViewState, default ``pydeck.ViewState(latitude=0, longitude=0, zoom=1)``
             Initial camera angle relative to the map, defaults to a fully zoomed out 0, 0-centered map
             To compute a viewport from data, see :func:`pydeck.data_utils.viewport_helpers.compute_view`
+        height : int, default 500
+            Height of Jupyter notebook cell, in pixels.
         width : int` or string, default '100%'
             Width of visualization, in pixels (if a number) or as a CSS value string.
         tooltip : bool or dict of {str: str}, default True
@@ -99,12 +101,13 @@ class Deck(JSONMixin):
             return None
         return self.deck_widget.selected_data
 
-    def _set_api_keys(self, api_keys: dict):
+    def _set_api_keys(self, api_keys: dict = {}):
         for k in api_keys:
             k and Providers.in_list_or_raise(k)
-            attr_name = f"{k}_key"
-            attr_env_value = f"{k}_API_KEY".upper()
-            attr_value = api_keys.get(k) or os.getenv(attr_env_value)
+        for provider in Providers.as_list():
+            attr_name = f"{provider}_key"
+            provider_env_var = f"{provider}_API_KEY".upper()
+            attr_value = api_keys.get(provider) or os.getenv(provider_env_var)
             setattr(self, attr_name, attr_value)
             setattr(self.deck_widget, attr_name, attr_value)
 

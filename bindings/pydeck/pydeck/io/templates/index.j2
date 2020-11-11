@@ -51,14 +51,12 @@
   </body>
   <script>
     const jsonInput = {{json_input}};
-    const MAPBOX_API_KEY = '{{mapbox_key}}';
-    const GOOGLE_MAPS_API_KEY = '{{google_maps_key}}';
     const tooltip = {{tooltip}};
     const customLibraries = {{ custom_libraries or 'null' }};
 
-    const deck = createDeck({
-      mapboxApiKey: MAPBOX_API_KEY,
-      googleMapsKey: GOOGLE_MAPS_API_KEY,
+    const deckInstance = createDeck({
+      mapboxApiKey: '{{mapbox_key}}',
+      googleMapsKey: '{{google_maps_key}}',
       container: document.getElementById('deck-container'),
       jsonInput,
       tooltip,
