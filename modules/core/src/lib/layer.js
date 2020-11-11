@@ -47,6 +47,8 @@ const TRACE_UPDATE = 'layer.update';
 const TRACE_FINALIZE = 'layer.finalize';
 const TRACE_MATCHED = 'layer.matched';
 
+const MAX_PICKING_COLOR_CACHE_SIZE = 16777215;
+
 const EMPTY_ARRAY = Object.freeze([]);
 
 // Only compare the same two viewports once
@@ -476,15 +478,22 @@ export default class Layer extends Component {
     const cacheSize = pickingColorCache.length / 3;
 
     if (cacheSize < numInstances) {
+      let overAlloc;
+      if (numInstances > MAX_PICKING_COLOR_CACHE_SIZE) {
+        log.warn('Index out of picking color range. Picking might not work as expected.');
+        overAlloc = 1;
+        numInstances = MAX_PICKING_COLOR_CACHE_SIZE;
+      }
+
       pickingColorCache = typedArrayManager.allocate(pickingColorCache, numInstances, {
         size: 3,
-        copy: true
+        copy: true,
+        overAlloc
       });
+
       // If the attribute is larger than the cache, resize the cache and populate the missing chunk
       const newCacheSize = pickingColorCache.length / 3;
       const pickingColor = [];
-      assert(newCacheSize < 16777215, 'index out of picking color range');
-
       for (let i = cacheSize; i < newCacheSize; i++) {
         this.encodePickingColor(i, pickingColor);
         pickingColorCache[i * 3 + 0] = pickingColor[0];

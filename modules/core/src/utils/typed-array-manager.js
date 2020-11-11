@@ -9,7 +9,11 @@ export class TypedArrayManager {
     Object.assign(this.props, props);
   }
 
-  allocate(typedArray, count, {size = 1, type, padding = 0, copy = false, initialize = false}) {
+  allocate(
+    typedArray,
+    count,
+    {size = 1, type, padding = 0, copy = false, initialize = false, overAlloc}
+  ) {
     const Type = type || (typedArray && typedArray.constructor) || Float32Array;
 
     const newSize = count * size + padding;
@@ -22,7 +26,7 @@ export class TypedArrayManager {
       }
     }
 
-    const newArray = this._allocate(Type, newSize, initialize);
+    const newArray = this._allocate(Type, newSize, initialize, overAlloc);
 
     if (typedArray && copy) {
       newArray.set(typedArray);
@@ -39,9 +43,9 @@ export class TypedArrayManager {
     this._release(typedArray);
   }
 
-  _allocate(Type, size, initialize) {
+  _allocate(Type, size, initialize, overAlloc) {
     // Allocate at least one element to ensure a valid buffer
-    size = Math.max(Math.ceil(size * this.props.overAlloc), 1);
+    size = Math.max(Math.ceil(size * (overAlloc || this.props.overAlloc)), 1);
 
     // Check if available in pool
     const pool = this._pool;

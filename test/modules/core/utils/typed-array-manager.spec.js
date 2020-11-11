@@ -34,6 +34,11 @@ test('TypedArrayManager#allocate', t => {
   t.is(array2.length, 4, 'Allocated array has correct length');
   t.is(array.buffer, array2.buffer, 'Reused existing arraybuffer');
 
+  // Create a new array with custom over allocation
+  array = typedArrayManager.allocate(null, 1, {size: 2, type: Float32Array, overAlloc: 1});
+  t.is(array.length, 2, 'Allocated array has correct length');
+  array.fill(1);
+
   t.end();
 });
 
