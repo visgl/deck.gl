@@ -102,5 +102,5 @@
       ]
     }
   ],
-  "mapProvider": "mapbox"
+  "mapProvider": "carto"
 }

@@ -42,5 +42,5 @@
       "controller": true
     }
   ],
-  "mapProvider": "mapbox"
+  "mapProvider": "carto"
 }
