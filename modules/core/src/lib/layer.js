@@ -47,7 +47,7 @@ const TRACE_UPDATE = 'layer.update';
 const TRACE_FINALIZE = 'layer.finalize';
 const TRACE_MATCHED = 'layer.matched';
 
-const MAX_PICKING_COLOR_CACHE_SIZE = 2 ** 24;
+const MAX_PICKING_COLOR_CACHE_SIZE = 2 ** 24 - 1;
 
 const EMPTY_ARRAY = Object.freeze([]);
 
@@ -488,7 +488,7 @@ export default class Layer extends Component {
       pickingColorCache = typedArrayManager.allocate(pickingColorCache, numInstances, {
         size: 3,
         copy: true,
-        overAllocCountCap: MAX_PICKING_COLOR_CACHE_SIZE
+        maxCount: MAX_PICKING_COLOR_CACHE_SIZE
       });
 
       // If the attribute is larger than the cache, resize the cache and populate the missing chunk

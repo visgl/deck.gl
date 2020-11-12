@@ -12,7 +12,7 @@ export class TypedArrayManager {
   allocate(
     typedArray,
     count,
-    {size = 1, type, padding = 0, copy = false, initialize = false, overAllocCountCap}
+    {size = 1, type, padding = 0, copy = false, initialize = false, maxCount}
   ) {
     const Type = type || (typedArray && typedArray.constructor) || Float32Array;
 
@@ -26,12 +26,12 @@ export class TypedArrayManager {
       }
     }
 
-    let overAllocSizeCap;
-    if (overAllocCountCap) {
-      overAllocSizeCap = overAllocCountCap * size;
+    let maxSize;
+    if (maxCount) {
+      maxSize = maxCount * size;
     }
 
-    const newArray = this._allocate(Type, newSize, initialize, overAllocSizeCap);
+    const newArray = this._allocate(Type, newSize, initialize, maxSize);
 
     if (typedArray && copy) {
       newArray.set(typedArray);
@@ -48,14 +48,12 @@ export class TypedArrayManager {
     this._release(typedArray);
   }
 
-  _allocate(Type, size, initialize, overAllocSizeCap) {
+  _allocate(Type, size, initialize, maxSize) {
     // Allocate at least one element to ensure a valid buffer
     let sizeToAllocate = Math.max(Math.ceil(size * this.props.overAlloc), 1);
     // Don't over allocate after certain specified number of elements
-    if (overAllocSizeCap) {
-      if (sizeToAllocate > overAllocSizeCap) {
-        sizeToAllocate = Math.max(size, overAllocSizeCap);
-      }
+    if (sizeToAllocate > maxSize) {
+      sizeToAllocate = Math.max(size, maxSize);
     }
 
     // Check if available in pool
