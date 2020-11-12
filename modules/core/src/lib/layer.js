@@ -47,7 +47,7 @@ const TRACE_UPDATE = 'layer.update';
 const TRACE_FINALIZE = 'layer.finalize';
 const TRACE_MATCHED = 'layer.matched';
 
-const MAX_PICKING_COLOR_CACHE_SIZE = 16777215;
+const MAX_PICKING_COLOR_CACHE_SIZE = 2 ** 24;
 
 const EMPTY_ARRAY = Object.freeze([]);
 
@@ -478,17 +478,17 @@ export default class Layer extends Component {
     const cacheSize = pickingColorCache.length / 3;
 
     if (cacheSize < numInstances) {
-      let overAlloc;
       if (numInstances > MAX_PICKING_COLOR_CACHE_SIZE) {
-        log.warn('Index out of picking color range. Picking might not work as expected.');
-        overAlloc = 1;
+        log.warn(
+          'Layer has too many data objects. Picking might not be able to distinguish all objects.'
+        )();
         numInstances = MAX_PICKING_COLOR_CACHE_SIZE;
       }
 
       pickingColorCache = typedArrayManager.allocate(pickingColorCache, numInstances, {
         size: 3,
         copy: true,
-        overAlloc
+        overAllocCountCap: MAX_PICKING_COLOR_CACHE_SIZE
       });
 
       // If the attribute is larger than the cache, resize the cache and populate the missing chunk
