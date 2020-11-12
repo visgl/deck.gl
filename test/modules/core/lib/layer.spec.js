@@ -486,6 +486,17 @@ test('Layer#calculateInstancePickingColors', t => {
           'instancePickingColors is populated'
         );
       }
+    },
+    {
+      updateProps: {
+        data: new Array(2 ** 24 + 1000).fill(0),
+        pickable: true
+      },
+      onAfterUpdate: ({layer}) => {
+        const {instancePickingColors} = layer.getAttributeManager().getAttributes();
+        const {length} = instancePickingColors.value;
+        t.deepEquals(length, 2 ** 24 * 3, `instancePickingColors buffer size is capped`);
+      }
     }
   ];
 
