@@ -36,11 +36,13 @@ test('TypedArrayManager#allocate', t => {
 
   // Create a new array with over allocation.
   // Allocated array with over allocation should be smaller than over allocation cap.
+  // 2 elements x 2 bytes x 2 default over alloc => 8
   array = typedArrayManager.allocate(null, 2, {size: 2, type: Float32Array, maxCount: 5});
   t.is(array.length, 8, 'Allocated array has correct length, not affected by over alloc cap');
 
   // Create a new array with over allocation.
   // Allocated array with over allocation is capped by over allocation cap.
+  // 3 elements x 2 bytes x 2 default over alloc => 12; max count limits allocation to 10.
   array = typedArrayManager.allocate(null, 3, {size: 2, type: Float32Array, maxCount: 5});
   t.is(array.length, 10, 'Allocated array has correct length, affected by over alloc cap');
 

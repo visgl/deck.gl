@@ -488,7 +488,7 @@ export default class Layer extends Component {
       pickingColorCache = typedArrayManager.allocate(pickingColorCache, numInstances, {
         size: 3,
         copy: true,
-        maxCount: MAX_PICKING_COLOR_CACHE_SIZE
+        maxCount: Math.max(numInstances, MAX_PICKING_COLOR_CACHE_SIZE)
       });
 
       // If the attribute is larger than the cache, resize the cache and populate the missing chunk

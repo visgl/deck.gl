@@ -28,7 +28,7 @@ export class TypedArrayManager {
 
     let maxSize;
     if (maxCount) {
-      maxSize = maxCount * size;
+      maxSize = maxCount * size + padding;
     }
 
     const newArray = this._allocate(Type, newSize, initialize, maxSize);
@@ -53,7 +53,7 @@ export class TypedArrayManager {
     let sizeToAllocate = Math.max(Math.ceil(size * this.props.overAlloc), 1);
     // Don't over allocate after certain specified number of elements
     if (sizeToAllocate > maxSize) {
-      sizeToAllocate = Math.max(size, maxSize);
+      sizeToAllocate = maxSize;
     }
 
     // Check if available in pool
