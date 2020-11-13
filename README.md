@@ -60,6 +60,14 @@ npm install deck.gl
 - [Get started](/docs/get-started/using-with-react.md)
 - [Full examples](/examples/get-started/react)
 
+#### Vue JS
+```bash
+npm install @hirelofty/vue_deckgl
+```
+- [Get started](https://loftylabs.github.io/vue_deckgl/)
+- [Full examples](https://loftylabs.github.io/vue_deckgl/instant)
+
+
 ### Python
 
 ```bash
