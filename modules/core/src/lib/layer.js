@@ -482,7 +482,6 @@ export default class Layer extends Component {
         log.warn(
           'Layer has too many data objects. Picking might not be able to distinguish all objects.'
         )();
-        numInstances = MAX_PICKING_COLOR_CACHE_SIZE;
       }
 
       pickingColorCache = typedArrayManager.allocate(pickingColorCache, numInstances, {

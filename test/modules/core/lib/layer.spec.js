@@ -489,17 +489,16 @@ test('Layer#calculateInstancePickingColors', t => {
     },
     {
       updateProps: {
-        data: new Array(2 ** 24 + 1000).fill(0),
+        data: new Array(2 ** 24 + 100).fill(0),
         pickable: true
       },
       onAfterUpdate: ({layer}) => {
         const {instancePickingColors} = layer.getAttributeManager().getAttributes();
         const {length} = instancePickingColors.value;
-        t.deepEquals(length, (2 ** 24 - 1) * 3, `instancePickingColors buffer size is capped`);
         t.deepEquals(
-          instancePickingColors.value.slice(-3),
-          [255, 255, 255],
-          'last picking color is correct'
+          length,
+          (2 ** 24 + 100) * 3,
+          `no over allocation for instancePickingColors buffer after 2**24 elements`
         );
       }
     }
