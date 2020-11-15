@@ -7,7 +7,7 @@ from ..settings import settings as pydeck_settings
 from ..widget import DeckGLWidget
 from .view import View
 from .view_state import ViewState
-from .provider import BaseMapProvider
+from .base_map_provider import BaseMapProvider
 from .map_styles import DARK, get_from_map_identifier
 
 
