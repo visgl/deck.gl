@@ -24,7 +24,7 @@ class Deck(JSONMixin):
         tooltip=True,
         description=None,
         effects=None,
-        map_provider=BaseMapProvider.CARTO,
+        map_provider=BaseMapProvider.CARTO.value,
         parameters=None,
     ):
         """This is the renderer and configuration for a deck.gl visualization, similar to the
@@ -104,7 +104,7 @@ class Deck(JSONMixin):
     def _set_api_keys(self, api_keys: dict = None):
         """Sets API key for base map provider for both HTML embedding and the Jupyter widget"""
         for k in api_keys:
-            k and BaseMapProvider.in_list_or_raise(k)
+            k and BaseMapProvider(k)
         for provider in BaseMapProvider:
             attr_name = f"{provider.value}_key"
             provider_env_var = f"{provider.name}_API_KEY"
