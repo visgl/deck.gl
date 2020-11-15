@@ -1,8 +1,10 @@
+from enum import Enum
+
 from pydeck.exceptions import PydeckException
 
 
-class Providers:
-    """Basemap providers available in pydeck"""
+class BaseMapProvider(Enum):
+    """Basemap provider available in pydeck"""
 
     MAPBOX = "mapbox"
     GOOGLE_MAPS = "google_maps"
@@ -10,7 +12,7 @@ class Providers:
 
     @classmethod
     def as_list(cls):
-        return [getattr(cls, a) for a in dir(cls) if not a.startswith("__") and not callable(getattr(cls, a))]
+        return [x.value for x in cls]
 
     @classmethod
     def in_list_or_raise(cls, value):
