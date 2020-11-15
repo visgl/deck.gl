@@ -144,6 +144,7 @@ function createStandaloneFromProvider({
     case 'carto':
       deck.log.info('Using Carto base maps')();
       return new deck.DeckGL({
+        map: mapboxgl,
         ...sharedProps,
         ...props
       });
