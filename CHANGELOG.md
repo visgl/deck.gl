@@ -19,6 +19,11 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v8.3
 
+#### deck.gl [8.3.7] - Nov 15 2020
+
+- Fix: Limit for color picking cache size; overAlloc override. (#5115)
+- Remove double buffer overallocation (#5118)
+
 #### deck.gl [8.3.6] - Nov 5 2020
 
 - Basemap module for @deck.gl/carto (#5055)
