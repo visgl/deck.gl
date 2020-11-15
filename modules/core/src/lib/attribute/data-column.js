@@ -236,12 +236,10 @@ export default class DataColumn {
       if (this.doublePrecision && value instanceof Float64Array) {
         value = toDoublePrecisionArray(value, accessor);
       }
-
-      // A small over allocation is used as safety margin
-      // Shader attributes may try to access this buffer with bigger offsets
-      const requiredBufferSize = value.byteLength + byteOffset + accessor.stride * 2;
-      if (buffer.byteLength < requiredBufferSize) {
-        buffer.reallocate(requiredBufferSize);
+      // TODO: support offset in buffer.setData?
+      if (buffer.byteLength < value.byteLength + byteOffset) {
+        // Over allocation is required because shader attributes may have bigger offsets
+        buffer.reallocate((value.byteLength + byteOffset) * 2);
       }
       // Hack: force Buffer to infer data type
       buffer.setAccessor(null);

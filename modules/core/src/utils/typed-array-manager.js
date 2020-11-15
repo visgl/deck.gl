@@ -9,11 +9,7 @@ export class TypedArrayManager {
     Object.assign(this.props, props);
   }
 
-  allocate(
-    typedArray,
-    count,
-    {size = 1, type, padding = 0, copy = false, initialize = false, maxCount}
-  ) {
+  allocate(typedArray, count, {size = 1, type, padding = 0, copy = false, initialize = false}) {
     const Type = type || (typedArray && typedArray.constructor) || Float32Array;
 
     const newSize = count * size + padding;
@@ -26,17 +22,12 @@ export class TypedArrayManager {
       }
     }
 
-    let maxSize;
-    if (maxCount) {
-      maxSize = maxCount * size + padding;
-    }
-
-    const newArray = this._allocate(Type, newSize, initialize, maxSize);
+    const newArray = this._allocate(Type, newSize, initialize);
 
     if (typedArray && copy) {
       newArray.set(typedArray);
     } else if (!initialize) {
-      // Hack - always initialize the first 4 elements. NaNs crash the Attribute validation
+      // Hack - always initialize the first 4 elements. NaNs crashe the Attribute validation
       newArray.fill(0, 0, 4);
     }
 
@@ -48,28 +39,24 @@ export class TypedArrayManager {
     this._release(typedArray);
   }
 
-  _allocate(Type, size, initialize, maxSize) {
+  _allocate(Type, size, initialize) {
     // Allocate at least one element to ensure a valid buffer
-    let sizeToAllocate = Math.max(Math.ceil(size * this.props.overAlloc), 1);
-    // Don't over allocate after certain specified number of elements
-    if (sizeToAllocate > maxSize) {
-      sizeToAllocate = maxSize;
-    }
+    size = Math.max(Math.ceil(size * this.props.overAlloc), 1);
 
     // Check if available in pool
     const pool = this._pool;
-    const byteLength = Type.BYTES_PER_ELEMENT * sizeToAllocate;
+    const byteLength = Type.BYTES_PER_ELEMENT * size;
     const i = pool.findIndex(b => b.byteLength >= byteLength);
     if (i >= 0) {
       // Create a new array using an existing buffer
-      const array = new Type(pool.splice(i, 1)[0], 0, sizeToAllocate);
+      const array = new Type(pool.splice(i, 1)[0], 0, size);
       if (initialize) {
         // Viewing a buffer with a different type may create NaNs
         array.fill(0);
       }
       return array;
     }
-    return new Type(sizeToAllocate);
+    return new Type(size);
   }
 
   _release(typedArray) {
