@@ -10,14 +10,21 @@ LIGHT_NO_LABELS = "light_no_labels"
 
 MAPBOX_LIGHT = "mapbox://styles/mapbox/light-v9"
 MAPBOX_DARK = "mapbox://styles/mapbox/dark-v9"
-MAPBOX_DARK_NO_LABELS = "https://rivulet-zhang.github.io/dataRepo/mapbox/style/map-style-dark-v9-no-labels.json"
+MAPBOX_DARK_NO_LABELS = (
+    "https://gist.githubusercontent.com/ajduberstein/bf703a04db773e20958f4158c45fb996"
+    "/raw/a467c7649ddc25a43469e1c3932763582546b9b0/mapbox-map-style-dark-v9-no-labels.json"
+)
 MAPBOX_ROAD = "mapbox://styles/mapbox/streets-v9"
 MAPBOX_SATELLITE = "mapbox://styles/mapbox/satellite-v9"
 
 CARTO_DARK = "https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json"
-CARTO_DARK_NO_LABELS = "https://basemaps.cartocdn.com/gl/dark-matter-nolabels-gl-style/style.json"
+CARTO_DARK_NO_LABELS = (
+    "https://basemaps.cartocdn.com/gl/dark-matter-nolabels-gl-style/style.json"
+)
 CARTO_LIGHT = "https://basemaps.cartocdn.com/gl/positron-gl-style/style.json"
-CARTO_LIGHT_NO_LABELS = "https://basemaps.cartocdn.com/gl/positron-nolabels-gl-style/style.json"
+CARTO_LIGHT_NO_LABELS = (
+    "https://basemaps.cartocdn.com/gl/positron-nolabels-gl-style/style.json"
+)
 CARTO_ROAD = "https://basemaps.cartocdn.com/gl/voyager-gl-style/style.json"
 
 GOOGLE_SATELLITE = "satellite"
