@@ -21,6 +21,22 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ### deck.gl v8.4 Prereleases
 
+#### deck.gl [8.4.0-alpha.2] - Nov 12 2020
+
+- Fix: apply restrictive zoom for inline tilejson at MVTLayer (#5114)
+- Add onIconError to IconLayer (#5103)
+- CPU Aggregator accessor conformance (#5084)
+- MVT getRenderedFeatures (#4953)
+- [carto] Adapt to endpoints refactor (#5075)
+- Fix a bug polygon fill layer updates when line color changes (#5082)
+- Model Matrix for TileLayer (non-geospatial) (#5080)
+- Shader support for extreme latitude coordinates (#5081)
+- Fix using CARTESIAN coordinates in GlobeView (#5078)
+- ArcGIS 3D altitude fix (#5066)
+- [carto] Maps API v2 (#5053)
+- MimeTypes in JSONLoader (#5054)
+- Basemap module for @deck.gl/carto (#5055)
+
 #### deck.gl [8.4.0-alpha.1] - Oct 22 2020
 
 - Fix project precision on iOS 14 (#5056)

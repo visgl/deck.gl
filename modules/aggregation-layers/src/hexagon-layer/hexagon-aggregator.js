@@ -48,14 +48,11 @@ export function pointToHexbin(props, aggregationParams) {
     const position = [positions[posIndex], positions[posIndex + 1]];
     const arrayIsFinite = Number.isFinite(position[0]) && Number.isFinite(position[1]);
     if (arrayIsFinite) {
-      screenPoints.push(
-        Object.assign(
-          {
-            screenCoord: viewport.projectFlat(position)
-          },
-          object
-        )
-      );
+      screenPoints.push({
+        screenCoord: viewport.projectFlat(position),
+        source: object,
+        index: objectInfo.index
+      });
     } else {
       log.warn('HexagonLayer: invalid position')();
     }
