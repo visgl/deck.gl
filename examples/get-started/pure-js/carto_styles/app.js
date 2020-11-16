@@ -1,6 +1,6 @@
 import mapboxgl from 'mapbox-gl';
 import {Deck} from '@deck.gl/core';
-import {ColorsBins, CartoDOLayer, setDefaultCredentials, BASEMAP} from '@deck.gl/carto';
+import {ColorsBins, ColorsCategories, CartoDOLayer, setDefaultCredentials, BASEMAP} from '@deck.gl/carto';
 
 const INITIAL_VIEW_STATE = {
   latitude: 40.75143535766423,
@@ -63,6 +63,14 @@ const colorManual = ColorsBins({
 
 let colorByStats;
 
+const colorCategoriesManual = ColorsCategories({
+  categories: ['Consumer Services', 'Commercial Services', 'Attorney'],
+  colors: [[0, 155, 158],[66, 183, 185],[167, 211, 212],[241, 241, 241],[228, 193, 217],[214, 145, 193],[199, 93, 171]],
+  defaultColor: [255,255,255]
+})
+
+let colorCategoriesByStats
+
 render();
 
 // Function to render the layers. Will be invoked any time visibility changes.
@@ -88,6 +96,38 @@ function render() {
       pickable: true,
       sample: true,
       onDataLoad
+    }),
+    new CartoDOLayer({
+      id: 'do-layer-category-manual',
+      data: 'carto-do.here.pointsofinterest_pointsofinterest_usa_latlon_v1_quarterly_v1',
+      visible: visibleLayer === 'color_categories_manual',
+      getFillColor: d => colorCategoriesManual(d.properties.category_name),
+      filled: true,
+      pointRadiusMinPixels: 3,
+      pickable: true,
+      sample: true,
+    }),
+    new CartoDOLayer({
+      id: 'do-layer-category-stats',
+      data: 'carto-do.here.pointsofinterest_pointsofinterest_usa_latlon_v1_quarterly_v1',
+      visible: visibleLayer === 'color_categories_stats',
+      ...(colorCategoriesByStats && {getFillColor: d => colorCategoriesByStats(d.properties.category_name)}),
+      filled: true,
+      pointRadiusMinPixels: 3,
+      pickable: true,
+      sample: true,
+      onDataLoad: tileJSON => {
+        const {tilestats} = tileJSON;
+        const stats = tilestats.layers[0].attributes.find(d => d.attribute === 'category_name');
+        colorCategoriesByStats = ColorsCategories({
+          categories: {
+            stats,
+            top: 10
+          },
+          colors: [[0, 155, 158],[66, 183, 185],[167, 211, 212],[241, 241, 241],[228, 193, 217],[214, 145, 193],[199, 93, 171]]
+        })
+        render();
+      }
     })
   ];
   // update layers in deck.gl.
