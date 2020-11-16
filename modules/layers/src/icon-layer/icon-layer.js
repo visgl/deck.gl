@@ -17,7 +17,7 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
-import {Layer, project32, picking} from '@deck.gl/core';
+import {Layer, project32, picking, log} from '@deck.gl/core';
 import GL from '@luma.gl/constants';
 import {Model, Geometry} from '@luma.gl/core';
 
@@ -64,7 +64,9 @@ const defaultProps = {
   getColor: {type: 'accessor', value: DEFAULT_COLOR},
   getSize: {type: 'accessor', value: 1},
   getAngle: {type: 'accessor', value: 0},
-  getPixelOffset: {type: 'accessor', value: [0, 0]}
+  getPixelOffset: {type: 'accessor', value: [0, 0]},
+
+  onIconError: {type: 'function', value: null, compare: false, optional: true}
 };
 
 export default class IconLayer extends Layer {
@@ -74,7 +76,10 @@ export default class IconLayer extends Layer {
 
   initializeState() {
     this.state = {
-      iconManager: new IconManager(this.context.gl, {onUpdate: () => this._onUpdate()})
+      iconManager: new IconManager(this.context.gl, {
+        onUpdate: this._onUpdate.bind(this),
+        onError: this._onError.bind(this)
+      })
     };
 
     const attributeManager = this.getAttributeManager();
@@ -236,6 +241,15 @@ export default class IconLayer extends Layer {
 
   _onUpdate() {
     this.setNeedsRedraw();
+  }
+
+  _onError(evt) {
+    const {onIconError} = this.getCurrentLayer().props;
+    if (onIconError) {
+      onIconError(evt);
+    } else {
+      log.error(evt.error)();
+    }
   }
 
   getInstanceOffset(icon) {

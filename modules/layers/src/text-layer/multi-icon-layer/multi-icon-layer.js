@@ -31,7 +31,7 @@ const EMPTY_ARRAY = [];
 const defaultProps = {
   backgroundColor: {type: 'color', value: null, optional: true},
   getIconOffsets: {type: 'accessor', value: x => x.offsets},
-  alphaCutoff: 0
+  alphaCutoff: 0.001
 };
 
 export default class MultiIconLayer extends IconLayer {

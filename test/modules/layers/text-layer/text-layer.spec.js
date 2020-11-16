@@ -33,7 +33,7 @@ test('TextLayer - sdf', t => {
       },
       onAfterUpdate: ({subLayer}) => {
         t.notOk(subLayer.props.sdf, 'sublayer props.sdf');
-        t.is(subLayer.props.alphaCutoff, 0, 'sublayer props.alphaCutoff');
+        t.is(subLayer.props.alphaCutoff, 0.001, 'sublayer props.alphaCutoff');
       }
     },
     {
