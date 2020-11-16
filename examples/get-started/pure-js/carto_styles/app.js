@@ -1,6 +1,12 @@
 import mapboxgl from 'mapbox-gl';
 import {Deck} from '@deck.gl/core';
-import {ColorsBins, ColorsCategories, CartoDOLayer, setDefaultCredentials, BASEMAP} from '@deck.gl/carto';
+import {
+  ColorsBins,
+  ColorsCategories,
+  CartoDOLayer,
+  setDefaultCredentials,
+  BASEMAP
+} from '@deck.gl/carto';
 
 const INITIAL_VIEW_STATE = {
   latitude: 40.75143535766423,
@@ -65,11 +71,19 @@ let colorByStats;
 
 const colorCategoriesManual = ColorsCategories({
   categories: ['Consumer Services', 'Commercial Services', 'Attorney'],
-  colors: [[0, 155, 158],[66, 183, 185],[167, 211, 212],[241, 241, 241],[228, 193, 217],[214, 145, 193],[199, 93, 171]],
-  defaultColor: [255,255,255]
-})
+  colors: [
+    [0, 155, 158],
+    [66, 183, 185],
+    [167, 211, 212],
+    [241, 241, 241],
+    [228, 193, 217],
+    [214, 145, 193],
+    [199, 93, 171]
+  ],
+  defaultColor: [255, 255, 255]
+});
 
-let colorCategoriesByStats
+let colorCategoriesByStats;
 
 render();
 
@@ -105,13 +119,15 @@ function render() {
       filled: true,
       pointRadiusMinPixels: 3,
       pickable: true,
-      sample: true,
+      sample: true
     }),
     new CartoDOLayer({
       id: 'do-layer-category-stats',
       data: 'carto-do.here.pointsofinterest_pointsofinterest_usa_latlon_v1_quarterly_v1',
       visible: visibleLayer === 'color_categories_stats',
-      ...(colorCategoriesByStats && {getFillColor: d => colorCategoriesByStats(d.properties.category_name)}),
+      ...(colorCategoriesByStats && {
+        getFillColor: d => colorCategoriesByStats(d.properties.category_name)
+      }),
       filled: true,
       pointRadiusMinPixels: 3,
       pickable: true,
@@ -124,8 +140,16 @@ function render() {
             stats,
             top: 10
           },
-          colors: [[0, 155, 158],[66, 183, 185],[167, 211, 212],[241, 241, 241],[228, 193, 217],[214, 145, 193],[199, 93, 171]]
-        })
+          colors: [
+            [0, 155, 158],
+            [66, 183, 185],
+            [167, 211, 212],
+            [241, 241, 241],
+            [228, 193, 217],
+            [214, 145, 193],
+            [199, 93, 171]
+          ]
+        });
         render();
       }
     })
