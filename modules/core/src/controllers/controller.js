@@ -248,7 +248,12 @@ export default class Controller {
     if (!this.isPointInBounds(pos, event)) {
       return false;
     }
-    const newControllerState = this.controllerState.panStart({pos}).rotateStart({pos});
+    let alternateMode = this.isFunctionKeyPressed(event) || event.rightButton;
+    alternateMode = this.invertPan ? !alternateMode : alternateMode;
+    const newControllerState = this.controllerState[alternateMode ? 'panStart' : 'rotateStart']({
+      pos
+    });
+    this._panMove = alternateMode;
     this.updateViewport(newControllerState, NO_TRANSITION_PROPS, {isDragging: true});
     return true;
   }
@@ -258,14 +263,12 @@ export default class Controller {
     if (!this.isDragging()) {
       return false;
     }
-    let alternateMode = this.isFunctionKeyPressed(event) || event.rightButton;
-    alternateMode = this.invertPan ? !alternateMode : alternateMode;
-    return alternateMode ? this._onPanMove(event) : this._onPanRotate(event);
+    return this._panMove ? this._onPanMove(event) : this._onPanRotate(event);
   }
 
   // Default handler for the `panend` event.
   _onPanEnd(event) {
-    const newControllerState = this.controllerState.panEnd().rotateEnd();
+    const newControllerState = this.controllerState[this._panMove ? 'panEnd' : 'rotateEnd']();
     this.updateViewport(newControllerState, null, {
       isDragging: false,
       isPanning: false,

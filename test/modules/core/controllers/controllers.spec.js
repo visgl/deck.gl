@@ -75,7 +75,7 @@ test('FirstPersonController', t => {
       position: [0, 0, 2]
     },
     // FirstPersonController does not pan
-    ['pan', 'pan#function key']
+    ['pan#function key', 'pan#function key#disabled']
   );
 
   t.end();
