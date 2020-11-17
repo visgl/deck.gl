@@ -19,6 +19,12 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v8.3
 
+#### deck.gl [8.3.8] - Nov 17 2020
+
+- Change default alphaCutoff to non-zero (#5129)
+- Fix H3HexagonLayer in GlobeView (#5135)
+- Fix attribute transition when using Float32Array with double precision attributes (#5138)
+
 #### deck.gl [8.3.7] - Nov 15 2020
 
 - Fix: Limit for color picking cache size; overAlloc override. (#5115)
