@@ -30,6 +30,7 @@
   },
   "dependencies": {
     "@deck.gl/aggregation-layers": "8.4.0-alpha.2",
+    "@deck.gl/carto": "8.4.0-alpha.2",
     "@deck.gl/geo-layers": "8.4.0-alpha.2",
     "@deck.gl/google-maps": "8.4.0-alpha.2",
     "@deck.gl/json": "8.4.0-alpha.2",

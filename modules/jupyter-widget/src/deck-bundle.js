@@ -11,6 +11,7 @@ Object.assign(
   require('@deck.gl/geo-layers'),
   require('@deck.gl/mesh-layers'),
   require('@deck.gl/google-maps'),
+  require('@deck.gl/carto'),
   require('@deck.gl/json')
 );
 
