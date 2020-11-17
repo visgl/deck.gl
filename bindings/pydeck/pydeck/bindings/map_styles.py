@@ -10,10 +10,6 @@ LIGHT_NO_LABELS = "light_no_labels"
 
 MAPBOX_LIGHT = "mapbox://styles/mapbox/light-v9"
 MAPBOX_DARK = "mapbox://styles/mapbox/dark-v9"
-MAPBOX_DARK_NO_LABELS = (
-    "https://gist.githubusercontent.com/ajduberstein/bf703a04db773e20958f4158c45fb996"
-    "/raw/a467c7649ddc25a43469e1c3932763582546b9b0/mapbox-map-style-dark-v9-no-labels.json"
-)
 MAPBOX_ROAD = "mapbox://styles/mapbox/streets-v9"
 MAPBOX_SATELLITE = "mapbox://styles/mapbox/satellite-v9"
 
@@ -32,7 +28,7 @@ GOOGLE_ROAD = "roadmap"
 
 styles = {
     DARK: {"mapbox": MAPBOX_DARK, "carto": CARTO_DARK},
-    DARK_NO_LABELS: {"mapbox": MAPBOX_DARK_NO_LABELS, "carto": CARTO_DARK_NO_LABELS},
+    DARK_NO_LABELS: {"carto": CARTO_DARK_NO_LABELS},
     LIGHT: {"mapbox": MAPBOX_LIGHT, "carto": CARTO_LIGHT},
     LIGHT_NO_LABELS: {"carto": CARTO_LIGHT_NO_LABELS},
     ROAD: {"carto": CARTO_ROAD, "google_maps": GOOGLE_ROAD, "mapbox": MAPBOX_ROAD},
