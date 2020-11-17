@@ -13,13 +13,16 @@ class View(JSONMixin):
         deck.gl view to display, e.g., MapView
     controller : bool, default None
         If enabled, camera becomes interactive.
+    **kwargs
+        Any of the parameters passable to a deck.gl View
     """
 
-    def __init__(self, type=None, controller=None, width=None, height=None):
+    def __init__(self, type=None, controller=None, width=None, height=None, **kwargs):
         self.type = type
         self.controller = controller
         self.width = width
         self.height = height
+        self.__dict__.update(kwargs)
 
     @property
     def type(self):

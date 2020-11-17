@@ -50,5 +50,5 @@
       "fontFamily": "Times, Times New Roman, Georgia, serif"
     }
   ],
-  "mapProvider": "mapbox"
+  "mapProvider": "carto"
 }
