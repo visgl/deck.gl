@@ -1,7 +1,14 @@
-const DEFAULT_COLOR = [0, 0, 0];
+import {gePalette, NULL_COLOR} from './utils';
+
+const OTHERS_COLOR = [0, 0, 0];
 const TOP = 10;
 
-export default function ColorsCategories({categories, colors, defaultColor}) {
+export default function ColorsCategories({
+  categories,
+  colors,
+  nulltColor = NULL_COLOR,
+  othersColor = OTHERS_COLOR
+}) {
   let categoryList;
   const colorsByCategory = {};
 
@@ -12,11 +19,13 @@ export default function ColorsCategories({categories, colors, defaultColor}) {
     categoryList = stats.categories.map(c => c.category).slice(0, top);
   }
 
+  const palette = typeof colors === 'string' ? gePalette(colors, categoryList.length) : colors;
+
   for (const [i, c] of categoryList.entries()) {
-    colorsByCategory[c] = colors[i];
+    colorsByCategory[c] = palette[i];
   }
 
   return d => {
-    return colorsByCategory[d] || defaultColor || DEFAULT_COLOR;
+    return d === (undefined || null) ? nulltColor : colorsByCategory[d] || othersColor;
   };
 }

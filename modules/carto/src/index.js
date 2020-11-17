@@ -5,3 +5,4 @@ export {default as CartoDOLayer} from './layers/carto-do-layer';
 export {default as BASEMAP} from './basemap';
 export {default as ColorsBins} from './style/color-bins-style';
 export {default as ColorsCategories} from './style/color-categories-style';
+export {default as ColorsContinuous} from './style/color-continuous-style';

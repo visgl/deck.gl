@@ -3,6 +3,7 @@ import {Deck} from '@deck.gl/core';
 import {
   ColorsBins,
   ColorsCategories,
+  ColorsContinuous,
   CartoDOLayer,
   setDefaultCredentials,
   BASEMAP
@@ -20,9 +21,8 @@ setDefaultCredentials({
   mapsUrl: 'https://maps-api-v2.carto-staging.com/user/{user}'
 });
 
-const DATASET_ID =
-  'carto-do-public-data.usa_acs.demographics_sociodemographics_usa_blockgroup_2015_5yrs_20132017';
-const VARIABLE = 'total_pop';
+const TOTAL_POP_VARIABLE = 'total_pop';
+const CATEGORY_NAME_VARIABLE = 'category_name';
 
 // Add Mapbox GL for the basemap. It's not a requirement if you don't need a basemap.
 const map = new mapboxgl.Map({
@@ -62,28 +62,27 @@ document.getElementsByName('layer-visibility').forEach(e => {
   });
 });
 
-const colorManual = ColorsBins({
+const colorBinsManual = ColorsBins({
   breaks: [100, 200, 300],
-  colors: [[225, 83, 131], [241, 109, 122], [250, 138, 118], [255, 166, 121], [255, 194, 133]]
+  colors: [[225, 83, 131], [241, 109, 122], [250, 138, 118], [255, 166, 121]]
 });
 
-let colorByStats;
+let colorBinsByStats;
 
 const colorCategoriesManual = ColorsCategories({
   categories: ['Consumer Services', 'Commercial Services', 'Attorney'],
-  colors: [
-    [0, 155, 158],
-    [66, 183, 185],
-    [167, 211, 212],
-    [241, 241, 241],
-    [228, 193, 217],
-    [214, 145, 193],
-    [199, 93, 171]
-  ],
-  defaultColor: [255, 255, 255]
+  colors: 'Antique',
+  nulltColor: [255, 255, 255]
 });
 
 let colorCategoriesByStats;
+
+const colorContinuousManual = ColorsContinuous({
+  breaks: [0, 500],
+  colors: 'BrwnYl'
+});
+
+let colorContinuousByStats;
 
 render();
 
@@ -92,9 +91,10 @@ function render() {
   const layers = [
     new CartoDOLayer({
       id: 'do-layer-manual',
-      data: DATASET_ID,
+      data:
+        'carto-do-public-data.usa_acs.demographics_sociodemographics_usa_blockgroup_2015_5yrs_20132017',
       visible: visibleLayer === 'color_bins_manual',
-      getFillColor: d => colorManual(d.properties[VARIABLE]),
+      getFillColor: d => colorBinsManual(d.properties[TOTAL_POP_VARIABLE]),
       getLineColor: [0, 0, 0, 100],
       lineWidthMinPixels: 0.5,
       pickable: true,
@@ -102,20 +102,36 @@ function render() {
     }),
     new CartoDOLayer({
       id: 'do-layer-stats',
-      data: DATASET_ID,
+      data:
+        'carto-do-public-data.usa_acs.demographics_sociodemographics_usa_blockgroup_2015_5yrs_20132017',
       visible: visibleLayer === 'color_bins_stats',
-      ...(colorByStats && {getFillColor: d => colorByStats(d.properties[VARIABLE])}),
+      ...(colorBinsByStats && {
+        getFillColor: d => colorBinsByStats(d.properties[TOTAL_POP_VARIABLE])
+      }),
       getLineColor: [0, 0, 0, 100],
       lineWidthMinPixels: 0.5,
       pickable: true,
       sample: true,
-      onDataLoad
+      onDataLoad: tileJSON => {
+        const {tilestats} = tileJSON;
+        const stats = tilestats.layers[0].attributes.find(d => d.attribute === TOTAL_POP_VARIABLE);
+        colorBinsByStats = ColorsBins({
+          breaks: {
+            stats,
+            method: 'quantiles',
+            bins: 5
+          },
+          colors: 'OrYel'
+        });
+
+        render();
+      }
     }),
     new CartoDOLayer({
       id: 'do-layer-category-manual',
       data: 'carto-do.here.pointsofinterest_pointsofinterest_usa_latlon_v1_quarterly_v1',
       visible: visibleLayer === 'color_categories_manual',
-      getFillColor: d => colorCategoriesManual(d.properties.category_name),
+      getFillColor: d => colorCategoriesManual(d.properties[CATEGORY_NAME_VARIABLE]),
       filled: true,
       pointRadiusMinPixels: 3,
       pickable: true,
@@ -126,7 +142,7 @@ function render() {
       data: 'carto-do.here.pointsofinterest_pointsofinterest_usa_latlon_v1_quarterly_v1',
       visible: visibleLayer === 'color_categories_stats',
       ...(colorCategoriesByStats && {
-        getFillColor: d => colorCategoriesByStats(d.properties.category_name)
+        getFillColor: d => colorCategoriesByStats(d.properties[CATEGORY_NAME_VARIABLE])
       }),
       filled: true,
       pointRadiusMinPixels: 3,
@@ -134,11 +150,13 @@ function render() {
       sample: true,
       onDataLoad: tileJSON => {
         const {tilestats} = tileJSON;
-        const stats = tilestats.layers[0].attributes.find(d => d.attribute === 'category_name');
+        const stats = tilestats.layers[0].attributes.find(
+          d => d.attribute === CATEGORY_NAME_VARIABLE
+        );
         colorCategoriesByStats = ColorsCategories({
           categories: {
             stats,
-            top: 10
+            top: 7
           },
           colors: [
             [0, 155, 158],
@@ -152,23 +170,48 @@ function render() {
         });
         render();
       }
+    }),
+    new CartoDOLayer({
+      id: 'do-layer-continuous-manual',
+      data:
+        'carto-do-public-data.usa_acs.demographics_sociodemographics_usa_blockgroup_2015_5yrs_20132017',
+      visible: visibleLayer === 'color_continuous_manual',
+      getFillColor: d => colorContinuousManual(d.properties[TOTAL_POP_VARIABLE]),
+      getLineColor: [0, 0, 0, 100],
+      lineWidthMinPixels: 0.5,
+      pickable: true,
+      sample: true
+    }),
+    new CartoDOLayer({
+      id: 'do-layer-continuous-by-stats',
+      data:
+        'carto-do-public-data.usa_acs.demographics_sociodemographics_usa_blockgroup_2015_5yrs_20132017',
+      visible: visibleLayer === 'color_continuous_stats',
+      ...(colorContinuousByStats && {
+        getFillColor: d => colorContinuousByStats(d.properties[TOTAL_POP_VARIABLE])
+      }),
+      getLineColor: [0, 0, 0, 100],
+      lineWidthMinPixels: 0.5,
+      pickable: true,
+      sample: true,
+      onDataLoad: tileJSON => {
+        const {tilestats} = tileJSON;
+        const stats = tilestats.layers[0].attributes.find(d => d.attribute === TOTAL_POP_VARIABLE);
+        colorContinuousByStats = ColorsContinuous({
+          breaks: {
+            stats
+          },
+          // colors: [
+          //   [0, 155, 158],
+          //   [199, 93, 171]
+          // ]
+          colors: 'BrwnYl'
+        });
+
+        render();
+      }
     })
   ];
   // update layers in deck.gl.
   deck.setProps({layers});
-}
-
-function onDataLoad(tileJSON) {
-  const {tilestats} = tileJSON;
-  const stats = tilestats.layers[0].attributes.find(d => d.attribute === VARIABLE);
-  colorByStats = ColorsBins({
-    breaks: {
-      stats,
-      method: 'quantiles',
-      bins: 10
-    },
-    colors: [[225, 83, 131], [241, 109, 122], [250, 138, 118], [255, 166, 121], [255, 194, 133]]
-  });
-
-  render();
 }

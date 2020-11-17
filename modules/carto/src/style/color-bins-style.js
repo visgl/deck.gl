@@ -1,9 +1,10 @@
 import {scaleThreshold} from 'd3-scale';
 import {range} from 'd3-array';
+import {gePalette, NULL_COLOR} from './utils';
 
 const N_BINS = 5;
 
-export default function ColorsBins({breaks, colors}) {
+export default function ColorsBins({breaks, colors, nulltColor = NULL_COLOR}) {
   let domain;
   if (Array.isArray(breaks)) {
     domain = breaks;
@@ -22,13 +23,18 @@ export default function ColorsBins({breaks, colors}) {
       domain = quantiles[bins];
     } else {
       const {min, max} = stats;
-      const step = (max - min) / (bins - 1);
-      domain = range(min, max, step);
-      domain.push(domain[domain.length - 1] + step);
+      const step = (max - min) / bins;
+      domain = range(min + step, max, step);
     }
   }
 
-  return scaleThreshold()
+  const palette = typeof colors === 'string' ? gePalette(colors, domain.length + 1) : colors;
+
+  const color = scaleThreshold()
     .domain(domain)
-    .range(colors);
+    .range(palette);
+
+  return d => {
+    return d === (undefined || null) ? nulltColor : color(d);
+  };
 }
