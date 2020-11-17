@@ -33,11 +33,10 @@ matrix:
         - cat coverage/lcov.info | coveralls
 
     - language: python
-      dist: precise
+      dist: xenial
       os: linux
       group: stable
       sudo: required
-      dist: trusty
       addons:
         apt:
           sources:
@@ -45,8 +44,7 @@ matrix:
       before_install:
         - cd bindings/pydeck
       python:
-        - "3.5"
-        - "2.7"
+        - "3.7"
       cache:
         pip: true
         directories:

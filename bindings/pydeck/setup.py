@@ -124,20 +124,12 @@ class FrontendBuild(Command):
         if build_all:
             log.info("Installing build dependencies with yarn. This may take a while...")
             check_call(
-                ["yarn", "bootstrap"],
-                cwd=yarn_root,
-                stdout=sys.stdout,
-                stderr=sys.stderr,
-                env=env,
+                ["yarn", "bootstrap"], cwd=yarn_root, stdout=sys.stdout, stderr=sys.stderr, env=env,
             )
         else:
             log.info("Installing build dependencies with `npm run build`.")
             check_call(
-                ["npm", "run", "build"],
-                cwd=widget_dir,
-                stdout=sys.stdout,
-                stderr=sys.stderr,
-                env=env,
+                ["npm", "run", "build"], cwd=widget_dir, stdout=sys.stdout, stderr=sys.stderr, env=env,
             )
 
         self.clean_frontend_build()

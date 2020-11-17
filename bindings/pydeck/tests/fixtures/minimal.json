@@ -35,12 +35,12 @@
       }
     }
   ],
-  "mapStyle": "mapbox://styles/mapbox/dark-v9",
+  "mapStyle": "https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json",
   "views": [
     {
       "@@type": "MapView",
       "controller": true
     }
   ],
-  "mapProvider": "mapbox"
+  "mapProvider": "carto"
 }

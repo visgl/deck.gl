@@ -510,14 +510,13 @@ test('Attribute#updateBuffer#noAlloc', t => {
   });
 
   // 1 vertex + 1 vertexOffset => 2 vertices * 2 floats => 16 bytes
-  // overallocation x 2
+  // overallocation: 2 floats * 2 = 16 bytes
   value = new Float32Array([1, 1]);
   attribute.setNeedsUpdate(true);
   attribute.updateBuffer({data: value});
   t.is(attribute.buffer.byteLength, 32, `overallocated buffer for ${value.byteLength} bytes`);
 
-  // 2 vertices + 1 vertexOffset => 3 vertices * 2 floats => 24 bytes
-  value = new Float32Array([1, 1, 2, 2]);
+  value = new Float32Array([1, 2]);
   attribute.setNeedsUpdate(true);
   attribute.updateBuffer({data: value});
   t.is(attribute.buffer.byteLength, 32, `buffer is big enough ${value.byteLength} bytes`);
@@ -526,7 +525,7 @@ test('Attribute#updateBuffer#noAlloc', t => {
   value = new Float32Array([1, 1, 2, 2, 3, 3, 4, 4]);
   attribute.setNeedsUpdate(true);
   attribute.updateBuffer({data: value});
-  t.is(attribute.buffer.byteLength, 80, `re-allocated buffer for ${value.byteLength} bytes`);
+  t.is(attribute.buffer.byteLength, 56, `re-allocated buffer for ${value.byteLength} bytes`);
 
   attribute.delete();
   t.end();

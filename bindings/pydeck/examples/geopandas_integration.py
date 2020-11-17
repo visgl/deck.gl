@@ -8,11 +8,7 @@ centroids["geometry"] = world.geometry.centroid
 centroids["name"] = world.name
 
 layers = [
-    pdk.Layer(
-        "GeoJsonLayer",
-        data=world,
-        get_fill_color=[0, 0, 0],
-    ),
+    pdk.Layer("GeoJsonLayer", data=world, get_fill_color=[0, 0, 0],),
     pdk.Layer(
         "TextLayer",
         data=centroids,
