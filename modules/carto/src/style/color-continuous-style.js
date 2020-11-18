@@ -1,12 +1,12 @@
 import {scaleLinear} from 'd3-scale';
 import {gePalette, NULL_COLOR} from './utils';
 
-export default function ColorsContinuous({breaks, colors, nulltColor = NULL_COLOR}) {
+export default function ColorsContinuous({range, colors, nulltColor = NULL_COLOR}) {
   let domain;
-  if (Array.isArray(breaks)) {
-    domain = breaks;
+  if (Array.isArray(range)) {
+    domain = range;
   } else {
-    const {stats} = breaks;
+    const {stats} = range;
     domain = [stats.min, stats.max];
   }
 

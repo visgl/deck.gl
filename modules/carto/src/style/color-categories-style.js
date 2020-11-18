@@ -1,6 +1,6 @@
 import {gePalette, NULL_COLOR} from './utils';
 
-const OTHERS_COLOR = [0, 0, 0];
+const OTHERS_COLOR = [119, 119, 119];
 const TOP = 10;
 
 export default function ColorsCategories({

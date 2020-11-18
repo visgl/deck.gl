@@ -78,7 +78,7 @@ const colorCategoriesManual = ColorsCategories({
 let colorCategoriesByStats;
 
 const colorContinuousManual = ColorsContinuous({
-  breaks: [0, 500],
+  range: [0, 500],
   colors: 'BrwnYl'
 });
 
@@ -198,7 +198,7 @@ function render() {
         const {tilestats} = tileJSON;
         const stats = tilestats.layers[0].attributes.find(d => d.attribute === TOTAL_POP_VARIABLE);
         colorContinuousByStats = ColorsContinuous({
-          breaks: {
+          range: {
             stats
           },
           // colors: [
