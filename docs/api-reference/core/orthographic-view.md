@@ -12,7 +12,9 @@ import {OrthographicView} from '@deck.gl/core';
 const view = new OrthographicView({id, ...});
 ```
 
-`OrthographicView` takes the same parameters as the [View](/docs/api-reference/core/view.md) superclass constructor.
+`OrthographicView` takes the same parameters as the [View](/docs/api-reference/core/view.md) superclass constructor, plus the following:
+
+- `flipY` (`Boolean`) - Whether to use top-left coordinates (`true`) or bottom-left coordinates (`false`). Default `true`.
 
 
 ## View State
