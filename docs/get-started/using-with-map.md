@@ -1,10 +1,10 @@
 # Using deck.gl with a Base Map
 
-While deck.gl works independently without any map component, when visualizing geographic datasets, a base map could offer the invaluable context for understanding the overlay layers.
+While deck.gl works independently without any map component, when visualizing geospatial datasets, a base map can offer the invaluable context for understanding the overlay layers.
 
 deck.gl has been designed to work in tandem with popular JavaScript base map providers, especially Mapbox. Depending on your tech stack, deck.gl's support for a particular base map solution may come with different level of compatibility and limitations.
 
-In this document you will find how to use deck.gl with different providers and technologies. It is important to understand the difference between the JS library rendering and the basemap provider itself. For example you can use MapboxGL with Mapbox basemaps, but also with any other basemap provider that provides Mapbox Vector Tiles. 
+In this document you will find how to use deck.gl with different providers and technologies. It is important to understand the difference between the JS library rendering and the basemap provider itself. For example you can use MapboxGL with Mapbox basemaps, but also with any other basemap provider that provides Mapbox Vector Tiles.
 
 When using different basemaps you have to be sure to follow the terms and conditions of each service and their attribution requirements.
 
@@ -29,7 +29,7 @@ All the [examples on this website](https://github.com/visgl/deck.gl/tree/master/
 
 ### Using Mapbox basemap service (with Mapbox token)
 
-The mapbox-gl library is open source and free to use. However, to load the map styles and tiles from Mapbox's data service, you will need to register on their website in order to retrieve an [access token](https://docs.mapbox.com/help/how-mapbox-works/access-tokens/) required by the map component, which will be used to identify you and start serving up map tiles. The service will be free until a certain level of traffic is exceeded.
+The mapbox-gl library is open source and free to use. However, to load the map styles and tiles from Mapbox's data service, you will need to register on their website in order to retrieve an [access token](https://docs.mapbox.com/help/how-mapbox-works/access-tokens/) required by the map component, which will be used to identify you and start serving up map tiles. The service will be free until a [certain level](https://docs.mapbox.com/api/#rate-limits) of traffic is exceeded.
 
 If you are using mapbox-gl without React, check out [Mapbox GL JS API](https://docs.mapbox.com/mapbox-gl-js/api/#accesstoken) for how to apply the token.
 
@@ -50,9 +50,9 @@ You can use existing free vector tile services:
 
 ### Hosting your own basemap service
 
-If you host your own map tiles, you will need a custom Mapbox GL style that points to your own [vector tile source](https://www.mapbox.com/mapbox-gl-js/style-spec/), this custom style must match the schema of your tile source. 
+If you host your own map tiles, you will need a custom Mapbox GL style that points to your own [vector tile source](https://www.mapbox.com/mapbox-gl-js/style-spec/), this custom style must match the schema of your tile source.
 
-Open source tile schemas include: 
+Open source tile schemas include:
 
 - [TileZen schema](https://tilezen.readthedocs.io/en/latest/layers/)
 - [OpenMapTiles schema ](https://openmaptiles.org/schema/)
@@ -72,4 +72,3 @@ Starting v7.0, deck.gl has experimental support for Google Maps with the [@deck.
 The Deck canvas can only be used as a overlay on top of Google Maps, see [pure JS example](https://github.com/visgl/deck.gl/tree/master/examples/get-started/pure-js/google-maps). Tilting is not supported due to Google Maps API restrictions. See module documentation page for a full list of features.
 
 Note that to run the examples, you need a [Google Maps API key](https://developers.google.com/maps/documentation/javascript/get-api-key).
-
