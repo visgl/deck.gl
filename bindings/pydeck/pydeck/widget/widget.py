@@ -55,8 +55,11 @@ class DeckGLWidget(DOMWidget):
     _view_name = Unicode("JupyterTransportView").tag(sync=True)
     _view_module = Unicode(module_name).tag(sync=True)
     _view_module_version = Unicode(module_version).tag(sync=True)
-    google_maps_key = Unicode("", allow_none=True).tag(sync=True)
+
+    carto_key = Unicode("", allow_none=True).tag(sync=True)
     mapbox_key = Unicode("", allow_none=True).tag(sync=True)
+    google_maps_key = Unicode("", allow_none=True).tag(sync=True)
+
     json_input = Unicode("").tag(sync=True)
     data_buffer = Any(default_value=None, allow_none=True).tag(sync=True, **data_buffer_serialization)
     custom_libraries = Any(allow_none=True).tag(sync=True)

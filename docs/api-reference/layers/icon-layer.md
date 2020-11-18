@@ -270,6 +270,21 @@ Screen space offset relative to the `coordinates` in pixel unit.
 * If an array is provided, it is used as the offset for all objects.
 * If a function is provided, it is called on each object to retrieve its offset.
 
+### Callbacks
+
+##### `onIconError` (Function)
+
+* Default: `null`
+
+Only used when using auto-packing. If the attempt to fetch an icon returned by `getIcon` fails, this callback is called with the following arguments:
+
+- `event` (Object)
+  + `url` (String) - the URL that was trying to fetch
+  + `loadOptions` (Object) - the load options used for the fetch
+  + `source` (Object) - the original data object that requested this icon
+  + `sourceIndex` (Object) - the index of the original data object that requested this icon
+  + `error` (Error)
+
 
 ## Use binary attributes
 

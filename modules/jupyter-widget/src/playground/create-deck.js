@@ -141,11 +141,18 @@ function createStandaloneFromProvider({
         mapboxApiAccessToken: mapboxApiKey,
         onLoad: modifyMapboxElements
       });
+    case 'carto':
+      deck.log.info('Using Carto base maps')();
+      return new deck.DeckGL({
+        map: mapboxgl,
+        ...sharedProps,
+        ...props
+      });
     case 'google_maps':
       deck.log.info('Using Google Maps base maps')();
       return createGoogleMapsDeckOverlay({
         ...sharedProps,
-        props, // TODO not ...props?
+        ...props,
         googleMapsKey
       });
     default:
