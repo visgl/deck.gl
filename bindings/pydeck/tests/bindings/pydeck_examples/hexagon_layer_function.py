@@ -63,7 +63,7 @@ def create_heatmap_test_object():
     return Deck(
         description=DESCRIPTION,
         initial_view_state=ViewState(
-            **{"longitude": 0, "latitude": 0, "zoom": 5, "pitch": 40.5, "bearing": -27.396674584323023,}
+            **{"longitude": 0, "latitude": 0, "zoom": 5, "pitch": 40.5, "bearing": -27.396674584323023}
         ),
         views=[View(type="MapView", controller=True)],
         layers=[failed_hexagon_layer, successful_heatmap_layer],

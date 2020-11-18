@@ -42,7 +42,7 @@ new DeckLayer(props);
 
 Inherits all properties from the base [Layer](https://developers.arcgis.com/javascript/latest/api-reference/esri-layers-Layer.html#properties-summary) class.
 
-Property names that start with `deck.` are forwarded to a `Deck` instance. The following [Deck](/docs/api-reference/deck.md) props are supported:
+Property names that start with `deck.` are forwarded to a `Deck` instance. The following [Deck](/docs/api-reference/core/deck.md) props are supported:
 
 - `deck.layers`
 - `deck.layerFilter`
@@ -59,6 +59,8 @@ Property names that start with `deck.` are forwarded to a `Deck` instance. The f
 - `deck.onError`
 - `deck.debug`
 - `deck.drawPickingColors`
+- `deck.getCursor`
+- `deck.getTooltip`
 
 ## Members
 

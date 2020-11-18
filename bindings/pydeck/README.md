@@ -1,55 +1,22 @@
 [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/uber/deck.gl/binder)
 [![Documentation Status](https://readthedocs.org/projects/deckgl/badge/?version=latest)](https://pydeck.gl)
 [![Anaconda-Server Badge](https://anaconda.org/conda-forge/pydeck/badges/version.svg)](https://anaconda.org/conda-forge/pydeck)
+[![Downloads](https://pepy.tech/badge/pydeck/week)](https://pepy.tech/project/pydeck/week)
 
 # pydeck: Large-scale interactive data visualization in Python
 
-![demo](https://user-images.githubusercontent.com/2204757/58838976-1538f400-8615-11e9-84f6-a2fe42bb300b.gif)
+[![demo](https://user-images.githubusercontent.com/2204757/58838976-1538f400-8615-11e9-84f6-a2fe42bb300b.gif)](https://pydeck.gl/)
 
 The pydeck library is a set of Python bindings for making spatial visualizations with [deck.gl](https://deck.gl),
-optimized for a Jupyter Notebook environment.
+optimized for a Jupyter environment. To get started, __[see the documentation](https://pydeck.gl/)__.
+
+__[To install pydeck, see the instructions here](https://pydeck.gl/installation.html)__.
 
 For __interactive demos__, click the binder logo below:
 
 [![Binder](https://mybinder.org/static/logo.svg?v=f9f0d927b67cc9dc99d788c822ca21c0)](https://mybinder.org/v2/gh/uber/deck.gl/binder)
 
-
-See the documentation at the [pydeck website](https://pydeck.gl)
-
-## Installation
-
-```bash
-pip install pydeck
-```
-
-The library is available via conda as well:
-
-```bash
-conda install -c conda-forge pydeck
-```
-
-To install pydeck for Jupyter Notebook, run the following commands on your Jupyter server:
-
-```bash
-jupyter nbextension install --sys-prefix --symlink --overwrite --py pydeck
-jupyter nbextension enable --sys-prefix --py pydeck
-```
-
-To install pydeck for JupyterLab, run the following:
-
-```bash
-jupyter labextension install @jupyter-widgets/jupyterlab-manager
-DECKGL_SEMVER=`python -c "import pydeck; print(pydeck.frontend_semver.DECKGL_SEMVER)"`
-jupyter labextension install @deck.gl/jupyter-widget@$DECKGL_SEMVER
-```
-
-### Mapbox API token
-
-Like deck.gl, the pydeck library takes its basemap tiles from [Mapbox](http://mapbox.com/). Register with Mapbox, and you can [find your Mapbox access token here](https://account.mapbox.com/access-tokens/). The service is free until a certain level of traffic is exceeded.
-
-You will need to inform pydeck about your key by setting an environment variable. In your terminal, run `export MAPBOX_API_KEY=<mapbox-key-here>`, which pydeck will read to use Mapbox basemaps. You can also refer to the pydeck docs to see how to pass the key as a variable.
-
-## Getting started
+## Sample code
 
 The following code renders a visualization similar to the one above in a Jupyter notebook:
 
@@ -87,57 +54,18 @@ r = pdk.Deck(layers=[layer], initial_view_state=view_state)
 r.to_html('demo.html')
 ```
 
-If you're doing this outside a Jupyter environment, you can run:
+If you're developing outside a Jupyter environment, you can run:
 
 ```python
 r.to_html('demo.html', notebook_display=False)
 ```
 
-For more, check out the docs and Binder examples above.
+__[See the gallery for more examples.](https://pydeck.gl/#gallery)__
 
-### Debugging note
-
-Currently, some errors in pydeck will only appear in your browser's developer console.
-If a visualization fails to render, open the developer console.
-Error handling will be expanded in future versions of pydeck.
-
-### Issues
+### Issues and contributing
 
 If you encounter an issue, file it in the [deck.gl issues page](https://github.com/visgl/deck.gl/issues/new?assignees=&labels=question&template=question.md&title=)
 and include your browser's console output, if any.
 
-
-### Installation from source
-
-```bash
-# Clone the deck.gl repo
-git clone https://github.com/visgl/deck.gl/
-
-# Navigate to the pydeck module
-cd deck.gl/bindings/pydeck
-
-# Create a virtual environment
-python3 -m venv env3
-. env3/bin/activate
-```
-
-## Development
-
-From the directory of this README, set up the developer environment for pydeck:
-
-```bash
-make init
-```
-
-Development inside a virtual environment is preferred.
-
-JupyterLab is the recommended environment for development testing with pydeck.
-The `jupyter lab --watch` command can be used to provide hot reloading for development.
-
-### Tests
-
-Tests are handled by pytest. In the top-level pydeck directory, you can type:
-
-```bash
-pytest
-```
+If you'd like to contribute to pydeck, please follow the [deck.gl contribution guidelines](https://github.com/visgl/deck.gl/blob/master/CONTRIBUTING.md)
+and the [pydeck development installation instructions](https://pydeck.gl/installation.html#development-notes).

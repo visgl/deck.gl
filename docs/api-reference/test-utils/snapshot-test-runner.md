@@ -79,7 +79,7 @@ new TestRender({width: 800, height: 600})
 new SnapshotTestRunner(deckProps)
 ```
 
-Create a SnapshotTestRunner instance. The `deckProps` argument is passed to the [Deck](/docs/api-reference/deck.md) constructor.
+Create a SnapshotTestRunner instance. The `deckProps` argument is passed to the [Deck](/docs/api-reference/core/deck.md) constructor.
 
 ### add(testCase: Array|Object)
 
@@ -89,13 +89,16 @@ Add one or a list of test cases. Each test case may contain the following fields
 * `goldenImage` (String) - path to the golden image, relative to the root where the node script is executed.
 * `timeout` (Number) - time to wait for this test case to resolve (by calling the `done` callback) before aborting, in milliseconds. If not provided, fallback to the shared option that is passed to `SnapshotTestRunner.run`.
 * `imageDiffOptions` (Object, optional) - image diffing options for this test case. See "Image Diff Options" section below.
+* `onBeforeRender` (Function, optional) - callback before each time deck rerenders. Receives the following arguments:
+  - `deck` (Deck) - the `Deck` instance.
+  - `layers` (Array) - the list of layers that were rendered.
 * `onAfterRender` (Function, optional) - callback after each time deck rerenders. Receives the following arguments:
   - `deck` (Deck) - the `Deck` instance.
   - `layers` (Array) - the list of layers that were rendered.
   - `done` (Function) - must be called when the test case is done rendering and ready for screen capture and comparison.
   
   The default `onAfterRender` calls `done` immediately, i.e. takes screenshot as soon as the canvas is rendered for the first time. If some resources are loaded asynchronously, you may need to provide an implementation of this callback to check whether all layers are fully loaded.
-* Any other props that [Deck.setProps](/docs/api-reference/deck.md) accepts.
+* Any other props that [Deck.setProps](/docs/api-reference/core/deck.md) accepts.
 
 ### run(options: Object)
 

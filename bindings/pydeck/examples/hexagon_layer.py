@@ -35,4 +35,4 @@ view_state = pdk.ViewState(
 
 # Render
 r = pdk.Deck(layers=[layer], initial_view_state=view_state)
-r.to_html("hexagon_layer.html", notebook_display=False)
+r.to_html("hexagon_layer.html")

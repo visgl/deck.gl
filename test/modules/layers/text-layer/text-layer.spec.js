@@ -23,6 +23,36 @@ test('TextLayer', t => {
   t.end();
 });
 
+test('TextLayer - sdf', t => {
+  const testCases = [
+    {
+      props: {
+        data: FIXTURES.points,
+        getText: d => d.ADDRESS,
+        getPosition: d => d.COORDINATES
+      },
+      onAfterUpdate: ({subLayer}) => {
+        t.notOk(subLayer.props.sdf, 'sublayer props.sdf');
+        t.is(subLayer.props.alphaCutoff, 0.001, 'sublayer props.alphaCutoff');
+      }
+    },
+    {
+      updateProps: {
+        fontSettings: {
+          sdf: true,
+          buffer: 10
+        }
+      },
+      onAfterUpdate: ({subLayer}) => {
+        t.ok(subLayer.props.sdf, 'sublayer props.sdf');
+      }
+    }
+  ];
+  testLayer({Layer: TextLayer, testCases, onError: t.notOk});
+
+  t.end();
+});
+
 test('TextLayer - binary', t => {
   const value = new Uint8Array([72, 101, 108, 108, 111, 32, 119, 111, 114, 108, 100, 33]);
   const startIndices = [0, 6];

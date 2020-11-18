@@ -15,12 +15,25 @@ export function testAsyncData(t, data) {
     updateState({props, oldProps, changeFlags}) {
       if (oldProps.data) {
         t.ok(props.data.length > oldProps.data.length, 'data has changed');
-        t.ok(changeFlags.dataChanged[0].endRow, 'data diff is generated');
+      }
+      if (Array.isArray(changeFlags.dataChanged)) {
+        t.is(
+          changeFlags.dataChanged[0].startRow,
+          oldProps.data.length,
+          'data diff starts from last position'
+        );
+        t.is(
+          changeFlags.dataChanged[changeFlags.dataChanged.length - 1].endRow,
+          props.data.length,
+          'data diff covers rest of range'
+        );
       }
     }
   }
 
   return new Promise(resolve => {
+    let loadedData = null;
+
     const deck = new Deck({
       gl,
       width: 1,
@@ -31,11 +44,17 @@ export function testAsyncData(t, data) {
         new TestLayer({
           data,
           onDataLoad: value => {
-            deck.finalize();
-            resolve(value);
+            loadedData = value;
           }
         })
-      ]
+      ],
+
+      onAfterRender: () => {
+        if (loadedData) {
+          deck.finalize();
+          resolve(loadedData);
+        }
+      }
     });
   });
 }

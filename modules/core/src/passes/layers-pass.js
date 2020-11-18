@@ -31,6 +31,8 @@ export default class LayersPass extends Pass {
       // Update context to point to this viewport
       onViewportActive(viewport);
 
+      const drawLayerParams = this._getDrawLayerParams(viewport, props);
+
       props.view = view;
 
       // render this viewport
@@ -38,21 +40,56 @@ export default class LayersPass extends Pass {
       for (const subViewport of subViewports) {
         props.viewport = subViewport;
 
-        const stats = this._drawLayersInViewport(gl, props);
+        const stats = this._drawLayersInViewport(gl, props, drawLayerParams);
         renderStats.push(stats);
       }
     }
     return renderStats;
   }
 
+  // Resolve the parameters needed to draw each layer
+  // When a viewport contains multiple subviewports (e.g. repeated web mercator map),
+  // this is only done once for the parent viewport
+  _getDrawLayerParams(
+    viewport,
+    {layers, pass = 'unknown', layerFilter, effects, moduleParameters}
+  ) {
+    const drawLayerParams = [];
+    const indexResolver = layerIndexResolver();
+    for (let layerIndex = 0; layerIndex < layers.length; layerIndex++) {
+      const layer = layers[layerIndex];
+      // Check if we should draw layer
+      const shouldDrawLayer = this._shouldDrawLayer(layer, viewport, pass, layerFilter);
+
+      // This is the "logical" index for ordering this layer in the stack
+      // used to calculate polygon offsets
+      // It can be the same as another layer
+      const layerRenderIndex = indexResolver(layer, shouldDrawLayer);
+
+      const layerParam = {
+        shouldDrawLayer,
+        layerRenderIndex
+      };
+
+      if (shouldDrawLayer) {
+        layerParam.moduleParameters = this._getModuleParameters(
+          layer,
+          effects,
+          pass,
+          moduleParameters
+        );
+        layerParam.layerParameters = this.getLayerParameters(layer, layerIndex);
+      }
+      drawLayerParams[layerIndex] = layerParam;
+    }
+    return drawLayerParams;
+  }
+
   // Draws a list of layers in one viewport
   // TODO - when picking we could completely skip rendering viewports that dont
   // intersect with the picking rect
   /* eslint-disable max-depth, max-statements */
-  _drawLayersInViewport(
-    gl,
-    {layers, layerFilter, onError, viewport, view, pass = 'unknown', effects, moduleParameters}
-  ) {
+  _drawLayersInViewport(gl, {layers, onError, viewport, view}, drawLayerParams) {
     const glViewport = getGLViewport(gl, {viewport});
 
     if (view && view.props.clear) {
@@ -77,17 +114,15 @@ export default class LayersPass extends Pass {
 
     setParameters(gl, {viewport: glViewport});
 
-    const indexResolver = layerIndexResolver();
     // render layers in normal colors
     for (let layerIndex = 0; layerIndex < layers.length; layerIndex++) {
       const layer = layers[layerIndex];
-      // Check if we should draw layer
-      const shouldDrawLayer = this._shouldDrawLayer(layer, viewport, pass, layerFilter);
-
-      // This is the "logical" index for ordering this layer in the stack
-      // used to calculate polygon offsets
-      // It can be the same as another layer
-      const layerRenderIndex = indexResolver(layer, shouldDrawLayer);
+      const {
+        shouldDrawLayer,
+        layerRenderIndex,
+        moduleParameters,
+        layerParameters
+      } = drawLayerParams[layerIndex];
 
       // Calculate stats
       if (shouldDrawLayer && layer.props.pickable) {
@@ -95,20 +130,16 @@ export default class LayersPass extends Pass {
       }
       if (layer.isComposite) {
         renderStatus.compositeCount++;
-      }
-
-      // Draw the layer
-      if (shouldDrawLayer) {
+      } else if (shouldDrawLayer) {
+        // Draw the layer
         renderStatus.visibleCount++;
 
-        const _moduleParameters = this._getModuleParameters(layer, effects, pass, moduleParameters);
-        const layerParameters = this.getLayerParameters(layer, layerIndex);
         // overwrite layer.context.viewport with the sub viewport
-        _moduleParameters.viewport = viewport;
+        moduleParameters.viewport = viewport;
 
         try {
           layer.drawLayer({
-            moduleParameters: _moduleParameters,
+            moduleParameters,
             uniforms: {layerIndex: layerRenderIndex},
             parameters: layerParameters
           });
@@ -141,7 +172,7 @@ export default class LayersPass extends Pass {
 
   /* Private */
   _shouldDrawLayer(layer, viewport, pass, layerFilter) {
-    let shouldDrawLayer = this.shouldDrawLayer(layer) && !layer.isComposite && layer.props.visible;
+    let shouldDrawLayer = this.shouldDrawLayer(layer) && layer.props.visible;
 
     if (shouldDrawLayer && layerFilter) {
       shouldDrawLayer = layerFilter({
@@ -151,11 +182,17 @@ export default class LayersPass extends Pass {
         renderPass: pass
       });
     }
+    if (shouldDrawLayer) {
+      // If a layer is drawn, update its viewportChanged flag
+      layer.activateViewport(viewport);
+    }
+
     return shouldDrawLayer;
   }
 
   _getModuleParameters(layer, effects, pass, overrides) {
     const moduleParameters = Object.assign(Object.create(layer.props), {
+      autoWrapLongitude: layer.wrapLongitude,
       viewport: layer.context.viewport,
       mousePosition: layer.context.mousePosition,
       pickingActive: 0,
@@ -181,12 +218,17 @@ export default class LayersPass extends Pass {
 export function layerIndexResolver(startIndex = 0, layerIndices = {}) {
   const resolvers = {};
 
-  return (layer, isDrawn) => {
+  const resolveLayerIndex = (layer, isDrawn) => {
     const indexOverride = layer.props._offset;
     const layerId = layer.id;
     const parentId = layer.parent && layer.parent.id;
 
     let index;
+
+    if (parentId && !(parentId in layerIndices)) {
+      // Populate layerIndices with the parent layer's index
+      resolveLayerIndex(layer.parent, false);
+    }
 
     if (parentId in resolvers) {
       const resolver = (resolvers[parentId] =
@@ -209,6 +251,7 @@ export function layerIndexResolver(startIndex = 0, layerIndices = {}) {
     layerIndices[layerId] = index;
     return index;
   };
+  return resolveLayerIndex;
 }
 
 // Convert viewport top-left CSS coordinates to bottom up WebGL coordinates

@@ -29,6 +29,7 @@ import debug from '../debug';
 import GL from '@luma.gl/constants';
 import {withParameters, setParameters} from '@luma.gl/core';
 import assert from '../utils/assert';
+import memoize from '../utils/memoize';
 import {mergeShaders} from '../utils/shader';
 import {projectPosition, getWorldPosition} from '../shaderlib/project/project-functions';
 import typedArrayManager from '../utils/typed-array-manager';
@@ -46,7 +47,14 @@ const TRACE_UPDATE = 'layer.update';
 const TRACE_FINALIZE = 'layer.finalize';
 const TRACE_MATCHED = 'layer.matched';
 
+const MAX_PICKING_COLOR_CACHE_SIZE = 2 ** 24 - 1;
+
 const EMPTY_ARRAY = Object.freeze([]);
+
+// Only compare the same two viewports once
+const areViewportsEqual = memoize(({oldViewport, viewport}) => {
+  return oldViewport.equals(viewport);
+});
 
 let pickingColorCache = new Uint8ClampedArray(0);
 
@@ -59,7 +67,27 @@ const defaultProps = {
   onDataLoad: {type: 'function', value: null, compare: false, optional: true},
   fetch: {
     type: 'function',
-    value: (url, {layer}) => load(url, layer.getLoadOptions()),
+    value: (url, {propName, layer}) => {
+      const {resourceManager} = layer.context;
+      const loadOptions = layer.getLoadOptions();
+      let inResourceManager = resourceManager.contains(url);
+
+      if (!inResourceManager && !loadOptions) {
+        // If there is no layer-specific load options, then attempt to cache this resource in the data manager
+        resourceManager.add({resourceId: url, data: url, persistent: false});
+        inResourceManager = true;
+      }
+      if (inResourceManager) {
+        return resourceManager.subscribe({
+          resourceId: url,
+          onChange: data => layer.internalState.reloadAsyncProp(propName, data),
+          consumerId: layer.id,
+          requestId: propName
+        });
+      }
+
+      return load(url, loadOptions);
+    },
     compare: false
   },
   updateTriggers: {}, // Update triggers: a core change detection mechanism in deck.gl
@@ -95,7 +123,7 @@ const defaultProps = {
   },
 
   // Selection/Highlighting
-  highlightedObjectIndex: null,
+  highlightedObjectIndex: -1,
   autoHighlight: false,
   highlightColor: {type: 'accessor', value: [0, 0, 128, 128]}
 };
@@ -150,6 +178,10 @@ export default class Layer extends Component {
 
   get isLoaded() {
     return this.internalState && !this.internalState.isAsyncPropLoading();
+  }
+
+  get wrapLongitude() {
+    return this.props.wrapLongitude;
   }
 
   // Returns true if the layer is pickable and visible.
@@ -297,6 +329,23 @@ export default class Layer extends Component {
         attributeManager.invalidateAll();
       }
     }
+
+    const neededPickingBuffer = oldProps.highlightedObjectIndex >= 0 || oldProps.pickable;
+    const needPickingBuffer = props.highlightedObjectIndex >= 0 || props.pickable;
+    if (neededPickingBuffer !== needPickingBuffer && attributeManager) {
+      const {pickingColors, instancePickingColors} = attributeManager.attributes;
+      const pickingColorsAttribute = pickingColors || instancePickingColors;
+      if (pickingColorsAttribute) {
+        if (needPickingBuffer && pickingColorsAttribute.constant) {
+          pickingColorsAttribute.constant = false;
+          attributeManager.invalidate(pickingColorsAttribute.id);
+        }
+        if (!pickingColorsAttribute.value && !needPickingBuffer) {
+          pickingColorsAttribute.constant = true;
+          pickingColorsAttribute.value = [0, 0, 0];
+        }
+      }
+    }
   }
 
   // Called once when layer is no longer matched and state will be discarded
@@ -309,6 +358,7 @@ export default class Layer extends Component {
     if (attributeManager) {
       attributeManager.finalize();
     }
+    this.context.resourceManager.unsubscribe({consumerId: this.id});
     this.internalState.uniformTransitions.clear();
   }
 
@@ -338,6 +388,15 @@ export default class Layer extends Component {
   // //////////////////////////////////////////////////
 
   // INTERNAL METHODS
+  activateViewport(viewport) {
+    const oldViewport = this.internalState.viewport;
+    this.internalState.viewport = viewport;
+
+    if (!oldViewport || !areViewportsEqual({oldViewport, viewport})) {
+      this.setChangeFlags({viewportChanged: true});
+      this._update();
+    }
+  }
 
   // Default implementation of attribute invalidation, can be redefined
   invalidateAttribute(name = 'all', diffReason = '') {
@@ -410,20 +469,30 @@ export default class Layer extends Component {
   }
 
   calculateInstancePickingColors(attribute, {numInstances}) {
+    if (attribute.constant) {
+      return;
+    }
+
     // calculateInstancePickingColors always generates the same sequence.
     // pickingColorCache saves the largest generated sequence for reuse
     const cacheSize = pickingColorCache.length / 3;
 
     if (cacheSize < numInstances) {
+      if (numInstances > MAX_PICKING_COLOR_CACHE_SIZE) {
+        log.warn(
+          'Layer has too many data objects. Picking might not be able to distinguish all objects.'
+        )();
+      }
+
       pickingColorCache = typedArrayManager.allocate(pickingColorCache, numInstances, {
         size: 3,
-        copy: true
+        copy: true,
+        maxCount: Math.max(numInstances, MAX_PICKING_COLOR_CACHE_SIZE)
       });
+
       // If the attribute is larger than the cache, resize the cache and populate the missing chunk
       const newCacheSize = pickingColorCache.length / 3;
       const pickingColor = [];
-      assert(newCacheSize < 16777215, 'index out of picking color range');
-
       for (let i = cacheSize; i < newCacheSize; i++) {
         this.encodePickingColor(i, pickingColor);
         pickingColorCache[i * 3 + 0] = pickingColor[0];
@@ -551,17 +620,22 @@ export default class Layer extends Component {
       this._updateState();
     }
   }
-  /* eslint-enable max-statements */
 
   // Common code for _initialize and _update
   _updateState() {
     const currentProps = this.props;
+    const currentViewport = this.context.viewport;
     const propsInTransition = this._updateUniformTransition();
     this.internalState.propsInTransition = propsInTransition;
+    // Overwrite this.context.viewport during update to use the last activated viewport on this layer
+    // In multi-view applications, a layer may only be drawn in one of the views
+    // Which would make the "active" viewport different from the shared context
+    this.context.viewport = this.internalState.viewport || currentViewport;
     // Overwrite this.props during update to use in-transition prop values
     this.props = propsInTransition;
 
     const updateParams = this._getUpdateParams();
+    const oldModels = this.getModels();
 
     // Safely call subclass lifecycle methods
     if (this.context.gl) {
@@ -577,7 +651,9 @@ export default class Layer extends Component {
     for (const extension of this.props.extensions) {
       extension.updateState.call(this, updateParams, extension);
     }
-    this._updateModules(updateParams);
+
+    const modelChanged = this.getModels()[0] !== oldModels[0];
+    this._updateModules(updateParams, modelChanged);
     // End subclass lifecycle methods
 
     if (this.isComposite) {
@@ -594,11 +670,14 @@ export default class Layer extends Component {
       }
     }
 
+    // Restore shared context
+    this.context.viewport = currentViewport;
     this.props = currentProps;
     this.clearChangeFlags();
     this.internalState.needsUpdate = false;
     this.internalState.resetOldProps();
   }
+  /* eslint-enable max-statements */
 
   // Called by manager when layer is about to be disposed
   // Note: not guaranteed to be called on application shutdown
@@ -666,12 +745,32 @@ export default class Layer extends Component {
   setChangeFlags(flags) {
     const {changeFlags} = this.internalState;
 
-    for (const key in changeFlags) {
-      if (flags[key] && !changeFlags[key]) {
-        changeFlags[key] = flags[key];
-        debug(TRACE_CHANGE_FLAG, this, key, flags);
+    /* eslint-disable no-fallthrough, max-depth */
+    for (const key in flags) {
+      if (flags[key]) {
+        let flagChanged = false;
+        switch (key) {
+          case 'dataChanged':
+            // changeFlags.dataChanged may be `false`, a string (reason) or an array of ranges
+            if (Array.isArray(changeFlags[key])) {
+              changeFlags[key] = Array.isArray(flags[key])
+                ? changeFlags[key].concat(flags[key])
+                : flags[key];
+              flagChanged = true;
+            }
+
+          default:
+            if (!changeFlags[key]) {
+              changeFlags[key] = flags[key];
+              flagChanged = true;
+            }
+        }
+        if (flagChanged) {
+          debug(TRACE_CHANGE_FLAG, this, key, flags);
+        }
       }
     }
+    /* eslint-enable no-fallthrough, max-depth */
 
     // Update composite flags
     const propsOrDataChanged =
@@ -745,10 +844,11 @@ export default class Layer extends Component {
   }
 
   // PRIVATE METHODS
-  _updateModules({props, oldProps}) {
+  _updateModules({props, oldProps}, forceUpdate) {
     // Picking module parameters
     const {autoHighlight, highlightedObjectIndex, highlightColor} = props;
     if (
+      forceUpdate ||
       oldProps.autoHighlight !== autoHighlight ||
       oldProps.highlightedObjectIndex !== highlightedObjectIndex ||
       oldProps.highlightColor !== highlightColor

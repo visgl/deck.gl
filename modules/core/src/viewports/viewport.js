@@ -108,6 +108,9 @@ export default class Viewport {
     if (!(viewport instanceof Viewport)) {
       return false;
     }
+    if (this === viewport) {
+      return true;
+    }
 
     return (
       viewport.width === this.width &&
@@ -208,6 +211,22 @@ export default class Viewport {
       return worldToLngLat(xyz);
     }
     return xyz;
+  }
+
+  getBounds(options = {}) {
+    const unprojectOption = {targetZ: options.z || 0};
+
+    const topLeft = this.unproject([0, 0], unprojectOption);
+    const topRight = this.unproject([this.width, 0], unprojectOption);
+    const bottomLeft = this.unproject([0, this.height], unprojectOption);
+    const bottomRight = this.unproject([this.width, this.height], unprojectOption);
+
+    return [
+      Math.min(topLeft[0], topRight[0], bottomLeft[0], bottomRight[0]),
+      Math.min(topLeft[1], topRight[1], bottomLeft[1], bottomRight[1]),
+      Math.max(topLeft[0], topRight[0], bottomLeft[0], bottomRight[0]),
+      Math.max(topLeft[1], topRight[1], bottomLeft[1], bottomRight[1])
+    ];
   }
 
   getDistanceScales(coordinateOrigin = null) {
@@ -347,8 +366,7 @@ export default class Viewport {
     const {meterOffset, distanceScales} = this;
 
     // Make a centered version of the matrix for projection modes without an offset
-    const center2d = this.projectFlat([longitude, latitude]);
-    const center = new Vector3(center2d[0], center2d[1], 0);
+    const center = new Vector3(this.projectPosition([longitude, latitude, 0]));
 
     if (meterOffset) {
       const commonPosition = new Vector3(meterOffset)

@@ -10,23 +10,6 @@ from . import pydeck_examples
 from pydeck import Deck
 
 
-def test_warning():
-    """Verify that a warning is emitted when no Mapbox API key is set"""
-    _environ = dict(os.environ)
-    try:
-        if os.environ.get("MAPBOX_API_KEY"):
-            del os.environ["MAPBOX_API_KEY"]
-        with pytest.warns(UserWarning) as record:
-            d = Deck()
-            os.environ["MAPBOX_API_KEY"] = "pk.xx"
-            d = Deck()
-        # Assert that only one warning has been raised
-        assert len(record) == 1
-    finally:
-        os.environ.clear()
-        os.environ.update(_environ)
-
-
 def test_deck_layer_args():
     """Verify layer argument null cases"""
     CASES = [({"layers": None}, []), ({"layers": []}, [])]

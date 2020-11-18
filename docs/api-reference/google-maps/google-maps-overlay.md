@@ -33,8 +33,9 @@ This class implements the [OverlayView](https://developers.google.com/maps/docum
 const overlay = new GoogleMapsOverlay(props)
 ```
 
-`props` are forwarded to a `Deck` instance. The following [Deck](/docs/api-reference/deck.md) props are supported:
+`props` are forwarded to a `Deck` instance. The following [Deck](/docs/api-reference/core/deck.md) props are supported:
 
+- `styles`
 - `layers`
 - `effects`
 - `parameters`
@@ -65,15 +66,15 @@ Update (partial) props.
 
 ##### `pickObject`
 
-Equivalent of [deck.pickObject](/docs/api-reference/deck.md).
+Equivalent of [deck.pickObject](/docs/api-reference/core/deck.md).
 
 ##### `pickObjects`
 
-Equivalent of [deck.pickObjects](/docs/api-reference/deck.md).
+Equivalent of [deck.pickObjects](/docs/api-reference/core/deck.md).
 
 ##### `pickMultipleObjects`
 
-Equivalent of [deck.pickMultipleObjects](/docs/api-reference/deck.md).
+Equivalent of [deck.pickMultipleObjects](/docs/api-reference/core/deck.md).
 
 ##### `finalize`
 

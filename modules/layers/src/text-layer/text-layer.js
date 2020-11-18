@@ -259,7 +259,7 @@ export default class TextLayer extends CompositeLayer {
       getAngle,
       getPixelOffset,
       billboard,
-      sdf,
+      fontSettings,
       sizeScale,
       sizeUnits,
       sizeMinPixels,
@@ -274,7 +274,7 @@ export default class TextLayer extends CompositeLayer {
 
     return new SubLayerClass(
       {
-        sdf,
+        sdf: fontSettings.sdf,
         iconAtlas: texture,
         iconMapping: mapping,
         backgroundColor,
@@ -302,6 +302,7 @@ export default class TextLayer extends CompositeLayer {
       this.getSubLayerProps({
         id: 'characters',
         updateTriggers: {
+          getIcon: updateTriggers.getText,
           getPosition: updateTriggers.getPosition,
           getAngle: updateTriggers.getAngle,
           getColor: updateTriggers.getColor,

@@ -44,9 +44,7 @@ This example is adapted from the deck.gl documentation.
 import pydeck as pdk
 import pandas as pd
 
-H3_CLUSTER_LAYER_DATA = (
-    "https://raw.githubusercontent.com/visgl/deck.gl-data/master/website/sf.h3clusters.json"  # noqa
-)
+H3_CLUSTER_LAYER_DATA = "https://raw.githubusercontent.com/visgl/deck.gl-data/master/website/sf.h3clusters.json"  # noqa
 
 df = pd.read_json(H3_CLUSTER_LAYER_DATA)
 
@@ -70,4 +68,4 @@ view_state = pdk.ViewState(latitude=37.7749295, longitude=-122.4194155, zoom=11,
 
 # Render
 r = pdk.Deck(layers=[layer], initial_view_state=view_state, tooltip={"text": "Density: {mean}"})
-r.to_html("h3_cluster_layer.html", notebook_display=False)
+r.to_html("h3_cluster_layer.html")

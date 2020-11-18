@@ -1,19 +1,9 @@
-This is a minimal standalone version of the GeoJsonLayer example
+This is a minimal standalone version of the GeoJsonLayer (Polygons) example
 on [deck.gl](http://deck.gl) website.
 
 ### Usage
 
 Copy the content of this folder to your project. 
-
-To see the base map, you need a [Mapbox access token](https://docs.mapbox.com/help/how-mapbox-works/access-tokens/). You can either set an environment variable:
-
-```bash
-export MapboxAccessToken=<mapbox_access_token>
-```
-
-Or set `MAPBOX_TOKEN` directly in `app.js`.
-
-Other options can be found at [using with Mapbox GL](../../../docs/get-started/using-with-mapbox-gl.md).
 
 ```bash
 # install dependencies
@@ -25,5 +15,12 @@ npm start
 ```
 
 ### Data format
-Sample data is stored in [deck.gl Example Data](https://github.com/visgl/deck.gl-data/tree/master/examples/geojson). To use your own data, check out
-the [documentation of GeoJsonLayer](../../../docs/layers/geojson-layer.md).
+
+Sample data is stored in [deck.gl Example Data](https://github.com/visgl/deck.gl-data/tree/master/examples/geojson), showing the property values of Vancouver. [Source](http://data.vancouver.ca/)
+
+To use your own data, check out
+the [documentation of GeoJsonLayer](../../../docs/api-reference/layers/geojson-layer.md).
+
+### Basemap
+
+The basemap in this example is provided by [CARTO free basemap service](https://carto.com/basemaps). To use an alternative base map solution, visit [this guide](https://deck.gl/docs/get-started/using-with-map#using-other-basemap-services)

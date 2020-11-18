@@ -4,35 +4,23 @@ node scripts/validate-token.js
 MODE=$1
 WEBSITE_DIR=`pwd`
 
-# clean up dist directory
-rm -rf ./dist
-mkdir dist
-
-# copy static assets
-cp -r ./src/static/* dist
+# clean up cache
+rm -rf ./.cache ./public
 
 case $MODE in
   "prod")
-    mv dist/index-prod.html dist/index.html
+    gatsby build
     ;;
   "staging")
-    mv dist/index-staging.html dist/index.html
-    # build production bundles
-    cd ../modules/core
-    yarn build-bundle
-    cp debug.min.js $WEBSITE_DIR/dist
-    cd ../main
-    yarn build-bundle
-    cp dist.min.js $WEBSITE_DIR/dist
-    cd $WEBSITE_DIR
+    gatsby build --prefix-paths
     ;;
 esac
 
 # transpile workers
-BABEL_ENV=es5 babel --config-file ../babel.config.js ./src/static/workers --out-dir dist/workers
-
-# build script
-webpack -p --env.prod
+(
+  cd ..
+  BABEL_ENV=es5 npx babel ./website/static/workers --out-dir ./website/public/workers
+)
 
 # build gallery (scripting) examples
 (
@@ -40,8 +28,8 @@ webpack -p --env.prod
   yarn
   yarn build
 )
-mkdir dist/gallery
-cp -r ../examples/gallery/dist/* dist/gallery/
+mkdir public/gallery
+cp -r ../examples/gallery/dist/* public/gallery/
 
 # build playground (json) examples
 (
@@ -49,5 +37,5 @@ cp -r ../examples/gallery/dist/* dist/gallery/
   yarn
   yarn build
 )
-mkdir dist/playground
-cp -r ../examples/playground/dist/* dist/playground/
+mkdir public/playground
+cp -r ../examples/playground/dist/* public/playground/

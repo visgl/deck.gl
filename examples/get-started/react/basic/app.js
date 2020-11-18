@@ -1,4 +1,4 @@
-import React, {Component} from 'react';
+import React from 'react';
 import {render} from 'react-dom';
 import DeckGL, {GeoJsonLayer, ArcLayer} from 'deck.gl';
 
@@ -16,53 +16,50 @@ const INITIAL_VIEW_STATE = {
   pitch: 30
 };
 
-class Root extends Component {
-  _onClick(info) {
+function Root() {
+  const onClick = info => {
     if (info.object) {
       // eslint-disable-next-line
       alert(`${info.object.properties.name} (${info.object.properties.abbrev})`);
     }
-  }
+  };
 
-  render() {
-    return (
-      <DeckGL controller={true} initialViewState={INITIAL_VIEW_STATE}>
-        <GeoJsonLayer
-          id="base-map"
-          data={COUNTRIES}
-          stroked={true}
-          filled={true}
-          lineWidthMinPixels={2}
-          opacity={0.4}
-          getLineDashArray={[3, 3]}
-          getLineColor={[60, 60, 60]}
-          getFillColor={[200, 200, 200]}
-        />
-        <GeoJsonLayer
-          id="airports"
-          data={AIR_PORTS}
-          filled={true}
-          pointRadiusMinPixels={2}
-          pointRadiusScale={2000}
-          getRadius={f => 11 - f.properties.scalerank}
-          getFillColor={[200, 0, 80, 180]}
-          pickable={true}
-          autoHighlight={true}
-          onClick={this._onClick}
-        />
-        <ArcLayer
-          id="arcs"
-          data={AIR_PORTS}
-          dataTransform={d => d.features.filter(f => f.properties.scalerank < 4)}
-          getSourcePosition={f => [-0.4531566, 51.4709959]}
-          getTargetPosition={f => f.geometry.coordinates}
-          getSourceColor={[0, 128, 200]}
-          getTargetColor={[200, 0, 80]}
-          getWidth={1}
-        />
-      </DeckGL>
-    );
-  }
+  return (
+    <DeckGL controller={true} initialViewState={INITIAL_VIEW_STATE}>
+      <GeoJsonLayer
+        id="base-map"
+        data={COUNTRIES}
+        stroked={true}
+        filled={true}
+        lineWidthMinPixels={2}
+        opacity={0.4}
+        getLineColor={[60, 60, 60]}
+        getFillColor={[200, 200, 200]}
+      />
+      <GeoJsonLayer
+        id="airports"
+        data={AIR_PORTS}
+        filled={true}
+        pointRadiusMinPixels={2}
+        pointRadiusScale={2000}
+        getRadius={f => 11 - f.properties.scalerank}
+        getFillColor={[200, 0, 80, 180]}
+        pickable={true}
+        autoHighlight={true}
+        onClick={onClick}
+      />
+      <ArcLayer
+        id="arcs"
+        data={AIR_PORTS}
+        dataTransform={d => d.features.filter(f => f.properties.scalerank < 4)}
+        getSourcePosition={f => [-0.4531566, 51.4709959]}
+        getTargetPosition={f => f.geometry.coordinates}
+        getSourceColor={[0, 128, 200]}
+        getTargetColor={[200, 0, 80]}
+        getWidth={1}
+      />
+    </DeckGL>
+  );
 }
 
 /* global document */

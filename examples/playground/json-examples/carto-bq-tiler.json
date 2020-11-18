@@ -1,0 +1,26 @@
+{
+  "description": "CartoBQTilerLayer declarative example",
+  "initialViewState": {
+    "latitude": 40.7368521,
+    "longitude": -73.8536065,
+    "zoom": 9,
+    "pitch": 0,
+    "bearing": 0
+  },
+  "views": [
+    {
+      "@@type": "MapView",
+      "controller": true,
+      "mapStyle": "https://basemaps.cartocdn.com/gl/positron-gl-style/style.json"    
+    }
+  ],
+  "layers": [
+    {
+      "@@type": "CartoBQTilerLayer",
+      "data": "cartobq.maps.nyc_taxi_points_demo_id",
+      "getFillColor": [232, 133, 113],
+      "pointRadiusMinPixels": 2,
+      "stroked": false
+    }
+  ]
+}

@@ -89,7 +89,6 @@ map.on('load', () => {
 }
 ```
 
-
 ## Constructor
 
 ```js
@@ -103,7 +102,7 @@ Parameters:
   + `props.id` (String) - an unique id is required for each layer.
   + `props.deck` (`Deck`, optional) - a `Deck` instance that controls the rendering of this layer. If provided, the layer will be looked up from its layer stack by `id` at render time, and all other props are ignored.
   + `props.type` (`Layer`, optional) - a class that extends deck.gl's base `Layer` class. Required if `deck` is not provided.
-  + Optional: any other prop needed by this type of layer. See deck.gl's [layer catalog](http://deck.gl/#/documentation/deckgl-api-reference/layers/layer) for documentations and examples on how to create layers.
+  + Optional: any other prop needed by this type of layer. See deck.gl's [layer catalog](/docs/api-reference/geo-layers/README.md) for documentations and examples on how to create layers.
 
 
 ## Methods

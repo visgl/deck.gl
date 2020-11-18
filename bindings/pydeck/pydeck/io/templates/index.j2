@@ -2,6 +2,10 @@
   <head>
     <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
     <title>pydeck</title>
+{% if google_maps_key %}
+    <script src="https://maps.googleapis.com/maps/api/js?key={{google_maps_key}}&libraries=places"></script>
+{% endif %}
+    <script src="https://api.tiles.mapbox.com/mapbox-gl-js/v1.4.0/mapbox-gl.js"></script>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap-theme.min.css" />
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.3/css/font-awesome.min.css" />
     {{deckgl_jupyter_widget_bundle}}
@@ -48,12 +52,12 @@
   </body>
   <script>
     const jsonInput = {{json_input}};
-    const MAPBOX_API_KEY = '{{mapbox_key}}';
     const tooltip = {{tooltip}};
     const customLibraries = {{ custom_libraries or 'null' }};
 
-    const deck = createDeck({
-      mapboxApiKey: MAPBOX_API_KEY,
+    const deckInstance = createDeck({
+      mapboxApiKey: '{{mapbox_key}}',
+      googleMapsKey: '{{google_maps_key}}',
       container: document.getElementById('deck-container'),
       jsonInput,
       tooltip,

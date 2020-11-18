@@ -113,10 +113,7 @@ export default class PolygonLayer extends CompositeLayer {
         // holeIndices[-1] falls back to 0
         // holeIndices[holeIndices.length] falls back to positions.length
         for (let i = 0; i <= holeIndices.length; i++) {
-          const path = positions.subarray(
-            holeIndices[i - 1] || 0,
-            holeIndices[i] || positions.length
-          );
+          const path = positions.slice(holeIndices[i - 1] || 0, holeIndices[i] || positions.length);
           paths.push(this.getSubLayerRow({path}, object, objectInfo.index));
         }
       } else {
@@ -185,7 +182,7 @@ export default class PolygonLayer extends CompositeLayer {
 
           getElevation,
           getFillColor,
-          getLineColor,
+          getLineColor: extruded && wireframe ? getLineColor : defaultLineColor,
 
           material,
           transitions
@@ -196,6 +193,9 @@ export default class PolygonLayer extends CompositeLayer {
             getPolygon: updateTriggers.getPolygon,
             getElevation: updateTriggers.getElevation,
             getFillColor: updateTriggers.getFillColor,
+            // using a legacy API to invalid lineColor attributes
+            // if (extruded && wireframe) has changed
+            lineColors: extruded && wireframe,
             getLineColor: updateTriggers.getLineColor
           }
         }),

@@ -43,7 +43,12 @@ function getTextureFromData(gl, data, opts) {
   return new Texture2D(gl, Object.assign({data}, opts));
 }
 
-function validateGeometryAttributes(attributes) {
+function validateGeometryAttributes(attributes, useMeshColors) {
+  const hasColorAttribute = attributes.COLOR_0 || attributes.colors;
+  const useColorAttribute = hasColorAttribute && useMeshColors;
+  if (!useColorAttribute) {
+    attributes.colors = {constant: true, value: new Float32Array([1, 1, 1])};
+  }
   log.assert(
     attributes.positions || attributes.POSITION,
     'SimpleMeshLayer requires "postions" or "POSITION" attribute in mesh property.'
@@ -54,16 +59,16 @@ function validateGeometryAttributes(attributes) {
  * Convert mesh data into geometry
  * @returns {Geometry} geometry
  */
-function getGeometry(data) {
+function getGeometry(data, useMeshColors) {
   if (data.attributes) {
-    validateGeometryAttributes(data.attributes);
+    validateGeometryAttributes(data.attributes, useMeshColors);
     if (data instanceof Geometry) {
       return data;
     } else {
       return new Geometry(data);
     }
   } else if (data.positions || data.POSITION) {
-    validateGeometryAttributes(data);
+    validateGeometryAttributes(data, useMeshColors);
     return new Geometry({
       attributes: data
     });
@@ -77,6 +82,10 @@ const defaultProps = {
   mesh: {value: null, type: 'object', async: true},
   texture: {type: 'object', value: null, async: true},
   sizeScale: {type: 'number', value: 1, min: 0},
+  // Whether the color attribute in a mesh will be used
+  // This prop will be removed and set to true in next major release
+  _useMeshColors: {type: 'boolean', value: false},
+
   // TODO - parameters should be merged, not completely overridden
   parameters: {
     depthTest: true,
@@ -215,7 +224,7 @@ export default class SimpleMeshLayer extends Layer {
       this.context.gl,
       Object.assign({}, this.getShaders(), {
         id: this.props.id,
-        geometry: getGeometry(mesh),
+        geometry: getGeometry(mesh, this.props._useMeshColors),
         isInstanced: true
       })
     );

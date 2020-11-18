@@ -57,5 +57,5 @@ Binary transport will only work if the following requirements are met:
 Example
 ^^^^^^^
 
-.. literalinclude:: ../examples/graph_example.py
+.. literalinclude:: ../examples/binary_transport.py
    :language: python

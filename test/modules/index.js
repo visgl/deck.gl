@@ -23,6 +23,7 @@ import './core';
 
 import './layers';
 import './aggregation-layers';
+import './carto';
 import './geo-layers';
 import './mesh-layers';
 

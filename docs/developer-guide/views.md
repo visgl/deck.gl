@@ -1,6 +1,6 @@
 # Views and Projections
 
-The same data can be drawn differently to screen based on what projection method is used. deck.gl's view system defines how one or more cameras should be set up to look at your data objects. The default view used in deck.gl is the [MapView](/docs/api-reference/map-view.md), which implements the [Web Meractor projection](https://en.wikipedia.org/wiki/Web_Mercator_projection). 
+The same data can be drawn differently to screen based on what projection method is used. deck.gl's view system defines how one or more cameras should be set up to look at your data objects. The default view used in deck.gl is the [MapView](/docs/api-reference/core/map-view.md), which implements the [Web Meractor projection](https://en.wikipedia.org/wiki/Web_Mercator_projection). 
 The view system is designed to be flexible and composable and can handle many different configurations such as side-by-side views, overlapping views etc. If you plan to work with non-geospatial data, or show more than a single standard viewport, it may be worth spending some time to get familiar with the `View` API.
 
 View classes enable applications to specify one or more rectangular viewports and control what should be rendered inside each view.
@@ -9,15 +9,15 @@ View classes enable applications to specify one or more rectangular viewports an
   <tbody>
     <tr>
       <td style="vertical-align: top">
-        <img height=200 src="https://raw.github.com/visgl/deck.gl-data/master/images/docs/minimap.gif" />
+        <img height="200" src="https://raw.github.com/visgl/deck.gl-data/master/images/docs/minimap.gif" />
         <p><i>A "minimap" app, implemented as two overlapping, partially synchronized MapViews</i></p>
       </td>
       <td style="vertical-align: top">
-        <img height=200 src="https://raw.github.com/visgl/deck.gl-data/master/images/docs/first-person-view.gif" />
+        <img height="200" src="https://raw.github.com/visgl/deck.gl-data/master/images/docs/first-person-view.gif" />
         <p><i>A vehicle log rendered from the driver's perspective, implemented with FirstPersonView</i></p>
       </td>
       <td style="vertical-align: top">
-        <img height=200 src="https://raw.github.com/visgl/deck.gl-data/master/images/docs/orthographic-view.gif" />
+        <img height="200" src="https://raw.github.com/visgl/deck.gl-data/master/images/docs/orthographic-view.gif" />
         <p><i>A graph, implemented with OrthographicView</i></p>
       </td>
     </tr>
@@ -29,12 +29,12 @@ View classes enable applications to specify one or more rectangular viewports an
 
 ### View
 
-A [View](/docs/api-reference/view.md) instance defines the following information:
+A [View](/docs/api-reference/core/view.md) instance defines the following information:
 
 * A unique `id`.
 * The position and extent of the view on the canvas: `x`, `y`, `width`, and `height`.
 * Certain camera parameters specifying how your data should be projected into this view, e.g. field of view, near/far planes, perspective vs. orthographic, etc.
-* The [controller](/docs/api-reference/controller.md) to be used for this view. A controller listens to pointer events and touch gestures, and translates user input into changes in the view state. If enabled, the camera becomes interactive.
+* The [controller](/docs/api-reference/core/controller.md) to be used for this view. A controller listens to pointer events and touch gestures, and translates user input into changes in the view state. If enabled, the camera becomes interactive.
 
 To summarize, a `View` instance wraps the "hard configuration" of a camera. Once defined, it does not need to change frequently.
 
@@ -48,7 +48,7 @@ To summarize, a `viewState` object describes the "real-time properties" of a cam
 
 ### Viewport
 
-A [Viewport](/docs/api-reference/viewport.md) instance is the camera itself. It is "resolved" from a `View` instance and its `viewState`. It handles the mathematical operations such as coordinate projection/unprojection, the calculation of projection matrices, and other GLSL uniforms needed by the shaders.
+A [Viewport](/docs/api-reference/core/viewport.md) instance is the camera itself. It is "resolved" from a `View` instance and its `viewState`. It handles the mathematical operations such as coordinate projection/unprojection, the calculation of projection matrices, and other GLSL uniforms needed by the shaders.
 
 Whenever `viewState` updates, the view creates a new viewport under the hood. Typically, the deck.gl user does not need to work with viewports directly. In certain use cases, the JavaScript functions offered by a `Viewport` instance can be handy for projecting and unprojecting coordinates.
 
@@ -83,11 +83,11 @@ Note that the set of view state parameters that will be used varies between View
 
 | View Class                                                     | Use Case  | Status | Description |
 | ---                                                            | ---         | ---         | ---         |
-| [`View`](/docs/api-reference/view.md)                          |    |    | The base view has to be supplied with raw view and projection matrices. It is typically only instantiated directly if the application needs to work with views that have been supplied from external sources, such as the [WebVR API](https://developer.mozilla.org/en-US/docs/Web/API/WebVR_API). |
-| [`MapView`](/docs/api-reference/map-view.md) (default)         | geospatial | full support | This class renders data using the [Web Meractor projection](https://en.wikipedia.org/wiki/Web_Mercator_projection) and is designed to match an external base map library such as mapbox-gl or Google Maps.
-| [`FirstPersonView`](/docs/api-reference/first-person-view.md)  | geospatial | full support | The camera is positioned in a provided geolocation and looks in a provided direction, similar to that of a [first-person game](https://en.wikipedia.org/wiki/First-person_(gaming)). |
-| [`OrthographicView`](/docs/api-reference/orthographic-view.md) | info-vis (2D)     | full support | The camera looks at a target point from top-down. Does not rotate. |
-| [`OrbitView`](/docs/api-reference/perspective-view.md)         | info-vis (3D)     | full support | The camera looks at a target point from a provided direction. Rotates around the target. |
+| [`View`](/docs/api-reference/core/view.md)                          |    |    | The base view has to be supplied with raw view and projection matrices. It is typically only instantiated directly if the application needs to work with views that have been supplied from external sources, such as the [WebVR API](https://developer.mozilla.org/en-US/docs/Web/API/WebVR_API). |
+| [`MapView`](/docs/api-reference/core/map-view.md) (default)         | geospatial | full support | This class renders data using the [Web Meractor projection](https://en.wikipedia.org/wiki/Web_Mercator_projection) and is designed to match an external base map library such as mapbox-gl or Google Maps.
+| [`FirstPersonView`](/docs/api-reference/core/first-person-view.md)  | geospatial | full support | The camera is positioned in a provided geolocation and looks in a provided direction, similar to that of a [first-person game](https://en.wikipedia.org/wiki/First-person_(gaming)). |
+| [`OrthographicView`](/docs/api-reference/core/orthographic-view.md) | info-vis (2D)     | full support | The camera looks at a target point from top-down. Does not rotate. |
+| [`OrbitView`](/docs/api-reference/core/perspective-view.md)         | info-vis (3D)     | full support | The camera looks at a target point from a provided direction. Rotates around the target. |
 
 
 ## Examples
@@ -131,45 +131,31 @@ const deck = new Deck({
 If you need to manage and manipulate the view state outside of deck.gl, you may do so by providing an external `viewState` prop (used as a "stateless" component). In this case, you also need to listen to the `onViewStateChange` callback and update the `viewState` object yourself:
 
 ```js
-import React from 'react';
+import React, {useState, useCallback} from 'react';
 import DeckGL from '@deck.gl/react';
 import {OrthographicView} from '@deck.gl/core';
 
-const INITIAL_VIEW_STATE = {
-  target: [0, 0, 0],
-  rotationX: 0,
-  rotationOrbit: 0,
-  zoom: 1
-};
+function App() {
+  const [viewState, setViewState] = useState({
+    target: [0, 0, 0],
+    rotationX: 0,
+    rotationOrbit: 0,
+    zoom: 1
+  })
 
-class App extends React.Component {
-  state = {
-    // Default view state
-    viewState: INITIAL_VIEW_STATE
-  };
-
-  _onViewStateChange = ({viewState}) => {
+  const onViewStateChange = useCallback(({viewState}) => {
     // Manipulate view state
     viewState.target[0] = Math.min(viewState.target[0], 10);
     // Save the view state and trigger rerender
-    this.setState({viewState});
-  };
+    setViewState(viewState);
+  }, []);
 
-  _reset = () => {
-    this.setState({
-      viewState: INITIAL_VIEW_STATE
-    });
-  }
-
-  render() {
-    return <DeckGL
-      ...
-      views={new OrthographicView()}
-      controller={true}
-      viewState={this.state.viewState}
-      onViewStateChange={this._onViewStateChange}
-    />;
-  }
+  return <DeckGL
+    views={new OrthographicView()}
+    controller={true}
+    viewState={viewState}
+    onViewStateChange={onViewStateChange}
+  />;
 }
 ```
 
@@ -241,46 +227,49 @@ const deck = new Deck({
 When using multiple views, each `View` can either have its own independent view state, or share the same view state as other views. To define the view state of a specific view, add a key to the `viewState` object that matches its view id:
 
 ```js
-import React from 'react';
+import React, {useState, useCallback} from 'react';
 import DeckGL from '@deck.gl/react';
 import {FirstPersonView, MapView} from '@deck.gl/core';
 
-const INITIAL_VIEW_STATE = {
-  longitude: -122.4,
-  latitude: 37.8,
-  pitch: 0,
-  bearing: 0,
-  zoom: 10
-};
+function App() {
+  const [viewStates, setViewStates] = useState({
+    longitude: -122.4,
+    latitude: 37.8,
+    pitch: 0,
+    bearing: 0,
+    zoom: 10
+  });
 
-class App extends React.Component {
-  state = {
-    // Default view state
-    viewStates: INITIAL_VIEW_STATE,
-  };
-
-  _onViewStateChange = ({viewId, viewState}) => {
-    const viewStates = {...this.state.viewStates};
-
-    // Update a single view
-    viewStates[viewId] = viewState;
-    // Or update both
-    viewStates['first-person'] = viewState;
-    viewStates.minimap = {...viewState, pitch: 0};
-
-    // Save the view state and trigger rerender
-    this.setState({viewStates});
-  };
+  const onViewStateChange = useCallback(({viewId, viewState}) => {
+    if (viewId === 'main') {
+      setViewStates(currentViewStates => ({
+        main: viewState,
+        minimap: {
+          ...currentViewStates.minimap,
+          longitude: viewState.longitude,
+          latitude: viewState.latitude
+        }
+      }));
+    } else {
+      setViewStates(currentViewStates => ({
+        main: {
+          ...currentViewStates.main,
+          longitude: viewState.longitude,
+          latitude: viewState.latitude
+        },
+        minimap: viewState
+      }));
+    }
+  }, []);
 
   render() {
     return <DeckGL
-      ...
       views={views: [
-        new FirstPersonView({id: 'first-person', controller: true}),
-        new MapView({id: 'mini-map', ..., controller: true}})
+        new MapView({id: 'main', controller: true}),
+        new MapView({id: 'minimap', x: 10, y: 10, width: '20%', height: '20%', controller: true}})
       ]}
-      viewState={this.state.viewStates}
-      onViewStateChange={this._onViewStateChange}
+      viewState={viewStates}
+      onViewStateChange={onViewStateChange}
     />;
   }
 }
@@ -317,6 +306,29 @@ const deck = new Deck({
   ]
 });
 ```
+
+Some layers, including `TileLayer`, `Tile3DLayer`, `HeatmapLayer` and `ScreenGridLayer`, perform expensive operations (data fetching/aggregation) on viewport change. Therefore, it is generally NOT recommended to render them into multiple views. If you do need to show e.g. tiled base map in multiple views, create one layer instance for each view and limit their rendering with `layerFilter`:
+
+```js
+const deck = new Deck({
+  ...
+  views: [
+    new MapView({id: 'main', ...}),
+    new MapView({id: 'mini-map', ...})
+  ],
+  layers: [
+    new TileLayer({id: 'tiles-for-main', ...}),
+    new TileLayer({id: 'tiles-for-mini-map', ...})
+  ],
+  layerFilter: ({layer, viewport} => {
+    if (layer.id.startsWith('tiles-for')) {
+      return layer.id.startsWith(`tiles-for-${viewport.id}`);
+    }
+    return true;
+  });
+});
+```
+
 
 ### Picking in Multiple Views
 
@@ -386,6 +398,6 @@ function App() {
 
 When `views`/`viewState` do change, new viewports are constructed. At this point, layers can get a chance to update their state, with the `changeFlags` argument containing `viewportChanged: true`. During interaction and transition, this may happen many times a second, raising performance concern if many layers need to recompute their states. By default, most layers ignore viewport changes, so the `updateState` lifecycle method do not get called if nothing else change.
 
-However, some layers do need to update state when viewport changes (e.g. the [TileLayer](/docs/layers/tile-layer.md)). To make sure `updateState` is called, the layer needs to override `shouldUpdateState`.
+However, some layers do need to update state when viewport changes (e.g. the [TileLayer](/docs/api-reference/geo-layers/tile-layer.md)). To make sure `updateState` is called, the layer needs to override `shouldUpdateState`.
 
 Read more in [Layer Lifecycles](/docs/developer-guide/custom-layers/layer-lifecycle.md).

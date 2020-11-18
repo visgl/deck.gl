@@ -294,6 +294,9 @@ export default class Attribute extends DataColumn {
 
   /* eslint-disable max-depth, max-statements */
   _autoUpdater(attribute, {data, startRow, endRow, props, numInstances}) {
+    if (attribute.constant) {
+      return;
+    }
     const {settings, state, value, size, startIndices} = attribute;
 
     const {accessor, transform} = settings;
@@ -316,7 +319,9 @@ export default class Attribute extends DataColumn {
 
       if (startIndices) {
         const numVertices =
-          (startIndices[objectInfo.index + 1] || numInstances) - startIndices[objectInfo.index];
+          (objectInfo.index < startIndices.length - 1
+            ? startIndices[objectInfo.index + 1]
+            : numInstances) - startIndices[objectInfo.index];
         if (objectValue && Array.isArray(objectValue[0])) {
           let startIndex = i;
           for (const item of objectValue) {
@@ -340,7 +345,6 @@ export default class Attribute extends DataColumn {
         i += size;
       }
     }
-    attribute.constant = false;
   }
   /* eslint-enable max-depth, max-statements */
 

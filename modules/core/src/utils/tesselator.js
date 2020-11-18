@@ -88,6 +88,9 @@ export default class Tesselator {
   }
 
   /* Subclass interface */
+  normalizeGeometry(geometry) {
+    return geometry;
+  }
 
   // Update the positions of a single geometry
   updateGeometryAttributes(geometry, startIndex, size) {
@@ -156,6 +159,8 @@ export default class Tesselator {
     const {data, geometryBuffer} = this;
     const {startRow = 0, endRow = Infinity} = dataRange || {};
 
+    const normalizedData = {};
+
     if (!dataRange) {
       // Full update - regenerate buffer layout from scratch
       indexStarts = [0];
@@ -164,6 +169,8 @@ export default class Tesselator {
     if (this.normalize || !geometryBuffer) {
       this._forEachGeometry(
         (geometry, dataIndex) => {
+          geometry = this.normalizeGeometry(geometry);
+          normalizedData[dataIndex] = geometry;
           vertexStarts[dataIndex + 1] = vertexStarts[dataIndex] + this.getGeometrySize(geometry);
         },
         startRow,
@@ -196,6 +203,7 @@ export default class Tesselator {
 
     this._forEachGeometry(
       (geometry, dataIndex) => {
+        geometry = normalizedData[dataIndex] || geometry;
         context.vertexStart = vertexStarts[dataIndex];
         context.indexStart = indexStarts[dataIndex];
         const vertexEnd =

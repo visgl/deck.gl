@@ -32,7 +32,7 @@ const zoom2Scale = zoom => Math.pow(2, zoom);
 
 export class OrbitState extends ViewState {
   constructor({
-    ViewportType,
+    makeViewport,
 
     /* Viewport arguments */
     width, // Width of viewport
@@ -83,7 +83,7 @@ export class OrbitState extends ViewState {
       startZoom
     };
 
-    this.ViewportType = ViewportType;
+    this.makeViewport = makeViewport;
   }
 
   /* Public API */
@@ -335,7 +335,7 @@ export class OrbitState extends ViewState {
     if (startTarget) {
       viewportProps.target = startTarget;
     }
-    const viewport = new this.ViewportType(viewportProps);
+    const viewport = this.makeViewport(viewportProps);
     const center = viewport.project(viewportProps.target);
     return viewport.unproject([center[0] - pixelOffset[0], center[1] - pixelOffset[1], center[2]]);
   }

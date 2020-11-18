@@ -2,21 +2,20 @@ export const dashShaders = {
   inject: {
     'vs:#decl': `
 attribute vec2 instanceDashArrays;
+attribute float instanceDashOffsets;
 varying vec2 vDashArray;
+varying float vDashOffset;
 `,
 
     'vs:#main-end': `
 vDashArray = instanceDashArrays;
+vDashOffset = instanceDashOffsets / width.x;
 `,
 
     'fs:#decl': `
 uniform float dashAlignMode;
 varying vec2 vDashArray;
-
-// mod doesn't work correctly for negative numbers
-float mod2(float a, float b) {
-  return a - floor(a / b) * b;
-}
+varying float vDashOffset;
 
 float round(float x) {
   return floor(x + 0.5);
@@ -36,24 +35,23 @@ float round(float x) {
   float gapLength = vDashArray.y;
   float unitLength = solidLength + gapLength;
 
-  if (unitLength > 0.0) {
-    unitLength = mix(
-      unitLength,
-      vPathLength / round(vPathLength / unitLength),
-      dashAlignMode
-    );
+  float offset;
 
-    float offset = dashAlignMode * solidLength / 2.0;
+  if (unitLength > 0.0) {
+    if (dashAlignMode == 0.0) {
+      offset = vDashOffset;
+    } else {
+      unitLength = vPathLength / round(vPathLength / unitLength);
+      offset = solidLength / 2.0;
+    }
 
     if (
       gapLength > 0.0 &&
-      vPathPosition.y >= 0.0 &&
-      vPathPosition.y <= vPathLength &&
-      mod2(vPathPosition.y + offset, unitLength) > solidLength
+      mod(clamp(vPathPosition.y, 0.0, vPathLength) + offset, unitLength) > solidLength
     ) {
       discard;
     }
-  }  
+  }
 `
   }
 };

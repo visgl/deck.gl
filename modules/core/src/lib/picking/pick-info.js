@@ -18,20 +18,31 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-// TODO - break this monster function into 3+ parts
-/* eslint-disable max-depth, max-statements */
+// Even if nothing gets picked, we need to expose some information of the picking action:
+// x, y, coordinates etc.
+export function getEmptyPickingInfo({pickInfo, viewports, pixelRatio, x, y, z}) {
+  const viewport = getViewportFromCoordinates({viewports}); // TODO - add coords
+  const coordinate = viewport && viewport.unproject([x - viewport.x, y - viewport.y], {targetZ: z});
 
-export function processPickInfo({
-  pickInfo,
-  lastPickedInfo,
-  mode,
-  layers,
-  viewports,
-  x,
-  y,
-  z,
-  pixelRatio
-}) {
+  return {
+    color: null,
+    layer: null,
+    index: -1,
+    picked: false,
+    x,
+    y,
+    pixel: [x, y],
+    coordinate,
+    // TODO remove the lngLat prop after compatibility check
+    lngLat: coordinate,
+    devicePixel: pickInfo && [pickInfo.pickedX, pickInfo.pickedY],
+    pixelRatio
+  };
+}
+
+/* eslint-disable max-depth */
+export function processPickInfo(opts) {
+  const {pickInfo, lastPickedInfo, mode, layers} = opts;
   const {pickedColor, pickedLayer, pickedObjectIndex} = pickInfo;
 
   const affectedLayers = pickedLayer ? [pickedLayer] : [];
@@ -62,23 +73,7 @@ export function processPickInfo({
     }
   }
 
-  const viewport = getViewportFromCoordinates({viewports}); // TODO - add coords
-  const coordinate = viewport && viewport.unproject([x, y], {targetZ: z});
-
-  const baseInfo = {
-    color: null,
-    layer: null,
-    index: -1,
-    picked: false,
-    x,
-    y,
-    pixel: [x, y],
-    coordinate,
-    // TODO remove the lngLat prop after compatibility check
-    lngLat: coordinate,
-    devicePixel: [pickInfo.pickedX, pickInfo.pickedY],
-    pixelRatio
-  };
+  const baseInfo = getEmptyPickingInfo(opts);
 
   // Use a Map to store all picking infos.
   // The following two forEach loops are the result of

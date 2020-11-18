@@ -1,4 +1,4 @@
-/* global document, google */
+/* global google, document */
 import {Deck} from '@deck.gl/core';
 
 // https://en.wikipedia.org/wiki/Web_Mercator_projection#Formulas
@@ -10,7 +10,7 @@ const MAX_LATITUDE = 85.05113;
  * @param overlay (google.maps.OverlayView) - A maps Overlay instance
  * @param [deck] (Deck) - a previously created instances
  */
-export function createDeckInstance(map, overlay, deck) {
+export function createDeckInstance(map, overlay, deck, props) {
   if (deck) {
     if (deck.props.userData._googleMap === map) {
       return deck;
@@ -21,12 +21,15 @@ export function createDeckInstance(map, overlay, deck) {
 
   const eventListeners = {
     click: null,
+    dblclick: null,
     mousemove: null,
     mouseout: null
   };
 
   deck = new Deck({
-    canvas: createDeckCanvas(overlay),
+    ...props,
+    style: null,
+    parent: getContainer(overlay, props.style),
     initialViewState: {
       longitude: 0,
       latitude: 0,
@@ -49,16 +52,13 @@ export function createDeckInstance(map, overlay, deck) {
   return deck;
 }
 
-function createDeckCanvas(overlay) {
-  const container = overlay.getPanes().overlayLayer;
-  const deckCanvas = document.createElement('canvas');
-  Object.assign(deckCanvas.style, {
-    // map container position is always non-static
-    position: 'absolute'
-  });
-
-  container.appendChild(deckCanvas);
-  return deckCanvas;
+// Create a container that will host the deck canvas and tooltip
+function getContainer(overlay, style) {
+  const container = document.createElement('div');
+  container.style.position = 'absolute';
+  Object.assign(container.style, style);
+  overlay.getPanes().overlayLayer.appendChild(container);
+  return container;
 }
 
 /**
@@ -74,9 +74,6 @@ export function destroyDeckInstance(deck) {
   }
 
   deck.finalize();
-
-  // Remove canvas
-  deck.canvas.parentNode.removeChild(deck.canvas);
 }
 
 /* eslint-disable max-statements */
@@ -150,36 +147,52 @@ export function getViewState(map, overlay) {
 }
 /* eslint-enable max-statements */
 
+function getEventPixel(event, deck) {
+  if (event.pixel) {
+    return event.pixel;
+  }
+  // event.pixel may not exist when clicking on a POI
+  // https://developers.google.com/maps/documentation/javascript/reference/map#MouseEvent
+  const point = deck.getViewports()[0].project([event.latLng.lng(), event.latLng.lat()]);
+  return {
+    x: point[0],
+    y: point[1]
+  };
+}
+
 // Triggers picking on a mouse event
 function handleMouseEvent(deck, type, event) {
-  let callback;
+  const mockEvent = {
+    type,
+    offsetCenter: getEventPixel(event, deck),
+    srcEvent: event
+  };
+
   switch (type) {
     case 'click':
       // Hack: because we do not listen to pointer down, perform picking now
-      deck._lastPointerDownInfo = deck.pickObject({
-        x: event.pixel.x,
-        y: event.pixel.y
-      });
-      callback = deck._onEvent;
+      deck._lastPointerDownInfo = deck.pickObject(mockEvent.offsetCenter);
+      mockEvent.tapCount = 1;
+      deck._onEvent(mockEvent);
+      break;
+
+    case 'dblclick':
+      mockEvent.type = 'click';
+      mockEvent.tapCount = 2;
+      deck._onEvent(mockEvent);
       break;
 
     case 'mousemove':
-      type = 'pointermove';
-      callback = deck._onPointerMove;
+      mockEvent.type = 'pointermove';
+      deck._onPointerMove(mockEvent);
       break;
 
     case 'mouseout':
-      type = 'pointerleave';
-      callback = deck._onPointerMove;
+      mockEvent.type = 'pointerleave';
+      deck._onPointerMove(mockEvent);
       break;
 
     default:
       return;
   }
-
-  callback({
-    type,
-    offsetCenter: event.pixel,
-    srcEvent: event
-  });
 }

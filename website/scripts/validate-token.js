@@ -24,19 +24,19 @@ const console = require('console');
 const process = require('process');
 const readline = require("readline");
 
-function checkMapboxToken() {
+function checkToken(key) {
   // eslint-disable-next-line
-  if (process.env.MapboxAccessToken === undefined) {
-    console.log('\x1b[31m%s\x1b[0m', 'Need set MapboxAccessToken!');
+  if (!process.env[key]) {
+    console.log('\x1b[31m%s\x1b[0m', `Missing ${key}!`);
     process.exit(1); //eslint-disable-line
   } else {
-    console.log('MapboxAccessToken: \r\n\x1b[36m%s\x1b[0m', `${process.env.MapboxAccessToken}`);
+    console.log(`${key}: \r\n\x1b[36m%s\x1b[0m ${process.env[key]}`);
   }
 }
 
 function verifyUserInput() {
   const prompts = readline.createInterface(process.stdin, process.stdout);
-  prompts.question('Is the token correct? y/n \r\n', answer => {
+  prompts.question('Proceed with the above tokens: y/n \r\n', answer => {
     if (answer === 'y' || answer === 'Y') {
       process.exit(0);
     } else {
@@ -45,5 +45,6 @@ function verifyUserInput() {
   });
 }
 
-checkMapboxToken();
+checkToken('MapboxAccessToken');
+checkToken('GoogleMapsAPIKey');
 verifyUserInput();

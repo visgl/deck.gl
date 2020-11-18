@@ -56,7 +56,7 @@ new TestRender({
 new InteractionTestRunner(deckProps)
 ```
 
-Create a InteractionTestRunner instance. The `deckProps` argument is passed to the [Deck](/docs/api-reference/deck.md) constructor.
+Create a InteractionTestRunner instance. The `deckProps` argument is passed to the [Deck](/docs/api-reference/core/deck.md) constructor.
 
 ### add(testCase: Array|Object)
 

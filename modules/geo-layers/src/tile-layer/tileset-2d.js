@@ -1,5 +1,7 @@
 import Tile2DHeader from './tile-2d-header';
 import {getTileIndices, tileToBoundingBox} from './utils';
+import {RequestScheduler} from '@loaders.gl/loader-utils';
+import {Matrix4} from 'math.gl';
 
 const TILE_STATE_UNKNOWN = 0;
 const TILE_STATE_VISIBLE = 1;
@@ -54,6 +56,12 @@ export default class Tileset2D {
         this._resizeCache();
       }
     };
+    this.onTileUnload = opts.onTileUnload;
+
+    this._requestScheduler = new RequestScheduler({
+      maxRequests: opts.maxRequests,
+      throttleRequests: opts.maxRequests > 0
+    });
 
     // Maps tile id in string {z}-{x}-{y} to a Tile object
     this._cache = new Map();
@@ -93,18 +101,27 @@ export default class Tileset2D {
   }
 
   /**
-   * Update the cache with the given viewport and triggers callback onUpdate.
+   * Update the cache with the given viewport and model matrix and triggers callback onUpdate.
    * @param {*} viewport
    * @param {*} onUpdate
+   * @param {*} modelMatrix
    */
-  update(viewport, {zRange} = {}) {
-    if (viewport !== this._viewport) {
+  update(viewport, {zRange, modelMatrix} = {}) {
+    const modelMatrixAsMatrix4 = new Matrix4(modelMatrix);
+    const isModelMatrixNew = !modelMatrixAsMatrix4.equals(this._modelMatrix);
+    if (!viewport.equals(this._viewport) || isModelMatrixNew) {
+      if (isModelMatrixNew) {
+        this._modelMatrixInverse = modelMatrix && modelMatrixAsMatrix4.clone().invert();
+        this._modelMatrix = modelMatrix && modelMatrixAsMatrix4;
+      }
       this._viewport = viewport;
       const tileIndices = this.getTileIndices({
         viewport,
         maxZoom: this._maxZoom,
         minZoom: this._minZoom,
-        zRange
+        zRange,
+        modelMatrix: this._modelMatrix,
+        modelMatrixInverse: this._modelMatrixInverse
       });
       this._selectedTiles = tileIndices.map(index => this._getTile(index, true));
 
@@ -125,21 +142,30 @@ export default class Tileset2D {
     if (changed) {
       this._frameNumber++;
     }
+
     return this._frameNumber;
   }
 
   /* Public interface for subclassing */
 
   // Returns array of {x, y, z}
-  getTileIndices({viewport, maxZoom, minZoom, zRange}) {
-    return getTileIndices(viewport, maxZoom, minZoom, zRange, this.opts.tileSize);
+  getTileIndices({viewport, maxZoom, minZoom, zRange, modelMatrix, modelMatrixInverse}) {
+    const {tileSize, extent} = this.opts;
+    return getTileIndices({
+      viewport,
+      maxZoom,
+      minZoom,
+      zRange,
+      tileSize,
+      extent,
+      modelMatrix,
+      modelMatrixInverse
+    });
   }
 
   // Add custom metadata to tiles
   getTileMetadata({x, y, z}) {
-    return {
-      bbox: tileToBoundingBox(this._viewport, x, y, z, this.opts.tileSize)
-    };
+    return {bbox: tileToBoundingBox(this._viewport, x, y, z)};
   }
 
   // Returns {x, y, z} of the parent tile
@@ -155,12 +181,36 @@ export default class Tileset2D {
   updateTileStates() {
     this._updateTileStates(this.selectedTiles);
 
+    const {maxRequests} = this.opts;
+
+    const abortCandidates = [];
+    let ongoingRequestCount = 0;
     let changed = false;
     for (const tile of this._cache.values()) {
       const isVisible = Boolean(tile.state & TILE_STATE_VISIBLE);
       if (tile.isVisible !== isVisible) {
         changed = true;
         tile.isVisible = isVisible;
+      }
+
+      // isSelected used in request scheduler
+      tile.isSelected = tile.state === TILE_STATE_SELECTED;
+
+      // Keep track of all the ongoing requests
+      if (tile.isLoading) {
+        ongoingRequestCount++;
+        if (!tile.isSelected) {
+          abortCandidates.push(tile);
+        }
+      }
+    }
+
+    if (maxRequests > 0) {
+      while (ongoingRequestCount > maxRequests && abortCandidates.length > 0) {
+        // There are too many ongoing requests, so abort some that are unselected
+        const tile = abortCandidates.shift();
+        tile.abort();
+        ongoingRequestCount--;
       }
     }
 
@@ -243,6 +293,7 @@ export default class Tileset2D {
           // delete tile
           this._cacheByteSize -= opts.maxCacheByteSize ? tile.byteLength : 0;
           _cache.delete(tileId);
+          this.onTileUnload(tile);
         }
         if (_cache.size <= maxCacheSize && this._cacheByteSize <= maxCacheByteSize) {
           break;
@@ -274,10 +325,13 @@ export default class Tileset2D {
         onTileError: this.onTileError
       });
       Object.assign(tile, this.getTileMetadata(tile));
-      tile.loadData(this._getTileData);
+      tile.loadData(this._getTileData, this._requestScheduler);
       this._cache.set(tileId, tile);
       this._dirty = true;
+    } else if (tile && tile.isCancelled && !tile.isLoading) {
+      tile.loadData(this._getTileData, this._requestScheduler);
     }
+
     return tile;
   }
 

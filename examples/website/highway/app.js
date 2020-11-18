@@ -1,12 +1,9 @@
-import React, {Component} from 'react';
+import React, {useState, useMemo} from 'react';
 import {render} from 'react-dom';
 import {StaticMap} from 'react-map-gl';
 import DeckGL from '@deck.gl/react';
 import {GeoJsonLayer} from '@deck.gl/layers';
 import {scaleLinear, scaleThreshold} from 'd3-scale';
-
-// Set your mapbox token here
-const MAPBOX_TOKEN = process.env.MapboxAccessToken; // eslint-disable-line
 
 // Source data GeoJSON
 const DATA_URL = {
@@ -47,153 +44,120 @@ const INITIAL_VIEW_STATE = {
   maxZoom: 8
 };
 
-export default class App extends Component {
-  constructor(props) {
-    super(props);
+const MAP_STYLE = 'https://basemaps.cartocdn.com/gl/dark-matter-nolabels-gl-style/style.json';
 
-    this.state = {
-      hoveredObject: null,
-      ...this._aggregateAccidents(props.accidents)
-    };
-    this._onHover = this._onHover.bind(this);
-    this._renderTooltip = this._renderTooltip.bind(this);
+function aggregateAccidents(accidents) {
+  const incidents = {};
+  const fatalities = {};
+
+  if (accidents) {
+    accidents.forEach(a => {
+      const r = (incidents[a.year] = incidents[a.year] || {});
+      const f = (fatalities[a.year] = fatalities[a.year] || {});
+      const key = getKey(a);
+      r[key] = a.incidents;
+      f[key] = a.fatalities;
+    });
+  }
+  return {incidents, fatalities};
+}
+
+function renderTooltip({fatalities, incidents, year, hoverInfo}) {
+  const {object, x, y} = hoverInfo;
+
+  if (!object) {
+    return null;
   }
 
-  componentWillReceiveProps(nextProps) {
-    if (nextProps.accidents !== this.props.accidents) {
-      this.setState({
-        ...this._aggregateAccidents(nextProps.accidents)
-      });
-    }
-  }
+  const props = object.properties;
+  const key = getKey(props);
+  const f = fatalities[year][key];
+  const r = incidents[year][key];
 
-  _aggregateAccidents(accidents) {
-    const incidents = {};
-    const fatalities = {};
+  const content = r ? (
+    <div>
+      <b>{f}</b> people died in <b>{r}</b> crashes on{' '}
+      {props.type === 'SR' ? props.state : props.type}-{props.id} in <b>{year}</b>
+    </div>
+  ) : (
+    <div>
+      no accidents recorded in <b>{year}</b>
+    </div>
+  );
 
-    if (accidents) {
-      accidents.forEach(a => {
-        const r = (incidents[a.year] = incidents[a.year] || {});
-        const f = (fatalities[a.year] = fatalities[a.year] || {});
-        const key = getKey(a);
-        r[key] = a.incidents;
-        f[key] = a.fatalities;
-      });
-    }
-    return {incidents, fatalities};
-  }
+  return (
+    <div className="tooltip" style={{left: x, top: y}}>
+      <big>
+        {props.name} ({props.state})
+      </big>
+      {content}
+    </div>
+  );
+}
 
-  _getLineColor(f, fatalities) {
-    if (!fatalities) {
+export default function App({roads = DATA_URL.ROADS, year, accidents, mapStyle = MAP_STYLE}) {
+  const [hoverInfo, setHoverInfo] = useState({});
+  const {incidents, fatalities} = useMemo(() => aggregateAccidents(accidents), [accidents]);
+
+  const getLineColor = f => {
+    if (!fatalities[year]) {
       return [200, 200, 200];
     }
     const key = getKey(f.properties);
-    const fatalitiesPer1KMile = ((fatalities[key] || 0) / f.properties.length) * 1000;
+    const fatalitiesPer1KMile = ((fatalities[year][key] || 0) / f.properties.length) * 1000;
     return COLOR_SCALE(fatalitiesPer1KMile);
-  }
+  };
 
-  _getLineWidth(f, incidents) {
-    if (!incidents) {
+  const getLineWidth = f => {
+    if (!incidents[year]) {
       return 10;
     }
     const key = getKey(f.properties);
-    const incidentsPer1KMile = ((incidents[key] || 0) / f.properties.length) * 1000;
+    const incidentsPer1KMile = ((incidents[year][key] || 0) / f.properties.length) * 1000;
     return WIDTH_SCALE(incidentsPer1KMile);
-  }
+  };
 
-  _onHover({x, y, object}) {
-    this.setState({x, y, hoveredObject: object});
-  }
+  const layers = [
+    new GeoJsonLayer({
+      id: 'geojson',
+      data: roads,
+      stroked: false,
+      filled: false,
+      lineWidthMinPixels: 0.5,
+      parameters: {
+        depthTest: false
+      },
 
-  _renderLayers() {
-    const {roads = DATA_URL.ROADS, year} = this.props;
-    const {incidents, fatalities} = this.state;
+      getLineColor,
+      getLineWidth,
 
-    return [
-      new GeoJsonLayer({
-        id: 'geojson',
-        data: roads,
-        stroked: false,
-        filled: false,
-        lineWidthMinPixels: 0.5,
-        parameters: {
-          depthTest: false
-        },
+      pickable: true,
+      onHover: setHoverInfo,
 
-        getLineColor: f => this._getLineColor(f, fatalities[year]),
-        getLineWidth: f => this._getLineWidth(f, incidents[year]),
+      updateTriggers: {
+        getLineColor: {year},
+        getLineWidth: {year}
+      },
 
-        pickable: true,
-        onHover: this._onHover,
+      transitions: {
+        getLineColor: 1000,
+        getLineWidth: 1000
+      }
+    })
+  ];
 
-        updateTriggers: {
-          getLineColor: {year},
-          getLineWidth: {year}
-        },
+  return (
+    <DeckGL
+      layers={layers}
+      pickingRadius={5}
+      initialViewState={INITIAL_VIEW_STATE}
+      controller={true}
+    >
+      <StaticMap reuseMaps mapStyle={mapStyle} preventStyleDiffing={true} />
 
-        transitions: {
-          getLineColor: 1000,
-          getLineWidth: 1000
-        }
-      })
-    ];
-  }
-
-  _renderTooltip() {
-    const {hoveredObject, x, y, fatalities, incidents} = this.state;
-    const {year} = this.props;
-
-    if (!hoveredObject) {
-      return null;
-    }
-
-    const props = hoveredObject.properties;
-    const key = getKey(props);
-    const f = fatalities[year][key];
-    const r = incidents[year][key];
-
-    const content = r ? (
-      <div>
-        <b>{f}</b> people died in <b>{r}</b> crashes on{' '}
-        {props.type === 'SR' ? props.state : props.type}-{props.id} in <b>{year}</b>
-      </div>
-    ) : (
-      <div>
-        no accidents recorded in <b>{year}</b>
-      </div>
-    );
-
-    return (
-      <div className="tooltip" style={{left: x, top: y}}>
-        <big>
-          {props.name} ({props.state})
-        </big>
-        {content}
-      </div>
-    );
-  }
-
-  render() {
-    const {mapStyle = 'mapbox://styles/mapbox/dark-v9'} = this.props;
-
-    return (
-      <DeckGL
-        layers={this._renderLayers()}
-        pickingRadius={5}
-        initialViewState={INITIAL_VIEW_STATE}
-        controller={true}
-      >
-        <StaticMap
-          reuseMaps
-          mapStyle={mapStyle}
-          preventStyleDiffing={true}
-          mapboxApiAccessToken={MAPBOX_TOKEN}
-        />
-
-        {this._renderTooltip}
-      </DeckGL>
-    );
-  }
+      {renderTooltip({incidents, fatalities, year, hoverInfo})}
+    </DeckGL>
+  );
 }
 
 export function renderToDOM(container) {

@@ -45,19 +45,19 @@ EXPECTED_OUTPUT = {
     "a": {
         "length": 3,
         "attributes": {
-            "getPosition": {"value": memoryview(np.array([1, 2, 3])), "dtype": "int64", "size": 1,},
+            "getPosition": {"value": memoryview(np.array([1, 2, 3])), "dtype": "int64", "size": 1},
             "getFillColor": {
                 "value": memoryview(np.stack([[11, 22, 33], [44, 55, 0], [255, 20.0, 0]])),
                 "dtype": "float64",
                 "size": 3,
             },
-            "getRadius": {"value": memoryview(np.array([0, 0, 1], dtype="uint32")), "dtype": "uint32", "size": 1,},
+            "getRadius": {"value": memoryview(np.array([0, 0, 1], dtype="uint32")), "dtype": "uint32", "size": 1},
         },
     },
     "b": {
         "length": 3,
         "attributes": {
-            "getPosition": {"value": memoryview(np.array([0, 0, 1], dtype="uint32")), "dtype": "uint32", "size": 1,},
+            "getPosition": {"value": memoryview(np.array([0, 0, 1], dtype="uint32")), "dtype": "uint32", "size": 1},
             "getRadius": {
                 "value": memoryview(np.stack([[11, 22, 33], [44, 55, 0], [255, 20.0, 0]])),
                 "dtype": "float64",
@@ -69,7 +69,7 @@ EXPECTED_OUTPUT = {
 
 
 def test_serialize_columns_none_input():
-    assert serialize_columns(None) == None
+    assert serialize_columns(None) is None
 
 
 def test_serialize_columns():

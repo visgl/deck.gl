@@ -5,16 +5,6 @@ on [deck.gl](http://deck.gl) website.
 
 Copy the content of this folder to your project. 
 
-To see the base map, you need a [Mapbox access token](https://docs.mapbox.com/help/how-mapbox-works/access-tokens/). You can either set an environment variable:
-
-```bash
-export MapboxAccessToken=<mapbox_access_token>
-```
-
-Or set `MAPBOX_TOKEN` directly in `app.js`.
-
-Other options can be found at [using with Mapbox GL](../../../docs/get-started/using-with-mapbox-gl.md).
-
 ```bash
 # install dependencies
 npm install
@@ -25,5 +15,13 @@ npm start
 ```
 
 ### Data format
-Sample data is stored in [kepler.gl Example Data](https://raw.githubusercontent.com/uber-web/kepler.gl-data/master/earthquakes/). To use your own data, check out
-the [documentation of DataFilterExtension](../../../docs/extensions/data-filter-extension.md).
+
+Sample data is stored in [kepler.gl Example Data](https://raw.githubusercontent.com/uber-web/kepler.gl-data/master/earthquakes/), showing significant earthquakes in California.
+
+To use your own data, check out
+the [documentation of DataFilterExtension](../../../docs/api-reference/extensions/data-filter-extension.md).
+
+### Basemap
+
+The basemap in this example is provided by [CARTO free basemap service](https://carto.com/basemaps). To use an alternative base map solution, visit [this guide](https://deck.gl/docs/get-started/using-with-map#using-other-basemap-services)
+

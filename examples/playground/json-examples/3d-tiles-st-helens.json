@@ -14,7 +14,7 @@
   "views": [
     {
       "@@type": "MapView",
-      "mapStyle": "mapbox://styles/mapbox/dark-v9",
+      "mapStyle": "https://basemaps.cartocdn.com/gl/dark-matter-nolabels-gl-style/style.json",
       "controller": true
     }
   ],

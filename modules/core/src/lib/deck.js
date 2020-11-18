@@ -28,6 +28,7 @@ import DeckPicker from './deck-picker';
 import Tooltip from './tooltip';
 import log from '../utils/log';
 import {deepEqual} from '../utils/deep-equal';
+import typedArrayManager from '../utils/typed-array-manager';
 import deckGlobal from './init';
 
 import {getBrowser} from 'probe.gl/env';
@@ -90,7 +91,15 @@ function getPropTypes(PropTypes) {
     // Experimental props
     _framebuffer: PropTypes.object,
     // Forces a redraw every animation frame
-    _animate: PropTypes.bool
+    _animate: PropTypes.bool,
+
+    // UNSAFE options - not exhaustively tested, not guaranteed to work in all cases, use at your own risk
+
+    // Set to false to disable picking - avoiding picking buffer creation can save memory for mobile web browsers
+    _pickable: PropTypes.bool,
+
+    // Adjust parameters of typed array manager, can save memory e.g. for mobile web browsers
+    _typedArrayManagerProps: PropTypes.object //  {overAlloc: number, poolSize: number}
   };
 }
 
@@ -111,6 +120,8 @@ const defaultProps = {
   touchAction: 'none',
   _framebuffer: null,
   _animate: false,
+  _pickable: true,
+  _typedArrayManagerProps: {},
 
   onWebGLInitialized: noop,
   onResize: noop,
@@ -202,6 +213,11 @@ export default class Deck {
 
     this.setProps(props);
 
+    // UNSAFE/experimental prop: only set at initialization to avoid performance hit
+    if (props._typedArrayManagerProps) {
+      typedArrayManager.setProps(props._typedArrayManagerProps);
+    }
+
     this.animationLoop.start();
   }
 
@@ -275,6 +291,8 @@ export default class Deck {
     // If initialized, update sub manager props
     if (this.layerManager) {
       this.viewManager.setProps(resolvedProps);
+      // Make sure that any new layer gets initialized with the current viewport
+      this.layerManager.activateViewport(this.getViewports()[0]);
       this.layerManager.setProps(resolvedProps);
       this.effectManager.setProps(resolvedProps);
       this.deckRenderer.setProps(resolvedProps);
@@ -359,6 +377,20 @@ export default class Deck {
     return this._pick('pickObjects', 'pickObjects Time', opts);
   }
 
+  // Experimental
+
+  _addResources(resources, forceUpdate = false) {
+    for (const id in resources) {
+      this.layerManager.resourceManager.add({resourceId: id, data: resources[id], forceUpdate});
+    }
+  }
+
+  _removeResources(resourceIds) {
+    for (const id of resourceIds) {
+      this.layerManager.resourceManager.remove(id);
+    }
+  }
+
   // Private Methods
 
   _pick(method, statKey, opts) {
@@ -371,6 +403,7 @@ export default class Deck {
       Object.assign(
         {
           layers: this.layerManager.getLayers(opts),
+          views: this.viewManager.getViews(),
           viewports: this.getViewports(opts),
           onViewportActive: this.layerManager.activateViewport
         },
@@ -528,21 +561,32 @@ export default class Deck {
     if (_pickRequest.event) {
       // Perform picking
       const {result, emptyInfo} = this._pick('pickObject', 'pickObject Time', _pickRequest);
-      const pickedInfo = result[0] || emptyInfo;
+
+      // There are 4 possible scenarios:
+      // result is [outInfo, pickedInfo] (moved from one pickable layer to another)
+      // result is [outInfo] (moved outside of a pickable layer)
+      // result is [pickedInfo] (moved into or over a pickable layer)
+      // result is [] (nothing is or was picked)
+      //
+      // `layer.props.onHover` should be called on all affected layers (out/over)
+      // `deck.props.onHover` should be called with the picked info if any, or empty info otherwise
+      // `deck.props.getTooltip` should be called with the picked info if any, or empty info otherwise
+
+      // Execute callbacks
+      let pickedInfo = emptyInfo;
+      let handled = false;
+      for (const info of result) {
+        pickedInfo = info;
+        handled = info.layer.onHover(info, _pickRequest.event);
+      }
+      if (!handled && this.props.onHover) {
+        this.props.onHover(pickedInfo, _pickRequest.event);
+      }
 
       // Update tooltip
       if (this.props.getTooltip) {
         const displayInfo = this.props.getTooltip(pickedInfo);
         this.tooltip.setTooltip(displayInfo, pickedInfo.x, pickedInfo.y);
-      }
-
-      // Execute callbacks
-      let handled = false;
-      if (pickedInfo.layer) {
-        handled = pickedInfo.layer.onHover(pickedInfo, _pickRequest.event);
-      }
-      if (!handled && this.props.onHover) {
-        this.props.onHover(pickedInfo, _pickRequest.event);
       }
 
       // Clear pending pickRequest

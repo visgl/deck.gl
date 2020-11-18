@@ -1,0 +1,2 @@
+class PydeckException(BaseException):
+    pass

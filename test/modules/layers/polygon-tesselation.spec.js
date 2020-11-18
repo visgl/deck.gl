@@ -102,7 +102,6 @@ const TEST_CASES = [
 
 test('polygon#imports', t => {
   t.ok(typeof Polygon.normalize === 'function', 'Polygon.normalize imported');
-  t.ok(typeof Polygon.getVertexCount === 'function', 'Polygon.getVertexCount imported');
   t.ok(typeof Polygon.getSurfaceIndices === 'function', 'Polygon.getSurfaceIndices imported');
   t.end();
 });
@@ -113,7 +112,7 @@ test('polygon#fuctions', t => {
 
     const complexPolygon = Polygon.normalize(object.polygon, 2);
     t.ok(
-      ArrayBuffer.isView(complexPolygon.positions || complexPolygon),
+      (complexPolygon.positions || complexPolygon).every(Number.isFinite),
       'Polygon.normalize flattens positions'
     );
     if (complexPolygon.holeIndices) {
@@ -122,14 +121,6 @@ test('polygon#fuctions', t => {
         'Polygon.normalize returns starting indices of rings'
       );
     }
-
-    const vertexCount = Polygon.getVertexCount(object.polygon, 2);
-    t.ok(Number.isFinite(vertexCount), 'Polygon.getVertexCount');
-    t.is(
-      vertexCount,
-      Polygon.getVertexCount(complexPolygon, 2),
-      'Polygon.getVertexCount returns consistent result'
-    );
 
     const indices = Polygon.getSurfaceIndices(complexPolygon, 2);
     t.ok(Array.isArray(indices), 'Polygon.getSurfaceIndices');
@@ -396,6 +387,34 @@ test('PolygonTesselator#geometryBuffer#buffer', t => {
     [1, 1, 0, 1, 1, 1, 1, 0],
     'vertexValid are populated'
   );
+
+  t.end();
+});
+
+test('PolygonTesselator#normalizeGeometry', t => {
+  const sampleData = [[[150, 30], [-150, 30], [-150, -30], [150, -30], [150, 30]]];
+  const tesselator = new PolygonTesselator({
+    data: sampleData,
+    getGeometry: d => d
+  });
+
+  t.is(tesselator.instanceCount, 5, 'Updated instanceCount from input');
+
+  tesselator.updateGeometry({
+    resolution: 30,
+    wrapLongitude: false
+  });
+
+  // subdivide into smaller segments
+  t.is(tesselator.instanceCount, 90, 'Updated instanceCount from input');
+
+  tesselator.updateGeometry({
+    resolution: null,
+    wrapLongitude: true
+  });
+
+  // split at 180th meridian
+  t.is(tesselator.instanceCount, 9, 'Updated instanceCount from input');
 
   t.end();
 });

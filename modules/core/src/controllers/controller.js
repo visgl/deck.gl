@@ -19,7 +19,6 @@
 // THE SOFTWARE.
 
 import TransitionManager from './transition-manager';
-import log from '../utils/log';
 import assert from '../utils/assert';
 
 const NO_TRANSITION_PROPS = {
@@ -82,9 +81,11 @@ export default class Controller {
    */
   handleEvent(event) {
     const {ControllerState} = this;
-    this.controllerState = new ControllerState(
-      Object.assign({}, this.controllerStateProps, this._state)
-    );
+    this.controllerState = new ControllerState({
+      makeViewport: this.makeViewport,
+      ...this.controllerStateProps,
+      ...this._state
+    });
 
     switch (event.type) {
       case 'panstart':
@@ -145,14 +146,14 @@ export default class Controller {
    */
   /* eslint-disable complexity, max-statements */
   setProps(props) {
-    if ('onViewportChange' in props) {
-      log.removed('onViewportChange')();
-    }
     if ('onViewStateChange' in props) {
       this.onViewStateChange = props.onViewStateChange;
     }
     if ('onStateChange' in props) {
       this.onStateChange = props.onStateChange;
+    }
+    if ('makeViewport' in props) {
+      this.makeViewport = props.makeViewport;
     }
     this.controllerStateProps = props;
 
@@ -247,7 +248,12 @@ export default class Controller {
     if (!this.isPointInBounds(pos, event)) {
       return false;
     }
-    const newControllerState = this.controllerState.panStart({pos}).rotateStart({pos});
+    let alternateMode = this.isFunctionKeyPressed(event) || event.rightButton;
+    alternateMode = this.invertPan ? !alternateMode : alternateMode;
+    const newControllerState = this.controllerState[alternateMode ? 'panStart' : 'rotateStart']({
+      pos
+    });
+    this._panMove = alternateMode;
     this.updateViewport(newControllerState, NO_TRANSITION_PROPS, {isDragging: true});
     return true;
   }
@@ -257,14 +263,12 @@ export default class Controller {
     if (!this.isDragging()) {
       return false;
     }
-    let alternateMode = this.isFunctionKeyPressed(event) || event.rightButton;
-    alternateMode = this.invertPan ? !alternateMode : alternateMode;
-    return alternateMode ? this._onPanMove(event) : this._onPanRotate(event);
+    return this._panMove ? this._onPanMove(event) : this._onPanRotate(event);
   }
 
   // Default handler for the `panend` event.
   _onPanEnd(event) {
-    const newControllerState = this.controllerState.panEnd().rotateEnd();
+    const newControllerState = this.controllerState[this._panMove ? 'panEnd' : 'rotateEnd']();
     this.updateViewport(newControllerState, null, {
       isDragging: false,
       isPanning: false,
@@ -427,18 +431,18 @@ export default class Controller {
     let newControllerState;
     const interactionState = {};
 
-    switch (event.srcEvent.keyCode) {
-      case 189: // -
+    switch (event.srcEvent.code) {
+      case 'Minus':
         newControllerState = funcKey
           ? controllerState.zoomOut().zoomOut()
           : controllerState.zoomOut();
         interactionState.isZooming = true;
         break;
-      case 187: // +
+      case 'Equal':
         newControllerState = funcKey ? controllerState.zoomIn().zoomIn() : controllerState.zoomIn();
         interactionState.isZooming = true;
         break;
-      case 37: // left
+      case 'ArrowLeft':
         if (funcKey) {
           newControllerState = controllerState.rotateLeft();
           interactionState.isRotating = true;
@@ -447,7 +451,7 @@ export default class Controller {
           interactionState.isPanning = true;
         }
         break;
-      case 39: // right
+      case 'ArrowRight':
         if (funcKey) {
           newControllerState = controllerState.rotateRight();
           interactionState.isRotating = true;
@@ -456,7 +460,7 @@ export default class Controller {
           interactionState.isPanning = true;
         }
         break;
-      case 38: // up
+      case 'ArrowUp':
         if (funcKey) {
           newControllerState = controllerState.rotateUp();
           interactionState.isRotating = true;
@@ -465,7 +469,7 @@ export default class Controller {
           interactionState.isPanning = true;
         }
         break;
-      case 40: // down
+      case 'ArrowDown':
         if (funcKey) {
           newControllerState = controllerState.rotateDown();
           interactionState.isRotating = true;

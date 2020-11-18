@@ -510,14 +510,13 @@ test('Attribute#updateBuffer#noAlloc', t => {
   });
 
   // 1 vertex + 1 vertexOffset => 2 vertices * 2 floats => 16 bytes
-  // overallocation x 2
+  // overallocation: 2 floats * 2 = 16 bytes
   value = new Float32Array([1, 1]);
   attribute.setNeedsUpdate(true);
   attribute.updateBuffer({data: value});
   t.is(attribute.buffer.byteLength, 32, `overallocated buffer for ${value.byteLength} bytes`);
 
-  // 2 vertices + 1 vertexOffset => 3 vertices * 2 floats => 24 bytes
-  value = new Float32Array([1, 1, 2, 2]);
+  value = new Float32Array([1, 2]);
   attribute.setNeedsUpdate(true);
   attribute.updateBuffer({data: value});
   t.is(attribute.buffer.byteLength, 32, `buffer is big enough ${value.byteLength} bytes`);
@@ -526,7 +525,7 @@ test('Attribute#updateBuffer#noAlloc', t => {
   value = new Float32Array([1, 1, 2, 2, 3, 3, 4, 4]);
   attribute.setNeedsUpdate(true);
   attribute.updateBuffer({data: value});
-  t.is(attribute.buffer.byteLength, 80, `re-allocated buffer for ${value.byteLength} bytes`);
+  t.is(attribute.buffer.byteLength, 56, `re-allocated buffer for ${value.byteLength} bytes`);
 
   attribute.delete();
   t.end();
@@ -535,6 +534,7 @@ test('Attribute#updateBuffer#noAlloc', t => {
 test('Attribute#standard accessor - variable width', t => {
   const TEST_PROPS = {
     data: [
+      {id: 'Empty', value: [], color: [0, 255, 0]},
       {id: 'A', value: [10, 11], color: [[255, 0, 0], [255, 255, 0]]},
       {id: 'B', value: [20], color: [[128, 128, 128], [128, 128, 128]]},
       {id: 'C', value: [30, 31, 32], color: [255, 255, 255]}
@@ -561,31 +561,14 @@ test('Attribute#standard accessor - variable width', t => {
         defaultValue: [0, 0, 0, 255],
         accessor: 'getColor'
       }),
+      // prettier-ignore
       result: [
-        255,
-        0,
-        0,
-        255,
-        255,
-        255,
-        0,
-        255,
-        128,
-        128,
-        128,
-        255,
-        255,
-        255,
-        255,
-        255,
-        255,
-        255,
-        255,
-        255,
-        255,
-        255,
-        255,
-        255
+        255, 0, 0, 255,
+        255, 255, 0, 255,
+        128, 128, 128, 255,
+        255, 255, 255, 255,
+        255, 255, 255, 255,
+        255, 255, 255, 255
       ]
     }
   ];
@@ -593,7 +576,7 @@ test('Attribute#standard accessor - variable width', t => {
   for (const testCase of TEST_CASES) {
     const {attribute, result} = testCase;
     attribute.setNeedsUpdate(true);
-    attribute.startIndices = [0, 2, 3];
+    attribute.startIndices = [0, 0, 2, 3];
     attribute.allocate(10);
     attribute.updateBuffer({
       numInstances: 6,

@@ -1,6 +1,6 @@
 # Adding Interactivity
 
-> This article discusses interacting with data (i.e. selecting, or picking objects). Viewport controls (panning, zooming etc) are discussed in [Controllers](/docs/api-reference/map-controller.md).
+> This article discusses interacting with data (i.e. selecting, or picking objects). Viewport controls (panning, zooming etc) are discussed in [Controllers](/docs/api-reference/core/map-controller.md).
 
 ## Overview
 
@@ -8,11 +8,11 @@ deck.gl includes a powerful picking engine that enables the application to preci
 
 ### What can be Picked?
 
-The "picking engine" identifies which object in which layer is at the given coordinates. While usually intuitive, what constitutes a pickable "object" is defined by each layer. Typically, it corresponds to one of the data entries that is passed in via `prop.data`. For example, in [Scatterplot Layer](/docs/layers/scatterplot-layer.md), an object is an element in the `props.data` array that is used to render one circle. In [GeoJson Layer](/docs/layers/geojson-layer.md), an object is a GeoJSON feature in the `props.data` feature collection that is used to render one point, path or polygon.
+The "picking engine" identifies which object in which layer is at the given coordinates. While usually intuitive, what constitutes a pickable "object" is defined by each layer. Typically, it corresponds to one of the data entries that is passed in via `prop.data`. For example, in [Scatterplot Layer](/docs/api-reference/layers/scatterplot-layer.md), an object is an element in the `props.data` array that is used to render one circle. In [GeoJson Layer](/docs/api-reference/layers/geojson-layer.md), an object is a GeoJSON feature in the `props.data` feature collection that is used to render one point, path or polygon.
 
 ### Enabling Picking
 
-Picking can be enabled or disabled on a layer-by-layer basis. To enable picking on a layer, set its [`pickable`](/docs/api-reference/layer.md#-pickable-boolean-optional-) prop to `true`. This value is `false` by default.
+Picking can be enabled or disabled on a layer-by-layer basis. To enable picking on a layer, set its [`pickable`](/docs/api-reference/core/layer.md#pickable) prop to `true`. This value is `false` by default.
 
 ### The Picking Info Object
 
@@ -32,12 +32,9 @@ The picking engine returns "picking info" objects which contains a variety of fi
 
 ## Example: Display a Tooltip for Hovered Object
 
-### Using Pure JS
+### Using the Built-In Tooltip
 
-```js
-<canvas id="deck-canvas"></canvas>
-<div id="tooltip" style="position: absolute; z-index: 1; pointer-events: none;"></div>
-```
+`Deck` automatically renders a tooltip if the `getTooltip` callback is supplied:
 
 ```js
 import {Deck} from '@deck.gl/core';
@@ -56,95 +53,93 @@ const deck = new Deck({
       getRadius: 1000,
       getFillColor: [255, 255, 0],
       // Enable picking
-      pickable: true,
-      // Update tooltip
-      onHover: info => setTooltip(info.object, info.x, info.y)
+      pickable: true
     })
-  ]
+  ],
+  getTooltip: ({object}) => object && object.message
 });
-
-function setTooltip(object, x, y) {
-  const el = document.getElementById('tooltip');
-  if (object) {
-    el.innerHTML = object.message;
-    el.style.display = 'block';
-    el.style.left = x + 'px';
-    el.style.top = y + 'px';
-  } else {
-    el.style.display = 'none';
-  }
-}
 ```
+
+It receives a picking info object and returns the content of the tooltip. To custom the tooltip further, return an object instead:
+
+```js
+  getTooltip: ({object}) => object && {
+    html: `<h2>${object.name}</h2><div>${object.message}</div>`,
+    style: {
+      backgroundColor: '#f00',
+      fontSize: '0.8em'
+    }
+  }
+```
+
+For a range of options, see [getTooltip](/docs/api-reference/core/deck.md#gettooltip) documentation.
 
 ### Using React
 
 ```js
-import React from 'react';
+import React, {useState} from 'react';
 import {DeckGL, ScatterplotLayer} from 'deck.gl';
 
-class App extends React.Component {
+const data = [
+  {position: [-122.45, 37.78], message: 'Hover over me'}
+];
 
-  _renderTooltip() {
-    const {hoveredObject, pointerX, pointerY} = this.state || {};
-    return hoveredObject && (
-      <div style={{position: 'absolute', zIndex: 1, pointerEvents: 'none', left: pointerX, top: pointerY}}>
-        { hoveredObject.message }
-      </div>
-    );
-  }
+function App() {
+  const [hoverInfo, setHoverInfo] = useState;
 
-  render() {
-    const layers = [
-      new ScatterplotLayer({
-        data: [
-          {position: [-122.45, 37.78], message: 'Hover over me'}
-        ],
-        getPosition: d => d.position,
-        getRadius: 1000,
-        getFillColor: [255, 255, 0],
-        // Enable picking
-        pickable: true,
-        // Update app state
-        onHover: info => this.setState({
-          hoveredObject: info.object,
-          pointerX: info.x,
-          pointerY: info.y
-        })
-      })
-    ];
+  const layers = [
+    new ScatterplotLayer({
+      data,
+      getPosition: d => d.position,
+      getRadius: 1000,
+      getFillColor: [255, 255, 0],
+      // Enable picking
+      pickable: true,
+      // Update app state
+      onHover: info => setHoverInfo(info)
+    })
+  ];
 
-    return (
-      <DeckGL initialViewState={{longitude: -122.45, latitude: 27.78, zoom: 12}}
-          controller={true}
-          layers={layers} >
-        { this._renderTooltip() }
-      </DeckGL>
-    );
-  }
+  return (
+    <DeckGL initialViewState={{longitude: -122.45, latitude: 27.78, zoom: 12}}
+        controller={true}
+        layers={layers} >
+      {hoverInfo.object && (
+        <div style={{position: 'absolute', zIndex: 1, pointerEvents: 'none', left: hoverInfo.x, top: hoverInfo.y}}>
+          { hoverInfo.object.message }
+        </div>
+      )}
+    </DeckGL>
+  );
 }
 ```
 
 ## Calling the Picking Engine Directly
 
-The picking engine is exposed through the [`Deck.pickObject`](/docs/api-reference/deck.md) and [`Deck.pickObjects`](/docs/api-reference/deck.md) methods. These methods allow you to query what layers and objects within those layers are under a specific point or within a specified rectangle. They return `Picking Info` objects as described below.
+The picking engine is exposed through the [`Deck.pickObject`](/docs/api-reference/core/deck.md) and [`Deck.pickObjects`](/docs/api-reference/core/deck.md) methods. These methods allow you to query what layers and objects within those layers are under a specific point or within a specified rectangle. They return `Picking Info` objects as described below.
 
 `pickObject` allows an application to define its own event handling. When it comes to how to actually do event handling in a browser, there are many options. In a React application, perhaps the simplest is to just use React's "synthetic" event handling together with `pickObject`:
 
 ```js
-class MyComponent extends React.Component {
-  ...
-  onClickHandler = (event) => {
-    const pickInfo = this.deckGL.pickObject({x: event.clientX, y: event.clientY, ...});
-    console.log(pickInfo.coordinate);
-  }
+import React, {useRef, useCallback} from 'react';
 
-  render() {
-    return (
-      <div onClick={this.onClickHandler}>
-        <DeckGL ref={deck => { this.deckGL = deck; }} .../>
-      </div>
-    );
-  }
+function App() {
+  const deckRef = useRef(null);
+
+  const onClick = useCallback(event => {
+    const pickInfo = deckRef.current.pickObject({
+      x: event.clientX,
+      y: event.clientY,
+      radius: 1
+    });
+    console.log(pickInfo.coordinate);
+  }, [])
+
+  return (
+    <div onClick={onClick}>
+      <DeckGL ref={deckRef} ... />
+    </div>
+  );
 }
 ```
 
@@ -166,7 +161,7 @@ A event handler function is called with two parameters: `info` that contains the
 
 There are two ways to subscribe to the built-in picking event handling:
 
-* Specify callbacks for each pickable layer by passing [event handler props](/docs/api-reference/layer.md#interaction-properties):
+* Specify callbacks for each pickable layer by passing [event handler props](/docs/api-reference/core/layer.md#interaction-properties):
 
 ```js
 const layer = new ScatterplotLayer({

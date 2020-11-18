@@ -45,6 +45,7 @@ const defaultProps = {
 
   elevationScale: 1,
 
+  pointRadiusUnits: 'meters',
   pointRadiusScale: 1,
   pointRadiusMinPixels: 0, //  min point radius in pixels
   pointRadiusMaxPixels: Number.MAX_SAFE_INTEGER, // max point radius in pixels
@@ -132,6 +133,7 @@ export default class GeoJsonLayer extends CompositeLayer {
       lineWidthMaxPixels,
       lineJointRounded,
       lineMiterLimit,
+      pointRadiusUnits,
       pointRadiusScale,
       pointRadiusMinPixels,
       pointRadiusMaxPixels,
@@ -169,7 +171,9 @@ export default class GeoJsonLayer extends CompositeLayer {
           material,
           getElevation: this.getSubLayerAccessor(getElevation),
           getFillColor: this.getSubLayerAccessor(getFillColor),
-          getLineColor: this.getSubLayerAccessor(getLineColor),
+          getLineColor: this.getSubLayerAccessor(
+            extruded && wireframe ? getLineColor : defaultLineColor
+          ),
 
           transitions: transitions && {
             getPolygon: transitions.geometry,
@@ -183,6 +187,9 @@ export default class GeoJsonLayer extends CompositeLayer {
           updateTriggers: {
             getElevation: updateTriggers.getElevation,
             getFillColor: updateTriggers.getFillColor,
+            // using a legacy API to invalid lineColor attributes
+            // if (extruded && wireframe) has changed
+            lineColors: extruded && wireframe,
             getLineColor: updateTriggers.getLineColor
           }
         }),
@@ -279,6 +286,7 @@ export default class GeoJsonLayer extends CompositeLayer {
 
           stroked,
           filled,
+          radiusUnits: pointRadiusUnits,
           radiusScale: pointRadiusScale,
           radiusMinPixels: pointRadiusMinPixels,
           radiusMaxPixels: pointRadiusMaxPixels,

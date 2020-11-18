@@ -37,7 +37,11 @@ export default class GoogleMapsOverlay {
   setProps(props) {
     Object.assign(this.props, props);
     if (this._deck) {
-      this._deck.setProps(this.props);
+      if (props.style) {
+        Object.assign(this._deck.canvas.parentElement.style, props.style);
+        props.style = null;
+      }
+      this._deck.setProps(props);
     }
   }
 
@@ -63,8 +67,7 @@ export default class GoogleMapsOverlay {
 
   /* Private API */
   _onAdd() {
-    this._deck = createDeckInstance(this._map, this._overlay, this._deck);
-    this._deck.setProps(this.props);
+    this._deck = createDeckInstance(this._map, this._overlay, this._deck, this.props);
   }
 
   _onRemove() {
@@ -81,8 +84,9 @@ export default class GoogleMapsOverlay {
 
     const canSyncWithGoogleMaps = pitch === 0;
 
-    deck.canvas.style.left = `${left}px`;
-    deck.canvas.style.top = `${top}px`;
+    const parentStyle = deck.canvas.parentElement.style;
+    parentStyle.left = `${left}px`;
+    parentStyle.top = `${top}px`;
 
     deck.setProps({
       width,

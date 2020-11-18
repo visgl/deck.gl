@@ -1,4 +1,4 @@
-import React, {PureComponent} from 'react';
+import React from 'react';
 import {render} from 'react-dom';
 import DeckGL from '@deck.gl/react';
 import {
@@ -61,44 +61,42 @@ const background = [
   [[-1000.0, -1000.0, -40], [1000.0, -1000.0, -40], [1000.0, 1000.0, -40], [-1000.0, 1000.0, -40]]
 ];
 
-export default class App extends PureComponent {
-  render() {
-    const layers = [
-      new SimpleMeshLayer({
-        id: 'mini-coopers',
-        data: SAMPLE_DATA,
-        mesh: MESH_URL,
-        coordinateSystem: COORDINATE_SYSTEM.CARTESIAN,
-        getPosition: d => d.position,
-        getColor: d => d.color,
-        getOrientation: d => d.orientation
-      }),
-      // only needed when using shadows - a plane for shadows to drop on
-      new SolidPolygonLayer({
-        id: 'background',
-        data: background,
-        extruded: false,
-        coordinateSystem: COORDINATE_SYSTEM.CARTESIAN,
-        getPolygon: f => f,
-        getFillColor: [0, 0, 0, 0]
-      })
-    ];
+export default function App() {
+  const layers = [
+    new SimpleMeshLayer({
+      id: 'mini-coopers',
+      data: SAMPLE_DATA,
+      mesh: MESH_URL,
+      coordinateSystem: COORDINATE_SYSTEM.CARTESIAN,
+      getPosition: d => d.position,
+      getColor: d => d.color,
+      getOrientation: d => d.orientation
+    }),
+    // only needed when using shadows - a plane for shadows to drop on
+    new SolidPolygonLayer({
+      id: 'background',
+      data: background,
+      extruded: false,
+      coordinateSystem: COORDINATE_SYSTEM.CARTESIAN,
+      getPolygon: f => f,
+      getFillColor: [0, 0, 0, 0]
+    })
+  ];
 
-    return (
-      <DeckGL
-        views={
-          new OrbitView({
-            near: 0.1,
-            far: 2
-          })
-        }
-        initialViewState={INITIAL_VIEW_STATE}
-        controller={true}
-        layers={layers}
-        effects={[lightingEffect]}
-      />
-    );
-  }
+  return (
+    <DeckGL
+      views={
+        new OrbitView({
+          near: 0.1,
+          far: 2
+        })
+      }
+      initialViewState={INITIAL_VIEW_STATE}
+      controller={true}
+      layers={layers}
+      effects={[lightingEffect]}
+    />
+  );
 }
 
 export function renderToDOM(container) {

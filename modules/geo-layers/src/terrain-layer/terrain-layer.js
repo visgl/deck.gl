@@ -146,16 +146,12 @@ export default class TerrainLayer extends CompositeLayer {
   renderSubLayers(props) {
     const SubLayerClass = this.getSubLayerClass('mesh', SimpleMeshLayer);
     const {data, color} = props;
-    let mesh = null;
-    let texture = null;
 
-    if (Array.isArray(data)) {
-      mesh = data[0];
-      texture = data[1];
-    } else if (data) {
-      mesh = data.then(result => result && result[0]);
-      texture = data.then(result => result && result[1]);
+    if (!data) {
+      return null;
     }
+
+    const [mesh, texture] = data;
 
     return new SubLayerClass(props, {
       data: DUMMY_DATA,
@@ -174,7 +170,7 @@ export default class TerrainLayer extends CompositeLayer {
     }
 
     const {zRange} = this.state;
-    const ranges = data.map(arr => {
+    const ranges = data.filter(Boolean).map(arr => {
       const bounds = arr[0].header.boundingBox;
       return bounds.map(bound => bound[2]);
     });
@@ -194,7 +190,12 @@ export default class TerrainLayer extends CompositeLayer {
       texture,
       wireframe,
       meshMaxError,
-      elevationDecoder
+      elevationDecoder,
+      tileSize,
+      maxZoom,
+      minZoom,
+      extent,
+      maxRequests
     } = this.props;
 
     if (this.state.isTiled) {
@@ -217,7 +218,12 @@ export default class TerrainLayer extends CompositeLayer {
             }
           },
           onViewportLoad: this.onViewportLoad.bind(this),
-          zRange: this.state.zRange || null
+          zRange: this.state.zRange || null,
+          tileSize,
+          maxZoom,
+          minZoom,
+          extent,
+          maxRequests
         }
       );
     }

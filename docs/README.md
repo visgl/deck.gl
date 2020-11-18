@@ -2,10 +2,16 @@
 
 <p align="center">
   These docs are for
+  <a href="https://github.com/visgl/deck.gl/blob/8.3-release/docs/README.md">
+    <img src="https://img.shields.io/badge/deck.gl-v8.3-brightgreen.svg?style=flat-square" />
+  </a>
+  Looking for an old version?
+  <a href="https://github.com/visgl/deck.gl/blob/8.2-release/docs/README.md">
+    <img src="https://img.shields.io/badge/deck.gl-v8.2-brightgreen.svg?style=flat-square" />
+  </a>
   <a href="https://github.com/visgl/deck.gl/blob/8.1-release/docs/README.md">
     <img src="https://img.shields.io/badge/deck.gl-v8.1-brightgreen.svg?style=flat-square" />
   </a>
-  Looking for an old version?
   <a href="https://github.com/visgl/deck.gl/blob/8.0-release/docs/README.md">
     <img src="https://img.shields.io/badge/deck.gl-v8.0-green.svg?style=flat-square" />
   </a>
@@ -64,13 +70,16 @@ npm install deck.gl
 pip install pydeck
 ```
 
-- [Get started](https://github.com/visgl/deck.gl/blob/master/bindings/pydeck/README.md)
+- [Get started](https://pydeck.gl/installation.html)
+- [Examples](https://pydeck.gl/)
 
 ### Third-Party Bindings
 
 - [deckgl-typings](https://github.com/danmarshall/deckgl-typings) (Typescript)
 - [mapdeck](https://symbolixau.github.io/mapdeck/articles/mapdeck.html) (R)
 - [vega-deck.gl](https://github.com/microsoft/SandDance/tree/master/packages/vega-deck.gl) ([Vega](https://vega.github.io/))
+- [earthengine-layers](https://earthengine-layers.com/) ([Google Earth Engine](https://earthengine.google.com/))
+- [deck.gl-native](https://github.com/UnfoldedInc/deck.gl-native) (C++)
 
 ## Ecosystem
 
@@ -92,7 +101,7 @@ Getting familiar with the various layers and their props, and reading the basic 
 
 Exploring the deck.gl examples is a good starting point.
 
-In-depth tutorials for how to develop deck.gl applications are available on the [Vis Academy](http://vis.academy/#/) website.
+In-depth tutorials for how to develop deck.gl applications are available on the [Vis Academy](http://vis.academy/) website.
 
 And our [blog](https://medium.com/vis-gl) contains a lot of additional information that might be helpful.
 

@@ -9,16 +9,6 @@ with [webpack-dev-server](https://webpack.js.org/guides/development/#webpack-dev
 
 ## Usage
 
-To run this example, you need a [Mapbox access token](https://docs.mapbox.com/help/how-mapbox-works/access-tokens/). You can either set an environment variable:
-
-```bash
-export MapboxAccessToken=<mapbox_access_token>
-```
-
-Or set `MAPBOX_TOKEN` directly in `app.js`.
-
-Other options can be found at [using with Mapbox GL](../../../../docs/get-started/using-with-mapbox-gl.md).
-
 To install dependencies:
 
 ```bash
@@ -28,5 +18,9 @@ yarn
 ```
 
 Commands:
-* `npm start` is the development target, to serves the app and hot reload.
+* `npm start` is the development target, to serve the app and hot reload.
 * `npm run build` is the production target, to create the final bundle and write to disk.
+
+### Basemap
+
+The basemap in this example is provided by [CARTO free basemap service](https://carto.com/basemaps). To use an alternative base map solution, visit [this guide](https://deck.gl/docs/get-started/using-with-map#using-other-basemap-services)

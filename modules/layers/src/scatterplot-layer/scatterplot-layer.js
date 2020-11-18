@@ -28,6 +28,7 @@ import fs from './scatterplot-layer-fragment.glsl';
 const DEFAULT_COLOR = [0, 0, 0, 255];
 
 const defaultProps = {
+  radiusUnits: 'meters',
   radiusScale: {type: 'number', min: 0, value: 1},
   radiusMinPixels: {type: 'number', min: 0, value: 0}, //  min point radius in pixels
   radiusMaxPixels: {type: 'number', min: 0, value: Number.MAX_SAFE_INTEGER}, // max point radius in pixels
@@ -112,6 +113,7 @@ export default class ScatterplotLayer extends Layer {
   draw({uniforms}) {
     const {viewport} = this.context;
     const {
+      radiusUnits,
       radiusScale,
       radiusMinPixels,
       radiusMaxPixels,
@@ -123,17 +125,18 @@ export default class ScatterplotLayer extends Layer {
       lineWidthMaxPixels
     } = this.props;
 
-    const widthMultiplier = lineWidthUnits === 'pixels' ? viewport.metersPerPixel : 1;
+    const pointRadiusMultiplier = radiusUnits === 'pixels' ? viewport.metersPerPixel : 1;
+    const lineWidthMultiplier = lineWidthUnits === 'pixels' ? viewport.metersPerPixel : 1;
 
     this.state.model
       .setUniforms(uniforms)
       .setUniforms({
         stroked: stroked ? 1 : 0,
         filled,
-        radiusScale,
+        radiusScale: radiusScale * pointRadiusMultiplier,
         radiusMinPixels,
         radiusMaxPixels,
-        lineWidthScale: lineWidthScale * widthMultiplier,
+        lineWidthScale: lineWidthScale * lineWidthMultiplier,
         lineWidthMinPixels,
         lineWidthMaxPixels
       })
@@ -142,7 +145,7 @@ export default class ScatterplotLayer extends Layer {
 
   _getModel(gl) {
     // a square that minimally cover the unit circle
-    const positions = [-1, -1, 0, -1, 1, 0, 1, 1, 0, 1, -1, 0];
+    const positions = [-1, -1, 0, 1, -1, 0, 1, 1, 0, -1, 1, 0];
 
     return new Model(
       gl,

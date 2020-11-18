@@ -56,6 +56,10 @@ export default class PathLayer extends Layer {
     return super.getShaders({vs, fs, modules: [project32, picking]}); // 'project' module added by default.
   }
 
+  get wrapLongitude() {
+    return false;
+  }
+
   initializeState() {
     const noAlloc = true;
     const attributeManager = this.getAttributeManager();
@@ -139,6 +143,7 @@ export default class PathLayer extends Layer {
     if (geometryChanged) {
       const {pathTesselator} = this.state;
       const buffers = props.data.attributes || {};
+
       pathTesselator.updateGeometry({
         data: props.data,
         geometryBuffer: buffers.getPath,
@@ -147,6 +152,9 @@ export default class PathLayer extends Layer {
         loop: props._pathType === 'loop',
         getGeometry: props.getPath,
         positionFormat: props.positionFormat,
+        wrapLongitude: props.wrapLongitude,
+        // TODO - move the flag out of the viewport
+        resolution: this.context.viewport.resolution,
         dataChanged: changeFlags.dataChanged
       });
       this.setState({
@@ -226,45 +234,33 @@ export default class PathLayer extends Layer {
      *                                   /     :     o
      */
 
+    // prettier-ignore
     const SEGMENT_INDICES = [
       // start corner
-      0,
-      2,
-      1,
+      0, 1, 2,
       // body
-      1,
-      2,
-      4,
-      1,
-      4,
-      3,
+      1, 4, 2,
+      1, 3, 4,
       // end corner
-      3,
-      4,
-      5
+      3, 5, 4
     ];
 
     // [0] position on segment - 0: start, 1: end
     // [1] side of path - -1: left, 0: center (joint), 1: right
+    // prettier-ignore
     const SEGMENT_POSITIONS = [
       // bevel start corner
-      0,
-      0,
+      0, 0,
       // start inner corner
-      0,
-      -1,
+      0, -1,
       // start outer corner
-      0,
-      1,
+      0, 1,
       // end inner corner
-      1,
-      -1,
+      1, -1,
       // end outer corner
-      1,
-      1,
+      1, 1,
       // bevel end corner
-      1,
-      0
+      1, 0
     ];
 
     return new Model(

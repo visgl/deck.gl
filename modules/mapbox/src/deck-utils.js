@@ -55,7 +55,9 @@ export function getDeckInstance({map, gl, deck}) {
   }
   deck.props.userData.mapboxVersion = getMapboxVersion(map);
   map.__deck = deck;
-  map.on('render', () => afterRender(deck, map));
+  map.on('render', () => {
+    if (deck.layerManager) afterRender(deck, map);
+  });
 
   return deck;
 }
@@ -82,7 +84,9 @@ export function drawLayer(deck, map, layer) {
     currentViewport = getViewport(deck, map, true);
     deck.props.userData.currentViewport = currentViewport;
   }
-
+  if (!deck.layerManager) {
+    return;
+  }
   deck._drawLayers('mapbox-repaint', {
     viewports: [currentViewport],
     // TODO - accept layerFilter in drawLayers' renderOptions

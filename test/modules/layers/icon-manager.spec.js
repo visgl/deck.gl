@@ -1,5 +1,6 @@
 import test from 'tape';
-import {buildMapping, getDiffIcons} from '@deck.gl/layers/icon-layer/icon-manager';
+import IconManager, {buildMapping, getDiffIcons} from '@deck.gl/layers/icon-layer/icon-manager';
+import {gl} from '@deck.gl/test-utils';
 
 const DATA = [
   {
@@ -201,14 +202,18 @@ test('IconManager#getDiffIcons', t => {
       width: 12,
       height: 12,
       anchorY: 12,
-      url: '/icon/0-123'
+      url: '/icon/0-123',
+      source: data[0],
+      sourceIndex: 0
     },
     // new icon
     '/icon/3': {
       width: 16,
       height: 16,
       anchorY: 16,
-      url: '/icon/3'
+      url: '/icon/3',
+      source: data[3],
+      sourceIndex: 3
     }
   };
 
@@ -216,4 +221,24 @@ test('IconManager#getDiffIcons', t => {
   t.deepEqual(icons, expected, 'Should get diff icons as expectation.');
 
   t.end();
+});
+
+test('IconManager#events', t => {
+  const onError = e => {
+    t.deepEqual(e.source, {id: 0}, 'onError is called with source object');
+    iconManager.finalize(); // eslint-disable-line
+    t.end();
+  };
+  const iconManager = new IconManager(gl, {onError});
+
+  iconManager.setProps({
+    autoPacking: true,
+    loadOptions: {},
+    data: [{id: 0}],
+    getIcon: d => ({
+      url: 'icon.png',
+      width: 64,
+      height: 64
+    })
+  });
 });

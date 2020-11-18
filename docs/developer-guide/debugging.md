@@ -4,7 +4,6 @@ deck.gl provides support for debugging applications and layers, which includes:
 
 * deck.gl logging
 * luma.gl debugging support
-* The Seer Chrome Extension
 
 
 ## deck.gl logging

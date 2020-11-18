@@ -53,19 +53,18 @@ def has_pyppeteer():
 async def test_standalone_rendering(tmp_path):
     from .screenshot_utils import go_to_page_and_screenshot  # noqa
 
-    filename = d.to_html(str(tmp_path) + "/", open_browser=False, notebook_display=False)
-    await go_to_page_and_screenshot("file://" + filename, filename, output_dir=tmp_path)
+    fname = str(tmp_path) + "/pydeck-mapbox.html"
+    d.to_html(fname, offline=True)
+    await go_to_page_and_screenshot("file://" + fname, fname, output_dir=tmp_path)
+
+    d.map_provider = "google_maps"
+    d.map_style = "satellite"
+    fname = str(tmp_path) + "/pydeck-gmaps.html"
+    d.to_html(fname, offline=True, notebook_display=False)
+    await go_to_page_and_screenshot("file://" + fname, fname, output_dir=tmp_path)
 
 
 @pytest.mark.skip(reason="Not yet implemented")
 @pytest.mark.asyncio
 async def test_notebook_iframe_rendering():
     pass
-
-
-def main():
-    asyncio.get_event_loop().run_until_complete(run_html())
-
-
-if __name__ == "__main__":
-    main()

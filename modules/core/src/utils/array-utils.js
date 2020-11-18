@@ -21,7 +21,7 @@
 /*
  * Helper function for padArray
  */
-function padArrayChunk({source, target, start = 0, end, getData}) {
+function padArrayChunk({source, target, start = 0, end, size, getData}) {
   end = end || target.length;
 
   const sourceLength = source.length;
@@ -42,8 +42,8 @@ function padArrayChunk({source, target, start = 0, end, getData}) {
   let i = sourceLength;
   while (i < targetLength) {
     const datum = getData(i, source);
-    for (let j = 0; j < datum.length; j++) {
-      target[start + i] = datum[j];
+    for (let j = 0; j < size; j++) {
+      target[start + i] = datum[j] || 0;
       i++;
     }
   }
@@ -67,6 +67,7 @@ export function padArray({source, target, size, getData, sourceStartIndices, tar
     padArrayChunk({
       source,
       target,
+      size,
       getData
     });
     return target;
@@ -88,6 +89,7 @@ export function padArray({source, target, size, getData, sourceStartIndices, tar
       target,
       start: targetIndex,
       end: nextTargetIndex,
+      size,
       getData: getChunkData
     });
 
@@ -100,6 +102,7 @@ export function padArray({source, target, size, getData, sourceStartIndices, tar
       source: [],
       target,
       start: targetIndex,
+      size,
       getData: getChunkData
     });
   }

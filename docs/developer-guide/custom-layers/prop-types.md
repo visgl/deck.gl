@@ -54,7 +54,7 @@ Each prop in `defaultProps` may be an object in the following shape:
 
 - `type` (string, required)
 - `value` (any, required) - the default value if this prop is not supplied
-- `async` (boolean, optional) - if `true`, the prop can either be a [Promise](https://developer.mozilla.org/en/docs/Web/JavaScript/Reference/Global_Objects/Promise) that resolves to its actual value, or an url string (loaded using the base Layer's [fetch](/docs/api-reference/layer.md) prop).
+- `async` (boolean, optional) - if `true`, the prop can either be a [Promise](https://developer.mozilla.org/en/docs/Web/JavaScript/Reference/Global_Objects/Promise) that resolves to its actual value, or an url string (loaded using the base Layer's [fetch](/docs/api-reference/core/layer.md) prop).
 - `validate` (function, optional) - receives `value` as argument and returns `true` if the value is valid. Validation of layer props is only invoked in debug mode. This function is automatically populated if the prop has a built-in type.
 - `equal` (function, optional) - receives `value1`, `value2` as argument and returns `true` if the two values are equal. Comparison of layer props is invoked during layer update and the result is passed to `changeFlags.propsChanged`. This function is automatically populated if the prop has a built-in type.
 - `deprecatedFor` (string|array, optional) - mark this prop as deprecated. The value is the new prop name(s) that this prop has been deprecated for. If the old prop is supplied instead of the new one, its value will be transferred to the new prop. The user will get a warning about the deprecation.
@@ -170,37 +170,30 @@ The performance of a deck.gl application can be greately improved by limiting th
 ```jsx
 import React from 'react';
 
-export class App extends React.Component {
-  state = {
-    viewState: {
-      latitude: 49.254,
-      longitude: -123.13,
-      zoom: 11
-    }
-  };
+function App() {
+  const layers = [
+    new GeoJsonLayer({
+      id: 'geojson',
+      data: DATA_URL,
+      extruded: true,
+      wireframe: true,
+      getElevation: f => ELEVATION_SCALE(f.properties.population),
+      getFillColor: f => COLOR_SCALE(f.properties.income),
+      getLineColor: [255, 255, 255]
+    })
+  ];
 
-  render() {
-    const layers = [
-      new GeoJsonLayer({
-        id: 'geojson',
-        data: DATA_URL,
-        extruded: true,
-        wireframe: true,
-        getElevation: f => ELEVATION_SCALE(f.properties.population),
-        getFillColor: f => COLOR_SCALE(f.properties.income),
-        getLineColor: [255, 255, 255]
-      })
-    ];
-
-    return (
-      <DeckGL
-        layers={layers}
-        viewState={this.state.viewState}
-        onViewStateChange={({viewState}) => this.setState({viewState})}
-        controller={true}
-      />
-    );
-  }
+  return (
+    <DeckGL
+      layers={layers}
+      initialViewState={{
+        latitude: 49.254,
+        longitude: -123.13,
+        zoom: 11
+      }}
+      controller={true}
+    />
+  );
 }
 ```
 

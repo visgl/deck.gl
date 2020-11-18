@@ -61,7 +61,8 @@ test('Tileset2D#maxCacheSize', t => {
   const tileset = new Tileset2D({
     getTileData,
     maxCacheSize: 1,
-    onTileLoad: () => {}
+    onTileLoad: () => {},
+    onTileUnload: () => {}
   });
   // load a viewport to fill the cache
   tileset.update(testViewport);
@@ -88,7 +89,8 @@ test('Tileset2D#maxCacheByteSize', async t => {
   const tileset = new Tileset2D({
     getTileData: () => Promise.resolve({byteLength: 100}),
     maxCacheByteSize: 150,
-    onTileLoad: () => {}
+    onTileLoad: () => {},
+    onTileUnload: () => {}
   });
   // load a viewport to fill the cache
   tileset.update(testViewport);
@@ -143,25 +145,40 @@ test('Tileset2D#under-zoomed', t => {
     maxZoom: 13,
     onTileLoad: () => {}
   });
-  const zoomedOutViewport = new WebMercatorViewport(
-    Object.assign({}, testViewState, {
-      zoom: 1
-    })
-  );
+  const zoomedOutViewport = new WebMercatorViewport(Object.assign({}, testViewState, {zoom: 1}));
 
   tileset.update(zoomedOutViewport);
   t.equal(tileset.tiles.length, 0);
   t.end();
 });
 
+test('Tileset2D#under-zoomed-with-extent', t => {
+  const tileset = new Tileset2D({
+    getTileData,
+    minZoom: 11,
+    maxZoom: 13,
+    extent: [-180, -85.05113, 180, 85.05113],
+    onTileLoad: () => {}
+  });
+  const zoomedOutViewport = new WebMercatorViewport(Object.assign({}, testViewState, {zoom: 1}));
+
+  tileset.update(zoomedOutViewport);
+  const tileZoomLevels = tileset.tiles.map(tile => tile.z);
+  t.assert(tileZoomLevels[0] === 11);
+  t.end();
+});
+
 test('Tileset2D#callbacks', async t => {
   let tileLoadCalled = 0;
   let tileErrorCalled = 0;
+  let tileUnloadCalled = 0;
 
   const tileset = new Tileset2D({
+    maxCacheSize: 1,
     getTileData: () => Promise.resolve(null),
     onTileLoad: () => tileLoadCalled++,
-    onTileError: () => tileErrorCalled++
+    onTileError: () => tileErrorCalled++,
+    onTileUnload: () => tileUnloadCalled++
   });
   tileset.update(testViewport);
   t.notOk(tileset.isLoaded, 'should be loading');
@@ -189,6 +206,18 @@ test('Tileset2D#callbacks', async t => {
   t.ok(errorTileset.isLoaded, 'tileset is loaded');
   t.is(tileLoadCalled, 0, 'onTileLoad is not called');
   t.is(tileErrorCalled, 1, 'onTileError is called');
+
+  t.is(tileUnloadCalled, 0, 'onTileUnload is not called');
+  // load another viewport. The previous cached tiles shouldn't be visible
+  tileset.update(
+    new WebMercatorViewport(
+      Object.assign({}, testViewState, {
+        longitude: -100,
+        latitude: 80
+      })
+    )
+  );
+  t.is(tileUnloadCalled, 1, 'onTileUnload is called');
 
   t.end();
 });

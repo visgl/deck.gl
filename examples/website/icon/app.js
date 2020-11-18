@@ -1,4 +1,4 @@
-import React, {Component} from 'react';
+import React, {useState} from 'react';
 import {render} from 'react-dom';
 import {StaticMap} from 'react-map-gl';
 import DeckGL from '@deck.gl/react';
@@ -6,9 +6,6 @@ import {MapView} from '@deck.gl/core';
 import {IconLayer} from '@deck.gl/layers';
 
 import IconClusterLayer from './icon-cluster-layer';
-
-// Set your mapbox token here
-const MAPBOX_TOKEN = process.env.MapboxAccessToken; // eslint-disable-line
 
 // Source data CSV
 const DATA_URL =
@@ -24,140 +21,98 @@ const INITIAL_VIEW_STATE = {
   bearing: 0
 };
 
-/* eslint-disable react/no-deprecated */
-export default class App extends Component {
-  constructor(props) {
-    super(props);
+const MAP_STYLE = 'https://basemaps.cartocdn.com/gl/dark-matter-nolabels-gl-style/style.json';
 
-    this.state = {
-      x: 0,
-      y: 0,
-      hoveredObject: null,
-      expandedObjects: null
-    };
-    this._onHover = this._onHover.bind(this);
-    this._onClick = this._onClick.bind(this);
-    this._closePopup = this._closePopup.bind(this);
-    this._renderhoveredItems = this._renderhoveredItems.bind(this);
-  }
+function renderTooltip(info) {
+  const {object, x, y} = info;
 
-  _onHover(info) {
-    if (this.state.expandedObjects) {
-      return;
-    }
-
-    const {x, y, object} = info;
-    this.setState({x, y, hoveredObject: object});
-  }
-
-  _onClick(info) {
-    const {showCluster = true} = this.props;
-    const {x, y, objects, object} = info;
-
-    if (object && showCluster) {
-      this.setState({x, y, expandedObjects: objects || [object]});
-    } else {
-      this._closePopup();
-    }
-  }
-
-  _closePopup() {
-    if (this.state.expandedObjects) {
-      this.setState({expandedObjects: null, hoveredObject: null});
-    }
-  }
-
-  _renderhoveredItems() {
-    const {x, y, hoveredObject, expandedObjects} = this.state;
-
-    if (expandedObjects) {
-      return (
-        <div className="tooltip interactive" style={{left: x, top: y}}>
-          {expandedObjects.map(({name, year, mass, class: meteorClass}) => {
-            return (
-              <div key={name}>
-                <h5>{name}</h5>
-                <div>Year: {year || 'unknown'}</div>
-                <div>Class: {meteorClass}</div>
-                <div>Mass: {mass}g</div>
-              </div>
-            );
-          })}
-        </div>
-      );
-    }
-
-    if (!hoveredObject) {
-      return null;
-    }
-
-    return hoveredObject.cluster ? (
-      <div className="tooltip" style={{left: x, top: y}}>
-        <h5>{hoveredObject.point_count} records</h5>
-      </div>
-    ) : (
-      <div className="tooltip" style={{left: x, top: y}}>
-        <h5>
-          {hoveredObject.name} {hoveredObject.year ? `(${hoveredObject.year})` : ''}
-        </h5>
-      </div>
-    );
-  }
-
-  _renderLayers() {
-    const {
-      data = DATA_URL,
-      iconMapping = 'data/location-icon-mapping.json',
-      iconAtlas = 'data/location-icon-atlas.png',
-      showCluster = true
-    } = this.props;
-
-    const layerProps = {
-      data,
-      pickable: true,
-      getPosition: d => d.coordinates,
-      iconAtlas,
-      iconMapping,
-      onHover: this._onHover
-    };
-
-    const layer = showCluster
-      ? new IconClusterLayer({...layerProps, id: 'icon-cluster', sizeScale: 60})
-      : new IconLayer({
-          ...layerProps,
-          id: 'icon',
-          getIcon: d => 'marker',
-          sizeUnits: 'meters',
-          sizeScale: 2000,
-          sizeMinPixels: 6
-        });
-
-    return [layer];
-  }
-
-  render() {
-    const {mapStyle = 'mapbox://styles/mapbox/dark-v9'} = this.props;
-
+  if (info.objects) {
     return (
-      <DeckGL
-        layers={this._renderLayers()}
-        views={MAP_VIEW}
-        initialViewState={INITIAL_VIEW_STATE}
-        controller={{dragRotate: false}}
-        onViewStateChange={this._closePopup}
-        onClick={this._onClick}
-      >
-        <StaticMap
-          reuseMaps
-          mapStyle={mapStyle}
-          preventStyleDiffing={true}
-          mapboxApiAccessToken={MAPBOX_TOKEN}
-        />
-
-        {this._renderhoveredItems}
-      </DeckGL>
+      <div className="tooltip interactive" style={{left: x, top: y}}>
+        {info.objects.map(({name, year, mass, class: meteorClass}) => {
+          return (
+            <div key={name}>
+              <h5>{name}</h5>
+              <div>Year: {year || 'unknown'}</div>
+              <div>Class: {meteorClass}</div>
+              <div>Mass: {mass}g</div>
+            </div>
+          );
+        })}
+      </div>
     );
   }
+
+  if (!object) {
+    return null;
+  }
+
+  return object.cluster ? (
+    <div className="tooltip" style={{left: x, top: y}}>
+      {object.point_count} records
+    </div>
+  ) : (
+    <div className="tooltip" style={{left: x, top: y}}>
+      {object.name} {object.year ? `(${object.year})` : ''}
+    </div>
+  );
+}
+
+/* eslint-disable react/no-deprecated */
+export default function App({
+  data = DATA_URL,
+  iconMapping = 'data/location-icon-mapping.json',
+  iconAtlas = 'data/location-icon-atlas.png',
+  showCluster = true,
+  mapStyle = MAP_STYLE
+}) {
+  const [hoverInfo, setHoverInfo] = useState({});
+
+  const hideTooltip = () => {
+    setHoverInfo({});
+  };
+  const expandTooltip = info => {
+    if (info.picked && showCluster) {
+      setHoverInfo(info);
+    } else {
+      setHoverInfo({});
+    }
+  };
+
+  const layerProps = {
+    data,
+    pickable: true,
+    getPosition: d => d.coordinates,
+    iconAtlas,
+    iconMapping,
+    onHover: !hoverInfo.objects && setHoverInfo
+  };
+
+  const layer = showCluster
+    ? new IconClusterLayer({...layerProps, id: 'icon-cluster', sizeScale: 60})
+    : new IconLayer({
+        ...layerProps,
+        id: 'icon',
+        getIcon: d => 'marker',
+        sizeUnits: 'meters',
+        sizeScale: 2000,
+        sizeMinPixels: 6
+      });
+
+  return (
+    <DeckGL
+      layers={[layer]}
+      views={MAP_VIEW}
+      initialViewState={INITIAL_VIEW_STATE}
+      controller={{dragRotate: false}}
+      onViewStateChange={hideTooltip}
+      onClick={expandTooltip}
+    >
+      <StaticMap reuseMaps mapStyle={mapStyle} preventStyleDiffing={true} />
+
+      {renderTooltip(hoverInfo)}
+    </DeckGL>
+  );
 }
 
 export function renderToDOM(container) {
