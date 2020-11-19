@@ -68,7 +68,7 @@ If set to `false`, force disables all picking features (overrides `layer.props.p
 ##### `_typedArrayManagerProps` (Object)
 
 - `overAlloc` (Number) - Default `2`. By default, attributes are allocated twice the memory than they actually need (on both CPU and GPU). Must be larger than `1`.
-- `poolSize` (Number) - Default `100`. When memory reallocation is needed, old chunks are held on to and recycled. Smaller number usese less CPU memory. Can be any number `>=0`.
+- `poolSize` (Number) - Default `100`. When memory reallocation is needed, old chunks are held on to and recycled. Smaller number uses less CPU memory. Can be any number `>=0`.
 
 The above default settings make data updates faster, at the price of using more memory. If the app does not anticipate frequent data changes, they may be aggressively reduced:
 

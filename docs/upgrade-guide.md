@@ -215,7 +215,7 @@ See [View class](/docs/api-reference/core/view.md) documentation for details.
 
 - Non-breaking Change: The `_JSONConverter` class has been renamed to `JSONConverter` (deprecated alias still available).
 - Non-breaking Change: The `_JSONConverter.convertJson()` method has been renamed to `JSONConverter.convert()`  (deprecated stub still available).
-- Breaking Change: The `_JSONConverter` no longer automatically injects deck.gl `View` classes and enumerations. If reqiured need to import and add these to your `JSONConfiguration`.
+- Breaking Change: The `_JSONConverter` no longer automatically injects deck.gl `View` classes and enumerations. If required need to import and add these to your `JSONConfiguration`.
 - Removed: The `JSONLayer` is no longer included in this module. The code for this layer has been moved to an example in `/test/apps/json-layer`, and would need to be copied into applications to be used.
 
 
@@ -408,7 +408,7 @@ The experimental `OrthographicView` class has the following breaking changes:
 Deprecations:
 
 - `outline` is deprecated: use `stroked` instead.
-- `strokeWidth` is deprecated: use `getLineWidth` instead. Note that while `strokeWidth` is in pixels, line width is now pecified in meters. The old appearance can be achieved by using `lineWidthMinPixels` and/or `lineWidthMaxPixels`.
+- `strokeWidth` is deprecated: use `getLineWidth` instead. Note that while `strokeWidth` is in pixels, line width is now specified in meters. The old appearance can be achieved by using `lineWidthMinPixels` and/or `lineWidthMaxPixels`.
 - `getColor` is deprecated: use `getFillColor` and `getLineColor` instead.
 
 Breaking changes:
@@ -764,7 +764,7 @@ All line based layers (`LineLayer and `ArcLayer` and the `ScatterplotLayer` in o
 
 This particular change was caused by browsers dropping support for this feature ([Chrome](https://bugs.chromium.org/p/chromium/issues/detail?id=60124) and [Firefox](https://bugzilla.mozilla.org/show_bug.cgi?id=634506)).
 
-Also `GL.LINE` mode rendering always had signficant limitations in terms of lack of support for mitering, unreliable support for anti-aliasing and platform dependent line width limits so this should represent an improvement in visual quality and consistency for these layers.
+Also `GL.LINE` mode rendering always had significant limitations in terms of lack of support for mitering, unreliable support for anti-aliasing and platform dependent line width limits so this should represent an improvement in visual quality and consistency for these layers.
 
 #### Removed prop: `Layer.dataIterator`
 

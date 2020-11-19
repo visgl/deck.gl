@@ -136,7 +136,7 @@ Parameters:
   
 Returns: 
 
-* New `WebMercatorViewport` fit around the gven bounding box.
+* New `WebMercatorViewport` fit around the given bounding box.
 
 ## Remarks
 
