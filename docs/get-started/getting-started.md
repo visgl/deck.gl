@@ -29,10 +29,10 @@ Clone the deck.gl repo, if you haven't already
 git clone git@github.com:uber/deck.gl.git
 ```
 
-For most consistent results, it is recommended that you check out the latest release branch (e.g. `7.0-release`) instead of `master` when running examples.
+For most consistent results, it is recommended that you check out the latest release branch (e.g. `8.0-release`) instead of `master` when running examples.
 
 ```bash
-git checkout 7.0-release
+git checkout 8.0-release
 ```
 
 Change directory to the example you are interested in, e.g.
