@@ -18,12 +18,7 @@ export default class AttributeTransitionManager {
     this.needsRedraw = false;
     this.numInstances = 1;
 
-    if (Transform.isSupported(gl)) {
-      this.isSupported = true;
-    } else if (gl) {
-      // This class may be instantiated without a WebGL context (e.g. web worker)
-      log.warn('WebGL2 not supported by this browser. Transition animation is disabled.')();
-    }
+    this.isSupported = Transform.isSupported(gl);
   }
 
   finalize() {
@@ -39,10 +34,6 @@ export default class AttributeTransitionManager {
   update({attributes, transitions = {}, numInstances}) {
     // Transform class will crash if elementCount is 0
     this.numInstances = numInstances || 1;
-
-    if (!this.isSupported) {
-      return;
-    }
 
     for (const attributeName in attributes) {
       const attribute = attributes[attributeName];
@@ -120,6 +111,13 @@ export default class AttributeTransitionManager {
     // for the next transition
     let isNew = !transition || transition.type !== settings.type;
     if (isNew) {
+      if (!this.isSupported) {
+        log.warn(
+          `WebGL2 not supported by this browser. Transition for ${attributeName} is disabled.`
+        )();
+        return;
+      }
+
       if (transition) {
         this._removeTransition(attributeName);
       }
