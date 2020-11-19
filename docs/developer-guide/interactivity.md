@@ -1,8 +1,134 @@
 # Adding Interactivity
 
-> This article discusses interacting with data (i.e. selecting, or picking objects). Viewport controls (panning, zooming etc) are discussed in [Controllers](/docs/api-reference/core/map-controller.md).
+## Controlling the Camera
 
-## Overview
+Out of the box, deck.gl offers viewport controllers that map keyboard, mouse or touch input to camera state change. The easiest way to enable pan/zoom/rotate of the visualization is to set the `controller` prop on `Deck` or `<DeckGL>` to `true` along with an `initialViewState` object that defines the initial camera settings:
+
+```js
+import {Deck} from '@deck.gl/core';
+
+new Deck({
+  initialViewState: {
+    longitude: -122.4,
+    latitude: 37.8,
+    zoom: 12,
+    pitch: 0,
+    bearing: 0
+  },
+  controller: true,
+  layers: []
+});
+```
+
+You can also selectively enable/disable certain controller features:
+
+```js
+  controller: {doubleClickZoom: false, touchRotate: true}
+```
+
+See [Controller](/docs/api-reference/core/controller.md) for all options.
+
+
+### Reset Camera Position
+
+An application can reset the camera state by supplying a new `initialViewState` object at any time:
+
+```js
+import {Deck} from '@deck.gl/core';
+
+const deckgl = new Deck({
+  initialViewState: {
+    longitude: -122.4,
+    latitude: 37.8,
+    zoom: 12
+  },
+  controller: true,
+  layers: []
+});
+
+button.onclick = gotoNYC;
+
+// Jump to New York City
+function goToNYC() {
+  deckgl.setProps({
+    initialViewState: {
+      longitude: -70.4,
+      latitude: 40.7,
+      zoom: 12
+    }
+  })
+}
+```
+
+To add a transition animation, see [view state transitions](/docs/developer-guide/view-state-transitions.md).
+
+
+### Add Constraints to View State
+
+An application can optionally supply the [onViewStateChange](/docs/api-reference/core/deck.md#onviewstatechange) callback and manipulate the view state before it is used. The following example constrains the map in a bounding box:
+
+```js
+import {Deck} from '@deck.gl/core';
+
+const LONGITUDE_RANGE = [-123, -122];
+const LATITUDE_RANGE = [37, 38];
+
+new Deck({
+  initialViewState: {
+    longitude: -122.4,
+    latitude: 37.8,
+    zoom: 12
+  },
+  controller: true,
+  onViewStateChange: ({viewState}) => {
+    viewState.longitude = Math.min(LONGITUDE_RANGE[1], Math.max(LONGITUDE_RANGE[0], viewState.longitude));
+    viewState.latitude = Math.min(LATITUDE_RANGE[1], Math.max(LATITUDE_RANGE[0], viewState.latitude));
+    return viewState;
+  }
+});
+```
+
+
+### Externally Manage View State
+
+For more flexibility you can maintain the view state yourself and pass it in to deck.gl via the `viewState` parameter. This essentially makes `Deck`/`<DeckGL>` a stateless component, and allows you to share the view state between multiple components, e.g. via a Redux store.
+
+Note: Do not combine `initialViewState` and `viewState` props. `viewState` will always overwrite any internal state.
+
+The following example demonstrates how to do this with React:
+
+```js
+import React, {useState} from 'react';
+import DeckGL from '@deck.gl/react';
+
+function App() {
+  const [viewState, setViewState] = useState({
+    longitude: -122.4,
+    latitude: 37.8,
+    zoom: 12
+  });
+
+  const layers = [
+    //...
+  ];
+  return (
+    <DeckGL
+        viewState={viewState}
+        onViewStateChange={e => setViewState(e.viewState)}
+        controller={true}
+        layers={layers}>
+    </DeckGL>
+  );
+}
+```
+
+### Advanced View Controls
+
+- Alternative views such as OrbitView, FirstPersonView, and using multiple views such as VR, minimap: [Views and Projections](/docs/developer-guide/views.md)
+- Implement a custom controller: [Controller](/docs/api-reference/core/controller.md)
+
+
+## Picking
 
 deck.gl includes a powerful picking engine that enables the application to precisely determine what object and layer is rendered on a certain pixel on the screen. This picking engine can either be called directly by an application (which is then typically implementing its own event handling), or it can be called automatically by the basic built-in event handling in deck.gl
 
@@ -30,9 +156,9 @@ The picking engine returns "picking info" objects which contains a variety of fi
 > Specific deck.gl Layers may add additional fields to the picking `info` object. Check the documentation of each layer.
 
 
-## Example: Display a Tooltip for Hovered Object
+### Example: Display a Tooltip for Hovered Object
 
-### Using the Built-In Tooltip
+#### Using the Built-In Tooltip
 
 `Deck` automatically renders a tooltip if the `getTooltip` callback is supplied:
 
@@ -74,7 +200,7 @@ It receives a picking info object and returns the content of the tooltip. To cus
 
 For a range of options, see [getTooltip](/docs/api-reference/core/deck.md#gettooltip) documentation.
 
-### Using React
+#### Using React
 
 ```js
 import React, {useState} from 'react';
@@ -114,7 +240,7 @@ function App() {
 }
 ```
 
-## Calling the Picking Engine Directly
+### Calling the Picking Engine Directly
 
 The picking engine is exposed through the [`Deck.pickObject`](/docs/api-reference/core/deck.md) and [`Deck.pickObjects`](/docs/api-reference/core/deck.md) methods. These methods allow you to query what layers and objects within those layers are under a specific point or within a specified rectangle. They return `Picking Info` objects as described below.
 
@@ -145,7 +271,15 @@ function App() {
 
 Also note that by directly calling `queryObject`, integrating deck.gl into an existing application often becomes easier since you don't have to change the application's existing approach to event handling.
 
-## Using the Built-in Event-Handling
+### Under The Hood
+
+If you are using the core layers, all has been taken care of.
+
+If you are implementing a custom layer, read more about
+[how picking is implemented](/docs/developer-guide/custom-layers/picking.md).
+
+
+## Built-in Events
 
 For applications that have basic event handling needs, deck.gl has built-in support for handling selected pointer events. When the application registers callbacks, deck.gl automatically tracks these events, runs the picking engine and calls application callbacks with a single parameter `info` which contains the resulting picking info object.
 
@@ -190,11 +324,3 @@ Picking events are triggered based on *pickable objects*:
 * A `hover` event is triggered every time the hovered object of a pickable layer changes.
 
 When an event is fired, the `onHover` or `onClick` callback of the affected layer is called first. If the callback returns a truthy value, the event is marked as handled. Otherwise, the event will bubble up to the `DeckGL` canvas and be visible to its `onHover` and `onClick` callbacks.
-
-
-## Under The Hood
-
-If you are using the core layers, all has been taken care of.
-
-If you are implementing a custom layer, read more about
-[how picking is implemented](/docs/developer-guide/custom-layers/picking.md).

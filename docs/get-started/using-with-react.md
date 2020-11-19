@@ -1,6 +1,6 @@
 # Using deck.gl with React
 
-While not directly based on React, deck.gl is designed from ground up to work with [React](https://facebook.github.io/react/)-based applications. deck.gl layers fit naturally into React's component render flow and flux/redux based appications. deck.gl layers will be performantly rerendered whenever you rerender your normal JSX or React components.
+While not directly based on React, deck.gl is designed from ground up to work with [React](https://facebook.github.io/react/) based applications. deck.gl layers fit naturally into React's component render flow and flux/redux based appications. deck.gl layers will be performantly rerendered whenever you rerender your normal JSX or React components.
 
 
 ## The DeckGL React Component
