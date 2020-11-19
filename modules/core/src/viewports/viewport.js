@@ -193,10 +193,6 @@ export default class Viewport {
    */
   projectFlat(xyz) {
     if (this.isGeospatial) {
-      if (Math.abs(xyz[1]) > 89.9) {
-        xyz = xyz.slice();
-        xyz[1] = Math.max(-89.9, Math.min(89.9, xyz[1]));
-      }
       return lngLatToWorld(xyz);
     }
     return xyz;
