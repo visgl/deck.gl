@@ -224,26 +224,22 @@ export default class BitmapLayer extends Layer {
   }
 
   _getCoordinateUniforms() {
+    const {LNGLAT, CARTESIAN, DEFAULT} = COORDINATE_SYSTEM;
     let {_imageCoordinateSystem: imageCoordinateSystem} = this.props;
-    if (imageCoordinateSystem !== COORDINATE_SYSTEM.DEFAULT) {
+    if (imageCoordinateSystem !== DEFAULT) {
       const {bounds} = this.props;
       if (!Number.isFinite(bounds[0])) {
         throw new Error('_imageCoordinateSystem only supports rectangular bounds');
       }
 
       // The default behavior (linearly interpolated tex coords)
-      const defaultImageCoordinateSystem = this.context.viewport.resolution
-        ? COORDINATE_SYSTEM.LNGLAT
-        : COORDINATE_SYSTEM.CARTESIAN;
-      imageCoordinateSystem =
-        imageCoordinateSystem === COORDINATE_SYSTEM.LNGLAT
-          ? COORDINATE_SYSTEM.LNGLAT
-          : COORDINATE_SYSTEM.CARTESIAN;
+      const defaultImageCoordinateSystem = this.context.viewport.resolution ? LNGLAT : CARTESIAN;
+      imageCoordinateSystem = imageCoordinateSystem === LNGLAT ? LNGLAT : CARTESIAN;
 
-      if (imageCoordinateSystem > defaultImageCoordinateSystem) {
+      if (imageCoordinateSystem === LNGLAT && defaultImageCoordinateSystem === CARTESIAN) {
         // LNGLAT in Mercator, e.g. display LNGLAT-encoded image in WebMercator projection
         return {coordinateConversion: -1, bounds};
-      } else if (imageCoordinateSystem < defaultImageCoordinateSystem) {
+      } else if (imageCoordinateSystem === CARTESIAN && defaultImageCoordinateSystem === LNGLAT) {
         // Mercator in LNGLAT, e.g. display WebMercator encoded image in Globe projection
         const bottomLeft = lngLatToWorld([bounds[0], bounds[1]]);
         const topRight = lngLatToWorld([bounds[2], bounds[3]]);
