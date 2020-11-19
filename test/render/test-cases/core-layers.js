@@ -201,6 +201,29 @@ export default [
     goldenImage: './test/render/golden-images/bitmap.png'
   },
   {
+    name: 'bitmap-layer-imagecoordinates',
+    viewState: {
+      latitude: 0,
+      longitude: 0,
+      zoom: 1,
+      pitch: 0,
+      bearing: 0
+    },
+    layers: [
+      new BitmapLayer({
+        bounds: [-180, -90, 180, 90],
+        image: './test/data/world.jpg',
+        _imageCoordinateSystem: COORDINATE_SYSTEM.LNGLAT
+      })
+    ],
+    onAfterRender: ({layers, done}) => {
+      if (layers[0].state.bitmapTexture) {
+        done();
+      }
+    },
+    goldenImage: './test/render/golden-images/bitmap-imagecoordinates.png'
+  },
+  {
     name: 'binary',
     views: new OrthographicView(),
     viewState: {

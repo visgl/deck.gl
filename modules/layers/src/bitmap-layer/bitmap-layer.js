@@ -239,7 +239,8 @@ export default class BitmapLayer extends Layer {
       if (imageCoordinateSystem === LNGLAT && defaultImageCoordinateSystem === CARTESIAN) {
         // LNGLAT in Mercator, e.g. display LNGLAT-encoded image in WebMercator projection
         return {coordinateConversion: -1, bounds};
-      } else if (imageCoordinateSystem === CARTESIAN && defaultImageCoordinateSystem === LNGLAT) {
+      }
+      if (imageCoordinateSystem === CARTESIAN && defaultImageCoordinateSystem === LNGLAT) {
         // Mercator in LNGLAT, e.g. display WebMercator encoded image in Globe projection
         const bottomLeft = lngLatToWorld([bounds[0], bounds[1]]);
         const topRight = lngLatToWorld([bounds[2], bounds[3]]);
