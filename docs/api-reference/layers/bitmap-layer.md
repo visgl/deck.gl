@@ -102,6 +102,24 @@ new BitmapLayer({
 
 This prop is only used when `image` initially loads or changes.
 
+##### `_imageCoordinateSystem` (Number, optional)
+
+> Note: this prop is experimental.
+
+Specifies how image coordinates should be geographically interpreted.
+
+By default, the image is uniformly stretched to fill the geometry defined by `bounds`. This might not be desirable if the image is encoded in a different coordinate system from the projection that the layer is using. For example, a [satellite image encoded in longitude/latitude](https://en.wikipedia.org/wiki/File:Whole_world_-_land_and_oceans_12000.jpg) should not be interpreted linearly when placed in a Web Mercator visualization.
+
+This prop allows you to explicitly inform the layer of the coordinate system of the image:
+
+- `COORDINATE_SYSTEM.LNGLAT` if x-axis maps to longitude and y-axis maps to latitude
+- `COORDINATE_SYSTEM.CARTESIAN` if the image is pre-projected into the Web Mercator plane.
+
+This option only works with geospatial views and `bounds` that is orthogonal (`[left, bottom, right, top]`).
+
+See the article on [Coordinate Systems](/docs/developer-guide/coordinate-systems.md) for more information.
+
+
 ### Render Options
 
 ##### `desaturate` (Number) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
