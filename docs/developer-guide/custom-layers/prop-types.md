@@ -165,7 +165,7 @@ MyLayerClass.defaultProps = {
 
 ## Prop Types and Performance
 
-The performance of a deck.gl application can be greately improved by limiting the frequency of layer updates. Consider the following app:
+The performance of a deck.gl application can be greatly improved by limiting the frequency of layer updates. Consider the following app:
 
 ```jsx
 import React from 'react';

@@ -34,7 +34,7 @@ deck.gl was designed from the start to leverage tree-shaking. This technique has
 
 Note that tree-shaking still has limitations:
 
-* At least in webpack, tree shaking is done by the uglifierm, which is typically only run on production builds, so it is typically not possible to assess the benefits of tree shaking during development. In addition, this makes it even harder to make statements about bundle size impact from looking at bundle sizes in development builds. The recommendation is to always measure impact on your final production builds.
+* At least in webpack, tree shaking is done by the uglifier, which is typically only run on production builds, so it is typically not possible to assess the benefits of tree shaking during development. In addition, this makes it even harder to make statements about bundle size impact from looking at bundle sizes in development builds. The recommendation is to always measure impact on your final production builds.
 * Static dependency analyzers err on the side of safety and will still include any symbol it is not sure will never be used.
 * This is compounded by the fact that there are side effects in various language feature that complicate or defeat current static dependency analysis techniques, causing "dead code" to still be bundled. The good news is that the analyzers are getting better.
 * Naturally, an application that uses all the functionality offered by the library will benefit little from tree shaking, whereas a small app that only uses a few layers should expect bigger savings.
@@ -58,10 +58,10 @@ Notes:
 
 ### Future Work
 
-This is not the final word on deck.gl bundle size. More work is being done to reduce the size of deck.gl and we are confident that even as fture releases will have more functionality, we will be able to keep the library code from growing and, more importantly, make deck.gl even more "tree shakeable", with the intention that apps should only "pay for what they use".
+This is not the final word on deck.gl bundle size. More work is being done to reduce the size of deck.gl and we are confident that even as future releases will have more functionality, we will be able to keep the library code from growing and, more importantly, make deck.gl even more "tree shakeable", with the intention that apps should only "pay for what they use".
 
 
 ## Remarks
 
 * **Optimizing for minified code** - Due to inclusion of sourcemaps etc, the bundle size impact of deck.gl tends to look more significant in development builds than in the final production builds. While reducing the size of the development libraries is also desirable, the current goal is to ensure the impact of adding deck.gl on the final, minified/uglified application bundle is as small as possible.
-* Compressed bundle sizes are calculated using `gzip -9`. Consider using slower `brotli` compression for static assests, it typically provides an additional 20% reduction.
+* Compressed bundle sizes are calculated using `gzip -9`. Consider using slower `brotli` compression for static assets, it typically provides an additional 20% reduction.

@@ -1,6 +1,6 @@
 # Views and Projections
 
-The same data can be drawn differently to screen based on what projection method is used. deck.gl's view system defines how one or more cameras should be set up to look at your data objects. The default view used in deck.gl is the [MapView](/docs/api-reference/core/map-view.md), which implements the [Web Meractor projection](https://en.wikipedia.org/wiki/Web_Mercator_projection). 
+The same data can be drawn differently to screen based on what projection method is used. deck.gl's view system defines how one or more cameras should be set up to look at your data objects. The default view used in deck.gl is the [MapView](/docs/api-reference/core/map-view.md), which implements the [Web Mercator projection](https://en.wikipedia.org/wiki/Web_Mercator_projection). 
 The view system is designed to be flexible and composable and can handle many different configurations such as side-by-side views, overlapping views etc. If you plan to work with non-geospatial data, or show more than a single standard viewport, it may be worth spending some time to get familiar with the `View` API.
 
 View classes enable applications to specify one or more rectangular viewports and control what should be rendered inside each view.
@@ -84,7 +84,7 @@ Note that the set of view state parameters that will be used varies between View
 | View Class                                                     | Use Case  | Status | Description |
 | ---                                                            | ---         | ---         | ---         |
 | [`View`](/docs/api-reference/core/view.md)                          |    |    | The base view has to be supplied with raw view and projection matrices. It is typically only instantiated directly if the application needs to work with views that have been supplied from external sources, such as the [WebVR API](https://developer.mozilla.org/en-US/docs/Web/API/WebVR_API). |
-| [`MapView`](/docs/api-reference/core/map-view.md) (default)         | geospatial | full support | This class renders data using the [Web Meractor projection](https://en.wikipedia.org/wiki/Web_Mercator_projection) and is designed to match an external base map library such as mapbox-gl or Google Maps.
+| [`MapView`](/docs/api-reference/core/map-view.md) (default)         | geospatial | full support | This class renders data using the [Web Mercator projection](https://en.wikipedia.org/wiki/Web_Mercator_projection) and is designed to match an external base map library such as mapbox-gl or Google Maps.
 | [`FirstPersonView`](/docs/api-reference/core/first-person-view.md)  | geospatial | full support | The camera is positioned in a provided geolocation and looks in a provided direction, similar to that of a [first-person game](https://en.wikipedia.org/wiki/First-person_(gaming)). |
 | [`OrthographicView`](/docs/api-reference/core/orthographic-view.md) | info-vis (2D)     | full support | The camera looks at a target point from top-down. Does not rotate. |
 | [`OrbitView`](/docs/api-reference/core/perspective-view.md)         | info-vis (3D)     | full support | The camera looks at a target point from a provided direction. Rotates around the target. |

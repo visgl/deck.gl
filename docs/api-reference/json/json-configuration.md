@@ -7,6 +7,6 @@ Object with the following fields.
 * `enumerations` - a map of enumerations that should be made available to the JSON string resolver.
 
 > * `reactComponents` - a map of general react components that should be made available to the JSON class resolver.
-> React support is experiemntal. The React dependency has to be injected via the configuration
+> React support is experimental. The React dependency has to be injected via the configuration
 
 See more details in the `Configuration Reference` section.

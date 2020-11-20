@@ -27,7 +27,7 @@ Often a more complex visualization is composited from a number of layers that us
 
 Creating a collection layer have the following advantages:
 
-* Collect the complex code that handles a specific data format or visual configuration into one class. This helps to create a cleaner, more abstract interface for the users of this layer, and control the complexity of the compoent that renders the `Deck` instance.
+* Collect the complex code that handles a specific data format or visual configuration into one class. This helps to create a cleaner, more abstract interface for the users of this layer, and control the complexity of the component that renders the `Deck` instance.
 * Improve memory usage by sharing the same objects/buffers cross layers. Instead of each sublayer loading and storing their own copy of the raw data, the composite layer will manage the data source and pass it down to several layers.
 
 The deck.gl layers [GeoJsonLayer](/docs/api-reference/layers/geojson-layer.md) and [PolygonLayer](/docs/api-reference/layers/polygon-layer.md) are written as composite "collection" layers.
@@ -173,7 +173,7 @@ class LabeledIconLayer extends CompositeLayer {
 
 ### Forwarding Properties
 
-There are a number of base `Layer` class props that are usually expected to propogate down to all sublayers, such as `pickable`, `visible`, `coordinateSystem` and `opacity`. It is desirable to just forward many of these props directly to the sublayers.
+There are a number of base `Layer` class props that are usually expected to propagate down to all sublayers, such as `pickable`, `visible`, `coordinateSystem` and `opacity`. It is desirable to just forward many of these props directly to the sublayers.
 
 There is a method `compositeLayer.getSubLayerProps` that handles a lot of these common compliance chore that were mentioned above. When calling it with a list of prop values that we care about, the list gets wrapped/populated with additional props that will help the sublayers align with deck.gl norms.
 
@@ -316,4 +316,4 @@ When the sublayer receives data decorated by `getSubLayerRow`, its accessors nee
   }
 ```
 
-The default implementations of lifecycle methods such as `getPickingInfo` also understand how to retrieve the orignal objects from the sublayer data if they are created using `getSubLayerRow`.
+The default implementations of lifecycle methods such as `getPickingInfo` also understand how to retrieve the original objects from the sublayer data if they are created using `getSubLayerRow`.

@@ -440,9 +440,9 @@ When using GPU Aggregation, `onSetColorDomain` and `onSetElevationDomain` are no
 
 The GridLayer renders the following sublayers:
 
-* `CPU` - a [CPUGridLayer](/docs/api-reference/aggregation-layers/cpu-grid-layer.md) when using CPU aggregatoin.
+* `CPU` - a [CPUGridLayer](/docs/api-reference/aggregation-layers/cpu-grid-layer.md) when using CPU aggregation.
 
-* `GPU` - a [GPUGridLayer](/docs/api-reference/aggregation-layers/gpu-grid-layer.md) when using GPU aggregatoin.
+* `GPU` - a [GPUGridLayer](/docs/api-reference/aggregation-layers/gpu-grid-layer.md) when using GPU aggregation.
 
 ## Source
 
