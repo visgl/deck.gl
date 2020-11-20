@@ -16,6 +16,7 @@ The base Controller class supports the following options:
 * `touchZoom` (`Boolean`) - enable zooming with multi-touch. Default `true`
 * `touchRotate` (`Boolean`) - enable rotating with multi-touch. Default `false`
 * `keyboard` (`Boolean`) - enable interaction with keyboard. Default `true`
+* `dragMode` (`String`) - drag behavior without pressing function keys, one of `pan` and `rotate`.
 
 
 ## Methods
