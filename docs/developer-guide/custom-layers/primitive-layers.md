@@ -132,7 +132,7 @@ Note: the reason that the supplied uniforms need to be passed on to your shaders
 
 ## Handling Coordinate Systems
 
-While you have the freedom to create any type of layer you want, with any type of coordinate system that suits your application, a common characteristic of the layers provided by deck.gl is that they work seamlessly as map overlays, both with positions specified as longitude and latitude scoordinates, as well as with positions specified in meters.
+While you have the freedom to create any type of layer you want, with any type of coordinate system that suits your application, a common characteristic of the layers provided by deck.gl is that they work seamlessly as map overlays, both with positions specified as longitude and latitude coordinates, as well as with positions specified in meters.
 
 ### Making Shaders Work with deck.gl's Coordinate Systems
 
