@@ -119,7 +119,7 @@ For geospatial data, a new projection mode -- globe projection is now available 
 
 Currently there is no base map provider under this view. You may use the `BitmapLayer` or `GeoJsonLayer` to render a backdrop for your data.
 
-Before getting started with [this example](https://github.com/visgl/deck.gl/tree/8.3-release/examples/get-started/pure-js/globe), make sure you check out the [docs](/docs/api-reference/core/globe-view.md) for the limitaions of the current implementation.
+Before getting started with [this example](https://github.com/visgl/deck.gl/tree/8.3-release/examples/get-started/pure-js/globe), make sure you check out the [docs](/docs/api-reference/core/globe-view.md) for the limitations of the current implementation.
 
 
 ### Antimeridian Handling
@@ -441,7 +441,7 @@ As an experimental feature, the [LightingEffect](/docs/api-reference/core/lighti
 
 #### Streaming Data Support
 
-Layers now have built-in streaming support. The `data` prop now accepts an [async iterable](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Symbol/asyncIterator) object. As new baches of data are resolved, the layer is updated incrementally. This eliminates the need to manually merge chunks of data or manage multiple layer instances.
+Layers now have built-in streaming support. The `data` prop now accepts an [async iterable](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Symbol/asyncIterator) object. As new batches of data are resolved, the layer is updated incrementally. This eliminates the need to manually merge chunks of data or manage multiple layer instances.
 See details in the [data prop](/docs/api-reference/core/layer.md#basic-properties) documentation and the updated [performance optimization](/docs/developer-guide/performance.md) examples.
 
 #### Partial Data Update
@@ -552,7 +552,7 @@ import {_MapContext as MapContext, NavigationControl} from 'react-map-gl';
 
 ### Performance Metrics
 
-- Added a `metrics` property to `Deck` instances that tracks performance statistics like fps, CPU/GPU render time and memory usage. See [Deck](/docs/api-reference/core/deck.md) class documention for details.
+- Added a `metrics` property to `Deck` instances that tracks performance statistics like fps, CPU/GPU render time and memory usage. See [Deck](/docs/api-reference/core/deck.md) class documentation for details.
 
 
 ## deck.gl v7.0
@@ -727,7 +727,7 @@ Release Date: Jan 29, 2019
 - `ContourLayer` now supports isoband - filling between two thresholds.
 - `ScreenGridLayer` now supports aggregating by min/max/mean.
 - `TextLayer` adds new props that allow better control of the font rendering quality, including font weight and raster size. The layer can also optionally generate a font atlas with [Signed Distance Fields](http://cs.brown.edu/people/pfelzens/papers/dt-final.pdf), which yields a much crisper look when rendering large font sizes.
-- `IconLayer` supports dynamically packed icon atlas. Users can now load programatically generated image urls as icons, for example Facebook profile images.
+- `IconLayer` supports dynamically packed icon atlas. Users can now load programmatically generated image urls as icons, for example Facebook profile images.
 - `PathLayer`'s `getPath` and `PolygonLayer`'s `getPolygon` props now support flattened coordinates instead of nested arrays, making it easier for these layers to use binary data.
 
 See each layer's documentation for full API changes.
@@ -945,7 +945,7 @@ deck.gl can now pick occluded objects using the new `Deck.pickMultipleObjects` m
 
 #### Switch between Perspective and Orthographic mode
 
-The [`View`](/docs/api-reference/core/view.md) classes can now build an orthographic projection matrix from the same "field of view" parameter it uses to create perspective mode (rather than requiring a separate set of parameters). This makes switching between perspective and orhtographic projection modes easier then ever (simply set the new `View.orthographic` prop to `true` to activate orthographic projection).
+The [`View`](/docs/api-reference/core/view.md) classes can now build an orthographic projection matrix from the same "field of view" parameter it uses to create perspective mode (rather than requiring a separate set of parameters). This makes switching between perspective and orthographic projection modes easier then ever (simply set the new `View.orthographic` prop to `true` to activate orthographic projection).
 
 
 #### Per-instance stroke width in LineLayer and ArcLayer
@@ -1370,7 +1370,7 @@ The `updateTriggers` mechanism in deck.gl v3 required the user to know the name 
 
 #### Overridable Shaders
 
-All layers now have a `getShaders` method that can be overriden by subclasses, enables reuse of all layer code while just replacing one or both shaders, often dramatically reducing the amount of code needed to add a small feature or change to en existing layers.
+All layers now have a `getShaders` method that can be overridden by subclasses, enables reuse of all layer code while just replacing one or both shaders, often dramatically reducing the amount of code needed to add a small feature or change to en existing layers.
 
 ### New Features for Layer Writers
 

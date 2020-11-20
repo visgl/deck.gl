@@ -188,7 +188,7 @@ Check [the lighting guide](/docs/developer-guide/using-lighting.md#constructing-
 
 If `false`, will skip normalizing the coordinates returned by `getPolygon`. Disabling normalization improves performance during data update, but makes the layer prone to error in case the data is malformed. It is only recommended when you use this layer with preprocessed static data or validation on the backend.
 
-When normalization is disabled, polygons must be specified in the format of flat array or `{positions, holeIndices}`. Rings must be closed (i.e. the first and last vertices must be identical) and must contain at leat 3 vertices. See `getPolygon` below for details.
+When normalization is disabled, polygons must be specified in the format of flat array or `{positions, holeIndices}`. Rings must be closed (i.e. the first and last vertices must be identical) and must contain at least 3 vertices. See `getPolygon` below for details.
 
 
 ### Data Accessors

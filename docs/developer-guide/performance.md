@@ -433,7 +433,7 @@ When creating data-intensive applications, it is often desirable to offload clie
 
 The server can send data to the client more efficiently using binary formats, e.g. [protobuf](https://developers.google.com/protocol-buffers), [Arrow](https://arrow.apache.org/) or simply a custom binary blob.
 
-Some deck.gl applications use web workers to load data and generate attributes to get the processing off the main thread. Modern worker implementations allow ownership of typed arrays to be [transferred directly](https://developer.mozilla.org/en-US/docs/Web/API/Worker/postMessage#Parameters) between threads at virtualy no cost, bypassing serialization and deserialization of JSON objects.
+Some deck.gl applications use web workers to load data and generate attributes to get the processing off the main thread. Modern worker implementations allow ownership of typed arrays to be [transferred directly](https://developer.mozilla.org/en-US/docs/Web/API/Worker/postMessage#Parameters) between threads at virtually no cost, bypassing serialization and deserialization of JSON objects.
 
 #### Supply binary blobs to the data prop
 
@@ -465,7 +465,7 @@ Some deck.gl applications use web workers to load data and generate attributes t
   });
   ```
 
-  However, in addition to requiring custom repacking code, this array will take valuable CPU time to create, and significantly more memory to store than its binary form. In performance-sensitive applications that constantly push a large volumn of data (e.g. animations), this method will not be efficient enough.
+  However, in addition to requiring custom repacking code, this array will take valuable CPU time to create, and significantly more memory to store than its binary form. In performance-sensitive applications that constantly push a large volume of data (e.g. animations), this method will not be efficient enough.
 
   Alternatively, one may supply a non-iterable object (not Array or TypedArray) to the `data` object. In this case, it must contain a `length` field that specifies the total number of objects. Since `data` is not iterable, each accessor will not receive a valid `object` argument, and therefore responsible of interpreting the input data's buffer layout:
 

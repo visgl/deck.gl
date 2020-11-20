@@ -51,7 +51,7 @@ const App = (data) => (
 
 ##### `ContextProvider` (React.Component, optional)
 
-A [Context.Provider](https://reactjs.org/docs/context.html#contextprovider) component. If supplied, will be rendered as the ancester to all children. The passed through context contains the following values:
+A [Context.Provider](https://reactjs.org/docs/context.html#contextprovider) component. If supplied, will be rendered as the ancestor to all children. The passed through context contains the following values:
 
 - `viewport` ([Viewport](/docs/api-reference/core/viewport.md)) - the current viewport
 - `container` (DOMElement) - the DOM element containing the deck canvas
@@ -85,7 +85,7 @@ It is possible to use JSX syntax to create deck.gl layers as React children of t
   <DeckGL />
 ```
 
-> Caveat: The JSX layer syntax is limitated in that it only works when the layers are direct children of the `DeckGL` component. deck.gl layers are not true React components and cannot be rendered independently by React, and the JSX support depends on deck.gl intercepting the JSX generated child elements before React tries to render them.
+> Caveat: The JSX layer syntax is limited in that it only works when the layers are direct children of the `DeckGL` component. deck.gl layers are not true React components and cannot be rendered independently by React, and the JSX support depends on deck.gl intercepting the JSX generated child elements before React tries to render them.
 
 
 #### JSX views

@@ -84,7 +84,7 @@ or a URL to a mesh description file in a format supported by [loaders.gl](https:
 The following attributes are expected:
 
 - `positions` (Float32Array) - 3d vertex offset from the object center, in meters
-- `normals` (Float32Array) - 3d nomals
+- `normals` (Float32Array) - 3d normals
 - `texCoords` (Float32Array) - 2d texture coordinates
 
 

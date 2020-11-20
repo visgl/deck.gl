@@ -125,7 +125,7 @@ Format:
 
 * Default: `null`
 
-If specified, objects will be faded in/out instead of abruptly shown/hiden. When the filtered value is outside of the bounds defined by `filterSoftRange` but still within the bounds defined by `filterRange`, the object will be rendered as "faded." See `filterTransformSize` and `filterTransformColor` for additional control over this behavior.
+If specified, objects will be faded in/out instead of abruptly shown/hidden. When the filtered value is outside of the bounds defined by `filterSoftRange` but still within the bounds defined by `filterRange`, the object will be rendered as "faded." See `filterTransformSize` and `filterTransformColor` for additional control over this behavior.
 
 ```js
 new ScatterplotLayer({

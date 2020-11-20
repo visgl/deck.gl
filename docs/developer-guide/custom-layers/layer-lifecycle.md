@@ -70,7 +70,7 @@ Rendering happens during each rendering cycle to draw the layer to the WebGL con
 
 For primitive layers, [`layer.draw()`](/docs/api-reference/core/layer.md#draw)
 is called at this stage, which invokes the layers' `model.render` calls.
-For composite layers, `layer.renderLayers` is called to genrate sublayers.
+For composite layers, `layer.renderLayers` is called to generate sublayers.
 
 ### Picking
 
