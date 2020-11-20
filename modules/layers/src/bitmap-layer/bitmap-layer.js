@@ -20,8 +20,10 @@
 
 /* global HTMLVideoElement */
 import GL from '@luma.gl/constants';
-import {Layer, project32, picking} from '@deck.gl/core';
+import {Layer, project32, picking, COORDINATE_SYSTEM} from '@deck.gl/core';
 import {Model, Geometry, Texture2D} from '@luma.gl/core';
+import {lngLatToWorld} from '@math.gl/web-mercator';
+
 import createMesh from './create-mesh';
 
 import vs from './bitmap-layer-vertex';
@@ -37,6 +39,7 @@ const DEFAULT_TEXTURE_PARAMETERS = {
 const defaultProps = {
   image: {type: 'object', value: null, async: true},
   bounds: {type: 'array', value: [1, 0, 0, 1], compare: true},
+  _imageCoordinateSystem: COORDINATE_SYSTEM.DEFAULT,
 
   desaturate: {type: 'number', min: 0, max: 1, value: 0},
   // More context: because of the blending mode we're using for ground imagery,
@@ -113,7 +116,9 @@ export default class BitmapLayer extends Layer {
           attributeManager.invalidate(key);
         }
       }
-      this.setState({mesh});
+      this.setState({mesh, ...this._getCoordinateUniforms()});
+    } else if (props._imageCoordinateSystem !== oldProps._imageCoordinateSystem) {
+      this.setState(this._getCoordinateUniforms());
     }
   }
 
@@ -174,7 +179,7 @@ export default class BitmapLayer extends Layer {
 
   draw(opts) {
     const {uniforms} = opts;
-    const {bitmapTexture, model} = this.state;
+    const {bitmapTexture, model, coordinateConversion, bounds} = this.state;
     const {image, desaturate, transparentColor, tintColor} = this.props;
 
     // Update video frame
@@ -205,16 +210,50 @@ export default class BitmapLayer extends Layer {
     // Render the image
     if (bitmapTexture && model) {
       model
-        .setUniforms(
-          Object.assign({}, uniforms, {
-            bitmapTexture,
-            desaturate,
-            transparentColor: transparentColor.map(x => x / 255),
-            tintColor: tintColor.slice(0, 3).map(x => x / 255)
-          })
-        )
+        .setUniforms(uniforms)
+        .setUniforms({
+          bitmapTexture,
+          desaturate,
+          transparentColor: transparentColor.map(x => x / 255),
+          tintColor: tintColor.slice(0, 3).map(x => x / 255),
+          coordinateConversion,
+          bounds
+        })
         .draw();
     }
+  }
+
+  _getCoordinateUniforms() {
+    const {LNGLAT, CARTESIAN, DEFAULT} = COORDINATE_SYSTEM;
+    let {_imageCoordinateSystem: imageCoordinateSystem} = this.props;
+    if (imageCoordinateSystem !== DEFAULT) {
+      const {bounds} = this.props;
+      if (!Number.isFinite(bounds[0])) {
+        throw new Error('_imageCoordinateSystem only supports rectangular bounds');
+      }
+
+      // The default behavior (linearly interpolated tex coords)
+      const defaultImageCoordinateSystem = this.context.viewport.resolution ? LNGLAT : CARTESIAN;
+      imageCoordinateSystem = imageCoordinateSystem === LNGLAT ? LNGLAT : CARTESIAN;
+
+      if (imageCoordinateSystem === LNGLAT && defaultImageCoordinateSystem === CARTESIAN) {
+        // LNGLAT in Mercator, e.g. display LNGLAT-encoded image in WebMercator projection
+        return {coordinateConversion: -1, bounds};
+      }
+      if (imageCoordinateSystem === CARTESIAN && defaultImageCoordinateSystem === LNGLAT) {
+        // Mercator in LNGLAT, e.g. display WebMercator encoded image in Globe projection
+        const bottomLeft = lngLatToWorld([bounds[0], bounds[1]]);
+        const topRight = lngLatToWorld([bounds[2], bounds[3]]);
+        return {
+          coordinateConversion: 1,
+          bounds: [bottomLeft[0], bottomLeft[1], topRight[0], topRight[1]]
+        };
+      }
+    }
+    return {
+      coordinateConversion: 0,
+      bounds: [0, 0, 0, 0]
+    };
   }
 
   loadTexture(image, textureParameters) {
