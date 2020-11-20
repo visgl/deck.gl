@@ -32,8 +32,8 @@ class GlobeState extends MapState {
 
 export default class GlobeController extends Controller {
   constructor(props) {
+    props.dragMode = props.dragMode || 'pan';
     super(GlobeState, props);
-    this.invertPan = true;
   }
 
   setProps(props) {

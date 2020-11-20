@@ -6,6 +6,9 @@ attribute vec3 positions;
 attribute vec3 positions64Low;
 
 varying vec2 vTexCoord;
+varying vec2 vTexPos;
+
+uniform float coordinateConversion;
 
 const vec3 pickingColor = vec3(1.0, 0.0, 0.0);
 
@@ -18,6 +21,12 @@ void main(void) {
   DECKGL_FILTER_GL_POSITION(gl_Position, geometry);
 
   vTexCoord = texCoords;
+
+  if (coordinateConversion < -0.5) {
+    vTexPos = geometry.position.xy;
+  } else if (coordinateConversion > 0.5) {
+    vTexPos = geometry.worldPosition.xy;
+  }
 
   vec4 color = vec4(0.0);
   DECKGL_FILTER_COLOR(color, geometry);

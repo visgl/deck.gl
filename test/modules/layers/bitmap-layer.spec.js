@@ -1,7 +1,8 @@
 import test from 'tape-catch';
 
+import {COORDINATE_SYSTEM, _GlobeViewport as GlobeViewport} from '@deck.gl/core';
 import {BitmapLayer} from '@deck.gl/layers';
-import {testLayer} from '@deck.gl/test-utils';
+import {testLayer, testInitializeLayer} from '@deck.gl/test-utils';
 import createMesh from '@deck.gl/layers/bitmap-layer/create-mesh';
 
 test('BitmapLayer#constructor', t => {
@@ -50,6 +51,105 @@ test('BitmapLayer#constructor', t => {
   });
 
   t.end();
+});
+
+test('BitmapLayer#imageCoordinateSystem', t => {
+  t.plan(13);
+
+  testLayer({
+    Layer: BitmapLayer,
+    onError: t.notOk,
+    testCases: [
+      {
+        props: {
+          bounds: [-180, -90, 180, 90]
+        },
+        onAfterUpdate({layer}) {
+          t.comment('MapView + default imageCoordinateSystem');
+
+          const {coordinateConversion, bounds} = layer.state;
+          t.is(coordinateConversion, 0, 'No coordinate conversion');
+          t.deepEqual(bounds, [0, 0, 0, 0], 'Default bounds');
+        }
+      },
+      {
+        updateProps: {
+          _imageCoordinateSystem: COORDINATE_SYSTEM.CARTESIAN
+        },
+        onAfterUpdate({layer}) {
+          t.comment('MapView + imageCoordinateSystem: CARTESIAN');
+
+          const {coordinateConversion, bounds} = layer.state;
+          t.is(coordinateConversion, 0, 'No coordinate conversion');
+          t.deepEqual(bounds, [0, 0, 0, 0], 'Default bounds');
+        }
+      },
+      {
+        updateProps: {
+          _imageCoordinateSystem: COORDINATE_SYSTEM.LNGLAT
+        },
+        onAfterUpdate({layer}) {
+          t.comment('MapView + imageCoordinateSystem: LNGLAT');
+
+          const {coordinateConversion, bounds} = layer.state;
+          t.is(coordinateConversion, -1, 'Convert image coordinate from LNGLAT');
+          t.deepEqual(bounds, [-180, -90, 180, 90], 'Generated LNGLAT bounds');
+        }
+      }
+    ]
+  });
+
+  testLayer({
+    Layer: BitmapLayer,
+    onError: t.notOk,
+    viewport: new GlobeViewport({width: 800, height: 600, latitude: 0, longitude: 0, zoom: 1}),
+    testCases: [
+      {
+        props: {
+          bounds: [0, -30, 45, 0]
+        },
+        onAfterUpdate({layer}) {
+          t.comment('GlobeView + default imageCoordinateSystem');
+
+          const {coordinateConversion, bounds} = layer.state;
+          t.is(coordinateConversion, 0, 'No coordinate conversion');
+          t.deepEqual(bounds, [0, 0, 0, 0], 'Default bounds');
+        }
+      },
+      {
+        updateProps: {
+          _imageCoordinateSystem: COORDINATE_SYSTEM.CARTESIAN
+        },
+        onAfterUpdate({layer}) {
+          t.comment('GlobeView + imageCoordinateSystem: CARTESIAN');
+
+          const {coordinateConversion, bounds} = layer.state;
+          t.is(coordinateConversion, 1, 'Convert image coordinates from WebMercator');
+          t.deepEqual(bounds, [256, 211.23850847154438, 320, 256], 'Generated bounds');
+        }
+      },
+      {
+        updateProps: {
+          _imageCoordinateSystem: COORDINATE_SYSTEM.LNGLAT
+        },
+        onAfterUpdate({layer}) {
+          t.comment('GlobeView + imageCoordinateSystem: LNGLAT');
+
+          const {coordinateConversion, bounds} = layer.state;
+          t.is(coordinateConversion, 0, 'No coordinate conversion');
+          t.deepEqual(bounds, [0, 0, 0, 0], 'Default bounds');
+        }
+      }
+    ]
+  });
+
+  testInitializeLayer({
+    layer: new BitmapLayer({
+      bounds: [[0, 0, 0], [0, 2, 1], [2, 3, 0], [2, 1, 1]],
+      _imageCoordinateSystem: COORDINATE_SYSTEM.CARTESIAN
+    }),
+    onError: () => t.pass('Layer should throw if _imageCoordinateSystem is used with quad bounds')
+  });
 });
 
 test('createMesh', t => {

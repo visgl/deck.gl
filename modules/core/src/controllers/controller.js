@@ -51,7 +51,6 @@ export default class Controller {
     this._customEvents = [];
     this.onViewStateChange = null;
     this.onStateChange = null;
-    this.invertPan = false;
 
     this.handleEvent = this.handleEvent.bind(this);
 
@@ -155,6 +154,9 @@ export default class Controller {
     if ('makeViewport' in props) {
       this.makeViewport = props.makeViewport;
     }
+    if ('dragMode' in props) {
+      this.dragMode = props.dragMode;
+    }
     this.controllerStateProps = props;
 
     if ('eventManager' in props && this.eventManager !== props.eventManager) {
@@ -249,7 +251,10 @@ export default class Controller {
       return false;
     }
     let alternateMode = this.isFunctionKeyPressed(event) || event.rightButton;
-    alternateMode = this.invertPan ? !alternateMode : alternateMode;
+    if (this.invertPan || this.dragMode === 'pan') {
+      // invertPan is replaced by props.dragMode, keeping for backward compatibility
+      alternateMode = !alternateMode;
+    }
     const newControllerState = this.controllerState[alternateMode ? 'panStart' : 'rotateStart']({
       pos
     });
