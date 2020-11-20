@@ -110,7 +110,7 @@ class OSMNode {
 }
 
 export function getOSMTileIndices(viewport, maxZ, zRange) {
-  const project = viewport.resolution > 0 ? viewport.projectPosition : null;
+  const project = viewport.resolution ? viewport.projectPosition : null;
 
   // Get the culling volume of the current camera
   const planes = Object.values(viewport.getFrustumPlanes()).map(
