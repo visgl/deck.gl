@@ -12,8 +12,8 @@ const LINEAR_TRANSITION_PROPS = {
 
 export default class OrthographicController extends Controller {
   constructor(props) {
+    props.dragMode = props.dragMode || 'pan';
     super(OrbitState, props);
-    this.invertPan = true;
   }
 
   _onPanRotate(event) {

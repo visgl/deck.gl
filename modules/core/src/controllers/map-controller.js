@@ -421,8 +421,8 @@ export class MapState extends ViewState {
 
 export default class MapController extends Controller {
   constructor(props) {
+    props.dragMode = props.dragMode || 'pan';
     super(MapState, props);
-    this.invertPan = true;
   }
 
   _getTransitionProps() {
