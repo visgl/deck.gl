@@ -432,6 +432,7 @@ export default class Controller {
       return false;
     }
     const funcKey = this.isFunctionKeyPressed(event);
+    const {zoomSpeed, moveSpeed, rotateSpeedX, rotateSpeedY} = this.keyboard;
     const {controllerState} = this;
     let newControllerState;
     const interactionState = {};
@@ -439,47 +440,49 @@ export default class Controller {
     switch (event.srcEvent.code) {
       case 'Minus':
         newControllerState = funcKey
-          ? controllerState.zoomOut().zoomOut()
-          : controllerState.zoomOut();
+          ? controllerState.zoomOut(zoomSpeed).zoomOut(zoomSpeed)
+          : controllerState.zoomOut(zoomSpeed);
         interactionState.isZooming = true;
         break;
       case 'Equal':
-        newControllerState = funcKey ? controllerState.zoomIn().zoomIn() : controllerState.zoomIn();
+        newControllerState = funcKey
+          ? controllerState.zoomIn(zoomSpeed).zoomIn(zoomSpeed)
+          : controllerState.zoomIn(zoomSpeed);
         interactionState.isZooming = true;
         break;
       case 'ArrowLeft':
         if (funcKey) {
-          newControllerState = controllerState.rotateLeft();
+          newControllerState = controllerState.rotateLeft(rotateSpeedX);
           interactionState.isRotating = true;
         } else {
-          newControllerState = controllerState.moveLeft();
+          newControllerState = controllerState.moveLeft(moveSpeed);
           interactionState.isPanning = true;
         }
         break;
       case 'ArrowRight':
         if (funcKey) {
-          newControllerState = controllerState.rotateRight();
+          newControllerState = controllerState.rotateRight(rotateSpeedX);
           interactionState.isRotating = true;
         } else {
-          newControllerState = controllerState.moveRight();
+          newControllerState = controllerState.moveRight(moveSpeed);
           interactionState.isPanning = true;
         }
         break;
       case 'ArrowUp':
         if (funcKey) {
-          newControllerState = controllerState.rotateUp();
+          newControllerState = controllerState.rotateUp(rotateSpeedY);
           interactionState.isRotating = true;
         } else {
-          newControllerState = controllerState.moveUp();
+          newControllerState = controllerState.moveUp(moveSpeed);
           interactionState.isPanning = true;
         }
         break;
       case 'ArrowDown':
         if (funcKey) {
-          newControllerState = controllerState.rotateDown();
+          newControllerState = controllerState.rotateDown(rotateSpeedY);
           interactionState.isRotating = true;
         } else {
-          newControllerState = controllerState.moveDown();
+          newControllerState = controllerState.moveDown(moveSpeed);
           interactionState.isPanning = true;
         }
         break;

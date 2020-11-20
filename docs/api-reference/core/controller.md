@@ -15,9 +15,12 @@ The base Controller class supports the following options:
 * `doubleClickZoom` (`Boolean`) - enable zooming with double click. Default `true`
 * `touchZoom` (`Boolean`) - enable zooming with multi-touch. Default `true`
 * `touchRotate` (`Boolean`) - enable rotating with multi-touch. Default `false`
-* `keyboard` (`Boolean`) - enable interaction with keyboard. Default `true`
+* `keyboard` (`Boolean`|`Object`) - enable interaction with keyboard. Default `true`. If an object is supplied, it may contain the following fields to customize the keyboard behavior:
+    * `zoomSpeed` (`Number`) - speed of zoom using +/- keys. Default `2`.
+    * `moveSpeed` (`Number`) - speed of movement using arrow keys, in pixels.
+    * `rotateSpeedX` (`Number`) - speed of rotation using shift + left/right arrow keys, in degrees. Default `15`.
+    * `rotateSpeedY` (`Number`) - speed of rotation using shift + up/down arrow keys, in degrees. Default `10`.
 * `dragMode` (`String`) - drag behavior without pressing function keys, one of `pan` and `rotate`.
-
 
 ## Methods
 
