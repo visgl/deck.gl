@@ -5,8 +5,6 @@ import LinearInterpolator from '../transitions/linear-interpolator';
 import {TRANSITION_EVENTS} from './transition-manager';
 import {mod} from '../utils/math-utils';
 
-const MOVEMENT_SPEED = 50; // per keyboard click
-
 const DEFAULT_STATE = {
   orbitAxis: 'Z',
   rotationX: 0,
@@ -251,67 +249,67 @@ export class OrbitState extends ViewState {
     });
   }
 
-  zoomIn() {
+  zoomIn(speed = 2) {
     return this._getUpdatedState({
-      zoom: this._calculateNewZoom({scale: 2})
+      zoom: this._calculateNewZoom({scale: speed})
     });
   }
 
-  zoomOut() {
+  zoomOut(speed = 2) {
     return this._getUpdatedState({
-      zoom: this._calculateNewZoom({scale: 0.5})
+      zoom: this._calculateNewZoom({scale: 1 / speed})
     });
   }
 
-  moveLeft() {
-    const pixelOffset = [-MOVEMENT_SPEED, 0];
+  moveLeft(speed = 50) {
+    const pixelOffset = [-speed, 0];
     return this._getUpdatedState({
       target: this._calculateNewTarget({pixelOffset})
     });
   }
 
-  moveRight() {
-    const pixelOffset = [MOVEMENT_SPEED, 0];
+  moveRight(speed = 50) {
+    const pixelOffset = [speed, 0];
     return this._getUpdatedState({
       target: this._calculateNewTarget({pixelOffset})
     });
   }
 
-  moveUp() {
-    const pixelOffset = [0, -MOVEMENT_SPEED];
+  moveUp(speed = 50) {
+    const pixelOffset = [0, -speed];
     return this._getUpdatedState({
       target: this._calculateNewTarget({pixelOffset})
     });
   }
 
-  moveDown() {
-    const pixelOffset = [0, MOVEMENT_SPEED];
+  moveDown(speed = 50) {
+    const pixelOffset = [0, speed];
     return this._getUpdatedState({
       target: this._calculateNewTarget({pixelOffset})
     });
   }
 
-  rotateLeft() {
+  rotateLeft(speed = 15) {
     return this._getUpdatedState({
-      rotationOrbit: this._viewportProps.rotationOrbit - 15
+      rotationOrbit: this._viewportProps.rotationOrbit - speed
     });
   }
 
-  rotateRight() {
+  rotateRight(speed = 15) {
     return this._getUpdatedState({
-      rotationOrbit: this._viewportProps.rotationOrbit + 15
+      rotationOrbit: this._viewportProps.rotationOrbit + speed
     });
   }
 
-  rotateUp() {
+  rotateUp(speed = 10) {
     return this._getUpdatedState({
-      rotationX: this._viewportProps.rotationX - 10
+      rotationX: this._viewportProps.rotationX - speed
     });
   }
 
-  rotateDown() {
+  rotateDown(speed = 10) {
     return this._getUpdatedState({
-      rotationX: this._viewportProps.rotationX + 10
+      rotationX: this._viewportProps.rotationX + speed
     });
   }
 
