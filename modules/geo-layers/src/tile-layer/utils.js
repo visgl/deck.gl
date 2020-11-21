@@ -81,7 +81,7 @@ function getScale(z) {
 }
 
 // https://wiki.openstreetmap.org/wiki/Slippy_map_tilenames#Lon..2Flat._to_tile_numbers_2
-function osmTile2lngLat(x, y, z) {
+export function osmTile2lngLat(x, y, z) {
   const scale = getScale(z);
   const lng = (x / scale) * 360 - 180;
   const n = Math.PI - (2 * Math.PI * y) / scale;
