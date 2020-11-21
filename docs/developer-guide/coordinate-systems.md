@@ -51,7 +51,7 @@ An example of a use case where different coordinate systems are combined:
 
 ### Limitations of the Offset Systems
 
-Like most cartographic projections, the [Web Meractor projection](https://en.wikipedia.org/wiki/Web_Mercator_projection) is non-linear. The offset system trades accuracy for performance by approximating the projection with a linearized local projection system. When working on local scales, small cities etc, using meter offsets gives a [very high degree of precision](https://github.com/uber-common/viewport-mercator-project/blob/master/docs/articles/offset-accuracy.md#meter-offset-to-pixels). When visualizing data on large scales (countries and continents) results will only be correct if you specify longitude and latitude for every point.
+Like most cartographic projections, the [Web Mercator projection](https://en.wikipedia.org/wiki/Web_Mercator_projection) is non-linear. The offset system trades accuracy for performance by approximating the projection with a linearized local projection system. When working on local scales, small cities etc, using meter offsets gives a [very high degree of precision](https://github.com/uber-common/viewport-mercator-project/blob/master/docs/articles/offset-accuracy.md#meter-offset-to-pixels). When visualizing data on large scales (countries and continents) results will only be correct if you specify longitude and latitude for every point.
 
 
 ## Transforming Positions and Dimensions
@@ -76,7 +76,7 @@ The same positions can be drawn differently to screen based on what projection m
 
 The view is independent of the layers' coordinate systems, and is shared by all layers. So all layers will always pan, zoom and tilt together, regardless of what coordinate system their positions are specified in.
 
-The default view used in deck.gl is the [MapView](/docs/api-reference/core/map-view.md), which implements the [Web Meractor projection](https://en.wikipedia.org/wiki/Web_Mercator_projection). When working with non-geospatial datasets, the `IDENTITY` coordinate system needs to be used in combination with an alternative view. Read about deck.gl's view system in [Views and Projections](/docs/developer-guide/views.md).
+The default view used in deck.gl is the [MapView](/docs/api-reference/core/map-view.md), which implements the [Web Mercator projection](https://en.wikipedia.org/wiki/Web_Mercator_projection). When working with non-geospatial datasets, the `IDENTITY` coordinate system needs to be used in combination with an alternative view. Read about deck.gl's view system in [Views and Projections](/docs/developer-guide/views.md).
 
 
 ## Comparison to Standard 3D Graphics Coordinate Systems

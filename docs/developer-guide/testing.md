@@ -7,7 +7,7 @@ The [@deck.gl/test-utils](/docs/api-reference/test-utils/overview.md) module is 
 
 ## Unit Tests for deck.gl Layers
 
-Lifecycle test functions are designed to allow for intregration with different unit test frameworks. Some of the details depend on the test framework you are using. deck.gl itself uses `tape` so the tests in the deck.gl repository contain extensive examples of `tape` integration, but it should also be straightforward to integrate with other unit testing frameworks.
+Lifecycle test functions are designed to allow for integration with different unit test frameworks. Some of the details depend on the test framework you are using. deck.gl itself uses `tape` so the tests in the deck.gl repository contain extensive examples of `tape` integration, but it should also be straightforward to integrate with other unit testing frameworks.
 
 ### Example
 

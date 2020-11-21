@@ -20,18 +20,14 @@ const NO_TRANSITION_PROPS = {
   transitionDuration: 0
 };
 
-// MAPBOX LIMITS
-export const MAPBOX_LIMITS = {
+const DEFAULT_STATE = {
+  pitch: 0,
+  bearing: 0,
+  altitude: 1.5,
   minZoom: 0,
   maxZoom: 20,
   minPitch: 0,
   maxPitch: 60
-};
-
-const DEFAULT_STATE = {
-  pitch: 0,
-  bearing: 0,
-  altitude: 1.5
 };
 
 /* Utils */
@@ -63,10 +59,10 @@ export class MapState extends ViewState {
     altitude = DEFAULT_STATE.altitude,
 
     /** Viewport constraints */
-    maxZoom = MAPBOX_LIMITS.maxZoom,
-    minZoom = MAPBOX_LIMITS.minZoom,
-    maxPitch = MAPBOX_LIMITS.maxPitch,
-    minPitch = MAPBOX_LIMITS.minPitch,
+    maxZoom = DEFAULT_STATE.maxZoom,
+    minZoom = DEFAULT_STATE.minZoom,
+    maxPitch = DEFAULT_STATE.maxPitch,
+    minPitch = DEFAULT_STATE.minPitch,
 
     /** Interaction states, required to calculate change during transform */
     /* The point on map being grabbed when the operation first started */
@@ -270,51 +266,51 @@ export class MapState extends ViewState {
     });
   }
 
-  zoomIn() {
-    return this._zoomFromCenter(2);
+  zoomIn(speed = 2) {
+    return this._zoomFromCenter(speed);
   }
 
-  zoomOut() {
-    return this._zoomFromCenter(0.5);
+  zoomOut(speed = 2) {
+    return this._zoomFromCenter(1 / speed);
   }
 
-  moveLeft() {
-    return this._panFromCenter([100, 0]);
+  moveLeft(speed = 100) {
+    return this._panFromCenter([speed, 0]);
   }
 
-  moveRight() {
-    return this._panFromCenter([-100, 0]);
+  moveRight(speed = 100) {
+    return this._panFromCenter([-speed, 0]);
   }
 
-  moveUp() {
-    return this._panFromCenter([0, 100]);
+  moveUp(speed = 100) {
+    return this._panFromCenter([0, speed]);
   }
 
-  moveDown() {
-    return this._panFromCenter([0, -100]);
+  moveDown(speed = 100) {
+    return this._panFromCenter([0, -speed]);
   }
 
-  rotateLeft() {
+  rotateLeft(speed = 15) {
     return this._getUpdatedState({
-      bearing: this._viewportProps.bearing - 15
+      bearing: this._viewportProps.bearing - speed
     });
   }
 
-  rotateRight() {
+  rotateRight(speed = 15) {
     return this._getUpdatedState({
-      bearing: this._viewportProps.bearing + 15
+      bearing: this._viewportProps.bearing + speed
     });
   }
 
-  rotateUp() {
+  rotateUp(speed = 10) {
     return this._getUpdatedState({
-      pitch: this._viewportProps.pitch + 10
+      pitch: this._viewportProps.pitch + speed
     });
   }
 
-  rotateDown() {
+  rotateDown(speed = 10) {
     return this._getUpdatedState({
-      pitch: this._viewportProps.pitch - 10
+      pitch: this._viewportProps.pitch - speed
     });
   }
 

@@ -61,7 +61,7 @@ This is an object to define the connection to CARTO, including the credentials (
 
 * username (required): unique username in the platform
 * apiKey (optional): api key. default to `public_user`
-* region (optional): region of the user, posible values are `us` or `eu`. Only need to be specified if you've specifically requested an account in `eu`.
+* region (optional): region of the user, possible values are `us` or `eu`. Only need to be specified if you've specifically requested an account in `eu`.
 * sqlUrl (optional): SQL API URL Template. Default to `https://{user}.carto.com/api/v2/sql`,
 * mapsUrl (optional): MAPS API URL Template. Default to `https://{user}.carto.com/api/v1/map`
 

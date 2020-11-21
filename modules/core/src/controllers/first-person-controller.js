@@ -162,7 +162,7 @@ class FirstPersonState extends ViewState {
     }
 
     const direction = this.getDirection();
-    return this._move(direction, Math.log2(scale), startZoomPosition);
+    return this._move(direction, Math.log2(scale) * MOVEMENT_SPEED, startZoomPosition);
   }
 
   /**
@@ -176,58 +176,58 @@ class FirstPersonState extends ViewState {
     });
   }
 
-  moveLeft() {
+  moveLeft(speed = MOVEMENT_SPEED) {
     const direction = this.getDirection(true);
-    return this._move(direction.rotateZ({radians: Math.PI / 2}));
+    return this._move(direction.rotateZ({radians: Math.PI / 2}), speed);
   }
 
-  moveRight() {
+  moveRight(speed = MOVEMENT_SPEED) {
     const direction = this.getDirection(true);
-    return this._move(direction.rotateZ({radians: -Math.PI / 2}));
+    return this._move(direction.rotateZ({radians: -Math.PI / 2}), speed);
   }
 
   // forward
-  moveUp() {
+  moveUp(speed = MOVEMENT_SPEED) {
     const direction = this.getDirection(true);
-    return this._move(direction);
+    return this._move(direction, speed);
   }
 
   // backward
-  moveDown() {
+  moveDown(speed = MOVEMENT_SPEED) {
     const direction = this.getDirection(true);
-    return this._move(direction.negate());
+    return this._move(direction.negate(), speed);
   }
 
-  rotateLeft() {
+  rotateLeft(speed = 15) {
     return this._getUpdatedState({
-      bearing: this._viewportProps.bearing - 15
+      bearing: this._viewportProps.bearing - speed
     });
   }
 
-  rotateRight() {
+  rotateRight(speed = 15) {
     return this._getUpdatedState({
-      bearing: this._viewportProps.bearing + 15
+      bearing: this._viewportProps.bearing + speed
     });
   }
 
-  rotateUp() {
+  rotateUp(speed = 10) {
     return this._getUpdatedState({
-      pitch: this._viewportProps.pitch + 10
+      pitch: this._viewportProps.pitch + speed
     });
   }
 
-  rotateDown() {
+  rotateDown(speed = 10) {
     return this._getUpdatedState({
-      pitch: this._viewportProps.pitch - 10
+      pitch: this._viewportProps.pitch - speed
     });
   }
 
-  zoomIn() {
-    return this.zoom({scale: 2});
+  zoomIn(speed = 2) {
+    return this.zoom({scale: speed});
   }
 
-  zoomOut() {
-    return this.zoom({scale: 0.5});
+  zoomOut(speed = 2) {
+    return this.zoom({scale: 1 / speed});
   }
 
   // shortest path between two view states
@@ -246,8 +246,8 @@ class FirstPersonState extends ViewState {
   }
 
   /* Private methods */
-  _move(direction, speed = 1, fromPosition = this._viewportProps.position) {
-    const delta = direction.scale(speed * MOVEMENT_SPEED);
+  _move(direction, speed, fromPosition = this._viewportProps.position) {
+    const delta = direction.scale(speed);
     return this._getUpdatedState({
       position: new Vector3(fromPosition).add(delta)
     });

@@ -13,7 +13,7 @@ deck.gl provides several ways to implement animation and transitions.
 
 ### Drawing Constantly vs. When Needed
 
-While some 3D applications such as games often keep drawing to screen at a high frame rate, deck.gl avoids this by default. When not animating, deck.gl is optimized to only render to the screen when something changes (a layer's data or props, the viewState etc). This keeps the GPU and CPU load low and minimizes power consumtion.
+While some 3D applications such as games often keep drawing to screen at a high frame rate, deck.gl avoids this by default. When not animating, deck.gl is optimized to only render to the screen when something changes (a layer's data or props, the viewState etc). This keeps the GPU and CPU load low and minimizes power consumption.
 
 However when animating properties, deck.gl needs to update the screen frequently. This does consume more power and can cause fans to spin up etc. However, even when animating deck.gl does not draw to the screen when the application's browser tab is not active.
 
