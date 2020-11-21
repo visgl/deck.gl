@@ -1,7 +1,7 @@
 /* eslint-disable complexity */
-import {CullingVolume, Plane, AxisAlignedBoundingBox} from '@math.gl/culling';
-import {WebMercatorViewport} from '@deck.gl/core';
-import {fitBounds} from '@math.gl/web-mercator';
+import {CullingVolume, Plane, AxisAlignedBoundingBox, BoundingSphere} from '@math.gl/culling';
+import {Vector3} from 'math.gl';
+import {osmTile2lngLat} from './utils';
 
 const TILE_SIZE = 512;
 // number of world copies to check
@@ -30,8 +30,8 @@ class OSMNode {
   }
 
   update(params) {
-    const {viewport, cullingVolume, elevationBounds, minZ, maxZ, offset} = params;
-    const boundingVolume = this.getBoundingVolume(elevationBounds, offset);
+    const {viewport, cullingVolume, elevationBounds, minZ, maxZ, offset, project} = params;
+    const boundingVolume = this.getBoundingVolume(elevationBounds, offset, project);
 
     // First, check if this tile is visible
     const isInside = cullingVolume.computeVisibility(boundingVolume);
@@ -77,7 +77,25 @@ class OSMNode {
     return result;
   }
 
-  getBoundingVolume(zRange, worldOffset) {
+  getBoundingVolume(zRange, worldOffset, project) {
+    if (project) {
+      // Custom projection
+      const corner0 = osmTile2lngLat(this.x, this.y, this.z);
+      const corner1 = osmTile2lngLat(this.x + 1, this.y + 1, this.z);
+      const center = osmTile2lngLat(this.x + 0.5, this.y + 0.5, this.z);
+      corner0.z = zRange[1];
+      corner1.z = zRange[1];
+      center.z = zRange[0];
+
+      const cornerPos0 = project(corner0);
+      const cornerPos1 = project(corner1);
+      const centerPos = new Vector3(project(center));
+      const R = Math.max(centerPos.distance(cornerPos0), centerPos.distance(cornerPos1));
+
+      return new BoundingSphere(centerPos, R);
+    }
+
+    // Use WebMercator projection
     const scale = Math.pow(2, this.z);
     const extent = TILE_SIZE / scale;
     const originX = this.x * extent + worldOffset * TILE_SIZE;
@@ -92,25 +110,7 @@ class OSMNode {
 }
 
 export function getOSMTileIndices(viewport, maxZ, zRange) {
-  if (!(viewport instanceof WebMercatorViewport)) {
-    const bbox = viewport.getBounds();
-    // The width and height here are arbitrary - they just need to form a reasonable aspect ratio
-    // so that we don't get too many world copies
-    const {longitude, latitude, zoom} = fitBounds({
-      width: 100,
-      height: 100,
-      bounds: [[bbox[0], bbox[1]], [bbox[2], bbox[3]]]
-    });
-
-    viewport = new WebMercatorViewport({
-      width: 100,
-      height: 100,
-      longitude,
-      latitude,
-      zoom,
-      repeat: true
-    });
-  }
+  const project = viewport.resolution ? viewport.projectPosition : null;
 
   // Get the culling volume of the current camera
   const planes = Object.values(viewport.getFrustumPlanes()).map(
@@ -129,6 +129,7 @@ export function getOSMTileIndices(viewport, maxZ, zRange) {
   const root = new OSMNode(0, 0, 0);
   const traversalParams = {
     viewport,
+    project,
     cullingVolume,
     elevationBounds: [elevationMin, elevationMax],
     minZ,

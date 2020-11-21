@@ -5,7 +5,7 @@ import {
   urlType,
   getURLFromTemplate
 } from '@deck.gl/geo-layers/tile-layer/utils';
-import {WebMercatorViewport, OrthographicView} from '@deck.gl/core';
+import {WebMercatorViewport, OrthographicView, _GlobeView as GlobeView} from '@deck.gl/core';
 import {Matrix4} from 'math.gl';
 
 const TEST_CASES = [
@@ -225,6 +225,31 @@ const TEST_CASES = [
       .scale(2)
       .invert(),
     output: []
+  },
+  {
+    title: 'globe',
+    viewport: new GlobeView().makeViewport({
+      width: 800,
+      height: 800,
+      viewState: {
+        longitude: -6,
+        latitude: 58,
+        zoom: 0.5
+      }
+    }),
+    tileSize: 256,
+    output: [
+      '0,0,2',
+      '0,1,1',
+      '0,1,2',
+      '1,0,2',
+      '1,1,1',
+      '1,1,2',
+      '2,0,2',
+      '2,1,2',
+      '3,0,2',
+      '3,1,2'
+    ]
   }
 ];
 
@@ -290,7 +315,7 @@ test('getTileIndices', t => {
 
 test('tileToBoundingBox', t => {
   for (const testCase of TEST_CASES) {
-    if (testCase.output.length) {
+    if (testCase.output.length && !testCase.viewport.resolution) {
       const {viewport, minZoom, maxZoom, tileSize, zRange} = testCase;
       const boundingBoxes = getTileIndices({viewport, maxZoom, minZoom, zRange, tileSize}).map(
         tile => tileToBoundingBox(viewport, tile.x, tile.y, tile.z)
