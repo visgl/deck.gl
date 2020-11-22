@@ -14,10 +14,7 @@ valid_url_regex = re.compile(
     re.IGNORECASE,
 )
 
-valid_image_regex = re.compile(
-    r".(gif|jpe?g|tiff?|png|webp|bmp)$",
-    re.IGNORECASE,
-)
+valid_image_regex = re.compile(r".(gif|jpe?g|tiff?|png|webp|bmp)$", re.IGNORECASE,)
 
 
 ENCODING_PREFIX = "data:image/png;base64,"
