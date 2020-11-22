@@ -5,7 +5,7 @@ import numpy as np
 from ..data_utils import is_pandas_df, has_geo_interface, records_from_geo_interface
 from .json_tools import JSONMixin, camel_and_lower
 
-from pydeck.bindings.types import Image
+from pydeck.types import Image
 from pydeck.exceptions import BinaryTransportException
 
 
@@ -90,7 +90,7 @@ class Layer(JSONMixin):
                 if isinstance(v, str) and v[0] in QUOTE_CHARS and v[0] == v[-1]:
                     # Skip quoted strings
                     kwargs[k] = v.replace(v[0], "")
-                elif isinstance(v, str) and Image.has_extension(v):
+                elif isinstance(v, str) and Image.validate_path(v):
                     # Have pydeck convert local images to strings and/or apply extra quotes
                     kwargs[k] = Image(v)
                 elif isinstance(v, str):

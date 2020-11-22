@@ -6,7 +6,7 @@ Names of various public transit stops within San Francisco, plotted at the locat
 """
 
 import pydeck as pdk
-from pydeck.typing import String
+from pydeck.types import String
 import pandas as pd
 
 TEXT_LAYER_DATA = "https://raw.githubusercontent.com/visgl/deck.gl-data/master/website/bart-stations.json"  # noqa

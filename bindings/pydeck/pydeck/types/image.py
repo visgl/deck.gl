@@ -41,4 +41,4 @@ class Image:
     @staticmethod
     def validate_path(cls, path):
         # Check if the path matches an image (and is therefore likely local) or is a valid URL
-        return valid_image_regex.search(path) or valid_url_regex.search(path)
+        return any((valid_image_regex.search(path), valid_url_regex.search(path), path.startswith(ENCODING_PREFIX)))
