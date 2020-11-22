@@ -5,18 +5,17 @@ import numpy as np
 from ..data_utils import is_pandas_df, has_geo_interface, records_from_geo_interface
 from .json_tools import JSONMixin, camel_and_lower
 
+from pydeck.bindings.types import Image
+from pydeck.exceptions import BinaryTransportException
+
 
 TYPE_IDENTIFIER = "@@type"
 FUNCTION_IDENTIFIER = "@@="
 QUOTE_CHARS = {"'", '"', "`"}
 
 
-class BinaryTransportException(Exception):
-    pass
-
-
 class Layer(JSONMixin):
-    def __init__(self, type, data, id=None, use_binary_transport=None, **kwargs):
+    def __init__(self, type, data=None, id=None, use_binary_transport=None, **kwargs):
         """Configures a deck.gl layer for rendering on a map. Parameters passed
         here will be specific to the particular deck.gl layer that you are choosing to use.
 
@@ -32,7 +31,7 @@ class Layer(JSONMixin):
             Type of layer to render, e.g., `HexagonLayer`
         id : str, default None
             Unique name for layer
-        data : str or list of dict of {str: Any} or pandas.DataFrame
+        data : str or list of dict of {str: Any} or pandas.DataFrame, default None
             Either a URL of data to load in or an array of data
         use_binary_transport : bool, default None
             Boolean indicating binary data
@@ -91,10 +90,12 @@ class Layer(JSONMixin):
                 if isinstance(v, str) and v[0] in QUOTE_CHARS and v[0] == v[-1]:
                     # Skip quoted strings
                     kwargs[k] = v.replace(v[0], "")
+                elif isinstance(v, str) and Image.has_extension(v):
+                    # Have pydeck convert local images to strings and/or apply extra quotes
+                    kwargs[k] = Image(v)
                 elif isinstance(v, str):
                     # Have @deck.gl/json treat strings values as functions
                     kwargs[k] = FUNCTION_IDENTIFIER + v
-
                 elif isinstance(v, list) and v != [] and isinstance(v[0], str):
                     # Allows the user to pass lists e.g. to specify coordinates
                     array_as_str = ""
