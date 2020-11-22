@@ -90,7 +90,7 @@ class Layer(JSONMixin):
                 if isinstance(v, str) and v[0] in QUOTE_CHARS and v[0] == v[-1]:
                     # Skip quoted strings
                     kwargs[k] = v.replace(v[0], "")
-                elif isinstance(v, str) and Image.validate_path(v):
+                elif isinstance(v, str) and Image.validate(v):
                     # Have pydeck convert local images to strings and/or apply extra quotes
                     kwargs[k] = Image(v)
                 elif isinstance(v, str):

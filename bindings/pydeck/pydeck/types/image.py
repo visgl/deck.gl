@@ -25,7 +25,7 @@ ENCODING_PREFIX = "data:image/png;base64,"
 
 class Image:
     def __init__(self, path: str):
-        if not self.validate_path(path):
+        if not self.validate(path):
             raise ValueError(f"{path} is not contain a valid image path")
         self.path = path
         self.is_local = not valid_url_regex.search(self.path)
@@ -33,12 +33,16 @@ class Image:
     def __repr__(self):
         if self.is_local:
             with open(self.path, "rb") as img_file:
-                encoded_string = ENCODING_PREFIX + base64.b64encode(img_file.read())
-                return String(encoded_string)
+                encoded_string = ENCODING_PREFIX + base64.b64encode(img_file.read()).decode("utf-8")
+                print(String(encoded_string).__repr__())
+                return String(encoded_string).__repr__()
         else:
-            return String(self.path)
+            return String(self.path).__repr__()
+
+    def __eq__(self, other):
+        return str(self) == str(other)
 
     @staticmethod
-    def validate_path(cls, path):
-        # Check if the path matches an image (and is therefore likely local) or is a valid URL
+    def validate(path):
+        # Necessary-but-not-sufficient checks for being a valid image for @deck.gl/json
         return any((valid_image_regex.search(path), valid_url_regex.search(path), path.startswith(ENCODING_PREFIX)))
