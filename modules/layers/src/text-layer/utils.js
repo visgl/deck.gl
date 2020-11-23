@@ -96,7 +96,7 @@ function breakAll(text, maxWidth, iconMapping) {
     const textWidth = getTextWidth(text[i], iconMapping);
     if (rowOffsetLeft + textWidth > maxWidth) {
       if (rowStartCharIndex < i) {
-        rows.push(text.substring(rowStartCharIndex, i));
+        rows.push(text.slice(rowStartCharIndex, i));
       }
       rowStartCharIndex = i;
       rowOffsetLeft = 0;
@@ -106,7 +106,7 @@ function breakAll(text, maxWidth, iconMapping) {
 
   // last row
   if (rowStartCharIndex < text.length) {
-    rows.push(text.substring(rowStartCharIndex));
+    rows.push(text.slice(rowStartCharIndex));
   }
 
   return {
@@ -133,7 +133,7 @@ function breakWord(text, maxWidth, iconMapping) {
       group = text[i];
       groupStartCharIndex = i + 1;
     } else if ((i + 1 < text.length && text[i + 1] === ' ') || i + 1 === text.length) {
-      group = text.substring(groupStartCharIndex, i + 1);
+      group = text.slice(groupStartCharIndex, i + 1);
       groupStartCharIndex = i + 1;
     } else {
       group = null;
@@ -145,7 +145,7 @@ function breakWord(text, maxWidth, iconMapping) {
       if (rowOffsetLeft + groupWidth > maxWidth) {
         const lastGroupStartIndex = groupStartCharIndex - group.length;
         if (rowStartCharIndex < lastGroupStartIndex) {
-          rows.push(text.substring(rowStartCharIndex, lastGroupStartIndex));
+          rows.push(text.slice(rowStartCharIndex, lastGroupStartIndex));
           rowStartCharIndex = lastGroupStartIndex;
           rowOffsetLeft = 0;
         }
@@ -168,7 +168,7 @@ function breakWord(text, maxWidth, iconMapping) {
 
   // last row
   if (rowStartCharIndex < text.length) {
-    rows.push(text.substring(rowStartCharIndex));
+    rows.push(text.slice(rowStartCharIndex));
   }
 
   return {
@@ -202,7 +202,7 @@ function transformRow(row, iconMapping) {
       leftOffsets[i] = x + frame.width / 2;
       x += frame.width;
     } else {
-      log.warn(`Missing character: ${character}`)();
+      log.warn(`Missing character: ${character} (${character.codePointAt(0)})`)();
       leftOffsets[i] = x;
       x += MISSING_CHAR_WIDTH;
     }
@@ -233,6 +233,9 @@ function transformRow(row, iconMapping) {
  */
 /* eslint-disable max-params, max-depth, complexity */
 export function transformParagraph(paragraph, lineHeight, wordBreak, maxWidth, iconMapping) {
+  // Break into an array of characters
+  // When dealing with double-length unicode characters, `str.length` or `str[i]` do not work
+  paragraph = Array.from(paragraph);
   const result = new Array(paragraph.length);
   const autoWrappingEnabled =
     (wordBreak === 'break-word' || wordBreak === 'break-all') && isFinite(maxWidth) && maxWidth > 0;
