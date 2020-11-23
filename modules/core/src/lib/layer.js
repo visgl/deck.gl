@@ -395,7 +395,7 @@ export default class Layer extends Component {
 
     if (!oldViewport || !areViewportsEqual({oldViewport, viewport})) {
       this.setChangeFlags({viewportChanged: true});
-      this._update();
+      this._onViewportChange();
     }
   }
 
@@ -417,6 +417,10 @@ export default class Layer extends Component {
     for (const model of this.getModels()) {
       this._setModelAttributes(model, changedAttributes);
     }
+  }
+
+  _onViewportChange() {
+    this._update();
   }
 
   // Calls attribute manager to update any WebGL attributes
