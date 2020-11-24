@@ -197,7 +197,8 @@ export default class TextLayer extends CompositeLayer {
       for (const object of iterable) {
         objectInfo.index++;
         const text = getText(object, objectInfo) || '';
-        numInstances += text.length;
+        // When dealing with double-length unicode characters, `str.length` is incorrect
+        numInstances += Array.from(text).length;
         startIndices.push(numInstances);
       }
     }
@@ -227,7 +228,7 @@ export default class TextLayer extends CompositeLayer {
           : getAlignmentBaseline
       ];
 
-    const offsets = new Array(paragraph.length * 2);
+    const offsets = new Array(characters.length * 2);
     let index = 0;
 
     for (const {rowWidth, x, y} of characters) {

@@ -53,6 +53,26 @@ test('TextLayer - sdf', t => {
   t.end();
 });
 
+test('TextLayer - special texts', t => {
+  const testCases = [
+    {
+      props: {
+        data: ['\u{F0004}', null, '\u{F0004}+\u{F0005}'],
+        getText: d => d,
+        getPosition: d => [0, 0]
+      },
+      onAfterUpdate: ({layer, subLayer}) => {
+        t.is(subLayer.props.numInstances, 4, 'sublayer has correct prop');
+        t.deepEqual(subLayer.props.startIndices, [0, 1, 1, 4], 'sublayer has correct prop');
+      }
+    }
+  ];
+
+  testLayer({Layer: TextLayer, testCases, onError: t.notOk});
+
+  t.end();
+});
+
 test('TextLayer - binary', t => {
   const value = new Uint8Array([72, 101, 108, 108, 111, 32, 119, 111, 114, 108, 100, 33]);
   const startIndices = [0, 6];
