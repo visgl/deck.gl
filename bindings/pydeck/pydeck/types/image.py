@@ -37,7 +37,6 @@ class Image:
         if self.is_local:
             with open(self.path, "rb") as img_file:
                 encoded_string = get_encoding(self.path) + base64.b64encode(img_file.read()).decode("utf-8")
-                print(String(encoded_string).__repr__())
                 return String(encoded_string).__repr__()
         else:
             return String(self.path).__repr__()
