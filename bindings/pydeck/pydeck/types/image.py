@@ -1,4 +1,5 @@
 import base64
+import pathlib
 import re
 
 from pydeck.types import String
@@ -14,10 +15,15 @@ valid_url_regex = re.compile(
     re.IGNORECASE,
 )
 
-valid_image_regex = re.compile(r".(gif|jpe?g|tiff?|png|webp|bmp)$", re.IGNORECASE,)
+valid_image_regex = re.compile(
+    r".(gif|jpe?g|tiff?|png|webp|bmp)$",
+    re.IGNORECASE,
+)
 
 
-ENCODING_PREFIX = "data:image/png;base64,"
+def get_encoding(path: str) -> str:
+    extension = pathlib.Path(path).suffix
+    return f"data:image/{extension};base64,"
 
 
 class Image:
@@ -30,7 +36,7 @@ class Image:
     def __repr__(self):
         if self.is_local:
             with open(self.path, "rb") as img_file:
-                encoded_string = ENCODING_PREFIX + base64.b64encode(img_file.read()).decode("utf-8")
+                encoded_string = get_encoding(self.path) + base64.b64encode(img_file.read()).decode("utf-8")
                 print(String(encoded_string).__repr__())
                 return String(encoded_string).__repr__()
         else:
@@ -42,4 +48,4 @@ class Image:
     @staticmethod
     def validate(path):
         # Necessary-but-not-sufficient checks for being a valid image for @deck.gl/json
-        return any((valid_image_regex.search(path), valid_url_regex.search(path), path.startswith(ENCODING_PREFIX)))
+        return any((valid_image_regex.search(path), valid_url_regex.search(path), path.startswith("data/image")))
