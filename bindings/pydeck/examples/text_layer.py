@@ -6,6 +6,7 @@ Names of various public transit stops within San Francisco, plotted at the locat
 """
 
 import pydeck as pdk
+from pydeck.types import String
 import pandas as pd
 
 TEXT_LAYER_DATA = "https://raw.githubusercontent.com/visgl/deck.gl-data/master/website/bart-stations.json"  # noqa
@@ -23,8 +24,8 @@ layer = pdk.Layer(
     get_angle=0,
     # Note that string constants in pydeck are explicitly passed as strings
     # This distinguishes them from columns in a data set
-    get_text_anchor="'middle'",
-    get_alignment_baseline="'center'",
+    get_text_anchor=String("middle"),
+    get_alignment_baseline=String("center"),
 )
 
 # Set the viewport location

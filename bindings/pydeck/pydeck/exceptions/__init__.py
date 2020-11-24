@@ -1,1 +1,1 @@
-from .exceptions import PydeckException  # noqa
+from .exceptions import BinaryTransportException, PydeckException  # noqa,
