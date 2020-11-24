@@ -1,10 +1,11 @@
 import uuid
+from collections.abc import Iterable
 
 import numpy as np
 
-from ..data_utils import is_pandas_df, has_geo_interface, records_from_geo_interface
+from ..data_utils import has_geo_interface, is_pandas_df, records_from_geo_interface
 from .json_tools import JSONMixin, camel_and_lower
-
+from .types import Function, Literal, Type
 
 TYPE_IDENTIFIER = "@@type"
 FUNCTION_IDENTIFIER = "@@="
@@ -82,6 +83,9 @@ class Layer(JSONMixin):
         self._kwargs = kwargs.copy()
         if kwargs:
             for k, v in kwargs.items():
+                if isinstance(v, Type):
+                    continue
+
                 # We assume strings and arrays of strings are identifiers
                 # ["lng", "lat"] would be converted to '[lng, lat]'
                 # TODO given that data here is usually a list of records,
@@ -89,21 +93,19 @@ class Layer(JSONMixin):
                 # Errors on case like get_position='-', however
 
                 if isinstance(v, str) and v[0] in QUOTE_CHARS and v[0] == v[-1]:
-                    # Skip quoted strings
-                    kwargs[k] = v.replace(v[0], "")
-                elif isinstance(v, str):
-                    # Have @deck.gl/json treat strings values as functions
-                    kwargs[k] = FUNCTION_IDENTIFIER + v
+                    # For quoted strings, consider inner part a literal string
+                    kwargs[k] = Literal(v[1:-1])
 
-                elif isinstance(v, list) and v != [] and isinstance(v[0], str):
-                    # Allows the user to pass lists e.g. to specify coordinates
-                    array_as_str = ""
-                    for i, identifier in enumerate(v):
-                        if i == len(v) - 1:
-                            array_as_str += "{}".format(identifier)
-                        else:
-                            array_as_str += "{}, ".format(identifier)
-                    kwargs[k] = "{}[{}]".format(FUNCTION_IDENTIFIER, array_as_str)
+                elif isinstance(v, str):
+                    # Treat strings values as functions
+                    kwargs[k] = Function(v)
+
+                elif isinstance(v, Iterable) and v != [] and isinstance(v[0], str):
+                    # Allow lists of str e.g. to specify coordinates
+                    kwargs[k] = Function(v)
+
+                else:
+                    kwargs[k] = Literal(v)
 
             self.__dict__.update(kwargs)
 
