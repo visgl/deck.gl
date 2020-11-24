@@ -19,6 +19,12 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v8.3
 
+#### deck.gl [8.3.9] - Nov 23 2020
+
+- Only warn about WebGL2 support if attribute transition is used (#5155)
+- Fix GlobeView tile traversal (#5160)
+- Fix TextLayer handling of unicode characters (#5168)
+
 #### deck.gl [8.3.8] - Nov 17 2020
 
 - Change default alphaCutoff to non-zero (#5129)
