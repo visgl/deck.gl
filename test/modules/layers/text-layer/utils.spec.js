@@ -172,6 +172,34 @@ test('TextLayer - utils#transformParagraph - multiple lines', t => {
   t.end();
 });
 
+test('TextLayer - utils#transformParagraph - unicode', t => {
+  const text = '\u{F0004}\n\u{F0005}';
+  const lineHeight = 1.0;
+
+  const iconMapping = {
+    ['\u{F0004}']: {width: 1, height: 4},
+    ['\u{F0005}']: {width: 2, height: 4}
+  };
+
+  const expected = {
+    characters: [
+      // text: '\u{F0004}'
+      {x: 0.5, y: 2, rowWidth: 1},
+      // text: '\n'
+      {x: 0, y: 0, rowWidth: 0},
+      // text: '\u{F0005}'
+      {x: 1, y: 6, rowWidth: 2}
+    ],
+    size: [2, 8]
+  };
+
+  const transformedData = transformParagraph(text, lineHeight, null, null, iconMapping);
+
+  t.deepEqual(transformedData, expected);
+
+  t.end();
+});
+
 test('TextLayer - utils#transformParagraph - multiple lines with line height', t => {
   const text = 'ab\nc';
   const lineHeight = 1.5;
