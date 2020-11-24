@@ -22,7 +22,7 @@ valid_image_regex = re.compile(
 
 
 def get_encoding(path: str) -> str:
-    extension = pathlib.Path(path).suffix.replace('.', '')
+    extension = pathlib.Path(path).suffix.replace(".", "")
     return f"data:image/{extension};base64,"
 
 
