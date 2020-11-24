@@ -52,7 +52,7 @@ To enable pydeck for Jupyter Notebook:
         jupyter nbextension install --sys-prefix --symlink --overwrite --py pydeck
         jupyter nbextension enable --sys-prefix --py pydeck
 
-To enable pydeck for JupyterLab:
+To enable pydeck for JupyterLab (on Mac/Unix-like systems):
 
 .. code-block:: bash
 
