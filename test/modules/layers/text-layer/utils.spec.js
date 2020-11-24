@@ -104,18 +104,9 @@ test('TextLayer - utils#transformParagraph - single line', t => {
   };
 
   const expected = {
-    characters: [
-      {
-        x: 0.5,
-        y: 2,
-        rowWidth: 3
-      },
-      {
-        x: 2,
-        y: 2,
-        rowWidth: 3
-      }
-    ],
+    x: [0.5, 2],
+    y: [2, 2],
+    rowWidth: [3, 3],
     size: [3, 4]
   };
 
@@ -137,32 +128,9 @@ test('TextLayer - utils#transformParagraph - multiple lines', t => {
   };
 
   const expected = {
-    characters: [
-      {
-        // text: 'a'
-        x: 0.5,
-        y: 2,
-        rowWidth: 4
-      },
-      {
-        // text: 'b'
-        x: 2.5,
-        y: 2,
-        rowWidth: 4
-      },
-      {
-        // text: '\n'
-        x: 0,
-        y: 0,
-        rowWidth: 0
-      },
-      {
-        // text: 'c'
-        x: 1,
-        y: 6,
-        rowWidth: 2
-      }
-    ],
+    x: [0.5, 2.5, 0, 1],
+    y: [2, 2, 0, 6],
+    rowWidth: [4, 4, 0, 2],
     size: [4, 8]
   };
 
@@ -182,14 +150,9 @@ test('TextLayer - utils#transformParagraph - unicode', t => {
   };
 
   const expected = {
-    characters: [
-      // text: '\u{F0004}'
-      {x: 0.5, y: 2, rowWidth: 1},
-      // text: '\n'
-      {x: 0, y: 0, rowWidth: 0},
-      // text: '\u{F0005}'
-      {x: 1, y: 6, rowWidth: 2}
-    ],
+    x: [0.5, 0, 1],
+    y: [2, 0, 6],
+    rowWidth: [1, 0, 2],
     size: [2, 8]
   };
 
@@ -211,32 +174,9 @@ test('TextLayer - utils#transformParagraph - multiple lines with line height', t
   };
 
   const expected = {
-    characters: [
-      {
-        // text: 'a',
-        x: 0.5,
-        y: 2,
-        rowWidth: 4
-      },
-      {
-        // text: 'b',
-        x: 2.5,
-        y: 2,
-        rowWidth: 4
-      },
-      {
-        // text: '\n'
-        x: 0,
-        y: 0,
-        rowWidth: 0
-      },
-      {
-        // text: 'c',
-        x: 1,
-        y: 8,
-        rowWidth: 2
-      }
-    ],
+    x: [0.5, 2.5, 0, 1],
+    y: [2, 2, 0, 8],
+    rowWidth: [4, 4, 0, 2],
     size: [4, 12]
   };
 
@@ -265,31 +205,46 @@ test('TextLayer - utils#autoWrapping', t => {
     '.': {width: 1}
   };
 
-  let expected = {
-    rows: ['Amy: ', 'Hello, ', 'Ben.'],
-    lastRowStartCharIndex: 12,
-    lastRowOffsetLeft: 7
+  const getStartIndices = parts => {
+    const indices = [];
+    let index = 0;
+    for (let i = 0; i < parts.length; i++) {
+      indices[i] = index;
+      index += parts[i].length;
+    }
+    return indices;
   };
+
+  let expected = getStartIndices(['Amy: ', 'Hello, ', 'Ben.']);
   let actual = autoWrapping(text, 'break-word', 15, iconMapping);
   t.deepEqual(actual, expected, 'Should match break word.');
 
-  expected = {
-    rows: ['Amy:', ' ', 'Hell', 'o, ', 'Ben.'],
-    lastRowStartCharIndex: 12,
-    lastRowOffsetLeft: 7
-  };
+  expected = getStartIndices(['Amy:', ' ', 'Hell', 'o, ', 'Ben.']);
   actual = autoWrapping(text, 'break-word', 10, iconMapping);
   t.deepEqual(actual, expected, 'Should break the word when it is longer than maxWidth.');
 
-  expected = {rows: ['Amy: H', 'ello, Be', 'n.'], lastRowStartCharIndex: 14, lastRowOffsetLeft: 4};
+  expected = getStartIndices(['Amy: H', 'ello, Be', 'n.']);
   actual = autoWrapping(text, 'break-all', 15, iconMapping);
   t.deepEqual(actual, expected, 'Should match break all.');
 
-  expected = {
-    rows: ['A', 'm', 'y', ':', ' ', 'H', 'e', 'l', 'l', 'o', ',', ' ', 'B', 'e', 'n', '.'],
-    lastRowStartCharIndex: 15,
-    lastRowOffsetLeft: 1
-  };
+  expected = getStartIndices([
+    'A',
+    'm',
+    'y',
+    ':',
+    ' ',
+    'H',
+    'e',
+    'l',
+    'l',
+    'o',
+    ',',
+    ' ',
+    'B',
+    'e',
+    'n',
+    '.'
+  ]);
   actual = autoWrapping(text, 'break-word', 1, iconMapping);
   t.deepEqual(
     actual,
@@ -314,50 +269,9 @@ test('TextLayer - utils#transformParagraph - autoWrapping', t => {
   };
 
   const expected = {
-    characters: [
-      {
-        // text: 'a',
-        x: 0.5,
-        y: 2,
-        rowWidth: 5
-      },
-      {
-        // text: 'b',
-        x: 2.5,
-        y: 2,
-        rowWidth: 5
-      },
-      {
-        // text: ' '
-        x: 4.5,
-        y: 2,
-        rowWidth: 5
-      },
-      {
-        // text: 'c',
-        x: 1,
-        y: 8,
-        rowWidth: 12
-      },
-      {
-        // text: 'd',
-        x: 7,
-        y: 8,
-        rowWidth: 12
-      },
-      {
-        // text: ' '
-        x: 0.5,
-        y: 14,
-        rowWidth: 3
-      },
-      {
-        // text: 'e'
-        x: 2,
-        y: 14,
-        rowWidth: 3
-      }
-    ],
+    x: [0.5, 2.5, 4.5, 1, 7, 0.5, 2],
+    y: [2, 2, 2, 8, 8, 14, 14],
+    rowWidth: [5, 5, 5, 12, 12, 3, 3],
     size: [12, 18]
   };
 

@@ -214,7 +214,9 @@ export default class TextLayer extends CompositeLayer {
 
     const paragraph = getText(object, objectInfo) || '';
     const {
-      characters,
+      x,
+      y,
+      rowWidth,
       size: [width, height]
     } = transformParagraph(paragraph, lineHeight, wordBreak, maxWidth, iconMapping);
     const anchorX =
@@ -228,15 +230,16 @@ export default class TextLayer extends CompositeLayer {
           : getAlignmentBaseline
       ];
 
-    const offsets = new Array(characters.length * 2);
+    const numCharacters = x.length;
+    const offsets = new Array(numCharacters * 2);
     let index = 0;
 
-    for (const {rowWidth, x, y} of characters) {
+    for (let i = 0; i < numCharacters; i++) {
       // For a multi-line object, offset in x-direction needs consider
       // the row offset in the paragraph and the object offset in the row
-      const rowOffset = ((1 - anchorX) * (width - rowWidth)) / 2;
-      offsets[index++] = ((anchorX - 1) * width) / 2 + rowOffset + x;
-      offsets[index++] = ((anchorY - 1) * height) / 2 + y;
+      const rowOffset = ((1 - anchorX) * (width - rowWidth[i])) / 2;
+      offsets[index++] = ((anchorX - 1) * width) / 2 + rowOffset + x[i];
+      offsets[index++] = ((anchorY - 1) * height) / 2 + y[i];
     }
     return offsets;
   }
