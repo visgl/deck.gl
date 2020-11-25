@@ -1,5 +1,22 @@
 # Upgrade Guide
 
+## Upgrading from deck.gl v8.3 to v8.4
+
+### wrapLongitude
+
+The behavior of `wrapLongitude` has changed. Before, setting this prop to `true` would project vertices to a copy of the map that is closer to the current center. Starting with v8.4, enabling this prop would "normalize" the geometry to the [-180, 180] longitude range. See the following list for layer-specific changes:
+
+- `LineLayer`: always draw the shortest path between source and target positions. If the shortest path crosses the 180th meridian, it is split into two segments.
+
+This change makes layers render more predictably at low zoom levels. To draw horizontally continuous map with multiple copies of the world, use [MapView](/docs/api-reference/core/map-view.md) with the `repeat` option:
+
+```js
+new Deck({
+  views: new MapView({repeat: true}),
+  ...
+})
+```
+
 ## Upgrading from deck.gl v8.2 to v8.3
 
 - The following is added to the default image loading options: `{imagebitmap: {premultiplyAlpha: 'none'}}` (previously `default`). This generates more visually similar outcome between `ImageBitmap` and `Image` formats (see changes in 8.2 below). You can override this behavior with the `loadOptions` prop of a layer. See [ImageLoader options](https://loaders.gl/modules/images/docs/api-reference/image-loader#options) for more information.
