@@ -20,20 +20,19 @@ jobs:
       - name: Install dependencies
         run: |
           sudo apt-get install -y g++-6 mesa-utils xvfb libgl1-mesa-dri libglapi-mesa libosmesa6 libxi-dev
-          sudo apt-get install xvfb
           yarn bootstrap
 
       - name: Run tests
         run: |
           export DISPLAY=:99.0
           Xvfb -ac :99 -screen 0 1280x1024x16 > /dev/null 2>&1 &
-          yarn test node
+          yarn test ci
 
-      # - name: Coveralls
-      #   if: matrix.node-version == 12
-      #   uses: coverallsapp/github-action@master
-      #   with:
-      #     github-token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Coveralls
+        if: matrix.node-version == 12
+        uses: coverallsapp/github-action@master
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
 
   test-python:
     runs-on: ubuntu-latest
