@@ -72,11 +72,11 @@ void main(void) {
     if (deltaLng * useShortestPath > 180.) {
       source_world.x += 360. * useShortestPath;
       source_world = splitLine(source_world, target_world, 180. * useShortestPath);
-      source_world_64low = splitLine(source_world_64low, target_world_64low, 0.0);
+      source_world_64low = vec3(0.0);
     } else if (deltaLng * useShortestPath < -180.) {
       target_world.x += 360. * useShortestPath;
       target_world = splitLine(source_world, target_world, 180. * useShortestPath);
-      target_world_64low = splitLine(source_world_64low, target_world_64low, 0.0);
+      target_world_64low = vec3(0.0);
     } else if (useShortestPath < 0.) {
       // Line is not split, abort
       gl_Position = vec4(0.);
