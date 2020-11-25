@@ -1,6 +1,11 @@
 name: test
 
-on: [push]
+# On every pull request, but only on push to master
+on:
+  push:
+    branches:
+    - master
+  pull_request_target:
 
 jobs:
   test-node:
