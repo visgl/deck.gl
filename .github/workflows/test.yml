@@ -21,12 +21,13 @@ jobs:
         run: |
           sudo apt-get install -y g++-6 mesa-utils xvfb libgl1-mesa-dri libglapi-mesa libosmesa6 libxi-dev
           sudo apt-get install xvfb
-          export DISPLAY=:99.0
-          Xvfb -ac :99 -screen 0 1280x1024x16 > /dev/null 2>&1 &
           yarn bootstrap
 
       - name: Run tests
-        run: npm run test node
+        run: |
+          export DISPLAY=:99.0
+          Xvfb -ac :99 -screen 0 1280x1024x16 > /dev/null 2>&1 &
+          yarn test node
 
       # - name: Coveralls
       #   if: matrix.node-version == 12
@@ -56,4 +57,6 @@ jobs:
           make init
 
       - name: Run tests
-        run: make test
+        run: |
+          cd bindings/pydeck
+          make test
