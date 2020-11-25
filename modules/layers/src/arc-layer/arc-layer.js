@@ -50,6 +50,11 @@ export default class ArcLayer extends Layer {
     return super.getShaders({vs, fs, modules: [project32, picking]}); // 'project' module added by default.
   }
 
+  // This layer has its own wrapLongitude logic
+  get wrapLongitude() {
+    return false;
+  }
+
   initializeState() {
     const attributeManager = this.getAttributeManager();
 
@@ -122,7 +127,14 @@ export default class ArcLayer extends Layer {
 
   draw({uniforms}) {
     const {viewport} = this.context;
-    const {widthUnits, widthScale, widthMinPixels, widthMaxPixels, greatCircle} = this.props;
+    const {
+      widthUnits,
+      widthScale,
+      widthMinPixels,
+      widthMaxPixels,
+      greatCircle,
+      wrapLongitude
+    } = this.props;
 
     const widthMultiplier = widthUnits === 'pixels' ? viewport.metersPerPixel : 1;
 
@@ -132,7 +144,8 @@ export default class ArcLayer extends Layer {
         greatCircle,
         widthScale: widthScale * widthMultiplier,
         widthMinPixels,
-        widthMaxPixels
+        widthMaxPixels,
+        useShortestPath: wrapLongitude
       })
       .draw();
   }
