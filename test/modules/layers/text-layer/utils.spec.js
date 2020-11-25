@@ -208,9 +208,9 @@ test('TextLayer - utils#autoWrapping', t => {
   const getStartIndices = parts => {
     const indices = [];
     let index = 0;
-    for (let i = 0; i < parts.length; i++) {
-      indices[i] = index;
+    for (let i = 0; i < parts.length - 1; i++) {
       index += parts[i].length;
+      indices[i] = index;
     }
     return indices;
   };
