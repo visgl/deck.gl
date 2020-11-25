@@ -1,6 +1,0 @@
-#!/usr/bin/env bash
-sh /etc/init.d/xvfb
-
-npm run cover
-
-cat coverage/lcov.info | coveralls

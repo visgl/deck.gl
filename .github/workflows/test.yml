@@ -1,0 +1,52 @@
+name: test
+
+on: [push, pull_request]
+
+jobs:
+  test-node:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [12.x]
+
+    steps:
+      - uses: actions/checkout@v2.1.1
+
+      - name: Set up Node ${{ matrix.node-version }}
+        uses: actions/setup-node@v1
+        with:
+          node-version: ${{ matrix.node-version }}
+
+      - name: Bootstrap
+        run: |
+          yarn bootstrap
+      - name: Run tests
+        run: |
+          npm run test ci
+      - name: Coveralls
+        if: matrix.node-version == 12
+        uses: coverallsapp/github-action@master
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+  test-python:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: [3.7]
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install dependencies
+        run: sudo apt-get install ubuntu-toolchain-r-test
+      - run: sudo nvm install 12.12.0 && nvm use 12.12.0
+      - run: cd bindings/pydeck && make init
+
+      - name: Run tests
+        run: make test
