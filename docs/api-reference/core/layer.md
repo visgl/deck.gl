@@ -382,7 +382,7 @@ Note:
 
 - Default: `null`
 
-Layers uses [loaders.gl](https://loaders.gl) to load data and other resources. `loadOptions` is an object to customize the behavior of any loader used during fetching and parsing. The object may contain any of the [top-level options](https://loaders.gl/modules/core/docs/api-reference/parse#options), as well as loader-specific options targeting a particular format.
+Layers use [loaders.gl](https://loaders.gl) to load data and other resources. `loadOptions` is an object to customize the behavior of any loader used during fetching and parsing. The object may contain any of the [top-level options](https://loaders.gl/modules/core/docs/api-reference/parse#options), as well as loader-specific options targeting a particular format.
 
 For example, the following prop value passes additional configs to the [fetch](https://developer.mozilla.org/en-US/docs/Web/API/WindowOrWorkerGlobalScope/fetch) call in order to access a secured API:
 
