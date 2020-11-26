@@ -153,6 +153,14 @@ Set `workerUrl` to an empty string to disable worker during debugging (improves 
 
 - Default: `null`
 
+
+##### `loadOptions` (Object, optional)
+
+On top of the [default options](/docs/api-reference/core/layer.md#loadoptions), also accepts options for the following loaders:
+
+- [ImageLoader](https://loaders.gl/modules/images/docs/api-reference/image-loader) if the `texture` prop is supplied
+
+
 ### Render Options
 
 ##### `color` (Color, optional)

@@ -111,6 +111,13 @@ Optional. When provided, a feature with ID corresponding to the supplied value w
 If `uniqueIdProperty` is provided, value within that feature property will be used for ID comparison. If not, [feature id](https://github.com/mapbox/vector-tile-spec/tree/master/2.1#42-features) will be used.
 
 
+##### `loadOptions` (Object, optional)
+
+On top of the [default options](/docs/api-reference/core/layer.md#loadoptions), also accepts options for the following loaders:
+
+- [MVTLoader](https://loaders.gl/modules/mvt/docs/api-reference/mvt-loader)
+
+
 ### Callbacks
 
 ##### `onDataLoad` (Function, optional)
