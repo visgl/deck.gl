@@ -6,7 +6,7 @@
 
 The behavior of `wrapLongitude` has changed. Before, setting this prop to `true` would project vertices to a copy of the map that is closer to the current center. Starting with v8.4, enabling this prop would "normalize" the geometry to the [-180, 180] longitude range. See the following list for layer-specific changes:
 
-- `LineLayer`: always draw the shortest path between source and target positions. If the shortest path crosses the 180th meridian, it is split into two segments.
+- `LineLayer` and `ArcLayer`: always draw the shortest path between source and target positions. If the shortest path crosses the 180th meridian, it is split into two segments.
 
 This change makes layers render more predictably at low zoom levels. To draw horizontally continuous map with multiple copies of the world, use [MapView](/docs/api-reference/core/map-view.md) with the `repeat` option:
 
