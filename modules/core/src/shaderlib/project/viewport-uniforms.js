@@ -226,7 +226,6 @@ function calculateViewportUniforms({
     project_uProjectionMode: viewport.projectionMode,
     project_uCoordinateOrigin: shaderCoordinateOrigin,
     project_uCenter: projectionCenter,
-    project_uAntimeridian: (viewport.longitude || 0) - 180,
 
     // Screen size
     project_uViewportSize: viewportSize,

@@ -36,7 +36,6 @@ uniform int project_uCoordinateSystem;
 uniform int project_uProjectionMode;
 uniform float project_uScale;
 uniform bool project_uWrapLongitude;
-uniform float project_uAntimeridian;
 uniform vec3 project_uCommonUnitsPerMeter;
 uniform vec3 project_uCommonUnitsPerWorldUnit;
 uniform vec3 project_uCommonUnitsPerWorldUnit2;
@@ -101,7 +100,7 @@ vec4 project_offset_(vec4 offset) {
 vec2 project_mercator_(vec2 lnglat) {
   float x = lnglat.x;
   if (project_uWrapLongitude) {
-    x = mod(x - project_uAntimeridian, 360.0) + project_uAntimeridian;
+    x = mod(x + 180., 360.0) - 180.;
   }
   float y = clamp(lnglat.y, -89.9, 89.9);
   return vec2(
