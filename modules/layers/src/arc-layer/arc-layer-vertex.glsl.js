@@ -34,6 +34,7 @@ attribute float instanceHeights;
 attribute float instanceTilts;
 
 uniform bool greatCircle;
+uniform bool useShortestPath;
 uniform float numSegments;
 uniform float opacity;
 uniform float widthScale;
@@ -133,6 +134,9 @@ void main(void) {
 
   float segmentIndex = positions.x;
   float segmentRatio = getSegmentRatio(segmentIndex);
+  float prevSegmentRatio = getSegmentRatio(max(0.0, segmentIndex - 1.0));
+  float nextSegmentRatio = getSegmentRatio(min(numSegments - 1.0, segmentIndex + 1.0));
+
   // if it's the first point, use next - current as direction
   // otherwise use current - prev
   float indexDir = mix(-1.0, 1.0, step(segmentIndex, 0.0));
@@ -151,9 +155,6 @@ void main(void) {
     source = project_globe_(vec3(instanceSourcePositions.xy, 0.0));
     target = project_globe_(vec3(instanceTargetPositions.xy, 0.0));
     float angularDist = getAngularDist(instanceSourcePositions.xy, instanceTargetPositions.xy);
-  
-    float prevSegmentRatio = getSegmentRatio(max(0.0, segmentIndex - 1.0));
-    float nextSegmentRatio = getSegmentRatio(min(numSegments, segmentIndex + 1.0));
 
     vec3 prevPos = interpolateGreatCircle(instanceSourcePositions, instanceTargetPositions, source, target, angularDist, prevSegmentRatio);
     vec3 currPos = interpolateGreatCircle(instanceSourcePositions, instanceTargetPositions, source, target, angularDist, segmentRatio);
@@ -184,12 +185,40 @@ void main(void) {
     next = project_position_to_clipspace(nextPos, nextPos64Low, vec3(0.0));
   
   } else {
-    source = project_position(instanceSourcePositions, instanceSourcePositions64Low);
-    target = project_position(instanceTargetPositions, instanceTargetPositions64Low);
+    vec3 source_world = instanceSourcePositions;
+    vec3 target_world = instanceTargetPositions;
+    if (useShortestPath) {
+      source_world.x = mod(source_world.x + 180., 360.0) - 180.;
+      target_world.x = mod(target_world.x + 180., 360.0) - 180.;
 
-    float nextSegmentRatio = getSegmentRatio(segmentIndex + indexDir);
+      float deltaLng = target_world.x - source_world.x;
+      if (deltaLng > 180.) target_world.x -= 360.;
+      if (deltaLng < -180.) source_world.x -= 360.;
+    }
+    source = project_position(source_world, instanceSourcePositions64Low);
+    target = project_position(target_world, instanceTargetPositions64Low);
+
+    if (useShortestPath) {
+      float thresholdRatio = -source.x / (target.x - source.x);
+
+      if (prevSegmentRatio <= thresholdRatio && nextSegmentRatio > thresholdRatio) {
+        isValid = 0.0;
+        indexDir = sign(segmentRatio - thresholdRatio);
+        segmentRatio = thresholdRatio;
+      }
+    }
+
+    nextSegmentRatio = indexDir < 0.0 ? prevSegmentRatio : nextSegmentRatio;
     vec3 currPos = interpolateFlat(source, target, segmentRatio);
     vec3 nextPos = interpolateFlat(source, target, nextSegmentRatio);
+
+    if (useShortestPath) {
+      if (nextPos.x < 0.0) {
+        currPos.x += TILE_SIZE;
+        nextPos.x += TILE_SIZE;
+      }
+    }
+
     curr = project_common_position_to_clipspace(vec4(currPos, 1.0));
     next = project_common_position_to_clipspace(vec4(nextPos, 1.0));
     geometry.position = vec4(currPos, 1.0);
