@@ -76,6 +76,13 @@ Can also be a luma.gl [ScenegraphNode](https://luma.gl/docs/api-reference/experi
 The layer calls _delete()_ on _scenegraph_ when a new one is provided or the layer is finalized.
 
 
+##### `loadOptions` (Object, optional)
+
+On top of the [default options](/docs/api-reference/core/layer.md#loadoptions), also accepts options for the following loaders:
+
+- [GLTFLoader](https://loaders.gl/modules/gltf/docs/api-reference/gltf-loader) if the `scenegraph` prop is an URL
+
+
 ### Render Options
 
 ##### `sizeScale` (Number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
