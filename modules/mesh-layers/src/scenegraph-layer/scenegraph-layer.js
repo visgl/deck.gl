@@ -107,18 +107,18 @@ export default class ScenegraphLayer extends Layer {
 
   _updateScenegraph(props) {
     const {gl} = this.context;
-    let scenegraphData;
+    let scenegraphData = null;
     if (props.scenegraph instanceof ScenegraphNode) {
       // Signature 1: props.scenegraph is a proper luma.gl Scenegraph
       scenegraphData = {scenes: [props.scenegraph]};
     } else if (props.scenegraph && !props.scenegraph.gltf) {
       // Converts loaders.gl gltf to luma.gl scenegraph using the undocumented @luma.gl/experimental function
       const gltf = props.scenegraph;
-      const gltfObjects = createGLTFObjects(gl, gltf, this.getLoadOptions());
+      const gltfObjects = createGLTFObjects(gl, gltf, this._getModelOptions());
       scenegraphData = Object.assign({gltf}, gltfObjects);
 
       waitForGLTFAssets(gltfObjects).then(() => this.setNeedsRedraw());
-    } else {
+    } else if (props.scenegraph) {
       // DEPRECATED PATH: Assumes this data was loaded through GLTFScenegraphLoader
       log.deprecated(
         'ScenegraphLayer.props.scenegraph',
@@ -196,7 +196,7 @@ export default class ScenegraphLayer extends Layer {
     }
   }
 
-  getLoadOptions() {
+  _getModelOptions() {
     const modules = [project32, picking];
     const {_lighting, _imageBasedLightingEnvironment} = this.props;
 
