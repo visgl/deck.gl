@@ -130,13 +130,10 @@ A loader which is used to decode the fetched tiles. Available options are [`Cesi
 
 ##### `loadOptions` (Object, Optional)
 
-- Default: `{}`
+On top of the [default options](/docs/api-reference/core/layer.md#loadoptions), also support the following keys:
 
-`Tile3DLayer` uses [`load`](https://loaders.gl/modules/core/docs/api-reference/load) provided by `@loaders.gl/core` to load a tileset and then constructs a [`Tileset3D`](https://loaders.gl/modules/3d-tiles/docs/api-reference/tileset-3d) object after fetching the tileset entry file.
-`loadOptions` is an experimental nested prop to forward options to the loaders and tileset object, 
-
-- `loadOptions[loader.id]` is used for passing any options available to the `loader`.
-- If you need forward options to [`Tileset3D`](https://loaders.gl/modules/tiles/docs/api-reference/tileset-3d#constructor-1), use`loadOptions.tileset`. Among these options, `onTileLoad`, `onTileUnload` and `onTileError` should be passed as layer props.
+- `[loader.id]` passing options to the loader defined by the `loader` prop.
+- `tileset`: Forward parameters to the [`Tileset3D`](https://loaders.gl/modules/tiles/docs/api-reference/tileset-3d#constructor-1) instance after fetching the tileset metadata.
 
 ```js
 import {CesiumIonLoader} from '@loaders.gl/3d-tiles';

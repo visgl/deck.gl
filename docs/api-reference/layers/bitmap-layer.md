@@ -69,6 +69,12 @@ Supported formats:
 `left` and `right` refers to the world longitude/x at the corresponding side of the image.
 `top` and `bottom` refers to the world latitude/y at the corresponding side of the image.
 
+##### `loadOptions` (Object, optional)
+
+On top of the [default options](/docs/api-reference/core/layer.md#loadoptions), also accepts options for the following loaders:
+
+- [ImageLoader](https://loaders.gl/modules/images/docs/api-reference/image-loader) if the `image` prop is an URL
+
 
 ### Render Options
 
