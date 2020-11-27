@@ -29,11 +29,6 @@ export default [
         opacity: 0.8
       })
     ],
-    onAfterRender: ({layers, done}) => {
-      if (layers[0].isLoaded) {
-        done();
-      }
-    },
     goldenImage: './test/render/golden-images/icon-lnglat.png'
   },
   {
@@ -70,11 +65,6 @@ export default [
         opacity: 0.8
       })
     ],
-    onAfterRender: ({layers, done}) => {
-      if (layers[0].state.iconManager.getTexture()) {
-        done();
-      }
-    },
     goldenImage: './test/render/golden-images/icon-lnglat.png'
   },
   {
@@ -101,11 +91,6 @@ export default [
         opacity: 0.8
       })
     ],
-    onAfterRender: ({layers, done}) => {
-      if (layers[0].state.iconManager.getTexture()) {
-        done();
-      }
-    },
     goldenImage: './test/render/golden-images/icon-lnglat-facing-up.png'
   },
   {
@@ -212,11 +197,6 @@ export default [
         opacity: 0.8
       })
     ],
-    onAfterRender: ({layers, done}) => {
-      if (layers[0].isLoaded) {
-        done();
-      }
-    },
     goldenImage: './test/render/golden-images/icon-lnglat.png'
   }
 ];

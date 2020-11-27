@@ -55,11 +55,11 @@ new deck.BitmapLayer({});
 
 ### Data
 
-##### `image` (String|Texture2D|Image|HTMLCanvasElement|HTMLVideoElement|ImageBitmap)
+##### `image` (String|Texture2D|Image|ImageData|HTMLCanvasElement|HTMLVideoElement|ImageBitmap)
 
 - Default `null`.
 
-The image to display. If a string is supplied, it is interpreted as a URL or a [Data URL](https://developer.mozilla.org/en-US/docs/Web/HTTP/Basics_of_HTTP/Data_URIs).
+The image to display. If a string is supplied, it is interpreted as a URL or a [Data URL](https://developer.mozilla.org/en-US/docs/Web/HTTP/Basics_of_HTTP/Data_URIs). The image data will be converted to a [Texture2D](https://luma.gl/docs/api-reference/webgl/texture-2d) object. See `textureParameters` prop for advanced customization.
 
 ##### `bounds` (Array)
 

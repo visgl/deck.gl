@@ -50,7 +50,7 @@ const DEFAULT_COLOR = [0, 0, 0, 255];
  * @param {func} props.getAngle - returns rotating angle (in degree) of the icon.
  */
 const defaultProps = {
-  iconAtlas: {type: 'object', value: null, async: true},
+  iconAtlas: {type: 'image', value: null, async: true},
   iconMapping: {type: 'object', value: {}, async: true},
   sizeScale: {type: 'number', value: 1, min: 0},
   billboard: true,
@@ -197,7 +197,7 @@ export default class IconLayer extends Layer {
     const {viewport} = this.context;
 
     const iconsTexture = iconManager.getTexture();
-    if (iconsTexture && iconsTexture.loaded) {
+    if (iconsTexture) {
       this.state.model
         .setUniforms(
           Object.assign({}, uniforms, {

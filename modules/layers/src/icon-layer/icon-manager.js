@@ -260,19 +260,8 @@ export default class IconManager {
       this._texture.delete();
       this._texture = null;
     }
-    if (iconAtlas instanceof Texture2D) {
-      iconAtlas.setParameters(DEFAULT_TEXTURE_PARAMETERS);
-
-      this._externalTexture = iconAtlas;
-      this.onUpdate();
-    } else if (iconAtlas) {
-      // Browser object: Image, ImageData, HTMLCanvasElement, ImageBitmap
-      this._texture = new Texture2D(this.gl, {
-        data: iconAtlas,
-        parameters: DEFAULT_TEXTURE_PARAMETERS
-      });
-      this.onUpdate();
-    }
+    this._externalTexture = iconAtlas;
+    this.onUpdate();
   }
 
   _updateAutoPacking(data) {
