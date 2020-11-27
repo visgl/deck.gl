@@ -193,11 +193,6 @@ export default [
         image: './test/data/icon-atlas.png'
       })
     ],
-    onAfterRender: ({layers, done}) => {
-      if (layers[0].state.bitmapTexture) {
-        done();
-      }
-    },
     goldenImage: './test/render/golden-images/bitmap.png'
   },
   {
@@ -216,11 +211,6 @@ export default [
         _imageCoordinateSystem: COORDINATE_SYSTEM.LNGLAT
       })
     ],
-    onAfterRender: ({layers, done}) => {
-      if (layers[0].state.bitmapTexture) {
-        done();
-      }
-    },
     goldenImage: './test/render/golden-images/bitmap-imagecoordinates.png'
   },
   {
