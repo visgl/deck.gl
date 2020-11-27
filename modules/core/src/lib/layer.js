@@ -360,6 +360,7 @@ export default class Layer extends Component {
     }
     this.context.resourceManager.unsubscribe({consumerId: this.id});
     this.internalState.uniformTransitions.clear();
+    this.internalState.finalize();
   }
 
   // If state has a model, draw it with supplied uniforms
