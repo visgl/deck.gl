@@ -17,6 +17,7 @@ The loaded tile data is then rendered with the layer(s) returned by `renderSubLa
 
 ```js
 import DeckGL from '@deck.gl/react';
+import {BitmapLayer} from '@deck.gl/layers';
 import {TileLayer} from '@deck.gl/geo-layers';
 
 function App({viewState}) {
