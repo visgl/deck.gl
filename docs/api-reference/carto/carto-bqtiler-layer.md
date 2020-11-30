@@ -10,6 +10,7 @@ First you need first to generate a tileset of your dataset in your BigQuery acco
 import DeckGL from '@deck.gl/react';
 import {CartoBQTilerLayer} from '@deck.gl/carto';
 
+
 function App({viewState}) {
   const layer = new CartoBQTilerLayer({
     data: 'cartobq.maps.nyc_taxi_points_demo_id',
@@ -55,9 +56,11 @@ To use pre-bundled scripts:
 new deck.carto.CartoBQTilerLayer({});
 ```
 
+
 ## Properties
 
 Inherits all properties from [`MVTLayer`](/docs/api-reference/geo-layers/mvt-layer.md).
+
 
 ##### `data` (String)
 
@@ -65,7 +68,7 @@ Required. Tileset id
 
 ##### `uniqueIdProperty` (String)
 
-- Default: `id`
+* Default: `id`
 
 Optional. Needed for highlighting a feature split across two or more tiles if no [feature id](https://github.com/mapbox/vector-tile-spec/tree/master/2.1#42-features) is provided.
 
@@ -92,6 +95,7 @@ Receives arguments:
 Receives arguments:
 
 - `error` (`Error`)
+
 
 ## Source
 
