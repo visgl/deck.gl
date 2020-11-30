@@ -19,6 +19,10 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v8.3
 
+#### deck.gl [8.3.10] - Nov 30 2020
+
+- Fix ScenegraphLayer warnings (#5194)
+
 #### deck.gl [8.3.9] - Nov 23 2020
 
 - Only warn about WebGL2 support if attribute transition is used (#5155)
