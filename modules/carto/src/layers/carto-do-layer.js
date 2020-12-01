@@ -13,7 +13,7 @@ export default class CartoDOLayer extends CartoLayer {
           type: 'tileset',
           source: 'data-observatory',
           options: {
-            dataset: this.props.data,
+            tileset: this.props.data,
             sample: this.props.sample
           }
         }
