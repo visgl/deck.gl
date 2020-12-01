@@ -35,11 +35,11 @@
     "@loaders.gl/mvt": "^2.3.0",
     "@loaders.gl/terrain": "^2.3.0",
     "@loaders.gl/tiles": "^2.3.0",
-    "@math.gl/culling": "^3.3.0",
-    "@math.gl/web-mercator": "^3.3.0",
+    "@math.gl/culling": "^3.3.2",
+    "@math.gl/web-mercator": "^3.3.2",
     "h3-js": "^3.6.0",
     "long": "^3.2.0",
-    "math.gl": "^3.3.0"
+    "math.gl": "^3.3.2"
   },
   "peerDependencies": {
     "@deck.gl/core": "^8.0.0",
