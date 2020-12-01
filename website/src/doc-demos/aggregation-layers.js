@@ -12,9 +12,10 @@ import makeLayerDemo from './layer-demo';
 import {DATA_URI} from '../constants/defaults';
 
 export const ContourLayerDemo = makeLayerDemo({
-  getTooltip: ({object}) => `threshold: ${object.contour.threshold}`,
-  layer: new ContourLayer({
-    data: `${DATA_URI}/sf-bike-parking.json`,
+  Layer: ContourLayer,
+  getTooltip: '({object}) => object && `threshold: ${object.contour.threshold}`',
+  props: `{
+    data: '${DATA_URI}/sf-bike-parking.json',
     pickable: true,
     cellSize: 200,
     getPosition: d => d.COORDINATES,
@@ -24,52 +25,53 @@ export const ContourLayerDemo = makeLayerDemo({
       {threshold: 5, color: [0, 255, 0], strokeWidth: 6, zIndex: 2},
       {threshold: 15, color: [0, 0, 255], strokeWidth: 4, zIndex: 3}
     ]
-  })
+  }`
 });
 
 const GRID_LAYER_INFO = {
-  getTooltip: ({object}) => `${object.position.join(', ')}\nCount: ${object.count}`,
-  props: {
-    data: `${DATA_URI}/sf-bike-parking.json`,
+  getTooltip: '({object}) => object && `${object.position.join(\', \')}\nCount: ${object.count}`',
+  props: `{
+    data: '${DATA_URI}/sf-bike-parking.json',
     pickable: true,
     extruded: true,
     cellSize: 200,
     elevationScale: 4,
     getPosition: d => d.COORDINATES
-  }
+  }`
 };
 
 export const GPUGridLayerDemo = makeLayerDemo({
-  getTooltip: GRID_LAYER_INFO.getTooltip,
-  layer: new GPUGridLayer(GRID_LAYER_INFO.props)
+  Layer: GPUGridLayer,
+  ...GRID_LAYER_INFO
 });
 
 export const GridLayerDemo = makeLayerDemo({
-  getTooltip: GRID_LAYER_INFO.getTooltip,
-  layer: new GridLayer(GRID_LAYER_INFO.props)
+  Layer: GridLayer,
+  ...GRID_LAYER_INFO
 });
 
 export const CPUGridLayerDemo = makeLayerDemo({
-  getTooltip: GRID_LAYER_INFO.getTooltip,
-  layer: new CPUGridLayer(GRID_LAYER_INFO.props)
+  Layer: CPUGridLayer,
+  ...GRID_LAYER_INFO
 });
 
 export const HexagonLayerDemo = makeLayerDemo({
-  getTooltip: ({object}) => `${object.position.join(', ')}\nCount: ${object.count}`,
-  layer: new HexagonLayer({
-    data: `${DATA_URI}/sf-bike-parking.json`,
+  Layer: HexagonLayer,
+  getTooltip: '({object}) => object && `${object.position.join(\', \')}\nCount: ${object.points.length}`',
+  props: `{
+    data: '${DATA_URI}/sf-bike-parking.json',
+    pickable: true,
     extruded: true,
     radius: 200,
     elevationScale: 4,
     getPosition: d => d.COORDINATES
-  })
+  }`
 });
 
 export const ScreenGridLayerDemo = makeLayerDemo({
-  getTooltip: _ => 'aggregated cell',
-  layer: new ScreenGridLayer({
-    data: `${DATA_URI}/sf-bike-parking.json`,
-    pickable: false,
+  Layer: ScreenGridLayer,
+  props: `{
+    data: '${DATA_URI}/sf-bike-parking.json',
     opacity: 0.8,
     cellSizePixels: 50,
     colorRange: [
@@ -82,15 +84,14 @@ export const ScreenGridLayerDemo = makeLayerDemo({
     ],
     getPosition: d => d.COORDINATES,
     getWeight: d => d.SPACES
-  })
+  }`
 });
 
 export const HeatmapLayerDemo = makeLayerDemo({
-  getTooltip: _ => 'heatmap',
-  layer: new HeatmapLayer({
-    data: `${DATA_URI}/sf-bike-parking.json`,
-    pickable: false,
+  Layer: HeatmapLayer,
+  props: `{
+    data: '${DATA_URI}/sf-bike-parking.json',
     getPosition: d => d.COORDINATES,
     radiusPixels: 25
-  })
+  }`
 });
