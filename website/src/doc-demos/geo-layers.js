@@ -14,8 +14,6 @@ import {
 import makeLayerDemo from './layer-demo';
 import {DATA_URI} from '../constants/defaults';
 
-const MAPBOX_TOKEN = process.env.MapboxAccessToken; // eslint-disable-line
-
 export const GreatCircleLayerDemo = makeLayerDemo({
   Layer: GreatCircleLayer,
   getTooltip: '({object}) => object && `${object.from.name} to ${object.to.name}`',
