@@ -145,7 +145,11 @@ export const PathLayerDemo = makeLayerDemo({
     widthScale: 20,
     widthMinPixels: 2,
     getPath: d => d.path,
-    getColor: d => colorToRGBArray(d.color),
+    getColor: d => {
+      const hex = d.color;
+      // convert to RGB
+      return hex.match(/[0-9a-f]{2}/g).map(x => parseInt(x, 16));
+    },
     getWidth: d => 5
   }`
 });
