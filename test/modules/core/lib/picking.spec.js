@@ -50,18 +50,35 @@ const parameters = {
   mode: 'hover',
   viewports: [
     new WebMercatorViewport({
+      id: 'map1',
       longitude: -122,
       latitude: 38,
       zoom: 1,
       width: 200,
       height: 200
+    }),
+    new WebMercatorViewport({
+      id: 'map2',
+      longitude: -122,
+      latitude: 38,
+      zoom: 1,
+      x: 200,
+      y: 0,
+      width: 200,
+      height: 200
+    }),
+    new WebMercatorViewport({
+      id: 'minimap',
+      longitude: -100,
+      latitude: 40,
+      zoom: 1,
+      x: 250,
+      y: 50,
+      width: 100,
+      height: 100
     })
   ],
   layers: [testLayer, testLayerWithCallback, testCompositeLayer],
-  x: 100,
-  y: 100,
-  deviceX: 200,
-  deviceY: 200,
   pixelRatio: 2
 };
 
@@ -80,6 +97,8 @@ test('processPickInfo', t => {
   testInitializeLayer({layer: testLayerWithCallback});
   testInitializeLayer({layer: testCompositeLayer});
 
+  testLayerWithCallback.activateViewport(parameters.viewports[1]);
+
   const TEST_CASES = [
     {
       pickInfo: {
@@ -87,6 +106,8 @@ test('processPickInfo', t => {
         pickedLayer: null,
         pickedObjectIndex: -1
       },
+      x: 100,
+      y: 100,
       size: 1,
       info: {layer: null, index: -1, picked: false, x: 100, coordinate: [-122, 38]},
       lastPickedInfo: {layerId: null, index: -1},
@@ -98,6 +119,8 @@ test('processPickInfo', t => {
         pickedLayer: testLayer,
         pickedObjectIndex: 0
       },
+      x: 100,
+      y: 100,
       size: 2,
       info: {layer: testLayer, object: 'a', index: 0, picked: true, x: 100, coordinate: [-122, 38]},
       lastPickedInfo: {layerId: 'test-layer', index: 0},
@@ -109,6 +132,8 @@ test('processPickInfo', t => {
         pickedLayer: testLayer,
         pickedObjectIndex: 1
       },
+      x: 100,
+      y: 100,
       size: 2,
       info: {layer: testLayer, object: 'b'},
       lastPickedInfo: {layerId: 'test-layer', index: 1},
@@ -120,6 +145,8 @@ test('processPickInfo', t => {
         pickedLayer: testLayerWithCallback,
         pickedObjectIndex: 0
       },
+      x: 100,
+      y: 100,
       size: 3,
       info: {
         layer: testLayerWithCallback,
@@ -143,6 +170,8 @@ test('processPickInfo', t => {
         pickedLayer: testLayerWithCallback,
         pickedObjectIndex: 1
       },
+      x: 100,
+      y: 100,
       size: 2,
       info: {layer: testLayerWithCallback, object: 'b'},
       lastPickedInfo: {layerId: 'test-layer-with-callback', index: 1},
@@ -159,6 +188,8 @@ test('processPickInfo', t => {
         pickedLayer: testCompositeLayer.getSubLayers()[0],
         pickedObjectIndex: 0
       },
+      x: 100,
+      y: 100,
       size: 3,
       info: {
         layer: testCompositeLayer,
@@ -166,6 +197,45 @@ test('processPickInfo', t => {
       },
       lastPickedInfo: {layerId: 'test-composite-layer-points', index: 0},
       testLayerUniforms: {picking_uSelectedColorValid: 0}
+    },
+    {
+      pickInfo: {
+        pickedColor: [1, 0, 0, 0],
+        pickedLayer: testLayer,
+        pickedObjectIndex: 0
+      },
+      x: 300,
+      y: 100,
+      size: 2,
+      info: {layer: testLayer, object: 'a', index: 0, picked: true, x: 300, coordinate: [-100, 40]},
+      lastPickedInfo: {layerId: 'test-layer', index: 0},
+      testLayerUniforms: {picking_uSelectedColorValid: 1, picking_uSelectedColor: [1, 0, 0]}
+    },
+    {
+      pickInfo: {
+        pickedColor: [2, 0, 0, 0],
+        pickedLayer: testLayerWithCallback,
+        pickedObjectIndex: 1
+      },
+      x: 300,
+      y: 100,
+      size: 3,
+      info: {layer: testLayerWithCallback, object: 'b', x: 300, coordinate: [-122, 38]},
+      lastPickedInfo: {layerId: 'test-layer-with-callback', index: 1},
+      testLayerUniforms: {picking_uSelectedColorValid: 0, picking_uSelectedColor: [1, 0, 0]}
+    },
+    {
+      pickInfo: {
+        pickedColor: [0, 0, 0, 0],
+        pickedLayer: null,
+        pickedObjectIndex: -1
+      },
+      x: -1,
+      y: -1,
+      size: 2,
+      info: {layer: testLayerWithCallback, x: -1, viewport: parameters.viewports[0]},
+      lastPickedInfo: {layerId: null, index: -1},
+      testLayerUniforms: {picking_uSelectedColorValid: 0, picking_uSelectedColor: [1, 0, 0]}
     }
   ];
 
@@ -177,6 +247,8 @@ test('processPickInfo', t => {
 
   for (const testCase of TEST_CASES) {
     parameters.pickInfo = testCase.pickInfo;
+    parameters.x = testCase.x;
+    parameters.y = testCase.y;
     const infos = processPickInfo(parameters);
     t.is(infos.size, testCase.size, 'returns expected infos');
 

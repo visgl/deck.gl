@@ -18,6 +18,11 @@ new Deck({
 })
 ```
 
+### pickingInfo
+
+A legacy field `pickingInfo.lngLat` has been removed. Use `pickingInfo.coordinate` instead.
+
+
 ## Upgrading from deck.gl v8.2 to v8.3
 
 - The following is added to the default image loading options: `{imagebitmap: {premultiplyAlpha: 'none'}}` (previously `default`). This generates more visually similar outcome between `ImageBitmap` and `Image` formats (see changes in 8.2 below). You can override this behavior with the `loadOptions` prop of a layer. See [ImageLoader options](https://loaders.gl/modules/images/docs/api-reference/image-loader#options) for more information.
