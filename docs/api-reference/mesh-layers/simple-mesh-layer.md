@@ -88,14 +88,29 @@ The following attributes are expected:
 - `texCoords` (Float32Array) - 2d texture coordinates
 
 
-##### `texture` (Texture2D|Image|String, optional)
+##### `texture` (String|Texture2D|Image|ImageData|HTMLCanvasElement|HTMLVideoElement|ImageBitmap, optional)
 
 - Default `null`.
 
-The texture of the geometries.
-Can be either a luma.gl [Texture2D](https://luma.gl/docs/api-reference/webgl/texture-2d) instance, an HTMLImageElement, or a url string to the texture image.
+The texture of the geometries. If a string is supplied, it is interpreted as a URL or a [Data URL](https://developer.mozilla.org/en-US/docs/Web/HTTP/Basics_of_HTTP/Data_URIs). The image data will be converted to a [Texture2D](https://luma.gl/docs/api-reference/webgl/texture-2d) object. See `textureParameters` prop for advanced customization.
 
 If `texture` is supplied, texture is used to render the geometries. Otherwise, object color obtained via the `getColor` accessor is used.
+
+
+##### `textureParameters` (Object)
+
+Customize the [texture parameters](https://developer.mozilla.org/en-US/docs/Web/API/WebGLRenderingContext/texParameter).
+
+If not specified, the layer uses the following defaults to create a linearly smoothed texture from `texture`:
+
+```js
+{
+  [GL.TEXTURE_MIN_FILTER]: GL.LINEAR_MIPMAP_LINEAR,
+  [GL.TEXTURE_MAG_FILTER]: GL.LINEAR,
+  [GL.TEXTURE_WRAP_S]: GL.CLAMP_TO_EDGE,
+  [GL.TEXTURE_WRAP_T]: GL.CLAMP_TO_EDGE
+}
+```
 
 
 ### Render Options

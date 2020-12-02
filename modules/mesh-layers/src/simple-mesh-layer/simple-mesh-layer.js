@@ -32,17 +32,6 @@ import {MATRIX_ATTRIBUTES, shouldComposeModelMatrix} from '../utils/matrix';
 import vs from './simple-mesh-layer-vertex.glsl';
 import fs from './simple-mesh-layer-fragment.glsl';
 
-/*
- * Convert image data into texture
- * @returns {Texture2D} texture
- */
-function getTextureFromData(gl, data, opts) {
-  if (data instanceof Texture2D) {
-    return data;
-  }
-  return new Texture2D(gl, Object.assign({data}, opts));
-}
-
 function validateGeometryAttributes(attributes, useMeshColors) {
   const hasColorAttribute = attributes.COLOR_0 || attributes.colors;
   const useColorAttribute = hasColorAttribute && useMeshColors;
@@ -80,7 +69,7 @@ const DEFAULT_COLOR = [0, 0, 0, 255];
 
 const defaultProps = {
   mesh: {value: null, type: 'object', async: true},
-  texture: {type: 'object', value: null, async: true},
+  texture: {type: 'image', value: null, async: true},
   sizeScale: {type: 'number', value: 1, min: 0},
   // Whether the color attribute in a mesh will be used
   // This prop will be removed and set to true in next major release
@@ -197,9 +186,6 @@ export default class SimpleMeshLayer extends Layer {
     super.finalizeState();
 
     this.state.emptyTexture.delete();
-    if (this.state.texture) {
-      this.state.texture.delete();
-    }
   }
 
   draw({uniforms}) {
@@ -229,7 +215,8 @@ export default class SimpleMeshLayer extends Layer {
       })
     );
 
-    const {texture, emptyTexture} = this.state;
+    const {texture} = this.props;
+    const {emptyTexture} = this.state;
     model.setUniforms({
       sampler: texture || emptyTexture,
       hasTexture: Boolean(texture)
@@ -238,16 +225,9 @@ export default class SimpleMeshLayer extends Layer {
     return model;
   }
 
-  setTexture(image) {
+  setTexture(texture) {
     const {gl} = this.context;
     const {emptyTexture, model} = this.state;
-
-    if (this.state.texture) {
-      this.state.texture.delete();
-    }
-
-    const texture = image ? getTextureFromData(gl, image) : null;
-    this.setState({texture});
 
     if (model) {
       // props.mesh may not be ready at this time.

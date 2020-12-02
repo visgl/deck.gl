@@ -141,13 +141,17 @@ new deck.IconLayer({});
 
 Inherits from all [Base Layer](/docs/api-reference/core/layer.md) properties.
 
-##### `iconAtlas` (Texture2D | String)
+##### `iconAtlas` (String|Texture2D|Image|ImageData|HTMLCanvasElement|HTMLVideoElement|ImageBitmap, optional)
 
-Atlas image url or texture
+The atlas image. If a string is supplied, it is interpreted as a URL or a [Data URL](https://developer.mozilla.org/en-US/docs/Web/HTTP/Basics_of_HTTP/Data_URIs). The image data will be converted to a [Texture2D](https://luma.gl/docs/api-reference/webgl/texture-2d) object. See `textureParameters` prop for advanced customization.
 
-##### `iconMapping` (Object | String)
+If you go with pre-packed strategy, this prop is required.
 
-Icon names mapped to icon definitions. Each icon is defined with the following values:
+If you choose to use auto packing, this prop should be left empty.
+
+##### `iconMapping` (Object|String, optional)
+
+Icon names mapped to icon definitions, or a URL to load such mapping from a JSON file. Each icon is defined with the following values:
 
 - `x` (Number, required): x position of icon on the atlas image
 - `y` (Number, required): y position of icon on the atlas image
@@ -160,11 +164,9 @@ Icon names mapped to icon definitions. Each icon is defined with the following v
   If `false`, pixel color from the image is applied. User still can specify the opacity through getColor.
   Default: `false`
 
-If you go with pre-packed strategy, both `iconAtlas` and `iconMapping` are required.
+If you go with pre-packed strategy, this prop is required.
 
-If you choose to use auto packing, then `iconAtlas` and `iconMapping` should not be provided,
-otherwise it causes error since `IconLayer` will attempt to retrieve icons from
-given pre-packed `iconAtlas`.
+If you choose to use auto packing, this prop should be left empty.
 
 ##### `sizeScale` (Number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
 
@@ -209,6 +211,21 @@ On top of the [default options](/docs/api-reference/core/layer.md#loadoptions), 
 
 - [ImageLoader](https://loaders.gl/modules/images/docs/api-reference/image-loader) if the `iconAtlas` prop is an URL, or if `getIcon` returns URLs for auto-packing
 
+
+##### `textureParameters` (Object)
+
+Customize the [texture parameters](https://developer.mozilla.org/en-US/docs/Web/API/WebGLRenderingContext/texParameter).
+
+If not specified, the layer uses the following defaults to create a linearly smoothed texture from `iconAtlas`:
+
+```js
+{
+  [GL.TEXTURE_MIN_FILTER]: GL.LINEAR_MIPMAP_LINEAR,
+  [GL.TEXTURE_MAG_FILTER]: GL.LINEAR,
+  [GL.TEXTURE_WRAP_S]: GL.CLAMP_TO_EDGE,
+  [GL.TEXTURE_WRAP_T]: GL.CLAMP_TO_EDGE
+}
+```
 
 ### Data Accessors
 

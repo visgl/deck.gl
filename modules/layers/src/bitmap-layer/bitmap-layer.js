@@ -18,10 +18,9 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-/* global HTMLVideoElement */
 import GL from '@luma.gl/constants';
 import {Layer, project32, picking, COORDINATE_SYSTEM} from '@deck.gl/core';
-import {Model, Geometry, Texture2D} from '@luma.gl/core';
+import {Model, Geometry} from '@luma.gl/core';
 import {lngLatToWorld} from '@math.gl/web-mercator';
 
 import createMesh from './create-mesh';
@@ -29,15 +28,8 @@ import createMesh from './create-mesh';
 import vs from './bitmap-layer-vertex';
 import fs from './bitmap-layer-fragment';
 
-const DEFAULT_TEXTURE_PARAMETERS = {
-  [GL.TEXTURE_MIN_FILTER]: GL.LINEAR_MIPMAP_LINEAR,
-  [GL.TEXTURE_MAG_FILTER]: GL.LINEAR,
-  [GL.TEXTURE_WRAP_S]: GL.CLAMP_TO_EDGE,
-  [GL.TEXTURE_WRAP_T]: GL.CLAMP_TO_EDGE
-};
-
 const defaultProps = {
-  image: {type: 'object', value: null, async: true},
+  image: {type: 'image', value: null, async: true},
   bounds: {type: 'array', value: [1, 0, 0, 1], compare: true},
   _imageCoordinateSystem: COORDINATE_SYSTEM.DEFAULT,
 
@@ -46,9 +38,7 @@ const defaultProps = {
   // alpha is not effective when blending the bitmap layers with the base map.
   // Instead we need to manually dim/blend rgb values with a background color.
   transparentColor: {type: 'color', value: [0, 0, 0, 0]},
-  tintColor: {type: 'color', value: [255, 255, 255]},
-
-  textureParameters: null
+  tintColor: {type: 'color', value: [255, 255, 255]}
 };
 
 /*
@@ -101,10 +91,6 @@ export default class BitmapLayer extends Layer {
       this.getAttributeManager().invalidateAll();
     }
 
-    if (props.image !== oldProps.image) {
-      this.loadTexture(props.image, {...DEFAULT_TEXTURE_PARAMETERS, ...props.textureParameters});
-    }
-
     const attributeManager = this.getAttributeManager();
 
     if (props.bounds !== oldProps.bounds) {
@@ -119,14 +105,6 @@ export default class BitmapLayer extends Layer {
       this.setState({mesh, ...this._getCoordinateUniforms()});
     } else if (props._imageCoordinateSystem !== oldProps._imageCoordinateSystem) {
       this.setState(this._getCoordinateUniforms());
-    }
-  }
-
-  finalizeState() {
-    super.finalizeState();
-
-    if (this.state.bitmapTexture) {
-      this.state.bitmapTexture.delete();
     }
   }
 
@@ -179,40 +157,16 @@ export default class BitmapLayer extends Layer {
 
   draw(opts) {
     const {uniforms} = opts;
-    const {bitmapTexture, model, coordinateConversion, bounds} = this.state;
+    const {model, coordinateConversion, bounds} = this.state;
     const {image, desaturate, transparentColor, tintColor} = this.props;
-
-    // Update video frame
-    if (
-      bitmapTexture &&
-      image instanceof HTMLVideoElement &&
-      image.readyState > HTMLVideoElement.HAVE_METADATA
-    ) {
-      const sizeChanged =
-        bitmapTexture.width !== image.videoWidth || bitmapTexture.height !== image.videoHeight;
-      if (sizeChanged) {
-        // note clears image and mipmaps when resizing
-        bitmapTexture.resize({width: image.videoWidth, height: image.videoHeight, mipmaps: true});
-        bitmapTexture.setSubImageData({
-          data: image,
-          parameters: {...DEFAULT_TEXTURE_PARAMETERS, ...this.props.textureParameters}
-        });
-      } else {
-        bitmapTexture.setSubImageData({
-          data: image
-        });
-      }
-
-      bitmapTexture.generateMipmap();
-    }
 
     // // TODO fix zFighting
     // Render the image
-    if (bitmapTexture && model) {
+    if (image && model) {
       model
         .setUniforms(uniforms)
         .setUniforms({
-          bitmapTexture,
+          bitmapTexture: image,
           desaturate,
           transparentColor: transparentColor.map(x => x / 255),
           tintColor: tintColor.slice(0, 3).map(x => x / 255),
@@ -254,36 +208,6 @@ export default class BitmapLayer extends Layer {
       coordinateConversion: 0,
       bounds: [0, 0, 0, 0]
     };
-  }
-
-  loadTexture(image, textureParameters) {
-    const {gl} = this.context;
-
-    if (this.state.bitmapTexture) {
-      this.state.bitmapTexture.delete();
-    }
-
-    if (image instanceof Texture2D) {
-      this.setState({bitmapTexture: image});
-    } else if (image instanceof HTMLVideoElement) {
-      // Initialize an empty texture while we wait for the video to load
-      this.setState({
-        bitmapTexture: new Texture2D(gl, {
-          width: 1,
-          height: 1,
-          parameters: textureParameters,
-          mipmaps: false
-        })
-      });
-    } else if (image) {
-      // Browser object: Image, ImageData, HTMLCanvasElement, ImageBitmap
-      this.setState({
-        bitmapTexture: new Texture2D(gl, {
-          data: image,
-          parameters: textureParameters
-        })
-      });
-    }
   }
 }
 
