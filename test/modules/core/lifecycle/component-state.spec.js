@@ -1,24 +1,19 @@
 import test from 'tape-catch';
 import ComponentState from '@deck.gl/core/lifecycle/component-state';
 import Component from '@deck.gl/core/lifecycle/component';
+import {gl} from '@deck.gl/test-utils';
 
-/* global fetch */
 const EMPTY_ARRAY = Object.freeze([]);
 
 const defaultProps = {
   // data: Special handling for null, see below
   data: {type: 'data', value: EMPTY_ARRAY, async: true},
-  dataComparator: null,
-  dataTransform: data => data,
-  fetch: url => fetch(url).then(response => response.json())
+  dataTransform: data => data
 };
 
-class TestComponent extends Component {
-  constructor(...props) {
-    super(...props);
-  }
-}
+class TestComponent extends Component {}
 
+TestComponent.componentName = 'TestComponent';
 TestComponent.defaultProps = defaultProps;
 
 function makePromise() {
@@ -147,4 +142,64 @@ test('ComponentState#asynchronous async props', t => {
     })
     .then(_ => t.end())
     .catch(_ => t.end());
+});
+
+test('ComponentState#async props with transform', t => {
+  const testContext = {gl};
+
+  const testData = [0, 1, 2, 3, 4];
+  const state = new ComponentState();
+
+  // Simulate Layer class
+  const makeComponent = (props, onAsyncPropUpdated) => {
+    const comp = new TestComponent(props);
+    comp.internalState = state;
+    comp.context = testContext;
+
+    state.component = comp;
+    state.setAsyncProps(comp.props);
+    state.onAsyncPropUpdated = onAsyncPropUpdated || (() => {});
+
+    return comp;
+  };
+
+  // Synchronous value for async prop
+  let component = makeComponent({
+    data: testData,
+    dataTransform: d => d.slice(0, 2)
+  });
+  let data = component.props.data;
+  t.deepEqual(data, [0, 1], 'Synchronous value for data should be transformed');
+
+  component = makeComponent({
+    data: testData,
+    dataTransform: d => d.slice(0, 2)
+  });
+  t.is(component.props.data, data, 'Unchanged data value is not transformed again');
+
+  component = makeComponent({
+    data,
+    dataTransform: d => d.slice(0, 2)
+  });
+  t.is(component.props.data, data, 'Unchanged data value is not transformed again');
+
+  // Async value for async prop
+  component = makeComponent(
+    {
+      data: Promise.resolve(testData),
+      dataTransform: d => d.slice(0, 2)
+    },
+    (propName, value) => {
+      if (propName === 'data') {
+        data = component.props.data;
+        t.deepEqual(data, [0, 1], 'Async value for data should be transformed');
+      }
+
+      if (!state.isAsyncPropLoading()) {
+        state.finalize();
+
+        t.end();
+      }
+    }
+  );
 });
