@@ -57,7 +57,10 @@ Each prop in `defaultProps` may be an object in the following shape:
 - `async` (boolean, optional) - if `true`, the prop can either be a [Promise](https://developer.mozilla.org/en/docs/Web/JavaScript/Reference/Global_Objects/Promise) that resolves to its actual value, or an url string (loaded using the base Layer's [fetch](/docs/api-reference/core/layer.md) prop).
 - `transform` (function, optional) - transforms an asynchronously loaded value and returns a new form. Receives the following arguments:
   + `value` - the new value of this prop
-  + `oldValue` - the previous value of this prop
+  + `propType` - this prop type definition
+  + `layer` - the owner of this prop
+- `release` (function, optional) - release a transformed value when it's no longer in use. Receives the following arguments:
+  + `value` - the old value of this prop
   + `propType` - this prop type definition
   + `layer` - the owner of this prop
 - `validate` (function, optional) - returns `true` if the value is valid. Validation of layer props is only invoked in debug mode. This function is automatically populated if the prop has a built-in type. Receives the following arguments:

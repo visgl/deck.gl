@@ -56,7 +56,7 @@ const TYPE_DEFINITIONS = {
     }
   },
   data: {
-    transform: (value, oldValue, propType, component) => {
+    transform: (value, propType, component) => {
       const {dataTransform} = component ? component.props : {};
       return dataTransform && value ? dataTransform(value) : value;
     }

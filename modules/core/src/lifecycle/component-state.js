@@ -37,9 +37,9 @@ export default class ComponentState {
   finalize() {
     for (const propName in this.asyncProps) {
       const asyncProp = this.asyncProps[propName];
-      if (asyncProp.type && asyncProp.type.transform) {
+      if (asyncProp.type && asyncProp.type.release) {
         // Release any resources created by transforms
-        asyncProp.type.transform(null, asyncProp.resolvedValue, asyncProp.type, this.component);
+        asyncProp.type.release(asyncProp.resolvedValue, asyncProp.type, this.component);
       }
     }
   }
@@ -256,13 +256,14 @@ export default class ComponentState {
 
   // Give the app a chance to post process the loaded data
   _postProcessValue(asyncProp, value) {
-    if (asyncProp.type && asyncProp.type.transform) {
-      return asyncProp.type.transform(
-        value,
-        asyncProp.resolvedValue,
-        asyncProp.type,
-        this.component
-      );
+    const propType = asyncProp.type;
+    if (propType) {
+      if (propType.release) {
+        propType.release(asyncProp.resolvedValue, propType, this.component);
+      }
+      if (propType.transform) {
+        return propType.transform(value, propType, this.component);
+      }
     }
     return value;
   }
