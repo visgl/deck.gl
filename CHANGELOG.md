@@ -21,6 +21,30 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ### deck.gl v8.4 Prereleases
 
+#### deck.gl [8.4.0-alpha.3] - Dec 1 2020
+
+- Add image prop type (#5197)
+- Support generic transform in prop types (#5196)
+- wrapLongitude breaking change (#5184)
+- Bump math.gl dependency (#5207)
+- Fix ScenegraphLayer warnings (#5194)
+- ArcLayer wrapLongitude always draws shortest path (#5182)
+- LineLayer wrapLongitude always draws shortest path (#5176)
+- Improve TextLayer layout performance (#5175)
+- Fix TextLayer handling of unicode characters (#5168)
+- Fix GlobeView tile traversal (#5160)
+- Expose hardcoded keyboard control parameters (#5159)
+- Expose option to flip pan/rotate in controllers (#5157)
+- Add imageCoordinateSystem prop to BitmapLayer (#5154)
+- Only warn about WebGL2 support if attribute transition is used (#5155)
+- Add flipY option to OrthographicView (#5145)
+- [controller] disable move/rotate switching during panning (#5137)
+- Fix attribute transition when using Float32Array with double precision attributes (#5138)
+- Fix H3HexagonLayer in GlobeView (#5135)
+- Change default alphaCutoff to non-zero (#5129)
+- Fix: Limit for color picking cache size; overAlloc override. (#5115)
+- Remove double buffer overallocation (#5118)
+
 #### deck.gl [8.4.0-alpha.2] - Nov 12 2020
 
 - Fix: apply restrictive zoom for inline tilejson at MVTLayer (#5114)

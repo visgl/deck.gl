@@ -191,7 +191,6 @@ test('ComponentState#async props with transform', t => {
   t.is(component.props.data, data, 'Unchanged data value is not transformed again');
   t.is(component.props.image, image, 'Unchanged image value is not transformed again');
 
-  
   component = makeComponent({
     data,
     dataTransform: d => d.slice(0, 2),
