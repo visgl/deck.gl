@@ -8,6 +8,7 @@ const DEFAULT_TEXTURE_PARAMETERS = {
   [GL.TEXTURE_WRAP_T]: GL.CLAMP_TO_EDGE
 };
 
+// Track the textures that are created by us. They need to be released when they are no longer used.
 const internalTextures = {};
 
 export function createTexture(layer, image) {
@@ -24,7 +25,7 @@ export function createTexture(layer, image) {
       data: image,
       parameters: {...DEFAULT_TEXTURE_PARAMETERS, ...layer.props.textureParameters}
     });
-    // Store the original value for update
+    // Track this texture
     internalTextures[texture.id] = true;
   }
   return texture;

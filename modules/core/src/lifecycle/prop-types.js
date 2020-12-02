@@ -64,9 +64,11 @@ const TYPE_DEFINITIONS = {
     }
   },
   image: {
-    transform: (value, oldValue, propType, component) => {
-      destroyTexture(oldValue);
+    transform: (value, propType, component) => {
       return createTexture(component, value);
+    },
+    release: value => {
+      destroyTexture(value);
     }
   }
 };
