@@ -33,7 +33,7 @@ const CACHE_LIMIT = 3;
  *   xOffset, // x position of last character in mapping
  *   yOffset, // y position of last character in mapping
  *   mapping, // x, y coordinate of each character in shared `fontAtlas`
- *   canvas, // canvas
+ *   data, // canvas
  *   width. // canvas.width,
  *   height, // canvas.height
  * }
@@ -98,9 +98,7 @@ function setTextStyle(ctx, fontFamily, fontSize, fontWeight) {
 }
 
 export default class FontAtlasManager {
-  constructor(gl) {
-    this.gl = gl;
-
+  constructor() {
     // font settings
     this.props = {
       fontFamily: DEFAULT_FONT_FAMILY,
@@ -117,15 +115,15 @@ export default class FontAtlasManager {
 
     // key is used for caching generated fontAtlas
     this._key = null;
-    this._data = null;
+    this._atlas = null;
   }
 
   get texture() {
-    return this._data && this._data.canvas;
+    return this._atlas && this._atlas.data;
   }
 
   get mapping() {
-    return this._data && this._data.mapping;
+    return this._atlas && this._atlas.mapping;
   }
 
   get scale() {
@@ -151,14 +149,14 @@ export default class FontAtlasManager {
     if (cachedFontAtlas && charSet.length === 0) {
       // update texture with cached fontAtlas
       if (this._key !== oldKey) {
-        this._data = cachedFontAtlas;
+        this._atlas = cachedFontAtlas;
       }
       return;
     }
 
     // update fontAtlas with new settings
     const fontAtlas = this._generateFontAtlas(this._key, charSet, cachedFontAtlas);
-    this._data = fontAtlas;
+    this._atlas = fontAtlas;
 
     // update cache
     cache.set(this._key, fontAtlas);
@@ -166,7 +164,7 @@ export default class FontAtlasManager {
 
   _generateFontAtlas(key, characterSet, cachedFontAtlas) {
     const {fontFamily, fontWeight, fontSize, buffer, sdf, radius, cutoff} = this.props;
-    let canvas = cachedFontAtlas && cachedFontAtlas.canvas;
+    let canvas = cachedFontAtlas && cachedFontAtlas.data;
     if (!canvas) {
       canvas = document.createElement('canvas');
       canvas.width = MAX_CANVAS_WIDTH;
@@ -223,17 +221,17 @@ export default class FontAtlasManager {
       xOffset,
       yOffset,
       mapping,
-      canvas,
+      data: canvas,
       width: canvas.width,
       height: canvas.height
     };
   }
 
   _getKey() {
-    const {gl, fontFamily, fontWeight, fontSize, buffer, sdf, radius, cutoff} = this.props;
+    const {fontFamily, fontWeight, fontSize, buffer, sdf, radius, cutoff} = this.props;
     if (sdf) {
-      return `${gl} ${fontFamily} ${fontWeight} ${fontSize} ${buffer} ${radius} ${cutoff}`;
+      return `${fontFamily} ${fontWeight} ${fontSize} ${buffer} ${radius} ${cutoff}`;
     }
-    return `${gl} ${fontFamily} ${fontWeight} ${fontSize} ${buffer}`;
+    return `${fontFamily} ${fontWeight} ${fontSize} ${buffer}`;
   }
 }

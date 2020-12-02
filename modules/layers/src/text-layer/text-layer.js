@@ -89,7 +89,7 @@ export default class TextLayer extends CompositeLayer {
   initializeState() {
     this.state = {
       styleVersion: 0,
-      fontAtlasManager: new FontAtlasManager(this.context.gl)
+      fontAtlasManager: new FontAtlasManager()
     };
   }
 
