@@ -240,7 +240,7 @@ Specifies a longitude and a latitude from which meter offsets are calculated. Se
 
 - Default: `false`
 
-Normalizes geometry longitudes. Only works with geospatial data.
+Normalizes geometry longitudes. Only works with the `LNGLAT` coordinate system.
 
 When enabled on `PathLayer`, `PolygonLayer` and `GeoJsonLayer`, the paths/polygons are interpretted such that the connection between any two neighboring vertices is drawn on the shorter side of the world, and split into two if it crosses the 180th meridian. Note that this introduces CPU overhead at runtime. When working with static data, it is recommend that you preprocess the features offline instead of using this option.
 
