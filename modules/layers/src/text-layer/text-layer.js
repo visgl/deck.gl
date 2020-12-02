@@ -122,12 +122,6 @@ export default class TextLayer extends CompositeLayer {
     }
   }
 
-  finalizeState() {
-    super.finalizeState();
-    // Release resources held by the font atlas manager
-    this.state.fontAtlasManager.finalize();
-  }
-
   getPickingInfo({info}) {
     // because `TextLayer` assign the same pickingInfoIndex for one text label,
     // here info.index refers the index of text label in props.data

@@ -1,6 +1,4 @@
 /* global document */
-
-import {Texture2D} from '@luma.gl/core';
 import TinySDF from '@mapbox/tiny-sdf';
 
 import {buildMapping} from './utils';
@@ -22,9 +20,6 @@ export const DEFAULT_BUFFER = 2;
 export const DEFAULT_CUTOFF = 0.25;
 export const DEFAULT_RADIUS = 3;
 
-const GL_TEXTURE_WRAP_S = 0x2802;
-const GL_TEXTURE_WRAP_T = 0x2803;
-const GL_CLAMP_TO_EDGE = 0x812f;
 const MAX_CANVAS_WIDTH = 1024;
 
 const BASELINE_SCALE = 0.9;
@@ -38,7 +33,7 @@ const CACHE_LIMIT = 3;
  *   xOffset, // x position of last character in mapping
  *   yOffset, // y position of last character in mapping
  *   mapping, // x, y coordinate of each character in shared `fontAtlas`
- *   data, // canvas
+ *   canvas, // canvas
  *   width. // canvas.width,
  *   height, // canvas.height
  * }
@@ -122,20 +117,15 @@ export default class FontAtlasManager {
 
     // key is used for caching generated fontAtlas
     this._key = null;
-    this._texture = new Texture2D(this.gl);
-  }
-
-  finalize() {
-    this._texture.delete();
+    this._data = null;
   }
 
   get texture() {
-    return this._texture;
+    return this._data && this._data.canvas;
   }
 
   get mapping() {
-    const data = cache.get(this._key);
-    return data && data.mapping;
+    return this._data && this._data.mapping;
   }
 
   get scale() {
@@ -161,43 +151,22 @@ export default class FontAtlasManager {
     if (cachedFontAtlas && charSet.length === 0) {
       // update texture with cached fontAtlas
       if (this._key !== oldKey) {
-        this._updateTexture(cachedFontAtlas);
+        this._data = cachedFontAtlas;
       }
       return;
     }
 
     // update fontAtlas with new settings
     const fontAtlas = this._generateFontAtlas(this._key, charSet, cachedFontAtlas);
-    this._updateTexture(fontAtlas);
+    this._data = fontAtlas;
 
     // update cache
     cache.set(this._key, fontAtlas);
   }
 
-  _updateTexture({data: canvas, width, height}) {
-    // resize texture
-    if (this._texture.width !== width || this._texture.height !== height) {
-      this._texture.resize({width, height});
-    }
-
-    // update image data
-    this._texture.setImageData({
-      data: canvas,
-      width,
-      height,
-      parameters: {
-        [GL_TEXTURE_WRAP_S]: GL_CLAMP_TO_EDGE,
-        [GL_TEXTURE_WRAP_T]: GL_CLAMP_TO_EDGE
-      }
-    });
-
-    // this is required step after texture data changed
-    this._texture.generateMipmap();
-  }
-
   _generateFontAtlas(key, characterSet, cachedFontAtlas) {
     const {fontFamily, fontWeight, fontSize, buffer, sdf, radius, cutoff} = this.props;
-    let canvas = cachedFontAtlas && cachedFontAtlas.data;
+    let canvas = cachedFontAtlas && cachedFontAtlas.canvas;
     if (!canvas) {
       canvas = document.createElement('canvas');
       canvas.width = MAX_CANVAS_WIDTH;
@@ -254,7 +223,7 @@ export default class FontAtlasManager {
       xOffset,
       yOffset,
       mapping,
-      data: canvas,
+      canvas,
       width: canvas.width,
       height: canvas.height
     };
