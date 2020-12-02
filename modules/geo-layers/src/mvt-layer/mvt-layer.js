@@ -190,7 +190,7 @@ export default class MVTLayer extends TileLayer {
     for (const f of features) {
       const featureId = getFeatureUniqueId(f.object, this.props.uniqueIdProperty);
 
-      if (featureId === -1) {
+      if (featureId === null) {
         // we have no id for the feature, we just add to the list
         renderedFeatures.push(f.object);
       } else if (!featureCache.has(featureId)) {
@@ -229,7 +229,7 @@ function getFeatureUniqueId(feature, uniqueIdProperty) {
     return feature.id;
   }
 
-  return -1;
+  return null;
 }
 
 function isFeatureIdDefined(value) {
