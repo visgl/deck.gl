@@ -37,7 +37,7 @@ module.exports = {
 
         THEME_OVERRIDES: require('./src/theme.json'),
 
-        HOME_PATH: '/',
+        HOME_PATH: '',
         LINK_TO_GET_STARTED: '/docs',
         PAGES: [
           {
