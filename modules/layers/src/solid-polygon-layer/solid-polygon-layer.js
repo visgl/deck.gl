@@ -61,9 +61,9 @@ const ATTRIBUTE_TRANSITION = {
 };
 
 export default class SolidPolygonLayer extends Layer {
-  getShaders(vs) {
+  getShaders(type) {
     return super.getShaders({
-      vs,
+      vs: type === 'top' ? vsTop : vsSide,
       fs,
       defines: {},
       modules: [project32, gouraudLighting, picking]
@@ -304,7 +304,7 @@ export default class SolidPolygonLayer extends Layer {
     let sideModel;
 
     if (filled) {
-      const shaders = this.getShaders(vsTop);
+      const shaders = this.getShaders('top');
       shaders.defines.NON_INSTANCED_MODEL = 1;
 
       topModel = new Model(
@@ -327,7 +327,7 @@ export default class SolidPolygonLayer extends Layer {
     if (extruded) {
       sideModel = new Model(
         gl,
-        Object.assign({}, this.getShaders(vsSide), {
+        Object.assign({}, this.getShaders('side'), {
           id: `${id}-side`,
           geometry: new Geometry({
             drawMode: GL.LINES,

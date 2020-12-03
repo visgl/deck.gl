@@ -63,7 +63,7 @@ function normalizeData(data) {
 }
 
 export default class PointCloudLayer extends Layer {
-  getShaders(id) {
+  getShaders() {
     return super.getShaders({vs, fs, modules: [project32, gouraudLighting, picking]});
   }
 
