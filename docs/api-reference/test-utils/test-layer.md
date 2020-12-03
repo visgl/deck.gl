@@ -83,7 +83,7 @@ A test case is an object with the following fields:
   - `info.oldState` (Object) - layer state before the update
   - `info.subLayers` (Array) - sub layers rendered, if the layer is composite
   - `info.subLayer` (`Layer`) - the first sub layer rendered, if the layer is composite
-  - `info.spies` (Object) - key are layer method names and values are [spies](https://github.com/uber-web/probe.gl/blob/master/docs/api-reference/test-utils/make-spy.md#methods-and-fields-on-the-wrapped-function).
+  - `info.spies` (Object) - key are layer method names and values are [spies](https://uber-web.github.io/probe.gl/docs/api-reference/test-utils/make-spy).
 
 
 Note that `onAfterUpdate` is called immediately after the props are updated. If the layer contains asynchronous props, they may not have been loaded at this point.

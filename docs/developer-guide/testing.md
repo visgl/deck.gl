@@ -82,7 +82,7 @@ test('GeoJsonLayer#tests', t => {
 
 While unit tests are good at capturing issues in layer initialization and prop updates, they do not guarantee that the layer will be correctly rendered to screen. Some issues in e.g. the WebGL shaders can only be spotted in an integration test.
 
-The `@deck.gl/test-utils` module offers a [SnapshotTestRunner](/docs/api-reference/test-utils/snapshot-test-runner.md) that works with the [probe.gl](https://uber-web.github.io/probe.gl) library's [`BrowserTestDriver`](https://github.com/uber-web/probe.gl/blob/master/docs/api-reference/test-utils/browser-test-driver.md) class to perform this task. Together, they enable the following scenario:
+The `@deck.gl/test-utils` module offers a [SnapshotTestRunner](/docs/api-reference/test-utils/snapshot-test-runner.md) that works with the [probe.gl](https://uber-web.github.io/probe.gl) library's [`BrowserTestDriver`](https://uber-web.github.io/probe.gl/docs/api-reference/test-utils/browser-test-driver) class to perform this task. Together, they enable the following scenario:
 
 * start a controlled Chromium browser instance
 * start a server (we use a webpack-dev-server) that bundles a test script.
