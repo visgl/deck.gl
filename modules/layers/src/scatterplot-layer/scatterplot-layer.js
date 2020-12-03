@@ -54,7 +54,7 @@ const defaultProps = {
 };
 
 export default class ScatterplotLayer extends Layer {
-  getShaders(id) {
+  getShaders() {
     return super.getShaders({vs, fs, modules: [project32, picking]});
   }
 
