@@ -119,7 +119,7 @@ export default class FontAtlasManager {
   }
 
   get texture() {
-    return this._atlas && this._atlas.data;
+    return this._atlas;
   }
 
   get mapping() {
