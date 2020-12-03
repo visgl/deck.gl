@@ -8,7 +8,7 @@ import {H3HexagonLayerDemo} from 'website-components/doc-demos/geo-layers';
 
 # H3HexagonLayer
 
-The `H3HexagonLayer` renders hexagons from the [H3](https://uber.github.io/h3/) geospatial indexing system.
+The `H3HexagonLayer` renders hexagons from the [H3](https://h3geo.org/) geospatial indexing system.
 
 `H3HexagonLayer` is a [CompositeLayer](/docs/api-reference/core/composite-layer.md).
 
@@ -117,7 +117,7 @@ Hexagon radius multiplier, between 0 - 1. When `coverage` = 1, hexagon is render
 
 * Default: `object => object.hexagon`
 
-Method called to retrieve the [H3](https://uber.github.io/h3/) hexagon index of each object. Note that all hexagons within one `H3HexagonLayer` must use the same [resolution](https://h3geo.org/docs/core-library/restable).
+Method called to retrieve the [H3](https://h3geo.org/) hexagon index of each object. Note that all hexagons within one `H3HexagonLayer` must use the same [resolution](https://h3geo.org/docs/core-library/restable).
 
 
 ## Sub Layers
