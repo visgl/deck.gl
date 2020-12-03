@@ -83,7 +83,7 @@ function App({data, viewState}) {
   const layer = new IconLayer({
     id: 'icon-layer',
     data: octokit.repos.getContributors({
-      owner: 'uber',
+      owner: 'visgl',
       repo: 'deck.gl'
     }).then(result => result.data),
     // iconAtlas and iconMapping should not be provided
