@@ -500,7 +500,8 @@ export default class Deck {
       onInitialize: this._onRendererInitialized,
       onRender: this._onRenderFrame,
       onBeforeRender: props.onBeforeRender,
-      onAfterRender: props.onAfterRender
+      onAfterRender: props.onAfterRender,
+      onError: props.onError
     });
   }
 
