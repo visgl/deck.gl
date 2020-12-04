@@ -20,6 +20,7 @@
 
 /* eslint-disable max-params */
 import earcut from 'earcut';
+import {Polygon} from '@math.gl/polygon';
 
 // 4 data formats are supported:
 // Simple Polygon: an array of points
@@ -47,6 +48,30 @@ function validate(polygon) {
  */
 function isSimple(polygon) {
   return polygon.length >= 1 && polygon[0].length >= 2 && Number.isFinite(polygon[0][0]);
+}
+
+/**
+ * Computes winding order of a polygon and reverses points of the polygon in case of counter clockwise winding order.
+ * @param {Array} positions - array of numbers
+ * @param {Number} start - start index of the polygon in the positions array
+ * @param {Number} end - end index of the polygon in the positions array
+ * @param {Number} size - size of a position, 2 (xy) or 3 (xyz)
+ */
+function ensureWindingOrder(positions, start, end, size) {
+  const numPositions = (end - start) / size;
+  const points = [];
+  for (let i = 0; i < numPositions; i++) {
+    points[i] = [positions[i * size], positions[i * size + 1]];
+  }
+
+  const polygon = new Polygon(points);
+
+  if (polygon.getWindingDirection() < 0) {
+    for (let i = 0; i < numPositions; i++) {
+      positions[i * size] = points[numPositions - i - 1][0];
+      positions[i * size + 1] = points[numPositions - i - 1][1];
+    }
+  }
 }
 
 /**
@@ -101,6 +126,9 @@ function copyNestedRing(target, targetStartIndex, simplePolygon, size) {
       target[targetIndex++] = simplePolygon[0][j] || 0;
     }
   }
+
+  ensureWindingOrder(target, targetStartIndex, targetIndex, size);
+
   return targetIndex;
 }
 
@@ -131,6 +159,9 @@ function copyFlatRing(target, targetStartIndex, positions, size, srcStartIndex =
       target[targetIndex++] = positions[srcStartIndex + i];
     }
   }
+
+  ensureWindingOrder(target, targetStartIndex, targetIndex, size);
+
   return targetIndex;
 }
 
