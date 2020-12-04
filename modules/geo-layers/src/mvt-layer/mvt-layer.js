@@ -143,6 +143,10 @@ export default class MVTLayer extends TileLayer {
         newHoveredFeatureId = getFeatureUniqueId(hoveredFeature, uniqueIdProperty);
       }
 
+      if (newHoveredFeatureId === -1) {
+        return;
+      }
+
       if (hoveredFeatureId !== newHoveredFeatureId) {
         this.setState({hoveredFeatureId: newHoveredFeatureId});
       }
@@ -190,7 +194,7 @@ export default class MVTLayer extends TileLayer {
     for (const f of features) {
       const featureId = getFeatureUniqueId(f.object, this.props.uniqueIdProperty);
 
-      if (featureId === null) {
+      if (featureId === -1) {
         // we have no id for the feature, we just add to the list
         renderedFeatures.push(f.object);
       } else if (!featureCache.has(featureId)) {
@@ -229,7 +233,7 @@ function getFeatureUniqueId(feature, uniqueIdProperty) {
     return feature.id;
   }
 
-  return null;
+  return -1;
 }
 
 function isFeatureIdDefined(value) {
