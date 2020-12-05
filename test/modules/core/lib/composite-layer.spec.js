@@ -19,7 +19,13 @@
 // THE SOFTWARE.
 
 import test from 'tape-catch';
-import {LayerManager, CompositeLayer, Layer, COORDINATE_SYSTEM} from 'deck.gl';
+import {
+  LayerManager,
+  CompositeLayer,
+  Layer,
+  COORDINATE_SYSTEM,
+  WebMercatorViewport
+} from '@deck.gl/core';
 import {gl, testLayer, testInitializeLayer} from '@deck.gl/test-utils';
 
 const SUB_LAYER_ID = 'sub-layer-id';
@@ -352,4 +358,59 @@ test('CompositeLayer#isLoaded', t => {
   testInitializeLayer({layer});
 
   t.notOk(layer.isLoaded, 'is loading data');
+});
+
+test('CompositeLayer#onViewportChange', t => {
+  class CompLayer extends CompositeLayer {
+    shouldUpdateState({changeFlags}) {
+      return changeFlags.somethingChanged;
+    }
+
+    renderLayers() {
+      return [
+        new TestLayer(
+          this.getSubLayerProps({
+            id: 'sublayer'
+          }),
+          {
+            zoom: this.context.viewport.zoom
+          }
+        )
+      ];
+    }
+  }
+
+  const testCases = [
+    {
+      viewport: new WebMercatorViewport({
+        longitude: 0,
+        latitude: 0,
+        zoom: 0,
+        width: 100,
+        height: 100
+      }),
+      props: {},
+      onAfterUpdate: ({subLayer}) => {
+        t.is(subLayer.props.zoom, 0, 'Sub layer prop is populated');
+        t.ok(subLayer.state, 'Sub layer is added to the stack');
+      }
+    },
+    {
+      viewport: new WebMercatorViewport({
+        longitude: 0,
+        latitude: 0,
+        zoom: 1,
+        width: 100,
+        height: 100
+      }),
+      onAfterUpdate: ({subLayer}) => {
+        t.is(subLayer.props.zoom, 1, 'Sub layer prop is populated');
+        t.ok(subLayer.state, 'Sub layer is added to the stack');
+      }
+    }
+  ];
+
+  testLayer({Layer: CompLayer, testCases, onError: t.notOk});
+
+  t.end();
 });
