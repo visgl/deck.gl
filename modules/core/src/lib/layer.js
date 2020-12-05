@@ -395,7 +395,17 @@ export default class Layer extends Component {
 
     if (!oldViewport || !areViewportsEqual({oldViewport, viewport})) {
       this.setChangeFlags({viewportChanged: true});
-      this._onViewportChange();
+
+      if (this.isComposite) {
+        if (this.needsUpdate()) {
+          // Composite layers may add/remove sublayers on viewport change
+          // Because we cannot change the layers list during a draw cycle, we don't want to update sublayers right away
+          // This will not call update immediately, but mark the layerManager as needs update on the next frame
+          this.setNeedsUpdate();
+        }
+      } else {
+        this._update();
+      }
     }
   }
 
@@ -417,10 +427,6 @@ export default class Layer extends Component {
     for (const model of this.getModels()) {
       this._setModelAttributes(model, changedAttributes);
     }
-  }
-
-  _onViewportChange() {
-    this._update();
   }
 
   // Calls attribute manager to update any WebGL attributes

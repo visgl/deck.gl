@@ -205,12 +205,6 @@ export default class CompositeLayer extends Layer {
     return newProps;
   }
 
-  _onViewportChange() {
-    if (this.needsUpdate()) {
-      this.setNeedsUpdate();
-    }
-  }
-
   _getAttributeManager() {
     return null;
   }
