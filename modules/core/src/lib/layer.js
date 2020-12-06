@@ -110,7 +110,7 @@ const defaultProps = {
   colorFormat: 'RGBA',
 
   parameters: {},
-  uniforms: {},
+  transitions: null,
   extensions: [],
 
   // Offset depth based on layer index to avoid z-fighting.
