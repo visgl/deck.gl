@@ -32,8 +32,8 @@ export function generateLayerTests({
   Layer,
   sampleProps = {},
   assert = defaultAssert,
-  onBeforeUpdate,
-  onAfterUpdate = () => {},
+  onBeforeUpdate = noop,
+  onAfterUpdate = noop,
   runDefaultAsserts = true
 }) {
   assert(Layer.layerName, 'Layer should have display name');
