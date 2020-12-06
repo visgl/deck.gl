@@ -11,7 +11,8 @@ export default {
   'website/3D Tiles (Tile3DLayer, St Helens)': require('./3d-tiles-st-helens.json'),
   'website/3D Tiles (Tile3DLayer, Cairo/vricon)': require('./3d-tiles-cairo-vricon.json'),
   'website/3D Tiles (Tile3DLayer, New York)': require('./3d-tiles-new-york.json'),
-  'website/CartoSQLLayer': require('./carto-sql.json'),
+  'website/CartoSQLLayer (ColorBins)': require('./carto-sql-color-bins.json'),
+  'website/CartoSQLLayer (ColorCategories)': require('./carto-sql-color-categories.json'),
   'website/CartoBQTilerLayer': require('./carto-bq-tiler.json'),
   // GET STARTED EXAMPLES AS JSON PAYLOADS
   'get-started/US map (GeoJsonLayer)': require('./us-map.json'),
