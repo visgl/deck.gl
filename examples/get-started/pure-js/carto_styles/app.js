@@ -1,9 +1,9 @@
 import mapboxgl from 'mapbox-gl';
 import {Deck} from '@deck.gl/core';
 import {
-  ColorsBins,
-  ColorsCategories,
-  ColorsContinuous,
+  ColorBins,
+  ColorCategories,
+  ColorContinuous,
   CartoDOLayer,
   setDefaultCredentials,
   BASEMAP
@@ -62,22 +62,22 @@ document.getElementsByName('layer-visibility').forEach(e => {
   });
 });
 
-const colorBinsManual = ColorsBins({
+const colorBinsManual = ColorBins({
   breaks: [100, 200, 300],
   colors: [[225, 83, 131], [241, 109, 122], [250, 138, 118], [255, 166, 121]]
 });
 
 let colorBinsByStats;
 
-const colorCategoriesManual = ColorsCategories({
+const colorCategoriesManual = ColorCategories({
   categories: ['Consumer Services', 'Commercial Services', 'Attorney'],
   colors: 'Antique',
-  nulltColor: [255, 255, 255]
+  nullColor: [255, 255, 255]
 });
 
 let colorCategoriesByStats;
 
-const colorContinuousManual = ColorsContinuous({
+const colorContinuousManual = ColorContinuous({
   range: [0, 500],
   colors: 'BrwnYl'
 });
@@ -115,7 +115,7 @@ function render() {
       onDataLoad: tileJSON => {
         const {tilestats} = tileJSON;
         const stats = tilestats.layers[0].attributes.find(d => d.attribute === TOTAL_POP_VARIABLE);
-        colorBinsByStats = ColorsBins({
+        colorBinsByStats = ColorBins({
           breaks: {
             stats,
             method: 'quantiles',
@@ -153,7 +153,7 @@ function render() {
         const stats = tilestats.layers[0].attributes.find(
           d => d.attribute === CATEGORY_NAME_VARIABLE
         );
-        colorCategoriesByStats = ColorsCategories({
+        colorCategoriesByStats = ColorCategories({
           categories: {
             stats,
             top: 7
@@ -197,7 +197,7 @@ function render() {
       onDataLoad: tileJSON => {
         const {tilestats} = tileJSON;
         const stats = tilestats.layers[0].attributes.find(d => d.attribute === TOTAL_POP_VARIABLE);
-        colorContinuousByStats = ColorsContinuous({
+        colorContinuousByStats = ColorContinuous({
           range: {
             stats
           },

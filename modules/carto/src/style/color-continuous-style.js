@@ -1,7 +1,7 @@
 import {scaleLinear} from 'd3-scale';
-import {gePalette, NULL_COLOR} from './utils';
+import {getPalette, NULL_COLOR} from './utils';
 
-export default function ColorsContinuous({range, colors, nulltColor = NULL_COLOR}) {
+export default function ColorContinuous({range, colors, nullColor = NULL_COLOR}) {
   let domain;
   if (Array.isArray(range)) {
     domain = range;
@@ -10,13 +10,13 @@ export default function ColorsContinuous({range, colors, nulltColor = NULL_COLOR
     domain = [stats.min, stats.max];
   }
 
-  const palette = typeof colors === 'string' ? gePalette(colors) : colors;
+  const palette = typeof colors === 'string' ? getPalette(colors) : colors;
 
   const color = scaleLinear()
     .domain(domain)
     .range(palette);
 
   return d => {
-    return d === (undefined || null) ? nulltColor : color(d);
+    return d === (undefined || null) ? nullColor : color(d);
   };
 }

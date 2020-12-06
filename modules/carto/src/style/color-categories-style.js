@@ -1,12 +1,12 @@
-import {gePalette, NULL_COLOR} from './utils';
+import {getPalette, NULL_COLOR} from './utils';
 
 const OTHERS_COLOR = [119, 119, 119];
 const TOP = 10;
 
-export default function ColorsCategories({
+export default function ColorCategories({
   categories,
   colors,
-  nulltColor = NULL_COLOR,
+  nullColor = NULL_COLOR,
   othersColor = OTHERS_COLOR
 }) {
   let categoryList;
@@ -19,13 +19,13 @@ export default function ColorsCategories({
     categoryList = stats.categories.map(c => c.category).slice(0, top);
   }
 
-  const palette = typeof colors === 'string' ? gePalette(colors, categoryList.length) : colors;
+  const palette = typeof colors === 'string' ? getPalette(colors, categoryList.length) : colors;
 
   for (const [i, c] of categoryList.entries()) {
     colorsByCategory[c] = palette[i];
   }
 
   return d => {
-    return d === (undefined || null) ? nulltColor : colorsByCategory[d] || othersColor;
+    return d === (undefined || null) ? nullColor : colorsByCategory[d] || othersColor;
   };
 }

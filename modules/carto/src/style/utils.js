@@ -2,7 +2,7 @@ import * as cartoColors from 'cartocolor';
 
 export const NULL_COLOR = [204, 204, 204];
 
-export function gePalette(name, numCategories) {
+export function getPalette(name, numCategories) {
   const palette = cartoColors[name];
   let paletteIndex = numCategories;
 
