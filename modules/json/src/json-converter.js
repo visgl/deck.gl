@@ -131,17 +131,20 @@ function convertClassInstance(json, configuration) {
 
 // Plain JS object, embed functions.
 function convertFunctionObject(json, configuration) {
-  const {functionKey} = configuration;
+  if (configuration.functions && configuration.convertFunction) {
+    const {functionKey} = configuration;
 
-  const targetFunction = json[functionKey];
-  const dataProp = json.prop;
-  const availableFunctions = configuration.functions;
+    const targetFunction = json[functionKey];
+    const dataProp = json.prop;
+    const availableFunctions = configuration.functions;
 
-  const fn = availableFunctions[targetFunction];
-  /* eslint-disable no-unused-vars */
-  const wrapperFn = fn(json);
-  /* eslint-disable no-eval */
-  return eval(`row => wrapperFn(row.${dataProp})`);
+    const fn = availableFunctions[targetFunction];
+    const wrapperFn = fn(json);
+
+    return configuration.convertFunction(dataProp, configuration, wrapperFn);
+  }
+
+  return json;
 }
 
 // Plain JS object, convert each key and return.
