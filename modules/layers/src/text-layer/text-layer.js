@@ -294,7 +294,7 @@ export default class TextLayer extends CompositeLayer {
           getAngle: transitions.getAngle,
           getColor: transitions.getColor,
           getSize: transitions.getSize,
-          getPixelOffset: updateTriggers.getPixelOffset
+          getPixelOffset: transitions.getPixelOffset
         }
       },
       this.getSubLayerProps({

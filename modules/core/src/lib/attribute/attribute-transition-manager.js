@@ -31,7 +31,7 @@ export default class AttributeTransitionManager {
 
   // Called when attribute manager updates
   // Check the latest attributes for updates.
-  update({attributes, transitions = {}, numInstances}) {
+  update({attributes, transitions, numInstances}) {
     // Transform class will crash if elementCount is 0
     this.numInstances = numInstances || 1;
 
