@@ -178,6 +178,7 @@ export const PolygonLayerDemo = makeLayerDemo({
     pickable: true,
     stroked: true,
     filled: true,
+    extruded: true,
     wireframe: true,
     lineWidthMinPixels: 1,
     getPolygon: d => d.contour,
