@@ -19,6 +19,12 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v8.3
 
+#### deck.gl [8.3.11] - Dec 8 2020
+
+- Pass onError prop to AnimationLoop (#5221)
+- Fix TextLayer transition forwarding (#5225)
+- [test-utils] Fix generateLayerTests crash when onBeforeUpdate is not supplied (#5224)
+
 #### deck.gl [8.3.10] - Nov 30 2020
 
 - Fix ScenegraphLayer warnings (#5194)
