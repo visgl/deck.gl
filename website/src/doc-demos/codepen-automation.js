@@ -7,6 +7,11 @@ const PROP_OVERRIDES = {
   characterSet: '" !\\"#$%&\'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\]^_`abcdefghijklmnopqrstuvwxyz{|}~"'
 };
 
+/*
+ * Adjust indent to a block of code
+ * @param text (String) - source code
+ * @param spaces (Number) - positive: add x spaces to indent; negative: remove x spaces to indent
+ */
 function addIndent(text, spaces) {
   if (!text.includes('\n') || spaces === 0) {
     return text;
@@ -24,6 +29,9 @@ function addIndent(text, spaces) {
   }
 }
 
+/*
+ * Format an object for use in source code
+ */
 function formatValue(value) {
   if (value === null || value === undefined) {
     return 'null';
@@ -39,6 +47,9 @@ function formatValue(value) {
   return addIndent(JSON.stringify(value, null, 2), 2);
 }
 
+/*
+ * Convert the source code that describes a JS props object to a map of propName -> source
+ */
 function parsePropSource(source) {
   const lines = source.split('\n');
   lines.pop();
@@ -60,7 +71,10 @@ function parsePropSource(source) {
   }
   return result;
 }
-  
+
+/*
+ * Takes a layer instance and returns JS code that reproduces it
+ */
 function printLayerProps(layer, propsSource) {
   const result = [];
   const propNames = {};
@@ -142,6 +156,9 @@ function printLayerProps(layer, propsSource) {
   return result.join('\n  ');
 }
 
+/*
+ * Open a layer example in Codepen
+ */
 export function gotoSource(layer, config, initialViewState) {
   const {Layer, getTooltip, props, mapStyle = true, dependencies = [], loaders, imports} = config;
 

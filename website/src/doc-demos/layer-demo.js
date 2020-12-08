@@ -4,7 +4,7 @@ import {StaticMap} from 'react-map-gl';
 import styled from 'styled-components';
 
 import {MAPBOX_STYLES} from '../constants/defaults';
-import {gotoSource} from './codepen';
+import {gotoSource} from './codepen-automation';
 
 const INITIAL_VIEW_STATE = {
   longitude: -122.4,
