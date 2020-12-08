@@ -75,12 +75,6 @@ const defaultProps = {
   // This prop will be removed and set to true in next major release
   _useMeshColors: {type: 'boolean', value: false},
 
-  // TODO - parameters should be merged, not completely overridden
-  parameters: {
-    depthTest: true,
-    depthFunc: GL.LEQUAL
-  },
-
   // _instanced is a hack to use world position instead of meter offsets in mesh
   // TODO - formalize API
   _instanced: true,
