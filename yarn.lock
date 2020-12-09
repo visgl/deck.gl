@@ -2156,7 +2156,7 @@
     "@babel/runtime" "^7.0.0"
     gl-matrix "^3.0.0"
 
-"@math.gl/culling@3.3.2", "@math.gl/culling@^3.3.0", "@math.gl/culling@^3.3.2":
+"@math.gl/culling@^3.3.0", "@math.gl/culling@^3.3.2":
   version "3.3.2"
   resolved "https://registry.yarnpkg.com/@math.gl/culling/-/culling-3.3.2.tgz#3ae4e7cf6726b400652c862ea300c04015be28d9"
   integrity sha512-tzfEMoFOc9Ee0gf3AyflMS4YxJGcKMqZAv17GRwCqb2q752v1NLIeC8JiCnlS31kLWsN9X/1xQQiDmhrnq451g==
@@ -2165,7 +2165,7 @@
     "@math.gl/core" "3.3.2"
     gl-matrix "^3.0.0"
 
-"@math.gl/geospatial@3.3.2", "@math.gl/geospatial@^3.3.0":
+"@math.gl/geospatial@^3.3.0":
   version "3.3.2"
   resolved "https://registry.yarnpkg.com/@math.gl/geospatial/-/geospatial-3.3.2.tgz#1a48aa5c833b639a63eb0823bb370bf7d4bfbd2a"
   integrity sha512-Drz8XK/VYiG9nj05daUHYSOrMSav2qSEROQNgt5egqouFDTWAIPooraJln+FB2F4wwA9oypFaH7jUH11X/CjEg==
@@ -2181,7 +2181,7 @@
   dependencies:
     "@math.gl/core" "3.3.2"
 
-"@math.gl/web-mercator@3.3.2", "@math.gl/web-mercator@^3.1.3", "@math.gl/web-mercator@^3.3.0", "@math.gl/web-mercator@^3.3.2":
+"@math.gl/web-mercator@^3.1.3", "@math.gl/web-mercator@^3.3.0", "@math.gl/web-mercator@^3.3.2":
   version "3.3.2"
   resolved "https://registry.yarnpkg.com/@math.gl/web-mercator/-/web-mercator-3.3.2.tgz#e85e4efab8c74edd549f20121ba680b0f466e9cd"
   integrity sha512-84NNnwP97Xwm1ynZzat1BuEU2uLyIw0gzG5uvGMrAzezny2P38+E2cUK8t9eptKa8gjk2MaC7hhcO0saFCZTHw==
@@ -7326,7 +7326,7 @@ mapbox-gl@^1.0.0, mapbox-gl@^1.2.1:
     tinyqueue "^2.0.0"
     vt-pbf "^3.1.1"
 
-math.gl@3.3.2, math.gl@^3.3.0, math.gl@^3.3.2:
+math.gl@^3.3.0, math.gl@^3.3.2:
   version "3.3.2"
   resolved "https://registry.yarnpkg.com/math.gl/-/math.gl-3.3.2.tgz#3fefd42e37337f3788985ffcd4c52ccd5c65fc07"
   integrity sha512-33CWhbeiQxl+lzpnKdKijH9mPdZRQUP9TlBILNh6xhnJdMD9D+Kle6Xhfb8dMllE1UUQcPZlQ8/Sd1qSVtNsKQ==

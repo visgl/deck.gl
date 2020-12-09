@@ -29,7 +29,6 @@ uniform float elevationScale;
 uniform float opacity;
 
 varying vec4 vColor;
-varying float isValid;
 
 struct PolygonProps {
   vec4 fillColors;
@@ -52,6 +51,13 @@ vec3 project_offset_normal(vec3 vector) {
 }
 
 void calculatePosition(PolygonProps props) {
+#ifdef IS_SIDE_VERTEX
+  if(vertexValid < 0.5){
+    gl_Position = vec4(0.);
+    return;
+  }
+#endif
+
   vec3 pos;
   vec3 pos64Low;
   vec3 normal;
@@ -64,11 +70,9 @@ void calculatePosition(PolygonProps props) {
 #ifdef IS_SIDE_VERTEX
   pos = mix(props.positions, props.nextPositions, vertexPositions.x);
   pos64Low = mix(props.positions64Low, props.nextPositions64Low, vertexPositions.x);
-  isValid = vertexValid;
 #else
   pos = props.positions;
   pos64Low = props.positions64Low;
-  isValid = 1.0;
 #endif
 
   if (extruded) {

@@ -76,12 +76,12 @@ export default class Attribute extends DataColumn {
 
   // Resolve transition settings object if transition is enabled, otherwise `null`
   getTransitionSetting(opts) {
+    if (!opts || !this.supportsTransition()) {
+      return null;
+    }
     const {accessor} = this.settings;
     // TODO: have the layer resolve these transition settings itself?
     const layerSettings = this.settings.transition;
-    if (!this.supportsTransition()) {
-      return null;
-    }
     // these are the transition settings passed in by the user
     const userSettings = Array.isArray(accessor)
       ? opts[accessor.find(a => opts[a])]

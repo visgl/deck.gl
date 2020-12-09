@@ -110,7 +110,7 @@ const defaultProps = {
   colorFormat: 'RGBA',
 
   parameters: {},
-  uniforms: {},
+  transitions: null,
   extensions: [],
 
   // Offset depth based on layer index to avoid z-fighting.
@@ -395,7 +395,17 @@ export default class Layer extends Component {
 
     if (!oldViewport || !areViewportsEqual({oldViewport, viewport})) {
       this.setChangeFlags({viewportChanged: true});
-      this._update();
+
+      if (this.isComposite) {
+        if (this.needsUpdate()) {
+          // Composite layers may add/remove sublayers on viewport change
+          // Because we cannot change the layers list during a draw cycle, we don't want to update sublayers right away
+          // This will not call update immediately, but mark the layerManager as needs update on the next frame
+          this.setNeedsUpdate();
+        }
+      } else {
+        this._update();
+      }
     }
   }
 

@@ -67,6 +67,16 @@ const defaultProps = {
 };
 
 export default class ScenegraphLayer extends Layer {
+  getShaders() {
+    const modules = [project32, picking];
+
+    if (this.props._lighting === 'pbr') {
+      modules.push(pbr);
+    }
+
+    return {vs, fs, modules};
+  }
+
   initializeState() {
     const attributeManager = this.getAttributeManager();
     attributeManager.addInstanced({
@@ -197,12 +207,7 @@ export default class ScenegraphLayer extends Layer {
   }
 
   _getModelOptions() {
-    const modules = [project32, picking];
-    const {_lighting, _imageBasedLightingEnvironment} = this.props;
-
-    if (_lighting === 'pbr') {
-      modules.push(pbr);
-    }
+    const {_imageBasedLightingEnvironment} = this.props;
 
     let env = null;
     if (_imageBasedLightingEnvironment) {
@@ -218,11 +223,9 @@ export default class ScenegraphLayer extends Layer {
       waitForFullLoad: true,
       imageBasedLightingEnvironment: env,
       modelOptions: {
-        vs,
-        fs,
-        modules,
         isInstanced: true,
-        transpileToGLSL100: !isWebGL2(this.context.gl)
+        transpileToGLSL100: !isWebGL2(this.context.gl),
+        ...this.getShaders()
       },
       // tangents are not supported
       useTangents: false

@@ -1,3 +1,7 @@
+import {SimpleMeshLayerDemo} from 'website-components/doc-demos/mesh-layers';
+
+<SimpleMeshLayerDemo />
+
 <p class="badges">
   <img src="https://img.shields.io/badge/lighting-yes-blue.svg?style=flat-square" alt="lighting" />
 </p>
@@ -9,7 +13,7 @@ The `SimpleMeshLayer` renders a number of arbitrary geometries. For example, a f
 ```js
 import DeckGL from '@deck.gl/react';
 import {SimpleMeshLayer} from '@deck.gl/mesh-layers';
-import {CubeGeometry} from 'luma.gl'
+import {CubeGeometry} from '@luma.gl/core'
 
 function App({data, viewState}) {
   /**
@@ -32,7 +36,10 @@ function App({data, viewState}) {
     id: 'mesh-layer',
     data,
     texture: 'texture.png',
-    mesh: new CubeGeometry()
+    mesh: new CubeGeometry(),
+    getPosition: d => d.position,
+    getColor: d => d.color,
+    getOrientation: d => [0, d.angle, 0]
   });
 
   return <DeckGL viewState={viewState} layers={[layer]} />;
@@ -74,25 +81,30 @@ Inherits from all [Base Layer](/docs/api-reference/core/layer.md) properties.
 
 ### Mesh
 
-##### `mesh` (Geometry|Object|Promise)
+##### `mesh` (String|Geometry|Object)
 
-The geometry to render for each data object.
-Can be a luma.gl [Geometry](https://luma.gl/docs/api-reference/engine/geometry) instance, or an object of attributes, a `Promise` that resolves to one of the above,
-or a URL to a mesh description file in a format supported by [loaders.gl](https://github.com/visgl/loaders.gl) (the appropriate loader will have to be registered via the loaders.gl
-`registerLoaders` function for this usage).
+The geometry to render for each data object. One of:
 
-The following attributes are expected:
-
-- `positions` (Float32Array) - 3d vertex offset from the object center, in meters
-- `normals` (Float32Array) - 3d normals
-- `texCoords` (Float32Array) - 2d texture coordinates
+- An URL to a mesh description file in a format supported by [loaders.gl](https://loaders.gl/docs/specifications/category-mesh). The appropriate loader will have to be registered via the loaders.gl `registerLoaders` function for this usage.
+- A luma.gl [Geometry](https://luma.gl/docs/api-reference/engine/geometry) instance
+- An object containing the following fields:
+  + `positions` (Float32Array) - 3d vertex offset from the object center, in meters
+  + `normals` (Float32Array) - 3d normals
+  + `texCoords` (Float32Array) - 2d texture coordinates
 
 
-##### `texture` (String|Texture2D|Image|ImageData|HTMLCanvasElement|HTMLVideoElement|ImageBitmap, optional)
+##### `texture` (String|Texture2D|Image|ImageData|HTMLCanvasElement|HTMLVideoElement|ImageBitmap|Object, optional)
 
 - Default `null`.
 
-The texture of the geometries. If a string is supplied, it is interpreted as a URL or a [Data URL](https://developer.mozilla.org/en-US/docs/Web/HTTP/Basics_of_HTTP/Data_URIs). The image data will be converted to a [Texture2D](https://luma.gl/docs/api-reference/webgl/texture-2d) object. See `textureParameters` prop for advanced customization.
+The texture of the geometries.
+
+- If a string is supplied, it is interpreted as a URL or a [Data URL](https://developer.mozilla.org/en-US/docs/Web/HTTP/Basics_of_HTTP/Data_URIs).
+- One of the valid [pixel sources for WebGL texture](https://developer.mozilla.org/en-US/docs/Web/API/WebGLRenderingContext/texImage2D)
+- A luma.gl [Texture2D](https://luma.gl/docs/api-reference/webgl/texture-2d) instance
+- A plain object that can be passed to the `Texture2D` constructor, e.g. `{width: <number>, height: <number>, data: <Uint8Array>}`. Note that whenever this object shallowly changes, a new texture will be created.
+
+The image data will be converted to a [Texture2D](https://luma.gl/docs/api-reference/webgl/texture-2d) object. See `textureParameters` prop for advanced customization.
 
 If `texture` is supplied, texture is used to render the geometries. Otherwise, object color obtained via the `getColor` accessor is used.
 

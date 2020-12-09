@@ -21,6 +21,19 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ### deck.gl v8.4 Prereleases
 
+#### deck.gl [8.4.0-alpha.4] - Dec 8 2020
+
+- Remove unused layer prop (#5226)
+- [test-utils] Fix generateLayerTests crash when onBeforeUpdate is not supplied (#5224)
+- Fix TextLayer transition forwarding (#5225)
+- Fix composite layer update on viewport change (#5172)
+- Support plain object as image source (#5212)
+- Pass onError prop to AnimationLoop (#5221)
+- Improve SolidPolygonLayer shaders performance (side polygons) (#5218)
+- getShaders() consistency (#5214)
+- Update outdated links in docs (#5213)
+- Simplify FontAtlasManager (#5209)
+
 #### deck.gl [8.4.0-alpha.3] - Dec 1 2020
 
 - Add image prop type (#5197)

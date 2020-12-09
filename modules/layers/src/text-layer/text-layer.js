@@ -89,7 +89,7 @@ export default class TextLayer extends CompositeLayer {
   initializeState() {
     this.state = {
       styleVersion: 0,
-      fontAtlasManager: new FontAtlasManager(this.context.gl)
+      fontAtlasManager: new FontAtlasManager()
     };
   }
 
@@ -120,12 +120,6 @@ export default class TextLayer extends CompositeLayer {
         styleVersion: this.state.styleVersion + 1
       });
     }
-  }
-
-  finalizeState() {
-    super.finalizeState();
-    // Release resources held by the font atlas manager
-    this.state.fontAtlasManager.finalize();
   }
 
   getPickingInfo({info}) {
@@ -300,7 +294,7 @@ export default class TextLayer extends CompositeLayer {
           getAngle: transitions.getAngle,
           getColor: transitions.getColor,
           getSize: transitions.getSize,
-          getPixelOffset: updateTriggers.getPixelOffset
+          getPixelOffset: transitions.getPixelOffset
         }
       },
       this.getSubLayerProps({
