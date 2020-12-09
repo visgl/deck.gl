@@ -4,7 +4,7 @@
 
 | High-scale spatial rendering in Python, powered by `deck.gl <https://deck.gl/#/>`__.
 
-Get started by `installing pydeck <installation.rst>`__.
+Get started by `installing pydeck <installation.html>`__.
 
 Gallery
 ^^^^^^^
@@ -16,7 +16,7 @@ Gallery
 Overview
 ^^^^^^^^
 
-`pydeck in Jupyter <jupyter.rst>`__
+`pydeck in Jupyter <jupyter.html>`__
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Uniquely integrated with the Jupyter ecosystem, pydeck supports interactions in a visualization that communicate
@@ -32,36 +32,36 @@ with the Jupyter kernel. Read more about usage in Jupyter `here <jupyter.html>`_
 
    `See hosted examples on mybinder.org <https://mybinder.org/v2/gh/uber/deck.gl/binder>`__
 
-`Layers <layer.rst>`__
+`Layers <layer.html>`__
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Configure one of the many deck.gl layers for rendering in pydeck.
 
-`Deck <deck.rst>`__
+`Deck <deck.html>`__
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Better understand the main object within visualization, used to write data out to a widget in Jupyter,
 save it out to HTML, and configure some global parameters of a visualization, like its size or
 tooltip.
 
-`Data utilities <data_utils.rst>`__
+`Data utilities <data_utils.html>`__
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 A handful of functions to make certain common data exercises easier,
 like automatically fitting a viewport to data on a map or quickly coloring categorical data
 
-`ViewState <view_state.rst>`__
+`ViewState <view_state.html>`__
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Used to set the precise location of a user's vantage point on the data, like
 a user's zoom level
 
-`View <view.rst>`__
+`View <view.html>`__
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Used to enable or disable map controls and also modify the kind of map projection,
 like plotting in flat plane instead of plotting on a mercator projection
 
-`LightSettings (Experimental) <light_settings.rst>`__
+`LightSettings (Experimental) <light_settings.html>`__
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Configure the lighting within a visualization.
