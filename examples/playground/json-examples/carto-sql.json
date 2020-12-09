@@ -23,7 +23,7 @@
         "apiKey": "default_public"
       },
       "getLineColor": [255, 255, 255],
-      "getFillColor": "@@= properties.gn_pop > 10000 ? [225, 83, 131] : [255, 221, 154]",
+      "getFillColor": "@@=properties.gn_pop > 10000 ? [225, 83, 131] : [255, 221, 154]",
       "pointRadiusMinPixels": 5,
       "lineWidthMinPixels": 1
     }

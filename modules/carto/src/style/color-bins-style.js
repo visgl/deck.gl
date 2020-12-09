@@ -4,7 +4,7 @@ import {getPalette, NULL_COLOR} from './utils';
 
 const N_BINS = 5;
 
-export default function ColorBins({breaks, colors, nullColor = NULL_COLOR}) {
+export default function colorBins({breaks, colors, nullColor = NULL_COLOR}) {
   let domain;
   if (Array.isArray(breaks)) {
     domain = breaks;

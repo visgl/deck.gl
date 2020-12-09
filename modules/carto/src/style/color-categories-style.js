@@ -3,7 +3,7 @@ import {getPalette, NULL_COLOR} from './utils';
 const OTHERS_COLOR = [119, 119, 119];
 const TOP = 10;
 
-export default function ColorCategories({
+export default function colorCategories({
   categories,
   colors,
   nullColor = NULL_COLOR,

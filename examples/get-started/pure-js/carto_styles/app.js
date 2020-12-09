@@ -1,9 +1,9 @@
 import mapboxgl from 'mapbox-gl';
 import {Deck} from '@deck.gl/core';
 import {
-  ColorBins,
-  ColorCategories,
-  ColorContinuous,
+  colorBins,
+  colorCategories,
+  colorContinuous,
   CartoDOLayer,
   setDefaultCredentials,
   BASEMAP
@@ -62,14 +62,14 @@ document.getElementsByName('layer-visibility').forEach(e => {
   });
 });
 
-const colorBinsManual = ColorBins({
+const colorBinsManual = colorBins({
   breaks: [100, 200, 300],
   colors: [[225, 83, 131], [241, 109, 122], [250, 138, 118], [255, 166, 121]]
 });
 
 let colorBinsByStats;
 
-const colorCategoriesManual = ColorCategories({
+const colorCategoriesManual = colorCategories({
   categories: ['Consumer Services', 'Commercial Services', 'Attorney'],
   colors: 'Antique',
   nullColor: [255, 255, 255]
@@ -77,7 +77,7 @@ const colorCategoriesManual = ColorCategories({
 
 let colorCategoriesByStats;
 
-const colorContinuousManual = ColorContinuous({
+const colorContinuousManual = colorContinuous({
   range: [0, 500],
   colors: 'BrwnYl'
 });
@@ -115,7 +115,7 @@ function render() {
       onDataLoad: tileJSON => {
         const {tilestats} = tileJSON;
         const stats = tilestats.layers[0].attributes.find(d => d.attribute === TOTAL_POP_VARIABLE);
-        colorBinsByStats = ColorBins({
+        colorBinsByStats = colorBins({
           breaks: {
             stats,
             method: 'quantiles',
@@ -153,7 +153,7 @@ function render() {
         const stats = tilestats.layers[0].attributes.find(
           d => d.attribute === CATEGORY_NAME_VARIABLE
         );
-        colorCategoriesByStats = ColorCategories({
+        colorCategoriesByStats = colorCategories({
           categories: {
             stats,
             top: 7
@@ -197,7 +197,7 @@ function render() {
       onDataLoad: tileJSON => {
         const {tilestats} = tileJSON;
         const stats = tilestats.layers[0].attributes.find(d => d.attribute === TOTAL_POP_VARIABLE);
-        colorContinuousByStats = ColorContinuous({
+        colorContinuousByStats = colorContinuous({
           range: {
             stats
           },

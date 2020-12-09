@@ -1,7 +1,7 @@
 import {scaleLinear} from 'd3-scale';
 import {getPalette, NULL_COLOR} from './utils';
 
-export default function ColorContinuous({range, colors, nullColor = NULL_COLOR}) {
+export default function colorContinuous({range, colors, nullColor = NULL_COLOR}) {
   let domain;
   if (Array.isArray(range)) {
     domain = range;

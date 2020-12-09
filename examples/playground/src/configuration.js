@@ -8,9 +8,9 @@ import * as MeshLayers from '@deck.gl/mesh-layers';
 import {
   CartoSQLLayer,
   CartoBQTilerLayer,
-  ColorBins,
-  ColorCategories,
-  ColorContinuous
+  colorBins,
+  colorCategories,
+  colorContinuous
 } from '@deck.gl/carto';
 
 import {COORDINATE_SYSTEM} from '@deck.gl/core';
@@ -40,7 +40,7 @@ export default {
   ),
 
   // Functions that should be executed by JSON converter
-  functions: Object.assign({ColorBins, ColorCategories, ColorContinuous}),
+  functions: Object.assign({colorBins, colorCategories, colorContinuous}),
 
   // Enumerations that should be available to JSON parser
   // Will be resolved as `<enum-name>.<enum-value>`
