@@ -9,7 +9,7 @@ export default function ColorCategories({
   nullColor = NULL_COLOR,
   othersColor = OTHERS_COLOR
 }) {
-  let categoryList;
+  let categoryList = [];
   const colorsByCategory = {};
 
   if (Array.isArray(categories)) {
@@ -19,7 +19,7 @@ export default function ColorCategories({
     categoryList = stats.categories.map(c => c.category).slice(0, top);
   }
 
-  const palette = typeof colors === 'string' ? getPalette(colors, categoryList.length) : colors;
+  const palette = typeof colors === 'string' ? getPalette(colors, categoryList.size) : colors;
 
   for (const [i, c] of categoryList.entries()) {
     colorsByCategory[c] = palette[i];

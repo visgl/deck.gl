@@ -23,10 +23,10 @@ export function getPalette(name = undefined, numCategories) {
     paletteIndex = smallestPaletteIndex;
   }
 
-  const colors = palette[paletteIndex];
+  let colors = palette[paletteIndex];
 
   if (palette.tags && palette.tags.includes('qualitative')) {
-    colors.pop();
+    colors = colors.slice(0, -1);
   }
 
   return colors.map(c => hexToRgb(c));

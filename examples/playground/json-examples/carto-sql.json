@@ -23,12 +23,7 @@
         "apiKey": "default_public"
       },
       "getLineColor": [255, 255, 255],
-      "getFillColor": {
-        "@@function": "ColorBins",
-        "prop": "properties.gn_pop",
-        "breaks": [0, 10000, 100000],
-        "colors": [[255, 238, 204], [255, 221, 154], [225, 83, 131], [130, 23, 59]]
-      },
+      "getFillColor": "@@= properties.gn_pop > 10000 ? [225, 83, 131] : [255, 221, 154]",
       "pointRadiusMinPixels": 5,
       "lineWidthMinPixels": 1
     }
