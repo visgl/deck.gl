@@ -67,7 +67,7 @@ export default class MVTLayer extends TileLayer {
         newHoveredFeatureId = getFeatureUniqueId(hoveredFeature, uniqueIdProperty);
       }
 
-      if (hoveredFeatureId !== newHoveredFeatureId) {
+      if (hoveredFeatureId !== newHoveredFeatureId && newHoveredFeatureId !== -1) {
         this.setState({hoveredFeatureId: newHoveredFeatureId});
       }
     }
