@@ -22,8 +22,13 @@
         "username": "public",
         "apiKey": "default_public"
       },
-      "getLineColor": [255, 255, 255],
-      "getFillColor": "@@= properties.gn_pop > 10000 ? [225, 83, 131] : [255, 221, 154]",
+      "getLineColor": [255, 255, 255, 100],
+      "getFillColor": {
+        "@@function": "colorBins",
+        "prop": "properties.gn_pop",
+        "breaks": [1e5, 2e5, 3e5],
+        "colors": "Teal"
+      },
       "pointRadiusMinPixels": 5,
       "lineWidthMinPixels": 1
     }
