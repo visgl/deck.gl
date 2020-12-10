@@ -20,7 +20,7 @@
       "data": "cartobq.maps.nyc_taxi_points_demo_id",
       "getFillColor": {
         "@@function": "colorBins",
-        "prop": "properties.avg_fare_amount",
+        "key": "properties.avg_fare_amount",
         "domain": [0, 10, 25, 50, 100],
         "colors": "Prism"
       },
