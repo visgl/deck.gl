@@ -2,6 +2,7 @@ import getPalette, {NULL_COLOR, OTHERS_COLOR} from './palette';
 import {getAttrValue} from './utils';
 
 export default function colorCategories({
+  attr,
   categories,
   colors,
   nullColor = NULL_COLOR,

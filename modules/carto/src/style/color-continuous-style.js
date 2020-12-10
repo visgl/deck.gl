@@ -2,7 +2,7 @@ import {scaleLinear} from 'd3-scale';
 import getPalette, {NULL_COLOR} from './palette';
 import {getAttrValue} from './utils';
 
-export default function colorContinuous({range, colors, nullColor = NULL_COLOR}) {
+export default function colorContinuous({attr, range, colors, nullColor = NULL_COLOR}) {
   if (Array.isArray(range)) {
     const palette = typeof colors === 'string' ? getPalette(colors) : colors;
 
