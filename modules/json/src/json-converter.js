@@ -135,13 +135,14 @@ function convertFunctionObject(json, configuration) {
     const {functionKey} = configuration;
 
     const targetFunction = json[functionKey];
-    const dataProp = json.prop;
+    const dataProp = json.key;
     const availableFunctions = configuration.functions;
 
     const fn = availableFunctions[targetFunction];
     const wrapperFn = fn(json);
 
-    return configuration.convertFunction(dataProp, configuration, wrapperFn);
+    const accessor = configuration.convertFunction(dataProp, configuration);
+    return row => wrapperFn(accessor(row));
   }
 
   return json;

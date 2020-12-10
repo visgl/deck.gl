@@ -1,5 +1,5 @@
 // TODO - default parsing code should not be part of the configuration.
-import parseExpression from './helpers/parse-expression';
+import parseExpressionString from './helpers/parse-expression-string';
 import assert from './utils/assert';
 
 import {TYPE_KEY, FUNCTION_KEY} from './syntactic-sugar';
@@ -18,7 +18,7 @@ export default class JSONConfiguration {
     this.constants = {};
     this.functions = {};
     // TODO - this needs to be simpler, function conversion should be built in
-    this.convertFunction = convertFunction;
+    this.convertFunction = parseExpressionString;
     this.preProcessClassProps = (Class, props) => props;
     this.postProcessConvertedJson = json => json;
 
@@ -50,8 +50,4 @@ export default class JSONConfiguration {
     assert(isObject(this.classes));
     return true;
   }
-}
-
-function convertFunction(value, configuration, wrapperFn) {
-  return parseExpression(value, configuration, wrapperFn);
 }
