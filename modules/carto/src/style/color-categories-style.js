@@ -1,6 +1,4 @@
-import {getPalette, NULL_COLOR} from './utils';
-
-const OTHERS_COLOR = [119, 119, 119];
+import {getPalette, isNumberOrStringValid, NULL_COLOR, OTHERS_COLOR} from './utils';
 
 export default function colorCategories({
   categories,
@@ -17,9 +15,7 @@ export default function colorCategories({
       colorsByCategory[c] = palette[i];
     }
 
-    return d => {
-      return d === (undefined || null) ? nullColor : colorsByCategory[d] || othersColor;
-    };
+    return d => (isNumberOrStringValid(d) ? colorsByCategory[d] || othersColor : nullColor);
   }
 
   return () => NULL_COLOR;

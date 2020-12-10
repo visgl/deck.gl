@@ -1,5 +1,5 @@
 import {scaleLinear} from 'd3-scale';
-import {getPalette, NULL_COLOR} from './utils';
+import {getPalette, isNumberValid, NULL_COLOR} from './utils';
 
 export default function colorContinuous({range, colors, nullColor = NULL_COLOR}) {
   if (Array.isArray(range)) {
@@ -9,9 +9,7 @@ export default function colorContinuous({range, colors, nullColor = NULL_COLOR})
       .domain(range)
       .range(palette);
 
-    return d => {
-      return d === (undefined || null) ? nullColor : color(d);
-    };
+    return d => (isNumberValid(d) ? color(d) : nullColor);
   }
 
   return () => NULL_COLOR;

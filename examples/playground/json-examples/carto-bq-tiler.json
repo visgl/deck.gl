@@ -21,7 +21,7 @@
       "getFillColor": {
         "@@function": "colorBins",
         "prop": "properties.avg_fare_amount",
-        "breaks": [0, 10, 25, 50, 100],
+        "domain": [0, 10, 25, 50, 100],
         "colors": "Prism"
       },
       "pointRadiusMinPixels": 2,

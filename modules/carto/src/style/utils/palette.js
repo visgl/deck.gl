@@ -1,8 +1,6 @@
 import * as cartoColors from 'cartocolor';
 
-export const NULL_COLOR = [204, 204, 204];
-
-export function getPalette(name = undefined, numCategories) {
+export default function getPalette(name, numCategories) {
   const palette = cartoColors[name];
   let paletteIndex = numCategories;
 

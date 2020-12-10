@@ -1,17 +1,15 @@
 import {scaleThreshold} from 'd3-scale';
-import {getPalette, NULL_COLOR} from './utils';
+import {getPalette, isNumberValid, NULL_COLOR} from './utils';
 
-export default function colorBins({breaks, colors, nullColor = NULL_COLOR}) {
-  if (Array.isArray(breaks)) {
-    const palette = typeof colors === 'string' ? getPalette(colors, breaks.length + 1) : colors;
+export default function colorBins({domain, colors, nullColor = NULL_COLOR}) {
+  if (Array.isArray(domain)) {
+    const palette = typeof colors === 'string' ? getPalette(colors, domain.length) : colors;
 
     const color = scaleThreshold()
-      .domain(breaks)
+      .domain(domain)
       .range(palette);
 
-    return d => {
-      return d === (undefined || null) ? nullColor : color(d);
-    };
+    return d => (isNumberValid(d) ? color(d) : nullColor);
   }
 
   return () => NULL_COLOR;
