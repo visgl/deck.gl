@@ -33,6 +33,9 @@ export default {
     {}
   ),
 
+  // Functions that should be executed by JSON converter
+  functions: Object.assign({}),
+
   // Enumerations that should be available to JSON parser
   // Will be resolved as `<enum-name>.<enum-value>`
   enumerations: {

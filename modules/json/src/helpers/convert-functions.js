@@ -1,4 +1,4 @@
-import parseExpressionString from './parse-expression-string';
+import parseExpression from './parse-expression';
 
 import {FUNCTION_IDENTIFIER} from '../syntactic-sugar';
 
@@ -24,8 +24,9 @@ export default function convertFunctions(props, configuration) {
     if (isFunction) {
       // Parse string as "expression", return equivalent JavaScript function
       propValue = trimFunctionIdentifier(propValue);
-      propValue = parseExpressionString(propValue, configuration);
+      propValue = parseExpression(propValue, configuration);
     }
+
     replacedProps[propName] = propValue;
   }
 

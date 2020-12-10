@@ -12,7 +12,7 @@ import assert from './utils/assert';
 import JSONConfiguration from './json-configuration';
 import {instantiateClass} from './helpers/instantiate-class';
 
-import {FUNCTION_IDENTIFIER, CONSTANT_IDENTIFIER} from './syntactic-sugar';
+import {FUNCTION_IDENTIFIER, CONSTANT_IDENTIFIER, FUNCTION_KEY} from './syntactic-sugar';
 import parseJSON from './helpers/parse-json';
 
 const isObject = value => value && typeof value === 'object';
@@ -92,6 +92,10 @@ function convertJSONRecursively(json, key, configuration) {
   }
 
   if (isObject(json)) {
+    // If object.function is in configuration, convert object to function
+    if (FUNCTION_KEY in json) {
+      return convertFunctionObject(json, configuration);
+    }
     return convertPlainObject(json, configuration);
   }
 
@@ -123,6 +127,24 @@ function convertClassInstance(json, configuration) {
   props = convertPlainObject(props, configuration);
 
   return instantiateClass(type, props, configuration);
+}
+
+// Plain JS object, embed functions.
+function convertFunctionObject(json, configuration) {
+  if (configuration.functions && configuration.convertFunction) {
+    const {functionKey} = configuration;
+
+    const targetFunction = json[functionKey];
+    const dataProp = json.prop;
+    const availableFunctions = configuration.functions;
+
+    const fn = availableFunctions[targetFunction];
+    const wrapperFn = fn(json);
+
+    return configuration.convertFunction(dataProp, configuration, wrapperFn);
+  }
+
+  return json;
 }
 
 // Plain JS object, convert each key and return.
