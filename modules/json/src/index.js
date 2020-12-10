@@ -9,5 +9,5 @@ export {default as Transport} from './transports/transport';
 
 // Helpers
 export {default as _convertFunctions} from './helpers/convert-functions';
-export {default as _parseExpression} from './helpers/parse-expression';
+export {default as _parseExpressionString} from './helpers/parse-expression-string';
 export {shallowEqualObjects as _shallowEqualObjects} from './utils/shallow-equal-objects';

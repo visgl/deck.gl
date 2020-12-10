@@ -7,12 +7,12 @@ const cachedExpressionMap = {
   '-': object => object
 };
 
-// Calculates an accessor function from a JSON string or object
+// Calculates an accessor function from a JSON string
 // '-' : x => x
 // 'a.b.c': x => x.a.b.c
-export default function parseExpression(propValue, configuration, wrapperFn) {
+export default function parseExpressionString(propValue, configuration) {
   // NOTE: Can be null which represents invalid function. Return null so that prop can be omitted
-  if (propValue in cachedExpressionMap && !wrapperFn) {
+  if (propValue in cachedExpressionMap) {
     return cachedExpressionMap[propValue];
   }
 
@@ -23,10 +23,6 @@ export default function parseExpression(propValue, configuration, wrapperFn) {
     if (ast.type === 'Identifier') {
       func = row => {
         return get(row, propValue);
-      };
-    } else if (ast.type === 'MemberExpression' && wrapperFn) {
-      func = row => {
-        return wrapperFn(expressionEval.eval(ast, row));
       };
     } else {
       // NOTE: To avoid security risks, the arguments passed to the
