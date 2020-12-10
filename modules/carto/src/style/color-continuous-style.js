@@ -14,5 +14,5 @@ export default function colorContinuous({range, colors, nullColor = NULL_COLOR})
     };
   }
 
-  return NULL_COLOR;
+  return () => NULL_COLOR;
 }

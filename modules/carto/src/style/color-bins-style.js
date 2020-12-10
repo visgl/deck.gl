@@ -14,5 +14,5 @@ export default function colorBins({breaks, colors, nullColor = NULL_COLOR}) {
     };
   }
 
-  return NULL_COLOR;
+  return () => NULL_COLOR;
 }

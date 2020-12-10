@@ -22,5 +22,5 @@ export default function colorCategories({
     };
   }
 
-  return NULL_COLOR;
+  return () => NULL_COLOR;
 }
