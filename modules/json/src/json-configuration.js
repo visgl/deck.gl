@@ -1,5 +1,5 @@
 // TODO - default parsing code should not be part of the configuration.
-import parseExpressionString from './helpers/parse-expression-string';
+import parseExpression from './helpers/parse-expression';
 import assert from './utils/assert';
 
 import {TYPE_KEY, FUNCTION_KEY} from './syntactic-sugar';

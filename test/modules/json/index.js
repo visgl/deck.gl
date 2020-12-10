@@ -1,7 +1,7 @@
 import './utils/get.spec';
 import './utils/shallow-equal-objects.spec';
 
-import './helpers/parse-expression-string.spec';
+import './helpers/parse-expression.spec';
 import './helpers/convert-functions.spec';
 
 import './json-configuration.spec';
