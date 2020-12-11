@@ -1,6 +1,6 @@
 // Based on https://github.com/donmccurdy/expression-eval under MIT license
 import test from 'tape-catch';
-import parseExpressionString from '@deck.gl/json/helpers/parse-expression';
+import parseExpressionString from '@deck.gl/json/helpers/parse-expression-string';
 
 const row = Object.freeze({
   foo: {

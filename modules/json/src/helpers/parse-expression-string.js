@@ -19,25 +19,23 @@ export default function parseExpressionString(propValue, configuration) {
   let func;
   // Compile with expression-eval
   const ast = expressionEval.parse(propValue);
-  if (!ast.right && !ast.left) {
-    if (ast.type === 'Identifier') {
-      func = row => {
-        return get(row, propValue);
-      };
-    } else {
-      // NOTE: To avoid security risks, the arguments passed to the
-      // compiled expression must only give access to pure data (no globals etc)
-      // We disable function call syntax
-      traverse(ast, node => {
-        if (node.type === 'CallExpression') {
-          throw new Error('Function calls not allowed in JSON expressions');
-        }
-      });
-      // TODO Something like `expressionEval.eval(ast, {row});` would be useful for unpacking arrays
-      func = row => {
-        return expressionEval.eval(ast, row);
-      };
-    }
+  if (!ast.right && !ast.left && ast.type === 'Identifier') {
+    func = row => {
+      return get(row, propValue);
+    };
+  } else {
+    // NOTE: To avoid security risks, the arguments passed to the
+    // compiled expression must only give access to pure data (no globals etc)
+    // We disable function call syntax
+    traverse(ast, node => {
+      if (node.type === 'CallExpression') {
+        throw new Error('Function calls not allowed in JSON expressions');
+      }
+    });
+    // TODO Something like `expressionEval.eval(ast, {row});` would be useful for unpacking arrays
+    func = row => {
+      return expressionEval.eval(ast, row);
+    };
   }
 
   // Cache the compiled function
