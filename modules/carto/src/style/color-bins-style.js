@@ -1,7 +1,8 @@
 import {scaleThreshold} from 'd3-scale';
-import {getPalette, isNumberValid, NULL_COLOR} from './utils';
+import getPalette, {NULL_COLOR} from './palette';
+import {getAttrValue} from './utils';
 
-export default function colorBins({domain, colors, nullColor = NULL_COLOR}) {
+export default function colorBins({attr, domain, colors, nullColor = NULL_COLOR}) {
   if (Array.isArray(domain)) {
     const palette = typeof colors === 'string' ? getPalette(colors, domain.length) : colors;
 
@@ -9,7 +10,10 @@ export default function colorBins({domain, colors, nullColor = NULL_COLOR}) {
       .domain(domain)
       .range(palette);
 
-    return d => (isNumberValid(d) ? color(d) : nullColor);
+    return d => {
+      const value = getAttrValue(attr, d);
+      return Number.isFinite(value) ? color(value) : nullColor;
+    };
   }
 
   return () => NULL_COLOR;

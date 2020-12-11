@@ -1,4 +1,5 @@
-import {getPalette, isNumberOrStringValid, NULL_COLOR, OTHERS_COLOR} from './utils';
+import getPalette, {NULL_COLOR, OTHERS_COLOR} from './palette';
+import {getAttrValue} from './utils';
 
 export default function colorCategories({
   categories,
@@ -15,7 +16,12 @@ export default function colorCategories({
       colorsByCategory[c] = palette[i];
     }
 
-    return d => (isNumberOrStringValid(d) ? colorsByCategory[d] || othersColor : nullColor);
+    return d => {
+      const value = getAttrValue(attr, d);
+      return Number.isFinite(value) || typeof value === 'string'
+        ? colorsByCategory[value] || othersColor
+        : nullColor;
+    };
   }
 
   return () => NULL_COLOR;
