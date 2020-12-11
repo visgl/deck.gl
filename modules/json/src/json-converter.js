@@ -131,21 +131,18 @@ function convertClassInstance(json, configuration) {
 
 // Plain JS object, embed functions.
 function convertFunctionObject(json, configuration) {
-  if (configuration.functions && configuration.convertFunction) {
-    const {functionKey} = configuration;
+  const {functionKey} = configuration;
 
-    const targetFunction = json[functionKey];
-    const dataProp = json.key;
-    const availableFunctions = configuration.functions;
+  let props = {...json};
+  delete props[functionKey];
 
-    const fn = availableFunctions[targetFunction];
-    const wrapperFn = fn(json);
+  props = convertPlainObject(props, configuration);
 
-    const accessor = configuration.convertFunction(dataProp, configuration);
-    return row => wrapperFn(accessor(row));
-  }
+  const targetFunction = json[functionKey];
+  const availableFunctions = configuration.functions;
+  const matchedFn = availableFunctions[targetFunction];
 
-  return json;
+  return matchedFn(props);
 }
 
 // Plain JS object, convert each key and return.
