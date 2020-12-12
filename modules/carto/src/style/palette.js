@@ -1,4 +1,5 @@
 import * as cartoColors from 'cartocolor';
+import {assert} from './utils';
 
 export const NULL_COLOR = [204, 204, 204];
 export const OTHERS_COLOR = [119, 119, 119];
@@ -7,9 +8,7 @@ export default function getPalette(name, numCategories) {
   const palette = cartoColors[name];
   let paletteIndex = numCategories;
 
-  if (!palette) {
-    throw new Error(`Palette ${name} is not found.`);
-  }
+  assert(palette, `Palette "${name}" not found. Expected a CARTOColors string`);
 
   const palettesColorVariants = Object.keys(palette)
     .filter(p => p !== 'tags')
@@ -77,5 +76,7 @@ function hexToRgb(hex) {
     ];
   }
 
-  throw new Error(`Error parsing hexadecimal color: ${hex}`);
+  assert(result, `Hexadecimal color "${hex}" was not parsed correctly`);
+
+  return NULL_COLOR;
 }
