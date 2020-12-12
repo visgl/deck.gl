@@ -431,6 +431,32 @@ export default class MapController extends Controller {
       return false;
     }
 
+    const newControllerState = this.controllerState.rotate(this._getRotationParams(event));
+    return this.updateViewport(newControllerState, NO_TRANSITION_PROPS, {
+      isDragging: true,
+      isRotating: true
+    });
+  }
+
+  _onTriplePan(event) {
+    if (!this.touchRotate) {
+      return false;
+    }
+    if (!this.isDragging()) {
+      return false;
+    }
+
+    const newControllerState = this.controllerState.rotate({
+      deltaScaleY: this._getRotationParams(event).deltaScaleY
+    });
+    this.updateViewport(newControllerState, NO_TRANSITION_PROPS, {
+      isDragging: true,
+      isRotating: true
+    });
+    return true;
+  }
+
+  _getRotationParams(event) {
     const {deltaX, deltaY} = event;
     const [, centerY] = this.getCenter(event);
     const startY = centerY - deltaY;
@@ -451,11 +477,6 @@ export default class MapController extends Controller {
       }
     }
     deltaScaleY = Math.min(1, Math.max(-1, deltaScaleY));
-
-    const newControllerState = this.controllerState.rotate({deltaScaleX, deltaScaleY});
-    return this.updateViewport(newControllerState, NO_TRANSITION_PROPS, {
-      isDragging: true,
-      isRotating: true
-    });
+    return {deltaScaleX, deltaScaleY};
   }
 }
