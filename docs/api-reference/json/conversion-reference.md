@@ -84,7 +84,7 @@ and used to resolve this JSON object–
       "getColor": [0, 128, 255],
       "getRadius": {
         "@@function": "calculateRadius",
-        "base": 10,
+        "base": 2,
         "exponent": 3
       }
     }
@@ -100,7 +100,7 @@ it will replace the layers descriptor with
     new ScatterplotLayer({
       data: ...,
       getColor: [0, 128, 255],
-      getRadius: 1000
+      getRadius: 8
     })
   ]
 }
