@@ -2,7 +2,8 @@
 
 Helper functions to create data-driven map visualizations.
 
-Transform data values into visual variables and take the advantage of [CARTOColors](https://carto.com/carto-colors/) custom color schemes.
+Take the advantage of [CARTOColors](https://carto.com/carto-colors/), custom color schemes built on top of well-known standards for color use on maps, with next generation enhancements for the web and CARTO basemaps.
+
 
 ## Color Bins
 
