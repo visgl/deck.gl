@@ -64,7 +64,7 @@ Any JavaScript function can be passed. For example, when this configuration of f
 
 ```js
 function calculateRadius({base, exponent}) {
-  return Math.pow(base, exponenet);
+  return Math.pow(base, exponent);
 }
 
 const configuration = {

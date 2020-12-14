@@ -89,7 +89,7 @@ A map of functions that should be made available to the JSON function resolver. 
 
 ```js
 function calculateRadius({base, exponent}) {
-  return Math.pow(base, exponenet);
+  return Math.pow(base, exponent);
 }
 
 const configuration = {
