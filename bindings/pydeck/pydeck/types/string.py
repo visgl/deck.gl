@@ -1,8 +1,10 @@
 from functools import total_ordering
 
+from .base import PydeckType
+
 
 @total_ordering
-class String:
+class String(PydeckType):
     def __init__(self, s: str, quote_type: str = '"'):
         self.value = f"{quote_type}{s}{quote_type}"
 
