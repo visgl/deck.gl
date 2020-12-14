@@ -1,18 +1,14 @@
-import getPalette, {NULL_COLOR, OTHERS_COLOR} from './palette';
+import getPalette, {DEFAULT_PALETTE, NULL_COLOR, OTHERS_COLOR} from './palette';
 import {assert, getAttrValue} from './utils';
 
 export default function colorCategories({
   attr,
   categories,
-  colors,
+  colors = DEFAULT_PALETTE,
   nullColor = NULL_COLOR,
   othersColor = OTHERS_COLOR
 }) {
-  assert(Array.isArray(categories), 'Expected "domain" to be an array of numbers or strings');
-  assert(
-    typeof colors === 'string' || Array.isArray(colors),
-    'Expected "colors" to be an array of numbers or a CARTOColors string'
-  );
+  assert(Array.isArray(categories), 'Expected "categories" to be an array of numbers or strings');
 
   const colorsByCategory = {};
   const palette = typeof colors === 'string' ? getPalette(colors, categories.length) : colors;
