@@ -4,7 +4,7 @@ import {makeSpy} from '@probe.gl/test-utils';
 import {COORDINATE_SYSTEM} from '@deck.gl/core/lib/constants';
 import {MapController} from '@deck.gl/core';
 import {JSONConverter} from '@deck.gl/json';
-import configuration, {log} from './json-configuration-for-deck';
+import configuration, {log, calculateRadius} from './json-configuration-for-deck';
 import JSON_DATA from './data/deck-props.json';
 import COMPLEX_JSON from './data/complex-data.json';
 
@@ -36,6 +36,12 @@ test('JSONConverter#convert', t => {
     pointCloudLayerProps.coordinateSystem,
     COORDINATE_SYSTEM.METER_OFFSETS,
     'Should evaluate enums.'
+  );
+
+  t.deepEqual(
+    deckProps.layers[0].props.getRadius,
+    calculateRadius({base: 10, exponent: 3}),
+    'Should evaluate functions.'
   );
 
   t.end();
