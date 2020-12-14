@@ -94,7 +94,7 @@ function calculateRadius({base, exponent}) {
 
 const configuration = {
   ...,
-  functions: Object.assign({calculateRadius})
+  functions: {calculateRadius}
 };
 ```
 
