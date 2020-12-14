@@ -65,7 +65,6 @@ def lower_camel_case_keys(attrs):
 
 def default_serialize(o, remap_function=lower_camel_case_keys):
     """Default method for rendering JSON from a dictionary"""
-    print(type(o))
     if issubclass(type(o), PydeckType):
         return repr(o)
     attrs = vars(o)
