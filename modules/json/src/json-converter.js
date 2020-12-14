@@ -142,6 +142,8 @@ function convertFunctionObject(json, configuration) {
   const availableFunctions = configuration.functions;
   const matchedFn = availableFunctions[targetFunction];
 
+  assert(matchedFn, `Function ${targetFunction} not found.`);
+
   return matchedFn(props);
 }
 
