@@ -152,9 +152,13 @@ The picking engine returns "picking info" objects which contains a variety of fi
 | `x`      | Mouse position x relative to the viewport. |
 | `y`      | Mouse position y relative to the viewport. |
 | `coordinate` | Mouse position in geospatial coordinates. Only applies if `layer.props.coordinateSystem` is a geospatial mode such as `COORDINATE_SYSTEM.LNGLAT`. |
+| `viewport` | The viewport that the picked object belongs to. |
 
-> Specific deck.gl Layers may add additional fields to the picking `info` object. Check the documentation of each layer.
 
+Remarks:
+
+- Specific deck.gl Layers may add additional fields to the picking `info` object. Check the documentation of each layer.
+- Limitation when using multiple views: `viewport` could potentially be misidentified if two views that contain the picked layer also overlap with each other and do not clear the background.
 
 ### Example: Display a Tooltip for Hovered Object
 
