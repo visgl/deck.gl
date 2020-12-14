@@ -10,7 +10,7 @@ export default function colorCategories({
 }) {
   assert(Array.isArray(categories), 'Expected "domain" to be an array of numbers or strings');
   assert(
-    Array.isArray(colors),
+    typeof colors === 'string' || Array.isArray(colors),
     'Expected "colors" to be an array of numbers or a CARTOColors string'
   );
 

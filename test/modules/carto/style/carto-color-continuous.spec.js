@@ -1,7 +1,7 @@
 import test from 'tape-catch';
 import {colorContinuous} from '@deck.gl/carto';
 
-const CATEGORIES_TEST_CASES = [
+const CONTINUOUS_TEST_CASES = [
   {
     title: 'Feature 1',
     argument: {
@@ -34,11 +34,11 @@ const CATEGORIES_TEST_CASES = [
 test('colorContinuous#tests', t => {
   const colorContinuousManual = colorContinuous({
     attr: 'target',
-    range: [0, 100],
+    domain: [0, 100],
     colors: [[255, 0, 0], [255, 255, 0]]
   });
 
-  for (const tc of CATEGORIES_TEST_CASES) {
+  for (const tc of CONTINUOUS_TEST_CASES) {
     const func = colorContinuousManual(tc.argument);
     t.deepEqual(func, tc.result, `colorContinuous ${tc.title} returned expected result`);
   }
