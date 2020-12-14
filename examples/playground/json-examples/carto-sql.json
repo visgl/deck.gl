@@ -24,10 +24,10 @@
       },
       "getLineColor": [255, 255, 255, 100],
       "getFillColor": {
-        "@@function": "colorBins",
+        "@@function": "colorContinuous",
         "attr": "gn_pop",
-        "domain": [1e5, 2e5, 3e5],
-        "colors": "Teal"
+        "range": [0, 1e6],
+        "colors": "BlueYl"
       },
       "pointRadiusMinPixels": 5,
       "lineWidthMinPixels": 1
