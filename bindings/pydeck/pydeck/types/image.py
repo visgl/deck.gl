@@ -1,6 +1,8 @@
 import base64
+import os
 import pathlib
 import re
+
 
 from pydeck.types import String
 from pydeck.types.base import PydeckType
@@ -16,7 +18,10 @@ valid_url_regex = re.compile(
     re.IGNORECASE,
 )
 
-valid_image_regex = re.compile(r".(gif|jpe?g|tiff?|png|webp|bmp)$", re.IGNORECASE,)
+valid_image_regex = re.compile(
+    r".(gif|jpe?g|tiff?|png|webp|bmp)$",
+    re.IGNORECASE,
+)
 
 
 def get_encoding(path: str) -> str:
@@ -33,9 +38,9 @@ class Image(PydeckType):
 
     def __repr__(self):
         if self.is_local:
-            with open(self.path, "rb") as img_file:
+            with open(os.path.expanduser(self.path), "rb") as img_file:
                 encoded_string = get_encoding(self.path) + base64.b64encode(img_file.read()).decode("utf-8")
-                return repr(String(encoded_string))
+                return repr(String(encoded_string, quote_type=""))
         else:
             return self.path
 

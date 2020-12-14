@@ -5,7 +5,9 @@
 {% if google_maps_key %}
     <script src="https://maps.googleapis.com/maps/api/js?key={{google_maps_key}}&libraries=places"></script>
 {% endif %}
+{% if mapbox_key %}
     <script src="https://api.tiles.mapbox.com/mapbox-gl-js/v1.4.0/mapbox-gl.js"></script>
+{% endif %}
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap-theme.min.css" />
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.3/css/font-awesome.min.css" />
     {{deckgl_jupyter_widget_bundle}}
@@ -56,8 +58,12 @@
     const customLibraries = {{ custom_libraries or 'null' }};
 
     const deckInstance = createDeck({
+      {% if mapbox_key %}
       mapboxApiKey: '{{mapbox_key}}',
+      {% endif %}
+      {% if google_maps_key %}
       googleMapsKey: '{{google_maps_key}}',
+      {% endif %}
       container: document.getElementById('deck-container'),
       jsonInput,
       tooltip,
