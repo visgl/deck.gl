@@ -26,8 +26,8 @@
       "getFillColor": {
         "@@function": "colorContinuous",
         "attr": "gn_pop",
-        "range": [0, 1e6],
-        "colors": "BlueYl"
+        "domain": [0, 1e5],
+        "colors": "BluYl"
       },
       "pointRadiusMinPixels": 5,
       "lineWidthMinPixels": 1
