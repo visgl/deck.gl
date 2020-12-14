@@ -247,6 +247,7 @@ export default class DeckPicker {
         lastPickedInfo: this.lastPickedInfo,
         mode,
         layers,
+        layerFilter: this.layerFilter,
         viewports,
         x,
         y,

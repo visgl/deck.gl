@@ -20,8 +20,19 @@
 
 // Even if nothing gets picked, we need to expose some information of the picking action:
 // x, y, coordinates etc.
-export function getEmptyPickingInfo({pickInfo, viewports, pixelRatio, x, y, z}) {
-  const viewport = getViewportFromCoordinates(viewports, {x, y}, pickInfo && pickInfo.pickedLayer); // TODO - add coords
+export function getEmptyPickingInfo({pickInfo, mode, viewports, layerFilter, pixelRatio, x, y, z}) {
+  const layer = pickInfo && pickInfo.pickedLayer;
+  const viewportFilter =
+    layerFilter &&
+    layer &&
+    (v =>
+      layerFilter({
+        layer,
+        viewport: v,
+        isPicking: true,
+        renderPass: `picking:${mode}`
+      }));
+  const viewport = getViewportFromCoordinates(viewports, {x, y}, viewportFilter);
   const coordinate = viewport && viewport.unproject([x - viewport.x, y - viewport.y], {targetZ: z});
 
   return {
@@ -140,19 +151,14 @@ export function getLayerPickingInfo({layer, info, mode}) {
 }
 
 // Indentifies which viewport, if any corresponds to x and y
-// If multiple viewports contain the target pixel, use priority:
-//  - last viewport that the picked layer was rendered in
-//  - last viewport drawn
+// If multiple viewports contain the target pixel, last viewport drawn is returend
 // Returns first viewport if no match
-function getViewportFromCoordinates(viewports, pixel, layer) {
-  const lastDrawnViewport = layer && layer.internalState.viewport;
-  if (lastDrawnViewport && lastDrawnViewport.containsPixel(pixel)) {
-    return lastDrawnViewport;
-  }
+function getViewportFromCoordinates(viewports, pixel, filter) {
   // find the last viewport that contains the pixel
   for (let i = viewports.length - 1; i >= 0; i--) {
-    if (viewports[i].containsPixel(pixel)) {
-      return viewports[i];
+    const viewport = viewports[i];
+    if (viewport.containsPixel(pixel) && (!filter || filter(viewport))) {
+      return viewport;
     }
   }
   return viewports[0];
