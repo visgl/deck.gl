@@ -79,6 +79,12 @@ const parameters = {
     })
   ],
   layers: [testLayer, testLayerWithCallback, testCompositeLayer],
+  layerFilter: ({layer, viewport}) => {
+    if (viewport.id === 'minimap') {
+      return layer.id !== 'test-layer-with-callback';
+    }
+    return true;
+  },
   pixelRatio: 2
 };
 
@@ -96,8 +102,6 @@ test('processPickInfo', t => {
   testInitializeLayer({layer: testLayer});
   testInitializeLayer({layer: testLayerWithCallback});
   testInitializeLayer({layer: testCompositeLayer});
-
-  testLayerWithCallback.activateViewport(parameters.viewports[1]);
 
   const TEST_CASES = [
     {
