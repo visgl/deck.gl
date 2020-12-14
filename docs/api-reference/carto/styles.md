@@ -1,6 +1,6 @@
 # Styles
 
-`CARTO styles` are a set of scale functions to easily assign a color to a feature.
+Helper functions to create data-driven map visualizations.
 
 Transform data values into visual variables and take the advantage of [CARTOColors](https://carto.com/carto-colors/) custom color schemes.
 
