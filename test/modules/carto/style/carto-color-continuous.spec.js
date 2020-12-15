@@ -31,7 +31,23 @@ const CONTINUOUS_TEST_CASES = [
   }
 ];
 
-test('colorContinuous#tests', t => {
+const ERROR_TEST_CASES_COLORS = [
+  {
+    title: 'Feature with invalid colors',
+    domain: [0, 100],
+    colors: null
+  }
+];
+
+const ERROR_TEST_CASES_DOMAIN = [
+  {
+    title: 'Feature with invalid domain',
+    domain: -1,
+    colors: [[255, 0, 0], [255, 255, 0]]
+  }
+];
+
+test('colorContinuous', t => {
   const colorContinuousManual = colorContinuous({
     attr: 'target',
     domain: [0, 100],
@@ -41,6 +57,38 @@ test('colorContinuous#tests', t => {
   for (const tc of CONTINUOUS_TEST_CASES) {
     const func = colorContinuousManual(tc.argument);
     t.deepEqual(func, tc.result, `colorContinuous ${tc.title} returned expected result`);
+  }
+
+  t.end();
+});
+
+test('colorContinuous#invalidColorsArgument', t => {
+  for (const tc of ERROR_TEST_CASES_COLORS) {
+    t.throws(
+      () =>
+        colorContinuous({
+          attr: 'target',
+          domain: tc.domain,
+          colors: tc.colors
+        }),
+      `throws on invalid colors ${tc.colors}`
+    );
+  }
+
+  t.end();
+});
+
+test('colorContinuous#invalidDomainArgument', t => {
+  for (const tc of ERROR_TEST_CASES_DOMAIN) {
+    t.throws(
+      () =>
+        colorContinuous({
+          attr: 'target',
+          domain: tc.domain,
+          colors: tc.colors
+        }),
+      `throws on invalid domain ${tc.domain}`
+    );
   }
 
   t.end();

@@ -39,7 +39,7 @@ test('hexToRgb#tests', t => {
 
 test('hexToRgb#invalidData', t => {
   for (const tc of ERROR_TEST_CASES) {
-    t.throws(() => hexToRgb(tc.argument), `${tc.argument} is not a hexadecimal color`);
+    t.throws(() => hexToRgb(tc.argument), `throws on invalid hexadecimal color ${tc.argument}`);
   }
 
   t.end();

@@ -23,7 +23,7 @@ test('getAttrValue', t => {
 
 test('getAttrValue#invalidParams', t => {
   for (const tc of ERROR_TEST_CASES) {
-    t.throws(() => getAttrValue(tc, DATA), `${typeof tc} not allowed`);
+    t.throws(() => getAttrValue(tc, DATA), `throws on invalid type ${typeof tc}`);
   }
 
   t.end();

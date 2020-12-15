@@ -31,7 +31,23 @@ const CATEGORIES_TEST_CASES = [
   }
 ];
 
-test('colorCategories#tests', t => {
+const ERROR_TEST_CASES_COLORS = [
+  {
+    title: 'Feature with invalid colors',
+    categories: ['Category 1', 'Category 2', 'Category 3'],
+    colors: null
+  }
+];
+
+const ERROR_TEST_CASES_CATEGORIES = [
+  {
+    title: 'Feature with invalid domain',
+    categories: -1,
+    colors: 'Mint'
+  }
+];
+
+test('colorCategories', t => {
   const colorCategoriesManual = colorCategories({
     attr: 'target',
     categories: ['Category 1', 'Category 2', 'Category 3'],
@@ -41,6 +57,38 @@ test('colorCategories#tests', t => {
   for (const tc of CATEGORIES_TEST_CASES) {
     const func = colorCategoriesManual(tc.argument);
     t.deepEqual(func, tc.result, `colorCategories ${tc.title} returned expected result`);
+  }
+
+  t.end();
+});
+
+test('colorCategories#invalidColorsArgument', t => {
+  for (const tc of ERROR_TEST_CASES_COLORS) {
+    t.throws(
+      () =>
+        colorCategories({
+          attr: 'target',
+          categories: tc.categories,
+          colors: tc.colors
+        }),
+      `throws on invalid colors ${tc.colors}`
+    );
+  }
+
+  t.end();
+});
+
+test('colorCategories#invalidCategoriesArgument', t => {
+  for (const tc of ERROR_TEST_CASES_CATEGORIES) {
+    t.throws(
+      () =>
+        colorCategories({
+          attr: 'target',
+          categories: tc.categories,
+          colors: tc.colors
+        }),
+      `throws on invalid categories ${tc.categories}`
+    );
   }
 
   t.end();
