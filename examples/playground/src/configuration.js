@@ -40,7 +40,7 @@ export default {
   ),
 
   // Functions that should be executed by JSON converter
-  functions: Object.assign({colorBins, colorCategories, colorContinuous}),
+  functions: {colorBins, colorCategories, colorContinuous},
 
   // Enumerations that should be available to JSON parser
   // Will be resolved as `<enum-name>.<enum-value>`
