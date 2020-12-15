@@ -33,7 +33,7 @@ export default function getPalette(name, numCategories) {
   return colors.map(c => hexToRgb(c));
 }
 
-function hexToRgb(hex) {
+export function hexToRgb(hex) {
   // Evaluate #ABC
   let result = /^#?([a-f\d]{1})([a-f\d]{1})([a-f\d]{1})$/i.exec(hex);
 
