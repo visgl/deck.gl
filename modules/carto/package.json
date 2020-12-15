@@ -35,7 +35,9 @@
     "@loaders.gl/loader-utils": "^2.3.0",
     "@loaders.gl/mvt": "^2.3.0",
     "@loaders.gl/tiles": "^2.3.0",
-    "@math.gl/web-mercator": "^3.3.2"
+    "@math.gl/web-mercator": "^3.3.2",
+    "cartocolor": "^4.0.2",
+    "d3-scale": "^3.2.3"
   },
   "peerDependencies": {
     "@deck.gl/core": "^8.0.0",

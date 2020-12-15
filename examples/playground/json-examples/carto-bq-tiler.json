@@ -3,7 +3,7 @@
   "initialViewState": {
     "latitude": 40.7368521,
     "longitude": -73.8536065,
-    "zoom": 9,
+    "zoom": 3,
     "pitch": 0,
     "bearing": 0
   },
@@ -17,8 +17,13 @@
   "layers": [
     {
       "@@type": "CartoBQTilerLayer",
-      "data": "cartobq.maps.nyc_taxi_points_demo_id",
-      "getFillColor": [232, 133, 113],
+      "data": "cartobq.maps.osm_buildings",
+      "getFillColor": {
+        "@@function": "colorBins",
+        "attr": "aggregated_total",
+        "domain": [10, 100, 1000, 10000, 100000, 1000000],
+        "colors": "BluYl"
+      },
       "pointRadiusMinPixels": 2,
       "stroked": false
     }
