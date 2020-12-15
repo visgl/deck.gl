@@ -88,7 +88,7 @@ Color for null values.
 
 Default: `[204, 204, 204]`
 
-#### `othersColor` (Array, optional) for `colorCategories`
+#### `othersColor` (Array, optional)
 
 Fallback color for a category not correctly assigned.
 
