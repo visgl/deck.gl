@@ -34,7 +34,7 @@ const CATEGORIES_TEST_CASES = [
 const ERROR_TEST_CASES_COLORS = [
   {
     title: 'Feature with invalid colors',
-    categories: ['Category 1', 'Category 2', 'Category 3'],
+    domain: ['Category 1', 'Category 2', 'Category 3'],
     colors: null
   }
 ];
@@ -42,7 +42,7 @@ const ERROR_TEST_CASES_COLORS = [
 const ERROR_TEST_CASES_CATEGORIES = [
   {
     title: 'Feature with invalid domain',
-    categories: -1,
+    domain: -1,
     colors: 'Mint'
   }
 ];
@@ -50,7 +50,7 @@ const ERROR_TEST_CASES_CATEGORIES = [
 test('colorCategories', t => {
   const colorCategoriesManual = colorCategories({
     attr: 'target',
-    categories: ['Category 1', 'Category 2', 'Category 3'],
+    domain: ['Category 1', 'Category 2', 'Category 3'],
     colors: [[255, 0, 0], [0, 255, 0], [0, 0, 255]]
   });
 
@@ -68,7 +68,7 @@ test('colorCategories#invalidColorsArgument', t => {
       () =>
         colorCategories({
           attr: 'target',
-          categories: tc.categories,
+          domain: tc.domain,
           colors: tc.colors
         }),
       `throws on invalid colors ${tc.colors}`
@@ -84,10 +84,10 @@ test('colorCategories#invalidCategoriesArgument', t => {
       () =>
         colorCategories({
           attr: 'target',
-          categories: tc.categories,
+          domain: tc.domain,
           colors: tc.colors
         }),
-      `throws on invalid categories ${tc.categories}`
+      `throws on invalid domain ${tc.domain}`
     );
   }
 

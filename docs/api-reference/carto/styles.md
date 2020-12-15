@@ -57,7 +57,7 @@ new CartoSQLLayer({
   data: 'SELECT the_geom_webmercator, type FROM ne_10m_airports',
   getFillColor: colorCategories({
     attr: 'type',
-    categories: ['mid', 'major', 'military mid', 'mid and military', 'major and military'],
+    domain: ['mid', 'major', 'military mid', 'mid and military', 'major and military'],
     colors: 'Bold'
   })
 });

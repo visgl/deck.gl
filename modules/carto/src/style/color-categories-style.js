@@ -3,17 +3,17 @@ import {assert, getAttrValue} from './utils';
 
 export default function colorCategories({
   attr,
-  categories,
+  domain,
   colors = DEFAULT_PALETTE,
   nullColor = NULL_COLOR,
   othersColor = OTHERS_COLOR
 }) {
-  assert(Array.isArray(categories), 'Expected "categories" to be an array of numbers or strings');
+  assert(Array.isArray(domain), 'Expected "domain" to be an array of numbers or strings');
 
   const colorsByCategory = {};
-  const palette = typeof colors === 'string' ? getPalette(colors, categories.length) : colors;
+  const palette = typeof colors === 'string' ? getPalette(colors, domain.length) : colors;
 
-  for (const [i, c] of categories.entries()) {
+  for (const [i, c] of domain.entries()) {
     colorsByCategory[c] = palette[i];
   }
 
