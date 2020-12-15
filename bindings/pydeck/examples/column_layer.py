@@ -10,17 +10,17 @@ The real estate valuation data set from UC Irvine's Machine Learning repository,
 https://archive.ics.uci.edu/ml/datasets/Real+estate+valuation+data+set
 """
 
-import pydeck
 import pandas as pd
+import pydeck as pdk
 
 DATA_URL = "https://raw.githubusercontent.com/ajduberstein/geo_datasets/master/housing.csv"
 df = pd.read_csv(DATA_URL)
 
-view = pydeck.data_utils.compute_view(df[["lng", "lat"]])
+view = pdk.data_utils.compute_view(df[["lng", "lat"]])
 view.pitch = 75
 view.bearing = 60
 
-column_layer = pydeck.Layer(
+column_layer = pdk.Layer(
     "ColumnLayer",
     data=df,
     get_position=["lng", "lat"],
@@ -37,8 +37,12 @@ tooltip = {
     "style": {"background": "grey", "color": "white", "font-family": '"Helvetica Neue", Arial', "z-index": "10000"},
 }
 
-r = pydeck.Deck(
-    column_layer, initial_view_state=view, tooltip=tooltip, map_style="mapbox://styles/mapbox/satellite-v9",
+r = pdk.Deck(
+    column_layer,
+    initial_view_state=view,
+    tooltip=tooltip,
+    map_provider="mapbox",
+    map_style=pdk.map_styles.SATELLITE,
 )
 
-r.to_html("column_layer.html", notebook_display=False)
+r.to_html("column_layer.html")

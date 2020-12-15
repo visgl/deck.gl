@@ -64,6 +64,8 @@ poultry = pdk.Layer(
 r = pdk.Deck(
     layers=[cattle, poultry],
     initial_view_state=view,
+    map_provider="mapbox",
+    map_styl=pdk.map_styles.SATELLITE,
     tooltip={"text": "Concentration of cattle in blue, concentration of poultry in orange"},
 )
 

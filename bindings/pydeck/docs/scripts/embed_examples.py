@@ -14,11 +14,6 @@ from utils import to_presentation_name, to_snake_case_string
 from templates import DOC_TEMPLATE
 
 
-if not os.environ.get("MAPBOX_API_KEY"):
-    # If running for rtfd.io, set this variable from the Admin panel
-    raise Exception("MAPBOX_API_KEY not set")
-
-
 def create_rst(pydeck_example_file_name):
     asset_name = to_snake_case_string(file_name=pydeck_example_file_name)
     deckgl_docs_layer_name = asset_name.replace("_", "-")
