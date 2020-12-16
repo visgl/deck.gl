@@ -2,6 +2,7 @@ import test from 'tape-catch';
 import {testLayer} from '@deck.gl/test-utils';
 import {MVTLayer} from '@deck.gl/geo-layers';
 import ClipExtension from '@deck.gl/geo-layers/mvt-layer/clip-extension';
+import {transform} from '@deck.gl/geo-layers/mvt-layer/coordinate-transform';
 import {GeoJsonLayer} from '@deck.gl/layers';
 
 import {ScatterplotLayer} from '@deck.gl/layers';
@@ -28,6 +29,103 @@ const geoJSONData = [
     properties: {
       cartodb_id: 148
     }
+  }
+];
+
+const TARGET_TILE = {
+  x: 16059,
+  y: 12349,
+  z: 15
+};
+
+const TRANSFORM_COORDS_DATA = [
+  {
+    result: {type: 'Point', coordinates: [-3.56781005859375, 40.46993497635157]},
+    geom: {
+      type: 'Point',
+      coordinates: [0.25, 0.25] // local coords
+    },
+    tile: TARGET_TILE
+  },
+  {
+    result: {
+      type: 'MultiPoint',
+      coordinates: [[-3.56781005859375, 40.46993497635157], [-3.5650634765625, 40.46784549077253]]
+    },
+    geom: {
+      type: 'MultiPoint',
+      coordinates: [[0.25, 0.25], [0.5, 0.5]] // local coords
+    },
+    tile: TARGET_TILE
+  },
+  {
+    result: {
+      type: 'Polygon',
+      coordinates: [
+        [
+          [-3.570556640625, 40.46366632458768],
+          [-3.5595703125, 40.46366632458768],
+          [-3.5595703125, 40.46784549077253],
+          [-3.570556640625, 40.46366632458768]
+        ]
+      ]
+    },
+    geom: {
+      type: 'Polygon',
+      coordinates: [[[0, 1], [1, 1], [1, 0.5], [0, 1]]] // local coords
+    },
+    tile: TARGET_TILE
+  },
+  {
+    result: {
+      type: 'MultiPolygon',
+      coordinates: [
+        [
+          [
+            [-3.570556640625, 40.46366632458768],
+            [-3.5595703125, 40.46366632458768],
+            [-3.5595703125, 40.46784549077253],
+            [-3.570556640625, 40.46366632458768]
+          ],
+          [
+            [-3.570556640625, 40.46366632458768],
+            [-3.5595703125, 40.45948689837198],
+            [-3.5595703125, 40.46157664398328],
+            [-3.570556640625, 40.46366632458768]
+          ]
+        ]
+      ]
+    },
+    geom: {
+      type: 'MultiPolygon',
+      coordinates: [[[[0, 1], [1, 1], [1, 0.5], [0, 1]], [[0, 1], [1, 1.5], [1, 1.25], [0, 1]]]] // local coords
+    },
+    tile: TARGET_TILE
+  },
+  {
+    result: {
+      type: 'LineString',
+      coordinates: [[-3.570556640625, 40.472024396920574], [-3.570556640625, 40.46366632458768]]
+    },
+    geom: {
+      type: 'LineString',
+      coordinates: [[0, 0], [0, 1]] // local coords
+    },
+    tile: TARGET_TILE
+  },
+  {
+    result: {
+      type: 'MultiLineString',
+      coordinates: [
+        [[-3.570556640625, 40.472024396920574], [-3.570556640625, 40.46366632458768]],
+        [[-3.5650634765625, 40.46784549077253], [-3.570556640625, 40.46366632458768]]
+      ]
+    },
+    geom: {
+      type: 'MultiLineString',
+      coordinates: [[[0, 0], [0, 1]], [[0.5, 0.5], [0, 1]]] // local coords
+    },
+    tile: TARGET_TILE
   }
 ];
 
@@ -59,6 +157,15 @@ test('ClipExtension', t => {
   ];
 
   testLayer({Layer: GeoJsonLayer, testCases, onError: t.notOk});
+
+  t.end();
+});
+
+test('transformCoorsToWGS84', t => {
+  for (const tc of TRANSFORM_COORDS_DATA) {
+    const func = transform(tc.geom, tc.tile, tc.tileExtent);
+    t.deepEqual(func, tc.result, `transform ${tc.geom.type} returned expected WGS84 coordinates`);
+  }
 
   t.end();
 });

@@ -6,6 +6,7 @@ import {COORDINATE_SYSTEM} from '@deck.gl/core';
 import TileLayer from '../tile-layer/tile-layer';
 import {getURLFromTemplate, isURLTemplate} from '../tile-layer/utils';
 import ClipExtension from './clip-extension';
+import {transform} from './coordinate-transform';
 
 const WORLD_SIZE = 512;
 
@@ -51,7 +52,7 @@ export default class MVTLayer extends TileLayer {
   }
 
   async _updateTileData({props}) {
-    const {onDataLoad} = this.props;
+    const {onDataLoad, tileExtent = 4096} = this.props;
     let {data} = props;
     let tileJSON = null;
     let {minZoom, maxZoom} = props;
@@ -82,7 +83,7 @@ export default class MVTLayer extends TileLayer {
       }
     }
 
-    this.setState({data, tileJSON, minZoom, maxZoom});
+    this.setState({data, tileJSON, minZoom, maxZoom, tileExtent});
   }
 
   renderLayers() {
@@ -133,6 +134,7 @@ export default class MVTLayer extends TileLayer {
 
   onHover(info, pickingEvent) {
     const {uniqueIdProperty, autoHighlight} = this.props;
+    const {object, tile} = info;
 
     if (autoHighlight) {
       const {hoveredFeatureId} = this.state;
@@ -148,7 +150,21 @@ export default class MVTLayer extends TileLayer {
       }
     }
 
+    if (object) {
+      info = transformTileCoordsToWGS84(info, object, tile);
+    }
+
     return super.onHover(info, pickingEvent);
+  }
+
+  onClick(info, pickingEvent) {
+    const {object, tile} = info;
+
+    if (object) {
+      info = transformTileCoordsToWGS84(info, object, tile);
+    }
+
+    return super.onClick(info, pickingEvent);
   }
 
   getHighlightedObjectIndex(tile) {
@@ -234,6 +250,16 @@ function getFeatureUniqueId(feature, uniqueIdProperty) {
 
 function isFeatureIdDefined(value) {
   return value !== undefined && value !== null && value !== '';
+}
+
+function transformTileCoordsToWGS84(info, object, tile) {
+  return {
+    ...info,
+    object: {
+      ...info.object,
+      geometry: transform(object.geometry, tile)
+    }
+  };
 }
 
 MVTLayer.layerName = 'MVTLayer';
