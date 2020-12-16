@@ -52,7 +52,7 @@ export default class MVTLayer extends TileLayer {
   }
 
   async _updateTileData({props}) {
-    const {onDataLoad, tileExtent = 4096} = this.props;
+    const {onDataLoad} = this.props;
     let {data} = props;
     let tileJSON = null;
     let {minZoom, maxZoom} = props;
@@ -83,7 +83,7 @@ export default class MVTLayer extends TileLayer {
       }
     }
 
-    this.setState({data, tileJSON, minZoom, maxZoom, tileExtent});
+    this.setState({data, tileJSON, minZoom, maxZoom});
   }
 
   renderLayers() {
