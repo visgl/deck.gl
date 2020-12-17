@@ -7,25 +7,29 @@ const availableTransformations = {
   MultiPolygon
 };
 
-function Point(point, tile) {
-  const originX = tile.x;
-  const originY = tile.y;
-  const zoomLevelSize = Math.pow(2, tile.z);
+function Point([pointX, pointY], {x, y, z}) {
+  const originX = x;
+  const originY = y;
+  const zoomLevelSize = Math.pow(2, z);
 
-  const y2 = 180 - ((point[1] + originY) * 360) / zoomLevelSize;
+  const y2 = 180 - ((pointY + originY) * 360) / zoomLevelSize;
 
   return [
-    ((point[0] + originX) * 360) / zoomLevelSize - 180,
+    ((pointX + originX) * 360) / zoomLevelSize - 180,
     (360 / Math.PI) * Math.atan(Math.exp((y2 * Math.PI) / 180)) - 90
   ];
 }
 
+function getPoints(geometry, tile) {
+  return geometry.map(g => availableTransformations.Point(g, tile));
+}
+
 function MultiPoint(multiPoint, tile) {
-  return multiPoint.map(point => availableTransformations.Point(point, tile));
+  return getPoints(multiPoint, tile);
 }
 
 function LineString(line, tile) {
-  return line.map(linePoint => availableTransformations.Point(linePoint, tile));
+  return getPoints(line, tile);
 }
 
 function MultiLineString(multiLineString, tile) {
@@ -33,7 +37,7 @@ function MultiLineString(multiLineString, tile) {
 }
 
 function Polygon(polygon, tile) {
-  return polygon.map(polygonRing => availableTransformations.LineString(polygonRing, tile));
+  return polygon.map(polygonRing => getPoints(polygonRing, tile));
 }
 
 function MultiPolygon(multiPolygon, tile) {
