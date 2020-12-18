@@ -19,7 +19,7 @@ function Point([pointX, pointY], bbox, viewport) {
 }
 
 function getPoints(geometry, bbox, viewport) {
-  return geometry.map(g => availableTransformations.Point(g, bbox, viewport));
+  return geometry.map(g => Point(g, bbox, viewport));
 }
 
 function MultiPoint(multiPoint, bbox, viewport) {
@@ -31,9 +31,7 @@ function LineString(line, bbox, viewport) {
 }
 
 function MultiLineString(multiLineString, bbox, viewport) {
-  return multiLineString.map(lineString =>
-    availableTransformations.LineString(lineString, bbox, viewport)
-  );
+  return multiLineString.map(lineString => LineString(lineString, bbox, viewport));
 }
 
 function Polygon(polygon, bbox, viewport) {
@@ -41,7 +39,7 @@ function Polygon(polygon, bbox, viewport) {
 }
 
 function MultiPolygon(multiPolygon, bbox, viewport) {
-  return multiPolygon.map(polygon => availableTransformations.Polygon(polygon, bbox, viewport));
+  return multiPolygon.map(polygon => Polygon(polygon, bbox, viewport));
 }
 
 export function transform(geometry, bbox, viewport) {
