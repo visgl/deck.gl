@@ -152,11 +152,12 @@ export default class MVTLayer extends TileLayer {
     return super.onHover(info, pickingEvent);
   }
 
-  getPickingInfo({info, sourceLayer}) {
+  getPickingInfo(params) {
+    const info = super.getPickingInfo(params);
+
     const isWGS84 = this.context.viewport.resolution;
 
     if (!isWGS84 && info.object) {
-      info.tile = sourceLayer.props.tile;
       info.object = transformTileCoordsToWGS84(info.object, info.tile, this.context.viewport);
     }
 
