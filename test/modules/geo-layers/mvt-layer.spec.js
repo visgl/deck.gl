@@ -146,12 +146,14 @@ test('transformCoorsToWGS84', t => {
   t.end();
 });
 
-test.skip('MVT Highlight', t => {
+test('MVT Highlight', async t => {
   class TestMVTLayer extends MVTLayer {
     getTileData() {
       return geoJSONData;
     }
   }
+
+  TestMVTLayer.componentName = 'TestMVTLayer';
 
   const testCases = [
     {
@@ -166,14 +168,14 @@ test.skip('MVT Highlight', t => {
       onAfterUpdate: ({subLayers}) => {
         for (const layer of subLayers) {
           t.ok(layer.props.pickable, 'MVT Sublayer is pickable');
-          t.ok(layer.props.autoHighlight, 'AutoHighlight should be disabled');
+          t.ok(!layer.props.autoHighlight, 'AutoHighlight should be disabled');
           t.equal(layer.props.highlightedObjectIndex, 0, 'Feature highlighted has index 0');
         }
       }
     }
   ];
 
-  testLayer({Layer: TestMVTLayer, testCases, onError: t.notOk});
+  await testLayerAsync({Layer: TestMVTLayer, testCases, onError: t.notOk});
 
   t.end();
 });

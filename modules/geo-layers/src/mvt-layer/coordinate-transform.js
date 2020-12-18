@@ -9,11 +9,9 @@ const availableTransformations = {
   MultiPolygon
 };
 
-function Point([pointX, pointY], bbox, viewport) {
-  const [minX, minY] = viewport.projectFlat([bbox.west, bbox.north]);
-  const [maxX, maxY] = viewport.projectFlat([bbox.east, bbox.south]);
-  const x = lerp(minX, maxX, pointX);
-  const y = lerp(minY, maxY, pointY);
+function Point([pointX, pointY], [nw, se], viewport) {
+  const x = lerp(nw[0], se[0], pointX);
+  const y = lerp(nw[1], se[1], pointY);
 
   return viewport.unprojectFlat([x, y]);
 }
@@ -43,8 +41,16 @@ function MultiPolygon(multiPolygon, bbox, viewport) {
 }
 
 export function transform(geometry, bbox, viewport) {
+  const nw = viewport.projectFlat([bbox.west, bbox.north]);
+  const se = viewport.projectFlat([bbox.east, bbox.south]);
+  const projectedBbox = [nw, se];
+
   return {
     ...geometry,
-    coordinates: availableTransformations[geometry.type](geometry.coordinates, bbox, viewport)
+    coordinates: availableTransformations[geometry.type](
+      geometry.coordinates,
+      projectedBbox,
+      viewport
+    )
   };
 }
