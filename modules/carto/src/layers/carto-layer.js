@@ -48,11 +48,6 @@ export default class CartoLayer extends CompositeLayer {
     return mvtLayer ? mvtLayer.onHover(info, pickingEvent) : super.onHover(info, pickingEvent);
   }
 
-  onClick(info, pickingEvent) {
-    const [mvtLayer] = this.getSubLayers();
-    return mvtLayer ? mvtLayer.onClick(info, pickingEvent) : super.onClick(info, pickingEvent);
-  }
-
   renderLayers() {
     if (!this.state.tilejson) return null;
 

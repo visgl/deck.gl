@@ -32,100 +32,68 @@ const geoJSONData = [
   }
 ];
 
-const TARGET_TILE = {
-  x: 16059,
-  y: 12349,
-  z: 15
-};
-
 const TRANSFORM_COORDS_DATA = [
   {
-    result: {type: 'Point', coordinates: [-3.56781005859375, 40.46993497635157]},
+    result: {type: 'Point', coordinates: [-135, 79.17133464081945]},
     geom: {
       type: 'Point',
       coordinates: [0.25, 0.25] // local coords
-    },
-    tile: TARGET_TILE
+    }
   },
   {
     result: {
       type: 'MultiPoint',
-      coordinates: [[-3.56781005859375, 40.46993497635157], [-3.5650634765625, 40.46784549077253]]
+      coordinates: [[-135, 79.17133464081945], [-90, 66.51326044311185]]
     },
     geom: {
       type: 'MultiPoint',
       coordinates: [[0.25, 0.25], [0.5, 0.5]] // local coords
-    },
-    tile: TARGET_TILE
+    }
   },
   {
     result: {
       type: 'Polygon',
-      coordinates: [
-        [
-          [-3.570556640625, 40.46366632458768],
-          [-3.5595703125, 40.46366632458768],
-          [-3.5595703125, 40.46784549077253],
-          [-3.570556640625, 40.46366632458768]
-        ]
-      ]
+      coordinates: [[[-180, 0], [0, 0], [0, 66.51326044311185], [-180, 0]]]
     },
     geom: {
       type: 'Polygon',
       coordinates: [[[0, 1], [1, 1], [1, 0.5], [0, 1]]] // local coords
-    },
-    tile: TARGET_TILE
+    }
   },
   {
     result: {
       type: 'MultiPolygon',
       coordinates: [
         [
-          [
-            [-3.570556640625, 40.46366632458768],
-            [-3.5595703125, 40.46366632458768],
-            [-3.5595703125, 40.46784549077253],
-            [-3.570556640625, 40.46366632458768]
-          ],
-          [
-            [-3.570556640625, 40.46366632458768],
-            [-3.5595703125, 40.45948689837198],
-            [-3.5595703125, 40.46157664398328],
-            [-3.570556640625, 40.46366632458768]
-          ]
+          [[-180, 0], [0, 0], [0, 66.51326044311185], [-180, 0]],
+          [[-180, 0], [0, -66.51326044311185], [0, -40.97989806962013], [-180, 0]]
         ]
       ]
     },
     geom: {
       type: 'MultiPolygon',
       coordinates: [[[[0, 1], [1, 1], [1, 0.5], [0, 1]], [[0, 1], [1, 1.5], [1, 1.25], [0, 1]]]] // local coords
-    },
-    tile: TARGET_TILE
+    }
   },
   {
     result: {
       type: 'LineString',
-      coordinates: [[-3.570556640625, 40.472024396920574], [-3.570556640625, 40.46366632458768]]
+      coordinates: [[-180, 85.0511287798066], [-180, 0]]
     },
     geom: {
       type: 'LineString',
       coordinates: [[0, 0], [0, 1]] // local coords
-    },
-    tile: TARGET_TILE
+    }
   },
   {
     result: {
       type: 'MultiLineString',
-      coordinates: [
-        [[-3.570556640625, 40.472024396920574], [-3.570556640625, 40.46366632458768]],
-        [[-3.5650634765625, 40.46784549077253], [-3.570556640625, 40.46366632458768]]
-      ]
+      coordinates: [[[-180, 85.0511287798066], [-180, 0]], [[-90, 66.51326044311185], [-180, 0]]]
     },
     geom: {
       type: 'MultiLineString',
       coordinates: [[[0, 0], [0, 1]], [[0.5, 0.5], [0, 1]]] // local coords
-    },
-    tile: TARGET_TILE
+    }
   }
 ];
 
@@ -162,8 +130,16 @@ test('ClipExtension', t => {
 });
 
 test('transformCoorsToWGS84', t => {
+  const viewport = new WebMercatorViewport({
+    latitude: 0,
+    longitude: 0,
+    zoom: 1
+  });
+
+  const bbox = {west: -180, north: 85.0511287798066, east: 0, south: 0};
+
   for (const tc of TRANSFORM_COORDS_DATA) {
-    const func = transform(tc.geom, tc.tile, tc.tileExtent);
+    const func = transform(tc.geom, bbox, viewport);
     t.deepEqual(func, tc.result, `transform ${tc.geom.type} returned expected WGS84 coordinates`);
   }
 

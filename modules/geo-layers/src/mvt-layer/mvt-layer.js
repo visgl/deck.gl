@@ -134,7 +134,6 @@ export default class MVTLayer extends TileLayer {
 
   onHover(info, pickingEvent) {
     const {uniqueIdProperty, autoHighlight} = this.props;
-    const {object, tile} = info;
 
     if (autoHighlight) {
       const {hoveredFeatureId} = this.state;
@@ -150,21 +149,20 @@ export default class MVTLayer extends TileLayer {
       }
     }
 
-    if (object) {
-      info = transformTileCoordsToWGS84(info, object, tile);
-    }
-
     return super.onHover(info, pickingEvent);
   }
 
-  onClick(info, pickingEvent) {
-    const {object, tile} = info;
+  getPickingInfo({info, sourceLayer}) {
+    info.sourceLayer = sourceLayer;
+    info.tile = sourceLayer.props.tile;
 
-    if (object) {
-      info = transformTileCoordsToWGS84(info, object, tile);
+    const isWGS84 = this.context.viewport.resolution;
+
+    if (!isWGS84 && info.object) {
+      info = {...info, object: transformTileCoordsToWGS84(info, this.context.viewport)};
     }
 
-    return super.onClick(info, pickingEvent);
+    return info;
   }
 
   getHighlightedObjectIndex(tile) {
@@ -252,14 +250,18 @@ function isFeatureIdDefined(value) {
   return value !== undefined && value !== null && value !== '';
 }
 
-function transformTileCoordsToWGS84(info, object, tile) {
-  return {
-    ...info,
-    object: {
-      ...info.object,
-      geometry: transform(object.geometry, tile)
+function transformTileCoordsToWGS84({object, tile}, viewport) {
+  const {properties, geometry} = object;
+  const feature = {properties, geometry: {type: geometry.type}};
+
+  // eslint-disable-next-line accessor-pairs
+  Object.defineProperty(feature.geometry, 'coordinates', {
+    get: () => {
+      return transform(geometry, tile.bbox, viewport);
     }
-  };
+  });
+
+  return feature;
 }
 
 MVTLayer.layerName = 'MVTLayer';

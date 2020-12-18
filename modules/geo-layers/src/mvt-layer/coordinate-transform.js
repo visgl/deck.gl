@@ -1,3 +1,5 @@
+import {lerp} from 'math.gl';
+
 const availableTransformations = {
   Point,
   MultiPoint,
@@ -7,46 +9,44 @@ const availableTransformations = {
   MultiPolygon
 };
 
-function Point([pointX, pointY], {x, y, z}) {
-  const originX = x;
-  const originY = y;
-  const zoomLevelSize = Math.pow(2, z);
+function Point([pointX, pointY], bbox, viewport) {
+  const [minX, minY] = viewport.projectFlat([bbox.west, bbox.north]);
+  const [maxX, maxY] = viewport.projectFlat([bbox.east, bbox.south]);
+  const x = lerp(minX, maxX, pointX);
+  const y = lerp(minY, maxY, pointY);
 
-  const y2 = 180 - ((pointY + originY) * 360) / zoomLevelSize;
-
-  return [
-    ((pointX + originX) * 360) / zoomLevelSize - 180,
-    (360 / Math.PI) * Math.atan(Math.exp((y2 * Math.PI) / 180)) - 90
-  ];
+  return viewport.unprojectFlat([x, y]);
 }
 
-function getPoints(geometry, tile) {
-  return geometry.map(g => availableTransformations.Point(g, tile));
+function getPoints(geometry, bbox, viewport) {
+  return geometry.map(g => availableTransformations.Point(g, bbox, viewport));
 }
 
-function MultiPoint(multiPoint, tile) {
-  return getPoints(multiPoint, tile);
+function MultiPoint(multiPoint, bbox, viewport) {
+  return getPoints(multiPoint, bbox, viewport);
 }
 
-function LineString(line, tile) {
-  return getPoints(line, tile);
+function LineString(line, bbox, viewport) {
+  return getPoints(line, bbox, viewport);
 }
 
-function MultiLineString(multiLineString, tile) {
-  return multiLineString.map(lineString => availableTransformations.LineString(lineString, tile));
+function MultiLineString(multiLineString, bbox, viewport) {
+  return multiLineString.map(lineString =>
+    availableTransformations.LineString(lineString, bbox, viewport)
+  );
 }
 
-function Polygon(polygon, tile) {
-  return polygon.map(polygonRing => getPoints(polygonRing, tile));
+function Polygon(polygon, bbox, viewport) {
+  return polygon.map(polygonRing => getPoints(polygonRing, bbox, viewport));
 }
 
-function MultiPolygon(multiPolygon, tile) {
-  return multiPolygon.map(polygon => availableTransformations.Polygon(polygon, tile));
+function MultiPolygon(multiPolygon, bbox, viewport) {
+  return multiPolygon.map(polygon => availableTransformations.Polygon(polygon, bbox, viewport));
 }
 
-export function transform(geometry, tile) {
+export function transform(geometry, bbox, viewport) {
   return {
     ...geometry,
-    coordinates: availableTransformations[geometry.type](geometry.coordinates, tile)
+    coordinates: availableTransformations[geometry.type](geometry.coordinates, bbox, viewport)
   };
 }
