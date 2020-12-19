@@ -2,6 +2,7 @@ import test from 'tape-catch';
 import {testLayer} from '@deck.gl/test-utils';
 import {MVTLayer} from '@deck.gl/geo-layers';
 import ClipExtension from '@deck.gl/geo-layers/mvt-layer/clip-extension';
+import {transform} from '@deck.gl/geo-layers/mvt-layer/coordinate-transform';
 import {GeoJsonLayer} from '@deck.gl/layers';
 
 import {ScatterplotLayer} from '@deck.gl/layers';
@@ -27,6 +28,71 @@ const geoJSONData = [
     },
     properties: {
       cartodb_id: 148
+    }
+  }
+];
+
+const TRANSFORM_COORDS_DATA = [
+  {
+    result: {type: 'Point', coordinates: [-135, 79.17133464081945]},
+    geom: {
+      type: 'Point',
+      coordinates: [0.25, 0.25] // local coords
+    }
+  },
+  {
+    result: {
+      type: 'MultiPoint',
+      coordinates: [[-135, 79.17133464081945], [-90, 66.51326044311185]]
+    },
+    geom: {
+      type: 'MultiPoint',
+      coordinates: [[0.25, 0.25], [0.5, 0.5]] // local coords
+    }
+  },
+  {
+    result: {
+      type: 'Polygon',
+      coordinates: [[[-180, 0], [0, 0], [0, 66.51326044311185], [-180, 0]]]
+    },
+    geom: {
+      type: 'Polygon',
+      coordinates: [[[0, 1], [1, 1], [1, 0.5], [0, 1]]] // local coords
+    }
+  },
+  {
+    result: {
+      type: 'MultiPolygon',
+      coordinates: [
+        [
+          [[-180, 0], [0, 0], [0, 66.51326044311185], [-180, 0]],
+          [[-180, 0], [0, -66.51326044311185], [0, -40.97989806962013], [-180, 0]]
+        ]
+      ]
+    },
+    geom: {
+      type: 'MultiPolygon',
+      coordinates: [[[[0, 1], [1, 1], [1, 0.5], [0, 1]], [[0, 1], [1, 1.5], [1, 1.25], [0, 1]]]] // local coords
+    }
+  },
+  {
+    result: {
+      type: 'LineString',
+      coordinates: [[-180, 85.0511287798066], [-180, 0]]
+    },
+    geom: {
+      type: 'LineString',
+      coordinates: [[0, 0], [0, 1]] // local coords
+    }
+  },
+  {
+    result: {
+      type: 'MultiLineString',
+      coordinates: [[[-180, 85.0511287798066], [-180, 0]], [[-90, 66.51326044311185], [-180, 0]]]
+    },
+    geom: {
+      type: 'MultiLineString',
+      coordinates: [[[0, 0], [0, 1]], [[0.5, 0.5], [0, 1]]] // local coords
     }
   }
 ];
@@ -63,12 +129,31 @@ test('ClipExtension', t => {
   t.end();
 });
 
-test.skip('MVT Highlight', t => {
+test('transformCoorsToWGS84', t => {
+  const viewport = new WebMercatorViewport({
+    latitude: 0,
+    longitude: 0,
+    zoom: 1
+  });
+
+  const bbox = {west: -180, north: 85.0511287798066, east: 0, south: 0};
+
+  for (const tc of TRANSFORM_COORDS_DATA) {
+    const func = transform(tc.geom, bbox, viewport);
+    t.deepEqual(func, tc.result, `transform ${tc.geom.type} returned expected WGS84 coordinates`);
+  }
+
+  t.end();
+});
+
+test('MVT Highlight', async t => {
   class TestMVTLayer extends MVTLayer {
     getTileData() {
       return geoJSONData;
     }
   }
+
+  TestMVTLayer.componentName = 'TestMVTLayer';
 
   const testCases = [
     {
@@ -83,14 +168,14 @@ test.skip('MVT Highlight', t => {
       onAfterUpdate: ({subLayers}) => {
         for (const layer of subLayers) {
           t.ok(layer.props.pickable, 'MVT Sublayer is pickable');
-          t.ok(layer.props.autoHighlight, 'AutoHighlight should be disabled');
+          t.ok(!layer.props.autoHighlight, 'AutoHighlight should be disabled');
           t.equal(layer.props.highlightedObjectIndex, 0, 'Feature highlighted has index 0');
         }
       }
     }
   ];
 
-  testLayer({Layer: TestMVTLayer, testCases, onError: t.notOk});
+  await testLayerAsync({Layer: TestMVTLayer, testCases, onError: t.notOk});
 
   t.end();
 });

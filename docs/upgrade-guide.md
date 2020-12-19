@@ -22,6 +22,10 @@ new Deck({
 
 A legacy field `pickingInfo.lngLat` has been removed. Use `pickingInfo.coordinate` instead.
 
+### MVTLayer
+
+- `onHover` and `onClick` callbacks now throw the `info.object` feature coordinates in WGS84 standard.
+
 
 ## Upgrading from deck.gl v8.2 to v8.3
 
