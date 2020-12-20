@@ -57,9 +57,11 @@ DOC_TEMPLATE = jinja2.Template(
 .. raw:: html
 
     <style>
+   .wy-nav-content {
+        max-width: 100% !important;
+    }
     #deck-container {
         height: 50vh;
-        max-width: 650px;
         width: 100%;
     }
     #deck-link {
@@ -88,7 +90,6 @@ IMAGES_RST_TEMPLATE = jinja2.Template(
 {% endfor %}
 
 .. toctree::
-   :hidden:
    :maxdepth: 0
 
 {% for rst_name in assets %}

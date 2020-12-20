@@ -14,13 +14,9 @@ MAPBOX_ROAD = "mapbox://styles/mapbox/streets-v9"
 MAPBOX_SATELLITE = "mapbox://styles/mapbox/satellite-v9"
 
 CARTO_DARK = "https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json"
-CARTO_DARK_NO_LABELS = (
-    "https://basemaps.cartocdn.com/gl/dark-matter-nolabels-gl-style/style.json"
-)
+CARTO_DARK_NO_LABELS = "https://basemaps.cartocdn.com/gl/dark-matter-nolabels-gl-style/style.json"
 CARTO_LIGHT = "https://basemaps.cartocdn.com/gl/positron-gl-style/style.json"
-CARTO_LIGHT_NO_LABELS = (
-    "https://basemaps.cartocdn.com/gl/positron-nolabels-gl-style/style.json"
-)
+CARTO_LIGHT_NO_LABELS = "https://basemaps.cartocdn.com/gl/positron-nolabels-gl-style/style.json"
 CARTO_ROAD = "https://basemaps.cartocdn.com/gl/voyager-gl-style/style.json"
 
 GOOGLE_SATELLITE = "satellite"

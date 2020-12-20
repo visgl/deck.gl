@@ -32,5 +32,4 @@ view_state = pdk.ViewState(
 
 r = pdk.Deck(bitmap_layer, initial_view_state=view_state, map_provider="mapbox", map_style=pdk.map_styles.SATELLITE)
 
-
 r.to_html("bitmap_layer.html")

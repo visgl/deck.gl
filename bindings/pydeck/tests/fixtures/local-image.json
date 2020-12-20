@@ -1,0 +1,28 @@
+{
+    "initialViewState": {
+    	"bearing": -45,
+    	"latitude": 37.7576171,
+    	"longitude": -122.5776844,
+    	"pitch": 60,
+    	"zoom": 10
+    },
+    "layers": [{
+    	"@@type": "BitmapLayer",
+    	"bounds": [
+    		[-122.52690000000051, 37.70313158980733],
+    		[-122.52690000000051, 37.816395657523195],
+    		[-122.34604834372873, 37.816134829424335],
+    		[-122.34656848822227, 37.70339041384273]
+    	],
+    	"id": "b39571b8-7d3d-43bf-b846-9a3ca0e5a72f",
+        "image": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUAAAAFCAYAAACNbyblAAAAHElEQVQI12P4//8/w38GIAXDIBKE0DHxgljNBAAO9TXL0Y4OHwAAAABJRU5ErkJggg==",
+    	"opacity": 0.7
+    }],
+    "mapProvider": "mapbox",
+    "mapStyle": "mapbox://styles/mapbox/satellite-v9",
+    "views": [{
+    	"@@type": "MapView",
+    	"controller": true
+    }]
+}
+

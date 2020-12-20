@@ -1,8 +1,11 @@
 import base64
+import os
 import pathlib
 import re
 
+
 from pydeck.types import String
+from pydeck.types.base import PydeckType
 
 # See https://github.com/django/django/blob/stable/1.3.x/django/core/validators.py#L45
 valid_url_regex = re.compile(
@@ -26,7 +29,16 @@ def get_encoding(path: str) -> str:
     return f"data:image/{extension};base64,"
 
 
-class Image:
+class Image(PydeckType):
+    """Indicate an image for pydeck
+
+    Parameters
+    ----------
+
+    path : str
+        Path to image (either remote or local)
+    """
+
     def __init__(self, path: str):
         if not self.validate(path):
             raise ValueError(f"{path} is not contain a valid image path")
@@ -35,11 +47,11 @@ class Image:
 
     def __repr__(self):
         if self.is_local:
-            with open(self.path, "rb") as img_file:
+            with open(os.path.expanduser(self.path), "rb") as img_file:
                 encoded_string = get_encoding(self.path) + base64.b64encode(img_file.read()).decode("utf-8")
-                return String(encoded_string).__repr__()
+                return repr(String(encoded_string, quote_type=""))
         else:
-            return String(self.path).__repr__()
+            return self.path
 
     def __eq__(self, other):
         return str(self) == str(other)
