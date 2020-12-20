@@ -30,6 +30,15 @@ def get_encoding(path: str) -> str:
 
 
 class Image(PydeckType):
+    """Indicate an image for pydeck
+
+    Parameters
+    ----------
+
+    path : str
+        Path to image (either remote or local)
+    """
+
     def __init__(self, path: str):
         if not self.validate(path):
             raise ValueError(f"{path} is not contain a valid image path")

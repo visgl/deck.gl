@@ -20,7 +20,7 @@ layer = pdk.Layer(
     get_position="coordinates",
     get_text="name",
     get_size=16,
-    get_color=[255, 255, 255],
+    get_color=[0, 0, 0],
     get_angle=0,
     # Note that string constants in pydeck are explicitly passed as strings
     # This distinguishes them from columns in a data set
@@ -36,6 +36,6 @@ r = pdk.Deck(
     layers=[layer],
     initial_view_state=view_state,
     tooltip={"text": "{name}\n{address}"},
-    map_style=pdk.map_styles.SATELLITE,
+    map_style=pdk.map_styles.ROAD,
 )
-r.to_html("text_layer.html", notebook_display=False)
+r.to_html("text_layer.html")

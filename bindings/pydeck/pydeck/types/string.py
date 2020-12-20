@@ -5,6 +5,15 @@ from .base import PydeckType
 
 @total_ordering
 class String(PydeckType):
+    """Indicate a string value in pydeck
+
+    Parameters
+    ----------
+
+    value : str
+        Value of the string
+    """
+
     def __init__(self, s: str, quote_type: str = ""):
         self.value = f"{quote_type}{s}{quote_type}"
 
