@@ -1,51 +1,18 @@
+<!DOCTYPE html>
 <html>
   <head>
     <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
     <title>pydeck</title>
-{% if google_maps_key %}
+    {% if google_maps_key %}
     <script src="https://maps.googleapis.com/maps/api/js?key={{google_maps_key}}&libraries=places"></script>
-{% endif %}
-{% if mapbox_key %}
-    <script src="https://api.tiles.mapbox.com/mapbox-gl-js/v1.4.0/mapbox-gl.js"></script>
-{% endif %}
+    {% else %}
+    <script src="https://api.tiles.mapbox.com/mapbox-gl-js/v1.13.0/mapbox-gl.js"></script>
+    {% endif %}
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap-theme.min.css" />
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.3/css/font-awesome.min.css" />
-    {{deckgl_jupyter_widget_bundle}}
+    {{ deckgl_jupyter_widget_bundle }}
     <style>
-    body {
-      margin: 0;
-      padding: 0;
-      overflow: hidden;
-    }
-
-    #deck-map-container {
-      width: 100%;
-      height: 100%;
-      background-color: black;
-    }
-
-    #map {
-      pointer-events: none;
-      height: 100%;
-      width: 100%;
-      position: absolute;
-      z-index: 1;
-    }
-
-    #deckgl-overlay {
-      z-index: 2;
-      background: {{css_background_color or 'none'}};
-    }
-
-    #deck-map-wrapper {
-      width: 100%;
-      height: 100%;
-    }
-
-    #deck-container {
-      width: 100vw;
-      height: 100vh;
-    }
+    {%+ include 'style.css' %}
     </style>
   </head>
   <body>
