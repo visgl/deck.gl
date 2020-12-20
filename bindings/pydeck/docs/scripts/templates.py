@@ -90,7 +90,6 @@ IMAGES_RST_TEMPLATE = jinja2.Template(
 {% endfor %}
 
 .. toctree::
-   :hidden:
    :maxdepth: 0
 
 {% for rst_name in assets %}
