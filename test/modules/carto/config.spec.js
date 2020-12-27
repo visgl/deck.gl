@@ -1,5 +1,42 @@
 import test from 'tape-catch';
-import {getDefaultCredentials, setDefaultCredentials} from '@deck.gl/carto';
+import {getDefaultCredentials, setDefaultCredentials, _getMapsVersion} from '@deck.gl/carto';
+
+const VERSION_TEST_CASES = [
+  {
+    mapsUrl: 'https://{username}.carto.com/api/v1/map/',
+    output: 'v1'
+  },
+  {
+    mapsUrl: 'https://maps-api-v2.{region}.carto.com/user/{user}',
+    output: 'v2'
+  },
+  {
+    mapsVersion: 'v1',
+    output: 'v1'
+  },
+  {
+    mapsVersion: 'v2',
+    output: 'v2'
+  }
+];
+
+test('config#getMapsVersion', t => {
+  for (const tc of VERSION_TEST_CASES) {
+    setDefaultCredentials({
+      mapsVersion: tc.mapsVersion
+    });
+
+    const appendVersion = {
+      ...getDefaultCredentials(),
+      ...tc
+    };
+
+    const func = _getMapsVersion(appendVersion);
+    t.ok(func === tc.output, `getMapsVersion returned expected result: ${tc.output}`);
+  }
+
+  t.end();
+});
 
 test('config#getDefaultCredentials', t => {
   const credentials = getDefaultCredentials();
