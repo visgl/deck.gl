@@ -31,7 +31,7 @@ test('GlobeController', t => {
       zoom: 0
     },
     // GlobeView cannot be rotated
-    ['pan#function key', 'pinch']
+    ['pan#function key', 'pinch', 'tripan']
   );
 
   t.end();
@@ -58,7 +58,7 @@ test('OrthographicController', t => {
       zoom: 1
     },
     // OrthographicView cannot be rotated
-    ['pan#function key']
+    ['pan#function key', 'tripan']
   );
 
   t.end();
