@@ -171,7 +171,7 @@ Method called to retrieve the content of each text label.
 
 ##### `getPosition` ([Function](/docs/developer-guide/using-layers.md#accessors), optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
 
-* Default: `x => x.position || x.coordinates`
+* Default: `x => x.position`
 
 Method called to retrieve the location of each text label.
 
@@ -205,11 +205,10 @@ The rotating angle of each text label, in degrees.
 * If a number is provided, it is used as the angle for all objects.
 * If a function is provided, it is called on each object to retrieve its angle.
 
-### Text Alignment Options
 
 ##### `getTextAnchor` ([Function](/docs/developer-guide/using-layers.md#accessors)|String, optional)
 
-* Default: `x => x.textAnchor || 'middle'`
+* Default: `'middle'`
 
 The text anchor. Available options include `'start'`, `'middle'` and `'end'`.
 
@@ -219,7 +218,7 @@ The text anchor. Available options include `'start'`, `'middle'` and `'end'`.
 
 ##### `getAlignmentBaseline` ([Function](/docs/developer-guide/using-layers.md#accessors)|String, optional)
 
-* Default: `x => x.alignmentBaseline || 'center'`
+* Default: `'center'`
 
 The alignment baseline. Available options include `'top'`, `'center'` and `'bottom'`.
 
@@ -229,7 +228,7 @@ The alignment baseline. Available options include `'top'`, `'center'` and `'bott
 
 ##### `getPixelOffset` ([Function](/docs/developer-guide/using-layers.md#accessors)|Array, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
 
-* Default: `x.pixelOffset || [0, 0]`
+* Default: `[0, 0]`
 
 Screen space offset relative to the `coordinates` in pixel unit.
 
