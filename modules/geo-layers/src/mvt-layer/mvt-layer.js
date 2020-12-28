@@ -6,6 +6,7 @@ import {COORDINATE_SYSTEM} from '@deck.gl/core';
 import TileLayer from '../tile-layer/tile-layer';
 import {getURLFromTemplate, isURLTemplate} from '../tile-layer/utils';
 import ClipExtension from './clip-extension';
+import {transform} from './coordinate-transform';
 
 const WORLD_SIZE = 512;
 
@@ -151,6 +152,18 @@ export default class MVTLayer extends TileLayer {
     return super.onHover(info, pickingEvent);
   }
 
+  getPickingInfo(params) {
+    const info = super.getPickingInfo(params);
+
+    const isWGS84 = this.context.viewport.resolution;
+
+    if (!isWGS84 && info.object) {
+      info.object = transformTileCoordsToWGS84(info.object, info.tile, this.context.viewport);
+    }
+
+    return info;
+  }
+
   getHighlightedObjectIndex(tile) {
     const {hoveredFeatureId} = this.state;
     const {uniqueIdProperty, highlightedFeatureId} = this.props;
@@ -234,6 +247,24 @@ function getFeatureUniqueId(feature, uniqueIdProperty) {
 
 function isFeatureIdDefined(value) {
   return value !== undefined && value !== null && value !== '';
+}
+
+function transformTileCoordsToWGS84(object, tile, viewport) {
+  const feature = {
+    ...object,
+    geometry: {
+      type: object.geometry.type
+    }
+  };
+
+  // eslint-disable-next-line accessor-pairs
+  Object.defineProperty(feature.geometry, 'coordinates', {
+    get: () => {
+      return transform(object.geometry, tile.bbox, viewport);
+    }
+  });
+
+  return feature;
 }
 
 MVTLayer.layerName = 'MVTLayer';

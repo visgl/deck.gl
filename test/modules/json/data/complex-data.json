@@ -22,7 +22,11 @@
         0,
         255
       ],
-      "getRadius": 1000
+      "getRadius": {
+        "@@function": "calculateRadius",
+        "base": 10,
+        "exponent": 3 
+      }
     },
     {
       "@@type": "TextLayer",
@@ -75,10 +79,10 @@
       "@@type": "PointCloudLayer",
       "data": [
         {
-	  "position": [-122.4, 37.7, 12],
-	  "normal": [-1, 0, 0],
-	  "color": [255, 255, 0]
-	}
+          "position": [-122.4, 37.7, 12],
+          "normal": [-1, 0, 0],
+          "color": [255, 255, 0]
+        }
       ],
       "pointSize": 10,
       "coordinateSystem": "@@#COORDINATE_SYSTEM.METER_OFFSETS",

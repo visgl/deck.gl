@@ -10,6 +10,9 @@
 .. image:: gallery/images/binary_transport.png
    :width: 0
 
+.. image:: gallery/images/carto_sql_layer.png
+   :width: 0
+
 .. image:: gallery/images/column_layer.png
    :width: 0
 

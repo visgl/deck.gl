@@ -22,8 +22,13 @@
         "username": "public",
         "apiKey": "default_public"
       },
-      "getLineColor": [255, 255, 255],
-      "getFillColor": "@@= properties.gn_pop > 10000 ? [225, 83, 131] : [255, 221, 154]",
+      "getLineColor": [255, 255, 255, 100],
+      "getFillColor": {
+        "@@function": "colorContinuous",
+        "attr": "gn_pop",
+        "domain": [0, 1e5],
+        "colors": "BluYl"
+      },
       "pointRadiusMinPixels": 5,
       "lineWidthMinPixels": 1
     }

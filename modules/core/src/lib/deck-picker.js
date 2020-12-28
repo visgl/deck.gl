@@ -85,15 +85,18 @@ export default class DeckPicker {
   // Returns a new picking info object by assuming the last picked object is still picked
   getLastPickedObject({x, y, layers, viewports}, lastPickedInfo = this.lastPickedInfo.info) {
     const lastPickedLayerId = lastPickedInfo && lastPickedInfo.layer && lastPickedInfo.layer.id;
+    const lastPickedViewportId =
+      lastPickedInfo && lastPickedInfo.viewport && lastPickedInfo.viewport.id;
     const layer = lastPickedLayerId ? layers.find(l => l.id === lastPickedLayerId) : null;
-    const coordinate = viewports[0] && viewports[0].unproject([x, y]);
+    const viewport =
+      (lastPickedViewportId && viewports.find(v => v.id === lastPickedViewportId)) || viewports[0];
+    const coordinate = viewport && viewport.unproject([x - viewport.x, y - viewport.y]);
 
     const info = {
       x,
       y,
+      viewport,
       coordinate,
-      // TODO remove the lngLat prop after compatibility check
-      lngLat: coordinate,
       layer
     };
 
@@ -244,6 +247,7 @@ export default class DeckPicker {
         lastPickedInfo: this.lastPickedInfo,
         mode,
         layers,
+        layerFilter: this.layerFilter,
         viewports,
         x,
         y,

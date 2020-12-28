@@ -22,8 +22,14 @@ BOUNDS = [
 
 bitmap_layer = pdk.Layer("BitmapLayer", image=IMG_URL, bounds=BOUNDS, opacity=0.7)
 
-view_state = pdk.ViewState(latitude=37.7576171, longitude=-122.5776844, zoom=10, bearing=-45, pitch=60,)
+view_state = pdk.ViewState(
+    latitude=37.7576171,
+    longitude=-122.5776844,
+    zoom=10,
+    bearing=-45,
+    pitch=60,
+)
 
-r = pdk.Deck(bitmap_layer, initial_view_state=view_state, map_style=pdk.map_styles.SATELLITE)
+r = pdk.Deck(bitmap_layer, initial_view_state=view_state, map_provider="mapbox", map_style=pdk.map_styles.SATELLITE)
 
 r.to_html("bitmap_layer.html")

@@ -25,6 +25,7 @@ def test_json_output():
     in the root of the deck.gl repo.
     """
     TEST_CASES = [
+        (pydeck_examples.create_local_image_test_object(), fixtures["local-image"], "local-image"),
         (pydeck_examples.create_minimal_test_object(), fixtures["minimal"], "minimal"),
         (pydeck_examples.create_heatmap_test_object(), fixtures["heatmap-layer-function"], "heatmap-layer-function"),
         (pydeck_examples.create_geojson_layer_test_object(), fixtures["geojson-layer"], "geojson-layer"),
