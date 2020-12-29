@@ -19,6 +19,11 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v8.3
 
+#### deck.gl [8.3.12] - Dec 28 2020
+
+- Fix MVTLayer autohighlighted feature when no featureId or uniqueProp present (#5210)
+- Fix h3 layers transitions (#5287)
+
 #### deck.gl [8.3.11] - Dec 8 2020
 
 - Pass onError prop to AnimationLoop (#5221)
