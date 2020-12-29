@@ -225,6 +225,7 @@ export default class H3HexagonLayer extends CompositeLayer {
       getElevation,
       getLineColor,
       getLineWidth,
+      transitions,
       updateTriggers
     } = this.props;
 
@@ -244,6 +245,7 @@ export default class H3HexagonLayer extends CompositeLayer {
       getFillColor,
       getLineColor,
       getLineWidth,
+      transitions,
       updateTriggers: {
         getFillColor: updateTriggers.getFillColor,
         getElevation: updateTriggers.getElevation,
