@@ -6,4 +6,5 @@ import './style/carto-color-continuous.spec';
 import './style/carto-hex-to-rgb.spec';
 import './style/carto-palette.spec';
 import './style/carto-utils.spec';
+import './api/maps-api-client.spec';
 import './config.spec';
