@@ -32,6 +32,7 @@ const EVENT_TYPES = {
   WHEEL: ['wheel'],
   PAN: ['panstart', 'panmove', 'panend'],
   PINCH: ['pinchstart', 'pinchmove', 'pinchend'],
+  TRIPLE_PINCH: ['tripanstart', 'tripanmove', 'tripanend'],
   DOUBLE_TAP: ['doubletap'],
   KEYBOARD: ['keydown']
 };
@@ -78,6 +79,7 @@ export default class Controller {
    * Callback for events
    * @param {hammer.Event} event
    */
+  // eslint-disable-next-line complexity
   handleEvent(event) {
     const {ControllerState} = this;
     this.controllerState = new ControllerState({
@@ -99,6 +101,12 @@ export default class Controller {
         return this._onPinch(event);
       case 'pinchend':
         return this._onPinchEnd(event);
+      case 'tripanstart':
+        return this._onTriplePanStart(event);
+      case 'tripanmove':
+        return this._onTriplePan(event);
+      case 'tripanend':
+        return this._onTriplePanEnd(event);
       case 'doubletap':
         return this._onDoubleTap(event);
       case 'wheel':
@@ -184,6 +192,7 @@ export default class Controller {
     this.toggleEvents(EVENT_TYPES.WHEEL, isInteractive && scrollZoom);
     this.toggleEvents(EVENT_TYPES.PAN, isInteractive && (dragPan || dragRotate));
     this.toggleEvents(EVENT_TYPES.PINCH, isInteractive && (touchZoom || touchRotate));
+    this.toggleEvents(EVENT_TYPES.TRIPLE_PINCH, isInteractive && touchRotate);
     this.toggleEvents(EVENT_TYPES.DOUBLE_TAP, isInteractive && doubleClickZoom);
     this.toggleEvents(EVENT_TYPES.KEYBOARD, isInteractive && keyboard);
 
@@ -342,6 +351,45 @@ export default class Controller {
     this.updateViewport(newControllerState, NO_TRANSITION_PROPS, {
       isZooming: true,
       isPanning: true
+    });
+    return true;
+  }
+
+  _onTriplePanStart(event) {
+    const pos = this.getCenter(event);
+    if (!this.isPointInBounds(pos, event)) {
+      return false;
+    }
+    const newControllerState = this.controllerState.rotateStart({pos});
+    this.updateViewport(newControllerState, NO_TRANSITION_PROPS, {isDragging: true});
+    return true;
+  }
+
+  _onTriplePan(event) {
+    if (!this.touchRotate) {
+      return false;
+    }
+    if (!this.isDragging()) {
+      return false;
+    }
+
+    const {deltaY} = event;
+    const {height} = this.controllerState.getViewportProps();
+    const deltaScaleY = deltaY / height;
+
+    const newControllerState = this.controllerState.rotate({deltaScaleY});
+    this.updateViewport(newControllerState, NO_TRANSITION_PROPS, {
+      isDragging: true,
+      isRotating: true
+    });
+    return true;
+  }
+
+  _onTriplePanEnd(event) {
+    const newControllerState = this.controllerState.rotateEnd();
+    this.updateViewport(newControllerState, null, {
+      isDragging: false,
+      isRotating: false
     });
     return true;
   }

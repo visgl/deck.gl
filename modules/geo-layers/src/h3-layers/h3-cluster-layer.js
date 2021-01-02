@@ -54,6 +54,7 @@ export default class H3ClusterLayer extends CompositeLayer {
       getLineWidth,
       getLineDashArray,
       getElevation,
+      transitions,
       updateTriggers
     } = this.props;
 
@@ -76,6 +77,7 @@ export default class H3ClusterLayer extends CompositeLayer {
         lineDashJustified,
 
         material,
+        transitions,
 
         getFillColor: this.getSubLayerAccessor(getFillColor),
         getLineColor: this.getSubLayerAccessor(getLineColor),
