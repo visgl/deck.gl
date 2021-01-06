@@ -207,6 +207,21 @@ export default class SolidPolygonLayer extends Layer {
     return info;
   }
 
+  clearPickingColor(objectIndex) {
+    const {data} = this.props;
+
+    if (data[0] && data[0].__source) {
+      // data is wrapped
+      for (let i = 0; i < data.length; i++) {
+        if (data[i].__source.index === objectIndex) {
+          super.clearPickingColor(i);
+        }
+      }
+    } else {
+      super.clearPickingColor(objectIndex);
+    }
+  }
+
   draw({uniforms}) {
     const {extruded, filled, wireframe, elevationScale} = this.props;
     const {topModel, sideModel, polygonTesselator} = this.state;

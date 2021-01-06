@@ -526,14 +526,13 @@ export default class Layer extends Component {
     model.setAttributes(shaderAttributes);
   }
 
-  // Sets the specified instanced picking color to null picking color. Used for multi picking.
-  clearPickingColor(color) {
+  // Sets the picking color at the specified index to null picking color. Used for multi picking.
+  clearPickingColor(objectIndex) {
     const {pickingColors, instancePickingColors} = this.getAttributeManager().attributes;
     const colors = pickingColors || instancePickingColors;
 
-    const i = this.decodePickingColor(color);
-    const start = colors.getVertexOffset(i);
-    const end = colors.getVertexOffset(i + 1);
+    const start = colors.getVertexOffset(objectIndex);
+    const end = colors.getVertexOffset(objectIndex + 1);
 
     // Fill the sub buffer with 0s
     colors.buffer.subData({
