@@ -56,6 +56,37 @@ function App({data, viewState}) {
 }
 ```
 
+
+## Installation
+
+To install the dependencies from NPM:
+
+```bash
+npm install deck.gl
+# or
+npm install @deck.gl/core @deck.gl/layers @deck.gl/geo-layers
+```
+
+```js
+import {GreatCircleLayer} from '@deck.gl/geo-layers';
+new GreatCircleLayer({});
+```
+
+To use pre-bundled scripts:
+
+```html
+<script src="https://unpkg.com/deck.gl@^8.0.0/dist.min.js"></script>
+<!-- or -->
+<script src="https://unpkg.com/@deck.gl/core@^8.0.0/dist.min.js"></script>
+<script src="https://unpkg.com/@deck.gl/layers@^8.0.0/dist.min.js"></script>
+<script src="https://unpkg.com/@deck.gl/geo-layers@^8.0.0/dist.min.js"></script>
+```
+
+```js
+new deck.GreatCircleLayer({});
+```
+
+
 ## Properties
 
 Inherits from all [Base Layer](/docs/api-reference/core/layer.md) and [ArcLayer](/docs/api-reference/layers/arc-layer.md) properties.

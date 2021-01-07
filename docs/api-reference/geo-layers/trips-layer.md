@@ -6,17 +6,6 @@ import {TripsLayerDemo} from 'website-components/doc-demos/geo-layers';
 
 This layer renders animated paths that represent vehicle trips.
 
-
-## Installation
-
-To install the dependencies from NPM:
-
-```bash
-npm install deck.gl
-# or
-npm install @deck.gl/core @deck.gl/layers @deck.gl/geo-layers
-```
-
 ```js
 import {TripsLayer} from '@deck.gl/geo-layers';
 
@@ -50,6 +39,21 @@ function App({data, viewState}) {
 
   return <DeckGL viewState={viewState} layers={[layer]} />;
 }
+```
+
+## Installation
+
+To install the dependencies from NPM:
+
+```bash
+npm install deck.gl
+# or
+npm install @deck.gl/core @deck.gl/layers @deck.gl/geo-layers
+```
+
+```js
+import {TripsLayer} from '@deck.gl/geo-layers';
+new TripsLayer({});
 ```
 
 To use pre-bundled scripts:
