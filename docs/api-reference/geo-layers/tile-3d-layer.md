@@ -19,7 +19,7 @@ import {Tile3DLayer} from '@deck.gl/geo-layers';
 function App({viewState}) {
   const layer = new Tile3DLayer({
     id: 'tile-3d-layer',
-    // tileset json file url 
+    // tileset json file url
     data: 'https://assets.cesium.com/43978/tileset.json',
     loader: CesiumIonLoader,
     // https://cesium.com/docs/rest-api/
@@ -57,11 +57,11 @@ import {Tile3DLayer} from '@deck.gl/geo-layers';
 function App({viewState}) {
   const layer = new Tile3DLayer({
     id: 'tile-3d-layer',
-    // Tileset entry point: Indexed 3D layer file url 
+    // Tileset entry point: Indexed 3D layer file url
     data: 'https://tiles.arcgis.com/tiles/z2tnIkrLQ2BRzr6P/arcgis/rest/services/SanFrancisco_Bldgs/SceneServer/layers/0',
     loader: I3SLoader
   });
-     
+
   return <DeckGL viewState={viewState} layers={[layer]} />;
 }
 ```
@@ -73,7 +73,7 @@ To install the dependencies:
 ```bash
 npm install deck.gl
 # or
-npm install @deck.gl/core @deck.gl/geo-layers
+npm install @deck.gl/core @deck.gl/layers @deck.gl/mesh-layers @deck.gl/geo-layers
 ```
 
 ```js
@@ -88,6 +88,7 @@ To use pre-bundled scripts:
 <!-- or -->
 <script src="https://unpkg.com/@deck.gl/core@^8.0.0/dist.min.js"></script>
 <script src="https://unpkg.com/@deck.gl/layers@^8.0.0/dist.min.js"></script>
+<script src="https://unpkg.com/@deck.gl/mesh-layers@^8.0.0/dist.min.js"></script>
 <script src="https://unpkg.com/@deck.gl/geo-layers@^8.0.0/dist.min.js"></script>
 ```
 
@@ -141,14 +142,14 @@ import {Tile3DLayer} from '@deck.gl/geo-layers';
 
 const layer = new Tile3DLayer({
   id: 'tile-3d-layer',
-  // tileset json file url 
+  // tileset json file url
   data: 'https://assets.cesium.com/43978/tileset.json',
   loader: CesiumIonLoader,
   loadOptions: {
     tileset: {
       throttleRequests: false,
     },
-    'cesium-ion': {accessToken: '<ion_access_token_for_your_asset>'} 
+    'cesium-ion': {accessToken: '<ion_access_token_for_your_asset>'}
   }
 })
 ```
@@ -164,11 +165,11 @@ When [`picking`](/docs/developer-guide/custom-layers/picking.md) is enabled, `in
 ##### `getPointColor` (Function|Array, Optional)
 
 - Default `[0, 0, 0, 255]`
-  
-  The rgba color at the target, in `r, g, b, [a]`. Each component is in the 0-255 range.
-  This value is only applied when [tile format](https://github.com/AnalyticalGraphicsInc/3d-tiles/tree/master/specification#introduction) is `pnts` and no [color properties](https://github.com/AnalyticalGraphicsInc/3d-tiles/blob/master/specification/TileFormats/PointCloud/README.md#point-colors) are defined in point cloud tile file. 
 
-### Callbacks 
+  The rgba color at the target, in `r, g, b, [a]`. Each component is in the 0-255 range.
+  This value is only applied when [tile format](https://github.com/AnalyticalGraphicsInc/3d-tiles/tree/master/specification#introduction) is `pnts` and no [color properties](https://github.com/AnalyticalGraphicsInc/3d-tiles/blob/master/specification/TileFormats/PointCloud/README.md#point-colors) are defined in point cloud tile file.
+
+### Callbacks
 
 ##### `onTilesetLoad` (Function, optional)
 `onTilesetLoad` is a function that is called when Tileset JSON file is loaded. [Tileset](https://github.com/AnalyticalGraphicsInc/3d-tiles/tree/master/specification#tileset-json) object is passed in the callback.
