@@ -21,7 +21,15 @@
 /* eslint-disable dot-notation, max-statements, no-unused-vars */
 
 import test from 'tape-catch';
-import {MapView, ScatterplotLayer, Deck, PolygonLayer, PathLayer, GridLayer} from 'deck.gl';
+import {
+  MapView,
+  ScatterplotLayer,
+  Deck,
+  PolygonLayer,
+  PathLayer,
+  GeoJsonLayer,
+  GridLayer
+} from 'deck.gl';
 import * as DATA from '../../../../examples/layer-browser/src/data-samples';
 
 const VIEW_STATE = {
@@ -354,6 +362,87 @@ const TEST_CASES = [
     }
   },
   {
+    id: 'geojsonLayer',
+    props: {
+      layers: [
+        new GeoJsonLayer({
+          data: DATA.geojson,
+          getRadius: 100,
+          getLineWidth: 20,
+          getElevation: 500,
+          lineWidthMinPixels: 1,
+          pickable: true
+        })
+      ]
+    },
+    pickingMethods: {
+      pickObject: [
+        {
+          parameters: {
+            x: 260,
+            y: 300
+          },
+          results: {
+            count: 1
+          }
+        },
+        {
+          parameters: {
+            x: 10,
+            y: 10
+          },
+          results: {
+            count: 0
+          }
+        }
+      ],
+      pickObjects: [
+        {
+          parameters: {
+            x: 0,
+            y: 0,
+            width: 400,
+            height: 400
+          },
+          results: {
+            count: 8
+          }
+        },
+        {
+          parameters: {
+            x: 10,
+            y: 10,
+            width: 10,
+            height: 10
+          },
+          results: {
+            count: 0
+          }
+        }
+      ],
+      pickMultipleObjects: [
+        {
+          parameters: {
+            x: 260,
+            y: 300
+          },
+          results: {
+            count: 1
+          }
+        },
+        {
+          parameters: {
+            x: 10,
+            y: 10
+          },
+          results: {
+            count: 0
+          }
+        }
+      ]
+    }
+  },
+  {
     id: 'multiLayers',
     props: {
       layers: [
@@ -498,15 +587,25 @@ test(`pickingTest`, t => {
     for (const pickingMethod in pickingMethods) {
       for (const pickingCase of pickingMethods[pickingMethod]) {
         pickInfos = deck[pickingMethod](pickingCase.parameters);
+        if (!Array.isArray(pickInfos)) {
+          pickInfos = pickInfos ? [pickInfos] : [];
+        }
         t.equal(
-          !pickInfos ? 0 : !Array.isArray(pickInfos) ? 1 : pickInfos.length,
+          pickInfos.length,
           pickingCase.results.count,
           `${testCase.id}: ${pickingMethod} should find expected number of objects`
         );
+
+        if (pickInfos.length > 1) {
+          t.equal(
+            new Set(pickInfos.map(x => x.object)).size,
+            pickInfos.length,
+            'Returned distinct picked objects'
+          );
+        }
+
         if (pickingCase.results.cellCounts) {
-          const cellCounts = Array.isArray(pickInfos)
-            ? pickInfos.map(x => x.object.count)
-            : [pickInfos.object.count];
+          const cellCounts = pickInfos.map(x => x.object.count);
           t.deepEqual(
             cellCounts,
             pickingCase.results.cellCounts,

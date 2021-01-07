@@ -238,7 +238,7 @@ export default class DeckPicker {
       if (pickInfo.pickedColor && i + 1 < depth) {
         const layerId = pickInfo.pickedColor[3] - 1;
         affectedLayers[layerId] = true;
-        layers[layerId].clearPickingColor(pickInfo.pickedColor);
+        layers[layerId].disablePickingIndex(pickInfo.pickedObjectIndex);
       }
 
       // This logic needs to run even if no object is picked.
