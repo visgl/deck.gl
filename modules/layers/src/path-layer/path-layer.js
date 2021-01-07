@@ -183,25 +183,27 @@ export default class PathLayer extends Layer {
     const {index} = info;
     const {data} = this.props;
 
+    // Check if data comes from a composite layer, wrapped with getSubLayerRow
     if (data[0] && data[0].__source) {
-      // data is wrapped
+      // index decoded from picking color refers to the source index
       info.object = data.find(d => d.__source.index === index);
     }
     return info;
   }
 
-  clearPickingColor(objectIndex) {
+  disablePickingIndex(objectIndex) {
     const {data} = this.props;
 
+    // Check if data comes from a composite layer, wrapped with getSubLayerRow
     if (data[0] && data[0].__source) {
-      // data is wrapped
+      // index decoded from picking color refers to the source index
       for (let i = 0; i < data.length; i++) {
         if (data[i].__source.index === objectIndex) {
-          super.clearPickingColor(i);
+          this._disablePickingIndex(i);
         }
       }
     } else {
-      super.clearPickingColor(objectIndex);
+      this._disablePickingIndex(objectIndex);
     }
   }
 

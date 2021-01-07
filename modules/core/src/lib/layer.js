@@ -526,8 +526,13 @@ export default class Layer extends Component {
     model.setAttributes(shaderAttributes);
   }
 
-  // Sets the picking color at the specified index to null picking color. Used for multi picking.
-  clearPickingColor(objectIndex) {
+  // Sets the picking color at the specified index to null picking color. Used for multi-depth picking.
+  // This method may be overriden by layer implementations
+  disablePickingIndex(objectIndex) {
+    this._disablePickingIndex(objectIndex);
+  }
+
+  _disablePickingIndex(objectIndex) {
     const {pickingColors, instancePickingColors} = this.getAttributeManager().attributes;
     const colors = pickingColors || instancePickingColors;
 
