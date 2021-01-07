@@ -19,6 +19,10 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v8.3
 
+#### deck.gl [8.3.13] - Jan 7 2021
+
+- Fix multi-depth picking for GeoJsonLayer (#5298)
+
 #### deck.gl [8.3.12] - Dec 28 2020
 
 - Fix MVTLayer autohighlighted feature when no featureId or uniqueProp present (#5210)
