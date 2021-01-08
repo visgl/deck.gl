@@ -218,13 +218,24 @@ export default class MVTLayer extends TileLayer {
   }
 
   _onViewportChange() {
+    const {tileset} = this.state;
     const {onViewportChange} = this.props;
     if (onViewportChange) {
       const {viewport} = this.context;
-      onViewportChange({
+
+      const viewportProps = {
         getRenderedFeatures: this.getRenderedFeatures.bind(this),
         viewport
+      };
+
+      // eslint-disable-next-line accessor-pairs
+      Object.defineProperty(viewportProps, 'visibleTiles', {
+        get: () => {
+          return tileset.selectedTiles;
+        }
       });
+
+      onViewportChange(viewportProps);
     }
   }
 
