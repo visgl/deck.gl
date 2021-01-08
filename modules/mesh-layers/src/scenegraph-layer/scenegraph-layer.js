@@ -23,6 +23,7 @@ import {isWebGL2} from '@luma.gl/core';
 import {pbr} from '@luma.gl/shadertools';
 import {ScenegraphNode, createGLTFObjects} from '@luma.gl/experimental';
 import GL from '@luma.gl/constants';
+import {GLTFLoader} from '@loaders.gl/gltf';
 import {waitForGLTFAssets} from './gltf-utils';
 
 import {MATRIX_ATTRIBUTES, shouldComposeModelMatrix} from '../utils/matrix';
@@ -63,7 +64,9 @@ const defaultProps = {
   getScale: {type: 'accessor', value: [1, 1, 1]},
   getTranslation: {type: 'accessor', value: [0, 0, 0]},
   // 4x4 matrix
-  getTransformMatrix: {type: 'accessor', value: []}
+  getTransformMatrix: {type: 'accessor', value: []},
+
+  loaders: [GLTFLoader]
 };
 
 export default class ScenegraphLayer extends Layer {

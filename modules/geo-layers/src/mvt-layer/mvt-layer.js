@@ -13,7 +13,8 @@ const WORLD_SIZE = 512;
 const defaultProps = {
   uniqueIdProperty: {type: 'string', value: ''},
   highlightedFeatureId: null,
-  onViewportChange: {type: 'function', optional: true, value: null, compare: false}
+  onViewportChange: {type: 'function', optional: true, value: null, compare: false},
+  loaders: MVTLoader
 };
 
 async function fetchTileJSON(url) {
@@ -105,7 +106,7 @@ export default class MVTLayer extends TileLayer {
         tileIndex: {x: tile.x, y: tile.y, z: tile.z}
       }
     };
-    return load(url, MVTLoader, options);
+    return load(url, this.props.loaders, options);
   }
 
   renderSubLayers(props) {

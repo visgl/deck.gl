@@ -67,7 +67,14 @@ export default class Tile3DLayer extends CompositeLayer {
   }
 
   async _loadTileset(tilesetUrl) {
-    const {loader, loadOptions} = this.props;
+    const {loadOptions} = this.props;
+
+    // TODO: deprecate `loader` in v9.0
+    let loader = this.props.loader || this.props.loaders;
+    if (Array.isArray(loader)) {
+      loader = loader[0];
+    }
+
     const options = {...loadOptions};
     if (loader.preload) {
       const preloadOptions = await loader.preload(tilesetUrl, loadOptions);
