@@ -83,6 +83,55 @@ will replace the layers descriptor with
 
 Whenever the `JSONConverter` component finds a "type" field, it looks into a "class catalog". This can be a layer, a view, or other objects.
 
+### Functions Catalogs
+
+A map of functions that should be made available to the JSON function resolver. For example, when this configuration is passed to `JSONConverter`:
+
+```js
+function calculateRadius({base, exponent}) {
+  return Math.pow(base, exponent);
+}
+
+const configuration = {
+  ...,
+  functions: {calculateRadius}
+};
+```
+
+and used to resolve this JSON object:
+
+```json
+{
+  "layers": [
+    {
+      "@@type": "ScatterplotLayer",
+      "data": ...,
+      "getColor": [0, 128, 255],
+      "getRadius": {
+        "@@function": "calculateRadius",
+        "base": 2,
+        "exponent": 3
+      }
+    }
+  ]
+}
+```
+
+it will replace the layers descriptor with
+
+```js
+{
+  layers: [
+    new ScatterplotLayer({
+      data: ...,
+      getColor: [0, 128, 255],
+      getRadius: 8
+    })
+  ]
+}
+```
+
+Whenever the `JSONConverter` component finds a "function" field, it looks into a "function catalog".
 
 ### Enumeration Catalogs
 

@@ -30,7 +30,7 @@ custom_layer = pydeck.Layer(
     get_label="properties.name",
     get_label_size=200000,
     get_label_color=[0, 255, 255],
-    label_size_units='"meters"',
+    label_size_units=pydeck.types.String("meters"),
     line_width_min_pixels=1,
 )
 

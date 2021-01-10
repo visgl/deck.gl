@@ -150,12 +150,12 @@ test('ComponentState#async props with transform', t => {
 
   const testData = [0, 1, 2, 3, 4];
   // prettier-ignore
-  const testImage = new Uint8ClampedArray([
+  const testImage = {data: new Uint8ClampedArray([
     0, 0, 0, 255,
     255, 0, 0, 255,
     0, 255, 0, 255,
     0, 0, 255, 255
-  ]);
+  ]), width: 2, height: 2};
 
   const state = new ComponentState();
 

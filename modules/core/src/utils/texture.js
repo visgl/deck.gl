@@ -13,21 +13,27 @@ const internalTextures = {};
 
 export function createTexture(layer, image) {
   const gl = layer.context && layer.context.gl;
-  if (!gl) {
+  if (!gl || !image) {
     return null;
   }
-  let texture = null;
+
+  // image could be one of:
+  //  - Texture2D
+  //  - Browser object: Image, ImageData, ImageData, HTMLCanvasElement, HTMLVideoElement, ImageBitmap
+  //  - Plain object: {width: <number>, height: <number>, data: <Uint8Array>}
   if (image instanceof Texture2D) {
     return image;
-  } else if (image) {
-    // Image, ImageData, ImageData, HTMLCanvasElement, HTMLVideoElement, ImageBitmap
-    texture = new Texture2D(gl, {
-      data: image,
-      parameters: {...DEFAULT_TEXTURE_PARAMETERS, ...layer.props.textureParameters}
-    });
-    // Track this texture
-    internalTextures[texture.id] = true;
+  } else if (image.constructor && image.constructor.name !== 'Object') {
+    // Browser object
+    image = {data: image};
   }
+
+  const texture = new Texture2D(gl, {
+    ...image,
+    parameters: {...DEFAULT_TEXTURE_PARAMETERS, ...layer.props.textureParameters}
+  });
+  // Track this texture
+  internalTextures[texture.id] = true;
   return texture;
 }
 

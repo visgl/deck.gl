@@ -10,6 +10,8 @@ function makeEvent(type, opts, seed) {
     handled: opts.handled,
     offsetCenter: {x: 100 + seed, y: 100 - seed},
     delta: -seed - 1,
+    deltaX: seed / 2,
+    deltaY: seed / 2,
     scale: 1 + (seed + 1) * 0.1,
     rotation: (seed + 1) * 5,
     srcEvent: opts,
@@ -97,6 +99,28 @@ const TEST_CASES = [
     title: 'pinch#disabled',
     props: {touchZoom: false, touchRotate: false},
     events: () => makeEvents(['pinchstart', 'pinchmove', 'pinchend']),
+    viewStateChanges: 2,
+    interactionStates: 1 // isDragging
+  },
+
+  {
+    title: 'tripan',
+    props: {},
+    events: () => makeEvents(['tripanstart', 'tripanmove', 'tripanend']),
+    viewStateChanges: 3,
+    interactionStates: 2 // isDragging, isRotating
+  },
+  {
+    title: 'tripan#out of bounds',
+    props: {x: 200},
+    events: () => makeEvents(['tripanstart', 'tripanmove', 'tripanend']),
+    viewStateChanges: 1,
+    interactionStates: 0
+  },
+  {
+    title: 'tripan#disabled',
+    props: {touchRotate: false},
+    events: () => makeEvents(['tripanstart', 'tripanmove', 'tripanend']),
     viewStateChanges: 2,
     interactionStates: 1 // isDragging
   },

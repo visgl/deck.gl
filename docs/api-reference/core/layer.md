@@ -544,8 +544,6 @@ The state object allows a layer to store persistent information cross rendering 
 [Properties](/docs/api-reference/core/layer.md#constructor) of this layer.
 
 
-## Members
-
 ##### `isLoaded`
 
 `true` if all asynchronous assets are loaded.

@@ -42,7 +42,7 @@ cattle = pdk.Layer(
     data=cattle_df,
     opacity=0.9,
     get_position=["lng", "lat"],
-    aggregation='"MEAN"',
+    aggregation=pdk.types.String("MEAN"),
     color_range=COLOR_BREWER_BLUE_SCALE,
     threshold=1,
     get_weight="weight",
@@ -55,7 +55,7 @@ poultry = pdk.Layer(
     opacity=0.9,
     get_position=["lng", "lat"],
     threshold=0.75,
-    aggregation='"MEAN"',
+    aggregation=pdk.types.String("MEAN"),
     get_weight="weight",
     pickable=True,
 )
@@ -64,6 +64,8 @@ poultry = pdk.Layer(
 r = pdk.Deck(
     layers=[cattle, poultry],
     initial_view_state=view,
+    map_provider="mapbox",
+    map_style=pdk.map_styles.SATELLITE,
     tooltip={"text": "Concentration of cattle in blue, concentration of poultry in orange"},
 )
 

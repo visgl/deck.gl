@@ -1,3 +1,4 @@
+from .local_image import create_local_image_test_object  # noqa
 from .minimal import create_minimal_test_object  # noqa
 from .hexagon_layer_function import create_heatmap_test_object  # noqa
 from .geojson_layer import create_geojson_layer_test_object  # noqa

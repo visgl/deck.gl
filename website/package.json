@@ -18,6 +18,7 @@
     "deploy": "NODE_DEBUG=gh-pages gh-pages -d public"
   },
   "dependencies": {
+    "@loaders.gl/obj": "^2.3.5",
     "d3-color": "^1.4.1",
     "d3-request": "^1.0.6",
     "d3-scale": "^3.2.1",

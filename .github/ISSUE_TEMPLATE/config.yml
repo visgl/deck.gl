@@ -1,0 +1,5 @@
+blank_issues_enabled: false
+contact_links:
+  - name: deck.gl Discussions
+    url: https://github.com/visgl/deck.gl/discussions
+    about: Go to Discussions for generic Q&A or ask for help

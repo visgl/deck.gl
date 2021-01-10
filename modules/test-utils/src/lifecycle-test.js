@@ -199,15 +199,22 @@ function runLayerTestUpdate(testCase, {layerManager, deckRenderer}, layer, spies
   // Create a map of spies that the test case can inspect
   spies = testCase.spies || spies;
   const spyMap = injectSpies(layer, spies);
+  const drawLayers = () => {
+    deckRenderer.renderLayers({
+      viewports: [viewport],
+      layers: layerManager.getLayers(),
+      onViewportActive: layerManager.activateViewport
+    });
+  };
 
   layerManager.setLayers([layer]);
+  drawLayers();
 
-  // call draw layer
-  deckRenderer.renderLayers({
-    viewports: [viewport],
-    layers: layerManager.getLayers(),
-    onViewportActive: layerManager.activateViewport
-  });
+  // clear update flags set by viewport change, if any
+  if (layerManager.needsUpdate()) {
+    layerManager.updateLayers();
+    drawLayers();
+  }
 
   return {layer, spyMap};
 }

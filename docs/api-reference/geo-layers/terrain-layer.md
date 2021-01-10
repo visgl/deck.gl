@@ -41,7 +41,7 @@ To install the dependencies from NPM:
 ```bash
 npm install deck.gl
 # or
-npm install @deck.gl/core @deck.gl/layers @deck.gl/geo-layers
+npm install @deck.gl/core @deck.gl/mesh-layers @deck.gl/geo-layers
 ```
 
 ```js
@@ -55,7 +55,7 @@ To use pre-bundled scripts:
 <script src="https://unpkg.com/deck.gl@^8.0.0/dist.min.js"></script>
 <!-- or -->
 <script src="https://unpkg.com/@deck.gl/core@^8.0.0/dist.min.js"></script>
-<script src="https://unpkg.com/@deck.gl/layers@^8.0.0/dist.min.js"></script>
+<script src="https://unpkg.com/@deck.gl/mesh-layers@^8.0.0/dist.min.js"></script>
 <script src="https://unpkg.com/@deck.gl/geo-layers@^8.0.0/dist.min.js"></script>
 ```
 
@@ -136,7 +136,7 @@ The default value of `elevationDecoder` decodes a grayscale image:
 
 ##### `bounds` (Array, optional)
 
-Bounds of the image to fit x,y coordinates into. In `[left, bottom, right, top]`. 
+Bounds of the image to fit x,y coordinates into. In `[left, bottom, right, top]`.
 `left` and `right` refers to the world longitude/x at the corresponding side of the image.
 `top` and `bottom` refers to the world latitude/y at the corresponding side of the image.
 

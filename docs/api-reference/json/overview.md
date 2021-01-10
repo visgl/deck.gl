@@ -4,7 +4,7 @@ The deck.gl JSON module provides a `JSONConverter` class that converts textual J
 
 Through a set of conventions, the JSON module allows the specification of _JavaScript class instances_, _React elements_, _enumerations_ and _functions_ (in addition to the basic types created during the JSON parsing process (i.e. arrays, objects, strings, numbers and booleans).
 
-The set of classes, React components and enumerations that should be available to the JSONConverter must be provided via an application-provided configuration object.
+The set of classes, React components, functions, constants and enumerations that should be available to the JSONConverter must be provided via an application-provided configuration object.
 
 ## Use Cases
 

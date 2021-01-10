@@ -20,13 +20,17 @@ const INITIAL_TEMPLATE = Object.keys(JSON_TEMPLATES)[0];
 // Set your mapbox token here
 const GOOGLE_MAPS_TOKEN = process.env.GoogleMapsToken; // eslint-disable-line
 
+function isFunctionObject(value) {
+  return typeof value === 'object' && '@@function' in value;
+}
+
 function addUpdateTriggersForAccessors(json) {
   if (!json || !json.layers) return;
 
   for (const layer of json.layers) {
     const updateTriggers = {};
     for (const [key, value] of Object.entries(layer)) {
-      if (key.startsWith('get') && typeof value === 'string') {
+      if ((key.startsWith('get') && typeof value === 'string') || isFunctionObject(value)) {
         // it's an accessor and it's a string
         // we add the value of the accesor to update trigger to refresh when it changes
         updateTriggers[key] = value;
