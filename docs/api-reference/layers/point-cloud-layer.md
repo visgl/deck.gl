@@ -44,7 +44,7 @@ function App({data, viewState}) {
 `loaders.gl` offers a [category](https://loaders.gl/docs/specifications/category-mesh) of loaders for loading point clouds from standard formats. For example, the following code adds support for LAS/LAZ files:
 
 ```js
-import {PointCloudLayer} from '@deck.gl/mesh-layers';
+import {PointCloudLayer} from '@deck.gl/layers';
 import {LASLoader} from '@loaders.gl/las';
 
 new PointCloudLayer({
