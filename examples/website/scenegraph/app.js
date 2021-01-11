@@ -6,11 +6,6 @@ import {StaticMap} from 'react-map-gl';
 import DeckGL from '@deck.gl/react';
 import {ScenegraphLayer} from '@deck.gl/mesh-layers';
 
-import {GLTFLoader} from '@loaders.gl/gltf';
-import {registerLoaders} from '@loaders.gl/core';
-
-registerLoaders([GLTFLoader]);
-
 // Data provided by the OpenSky Network, http://www.opensky-network.org
 const DATA_URL = 'https://opensky-network.org/api/states/all';
 const MODEL_URL =
