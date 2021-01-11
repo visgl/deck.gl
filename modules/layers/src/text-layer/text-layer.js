@@ -72,7 +72,7 @@ const defaultProps = {
   fontSettings: {},
 
   // auto wrapping options
-  wordBreak: 'word-break',
+  wordBreak: 'break-word',
   maxWidth: {type: 'number', value: -1},
 
   getText: {type: 'accessor', value: x => x.text},
