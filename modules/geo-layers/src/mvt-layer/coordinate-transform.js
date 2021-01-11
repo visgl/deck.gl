@@ -45,12 +45,5 @@ export function transform(geometry, bbox, viewport) {
   const se = viewport.projectFlat([bbox.east, bbox.south]);
   const projectedBbox = [nw, se];
 
-  return {
-    ...geometry,
-    coordinates: availableTransformations[geometry.type](
-      geometry.coordinates,
-      projectedBbox,
-      viewport
-    )
-  };
+  return availableTransformations[geometry.type](geometry.coordinates, projectedBbox, viewport);
 }

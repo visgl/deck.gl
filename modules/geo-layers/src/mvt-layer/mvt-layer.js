@@ -228,7 +228,11 @@ export default class MVTLayer extends TileLayer {
         // eslint-disable-next-line accessor-pairs
         Object.defineProperty(tile, 'dataWithWGS84Coords', {
           get: () => {
-            return tile.data.map(object => transformTileCoordsToWGS84(object, tile, viewport));
+            if (this.isLoaded) {
+              return tile.data.map(object => transformTileCoordsToWGS84(object, tile, viewport));
+            }
+
+            return [];
           },
           configurable: true
         });
