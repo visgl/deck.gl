@@ -67,11 +67,11 @@ const defaultProps = {
 function getCoordinates(f) {
   return f.geometry.coordinates;
 }
-
 export default class GeoJsonLayer extends CompositeLayer {
   initializeState() {
     this.state = {
-      features: {}
+      features: {},
+      binaryData: {}
     };
 
     if (this.props.getLineDashArray) {
@@ -83,44 +83,46 @@ export default class GeoJsonLayer extends CompositeLayer {
     if (!changeFlags.dataChanged) {
       return;
     }
-    const features = getGeojsonFeatures(props.data);
-    const wrapFeature = this.getSubLayerRow.bind(this);
 
-    if (Array.isArray(changeFlags.dataChanged)) {
-      const oldFeatures = this.state.features;
-      const newFeatures = {};
-      const featuresDiff = {};
-      for (const key in oldFeatures) {
-        newFeatures[key] = oldFeatures[key].slice();
-        featuresDiff[key] = [];
-      }
+    if (!this._isBinary()) {
 
-      for (const dataRange of changeFlags.dataChanged) {
-        const partialFeatures = separateGeojsonFeatures(features, wrapFeature, dataRange);
+      const features = getGeojsonFeatures(props.data);
+      const wrapFeature = this.getSubLayerRow.bind(this);
+
+      if (Array.isArray(changeFlags.dataChanged)) {
+        const oldFeatures = this.state.features;
+        const newFeatures = {};
+        const featuresDiff = {};
         for (const key in oldFeatures) {
-          featuresDiff[key].push(
-            replaceInRange({
-              data: newFeatures[key],
-              getIndex: f => f.__source.index,
-              dataRange,
-              replace: partialFeatures[key]
-            })
-          );
+          newFeatures[key] = oldFeatures[key].slice();
+          featuresDiff[key] = [];
         }
+
+        for (const dataRange of changeFlags.dataChanged) {
+          const partialFeatures = separateGeojsonFeatures(features, wrapFeature, dataRange);
+          for (const key in oldFeatures) {
+            featuresDiff[key].push(
+              replaceInRange({
+                data: newFeatures[key],
+                getIndex: f => f.__source.index,
+                dataRange,
+                replace: partialFeatures[key]
+              })
+            );
+          }
+        }
+        this.setState({features: newFeatures, featuresDiff});
+      } else {
+        this.setState({
+          features: separateGeojsonFeatures(features, wrapFeature),
+          featuresDiff: {}
+        });
       }
-      this.setState({features: newFeatures, featuresDiff});
-    } else {
-      this.setState({
-        features: separateGeojsonFeatures(features, wrapFeature),
-        featuresDiff: {}
-      });
     }
   }
 
   /* eslint-disable complexity */
   renderLayers() {
-    const {features, featuresDiff} = this.state;
-    const {pointFeatures, lineFeatures, polygonFeatures, polygonOutlineFeatures} = features;
 
     // Layer composition props
     const {stroked, filled, extruded, wireframe, material, transitions} = this.props;
@@ -156,133 +158,161 @@ export default class GeoJsonLayer extends CompositeLayer {
     const PolygonStrokeLayer = this.getSubLayerClass('polygons-stroke', PathLayer);
     const LineStringsLayer = this.getSubLayerClass('line-strings', PathLayer);
     const PointsLayer = this.getSubLayerClass('points', ScatterplotLayer);
+ 
+    let pointData;
+    // let linesData;
+    // let polygonsData;
+    let _pointDataDiff;
 
-    // Filled Polygon Layer
-    const polygonFillLayer =
-      this.shouldRenderSubLayer('polygons-fill', polygonFeatures) &&
-      new PolygonFillLayer(
-        {
-          _dataDiff: featuresDiff.polygonFeatures && (() => featuresDiff.polygonFeatures),
+    const isBinary = this._isBinary();
 
-          extruded,
-          elevationScale,
-          filled,
-          wireframe,
-          material,
-          getElevation: this.getSubLayerAccessor(getElevation),
-          getFillColor: this.getSubLayerAccessor(getFillColor),
-          getLineColor: this.getSubLayerAccessor(
-            extruded && wireframe ? getLineColor : defaultLineColor
-          ),
+    if (isBinary) {
+      // polygonsData = props.data.polygons;
+      // linesData = props.data.lines;
+      const {points} = this.props.data;
 
-          transitions: transitions && {
-            getPolygon: transitions.geometry,
-            getElevation: transitions.getElevation,
-            getFillColor: transitions.getFillColor,
-            getLineColor: transitions.getLineColor
-          }
-        },
-        this.getSubLayerProps({
-          id: 'polygons-fill',
-          updateTriggers: {
-            getElevation: updateTriggers.getElevation,
-            getFillColor: updateTriggers.getFillColor,
-            // using a legacy API to invalid lineColor attributes
-            // if (extruded && wireframe) has changed
-            lineColors: extruded && wireframe,
-            getLineColor: updateTriggers.getLineColor
-          }
-        }),
-        {
-          data: polygonFeatures,
-          getPolygon: getCoordinates
+      pointData = {
+        // this is required so that the layer knows how many points to draw
+        length: points.positions.value.length/points.positions.size,
+        attributes: {
+          getPosition: points.positions,
         }
-      );
+      };      
+      _pointDataDiff = true;
+    }
+    else {
+      // Default  format
+      const {features, featuresDiff} = this.state;
+      // const {pointFeatures, lineFeatures, polygonFeatures, polygonOutlineFeatures} = features;
+      const {pointFeatures} = features;
+      pointData = pointFeatures;
+      _pointDataDiff = featuresDiff.pointFeatures && (() => featuresDiff.pointFeatures);
+    }
 
-    const polygonLineLayer =
-      !extruded &&
-      stroked &&
-      this.shouldRenderSubLayer('polygons-stroke', polygonOutlineFeatures) &&
-      new PolygonStrokeLayer(
-        {
-          _dataDiff:
-            featuresDiff.polygonOutlineFeatures && (() => featuresDiff.polygonOutlineFeatures),
+    // // Filled Polygon Layer
+    // const polygonFillLayer =
+    //   this.shouldRenderSubLayer('polygons-fill', polygonData) &&
+    //   new PolygonFillLayer(
+    //     {
+    //       _dataDiff,
+    //       extruded,
+    //       elevationScale,
+    //       filled,
+    //       wireframe,
+    //       material,
+    //       getElevation: this.getSubLayerAccessor(getElevation),
+    //       getFillColor: this.getSubLayerAccessor(getFillColor),
+    //       getLineColor: this.getSubLayerAccessor(
+    //         extruded && wireframe ? getLineColor : defaultLineColor
+    //       ),
+    //       transitions: transitions && {
+    //         getPolygon: transitions.geometry,
+    //         getElevation: transitions.getElevation,
+    //         getFillColor: transitions.getFillColor,
+    //         getLineColor: transitions.getLineColor
+    //       }
+    //     },
+    //     this.getSubLayerProps({
+    //       id: 'polygons-fill',
+    //       updateTriggers: {
+    //         getElevation: updateTriggers.getElevation,
+    //         getFillColor: updateTriggers.getFillColor,
+    //         // using a legacy API to invalid lineColor attributes
+    //         // if (extruded && wireframe) has changed
+    //         lineColors: extruded && wireframe,
+    //         getLineColor: updateTriggers.getLineColor
+    //       }
+    //     }),
+    //     {
+    //       data: polygonFeatures,
+    //       getPolygon: getCoordinates
+    //     }
+    //   );
 
-          widthUnits: lineWidthUnits,
-          widthScale: lineWidthScale,
-          widthMinPixels: lineWidthMinPixels,
-          widthMaxPixels: lineWidthMaxPixels,
-          rounded: lineJointRounded,
-          miterLimit: lineMiterLimit,
-          dashJustified: lineDashJustified,
+    // const polygonLineLayer =
+    //   !extruded &&
+    //   stroked &&
+    //   this.shouldRenderSubLayer('polygons-stroke', polygonOutlineFeatures) &&
+    //   new PolygonStrokeLayer(
+    //     {
+    //       _dataDiff:
+    //         featuresDiff.polygonOutlineFeatures && (() => featuresDiff.polygonOutlineFeatures),
 
-          getColor: this.getSubLayerAccessor(getLineColor),
-          getWidth: this.getSubLayerAccessor(getLineWidth),
-          getDashArray: this.getSubLayerAccessor(getLineDashArray),
+    //       widthUnits: lineWidthUnits,
+    //       widthScale: lineWidthScale,
+    //       widthMinPixels: lineWidthMinPixels,
+    //       widthMaxPixels: lineWidthMaxPixels,
+    //       rounded: lineJointRounded,
+    //       miterLimit: lineMiterLimit,
+    //       dashJustified: lineDashJustified,
 
-          transitions: transitions && {
-            getPath: transitions.geometry,
-            getColor: transitions.getLineColor,
-            getWidth: transitions.getLineWidth
-          }
-        },
-        this.getSubLayerProps({
-          id: 'polygons-stroke',
-          updateTriggers: {
-            getColor: updateTriggers.getLineColor,
-            getWidth: updateTriggers.getLineWidth,
-            getDashArray: updateTriggers.getLineDashArray
-          }
-        }),
-        {
-          data: polygonOutlineFeatures,
-          getPath: getCoordinates
-        }
-      );
+    //       getColor: this.getSubLayerAccessor(getLineColor),
+    //       getWidth: this.getSubLayerAccessor(getLineWidth),
+    //       getDashArray: this.getSubLayerAccessor(getLineDashArray),
 
-    const pathLayer =
-      this.shouldRenderSubLayer('linestrings', lineFeatures) &&
-      new LineStringsLayer(
-        {
-          _dataDiff: featuresDiff.lineFeatures && (() => featuresDiff.lineFeatures),
+    //       transitions: transitions && {
+    //         getPath: transitions.geometry,
+    //         getColor: transitions.getLineColor,
+    //         getWidth: transitions.getLineWidth
+    //       }
+    //     },
+    //     this.getSubLayerProps({
+    //       id: 'polygons-stroke',
+    //       updateTriggers: {
+    //         getColor: updateTriggers.getLineColor,
+    //         getWidth: updateTriggers.getLineWidth,
+    //         getDashArray: updateTriggers.getLineDashArray
+    //       }
+    //     }),
+    //     {
+    //       data: polygonOutlineFeatures,
+    //       getPath: getCoordinates
+    //     }
+    //   );
 
-          widthUnits: lineWidthUnits,
-          widthScale: lineWidthScale,
-          widthMinPixels: lineWidthMinPixels,
-          widthMaxPixels: lineWidthMaxPixels,
-          rounded: lineJointRounded,
-          miterLimit: lineMiterLimit,
-          dashJustified: lineDashJustified,
+    // const pathLayer =
+    //   this.shouldRenderSubLayer('linestrings', lineFeatures) &&
+    //   new LineStringsLayer(
+    //     {
+    //       _dataDiff: featuresDiff.lineFeatures && (() => featuresDiff.lineFeatures),
 
-          getColor: this.getSubLayerAccessor(getLineColor),
-          getWidth: this.getSubLayerAccessor(getLineWidth),
-          getDashArray: this.getSubLayerAccessor(getLineDashArray),
+    //       widthUnits: lineWidthUnits,
+    //       widthScale: lineWidthScale,
+    //       widthMinPixels: lineWidthMinPixels,
+    //       widthMaxPixels: lineWidthMaxPixels,
+    //       rounded: lineJointRounded,
+    //       miterLimit: lineMiterLimit,
+    //       dashJustified: lineDashJustified,
 
-          transitions: transitions && {
-            getPath: transitions.geometry,
-            getColor: transitions.getLineColor,
-            getWidth: transitions.getLineWidth
-          }
-        },
-        this.getSubLayerProps({
-          id: 'line-strings',
-          updateTriggers: {
-            getColor: updateTriggers.getLineColor,
-            getWidth: updateTriggers.getLineWidth,
-            getDashArray: updateTriggers.getLineDashArray
-          }
-        }),
-        {
-          data: lineFeatures,
-          getPath: getCoordinates
-        }
-      );
+    //       getColor: this.getSubLayerAccessor(getLineColor),
+    //       getWidth: this.getSubLayerAccessor(getLineWidth),
+    //       getDashArray: this.getSubLayerAccessor(getLineDashArray),
+
+    //       transitions: transitions && {
+    //         getPath: transitions.geometry,
+    //         getColor: transitions.getLineColor,
+    //         getWidth: transitions.getLineWidth
+    //       }
+    //     },
+    //     this.getSubLayerProps({
+    //       id: 'line-strings',
+    //       updateTriggers: {
+    //         getColor: updateTriggers.getLineColor,
+    //         getWidth: updateTriggers.getLineWidth,
+    //         getDashArray: updateTriggers.getLineDashArray
+    //       }
+    //     }),
+    //     {
+    //       data: lineFeatures,
+    //       getPath: getCoordinates
+    //     }
+    //   );
 
     const pointLayer =
-      this.shouldRenderSubLayer('points', pointFeatures) &&
+      this.shouldRenderSubLayer('points', pointData) &&
       new PointsLayer(
         {
-          _dataDiff: featuresDiff.pointFeatures && (() => featuresDiff.pointFeatures),
+          // _dataDiff: _pointDataDiff,
 
           stroked,
           filled,
@@ -295,18 +325,20 @@ export default class GeoJsonLayer extends CompositeLayer {
           lineWidthMinPixels,
           lineWidthMaxPixels,
 
-          getFillColor: this.getSubLayerAccessor(getFillColor),
-          getLineColor: this.getSubLayerAccessor(getLineColor),
-          getRadius: this.getSubLayerAccessor(getRadius),
-          getLineWidth: this.getSubLayerAccessor(getLineWidth),
+          // getFillColor: this.getSubLayerAccessor(getFillColor),
+          // getLineColor: this.getSubLayerAccessor(getLineColor),
+          // getRadius: this.getSubLayerAccessor(getRadius),
+          // getLineWidth: this.getSubLayerAccessor(getLineWidth),
 
-          transitions: transitions && {
-            getPosition: transitions.geometry,
-            getFillColor: transitions.getFillColor,
-            getLineColor: transitions.getLineColor,
-            getRadius: transitions.getRadius,
-            getLineWidth: transitions.getLineWidth
-          }
+          
+
+          // transitions: transitions && {
+          //   getPosition: transitions.geometry,
+          //   getFillColor: transitions.getFillColor,
+          //   getLineColor: transitions.getLineColor,
+          //   getRadius: transitions.getRadius,
+          //   getLineWidth: transitions.getLineWidth
+          // }
         },
         this.getSubLayerProps({
           id: 'points',
@@ -318,20 +350,20 @@ export default class GeoJsonLayer extends CompositeLayer {
           }
         }),
         {
-          data: pointFeatures,
-          getPosition: getCoordinates,
-          highlightedObjectIndex: this._getHighlightedIndex(pointFeatures)
+            data: pointData,
+            getPosition: isBinary ? null : getCoordinates, 
+            // highlightedObjectIndex: this._getHighlightedIndex(pointData)
         }
       );
 
     return [
       // If not extruded: flat fill layer is drawn below outlines
-      !extruded && polygonFillLayer,
-      polygonLineLayer,
-      pathLayer,
+      // !extruded && polygonFillLayer,
+      // polygonLineLayer,
+      // pathLayer,
       pointLayer,
       // If extruded: draw fill layer last for correct blending behavior
-      extruded && polygonFillLayer
+      // extruded && polygonFillLayer
     ];
   }
   /* eslint-enable complexity */
@@ -341,6 +373,11 @@ export default class GeoJsonLayer extends CompositeLayer {
     return Number.isFinite(highlightedObjectIndex)
       ? data.findIndex(d => d.__source.index === highlightedObjectIndex)
       : null;
+  }
+
+  _isBinary() {
+    const {data} = this.props;
+    return data!== null && typeof data === 'object' && 'points' in data && 'polygons' in data && 'lines' in data;
   }
 }
 

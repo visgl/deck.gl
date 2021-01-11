@@ -1,6 +1,7 @@
 import {Matrix4} from 'math.gl';
 import {MVTLoader} from '@loaders.gl/mvt';
 import {load} from '@loaders.gl/core';
+// import {binaryToGeoJson} from '@loaders.gl/gis';
 import {COORDINATE_SYSTEM} from '@deck.gl/core';
 
 import TileLayer from '../tile-layer/tile-layer';
@@ -99,7 +100,14 @@ export default class MVTLayer extends TileLayer {
       mvt: {
         ...(options && options.mvt),
         coordinates: this.context.viewport.resolution ? 'wgs84' : 'local',
-        tileIndex: {x: tile.x, y: tile.y, z: tile.z}
+        tileIndex: {x: tile.x, y: tile.y, z: tile.z},
+        // Local worker debud
+        // workerUrl: `modules/mvt/dist/mvt-loader.worker.js`
+        // Set worker to null to skip web workers 
+        // workerUrl: null
+      },
+      gis:{
+        format: 'binary'
       }
     };
     return load(url, this.props.loaders, options);

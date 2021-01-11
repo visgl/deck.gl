@@ -41,6 +41,8 @@ function makeLocalDevConfig(EXAMPLE_DIR = LIB_DIR, linkToLuma) {
     '@loaders.gl/images': `${ROOT_DIR}/node_modules/@loaders.gl/images`
   };
 
+  const path = require('path');
+
   const LUMA_ALIASES = linkToLuma ? LUMA_LINK_ALIASES : LUMA_LOCAL_ALIASES;
   // console.warn(JSON.stringify(LUMA_ALIASES, null, 2)); // uncomment to debug config
   // require('fs').writeFileSync('/tmp/ocular.log', JSON.stringify(config, null, 2));
@@ -53,7 +55,8 @@ function makeLocalDevConfig(EXAMPLE_DIR = LIB_DIR, linkToLuma) {
     devServer: {
       stats: {
         warnings: false
-      }
+      },
+      contentBase: [ROOT_DIR, resolve(ROOT_DIR, '..' , 'loaders.gl') ]
     },
 
     devtool: 'source-map',
@@ -127,6 +130,6 @@ module.exports = (config, exampleDir) => env => {
     config.mode = 'production';
   }
 
-  // console.warn(JSON.stringify(config, null, 2)); // uncomment to debug config
+  console.warn(JSON.stringify(config, null, 2)); // uncomment to debug config
   return config;
 };
