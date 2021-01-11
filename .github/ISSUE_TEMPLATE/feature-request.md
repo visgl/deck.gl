@@ -1,6 +1,6 @@
 ---
-name: Feature Template
-about: Template for a new feature or enhancement
+name: Feature Request
+about: Request for a new feature or enhancement
 title: ''
 labels: feature
 assignees: ''
