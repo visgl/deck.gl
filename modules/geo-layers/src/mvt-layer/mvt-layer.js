@@ -217,25 +217,36 @@ export default class MVTLayer extends TileLayer {
     return renderedFeatures;
   }
 
+  getVisibleTiles(tileCoords = 'wgs84') {
+    const {selectedTiles} = this.state.tileset;
+    const {viewport} = this.context;
+
+    const isWGS84 = viewport.resolution;
+
+    if (!isWGS84 && tileCoords === 'wgs84') {
+      selectedTiles.forEach(tile => {
+        // eslint-disable-next-line accessor-pairs
+        Object.defineProperty(tile, 'dataWithWGS84Coords', {
+          get: () => {
+            return tile.data.map(object => transformTileCoordsToWGS84(object, tile, viewport));
+          },
+          configurable: true
+        });
+      });
+    }
+
+    return selectedTiles;
+  }
+
   _onViewportChange() {
-    const {tileset} = this.state;
     const {onViewportChange} = this.props;
     if (onViewportChange) {
       const {viewport} = this.context;
-
-      const viewportProps = {
+      onViewportChange({
         getRenderedFeatures: this.getRenderedFeatures.bind(this),
+        getVisibleTiles: this.getVisibleTiles.bind(this),
         viewport
-      };
-
-      // eslint-disable-next-line accessor-pairs
-      Object.defineProperty(viewportProps, 'visibleTiles', {
-        get: () => {
-          return tileset.selectedTiles;
-        }
       });
-
-      onViewportChange(viewportProps);
     }
   }
 
