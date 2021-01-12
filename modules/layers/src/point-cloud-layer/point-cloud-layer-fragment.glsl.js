@@ -24,14 +24,13 @@ export default `\
 precision highp float;
 
 varying vec4 vColor;
-varying vec2 unitPosition;
 
 void main(void) {
-  geometry.uv = unitPosition;
+  geometry.uv = gl_PointCoord;
 
-  float distToCenter = length(unitPosition);
+  float distToCenter = length(gl_PointCoord - vec2(0.5));
 
-  if (distToCenter > 1.0) {
+  if (distToCenter > 0.5) {
     discard;
   }
 

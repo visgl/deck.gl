@@ -21,7 +21,6 @@
 export default `\
 #define SHADER_NAME point-cloud-layer-vertex-shader
 
-attribute vec3 positions;
 attribute vec3 instanceNormals;
 attribute vec4 instanceColors;
 attribute vec3 instancePositions;
@@ -32,23 +31,18 @@ uniform float opacity;
 uniform float radiusPixels;
 
 varying vec4 vColor;
-varying vec2 unitPosition;
 
 void main(void) {
   geometry.worldPosition = instancePositions;
   geometry.normal = project_normal(instanceNormals);
-
-  // position on the containing square in [-1, 1] space
-  unitPosition = positions.xy;
-  geometry.uv = unitPosition;
   geometry.pickingColor = instancePickingColors;
 
   // Find the center of the point and add the current vertex
-  vec3 offset = vec3(positions.xy * radiusPixels, 0.0);
+  vec3 offset = vec3(radiusPixels);
   DECKGL_FILTER_SIZE(offset, geometry);
 
   gl_Position = project_position_to_clipspace(instancePositions, instancePositions64Low, vec3(0.), geometry.position);
-  gl_Position.xy += project_pixel_size_to_clipspace(offset.xy);
+  gl_PointSize = offset.x * 2.0 * project_uFocalDistance / gl_Position.w;
   DECKGL_FILTER_GL_POSITION(gl_Position, geometry);
 
   // Apply lighting

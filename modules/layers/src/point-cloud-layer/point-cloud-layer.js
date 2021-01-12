@@ -20,7 +20,7 @@
 
 import {Layer, project32, gouraudLighting, picking} from '@deck.gl/core';
 import GL from '@luma.gl/constants';
-import {Model, Geometry} from '@luma.gl/core';
+import {Model} from '@luma.gl/core';
 
 import vs from './point-cloud-layer-vertex.glsl';
 import fs from './point-cloud-layer-fragment.glsl';
@@ -126,23 +126,12 @@ export default class PointCloudLayer extends Layer {
   }
 
   _getModel(gl) {
-    // a triangle that minimally cover the unit circle
-    const positions = [];
-    for (let i = 0; i < 3; i++) {
-      const angle = (i / 3) * Math.PI * 2;
-      positions.push(Math.cos(angle) * 2, Math.sin(angle) * 2, 0);
-    }
-
     return new Model(
       gl,
       Object.assign({}, this.getShaders(), {
         id: this.props.id,
-        geometry: new Geometry({
-          drawMode: GL.TRIANGLES,
-          attributes: {
-            positions: new Float32Array(positions)
-          }
-        }),
+        drawMode: GL.POINTS,
+        vertexCount: 1,
         isInstanced: true
       })
     );
