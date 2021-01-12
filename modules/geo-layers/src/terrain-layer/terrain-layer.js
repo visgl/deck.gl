@@ -54,7 +54,9 @@ const defaultProps = {
   workerUrl: {type: 'string', value: null},
   // Same as SimpleMeshLayer wireframe
   wireframe: false,
-  material: true
+  material: true,
+
+  loaders: TerrainLoader
 };
 
 // Turns array of templates into a single string to work around shallow change
@@ -110,7 +112,7 @@ export default class TerrainLayer extends CompositeLayer {
     if (workerUrl !== null) {
       options.terrain.workerUrl = workerUrl;
     }
-    return load(elevationData, TerrainLoader, options);
+    return load(elevationData, this.props.loaders, options);
   }
 
   getTiledTerrainData(tile) {

@@ -70,11 +70,12 @@ const defaultProps = {
     value: (url, {propName, layer}) => {
       const {resourceManager} = layer.context;
       const loadOptions = layer.getLoadOptions();
+      const {loaders} = layer.props;
       let inResourceManager = resourceManager.contains(url);
 
       if (!inResourceManager && !loadOptions) {
         // If there is no layer-specific load options, then attempt to cache this resource in the data manager
-        resourceManager.add({resourceId: url, data: url, persistent: false});
+        resourceManager.add({resourceId: url, data: load(url, loaders), persistent: false});
         inResourceManager = true;
       }
       if (inResourceManager) {
@@ -86,7 +87,7 @@ const defaultProps = {
         });
       }
 
-      return load(url, loadOptions);
+      return load(url, loaders, loadOptions);
     },
     compare: false
   },
@@ -112,6 +113,7 @@ const defaultProps = {
   parameters: {},
   transitions: null,
   extensions: [],
+  loaders: {type: 'array', value: [], optional: true, compare: true},
 
   // Offset depth based on layer index to avoid z-fighting.
   // Negative values pull layer towards the camera
@@ -526,14 +528,18 @@ export default class Layer extends Component {
     model.setAttributes(shaderAttributes);
   }
 
-  // Sets the specified instanced picking color to null picking color. Used for multi picking.
-  clearPickingColor(color) {
+  // Sets the picking color at the specified index to null picking color. Used for multi-depth picking.
+  // This method may be overriden by layer implementations
+  disablePickingIndex(objectIndex) {
+    this._disablePickingIndex(objectIndex);
+  }
+
+  _disablePickingIndex(objectIndex) {
     const {pickingColors, instancePickingColors} = this.getAttributeManager().attributes;
     const colors = pickingColors || instancePickingColors;
 
-    const i = this.decodePickingColor(color);
-    const start = colors.getVertexOffset(i);
-    const end = colors.getVertexOffset(i + 1);
+    const start = colors.getVertexOffset(objectIndex);
+    const end = colors.getVertexOffset(objectIndex + 1);
 
     // Fill the sub buffer with 0s
     colors.buffer.subData({

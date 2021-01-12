@@ -46,6 +46,19 @@ function App({data, viewState}) {
 }
 ```
 
+`loaders.gl` offers a [category](https://loaders.gl/docs/specifications/category-mesh) of loaders for loading meshes from standard formats. For example, the following code adds support for OBJ files:
+
+```js
+import {SimpleMeshLayer} from '@deck.gl/mesh-layers';
+import {OBJLoader} from '@loaders.gl/obj';
+
+new SimpleMeshLayer({
+  ...
+  mesh: 'path/to/model.obj',
+  loaders: [OBJLoader]
+});
+```
+
 ## Installation
 
 To install the dependencies from NPM:

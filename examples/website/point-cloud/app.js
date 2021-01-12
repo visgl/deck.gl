@@ -7,12 +7,6 @@ import {PointCloudLayer} from '@deck.gl/layers';
 
 import {LASWorkerLoader} from '@loaders.gl/las';
 // import {PLYWorkerLoader} from '@loaders.gl/ply';
-import {registerLoaders} from '@loaders.gl/core';
-
-// Additional format support can be added here, see
-// https://github.com/visgl/loaders.gl/blob/master/docs/api-reference/core/register-loaders.md
-registerLoaders(LASWorkerLoader);
-// registerLoaders(PLYWorkerLoader);
 
 // Data source: kaarta.com
 const LAZ_SAMPLE =
@@ -84,7 +78,12 @@ export default function App({onLoad}) {
       getNormal: [0, 1, 0],
       getColor: [255, 255, 255],
       opacity: 0.5,
-      pointSize: 0.5
+      pointSize: 0.5,
+      // Additional format support can be added here
+      loaders: [
+        LASWorkerLoader
+        // PLYWorkerLoader
+      ]
     })
   ];
 

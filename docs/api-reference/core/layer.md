@@ -381,6 +381,26 @@ Note:
 * change of the `data` prop has higher priority than the `updateTriggers`. If the app supplies a new `data` object, then all attributes will be automatically updated, even if the updateTriggers have not changed. To block excessive attribute updates, set the [`dataComparator`](/docs/api-reference/core/layer.md#datacomparator) prop.
 
 
+##### `loaders` (Array, optional)
+
+- Default: `[]`
+
+An array of [loaders.gl loaders](https://loaders.gl/docs/developer-guide/using-loaders).
+
+Out of the box, deck.gl supports loading JSON and image files (with [ImageLoader](https://loaders.gl/modules/images/docs/api-reference/image-loader)), and specific layer implementation such as `MVTLayer`, `TerrainLayer` and `ScenegraphLayer` also include loaders for their targeted formats.
+
+Support for addtional formats can be added by adding loaders to the `loaders` prop. For example, to load data from CSV files:
+
+```js
+import {CSVLoader} from '@loaders.gl/csv';
+
+const layer = new HexagonLayer({
+  data: './data.csv',
+  loaders: [CSVLoader]
+  ...
+});
+```
+
 ##### `loadOptions` (Object, optional)
 
 - Default: `null`
@@ -405,16 +425,14 @@ const layer = new ScatterplotLayer({
 });
 ```
 
-The following code adds the [CSVLoader](https://loaders.gl/modules/csv/docs/api-reference/csv-loader) to support CSV files:
+The following code adds the [CSVLoader](https://loaders.gl/modules/csv/docs/api-reference/csv-loader) to support CSV files, with customization of the parser behavior:
 
 ```js
 import {CSVLoader} from '@loaders.gl/csv';
-import {registerLoaders} from '@loaders.gl/core';
-
-registerLoaders([CSVLoader]);
 
 const layer = new HexagonLayer({
   data: './data.csv',
+  loaders: [CSVLoader]
   loadOptions: {
     csv: {
       header: false,
@@ -543,8 +561,6 @@ The state object allows a layer to store persistent information cross rendering 
 
 [Properties](/docs/api-reference/core/layer.md#constructor) of this layer.
 
-
-## Members
 
 ##### `isLoaded`
 

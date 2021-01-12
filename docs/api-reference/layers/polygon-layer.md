@@ -104,7 +104,7 @@ the area between the outer polygon and any holes will be filled.
 
 ##### `stroked` (Boolean, optional)
 
-* Default: `false`
+* Default: `true`
 
 Whether to draw an outline around the polygon (solid fill). Note that
 both the outer polygon as well the outlines of any holes will be drawn.

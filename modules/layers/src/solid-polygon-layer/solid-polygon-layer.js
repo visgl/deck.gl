@@ -200,11 +200,28 @@ export default class SolidPolygonLayer extends Layer {
     const {index} = info;
     const {data} = this.props;
 
+    // Check if data comes from a composite layer, wrapped with getSubLayerRow
     if (data[0] && data[0].__source) {
-      // data is wrapped
+      // index decoded from picking color refers to the source index
       info.object = data.find(d => d.__source.index === index);
     }
     return info;
+  }
+
+  disablePickingIndex(objectIndex) {
+    const {data} = this.props;
+
+    // Check if data comes from a composite layer, wrapped with getSubLayerRow
+    if (data[0] && data[0].__source) {
+      // index decoded from picking color refers to the source index
+      for (let i = 0; i < data.length; i++) {
+        if (data[i].__source.index === objectIndex) {
+          this._disablePickingIndex(i);
+        }
+      }
+    } else {
+      this._disablePickingIndex(objectIndex);
+    }
   }
 
   draw({uniforms}) {

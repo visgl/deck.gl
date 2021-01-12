@@ -21,6 +21,18 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ### deck.gl v8.4 Prereleases
 
+#### deck.gl [8.4.0-alpha.5] - Jan 10 2021
+
+- Fix multi-depth picking for GeoJsonLayer (#5298)
+- Fix geo-layers module peer dependencies in documentation (#5296)
+- Fix h3 layers transitions (#5287)
+- Support three-finger gesture to change pitch (#5254)
+- MVTLayer coordinates transformation to WGS84 (#5261)
+- Style helpers and CARTO colors - @deck.gl/carto  (#5251)
+- Fix picking coordinate calculation in overlapping views (#5208)
+- Include support to deck.gl/json to interpret string as a Javascript function
+- Fix MVTLayer autohighlighted feature when no featureId or uniqueProp present (#5210)
+
 #### deck.gl [8.4.0-alpha.4] - Dec 8 2020
 
 - Remove unused layer prop (#5226)

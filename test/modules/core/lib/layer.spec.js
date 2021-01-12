@@ -475,7 +475,7 @@ test('Layer#calculateInstancePickingColors', t => {
         data: new Array(3).fill(0)
       },
       onBeforeUpdate: ({layer}) => {
-        layer.clearPickingColor(new Uint8Array([2, 0, 0]));
+        layer.disablePickingIndex(1);
         layer.restorePickingColors();
       },
       onAfterUpdate: ({layer}) => {
