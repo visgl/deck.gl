@@ -141,7 +141,7 @@ new BitmapLayer({
 })
 ```
 
-If you have a customly formatted binary, consider the techniques in [using binary data](/docs/developer-guide/performance.md#use-binary-data).
+If you have a custom-formatted binary, consider the techniques in [using binary data](/docs/developer-guide/performance.md#use-binary-data).
 
 The following examples only address the use cases where you need a loader/parser to interpret the incoming data.
 
