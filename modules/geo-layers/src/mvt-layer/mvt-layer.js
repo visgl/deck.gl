@@ -217,7 +217,7 @@ export default class MVTLayer extends TileLayer {
     return renderedFeatures;
   }
 
-  getVisibleTiles(tileCoords = 'wgs84') {
+  getVisibleTiles(tileCoords = 'local') {
     const {selectedTiles} = this.state.tileset;
     const {viewport} = this.context;
 
@@ -227,12 +227,9 @@ export default class MVTLayer extends TileLayer {
       selectedTiles.forEach(tile => {
         // eslint-disable-next-line accessor-pairs
         Object.defineProperty(tile, 'dataWithWGS84Coords', {
-          get: () => {
-            if (this.isLoaded) {
-              return tile.data.map(object => transformTileCoordsToWGS84(object, tile, viewport));
-            }
-
-            return [];
+          get: async () => {
+            const features = (await tile.data) || [];
+            return features.map(object => transformTileCoordsToWGS84(object, tile, viewport));
           },
           configurable: true
         });
