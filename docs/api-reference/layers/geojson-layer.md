@@ -101,7 +101,7 @@ prop is effective only when the polygon is NOT extruded.
 
 ##### `stroked` (Boolean, optional)
 
-* Default: `false`
+* Default: `true`
 
 Whether to draw an outline around polygons (solid fill). Note that
 for complex polygons, both the outer polygon as well the outlines of
