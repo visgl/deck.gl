@@ -83,7 +83,7 @@ export default class GeoJsonLayer extends CompositeLayer {
     if (!changeFlags.dataChanged || this._isBinary()) {
       return;
     }
-  
+
     const features = getGeojsonFeatures(props.data);
     const wrapFeature = this.getSubLayerRow.bind(this);
 
@@ -119,7 +119,6 @@ export default class GeoJsonLayer extends CompositeLayer {
         featuresDiff: {}
       });
     }
-    
   }
 
   /* eslint-disable complexity */
@@ -243,7 +242,6 @@ export default class GeoJsonLayer extends CompositeLayer {
       this.shouldRenderSubLayer('polygons-fill', layerProps.polygons.data) &&
       new PolygonFillLayer(
         {
-          // _dataDiff,
           extruded,
           elevationScale,
           filled,
@@ -281,8 +279,6 @@ export default class GeoJsonLayer extends CompositeLayer {
       this.shouldRenderSubLayer('polygons-stroke', layerProps.polygonsOutline.data) &&
       new PolygonStrokeLayer(
         {
-          // _dataDiff: polygonOutlineDataDiff
-
           widthUnits: lineWidthUnits,
           widthScale: lineWidthScale,
           widthMinPixels: lineWidthMinPixels,
@@ -316,8 +312,6 @@ export default class GeoJsonLayer extends CompositeLayer {
       this.shouldRenderSubLayer('linestrings', layerProps.lines.data) &&
       new LineStringsLayer(
         {
-          // _dataDiff: featuresDiff.lineFeatures && (() => featuresDiff.lineFeatures),
-
           widthUnits: lineWidthUnits,
           widthScale: lineWidthScale,
           widthMinPixels: lineWidthMinPixels,
@@ -351,8 +345,6 @@ export default class GeoJsonLayer extends CompositeLayer {
       this.shouldRenderSubLayer('points', layerProps.points.data) &&
       new PointsLayer(
         {
-          // _dataDiff: _pointDataDiff,
-
           stroked,
           filled,
           radiusUnits: pointRadiusUnits,
