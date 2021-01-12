@@ -100,13 +100,13 @@ export default class MVTLayer extends TileLayer {
       mvt: {
         ...(options && options.mvt),
         coordinates: this.context.viewport.resolution ? 'wgs84' : 'local',
-        tileIndex: {x: tile.x, y: tile.y, z: tile.z},
+        tileIndex: {x: tile.x, y: tile.y, z: tile.z}
         // Local worker debud
         // workerUrl: `modules/mvt/dist/mvt-loader.worker.js`
-        // Set worker to null to skip web workers 
+        // Set worker to null to skip web workers
         // workerUrl: null
       },
-      gis:{
+      gis: {
         format: 'binary'
       }
     };
