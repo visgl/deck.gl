@@ -19,6 +19,10 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v8.3
 
+#### deck.gl [8.3.14] - Jan 12 2021
+
+- Fix TextLayer wordBreak default value (#5315)
+
 #### deck.gl [8.3.13] - Jan 7 2021
 
 - Fix multi-depth picking for GeoJsonLayer (#5298)
