@@ -27,7 +27,7 @@ Via conda
 Getting a Mapbox API key
 ^^^^^^^^^^^^^^^^^^^^^^^^
 
-By default, pydeck 0.6 provide basemap tiles through Carto.
+By default, pydeck 0.6 provides basemap tiles through Carto.
 
 You can use a Mapbox API key, which you can do by 
 registering for Mapbox via `this link <https://account.mapbox.com/auth/signup/>`_. 
