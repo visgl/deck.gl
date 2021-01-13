@@ -234,3 +234,35 @@ test('TileJSON', async t => {
   // restore fetcch
   _global.fetch = fetch;
 });
+
+test('MVT#getVisibleTiles', async t => {
+  class TestMVTLayerVisibleTiles extends MVTLayer {
+    getTileData() {
+      return geoJSONData;
+    }
+  }
+
+  TestMVTLayerVisibleTiles.componentName = 'TestMVTLayerVisibleTiles';
+
+  const testCases = [
+    {
+      props: {
+        data: ['https://a.basemaps.cartocdn.com/rastertiles/voyager_labels_under/{z}/{x}/{y}.png'],
+        id: 'mvt-visible-tiles-test'
+      },
+      onAfterUpdate: async ({layer}) => {
+        if (layer.isLoaded) {
+          const selectedTilesInWGS84Coords = await layer.getVisibleTiles('wgs84');
+
+          selectedTilesInWGS84Coords.forEach(tile => {
+            t.ok(tile.dataWithWGS84Coords, 'Correctly added dataWithWGS84Coords key');
+          });
+        }
+      }
+    }
+  ];
+
+  await testLayerAsync({Layer: TestMVTLayerVisibleTiles, testCases, onError: t.notOk});
+
+  t.end();
+});

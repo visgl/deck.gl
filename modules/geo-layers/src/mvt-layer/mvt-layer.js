@@ -217,22 +217,18 @@ export default class MVTLayer extends TileLayer {
     return renderedFeatures;
   }
 
-  getVisibleTiles(tileCoords = 'local') {
+  async getVisibleTiles(tileCoords = 'local') {
     const {selectedTiles} = this.state.tileset;
     const {viewport} = this.context;
 
     const isWGS84 = viewport.resolution;
 
     if (!isWGS84 && tileCoords === 'wgs84') {
-      selectedTiles.forEach(tile => {
-        // eslint-disable-next-line accessor-pairs
-        Object.defineProperty(tile, 'dataWithWGS84Coords', {
-          get: async () => {
-            const features = (await tile.data) || [];
-            return features.map(object => transformTileCoordsToWGS84(object, tile, viewport));
-          },
-          configurable: true
-        });
+      await selectedTiles.forEach(async tile => {
+        const features = (await tile.data) || [];
+        tile.dataWithWGS84Coords = features.map(object =>
+          transformTileCoordsToWGS84(object, tile, viewport)
+        );
       });
     }
 
