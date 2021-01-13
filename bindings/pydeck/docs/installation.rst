@@ -29,7 +29,7 @@ Getting a Mapbox API key
 
 By default, pydeck 0.6 provides basemap tiles through Carto.
 
-You can use a Mapbox API key, which you can do by 
+You can optionally use a Mapbox API key, by 
 registering for Mapbox via `this link <https://account.mapbox.com/auth/signup/>`_. 
 You should then create a `new public API token <https://account.mapbox.com/access-tokens/>`_.
 You can learn more about Mapbox tokens via their `documentation <https://docs.mapbox.com/help/how-mapbox-works/access-tokens/#how-access-tokens-work>`_.
