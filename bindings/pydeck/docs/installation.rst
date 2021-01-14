@@ -4,8 +4,8 @@ Installing pydeck
 There are three steps before using pydeck:
 
         1. Install the library via pip or conda
-        2. Get a Mapbox API token
-        3. Enable pydeck for JupyterLab or Jupyter Notebook
+        2. Enable pydeck for JupyterLab or Jupyter Notebook
+        3. Include an API key from Google Maps or Mapbox (Optional)
 
 Via pip
 ^^^^^^^
@@ -27,16 +27,16 @@ Via conda
 Getting a Mapbox API key
 ^^^^^^^^^^^^^^^^^^^^^^^^
 
-To add basemap tiles, you must get a Mapbox API key, which you can do by 
+By default, pydeck 0.6 provides basemap tiles through Carto.
+
+You can optionally use a Mapbox API key, by 
 registering for Mapbox via `this link <https://account.mapbox.com/auth/signup/>`_. 
 You should then create a `new public API token <https://account.mapbox.com/access-tokens/>`_.
+You can learn more about Mapbox tokens via their `documentation <https://docs.mapbox.com/help/how-mapbox-works/access-tokens/#how-access-tokens-work>`_.
 
-Mapbox tiles are free for a rather high level of usage. You can learn more about
-Mapbox tokens via their `documentation <https://docs.mapbox.com/help/how-mapbox-works/access-tokens/#how-access-tokens-work>`_.
+You can also use a Google Maps API key in a similar way. Currently Google Maps is not supported for 3D visualizations.
 
-If you set a ``MAPBOX_API_KEY`` environment variable, pydeck will detect it. This way, you do not
-need to specify the Mapbox token in your source code.
-
+If you set a ``MAPBOX_API_KEY`` or ``GOOGLE_MAPS_API_KEY`` environment variables, pydeck will detect them. 
 
 Enabling pydeck for Jupyter
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -61,7 +61,7 @@ To enable pydeck for JupyterLab (on Mac/Unix-like systems):
         jupyter labextension install @deck.gl/jupyter-widget@$DECKGL_SEMVER
 
 
-Currently while you can install pydeck in Google Colab via pip, it is not enabled for server use there.
+pydeck also works in Google Colab. While you can install pydeck in Google Colab via pip, it is not yet enabled for server use.
 
 Installing from source
 ^^^^^^^^^^^^^^^^^^^^^^
