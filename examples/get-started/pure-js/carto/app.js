@@ -82,7 +82,7 @@ function render() {
       getFillColor: colorBins({
         attr: 'aggregated_total',
         domain: [10, 100, 1e3, 1e4, 1e5, 1e6],
-        colors: 'Teal'
+        colors: 'Temps'
       }),
       pointRadiusMinPixels: 2,
       stroked: false
