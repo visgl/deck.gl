@@ -19,22 +19,73 @@
 // THE SOFTWARE.
 import test from 'tape-catch';
 
-import {testLayer, generateLayerTests} from '@deck.gl/test-utils';
+import {testLayerAsync} from '@deck.gl/test-utils';
 import {Tile3DLayer} from '@deck.gl/geo-layers';
+import {WebMercatorViewport} from '@deck.gl/core';
 
-test('Tile3DLayer', t => {
-  const testCases = generateLayerTests({
-    Layer: Tile3DLayer,
-    assert: t.ok,
-    onBeforeUpdate: ({testCase}) => t.comment(testCase.title),
-    runDefaultAsserts: false
-  });
+const fetchFile = url => {
+  url = url
+    .replace(/\?.+$/, '') // strip query parameters
+    .replace(/^\//, './');
+  return require('fs').readFileSync(url);
+};
 
-  testLayer({
+test('Tile3DLayer', async t => {
+  let oldFetch;
+  /* global global */
+  const isNode = typeof global !== 'undefined';
+  if (isNode) {
+    oldFetch = global.fetch;
+    global.fetch = fetchFile;
+  }
+
+  const testCases = [
+    {
+      props: {
+        data: './test/data/3d-tiles/tileset.json',
+        getPointColor: [0, 0, 0],
+        loadOptions: isNode
+          ? {
+              fetch: fetchFile,
+              '3d-tiles': {isTileset: true}
+            }
+          : {}
+      },
+      onBeforeUpdate: () => t.comment('inital load'),
+      onAfterUpdate: ({layer, subLayers}) => {
+        if (layer.isLoaded) {
+          t.ok(subLayers[0], 'Renders sub layers');
+        }
+      }
+    },
+    {
+      updateProps: {
+        opacity: 0.5
+      },
+      onBeforeUpdate: () => t.comment('update opacity'),
+      onAfterUpdate: ({layer, subLayers}) => {
+        if (layer.isLoaded) {
+          t.is(subLayers[0].props.opacity, 0.5, 'Updated sub layer props');
+        }
+      }
+    }
+  ];
+
+  await testLayerAsync({
     Layer: Tile3DLayer,
+    viewport: new WebMercatorViewport({
+      width: 400,
+      height: 300,
+      longitude: -1.3197,
+      latitude: 0.69885,
+      zoom: 12
+    }),
     testCases,
     onError: t.notOk
   });
 
+  if (oldFetch) {
+    global.fetch = oldFetch;
+  }
   t.end();
 });
