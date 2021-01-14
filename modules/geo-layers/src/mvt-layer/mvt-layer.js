@@ -224,12 +224,7 @@ export default class MVTLayer extends TileLayer {
     const isWGS84 = viewport.resolution;
 
     if (!isWGS84 && tileCoords === 'wgs84') {
-      await selectedTiles.forEach(async tile => {
-        const features = (await tile.data) || [];
-        tile.dataWithWGS84Coords = features.map(object =>
-          transformTileCoordsToWGS84(object, tile, viewport)
-        );
-      });
+      await updateTilesWithWGS84Coords(selectedTiles, viewport);
     }
 
     return selectedTiles;
@@ -286,6 +281,20 @@ function transformTileCoordsToWGS84(object, tile, viewport) {
   });
 
   return feature;
+}
+
+async function updateTilesWithWGS84Coords(tiles, viewport) {
+  const tilesData = await Promise.all(
+    tiles.map(async tile => {
+      return (await tile.data) || [];
+    })
+  );
+
+  tiles.forEach((tile, tileIdx) => {
+    tile.dataWithWGS84Coords = tilesData[tileIdx].map(object =>
+      transformTileCoordsToWGS84(object, tile, viewport)
+    );
+  });
 }
 
 MVTLayer.layerName = 'MVTLayer';
