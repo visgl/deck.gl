@@ -11,7 +11,7 @@ deck.gl core always includes loaders for JSON and standard image formats (e.g, p
 
 ## Customize Data Loading Behavior
 
-All layers support a [loadOptions](/docs/api-reference/core/layer.md#loadoptions) prop that can be used to customize the behavior during loading and parsing.
+All layers support a [loadOptions](/docs/api-reference/core/layer.md#loadoptions) prop that can be used to customize loading and parsing.
 
 ### Example: Fetch data with credentials
 
