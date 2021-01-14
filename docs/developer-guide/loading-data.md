@@ -1,13 +1,16 @@
 # Loading Data
 
-deck.gl uses [loaders.gl](https://loaders.gl), a framework-agnostic library to read data and resources. Some examples of when loaders are used:
+deck.gl uses [loaders.gl](https://loaders.gl), a framework-agnostic library to read data and resources.
+
+deck.gl core always includes loaders for JSON and standard image formats (e.g, png, jpeg, svg). Certain layers include additional loaders supporting their own use cases. It is easy for applications to provide options to configure the behavior of the default loaders or to add loaders to support for additional formats.
+
+Some examples of when loaders are used:
 
 - JSON array or object from an URL passed to the `data` prop of a layer
 - Texture from an image, such as `image` in `BitmapLayer`, `iconAtlas` in `IconLayer`, and `texture` in `SimpleMeshLayer`
 - Geometries from a binary tile, e.g. `MVTLayer`, `TerrainLayer`, and `Tile3DLayer`
 - Geometries from a standard 3D format, e.g. `scenegraph` in `ScenegraphLayer`, and `mesh` in `SimpleMeshLayer`
 
-deck.gl core always includes loaders for JSON and standard image formats (e.g, png, jpeg, svg). Certain layers include additional loaders supporting their own use cases. It is easy for applications to provide options to configure the behavior of the default loaders or to add loaders to support for additional formats.
 
 ## Customize Data Loading Behavior
 
@@ -118,15 +121,19 @@ The following code refreshes data from the same URL every 5 minutes by changing 
 ```js
 const deck = new Deck({...});
 
-function updateData() {
+let dataVersion = 0;
+function update() {
   const layer = new ScatterplotLayer({
-    data: `path/to/data.json?t=${Date.now()}`
+    data: `path/to/data.json?v=${dataVersion}`
   });
 
   deck.setProps({layers: [layer]});
 };
 
-setInterval(updateData, 5 * 60 * 1000);
+setInterval(() => {
+  dataVersion++;
+  update();
+}, 5 * 60 * 1000);
 ```
 
 ## Load Resource Without an URL
