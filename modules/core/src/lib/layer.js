@@ -70,11 +70,12 @@ const defaultProps = {
     value: (url, {propName, layer}) => {
       const {resourceManager} = layer.context;
       const loadOptions = layer.getLoadOptions();
+      const {loaders} = layer.props;
       let inResourceManager = resourceManager.contains(url);
 
       if (!inResourceManager && !loadOptions) {
         // If there is no layer-specific load options, then attempt to cache this resource in the data manager
-        resourceManager.add({resourceId: url, data: url, persistent: false});
+        resourceManager.add({resourceId: url, data: load(url, loaders), persistent: false});
         inResourceManager = true;
       }
       if (inResourceManager) {
@@ -86,7 +87,7 @@ const defaultProps = {
         });
       }
 
-      return load(url, loadOptions);
+      return load(url, loaders, loadOptions);
     },
     compare: false
   },
@@ -112,6 +113,7 @@ const defaultProps = {
   parameters: {},
   transitions: null,
   extensions: [],
+  loaders: {type: 'array', value: [], optional: true, compare: true},
 
   // Offset depth based on layer index to avoid z-fighting.
   // Negative values pull layer towards the camera

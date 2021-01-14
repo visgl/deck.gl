@@ -381,51 +381,35 @@ Note:
 * change of the `data` prop has higher priority than the `updateTriggers`. If the app supplies a new `data` object, then all attributes will be automatically updated, even if the updateTriggers have not changed. To block excessive attribute updates, set the [`dataComparator`](/docs/api-reference/core/layer.md#datacomparator) prop.
 
 
+##### `loaders` (Array, optional)
+
+- Default: `[]`
+
+An array of [loaders.gl loaders](https://loaders.gl/docs/developer-guide/using-loaders).
+
+Out of the box, deck.gl supports loading JSON and image files (with [ImageLoader](https://loaders.gl/modules/images/docs/api-reference/image-loader)), and specific layer implementation such as `MVTLayer`, `TerrainLayer` and `ScenegraphLayer` also include loaders for their targeted formats.
+
+Support for addtional formats can be added by adding loaders to the `loaders` prop. For example, to load data from CSV files:
+
+```js
+import {CSVLoader} from '@loaders.gl/csv';
+
+const layer = new HexagonLayer({
+  data: './data.csv',
+  loaders: [CSVLoader]
+  ...
+});
+```
+
 ##### `loadOptions` (Object, optional)
 
 - Default: `null`
 
 Layers use [loaders.gl](https://loaders.gl) to load data and other resources. `loadOptions` is an object to customize the behavior of any loader used during fetching and parsing. The object may contain any of the [top-level options](https://loaders.gl/modules/core/docs/api-reference/parse#options), as well as loader-specific options targeting a particular format.
 
-For example, the following prop value passes additional configs to the [fetch](https://developer.mozilla.org/en-US/docs/Web/API/WindowOrWorkerGlobalScope/fetch) call in order to access a secured API:
-
-```js
-const layer = new ScatterplotLayer({
-  data: 'https://my-server.com/userActivity',
-  loadOptions: {
-    fetch: {
-      method: 'GET',
-      headers: {
-        'Authorization': 'Bearer AbCdEf123456',
-        'Content-Type': 'application/json'
-      }
-    }
-  }
-  ...
-});
-```
-
-The following code adds the [CSVLoader](https://loaders.gl/modules/csv/docs/api-reference/csv-loader) to support CSV files:
-
-```js
-import {CSVLoader} from '@loaders.gl/csv';
-import {registerLoaders} from '@loaders.gl/core';
-
-registerLoaders([CSVLoader]);
-
-const layer = new HexagonLayer({
-  data: './data.csv',
-  loadOptions: {
-    csv: {
-      header: false,
-      dynamicTyping: true
-    }
-  },
-  ...
-});
-```
-
 Layers may also include specialized loaders for their own use case, such as images, 3d-tiles, etc. See the documentation of each layer for additional load options that are available.
+
+Find usage examples in the [data loading guide](/docs/developer-guide/loading-data.md).
 
 
 ##### `onDataLoad` (Function, optional)
