@@ -221,10 +221,8 @@ export default class MVTLayer extends TileLayer {
     const {selectedTiles} = this.state.tileset;
     const {viewport} = this.context;
 
-    const isWGS84 = viewport.resolution;
-
-    if (!isWGS84 && tileCoords === 'wgs84') {
-      await updateTilesWithWGS84Coords(selectedTiles, viewport);
+    if (conversionToWGS84isRequired(tileCoords, viewport)) {
+      await convertTilesToWGS84(selectedTiles, viewport);
     }
 
     return selectedTiles;
@@ -283,18 +281,26 @@ function transformTileCoordsToWGS84(object, tile, viewport) {
   return feature;
 }
 
-async function updateTilesWithWGS84Coords(tiles, viewport) {
+function conversionToWGS84isRequired(tileCoords, {resolution: isWGS84}) {
+  return tileCoords === 'wgs84' && !isWGS84;
+}
+
+function updateTilesWithWGS84Coords(tiles, tilesData, viewport) {
+  tiles.forEach((tile, idx) => {
+    tile.dataWithWGS84Coords = tilesData[idx].map(object =>
+      transformTileCoordsToWGS84(object, tile, viewport)
+    );
+  });
+}
+
+async function convertTilesToWGS84(tiles, viewport) {
   const tilesData = await Promise.all(
     tiles.map(async tile => {
       return (await tile.data) || [];
     })
   );
 
-  tiles.forEach((tile, tileIdx) => {
-    tile.dataWithWGS84Coords = tilesData[tileIdx].map(object =>
-      transformTileCoordsToWGS84(object, tile, viewport)
-    );
-  });
+  updateTilesWithWGS84Coords(tiles, tilesData, viewport);
 }
 
 MVTLayer.layerName = 'MVTLayer';

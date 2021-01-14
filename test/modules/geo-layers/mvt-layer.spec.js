@@ -244,6 +244,9 @@ test('MVT#getVisibleTiles', async t => {
 
   TestMVTLayerVisibleTiles.componentName = 'TestMVTLayerVisibleTiles';
 
+  const LOCAL_COORDS_TEST_CASES = [null, undefined, 1, true, false, '', 'local'];
+  const WGS84_TEST_CASE = 'wgs84';
+
   const testCases = [
     {
       props: {
@@ -252,10 +255,18 @@ test('MVT#getVisibleTiles', async t => {
       },
       onAfterUpdate: async ({layer}) => {
         if (layer.isLoaded) {
-          const selectedTilesInWGS84Coords = await layer.getVisibleTiles('wgs84');
+          for (const tc of LOCAL_COORDS_TEST_CASES) {
+            const selectedTiles = await layer.getVisibleTiles(tc);
 
-          selectedTilesInWGS84Coords.forEach(tile => {
-            t.ok(tile.dataWithWGS84Coords, 'Correctly added dataWithWGS84Coords key');
+            selectedTiles.forEach(tile => {
+              t.ok(!tile.dataWithWGS84Coords, 'Correctly skips tile data transformation to WGS84.');
+            });
+          }
+
+          const selectedTiles = await layer.getVisibleTiles(WGS84_TEST_CASE);
+
+          selectedTiles.forEach(tile => {
+            t.ok('dataWithWGS84Coords' in tile, 'Tile data correctly transformed to WGS84.');
           });
         }
       }
