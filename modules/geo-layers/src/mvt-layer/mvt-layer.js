@@ -221,7 +221,7 @@ export default class MVTLayer extends TileLayer {
     const {selectedTiles} = this.state.tileset;
     const {viewport} = this.context;
 
-    if (conversionToWGS84isRequired(tileCoords, viewport)) {
+    if (conversionToWGS84isRequired(tileCoords, viewport.resolution)) {
       await convertTilesToWGS84(selectedTiles, viewport);
     }
 
@@ -281,7 +281,7 @@ function transformTileCoordsToWGS84(object, tile, viewport) {
   return feature;
 }
 
-function conversionToWGS84isRequired(tileCoords, {resolution: isWGS84}) {
+function conversionToWGS84isRequired(tileCoords, isWGS84) {
   return tileCoords === 'wgs84' && !isWGS84;
 }
 

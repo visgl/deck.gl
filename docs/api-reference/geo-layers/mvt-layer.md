@@ -130,25 +130,29 @@ tileJSON (Object) - the tileJSON fetched
 
 ##### `onViewportChange` (Function, optional)
 
-`onViewportChange` called when the viewport changes or all tiles in the current viewport have been loaded. A function (`getRenderedFeatures`) to calculate the features rendered in the current viewport is passed as a JSON to this callback function.
+`onViewportChange` called when the viewport changes or all tiles in the current viewport have been loaded.
 
+Functions passed as a JSON to this callback function:
+
+- `getRenderedFeatures`: calculates the features rendered in the current viewport.
+- `getVisibleTiles`: retrieves the visible tiles in the current viewport.
+
+Remarks
+
+* It is not recommended to call these function every time `onViewportChange` is executed, instead, use a debounce function.
 
 Receives arguments:
 
 * `getRenderedFeatures` (Function)
 
-  + maxFeatures: Optional. Max number of features to retrieve when getRenderedFeatures is called. Default to `null`.
+  + maxFeatures: Optional. Max number of features to retrieve when `getRenderedFeatures` is called. Default to `null`.
 
   Requires `pickable` to be true.
 
-  It is not recommended to call `getRenderedFeatures` every time `onViewportChange` is executed, instead, use a debounce function.
-
   If a `uniqueIdProperty` is provided only unique properties are returned.
 
-* `viewport` (Object). A instance of the current [`Viewport`](/docs/api-reference/core/viewport.md).
-
 ```javascript
-const onViewportChange =  e => {
+const onViewportChange = e => {
   const features = e.getRenderedFeatures();
 };
 
@@ -160,6 +164,26 @@ new MVTLayer({
   uniqueIdProperty: 'geoid'
 })
 ```
+
+* `getVisibleTiles` (async Function)
+
+  + tileCoords: Optional. Tile data coordinates, one of `'wgs84'`, `'local'`. Default to `'local'`.
+
+  If `tileCoords` is `'wgs84'`, each tile will contain a new `dataWithWGS84Coords` key with transformed coordinates.
+
+```javascript
+const onViewportChange = async e => {
+  const visibleTiles = await e.getVisibleTiles('wgs84');
+};
+
+new MVTLayer({
+  id: "..."
+  data: "..."
+  onViewportChange: debounce(onViewportChange, 500)
+})
+```
+
+* `viewport` (Object). An instance of the current [`Viewport`](/docs/api-reference/core/viewport.md).
 
 ## Source
 

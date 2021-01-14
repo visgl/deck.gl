@@ -114,7 +114,7 @@ test('ClipExtension', t => {
   t.end();
 });
 
-test('transformCoorsToWGS84', t => {
+test('transformCoordsToWGS84', t => {
   const viewport = new WebMercatorViewport({
     latitude: 0,
     longitude: 0,
@@ -170,10 +170,12 @@ test('TileJSON', async t => {
     getTileData() {
       return [];
     }
+
     renderSubLayers(props) {
       return new ScatterplotLayer(props, {id: `${props.id}-fill`});
     }
   }
+
   const testViewport = new WebMercatorViewport({
     width: 100,
     height: 100,
@@ -198,7 +200,7 @@ test('TileJSON', async t => {
   const _global = typeof global !== 'undefined' ? global : window;
   const fetch = _global.fetch;
 
-  _global.fetch = url => {
+  _global.fetch = () => {
     return Promise.resolve(JSON.stringify(tileJSON));
   };
 
@@ -228,10 +230,12 @@ test('TileJSON', async t => {
       onAfterUpdate
     }
   ];
+
   await testLayerAsync({Layer: TestMVTLayer, viewport: testViewport, testCases, onError: t.notOk});
+
   t.end();
 
-  // restore fetcch
+  // restore fetch
   _global.fetch = fetch;
 });
 
