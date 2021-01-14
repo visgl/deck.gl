@@ -7,7 +7,7 @@ deck.gl uses [loaders.gl](https://loaders.gl), a framework-agnostic library to r
 - Geometries from a binary tile, e.g. `MVTLayer`, `TerrainLayer`, and `Tile3DLayer`
 - Geometries from a standard 3D format, e.g. `scenegraph` in `ScenegraphLayer`, and `mesh` in `SimpleMeshLayer`
 
-deck.gl core has built-in support for JSON and image formats. Specific layer implementations may include the loaders targeting their own use cases. It is also easy to tweak the default parser behavior or add support for additional formats.
+deck.gl core always includes loaders for JSON and standard image formats (e.g, png, jpeg, svg). Certain layers include additional loaders supporting their own use cases. It is easy for applications to provide options to configure the behavior of the default loaders or to add loaders to support for additional formats.
 
 ## Customize Data Loading Behavior
 
