@@ -261,7 +261,8 @@ function transformTileCoordsToWGS84(object, tile, viewport) {
   // eslint-disable-next-line accessor-pairs
   Object.defineProperty(feature.geometry, 'coordinates', {
     get: () => {
-      return transform(object.geometry, tile.bbox, viewport);
+      const wgs84Geom = transform(object.geometry, tile.bbox, viewport);
+      return wgs84Geom.coordinates;
     }
   });
 

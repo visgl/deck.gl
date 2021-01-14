@@ -32,6 +32,7 @@
             {"entry": "docs/developer-guide/coordinate-systems"},
             {"entry": "docs/developer-guide/views"},
             {"entry": "docs/developer-guide/view-state-transitions"},
+            {"entry": "docs/developer-guide/loading-data"},
             {"entry": "docs/developer-guide/using-lighting"},
             {"entry": "docs/developer-guide/performance"},
             {"entry": "docs/developer-guide/64-bits"},
