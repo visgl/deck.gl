@@ -9,9 +9,14 @@ const DEFAULT_REQUIRED_PROPS = ['longitude', 'latitude', 'zoom'];
  */
 export default class LinearInterpolator extends TransitionInterpolator {
   /**
-   * @param {Array} transitionProps - list of props to apply linear transition to.
+   * @param {Object} opts
+   * @param {Array} opts.transitionProps - list of props to apply linear transition to.
+   * @param {Array} opts.around - a screen point to zoom/rotate around.
+   * @param {Function} opts.makeViewport - construct a viewport instance with given props.
    */
-  constructor(transitionProps) {
+  constructor(opts = {}) {
+    // Backward compatibility
+    const transitionProps = Array.isArray(opts) ? opts : opts.transitionProps;
     super(
       transitionProps || {
         compare: DEFAULT_PROPS,
@@ -19,13 +24,46 @@ export default class LinearInterpolator extends TransitionInterpolator {
         required: DEFAULT_REQUIRED_PROPS
       }
     );
+    this.opts = opts;
+  }
+
+  initializeProps(startProps, endProps) {
+    const result = super.initializeProps(startProps, endProps);
+
+    const {makeViewport, around} = this.opts;
+    if (makeViewport && around) {
+      const startViewport = makeViewport(startProps);
+      const endViewport = makeViewport(endProps);
+      const aroundLngLat = startViewport.unproject(around);
+      result.start.around = around;
+      Object.assign(result.end, {
+        around: endViewport.project(aroundLngLat),
+        aroundLngLat,
+        width: endProps.width,
+        height: endProps.height
+      });
+    }
+
+    return result;
   }
 
   interpolateProps(startProps, endProps, t) {
-    const viewport = {};
-    for (const key in endProps) {
-      viewport[key] = lerp(startProps[key] || 0, endProps[key] || 0, t);
+    const propsInTransition = {};
+    for (const key of this._propsToExtract) {
+      propsInTransition[key] = lerp(startProps[key] || 0, endProps[key] || 0, t);
     }
-    return viewport;
+
+    if (endProps.aroundLngLat) {
+      // Linear transition should be performed in common space
+      const viewport = this.opts.makeViewport({...endProps, ...propsInTransition});
+      const [longitude, latitude] = viewport.getMapCenterByLngLatPosition({
+        lngLat: endProps.aroundLngLat,
+        // anchor point in current screen coordinates
+        pos: lerp(startProps.around, endProps.around, t)
+      });
+      propsInTransition.longitude = longitude;
+      propsInTransition.latitude = latitude;
+    }
+    return propsInTransition;
   }
 }

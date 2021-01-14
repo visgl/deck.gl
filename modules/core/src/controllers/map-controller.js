@@ -421,9 +421,17 @@ export default class MapController extends Controller {
     super(MapState, props);
   }
 
-  _getTransitionProps() {
+  _getTransitionProps(opts) {
     // Enables Transitions on double-tap and key-down events.
-    return LINEAR_TRANSITION_PROPS;
+    return opts
+      ? {
+          ...LINEAR_TRANSITION_PROPS,
+          transitionInterpolator: new LinearInterpolator({
+            ...opts,
+            makeViewport: this.controllerState.makeViewport
+          })
+        }
+      : LINEAR_TRANSITION_PROPS;
   }
 
   _onPanRotate(event) {
