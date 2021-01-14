@@ -6,6 +6,7 @@ export default class Tile2DHeader {
     this.x = x;
     this.y = y;
     this.z = z;
+
     this.isVisible = false;
     this.isSelected = false;
     this.parent = null;
@@ -17,9 +18,19 @@ export default class Tile2DHeader {
 
     this.onTileLoad = onTileLoad;
     this.onTileError = onTileError;
+
+    this.transformToWorld = null;
   }
 
   get data() {
+    return this._isLoaded ? this.content : this._loader;
+  }
+
+  get dataInWorldCoordinates() {
+    if (this.transformToWorld) {
+      return this.transformToWorld(this, this.content);
+    }
+
     return this._isLoaded ? this.content : this._loader;
   }
 

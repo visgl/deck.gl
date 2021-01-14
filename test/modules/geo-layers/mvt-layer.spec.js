@@ -239,7 +239,7 @@ test('TileJSON', async t => {
   _global.fetch = fetch;
 });
 
-test('MVT#getVisibleTiles', async t => {
+test.skip('MVT#getVisibleTiles', async t => {
   class TestMVTLayerVisibleTiles extends MVTLayer {
     getTileData() {
       return geoJSONData;
