@@ -3,20 +3,35 @@ import {getDefaultCredentials, getMapsVersion} from '../config';
 const DEFAULT_USER_COMPONENT_IN_URL = '{user}';
 const DEFAULT_REGION_COMPONENT_IN_URL = '{region}';
 
+export const MAP_TYPES = {
+  SQL: 'sql',
+  TABLE: 'table',
+  TILESET: 'tileset'
+};
+
+export const CONNECTIONS = {
+  BIGQUERY: 'bigquery',
+  CARTO: 'carto'
+};
+
 /**
  * Obtain a TileJson from Maps API v1 and v2
  */
-export async function getTileJSON(mapConfig, credentials) {
+export async function getTileJSON({connection, type, source, mapConfig, credentials}) {
   const creds = {...getDefaultCredentials(), ...credentials};
+  let url;
+
   switch (getMapsVersion(creds)) {
     case 'v1':
       // Maps API v1
-      const layergroup = await instantiateMap({mapConfig, credentials: creds});
+      url = buildURL({mapConfig, credentials: creds});
+      const layergroup = await request({url, credentials: creds});
       return layergroup.metadata.tilejson.vector;
 
     case 'v2':
       // Maps API v2
-      return await instantiateMap({mapConfig, credentials: creds});
+      url = buildURL({connection, type, source, credentials: creds});
+      return await request({url, credentials: creds});
 
     default:
       throw new Error('Invalid maps API version. It shoud be v1 or v2');
@@ -24,11 +39,9 @@ export async function getTileJSON(mapConfig, credentials) {
 }
 
 /**
- * Instantiate a map using Maps API
+ * Request against Maps API
  */
-async function instantiateMap({mapConfig, credentials}) {
-  const url = buildURL({mapConfig, credentials});
-
+async function request({url, credentials}) {
   let response;
 
   try {
@@ -79,15 +92,18 @@ function dealWithError({response, json, credentials}) {
 /**
  * Build a URL with all required parameters
  */
-function buildURL({mapConfig, credentials}) {
-  const cfg = JSON.stringify(mapConfig);
+function buildURL({connection, type, source, mapConfig, credentials}) {
   const encodedApiKey = encodeParameter('api_key', credentials.apiKey);
   const encodedClient = encodeParameter('client', `deck-gl-carto`);
   const parameters = [encodedApiKey, encodedClient];
-  return `${mapsUrl(credentials)}/tilejson?${parameters.join('&')}&${encodeParameter(
-    'config',
-    cfg
-  )}`;
+
+  if (mapConfig) {
+    const cfg = JSON.stringify(mapConfig);
+    return `${mapsUrl(credentials)}?${parameters.join('&')}&${encodeParameter('config', cfg)}`;
+  }
+  let url = `${mapsUrl(credentials)}/${connection}/${type}?`;
+  url += `${encodeParameter('source', source)}&format=tilejson&${parameters.join('&')}`;
+  return url;
 }
 
 /**

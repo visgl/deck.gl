@@ -1,5 +1,6 @@
 import CartoLayer from './carto-layer';
 import {getMapsVersion} from '../config';
+import {getTileJSON, CONNECTIONS, MAP_TYPES} from '../api/maps-api-client';
 
 const defaultProps = {
   bufferSize: 16, // MVT buffersize in pixels,
@@ -8,17 +9,17 @@ const defaultProps = {
 };
 
 export default class CartoSQLLayer extends CartoLayer {
-  buildMapConfig() {
-    const {data, bufferSize, tileExtent} = this.props;
-
-    const version = getMapsVersion(this.props.creds);
+  async updateTileJSON() {
+    const {data, bufferSize, tileExtent, credentials} = this.props;
+    const version = getMapsVersion(credentials);
     const isSQL = data.search(' ') > -1;
-    const sql = isSQL ? data : `SELECT * FROM ${data}`;
 
     switch (version) {
       case 'v1':
+        const sql = isSQL ? data : `SELECT * FROM ${data}`;
+
         // Map config v1
-        return {
+        const mapConfig = {
           version: '1.3.1',
           buffersize: {
             mvt: bufferSize
@@ -34,23 +35,16 @@ export default class CartoSQLLayer extends CartoLayer {
           ]
         };
 
+        return await getTileJSON({mapConfig, credentials});
+
       case 'v2':
-        // Map config v2
-        return {
-          version: '2.0.0',
-          buffer_size: bufferSize,
-          tile_extent: tileExtent,
-          layers: [
-            {
-              type: 'sql',
-              source: 'postgres',
-              options: {
-                sql: sql.trim(),
-                vector_extent: tileExtent
-              }
-            }
-          ]
-        };
+        return await getTileJSON({
+          connection: CONNECTIONS.CARTO,
+          source: data,
+          type: isSQL ? MAP_TYPES.SQL : MAP_TYPES.TABLE,
+          credentials
+        });
+
       default:
         throw new Error(`Cannot build MapConfig for unmatching version ${version}`);
     }
