@@ -24,7 +24,7 @@ export function getDefaultCredentials() {
 }
 
 export function getMapsVersion(creds) {
-  const localCreds = creds || credentials;
+  const localCreds = {...credentials, ...creds};
   if (localCreds.mapsVersion) {
     return localCreds.mapsVersion;
   }
