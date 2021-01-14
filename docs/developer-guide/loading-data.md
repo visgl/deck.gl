@@ -15,7 +15,7 @@ All layers support a [loadOptions](/docs/api-reference/core/layer.md#loadoptions
 
 ### Example: Fetch data with credentials
 
-In a production environment, data may be loaded from a secured API that requires a payload/header.
+In a production environment, deck.gl applications may need to load data from secure APIs that require special HTTP headers (such as `Authorization`) to be set.
 
 The following prop value passes additional configs to the [fetch](https://developer.mozilla.org/en-US/docs/Web/API/WindowOrWorkerGlobalScope/fetch) call in order to access a secured API:
 
