@@ -106,9 +106,7 @@ export default class MVTLayer extends TileLayer {
         // Set worker to null to skip web workers
         // workerUrl: null
       },
-      gis: {
-        format: 'binary'
-      }
+      gis: this.props.binary ? { format: 'binary' } : undefined
     };
     return load(url, this.props.loaders, options);
   }
@@ -157,13 +155,50 @@ export default class MVTLayer extends TileLayer {
     return super.onHover(info, pickingEvent);
   }
 
+  // eslint-disable-next-line complexity
   getPickingInfo(params) {
     const info = super.getPickingInfo(params);
 
     const isWGS84 = this.context.viewport.resolution;
 
-    if (!isWGS84 && info.object) {
-      info.object = transformTileCoordsToWGS84(info.object, info.tile.bbox, this.context.viewport);
+    if (info.object) {
+      if (!isWGS84 && info.object) {
+        info.object = transformTileCoordsToWGS84(info.object, info.tile, this.context.viewport);
+      }
+    } else if (this.props.binary && info.index !== -1) {
+      const geomType = this._getLayerDataGeomType(params.sourceLayer.props.data);
+      if (geomType) {
+        const data = params.sourceLayer.props.data[geomType];
+
+        // Select feature index depending on geometry type
+        let geometryIndex;
+        let featureIndex;
+        switch (geomType) {
+          case 'points':    geometryIndex = data.featureIds.value[info.index];
+                            featureIndex = geometryIndex;
+                            break;
+          case 'lines':     featureIndex = data.pathIndices.value[info.index];
+                            geometryIndex = data.featureIds.value[featureIndex];
+                            break;
+          case 'polygons':  featureIndex = data.polygonIndices.value[info.index];
+                            geometryIndex = data.featureIds.value[featureIndex];
+                            break;
+          default:          featureIndex = -1;
+                            geometryIndex = featureIndex;
+                            
+        }
+
+        if (featureIndex !== -1) {
+          const numericProps = {};
+            // eslint-disable-next-line max-depth
+            for (const prop in data.numericProps) {
+              numericProps[prop]=data.numericProps[prop].value[featureIndex * data.numericProps[prop].size];
+            }
+          info.object = {
+            properties: { ...data.properties[geometryIndex], ...numericProps }
+          }
+        }
+      }
     }
 
     return info;
@@ -171,13 +206,13 @@ export default class MVTLayer extends TileLayer {
 
   getHighlightedObjectIndex(tile) {
     const {hoveredFeatureId} = this.state;
-    const {uniqueIdProperty, highlightedFeatureId} = this.props;
+    const {uniqueIdProperty, highlightedFeatureId, binary} = this.props;
     const {data} = tile;
-
+    
     const isFeatureIdPresent =
       isFeatureIdDefined(hoveredFeatureId) || isFeatureIdDefined(highlightedFeatureId);
 
-    if (!isFeatureIdPresent || !Array.isArray(data)) {
+    if (!isFeatureIdPresent) {
       return -1;
     }
 
@@ -185,9 +220,19 @@ export default class MVTLayer extends TileLayer {
       ? highlightedFeatureId
       : hoveredFeatureId;
 
-    return data.findIndex(
-      feature => getFeatureUniqueId(feature, uniqueIdProperty) === featureIdToHighlight
-    );
+    // Iterable data
+    if (Array.isArray(data)) {
+      return data.findIndex(
+        feature => getFeatureUniqueId(feature, uniqueIdProperty) === featureIdToHighlight
+      );
+    
+    // Non-iterable data
+    } else if (data && binary) {
+      const index = this._getHightlightedObjectIndexForBinaryData(data, uniqueIdProperty, featureIdToHighlight);
+      return index;
+    }
+
+    return -1;
   }
 
   _pickObjects(maxObjects) {
@@ -198,6 +243,45 @@ export default class MVTLayer extends TileLayer {
     const y = viewport.y;
     const layerIds = [this.id];
     return deck.pickObjects({x, y, width, height, layerIds, maxObjects});
+  }
+
+  _getLayerDataGeomType(data) {
+    if (Promise.resolve(data) !== data) {
+      if (data.points.featureIds.value.length) {
+        return 'points';
+      } else if (data.lines.featureIds.value.length) {
+        return 'lines';
+      } else if (data.polygons.featureIds.value.length) {
+        return 'polygons';
+      }
+    }
+    return null;
+  }
+
+  _getHightlightedObjectIndexForBinaryData(data, uniqueIdProperty, featureIdToHighlight) {
+    const geomType = this._getLayerDataGeomType(data);
+
+    if (geomType) {
+      // Look for the uniqueIdProperty
+      let index = -1;
+      if (data[geomType].numericProps[uniqueIdProperty]) {
+        index = data[geomType].numericProps[uniqueIdProperty].value.indexOf(featureIdToHighlight);
+      } else {
+        const propertyIndex = data[geomType].properties.findIndex((elem) => elem[uniqueIdProperty] === featureIdToHighlight);
+        index = data[geomType].featureIds.value.indexOf(propertyIndex);
+      }
+      
+      if (index !== -1) {
+        // Select geometry index depending on geometry type
+        // eslint-disable-next-line default-case
+        switch (geomType) {
+          case 'points':    return data[geomType].featureIds.value.indexOf(index);
+          case 'lines':     return data[geomType].pathIndices.value.indexOf(index);
+          case 'polygons':  return data[geomType].polygonIndices.value.indexOf(index);
+        }
+      }
+    }
+    return -1;
   }
 
   getRenderedFeatures(maxFeatures = null) {

@@ -176,7 +176,8 @@ export default class GeoJsonLayer extends CompositeLayer {
         attributes: {
           getPosition: points.positions,
           getProperties: points.properties,
-          getNumericProps: points.numericProps
+          getNumericProps: points.numericProps,
+          getGlobalFeatureIds: points.globalFeatureIds
         }
       };
 
@@ -378,8 +379,10 @@ export default class GeoJsonLayer extends CompositeLayer {
             getLineWidth: updateTriggers.getLineWidth
           }
         }),
-        // highlightedObjectIndex: this._getHighlightedIndex(pointData)
-        layerProps.points
+        {
+          ...layerProps.points,
+          highlightedObjectIndex: this._getHighlightedIndex(layerProps.points.data)
+        }
       );
 
     return [
@@ -396,9 +399,12 @@ export default class GeoJsonLayer extends CompositeLayer {
 
   _getHighlightedIndex(data) {
     const {highlightedObjectIndex} = this.props;
-    return Number.isFinite(highlightedObjectIndex)
-      ? data.findIndex(d => d.__source.index === highlightedObjectIndex)
-      : null;
+    if (!this._isBinary()) {
+      return Number.isFinite(highlightedObjectIndex)
+        ? data.findIndex(d => d.__source.index === highlightedObjectIndex)
+        : null;
+    }
+    return highlightedObjectIndex;
   }
 
   _isBinary() {

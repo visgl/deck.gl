@@ -117,6 +117,11 @@ On top of the [default options](/docs/api-reference/core/layer.md#loadoptions), 
 
 - [MVTLoader](https://loaders.gl/modules/mvt/docs/api-reference/mvt-loader)
 
+##### `binary` (Boolean, optional)
+
+* Default: true
+
+Reads data in binary format to improve performance. More information in the [performance optimization guide](/docs/developer-guide/performance.md#use-binary-data).
 
 ### Callbacks
 
