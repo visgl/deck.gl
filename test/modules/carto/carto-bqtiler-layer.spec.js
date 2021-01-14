@@ -1,9 +1,7 @@
 import test from 'tape-catch';
 import {testLayer, generateLayerTests} from '@deck.gl/test-utils';
 import {CartoBQTilerLayer} from '@deck.gl/carto';
-import {mockTileJSON} from './mock-fetch';
-
-mockTileJSON();
+import {mockFetchWithTileJSON, restoreFetch} from './mock-fetch';
 
 test('CartoBQTilerLayer', t => {
   const testCases = generateLayerTests({
@@ -17,6 +15,7 @@ test('CartoBQTilerLayer', t => {
 });
 
 test('CartoBQTilerLayer#updateTileJSON', t => {
+  const fetch = mockFetchWithTileJSON();
   const testCases = [
     {
       spies: ['updateTileJSON'],
@@ -57,4 +56,6 @@ test('CartoBQTilerLayer#updateTileJSON', t => {
 
   testLayer({Layer: CartoBQTilerLayer, testCases, onError: t.notOk});
   t.end();
+
+  restoreFetch(fetch);
 });
