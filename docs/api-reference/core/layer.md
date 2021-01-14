@@ -407,43 +407,9 @@ const layer = new HexagonLayer({
 
 Layers use [loaders.gl](https://loaders.gl) to load data and other resources. `loadOptions` is an object to customize the behavior of any loader used during fetching and parsing. The object may contain any of the [top-level options](https://loaders.gl/modules/core/docs/api-reference/parse#options), as well as loader-specific options targeting a particular format.
 
-For example, the following prop value passes additional configs to the [fetch](https://developer.mozilla.org/en-US/docs/Web/API/WindowOrWorkerGlobalScope/fetch) call in order to access a secured API:
-
-```js
-const layer = new ScatterplotLayer({
-  data: 'https://my-server.com/userActivity',
-  loadOptions: {
-    fetch: {
-      method: 'GET',
-      headers: {
-        'Authorization': 'Bearer AbCdEf123456',
-        'Content-Type': 'application/json'
-      }
-    }
-  }
-  ...
-});
-```
-
-The following code adds the [CSVLoader](https://loaders.gl/modules/csv/docs/api-reference/csv-loader) to support CSV files, with customization of the parser behavior:
-
-```js
-import {CSVLoader} from '@loaders.gl/csv';
-
-const layer = new HexagonLayer({
-  data: './data.csv',
-  loaders: [CSVLoader]
-  loadOptions: {
-    csv: {
-      header: false,
-      dynamicTyping: true
-    }
-  },
-  ...
-});
-```
-
 Layers may also include specialized loaders for their own use case, such as images, 3d-tiles, etc. See the documentation of each layer for additional load options that are available.
+
+Find usage examples in the [data loading guide](/docs/developer-guide/loading-data.md).
 
 
 ##### `onDataLoad` (Function, optional)
