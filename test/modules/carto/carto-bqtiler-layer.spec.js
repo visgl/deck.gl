@@ -1,6 +1,7 @@
 import test from 'tape-catch';
 import {testLayer, generateLayerTests} from '@deck.gl/test-utils';
 import {CartoBQTilerLayer} from '@deck.gl/carto';
+import {mockFetchWithTileJSON, restoreFetch} from './mock-fetch';
 
 test('CartoBQTilerLayer', t => {
   const testCases = generateLayerTests({
@@ -13,39 +14,40 @@ test('CartoBQTilerLayer', t => {
   t.end();
 });
 
-test('CartoBQTilerLayer#_updateTileJSON', t => {
+test('CartoBQTilerLayer#updateTileJSON', t => {
+  const fetch = mockFetchWithTileJSON();
   const testCases = [
     {
-      spies: ['_updateTileJSON'],
+      spies: ['updateTileJSON'],
       onAfterUpdate({spies}) {
-        t.notOk(spies._updateTileJSON.called, 'no data, no map instantiation');
-        t.ok(spies._updateTileJSON.callCount === 0);
+        t.notOk(spies.updateTileJSON.called, 'no data, no map instantiation');
+        t.ok(spies.updateTileJSON.callCount === 0);
       }
     },
     {
       updateProps: {data: 'project.dataset.tileset_table_name'},
-      spies: ['_updateTileJSON'],
+      spies: ['updateTileJSON'],
       onAfterUpdate({spies}) {
-        t.ok(spies._updateTileJSON.called, 'initial data triggers map instantiation');
-        t.ok(spies._updateTileJSON.callCount === 1);
+        t.ok(spies.updateTileJSON.called, 'initial data triggers map instantiation');
+        t.ok(spies.updateTileJSON.callCount === 1);
       }
     },
     {
       updateProps: {data: 'project.dataset.tileset_table_name'},
-      spies: ['_updateTileJSON'],
+      spies: ['updateTileJSON'],
       onAfterUpdate({spies}) {
         t.ok(
-          spies._updateTileJSON.callCount === 0,
+          spies.updateTileJSON.callCount === 0,
           'same data does not trigger a new map instantiation'
         );
       }
     },
     {
       updateProps: {data: 'project.dataset.ANOTHER_tileset_table_name'},
-      spies: ['_updateTileJSON'],
+      spies: ['updateTileJSON'],
       onAfterUpdate({spies}) {
         t.ok(
-          spies._updateTileJSON.callCount === 1,
+          spies.updateTileJSON.callCount === 1,
           'different data triggers a new map instantiation'
         );
       }
@@ -54,4 +56,6 @@ test('CartoBQTilerLayer#_updateTileJSON', t => {
 
   testLayer({Layer: CartoBQTilerLayer, testCases, onError: t.notOk});
   t.end();
+
+  restoreFetch(fetch);
 });

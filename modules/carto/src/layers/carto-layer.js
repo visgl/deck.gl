@@ -1,8 +1,8 @@
 import {CompositeLayer} from '@deck.gl/core';
 import {MVTLayer} from '@deck.gl/geo-layers';
-import {getTileJSON} from '../api/maps-api-client';
 
 const defaultProps = {
+  ...MVTLayer.defaultProps,
   data: null,
   credentials: null,
   onDataLoad: {type: 'function', value: tilejson => {}, compare: false},
@@ -26,7 +26,7 @@ export default class CartoLayer extends CompositeLayer {
 
   async _updateData() {
     try {
-      const tilejson = await this._updateTileJSON();
+      const tilejson = await this.updateTileJSON();
       this.setState({tilejson});
       this.props.onDataLoad(tilejson);
     } catch (err) {
@@ -34,13 +34,8 @@ export default class CartoLayer extends CompositeLayer {
     }
   }
 
-  buildMapConfig() {
+  async updateTileJSON() {
     throw new Error('You must use one of the specific carto layers: BQ or SQL type');
-  }
-
-  async _updateTileJSON() {
-    const tilejson = await getTileJSON(this.buildMapConfig(this.props), this.props.credentials);
-    return tilejson;
   }
 
   onHover(info, pickingEvent) {
