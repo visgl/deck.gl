@@ -20,6 +20,7 @@ export default class Tile2DHeader {
     this.onTileError = onTileError;
 
     this.transformToWorld = null;
+    this._transformToWorldDataCache = [];
   }
 
   get data() {
@@ -27,11 +28,17 @@ export default class Tile2DHeader {
   }
 
   get dataInWorldCoordinates() {
+    const data = this._isLoaded ? this.content : this._loader;
+
     if (this.transformToWorld) {
-      return this.transformToWorld(this, this.content);
+      if (!this._transformToWorldDataCache.length) {
+        this._transformToWorldDataCache = this.transformToWorld(data);
+      }
+      
+      return this._transformToWorldDataCache;
     }
 
-    return this._isLoaded ? this.content : this._loader;
+    return data;
   }
 
   get isLoaded() {

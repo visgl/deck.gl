@@ -30,8 +30,7 @@ export default class MVTLayer extends TileLayer {
     super.initializeState();
     this.setState({
       data: null,
-      tileJSON: null,
-      tileIdsCache: new Set()
+      tileJSON: null
     });
   }
 
@@ -218,27 +217,18 @@ export default class MVTLayer extends TileLayer {
     return renderedFeatures;
   }
 
-  getVisibleTiles(tileCoords = 'local') {
-    const {selectedTiles} = this.state.tileset;
-    const {viewport} = this.context;
-
-    if (conversionToWGS84isRequired(tileCoords, viewport.resolution)) {
-      this._convertTilesToWGS84(selectedTiles, viewport);
-    }
-
-    return selectedTiles;
+  getVisibleTiles() {
+    return this.state.tileset.selectedTiles;
   }
 
   _convertTilesToWGS84(tiles, viewport) {
-    const {tileIdsCache} = this.state;
-
     tiles.forEach(tile => {
-      const tileId = `${tile.x},${tile.y},${tile.z}`;
-
-      if (!tileIdsCache.has(tileId)) {
-        tileIdsCache.add(tileId);
-        tile.transformToWorld = () => updateTileWithWGS84Coords(tile, tile.content, viewport);
-      }
+      tile.transformToWorld = data => {
+        if (Array.isArray(data)) {
+          return data.map(object => transformTileCoordsToWGS84(object, tile, viewport));
+        }
+        return [];
+      };
     });
   }
 
@@ -246,6 +236,7 @@ export default class MVTLayer extends TileLayer {
     const {onViewportChange} = this.props;
     if (onViewportChange) {
       const {viewport} = this.context;
+      this._convertTilesToWGS84(this.state.tileset.selectedTiles, viewport);
       onViewportChange({
         getRenderedFeatures: this.getRenderedFeatures.bind(this),
         getVisibleTiles: this.getVisibleTiles.bind(this),
@@ -293,18 +284,6 @@ function transformTileCoordsToWGS84(object, tile, viewport) {
   });
 
   return feature;
-}
-
-function conversionToWGS84isRequired(tileCoords, isWGS84) {
-  return tileCoords === 'wgs84' && !isWGS84;
-}
-
-function updateTileWithWGS84Coords(tile, content, viewport) {
-  if (Array.isArray(content)) {
-    return content.map(object => transformTileCoordsToWGS84(object, tile, viewport));
-  }
-
-  return [];
 }
 
 MVTLayer.layerName = 'MVTLayer';
