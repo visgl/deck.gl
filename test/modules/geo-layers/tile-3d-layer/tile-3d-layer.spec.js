@@ -26,15 +26,15 @@ import {WebMercatorViewport} from '@deck.gl/core';
 const fetchFile = url => {
   url = url
     .replace(/\?.+$/, '') // strip query parameters
-    .replace(/^\//, './');
+    .replace(/^\//, './test/data/3d-tiles/');
   return require('fs').readFileSync(url);
 };
 
 test('Tile3DLayer', async t => {
   let oldFetch;
-  /* global global */
-  const isNode = typeof global !== 'undefined';
-  if (isNode) {
+  /* global global, Response */
+  const needsFetchPolyfill = typeof Response === 'undefined';
+  if (needsFetchPolyfill) {
     oldFetch = global.fetch;
     global.fetch = fetchFile;
   }
@@ -44,12 +44,7 @@ test('Tile3DLayer', async t => {
       props: {
         data: './test/data/3d-tiles/tileset.json',
         getPointColor: [0, 0, 0],
-        loadOptions: isNode
-          ? {
-              fetch: fetchFile,
-              '3d-tiles': {isTileset: true}
-            }
-          : {}
+        loadOptions: needsFetchPolyfill ? {'3d-tiles': {isTileset: true}} : {}
       },
       onBeforeUpdate: () => t.comment('inital load'),
       onAfterUpdate: ({layer, subLayers}) => {

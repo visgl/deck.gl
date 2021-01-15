@@ -138,17 +138,17 @@ export default class Tile3DLayer extends CompositeLayer {
 
     switch (tileHeader.type) {
       case TILE_TYPE.POINTCLOUD:
-        return this._getPointCloudLayer(tileHeader, oldLayer);
+        return this._makePointCloudLayer(tileHeader, oldLayer);
       case TILE_TYPE.SCENEGRAPH:
-        return this._get3DModelLayer(tileHeader, oldLayer);
+        return this._make3DModelLayer(tileHeader, oldLayer);
       case TILE_TYPE.MESH:
-        return this._getSimpleMeshLayer(tileHeader, oldLayer);
+        return this._makeSimpleMeshLayer(tileHeader, oldLayer);
       default:
         throw new Error(`Tile3DLayer: Failed to render layer of type ${tileHeader.content.type}`);
     }
   }
 
-  _getPointCloudLayer(tileHeader, oldLayer) {
+  _makePointCloudLayer(tileHeader, oldLayer) {
     const {
       attributes,
       pointCount,
@@ -193,7 +193,7 @@ export default class Tile3DLayer extends CompositeLayer {
     );
   }
 
-  _get3DModelLayer(tileHeader) {
+  _make3DModelLayer(tileHeader) {
     const {gltf, instances, cartographicOrigin, modelMatrix} = tileHeader.content;
 
     const SubLayerClass = this.getSubLayerClass('scenegraph', ScenegraphLayer);
@@ -219,7 +219,7 @@ export default class Tile3DLayer extends CompositeLayer {
     );
   }
 
-  _getSimpleMeshLayer(tileHeader, oldLayer) {
+  _makeSimpleMeshLayer(tileHeader, oldLayer) {
     const content = tileHeader.content;
     const {attributes, modelMatrix, cartographicOrigin, texture} = content;
     const {positions, normals, texCoords} = attributes;
