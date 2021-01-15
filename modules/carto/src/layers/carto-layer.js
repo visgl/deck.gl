@@ -17,6 +17,10 @@ export default class CartoLayer extends CompositeLayer {
     };
   }
 
+  get isLoaded() {
+    return this.getSubLayers().length > 0 && super.isLoaded;
+  }
+
   updateState({changeFlags}) {
     const {data} = this.props;
     if (changeFlags.dataChanged && data) {
