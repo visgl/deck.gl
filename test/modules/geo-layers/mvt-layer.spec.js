@@ -263,9 +263,9 @@ test('MVT#getVisibleTiles', async t => {
         data: ['https://a.basemaps.cartocdn.com/rastertiles/voyager_labels_under/{z}/{x}/{y}.png'],
         id: 'mvt-visible-tiles-test'
       },
-      onAfterUpdate: async ({layer}) => {
+      onAfterUpdate: ({layer}) => {
         if (layer.isLoaded) {
-          const selectedTiles = await layer.getVisibleTiles();
+          const selectedTiles = layer.getVisibleTiles();
 
           t.deepEqual(
             selectedTiles[0].dataInWorldCoordinates[0].geometry.coordinates,
@@ -273,7 +273,7 @@ test('MVT#getVisibleTiles', async t => {
             'dataInWorldCoordinates getter correctly returns data in local coordinates.'
           );
 
-          const selectedTilesWithWGS84Coords = await layer.getVisibleTiles('wgs84');
+          const selectedTilesWithWGS84Coords = layer.getVisibleTiles('wgs84');
 
           t.deepEqual(
             selectedTilesWithWGS84Coords[0].dataInWorldCoordinates[0].geometry.coordinates,
