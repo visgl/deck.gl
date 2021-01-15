@@ -132,11 +132,6 @@ tileJSON (Object) - the tileJSON fetched
 
 `onViewportChange` called when the viewport changes or all tiles in the current viewport have been loaded.
 
-Functions passed as a JSON to this callback function:
-
-- `getRenderedFeatures`: calculates the features rendered in the current viewport.
-- `getVisibleTiles`: retrieves the visible tiles in the current viewport.
-
 Remarks
 
 * It is not recommended to call these function every time `onViewportChange` is executed, instead, use a debounce function.
@@ -144,6 +139,8 @@ Remarks
 Receives arguments:
 
 * `getRenderedFeatures` (Function)
+
+  Calculates the features rendered in the current viewport.
 
   + maxFeatures: Optional. Max number of features to retrieve when `getRenderedFeatures` is called. Default to `null`.
 
@@ -165,15 +162,25 @@ new MVTLayer({
 })
 ```
 
-* `getVisibleTiles` (async Function)
+* `getVisibleTiles` (Function)
+
+  Retrieves the visible tiles in the current viewport
 
   + tileCoords: Optional. Tile data coordinates, one of `'wgs84'`, `'local'`. Default to `'local'`.
 
-  If `tileCoords` is `'wgs84'`, each tile will contain a new `dataWithWGS84Coords` key with transformed coordinates.
+  If `tileCoords` is `'wgs84'`, each tile will contain a new `dataInWorldCoordinates` getter.
 
 ```javascript
-const onViewportChange = async e => {
-  const visibleTiles = await e.getVisibleTiles('wgs84');
+const onViewportChange = e => {
+  const visibleTiles = e.getVisibleTiles();
+  visibleTiles.forEach(tile => {
+    // tile.data
+  });
+
+  const visibleTilesInWGS84 = e.getVisibleTiles('wgs84');
+  visibleTilesInWGS84.forEach(tile => {
+    // tile.dataInWorldCoordinates
+  });
 };
 
 new MVTLayer({

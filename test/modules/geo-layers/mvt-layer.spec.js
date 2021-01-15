@@ -239,7 +239,7 @@ test('TileJSON', async t => {
   _global.fetch = fetch;
 });
 
-test.skip('MVT#getVisibleTiles', async t => {
+test('MVT#getVisibleTiles', async t => {
   class TestMVTLayerVisibleTiles extends MVTLayer {
     getTileData() {
       return geoJSONData;
@@ -248,8 +248,14 @@ test.skip('MVT#getVisibleTiles', async t => {
 
   TestMVTLayerVisibleTiles.componentName = 'TestMVTLayerVisibleTiles';
 
-  const LOCAL_COORDS_TEST_CASES = [null, undefined, 1, true, false, '', 'local'];
-  const WGS84_TEST_CASE = 'wgs84';
+  const CONVERTED_WGS84_TILE_COORDS = [
+    [
+      [-34.365234375, 18.812717856407776],
+      [-34.27734374999999, 18.729501999072138],
+      [-34.365234375, 18.729501999072138],
+      [-34.365234375, 18.812717856407776]
+    ]
+  ];
 
   const testCases = [
     {
@@ -259,19 +265,21 @@ test.skip('MVT#getVisibleTiles', async t => {
       },
       onAfterUpdate: async ({layer}) => {
         if (layer.isLoaded) {
-          for (const tc of LOCAL_COORDS_TEST_CASES) {
-            const selectedTiles = await layer.getVisibleTiles(tc);
+          const selectedTiles = await layer.getVisibleTiles();
 
-            selectedTiles.forEach(tile => {
-              t.ok(!tile.dataWithWGS84Coords, 'Correctly skips tile data transformation to WGS84.');
-            });
-          }
+          t.deepEqual(
+            selectedTiles[0].dataInWorldCoordinates[0].geometry.coordinates,
+            selectedTiles[0].content[0].geometry.coordinates,
+            'dataInWorldCoordinates getter correctly returns data in local coordinates.'
+          );
 
-          const selectedTiles = await layer.getVisibleTiles(WGS84_TEST_CASE);
+          const selectedTilesWithWGS84Coords = await layer.getVisibleTiles('wgs84');
 
-          selectedTiles.forEach(tile => {
-            t.ok('dataWithWGS84Coords' in tile, 'Tile data correctly transformed to WGS84.');
-          });
+          t.deepEqual(
+            selectedTilesWithWGS84Coords[0].dataInWorldCoordinates[0].geometry.coordinates,
+            CONVERTED_WGS84_TILE_COORDS,
+            'dataInWorldCoordinates getter correctly returns data in WGS84.'
+          );
         }
       }
     }

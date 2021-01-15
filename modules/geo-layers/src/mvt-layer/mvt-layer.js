@@ -30,7 +30,8 @@ export default class MVTLayer extends TileLayer {
     super.initializeState();
     this.setState({
       data: null,
-      tileJSON: null
+      tileJSON: null,
+      tileIdsCache: new Set()
     });
   }
 
@@ -222,10 +223,23 @@ export default class MVTLayer extends TileLayer {
     const {viewport} = this.context;
 
     if (conversionToWGS84isRequired(tileCoords, viewport.resolution)) {
-      convertTilesToWGS84(selectedTiles, viewport);
+      this._convertTilesToWGS84(selectedTiles, viewport);
     }
 
     return selectedTiles;
+  }
+
+  _convertTilesToWGS84(tiles, viewport) {
+    const {tileIdsCache} = this.state;
+
+    tiles.forEach(tile => {
+      const tileId = `${tile.x},${tile.y},${tile.z}`;
+
+      if (!tileIdsCache.has(tileId)) {
+        tileIdsCache.add(tileId);
+        tile.transformToWorld = () => updateTileWithWGS84Coords(tile, tile.content, viewport);
+      }
+    });
   }
 
   _onViewportChange() {
@@ -286,13 +300,11 @@ function conversionToWGS84isRequired(tileCoords, isWGS84) {
 }
 
 function updateTileWithWGS84Coords(tile, content, viewport) {
-  return content.map(object => transformTileCoordsToWGS84(object, tile, viewport));
-}
+  if (Array.isArray(content)) {
+    return content.map(object => transformTileCoordsToWGS84(object, tile, viewport));
+  }
 
-async function convertTilesToWGS84(tiles, viewport) {
-  tiles.forEach(tile => {
-    tile.transformToWorld = () => updateTileWithWGS84Coords(tile, tile.content, viewport);
-  });
+  return [];
 }
 
 MVTLayer.layerName = 'MVTLayer';
