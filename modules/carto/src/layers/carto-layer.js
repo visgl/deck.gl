@@ -2,6 +2,7 @@ import {CompositeLayer} from '@deck.gl/core';
 import {MVTLayer} from '@deck.gl/geo-layers';
 
 const defaultProps = {
+  ...MVTLayer.defaultProps,
   data: null,
   credentials: null,
   onDataLoad: {type: 'function', value: tilejson => {}, compare: false},
