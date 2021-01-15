@@ -37,15 +37,3 @@ export function mockFetchMapsV1() {
 export function restoreFetch(fetch) {
   _global.fetch = fetch;
 }
-© 2021 GitHub, Inc.
-Terms
-Privacy
-Security
-Status
-Help
-Contact GitHub
-Pricing
-API
-Training
-Blog
-About
