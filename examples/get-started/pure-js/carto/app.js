@@ -1,6 +1,12 @@
 import mapboxgl from 'mapbox-gl';
 import {Deck} from '@deck.gl/core';
-import {CartoSQLLayer, CartoBQTilerLayer, setDefaultCredentials, BASEMAP} from '@deck.gl/carto';
+import {
+  CartoSQLLayer,
+  CartoBQTilerLayer,
+  setDefaultCredentials,
+  BASEMAP,
+  colorBins
+} from '@deck.gl/carto';
 
 const INITIAL_VIEW_STATE = {
   latitude: 0,
@@ -21,17 +27,6 @@ const map = new mapboxgl.Map({
   center: [INITIAL_VIEW_STATE.longitude, INITIAL_VIEW_STATE.latitude],
   zoom: INITIAL_VIEW_STATE.zoom
 });
-
-// Define color breaks for CartoBQTilerLayer
-const BUILDINGS_COLORS = {
-  ONE_MILLION: [207, 89, 126],
-  HUNDRED_THOUSAND: [232, 133, 113],
-  TEN_THOUSAND: [238, 180, 121],
-  THOUSAND: [233, 226, 156],
-  HUNDRED: [156, 203, 134],
-  TEN: [57, 177, 133],
-  OTHER: [0, 147, 146]
-};
 
 // Set the default visible layer
 let visibleLayer = 'airports';
@@ -69,7 +64,7 @@ function render() {
   const layers = [
     new CartoSQLLayer({
       id: 'airports',
-      data: 'SELECT * FROM ne_10m_airports',
+      data: 'SELECT cartodb_id, the_geom_webmercator, scalerank FROM ne_10m_airports',
       visible: visibleLayer === 'airports',
       filled: true,
       pointRadiusMinPixels: 2,
@@ -84,23 +79,11 @@ function render() {
       id: 'osm_buildings',
       data: 'cartobq.maps.osm_buildings',
       visible: visibleLayer === 'building',
-      getFillColor: object => {
-        // Apply color based on an attribute
-        if (object.properties.aggregated_total > 1000000) {
-          return BUILDINGS_COLORS.ONE_MILLION;
-        } else if (object.properties.aggregated_total > 100000) {
-          return BUILDINGS_COLORS.HUNDRED_THOUSAND;
-        } else if (object.properties.aggregated_total > 10000) {
-          return BUILDINGS_COLORS.TEN_THOUSAND;
-        } else if (object.properties.aggregated_total > 1000) {
-          return BUILDINGS_COLORS.THOUSAND;
-        } else if (object.properties.aggregated_total > 100) {
-          return BUILDINGS_COLORS.HUNDRED;
-        } else if (object.properties.aggregated_total > 10) {
-          return BUILDINGS_COLORS.TEN;
-        }
-        return BUILDINGS_COLORS.OTHER;
-      },
+      getFillColor: colorBins({
+        attr: 'aggregated_total',
+        domain: [10, 100, 1e3, 1e4, 1e5, 1e6],
+        colors: 'Temps'
+      }),
       pointRadiusMinPixels: 2,
       stroked: false
     })
