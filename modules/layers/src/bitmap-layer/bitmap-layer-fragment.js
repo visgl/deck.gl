@@ -1,3 +1,31 @@
+/**
+ * Pack the top 12 bits of two normalized floats into 3 8-bit (rgb) values
+ * This enables addressing 4096x4096 individual pixels
+ *
+ * TODO - current implementation only handles u fractions: 4096x256
+ *
+ * returns vec3 encoded RGB colors
+ *  result.r - top 8 bits of u
+ *  result.g - top 8 bits of v
+ *  result.b - next 4 bits of u and v: (u + v * 16)
+ */
+const packUVsIntoRGB = `
+vec3 packUVsIntoRGB(vec2 uv) {
+  // Extract the top 8 bits. We want values to be truncated down so we can add a fraction
+  vec2 uv8bit = floor(uv * 256.) / 256.;
+
+  // Calculate the normalized remainders of u and v parts that do not fit into 8 bits
+  // Scale and clamp to 0-1 range
+  vec2 uvFraction = mod((uv - uv8bit) * 256. * 16., 16.) / 16.0;
+
+  // Remainder can be encoded in blue channel, encode as 4 bits for pixel coordinates
+  // TODO add make v component work without interfering with u
+  float fractions = uvFraction.x / 16.; // + uvFraction.y;
+
+  return vec3(uv8bit, fractions);
+}
+`;
+
 export default `
 #define SHADER_NAME bitmap-layer-fragment-shader
 
@@ -66,6 +94,8 @@ vec2 getUV(vec2 pos) {
   );
 }
 
+${packUVsIntoRGB}
+
 void main(void) {
   vec2 uv = vTexCoord;
   if (coordinateConversion < -0.5) {
@@ -81,5 +111,10 @@ void main(void) {
 
   geometry.uv = uv;
   DECKGL_FILTER_COLOR(gl_FragColor, geometry);
+
+  if (picking_uActive) {
+    // Since instance information is not used, we can use picking color for pixel index
+    gl_FragColor.rgb = packUVsIntoRGB(uv);
+  }
 }
 `;
