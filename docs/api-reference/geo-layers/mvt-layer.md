@@ -132,10 +132,6 @@ tileJSON (Object) - the tileJSON fetched
 
 `onViewportChange` called when the viewport changes or all tiles in the current viewport have been loaded.
 
-Remarks
-
-* It is not recommended to call these function every time `onViewportChange` is executed, instead, use a debounce function.
-
 Receives arguments:
 
 * `getRenderedFeatures` (Function)
@@ -164,22 +160,17 @@ new MVTLayer({
 
 * `getVisibleTiles` (Function)
 
-  Retrieves the visible tiles in the current viewport
-
-  + tileCoords: Optional. Tile data coordinates, one of `'wgs84'`, `'local'`. Default to `'local'`.
-
-  If `tileCoords` is `'wgs84'`, each tile will contain a new `dataInWorldCoordinates` getter.
+  Retrieves the visible tiles in the current viewport.
 
 ```javascript
 const onViewportChange = e => {
   const visibleTiles = e.getVisibleTiles();
-  visibleTiles.forEach(tile => {
-    // tile.data
-  });
 
-  const visibleTilesInWGS84 = e.getVisibleTiles('wgs84');
-  visibleTilesInWGS84.forEach(tile => {
-    // tile.dataInWorldCoordinates
+  visibleTiles.forEach(tile => {
+    // data in local coordinates
+    const dataInLocalCoords = tile.data;
+    // data in WGS84
+    const dataInWGS84 = tile.dataInWorldCoordinates;
   });
 };
 
@@ -191,6 +182,10 @@ new MVTLayer({
 ```
 
 * `viewport` (Object). An instance of the current [`Viewport`](/docs/api-reference/core/viewport.md).
+
+Remarks
+
+- It is not recommended to call these functions every time `onViewportChange` is executed, instead, use a debounce function.
 
 ## Source
 

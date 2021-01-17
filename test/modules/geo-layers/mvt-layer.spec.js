@@ -248,12 +248,12 @@ test('MVT#getVisibleTiles', async t => {
 
   TestMVTLayerVisibleTiles.componentName = 'TestMVTLayerVisibleTiles';
 
-  const LOCAL_DATA_COORDS = [
+  const WGS84_DATA_COORDS = [
     [
-      [0.80908203125, 0.8935546875],
-      [0.8095703125, 0.89404296875],
-      [0.80908203125, 0.89404296875],
-      [0.80908203125, 0.8935546875]
+      [-34.365234375, 18.812717856407776],
+      [-34.27734374999999, 18.729501999072138],
+      [-34.365234375, 18.729501999072138],
+      [-34.365234375, 18.812717856407776]
     ]
   ];
 
@@ -268,13 +268,7 @@ test('MVT#getVisibleTiles', async t => {
           const selectedTiles = layer.getVisibleTiles();
 
           t.deepEqual(
-            LOCAL_DATA_COORDS,
-            selectedTiles[0].data[0].geometry.coordinates,
-            'dataInWorldCoordinates getter correctly returns data in local coordinates.'
-          );
-
-          t.deepEqual(
-            geoJSONData[0].geometry.coordinates,
+            WGS84_DATA_COORDS,
             selectedTiles[0].dataInWorldCoordinates[0].geometry.coordinates,
             'dataInWorldCoordinates getter correctly returns data in WGS84.'
           );
