@@ -342,6 +342,26 @@ export default class GeoJsonLayer extends CompositeLayer {
     const {data} = this.props;
     return data && 'points' in data && 'polygons' in data && 'lines' in data;
   }
+
+  getSubLayerAccessor(accessor) {
+    if (!this._isBinary() || typeof accessor !== 'function') {
+      return super.getSubLayerAccessor(accessor);
+    }
+
+    return (object, info) => {
+      const {data, index} = info;
+      const properties = data.properties[index];
+      const numericProps = {};
+      for (const prop in data.numericProps) {
+        numericProps[prop] = data.numericProps[prop].value[index * data.numericProps[prop].size];
+      }
+      object = {
+        properties: {...numericProps, ...properties}
+      };
+
+      return accessor(object, info);
+    };
+  }
 }
 
 GeoJsonLayer.layerName = 'GeoJsonLayer';
