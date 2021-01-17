@@ -57,6 +57,36 @@ test('Tileset2D#update', t => {
   t.end();
 });
 
+test('Tileset2D#finalize', async t => {
+  const tileset = new Tileset2D({
+    getTileData: () => sleep(50),
+    onTileLoad: () => {}
+  });
+  tileset.update(testViewport);
+
+  await sleep(60);
+
+  tileset.update(
+    new WebMercatorViewport(
+      Object.assign({}, testViewState, {
+        longitude: -100,
+        latitude: 80
+      })
+    )
+  );
+
+  tileset.finalize();
+
+  t.is(
+    tileset._cache.get('1171,1566,12')._isCancelled,
+    false,
+    'first tile should not have been loading and thus not been aborteed'
+  );
+  t.is(tileset._cache.get('910,459,12')._isCancelled, true, 'second tile should have been aborted');
+
+  t.end();
+});
+
 test('Tileset2D#maxCacheSize', t => {
   const tileset = new Tileset2D({
     getTileData,
