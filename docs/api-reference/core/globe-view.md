@@ -32,18 +32,18 @@ const view = new GlobeView({id, ...});
 
 `GlobeView` takes the same parameters as the [View](/docs/api-reference/core/view.md) superclass constructor, plus the following:
 
-- `resolution` (`Number`, optional) - the resolution at which to turn flat features into 3D meshes, in degrees. Smaller numbers will generate more detailed mesh. Default `10`.
+- `resolution` (Number, optional) - the resolution at which to turn flat features into 3D meshes, in degrees. Smaller numbers will generate more detailed mesh. Default `10`.
 
 
 ## View State
 
 To render, `GlobeView` needs to be used together with a `viewState` with the following parameters:
 
-- `longitude` (`Number`) - longitude at the viewport center
-- `latitude` (`Number`) - latitude at the viewport center
-- `zoom` (`Number`) - zoom level
-- `maxZoom` (`Number`, optional) - max zoom level. Default `20`.
-- `minZoom` (`Number`, optional) - min zoom level. Default `0`.
+- `longitude` (Number) - longitude at the viewport center
+- `latitude` (Number) - latitude at the viewport center
+- `zoom` (Number) - zoom level
+- `maxZoom` (Number, optional) - max zoom level. Default `20`.
+- `minZoom` (Number, optional) - min zoom level. Default `0`.
 
 Additional projection matrix arguments:
 
