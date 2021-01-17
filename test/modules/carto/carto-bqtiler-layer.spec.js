@@ -15,7 +15,7 @@ test('CartoBQTilerLayer', t => {
 });
 
 test('CartoBQTilerLayer#updateTileJSON', t => {
-  const fetch = mockFetchMapsV2();
+  const fetchMock = mockFetchMapsV2();
   const testCases = [
     {
       spies: ['updateTileJSON'],
@@ -57,5 +57,5 @@ test('CartoBQTilerLayer#updateTileJSON', t => {
   testLayer({Layer: CartoBQTilerLayer, testCases, onError: t.notOk});
   t.end();
 
-  restoreFetch(fetch);
+  restoreFetch(fetchMock);
 });

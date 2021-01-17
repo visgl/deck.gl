@@ -64,7 +64,7 @@ test('CartoSQLLayer#updateTileJSON', t => {
 });
 
 test('CartoSQLLayer#Maps API', async t => {
-  const fetch = mockFetchMapsV1();
+  const fetchMock = mockFetchMapsV1();
 
   const spy = makeSpy(MVTLayer.prototype, 'getTileData');
   spy.returns([]);
@@ -111,11 +111,11 @@ test('CartoSQLLayer#Maps API', async t => {
   spy.restore();
   t.end();
 
-  restoreFetch(fetch);
+  restoreFetch(fetchMock);
 });
 
 test('CartoSQLLayer#onDataLoad', async t => {
-  const fetch = mockFetchMapsV2();
+  const fetchMock = mockFetchMapsV2();
 
   const spy = makeSpy(MVTLayer.prototype, 'getTileData');
   spy.returns([]);
@@ -142,5 +142,5 @@ test('CartoSQLLayer#onDataLoad', async t => {
   spy.restore();
   t.end();
 
-  restoreFetch(fetch);
+  restoreFetch(fetchMock);
 });
