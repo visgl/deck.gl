@@ -155,26 +155,14 @@ The color to tint the bitmap by, in `[r, g, b]`. Each component is in the `[0, 2
 
 ### Callbacks
 
-From v8.4, `BitmapLayer` provides information on which pixel was picked. Picking callbacks (`onHover`, `onClick`) now contain an additional field `bitmap` field, with `pixel` coordinates.
+From v8.4, `BitmapLayer` provides information on which pixel was picked. Picking callbacks (`onHover`, `onClick`) contain an additional `bitmap` field with the following shape.
 
-```typescript
-{
-  PickingInfo,
-  bitmap?: {
-    /** Size of bitmap imn pixels */
-    size: {
-      width: number;
-      height: number;
-    },
-    /* Integer coordinates into the bitmap */
-    pixel: [number, number];
-    /* Relative (0-1) floating point coordinates */
-    uv: [number, number];
-    /* Picked texture */
-    texture: Texture2D;
-  }
-};
-```
+    
+- `pixel` ([number, number])  Integer coordinates into the bitmap
+- `size` ({width: number; height: number})  Size of bitmap in pixels
+- `uv` ([number, number]) Normalized (0-1) floating point coordinates
+
+Note that the `bitmap` field can be `null` if the layer is being deselected or the bitmap has not yet loaded.
 
 ## Source
 

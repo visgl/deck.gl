@@ -129,8 +129,7 @@ export default class BitmapLayer extends Layer {
     info.bitmap = {
       size: {width, height}, // Size of bitmap
       uv, // Floating point precision in 0-1 range
-      pixel, // Truncated to integer and scaled to pixel size
-      texture: bitmapTexture
+      pixel // Truncated to integer and scaled to pixel size
     };
 
     return info;

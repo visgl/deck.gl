@@ -19,9 +19,9 @@ const ROOT_URL =
 function getTooltip({tile, bitmap}) {
   let message = tile ? `tile: x: ${tile.x}, y: ${tile.y}, z: ${tile.z}` : '';
   if (bitmap) {
-    message += `\n${bitmap.pixel[0]},${bitmap.pixel[1]} of ${bitmap.size.width}x${
+    message += `\n${bitmap.pixel[0]},${bitmap.pixel[1]} in ${bitmap.size.width}x${
       bitmap.size.height
-    } ${bitmap.texture.id}`;
+    }`;
   }
   return message;
 }
