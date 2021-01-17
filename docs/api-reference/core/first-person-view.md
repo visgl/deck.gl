@@ -19,13 +19,13 @@ new FirstPersonView({id, ...});
 
 To render, a `FirstPersonView` needs to be combined with a `viewState` object with the following parameters:
 
-- `longitude` (`Number`, optional) - longitude of the camera
-- `latitude` (`Number`, optional) - latitude of the camera
-* `position` (`Number[3]`, optional) - meter offsets of the camera from the lng-lat anchor point. Default `[0, 0, 0]`.
-* `bearing` (`Number`, optional) - bearing angle in degrees. Default `0` (north).
-* `pitch` (`Number`, optional) - pitch angle in degrees. Default `0` (horizontal).
-- `maxPitch` (`Number`, optional) - max pitch angle. Default `90` (down).
-- `minPitch` (`Number`, optional) - min pitch angle. Default `-90` (up).
+- `longitude` (Number, optional) - longitude of the camera
+- `latitude` (Number, optional) - latitude of the camera
+* `position` (Number[3], optional) - meter offsets of the camera from the lng-lat anchor point. Default `[0, 0, 0]`.
+* `bearing` (Number, optional) - bearing angle in degrees. Default `0` (north).
+* `pitch` (Number, optional) - pitch angle in degrees. Default `0` (horizontal).
+- `maxPitch` (Number, optional) - max pitch angle. Default `90` (down).
+- `minPitch` (Number, optional) - min pitch angle. Default `-90` (up).
 
 
 ## FirstPersonController
