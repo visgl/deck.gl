@@ -1,4 +1,3 @@
-/* eslint-disable complexity */
 // Copyright (c) 2015 - 2017 Uber Technologies, Inc.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -133,6 +132,7 @@ export default class GeoJsonLayer extends CompositeLayer {
     });
   }
 
+  /* eslint-disable complexity */
   renderLayers() {
     // Layer composition props
     const {stroked, filled, extruded, wireframe, material, transitions} = this.props;

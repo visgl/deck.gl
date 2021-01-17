@@ -40,6 +40,7 @@ function makeLocalDevConfig(EXAMPLE_DIR = LIB_DIR, linkToLuma) {
     '@loaders.gl/core': `${ROOT_DIR}/node_modules/@loaders.gl/core`,
     '@loaders.gl/images': `${ROOT_DIR}/node_modules/@loaders.gl/images`
   };
+
   const LUMA_ALIASES = linkToLuma ? LUMA_LINK_ALIASES : LUMA_LOCAL_ALIASES;
   // console.warn(JSON.stringify(LUMA_ALIASES, null, 2)); // uncomment to debug config
   // require('fs').writeFileSync('/tmp/ocular.log', JSON.stringify(config, null, 2));
