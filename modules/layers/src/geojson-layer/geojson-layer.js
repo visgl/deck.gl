@@ -1,3 +1,4 @@
+/* eslint-disable complexity */
 // Copyright (c) 2015 - 2017 Uber Technologies, Inc.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -26,6 +27,7 @@ import SolidPolygonLayer from '../solid-polygon-layer/solid-polygon-layer';
 import {replaceInRange} from '../utils';
 
 import {getGeojsonFeatures, separateGeojsonFeatures} from './geojson';
+import {createLayerPropsFromFeatures, createLayerPropsFromBinary} from './geojson-layer-props';
 
 const defaultLineColor = [0, 0, 0, 255];
 const defaultFillColor = [0, 0, 0, 255];
@@ -63,15 +65,11 @@ const defaultProps = {
   // Optional material for 'lighting' shader module
   material: true
 };
-
-function getCoordinates(f) {
-  return f.geometry.coordinates;
-}
 export default class GeoJsonLayer extends CompositeLayer {
   initializeState() {
     this.state = {
-      features: {},
-      binaryData: {}
+      layerProps: {},
+      features: {}
     };
 
     if (this.props.getLineDashArray) {
@@ -80,25 +78,35 @@ export default class GeoJsonLayer extends CompositeLayer {
   }
 
   updateState({props, changeFlags}) {
-    if (!changeFlags.dataChanged || this._isBinary()) {
+    if (!changeFlags.dataChanged) {
       return;
     }
 
+    if (this._isBinary()) {
+      this._updateStateBinary({props, changeFlags});
+    } else {
+      this._updateStateJSON({props, changeFlags});
+    }
+  }
+
+  _updateStateBinary({props, changeFlags}) {
+    const layerProps = createLayerPropsFromBinary(props.data);
+    this.setState({layerProps});
+  }
+
+  _updateStateJSON({props, changeFlags}) {
     const features = getGeojsonFeatures(props.data);
     const wrapFeature = this.getSubLayerRow.bind(this);
+    let newFeatures = {};
+    const featuresDiff = {};
 
     if (Array.isArray(changeFlags.dataChanged)) {
       const oldFeatures = this.state.features;
-      const newFeatures = {};
-      const featuresDiff = {};
-
-      // Initialize new features object
       for (const key in oldFeatures) {
         newFeatures[key] = oldFeatures[key].slice();
         featuresDiff[key] = [];
       }
 
-      // Fill featuresDiff with the changed data
       for (const dataRange of changeFlags.dataChanged) {
         const partialFeatures = separateGeojsonFeatures(features, wrapFeature, dataRange);
         for (const key in oldFeatures) {
@@ -112,17 +120,19 @@ export default class GeoJsonLayer extends CompositeLayer {
           );
         }
       }
-      this.setState({features: newFeatures, featuresDiff});
     } else {
-      this.setState({
-        features: separateGeojsonFeatures(features, wrapFeature),
-        featuresDiff: {}
-      });
+      newFeatures = separateGeojsonFeatures(features, wrapFeature);
     }
+
+    const layerProps = createLayerPropsFromFeatures(newFeatures, featuresDiff);
+
+    this.setState({
+      features: newFeatures,
+      featuresDiff,
+      layerProps
+    });
   }
 
-  /* eslint-disable complexity */
-  // eslint-disable-next-line max-statements
   renderLayers() {
     // Layer composition props
     const {stroked, filled, extruded, wireframe, material, transitions} = this.props;
@@ -159,84 +169,7 @@ export default class GeoJsonLayer extends CompositeLayer {
     const LineStringsLayer = this.getSubLayerClass('line-strings', PathLayer);
     const PointsLayer = this.getSubLayerClass('points', ScatterplotLayer);
 
-    const layerProps = {
-      points: {data: undefined, _dataDiff: undefined},
-      lines: {data: undefined, _dataDiff: undefined},
-      polygons: {data: undefined, _dataDiff: undefined},
-      polygonsOutline: {data: undefined, _dataDiff: undefined}
-    };
-
-    const isBinary = this._isBinary();
-
-    if (isBinary) {
-      const {points, lines, polygons} = this.props.data;
-
-      layerProps.points.data = {
-        length: points.positions.value.length / points.positions.size,
-        attributes: {
-          getPosition: points.positions,
-          getProperties: points.properties,
-          getNumericProps: points.numericProps,
-          getGlobalFeatureIds: points.globalFeatureIds
-        }
-      };
-
-      layerProps.lines.data = {
-        length: lines.pathIndices.value.length - 1,
-        startIndices: lines.pathIndices.value,
-        attributes: {
-          getPath: lines.positions,
-          getProperties: lines.properties,
-          getNumericProps: lines.numericProps
-        }
-      };
-      layerProps.lines._pathType = 'open';
-
-      layerProps.polygons.data = {
-        length: polygons.polygonIndices.value.length - 1,
-        startIndices: polygons.polygonIndices.value,
-        attributes: {
-          getPolygon: polygons.positions,
-          getProperties: polygons.properties,
-          getNumericProps: polygons.numericProps
-        }
-      };
-      layerProps.polygons._normalize = false;
-
-      layerProps.polygonsOutline.data = {
-        length: polygons.primitivePolygonIndices.value.length - 1,
-        startIndices: polygons.primitivePolygonIndices.value,
-        attributes: {
-          getPath: polygons.positions,
-          getProperties: polygons.properties,
-          getNumericProps: polygons.numericProps
-        }
-      };
-      layerProps.polygonsOutline._pathType = 'open';
-    } else {
-      // Data is not in binary format
-      const {features, featuresDiff} = this.state;
-      const {pointFeatures, lineFeatures, polygonFeatures, polygonOutlineFeatures} = features;
-
-      layerProps.points.data = pointFeatures;
-      layerProps.points._dataDiff =
-        featuresDiff.pointFeatures && (() => featuresDiff.pointFeatures);
-      layerProps.points.getPosition = getCoordinates;
-
-      layerProps.lines.data = lineFeatures;
-      layerProps.lines._dataDiff = featuresDiff.lineFeatures && (() => featuresDiff.lineFeatures);
-      layerProps.lines.getPath = getCoordinates;
-
-      layerProps.polygons.data = polygonFeatures;
-      layerProps.polygons._dataDiff =
-        featuresDiff.polygonFeatures && (() => featuresDiff.polygonFeatures);
-      layerProps.polygons.getPolygon = getCoordinates;
-
-      layerProps.polygonsOutline.data = polygonOutlineFeatures;
-      layerProps.polygonsOutline._dataDiff =
-        featuresDiff.polygonOutlineFeatures && (() => featuresDiff.polygonOutlineFeatures);
-      layerProps.polygonsOutline.getPath = getCoordinates;
-    }
+    const {layerProps} = this.state;
 
     // Filled Polygon Layer
     const polygonFillLayer =
@@ -395,8 +328,6 @@ export default class GeoJsonLayer extends CompositeLayer {
       extruded && polygonFillLayer
     ];
   }
-  /* eslint-enable complexity */
-
   _getHighlightedIndex(data) {
     const {highlightedObjectIndex} = this.props;
     if (!this._isBinary()) {
@@ -409,25 +340,7 @@ export default class GeoJsonLayer extends CompositeLayer {
 
   _isBinary() {
     const {data} = this.props;
-    return (
-      data !== null &&
-      typeof data === 'object' &&
-      'points' in data &&
-      'polygons' in data &&
-      'lines' in data
-    );
-  }
-
-  getNonIterableProperties(e) {
-    const properties = e.data.attributes.getProperties[e.index];
-    const numericProps = {};
-    for (const prop in e.data.attributes.getNumericProps) {
-      numericProps[prop] =
-        e.data.attributes.getNumericProps[prop].value[
-          e.index * e.data.attributes.getNumericProps[prop].size
-        ];
-    }
-    return {...numericProps, ...properties};
+    return data && 'points' in data && 'polygons' in data && 'lines' in data;
   }
 }
 

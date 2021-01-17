@@ -113,25 +113,15 @@ export default class CompositeLayer extends Layer {
         target: []
       };
       return (x, i) => {
-        // Iterable data
-        if (x) {
-          if (x.__source) {
-            objectInfo.index = x.__source.index;
-            return accessor(x.__source.object, objectInfo);
-          }
-        } else {
-          // Non-iterable data
-          x = {
-            properties: this.getNonIterableProperties(i)
-          };
+        if (x && x.__source) {
+          objectInfo.index = x.__source.index;
+          return accessor(x.__source.object, objectInfo);
         }
         return accessor(x, i);
       };
     }
     return accessor;
   }
-
-  getNonIterableProperties(i) {}
 
   // Returns sub layer props for a specific sublayer
   getSubLayerProps(sublayerProps = {}) {

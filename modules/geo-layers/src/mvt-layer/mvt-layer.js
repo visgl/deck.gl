@@ -1,13 +1,13 @@
 import {Matrix4} from 'math.gl';
 import {MVTLoader} from '@loaders.gl/mvt';
 import {load} from '@loaders.gl/core';
-// import {binaryToGeoJson} from '@loaders.gl/gis';
 import {COORDINATE_SYSTEM} from '@deck.gl/core';
 
 import TileLayer from '../tile-layer/tile-layer';
 import {getURLFromTemplate, isURLTemplate} from '../tile-layer/utils';
 import ClipExtension from './clip-extension';
 import {transform} from './coordinate-transform';
+import {binaryToFeature, getHightlightedObjectIndex} from './binary-utils';
 
 const WORLD_SIZE = 512;
 
@@ -101,12 +101,12 @@ export default class MVTLayer extends TileLayer {
         ...(options && options.mvt),
         coordinates: this.context.viewport.resolution ? 'wgs84' : 'local',
         tileIndex: {x: tile.x, y: tile.y, z: tile.z}
-        // Local worker debud
+        // Local worker debug
         // workerUrl: `modules/mvt/dist/mvt-loader.worker.js`
         // Set worker to null to skip web workers
         // workerUrl: null
       },
-      gis: this.props.binary ? { format: 'binary' } : undefined
+      gis: this.props.binary ? {format: 'binary'} : undefined
     };
     return load(url, this.props.loaders, options);
   }
@@ -155,7 +155,6 @@ export default class MVTLayer extends TileLayer {
     return super.onHover(info, pickingEvent);
   }
 
-  // eslint-disable-next-line complexity
   getPickingInfo(params) {
     const info = super.getPickingInfo(params);
 
@@ -166,39 +165,7 @@ export default class MVTLayer extends TileLayer {
         info.object = transformTileCoordsToWGS84(info.object, info.tile, this.context.viewport);
       }
     } else if (this.props.binary && info.index !== -1) {
-      const geomType = this._getLayerDataGeomType(params.sourceLayer.props.data);
-      if (geomType) {
-        const data = params.sourceLayer.props.data[geomType];
-
-        // Select feature index depending on geometry type
-        let geometryIndex;
-        let featureIndex;
-        switch (geomType) {
-          case 'points':    geometryIndex = data.featureIds.value[info.index];
-                            featureIndex = geometryIndex;
-                            break;
-          case 'lines':     featureIndex = data.pathIndices.value[info.index];
-                            geometryIndex = data.featureIds.value[featureIndex];
-                            break;
-          case 'polygons':  featureIndex = data.polygonIndices.value[info.index];
-                            geometryIndex = data.featureIds.value[featureIndex];
-                            break;
-          default:          featureIndex = -1;
-                            geometryIndex = featureIndex;
-                            
-        }
-
-        if (featureIndex !== -1) {
-          const numericProps = {};
-            // eslint-disable-next-line max-depth
-            for (const prop in data.numericProps) {
-              numericProps[prop]=data.numericProps[prop].value[featureIndex * data.numericProps[prop].size];
-            }
-          info.object = {
-            properties: { ...data.properties[geometryIndex], ...numericProps }
-          }
-        }
-      }
+      info.object = binaryToFeature(params.sourceLayer.props.data, info.index);
     }
 
     return info;
@@ -208,7 +175,7 @@ export default class MVTLayer extends TileLayer {
     const {hoveredFeatureId} = this.state;
     const {uniqueIdProperty, highlightedFeatureId, binary} = this.props;
     const {data} = tile;
-    
+
     const isFeatureIdPresent =
       isFeatureIdDefined(hoveredFeatureId) || isFeatureIdDefined(highlightedFeatureId);
 
@@ -225,11 +192,10 @@ export default class MVTLayer extends TileLayer {
       return data.findIndex(
         feature => getFeatureUniqueId(feature, uniqueIdProperty) === featureIdToHighlight
       );
-    
-    // Non-iterable data
+
+      // Non-iterable data
     } else if (data && binary) {
-      const index = this._getHightlightedObjectIndexForBinaryData(data, uniqueIdProperty, featureIdToHighlight);
-      return index;
+      return getHightlightedObjectIndex(data, uniqueIdProperty, featureIdToHighlight);
     }
 
     return -1;
@@ -243,45 +209,6 @@ export default class MVTLayer extends TileLayer {
     const y = viewport.y;
     const layerIds = [this.id];
     return deck.pickObjects({x, y, width, height, layerIds, maxObjects});
-  }
-
-  _getLayerDataGeomType(data) {
-    if (Promise.resolve(data) !== data) {
-      if (data.points.featureIds.value.length) {
-        return 'points';
-      } else if (data.lines.featureIds.value.length) {
-        return 'lines';
-      } else if (data.polygons.featureIds.value.length) {
-        return 'polygons';
-      }
-    }
-    return null;
-  }
-
-  _getHightlightedObjectIndexForBinaryData(data, uniqueIdProperty, featureIdToHighlight) {
-    const geomType = this._getLayerDataGeomType(data);
-
-    if (geomType) {
-      // Look for the uniqueIdProperty
-      let index = -1;
-      if (data[geomType].numericProps[uniqueIdProperty]) {
-        index = data[geomType].numericProps[uniqueIdProperty].value.indexOf(featureIdToHighlight);
-      } else {
-        const propertyIndex = data[geomType].properties.findIndex((elem) => elem[uniqueIdProperty] === featureIdToHighlight);
-        index = data[geomType].featureIds.value.indexOf(propertyIndex);
-      }
-      
-      if (index !== -1) {
-        // Select geometry index depending on geometry type
-        // eslint-disable-next-line default-case
-        switch (geomType) {
-          case 'points':    return data[geomType].featureIds.value.indexOf(index);
-          case 'lines':     return data[geomType].pathIndices.value.indexOf(index);
-          case 'polygons':  return data[geomType].polygonIndices.value.indexOf(index);
-        }
-      }
-    }
-    return -1;
   }
 
   getRenderedFeatures(maxFeatures = null) {

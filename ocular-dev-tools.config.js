@@ -22,10 +22,7 @@ const config = {
   },
 
   aliases: {
-    'deck.gl-test': resolve(__dirname, './test'),
-    '@loaders.gl/loader-utils': `${__dirname}/../loaders.gl/modules/loader-utils/src`,
-    '@loaders.gl/mvt': `${__dirname}/../loaders.gl/modules/mvt/src`,
-    '@loaders.gl/gis': `${__dirname}/../loaders.gl/modules/gis/src`
+    'deck.gl-test': resolve(__dirname, './test')
   },
 
   browserTest: {
