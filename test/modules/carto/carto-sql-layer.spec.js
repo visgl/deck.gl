@@ -76,7 +76,7 @@ test('CartoSQLLayer#Maps API', async t => {
     } else {
       t.is(subLayers.length, 1, 'should render a subLayer');
       t.ok(Array.isArray(tilejson.tiles), 'tiles should be an array');
-      t.ok(subLayer instanceof MVTLayer, 'subLayer should be an MVT layer ');
+      t.ok(subLayer instanceof MVTLayer, 'subLayer should be a MVT layer ');
       t.is(subLayer.props.data, tilejson, 'data should be a tileJSON');
     }
   };
