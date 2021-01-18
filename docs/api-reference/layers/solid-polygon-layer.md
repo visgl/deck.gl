@@ -236,7 +236,7 @@ new SolidPolygonLayer({
 ## Remarks
 
 * This layer only renders filled polygons. If you need to render polygon
-  outlines, use the [`PathLayer`](/docs/api-reference/geo-layers/path-layer.md)
+  outlines, use the [`PathLayer`](/docs/api-reference/layers/path-layer.md)
 * Polygons are always closed, i.e. there is an implicit line segment between
   the first and last vertices, when those vertices are not equal.
 * The specification of complex polygons intentionally follows the GeoJson

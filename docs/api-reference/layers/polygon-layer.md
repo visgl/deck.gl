@@ -282,8 +282,8 @@ Only applies if `extruded: true`.
 
 The PolygonLayer renders the following sublayers:
 
-* `fill` - a [SolidPolygonLayer](/docs/api-reference/geo-layers/solid-polygon-layer.md) rendering the surface of all polygons.
-* `stroke` - a [PathLayer](/docs/api-reference/geo-layers/path-layer.md) rendering the outline of all polygons. Only rendered if `stroked: true` and `extruded: false`.
+* `fill` - a [SolidPolygonLayer](/docs/api-reference/layers/solid-polygon-layer.md) rendering the surface of all polygons.
+* `stroke` - a [PathLayer](/docs/api-reference/layers/path-layer.md) rendering the outline of all polygons. Only rendered if `stroked: true` and `extruded: false`.
 
 
 ## Remarks
