@@ -248,15 +248,6 @@ test('MVT#getVisibleTiles', async t => {
 
   TestMVTLayerVisibleTiles.componentName = 'TestMVTLayerVisibleTiles';
 
-  const WGS84_DATA_COORDS = [
-    [
-      [-34.365234375, 18.812717856407776],
-      [-34.27734374999999, 18.729501999072138],
-      [-34.365234375, 18.729501999072138],
-      [-34.365234375, 18.812717856407776]
-    ]
-  ];
-
   const testCases = [
     {
       props: {
@@ -265,12 +256,14 @@ test('MVT#getVisibleTiles', async t => {
       },
       onAfterUpdate: ({layer}) => {
         if (layer.isLoaded) {
-          const selectedTiles = layer.getVisibleTiles();
+          const [selectedTile] = layer.getVisibleTiles();
+
+          selectedTile.transformToWorld = content => content;
 
           t.deepEqual(
-            WGS84_DATA_COORDS,
-            selectedTiles[0].dataInWorldCoordinates[0].geometry.coordinates,
-            'dataInWorldCoordinates getter correctly returns data in WGS84.'
+            geoJSONData[0].geometry.coordinates,
+            selectedTile.dataInWorldCoordinates[0].geometry.coordinates,
+            'dataInWorldCoordinates getter correctly returns data.'
           );
         }
       }
