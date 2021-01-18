@@ -219,7 +219,10 @@ export default class MVTLayer extends TileLayer {
   }
 
   getVisibleTiles() {
-    return this.state.tileset.selectedTiles;
+    if (this.state && this.state.tileset && this.state.tileset.isLoaded) {
+      return this.state.tileset.selectedTiles;
+    }
+    return [];
   }
 
   _setupTileTransform(tiles, viewport) {

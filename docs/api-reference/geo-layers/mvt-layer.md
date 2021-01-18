@@ -117,12 +117,17 @@ On top of the [default options](/docs/api-reference/core/layer.md#loadoptions), 
 
 - [MVTLoader](https://loaders.gl/modules/mvt/docs/api-reference/mvt-loader)
 
+## Methods
 
-### Callbacks
+##### `getVisibleTiles`
+
+`getVisibleTiles` retrieves the visible tiles in the current viewport.
+
+## Callbacks
 
 ##### `onDataLoad` (Function, optional)
 
-`onDataLoad` called when a tileJSON is successfully fetched
+`onDataLoad` called when a tileJSON is successfully fetched.
 
 Receives arguments:
 

@@ -65,3 +65,42 @@ test('Tile2DHeader#Abort quickly', async t => {
   t.notOk(requestScheduler.requestMap.has(tile), 'Scheduler deletes tile on abort');
   t.end();
 });
+
+test('Tile2DHeader#transformToWorld', async t => {
+  const TILE_DATA_VALUES = {
+    initial: [{a: 1}],
+    transformed: [{a: 2}]
+  };
+
+  const requestScheduler = new RequestScheduler({throttleRequests: true, maxRequests: 1});
+  const getTileData = () => TILE_DATA_VALUES.initial;
+  const onTileLoad = () => null;
+  const onTileError = () => null;
+
+  const tile = new Tile2DHeader({onTileLoad, onTileError});
+  tile.isSelected = true;
+  tile.transformToWorld = () => TILE_DATA_VALUES.transformed;
+
+  const loader = tile._loadData(getTileData, requestScheduler);
+  await loader;
+
+  if (tile.isLoaded) {
+    const data = tile.dataInWorldCoordinates;
+    t.deepEqual(
+      data,
+      TILE_DATA_VALUES.transformed,
+      'dataInWorldCoordinates correctly returns transformed data.'
+    );
+  }
+
+  const data = tile.dataInWorldCoordinates;
+  if (tile._transformToWorldDataCache) {
+    t.deepEqual(
+      data,
+      TILE_DATA_VALUES.transformed,
+      'dataInWorldCoordinates correctly returns cached data.'
+    );
+  }
+
+  t.end();
+});
