@@ -4,7 +4,7 @@ import {TextLayerDemo} from 'website-components/doc-demos/layers';
 
 # TextLayer
 
-The text layer renders text labels on the map using texture mapping. This Layer is extended based on [Icon Layer](/docs/api-reference/geo-layers/icon-layer.md) and wrapped using [Composite Layer](/docs/api-reference/core/composite-layer.md).
+The text layer renders text labels on the map using texture mapping. This Layer is extended based on [Icon Layer](/docs/api-reference/layers/icon-layer.md) and wrapped using [Composite Layer](/docs/api-reference/core/composite-layer.md).
 
 Auto pack required `characterSet` into a shared texture `fontAtlas`.
 
