@@ -12,6 +12,10 @@ function makeEvent(type, opts, seed) {
     delta: -seed - 1,
     deltaX: seed / 2,
     deltaY: seed / 2,
+    velocityX: seed / 2,
+    velocityY: seed / 2,
+    velocity: seed / 2,
+    deltaTime: seed,
     scale: 1 + (seed + 1) * 0.1,
     rotation: (seed + 1) * 5,
     srcEvent: opts,
@@ -56,14 +60,14 @@ const TEST_CASES = [
     title: 'pan#out of bounds',
     props: {x: 200},
     events: () => makeEvents(['panstart', 'panmove', 'panend']),
-    viewStateChanges: 1,
+    viewStateChanges: 0,
     interactionStates: 0
   },
   {
     title: 'pan#handled event',
     props: {},
     events: () => makeEvents(['panstart', 'panmove', 'panend'], {handled: true}),
-    viewStateChanges: 1,
+    viewStateChanges: 0,
     interactionStates: 0
   },
   {
@@ -92,7 +96,7 @@ const TEST_CASES = [
     title: 'pinch#out of bounds',
     props: {x: 200},
     events: () => makeEvents(['pinchstart', 'pinchmove', 'pinchend']),
-    viewStateChanges: 1,
+    viewStateChanges: 0,
     interactionStates: 0
   },
   {
@@ -114,7 +118,7 @@ const TEST_CASES = [
     title: 'tripan#out of bounds',
     props: {x: 200},
     events: () => makeEvents(['tripanstart', 'tripanmove', 'tripanend']),
-    viewStateChanges: 1,
+    viewStateChanges: 0,
     interactionStates: 0
   },
   {
@@ -243,7 +247,10 @@ async function runTestCase(t, controller, testCase, defaultProps) {
   );
   for (const event of testCase.events()) {
     controller.handleEvent(event);
-    await waitUntil(controller, () => !controller._interactionState.inTransition);
+    await waitUntil(
+      controller,
+      () => !controller._eventStartBlocked && !controller._interactionState.inTransition
+    );
   }
   t.is(onViewStateChangeCalled, testCase.viewStateChanges, `${testCase.title} onViewStateChange`);
   t.is(

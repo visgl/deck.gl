@@ -314,6 +314,9 @@ export default class Controller {
   }
 
   _onPanEnd(event) {
+    if (!this.isDragging()) {
+      return false;
+    }
     return this._panMove ? this._onPanMoveEnd(event) : this._onPanRotateEnd(event);
   }
 
@@ -334,7 +337,7 @@ export default class Controller {
 
   _onPanMoveEnd(event) {
     const {inertia} = this;
-    if (inertia && event.velocity) {
+    if (this.dragPan && inertia && event.velocity) {
       const pos = this.getCenter(event);
       const endPos = [
         pos[0] + (event.velocityX * inertia) / 2,
@@ -381,7 +384,7 @@ export default class Controller {
 
   _onPanRotateEnd(event) {
     const {inertia} = this;
-    if (inertia && event.velocity) {
+    if (this.dragRotate && inertia && event.velocity) {
       const pos = this.getCenter(event);
       const endPos = [
         pos[0] + (event.velocityX * inertia) / 2,
@@ -473,8 +476,11 @@ export default class Controller {
   }
 
   _onTriplePanEnd(event) {
+    if (!this.isDragging()) {
+      return false;
+    }
     const {inertia} = this;
-    if (inertia && event.velocityY) {
+    if (this.touchRotate && inertia && event.velocityY) {
       const pos = this.getCenter(event);
       const endPos = [pos[0], (pos[1] += (event.velocityY * inertia) / 2)];
       const newControllerState = this.controllerState.rotate({pos: endPos});
@@ -549,25 +555,18 @@ export default class Controller {
   }
 
   _onPinchEnd(event) {
+    if (!this.isDragging()) {
+      return false;
+    }
     const {inertia, _lastPinchEvent} = this;
-    if (inertia && _lastPinchEvent && event.scale !== _lastPinchEvent.scale) {
+    if (this.touchZoom && inertia && _lastPinchEvent && event.scale !== _lastPinchEvent.scale) {
       const pos = this.getCenter(event);
-      let newControllerState = this.controllerState;
-      if (this.touchZoom) {
-        const z = Math.log2(event.scale);
-        const velocityZ =
-          (z - Math.log2(_lastPinchEvent.scale)) / (event.deltaTime - _lastPinchEvent.deltaTime);
-        const endScale = Math.pow(2, z + (velocityZ * inertia) / 2);
-        newControllerState = newControllerState.zoom({pos, scale: endScale}).zoomEnd();
-      }
-      if (this.touchRotate) {
-        const {rotation} = event;
-        newControllerState = newControllerState
-          .rotate({
-            deltaAngleX: this._startPinchRotation - rotation
-          })
-          .rotateEnd();
-      }
+      let newControllerState = this.controllerState.rotateEnd();
+      const z = Math.log2(event.scale);
+      const velocityZ =
+        (z - Math.log2(_lastPinchEvent.scale)) / (event.deltaTime - _lastPinchEvent.deltaTime);
+      const endScale = Math.pow(2, z + (velocityZ * inertia) / 2);
+      newControllerState = newControllerState.zoom({pos, scale: endScale}).zoomEnd();
 
       this.updateViewport(
         newControllerState,
@@ -580,7 +579,7 @@ export default class Controller {
           isDragging: false,
           isPanning: this.touchZoom,
           isZooming: this.touchZoom,
-          isRotating: this.touchRotate
+          isRotating: false
         }
       );
       this.blockEvents(inertia);
