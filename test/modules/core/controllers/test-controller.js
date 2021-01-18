@@ -197,10 +197,7 @@ const TEST_CASES = [
   }
 ];
 
-export default function testController(t, ViewClass, defaultProps, blackList = []) {
-  let onViewStateChangeCalled = 0;
-  let affectedStates = null;
-
+export default async function testController(t, ViewClass, defaultProps, blackList = []) {
   const timeline = new Timeline();
   const view = new ViewClass({controller: true});
   Object.assign(defaultProps, BASE_PROPS, view.controller, {
@@ -214,37 +211,61 @@ export default function testController(t, ViewClass, defaultProps, blackList = [
     if (blackList.includes(testCase.title)) {
       continue; // eslint-disable-line
     }
-    // reset
-    onViewStateChangeCalled = 0;
-    affectedStates = new Set();
+    await runTestCase(t, controller, testCase, defaultProps);
+  }
+}
 
-    /* eslint-disable no-loop-func */
-    controller.setProps(
-      Object.assign(
-        {
-          onViewStateChange: () => {
+async function runTestCase(t, controller, testCase, defaultProps) {
+  let onViewStateChangeCalled = 0;
+  const affectedStates = new Set();
+
+  /* eslint-disable no-loop-func */
+  controller.setProps(
+    Object.assign(
+      {
+        onViewStateChange: ({viewState, interactionState}) => {
+          if (!interactionState.inTransition) {
             onViewStateChangeCalled++;
-          },
-          onStateChange: state => {
-            for (const key in state) {
-              if (state[key] && key.startsWith('is')) {
-                affectedStates.add(key);
-              }
+          }
+          controller.setProps(Object.assign({}, defaultProps, testCase.props, viewState));
+        },
+        onStateChange: state => {
+          for (const key in state) {
+            if (state[key] && key.startsWith('is')) {
+              affectedStates.add(key);
             }
           }
-        },
-        defaultProps,
-        testCase.props
-      )
-    );
-    for (const event of testCase.events()) {
-      controller.handleEvent(event);
-    }
-    t.is(onViewStateChangeCalled, testCase.viewStateChanges, `${testCase.title} onViewStateChange`);
-    t.is(
-      affectedStates.size,
-      testCase.interactionStates,
-      `${testCase.title} interaction state updated`
-    );
+        }
+      },
+      defaultProps,
+      testCase.props
+    )
+  );
+  for (const event of testCase.events()) {
+    controller.handleEvent(event);
+    await waitUntil(controller, () => !controller._interactionState.inTransition);
   }
+  t.is(onViewStateChangeCalled, testCase.viewStateChanges, `${testCase.title} onViewStateChange`);
+  t.is(
+    affectedStates.size,
+    testCase.interactionStates,
+    `${testCase.title} interaction state updated`
+  );
+}
+
+function waitUntil(controller, verify) {
+  const {timeline} = controller.controllerStateProps;
+  return new Promise(resolve => {
+    const check = () => {
+      if (verify()) {
+        resolve();
+      } else {
+        timeline.setTime(timeline.getTime() + 100);
+        controller.updateTransition();
+        /* global setTimeout */
+        setTimeout(check, 10);
+      }
+    };
+    check();
+  });
 }
