@@ -66,8 +66,8 @@ export function createLayerPropsFromBinary(geojsonBinary) {
     attributes: {
       getPolygon: polygons.positions
     },
-    properties: lines.properties,
-    numericProps: lines.numericProps
+    properties: polygons.properties,
+    numericProps: polygons.numericProps
   };
   layerProps.polygons._normalize = false;
 
@@ -77,8 +77,8 @@ export function createLayerPropsFromBinary(geojsonBinary) {
     attributes: {
       getPath: polygons.positions
     },
-    properties: lines.properties,
-    numericProps: lines.numericProps
+    properties: polygons.properties,
+    numericProps: polygons.numericProps
   };
   layerProps.polygonsOutline._pathType = 'open';
 
