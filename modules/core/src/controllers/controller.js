@@ -44,9 +44,13 @@ export default class Controller {
     this.controllerState = null;
     this.controllerStateProps = null;
     this.eventManager = null;
-    this.transitionManager = new TransitionManager(ControllerState, options);
+    this.transitionManager = new TransitionManager(ControllerState, {
+      ...options,
+      onViewStateChange: this._onTransition.bind(this),
+      onStateChange: this._setInteractionState.bind(this)
+    });
     this._events = null;
-    this._state = {
+    this._interactionState = {
       isDragging: false
     };
     this._customEvents = [];
@@ -145,7 +149,7 @@ export default class Controller {
   }
 
   isDragging() {
-    return this._state.isDragging;
+    return this._interactionState.isDragging;
   }
 
   /**
@@ -238,17 +242,28 @@ export default class Controller {
     // const oldViewState = this.controllerState.getViewportProps();
     // const changed = Object.keys(viewState).some(key => oldViewState[key] !== viewState[key]);
 
+    this._state = newControllerState.getState();
+    this._setInteractionState(interactionState);
+
     if (changed) {
       const oldViewState = this.controllerState ? this.controllerState.getViewportProps() : null;
       if (this.onViewStateChange) {
-        this.onViewStateChange({viewState, interactionState, oldViewState});
+        this.onViewStateChange({viewState, interactionState: this._interactionState, oldViewState});
       }
     }
+  }
 
-    Object.assign(this._state, newControllerState.getState(), interactionState);
+  _onTransition(params) {
+    if (this.onViewStateChange) {
+      params.interactionState = this._interactionState;
+      this.onViewStateChange(params);
+    }
+  }
 
+  _setInteractionState(newStates) {
+    Object.assign(this._interactionState, newStates);
     if (this.onStateChange) {
-      this.onStateChange(this._state);
+      this.onStateChange(this._interactionState);
     }
   }
 

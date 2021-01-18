@@ -26,7 +26,8 @@ export default class TransitionManager {
     this.propsInTransition = null;
     this.transition = new Transition(props.timeline);
 
-    this.onViewStateChange = props.onViewStateChange;
+    this.onViewStateChange = props.onViewStateChange || noop;
+    this.onStateChange = props.onStateChange || noop;
 
     this._onTransitionUpdate = this._onTransitionUpdate.bind(this);
   }
@@ -144,12 +145,23 @@ export default class TransitionManager {
       onInterrupt: this._onTransitionEnd(endProps.onTransitionInterrupt),
       onEnd: this._onTransitionEnd(endProps.onTransitionEnd)
     });
+
+    this.onStateChange({inTransition: true});
+
     this.updateTransition();
   }
 
   _onTransitionEnd(callback) {
     return transition => {
       this.propsInTransition = null;
+
+      this.onStateChange({
+        inTransition: false,
+        isZooming: false,
+        isPanning: false,
+        isRotating: false
+      });
+
       callback(transition);
     };
   }
@@ -169,13 +181,10 @@ export default class TransitionManager {
       Object.assign({}, this.props, viewport)
     ).getViewportProps();
 
-    if (this.onViewStateChange) {
-      this.onViewStateChange({
-        viewState: this.propsInTransition,
-        interactionState: {inTransition: true},
-        oldViewState: this.props
-      });
-    }
+    this.onViewStateChange({
+      viewState: this.propsInTransition,
+      oldViewState: this.props
+    });
   }
 }
 

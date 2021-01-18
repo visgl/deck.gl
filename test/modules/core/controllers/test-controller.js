@@ -222,9 +222,8 @@ export default function testController(t, ViewClass, defaultProps, blackList = [
     controller.setProps(
       Object.assign(
         {
-          onViewStateChange: ({viewState}) => {
+          onViewStateChange: () => {
             onViewStateChangeCalled++;
-            controller.setProps(Object.assign({}, defaultProps, testCase.props, viewState));
           },
           onStateChange: state => {
             for (const key in state) {
