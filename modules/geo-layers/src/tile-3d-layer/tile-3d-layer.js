@@ -38,7 +38,7 @@ export default class Tile3DLayer extends CompositeLayer {
 
   get isLoaded() {
     const {tileset3d} = this.state;
-    return tileset3d && tileset3d.tiles.every(tile => !tile.selected || tile.contentReady);
+    return tileset3d && tileset3d.isLoaded();
   }
 
   shouldUpdateState({changeFlags}) {
