@@ -4,7 +4,7 @@
 
 Make sure to read the [Using deck.gl with React](/docs/get-started/using-with-react.md) article.
 
-The `DeckGL` class is a React wrapper of the `Deck` JavaScript class which exposes essentially the same props. The `Deck` class should not be used directly in React applications.
+The `DeckGL` class is a React wrapper of the [Deck](/docs/api-reference/core/deck.md) JavaScript class which exposes essentially the same props. The `Deck` class should not be used directly in React applications.
 
 
 ## Usage
