@@ -224,8 +224,10 @@ export default class MVTLayer extends TileLayer {
 
   _setupTileTransform(tiles, viewport) {
     tiles.forEach(tile => {
-      tile.transformToWorld = data =>
-        data.map(object => transformTileCoordsToWGS84(object, tile, viewport));
+      if (tile.transformToWorld === null) {
+        tile.transformToWorld = content =>
+          content.map(object => transformTileCoordsToWGS84(object, tile, viewport));
+      }
     });
   }
 
