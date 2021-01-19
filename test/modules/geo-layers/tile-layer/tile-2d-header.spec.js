@@ -1,6 +1,8 @@
 import test from 'tape-catch';
 import Tile2DHeader from '@deck.gl/geo-layers/tile-layer/tile-2d-header';
 import {RequestScheduler} from '@loaders.gl/loader-utils';
+import {WebMercatorViewport} from '@deck.gl/core';
+import {_transformTileCoordsToWGS84} from '@deck.gl/geo-layers';
 
 test('Tile2DHeader', async t => {
   let onTileErrorCalled = false;
@@ -66,41 +68,103 @@ test('Tile2DHeader#Abort quickly', async t => {
   t.end();
 });
 
-test('Tile2DHeader#transformToWorld', async t => {
-  const TILE_DATA_VALUES = {
-    initial: [{a: 1}],
-    transformed: [{a: 2}]
-  };
+const LOCAL_TILE_COORDS = [
+  {
+    type: 'Feature',
+    geometry: {
+      type: 'Polygon',
+      coordinates: [
+        [
+          [0.80908203125, 0.8935546875],
+          [0.8095703125, 0.89404296875],
+          [0.80908203125, 0.89404296875],
+          [0.80908203125, 0.8935546875]
+        ]
+      ]
+    }
+  }
+];
 
-  const requestScheduler = new RequestScheduler({throttleRequests: true, maxRequests: 1});
-  const getTileData = () => TILE_DATA_VALUES.initial;
+test('Tile2DHeader#dataInWorldCoordinates', async t => {
+  const [tile, getTileData] = createTile2DHeaderWithMockedData(LOCAL_TILE_COORDS);
+
+  // Mock loader
+  tile._loader = getTileData();
+  // Not loaded data
+  t.is(
+    tile.dataInWorldCoordinates instanceof Promise,
+    tile._loader instanceof Promise,
+    'dataInWorldCoordinates getter correctly returns loader.'
+  );
+  // Load data
+  tile.content = await getTileData();
+  tile._isLoaded = true;
+  // Loaded data
+  t.deepEqual(
+    tile.dataInWorldCoordinates,
+    LOCAL_TILE_COORDS,
+    'dataInWorldCoordinates getter correctly returns no-transformed data.'
+  );
+
+  t.end();
+});
+
+const TRANSFORM_TO_WORLD_VIEWPORT = new WebMercatorViewport({
+  latitude: 0,
+  longitude: 0,
+  zoom: 1
+});
+
+const TRANSFORM_TO_WORLD_BBOX = {west: -180, north: 85.0511287798066, east: 0, south: 0};
+
+test('Tile2DHeader#transformToWorld', async t => {
+  const [tile, getTileData] = createTile2DHeaderWithMockedData(LOCAL_TILE_COORDS);
+
+  tile.bbox = TRANSFORM_TO_WORLD_BBOX;
+  tile.transformToWorld = content =>
+    content.map(object => _transformTileCoordsToWGS84(object, tile, TRANSFORM_TO_WORLD_VIEWPORT));
+  // Mock loader
+  tile._loader = getTileData();
+  // Not loaded data
+  t.is(
+    tile.dataInWorldCoordinates instanceof Promise,
+    tile._loader instanceof Promise,
+    'dataInWorldCoordinates getter correctly returns loader.'
+  );
+  // Load data
+  tile.content = await getTileData();
+  tile._isLoaded = true;
+  // Check empty cache
+  t.is(tile._transformToWorldDataCache, null, 'Data cache is empty.');
+  // Loaded data
+  t.deepEqual(
+    tile.dataInWorldCoordinates[0].geometry.coordinates,
+    tile.transformToWorld(tile.content)[0].geometry.coordinates,
+    'dataInWorldCoordinates getter correctly returns transformed data.'
+  );
+  // Check cache
+  t.isNot(tile._transformToWorldDataCache, null, 'Data cache is not empty.');
+  // Loaded data
+  t.deepEqual(
+    tile.dataInWorldCoordinates,
+    tile._transformToWorldDataCache,
+    'dataInWorldCoordinates getter correctly returns cached data.'
+  );
+
+  t.end();
+});
+
+function createTile2DHeaderWithMockedData(data) {
+  const getTileData = () =>
+    new Promise(resolve => {
+      resolve(data);
+    });
+
   const onTileLoad = () => null;
   const onTileError = () => null;
 
   const tile = new Tile2DHeader({onTileLoad, onTileError});
   tile.isSelected = true;
-  tile.transformToWorld = () => TILE_DATA_VALUES.transformed;
 
-  const loader = tile._loadData(getTileData, requestScheduler);
-  await loader;
-
-  if (tile.isLoaded) {
-    const data = tile.dataInWorldCoordinates;
-    t.deepEqual(
-      data,
-      TILE_DATA_VALUES.transformed,
-      'dataInWorldCoordinates correctly returns transformed data.'
-    );
-  }
-
-  const data = tile.dataInWorldCoordinates;
-  if (tile._transformToWorldDataCache) {
-    t.deepEqual(
-      data,
-      TILE_DATA_VALUES.transformed,
-      'dataInWorldCoordinates correctly returns cached data.'
-    );
-  }
-
-  t.end();
-});
+  return [tile, getTileData];
+}

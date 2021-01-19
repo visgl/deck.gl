@@ -117,13 +117,8 @@ On top of the [default options](/docs/api-reference/core/layer.md#loadoptions), 
 
 - [MVTLoader](https://loaders.gl/modules/mvt/docs/api-reference/mvt-loader)
 
-## Methods
 
-##### `getVisibleTiles`
-
-`getVisibleTiles` retrieves the visible tiles in the current viewport.
-
-## Callbacks
+### Callbacks
 
 ##### `onDataLoad` (Function, optional)
 
@@ -191,6 +186,12 @@ new MVTLayer({
 Remarks
 
 - It is not recommended to call these functions every time `onViewportChange` is executed, instead, use a debounce function.
+
+## Methods
+
+##### `getVisibleTiles`
+
+Retrieves the visible tiles in the current viewport.
 
 ## Source
 

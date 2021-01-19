@@ -268,7 +268,7 @@ function isFeatureIdDefined(value) {
   return value !== undefined && value !== null && value !== '';
 }
 
-function transformTileCoordsToWGS84(object, tile, viewport) {
+export function transformTileCoordsToWGS84(object, tile, viewport) {
   const feature = {
     ...object,
     geometry: {
