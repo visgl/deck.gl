@@ -18,12 +18,13 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {CompositeLayer, log, binaryToFeature} from '@deck.gl/core';
+import {CompositeLayer, log} from '@deck.gl/core';
 import ScatterplotLayer from '../scatterplot-layer/scatterplot-layer';
 import PathLayer from '../path-layer/path-layer';
 // Use primitive layer to avoid "Composite Composite" layers for now
 import SolidPolygonLayer from '../solid-polygon-layer/solid-polygon-layer';
 import {replaceInRange} from '../utils';
+import {geoJsonBinaryToFeature} from './geojson-binary';
 
 import {getGeojsonFeatures, separateGeojsonFeatures} from './geojson';
 import {createLayerPropsFromFeatures, createLayerPropsFromBinary} from './geojson-layer-props';
@@ -351,7 +352,7 @@ export default class GeoJsonLayer extends CompositeLayer {
     return (object, info) => {
       const {data, index} = info;
       const attr = 'startIndices' in data ? 'startIndices' : null;
-      const feature = binaryToFeature(data, index, attr);
+      const feature = geoJsonBinaryToFeature(data, index, attr);
       return accessor(feature, info);
     };
   }

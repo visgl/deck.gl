@@ -1,4 +1,4 @@
-export function binaryToFeature(data, index, indexAttr) {
+export function geoJsonBinaryToFeature(data, index, indexAttr) {
   const featureIndex = !indexAttr
     ? index
     : 'value' in data[indexAttr]
@@ -18,7 +18,7 @@ export function binaryToFeature(data, index, indexAttr) {
   return feature;
 }
 
-export function findFeatureBinary(data, uniqueIdProperty, featureId) {
+export function findFeatureGeoJsonBinary(data, uniqueIdProperty, featureId) {
   const geomTypes = ['points', 'lines', 'polygons'];
 
   for (const gt of geomTypes) {

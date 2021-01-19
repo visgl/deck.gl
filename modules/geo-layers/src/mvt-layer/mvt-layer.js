@@ -1,7 +1,8 @@
 import {Matrix4} from 'math.gl';
 import {MVTLoader} from '@loaders.gl/mvt';
 import {load} from '@loaders.gl/core';
-import {COORDINATE_SYSTEM, binaryToFeature, findFeatureBinary} from '@deck.gl/core';
+import {COORDINATE_SYSTEM} from '@deck.gl/core';
+import {_geoJsonBinaryToFeature, _findFeatureGeoJsonBinary} from '@deck.gl/layers';
 
 import TileLayer from '../tile-layer/tile-layer';
 import {getURLFromTemplate, isURLTemplate} from '../tile-layer/utils';
@@ -166,9 +167,9 @@ export default class MVTLayer extends TileLayer {
     } else if (this.props.binary && info.index !== -1) {
       const {data} = params.sourceLayer.props;
       info.object =
-        binaryToFeature(data.points, info.index) ||
-        binaryToFeature(data.lines, info.index, 'pathIndices') ||
-        binaryToFeature(data.polygons, info.index, 'primitivePolygonIndices');
+        _geoJsonBinaryToFeature(data.points, info.index) ||
+        _geoJsonBinaryToFeature(data.lines, info.index, 'pathIndices') ||
+        _geoJsonBinaryToFeature(data.polygons, info.index, 'primitivePolygonIndices');
     }
 
     return info;
@@ -198,7 +199,7 @@ export default class MVTLayer extends TileLayer {
 
       // Non-iterable data
     } else if (data && binary) {
-      return findFeatureBinary(data, uniqueIdProperty, featureIdToHighlight);
+      return _findFeatureGeoJsonBinary(data, uniqueIdProperty, featureIdToHighlight);
     }
 
     return -1;
