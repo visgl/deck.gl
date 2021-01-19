@@ -59,22 +59,15 @@ If this is an issue, set the `isolation` CSS prop on the `DeckGL` parent element
 
 The `Deck` class supports the following experimental props to aggressively reduce memory usage on memory-restricted devices:
 
-##### `_pickable` (Boolean)
+- [_pickable](/docs/api-reference/core/deck.md#_pickable)
+- [_typedArrayManagerProps](/docs/api-reference/core/deck.md#_typedArrayManagerProps)
 
-- Default `true`
-
-If set to `false`, force disables all picking features (overrides `layer.props.pickable`).
-
-##### `_typedArrayManagerProps` (Object)
-
-- `overAlloc` (Number) - Default `2`. By default, attributes are allocated twice the memory than they actually need (on both CPU and GPU). Must be larger than `1`.
-- `poolSize` (Number) - Default `100`. When memory reallocation is needed, old chunks are held on to and recycled. Smaller number uses less CPU memory. Can be any number `>=0`.
-
-The above default settings make data updates faster, at the price of using more memory. If the app does not anticipate frequent data changes, they may be aggressively reduced:
+The app can sacrefice certain features and/or runtime performance in exchange for a smaller memory footprint:
 
 ```js
 new Deck({
-  ...
+  // ...
+  _pickable: false,
   _typedArrayManagerProps: isMobile ? {overAlloc: 1, poolSize: 0} : null
 })
 ```

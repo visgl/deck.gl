@@ -9,17 +9,10 @@ const SQL_RESPONSE = {
   tilestats: {}
 };
 
-const MAP_CONFIG = {
-  version: '2.0.0',
-  buffer_size: 16,
-  tile_extent: 4096,
-  layers: [
-    {
-      type: 'sql',
-      source: 'postgres',
-      options: {sql: 'SELECT * FROM ne_10m_airports', vector_extent: 4096}
-    }
-  ]
+const CFG = {
+  connection: 'carto',
+  type: 'table',
+  source: 'ne_10m_airports'
 };
 
 const TEST_CASES = [
@@ -76,7 +69,7 @@ test('mapApiClient#getTileJSON', async t => {
       setDefaultCredentials(tc.credentials);
 
       try {
-        await _getTileJSON({mapConfig: MAP_CONFIG});
+        await _getTileJSON(CFG);
       } catch (err) {
         t.pass(`Correctly throws ${err}`);
       }
@@ -84,7 +77,7 @@ test('mapApiClient#getTileJSON', async t => {
       continue;
     }
 
-    const func = await _getTileJSON({mapConfig: MAP_CONFIG});
+    const func = await _getTileJSON(CFG);
     t.ok(func.tiles[0] === SQL_RESPONSE.tiles[0], 'getTileJSON correctly returns tiles endpoint');
   }
 
@@ -96,7 +89,7 @@ test('mapApiClient#getTileJSON', async t => {
     });
 
     try {
-      await _getTileJSON({mapConfig: MAP_CONFIG});
+      await _getTileJSON(CFG);
     } catch (err) {
       t.pass(`Correctly throws ${err}`);
     }

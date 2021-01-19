@@ -101,7 +101,7 @@ prop is effective only when the polygon is NOT extruded.
 
 ##### `stroked` (Boolean, optional)
 
-* Default: `false`
+* Default: `true`
 
 Whether to draw an outline around polygons (solid fill). Note that
 for complex polygons, both the outer polygon as well the outlines of
@@ -272,10 +272,10 @@ Note: This accessor is only called for `Polygon` and `MultiPolygon` features.
 
 The GeoJsonLayer renders the following sublayers:
 
-* `polygons-fill` - a [SolidPolygonLayer](/docs/api-reference/geo-layers/solid-polygon-layer.md) rendering all the `Polygon` and `MultiPolygon` features.
-* `polygons-stroke` - a [PathLayer](/docs/api-reference/geo-layers/path-layer.md) rendering the outline of all the `Polygon` and `MultiPolygon` features. Only rendered if `stroked: true` and `extruded: false`.
-* `linestrings` - a [PathLayer](/docs/api-reference/geo-layers/path-layer.md) rendering all the `LineString` and `MultiLineString` features.
-* `points` - a [ScatterplotLayer](/docs/api-reference/geo-layers/scatterplot-layer.md) rendering all the `Point` and `MultiPoint` features.
+* `polygons-fill` - a [SolidPolygonLayer](/docs/api-reference/layers/solid-polygon-layer.md) rendering all the `Polygon` and `MultiPolygon` features.
+* `polygons-stroke` - a [PathLayer](/docs/api-reference/layers/path-layer.md) rendering the outline of all the `Polygon` and `MultiPolygon` features. Only rendered if `stroked: true` and `extruded: false`.
+* `linestrings` - a [PathLayer](/docs/api-reference/layers/path-layer.md) rendering all the `LineString` and `MultiLineString` features.
+* `points` - a [ScatterplotLayer](/docs/api-reference/layers/scatterplot-layer.md) rendering all the `Point` and `MultiPoint` features.
 
 
 ## Remarks

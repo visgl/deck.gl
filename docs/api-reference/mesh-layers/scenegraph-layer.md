@@ -13,11 +13,6 @@ The `ScenegraphLayer` renders a number of instances of a complete luma.gl sceneg
 ```js
 import DeckGL from '@deck.gl/react';
 import {ScenegraphLayer} from '@deck.gl/mesh-layers';
-import {registerLoaders} from '@loaders.gl/core';
-import {GLTFLoader} from '@loaders.gl/gltf';
-
-// Register the proper loader for scenegraph.gltf
-registerLoaders(GLTFLoader);
 
 function App({data, viewState}) {
   /**
@@ -52,12 +47,27 @@ function App({data, viewState}) {
 To install the dependencies from NPM:
 
 ```bash
-npm install @deck.gl/mesh-layers
+npm install deck.gl
+# or
+npm install @deck.gl/core @deck.gl/mesh-layers
 ```
 
 ```js
 import {ScenegraphLayer} from '@deck.gl/mesh-layers';
 new ScenegraphLayer({});
+```
+
+To use pre-bundled scripts:
+
+```html
+<script src="https://unpkg.com/deck.gl@^8.0.0/dist.min.js"></script>
+<!-- or -->
+<script src="https://unpkg.com/@deck.gl/core@^8.0.0/dist.min.js"></script>
+<script src="https://unpkg.com/@deck.gl/mesh-layers@^8.0.0/dist.min.js"></script>
+```
+
+```js
+new deck.ScenegraphLayer({});
 ```
 
 

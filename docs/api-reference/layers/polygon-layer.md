@@ -104,7 +104,7 @@ the area between the outer polygon and any holes will be filled.
 
 ##### `stroked` (Boolean, optional)
 
-* Default: `false`
+* Default: `true`
 
 Whether to draw an outline around the polygon (solid fill). Note that
 both the outer polygon as well the outlines of any holes will be drawn.
@@ -282,8 +282,8 @@ Only applies if `extruded: true`.
 
 The PolygonLayer renders the following sublayers:
 
-* `fill` - a [SolidPolygonLayer](/docs/api-reference/geo-layers/solid-polygon-layer.md) rendering the surface of all polygons.
-* `stroke` - a [PathLayer](/docs/api-reference/geo-layers/path-layer.md) rendering the outline of all polygons. Only rendered if `stroked: true` and `extruded: false`.
+* `fill` - a [SolidPolygonLayer](/docs/api-reference/layers/solid-polygon-layer.md) rendering the surface of all polygons.
+* `stroke` - a [PathLayer](/docs/api-reference/layers/path-layer.md) rendering the outline of all polygons. Only rendered if `stroked: true` and `extruded: false`.
 
 
 ## Remarks

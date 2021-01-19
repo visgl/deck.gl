@@ -466,7 +466,7 @@ export default class Controller {
     const isZoomOut = this.isFunctionKeyPressed(event);
 
     const newControllerState = this.controllerState.zoom({pos, scale: isZoomOut ? 0.5 : 2});
-    this.updateViewport(newControllerState, this._getTransitionProps(), {
+    this.updateViewport(newControllerState, this._getTransitionProps({around: pos}), {
       isZooming: true,
       isPanning: true
     });

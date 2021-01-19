@@ -24,10 +24,11 @@ export function getDefaultCredentials() {
 }
 
 export function getMapsVersion(creds) {
-  const localCreds = creds || credentials;
-  if (localCreds.mapsVersion) {
-    return localCreds.mapsVersion;
+  const {mapsVersion, mapsUrl} = {...credentials, ...creds};
+
+  if (mapsVersion) {
+    return mapsVersion;
   }
 
-  return localCreds.mapsUrl.includes('api/v1/map') ? 'v1' : 'v2';
+  return mapsUrl.includes('api/v1/map') ? 'v1' : 'v2';
 }

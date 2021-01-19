@@ -160,11 +160,18 @@ function printLayerProps(layer, propsSource) {
  * Open a layer example in Codepen
  */
 export function gotoSource(layer, config, initialViewState) {
-  const {Layer, getTooltip, props, mapStyle = true, dependencies = [], loaders, imports} = config;
+  const {Layer, getTooltip, props, mapStyle = true, dependencies = [], imports} = config;
 
   const symbols = ['DeckGL', Layer.layerName];
+  const loaders = [];
   if (imports) {
-    symbols.push(...Object.keys(imports));
+    for (const key in imports) {
+      if (key.endsWith('Loader')) {
+        loaders.push(key);
+      } else {
+        symbols.push(key);
+      }
+    }
   }
 
   const initialViewStateSerialized = addIndent(
@@ -177,10 +184,9 @@ export function gotoSource(layer, config, initialViewState) {
  * ${window.location.href}
  */
 const {${symbols.join(', ')}} = deck;
-${loaders ? `\
-const {${['registerLoaders', ...loaders].join(', ')}} = loaders;
+${loaders.length ? `\
+const {${loaders.join(', ')}} = loaders;` : ''};
 
-registerLoaders([${loaders.join(', ')}]);` : ''}
 const layer = new ${Layer.layerName}({
   ${printLayerProps(layer, props)}
 });
