@@ -96,4 +96,4 @@ export {mergeShaders as _mergeShaders} from './utils/shader';
 export {compareProps as _compareProps} from './lifecycle/props';
 
 // Binary utilities
-export {binaryToFeature, binaryToFeatureIndexAttr, binaryGuessGeomType} from './utils/binary';
+export {binaryToFeature, findFeatureBinary} from './utils/binary';

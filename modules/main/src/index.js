@@ -83,8 +83,7 @@ export {
   fp64LowPart,
   createIterable,
   binaryToFeature,
-  binaryToFeatureIndexAttr,
-  binaryGuessGeomType
+  findFeatureBinary
 } from '@deck.gl/core';
 
 //

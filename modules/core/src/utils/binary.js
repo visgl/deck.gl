@@ -1,20 +1,4 @@
-export function binaryToFeature(geojsonBinary, index) {
-  const geomType = binaryGuessGeomType(geojsonBinary);
-
-  if (!geomType) {
-    return null;
-  }
-
-  const attr = {
-    points: null,
-    lines: 'pathIndices',
-    polygons: 'primitivePolygonIndices'
-  };
-
-  return binaryToFeatureIndexAttr(geojsonBinary[geomType], index, attr[geomType]);
-}
-
-export function binaryToFeatureIndexAttr(data, index, indexAttr) {
+export function binaryToFeature(data, index, indexAttr) {
   const featureIndex = !indexAttr
     ? index
     : 'value' in data[indexAttr]
@@ -34,15 +18,45 @@ export function binaryToFeatureIndexAttr(data, index, indexAttr) {
   return feature;
 }
 
-export function binaryGuessGeomType(data) {
-  if (data && Promise.resolve(data) !== data) {
-    if (data.points && data.points.featureIds.value.length) {
-      return 'points';
-    } else if (data.lines && data.lines.featureIds.value.length) {
-      return 'lines';
-    } else if (data.polygons && data.polygons.featureIds.value.length) {
-      return 'polygons';
+export function findFeatureBinary(data, uniqueIdProperty, featureId) {
+  const geomTypes = ['points', 'lines', 'polygons'];
+
+  for (const gt of geomTypes) {
+    const feature = findFeatureByType(data, uniqueIdProperty, featureId, gt);
+    if (feature !== -1) {
+      return feature;
     }
   }
-  return null;
+
+  return -1;
+}
+
+function findFeatureByType(data, uniqueIdProperty, featureId, geomType) {
+  if (!(geomType in data) || !data[geomType].positions.value.length) return -1;
+
+  // Look for the uniqueIdProperty
+  let index = -1;
+  if (data[geomType].numericProps[uniqueIdProperty]) {
+    index = data[geomType].numericProps[uniqueIdProperty].value.indexOf(featureId);
+  } else {
+    const propertyIndex = data[geomType].properties.findIndex(
+      elem => elem[uniqueIdProperty] === featureId
+    );
+    index = data[geomType].featureIds.value.indexOf(propertyIndex);
+  }
+
+  if (index !== -1) {
+    // Select geometry index depending on geometry type
+    // eslint-disable-next-line default-case
+    switch (geomType) {
+      case 'points':
+        return data[geomType].featureIds.value.indexOf(index);
+      case 'lines':
+        return data[geomType].pathIndices.value.indexOf(index);
+      case 'polygons':
+        return data[geomType].polygonIndices.value.indexOf(index);
+    }
+  }
+
+  return -1;
 }

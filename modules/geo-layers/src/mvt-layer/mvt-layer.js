@@ -1,7 +1,7 @@
 import {Matrix4} from 'math.gl';
 import {MVTLoader} from '@loaders.gl/mvt';
 import {load} from '@loaders.gl/core';
-import {COORDINATE_SYSTEM, binaryToFeature, binaryGuessGeomType} from '@deck.gl/core';
+import {COORDINATE_SYSTEM, binaryToFeature, findFeatureBinary} from '@deck.gl/core';
 
 import TileLayer from '../tile-layer/tile-layer';
 import {getURLFromTemplate, isURLTemplate} from '../tile-layer/utils';
@@ -164,7 +164,11 @@ export default class MVTLayer extends TileLayer {
         info.object = transformTileCoordsToWGS84(info.object, info.tile, this.context.viewport);
       }
     } else if (this.props.binary && info.index !== -1) {
-      info.object = binaryToFeature(params.sourceLayer.props.data, info.index);
+      const {data} = params.sourceLayer.props;
+      info.object =
+        binaryToFeature(data.points, info.index) ||
+        binaryToFeature(data.lines, info.index, 'pathIndices') ||
+        binaryToFeature(data.polygons, info.index, 'primitivePolygonIndices');
     }
 
     return info;
@@ -194,7 +198,7 @@ export default class MVTLayer extends TileLayer {
 
       // Non-iterable data
     } else if (data && binary) {
-      return getHightlightedObjectIndex(data, uniqueIdProperty, featureIdToHighlight);
+      return findFeatureBinary(data, uniqueIdProperty, featureIdToHighlight);
     }
 
     return -1;
@@ -292,37 +296,6 @@ function transformTileCoordsToWGS84(object, bbox, viewport) {
   });
 
   return feature;
-}
-
-function getHightlightedObjectIndex(data, uniqueIdProperty, featureIdToHighlight) {
-  const geomType = binaryGuessGeomType(data);
-
-  if (geomType) {
-    // Look for the uniqueIdProperty
-    let index = -1;
-    if (data[geomType].numericProps[uniqueIdProperty]) {
-      index = data[geomType].numericProps[uniqueIdProperty].value.indexOf(featureIdToHighlight);
-    } else {
-      const propertyIndex = data[geomType].properties.findIndex(
-        elem => elem[uniqueIdProperty] === featureIdToHighlight
-      );
-      index = data[geomType].featureIds.value.indexOf(propertyIndex);
-    }
-
-    if (index !== -1) {
-      // Select geometry index depending on geometry type
-      // eslint-disable-next-line default-case
-      switch (geomType) {
-        case 'points':
-          return data[geomType].featureIds.value.indexOf(index);
-        case 'lines':
-          return data[geomType].pathIndices.value.indexOf(index);
-        case 'polygons':
-          return data[geomType].polygonIndices.value.indexOf(index);
-      }
-    }
-  }
-  return -1;
 }
 
 MVTLayer.layerName = 'MVTLayer';
