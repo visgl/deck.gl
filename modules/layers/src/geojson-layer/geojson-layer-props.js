@@ -1,3 +1,5 @@
+import GL from '@luma.gl/constants';
+
 function createEmptyLayerProps() {
   return {
     points: {},
@@ -66,7 +68,13 @@ export function createLayerPropsFromBinary(geojsonBinary) {
     length: polygons.primitivePolygonIndices.value.length,
     startIndices: polygons.primitivePolygonIndices.value,
     attributes: {
-      getPolygon: polygons.positions
+      getPolygon: polygons.positions,
+      pickingColors: {
+        size: 3,
+        type: GL.UNSIGNED_BYTE,
+        update: calculatePickingColors,
+        // value: new Uint8ClampedArray(3 * polygons.primitivePolygonIndices.value.length)
+      }
     },
     properties: polygons.properties,
     numericProps: polygons.numericProps,
@@ -87,4 +95,20 @@ export function createLayerPropsFromBinary(geojsonBinary) {
   layerProps.polygonsOutline._pathType = 'open';
 
   return layerProps;
+}
+
+// Custom picking color to keep binary indexes
+
+function calculatePickingColors(attribute) {
+  console.log("calculatePickingColors", attribute);
+
+  // Fake 
+  const value = new Uint8ClampedArray(3 * attribute.size);
+  value.fill(0);
+  attribute.value = value;
+}
+
+function encodePickingColor(index) {
+  console.log("encodePickingColor", index);
+  return [0, 0, 0];
 }
