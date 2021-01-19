@@ -2,7 +2,7 @@ import test from 'tape-catch';
 import Tile2DHeader from '@deck.gl/geo-layers/tile-layer/tile-2d-header';
 import {RequestScheduler} from '@loaders.gl/loader-utils';
 import {WebMercatorViewport} from '@deck.gl/core';
-import {_transformTileCoordsToWGS84} from '@deck.gl/geo-layers';
+import {transformTileCoordsToWGS84} from '@deck.gl/geo-layers/mvt-layer/mvt-layer';
 
 test('Tile2DHeader', async t => {
   let onTileErrorCalled = false;
@@ -86,24 +86,15 @@ const LOCAL_TILE_COORDS = [
 ];
 
 test('Tile2DHeader#dataInWorldCoordinates', async t => {
-  const [tile, getTileData] = createTile2DHeaderWithMockedData(LOCAL_TILE_COORDS);
+  const [loader, tile] = createTile2DHeaderWithMockedData(LOCAL_TILE_COORDS);
 
-  // Mock loader
-  tile._loader = getTileData();
-  // Not loaded data
-  t.is(
-    tile.dataInWorldCoordinates instanceof Promise,
-    tile._loader instanceof Promise,
-    'dataInWorldCoordinates getter correctly returns loader.'
-  );
-  // Load data
-  tile.content = await getTileData();
-  tile._isLoaded = true;
-  // Loaded data
+  t.notOk(tile.isLoaded, 'Data has not been loaded yet');
+  t.deepEqual(await tile.dataInWorldCoordinates, await loader);
+  t.ok(tile.isLoaded, 'Data has been loaded');
   t.deepEqual(
-    tile.dataInWorldCoordinates,
-    LOCAL_TILE_COORDS,
-    'dataInWorldCoordinates getter correctly returns no-transformed data.'
+    await tile.dataInWorldCoordinates,
+    tile.content,
+    'Correctly returns no-transformed data'
   );
 
   t.end();
@@ -118,53 +109,36 @@ const TRANSFORM_TO_WORLD_VIEWPORT = new WebMercatorViewport({
 const TRANSFORM_TO_WORLD_BBOX = {west: -180, north: 85.0511287798066, east: 0, south: 0};
 
 test('Tile2DHeader#transformToWorld', async t => {
-  const [tile, getTileData] = createTile2DHeaderWithMockedData(LOCAL_TILE_COORDS);
+  const [loader, tile] = createTile2DHeaderWithMockedData(LOCAL_TILE_COORDS);
 
   tile.bbox = TRANSFORM_TO_WORLD_BBOX;
-  tile.transformToWorld = content =>
-    content.map(object => _transformTileCoordsToWGS84(object, tile, TRANSFORM_TO_WORLD_VIEWPORT));
-  // Mock loader
-  tile._loader = getTileData();
-  // Not loaded data
-  t.is(
-    tile.dataInWorldCoordinates instanceof Promise,
-    tile._loader instanceof Promise,
-    'dataInWorldCoordinates getter correctly returns loader.'
-  );
-  // Load data
-  tile.content = await getTileData();
-  tile._isLoaded = true;
-  // Check empty cache
-  t.is(tile._transformToWorldDataCache, null, 'Data cache is empty.');
-  // Loaded data
+  tile.transformToWorld = ([object]) =>
+    transformTileCoordsToWGS84(object, tile, TRANSFORM_TO_WORLD_VIEWPORT);
+
+  t.notOk(tile.isLoaded, 'Data has not been loaded yet');
+  t.deepEqual(await tile.dataInWorldCoordinates, await loader);
+  t.is(tile._transformToWorldDataCache, null, 'Data cache is empty');
+  t.ok(tile.isLoaded, 'Data has been loaded');
   t.deepEqual(
-    tile.dataInWorldCoordinates[0].geometry.coordinates,
-    tile.transformToWorld(tile.content)[0].geometry.coordinates,
-    'dataInWorldCoordinates getter correctly returns transformed data.'
-  );
-  // Check cache
-  t.isNot(tile._transformToWorldDataCache, null, 'Data cache is not empty.');
-  // Loaded data
-  t.deepEqual(
-    tile.dataInWorldCoordinates,
+    await tile.dataInWorldCoordinates,
     tile._transformToWorldDataCache,
-    'dataInWorldCoordinates getter correctly returns cached data.'
+    'Correctly returns transformed data'
   );
 
   t.end();
 });
 
 function createTile2DHeaderWithMockedData(data) {
-  const getTileData = () =>
-    new Promise(resolve => {
-      resolve(data);
-    });
+  const requestScheduler = new RequestScheduler({throttleRequests: true, maxRequests: 1});
 
+  const getTileData = () => Promise.resolve(data);
   const onTileLoad = () => null;
   const onTileError = () => null;
 
   const tile = new Tile2DHeader({onTileLoad, onTileError});
   tile.isSelected = true;
 
-  return [tile, getTileData];
+  const loader = tile._loadData(getTileData, requestScheduler);
+
+  return [loader, tile];
 }
