@@ -46,7 +46,7 @@ export default class MVTLayer extends TileLayer {
     if (this.state.data) {
       super.updateState({props, oldProps, context, changeFlags});
       const {tileset} = this.state;
-      this._setupTileTransform(tileset.selectedTiles, context.viewport);
+      setupTileTransform(tileset.selectedTiles, context.viewport);
       if (changeFlags.viewportChanged && tileset.isLoaded) {
         this._onViewportChange();
       }
@@ -225,15 +225,6 @@ export default class MVTLayer extends TileLayer {
     return [];
   }
 
-  _setupTileTransform(tiles, viewport) {
-    tiles.forEach(tile => {
-      if (tile.transformToWorld === null) {
-        tile.transformToWorld = content =>
-          content.map(object => transformTileCoordsToWGS84(object, tile, viewport));
-      }
-    });
-  }
-
   _onViewportChange() {
     const {onViewportChange} = this.props;
     if (onViewportChange) {
@@ -285,6 +276,15 @@ export function transformTileCoordsToWGS84(object, tile, viewport) {
   });
 
   return feature;
+}
+
+function setupTileTransform(tiles, viewport) {
+  tiles.forEach(tile => {
+    if (tile.transformToWorld === null) {
+      tile.transformToWorld = content =>
+        content.map(object => transformTileCoordsToWGS84(object, tile, viewport));
+    }
+  });
 }
 
 MVTLayer.layerName = 'MVTLayer';

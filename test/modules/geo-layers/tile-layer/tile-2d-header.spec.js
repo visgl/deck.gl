@@ -89,7 +89,9 @@ test('Tile2DHeader#dataInWorldCoordinates', async t => {
   const [loader, tile] = createTile2DHeaderWithMockedData(LOCAL_TILE_COORDS);
 
   t.notOk(tile.isLoaded, 'Data has not been loaded yet');
-  t.deepEqual(await tile.dataInWorldCoordinates, await loader);
+
+  await loader;
+
   t.ok(tile.isLoaded, 'Data has been loaded');
   t.deepEqual(
     await tile.dataInWorldCoordinates,
@@ -116,7 +118,9 @@ test('Tile2DHeader#transformToWorld', async t => {
     transformTileCoordsToWGS84(object, tile, TRANSFORM_TO_WORLD_VIEWPORT);
 
   t.notOk(tile.isLoaded, 'Data has not been loaded yet');
-  t.deepEqual(await tile.dataInWorldCoordinates, await loader);
+
+  await loader;
+
   t.is(tile._transformToWorldDataCache, null, 'Data cache is empty');
   t.ok(tile.isLoaded, 'Data has been loaded');
   t.deepEqual(
