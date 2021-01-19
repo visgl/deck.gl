@@ -81,7 +81,10 @@ export {
   // Utilities
   Tesselator,
   fp64LowPart,
-  createIterable
+  createIterable,
+  binaryToFeature,
+  binaryToFeatureIndexAttr,
+  binaryGuessGeomType
 } from '@deck.gl/core';
 
 //

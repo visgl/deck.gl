@@ -18,7 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {CompositeLayer, log} from '@deck.gl/core';
+import {CompositeLayer, log, binaryToFeatureIndexAttr} from '@deck.gl/core';
 import ScatterplotLayer from '../scatterplot-layer/scatterplot-layer';
 import PathLayer from '../path-layer/path-layer';
 // Use primitive layer to avoid "Composite Composite" layers for now
@@ -350,16 +350,9 @@ export default class GeoJsonLayer extends CompositeLayer {
 
     return (object, info) => {
       const {data, index} = info;
-      const properties = data.properties[index];
-      const numericProps = {};
-      for (const prop in data.numericProps) {
-        numericProps[prop] = data.numericProps[prop].value[index * data.numericProps[prop].size];
-      }
-      object = {
-        properties: {...numericProps, ...properties}
-      };
-
-      return accessor(object, info);
+      const attr = 'startIndices' in data ? 'startIndices' : null;
+      const feature = binaryToFeatureIndexAttr(data, index, attr);
+      return accessor(feature, info);
     };
   }
 }

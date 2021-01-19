@@ -1,13 +1,12 @@
 import {Matrix4} from 'math.gl';
 import {MVTLoader} from '@loaders.gl/mvt';
 import {load} from '@loaders.gl/core';
-import {COORDINATE_SYSTEM} from '@deck.gl/core';
+import {COORDINATE_SYSTEM, binaryToFeature, binaryGuessGeomType} from '@deck.gl/core';
 
 import TileLayer from '../tile-layer/tile-layer';
 import {getURLFromTemplate, isURLTemplate} from '../tile-layer/utils';
 import ClipExtension from './clip-extension';
 import {transform} from './coordinate-transform';
-import {binaryToFeature, getHightlightedObjectIndex} from './binary-utils';
 
 const WORLD_SIZE = 512;
 
@@ -293,6 +292,37 @@ function transformTileCoordsToWGS84(object, bbox, viewport) {
   });
 
   return feature;
+}
+
+function getHightlightedObjectIndex(data, uniqueIdProperty, featureIdToHighlight) {
+  const geomType = binaryGuessGeomType(data);
+
+  if (geomType) {
+    // Look for the uniqueIdProperty
+    let index = -1;
+    if (data[geomType].numericProps[uniqueIdProperty]) {
+      index = data[geomType].numericProps[uniqueIdProperty].value.indexOf(featureIdToHighlight);
+    } else {
+      const propertyIndex = data[geomType].properties.findIndex(
+        elem => elem[uniqueIdProperty] === featureIdToHighlight
+      );
+      index = data[geomType].featureIds.value.indexOf(propertyIndex);
+    }
+
+    if (index !== -1) {
+      // Select geometry index depending on geometry type
+      // eslint-disable-next-line default-case
+      switch (geomType) {
+        case 'points':
+          return data[geomType].featureIds.value.indexOf(index);
+        case 'lines':
+          return data[geomType].pathIndices.value.indexOf(index);
+        case 'polygons':
+          return data[geomType].polygonIndices.value.indexOf(index);
+      }
+    }
+  }
+  return -1;
 }
 
 MVTLayer.layerName = 'MVTLayer';

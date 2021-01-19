@@ -46,7 +46,8 @@ export function createLayerPropsFromBinary(geojsonBinary) {
       getPosition: points.positions
     },
     properties: points.properties,
-    numericProps: points.numericProps
+    numericProps: points.numericProps,
+    featureIds: points.featureIds
   };
 
   layerProps.lines.data = {
@@ -56,29 +57,32 @@ export function createLayerPropsFromBinary(geojsonBinary) {
       getPath: lines.positions
     },
     properties: lines.properties,
-    numericProps: lines.numericProps
+    numericProps: lines.numericProps,
+    featureIds: lines.featureIds
   };
   layerProps.lines._pathType = 'open';
 
   layerProps.polygons.data = {
-    length: polygons.polygonIndices.value.length - 1,
-    startIndices: polygons.polygonIndices.value,
+    length: polygons.primitivePolygonIndices.value.length,
+    startIndices: polygons.primitivePolygonIndices.value,
     attributes: {
       getPolygon: polygons.positions
     },
     properties: polygons.properties,
-    numericProps: polygons.numericProps
+    numericProps: polygons.numericProps,
+    featureIds: polygons.featureIds
   };
   layerProps.polygons._normalize = false;
 
   layerProps.polygonsOutline.data = {
-    length: polygons.primitivePolygonIndices.value.length - 1,
+    length: polygons.primitivePolygonIndices.value.length,
     startIndices: polygons.primitivePolygonIndices.value,
     attributes: {
       getPath: polygons.positions
     },
     properties: polygons.properties,
-    numericProps: polygons.numericProps
+    numericProps: polygons.numericProps,
+    featureIds: polygons.featureIds
   };
   layerProps.polygonsOutline._pathType = 'open';
 
