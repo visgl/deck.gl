@@ -2172,7 +2172,7 @@
     "@math.gl/core" "3.4.2"
     gl-matrix "^3.0.0"
 
-"@math.gl/geospatial@^3.3.0", "@math.gl/geospatial@^3.4.2":
+"@math.gl/geospatial@^3.3.0":
   version "3.4.2"
   resolved "https://registry.yarnpkg.com/@math.gl/geospatial/-/geospatial-3.4.2.tgz#2f497cd0f478eb77587db25e3e0131ba241d2983"
   integrity sha512-EiCwU3B4ftrUsPPHmLqJuxo37Y7Fvi9Mqpvxj6PvdvsF8EmEvMdYgiQXSNL9vSq5JbEy9xWL2ph47wvkWFoWUQ==
