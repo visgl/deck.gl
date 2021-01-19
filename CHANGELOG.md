@@ -21,6 +21,18 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ### deck.gl v8.4 Prereleases
 
+#### deck.gl [8.4.0-alpha.6] - Jan 19 2021
+
+- Abort Ongoing Tile Requests When New Tileset is Created (#5342)
+- Tile3DLayer: more reliable isLoaded test (#5355)
+- Remove 3rd party modules from @deck.gl/jupyter-widget (#5345)
+- Tile3DLayer compliance (#5333)
+- CARTO module: Integrate Maps API v2 endpoints (#5336)
+- Fix MapView center during linear zoom transition (#5318)
+- Fix: coordinate-transform return value at MVTLayer (#5316)
+- Add loaders prop to Layer class (#5309)
+- Fix TextLayer wordBreak default value (#5315)
+
 #### deck.gl [8.4.0-alpha.5] - Jan 10 2021
 
 - Fix multi-depth picking for GeoJsonLayer (#5298)
