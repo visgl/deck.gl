@@ -158,15 +158,28 @@ new MVTLayer({
 })
 ```
 
-* `getVisibleTiles` (Function)
+* `viewport` (Object). An instance of the current [`Viewport`](/docs/api-reference/core/viewport.md).
 
-  Retrieves the visible tiles in the current viewport.
+Remarks
+
+- It is not recommended to call these functions every time `onViewportChange` is executed, instead, use a debounce function.
+
+##### `onViewportLoad` (Function, optional)
+
+`onViewportLoad` is a function that is called when all tiles in the current viewport are loaded. 
+
+The loaded content or each visible tile is passed as an array of tile objects to this callback function. A tile object contains the following fields:
+
+- `x` (Number) - x index of the tile
+- `y` (Number) - y index of the tile
+- `z` (Number) - z index of the tile
+- `data` (Array) - JSON array with local tile coordinates. 
+- `dataInWorldCoordinates` (Array) - GeoJSON array with coordinates in WGS84. 
+
 
 ```javascript
-const onViewportChange = e => {
-  const visibleTiles = e.getVisibleTiles();
-
-  visibleTiles.forEach(tile => {
+const onViewportLoad = tiles => {
+  tiles.forEach(tile => {
     // data in local coordinates
     const dataInLocalCoords = tile.data;
     // data in WGS84
@@ -177,21 +190,9 @@ const onViewportChange = e => {
 new MVTLayer({
   id: "..."
   data: "..."
-  onViewportChange: debounce(onViewportChange, 500)
+  onViewportLoad
 })
 ```
-
-* `viewport` (Object). An instance of the current [`Viewport`](/docs/api-reference/core/viewport.md).
-
-Remarks
-
-- It is not recommended to call these functions every time `onViewportChange` is executed, instead, use a debounce function.
-
-## Methods
-
-##### `getVisibleTiles`
-
-Retrieves the visible tiles in the current viewport.
 
 ## Source
 

@@ -13,6 +13,7 @@ const WORLD_SIZE = 512;
 const defaultProps = {
   uniqueIdProperty: {type: 'string', value: ''},
   highlightedFeatureId: null,
+  onViewportLoad: {type: 'function', optional: true, value: null, compare: false},
   onViewportChange: {type: 'function', optional: true, value: null, compare: false},
   loaders: MVTLoader
 };
@@ -218,27 +219,25 @@ export default class MVTLayer extends TileLayer {
     return renderedFeatures;
   }
 
-  getVisibleTiles() {
-    if (this.state && this.state.tileset && this.state.tileset.isLoaded) {
-      return this.state.tileset.selectedTiles;
-    }
-    return [];
-  }
-
   _onViewportChange() {
     const {onViewportChange} = this.props;
     if (onViewportChange) {
       const {viewport} = this.context;
       onViewportChange({
         getRenderedFeatures: this.getRenderedFeatures.bind(this),
-        getVisibleTiles: this.getVisibleTiles.bind(this),
         viewport
       });
     }
   }
 
   _onViewportLoad() {
-    super._onViewportLoad();
+    const {tileset} = this.state;
+    const {onViewportLoad} = this.props;
+
+    if (onViewportLoad) {
+      onViewportLoad(tileset.selectedTiles);
+    }
+
     this._onViewportChange();
   }
 }

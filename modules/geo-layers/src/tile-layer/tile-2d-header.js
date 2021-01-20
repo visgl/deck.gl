@@ -28,17 +28,19 @@ export default class Tile2DHeader {
   }
 
   get dataInWorldCoordinates() {
-    if (this.transformToWorld) {
-      if (this._isLoaded) {
-        if (this._transformToWorldDataCache === null) {
-          this._transformToWorldDataCache = this.transformToWorld(this.content);
-        }
-        return this._transformToWorldDataCache;
-      }
+    if (!this.transformToWorld) {
+      throw Error('No transformToWorld function provided');
+    }
+    if (!this.isLoaded) {
+      // Return loader if it's still loading
       return this._loader;
     }
 
-    return this._isLoaded ? this.content : this._loader;
+    if (this._transformToWorldDataCache === null) {
+      this._transformToWorldDataCache = this.transformToWorld(this.content);
+    }
+
+    return this._transformToWorldDataCache;
   }
 
   get isLoaded() {

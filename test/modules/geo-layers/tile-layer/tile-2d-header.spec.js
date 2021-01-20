@@ -68,81 +68,73 @@ test('Tile2DHeader#Abort quickly', async t => {
   t.end();
 });
 
-const LOCAL_TILE_COORDS = [
-  {
-    type: 'Feature',
-    geometry: {
-      type: 'Polygon',
-      coordinates: [
-        [
-          [0.80908203125, 0.8935546875],
-          [0.8095703125, 0.89404296875],
-          [0.80908203125, 0.89404296875],
-          [0.80908203125, 0.8935546875]
-        ]
-      ]
-    }
-  }
-];
-
 test('Tile2DHeader#dataInWorldCoordinates', async t => {
-  const [loader, tile] = createTile2DHeaderWithMockedData(LOCAL_TILE_COORDS);
+  const VIEWPORT = new WebMercatorViewport({
+    latitude: 0,
+    longitude: 0,
+    zoom: 1
+  });
 
-  t.notOk(tile.isLoaded, 'Data has not been loaded yet');
+  const BBOX = {west: -180, north: 85.0511287798066, east: 0, south: 0};
 
-  await loader;
+  const TILE_DATA = [
+    {
+      type: 'Feature',
+      geometry: {
+        type: 'Polygon',
+        coordinates: [
+          [
+            [0.80908203125, 0.8935546875],
+            [0.8095703125, 0.89404296875],
+            [0.80908203125, 0.89404296875],
+            [0.80908203125, 0.8935546875]
+          ]
+        ]
+      }
+    }
+  ];
 
-  t.ok(tile.isLoaded, 'Data has been loaded');
-  t.deepEqual(
-    await tile.dataInWorldCoordinates,
-    tile.content,
-    'Correctly returns no-transformed data'
-  );
+  const WORLD_COORDS = [
+    [
+      [-34.365234375, 18.812717856407776],
+      [-34.27734374999999, 18.729501999072138],
+      [-34.365234375, 18.729501999072138],
+      [-34.365234375, 18.812717856407776]
+    ]
+  ];
 
-  t.end();
-});
+  let transformCount = 0;
 
-const TRANSFORM_TO_WORLD_VIEWPORT = new WebMercatorViewport({
-  latitude: 0,
-  longitude: 0,
-  zoom: 1
-});
-
-const TRANSFORM_TO_WORLD_BBOX = {west: -180, north: 85.0511287798066, east: 0, south: 0};
-
-test('Tile2DHeader#transformToWorld', async t => {
-  const [loader, tile] = createTile2DHeaderWithMockedData(LOCAL_TILE_COORDS);
-
-  tile.bbox = TRANSFORM_TO_WORLD_BBOX;
-  tile.transformToWorld = ([object]) =>
-    transformTileCoordsToWGS84(object, tile, TRANSFORM_TO_WORLD_VIEWPORT);
-
-  t.notOk(tile.isLoaded, 'Data has not been loaded yet');
-
-  await loader;
-
-  t.is(tile._transformToWorldDataCache, null, 'Data cache is empty');
-  t.ok(tile.isLoaded, 'Data has been loaded');
-  t.deepEqual(
-    await tile.dataInWorldCoordinates,
-    tile._transformToWorldDataCache,
-    'Correctly returns transformed data'
-  );
-
-  t.end();
-});
-
-function createTile2DHeaderWithMockedData(data) {
-  const requestScheduler = new RequestScheduler({throttleRequests: true, maxRequests: 1});
-
-  const getTileData = () => Promise.resolve(data);
-  const onTileLoad = () => null;
+  const requestScheduler = new RequestScheduler({throttleRequests: false});
+  const getTileData = () => TILE_DATA;
   const onTileError = () => null;
+  const onTileLoad = () => null;
+  const tile = new Tile2DHeader({onTileError, onTileLoad});
 
-  const tile = new Tile2DHeader({onTileLoad, onTileError});
-  tile.isSelected = true;
+  await tile._loadData(getTileData, requestScheduler);
 
-  const loader = tile._loadData(getTileData, requestScheduler);
+  t.ok(tile.isLoaded, 'Tile is loaded');
+  t.throws(
+    () => tile.dataInWorldCoordinates,
+    'should throw exception if not valid world coordinates'
+  );
 
-  return [loader, tile];
-}
+  // Set transformToWorld function
+  tile.bbox = BBOX;
+  tile.transformToWorld = ([object]) => {
+    transformCount++;
+    return transformTileCoordsToWGS84(object, tile, VIEWPORT);
+  };
+
+  // Test  transformation
+  let response = tile.dataInWorldCoordinates;
+  t.is(transformCount, 1, 'should call transformToWorld only once');
+  t.deepEqual(response.geometry.coordinates, WORLD_COORDS, 'should transform properly');
+
+  // Test transform cache
+  response = tile.dataInWorldCoordinates;
+  t.is(transformCount, 1, 'should not call transformToWorld anymore');
+  t.deepEqual(response.geometry.coordinates, WORLD_COORDS, 'should transform properly from cache');
+
+  t.end();
+});

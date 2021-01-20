@@ -253,34 +253,3 @@ test('TileJSON', async t => {
   // restore fetch
   _global.fetch = fetch;
 });
-
-test('MVT#getVisibleTiles', async t => {
-  class TestMVTLayerVisibleTiles extends MVTLayer {
-    getTileData() {
-      return geoJSONData;
-    }
-  }
-
-  TestMVTLayerVisibleTiles.componentName = 'TestMVTLayerVisibleTiles';
-
-  const testCases = [
-    {
-      props: {
-        data: ['https://a.basemaps.cartocdn.com/rastertiles/voyager_labels_under/{z}/{x}/{y}.png'],
-        id: 'mvt-visible-tiles-test'
-      },
-      onBeforeUpdate: ({layer}) => {
-        t.is(layer.getVisibleTiles().length, 0, 'Tiles correctly selected.');
-      },
-      onAfterUpdate: ({layer}) => {
-        if (layer.isLoaded) {
-          t.is(layer.getVisibleTiles().length, 4, 'Tiles correctly selected.');
-        }
-      }
-    }
-  ];
-
-  await testLayerAsync({Layer: TestMVTLayerVisibleTiles, testCases, onError: t.notOk});
-
-  t.end();
-});
