@@ -13,108 +13,61 @@ export function mod(value, divisor) {
 }
 
 // Extract camera vectors (move to math library?)
-export function extractCameraVectors({viewMatrix, viewMatrixInverse}) {
+export function getCameraPosition(viewMatrixInverse) {
   // Read the translation from the inverse view matrix
-  return {
-    eye: [viewMatrixInverse[12], viewMatrixInverse[13], viewMatrixInverse[14]],
-    direction: [-viewMatrix[2], -viewMatrix[6], -viewMatrix[10]],
-    up: [viewMatrix[1], viewMatrix[5], viewMatrix[9]],
-    right: [viewMatrix[0], viewMatrix[4], viewMatrix[8]]
-  };
+  return [viewMatrixInverse[12], viewMatrixInverse[13], viewMatrixInverse[14]];
 }
 
-const cameraPosition = new Vector3();
-const cameraDirection = new Vector3();
-const cameraUp = new Vector3();
-const cameraRight = new Vector3();
-const nearCenter = new Vector3();
-const farCenter = new Vector3();
-const a = new Vector3();
+// https://www.gamedevs.org/uploads/fast-extraction-viewing-frustum-planes-from-world-view-projection-matrix.pdf
+export function getFrustumPlanes(viewProjectionMatrix) {
+  const planes = {};
 
-/* eslint-disable max-statements */
-
-// Extract frustum planes in common space.
-// Note that common space is left-handed
-// (with y pointing down)
-export function getFrustumPlanes({aspect, near, far, fovyRadians, position, direction, up, right}) {
-  cameraDirection.copy(direction);
-
-  // Account for any scaling of the z axis (e.g. in
-  // mercator view matrix)
-  const nearFarScale = 1 / cameraDirection.len();
-  cameraDirection.normalize();
-
-  cameraPosition.copy(position);
-
-  cameraUp.copy(up);
-  // Account for scaling of the xy axis
-  const widthScale = 1 / cameraUp.len();
-  cameraUp.normalize();
-  cameraRight.copy(right).normalize();
-
-  const nearHeight = 2 * Math.tan(fovyRadians / 2) * near * widthScale;
-  const nearWidth = nearHeight * aspect;
-
-  nearCenter
-    .copy(cameraDirection)
-    .scale(near * nearFarScale)
-    .add(cameraPosition);
-  farCenter
-    .copy(cameraDirection)
-    .scale(far * nearFarScale)
-    .add(cameraPosition);
-
-  let normal = cameraDirection.clone().negate();
-  let distance = normal.dot(nearCenter);
-
-  const planes = {
-    near: {
-      distance,
-      normal
-    },
-    far: {
-      distance: cameraDirection.dot(farCenter),
-      normal: cameraDirection.clone()
-    }
-  };
-
-  a.copy(cameraRight)
-    .scale(nearWidth * 0.5)
-    .add(nearCenter)
-    .subtract(cameraPosition)
-    .normalize();
-  normal = new Vector3(a).cross(cameraUp);
-  distance = cameraPosition.dot(normal);
-  planes.right = {normal, distance};
-
-  a.copy(cameraRight)
-    .scale(-nearWidth * 0.5)
-    .add(nearCenter)
-    .subtract(cameraPosition)
-    .normalize();
-  normal = new Vector3(cameraUp).cross(a);
-  distance = cameraPosition.dot(normal);
-  planes.left = {normal, distance};
-
-  a.copy(cameraUp)
-    .scale(nearHeight * 0.5)
-    .add(nearCenter)
-    .subtract(cameraPosition)
-    .normalize();
-  normal = new Vector3(cameraRight).cross(a);
-  distance = cameraPosition.dot(normal);
-  planes.top = {normal, distance};
-
-  a.copy(cameraUp)
-    .scale(-nearHeight * 0.5)
-    .add(nearCenter)
-    .subtract(cameraPosition)
-    .normalize();
-  normal = new Vector3(a).cross(cameraRight);
-  distance = cameraPosition.dot(normal);
-  planes.bottom = {normal, distance};
+  planes.left = getFrustumPlane(
+    viewProjectionMatrix[3] + viewProjectionMatrix[0],
+    viewProjectionMatrix[7] + viewProjectionMatrix[4],
+    viewProjectionMatrix[11] + viewProjectionMatrix[8],
+    viewProjectionMatrix[15] + viewProjectionMatrix[12]
+  );
+  planes.right = getFrustumPlane(
+    viewProjectionMatrix[3] - viewProjectionMatrix[0],
+    viewProjectionMatrix[7] - viewProjectionMatrix[4],
+    viewProjectionMatrix[11] - viewProjectionMatrix[8],
+    viewProjectionMatrix[15] - viewProjectionMatrix[12]
+  );
+  planes.bottom = getFrustumPlane(
+    viewProjectionMatrix[3] + viewProjectionMatrix[1],
+    viewProjectionMatrix[7] + viewProjectionMatrix[5],
+    viewProjectionMatrix[11] + viewProjectionMatrix[9],
+    viewProjectionMatrix[15] + viewProjectionMatrix[13]
+  );
+  planes.top = getFrustumPlane(
+    viewProjectionMatrix[3] - viewProjectionMatrix[1],
+    viewProjectionMatrix[7] - viewProjectionMatrix[5],
+    viewProjectionMatrix[11] - viewProjectionMatrix[9],
+    viewProjectionMatrix[15] - viewProjectionMatrix[13]
+  );
+  planes.near = getFrustumPlane(
+    viewProjectionMatrix[3] + viewProjectionMatrix[2],
+    viewProjectionMatrix[7] + viewProjectionMatrix[6],
+    viewProjectionMatrix[11] + viewProjectionMatrix[10],
+    viewProjectionMatrix[15] + viewProjectionMatrix[14]
+  );
+  planes.far = getFrustumPlane(
+    viewProjectionMatrix[3] - viewProjectionMatrix[2],
+    viewProjectionMatrix[7] - viewProjectionMatrix[6],
+    viewProjectionMatrix[11] - viewProjectionMatrix[10],
+    viewProjectionMatrix[15] - viewProjectionMatrix[14]
+  );
 
   return planes;
+}
+
+const scratchVector = new Vector3();
+
+function getFrustumPlane(a, b, c, d) {
+  scratchVector.set(a, b, c);
+  const L = scratchVector.len();
+  return {distance: d / L, normal: new Vector3(-a / L, -b / L, -c / L)};
 }
 
 /**
