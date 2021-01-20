@@ -243,14 +243,13 @@ export default class MVTLayer extends TileLayer {
               tile.contentWGS84 = tile.content.map(feature =>
                 transformTileCoordsToWGS84(feature, tile.bbox, this.context.viewport)
               );
-            }            
+            }
             return tile.contentWGS84;
           }
         });
       }
     });
   }
-
 }
 
 function getFeatureUniqueId(feature, uniqueIdProperty) {
