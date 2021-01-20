@@ -21,7 +21,7 @@
 import test from 'tape-catch';
 import {WebMercatorViewport} from '@deck.gl/core';
 import {ScatterplotLayer} from '@deck.gl/layers';
-import {generateLayerTests, testLayerAsync} from '@deck.gl/test-utils';
+import {generateLayerTests, testLayerAsync, testLayer} from '@deck.gl/test-utils';
 import {TileLayer} from '@deck.gl/geo-layers';
 
 test('TileLayer', async t => {
@@ -196,3 +196,51 @@ test('TileLayer#MapView:repeat', async t => {
 
   t.end();
 });
+
+test('TileLayer#AbortRequestsOnUpdateTrigger', async t => {
+  const testViewport = new WebMercatorViewport({
+    width: 1200,
+    height: 400,
+    longitude: 0,
+    latitude: 0,
+    zoom: 1,
+    repeat: true
+  });
+  let tileset;
+
+  const testCases = [
+    {
+      props: {
+        getTileData: () => sleep(10)
+      },
+      onAfterUpdate: ({layer}) => {
+        tileset = layer.state.tileset;
+      }
+    },
+    {
+      updateProps: {
+        updateTriggers: {
+          getTileData: 1
+        }
+      },
+      onAfterUpdate: () => {
+        t.is(
+          tileset._tiles.map(tile => tile._isCancelled).length,
+          4,
+          'all tiles from discarded tileset should be cancelled'
+        );
+      }
+    }
+  ];
+
+  testLayer({Layer: TileLayer, viewport: testViewport, testCases, onError: t.notOk});
+
+  t.end();
+});
+
+function sleep(ms) {
+  return new Promise(resolve => {
+    /* global setTimeout */
+    setTimeout(resolve, ms);
+  });
+}

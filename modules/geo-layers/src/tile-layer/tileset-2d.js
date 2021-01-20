@@ -100,6 +100,15 @@ export default class Tileset2D {
     }
   }
 
+  // Clean up any outstanding tile requests.
+  finalize() {
+    for (const tile of this._cache.values()) {
+      if (tile.isLoading) {
+        tile.abort();
+      }
+    }
+  }
+
   /**
    * Update the cache with the given viewport and model matrix and triggers callback onUpdate.
    * @param {*} viewport
