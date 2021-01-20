@@ -233,11 +233,7 @@ Affects both rendering and tile fetching to produce a transformed tile layer.  N
 
 ##### `onViewportLoad` (Function, optional)
 
-<<<<<<< HEAD
 `onViewportLoad` is a function that is called when all tiles in the current viewport are loaded. An array of loaded [Tile](#tile) instances are passed as argument to this function
-=======
-`onViewportLoad` is a function that is called when all tiles in the current viewport are loaded. The loaded content for each visible tile is passed as an array of tile objects to this callback function. Check the [Tile](#tile) class for more info.
->>>>>>> Doc typo
 
 
 - Default: `data => null`
@@ -284,18 +280,6 @@ Properties:
 - `z` (Number) - z index of the tile
 - `bbox` (Object) - bounding box of the tile. When used with a geospatial view, `bbox` is in the shape of `{west: <longitude>, north: <latitude>, east: <longitude>, south: <latitude>}`. When used with a non-geospatial view, `bbox` is in the shape of `{left, top, right, bottom}`.
 - `data` (Array) - tiles content as returned by `getTileData`. 
-
-## Tile
-
-Class to hold the reading of a single tile
-
-Properties:
-
-- `x` (Number) - x index of the tile
-- `y` (Number) - y index of the tile
-- `z` (Number) - z index of the tile
-- `data` (Array) - tiles content as returned by `getTileData`. 
-
 ## Source
 
 [modules/geo-layers/src/tile-layer](https://github.com/visgl/deck.gl/tree/master/modules/geo-layers/src/tile-layer)
