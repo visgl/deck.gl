@@ -280,6 +280,7 @@ Properties:
 - `z` (Number) - z index of the tile
 - `bbox` (Object) - bounding box of the tile. When used with a geospatial view, `bbox` is in the shape of `{west: <longitude>, north: <latitude>, east: <longitude>, south: <latitude>}`. When used with a non-geospatial view, `bbox` is in the shape of `{left, top, right, bottom}`.
 - `data` (Array) - tiles content as returned by `getTileData`. 
+
 ## Source
 
 [modules/geo-layers/src/tile-layer](https://github.com/visgl/deck.gl/tree/master/modules/geo-layers/src/tile-layer)
