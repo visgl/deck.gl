@@ -176,7 +176,7 @@ test('PolygonTesselator#tesselation', t => {
 
   t.deepEquals(
     tesselator.get('indices').slice(0, 24),
-    [1, 3, 2, 4, 12, 11, 10, 12, 4, 5, 6, 7, 7, 4, 11, 10, 4, 5, 5, 7, 11, 11, 10, 5],
+    [1, 3, 2, 8, 12, 11, 10, 12, 8, 7, 6, 5, 5, 8, 11, 10, 8, 7, 7, 5, 11, 11, 10, 7],
     'returned correct indices'
   );
   t.deepEquals(
@@ -210,10 +210,10 @@ test('PolygonTesselator#partial update', t => {
   t.is(tesselator.vertexCount, 9, 'Initial vertex count');
   // prettier-ignore
   t.deepEquals(positions, [
-    1, 1, 0, 2, 2, 0, 3, 0, 0, 1, 1, 0,
-    0, 0, 0, 2, 0, 0, 2, 2, 0, 0, 2, 0, 0, 0, 0
+    1, 1, 0, 2, 2, 0, 3, 0, 0, 1, 1, 0, 0, 0, 0, 0, 2, 0, 2, 2, 0, 2, 0, 0, 0, 0, 0
   ], 'positions');
-  t.deepEquals(indices, [1, 3, 2, 7, 4, 5, 5, 6, 7], 'incides');
+  t.deepEquals(indices, [1, 3, 2, 5, 8, 7, 7, 6, 5], 'incides');
+
   t.deepEquals(Array.from(accessorCalled), ['A', 'B'], 'Accessor called on all data');
 
   sampleData[2] = {polygon: [[4, 4], [5, 5], [6, 4]], id: 'C'};
@@ -225,11 +225,12 @@ test('PolygonTesselator#partial update', t => {
   t.is(tesselator.vertexCount, 12, 'Updated vertex count');
   // prettier-ignore
   t.deepEquals(positions, [
-    1, 1, 0, 2, 2, 0, 3, 0, 0, 1, 1, 0,
-    0, 0, 0, 2, 0, 0, 2, 2, 0, 0, 2, 0, 0, 0, 0,
-    4, 4, 0, 5, 5, 0, 6, 4, 0, 4, 4, 0
+    1, 1, 0, 2, 2, 0, 3, 0, 0, 1,
+    1, 0, 0, 0, 0, 0, 2, 0, 2, 2,
+    0, 2, 0, 0, 0, 0, 0, 4, 4, 0,
+    5, 5, 0, 6, 4, 0, 4, 4, 0
   ], 'positions');
-  t.deepEquals(indices, [1, 3, 2, 7, 4, 5, 5, 6, 7, 10, 12, 11], 'incides');
+  t.deepEquals(indices, [1, 3, 2, 5, 8, 7, 7, 6, 5, 10, 12, 11], 'incides');
   t.deepEquals(Array.from(accessorCalled), ['C'], 'Accessor called only on partial data');
 
   sampleData[0] = {polygon: [[2, 2], [3, 0], [1, 1]], id: 'A'};
@@ -241,11 +242,13 @@ test('PolygonTesselator#partial update', t => {
   t.is(tesselator.vertexCount, 12, 'Updated vertex count');
   // prettier-ignore
   t.deepEquals(positions, [
-    2, 2, 0, 3, 0, 0, 1, 1, 0, 2, 2, 0,
-    0, 0, 0, 2, 0, 0, 2, 2, 0, 0, 2, 0, 0, 0, 0,
-    4, 4, 0, 5, 5, 0, 6, 4, 0, 4, 4, 0
+    2, 2, 0, 3, 0, 0, 1, 1, 0, 2,
+    2, 0, 0, 0, 0, 0, 2, 0, 2, 2,
+    0, 2, 0, 0, 0, 0, 0, 4, 4, 0,
+    5, 5, 0, 6, 4, 0, 4, 4, 0
   ], 'positions');
-  t.deepEquals(indices, [1, 3, 2, 7, 4, 5, 5, 6, 7, 10, 12, 11], 'incides');
+
+  t.deepEquals(indices, [1, 3, 2, 5, 8, 7, 7, 6, 5, 10, 12, 11], 'incides');
   t.deepEquals(Array.from(accessorCalled), ['A'], 'Accessor called only on partial data');
 
   t.end();
@@ -296,7 +299,7 @@ test('PolygonTesselator#geometryBuffer', t => {
   t.is(tesselator.instanceCount, 9, 'Updated instanceCount from geometryBuffer');
   t.deepEquals(
     tesselator.get('positions').slice(0, 27),
-    [1, 1, 0, 2, 2, 0, 3, 3, 0, 1, 1, 0, 0, 0, 0, 2, 0, 0, 2, 2, 0, 0, 2, 0, 0, 0, 0],
+    [1, 1, 0, 3, 3, 0, 2, 2, 0, 1, 1, 0, 0, 0, 0, 0, 2, 0, 2, 2, 0, 2, 0, 0, 0, 0, 0],
     'positions are populated'
   );
   t.ok(tesselator.get('indices'), 'indices generated');

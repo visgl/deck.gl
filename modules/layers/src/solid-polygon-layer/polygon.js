@@ -20,7 +20,7 @@
 
 /* eslint-disable max-params */
 import earcut from 'earcut';
-import {Polygon} from '@math.gl/polygon';
+import {modifyPolygonWindingDirection, WINDING} from '@math.gl/polygon';
 
 // 4 data formats are supported:
 // Simple Polygon: an array of points
@@ -48,30 +48,6 @@ function validate(polygon) {
  */
 function isSimple(polygon) {
   return polygon.length >= 1 && polygon[0].length >= 2 && Number.isFinite(polygon[0][0]);
-}
-
-/**
- * Computes winding order of a polygon and reverses points of the polygon in case of counter clockwise winding order.
- * @param {Array} positions - array of numbers
- * @param {Number} start - start index of the polygon in the positions array
- * @param {Number} end - end index of the polygon in the positions array
- * @param {Number} size - size of a position, 2 (xy) or 3 (xyz)
- */
-function ensureWindingOrder(positions, start, end, size) {
-  const numPositions = (end - start) / size;
-  const points = [];
-  for (let i = 0; i < numPositions; i++) {
-    points[i] = [positions[i * size], positions[i * size + 1]];
-  }
-
-  const polygon = new Polygon(points);
-
-  if (polygon.getWindingDirection() < 0) {
-    for (let i = 0; i < numPositions; i++) {
-      positions[i * size] = points[numPositions - i - 1][0];
-      positions[i * size + 1] = points[numPositions - i - 1][1];
-    }
-  }
 }
 
 /**
@@ -110,9 +86,10 @@ function isFlatRingClosed(positions, size, startIndex, endIndex) {
  * @param {Number} targetStartIndex - index in the destination to start copying into
  * @param {Array} simplePolygon - array of points
  * @param {Number} size - size of a position, 2 (xy) or 3 (xyz)
+ * @param {Number} [windingDirection] - modify polygon to be of the specified winding direction
  * @returns {Number} - the index of the write head in the destination
  */
-function copyNestedRing(target, targetStartIndex, simplePolygon, size) {
+function copyNestedRing(target, targetStartIndex, simplePolygon, size, windingDirection) {
   let targetIndex = targetStartIndex;
   const len = simplePolygon.length;
   for (let i = 0; i < len; i++) {
@@ -127,7 +104,14 @@ function copyNestedRing(target, targetStartIndex, simplePolygon, size) {
     }
   }
 
-  ensureWindingOrder(target, targetStartIndex, targetIndex, size);
+  if (windingDirection) {
+    modifyPolygonWindingDirection(target, windingDirection, {
+      start: targetStartIndex,
+      end: targetIndex,
+      size,
+      isClosed: true
+    });
+  }
 
   return targetIndex;
 }
@@ -140,9 +124,18 @@ function copyNestedRing(target, targetStartIndex, simplePolygon, size) {
  * @param {Number} size - size of a position, 2 (xy) or 3 (xyz)
  * @param {Number} [srcStartIndex] - start index of the path in the positions array
  * @param {Number} [srcEndIndex] - end index of the path in the positions array
+ * @param {Number} [windingDirection] - modify polygon to be of the specified winding direction
  * @returns {Number} - the index of the write head in the destination
  */
-function copyFlatRing(target, targetStartIndex, positions, size, srcStartIndex = 0, srcEndIndex) {
+function copyFlatRing(
+  target,
+  targetStartIndex,
+  positions,
+  size,
+  srcStartIndex = 0,
+  srcEndIndex,
+  windingDirection
+) {
   srcEndIndex = srcEndIndex || positions.length;
   const srcLength = srcEndIndex - srcStartIndex;
   if (srcLength <= 0) {
@@ -160,7 +153,14 @@ function copyFlatRing(target, targetStartIndex, positions, size, srcStartIndex =
     }
   }
 
-  ensureWindingOrder(target, targetStartIndex, targetIndex, size);
+  if (windingDirection) {
+    modifyPolygonWindingDirection(target, windingDirection, {
+      start: targetStartIndex,
+      end: targetIndex,
+      size,
+      isClosed: true
+    });
+  }
 
   return targetIndex;
 }
@@ -196,7 +196,8 @@ export function normalize(polygon, positionSize) {
           srcPositions,
           positionSize,
           srcHoleIndices[i - 1],
-          srcHoleIndices[i]
+          srcHoleIndices[i],
+          i === 0 ? WINDING.CLOCKWISE : WINDING.COUNTER_CLOCKWISE
         );
         holeIndices.push(targetIndex);
       }
@@ -209,15 +210,21 @@ export function normalize(polygon, positionSize) {
   }
   if (Number.isFinite(polygon[0])) {
     // simple flat
-    copyFlatRing(positions, 0, polygon, positionSize);
+    copyFlatRing(positions, 0, polygon, positionSize, 0, positions.length, WINDING.CLOCKWISE);
     return positions;
   }
   if (!isSimple(polygon)) {
     // complex polygon
     let targetIndex = 0;
 
-    for (const simplePolygon of polygon) {
-      targetIndex = copyNestedRing(positions, targetIndex, simplePolygon, positionSize);
+    for (const [polygonIndex, simplePolygon] of polygon.entries()) {
+      targetIndex = copyNestedRing(
+        positions,
+        targetIndex,
+        simplePolygon,
+        positionSize,
+        polygonIndex === 0 ? WINDING.CLOCKWISE : WINDING.COUNTER_CLOCKWISE
+      );
       holeIndices.push(targetIndex);
     }
     // The last one is not a starting index of a hole, remove
@@ -226,7 +233,7 @@ export function normalize(polygon, positionSize) {
     return {positions, holeIndices};
   }
   // simple polygon
-  copyNestedRing(positions, 0, polygon, positionSize);
+  copyNestedRing(positions, 0, polygon, positionSize, WINDING.CLOCKWISE);
   return positions;
 }
 /* eslint-enable max-statements */
