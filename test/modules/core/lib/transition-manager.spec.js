@@ -189,8 +189,7 @@ test('TransitionManager#callbacks', t => {
     }
   };
 
-  const mergeProps = props =>
-    Object.assign({timeline}, callbacks, props);
+  const mergeProps = props => Object.assign({timeline}, callbacks, props);
 
   const transitionManager = new TransitionManager(MapState, mergeProps(testCase.initialProps));
 
