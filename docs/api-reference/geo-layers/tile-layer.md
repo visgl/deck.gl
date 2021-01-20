@@ -233,7 +233,7 @@ Affects both rendering and tile fetching to produce a transformed tile layer.  N
 
 ##### `onViewportLoad` (Function, optional)
 
-`onViewportLoad` is a function that is called when all tiles in the current viewport are loaded. The loaded content or each visible tile is passed as an array of tile objects to this callback function. Check the [Tile](#tile) class for more info.
+`onViewportLoad` is a function that is called when all tiles in the current viewport are loaded. The loaded content for each visible tile is passed as an array of tile objects to this callback function. Check the [Tile](#tile) class for more info.
 
 
 - Default: `data => null`
