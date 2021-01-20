@@ -238,13 +238,18 @@ export default class MVTLayer extends TileLayer {
         // eslint-disable-next-line accessor-pairs
         Object.defineProperty(tile, propName, {
           get: () => {
-            if (tile.contentWGS84 === undefined) {
+            // Still loading or encountered an error
+            if (!tile.content) {
+              return null;
+            }
+
+            if (tile._contentWGS84 === undefined) {
               // Create a cache to transform only once
-              tile.contentWGS84 = tile.content.map(feature =>
+              tile._contentWGS84 = tile.content.map(feature =>
                 transformTileCoordsToWGS84(feature, tile.bbox, this.context.viewport)
               );
             }
-            return tile.contentWGS84;
+            return tile._contentWGS84;
           }
         });
       }
