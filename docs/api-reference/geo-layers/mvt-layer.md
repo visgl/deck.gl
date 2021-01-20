@@ -161,6 +161,30 @@ new MVTLayer({
 })
 ```
 
+##### `onViewportLoad` (Function, optional)
+
+`onViewportLoad` is a function that is called when all tiles in the current viewport are loaded. An array of loaded [Tile](/docs/api-reference/geo-layers/tile-layer.md#tile) instances are passed as argument to this function.
+
+A new getter `dataInWGS84` is added for the tile instance to retrieve the tile content in world coordinates (WGS84).
+
+- Default: `data => null`
+
+```javascript
+const onViewportLoad = tiles => {
+  tiles.forEach(tile => {
+    // data in local coordinates
+    const dataInLocalCoords = tile.data;
+    // data in world coordinates (WGS84)
+    const dataInWGS84 = tile.dataInWGS84;
+  });
+};
+new MVTLayer({
+  id: "..."
+  data: "..."
+  onViewportLoad
+})
+```
+
 ## Source
 
 [modules/geo-layers/src/mvt-layer/mvt-layer.js](https://github.com/visgl/deck.gl/tree/master/modules/geo-layers/src/mvt-layer/mvt-layer.js)
