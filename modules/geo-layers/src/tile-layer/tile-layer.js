@@ -137,7 +137,7 @@ export default class TileLayer extends CompositeLayer {
     const {onViewportLoad} = this.props;
 
     if (onViewportLoad) {
-      onViewportLoad(tileset.selectedTiles.map(tile => tile.data));
+      onViewportLoad(tileset.selectedTiles);
     }
   }
 

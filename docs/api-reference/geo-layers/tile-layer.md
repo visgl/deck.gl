@@ -233,7 +233,8 @@ Affects both rendering and tile fetching to produce a transformed tile layer.  N
 
 ##### `onViewportLoad` (Function, optional)
 
-`onViewportLoad` is a function that is called when all tiles in the current viewport are loaded. The loaded content (as returned by `getTileData`) for each visible tile is passed as an array to this callback function.
+`onViewportLoad` is a function that is called when all tiles in the current viewport are loaded. The loaded content or each visible tile is passed as an array of tile objects to this callback function. Check the [Tile](#tile) class for more info.
+
 
 - Default: `data => null`
 
@@ -268,6 +269,19 @@ Receives arguments:
 
 - `tile` (Object) - the tile that has been cleared from cache.
 
+## Tile
+
+Class to hold the reading of a single tile
+
+Properties:
+
+- `x` (Number) - x index of the tile
+- `y` (Number) - y index of the tile
+- `z` (Number) - z index of the tile
+- `data` (Array) - tiles content as returned by `getTileData`. 
+
 ## Source
 
 [modules/geo-layers/src/tile-layer](https://github.com/visgl/deck.gl/tree/master/modules/geo-layers/src/tile-layer)
+
+
