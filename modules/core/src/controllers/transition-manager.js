@@ -10,9 +10,9 @@ export const TRANSITION_EVENTS = {
 };
 
 const DEFAULT_PROPS = {
-  transitionDuration: 0,
+  // transitionDuration: 0,
   transitionEasing: t => t,
-  transitionInterpolator: new LinearInterpolator(),
+  // transitionInterpolator: new LinearInterpolator(),
   transitionInterruption: TRANSITION_EVENTS.BREAK,
   onTransitionStart: noop,
   onTransitionInterrupt: noop,
@@ -187,5 +187,3 @@ export default class TransitionManager {
     });
   }
 }
-
-TransitionManager.defaultProps = DEFAULT_PROPS;
