@@ -47,7 +47,6 @@ export default class MVTLayer extends TileLayer {
     if (this.state.data) {
       super.updateState({props, oldProps, context, changeFlags});
       const {tileset} = this.state;
-      setupTileTransform(tileset.selectedTiles, context.viewport);
       if (changeFlags.viewportChanged && tileset.isLoaded) {
         this._onViewportChange();
       }
@@ -235,6 +234,8 @@ export default class MVTLayer extends TileLayer {
     const {onViewportLoad} = this.props;
 
     if (onViewportLoad) {
+      // Setup transformation to allow get data in world coordinates
+      setupTileTransform(tileset.selectedTiles, this.context.viewport);
       onViewportLoad(tileset.selectedTiles);
     }
 
