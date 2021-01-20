@@ -33,7 +33,7 @@ const EVENT_TYPES = {
   WHEEL: ['wheel'],
   PAN: ['panstart', 'panmove', 'panend'],
   PINCH: ['pinchstart', 'pinchmove', 'pinchend'],
-  TRIPLE_PINCH: ['tripanstart', 'tripanmove', 'tripanend'],
+  TRIPLE_PAN: ['tripanstart', 'tripanmove', 'tripanend'],
   DOUBLE_TAP: ['doubletap'],
   KEYBOARD: ['keydown']
 };
@@ -194,7 +194,7 @@ export default class Controller {
     this.transitionManager.processViewStateChange(props);
 
     let {inertia} = props;
-    if (inertia && !Number.isFinite(inertia)) {
+    if (inertia === true) {
       inertia = DEFAULT_INERTIA;
     }
     this.inertia = inertia;
@@ -215,7 +215,7 @@ export default class Controller {
     this.toggleEvents(EVENT_TYPES.WHEEL, isInteractive && scrollZoom);
     this.toggleEvents(EVENT_TYPES.PAN, isInteractive && (dragPan || dragRotate));
     this.toggleEvents(EVENT_TYPES.PINCH, isInteractive && (touchZoom || touchRotate));
-    this.toggleEvents(EVENT_TYPES.TRIPLE_PINCH, isInteractive && touchRotate);
+    this.toggleEvents(EVENT_TYPES.TRIPLE_PAN, isInteractive && touchRotate);
     this.toggleEvents(EVENT_TYPES.DOUBLE_TAP, isInteractive && doubleClickZoom);
     this.toggleEvents(EVENT_TYPES.KEYBOARD, isInteractive && keyboard);
 
@@ -437,7 +437,7 @@ export default class Controller {
     const newControllerState = this.controllerState.zoom({pos, scale});
     this.updateViewport(
       newControllerState,
-      smooth ? this._getTransitionProps({around: pos}) : NO_TRANSITION_PROPS,
+      {...this._getTransitionProps({around: pos}), transitionDuration: smooth ? 250 : 1},
       {
         isZooming: true,
         isPanning: true
