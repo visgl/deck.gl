@@ -130,22 +130,25 @@ tileJSON (Object) - the tileJSON fetched
 
 ##### `onViewportChange` (Function, optional)
 
-`onViewportChange` called when the viewport changes or all tiles in the current viewport have been loaded.
+`onViewportChange` called when the viewport changes or all tiles in the current viewport have been loaded. A function (`getRenderedFeatures`) to calculate the features rendered in the current viewport is passed as a JSON to this callback function.
+
 
 Receives arguments:
 
 * `getRenderedFeatures` (Function)
 
-  Calculates the features rendered in the current viewport.
-
-  + maxFeatures: Optional. Max number of features to retrieve when `getRenderedFeatures` is called. Default to `null`.
+  + maxFeatures: Optional. Max number of features to retrieve when getRenderedFeatures is called. Default to `null`.
 
   Requires `pickable` to be true.
 
+  It is not recommended to call `getRenderedFeatures` every time `onViewportChange` is executed, instead, use a debounce function.
+
   If a `uniqueIdProperty` is provided only unique properties are returned.
 
+* `viewport` (Object). A instance of the current [`Viewport`](/docs/api-reference/core/viewport.md).
+
 ```javascript
-const onViewportChange = e => {
+const onViewportChange =  e => {
   const features = e.getRenderedFeatures();
 };
 
@@ -157,12 +160,6 @@ new MVTLayer({
   uniqueIdProperty: 'geoid'
 })
 ```
-
-* `viewport` (Object). An instance of the current [`Viewport`](/docs/api-reference/core/viewport.md).
-
-Remarks
-
-- It is not recommended to call these functions every time `onViewportChange` is executed, instead, use a debounce function.
 
 ##### `onViewportLoad` (Function, optional)
 
