@@ -128,38 +128,28 @@ Receives arguments:
 
 tileJSON (Object) - the tileJSON fetched
 
-##### `onViewportChange` (Function, optional)
+## Methods
 
-`onViewportChange` called when the viewport changes or all tiles in the current viewport have been loaded. A function (`getRenderedFeatures`) to calculate the features rendered in the current viewport is passed as a JSON to this callback function.
+#### `getRenderedFeatures` (Function)
 
+Get the rendered features in the current viewport.
 
-Receives arguments:
+If a `uniqueIdProperty` is provided only unique properties are returned.
 
-* `getRenderedFeatures` (Function)
+Requires `pickable` prop to be true.
 
-  + maxFeatures: Optional. Max number of features to retrieve when getRenderedFeatures is called. Default to `null`.
+Parameters:
 
-  Requires `pickable` to be true.
+- `maxFeatures` (Number, optional): Max number of features to retrieve when getRenderedFeatures is called. Default to `null`.
 
-  It is not recommended to call `getRenderedFeatures` every time `onViewportChange` is executed, instead, use a debounce function.
+Returns:
 
-  If a `uniqueIdProperty` is provided only unique properties are returned.
+- An array with geometries in GeoJSON format.
 
-* `viewport` (Object). A instance of the current [`Viewport`](/docs/api-reference/core/viewport.md).
+Remarks:
 
-```javascript
-const onViewportChange =  e => {
-  const features = e.getRenderedFeatures();
-};
-
-new MVTLayer({
-  id: "..."
-  data: "..."
-  pickable: true
-  onViewportChange: debounce(onViewportChange, 500)
-  uniqueIdProperty: 'geoid'
-})
-```
+- As it's an expensive operation, it's not recommended to call `getRenderedFeatures` every time `onViewStateChange` is executed, use a debounce function instead. 
+- In most of the cases you probably want to use it attached to `onViewStateChange` and `onViewportLoad`.
 
 ## Tile
 
