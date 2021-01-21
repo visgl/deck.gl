@@ -161,6 +161,30 @@ new MVTLayer({
 })
 ```
 
+## Tile
+
+Aside from all members of the [Tile](/docs/api-reference/geo-layers/tile-layer.md#tile) class, tile instances from the `MVTLayer` also include the following fields:
+
+##### `dataInWGS84` (Array)
+
+A list of features in world coordinates (WGS84).
+
+Usage example:
+
+```javascript
+const onViewportLoad = tiles => {
+  tiles.forEach(tile => {
+    // data in world coordinates (WGS84)
+    const dataInWGS84 = tile.dataInWGS84;
+  });
+};
+new MVTLayer({
+  id: "..."
+  data: "..."
+  onViewportLoad
+})
+```
+
 ## Source
 
 [modules/geo-layers/src/mvt-layer/mvt-layer.js](https://github.com/visgl/deck.gl/tree/master/modules/geo-layers/src/mvt-layer/mvt-layer.js)
