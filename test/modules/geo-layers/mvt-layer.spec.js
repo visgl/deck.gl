@@ -267,7 +267,7 @@ test('TileJSON', async t => {
   _global.fetch = fetch;
 });
 
-test.only('MVT dataInWGS84', async t => {
+test('MVT dataInWGS84', async t => {
   class TestMVTLayer extends MVTLayer {
     getTileData() {
       return geoJSONData;
