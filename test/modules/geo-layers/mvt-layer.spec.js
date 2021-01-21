@@ -32,6 +32,23 @@ const geoJSONData = [
   }
 ];
 
+const geoJSONDataWGS84 = [
+  {
+    ...geoJSONData[0],
+    geometry: {
+      type: 'Polygon',
+      coordinates: [
+        [
+          [111.26953125, -80.35699541661765],
+          [111.44531250000001, -80.38639582973977],
+          [111.26953125, -80.38639582973977],
+          [111.26953125, -80.35699541661765]
+        ]
+      ]
+    }
+  }
+];
+
 const TRANSFORM_COORDS_DATA = [
   {
     result: {type: 'Point', coordinates: [-135, 79.17133464081945]},
@@ -248,4 +265,50 @@ test('TileJSON', async t => {
 
   // restore fetcch
   _global.fetch = fetch;
+});
+
+test.only('MVT dataInWGS84', async t => {
+  class TestMVTLayer extends MVTLayer {
+    getTileData() {
+      return geoJSONData;
+    }
+  }
+
+  TestMVTLayer.componentName = 'TestMVTLayer';
+
+  const viewport = new WebMercatorViewport({
+    longitude: 0,
+    latitude: 0,
+    zoom: 0
+  });
+
+  const testCases = [
+    {
+      props: {
+        data: ['https://server.com/{z}/{x}/{y}.mvt']
+      },
+      onAfterUpdate: ({layer}) => {
+        if (layer.isLoaded) {
+          const tile = layer.state.tileset.selectedTiles[0];
+          const contentWGS84 = tile.dataInWGS84;
+
+          t.deepEqual(
+            contentWGS84[0].geometry.coordinates,
+            geoJSONDataWGS84[0].geometry.coordinates,
+            'should transform to WGS84'
+          );
+          t.isNot(tile._contentWGS84, undefined, 'should set cache for further requests');
+          t.is(tile.dataInWGS84, contentWGS84, 'should use the cache');
+
+          tile.content = null;
+          tile._contentWGS84 = null;
+          t.is(tile.dataInWGS84, null, 'should return null if content is null');
+        }
+      }
+    }
+  ];
+
+  await testLayerAsync({Layer: TestMVTLayer, viewport, testCases, onError: t.notOk});
+
+  t.end();
 });
