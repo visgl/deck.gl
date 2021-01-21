@@ -26,7 +26,7 @@ export default [
       new GeoJsonLayer({
         id: 'first-person',
         data: dataSamples.geojson,
-        opacity: 0.6,
+        opacity: 0.8,
         getRadius: 500,
         getFillColor: f => parseColor(f.properties.fill),
         getLineColor: f => parseColor(f.properties.stroke),

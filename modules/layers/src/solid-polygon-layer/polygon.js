@@ -22,6 +22,9 @@
 import earcut from 'earcut';
 import {modifyPolygonWindingDirection, WINDING} from '@math.gl/polygon';
 
+const OUTER_POLYGON_WINDING = WINDING.CLOCKWISE;
+const HOLE_POLYGON_WINDING = WINDING.COUNTER_CLOCKWISE;
+
 // 4 data formats are supported:
 // Simple Polygon: an array of points
 // Complex Polygon: an array of array of points (array of rings)
@@ -197,7 +200,7 @@ export function normalize(polygon, positionSize) {
           positionSize,
           srcHoleIndices[i - 1],
           srcHoleIndices[i],
-          i === 0 ? WINDING.CLOCKWISE : WINDING.COUNTER_CLOCKWISE
+          i === 0 ? OUTER_POLYGON_WINDING : HOLE_POLYGON_WINDING
         );
         holeIndices.push(targetIndex);
       }
@@ -210,7 +213,7 @@ export function normalize(polygon, positionSize) {
   }
   if (Number.isFinite(polygon[0])) {
     // simple flat
-    copyFlatRing(positions, 0, polygon, positionSize, 0, positions.length, WINDING.CLOCKWISE);
+    copyFlatRing(positions, 0, polygon, positionSize, 0, positions.length, OUTER_POLYGON_WINDING);
     return positions;
   }
   if (!isSimple(polygon)) {
@@ -223,7 +226,7 @@ export function normalize(polygon, positionSize) {
         targetIndex,
         simplePolygon,
         positionSize,
-        polygonIndex === 0 ? WINDING.CLOCKWISE : WINDING.COUNTER_CLOCKWISE
+        polygonIndex === 0 ? OUTER_POLYGON_WINDING : HOLE_POLYGON_WINDING
       );
       holeIndices.push(targetIndex);
     }
@@ -233,7 +236,7 @@ export function normalize(polygon, positionSize) {
     return {positions, holeIndices};
   }
   // simple polygon
-  copyNestedRing(positions, 0, polygon, positionSize, WINDING.CLOCKWISE);
+  copyNestedRing(positions, 0, polygon, positionSize, OUTER_POLYGON_WINDING);
   return positions;
 }
 /* eslint-enable max-statements */
