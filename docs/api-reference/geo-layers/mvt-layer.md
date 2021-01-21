@@ -130,7 +130,7 @@ tileJSON (Object) - the tileJSON fetched
 
 ## Methods
 
-#### getRenderedFeatures` (Function)
+#### `getRenderedFeatures` (Function)
 
 Get the rendered features in the current viewport.
 
@@ -149,7 +149,6 @@ Returns:
 Remarks:
 
 - As it's an expensive operation, it's not recommended to call `getRenderedFeatures` every time `onViewStateChange` is executed, use a debounce function instead. 
-
 - In most of the cases you probably want to use it attached to `onViewStateChange` and `onViewportLoad`.
 
 ## Tile
