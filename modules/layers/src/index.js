@@ -39,5 +39,5 @@ export {default as _MultiIconLayer} from './text-layer/multi-icon-layer/multi-ic
 
 export {
   geoJsonBinaryToFeature as _geoJsonBinaryToFeature,
-  findFeatureGeoJsonBinary as _findFeatureGeoJsonBinary
+  findIndexGeoJsonBinary as _findIndexGeoJsonBinary
 } from './geojson-layer/geojson-binary';

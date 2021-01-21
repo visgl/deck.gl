@@ -2,7 +2,7 @@ import {Matrix4} from 'math.gl';
 import {MVTLoader} from '@loaders.gl/mvt';
 import {load} from '@loaders.gl/core';
 import {COORDINATE_SYSTEM} from '@deck.gl/core';
-import {_geoJsonBinaryToFeature, _findFeatureGeoJsonBinary} from '@deck.gl/layers';
+import {_geoJsonBinaryToFeature, _findIndexGeoJsonBinary} from '@deck.gl/layers';
 
 import TileLayer from '../tile-layer/tile-layer';
 import {getURLFromTemplate, isURLTemplate} from '../tile-layer/utils';
@@ -168,8 +168,8 @@ export default class MVTLayer extends TileLayer {
       const {data} = params.sourceLayer.props;
       info.object =
         _geoJsonBinaryToFeature(data.points, info.index) ||
-        _geoJsonBinaryToFeature(data.lines, info.index, 'pathIndices') ||
-        _geoJsonBinaryToFeature(data.polygons, info.index, 'primitivePolygonIndices');
+        _geoJsonBinaryToFeature(data.lines, info.index) ||
+        _geoJsonBinaryToFeature(data.polygons, info.index);
     }
 
     return info;
@@ -199,7 +199,18 @@ export default class MVTLayer extends TileLayer {
 
       // Non-iterable data
     } else if (data && binary) {
-      return _findFeatureGeoJsonBinary(data, uniqueIdProperty, featureIdToHighlight);
+      const featureIdIndex = _findIndexGeoJsonBinary(data, uniqueIdProperty, featureIdToHighlight);
+      // TODO: Fix linter for nullish coalesce operator
+      // const index =
+      //   data.points.featureIds.value[featureIdIndex] ??
+      //   data.lines.featureIds.value[featureIdIndex] ??
+      //   data.polygons.featureIds.value[featureIdIndex];
+
+      const geometries = ['points', 'lines', 'polygons'];
+      for (const geometry of geometries) {
+        const index = data[geometry] && data[geometry].featureIds.value[featureIdIndex];
+        if (index !== undefined) return index;
+      }
     }
 
     return -1;

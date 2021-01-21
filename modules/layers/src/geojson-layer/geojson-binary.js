@@ -1,24 +1,20 @@
-export function geoJsonBinaryToFeature(data, index, indexAttr) {
-  const featureIndex = !indexAttr
-    ? index
-    : 'value' in data[indexAttr]
-      ? data[indexAttr].value[index]
-      : data[indexAttr][index];
-  const geometryIndex = data.featureIds.value[featureIndex];
-  const feature = {};
+export function geoJsonBinaryToFeature(data, index) {
+  let feature;
+  const featureIdIndex = data.featureIds.value.indexOf(index);
 
-  if (featureIndex !== -1) {
-    feature.properties = {...data.properties[geometryIndex]};
+  if (featureIdIndex > -1) {
+    feature = {};
+    feature.properties = {...data.properties[index]};
     for (const prop in data.numericProps) {
       feature.properties[prop] =
-        data.numericProps[prop].value[featureIndex * data.numericProps[prop].size];
+        data.numericProps[prop].value[featureIdIndex * data.numericProps[prop].size];
     }
   }
 
   return feature;
 }
 
-export function findFeatureGeoJsonBinary(data, uniqueIdProperty, featureId) {
+export function findIndexGeoJsonBinary(data, uniqueIdProperty, featureId) {
   const geomTypes = ['points', 'lines', 'polygons'];
 
   for (const gt of geomTypes) {
@@ -45,18 +41,5 @@ function findFeatureByType(data, uniqueIdProperty, featureId, geomType) {
     index = data[geomType].featureIds.value.indexOf(propertyIndex);
   }
 
-  if (index !== -1) {
-    // Select geometry index depending on geometry type
-    // eslint-disable-next-line default-case
-    switch (geomType) {
-      case 'points':
-        return data[geomType].featureIds.value.indexOf(index);
-      case 'lines':
-        return data[geomType].pathIndices.value.indexOf(index);
-      case 'polygons':
-        return data[geomType].polygonIndices.value.indexOf(index);
-    }
-  }
-
-  return -1;
+  return index;
 }

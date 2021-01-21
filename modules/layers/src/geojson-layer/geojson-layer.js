@@ -90,7 +90,7 @@ export default class GeoJsonLayer extends CompositeLayer {
   }
 
   _updateStateBinary({props, changeFlags}) {
-    const layerProps = createLayerPropsFromBinary(props.data);
+    const layerProps = createLayerPropsFromBinary(props.data, this.encodePickingColor);
     this.setState({layerProps});
   }
 
@@ -331,6 +331,7 @@ export default class GeoJsonLayer extends CompositeLayer {
   }
   _getHighlightedIndex(data) {
     const {highlightedObjectIndex} = this.props;
+
     if (!this._isBinary()) {
       return Number.isFinite(highlightedObjectIndex)
         ? data.findIndex(d => d.__source.index === highlightedObjectIndex)

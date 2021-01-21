@@ -1,5 +1,3 @@
-import GL from '@luma.gl/constants';
-
 function createEmptyLayerProps() {
   return {
     points: {},
@@ -38,14 +36,24 @@ export function createLayerPropsFromFeatures(features, featuresDiff) {
   return layerProps;
 }
 
-export function createLayerPropsFromBinary(geojsonBinary) {
+export function createLayerPropsFromBinary(geojsonBinary, uniqueIdProperty, encodePickingColor) {
   const layerProps = createEmptyLayerProps();
   const {points, lines, polygons} = geojsonBinary;
+
+  const customPickingColors = calculatePickingColors(
+    geojsonBinary,
+    uniqueIdProperty,
+    encodePickingColor
+  );
 
   layerProps.points.data = {
     length: points.positions.value.length / points.positions.size,
     attributes: {
-      getPosition: points.positions
+      getPosition: points.positions,
+      pickingColors: {
+        size: 3,
+        value: customPickingColors.points
+      }
     },
     properties: points.properties,
     numericProps: points.numericProps,
@@ -56,7 +64,11 @@ export function createLayerPropsFromBinary(geojsonBinary) {
     length: lines.pathIndices.value.length - 1,
     startIndices: lines.pathIndices.value,
     attributes: {
-      getPath: lines.positions
+      getPath: lines.positions,
+      pickingColors: {
+        size: 3,
+        value: customPickingColors.lines
+      }
     },
     properties: lines.properties,
     numericProps: lines.numericProps,
@@ -71,9 +83,7 @@ export function createLayerPropsFromBinary(geojsonBinary) {
       getPolygon: polygons.positions,
       pickingColors: {
         size: 3,
-        type: GL.UNSIGNED_BYTE,
-        update: calculatePickingColors,
-        // value: new Uint8ClampedArray(3 * polygons.primitivePolygonIndices.value.length)
+        value: customPickingColors.polygons
       }
     },
     properties: polygons.properties,
@@ -86,7 +96,11 @@ export function createLayerPropsFromBinary(geojsonBinary) {
     length: polygons.primitivePolygonIndices.value.length,
     startIndices: polygons.primitivePolygonIndices.value,
     attributes: {
-      getPath: polygons.positions
+      getPath: polygons.positions,
+      instancePickingColors: {
+        size: 3,
+        value: customPickingColors.polygons
+      }
     },
     properties: polygons.properties,
     numericProps: polygons.numericProps,
@@ -99,16 +113,22 @@ export function createLayerPropsFromBinary(geojsonBinary) {
 
 // Custom picking color to keep binary indexes
 
-function calculatePickingColors(attribute) {
-  console.log("calculatePickingColors", attribute);
+function calculatePickingColors(geojsonBinary, encodePickingColor) {
+  const pickingColors = {
+    points: null,
+    lines: null,
+    polygons: null
+  };
+  for (const key in pickingColors) {
+    pickingColors[key] = new Uint8ClampedArray(geojsonBinary[key].featureIds.value.length * 3);
+    const pickingColor = [];
+    for (let i = 0; i < geojsonBinary[key].featureIds.value.length; i++) {
+      encodePickingColor(geojsonBinary[key].featureIds.value[i], pickingColor);
+      pickingColors[key][i * 3 + 0] = pickingColor[0];
+      pickingColors[key][i * 3 + 1] = pickingColor[1];
+      pickingColors[key][i * 3 + 2] = pickingColor[2];
+    }
+  }
 
-  // Fake 
-  const value = new Uint8ClampedArray(3 * attribute.size);
-  value.fill(0);
-  attribute.value = value;
-}
-
-function encodePickingColor(index) {
-  console.log("encodePickingColor", index);
-  return [0, 0, 0];
+  return pickingColors;
 }
