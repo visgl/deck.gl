@@ -148,9 +148,9 @@ Returns:
 
 Remarks:
 
-- As it's an expensive operation, it is not recommended to call `getRenderedFeatures` every time `onViewStateChange` is executed, use a debounce function instead. 
+- As it's an expensive operation, it's not recommended to call `getRenderedFeatures` every time `onViewStateChange` is executed, use a debounce function instead. 
 
-- In most of the cases you probably want to use it attached to `onViewStateChange` and `onViewportLoad`
+- In most of the cases you probably want to use it attached to `onViewStateChange` and `onViewportLoad`.
 
 ## Tile
 
