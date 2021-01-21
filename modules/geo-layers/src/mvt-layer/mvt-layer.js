@@ -2,7 +2,7 @@ import {Matrix4} from 'math.gl';
 import {MVTLoader} from '@loaders.gl/mvt';
 import {load} from '@loaders.gl/core';
 import {COORDINATE_SYSTEM} from '@deck.gl/core';
-import {_geoJsonBinaryToFeature, _findIndexGeoJsonBinary} from '@deck.gl/layers';
+import {_binaryToFeature, _findIndexBinary} from '@deck.gl/layers';
 
 import TileLayer from '../tile-layer/tile-layer';
 import {getURLFromTemplate, isURLTemplate} from '../tile-layer/utils';
@@ -14,7 +14,8 @@ const WORLD_SIZE = 512;
 const defaultProps = {
   uniqueIdProperty: {type: 'string', value: ''},
   highlightedFeatureId: null,
-  loaders: MVTLoader
+  loaders: MVTLoader,
+  binary: false
 };
 
 async function fetchTileJSON(url) {
@@ -165,11 +166,12 @@ export default class MVTLayer extends TileLayer {
         info.object = transformTileCoordsToWGS84(info.object, info.tile, this.context.viewport);
       }
     } else if (this.props.binary && info.index !== -1) {
+      // get the feature from the binary at the given index.
       const {data} = params.sourceLayer.props;
       info.object =
-        _geoJsonBinaryToFeature(data.points, info.index) ||
-        _geoJsonBinaryToFeature(data.lines, info.index) ||
-        _geoJsonBinaryToFeature(data.polygons, info.index);
+        _binaryToFeature(data.points, info.index) ||
+        _binaryToFeature(data.lines, info.index) ||
+        _binaryToFeature(data.polygons, info.index);
     }
 
     return info;
@@ -199,12 +201,8 @@ export default class MVTLayer extends TileLayer {
 
       // Non-iterable data
     } else if (data && binary) {
-      const featureIdIndex = _findIndexGeoJsonBinary(data, uniqueIdProperty, featureIdToHighlight);
-      // TODO: Fix linter for nullish coalesce operator
-      // const index =
-      //   data.points.featureIds.value[featureIdIndex] ??
-      //   data.lines.featureIds.value[featureIdIndex] ??
-      //   data.polygons.featureIds.value[featureIdIndex];
+      // Get the feature index of the selected item to highlight
+      const featureIdIndex = _findIndexBinary(data, uniqueIdProperty, featureIdToHighlight);
 
       const geometries = ['points', 'lines', 'polygons'];
       for (const geometry of geometries) {

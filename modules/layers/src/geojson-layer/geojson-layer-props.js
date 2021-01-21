@@ -1,3 +1,5 @@
+import {calculatePickingColors} from './geojson-binary';
+
 function createEmptyLayerProps() {
   return {
     points: {},
@@ -97,7 +99,7 @@ export function createLayerPropsFromBinary(geojsonBinary, uniqueIdProperty, enco
     startIndices: polygons.primitivePolygonIndices.value,
     attributes: {
       getPath: polygons.positions,
-      instancePickingColors: {
+      pickingColors: {
         size: 3,
         value: customPickingColors.polygons
       }
@@ -109,26 +111,4 @@ export function createLayerPropsFromBinary(geojsonBinary, uniqueIdProperty, enco
   layerProps.polygonsOutline._pathType = 'open';
 
   return layerProps;
-}
-
-// Custom picking color to keep binary indexes
-
-function calculatePickingColors(geojsonBinary, encodePickingColor) {
-  const pickingColors = {
-    points: null,
-    lines: null,
-    polygons: null
-  };
-  for (const key in pickingColors) {
-    pickingColors[key] = new Uint8ClampedArray(geojsonBinary[key].featureIds.value.length * 3);
-    const pickingColor = [];
-    for (let i = 0; i < geojsonBinary[key].featureIds.value.length; i++) {
-      encodePickingColor(geojsonBinary[key].featureIds.value[i], pickingColor);
-      pickingColors[key][i * 3 + 0] = pickingColor[0];
-      pickingColors[key][i * 3 + 1] = pickingColor[1];
-      pickingColors[key][i * 3 + 2] = pickingColor[2];
-    }
-  }
-
-  return pickingColors;
 }

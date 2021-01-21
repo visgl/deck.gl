@@ -38,6 +38,6 @@ export {default as SolidPolygonLayer} from './solid-polygon-layer/solid-polygon-
 export {default as _MultiIconLayer} from './text-layer/multi-icon-layer/multi-icon-layer';
 
 export {
-  geoJsonBinaryToFeature as _geoJsonBinaryToFeature,
-  findIndexGeoJsonBinary as _findIndexGeoJsonBinary
+  binaryToFeature as _binaryToFeature,
+  findIndexBinary as _findIndexBinary
 } from './geojson-layer/geojson-binary';

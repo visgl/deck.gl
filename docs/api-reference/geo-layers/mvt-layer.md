@@ -119,9 +119,14 @@ On top of the [default options](/docs/api-reference/core/layer.md#loadoptions), 
 
 ##### `binary` (Boolean, optional)
 
-* Default: true
+* Default: false
 
-Reads data in binary format to improve performance. More information in the [performance optimization guide](/docs/developer-guide/performance.md#use-binary-data).
+Use tile data in [binary format](https://github.com/visgl/loaders.gl/blob/master/modules/gis/docs/api-reference/geojson-to-binary.md) to improve performance. It removes the need for serialization and deserialization of data transferred by the worker back to the main process.
+
+Remarks: 
+
+- It requires to use `GeoJsonLayer` as the `renderSubLayers` function to work.
+- In binary format, polygons or multipolygons with holes are not supported.
 
 ### Callbacks
 

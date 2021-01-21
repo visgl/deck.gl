@@ -24,7 +24,7 @@ import PathLayer from '../path-layer/path-layer';
 // Use primitive layer to avoid "Composite Composite" layers for now
 import SolidPolygonLayer from '../solid-polygon-layer/solid-polygon-layer';
 import {replaceInRange} from '../utils';
-import {geoJsonBinaryToFeature} from './geojson-binary';
+import {binaryToFeatureForAccesor} from './geojson-binary';
 
 import {getGeojsonFeatures, separateGeojsonFeatures} from './geojson';
 import {createLayerPropsFromFeatures, createLayerPropsFromBinary} from './geojson-layer-props';
@@ -352,8 +352,7 @@ export default class GeoJsonLayer extends CompositeLayer {
 
     return (object, info) => {
       const {data, index} = info;
-      const attr = 'startIndices' in data ? 'startIndices' : null;
-      const feature = geoJsonBinaryToFeature(data, index, attr);
+      const feature = binaryToFeatureForAccesor(data, index);
       return accessor(feature, info);
     };
   }
