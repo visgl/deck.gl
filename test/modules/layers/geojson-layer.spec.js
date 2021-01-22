@@ -20,6 +20,7 @@
 
 import test from 'tape-catch';
 import {testLayer, generateLayerTests} from '@deck.gl/test-utils';
+import {geojsonToBinary} from '@loaders.gl/gis';
 
 import {GeoJsonLayer} from 'deck.gl';
 
@@ -79,6 +80,24 @@ test('GeoJsonLayer#tests', t => {
     updateProps: {
       data: Object.assign({}, FIXTURES.choropleths),
       _dataDiff: () => [{startRow: 0, endRow: 3}]
+    }
+  });
+
+  testCases.push({
+    title: 'GeoJsonLayer#binary',
+    onBeforeUpdate: ({testCase}) => t.comment(testCase.title),
+    onAfterUpdate: ({layer, subLayers}) => {
+      t.ok(layer.state.features, 'should update features');
+      const hasData = layer.props && layer.props.data && Object.keys(layer.props.data).length;
+      t.is(
+        subLayers.length,
+        !hasData ? 0 : layer.props.stroked && !layer.props.extruded ? 4 : 3,
+        'correct number of sublayers'
+      );
+    },
+    props: {
+      // TODO: Set a right geojson example as the provided from 'deck.gl-data' contains 'GeometryCollection' types that are not compatible with geojsonToBinary
+      data: geojsonToBinary(FIXTURES.geojson.features.slice(0, 7))
     }
   });
 

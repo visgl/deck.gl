@@ -19,7 +19,7 @@ export function binaryToFeature(data, featureIdIndex) {
     return getPropertiesForIndex(data, featureIdIndex, index);
   }
 
-  return -1;
+  return null;
 }
 
 /**

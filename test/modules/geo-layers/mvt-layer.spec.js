@@ -4,6 +4,7 @@ import {MVTLayer} from '@deck.gl/geo-layers';
 import ClipExtension from '@deck.gl/geo-layers/mvt-layer/clip-extension';
 import {transform} from '@deck.gl/geo-layers/mvt-layer/coordinate-transform';
 import {GeoJsonLayer} from '@deck.gl/layers';
+import {geojsonToBinary} from '@loaders.gl/gis';
 
 import {ScatterplotLayer} from '@deck.gl/layers';
 import {WebMercatorViewport} from '@deck.gl/core';
@@ -48,6 +49,9 @@ const geoJSONDataWGS84 = [
     }
   }
 ];
+
+const geoJSONBinaryData = geojsonToBinary(geoJSONData);
+const geoJSONBinaryDataWGS84 = geojsonToBinary(geoJSONDataWGS84);
 
 const TRANSFORM_COORDS_DATA = [
   {
@@ -146,7 +150,7 @@ test('ClipExtension', t => {
   t.end();
 });
 
-test('transformCoorsToWGS84', t => {
+test('transformCoordsToWGS84', t => {
   const viewport = new WebMercatorViewport({
     latitude: 0,
     longitude: 0,
@@ -166,11 +170,19 @@ test('transformCoorsToWGS84', t => {
 test('MVT Highlight', async t => {
   class TestMVTLayer extends MVTLayer {
     getTileData() {
-      return geoJSONData;
+      return this.props.binary ? geoJSONBinaryData : geoJSONData;
     }
   }
 
   TestMVTLayer.componentName = 'TestMVTLayer';
+
+  const onAfterUpdate = ({subLayers}) => {
+    for (const layer of subLayers) {
+      t.ok(layer.props.pickable, 'MVT Sublayer is pickable');
+      t.ok(!layer.props.autoHighlight, 'AutoHighlight should be disabled');
+      t.equal(layer.props.highlightedObjectIndex, 0, 'Feature highlighted has index 0');
+    }
+  };
 
   const testCases = [
     {
@@ -180,15 +192,16 @@ test('MVT Highlight', async t => {
         filled: true,
         pickable: true,
         autoHighlight: true,
-        highlightedFeatureId: 1
+        highlightedFeatureId: 1,
+        binary: false
       },
-      onAfterUpdate: ({subLayers}) => {
-        for (const layer of subLayers) {
-          t.ok(layer.props.pickable, 'MVT Sublayer is pickable');
-          t.ok(!layer.props.autoHighlight, 'AutoHighlight should be disabled');
-          t.equal(layer.props.highlightedObjectIndex, 0, 'Feature highlighted has index 0');
-        }
-      }
+      onAfterUpdate
+    },
+    {
+      updateProps: {
+        binary: true
+      },
+      onAfterUpdate
     }
   ];
 
@@ -249,13 +262,15 @@ test('TileJSON', async t => {
   const testCases = [
     {
       props: {
-        data: 'http://echo.jsontest.com/key/value'
+        data: 'http://echo.jsontest.com/key/value',
+        binary: false
       },
       onAfterUpdate
     },
     {
       props: {
-        data: tileJSON
+        data: tileJSON,
+        binary: false
       },
       onAfterUpdate
     }
@@ -270,7 +285,7 @@ test('TileJSON', async t => {
 test('MVT dataInWGS84', async t => {
   class TestMVTLayer extends MVTLayer {
     getTileData() {
-      return geoJSONData;
+      return this.props.binary ? geoJSONBinaryData : geoJSONData;
     }
   }
 
@@ -282,30 +297,39 @@ test('MVT dataInWGS84', async t => {
     zoom: 0
   });
 
+  const onAfterUpdate = ({layer}) => {
+    if (layer.isLoaded) {
+      const tile = layer.state.tileset.selectedTiles[0];
+      const contentWGS84 = tile.dataInWGS84;
+
+      t.deepEqual(
+        layer.props.binary ? contentWGS84 : contentWGS84[0].geometry.coordinates,
+        layer.props.binary ? geoJSONBinaryDataWGS84 : geoJSONDataWGS84[0].geometry.coordinates,
+        'should transform to WGS84'
+      );
+      t.isNot(tile._contentWGS84, undefined, 'should set cache for further requests');
+      t.is(tile.dataInWGS84, contentWGS84, 'should use the cache');
+
+      tile.content = null;
+      tile._contentWGS84 = null;
+      t.is(tile.dataInWGS84, null, 'should return null if content is null');
+    }
+  };
+
   const testCases = [
     {
       props: {
-        data: ['https://server.com/{z}/{x}/{y}.mvt']
+        data: ['https://server.com/{z}/{x}/{y}.mvt'],
+        binary: false
       },
-      onAfterUpdate: ({layer}) => {
-        if (layer.isLoaded) {
-          const tile = layer.state.tileset.selectedTiles[0];
-          const contentWGS84 = tile.dataInWGS84;
-
-          t.deepEqual(
-            contentWGS84[0].geometry.coordinates,
-            geoJSONDataWGS84[0].geometry.coordinates,
-            'should transform to WGS84'
-          );
-          t.isNot(tile._contentWGS84, undefined, 'should set cache for further requests');
-          t.is(tile.dataInWGS84, contentWGS84, 'should use the cache');
-
-          tile.content = null;
-          tile._contentWGS84 = null;
-          t.is(tile.dataInWGS84, null, 'should return null if content is null');
-        }
-      }
+      onAfterUpdate
     }
+    // {
+    //   updateProps: {
+    //     binary: true
+    //   },
+    //   onAfterUpdate
+    // }
   ];
 
   await testLayerAsync({Layer: TestMVTLayer, viewport, testCases, onError: t.notOk});

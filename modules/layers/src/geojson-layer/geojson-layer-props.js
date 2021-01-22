@@ -99,7 +99,7 @@ export function createLayerPropsFromBinary(geojsonBinary, uniqueIdProperty, enco
     startIndices: polygons.primitivePolygonIndices.value,
     attributes: {
       getPath: polygons.positions,
-      pickingColors: {
+      instancePickingColors: {
         size: 3,
         value: customPickingColors.polygons
       }
