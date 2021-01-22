@@ -1,7 +1,7 @@
 import test from 'tape-catch';
 import {floatEquals, vecEquals} from '../../../utils/utils';
 import {getFrustumPlanes, toDoublePrecisionArray} from '@deck.gl/core/utils/math-utils';
-import {equals} from 'math.gl';
+import {equals, Matrix4} from 'math.gl';
 
 const ROOT2 = 0.7071;
 
@@ -35,17 +35,16 @@ const EXPECTED_PLANES = {
 // Test a simple frustum with all planes
 // at 45 degree angles
 test('getFrustumPlanes#tests', t => {
-  const planes = getFrustumPlanes({
-    position: [0, 0, 1],
-    direction: [0, 0, -1],
-    up: [0, 1, 0],
-    right: [1, 0, 0],
-    near: 1,
-    far: 10,
-    fovyRadians: Math.PI / 2,
-    height: 1,
-    aspect: 1
-  });
+  const viewMatrix = new Matrix4().lookAt([0, 0, 1], [0, 0, 0], [0, 1, 0]);
+  const viewProjMatrix = new Matrix4()
+    .perspective({
+      fovy: Math.PI / 2,
+      aspect: 1,
+      near: 1,
+      far: 10
+    })
+    .multiplyRight(viewMatrix);
+  const planes = getFrustumPlanes(viewProjMatrix);
 
   for (const plane in planes) {
     const calculated = planes[plane];

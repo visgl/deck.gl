@@ -19,7 +19,7 @@
 // THE SOFTWARE.
 
 import log from '../utils/log';
-import {createMat4, extractCameraVectors, getFrustumPlanes} from '../utils/math-utils';
+import {createMat4, getCameraPosition, getFrustumPlanes} from '../utils/math-utils';
 
 import {Matrix4, Vector3, equals} from 'math.gl';
 import * as mat4 from 'gl-matrix/mat4';
@@ -255,21 +255,7 @@ export default class Viewport {
       return this._frustumPlanes;
     }
 
-    const {near, far, fovyRadians, aspect} = this.projectionProps;
-
-    Object.assign(
-      this._frustumPlanes,
-      getFrustumPlanes({
-        aspect,
-        near,
-        far,
-        fovyRadians,
-        position: this.cameraPosition,
-        direction: this.cameraDirection,
-        up: this.cameraUp,
-        right: this.cameraRight
-      })
-    );
+    Object.assign(this._frustumPlanes, getFrustumPlanes(this.viewProjectionMatrix));
 
     return this._frustumPlanes;
   }
@@ -392,16 +378,16 @@ export default class Viewport {
       focalDistance = 1
     } = opts;
 
-    this.projectionProps = {
-      orthographic,
-      fovyRadians: fovyRadians || fovy * DEGREES_TO_RADIANS,
-      aspect: this.width / this.height,
-      focalDistance,
-      near,
-      far
-    };
-
-    this.projectionMatrix = projectionMatrix || this._createProjectionMatrix(this.projectionProps);
+    this.projectionMatrix =
+      projectionMatrix ||
+      this._createProjectionMatrix({
+        orthographic,
+        fovyRadians: fovyRadians || fovy * DEGREES_TO_RADIANS,
+        aspect: this.width / this.height,
+        focalDistance,
+        near,
+        far
+      });
   }
 
   _initPixelMatrices() {
@@ -417,17 +403,8 @@ export default class Viewport {
     // Calculate inverse view matrix
     this.viewMatrixInverse = mat4.invert([], this.viewMatrix) || this.viewMatrix;
 
-    // Decompose camera directions
-    const {eye, direction, up, right} = extractCameraVectors({
-      viewMatrix: this.viewMatrix,
-      viewMatrixInverse: this.viewMatrixInverse
-    });
-    this.cameraPosition = eye;
-    this.cameraDirection = direction;
-    this.cameraUp = up;
-    this.cameraRight = right;
-
-    // console.log(this.cameraPosition, this.cameraDirection, this.cameraUp);
+    // Decompose camera parameters
+    this.cameraPosition = getCameraPosition(this.viewMatrixInverse);
 
     /*
      * Builds matrices that converts preprojected lngLats to screen pixels

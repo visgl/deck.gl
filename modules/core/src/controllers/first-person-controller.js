@@ -33,6 +33,7 @@ class FirstPersonState extends ViewState {
     minPitch = DEFAULT_STATE.minPitch,
 
     // Model state when the rotate operation first started
+    startRotatePos,
     startBearing,
     startPitch,
     startZoomPosition,
@@ -50,7 +51,8 @@ class FirstPersonState extends ViewState {
       minPitch
     });
 
-    this._interactiveState = {
+    this._state = {
+      startRotatePos,
       startBearing,
       startPitch,
       startZoomPosition,
@@ -59,10 +61,6 @@ class FirstPersonState extends ViewState {
   }
 
   /* Public API */
-
-  getInteractiveState() {
-    return this._interactiveState;
-  }
 
   getDirection(use2D = false) {
     const spherical = new SphericalCoordinates({
@@ -103,6 +101,7 @@ class FirstPersonState extends ViewState {
    */
   rotateStart({pos}) {
     return this._getUpdatedState({
+      startRotatePos: pos,
       startBearing: this._viewportProps.bearing,
       startPitch: this._viewportProps.pitch
     });
@@ -112,17 +111,30 @@ class FirstPersonState extends ViewState {
    * Rotate
    * @param {[Number, Number]} pos - position on screen where the pointer is
    */
-  rotate({deltaScaleX, deltaScaleY}) {
-    const {startBearing, startPitch} = this._interactiveState;
+  rotate({pos, deltaAngleX = 0, deltaAngleY = 0}) {
+    const {startRotatePos, startBearing, startPitch} = this._state;
+    const {width, height} = this._viewportProps;
 
-    if (!Number.isFinite(startBearing) || !Number.isFinite(startPitch)) {
+    if (!startRotatePos || !Number.isFinite(startBearing) || !Number.isFinite(startPitch)) {
       return this;
     }
 
-    return this._getUpdatedState({
-      bearing: startBearing - deltaScaleX * 180,
-      pitch: startPitch - deltaScaleY * 90
-    });
+    let newRotation;
+    if (pos) {
+      const deltaScaleX = (pos[0] - startRotatePos[0]) / width;
+      const deltaScaleY = (pos[1] - startRotatePos[1]) / height;
+      newRotation = {
+        bearing: startBearing - deltaScaleX * 180,
+        pitch: startPitch - deltaScaleY * 90
+      };
+    } else {
+      newRotation = {
+        bearing: startBearing - deltaAngleX,
+        pitch: startPitch - deltaAngleY
+      };
+    }
+
+    return this._getUpdatedState(newRotation);
   }
 
   /**
@@ -131,6 +143,7 @@ class FirstPersonState extends ViewState {
    */
   rotateEnd() {
     return this._getUpdatedState({
+      startRotatePos: null,
       startBearing: null,
       startPitch: null
     });
@@ -156,7 +169,7 @@ class FirstPersonState extends ViewState {
    *   relative scale.
    */
   zoom({scale}) {
-    let {startZoomPosition} = this._interactiveState;
+    let {startZoomPosition} = this._state;
     if (!startZoomPosition) {
       startZoomPosition = this._viewportProps.position;
     }
@@ -255,9 +268,7 @@ class FirstPersonState extends ViewState {
 
   _getUpdatedState(newProps) {
     // Update _viewportProps
-    return new FirstPersonState(
-      Object.assign({}, this._viewportProps, this._interactiveState, newProps)
-    );
+    return new FirstPersonState(Object.assign({}, this._viewportProps, this._state, newProps));
   }
 
   // Apply any constraints (mathematical or defined by _viewportProps) to map state
