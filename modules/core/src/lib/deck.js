@@ -133,7 +133,7 @@ const defaultProps = {
   onBeforeRender: noop,
   onAfterRender: noop,
   onLoad: noop,
-  onError: null,
+  onError: (error, ...args) => log.error(...args, error)(),
   _onMetrics: null,
 
   getCursor,
@@ -496,7 +496,15 @@ export default class Deck {
       autoResizeDrawingBuffer,
       autoResizeViewport: false,
       gl,
-      onCreateContext: opts => createGLContext({...glOptions, ...opts, canvas: this.canvas, debug}),
+      onCreateContext: options =>
+        createGLContext({
+          ...glOptions,
+          ...options,
+          canvas: this.canvas,
+          debug,
+          // eslint-disable-next-line
+          onContextLost: event => this.props.onError(event)
+        }),
       onInitialize: this._onRendererInitialized,
       onRender: this._onRenderFrame,
       onBeforeRender: props.onBeforeRender,
