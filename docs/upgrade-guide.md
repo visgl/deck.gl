@@ -26,7 +26,7 @@ A legacy field `pickingInfo.lngLat` has been removed. Use `pickingInfo.coordinat
 
 - `MVTLayer`'s `onHover` and `onClick` callbacks now yield the `info.object` feature coordinates in WGS84 standard.
 - `ScenegraphLayer` now has built-in support for `GLTFLoader`. It's no longer necessary to call `registerLoaders` before using it.
-
+- `SolidPolygonLayer`'s polygonTesselator enforces winding order for outer polygons and holes (Potentially breaking visual change).
 
 ## Upgrading from deck.gl v8.2 to v8.3
 
