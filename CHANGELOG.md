@@ -21,6 +21,22 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ### deck.gl v8.4 Prereleases
 
+#### deck.gl [8.4.0-beta.1] - Jan 22 2021
+
+- Bump luma.gl to 8.4.0-beta (#5374)
+- SolidPolygonLayer basic winding order check and winding order enforcement (#5223)
+- Fix HeatmapLayer update racing condition (#5368)
+- Controller inertia (3/3): add inertia option to controllers (#5350)
+- Controller inertia (2/3): maintain correct interaction state in controller (#5371)
+- Clean up ViewState classes (#5348)
+- More robust and simple frustum calculation (#5362)
+- Remove onViewportChange callback at MVT layer (#5366)
+- Tiles content in WGS84 for MVTLayer (#5361)
+- Fix Tile3DLayer example in gallery (#5363)
+- TileLayer add tile objects at OnViewportLoad instead of data content (#5360)
+- Abort Ongoing Requests when TileLayer is Destroyed (#5357)
+- Bump math.gl dependency => 3.4.2 (#5356)
+
 #### deck.gl [8.4.0-alpha.6] - Jan 19 2021
 
 - Abort Ongoing Tile Requests When New Tileset is Created (#5342)
