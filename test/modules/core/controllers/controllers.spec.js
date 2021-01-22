@@ -21,6 +21,19 @@ test('MapController', async t => {
   t.end();
 });
 
+test('MapController#inertia', async t => {
+  await testController(t, MapView, {
+    longitude: -122.45,
+    latitude: 37.78,
+    zoom: 10,
+    pitch: 30,
+    bearing: -45,
+    inertia: true
+  });
+
+  t.end();
+});
+
 test('GlobeController', async t => {
   await testController(
     t,
