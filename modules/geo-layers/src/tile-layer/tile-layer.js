@@ -40,9 +40,16 @@ const defaultProps = {
 export default class TileLayer extends CompositeLayer {
   initializeState() {
     this.state = {
-      tiles: [],
+      tileset: null,
       isLoaded: false
     };
+  }
+
+  finalizeState() {
+    const {tileset} = this.state;
+    if (tileset) {
+      tileset.finalize();
+    }
   }
 
   get isLoaded() {
@@ -65,6 +72,9 @@ export default class TileLayer extends CompositeLayer {
         (changeFlags.updateTriggersChanged.all || changeFlags.updateTriggersChanged.getTileData));
 
     if (createTileCache) {
+      if (tileset) {
+        tileset.finalize();
+      }
       const maxZoom = Number.isFinite(this.state.maxZoom) ? this.state.maxZoom : props.maxZoom;
       const minZoom = Number.isFinite(this.state.minZoom) ? this.state.minZoom : props.minZoom;
       const {
@@ -127,7 +137,7 @@ export default class TileLayer extends CompositeLayer {
     const {onViewportLoad} = this.props;
 
     if (onViewportLoad) {
-      onViewportLoad(tileset.selectedTiles.map(tile => tile.data));
+      onViewportLoad(tileset.selectedTiles);
     }
   }
 
