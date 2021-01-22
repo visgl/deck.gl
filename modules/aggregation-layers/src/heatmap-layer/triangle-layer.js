@@ -72,13 +72,8 @@ export default class TriangleLayer extends Layer {
       intensity,
       threshold,
       aggregationMode,
-      colorDomain,
-      onRedraw
+      colorDomain
     } = this.props;
-
-    if (onRedraw) {
-      onRedraw();
-    }
 
     model
       .setUniforms({
