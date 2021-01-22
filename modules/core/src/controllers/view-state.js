@@ -14,6 +14,10 @@ export default class ViewState {
     return this._viewportProps;
   }
 
+  getState() {
+    return this._state;
+  }
+
   shortestPathFrom(viewState) {
     return this._viewportProps;
   }

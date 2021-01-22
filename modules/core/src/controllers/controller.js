@@ -245,7 +245,7 @@ export default class Controller {
       }
     }
 
-    Object.assign(this._state, newControllerState.getInteractiveState(), interactionState);
+    Object.assign(this._state, newControllerState.getState(), interactionState);
 
     if (this.onStateChange) {
       this.onStateChange(this._state);
@@ -313,13 +313,8 @@ export default class Controller {
       return false;
     }
 
-    const {deltaX, deltaY} = event;
-    const {width, height} = this.controllerState.getViewportProps();
-
-    const deltaScaleX = deltaX / width;
-    const deltaScaleY = deltaY / height;
-
-    const newControllerState = this.controllerState.rotate({deltaScaleX, deltaScaleY});
+    const pos = this.getCenter(event);
+    const newControllerState = this.controllerState.rotate({pos});
     this.updateViewport(newControllerState, NO_TRANSITION_PROPS, {
       isDragging: true,
       isRotating: true
@@ -373,11 +368,10 @@ export default class Controller {
       return false;
     }
 
-    const {deltaY} = event;
-    const {height} = this.controllerState.getViewportProps();
-    const deltaScaleY = deltaY / height;
+    const pos = this.getCenter(event);
+    pos[0] -= event.deltaX;
 
-    const newControllerState = this.controllerState.rotate({deltaScaleY});
+    const newControllerState = this.controllerState.rotate({pos});
     this.updateViewport(newControllerState, NO_TRANSITION_PROPS, {
       isDragging: true,
       isRotating: true
@@ -427,7 +421,7 @@ export default class Controller {
       const {rotation} = event;
       const {startPinchRotation} = this._state;
       newControllerState = newControllerState.rotate({
-        deltaScaleX: -(rotation - startPinchRotation) / 180
+        deltaAngleX: startPinchRotation - rotation
       });
     }
 
