@@ -107,7 +107,7 @@ export default class HeatmapLayer extends AggregationLayer {
     return changeFlags.somethingChanged;
   }
 
-  /* eslint-disable complexity */
+  /* eslint-disable max-statements,complexity */
   updateState(opts) {
     if (!this.state.supported) {
       return;
@@ -122,8 +122,11 @@ export default class HeatmapLayer extends AggregationLayer {
     }
 
     if (changeFlags.dataChanged || changeFlags.boundsChanged) {
+      // Update weight map immediately
+      clearTimeout(this.state.updateTimer);
       this.setState({isWeightMapDirty: true});
     } else if (changeFlags.viewportZoomChanged) {
+      // Update weight map when zoom stops
       this._debouncedUpdateWeightmap();
     }
 
@@ -148,9 +151,13 @@ export default class HeatmapLayer extends AggregationLayer {
       this.setState({colorDomain});
     }
 
+    if (this.state.isWeightMapDirty) {
+      this._updateWeightmap();
+    }
+
     this.setState({zoom: opts.context.viewport.zoom});
   }
-  /* eslint-enable complexity */
+  /* eslint-enable max-statements,complexity */
 
   renderLayers() {
     if (!this.state.supported) {
@@ -178,11 +185,6 @@ export default class HeatmapLayer extends AggregationLayer {
           attributes: {
             positions: triPositionBuffer,
             texCoords: triTexCoordBuffer
-          }
-        },
-        onRedraw: () => {
-          if (this.state.isWeightMapDirty) {
-            this._updateWeightmap();
           }
         },
         vertexCount: 4,
