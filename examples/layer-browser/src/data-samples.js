@@ -8,6 +8,7 @@ import {default as meterTrajectorySmall} from '../data/meter-trajectory-small.js
 
 import {default as choropleths} from '../data/sf.zip.geo.json';
 export {default as geojson} from '../data/sample.geo.json';
+export {default as geojsonHole} from '../data/hole.geo.json';
 export {default as geojsonLarge} from '../data/canada.geo.json';
 export {default as hexagons} from '../data/hexagons.json';
 export {default as routes} from '../data/sfmta.routes.json';
