@@ -13,7 +13,6 @@ const WORLD_SIZE = 512;
 const defaultProps = {
   uniqueIdProperty: {type: 'string', value: ''},
   highlightedFeatureId: null,
-  onViewportChange: {type: 'function', optional: true, value: null, compare: false},
   loaders: MVTLoader
 };
 
@@ -45,10 +44,7 @@ export default class MVTLayer extends TileLayer {
 
     if (this.state.data) {
       super.updateState({props, oldProps, context, changeFlags});
-      const {tileset} = this.state;
-      if (changeFlags.viewportChanged && tileset.isLoaded) {
-        this._onViewportChange();
-      }
+      this._setWGS84PropertyForTiles();
     }
   }
 
@@ -159,7 +155,7 @@ export default class MVTLayer extends TileLayer {
     const isWGS84 = this.context.viewport.resolution;
 
     if (!isWGS84 && info.object) {
-      info.object = transformTileCoordsToWGS84(info.object, info.tile, this.context.viewport);
+      info.object = transformTileCoordsToWGS84(info.object, info.tile.bbox, this.context.viewport);
     }
 
     return info;
@@ -217,20 +213,31 @@ export default class MVTLayer extends TileLayer {
     return renderedFeatures;
   }
 
-  _onViewportChange() {
-    const {onViewportChange} = this.props;
-    if (onViewportChange) {
-      const {viewport} = this.context;
-      onViewportChange({
-        getRenderedFeatures: this.getRenderedFeatures.bind(this),
-        viewport
-      });
-    }
-  }
+  _setWGS84PropertyForTiles() {
+    const propName = 'dataInWGS84';
+    const {tileset} = this.state;
 
-  _onViewportLoad() {
-    super._onViewportLoad();
-    this._onViewportChange();
+    tileset.selectedTiles.forEach(tile => {
+      if (!tile.hasOwnProperty(propName)) {
+        // eslint-disable-next-line accessor-pairs
+        Object.defineProperty(tile, propName, {
+          get: () => {
+            // Still loading or encountered an error
+            if (!tile.content) {
+              return null;
+            }
+
+            if (tile._contentWGS84 === undefined) {
+              // Create a cache to transform only once
+              tile._contentWGS84 = tile.content.map(feature =>
+                transformTileCoordsToWGS84(feature, tile.bbox, this.context.viewport)
+              );
+            }
+            return tile._contentWGS84;
+          }
+        });
+      }
+    });
   }
 }
 
@@ -250,7 +257,7 @@ function isFeatureIdDefined(value) {
   return value !== undefined && value !== null && value !== '';
 }
 
-function transformTileCoordsToWGS84(object, tile, viewport) {
+function transformTileCoordsToWGS84(object, bbox, viewport) {
   const feature = {
     ...object,
     geometry: {
@@ -261,7 +268,7 @@ function transformTileCoordsToWGS84(object, tile, viewport) {
   // eslint-disable-next-line accessor-pairs
   Object.defineProperty(feature.geometry, 'coordinates', {
     get: () => {
-      const wgs84Geom = transform(object.geometry, tile.bbox, viewport);
+      const wgs84Geom = transform(object.geometry, bbox, viewport);
       return wgs84Geom.coordinates;
     }
   });

@@ -16,10 +16,6 @@ const LINEAR_TRANSITION_PROPS = {
   transitionInterruption: TRANSITION_EVENTS.BREAK
 };
 
-const NO_TRANSITION_PROPS = {
-  transitionDuration: 0
-};
-
 const DEFAULT_STATE = {
   pitch: 0,
   bearing: 0,
@@ -69,6 +65,8 @@ export class MapState extends ViewState {
     startPanLngLat,
     /* Center of the zoom when the operation first started */
     startZoomLngLat,
+    /* Pointer position when rotation started */
+    startRotatePos,
     /** Bearing when current perspective rotate operation started */
     startBearing,
     /** Pitch when current perspective rotate operation started */
@@ -95,25 +93,16 @@ export class MapState extends ViewState {
       minPitch
     });
 
-    this._interactiveState = {
+    this._state = {
       startPanLngLat,
       startZoomLngLat,
+      startRotatePos,
       startBearing,
       startPitch,
       startZoom
     };
 
     this.makeViewport = makeViewport;
-  }
-
-  /* Public API */
-
-  getViewportProps() {
-    return this._viewportProps;
-  }
-
-  getInteractiveState() {
-    return this._interactiveState;
   }
 
   /**
@@ -133,7 +122,7 @@ export class MapState extends ViewState {
    *   the start of the operation. Must be supplied of `panStart()` was not called
    */
   pan({pos, startPos}) {
-    const startPanLngLat = this._interactiveState.startPanLngLat || this._unproject(startPos);
+    const startPanLngLat = this._state.startPanLngLat || this._unproject(startPos);
 
     if (!startPanLngLat) {
       return this;
@@ -163,6 +152,7 @@ export class MapState extends ViewState {
    */
   rotateStart({pos}) {
     return this._getUpdatedState({
+      startRotatePos: pos,
       startBearing: this._viewportProps.bearing,
       startPitch: this._viewportProps.pitch
     });
@@ -170,29 +160,28 @@ export class MapState extends ViewState {
 
   /**
    * Rotate
-   * @param {Number} deltaScaleX - a number between [-1, 1] specifying the
-   *   change to bearing.
-   * @param {Number} deltaScaleY - a number between [-1, 1] specifying the
-   *   change to pitch. -1 sets to minPitch and 1 sets to maxPitch.
+   * @param {[Number, Number]} pos - position on screen where the center is
    */
-  rotate({deltaScaleX = 0, deltaScaleY = 0}) {
-    const {startBearing, startPitch} = this._interactiveState;
+  rotate({pos, deltaAngleX = 0, deltaAngleY = 0}) {
+    const {startRotatePos, startBearing, startPitch} = this._state;
 
-    if (!Number.isFinite(startBearing) || !Number.isFinite(startPitch)) {
+    if (!startRotatePos || !Number.isFinite(startBearing) || !Number.isFinite(startPitch)) {
       return this;
     }
-
-    const {pitch, bearing} = this._calculateNewPitchAndBearing({
-      deltaScaleX,
-      deltaScaleY,
-      startBearing,
-      startPitch
-    });
-
-    return this._getUpdatedState({
-      bearing,
-      pitch
-    });
+    let newRotation;
+    if (pos) {
+      newRotation = this._calculateNewPitchAndBearing({
+        ...this._getRotationParams(pos, startRotatePos),
+        startBearing,
+        startPitch
+      });
+    } else {
+      newRotation = {
+        bearing: startBearing + deltaAngleX,
+        pitch: startPitch + deltaAngleY
+      };
+    }
+    return this._getUpdatedState(newRotation);
   }
 
   /**
@@ -227,7 +216,7 @@ export class MapState extends ViewState {
    */
   zoom({pos, startPos, scale}) {
     // Make sure we zoom around the current mouse position rather than map center
-    let {startZoom, startZoomLngLat} = this._interactiveState;
+    let {startZoom, startZoomLngLat} = this._state;
 
     if (!Number.isFinite(startZoom)) {
       // We have two modes of zoom:
@@ -352,7 +341,7 @@ export class MapState extends ViewState {
     return new this.constructor({
       makeViewport: this.makeViewport,
       ...this._viewportProps,
-      ...this._interactiveState,
+      ...this._state,
       ...newProps
     });
   }
@@ -413,6 +402,31 @@ export class MapState extends ViewState {
       bearing
     };
   }
+
+  _getRotationParams(pos, startPos) {
+    const deltaX = pos[0] - startPos[0];
+    const deltaY = pos[1] - startPos[1];
+    const centerY = pos[1];
+    const startY = startPos[1];
+    const {width, height} = this._viewportProps;
+
+    const deltaScaleX = deltaX / width;
+    let deltaScaleY = 0;
+
+    if (deltaY > 0) {
+      if (Math.abs(height - startY) > PITCH_MOUSE_THRESHOLD) {
+        // Move from 0 to -1 as we drag upwards
+        deltaScaleY = (deltaY / (startY - height)) * PITCH_ACCEL;
+      }
+    } else if (deltaY < 0) {
+      if (startY > PITCH_MOUSE_THRESHOLD) {
+        // Move from 0 to 1 as we drag upwards
+        deltaScaleY = 1 - centerY / startY;
+      }
+    }
+    deltaScaleY = Math.min(1, Math.max(-1, deltaScaleY));
+    return {deltaScaleX, deltaScaleY};
+  }
 }
 
 export default class MapController extends Controller {
@@ -432,59 +446,5 @@ export default class MapController extends Controller {
           })
         }
       : LINEAR_TRANSITION_PROPS;
-  }
-
-  _onPanRotate(event) {
-    if (!this.dragRotate) {
-      return false;
-    }
-
-    const newControllerState = this.controllerState.rotate(this._getRotationParams(event));
-    return this.updateViewport(newControllerState, NO_TRANSITION_PROPS, {
-      isDragging: true,
-      isRotating: true
-    });
-  }
-
-  _onTriplePan(event) {
-    if (!this.touchRotate) {
-      return false;
-    }
-    if (!this.isDragging()) {
-      return false;
-    }
-
-    const newControllerState = this.controllerState.rotate({
-      deltaScaleY: this._getRotationParams(event).deltaScaleY
-    });
-    this.updateViewport(newControllerState, NO_TRANSITION_PROPS, {
-      isDragging: true,
-      isRotating: true
-    });
-    return true;
-  }
-
-  _getRotationParams(event) {
-    const {deltaX, deltaY} = event;
-    const [, centerY] = this.getCenter(event);
-    const startY = centerY - deltaY;
-    const {width, height} = this.controllerState.getViewportProps();
-
-    const deltaScaleX = deltaX / width;
-    let deltaScaleY = 0;
-
-    if (deltaY > 0) {
-      if (Math.abs(height - startY) > PITCH_MOUSE_THRESHOLD) {
-        // Move from 0 to -1 as we drag upwards
-        deltaScaleY = (deltaY / (startY - height)) * PITCH_ACCEL;
-      }
-    } else if (deltaY < 0) {
-      if (startY > PITCH_MOUSE_THRESHOLD) {
-        // Move from 0 to 1 as we drag upwards
-        deltaScaleY = 1 - centerY / startY;
-      }
-    }
-    deltaScaleY = Math.min(1, Math.max(-1, deltaScaleY));
-    return {deltaScaleX, deltaScaleY};
   }
 }

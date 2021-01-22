@@ -18,6 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
+/* eslint-disable max-statements, complexity */
 import TransitionManager from './transition-manager';
 import assert from '../utils/assert';
 
@@ -25,14 +26,14 @@ const NO_TRANSITION_PROPS = {
   transitionDuration: 0
 };
 
-// EVENT HANDLING PARAMETERS
-const ZOOM_ACCEL = 0.01;
+const DEFAULT_INERTIA = 300;
+const INERTIA_EASING = t => 1 - (1 - t) * (1 - t);
 
 const EVENT_TYPES = {
   WHEEL: ['wheel'],
   PAN: ['panstart', 'panmove', 'panend'],
   PINCH: ['pinchstart', 'pinchmove', 'pinchend'],
-  TRIPLE_PINCH: ['tripanstart', 'tripanmove', 'tripanend'],
+  TRIPLE_PAN: ['tripanstart', 'tripanmove', 'tripanend'],
   DOUBLE_TAP: ['doubletap'],
   KEYBOARD: ['keydown']
 };
@@ -44,9 +45,13 @@ export default class Controller {
     this.controllerState = null;
     this.controllerStateProps = null;
     this.eventManager = null;
-    this.transitionManager = new TransitionManager(ControllerState, options);
+    this.transitionManager = new TransitionManager(ControllerState, {
+      ...options,
+      onViewStateChange: this._onTransition.bind(this),
+      onStateChange: this._setInteractionState.bind(this)
+    });
     this._events = null;
-    this._state = {
+    this._interactionState = {
       isDragging: false
     };
     this._customEvents = [];
@@ -79,7 +84,6 @@ export default class Controller {
    * Callback for events
    * @param {hammer.Event} event
    */
-  // eslint-disable-next-line complexity
   handleEvent(event) {
     const {ControllerState} = this;
     this.controllerState = new ControllerState({
@@ -87,22 +91,23 @@ export default class Controller {
       ...this.controllerStateProps,
       ...this._state
     });
+    const eventStartBlocked = this._eventStartBlocked;
 
     switch (event.type) {
       case 'panstart':
-        return this._onPanStart(event);
+        return eventStartBlocked ? false : this._onPanStart(event);
       case 'panmove':
         return this._onPan(event);
       case 'panend':
         return this._onPanEnd(event);
       case 'pinchstart':
-        return this._onPinchStart(event);
+        return eventStartBlocked ? false : this._onPinchStart(event);
       case 'pinchmove':
         return this._onPinch(event);
       case 'pinchend':
         return this._onPinchEnd(event);
       case 'tripanstart':
-        return this._onTriplePanStart(event);
+        return eventStartBlocked ? false : this._onTriplePanStart(event);
       case 'tripanmove':
         return this._onTriplePan(event);
       case 'tripanend':
@@ -145,13 +150,25 @@ export default class Controller {
   }
 
   isDragging() {
-    return this._state.isDragging;
+    return this._interactionState.isDragging;
+  }
+
+  // When a multi-touch event ends, e.g. pinch, not all pointers are lifted at the same time.
+  // This triggers a brief `pan` event.
+  // Calling this method will temporarily disable *start events to avoid conflicting transitions.
+  blockEvents(timeout) {
+    /* global setTimeout */
+    const timer = setTimeout(() => {
+      if (this._eventStartBlocked === timer) {
+        this._eventStartBlocked = null;
+      }
+    }, timeout);
+    this._eventStartBlocked = timer;
   }
 
   /**
    * Extract interactivity options
    */
-  /* eslint-disable complexity, max-statements */
   setProps(props) {
     if ('onViewStateChange' in props) {
       this.onViewStateChange = props.onViewStateChange;
@@ -174,7 +191,13 @@ export default class Controller {
       this.toggleEvents(this._customEvents, true);
     }
 
-    this.transitionManager.processViewStateChange(this.controllerStateProps);
+    this.transitionManager.processViewStateChange(props);
+
+    let {inertia} = props;
+    if (inertia === true) {
+      inertia = DEFAULT_INERTIA;
+    }
+    this.inertia = inertia;
 
     // TODO - make sure these are not reset on every setProps
     const {
@@ -192,7 +215,7 @@ export default class Controller {
     this.toggleEvents(EVENT_TYPES.WHEEL, isInteractive && scrollZoom);
     this.toggleEvents(EVENT_TYPES.PAN, isInteractive && (dragPan || dragRotate));
     this.toggleEvents(EVENT_TYPES.PINCH, isInteractive && (touchZoom || touchRotate));
-    this.toggleEvents(EVENT_TYPES.TRIPLE_PINCH, isInteractive && touchRotate);
+    this.toggleEvents(EVENT_TYPES.TRIPLE_PAN, isInteractive && touchRotate);
     this.toggleEvents(EVENT_TYPES.DOUBLE_TAP, isInteractive && doubleClickZoom);
     this.toggleEvents(EVENT_TYPES.KEYBOARD, isInteractive && keyboard);
 
@@ -205,7 +228,6 @@ export default class Controller {
     this.touchRotate = touchRotate;
     this.keyboard = keyboard;
   }
-  /* eslint-enable complexity, max-statements */
 
   updateTransition() {
     this.transitionManager.updateTransition();
@@ -238,17 +260,28 @@ export default class Controller {
     // const oldViewState = this.controllerState.getViewportProps();
     // const changed = Object.keys(viewState).some(key => oldViewState[key] !== viewState[key]);
 
+    this._state = newControllerState.getState();
+    this._setInteractionState(interactionState);
+
     if (changed) {
       const oldViewState = this.controllerState ? this.controllerState.getViewportProps() : null;
       if (this.onViewStateChange) {
-        this.onViewStateChange({viewState, interactionState, oldViewState});
+        this.onViewStateChange({viewState, interactionState: this._interactionState, oldViewState});
       }
     }
+  }
 
-    Object.assign(this._state, newControllerState.getInteractiveState(), interactionState);
+  _onTransition(params) {
+    if (this.onViewStateChange) {
+      params.interactionState = this._interactionState;
+      this.onViewStateChange(params);
+    }
+  }
 
+  _setInteractionState(newStates) {
+    Object.assign(this._interactionState, newStates);
     if (this.onStateChange) {
-      this.onStateChange(this._state);
+      this.onStateChange(this._interactionState);
     }
   }
 
@@ -272,7 +305,7 @@ export default class Controller {
     return true;
   }
 
-  // Default handler for the `panmove` event.
+  // Default handler for the `panmove` and `panend` event.
   _onPan(event) {
     if (!this.isDragging()) {
       return false;
@@ -280,15 +313,11 @@ export default class Controller {
     return this._panMove ? this._onPanMove(event) : this._onPanRotate(event);
   }
 
-  // Default handler for the `panend` event.
   _onPanEnd(event) {
-    const newControllerState = this.controllerState[this._panMove ? 'panEnd' : 'rotateEnd']();
-    this.updateViewport(newControllerState, null, {
-      isDragging: false,
-      isPanning: false,
-      isRotating: false
-    });
-    return true;
+    if (!this.isDragging()) {
+      return false;
+    }
+    return this._panMove ? this._onPanMoveEnd(event) : this._onPanRotateEnd(event);
   }
 
   // Default handler for panning to move.
@@ -306,6 +335,37 @@ export default class Controller {
     return true;
   }
 
+  _onPanMoveEnd(event) {
+    const {inertia} = this;
+    if (this.dragPan && inertia && event.velocity) {
+      const pos = this.getCenter(event);
+      const endPos = [
+        pos[0] + (event.velocityX * inertia) / 2,
+        pos[1] + (event.velocityY * inertia) / 2
+      ];
+      const newControllerState = this.controllerState.pan({pos: endPos}).panEnd();
+      this.updateViewport(
+        newControllerState,
+        {
+          ...this._getTransitionProps(),
+          transitionDuration: inertia,
+          transitionEasing: INERTIA_EASING
+        },
+        {
+          isDragging: false,
+          isPanning: true
+        }
+      );
+    } else {
+      const newControllerState = this.controllerState.panEnd();
+      this.updateViewport(newControllerState, null, {
+        isDragging: false,
+        isPanning: false
+      });
+    }
+    return true;
+  }
+
   // Default handler for panning to rotate.
   // Called by `_onPan` when panning with function key pressed.
   _onPanRotate(event) {
@@ -313,17 +373,43 @@ export default class Controller {
       return false;
     }
 
-    const {deltaX, deltaY} = event;
-    const {width, height} = this.controllerState.getViewportProps();
-
-    const deltaScaleX = deltaX / width;
-    const deltaScaleY = deltaY / height;
-
-    const newControllerState = this.controllerState.rotate({deltaScaleX, deltaScaleY});
+    const pos = this.getCenter(event);
+    const newControllerState = this.controllerState.rotate({pos});
     this.updateViewport(newControllerState, NO_TRANSITION_PROPS, {
       isDragging: true,
       isRotating: true
     });
+    return true;
+  }
+
+  _onPanRotateEnd(event) {
+    const {inertia} = this;
+    if (this.dragRotate && inertia && event.velocity) {
+      const pos = this.getCenter(event);
+      const endPos = [
+        pos[0] + (event.velocityX * inertia) / 2,
+        pos[1] + (event.velocityY * inertia) / 2
+      ];
+      const newControllerState = this.controllerState.rotate({pos: endPos}).rotateEnd();
+      this.updateViewport(
+        newControllerState,
+        {
+          ...this._getTransitionProps(),
+          transitionDuration: inertia,
+          transitionEasing: INERTIA_EASING
+        },
+        {
+          isDragging: false,
+          isRotating: true
+        }
+      );
+    } else {
+      const newControllerState = this.controllerState.rotateEnd();
+      this.updateViewport(newControllerState, null, {
+        isDragging: false,
+        isRotating: false
+      });
+    }
     return true;
   }
 
@@ -339,19 +425,24 @@ export default class Controller {
       return false;
     }
 
+    const {speed = 0.01, smooth = false} = this.scrollZoom;
     const {delta} = event;
 
     // Map wheel delta to relative scale
-    let scale = 2 / (1 + Math.exp(-Math.abs(delta * ZOOM_ACCEL)));
+    let scale = 2 / (1 + Math.exp(-Math.abs(delta * speed)));
     if (delta < 0 && scale !== 0) {
       scale = 1 / scale;
     }
 
     const newControllerState = this.controllerState.zoom({pos, scale});
-    this.updateViewport(newControllerState, NO_TRANSITION_PROPS, {
-      isZooming: true,
-      isPanning: true
-    });
+    this.updateViewport(
+      newControllerState,
+      {...this._getTransitionProps({around: pos}), transitionDuration: smooth ? 250 : 1},
+      {
+        isZooming: true,
+        isPanning: true
+      }
+    );
     return true;
   }
 
@@ -373,11 +464,10 @@ export default class Controller {
       return false;
     }
 
-    const {deltaY} = event;
-    const {height} = this.controllerState.getViewportProps();
-    const deltaScaleY = deltaY / height;
+    const pos = this.getCenter(event);
+    pos[0] -= event.deltaX;
 
-    const newControllerState = this.controllerState.rotate({deltaScaleY});
+    const newControllerState = this.controllerState.rotate({pos});
     this.updateViewport(newControllerState, NO_TRANSITION_PROPS, {
       isDragging: true,
       isRotating: true
@@ -386,11 +476,34 @@ export default class Controller {
   }
 
   _onTriplePanEnd(event) {
-    const newControllerState = this.controllerState.rotateEnd();
-    this.updateViewport(newControllerState, null, {
-      isDragging: false,
-      isRotating: false
-    });
+    if (!this.isDragging()) {
+      return false;
+    }
+    const {inertia} = this;
+    if (this.touchRotate && inertia && event.velocityY) {
+      const pos = this.getCenter(event);
+      const endPos = [pos[0], (pos[1] += (event.velocityY * inertia) / 2)];
+      const newControllerState = this.controllerState.rotate({pos: endPos});
+      this.updateViewport(
+        newControllerState,
+        {
+          ...this._getTransitionProps(),
+          transitionDuration: inertia,
+          transitionEasing: INERTIA_EASING
+        },
+        {
+          isDragging: false,
+          isRotating: true
+        }
+      );
+      this.blockEvents(inertia);
+    } else {
+      const newControllerState = this.controllerState.rotateEnd();
+      this.updateViewport(newControllerState, null, {
+        isDragging: false,
+        isRotating: false
+      });
+    }
     return true;
   }
 
@@ -403,12 +516,13 @@ export default class Controller {
 
     const newControllerState = this.controllerState.zoomStart({pos}).rotateStart({pos});
     // hack - hammer's `rotation` field doesn't seem to produce the correct angle
-    this._state.startPinchRotation = event.rotation;
+    this._startPinchRotation = event.rotation;
+    this._lastPinchEvent = event;
     this.updateViewport(newControllerState, NO_TRANSITION_PROPS, {isDragging: true});
     return true;
   }
 
-  // Default handler for the `pinch` event.
+  // Default handler for the `pinchmove` and `pinchend` events.
   _onPinch(event) {
     if (!this.touchZoom && !this.touchRotate) {
       return false;
@@ -425,9 +539,8 @@ export default class Controller {
     }
     if (this.touchRotate) {
       const {rotation} = event;
-      const {startPinchRotation} = this._state;
       newControllerState = newControllerState.rotate({
-        deltaScaleX: -(rotation - startPinchRotation) / 180
+        deltaAngleX: this._startPinchRotation - rotation
       });
     }
 
@@ -437,19 +550,50 @@ export default class Controller {
       isZooming: this.touchZoom,
       isRotating: this.touchRotate
     });
+    this._lastPinchEvent = event;
     return true;
   }
 
-  // Default handler for the `pinchend` event.
   _onPinchEnd(event) {
-    const newControllerState = this.controllerState.zoomEnd().rotateEnd();
-    this._state.startPinchRotation = 0;
-    this.updateViewport(newControllerState, null, {
-      isDragging: false,
-      isPanning: false,
-      isZooming: false,
-      isRotating: false
-    });
+    if (!this.isDragging()) {
+      return false;
+    }
+    const {inertia, _lastPinchEvent} = this;
+    if (this.touchZoom && inertia && _lastPinchEvent && event.scale !== _lastPinchEvent.scale) {
+      const pos = this.getCenter(event);
+      let newControllerState = this.controllerState.rotateEnd();
+      const z = Math.log2(event.scale);
+      const velocityZ =
+        (z - Math.log2(_lastPinchEvent.scale)) / (event.deltaTime - _lastPinchEvent.deltaTime);
+      const endScale = Math.pow(2, z + (velocityZ * inertia) / 2);
+      newControllerState = newControllerState.zoom({pos, scale: endScale}).zoomEnd();
+
+      this.updateViewport(
+        newControllerState,
+        {
+          ...this._getTransitionProps({around: pos}),
+          transitionDuration: inertia,
+          transitionEasing: INERTIA_EASING
+        },
+        {
+          isDragging: false,
+          isPanning: this.touchZoom,
+          isZooming: this.touchZoom,
+          isRotating: false
+        }
+      );
+      this.blockEvents(inertia);
+    } else {
+      const newControllerState = this.controllerState.zoomEnd().rotateEnd();
+      this.updateViewport(newControllerState, null, {
+        isDragging: false,
+        isPanning: false,
+        isZooming: false,
+        isRotating: false
+      });
+    }
+    this._startPinchRotation = null;
+    this._lastPinchEvent = null;
     return true;
   }
 
@@ -470,10 +614,10 @@ export default class Controller {
       isZooming: true,
       isPanning: true
     });
+    this.blockEvents(100);
     return true;
   }
 
-  /* eslint-disable complexity, max-statements */
   // Default handler for the `keydown` event
   _onKeyDown(event) {
     if (!this.keyboard) {
@@ -540,7 +684,6 @@ export default class Controller {
     this.updateViewport(newControllerState, this._getTransitionProps(), interactionState);
     return true;
   }
-  /* eslint-enable complexity */
 
   _getTransitionProps() {
     // Transitions on double-tap and key-down are only supported by MapController
