@@ -1,4 +1,3 @@
-import LinearInterpolator from '../transitions/linear-interpolator';
 import Transition from '../transitions/transition';
 
 const noop = () => {};
@@ -10,9 +9,7 @@ export const TRANSITION_EVENTS = {
 };
 
 const DEFAULT_PROPS = {
-  transitionDuration: 0,
   transitionEasing: t => t,
-  transitionInterpolator: new LinearInterpolator(),
   transitionInterruption: TRANSITION_EVENTS.BREAK,
   onTransitionStart: noop,
   onTransitionInterrupt: noop,
@@ -26,7 +23,8 @@ export default class TransitionManager {
     this.propsInTransition = null;
     this.transition = new Transition(props.timeline);
 
-    this.onViewStateChange = props.onViewStateChange;
+    this.onViewStateChange = props.onViewStateChange || noop;
+    this.onStateChange = props.onStateChange || noop;
 
     this._onTransitionUpdate = this._onTransitionUpdate.bind(this);
   }
@@ -144,12 +142,23 @@ export default class TransitionManager {
       onInterrupt: this._onTransitionEnd(endProps.onTransitionInterrupt),
       onEnd: this._onTransitionEnd(endProps.onTransitionEnd)
     });
+
+    this.onStateChange({inTransition: true});
+
     this.updateTransition();
   }
 
   _onTransitionEnd(callback) {
     return transition => {
       this.propsInTransition = null;
+
+      this.onStateChange({
+        inTransition: false,
+        isZooming: false,
+        isPanning: false,
+        isRotating: false
+      });
+
       callback(transition);
     };
   }
@@ -169,14 +178,9 @@ export default class TransitionManager {
       Object.assign({}, this.props, viewport)
     ).getViewportProps();
 
-    if (this.onViewStateChange) {
-      this.onViewStateChange({
-        viewState: this.propsInTransition,
-        interactionState: {inTransition: true},
-        oldViewState: this.props
-      });
-    }
+    this.onViewStateChange({
+      viewState: this.propsInTransition,
+      oldViewState: this.props
+    });
   }
 }
-
-TransitionManager.defaultProps = DEFAULT_PROPS;

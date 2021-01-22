@@ -238,6 +238,45 @@ test('TileLayer#AbortRequestsOnUpdateTrigger', async t => {
   t.end();
 });
 
+test('TileLayer#AbortRequestsOnNewLayer', async t => {
+  const testViewport = new WebMercatorViewport({
+    width: 1200,
+    height: 400,
+    longitude: 0,
+    latitude: 0,
+    zoom: 1,
+    repeat: true
+  });
+  let tileset;
+
+  const testCases = [
+    {
+      props: {
+        getTileData: () => sleep(10)
+      },
+      onAfterUpdate: ({layer}) => {
+        tileset = layer.state.tileset;
+      }
+    },
+    {
+      props: {
+        id: 'new-layer'
+      },
+      onAfterUpdate: () => {
+        t.is(
+          tileset._tiles.map(tile => tile._isCancelled).length,
+          4,
+          'all tiles from discarded layer should be cancelled'
+        );
+      }
+    }
+  ];
+
+  testLayer({Layer: TileLayer, viewport: testViewport, testCases, onError: t.notOk});
+
+  t.end();
+});
+
 function sleep(ms) {
   return new Promise(resolve => {
     /* global setTimeout */

@@ -52,6 +52,7 @@ export class OrbitState extends ViewState {
     startPanPosition,
     startTarget,
     // Model state when the rotate operation first started
+    startRotatePos,
     startRotationX,
     startRotationOrbit,
     // Model state when the zoom operation first started
@@ -72,9 +73,10 @@ export class OrbitState extends ViewState {
       maxZoom
     });
 
-    this._interactiveState = {
+    this._state = {
       startPanPosition,
       startTarget,
+      startRotatePos,
       startRotationX,
       startRotationOrbit,
       startZoomPosition,
@@ -82,16 +84,6 @@ export class OrbitState extends ViewState {
     };
 
     this.makeViewport = makeViewport;
-  }
-
-  /* Public API */
-
-  getViewportProps() {
-    return this._viewportProps;
-  }
-
-  getInteractiveState() {
-    return this._interactiveState;
   }
 
   /**
@@ -112,7 +104,7 @@ export class OrbitState extends ViewState {
    * @param {[Number, Number]} pos - position on screen where the pointer is
    */
   pan({pos, startPos}) {
-    const {startPanPosition, startTarget} = this._interactiveState;
+    const {startPanPosition, startTarget} = this._state;
     const delta = new Vector2(pos).subtract(startPanPosition);
 
     return this._getUpdatedState({
@@ -137,6 +129,7 @@ export class OrbitState extends ViewState {
    */
   rotateStart({pos}) {
     return this._getUpdatedState({
+      startRotatePos: pos,
       startRotationX: this._viewportProps.rotationX,
       startRotationOrbit: this._viewportProps.rotationOrbit
     });
@@ -146,23 +139,40 @@ export class OrbitState extends ViewState {
    * Rotate
    * @param {[Number, Number]} pos - position on screen where the pointer is
    */
-  rotate({deltaScaleX, deltaScaleY}) {
-    const {startRotationX, startRotationOrbit} = this._interactiveState;
+  rotate({pos, deltaAngleX = 0, deltaAngleY = 0}) {
+    const {startRotatePos, startRotationX, startRotationOrbit} = this._state;
+    const {width, height} = this._viewportProps;
 
-    if (!Number.isFinite(startRotationX) || !Number.isFinite(startRotationOrbit)) {
+    if (
+      !startRotatePos ||
+      !Number.isFinite(startRotationX) ||
+      !Number.isFinite(startRotationOrbit)
+    ) {
       return this;
     }
-    if (startRotationX < -90 || startRotationX > 90) {
-      // When looking at the "back" side of the scene, invert horizontal drag
-      // so that the camera movement follows user input
-      deltaScaleX *= -1;
+
+    let newRotation;
+    if (pos) {
+      let deltaScaleX = (pos[0] - startRotatePos[0]) / width;
+      const deltaScaleY = (pos[1] - startRotatePos[1]) / height;
+
+      if (startRotationX < -90 || startRotationX > 90) {
+        // When looking at the "back" side of the scene, invert horizontal drag
+        // so that the camera movement follows user input
+        deltaScaleX *= -1;
+      }
+      newRotation = {
+        rotationX: startRotationX + deltaScaleY * 180,
+        rotationOrbit: startRotationOrbit + deltaScaleX * 180
+      };
+    } else {
+      newRotation = {
+        rotationX: startRotationX + deltaAngleY,
+        rotationOrbit: startRotationOrbit + deltaAngleX
+      };
     }
 
-    return this._getUpdatedState({
-      rotationX: startRotationX + deltaScaleY * 180,
-      rotationOrbit: startRotationOrbit + deltaScaleX * 180,
-      isRotating: true
-    });
+    return this._getUpdatedState(newRotation);
   }
 
   /**
@@ -211,7 +221,7 @@ export class OrbitState extends ViewState {
    */
   zoom({pos, startPos, scale}) {
     const {zoom, width, height, target} = this._viewportProps;
-    let {startZoom, startZoomPosition, startTarget} = this._interactiveState;
+    let {startZoom, startZoomPosition, startTarget} = this._state;
     if (!Number.isFinite(startZoom)) {
       // We have two modes of zoom:
       // scroll zoom that are discrete events (transform from the current zoom level),
@@ -340,7 +350,7 @@ export class OrbitState extends ViewState {
 
   _getUpdatedState(newProps) {
     // Update _viewportProps
-    return new OrbitState(Object.assign({}, this._viewportProps, this._interactiveState, newProps));
+    return new OrbitState(Object.assign({}, this._viewportProps, this._state, newProps));
   }
 
   // Apply any constraints (mathematical or defined by _viewportProps) to map state

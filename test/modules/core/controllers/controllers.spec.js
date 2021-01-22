@@ -9,8 +9,8 @@ import {
 
 import testController from './test-controller';
 
-test('MapController', t => {
-  testController(t, MapView, {
+test('MapController', async t => {
+  await testController(t, MapView, {
     longitude: -122.45,
     latitude: 37.78,
     zoom: 10,
@@ -21,8 +21,21 @@ test('MapController', t => {
   t.end();
 });
 
-test('GlobeController', t => {
-  testController(
+test('MapController#inertia', async t => {
+  await testController(t, MapView, {
+    longitude: -122.45,
+    latitude: 37.78,
+    zoom: 10,
+    pitch: 30,
+    bearing: -45,
+    inertia: true
+  });
+
+  t.end();
+});
+
+test('GlobeController', async t => {
+  await testController(
     t,
     GlobeView,
     {
@@ -37,8 +50,8 @@ test('GlobeController', t => {
   t.end();
 });
 
-test('OrbitController', t => {
-  testController(t, OrbitView, {
+test('OrbitController', async t => {
+  await testController(t, OrbitView, {
     orbitAxis: 'Y',
     rotationX: 30,
     rotationOrbit: -45,
@@ -49,8 +62,8 @@ test('OrbitController', t => {
   t.end();
 });
 
-test('OrthographicController', t => {
-  testController(
+test('OrthographicController', async t => {
+  await testController(
     t,
     OrthographicView,
     {
@@ -64,8 +77,8 @@ test('OrthographicController', t => {
   t.end();
 });
 
-test('FirstPersonController', t => {
-  testController(
+test('FirstPersonController', async t => {
+  await testController(
     t,
     FirstPersonView,
     {

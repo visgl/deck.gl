@@ -24,12 +24,6 @@ import {Layer, project32} from '@deck.gl/core';
 import vs from './triangle-layer-vertex.glsl';
 import fs from './triangle-layer-fragment.glsl';
 
-const defaultProps = {
-  count: 0, // number of triangles to be rendered
-  texture: null,
-  onRedraw: {type: 'function', value: null, compare: false}
-};
-
 export default class TriangleLayer extends Layer {
   getShaders() {
     return {vs, fs, modules: [project32]};
@@ -72,13 +66,8 @@ export default class TriangleLayer extends Layer {
       intensity,
       threshold,
       aggregationMode,
-      colorDomain,
-      onRedraw
+      colorDomain
     } = this.props;
-
-    if (onRedraw) {
-      onRedraw();
-    }
 
     model
       .setUniforms({
@@ -96,4 +85,3 @@ export default class TriangleLayer extends Layer {
 }
 
 TriangleLayer.layerName = 'TriangleLayer';
-TriangleLayer.defaultProps = defaultProps;

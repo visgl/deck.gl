@@ -1,9 +1,9 @@
 import test from 'tape-catch';
 import TransitionManager from '@deck.gl/core/controllers/transition-manager';
-import FlyToInterpolator from '@deck.gl/core/transitions/viewport-fly-to-interpolator.js';
 import {MapState} from '@deck.gl/core/controllers/map-controller';
 import {Timeline} from '@luma.gl/core';
 import {config} from 'math.gl';
+import {LinearInterpolator, FlyToInterpolator} from '@deck.gl/core';
 
 /* global global, setTimeout, clearTimeout */
 // backfill requestAnimationFrame on Node
@@ -24,6 +24,7 @@ const TEST_CASES = [
       zoom: 12,
       pitch: 0,
       bearing: 0,
+      transitionInterpolator: new LinearInterpolator(),
       transitionDuration: 200
     },
     input: [
@@ -36,6 +37,7 @@ const TEST_CASES = [
         zoom: 12,
         pitch: 0,
         bearing: 0,
+        transitionInterpolator: new LinearInterpolator(),
         transitionDuration: 200
       },
       // no valid prop change
@@ -47,6 +49,7 @@ const TEST_CASES = [
         zoom: 12,
         pitch: 0,
         bearing: 0,
+        transitionInterpolator: new LinearInterpolator(),
         transitionDuration: 'auto'
       },
       // transitionDuration is 0
@@ -76,6 +79,7 @@ const TEST_CASES = [
       zoom: 12,
       pitch: 60,
       bearing: 0,
+      transitionInterpolator: new LinearInterpolator(),
       transitionDuration: 200
     },
     input: [
@@ -88,6 +92,7 @@ const TEST_CASES = [
         zoom: 12,
         pitch: 0,
         bearing: 0,
+        transitionInterpolator: new LinearInterpolator(),
         transitionDuration: 200
       },
       // viewport change interrupting transition
@@ -99,6 +104,7 @@ const TEST_CASES = [
         zoom: 12,
         pitch: 0,
         bearing: 0,
+        transitionInterpolator: new LinearInterpolator(),
         transitionDuration: 200
       },
       // viewport change interrupting transition - 'auto'
@@ -128,7 +134,7 @@ test('TransitionManager#constructor', t => {
 
 test('TransitionManager#processViewStateChange', t => {
   const timeline = new Timeline();
-  const mergeProps = props => Object.assign({timeline}, TransitionManager.defaultProps, props);
+  const mergeProps = props => Object.assign({timeline}, props);
 
   TEST_CASES.forEach(testCase => {
     const transitionManager = new TransitionManager(MapState, mergeProps(testCase.initialProps));
@@ -158,7 +164,7 @@ test('TransitionManager#callbacks', t => {
   let viewport;
   let transitionProps;
 
-  const {transitionInterpolator} = TransitionManager.defaultProps;
+  const transitionInterpolator = new LinearInterpolator();
 
   const callbacks = {
     onTransitionStart: () => {
@@ -183,8 +189,7 @@ test('TransitionManager#callbacks', t => {
     }
   };
 
-  const mergeProps = props =>
-    Object.assign({timeline}, TransitionManager.defaultProps, callbacks, props);
+  const mergeProps = props => Object.assign({timeline}, callbacks, props);
 
   const transitionManager = new TransitionManager(MapState, mergeProps(testCase.initialProps));
 
@@ -213,7 +218,7 @@ test('TransitionManager#callbacks', t => {
 
 test('TransitionManager#auto#duration', t => {
   const timeline = new Timeline();
-  const mergeProps = props => Object.assign({timeline}, TransitionManager.defaultProps, props);
+  const mergeProps = props => Object.assign({timeline}, props);
   const initialProps = {
     width: 100,
     height: 100,
@@ -221,8 +226,7 @@ test('TransitionManager#auto#duration', t => {
     latitude: 37.78,
     zoom: 12,
     pitch: 0,
-    bearing: 0,
-    transitionDuration: 200
+    bearing: 0
   };
   const transitionManager = new TransitionManager(MapState, mergeProps(initialProps));
   transitionManager.processViewStateChange(

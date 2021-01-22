@@ -9,18 +9,21 @@ A controller class can be passed to the `Deck.controller` or `View.controller` p
 
 The base Controller class supports the following options:
 
-* `scrollZoom` (`Boolean`) - enable zooming with mouse wheel. Default `true`
-* `dragPan` (`Boolean`) - enable panning with pointer drag. Default `true`
-* `dragRotate` (`Boolean`) - enable rotating with pointer drag. Default `true`
-* `doubleClickZoom` (`Boolean`) - enable zooming with double click. Default `true`
-* `touchZoom` (`Boolean`) - enable zooming with multi-touch. Default `true`
-* `touchRotate` (`Boolean`) - enable rotating with multi-touch. Use two-finger rotating gesture for horizontal and three-finger swiping gesture for vertical rotation. Default `false`
-* `keyboard` (`Boolean`|`Object`) - enable interaction with keyboard. Default `true`. If an object is supplied, it may contain the following fields to customize the keyboard behavior:
-    * `zoomSpeed` (`Number`) - speed of zoom using +/- keys. Default `2`.
-    * `moveSpeed` (`Number`) - speed of movement using arrow keys, in pixels.
-    * `rotateSpeedX` (`Number`) - speed of rotation using shift + left/right arrow keys, in degrees. Default `15`.
-    * `rotateSpeedY` (`Number`) - speed of rotation using shift + up/down arrow keys, in degrees. Default `10`.
-* `dragMode` (`String`) - drag behavior without pressing function keys, one of `pan` and `rotate`.
+* `scrollZoom` (Boolean|Object) - enable zooming with mouse wheel. Default `true`. If an object is supplied, it may contain the following fields to customize the zooming behavior:
+  + `speed` (Number) - scaler that translates wheel delta to the change of viewport scale. Default `0.01`.
+  + `smooth` (Boolean) - smoothly transition to the new zoom. If enabled, will provide a slightly lagged but smoother experience. Default `false`.
+* `dragPan` (Boolean) - enable panning with pointer drag. Default `true`
+* `dragRotate` (Boolean) - enable rotating with pointer drag. Default `true`
+* `doubleClickZoom` (Boolean) - enable zooming with double click. Default `true`
+* `touchZoom` (Boolean) - enable zooming with multi-touch. Default `true`
+* `touchRotate` (Boolean) - enable rotating with multi-touch. Use two-finger rotating gesture for horizontal and three-finger swiping gesture for vertical rotation. Default `false`
+* `keyboard` (Boolean|Object) - enable interaction with keyboard. Default `true`. If an object is supplied, it may contain the following fields to customize the keyboard behavior:
+    * `zoomSpeed` (Number) - speed of zoom using +/- keys. Default `2`.
+    * `moveSpeed` (Number) - speed of movement using arrow keys, in pixels.
+    * `rotateSpeedX` (Number) - speed of rotation using shift + left/right arrow keys, in degrees. Default `15`.
+    * `rotateSpeedY` (Number) - speed of rotation using shift + up/down arrow keys, in degrees. Default `10`.
+* `dragMode` (String) - drag behavior without pressing function keys, one of `pan` and `rotate`.
+* `inertia` (Boolean|Number) - Enable inertia after panning/pinching. If a number is provided, indicates the duration of time over which the velocity reduces to zero, in milliseconds. Default `false`.
 
 ## Methods
 

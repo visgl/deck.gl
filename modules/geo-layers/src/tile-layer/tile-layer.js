@@ -45,6 +45,13 @@ export default class TileLayer extends CompositeLayer {
     };
   }
 
+  finalizeState() {
+    const {tileset} = this.state;
+    if (tileset) {
+      tileset.finalize();
+    }
+  }
+
   get isLoaded() {
     const {tileset} = this.state;
     return tileset.selectedTiles.every(
@@ -130,7 +137,7 @@ export default class TileLayer extends CompositeLayer {
     const {onViewportLoad} = this.props;
 
     if (onViewportLoad) {
-      onViewportLoad(tileset.selectedTiles.map(tile => tile.data));
+      onViewportLoad(tileset.selectedTiles);
     }
   }
 
