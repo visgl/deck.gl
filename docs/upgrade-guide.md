@@ -26,7 +26,7 @@ A legacy field `pickingInfo.lngLat` has been removed. Use `pickingInfo.coordinat
 
 - `MVTLayer`'s `onHover` and `onClick` callbacks now yield the `info.object` feature coordinates in WGS84 standard.
 - `ScenegraphLayer` now has built-in support for `GLTFLoader`. It's no longer necessary to call `registerLoaders` before using it.
-- `SolidPolygonLayer`'s polygonTesselator enforces winding order for outer polygons and holes (Potentially breaking visual change). Make sure to use correct culling settings.
+- `SolidPolygonLayer` now enforces the winding order for outer polygons and holes. This ensures the correct orientation of an extruded polygon's surfaces, and therefore consistent culling and lighting effect results. This may change the visual outcome of your layers if the winding order was wrongly deduced in the previous versions.
 - `TileLayer` `onViewportLoad` receives as argument an array of loaded [Tile](/docs/api-reference/geo-layers/tile-layer.md#tile) instances. At previous version the argument was an array of tile content.
 
 ## Upgrading from deck.gl v8.2 to v8.3
