@@ -272,6 +272,7 @@ export default class H3HexagonLayer extends CompositeLayer {
       {
         data,
         _normalize: false,
+        _windingOrder: 'CCW',
         positionFormat: 'XY',
         getPolygon: (object, objectInfo) => {
           const hexagonId = getHexagon(object, objectInfo);
