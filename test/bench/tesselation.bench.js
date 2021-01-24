@@ -1,6 +1,7 @@
 import * as data from 'deck.gl-test/data';
 
 import PolygonTesselator from '@deck.gl/layers/solid-polygon-layer/polygon-tesselator';
+import {normalize} from '@deck.gl/layers/solid-polygon-layer/polygon';
 
 const polygons = data.choropleths.features.map(f => f.geometry.coordinates);
 
@@ -23,5 +24,10 @@ export default function tesselationBench(suite) {
         fp64: true,
         positionFormat: 'XYZ'
       });
+    })
+    .add('polygonTesselator.normalizeGeometry', () => {
+      for (const polygon of polygons) {
+        normalize(polygon, 3);
+      }
     });
 }

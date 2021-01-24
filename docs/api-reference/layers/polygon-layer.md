@@ -188,7 +188,20 @@ Check [the lighting guide](/docs/developer-guide/using-lighting.md#constructing-
 
 If `false`, will skip normalizing the coordinates returned by `getPolygon`. Disabling normalization improves performance during data update, but makes the layer prone to error in case the data is malformed. It is only recommended when you use this layer with preprocessed static data or validation on the backend.
 
-When normalization is disabled, polygons must be specified in the format of flat array or `{positions, holeIndices}`. Rings must be closed (i.e. the first and last vertices must be identical) and must contain at least 3 vertices. See `getPolygon` below for details.
+When normalization is disabled, polygons must be specified in the format of flat array or `{positions, holeIndices}`. Rings must be closed (i.e. the first and last vertices must be identical). The winding order of rings must be consistent with that defined by `_windingOrder`. See `getPolygon` below for details.
+
+##### `_windingOrder` (String, optional)
+
+* Default: `'CW'`
+
+> Note: This prop is experimental
+
+This prop is only effective with `_normalize: false`. It specifies the winding order of rings in the polygon data, one of:
+
+- `'CW'`: outer-ring is clockwise, and holes are counter-clockwise
+- `'CCW'`: outer-ring is counter-clockwise, and holes are clockwise
+
+The proper value depends on the source of your data. Most geometry formats [enforce a specific winding order](https://gis.stackexchange.com/a/147971). Incorrectly set winding order will cause  an extruded polygon's surfaces to be flipped, affecting culling and the lighting effect.
 
 
 ### Data Accessors

@@ -34,6 +34,7 @@ const defaultProps = {
   elevationScale: 1,
   wireframe: false,
   _normalize: true,
+  _windingOrder: 'CW',
 
   lineWidthUnits: 'meters',
   lineWidthScale: 1,
@@ -134,6 +135,7 @@ export default class PolygonLayer extends CompositeLayer {
       extruded,
       wireframe,
       _normalize,
+      _windingOrder,
       elevationScale,
       transitions,
       positionFormat
@@ -179,6 +181,7 @@ export default class PolygonLayer extends CompositeLayer {
           filled,
           wireframe,
           _normalize,
+          _windingOrder,
 
           getElevation,
           getFillColor,
