@@ -2,8 +2,6 @@
  * Pack the top 12 bits of two normalized floats into 3 8-bit (rgb) values
  * This enables addressing 4096x4096 individual pixels
  *
- * TODO - current implementation only handles u fractions: 4096x256
- *
  * returns vec3 encoded RGB colors
  *  result.r - top 8 bits of u
  *  result.g - top 8 bits of v
@@ -20,7 +18,7 @@ vec3 packUVsIntoRGB(vec2 uv) {
   vec2 uvFraction4bit = floor(uvFraction * 16.);
 
   // Remainder can be encoded in blue channel, encode as 4 bits for pixel coordinates
-  float fractions = uvFraction4bit.x * 16. + uvFraction4bit.y;
+  float fractions = uvFraction4bit.x + uvFraction4bit.y * 16.;
 
   return vec3(uv8bit, fractions) / 255.;
 }

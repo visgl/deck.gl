@@ -249,7 +249,7 @@ BitmapLayer.defaultProps = defaultProps;
  */
 function unpackUVsFromRGB(color) {
   const [u, v, fracUV] = color;
-  const uFrac = (fracUV & 0xf0) / 256;
-  const vFrac = (fracUV & 0x0f) / 16;
+  const vFrac = (fracUV & 0xf0) / 256;
+  const uFrac = (fracUV & 0x0f) / 16;
   return [(u + uFrac) / 256, (v + vFrac) / 256];
 }
