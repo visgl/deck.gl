@@ -67,7 +67,7 @@ export default class SolidPolygonLayer extends Layer {
       vs: type === 'top' ? vsTop : vsSide,
       fs,
       defines: {
-        RING_WINDING_ORDER: !this.props._normalize && this.props._windingOrder === 'CCW' ? -1 : 1
+        RING_WINDING_ORDER_CW: !this.props._normalize && this.props._windingOrder === 'CCW' ? 0 : 1
       },
       modules: [project32, gouraudLighting, picking]
     });

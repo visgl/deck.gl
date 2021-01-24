@@ -113,6 +113,7 @@ function copyNestedRing(target, targetStartIndex, simplePolygon, size, windingDi
 
   windingOptions.start = targetStartIndex;
   windingOptions.end = targetIndex;
+  windingOptions.size = size;
   modifyPolygonWindingDirection(target, windingDirection, windingOptions);
 
   return targetIndex;
@@ -157,6 +158,7 @@ function copyFlatRing(
 
   windingOptions.start = targetStartIndex;
   windingOptions.end = targetIndex;
+  windingOptions.size = size;
   modifyPolygonWindingDirection(target, windingDirection, windingOptions);
 
   return targetIndex;
@@ -176,7 +178,6 @@ export function normalize(polygon, positionSize) {
 
   const positions = [];
   const holeIndices = [];
-  windingOptions.size = positionSize;
 
   if (polygon.positions) {
     // complex flat

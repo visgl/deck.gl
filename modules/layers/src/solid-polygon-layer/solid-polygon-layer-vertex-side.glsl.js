@@ -39,7 +39,7 @@ ${main}
 void main(void) {
   PolygonProps props;
 
-  #if RING_WINDING_ORDER == 1
+  #if RING_WINDING_ORDER_CW == 1
     props.positions = instancePositions;
     props.positions64Low = instancePositions64Low;
     props.nextPositions = nextPositions;
