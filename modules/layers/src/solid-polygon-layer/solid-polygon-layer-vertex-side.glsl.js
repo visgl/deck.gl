@@ -39,14 +39,21 @@ ${main}
 void main(void) {
   PolygonProps props;
 
-  props.positions = instancePositions;
-  props.positions64Low = instancePositions64Low;
+  #if RING_WINDING_ORDER_CW == 1
+    props.positions = instancePositions;
+    props.positions64Low = instancePositions64Low;
+    props.nextPositions = nextPositions;
+    props.nextPositions64Low = nextPositions64Low;
+  #else
+    props.positions = nextPositions;
+    props.positions64Low = nextPositions64Low;
+    props.nextPositions = instancePositions;
+    props.nextPositions64Low = instancePositions64Low;
+  #endif
   props.elevations = instanceElevations;
   props.fillColors = instanceFillColors;
   props.lineColors = instanceLineColors;
   props.pickingColors = instancePickingColors;
-  props.nextPositions = nextPositions;
-  props.nextPositions64Low = nextPositions64Low;
 
   calculatePosition(props);
 }
