@@ -12,17 +12,17 @@
 const packUVsIntoRGB = `
 vec3 packUVsIntoRGB(vec2 uv) {
   // Extract the top 8 bits. We want values to be truncated down so we can add a fraction
-  vec2 uv8bit = floor(uv * 256.) / 256.;
+  vec2 uv8bit = floor(uv * 256.);
 
   // Calculate the normalized remainders of u and v parts that do not fit into 8 bits
   // Scale and clamp to 0-1 range
-  vec2 uvFraction = mod((uv - uv8bit) * 256. * 16., 16.) / 16.0;
+  vec2 uvFraction = fract(uv * 256.);
+  vec2 uvFraction4bit = floor(uvFraction * 16.);
 
   // Remainder can be encoded in blue channel, encode as 4 bits for pixel coordinates
-  // TODO add make v component work without interfering with u
-  float fractions = uvFraction.x / 16.; // + uvFraction.y;
+  float fractions = uvFraction4bit.x * 16. + uvFraction4bit.y;
 
-  return vec3(uv8bit, fractions);
+  return vec3(uv8bit, fractions) / 255.;
 }
 `;
 

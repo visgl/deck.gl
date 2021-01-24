@@ -109,21 +109,21 @@ export default class BitmapLayer extends Layer {
   }
 
   getPickingInfo({info}) {
-    const uniforms = this.state && this.state.model && this.state.model.uniforms;
-    const {bitmapTexture} = uniforms || {};
+    const {image} = this.props;
 
-    if (!info.color || !bitmapTexture) {
+    if (!info.color || !image) {
       info.bitmap = null;
       return info;
     }
 
-    const {width, height} = bitmapTexture;
+    const {width, height} = image;
 
     // Picking color doesn't represent object index in this layer
     info.index = 0;
 
     // Calculate uv and pixel in bitmap
     const uv = unpackUVsFromRGB(info.color);
+
     const pixel = [Math.floor(uv[0] * width), Math.floor(uv[1] * height)];
 
     info.bitmap = {
@@ -249,7 +249,7 @@ BitmapLayer.defaultProps = defaultProps;
  */
 function unpackUVsFromRGB(color) {
   const [u, v, fracUV] = color;
-  const vFrac = (fracUV & 0xf0) / 256;
-  const uFrac = (fracUV & 0x0f) / 16;
-  return [(u + uFrac) / 255, (v + vFrac) / 255];
+  const uFrac = (fracUV & 0xf0) / 256;
+  const vFrac = (fracUV & 0x0f) / 16;
+  return [(u + uFrac) / 256, (v + vFrac) / 256];
 }
