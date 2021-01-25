@@ -51,7 +51,6 @@ const geoJSONDataWGS84 = [
 ];
 
 const geoJSONBinaryData = geojsonToBinary(geoJSONData);
-const geoJSONBinaryDataWGS84 = geojsonToBinary(geoJSONDataWGS84);
 
 const TRANSFORM_COORDS_DATA = [
   {
@@ -303,8 +302,8 @@ test('MVT dataInWGS84', async t => {
       const contentWGS84 = tile.dataInWGS84;
 
       t.deepEqual(
-        layer.props.binary ? contentWGS84 : contentWGS84[0].geometry.coordinates,
-        layer.props.binary ? geoJSONBinaryDataWGS84 : geoJSONDataWGS84[0].geometry.coordinates,
+        contentWGS84[0].geometry.coordinates,
+        geoJSONDataWGS84[0].geometry.coordinates,
         'should transform to WGS84'
       );
       t.isNot(tile._contentWGS84, undefined, 'should set cache for further requests');
