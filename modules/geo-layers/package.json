@@ -33,6 +33,7 @@
     "@loaders.gl/3d-tiles": "^2.3.0",
     "@loaders.gl/loader-utils": "^2.3.0",
     "@loaders.gl/mvt": "^2.3.0",
+    "@loaders.gl/gis": "^2.3.0",
     "@loaders.gl/terrain": "^2.3.0",
     "@loaders.gl/tiles": "^2.3.0",
     "@math.gl/culling": "^3.4.2",

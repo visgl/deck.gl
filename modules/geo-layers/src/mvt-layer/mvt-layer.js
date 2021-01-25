@@ -1,5 +1,6 @@
 import {Matrix4} from 'math.gl';
 import {MVTLoader} from '@loaders.gl/mvt';
+import {binaryToGeoJson} from '@loaders.gl/gis';
 import {load} from '@loaders.gl/core';
 import {COORDINATE_SYSTEM} from '@deck.gl/core';
 import {_binaryToFeature, _findIndexBinary} from '@deck.gl/layers';
@@ -259,9 +260,16 @@ export default class MVTLayer extends TileLayer {
               return null;
             }
 
+            if (this.props.binary && Array.isArray(tile.content) && !tile.content.length) {
+              // TODO: @deck.gl/loaders returns [] when no content. It should return a valid empty binary.
+              // https://github.com/visgl/loaders.gl/blob/master/modules/mvt/src/lib/parse-mvt.js#L17
+              return [];
+            }
+
             if (tile._contentWGS84 === undefined) {
               // Create a cache to transform only once
-              tile._contentWGS84 = tile.content.map(feature =>
+              const content = this.props.binary ? binaryToGeoJson(tile.content): tile.content;
+              tile._contentWGS84 = content.map(feature =>
                 transformTileCoordsToWGS84(feature, tile.bbox, this.context.viewport)
               );
             }
