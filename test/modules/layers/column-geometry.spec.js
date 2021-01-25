@@ -49,14 +49,18 @@ test('ColumnGeometry#tesselation', t => {
 
   // prettier-ignore
   t.ok(equals(attributes.POSITION.value.slice(0, 3 * 8), [
-    -1, -1, 0.5, -1, -1, -0.5, -1, 1, 0.5, -1, 1, -0.5,
-    1, 1, 0.5, 1, 1, -0.5, 1, -1, 0.5, 1, -1, -0.5
+    1, -1, 0.5, 1, -1, -0.5,
+    1, 1, 0.5, 1, 1, -0.5,
+    -1, 1, 0.5, -1, 1, -0.5,
+    -1, -1, 0.5, -1, -1, -0.5
   ]), 'positions generated');
 
   // prettier-ignore
   t.ok(equals(attributes.NORMAL.value.slice(0, 3 * 8), [
-    0, 2, 0, 0, 2, 0, 2, 0, 0, 2, 0, 0,
-    0, -2, 0, 0, -2, 0, -2, 0, 0, -2, 0, 0
+    1, -1, 0, 1, -1, -0,
+    1, 1, 0, 1, 1, -0,
+    -1, 1, 0, -1, 1, -0,
+    -1, -1, 0, -1, -1, -0
   ]), 'normals generated');
 
   t.end();
