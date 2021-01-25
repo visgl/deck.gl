@@ -268,7 +268,7 @@ export default class MVTLayer extends TileLayer {
 
             if (tile._contentWGS84 === undefined) {
               // Create a cache to transform only once
-              const content = this.props.binary ? binaryToGeoJson(tile.content): tile.content;
+              const content = this.props.binary ? binaryToGeoJson(tile.content) : tile.content;
               tile._contentWGS84 = content.map(feature =>
                 transformTileCoordsToWGS84(feature, tile.bbox, this.context.viewport)
               );
