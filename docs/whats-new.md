@@ -2,6 +2,14 @@
 
 This page contains highlights of each deck.gl release. Also check our [vis.gl blog](https://medium.com/vis-gl) for news about new releases and features in deck.gl.
 
+## deck.gl v8.4 (in development)
+
+Release data: TBD
+
+### BitmapLayer
+
+- `BitmapLayer` picking callbacks now provide information on which pixel was picked.
+
 ## deck.gl v8.3
 
 Release Date: Oct 12, 2020
