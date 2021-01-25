@@ -7,15 +7,24 @@ function createMVTLayer(id, {highlight = false, binary = false} = {}) {
   const highlightProps = highlight
     ? {highlightedFeatureId: 1862, uniqueIdProperty: 'cartodb_id'}
     : {};
+  const viewState = highlight
+    ? {
+        longitude: -74.006,
+        latitude: 40.7128,
+        zoom: 13,
+        pitch: 0,
+        bearing: 0
+      }
+    : {
+        longitude: -100,
+        latitude: 40,
+        zoom: 3,
+        pitch: 0,
+        bearing: 0
+      };
   return {
     name: id,
-    viewState: {
-      longitude: -100,
-      latitude: 40,
-      zoom: 3,
-      pitch: 0,
-      bearing: 0
-    },
+    viewState,
     layers: [
       new MVTLayer({
         id,
