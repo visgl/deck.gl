@@ -83,6 +83,10 @@ test('GeoJsonLayer#tests', t => {
     }
   });
 
+  // TODO: @loaders.gl binaryToGeojson should no modify input data
+  // TODO: Set a right geojson example as the provided from 'deck.gl-data' contains 'GeometryCollection' types that are not compatible with geojsonToBinary
+  const binaryData = JSON.parse(JSON.stringify(FIXTURES.geojson.features)).slice(0, 7);
+
   testCases.push({
     title: 'GeoJsonLayer#binary',
     onBeforeUpdate: ({testCase}) => t.comment(testCase.title),
@@ -104,7 +108,7 @@ test('GeoJsonLayer#tests', t => {
     },
     props: {
       // TODO: Set a right geojson example as the provided from 'deck.gl-data' contains 'GeometryCollection' types that are not compatible with geojsonToBinary
-      data: geojsonToBinary(FIXTURES.geojson.features.slice(0, 7))
+      data: geojsonToBinary(binaryData)
     }
   });
 
