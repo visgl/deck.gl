@@ -87,7 +87,14 @@ test('GeoJsonLayer#tests', t => {
     title: 'GeoJsonLayer#binary',
     onBeforeUpdate: ({testCase}) => t.comment(testCase.title),
     onAfterUpdate: ({layer, subLayers}) => {
-      t.ok(layer.state.features, 'should update features');
+      t.ok(
+        layer.state.layerProps.points.data.featureIds &&
+          layer.state.layerProps.lines.data.featureIds &&
+          layer.state.layerProps.polygons.data.featureIds &&
+          layer.state.layerProps.polygonsOutline.data.featureIds,
+        'should receive data in binary mode'
+      );
+      t.ok(layer._isBinary(), 'detects binary data');
       const hasData = layer.props && layer.props.data && Object.keys(layer.props.data).length;
       t.is(
         subLayers.length,
