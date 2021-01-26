@@ -25,6 +25,10 @@ import {modifyPolygonWindingDirection, WINDING} from '@math.gl/polygon';
 const OUTER_POLYGON_WINDING = WINDING.CLOCKWISE;
 const HOLE_POLYGON_WINDING = WINDING.COUNTER_CLOCKWISE;
 
+const windingOptions = {
+  isClosed: true
+};
+
 // 4 data formats are supported:
 // Simple Polygon: an array of points
 // Complex Polygon: an array of array of points (array of rings)
@@ -107,14 +111,10 @@ function copyNestedRing(target, targetStartIndex, simplePolygon, size, windingDi
     }
   }
 
-  if (windingDirection) {
-    modifyPolygonWindingDirection(target, windingDirection, {
-      start: targetStartIndex,
-      end: targetIndex,
-      size,
-      isClosed: true
-    });
-  }
+  windingOptions.start = targetStartIndex;
+  windingOptions.end = targetIndex;
+  windingOptions.size = size;
+  modifyPolygonWindingDirection(target, windingDirection, windingOptions);
 
   return targetIndex;
 }
@@ -156,14 +156,10 @@ function copyFlatRing(
     }
   }
 
-  if (windingDirection) {
-    modifyPolygonWindingDirection(target, windingDirection, {
-      start: targetStartIndex,
-      end: targetIndex,
-      size,
-      isClosed: true
-    });
-  }
+  windingOptions.start = targetStartIndex;
+  windingOptions.end = targetIndex;
+  windingOptions.size = size;
+  modifyPolygonWindingDirection(target, windingDirection, windingOptions);
 
   return targetIndex;
 }

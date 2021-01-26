@@ -1,5 +1,6 @@
 import {log} from '@deck.gl/core';
 import {Geometry, uid} from '@luma.gl/core';
+import {modifyPolygonWindingDirection, WINDING} from '@math.gl/polygon';
 
 export default class ColumnGeometry extends Geometry {
   constructor(props = {}) {
@@ -16,8 +17,14 @@ export default class ColumnGeometry extends Geometry {
 
 /* eslint-disable max-statements, complexity */
 function tesselateColumn(props) {
-  const {radius, height = 1, nradial = 10, vertices} = props;
-  log.assert(!vertices || vertices.length >= nradial);
+  const {radius, height = 1, nradial = 10} = props;
+  let {vertices} = props;
+
+  if (vertices) {
+    log.assert(vertices.length >= nradial);
+    vertices = vertices.flatMap(v => [v[0], v[1]]);
+    modifyPolygonWindingDirection(vertices, WINDING.COUNTER_CLOCKWISE);
+  }
 
   const vertsAroundEdge = nradial + 1; // loop
   const numVertices = vertsAroundEdge * 3; // top, side top edge, side bottom edge
@@ -40,18 +47,17 @@ function tesselateColumn(props) {
   //
   for (let j = 0; j < vertsAroundEdge; j++) {
     const a = j * stepAngle;
-    const vertex = vertices && vertices[j % nradial];
-    const nextVertex = vertices && vertices[(j + 1) % nradial];
+    const vertexIndex = j % nradial;
     const sin = Math.sin(a);
     const cos = Math.cos(a);
 
     for (let k = 0; k < 2; k++) {
-      positions[i + 0] = vertex ? vertex[0] : cos * radius;
-      positions[i + 1] = vertex ? vertex[1] : sin * radius;
+      positions[i + 0] = vertices ? vertices[vertexIndex * 2] : cos * radius;
+      positions[i + 1] = vertices ? vertices[vertexIndex * 2 + 1] : sin * radius;
       positions[i + 2] = (1 / 2 - k) * height;
 
-      normals[i + 0] = vertex ? nextVertex[0] - vertex[0] : cos;
-      normals[i + 1] = vertex ? nextVertex[1] - vertex[1] : sin;
+      normals[i + 0] = vertices ? vertices[vertexIndex * 2] : cos;
+      normals[i + 1] = vertices ? vertices[vertexIndex * 2 + 1] : sin;
 
       i += 3;
     }
@@ -70,12 +76,12 @@ function tesselateColumn(props) {
   for (let j = 0; j < vertsAroundEdge; j++) {
     const v = Math.floor(j / 2) * Math.sign((j % 2) - 0.5);
     const a = v * stepAngle;
-    const vertex = vertices && vertices[(v + nradial) % nradial];
+    const vertexIndex = (v + nradial) % nradial;
     const sin = Math.sin(a);
     const cos = Math.cos(a);
 
-    positions[i + 0] = vertex ? vertex[0] : cos * radius;
-    positions[i + 1] = vertex ? vertex[1] : sin * radius;
+    positions[i + 0] = vertices ? vertices[vertexIndex * 2] : cos * radius;
+    positions[i + 1] = vertices ? vertices[vertexIndex * 2 + 1] : sin * radius;
     positions[i + 2] = height / 2;
 
     normals[i + 2] = 1;
