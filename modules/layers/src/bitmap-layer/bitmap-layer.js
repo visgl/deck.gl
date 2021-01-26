@@ -108,6 +108,33 @@ export default class BitmapLayer extends Layer {
     }
   }
 
+  getPickingInfo({info}) {
+    const {image} = this.props;
+
+    if (!info.color || !image) {
+      info.bitmap = null;
+      return info;
+    }
+
+    const {width, height} = image;
+
+    // Picking color doesn't represent object index in this layer
+    info.index = 0;
+
+    // Calculate uv and pixel in bitmap
+    const uv = unpackUVsFromRGB(info.color);
+
+    const pixel = [Math.floor(uv[0] * width), Math.floor(uv[1] * height)];
+
+    info.bitmap = {
+      size: {width, height}, // Size of bitmap
+      uv, // Floating point precision in 0-1 range
+      pixel // Truncated to integer and scaled to pixel size
+    };
+
+    return info;
+  }
+
   _createMesh() {
     const {bounds} = this.props;
 
@@ -213,3 +240,16 @@ export default class BitmapLayer extends Layer {
 
 BitmapLayer.layerName = 'BitmapLayer';
 BitmapLayer.defaultProps = defaultProps;
+
+/**
+ * Decode uv floats from rgb bytes where b contains 4-bit fractions of uv
+ * @param {number[]} color
+ * @returns {number[]} uvs
+ * https://stackoverflow.com/questions/30242013/glsl-compressing-packing-multiple-0-1-colours-var4-into-a-single-var4-variab
+ */
+function unpackUVsFromRGB(color) {
+  const [u, v, fracUV] = color;
+  const vFrac = (fracUV & 0xf0) / 256;
+  const uFrac = (fracUV & 0x0f) / 16;
+  return [(u + uFrac) / 256, (v + vFrac) / 256];
+}

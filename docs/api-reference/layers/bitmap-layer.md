@@ -153,6 +153,39 @@ The color to use for transparent pixels, in `[r, g, b, a]`. Each component is in
 
 The color to tint the bitmap by, in `[r, g, b]`. Each component is in the `[0, 255]` range.
 
+## Pixel Picking
+
+(From v8.4) The [picking info](/docs/developer-guide/interactivity.md#the-picking-info-object) passed to callbacks (`onHover`, `onClick`, etc.) provides information on which pixel was picked. It contains an additional `bitmap` field if applicable:
+
+- `bitmap`
+  + `pixel` ([number, number])  Integer coordinates into the bitmap
+  + `size` ({width: number; height: number})  Size of bitmap in pixels
+  + `uv` ([number, number]) Normalized (0-1) floating point coordinates
+
+Note that the `bitmap` field can be `null` if on mouse leave or if the bitmap has not yet loaded.
+
+The following code reads the picked pixel color from the bitmap when the layer is clicked:
+
+```js
+import {readPixelsToArray} from '@luma.gl/core';
+
+new BitmapLayer({
+  image: './my-image.png',
+  bounds: [-122.45, 37.75, -122.43, 37.78],
+  pickable: true,
+  onClick: ({bitmap, layer}) => {
+    if (bitmap) {
+      const pixelColor = readPixelsToArray(layer.props.image, {
+        sourceX: bitmap.pixel[0],
+        sourceY: bitmap.pixel[1],
+        sourceWidth: 1,
+        sourceHeight: 1
+      })
+      console.log('Color at picked pixel:', pixelColor)
+    }
+  }
+})
+```
 
 ## Source
 

@@ -80,8 +80,7 @@ export default class View {
 
     // Resolve relative viewport dimensions
     const viewportDimensions = this.getDimensions({width, height});
-    const props = {...viewState, ...this.props, ...viewportDimensions};
-    return this._getViewport(props);
+    return this._getViewport(viewState, viewportDimensions);
   }
 
   getViewStateId() {
@@ -148,10 +147,10 @@ export default class View {
   }
 
   // Overridable method
-  _getViewport(props) {
+  _getViewport(viewState, viewportDimensions) {
     // Get the type of the viewport
     const {type: ViewportType} = this;
-    return new ViewportType(props);
+    return new ViewportType({...viewState, ...this.props, ...viewportDimensions});
   }
 
   // Parse relative viewport dimension descriptors (e.g {y: '50%', height: '50%'})

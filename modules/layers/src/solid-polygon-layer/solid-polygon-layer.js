@@ -38,6 +38,7 @@ const defaultProps = {
   // Whether to draw a GL.LINES wireframe of the polygon
   wireframe: false,
   _normalize: true,
+  _windingOrder: 'CW',
 
   // elevation multiplier
   elevationScale: {type: 'number', min: 0, value: 1},
@@ -65,7 +66,9 @@ export default class SolidPolygonLayer extends Layer {
     return super.getShaders({
       vs: type === 'top' ? vsTop : vsSide,
       fs,
-      defines: {},
+      defines: {
+        RING_WINDING_ORDER_CW: !this.props._normalize && this.props._windingOrder === 'CCW' ? 0 : 1
+      },
       modules: [project32, gouraudLighting, picking]
     });
   }
