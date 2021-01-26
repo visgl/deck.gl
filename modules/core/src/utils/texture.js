@@ -28,8 +28,9 @@ export function createTexture(layer, image) {
     image = {data: image};
   }
 
-  const specialTextureParameters = {};
+  let specialTextureParameters = null;
   if (image.compressed) {
+    specialTextureParameters = {};
     specialTextureParameters[gl.TEXTURE_MIN_FILTER] =
       image.data.length > 1 ? gl.LINEAR_MIPMAP_NEAREST : gl.LINEAR;
   }
