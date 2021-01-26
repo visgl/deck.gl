@@ -28,8 +28,7 @@ const LAYER_EXAMPLES = {
   'TileLayer': 'tile-layer',
   'TileLayer (Non-geospatial)': 'tile-layer-non-geospatial',
   'Tile3DLayer': 'tile-3d-layer',
-  'TripsLayer': 'trips-layer',
-  '3D Plot': 'plot'
+  'TripsLayer': 'trips-layer'
 };
 
 const INTEGRATION_EXAMPLES = {
@@ -37,6 +36,11 @@ const INTEGRATION_EXAMPLES = {
   'CARTO': 'carto',
   'Google Maps': 'google-maps',
   'Mapbox': 'mapbox'
+};
+
+const VIEW_EXAMPLES = {
+  'Minimap': 'multi-view',
+  'OrbitView': 'plot'
 };
 
 const EXTENSION_EXAMPLES = {
@@ -47,6 +51,7 @@ const EXTENSION_EXAMPLES = {
 module.exports = [].concat(
   makeExampleEntries(LAYER_EXAMPLES, 'Layers'),
   makeExampleEntries(INTEGRATION_EXAMPLES, 'Integrations'),
+  makeExampleEntries(VIEW_EXAMPLES, 'Views'),
   makeExampleEntries(EXTENSION_EXAMPLES, 'Extensions'),
   {
     title: 'Playground',
