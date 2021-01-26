@@ -26,16 +26,16 @@ function tesselateColumn(props) {
     modifyPolygonWindingDirection(vertices, WINDING.COUNTER_CLOCKWISE);
   }
 
+  const isExtruded = height > 0;
   const vertsAroundEdge = nradial + 1; // loop
-  const numVertices =
-    height > 0
-      ? vertsAroundEdge * 3 // top, side top edge, side bottom edge
-      : nradial; // top
+  const numVertices = isExtruded
+    ? vertsAroundEdge * 3 // top, side top edge, side bottom edge
+    : nradial; // top
 
   const stepAngle = (Math.PI * 2) / nradial;
 
   // Used for wireframe
-  const indices = new Uint16Array(height > 0 ? nradial * 3 * 2 : 0); // top loop, side vertical, bottom loop
+  const indices = new Uint16Array(isExtruded ? nradial * 3 * 2 : 0); // top loop, side vertical, bottom loop
 
   const positions = new Float32Array(numVertices * 3);
   const normals = new Float32Array(numVertices * 3);
@@ -48,7 +48,7 @@ function tesselateColumn(props) {
   // | / | / |
   // 1 - 3 - 5  ... bottom
   //
-  if (height > 0) {
+  if (isExtruded) {
     for (let j = 0; j < vertsAroundEdge; j++) {
       const a = j * stepAngle;
       const vertexIndex = j % nradial;
@@ -78,7 +78,7 @@ function tesselateColumn(props) {
   //   \      /
   //   -3 -- 4
   //
-  for (let j = height > 0 ? 0 : 1; j < vertsAroundEdge; j++) {
+  for (let j = isExtruded ? 0 : 1; j < vertsAroundEdge; j++) {
     const v = Math.floor(j / 2) * Math.sign((j % 2) - 0.5);
     const a = v * stepAngle;
     const vertexIndex = (v + nradial) % nradial;
@@ -94,7 +94,7 @@ function tesselateColumn(props) {
     i += 3;
   }
 
-  if (height > 0) {
+  if (isExtruded) {
     let index = 0;
     for (let j = 0; j < nradial; j++) {
       // top loop
