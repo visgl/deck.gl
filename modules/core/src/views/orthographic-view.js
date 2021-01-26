@@ -35,7 +35,7 @@ class OrthographicViewport extends Viewport {
     flipY = true
   }) {
     const scale = Math.pow(2, zoom);
-    return new Viewport({
+    super({
       id,
       x,
       y,
