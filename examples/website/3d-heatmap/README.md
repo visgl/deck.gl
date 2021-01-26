@@ -19,7 +19,7 @@ npm start
 Sample data is stored in [deck.gl Example Data](https://github.com/visgl/deck.gl-data/tree/master/examples/3d-heatmap), showing personal injury from road accidents in the UK. [Source](https://data.gov.uk)
 
 To use your own data, check out
-the [documentation of HexagonLayer](../../../docs/api-/reference/aggregation-layers/hexagon-layer.md)
+the [documentation of HexagonLayer](../../../docs/api-reference/aggregation-layers/hexagon-layer.md)
 
 ### Basemap
 
