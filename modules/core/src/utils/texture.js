@@ -38,8 +38,8 @@ export function createTexture(layer, image) {
     ...image,
     parameters: {
       ...DEFAULT_TEXTURE_PARAMETERS,
-      ...layer.props.textureParameters,
-      ...specialTextureParameters
+      ...specialTextureParameters,
+      ...layer.props.textureParameters
     }
   });
   // Track this texture
