@@ -79,6 +79,7 @@ function getPropTypes(PropTypes) {
     onWebGLInitialized: PropTypes.func,
     onResize: PropTypes.func,
     onViewStateChange: PropTypes.func,
+    onInteractionStateChange: PropTypes.func,
     onBeforeRender: PropTypes.func,
     onAfterRender: PropTypes.func,
     onLoad: PropTypes.func,
@@ -126,6 +127,7 @@ const defaultProps = {
   onWebGLInitialized: noop,
   onResize: noop,
   onViewStateChange: noop,
+  onInteractionStateChange: noop,
   onBeforeRender: noop,
   onAfterRender: noop,
   onLoad: noop,
@@ -173,7 +175,7 @@ export default class Deck {
     this._onRendererInitialized = this._onRendererInitialized.bind(this);
     this._onRenderFrame = this._onRenderFrame.bind(this);
     this._onViewStateChange = this._onViewStateChange.bind(this);
-    this._onInteractiveStateChange = this._onInteractiveStateChange.bind(this);
+    this._onInteractionStateChange = this._onInteractionStateChange.bind(this);
 
     if (props.viewState && props.initialViewState) {
       log.warn(
@@ -646,7 +648,7 @@ export default class Deck {
       timeline,
       eventManager: this.eventManager,
       onViewStateChange: this._onViewStateChange,
-      onInteractiveStateChange: this._onInteractiveStateChange,
+      onInteractionStateChange: this._onInteractionStateChange,
       views: this._getViews(),
       viewState: this._getViewState(),
       width: this.width,
@@ -762,10 +764,9 @@ export default class Deck {
     }
   }
 
-  _onInteractiveStateChange({isDragging = false}) {
-    if (isDragging !== this.interactiveState.isDragging) {
-      this.interactiveState.isDragging = isDragging;
-    }
+  _onInteractionStateChange(interactionState) {
+    this.interactiveState.isDragging = interactionState.isDragging;
+    this.props.onInteractionStateChange(interactionState);
   }
 
   _onEvent(event) {

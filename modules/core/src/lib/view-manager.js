@@ -42,7 +42,7 @@ export default class ViewManager {
     this._eventManager = props.eventManager;
     this._eventCallbacks = {
       onViewStateChange: props.onViewStateChange,
-      onInteractiveStateChange: props.onInteractiveStateChange
+      onInteractionStateChange: props.onInteractionStateChange
     };
 
     Object.seal(this);
@@ -250,7 +250,7 @@ export default class ViewManager {
       eventManager: this._eventManager,
       // Set an internal callback that calls the prop callback if provided
       onViewStateChange: this._onViewStateChange.bind(this, props.id),
-      onStateChange: this._eventCallbacks.onInteractiveStateChange,
+      onStateChange: this._eventCallbacks.onInteractionStateChange,
       makeViewport: view._getViewport.bind(view),
       ...props
     });
