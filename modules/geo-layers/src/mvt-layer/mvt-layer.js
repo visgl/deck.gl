@@ -261,8 +261,8 @@ export default class MVTLayer extends TileLayer {
             }
 
             if (this.props.binary && Array.isArray(tile.content) && !tile.content.length) {
-              // TODO: @deck.gl/loaders returns [] when no content. It should return a valid empty binary.
-              // https://github.com/visgl/loaders.gl/blob/master/modules/mvt/src/lib/parse-mvt.js#L17
+              // TODO: @loaders.gl/mvt returns [] when no content. It should return a valid empty binary.
+              // https://github.com/visgl/loaders.gl/pull/1137
               return [];
             }
 

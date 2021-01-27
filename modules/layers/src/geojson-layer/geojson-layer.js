@@ -81,8 +81,12 @@ export default class GeoJsonLayer extends CompositeLayer {
     if (!changeFlags.dataChanged) {
       return;
     }
+    const {data} = this.props;
+    const binary = data && 'points' in data && 'polygons' in data && 'lines' in data;
+    
+    this.setState({binary});
 
-    if (this._isBinary()) {
+    if (binary) {
       this._updateStateBinary({props, changeFlags});
     } else {
       this._updateStateJSON({props, changeFlags});
@@ -331,8 +335,9 @@ export default class GeoJsonLayer extends CompositeLayer {
   }
   _getHighlightedIndex(data) {
     const {highlightedObjectIndex} = this.props;
+    const {binary} = this.state;
 
-    if (!this._isBinary()) {
+    if (!binary) {
       return Number.isFinite(highlightedObjectIndex)
         ? data.findIndex(d => d.__source.index === highlightedObjectIndex)
         : null;
@@ -340,13 +345,9 @@ export default class GeoJsonLayer extends CompositeLayer {
     return highlightedObjectIndex;
   }
 
-  _isBinary() {
-    const {data} = this.props;
-    return data && 'points' in data && 'polygons' in data && 'lines' in data;
-  }
-
   getSubLayerAccessor(accessor) {
-    if (!this._isBinary() || typeof accessor !== 'function') {
+    const {binary} = this.state;
+    if (!binary || typeof accessor !== 'function') {
       return super.getSubLayerAccessor(accessor);
     }
 

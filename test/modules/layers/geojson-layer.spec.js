@@ -98,7 +98,7 @@ test('GeoJsonLayer#tests', t => {
           layer.state.layerProps.polygonsOutline.data.featureIds,
         'should receive data in binary mode'
       );
-      t.ok(layer._isBinary(), 'detects binary data');
+      t.ok(layer.state.binary, 'detects binary data');
       const hasData = layer.props && layer.props.data && Object.keys(layer.props.data).length;
       t.is(
         subLayers.length,

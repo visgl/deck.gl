@@ -50,7 +50,7 @@ const geoJSONDataWGS84 = [
   }
 ];
 
-const geoJSONBinaryData = geojsonToBinary(geoJSONData);
+const geoJSONBinaryData = geojsonToBinary(JSON.parse(JSON.stringify(geoJSONData)));
 
 const TRANSFORM_COORDS_DATA = [
   {
@@ -184,9 +184,10 @@ test('MVT Highlight', async t => {
   };
 
   const testCases = [
+    // Highlight using id field
     {
       props: {
-        data: ['https://a.basemaps.cartocdn.com/rastertiles/voyager_labels_under/{z}/{x}/{y}.png'],
+        data: ['https://json/{z}/{x}/{y}.mvt'],
         id: 'mvt-highlight-test',
         filled: true,
         pickable: true,
@@ -196,9 +197,22 @@ test('MVT Highlight', async t => {
       },
       onAfterUpdate
     },
+    // highlight using a property
     {
       updateProps: {
-        binary: true
+        data: ['https://json_2/{z}/{x}/{y}.mvt'],
+        uniqueIdProperty: 'cartodb_id',
+        highlightedFeatureId: 148
+      },
+      onAfterUpdate
+    },
+    // highlight binary data
+    {
+      updateProps: {
+        binary: true,
+        data: ['https://binary/{z}/{x}/{y}.mvt'],
+        uniqueIdProperty: 'cartodb_id',
+        highlightedFeatureId: 148
       },
       onAfterUpdate
     }
@@ -299,6 +313,7 @@ test('MVT dataInWGS84', async t => {
   const onAfterUpdate = ({layer}) => {
     if (layer.isLoaded) {
       const tile = layer.state.tileset.selectedTiles[0];
+
       const contentWGS84 = tile.dataInWGS84;
 
       t.deepEqual(
@@ -323,8 +338,10 @@ test('MVT dataInWGS84', async t => {
       },
       onAfterUpdate
     }
+    // TODO: comment out when https://github.com/visgl/loaders.gl/pull/1137 is merged
     // {
     //   updateProps: {
+    //     data: ['https://binary.com/{z}/{x}/{y}.mvt'],
     //     binary: true
     //   },
     //   onAfterUpdate

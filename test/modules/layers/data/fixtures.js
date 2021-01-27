@@ -39,29 +39,7 @@ export const geoJSONData = [
   }
 ];
 
-export const pickingColorsSample = Uint8ClampedArray.from([
-  1,
-  0,
-  0,
-  1,
-  0,
-  0,
-  1,
-  0,
-  0,
-  1,
-  0,
-  0,
-  2,
-  0,
-  0,
-  2,
-  0,
-  0,
-  2,
-  0,
-  0,
-  2,
-  0,
-  0
+// prettier-ignore
+export const pickingColorsSample = Uint8ClampedArray.from([ 
+  1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 2, 0, 0, 2, 0, 0, 2, 0, 0, 2, 0, 0
 ]);

@@ -2,6 +2,8 @@
 // the geojson-binary format defined at loaders.gl:
 // https://github.com/visgl/loaders.gl/blob/master/modules/gis/docs/api-reference/geojson-to-binary.md
 
+const GEOM_TYPES = ['points', 'lines', 'polygons'];
+
 /**
  * Return the feature for a given featureId index value
  *
@@ -40,7 +42,7 @@ export function binaryToFeatureForAccesor(data, index) {
     return getPropertiesForIndex(data, geometryIndex, featureIndex);
   }
 
-  return -1;
+  return null;
 }
 
 function getPropertiesForIndex(data, propertiesIndex, numericPropsIndex) {
@@ -49,8 +51,7 @@ function getPropertiesForIndex(data, propertiesIndex, numericPropsIndex) {
   };
 
   for (const prop in data.numericProps) {
-    feature.properties[prop] =
-      data.numericProps[prop].value[numericPropsIndex * data.numericProps[prop].size];
+    feature.properties[prop] = data.numericProps[prop].value[numericPropsIndex];
   }
 
   return feature;
@@ -69,9 +70,7 @@ export function findIndexBinary(data, uniqueIdProperty, featureId) {
     return -1;
   }
 
-  const geomTypes = ['points', 'lines', 'polygons'];
-
-  for (const gt of geomTypes) {
+  for (const gt of GEOM_TYPES) {
     const index = findIndexByType(data, uniqueIdProperty, featureId, gt);
     if (index !== -1) {
       return index;
@@ -110,10 +109,11 @@ export function calculatePickingColors(geojsonBinary, encodePickingColor) {
     polygons: null
   };
   for (const key in pickingColors) {
-    pickingColors[key] = new Uint8ClampedArray(geojsonBinary[key].featureIds.value.length * 3);
+    const featureIds = geojsonBinary[key].featureIds.value;
+    pickingColors[key] = new Uint8ClampedArray(featureIds.length * 3);
     const pickingColor = [];
-    for (let i = 0; i < geojsonBinary[key].featureIds.value.length; i++) {
-      encodePickingColor(geojsonBinary[key].featureIds.value[i], pickingColor);
+    for (let i = 0; i < featureIds.length; i++) {
+      encodePickingColor(featureIds[i], pickingColor);
       pickingColors[key][i * 3 + 0] = pickingColor[0];
       pickingColors[key][i * 3 + 1] = pickingColor[1];
       pickingColors[key][i * 3 + 2] = pickingColor[2];
