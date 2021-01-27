@@ -28,9 +28,20 @@ export function createTexture(layer, image) {
     image = {data: image};
   }
 
+  let specialTextureParameters = null;
+  if (image.compressed) {
+    specialTextureParameters = {
+      [GL.TEXTURE_MIN_FILTER]: image.data.length > 1 ? GL.LINEAR_MIPMAP_NEAREST : GL.LINEAR
+    };
+  }
+
   const texture = new Texture2D(gl, {
     ...image,
-    parameters: {...DEFAULT_TEXTURE_PARAMETERS, ...layer.props.textureParameters}
+    parameters: {
+      ...DEFAULT_TEXTURE_PARAMETERS,
+      ...specialTextureParameters,
+      ...layer.props.textureParameters
+    }
   });
   // Track this texture
   internalTextures[texture.id] = true;
