@@ -343,6 +343,7 @@ Receives arguments:
 
 - `interactiveState` (Object)
   + `isDragging` (Boolean) - whether the pointer is down and moving
+  + `isHovering` (Boolean) - whether the pointer is over a pickable object
 
 Returns:
 
