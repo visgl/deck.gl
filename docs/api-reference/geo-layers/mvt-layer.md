@@ -125,7 +125,7 @@ Use tile data in [binary format](https://github.com/visgl/loaders.gl/blob/master
 
 Remarks: 
 
-- It requires to use `GeoJsonLayer` as the `renderSubLayers` function to work.
+It requires using `GeoJsonLayer` in the `renderSubLayers` callback.
 - In binary format, polygons or multipolygons with holes are not supported.
 
 ### Callbacks
