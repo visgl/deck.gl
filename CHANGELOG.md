@@ -19,6 +19,10 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v8.3
 
+#### deck.gl [8.3.15] - Jan 26 2021
+
+- Fix S2Layer handling of coordinates across the antimeridian (#5378)
+
 #### deck.gl [8.3.14] - Jan 12 2021
 
 - Fix TextLayer wordBreak default value (#5315)
