@@ -30,9 +30,9 @@ export function createTexture(layer, image) {
 
   let specialTextureParameters = null;
   if (image.compressed) {
-    specialTextureParameters = {};
-    specialTextureParameters[gl.TEXTURE_MIN_FILTER] =
-      image.data.length > 1 ? gl.LINEAR_MIPMAP_NEAREST : gl.LINEAR;
+    specialTextureParameters = {
+      [GL.TEXTURE_MIN_FILTER]: image.data.length > 1 ? GL.LINEAR_MIPMAP_NEAREST : GL.LINEAR
+    };
   }
 
   const texture = new Texture2D(gl, {
