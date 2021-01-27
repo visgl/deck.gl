@@ -207,9 +207,8 @@ test('LayerManager#error handling', t => {
     new BadLayer({id: 'crash-on-update', throw: true})
   ]);
 
-  t.is(errorArgs.length, 3, 'onError is called');
-  t.is(errorArgs[1].layer.id, 'crash-on-init', 'onError is called with correct args');
-  t.is(errorArgs[2].layer.id, 'crash-on-update', 'onError is called with correct args');
+  t.is(errorArgs.length, 2, 'onError is called');
+  t.is(errorArgs[1].layer.id, 'crash-on-update', 'onError is called with correct args');
 
   t.end();
 });
