@@ -83,7 +83,7 @@ export default class GeoJsonLayer extends CompositeLayer {
     }
     const {data} = this.props;
     const binary = data && 'points' in data && 'polygons' in data && 'lines' in data;
-    
+
     this.setState({binary});
 
     if (binary) {
