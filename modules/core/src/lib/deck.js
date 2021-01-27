@@ -74,6 +74,7 @@ function getPropTypes(PropTypes) {
     pickingRadius: PropTypes.number,
     useDevicePixels: PropTypes.oneOfType([PropTypes.bool, PropTypes.number]),
     touchAction: PropTypes.string,
+    eventRecognizerOptions: PropTypes.object,
 
     // Callbacks
     onWebGLInitialized: PropTypes.func,
@@ -118,6 +119,7 @@ const defaultProps = {
   controller: null, // Rely on external controller, e.g. react-map-gl
   useDevicePixels: true,
   touchAction: 'none',
+  eventRecognizerOptions: {},
   _framebuffer: null,
   _animate: false,
   _pickable: true,
@@ -632,6 +634,7 @@ export default class Deck {
 
     this.eventManager = new EventManager(this.props.parent || gl.canvas, {
       touchAction: this.props.touchAction,
+      recognizerOptions: this.props.eventRecognizerOptions,
       events: {
         pointerdown: this._onPointerDown,
         pointermove: this._onPointerMove,
