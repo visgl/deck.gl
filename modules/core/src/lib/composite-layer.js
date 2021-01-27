@@ -113,7 +113,7 @@ export default class CompositeLayer extends Layer {
         target: []
       };
       return (x, i) => {
-        if (x.__source) {
+        if (x && x.__source) {
           objectInfo.index = x.__source.index;
           return accessor(x.__source.object, objectInfo);
         }

@@ -117,6 +117,16 @@ On top of the [default options](/docs/api-reference/core/layer.md#loadoptions), 
 
 - [MVTLoader](https://loaders.gl/modules/mvt/docs/api-reference/mvt-loader)
 
+##### `binary` (Boolean, optional)
+
+* Default: false
+
+Use tile data in [binary format](https://github.com/visgl/loaders.gl/blob/master/modules/gis/docs/api-reference/geojson-to-binary.md) to improve performance. It removes the need for serialization and deserialization of data transferred by the worker back to the main process.
+
+Remarks: 
+
+- It requires using `GeoJsonLayer` in the `renderSubLayers` callback.
+- In binary format, there are some rendering issues with polygons or multipolygons which contain holes (the holes won't appear as expected), we're working to fix it for the next release.
 
 ### Callbacks
 

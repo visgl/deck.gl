@@ -20,6 +20,7 @@
 
 import test from 'tape-catch';
 import {testLayer, generateLayerTests} from '@deck.gl/test-utils';
+import {geojsonToBinary} from '@loaders.gl/gis';
 
 import {GeoJsonLayer} from 'deck.gl';
 
@@ -79,6 +80,35 @@ test('GeoJsonLayer#tests', t => {
     updateProps: {
       data: Object.assign({}, FIXTURES.choropleths),
       _dataDiff: () => [{startRow: 0, endRow: 3}]
+    }
+  });
+
+  // TODO: @loaders.gl binaryToGeojson should no modify input data
+  // TODO: Set a right geojson example as the provided from 'deck.gl-data' contains 'GeometryCollection' types that are not compatible with geojsonToBinary
+  const binaryData = JSON.parse(JSON.stringify(FIXTURES.geojson.features)).slice(0, 7);
+
+  testCases.push({
+    title: 'GeoJsonLayer#binary',
+    onBeforeUpdate: ({testCase}) => t.comment(testCase.title),
+    onAfterUpdate: ({layer, subLayers}) => {
+      t.ok(
+        layer.state.layerProps.points.data.featureIds &&
+          layer.state.layerProps.lines.data.featureIds &&
+          layer.state.layerProps.polygons.data.featureIds &&
+          layer.state.layerProps.polygonsOutline.data.featureIds,
+        'should receive data in binary mode'
+      );
+      t.ok(layer.state.binary, 'detects binary data');
+      const hasData = layer.props && layer.props.data && Object.keys(layer.props.data).length;
+      t.is(
+        subLayers.length,
+        !hasData ? 0 : layer.props.stroked && !layer.props.extruded ? 4 : 3,
+        'correct number of sublayers'
+      );
+    },
+    props: {
+      // TODO: Set a right geojson example as the provided from 'deck.gl-data' contains 'GeometryCollection' types that are not compatible with geojsonToBinary
+      data: geojsonToBinary(binaryData)
     }
   });
 

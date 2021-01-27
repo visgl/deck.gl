@@ -1,7 +1,9 @@
 import {Matrix4} from 'math.gl';
 import {MVTLoader} from '@loaders.gl/mvt';
+import {binaryToGeoJson} from '@loaders.gl/gis';
 import {load} from '@loaders.gl/core';
 import {COORDINATE_SYSTEM} from '@deck.gl/core';
+import {_binaryToFeature, _findIndexBinary} from '@deck.gl/layers';
 
 import TileLayer from '../tile-layer/tile-layer';
 import {getURLFromTemplate, isURLTemplate} from '../tile-layer/utils';
@@ -13,7 +15,8 @@ const WORLD_SIZE = 512;
 const defaultProps = {
   uniqueIdProperty: {type: 'string', value: ''},
   highlightedFeatureId: null,
-  loaders: MVTLoader
+  loaders: MVTLoader,
+  binary: false
 };
 
 async function fetchTileJSON(url) {
@@ -100,7 +103,12 @@ export default class MVTLayer extends TileLayer {
         ...(options && options.mvt),
         coordinates: this.context.viewport.resolution ? 'wgs84' : 'local',
         tileIndex: {x: tile.x, y: tile.y, z: tile.z}
-      }
+        // Local worker debug
+        // workerUrl: `modules/mvt/dist/mvt-loader.worker.js`
+        // Set worker to null to skip web workers
+        // workerUrl: null
+      },
+      gis: this.props.binary ? {format: 'binary'} : undefined
     };
     return load(url, this.props.loaders, options);
   }
@@ -154,8 +162,17 @@ export default class MVTLayer extends TileLayer {
 
     const isWGS84 = this.context.viewport.resolution;
 
-    if (!isWGS84 && info.object) {
-      info.object = transformTileCoordsToWGS84(info.object, info.tile.bbox, this.context.viewport);
+    if (info.object) {
+      if (!isWGS84 && info.object) {
+        info.object = transformTileCoordsToWGS84(info.object, info.tile, this.context.viewport);
+      }
+    } else if (this.props.binary && info.index !== -1) {
+      // get the feature from the binary at the given index.
+      const {data} = params.sourceLayer.props;
+      info.object =
+        _binaryToFeature(data.points, info.index) ||
+        _binaryToFeature(data.lines, info.index) ||
+        _binaryToFeature(data.polygons, info.index);
     }
 
     return info;
@@ -163,13 +180,13 @@ export default class MVTLayer extends TileLayer {
 
   getHighlightedObjectIndex(tile) {
     const {hoveredFeatureId} = this.state;
-    const {uniqueIdProperty, highlightedFeatureId} = this.props;
+    const {uniqueIdProperty, highlightedFeatureId, binary} = this.props;
     const {data} = tile;
 
     const isFeatureIdPresent =
       isFeatureIdDefined(hoveredFeatureId) || isFeatureIdDefined(highlightedFeatureId);
 
-    if (!isFeatureIdPresent || !Array.isArray(data)) {
+    if (!isFeatureIdPresent) {
       return -1;
     }
 
@@ -177,9 +194,25 @@ export default class MVTLayer extends TileLayer {
       ? highlightedFeatureId
       : hoveredFeatureId;
 
-    return data.findIndex(
-      feature => getFeatureUniqueId(feature, uniqueIdProperty) === featureIdToHighlight
-    );
+    // Iterable data
+    if (Array.isArray(data)) {
+      return data.findIndex(
+        feature => getFeatureUniqueId(feature, uniqueIdProperty) === featureIdToHighlight
+      );
+
+      // Non-iterable data
+    } else if (data && binary) {
+      // Get the feature index of the selected item to highlight
+      const featureIdIndex = _findIndexBinary(data, uniqueIdProperty, featureIdToHighlight);
+
+      const geometries = ['points', 'lines', 'polygons'];
+      for (const geometry of geometries) {
+        const index = data[geometry] && data[geometry].featureIds.value[featureIdIndex];
+        if (index !== undefined) return index;
+      }
+    }
+
+    return -1;
   }
 
   _pickObjects(maxObjects) {
@@ -227,9 +260,16 @@ export default class MVTLayer extends TileLayer {
               return null;
             }
 
+            if (this.props.binary && Array.isArray(tile.content) && !tile.content.length) {
+              // TODO: @loaders.gl/mvt returns [] when no content. It should return a valid empty binary.
+              // https://github.com/visgl/loaders.gl/pull/1137
+              return [];
+            }
+
             if (tile._contentWGS84 === undefined) {
               // Create a cache to transform only once
-              tile._contentWGS84 = tile.content.map(feature =>
+              const content = this.props.binary ? binaryToGeoJson(tile.content) : tile.content;
+              tile._contentWGS84 = content.map(feature =>
                 transformTileCoordsToWGS84(feature, tile.bbox, this.context.viewport)
               );
             }
