@@ -162,6 +162,7 @@ export default class Deck {
 
     this.viewState = null; // Internal view state if no callback is supplied
     this.interactiveState = {
+      isHovering: false, // Whether the cursor is over a pickable object
       isDragging: false // Whether the cursor is down
     };
 
@@ -562,6 +563,7 @@ export default class Deck {
     if (_pickRequest.event) {
       // Perform picking
       const {result, emptyInfo} = this._pick('pickObject', 'pickObject Time', _pickRequest);
+      this.interactiveState.isHovering = result.length > 0;
 
       // There are 4 possible scenarios:
       // result is [outInfo, pickedInfo] (moved from one pickable layer to another)
