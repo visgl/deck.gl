@@ -457,6 +457,25 @@ A view state object that is used to update `Deck`'s internally tracked view stat
 
 If no value is returned, it's equivalent to `(viewState) => viewState`.
 
+##### `onInteractionStateChange` (Function)
+
+Called when the user has interacted with the deck.gl canvas, e.g. using mouse, touch or keyboard.
+
+`onInteractionStateChange(interactionState)`
+
+Receives arguments:
+
+* `interactionState` - Describes the current interaction. May include the following fields:
+  + `inTransition` (Boolean)
+  + `isDragging` (Boolean)
+  + `isPanning` (Boolean)
+  + `isRotating` (Boolean)
+  + `isZooming` (Boolean)
+
+Note:
+* `onInteractionStateChange` may be fired without `onViewStateChange`. For example, when the pointer is released at the end of a drag-pan, `isDragging` is reset to `false`, without the viewport's `longitude` and `latitude` changing.
+
+
 ##### `onHover` (Function)
 
 Called when the pointer moves over the canvas.
