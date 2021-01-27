@@ -40,7 +40,8 @@ const INTEGRATION_EXAMPLES = {
 
 const VIEW_EXAMPLES = {
   'Minimap': 'multi-view',
-  'OrbitView': 'plot'
+  'OrbitView': 'plot',
+  'OrthographicView': 'orthographic-view'
 };
 
 const EXTENSION_EXAMPLES = {
