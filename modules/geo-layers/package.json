@@ -2,7 +2,7 @@
   "name": "@deck.gl/geo-layers",
   "description": "deck.gl layers supporting geospatial use cases and GIS formats",
   "license": "MIT",
-  "version": "8.4.0-beta.1",
+  "version": "8.4.0-beta.2",
   "publishConfig": {
     "access": "public"
   },
@@ -31,9 +31,9 @@
   },
   "dependencies": {
     "@loaders.gl/3d-tiles": "^2.3.0",
+    "@loaders.gl/gis": "^2.3.0",
     "@loaders.gl/loader-utils": "^2.3.0",
     "@loaders.gl/mvt": "^2.3.0",
-    "@loaders.gl/gis": "^2.3.0",
     "@loaders.gl/terrain": "^2.3.0",
     "@loaders.gl/tiles": "^2.3.0",
     "@math.gl/culling": "^3.4.2",

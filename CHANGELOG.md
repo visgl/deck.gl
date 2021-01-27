@@ -21,6 +21,20 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ### deck.gl v8.4 Prereleases
 
+#### deck.gl [8.4.0-beta.2] - Jan 27 2021
+
+- Pass isHovering to getCursor (#5386)
+- Add onInteractionStateChange callback (#5385)
+- Expose EventManager recognizer options (#5384)
+- MVT Binary data support (#5332)
+- core: support compressed textures (#5381)
+- Improve ColumnLayer perf when used without extrusion or stroke (#5380)
+- Fix S2Layer handling of coordinates across the antimeridian (#5378)
+- Fix OrthographicController with flipY: false (#5379)
+- Fix H3HexagonLayer lighting (#5377)
+- feature(core): Add pixel picking to BitmapLayer (#5341)
+- Add prop to specify winding direction in SolidPolygonLayer (#5376)
+
 #### deck.gl [8.4.0-beta.1] - Jan 22 2021
 
 - Bump luma.gl to 8.4.0-beta (#5374)
