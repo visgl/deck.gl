@@ -651,48 +651,50 @@ export default class Layer extends Component {
     // Overwrite this.props during update to use in-transition prop values
     this.props = propsInTransition;
 
-    const updateParams = this._getUpdateParams();
-    const oldModels = this.getModels();
+    try {
+      const updateParams = this._getUpdateParams();
+      const oldModels = this.getModels();
 
-    // Safely call subclass lifecycle methods
-    if (this.context.gl) {
-      this.updateState(updateParams);
-    } else {
-      try {
+      // Safely call subclass lifecycle methods
+      if (this.context.gl) {
         this.updateState(updateParams);
-      } catch (error) {
-        // ignore error if gl context is missing
+      } else {
+        try {
+          this.updateState(updateParams);
+        } catch (error) {
+          // ignore error if gl context is missing
+        }
       }
-    }
-    // Execute extension updates
-    for (const extension of this.props.extensions) {
-      extension.updateState.call(this, updateParams, extension);
-    }
-
-    const modelChanged = this.getModels()[0] !== oldModels[0];
-    this._updateModules(updateParams, modelChanged);
-    // End subclass lifecycle methods
-
-    if (this.isComposite) {
-      // Render or update previously rendered sublayers
-      this._renderLayers(updateParams);
-    } else {
-      this.setNeedsRedraw();
-      // Add any subclass attributes
-      this._updateAttributes(this.props);
-
-      // Note: Automatic instance count update only works for single layers
-      if (this.state.model) {
-        this.state.model.setInstanceCount(this.getNumInstances());
+      // Execute extension updates
+      for (const extension of this.props.extensions) {
+        extension.updateState.call(this, updateParams, extension);
       }
-    }
 
-    // Restore shared context
-    this.context.viewport = currentViewport;
-    this.props = currentProps;
-    this.clearChangeFlags();
-    this.internalState.needsUpdate = false;
-    this.internalState.resetOldProps();
+      const modelChanged = this.getModels()[0] !== oldModels[0];
+      this._updateModules(updateParams, modelChanged);
+      // End subclass lifecycle methods
+
+      if (this.isComposite) {
+        // Render or update previously rendered sublayers
+        this._renderLayers(updateParams);
+      } else {
+        this.setNeedsRedraw();
+        // Add any subclass attributes
+        this._updateAttributes(this.props);
+
+        // Note: Automatic instance count update only works for single layers
+        if (this.state.model) {
+          this.state.model.setInstanceCount(this.getNumInstances());
+        }
+      }
+    } finally {
+      // Restore shared context
+      this.context.viewport = currentViewport;
+      this.props = currentProps;
+      this.clearChangeFlags();
+      this.internalState.needsUpdate = false;
+      this.internalState.resetOldProps();
+    }
   }
   /* eslint-enable max-statements */
 
@@ -723,33 +725,35 @@ export default class Layer extends Component {
     // apply gamma to opacity to make it visually "linear"
     uniforms.opacity = Math.pow(opacity, 1 / 2.2);
 
-    // TODO/ib - hack move to luma Model.draw
-    if (moduleParameters) {
-      this.setModuleParameters(moduleParameters);
-    }
-
-    // Apply polygon offset to avoid z-fighting
-    // TODO - move to draw-layers
-    const {getPolygonOffset} = this.props;
-    const offsets = (getPolygonOffset && getPolygonOffset(uniforms)) || [0, 0];
-
-    setParameters(this.context.gl, {polygonOffset: offsets});
-
-    // Call subclass lifecycle method
-    withParameters(this.context.gl, parameters, () => {
-      const opts = {moduleParameters, uniforms, parameters, context: this.context};
-
-      // extensions
-      for (const extension of this.props.extensions) {
-        extension.draw.call(this, opts, extension);
+    try {
+      // TODO/ib - hack move to luma Model.draw
+      if (moduleParameters) {
+        this.setModuleParameters(moduleParameters);
       }
 
-      this.draw(opts);
-    });
+      // Apply polygon offset to avoid z-fighting
+      // TODO - move to draw-layers
+      const {getPolygonOffset} = this.props;
+      const offsets = (getPolygonOffset && getPolygonOffset(uniforms)) || [0, 0];
+
+      setParameters(this.context.gl, {polygonOffset: offsets});
+
+      // Call subclass lifecycle method
+      withParameters(this.context.gl, parameters, () => {
+        const opts = {moduleParameters, uniforms, parameters, context: this.context};
+
+        // extensions
+        for (const extension of this.props.extensions) {
+          extension.draw.call(this, opts, extension);
+        }
+
+        this.draw(opts);
+      });
+    } finally {
+      this.props = currentProps;
+    }
 
     // End lifecycle method
-
-    this.props = currentProps;
   }
 
   // Helper methods
