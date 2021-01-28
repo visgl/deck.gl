@@ -42,6 +42,6 @@ export function sliceData(data) {
 export function getDate(data, t) {
   const index = Math.min(data.length - 1, Math.floor(t / SEC_PER_DAY));
   const date = data[index].date;
-  const timestamp = new Date(`${date} 00:00:00+0:00`).getTime() + (t % SEC_PER_DAY) * 1000;
+  const timestamp = new Date(`${date}T00:00:00Z`).getTime() + (t % SEC_PER_DAY) * 1000;
   return new Date(timestamp);
 }
