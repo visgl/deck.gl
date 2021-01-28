@@ -9,8 +9,7 @@ class MultiViewDemo extends Component {
   static title = 'Air Traffic During the Global Pandemic';
 
   static data = {
-    url: `/air-traffic.txt`,
-    // url: `${DATA_URI}/air-traffic.txt`,
+    url: `${DATA_URI}/air-traffic.txt`,
     worker: '/workers/air-traffic-decoder.js'
   };
   
