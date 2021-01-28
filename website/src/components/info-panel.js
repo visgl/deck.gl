@@ -56,6 +56,9 @@ hr {
   .text-right {
     text-align: right;
   }
+  .text-center {
+    text-align: center;
+  }
 }
 `;
 
