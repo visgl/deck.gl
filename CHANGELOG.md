@@ -21,6 +21,11 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ### deck.gl v8.4 Prereleases
 
+#### deck.gl [8.4.0-beta.3] - Jan 28 2021
+
+- Fix SunLight calculation bugs (#5393)
+- Make sure layer context is reset even if a layer throws during update (#5389)
+
 #### deck.gl [8.4.0-beta.2] - Jan 27 2021
 
 - Pass isHovering to getCursor (#5386)
