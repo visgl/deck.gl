@@ -132,7 +132,7 @@ Remarks:
 
 ##### `onDataLoad` (Function, optional)
 
-Called when a TileJSON is successfully fetched
+Called when a TileJSON file is successfully fetched
 
 Receives arguments:
 
