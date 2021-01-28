@@ -1,0 +1,25 @@
+{
+  "name": "radio",
+  "version": "0.0.0",
+  "license": "MIT",
+  "scripts": {
+    "start-local": "webpack-dev-server --env.local --progress --hot --open",
+    "start": "webpack-dev-server --progress --hot --open"
+  },
+  "dependencies": {
+    "@loaders.gl/csv": "^2.3.0",
+    "@material-ui/core": "^4.10.2",
+    "@material-ui/icons": "^4.9.1",
+    "deck.gl": "^8.3.0",
+    "react": "^16.3.0",
+    "react-dom": "^16.3.0"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.4.0",
+    "@babel/preset-react": "^7.0.0",
+    "babel-loader": "^8.0.5",
+    "webpack": "^4.20.2",
+    "webpack-cli": "^3.1.2",
+    "webpack-dev-server": "^3.1.1"
+  }
+}
