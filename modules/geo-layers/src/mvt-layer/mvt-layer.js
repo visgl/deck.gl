@@ -108,7 +108,7 @@ export default class MVTLayer extends TileLayer {
         // Set worker to null to skip web workers
         // workerUrl: null
       },
-      gis: this.props.binary ? {format: 'binary'} : undefined
+      gis: this.props.binary ? {format: 'binary'} : {}
     };
     return load(url, this.props.loaders, options);
   }
