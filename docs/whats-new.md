@@ -75,10 +75,13 @@ A new property `binary` is added to the MVT layer. If set to `true`, it removes 
 
 Additionally, various layers received performance optimization, corrected lighting calculation, and API consistency improvements. See [upgrade guide](/docs/upgrade-guide.md) for a list breaking changes in this release.
 
+### Functions in declarative language
+
+[@@function](/docs/api-reference/json/conversion-reference.md#functions-and-using-function) prefix is included to interpret a string as a JavaScript function. 
+
 ### @deck.gl/carto
 
-TODO
-
+[Helper](/docs/api-reference/carto/styles.md) functions to create data-driven map visualizations using [CARTOColors](https://carto.com/carto-colors/)
 
 ## deck.gl v8.3
 
