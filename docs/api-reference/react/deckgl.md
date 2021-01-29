@@ -55,7 +55,7 @@ A [Context.Provider](https://reactjs.org/docs/context.html#contextprovider) comp
 
 - `viewport` ([Viewport](/docs/api-reference/core/viewport.md)) - the current viewport
 - `container` (DOMElement) - the DOM element containing the deck canvas
-- `eventManager` ([EventManager](https://github.com/uber-web/mjolnir.js/blob/master/docs/api-reference/core/event-manager.md))
+- `eventManager` ([EventManager](https://uber-web.github.io/mjolnir.js/docs/api-reference/event-manager))
 
 ```jsx
 /// Example using react-map-gl controls with deck.gl
