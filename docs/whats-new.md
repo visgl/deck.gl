@@ -60,18 +60,20 @@ A new property `binary` is added to the MVT layer. If set to `true`, it removes 
 
 ### Layer improvements
 
-- All layers now have a `loaders` prop to support additional data formats. See the [Data Loading Guide](/docs/developer-guide/loading-data.md) for examples.
-- All layers that use a texture (`BitmapLayer`, `IconLayer`, `SimpleMeshLayer`) now offer consistent support for a variety of input formats. Newly added support for plain object descriptors (e.g. `{data: <Uint8Array>, width, height}`) and `HTMLVideoElement` that continuously updates. A new prop `textureParameters` also allows easy customization of texture settings.
-- `HeatmapLayer` supports new prop `aggregation` which can be either `SUM` (default) or `MEAN`.
-- `BitmapLayer` picking callbacks now provide information on which pixel was picked.
-- `GlobeView` now works with `COORDINATE_SYSTEM.CARTESIAN` and `SunLight`.
-- `TileLayer` now supports `modelMatrix`.
-- `IconLayer` adds `onIconError` callback.
-- `OrthographicView` adds `flipY` option.
-- `BitmapLayer` adds experimental `_imageCoordinateSystem` prop, so that raster tiles may render correctly in `GlobeView`.
-- `wrapLongitude` now has more consistent behavior across the core layer catalog.
+- **All layers**
+  + Add a new `loaders` prop to support additional data formats. See the [Data Loading Guide](/docs/developer-guide/loading-data.md) for examples.
+  + Layers that use a texture (e.g. `BitmapLayer`, `IconLayer`, `SimpleMeshLayer`) now offer consistent support for a variety of input formats. Newly support for plain object descriptors (e.g. `{data: <Uint8Array>, width, height}`) and `HTMLVideoElement` that continuously updates. A new prop `textureParameters` also allows easy customization of texture settings.
+- **HeatmapLayer** adds new prop `aggregation` which can be either `SUM` (default) or `MEAN`.
+- **BitmapLayer**
+  + picking callbacks now provide information on which pixel was picked.
+  + Adds experimental `_imageCoordinateSystem` prop, so that raster tiles may render correctly in `GlobeView`.
+- **GlobeView** now works with `COORDINATE_SYSTEM.CARTESIAN` and `SunLight`.
+- **TileLayer** now supports `modelMatrix`.
+- **IconLayer** adds `onIconError` callback.
+- **OrthographicView** adds `flipY` option.
+- **ArcLayer** and **LineLayer** now render the shortest path with `wrapLongitude: true`.
 
-Additionally, various layers received performance optimization, corrected lighting calculation, and API consistency improvements. See "Upgrade Guide" for a list breaking changes in this release.
+Additionally, various layers received performance optimization, corrected lighting calculation, and API consistency improvements. See [upgrade guide](/docs/upgrade-guide.md) for a list breaking changes in this release.
 
 ### @deck.gl/carto
 
