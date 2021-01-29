@@ -6,18 +6,23 @@ This page contains highlights of each deck.gl release. Also check our [vis.gl bl
 
 Release date: Jan 31, 2021
 
-### Interaction Customizations
+### Better Interaction
 
-#### More controller options
+#### Improved experience on mobile devices
 
-Three-finger swipe gesture is added to support changing pitch on mobile.
+All controllers now support smooth easing at the end of dragging and pinching. This can be turned on via the new [inertia](/docs/api-reference/core/controller.md#options) option:
 
-All controllers now accept the following options:
+```js
+controller: {inertia: true}
+```
 
-- `inertia` for smooth easing at the end of panning/pinching
-- `dragMode` for flipping pan/rotate modes
-- `keyboard` object for customizing movement speed
-- `scrollZoom` object for customizing wheel zoom speed and easing
+In addition, a three-finger swipe gesture is added to support changing pitch on mobile. It is enabled via the `touchRotate` option.
+
+#### More customizable controller behavior
+
+- New `dragMode` option for flipping pan/rotate modes
+- The `keyboard` option now accepts an object for customizing movement speed
+- The `scrollZoom` option now accepts an object for customizing wheel zoom speed and easing
 
 #### New Deck component API
 
@@ -63,7 +68,7 @@ A new property `binary` is added to the MVT layer. If set to `true`, it removes 
 - `TileLayer` now supports `modelMatrix`.
 - `IconLayer` adds `onIconError` callback.
 - `OrthographicView` adds `flipY` option.
-- `BitmapLayer` adds experimental `_imageCoordinateSystem` prop. Raster tiles may render correctly in `GlobeView`.
+- `BitmapLayer` adds experimental `_imageCoordinateSystem` prop, so that raster tiles may render correctly in `GlobeView`.
 - `wrapLongitude` now has more consistent behavior across the core layer catalog.
 
 Additionally, various layers received performance optimization, corrected lighting calculation, and API consistency improvements. See "Upgrade Guide" for a list breaking changes in this release.
