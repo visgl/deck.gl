@@ -46,7 +46,7 @@ A new method `getRenderedFeatures` is added for querying all visible features in
 
 #### Binary mode
 
-A new property `binary` is added to the MVT layer. If set to `true`, it removes the need for serialization and deserialization of data transferred by the worker back to the main process, as well as attribute packing in the main thread. The following numbers show the performance improvements in loading and rendering a full viewport:
+A new prop `binary` is added to the MVTLayer. If set to `true`, it removes the need for serialization and deserialization of data transferred by the worker back to the main process, as well as attribute packing in the main thread. The following numbers show the performance improvements in loading and rendering a full viewport:
 
 |                    | N Vertex | Binary  | Non-Binary  | Change    |
 | ------------------ | -------- | ------- | ----------- | --------- |
@@ -62,7 +62,7 @@ A new property `binary` is added to the MVT layer. If set to `true`, it removes 
 
 - **All layers**
   + Add a new `loaders` prop to support additional data formats. See the [Data Loading Guide](/docs/developer-guide/loading-data.md) for examples.
-  + Layers that use a texture (e.g. `BitmapLayer`, `IconLayer`, `SimpleMeshLayer`) now offer consistent support for a variety of input formats. Newly support for plain object descriptors (e.g. `{data: <Uint8Array>, width, height}`) and `HTMLVideoElement` that continuously updates. A new prop `textureParameters` also allows easy customization of texture settings.
+  + Layers that use a texture (e.g. `BitmapLayer`, `IconLayer`, `SimpleMeshLayer`) now offer consistent support for a variety of input formats. Newly supported are plain object descriptors (e.g. `{data: <Uint8Array>, width, height}`) and `HTMLVideoElement` that continuously updates. A new prop `textureParameters` also allows easy customization of texture settings.
 - **HeatmapLayer** adds new prop `aggregation` which can be either `SUM` (default) or `MEAN`.
 - **BitmapLayer**
   + picking callbacks now provide information on which pixel was picked.
@@ -81,7 +81,7 @@ Additionally, various layers received performance optimization, corrected lighti
 
 ### @deck.gl/carto
 
-[Helper](/docs/api-reference/carto/styles.md) functions to create data-driven map visualizations using [CARTOColors](https://carto.com/carto-colors/)
+Adds [helper functions](/docs/api-reference/carto/styles.md) to create data-driven map visualizations using [CARTOColors](https://carto.com/carto-colors/)
 
 ## deck.gl v8.3
 
