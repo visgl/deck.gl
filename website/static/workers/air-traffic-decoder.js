@@ -1,5 +1,4 @@
 importScripts('./util.js');
-let result = [];
 let count = 0;
 
 onmessage = function(e) {
@@ -7,7 +6,7 @@ onmessage = function(e) {
 
   for (const line of lines) {
     if (!line) {
-      return;
+      continue;
     }
 
     const date = line.slice(0, 10);
@@ -33,20 +32,14 @@ onmessage = function(e) {
     }
 
     count += flights.length;
-    result.push({date, flights});
+    postMessage({
+      action: 'add',
+      data: [{date, flights}],
+      meta: {count}
+    });
   }
 
   if (e.data.event === 'load') {
-    flush();
     postMessage({action: 'end'});
   }
 };
-
-function flush() {
-  postMessage({
-    action: 'add',
-    data: result,
-    meta: {count}
-  });
-  result = [];
-}
