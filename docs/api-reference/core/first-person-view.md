@@ -1,3 +1,7 @@
+import {FirstPersonViewDemo} from 'website-components/doc-demos/views';
+
+<FirstPersonViewDemo />
+
 # FirstPersonView
 
 The [`FirstPersonView`] class is a subclass of [View](/docs/api-reference/core/viewport.md) that describes a camera placed at a provided location, looking **towards** the direction and orientation specified by `viewState`. The behavior is similar to that of a [first-person game](https://en.wikipedia.org/wiki/First-person_(gaming)).

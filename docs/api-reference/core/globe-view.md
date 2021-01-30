@@ -1,3 +1,7 @@
+import {GlobeViewDemo} from 'website-components/doc-demos/views';
+
+<GlobeViewDemo />
+
 # GlobeView (Experimental)
 
 > This class is experimental, which means it does not provide the compatibility and stability that one would typically expect from other `View` classes. Use with caution and report any issues that you find on GitHub.
