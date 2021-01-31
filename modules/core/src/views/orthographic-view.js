@@ -22,25 +22,19 @@ function getProjectionMatrix({width, height, near, far}) {
 }
 
 class OrthographicViewport extends Viewport {
-  constructor({
-    id,
-    x,
-    y,
-    width,
-    height,
-    near = 0.1,
-    far = 1000,
-    zoom = 0,
-    target = [0, 0, 0],
-    flipY = true
-  }) {
-    const scale = Math.pow(2, zoom);
-    super({
-      id,
-      x,
-      y,
+  constructor(props) {
+    const {
       width,
       height,
+      near = 0.1,
+      far = 1000,
+      zoom = 0,
+      target = [0, 0, 0],
+      flipY = true
+    } = props;
+    const scale = Math.pow(2, zoom);
+    super({
+      ...props,
       position: target,
       viewMatrix: viewMatrix.clone().scale([scale, scale * (flipY ? -1 : 1), scale]),
       projectionMatrix: getProjectionMatrix({width, height, near, far}),
