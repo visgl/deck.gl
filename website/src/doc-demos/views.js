@@ -142,9 +142,7 @@ const colorScale = d3.scaleLog()
     target: [500, 500, 0],
     zoom: 0,
     minZoom: -2,
-    maxZoom: 40,
-    maxPitch: 89,
-    minPitch: -89
+    maxZoom: 40
   },
   layers: `[
     new ScatterplotLayer({
@@ -184,7 +182,9 @@ export const FirstPersonViewDemo = makeViewDemo({
     latitude: 0,
     position: [0, 0, 43.5],
     bearing: 0,
-    pitch: 0
+    pitch: 0,
+    maxPitch: 89,
+    minPitch: -89
   },
   layers: `[
     new PointCloudLayer({
