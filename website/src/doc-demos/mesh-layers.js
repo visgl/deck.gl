@@ -3,7 +3,7 @@ import {
 } from '@deck.gl/mesh-layers';
 import {OBJLoader} from '@loaders.gl/obj';
 
-import makeLayerDemo from './layer-demo';
+import {makeLayerDemo} from './demo-base';
 import {DATA_URI} from '../constants/defaults';
 
 export const ScenegraphLayerDemo = makeLayerDemo({
