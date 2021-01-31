@@ -19,7 +19,9 @@
   },
   "dependencies": {
     "@loaders.gl/obj": "^2.3.5",
+    "@loaders.gl/ply": "^2.3.5",
     "d3-color": "^1.4.1",
+    "d3-hierarchy": "^2.0.0",
     "d3-request": "^1.0.6",
     "d3-scale": "^3.2.1",
     "expr-eval": "^2.0.2"

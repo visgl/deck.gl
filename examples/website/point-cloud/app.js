@@ -6,14 +6,10 @@ import {COORDINATE_SYSTEM, OrbitView, LinearInterpolator} from '@deck.gl/core';
 import {PointCloudLayer} from '@deck.gl/layers';
 
 import {LASWorkerLoader} from '@loaders.gl/las';
-// import {PLYWorkerLoader} from '@loaders.gl/ply';
 
 // Data source: kaarta.com
 const LAZ_SAMPLE =
   'https://raw.githubusercontent.com/visgl/deck.gl-data/master/examples/point-cloud-laz/indoor.0.1.laz';
-// Data source: The Stanford 3D Scanning Repository
-// const PLY_SAMPLE =
-//   'https://raw.githubusercontent.com/visgl/deck.gl-data/master/examples/point-cloud-ply/lucy800k.ply';
 
 const INITIAL_VIEW_STATE = {
   target: [0, 0, 0],
@@ -80,10 +76,7 @@ export default function App({onLoad}) {
       opacity: 0.5,
       pointSize: 0.5,
       // Additional format support can be added here
-      loaders: [
-        LASWorkerLoader
-        // PLYWorkerLoader
-      ]
+      loaders: [LASWorkerLoader]
     })
   ];
 

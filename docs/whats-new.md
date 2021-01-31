@@ -2,33 +2,51 @@
 
 This page contains highlights of each deck.gl release. Also check our [vis.gl blog](https://medium.com/vis-gl) for news about new releases and features in deck.gl.
 
-## deck.gl v8.4 (in development)
+## deck.gl v8.4
 
-Release data: TBD
+Release date: Jan 31, 2021
 
-### BitmapLayer
+### Better Interaction
 
-- `BitmapLayer` picking callbacks now provide information on which pixel was picked.
+#### Improved experience on mobile devices
+
+All controllers now support smooth easing at the end of dragging and pinching. This can be turned on via the new [inertia](/docs/api-reference/core/controller.md#options) option:
+
+```js
+controller: {inertia: true}
+```
+
+In addition, a three-finger swipe gesture is added to support changing pitch on mobile. It is enabled via the `touchRotate` option.
+
+#### More customizable controller behavior
+
+- New `dragMode` option for flipping pan/rotate modes
+- The `keyboard` option now accepts an object for customizing movement speed
+- The `scrollZoom` option now accepts an object for customizing wheel zoom speed and easing
+
+#### New Deck component API
+
+- `eventRecognizerOptions` for fine-tuning gesture recognition
+- `onInteractionStateChange` callback
+- The `getCursor` now receives an `isHovering` argument that indicates whether the pointer is over a pickable object.
 
 ### MVT Layer
 
-#### Binary format
+#### TileJSON
 
-A new property binary is added to the MVT layer. If set to true, it removes the need for serialization and deserialization of data transferred by the worker back to the main process.
+The `data` prop now accepts a [TileJSON](https://github.com/mapbox/tilejson-spec) URL. The `onDataLoad` callback is fired when the TileJSON loads.
 
-Resolution: 1140x900.
-View State:
+#### Query rendered features
 
-```javascript
-{
-  latitude: 41.850033,
-  longitude: -92.6500523,
-  zoom: 3
-}
-```
+A new method `getRenderedFeatures` is added for querying all visible features in the current viewport.
 
-*Benchmark run on 2017 Macbook Pro, 3,1 GHz Dual-Core Intel Core i5, 16 GB memory, Intel Iris Plus Graphics 650 1536 MB. Network transfer data is not included*
+#### Features in WGS84 coordinates
 
+`onHover`, `onClick`, `onTileLoad`, `onTileError` and `onViewportLoad` callbacks can now access features in WGS84 coordinates.
+
+#### Binary mode
+
+A new prop `binary` is added to the MVTLayer. If set to `true`, it removes the need for serialization and deserialization of data transferred by the worker back to the main process, as well as attribute packing in the main thread. The following numbers show the performance improvements in loading and rendering a full viewport:
 
 |                    | N Vertex | Binary  | Non-Binary  | Change    |
 | ------------------ | -------- | ------- | ----------- | --------- |
@@ -37,6 +55,33 @@ View State:
 | Census Tract       | 988K     | 2713ms  | 6242ms      | -56.53%   |
 | Block groups       | 1.57M    | 4261ms  | 9202ms      | -53.69%   |
 | Usa Zip Code Layer | 1.38M    | 2938ms  | 6564ms      | -55.24%   |
+
+*Benchmark run on 2017 Macbook Pro, 3,1 GHz Dual-Core Intel Core i5, 16 GB memory, Intel Iris Plus Graphics 650 1536 MB. Resolution 1140x900. Network transfer time is not included*
+
+### Layer improvements
+
+- **All layers**
+  + Add a new `loaders` prop to support additional data formats. See the [Data Loading Guide](/docs/developer-guide/loading-data.md) for examples.
+  + Layers that use a texture (e.g. `BitmapLayer`, `IconLayer`, `SimpleMeshLayer`) now offer consistent support for a variety of input formats. Newly supported are plain object descriptors (e.g. `{data: <Uint8Array>, width, height}`) and `HTMLVideoElement` that continuously updates. A new prop `textureParameters` also allows easy customization of texture settings.
+- **HeatmapLayer** adds new prop `aggregation` which can be either `SUM` (default) or `MEAN`.
+- **BitmapLayer**
+  + picking callbacks now provide information on which pixel was picked.
+  + Adds experimental `_imageCoordinateSystem` prop, so that raster tiles may render correctly in `GlobeView`.
+- **GlobeView** now works with `COORDINATE_SYSTEM.CARTESIAN` and `SunLight`.
+- **TileLayer** now supports `modelMatrix`.
+- **IconLayer** adds `onIconError` callback.
+- **OrthographicView** adds `flipY` option.
+- **ArcLayer** and **LineLayer** now render the shortest path with `wrapLongitude: true`.
+
+Additionally, various layers received performance optimization, corrected lighting calculation, and API consistency improvements. See [upgrade guide](/docs/upgrade-guide.md) for a list breaking changes in this release.
+
+### Functions in declarative language
+
+[@@function](/docs/api-reference/json/conversion-reference.md#functions-and-using-function) prefix is included to interpret a string as a JavaScript function. 
+
+### @deck.gl/carto
+
+Adds [helper functions](/docs/api-reference/carto/styles.md) to create data-driven map visualizations using [CARTOColors](https://carto.com/carto-colors/)
 
 ## deck.gl v8.3
 
