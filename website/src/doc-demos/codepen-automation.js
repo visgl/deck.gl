@@ -157,51 +157,6 @@ function printLayerProps(layer, propsSource) {
   return result.join('\n  ');
 }
 
-export function gotoViewSource(config) {
-  const {layers, view, mapStyle, dependencies = [], imports, prepend, initialViewState} = config;
-
-  let viewName;
-  const symbols = ['DeckGL'];
-  const loaders = [];
-  for (const key in imports) {
-    if (key[0] >= 'a') continue;
-    if (key.endsWith('Loader')) {
-      loaders.push(key);
-    } else {
-      symbols.push(key);
-    }
-    if (key.endsWith('View')) {
-      viewName = key.replace('_', '');
-    }
-  }
-
-  const initialViewStateSerialized = addIndent(
-    JSON.stringify(initialViewState, null, 2).replace(/"/g, ''),  // remove quotes
-    2);
-
-  // https://blog.codepen.io/documentation/prefill/
-  const source = `\
-${prepend && prepend.code || ''}
-const {${symbols.join(', ')}} = deck;
-${loaders.length ? `\
-const {${loaders.join(', ')}} = loaders;
-` : ''}
-new DeckGL({
-  views: ${view},
-  initialViewState: ${initialViewStateSerialized},
-  controller: true,
-  ${mapStyle ? `mapStyle: 'https://basemaps.cartocdn.com/gl/positron-gl-style/style.json',` : ''}
-  layers: ${layers}
-});
-  `;
-  
-  gotoSource({
-    dependencies: mapStyle ? dependencies.concat(['https://api.mapbox.com/mapbox-gl-js/v1.12.0/mapbox-gl.js']) : dependencies,
-    title: `deck.gl ${viewName}`,
-    source
-  });
-}
-
 /*
  * Open a layer example in Codepen
  */
