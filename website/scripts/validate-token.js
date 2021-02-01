@@ -22,29 +22,14 @@
 
 const console = require('console');
 const process = require('process');
-const readline = require("readline");
 
 function checkToken(key) {
   // eslint-disable-next-line
   if (!process.env[key]) {
     console.log('\x1b[31m%s\x1b[0m', `Missing ${key}!`);
     process.exit(1); //eslint-disable-line
-  } else {
-    console.log(`${key}: \r\n\x1b[36m%s\x1b[0m ${process.env[key]}`);
   }
-}
-
-function verifyUserInput() {
-  const prompts = readline.createInterface(process.stdin, process.stdout);
-  prompts.question('Proceed with the above tokens: y/n \r\n', answer => {
-    if (answer === 'y' || answer === 'Y') {
-      process.exit(0);
-    } else {
-      process.exit(1); //eslint-disable-line
-    }
-  });
 }
 
 checkToken('MapboxAccessToken');
 checkToken('GoogleMapsAPIKey');
-verifyUserInput();

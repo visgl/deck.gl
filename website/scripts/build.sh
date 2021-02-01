@@ -1,3 +1,6 @@
+#!/bin/bash
+set -e
+
 node scripts/validate-token.js
 
 # staging or prod
