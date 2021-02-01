@@ -32,35 +32,15 @@ To render, a `FirstPersonView` needs to be combined with a `viewState` object wi
 - `minPitch` (Number, optional) - min pitch angle. Default `-90` (up).
 
 
-## FirstPersonController
+## Controller
 
 By default, `FirstPersonView` uses the `FirstPersonController` to handle interactivity. To enable the controller, use:
 
 ```js
-const view = new FirstPersonView({id: 'first-person', controller: true});
+const view = new FirstPersonView({id: 'pov', controller: true});
 ```
 
-`FirstPersonController` supports the following interactions:
-
-- `dragRotate`: Drag to rotate
-- `scrollZoom`: Mouse wheel to zoom
-- `doubleClickZoom`: Double click to zoom in, with shift/ctrl down to zoom out
-- `touchZoom`: Pinch zoom
-- `touchRotate`: Multi-touch rotate
-- `keyboard`: Keyboard (arrow keys to move camera, arrow keys with shift/ctrl down to rotate, +/- to zoom)
-
-You can further customize its behavior by extending the class:
-
-```js
-import {FirstPersonController} from '@deck.gl/core';
-
-class MyFirstPersonController extends FirstPersonController {}
-
-const view = new FirstPersonView({id: 'first-person', controller: MyFirstPersonController});
-```
-
-See the documentation of [Controller](/docs/api-reference/core/controller.md) for implementation details.
-
+Visit the [FirstPersonController](/docs/api-reference/core/first-person-controller.md) documentation for a full list of supported options.
 
 ## Source
 

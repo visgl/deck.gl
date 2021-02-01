@@ -1,4 +1,4 @@
-# TransitionInterpolator Class
+# TransitionInterpolator
 
 Base interpolator class that provides common functionality required to interpolate between two [View States](/docs/developer-guide/views.md). This class is not intended to be used directly. See [View State Transitions](/docs/developer-guide/view-state-transitions.md) for backgrounds.
 

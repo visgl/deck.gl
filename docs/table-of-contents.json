@@ -144,7 +144,11 @@
           "title": "Controllers",
           "entries": [
             {"entry": "docs/api-reference/core/controller"},
-            {"entry": "docs/api-reference/core/map-controller"}
+            {"entry": "docs/api-reference/core/map-controller"},
+            {"entry": "docs/api-reference/core/globe-controller"},
+            {"entry": "docs/api-reference/core/first-person-controller"},
+            {"entry": "docs/api-reference/core/orthographic-controller"},
+            {"entry": "docs/api-reference/core/orbit-controller"}
           ]
         },
         {
