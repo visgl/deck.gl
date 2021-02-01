@@ -6,7 +6,7 @@ const defaultProps = {
   data: null,
   credentials: null,
   onDataLoad: {type: 'function', value: tilejson => {}, compare: false},
-  onDataError: {type: 'function', value: null, compare: false}
+  onDataError: {type: 'function', value: null, compare: false, optional: true}
 };
 
 export default class CartoLayer extends CompositeLayer {
