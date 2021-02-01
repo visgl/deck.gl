@@ -14,7 +14,7 @@ Views allow you to specify:
 deck.gl offers a set of `View` classes that package the camera and controller logic that you need to visualize and interact with your data. You may choose one or multiple `View` classes based on the type of data (e.g. geospatial, 2D chart) and the desired perspective (top down, first-person, etc).
 
 
-## Constructor(props : Object)
+## Constructor
 
 ```js
 const view = new View({id, x, y, width, height, ...});
@@ -89,34 +89,33 @@ Note that deck.gl always clears the screen before each render, and clearing, whi
 
 Default `false`.
 
-##### `projectionMatrix` (`Array[16]`, optional)
+##### `projectionMatrix` (Array[16], optional)
 
 Projection matrix.
 
 If `projectionMatrix` is not supplied, the `View` class will build a projection matrix from the following parameters:
 
-##### `fovy` (`Number`, optional)
+##### `fovy` (Number, optional)
 
 Field of view covered by camera, in the perspective case. In degrees. Default `75`.
 
-##### `aspect` (`Number`, optional)
+##### `aspect` (Number, optional)
 
 Aspect ratio. Defaults to the Viewport's `width/height` ratio.
 
-##### `near` (`Number`, optional)
+##### `near` (Number, optional)
 
 Distance of near clipping plane. Default `0.1`.
 
-##### `far` (`Number`, optional)
+##### `far` (Number, optional)
 
 Distance of far clipping plane. Default `1000`.
 
-##### `orthographic` (`Boolean`)
+##### `orthographic` (Boolean)
 
 Whether to create an orthographic or perspective projection matrix. Default is `false` (perspective projection).
 
-
-##### `focalDistance` (`Number`, optional)
+##### `focalDistance` (Number, optional)
 
 Modifier of viewport scale. Corresponds to the number of pixels per meter. Default `1`.
 
