@@ -8,11 +8,13 @@ import {SphereGeometry} from '@luma.gl/engine';
 import GL from '@luma.gl/constants';
 
 // Data provided by the NASA Jet Propulsion Laboratory, Public domain, via Wikimedia Commons
-// const VIDEO_URL = 'https://upload.wikimedia.org/wikipedia/commons/5/5d/Earth_360_Video_The_Call_of_Science.webm';
+const VIDEO_URL =
+  'https://upload.wikimedia.org/wikipedia/commons/5/5d/Earth_360_Video_The_Call_of_Science.webm';
 // const VIDEO_URL =
 //   'https://upload.wikimedia.org/wikipedia/commons/0/0a/NASA_VR-360_Astronaut_Training-_Space_Walk.webm';
 
-const VIDEO_URL = 'https://cdn.aframe.io/videos/fireworks.mp4';
+// const VIDEO_URL = 'https://cdn.aframe.io/videos/fireworks.mp4';
+
 const sphere = new SphereGeometry({
   nlat: 50,
   nlong: 50,
@@ -63,7 +65,9 @@ export default function App() {
   const layer = new SimpleMeshLayer({
     id: 'simplemesh-layer',
     data: [null],
-    texture: videoRef.current,
+    // texture: videoRef.current,
+    texture:
+      'https://upload.wikimedia.org/wikipedia/commons/d/da/Bahnhof_Mooskamp_Werkshalle_Panorama_03.jpg',
     mesh: sphere,
     getPosition: d => [0, 0, 0],
     material: false,
