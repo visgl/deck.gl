@@ -51,7 +51,7 @@ export default function App() {
   }, []);
 
   const layer = new SimpleMeshLayer({
-    id: 'simplemesh-layer',
+    id: 'video-sphere',
     data: [0],
     coordinateSystem: COORDINATE_SYSTEM.METER_OFFSETS,
     texture: video,
