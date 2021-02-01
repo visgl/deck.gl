@@ -24,7 +24,8 @@ class FirstPersonViewport extends Viewport {
     // Always calculate direction from bearing and pitch
     const dir = getDirectionFromBearingAndPitch({
       bearing,
-      pitch: 90 + pitch
+      // Avoid "pixel project matrix not invertible" error
+      pitch: pitch === -90 ? 0.0001 : 90 + pitch
     });
 
     // Direction is relative to model coordinates, of course

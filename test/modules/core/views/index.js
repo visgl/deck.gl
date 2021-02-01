@@ -19,4 +19,5 @@
 // THE SOFTWARE.
 
 import './view.spec';
+import './first-person-view.spec';
 import './view-manager.spec';
