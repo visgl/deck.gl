@@ -9,8 +9,8 @@ const DEFAULT_STATE = {
   position: [0, 0, 0],
   pitch: 0,
   bearing: 0,
-  maxPitch: 90,
-  minPitch: -90
+  maxPitch: 89,
+  minPitch: -89
 };
 
 class FirstPersonState extends ViewState {
