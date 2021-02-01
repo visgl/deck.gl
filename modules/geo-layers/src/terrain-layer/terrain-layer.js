@@ -166,16 +166,22 @@ export default class TerrainLayer extends CompositeLayer {
   }
 
   // Update zRange of viewport
-  onViewportLoad(data) {
-    if (!data || data.length === 0 || data.every(x => !x)) {
+  onViewportLoad(tiles) {
+    if (!tiles) {
       return;
     }
 
     const {zRange} = this.state;
-    const ranges = data.filter(Boolean).map(arr => {
-      const bounds = arr[0].header.boundingBox;
-      return bounds.map(bound => bound[2]);
-    });
+    const ranges = tiles
+      .map(tile => tile.content)
+      .filter(Boolean)
+      .map(arr => {
+        const bounds = arr[0].header.boundingBox;
+        return bounds.map(bound => bound[2]);
+      });
+    if (ranges.length === 0) {
+      return;
+    }
     const minZ = Math.min(...ranges.map(x => x[0]));
     const maxZ = Math.max(...ranges.map(x => x[1]));
 

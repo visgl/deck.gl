@@ -11,7 +11,7 @@ import {
   H3ClusterLayer
 } from '@deck.gl/geo-layers';
 
-import makeLayerDemo from './layer-demo';
+import {makeLayerDemo} from './demo-base';
 import {DATA_URI} from '../constants/defaults';
 
 export const GreatCircleLayerDemo = makeLayerDemo({
