@@ -4,7 +4,7 @@ import {StaticMap} from 'react-map-gl';
 import styled from 'styled-components';
 
 import {MAPBOX_STYLES} from '../constants/defaults';
-import {gotoLayerSource, gotoViewSource} from './codepen-automation';
+import {gotoLayerSource} from './codepen-automation';
 
 const INITIAL_VIEW_STATE = {
   longitude: -122.4,
@@ -120,36 +120,3 @@ export function makeLayerDemo(config) {
   }
   return React.memo(Demo);
 }
-
-export function makeViewDemo(config) {
-  const {layers, view, mapStyle = null, initialViewState, prepend, imports} = config;
-
-  function Demo() {
-    if (prepend) {
-      Object.assign(imports, evalObject(prepend.code, imports, prepend.out));
-    }
-    const layerInstances = evalObject(layers, imports);
-    const viewInstance = evalObject(view, imports);
-
-    return (
-      <DemoPlaceholder>
-        <DemoContainer>
-          <DeckGL
-            views={viewInstance}
-            initialViewState={initialViewState}
-            controller={true}
-            layers={layerInstances}
-          >
-            {mapStyle && <StaticMap reuseMaps mapStyle={MAPBOX_STYLES.LIGHT} preventStyleDiffing={true} />}
-          </DeckGL>
-        </DemoContainer>
-        <DemoSourceLink onClick={() => gotoViewSource(config)}>
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" ><path d="M0 0h24v24H0V0z" fill="none"/><path d="M9.4 16.6L4.8 12l4.6-4.6L8 6l-6 6 6 6 1.4-1.4zm5.2 0l4.6-4.6-4.6-4.6L16 6l6 6-6 6-1.4-1.4z"/></svg>
-          Edit on Codepen
-        </DemoSourceLink>
-      </DemoPlaceholder>
-    );
-  }
-  return React.memo(Demo);
-}
-

@@ -1,12 +1,17 @@
-import {MapViewDemo} from 'website-components/doc-demos/views';
-
-<MapViewDemo />
-
 # MapView
 
-The [`MapView`] class is a subclass of [View](/docs/api-reference/core/view.md). This viewport creates a camera that looks at a geospatial location on a map from a certain direction. The behavior of `MapView` is generally modeled after that of Mapbox GL JS.
+The `MapView` class is a subclass of [View](/docs/api-reference/core/view.md). This viewport creates a camera that looks at a geospatial location on a map from a certain direction. The behavior of `MapView` is generally modeled after that of Mapbox GL JS.
 
 It's recommended that you read the [Views and Projections guide](/docs/developer-guide/views.md) before using this class.
+
+<div style="position:relative;height:450px"></div>
+<div style="position:absolute;transform:translateY(-450px);padding-left:inherit;padding-right:inherit;left:0;right:0">
+  <iframe height="450" width="100%" scrolling="no" title="deck.gl MapView" src="https://codepen.io/vis-gl/embed/MWbwyWy?height=450&theme-id=light&default-tab=result" frameborder="no" loading="lazy" allowtransparency="true" allowfullscreen="true">
+    See the Pen <a href='https://codepen.io/vis-gl/pen/MWbwyWy'>deck.gl MapView</a> by vis.gl
+    (<a href='https://codepen.io/vis-gl'>@vis-gl</a>) on <a href='https://codepen.io'>CodePen</a>.
+  </iframe>
+</div>
+
 
 ## Constructor
 
