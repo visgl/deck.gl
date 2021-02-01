@@ -1,4 +1,4 @@
-This is a minimal standalone version of the SimpleMeshLayer example
+This is a minimal standalone version of the FirstPersonView example
 on [deck.gl](http://deck.gl) website.
 
 ### Usage
