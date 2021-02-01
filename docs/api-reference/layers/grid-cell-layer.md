@@ -145,4 +145,4 @@ The elevation of each cell in meters.
 
 ## Source
 
-[modules/layers/src/grid-cell-layer](https://github.com/visgl/deck.gl/tree/master/modules/layers/src/column-layer/grid-cell-layer.js)
+[modules/layers/src/grid-cell-layer](https://github.com/visgl/deck.gl/tree/8.4-release/modules/layers/src/column-layer/grid-cell-layer.js)

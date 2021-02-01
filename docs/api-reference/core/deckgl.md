@@ -86,4 +86,4 @@ Returns the mapbox-gl [Map](https://www.mapbox.com/mapbox-gl-js/api/#map) instan
 
 ## Source
 
-[modules/main/bundle.js](https://github.com/visgl/deck.gl/blob/master/modules/main/bundle.js)
+[modules/main/bundle.js](https://github.com/visgl/deck.gl/tree/8.4-release/modules/main/bundle.js)

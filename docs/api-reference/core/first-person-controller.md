@@ -72,4 +72,4 @@ See the `Controller` class [documentation](/docs/api-reference/core/controller.m
 
 ## Source
 
-[modules/core/src/controllers/first-person-controller.js](https://github.com/visgl/deck.gl/blob/master/modules/core/src/controllers/first-person-controller.js)
+[modules/core/src/controllers/first-person-controller.js](https://github.com/visgl/deck.gl/tree/8.4-release/modules/core/src/controllers/first-person-controller.js)

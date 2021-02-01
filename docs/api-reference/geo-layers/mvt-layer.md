@@ -187,4 +187,4 @@ new MVTLayer({
 
 ## Source
 
-[modules/geo-layers/src/mvt-layer/mvt-layer.js](https://github.com/visgl/deck.gl/tree/master/modules/geo-layers/src/mvt-layer/mvt-layer.js)
+[modules/geo-layers/src/mvt-layer/mvt-layer.js](https://github.com/visgl/deck.gl/tree/8.4-release/modules/geo-layers/src/mvt-layer/mvt-layer.js)

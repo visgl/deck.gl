@@ -24,4 +24,4 @@ Parameters:
 
 ## Source
 
-[modules/core/src/transitions/viewport-fly-to-interpolator.js](https://github.com/visgl/deck.gl/blob/master/modules/core/src/transitions/viewport-fly-to-interpolator.js)
+[modules/core/src/transitions/viewport-fly-to-interpolator.js](https://github.com/visgl/deck.gl/tree/8.4-release/modules/core/src/transitions/viewport-fly-to-interpolator.js)

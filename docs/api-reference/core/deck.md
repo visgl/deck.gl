@@ -709,4 +709,4 @@ A map of various performance statistics for the last 60 frames of rendering. Met
 
 ## Source
 
-[modules/core/src/lib/deck.js](https://github.com/visgl/deck.gl/blob/master/modules/core/src/lib/deck.js)
+[modules/core/src/lib/deck.js](https://github.com/visgl/deck.gl/tree/8.4-release/modules/core/src/lib/deck.js)

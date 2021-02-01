@@ -189,4 +189,4 @@ new BitmapLayer({
 
 ## Source
 
-[modules/layers/src/bitmap-layer](https://github.com/visgl/deck.gl/tree/master/modules/layers/src/bitmap-layer)
+[modules/layers/src/bitmap-layer](https://github.com/visgl/deck.gl/tree/8.4-release/modules/layers/src/bitmap-layer)

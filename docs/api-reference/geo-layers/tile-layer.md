@@ -283,6 +283,6 @@ Properties:
 
 ## Source
 
-[modules/geo-layers/src/tile-layer](https://github.com/visgl/deck.gl/tree/master/modules/geo-layers/src/tile-layer)
+[modules/geo-layers/src/tile-layer](https://github.com/visgl/deck.gl/tree/8.4-release/modules/geo-layers/src/tile-layer)
 
 

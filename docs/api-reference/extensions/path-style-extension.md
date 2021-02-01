@@ -117,4 +117,4 @@ The high precision mode pre-calculates path length on the CPU, so it may be slow
 
 ## Source
 
-[modules/extensions/src/path-style](https://github.com/visgl/deck.gl/tree/master/modules/extensions/src/path-style)
+[modules/extensions/src/path-style](https://github.com/visgl/deck.gl/tree/8.4-release/modules/extensions/src/path-style)

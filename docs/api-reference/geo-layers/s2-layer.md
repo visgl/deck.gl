@@ -110,5 +110,5 @@ The `S2Layer` renders the following sublayers:
 
 ## Source
 
-[modules/geo-layers/src/s2-layer](https://github.com/visgl/deck.gl/tree/master/modules/geo-layers/src/s2-layer)
+[modules/geo-layers/src/s2-layer](https://github.com/visgl/deck.gl/tree/8.4-release/modules/geo-layers/src/s2-layer)
 

@@ -49,4 +49,4 @@ Visit the [OrbitController](/docs/api-reference/core/orbit-controller.md) docume
 
 ## Source
 
-[modules/core/src/views/orbit-view.js](https://github.com/visgl/deck.gl/blob/master/modules/core/src/views/orbit-view.js)
+[modules/core/src/views/orbit-view.js](https://github.com/visgl/deck.gl/tree/8.4-release/modules/core/src/views/orbit-view.js)
