@@ -19,6 +19,14 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v8.4
 
+#### deck.gl [8.4.0] - Feb 1 2021
+
+- Bump luma.gl to 8.4.0 (#5416)
+- Fix FirstPersonView "matrix not invertible" error at pitch=-90 (#5415)
+- Orbit and Ortho viewports pass additional props to the Viewport constructor (#5407)
+- Avoid silencing errors by default in CartoLayer (#5402)
+- Fix TerrainLayer error (#5404)
+
 ### deck.gl v8.4 Prereleases
 
 #### deck.gl [8.4.0-beta.3] - Jan 28 2021
