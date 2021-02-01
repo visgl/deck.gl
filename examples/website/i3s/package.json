@@ -8,7 +8,7 @@
   },
   "dependencies": {
     "@loaders.gl/i3s": "^2.3.0",
-    "deck.gl": "^8.3.0"
+    "deck.gl": "^8.4.0"
   },
   "devDependencies": {
     "webpack": "^4.20.2",
