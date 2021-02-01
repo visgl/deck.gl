@@ -16,4 +16,4 @@ npm start
 
 ### Video source
 
-The 360 video was created by [NASA Jet Propulsion Laboratory, Public domain, via Wikimedia Commons](https://commons.wikimedia.org/wiki/File:Earth_360_Video_The_Call_of_Science.webm).
+The 360 video was created by [NASA Jet Propulsion Laboratory, Public domain, via Wikimedia Commons](https://commons.wikimedia.org/wiki/File:NASA_VR-360_Astronaut_Training-_Space_Walk.webm).
