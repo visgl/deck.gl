@@ -36,7 +36,9 @@ const view = new GlobeView({id, ...});
 
 `GlobeView` takes the same parameters as the [View](/docs/api-reference/core/view.md) superclass constructor, plus the following:
 
-- `resolution` (Number, optional) - the resolution at which to turn flat features into 3D meshes, in degrees. Smaller numbers will generate more detailed mesh. Default `10`.
+##### `resolution` (Number, optional)
+
+The resolution at which to turn flat features into 3D meshes, in degrees. Smaller numbers will generate more detailed mesh. Default `10`.
 
 
 ## View State
@@ -54,7 +56,7 @@ Additional projection matrix arguments:
 + `nearZMultiplier` (Number, optional) - Scaler for the near plane, 1 unit equals to the height of the viewport. Default to `0.1`.
 + `farZMultiplier` (Number, optional) - Scaler for the far plane, 1 unit equals to the distance from the camera to the edge of the screen. Default to `2`.
 
-## GlobeController
+## Controller
 
 By default, `GlobeView` uses the `GlobeController` to handle interactivity. To enable the controller, use:
 
@@ -62,25 +64,7 @@ By default, `GlobeView` uses the `GlobeController` to handle interactivity. To e
 const view = new GlobeView({id: 'globe', controller: true});
 ```
 
-`GlobeController` supports the following interactions:
-
-- `dragPan`: Drag to pan
-- `scrollZoom`: Mouse wheel to zoom
-- `doubleClickZoom`: Double click to zoom in, with shift/ctrl down to zoom out
-- `touchZoom`: Pinch zoom
-- `keyboard`: Keyboard (arrow keys to pan, +/- to zoom)
-
-You can further customize its behavior by extending the class:
-
-```js
-import {_GlobeController as GlobeController} from '@deck.gl/core';
-
-class MyGlobeController extends GlobeController {}
-
-const view = new GlobeView({id: 'globe', controller: MyGlobeController});
-```
-
-See the documentation of [Controller](/docs/api-reference/core/controller.md) for implementation details.
+Visit the [GlobeController](/docs/api-reference/core/globe-controller.md) documentation for a full list of supported options.
 
 
 # Remarks
