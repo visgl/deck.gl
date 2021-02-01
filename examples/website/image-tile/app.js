@@ -17,13 +17,12 @@ const ROOT_URL =
   'https://raw.githubusercontent.com/visgl/deck.gl-data/master/website/image-tiles/moon.image';
 
 function getTooltip({tile, bitmap}) {
-  let message = tile ? `tile: x: ${tile.x}, y: ${tile.y}, z: ${tile.z}` : '';
-  if (bitmap) {
-    message += `\n${bitmap.pixel[0]},${bitmap.pixel[1]} in ${bitmap.size.width}x${
-      bitmap.size.height
-    }`;
+  if (tile && bitmap) {
+    return `\
+    tile: x: ${tile.x}, y: ${tile.y}, z: ${tile.z}
+    (${bitmap.pixel[0]},${bitmap.pixel[1]}) in ${bitmap.size.width}x${bitmap.size.height}`;
   }
-  return message;
+  return null;
 }
 
 export default function App({autoHighlight = true, onTilesLoad}) {

@@ -8,7 +8,7 @@
   ],
   "main": "gatsby-config.js",
   "scripts": {
-    "install-deps": "yarn && find ../examples/website -name package.json -depth 2 -execdir yarn \\;",
+    "install-deps": "yarn && find ../examples/website -name 'package.json' -maxdepth 2 -execdir yarn \\;",
     "start": "yarn clean && yarn develop",
     "build": "./scripts/build.sh prod",
     "build-staging": "./scripts/build.sh staging",

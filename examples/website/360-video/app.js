@@ -38,16 +38,19 @@ export default function App() {
 
   const video = useMemo(() => {
     /* global document */
-    const videoEl = document.createElement('video');
-    videoEl.crossOrigin = 'anonymous';
-    videoEl.preload = 'auto';
-    videoEl.loop = true;
+    if (typeof document !== 'undefined') {
+      const videoEl = document.createElement('video');
+      videoEl.crossOrigin = 'anonymous';
+      videoEl.preload = 'auto';
+      videoEl.loop = true;
 
-    const source = document.createElement('source');
-    source.src = VIDEO_URL;
-    videoEl.append(source);
+      const source = document.createElement('source');
+      source.src = VIDEO_URL;
+      videoEl.append(source);
 
-    return videoEl;
+      return videoEl;
+    }
+    return null;
   }, []);
 
   const layer = new SimpleMeshLayer({
