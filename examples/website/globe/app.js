@@ -134,28 +134,28 @@ export default function App({data}) {
 export function renderToDOM(container) {
   render(<App />, container);
 
-  async function loadFile(date) {
-    const url = `${DATA_URL}/${date}.csv`;
-    const flights = await load(url, CSVLoader, {csv: {skipEmptyLines: true}});
-    return {flights, date};
+  async function loadData(dates) {
+    const data = [];
+    for (const date of dates) {
+      const url = `${DATA_URL}/${date}.csv`;
+      const flights = await load(url, CSVLoader, {csv: {skipEmptyLines: true}});
+      data.push({flights, date});
+      render(<App data={data} />, container);
+    }
   }
 
-  Promise.all(
-    [
-      '2020-01-14',
-      '2020-02-11',
-      '2020-03-10',
-      '2020-04-14',
-      '2020-05-12',
-      '2020-06-09',
-      '2020-07-14',
-      '2020-08-11',
-      '2020-09-08',
-      '2020-10-13',
-      '2020-11-10',
-      '2020-12-08'
-    ].map(loadFile)
-  ).then(data => {
-    render(<App data={data} />, container);
-  });
+  loadData([
+    '2020-01-14',
+    '2020-02-11',
+    '2020-03-10',
+    '2020-04-14',
+    '2020-05-12',
+    '2020-06-09',
+    '2020-07-14',
+    '2020-08-11',
+    '2020-09-08',
+    '2020-10-13',
+    '2020-11-10',
+    '2020-12-08'
+  ]);
 }

@@ -22,8 +22,7 @@ class MultiViewDemo extends Component {
       <div>
         <p>The development of air traffic on selected dates between Feburary and October, 2020.</p>
         <p>
-          Data source: <a href="https://zenodo.org/record/3974209">Crowdsourced air traffic data</a>
-          from <a href="http://www.opensky-network.org"> The OpenSky Network</a>
+          Data source: <a href="https://zenodo.org/record/3974209">Crowdsourced air traffic data</a> from <a href="http://www.opensky-network.org"> The OpenSky Network</a>
         </p>
         <div className="layout">
           <div className="stat col-1-2">No. of Flights
