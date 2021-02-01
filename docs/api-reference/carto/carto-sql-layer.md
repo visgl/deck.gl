@@ -115,9 +115,9 @@ Receives arguments:
 
 ##### `onDataError` (Function, optional)
 
-`onDataError` is called when the request to the CARTO tiler failed.
+`onDataError` is called when the request to the CARTO tiler failed. By default the Error is thrown.
 
-* Default: `console.error`
+* Default: `null`
 
 Receives arguments:
 

@@ -39,15 +39,8 @@ function getViewMatrix({height, fovy, orbitAxis, rotationX, rotationOrbit, zoom}
 class OrbitViewport extends Viewport {
   constructor(props) {
     const {
-      id,
-      x,
-      y,
-      width,
       height,
-
       fovy = 50, // From eye position to lookAt
-      near,
-      far,
       orbitAxis = 'Z', // Orbit axis with 360 degrees rotating freedom, can only be 'Y' or 'Z'
       target = [0, 0, 0], // Which point is camera looking at, default origin
 
@@ -58,7 +51,7 @@ class OrbitViewport extends Viewport {
     } = props;
 
     super({
-      id,
+      ...props,
       viewMatrix: getViewMatrix({
         height,
         fovy,
@@ -68,13 +61,7 @@ class OrbitViewport extends Viewport {
         zoom
       }),
       fovy,
-      near,
-      far,
-      x,
-      y,
       position: target,
-      width,
-      height,
       zoom
     });
   }
