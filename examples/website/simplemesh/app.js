@@ -9,9 +9,10 @@ import GL from '@luma.gl/constants';
 
 // Data provided by the NASA Jet Propulsion Laboratory, Public domain, via Wikimedia Commons
 // const VIDEO_URL = 'https://upload.wikimedia.org/wikipedia/commons/5/5d/Earth_360_Video_The_Call_of_Science.webm';
-const VIDEO_URL =
-  'https://upload.wikimedia.org/wikipedia/commons/0/0a/NASA_VR-360_Astronaut_Training-_Space_Walk.webm';
+// const VIDEO_URL =
+//   'https://upload.wikimedia.org/wikipedia/commons/0/0a/NASA_VR-360_Astronaut_Training-_Space_Walk.webm';
 
+const VIDEO_URL = 'https://cdn.aframe.io/videos/fireworks.mp4';
 const sphere = new SphereGeometry({
   nlat: 50,
   nlong: 50,
@@ -21,7 +22,7 @@ const sphere = new SphereGeometry({
 const INITIAL_VIEW_STATE = {
   latitude: 0,
   longitude: 0,
-  position: [0, 0, 50],
+  position: [0, 0, 75],
   pitch: 0,
   bearing: 0
 };
@@ -40,6 +41,7 @@ function HiddenVideo({videoRef}) {
       controls
       crossOrigin="anonymouse"
       autoPlay
+      preload="auto"
     >
       <source src={VIDEO_URL} />
     </video>
@@ -48,6 +50,15 @@ function HiddenVideo({videoRef}) {
 
 export default function App() {
   const videoRef = React.createRef();
+
+  const togglePlay = () => {
+    const video = videoRef.current;
+    if (video.paused || video.ended) {
+      video.play();
+    } else {
+      video.pause();
+    }
+  };
 
   const layer = new SimpleMeshLayer({
     id: 'simplemesh-layer',
@@ -66,6 +77,7 @@ export default function App() {
         initialViewState={INITIAL_VIEW_STATE}
         views={new FirstPersonView({})}
         controller={true}
+        onClick={togglePlay}
         _animate={true}
       />
       <HiddenVideo videoRef={videoRef} />
