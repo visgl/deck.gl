@@ -19,6 +19,10 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v8.4
 
+#### deck.gl [8.4.1] - Feb 3 2021
+
+- Fix controller.makeViewport when using percentage dimensions (#5431)
+
 #### deck.gl [8.4.0] - Feb 1 2021
 
 - Bump luma.gl to 8.4.0 (#5416)
