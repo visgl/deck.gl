@@ -251,7 +251,11 @@ export default class ViewManager {
       // Set an internal callback that calls the prop callback if provided
       onViewStateChange: this._onViewStateChange.bind(this, props.id),
       onStateChange: this._eventCallbacks.onInteractionStateChange,
-      makeViewport: view._getViewport.bind(view),
+      makeViewport: viewState =>
+        view._getViewport(viewState, {
+          width: viewState.width,
+          height: viewState.height
+        }),
       ...props
     });
 

@@ -206,7 +206,8 @@ export default async function testController(t, ViewClass, defaultProps, blackLi
   const view = new ViewClass({controller: true});
   Object.assign(defaultProps, BASE_PROPS, view.controller, {
     timeline,
-    makeViewport: view.makeViewport.bind(view)
+    makeViewport: viewState =>
+      view.makeViewport({width: BASE_PROPS.width, height: BASE_PROPS.height, viewState})
   });
   const ControllerClass = defaultProps.type;
   const controller = new ControllerClass(defaultProps);
