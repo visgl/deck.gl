@@ -113,7 +113,14 @@ test('ViewManager#unproject', t => {
 
 test('ViewManager#controllers', t => {
   const mainView = new MapView({id: 'main', controller: true});
-  const minimapView = new MapView({id: 'minimap', width: '10%', height: '10%', x: '5%', y: '5%'});
+  const minimapView = new MapView({
+    id: 'minimap',
+    width: '10%',
+    height: '10%',
+    x: '5%',
+    y: '5%',
+    controller: true
+  });
 
   const viewManager = new ViewManager({
     views: [mainView, minimapView],
@@ -128,10 +135,21 @@ test('ViewManager#controllers', t => {
     height: 100
   });
 
-  t.ok(viewManager.controllers.main, 'controller is constructed');
+  t.ok(
+    viewManager.controllers.main && viewManager.controllers.minimap,
+    'controllers are constructed'
+  );
+
+  const viewport = viewManager.controllers.minimap.makeViewport(
+    viewManager.controllers.minimap.controllerStateProps
+  );
+  t.ok(viewport.viewProjectionMatrix.every(Number.isFinite), 'makeViewport returns valid viewport');
 
   viewManager.finalize();
-  t.notOk(viewManager.controllers.main, 'controller is deleted');
+  t.notOk(
+    viewManager.controllers.main || viewManager.controllers.minimap,
+    'controllers are deleted'
+  );
 
   t.end();
 });
