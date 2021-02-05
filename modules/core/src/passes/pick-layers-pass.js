@@ -10,10 +10,12 @@ const PICKING_PARAMETERS = {
 export default class PickLayersPass extends LayersPass {
   render(props) {
     if (props.pickingFBO) {
-      this.toScreen = false;
+      // When drawing into an off-screen buffer, use the alpha channel to encode layer index
+      this.useAlpha = true;
       this._drawPickingBuffer(props);
     } else {
-      this.toScreen = true;
+      // When drawing to screen (debug mode), do not use the alpha channel so that result is always visible
+      this.useAlpha = false;
       super.render(props);
     }
   }
@@ -95,7 +97,7 @@ export default class PickLayersPass extends LayersPass {
       : {
           ...PICKING_PARAMETERS,
           blend: true,
-          blendColor: [0, 0, 0, this.toScreen ? 1 : (layerIndex + 1) / 255]
+          blendColor: [0, 0, 0, this.useAlpha ? (layerIndex + 1) / 255 : 1]
         };
 
     // Override layer parameters with pick parameters
