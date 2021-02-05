@@ -19,6 +19,12 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v8.4
 
+#### deck.gl [8.4.2] - Feb 5 2021
+
+- Bump luma.gl dependencies (#5441)
+- Fix drawPickingColors usability (#5437)
+- Fix FillStyleExtension bugs (#5438)
+
 #### deck.gl [8.4.1] - Feb 3 2021
 
 - Fix controller.makeViewport when using percentage dimensions (#5431)
