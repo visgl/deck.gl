@@ -1,0 +1,30 @@
+{
+  "hatch-1x": {
+    "x": 4,
+    "y": 4,
+    "width": 120,
+    "height": 120,
+    "mask": true
+  },
+  "hatch-2x": {
+    "x": 132,
+    "y": 4,
+    "width": 120,
+    "height": 120,
+    "mask": true
+  },
+  "hatch-cross": {
+    "x": 4,
+    "y": 132,
+    "width": 120,
+    "height": 120,
+    "mask": true
+  },
+  "dots": {
+    "x": 132,
+    "y": 132,
+    "width": 120,
+    "height": 120,
+    "mask": true
+  }
+}

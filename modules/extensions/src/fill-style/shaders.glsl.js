@@ -59,12 +59,10 @@ const inject = {
       patternUV = mod(fill_patternPlacement.xy + patternUV, 1.0);
 
       vec2 texCoords = fill_patternBounds.xy + fill_patternBounds.zw * patternUV;
-      texCoords.y = 1.0 - texCoords.y;
 
       vec4 patternColor = texture2D(fill_patternTexture, texCoords);
-      if (fill_patternMask) {
-        color.a *= patternColor.a;
-      } else {
+      color.a *= patternColor.a;
+      if (!fill_patternMask) {
         color.rgb = patternColor.rgb;
       }
     }
