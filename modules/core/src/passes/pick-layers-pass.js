@@ -10,8 +10,10 @@ const PICKING_PARAMETERS = {
 export default class PickLayersPass extends LayersPass {
   render(props) {
     if (props.pickingFBO) {
+      this.toScreen = false;
       this._drawPickingBuffer(props);
     } else {
+      this.toScreen = true;
       super.render(props);
     }
   }
@@ -90,7 +92,11 @@ export default class PickLayersPass extends LayersPass {
     // These will override any layer parameters
     const pickParameters = this.pickZ
       ? {blend: false}
-      : {...PICKING_PARAMETERS, blend: true, blendColor: [0, 0, 0, (layerIndex + 1) / 255]};
+      : {
+          ...PICKING_PARAMETERS,
+          blend: true,
+          blendColor: [0, 0, 0, this.toScreen ? 1 : (layerIndex + 1) / 255]
+        };
 
     // Override layer parameters with pick parameters
     return Object.assign({}, layer.props.parameters, pickParameters);
