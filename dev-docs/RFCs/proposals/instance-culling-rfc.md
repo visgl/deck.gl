@@ -1,5 +1,9 @@
 # RFC: Instance Culling
 
+* **Author**: Ib Green
+* **Date**: Feb, 2021
+* **Status**: **Conceptual Draft**
+
 ## Summary
 
 This RFC explores approaches to cull the number of instances to be rendered based
@@ -36,6 +40,7 @@ There are a number of techniques that can be applied to the problem:
 - **bounding boxes** - Using bounding boxes to automatically determine distance culling limits
 - **vertex filtering** - A simpler, less performant approach of filtering out unnecessary work by filtering vertices
 - **instance filtering** - A more powerful, potentially more performant approach of filtering out unnecessary rendering by filtering the instance list 
+- **run-time tiling** - Separating a big table in sub-tables based on octree or runtime KD-tree decomposition, in the style of I3S or 3D tiles. 
 - **LOD** - using different geometries
 - **Decimation** - Automatic generation of smaller, reduced detail geometries by implementing decimation algorithms.
 
@@ -69,6 +74,22 @@ For layers that typically have modest amounts of instances (<10K instances) such
 For the general case, where we may deal with millions of instances, we could investigate if some transform feedback type technique could be used to filter the arrays on the GPU. Since the output is random access (not row-to-row) the results would presumably need to be written into a texture and converted to a buffer. Actual performance would have to be carefully measured to ensure that the desired performance characterstics are met.
 
 Note that gor filtering use cases, the performance criteria may be lower than rendering and the GPU technique might be more applicable.
+
+## Run-Time Tiling
+
+The idea is to do an initial separation/segmentation of a big table in sub-tables based on octree or runtime KD-tree decomposition, in the style of I3S or 3D tiles. 
+
+This would be done once on load, possibly on a worker thread, based on center points or bounding boxes of instance geometries.
+
+Each sub tile would be treated separately. LOD selection could be made for all instances in a tile
+based on the tiles distance from the viewer. Tiles that are on the border could be further refined
+with instance culling, avoiding the cost of always instance culling the entire table.
+
+Splitting in tiles normally increased the number of draw calls. 
+All the tiles for an in-memory tiled layer could still be kept in a single buffer and rendered 
+with a single draw call using the
+[WEBGL_multi_draw](https://www.khronos.org/registry/webgl/extensions/WEBGL_multi_draw/)
+extension.
 
 
 ## LOD (Level of Detail)
