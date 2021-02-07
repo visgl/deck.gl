@@ -176,3 +176,28 @@ Nexus may be worth a look
 - http://vcg.isti.cnr.it/nexus/
 
 Side note: A decimation feature could be implemented in luma.gl but it could also be part of the planned geometry manipulation packages in math.gl.
+
+
+## Open Questions
+
+> Some benchmarking is needed to understand the perf impact of this. It would require projecting the anchor position and transforming the bounding box of every instance on render. Overhead increases linearly with data size.
+
+ 
+
+> An issue with tiling is that it has to be regenerated when instance bounding box changes. This defeats the performance benefit of using e.g. sizeScale of the ScenegraphLayer.
+
+- The 95% use case (at least for ScenegraphLayer) may not involve globally and dynamically changing scale of models. Many users would be OK with giving up that feature for the benefit of being able to render ~10K high resolution models.
+- Doing culling and LOD selection on center points will give very close to desired results for 95% of scenegraphs. The point at which one switches LOD level is somewhat subjective in any case, and some variation should be acceptable.
+- Perhaps we could simply document a limitation for instance culling: Dynamic sizeScale does not affect LOD selection? Or a prop could activate the more expensive behavior for those that really need it?
+
+>It would require projecting the anchor position and transforming the bounding box of every instance on render.
+
+Ideas:
+
+- Could it be possible project the camera to the coordinate system of the positions, rather than the reverse? Then we only project as single point.
+- Tile bounding boxes could perhaps be adjusted smartly with the global scale, rather than instance boxes. With the idea of only culling instances in tiles whose bounding boxes cross the LOD screen size limit, this would then be handled by just instance culling more (or fewer) tiles, but not all of them.
+
+> Sorting data based on LOD so that we can still leverage some instanced-drawing techniques?
+
+- Instanced drawing is still used, but we do have to "filter" the instance table when the camera changes.
+- LOD selection depends on camera position, I can't really see a way to pre-sort other than cutting into cubes or "tiles" as suggested..
