@@ -12,7 +12,7 @@ author = "Andrew Duberstein"
 # The short X.Y version
 version = "0.6"
 # The full version, including alpha/beta/rc tags
-release = "0.6.0-b.1"
+release = "0.6.0"
 # Extensions to generate documents from our docstrings here
 extensions = ["sphinx.ext.autodoc", "sphinx.ext.napoleon", "sphinx_rtd_theme"]
 templates_path = ["_templates"]
