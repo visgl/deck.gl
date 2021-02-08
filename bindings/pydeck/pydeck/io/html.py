@@ -65,14 +65,14 @@ def render_json_to_html(
 ):
     js = j2_env.get_template("index.j2")
     css = j2_env.get_template("style.j2")
+    css_text = css.render(css_background_color=css_background_color)
     html_str = js.render(
         mapbox_key=mapbox_key,
         google_maps_key=google_maps_key,
         json_input=json_input,
         deckgl_jupyter_widget_bundle=cdn_picker(offline=offline),
         tooltip=convert_js_bool(tooltip),
-        css_text=css.render(),
-        css_background_color=css_background_color,
+        css_text=css_text,
         custom_libraries=custom_libraries,
     )
     return html_str
