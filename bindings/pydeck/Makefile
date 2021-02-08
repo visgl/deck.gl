@@ -1,5 +1,5 @@
 help:
-	@echo "\nPlease use `make target` where target is one of\n"
+	@echo "\nPlease use \`make target\` where target is one of\n"
 	@echo "init - build deck.gl and install all requirements for development"
 	@echo "test - run tests"
 	@echo "prepare-jupyter - initiate pydeck-related extensions in JupyterLab and Jupyter Notebook"
