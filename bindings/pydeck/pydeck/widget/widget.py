@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-# coding: utf-8
 from ast import literal_eval
 import json
 
@@ -76,8 +74,8 @@ class DeckGLWidget(DOMWidget):
         self.on_msg(self._handle_custom_msgs)
 
         self.handler_exception = None
-        self.on_click(store_selection)
         self.selected_data = []
+        self.on_click(store_selection)
 
     def on_hover(self, callback, remove=False):
         self._hover_handlers.register_callback(callback, remove=remove)
