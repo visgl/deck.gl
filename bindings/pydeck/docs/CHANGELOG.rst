@@ -3,6 +3,15 @@ CHANGELOG
 
 Releases and associated GitHub PRs for pydeck are documented here.
 
+0.6 Releases
+------------
+
+0.6.0 - Feb 7 2021
+------------------
+- Lock to @deck.gl/jupyter-widget@~8.4.*
+- Improve support for multiple map providders; make Carto default base map provider (#5131)
+- Improve local image file loading experience for BitmapLayer and TileLayer (#5269)
+
 0.5 Releases
 ------------
 
