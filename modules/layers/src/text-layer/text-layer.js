@@ -67,7 +67,7 @@ const defaultProps = {
   sizeMaxPixels: Number.MAX_SAFE_INTEGER,
 
   background: false,
-  getBackgroundColor: {type: 'accessor', value: DEFAULT_COLOR},
+  getBackgroundColor: {type: 'accessor', value: [255, 255, 255, 255]},
   getBorderColor: {type: 'accessor', value: DEFAULT_COLOR},
   getBorderWidth: {type: 'accessor', value: 0},
   backgroundPadding: {type: 'array', value: [0, 0]},
@@ -332,6 +332,9 @@ export default class TextLayer extends CompositeLayer {
               getPosition: transitions.getPosition,
               getAngle: transitions.getAngle,
               getSize: transitions.getSize,
+              getFillColor: transitions.getBackgroundColor,
+              getLineColor: transitions.getBorderColor,
+              getLineWidth: transitions.getBorderWidth,
               getPixelOffset: transitions.getPixelOffset
             }
           },
@@ -341,6 +344,9 @@ export default class TextLayer extends CompositeLayer {
               getPosition: updateTriggers.getPosition,
               getAngle: updateTriggers.getAngle,
               getSize: updateTriggers.getSize,
+              getFillColor: updateTriggers.getBackgroundColor,
+              getLineColor: updateTriggers.getBorderColor,
+              getLineWidth: updateTriggers.getBorderWidth,
               getPixelOffset: updateTriggers.getPixelOffset,
               getBoundingRect: {
                 getText: updateTriggers.getText,
