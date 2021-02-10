@@ -16,12 +16,12 @@ void main(void) {
 
   vec2 pixelPosition = uv * dimensions;
   if (stroked) {
-    if (pixelPosition.x < vLineWidth || pixelPosition.x > dimensions.x - vLineWidth ||
-        pixelPosition.y < vLineWidth || pixelPosition.y > dimensions.y - vLineWidth) {
-          gl_FragColor = vLineColor;
-        } else {
-          gl_FragColor = vFillColor;
-        }
+    float distToEdge = min(
+      min(pixelPosition.x, dimensions.x - pixelPosition.x),
+      min(pixelPosition.y, dimensions.y - pixelPosition.y)
+    );
+    float isBorder = smoothedge(distToEdge, vLineWidth);
+    gl_FragColor = mix(vFillColor, vLineColor, isBorder);
   } else {
     gl_FragColor = vFillColor;
   }

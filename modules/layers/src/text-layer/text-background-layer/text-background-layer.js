@@ -47,20 +47,16 @@ export default class TextBackgroundLayer extends Layer {
       instanceAngles: {
         size: 1,
         transition: true,
-        accessor: 'getAngle',
-        defaultValue: 0
+        accessor: 'getAngle'
       },
       instanceRects: {
         size: 4,
-        transition: true,
-        accessor: 'getBoundingRect',
-        defaultValue: 1
+        accessor: 'getBoundingRect'
       },
       instancePixelOffsets: {
         size: 2,
         transition: true,
-        accessor: 'getPixelOffset',
-        defaultValue: [0, 0]
+        accessor: 'getPixelOffset'
       },
       instanceFillColors: {
         size: 4,

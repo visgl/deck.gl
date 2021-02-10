@@ -66,18 +66,6 @@ export default class MultiIconLayer extends IconLayer {
     });
   }
 
-  updateState(updateParams) {
-    super.updateState(updateParams);
-    const {oldProps, props} = updateParams;
-
-    if (props.backgroundColor !== oldProps.backgroundColor) {
-      const backgroundColor = Array.isArray(props.backgroundColor)
-        ? props.backgroundColor.map(c => c / 255.0).slice(0, 3)
-        : null;
-      this.setState({backgroundColor});
-    }
-  }
-
   draw({uniforms}) {
     const {sdf} = this.props;
 

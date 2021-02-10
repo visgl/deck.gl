@@ -397,7 +397,6 @@ const TextLayerExample = {
     pickable: true,
     maxWidth: 500,
     wordBreak: 'break-word',
-    backgroundColor: [255, 255, 0],
     highlightColor: [0, 0, 128, 128],
     getText: x => `${x.LOCATION_NAME}\n${x.ADDRESS}`,
     getPosition: x => x.COORDINATES,

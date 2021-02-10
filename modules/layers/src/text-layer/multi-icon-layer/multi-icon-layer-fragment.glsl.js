@@ -28,8 +28,6 @@ uniform sampler2D iconsTexture;
 uniform float buffer;
 uniform bool sdf;
 uniform float alphaCutoff;
-uniform bool shouldDrawBackground;
-uniform vec3 backgroundColor;
 
 varying vec4 vColor;
 varying vec2 vTextureCoords;
@@ -52,23 +50,12 @@ void main(void) {
     
     if (a < alphaCutoff) {
       // We are now in the background, let's decide what to draw
-      if (shouldDrawBackground) {
-        // draw background color and return if not picking
-        gl_FragColor = vec4(backgroundColor, vColor.a);
-      } else {
-        // no background and no picking
-        discard;
-      }
-    } else {
-      if (shouldDrawBackground) {
-        gl_FragColor = vec4(mix(backgroundColor, vColor.rgb, alpha), vColor.a * opacity);
-      } else {
-        gl_FragColor = vec4(vColor.rgb, a * opacity);
-      }
-      DECKGL_FILTER_COLOR(gl_FragColor, geometry);
+      discard;
     }
-  } else {
-    DECKGL_FILTER_COLOR(gl_FragColor, geometry);
+
+    gl_FragColor = vec4(vColor.rgb, a * opacity);
   }
+
+  DECKGL_FILTER_COLOR(gl_FragColor, geometry);
 }
 `;
