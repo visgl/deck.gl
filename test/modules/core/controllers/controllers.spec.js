@@ -85,6 +85,7 @@ test('FirstPersonController', async t => {
       longitude: -122.45,
       latitude: 37.78,
       pitch: 15,
+      bearing: 0,
       position: [0, 0, 2]
     },
     // FirstPersonController does not pan
