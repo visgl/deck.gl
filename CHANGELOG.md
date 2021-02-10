@@ -19,6 +19,11 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v8.4
 
+#### deck.gl [8.4.3] - Feb 10 2021
+
+- Fix MVTLayer loader propagation (#5455)
+- Restore default transitionInterpolator (#5459)
+
 #### deck.gl [8.4.2] - Feb 5 2021
 
 - Bump luma.gl dependencies (#5441)
