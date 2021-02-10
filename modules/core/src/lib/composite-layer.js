@@ -55,10 +55,11 @@ export default class CompositeLayer extends Layer {
   // override Layer.getPickingInfo() because decoding / setting uniform do
   // not apply to a composite layer.
   // @return null to cancel event
-  getPickingInfo({info}) {
+  getPickingInfo({info, sourceLayer}) {
     const {object} = info;
     const isDataWrapped =
       object && object.__source && object.__source.parent && object.__source.parent.id === this.id;
+    info.sourceLayer = sourceLayer;
 
     if (!isDataWrapped) {
       return info;
@@ -203,6 +204,12 @@ export default class CompositeLayer extends Layer {
     }
 
     return newProps;
+  }
+
+  updateAutoHighlight(info) {
+    for (const layer of this.getSubLayers()) {
+      layer.updateAutoHighlight(info);
+    }
   }
 
   _getAttributeManager() {

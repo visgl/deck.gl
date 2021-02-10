@@ -198,6 +198,12 @@ export default class TileLayer extends CompositeLayer {
     return info;
   }
 
+  updateAutoHighlight(info) {
+    if (info.sourceLayer) {
+      info.sourceLayer.updateAutoHighlight(info);
+    }
+  }
+
   renderLayers() {
     const {visible} = this.props;
     return this.state.tileset.tiles.map(tile => {

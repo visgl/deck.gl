@@ -137,6 +137,17 @@ export default class GeoJsonLayer extends CompositeLayer {
     });
   }
 
+  updateAutoHighlight(info) {
+    // All sub layers except the points layer use source feature index to encode the picking color
+    // The points layer uses indices from the points data array.
+    const sourceIsPoints = info.sourceLayer.id.endsWith('points');
+    for (const layer of this.getSubLayers()) {
+      if (layer.id.endsWith('points') === sourceIsPoints) {
+        layer.updateAutoHighlight(info);
+      }
+    }
+  }
+
   /* eslint-disable complexity */
   renderLayers() {
     // Layer composition props

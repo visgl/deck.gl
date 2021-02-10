@@ -864,6 +864,19 @@ export default class Layer extends Component {
     }
   }
 
+  updateAutoHighlight(info) {
+    const pickingModuleParameters = {
+      pickingSelectedColor: info.picked ? info.color : null
+    };
+    const {highlightColor} = this.props;
+    if (info.picked && typeof highlightColor === 'function') {
+      pickingModuleParameters.pickingHighlightColor = highlightColor(info);
+    }
+    this.setModuleParameters(pickingModuleParameters);
+    // setModuleParameters does not trigger redraw
+    this.setNeedsRedraw();
+  }
+
   // PRIVATE METHODS
   _updateModules({props, oldProps}, forceUpdate) {
     // Picking module parameters
