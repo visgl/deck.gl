@@ -191,6 +191,11 @@ export default class Controller {
       this.toggleEvents(this._customEvents, true);
     }
 
+    if (!('transitionInterpolator' in props)) {
+      // Add default transition interpolator
+      props.transitionInterpolator = this._getTransitionProps().transitionInterpolator;
+    }
+
     this.transitionManager.processViewStateChange(props);
 
     let {inertia} = props;

@@ -1,6 +1,8 @@
 import Controller from './controller';
 import ViewState from './view-state';
 import {mod} from '../utils/math-utils';
+import LinearInterpolator from '../transitions/linear-interpolator';
+import {TRANSITION_EVENTS} from './transition-manager';
 
 import {Vector3, _SphericalCoordinates as SphericalCoordinates, clamp} from 'math.gl';
 
@@ -11,6 +13,13 @@ const DEFAULT_STATE = {
   bearing: 0,
   maxPitch: 90,
   minPitch: -90
+};
+
+const LINEAR_TRANSITION_PROPS = {
+  transitionDuration: 300,
+  transitionEasing: t => t,
+  transitionInterpolator: new LinearInterpolator(['position', 'pitch', 'bearing']),
+  transitionInterruption: TRANSITION_EVENTS.BREAK
 };
 
 class FirstPersonState extends ViewState {
@@ -292,5 +301,10 @@ class FirstPersonState extends ViewState {
 export default class FirstPersonController extends Controller {
   constructor(props) {
     super(FirstPersonState, props);
+  }
+
+  _getTransitionProps() {
+    // Enables Transitions on double-tap and key-down events.
+    return LINEAR_TRANSITION_PROPS;
   }
 }
