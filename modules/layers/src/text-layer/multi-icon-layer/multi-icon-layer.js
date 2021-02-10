@@ -29,7 +29,6 @@ const DEFAULT_BUFFER = 192.0 / 256;
 const EMPTY_ARRAY = [];
 
 const defaultProps = {
-  backgroundColor: {type: 'color', value: null, optional: true},
   getIconOffsets: {type: 'accessor', value: x => x.offsets},
   alphaCutoff: 0.001
 };
@@ -81,8 +80,6 @@ export default class MultiIconLayer extends IconLayer {
 
   draw({uniforms}) {
     const {sdf} = this.props;
-    const {backgroundColor} = this.state;
-    const shouldDrawBackground = Array.isArray(backgroundColor);
 
     super.draw({
       uniforms: Object.assign({}, uniforms, {
@@ -90,9 +87,7 @@ export default class MultiIconLayer extends IconLayer {
         // https://blog.mapbox.com/drawing-text-with-signed-distance-fields-in-mapbox-gl-b0933af6f817
         buffer: DEFAULT_BUFFER,
         gamma: DEFAULT_GAMMA,
-        sdf: Boolean(sdf),
-        backgroundColor: backgroundColor || [0, 0, 0],
-        shouldDrawBackground
+        sdf: Boolean(sdf)
       })
     });
   }

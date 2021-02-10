@@ -378,6 +378,14 @@ const TextLayerExample = {
       name: 'maxWidth',
       type: 'number',
       max: 5000
+    },
+    backgroundPadding: {type: 'compound', elements: ['padding']},
+    padding: {
+      type: 'number',
+      max: 100,
+      onUpdate: (newValue, newSettings, change) => {
+        change('backgroundPadding', [newValue, newValue]);
+      }
     }
   },
   props: {
@@ -389,10 +397,15 @@ const TextLayerExample = {
     pickable: true,
     maxWidth: 500,
     wordBreak: 'break-word',
+    backgroundColor: [255, 255, 0],
     highlightColor: [0, 0, 128, 128],
     getText: x => `${x.LOCATION_NAME}\n${x.ADDRESS}`,
     getPosition: x => x.COORDINATES,
     getColor: x => [153, 0, 0],
+    background: false,
+    getBackgroundColor: x => [255, 255, 255],
+    getBorderColor: x => [0, 0, 0],
+    getBorderWidth: 0,
     getAngle: x => 30,
     getTextAnchor: x => 'middle',
     getAlignmentBaseline: x => 'center',
