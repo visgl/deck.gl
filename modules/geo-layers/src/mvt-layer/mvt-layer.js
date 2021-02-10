@@ -137,24 +137,20 @@ export default class MVTLayer extends TileLayer {
     return super.renderSubLayers(props);
   }
 
-  onHover(info, pickingEvent) {
-    const {uniqueIdProperty, autoHighlight} = this.props;
+  updateAutoHighlight(info) {
+    const {uniqueIdProperty} = this.props;
 
-    if (autoHighlight) {
-      const {hoveredFeatureId} = this.state;
-      const hoveredFeature = info.object;
-      let newHoveredFeatureId;
+    const {hoveredFeatureId} = this.state;
+    const hoveredFeature = info.object;
+    let newHoveredFeatureId;
 
-      if (hoveredFeature) {
-        newHoveredFeatureId = getFeatureUniqueId(hoveredFeature, uniqueIdProperty);
-      }
-
-      if (hoveredFeatureId !== newHoveredFeatureId && newHoveredFeatureId !== -1) {
-        this.setState({hoveredFeatureId: newHoveredFeatureId});
-      }
+    if (hoveredFeature) {
+      newHoveredFeatureId = getFeatureUniqueId(hoveredFeature, uniqueIdProperty);
     }
 
-    return super.onHover(info, pickingEvent);
+    if (hoveredFeatureId !== newHoveredFeatureId && newHoveredFeatureId !== -1) {
+      this.setState({hoveredFeatureId: newHoveredFeatureId});
+    }
   }
 
   getPickingInfo(params) {
