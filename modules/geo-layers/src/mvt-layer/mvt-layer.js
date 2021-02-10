@@ -15,7 +15,7 @@ const WORLD_SIZE = 512;
 const defaultProps = {
   uniqueIdProperty: {type: 'string', value: ''},
   highlightedFeatureId: null,
-  loaders: MVTLoader,
+  loaders: [MVTLoader],
   binary: false
 };
 
