@@ -56,7 +56,7 @@ const defaultProps = {
   wireframe: false,
   material: true,
 
-  loaders: TerrainLoader
+  loaders: [TerrainLoader]
 };
 
 // Turns array of templates into a single string to work around shallow change
