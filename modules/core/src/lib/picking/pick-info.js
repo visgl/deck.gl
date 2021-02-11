@@ -115,7 +115,7 @@ export function processPickInfo(opts) {
       infos.set(info.layer.id, info);
     }
 
-    if (mode === 'hover' && info.layer.props.autoHighlight) {
+    if (mode === 'hover') {
       info.layer.updateAutoHighlight(info);
     }
   });

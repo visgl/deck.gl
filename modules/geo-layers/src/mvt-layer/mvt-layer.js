@@ -137,7 +137,7 @@ export default class MVTLayer extends TileLayer {
     return super.renderSubLayers(props);
   }
 
-  updateAutoHighlight(info) {
+  _updateAutoHighlight(info) {
     const {uniqueIdProperty} = this.props;
 
     const {hoveredFeatureId} = this.state;

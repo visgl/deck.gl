@@ -135,8 +135,8 @@ export default class BitmapLayer extends Layer {
     return info;
   }
 
-  updateAutoHighlight(info) {
-    super.updateAutoHighlight({
+  _updateAutoHighlight(info) {
+    super._updateAutoHighlight({
       ...info,
       color: this.encodePickingColor(0)
     });

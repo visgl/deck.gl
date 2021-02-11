@@ -198,7 +198,7 @@ export default class TileLayer extends CompositeLayer {
     return info;
   }
 
-  updateAutoHighlight(info) {
+  _updateAutoHighlight(info) {
     if (info.sourceLayer) {
       info.sourceLayer.updateAutoHighlight(info);
     }

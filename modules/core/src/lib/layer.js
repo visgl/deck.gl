@@ -865,6 +865,13 @@ export default class Layer extends Component {
   }
 
   updateAutoHighlight(info) {
+    if (this.props.autoHighlight) {
+      this._updateAutoHighlight(info);
+    }
+  }
+
+  // May be overriden by classes
+  _updateAutoHighlight(info) {
     const pickingModuleParameters = {
       pickingSelectedColor: info.picked ? info.color : null
     };

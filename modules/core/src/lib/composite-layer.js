@@ -206,7 +206,7 @@ export default class CompositeLayer extends Layer {
     return newProps;
   }
 
-  updateAutoHighlight(info) {
+  _updateAutoHighlight(info) {
     for (const layer of this.getSubLayers()) {
       layer.updateAutoHighlight(info);
     }
