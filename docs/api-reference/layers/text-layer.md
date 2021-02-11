@@ -279,6 +279,7 @@ The border thickness of each text label, in pixels. Only effective if `backgroun
 The TextLayer renders the following sublayers:
 
 * `characters` - an `IconLayer` rendering all the characters.
+* `background` - the background for each text block, if `background: true`.
 
 
 ## Use binary attributes
@@ -343,10 +344,50 @@ new TextLayer({
     startIndices: startIndices, // this is required to render the texts correctly!
     attributes: {
       getText: {value: texts},
-      getPosition: {value: positions, size: 2}
+      getPosition: {value: positions, size: 2},
       getColor: {value: colors, size: 3}
     }
   }
+})
+```
+
+### Use binary attributes with background
+
+To use `background: true` with binary data, the background attributes must be supplied separately via `data.attributes.background`. Each attribute is packed with *one vertex* per object.
+
+`data.attributes.background` may contain the following keys:
+
+- `getPosition`: corresponds to the `getPosition` accessor
+- `getAngle`: corresponds to the `getAngle` accessor
+- `getSize`: corresponds to the `getSize` accessor
+- `getPixelOffset`: corresponds to the `getPixelOffset` accessor
+- `getFillColor`: corresponds to the `getBackgroundColor` accessor
+- `getLineColor`: corresponds to the `getBorderColor` accessor
+- `getLineWidth`: corresponds to the `getBorderWidth` accessor
+
+Following the above example, additional attributes are required to render the background:
+
+```js
+// The background position attribute supplies one position for each text block
+const backgroundPositions = new Float64Array(TEXT_DATA.map(d => d.position).flat());
+// The background color attribute supplies one color for each text block
+const backgroundColors = new Uint8Array(TEXT_DATA.map(d => d.bgColor).flat());
+
+new TextLayer({
+  data: {
+    length: TEXT_DATA.length,
+    startIndices: startIndices, // this is required to render the texts correctly!
+    attributes: {
+      getText: {value: texts},
+      getPosition: {value: positions, size: 2},
+      getColor: {value: colors, size: 3},
+      background: {
+        getPosition: {value: backgroundPosition, size: 2},
+        getFillColor: {value: backgroundColors, size: 3}
+      }
+    }
+  },
+  background: true
 })
 ```
 

@@ -1,5 +1,9 @@
 # Upgrade Guide
 
+## Upgrading from deck.gl v8.4 to v8.5
+
+- `TextLayer`'s `backgroundColor` prop is deprecated. Use `background: true` and `getBackgroundColor` instead.
+
 ## Upgrading from deck.gl v8.3 to v8.4
 
 ### wrapLongitude
