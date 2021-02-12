@@ -6,6 +6,11 @@ Releases and associated GitHub PRs for pydeck are documented here.
 0.6 Releases
 ------------
 
+0.6.1 - Feb 12 2021
+------------------
+- Fix API keys bug where pydeck fails to use API keys passed
+  as parameters to a Deck object (#5475)
+
 0.6.0 - Feb 7 2021
 ------------------
 - Lock to @deck.gl/jupyter-widget@~8.4.*
