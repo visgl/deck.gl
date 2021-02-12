@@ -1,5 +1,6 @@
 // core layers
 import coreLayersTests from './core-layers';
+import arcLayersTests from './arc-layer';
 import columnLayerTests from './column-layer';
 import geojsonLayerTests from './geojson-layer';
 import pathLayerTests from './path-layer';
@@ -28,6 +29,7 @@ import transitionTests from './transitions';
 
 export default [].concat(
   coreLayersTests,
+  arcLayersTests,
   columnLayerTests,
   geojsonLayerTests,
   pathLayerTests,
