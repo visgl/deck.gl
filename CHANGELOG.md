@@ -19,6 +19,10 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v8.4
 
+#### deck.gl [8.4.4] - Feb 12 2021
+
+- MVT: fix picking non-binary (#5471)
+
 #### deck.gl [8.4.3] - Feb 10 2021
 
 - Fix MVTLayer loader propagation (#5455)
