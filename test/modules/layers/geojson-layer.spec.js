@@ -25,6 +25,7 @@ import {geojsonToBinary} from '@loaders.gl/gis';
 import {GeoJsonLayer} from 'deck.gl';
 
 import * as FIXTURES from 'deck.gl-test/data';
+import {testPickingLayer} from './test-picking-layer';
 
 test('GeoJsonLayer#tests', t => {
   const testCases = generateLayerTests({
@@ -113,6 +114,121 @@ test('GeoJsonLayer#tests', t => {
   });
 
   testLayer({Layer: GeoJsonLayer, testCases, onError: t.notOk});
+
+  t.end();
+});
+
+test('GeoJsonLayer#picking', async t => {
+  await testPickingLayer({
+    layer: new GeoJsonLayer({
+      id: 'geojson',
+      data: FIXTURES.geojson,
+      pickable: true,
+      autoHighlight: true
+    }),
+    testCases: [
+      {
+        pickedColor: new Uint8Array([1, 0, 0, 0]),
+        pickedLayerId: 'geojson-points',
+        mode: 'hover',
+        onAfterUpdate: ({layer, subLayers, info}) => {
+          t.comment('hover over point feature');
+
+          t.ok(info.object.properties, 'info.object populated');
+          t.is(info.object.geometry.type, 'Point', 'info.object populated');
+
+          for (const subLayer of subLayers) {
+            const uniforms = subLayer.getModels()[0].getUniforms();
+            t.is(
+              uniforms.picking_uSelectedColorValid,
+              subLayer.id === 'geojson-points' ? 1 : 0,
+              `auto highlight is set for ${subLayer.id}`
+            );
+            if (uniforms.picking_uSelectedColorValid) {
+              t.deepEqual(
+                uniforms.picking_uSelectedColor,
+                [1, 0, 0],
+                'highlighted index is set correctly'
+              );
+            }
+          }
+        }
+      },
+      {
+        pickedColor: new Uint8Array([2, 0, 0, 0]),
+        pickedLayerId: 'geojson-points',
+        mode: 'hover',
+        onAfterUpdate: ({layer, subLayers, info}) => {
+          t.comment('hover over point feature');
+
+          t.ok(info.object.properties, 'info.object populated');
+          t.is(info.object.geometry.type, 'Point', 'info.object populated');
+
+          for (const subLayer of subLayers) {
+            const uniforms = subLayer.getModels()[0].getUniforms();
+            t.is(
+              uniforms.picking_uSelectedColorValid,
+              subLayer.id === 'geojson-points' ? 1 : 0,
+              `auto highlight is set for ${subLayer.id}`
+            );
+            if (uniforms.picking_uSelectedColorValid) {
+              t.deepEqual(
+                uniforms.picking_uSelectedColor,
+                [2, 0, 0],
+                'highlighted index is set correctly'
+              );
+            }
+          }
+        }
+      },
+      {
+        pickedColor: new Uint8Array([6, 0, 0, 1]),
+        pickedLayerId: 'geojson-polygons-fill',
+        mode: 'hover',
+        onAfterUpdate: ({layer, subLayers, info}) => {
+          t.comment('hover over polygon feature');
+
+          t.ok(info.object.properties, 'info.object populated');
+          t.is(info.object.geometry.type, 'Polygon', 'info.object populated');
+
+          for (const subLayer of subLayers) {
+            const uniforms = subLayer.getModels()[0].getUniforms();
+            t.is(
+              uniforms.picking_uSelectedColorValid,
+              subLayer.id === 'geojson-points' ? 0 : 1,
+              `auto highlight is set for ${subLayer.id}`
+            );
+            if (uniforms.picking_uSelectedColorValid) {
+              t.deepEqual(
+                uniforms.picking_uSelectedColor,
+                [6, 0, 0],
+                'highlighted index is set correctly'
+              );
+            }
+          }
+        }
+      },
+      {
+        pickedColor: new Uint8Array([0, 0, 0, 0]),
+        pickedLayerId: null,
+        mode: 'hover',
+        onAfterUpdate: ({layer, subLayers, info}) => {
+          t.comment('pointer leave');
+
+          t.notOk(info.object, 'info.object is null');
+
+          for (const subLayer of subLayers) {
+            const uniforms = subLayer.getModels()[0].getUniforms();
+            t.is(
+              uniforms.picking_uSelectedColorValid,
+              0,
+              `auto highlight is set for ${subLayer.id}`
+            );
+          }
+        }
+      }
+    ]
+  });
 
   t.end();
 });

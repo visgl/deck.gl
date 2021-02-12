@@ -10,6 +10,8 @@ import {ScatterplotLayer} from '@deck.gl/layers';
 import {WebMercatorViewport} from '@deck.gl/core';
 import {testLayerAsync} from '@deck.gl/test-utils';
 
+import {testPickingLayer} from '../layers/test-picking-layer';
+
 import * as FIXTURES from 'deck.gl-test/data';
 
 const geoJSONData = [
@@ -149,7 +151,7 @@ test('ClipExtension', t => {
   t.end();
 });
 
-test('transformCoordsToWGS84', t => {
+test('MVTLayer#transformCoordsToWGS84', t => {
   const viewport = new WebMercatorViewport({
     latitude: 0,
     longitude: 0,
@@ -166,7 +168,7 @@ test('transformCoordsToWGS84', t => {
   t.end();
 });
 
-test('MVT Highlight', async t => {
+test('MVTLayer#autoHighlight', async t => {
   class TestMVTLayer extends MVTLayer {
     getTileData() {
       return this.props.binary ? geoJSONBinaryData : geoJSONData;
@@ -223,7 +225,61 @@ test('MVT Highlight', async t => {
   t.end();
 });
 
-test('TileJSON', async t => {
+test('MVTLayer#picking', async t => {
+  class TestMVTLayer extends MVTLayer {
+    getTileData() {
+      return geoJSONData;
+    }
+  }
+
+  TestMVTLayer.componentName = 'TestMVTLayer';
+
+  await testPickingLayer({
+    layer: new TestMVTLayer({
+      id: 'mvt',
+      data: ['https://json_2/{z}/{x}/{y}.mvt'],
+      uniqueIdProperty: 'cartodb_id',
+      autoHighlight: true
+    }),
+    viewport: new WebMercatorViewport({
+      latitude: 0,
+      longitude: 0,
+      zoom: 1
+    }),
+    testCases: [
+      {
+        pickedColor: new Uint8Array([1, 0, 0, 0]),
+        pickedLayerId: 'mvt-0-0-1-polygons-fill',
+        mode: 'hover',
+        onAfterUpdate: ({layer, subLayers, info}) => {
+          t.comment('hover over polygon');
+          t.ok(info.object, 'info.object is populated');
+          t.ok(
+            subLayers.every(l => l.props.highlightedObjectIndex === 0),
+            'set sub layers highlightedObjectIndex'
+          );
+        }
+      },
+      {
+        pickedColor: new Uint8Array([0, 0, 0, 0]),
+        pickedLayerId: '',
+        mode: 'hover',
+        onAfterUpdate: ({layer, subLayers, info}) => {
+          t.comment('pointer leave');
+          t.notOk(info.object, 'info.object is not populated');
+          t.ok(
+            subLayers.every(l => l.props.highlightedObjectIndex === -1),
+            'cleared sub layers highlightedObjectIndex'
+          );
+        }
+      }
+    ]
+  });
+
+  t.end();
+});
+
+test('MVTLayer#TileJSON', async t => {
   class TestMVTLayer extends MVTLayer {
     getTileData() {
       return [];
@@ -295,7 +351,7 @@ test('TileJSON', async t => {
   _global.fetch = fetch;
 });
 
-test('MVT dataInWGS84', async t => {
+test('MVTLayer#dataInWGS84', async t => {
   class TestMVTLayer extends MVTLayer {
     getTileData() {
       return this.props.binary ? geoJSONBinaryData : geoJSONData;

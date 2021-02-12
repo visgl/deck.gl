@@ -111,9 +111,7 @@ export function processPickInfo(opts) {
 
     // This guarantees that there will be only one copy of info for
     // one composite layer
-    if (info) {
-      infos.set(info.layer.id, info);
-    }
+    infos.set(info.layer.id, info);
 
     if (mode === 'hover') {
       info.layer.updateAutoHighlight(info);
