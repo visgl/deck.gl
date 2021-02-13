@@ -19,6 +19,11 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v8.4
 
+#### deck.gl [8.4.5] - Feb 12 2021
+
+- Bump loaders.gl dependencies (#5477)
+- Fix ArcLayer with wrapLongitude:true at high zoom (#5478)
+
 #### deck.gl [8.4.4] - Feb 12 2021
 
 - MVT: fix picking non-binary (#5471)
