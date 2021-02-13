@@ -64,8 +64,6 @@ export default class Tile3DLayer extends CompositeLayer {
 
   getPickingInfo({info, sourceLayer}) {
     const {layerMap} = this.state;
-    info.sourceLayer = sourceLayer;
-
     const layerId = sourceLayer && sourceLayer.id;
     if (layerId) {
       // layerId: this.id-[scenegraph|pointcloud]-tileId

@@ -128,7 +128,8 @@ export function getLayerPickingInfo({layer, info, mode}) {
     // where the event originates from.
     // It provides additional context for the composite layer's
     // getPickingInfo() method to populate the info object
-    const sourceLayer = info.layer || layer;
+    const sourceLayer = info.layer || null;
+    info.sourceLayer = sourceLayer;
     info.layer = layer;
     // layer.pickLayer() function requires a non-null ```layer.state```
     // object to function properly. So the layer referenced here

@@ -193,7 +193,6 @@ export default class TileLayer extends CompositeLayer {
   }
 
   getPickingInfo({info, sourceLayer}) {
-    info.sourceLayer = sourceLayer;
     info.tile = sourceLayer.props.tile;
     return info;
   }

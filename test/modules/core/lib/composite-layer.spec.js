@@ -307,18 +307,16 @@ test('CompositeLayer#getSubLayerRow, getSubLayerAccessor', t => {
 
   t.deepEqual(
     layer.getPickingInfo({
-      info: {object: originalRow, index: 1},
-      sourceLayer: null
+      info: {object: originalRow, index: 1}
     }),
-    {object: originalRow, index: 1, sourceLayer: null},
+    {object: originalRow, index: 1},
     'returns correct picking info'
   );
   t.deepEqual(
     layer.getPickingInfo({
-      info: {object: sublayerRow, index: 1},
-      sourceLayer: null
+      info: {object: sublayerRow, index: 1}
     }),
-    {object: originalRow, index: 0, sourceLayer: null},
+    {object: originalRow, index: 0},
     'returns correct picking info'
   );
 
