@@ -32,10 +32,6 @@ test('MapViewState', t => {
   t.is(transitionViewportProps.bearing, 330, 'found shortest path for bearing');
 
   t.throws(
-    () => new MapViewState({longitude: 0, latitude: 0, zoom: 1}),
-    'should throw if missing dimension props'
-  );
-  t.throws(
     () => new MapViewState({width: 400, height: 300}),
     'should throw if missing geospatial props'
   );

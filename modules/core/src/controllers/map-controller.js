@@ -74,9 +74,9 @@ export class MapState extends ViewState {
     /** Zoom when current zoom operation started */
     startZoom
   } = {}) {
-    assert(Number.isFinite(longitude), '`longitude` must be supplied');
-    assert(Number.isFinite(latitude), '`latitude` must be supplied');
-    assert(Number.isFinite(zoom), '`zoom` must be supplied');
+    assert(Number.isFinite(longitude)); // `longitude` must be supplied
+    assert(Number.isFinite(latitude)); // `latitude` must be supplied
+    assert(Number.isFinite(zoom)); // `zoom` must be supplied
 
     super({
       width,
