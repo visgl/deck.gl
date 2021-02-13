@@ -158,10 +158,8 @@ export default class MVTLayer extends TileLayer {
 
     const isWGS84 = this.context.viewport.resolution;
 
-    if (info.object) {
-      if (!isWGS84) {
-        info.object = transformTileCoordsToWGS84(info.object, info.tile, this.context.viewport);
-      }
+    if (info.object && !isWGS84) {
+      info.object = transformTileCoordsToWGS84(info.object, info.tile.bbox, this.context.viewport);
     } else if (this.props.binary && info.index !== -1) {
       // get the feature from the binary at the given index.
       const {data} = params.sourceLayer.props;
