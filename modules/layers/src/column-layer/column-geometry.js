@@ -21,7 +21,7 @@ function tesselateColumn(props) {
   let {vertices} = props;
 
   if (vertices) {
-    log.assert(vertices.length >= nradial);
+    log.assert(vertices.length >= nradial, 'not enough vertices');
     vertices = vertices.flatMap(v => [v[0], v[1]]);
     modifyPolygonWindingDirection(vertices, WINDING.COUNTER_CLOCKWISE);
   }

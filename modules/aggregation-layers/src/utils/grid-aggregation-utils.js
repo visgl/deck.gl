@@ -49,9 +49,10 @@ function getTranslation(boundingBox, gridOffset, coordinateSystem, viewport) {
 
   // Other coordinate systems not supported/verified yet.
   log.assert(
-    [COORDINATE_SYSTEM.CARTESIAN, COORDINATE_SYSTEM.LNGLAT, COORDINATE_SYSTEM.DEFAULT].includes(
-      coordinateSystem
-    )
+    coordinateSystem === COORDINATE_SYSTEM.CARTESIAN ||
+      coordinateSystem === COORDINATE_SYSTEM.LNGLAT ||
+      coordinateSystem === COORDINATE_SYSTEM.DEFAULT,
+    'unsupported coordinateSystem'
   );
 
   const {xMin, yMin} = boundingBox;

@@ -428,7 +428,7 @@ export default class Deck {
     // TODO EventManager should accept element id
     if (typeof canvas === 'string') {
       canvas = document.getElementById(canvas);
-      assert(canvas);
+      assert(canvas, `cannot find canvas #${props.canvas}`);
     }
 
     if (!canvas) {

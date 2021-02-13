@@ -702,7 +702,6 @@ export default class Layer extends Component {
   // Note: not guaranteed to be called on application shutdown
   _finalize() {
     debug(TRACE_FINALIZE, this);
-    assert(this.internalState && this.state);
 
     // Call subclass lifecycle method
     this.finalizeState(this.context);
@@ -951,7 +950,7 @@ export default class Layer extends Component {
   }
 
   _initState() {
-    assert(!this.internalState && !this.state);
+    assert(!this.internalState && !this.state, `finalized layer cannot be reused: ${this.id}`);
     assert(isFinite(this.props.coordinateSystem), `${this.id}: invalid coordinateSystem`);
 
     const attributeManager = this._getAttributeManager();
@@ -1001,7 +1000,6 @@ export default class Layer extends Component {
     debug(TRACE_MATCHED, this, this === oldLayer);
 
     const {state, internalState} = oldLayer;
-    assert(state && internalState);
 
     if (this === oldLayer) {
       return;
