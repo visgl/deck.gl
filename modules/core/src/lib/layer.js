@@ -950,8 +950,8 @@ export default class Layer extends Component {
   }
 
   _initState() {
-    assert(!this.internalState && !this.state, `finalized layer cannot be reused: ${this.id}`);
-    assert(isFinite(this.props.coordinateSystem), `${this.id}: invalid coordinateSystem`);
+    assert(!this.internalState && !this.state); // finalized layer cannot be reused
+    assert(isFinite(this.props.coordinateSystem)); // invalid coordinateSystem
 
     const attributeManager = this._getAttributeManager();
 

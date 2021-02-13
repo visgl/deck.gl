@@ -40,7 +40,7 @@ function validateGeometryAttributes(attributes, useMeshColors) {
   }
   log.assert(
     attributes.positions || attributes.POSITION,
-    'no "postions" or "POSITION" attribute in mesh property.'
+    'no "postions" or "POSITION" attribute in mesh'
   );
 }
 
