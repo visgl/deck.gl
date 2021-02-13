@@ -39,6 +39,6 @@
     "gl-matrix": "^3.0.0",
     "math.gl": "^3.4.2",
     "mjolnir.js": "^2.5.0",
-    "probe.gl": "^3.2.1"
+    "probe.gl": "^3.3.1"
   }
 }
