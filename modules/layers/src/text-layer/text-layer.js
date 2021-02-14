@@ -38,7 +38,8 @@ const DEFAULT_FONT_SETTINGS = {
   buffer: DEFAULT_BUFFER,
   sdf: false,
   radius: DEFAULT_RADIUS,
-  cutoff: DEFAULT_CUTOFF
+  cutoff: DEFAULT_CUTOFF,
+  smoothing: 0.1
 };
 
 const TEXT_ANCHOR = {
@@ -76,6 +77,8 @@ const defaultProps = {
   fontFamily: DEFAULT_FONT_FAMILY,
   fontWeight: DEFAULT_FONT_WEIGHT,
   lineHeight: DEFAULT_LINE_HEIGHT,
+  outlineWidth: {type: 'number', value: 0, min: 0},
+  outlineColor: {type: 'color', value: DEFAULT_COLOR},
   fontSettings: {},
 
   // auto wrapping options
@@ -296,6 +299,8 @@ export default class TextLayer extends CompositeLayer {
       background,
       billboard,
       fontSettings,
+      outlineWidth,
+      outlineColor,
       sizeScale,
       sizeUnits,
       sizeMinPixels,
@@ -369,6 +374,11 @@ export default class TextLayer extends CompositeLayer {
       new CharactersLayerClass(
         {
           sdf: fontSettings.sdf,
+          smoothing: Number.isFinite(fontSettings.smoothing)
+            ? fontSettings.smoothing
+            : DEFAULT_FONT_SETTINGS.smoothing,
+          outlineWidth,
+          outlineColor,
           iconAtlas: texture,
           iconMapping: mapping,
 

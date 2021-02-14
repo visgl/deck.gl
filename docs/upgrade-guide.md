@@ -3,6 +3,7 @@
 ## Upgrading from deck.gl v8.4 to v8.5
 
 - `TextLayer`'s `backgroundColor` prop is deprecated. Use `background: true` and `getBackgroundColor` instead.
+- `TextLayer`'s default `fontSettings` have changed. When using `sdf`, the default `buffer` is now `4` and the default `radius` is now `12`.
 
 ## Upgrading from deck.gl v8.3 to v8.4
 

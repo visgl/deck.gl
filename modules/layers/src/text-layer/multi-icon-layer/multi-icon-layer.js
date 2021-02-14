@@ -19,34 +19,26 @@
 // THE SOFTWARE.
 
 import GL from '@luma.gl/constants';
+import {log} from '@deck.gl/core';
 import IconLayer from '../../icon-layer/icon-layer';
 
 import fs from './multi-icon-layer-fragment.glsl';
 
 // TODO expose as layer properties
-const DEFAULT_GAMMA = 0.2;
 const DEFAULT_BUFFER = 192.0 / 256;
 const EMPTY_ARRAY = [];
 
 const defaultProps = {
   getIconOffsets: {type: 'accessor', value: x => x.offsets},
-  alphaCutoff: 0.001
+  alphaCutoff: 0.001,
+  smoothing: 0.1,
+  outlineWidth: 0,
+  outlineColor: {type: 'color', value: [0, 0, 0, 255]}
 };
 
 export default class MultiIconLayer extends IconLayer {
   getShaders() {
-    return Object.assign({}, super.getShaders(), {
-      inject: {
-        'vs:#decl': `
-  uniform float gamma;
-  varying float vGamma;
-`,
-        'vs:#main-end': `
-  vGamma = gamma / (sizeScale * iconSize.y);
-`
-      },
-      fs
-    });
+    return {...super.getShaders(), fs};
   }
 
   initializeState() {
@@ -66,16 +58,37 @@ export default class MultiIconLayer extends IconLayer {
     });
   }
 
+  updateState(params) {
+    super.updateState(params);
+    const {props, oldProps} = params;
+    let {outlineColor} = props;
+
+    if (outlineColor !== oldProps.outlineColor) {
+      outlineColor = outlineColor.map(x => x / 255);
+      outlineColor[3] = Number.isFinite(outlineColor[3]) ? outlineColor[3] : 1;
+
+      this.setState({
+        outlineColor
+      });
+    }
+    if (!props.sdf && props.outlineWidth) {
+      log.warn(`${this.id}: fontSettings.sdf is required to render outline`)();
+    }
+  }
+
   draw({uniforms}) {
-    const {sdf} = this.props;
+    const {sdf, smoothing, outlineWidth} = this.props;
+    const {outlineColor} = this.state;
 
     super.draw({
       uniforms: Object.assign({}, uniforms, {
         // Refer the following doc about gamma and buffer
         // https://blog.mapbox.com/drawing-text-with-signed-distance-fields-in-mapbox-gl-b0933af6f817
         buffer: DEFAULT_BUFFER,
-        gamma: DEFAULT_GAMMA,
-        sdf: Boolean(sdf)
+        outlineBuffer: outlineWidth ? Math.max(smoothing, DEFAULT_BUFFER * (1 - outlineWidth)) : -1,
+        gamma: smoothing,
+        sdf: Boolean(sdf),
+        outlineColor
       })
     });
   }
