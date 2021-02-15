@@ -1,5 +1,11 @@
 import {ColumnLayer, GridCellLayer} from '@deck.gl/layers';
+import GL from '@luma.gl/constants';
 import {hexagons, worldGrid} from 'deck.gl-test/data';
+
+const parameters = {
+  cull: true,
+  cullFace: GL.BACK
+};
 
 export default [
   {
@@ -18,7 +24,8 @@ export default [
         cellSize: worldGrid.cellSize,
         extruded: true,
         getFillColor: g => [245, 166, g.value * 255, 255],
-        getElevation: h => h.value * 5000
+        getElevation: h => h.value * 5000,
+        parameters
       })
     ],
     goldenImage: './test/render/golden-images/gridcell-lnglat.png'
@@ -43,7 +50,8 @@ export default [
         extruded: true,
         getPosition: h => h.centroid,
         getFillColor: h => [48, 128, h.value * 255, 255],
-        getElevation: h => h.value * 5000
+        getElevation: h => h.value * 5000,
+        parameters
       })
     ],
     goldenImage: './test/render/golden-images/column-lnglat.png'
@@ -71,7 +79,8 @@ export default [
         getPosition: h => h.centroid,
         getFillColor: h => [48, 128, h.value * 255, 255],
         getLineColor: [255, 255, 255],
-        getLineWidth: 4
+        getLineWidth: 4,
+        parameters
       })
     ],
     goldenImage: './test/render/golden-images/column-lnglat-stroke.png'

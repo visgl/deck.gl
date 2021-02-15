@@ -33,8 +33,8 @@ test('ColumnGeometry#tesselation', t => {
   let geometry = new ColumnGeometry({radius: 1, height: 1, nradial: 4});
   let attributes = geometry.getAttributes();
 
-  t.is(attributes.POSITION.value.length, 5 * 3 * 3, 'POSITION has correct size');
-  t.is(attributes.NORMAL.value.length, 5 * 3 * 3, 'NORMAL has correct size');
+  t.is(attributes.POSITION.value.length, (5 * 3 + 1) * 3, 'POSITION has correct size');
+  t.is(attributes.NORMAL.value.length, (5 * 3 + 1) * 3, 'NORMAL has correct size');
   t.is(attributes.indices.value.length, 4 * 3 * 2, 'indices has correct size');
 
   // prettier-ignore
@@ -80,8 +80,8 @@ test('ColumnGeometry#tesselation', t => {
   // prettier-ignore
   t.ok(equals(attributes.POSITION.value, [
     1, 0, 0,
-    0, -1, 0,
     0, 1, 0,
+    0, -1, 0,
     -1, 0, 0
   ]), 'positions generated');
 

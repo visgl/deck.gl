@@ -1,4 +1,6 @@
 import {HexagonLayer} from '@deck.gl/aggregation-layers';
+import GL from '@luma.gl/constants';
+
 import * as dataSamples from 'deck.gl-test/data';
 
 import {getMean, getMax} from './grid-layer';
@@ -11,6 +13,11 @@ const VIEW_STATE = {
   bearing: 0
 };
 
+const parameters = {
+  cull: true,
+  cullFace: GL.BACK
+};
+
 const PROPS = {
   data: dataSamples.points,
   extruded: true,
@@ -18,7 +25,8 @@ const PROPS = {
   elevationScale: 1,
   elevationRange: [0, 3000],
   coverage: 1,
-  getPosition: d => d.COORDINATES
+  getPosition: d => d.COORDINATES,
+  parameters
 };
 
 const GOLDEN_IMAGE = './test/render/golden-images/hexagon-lnglat.png';
@@ -53,5 +61,20 @@ export default [
       )
     ],
     goldenImage: GOLDEN_IMAGE
+  },
+  {
+    name: 'hexagon-lnglat-flat',
+    viewState: VIEW_STATE,
+    layers: [
+      new HexagonLayer(
+        Object.assign({}, PROPS, {
+          extruded: false,
+          id: 'hexagon-lnglat-flat',
+          getColorValue: points => getMean(points, 'SPACES'),
+          getElevationValue: points => getMax(points, 'SPACES')
+        })
+      )
+    ],
+    goldenImage: './test/render/golden-images/hexagon-lnglat-flat.png'
   }
 ];
