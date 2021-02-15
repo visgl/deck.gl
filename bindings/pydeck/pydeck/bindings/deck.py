@@ -188,3 +188,8 @@ class Deck(JSONMixin):
             **kwargs,
         )
         return f
+
+    def _repr_html_(self):
+        # doesn't actually need the HTML packaging in iframe_with_srcdoc,
+        # so we just take the HTML.data part
+        return self.to_html(notebook_display=True).data

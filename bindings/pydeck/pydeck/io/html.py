@@ -3,6 +3,7 @@ import os
 from os.path import relpath, realpath, join, dirname
 import sys
 import tempfile
+import textwrap
 import time
 import warnings
 import webbrowser
@@ -87,14 +88,30 @@ def display_html(filename):
 
 
 def iframe_with_srcdoc(html_str, width="100%", height=500):
-    width = '"{}"'.format(width) if type(width) == str else width
-    iframe = """<iframe src="about:blank" frameborder="0" srcdoc="{}" width={} height={}></iframe>""".format(
-        html.escape(html_str), width, height
+    if isinstance(width, str):
+        width = '"{}"'.format(width)
+
+    iframe = """
+        <iframe
+            width={width}
+            height={height}
+            frameborder="0"
+            srcdoc="{srcdoc}"
+        ></iframe>
+    """
+
+    iframe = textwrap.dedent(iframe).strip()
+    iframe = iframe.format(
+        width=width,
+        height=height,
+        srcdoc=html.escape(html_str),
     )
+
     from IPython.display import HTML  # noqa
 
     with warnings.catch_warnings():
-        warnings.filterwarnings("ignore", message="Consider using IPython.display.iframe instead")
+        msg = "Consider using IPython.display.iframe instead"
+        warnings.filterwarnings("ignore", message=msg)
         return HTML(iframe)
 
 
