@@ -135,6 +135,13 @@ export default class BitmapLayer extends Layer {
     return info;
   }
 
+  _updateAutoHighlight(info) {
+    super._updateAutoHighlight({
+      ...info,
+      color: this.encodePickingColor(0)
+    });
+  }
+
   _createMesh() {
     const {bounds} = this.props;
 

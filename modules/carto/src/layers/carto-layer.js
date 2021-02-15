@@ -45,11 +45,6 @@ export default class CartoLayer extends CompositeLayer {
     throw new Error('You must use one of the specific carto layers: BQ or SQL type');
   }
 
-  onHover(info, pickingEvent) {
-    const [mvtLayer] = this.getSubLayers();
-    return mvtLayer ? mvtLayer.onHover(info, pickingEvent) : super.onHover(info, pickingEvent);
-  }
-
   renderLayers() {
     if (!this.state.tilejson) return null;
 
