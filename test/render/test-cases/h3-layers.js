@@ -1,12 +1,6 @@
 import {H3HexagonLayer, H3ClusterLayer} from '@deck.gl/geo-layers';
-import GL from '@luma.gl/constants';
 
 import * as h3 from 'h3-js';
-
-const parameters = {
-  cull: true,
-  cullFace: GL.BACK
-};
 
 export default [
   {
@@ -24,8 +18,7 @@ export default [
         opacity: 0.8,
         getHexagon: d => d,
         getFillColor: (d, {index}) => [255, index * 5, 0],
-        getElevation: (d, {index}) => index * 100,
-        parameters
+        getElevation: (d, {index}) => index * 100
       })
     ],
     goldenImage: './test/render/golden-images/h3-hexagon.png'
@@ -45,8 +38,7 @@ export default [
         opacity: 0.8,
         getHexagon: d => d,
         getFillColor: (d, {index}) => [255, index * 5, 0],
-        getElevation: (d, {index}) => index * 10,
-        parameters
+        getElevation: (d, {index}) => index * 10
       })
     ],
     goldenImage: './test/render/golden-images/h3-hexagon-high-precision.png'
@@ -69,8 +61,7 @@ export default [
         stroked: true,
         getFillColor: (d, {index}) => [255, index * 5, 0],
         getLineColor: [255, 255, 255],
-        lineWidthMinPixels: 2,
-        parameters
+        lineWidthMinPixels: 2
       })
     ],
     goldenImage: './test/render/golden-images/h3-hexagon-flat.png'
@@ -94,8 +85,7 @@ export default [
         highPrecision: true,
         getFillColor: (d, {index}) => [255, index * 5, 0],
         getLineColor: [255, 255, 255],
-        lineWidthMinPixels: 2,
-        parameters
+        lineWidthMinPixels: 2
       })
     ],
     goldenImage: './test/render/golden-images/h3-hexagon-flat.png'
@@ -118,8 +108,7 @@ export default [
         filled: false,
         stroked: true,
         getLineColor: [0, 0, 0],
-        lineWidthMinPixels: 2,
-        parameters
+        lineWidthMinPixels: 2
       })
     ],
     goldenImage: './test/render/golden-images/h3-hexagon-low-zoom.png'
@@ -140,8 +129,7 @@ export default [
         getHexagons: d => h3.kRing(d, 6),
         getLineWidth: 100,
         stroked: true,
-        filled: false,
-        parameters
+        filled: false
       })
     ],
     goldenImage: './test/render/golden-images/h3-cluster.png'
