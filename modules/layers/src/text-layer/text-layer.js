@@ -304,7 +304,7 @@ export default class TextLayer extends CompositeLayer {
       updateTriggers
     } = this.props;
 
-    const CharacgtersLayerClass = this.getSubLayerClass('characters', MultiIconLayer);
+    const CharactersLayerClass = this.getSubLayerClass('characters', MultiIconLayer);
     const BackgroundLayerClass = this.getSubLayerClass('background', TextBackgroundLayer);
 
     return [
@@ -366,7 +366,7 @@ export default class TextLayer extends CompositeLayer {
             getBoundingRect: this.getBoundingRect.bind(this)
           }
         ),
-      new CharacgtersLayerClass(
+      new CharactersLayerClass(
         {
           sdf: fontSettings.sdf,
           iconAtlas: texture,
