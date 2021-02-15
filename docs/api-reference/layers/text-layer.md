@@ -106,12 +106,17 @@ The maximum size in pixels.
 
 If on, the text always faces camera. Otherwise the text faces up (z).
 
-##### `backgroundColor` (Array, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
+##### `background` (Boolean, optional)
 
-- Default `null`
+- Default `false`
 
-The color to use for text background, in `[r, g, b]`. Each component is in the `[0, 255]` range.
-The alpha of the background matches the opacity of each object, controlled by the props `getColor` and `opacity`.
+Whether to render background for the text blocks.
+
+##### `backgroundPadding` (Array, optional)
+
+- Default `[0, 0]`
+
+The padding of the background, `[padding_x, padding_y]` in pixels.
 
 ##### `fontFamily` (String, optional)
 
@@ -236,11 +241,45 @@ Screen space offset relative to the `coordinates` in pixel unit.
 * If a function is provided, it is called on each object to retrieve its offset.
 
 
+##### `getBackgroundColor` ([Function](/docs/developer-guide/using-layers.md#accessors)|Array, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
+
+* Default: `[255, 255, 255, 255]`
+
+The background color. Only effective if `background: true`.
+
+The rgba color is in the format of `[r, g, b, [a]]`. Each channel is a number between 0-255 and `a` is 255 if not supplied.
+
+* If an array is provided, it is used as the background color for all objects.
+* If a function is provided, it is called on each object to retrieve its background color.
+
+##### `getBorderColor` ([Function](/docs/developer-guide/using-layers.md#accessors)|Array, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
+
+* Default: `[0, 0, 0, 255]`
+
+The border color of the background. Only effective if `background: true`.
+
+The rgba color is in the format of `[r, g, b, [a]]`. Each channel is a number between 0-255 and `a` is 255 if not supplied.
+
+* If an array is provided, it is used as the border color for all objects.
+* If a function is provided, it is called on each object to retrieve its border color.
+
+
+##### `getBorderWidth` ([Function](/docs/developer-guide/using-layers.md#accessors)|Number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
+
+* Default: `0`
+
+The border thickness of each text label, in pixels. Only effective if `background: true`.
+
+* If a number is provided, it is used as the border thickness for all objects.
+* If a function is provided, it is called on each object to retrieve its border thickness.
+
+
 ## Sub Layers
 
 The TextLayer renders the following sublayers:
 
 * `characters` - an `IconLayer` rendering all the characters.
+* `background` - the background for each text block, if `background: true`.
 
 
 ## Use binary attributes
@@ -305,10 +344,50 @@ new TextLayer({
     startIndices: startIndices, // this is required to render the texts correctly!
     attributes: {
       getText: {value: texts},
-      getPosition: {value: positions, size: 2}
+      getPosition: {value: positions, size: 2},
       getColor: {value: colors, size: 3}
     }
   }
+})
+```
+
+### Use binary attributes with background
+
+To use `background: true` with binary data, the background attributes must be supplied separately via `data.attributes.background`. Each attribute is packed with *one vertex* per object.
+
+`data.attributes.background` may contain the following keys:
+
+- `getPosition`: corresponds to the `getPosition` accessor
+- `getAngle`: corresponds to the `getAngle` accessor
+- `getSize`: corresponds to the `getSize` accessor
+- `getPixelOffset`: corresponds to the `getPixelOffset` accessor
+- `getFillColor`: corresponds to the `getBackgroundColor` accessor
+- `getLineColor`: corresponds to the `getBorderColor` accessor
+- `getLineWidth`: corresponds to the `getBorderWidth` accessor
+
+Following the above example, additional attributes are required to render the background:
+
+```js
+// The background position attribute supplies one position for each text block
+const backgroundPositions = new Float64Array(TEXT_DATA.map(d => d.position).flat());
+// The background color attribute supplies one color for each text block
+const backgroundColors = new Uint8Array(TEXT_DATA.map(d => d.bgColor).flat());
+
+new TextLayer({
+  data: {
+    length: TEXT_DATA.length,
+    startIndices: startIndices, // this is required to render the texts correctly!
+    attributes: {
+      getText: {value: texts},
+      getPosition: {value: positions, size: 2},
+      getColor: {value: colors, size: 3},
+      background: {
+        getPosition: {value: backgroundPosition, size: 2},
+        getFillColor: {value: backgroundColors, size: 3}
+      }
+    }
+  },
+  background: true
 })
 ```
 
