@@ -62,7 +62,7 @@ export default class Tesselator {
 
     // Handle external logical value
     if (geometryBuffer) {
-      assert(data.startIndices, 'binary data missing startIndices');
+      assert(data.startIndices); // binary data missing startIndices
       this.getGeometry = this.getGeometryFromBuffer(geometryBuffer);
 
       if (!normalize) {
@@ -104,7 +104,7 @@ export default class Tesselator {
 
   getGeometryFromBuffer(geometryBuffer) {
     const value = geometryBuffer.value || geometryBuffer;
-    assert(ArrayBuffer.isView(value), 'cannot read geometries');
+    assert(ArrayBuffer.isView(value)); // invalid binary geometries
 
     return getAccessorFromBuffer(value, {
       size: this.positionSize,

@@ -702,7 +702,6 @@ export default class Layer extends Component {
   // Note: not guaranteed to be called on application shutdown
   _finalize() {
     debug(TRACE_FINALIZE, this);
-    assert(this.internalState && this.state);
 
     // Call subclass lifecycle method
     this.finalizeState(this.context);
@@ -864,6 +863,26 @@ export default class Layer extends Component {
     }
   }
 
+  updateAutoHighlight(info) {
+    if (this.props.autoHighlight) {
+      this._updateAutoHighlight(info);
+    }
+  }
+
+  // May be overriden by classes
+  _updateAutoHighlight(info) {
+    const pickingModuleParameters = {
+      pickingSelectedColor: info.picked ? info.color : null
+    };
+    const {highlightColor} = this.props;
+    if (info.picked && typeof highlightColor === 'function') {
+      pickingModuleParameters.pickingHighlightColor = highlightColor(info);
+    }
+    this.setModuleParameters(pickingModuleParameters);
+    // setModuleParameters does not trigger redraw
+    this.setNeedsRedraw();
+  }
+
   // PRIVATE METHODS
   _updateModules({props, oldProps}, forceUpdate) {
     // Picking module parameters
@@ -931,8 +950,8 @@ export default class Layer extends Component {
   }
 
   _initState() {
-    assert(!this.internalState && !this.state);
-    assert(isFinite(this.props.coordinateSystem), `${this.id}: invalid coordinateSystem`);
+    assert(!this.internalState && !this.state); // finalized layer cannot be reused
+    assert(isFinite(this.props.coordinateSystem)); // invalid coordinateSystem
 
     const attributeManager = this._getAttributeManager();
 
@@ -981,7 +1000,6 @@ export default class Layer extends Component {
     debug(TRACE_MATCHED, this, this === oldLayer);
 
     const {state, internalState} = oldLayer;
-    assert(state && internalState);
 
     if (this === oldLayer) {
       return;

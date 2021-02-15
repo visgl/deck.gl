@@ -25,7 +25,6 @@ import * as vec4 from 'gl-matrix/vec4';
 import {COORDINATE_SYSTEM, PROJECTION_MODE} from '../../lib/constants';
 
 import memoize from '../../utils/memoize';
-import assert from '../../utils/assert';
 
 // To quickly set a vector to zero
 const ZERO_VECTOR = [0, 0, 0, 0];
@@ -175,13 +174,8 @@ export function getUniformsFromViewport({
   // Match Layer.defaultProps
   coordinateSystem = COORDINATE_SYSTEM.DEFAULT,
   coordinateOrigin,
-  autoWrapLongitude = false,
-  // Deprecated
-  projectionMode,
-  positionOrigin
+  autoWrapLongitude = false
 } = {}) {
-  assert(viewport);
-
   if (coordinateSystem === COORDINATE_SYSTEM.DEFAULT) {
     coordinateSystem = viewport.isGeospatial
       ? COORDINATE_SYSTEM.LNGLAT

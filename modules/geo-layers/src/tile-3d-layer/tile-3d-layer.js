@@ -75,6 +75,12 @@ export default class Tile3DLayer extends CompositeLayer {
     return info;
   }
 
+  _updateAutoHighlight(info) {
+    if (info.sourceLayer) {
+      info.sourceLayer.updateAutoHighlight(info);
+    }
+  }
+
   async _loadTileset(tilesetUrl) {
     const {loadOptions} = this.props;
 

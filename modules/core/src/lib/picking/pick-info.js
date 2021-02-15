@@ -111,21 +111,10 @@ export function processPickInfo(opts) {
 
     // This guarantees that there will be only one copy of info for
     // one composite layer
-    if (info) {
-      infos.set(info.layer.id, info);
-    }
+    infos.set(info.layer.id, info);
 
-    if (mode === 'hover' && layer.props.autoHighlight) {
-      const pickingModuleParameters = {
-        pickingSelectedColor: pickedLayer === layer ? pickedColor : null
-      };
-      const {highlightColor} = layer.props;
-      if (pickedLayer === layer && typeof highlightColor === 'function') {
-        pickingModuleParameters.pickingHighlightColor = highlightColor(info);
-      }
-      layer.setModuleParameters(pickingModuleParameters);
-      // setModuleParameters does not trigger redraw
-      layer.setNeedsRedraw();
+    if (mode === 'hover') {
+      info.layer.updateAutoHighlight(info);
     }
   });
 
@@ -139,7 +128,8 @@ export function getLayerPickingInfo({layer, info, mode}) {
     // where the event originates from.
     // It provides additional context for the composite layer's
     // getPickingInfo() method to populate the info object
-    const sourceLayer = info.layer || layer;
+    const sourceLayer = info.layer || null;
+    info.sourceLayer = sourceLayer;
     info.layer = layer;
     // layer.pickLayer() function requires a non-null ```layer.state```
     // object to function properly. So the layer referenced here
