@@ -20,7 +20,6 @@
 
 /* eslint-disable max-statements, complexity */
 import TransitionManager from './transition-manager';
-import assert from '../utils/assert';
 
 const NO_TRANSITION_PROPS = {
   transitionDuration: 0
@@ -40,7 +39,6 @@ const EVENT_TYPES = {
 
 export default class Controller {
   constructor(ControllerState, options = {}) {
-    assert(ControllerState);
     this.ControllerState = ControllerState;
     this.controllerState = null;
     this.controllerStateProps = null;
@@ -189,6 +187,11 @@ export default class Controller {
       this.eventManager = props.eventManager;
       this._events = {};
       this.toggleEvents(this._customEvents, true);
+    }
+
+    if (!('transitionInterpolator' in props)) {
+      // Add default transition interpolator
+      props.transitionInterpolator = this._getTransitionProps().transitionInterpolator;
     }
 
     this.transitionManager.processViewStateChange(props);

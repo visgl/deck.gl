@@ -125,7 +125,6 @@ export default class Attribute extends DataColumn {
     }
 
     if (settings.update) {
-      assert(Number.isFinite(numInstances));
       super.allocate({
         numInstances,
         copy: state.updateRanges !== range.FULL

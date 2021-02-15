@@ -47,11 +47,11 @@ function getTranslation(boundingBox, gridOffset, coordinateSystem, viewport) {
   const worldOrigin =
     coordinateSystem === COORDINATE_SYSTEM.CARTESIAN ? [-width / 2, -height / 2] : [-180, -90];
 
-  // Other coordinate systems not supported/verified yet.
+  // Other coordinate systems not supported/verified yet
   log.assert(
-    [COORDINATE_SYSTEM.CARTESIAN, COORDINATE_SYSTEM.LNGLAT, COORDINATE_SYSTEM.DEFAULT].includes(
-      coordinateSystem
-    )
+    coordinateSystem === COORDINATE_SYSTEM.CARTESIAN ||
+      coordinateSystem === COORDINATE_SYSTEM.LNGLAT ||
+      coordinateSystem === COORDINATE_SYSTEM.DEFAULT
   );
 
   const {xMin, yMin} = boundingBox;

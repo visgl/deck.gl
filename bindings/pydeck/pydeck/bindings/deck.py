@@ -108,7 +108,7 @@ class Deck(JSONMixin):
         for provider in BaseMapProvider:
             attr_name = f"{provider.value}_key"
             provider_env_var = f"{provider.name}_API_KEY"
-            attr_value = api_keys.get(provider) or os.getenv(provider_env_var)
+            attr_value = api_keys.get(provider.value) or os.getenv(provider_env_var)
             setattr(self, attr_name, attr_value)
             setattr(self.deck_widget, attr_name, attr_value)
 

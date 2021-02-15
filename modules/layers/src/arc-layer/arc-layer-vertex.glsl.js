@@ -198,8 +198,14 @@ void main(void) {
     source = project_position(source_world, instanceSourcePositions64Low);
     target = project_position(target_world, instanceTargetPositions64Low);
 
+    // common x at longitude=-180
+    float antiMeridianX = 0.0;
+
     if (useShortestPath) {
-      float thresholdRatio = -source.x / (target.x - source.x);
+      if (project_uProjectionMode == PROJECTION_MODE_WEB_MERCATOR_AUTO_OFFSET) {
+        antiMeridianX = -(project_uCoordinateOrigin.x + 180.) / 360. * TILE_SIZE;
+      }
+      float thresholdRatio = (antiMeridianX - source.x) / (target.x - source.x);
 
       if (prevSegmentRatio <= thresholdRatio && nextSegmentRatio > thresholdRatio) {
         isValid = 0.0;
@@ -213,7 +219,7 @@ void main(void) {
     vec3 nextPos = interpolateFlat(source, target, nextSegmentRatio);
 
     if (useShortestPath) {
-      if (nextPos.x < 0.0) {
+      if (nextPos.x < antiMeridianX) {
         currPos.x += TILE_SIZE;
         nextPos.x += TILE_SIZE;
       }

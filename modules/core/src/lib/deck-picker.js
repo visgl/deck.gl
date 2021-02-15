@@ -27,7 +27,6 @@ import {
   cssToDevicePixels
 } from '@luma.gl/core';
 import GL from '@luma.gl/constants';
-import assert from '../utils/assert';
 import log from '../utils/log';
 import PickLayersPass from '../passes/pick-layers-pass';
 import {getClosestObject, getUniqueObjects} from './picking/query-object';
@@ -371,8 +370,6 @@ export default class DeckPicker {
     redrawReason,
     pickZ
   }) {
-    assert(deviceRect.width > 0 && deviceRect.height > 0);
-
     if (layers.length < 1) {
       return null;
     }
