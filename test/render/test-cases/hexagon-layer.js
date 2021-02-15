@@ -1,5 +1,4 @@
 import {HexagonLayer} from '@deck.gl/aggregation-layers';
-
 import * as dataSamples from 'deck.gl-test/data';
 
 import {getMean, getMax} from './grid-layer';
