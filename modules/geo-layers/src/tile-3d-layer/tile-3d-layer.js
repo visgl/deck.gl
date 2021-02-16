@@ -229,8 +229,10 @@ export default class Tile3DLayer extends CompositeLayer {
     const content = tileHeader.content;
     const {modelMatrix, cartographicOrigin, texture} = content;
     const attributes = {};
-    attributes.positions = content.attributes.positions;
-    attributes.positions.value = new Float32Array(attributes.positions.value);
+    attributes.positions = {
+      ...content.attributes.positions,
+      value: new Float32Array(content.attributes.positions.value)
+    };
     if (content.attributes.normals) {
       attributes.normals = content.attributes.normals;
     }
