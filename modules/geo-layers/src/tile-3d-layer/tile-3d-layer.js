@@ -227,24 +227,13 @@ export default class Tile3DLayer extends CompositeLayer {
 
   _makeSimpleMeshLayer(tileHeader, oldLayer) {
     const content = tileHeader.content;
-    const {modelMatrix, cartographicOrigin, texture} = content;
-    const attributes = {};
-    attributes.positions = {
-      ...content.attributes.positions,
-      value: new Float32Array(content.attributes.positions.value)
-    };
-    if (content.attributes.normals) {
-      attributes.normals = content.attributes.normals;
-    }
-    if (content.attributes.texCoords) {
-      attributes.texCoords = content.attributes.texCoords;
-    }
+    const {attributes, modelMatrix, cartographicOrigin, texture} = content;
 
     const geometry =
       (oldLayer && oldLayer.props.mesh) ||
       new Geometry({
         drawMode: GL.TRIANGLES,
-        attributes
+        attributes: this._takeNecessaryAttributes(attributes)
       });
 
     const SubLayerClass = this.getSubLayerClass('mesh', SimpleMeshLayer);
@@ -265,6 +254,21 @@ export default class Tile3DLayer extends CompositeLayer {
         coordinateSystem: COORDINATE_SYSTEM.METER_OFFSETS
       }
     );
+  }
+
+  _takeNecessaryAttributes(contentAttributes) {
+    const attributes = {};
+    attributes.positions = {
+      ...contentAttributes.positions,
+      value: new Float32Array(contentAttributes.positions.value)
+    };
+    if (contentAttributes.normals) {
+      attributes.normals = contentAttributes.normals;
+    }
+    if (contentAttributes.texCoords) {
+      attributes.texCoords = contentAttributes.texCoords;
+    }
+    return attributes;
   }
 
   renderLayers() {
