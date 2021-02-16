@@ -29,7 +29,7 @@ function tesselateColumn(props) {
   const isExtruded = height > 0;
   const vertsAroundEdge = nradial + 1; // loop
   const numVertices = isExtruded
-    ? vertsAroundEdge * 3 // top, side top edge, side bottom edge
+    ? vertsAroundEdge * 3 + 1 // top, side top edge, side bottom edge, one additional degenerage vertex
     : nradial; // top
 
   const stepAngle = (Math.PI * 2) / nradial;
@@ -66,7 +66,17 @@ function tesselateColumn(props) {
         i += 3;
       }
     }
+
+    // duplicate the last vertex to create proper degenerate triangle.
+    positions[i + 0] = positions[i - 3];
+    positions[i + 1] = positions[i - 2];
+    positions[i + 2] = positions[i - 1];
+    i += 3;
   }
+
+  // The column geometry is rendered as a triangle strip, so
+  // in order to render sides and top in one go we need to use degenerate triangles.
+  // Duplicate last vertex of side trinagles and first vertex of the top cap to preserve winding order.
 
   // top tesselation: 0, -1, 1, -2, 2, -3, 3, ...
   //
@@ -79,7 +89,7 @@ function tesselateColumn(props) {
   //   -3 -- 4
   //
   for (let j = isExtruded ? 0 : 1; j < vertsAroundEdge; j++) {
-    const v = Math.floor(j / 2) * Math.sign((j % 2) - 0.5);
+    const v = Math.floor(j / 2) * Math.sign(0.5 - (j % 2));
     const a = v * stepAngle;
     const vertexIndex = (v + nradial) % nradial;
     const sin = Math.sin(a);

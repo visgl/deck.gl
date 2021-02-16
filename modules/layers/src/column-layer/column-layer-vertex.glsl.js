@@ -69,7 +69,7 @@ void main(void) {
   } else if (isStroke) {
     float widthPixels = clamp(project_size_to_pixel(instanceStrokeWidths * widthScale),
       widthMinPixels, widthMaxPixels) / 2.0;
-    strokeOffsetRatio += sign(positions.z) * project_pixel_size(widthPixels) / project_size(edgeDistance * coverage * radius);
+    strokeOffsetRatio -= sign(positions.z) * project_pixel_size(widthPixels) / project_size(edgeDistance * coverage * radius);
   }
 
   // if alpha == 0.0 or z < 0.0, do not render element
