@@ -251,7 +251,7 @@ export function transformParagraph(paragraph, lineHeight, wordBreak, maxWidth, i
         }
 
         rowOffsetTop = rowOffsetTop + rowSize[1] * lineHeight;
-        size[0] = autoWrappingEnabled ? maxWidth : Math.max(size[0], rowSize[0]);
+        size[0] = Math.max(size[0], rowSize[0]);
       }
       lineStartIndex = lineEndIndex;
     }

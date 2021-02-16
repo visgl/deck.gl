@@ -9,6 +9,7 @@ test('TextLayer', t => {
     Layer: TextLayer,
     sampleProps: {
       data: FIXTURES.points,
+      background: true,
       getText: d => d.ADDRESS,
       getPosition: d => d.COORDINATES
     },
