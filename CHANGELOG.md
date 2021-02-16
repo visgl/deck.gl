@@ -19,6 +19,11 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v8.4
 
+#### deck.gl [8.4.6] - Feb 16 2021
+
+- Fix for inconsistent column geometry's top cap winding order (#5492)
+- Tile3DLayer - fix render when normals are missing (#5485)
+
 #### deck.gl [8.4.5] - Feb 12 2021
 
 - Bump loaders.gl dependencies (#5477)
