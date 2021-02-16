@@ -1,15 +1,17 @@
 import {ColumnLayer, GridCellLayer} from '@deck.gl/layers';
 import GL from '@luma.gl/constants';
-import {hexagons, worldGrid, polygonCW, polygonCCW} from 'deck.gl-test/data';
+import {hexagons, worldGrid} from 'deck.gl-test/data';
 
 const cullBackParameters = {
   cull: true,
   cullFace: GL.BACK
 };
 
-function genColumnLayerTestCase(name, props, visState) {
+export const polygonCCW = [[1, 0, 0], [0.3, 1, 0], [-0.6, 1, 0], [-1, -0.3, 0], [0, -1, 0]];
+
+function genColumnLayerTestCase(settings, props = {}, visState = {}) {
   return {
-    name,
+    name: settings.name,
     viewState: {
       latitude: 37.751537058389985,
       longitude: -122.42694203247012,
@@ -21,7 +23,7 @@ function genColumnLayerTestCase(name, props, visState) {
     },
     layers: [
       new ColumnLayer({
-        id: name,
+        id: settings.name,
         data: hexagons,
         radius: 250,
         angle: Math.PI / 2,
@@ -32,7 +34,7 @@ function genColumnLayerTestCase(name, props, visState) {
         ...props
       })
     ],
-    goldenImage: `./test/render/golden-images/${name}.png`
+    goldenImage: `./test/render/golden-images/${settings.goldenImage || settings.name}.png`
   };
 }
 
@@ -58,27 +60,46 @@ export default [
     ],
     goldenImage: './test/render/golden-images/gridcell-lnglat.png'
   },
-  genColumnLayerTestCase('column-lnglat-extruded-wireframe', {
-    wireframe: true,
-    extruded: true,
-    getElevation: h => h.value * 5000
-  }),
-  genColumnLayerTestCase('column-lnglat-extruded-wireframe-ccw', {
-    extruded: true,
-    wireframe: true,
-    diskResolution: polygonCCW.length,
-    vertices: polygonCCW,
-    getElevation: h => h.value * 5000
-  }),
-  genColumnLayerTestCase('column-lnglat-extruded-wireframe-cw', {
-    extruded: true,
-    wireframe: true,
-    diskResolution: polygonCW.length,
-    vertices: polygonCW,
-    getElevation: h => h.value * 5000
-  }),
   genColumnLayerTestCase(
-    'column-lnglat-flat-stroke',
+    {
+      name: 'column-lnglat-extruded-wireframe'
+    },
+    {
+      wireframe: true,
+      extruded: true,
+      getElevation: h => h.value * 5000
+    }
+  ),
+  genColumnLayerTestCase(
+    {
+      name: 'column-lnglat-extruded-wireframe-ccw',
+      goldenImage: 'column-lnglat-extruded-wireframe-vertices'
+    },
+    {
+      extruded: true,
+      wireframe: true,
+      diskResolution: polygonCCW.length,
+      vertices: polygonCCW,
+      getElevation: h => h.value * 5000
+    }
+  ),
+  genColumnLayerTestCase(
+    {
+      name: 'column-lnglat-extruded-wireframe-cw',
+      goldenImage: 'column-lnglat-extruded-wireframe-vertices'
+    },
+    {
+      extruded: true,
+      wireframe: true,
+      diskResolution: polygonCCW.length,
+      vertices: polygonCCW.reverse(),
+      getElevation: h => h.value * 5000
+    }
+  ),
+  genColumnLayerTestCase(
+    {
+      name: 'column-lnglat-flat-stroke'
+    },
     {
       extruded: false,
       stroked: true,
@@ -89,7 +110,10 @@ export default [
     {pitch: 0}
   ),
   genColumnLayerTestCase(
-    'column-lnglat-flat-stroke-ccw',
+    {
+      name: 'column-lnglat-flat-stroke-ccw',
+      goldenImage: 'column-lnglat-flat-stroke-vertices'
+    },
     {
       extruded: false,
       stroked: true,
@@ -102,15 +126,18 @@ export default [
     {pitch: 0}
   ),
   genColumnLayerTestCase(
-    'column-lnglat-flat-stroke-cw',
+    {
+      name: 'column-lnglat-flat-stroke-cw',
+      goldenImage: 'column-lnglat-flat-stroke-vertices'
+    },
     {
       extruded: false,
       stroked: true,
       lineWidthUnits: 'pixels',
       getLineWidth: 4,
       getLineColor: [255, 255, 255],
-      diskResolution: polygonCW.length,
-      vertices: polygonCW
+      diskResolution: polygonCCW.length,
+      vertices: polygonCCW.reverse()
     },
     {pitch: 0}
   )

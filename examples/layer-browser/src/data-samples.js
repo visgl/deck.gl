@@ -267,7 +267,3 @@ function getMeshSampleData([xCount, yCount], spacing) {
 }
 
 export const meshSampleData = getMeshSampleData([10, 10], 120);
-
-export const polygonCW = [[1, 1, 0], [1, -1, 0], [-1, -1, 0], [-1, 1, 0]];
-
-export const polygonCCW = [[1, 0, 0], [0.3, 1, 0], [-0.6, 1, 0], [-1, -0.3, 0], [0, -1, 0]];
