@@ -169,7 +169,7 @@ Available options are `break-all` and `break-word`. A valid `maxWidth` has to be
 
 * Default: `0`
 
-Width of outline around the text, relative to the font size.
+Width of outline around the text, relative to the font size. Only effective if `fontSettings.sdf` is `true`.
 
 ##### `outlineColor` (Array, optional)
 

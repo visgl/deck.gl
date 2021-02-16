@@ -4,6 +4,21 @@ This page contains highlights of each deck.gl release. Also check our [vis.gl bl
 
 ## deck.gl v8.5 (In development)
 
+Release date: TBD
+
+
+<table style="border: 0;" align="center">
+  <tbody>
+    <tr>
+      <td>
+        <img style="max-height:200px" src="https://github.com/visgl/deck.gl-data/blob/master/images/whats-new/text-layer-styling.gif?raw=true" />
+        <p><i>TextLayer styling</i></p>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+
 ### MVT Layer
 
 #### Direct binary parsing
@@ -18,6 +33,21 @@ Mapbox Vector Tiles parsing throughput is now 2-3x faster, due to MVT tiles bein
 | USA Zip Code Layer | 8.45/s      | 20.3/s | 2.4x           |
 
 _Benchmarks ran using scripts on a 2012 MacBook Pro, 2.3 GHz Intel Core i7, 8 GB, measuring parsing time of MVTLoader only (network time and rendering is not included)_
+
+### TextLayer
+
+New props are added for more flexible styling of the texts:
+
+* `background`
+* `backgroundPadding`
+* `outlineWidth`
+* `outlineColor`
+* `getBackgroundColor`
+* `getBorderWidth`
+* `getBorderColor`
+
+See [documentation](/docs/api-reference/layers/text-layer.md) for details.
+
 
 ## deck.gl v8.4
 
