@@ -16,9 +16,9 @@ export const DEFAULT_CHAR_SET = getDefaultCharacterSet();
 export const DEFAULT_FONT_FAMILY = 'Monaco, monospace';
 export const DEFAULT_FONT_WEIGHT = 'normal';
 export const DEFAULT_FONT_SIZE = 64;
-export const DEFAULT_BUFFER = 2;
+export const DEFAULT_BUFFER = 4;
 export const DEFAULT_CUTOFF = 0.25;
-export const DEFAULT_RADIUS = 3;
+export const DEFAULT_RADIUS = 12;
 
 const MAX_CANVAS_WIDTH = 1024;
 
@@ -209,7 +209,7 @@ export default class FontAtlasManager {
 
       for (const char of characterSet) {
         populateAlphaChannel(tinySDF.draw(char), imageData);
-        ctx.putImageData(imageData, mapping[char].x - buffer, mapping[char].y - buffer);
+        ctx.putImageData(imageData, mapping[char].x - buffer, mapping[char].y + buffer);
       }
     } else {
       for (const char of characterSet) {

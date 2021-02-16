@@ -31,12 +31,15 @@ import FontAtlasManager, {
 } from './font-atlas-manager';
 import {transformParagraph, getTextFromBuffer} from './utils';
 
+import TextBackgroundLayer from './text-background-layer/text-background-layer';
+
 const DEFAULT_FONT_SETTINGS = {
   fontSize: DEFAULT_FONT_SIZE,
   buffer: DEFAULT_BUFFER,
   sdf: false,
   radius: DEFAULT_RADIUS,
-  cutoff: DEFAULT_CUTOFF
+  cutoff: DEFAULT_CUTOFF,
+  smoothing: 0.1
 };
 
 const TEXT_ANCHOR = {
@@ -63,12 +66,19 @@ const defaultProps = {
   sizeUnits: 'pixels',
   sizeMinPixels: 0,
   sizeMaxPixels: Number.MAX_SAFE_INTEGER,
-  backgroundColor: {type: 'color', value: null, optional: true},
+
+  background: false,
+  getBackgroundColor: {type: 'accessor', value: [255, 255, 255, 255]},
+  getBorderColor: {type: 'accessor', value: DEFAULT_COLOR},
+  getBorderWidth: {type: 'accessor', value: 0},
+  backgroundPadding: {type: 'array', value: [0, 0]},
 
   characterSet: DEFAULT_CHAR_SET,
   fontFamily: DEFAULT_FONT_FAMILY,
   fontWeight: DEFAULT_FONT_WEIGHT,
   lineHeight: DEFAULT_LINE_HEIGHT,
+  outlineWidth: {type: 'number', value: 0, min: 0},
+  outlineColor: {type: 'color', value: DEFAULT_COLOR},
   fontSettings: {},
 
   // auto wrapping options
@@ -82,7 +92,10 @@ const defaultProps = {
   getAngle: {type: 'accessor', value: 0},
   getTextAnchor: {type: 'accessor', value: 'middle'},
   getAlignmentBaseline: {type: 'accessor', value: 'center'},
-  getPixelOffset: {type: 'accessor', value: [0, 0]}
+  getPixelOffset: {type: 'accessor', value: [0, 0]},
+
+  // deprecated
+  backgroundColor: {deprecatedFor: ['background', 'getBackgroundColor']}
 };
 
 export default class TextLayer extends CompositeLayer {
@@ -201,6 +214,30 @@ export default class TextLayer extends CompositeLayer {
   }
 
   // Returns the x, y offsets of each character in a text string
+  getBoundingRect(object, objectInfo) {
+    const iconMapping = this.state.fontAtlasManager.mapping;
+    const {getText} = this.state;
+    const {wordBreak, maxWidth, lineHeight, getTextAnchor, getAlignmentBaseline} = this.props;
+
+    const paragraph = getText(object, objectInfo) || '';
+    const {
+      size: [width, height]
+    } = transformParagraph(paragraph, lineHeight, wordBreak, maxWidth, iconMapping);
+    const anchorX =
+      TEXT_ANCHOR[
+        typeof getTextAnchor === 'function' ? getTextAnchor(object, objectInfo) : getTextAnchor
+      ];
+    const anchorY =
+      ALIGNMENT_BASELINE[
+        typeof getAlignmentBaseline === 'function'
+          ? getAlignmentBaseline(object, objectInfo)
+          : getAlignmentBaseline
+      ];
+
+    return [((anchorX - 1) * width) / 2, ((anchorY - 1) * height) / 2, width, height];
+  }
+
+  // Returns the x, y, w, h of each text object
   getIconOffsets(object, objectInfo) {
     const iconMapping = this.state.fontAtlasManager.mapping;
     const {getText} = this.state;
@@ -250,14 +287,20 @@ export default class TextLayer extends CompositeLayer {
     const {
       data,
       _dataDiff,
-      backgroundColor,
       getPosition,
       getColor,
       getSize,
       getAngle,
       getPixelOffset,
+      getBackgroundColor,
+      getBorderColor,
+      getBorderWidth,
+      backgroundPadding,
+      background,
       billboard,
       fontSettings,
+      outlineWidth,
+      outlineColor,
       sizeScale,
       sizeUnits,
       sizeMinPixels,
@@ -266,63 +309,126 @@ export default class TextLayer extends CompositeLayer {
       updateTriggers
     } = this.props;
 
-    const getIconOffsets = this.getIconOffsets.bind(this);
+    const CharactersLayerClass = this.getSubLayerClass('characters', MultiIconLayer);
+    const BackgroundLayerClass = this.getSubLayerClass('background', TextBackgroundLayer);
 
-    const SubLayerClass = this.getSubLayerClass('characters', MultiIconLayer);
+    return [
+      background &&
+        new BackgroundLayerClass(
+          {
+            // background props
+            getFillColor: getBackgroundColor,
+            getLineColor: getBorderColor,
+            getLineWidth: getBorderWidth,
+            padding: backgroundPadding,
 
-    return new SubLayerClass(
-      {
-        sdf: fontSettings.sdf,
-        iconAtlas: texture,
-        iconMapping: mapping,
-        backgroundColor,
+            // props shared with characters layer
+            getPosition,
+            getSize,
+            getAngle,
+            getPixelOffset,
+            billboard,
+            sizeScale: sizeScale / this.state.fontAtlasManager.props.fontSize,
+            sizeUnits,
+            sizeMinPixels,
+            sizeMaxPixels,
 
-        getPosition,
-        getColor,
-        getSize,
-        getAngle,
-        getPixelOffset,
-
-        billboard,
-        sizeScale: sizeScale * scale,
-        sizeUnits,
-        sizeMinPixels: sizeMinPixels * scale,
-        sizeMaxPixels: sizeMaxPixels * scale,
-
-        transitions: transitions && {
-          getPosition: transitions.getPosition,
-          getAngle: transitions.getAngle,
-          getColor: transitions.getColor,
-          getSize: transitions.getSize,
-          getPixelOffset: transitions.getPixelOffset
-        }
-      },
-      this.getSubLayerProps({
-        id: 'characters',
-        updateTriggers: {
-          getIcon: updateTriggers.getText,
-          getPosition: updateTriggers.getPosition,
-          getAngle: updateTriggers.getAngle,
-          getColor: updateTriggers.getColor,
-          getSize: updateTriggers.getSize,
-          getPixelOffset: updateTriggers.getPixelOffset,
-          getIconOffsets: {
-            getText: updateTriggers.getText,
-            getTextAnchor: updateTriggers.getTextAnchor,
-            getAlignmentBaseline: updateTriggers.getAlignmentBaseline,
-            styleVersion
+            transitions: transitions && {
+              getPosition: transitions.getPosition,
+              getAngle: transitions.getAngle,
+              getSize: transitions.getSize,
+              getFillColor: transitions.getBackgroundColor,
+              getLineColor: transitions.getBorderColor,
+              getLineWidth: transitions.getBorderWidth,
+              getPixelOffset: transitions.getPixelOffset
+            }
+          },
+          this.getSubLayerProps({
+            id: 'background',
+            updateTriggers: {
+              getPosition: updateTriggers.getPosition,
+              getAngle: updateTriggers.getAngle,
+              getSize: updateTriggers.getSize,
+              getFillColor: updateTriggers.getBackgroundColor,
+              getLineColor: updateTriggers.getBorderColor,
+              getLineWidth: updateTriggers.getBorderWidth,
+              getPixelOffset: updateTriggers.getPixelOffset,
+              getBoundingRect: {
+                getText: updateTriggers.getText,
+                getTextAnchor: updateTriggers.getTextAnchor,
+                getAlignmentBaseline: updateTriggers.getAlignmentBaseline,
+                styleVersion
+              }
+            }
+          }),
+          {
+            data: data.attributes
+              ? {length: data.length, attributes: data.attributes.background || {}}
+              : data,
+            _dataDiff,
+            // Maintain the same background behavior as <=8.3. Remove in v9?
+            autoHighlight: false,
+            getBoundingRect: this.getBoundingRect.bind(this)
           }
+        ),
+      new CharactersLayerClass(
+        {
+          sdf: fontSettings.sdf,
+          smoothing: Number.isFinite(fontSettings.smoothing)
+            ? fontSettings.smoothing
+            : DEFAULT_FONT_SETTINGS.smoothing,
+          outlineWidth,
+          outlineColor,
+          iconAtlas: texture,
+          iconMapping: mapping,
+
+          getPosition,
+          getColor,
+          getSize,
+          getAngle,
+          getPixelOffset,
+
+          billboard,
+          sizeScale: sizeScale * scale,
+          sizeUnits,
+          sizeMinPixels: sizeMinPixels * scale,
+          sizeMaxPixels: sizeMaxPixels * scale,
+
+          transitions: transitions && {
+            getPosition: transitions.getPosition,
+            getAngle: transitions.getAngle,
+            getColor: transitions.getColor,
+            getSize: transitions.getSize,
+            getPixelOffset: transitions.getPixelOffset
+          }
+        },
+        this.getSubLayerProps({
+          id: 'characters',
+          updateTriggers: {
+            getIcon: updateTriggers.getText,
+            getPosition: updateTriggers.getPosition,
+            getAngle: updateTriggers.getAngle,
+            getColor: updateTriggers.getColor,
+            getSize: updateTriggers.getSize,
+            getPixelOffset: updateTriggers.getPixelOffset,
+            getIconOffsets: {
+              getText: updateTriggers.getText,
+              getTextAnchor: updateTriggers.getTextAnchor,
+              getAlignmentBaseline: updateTriggers.getAlignmentBaseline,
+              styleVersion
+            }
+          }
+        }),
+        {
+          data,
+          _dataDiff,
+          startIndices,
+          numInstances,
+          getIconOffsets: this.getIconOffsets.bind(this),
+          getIcon: getText
         }
-      }),
-      {
-        data,
-        _dataDiff,
-        startIndices,
-        numInstances,
-        getIconOffsets,
-        getIcon: getText
-      }
-    );
+      )
+    ];
   }
 }
 
