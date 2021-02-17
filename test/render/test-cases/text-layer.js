@@ -68,6 +68,7 @@ export default (OS === 'Mac'
             getPixelOffset: x => [10, 0]
           })
         ],
+        imageDiffOptions: {threshold: 0.96},
         goldenImage: './test/render/golden-images/text-layer.png'
       },
       {
@@ -96,6 +97,7 @@ export default (OS === 'Mac'
             getPixelOffset: x => [10, 0]
           })
         ],
+        imageDiffOptions: {threshold: 0.96},
         goldenImage: './test/render/golden-images/text-layer.png'
       },
       {
@@ -127,6 +129,7 @@ export default (OS === 'Mac'
             getPixelOffset: [10, 0]
           })
         ],
+        imageDiffOptions: {threshold: 0.96},
         goldenImage: './test/render/golden-images/text-layer.png'
       },
       {
@@ -153,6 +156,7 @@ export default (OS === 'Mac'
             getAlignmentBaseline: 'center'
           })
         ],
+        imageDiffOptions: {threshold: 0.96},
         goldenImage: './test/render/golden-images/text-layer-multi-lines.png'
       },
       {
@@ -181,6 +185,7 @@ export default (OS === 'Mac'
             getAlignmentBaseline: 'center'
           })
         ],
+        imageDiffOptions: {threshold: 0.96},
         goldenImage: './test/render/golden-images/text-layer-auto-wrapping.png'
       },
       {
@@ -212,6 +217,7 @@ export default (OS === 'Mac'
             getAlignmentBaseline: 'center'
           })
         ],
+        imageDiffOptions: {threshold: 0.96},
         goldenImage: './test/render/golden-images/text-layer-background.png'
       }
     ]
