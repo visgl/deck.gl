@@ -20,9 +20,8 @@
 
 /* eslint-disable no-unused-vars */
 import test from 'tape-catch';
-import {createElement} from 'react';
+import {createElement, createRef} from 'react';
 import ReactDOM from 'react-dom';
-import ReactTestUtils from 'react-dom/test-utils';
 
 import DeckGL, {ScatterplotLayer} from 'deck.gl';
 
@@ -41,38 +40,38 @@ const TEST_VIEW_STATE = {
 const getMockContext = () => (typeof global !== 'undefined' && global.__JSDOM__ ? gl : null);
 
 test('DeckGL#mount/unmount', t => {
+  const ref = createRef();
   const container = document.createElement('div');
-  const component = ReactDOM.render(
+  ReactDOM.render(
     createElement(DeckGL, {
       initialViewState: TEST_VIEW_STATE,
+      ref,
       width: 100,
       height: 100,
       gl: getMockContext(),
       onLoad: () => {
-        t.ok(component.deck, 'DeckGL is initialized');
-        t.is(
-          component.deck.getViewports()[0].longitude,
-          TEST_VIEW_STATE.longitude,
-          'View state is set'
-        );
+        const {deck} = ref.current;
+        t.ok(deck, 'DeckGL is initialized');
+        t.is(deck.getViewports()[0].longitude, TEST_VIEW_STATE.longitude, 'View state is set');
 
         ReactDOM.unmountComponentAtNode(container);
 
-        t.notOk(component.deck.animationLoop, 'Deck is finalized');
+        t.notOk(deck.animationLoop, 'Deck is finalized');
 
         t.end();
       }
     }),
-    container
+    container,
+    () => {
+      t.ok(ref.current, 'DeckGL overlay is rendered.');
+    }
   );
-
-  t.ok(component, 'DeckGL overlay is rendered.');
 });
 
 test('DeckGL#render', t => {
   const container = document.createElement('div');
 
-  const component = ReactDOM.render(
+  ReactDOM.render(
     createElement(
       DeckGL,
       {
@@ -81,7 +80,7 @@ test('DeckGL#render', t => {
         height: 100,
         gl: getMockContext(),
         onAfterRender: () => {
-          const child = ReactTestUtils.findRenderedDOMComponentWithClass(component, 'child');
+          const child = container.querySelector('.child');
           t.ok(child, 'Child is rendered');
 
           ReactDOM.unmountComponentAtNode(container);
