@@ -89,7 +89,7 @@ def display_html(filename):
 
 def iframe_with_srcdoc(html_str, width="100%", height=500):
     if isinstance(width, str):
-        width = '"{}"'.format(width)
+        width = f'"{width}"'
 
     iframe = """
         <iframe
