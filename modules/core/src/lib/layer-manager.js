@@ -83,6 +83,7 @@ export default class LayerManager {
       resourceManager: this.resourceManager
     });
 
+    this._nextLayers = null;
     this._needsRedraw = 'Initial render';
     this._needsUpdate = false;
     this._debug = false;
@@ -121,6 +122,10 @@ export default class LayerManager {
 
   // Check if a deep update of all layers is needed
   needsUpdate() {
+    if (this._nextLayers && this._nextLayers !== this.lastRenderedLayers) {
+      // New layers array may be the same as the old one if `setProps` is called by React
+      return 'layers changed';
+    }
     return this._needsUpdate;
   }
 
@@ -155,9 +160,9 @@ export default class LayerManager {
       this.context.userData = props.userData;
     }
 
-    // TODO - For now we set layers before viewports to preserve changeFlags
+    // New layers will be processed in `updateLayers` in the next update cycle
     if ('layers' in props) {
-      this.setLayers(props.layers);
+      this._nextLayers = props.layers;
     }
 
     if ('onError' in props) {
@@ -166,14 +171,9 @@ export default class LayerManager {
   }
 
   // Supply a new layer list, initiating sublayer generation and layer matching
-  setLayers(newLayers, forceUpdate = false) {
-    // TODO - something is generating state updates that cause rerender of the same
-    const shouldUpdate = forceUpdate || newLayers !== this.lastRenderedLayers;
-    debug(TRACE_SET_LAYERS, this, shouldUpdate, newLayers);
+  setLayers(newLayers, reason) {
+    debug(TRACE_SET_LAYERS, this, reason, newLayers);
 
-    if (!shouldUpdate) {
-      return this;
-    }
     this.lastRenderedLayers = newLayers;
 
     newLayers = flatten(newLayers, Boolean);
@@ -196,9 +196,10 @@ export default class LayerManager {
     if (reason) {
       this.setNeedsRedraw(`updating layers: ${reason}`);
       // Force a full update
-      const forceUpdate = true;
-      this.setLayers(this.lastRenderedLayers, forceUpdate);
+      this.setLayers(this._nextLayers || this.lastRenderedLayers, reason);
     }
+    // Updated, clear the backlog
+    this._nextLayers = null;
   }
 
   //
