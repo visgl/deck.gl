@@ -49,14 +49,56 @@ function getRefHandles(thisRef) {
   return handles;
 }
 
+function redrawDeck(thisRef) {
+  if (thisRef.redrawReason) {
+    // Only redraw if we have received a dirty flag
+    thisRef.deck._drawLayers(thisRef.redrawReason);
+    thisRef.redrawReason = null;
+  }
+}
+
+function createDeckInstance(thisRef, props) {
+  // Allows a subclass of Deck to be used
+  // TODO - update propTypes / defaultProps?
+  const DeckClass = props.Deck || Deck;
+  const deck = new DeckClass({
+    ...props,
+    style: null,
+    width: '100%',
+    height: '100%',
+    // The Deck's animation loop is independent from React's render cycle, causing potential
+    // synchronization issues. We provide this custom render function to make sure that React
+    // and Deck update on the same schedule.
+    _customRender: redrawReason => {
+      // Save the dirty flag for later
+      thisRef.redrawReason = redrawReason;
+
+      // Viewport/view state is passed to child components as props.
+      // If they have changed, we need to trigger a React rerender to update children props.
+      const viewports = deck.viewManager.getViewports();
+      if (thisRef.lastRenderedViewports !== viewports) {
+        // Viewports have changed, update children props first.
+        // This will delay the Deck canvas redraw till after React update (in useLayoutEffect)
+        // so that the canvas does not get rendered before the child components update.
+        thisRef.forceUpdate(v => v + 1);
+      } else {
+        redrawDeck(thisRef);
+      }
+    }
+  });
+  return deck;
+}
+
 const DeckGL = forwardRef((props, ref) => {
-  // A persistent reference
+  // A reference to persistent states
   const _thisRef = useRef({});
   const thisRef = _thisRef.current;
-  const containerRef = useRef(null);
-  const canvasRef = useRef(null);
   // A mechanism to force redraw
   const [, setVersion] = useState(0);
+  thisRef.forceUpdate = setVersion;
+  // DOM refs
+  const containerRef = useRef(null);
+  const canvasRef = useRef(null);
 
   // extract any deck.gl layers masquerading as react elements from props.children
   const jsxProps = useMemo(() => extractJSXLayers(props), [
@@ -66,14 +108,6 @@ const DeckGL = forwardRef((props, ref) => {
   ]);
 
   // Callbacks
-  const redrawDeck = () => {
-    if (thisRef.redrawReason) {
-      // Only redraw if we have received a dirty flag
-      thisRef.deck._drawLayers(thisRef.redrawReason);
-      thisRef.redrawReason = null;
-    }
-  };
-
   let inRender = true;
   let viewStateUpdateRequested;
   let interactionStateUpdateRequested;
@@ -119,42 +153,11 @@ const DeckGL = forwardRef((props, ref) => {
   };
 
   useEffect(() => {
-    // Allows a subclass of Deck to be used
-    // TODO - update propTypes / defaultProps?
-    const DeckClass = props.Deck || Deck;
-
-    const customRender = redrawReason => {
-      // Save the dirty flag for later
-      thisRef.redrawReason = redrawReason;
-
-      // Viewport/view state is passed to child components as props.
-      // If they have changed, we need to trigger a React rerender to update children props.
-      const viewports = thisRef.deck.viewManager.getViewports();
-      if (thisRef.lastRenderedViewports !== viewports) {
-        // Viewports have changed, update children props first.
-        // This will delay the Deck canvas redraw till after React update (in useLayoutEffect)
-        // so that the canvas does not get rendered before the child components update.
-        setVersion(v => v + 1);
-      } else {
-        redrawDeck();
-      }
-    };
-
-    // DEVTOOLS can cause this to be called twice
-    thisRef.deck =
-      thisRef.deck ||
-      new DeckClass({
-        ...props,
-        parent: containerRef.current,
-        canvas: canvasRef.current,
-        style: null,
-        width: '100%',
-        height: '100%',
-        // The Deck's animation loop is independent from React's render cycle, causing potential
-        // synchronization issues. We provide this custom render function to make sure that React
-        // and Deck update on the same schedule.
-        _customRender: customRender
-      });
+    thisRef.deck = createDeckInstance(thisRef, {
+      ...props,
+      parent: containerRef.current,
+      canvas: canvasRef.current
+    });
     updateFromProps();
 
     return () => thisRef.deck.finalize();
@@ -164,7 +167,7 @@ const DeckGL = forwardRef((props, ref) => {
     // render has just been called. The children are positioned based on the current view state.
     // Redraw Deck canvas immediately, if necessary, using the current view state, so that it
     // matches the child components.
-    redrawDeck();
+    redrawDeck(thisRef);
 
     // Execute deferred callbacks
     if (viewStateUpdateRequested) {
