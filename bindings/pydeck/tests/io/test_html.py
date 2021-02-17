@@ -1,11 +1,4 @@
-import pytest
-
 import html
-import os
-import sys
-import tempfile
-import textwrap
-from pathlib import Path
 import webbrowser
 
 import IPython
@@ -45,8 +38,9 @@ def test_iframe_with_srcdoc():
     IPython.display.HTML = MagicMock()
     html_str = "<html></html>"
     iframe_with_srcdoc(html_str)
+    escaped_html_str = html.escape("<html></html>")
 
-    iframe = """
+    iframe = f"""
         <iframe
             width="100%"
             height=500
@@ -54,8 +48,6 @@ def test_iframe_with_srcdoc():
             srcdoc="{escaped_html_str}"
         ></iframe>
     """
-    iframe = textwrap.dedent(iframe).strip()
-    iframe = iframe.format(escaped_html_str=html.escape("<html></html>"))
 
     IPython.display.HTML.assert_called_once_with(iframe)
 

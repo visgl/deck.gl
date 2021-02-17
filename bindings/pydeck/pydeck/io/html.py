@@ -1,9 +1,7 @@
 import html
 import os
-from os.path import relpath, realpath, join, dirname
+from os.path import realpath, join, dirname
 import sys
-import tempfile
-import textwrap
 import time
 import warnings
 import webbrowser
@@ -90,8 +88,9 @@ def display_html(filename):
 def iframe_with_srcdoc(html_str, width="100%", height=500):
     if isinstance(width, str):
         width = f'"{width}"'
+    srcdoc = html.escape(html_str)
 
-    iframe = """
+    iframe = f"""
         <iframe
             width={width}
             height={height}
@@ -100,17 +99,10 @@ def iframe_with_srcdoc(html_str, width="100%", height=500):
         ></iframe>
     """
 
-    iframe = textwrap.dedent(iframe).strip()
-    iframe = iframe.format(
-        width=width,
-        height=height,
-        srcdoc=html.escape(html_str),
-    )
-
     from IPython.display import HTML  # noqa
 
     with warnings.catch_warnings():
-        msg = "Consider using IPython.display.iframe instead"
+        msg = "Consider using IPython.display.IFrame instead"
         warnings.filterwarnings("ignore", message=msg)
         return HTML(iframe)
 
