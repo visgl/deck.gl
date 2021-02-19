@@ -110,7 +110,7 @@ export default class MVTLayer extends TileLayer {
       },
       gis: this.props.binary ? {format: 'binary'} : {}
     };
-    return load(url, this.props.loaders, options);
+    return load(url, this.props.loaders[0], options);
   }
 
   renderSubLayers(props) {
