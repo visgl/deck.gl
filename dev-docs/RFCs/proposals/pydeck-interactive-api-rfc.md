@@ -1,7 +1,7 @@
 # RFC: pydeck interaction API
 
-* **Authors**: Andrew Duberstein (@ajduberstein), Ib Green (@ibgreen)
-* **Date**: January 26, 2020
+* **Authors**: Andrew Duberstein (@ajduberstein), Ib Green (@ibgreen), Kyle Barron (@kylebarron)
+* **Date**: May 4, 2020 (original January 26, 2020)
 * **Status**: Draft
 
 References:
@@ -32,21 +32,34 @@ Question: Should we use ipywidgets style API, or deck.gl API, or transport API o
 
 ## Use Cases
 
-### "Raw" Events (Click and Hover, etc)
+### Events (Click and Hover, etc)
 
-Hover
+**Hover Tooltip**
 - Currently pydeck has "partial support" for Hover events through the [`tooltip` prop](https://deckgl.readthedocs.io/en/latest/tooltip.html).
-- This is somewhat "raw" ("innerHTML" props), but serves its purpose.]
-- An alternate (or parallel) onHover handler would be a P2
+- The API is somewhat "raw" ("innerHTML" props), but serves its purpose.
 
-Click
+**Hover**
+- An basic onHover callback
+- Deep picking on hover? (no)
+
+**Click**
 - Click events should be a P1 priority.
+- Deep picking on click? (YES? How deep? configurable?) 
+
+**PickInfo**
+- Serialize [PickInfo](https://deck.gl/#/documentation/developer-guide/adding-interactivity?section=what-can-be-picked-) to JSON and expose as dictionary 
+
+**ViewStateChange**
+- Being able to manage view state in the pydeck application will provide Python applications with significantly more control.
+
 
 Other events?
-- deck may have additional hooks, Drag etc? (exposing raw events is not a P1, but selection is, see next section)
-- Longer-term: What would a mjolnir.js integration look like? The mjolnir EventManager API is already semi-declarative...
+- deck has additional hooks, Drag etc, but they are not being covered by this RFC.
 
-### Selections
+
+### Semantic Events
+
+Selections
 
 deck.gl offers powerful picking feature (deep picking, area picking), but it is not possible to use these features declaratively.
 
@@ -57,6 +70,7 @@ pd.DataFrame([r.deck_widget.selected_data])
 ```
 
 It would be good to have a declarative API for this.
+
 
 ### Measurement Tools (nebula.gl)
 
@@ -71,11 +85,13 @@ Currently not clear:
 - if these measurement tools would be easy to make available declaratively in JSON/pydeck etc (since their activation is presumably "stateful").
 - whether "selection" would be good to package as a "tool" (could solve the API design in the previous section).
 
+
 ### Editable Layers (nebula.gl)
 
 With the right callback system in place, it would be great to expose nebula.gl's editable layers, e.g. `EditableGeojsonLayer`) in pydeck.
 
 Python could pass in GeoJSON and get an edited version back...
+
 
 ## Transport
 
@@ -96,10 +112,12 @@ Transport back-channel event
 {
   "@@type": 'event'
   "data": <user_data>
+  "info": <pick info object>
 }
 ```
 
 Python specifying a "callable"
+
 ```python
 import pydeck as pdk
 layer = pdk.Layer(
@@ -113,3 +131,5 @@ layer = pdk.Layer(
     on_click=<callable>,<user_data>)
 r = pdk.Deck(layers=[layer], initial_view_state=viewport)
 ```
+
+TBD: Add new `userData` prop?

@@ -1,12 +1,19 @@
 export class TypedArrayManager {
-  constructor({overAlloc = 2, poolSize = 100} = {}) {
-    this.overAlloc = overAlloc;
-    this.poolSize = poolSize;
-
+  constructor(props) {
     this._pool = [];
+    this.props = {overAlloc: 2, poolSize: 100};
+    this.setProps(props);
   }
 
-  allocate(typedArray, count, {size = 1, type, padding = 0, copy = false}) {
+  setProps(props) {
+    Object.assign(this.props, props);
+  }
+
+  allocate(
+    typedArray,
+    count,
+    {size = 1, type, padding = 0, copy = false, initialize = false, maxCount}
+  ) {
     const Type = type || (typedArray && typedArray.constructor) || Float32Array;
 
     const newSize = count * size + padding;
@@ -19,13 +26,17 @@ export class TypedArrayManager {
       }
     }
 
-    const newArray = this._allocate(Type, newSize);
+    let maxSize;
+    if (maxCount) {
+      maxSize = maxCount * size + padding;
+    }
+
+    const newArray = this._allocate(Type, newSize, initialize, maxSize);
 
     if (typedArray && copy) {
       newArray.set(typedArray);
-    } else {
-      // Hack - viewing a buffer with a different type may create NaNs
-      // which crashes the Attribute validation
+    } else if (!initialize) {
+      // Hack - always initialize the first 4 elements. NaNs crash the Attribute validation
       newArray.fill(0, 0, 4);
     }
 
@@ -37,19 +48,28 @@ export class TypedArrayManager {
     this._release(typedArray);
   }
 
-  _allocate(Type, size) {
+  _allocate(Type, size, initialize, maxSize) {
     // Allocate at least one element to ensure a valid buffer
-    size = Math.max(Math.ceil(size * this.overAlloc), 1);
+    let sizeToAllocate = Math.max(Math.ceil(size * this.props.overAlloc), 1);
+    // Don't over allocate after certain specified number of elements
+    if (sizeToAllocate > maxSize) {
+      sizeToAllocate = maxSize;
+    }
 
     // Check if available in pool
     const pool = this._pool;
-    const byteLength = Type.BYTES_PER_ELEMENT * size;
+    const byteLength = Type.BYTES_PER_ELEMENT * sizeToAllocate;
     const i = pool.findIndex(b => b.byteLength >= byteLength);
     if (i >= 0) {
       // Create a new array using an existing buffer
-      return new Type(pool.splice(i, 1)[0], 0, size);
+      const array = new Type(pool.splice(i, 1)[0], 0, sizeToAllocate);
+      if (initialize) {
+        // Viewing a buffer with a different type may create NaNs
+        array.fill(0);
+      }
+      return array;
     }
-    return new Type(size);
+    return new Type(sizeToAllocate);
   }
 
   _release(typedArray) {
@@ -65,10 +85,10 @@ export class TypedArrayManager {
     const i = pool.findIndex(b => b.byteLength >= byteLength);
     if (i < 0) {
       pool.push(buffer);
-    } else if (i > 0 || pool.length < this.poolSize) {
+    } else if (i > 0 || pool.length < this.props.poolSize) {
       pool.splice(i, 0, buffer);
     }
-    if (pool.length > this.poolSize) {
+    if (pool.length > this.props.poolSize) {
       // Drop the smallest one
       pool.shift();
     }

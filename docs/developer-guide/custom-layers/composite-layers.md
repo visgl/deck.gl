@@ -15,7 +15,7 @@ Examples could be:
 * A `TopoJSONLayer` that is like the `GeoJsonLayer`, but accepts [TopoJSON](https://github.com/topojson/topojson) provided to the `data` prop.
 * Adding aggregation to an existing layer. By default, deck.gl layers render one graphical element for each element in the `data` prop. But in some cases, e.g. heatmaps, the data needs to be aggregated (or "binned") into cells before rendering. An adaptor in the form of a composite layer is one way to add this functionality.
 
-The deck.gl layers [TextLayer](/docs/layers/text-layer.md), [HexagonLayer](/docs/layers/hexagon-layer.md), [CPUGridLayer](/docs/layers/cpu-grid-layer.md) and few others are written as composite "adapter" layers.
+The deck.gl layers [TextLayer](/docs/api-reference/layers/text-layer.md), [HexagonLayer](/docs/api-reference/aggregation-layers/hexagon-layer.md), [CPUGridLayer](/docs/api-reference/aggregation-layers/cpu-grid-layer.md) and few others are written as composite "adapter" layers.
 
 
 ### Collection Layers
@@ -27,10 +27,10 @@ Often a more complex visualization is composited from a number of layers that us
 
 Creating a collection layer have the following advantages:
 
-* Collect the complex code that handles a specific data format or visual configuration into one class. This helps to create a cleaner, more abstract interface for the users of this layer, and control the complexity of the compoent that renders the `Deck` instance.
+* Collect the complex code that handles a specific data format or visual configuration into one class. This helps to create a cleaner, more abstract interface for the users of this layer, and control the complexity of the component that renders the `Deck` instance.
 * Improve memory usage by sharing the same objects/buffers cross layers. Instead of each sublayer loading and storing their own copy of the raw data, the composite layer will manage the data source and pass it down to several layers.
 
-The deck.gl layers [GeoJsonLayer](/docs/layers/geojson-layer.md) and [PolygonLayer](/docs/layers/polygon-layer.md) are written as composite "collection" layers.
+The deck.gl layers [GeoJsonLayer](/docs/api-reference/layers/geojson-layer.md) and [PolygonLayer](/docs/api-reference/layers/polygon-layer.md) are written as composite "collection" layers.
 
 ## Implementing A Composite Layer
 
@@ -140,7 +140,7 @@ class LabeledIconLayer extends CompositeLayer {
 
 Something that needs special attention is that all layer ids must be unique, no matter whether they are nested inside other layers. This means the sublayer ids must be generated dynamically based on the id of their parent, otherwise when there are multiple instances of `LabeledIconLayer`s their sublayer ids will collide.
 
-Finally, to make [updateTriggers](/docs/api-reference/layer.md#-updatetriggers-object-optional-) work when accessors need to be recalculated, we need to remap the user's `updateTriggers` from the parent layer's prop names to the sublayers' prop names.
+Finally, to make [updateTriggers](/docs/api-reference/core/layer.md#updatetriggers) work when accessors need to be recalculated, we need to remap the user's `updateTriggers` from the parent layer's prop names to the sublayers' prop names.
 
 ```js
 class LabeledIconLayer extends CompositeLayer {
@@ -173,7 +173,7 @@ class LabeledIconLayer extends CompositeLayer {
 
 ### Forwarding Properties
 
-There are a number of base `Layer` class props that are usually expected to propogate down to all sublayers, such as `pickable`, `visible`, `coordinateSystem` and `opacity`. It is desirable to just forward many of these props directly to the sublayers.
+There are a number of base `Layer` class props that are usually expected to propagate down to all sublayers, such as `pickable`, `visible`, `coordinateSystem` and `opacity`. It is desirable to just forward many of these props directly to the sublayers.
 
 There is a method `compositeLayer.getSubLayerProps` that handles a lot of these common compliance chore that were mentioned above. When calling it with a list of prop values that we care about, the list gets wrapped/populated with additional props that will help the sublayers align with deck.gl norms.
 
@@ -254,7 +254,7 @@ For more details, read about [how picking works](/docs/developer-guide/custom-la
 
 ### Transforming Data
 
-Because deck.gl's primitive layers expect input to be a flat iteratorable data structure, some composite layers need to transform user data into a different format before passing to sublayers. This transformation may consist converting a tree to an array, filtering, sorting, etc. For example, the [GeoJsonLayer](/docs/layers/geojson-layer.md) splits features by type and passes each to `ScatterplotLayer`, `PathLayer` or `SolidPolygonLayer` respectively. The [TextLayer](/docs/layers/text-layer.md) breaks each text string down to multiple characters and render them with a variation of `IconLayer`.
+Because deck.gl's primitive layers expect input to be a flat iteratorable data structure, some composite layers need to transform user data into a different format before passing to sublayers. This transformation may consist converting a tree to an array, filtering, sorting, etc. For example, the [GeoJsonLayer](/docs/api-reference/layers/geojson-layer.md) splits features by type and passes each to `ScatterplotLayer`, `PathLayer` or `SolidPolygonLayer` respectively. The [TextLayer](/docs/api-reference/layers/text-layer.md) breaks each text string down to multiple characters and render them with a variation of `IconLayer`.
 
 From the user's perspective, when they specify accessors such as `getColor`, or callbacks such as `onHover`, the functions should always interface with the original data that they give the top-level layer, instead of its internal implementations. For the sublayer to reference back to the original data, we can add a reference onto every transformed datum by calling `getSubLayerRow`:
 
@@ -316,4 +316,4 @@ When the sublayer receives data decorated by `getSubLayerRow`, its accessors nee
   }
 ```
 
-The default implementations of lifecycle methods such as `getPickingInfo` also understand how to retrieve the orignal objects from the sublayer data if they are created using `getSubLayerRow`.
+The default implementations of lifecycle methods such as `getPickingInfo` also understand how to retrieve the original objects from the sublayer data if they are created using `getSubLayerRow`.

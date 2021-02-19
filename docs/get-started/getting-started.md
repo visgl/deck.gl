@@ -26,13 +26,13 @@ You should be able to copy these folders to your preferred locations, and get th
 Clone the deck.gl repo, if you haven't already
 
 ```bash
-git clone git@github.com:uber/deck.gl.git
+git clone git@github.com:visgl/deck.gl.git
 ```
 
-For most consistent results, it is recommended that you check out the latest release branch (e.g. `7.0-release`) instead of `master` when running examples.
+For most consistent results, it is recommended that you check out the latest release branch (e.g. `8.0-release`) instead of `master` when running examples.
 
 ```bash
-git checkout 7.0-release
+git checkout 8.0-release
 ```
 
 Change directory to the example you are interested in, e.g.

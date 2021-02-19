@@ -1,3 +1,5 @@
+import {createTexture, destroyTexture} from '../utils/texture';
+
 const TYPE_DEFINITIONS = {
   boolean: {
     validate(value, propType) {
@@ -53,6 +55,20 @@ const TYPE_DEFINITIONS = {
     },
     equal(value1, value2, propType) {
       return !propType.compare || value1 === value2;
+    }
+  },
+  data: {
+    transform: (value, propType, component) => {
+      const {dataTransform} = component ? component.props : {};
+      return dataTransform && value ? dataTransform(value) : value;
+    }
+  },
+  image: {
+    transform: (value, propType, component) => {
+      return createTexture(component, value);
+    },
+    release: value => {
+      destroyTexture(value);
     }
   }
 };

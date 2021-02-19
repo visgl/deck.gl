@@ -123,16 +123,17 @@ export default class ColumnLayer extends Layer {
     if (
       regenerateModels ||
       props.diskResolution !== oldProps.diskResolution ||
-      props.vertices !== oldProps.vertices
+      props.vertices !== oldProps.vertices ||
+      (props.extruded || props.stroked) !== (oldProps.extruded || oldProps.stroked)
     ) {
       this._updateGeometry(props);
     }
   }
 
-  getGeometry(diskResolution, vertices) {
+  getGeometry(diskResolution, vertices, hasThinkness) {
     const geometry = new ColumnGeometry({
       radius: 1,
-      height: 2,
+      height: hasThinkness ? 2 : 0,
       vertices,
       nradial: diskResolution
     });
@@ -164,8 +165,8 @@ export default class ColumnLayer extends Layer {
     );
   }
 
-  _updateGeometry({diskResolution, vertices}) {
-    const geometry = this.getGeometry(diskResolution, vertices);
+  _updateGeometry({diskResolution, vertices, extruded, stroked}) {
+    const geometry = this.getGeometry(diskResolution, vertices, extruded || stroked);
 
     this.setState({
       fillVertexCount: geometry.attributes.POSITION.value.length / 3,

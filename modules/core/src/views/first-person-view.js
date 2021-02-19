@@ -10,14 +10,8 @@ function getDirectionFromBearingAndPitch({bearing, pitch}) {
   return direction;
 }
 
-export default class FirstPersonView extends View {
-  get controller() {
-    return this._getControllerProps({
-      type: FirstPersonController
-    });
-  }
-
-  _getViewport(props) {
+class FirstPersonViewport extends Viewport {
+  constructor(props) {
     // TODO - push direction handling into Matrix4.lookAt
     const {
       // view matrix arguments
@@ -25,12 +19,13 @@ export default class FirstPersonView extends View {
       bearing = 0,
       pitch = 0,
       up = [0, 0, 1] // Defines up direction, default positive z axis,
-    } = props.viewState;
+    } = props;
 
     // Always calculate direction from bearing and pitch
     const dir = getDirectionFromBearingAndPitch({
       bearing,
-      pitch: 90 + pitch
+      // Avoid "pixel project matrix not invertible" error
+      pitch: pitch === -90 ? 0.0001 : 90 + pitch
     });
 
     // Direction is relative to model coordinates, of course
@@ -41,12 +36,27 @@ export default class FirstPersonView extends View {
     const scale = Math.pow(2, zoom);
     const viewMatrix = new Matrix4().lookAt({eye: [0, 0, 0], center, up}).scale(scale);
 
-    return new Viewport(
+    super({
+      ...props,
+      zoom,
+      viewMatrix
+    });
+  }
+}
+
+export default class FirstPersonView extends View {
+  constructor(props) {
+    super(
       Object.assign({}, props, {
-        zoom,
-        viewMatrix
+        type: FirstPersonViewport
       })
     );
+  }
+
+  get controller() {
+    return this._getControllerProps({
+      type: FirstPersonController
+    });
   }
 }
 

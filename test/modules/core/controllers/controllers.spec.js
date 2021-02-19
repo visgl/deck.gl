@@ -1,10 +1,16 @@
 import test from 'tape-catch';
-import {MapView, OrbitView, OrthographicView, FirstPersonView} from '@deck.gl/core';
+import {
+  MapView,
+  OrbitView,
+  OrthographicView,
+  FirstPersonView,
+  _GlobeView as GlobeView
+} from '@deck.gl/core';
 
 import testController from './test-controller';
 
-test('MapController', t => {
-  testController(t, MapView, {
+test('MapController', async t => {
+  await testController(t, MapView, {
     longitude: -122.45,
     latitude: 37.78,
     zoom: 10,
@@ -15,8 +21,37 @@ test('MapController', t => {
   t.end();
 });
 
-test('OrbitController', t => {
-  testController(t, OrbitView, {
+test('MapController#inertia', async t => {
+  await testController(t, MapView, {
+    longitude: -122.45,
+    latitude: 37.78,
+    zoom: 10,
+    pitch: 30,
+    bearing: -45,
+    inertia: true
+  });
+
+  t.end();
+});
+
+test('GlobeController', async t => {
+  await testController(
+    t,
+    GlobeView,
+    {
+      longitude: -122.45,
+      latitude: 37.78,
+      zoom: 0
+    },
+    // GlobeView cannot be rotated
+    ['pan#function key', 'pinch', 'tripan']
+  );
+
+  t.end();
+});
+
+test('OrbitController', async t => {
+  await testController(t, OrbitView, {
     orbitAxis: 'Y',
     rotationX: 30,
     rotationOrbit: -45,
@@ -27,8 +62,8 @@ test('OrbitController', t => {
   t.end();
 });
 
-test('OrthographicController', t => {
-  testController(
+test('OrthographicController', async t => {
+  await testController(
     t,
     OrthographicView,
     {
@@ -36,24 +71,25 @@ test('OrthographicController', t => {
       zoom: 1
     },
     // OrthographicView cannot be rotated
-    ['pan#function key']
+    ['pan#function key', 'tripan']
   );
 
   t.end();
 });
 
-test('FirstPersonController', t => {
-  testController(
+test('FirstPersonController', async t => {
+  await testController(
     t,
     FirstPersonView,
     {
       longitude: -122.45,
       latitude: 37.78,
       pitch: 15,
+      bearing: 0,
       position: [0, 0, 2]
     },
     // FirstPersonController does not pan
-    ['pan', 'pan#function key']
+    ['pan#function key', 'pan#function key#disabled']
   );
 
   t.end();

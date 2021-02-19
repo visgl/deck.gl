@@ -3,7 +3,7 @@ import GL from '@luma.gl/constants';
 import {Texture2D, copyToTexture, cloneTextureFrom} from '@luma.gl/core';
 import {ImageLoader} from '@loaders.gl/images';
 import {load} from '@loaders.gl/core';
-import {createIterable, log} from '@deck.gl/core';
+import {createIterable} from '@deck.gl/core';
 
 const DEFAULT_CANVAS_WIDTH = 1024;
 const DEFAULT_BUFFER = 4;
@@ -25,8 +25,7 @@ function nextPowOfTwo(number) {
 
 // update comment to create a new texture and copy original data.
 function resizeImage(ctx, imageData, width, height) {
-  const {naturalWidth, naturalHeight} = imageData;
-  if (width === naturalWidth && height === naturalHeight) {
+  if (width === imageData.width && height === imageData.height) {
     return imageData;
   }
 
@@ -36,7 +35,7 @@ function resizeImage(ctx, imageData, width, height) {
   ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
 
   // image, sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight
-  ctx.drawImage(imageData, 0, 0, naturalWidth, naturalHeight, 0, 0, width, height);
+  ctx.drawImage(imageData, 0, 0, imageData.width, imageData.height, 0, 0, width, height);
 
   return ctx.canvas;
 }
@@ -167,7 +166,7 @@ export function getDiffIcons(data, getIcon, cachedIcons) {
     }
 
     if (!icons[id] && (!cachedIcons[id] || icon.url !== cachedIcons[id].url)) {
-      icons[id] = icon;
+      icons[id] = {...icon, source: object, sourceIndex: objectInfo.index};
     }
   }
   return icons;
@@ -177,11 +176,13 @@ export default class IconManager {
   constructor(
     gl,
     {
-      onUpdate = noop // notify IconLayer when icon texture update
+      onUpdate = noop, // notify IconLayer when icon texture update
+      onError = noop
     }
   ) {
     this.gl = gl;
     this.onUpdate = onUpdate;
+    this.onError = onError;
 
     // load options used for loading images
     this._loadOptions = null;
@@ -259,19 +260,8 @@ export default class IconManager {
       this._texture.delete();
       this._texture = null;
     }
-    if (iconAtlas instanceof Texture2D) {
-      iconAtlas.setParameters(DEFAULT_TEXTURE_PARAMETERS);
-
-      this._externalTexture = iconAtlas;
-      this.onUpdate();
-    } else if (iconAtlas) {
-      // Browser object: Image, ImageData, HTMLCanvasElement, ImageBitmap
-      this._texture = new Texture2D(this.gl, {
-        data: iconAtlas,
-        parameters: DEFAULT_TEXTURE_PARAMETERS
-      });
-      this.onUpdate();
-    }
+    this._externalTexture = iconAtlas;
+    this.onUpdate();
   }
 
   _updateAutoPacking(data) {
@@ -346,7 +336,13 @@ export default class IconManager {
           this.onUpdate();
         })
         .catch(error => {
-          log.error(error)();
+          this.onError({
+            url: icon.url,
+            source: icon.source,
+            sourceIndex: icon.sourceIndex,
+            loadOptions: this._loadOptions,
+            error
+          });
         })
         .finally(() => {
           this._pendingCount--;

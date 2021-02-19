@@ -1,17 +1,20 @@
 import pytest
 
+import html
 import os
 import sys
 import tempfile
 from pathlib import Path
 import webbrowser
 
+import IPython
+
 try:
     from unittest.mock import MagicMock
 except ImportError:
     from mock import MagicMock
 
-from pydeck.io.html import display_html, render_json_to_html, open_named_or_temporary_file
+from pydeck.io.html import cdn_picker, display_html, iframe_with_srcdoc, in_jupyter, render_json_to_html, CDN_URL
 
 from ..fixtures import fixtures
 
@@ -24,38 +27,29 @@ def test_rendering_is_not_broken():
 
 def test_display_html():
     webbrowser.open = MagicMock()
-    display_html("test.htm", 500, 500)
+    display_html("test.htm")
     webbrowser.open.assert_called_once_with("file://test.htm")
 
 
-def test_open_named_or_temporary_file(tmp_path):
-    # Verify that a file is created with a .html extension and in write mode
-    path = tmp_path / "test_file"
-    named_file = open_named_or_temporary_file(str(path))
-    assert named_file.mode == "w+"
+def test_cdn_picker(monkeypatch):
+    assert len(cdn_picker(offline=True)) > 1000
+    PORT = 8080
+    monkeypatch.setenv("PYDECK_DEV_PORT", PORT)
+    assert "localhost:{}".format(PORT) in cdn_picker()
+    monkeypatch.delenv("PYDECK_DEV_PORT", raising=False)
+    assert CDN_URL in cdn_picker()
 
-    path = str(tmp_path / "test_file.html")
-    is_saved_at_path = not os.path.isfile("test_file.html") and os.path.isfile(path)
-    # Verify that a file with the given name is created at the specified path
-    assert is_saved_at_path
 
-    # Verify that a temporary file
-    add_html_file = open_named_or_temporary_file(str(tmp_path / "test_file"))
-    assert add_html_file.name.endswith(".html")
-    assert os.path.isfile(add_html_file.name)
+def test_iframe_with_srcdoc():
+    IPython.display.HTML = MagicMock()
+    html_str = "<html></html>"
+    iframe_with_srcdoc(html_str)
+    escaped_html_str = html.escape("<html></html>")
+    iframe = """<iframe src="about:blank" frameborder="0" srcdoc="{escaped_html_str}" width="100%" height=500></iframe>""".format(
+        escaped_html_str=escaped_html_str
+    )
+    IPython.display.HTML.assert_called_once_with(iframe)
 
-    # Verify the ability to create a local temporary file
-    try:
-        local_temporary_file = open_named_or_temporary_file()
-        assert add_html_file.name.endswith(".html")
-        assert os.path.isfile(local_temporary_file.name)
-    finally:
-        os.remove(local_temporary_file.name)
 
-    # Verify that there's a directory at the specified path with an html file in it
-    parent_dir = str(tmp_path / "test_dir") + "/"
-    assert not os.path.isdir(parent_dir)
-    directory_given_file = open_named_or_temporary_file(parent_dir)
-    assert directory_given_file.name.endswith(".html")
-    assert os.path.isfile(directory_given_file.name)
-    assert os.path.isdir(parent_dir)
+def test_in_jupyter():
+    assert not in_jupyter()

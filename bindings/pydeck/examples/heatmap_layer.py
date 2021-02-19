@@ -11,7 +11,7 @@ Overlaid with the satellite imagery from Mapbox to highlight the how terrain aff
 """
 
 import pandas as pd
-import pydeck
+import pydeck as pdk
 
 CATTLE_DATA = "https://raw.githubusercontent.com/ajduberstein/geo_datasets/master/nm_cattle.csv"
 POULTRY_DATA = "https://raw.githubusercontent.com/ajduberstein/geo_datasets/master/nm_chickens.csv"
@@ -34,38 +34,39 @@ COLOR_BREWER_BLUE_SCALE = [
 ]
 
 
-view = pydeck.data_utils.compute_view(cattle_df[["lng", "lat"]])
+view = pdk.data_utils.compute_view(cattle_df[["lng", "lat"]])
 view.zoom = 6
 
-cattle = pydeck.Layer(
+cattle = pdk.Layer(
     "HeatmapLayer",
     data=cattle_df,
     opacity=0.9,
     get_position=["lng", "lat"],
-    aggregation='"MEAN"',
+    aggregation=pdk.types.String("MEAN"),
     color_range=COLOR_BREWER_BLUE_SCALE,
     threshold=1,
     get_weight="weight",
     pickable=True,
 )
 
-poultry = pydeck.Layer(
+poultry = pdk.Layer(
     "HeatmapLayer",
     data=poultry_df,
     opacity=0.9,
     get_position=["lng", "lat"],
     threshold=0.75,
-    aggregation='"MEAN"',
+    aggregation=pdk.types.String("MEAN"),
     get_weight="weight",
     pickable=True,
 )
 
 
-r = pydeck.Deck(
+r = pdk.Deck(
     layers=[cattle, poultry],
     initial_view_state=view,
-    map_style="mapbox://styles/mapbox/dark-v9",
+    map_provider="mapbox",
+    map_style=pdk.map_styles.SATELLITE,
     tooltip={"text": "Concentration of cattle in blue, concentration of poultry in orange"},
 )
 
-r.to_html("heatmap_layer.html", notebook_display=False)
+r.to_html("heatmap_layer.html")

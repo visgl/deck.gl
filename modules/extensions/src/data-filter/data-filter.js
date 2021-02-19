@@ -20,10 +20,13 @@
 
 import {LayerExtension} from '@deck.gl/core';
 import {shaderModule, shaderModule64} from './shader-module';
+import * as aggregator from './aggregator';
+import {readPixelsToArray, clear} from '@luma.gl/core';
 import GL from '@luma.gl/constants';
 
 const defaultProps = {
   getFilterValue: {type: 'accessor', value: 0},
+  onFilteredItemsChange: {type: 'function', value: null, compare: false},
 
   filterEnabled: true,
   filterRange: [-1, 1],
@@ -40,12 +43,12 @@ const DATA_TYPE_FROM_SIZE = {
 };
 
 export default class DataFilterExtension extends LayerExtension {
-  constructor({filterSize = 1, fp64 = false} = {}) {
+  constructor({filterSize = 1, fp64 = false, countItems = false} = {}) {
     if (!DATA_TYPE_FROM_SIZE[filterSize]) {
       throw new Error('filterSize out of range');
     }
 
-    super({filterSize, fp64});
+    super({filterSize, fp64, countItems});
   }
 
   getShaders(extension) {
@@ -78,6 +81,97 @@ export default class DataFilterExtension extends LayerExtension {
           }
         }
       });
+    }
+
+    const {gl} = this.context;
+    if (attributeManager && extension.opts.countItems) {
+      const useFloatTarget = aggregator.supportsFloatTarget(gl);
+      // This attribute is needed for variable-width data, e.g. Path, SolidPolygon, Text
+      // The vertex shader checks if a vertex has the same "index" as the previous vertex
+      // so that we only write one count cross multiple vertices of the same object
+      attributeManager.add({
+        filterIndices: {
+          size: useFloatTarget ? 1 : 2,
+          vertexOffset: 1,
+          type: GL.UNSIGNED_BYTE,
+          normalized: true,
+          accessor: (object, {index}) => {
+            const i = object && object.__source ? object.__source.index : index;
+            return useFloatTarget ? (i + 1) % 255 : [(i + 1) % 255, Math.floor(i / 255) % 255];
+          },
+          shaderAttributes: {
+            filterPrevIndices: {
+              vertexOffset: 0
+            },
+            filterIndices: {
+              vertexOffset: 1
+            }
+          }
+        }
+      });
+
+      const filterFBO = aggregator.getFramebuffer(gl, useFloatTarget);
+      const filterModel = aggregator.getModel(gl, extension.getShaders(extension), useFloatTarget);
+      this.setState({filterFBO, filterModel});
+    }
+  }
+
+  updateState({props, oldProps}) {
+    if (this.state.filterModel) {
+      const attributeManager = this.getAttributeManager();
+      const filterNeedsUpdate =
+        attributeManager.attributes.filterValues.needsUpdate() ||
+        props.filterEnabled !== oldProps.filterEnabled ||
+        props.filterRange !== oldProps.filterRange ||
+        props.filterSoftRange !== oldProps.filterSoftRange;
+      if (filterNeedsUpdate) {
+        this.setState({filterNeedsUpdate});
+      }
+    }
+  }
+
+  draw(params, extension) {
+    const {filterFBO, filterModel, filterNeedsUpdate} = this.state;
+    const {onFilteredItemsChange} = this.props;
+    if (filterNeedsUpdate && onFilteredItemsChange && filterModel) {
+      const {
+        attributes: {filterValues, filterIndices}
+      } = this.getAttributeManager();
+      filterModel.setVertexCount(this.getNumInstances());
+
+      const {gl} = this.context;
+      clear(gl, {framebuffer: filterFBO, color: [0, 0, 0, 0]});
+
+      filterModel
+        .updateModuleSettings(params.moduleParameters)
+        .setAttributes({
+          ...filterValues.getShaderAttributes(),
+          ...(filterIndices && filterIndices.getShaderAttributes())
+        })
+        .draw({
+          framebuffer: filterFBO,
+          parameters: {
+            ...aggregator.parameters,
+            viewport: [0, 0, filterFBO.width, filterFBO.height]
+          }
+        });
+      const color = readPixelsToArray(filterFBO);
+      let count = 0;
+      for (let i = 0; i < color.length; i++) {
+        count += color[i];
+      }
+      onFilteredItemsChange({id: this.id, count});
+
+      this.state.filterNeedsUpdate = false;
+    }
+  }
+
+  finalizeState() {
+    const {filterFBO, filterModel} = this.state;
+    if (filterFBO) {
+      filterFBO.color.delete();
+      filterFBO.delete();
+      filterModel.delete();
     }
   }
 }

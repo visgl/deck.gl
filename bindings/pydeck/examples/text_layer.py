@@ -6,6 +6,7 @@ Names of various public transit stops within San Francisco, plotted at the locat
 """
 
 import pydeck as pdk
+from pydeck.types import String
 import pandas as pd
 
 TEXT_LAYER_DATA = "https://raw.githubusercontent.com/visgl/deck.gl-data/master/website/bart-stations.json"  # noqa
@@ -19,12 +20,12 @@ layer = pdk.Layer(
     get_position="coordinates",
     get_text="name",
     get_size=16,
-    get_color=[255, 255, 255],
+    get_color=[0, 0, 0],
     get_angle=0,
     # Note that string constants in pydeck are explicitly passed as strings
     # This distinguishes them from columns in a data set
-    get_text_anchor="'middle'",
-    get_alignment_baseline="'center'",
+    get_text_anchor=String("middle"),
+    get_alignment_baseline=String("center"),
 )
 
 # Set the viewport location
@@ -35,6 +36,6 @@ r = pdk.Deck(
     layers=[layer],
     initial_view_state=view_state,
     tooltip={"text": "{name}\n{address}"},
-    map_style="mapbox://styles/mapbox/satellite-v9",
+    map_style=pdk.map_styles.ROAD,
 )
-r.to_html("text_layer.html", notebook_display=False)
+r.to_html("text_layer.html")

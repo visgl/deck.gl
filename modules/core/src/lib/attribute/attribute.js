@@ -76,12 +76,12 @@ export default class Attribute extends DataColumn {
 
   // Resolve transition settings object if transition is enabled, otherwise `null`
   getTransitionSetting(opts) {
+    if (!opts || !this.supportsTransition()) {
+      return null;
+    }
     const {accessor} = this.settings;
     // TODO: have the layer resolve these transition settings itself?
     const layerSettings = this.settings.transition;
-    if (!this.supportsTransition()) {
-      return null;
-    }
     // these are the transition settings passed in by the user
     const userSettings = Array.isArray(accessor)
       ? opts[accessor.find(a => opts[a])]
@@ -125,7 +125,6 @@ export default class Attribute extends DataColumn {
     }
 
     if (settings.update) {
-      assert(Number.isFinite(numInstances));
       super.allocate({
         numInstances,
         copy: state.updateRanges !== range.FULL
@@ -294,6 +293,9 @@ export default class Attribute extends DataColumn {
 
   /* eslint-disable max-depth, max-statements */
   _autoUpdater(attribute, {data, startRow, endRow, props, numInstances}) {
+    if (attribute.constant) {
+      return;
+    }
     const {settings, state, value, size, startIndices} = attribute;
 
     const {accessor, transform} = settings;
@@ -316,7 +318,9 @@ export default class Attribute extends DataColumn {
 
       if (startIndices) {
         const numVertices =
-          (startIndices[objectInfo.index + 1] || numInstances) - startIndices[objectInfo.index];
+          (objectInfo.index < startIndices.length - 1
+            ? startIndices[objectInfo.index + 1]
+            : numInstances) - startIndices[objectInfo.index];
         if (objectValue && Array.isArray(objectValue[0])) {
           let startIndex = i;
           for (const item of objectValue) {
@@ -340,7 +344,6 @@ export default class Attribute extends DataColumn {
         i += size;
       }
     }
-    attribute.constant = false;
   }
   /* eslint-enable max-depth, max-statements */
 

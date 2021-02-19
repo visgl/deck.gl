@@ -38,6 +38,7 @@ const defaultProps = {
   // Whether to draw a GL.LINES wireframe of the polygon
   wireframe: false,
   _normalize: true,
+  _windingOrder: 'CW',
 
   // elevation multiplier
   elevationScale: {type: 'number', min: 0, value: 1},
@@ -61,13 +62,19 @@ const ATTRIBUTE_TRANSITION = {
 };
 
 export default class SolidPolygonLayer extends Layer {
-  getShaders(vs) {
+  getShaders(type) {
     return super.getShaders({
-      vs,
+      vs: type === 'top' ? vsTop : vsSide,
       fs,
-      defines: {},
+      defines: {
+        RING_WINDING_ORDER_CW: !this.props._normalize && this.props._windingOrder === 'CCW' ? 0 : 1
+      },
       modules: [project32, gouraudLighting, picking]
     });
+  }
+
+  get wrapLongitude() {
+    return false;
   }
 
   initializeState() {
@@ -80,7 +87,9 @@ export default class SolidPolygonLayer extends Layer {
     this.setState({
       numInstances: 0,
       polygonTesselator: new PolygonTesselator({
-        preproject: coordinateSystem === COORDINATE_SYSTEM.LNGLAT,
+        // Lnglat coordinates are usually projected non-linearly, which affects tesselation results
+        // Provide a preproject function if the coordinates are in lnglat
+        preproject: coordinateSystem === COORDINATE_SYSTEM.LNGLAT && viewport.projectFlat,
         fp64: this.use64bitPositions(),
         IndexType: !gl || hasFeatures(gl, FEATURES.ELEMENT_INDEX_UINT32) ? Uint32Array : Uint16Array
       })
@@ -194,11 +203,28 @@ export default class SolidPolygonLayer extends Layer {
     const {index} = info;
     const {data} = this.props;
 
+    // Check if data comes from a composite layer, wrapped with getSubLayerRow
     if (data[0] && data[0].__source) {
-      // data is wrapped
+      // index decoded from picking color refers to the source index
       info.object = data.find(d => d.__source.index === index);
     }
     return info;
+  }
+
+  disablePickingIndex(objectIndex) {
+    const {data} = this.props;
+
+    // Check if data comes from a composite layer, wrapped with getSubLayerRow
+    if (data[0] && data[0].__source) {
+      // index decoded from picking color refers to the source index
+      for (let i = 0; i < data.length; i++) {
+        if (data[i].__source.index === objectIndex) {
+          this._disablePickingIndex(i);
+        }
+      }
+    } else {
+      this._disablePickingIndex(objectIndex);
+    }
   }
 
   draw({uniforms}) {
@@ -271,6 +297,9 @@ export default class SolidPolygonLayer extends Layer {
         buffers,
         getGeometry: props.getPolygon,
         positionFormat: props.positionFormat,
+        wrapLongitude: props.wrapLongitude,
+        // TODO - move the flag out of the viewport
+        resolution: this.context.viewport.resolution,
         fp64: this.use64bitPositions(),
         dataChanged: changeFlags.dataChanged
       });
@@ -295,7 +324,7 @@ export default class SolidPolygonLayer extends Layer {
     let sideModel;
 
     if (filled) {
-      const shaders = this.getShaders(vsTop);
+      const shaders = this.getShaders('top');
       shaders.defines.NON_INSTANCED_MODEL = 1;
 
       topModel = new Model(
@@ -318,7 +347,7 @@ export default class SolidPolygonLayer extends Layer {
     if (extruded) {
       sideModel = new Model(
         gl,
-        Object.assign({}, this.getShaders(vsSide), {
+        Object.assign({}, this.getShaders('side'), {
           id: `${id}-side`,
           geometry: new Geometry({
             drawMode: GL.LINES,
@@ -327,7 +356,7 @@ export default class SolidPolygonLayer extends Layer {
               // top right - top left - bootom left - bottom right
               vertexPositions: {
                 size: 2,
-                value: new Float32Array([1, 1, 0, 1, 0, 0, 1, 0])
+                value: new Float32Array([1, 0, 0, 0, 0, 1, 1, 1])
               }
             }
           }),

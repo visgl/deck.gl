@@ -171,6 +171,7 @@ test('LayersPass#layerIndexResolver', t => {
 
   for (const testCase of TEST_CASES) {
     const resolver = layerIndexResolver();
+    const resolver2 = layerIndexResolver();
 
     const layerManager = new LayerManager(gl, {});
     layerManager.setLayers(testCase.layers);
@@ -181,6 +182,12 @@ test('LayersPass#layerIndexResolver', t => {
       const result = resolver(layer, !layer.isComposite && layer.props.visible);
       const expected = testCase.expected[layer.id];
       t.is(result, expected, layer.id);
+
+      // Should yield the same result even if parent layer is not resolved first
+      if (!layer.isComposite) {
+        const result2 = resolver2(layer, layer.props.visible);
+        t.is(result2, expected, layer.id);
+      }
     }
   }
 

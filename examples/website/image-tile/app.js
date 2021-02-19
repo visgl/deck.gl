@@ -1,10 +1,12 @@
-import React, {PureComponent} from 'react';
+/* global fetch, DOMParser */
+import React, {useState, useEffect} from 'react';
 import {render} from 'react-dom';
 
 import DeckGL, {OrthographicView, COORDINATE_SYSTEM} from 'deck.gl';
 import {TileLayer} from '@deck.gl/geo-layers';
 import {BitmapLayer} from '@deck.gl/layers';
 import {load} from '@loaders.gl/core';
+import {clamp} from 'math.gl';
 
 const INITIAL_VIEW_STATE = {
   target: [13000, 13000, 0],
@@ -14,121 +16,81 @@ const INITIAL_VIEW_STATE = {
 const ROOT_URL =
   'https://raw.githubusercontent.com/visgl/deck.gl-data/master/website/image-tiles/moon.image';
 
-export default class App extends PureComponent {
-  constructor(props) {
-    super(props);
-    this.state = {
-      height: null,
-      width: null,
-      tileSize: null
+function getTooltip({tile, bitmap}) {
+  if (tile && bitmap) {
+    return `\
+    tile: x: ${tile.x}, y: ${tile.y}, z: ${tile.z}
+    (${bitmap.pixel[0]},${bitmap.pixel[1]}) in ${bitmap.size.width}x${bitmap.size.height}`;
+  }
+  return null;
+}
+
+export default function App({autoHighlight = true, onTilesLoad}) {
+  const [dimensions, setDimensions] = useState(null);
+
+  useEffect(() => {
+    const getMetaData = async () => {
+      const dziSource = `${ROOT_URL}/moon.image.dzi`;
+      const response = await fetch(dziSource);
+      const xmlText = await response.text();
+      const dziXML = new DOMParser().parseFromString(xmlText, 'text/xml');
+
+      if (Number(dziXML.getElementsByTagName('Image')[0].attributes.Overlap.value) !== 0) {
+        // eslint-disable-next-line no-undef, no-console
+        console.warn('Overlap parameter is nonzero and should be 0');
+      }
+      setDimensions({
+        height: Number(dziXML.getElementsByTagName('Size')[0].attributes.Height.value),
+        width: Number(dziXML.getElementsByTagName('Size')[0].attributes.Width.value),
+        tileSize: Number(dziXML.getElementsByTagName('Image')[0].attributes.TileSize.value)
+      });
     };
-    this._onHover = this._onHover.bind(this);
-    this._renderTooltip = this._renderTooltip.bind(this);
-    this.inTileBounds = this.inTileBounds.bind(this);
-    this.cutOffImageBounds = this.cutOffImageBounds.bind(this);
-    this.fetchDataFromDZI(`${ROOT_URL}/moon.image.dzi`);
-  }
+    getMetaData();
+  }, []);
 
-  _onHover({x, y, sourceLayer, tile}) {
-    this.setState({x, y, hoveredObject: {sourceLayer, tile}});
-  }
+  const tileLayer =
+    dimensions &&
+    new TileLayer({
+      pickable: autoHighlight,
+      tileSize: dimensions.tileSize,
+      autoHighlight,
+      highlightColor: [60, 60, 60, 100],
+      minZoom: -7,
+      maxZoom: 0,
+      coordinateSystem: COORDINATE_SYSTEM.CARTESIAN,
+      extent: [0, 0, dimensions.width, dimensions.height],
+      getTileData: ({x, y, z}) => {
+        return load(`${ROOT_URL}/moon.image_files/${15 + z}/${x}_${y}.jpeg`);
+      },
+      onViewportLoad: onTilesLoad,
 
-  _renderTooltip() {
-    const {x, y, hoveredObject} = this.state;
-    const {sourceLayer, tile} = hoveredObject || {};
-    return (
-      sourceLayer &&
-      tile && (
-        <div className="tooltip" style={{left: x, top: y}}>
-          tile: x: {tile.x}, y: {tile.y}, z: {tile.z}
-        </div>
-      )
-    );
-  }
+      renderSubLayers: props => {
+        const {
+          bbox: {left, bottom, right, top}
+        } = props.tile;
+        const {width, height} = dimensions;
+        return new BitmapLayer(props, {
+          data: null,
+          image: props.data,
+          bounds: [
+            clamp(left, 0, width),
+            clamp(bottom, 0, height),
+            clamp(right, 0, width),
+            clamp(top, 0, height)
+          ]
+        });
+      }
+    });
 
-  inTileBounds({x, y, z}) {
-    const xInBounds = x < Math.ceil(this.state.width / (this.state.tileSize * 2 ** z)) && x >= 0;
-    const yInBounds = y < Math.ceil(this.state.height / (this.state.tileSize * 2 ** z)) && y >= 0;
-    return xInBounds && yInBounds;
-  }
-
-  cutOffImageBounds({left, bottom, right, top}) {
-    return {
-      left: Math.max(0, left),
-      bottom: Math.max(0, Math.min(this.state.height, bottom)),
-      right: Math.max(0, Math.min(this.state.width, right)),
-      top: Math.max(0, top)
-    };
-  }
-
-  fetchDataFromDZI(dziSource) {
-    return (
-      fetch(dziSource) // eslint-disable-line no-undef
-        .then(response => response.text())
-        // eslint-disable-next-line no-undef
-        .then(str => new window.DOMParser().parseFromString(str, 'text/xml'))
-        .then(dziXML => {
-          if (Number(dziXML.getElementsByTagName('Image')[0].attributes.Overlap.value) !== 0) {
-            // eslint-disable-next-line no-undef, no-console
-            console.warn('Overlap paramter is nonzero and should be 0');
-          }
-          this.setState({
-            height: Number(dziXML.getElementsByTagName('Size')[0].attributes.Height.value),
-            width: Number(dziXML.getElementsByTagName('Size')[0].attributes.Width.value),
-            tileSize: Number(dziXML.getElementsByTagName('Image')[0].attributes.TileSize.value)
-          });
-        })
-    );
-  }
-
-  _renderLayers() {
-    const {autoHighlight = true, highlightColor = [60, 60, 60, 40]} = this.props;
-    const {tileSize, height, width} = this.state;
-    return [
-      new TileLayer({
-        pickable: true,
-        onHover: this._onHover,
-        tileSize,
-        autoHighlight,
-        highlightColor,
-        minZoom: -7,
-        maxZoom: 0,
-        coordinateSystem: COORDINATE_SYSTEM.CARTESIAN,
-        extent: [0, 0, width, height],
-        getTileData: ({x, y, z}) => {
-          if (this.inTileBounds({x, y, z: -z})) {
-            return load(`${ROOT_URL}/moon.image_files/${15 + z}/${x}_${y}.jpeg`);
-          }
-          return null;
-        },
-
-        renderSubLayers: props => {
-          const {
-            bbox: {left, bottom, right, top}
-          } = props.tile;
-          const newBounds = this.cutOffImageBounds({left, bottom, right, top});
-          return new BitmapLayer(props, {
-            data: null,
-            image: props.data,
-            bounds: [newBounds.left, newBounds.bottom, newBounds.right, newBounds.top]
-          });
-        }
-      })
-    ];
-  }
-
-  render() {
-    return (
-      <DeckGL
-        views={[new OrthographicView({id: 'ortho'})]}
-        layers={this.state.tileSize ? this._renderLayers() : []}
-        initialViewState={INITIAL_VIEW_STATE}
-        controller={true}
-      >
-        {this._renderTooltip}
-      </DeckGL>
-    );
-  }
+  return (
+    <DeckGL
+      views={[new OrthographicView({id: 'ortho'})]}
+      layers={[tileLayer]}
+      initialViewState={INITIAL_VIEW_STATE}
+      controller={true}
+      getTooltip={getTooltip}
+    />
+  );
 }
 
 export function renderToDOM(container) {

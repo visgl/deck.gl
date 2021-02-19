@@ -1,12 +1,12 @@
 # About 64-bit Layers
 
-deck.gl can leverage high precision GPU floating point using emulated 64-bit floating point. For supportd layers (look for the 64-bit icon in the docs), 64-bit shaders are used when the `fp64` prop is set to true.
+deck.gl can leverage high precision GPU floating point using emulated 64-bit floating point. For supported layers (look for the 64-bit icon in the docs), 64-bit shaders are used when the `fp64` prop is set to true.
 
 > With the improved precision 32 bit projection mode in deck.gl 6.1, the use of `fp64` is no longer required to achieve sub-centimeter precision. The new 32 bit projection mode has much better performance. This makes the `fp64` mode more of a niche technology that demonstrates how to use 64 bit calculations should you need to use them in your own applications.
 
 <div align="center">
   <div>
-    <img src="/website/src/static/images/demo-mandelbrot.gif" />
+    <img src="https://raw.github.com/visgl/deck.gl-data/master/images/fp64-mandelbrot.gif" />
     <p><i>32-bit vs 64-bit Mandelbrot Set Zoom</i></p>
   </div>
 </div>
@@ -44,7 +44,7 @@ Note: `ulp` = [unit of least precision](https://en.wikipedia.org/wiki/Unit_in_th
 Since the 64-bit floating point maths are emulated using the multiple precision arithmetics, it costs more GPU cycles than native 32-bit
 math (the shader execution time alone is about 10x slower). However, since 64-bit floating point maths are usually only required in vertex shader, the overall performance impact is usually less than 10x.
 
-There will be a memory impact too, in that all vertex attributes and uniform that uses 64-bit maths require double storage space in JavaScirpt. Same as mentioned above, since a layer usually has some attributes that do not require 64-bit maths, the total memory impact is normally significantly less than 2x.
+There will be a memory impact too, in that all vertex attributes and uniform that uses 64-bit maths require double storage space in JavaScript. Same as mentioned above, since a layer usually has some attributes that do not require 64-bit maths, the total memory impact is normally significantly less than 2x.
 
 Shaders are more complex and can take time to compile on some systems, notably Windows.
 

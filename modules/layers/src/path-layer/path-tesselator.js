@@ -18,6 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 import {Tesselator} from '@deck.gl/core';
+import {normalizePath} from './path';
 
 const START_CAP = 1;
 const END_CAP = 2;
@@ -32,7 +33,12 @@ export default class PathTesselator extends Tesselator {
       attributes: {
         // Padding covers shaderAttributes for last segment in largest case fp64
         // additional vertex + hi & low parts, 3 * 6
-        positions: {size: 3, padding: 18, type: opts.fp64 ? Float64Array : Float32Array},
+        positions: {
+          size: 3,
+          padding: 18,
+          initialize: true,
+          type: opts.fp64 ? Float64Array : Float32Array
+        },
         segmentTypes: {size: 1, type: Uint8ClampedArray}
       }
     });
@@ -46,6 +52,13 @@ export default class PathTesselator extends Tesselator {
     return () => null;
   }
 
+  normalizeGeometry(path) {
+    if (this.normalize) {
+      return normalizePath(path, this.positionSize, this.opts.resolution, this.opts.wrapLongitude);
+    }
+    return path;
+  }
+
   /* Getters */
   get(attributeName) {
     return this.attributes[attributeName];
@@ -53,11 +66,13 @@ export default class PathTesselator extends Tesselator {
 
   /* Implement base Tesselator interface */
   getGeometrySize(path) {
-    if (!this.normalize) {
-      const numPoints = path.length / this.positionSize;
-      return this.opts.loop ? numPoints + 2 : numPoints;
+    if (Array.isArray(path[0])) {
+      let size = 0;
+      for (const subPath of path) {
+        size += this.getGeometrySize(subPath);
+      }
+      return size;
     }
-
     const numPoints = this.getPathLength(path);
     if (numPoints < 2) {
       // invalid path
@@ -74,8 +89,17 @@ export default class PathTesselator extends Tesselator {
     if (context.geometrySize === 0) {
       return;
     }
-    this._updateSegmentTypes(path, context);
-    this._updatePositions(path, context);
+    if (path && Array.isArray(path[0])) {
+      for (const subPath of path) {
+        const geometrySize = this.getGeometrySize(subPath);
+        context.geometrySize = geometrySize;
+        this.updateGeometryAttributes(subPath, context);
+        context.vertexStart += geometrySize;
+      }
+    } else {
+      this._updateSegmentTypes(path, context);
+      this._updatePositions(path, context);
+    }
   }
 
   _updateSegmentTypes(path, context) {
@@ -102,59 +126,49 @@ export default class PathTesselator extends Tesselator {
       return;
     }
     const {vertexStart, geometrySize} = context;
+    const p = new Array(3);
 
     // positions   --  A0 A1 B0 B1 B2 B3 B0 B1 B2 --
     // segmentTypes     3  4  4  0  0  0  0  4  4
     for (let i = vertexStart, ptIndex = 0; ptIndex < geometrySize; i++, ptIndex++) {
-      const p = this.getPointOnPath(path, ptIndex);
+      this.getPointOnPath(path, ptIndex, p);
       positions[i * 3] = p[0];
       positions[i * 3 + 1] = p[1];
-      positions[i * 3 + 2] = p[2] || 0;
+      positions[i * 3 + 2] = p[2];
     }
   }
 
   /* Utilities */
+  // Returns the number of points in the path
   getPathLength(path) {
-    if (Number.isFinite(path[0])) {
-      // flat format
-      return path.length / this.positionSize;
-    }
-    return path.length;
+    return path.length / this.positionSize;
   }
 
-  getPointOnPath(path, index) {
-    if (Number.isFinite(path[0])) {
-      // flat format
-      const {positionSize} = this;
-      if (index * positionSize >= path.length) {
-        // loop
-        index += 1 - path.length / positionSize;
-      }
-      // TODO - avoid creating new arrays when using binary
-      return [
-        path[index * positionSize],
-        path[index * positionSize + 1],
-        positionSize === 3 ? path[index * positionSize + 2] : 0
-      ];
-    }
-    if (index >= path.length) {
+  // Returns a point on the path at the specified index
+  getPointOnPath(path, index, target = []) {
+    const {positionSize} = this;
+    if (index * positionSize >= path.length) {
       // loop
-      index += 1 - path.length;
+      index += 1 - path.length / positionSize;
     }
-    return path[index];
+    const i = index * positionSize;
+    target[0] = path[i];
+    target[1] = path[i + 1];
+    target[2] = (positionSize === 3 && path[i + 2]) || 0;
+    return target;
   }
 
+  // Returns true if the first and last points are identical
   isClosed(path) {
     if (!this.normalize) {
       return this.opts.loop;
     }
-    const numPoints = this.getPathLength(path);
-    const firstPoint = this.getPointOnPath(path, 0);
-    const lastPoint = this.getPointOnPath(path, numPoints - 1);
+    const {positionSize} = this;
+    const lastPointIndex = path.length - positionSize;
     return (
-      firstPoint[0] === lastPoint[0] &&
-      firstPoint[1] === lastPoint[1] &&
-      firstPoint[2] === lastPoint[2]
+      path[0] === path[lastPointIndex] &&
+      path[1] === path[lastPointIndex + 1] &&
+      (positionSize === 2 || path[2] === path[lastPointIndex + 2])
     );
   }
 }

@@ -36,7 +36,6 @@ uniform int project_uCoordinateSystem;
 uniform int project_uProjectionMode;
 uniform float project_uScale;
 uniform bool project_uWrapLongitude;
-uniform float project_uAntimeridian;
 uniform vec3 project_uCommonUnitsPerMeter;
 uniform vec3 project_uCommonUnitsPerWorldUnit;
 uniform vec3 project_uCommonUnitsPerWorldUnit2;
@@ -53,6 +52,8 @@ const float TILE_SIZE = 512.0;
 const float PI = 3.1415926536;
 const float WORLD_SCALE = TILE_SIZE / (PI * 2.0);
 const vec3 ZERO_64_LOW = vec3(0.0);
+const float EARTH_RADIUS = 6370972.0; // meters
+const float GLOBE_RADIUS = 256.0;
 
 //
 // Scaling offsets - scales meters to "world distance"
@@ -99,12 +100,26 @@ vec4 project_offset_(vec4 offset) {
 vec2 project_mercator_(vec2 lnglat) {
   float x = lnglat.x;
   if (project_uWrapLongitude) {
-    x = mod(x - project_uAntimeridian, 360.0) + project_uAntimeridian;
+    x = mod(x + 180., 360.0) - 180.;
   }
+  float y = clamp(lnglat.y, -89.9, 89.9);
   return vec2(
     radians(x) + PI,
-    PI + log(tan_fp32(PI * 0.25 + radians(lnglat.y) * 0.5))
+    PI + log(tan_fp32(PI * 0.25 + radians(y) * 0.5))
   );
+}
+
+vec3 project_globe_(vec3 lnglatz) {
+  float lambda = radians(lnglatz.x);
+  float phi = radians(lnglatz.y);
+  float cosPhi = cos(phi);
+  float D = (lnglatz.z / EARTH_RADIUS + 1.0) * GLOBE_RADIUS;
+
+  return vec3(
+    sin(lambda) * cosPhi,
+    -cos(lambda) * cosPhi,
+    sin(phi)
+  ) * D;
 }
 
 //
@@ -122,6 +137,17 @@ vec4 project_position(vec4 position, vec3 position64Low) {
         position_world.w
       );
     }
+    if (project_uCoordinateSystem == COORDINATE_SYSTEM_CARTESIAN) {
+      position_world.xyz += project_uCoordinateOrigin;
+    }
+  }
+  if (project_uProjectionMode == PROJECTION_MODE_GLOBE) {
+    if (project_uCoordinateSystem == COORDINATE_SYSTEM_LNGLAT) {
+      return vec4(
+        project_globe_(position_world.xyz),
+        position_world.w
+      );
+    }
   }
   if (project_uProjectionMode == PROJECTION_MODE_IDENTITY ||
     (project_uProjectionMode == PROJECTION_MODE_WEB_MERCATOR_AUTO_OFFSET &&
@@ -129,11 +155,10 @@ vec4 project_position(vec4 position, vec3 position64Low) {
      project_uCoordinateSystem == COORDINATE_SYSTEM_CARTESIAN))) {
     // Subtract high part of 64 bit value. Convert remainder to float32, preserving precision.
     position_world.xyz -= project_uCoordinateOrigin;
-    // Translation is already added to the high parts
-    position_world += project_uModelMatrix * vec4(position64Low, 0.0);
   }
 
-  return project_offset_(position_world);
+  // Translation is already added to the high parts
+  return project_offset_(position_world + project_uModelMatrix * vec4(position64Low, 0.0));
 }
 
 vec4 project_position(vec4 position) {
@@ -181,5 +206,23 @@ float project_pixel_size(float pixels) {
 }
 vec2 project_pixel_size(vec2 pixels) {
   return pixels / project_uScale;
+}
+
+// Get rotation matrix that aligns the z axis with the given up vector
+// Find 3 unit vectors ux, uy, uz that are perpendicular to each other and uz == up
+mat3 project_get_orientation_matrix(vec3 up) {
+  vec3 uz = normalize(up);
+  // Tangent on XY plane
+  vec3 ux = abs(uz.z) == 1.0 ? vec3(1.0, 0.0, 0.0) : normalize(vec3(uz.y, -uz.x, 0));
+  vec3 uy = cross(uz, ux);
+  return mat3(ux, uy, uz);
+}
+
+bool project_needs_rotation(vec3 commonPosition, out mat3 transform) {
+  if (project_uProjectionMode == PROJECTION_MODE_GLOBE) {
+    transform = project_get_orientation_matrix(commonPosition);
+    return true;
+  }
+  return false;
 }
 `;

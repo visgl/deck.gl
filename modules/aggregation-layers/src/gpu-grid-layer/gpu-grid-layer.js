@@ -34,13 +34,13 @@ const defaultProps = {
   // color
   colorDomain: null,
   colorRange: defaultColorRange,
-  getColorWeight: {type: 'accessor', value: x => 1},
+  getColorWeight: {type: 'accessor', value: 1},
   colorAggregation: 'SUM',
 
   // elevation
   elevationDomain: null,
   elevationRange: [0, 1000],
-  getElevationWeight: {type: 'accessor', value: x => 1},
+  getElevationWeight: {type: 'accessor', value: 1},
   elevationAggregation: 'SUM',
   elevationScale: {type: 'number', min: 0, value: 1},
 

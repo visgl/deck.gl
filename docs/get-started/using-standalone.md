@@ -2,14 +2,14 @@
 
 The deck.gl core library and layers have no dependencies on React or Mapbox GL and can be used by any JavaScript application.
 
-Our [get-started examples](https://github.com/visgl/deck.gl/tree/master/examples/get-started) contains non-React templates that serve as a starting point for your application.
+Our [get-started examples](https://github.com/visgl/deck.gl/tree/master/examples/get-started) contains vanilla JavaScript templates that serve as a starting point for your application.
 
 
 ## Using @deck.gl/core
 
 ` @deck.gl/core` is a submodule of deck.gl that contains no React dependency.
 
-The [Deck](/docs/api-reference/deck.md) class takes deck.gl layer instances and viewport parameters, and renders those layers as a transparent overlay.
+The [Deck](/docs/api-reference/core/deck.md) class takes deck.gl layer instances and viewport parameters, and renders those layers as a transparent overlay.
 
 ```bash
 npm install @deck.gl/core @deck.gl/layers
@@ -55,12 +55,11 @@ To use deck.gl in a scripting environment, include the standalone version in a `
 
 It exposes two global objects `deck` and `luma`. Any exports from the deck.gl core can be accessed by `deck.<Class>`.
 
-The scripting API's [DeckGL](/docs/api-reference/standalone/deckgl.md) class extends the core `Deck` class with some additional features such as Mapbox integration.
+The scripting API's [DeckGL](/docs/api-reference/core/deckgl.md) class extends the core `Deck` class with some additional features such as Mapbox integration.
 
 ```js
 new deck.DeckGL({
-  mapboxApiAccessToken: '<your_token_here>',
-  mapStyle: 'mapbox://styles/mapbox/light-v9',
+  mapStyle: 'https://basemaps.cartocdn.com/gl/positron-nolabels-gl-style/style.json',
   initialViewState: {
     longitude: -122.45,
     latitude: 37.8,

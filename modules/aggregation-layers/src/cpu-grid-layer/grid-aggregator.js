@@ -99,7 +99,10 @@ function pointsToGridHashing(props, aggregationParams) {
 
         gridHash[key] = gridHash[key] || {count: 0, points: [], lonIdx: xIndex, latIdx: yIndex};
         gridHash[key].count += 1;
-        gridHash[key].points.push(pt);
+        gridHash[key].points.push({
+          source: pt,
+          index: objectInfo.index
+        });
       }
     }
   }

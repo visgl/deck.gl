@@ -1,4 +1,3 @@
-import {Vector3} from '@math.gl/core';
 import GL from '@luma.gl/constants';
 import {Geometry} from '@luma.gl/core';
 import {COORDINATE_SYSTEM, CompositeLayer} from '@deck.gl/core';
@@ -10,20 +9,19 @@ import {load} from '@loaders.gl/core';
 import {Tileset3D, TILE_TYPE} from '@loaders.gl/tiles';
 import {Tiles3DLoader} from '@loaders.gl/3d-tiles';
 
-const scratchOffset = new Vector3();
+const SINGLE_DATA = [0];
 
 const defaultProps = {
-  getPointColor: [0, 0, 0],
+  getPointColor: {type: 'accessor', value: [0, 0, 0, 255]},
   pointSize: 1.0,
 
   data: null,
-  loadOptions: {},
   loader: Tiles3DLoader,
 
-  onTilesetLoad: tileset3d => {},
-  onTileLoad: tileHeader => {},
-  onTileUnload: tileHeader => {},
-  onTileError: (tile, message, url) => {}
+  onTilesetLoad: {type: 'function', value: tileset3d => {}, compare: false},
+  onTileLoad: {type: 'function', value: tileHeader => {}, compare: false},
+  onTileUnload: {type: 'function', value: tileHeader => {}, compare: false},
+  onTileError: {type: 'function', value: (tile, message, url) => {}, compare: false}
 };
 
 export default class Tile3DLayer extends CompositeLayer {
@@ -38,6 +36,11 @@ export default class Tile3DLayer extends CompositeLayer {
     };
   }
 
+  get isLoaded() {
+    const {tileset3d} = this.state;
+    return tileset3d && tileset3d.isLoaded();
+  }
+
   shouldUpdateState({changeFlags}) {
     return changeFlags.somethingChanged;
   }
@@ -50,6 +53,12 @@ export default class Tile3DLayer extends CompositeLayer {
     if (changeFlags.viewportChanged) {
       const {tileset3d} = this.state;
       this._updateTileset(tileset3d);
+    }
+    if (changeFlags.propsChanged) {
+      const {layerMap} = this.state;
+      for (const key in layerMap) {
+        layerMap[key].needsUpdate = true;
+      }
     }
   }
 
@@ -66,8 +75,21 @@ export default class Tile3DLayer extends CompositeLayer {
     return info;
   }
 
+  _updateAutoHighlight(info) {
+    if (info.sourceLayer) {
+      info.sourceLayer.updateAutoHighlight(info);
+    }
+  }
+
   async _loadTileset(tilesetUrl) {
-    const {loader, loadOptions} = this.props;
+    const {loadOptions} = this.props;
+
+    // TODO: deprecate `loader` in v9.0
+    let loader = this.props.loader || this.props.loaders;
+    if (Array.isArray(loader)) {
+      loader = loader[0];
+    }
+
     const options = {...loadOptions};
     if (loader.preload) {
       const preloadOptions = await loader.preload(tilesetUrl, loadOptions);
@@ -115,24 +137,24 @@ export default class Tile3DLayer extends CompositeLayer {
     }
   }
 
-  _create3DTileLayer(tileHeader) {
+  _getSubLayer(tileHeader, oldLayer) {
     if (!tileHeader.content) {
       return null;
     }
 
     switch (tileHeader.type) {
       case TILE_TYPE.POINTCLOUD:
-        return this._createPointCloudTileLayer(tileHeader);
+        return this._makePointCloudLayer(tileHeader, oldLayer);
       case TILE_TYPE.SCENEGRAPH:
-        return this._create3DModelTileLayer(tileHeader);
+        return this._make3DModelLayer(tileHeader, oldLayer);
       case TILE_TYPE.MESH:
-        return this._createSimpleMeshLayer(tileHeader);
+        return this._makeSimpleMeshLayer(tileHeader, oldLayer);
       default:
         throw new Error(`Tile3DLayer: Failed to render layer of type ${tileHeader.content.type}`);
     }
   }
 
-  _createPointCloudTileLayer(tileHeader) {
+  _makePointCloudLayer(tileHeader, oldLayer) {
     const {
       attributes,
       pointCount,
@@ -145,6 +167,16 @@ export default class Tile3DLayer extends CompositeLayer {
     if (!positions) {
       return null;
     }
+    const data = (oldLayer && oldLayer.props.data) || {
+      header: {
+        vertexCount: pointCount
+      },
+      attributes: {
+        POSITION: positions,
+        NORMAL: normals,
+        COLOR_0: colors
+      }
+    };
 
     const {pointSize, getPointColor} = this.props;
     const SubLayerClass = this.getSubLayerClass('pointcloud', PointCloudLayer);
@@ -157,16 +189,7 @@ export default class Tile3DLayer extends CompositeLayer {
       }),
       {
         id: `${this.id}-pointcloud-${tileHeader.id}`,
-        data: {
-          header: {
-            vertexCount: pointCount
-          },
-          attributes: {
-            POSITION: positions,
-            NORMAL: normals,
-            COLOR_0: colors
-          }
-        },
+        data,
         coordinateSystem: COORDINATE_SYSTEM.METER_OFFSETS,
         coordinateOrigin: cartographicOrigin,
         modelMatrix,
@@ -176,7 +199,7 @@ export default class Tile3DLayer extends CompositeLayer {
     );
   }
 
-  _create3DModelTileLayer(tileHeader) {
+  _make3DModelLayer(tileHeader) {
     const {gltf, instances, cartographicOrigin, modelMatrix} = tileHeader.content;
 
     const SubLayerClass = this.getSubLayerClass('scenegraph', ScenegraphLayer);
@@ -190,36 +213,28 @@ export default class Tile3DLayer extends CompositeLayer {
       }),
       {
         id: `${this.id}-scenegraph-${tileHeader.id}`,
-        data: instances || [{}],
+        data: instances || SINGLE_DATA,
         scenegraph: gltf,
 
         coordinateSystem: COORDINATE_SYSTEM.METER_OFFSETS,
         coordinateOrigin: cartographicOrigin,
         modelMatrix,
         getTransformMatrix: instance => instance.modelMatrix,
-        getPosition: instance => [0, 0, 0]
+        getPosition: [0, 0, 0]
       }
     );
   }
 
-  _createSimpleMeshLayer(tileHeader) {
+  _makeSimpleMeshLayer(tileHeader, oldLayer) {
     const content = tileHeader.content;
     const {attributes, modelMatrix, cartographicOrigin, texture} = content;
-    const {normals, texCoords} = attributes;
-    const positions = new Float32Array(attributes.positions.value.length);
-    for (let i = 0; i < positions.length; i += 3) {
-      scratchOffset.copy(attributes.positions.value.subarray(i, i + 3));
-      positions.set(scratchOffset, i);
-    }
 
-    const geometry = new Geometry({
-      drawMode: GL.TRIANGLES,
-      attributes: {
-        positions,
-        normals,
-        texCoords
-      }
-    });
+    const geometry =
+      (oldLayer && oldLayer.props.mesh) ||
+      new Geometry({
+        drawMode: GL.TRIANGLES,
+        attributes: getMeshGeometry(attributes)
+      });
 
     const SubLayerClass = this.getSubLayerClass('mesh', SimpleMeshLayer);
 
@@ -230,7 +245,7 @@ export default class Tile3DLayer extends CompositeLayer {
       {
         id: `${this.id}-mesh-${tileHeader.id}`,
         mesh: geometry,
-        data: [{}],
+        data: SINGLE_DATA,
         getPosition: [0, 0, 0],
         getColor: [255, 255, 255],
         texture,
@@ -249,33 +264,47 @@ export default class Tile3DLayer extends CompositeLayer {
 
     return tileset3d.tiles
       .map(tile => {
-        let layer = layerMap[tile.id] && layerMap[tile.id].layer;
-        // render selected tiles
+        const layerCache = (layerMap[tile.id] = layerMap[tile.id] || {tile});
+        let {layer} = layerCache;
         if (tile.selected) {
-          // create layer
+          // render selected tiles
           if (!layer) {
-            layer = this._create3DTileLayer(tile);
-            layerMap[tile.id] = {layer, tile};
-          }
-          // update layer visibility
-          if (layer && layer.props && !layer.props.visible) {
+            // create layer
+            layer = this._getSubLayer(tile);
+          } else if (layerCache.needsUpdate) {
+            // props have changed, rerender layer
+            layer = this._getSubLayer(tile, layer);
+            layerCache.needsUpdate = false;
+          } else if (!layer.props.visible) {
+            // update layer visibility
             // Still has GPU resource but visibility is turned off so turn it back on so we can render it.
             layer = layer.clone({visible: true});
-            layerMap[tile.id].layer = layer;
           }
-          return layer;
-        }
-
-        // hide non-selected tiles
-        if (layer && layer.props && layer.props.visible) {
+        } else if (layer && layer.props.visible) {
+          // hide non-selected tiles
           // Still in tileset cache but doesn't need to render this frame. Keep the GPU resource bound but don't render it.
           layer = layer.clone({visible: false});
-          layerMap[tile.id].layer = layer;
         }
+        layerCache.layer = layer;
         return layer;
       })
       .filter(Boolean);
   }
+}
+
+function getMeshGeometry(contentAttributes) {
+  const attributes = {};
+  attributes.positions = {
+    ...contentAttributes.positions,
+    value: new Float32Array(contentAttributes.positions.value)
+  };
+  if (contentAttributes.normals) {
+    attributes.normals = contentAttributes.normals;
+  }
+  if (contentAttributes.texCoords) {
+    attributes.texCoords = contentAttributes.texCoords;
+  }
+  return attributes;
 }
 
 Tile3DLayer.layerName = 'Tile3DLayer';

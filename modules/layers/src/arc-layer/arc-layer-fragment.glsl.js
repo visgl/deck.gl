@@ -25,8 +25,13 @@ precision highp float;
 
 varying vec4 vColor;
 varying vec2 uv;
+varying float isValid;
 
 void main(void) {
+  if (isValid == 0.0) {
+    discard;
+  }
+
   gl_FragColor = vColor;
   geometry.uv = uv;
 

@@ -11,12 +11,12 @@ Not to worry, there are easier ways to use deck.gl:
 
 * **JSON Layers** - It is even possible to use deck.gl without programming, by specifying deck.gl layers using a simple JSON format. See [JSON Layer Browser](deck.gl/json).
 
-* **kepler.gl** - If scripting JSON is also too much, and you just want to play around with deck.gl visualizations in a polished application user interface, please check out [kepler.gl](http://kepler.gl/#/).
+* **kepler.gl** - If scripting JSON is also too much, and you just want to play around with deck.gl visualizations in a polished application user interface, please check out [kepler.gl](http://kepler.gl/).
 
 
 ## Layer pixels render randomly on top of each other
 
-You are likely experiencing a well-known issue in 3D graphics known as Z-fighting. The good news is that there are many ways to mitigate Z-fighting and deck.gl provides several mechanisms to help you. To get started, see the [tips and tricks](http://deck.gl/#/documentation/developer-guide/tips-and-tricks) article.
+You are likely experiencing a well-known issue in 3D graphics known as Z-fighting. The good news is that there are many ways to mitigate Z-fighting and deck.gl provides several mechanisms to help you. To get started, see the [tips and tricks](/docs/developer-guide/tips-and-tricks.md) article.
 
 
 ## Should I really regenerate all layers every time something changes?
@@ -29,7 +29,7 @@ This is a "functional" take on programming, and it parallels key ideas in the wi
 
 If you are coming from a more "imperative" programming experience, it can initially seem a little counter-intuitive (especially from a performance perspective). But in spite of how the API looks, performance should be very good, if this is not the case you are likely doing something else wrong.
 
-For more information, see the article about [updates](http://deck.gl/#/documentation/developer-guide/optimizing-updates).
+For more information, see the article about [updates](/docs/developer-guide/performance.md).
 
 
 ## I can't "extend" my Custom Layer
@@ -43,9 +43,9 @@ Every time you change your layer, you create a new layer and pass it to Deck or 
 
 ## How do I **debug** deck.gl applications?
 
-Both deck.gl and luma.gl have powerful logging capabilities, as well as the `seer` Chrome extension.
+Both deck.gl and luma.gl have powerful logging capabilities.
 
-See the article about [debugging](http://deck.gl/#/documentation/developer-guide/debugging).
+See the article about [debugging](/docs/developer-guide/debugging.md).
 
 
 ## How do I **test** deck.gl applications?

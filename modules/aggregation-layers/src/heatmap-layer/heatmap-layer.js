@@ -28,15 +28,7 @@ import {
   getTextureCoordinates,
   getTextureParams
 } from './heatmap-layer-utils';
-import {
-  Buffer,
-  Texture2D,
-  Transform,
-  getParameters,
-  FEATURES,
-  hasFeatures,
-  isWebGL2
-} from '@luma.gl/core';
+import {Buffer, Texture2D, Transform, getParameters, FEATURES, hasFeatures} from '@luma.gl/core';
 import {
   AttributeManager,
   COORDINATE_SYSTEM,
@@ -50,6 +42,7 @@ import {defaultColorRange, colorRangeToFlatArray} from '../utils/color-utils';
 import weights_vs from './weights-vs.glsl';
 import weights_fs from './weights-fs.glsl';
 import vs_max from './max-vs.glsl';
+import fs_max from './max-fs.glsl';
 
 const RESOLUTION = 2; // (number of common space pixels) / (number texels)
 const SIZE_2K = 2048;
@@ -65,6 +58,10 @@ const TEXTURE_OPTIONS = {
   dataFormat: GL.RGBA
 };
 const DEFAULT_COLOR_DOMAIN = [0, 0];
+const AGGREGATION_MODE = {
+  SUM: 0,
+  MEAN: 1
+};
 
 const defaultProps = {
   getPosition: {type: 'accessor', value: x => x.position},
@@ -73,7 +70,9 @@ const defaultProps = {
   radiusPixels: {type: 'number', min: 1, max: 100, value: 50},
   colorRange: defaultColorRange,
   threshold: {type: 'number', min: 0, max: 1, value: 0.05},
-  colorDomain: {type: 'array', value: null, optional: true}
+  colorDomain: {type: 'array', value: null, optional: true},
+  // 'SUM' or 'MEAN'
+  aggregation: 'SUM'
 };
 
 const REQUIRED_FEATURES = [
@@ -108,7 +107,7 @@ export default class HeatmapLayer extends AggregationLayer {
     return changeFlags.somethingChanged;
   }
 
-  /* eslint-disable complexity */
+  /* eslint-disable max-statements,complexity */
   updateState(opts) {
     if (!this.state.supported) {
       return;
@@ -119,20 +118,20 @@ export default class HeatmapLayer extends AggregationLayer {
 
     if (changeFlags.viewportChanged) {
       changeFlags.boundsChanged = this._updateBounds();
+      this._updateTextureRenderingBounds();
     }
 
     if (changeFlags.dataChanged || changeFlags.boundsChanged) {
-      this._updateWeightmap();
+      // Update weight map immediately
+      clearTimeout(this.state.updateTimer);
+      this.setState({isWeightMapDirty: true});
     } else if (changeFlags.viewportZoomChanged) {
+      // Update weight map when zoom stops
       this._debouncedUpdateWeightmap();
     }
 
     if (props.colorRange !== oldProps.colorRange) {
       this._updateColorTexture(opts);
-    }
-
-    if (changeFlags.viewportChanged) {
-      this._updateTextureRenderingBounds();
     }
 
     if (oldProps.colorDomain !== props.colorDomain || changeFlags.viewportChanged) {
@@ -152,9 +151,13 @@ export default class HeatmapLayer extends AggregationLayer {
       this.setState({colorDomain});
     }
 
+    if (this.state.isWeightMapDirty) {
+      this._updateWeightmap();
+    }
+
     this.setState({zoom: opts.context.viewport.zoom});
   }
-  /* eslint-enable complexity */
+  /* eslint-enable max-statements,complexity */
 
   renderLayers() {
     if (!this.state.supported) {
@@ -168,7 +171,7 @@ export default class HeatmapLayer extends AggregationLayer {
       colorTexture,
       colorDomain
     } = this.state;
-    const {updateTriggers, intensity, threshold} = this.props;
+    const {updateTriggers, intensity, threshold, aggregation} = this.props;
 
     const TriangleLayerClass = this.getSubLayerClass('triangle', TriangleLayer);
 
@@ -187,6 +190,7 @@ export default class HeatmapLayer extends AggregationLayer {
         vertexCount: 4,
         maxTexture: maxWeightsTexture,
         colorTexture,
+        aggregationMode: AGGREGATION_MODE[aggregation] || 0,
         texture: weightsTexture,
         intensity,
         threshold,
@@ -328,6 +332,7 @@ export default class HeatmapLayer extends AggregationLayer {
       _targetTexture: maxWeightsTexture,
       _targetTextureVarying: 'outTexture',
       vs: vs_max,
+      _fs: fs_max,
       elementCount: textureSize * textureSize
     });
 
@@ -438,7 +443,7 @@ export default class HeatmapLayer extends AggregationLayer {
   _updateColorTexture(opts) {
     const {colorRange} = opts.props;
     let {colorTexture} = this.state;
-    const colors = colorRangeToFlatArray(colorRange, true);
+    const colors = colorRangeToFlatArray(colorRange, false, Uint8Array);
 
     if (colorTexture) {
       colorTexture.setImageData({
@@ -450,8 +455,6 @@ export default class HeatmapLayer extends AggregationLayer {
         data: colors,
         width: colorRange.length,
         height: 1,
-        format: isWebGL2(this.context.gl) ? GL.RGBA32F : GL.RGBA,
-        type: GL.FLOAT,
         ...TEXTURE_OPTIONS
       });
     }
@@ -461,6 +464,7 @@ export default class HeatmapLayer extends AggregationLayer {
   _updateWeightmap() {
     const {radiusPixels} = this.props;
     const {weightsTransform, worldBounds, textureSize, weightsTexture, weightsScale} = this.state;
+    this.state.isWeightMapDirty = false;
 
     // #5: convert world bounds to common using Layer's coordiante system and origin
     const commonBounds = this._worldToCommonBounds(worldBounds, {
@@ -497,28 +501,21 @@ export default class HeatmapLayer extends AggregationLayer {
       [GL.TEXTURE_MAG_FILTER]: GL.LINEAR,
       [GL.TEXTURE_MIN_FILTER]: GL.LINEAR
     });
-
-    this.setState({lastUpdate: Date.now()});
   }
 
   _debouncedUpdateWeightmap(fromTimer = false) {
     let {updateTimer} = this.state;
-    const timeSinceLastUpdate = Date.now() - this.state.lastUpdate;
 
     if (fromTimer) {
       updateTimer = null;
-    }
-
-    if (timeSinceLastUpdate >= ZOOM_DEBOUNCE) {
       // update
       this._updateBounds(true);
-      this._updateWeightmap();
       this._updateTextureRenderingBounds();
-    } else if (!updateTimer) {
-      updateTimer = setTimeout(
-        this._debouncedUpdateWeightmap.bind(this, true),
-        ZOOM_DEBOUNCE - timeSinceLastUpdate
-      );
+      this.setState({isWeightMapDirty: true});
+    } else {
+      this.setState({isWeightMapDirty: false});
+      clearTimeout(updateTimer);
+      updateTimer = setTimeout(this._debouncedUpdateWeightmap.bind(this, true), ZOOM_DEBOUNCE);
     }
 
     this.setState({updateTimer});

@@ -6,8 +6,7 @@ set -e
 
 BRANCH=`echo "$1-release"`
 VERSION=`echo "$1.0"`
-WEBSITE_PAGES=website/contents/pages.js
-WEBSITE_WEBPACK_CONFIG=website/webpack.config.js
+WEBSITE_PAGES=website/src/constants/defaults.js
 
 echo "Updating branch to ${BRANCH}..."
 
@@ -16,11 +15,7 @@ find docs -iname "*.md" -type f -exec sed -i '' -E "s/deck.gl\/(tree|blob)\/mast
 find docs -iname "*.md" -type f -exec sed -i '' -E "s/deck.gl\/(tree|blob)\/master\/examples/deck.gl\/tree\/${BRANCH}\/examples/g" {} \;
 
 # Replace source links in website
-sed -i '' -E "s/deck.gl\/master\/docs/deck.gl\/${BRANCH}\/docs/g" "${WEBSITE_PAGES}"
-sed -i '' -E "s/deck.gl\/tree\/master\//deck.gl\/tree\/${BRANCH}\//g" "${WEBSITE_PAGES}"
-
-# Replace source links in website/webpack.config.js
-sed -i '' -E "s/deck.gl\/master/deck.gl\/${BRANCH}/g" "${WEBSITE_WEBPACK_CONFIG}"
+sed -i '' -E "s/deck.gl\/tree\/master/deck.gl\/tree\/${BRANCH}/g" "${WEBSITE_PAGES}"
 
 # Bump dependencies in examples
 update_dep() {

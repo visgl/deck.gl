@@ -1,5 +1,6 @@
 // core layers
 import coreLayersTests from './core-layers';
+import arcLayersTests from './arc-layer';
 import columnLayerTests from './column-layer';
 import geojsonLayerTests from './geojson-layer';
 import pathLayerTests from './path-layer';
@@ -20,6 +21,7 @@ import tripsLayerTests from './trips-layer';
 import mvtLayerTests from './mvt-layer';
 // mesh-layers
 import simpleMeshLayerTests from './simple-mesh-layer';
+import scenegraphLayerTests from './scenegraph-layer';
 // other
 import viewsTests from './views';
 import effectsTests from './effects';
@@ -27,6 +29,7 @@ import transitionTests from './transitions';
 
 export default [].concat(
   coreLayersTests,
+  arcLayersTests,
   columnLayerTests,
   geojsonLayerTests,
   pathLayerTests,
@@ -44,6 +47,7 @@ export default [].concat(
   tripsLayerTests,
   mvtLayerTests,
   simpleMeshLayerTests,
+  scenegraphLayerTests,
   viewsTests,
   effectsTests,
   transitionTests

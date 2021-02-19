@@ -18,6 +18,8 @@ yarn bootstrap
 yarn test
 ```
 
+Additional instructions for [Windows](/CONTRIBUTING.md#develop-on-windows).
+
 Run the layer browser application:
 
 ```bash
@@ -43,8 +45,7 @@ deck.gl development is governed by the vis.gl Technical Steering Committee (TSC)
 
 - [Ib Green](https://github.com/ibgreen)
 - [Xiaoji Chen](https://github.com/Pessimistress) - chairperson
-- [Tarek Sherif](https://github.com/tsherif)
-- [Ravi Akkenapally](https://github.com/1chandu)
+- [Alberto Asuero](https://github.com/alasarr)
 
 
 ### Maintainers
@@ -52,17 +53,47 @@ deck.gl development is governed by the vis.gl Technical Steering Committee (TSC)
 - [Andrew Duberstein](https://github.com/ajduberstein) - pydeck, json
 - [Xintong Xia](https://github.com/xintongxia) - layers
 - [Georgios Karnas](https://github.com/georgios-uber) - glTF
+- [Kyle Barron](https://github.com/kylebarron) - tiles
+- [Chris Gervang](https://github.com/chrisgervang) - terrain
 - [Dario D'Amico](https://github.com/damix911) - ArcGIS
 - [Jesús Botella](https://github.com/jesusbotella) - MVT
+- [Javier Aragón](https://github.com/padawannn) - MVT, CARTO
+- [Víctor Velarde](https://github.com/https://github.com/VictorVelarde) - MVT, CARTO
+- [Raúl Yeguas](https://github.com/neokore) - MVT, CARTO
 
 Maintainers of deck.gl have commit access to this GitHub repository, and take part in the decision making process.
 
 If you are interested in becoming a maintainer, read the [governance guidelines](https://github.com/visgl/tsc/tree/master/developer-process/governance.md).
 
 The vis.gl TSC meets monthly and publishes meeting notes via a [mailing list](https://lists.uc.foundation/g/visgl).
-This mailing list can also be utilized to reach out to the TSC.  
+This mailing list can also be utilized to reach out to the TSC.
 
 
 ## Code of Conduct
 
 Please be mindful of and adhere to the Linux Foundation's [Code of Conduct](https://lfprojects.org/policies/code-of-conduct/) when contributing to deck.gl.
+
+## Troubleshooting
+
+### Develop on Windows
+
+It's possible to set up the dev environment in [Windows Subsystem for Linux](https://docs.microsoft.com/en-us/windows/wsl/install-win10).
+
+To get OpenGL support, install [VcXsrv](https://sourceforge.net/projects/vcxsrv/). In xlaunch.exe, choose multiple windows, display 0, start no client, disable native opengl. ([source](https://github.com/Microsoft/WSL/issues/2855#issuecomment-358861903))
+
+```bash
+sudo apt-get update
+sudo apt install mesa-utils
+export DISPLAY=localhost:0
+glxgears
+```
+
+If successful, you should see a window open with gears turning.
+
+Next, install [headless-gl dependencies](https://github.com/stackgl/headless-gl#system-dependencies):
+
+```bash
+sudo apt-get install -y build-essential libxi-dev libglu1-mesa-dev libglew-dev pkg-config
+```
+
+Verify that everything works by running `yarn test node`.

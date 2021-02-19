@@ -1,0 +1,52 @@
+name: website
+
+on:
+  push:
+    branches:
+      - '*-release'
+
+jobs:
+  publish-website:
+    runs-on: ubuntu-latest
+
+    if: github.repository_owner == 'visgl'
+
+    env:
+      MapboxAccessToken: ${{ secrets.MAPBOX_ACCESS_TOKEN }}
+      GoogleMapsAPIKey: ${{ secrets.GOOGLE_MAPS_API_KEY }}
+
+    steps:
+      - uses: actions/checkout@v2.1.1
+        with:
+          token: ${{ secrets.ADMIN_TOKEN }}
+
+      - name: Use Node.js
+        uses: actions/setup-node@v1
+        with:
+          node-version: '12.x'
+
+      - name: Get version
+        id: get-version
+        run: LATEST=$(npm show deck.gl version | grep -o -E "^[0-9]+\.[0-9]+") && echo "::set-output name=latest::/${LATEST}-release"
+
+      - name: Check version
+        if: ${{ !endsWith(github.ref, steps.get-version.outputs.latest) }}
+        run: |
+          echo "Website is only published from the latest release branch"
+
+      - name: Build website
+        if: ${{ endsWith(github.ref, steps.get-version.outputs.latest) }}
+        run: |
+          yarn bootstrap
+          cd website
+          yarn install-deps
+          yarn build
+
+      - name: Deploy
+        if: ${{ endsWith(github.ref, steps.get-version.outputs.latest) }}
+        uses: JamesIves/github-pages-deploy-action@3.7.1
+        with:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          BRANCH: gh-pages
+          FOLDER: website/public
+          CLEAN: true

@@ -9,6 +9,7 @@ test('TextLayer', t => {
     Layer: TextLayer,
     sampleProps: {
       data: FIXTURES.points,
+      background: true,
       getText: d => d.ADDRESS,
       getPosition: d => d.COORDINATES
     },
@@ -18,6 +19,56 @@ test('TextLayer', t => {
       t.ok(subLayer, 'Renders sublayer');
     }
   });
+  testLayer({Layer: TextLayer, testCases, onError: t.notOk});
+
+  t.end();
+});
+
+test('TextLayer - sdf', t => {
+  const testCases = [
+    {
+      props: {
+        data: FIXTURES.points,
+        getText: d => d.ADDRESS,
+        getPosition: d => d.COORDINATES
+      },
+      onAfterUpdate: ({subLayer}) => {
+        t.notOk(subLayer.props.sdf, 'sublayer props.sdf');
+        t.is(subLayer.props.alphaCutoff, 0.001, 'sublayer props.alphaCutoff');
+      }
+    },
+    {
+      updateProps: {
+        fontSettings: {
+          sdf: true,
+          buffer: 10
+        }
+      },
+      onAfterUpdate: ({subLayer}) => {
+        t.ok(subLayer.props.sdf, 'sublayer props.sdf');
+      }
+    }
+  ];
+  testLayer({Layer: TextLayer, testCases, onError: t.notOk});
+
+  t.end();
+});
+
+test('TextLayer - special texts', t => {
+  const testCases = [
+    {
+      props: {
+        data: ['\u{F0004}', null, '\u{F0004}+\u{F0005}'],
+        getText: d => d,
+        getPosition: d => [0, 0]
+      },
+      onAfterUpdate: ({layer, subLayer}) => {
+        t.is(subLayer.props.numInstances, 4, 'sublayer has correct prop');
+        t.deepEqual(subLayer.props.startIndices, [0, 1, 1, 4], 'sublayer has correct prop');
+      }
+    }
+  ];
+
   testLayer({Layer: TextLayer, testCases, onError: t.notOk});
 
   t.end();

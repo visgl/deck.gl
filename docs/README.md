@@ -2,10 +2,19 @@
 
 <p align="center">
   These docs are for
+  <a href="https://github.com/visgl/deck.gl/blob/8.4-release/docs/README.md">
+    <img src="https://img.shields.io/badge/deck.gl-v8.4-brightgreen.svg?style=flat-square" />
+  </a>
+  Looking for an old version?
+  <a href="https://github.com/visgl/deck.gl/blob/8.3-release/docs/README.md">
+    <img src="https://img.shields.io/badge/deck.gl-v8.3-brightgreen.svg?style=flat-square" />
+  </a>
+  <a href="https://github.com/visgl/deck.gl/blob/8.2-release/docs/README.md">
+    <img src="https://img.shields.io/badge/deck.gl-v8.2-brightgreen.svg?style=flat-square" />
+  </a>
   <a href="https://github.com/visgl/deck.gl/blob/8.1-release/docs/README.md">
     <img src="https://img.shields.io/badge/deck.gl-v8.1-brightgreen.svg?style=flat-square" />
   </a>
-  Looking for an old version?
   <a href="https://github.com/visgl/deck.gl/blob/8.0-release/docs/README.md">
     <img src="https://img.shields.io/badge/deck.gl-v8.0-green.svg?style=flat-square" />
   </a>
@@ -26,7 +35,7 @@ deck.gl handles a number of challenges out of the box:
 
 * Performant rendering and updating of large data sets
 * Interactive event handling such as picking, highlighting and filtering
-* Cartographic projections and integration with major basemap providers
+* Cartographic projections and integration with major basemap providers including Mapbox, Google Maps and ESRI
 * A catalog of proven, well-tested layers
 
 Deck.gl is designed to be highly customizable. All layers come with flexible APIs to allow programmatic control of each aspect of the rendering. All core classes such are easily extendable by the users to address custom use cases.
@@ -64,13 +73,16 @@ npm install deck.gl
 pip install pydeck
 ```
 
-- [Get started](https://github.com/visgl/deck.gl/blob/master/bindings/pydeck/README.md)
+- [Get started](https://pydeck.gl/installation.html)
+- [Examples](https://pydeck.gl/)
 
 ### Third-Party Bindings
 
 - [deckgl-typings](https://github.com/danmarshall/deckgl-typings) (Typescript)
 - [mapdeck](https://symbolixau.github.io/mapdeck/articles/mapdeck.html) (R)
 - [vega-deck.gl](https://github.com/microsoft/SandDance/tree/master/packages/vega-deck.gl) ([Vega](https://vega.github.io/))
+- [earthengine-layers](https://earthengine-layers.com/) ([Google Earth Engine](https://earthengine.google.com/))
+- [deck.gl-native](https://github.com/UnfoldedInc/deck.gl-native) (C++)
 
 ## Ecosystem
 
@@ -92,7 +104,7 @@ Getting familiar with the various layers and their props, and reading the basic 
 
 Exploring the deck.gl examples is a good starting point.
 
-In-depth tutorials for how to develop deck.gl applications are available on the [Vis Academy](http://vis.academy/#/) website.
+In-depth tutorials for how to develop deck.gl applications are available on the [Vis Academy](http://vis.academy/) website.
 
 And our [blog](https://medium.com/vis-gl) contains a lot of additional information that might be helpful.
 
@@ -101,7 +113,7 @@ But where to go after that?
 
 ### Learning Reactive UI Programming
 
-deck.gl is designed according to functional UI programming principles, made fashionable by frameworks like React. The key to writing good, performant deck.gl applications and layers lies in knowing how to minimize updates and redundant calculations, understanding concepts like "shallow equality" etc. This is critical when using deck.gl with React, but can still be helpful to understand when using deck.gl in non-React contexts.
+deck.gl is designed according to functional UI programming principles, popularized by frameworks like React. The key to writing good, performant deck.gl applications and layers lies in knowing how to minimize updates and redundant calculations, understanding concepts like "shallow equality" etc. This is critical when using deck.gl with React, but can still be helpful to understand when using deck.gl in non-React contexts.
 
 There is an impressive amount of information (documentation, blog posts, educational videos, etc.) on the reactive programming paradigm in relation to modern web frameworks such as React, Flux and Redux. Where to start depends mostly on your application architecture choices. Exploring such information will take you beyond what we can cover in the basic deck.gl developer guide article on Updates.
 

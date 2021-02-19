@@ -17,7 +17,7 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
-import {Layer, project32, picking} from '@deck.gl/core';
+import {Layer, project32, picking, log} from '@deck.gl/core';
 import GL from '@luma.gl/constants';
 import {Model, Geometry} from '@luma.gl/core';
 
@@ -50,7 +50,7 @@ const DEFAULT_COLOR = [0, 0, 0, 255];
  * @param {func} props.getAngle - returns rotating angle (in degree) of the icon.
  */
 const defaultProps = {
-  iconAtlas: {type: 'object', value: null, async: true},
+  iconAtlas: {type: 'image', value: null, async: true},
   iconMapping: {type: 'object', value: {}, async: true},
   sizeScale: {type: 'number', value: 1, min: 0},
   billboard: true,
@@ -64,7 +64,9 @@ const defaultProps = {
   getColor: {type: 'accessor', value: DEFAULT_COLOR},
   getSize: {type: 'accessor', value: 1},
   getAngle: {type: 'accessor', value: 0},
-  getPixelOffset: {type: 'accessor', value: [0, 0]}
+  getPixelOffset: {type: 'accessor', value: [0, 0]},
+
+  onIconError: {type: 'function', value: null, compare: false, optional: true}
 };
 
 export default class IconLayer extends Layer {
@@ -74,7 +76,10 @@ export default class IconLayer extends Layer {
 
   initializeState() {
     this.state = {
-      iconManager: new IconManager(this.context.gl, {onUpdate: () => this._onUpdate()})
+      iconManager: new IconManager(this.context.gl, {
+        onUpdate: this._onUpdate.bind(this),
+        onError: this._onError.bind(this)
+      })
     };
 
     const attributeManager = this.getAttributeManager();
@@ -157,7 +162,6 @@ export default class IconLayer extends Layer {
         (changeFlags.updateTriggersChanged.all || changeFlags.updateTriggersChanged.getIcon))
     ) {
       iconManager.setProps({data, getIcon});
-      iconMappingChanged = true;
     }
 
     if (iconMappingChanged) {
@@ -193,7 +197,7 @@ export default class IconLayer extends Layer {
     const {viewport} = this.context;
 
     const iconsTexture = iconManager.getTexture();
-    if (iconsTexture && iconsTexture.loaded) {
+    if (iconsTexture) {
       this.state.model
         .setUniforms(
           Object.assign({}, uniforms, {
@@ -237,6 +241,15 @@ export default class IconLayer extends Layer {
 
   _onUpdate() {
     this.setNeedsRedraw();
+  }
+
+  _onError(evt) {
+    const {onIconError} = this.getCurrentLayer().props;
+    if (onIconError) {
+      onIconError(evt);
+    } else {
+      log.error(evt.error)();
+    }
   }
 
   getInstanceOffset(icon) {

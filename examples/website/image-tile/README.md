@@ -20,4 +20,9 @@ A DeepZoom pyramid was created from a [source image](http://lroc.sese.asu.edu/po
 If you have [libvips](https://github.com/libvips/libvips) installed,
 you can run something from the command line like:
 
-`vips dzsave wac_nearside.tif moon.image --tile-size 512 --overlap 0`
+```bash
+vips dzsave wac_nearside.tif moon.image --tile-size 512 --overlap 0
+```
+
+For more information, check out
+the [documentation of TileLayer](../../../docs/api-reference/geo-layers/tile-layer.md).

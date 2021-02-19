@@ -25,7 +25,6 @@ import * as vec4 from 'gl-matrix/vec4';
 import {COORDINATE_SYSTEM, PROJECTION_MODE} from '../../lib/constants';
 
 import memoize from '../../utils/memoize';
-import assert from '../../utils/assert';
 
 // To quickly set a vector to zero
 const ZERO_VECTOR = [0, 0, 0, 0];
@@ -80,11 +79,19 @@ export function getOffsetOrigin(
         ];
         // Geospatial origin (wgs84) must match shaderCoordinateOrigin (common)
         geospatialOrigin = viewport.unprojectPosition(shaderCoordinateOrigin);
+        shaderCoordinateOrigin[0] -= coordinateOrigin[0];
+        shaderCoordinateOrigin[1] -= coordinateOrigin[1];
+        shaderCoordinateOrigin[2] -= coordinateOrigin[2];
       }
       break;
 
     case PROJECTION_MODE.IDENTITY:
       shaderCoordinateOrigin = viewport.position.map(Math.fround);
+      break;
+
+    case PROJECTION_MODE.GLOBE:
+      offsetMode = false;
+      geospatialOrigin = null;
       break;
 
     default:
@@ -167,13 +174,8 @@ export function getUniformsFromViewport({
   // Match Layer.defaultProps
   coordinateSystem = COORDINATE_SYSTEM.DEFAULT,
   coordinateOrigin,
-  wrapLongitude = false,
-  // Deprecated
-  projectionMode,
-  positionOrigin
+  autoWrapLongitude = false
 } = {}) {
-  assert(viewport);
-
   if (coordinateSystem === COORDINATE_SYSTEM.DEFAULT) {
     coordinateSystem = viewport.isGeospatial
       ? COORDINATE_SYSTEM.LNGLAT
@@ -187,7 +189,7 @@ export function getUniformsFromViewport({
     coordinateOrigin
   });
 
-  uniforms.project_uWrapLongitude = wrapLongitude;
+  uniforms.project_uWrapLongitude = autoWrapLongitude;
   uniforms.project_uModelMatrix = modelMatrix || IDENTITY_MATRIX;
 
   return uniforms;
@@ -218,7 +220,6 @@ function calculateViewportUniforms({
     project_uProjectionMode: viewport.projectionMode,
     project_uCoordinateOrigin: shaderCoordinateOrigin,
     project_uCenter: projectionCenter,
-    project_uAntimeridian: (viewport.longitude || 0) - 180,
 
     // Screen size
     project_uViewportSize: viewportSize,

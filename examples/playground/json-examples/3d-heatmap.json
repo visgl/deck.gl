@@ -14,7 +14,7 @@
     {
       "@@type": "MapView",
       "controller": true,
-      "mapStyle": "mapbox://styles/mapbox/dark-v9"
+      "mapStyle": "https://basemaps.cartocdn.com/gl/dark-matter-nolabels-gl-style/style.json"
     }
   ],
   "layers": [
@@ -23,7 +23,9 @@
       "id": "heatmap",
       "data": "https://raw.githubusercontent.com/visgl/deck.gl-data/master/examples/3d-heatmap/heatmap-data.csv",
       "loadOptions": {
-        "header": false
+        "csv": {
+          "header": false
+        }
       },
       "coverage": 1,
       "pickable": true,

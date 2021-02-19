@@ -25,15 +25,6 @@ def read(*parts):
     return open(os.path.join(here, *parts), "r").read()
 
 
-def assert_prelease_on_master():
-    """Require that prereleases only be from the master branch"""
-    git_branch = check_output("git rev-parse --abbrev-ref HEAD".split()).decode("ascii").strip()
-    is_prerelease = any([c for c in version_ns["__version__"] if c.isalpha()])
-    msg = "Can only release a prerelease from master, but branch is {} and release version is {}"
-    if is_prerelease:
-        assert git_branch == "master", msg.format(git_branch, version_ns["__version__"])
-
-
 log.info("setup.py entered")
 log.info("$PATH=%s" % os.environ["PATH"])
 
@@ -111,7 +102,7 @@ class FrontendBuild(Command):
 
     def copy_frontend_build(self):
         """Copy JS bundle from top-level JS module to pydeck widget's `static/` folder.
-           Overwrites destination files"""
+        Overwrites destination files"""
         js_dist_dir = os.path.join(widget_dir, "dist")
         nbextension_folder = os.path.join(here, "pydeck", "nbextension", "static")
         js_files = [
@@ -160,8 +151,6 @@ def js_prerelease(command, strict=False):
 
     class DecoratedCommand(command):
         def run(self):
-            if strict:
-                assert_prelease_on_master()
             jsdeps = self.distribution.get_command_obj("jsdeps")  # noqa
             self.distribution.run_command("jsdeps")
             command.run(self)
@@ -183,7 +172,7 @@ if __name__ == "__main__":
         long_description_content_type="text/markdown",
         license="Apache 2.0 License",
         include_package_data=True,
-        packages=find_packages(exclude=["test"]),
+        packages=find_packages(exclude=["tests*"]),
         cmdclass={
             "install": install,
             "develop": js_prerelease(ExitHookDevelop),
@@ -200,8 +189,6 @@ if __name__ == "__main__":
             "Intended Audience :: Developers",
             "Intended Audience :: Science/Research",
             "Topic :: Multimedia :: Graphics",
-            "OSI Approved :: Apache Software License",
-            "Programming Language :: Python :: 2.7",
             "Programming Language :: Python :: 3",
             "Programming Language :: Python :: 3.3",
             "Programming Language :: Python :: 3.4",

@@ -5,7 +5,8 @@ import {
   urlType,
   getURLFromTemplate
 } from '@deck.gl/geo-layers/tile-layer/utils';
-import {WebMercatorViewport, OrthographicView} from '@deck.gl/core';
+import {WebMercatorViewport, OrthographicView, _GlobeView as GlobeView} from '@deck.gl/core';
+import {Matrix4} from 'math.gl';
 
 const TEST_CASES = [
   {
@@ -34,34 +35,43 @@ const TEST_CASES = [
     }),
     minZoom: undefined,
     maxZoom: undefined,
-    output: [
-      '0,1,3',
-      '0,2,3',
-      '0,3,3',
-      '1,1,3',
-      '1,2,3',
-      '1,3,3',
-      '2,1,3',
-      '2,2,3',
-      '2,3,3',
-      '3,1,3',
-      '3,2,3',
-      '3,3,3'
-    ]
+    output: ['0,2,3', '0,3,3', '1,2,3', '1,3,3', '2,1,3', '2,2,3', '2,3,3', '3,2,3', '3,3,3']
   },
   {
-    title: 'flat viewport (exact)',
+    title: 'extreme pitch',
     viewport: new WebMercatorViewport({
-      width: 1024,
-      height: 1024,
+      width: 800,
+      height: 400,
+      pitch: 75,
+      bearing: 0,
       longitude: 0,
       latitude: 0,
-      orthographic: true,
-      zoom: 2
+      zoom: 4
     }),
     minZoom: undefined,
     maxZoom: undefined,
-    output: ['1,1,2', '1,2,2', '2,1,2', '2,2,2']
+    output: [
+      '0,0,2',
+      '1,0,2',
+      '2,0,2',
+      '2,2,3',
+      '2,3,3',
+      '3,0,2',
+      '3,2,3',
+      '4,2,3',
+      '5,2,3',
+      '5,3,3',
+      '6,6,4',
+      '6,7,4',
+      '7,6,4',
+      '7,7,4',
+      '7,8,4',
+      '8,6,4',
+      '8,7,4',
+      '8,8,4',
+      '9,6,4',
+      '9,7,4'
+    ]
   },
   {
     title: 'under zoom',
@@ -94,7 +104,6 @@ const TEST_CASES = [
     }),
     minZoom: undefined,
     maxZoom: undefined,
-    tileSize: 128, // this should have no effect!
     output: ['0,0,0']
   },
   {
@@ -104,7 +113,8 @@ const TEST_CASES = [
       height: 200,
       longitude: -152,
       latitude: 0,
-      zoom: 3
+      zoom: 3,
+      repeat: true
     }),
     maxZoom: 2,
     output: ['0,1,2', '0,2,2', '3,1,2', '3,2,2']
@@ -132,7 +142,114 @@ const TEST_CASES = [
       }
     }),
     tileSize: 256,
-    output: ['1,2,3', '1,3,3', '2,2,3', '2,3,3', '3,2,3', '3,3,3', '4,2,3', '4,3,3']
+    output: ['1,2,4', '1,3,4', '2,2,4', '2,3,4', '3,2,4', '3,3,4', '4,2,4', '4,3,4']
+  },
+  {
+    title: 'non-geospatial modelMatrix identity',
+    viewport: new OrthographicView().makeViewport({
+      width: 100,
+      height: 100,
+      viewState: {
+        target: [512, 512],
+        zoom: 0
+      }
+    }),
+    tileSize: 512,
+    modelMatrix: new Matrix4().identity(),
+    modelMatrixInverse: new Matrix4().identity().invert(),
+    output: ['0,0,0', '0,1,0', '1,0,0', '1,1,0']
+  },
+  {
+    title: 'non-geospatial modelMatrix scaling',
+    viewport: new OrthographicView().makeViewport({
+      width: 100,
+      height: 100,
+      viewState: {
+        target: [512, 512],
+        zoom: 0
+      }
+    }),
+    tileSize: 512,
+    modelMatrix: new Matrix4().scale(2),
+    modelMatrixInverse: new Matrix4().scale(2).invert(),
+    output: ['0,0,0']
+  },
+  {
+    title: 'non-geospatial modelMatrix translation',
+    viewport: new OrthographicView().makeViewport({
+      width: 100,
+      height: 100,
+      viewState: {
+        target: [512, 512],
+        zoom: 0
+      }
+    }),
+    tileSize: 512,
+    modelMatrix: new Matrix4().translate([300, 300, 0]),
+    modelMatrixInverse: new Matrix4().translate([300, 300, 0]).invert(),
+    output: ['0,0,0']
+  },
+  {
+    title: 'non-geospatial modelMatrix translation & scaling',
+    viewport: new OrthographicView().makeViewport({
+      width: 100,
+      height: 100,
+      viewState: {
+        target: [512, 512],
+        zoom: 0
+      }
+    }),
+    tileSize: 512,
+    modelMatrix: new Matrix4().translate([1024, 1024, 0]).scale(2),
+    modelMatrixInverse: new Matrix4()
+      .translate([1024, 1024, 0])
+      .scale(2)
+      .invert(),
+    output: ['-1,-1,0']
+  },
+  {
+    title: 'non-geospatial modelMatrix with extent prop',
+    viewport: new OrthographicView().makeViewport({
+      width: 100,
+      height: 100,
+      viewState: {
+        target: [512, 512],
+        zoom: 0
+      }
+    }),
+    tileSize: 512,
+    extent: [0, 0, 2048, 2048],
+    modelMatrix: new Matrix4().translate([1024, 1024, 0]).scale(2),
+    modelMatrixInverse: new Matrix4()
+      .translate([1024, 1024, 0])
+      .scale(2)
+      .invert(),
+    output: []
+  },
+  {
+    title: 'globe',
+    viewport: new GlobeView().makeViewport({
+      width: 800,
+      height: 800,
+      viewState: {
+        longitude: -6,
+        latitude: 58,
+        zoom: 0.5
+      }
+    }),
+    tileSize: 256,
+    output: [
+      '0,0,2',
+      '0,1,1',
+      '0,1,2',
+      '1,0,2',
+      '1,1,1',
+      '1,1,2',
+      '2,0,2',
+      '2,1,2',
+      '3,0,2',
+      '3,1,2'
+    ]
   }
 ];
 
@@ -170,13 +287,25 @@ function mergeBoundingBox(boundingBoxes) {
 
 test('getTileIndices', t => {
   for (const testCase of TEST_CASES) {
-    const {viewport, maxZoom, minZoom, zRange, tileSize} = testCase;
+    const {
+      viewport,
+      maxZoom,
+      minZoom,
+      zRange,
+      tileSize,
+      modelMatrix,
+      extent,
+      modelMatrixInverse
+    } = testCase;
     const result = getTileIndices({
       viewport,
       maxZoom,
       minZoom,
       zRange,
-      tileSize
+      tileSize,
+      modelMatrix,
+      modelMatrixInverse,
+      extent
     });
     t.deepEqual(getTileIds(result), testCase.output, testCase.title);
   }
@@ -186,10 +315,10 @@ test('getTileIndices', t => {
 
 test('tileToBoundingBox', t => {
   for (const testCase of TEST_CASES) {
-    if (testCase.output.length) {
+    if (testCase.output.length && !testCase.viewport.resolution) {
       const {viewport, minZoom, maxZoom, tileSize, zRange} = testCase;
       const boundingBoxes = getTileIndices({viewport, maxZoom, minZoom, zRange, tileSize}).map(
-        tile => tileToBoundingBox(viewport, tile.x, tile.y, tile.z, tileSize)
+        tile => tileToBoundingBox(viewport, tile.x, tile.y, tile.z)
       );
       const result = mergeBoundingBox(boundingBoxes);
       const corners = [
@@ -262,9 +391,9 @@ test('tileToBoundingBox#Infovis', t => {
   );
 
   t.deepEqual(
-    tileToBoundingBox(viewport, 0, 0, 0, 256),
+    tileToBoundingBox(viewport, 0, 0, 1),
     {left: 0, top: 0, right: 256, bottom: 256},
-    '0,0,0 with custom tileSize Should match the results.'
+    '0,0,1 Should match the results.'
   );
 
   t.deepEqual(
@@ -274,9 +403,9 @@ test('tileToBoundingBox#Infovis', t => {
   );
 
   t.deepEqual(
-    tileToBoundingBox(viewport, 4, -1, 2, 256),
+    tileToBoundingBox(viewport, 4, -1, 3),
     {left: 256, top: -64, right: 320, bottom: 0},
-    '4,-1,2 with custom tileSize Should match the results.'
+    '4,-1,3 Should match the results.'
   );
 
   t.end();

@@ -52,3 +52,22 @@ If this is an issue, set the `isolation` CSS prop on the `DeckGL` parent element
   isolation: 'isolate';
 }
 ```
+
+## Optimization for Mobile
+
+### Experimental Memory Usage Controls
+
+The `Deck` class supports the following experimental props to aggressively reduce memory usage on memory-restricted devices:
+
+- [_pickable](/docs/api-reference/core/deck.md#_pickable)
+- [_typedArrayManagerProps](/docs/api-reference/core/deck.md#_typedArrayManagerProps)
+
+The app can sacrefice certain features and/or runtime performance in exchange for a smaller memory footprint:
+
+```js
+new Deck({
+  // ...
+  _pickable: false,
+  _typedArrayManagerProps: isMobile ? {overAlloc: 1, poolSize: 0} : null
+})
+```

@@ -5,7 +5,7 @@
 
 ## Binary Data
 
-If you plan to work with binary data, you will want to make sure you are up to speed on JavaScript typed arrays as well as GPU buffers, both in terms of general concepts as well as a basic graps of the API.
+If you plan to work with binary data, you will want to make sure you are up to speed on JavaScript typed arrays as well as GPU buffers, both in terms of general concepts as well as a basic grasp of the API.
 
 JavaScript has a number of different ways to represent binary data (Browser `Blob`, Node.js Buffers, base64 etc), however deck.gl primarily accepts typed arrays. deck.gl should accept GPU buffers (`WebGLBuffer` or luma.gl `Buffer` instances).
 
@@ -80,7 +80,7 @@ new Layer({
 
 A disadvantage of columnar tables is that columns can get very long, blocking incremental reads/writes of tables and even exceeding platform's allocation limits.
 
-More advanced binary columnar table formats like Apache Arrow solves this by breaking logical arrays into chunks. An additional benefit of chunked arrays can support remarkably efficient data-frame operations (slicing/dicing and filtering multigigabyte data set with "zero cost").
+More advanced binary columnar table formats like Apache Arrow solves this by breaking logical arrays into chunks. An additional benefit of chunked arrays can support remarkably efficient data-frame operations (slicing/dicing and filtering multi-gigabyte data set with "zero cost").
 
 Another complication when using binary columnar tables is that it may not be possible to represent e.g. the lack of a value. In some libraries (e.g. Apache Arrow) this is solved through an additional `null map`.
 

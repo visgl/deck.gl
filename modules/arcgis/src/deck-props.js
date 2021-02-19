@@ -13,7 +13,9 @@ const properties = {
   onDragEnd: {},
   onError: {},
   debug: {},
-  drawPickingColors: {}
+  drawPickingColors: {},
+  getCursor: {},
+  getTooltip: {}
 };
 
 /* eslint-disable callback-return */
@@ -45,7 +47,7 @@ export default function loadDeckProps(Accessor) {
 
     toJSON() {
       const result = {};
-      for (const key in this.properties) {
+      for (const key of this.keys()) {
         if (this[key] !== undefined) {
           result[key] = this[key];
         }

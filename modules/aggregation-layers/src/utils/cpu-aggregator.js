@@ -19,7 +19,7 @@
 // THE SOFTWARE.
 import BinSorter from './bin-sorter';
 import {getScaleFunctionByScaleType} from './scale-utils';
-import {getValueFunc} from './aggregation-operation-utils';
+import {getValueFunc, wrapGetValueFunc} from './aggregation-operation-utils';
 
 function nop() {}
 
@@ -221,9 +221,13 @@ export default class CPUAggregator {
         changeFlags
       );
 
-      if (getValueChanged && getValue === null) {
-        // If `getValue` is not provided from props, build it with aggregation and weight.
-        getValue = getValueFunc(props[aggregation.prop], props[weight.prop]);
+      if (getValueChanged) {
+        if (getValue) {
+          getValue = wrapGetValueFunc(getValue, {data: props.data});
+        } else {
+          // If `getValue` is not provided from props, build it with aggregation and weight.
+          getValue = getValueFunc(props[aggregation.prop], props[weight.prop], {data: props.data});
+        }
       }
 
       if (getValue) {
@@ -292,10 +296,12 @@ export default class CPUAggregator {
     return Object.values(dimensionStep.triggers).some(item => {
       if (item.updateTrigger) {
         // check based on updateTriggers change first
+        // if data has changed, always update value
         return (
-          changeFlags.updateTriggersChanged &&
-          (changeFlags.updateTriggersChanged.all ||
-            changeFlags.updateTriggersChanged[item.updateTrigger])
+          changeFlags.dataChanged ||
+          (changeFlags.updateTriggersChanged &&
+            (changeFlags.updateTriggersChanged.all ||
+              changeFlags.updateTriggersChanged[item.updateTrigger]))
         );
       }
       // fallback to direct comparison

@@ -34,6 +34,7 @@ uniform float opacity;
 uniform float widthScale;
 uniform float widthMinPixels;
 uniform float widthMaxPixels;
+uniform float useShortestPath;
 
 varying vec4 vColor;
 varying vec2 uv;
@@ -49,15 +50,45 @@ vec2 getExtrusionOffset(vec2 line_clipspace, float offset_direction, float width
   return dir_screenspace * offset_direction * width / 2.0;
 }
 
+vec3 splitLine(vec3 a, vec3 b, float x) {
+  float t = (x - a.x) / (b.x - a.x);
+  return vec3(x, mix(a.yz, b.yz, t));
+}
+
 void main(void) {
   geometry.worldPosition = instanceSourcePositions;
   geometry.worldPositionAlt = instanceTargetPositions;
 
+  vec3 source_world = instanceSourcePositions;
+  vec3 target_world = instanceTargetPositions;
+  vec3 source_world_64low = instanceSourcePositions64Low;
+  vec3 target_world_64low = instanceTargetPositions64Low;
+
+  if (useShortestPath > 0.5 || useShortestPath < -0.5) {
+    source_world.x = mod(source_world.x + 180., 360.0) - 180.;
+    target_world.x = mod(target_world.x + 180., 360.0) - 180.;
+    float deltaLng = target_world.x - source_world.x;
+
+    if (deltaLng * useShortestPath > 180.) {
+      source_world.x += 360. * useShortestPath;
+      source_world = splitLine(source_world, target_world, 180. * useShortestPath);
+      source_world_64low = vec3(0.0);
+    } else if (deltaLng * useShortestPath < -180.) {
+      target_world.x += 360. * useShortestPath;
+      target_world = splitLine(source_world, target_world, 180. * useShortestPath);
+      target_world_64low = vec3(0.0);
+    } else if (useShortestPath < 0.) {
+      // Line is not split, abort
+      gl_Position = vec4(0.);
+      return;
+    }
+  }
+
   // Position
   vec4 source_commonspace;
   vec4 target_commonspace;
-  vec4 source = project_position_to_clipspace(instanceSourcePositions, instanceSourcePositions64Low, vec3(0.), source_commonspace);
-  vec4 target = project_position_to_clipspace(instanceTargetPositions, instanceTargetPositions64Low, vec3(0.), target_commonspace);
+  vec4 source = project_position_to_clipspace(source_world, source_world_64low, vec3(0.), source_commonspace);
+  vec4 target = project_position_to_clipspace(target_world, target_world_64low, vec3(0.), target_commonspace);
 
   // Multiply out width and clamp to limits
   float widthPixels = clamp(

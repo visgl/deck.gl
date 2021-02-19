@@ -1,7 +1,7 @@
 import {clamp} from 'math.gl';
 import Controller from './controller';
 import ViewState from './view-state';
-import WebMercatorViewport, {normalizeViewportProps} from '@math.gl/web-mercator';
+import {normalizeViewportProps} from '@math.gl/web-mercator';
 import assert from '../utils/assert';
 import LinearInterpolator from '../transitions/linear-interpolator';
 import {TRANSITION_EVENTS} from './transition-manager';
@@ -16,28 +16,22 @@ const LINEAR_TRANSITION_PROPS = {
   transitionInterruption: TRANSITION_EVENTS.BREAK
 };
 
-const NO_TRANSITION_PROPS = {
-  transitionDuration: 0
-};
-
-// MAPBOX LIMITS
-export const MAPBOX_LIMITS = {
+const DEFAULT_STATE = {
+  pitch: 0,
+  bearing: 0,
+  altitude: 1.5,
   minZoom: 0,
   maxZoom: 20,
   minPitch: 0,
   maxPitch: 60
 };
 
-const DEFAULT_STATE = {
-  pitch: 0,
-  bearing: 0,
-  altitude: 1.5
-};
-
 /* Utils */
 
-class MapState extends ViewState {
+export class MapState extends ViewState {
   constructor({
+    makeViewport,
+
     /** Mapbox viewport properties */
     /** The width of the viewport */
     width,
@@ -61,16 +55,18 @@ class MapState extends ViewState {
     altitude = DEFAULT_STATE.altitude,
 
     /** Viewport constraints */
-    maxZoom = MAPBOX_LIMITS.maxZoom,
-    minZoom = MAPBOX_LIMITS.minZoom,
-    maxPitch = MAPBOX_LIMITS.maxPitch,
-    minPitch = MAPBOX_LIMITS.minPitch,
+    maxZoom = DEFAULT_STATE.maxZoom,
+    minZoom = DEFAULT_STATE.minZoom,
+    maxPitch = DEFAULT_STATE.maxPitch,
+    minPitch = DEFAULT_STATE.minPitch,
 
     /** Interaction states, required to calculate change during transform */
     /* The point on map being grabbed when the operation first started */
     startPanLngLat,
     /* Center of the zoom when the operation first started */
     startZoomLngLat,
+    /* Pointer position when rotation started */
+    startRotatePos,
     /** Bearing when current perspective rotate operation started */
     startBearing,
     /** Pitch when current perspective rotate operation started */
@@ -78,9 +74,9 @@ class MapState extends ViewState {
     /** Zoom when current zoom operation started */
     startZoom
   } = {}) {
-    assert(Number.isFinite(longitude), '`longitude` must be supplied');
-    assert(Number.isFinite(latitude), '`latitude` must be supplied');
-    assert(Number.isFinite(zoom), '`zoom` must be supplied');
+    assert(Number.isFinite(longitude)); // `longitude` must be supplied
+    assert(Number.isFinite(latitude)); // `latitude` must be supplied
+    assert(Number.isFinite(zoom)); // `zoom` must be supplied
 
     super({
       width,
@@ -97,23 +93,16 @@ class MapState extends ViewState {
       minPitch
     });
 
-    this._interactiveState = {
+    this._state = {
       startPanLngLat,
       startZoomLngLat,
+      startRotatePos,
       startBearing,
       startPitch,
       startZoom
     };
-  }
 
-  /* Public API */
-
-  getViewportProps() {
-    return this._viewportProps;
-  }
-
-  getInteractiveState() {
-    return this._interactiveState;
+    this.makeViewport = makeViewport;
   }
 
   /**
@@ -133,7 +122,7 @@ class MapState extends ViewState {
    *   the start of the operation. Must be supplied of `panStart()` was not called
    */
   pan({pos, startPos}) {
-    const startPanLngLat = this._interactiveState.startPanLngLat || this._unproject(startPos);
+    const startPanLngLat = this._state.startPanLngLat || this._unproject(startPos);
 
     if (!startPanLngLat) {
       return this;
@@ -163,6 +152,7 @@ class MapState extends ViewState {
    */
   rotateStart({pos}) {
     return this._getUpdatedState({
+      startRotatePos: pos,
       startBearing: this._viewportProps.bearing,
       startPitch: this._viewportProps.pitch
     });
@@ -170,29 +160,28 @@ class MapState extends ViewState {
 
   /**
    * Rotate
-   * @param {Number} deltaScaleX - a number between [-1, 1] specifying the
-   *   change to bearing.
-   * @param {Number} deltaScaleY - a number between [-1, 1] specifying the
-   *   change to pitch. -1 sets to minPitch and 1 sets to maxPitch.
+   * @param {[Number, Number]} pos - position on screen where the center is
    */
-  rotate({deltaScaleX = 0, deltaScaleY = 0}) {
-    const {startBearing, startPitch} = this._interactiveState;
+  rotate({pos, deltaAngleX = 0, deltaAngleY = 0}) {
+    const {startRotatePos, startBearing, startPitch} = this._state;
 
-    if (!Number.isFinite(startBearing) || !Number.isFinite(startPitch)) {
+    if (!startRotatePos || !Number.isFinite(startBearing) || !Number.isFinite(startPitch)) {
       return this;
     }
-
-    const {pitch, bearing} = this._calculateNewPitchAndBearing({
-      deltaScaleX,
-      deltaScaleY,
-      startBearing,
-      startPitch
-    });
-
-    return this._getUpdatedState({
-      bearing,
-      pitch
-    });
+    let newRotation;
+    if (pos) {
+      newRotation = this._calculateNewPitchAndBearing({
+        ...this._getRotationParams(pos, startRotatePos),
+        startBearing,
+        startPitch
+      });
+    } else {
+      newRotation = {
+        bearing: startBearing + deltaAngleX,
+        pitch: startPitch + deltaAngleY
+      };
+    }
+    return this._getUpdatedState(newRotation);
   }
 
   /**
@@ -227,7 +216,7 @@ class MapState extends ViewState {
    */
   zoom({pos, startPos, scale}) {
     // Make sure we zoom around the current mouse position rather than map center
-    let {startZoom, startZoomLngLat} = this._interactiveState;
+    let {startZoom, startZoomLngLat} = this._state;
 
     if (!Number.isFinite(startZoom)) {
       // We have two modes of zoom:
@@ -242,7 +231,7 @@ class MapState extends ViewState {
 
     const zoom = this._calculateNewZoom({scale, startZoom});
 
-    const zoomedViewport = new WebMercatorViewport(Object.assign({}, this._viewportProps, {zoom}));
+    const zoomedViewport = this.makeViewport({...this._viewportProps, zoom});
     const [longitude, latitude] = zoomedViewport.getMapCenterByLngLatPosition({
       lngLat: startZoomLngLat,
       pos
@@ -266,51 +255,51 @@ class MapState extends ViewState {
     });
   }
 
-  zoomIn() {
-    return this._zoomFromCenter(2);
+  zoomIn(speed = 2) {
+    return this._zoomFromCenter(speed);
   }
 
-  zoomOut() {
-    return this._zoomFromCenter(0.5);
+  zoomOut(speed = 2) {
+    return this._zoomFromCenter(1 / speed);
   }
 
-  moveLeft() {
-    return this._panFromCenter([100, 0]);
+  moveLeft(speed = 100) {
+    return this._panFromCenter([speed, 0]);
   }
 
-  moveRight() {
-    return this._panFromCenter([-100, 0]);
+  moveRight(speed = 100) {
+    return this._panFromCenter([-speed, 0]);
   }
 
-  moveUp() {
-    return this._panFromCenter([0, 100]);
+  moveUp(speed = 100) {
+    return this._panFromCenter([0, speed]);
   }
 
-  moveDown() {
-    return this._panFromCenter([0, -100]);
+  moveDown(speed = 100) {
+    return this._panFromCenter([0, -speed]);
   }
 
-  rotateLeft() {
+  rotateLeft(speed = 15) {
     return this._getUpdatedState({
-      bearing: this._viewportProps.bearing - 15
+      bearing: this._viewportProps.bearing - speed
     });
   }
 
-  rotateRight() {
+  rotateRight(speed = 15) {
     return this._getUpdatedState({
-      bearing: this._viewportProps.bearing + 15
+      bearing: this._viewportProps.bearing + speed
     });
   }
 
-  rotateUp() {
+  rotateUp(speed = 10) {
     return this._getUpdatedState({
-      pitch: this._viewportProps.pitch + 10
+      pitch: this._viewportProps.pitch + speed
     });
   }
 
-  rotateDown() {
+  rotateDown(speed = 10) {
     return this._getUpdatedState({
-      pitch: this._viewportProps.pitch - 10
+      pitch: this._viewportProps.pitch - speed
     });
   }
 
@@ -349,7 +338,12 @@ class MapState extends ViewState {
 
   _getUpdatedState(newProps) {
     // Update _viewportProps
-    return new MapState(Object.assign({}, this._viewportProps, this._interactiveState, newProps));
+    return new this.constructor({
+      makeViewport: this.makeViewport,
+      ...this._viewportProps,
+      ...this._state,
+      ...newProps
+    });
   }
 
   // Apply any constraints (mathematical or defined by _viewportProps) to map state
@@ -368,13 +362,13 @@ class MapState extends ViewState {
   }
 
   _unproject(pos) {
-    const viewport = new WebMercatorViewport(this._viewportProps);
+    const viewport = this.makeViewport(this._viewportProps);
     return pos && viewport.unproject(pos);
   }
 
   // Calculate a new lnglat based on pixel dragging position
   _calculateNewLngLat({startPanLngLat, pos}) {
-    const viewport = new WebMercatorViewport(this._viewportProps);
+    const viewport = this.makeViewport(this._viewportProps);
     return viewport.getMapCenterByLngLatPosition({lngLat: startPanLngLat, pos});
   }
 
@@ -408,28 +402,13 @@ class MapState extends ViewState {
       bearing
     };
   }
-}
 
-export default class MapController extends Controller {
-  constructor(props) {
-    super(MapState, props);
-    this.invertPan = true;
-  }
-
-  _getTransitionProps() {
-    // Enables Transitions on double-tap and key-down events.
-    return LINEAR_TRANSITION_PROPS;
-  }
-
-  _onPanRotate(event) {
-    if (!this.dragRotate) {
-      return false;
-    }
-
-    const {deltaX, deltaY} = event;
-    const [, centerY] = this.getCenter(event);
-    const startY = centerY - deltaY;
-    const {width, height} = this.controllerState.getViewportProps();
+  _getRotationParams(pos, startPos) {
+    const deltaX = pos[0] - startPos[0];
+    const deltaY = pos[1] - startPos[1];
+    const centerY = pos[1];
+    const startY = startPos[1];
+    const {width, height} = this._viewportProps;
 
     const deltaScaleX = deltaX / width;
     let deltaScaleY = 0;
@@ -446,13 +425,26 @@ export default class MapController extends Controller {
       }
     }
     deltaScaleY = Math.min(1, Math.max(-1, deltaScaleY));
-
-    const newControllerState = this.controllerState.rotate({deltaScaleX, deltaScaleY});
-    return this.updateViewport(newControllerState, NO_TRANSITION_PROPS, {
-      isDragging: true,
-      isRotating: true
-    });
+    return {deltaScaleX, deltaScaleY};
   }
 }
 
-export const testExports = {MapState};
+export default class MapController extends Controller {
+  constructor(props) {
+    props.dragMode = props.dragMode || 'pan';
+    super(MapState, props);
+  }
+
+  _getTransitionProps(opts) {
+    // Enables Transitions on double-tap and key-down events.
+    return opts
+      ? {
+          ...LINEAR_TRANSITION_PROPS,
+          transitionInterpolator: new LinearInterpolator({
+            ...opts,
+            makeViewport: this.controllerState.makeViewport
+          })
+        }
+      : LINEAR_TRANSITION_PROPS;
+  }
+}

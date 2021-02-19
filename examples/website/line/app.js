@@ -1,13 +1,10 @@
-import React, {Component} from 'react';
+import React from 'react';
 import {render} from 'react-dom';
 
 import {StaticMap} from 'react-map-gl';
 import DeckGL from '@deck.gl/react';
 import {LineLayer, ScatterplotLayer} from '@deck.gl/layers';
 import GL from '@luma.gl/constants';
-
-// Set your mapbox token here
-const MAPBOX_TOKEN = process.env.MapboxAccessToken; // eslint-disable-line
 
 // Source data CSV
 const DATA_URL = {
@@ -26,6 +23,8 @@ const INITIAL_VIEW_STATE = {
   bearing: 0
 };
 
+const MAP_STYLE = 'https://basemaps.cartocdn.com/gl/dark-matter-nolabels-gl-style/style.json';
+
 function getColor(d) {
   const z = d.start[2];
   const r = z / 10000;
@@ -43,89 +42,58 @@ function getSize(type) {
   return 60;
 }
 
-export default class App extends Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      hoveredObject: null
-    };
-    this._onHover = this._onHover.bind(this);
-    this._renderTooltip = this._renderTooltip.bind(this);
-  }
+function getTooltip({object}) {
+  return (
+    object &&
+    `\
+  ${object.country || object.abbrev || ''}
+  ${object.name.indexOf('0x') >= 0 ? '' : object.name}`
+  );
+}
 
-  _onHover({x, y, object}) {
-    this.setState({x, y, hoveredObject: object});
-  }
+export default function App({
+  airports = DATA_URL.AIRPORTS,
+  flightPaths = DATA_URL.FLIGHT_PATHS,
+  getWidth = 3,
+  mapStyle = MAP_STYLE
+}) {
+  const layers = [
+    new ScatterplotLayer({
+      id: 'airports',
+      data: airports,
+      radiusScale: 20,
+      getPosition: d => d.coordinates,
+      getFillColor: [255, 140, 0],
+      getRadius: d => getSize(d.type),
+      pickable: true
+    }),
+    new LineLayer({
+      id: 'flight-paths',
+      data: flightPaths,
+      opacity: 0.8,
+      getSourcePosition: d => d.start,
+      getTargetPosition: d => d.end,
+      getColor,
+      getWidth,
+      pickable: true
+    })
+  ];
 
-  _renderTooltip() {
-    const {x, y, hoveredObject} = this.state;
-    return (
-      hoveredObject && (
-        <div className="tooltip" style={{left: x, top: y}}>
-          <div>{hoveredObject.country || hoveredObject.abbrev}</div>
-          <div>{hoveredObject.name.indexOf('0x') >= 0 ? '' : hoveredObject.name}</div>
-        </div>
-      )
-    );
-  }
-
-  _renderLayers() {
-    const {
-      airports = DATA_URL.AIRPORTS,
-      flightPaths = DATA_URL.FLIGHT_PATHS,
-      getWidth = 3
-    } = this.props;
-
-    return [
-      new ScatterplotLayer({
-        id: 'airports',
-        data: airports,
-        radiusScale: 20,
-        getPosition: d => d.coordinates,
-        getFillColor: [255, 140, 0],
-        getRadius: d => getSize(d.type),
-        pickable: true,
-        onHover: this._onHover
-      }),
-      new LineLayer({
-        id: 'flight-paths',
-        data: flightPaths,
-        opacity: 0.8,
-        getSourcePosition: d => d.start,
-        getTargetPosition: d => d.end,
-        getColor,
-        getWidth,
-        pickable: true,
-        onHover: this._onHover
-      })
-    ];
-  }
-
-  render() {
-    const {mapStyle = 'mapbox://styles/mapbox/dark-v9'} = this.props;
-
-    return (
-      <DeckGL
-        layers={this._renderLayers()}
-        initialViewState={INITIAL_VIEW_STATE}
-        controller={true}
-        pickingRadius={5}
-        parameters={{
-          blendFunc: [GL.SRC_ALPHA, GL.ONE, GL.ONE_MINUS_DST_ALPHA, GL.ONE],
-          blendEquation: GL.FUNC_ADD
-        }}
-      >
-        <StaticMap
-          reuseMaps
-          mapStyle={mapStyle}
-          preventStyleDiffing={true}
-          mapboxApiAccessToken={MAPBOX_TOKEN}
-        />
-
-        {this._renderTooltip}
-      </DeckGL>
-    );
-  }
+  return (
+    <DeckGL
+      layers={layers}
+      initialViewState={INITIAL_VIEW_STATE}
+      controller={true}
+      pickingRadius={5}
+      parameters={{
+        blendFunc: [GL.SRC_ALPHA, GL.ONE, GL.ONE_MINUS_DST_ALPHA, GL.ONE],
+        blendEquation: GL.FUNC_ADD
+      }}
+      getTooltip={getTooltip}
+    >
+      <StaticMap reuseMaps mapStyle={mapStyle} preventStyleDiffing={true} />
+    </DeckGL>
+  );
 }
 
 export function renderToDOM(container) {

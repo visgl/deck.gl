@@ -8,6 +8,7 @@ uniform bool composeModelMatrix;
 // Primitive attributes
 in vec3 positions;
 in vec3 normals;
+in vec3 colors;
 in vec2 texCoords;
 
 // Instance attributes
@@ -33,7 +34,7 @@ void main(void) {
   vTexCoord = texCoords;
   cameraPosition = project_uCameraPosition;
   normals_commonspace = project_normal(instanceModelMatrix * normals);
-  vColor = instanceColors;
+  vColor = vec4(colors * instanceColors.rgb, instanceColors.a);
   geometry.normal = normals_commonspace;
 
   vec3 pos = (instanceModelMatrix * positions) * sizeScale + instanceTranslation;

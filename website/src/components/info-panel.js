@@ -1,73 +1,112 @@
 /* eslint import/namespace: ['error', { allowComputed: true }] */
-/* global window */
+/* global setTimeout, clearTimeout */
 import React, {Component} from 'react';
-import {connect} from 'react-redux';
-import autobind from 'autobind-decorator';
+import styled from 'styled-components';
+import {InfoPanel} from 'gatsby-theme-ocular/components';
 
 import GenericInput from './input';
 import Spinner from './spinner';
-import * as Demos from './demos';
-import {updateParam} from '../actions/app-actions';
 
-class InfoPanel extends Component {
+const InfoPanelContent = styled.div`
+hr {
+  margin: 12px -24px;
+}
+a {
+  text-decoration: none;
+  display: inline;
+  color: ${props => props.theme.colors.primary};
+}
+p {
+  margin-bottom: 16px;
+}
+.legend {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+}
+.stat {
+  text-transform: uppercase;
+  font-size: 0.833em;
+
+  b {
+    display: block;
+    font-size: 3em;
+    font-weight: bold;
+    line-height: 1.833;
+  }
+}
+hr {
+  border: none;
+  background: ${props => props.theme.colors.mono400};
+  height: 1px;
+}
+.layout {
+  display: table;
+  width: 100%;
+
+  >* {
+    display: table-cell !important;
+  }
+  .col-1-3 {
+    width: 33.33%;
+  }
+  .col-1-2 {
+    width: 50%;
+  }
+  .text-right {
+    text-align: right;
+  }
+  .text-center {
+    text-align: center;
+  }
+}
+`;
+
+export default class ExampleInfoPanel extends Component {
   constructor(props) {
     super(props);
     this.state = {hasFocus: false};
     this._blurTimer = null;
   }
 
-  @autobind
   _onFocus() {
-    window.clearTimeout(this._blurTimer);
+    clearTimeout(this._blurTimer);
     this.setState({hasFocus: true});
   }
 
-  @autobind
   _onBlur() {
     // New focus is not yet available when blur event fires.
     // Wait a bit and if no onfocus event is fired, remove focus
-    this._blurTimer = window.setTimeout(() => {
+    this._blurTimer = setTimeout(() => {
       this.setState({hasFocus: false});
     }, 1);
   }
 
   render() {
-    const {demo, params, owner, meta} = this.props;
+    const {title, sourceLink, params, meta} = this.props;
     const {hasFocus} = this.state;
-    const DemoComponent = Demos[demo];
-    const metaLoaded = owner === demo ? meta : {};
 
     return (
-      <div
-        className={`options-panel top-right ${hasFocus ? 'focus' : ''}`}
-        tabIndex="0"
-        onFocus={this._onFocus}
-        onBlur={this._onBlur}
-      >
-        {DemoComponent.renderInfo(metaLoaded)}
+      <InfoPanel title={title} sourceLink={sourceLink}>
+        <InfoPanelContent>
+          {this.props.children}
 
-        {Object.keys(params).length > 0 && <hr />}
+          {Object.keys(params).length > 0 && <hr />}
 
-        {Object.keys(params)
-          .sort()
-          .map((name, i) => (
-            <GenericInput
-              key={`${i}-${name}`}
-              name={name}
-              {...params[name]}
-              onChange={this.props.updateParam}
-            />
-          ))}
+          {Object.keys(params)
+            .sort()
+            .map((name, i) => (
+              <GenericInput
+                key={`${i}-${name}`}
+                name={name}
+                {...params[name]}
+                onChange={this.props.updateParam}
+              />
+            ))}
+        </InfoPanelContent>
 
-        {this.props.children}
-
-        <Spinner meta={metaLoaded} />
-      </div>
+        <Spinner meta={meta} />
+      </InfoPanel>
     );
   }
 }
-
-export default connect(
-  state => state.vis,
-  {updateParam}
-)(InfoPanel);

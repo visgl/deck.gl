@@ -6,8 +6,6 @@ import DeckGL, {COORDINATE_SYSTEM, ScatterplotLayer, PolygonLayer} from 'deck.gl
 
 import DataGenerator from './data-generator';
 
-// Set your mapbox token here
-const MAPBOX_TOKEN = process.env.MapboxAccessToken; // eslint-disable-line
 const MAP_CENTER = [-122.45, 37.78];
 const VIEW_STATE = {
   longitude: MAP_CENTER[0],

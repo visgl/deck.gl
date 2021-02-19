@@ -64,12 +64,9 @@ window.onload = () => {
     });
   }
 
-  // Set your mapbox token here
-  mapboxgl.accessToken = process.env.MapboxAccessToken; // eslint-disable-line
-
   const map = new mapboxgl.Map({
     container: 'map',
-    style: 'mapbox://styles/mapbox/light-v9',
+    style: 'https://basemaps.cartocdn.com/gl/positron-nolabels-gl-style/style.json',
     // Note: deck.gl will be in charge of interaction and event handling
     interactive: false,
     center: [INITIAL_VIEW_STATE.longitude, INITIAL_VIEW_STATE.latitude],

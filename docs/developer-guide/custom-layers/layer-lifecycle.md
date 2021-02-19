@@ -30,11 +30,11 @@ Layers can use the state object to store persistent information cross rendering 
 Initialization happens only once for each layer that is being added, i.e. a layer from the
 current rendering cycle whose `id` does not get matched with any layer in the previous
 cycle.
-[`layer.initializeState()`](/docs/api-reference/layer.md#-initializestate-) is called at
+[`layer.initializeState()`](/docs/api-reference/core/layer.md#initializestate) is called at
 this stage.
 
 At the end of initialization,
-[`layer.updateState()`](/docs/api-reference/layer.md#-updatestate-) is called
+[`layer.updateState()`](/docs/api-reference/core/layer.md#updatestate) is called
 before the first render.
 
 ### Updating
@@ -43,22 +43,22 @@ Updating happens when a new layer has been matched with a layer from the previou
 rendering cycle (resulting in new props being passed to that layer),
 or when context has changed and layers are about to be drawn.
 
-[`layer.shouldUpdateState()`](/docs/api-reference/layer.md#-shouldupdatestate-)
+[`layer.shouldUpdateState()`](/docs/api-reference/core/layer.md#shouldupdatestate)
 is called to determine if the layer needs an update. The default implementation updates on prop and data changes, but not on viewport changes, so screen-space based layers may want to override this (see e.g. ScreenGridLayer).
 Under more complicated circumstances, additional checks can be supplied through the
-[`dataComparator`](/docs/api-reference/layer.md#-datacomparator-function-optional-)
+[`dataComparator`](/docs/api-reference/core/layer.md#datacomparator)
 prop.
 
 If the layer does need to be updated,
-[`layer.updateState()`](/docs/api-reference/layer.md#-updatestate-)
+[`layer.updateState()`](/docs/api-reference/core/layer.md#updatestate)
 is called to perform any necessary operation before the layer is rendered.
 This usually involves recalculating an attribute by calling
-[`state.attributeManager.invalidate`](/docs/api-reference/attribute-manager.md#-invalidate-)
+[`state.attributeManager.invalidate`](/docs/api-reference/core/attribute-manager.md#invalidate)
 and updating uniforms by calling `model.setUniforms`.
 By default, when `props.data` changes, all attributes are invalidated and recalculated.
 
 A composite layer may use
-[`compositeLayer.renderLayers()`](/docs/api-reference/composite-layer.md#-renderlayers-)
+[`compositeLayer.renderLayers()`](/docs/api-reference/core/composite-layer.md#renderlayers)
 to insert one or more deck.gl layers after itself.
 The generated layers will then be matched and updated,
 allowing the decomposition of the drawing of a complex data set
@@ -68,19 +68,19 @@ into "primitive" layers.
 
 Rendering happens during each rendering cycle to draw the layer to the WebGL context.
 
-For primitive layers, [`layer.draw()`](/docs/api-reference/layer.md#-draw-)
+For primitive layers, [`layer.draw()`](/docs/api-reference/core/layer.md#draw)
 is called at this stage, which invokes the layers' `model.render` calls.
-For composite layers, `layer.renderLayers` is called to genrate sublayers.
+For composite layers, `layer.renderLayers` is called to generate sublayers.
 
 ### Picking
 
 Happens when a pointer moves over or clicks on the deck.gl canvas.
 
-[`layer.draw()`](/docs/api-reference/layer.md#-draw-) of all pickable layers
+[`layer.draw()`](/docs/api-reference/core/layer.md#draw) of all pickable layers
 are called with special uniforms to draw into an off-screen picking buffer.
 
 When a layer is picked,
-[`layer.getPickingInfo()`](/docs/api-reference/layer.md#-getpickinginfo-)
+[`layer.getPickingInfo()`](/docs/api-reference/core/layer.md#getpickinginfo)
 is called to generate the `info` object of information about what has been picked.
 This object is then passed to the `onHover` or `onClick` callbacks of the layer.
 
@@ -91,7 +91,7 @@ Read more about [how picking works](/docs/developer-guide/custom-layers/picking.
 Happens for each layer that is being removed, i.e. a layer from the previous
 rendering cycle whose `id` did not get matched with any layer in the current
 cycle.
-[`layer.finalizeState()`](/docs/api-reference/layer.md#-finalizestate-)
+[`layer.finalizeState()`](/docs/api-reference/core/layer.md#finalizestate)
 is called just before the reference to the state of that layer
 is released.
 

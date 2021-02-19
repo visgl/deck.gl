@@ -1,4 +1,4 @@
-This is a minimal standalone version of the Graph Explorer example
+This is a minimal standalone version of the PointCloudLayer example
 on [deck.gl](http://deck.gl) website.
 
 ### Usage
@@ -16,5 +16,7 @@ npm start
 
 ### Data Source
 
-The sample data is from [kaarta.com](https://kaarta.com)
+The sample data is from [kaarta.com](https://kaarta.com).
 
+[loaders.gl](https://loaders.gl) offers loaders for a variety of common point cloud formats that work seamlessly with this layer. To use your own data, check out
+the [documentation of PointCloudLayer](../../../docs/api-reference/layers/point-cloud-layer.md).
