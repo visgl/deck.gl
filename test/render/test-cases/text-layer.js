@@ -41,6 +41,9 @@ function getBinaryAttributes(data, getText, accessors) {
   };
 }
 
+// Use lower threshold to account for differences in font hinting/antialiasing
+const imageDiffOptions = {threshold: 0.96};
+
 export default (OS === 'Mac'
   ? [
       {
@@ -68,6 +71,7 @@ export default (OS === 'Mac'
             getPixelOffset: x => [10, 0]
           })
         ],
+        imageDiffOptions,
         goldenImage: './test/render/golden-images/text-layer.png'
       },
       {
@@ -96,6 +100,7 @@ export default (OS === 'Mac'
             getPixelOffset: x => [10, 0]
           })
         ],
+        imageDiffOptions,
         goldenImage: './test/render/golden-images/text-layer.png'
       },
       {
@@ -127,6 +132,7 @@ export default (OS === 'Mac'
             getPixelOffset: [10, 0]
           })
         ],
+        imageDiffOptions,
         goldenImage: './test/render/golden-images/text-layer.png'
       },
       {
@@ -153,6 +159,7 @@ export default (OS === 'Mac'
             getAlignmentBaseline: 'center'
           })
         ],
+        imageDiffOptions,
         goldenImage: './test/render/golden-images/text-layer-multi-lines.png'
       },
       {
@@ -181,6 +188,7 @@ export default (OS === 'Mac'
             getAlignmentBaseline: 'center'
           })
         ],
+        imageDiffOptions,
         goldenImage: './test/render/golden-images/text-layer-auto-wrapping.png'
       },
       {
@@ -212,6 +220,7 @@ export default (OS === 'Mac'
             getAlignmentBaseline: 'center'
           })
         ],
+        imageDiffOptions,
         goldenImage: './test/render/golden-images/text-layer-background.png'
       }
     ]
