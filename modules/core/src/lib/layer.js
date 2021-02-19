@@ -555,7 +555,10 @@ export default class Layer extends Component {
     const {pickingColors, instancePickingColors} = this.getAttributeManager().attributes;
     const colors = pickingColors || instancePickingColors;
     // The picking color cache may have been freed and then reallocated. This ensures we read from the currently allocated cache.
-    if (this.internalState.usesPickingColorCache && colors.value.buffer !== pickingColorCache.buffer) {
+    if (
+      this.internalState.usesPickingColorCache &&
+      colors.value.buffer !== pickingColorCache.buffer
+    ) {
       colors.value = pickingColorCache.subarray(0, colors.value.length);
     }
     colors.updateSubBuffer({startOffset: 0});
