@@ -435,7 +435,7 @@ export default class Layer extends Component {
       }
     }
 
-    attribute.value = pickingColorCache;
+    attribute.value = pickingColorCache.subarray(0, numInstances * 3);
   }
 
   _setModelAttributes(model, changedAttributes) {
@@ -470,9 +470,9 @@ export default class Layer extends Component {
     const colors = pickingColors || instancePickingColors;
     // The picking color cache may have been freed and then reallocated. This ensures we read from the currently allocated cache.
     if (this.internalState.usesPickingColorCache) {
-      colors.value = pickingColorCache;
+      colors.value = pickingColorCache.subarray(0, colors.value.length);
     }
-    colors.updateSubBuffer({startOffset: 0, endOffset: this.getNumInstances() * 3});
+    colors.updateSubBuffer({startOffset: 0});
   }
 
   // Deduces numer of instances. Intention is to support:
