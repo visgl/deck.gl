@@ -414,6 +414,9 @@ export default class Layer extends Component {
     // pickingColorCache saves the largest generated sequence for reuse
     const cacheSize = pickingColorCache.length / 3;
 
+    // Record when using the picking buffer cache, so that layers can always point at the most recently allocated cache
+    this.internalState.usesPickingColorCache = true;
+
     if (cacheSize < numInstances) {
       pickingColorCache = typedArrayManager.allocate(pickingColorCache, numInstances, {
         size: 3,
@@ -432,7 +435,7 @@ export default class Layer extends Component {
       }
     }
 
-    attribute.value = pickingColorCache.subarray(0, numInstances * 3);
+    attribute.value = pickingColorCache;
   }
 
   _setModelAttributes(model, changedAttributes) {
@@ -465,7 +468,11 @@ export default class Layer extends Component {
   restorePickingColors() {
     const {pickingColors, instancePickingColors} = this.getAttributeManager().attributes;
     const colors = pickingColors || instancePickingColors;
-    colors.updateSubBuffer({startOffset: 0});
+    // The picking color cache may have been freed and then reallocated. This ensures we read from the currently allocated cache.
+    if (this.internalState.usesPickingColorCache) {
+      colors.value = pickingColorCache;
+    }
+    colors.updateSubBuffer({startOffset: 0, endOffset: this.getNumInstances() * 3});
   }
 
   // Deduces numer of instances. Intention is to support:
