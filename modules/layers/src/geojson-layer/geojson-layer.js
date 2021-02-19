@@ -24,8 +24,10 @@ import PathLayer from '../path-layer/path-layer';
 // Use primitive layer to avoid "Composite Composite" layers for now
 import SolidPolygonLayer from '../solid-polygon-layer/solid-polygon-layer';
 import {replaceInRange} from '../utils';
+import {binaryToFeatureForAccesor} from './geojson-binary';
 
 import {getGeojsonFeatures, separateGeojsonFeatures} from './geojson';
+import {createLayerPropsFromFeatures, createLayerPropsFromBinary} from './geojson-layer-props';
 
 const defaultLineColor = [0, 0, 0, 255];
 const defaultFillColor = [0, 0, 0, 255];
@@ -45,6 +47,7 @@ const defaultProps = {
 
   elevationScale: 1,
 
+  pointRadiusUnits: 'meters',
   pointRadiusScale: 1,
   pointRadiusMinPixels: 0, //  min point radius in pixels
   pointRadiusMaxPixels: Number.MAX_SAFE_INTEGER, // max point radius in pixels
@@ -62,14 +65,10 @@ const defaultProps = {
   // Optional material for 'lighting' shader module
   material: true
 };
-
-function getCoordinates(f) {
-  return f.geometry.coordinates;
-}
-
 export default class GeoJsonLayer extends CompositeLayer {
   initializeState() {
     this.state = {
+      layerProps: {},
       features: {}
     };
 
@@ -82,13 +81,31 @@ export default class GeoJsonLayer extends CompositeLayer {
     if (!changeFlags.dataChanged) {
       return;
     }
+    const {data} = this.props;
+    const binary = data && 'points' in data && 'polygons' in data && 'lines' in data;
+
+    this.setState({binary});
+
+    if (binary) {
+      this._updateStateBinary({props, changeFlags});
+    } else {
+      this._updateStateJSON({props, changeFlags});
+    }
+  }
+
+  _updateStateBinary({props, changeFlags}) {
+    const layerProps = createLayerPropsFromBinary(props.data, this.encodePickingColor);
+    this.setState({layerProps});
+  }
+
+  _updateStateJSON({props, changeFlags}) {
     const features = getGeojsonFeatures(props.data);
     const wrapFeature = this.getSubLayerRow.bind(this);
+    let newFeatures = {};
+    const featuresDiff = {};
 
     if (Array.isArray(changeFlags.dataChanged)) {
       const oldFeatures = this.state.features;
-      const newFeatures = {};
-      const featuresDiff = {};
       for (const key in oldFeatures) {
         newFeatures[key] = oldFeatures[key].slice();
         featuresDiff[key] = [];
@@ -107,20 +124,32 @@ export default class GeoJsonLayer extends CompositeLayer {
           );
         }
       }
-      this.setState({features: newFeatures, featuresDiff});
     } else {
-      this.setState({
-        features: separateGeojsonFeatures(features, wrapFeature),
-        featuresDiff: {}
-      });
+      newFeatures = separateGeojsonFeatures(features, wrapFeature);
+    }
+
+    const layerProps = createLayerPropsFromFeatures(newFeatures, featuresDiff);
+
+    this.setState({
+      features: newFeatures,
+      featuresDiff,
+      layerProps
+    });
+  }
+
+  _updateAutoHighlight(info) {
+    // All sub layers except the points layer use source feature index to encode the picking color
+    // The points layer uses indices from the points data array.
+    const sourceIsPoints = info.sourceLayer.id.endsWith('points');
+    for (const layer of this.getSubLayers()) {
+      if (layer.id.endsWith('points') === sourceIsPoints) {
+        layer.updateAutoHighlight(info);
+      }
     }
   }
 
   /* eslint-disable complexity */
   renderLayers() {
-    const {features, featuresDiff} = this.state;
-    const {pointFeatures, lineFeatures, polygonFeatures, polygonOutlineFeatures} = features;
-
     // Layer composition props
     const {stroked, filled, extruded, wireframe, material, transitions} = this.props;
 
@@ -132,6 +161,7 @@ export default class GeoJsonLayer extends CompositeLayer {
       lineWidthMaxPixels,
       lineJointRounded,
       lineMiterLimit,
+      pointRadiusUnits,
       pointRadiusScale,
       pointRadiusMinPixels,
       pointRadiusMaxPixels,
@@ -155,13 +185,13 @@ export default class GeoJsonLayer extends CompositeLayer {
     const LineStringsLayer = this.getSubLayerClass('line-strings', PathLayer);
     const PointsLayer = this.getSubLayerClass('points', ScatterplotLayer);
 
+    const {layerProps} = this.state;
+
     // Filled Polygon Layer
     const polygonFillLayer =
-      this.shouldRenderSubLayer('polygons-fill', polygonFeatures) &&
+      this.shouldRenderSubLayer('polygons-fill', layerProps.polygons.data) &&
       new PolygonFillLayer(
         {
-          _dataDiff: featuresDiff.polygonFeatures && (() => featuresDiff.polygonFeatures),
-
           extruded,
           elevationScale,
           filled,
@@ -169,8 +199,9 @@ export default class GeoJsonLayer extends CompositeLayer {
           material,
           getElevation: this.getSubLayerAccessor(getElevation),
           getFillColor: this.getSubLayerAccessor(getFillColor),
-          getLineColor: this.getSubLayerAccessor(getLineColor),
-
+          getLineColor: this.getSubLayerAccessor(
+            extruded && wireframe ? getLineColor : defaultLineColor
+          ),
           transitions: transitions && {
             getPolygon: transitions.geometry,
             getElevation: transitions.getElevation,
@@ -183,24 +214,21 @@ export default class GeoJsonLayer extends CompositeLayer {
           updateTriggers: {
             getElevation: updateTriggers.getElevation,
             getFillColor: updateTriggers.getFillColor,
+            // using a legacy API to invalid lineColor attributes
+            // if (extruded && wireframe) has changed
+            lineColors: extruded && wireframe,
             getLineColor: updateTriggers.getLineColor
           }
         }),
-        {
-          data: polygonFeatures,
-          getPolygon: getCoordinates
-        }
+        layerProps.polygons
       );
 
     const polygonLineLayer =
       !extruded &&
       stroked &&
-      this.shouldRenderSubLayer('polygons-stroke', polygonOutlineFeatures) &&
+      this.shouldRenderSubLayer('polygons-stroke', layerProps.polygonsOutline.data) &&
       new PolygonStrokeLayer(
         {
-          _dataDiff:
-            featuresDiff.polygonOutlineFeatures && (() => featuresDiff.polygonOutlineFeatures),
-
           widthUnits: lineWidthUnits,
           widthScale: lineWidthScale,
           widthMinPixels: lineWidthMinPixels,
@@ -227,18 +255,13 @@ export default class GeoJsonLayer extends CompositeLayer {
             getDashArray: updateTriggers.getLineDashArray
           }
         }),
-        {
-          data: polygonOutlineFeatures,
-          getPath: getCoordinates
-        }
+        layerProps.polygonsOutline
       );
 
     const pathLayer =
-      this.shouldRenderSubLayer('linestrings', lineFeatures) &&
+      this.shouldRenderSubLayer('linestrings', layerProps.lines.data) &&
       new LineStringsLayer(
         {
-          _dataDiff: featuresDiff.lineFeatures && (() => featuresDiff.lineFeatures),
-
           widthUnits: lineWidthUnits,
           widthScale: lineWidthScale,
           widthMinPixels: lineWidthMinPixels,
@@ -265,20 +288,16 @@ export default class GeoJsonLayer extends CompositeLayer {
             getDashArray: updateTriggers.getLineDashArray
           }
         }),
-        {
-          data: lineFeatures,
-          getPath: getCoordinates
-        }
+        layerProps.lines
       );
 
     const pointLayer =
-      this.shouldRenderSubLayer('points', pointFeatures) &&
+      this.shouldRenderSubLayer('points', layerProps.points.data) &&
       new PointsLayer(
         {
-          _dataDiff: featuresDiff.pointFeatures && (() => featuresDiff.pointFeatures),
-
           stroked,
           filled,
+          radiusUnits: pointRadiusUnits,
           radiusScale: pointRadiusScale,
           radiusMinPixels: pointRadiusMinPixels,
           radiusMaxPixels: pointRadiusMaxPixels,
@@ -310,9 +329,8 @@ export default class GeoJsonLayer extends CompositeLayer {
           }
         }),
         {
-          data: pointFeatures,
-          getPosition: getCoordinates,
-          highlightedObjectIndex: this._getHighlightedIndex(pointFeatures)
+          ...layerProps.points,
+          highlightedObjectIndex: this._getHighlightedIndex(layerProps.points.data)
         }
       );
 
@@ -326,13 +344,29 @@ export default class GeoJsonLayer extends CompositeLayer {
       extruded && polygonFillLayer
     ];
   }
-  /* eslint-enable complexity */
-
   _getHighlightedIndex(data) {
     const {highlightedObjectIndex} = this.props;
-    return Number.isFinite(highlightedObjectIndex)
-      ? data.findIndex(d => d.__source.index === highlightedObjectIndex)
-      : null;
+    const {binary} = this.state;
+
+    if (!binary) {
+      return Number.isFinite(highlightedObjectIndex)
+        ? data.findIndex(d => d.__source.index === highlightedObjectIndex)
+        : null;
+    }
+    return highlightedObjectIndex;
+  }
+
+  getSubLayerAccessor(accessor) {
+    const {binary} = this.state;
+    if (!binary || typeof accessor !== 'function') {
+      return super.getSubLayerAccessor(accessor);
+    }
+
+    return (object, info) => {
+      const {data, index} = info;
+      const feature = binaryToFeatureForAccesor(data, index);
+      return accessor(feature, info);
+    };
   }
 }
 

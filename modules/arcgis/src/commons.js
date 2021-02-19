@@ -46,8 +46,17 @@ export function initializeResources(gl) {
     // We use the same WebGL context as the ArcGIS API for JavaScript.
     gl,
 
+    // We need depth testing in general; we don't know what layers might be added to the deck.
+    parameters: {
+      depthTest: true
+    },
+
     // This deck renders into an auxiliary framebuffer.
     _framebuffer: this.deckFbo,
+
+    // To disable canvas resizing, since the FBO is owned by the ArcGIS API for JavaScript.
+    width: null,
+    height: null,
 
     _customRender: redrawReason => {
       if (redrawReason === 'arcgis') {

@@ -51,7 +51,7 @@ An example of a use case where different coordinate systems are combined:
 
 ### Limitations of the Offset Systems
 
-Like most cartographic projections, the [Web Meractor projection](https://en.wikipedia.org/wiki/Web_Mercator_projection) is non-linear. The offset system trades accuracy for performance by approximating the projection with a linearized local projection system. When working on local scales, small cities etc, using meter offsets gives a [very high degree of precision](https://github.com/uber-common/viewport-mercator-project/blob/master/docs/articles/offset-accuracy.md#meter-offset-to-pixels). When visualizing data on large scales (countries and continents) results will only be correct if you specify longitude and latitude for every point.
+Like most cartographic projections, the [Web Mercator projection](https://en.wikipedia.org/wiki/Web_Mercator_projection) is non-linear. The offset system trades accuracy for performance by approximating the projection with a linearized local projection system. When working on local scales, small cities etc, using meter offsets gives a [very high degree of precision](https://github.com/uber-web/math.gl/blob/master/modules/web-mercator/docs/developer-guide/offset-projection-accuracy.md). When visualizing data on large scales (countries and continents) results will only be correct if you specify longitude and latitude for every point.
 
 
 ## Transforming Positions and Dimensions
@@ -63,7 +63,7 @@ Raw data do not always align cleanly with one of the provided coordinate systems
 
 Again, converting raw data to match the coordinate system expectations can be very expensive if done on the CPU. This should be avoided whenever possible.
 
-Instead, in addition to specifying `coordinateSystem: COORDINATE_SYSTEM.METER_OFFSETS` and `coordinateOrigin`, a layer could also specify the `modelMatrix` prop as a 4x4 transformation matrix. The [math.gl](https://uber-web.github.io/math.gl/docs/api-reference/matrix4) library (a light wrapper of [gl-matrix](http://glmatrix.net/)) can be used for this purpose, which is already a dependency of deck.gl.
+Instead, in addition to specifying `coordinateSystem: COORDINATE_SYSTEM.METER_OFFSETS` and `coordinateOrigin`, a layer could also specify the `modelMatrix` prop as a 4x4 transformation matrix. The [math.gl](https://math.gl/modules/core/docs/api-reference/matrix4) library (a light wrapper of [gl-matrix](http://glmatrix.net/)) can be used for this purpose, which is already a dependency of deck.gl.
 
 The `modelMatrix` prop is most useful with the `METER_OFFSETS` and `IDENTITY` coordinate systems. It is usually the right solution for pre-processing (flipping, rotating, scaling etc) your data, since these operations will be done very performantly in the GPU. Note that these two coordinate systems are the only ones that are linear and uniform in all directions. Longitude and latitude based positions cannot be scaled/rotated/translated correctly with a 4x4 matrix.
 
@@ -76,7 +76,7 @@ The same positions can be drawn differently to screen based on what projection m
 
 The view is independent of the layers' coordinate systems, and is shared by all layers. So all layers will always pan, zoom and tilt together, regardless of what coordinate system their positions are specified in.
 
-The default view used in deck.gl is the [MapView](/docs/api-reference/map-view.md), which implements the [Web Meractor projection](https://en.wikipedia.org/wiki/Web_Mercator_projection). When working with non-geospatial datasets, the `IDENTITY` coordinate system needs to be used in combination with an alternative view. Read about deck.gl's view system in [Views and Projections](/docs/developer-guide/views.md).
+The default view used in deck.gl is the [MapView](/docs/api-reference/core/map-view.md), which implements the [Web Mercator projection](https://en.wikipedia.org/wiki/Web_Mercator_projection). When working with non-geospatial datasets, the `IDENTITY` coordinate system needs to be used in combination with an alternative view. Read about deck.gl's view system in [Views and Projections](/docs/developer-guide/views.md).
 
 
 ## Comparison to Standard 3D Graphics Coordinate Systems

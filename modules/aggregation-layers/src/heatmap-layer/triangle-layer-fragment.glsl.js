@@ -25,9 +25,10 @@ precision highp float;
 
 uniform float opacity;
 uniform sampler2D texture;
-varying vec2 vTexCoords;
 uniform sampler2D colorTexture;
+uniform float aggregationMode;
 
+varying vec2 vTexCoords;
 varying float vIntensityMin;
 varying float vIntensityMax;
 
@@ -39,7 +40,13 @@ vec4 getLinearColor(float value) {
 }
 
 void main(void) {
-  float weight = texture2D(texture, vTexCoords).r;
+  vec4 weights = texture2D(texture, vTexCoords);
+  float weight = weights.r;
+
+  if (aggregationMode > 0.5) {
+    weight /= max(1.0, weights.a);
+  }
+
   // discard pixels with 0 weight.
   if (weight <= 0.) {
      discard;

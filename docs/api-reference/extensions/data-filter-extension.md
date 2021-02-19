@@ -1,9 +1,17 @@
 
-# DataFilterExtension (experimental)
+# DataFilterExtension
 
 The `DataFilterExtension` adds GPU-based data filtering functionalities to layers. It allows the layer to show/hide objects based on user-defined properties. This extension provides a significantly more performant alternative to filtering the data array on the CPU.
 
 > Note: This extension does not work with all deck.gl layers. See "limitations" below.
+
+<div style="position:relative;height:450px"></div>
+<div style="position:absolute;transform:translateY(-450px);padding-left:inherit;padding-right:inherit;left:0;right:0">
+  <iframe height="450" style="width: 100%;" scrolling="no" title="deck.gl DataFilterExtension" src="https://codepen.io/vis-gl/embed/oNYbBMO?height=450&theme-id=light&default-tab=result" frameborder="no" loading="lazy" allowtransparency="true" allowfullscreen="true">
+    See the Pen <a href='https://codepen.io/vis-gl/pen/oNYbBMO'>deck.gl DataFilterExtension</a> by vis.gl
+    (<a href='https://codepen.io/vis-gl'>@vis-gl</a>) on <a href='https://codepen.io'>CodePen</a>.
+  </iframe>
+</div>
 
 ```js
 import {GeoJsonLayer} from '@deck.gl/layers';
@@ -64,6 +72,7 @@ new DataFilterExtension({filterSize, fp64});
 
 * `filterSize` (Number) - the size of the filter (number of columns to filter by). The data filter can show/hide data based on 1-4 numeric properties of each object. Default `1`.
 * `fp64` (Boolean) - if `true`, use 64-bit precision instead of 32-bit. Default `false`. See the "remarks" section below for use cases and limitations.
+* `countItems` (Boolean) - if `true`, reports the number of filtered objects with the `onFilteredItemsChange` callback. Default `false`.
 
 
 ## Layer Properties
@@ -124,7 +133,7 @@ Format:
 
 * Default: `null`
 
-If specified, objects will be faded in/out instead of abruptly shown/hiden. When the filtered value is outside of the bounds defined by `filterSoftRange` but still within the bounds defined by `filterRange`, the object will be rendered as "faded." See `filterTransformSize` and `filterTransformColor` for additional control over this behavior.
+If specified, objects will be faded in/out instead of abruptly shown/hidden. When the filtered value is outside of the bounds defined by `filterSoftRange` but still within the bounds defined by `filterRange`, the object will be rendered as "faded." See `filterTransformSize` and `filterTransformColor` for additional control over this behavior.
 
 ```js
 new ScatterplotLayer({
@@ -165,6 +174,13 @@ When an object is "faded", manipulate its opacity so that it appears more transl
 
 Enable/disable the data filter. If the data filter is disabled, all objects are rendered.
 
+##### `onFilteredItemsChange` (Function, optional)
+
+Only used if the `countItems` option is enabled. Called with the following arguments when the filter changes:
+
+- `event` (Object)
+  + `id` (String) - the id of the source layer. Note when this prop is specified on a [CompositeLayer](/docs/api-reference/composite-layer.md), such as `GeoJsonLayer`, the callback is called once by each sub layer.
+  + `count` (Number) - the number of data objects that pass the filter.
 
 ## Remarks
 

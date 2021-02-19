@@ -34,6 +34,16 @@ export default class ComponentState {
     this.oldAsyncProps = null; // Last props before update, with async values copied.
   }
 
+  finalize() {
+    for (const propName in this.asyncProps) {
+      const asyncProp = this.asyncProps[propName];
+      if (asyncProp.type && asyncProp.type.release) {
+        // Release any resources created by transforms
+        asyncProp.type.release(asyncProp.resolvedValue, asyncProp.type, this.component);
+      }
+    }
+  }
+
   getOldProps() {
     return this.oldAsyncProps || this.oldProps;
   }
@@ -94,6 +104,11 @@ export default class ComponentState {
     return false;
   }
 
+  // Without changing the original prop value, swap out the data resolution under the hood
+  reloadAsyncProp(propName, value) {
+    this._watchPromise(propName, Promise.resolve(value));
+  }
+
   // Updates all async/overridden props (when new props come in)
   // Checks if urls have changed, starts loading, or removes override
   setAsyncProps(props) {
@@ -105,14 +120,16 @@ export default class ComponentState {
     // TODO - use async props from the layer's prop types
     for (const propName in resolvedValues) {
       const value = resolvedValues[propName];
-      this._createAsyncPropData(propName, value, defaultValues[propName]);
+      this._createAsyncPropData(propName, defaultValues[propName]);
       this._updateAsyncProp(propName, value);
+      // Use transformed value
+      resolvedValues[propName] = this.getAsyncProp(propName);
     }
 
     for (const propName in originalValues) {
       const value = originalValues[propName];
       // Makes sure a record exists for this prop
-      this._createAsyncPropData(propName, value, defaultValues[propName]);
+      this._createAsyncPropData(propName, defaultValues[propName]);
       this._updateAsyncProp(propName, value);
     }
   }
@@ -150,7 +167,7 @@ export default class ComponentState {
   // Checks if an input value actually changed (to avoid reloading/rewatching promises/urls)
   _didAsyncInputValueChange(propName, value) {
     const asyncProp = this.asyncProps[propName];
-    if (value === asyncProp.lastValue) {
+    if (value === asyncProp.resolvedValue || value === asyncProp.lastValue) {
       return false;
     }
     asyncProp.lastValue = value;
@@ -160,7 +177,7 @@ export default class ComponentState {
   // Set normal, non-async value
   _setPropValue(propName, value) {
     const asyncProp = this.asyncProps[propName];
-    asyncProp.value = value;
+    value = this._postProcessValue(asyncProp, value);
     asyncProp.resolvedValue = value;
     asyncProp.pendingLoadCount++;
     asyncProp.resolvedLoadCount = asyncProp.pendingLoadCount;
@@ -190,7 +207,7 @@ export default class ComponentState {
     const loadCount = asyncProp.pendingLoadCount;
     promise
       .then(data => {
-        data = this._postProcessValue(propName, data);
+        data = this._postProcessValue(asyncProp, data);
         this._setAsyncPropValue(propName, data, loadCount);
 
         const onDataLoad = this.layer && this.layer.props.onDataLoad;
@@ -214,7 +231,12 @@ export default class ComponentState {
     let count = 0;
 
     for await (const chunk of iterable) {
-      data = this._postProcessValue(propName, chunk, data);
+      const {dataTransform} = this.component ? this.component.props : {};
+      if (dataTransform) {
+        data = dataTransform(chunk, data);
+      } else {
+        data = data.concat(chunk);
+      }
 
       // Used by the default _dataDiff function
       Object.defineProperty(data, '__diff', {
@@ -233,24 +255,27 @@ export default class ComponentState {
   }
 
   // Give the app a chance to post process the loaded data
-  _postProcessValue(propName, value, previousValue) {
-    const {dataTransform} = this.component ? this.component.props : {};
-    if (propName !== 'data') {
-      return value;
+  _postProcessValue(asyncProp, value) {
+    const propType = asyncProp.type;
+    if (propType) {
+      if (propType.release) {
+        propType.release(asyncProp.resolvedValue, propType, this.component);
+      }
+      if (propType.transform) {
+        return propType.transform(value, propType, this.component);
+      }
     }
-    if (dataTransform) {
-      return dataTransform(value, previousValue);
-    }
-    // previousValue is assigned if loaded with async iterator
-    return previousValue ? previousValue.concat(value) : value;
+    return value;
   }
 
   // Creating an asyncProp record if needed
-  _createAsyncPropData(propName, value, defaultValue) {
+  _createAsyncPropData(propName, defaultValue) {
     const asyncProp = this.asyncProps[propName];
     if (!asyncProp) {
+      const propTypes = this.component && this.component.constructor._propTypes;
       // assert(defaultValue !== undefined);
       this.asyncProps[propName] = {
+        type: propTypes && propTypes[propName],
         lastValue: null, // Supplied prop value (can be url/promise, not visible to layer)
         resolvedValue: defaultValue, // Resolved prop value (valid data, can be "shown" to layer)
         pendingLoadCount: 0, // How many loads have been issued

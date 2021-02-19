@@ -25,9 +25,9 @@ This "virtual" module is a dynamically generated prologue containing #defines de
 
 #### projection
 
-The [project](/docs/shader-modules/project.md) shader module is part of the core of deck.gl. It makes it easy to write shaders that support all of deck.gl's projection modes and it supports some advanced rendering techniques such as pixel space rendering etc.
+The [project](/docs/api-reference/core/project.md) shader module is part of the core of deck.gl. It makes it easy to write shaders that support all of deck.gl's projection modes and it supports some advanced rendering techniques such as pixel space rendering etc.
 
-The `project` module also has two extensions, [project32](/docs/shader-modules/project32.md) and [project64](/docs/shader-modules/project64.md).
+The `project` module also has two extensions, [project32](/docs/api-reference/core/project32.md) and [project64](/docs/api-reference/core/project64.md).
 
 
 #### lighting
@@ -179,7 +179,7 @@ In the fragment shader, multiply the fragment color with the opacity uniform.
 
 ### Shader Module Uniforms
 
-The luma.gl/deck.gl shader modules provide javascript functions to set their uniforms but the actual GLSL uniforms are typically considered implementation dependent. The intention is that you should use the public functions exposed by each shader module. That said, some uniforms from the [`project`](/docs/shader-modules/project.md) module are considered special and are documented.
+The luma.gl/deck.gl shader modules provide javascript functions to set their uniforms but the actual GLSL uniforms are typically considered implementation dependent. The intention is that you should use the public functions exposed by each shader module. That said, some uniforms from the [`project`](/docs/api-reference/core/project.md) module are considered special and are documented.
 
 ## Remarks
 

@@ -5,6 +5,13 @@ import * as Layers from '@deck.gl/layers';
 import * as AggregationLayers from '@deck.gl/aggregation-layers';
 import * as GeoLayers from '@deck.gl/geo-layers';
 import * as MeshLayers from '@deck.gl/mesh-layers';
+import {
+  CartoSQLLayer,
+  CartoBQTilerLayer,
+  colorBins,
+  colorCategories,
+  colorContinuous
+} from '@deck.gl/carto';
 
 import {COORDINATE_SYSTEM} from '@deck.gl/core';
 import GL from '@luma.gl/constants';
@@ -27,9 +34,13 @@ export default {
     AggregationLayers,
     GeoLayers,
     MeshLayers,
+    {CartoBQTilerLayer, CartoSQLLayer},
     // Any non-standard views
     {}
   ),
+
+  // Functions that should be executed by JSON converter
+  functions: {colorBins, colorCategories, colorContinuous},
 
   // Enumerations that should be available to JSON parser
   // Will be resolved as `<enum-name>.<enum-value>`

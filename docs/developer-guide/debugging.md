@@ -4,7 +4,6 @@ deck.gl provides support for debugging applications and layers, which includes:
 
 * deck.gl logging
 * luma.gl debugging support
-* The Seer Chrome Extension
 
 
 ## deck.gl logging
@@ -43,7 +42,7 @@ luma.log.enable()
 luma.log.level = 2
 ```
 
-The following features are abailable:
+The following features are available:
 
 * Automatic sanity checks are performed on uniforms and attributes. Passing an `undefined` value to a uniform is a common JavaScript mistake that will immediately generate a descriptive exception in deck.gl. This can be tracked from the console output.
 

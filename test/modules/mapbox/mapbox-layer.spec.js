@@ -169,6 +169,13 @@ test('MapboxLayer#external Deck', t => {
     t.ok(deck.layerManager, 'External Deck should not be finalized with map');
 
     deck.finalize();
+
+    map.emit('render');
+    t.pass('Map render does not throw');
+
+    layer.render();
+    t.pass('Map render does not throw');
+
     t.end();
   };
 });

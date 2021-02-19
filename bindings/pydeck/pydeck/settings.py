@@ -26,9 +26,12 @@ class Settings:
         ```
     """
 
-    def __init__(self, custom_libraries=None):
+    def __init__(self, custom_libraries: list = None):
         assert not settings, "Cannot instantiate more than one Settings object"
-        self.custom_libraries = custom_libraries
+        self.custom_libraries = custom_libraries or []
+
+    def register_library(self, name, uri):
+        self.custom_libraries.append({"libraryName": name, "uri": uri})
 
 
 if not settings:

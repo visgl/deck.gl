@@ -1,18 +1,13 @@
 /* eslint-disable max-len */
-import React, {Component} from 'react';
+import React from 'react';
 import {render} from 'react-dom';
 import {StaticMap} from 'react-map-gl';
 import DeckGL from '@deck.gl/react';
 import {TextLayer} from '@deck.gl/layers';
 import TagmapLayer from './tagmap-layer';
 
-// Set your mapbox token here
-const MAPBOX_TOKEN = process.env.MapboxAccessToken; // eslint-disable-line
 // sample data
 const DATA_URL = 'https://rivulet-zhang.github.io/dataRepo/tagmap/hashtags10k.json';
-// mapbox style file path
-const MAPBOX_STYLE =
-  'https://rivulet-zhang.github.io/dataRepo/mapbox/style/map-style-dark-v9-no-labels.json';
 
 const DEFAULT_COLOR = [29, 145, 192];
 
@@ -25,50 +20,42 @@ const INITIAL_VIEW_STATE = {
   bearing: 0
 };
 
-export default class App extends Component {
-  _renderLayers() {
-    const {data = DATA_URL, cluster = true, fontSize = 32} = this.props;
+const MAP_STYLE = 'https://basemaps.cartocdn.com/gl/dark-matter-nolabels-gl-style/style.json';
 
-    return [
-      cluster
-        ? new TagmapLayer({
-            id: 'twitter-topics-tagmap',
-            data,
-            getLabel: x => x.label,
-            getPosition: x => x.coordinates,
-            minFontSize: 14,
-            maxFontSize: fontSize * 2 - 14
-          })
-        : new TextLayer({
-            id: 'twitter-topics-raw',
-            data,
-            getText: d => d.label,
-            getPosition: x => x.coordinates,
-            getColor: d => DEFAULT_COLOR,
-            getSize: d => 20,
-            sizeScale: fontSize / 20
-          })
-    ];
-  }
+export default function App({
+  data = DATA_URL,
+  cluster = true,
+  fontSize = 32,
+  mapStyle = MAP_STYLE
+}) {
+  const textLayer = cluster
+    ? new TagmapLayer({
+        id: 'twitter-topics-tagmap',
+        data,
+        getLabel: x => x.label,
+        getPosition: x => x.coordinates,
+        minFontSize: 14,
+        maxFontSize: fontSize * 2 - 14
+      })
+    : new TextLayer({
+        id: 'twitter-topics-raw',
+        data,
+        getText: d => d.label,
+        getPosition: x => x.coordinates,
+        getColor: d => DEFAULT_COLOR,
+        getSize: d => 20,
+        sizeScale: fontSize / 20
+      });
 
-  render() {
-    const {mapStyle = MAPBOX_STYLE} = this.props;
-
-    return (
-      <DeckGL
-        layers={this._renderLayers()}
-        initialViewState={INITIAL_VIEW_STATE}
-        controller={{dragRotate: false}}
-      >
-        <StaticMap
-          reuseMaps
-          mapStyle={mapStyle}
-          preventStyleDiffing={true}
-          mapboxApiAccessToken={MAPBOX_TOKEN}
-        />
-      </DeckGL>
-    );
-  }
+  return (
+    <DeckGL
+      layers={[textLayer]}
+      initialViewState={INITIAL_VIEW_STATE}
+      controller={{dragRotate: false}}
+    >
+      <StaticMap reuseMaps mapStyle={mapStyle} preventStyleDiffing={true} />
+    </DeckGL>
+  );
 }
 
 export function renderToDOM(container) {

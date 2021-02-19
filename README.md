@@ -2,8 +2,8 @@
   <a href="https://npmjs.org/package/deck.gl">
     <img src="https://img.shields.io/npm/v/deck.gl.svg?style=flat-square" alt="version" />
   </a>
-  <a href="https://travis-ci.com/visgl/deck.gl">
-    <img src="https://api.travis-ci.com/visgl/deck.gl.svg?branch=master" alt="build" />
+  <a href="https://github.com/visgl/deck.gl/actions?query=workflow%3Atest+branch%3Amaster">
+    <img src="https://github.com/visgl/deck.gl/workflows/test/badge.svg?branch=master" alt="build" />
   </a>
   <a href="https://npmjs.org/package/deck.gl">
     <img src="https://img.shields.io/npm/dm/deck.gl.svg?style=flat-square" alt="downloads" />
@@ -66,14 +66,16 @@ npm install deck.gl
 pip install pydeck
 ```
 
-- [Get started](/bindings/pydeck/README.md)
+- [Get started](https://pydeck.gl/installation.html)
+- [Examples](https://pydeck.gl/)
 
 ### Third-Party Bindings
 
 - [deckgl-typings](https://github.com/danmarshall/deckgl-typings) (Typescript)
 - [mapdeck](https://symbolixau.github.io/mapdeck/articles/mapdeck.html) (R)
 - [vega-deck.gl](https://github.com/microsoft/SandDance/tree/master/packages/vega-deck.gl) ([Vega](https://vega.github.io/))
-
+- [earthengine-layers](https://earthengine-layers.com/) ([Google Earth Engine](https://earthengine.google.com/))
+- [deck.gl-native](https://github.com/UnfoldedInc/deck.gl-native) (C++)
 
 ## Learning Resources
 

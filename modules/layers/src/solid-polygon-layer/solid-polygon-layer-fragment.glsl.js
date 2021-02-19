@@ -24,13 +24,8 @@ export default `\
 precision highp float;
 
 varying vec4 vColor;
-varying float isValid;
 
 void main(void) {
-  if (isValid < 0.5) {
-    discard;
-  }
-
   gl_FragColor = vColor;
 
   DECKGL_FILTER_COLOR(gl_FragColor, geometry);

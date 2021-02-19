@@ -18,7 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {Layer, picking} from '@deck.gl/core';
+import {Layer, project32, picking} from '@deck.gl/core';
 
 import GL from '@luma.gl/constants';
 import {Model, Geometry} from '@luma.gl/core';
@@ -37,6 +37,8 @@ const defaultProps = {
   getHeight: {type: 'accessor', value: 1},
   getTilt: {type: 'accessor', value: 0},
 
+  greatCircle: false,
+
   widthUnits: 'pixels',
   widthScale: {type: 'number', value: 1, min: 0},
   widthMinPixels: {type: 'number', value: 0, min: 0},
@@ -45,7 +47,12 @@ const defaultProps = {
 
 export default class ArcLayer extends Layer {
   getShaders() {
-    return super.getShaders({vs, fs, modules: [picking]}); // 'project' module added by default.
+    return super.getShaders({vs, fs, modules: [project32, picking]}); // 'project' module added by default.
+  }
+
+  // This layer has its own wrapLongitude logic
+  get wrapLongitude() {
+    return false;
   }
 
   initializeState() {
@@ -120,18 +127,26 @@ export default class ArcLayer extends Layer {
 
   draw({uniforms}) {
     const {viewport} = this.context;
-    const {widthUnits, widthScale, widthMinPixels, widthMaxPixels} = this.props;
+    const {
+      widthUnits,
+      widthScale,
+      widthMinPixels,
+      widthMaxPixels,
+      greatCircle,
+      wrapLongitude
+    } = this.props;
 
     const widthMultiplier = widthUnits === 'pixels' ? viewport.metersPerPixel : 1;
 
     this.state.model
-      .setUniforms(
-        Object.assign({}, uniforms, {
-          widthScale: widthScale * widthMultiplier,
-          widthMinPixels,
-          widthMaxPixels
-        })
-      )
+      .setUniforms(uniforms)
+      .setUniforms({
+        greatCircle,
+        widthScale: widthScale * widthMultiplier,
+        widthMinPixels,
+        widthMaxPixels,
+        useShortestPath: wrapLongitude
+      })
       .draw();
   }
 
@@ -146,7 +161,7 @@ export default class ArcLayer extends Layer {
      *   (0, 1)"-------------(1, 1)
      */
     for (let i = 0; i < NUM_SEGMENTS; i++) {
-      positions = positions.concat([i, -1, 0, i, 1, 0]);
+      positions = positions.concat([i, 1, 0, i, -1, 0]);
     }
 
     const model = new Model(

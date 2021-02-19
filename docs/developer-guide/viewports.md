@@ -20,8 +20,8 @@ In addition to generating WebGL uniforms, the `Viewport` class also offers JavaS
 
 | Viewport Class        | Description |
 | ---                   | ---         |
-| [`Viewport`](/docs/api-reference/viewport.md)            | The base viewport has to be supplied view and projection matrices. It is typically only instantiated directly if the application needs to work with viewports that have been supplied from external sources, such as the `WebVR` API. |
-| [`WebMercatorViewport`](/docs/api-reference/web-mercator-viewport.md) | While all `Viewport` subclasses are geospatially enabled, this class renders from a perspective that matches a typical top-down map and is designed to synchronize perfectly with a mapbox-gl base map (even in 3D enabled perspective mode).
+| [`Viewport`](/docs/api-reference/core/viewport.md)            | The base viewport has to be supplied view and projection matrices. It is typically only instantiated directly if the application needs to work with viewports that have been supplied from external sources, such as the `WebVR` API. |
+| [`WebMercatorViewport`](/docs/api-reference/core/web-mercator-viewport.md) | While all `Viewport` subclasses are geospatially enabled, this class renders from a perspective that matches a typical top-down map and is designed to synchronize perfectly with a mapbox-gl base map (even in 3D enabled perspective mode).
 
 
 ## About Geospatial Positioning
@@ -42,6 +42,6 @@ Viewports allow the application to specify the position and extent of the viewpo
 
 * About viewport position and size coordinates: Internally, `gl.viewport` uses bottom-left, retina coordinates and normal CSS layout uses top left, non-retina coordinates. Translating between the two is surprisingly fiddly since both y coordinates and heights need to be stacked, and `devicePixelRatio` has to be matched to application settings, so having this translation taken care of by deck.gl was an explicit design goal.
 * For the `project`/`unproject` JavaScript functions, the default pixel coordinate system of the viewport is defined with the origin in the top left, where the positive x-axis goes right, and the positive y-axis goes down. That is, the top left corner is `[0, 0]` and the bottom right corner is `[width - 1, height - 1]`. The functions have a flag that can reverse this convention.
-* Non-pixel projection matrices are obviously bottom left.
+* Non-pixel projection matrices are bottom-left.
 * Mercator coordinates are specified in "lng-lat" format [lng, lat, z] format (which naturally corresponds to [x, y, z]).
 * It is possible to query the WebMercatorViewport for a meters per pixel scale. Note that that distance scales are latitude dependent under web mercator projection (see [http://wiki.openstreetmap.org/wiki/Zoom_levels](http://wiki.openstreetmap.org/wiki/Zoom_levels) for more details), so scaling will depend on the viewport center and any linear scale factor should only be expected to be locally correct.

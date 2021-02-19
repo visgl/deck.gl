@@ -23,6 +23,7 @@ function getIdFromToken(token) {
 const MAX_RESOLUTION = 100;
 
 /* Adapted from s2-geometry's S2Cell.getCornerLatLngs */
+/* eslint-disable max-statements */
 function getGeoBounds({face, ij, level}) {
   const offsets = [[0, 0], [0, 1], [1, 1], [1, 0], [0, 0]];
 
@@ -34,6 +35,7 @@ function getGeoBounds({face, ij, level}) {
   const resolution = Math.max(1, Math.ceil(MAX_RESOLUTION * Math.pow(2, -level)));
   const result = new Float64Array(4 * resolution * 2 + 2);
   let ptIndex = 0;
+  let prevLng = 0;
 
   for (let i = 0; i < 4; i++) {
     const offset = offsets[i].slice(0);
@@ -51,8 +53,16 @@ function getGeoBounds({face, ij, level}) {
       const xyz = FaceUVToXYZ(face, uv);
       const lngLat = XYZToLngLat(xyz);
 
+      // Adjust longitude for Web Mercator projection
+      if (Math.abs(lngLat[1]) > 89.999) {
+        lngLat[0] = prevLng;
+      }
+      const deltaLng = lngLat[0] - prevLng;
+      lngLat[0] += deltaLng > 180 ? -360 : deltaLng < -180 ? 360 : 0;
+
       result[ptIndex++] = lngLat[0];
       result[ptIndex++] = lngLat[1];
+      prevLng = lngLat[0];
     }
   }
   // close the loop
@@ -60,6 +70,7 @@ function getGeoBounds({face, ij, level}) {
   result[ptIndex++] = result[1];
   return result;
 }
+/* eslint-enable max-statements */
 
 export function getS2QuadKey(token) {
   if (typeof token === 'string') {

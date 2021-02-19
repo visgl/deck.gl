@@ -27,11 +27,10 @@ import {
   cssToDevicePixels
 } from '@luma.gl/core';
 import GL from '@luma.gl/constants';
-import assert from '../utils/assert';
 import log from '../utils/log';
 import PickLayersPass from '../passes/pick-layers-pass';
 import {getClosestObject, getUniqueObjects} from './picking/query-object';
-import {processPickInfo, getLayerPickingInfo} from './picking/pick-info';
+import {processPickInfo, getLayerPickingInfo, getEmptyPickingInfo} from './picking/pick-info';
 
 export default class DeckPicker {
   constructor(gl) {
@@ -55,6 +54,10 @@ export default class DeckPicker {
 
     if ('onError' in props) {
       this._onError = props.onError;
+    }
+
+    if ('_pickable' in props) {
+      this._pickable = props._pickable;
     }
   }
 
@@ -81,15 +84,18 @@ export default class DeckPicker {
   // Returns a new picking info object by assuming the last picked object is still picked
   getLastPickedObject({x, y, layers, viewports}, lastPickedInfo = this.lastPickedInfo.info) {
     const lastPickedLayerId = lastPickedInfo && lastPickedInfo.layer && lastPickedInfo.layer.id;
+    const lastPickedViewportId =
+      lastPickedInfo && lastPickedInfo.viewport && lastPickedInfo.viewport.id;
     const layer = lastPickedLayerId ? layers.find(l => l.id === lastPickedLayerId) : null;
-    const coordinate = viewports[0] && viewports[0].unproject([x, y]);
+    const viewport =
+      (lastPickedViewportId && viewports.find(v => v.id === lastPickedViewportId)) || viewports[0];
+    const coordinate = viewport && viewport.unproject([x - viewport.x, y - viewport.y]);
 
     const info = {
       x,
       y,
+      viewport,
       coordinate,
-      // TODO remove the lngLat prop after compatibility check
-      lngLat: coordinate,
       layer
     };
 
@@ -102,6 +108,7 @@ export default class DeckPicker {
   // Private
   _resizeBuffer() {
     const {gl} = this;
+
     // Create a frame buffer if not already available
     if (!this.pickingFBO) {
       this.pickingFBO = new Framebuffer(gl);
@@ -125,18 +132,22 @@ export default class DeckPicker {
 
   // picking can only handle up to 255 layers. Drop non-pickable/invisible layers from the list.
   _getPickable(layers) {
+    if (this._pickable === false) {
+      return null;
+    }
     const pickableLayers = layers.filter(layer => layer.isPickable() && !layer.isComposite);
     if (pickableLayers.length > 255) {
       log.warn('Too many pickable layers, only picking the first 255')();
       return pickableLayers.slice(0, 255);
     }
-    return pickableLayers;
+    return pickableLayers.length ? pickableLayers : null;
   }
 
   // Pick the closest object at the given (x,y) coordinate
   // eslint-disable-next-line max-statements,complexity
   _pickClosestObject({
     layers,
+    views,
     viewports,
     x,
     y,
@@ -148,7 +159,15 @@ export default class DeckPicker {
   }) {
     layers = this._getPickable(layers);
 
+    if (!layers) {
+      return {
+        result: [],
+        emptyInfo: getEmptyPickingInfo({viewports, x, y})
+      };
+    }
+
     this._resizeBuffer();
+
     // Convert from canvas top-left to WebGL bottom-left coordinates
     // Top-left coordinates [x, y] to bottom-left coordinates [deviceX, deviceY]
     // And compensate for pixelRatio
@@ -178,6 +197,7 @@ export default class DeckPicker {
         deviceRect &&
         this._drawAndSample({
           layers,
+          views,
           viewports,
           onViewportActive,
           deviceRect,
@@ -198,6 +218,7 @@ export default class DeckPicker {
       if (pickInfo.pickedLayer && unproject3D && this.depthFBO) {
         const zValues = this._drawAndSample({
           layers: [pickInfo.pickedLayer],
+          views,
           viewports,
           onViewportActive,
           deviceRect: {x: pickInfo.pickedX, y: pickInfo.pickedY, width: 1, height: 1},
@@ -216,7 +237,7 @@ export default class DeckPicker {
       if (pickInfo.pickedColor && i + 1 < depth) {
         const layerId = pickInfo.pickedColor[3] - 1;
         affectedLayers[layerId] = true;
-        layers[layerId].clearPickingColor(pickInfo.pickedColor);
+        layers[layerId].disablePickingIndex(pickInfo.pickedObjectIndex);
       }
 
       // This logic needs to run even if no object is picked.
@@ -225,6 +246,7 @@ export default class DeckPicker {
         lastPickedInfo: this.lastPickedInfo,
         mode,
         layers,
+        layerFilter: this.layerFilter,
         viewports,
         x,
         y,
@@ -255,15 +277,21 @@ export default class DeckPicker {
   // Pick all objects within the given bounding box
   _pickVisibleObjects({
     layers,
+    views,
     viewports,
     x,
     y,
     width = 1,
     height = 1,
     mode = 'query',
+    maxObjects = null,
     onViewportActive
   }) {
     layers = this._getPickable(layers);
+
+    if (!layers) {
+      return [];
+    }
 
     this._resizeBuffer();
     // Convert from canvas top-left to WebGL bottom-left coordinates
@@ -290,6 +318,7 @@ export default class DeckPicker {
 
     const pickedColors = this._drawAndSample({
       layers,
+      views,
       viewports,
       onViewportActive,
       deviceRect,
@@ -302,7 +331,13 @@ export default class DeckPicker {
     // Only return unique infos, identified by info.object
     const uniqueInfos = new Map();
 
-    pickInfos.forEach(pickInfo => {
+    const isMaxObjects = Number.isFinite(maxObjects);
+
+    for (let i = 0; i < pickInfos.length; i++) {
+      if (isMaxObjects && uniqueInfos.size >= maxObjects) {
+        break;
+      }
+      const pickInfo = pickInfos[i];
       let info = {
         color: pickInfo.pickedColor,
         layer: null,
@@ -319,15 +354,22 @@ export default class DeckPicker {
       if (!uniqueInfos.has(info.object)) {
         uniqueInfos.set(info.object, info);
       }
-    });
+    }
 
     return Array.from(uniqueInfos.values());
   }
 
   // returns pickedColor or null if no pickable layers found.
-  _drawAndSample({layers, viewports, onViewportActive, deviceRect, pass, redrawReason, pickZ}) {
-    assert(deviceRect.width > 0 && deviceRect.height > 0);
-
+  _drawAndSample({
+    layers,
+    views,
+    viewports,
+    onViewportActive,
+    deviceRect,
+    pass,
+    redrawReason,
+    pickZ
+  }) {
     if (layers.length < 1) {
       return null;
     }
@@ -338,6 +380,7 @@ export default class DeckPicker {
       layers,
       layerFilter: this.layerFilter,
       onError: this._onError,
+      views,
       viewports,
       onViewportActive,
       pickingFBO,

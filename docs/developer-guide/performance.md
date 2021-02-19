@@ -111,7 +111,7 @@ Some good places to check for performance improvements are:
   }
   ```
 
-  In this case, it is more efficient to use [`updateTriggers`](/docs/api-reference/layer.md#updatetriggers-object-optional) to invalidate only the selected attributes:
+  In this case, it is more efficient to use [`updateTriggers`](/docs/api-reference/core/layer.md#updatetriggers) to invalidate only the selected attributes:
 
   ```js
   // Good
@@ -214,7 +214,7 @@ Some good places to check for performance improvements are:
   }
   ```
 
-  See [Layer properties](/docs/api-reference/layer.md#basic-properties) for details.
+  See [Layer properties](/docs/api-reference/core/layer.md#basic-properties) for details.
 
 #### Favor layer visibility over addition and removal
 
@@ -247,7 +247,7 @@ Some good places to check for performance improvements are:
   }
   ```
 
-  The [`visible`](/docs/api-reference/layer.md#visible-boolean-optional) prop is a cheap way to temporarily disable a layer:
+  The [`visible`](/docs/api-reference/core/layer.md#visible) prop is a cheap way to temporarily disable a layer:
 
   ```js
   // Good
@@ -433,7 +433,7 @@ When creating data-intensive applications, it is often desirable to offload clie
 
 The server can send data to the client more efficiently using binary formats, e.g. [protobuf](https://developers.google.com/protocol-buffers), [Arrow](https://arrow.apache.org/) or simply a custom binary blob.
 
-Some deck.gl applications use web workers to load data and generate attributes to get the processing off the main thread. Modern worker implementations allow ownership of typed arrays to be [transferred directly](https://developer.mozilla.org/en-US/docs/Web/API/Worker/postMessage#Parameters) between threads at virtualy no cost, bypassing serialization and deserialization of JSON objects.
+Some deck.gl applications use web workers to load data and generate attributes to get the processing off the main thread. Modern worker implementations allow ownership of typed arrays to be [transferred directly](https://developer.mozilla.org/en-US/docs/Web/API/Worker/postMessage#Parameters) between threads at virtually no cost, bypassing serialization and deserialization of JSON objects.
 
 #### Supply binary blobs to the data prop
 
@@ -465,7 +465,7 @@ Some deck.gl applications use web workers to load data and generate attributes t
   });
   ```
 
-  However, in addition to requiring custom repacking code, this array will take valuable CPU time to create, and significantly more memory to store than its binary form. In performance-sensitive applications that constantly push a large volumn of data (e.g. animations), this method will not be efficient enough.
+  However, in addition to requiring custom repacking code, this array will take valuable CPU time to create, and significantly more memory to store than its binary form. In performance-sensitive applications that constantly push a large volume of data (e.g. animations), this method will not be efficient enough.
 
   Alternatively, one may supply a non-iterable object (not Array or TypedArray) to the `data` object. In this case, it must contain a `length` field that specifies the total number of objects. Since `data` is not iterable, each accessor will not receive a valid `object` argument, and therefore responsible of interpreting the input data's buffer layout:
 
@@ -568,7 +568,7 @@ Some deck.gl applications use web workers to load data and generate attributes t
   });
   ```
 
-  Note that instead of `getPosition`, we supply a `data.attributes.getPosition` object. This object defines the buffer from which `PointCloudLayer` should access its positions data. See the base `Layer` class' [data prop](/docs/api-reference/layer.md#basic-properties) for details.
+  Note that instead of `getPosition`, we supply a `data.attributes.getPosition` object. This object defines the buffer from which `PointCloudLayer` should access its positions data. See the base `Layer` class' [data prop](/docs/api-reference/core/layer.md#basic-properties) for details.
 
   It is also possible to use interleaved or custom layout external buffers:
 

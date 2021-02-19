@@ -18,20 +18,41 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-// TODO - break this monster function into 3+ parts
-/* eslint-disable max-depth, max-statements */
+// Even if nothing gets picked, we need to expose some information of the picking action:
+// x, y, coordinates etc.
+export function getEmptyPickingInfo({pickInfo, mode, viewports, layerFilter, pixelRatio, x, y, z}) {
+  const layer = pickInfo && pickInfo.pickedLayer;
+  const viewportFilter =
+    layerFilter &&
+    layer &&
+    (v =>
+      layerFilter({
+        layer,
+        viewport: v,
+        isPicking: true,
+        renderPass: `picking:${mode}`
+      }));
+  const viewport = getViewportFromCoordinates(viewports, {x, y}, viewportFilter);
+  const coordinate = viewport && viewport.unproject([x - viewport.x, y - viewport.y], {targetZ: z});
 
-export function processPickInfo({
-  pickInfo,
-  lastPickedInfo,
-  mode,
-  layers,
-  viewports,
-  x,
-  y,
-  z,
-  pixelRatio
-}) {
+  return {
+    color: null,
+    layer: null,
+    viewport,
+    index: -1,
+    picked: false,
+    x,
+    y,
+    pixel: [x, y],
+    coordinate,
+    devicePixel: pickInfo && [pickInfo.pickedX, pickInfo.pickedY],
+    pixelRatio
+  };
+}
+
+/* eslint-disable max-depth */
+export function processPickInfo(opts) {
+  const {pickInfo, lastPickedInfo, mode, layers} = opts;
   const {pickedColor, pickedLayer, pickedObjectIndex} = pickInfo;
 
   const affectedLayers = pickedLayer ? [pickedLayer] : [];
@@ -62,23 +83,7 @@ export function processPickInfo({
     }
   }
 
-  const viewport = getViewportFromCoordinates({viewports}); // TODO - add coords
-  const coordinate = viewport && viewport.unproject([x, y], {targetZ: z});
-
-  const baseInfo = {
-    color: null,
-    layer: null,
-    index: -1,
-    picked: false,
-    x,
-    y,
-    pixel: [x, y],
-    coordinate,
-    // TODO remove the lngLat prop after compatibility check
-    lngLat: coordinate,
-    devicePixel: [pickInfo.pickedX, pickInfo.pickedY],
-    pixelRatio
-  };
+  const baseInfo = getEmptyPickingInfo(opts);
 
   // Use a Map to store all picking infos.
   // The following two forEach loops are the result of
@@ -106,21 +111,10 @@ export function processPickInfo({
 
     // This guarantees that there will be only one copy of info for
     // one composite layer
-    if (info) {
-      infos.set(info.layer.id, info);
-    }
+    infos.set(info.layer.id, info);
 
-    if (mode === 'hover' && layer.props.autoHighlight) {
-      const pickingModuleParameters = {
-        pickingSelectedColor: pickedLayer === layer ? pickedColor : null
-      };
-      const {highlightColor} = layer.props;
-      if (pickedLayer === layer && typeof highlightColor === 'function') {
-        pickingModuleParameters.pickingHighlightColor = highlightColor(info);
-      }
-      layer.setModuleParameters(pickingModuleParameters);
-      // setModuleParameters does not trigger redraw
-      layer.setNeedsRedraw();
+    if (mode === 'hover') {
+      info.layer.updateAutoHighlight(info);
     }
   });
 
@@ -134,7 +128,8 @@ export function getLayerPickingInfo({layer, info, mode}) {
     // where the event originates from.
     // It provides additional context for the composite layer's
     // getPickingInfo() method to populate the info object
-    const sourceLayer = info.layer || layer;
+    const sourceLayer = info.layer || null;
+    info.sourceLayer = sourceLayer;
     info.layer = layer;
     // layer.pickLayer() function requires a non-null ```layer.state```
     // object to function properly. So the layer referenced here
@@ -146,11 +141,15 @@ export function getLayerPickingInfo({layer, info, mode}) {
 }
 
 // Indentifies which viewport, if any corresponds to x and y
+// If multiple viewports contain the target pixel, last viewport drawn is returend
 // Returns first viewport if no match
-// TODO - need to determine which viewport we are in
-// TODO - document concept of "primary viewport" that matches all coords?
-// TODO - static method on Viewport class?
-function getViewportFromCoordinates({viewports}) {
-  const viewport = viewports[0];
-  return viewport;
+function getViewportFromCoordinates(viewports, pixel, filter) {
+  // find the last viewport that contains the pixel
+  for (let i = viewports.length - 1; i >= 0; i--) {
+    const viewport = viewports[i];
+    if (viewport.containsPixel(pixel) && (!filter || filter(viewport))) {
+      return viewport;
+    }
+  }
+  return viewports[0];
 }

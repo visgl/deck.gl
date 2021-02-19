@@ -1,0 +1,31 @@
+{
+  "description": "CartoBQTilerLayer declarative example",
+  "initialViewState": {
+    "latitude": 40.7368521,
+    "longitude": -73.8536065,
+    "zoom": 3,
+    "pitch": 0,
+    "bearing": 0
+  },
+  "views": [
+    {
+      "@@type": "MapView",
+      "controller": true,
+      "mapStyle": "https://basemaps.cartocdn.com/gl/positron-gl-style/style.json"    
+    }
+  ],
+  "layers": [
+    {
+      "@@type": "CartoBQTilerLayer",
+      "data": "cartobq.maps.osm_buildings",
+      "getFillColor": {
+        "@@function": "colorBins",
+        "attr": "aggregated_total",
+        "domain": [10, 100, 1000, 10000, 100000, 1000000],
+        "colors": "BluYl"
+      },
+      "pointRadiusMinPixels": 2,
+      "stroked": false
+    }
+  ]
+}

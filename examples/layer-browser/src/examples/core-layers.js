@@ -12,7 +12,7 @@ import {
   TextLayer
 } from '@deck.gl/layers';
 
-import {PathStyleExtension} from '@deck.gl/extensions';
+import {PathStyleExtension, FillStyleExtension} from '@deck.gl/extensions';
 
 // Demonstrate immutable support
 import * as dataSamples from '../data-samples';
@@ -191,7 +191,15 @@ const PolygonLayerBinaryExample = {
   props: {
     ...PolygonLayerExample.props,
     getPolygon: d => d,
-    positionFormat: 'XY'
+    positionFormat: 'XY',
+
+    fillPatternAtlas: 'data/pattern.png',
+    fillPatternMapping: 'data/pattern.json',
+    getFillPattern: f =>
+      ['hatch-1x', 'hatch-2x', 'hatch-cross', 'dots'][Math.floor(Math.random() * 4)],
+    getFillPatternOffset: [0, 0],
+    getFillPatternScale: 5,
+    extensions: [new FillStyleExtension({pattern: true})]
   }
 };
 
@@ -224,7 +232,7 @@ const PathLayerExample = {
     widthMinPixels: 1,
     pickable: true,
     dashJustified: true,
-    extensions: [new PathStyleExtension({dash: true, offset: true})]
+    extensions: [new PathStyleExtension({dash: true, offset: true, highPrecisionDash: true})]
   }
 };
 
@@ -370,6 +378,14 @@ const TextLayerExample = {
       name: 'maxWidth',
       type: 'number',
       max: 5000
+    },
+    backgroundPadding: {type: 'compound', elements: ['padding']},
+    padding: {
+      type: 'number',
+      max: 100,
+      onUpdate: (newValue, newSettings, change) => {
+        change('backgroundPadding', [newValue, newValue]);
+      }
     }
   },
   props: {
@@ -385,6 +401,10 @@ const TextLayerExample = {
     getText: x => `${x.LOCATION_NAME}\n${x.ADDRESS}`,
     getPosition: x => x.COORDINATES,
     getColor: x => [153, 0, 0],
+    background: false,
+    getBackgroundColor: x => [255, 255, 255],
+    getBorderColor: x => [0, 0, 0],
+    getBorderWidth: 0,
     getAngle: x => 30,
     getTextAnchor: x => 'middle',
     getAlignmentBaseline: x => 'center',

@@ -38,11 +38,13 @@ export function getSolarPosition(timestamp, latitude, longitude) {
 
 export function getSunlightDirection(timestamp, latitude, longitude) {
   const {azimuth, altitude} = getSolarPosition(timestamp, latitude, longitude);
-  // convert azimuth from 0 at south to be 0 at north
-  const azimuthN = azimuth + Math.PI;
 
   // solar position to light direction
-  return [-Math.sin(azimuthN), -Math.cos(azimuthN), -Math.sin(altitude)];
+  return [
+    Math.sin(azimuth) * Math.cos(altitude),
+    Math.cos(azimuth) * Math.cos(altitude),
+    -Math.sin(altitude)
+  ];
 }
 
 function toJulianDay(timestamp) {

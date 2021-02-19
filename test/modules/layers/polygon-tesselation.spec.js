@@ -102,7 +102,6 @@ const TEST_CASES = [
 
 test('polygon#imports', t => {
   t.ok(typeof Polygon.normalize === 'function', 'Polygon.normalize imported');
-  t.ok(typeof Polygon.getVertexCount === 'function', 'Polygon.getVertexCount imported');
   t.ok(typeof Polygon.getSurfaceIndices === 'function', 'Polygon.getSurfaceIndices imported');
   t.end();
 });
@@ -113,7 +112,7 @@ test('polygon#fuctions', t => {
 
     const complexPolygon = Polygon.normalize(object.polygon, 2);
     t.ok(
-      ArrayBuffer.isView(complexPolygon.positions || complexPolygon),
+      (complexPolygon.positions || complexPolygon).every(Number.isFinite),
       'Polygon.normalize flattens positions'
     );
     if (complexPolygon.holeIndices) {
@@ -122,14 +121,6 @@ test('polygon#fuctions', t => {
         'Polygon.normalize returns starting indices of rings'
       );
     }
-
-    const vertexCount = Polygon.getVertexCount(object.polygon, 2);
-    t.ok(Number.isFinite(vertexCount), 'Polygon.getVertexCount');
-    t.is(
-      vertexCount,
-      Polygon.getVertexCount(complexPolygon, 2),
-      'Polygon.getVertexCount returns consistent result'
-    );
 
     const indices = Polygon.getSurfaceIndices(complexPolygon, 2);
     t.ok(Array.isArray(indices), 'Polygon.getSurfaceIndices');
@@ -185,7 +176,7 @@ test('PolygonTesselator#tesselation', t => {
 
   t.deepEquals(
     tesselator.get('indices').slice(0, 24),
-    [1, 3, 2, 4, 12, 11, 10, 12, 4, 5, 6, 7, 7, 4, 11, 10, 4, 5, 5, 7, 11, 11, 10, 5],
+    [1, 3, 2, 8, 12, 11, 10, 12, 8, 7, 6, 5, 5, 8, 11, 10, 8, 7, 7, 5, 11, 11, 10, 7],
     'returned correct indices'
   );
   t.deepEquals(
@@ -219,10 +210,10 @@ test('PolygonTesselator#partial update', t => {
   t.is(tesselator.vertexCount, 9, 'Initial vertex count');
   // prettier-ignore
   t.deepEquals(positions, [
-    1, 1, 0, 2, 2, 0, 3, 0, 0, 1, 1, 0,
-    0, 0, 0, 2, 0, 0, 2, 2, 0, 0, 2, 0, 0, 0, 0
+    1, 1, 0, 2, 2, 0, 3, 0, 0, 1, 1, 0, 0, 0, 0, 0, 2, 0, 2, 2, 0, 2, 0, 0, 0, 0, 0
   ], 'positions');
-  t.deepEquals(indices, [1, 3, 2, 7, 4, 5, 5, 6, 7], 'incides');
+  t.deepEquals(indices, [1, 3, 2, 5, 8, 7, 7, 6, 5], 'incides');
+
   t.deepEquals(Array.from(accessorCalled), ['A', 'B'], 'Accessor called on all data');
 
   sampleData[2] = {polygon: [[4, 4], [5, 5], [6, 4]], id: 'C'};
@@ -234,11 +225,12 @@ test('PolygonTesselator#partial update', t => {
   t.is(tesselator.vertexCount, 12, 'Updated vertex count');
   // prettier-ignore
   t.deepEquals(positions, [
-    1, 1, 0, 2, 2, 0, 3, 0, 0, 1, 1, 0,
-    0, 0, 0, 2, 0, 0, 2, 2, 0, 0, 2, 0, 0, 0, 0,
-    4, 4, 0, 5, 5, 0, 6, 4, 0, 4, 4, 0
+    1, 1, 0, 2, 2, 0, 3, 0, 0, 1,
+    1, 0, 0, 0, 0, 0, 2, 0, 2, 2,
+    0, 2, 0, 0, 0, 0, 0, 4, 4, 0,
+    5, 5, 0, 6, 4, 0, 4, 4, 0
   ], 'positions');
-  t.deepEquals(indices, [1, 3, 2, 7, 4, 5, 5, 6, 7, 10, 12, 11], 'incides');
+  t.deepEquals(indices, [1, 3, 2, 5, 8, 7, 7, 6, 5, 10, 12, 11], 'incides');
   t.deepEquals(Array.from(accessorCalled), ['C'], 'Accessor called only on partial data');
 
   sampleData[0] = {polygon: [[2, 2], [3, 0], [1, 1]], id: 'A'};
@@ -250,11 +242,13 @@ test('PolygonTesselator#partial update', t => {
   t.is(tesselator.vertexCount, 12, 'Updated vertex count');
   // prettier-ignore
   t.deepEquals(positions, [
-    2, 2, 0, 3, 0, 0, 1, 1, 0, 2, 2, 0,
-    0, 0, 0, 2, 0, 0, 2, 2, 0, 0, 2, 0, 0, 0, 0,
-    4, 4, 0, 5, 5, 0, 6, 4, 0, 4, 4, 0
+    2, 2, 0, 3, 0, 0, 1, 1, 0, 2,
+    2, 0, 0, 0, 0, 0, 2, 0, 2, 2,
+    0, 2, 0, 0, 0, 0, 0, 4, 4, 0,
+    5, 5, 0, 6, 4, 0, 4, 4, 0
   ], 'positions');
-  t.deepEquals(indices, [1, 3, 2, 7, 4, 5, 5, 6, 7, 10, 12, 11], 'incides');
+
+  t.deepEquals(indices, [1, 3, 2, 5, 8, 7, 7, 6, 5, 10, 12, 11], 'incides');
   t.deepEquals(Array.from(accessorCalled), ['A'], 'Accessor called only on partial data');
 
   t.end();
@@ -305,7 +299,7 @@ test('PolygonTesselator#geometryBuffer', t => {
   t.is(tesselator.instanceCount, 9, 'Updated instanceCount from geometryBuffer');
   t.deepEquals(
     tesselator.get('positions').slice(0, 27),
-    [1, 1, 0, 2, 2, 0, 3, 3, 0, 1, 1, 0, 0, 0, 0, 2, 0, 0, 2, 2, 0, 0, 2, 0, 0, 0, 0],
+    [1, 1, 0, 3, 3, 0, 2, 2, 0, 1, 1, 0, 0, 0, 0, 0, 2, 0, 2, 2, 0, 2, 0, 0, 0, 0, 0],
     'positions are populated'
   );
   t.ok(tesselator.get('indices'), 'indices generated');
@@ -396,6 +390,34 @@ test('PolygonTesselator#geometryBuffer#buffer', t => {
     [1, 1, 0, 1, 1, 1, 1, 0],
     'vertexValid are populated'
   );
+
+  t.end();
+});
+
+test('PolygonTesselator#normalizeGeometry', t => {
+  const sampleData = [[[150, 30], [-150, 30], [-150, -30], [150, -30], [150, 30]]];
+  const tesselator = new PolygonTesselator({
+    data: sampleData,
+    getGeometry: d => d
+  });
+
+  t.is(tesselator.instanceCount, 5, 'Updated instanceCount from input');
+
+  tesselator.updateGeometry({
+    resolution: 30,
+    wrapLongitude: false
+  });
+
+  // subdivide into smaller segments
+  t.ok(tesselator.instanceCount >= 80, 'Updated instanceCount from input');
+
+  tesselator.updateGeometry({
+    resolution: null,
+    wrapLongitude: true
+  });
+
+  // split at 180th meridian
+  t.is(tesselator.instanceCount, 9, 'Updated instanceCount from input');
 
   t.end();
 });

@@ -4,7 +4,7 @@
 
 Make sure to read the [Using deck.gl with React](/docs/get-started/using-with-react.md) article.
 
-The `DeckGL` class is a React wrapper of the `Deck` JavaScript class which exposes essentially the same props. The `Deck` class should not be used directly in React applications.
+The `DeckGL` class is a React wrapper of the [Deck](/docs/api-reference/core/deck.md) JavaScript class which exposes essentially the same props. The `Deck` class should not be used directly in React applications.
 
 
 ## Usage
@@ -45,17 +45,17 @@ const App = (data) => (
 
 ## Properties
 
-`DeckGL` accepts all [Deck](/docs/api-reference/deck.md#properties) properties, with these additional semantics:
+`DeckGL` accepts all [Deck](/docs/api-reference/core/deck.md#properties) properties, with these additional semantics:
 
 ### React Context
 
 ##### `ContextProvider` (React.Component, optional)
 
-A [Context.Provider](https://reactjs.org/docs/context.html#contextprovider) component. If supplied, will be rendered as the ancester to all children. The passed through context contains the following values:
+A [Context.Provider](https://reactjs.org/docs/context.html#contextprovider) component. If supplied, will be rendered as the ancestor to all children. The passed through context contains the following values:
 
-- `viewport` ([Viewport](/docs/api-reference/viewport.md)) - the current viewport
+- `viewport` ([Viewport](/docs/api-reference/core/viewport.md)) - the current viewport
 - `container` (DOMElement) - the DOM element containing the deck canvas
-- `eventManager` ([EventManager](https://github.com/uber-web/mjolnir.js/blob/master/docs/api-reference/event-manager.md))
+- `eventManager` ([EventManager](https://uber-web.github.io/mjolnir.js/docs/api-reference/event-manager))
 
 ```jsx
 /// Example using react-map-gl controls with deck.gl
@@ -85,7 +85,7 @@ It is possible to use JSX syntax to create deck.gl layers as React children of t
   <DeckGL />
 ```
 
-> Caveat: The JSX layer syntax is limitated in that it only works when the layers are direct children of the `DeckGL` component. deck.gl layers are not true React components and cannot be rendered independently by React, and the JSX support depends on deck.gl intercepting the JSX generated child elements before React tries to render them.
+> Caveat: The JSX layer syntax is limited in that it only works when the layers are direct children of the `DeckGL` component. deck.gl layers are not true React components and cannot be rendered independently by React, and the JSX support depends on deck.gl intercepting the JSX generated child elements before React tries to render them.
 
 
 #### JSX views
@@ -171,7 +171,7 @@ Additional Notes:
 
 ## Methods
 
-All [Deck](/docs/api-reference/deck.md#methods) methods are available on the `DeckGL` component, but not all of them can be explicitly called. For example, to rerender your component, you can pass updated props to `DeckGL` component directly, while you should call `setProps` with new props in `Deck`. 
+All [Deck](/docs/api-reference/core/deck.md#methods) methods are available on the `DeckGL` component, but not all of them can be explicitly called. For example, to rerender your component, you can pass updated props to `DeckGL` component directly, while you should call `setProps` with new props in `Deck`. 
 
 The public methods you can call explicitly list below:
 

@@ -1,6 +1,6 @@
-# JSONConverter (Experimental)
+# JSONConverter
 
-> NOTE: This component is only intended to support **official deck.gl API props** via JSON. In particular, it is not intended to evolve an implementation of alternate JSON schemas. Support for such schemas should be developed indenpendently, perhaps using the source code of this component as a base. See the [JSON Layers RFC](https://github.com/visgl/deck.gl/blob/master/dev-docs/RFCs/v6.1/json-layers-rfc.md) for more on this.
+> NOTE: This component is only intended to support **official deck.gl API props** via JSON. In particular, it is not intended to evolve an implementation of alternate JSON schemas. Support for such schemas should be developed independently, perhaps using the source code of this component as a base. See the [JSON Layers RFC](https://github.com/visgl/deck.gl/blob/master/dev-docs/RFCs/v6.1/json-layers-rfc.md) for more on this.
 
 Converts a JSON description of a deck.gl visualization into properties that can be passed to the `Deck` component.
 
@@ -38,7 +38,7 @@ deck.setProps(jsonConverter.convert(json));
 ##### `json` (Object|String)
 
 A JSON string or a parsed JSON structure.
-All properties in this object, after processing, are passed to a [Deck](/docs/api-reference/deck.md) instance as props.
+All properties in this object, after processing, are passed to a [Deck](/docs/api-reference/core/deck.md) instance as props.
 
 ## Configuration
 
@@ -83,6 +83,55 @@ will replace the layers descriptor with
 
 Whenever the `JSONConverter` component finds a "type" field, it looks into a "class catalog". This can be a layer, a view, or other objects.
 
+### Functions Catalogs
+
+A map of functions that should be made available to the JSON function resolver. For example, when this configuration is passed to `JSONConverter`:
+
+```js
+function calculateRadius({base, exponent}) {
+  return Math.pow(base, exponent);
+}
+
+const configuration = {
+  ...,
+  functions: {calculateRadius}
+};
+```
+
+and used to resolve this JSON object:
+
+```json
+{
+  "layers": [
+    {
+      "@@type": "ScatterplotLayer",
+      "data": ...,
+      "getColor": [0, 128, 255],
+      "getRadius": {
+        "@@function": "calculateRadius",
+        "base": 2,
+        "exponent": 3
+      }
+    }
+  ]
+}
+```
+
+it will replace the layers descriptor with
+
+```js
+{
+  layers: [
+    new ScatterplotLayer({
+      data: ...,
+      getColor: [0, 128, 255],
+      getRadius: 8
+    })
+  ]
+}
+```
+
+Whenever the `JSONConverter` component finds a "function" field, it looks into a "function catalog".
 
 ### Enumeration Catalogs
 

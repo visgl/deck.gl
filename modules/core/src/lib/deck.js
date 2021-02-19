@@ -28,6 +28,7 @@ import DeckPicker from './deck-picker';
 import Tooltip from './tooltip';
 import log from '../utils/log';
 import {deepEqual} from '../utils/deep-equal';
+import typedArrayManager from '../utils/typed-array-manager';
 import deckGlobal from './init';
 
 import {getBrowser} from 'probe.gl/env';
@@ -73,11 +74,13 @@ function getPropTypes(PropTypes) {
     pickingRadius: PropTypes.number,
     useDevicePixels: PropTypes.oneOfType([PropTypes.bool, PropTypes.number]),
     touchAction: PropTypes.string,
+    eventRecognizerOptions: PropTypes.object,
 
     // Callbacks
     onWebGLInitialized: PropTypes.func,
     onResize: PropTypes.func,
     onViewStateChange: PropTypes.func,
+    onInteractionStateChange: PropTypes.func,
     onBeforeRender: PropTypes.func,
     onAfterRender: PropTypes.func,
     onLoad: PropTypes.func,
@@ -90,7 +93,15 @@ function getPropTypes(PropTypes) {
     // Experimental props
     _framebuffer: PropTypes.object,
     // Forces a redraw every animation frame
-    _animate: PropTypes.bool
+    _animate: PropTypes.bool,
+
+    // UNSAFE options - not exhaustively tested, not guaranteed to work in all cases, use at your own risk
+
+    // Set to false to disable picking - avoiding picking buffer creation can save memory for mobile web browsers
+    _pickable: PropTypes.bool,
+
+    // Adjust parameters of typed array manager, can save memory e.g. for mobile web browsers
+    _typedArrayManagerProps: PropTypes.object //  {overAlloc: number, poolSize: number}
   };
 }
 
@@ -109,12 +120,16 @@ const defaultProps = {
   controller: null, // Rely on external controller, e.g. react-map-gl
   useDevicePixels: true,
   touchAction: 'none',
+  eventRecognizerOptions: {},
   _framebuffer: null,
   _animate: false,
+  _pickable: true,
+  _typedArrayManagerProps: {},
 
   onWebGLInitialized: noop,
   onResize: noop,
   onViewStateChange: noop,
+  onInteractionStateChange: noop,
   onBeforeRender: noop,
   onAfterRender: noop,
   onLoad: noop,
@@ -151,6 +166,7 @@ export default class Deck {
 
     this.viewState = null; // Internal view state if no callback is supplied
     this.interactiveState = {
+      isHovering: false, // Whether the cursor is over a pickable object
       isDragging: false // Whether the cursor is down
     };
 
@@ -162,7 +178,7 @@ export default class Deck {
     this._onRendererInitialized = this._onRendererInitialized.bind(this);
     this._onRenderFrame = this._onRenderFrame.bind(this);
     this._onViewStateChange = this._onViewStateChange.bind(this);
-    this._onInteractiveStateChange = this._onInteractiveStateChange.bind(this);
+    this._onInteractionStateChange = this._onInteractionStateChange.bind(this);
 
     if (props.viewState && props.initialViewState) {
       log.warn(
@@ -201,6 +217,11 @@ export default class Deck {
     this._metricsCounter = 0;
 
     this.setProps(props);
+
+    // UNSAFE/experimental prop: only set at initialization to avoid performance hit
+    if (props._typedArrayManagerProps) {
+      typedArrayManager.setProps(props._typedArrayManagerProps);
+    }
 
     this.animationLoop.start();
   }
@@ -275,6 +296,8 @@ export default class Deck {
     // If initialized, update sub manager props
     if (this.layerManager) {
       this.viewManager.setProps(resolvedProps);
+      // Make sure that any new layer gets initialized with the current viewport
+      this.layerManager.activateViewport(this.getViewports()[0]);
       this.layerManager.setProps(resolvedProps);
       this.effectManager.setProps(resolvedProps);
       this.deckRenderer.setProps(resolvedProps);
@@ -359,6 +382,20 @@ export default class Deck {
     return this._pick('pickObjects', 'pickObjects Time', opts);
   }
 
+  // Experimental
+
+  _addResources(resources, forceUpdate = false) {
+    for (const id in resources) {
+      this.layerManager.resourceManager.add({resourceId: id, data: resources[id], forceUpdate});
+    }
+  }
+
+  _removeResources(resourceIds) {
+    for (const id of resourceIds) {
+      this.layerManager.resourceManager.remove(id);
+    }
+  }
+
   // Private Methods
 
   _pick(method, statKey, opts) {
@@ -371,6 +408,7 @@ export default class Deck {
       Object.assign(
         {
           layers: this.layerManager.getLayers(opts),
+          views: this.viewManager.getViews(),
           viewports: this.getViewports(opts),
           onViewportActive: this.layerManager.activateViewport
         },
@@ -467,7 +505,8 @@ export default class Deck {
       onInitialize: this._onRendererInitialized,
       onRender: this._onRenderFrame,
       onBeforeRender: props.onBeforeRender,
-      onAfterRender: props.onAfterRender
+      onAfterRender: props.onAfterRender,
+      onError: props.onError
     });
   }
 
@@ -528,21 +567,33 @@ export default class Deck {
     if (_pickRequest.event) {
       // Perform picking
       const {result, emptyInfo} = this._pick('pickObject', 'pickObject Time', _pickRequest);
-      const pickedInfo = result[0] || emptyInfo;
+      this.interactiveState.isHovering = result.length > 0;
+
+      // There are 4 possible scenarios:
+      // result is [outInfo, pickedInfo] (moved from one pickable layer to another)
+      // result is [outInfo] (moved outside of a pickable layer)
+      // result is [pickedInfo] (moved into or over a pickable layer)
+      // result is [] (nothing is or was picked)
+      //
+      // `layer.props.onHover` should be called on all affected layers (out/over)
+      // `deck.props.onHover` should be called with the picked info if any, or empty info otherwise
+      // `deck.props.getTooltip` should be called with the picked info if any, or empty info otherwise
+
+      // Execute callbacks
+      let pickedInfo = emptyInfo;
+      let handled = false;
+      for (const info of result) {
+        pickedInfo = info;
+        handled = info.layer.onHover(info, _pickRequest.event);
+      }
+      if (!handled && this.props.onHover) {
+        this.props.onHover(pickedInfo, _pickRequest.event);
+      }
 
       // Update tooltip
       if (this.props.getTooltip) {
         const displayInfo = this.props.getTooltip(pickedInfo);
         this.tooltip.setTooltip(displayInfo, pickedInfo.x, pickedInfo.y);
-      }
-
-      // Execute callbacks
-      let handled = false;
-      if (pickedInfo.layer) {
-        handled = pickedInfo.layer.onHover(pickedInfo, _pickRequest.event);
-      }
-      if (!handled && this.props.onHover) {
-        this.props.onHover(pickedInfo, _pickRequest.event);
       }
 
       // Clear pending pickRequest
@@ -587,6 +638,7 @@ export default class Deck {
 
     this.eventManager = new EventManager(this.props.parent || gl.canvas, {
       touchAction: this.props.touchAction,
+      recognizerOptions: this.props.eventRecognizerOptions,
       events: {
         pointerdown: this._onPointerDown,
         pointermove: this._onPointerMove,
@@ -601,7 +653,7 @@ export default class Deck {
       timeline,
       eventManager: this.eventManager,
       onViewStateChange: this._onViewStateChange,
-      onInteractiveStateChange: this._onInteractiveStateChange,
+      onInteractionStateChange: this._onInteractionStateChange,
       views: this._getViews(),
       viewState: this._getViewState(),
       width: this.width,
@@ -717,10 +769,9 @@ export default class Deck {
     }
   }
 
-  _onInteractiveStateChange({isDragging = false}) {
-    if (isDragging !== this.interactiveState.isDragging) {
-      this.interactiveState.isDragging = isDragging;
-    }
+  _onInteractionStateChange(interactionState) {
+    this.interactiveState.isDragging = interactionState.isDragging;
+    this.props.onInteractionStateChange(interactionState);
   }
 
   _onEvent(event) {

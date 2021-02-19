@@ -36,3 +36,11 @@ export {default as SolidPolygonLayer} from './solid-polygon-layer/solid-polygon-
 
 // Experimental layer exports
 export {default as _MultiIconLayer} from './text-layer/multi-icon-layer/multi-icon-layer';
+export {
+  default as _TextBackgroundLayer
+} from './text-layer/text-background-layer/text-background-layer';
+
+export {
+  binaryToFeature as _binaryToFeature,
+  findIndexBinary as _findIndexBinary
+} from './geojson-layer/geojson-binary';

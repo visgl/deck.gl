@@ -1,0 +1,55 @@
+<html>
+<head>
+  <title>deck.gl Tile3DLayer</title>
+  <script src="https://unpkg.com/deck.gl@^8.1.0/dist.min.js"></script>
+  <script src="https://unpkg.com/@loaders.gl/i3s@^2.3.0/dist/dist.min.js"></script>
+  <script src="https://api.tiles.mapbox.com/mapbox-gl-js/v1.4.0/mapbox-gl.js"></script>
+</head>
+
+<body style="margin:0; width: 100vw; height: 100vh;"></body>
+
+<script type="text/javascript">
+  const INITIAL_VIEW_STATE = {
+    longitude: -120,
+    latitude: 34,
+    height: 600,
+    width: 800,
+    pitch: 45,
+    maxPitch: 85,
+    bearing: 0,
+    minZoom: 2,
+    maxZoom: 30,
+    zoom: 14.5
+  };
+
+  const {DeckGL, Tile3DLayer} = deck;
+  const {I3SLoader} = loaders;
+
+  const deckgl = new DeckGL({
+    mapStyle: 'https://basemaps.cartocdn.com/gl/dark-matter-nolabels-gl-style/style.json',
+    initialViewState: INITIAL_VIEW_STATE,
+    controller: true,
+    layers: [
+      new Tile3DLayer({
+        id: 'tile-3d-layer',
+        data:
+          'https://tiles.arcgis.com/tiles/z2tnIkrLQ2BRzr6P/arcgis/rest/services/SanFrancisco_Bldgs/SceneServer/layers/0',
+        loader: I3SLoader,
+        onTilesetLoad: (tileset) => {
+          const {zoom, cartographicCenter} = tileset;
+          const [longitude, latitude] = cartographicCenter;
+
+          const viewState = {
+            ...deckgl.viewState,
+            zoom: zoom + 2.5,
+            longitude,
+            latitude
+          };
+          deckgl.setProps({initialViewState: viewState});
+        }
+      })
+    ]
+  });
+
+</script>
+</html>

@@ -16,13 +16,36 @@ export default [
         id: 'heatmap-lnglat',
         data: points,
         opacity: 0.8,
-        pickable: false,
         getPosition: d => d.COORDINATES,
+        getWeight: d => d.SPACES,
         radiusPixels: 35,
         threshold: 0.1
       })
     ],
     goldenImage: './test/render/golden-images/heatmap-lnglat.png'
+  },
+  {
+    name: 'heatmap-lnglat-mean',
+    viewState: {
+      latitude: 37.75,
+      longitude: -122.44,
+      zoom: 11.5,
+      pitch: 30,
+      bearing: 0
+    },
+    layers: [
+      new HeatmapLayer({
+        id: 'heatmap-lnglat',
+        data: points,
+        opacity: 0.8,
+        aggregation: 'MEAN',
+        getPosition: d => d.COORDINATES,
+        getWeight: d => d.SPACES,
+        radiusPixels: 35,
+        threshold: 0.05
+      })
+    ],
+    goldenImage: './test/render/golden-images/heatmap-lnglat-mean.png'
   },
   {
     name: 'heatmap-lnglat-high-zoom',
@@ -38,7 +61,6 @@ export default [
         id: 'heatmap-lnglat-2',
         data: points,
         opacity: 0.8,
-        pickable: false,
         getPosition: d => d.COORDINATES,
         radiusPixels: 35,
         threshold: 0.1

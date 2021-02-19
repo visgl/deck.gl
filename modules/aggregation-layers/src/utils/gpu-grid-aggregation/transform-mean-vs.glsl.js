@@ -30,5 +30,8 @@ void main()
   // aggregationValues:  XYZ contain aggregated values, W contains count
   meanValues.xyz = isCellValid ? aggregationValues.xyz/aggregationValues.w : vec3(0, 0, 0);
   meanValues.w = aggregationValues.w;
+
+  // Enforce default value for ANGLE issue (https://bugs.chromium.org/p/angleproject/issues/detail?id=3941)
+  gl_PointSize = 1.0;
 }
 `;

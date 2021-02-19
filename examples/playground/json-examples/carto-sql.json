@@ -1,0 +1,36 @@
+{
+  "description": "CartoSQLLayer declarative example",
+  "initialViewState": {
+    "latitude": 0,
+    "longitude": 0,
+    "zoom": 1,
+    "pitch": 0,
+    "bearing": 0
+  },
+  "views": [
+    {
+      "@@type": "MapView",
+      "controller": true,
+      "mapStyle": "https://basemaps.cartocdn.com/gl/positron-gl-style/style.json"
+    }
+  ],
+  "layers": [
+    {
+      "@@type": "CartoSQLLayer",
+      "data": "SELECT the_geom_webmercator, gn_pop FROM populated_places",
+      "credentials": {
+        "username": "public",
+        "apiKey": "default_public"
+      },
+      "getLineColor": [255, 255, 255, 100],
+      "getFillColor": {
+        "@@function": "colorContinuous",
+        "attr": "gn_pop",
+        "domain": [0, 1e5],
+        "colors": "BluYl"
+      },
+      "pointRadiusMinPixels": 5,
+      "lineWidthMinPixels": 1
+    }
+  ]
+}

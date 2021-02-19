@@ -57,11 +57,91 @@ test('Tileset2D#update', t => {
   t.end();
 });
 
+test('Tileset2D#finalize', async t => {
+  const tileset = new Tileset2D({
+    getTileData: () => sleep(50),
+    onTileLoad: () => {}
+  });
+  tileset.update(testViewport);
+
+  await sleep(60);
+
+  tileset.update(
+    new WebMercatorViewport(
+      Object.assign({}, testViewState, {
+        longitude: -100,
+        latitude: 80
+      })
+    )
+  );
+
+  tileset.finalize();
+
+  t.is(
+    tileset._cache.get('1171,1566,12')._isCancelled,
+    false,
+    'first tile should not have been loading and thus not been aborteed'
+  );
+  t.is(tileset._cache.get('910,459,12')._isCancelled, true, 'second tile should have been aborted');
+
+  t.end();
+});
+
+test('Tileset2D#finalize-partial', async t => {
+  const tileset = new Tileset2D({
+    getTileData: () => sleep(10),
+    onTileLoad: () => {},
+    onTileError: () => {}
+  });
+  tileset.update(new WebMercatorViewport({longitude: 0, latitude: 0, zoom: 0}));
+
+  // Tiles that should be loaded
+  tileset._getTile({x: 1, y: 1, z: 1}, true);
+  await sleep(20);
+
+  // Tiles that should be cancelled
+  tileset._getTile({x: 0, y: 0, z: 1}, true);
+  tileset.finalize();
+
+  // Tiles that should be loaded
+  tileset._getTile({x: 1, y: 0, z: 1}, true);
+  await sleep(20);
+
+  t.is(
+    tileset._cache.get('0,0,0').isCancelled,
+    false,
+    'visible tile should have loaded and thus not been aborted'
+  );
+  t.is(
+    tileset._cache.get('1,1,1').isCancelled,
+    false,
+    'first tile should not have been loading and thus not been aborted'
+  );
+  t.is(tileset._cache.get('0,0,1').isCancelled, true, 'second tile should have been aborted');
+  t.is(
+    tileset._cache.get('1,0,1').isCancelled,
+    false,
+    'third tile should not have been loading and thus not been aborted'
+  );
+
+  // Now, these tiles should be loaded
+  tileset._getTile({x: 0, y: 0, z: 1}, true);
+  await sleep(20);
+  t.is(
+    tileset._cache.get('0,0,1').isCancelled,
+    false,
+    'second tile should should have loaded and not been aborted'
+  );
+
+  t.end();
+});
+
 test('Tileset2D#maxCacheSize', t => {
   const tileset = new Tileset2D({
     getTileData,
     maxCacheSize: 1,
-    onTileLoad: () => {}
+    onTileLoad: () => {},
+    onTileUnload: () => {}
   });
   // load a viewport to fill the cache
   tileset.update(testViewport);
@@ -88,7 +168,8 @@ test('Tileset2D#maxCacheByteSize', async t => {
   const tileset = new Tileset2D({
     getTileData: () => Promise.resolve({byteLength: 100}),
     maxCacheByteSize: 150,
-    onTileLoad: () => {}
+    onTileLoad: () => {},
+    onTileUnload: () => {}
   });
   // load a viewport to fill the cache
   tileset.update(testViewport);
@@ -169,11 +250,14 @@ test('Tileset2D#under-zoomed-with-extent', t => {
 test('Tileset2D#callbacks', async t => {
   let tileLoadCalled = 0;
   let tileErrorCalled = 0;
+  let tileUnloadCalled = 0;
 
   const tileset = new Tileset2D({
+    maxCacheSize: 1,
     getTileData: () => Promise.resolve(null),
     onTileLoad: () => tileLoadCalled++,
-    onTileError: () => tileErrorCalled++
+    onTileError: () => tileErrorCalled++,
+    onTileUnload: () => tileUnloadCalled++
   });
   tileset.update(testViewport);
   t.notOk(tileset.isLoaded, 'should be loading');
@@ -201,6 +285,18 @@ test('Tileset2D#callbacks', async t => {
   t.ok(errorTileset.isLoaded, 'tileset is loaded');
   t.is(tileLoadCalled, 0, 'onTileLoad is not called');
   t.is(tileErrorCalled, 1, 'onTileError is called');
+
+  t.is(tileUnloadCalled, 0, 'onTileUnload is not called');
+  // load another viewport. The previous cached tiles shouldn't be visible
+  tileset.update(
+    new WebMercatorViewport(
+      Object.assign({}, testViewState, {
+        longitude: -100,
+        latitude: 80
+      })
+    )
+  );
+  t.is(tileUnloadCalled, 1, 'onTileUnload is called');
 
   t.end();
 });

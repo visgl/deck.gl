@@ -14,9 +14,6 @@ const animate = () => {
   window.requestAnimationFrame(animate);
 };
 
-// Set your mapbox token here
-const MAPBOX_TOKEN = process.env.MapboxAccessToken; // eslint-disable-line
-
 class Root extends Component {
   constructor(props) {
     super(props);
@@ -78,8 +75,7 @@ class Root extends Component {
       <div>
         <MapGL
           {...viewport}
-          mapStyle="mapbox://styles/mapbox/dark-v9"
-          mapboxApiAccessToken={MAPBOX_TOKEN}
+          mapStyle="https://basemaps.cartocdn.com/gl/dark-matter-nolabels-gl-style/style.json"
           dragRotate
           onViewportChange={this._updateViewport}
         >

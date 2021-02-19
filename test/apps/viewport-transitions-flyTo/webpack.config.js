@@ -3,7 +3,6 @@
 
 // avoid destructuring for older Node version support
 const resolve = require('path').resolve;
-const webpack = require('webpack');
 const path = require('path');
 
 module.exports = {
@@ -48,8 +47,5 @@ module.exports = {
       // 'mapbox-gl$': resolve('../../../mapbox-gl-js/dist/mapbox-gl-dev.js')
       'mapbox-gl$': resolve('./node_modules/mapbox-gl/dist/mapbox-gl.js')
     }
-  },
-
-  // Optional: Enables reading mapbox token from environment variable
-  plugins: [new webpack.EnvironmentPlugin(['MapboxAccessToken'])]
+  }
 };

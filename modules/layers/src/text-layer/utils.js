@@ -1,7 +1,9 @@
+/* eslint-disable max-statements, max-params, complexity, max-depth */
 // TODO merge with icon-layer/icon-manager
 import {log} from '@deck.gl/core';
 
 const MISSING_CHAR_WIDTH = 32;
+const SINGLE_LINE = [];
 
 export function nextPowOfTwo(number) {
   return Math.pow(2, Math.ceil(Math.log2(number)));
@@ -70,9 +72,9 @@ export function buildMapping({
   };
 }
 
-function getTextWidth(text, mapping) {
+function getTextWidth(text, startIndex, endIndex, mapping) {
   let width = 0;
-  for (let i = 0; i < text.length; i++) {
+  for (let i = startIndex; i < endIndex; i++) {
     const character = text[i];
     let frameWidth = null;
     const frame = mapping && mapping[character];
@@ -86,17 +88,16 @@ function getTextWidth(text, mapping) {
   return width;
 }
 
-function breakAll(text, maxWidth, iconMapping) {
-  const rows = [];
-  let rowStartCharIndex = 0;
+function breakAll(text, startIndex, endIndex, maxWidth, iconMapping, target) {
+  let rowStartCharIndex = startIndex;
   let rowOffsetLeft = 0;
 
-  for (let i = 0; i < text.length; i++) {
+  for (let i = startIndex; i < endIndex; i++) {
     // 2. figure out where to break lines
-    const textWidth = getTextWidth(text[i], iconMapping);
+    const textWidth = getTextWidth(text, i, i + 1, iconMapping);
     if (rowOffsetLeft + textWidth > maxWidth) {
       if (rowStartCharIndex < i) {
-        rows.push(text.substring(rowStartCharIndex, i));
+        target.push(i);
       }
       rowStartCharIndex = i;
       rowOffsetLeft = 0;
@@ -104,95 +105,78 @@ function breakAll(text, maxWidth, iconMapping) {
     rowOffsetLeft += textWidth;
   }
 
-  // last row
-  if (rowStartCharIndex < text.length) {
-    rows.push(text.substring(rowStartCharIndex));
-  }
-
-  return {
-    rows,
-    lastRowStartCharIndex: rowStartCharIndex,
-    lastRowOffsetLeft: rowOffsetLeft
-  };
+  return rowOffsetLeft;
 }
 
-/* eslint-disable max-statements, complexity, max-depth */
-function breakWord(text, maxWidth, iconMapping) {
-  let rows = [];
-  let rowStartCharIndex = 0;
-  let groupStartCharIndex = 0;
+function breakWord(text, startIndex, endIndex, maxWidth, iconMapping, target) {
+  let rowStartCharIndex = startIndex;
+  let groupStartCharIndex = startIndex;
+  let groupEndCharIndex = startIndex;
   let rowOffsetLeft = 0;
-  let group = null;
 
-  for (let i = 0; i < text.length; i++) {
+  for (let i = startIndex; i < endIndex; i++) {
     // 1. break text into word groups
     //  - if current char is white space
     //  - else if next char is white space
     //  - else if reach last char
     if (text[i] === ' ') {
-      group = text[i];
-      groupStartCharIndex = i + 1;
-    } else if ((i + 1 < text.length && text[i + 1] === ' ') || i + 1 === text.length) {
-      group = text.substring(groupStartCharIndex, i + 1);
-      groupStartCharIndex = i + 1;
-    } else {
-      group = null;
+      groupEndCharIndex = i + 1;
+    } else if (text[i + 1] === ' ' || i + 1 === endIndex) {
+      groupEndCharIndex = i + 1;
     }
 
-    if (group) {
+    if (groupEndCharIndex > groupStartCharIndex) {
       // 2. break text into next row at maxWidth
-      let groupWidth = getTextWidth(group, iconMapping);
+      let groupWidth = getTextWidth(text, groupStartCharIndex, groupEndCharIndex, iconMapping);
       if (rowOffsetLeft + groupWidth > maxWidth) {
-        const lastGroupStartIndex = groupStartCharIndex - group.length;
-        if (rowStartCharIndex < lastGroupStartIndex) {
-          rows.push(text.substring(rowStartCharIndex, lastGroupStartIndex));
-          rowStartCharIndex = lastGroupStartIndex;
+        if (rowStartCharIndex < groupStartCharIndex) {
+          target.push(groupStartCharIndex);
+          rowStartCharIndex = groupStartCharIndex;
           rowOffsetLeft = 0;
         }
 
         // if a single text group is bigger than maxWidth, then `break-all`
         if (groupWidth > maxWidth) {
-          const subGroups = breakAll(group, maxWidth, iconMapping);
-          if (subGroups.rows.length > 1) {
-            // add all the sub rows to results except last row
-            rows = rows.concat(subGroups.rows.slice(0, subGroups.rows.length - 1));
-          }
+          groupWidth = breakAll(
+            text,
+            groupStartCharIndex,
+            groupEndCharIndex,
+            maxWidth,
+            iconMapping,
+            target
+          );
           // move reference to last row
-          rowStartCharIndex = rowStartCharIndex + subGroups.lastRowStartCharIndex;
-          groupWidth = subGroups.lastRowOffsetLeft;
+          rowStartCharIndex = target[target.length - 1];
         }
       }
+      groupStartCharIndex = groupEndCharIndex;
       rowOffsetLeft += groupWidth;
     }
   }
 
-  // last row
-  if (rowStartCharIndex < text.length) {
-    rows.push(text.substring(rowStartCharIndex));
-  }
-
-  return {
-    rows,
-    lastRowStartCharIndex: rowStartCharIndex,
-    lastRowOffsetLeft: rowOffsetLeft
-  };
+  return rowOffsetLeft;
 }
-/* eslint-enable max-statements, complexity, max-depth */
 
-export function autoWrapping(text, wordBreak, maxWidth, iconMapping) {
+// Returns a list of indices where line breaks should be inserted
+export function autoWrapping(text, wordBreak, maxWidth, iconMapping, startIndex = 0, endIndex) {
+  if (endIndex === undefined) {
+    endIndex = text.length;
+  }
+  const result = [];
   if (wordBreak === 'break-all') {
-    return breakAll(text, maxWidth, iconMapping);
+    breakAll(text, startIndex, endIndex, maxWidth, iconMapping, result);
+  } else {
+    breakWord(text, startIndex, endIndex, maxWidth, iconMapping, result);
   }
-  return breakWord(text, maxWidth, iconMapping);
+  return result;
 }
 
-function transformRow(row, iconMapping) {
+function transformRow(line, startIndex, endIndex, iconMapping, leftOffsets, rowSize) {
   let x = 0;
   let rowHeight = 0;
 
-  const leftOffsets = new Array(row.length);
-  for (let i = 0; i < row.length; i++) {
-    const character = row[i];
+  for (let i = startIndex; i < endIndex; i++) {
+    const character = line[i];
     const frame = iconMapping[character];
     if (frame) {
       if (!rowHeight) {
@@ -202,17 +186,14 @@ function transformRow(row, iconMapping) {
       leftOffsets[i] = x + frame.width / 2;
       x += frame.width;
     } else {
-      log.warn(`Missing character: ${character}`)();
+      log.warn(`Missing character: ${character} (${character.codePointAt(0)})`)();
       leftOffsets[i] = x;
       x += MISSING_CHAR_WIDTH;
     }
   }
 
-  return {
-    leftOffsets,
-    rowWidth: x,
-    rowHeight
-  };
+  rowSize[0] = x;
+  rowSize[1] = rowHeight;
 }
 
 /**
@@ -231,56 +212,63 @@ function transformRow(row, iconMapping) {
  *   - rowSize: [rowWidth, rowHeight] size of the row
  *   - len: length of the paragraph
  */
-/* eslint-disable max-params, max-depth, complexity */
 export function transformParagraph(paragraph, lineHeight, wordBreak, maxWidth, iconMapping) {
-  const result = new Array(paragraph.length);
+  // Break into an array of characters
+  // When dealing with double-length unicode characters, `str.length` or `str[i]` do not work
+  paragraph = Array.from(paragraph);
+  const numCharacters = paragraph.length;
+  const x = new Array(numCharacters);
+  const y = new Array(numCharacters);
+  const rowWidth = new Array(numCharacters);
   const autoWrappingEnabled =
     (wordBreak === 'break-word' || wordBreak === 'break-all') && isFinite(maxWidth) && maxWidth > 0;
 
   // maxWidth and height of the paragraph
   const size = [0, 0];
+  const rowSize = [];
   let rowOffsetTop = 0;
   let lineStartIndex = 0;
+  let lineEndIndex = 0;
 
-  for (let i = 0; i <= paragraph.length; i++) {
+  for (let i = 0; i <= numCharacters; i++) {
     const char = paragraph[i];
-    let line;
-    if (char === '\n' || char === undefined) {
-      line = paragraph.slice(lineStartIndex, i);
+    if (char === '\n' || i === numCharacters) {
+      lineEndIndex = i;
     }
 
-    if (line) {
+    if (lineEndIndex > lineStartIndex) {
       const rows = autoWrappingEnabled
-        ? autoWrapping(line, wordBreak, maxWidth, iconMapping).rows
-        : [line];
+        ? autoWrapping(paragraph, wordBreak, maxWidth, iconMapping, lineStartIndex, lineEndIndex)
+        : SINGLE_LINE;
 
-      for (const row of rows) {
-        const {rowWidth, rowHeight, leftOffsets} = transformRow(row, iconMapping, lineHeight);
-
-        for (const x of leftOffsets) {
-          result[lineStartIndex++] = {
-            x,
-            y: rowOffsetTop + rowHeight / 2,
-            rowWidth
-          };
+      for (let rowIndex = 0; rowIndex <= rows.length; rowIndex++) {
+        const rowStart = rowIndex === 0 ? lineStartIndex : rows[rowIndex - 1];
+        const rowEnd = rowIndex < rows.length ? rows[rowIndex] : lineEndIndex;
+        transformRow(paragraph, rowStart, rowEnd, iconMapping, x, rowSize);
+        for (let j = rowStart; j < rowEnd; j++) {
+          y[j] = rowOffsetTop + rowSize[1] / 2;
+          rowWidth[j] = rowSize[0];
         }
 
-        rowOffsetTop = rowOffsetTop + rowHeight * lineHeight;
-        size[0] = autoWrappingEnabled ? maxWidth : Math.max(size[0], rowWidth);
+        rowOffsetTop = rowOffsetTop + rowSize[1] * lineHeight;
+        size[0] = Math.max(size[0], rowSize[0]);
       }
+      lineStartIndex = lineEndIndex;
     }
 
     if (char === '\n') {
       // Make sure result.length matches paragraph.length
-      result[lineStartIndex++] = {x: 0, y: 0, rowWidth: 0};
+      x[lineStartIndex] = 0;
+      y[lineStartIndex] = 0;
+      rowWidth[lineStartIndex] = 0;
+      lineStartIndex++;
     }
   }
 
   // last row
   size[1] = rowOffsetTop;
-  return {characters: result, size};
+  return {x, y, rowWidth, size};
 }
-/* eslint-enable max-depth, complexity */
 
 export function getTextFromBuffer({value, length, stride, offset, startIndices}) {
   const bytesPerElement = value.BYTES_PER_ELEMENT;

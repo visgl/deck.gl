@@ -4,6 +4,7 @@
  */
 import {COORDINATE_SYSTEM} from '../../lib/constants';
 import {getOffsetOrigin} from './viewport-uniforms';
+import WebMercatorViewport from '../../viewports/web-mercator-viewport';
 
 import * as vec4 from 'gl-matrix/vec4';
 import * as vec3 from 'gl-matrix/vec3';
@@ -13,11 +14,15 @@ import {addMetersToLngLat} from '@math.gl/web-mercator';
 // offset modes apply the y adjustment (unitsPerMeter2) when projecting z
 // LNG_LAT mode only use the linear scale.
 function lngLatZToWorldPosition(lngLatZ, viewport, offsetMode = false) {
-  const [longitude, latitude, z = 0] = lngLatZ;
-  const [X, Y] = viewport.projectFlat(lngLatZ);
-  const distanceScales = viewport.getDistanceScales(offsetMode && [longitude, latitude]);
-  const Z = z * distanceScales.unitsPerMeter[2];
-  return [X, Y, Z];
+  const p = viewport.projectPosition(lngLatZ);
+
+  // TODO - avoid using instanceof
+  if (offsetMode && viewport instanceof WebMercatorViewport) {
+    const [longitude, latitude, z = 0] = lngLatZ;
+    const distanceScales = viewport.getDistanceScales([longitude, latitude]);
+    p[2] = z * distanceScales.unitsPerMeter[2];
+  }
+  return p;
 }
 
 function normalizeParameters(opts) {
@@ -48,7 +53,7 @@ export function getWorldPosition(
   position,
   {viewport, modelMatrix, coordinateSystem, coordinateOrigin, offsetMode}
 ) {
-  let [x, y, z] = position;
+  let [x, y, z = 0] = position;
 
   if (modelMatrix) {
     [x, y, z] = vec4.transformMat4([], [x, y, z, 1.0], modelMatrix);
@@ -74,7 +79,9 @@ export function getWorldPosition(
 
     case COORDINATE_SYSTEM.CARTESIAN:
     default:
-      return viewport.isGeospatial ? [x, y, z] : viewport.projectPosition([x, y, z]);
+      return viewport.isGeospatial
+        ? [x + coordinateOrigin[0], y + coordinateOrigin[1], z + coordinateOrigin[2]]
+        : viewport.projectPosition([x, y, z]);
   }
 }
 

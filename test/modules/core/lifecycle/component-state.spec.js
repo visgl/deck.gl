@@ -1,24 +1,20 @@
 import test from 'tape-catch';
 import ComponentState from '@deck.gl/core/lifecycle/component-state';
 import Component from '@deck.gl/core/lifecycle/component';
+import {gl} from '@deck.gl/test-utils';
 
-/* global fetch */
 const EMPTY_ARRAY = Object.freeze([]);
 
 const defaultProps = {
   // data: Special handling for null, see below
   data: {type: 'data', value: EMPTY_ARRAY, async: true},
-  dataComparator: null,
   dataTransform: data => data,
-  fetch: url => fetch(url).then(response => response.json())
+  image: {type: 'image', value: null, async: true}
 };
 
-class TestComponent extends Component {
-  constructor(...props) {
-    super(...props);
-  }
-}
+class TestComponent extends Component {}
 
+TestComponent.componentName = 'TestComponent';
 TestComponent.defaultProps = defaultProps;
 
 function makePromise() {
@@ -147,4 +143,86 @@ test('ComponentState#asynchronous async props', t => {
     })
     .then(_ => t.end())
     .catch(_ => t.end());
+});
+
+test('ComponentState#async props with transform', t => {
+  const testContext = {gl};
+
+  const testData = [0, 1, 2, 3, 4];
+  // prettier-ignore
+  const testImage = {data: new Uint8ClampedArray([
+    0, 0, 0, 255,
+    255, 0, 0, 255,
+    0, 255, 0, 255,
+    0, 0, 255, 255
+  ]), width: 2, height: 2};
+
+  const state = new ComponentState();
+
+  // Simulate Layer class
+  const makeComponent = (props, onAsyncPropUpdated) => {
+    const comp = new TestComponent(props);
+    comp.internalState = state;
+    comp.context = testContext;
+
+    state.component = comp;
+    state.setAsyncProps(comp.props);
+    state.onAsyncPropUpdated = onAsyncPropUpdated || (() => {});
+
+    return comp;
+  };
+
+  // Synchronous value for async prop
+  let component = makeComponent({
+    data: testData,
+    dataTransform: d => d.slice(0, 2),
+    image: testImage
+  });
+  let image = component.props.image;
+  let data = component.props.data;
+  t.deepEqual(data, [0, 1], 'Synchronous value for data should be transformed');
+  t.ok(image.handle, 'Synchronous value for image should be transformed');
+
+  component = makeComponent({
+    data: testData,
+    dataTransform: d => d.slice(0, 2),
+    image: testImage
+  });
+  t.is(component.props.data, data, 'Unchanged data value is not transformed again');
+  t.is(component.props.image, image, 'Unchanged image value is not transformed again');
+
+  component = makeComponent({
+    data,
+    dataTransform: d => d.slice(0, 2),
+    image
+  });
+  t.is(component.props.data, data, 'Unchanged data value is not transformed again');
+  t.is(component.props.image, image, 'Unchanged image value is not transformed again');
+
+  // Async value for async prop
+  component = makeComponent(
+    {
+      data: Promise.resolve(testData),
+      dataTransform: d => d.slice(0, 2),
+      image: Promise.resolve(testImage)
+    },
+    (propName, value) => {
+      if (propName === 'image') {
+        t.notOk(image.handle, 'Last texture is deleted');
+        image = component.props.image;
+        t.ok(image, 'Async value for image should be transformed');
+      }
+      if (propName === 'data') {
+        data = component.props.data;
+        t.deepEqual(data, [0, 1], 'Async value for data should be transformed');
+      }
+
+      if (!state.isAsyncPropLoading()) {
+        state.finalize();
+        t.notOk(image.handle, 'Texture is deleted on finalization');
+
+        t.end();
+      }
+    }
+  );
 });

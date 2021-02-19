@@ -44,6 +44,11 @@ export default class LineLayer extends Layer {
     return super.getShaders({vs, fs, modules: [project32, picking]});
   }
 
+  // This layer has its own wrapLongitude logic
+  get wrapLongitude() {
+    return false;
+  }
+
   initializeState() {
     const attributeManager = this.getAttributeManager();
 
@@ -96,19 +101,28 @@ export default class LineLayer extends Layer {
 
   draw({uniforms}) {
     const {viewport} = this.context;
-    const {widthUnits, widthScale, widthMinPixels, widthMaxPixels} = this.props;
+    const {widthUnits, widthScale, widthMinPixels, widthMaxPixels, wrapLongitude} = this.props;
 
     const widthMultiplier = widthUnits === 'pixels' ? viewport.metersPerPixel : 1;
 
     this.state.model
-      .setUniforms(
-        Object.assign({}, uniforms, {
-          widthScale: widthScale * widthMultiplier,
-          widthMinPixels,
-          widthMaxPixels
-        })
-      )
+      .setUniforms(uniforms)
+      .setUniforms({
+        widthScale: widthScale * widthMultiplier,
+        widthMinPixels,
+        widthMaxPixels,
+        useShortestPath: wrapLongitude ? 1 : 0
+      })
       .draw();
+
+    if (wrapLongitude) {
+      // Render a second copy for the clipped lines at the 180th meridian
+      this.state.model
+        .setUniforms({
+          useShortestPath: -1
+        })
+        .draw();
+    }
   }
 
   _getModel(gl) {

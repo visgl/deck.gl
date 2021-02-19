@@ -242,7 +242,13 @@ export default class App extends PureComponent {
         })
       ];
     } else {
-      views = new MapView({id: 'basemap', controller: true, position: [0, 0, 0], orthographic});
+      views = new MapView({
+        id: 'basemap',
+        controller: true,
+        position: [0, 0, 0],
+        repeat: true,
+        orthographic
+      });
     }
     return views;
   }

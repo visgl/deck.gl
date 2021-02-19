@@ -73,7 +73,7 @@ export function cycleBuffers(buffers) {
 
 export function getAttributeBufferLength(attribute, numInstances) {
   const {doublePrecision, settings, value, size} = attribute;
-  const multiplier = doublePrecision ? 2 : 1;
+  const multiplier = doublePrecision && value instanceof Float64Array ? 2 : 1;
   return (settings.noAlloc ? value.length : numInstances * size) * multiplier;
 }
 
@@ -94,7 +94,8 @@ export function padBuffer({
 }) {
   // TODO: move the precisionMultiplier logic to the attribute when retrieving
   // its `size` and `elementOffset`?
-  const precisionMultiplier = attribute.doublePrecision ? 2 : 1;
+  const precisionMultiplier =
+    attribute.doublePrecision && attribute.value instanceof Float64Array ? 2 : 1;
   const size = attribute.size * precisionMultiplier;
   const byteOffset = attribute.byteOffset;
   const toStartIndices = attribute.startIndices;

@@ -54,7 +54,9 @@ const defaultProps = {
   workerUrl: {type: 'string', value: null},
   // Same as SimpleMeshLayer wireframe
   wireframe: false,
-  material: true
+  material: true,
+
+  loaders: [TerrainLoader]
 };
 
 // Turns array of templates into a single string to work around shallow change
@@ -110,7 +112,7 @@ export default class TerrainLayer extends CompositeLayer {
     if (workerUrl !== null) {
       options.terrain.workerUrl = workerUrl;
     }
-    return load(elevationData, TerrainLoader, options);
+    return load(elevationData, this.props.loaders, options);
   }
 
   getTiledTerrainData(tile) {
@@ -146,16 +148,12 @@ export default class TerrainLayer extends CompositeLayer {
   renderSubLayers(props) {
     const SubLayerClass = this.getSubLayerClass('mesh', SimpleMeshLayer);
     const {data, color} = props;
-    let mesh = null;
-    let texture = null;
 
-    if (Array.isArray(data)) {
-      mesh = data[0];
-      texture = data[1];
-    } else if (data) {
-      mesh = data.then(result => result && result[0]);
-      texture = data.then(result => result && result[1]);
+    if (!data) {
+      return null;
     }
+
+    const [mesh, texture] = data;
 
     return new SubLayerClass(props, {
       data: DUMMY_DATA,
@@ -168,16 +166,22 @@ export default class TerrainLayer extends CompositeLayer {
   }
 
   // Update zRange of viewport
-  onViewportLoad(data) {
-    if (!data || data.length === 0 || data.every(x => !x)) {
+  onViewportLoad(tiles) {
+    if (!tiles) {
       return;
     }
 
     const {zRange} = this.state;
-    const ranges = data.map(arr => {
-      const bounds = arr[0].header.boundingBox;
-      return bounds.map(bound => bound[2]);
-    });
+    const ranges = tiles
+      .map(tile => tile.content)
+      .filter(Boolean)
+      .map(arr => {
+        const bounds = arr[0].header.boundingBox;
+        return bounds.map(bound => bound[2]);
+      });
+    if (ranges.length === 0) {
+      return;
+    }
     const minZ = Math.min(...ranges.map(x => x[0]));
     const maxZ = Math.max(...ranges.map(x => x[1]));
 
@@ -194,7 +198,12 @@ export default class TerrainLayer extends CompositeLayer {
       texture,
       wireframe,
       meshMaxError,
-      elevationDecoder
+      elevationDecoder,
+      tileSize,
+      maxZoom,
+      minZoom,
+      extent,
+      maxRequests
     } = this.props;
 
     if (this.state.isTiled) {
@@ -217,7 +226,12 @@ export default class TerrainLayer extends CompositeLayer {
             }
           },
           onViewportLoad: this.onViewportLoad.bind(this),
-          zRange: this.state.zRange || null
+          zRange: this.state.zRange || null,
+          tileSize,
+          maxZoom,
+          minZoom,
+          extent,
+          maxRequests
         }
       );
     }

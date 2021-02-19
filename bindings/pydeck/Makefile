@@ -1,46 +1,50 @@
 help:
-	@echo "Please use `make target' where target is one of"
-	@echo "pre-init - Set up a virtual environment and activate it"
-	@echo "init - Build deck.gl, install all requirements, and activate the plugin for Jupyter"
-	@echo "test - Run pytest tests"
-	@echo "bump-version - Bump the version files for the pydeck frontend and backend"
-	@echo "release - package and upload a release"
+	@echo "\nPlease use \`make target\` where target is one of\n"
+	@echo "init - build deck.gl and install all requirements for development"
+	@echo "test - run tests"
 	@echo "prepare-jupyter - initiate pydeck-related extensions in JupyterLab and Jupyter Notebook"
+	@echo "bump-version - bump the version files for the pydeck frontend and backend"
+	@echo "publish-pypi - prepare pydeck for publication to PyPI"
+	@echo "publish-test-pypi - prepare pydeck for publication to the test.pypi.org"
+	@echo "release - package and upload a release"
+	@echo "fast-build - rebuild @deck.gl/jupyter-widget"
+	@echo "setup-env - detect basic requirements for building the library and set up a virtualenv"
+	@echo "pre-commit - run pre-commit hook for pydeck"
 
 init:
-	# Build deck.gl at the root of this repository
 	cd ../..; yarn bootstrap; cd -; \
-	# Set up the pydeck project
 	pip install -r requirements/requirements.txt; \
 	pip install -r requirements/requirements-dev.txt; \
-	pip install -e . ; \
-	$(MAKE) prepare-jupyter
+	pip install -e .
+
+fast-build:
+	cd ../../modules/jupyter-widget; webpack; cd -; \
+	pip install -e .
 
 pre-commit:
-	black . --target-version py34 && $(MAKE) test
+	python -m black . --target-version py34 && $(MAKE) test
 
-pre-init:
-	python3 -m venv env; \
-	. env/bin/activate
+setup-env:
+	test `command -v python3` || echo Please install python3
+	test `command -v yarn` || echo Please install yarn
+	test `command -v python3` && test `command -v yarn`
+	python3 -m venv env
 
 prepare-jupyter:
 	# Enable the notebook extension
-	jupyter nbextension install --sys-prefix --symlink --overwrite --py pydeck
-	jupyter nbextension enable --sys-prefix --py pydeck
+	python -m jupyter nbextension install --sys-prefix --symlink --overwrite --py pydeck; \
+	python -m jupyter nbextension enable --sys-prefix --py pydeck; \
 	# Build and install the JS module
 	cd ../../modules/jupyter-widget/; \
-	  jupyter labextension install @jupyter-widgets/jupyterlab-manager --no-build; \
-	  jupyter labextension install . --no-build; \
-	  jupyter labextension link .; \
-	  jupyter lab build; \
-	  cd ../../bindings/pydeck
+	python -m jupyter labextension install @jupyter-widgets/jupyterlab-manager --no-build; \
+	python -m jupyter labextension install . --no-build; \
+	python -m jupyter labextension link .; \
+	python -m jupyter lab build; \
+	cd ../../bindings/pydeck
 
 test:
-	flake8 . && \
-	pytest --cov=pydeck 
-
-publish-conda:	
-	@echo "NOTE pydeck does not yet publish to conda-forge. Awaiting #4202."
+	python -m flake8 . && \
+	python -m pytest --cov=pydeck 
 
 bump-version:
 	@read -p "Choose a release type {MAJOR, MINOR, PATCH, BETA, ALPHA, RC}:" choice; \
@@ -64,6 +68,5 @@ release:
 	$(MAKE) bump-version;
 	$(MAKE) test;
 	VERSION=$$(python -c "import pydeck; print(pydeck.__version__)");
-	git commit -am "Release version $$VERSION";
-	$(MAKE) publish-conda;
+	git commit -am "pydeck $$VERSION";
 	$(MAKE) publish-pypi;

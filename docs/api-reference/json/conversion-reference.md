@@ -3,6 +3,7 @@
 | Prefix | Description | Example usage |
 | --- | --- | --- |
 | `@@type` | Interpret a string as a JavaScript class or React component, resolving in the JSONConfiguration. | `"@@type": "ScatterplotLayer"`
+| `@@function` | Interpret a string as a JavaScript function, resolving in the JSONConfiguration. | `"@@function": "calculateRadius"`
 | `@@=` | Interpret the rest of the string as a function, parsing unquoted character strings as identifiers | `"@@=[lng, lat]"`
 | `@@#` | Interpret the rest of the string as a constant, resolving in the JSON configuration | `"@@#GL.ONE"`
 
@@ -54,6 +55,61 @@ A warning will be raised if the named layer is not registered.
 Whenever the `JSONConverter` component finds the `@@type` field, it looks into the "class catalog"
 like that in the configuration object above. These classes can be layers, views, or other objects,
  provided the classes have been registered.
+
+
+## Functions and using `@@function`
+
+Any JavaScript function can be passed. For example, when this configuration of functions is passed to a
+`JSONConverter`–
+
+```js
+function calculateRadius({base, exponent}) {
+  return Math.pow(base, exponent);
+}
+
+const configuration = {
+  ...,
+  functions: {calculateRadius}
+};
+```
+
+and used to resolve this JSON object–
+
+```json
+{
+  "layers": [
+    {
+      "@@type": "ScatterplotLayer",
+      "data": ...,
+      "getColor": [0, 128, 255],
+      "getRadius": {
+        "@@function": "calculateRadius",
+        "base": 2,
+        "exponent": 3
+      }
+    }
+  ]
+}
+```
+
+it will replace the layers descriptor with
+
+```js
+{
+  layers: [
+    new ScatterplotLayer({
+      data: ...,
+      getColor: [0, 128, 255],
+      getRadius: 8
+    })
+  ]
+}
+```
+
+A warning will be raised if the function is not registered.
+
+Whenever the `JSONConverter` component finds the `@@function` field, it looks into the "function catalog"
+like that in the configuration object above.
 
 
 ### Enumerations and using the `@@#` prefix

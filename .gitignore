@@ -17,7 +17,9 @@ TODO
 mapbox-gl.js
 mapbox-gl-dev.js
 
-*/**/yarn.lock
+examples/**/yarn.lock
+showcases/**/yarn.lock
+test/**/yarn.lock
 yarn-error.log
 package-lock.json
 

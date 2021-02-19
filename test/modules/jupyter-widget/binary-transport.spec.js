@@ -1,4 +1,7 @@
 import test from 'tape-catch';
+import {deserializeMatrix} from '@deck.gl/jupyter-widget/lib/utils/deserialize-matrix';
+import {jsonConverter} from '@deck.gl/jupyter-widget/playground/create-deck';
+import {processDataBuffer} from '@deck.gl/jupyter-widget/playground/playground';
 
 const DEMO_ARRAY = new Uint32Array([0, 10, 2, 20]);
 
@@ -31,17 +34,6 @@ const EXPECTED_CONVERSION = {
 };
 
 test('jupyter-widget: binary-transport', t0 => {
-  let binaryTransportModule;
-  let widgetCreateDeckModule;
-  try {
-    binaryTransportModule = require('@deck.gl/jupyter-widget/binary-transport');
-    widgetCreateDeckModule = require('@deck.gl/jupyter-widget/create-deck');
-  } catch (error) {
-    t0.comment('dist mode, skipping binary-transport tests');
-    t0.end();
-    return;
-  }
-
   t0.test('deserializeMatrix', t => {
     const TEST_TABLE = [
       {input: null, expected: null, msg: 'Null arr should produce null output'},
@@ -54,7 +46,7 @@ test('jupyter-widget: binary-transport', t0 => {
 
     for (const testCase of TEST_TABLE) {
       t.deepEquals(
-        binaryTransportModule.deserializeMatrix(testCase.input),
+        deserializeMatrix(testCase.input),
         testCase.expected,
         `deserializeMatrix: ${testCase.msg}`
       );
@@ -76,9 +68,9 @@ test('jupyter-widget: binary-transport', t0 => {
   };
 
   t0.test('processDataBuffer', t => {
-    const newDeckProps = binaryTransportModule.processDataBuffer({
-      dataBuffer: EXPECTED_CONVERSION,
-      convertedJson: widgetCreateDeckModule.jsonConverter.convert(DEMO_JSON_PROPS)
+    const newDeckProps = processDataBuffer({
+      binary: EXPECTED_CONVERSION,
+      convertedJson: jsonConverter.convert(DEMO_JSON_PROPS)
     });
 
     t.deepEquals(

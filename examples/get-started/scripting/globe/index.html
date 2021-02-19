@@ -1,0 +1,90 @@
+<html>
+  <head>
+    <!-- deck.gl standalone bundle -->
+    <script src="https://unpkg.com/deck.gl@^8.2.0-beta.1/dist.min.js"></script>
+
+    <style type="text/css">
+      body {background: #111; margin: 0; padding: 0;}
+      #container {width: 100vw; height: 100vh;}
+    </style>
+  </head>
+
+  <body>
+    <div id="container"></div>
+  </body>
+
+  <script type="text/javascript">
+
+// source: Natural Earth http://www.naturalearthdata.com/ via geojson.xyz
+const COUNTRIES =
+  'https://d2ad6b4ur7yvpq.cloudfront.net/naturalearth-3.3.0/ne_50m_admin_0_scale_rank.geojson'; //eslint-disable-line
+const AIR_PORTS =
+  'https://d2ad6b4ur7yvpq.cloudfront.net/naturalearth-3.3.0/ne_10m_airports.geojson';
+
+const INITIAL_VIEW_STATE = {
+  latitude: 20,
+  longitude: 30,
+  zoom: 0
+};
+
+const deckgl = new deck.DeckGL({
+  container: 'container',
+
+  views: new deck._GlobeView(),
+  initialViewState: INITIAL_VIEW_STATE,
+  controller: true,
+  layers: [
+    // A GeoJSON polygon that covers the entire earth
+    // See /docs/api-reference/globe-view.md#remarks
+    new deck.SolidPolygonLayer({
+      id: 'background',
+      data: [
+        [[-180, 90], [0, 90], [180, 90], [180, -90], [0, -90], [-180, -90]]
+      ],
+      opacity: 0.5,
+      getPolygon: d => d,
+      stroked: false,
+      filled: true,
+      getFillColor: [5, 10, 40]
+    }),
+    new deck.GeoJsonLayer({
+      id: 'base-map',
+      data: COUNTRIES,
+      // Styles
+      stroked: true,
+      filled: true,
+      lineWidthMinPixels: 2,
+      getLineColor: [5, 10, 40],
+      getFillColor: [15, 40, 80]
+    }),
+    new deck.GeoJsonLayer({
+      id: 'airports',
+      data: AIR_PORTS,
+      // Styles
+      filled: true,
+      pointRadiusMinPixels: 2,
+      pointRadiusScale: 2000,
+      getRadius: f => 11 - f.properties.scalerank,
+      getFillColor: [200, 0, 80, 180],
+      // Interactive props
+      pickable: true,
+      autoHighlight: true,
+      onClick: info =>
+        // eslint-disable-next-line
+        info.object && alert(`${info.object.properties.name} (${info.object.properties.abbrev})`)
+    }),
+    new deck.ArcLayer({
+      id: 'arcs',
+      data: AIR_PORTS,
+      dataTransform: d => d.features.filter(f => f.properties.scalerank < 4),
+      // Styles
+      getSourcePosition: f => [-0.4531566, 51.4709959], // London
+      getTargetPosition: f => f.geometry.coordinates,
+      getSourceColor: [0, 128, 200],
+      getTargetColor: [200, 0, 80],
+      getWidth: 1
+    })
+  ]
+});
+  </script>
+</html>

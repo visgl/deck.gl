@@ -1,4 +1,3 @@
-/* eslint-disable */
 class BlankClass {
   constructor(attributes = {}) {
     Object.assign(attributes, this.defaults());

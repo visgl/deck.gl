@@ -155,8 +155,10 @@ export default class H3HexagonLayer extends CompositeLayer {
 
   _shouldUseHighPrecision() {
     const {resolution, hasPentagon, hasMultipleRes} = this.state;
+    const {viewport} = this.context;
     return (
       this.props.highPrecision ||
+      viewport.resolution ||
       hasMultipleRes ||
       hasPentagon ||
       (resolution >= 0 && resolution <= 5)
@@ -193,9 +195,10 @@ export default class H3HexagonLayer extends CompositeLayer {
     const [centerX, centerY] = viewport.projectFlat([centerLng, centerLat]);
     vertices = vertices.map(p => {
       const worldPosition = viewport.projectFlat(p);
-      worldPosition[0] = (worldPosition[0] - centerX) / unitsPerMeter[0];
-      worldPosition[1] = (worldPosition[1] - centerY) / unitsPerMeter[1];
-      return worldPosition;
+      return [
+        (worldPosition[0] - centerX) / unitsPerMeter[0],
+        (worldPosition[1] - centerY) / unitsPerMeter[1]
+      ];
     });
 
     this.setState({centerHex: hex, vertices});
@@ -222,6 +225,7 @@ export default class H3HexagonLayer extends CompositeLayer {
       getElevation,
       getLineColor,
       getLineWidth,
+      transitions,
       updateTriggers
     } = this.props;
 
@@ -241,6 +245,7 @@ export default class H3HexagonLayer extends CompositeLayer {
       getFillColor,
       getLineColor,
       getLineWidth,
+      transitions,
       updateTriggers: {
         getFillColor: updateTriggers.getFillColor,
         getElevation: updateTriggers.getElevation,
@@ -267,6 +272,7 @@ export default class H3HexagonLayer extends CompositeLayer {
       {
         data,
         _normalize: false,
+        _windingOrder: 'CCW',
         positionFormat: 'XY',
         getPolygon: (object, objectInfo) => {
           const hexagonId = getHexagon(object, objectInfo);

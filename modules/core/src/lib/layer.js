@@ -29,6 +29,7 @@ import debug from '../debug';
 import GL from '@luma.gl/constants';
 import {withParameters, setParameters} from '@luma.gl/core';
 import assert from '../utils/assert';
+import memoize from '../utils/memoize';
 import {mergeShaders} from '../utils/shader';
 import {projectPosition, getWorldPosition} from '../shaderlib/project/project-functions';
 import typedArrayManager from '../utils/typed-array-manager';
@@ -46,7 +47,14 @@ const TRACE_UPDATE = 'layer.update';
 const TRACE_FINALIZE = 'layer.finalize';
 const TRACE_MATCHED = 'layer.matched';
 
+const MAX_PICKING_COLOR_CACHE_SIZE = 2 ** 24 - 1;
+
 const EMPTY_ARRAY = Object.freeze([]);
+
+// Only compare the same two viewports once
+const areViewportsEqual = memoize(({oldViewport, viewport}) => {
+  return oldViewport.equals(viewport);
+});
 
 let pickingColorCache = new Uint8ClampedArray(0);
 
@@ -59,7 +67,28 @@ const defaultProps = {
   onDataLoad: {type: 'function', value: null, compare: false, optional: true},
   fetch: {
     type: 'function',
-    value: (url, {layer}) => load(url, layer.getLoadOptions()),
+    value: (url, {propName, layer}) => {
+      const {resourceManager} = layer.context;
+      const loadOptions = layer.getLoadOptions();
+      const {loaders} = layer.props;
+      let inResourceManager = resourceManager.contains(url);
+
+      if (!inResourceManager && !loadOptions) {
+        // If there is no layer-specific load options, then attempt to cache this resource in the data manager
+        resourceManager.add({resourceId: url, data: load(url, loaders), persistent: false});
+        inResourceManager = true;
+      }
+      if (inResourceManager) {
+        return resourceManager.subscribe({
+          resourceId: url,
+          onChange: data => layer.internalState.reloadAsyncProp(propName, data),
+          consumerId: layer.id,
+          requestId: propName
+        });
+      }
+
+      return load(url, loaders, loadOptions);
+    },
     compare: false
   },
   updateTriggers: {}, // Update triggers: a core change detection mechanism in deck.gl
@@ -82,8 +111,9 @@ const defaultProps = {
   colorFormat: 'RGBA',
 
   parameters: {},
-  uniforms: {},
+  transitions: null,
   extensions: [],
+  loaders: {type: 'array', value: [], optional: true, compare: true},
 
   // Offset depth based on layer index to avoid z-fighting.
   // Negative values pull layer towards the camera
@@ -95,7 +125,7 @@ const defaultProps = {
   },
 
   // Selection/Highlighting
-  highlightedObjectIndex: null,
+  highlightedObjectIndex: -1,
   autoHighlight: false,
   highlightColor: {type: 'accessor', value: [0, 0, 128, 128]}
 };
@@ -150,6 +180,10 @@ export default class Layer extends Component {
 
   get isLoaded() {
     return this.internalState && !this.internalState.isAsyncPropLoading();
+  }
+
+  get wrapLongitude() {
+    return this.props.wrapLongitude;
   }
 
   // Returns true if the layer is pickable and visible.
@@ -297,6 +331,23 @@ export default class Layer extends Component {
         attributeManager.invalidateAll();
       }
     }
+
+    const neededPickingBuffer = oldProps.highlightedObjectIndex >= 0 || oldProps.pickable;
+    const needPickingBuffer = props.highlightedObjectIndex >= 0 || props.pickable;
+    if (neededPickingBuffer !== needPickingBuffer && attributeManager) {
+      const {pickingColors, instancePickingColors} = attributeManager.attributes;
+      const pickingColorsAttribute = pickingColors || instancePickingColors;
+      if (pickingColorsAttribute) {
+        if (needPickingBuffer && pickingColorsAttribute.constant) {
+          pickingColorsAttribute.constant = false;
+          attributeManager.invalidate(pickingColorsAttribute.id);
+        }
+        if (!pickingColorsAttribute.value && !needPickingBuffer) {
+          pickingColorsAttribute.constant = true;
+          pickingColorsAttribute.value = [0, 0, 0];
+        }
+      }
+    }
   }
 
   // Called once when layer is no longer matched and state will be discarded
@@ -309,7 +360,9 @@ export default class Layer extends Component {
     if (attributeManager) {
       attributeManager.finalize();
     }
+    this.context.resourceManager.unsubscribe({consumerId: this.id});
     this.internalState.uniformTransitions.clear();
+    this.internalState.finalize();
   }
 
   // If state has a model, draw it with supplied uniforms
@@ -338,6 +391,25 @@ export default class Layer extends Component {
   // //////////////////////////////////////////////////
 
   // INTERNAL METHODS
+  activateViewport(viewport) {
+    const oldViewport = this.internalState.viewport;
+    this.internalState.viewport = viewport;
+
+    if (!oldViewport || !areViewportsEqual({oldViewport, viewport})) {
+      this.setChangeFlags({viewportChanged: true});
+
+      if (this.isComposite) {
+        if (this.needsUpdate()) {
+          // Composite layers may add/remove sublayers on viewport change
+          // Because we cannot change the layers list during a draw cycle, we don't want to update sublayers right away
+          // This will not call update immediately, but mark the layerManager as needs update on the next frame
+          this.setNeedsUpdate();
+        }
+      } else {
+        this._update();
+      }
+    }
+  }
 
   // Default implementation of attribute invalidation, can be redefined
   invalidateAttribute(name = 'all', diffReason = '') {
@@ -410,6 +482,10 @@ export default class Layer extends Component {
   }
 
   calculateInstancePickingColors(attribute, {numInstances}) {
+    if (attribute.constant) {
+      return;
+    }
+
     // calculateInstancePickingColors always generates the same sequence.
     // pickingColorCache saves the largest generated sequence for reuse
     const cacheSize = pickingColorCache.length / 3;
@@ -418,15 +494,21 @@ export default class Layer extends Component {
     this.internalState.usesPickingColorCache = true;
 
     if (cacheSize < numInstances) {
+      if (numInstances > MAX_PICKING_COLOR_CACHE_SIZE) {
+        log.warn(
+          'Layer has too many data objects. Picking might not be able to distinguish all objects.'
+        )();
+      }
+
       pickingColorCache = typedArrayManager.allocate(pickingColorCache, numInstances, {
         size: 3,
-        copy: true
+        copy: true,
+        maxCount: Math.max(numInstances, MAX_PICKING_COLOR_CACHE_SIZE)
       });
+
       // If the attribute is larger than the cache, resize the cache and populate the missing chunk
       const newCacheSize = pickingColorCache.length / 3;
       const pickingColor = [];
-      assert(newCacheSize < 16777215, 'index out of picking color range');
-
       for (let i = cacheSize; i < newCacheSize; i++) {
         this.encodePickingColor(i, pickingColor);
         pickingColorCache[i * 3 + 0] = pickingColor[0];
@@ -449,14 +531,18 @@ export default class Layer extends Component {
     model.setAttributes(shaderAttributes);
   }
 
-  // Sets the specified instanced picking color to null picking color. Used for multi picking.
-  clearPickingColor(color) {
+  // Sets the picking color at the specified index to null picking color. Used for multi-depth picking.
+  // This method may be overriden by layer implementations
+  disablePickingIndex(objectIndex) {
+    this._disablePickingIndex(objectIndex);
+  }
+
+  _disablePickingIndex(objectIndex) {
     const {pickingColors, instancePickingColors} = this.getAttributeManager().attributes;
     const colors = pickingColors || instancePickingColors;
 
-    const i = this.decodePickingColor(color);
-    const start = colors.getVertexOffset(i);
-    const end = colors.getVertexOffset(i + 1);
+    const start = colors.getVertexOffset(objectIndex);
+    const end = colors.getVertexOffset(objectIndex + 1);
 
     // Fill the sub buffer with 0s
     colors.buffer.subData({
@@ -558,60 +644,71 @@ export default class Layer extends Component {
       this._updateState();
     }
   }
-  /* eslint-enable max-statements */
 
   // Common code for _initialize and _update
   _updateState() {
     const currentProps = this.props;
+    const currentViewport = this.context.viewport;
     const propsInTransition = this._updateUniformTransition();
     this.internalState.propsInTransition = propsInTransition;
+    // Overwrite this.context.viewport during update to use the last activated viewport on this layer
+    // In multi-view applications, a layer may only be drawn in one of the views
+    // Which would make the "active" viewport different from the shared context
+    this.context.viewport = this.internalState.viewport || currentViewport;
     // Overwrite this.props during update to use in-transition prop values
     this.props = propsInTransition;
 
-    const updateParams = this._getUpdateParams();
+    try {
+      const updateParams = this._getUpdateParams();
+      const oldModels = this.getModels();
 
-    // Safely call subclass lifecycle methods
-    if (this.context.gl) {
-      this.updateState(updateParams);
-    } else {
-      try {
+      // Safely call subclass lifecycle methods
+      if (this.context.gl) {
         this.updateState(updateParams);
-      } catch (error) {
-        // ignore error if gl context is missing
+      } else {
+        try {
+          this.updateState(updateParams);
+        } catch (error) {
+          // ignore error if gl context is missing
+        }
       }
-    }
-    // Execute extension updates
-    for (const extension of this.props.extensions) {
-      extension.updateState.call(this, updateParams, extension);
-    }
-    this._updateModules(updateParams);
-    // End subclass lifecycle methods
-
-    if (this.isComposite) {
-      // Render or update previously rendered sublayers
-      this._renderLayers(updateParams);
-    } else {
-      this.setNeedsRedraw();
-      // Add any subclass attributes
-      this._updateAttributes(this.props);
-
-      // Note: Automatic instance count update only works for single layers
-      if (this.state.model) {
-        this.state.model.setInstanceCount(this.getNumInstances());
+      // Execute extension updates
+      for (const extension of this.props.extensions) {
+        extension.updateState.call(this, updateParams, extension);
       }
-    }
 
-    this.props = currentProps;
-    this.clearChangeFlags();
-    this.internalState.needsUpdate = false;
-    this.internalState.resetOldProps();
+      const modelChanged = this.getModels()[0] !== oldModels[0];
+      this._updateModules(updateParams, modelChanged);
+      // End subclass lifecycle methods
+
+      if (this.isComposite) {
+        // Render or update previously rendered sublayers
+        this._renderLayers(updateParams);
+      } else {
+        this.setNeedsRedraw();
+        // Add any subclass attributes
+        this._updateAttributes(this.props);
+
+        // Note: Automatic instance count update only works for single layers
+        if (this.state.model) {
+          this.state.model.setInstanceCount(this.getNumInstances());
+        }
+      }
+    } finally {
+      // Restore shared context
+      this.context.viewport = currentViewport;
+      this.props = currentProps;
+      this.clearChangeFlags();
+      this.internalState.needsUpdate = false;
+      this.internalState.resetOldProps();
+    }
   }
+  /* eslint-enable max-statements */
 
   // Called by manager when layer is about to be disposed
   // Note: not guaranteed to be called on application shutdown
   _finalize() {
     debug(TRACE_FINALIZE, this);
-    assert(this.internalState && this.state);
 
     // Call subclass lifecycle method
     this.finalizeState(this.context);
@@ -634,33 +731,35 @@ export default class Layer extends Component {
     // apply gamma to opacity to make it visually "linear"
     uniforms.opacity = Math.pow(opacity, 1 / 2.2);
 
-    // TODO/ib - hack move to luma Model.draw
-    if (moduleParameters) {
-      this.setModuleParameters(moduleParameters);
-    }
-
-    // Apply polygon offset to avoid z-fighting
-    // TODO - move to draw-layers
-    const {getPolygonOffset} = this.props;
-    const offsets = (getPolygonOffset && getPolygonOffset(uniforms)) || [0, 0];
-
-    setParameters(this.context.gl, {polygonOffset: offsets});
-
-    // Call subclass lifecycle method
-    withParameters(this.context.gl, parameters, () => {
-      const opts = {moduleParameters, uniforms, parameters, context: this.context};
-
-      // extensions
-      for (const extension of this.props.extensions) {
-        extension.draw.call(this, opts, extension);
+    try {
+      // TODO/ib - hack move to luma Model.draw
+      if (moduleParameters) {
+        this.setModuleParameters(moduleParameters);
       }
 
-      this.draw(opts);
-    });
+      // Apply polygon offset to avoid z-fighting
+      // TODO - move to draw-layers
+      const {getPolygonOffset} = this.props;
+      const offsets = (getPolygonOffset && getPolygonOffset(uniforms)) || [0, 0];
+
+      setParameters(this.context.gl, {polygonOffset: offsets});
+
+      // Call subclass lifecycle method
+      withParameters(this.context.gl, parameters, () => {
+        const opts = {moduleParameters, uniforms, parameters, context: this.context};
+
+        // extensions
+        for (const extension of this.props.extensions) {
+          extension.draw.call(this, opts, extension);
+        }
+
+        this.draw(opts);
+      });
+    } finally {
+      this.props = currentProps;
+    }
 
     // End lifecycle method
-
-    this.props = currentProps;
   }
 
   // Helper methods
@@ -673,12 +772,32 @@ export default class Layer extends Component {
   setChangeFlags(flags) {
     const {changeFlags} = this.internalState;
 
-    for (const key in changeFlags) {
-      if (flags[key] && !changeFlags[key]) {
-        changeFlags[key] = flags[key];
-        debug(TRACE_CHANGE_FLAG, this, key, flags);
+    /* eslint-disable no-fallthrough, max-depth */
+    for (const key in flags) {
+      if (flags[key]) {
+        let flagChanged = false;
+        switch (key) {
+          case 'dataChanged':
+            // changeFlags.dataChanged may be `false`, a string (reason) or an array of ranges
+            if (Array.isArray(changeFlags[key])) {
+              changeFlags[key] = Array.isArray(flags[key])
+                ? changeFlags[key].concat(flags[key])
+                : flags[key];
+              flagChanged = true;
+            }
+
+          default:
+            if (!changeFlags[key]) {
+              changeFlags[key] = flags[key];
+              flagChanged = true;
+            }
+        }
+        if (flagChanged) {
+          debug(TRACE_CHANGE_FLAG, this, key, flags);
+        }
       }
     }
+    /* eslint-enable no-fallthrough, max-depth */
 
     // Update composite flags
     const propsOrDataChanged =
@@ -751,11 +870,32 @@ export default class Layer extends Component {
     }
   }
 
+  updateAutoHighlight(info) {
+    if (this.props.autoHighlight) {
+      this._updateAutoHighlight(info);
+    }
+  }
+
+  // May be overriden by classes
+  _updateAutoHighlight(info) {
+    const pickingModuleParameters = {
+      pickingSelectedColor: info.picked ? info.color : null
+    };
+    const {highlightColor} = this.props;
+    if (info.picked && typeof highlightColor === 'function') {
+      pickingModuleParameters.pickingHighlightColor = highlightColor(info);
+    }
+    this.setModuleParameters(pickingModuleParameters);
+    // setModuleParameters does not trigger redraw
+    this.setNeedsRedraw();
+  }
+
   // PRIVATE METHODS
-  _updateModules({props, oldProps}) {
+  _updateModules({props, oldProps}, forceUpdate) {
     // Picking module parameters
     const {autoHighlight, highlightedObjectIndex, highlightColor} = props;
     if (
+      forceUpdate ||
       oldProps.autoHighlight !== autoHighlight ||
       oldProps.highlightedObjectIndex !== highlightedObjectIndex ||
       oldProps.highlightColor !== highlightColor
@@ -817,8 +957,8 @@ export default class Layer extends Component {
   }
 
   _initState() {
-    assert(!this.internalState && !this.state);
-    assert(isFinite(this.props.coordinateSystem), `${this.id}: invalid coordinateSystem`);
+    assert(!this.internalState && !this.state); // finalized layer cannot be reused
+    assert(isFinite(this.props.coordinateSystem)); // invalid coordinateSystem
 
     const attributeManager = this._getAttributeManager();
 
@@ -867,7 +1007,6 @@ export default class Layer extends Component {
     debug(TRACE_MATCHED, this, this === oldLayer);
 
     const {state, internalState} = oldLayer;
-    assert(state && internalState);
 
     if (this === oldLayer) {
       return;

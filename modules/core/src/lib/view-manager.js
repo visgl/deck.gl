@@ -18,7 +18,6 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import assert from '../utils/assert';
 import {deepEqual} from '../utils/deep-equal';
 import log from '../utils/log';
 import {flatten} from '../utils/flatten';
@@ -42,7 +41,7 @@ export default class ViewManager {
     this._eventManager = props.eventManager;
     this._eventCallbacks = {
       onViewStateChange: props.onViewStateChange,
-      onInteractiveStateChange: props.onInteractiveStateChange
+      onInteractionStateChange: props.onInteractionStateChange
     };
 
     Object.seal(this);
@@ -198,7 +197,6 @@ export default class ViewManager {
   }
 
   _setSize(width, height) {
-    assert(Number.isFinite(width) && Number.isFinite(height));
     if (width !== this.width || height !== this.height) {
       this.width = width;
       this.height = height;
@@ -242,40 +240,45 @@ export default class ViewManager {
     this._eventCallbacks.onViewStateChange(event);
   }
 
-  _createController(props) {
+  _createController(view, props) {
     const Controller = props.type;
 
-    const controller = new Controller(
-      Object.assign(
-        {
-          timeline: this.timeline,
-          eventManager: this._eventManager,
-          // Set an internal callback that calls the prop callback if provided
-          onViewStateChange: this._onViewStateChange.bind(this, props.id),
-          onStateChange: this._eventCallbacks.onInteractiveStateChange
-        },
-        props
-      )
-    );
+    const controller = new Controller({
+      timeline: this.timeline,
+      eventManager: this._eventManager,
+      // Set an internal callback that calls the prop callback if provided
+      onViewStateChange: this._onViewStateChange.bind(this, props.id),
+      onStateChange: this._eventCallbacks.onInteractionStateChange,
+      makeViewport: viewState =>
+        view._getViewport(viewState, {
+          width: viewState.width,
+          height: viewState.height
+        }),
+      ...props
+    });
 
     return controller;
   }
 
   _updateController(view, viewState, viewport, controller) {
-    if (view.controller) {
-      const controllerProps = Object.assign({}, view.controller, viewState, {
+    let controllerProps = view.controller;
+    if (controllerProps) {
+      controllerProps = {
+        ...viewState,
+        ...view.props,
+        ...controllerProps,
         id: view.id,
         x: viewport.x,
         y: viewport.y,
         width: viewport.width,
         height: viewport.height
-      });
+      };
 
       // TODO - check if view / controller type has changed, and replace the controller
       if (controller) {
         controller.setProps(controllerProps);
       } else {
-        controller = this._createController(controllerProps);
+        controller = this._createController(view, controllerProps);
       }
       return controller;
     }

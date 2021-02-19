@@ -14,24 +14,29 @@ function getProjectionMatrix({width, height, near, far}) {
   return new Matrix4().ortho({
     left: -width / 2,
     right: width / 2,
-    bottom: height / 2,
-    top: -height / 2,
+    bottom: -height / 2,
+    top: height / 2,
     near,
     far
   });
 }
 
 class OrthographicViewport extends Viewport {
-  constructor({id, x, y, width, height, near = 0.1, far = 1000, zoom = 0, target = [0, 0, 0]}) {
-    const scale = Math.pow(2, zoom);
-    return new Viewport({
-      id,
-      x,
-      y,
+  constructor(props) {
+    const {
       width,
       height,
+      near = 0.1,
+      far = 1000,
+      zoom = 0,
+      target = [0, 0, 0],
+      flipY = true
+    } = props;
+    const scale = Math.pow(2, zoom);
+    super({
+      ...props,
       position: target,
-      viewMatrix: viewMatrix.clone().scale(scale),
+      viewMatrix: viewMatrix.clone().scale([scale, scale * (flipY ? -1 : 1), scale]),
       projectionMatrix: getProjectionMatrix({width, height, near, far}),
       zoom
     });
@@ -49,8 +54,7 @@ export default class OrthographicView extends View {
 
   get controller() {
     return this._getControllerProps({
-      type: OrthographicController,
-      ViewportType: OrthographicViewport
+      type: OrthographicController
     });
   }
 }

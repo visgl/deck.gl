@@ -41,6 +41,9 @@ function getBinaryAttributes(data, getText, accessors) {
   };
 }
 
+// Use lower threshold to account for differences in font hinting/antialiasing
+const imageDiffOptions = {threshold: 0.96};
+
 export default (OS === 'Mac'
   ? [
       {
@@ -68,6 +71,7 @@ export default (OS === 'Mac'
             getPixelOffset: x => [10, 0]
           })
         ],
+        imageDiffOptions,
         goldenImage: './test/render/golden-images/text-layer.png'
       },
       {
@@ -96,6 +100,7 @@ export default (OS === 'Mac'
             getPixelOffset: x => [10, 0]
           })
         ],
+        imageDiffOptions,
         goldenImage: './test/render/golden-images/text-layer.png'
       },
       {
@@ -127,6 +132,7 @@ export default (OS === 'Mac'
             getPixelOffset: [10, 0]
           })
         ],
+        imageDiffOptions,
         goldenImage: './test/render/golden-images/text-layer.png'
       },
       {
@@ -153,6 +159,7 @@ export default (OS === 'Mac'
             getAlignmentBaseline: 'center'
           })
         ],
+        imageDiffOptions,
         goldenImage: './test/render/golden-images/text-layer-multi-lines.png'
       },
       {
@@ -181,6 +188,7 @@ export default (OS === 'Mac'
             getAlignmentBaseline: 'center'
           })
         ],
+        imageDiffOptions,
         goldenImage: './test/render/golden-images/text-layer-auto-wrapping.png'
       },
       {
@@ -199,15 +207,20 @@ export default (OS === 'Mac'
             coordinateOrigin: [-122.44, 37.75],
             coordinateSystem: COORDINATE_SYSTEM.METER_OFFSETS,
             fontFamily: 'Arial',
-            backgroundColor: [255, 255, 0, 200],
+            background: true,
+            backgroundPadding: [10, 10],
+            getBackgroundColor: [255, 255, 0, 200],
+            getBorderWidth: 1,
             getText: x => `${x.ADDRESS}-${x.SPACES}`,
             getPosition: (_, {index}) => [0, (index - 5) * 1000],
             getColor: [255, 0, 0],
+            getAngle: 15,
             getSize: 32,
             getTextAnchor: 'start',
             getAlignmentBaseline: 'center'
           })
         ],
+        imageDiffOptions,
         goldenImage: './test/render/golden-images/text-layer-background.png'
       }
     ]

@@ -19,7 +19,7 @@
 // THE SOFTWARE.
 
 import log from '../utils/log';
-import {createMat4, extractCameraVectors, getFrustumPlanes} from '../utils/math-utils';
+import {createMat4, getCameraPosition, getFrustumPlanes} from '../utils/math-utils';
 
 import {Matrix4, Vector3, equals} from 'math.gl';
 import * as mat4 from 'gl-matrix/mat4';
@@ -107,6 +107,9 @@ export default class Viewport {
   equals(viewport) {
     if (!(viewport instanceof Viewport)) {
       return false;
+    }
+    if (this === viewport) {
+      return true;
     }
 
     return (
@@ -210,6 +213,22 @@ export default class Viewport {
     return xyz;
   }
 
+  getBounds(options = {}) {
+    const unprojectOption = {targetZ: options.z || 0};
+
+    const topLeft = this.unproject([0, 0], unprojectOption);
+    const topRight = this.unproject([this.width, 0], unprojectOption);
+    const bottomLeft = this.unproject([0, this.height], unprojectOption);
+    const bottomRight = this.unproject([this.width, this.height], unprojectOption);
+
+    return [
+      Math.min(topLeft[0], topRight[0], bottomLeft[0], bottomRight[0]),
+      Math.min(topLeft[1], topRight[1], bottomLeft[1], bottomRight[1]),
+      Math.max(topLeft[0], topRight[0], bottomLeft[0], bottomRight[0]),
+      Math.max(topLeft[1], topRight[1], bottomLeft[1], bottomRight[1])
+    ];
+  }
+
   getDistanceScales(coordinateOrigin = null) {
     if (coordinateOrigin) {
       return getDistanceScales({
@@ -236,21 +255,7 @@ export default class Viewport {
       return this._frustumPlanes;
     }
 
-    const {near, far, fovyRadians, aspect} = this.projectionProps;
-
-    Object.assign(
-      this._frustumPlanes,
-      getFrustumPlanes({
-        aspect,
-        near,
-        far,
-        fovyRadians,
-        position: this.cameraPosition,
-        direction: this.cameraDirection,
-        up: this.cameraUp,
-        right: this.cameraRight
-      })
-    );
+    Object.assign(this._frustumPlanes, getFrustumPlanes(this.viewProjectionMatrix));
 
     return this._frustumPlanes;
   }
@@ -347,8 +352,7 @@ export default class Viewport {
     const {meterOffset, distanceScales} = this;
 
     // Make a centered version of the matrix for projection modes without an offset
-    const center2d = this.projectFlat([longitude, latitude]);
-    const center = new Vector3(center2d[0], center2d[1], 0);
+    const center = new Vector3(this.projectPosition([longitude, latitude, 0]));
 
     if (meterOffset) {
       const commonPosition = new Vector3(meterOffset)
@@ -374,16 +378,16 @@ export default class Viewport {
       focalDistance = 1
     } = opts;
 
-    this.projectionProps = {
-      orthographic,
-      fovyRadians: fovyRadians || fovy * DEGREES_TO_RADIANS,
-      aspect: this.width / this.height,
-      focalDistance,
-      near,
-      far
-    };
-
-    this.projectionMatrix = projectionMatrix || this._createProjectionMatrix(this.projectionProps);
+    this.projectionMatrix =
+      projectionMatrix ||
+      this._createProjectionMatrix({
+        orthographic,
+        fovyRadians: fovyRadians || fovy * DEGREES_TO_RADIANS,
+        aspect: this.width / this.height,
+        focalDistance,
+        near,
+        far
+      });
   }
 
   _initPixelMatrices() {
@@ -399,17 +403,8 @@ export default class Viewport {
     // Calculate inverse view matrix
     this.viewMatrixInverse = mat4.invert([], this.viewMatrix) || this.viewMatrix;
 
-    // Decompose camera directions
-    const {eye, direction, up, right} = extractCameraVectors({
-      viewMatrix: this.viewMatrix,
-      viewMatrixInverse: this.viewMatrixInverse
-    });
-    this.cameraPosition = eye;
-    this.cameraDirection = direction;
-    this.cameraUp = up;
-    this.cameraRight = right;
-
-    // console.log(this.cameraPosition, this.cameraDirection, this.cameraUp);
+    // Decompose camera parameters
+    this.cameraPosition = getCameraPosition(this.viewMatrixInverse);
 
     /*
      * Builds matrices that converts preprojected lngLats to screen pixels
