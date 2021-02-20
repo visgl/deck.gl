@@ -4,6 +4,9 @@
 
 - `TextLayer`'s `backgroundColor` prop is deprecated. Use `background: true` and `getBackgroundColor` instead.
 - `TextLayer`'s default `fontSettings` have changed. When using `sdf`, the default `buffer` is now `4` and the default `radius` is now `12`.
+- `PathLayer`'s `rounded` prop is deprecated, replaced by two separate flags `jointRounded` and `capRounded`.
+- `GeoJsonLayer`'s `lineJointRounded` prop now only controls line joints. To use rounded line caps, set `lineCapRounded` to `true`.
+- Dashed lines via `PathStyleExtension` now draw rounded dash caps if `capRounded` is `true`.
 
 ## Upgrading from deck.gl v8.3 to v8.4
 
