@@ -49,7 +49,7 @@ float round(float x) {
     float unitOffset = mod(clamp(vPathPosition.y, 0.0, vPathLength) + offset, unitLength);
 
     if (gapLength > 0.0 && unitOffset > solidLength) {
-      if (capType == 0.0) {
+      if (capType <= 0.5) {
         discard;
       } else {
         // caps are rounded, test the distance to solid ends

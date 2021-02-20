@@ -161,8 +161,6 @@ The maximum line width in pixels.
 
 Type of line caps. If `true`, draw round caps. Otherwise draw square caps.
 
-##### `lineMiterLimit` (Number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
-
 ##### `lineJointRounded` (Boolean, optional)
 
 * Default: `false`
