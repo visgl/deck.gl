@@ -8,10 +8,10 @@
     "build": "webpack -p"
   },
   "dependencies": {
-    "deck.gl": "^8.1.0",
+    "deck.gl": "^8.4.0",
     "react": "^16.3.0",
     "react-dom": "^16.3.0",
-    "react-map-gl": "^5.0.0"
+    "react-map-gl": "^5.3.0"
   },
   "devDependencies": {
     "@babel/core": "^7.0.0",
