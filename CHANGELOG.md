@@ -19,6 +19,11 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v8.4
 
+#### deck.gl [8.4.7] - Feb 19 2021
+
+- Force using a single loader for MVT data (#5507)
+- Fix picking color values coming from a reallocated buffer (#5503)
+
 #### deck.gl [8.4.6] - Feb 16 2021
 
 - Fix for inconsistent column geometry's top cap winding order (#5492)
