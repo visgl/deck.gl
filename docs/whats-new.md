@@ -49,6 +49,11 @@ New props are added for more flexible styling of the texts:
 See [documentation](/docs/api-reference/layers/text-layer.md) for details.
 
 
+### Other layer improvements
+
+- `PathLayer` now supports controlling `jointRounded` and `capRounded` separately. Dashed lines via `PathStyleExtension` also respects the cap type.
+
+
 ## deck.gl v8.4
 
 Release date: Jan 31, 2021
