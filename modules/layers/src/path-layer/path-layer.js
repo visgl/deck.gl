@@ -34,7 +34,8 @@ const defaultProps = {
   widthScale: {type: 'number', min: 0, value: 1}, // stroke width in meters
   widthMinPixels: {type: 'number', min: 0, value: 0}, //  min stroke width in pixels
   widthMaxPixels: {type: 'number', min: 0, value: Number.MAX_SAFE_INTEGER}, // max stroke width in pixels
-  rounded: false,
+  jointRounded: false,
+  capRounded: false,
   miterLimit: {type: 'number', min: 0, value: 4},
   billboard: false,
   // `loop` or `open`
@@ -42,7 +43,10 @@ const defaultProps = {
 
   getPath: {type: 'accessor', value: object => object.path},
   getColor: {type: 'accessor', value: DEFAULT_COLOR},
-  getWidth: {type: 'accessor', value: 1}
+  getWidth: {type: 'accessor', value: 1},
+
+  // deprecated props
+  rounded: {deprecatedFor: ['jointRounded', 'capRounded']}
 };
 
 const ATTRIBUTE_TRANSITION = {
@@ -210,7 +214,8 @@ export default class PathLayer extends Layer {
   draw({uniforms}) {
     const {viewport} = this.context;
     const {
-      rounded,
+      jointRounded,
+      capRounded,
       billboard,
       miterLimit,
       widthUnits,
@@ -224,7 +229,8 @@ export default class PathLayer extends Layer {
     this.state.model
       .setUniforms(
         Object.assign({}, uniforms, {
-          jointType: Number(rounded),
+          jointType: Number(jointRounded),
+          capType: Number(capRounded),
           billboard,
           widthScale: widthScale * widthMultiplier,
           miterLimit,

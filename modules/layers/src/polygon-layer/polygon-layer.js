@@ -221,7 +221,7 @@ export default class PolygonLayer extends CompositeLayer {
           widthScale: lineWidthScale,
           widthMinPixels: lineWidthMinPixels,
           widthMaxPixels: lineWidthMaxPixels,
-          rounded: lineJointRounded,
+          jointRounded: lineJointRounded,
           miterLimit: lineMiterLimit,
           dashJustified: lineDashJustified,
 
