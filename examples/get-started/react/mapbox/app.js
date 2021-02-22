@@ -1,6 +1,6 @@
 import React from 'react';
 import {render} from 'react-dom';
-import {StaticMap} from 'react-map-gl';
+import {StaticMap, MapContext, NavigationControl} from 'react-map-gl';
 import DeckGL, {GeoJsonLayer, ArcLayer} from 'deck.gl';
 
 // source: Natural Earth http://www.naturalearthdata.com/ via geojson.xyz
@@ -16,6 +16,11 @@ const INITIAL_VIEW_STATE = {
 };
 
 const MAP_STYLE = 'https://basemaps.cartocdn.com/gl/positron-nolabels-gl-style/style.json';
+const NAV_CONTROL_STYLE = {
+  position: 'absolute',
+  top: 10,
+  left: 10
+};
 
 function Root() {
   const onClick = info => {
@@ -54,8 +59,14 @@ function Root() {
   ];
 
   return (
-    <DeckGL initialViewState={INITIAL_VIEW_STATE} controller={true} layers={layers}>
+    <DeckGL
+      initialViewState={INITIAL_VIEW_STATE}
+      controller={true}
+      layers={layers}
+      ContextProvider={MapContext.Provider}
+    >
       <StaticMap mapStyle={MAP_STYLE} />
+      <NavigationControl style={NAV_CONTROL_STYLE} />
     </DeckGL>
   );
 }
