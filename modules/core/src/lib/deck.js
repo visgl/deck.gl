@@ -735,6 +735,11 @@ export default class Deck {
 
     this._updateCursor();
 
+    // If view state has changed, clear tooltip
+    if (this.tooltip.isVisible && this.viewManager.needsRedraw()) {
+      this.tooltip.setTooltip(null);
+    }
+
     // Update layers if needed (e.g. some async prop has loaded)
     // Note: This can trigger a redraw
     this.layerManager.updateLayers();
