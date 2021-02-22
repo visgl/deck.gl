@@ -109,23 +109,27 @@ const DeckGL = forwardRef((props, ref) => {
 
   // Callbacks
   let inRender = true;
-  let viewStateUpdateRequested;
-  let interactionStateUpdateRequested;
 
   const handleViewStateChange = params => {
     if (inRender && props.viewState) {
       // Callback may invoke a state update. Defer callback to after render() to avoid React error
-      viewStateUpdateRequested = params;
+      // In React StrictMode, render is executed twice and useEffect/useLayoutEffect is executed once
+      // Store deferred parameters in ref so that we can access it in another render
+      thisRef.viewStateUpdateRequested = params;
       return null;
     }
+    thisRef.viewStateUpdateRequested = null;
     return props.onViewStateChange(params);
   };
 
   const handleInteractionStateChange = params => {
     if (inRender) {
       // Callback may invoke a state update. Defer callback to after render() to avoid React error
-      interactionStateUpdateRequested = params;
+      // In React StrictMode, render is executed twice and useEffect/useLayoutEffect is executed once
+      // Store deferred parameters in ref so that we can access it in another render
+      thisRef.interactionStateUpdateRequested = params;
     } else {
+      thisRef.interactionStateUpdateRequested = null;
       props.onInteractionStateChange(params);
     }
   };
@@ -170,6 +174,7 @@ const DeckGL = forwardRef((props, ref) => {
     redrawDeck(thisRef);
 
     // Execute deferred callbacks
+    const {viewStateUpdateRequested, interactionStateUpdateRequested} = thisRef;
     if (viewStateUpdateRequested) {
       handleViewStateChange(viewStateUpdateRequested);
     }
@@ -201,7 +206,7 @@ const DeckGL = forwardRef((props, ref) => {
   //    This is because multiple changes may happen to Deck between two frames e.g. transition
   if (
     !thisRef.control || // initial mount
-    (!viewStateUpdateRequested && thisRef.lastRenderedViewports === currentViewports) || // case 2
+    (!thisRef.viewStateUpdateRequested && thisRef.lastRenderedViewports === currentViewports) || // case 2
     thisRef.redrawReason // case 3 just before deck redraws
   ) {
     thisRef.lastRenderedViewports = currentViewports;
