@@ -21,10 +21,7 @@ export default class GPUSpringTransition {
     // attribute, it will be converted and returned as a regular attribute
     // `attribute.userData` is the original options passed when constructing the attribute.
     // This ensures that we set the proper `doublePrecision` flag and shader attributes.
-    this.attributeInTransition = new Attribute(
-      gl,
-      Object.assign({}, attribute.settings, {normalized: false})
-    );
+    this.attributeInTransition = new Attribute(gl, {...attribute.settings, normalized: false});
     this.currentStartIndices = attribute.startIndices;
     // storing currentLength because this.buffer may be larger than the actual length we want to use
     // this is because we only reallocate buffers when they grow, not when they shrink,

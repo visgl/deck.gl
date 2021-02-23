@@ -69,11 +69,10 @@ class OrbitViewport extends Viewport {
 
 export default class OrbitView extends View {
   constructor(props) {
-    super(
-      Object.assign({}, props, {
-        type: OrbitViewport
-      })
-    );
+    super({
+      ...props,
+      type: OrbitViewport
+    });
   }
 
   get controller() {

@@ -95,7 +95,7 @@ export function processPickInfo(opts) {
   infos.set(null, baseInfo);
 
   affectedLayers.forEach(layer => {
-    let info = Object.assign({}, baseInfo);
+    let info = {...baseInfo};
 
     if (layer === pickedLayer) {
       info.color = pickedColor;

@@ -153,11 +153,9 @@ export default class SimpleMeshLayer extends Layer {
     super.updateState({props, oldProps, changeFlags});
 
     if (props.mesh !== oldProps.mesh || changeFlags.extensionsChanged) {
-      if (this.state.model) {
-        this.state.model.delete();
-      }
+      this.state.model?.delete();
       if (props.mesh) {
-        this.setState({model: this.getModel(props.mesh)});
+        this.state.model = this.getModel(props.mesh);
 
         const attributes = props.mesh.attributes || props.mesh;
         this.setState({
@@ -190,24 +188,23 @@ export default class SimpleMeshLayer extends Layer {
     const {viewport} = this.context;
     const {sizeScale, coordinateSystem, _instanced} = this.props;
 
-    this.state.model.draw({
-      uniforms: Object.assign({}, uniforms, {
+    this.state.model
+      .setUniforms(uniforms)
+      .setUniforms({
         sizeScale,
         composeModelMatrix: !_instanced || shouldComposeModelMatrix(viewport, coordinateSystem),
         flatShading: !this.state.hasNormals
       })
-    });
+      .draw();
   }
 
   getModel(mesh) {
-    const model = new Model(
-      this.context.gl,
-      Object.assign({}, this.getShaders(), {
-        id: this.props.id,
-        geometry: getGeometry(mesh, this.props._useMeshColors),
-        isInstanced: true
-      })
-    );
+    const model = new Model(this.context.gl, {
+      ...this.getShaders(),
+      id: this.props.id,
+      geometry: getGeometry(mesh, this.props._useMeshColors),
+      isInstanced: true
+    });
 
     const {texture} = this.props;
     const {emptyTexture} = this.state;
@@ -220,17 +217,14 @@ export default class SimpleMeshLayer extends Layer {
   }
 
   setTexture(texture) {
-    const {gl} = this.context;
     const {emptyTexture, model} = this.state;
 
-    if (model) {
-      // props.mesh may not be ready at this time.
-      // The sampler will be set when `getModel` is called
-      model.setUniforms({
-        sampler: texture || emptyTexture,
-        hasTexture: Boolean(texture)
-      });
-    }
+    // props.mesh may not be ready at this time.
+    // The sampler will be set when `getModel` is called
+    model?.setUniforms({
+      sampler: texture || emptyTexture,
+      hasTexture: Boolean(texture)
+    });
   }
 }
 

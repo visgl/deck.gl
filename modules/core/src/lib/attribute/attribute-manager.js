@@ -242,7 +242,7 @@ export default class AttributeManager {
   getChangedAttributes(opts = {clearChangedFlags: false}) {
     const {attributes, attributeTransitionManager} = this;
 
-    const changedAttributes = Object.assign({}, attributeTransitionManager.getAttributes());
+    const changedAttributes = {...attributeTransitionManager.getAttributes()};
 
     for (const attributeName in attributes) {
       const attribute = attributes[attributeName];
@@ -284,18 +284,12 @@ export default class AttributeManager {
       log.warn('AttributeManager.add({updaters}) - updater map no longer supported')();
     }
 
-    const newAttributes = {};
-
     for (const attributeName in attributes) {
       const attribute = attributes[attributeName];
 
       // Initialize the attribute descriptor, with WebGL and metadata fields
-      const newAttribute = this._createAttribute(attributeName, attribute, extraProps);
-
-      newAttributes[attributeName] = newAttribute;
+      this.attributes[attributeName] = this._createAttribute(attributeName, attribute, extraProps);
     }
-
-    Object.assign(this.attributes, newAttributes);
 
     this._mapUpdateTriggersToAttributes();
   }
@@ -303,6 +297,7 @@ export default class AttributeManager {
 
   _createAttribute(name, attribute, extraProps) {
     const props = {
+      ...attribute,
       id: name,
       // Luma fields
       constant: attribute.constant || false,
@@ -312,7 +307,7 @@ export default class AttributeManager {
       divisor: attribute.instanced || extraProps.instanced ? 1 : attribute.divisor
     };
 
-    return new Attribute(this.gl, Object.assign({}, attribute, props));
+    return new Attribute(this.gl, props);
   }
 
   // build updateTrigger name to attribute name mapping

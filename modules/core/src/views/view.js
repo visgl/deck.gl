@@ -35,14 +35,15 @@ export default class View {
     this.id = id || this.constructor.displayName || 'view';
     this.type = type;
 
-    this.props = Object.assign({}, props, {
+    this.props = {
+      ...props,
       id: this.id,
       projectionMatrix,
       fovy,
       near,
       far,
       modelMatrix
-    });
+    };
 
     // Extents
     this._parseDimensions({x, y, width, height});
@@ -108,7 +109,7 @@ export default class View {
       }
 
       // Merge in all props from View's viewState, except id
-      const newViewState = Object.assign({}, viewState);
+      const newViewState = {...viewState};
       for (const key in this.props.viewState) {
         if (key !== 'id') {
           newViewState[key] = this.props.viewState[key];
@@ -143,7 +144,7 @@ export default class View {
     if (typeof opts === 'function') {
       opts = {type: opts};
     }
-    return Object.assign({}, defaultOpts, opts);
+    return {...defaultOpts, ...opts};
   }
 
   // Overridable method

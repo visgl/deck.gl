@@ -50,10 +50,7 @@ export default class TileLayer extends CompositeLayer {
   }
 
   finalizeState() {
-    const {tileset} = this.state;
-    if (tileset) {
-      tileset.finalize();
-    }
+    this.state.tileset?.finalize();
   }
 
   get isLoaded() {
@@ -219,16 +216,15 @@ export default class TileLayer extends CompositeLayer {
       if (!tile.isLoaded) {
         // no op
       } else if (!tile.layers) {
-        const layers = this.renderSubLayers(
-          Object.assign({}, this.props, {
-            id: `${this.id}-${tile.x}-${tile.y}-${tile.z}`,
-            data: tile.data,
-            visible: isVisible,
-            _offset: 0,
-            tile,
-            highlightedObjectIndex
-          })
-        );
+        const layers = this.renderSubLayers({
+          ...this.props,
+          id: `${this.id}-${tile.x}-${tile.y}-${tile.z}`,
+          data: tile.data,
+          visible: isVisible,
+          _offset: 0,
+          tile,
+          highlightedObjectIndex
+        });
         tile.layers = flatten(layers, Boolean);
       } else if (
         tile.layers[0] &&

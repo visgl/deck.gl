@@ -211,16 +211,14 @@ export default class HeatmapLayer extends AggregationLayer {
       colorTexture,
       updateTimer
     } = this.state;
-    /* eslint-disable no-unused-expressions */
-    weightsTransform && weightsTransform.delete();
-    weightsTexture && weightsTexture.delete();
-    maxWeightTransform && maxWeightTransform.delete();
-    maxWeightsTexture && maxWeightsTexture.delete();
-    triPositionBuffer && triPositionBuffer.delete();
-    triTexCoordBuffer && triTexCoordBuffer.delete();
-    colorTexture && colorTexture.delete();
+    weightsTransform?.delete();
+    weightsTexture?.delete();
+    maxWeightTransform?.delete();
+    maxWeightsTexture?.delete();
+    triPositionBuffer?.delete();
+    triTexCoordBuffer?.delete();
+    colorTexture?.delete();
     updateTimer && clearTimeout(updateTimer);
-    /* eslint-enable no-unused-expressions */
   }
 
   // PRIVATE
@@ -297,9 +295,7 @@ export default class HeatmapLayer extends AggregationLayer {
     const {gl} = this.context;
     let {weightsTransform} = this.state;
     const {weightsTexture} = this.state;
-    if (weightsTransform) {
-      weightsTransform.delete();
-    }
+    weightsTransform?.delete();
     const shaders = mergeShaders(
       {
         vs: weights_vs,

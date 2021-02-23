@@ -172,10 +172,8 @@ export default class IconLayer extends Layer {
 
     if (changeFlags.extensionsChanged) {
       const {gl} = this.context;
-      if (this.state.model) {
-        this.state.model.delete();
-      }
-      this.setState({model: this._getModel(gl)});
+      this.state.model?.delete();
+      this.state.model = this._getModel(gl);
       attributeManager.invalidateAll();
     }
   }
@@ -199,17 +197,16 @@ export default class IconLayer extends Layer {
     const iconsTexture = iconManager.getTexture();
     if (iconsTexture) {
       this.state.model
-        .setUniforms(
-          Object.assign({}, uniforms, {
-            iconsTexture,
-            iconsTextureDim: [iconsTexture.width, iconsTexture.height],
-            sizeScale: sizeScale * (sizeUnits === 'pixels' ? viewport.metersPerPixel : 1),
-            sizeMinPixels,
-            sizeMaxPixels,
-            billboard,
-            alphaCutoff
-          })
-        )
+        .setUniforms(uniforms)
+        .setUniforms({
+          iconsTexture,
+          iconsTextureDim: [iconsTexture.width, iconsTexture.height],
+          sizeScale: sizeScale * (sizeUnits === 'pixels' ? viewport.metersPerPixel : 1),
+          sizeMinPixels,
+          sizeMaxPixels,
+          billboard,
+          alphaCutoff
+        })
         .draw();
     }
   }
@@ -219,24 +216,22 @@ export default class IconLayer extends Layer {
     // specifed via: attribute vec2 positions;
     const positions = [-1, -1, -1, 1, 1, 1, 1, -1];
 
-    return new Model(
-      gl,
-      Object.assign({}, this.getShaders(), {
-        id: this.props.id,
-        geometry: new Geometry({
-          drawMode: GL.TRIANGLE_FAN,
-          attributes: {
-            // The size must be explicitly passed here otherwise luma.gl
-            // will default to assuming that positions are 3D (x,y,z)
-            positions: {
-              size: 2,
-              value: new Float32Array(positions)
-            }
+    return new Model(gl, {
+      ...this.getShaders(),
+      id: this.props.id,
+      geometry: new Geometry({
+        drawMode: GL.TRIANGLE_FAN,
+        attributes: {
+          // The size must be explicitly passed here otherwise luma.gl
+          // will default to assuming that positions are 3D (x,y,z)
+          positions: {
+            size: 2,
+            value: new Float32Array(positions)
           }
-        }),
-        isInstanced: true
-      })
-    );
+        }
+      }),
+      isInstanced: true
+    });
   }
 
   _onUpdate() {

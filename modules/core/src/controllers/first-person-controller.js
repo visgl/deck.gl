@@ -255,7 +255,7 @@ class FirstPersonState extends ViewState {
   // shortest path between two view states
   shortestPathFrom(viewState) {
     const fromProps = viewState.getViewportProps();
-    const props = Object.assign({}, this._viewportProps);
+    const props = {...this._viewportProps};
     const {bearing, longitude} = props;
 
     if (Math.abs(bearing - fromProps.bearing) > 180) {
@@ -277,7 +277,7 @@ class FirstPersonState extends ViewState {
 
   _getUpdatedState(newProps) {
     // Update _viewportProps
-    return new FirstPersonState(Object.assign({}, this._viewportProps, this._state, newProps));
+    return new FirstPersonState({...this._viewportProps, ...this._state, ...newProps});
   }
 
   // Apply any constraints (mathematical or defined by _viewportProps) to map state

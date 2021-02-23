@@ -20,7 +20,7 @@ export class PointLight {
     this.type = 'point';
     this.position = position;
     this.attenuation = getAttenuation(props);
-    this.projectedLight = Object.assign({}, this);
+    this.projectedLight = {...this};
   }
 
   getProjectedLight({layer}) {

@@ -56,7 +56,7 @@ export function testLayer(opts) {
   // Run successive update tests
   for (const testCase of testCases) {
     // Save old state before update
-    const oldState = Object.assign({}, layer.state);
+    const oldState = {...layer.state};
 
     const {layer: newLayer, spyMap} = runLayerTestUpdate(testCase, resources, layer, spies);
 
@@ -82,7 +82,7 @@ export async function testLayerAsync(opts) {
   // Run successive update tests
   for (const testCase of testCases) {
     // Save old state before update
-    const oldState = Object.assign({}, layer.state);
+    const oldState = {...layer.state};
 
     const {layer: newLayer, spyMap} = runLayerTestUpdate(testCase, resources, layer, spies);
 

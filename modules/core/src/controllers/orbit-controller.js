@@ -189,7 +189,7 @@ export class OrbitState extends ViewState {
   // shortest path between two view states
   shortestPathFrom(viewState) {
     const fromProps = viewState.getViewportProps();
-    const props = Object.assign({}, this._viewportProps);
+    const props = {...this._viewportProps};
     const {rotationOrbit} = props;
 
     if (Math.abs(rotationOrbit - fromProps.rotationOrbit) > 180) {
@@ -336,7 +336,7 @@ export class OrbitState extends ViewState {
   }
 
   _calculateNewTarget({startTarget, zoom, pixelOffset}) {
-    const viewportProps = Object.assign({}, this._viewportProps);
+    const viewportProps = {...this._viewportProps};
     if (Number.isFinite(zoom)) {
       viewportProps.zoom = zoom;
     }
@@ -350,7 +350,7 @@ export class OrbitState extends ViewState {
 
   _getUpdatedState(newProps) {
     // Update _viewportProps
-    return new OrbitState(Object.assign({}, this._viewportProps, this._state, newProps));
+    return new OrbitState({...this._viewportProps, ...this._state, ...newProps});
   }
 
   // Apply any constraints (mathematical or defined by _viewportProps) to map state

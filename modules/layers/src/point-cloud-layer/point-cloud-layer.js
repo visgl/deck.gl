@@ -99,10 +99,8 @@ export default class PointCloudLayer extends Layer {
     super.updateState({props, oldProps, changeFlags});
     if (changeFlags.extensionsChanged) {
       const {gl} = this.context;
-      if (this.state.model) {
-        this.state.model.delete();
-      }
-      this.setState({model: this._getModel(gl)});
+      this.state.model?.delete();
+      this.state.model = this._getModel(gl);
       this.getAttributeManager().invalidateAll();
     }
     if (changeFlags.dataChanged) {
@@ -117,11 +115,10 @@ export default class PointCloudLayer extends Layer {
     const sizeMultiplier = sizeUnits === 'meters' ? 1 / viewport.metersPerPixel : 1;
 
     this.state.model
-      .setUniforms(
-        Object.assign({}, uniforms, {
-          radiusPixels: pointSize * sizeMultiplier
-        })
-      )
+      .setUniforms(uniforms)
+      .setUniforms({
+        radiusPixels: pointSize * sizeMultiplier
+      })
       .draw();
   }
 
@@ -133,19 +130,17 @@ export default class PointCloudLayer extends Layer {
       positions.push(Math.cos(angle) * 2, Math.sin(angle) * 2, 0);
     }
 
-    return new Model(
-      gl,
-      Object.assign({}, this.getShaders(), {
-        id: this.props.id,
-        geometry: new Geometry({
-          drawMode: GL.TRIANGLES,
-          attributes: {
-            positions: new Float32Array(positions)
-          }
-        }),
-        isInstanced: true
-      })
-    );
+    return new Model(gl, {
+      ...this.getShaders(),
+      id: this.props.id,
+      geometry: new Geometry({
+        drawMode: GL.TRIANGLES,
+        attributes: {
+          positions: new Float32Array(positions)
+        }
+      }),
+      isInstanced: true
+    });
   }
 }
 

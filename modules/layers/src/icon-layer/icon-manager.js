@@ -66,10 +66,11 @@ function buildRowMapping(mapping, columns, yOffset) {
   for (let i = 0; i < columns.length; i++) {
     const {icon, xOffset} = columns[i];
     const id = getIconId(icon);
-    mapping[id] = Object.assign({}, icon, {
+    mapping[id] = {
+      ...icon,
       x: xOffset,
       y: yOffset
-    });
+    };
   }
 }
 
@@ -209,9 +210,7 @@ export default class IconManager {
   }
 
   finalize() {
-    if (this._texture) {
-      this._texture.delete();
-    }
+    this._texture?.delete();
   }
 
   getTexture() {
@@ -256,10 +255,8 @@ export default class IconManager {
   }
 
   _updateIconAtlas(iconAtlas) {
-    if (this._texture) {
-      this._texture.delete();
-      this._texture = null;
-    }
+    this._texture?.delete();
+    this._texture = null;
     this._externalTexture = iconAtlas;
     this.onUpdate();
   }

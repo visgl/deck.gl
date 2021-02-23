@@ -256,7 +256,7 @@ export default class Controller {
   /* Callback util */
   // formats map state and invokes callback function
   updateViewport(newControllerState, extraProps = {}, interactionState = {}) {
-    const viewState = Object.assign({}, newControllerState.getViewportProps(), extraProps);
+    const viewState = {...newControllerState.getViewportProps(), ...extraProps};
 
     // TODO - to restore diffing, we need to include interactionState
     const changed = this.controllerState !== newControllerState;

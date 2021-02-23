@@ -138,10 +138,8 @@ export default class TextLayer extends CompositeLayer {
   getPickingInfo({info}) {
     // because `TextLayer` assign the same pickingInfoIndex for one text label,
     // here info.index refers the index of text label in props.data
-    return Object.assign(info, {
-      // override object with original data
-      object: info.index >= 0 ? this.props.data[info.index] : null
-    });
+    info.object = info.index >= 0 ? this.props.data[info.index] : null;
+    return info;
   }
 
   _updateFontAtlas(oldProps, props) {
@@ -149,13 +147,13 @@ export default class TextLayer extends CompositeLayer {
 
     // generate test characterSet
     const {fontAtlasManager} = this.state;
-    fontAtlasManager.setProps(
-      Object.assign({}, DEFAULT_FONT_SETTINGS, fontSettings, {
-        characterSet,
-        fontFamily,
-        fontWeight
-      })
-    );
+    fontAtlasManager.setProps({
+      ...DEFAULT_FONT_SETTINGS,
+      ...fontSettings,
+      characterSet,
+      fontFamily,
+      fontWeight
+    });
 
     this.setNeedsRedraw(true);
   }

@@ -231,10 +231,11 @@ export default class SolidPolygonLayer extends Layer {
     const {extruded, filled, wireframe, elevationScale} = this.props;
     const {topModel, sideModel, polygonTesselator} = this.state;
 
-    const renderUniforms = Object.assign({}, uniforms, {
+    const renderUniforms = {
+      ...uniforms,
       extruded: Boolean(extruded),
       elevationScale
-    });
+    };
 
     // Note: the order is important
     if (sideModel) {
@@ -270,9 +271,7 @@ export default class SolidPolygonLayer extends Layer {
       props.extruded !== oldProps.extruded;
 
     if (regenerateModels) {
-      if (this.state.models) {
-        this.state.models.forEach(model => model.delete());
-      }
+      this.state.models?.forEach(model => model.delete());
 
       this.setState(this._getModels(this.context.gl));
       attributeManager.invalidateAll();
@@ -327,43 +326,39 @@ export default class SolidPolygonLayer extends Layer {
       const shaders = this.getShaders('top');
       shaders.defines.NON_INSTANCED_MODEL = 1;
 
-      topModel = new Model(
-        gl,
-        Object.assign({}, shaders, {
-          id: `${id}-top`,
-          drawMode: GL.TRIANGLES,
-          attributes: {
-            vertexPositions: new Float32Array([0, 1])
-          },
-          uniforms: {
-            isWireframe: false,
-            isSideVertex: false
-          },
-          vertexCount: 0,
-          isIndexed: true
-        })
-      );
+      topModel = new Model(gl, {
+        ...shaders,
+        id: `${id}-top`,
+        drawMode: GL.TRIANGLES,
+        attributes: {
+          vertexPositions: new Float32Array([0, 1])
+        },
+        uniforms: {
+          isWireframe: false,
+          isSideVertex: false
+        },
+        vertexCount: 0,
+        isIndexed: true
+      });
     }
     if (extruded) {
-      sideModel = new Model(
-        gl,
-        Object.assign({}, this.getShaders('side'), {
-          id: `${id}-side`,
-          geometry: new Geometry({
-            drawMode: GL.LINES,
-            vertexCount: 4,
-            attributes: {
-              // top right - top left - bootom left - bottom right
-              vertexPositions: {
-                size: 2,
-                value: new Float32Array([1, 0, 0, 0, 0, 1, 1, 1])
-              }
+      sideModel = new Model(gl, {
+        ...this.getShaders('side'),
+        id: `${id}-side`,
+        geometry: new Geometry({
+          drawMode: GL.LINES,
+          vertexCount: 4,
+          attributes: {
+            // top right - top left - bootom left - bottom right
+            vertexPositions: {
+              size: 2,
+              value: new Float32Array([1, 0, 0, 0, 0, 1, 1, 1])
             }
-          }),
-          instanceCount: 0,
-          isInstanced: 1
-        })
-      );
+          }
+        }),
+        instanceCount: 0,
+        isInstanced: 1
+      });
 
       sideModel.userData.excludeAttributes = {indices: true};
     }

@@ -19,7 +19,7 @@ const DEFAULT_PROPS = {
 export default class TransitionManager {
   constructor(ControllerState, props = {}) {
     this.ControllerState = ControllerState;
-    this.props = Object.assign({}, DEFAULT_PROPS, props);
+    this.props = {...DEFAULT_PROPS, ...props};
     this.propsInTransition = null;
     this.transition = new Transition(props.timeline);
 
@@ -44,7 +44,7 @@ export default class TransitionManager {
     let transitionTriggered = false;
     const currentProps = this.props;
     // Set this.props here as '_triggerTransition' calls '_updateViewport' that uses this.props.
-    nextProps = Object.assign({}, DEFAULT_PROPS, nextProps);
+    nextProps = {...DEFAULT_PROPS, ...nextProps};
     this.props = nextProps;
 
     // NOTE: Be cautious re-ordering statements in this function.
@@ -54,13 +54,12 @@ export default class TransitionManager {
 
     if (this._isTransitionEnabled(nextProps)) {
       const {interruption, endProps} = this.transition.settings;
-      const startProps = Object.assign(
-        {},
-        currentProps,
-        interruption === TRANSITION_EVENTS.SNAP_TO_END
+      const startProps = {
+        ...currentProps,
+        ...(interruption === TRANSITION_EVENTS.SNAP_TO_END
           ? endProps
-          : this.propsInTransition || currentProps
-      );
+          : this.propsInTransition || currentProps)
+      };
 
       this._triggerTransition(startProps, nextProps);
 
@@ -174,9 +173,10 @@ export default class TransitionManager {
 
     // This gurantees all props (e.g. bearing, longitude) are normalized
     // So when viewports are compared they are in same range.
-    this.propsInTransition = new this.ControllerState(
-      Object.assign({}, this.props, viewport)
-    ).getViewportProps();
+    this.propsInTransition = new this.ControllerState({
+      ...this.props,
+      ...viewport
+    }).getViewportProps();
 
     this.onViewStateChange({
       viewState: this.propsInTransition,

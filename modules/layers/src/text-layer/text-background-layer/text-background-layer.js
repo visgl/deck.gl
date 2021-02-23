@@ -87,10 +87,8 @@ export default class TextBackgroundLayer extends Layer {
     super.updateState({props, oldProps, changeFlags});
     if (changeFlags.extensionsChanged) {
       const {gl} = this.context;
-      if (this.state.model) {
-        this.state.model.delete();
-      }
-      this.setState({model: this._getModel(gl)});
+      this.state.model?.delete();
+      this.state.model = this._getModel(gl);
       this.getAttributeManager().invalidateAll();
     }
   }
@@ -126,20 +124,18 @@ export default class TextBackgroundLayer extends Layer {
     // a square that minimally cover the unit circle
     const positions = [0, 0, 1, 0, 1, 1, 0, 1];
 
-    return new Model(
-      gl,
-      Object.assign(this.getShaders(), {
-        id: this.props.id,
-        geometry: new Geometry({
-          drawMode: GL.TRIANGLE_FAN,
-          vertexCount: 4,
-          attributes: {
-            positions: {size: 2, value: new Float32Array(positions)}
-          }
-        }),
-        isInstanced: true
-      })
-    );
+    return new Model(gl, {
+      ...this.getShaders(),
+      id: this.props.id,
+      geometry: new Geometry({
+        drawMode: GL.TRIANGLE_FAN,
+        vertexCount: 4,
+        attributes: {
+          positions: {size: 2, value: new Float32Array(positions)}
+        }
+      }),
+      isInstanced: true
+    });
   }
 }
 
