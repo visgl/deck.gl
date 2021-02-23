@@ -21,6 +21,12 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ### deck.gl v8.5 Prereleases
 
+#### deck.gl [8.5.0-alpha.2] - Feb 22 2021
+
+- PathLayer: separate joint type and cap type props (#5508)
+- [react] Fix flickering in React.StrictMode (#5511)
+- Clear tooltip when viewport changes (#5509)
+
 #### deck.gl [8.5.0-alpha.1] - Feb 19 2021
 
 - Migrate DeckGL to functional component (#5495)
