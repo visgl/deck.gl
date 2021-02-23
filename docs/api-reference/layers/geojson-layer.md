@@ -155,11 +155,17 @@ The minimum line width in pixels.
 
 The maximum line width in pixels.
 
+##### `lineCapRounded` (Boolean, optional)
+
+* Default: `false`
+
+Type of line caps. If `true`, draw round caps. Otherwise draw square caps.
+
 ##### `lineJointRounded` (Boolean, optional)
 
 * Default: `false`
 
-Type of joint. If `true`, draw round joints. Otherwise draw miter joints.
+Type of line joint. If `true`, draw round joints. Otherwise draw miter joints.
 
 ##### `lineMiterLimit` (Number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
 

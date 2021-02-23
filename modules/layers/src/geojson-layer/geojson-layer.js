@@ -43,6 +43,7 @@ const defaultProps = {
   lineWidthMinPixels: 0,
   lineWidthMaxPixels: Number.MAX_SAFE_INTEGER,
   lineJointRounded: false,
+  lineCapRounded: false,
   lineMiterLimit: 4,
 
   elevationScale: 1,
@@ -160,6 +161,7 @@ export default class GeoJsonLayer extends CompositeLayer {
       lineWidthMinPixels,
       lineWidthMaxPixels,
       lineJointRounded,
+      lineCapRounded,
       lineMiterLimit,
       pointRadiusUnits,
       pointRadiusScale,
@@ -233,7 +235,7 @@ export default class GeoJsonLayer extends CompositeLayer {
           widthScale: lineWidthScale,
           widthMinPixels: lineWidthMinPixels,
           widthMaxPixels: lineWidthMaxPixels,
-          rounded: lineJointRounded,
+          jointRounded: lineJointRounded,
           miterLimit: lineMiterLimit,
           dashJustified: lineDashJustified,
 
@@ -266,7 +268,8 @@ export default class GeoJsonLayer extends CompositeLayer {
           widthScale: lineWidthScale,
           widthMinPixels: lineWidthMinPixels,
           widthMaxPixels: lineWidthMaxPixels,
-          rounded: lineJointRounded,
+          jointRounded: lineJointRounded,
+          capRounded: lineCapRounded,
           miterLimit: lineMiterLimit,
           dashJustified: lineDashJustified,
 

@@ -97,7 +97,15 @@ The minimum path width in pixels. This prop can be used to prevent the path from
 
 The maximum path width in pixels. This prop can be used to prevent the path from getting too thick when zoomed in.
 
-##### `rounded` (Boolean, optional)
+
+##### `capRounded` (Boolean, optional)
+
+* Default: `false`
+
+Type of caps. If `true`, draw round caps. Otherwise draw square caps.
+
+
+##### `jointRounded` (Boolean, optional)
 
 * Default: `false`
 
@@ -115,7 +123,7 @@ If `false`, the width always faces up.
 * Default: `4`
 
 The maximum extent of a joint in ratio to the stroke width.
-Only works if `rounded` is `false`.
+Only works if `jointRounded` is `false`.
 
 ##### `_pathType` (Object, optional)
 

@@ -40,6 +40,7 @@ uniform float widthScale;
 uniform float widthMinPixels;
 uniform float widthMaxPixels;
 uniform float jointType;
+uniform float capType;
 uniform float miterLimit;
 uniform bool billboard;
 
@@ -50,6 +51,7 @@ varying vec2 vCornerOffset;
 varying float vMiterLength;
 varying vec2 vPathPosition;
 varying float vPathLength;
+varying float vJointType;
 
 const float EPSILON = 0.001;
 const vec3 ZERO_OFFSET = vec3(0.0);
@@ -132,7 +134,10 @@ vec3 lineJoin(
 
   // extend out a triangle to envelope the round cap
   if (isCap) {
-    offsetVec = mix(perp * sideOfPath, dir * jointType * 4.0 * flipIfTrue(isStartCap), isJoint);
+    offsetVec = mix(perp * sideOfPath, dir * capType * 4.0 * flipIfTrue(isStartCap), isJoint);
+    vJointType = capType;
+  } else {
+    vJointType = jointType;
   }
 
   // Generate variables for fragment shader
