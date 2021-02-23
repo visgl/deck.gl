@@ -2,7 +2,8 @@
 /* eslint-disable no-console */
 import {CSVLoader} from '@loaders.gl/csv';
 import {registerLoaders} from '@loaders.gl/core';
-import GL from '@luma.gl/constants';
+// Avoid calling it GL - would be removed by babel-plugin-inline-webgl-constants
+import GLConstants from '@luma.gl/constants';
 
 import makeTooltip from './widget-tooltip';
 
@@ -30,7 +31,7 @@ const jsonConverterConfiguration = {
   // Will be resolved as `<enum-name>.<enum-value>`
   enumerations: {
     COORDINATE_SYSTEM: deck.COORDINATE_SYSTEM,
-    GL
+    GL: GLConstants
   }
 };
 
