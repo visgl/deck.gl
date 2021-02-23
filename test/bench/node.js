@@ -1,3 +1,3 @@
-require('reify');
+require('@babel/register');
 
 require('./index');

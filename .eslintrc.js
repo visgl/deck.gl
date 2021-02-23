@@ -22,6 +22,7 @@ module.exports = {
   rules: {
     'guard-for-in': 0,
     'no-inline-comments': 0,
+    'no-unused-expressions': 0,
     camelcase: 0,
     'react/forbid-prop-types': 0,
     'react/no-deprecated': 0,
@@ -29,6 +30,6 @@ module.exports = {
     'import/no-extraneous-dependencies': ['error', {devDependencies: false, peerDependencies: true}]
   },
   parserOptions: {
-    ecmaVersion: 2018
+    ecmaVersion: 2020
   }
 };

@@ -143,12 +143,8 @@ export class OverlayView {
   }
 
   setMap(map) {
-    if (this.map) {
-      this.map._removeOverlay(this);
-    }
-    if (map) {
-      map._addOverlay(this);
-    }
+    this.map?._removeOverlay(this);
+    map?._addOverlay(this);
     this.map = map;
   }
 

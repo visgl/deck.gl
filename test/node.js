@@ -1,4 +1,4 @@
-require('reify');
+require('@babel/register');
 
 // Polyfill for loaders
 // TODO - @loaders.gl/polyfills seems to freeze the tests
