@@ -272,9 +272,7 @@ export default class GPUGridLayer extends GridAggregationLayer {
     [color, elevation].forEach(weight => {
       const {aggregationBuffer, maxMinBuffer} = weight;
       maxMinBuffer.delete();
-      if (aggregationBuffer) {
-        aggregationBuffer.delete();
-      }
+      aggregationBuffer?.delete();
     });
     super.finalizeState();
   }

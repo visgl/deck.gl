@@ -74,9 +74,7 @@ export default class GridAggregationLayer extends AggregationLayer {
       count.aggregationBuffer.delete();
     }
     const {gpuGridAggregator} = this.state;
-    if (gpuGridAggregator) {
-      gpuGridAggregator.delete();
-    }
+    gpuGridAggregator?.delete();
     super.finalizeState();
   }
 

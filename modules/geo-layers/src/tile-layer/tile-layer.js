@@ -50,10 +50,7 @@ export default class TileLayer extends CompositeLayer {
   }
 
   finalizeState() {
-    const {tileset} = this.state;
-    if (tileset) {
-      tileset.finalize();
-    }
+    this.state.tileset?.finalize();
   }
 
   get isLoaded() {

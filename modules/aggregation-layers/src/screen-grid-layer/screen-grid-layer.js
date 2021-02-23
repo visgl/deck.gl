@@ -126,15 +126,9 @@ export default class ScreenGridLayer extends GridAggregationLayer {
 
     const {aggregationBuffer, maxBuffer, maxTexture} = this.state;
 
-    if (aggregationBuffer) {
-      aggregationBuffer.delete();
-    }
-    if (maxBuffer) {
-      maxBuffer.delete();
-    }
-    if (maxTexture) {
-      maxTexture.delete();
-    }
+    aggregationBuffer?.delete();
+    maxBuffer?.delete();
+    maxTexture?.delete();
   }
 
   getPickingInfo({info, mode}) {

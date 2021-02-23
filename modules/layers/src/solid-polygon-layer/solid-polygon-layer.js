@@ -271,9 +271,7 @@ export default class SolidPolygonLayer extends Layer {
       props.extruded !== oldProps.extruded;
 
     if (regenerateModels) {
-      if (this.state.models) {
-        this.state.models.forEach(model => model.delete());
-      }
+      this.state.models?.forEach(model => model.delete());
 
       this.setState(this._getModels(this.context.gl));
       attributeManager.invalidateAll();

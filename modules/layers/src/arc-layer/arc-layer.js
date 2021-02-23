@@ -117,10 +117,8 @@ export default class ArcLayer extends Layer {
     // Re-generate model if geometry changed
     if (changeFlags.extensionsChanged) {
       const {gl} = this.context;
-      if (this.state.model) {
-        this.state.model.delete();
-      }
-      this.setState({model: this._getModel(gl)});
+      this.state.model?.delete();
+      this.state.model = this._getModel(gl);
       this.getAttributeManager().invalidateAll();
     }
   }

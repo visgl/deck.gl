@@ -210,9 +210,7 @@ export default class IconManager {
   }
 
   finalize() {
-    if (this._texture) {
-      this._texture.delete();
-    }
+    this._texture?.delete();
   }
 
   getTexture() {
@@ -257,10 +255,8 @@ export default class IconManager {
   }
 
   _updateIconAtlas(iconAtlas) {
-    if (this._texture) {
-      this._texture.delete();
-      this._texture = null;
-    }
+    this._texture?.delete();
+    this._texture = null;
     this._externalTexture = iconAtlas;
     this.onUpdate();
   }

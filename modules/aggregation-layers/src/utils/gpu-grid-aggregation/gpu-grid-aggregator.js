@@ -170,7 +170,6 @@ export default class GPUGridAggregator {
   }
 
   // Delete owned resources.
-  /* eslint no-unused-expressions: ["error", { "allowShortCircuit": true }] */
   delete() {
     const {gridAggregationModel, allAggregationModel, meanTransform} = this;
     const {
@@ -183,9 +182,9 @@ export default class GPUGridAggregator {
       resources
     } = this.state;
 
-    gridAggregationModel && gridAggregationModel.delete();
-    allAggregationModel && allAggregationModel.delete();
-    meanTransform && meanTransform.delete();
+    gridAggregationModel?.delete();
+    allAggregationModel?.delete();
+    meanTransform?.delete();
 
     deleteResources([
       framebuffers,
@@ -556,9 +555,7 @@ export default class GPUGridAggregator {
   _setupModels({numCol = 0, numRow = 0} = {}) {
     const {gl} = this;
     const {shaderOptions} = this.state;
-    if (this.gridAggregationModel) {
-      this.gridAggregationModel.delete();
-    }
+    this.gridAggregationModel?.delete();
     this.gridAggregationModel = getAggregationModel(gl, shaderOptions);
     if (!this.allAggregationModel) {
       const instanceCount = numCol * numRow;

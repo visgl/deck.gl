@@ -126,18 +126,12 @@ export default class FillStyleExtension extends LayerExtension {
 
   finalizeState() {
     const {patternTexture, emptyTexture} = this.state;
-    if (patternTexture) {
-      patternTexture.delete();
-    }
-    if (emptyTexture) {
-      emptyTexture.delete();
-    }
+    patternTexture?.delete();
+    emptyTexture?.delete();
   }
 
   async loadPatternAtlas({fillPatternAtlas, fetch}) {
-    if (this.state.patternTexture) {
-      this.state.patternTexture.delete();
-    }
+    this.state.patternTexture?.delete();
     this.setState({patternTexture: null});
     let image = fillPatternAtlas;
     if (typeof image === 'string') {
