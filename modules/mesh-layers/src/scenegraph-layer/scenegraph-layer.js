@@ -128,7 +128,7 @@ export default class ScenegraphLayer extends Layer {
       // Converts loaders.gl gltf to luma.gl scenegraph using the undocumented @luma.gl/experimental function
       const gltf = props.scenegraph;
       const gltfObjects = createGLTFObjects(gl, gltf, this._getModelOptions());
-      scenegraphData = Object.assign({gltf}, gltfObjects);
+      scenegraphData = {gltf, ...gltfObjects};
 
       waitForGLTFAssets(gltfObjects).then(() => this.setNeedsRedraw());
     } else if (props.scenegraph) {

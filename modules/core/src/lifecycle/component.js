@@ -45,7 +45,7 @@ export default class Component {
     }
 
     // Some custom layer implementation may not support multiple arguments in the constructor
-    return new this.constructor(Object.assign({}, props, asyncProps, newProps));
+    return new this.constructor({...props, ...asyncProps, ...newProps});
   }
 
   get stats() {

@@ -80,10 +80,11 @@ if(vTime > currentTime || vTime < currentTime - trailLength) {
   draw(params) {
     const {trailLength, currentTime} = this.props;
 
-    params.uniforms = Object.assign({}, params.uniforms, {
+    params.uniforms = {
+      ...params.uniforms,
       trailLength,
       currentTime
-    });
+    };
 
     super.draw(params);
   }

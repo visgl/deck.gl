@@ -66,10 +66,11 @@ function buildRowMapping(mapping, columns, yOffset) {
   for (let i = 0; i < columns.length; i++) {
     const {icon, xOffset} = columns[i];
     const id = getIconId(icon);
-    mapping[id] = Object.assign({}, icon, {
+    mapping[id] = {
+      ...icon,
       x: xOffset,
       y: yOffset
-    });
+    };
   }
 }
 

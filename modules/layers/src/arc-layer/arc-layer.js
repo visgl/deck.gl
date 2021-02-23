@@ -164,19 +164,17 @@ export default class ArcLayer extends Layer {
       positions = positions.concat([i, 1, 0, i, -1, 0]);
     }
 
-    const model = new Model(
-      gl,
-      Object.assign({}, this.getShaders(), {
-        id: this.props.id,
-        geometry: new Geometry({
-          drawMode: GL.TRIANGLE_STRIP,
-          attributes: {
-            positions: new Float32Array(positions)
-          }
-        }),
-        isInstanced: true
-      })
-    );
+    const model = new Model(gl, {
+      ...this.getShaders(),
+      id: this.props.id,
+      geometry: new Geometry({
+        drawMode: GL.TRIANGLE_STRIP,
+        attributes: {
+          positions: new Float32Array(positions)
+        }
+      }),
+      isInstanced: true
+    });
 
     model.setUniforms({numSegments: NUM_SEGMENTS});
 

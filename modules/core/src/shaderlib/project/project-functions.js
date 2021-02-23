@@ -26,7 +26,7 @@ function lngLatZToWorldPosition(lngLatZ, viewport, offsetMode = false) {
 }
 
 function normalizeParameters(opts) {
-  const normalizedParams = Object.assign({}, opts);
+  const normalizedParams = {...opts};
 
   let {coordinateSystem} = opts;
   const {viewport, coordinateOrigin, fromCoordinateSystem, fromCoordinateOrigin} = opts;

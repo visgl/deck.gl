@@ -143,9 +143,9 @@ function normalizePropDefinition(name, propDef) {
       // If no type and value this object is likely the value
       return {name, type: 'object', value: propDef};
     }
-    return Object.assign({name, type: getTypeOf(propDef.value)}, propDef);
+    return {name, type: getTypeOf(propDef.value), ...propDef};
   }
-  return Object.assign({name}, TYPE_DEFINITIONS[propDef.type], propDef);
+  return {name, ...TYPE_DEFINITIONS[propDef.type], ...propDef};
 }
 
 function isArray(value) {

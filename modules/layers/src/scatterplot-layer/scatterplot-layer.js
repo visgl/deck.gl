@@ -147,20 +147,18 @@ export default class ScatterplotLayer extends Layer {
     // a square that minimally cover the unit circle
     const positions = [-1, -1, 0, 1, -1, 0, 1, 1, 0, -1, 1, 0];
 
-    return new Model(
-      gl,
-      Object.assign(this.getShaders(), {
-        id: this.props.id,
-        geometry: new Geometry({
-          drawMode: GL.TRIANGLE_FAN,
-          vertexCount: 4,
-          attributes: {
-            positions: {size: 3, value: new Float32Array(positions)}
-          }
-        }),
-        isInstanced: true
-      })
-    );
+    return new Model(gl, {
+      ...this.getShaders(),
+      id: this.props.id,
+      geometry: new Geometry({
+        drawMode: GL.TRIANGLE_FAN,
+        vertexCount: 4,
+        attributes: {
+          positions: {size: 3, value: new Float32Array(positions)}
+        }
+      }),
+      isInstanced: true
+    });
   }
 }
 

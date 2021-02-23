@@ -190,24 +190,23 @@ export default class SimpleMeshLayer extends Layer {
     const {viewport} = this.context;
     const {sizeScale, coordinateSystem, _instanced} = this.props;
 
-    this.state.model.draw({
-      uniforms: Object.assign({}, uniforms, {
+    this.state.model
+      .setUniforms(uniforms)
+      .setUniforms({
         sizeScale,
         composeModelMatrix: !_instanced || shouldComposeModelMatrix(viewport, coordinateSystem),
         flatShading: !this.state.hasNormals
       })
-    });
+      .draw();
   }
 
   getModel(mesh) {
-    const model = new Model(
-      this.context.gl,
-      Object.assign({}, this.getShaders(), {
-        id: this.props.id,
-        geometry: getGeometry(mesh, this.props._useMeshColors),
-        isInstanced: true
-      })
-    );
+    const model = new Model(this.context.gl, {
+      ...this.getShaders(),
+      id: this.props.id,
+      geometry: getGeometry(mesh, this.props._useMeshColors),
+      isInstanced: true
+    });
 
     const {texture} = this.props;
     const {emptyTexture} = this.state;

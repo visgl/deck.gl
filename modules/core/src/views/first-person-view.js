@@ -46,11 +46,10 @@ class FirstPersonViewport extends Viewport {
 
 export default class FirstPersonView extends View {
   constructor(props) {
-    super(
-      Object.assign({}, props, {
-        type: FirstPersonViewport
-      })
-    );
+    super({
+      ...props,
+      type: FirstPersonViewport
+    });
   }
 
   get controller() {

@@ -215,18 +215,13 @@ export default {
   },
   getUniforms: (opts = {}, context = {}) => {
     if (opts.drawToShadowMap || (opts.shadowMaps && opts.shadowMaps.length > 0)) {
-      const shadowUniforms = {};
       const {shadowEnabled = true} = opts;
-      if (shadowEnabled && opts.shadowMatrices && opts.shadowMatrices.length > 0) {
-        Object.assign(shadowUniforms, createShadowUniforms(opts, context));
-      } else {
-        Object.assign(shadowUniforms, {
-          shadow_uDrawShadowMap: false,
-          shadow_uUseShadowMap: false
-        });
-      }
-
-      return shadowUniforms;
+      return shadowEnabled && opts.shadowMatrices && opts.shadowMatrices.length > 0
+        ? createShadowUniforms(opts, context)
+        : {
+            shadow_uDrawShadowMap: false,
+            shadow_uUseShadowMap: false
+          };
     }
     return {};
   }

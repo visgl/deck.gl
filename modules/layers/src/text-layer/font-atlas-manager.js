@@ -174,22 +174,18 @@ export default class FontAtlasManager {
     setTextStyle(ctx, fontFamily, fontSize, fontWeight);
 
     // 1. build mapping
-    const {mapping, canvasHeight, xOffset, yOffset} = buildMapping(
-      Object.assign(
-        {
-          getFontWidth: char => ctx.measureText(char).width,
-          fontHeight: fontSize * HEIGHT_SCALE,
-          buffer,
-          characterSet,
-          maxCanvasWidth: MAX_CANVAS_WIDTH
-        },
-        cachedFontAtlas && {
-          mapping: cachedFontAtlas.mapping,
-          xOffset: cachedFontAtlas.xOffset,
-          yOffset: cachedFontAtlas.yOffset
-        }
-      )
-    );
+    const {mapping, canvasHeight, xOffset, yOffset} = buildMapping({
+      getFontWidth: char => ctx.measureText(char).width,
+      fontHeight: fontSize * HEIGHT_SCALE,
+      buffer,
+      characterSet,
+      maxCanvasWidth: MAX_CANVAS_WIDTH,
+      ...(cachedFontAtlas && {
+        mapping: cachedFontAtlas.mapping,
+        xOffset: cachedFontAtlas.xOffset,
+        yOffset: cachedFontAtlas.yOffset
+      })
+    });
 
     // 2. update canvas
     // copy old canvas data to new canvas only when height changed

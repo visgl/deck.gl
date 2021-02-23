@@ -156,13 +156,11 @@ export default class ColumnLayer extends Layer {
   }
 
   _getModel(gl) {
-    return new Model(
-      gl,
-      Object.assign({}, this.getShaders(), {
-        id: this.props.id,
-        isInstanced: true
-      })
-    );
+    return new Model(gl, {
+      ...this.getShaders(),
+      id: this.props.id,
+      isInstanced: true
+    });
   }
 
   _updateGeometry({diskResolution, vertices, extruded, stroked}) {
@@ -198,20 +196,18 @@ export default class ColumnLayer extends Layer {
 
     const widthMultiplier = lineWidthUnits === 'pixels' ? viewport.metersPerPixel : 1;
 
-    model.setUniforms(
-      Object.assign({}, uniforms, {
-        radius,
-        angle: (angle / 180) * Math.PI,
-        offset,
-        extruded,
-        coverage,
-        elevationScale,
-        edgeDistance,
-        widthScale: lineWidthScale * widthMultiplier,
-        widthMinPixels: lineWidthMinPixels,
-        widthMaxPixels: lineWidthMaxPixels
-      })
-    );
+    model.setUniforms(uniforms).setUniforms({
+      radius,
+      angle: (angle / 180) * Math.PI,
+      offset,
+      extruded,
+      coverage,
+      elevationScale,
+      edgeDistance,
+      widthScale: lineWidthScale * widthMultiplier,
+      widthMinPixels: lineWidthMinPixels,
+      widthMaxPixels: lineWidthMaxPixels
+    });
 
     // When drawing 3d: draw wireframe first so it doesn't get occluded by depth test
     if (extruded && wireframe) {

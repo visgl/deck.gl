@@ -81,7 +81,8 @@ export default class MultiIconLayer extends IconLayer {
     const {outlineColor} = this.state;
 
     super.draw({
-      uniforms: Object.assign({}, uniforms, {
+      uniforms: {
+        ...uniforms,
         // Refer the following doc about gamma and buffer
         // https://blog.mapbox.com/drawing-text-with-signed-distance-fields-in-mapbox-gl-b0933af6f817
         buffer: DEFAULT_BUFFER,
@@ -89,7 +90,7 @@ export default class MultiIconLayer extends IconLayer {
         gamma: smoothing,
         sdf: Boolean(sdf),
         outlineColor
-      })
+      }
     });
   }
 

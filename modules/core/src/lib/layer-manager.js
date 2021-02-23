@@ -70,7 +70,8 @@ export default class LayerManager {
     this.layers = [];
     this.resourceManager = new ResourceManager({gl, protocol: 'deck://'});
 
-    this.context = Object.assign({}, INITIAL_CONTEXT, {
+    this.context = {
+      ...INITIAL_CONTEXT,
       layerManager: this,
       gl,
       deck,
@@ -81,7 +82,7 @@ export default class LayerManager {
       viewport: viewport || new Viewport({id: 'DEFAULT-INITIAL-VIEWPORT'}), // Current viewport, exposed to layers for project* function
       timeline: timeline || new Timeline(),
       resourceManager: this.resourceManager
-    });
+    };
 
     this._nextLayers = null;
     this._needsRedraw = 'Initial render';

@@ -145,7 +145,7 @@ const defaultProps = {
 /* eslint-disable max-statements */
 export default class Deck {
   constructor(props) {
-    props = Object.assign({}, defaultProps, props);
+    props = {...defaultProps, ...props};
     this.props = {};
 
     this.width = 0; // "read-only", auto-updated from canvas
@@ -404,17 +404,13 @@ export default class Deck {
     stats.get('Pick Count').incrementCount();
     stats.get(statKey).timeStart();
 
-    const infos = this.deckPicker[method](
-      Object.assign(
-        {
-          layers: this.layerManager.getLayers(opts),
-          views: this.viewManager.getViews(),
-          viewports: this.getViewports(opts),
-          onViewportActive: this.layerManager.activateViewport
-        },
-        opts
-      )
-    );
+    const infos = this.deckPicker[method]({
+      layers: this.layerManager.getLayers(opts),
+      views: this.viewManager.getViews(),
+      viewports: this.getViewports(opts),
+      onViewportActive: this.layerManager.activateViewport,
+      ...opts
+    });
 
     stats.get(statKey).timeEnd();
 
@@ -500,8 +496,7 @@ export default class Deck {
       autoResizeDrawingBuffer,
       autoResizeViewport: false,
       gl,
-      onCreateContext: opts =>
-        createGLContext(Object.assign({}, glOptions, opts, {canvas: this.canvas, debug})),
+      onCreateContext: opts => createGLContext({...glOptions, ...opts, canvas: this.canvas, debug}),
       onInitialize: this._onRendererInitialized,
       onRender: this._onRenderFrame,
       onBeforeRender: props.onBeforeRender,
@@ -691,21 +686,17 @@ export default class Deck {
 
     this.props.onBeforeRender({gl});
 
-    this.deckRenderer.renderLayers(
-      Object.assign(
-        {
-          target: this.props._framebuffer,
-          layers: this.layerManager.getLayers(),
-          viewports: this.viewManager.getViewports(),
-          onViewportActive: this.layerManager.activateViewport,
-          views: this.viewManager.getViews(),
-          pass: 'screen',
-          redrawReason,
-          effects: this.effectManager.getEffects()
-        },
-        renderOptions
-      )
-    );
+    this.deckRenderer.renderLayers({
+      target: this.props._framebuffer,
+      layers: this.layerManager.getLayers(),
+      viewports: this.viewManager.getViewports(),
+      onViewportActive: this.layerManager.activateViewport,
+      views: this.viewManager.getViews(),
+      pass: 'screen',
+      redrawReason,
+      effects: this.effectManager.getEffects(),
+      ...renderOptions
+    });
 
     this.props.onAfterRender({gl});
   }

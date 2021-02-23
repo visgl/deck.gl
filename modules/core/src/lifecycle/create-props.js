@@ -74,16 +74,15 @@ function createPropsPrototypeAndTypes(componentClass) {
   );
 
   // Create a merged type object
-  const propTypes = Object.assign({}, parentClass._propTypes, componentPropDefs.propTypes);
+  const propTypes = {...parentClass._propTypes, ...componentPropDefs.propTypes};
   // Add getters/setters for async props
   addAsyncPropsToPropPrototype(defaultProps, propTypes);
 
   // Create a map for prop whose default value is a callback
-  const deprecatedProps = Object.assign(
-    {},
-    parentClass._deprecatedProps,
-    componentPropDefs.deprecatedProps
-  );
+  const deprecatedProps = {
+    ...parentClass._deprecatedProps,
+    ...componentPropDefs.deprecatedProps
+  };
   // Add setters for deprecated props
   addDeprecatedPropsToPropPrototype(defaultProps, deprecatedProps);
 

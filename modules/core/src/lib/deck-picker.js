@@ -100,7 +100,7 @@ export default class DeckPicker {
     };
 
     if (layer) {
-      return Object.assign({}, lastPickedInfo, info);
+      return {...lastPickedInfo, ...info};
     }
     return Object.assign(info, {color: null, object: null, index: -1});
   }

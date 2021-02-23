@@ -45,11 +45,10 @@ class OrthographicViewport extends Viewport {
 
 export default class OrthographicView extends View {
   constructor(props) {
-    super(
-      Object.assign({}, props, {
-        type: OrthographicViewport
-      })
-    );
+    super({
+      ...props,
+      type: OrthographicViewport
+    });
   }
 
   get controller() {

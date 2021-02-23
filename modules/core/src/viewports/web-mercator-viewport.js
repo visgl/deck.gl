@@ -95,7 +95,8 @@ export default class WebMercatorViewport extends Viewport {
       viewMatrixUncentered = viewOffset.multiplyLeft(viewMatrixUncentered);
     }
 
-    const viewportOpts = Object.assign({}, opts, {
+    super({
+      ...opts,
       // x, y,
       width,
       height,
@@ -115,8 +116,6 @@ export default class WebMercatorViewport extends Viewport {
       near,
       far
     });
-
-    super(viewportOpts);
 
     // Save parameters
     this.latitude = latitude;
@@ -211,7 +210,7 @@ export default class WebMercatorViewport extends Viewport {
    */
   fitBounds(bounds, options = {}) {
     const {width, height} = this;
-    const {longitude, latitude, zoom} = fitBounds(Object.assign({width, height, bounds}, options));
+    const {longitude, latitude, zoom} = fitBounds({width, height, bounds, ...options});
     return new WebMercatorViewport({width, height, longitude, latitude, zoom});
   }
 }

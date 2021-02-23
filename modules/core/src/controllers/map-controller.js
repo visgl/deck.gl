@@ -306,7 +306,7 @@ export class MapState extends ViewState {
   shortestPathFrom(viewState) {
     // const endViewStateProps = new this.ControllerState(endProps).shortestPathFrom(startViewstate);
     const fromProps = viewState.getViewportProps();
-    const props = Object.assign({}, this._viewportProps);
+    const props = {...this._viewportProps};
     const {bearing, longitude} = props;
 
     if (Math.abs(bearing - fromProps.bearing) > 180) {

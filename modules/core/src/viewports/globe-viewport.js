@@ -51,7 +51,8 @@ export default class GlobeViewport extends Viewport {
     const halfFov = Math.atan(0.5 / altitude);
     const relativeScale = (GLOBE_RADIUS * 2 * scale) / height;
 
-    const viewportOpts = Object.assign({}, opts, {
+    super({
+      ...opts,
       // x, y,
       width,
       height,
@@ -69,8 +70,6 @@ export default class GlobeViewport extends Viewport {
       near: nearZMultiplier,
       far: Math.min(2, 1 / relativeScale + 1) * altitude * farZMultiplier
     });
-
-    super(viewportOpts);
 
     this.resolution = resolution;
     this.distanceScales = getDistanceScales();

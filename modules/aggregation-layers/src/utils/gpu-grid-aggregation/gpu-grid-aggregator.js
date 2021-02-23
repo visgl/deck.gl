@@ -242,7 +242,7 @@ export default class GPUGridAggregator {
   // PRIVATE
 
   _normalizeAggregationParams(opts) {
-    const aggregationParams = Object.assign({}, DEFAULT_RUN_PARAMS, opts);
+    const aggregationParams = {...DEFAULT_RUN_PARAMS, ...opts};
     const {weights} = aggregationParams;
     if (weights) {
       aggregationParams.weights = normalizeWeightParams(weights);
@@ -347,7 +347,7 @@ export default class GPUGridAggregator {
       if (combineMaxMin) {
         this._renderToMaxMinTexture({
           id,
-          parameters: Object.assign({}, parameters, {blendEquation: MAX_MIN_BLEND_EQUATION}),
+          parameters: {...parameters, blendEquation: MAX_MIN_BLEND_EQUATION},
           gridSize,
           minOrMaxFb: maxMinFramebuffers[id],
           clearParams: {clearColor: [0, 0, 0, MAX_32_BIT_FLOAT]},
@@ -357,7 +357,7 @@ export default class GPUGridAggregator {
         if (needMin) {
           this._renderToMaxMinTexture({
             id,
-            parameters: Object.assign({}, parameters, {blendEquation: MIN_BLEND_EQUATION}),
+            parameters: {...parameters, blendEquation: MIN_BLEND_EQUATION},
             gridSize,
             minOrMaxFb: minFramebuffers[id],
             clearParams: {clearColor: [MAX_32_BIT_FLOAT, MAX_32_BIT_FLOAT, MAX_32_BIT_FLOAT, 0]},
@@ -367,7 +367,7 @@ export default class GPUGridAggregator {
         if (needMax) {
           this._renderToMaxMinTexture({
             id,
-            parameters: Object.assign({}, parameters, {blendEquation: MAX_BLEND_EQUATION}),
+            parameters: {...parameters, blendEquation: MAX_BLEND_EQUATION},
             gridSize,
             minOrMaxFb: maxFramebuffers[id],
             clearParams: {clearColor: [0, 0, 0, 0]},
@@ -429,7 +429,7 @@ export default class GPUGridAggregator {
 
         const attributes = {weights: weightAttributes[id]};
         gridAggregationModel.draw({
-          parameters: Object.assign({}, parameters, {blendEquation: equations[id]}),
+          parameters: {...parameters, blendEquation: equations[id]},
           moduleSettings,
           uniforms,
           attributes
@@ -621,7 +621,7 @@ export default class GPUGridAggregator {
 function normalizeWeightParams(weights) {
   const result = {};
   for (const id in weights) {
-    result[id] = Object.assign({}, DEFAULT_WEIGHT_PARAMS, weights[id]);
+    result[id] = {...DEFAULT_WEIGHT_PARAMS, ...weights[id]};
   }
   return result;
 }
@@ -670,15 +670,9 @@ function getAllAggregationModel(gl, instanceCount) {
 }
 
 function getMeanTransform(gl, opts) {
-  return new Transform(
-    gl,
-    Object.assign(
-      {},
-      {
-        vs: TRANSFORM_MEAN_VS,
-        _targetTextureVarying: 'meanValues'
-      },
-      opts
-    )
-  );
+  return new Transform(gl, {
+    vs: TRANSFORM_MEAN_VS,
+    _targetTextureVarying: 'meanValues',
+    ...opts
+  });
 }

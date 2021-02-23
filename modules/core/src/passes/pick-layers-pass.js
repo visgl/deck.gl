@@ -101,6 +101,9 @@ export default class PickLayersPass extends LayersPass {
         };
 
     // Override layer parameters with pick parameters
-    return Object.assign({}, layer.props.parameters, pickParameters);
+    return {
+      ...layer.props.parameters,
+      ...pickParameters
+    };
   }
 }

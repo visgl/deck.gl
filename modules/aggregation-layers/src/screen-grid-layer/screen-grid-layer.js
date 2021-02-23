@@ -26,13 +26,14 @@ import ScreenGridCellLayer from './screen-grid-cell-layer';
 import GridAggregationLayer from '../grid-aggregation-layer';
 import {getFloatTexture} from '../utils/resource-utils.js';
 
-const defaultProps = Object.assign({}, ScreenGridCellLayer.defaultProps, {
+const defaultProps = {
+  ...ScreenGridCellLayer.defaultProps,
   getPosition: {type: 'accessor', value: d => d.position},
   getWeight: {type: 'accessor', value: 1},
 
   gpuAggregation: true,
   aggregation: 'SUM'
-});
+};
 
 const POSITION_ATTRIBUTE_NAME = 'positions';
 const DIMENSIONS = {
@@ -145,9 +146,10 @@ export default class ScreenGridLayer extends GridAggregationLayer {
 
       // Each instance (one cell) is aggregated into single pixel,
       // Get current instance's aggregation details.
-      info.object = GPUGridAggregator.getAggregationData(
-        Object.assign({pixelIndex: index}, aggregationResults)
-      );
+      info.object = GPUGridAggregator.getAggregationData({
+        pixelIndex: index,
+        ...aggregationResults
+      });
     }
 
     return info;

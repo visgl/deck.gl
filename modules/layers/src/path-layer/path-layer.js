@@ -227,17 +227,16 @@ export default class PathLayer extends Layer {
     const widthMultiplier = widthUnits === 'pixels' ? viewport.metersPerPixel : 1;
 
     this.state.model
-      .setUniforms(
-        Object.assign({}, uniforms, {
-          jointType: Number(jointRounded),
-          capType: Number(capRounded),
-          billboard,
-          widthScale: widthScale * widthMultiplier,
-          miterLimit,
-          widthMinPixels,
-          widthMaxPixels
-        })
-      )
+      .setUniforms(uniforms)
+      .setUniforms({
+        jointType: Number(jointRounded),
+        capType: Number(capRounded),
+        billboard,
+        widthScale: widthScale * widthMultiplier,
+        miterLimit,
+        widthMinPixels,
+        widthMaxPixels
+      })
       .draw();
   }
 
@@ -286,20 +285,18 @@ export default class PathLayer extends Layer {
       1, 0
     ];
 
-    return new Model(
-      gl,
-      Object.assign({}, this.getShaders(), {
-        id: this.props.id,
-        geometry: new Geometry({
-          drawMode: GL.TRIANGLES,
-          attributes: {
-            indices: new Uint16Array(SEGMENT_INDICES),
-            positions: {value: new Float32Array(SEGMENT_POSITIONS), size: 2}
-          }
-        }),
-        isInstanced: true
-      })
-    );
+    return new Model(gl, {
+      ...this.getShaders(),
+      id: this.props.id,
+      geometry: new Geometry({
+        drawMode: GL.TRIANGLES,
+        attributes: {
+          indices: new Uint16Array(SEGMENT_INDICES),
+          positions: {value: new Float32Array(SEGMENT_POSITIONS), size: 2}
+        }
+      }),
+      isInstanced: true
+    });
   }
 
   calculatePositions(attribute) {

@@ -23,10 +23,10 @@ export function mergeShaders(target, source) {
   if (!source) {
     return target;
   }
-  const result = Object.assign({}, target, source);
+  const result = {...target, ...source};
 
   if ('defines' in source) {
-    result.defines = Object.assign({}, target.defines, source.defines);
+    result.defines = {...target.defines, ...source.defines};
   }
   if ('modules' in source) {
     result.modules = (target.modules || []).concat(source.modules);

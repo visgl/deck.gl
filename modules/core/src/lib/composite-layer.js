@@ -64,11 +64,11 @@ export default class CompositeLayer extends Layer {
       return info;
     }
 
-    return Object.assign(info, {
-      // override object with picked data
-      object: object.__source.object,
-      index: object.__source.index
-    });
+    // override object with picked data
+    info.object = object.__source.object;
+    info.index = object.__source.index;
+
+    return info;
   }
 
   // Implement to generate subLayers
@@ -179,18 +179,14 @@ export default class CompositeLayer extends Layer {
       newProps,
       sublayerProps,
       // experimental feature that allows users to override sublayer props via parent layer prop
-      overridingSublayerProps,
-      {
-        id: `${this.props.id}-${sublayerId}`,
-        updateTriggers: Object.assign(
-          {
-            all: this.props.updateTriggers.all
-          },
-          sublayerProps.updateTriggers,
-          overridingSublayerTriggers
-        )
-      }
+      overridingSublayerProps
     );
+    newProps.id = `${this.props.id}-${sublayerId}`;
+    newProps.updateTriggers = {
+      all: this.props.updateTriggers.all,
+      ...sublayerProps.updateTriggers,
+      ...overridingSublayerTriggers
+    };
 
     // Pass through extension props
     for (const extension of extensions) {
