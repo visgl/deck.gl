@@ -475,9 +475,8 @@ export default class CPUAggregator {
       });
     }
 
-    // add bin colorValue and elevationValue to info
-    info.picked = Boolean(object);
     // override object with picked cell
+    info.picked = Boolean(object);
     info.object = object;
 
     return info;

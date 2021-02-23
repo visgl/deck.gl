@@ -211,7 +211,6 @@ export default class HeatmapLayer extends AggregationLayer {
       colorTexture,
       updateTimer
     } = this.state;
-    /* eslint-disable no-unused-expressions */
     weightsTransform?.delete();
     weightsTexture?.delete();
     maxWeightTransform?.delete();
@@ -220,7 +219,6 @@ export default class HeatmapLayer extends AggregationLayer {
     triTexCoordBuffer?.delete();
     colorTexture?.delete();
     updateTimer && clearTimeout(updateTimer);
-    /* eslint-enable no-unused-expressions */
   }
 
   // PRIVATE
