@@ -22,6 +22,7 @@ module.exports = {
   rules: {
     'guard-for-in': 0,
     'no-inline-comments': 0,
+    // eslint treats optional chaining as unused expressions
     'no-unused-expressions': 0,
     camelcase: 0,
     'react/forbid-prop-types': 0,

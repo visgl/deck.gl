@@ -1,4 +1,13 @@
-require('@babel/register');
+require('@babel/register')({
+  presets: [
+    [
+      '@babel/env',
+      {
+        targets: {node: '14'}
+      }
+    ]
+  ]
+});
 
 // Polyfill for loaders
 // TODO - @loaders.gl/polyfills seems to freeze the tests

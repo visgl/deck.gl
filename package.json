@@ -76,5 +76,8 @@
   "pre-commit": [
     "test-fast",
     "bindings-precommit-tests"
-  ]
+  ],
+  "engines": {
+    "node": ">=14"
+  }
 }
