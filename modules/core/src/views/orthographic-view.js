@@ -35,6 +35,9 @@ class OrthographicViewport extends Viewport {
     const scale = Math.pow(2, zoom);
     super({
       ...props,
+      // in case viewState contains longitude/latitude values,
+      // make sure that the base Viewport class does not treat this as a geospatial viewport
+      longitude: null,
       position: target,
       viewMatrix: viewMatrix.clone().scale([scale, scale * (flipY ? -1 : 1), scale]),
       projectionMatrix: getProjectionMatrix({width, height, near, far}),
