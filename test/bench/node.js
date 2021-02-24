@@ -1,12 +1,3 @@
-require('@babel/register')({
-  presets: [
-    [
-      '@babel/env',
-      {
-        targets: {node: '14'}
-      }
-    ]
-  ]
-});
+require('@babel/register');
 
 require('./index');

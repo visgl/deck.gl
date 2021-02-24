@@ -60,7 +60,7 @@ const config = {
         // Compile ES2015 using babel
         test: /\.js$/,
         loader: 'babel-loader',
-        include: [/src/, /bundle/],
+        include: [/src/, /bundle/, /esm/],
         options: {
           presets: [['@babel/preset-env', {forceAllTransforms: true}]],
           // all of the helpers will reference the module @babel/runtime to avoid duplication

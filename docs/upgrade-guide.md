@@ -2,6 +2,12 @@
 
 ## Upgrading from deck.gl v8.4 to v8.5
 
+### Transpilation
+
+The module entry point is now only lightly transpiled for the most commonly used evergreen browsers. This change offers significant savings on bundle size. If your application needs to support older browsers such as IE 11, make sure to include `node_modules` in your babel config.
+
+### Layers
+
 - `TextLayer`'s `backgroundColor` prop is deprecated. Use `background: true` and `getBackgroundColor` instead.
 - `TextLayer`'s default `fontSettings` have changed. When using `sdf`, the default `buffer` is now `4` and the default `radius` is now `12`.
 - `PathLayer`'s `rounded` prop is deprecated, replaced by two separate flags `jointRounded` and `capRounded`.
