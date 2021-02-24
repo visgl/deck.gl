@@ -63,7 +63,7 @@ float paraboloid(float distance, float sourceZ, float targetZ, float ratio) {
   float dir = step(deltaZ, 0.0);
   float z0 = mix(sourceZ, targetZ, dir);
   float r = mix(ratio, 1.0 - ratio, dir);
-  return sqrt(r * (p2 - r)) * dh + z0;
+  return dh == 0.0 ? sourceZ + deltaZ * ratio : sqrt(r * (p2 - r)) * dh + z0;
 }
 
 // offset vector by strokeWidth pixels
