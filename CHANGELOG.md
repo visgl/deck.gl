@@ -19,6 +19,11 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v8.4
 
+#### deck.gl [8.4.8] - Feb 23 2021
+
+- Fix TileLayer fetch options (#5521)
+- Force OrbitView/OrthographicView to create non-geospatial viewports (#5525)
+
 #### deck.gl [8.4.7] - Feb 19 2021
 
 - Force using a single loader for MVT data (#5507)
