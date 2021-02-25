@@ -7,7 +7,7 @@
   "dependencies": {
     "@deck.gl/core": "^8.1.0",
     "@deck.gl/layers": "^8.1.0",
-    "@loaders.gl/i3s": "^2.1.6",
+    "@loaders.gl/i3s": "^3.0.0-alpha",
     "loaders.gl": "^0.3.5"
   },
   "devDependencies": {

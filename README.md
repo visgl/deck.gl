@@ -6,7 +6,7 @@
     <img src="https://github.com/visgl/deck.gl/workflows/test/badge.svg?branch=master" alt="build" />
   </a>
   <a href="https://npmjs.org/package/deck.gl">
-    <img src="https://img.shields.io/npm/dm/deck.gl.svg?style=flat-square" alt="downloads" />
+    <img src="https://img.shields.io/npm/dm/@deck.gl/core.svg?style=flat-square" alt="downloads" />
   </a>
   <a href='https://coveralls.io/github/visgl/deck.gl?branch=master'>
     <img src='https://img.shields.io/coveralls/visgl/deck.gl.svg?style=flat-square' alt='Coverage Status' />

@@ -7,7 +7,7 @@
     "start-local": "webpack-dev-server --env.local --progress --hot --open"
   },
   "dependencies": {
-    "@loaders.gl/csv": "^2.3.9",
+    "@loaders.gl/csv": "^3.0.0-alpha",
     "d3-scale": "^2.0.0",
     "deck.gl": "^8.4.0",
     "mapbox-gl": "^1.0.0"

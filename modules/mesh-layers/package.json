@@ -18,7 +18,6 @@
   },
   "main": "dist/es5/index.js",
   "module": "dist/esm/index.js",
-  "esnext": "dist/es6/index.js",
   "files": [
     "dist",
     "src",
@@ -33,7 +32,7 @@
     "@deck.gl/core": "^8.0.0"
   },
   "dependencies": {
-    "@loaders.gl/gltf": "^2.3.9",
+    "@loaders.gl/gltf": "^3.0.0-alpha",
     "@luma.gl/experimental": "^8.4.1",
     "@luma.gl/shadertools": "^8.4.1"
   }

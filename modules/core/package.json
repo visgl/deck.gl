@@ -18,7 +18,6 @@
   },
   "main": "dist/es5/index.js",
   "module": "dist/esm/index.js",
-  "esnext": "dist/es6/index.js",
   "files": [
     "dist",
     "src",
@@ -32,8 +31,8 @@
     "prepublishOnly": "npm run build-debugger && npm run build-bundle && npm run build-bundle -- --env.dev"
   },
   "dependencies": {
-    "@loaders.gl/core": "^2.3.9",
-    "@loaders.gl/images": "^2.3.9",
+    "@loaders.gl/core": "^3.0.0-alpha",
+    "@loaders.gl/images": "^3.0.0-alpha",
     "@luma.gl/core": "^8.4.1",
     "@math.gl/web-mercator": "^3.4.2",
     "gl-matrix": "^3.0.0",
