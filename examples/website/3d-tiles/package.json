@@ -6,7 +6,7 @@
   },
   "dependencies": {
     "deck.gl": "^8.4.0",
-    "@loaders.gl/3d-tiles": "^2.3.9",
+    "@loaders.gl/3d-tiles": "^3.0.0-alpha",
     "react": "^16.8.0",
     "react-dom": "^16.8.0",
     "react-map-gl": "^5.0.0"
