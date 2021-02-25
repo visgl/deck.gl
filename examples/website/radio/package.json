@@ -7,7 +7,7 @@
     "start": "webpack-dev-server --progress --hot --open"
   },
   "dependencies": {
-    "@loaders.gl/csv": "^2.3.9",
+    "@loaders.gl/csv": "^3.0.0-alpha",
     "@material-ui/core": "^4.11.3",
     "@material-ui/lab": "^4.0.0-alpha.57",
     "d3-scale": "^2.0.0",

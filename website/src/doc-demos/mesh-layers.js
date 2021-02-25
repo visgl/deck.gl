@@ -25,7 +25,7 @@ export const ScenegraphLayerDemo = makeLayerDemo({
 
 export const SimpleMeshLayerDemo = makeLayerDemo({
   Layer: SimpleMeshLayer,
-  dependencies: ['https://unpkg.com/@loaders.gl/obj@latest/dist/dist.min.js'],
+  dependencies: ['https://unpkg.com/@loaders.gl/obj@beta/dist/dist.min.js'],
   imports: {OBJLoader},
   getTooltip: '({object}) => object && `${object.name}\n${object.address}`',
   props: `{
