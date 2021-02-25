@@ -10,22 +10,18 @@ deck.gl and luma.gl provide a lot of functionality and the amount of code these 
 There are multiple techniques used in JavaScript.
 
 
-### Choosing a dist folder
+### Choosing an entry point
 
-When installed from npm, deck.gl and related libraries come with three separate `dist` sub folders.
+When installed from npm, deck.gl and related libraries come with two separate distributions.
 
-| Folder     | `mainField` | Description   |
+| Directory     | `mainField` | Description   |
 | ---        | ---         | --- |
-| `dist/es5` | `main`      | All code is transpiled into ES5 and exports/imports are transpiled into `commonjs` requires. The main reason to use this distribution is if your bundler does not support tree-shaking using `import`/`export` |
+| `dist/es5` | `main`      | All code is transpiled to be compatible with the most commonly adopted evergreen browsers (see below). Exports/imports are transpiled into `commonjs` requires. The main reason to use this distribution is under Node.js (e.g. unit tests), or if your bundler does not support tree-shaking using `import`/`export`. |
 | `dist/esm` | `module`    | Same as `dist/es5`, except `export` and `import` statements are left untranspiled to enable tree shaking. |
-| `dist/es6` | `esnext`    | This distribution uses `babel-preset-env` and with very few exceptions essentially untranspiled ES6/ES2015 code. This is the smallest distribution, that will three-shake best, and is intended to be the best choice if you are only targeting "evergreen" browsers. |
 
-You will have to check the documentation of your particular bundler to see what configuration options are available:
+You will have to check the documentation of your particular bundler to see what configuration options are available. Webpack picks `module` main field over `main` if it is available. You can also explicitly choose one distribution by specifying a `resolve.mainFields` array.
 
-* Webpack 4 allows you to choose the `esnext` distribution by specifying a `resolve.mainFields` array.
-* Webpack 2 and later will pick `module` main field over `main` if it is available.
-
-For other bundlers, please refer to the respective documentation.
+The transpilation target is set to `>0.2%, maintained node versions, not ie 11, not dead, not chrome 49` resolved by [browserslist](https://github.com/browserslist/browserslist). To support older or less common browsers, you may use `@babel/preset-ev` in your babel settings and include `node_modules`.
 
 
 ### About Tree-Shaking
@@ -40,20 +36,19 @@ Note that tree-shaking still has limitations:
 * Naturally, an application that uses all the functionality offered by the library will benefit little from tree shaking, whereas a small app that only uses a few layers should expect bigger savings.
 
 
-### Bundle Size Number
+### Bundle Size Numbers
 
 So, what bundle size impact should you expect? When do you know if you have set up your bundler optimally. To help answer these questions, we provide some numbers you can compare against. deck.gl has scripts that measure the size of a minified bundle after each build, which allows us to provide comparison numbers between releases.
 
-| Dist | 6.0 Bundle (Compressed) | 5.2 Bundle (Compr.) | 5.1 Bundle (Compr.) | Comments |
-| ---  | ---                     | ---                 | ---                 | ---      |
-| ES6  | 530 KB (142 KB)         | 527 KB (141 KB)     | N/A                 | Minimally transpiled, almost "pure" ES6 |
-| ESM  | 633 KB (153 KB)         | 715 KB (159 KB)     | 708 KB (169 KB)     | Transpiled, tree-shaking enabled   |
-| ES5  | 695 KB (167 KB)         | 748 KB (166 KB)     | 754 KB (176 KB)     | Transpiled to ES5, no tree-shaking |
+| Entry point | 8.5 Bundle (Compressed) | 8.4 Bundle (Compressed) | Comments |
+| ---  | ---                     | ---                 | ---                 |
+| esm  | 398 KB (115 KB)         | 485 KB (128 KB)     | Transpiled, tree-shaking enabled   |
+| es5  | 686 KB (178 KB)         | 812 KB (197 KB)     | Transpiled, no tree-shaking |
 
 Notes:
 
-* Numbers represent the minified bundle size of a minimal application, bundled with Webpack 4, which means that the ES6 and ESM distribution results benefit from some tree shaking.
-* The number in parenthesis is the compressed bundle size. This is how much bigger you might expect your compressed bundle to get by adding deck.gl as a dependency to your application.
+* Numbers represent the bundle size of a minimal application, bundled with Webpack 4, which means that the untransipiled and the ESM distribution results benefit from some tree shaking.
+* The number in parenthesis is the compressed bundle size. This is how much bigger you might expect your gzipped bundle to get by adding deck.gl as a dependency to your application.
 
 
 ### Future Work

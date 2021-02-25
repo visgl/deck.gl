@@ -64,7 +64,7 @@
     "gl": "^4.9.0",
     "glsl-transpiler": "^1.8.3",
     "jsdom": "^15.0.0",
-    "ocular-dev-tools": "^0.2.3",
+    "ocular-dev-tools": "^0.3.0",
     "pre-commit": "^1.2.2",
     "pre-push": "^0.1.1",
     "raw-loader": "^0.5.1",
