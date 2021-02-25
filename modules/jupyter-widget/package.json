@@ -24,9 +24,9 @@
   "sideEffects": false,
   "scripts": {
     "watch": "webpack --watch",
-    "build": "webpack",
+    "build": "webpack -p",
     "build:labextension": "npm pack",
-    "prepublishOnly": "webpack"
+    "prepublishOnly": "webpack -p"
   },
   "dependencies": {
     "@deck.gl/aggregation-layers": "8.5.0-alpha.3",
