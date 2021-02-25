@@ -19,6 +19,10 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v8.4
 
+#### deck.gl [8.4.9] - Feb 25 2021
+
+- Fix zero height arc rendering between coordinates with different z components (#5527)
+
 #### deck.gl [8.4.8] - Feb 23 2021
 
 - Fix TileLayer fetch options (#5521)
