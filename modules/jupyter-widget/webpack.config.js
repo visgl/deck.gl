@@ -18,12 +18,19 @@ const rules = [
     include: /src/,
     options: {
       babelrc: false,
-      presets: [['@babel/preset-env', {forceAllTransforms: true}]],
+      presets: [
+        [
+          '@babel/preset-env',
+          {
+            targets: ['>0.2%', 'not ie 11', 'not dead', 'not chrome 49']
+          }
+        ]
+      ],
       // all of the helpers will reference the module @babel/runtime to avoid duplication
       // across the compiled output.
       plugins: [
         '@babel/transform-runtime',
-        // 'inline-webgl-constants',
+        'inline-webgl-constants',
         ['remove-glsl-comments', {patterns: ['**/*.glsl.js']}]
       ]
     }
