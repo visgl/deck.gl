@@ -56,7 +56,10 @@ float paraboloid(float distance, float sourceZ, float targetZ, float ratio) {
 
   float deltaZ = targetZ - sourceZ;
   float dh = distance * instanceHeights;
-  float unitZ = dh == 0.0 ? 0.0 : deltaZ / dh;
+  if (dh == 0.0) {
+    return sourceZ + deltaZ * ratio;
+  }
+  float unitZ = deltaZ / dh;
   float p2 = unitZ * unitZ + 1.0;
 
   // sqrt does not deal with negative values, manually flip source and target if delta.z < 0
