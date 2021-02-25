@@ -18,7 +18,6 @@ Release date: TBD
   </tbody>
 </table>
 
-
 ### MVT Layer
 
 #### Direct binary parsing
@@ -34,6 +33,23 @@ Mapbox Vector Tiles parsing throughput is now 2-3x faster, due to MVT tiles bein
 
 _Benchmarks ran using scripts on a 2012 MacBook Pro, 2.3 GHz Intel Core i7, 8 GB, measuring parsing time of MVTLoader only (network time and rendering is not included)_
 
+
+### Default transpilation and bundle size
+
+The NPM distribution has dropped IE 11 support in exchange for an almost 20% reduction in size.
+
+| Entry point | 8.5 Bundle (gzipped) | 8.4 Bundle (gzipped) | Comments |
+| ---  | ---                     | ---                 | ---                 |
+| module (dist/esm)  | 398 KB (115 KB)         | 485 KB (128 KB)     | Transpiled, tree-shaking enabled   |
+| main (dist/es5)    | 686 KB (178 KB)         | 812 KB (197 KB)     | Transpiled, no tree-shaking |
+
+*Measured as the footprint of @deck.gl/core, bundled and minified with Webpack 4*
+
+To support older or less common browsers, make sure that `node_modules` is included in your application's babel settings.
+
+For backward compatibility, the pre-built bundle (`dist.min.js`) is not affected by this change.
+
+
 ### TextLayer
 
 New props are added for more flexible styling of the texts:
@@ -48,10 +64,15 @@ New props are added for more flexible styling of the texts:
 
 See [documentation](/docs/api-reference/layers/text-layer.md) for details.
 
+### React
+
+The `DeckGL` React component is rewritten using functional component and hooks.
 
 ### Other layer improvements
 
 - `PathLayer` now supports controlling `jointRounded` and `capRounded` separately. Dashed lines via `PathStyleExtension` also respects the cap type.
+- `PolygonLayer` and `GeoJsonLayer`: `autoHighlight` now highlights both the outline and the fill of the hovered polygon, instead of either the outline or the fill.
+
 
 
 ## deck.gl v8.4
