@@ -21,6 +21,14 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ### deck.gl v8.5 Prereleases
 
+#### deck.gl [8.5.0-alpha.3] - Feb 25 2021
+
+- Bump luma.gl dependencies to 8.5.0-alpha (#5535)
+- Change build targets (#5528)
+- Bump loaders version to 3.0.0-alpha (#5531)
+- Syntax pass (#5520)
+- Update dev setup to support modern JS syntax (#5517)
+
 #### deck.gl [8.5.0-alpha.2] - Feb 22 2021
 
 - PathLayer: separate joint type and cap type props (#5508)
@@ -37,6 +45,15 @@ Ref: http://keepachangelog.com/en/0.3.0/
 - Standardize autoHighlight logic in CompositeLayer (#5454)
 
 ## deck.gl v8.4
+
+#### deck.gl [8.4.9] - Feb 25 2021
+
+- Fix zero height arc rendering between coordinates with different z components (#5527)
+
+#### deck.gl [8.4.8] - Feb 23 2021
+
+- Fix TileLayer fetch options (#5521)
+- Force OrbitView/OrthographicView to create non-geospatial viewports (#5525)
 
 #### deck.gl [8.4.7] - Feb 19 2021
 
