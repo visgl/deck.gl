@@ -85,7 +85,7 @@ function makeLocalDevConfig(EXAMPLE_DIR = LIB_DIR, linkToLuma) {
           test: /\.js$/,
           loader: 'babel-loader',
           options: {
-            presets: ['@babel/env']
+            presets: [['@babel/env', {targets: '> 1%, not ie 11'}]]
           },
           include: [resolve(ROOT_DIR, 'modules'), resolve(ROOT_DIR, '../luma.gl/modules')]
         }
