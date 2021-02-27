@@ -4,7 +4,7 @@
     {
       "title": "Overview",
       "entries": [
-        {"entry": "docs/README"},
+        {"entry": "docs"},
         {"entry": "docs/whats-new"},
         {"entry": "docs/upgrade-guide"},
         {"entry": "docs/contributing"},
@@ -45,7 +45,7 @@
         {
           "title": "Writing Custom Layers",
           "entries": [
-            {"entry": "docs/developer-guide/custom-layers/README"},
+            {"entry": "docs/developer-guide/custom-layers"},
             {"entry": "docs/developer-guide/custom-layers/layer-lifecycle"},
             {"entry": "docs/developer-guide/custom-layers/picking"},
             {"entry": "docs/developer-guide/custom-layers/composite-layers"},
@@ -71,7 +71,7 @@
         {
           "title": "Layers",
           "entries": [
-            {"entry": "docs/api-reference/layers/README"},
+            {"entry": "docs/api-reference/layers"},
             {"entry": "docs/api-reference/core/layer"},
             {"entry": "docs/api-reference/core/composite-layer"},
             {"entry": "docs/api-reference/layers/arc-layer"},
