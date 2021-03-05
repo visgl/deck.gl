@@ -19,6 +19,10 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v8.4
 
+#### deck.gl [8.4.10] - Mar 4 2021
+
+- Fix MVT layers binary with empty tiles. Bump loaders.gl to 2.3.13 (#5559)
+
 #### deck.gl [8.4.9] - Feb 25 2021
 
 - Fix zero height arc rendering between coordinates with different z components (#5527)
