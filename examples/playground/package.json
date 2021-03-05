@@ -8,11 +8,11 @@
     "build": "rm -rf dist && mkdir dist && cp index.html dist/ && webpack --env.local --env.production=true"
   },
   "dependencies": {
-    "@loaders.gl/3d-tiles": "^2.3.9",
-    "@loaders.gl/core": "^2.3.9",
-    "@loaders.gl/csv": "^2.3.9",
-    "@loaders.gl/draco": "^2.3.9",
-    "@loaders.gl/gltf": "^2.3.9",
+    "@loaders.gl/3d-tiles": "^2.3.13",
+    "@loaders.gl/core": "^2.3.13",
+    "@loaders.gl/csv": "^2.3.13",
+    "@loaders.gl/draco": "^2.3.13",
+    "@loaders.gl/gltf": "^2.3.13",
     "@luma.gl/constants": "^8.3.1",
     "brace": "^0.11.1",
     "deck.gl": "^8.3.0",
