@@ -14,7 +14,8 @@ export const CONNECTIONS = {
   BIGQUERY: 'bigquery',
   CARTO: 'carto',
   SNOWFLAKE: 'snowflake',
-  REDSHIFT: 'redshift'
+  REDSHIFT: 'redshift',
+  POSTGRES: 'postgres'
 };
 
 /**
