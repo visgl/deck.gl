@@ -11,7 +11,7 @@ export function getAttrValue(attr, d) {
 
   // Is string
   if (typeof attr === ALLOWED_ATTR_TYPES[1]) {
-    return d.properties[attr];
+    return d[attr] || d.properties[attr];
   }
 
   return {};

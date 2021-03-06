@@ -3,6 +3,7 @@ import {getDefaultCredentials, getMapsVersion} from '../config';
 const DEFAULT_USER_COMPONENT_IN_URL = '{user}';
 const DEFAULT_REGION_COMPONENT_IN_URL = '{region}';
 
+
 export const MAP_TYPES = {
   SQL: 'sql',
   TABLE: 'table',
@@ -11,32 +12,10 @@ export const MAP_TYPES = {
 
 export const CONNECTIONS = {
   BIGQUERY: 'bigquery',
-  CARTO: 'carto'
+  CARTO: 'carto',
+  SNOWFLAKE: 'snowflake',
+  REDSHIFT: 'redshift'
 };
-
-/**
- * Obtain a TileJson from Maps API v1 and v2
- */
-export async function getTileJSON({connection, type, source, mapConfig, credentials}) {
-  const creds = {...getDefaultCredentials(), ...credentials};
-  let url;
-
-  switch (getMapsVersion(creds)) {
-    case 'v1':
-      // Maps API v1
-      url = buildURL({mapConfig, credentials: creds});
-      const layergroup = await request({url, credentials: creds});
-      return layergroup.metadata.tilejson.vector;
-
-    case 'v2':
-      // Maps API v2
-      url = buildURL({connection, type, source, credentials: creds});
-      return await request({url, credentials: creds});
-
-    default:
-      throw new Error('Invalid maps API version. It shoud be v1 or v2');
-  }
-}
 
 /**
  * Request against Maps API
@@ -92,17 +71,24 @@ function dealWithError({response, json, credentials}) {
 /**
  * Build a URL with all required parameters
  */
-function buildURL({connection, type, source, mapConfig, credentials}) {
-  const encodedApiKey = encodeParameter('api_key', credentials.apiKey);
+function buildURL({connection, type, source, mapConfig, credentials, format}) {
+  
   const encodedClient = encodeParameter('client', `deck-gl-carto`);
-  const parameters = [encodedApiKey, encodedClient];
+  const parameters = [encodedClient];
+  
+  if (credentials.accessToken) {
+    parameters.push(encodeParameter('access_token', credentials.accessToken));
+  }
+  else if (credentials.apiKey !== 'default_public') {
+    parameters.push(encodeParameter('api_key', credentials.apiKey));
+  }
 
   if (mapConfig) {
     const cfg = JSON.stringify(mapConfig);
     return `${mapsUrl(credentials)}?${parameters.join('&')}&${encodeParameter('config', cfg)}`;
   }
   let url = `${mapsUrl(credentials)}/${connection}/${type}?`;
-  url += `${encodeParameter('source', source)}&format=tilejson&${parameters.join('&')}`;
+  url += `${encodeParameter('source', source)}&${parameters.join('&')}`;
   return url;
 }
 
@@ -120,4 +106,36 @@ function mapsUrl(credentials) {
  */
 function encodeParameter(name, value) {
   return `${name}=${encodeURIComponent(value)}`;
+}
+
+export async function getMapMetadata({connection, type, source, credentials}) {
+
+  const creds = {...getDefaultCredentials(), ...credentials};
+
+  const url = buildURL({connection, type, source, credentials: creds});
+
+  return await request({url, credentials: creds});
+}
+
+
+export async function getMapData({connection, type, source, mapConfig, credentials, format}) {
+  const creds = {...getDefaultCredentials(), ...credentials};
+  let url;
+
+  switch (getMapsVersion(creds)) {
+    case 'v1':
+      // Maps API v1
+      url = buildURL({mapConfig, credentials: creds, format});
+      const layergroup = await request({url, credentials: creds});
+      return layergroup.metadata.tilejson.vector;
+
+    case 'v2':
+      // Maps API v2
+      url = buildURL({connection, type, source, credentials: creds, format});
+      url += `&format=${format}`;
+      return await request({url, credentials: creds});
+
+    default:
+      throw new Error('Invalid maps API version. It shoud be v1 or v2');
+  }
 }

@@ -1,6 +1,7 @@
 const defaultCredentials = {
   username: 'public',
   apiKey: 'default_public',
+  accessToken: null,
   region: 'us',
   // Set to null to guess from mapsUrl attribute. Other values are 'v1' or 'v2'
   mapsVersion: null,
