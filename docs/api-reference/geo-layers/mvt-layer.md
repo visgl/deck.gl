@@ -140,7 +140,7 @@ Receives arguments:
 
 ## Methods
 
-#### `getRenderedFeatures` (Function)
+##### `getRenderedFeatures` (Function)
 
 Get the rendered features in the current viewport.
 

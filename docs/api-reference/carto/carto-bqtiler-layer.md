@@ -10,15 +10,14 @@ First you need first to generate a tileset of your dataset in your BigQuery acco
 import DeckGL from '@deck.gl/react';
 import {CartoBQTilerLayer} from '@deck.gl/carto';
 
-
 function App({viewState}) {
   const layer = new CartoBQTilerLayer({
-          data: 'cartobq.maps.nyc_taxi_points_demo_id',
-          getLineColor: [255, 255, 255],
-          getFillColor: [238, 77, 90],
-          pointRadiusMinPixels: 2,
-          lineWidthMinPixels: 1
-        });
+    data: 'cartobq.maps.nyc_taxi_points_demo_id',
+    getLineColor: [255, 255, 255],
+    getFillColor: [238, 77, 90],
+    pointRadiusMinPixels: 2,
+    lineWidthMinPixels: 1
+  });
 
   return <DeckGL viewState={viewState} layers={[layer]} />;
 }
