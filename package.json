@@ -71,7 +71,8 @@
     "react": "^16.2.0",
     "react-dom": "^16.2.0",
     "react-map-gl": "^5.1.0",
-    "s2-geometry": "^1.2.10"
+    "s2-geometry": "^1.2.10",
+    "typescript": "^4.2.3"
   },
   "pre-commit": [
     "test-fast",

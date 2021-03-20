@@ -40,6 +40,7 @@ export function getDeckInstance({map, gl, deck}) {
       gl,
       width: false,
       height: false,
+      touchAction: 'unset',
       viewState: getViewState(map)
     });
     deck = new Deck(deckProps);
