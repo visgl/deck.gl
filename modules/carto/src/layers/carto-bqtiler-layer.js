@@ -1,8 +1,8 @@
 import CartoLayer from './carto-layer';
-import {CONNECTIONS, MAP_TYPES} from '../api/maps-api-client';
+import {PROVIDERS, MAP_TYPES} from '../api/maps-api-client';
 
 const defaultProps = {
-  connection: CONNECTIONS.BIGQUERY,
+  provider: PROVIDERS.BIGQUERY,
   type: MAP_TYPES.TILESET
 };
 

@@ -27,10 +27,10 @@ const INITIAL_VIEW_STATE = {
 // };
 
 setDefaultCredentials({
-  username: 'carto',
-  apiKey: 'caa6158db8ba3550a16ea2b3505da92374ec92ec',
-  //accessToken: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImNhcnRvIiwiY29ubmVjdGlvbl9pZCI6ImRldi1zbm93Zmxha2UiLCJuYW1lIjoiSldUIHRlc3RpbmciLCJyZWdpb24iOiJ1cyIsInByaXZhY3kiOiJwdWJsaWMiLCJzY29wZXMiOlsic3FsIiwibWFwcyIsInRva2Vuczp3cml0ZSIsInRva2VuczpyZWFkIiwidXNlcjpyZWFkIl0sImFsbG93ZWRVcmxzIjpbImh0dHBzOi8vYXBwMS5jYXJ0by5jb20iXSwiaWF0IjoxNjE0OTc0MzIyLCJleHAiOjE2MTQ5Nzc5MjJ9.-SwG7ghhQatJJ0Au8mm17cX9rLEq3yjopX0GMAYqwdo',
-  mapsUrl: 'http://localhost:8282/user/{user}'
+  // username: 'carto',
+  // apiKey: 'caa6158db8ba3550a16ea2b3505da92374ec92ec',
+  accessToken: 'eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6InU5Umd1M3ZnZ2JYUndWaUYyTm5mNyJ9.eyJpc3MiOiJodHRwczovL2NhcnRvLnVzLmF1dGgwLmNvbS8iLCJzdWIiOiJnb29nbGUtb2F1dGgyfDEwODgyNDc2NDM3Mjk1ODU0MjY5NyIsImF1ZCI6Imh0dHA6Ly9sb2NhbGhvc3Q6ODI4MiIsImlhdCI6MTYxNjM0NjIwMywiZXhwIjoxNjE2NDMyNjAzLCJhenAiOiJKRDZiUkFVYTJsYjhDVlBOSnVOVTFmZ1lGWVF5b01yRSIsInBlcm1pc3Npb25zIjpbXX0.t1I8pinWqbh3VbYHT39SiBT8JQPqO4CujsfsEx7hbbtY2BV-r5LlggC7DYJNbB-cYw3yrG6qi15FPbzJyeXtsZM90Il9JkICQwGkVFZ4ECgEmOXXOvACnfDSE9QW2EJ0dKdOO7OsBfPhSDBC-IpqGbFXFhnO8Pix_YN_CBk9JA8TagdXavpSquaBu1M552e9M7XJHRlqexrvHSGaE9MARnlvCeF886ipZboUG1fgJO9wL6_fJ8kispup4rqSvhJXebN9Rbt9j2mIbajJAyBKN06Uk1vfaGaqf2WBY1zs06zmAixBJz5VsA7S9BKq-yjhlWXEJvLKbj3mgK08AtcxuA',
+  mapsUrl: 'http://localhost:8282'
 });
 
 // Add Mapbox GL for the basemap. It's not a requirement if you don't need a basemap.
@@ -180,9 +180,10 @@ function render() {
     
     // new CartoLayer({
     //   id: 'carto_table',
-    //   connection: 'snowflake',
+    //   provider: 'snowflake',
     //   data: 'alasarr.airports',
     //   type: 'table',
+    //   connection: 'dev-snowflake',
     //   filled: true,
     //   pointRadiusMinPixels: 2,
     //   pointRadiusScale: 2000,
@@ -192,6 +193,22 @@ function render() {
     //   highlightColor: [0, 0, 128, 128],
     //   pickable: true
     // })
+
+    new CartoLayer({
+      id: 'carto_table',
+      provider: 'snowflake',
+      data: 'select * from alasarr.airports',
+      type: 'sql',
+      connection: 'dev-snowflake',
+      filled: true,
+      pointRadiusMinPixels: 2,
+      pointRadiusScale: 2000,
+      getRadius: 15,
+      getFillColor: [200, 0, 80, 180],
+      autoHighlight: true,
+      highlightColor: [0, 0, 128, 128],
+      pickable: true
+    })
 
     // new CartoLayer({
     //   id: 'snowflake_query',
