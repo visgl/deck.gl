@@ -88,7 +88,9 @@ export default class LayerManager {
     this._needsRedraw = 'Initial render';
     this._needsUpdate = false;
     this._debug = false;
-    this._onError = null;
+    /** @type {(error: Error, source: string) => any} */
+    // eslint-disable-next-line handle-callback-err
+    this._onError = (error, source) => {};
 
     this.activateViewport = this.activateViewport.bind(this);
 
@@ -217,11 +219,8 @@ export default class LayerManager {
   }
 
   _handleError(stage, error, layer) {
-    if (this._onError) {
-      this._onError(error, layer);
-    } else {
-      log.error(`error during ${stage} of ${layerName(layer)}`, error)();
-    }
+    const message = `${error} during ${stage} of ${layerName(layer)}`;
+    this._onError(new Error(message), layer);
   }
 
   // Match all layers, checking for caught errors

@@ -133,7 +133,8 @@ const defaultProps = {
   onBeforeRender: noop,
   onAfterRender: noop,
   onLoad: noop,
-  onError: (error, ...args) => log.error(...args, error)(),
+  /** @type {(error: Error, source: string) => any} */
+  onError: (error, source) => log.error(`${error}`, source)(),
   _onMetrics: null,
 
   getCursor,
@@ -501,7 +502,7 @@ export default class Deck {
           ...options,
           canvas: this.canvas,
           debug,
-          onContextLost: event => this.props.onError(event)
+          onContextLost: event => this.props.onError(event, null)
         }),
       // eslint-disable-next-line no-shadow
       onInitialize: ({gl}) => this._setGLContext(gl),
