@@ -19,6 +19,10 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v8.4
 
+#### deck.gl [8.4.11] - Mar 22 2021
+
+- Mapbox module: unset touchAction when using external gl (#5568)
+
 #### deck.gl [8.4.10] - Mar 4 2021
 
 - Fix MVT layers binary with empty tiles. Bump loaders.gl to 2.3.13 (#5559)
