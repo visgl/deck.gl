@@ -146,6 +146,10 @@ export default class LayerManager {
 
   // Set props needed for layer rendering and picking.
   setProps(props) {
+    if ('onError' in props) {
+      this._onError = props.onError;
+    }
+
     if ('debug' in props) {
       this._debug = props.debug;
     }
@@ -158,10 +162,6 @@ export default class LayerManager {
     // TODO - For now we set layers before viewports to preserve changeFlags
     if ('layers' in props) {
       this.setLayers(props.layers);
-    }
-
-    if ('onError' in props) {
-      this._onError = props.onError;
     }
   }
 
