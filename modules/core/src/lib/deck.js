@@ -501,9 +501,9 @@ export default class Deck {
           ...options,
           canvas: this.canvas,
           debug,
-          // eslint-disable-next-line
           onContextLost: event => this.props.onError(event)
         }),
+      // eslint-disable-next-line no-shadow
       onInitialize: ({gl}) => this._setGLContext(gl),
       onRender: this._onRenderFrame,
       onBeforeRender: props.onBeforeRender,
