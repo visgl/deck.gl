@@ -133,7 +133,7 @@ const defaultProps = {
   onBeforeRender: noop,
   onAfterRender: noop,
   onLoad: noop,
-  onError: (error, ...args) => log.error(...args, error)(),
+  onError: null,
   _onMetrics: null,
 
   getCursor,
@@ -175,6 +175,7 @@ export default class Deck {
     this._onPointerDown = this._onPointerDown.bind(this);
     this._onPointerMove = this._onPointerMove.bind(this);
     this._pickAndCallback = this._pickAndCallback.bind(this);
+    this._onRendererInitialized = this._onRendererInitialized.bind(this);
     this._onRenderFrame = this._onRenderFrame.bind(this);
     this._onViewStateChange = this._onViewStateChange.bind(this);
     this._onInteractionStateChange = this._onInteractionStateChange.bind(this);
@@ -495,16 +496,8 @@ export default class Deck {
       autoResizeDrawingBuffer,
       autoResizeViewport: false,
       gl,
-      onCreateContext: options =>
-        createGLContext({
-          ...glOptions,
-          ...options,
-          canvas: this.canvas,
-          debug,
-          onContextLost: event => this.props.onError(event)
-        }),
-      // eslint-disable-next-line no-shadow
-      onInitialize: ({gl}) => this._setGLContext(gl),
+      onCreateContext: opts => createGLContext({...glOptions, ...opts, canvas: this.canvas, debug}),
+      onInitialize: this._onRendererInitialized,
       onRender: this._onRenderFrame,
       onBeforeRender: props.onBeforeRender,
       onAfterRender: props.onAfterRender,
@@ -709,6 +702,10 @@ export default class Deck {
   }
 
   // Callbacks
+
+  _onRendererInitialized({gl}) {
+    this._setGLContext(gl);
+  }
 
   _onRenderFrame(animationProps) {
     this._getFrameStats();
