@@ -1,5 +1,6 @@
 export default `\
 attribute vec3 positions;
+attribute vec3 positions64Low;
 attribute float weights;
 varying vec4 weightsTexture;
 uniform float radiusPixels;
@@ -13,7 +14,7 @@ void main()
   float radiusTexels  = project_pixel_size(radiusPixels) * textureWidth / (commonBounds.z - commonBounds.x);
   gl_PointSize = radiusTexels * 2.;
 
-  vec3 commonPosition = project_position(positions);
+  vec3 commonPosition = project_position(positions, positions64Low);
 
   // map xy from commonBounds to [-1, 1]
   gl_Position.xy = (commonPosition.xy - commonBounds.xy) / (commonBounds.zw - commonBounds.xy) ;
