@@ -67,5 +67,27 @@ export default [
       })
     ],
     goldenImage: './test/render/golden-images/heatmap-lnglat-high-zoom.png'
+  },
+  {
+    name: 'heatmap-lnglat-high-precision',
+    viewState: {
+      latitude: 37.76,
+      longitude: -122.42,
+      zoom: 22,
+      pitch: 0,
+      bearing: 0
+    },
+    layers: [
+      new HeatmapLayer({
+        id: 'heatmap-lnglat-high-precision',
+        data: points,
+        getPosition: d => [
+          (d.COORDINATES[0] + 122.42) / 1000 - 122.42,
+          (d.COORDINATES[1] - 37.76) / 1000 + 37.76
+        ],
+        radiusPixels: 35
+      })
+    ],
+    goldenImage: './test/render/golden-images/heatmap-lnglat-high-precision.png'
   }
 ];

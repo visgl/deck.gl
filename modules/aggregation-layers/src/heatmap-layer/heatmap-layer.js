@@ -33,8 +33,7 @@ import {
   AttributeManager,
   COORDINATE_SYSTEM,
   log,
-  _mergeShaders as mergeShaders,
-  project32
+  _mergeShaders as mergeShaders
 } from '@deck.gl/core';
 import TriangleLayer from './triangle-layer';
 import AggregationLayer from '../aggregation-layer';
@@ -269,7 +268,7 @@ export default class HeatmapLayer extends AggregationLayer {
   _setupAttributes() {
     const attributeManager = this.getAttributeManager();
     attributeManager.add({
-      positions: {size: 3, accessor: 'getPosition'},
+      positions: {size: 3, type: GL.DOUBLE, accessor: 'getPosition'},
       weights: {size: 1, accessor: 'getWeight'}
     });
     this.setState({positionAttributeName: 'positions'});
@@ -299,8 +298,7 @@ export default class HeatmapLayer extends AggregationLayer {
     const shaders = mergeShaders(
       {
         vs: weights_vs,
-        _fs: weights_fs,
-        modules: [project32]
+        _fs: weights_fs
       },
       shaderOptions
     );
@@ -377,7 +375,7 @@ export default class HeatmapLayer extends AggregationLayer {
       viewport.unproject([viewport.width, 0]),
       viewport.unproject([viewport.width, viewport.height]),
       viewport.unproject([0, viewport.height])
-    ];
+    ].map(p => p.map(Math.fround));
 
     // #1: get world bounds for current viewport extends
     const visibleWorldBounds = getBounds(viewportCorners); // TODO: Change to visible bounds
