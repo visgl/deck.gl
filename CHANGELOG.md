@@ -19,6 +19,12 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v8.4
 
+#### deck.gl [8.4.12] - Apr 5 2021
+
+- Fix HeatmapLayer in offset mode (#5625)
+- Fix HeatmapLayer precision (#5621)
+- set onError before setLayers (#5601)
+
 #### deck.gl [8.4.11] - Mar 22 2021
 
 - Mapbox module: unset touchAction when using external gl (#5568)
