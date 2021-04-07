@@ -179,7 +179,11 @@ export default class Controller {
     }
     if ('dragMode' in props) {
       this.dragMode = props.dragMode;
+    } else if ('invertPan' in props) {
+      this.invertPan = props.invertPan;
     }
+    // invertPan is replaced by props.dragMode, keeping for backward compatibility
+    // https://github.com/visgl/deck.gl/pull/5157/files#diff-c9195c6eee208cce0e5eee8931b242f29502d2ccf7297e553b4649ee82c807ee
     this.controllerStateProps = props;
 
     if ('eventManager' in props && this.eventManager !== props.eventManager) {
@@ -239,7 +243,7 @@ export default class Controller {
   toggleEvents(eventNames, enabled) {
     if (this.eventManager) {
       eventNames.forEach(eventName => {
-        if (this._events[eventName] !== enabled) {
+        if (this._events !== null && this._events[eventName] !== enabled) {
           this._events[eventName] = enabled;
           if (enabled) {
             this.eventManager.on(eventName, this.handleEvent);
@@ -247,6 +251,7 @@ export default class Controller {
             this.eventManager.off(eventName, this.handleEvent);
           }
         }
+        // TODO: this._events is null ?
       });
     }
   }
@@ -361,10 +366,14 @@ export default class Controller {
       );
     } else {
       const newControllerState = this.controllerState.panEnd();
-      this.updateViewport(newControllerState, null, {
-        isDragging: false,
-        isPanning: false
-      });
+      this.updateViewport(
+        newControllerState,
+        {},
+        {
+          isDragging: false,
+          isPanning: false
+        }
+      );
     }
     return true;
   }
@@ -408,10 +417,14 @@ export default class Controller {
       );
     } else {
       const newControllerState = this.controllerState.rotateEnd();
-      this.updateViewport(newControllerState, null, {
-        isDragging: false,
-        isRotating: false
-      });
+      this.updateViewport(
+        newControllerState,
+        {},
+        {
+          isDragging: false,
+          isRotating: false
+        }
+      );
     }
     return true;
   }
@@ -502,10 +515,14 @@ export default class Controller {
       this.blockEvents(inertia);
     } else {
       const newControllerState = this.controllerState.rotateEnd();
-      this.updateViewport(newControllerState, null, {
-        isDragging: false,
-        isRotating: false
-      });
+      this.updateViewport(
+        newControllerState,
+        {},
+        {
+          isDragging: false,
+          isRotating: false
+        }
+      );
     }
     return true;
   }
@@ -588,12 +605,16 @@ export default class Controller {
       this.blockEvents(inertia);
     } else {
       const newControllerState = this.controllerState.zoomEnd().rotateEnd();
-      this.updateViewport(newControllerState, null, {
-        isDragging: false,
-        isPanning: false,
-        isZooming: false,
-        isRotating: false
-      });
+      this.updateViewport(
+        newControllerState,
+        {},
+        {
+          isDragging: false,
+          isPanning: false,
+          isZooming: false,
+          isRotating: false
+        }
+      );
     }
     this._startPinchRotation = null;
     this._lastPinchEvent = null;
@@ -688,7 +709,7 @@ export default class Controller {
     return true;
   }
 
-  _getTransitionProps() {
+  _getTransitionProps({}) {
     // Transitions on double-tap and key-down are only supported by MapController
     return NO_TRANSITION_PROPS;
   }
