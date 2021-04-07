@@ -21,6 +21,11 @@
 /* eslint-disable max-statements, complexity */
 import TransitionManager from './transition-manager';
 
+/**
+ *
+ * @typedef { import('hammerjs')}
+ */
+
 const NO_TRANSITION_PROPS = {
   transitionDuration: 0
 };
@@ -80,7 +85,7 @@ export default class Controller {
 
   /**
    * Callback for events
-   * @param {hammer.Event} event
+   * @param {HammerInput} event
    */
   handleEvent(event) {
     const {ControllerState} = this;

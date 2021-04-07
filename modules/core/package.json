@@ -39,5 +39,8 @@
     "math.gl": "^3.4.2",
     "mjolnir.js": "^2.5.0",
     "probe.gl": "^3.3.1"
+  },
+  "devDependencies": {
+    "@types/hammerjs": "^2.0.39"
   }
 }
