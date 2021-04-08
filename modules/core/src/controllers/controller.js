@@ -709,8 +709,8 @@ export default class Controller {
     return true;
   }
 
-  _getTransitionProps({}) {
+  _getTransitionProps(TransitionProps = {}) {
     // Transitions on double-tap and key-down are only supported by MapController
-    return NO_TRANSITION_PROPS;
+    return TransitionProps ?? NO_TRANSITION_PROPS;
   }
 }
