@@ -19,6 +19,10 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v8.4
 
+#### deck.gl [8.4.13] - Apr 11 2021
+
+- Fix BitmapLayer crash during multi-depth picking (#5640)
+
 #### deck.gl [8.4.12] - Apr 5 2021
 
 - Fix HeatmapLayer in offset mode (#5625)
