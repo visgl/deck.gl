@@ -133,6 +133,15 @@ export default class BitmapLayer extends Layer {
     return info;
   }
 
+  // Override base Layer multi-depth picking logic
+  disablePickingIndex() {
+    this.setState({disablePicking: true});
+  }
+
+  restorePickingColors() {
+    this.setState({disablePicking: false});
+  }
+
   _updateAutoHighlight(info) {
     super._updateAutoHighlight({
       ...info,
@@ -186,9 +195,13 @@ export default class BitmapLayer extends Layer {
   }
 
   draw(opts) {
-    const {uniforms} = opts;
-    const {model, coordinateConversion, bounds} = this.state;
+    const {uniforms, moduleParameters} = opts;
+    const {model, coordinateConversion, bounds, disablePicking} = this.state;
     const {image, desaturate, transparentColor, tintColor} = this.props;
+
+    if (moduleParameters.pickingActive && disablePicking) {
+      return;
+    }
 
     // // TODO fix zFighting
     // Render the image
