@@ -5,7 +5,9 @@
 Ensure you follow the [Terms and Conditions](https://drive.google.com/file/d/1P7bhSE-N9iegI398QYDjKeVhnbS7-Ilk/view) when using them.
 
 
-## React
+## Usage
+
+### React
 
 **Important Note:** Mapbox-GL-JS v2.0 changed to a license that requires an API key for loading the library, which will prevent you from using `react-map-gl` ( a higher level library). They have an in-depth guide about it [here](https://github.com/visgl/react-map-gl/blob/v6.0.0/docs/get-started/mapbox-tokens.md).
 
@@ -28,7 +30,7 @@ import {BASEMAP} from '@deck.gl/carto';
 </DeckGL>
 ```
 
-## Standalone
+### Standalone
 
 To use pre-bundled scripts:
 
