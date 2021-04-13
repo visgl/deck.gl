@@ -110,7 +110,10 @@ def iframe_with_srcdoc(html_str, width="100%", height=500):
 def render_for_colab(html_str, iframe_height):
     from IPython.display import HTML, Javascript  # noqa
 
-    js_height_snippet = "google.colab.output.setIframeHeight(0, true, {maxHeight: %s})" % iframe_height
+    js_height_snippet = "google.colab.output.setIframeHeight(%d, true, {minHeight: %d})" % (
+        iframe_height,
+        iframe_height,
+    )
     display(Javascript(js_height_snippet))  # noqa
     display(HTML(html_str))  # noqa
 
@@ -153,7 +156,7 @@ def deck_to_html(
 
     if notebook_display and in_google_colab:
         render_for_colab(html_str, iframe_height)
-        return
+        return html_str
     elif not filename and as_string:
         return html_str
     elif notebook_display:
