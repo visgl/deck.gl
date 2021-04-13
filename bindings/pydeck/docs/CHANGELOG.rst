@@ -6,6 +6,11 @@ Releases and associated GitHub PRs for pydeck are documented here.
 0.6 Releases
 ------------
 
+0.6.2 - Apr 12 2021
+------------------
+- Fix bug that prevents pydeck from rendering in Colab (#5655)
+- Add ``_repr_html_`` for automatic Jupyter rendering (#5486)
+
 0.6.1 - Feb 12 2021
 ------------------
 - Fix API keys bug where pydeck fails to use API keys passed
