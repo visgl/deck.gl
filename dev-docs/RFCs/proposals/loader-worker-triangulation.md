@@ -31,6 +31,10 @@ Deep within the solid polygon layer we find the call out to earcut, including an
 
 When invoking the triangulation in the worker we need to specify whether to project or not. This is a bit messy as we are essentially duplicating the internal logic of the Layer, but I don't see a way around it. In practice most MVTLayers will likely be LNGLAT so having this as the default should mean that in practice most people will not be tripped up.
 
+### Moving earcut to loaders.gl
+
+While I was hesitant about putting the triangulation within loaders.gl, the advantage of doing the work there (rather than in a worker launched within deck.gl) is that we only have to transfer the data to-and-from the worker once. If the worker was launched from the deck.gl code it would lead to two workers being used, adding latency.
+
 ### Earcut removal from deck.gl
 
 A number of different Layers (not just MVTLayer) draw polygons (and thus invoke earcut) and they pass their data in different formats, e.g. MVT/geoJSON. As such we cannot remove earcut from the deck.gl codebase and keep compatibility with all the loaders. Especially as the scope of this work being restricted to the MVTLoader. In other words even if the new approach moves earcut to the worker for the MVTLayer, it cannot be removed from deck.gl entirely.
@@ -49,6 +53,16 @@ MVTLoader is modified to accept two new options:
 
 When triangulate is enabled, the MVTLoader will invoke earcut as part of the worker process and then return as part of the arrays it produces two addition arrays:
 
-- `triangles`, which will be a set of indices into the positions array. 
+- `triangles`, a set of indices into the positions array. 
+- `triangleIndices`, a set of indices marking the start positions for each polygon
 
+### deck.gl
 
+The Tesselator & PolygonTesselator classes are modified to be aware of these extra arrays and will not needlessly recompute the triangles on the main thread, but will use the passed values instead. This allows the entire `_updateIndices` method to be skipped and the update just becomes a straightforward assignment:
+
+- 'triangles` -> `this.attributes.indices`
+- 'triangleIndices` -> `this.indexStarts`
+
+## Future expansion
+
+The scope of this change is limited to the binary version of the MVTLoader & MVTLayer, but in principle other loaders could also supply the triangulation and be picked up by the Tesselator in deck.gl with minimal changes required.
