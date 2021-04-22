@@ -19,25 +19,19 @@ this operation is performed.
 
 ## Observations prior to design proposal
 
-### Cannot invoke web worker from within `updateState`
-
-Passing off computation to a web worker is an inherently async operation and thus we can't just create a worker within the implementation of the Layer component (e.g. somewhere as part of the implementation of updateState) as it would mean an async operation - which is at odds with the reactive model of Layers
-
-Thus, the invocation of the web worker to triangulate the polygon layer should happen before passing the data to the layer. This is in line with the recommendation in https://deck.gl/docs/developer-guide/performance regarding passing attribute buffer directly to Layers
-
 ### Preprojection
 
 Deep within the solid polygon layer we find the call out to earcut, including an optional preprojection [layers/src/solid-polygon-layer/polygon.js]. The preprojection is invoked for LNGLAT coordinate system and thus whether it occurs is coupled to the layer and potentially viewport configuration
 
-When invoking the triangulation in the worker we need to specify whether to project or not. This is a bit messy as we are essentially duplicating the internal logic of the Layer, but I don't see a way around it. In practice most MVTLayers will likely be LNGLAT so having this as the default should mean that in practice most people will not be tripped up.
+When invoking the triangulation in the worker we need to specify whether to project or not. The MVTLayer is a geospatial layer and as such only needs to support either LOCAL or LNGLAT projections. Which of these to use, is already specified in the MVTLoader options.
 
 ### Moving earcut to loaders.gl
 
 While I was hesitant about putting the triangulation within loaders.gl, the advantage of doing the work there (rather than in a worker launched within deck.gl) is that we only have to transfer the data to-and-from the worker once. If the worker was launched from the deck.gl code it would lead to two workers being used, adding latency.
 
-### Earcut removal from deck.gl
+### Earcut (non)removal from deck.gl
 
-A number of different Layers (not just MVTLayer) draw polygons (and thus invoke earcut) and they pass their data in different formats, e.g. MVT/geoJSON. As such we cannot remove earcut from the deck.gl codebase and keep compatibility with all the loaders. Especially as the scope of this work being restricted to the MVTLoader. In other words even if the new approach moves earcut to the worker for the MVTLayer, it cannot be removed from deck.gl entirely.
+A number of different Layers (not just MVTLayer) draw polygons (and thus invoke earcut) and they pass their data in different formats, e.g. MVT/GeoJSON. Additionaly SolidPolygonLayer is designed to be a general-purpose layer and should support the consumer of the library in accepting just polygons (for example GeoJSON) as data, and thus the triangulation capability must be retained.
 
 ## Design
 
@@ -49,20 +43,16 @@ Changes are required both in loaders.gl and deck.gl
 
 MVTLoader is modified to accept two new options:
 - triangulate : a Boolean, false by default which will invoke the earcut triangulation as part of the loading process
-- preprojectTriangulation: function or false, a function to perform the preprojection, or false to disable it
 
-When triangulate is enabled, the MVTLoader will invoke earcut as part of the worker process and then return as part of the arrays it produces two addition arrays:
+When triangulate is enabled, the MVTLoader will invoke earcut as part of the worker process and then return as part of the arrays it produces two additional arrays:
 
 - `triangles`, a set of indices into the positions array. 
 - `triangleIndices`, a set of indices marking the start positions for each polygon
 
 ### deck.gl
 
-The Tesselator & PolygonTesselator classes are modified to be aware of these extra arrays and will not needlessly recompute the triangles on the main thread, but will use the passed values instead. This allows the entire `_updateIndices` method to be skipped and the update just becomes a straightforward assignment:
-
-- 'triangles` -> `this.attributes.indices`
-- 'triangleIndices` -> `this.indexStarts`
+The PolygonTesselator already supports external indices. Thus the triangle data from loaders.gl will be passed through, and deck.gl will not needlessly recompute the triangles on the main thread. 
 
 ## Future expansion
 
-The scope of this change is limited to the binary version of the MVTLoader & MVTLayer, but in principle other loaders could also supply the triangulation and be picked up by the Tesselator in deck.gl with minimal changes required.
+The scope of this change is limited to the binary version of the MVTLoader & MVTLayer, but in principle other loaders could also supply the triangulation and be picked up by the Tesselator in deck.gl with minimal changes required. This should not be done without careful benchmarking, as the cost of passing the data to a worker may exceed the performance gains. In the case of the MVTLoader where the parsing already happens in a worker, this overhead is avoided.
