@@ -17,6 +17,7 @@ const defaultProps = {
 
   data: null,
   loader: Tiles3DLoader,
+  loadTiles: true,
 
   onTilesetLoad: {type: 'function', value: tileset3d => {}, compare: false},
   onTileLoad: {type: 'function', value: tileHeader => {}, compare: false},
@@ -130,6 +131,12 @@ export default class Tile3DLayer extends CompositeLayer {
     if (!timeline || !viewport || !tileset3d) {
       return;
     }
+
+    const currentProps = this.getCurrentLayer().props;
+    if (!currentProps.loadTiles) {
+      return;
+    }
+
     const frameNumber = tileset3d.update(viewport);
     const tilesetChanged = this.state.frameNumber !== frameNumber;
     if (tilesetChanged) {
