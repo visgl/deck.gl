@@ -1,7 +1,6 @@
 import GL from '@luma.gl/constants';
 import Pass from './pass';
 import {clear, setParameters, withParameters, cssToDeviceRatio} from '@luma.gl/core';
-import log from '../utils/log';
 
 export default class LayersPass extends Pass {
   render(props) {
@@ -89,7 +88,7 @@ export default class LayersPass extends Pass {
   // TODO - when picking we could completely skip rendering viewports that dont
   // intersect with the picking rect
   /* eslint-disable max-depth, max-statements */
-  _drawLayersInViewport(gl, {layers, onError, viewport, view}, drawLayerParams) {
+  _drawLayersInViewport(gl, {layers, pass = 'unknown', onError, viewport, view}, drawLayerParams) {
     const glViewport = getGLViewport(gl, {viewport});
 
     if (view && view.props.clear) {
@@ -144,11 +143,10 @@ export default class LayersPass extends Pass {
             parameters: layerParameters
           });
         } catch (err) {
-          if (onError) {
-            onError(err, layer);
-          } else {
-            log.error(`error during drawing of ${layer}`, err)();
-          }
+          onError?.(err, {
+            operation: `drawing of ${layer} to ${pass}`,
+            layer
+          });
         }
       }
     }

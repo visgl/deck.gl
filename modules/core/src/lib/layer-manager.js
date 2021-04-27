@@ -217,11 +217,10 @@ export default class LayerManager {
   }
 
   _handleError(stage, error, layer) {
-    if (this._onError) {
-      this._onError(error, layer);
-    } else {
-      log.error(`error during ${stage} of ${layerName(layer)}`, error)();
-    }
+    this._onError?.(error, {
+      operation: `${stage} of ${layerName(layer)}`,
+      layer
+    });
   }
 
   // Match all layers, checking for caught errors

@@ -14,6 +14,12 @@ The module entry point is now only lightly transpiled for the most commonly used
 - `GeoJsonLayer`'s `lineJointRounded` prop now only controls line joints. To use rounded line caps, set `lineCapRounded` to `true`.
 - Dashed lines via `PathStyleExtension` now draw rounded dash caps if `capRounded` is `true`.
 
+### onError Callback
+
+The second argument passed to `Deck`'s `onError` prop has changed. In previous versions, the argument used to be the source layer instance when applicable. It is now an object that provides richer contextual information about the error, and is more strictly typed. See [documentation](/docs/api-reference/core/deck.md#onerror).
+
+Explicitly setting `onError` to `null` now silently ignores all errors, instead of logging them to console.
+
 ## Upgrading from deck.gl v8.3 to v8.4
 
 ### wrapLongitude
