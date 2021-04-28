@@ -4,14 +4,14 @@ export default `#version 300 es
 // Scale the model
 uniform float sizeScale;
 uniform bool composeModelMatrix;
+uniform bool u_pickSegmentation;
 
 // Primitive attributes
 in vec3 positions;
 in vec3 normals;
 in vec3 colors;
 in vec2 texCoords;
-in vec4 uvRegions;
-in vec3 pickingColors;
+in vec3 segmentationPickingColors;
 
 // Instance attributes
 in vec3 instancePositions;
@@ -29,37 +29,16 @@ out vec4 position_commonspace;
 out vec4 vColor;
 
 void main(void) {
-  #ifdef HAS_UV_REGION
-    vec2 uv = fract(texCoords) * (uvRegions.zw - uvRegions.xy) + uvRegions.xy;
-  #else
-    vec2 uv = texCoords;
-  #endif
-
   geometry.worldPosition = instancePositions;
-  geometry.uv = uv;
+  geometry.uv = texCoords;
 
-  #ifdef INSTANCE_PICKING_MODE
+  if (u_pickSegmentation) {
+    geometry.pickingColor = segmentationPickingColors;
+  } else {
     geometry.pickingColor = instancePickingColors;
-  #else
-    geometry.pickingColor = pickingColors;
-  #endif
+  }
 
-  #ifdef MODULE_PBR
-    // set PBR data
-    #ifdef HAS_NORMALS
-      pbr_vNormal = project_normal(instanceModelMatrix * normals);
-      geometry.normal = pbr_vNormal;
-    #endif
-
-    #ifdef HAS_UV
-      pbr_vUV = uv;
-    #else
-      pbr_vUV = vec2(0., 0.);
-    #endif
-    geometry.uv = pbr_vUV;
-  #endif
-
-  vTexCoord = uv;
+  vTexCoord = texCoords;
   cameraPosition = project_uCameraPosition;
   normals_commonspace = project_normal(instanceModelMatrix * normals);
   vColor = vec4(colors * instanceColors.rgb, instanceColors.a);
@@ -78,12 +57,6 @@ void main(void) {
   }
 
   geometry.position = position_commonspace;
-
-  #ifdef MODULE_PBR
-    // set PBR data
-    pbr_vPosition = geometry.position.xyz;
-  #endif
-
   DECKGL_FILTER_GL_POSITION(gl_Position, geometry);
 
   DECKGL_FILTER_COLOR(vColor, geometry);

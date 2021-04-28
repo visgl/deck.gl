@@ -520,6 +520,20 @@ export default class Layer extends Component {
     attribute.value = pickingColorCache.subarray(0, numInstances * 3);
   }
 
+  calculateSegmentationPickingColors(attribute, segmentationData) {
+    const pickingColor = new Uint8ClampedArray(segmentationData.length * attribute.size);
+
+    for (let index = 0; index < segmentationData.length; index++) {
+      const color = this.encodePickingColor(segmentationData[index]);
+
+      pickingColor[index * 3] = color[0];
+      pickingColor[index * 3 + 1] = color[1];
+      pickingColor[index * 3 + 2] = color[2];
+    }
+
+    attribute.value = pickingColor;
+  }
+
   _setModelAttributes(model, changedAttributes) {
     const attributeManager = this.getAttributeManager();
     const excludeAttributes = model.userData.excludeAttributes || {};

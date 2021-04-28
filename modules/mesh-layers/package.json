@@ -34,7 +34,6 @@
   "dependencies": {
     "@loaders.gl/gltf": "^3.0.0-alpha",
     "@luma.gl/experimental": "^8.5.0-alpha.1",
-    "@luma.gl/shadertools": "^8.5.0-alpha.1",
-    "@luma.gl/webgl": "^8.5.0-alpha.1"
+    "@luma.gl/shadertools": "^8.5.0-alpha.1"
   }
 }
