@@ -1,5 +1,10 @@
 import {getDefaultCredentials} from '../config';
-import {encodeParameter, MAP_TYPES, PROVIDERS, FORMATS}  from './maps-api-common';
+import {encodeParameter, PROVIDERS, FORMATS}  from './maps-api-common';
+
+export const CONNECTIONS = {
+  BIGQUERY: 'bigquery',
+  CARTO: 'carto'
+};
 
 /**
  * Request against Maps API

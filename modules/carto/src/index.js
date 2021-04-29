@@ -12,5 +12,5 @@ export {default as colorBins} from './style/color-bins-style';
 export {default as colorCategories} from './style/color-categories-style';
 export {default as colorContinuous} from './style/color-continuous-style';
 // export {getTileJSON as _getTileJSON} from './api/maps-api-client';
-
-export { MAP_TYPES, PROVIDERS, FORMATS, getMap } from './api/maps-api-client'
+export { PROVIDERS } from './api/maps-api-common'
+export { MAP_TYPES, FORMATS, getMap } from './api/maps-api-client'

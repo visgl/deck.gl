@@ -26,7 +26,6 @@ export const FORMATS = {
   TILEJSON: 'tilejson',
 };
 
-
 /**
  * Simple encode parameter
  */
