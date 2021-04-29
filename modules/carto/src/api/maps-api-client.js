@@ -3,10 +3,29 @@ import {getDefaultCredentials, getMapsVersion} from '../config';
 const DEFAULT_USER_COMPONENT_IN_URL = '{user}';
 const DEFAULT_REGION_COMPONENT_IN_URL = '{region}';
 
+export const MODE_TYPES = {
+  CARTO: 'carto',
+  CARTO_CLOUD_NATIVE: 'carto-cloud-native'
+};
+
 export const MAP_TYPES = {
   SQL: 'sql',
   TABLE: 'table',
   TILESET: 'tileset'
+};
+
+export const PROVIDERS = {
+  BIGQUERY: 'bigquery',
+  SNOWFLAKE: 'snowflake',
+  REDSHIFT: 'redshift',
+  POSTGRES: 'postgres'
+};
+
+// AVAILABLE FORMATS
+export const FORMATS = {
+  GEOJSON: 'geojson',
+  JSON: 'json',
+  TILEJSON: 'tilejson',
 };
 
 export const CONNECTIONS = {
@@ -17,20 +36,21 @@ export const CONNECTIONS = {
 /**
  * Obtain a TileJson from Maps API v1 and v2
  */
-export async function getTileJSON({connection, type, source, mapConfig, credentials}) {
+ export async function getTileJSON({connection, type, source, mapConfig, credentials}) {
   const creds = {...getDefaultCredentials(), ...credentials};
   let url;
 
   switch (getMapsVersion(creds)) {
     case 'v1':
       // Maps API v1
-      url = buildURL({mapConfig, credentials: creds});
+      url = buildCartoURL({mapConfig, credentials: creds});
       const layergroup = await request({url, credentials: creds});
       return layergroup.metadata.tilejson.vector;
 
     case 'v2':
       // Maps API v2
-      url = buildURL({connection, type, source, credentials: creds});
+      url = buildCartoURL({connection, type, source, credentials: creds});
+      console.log(url)
       return await request({url, credentials: creds});
 
     default:
@@ -62,7 +82,7 @@ async function request({url, credentials}) {
     dealWithError({response, json, credentials});
   }
 
-  return json;
+  return json.rows ? json.rows : json;
 }
 
 /**
@@ -92,7 +112,29 @@ function dealWithError({response, json, credentials}) {
 /**
  * Build a URL with all required parameters
  */
-function buildURL({connection, type, source, mapConfig, credentials}) {
+function buildURL({provider, type, source, connection, credentials, format}) {
+  
+  const encodedClient = encodeParameter('client', 'deck-gl-carto');
+  const parameters = [encodedClient];
+  
+  if (credentials.accessToken) {
+    parameters.push(encodeParameter('access_token', credentials.accessToken));
+  }
+  else if (credentials.apiKey !== 'default_public') {
+    parameters.push(encodeParameter('api_key', credentials.apiKey));
+  }
+  
+  parameters.push(encodeParameter('source',source))
+  parameters.push(encodeParameter('connection',connection))
+
+  if (format) {
+    parameters.push(encodeParameter('format', format));
+  }
+
+  return `${credentials.mapsUrl}/${provider}/${type}?${parameters.join('&')}`;
+}
+
+function buildCartoURL({connection, type, source, mapConfig, credentials}) {
   const encodedApiKey = encodeParameter('api_key', credentials.apiKey);
   const encodedClient = encodeParameter('client', `deck-gl-carto`);
   const parameters = [encodedApiKey, encodedClient];
@@ -109,15 +151,56 @@ function buildURL({connection, type, source, mapConfig, credentials}) {
 /**
  * Prepare a url valid for the specified user
  */
-function mapsUrl(credentials) {
+ function mapsUrl(credentials) {
   return credentials.mapsUrl
     .replace(DEFAULT_USER_COMPONENT_IN_URL, credentials.username)
-    .replace(DEFAULT_REGION_COMPONENT_IN_URL, credentials.region);
+    .replace(DEFAULT_REGION_COMPONENT_IN_URL, credentials.region) + '/user/public';
 }
+
 
 /**
  * Simple encode parameter
  */
 function encodeParameter(name, value) {
   return `${name}=${encodeURIComponent(value)}`;
+}
+
+async function getMapMetadata({provider, type, source, connection, credentials}) {
+
+  const url = buildURL({provider, type, source, connection, credentials});
+
+  return await request({url, credentials});
+}
+
+function getUrlFromMetadata(metadata){
+
+  if (metadata.size === undefined) {
+    throw Error('Undefined response size');
+  }
+
+  const priorizedFormats = [FORMATS.GEOJSON, FORMATS.JSON, FORMATS.TILEJSON];
+
+  for (const format of priorizedFormats) {
+    const m = metadata[format];
+
+    if (m && !m.error && m.url) {
+      return [m.url[0], format];
+    }
+  }
+
+  throw new Error('Layer not available');
+}
+
+export async function getMap({provider, type, source, connection, credentials, format}) {
+  const creds = {...getDefaultCredentials(), ...credentials};
+
+  if (format) {
+    const formatUrl = buildURL({provider, type, source, connection, credentials: creds, format})
+    return [await request({url: formatUrl, credentials: creds}), format];
+  }
+
+  const metadata = await getMapMetadata({provider, type, source, connection, credentials:creds });
+  const [url, mapFormat] = await getUrlFromMetadata(metadata);
+  return [await request({url, credentials: creds}), mapFormat];
+  
 }

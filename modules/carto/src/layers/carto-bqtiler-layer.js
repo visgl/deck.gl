@@ -1,17 +1,13 @@
 import CartoLayer from './carto-layer';
-import {getTileJSON, CONNECTIONS, MAP_TYPES} from '../api/maps-api-client';
+import {PROVIDERS, MAP_TYPES} from '../api/maps-api-client';
 
-export default class CartoBQTilerLayer extends CartoLayer {
-  async updateTileJSON() {
-    const {credentials, data} = this.props;
+const defaultProps = {
+  mode: 'carto',
+  provider: PROVIDERS.BIGQUERY,
+  type: MAP_TYPES.TILESET
+};
 
-    return await getTileJSON({
-      connection: CONNECTIONS.BIGQUERY,
-      type: MAP_TYPES.TILESET,
-      source: data,
-      credentials
-    });
-  }
-}
+export default class CartoBQTilerLayer extends CartoLayer {}
 
 CartoBQTilerLayer.layerName = 'CartoBQTilerLayer';
+CartoBQTilerLayer.defaultProps = defaultProps;
