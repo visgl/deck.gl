@@ -84,7 +84,7 @@ export default class CartoLayer extends CompositeLayer {
       if (mode === MODE.CARTO_CLOUD_NATIVE) {
         [data, mapFormat] = await getMapCartoCloudNative({provider, type, source, connection, credentials, format});
       } else if (mode === MODE.CARTO) {
-        [data, mapFormat] = await getMapCarto({connection, source, credentials});
+        [data, mapFormat] = await getMapCarto({type, source, credentials});
       } else {
         log.assert(`Unknow mode ${mode}. Possible values are ${Object.values(MODE).toString()}`);
       }

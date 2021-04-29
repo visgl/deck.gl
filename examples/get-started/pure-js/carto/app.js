@@ -1,11 +1,14 @@
 import mapboxgl from 'mapbox-gl';
 import {Deck} from '@deck.gl/core';
 import {
+  CartoLayer,
   CartoSQLLayer,
   CartoBQTilerLayer,
   setDefaultCredentials,
   BASEMAP,
-  colorBins
+  colorBins,
+  MODE,
+  MAP_TYPES
 } from '@deck.gl/carto';
 
 const INITIAL_VIEW_STATE = {
@@ -62,8 +65,37 @@ render();
 // Function to render the layers. Will be invoked any time visibility changes.
 function render() {
   const layers = [
-    new CartoSQLLayer({
+    // TOREMOVE
+    // new CartoSQLLayer({
+    //   id: 'airports_toremove',
+    //   data: 'SELECT cartodb_id, the_geom_webmercator, scalerank FROM ne_10m_airports',
+    //   visible: true,
+    //   filled: true,
+    //   pointRadiusMinPixels: 2,
+    //   pointRadiusScale: 2000,
+    //   getRadius: f => 11 - f.properties.scalerank,
+    //   getFillColor: [200, 0, 80, 180],
+    //   autoHighlight: true,
+    //   highlightColor: [0, 0, 128, 128],
+    //   pickable: true
+    // }),
+    // TOREMOVE
+    // new CartoBQTilerLayer({
+    //   id: 'osm_buildings',
+    //   data: 'cartobq.maps.osm_buildings',
+    //   visible: visibleLayer === 'building',
+    //   getFillColor: colorBins({
+    //     attr: 'aggregated_total',
+    //     domain: [10, 100, 1e3, 1e4, 1e5, 1e6],
+    //     colors: 'Temps'
+    //   }),
+    //   pointRadiusMinPixels: 2,
+    //   stroked: false
+    // }),
+    new CartoLayer({
       id: 'airports',
+      mode: MODE.CARTO,
+      type: MAP_TYPES.SQL,
       data: 'SELECT cartodb_id, the_geom_webmercator, scalerank FROM ne_10m_airports',
       visible: visibleLayer === 'airports',
       filled: true,
@@ -75,8 +107,10 @@ function render() {
       highlightColor: [0, 0, 128, 128],
       pickable: true
     }),
-    new CartoBQTilerLayer({
+     new CartoLayer({
       id: 'osm_buildings',
+      mode: MODE.CARTO,
+      type: MAP_TYPES.TILESET,
       data: 'cartobq.maps.osm_buildings',
       visible: visibleLayer === 'building',
       getFillColor: colorBins({
@@ -86,7 +120,7 @@ function render() {
       }),
       pointRadiusMinPixels: 2,
       stroked: false
-    })
+    }),
   ];
   // update layers in deck.gl.
   deck.setProps({layers});
