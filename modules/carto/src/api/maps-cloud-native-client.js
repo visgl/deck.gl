@@ -4,7 +4,7 @@ import {encodeParameter, FORMATS}  from './maps-api-common';
 /**
  * Request against Maps API
  */
-async function request({url, credentials}) {
+async function request({url, config}) {
   let response;
 
   try {
@@ -22,7 +22,7 @@ async function request({url, credentials}) {
   const json = await response.json();
 
   if (!response.ok) {
-    dealWithError({response, json, credentials});
+    dealWithError({response, json, config});
   }
 
   return json.rows ? json.rows : json;
@@ -31,18 +31,18 @@ async function request({url, credentials}) {
 /**
  * Display proper message from Maps API error
  */
-function dealWithError({response, json, credentials}) {
+function dealWithError({response, json, config}) {
   switch (response.status) {
     case 401:
       throw new Error(
         `Unauthorized access to Maps API: invalid combination of user ('${
-          credentials.username
-        }') and apiKey ('${credentials.apiKey}')`
+          config.username
+        }') and apiKey ('${config.apiKey}')`
       );
     case 403:
       throw new Error(
         `Unauthorized access to dataset: the provided apiKey('${
-          credentials.apiKey
+          config.apiKey
         }') doesn't provide access to the requested data`
       );
 
@@ -55,11 +55,11 @@ function dealWithError({response, json, credentials}) {
 /**
  * Build a URL with all required parameters
  */
-function buildURL({provider, type, source, connection, credentials, format}) {
+function buildURL({provider, type, source, connection, config, format}) {
   const encodedClient = encodeParameter('client', 'deck-gl-carto');
   const parameters = [encodedClient];
   
-  parameters.push(encodeParameter('access_token', credentials.accessToken));
+  parameters.push(encodeParameter('access_token', config.accessToken));
   parameters.push(encodeParameter('source',source))
   parameters.push(encodeParameter('connection',connection))
 
@@ -67,13 +67,17 @@ function buildURL({provider, type, source, connection, credentials, format}) {
     parameters.push(encodeParameter('format', format));
   }
 
-  return `${credentials.mapsUrl}/${provider}/${type}?${parameters.join('&')}`;
+  return `${mapsUrl(config)}/${provider}/${type}?${parameters.join('&')}`;
 }
 
-async function getMapMetadata({provider, type, source, connection, credentials}) {
-  const url = buildURL({provider, type, source, connection, credentials});
+function mapsUrl(config){
+  return config.mapsUrl.replace('{tenant}',config.tenant);
+}
 
-  return await request({url, credentials});
+async function getMapMetadata({provider, type, source, connection, config}) {
+  const url = buildURL({provider, type, source, connection, config});
+
+  return await request({url, config});
 }
 
 function getUrlFromMetadata(metadata){
@@ -94,16 +98,16 @@ function getUrlFromMetadata(metadata){
   throw new Error('Layer not available');
 }
 
-export async function getMapCartoCloudNative({provider, type, source, connection, credentials, format}) {
-  const creds = {...getConfig(), ...credentials};
+export async function getMapCartoCloudNative({provider, type, source, connection, config, format}) {
+  const creds = {...getConfig(), ...config};
 
   if (format) {
-    const formatUrl = buildURL({provider, type, source, connection, credentials: creds, format})
-    return [await request({url: formatUrl, credentials: creds}), format];
+    const formatUrl = buildURL({provider, type, source, connection, config: creds, format})
+    return [await request({url: formatUrl, config: creds}), format];
   }
 
-  const metadata = await getMapMetadata({provider, type, source, connection, credentials:creds });
+  const metadata = await getMapMetadata({provider, type, source, connection, config:creds });
   const [url, mapFormat] = await getUrlFromMetadata(metadata);
-  return [await request({url, credentials: creds}), mapFormat];
+  return [await request({url, config: creds}), mapFormat];
 
 }

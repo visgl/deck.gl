@@ -15,7 +15,7 @@ const defaultClassicConfig = {
 const defaultCloudNativeConfig = {
   accessToken: null,
   tenant: 'gcp-us-east1.app.carto.com',
-  mapsUrl: 'https://maps-.{tenant}'
+  mapsUrl: 'https://maps-{tenant}'
 };
 
 let config = {};
