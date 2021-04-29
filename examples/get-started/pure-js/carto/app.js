@@ -74,7 +74,7 @@ render();
 // Function to render the layers. Will be invoked any time visibility changes.
 function render() {
   const layers = [
-    // TOREMOVE
+    // // TOREMOVE
     // new CartoSQLLayer({
     //   id: 'airports_toremove',
     //   data: 'SELECT cartodb_id, the_geom_webmercator, scalerank FROM ne_10m_airports',
@@ -88,7 +88,7 @@ function render() {
     //   highlightColor: [0, 0, 128, 128],
     //   pickable: true
     // }),
-    // TOREMOVE
+    // // TOREMOVE
     // new CartoBQTilerLayer({
     //   id: 'osm_buildings',
     //   data: 'cartobq.maps.osm_buildings',
@@ -100,7 +100,7 @@ function render() {
     //   }),
     //   pointRadiusMinPixels: 2,
     //   stroked: false
-    // }),
+    // // }),
     // new CartoLayer({
     //   id: 'airports',
     //   mode: MODE.CARTO,
@@ -131,45 +131,42 @@ function render() {
     //   pointRadiusMinPixels: 2,
     //   stroked: false
     // }),
-    // new CartoLayer({
-    //   id: 'osm_buildings',
-    //   connection: 'dev-bigquery',
-    //   provider: PROVIDERS.BIGQUERY,
-    //   mode: MODE.CARTO_CLOUD_NATIVE,
-    //   type: MAP_TYPES.TILESET,
-    //   data: 'cartobq.maps.osm_buildings',
-    //   visible: visibleLayer === 'building',
-    //   getFillColor: colorBins({
-    //     attr: 'aggregated_total',
-    //     domain: [10, 100, 1e3, 1e4, 1e5, 1e6],
-    //     colors: 'Temps'
-    //   }),
-    //   pointRadiusMinPixels: 2,
-    //   stroked: false
-    // }),
-
-    // new CartoLayer({
-    //   id: 'osm_buildings',
-    //   connection: 'dev-bigquery',
-    //   provider: PROVIDERS.BIGQUERY,
-    //   mode: MODE.CARTO_CLOUD_NATIVE,
-    //   type: MAP_TYPES.TABLE,
-    //   data: 'cartobq.testtables.points_10k',
-    //   visible: visibleLayer === 'building',
-    //   getFillColor: [255,0,0],
-    //   pointRadiusMinPixels: 2,
-    //   stroked: false
-    // }),
-
     new CartoLayer({
       id: 'osm_buildings',
       connection: 'dev-bigquery',
       provider: PROVIDERS.BIGQUERY,
       mode: MODE.CARTO_CLOUD_NATIVE,
-      type: MAP_TYPES.SQL,
-      data: 'select * from cartobq.testtables.points_10k LIMIT 500',
-      visible: visibleLayer === 'building',
+      type: MAP_TYPES.TILESET,
+      data: 'cartobq.maps.osm_buildings',
+      getFillColor: colorBins({
+        attr: 'aggregated_total',
+        domain: [10, 100, 1e3, 1e4, 1e5, 1e6],
+        colors: 'Temps'
+      }),
+      pointRadiusMinPixels: 2,
+      stroked: false
+    }),
+
+    new CartoLayer({
+      id: 'points_10k_table',
+      connection: 'dev-bigquery',
+      provider: PROVIDERS.BIGQUERY,
+      mode: MODE.CARTO_CLOUD_NATIVE,
+      type: MAP_TYPES.TABLE,
+      data: 'cartobq.testtables.points_10k',
       getFillColor: [255,0,0],
+      pointRadiusMinPixels: 2,
+      stroked: false
+    }),
+
+    new CartoLayer({
+      id: 'points_10k_sql',
+      connection: 'dev-bigquery',
+      provider: PROVIDERS.BIGQUERY,
+      mode: MODE.CARTO_CLOUD_NATIVE,
+      type: MAP_TYPES.SQL,
+      data: 'select * from cartobq.testtables.points_10k LIMIT 5000',
+      getFillColor: [0,255,0],
       pointRadiusMinPixels: 2,
       stroked: false
     }),
