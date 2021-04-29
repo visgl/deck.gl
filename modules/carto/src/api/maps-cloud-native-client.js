@@ -1,3 +1,6 @@
+/**
+ * Maps API Client for Carto Cloud Native
+ */
 import {getConfig} from '../config';
 import {encodeParameter, FORMATS} from './maps-api-common';
 import {log} from '@deck.gl/core';

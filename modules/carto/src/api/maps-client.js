@@ -1,3 +1,6 @@
+/**
+ * Maps API Client for Maps API v1 and Maps API v2
+ */
 import {getConfig, getMapsVersion} from '../config';
 import {
   DEFAULT_REGION_COMPONENT_IN_URL,
