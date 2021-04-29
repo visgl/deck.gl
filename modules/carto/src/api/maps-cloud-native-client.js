@@ -94,7 +94,7 @@ function getUrlFromMetadata(metadata){
   throw new Error('Layer not available');
 }
 
-export async function getMap({provider, type, source, connection, credentials, format}) {
+export async function getMapCartoCloudNative({provider, type, source, connection, credentials, format}) {
   const creds = {...getConfig(), ...credentials};
 
   if (format) {

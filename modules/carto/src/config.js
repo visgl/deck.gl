@@ -23,7 +23,7 @@ let config = {};
 export function setDefaultCredentials(opts) {
   console.warn('setDefaultCredentials will be deprecated un future versions. Use setConfig method instead.')
   setConfig({
-    mode: MODE,
+    mode: MODE.CARTO,
     ...opts
   })
 }

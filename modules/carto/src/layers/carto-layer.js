@@ -1,11 +1,8 @@
 import {CompositeLayer, log} from '@deck.gl/core';
 import {MVTLayer} from '@deck.gl/geo-layers';
 import {GeoJsonLayer} from '@deck.gl/layers';
-import {MODE} from '../api/maps-api-common';
-import {getMap as getMapClassic,getTileJSON } from '../api/maps-classic-client';
-import {getMap as getMapCloudNative, CONNECTIONS, FORMATS, getMap} from '../api/maps-cloud-native-client';
+import {getMapCartoCloudNative, getMapCarto, CONNECTIONS, FORMATS, MODE } from '../api';
 import {MAP_TYPES, PROVIDERS} from '../api/maps-api-common';
-import {getMapsVersion} from '../config';
 
 const defaultProps = {
   // (String, required): data resource to load. table name, sql query or tileset name.
@@ -85,12 +82,11 @@ export default class CartoLayer extends CompositeLayer {
       let data, mapFormat;
 
       if (mode === MODE.CARTO_CLOUD_NATIVE) {
-        debugger;
-        [data, mapFormat] = await getMapCloudNative({provider, type, source, connection, credentials, format});
-      }
-
-      if (mode === MODE.CARTO) {
-        [data, mapFormat] = await getMapClassic({connection: 'carto', source, credentials});
+        [data, mapFormat] = await getMapCartoCloudNative({provider, type, source, connection, credentials, format});
+      } else if (mode === MODE.CARTO) {
+        [data, mapFormat] = await getMapCarto({connection, source, credentials});
+      } else {
+        log.assert(`Unknow mode ${mode}. Possible values are ${Object.values(MODE).toString()}`);
       }
 
       const SubLayer = this.state.SubLayer || this.props.subLayer || getSublayerFromMapFormat(mapFormat);

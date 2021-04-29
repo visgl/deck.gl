@@ -1,7 +1,7 @@
 import {log} from '@deck.gl/core';
 import CartoLayer from './carto-layer';
-import {MODE, MAP_TYPES} from '../api/maps-api-common';
-import {CONNECTIONS} from '../api/maps-classic-client';
+import {MODE, MAP_TYPES} from '../api';
+import {CONNECTIONS} from '../api/maps-client';
 
 const defaultProps = {
   ...CartoLayer.defaultProps,
