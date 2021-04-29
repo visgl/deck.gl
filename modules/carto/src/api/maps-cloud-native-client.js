@@ -26,7 +26,7 @@ async function request({url, config}) {
   const json = await response.json();
 
   if (!response.ok) {
-    dealWithError({response, json, config});
+    dealWithError({response, json});
   }
 
   return json.rows ? json.rows : json;
@@ -35,21 +35,14 @@ async function request({url, config}) {
 /**
  * Display proper message from Maps API error
  */
-function dealWithError({response, json, config}) {
+function dealWithError({response, json}) {
   switch (response.status) {
     case 401:
-      throw new Error(
-        `Unauthorized access to Maps API: invalid combination of user ('${
-          config.username
-        }') and apiKey ('${config.apiKey}')`
-      );
     case 403:
       throw new Error(
-        `Unauthorized access to dataset: the provided apiKey('${
-          config.apiKey
-        }') doesn't provide access to the requested data`
+        `Unauthorized access to Maps API`
       );
-
+    
     default:
       const e = json.error;
       throw new Error(e);
