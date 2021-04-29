@@ -1,4 +1,4 @@
-import {getDefaultCredentials, getMapsVersion} from '../config';
+import {getConfig, getMapsVersion} from '../config';
 import { DEFAULT_REGION_COMPONENT_IN_URL, DEFAULT_USER_COMPONENT_IN_URL, encodeParameter}  from './maps-api-common';
 
 export const CONNECTIONS = {
@@ -12,11 +12,11 @@ const TILE_EXTENT = 4096
 /**
  * Obtain a TileJson from Maps API v1 and v2
  */
-export async function getMap({ connection, source, credentials}) {
-  const creds = {...getDefaultCredentials(), ...credentials};
+export async function getMapCarto({ type, source, credentials}) {
+  const creds = {...getConfig(), ...credentials};
   let url;
 
-  const type = getType({connection, source});
+  const connection = type === 'tileset' ? CONNECTIONS.BIGQUERY : CONNECTIONS.CARTO;
 
   switch (getMapsVersion(creds)) {
     case 'v1':

@@ -1,13 +1,11 @@
 import {log} from '@deck.gl/core';
 import CartoLayer from './carto-layer';
-import {MODE, MAP_TYPES} from '../api/maps-api-common';
-import {CONNECTIONS} from '../api/maps-classic-client';
+import {MODE, MAP_TYPES} from '../api';
 
 const defaultProps = {
   ...CartoLayer.defaultProps,
   mode: MODE.CARTO,
-  type: MAP_TYPES.TILESET,
-  connection: CONNECTIONS.BIGQUERY
+  type: MAP_TYPES.TILESET
 };
 
 export default class CartoBQTilerLayer extends CartoLayer {
