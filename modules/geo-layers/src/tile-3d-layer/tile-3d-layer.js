@@ -304,6 +304,9 @@ function getMeshGeometry(contentAttributes) {
   if (contentAttributes.texCoords) {
     attributes.texCoords = contentAttributes.texCoords;
   }
+  if (contentAttributes.colors) {
+    attributes.colors = contentAttributes.colors;
+  }
   return attributes;
 }
 

@@ -202,7 +202,7 @@ export default class SimpleMeshLayer extends Layer {
     const model = new Model(this.context.gl, {
       ...this.getShaders(),
       id: this.props.id,
-      geometry: getGeometry(mesh, this.props._useMeshColors),
+      geometry: getGeometry(mesh, true),
       isInstanced: true
     });
 

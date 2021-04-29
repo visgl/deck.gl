@@ -35,7 +35,7 @@ void main(void) {
     normal = normals_commonspace;
   }
 
-  vec4 color = hasTexture ? texture(sampler, vTexCoord) : vColor;
+  vec4 color = hasTexture ? texture(sampler, vTexCoord) * vColor : vColor;
   vec3 lightColor = lighting_getLightColor(color.rgb, cameraPosition, position_commonspace.xyz, normal);
   fragColor = vec4(lightColor, color.a * opacity);
 
