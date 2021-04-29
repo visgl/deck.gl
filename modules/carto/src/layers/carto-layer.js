@@ -1,9 +1,10 @@
-import {CompositeLayer} from '@deck.gl/core';
+import {CompositeLayer, log} from '@deck.gl/core';
 import {MVTLayer} from '@deck.gl/geo-layers';
 import {GeoJsonLayer} from '@deck.gl/layers';
 import {MODE} from '../api/maps-api-common';
 import {getMap as getMapClassic,getTileJSON } from '../api/maps-classic-client';
-import {getMap as getMapCloudNative, CONNECTIONS, MAP_TYPES, FORMATS, getMap} from '../api/maps-cloud-native-client';
+import {getMap as getMapCloudNative, CONNECTIONS, FORMATS, getMap} from '../api/maps-cloud-native-client';
+import {MAP_TYPES, PROVIDERS} from '../api/maps-api-common';
 import {getMapsVersion} from '../config';
 
 const defaultProps = {
@@ -43,15 +44,23 @@ export default class CartoLayer extends CompositeLayer {
     const {mode, provider, type, data: source, connection, credentials, format} = this.props;
 
     if (!Object.values(MODE).includes(mode)) {
-      throw Error(`Unknow mode ${mode}. Posible values are ${MODE.CARTO} or ${MODE.CARTO_CLOUD_NATIVE}`)
-    }
-  
-    if (mode === MODE.CARTO && connection===CONNECTIONS.BIGQUERY && type!==MAP_TYPES.TILESET){
-      throw Error(`Only ${MAP_TYPES.TILESET} supported for mode ${mode} and connection ${connection}`)
+      log.assert(`Unknow mode ${mode}. Possible values are ${Object.values(MODE).toString()}`);
     }
 
-    if (mode === MODE.CARTO && connection===CONNECTIONS.CARTO && type!==MAP_TYPES.SQL){
-      throw Error(`Only ${MAP_TYPES.SQL} supported for mode ${mode} and connection ${connection}`)
+    if (!Object.values(MAP_TYPES).includes(type)) {
+      log.assert(`Unknow mode ${type}. Possible values are ${Object.values(MAP_TYPES).toString()}`);
+    }
+
+    if (!Object.values(PROVIDERS).includes(provider)) {
+      log.assert(`Unknow mode ${provider}. Possible values are ${Object.values(PROVIDERS).toString()}`);
+    }
+  
+    if (mode === MODE.CARTO && connection === CONNECTIONS.BIGQUERY && type !== MAP_TYPES.TILESET){
+      log.assert(`Only ${MAP_TYPES.TILESET} supported for mode ${mode} and connection ${connection}`);
+    }
+
+    if (mode === MODE.CARTO && connection === CONNECTIONS.CARTO && type !== MAP_TYPES.SQL){
+      log.assert(`Only ${MAP_TYPES.SQL} supported for mode ${mode} and connection ${connection}`);
     }
   }
 
@@ -76,13 +85,12 @@ export default class CartoLayer extends CompositeLayer {
       let data, mapFormat;
 
       if (mode === MODE.CARTO_CLOUD_NATIVE) {
+        debugger;
         [data, mapFormat] = await getMapCloudNative({provider, type, source, connection, credentials, format});
       }
-      else if (mode === MODE.CARTO) {
-        [data ,mapFormat] = await getMapClassic({connection, source, credentials})
-      }
-      else {
-        throw Error(`Unknow mode ${mode}. Posible values are ${MODE.CARTO} or ${MODE.CARTO_CLOUD_NATIVE}`)
+
+      if (mode === MODE.CARTO) {
+        [data, mapFormat] = await getMapClassic({connection: 'carto', source, credentials});
       }
 
       const SubLayer = this.state.SubLayer || this.props.subLayer || getSublayerFromMapFormat(mapFormat);
@@ -123,9 +131,9 @@ CartoLayer.defaultProps = defaultProps;
 
 function getSublayerFromMapFormat(format) {
   switch (format) {
-    case FORMATS.TILEJSON:
+    case 'tilejson':
       return MVTLayer;
-    case FORMATS.GEOJSON:
+    case 'geojson':
       return GeoJsonLayer;
     default:
       return null;

@@ -22,13 +22,13 @@ export async function getMap({ connection, source, credentials}) {
     case 'v1':
       // Maps API v1
       const mapConfig = createMapConfig(source)
-      url = buildURLMapsAPIv1({ mapConfig, credentials: creds});
+      url = buildURLMapsAPIv1({mapConfig, credentials: creds});
       const layergroup = await request({url, credentials: creds});
       return [layergroup.metadata.tilejson.vector, 'tilejson'];
 
     case 'v2':
       // Maps API v2
-      url = buildURLMapsAPIv2({ connection, type, source, credentials: creds});
+      url = buildURLMapsAPIv2({connection, type, source, credentials: creds});
       return [await request({url, credentials: creds}), 'tilejson'];
 
     default:

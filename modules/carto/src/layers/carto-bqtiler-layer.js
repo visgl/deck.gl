@@ -1,5 +1,6 @@
+import {log} from '@deck.gl/core';
 import CartoLayer from './carto-layer';
-import {MODE,MAP_TYPES} from '../api/maps-api-common';
+import {MODE, MAP_TYPES} from '../api/maps-api-common';
 import {CONNECTIONS} from '../api/maps-classic-client';
 
 const defaultProps = {
@@ -9,7 +10,15 @@ const defaultProps = {
   connection: CONNECTIONS.BIGQUERY
 };
 
-export default class CartoBQTilerLayer extends CartoLayer {}
+export default class CartoBQTilerLayer extends CartoLayer {
+  constructor(...args) {
+    super(...args);
+
+    log.warn(
+      'CARTO warning: CartoBQTilerLayer will be removed in the following deck.gl versions, and they are not recommended to use. Use CartoLayer instead.'
+    )();
+  }
+}
 
 CartoBQTilerLayer.layerName = 'CartoBQTilerLayer';
 CartoBQTilerLayer.defaultProps = defaultProps;

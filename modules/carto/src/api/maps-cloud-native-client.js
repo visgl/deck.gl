@@ -1,5 +1,5 @@
 import {getConfig} from '../config';
-import {encodeParameter, MAP_TYPES, PROVIDERS, FORMATS}  from './maps-api-common';
+import {encodeParameter, FORMATS}  from './maps-api-common';
 
 /**
  * Request against Maps API
