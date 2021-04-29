@@ -97,3 +97,15 @@ sudo apt-get install -y build-essential libxi-dev libglu1-mesa-dev libglew-dev p
 ```
 
 Verify that everything works by running `yarn test node`.
+
+### Develop on MacOs on Apple Silicon (M1 chip)
+
+To install dependencies specify that you explicitly need the arm64 version
+```
+arch -arm64 brew install pkg-config cairo pango libpng jpeg giflib librsvg
+```
+
+After this `yarn bootstrap` can be run with
+```
+CPLUS_INCLUDE_PATH=/opt/homebrew/include yarn bootstrap
+```
