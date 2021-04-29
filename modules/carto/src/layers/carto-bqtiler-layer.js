@@ -1,10 +1,12 @@
 import CartoLayer from './carto-layer';
-import {PROVIDERS, MODE, MAP_TYPES} from '../api/maps-api-client';
+import {MODE,MAP_TYPES} from '../api/maps-api-common';
+import {CONNECTIONS} from '../api/maps-classic-client';
 
 const defaultProps = {
   ...CartoLayer.defaultProps,
   mode: MODE.CARTO,
-  type: MAP_TYPES.TILESET
+  type: MAP_TYPES.TILESET,
+  connection: CONNECTIONS.BIGQUERY
 };
 
 export default class CartoBQTilerLayer extends CartoLayer {}

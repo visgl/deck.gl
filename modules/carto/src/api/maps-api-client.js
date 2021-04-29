@@ -36,7 +36,7 @@ export const CONNECTIONS = {
 /**
  * Obtain a TileJson from Maps API v1 and v2
  */
- export async function getTileJSON({connection, type, source, mapConfig, credentials}) {
+ export function getTileJSON({connection, type, source, mapConfig, credentials}) {
   const creds = {...getDefaultCredentials(), ...credentials};
   let url;
 
@@ -192,4 +192,56 @@ export async function getMap({provider, type, source, connection, credentials, f
   const metadata = await getMapMetadata({provider, type, source, connection, credentials:creds });
   const [url, mapFormat] = await getUrlFromMetadata(metadata);
   return [await request({url, credentials: creds}), mapFormat];
+}
+
+
+
+async updateSQLTileJSON() {
+  const {data, bufferSize, tileExtent, credentials} = this.props;
+  const version = getMapsVersion(credentials);
+  const isSQL = data.search(' ') > -1;
+
+  switch (version) {
+    case 'v1':
+      const sql = isSQL ? data : `SELECT * FROM ${data}`;
+
+      // Map config v1
+      const mapConfig = {
+        version: '1.3.1',
+        buffersize: {
+          mvt: bufferSize
+        },
+        layers: [
+          {
+            type: 'mapnik',
+            options: {
+              sql: sql.trim(),
+              vector_extent: tileExtent
+            }
+          }
+        ]
+      };
+
+      return await getTileJSON({mapConfig, credentials});
+    case 'v2':
+      return await getTileJSON({
+        connection: CONNECTIONS.CARTO,
+        source: data,
+        type: isSQL ? MAP_TYPES.SQL : MAP_TYPES.TABLE,
+        credentials
+      });
+    default:
+      throw new Error(`Cannot build MapConfig for unmatching version ${version}`);
+  }
+}
+
+async updateBQTilerTileJSON() {
+  const {credentials, data} = this.props;
+
+  return await getTileJSON({
+    connection: CONNECTIONS.BIGQUERY,
+    type: MAP_TYPES.TILESET,
+    source: data,
+    credentials
+  });
 }

@@ -1,7 +1,9 @@
 import {CompositeLayer} from '@deck.gl/core';
 import {MVTLayer} from '@deck.gl/geo-layers';
 import {GeoJsonLayer} from '@deck.gl/layers';
-import {getMap, getTileJSON, MODE, CONNECTIONS, MAP_TYPES, FORMATS} from '../api/maps-api-client';
+import {MODE} from '../api/maps-api-common';
+import {getMap as getMapClassic,getTileJSON } from '../api/maps-classic-client';
+import {getMap as getMapCloudNative, CONNECTIONS, MAP_TYPES, FORMATS, getMap} from '../api/maps-cloud-native-client';
 import {getMapsVersion} from '../config';
 
 const defaultProps = {
@@ -37,7 +39,24 @@ export default class CartoLayer extends CompositeLayer {
     return this.getSubLayers().length > 0 && super.isLoaded;
   }
 
+  _checkProps(props){
+    const {mode, provider, type, data: source, connection, credentials, format} = this.props;
+
+    if (!Object.values(MODE).includes(mode)) {
+      throw Error(`Unknow mode ${mode}. Posible values are ${MODE.CARTO} or ${MODE.CARTO_CLOUD_NATIVE}`)
+    }
+  
+    if (mode === MODE.CARTO && connection===CONNECTIONS.BIGQUERY && type!==MAP_TYPES.TILESET){
+      throw Error(`Only ${MAP_TYPES.TILESET} supported for mode ${mode} and connection ${connection}`)
+    }
+
+    if (mode === MODE.CARTO && connection===CONNECTIONS.CARTO && type!==MAP_TYPES.SQL){
+      throw Error(`Only ${MAP_TYPES.SQL} supported for mode ${mode} and connection ${connection}`)
+    }
+  }
+
   updateState({props, oldProps, changeFlags}) {
+    this._checkProps(props)
     const shouldUpdateData = changeFlags.dataChanged ||
       props.provider !== oldProps.provider ||
       props.connection !== oldProps.connection ||
@@ -57,19 +76,13 @@ export default class CartoLayer extends CompositeLayer {
       let data, mapFormat;
 
       if (mode === MODE.CARTO_CLOUD_NATIVE) {
-        [data, mapFormat] = await getMap({provider, type, source, connection, credentials, format});
+        [data, mapFormat] = await getMapCloudNative({provider, type, source, connection, credentials, format});
       }
-
-      if (mode === MODE.CARTO) {
-        if (type === MAP_TYPES.SQL || type === MAP_TYPES.TABLE) {
-          data = await this.updateSQLTileJSON();
-        }
-
-        if (type === MAP_TYPES.TILESET) {
-          data = await this.updateBQTilerTileJSON();
-        }
-        
-        mapFormat = FORMATS.TILEJSON;
+      else if (mode === MODE.CARTO) {
+        [data ,mapFormat] = await getMapClassic({connection, source, credentials})
+      }
+      else {
+        throw Error(`Unknow mode ${mode}. Posible values are ${MODE.CARTO} or ${MODE.CARTO_CLOUD_NATIVE}`)
       }
 
       const SubLayer = this.state.SubLayer || this.props.subLayer || getSublayerFromMapFormat(mapFormat);
@@ -83,56 +96,6 @@ export default class CartoLayer extends CompositeLayer {
         throw err;
       }
     }
-  }
-
-  async updateSQLTileJSON() {
-    const {data, bufferSize, tileExtent, credentials} = this.props;
-    const version = getMapsVersion(credentials);
-    const isSQL = data.search(' ') > -1;
-
-    switch (version) {
-      case 'v1':
-        const sql = isSQL ? data : `SELECT * FROM ${data}`;
-
-        // Map config v1
-        const mapConfig = {
-          version: '1.3.1',
-          buffersize: {
-            mvt: bufferSize
-          },
-          layers: [
-            {
-              type: 'mapnik',
-              options: {
-                sql: sql.trim(),
-                vector_extent: tileExtent
-              }
-            }
-          ]
-        };
-
-        return await getTileJSON({mapConfig, credentials});
-      case 'v2':
-        return await getTileJSON({
-          connection: CONNECTIONS.CARTO,
-          source: data,
-          type: isSQL ? MAP_TYPES.SQL : MAP_TYPES.TABLE,
-          credentials
-        });
-      default:
-        throw new Error(`Cannot build MapConfig for unmatching version ${version}`);
-    }
-  }
-
-  async updateBQTilerTileJSON() {
-    const {credentials, data} = this.props;
-
-    return await getTileJSON({
-      connection: CONNECTIONS.BIGQUERY,
-      type: MAP_TYPES.TILESET,
-      source: data,
-      credentials
-    });
   }
 
   renderLayers() {

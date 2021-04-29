@@ -1,13 +1,12 @@
 import CartoLayer from './carto-layer';
-import {getMapsVersion} from '../config';
-import {getTileJSON, CONNECTIONS, MODE, MAP_TYPES} from '../api/maps-api-client';
+import {MODE ,MAP_TYPES} from '../api/maps-api-common';
+import {CONNECTIONS} from '../api/maps-classic-client';
 
 const defaultProps = {
   ...CartoLayer.defaultProps,
   mode: MODE.CARTO,
+  connection: CONNECTIONS.CARTO,
   type: MAP_TYPES.SQL,
-  bufferSize: 16, // MVT buffersize in pixels,
-  tileExtent: 4096, // Tile extent in tile coordinate space (MVT spec.)
   uniqueIdProperty: 'cartodb_id'
 };
 
