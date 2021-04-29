@@ -1,4 +1,5 @@
-import { MODE } from "./api/maps-api-common";
+import {MODES} from './api/maps-api-common';
+import {log} from '@deck.gl/core';
 
 const defaultClassicConfig = {
   username: 'public',
@@ -21,11 +22,13 @@ const defaultCloudNativeConfig = {
 let config = {};
 
 export function setDefaultCredentials(opts) {
-  console.warn('setDefaultCredentials will be deprecated un future versions. Use setConfig method instead.')
+  log.warn(
+    'setDefaultCredentials will be deprecated in future versions. Use setConfig method instead.'
+  )();
   setConfig({
-    mode: MODE.CARTO,
+    mode: MODES.CARTO,
     ...opts
-  })
+  });
 }
 
 export function getDefaultCredentials() {
@@ -43,21 +46,21 @@ export function getMapsVersion(configOpts) {
 }
 
 export function setConfig(opts) {
-  switch(opts.mode) {
-    case MODE.CARTO:
+  switch (opts.mode) {
+    case MODES.CARTO:
       config = {
         ...defaultClassicConfig,
         ...opts
       };
       break;
-    case MODE.CARTO_CLOUD_NATIVE:
+    case MODES.CARTO_CLOUD_NATIVE:
       config = {
         ...defaultCloudNativeConfig,
         ...opts
       };
       break;
     default:
-      throw new Error(`Invalid mode ....`)
+      throw new Error(`Invalid mode ....`);
   }
 }
 

@@ -1,7 +1,7 @@
 export const DEFAULT_USER_COMPONENT_IN_URL = '{user}';
 export const DEFAULT_REGION_COMPONENT_IN_URL = '{region}';
 
-export const MODE = {
+export const MODES = {
   CARTO: 'carto',
   CARTO_CLOUD_NATIVE: 'carto-cloud-native'
 };
@@ -16,14 +16,14 @@ export const PROVIDERS = {
   BIGQUERY: 'bigquery',
   SNOWFLAKE: 'snowflake',
   REDSHIFT: 'redshift',
-  POSTGRES: 'postgres',
+  POSTGRES: 'postgres'
 };
 
 // AVAILABLE FORMATS
 export const FORMATS = {
   GEOJSON: 'geojson',
   JSON: 'json',
-  TILEJSON: 'tilejson',
+  TILEJSON: 'tilejson'
 };
 
 /**

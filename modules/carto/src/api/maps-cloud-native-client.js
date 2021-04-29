@@ -1,5 +1,6 @@
 import {getConfig} from '../config';
-import {encodeParameter, FORMATS}  from './maps-api-common';
+import {encodeParameter, FORMATS} from './maps-api-common';
+import {log} from '@deck.gl/core';
 
 /**
  * Request against Maps API
@@ -58,10 +59,10 @@ function dealWithError({response, json, config}) {
 function buildURL({provider, type, source, connection, config, format}) {
   const encodedClient = encodeParameter('client', 'deck-gl-carto');
   const parameters = [encodedClient];
-  
+
   parameters.push(encodeParameter('access_token', config.accessToken));
-  parameters.push(encodeParameter('source',source))
-  parameters.push(encodeParameter('connection',connection))
+  parameters.push(encodeParameter('source', source));
+  parameters.push(encodeParameter('connection', connection));
 
   if (format) {
     parameters.push(encodeParameter('format', format));
@@ -70,8 +71,8 @@ function buildURL({provider, type, source, connection, config, format}) {
   return `${mapsUrl(config)}/${provider}/${type}?${parameters.join('&')}`;
 }
 
-function mapsUrl(config){
-  return config.mapsUrl.replace('{tenant}',config.tenant);
+function mapsUrl(config) {
+  return config.mapsUrl.replace('{tenant}', config.tenant);
 }
 
 async function getMapMetadata({provider, type, source, connection, config}) {
@@ -80,7 +81,7 @@ async function getMapMetadata({provider, type, source, connection, config}) {
   return await request({url, config});
 }
 
-function getUrlFromMetadata(metadata){
+function getUrlFromMetadata(metadata) {
   if (metadata.size === undefined) {
     throw Error('Undefined response size');
   }
@@ -99,15 +100,16 @@ function getUrlFromMetadata(metadata){
 }
 
 export async function getMapCartoCloudNative({provider, type, source, connection, config, format}) {
-  const creds = {...getConfig(), ...config};
+  const localConfig = {...getConfig(), ...config};
+
+  log.assert(localConfig.accessToken, 'Must define an access token');
 
   if (format) {
-    const formatUrl = buildURL({provider, type, source, connection, config: creds, format})
-    return [await request({url: formatUrl, config: creds}), format];
+    const formatUrl = buildURL({provider, type, source, connection, config: localConfig, format});
+    return [await request({url: formatUrl, config: localConfig}), format];
   }
 
-  const metadata = await getMapMetadata({provider, type, source, connection, config:creds });
+  const metadata = await getMapMetadata({provider, type, source, connection, config: localConfig});
   const [url, mapFormat] = await getUrlFromMetadata(metadata);
-  return [await request({url, config: creds}), mapFormat];
-
+  return [await request({url, config: localConfig}), mapFormat];
 }

@@ -1,5 +1,9 @@
 import {getConfig, getMapsVersion} from '../config';
-import { DEFAULT_REGION_COMPONENT_IN_URL, DEFAULT_USER_COMPONENT_IN_URL, encodeParameter}  from './maps-api-common';
+import {
+  DEFAULT_REGION_COMPONENT_IN_URL,
+  DEFAULT_USER_COMPONENT_IN_URL,
+  encodeParameter
+} from './maps-api-common';
 
 export const CONNECTIONS = {
   BIGQUERY: 'bigquery',
@@ -7,13 +11,13 @@ export const CONNECTIONS = {
 };
 
 const BUFFER_SIZE = 16;
-const TILE_EXTENT = 4096
+const TILE_EXTENT = 4096;
 
 /**
  * Obtain a TileJson from Maps API v1 and v2
  */
-export async function getMapCarto({ type, source, credentials}) {
-  const creds = {...getConfig(), ...credentials};
+export async function getMapCarto({type, source, config}) {
+  const creds = {...getConfig(), ...config};
   let url;
 
   const connection = type === 'tileset' ? CONNECTIONS.BIGQUERY : CONNECTIONS.CARTO;
@@ -21,36 +25,25 @@ export async function getMapCarto({ type, source, credentials}) {
   switch (getMapsVersion(creds)) {
     case 'v1':
       // Maps API v1
-      const mapConfig = createMapConfig(source)
-      url = buildURLMapsAPIv1({mapConfig, credentials: creds});
-      const layergroup = await request({url, credentials: creds});
+      const mapConfig = createMapConfig(source);
+      url = buildURLMapsAPIv1({mapConfig, config: creds});
+      const layergroup = await request({url, config: creds});
       return [layergroup.metadata.tilejson.vector, 'tilejson'];
 
     case 'v2':
       // Maps API v2
-      url = buildURLMapsAPIv2({connection, type, source, credentials: creds});
-      return [await request({url, credentials: creds}), 'tilejson'];
+      url = buildURLMapsAPIv2({connection, type, source, config: creds});
+      return [await request({url, config: creds}), 'tilejson'];
 
     default:
       throw new Error('Invalid maps API version. It shoud be v1 or v2');
   }
 }
 
-function isSQL(source) {
-  return source.search(' ') > -1;
-}
-
-function getType({connection, source}) {
-  if (connection === CONNECTIONS.BIGQUERY) 
-    return 'tileset'
-  
-  return isSQL(source) ? 'sql' : 'table'
-}
-
 /**
  * Request against Maps API
  */
-async function request({url, credentials}) {
+async function request({url, config}) {
   let response;
 
   try {
@@ -68,7 +61,7 @@ async function request({url, credentials}) {
   const json = await response.json();
 
   if (!response.ok) {
-    dealWithError({response, json, credentials});
+    dealWithError({response, json, config});
   }
 
   return json;
@@ -77,18 +70,18 @@ async function request({url, credentials}) {
 /**
  * Display proper message from Maps API error
  */
-function dealWithError({response, json, credentials}) {
+function dealWithError({response, json, config}) {
   switch (response.status) {
     case 401:
       throw new Error(
         `Unauthorized access to Maps API: invalid combination of user ('${
-          credentials.username
-        }') and apiKey ('${credentials.apiKey}')`
+          config.username
+        }') and apiKey ('${config.apiKey}')`
       );
     case 403:
       throw new Error(
         `Unauthorized access to dataset: the provided apiKey('${
-          credentials.apiKey
+          config.apiKey
         }') doesn't provide access to the requested data`
       );
 
@@ -98,8 +91,8 @@ function dealWithError({response, json, credentials}) {
   }
 }
 
-function initURLParameters(credentials) {
-  const encodedApiKey = encodeParameter('api_key', credentials.apiKey);
+function initURLParameters(config) {
+  const encodedApiKey = encodeParameter('api_key', config.apiKey);
   const encodedClient = encodeParameter('client', `deck-gl-carto`);
   return [encodedApiKey, encodedClient];
 }
@@ -107,15 +100,15 @@ function initURLParameters(credentials) {
 /**
  * Build a URL with all required parameters
  */
-function buildURLMapsAPIv1({mapConfig, credentials}) {
-  const parameters = initURLParameters(credentials);
+function buildURLMapsAPIv1({mapConfig, config}) {
+  const parameters = initURLParameters(config);
   const cfg = JSON.stringify(mapConfig);
-  return `${mapsUrl(credentials)}?${parameters.join('&')}&${encodeParameter('config', cfg)}`;
+  return `${mapsUrl(config)}?${parameters.join('&')}&${encodeParameter('config', cfg)}`;
 }
 
-function buildURLMapsAPIv2({connection, type, source, credentials}) {
-  const parameters = initURLParameters(credentials);
-  let url = `${mapsUrl(credentials)}/${connection}/${type}?`;
+function buildURLMapsAPIv2({connection, type, source, config}) {
+  const parameters = initURLParameters(config);
+  let url = `${mapsUrl(config)}/${connection}/${type}?`;
   url += `${encodeParameter('source', source)}&format=tilejson&${parameters.join('&')}`;
   return url;
 }
@@ -123,14 +116,13 @@ function buildURLMapsAPIv2({connection, type, source, credentials}) {
 /**
  * Prepare a url valid for the specified user
  */
-function mapsUrl(credentials) {
-  return credentials.mapsUrl
-    .replace(DEFAULT_USER_COMPONENT_IN_URL, credentials.username)
-    .replace(DEFAULT_REGION_COMPONENT_IN_URL, credentials.region);
+function mapsUrl(config) {
+  return config.mapsUrl
+    .replace(DEFAULT_USER_COMPONENT_IN_URL, config.username)
+    .replace(DEFAULT_REGION_COMPONENT_IN_URL, config.region);
 }
 
 function createMapConfig(sql) {
-
   return {
     version: '1.3.1',
     buffersize: {
@@ -147,4 +139,3 @@ function createMapConfig(sql) {
     ]
   };
 }
- 

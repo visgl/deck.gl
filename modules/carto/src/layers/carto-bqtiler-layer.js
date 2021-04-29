@@ -1,10 +1,10 @@
 import {log} from '@deck.gl/core';
 import CartoLayer from './carto-layer';
-import {MODE, MAP_TYPES} from '../api';
+import {MODES, MAP_TYPES} from '../api';
 
 const defaultProps = {
   ...CartoLayer.defaultProps,
-  mode: MODE.CARTO,
+  mode: MODES.CARTO,
   type: MAP_TYPES.TILESET
 };
 
@@ -13,7 +13,9 @@ export default class CartoBQTilerLayer extends CartoLayer {
     super(...args);
 
     log.warn(
-      'CARTO warning: CartoBQTilerLayer will be removed in the following deck.gl versions, and they are not recommended to use. Use CartoLayer instead.'
+      `CartoBQTilerLayer will be removed in future versions. Use CartoLayer with mode='${
+        MODES.CARTO
+      }' and type='${MAP_TYPES.TILESET}'`
     )();
   }
 }
