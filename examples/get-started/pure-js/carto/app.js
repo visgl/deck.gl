@@ -8,7 +8,7 @@ import {
   BASEMAP,
   colorBins
 } from '@deck.gl/carto';
-
+import {ArcLayer} from '@deck.gl/layers';
 import { H3HexagonLayer} from '@deck.gl/geo-layers';
 
 const INITIAL_VIEW_STATE = {
@@ -208,7 +208,18 @@ function render() {
       getFillColor: [200, 0, 80, 180],
       autoHighlight: true,
       highlightColor: [0, 0, 128, 128],
-      pickable: true
+      pickable: true,
+      renderSubLayers: props => {
+        return new ArcLayer({
+          id: 'arc-layer',
+          data: props.data.features,
+          getWidth: 3,
+          getSourcePosition: f => [-0.4531566, 51.4709959],
+          getTargetPosition: d => d.geometry.coordinates,
+          getSourceColor: [0, 128, 200],
+          getTargetColor: [200, 0, 80]
+        });
+      }
     })
 
     // new CartoLayer({
