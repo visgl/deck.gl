@@ -1,10 +1,5 @@
-import {getDefaultCredentials} from '../config';
-import {encodeParameter, PROVIDERS, FORMATS}  from './maps-api-common';
-
-export const CONNECTIONS = {
-  BIGQUERY: 'bigquery',
-  CARTO: 'carto'
-};
+import {getConfig} from '../config';
+import {encodeParameter, FORMATS}  from './maps-api-common';
 
 /**
  * Request against Maps API
@@ -100,7 +95,7 @@ function getUrlFromMetadata(metadata){
 }
 
 export async function getMap({provider, type, source, connection, credentials, format}) {
-  const creds = {...getDefaultCredentials(), ...credentials};
+  const creds = {...getConfig(), ...credentials};
 
   if (format) {
     const formatUrl = buildURL({provider, type, source, connection, credentials: creds, format})

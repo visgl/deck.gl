@@ -1,7 +1,8 @@
-const defaultCredentials = {
+import { MODE } from "./api/maps-api-common";
+
+const defaultClassicConfig = {
   username: 'public',
   apiKey: 'default_public',
-  accessToken: null,
   region: 'us',
   // Set to null to guess from mapsUrl attribute. Other values are 'v1' or 'v2'
   mapsVersion: null,
@@ -11,25 +12,55 @@ const defaultCredentials = {
   mapsUrl: 'https://maps-api-v2.{region}.carto.com/user/{user}'
 };
 
-let credentials = defaultCredentials;
+const defaultCloudNativeConfig = {
+  accessToken: null,
+  tenant: 'gcp-us-east1.app.carto.com',
+  mapsUrl: 'https://maps-.{tenant}'
+};
+
+let config = {};
 
 export function setDefaultCredentials(opts) {
-  credentials = {
-    ...credentials,
+  console.warn('setDefaultCredentials will be deprecated un future versions. Use setConfig method instead.')
+  setConfig({
+    mode: MODE,
     ...opts
-  };
+  })
 }
 
 export function getDefaultCredentials() {
-  return credentials;
+  return config;
 }
 
-export function getMapsVersion(creds) {
-  const {mapsVersion, mapsUrl} = {...credentials, ...creds};
+export function getMapsVersion(configOpts) {
+  const {mapsVersion, mapsUrl} = {...config, ...configOpts};
 
   if (mapsVersion) {
     return mapsVersion;
   }
 
   return mapsUrl.includes('api/v1/map') ? 'v1' : 'v2';
+}
+
+export function setConfig(opts) {
+  switch(opts.mode) {
+    case MODE.CARTO:
+      config = {
+        ...defaultClassicConfig,
+        ...opts
+      };
+      break;
+    case MODE.CARTO_CLOUD_NATIVE:
+      config = {
+        ...defaultCloudNativeConfig,
+        ...opts
+      };
+      break;
+    default:
+      throw new Error(`Invalid mode ....`)
+  }
+}
+
+export function getConfig() {
+  return config;
 }
