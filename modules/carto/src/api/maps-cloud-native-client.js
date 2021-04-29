@@ -1,4 +1,4 @@
-import {getDefaultCredentials} from '../config';
+import {getConfig} from '../config';
 import {encodeParameter, MAP_TYPES, PROVIDERS, FORMATS}  from './maps-api-common';
 
 /**
@@ -95,7 +95,7 @@ function getUrlFromMetadata(metadata){
 }
 
 export async function getMap({provider, type, source, connection, credentials, format}) {
-  const creds = {...getDefaultCredentials(), ...credentials};
+  const creds = {...getConfig(), ...credentials};
 
   if (format) {
     const formatUrl = buildURL({provider, type, source, connection, credentials: creds, format})

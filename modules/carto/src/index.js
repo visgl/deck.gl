@@ -2,7 +2,9 @@
 export {
   getDefaultCredentials,
   setDefaultCredentials,
-  getMapsVersion as _getMapsVersion
+  getMapsVersion as _getMapsVersion,
+  getConfig,
+  setConfig
 } from './config.js';
 export {default as CartoSQLLayer} from './layers/carto-sql-layer';
 export {default as CartoBQTilerLayer} from './layers/carto-bqtiler-layer';
