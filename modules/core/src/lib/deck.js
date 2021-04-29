@@ -510,7 +510,7 @@ export default class Deck {
       onRender: this._onRenderFrame,
       onBeforeRender: props.onBeforeRender,
       onAfterRender: props.onAfterRender,
-      onError: onError && (error => onError(error, {operation: 'creating WebGL context'}))
+      onError: onError && (error => onError(error, {operation: 'initialization'}))
     });
   }
 
