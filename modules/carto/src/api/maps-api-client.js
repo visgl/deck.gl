@@ -3,7 +3,7 @@ import {getDefaultCredentials, getMapsVersion} from '../config';
 const DEFAULT_USER_COMPONENT_IN_URL = '{user}';
 const DEFAULT_REGION_COMPONENT_IN_URL = '{region}';
 
-export const MODE_TYPES = {
+export const MODE = {
   CARTO: 'carto',
   CARTO_CLOUD_NATIVE: 'carto-cloud-native'
 };
@@ -33,6 +33,7 @@ export const CONNECTIONS = {
   CARTO: 'carto'
 };
 
+
 /**
  * Obtain a TileJson from Maps API v1 and v2
  */
@@ -50,7 +51,6 @@ export const CONNECTIONS = {
     case 'v2':
       // Maps API v2
       url = buildCartoURL({connection, type, source, credentials: creds});
-      console.log(url)
       return await request({url, credentials: creds});
 
     default:
@@ -112,18 +112,12 @@ function dealWithError({response, json, credentials}) {
 /**
  * Build a URL with all required parameters
  */
-function buildURL({provider, type, source, connection, credentials, format}) {
+function buildCartoCloudNativeURL({provider, type, source, connection, credentials, format}) {
   
   const encodedClient = encodeParameter('client', 'deck-gl-carto');
   const parameters = [encodedClient];
   
-  if (credentials.accessToken) {
-    parameters.push(encodeParameter('access_token', credentials.accessToken));
-  }
-  else if (credentials.apiKey !== 'default_public') {
-    parameters.push(encodeParameter('api_key', credentials.apiKey));
-  }
-  
+  parameters.push(encodeParameter('access_token', credentials.accessToken));
   parameters.push(encodeParameter('source',source))
   parameters.push(encodeParameter('connection',connection))
 
@@ -151,7 +145,7 @@ function buildCartoURL({connection, type, source, mapConfig, credentials}) {
 /**
  * Prepare a url valid for the specified user
  */
- function mapsUrl(credentials) {
+function mapsUrl(credentials) {
   return credentials.mapsUrl
     .replace(DEFAULT_USER_COMPONENT_IN_URL, credentials.username)
     .replace(DEFAULT_REGION_COMPONENT_IN_URL, credentials.region) + '/user/public';
@@ -167,7 +161,7 @@ function encodeParameter(name, value) {
 
 async function getMapMetadata({provider, type, source, connection, credentials}) {
 
-  const url = buildURL({provider, type, source, connection, credentials});
+  const url = buildCartoCloudNativeURL({provider, type, source, connection, credentials});
 
   return await request({url, credentials});
 }
@@ -192,15 +186,15 @@ function getUrlFromMetadata(metadata){
 }
 
 export async function getMap({provider, type, source, connection, credentials, format}) {
+
   const creds = {...getDefaultCredentials(), ...credentials};
 
   if (format) {
-    const formatUrl = buildURL({provider, type, source, connection, credentials: creds, format})
+    const formatUrl = buildCartoCloudNativeURL({provider, type, source, connection, credentials: creds, format})
     return [await request({url: formatUrl, credentials: creds}), format];
   }
 
   const metadata = await getMapMetadata({provider, type, source, connection, credentials:creds });
   const [url, mapFormat] = await getUrlFromMetadata(metadata);
   return [await request({url, credentials: creds}), mapFormat];
-  
 }
