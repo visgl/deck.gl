@@ -1,7 +1,8 @@
 import {CompositeLayer} from '@deck.gl/core';
 import {MVTLayer} from '@deck.gl/geo-layers';
 import {GeoJsonLayer} from '@deck.gl/layers';
-import {getMap} from '../api/maps-api-client';
+import {getMap, getTileJSON, MODE, CONNECTIONS, MAP_TYPES, FORMATS} from '../api/maps-api-client';
+import {getMapsVersion} from '../config';
 
 const defaultProps = {
   // (String, required): data resource to load. table name, sql query or tileset name.
@@ -24,16 +25,6 @@ const defaultProps = {
   onDataError: {type: 'function', value: null, compare: false, optional: true}
 };
 
-function getSublayerFromMapFormat(format) {
-  if (format === 'tilejson') {
-    return MVTLayer;
-  }
-  else if (format === 'geojson') {
-    return GeoJsonLayer;
-  }
-
-  return null;
-}
 export default class CartoLayer extends CompositeLayer {
   initializeState() {
     this.state = {
@@ -48,10 +39,10 @@ export default class CartoLayer extends CompositeLayer {
 
   updateState({props, oldProps, changeFlags}) {
     const shouldUpdateData = changeFlags.dataChanged ||
-        props.provider !== oldProps.provider ||
-        props.connection !== oldProps.connection ||
-        props.type !== oldProps.type ||
-        JSON.stringify(props.credentials) !== JSON.stringify(oldProps.credentials);
+      props.provider !== oldProps.provider ||
+      props.connection !== oldProps.connection ||
+      props.type !== oldProps.type ||
+      JSON.stringify(props.credentials) !== JSON.stringify(oldProps.credentials);
 
     if (shouldUpdateData) {
       this.setState({data: null, SubLayer: null});
@@ -61,23 +52,30 @@ export default class CartoLayer extends CompositeLayer {
 
   async _updateData() {
     try {
-    
       const {mode, provider, type, data: source, connection, credentials, format} = this.props;
 
       let data, mapFormat;
 
-      if (mode === mode.CARTO_CLOUD_NATIVE) {
+      if (mode === MODE.CARTO_CLOUD_NATIVE) {
         [data, mapFormat] = await getMap({provider, type, source, connection, credentials, format});
-      } else {
-        data = await this.updateTileJSON();
-        mapFormat = FORMATS.TILEJSON
+      }
+
+      if (mode === MODE.CARTO) {
+        if (type === MAP_TYPES.SQL || type === MAP_TYPES.TABLE) {
+          data = await this.updateSQLTileJSON();
+        }
+
+        if (type === MAP_TYPES.TILESET) {
+          data = await this.updateBQTilerTileJSON();
+        }
+        
+        mapFormat = FORMATS.TILEJSON;
       }
 
       const SubLayer = this.state.SubLayer || this.props.subLayer || getSublayerFromMapFormat(mapFormat);
 
       this.setState({SubLayer, data});
       this.props.onDataLoad(data);
-
     } catch (err) {
       if (this.props.onDataError) {
         this.props.onDataError(err);
@@ -87,8 +85,54 @@ export default class CartoLayer extends CompositeLayer {
     }
   }
 
-  async updateTileJSON() {
-    throw new Error('You must use one of the specific carto layers: BQ or SQL type');
+  async updateSQLTileJSON() {
+    const {data, bufferSize, tileExtent, credentials} = this.props;
+    const version = getMapsVersion(credentials);
+    const isSQL = data.search(' ') > -1;
+
+    switch (version) {
+      case 'v1':
+        const sql = isSQL ? data : `SELECT * FROM ${data}`;
+
+        // Map config v1
+        const mapConfig = {
+          version: '1.3.1',
+          buffersize: {
+            mvt: bufferSize
+          },
+          layers: [
+            {
+              type: 'mapnik',
+              options: {
+                sql: sql.trim(),
+                vector_extent: tileExtent
+              }
+            }
+          ]
+        };
+
+        return await getTileJSON({mapConfig, credentials});
+      case 'v2':
+        return await getTileJSON({
+          connection: CONNECTIONS.CARTO,
+          source: data,
+          type: isSQL ? MAP_TYPES.SQL : MAP_TYPES.TABLE,
+          credentials
+        });
+      default:
+        throw new Error(`Cannot build MapConfig for unmatching version ${version}`);
+    }
+  }
+
+  async updateBQTilerTileJSON() {
+    const {credentials, data} = this.props;
+
+    return await getTileJSON({
+      connection: CONNECTIONS.BIGQUERY,
+      type: MAP_TYPES.TILESET,
+      source: data,
+      credentials
+    });
   }
 
   renderLayers() {
@@ -113,3 +157,14 @@ export default class CartoLayer extends CompositeLayer {
 
 CartoLayer.layerName = 'CartoLayer';
 CartoLayer.defaultProps = defaultProps;
+
+function getSublayerFromMapFormat(format) {
+  switch (format) {
+    case FORMATS.TILEJSON:
+      return MVTLayer;
+    case FORMATS.GEOJSON:
+      return GeoJsonLayer;
+    default:
+      return null;
+  }
+}

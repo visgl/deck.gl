@@ -33,7 +33,6 @@ export const CONNECTIONS = {
   CARTO: 'carto'
 };
 
-
 /**
  * Obtain a TileJson from Maps API v1 and v2
  */
@@ -113,7 +112,6 @@ function dealWithError({response, json, credentials}) {
  * Build a URL with all required parameters
  */
 function buildCartoCloudNativeURL({provider, type, source, connection, credentials, format}) {
-  
   const encodedClient = encodeParameter('client', 'deck-gl-carto');
   const parameters = [encodedClient];
   
@@ -130,13 +128,14 @@ function buildCartoCloudNativeURL({provider, type, source, connection, credentia
 
 function buildCartoURL({connection, type, source, mapConfig, credentials}) {
   const encodedApiKey = encodeParameter('api_key', credentials.apiKey);
-  const encodedClient = encodeParameter('client', `deck-gl-carto`);
+  const encodedClient = encodeParameter('client', 'deck-gl-carto');
   const parameters = [encodedApiKey, encodedClient];
 
   if (mapConfig) {
     const cfg = JSON.stringify(mapConfig);
     return `${mapsUrl(credentials)}?${parameters.join('&')}&${encodeParameter('config', cfg)}`;
   }
+
   let url = `${mapsUrl(credentials)}/${connection}/${type}?`;
   url += `${encodeParameter('source', source)}&format=tilejson&${parameters.join('&')}`;
   return url;
@@ -148,9 +147,8 @@ function buildCartoURL({connection, type, source, mapConfig, credentials}) {
 function mapsUrl(credentials) {
   return credentials.mapsUrl
     .replace(DEFAULT_USER_COMPONENT_IN_URL, credentials.username)
-    .replace(DEFAULT_REGION_COMPONENT_IN_URL, credentials.region) + '/user/public';
+    .replace(DEFAULT_REGION_COMPONENT_IN_URL, credentials.region);
 }
-
 
 /**
  * Simple encode parameter
@@ -160,14 +158,12 @@ function encodeParameter(name, value) {
 }
 
 async function getMapMetadata({provider, type, source, connection, credentials}) {
-
   const url = buildCartoCloudNativeURL({provider, type, source, connection, credentials});
 
   return await request({url, credentials});
 }
 
 function getUrlFromMetadata(metadata){
-
   if (metadata.size === undefined) {
     throw Error('Undefined response size');
   }
@@ -186,7 +182,6 @@ function getUrlFromMetadata(metadata){
 }
 
 export async function getMap({provider, type, source, connection, credentials, format}) {
-
   const creds = {...getDefaultCredentials(), ...credentials};
 
   if (format) {
