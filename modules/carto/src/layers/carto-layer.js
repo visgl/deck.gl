@@ -1,3 +1,4 @@
+import { render } from '@deck.gl/arcgis/commons';
 import {CompositeLayer, log} from '@deck.gl/core';
 import {MVTLayer} from '@deck.gl/geo-layers';
 import {GeoJsonLayer} from '@deck.gl/layers';
@@ -18,7 +19,7 @@ const defaultProps = {
   // (String {table, sql, tileset}, required)
   type: null,
   // sublayer used to render. Any deck.gl layer or null to autodetect
-  subLayer: null,
+  renderSubLayers: null,
   // (String {geojson, json, tileset}, optional). Desired data format. By default, it's guessed automaticaly
   format: null,
   onDataLoad: {type: 'function', value: data => {}, compare: false},
@@ -89,7 +90,7 @@ export default class CartoLayer extends CompositeLayer {
         log.assert(`Unknow mode ${mode}. Possible values are ${Object.values(MODE).toString()}`);
       }
 
-      const SubLayer = this.state.SubLayer || this.props.subLayer || getSublayerFromMapFormat(mapFormat);
+      const SubLayer = this.state.SubLayer || getSublayerFromMapFormat(mapFormat);
 
       this.setState({SubLayer, data});
       this.props.onDataLoad(data);
@@ -106,7 +107,7 @@ export default class CartoLayer extends CompositeLayer {
     const {data, SubLayer} = this.state;
     if (!data) return null;
 
-    const {updateTriggers} = this.props;
+    const {renderSubLayers, updateTriggers} = this.props;
     const props = {...this.props};
     delete props.data;
  
@@ -118,7 +119,6 @@ export default class CartoLayer extends CompositeLayer {
         updateTriggers
       })
     );
-
   }
 }
 
