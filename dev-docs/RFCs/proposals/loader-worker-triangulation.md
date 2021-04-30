@@ -44,10 +44,9 @@ Changes are required both in loaders.gl and deck.gl
 MVTLoader is modified to accept two new options:
 - triangulate : a Boolean, false by default which will invoke the earcut triangulation as part of the loading process
 
-When triangulate is enabled, the MVTLoader will invoke earcut as part of the worker process and then return as part of the arrays it produces two additional arrays:
+When triangulate is enabled, the MVTLoader will invoke earcut as part of the worker process and then return as part of the arrays it produces an additional array:
 
 - `triangles`, a set of indices into the positions array. 
-- `triangleIndices`, a set of indices marking the start positions for each polygon
 
 ### deck.gl
 
