@@ -14,6 +14,13 @@ The module entry point is now only lightly transpiled for the most commonly used
 - `GeoJsonLayer`'s `lineJointRounded` prop now only controls line joints. To use rounded line caps, set `lineCapRounded` to `true`.
 - Dashed lines via `PathStyleExtension` now draw rounded dash caps if `capRounded` is `true`.
 
+### CARTO module
+
+- `credentials` parameter has been renamed to `config`.
+- `setDefaultCredentials` will be removed in future versions. Use `setConfig` instead.
+- `CartoBQTilerLayer` will be removed in future versions. Use `CartoLayer` with `type='tileset'`.
+- `CartoSQLLayer` will be removed in future versions. Use `CartoLayer` with `type='sql'`.
+
 ## Upgrading from deck.gl v8.3 to v8.4
 
 ### wrapLongitude
