@@ -17,14 +17,12 @@ const defaultProps = {
 
   data: null,
   loader: Tiles3DLoader,
-  loadTiles: true,
-  highlightColor: [0, 0, 255, 150],
-  pickFeatures: false,
 
   onTilesetLoad: {type: 'function', value: tileset3d => {}, compare: false},
   onTileLoad: {type: 'function', value: tileHeader => {}, compare: false},
   onTileUnload: {type: 'function', value: tileHeader => {}, compare: false},
-  onTileError: {type: 'function', value: (tile, message, url) => {}, compare: false}
+  onTileError: {type: 'function', value: (tile, message, url) => {}, compare: false},
+  getSimpleMeshLayerColor: {type: 'function', value: tileHeader => [255, 255, 255], compare: false}
 };
 
 export default class Tile3DLayer extends CompositeLayer {
@@ -129,16 +127,11 @@ export default class Tile3DLayer extends CompositeLayer {
   }
 
   _updateTileset(tileset3d) {
-    const {timeline, deck} = this.context;
-    const viewports = deck.viewManager.getViewports();
-    if (!timeline || !viewports || !tileset3d) {
+    const {timeline, viewport} = this.context;
+    if (!timeline || !viewport || !tileset3d) {
       return;
     }
-    const currentProps = this.getCurrentLayer().props;
-    if (!currentProps.loadTiles) {
-      return;
-    }
-    const frameNumber = tileset3d.update(viewports);
+    const frameNumber = tileset3d.update(viewport);
     const tilesetChanged = this.state.frameNumber !== frameNumber;
     if (tilesetChanged) {
       this.setState({frameNumber});
@@ -235,19 +228,8 @@ export default class Tile3DLayer extends CompositeLayer {
 
   _makeSimpleMeshLayer(tileHeader, oldLayer) {
     const content = tileHeader.content;
-    const {segmentationData} = tileHeader.header;
-    const {attributes, modelMatrix, cartographicOrigin, texture, material} = content;
-    const {
-      pickable,
-      pickFeatures,
-      autoHighlight,
-      highlightColor,
-      tileColorMode,
-      colorsMap,
-      selectedTileId,
-      coloredTilesMap,
-      wireframe
-    } = this.props;
+    const {attributes, modelMatrix, cartographicOrigin, texture} = content;
+    const {getSimpleMeshLayerColor} = this.props;
 
     const geometry =
       (oldLayer && oldLayer.props.mesh) ||
@@ -255,14 +237,6 @@ export default class Tile3DLayer extends CompositeLayer {
         drawMode: GL.TRIANGLES,
         attributes: getMeshGeometry(attributes)
       });
-
-    const color = colorsMap
-      ? colorsMap.getTileColor(tileHeader, {
-          coloredBy: tileColorMode,
-          selectedTileId,
-          coloredTilesMap
-        })
-      : [255, 255, 255];
 
     const SubLayerClass = this.getSubLayerClass('mesh', SimpleMeshLayer);
 
@@ -272,22 +246,14 @@ export default class Tile3DLayer extends CompositeLayer {
       }),
       {
         id: `${this.id}-mesh-${tileHeader.id}`,
-        viewportIds: tileHeader.viewportIds,
         mesh: geometry,
         data: SINGLE_DATA,
         getPosition: [0, 0, 0],
-        getColor: color,
+        getColor: getSimpleMeshLayerColor(tileHeader),
         texture,
-        material,
         modelMatrix,
         coordinateOrigin: cartographicOrigin,
-        coordinateSystem: COORDINATE_SYSTEM.METER_OFFSETS,
-        pickable,
-        autoHighlight,
-        wireframe,
-        highlightColor,
-        pickFeatures,
-        segmentationData
+        coordinateSystem: COORDINATE_SYSTEM.METER_OFFSETS
       }
     );
   }
@@ -339,15 +305,6 @@ function getMeshGeometry(contentAttributes) {
   }
   if (contentAttributes.texCoords) {
     attributes.texCoords = contentAttributes.texCoords;
-  }
-  if (contentAttributes.uvRegions) {
-    attributes.uvRegions = contentAttributes.uvRegions;
-  }
-  if (contentAttributes.colors) {
-    attributes.colors = contentAttributes.colors;
-  }
-  if (contentAttributes.featureIds) {
-    attributes.featureIds = contentAttributes.featureIds;
   }
   return attributes;
 }

@@ -288,8 +288,9 @@ export default class Layer extends Component {
   // @return {Array} - the decoded picking color
   decodePickingColor(color) {
     assert(color instanceof Uint8Array);
+    const [i1, i2, i3] = color;
     // 1 was added to seperate from no selection
-    const index = color[0] + color[1] * 256 + color[2] * 65536 - 1;
+    const index = i1 + i2 * 256 + i3 * 65536 - 1;
     return index;
   }
 
@@ -517,20 +518,6 @@ export default class Layer extends Component {
     }
 
     attribute.value = pickingColorCache.subarray(0, numInstances * 3);
-  }
-
-  calculateSegmentationPickingColors(attribute, segmentationData) {
-    const pickingColor = new Uint8ClampedArray(segmentationData.length * attribute.size);
-
-    for (let index = 0; index < segmentationData.length; index++) {
-      const color = this.encodePickingColor(segmentationData[index]);
-
-      pickingColor[index * 3] = color[0];
-      pickingColor[index * 3 + 1] = color[1];
-      pickingColor[index * 3 + 2] = color[2];
-    }
-
-    attribute.value = pickingColor;
   }
 
   _setModelAttributes(model, changedAttributes) {
