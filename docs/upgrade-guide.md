@@ -18,8 +18,8 @@ The module entry point is now only lightly transpiled for the most commonly used
 
 - `credentials` parameter has been renamed to `config`.
 - `setDefaultCredentials` will be removed in future versions. Use `setConfig` instead.
-- `CartoBQTilerLayer` will be removed in future versions. Use `CartoLayer` with `apiVersion='v2'` and `type='tileset'`.
-- `CartoSQLLayer` will be removed in future versions. Use `CartoSQLLayer` with `apiVersion='v2'` and `type='sql'`.
+- `CartoBQTilerLayer` will be removed in future versions. Use `CartoLayer` with `type='tileset'` and `setConfig({apiVersion: 'v2', ...})`.
+- `CartoSQLLayer` will be removed in future versions. Use `CartoSQLLayer` with `type='sql'` and `setConfig({apiVersion: 'v2', ...})`.
 
 ## Upgrading from deck.gl v8.3 to v8.4
 

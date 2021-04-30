@@ -14,7 +14,7 @@ export default class CartoBQTilerLayer extends CartoLayer {
     log.warn(
       `CartoBQTilerLayer will be removed in future versions. Use CartoLayer with type='${
         MAP_TYPES.TILESET
-      }' and apiVersion='v2' `
+      }' and apiVersion='v2'`
     )();
   }
 }
