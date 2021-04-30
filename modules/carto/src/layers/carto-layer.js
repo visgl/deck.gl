@@ -3,12 +3,11 @@ import {MVTLayer} from '@deck.gl/geo-layers';
 import {GeoJsonLayer} from '@deck.gl/layers';
 import {getMapCartoCloudNative, getMapCarto, FORMATS, API_VERSIONS} from '../api';
 import {MAP_TYPES, PROVIDERS} from '../api/maps-api-common';
+import {getConfig} from '../config';
 
 const defaultProps = {
   // (String, required): data resource to load. table name, sql query or tileset name.
   data: null,
-  // Maps API version, default to V3
-  apiVersion: API_VERSIONS.V3,
   // (String {bigquery, snowflake,redshift, postgres}, required)
   provider: null,
   // (String, required): connection name at CARTO platform
@@ -38,11 +37,15 @@ export default class CartoLayer extends CompositeLayer {
   }
 
   _checkProps(props) {
-    const {apiVersion, provider, type, format} = this.props;
+    const {provider, type, format, config} = this.props;
+    const localConfig = {...getConfig(), ...config};
+    const {apiVersion} = localConfig;
 
     log.assert(
       Object.values(API_VERSIONS).includes(apiVersion),
-      `Invalid apiVersion ${apiVersion}. Possible values are ${Object.values(API_VERSIONS).toString()}`
+      `Invalid apiVersion ${apiVersion}. Possible values are ${Object.values(
+        API_VERSIONS
+      ).toString()}`
     );
 
     if (apiVersion === API_VERSIONS.V1 || apiVersion === API_VERSIONS.V2) {
@@ -85,7 +88,9 @@ export default class CartoLayer extends CompositeLayer {
 
   async _updateData() {
     try {
-      const {apiVersion, provider, type, data: source, connection, config, format} = this.props;
+      const {provider, type, data: source, connection, config, format} = this.props;
+      const localConfig = {...getConfig(), ...config};
+      const {apiVersion} = localConfig;
 
       let data;
       let mapFormat;
@@ -102,7 +107,11 @@ export default class CartoLayer extends CompositeLayer {
       } else if (apiVersion === API_VERSIONS.V1 || apiVersion === API_VERSIONS.V2) {
         [data, mapFormat] = await getMapCarto({type, source, config});
       } else {
-        log.assert(`Unknow apiVersion ${apiVersion}. Possible values are ${Object.values(API_VERSIONS).toString()}`);
+        log.assert(
+          `Unknow apiVersion ${apiVersion}. Possible values are ${Object.values(
+            API_VERSIONS
+          ).toString()}`
+        );
       }
 
       const renderSubLayer = this.state.renderSubLayer || getRenderSubLayerFromMapFormat(mapFormat);

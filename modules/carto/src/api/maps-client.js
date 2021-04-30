@@ -24,7 +24,6 @@ export async function getMapCarto({type, source, config}) {
   const localConfig = {...getConfig(), ...config};
   const {apiVersion} = localConfig;
   let url;
-  debugger;
 
   const connection = type === 'tileset' ? CONNECTIONS.BIGQUERY : CONNECTIONS.CARTO;
 
@@ -42,7 +41,9 @@ export async function getMapCarto({type, source, config}) {
       return [await request({url, config: localConfig}), 'tilejson'];
 
     default:
-      throw new Error(`Invalid maps API version. It shoud be ${API_VERSIONS.V1} or ${API_VERSIONS.V2}`);
+      throw new Error(
+        `Invalid maps API version. It shoud be ${API_VERSIONS.V1} or ${API_VERSIONS.V2}`
+      );
   }
 }
 

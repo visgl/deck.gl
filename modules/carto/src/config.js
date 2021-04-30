@@ -6,12 +6,12 @@ const defaultClassicConfig = {
   apiKey: 'default_public',
   region: 'us',
   // SQL API URL
-  sqlUrl: 'https://{user}.carto.com/api/v2/sql',
+  sqlUrl: 'https://{user}.carto.com/api/v2/sql'
 };
 
 const defaultCloudNativeConfig = {
   accessToken: null,
-  tenant: 'gcp-us-east1.app.carto.com',
+  tenant: 'gcp-us-east1.app.carto.com'
 };
 
 let config = {};
@@ -31,12 +31,13 @@ export function getDefaultCredentials() {
 }
 
 export function setConfig(opts) {
-  const apiVersion = opts.apiVersion || API_VERSIONS.V3;
+  const apiVersion = opts.apiVersion || API_VERSIONS.V2;
 
   switch (apiVersion) {
     case API_VERSIONS.V1:
       opts.mapsUrl = opts.mapsUrl || 'https://{user}.carto.com/api/v1/map';
       config = {
+        apiVersion,
         ...defaultClassicConfig,
         ...opts
       };
@@ -45,6 +46,7 @@ export function setConfig(opts) {
     case API_VERSIONS.V2:
       opts.mapsUrl = opts.mapsUrl || 'https://maps-api-v2.{region}.carto.com/user/{user}';
       config = {
+        apiVersion,
         ...defaultClassicConfig,
         ...opts
       };
@@ -53,12 +55,13 @@ export function setConfig(opts) {
     case API_VERSIONS.V3:
       opts.mapsUrl = opts.mapsUrl || 'https://maps-{tenant}';
       config = {
+        apiVersion,
         ...defaultCloudNativeConfig,
         ...opts
       };
       break;
     default:
-      throw new Error(`Invalid API version ${mapsVersion}`);
+      throw new Error(`Invalid API version ${apiVersion}`);
   }
 }
 
