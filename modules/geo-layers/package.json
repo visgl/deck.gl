@@ -34,7 +34,7 @@
     "@loaders.gl/loader-utils": "^3.0.0-alpha",
     "@loaders.gl/mvt": "^3.0.0-alpha",
     "@loaders.gl/terrain": "^3.0.0-alpha",
-    "@loaders.gl/tiles": "^3.0.0-alpha",
+    "@loaders.gl/tiles": "^3.0.0-alpha.12",
     "@math.gl/culling": "^3.4.2",
     "@math.gl/web-mercator": "^3.4.2",
     "h3-js": "^3.6.0",

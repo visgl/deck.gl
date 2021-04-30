@@ -126,11 +126,12 @@ export default class Tile3DLayer extends CompositeLayer {
   }
 
   _updateTileset(tileset3d) {
-    const {timeline, viewport} = this.context;
-    if (!timeline || !viewport || !tileset3d) {
+    const {timeline, deck} = this.context;
+    const viewports = deck.viewManager.getViewports();
+    if (!timeline || !viewports || !tileset3d) {
       return;
     }
-    const frameNumber = tileset3d.update(viewport);
+    const frameNumber = tileset3d.update(viewports);
     const tilesetChanged = this.state.frameNumber !== frameNumber;
     if (tilesetChanged) {
       this.setState({frameNumber});

@@ -106,11 +106,11 @@ export async function testLayerAsync(opts) {
 
 function setupLayerTests(
   testTitle,
-  {viewport = testViewport, timeline = null, onError = defaultOnError}
+  {deck = null, viewport = testViewport, timeline = null, onError = defaultOnError}
 ) {
   const oldResourceCounts = getResourceCounts();
 
-  const layerManager = new LayerManager(gl, {viewport, timeline});
+  const layerManager = new LayerManager(gl, {deck, viewport, timeline});
   const deckRenderer = new DeckRenderer(gl);
 
   layerManager.context.animationProps = {
