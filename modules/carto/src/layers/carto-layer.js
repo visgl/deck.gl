@@ -8,20 +8,26 @@ import {getConfig} from '../config';
 const defaultProps = {
   // (String, required): data resource to load. table name, sql query or tileset name.
   data: null,
+  // (String {table, sql, tileset}, required)
+  type: null,
+  onDataLoad: {type: 'function', value: data => {}, compare: false},
+  onDataError: {type: 'function', value: null, compare: false, optional: true},
+
+  /*********************/
+  /* API v3 PARAMETERS */
+  /**********************/
+
   // (String {bigquery, snowflake,redshift, postgres}, required)
   provider: null,
   // (String, required): connection name at CARTO platform
   connection: null,
-  // (String {table, sql, tileset}, required)
-  type: null,
+ 
   // override carto config for the layer, set to null to read from default
   config: null,
   // sublayer used to render. Any deck.gl layer or null to autodetect
   renderSubLayer: null,
   // (String {geojson, json, tileset}, optional). Desired data format. By default, it's guessed automaticaly
-  format: null,
-  onDataLoad: {type: 'function', value: data => {}, compare: false},
-  onDataError: {type: 'function', value: null, compare: false, optional: true}
+  format: null
 };
 
 export default class CartoLayer extends CompositeLayer {
