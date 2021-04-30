@@ -1,22 +1,17 @@
-import {MODES} from './api/maps-api-common';
+import {API_VERSIONS} from './api/maps-api-common';
 import {log} from '@deck.gl/core';
 
 const defaultClassicConfig = {
   username: 'public',
   apiKey: 'default_public',
   region: 'us',
-  // Set to null to guess from mapsUrl attribute. Other values are 'v1' or 'v2'
-  mapsVersion: null,
   // SQL API URL
   sqlUrl: 'https://{user}.carto.com/api/v2/sql',
-  // Maps API URL
-  mapsUrl: 'https://maps-api-v2.{region}.carto.com/user/{user}'
 };
 
 const defaultCloudNativeConfig = {
   accessToken: null,
   tenant: 'gcp-us-east1.app.carto.com',
-  mapsUrl: 'https://maps-{tenant}'
 };
 
 let config = {};
@@ -26,7 +21,7 @@ export function setDefaultCredentials(opts) {
     'setDefaultCredentials will be deprecated in future versions. Use setConfig method instead.'
   )();
   setConfig({
-    mode: MODES.CARTO,
+    apiVersion: API_VERSIONS.V2,
     ...opts
   });
 }
@@ -35,32 +30,35 @@ export function getDefaultCredentials() {
   return config;
 }
 
-export function getMapsVersion(configOpts) {
-  const {mapsVersion, mapsUrl} = {...config, ...configOpts};
-
-  if (mapsVersion) {
-    return mapsVersion;
-  }
-
-  return mapsUrl.includes('api/v1/map') ? 'v1' : 'v2';
-}
-
 export function setConfig(opts) {
-  switch (opts.mode) {
-    case MODES.CARTO:
+  const apiVersion = opts.apiVersion || API_VERSIONS.V3;
+
+  switch (apiVersion) {
+    case API_VERSIONS.V1:
+      opts.mapsUrl = opts.mapsUrl || 'https://{user}.carto.com/api/v1/map';
       config = {
         ...defaultClassicConfig,
         ...opts
       };
       break;
-    case MODES.CARTO_CLOUD_NATIVE:
+
+    case API_VERSIONS.V2:
+      opts.mapsUrl = opts.mapsUrl || 'https://maps-api-v2.{region}.carto.com/user/{user}';
+      config = {
+        ...defaultClassicConfig,
+        ...opts
+      };
+
+      break;
+    case API_VERSIONS.V3:
+      opts.mapsUrl = opts.mapsUrl || 'https://maps-{tenant}';
       config = {
         ...defaultCloudNativeConfig,
         ...opts
       };
       break;
     default:
-      throw new Error(`Invalid mode ....`);
+      throw new Error(`Invalid API version ${mapsVersion}`);
   }
 }
 

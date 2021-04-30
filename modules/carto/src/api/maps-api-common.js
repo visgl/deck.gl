@@ -1,9 +1,10 @@
 export const DEFAULT_USER_COMPONENT_IN_URL = '{user}';
 export const DEFAULT_REGION_COMPONENT_IN_URL = '{region}';
 
-export const MODES = {
-  CARTO: 'carto',
-  CARTO_CLOUD_NATIVE: 'carto-cloud-native'
+export const API_VERSIONS = {
+  V1: 'v1',
+  V2: 'v2',
+  V3: 'v3'
 };
 
 export const MAP_TYPES = {

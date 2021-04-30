@@ -1,8 +1,9 @@
 /**
  * Maps API Client for Maps API v1 and Maps API v2
  */
-import {getConfig, getMapsVersion} from '../config';
+import {getConfig} from '../config';
 import {
+  API_VERSIONS,
   DEFAULT_REGION_COMPONENT_IN_URL,
   DEFAULT_USER_COMPONENT_IN_URL,
   encodeParameter
@@ -20,26 +21,28 @@ const TILE_EXTENT = 4096;
  * Obtain a TileJson from Maps API v1 and v2
  */
 export async function getMapCarto({type, source, config}) {
-  const creds = {...getConfig(), ...config};
+  const localConfig = {...getConfig(), ...config};
+  const {apiVersion} = localConfig;
   let url;
+  debugger;
 
   const connection = type === 'tileset' ? CONNECTIONS.BIGQUERY : CONNECTIONS.CARTO;
 
-  switch (getMapsVersion(creds)) {
-    case 'v1':
+  switch (apiVersion) {
+    case API_VERSIONS.V1:
       // Maps API v1
       const mapConfig = createMapConfig(source);
-      url = buildURLMapsAPIv1({mapConfig, config: creds});
-      const layergroup = await request({url, config: creds});
+      url = buildURLMapsAPIv1({mapConfig, config: localConfig});
+      const layergroup = await request({url, config: localConfig});
       return [layergroup.metadata.tilejson.vector, 'tilejson'];
 
-    case 'v2':
+    case API_VERSIONS.V2:
       // Maps API v2
-      url = buildURLMapsAPIv2({connection, type, source, config: creds});
-      return [await request({url, config: creds}), 'tilejson'];
+      url = buildURLMapsAPIv2({connection, type, source, config: localConfig});
+      return [await request({url, config: localConfig}), 'tilejson'];
 
     default:
-      throw new Error('Invalid maps API version. It shoud be v1 or v2');
+      throw new Error(`Invalid maps API version. It shoud be ${API_VERSIONS.V1} or ${API_VERSIONS.V2}`);
   }
 }
 
@@ -89,7 +92,7 @@ function dealWithError({response, json, config}) {
       );
 
     default:
-      const e = getMapsVersion() === 'v1' ? JSON.stringify(json.errors) : json.error;
+      const e = config.apiVersion === API_VERSIONS.V1 ? JSON.stringify(json.errors) : json.error;
       throw new Error(e);
   }
 }

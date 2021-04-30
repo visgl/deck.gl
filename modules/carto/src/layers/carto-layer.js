@@ -1,14 +1,14 @@
 import {CompositeLayer, log} from '@deck.gl/core';
 import {MVTLayer} from '@deck.gl/geo-layers';
 import {GeoJsonLayer} from '@deck.gl/layers';
-import {getMapCartoCloudNative, getMapCarto, FORMATS, MODES} from '../api';
+import {getMapCartoCloudNative, getMapCarto, FORMATS, API_VERSIONS} from '../api';
 import {MAP_TYPES, PROVIDERS} from '../api/maps-api-common';
 
 const defaultProps = {
   // (String, required): data resource to load. table name, sql query or tileset name.
   data: null,
-  // mode should carto or carto-cloud-native
-  mode: null,
+  // Maps API version, default to V3
+  apiVersion: API_VERSIONS.V3,
   // (String {bigquery, snowflake,redshift, postgres}, required)
   provider: null,
   // (String, required): connection name at CARTO platform
@@ -38,21 +38,21 @@ export default class CartoLayer extends CompositeLayer {
   }
 
   _checkProps(props) {
-    const {mode, provider, type, format} = this.props;
+    const {apiVersion, provider, type, format} = this.props;
 
     log.assert(
-      Object.values(MODES).includes(mode),
-      `Invalid mode ${mode}. Possible values are ${Object.values(MODES).toString()}`
+      Object.values(API_VERSIONS).includes(apiVersion),
+      `Invalid apiVersion ${apiVersion}. Possible values are ${Object.values(API_VERSIONS).toString()}`
     );
 
-    if (mode === MODES.CARTO) {
-      log.assert(!provider, `Provider not suport for mode ${mode}`);
-      log.assert(!format, `Format not suport for mode ${mode}`);
+    if (apiVersion === API_VERSIONS.V1 || apiVersion === API_VERSIONS.V2) {
+      log.assert(!provider, `Provider not suport for apiVersion ${apiVersion}`);
+      log.assert(!format, `Format not suport for apiVersion ${apiVersion}`);
       log.assert(
         type !== MAP_TYPES.TABLE,
-        `Use type ${MAP_TYPES.SQL} or ${MAP_TYPES.TILESET} for mode ${mode}`
+        `Use type ${MAP_TYPES.SQL} or ${MAP_TYPES.TILESET} for apiVersion ${apiVersion}`
       );
-    } else if (mode === MODES.CARTO_CLOUD_NATIVE) {
+    } else if (apiVersion === API_VERSIONS.V3) {
       log.assert(
         Object.values(MAP_TYPES).includes(type),
         `Invalid type ${type}. Possible values are ${Object.values(MAP_TYPES).toString()}`
@@ -85,12 +85,12 @@ export default class CartoLayer extends CompositeLayer {
 
   async _updateData() {
     try {
-      const {mode, provider, type, data: source, connection, config, format} = this.props;
+      const {apiVersion, provider, type, data: source, connection, config, format} = this.props;
 
       let data;
       let mapFormat;
 
-      if (mode === MODES.CARTO_CLOUD_NATIVE) {
+      if (apiVersion === API_VERSIONS.V3) {
         [data, mapFormat] = await getMapCartoCloudNative({
           provider,
           type,
@@ -99,10 +99,10 @@ export default class CartoLayer extends CompositeLayer {
           config,
           format
         });
-      } else if (mode === MODES.CARTO) {
+      } else if (apiVersion === API_VERSIONS.V1 || apiVersion === API_VERSIONS.V2) {
         [data, mapFormat] = await getMapCarto({type, source, config});
       } else {
-        log.assert(`Unknow mode ${mode}. Possible values are ${Object.values(MODES).toString()}`);
+        log.assert(`Unknow apiVersion ${apiVersion}. Possible values are ${Object.values(API_VERSIONS).toString()}`);
       }
 
       const renderSubLayer = this.state.renderSubLayer || getRenderSubLayerFromMapFormat(mapFormat);
