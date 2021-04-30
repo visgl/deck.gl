@@ -39,10 +39,8 @@ function dealWithError({response, json}) {
   switch (response.status) {
     case 401:
     case 403:
-      throw new Error(
-        `Unauthorized access to Maps API`
-      );
-    
+      throw new Error(`Unauthorized access to Maps API`);
+
     default:
       const e = json.error;
       throw new Error(e);
