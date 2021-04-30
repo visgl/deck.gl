@@ -1,12 +1,18 @@
 import test from 'tape-catch';
 import {testLayer, testLayerAsync, generateLayerTests} from '@deck.gl/test-utils';
 import {makeSpy} from '@probe.gl/test-utils';
-import {setConfig, CartoSQLLayer} from '@deck.gl/carto';
+import {setConfig, CartoSQLLayer, API_VERSIONS} from '@deck.gl/carto';
 import {MVTLayer} from '@deck.gl/geo-layers';
 import {log} from '@deck.gl/core';
 import {mockFetchMapsV2, restoreFetch} from './mock-fetch';
 
 test('CartoSQLLayer', t => {
+  setConfig({
+    apiVersion: API_VERSIONS.V2
+  });
+
+  const fetchMock = mockFetchMapsV2();
+
   const testCases = generateLayerTests({
     Layer: CartoSQLLayer,
     assert: t.ok,
@@ -14,23 +20,31 @@ test('CartoSQLLayer', t => {
   });
 
   testLayer({Layer: CartoSQLLayer, testCases, onError: t.notOk});
+
+  restoreFetch(fetchMock);
+
   t.end();
 });
 
-test('CartoSQLLayer#should throws an error due to invalid mode param', t => {
+test('CartoSQLLayer#should throws an error due to invalid apiVersion config param', t => {
   makeSpy(log, 'assert');
 
   const testCases = [
     {
       props: {
-        mode: 'not-allowed-mode',
         data: 'SELECT * FROM table'
       },
-      onAfterUpdate: () => {
-        t.ok(
-          log.assert.called,
-          'should produce an assert message if CartoSQLLayer mode is not allowed'
+      onBeforeUpdate: () => {
+        t.throws(
+          () =>
+            setConfig({
+              apiVersion: 'not-allowed'
+            }),
+          `throws on invalid apiVersion not-allowed`
         );
+      },
+      onAfterUpdate: () => {
+        t.ok(log.assert.called, 'should produce an assert message if apiVersion is not allowed');
       }
     }
   ];
@@ -53,9 +67,7 @@ test('CartoSQLLayer#should render a MVTLayer as sublayer', async t => {
       },
       onBeforeUpdate: () => {
         setConfig({
-          mode: 'carto',
-          mapsUrl: 'whatever-map-url',
-          accessToken: 'whatever-access-token'
+          apiVersion: API_VERSIONS.V2
         });
       },
       onAfterUpdate: ({layer, subLayer, subLayers}) => {
