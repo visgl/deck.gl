@@ -63,5 +63,8 @@ test('Tile3DLayer', async t => {
     onError: t.notOk
   });
 
+  if (oldFetch) {
+    global.fetch = oldFetch;
+  }
   t.end();
 });

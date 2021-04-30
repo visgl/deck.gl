@@ -16,14 +16,15 @@ const defaultProps = {
   getPointColor: {type: 'accessor', value: [0, 0, 0, 255]},
   pointSize: 1.0,
 
+  _getMeshColor: {type: 'function', value: tileHeader => [255, 255, 255], compare: false},
+
   data: null,
   loader: Tiles3DLoader,
 
   onTilesetLoad: {type: 'function', value: tileset3d => {}, compare: false},
   onTileLoad: {type: 'function', value: tileHeader => {}, compare: false},
   onTileUnload: {type: 'function', value: tileHeader => {}, compare: false},
-  onTileError: {type: 'function', value: (tile, message, url) => {}, compare: false},
-  _getMeshColor: {type: 'function', value: tileHeader => [255, 255, 255], compare: false}
+  onTileError: {type: 'function', value: (tile, message, url) => {}, compare: false}
 };
 
 export default class Tile3DLayer extends CompositeLayer {
@@ -65,8 +66,8 @@ export default class Tile3DLayer extends CompositeLayer {
   }
 
   getPickingInfo({info, sourceLayer}) {
-    const {layerMap} = this.state;
     const layerId = sourceLayer && sourceLayer.id;
+    const tile = this_getTileFromLayerId(layerId);
     if (layerId) {
       // layerId: this.id-[scenegraph|pointcloud]-tileId
       const substr = layerId.substring(this.id.length + 1);
@@ -77,6 +78,33 @@ export default class Tile3DLayer extends CompositeLayer {
     return info;
   }
 
+  // Controls layer visibility when rendering into different viewports
+  filterSubLayer({layer, viewport, isPicking, pass}) {
+    const {tileset3d} = this.state;
+    const tile = _getLayerFromLayerId(layer.id);
+    const view = viewport.id;
+    return tileset3d && tileset3d.isTileInView(tile, view);
+  }
+
+  // Layer Map Helpers
+
+  /**
+   * Get a tile object from a layer id in the layer map
+   * @returns {object | null} 
+   */
+  _getTileFromLayerId(layerId) {
+    if (layerId) {
+      // layerId: this.id-[scenegraph|pointcloud]-tileId
+      const substr = layerId.substring(this.id.length + 1);
+      const tileId = substr.substring(substr.indexOf('-') + 1);
+      const {layerMap} = this.state;
+      return layerMap[tileId] && layerMap[tileId].tile;
+    }
+    return null;
+  }
+
+  // Helpers
+
   _updateAutoHighlight(info) {
     if (info.sourceLayer) {
       info.sourceLayer.updateAutoHighlight(info);
@@ -86,8 +114,13 @@ export default class Tile3DLayer extends CompositeLayer {
   async _loadTileset(tilesetUrl) {
     const {loadOptions} = this.props;
 
-    // TODO: deprecate `loader` in v9.0
-    let loader = this.props.loader || this.props.loaders;
+    // TODO: remove `props.loader` in v9.0
+    if ('loader' in this.props) {
+      log.deprecated('loader', 'loaders')();
+    }
+
+    // TODO - bug: this runs preload before selecting loader...
+    let loader = this.props.loaders || this.props.loader;
     if (Array.isArray(loader)) {
       loader = loader[0];
     }
@@ -102,7 +135,7 @@ export default class Tile3DLayer extends CompositeLayer {
     const tileset3d = new Tileset3D(tilesetJson, {
       onTileLoad: this._onTileLoad.bind(this),
       onTileUnload: this._onTileUnload.bind(this),
-      onTileLoadFail: this.props.onTileError,
+      onTileError: this.props.onTileError,
       ...options
     });
 
@@ -116,8 +149,9 @@ export default class Tile3DLayer extends CompositeLayer {
   }
 
   _onTileLoad(tileHeader) {
+    const {tileset3d} = this.state;
     this.props.onTileLoad(tileHeader);
-    this._updateTileset(this.state.tileset3d);
+    this._updateTileset(tileset3d);
     this.setNeedsUpdate();
   }
 
@@ -128,11 +162,16 @@ export default class Tile3DLayer extends CompositeLayer {
   }
 
   _updateTileset(tileset3d) {
-    const {timeline, viewport} = this.context;
-    if (!timeline || !viewport || !tileset3d) {
+    const {timeline} = this.context;
+    const {activeViewports} = this.state;
+    const viewportsNumber = Object.keys(activeViewports).length;
+    if (!timeline || !viewportsNumber || !tileset3d) {
       return;
     }
-    const frameNumber = tileset3d.update(viewport);
+    const frameNumber = tileset3d.setProps({
+      views: Object.values(activeViewports)
+    });
+
     const tilesetChanged = this.state.frameNumber !== frameNumber;
     if (tilesetChanged) {
       this.setState({frameNumber});
