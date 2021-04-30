@@ -87,7 +87,8 @@ const defaultProps = {
   material: true,
   getPosition: {type: 'accessor', value: x => x.position},
   getColor: {type: 'accessor', value: DEFAULT_COLOR},
-  isDebugMode: false,
+  pickFeatures: false,
+  segmentationData: {type: 'Float32Array', value: []},
 
   // yaw, pitch and roll are in degrees
   // https://en.wikipedia.org/wiki/Euler_angles
@@ -101,15 +102,12 @@ const defaultProps = {
 
 export default class SimpleMeshLayer extends Layer {
   getShaders() {
-    const {material, isDebugMode} = this.props;
+    const {material} = this.props;
     const transpileToGLSL100 = !isWebGL2(this.context.gl);
 
     const defines = {};
     if (hasFeature(this.context.gl, FEATURES.GLSL_DERIVATIVES)) {
       defines.DERIVATIVES_AVAILABLE = 1;
-    }
-    if (isDebugMode) {
-      defines.INSTANCE_PICKING_MODE = 1;
     }
     const modules = [project32, phongLighting, picking];
     if (material) {
@@ -126,6 +124,7 @@ export default class SimpleMeshLayer extends Layer {
   }
 
   initializeState() {
+    const {pickFeatures, segmentationData} = this.props;
     const attributeManager = this.getAttributeManager();
 
     attributeManager.addInstanced({
@@ -147,14 +146,16 @@ export default class SimpleMeshLayer extends Layer {
       instanceModelMatrix: MATRIX_ATTRIBUTES
     });
 
-    this.state.attributeManager.add({
-      pickingColors: {
-        type: GL.UNSIGNED_BYTE,
-        size: 3,
-        noAlloc: true,
-        update: this.calculatePickingColors
-      }
-    });
+    if (pickFeatures && segmentationData.length) {
+      this.state.attributeManager.add({
+        segmentationPickingColors: {
+          type: GL.UNSIGNED_BYTE,
+          size: 3,
+          noAlloc: true,
+          update: attribute => this.calculateSegmentationPickingColors(attribute, segmentationData)
+        }
+      });
+    }
 
     this.setState({
       // Avoid luma.gl's missing uniform warning
@@ -208,7 +209,7 @@ export default class SimpleMeshLayer extends Layer {
     }
 
     const {viewport} = this.context;
-    const {sizeScale, coordinateSystem, _instanced} = this.props;
+    const {sizeScale, coordinateSystem, _instanced, pickFeatures, segmentationData} = this.props;
 
     this.state.model
       .setUniforms(uniforms)
@@ -217,7 +218,8 @@ export default class SimpleMeshLayer extends Layer {
         composeModelMatrix: !_instanced || shouldComposeModelMatrix(viewport, coordinateSystem),
         flatShading: !this.state.hasNormals,
         // Needed for PBR (TODO: find better way to get it)
-        u_Camera: this.state.model.getUniforms().project_uCameraPosition
+        u_Camera: this.state.model.getUniforms().project_uCameraPosition,
+        u_pickSegmentation: Boolean(pickFeatures && segmentationData)
       })
       .draw();
   }

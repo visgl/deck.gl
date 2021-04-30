@@ -18,7 +18,8 @@ const defaultProps = {
   data: null,
   loader: Tiles3DLoader,
   loadTiles: true,
-  isDebugMode: false,
+  highlightColor: [0, 0, 255, 150],
+  pickFeatures: false,
 
   onTilesetLoad: {type: 'function', value: tileset3d => {}, compare: false},
   onTileLoad: {type: 'function', value: tileHeader => {}, compare: false},
@@ -234,12 +235,14 @@ export default class Tile3DLayer extends CompositeLayer {
 
   _makeSimpleMeshLayer(tileHeader, oldLayer) {
     const content = tileHeader.content;
+    const {segmentationData} = tileHeader.header;
     const {attributes, modelMatrix, cartographicOrigin, texture, material} = content;
     const {
       pickable,
+      pickFeatures,
       autoHighlight,
+      highlightColor,
       tileColorMode,
-      isDebugMode,
       colorsMap,
       selectedTileId,
       coloredTilesMap,
@@ -281,9 +284,10 @@ export default class Tile3DLayer extends CompositeLayer {
         coordinateSystem: COORDINATE_SYSTEM.METER_OFFSETS,
         pickable,
         autoHighlight,
-        highlightColor: [0, 0, 255, 150],
-        isDebugMode,
-        wireframe
+        wireframe,
+        highlightColor,
+        pickFeatures,
+        segmentationData
       }
     );
   }
