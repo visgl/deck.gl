@@ -21,7 +21,7 @@
 import {registerLoaders} from '@loaders.gl/core';
 import {ImageLoader} from '@loaders.gl/images';
 
-import {global} from 'probe.gl/env';
+import {global, isBrowserMainThread} from 'probe.gl/env';
 import log from '../utils/log';
 import {register} from '../debug';
 import jsonLoader from '../utils/json-loader';
@@ -41,7 +41,7 @@ if (existingVersion && existingVersion !== version) {
 
 if (!existingVersion) {
   // eslint-disable-next-line
-  if (process.env.NODE_ENV !== 'production') {
+  if (isBrowserMainThread() && process.env.NODE_ENV !== 'production') {
     log.log(
       0,
       `deck.gl ${version} - set deck.log.level=1 (or higher) to trace attribute updates`
