@@ -203,7 +203,14 @@ export default class TerrainLayer extends CompositeLayer {
       maxZoom,
       minZoom,
       extent,
-      maxRequests
+      maxRequests,
+      onTileLoad,
+      onTileUnload,
+      onTileError,
+      maxCacheSize,
+      maxCacheByteSize,
+      refinementStrategy,
+      fetch
     } = this.props;
 
     if (this.state.isTiled) {
@@ -231,7 +238,14 @@ export default class TerrainLayer extends CompositeLayer {
           maxZoom,
           minZoom,
           extent,
-          maxRequests
+          maxRequests,
+          onTileLoad,
+          onTileUnload,
+          onTileError,
+          maxCacheSize,
+          maxCacheByteSize,
+          refinementStrategy,
+          fetch
         }
       );
     }
