@@ -19,6 +19,12 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v8.4
 
+#### deck.gl [8.4.14] - May 3 2021
+
+- Fix ScreenGridLayer picking error w/ cpu aggregation (#5710)
+- Update TerrainLayer props passed to TileLayer (#5720)
+- PathStyleExtension: allow picking gaps between solid lines (#5705)
+
 #### deck.gl [8.4.13] - Apr 11 2021
 
 - Fix BitmapLayer crash during multi-depth picking (#5640)
