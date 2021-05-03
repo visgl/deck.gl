@@ -14,6 +14,7 @@ vDashOffset = instanceDashOffsets / width.x;
 
     'fs:#decl': `
 uniform float dashAlignMode;
+uniform bool dashGapPickable;
 varying vec2 vDashArray;
 varying float vDashOffset;
 
@@ -49,7 +50,9 @@ float round(float x) {
       gapLength > 0.0 &&
       mod(clamp(vPathPosition.y, 0.0, vPathLength) + offset, unitLength) > solidLength
     ) {
-      discard;
+      if (!(dashGapPickable && picking_uActive)) {
+        discard;
+      }
     }
   }
 `
