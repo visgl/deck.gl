@@ -21,7 +21,7 @@ const defaultProps = {
   provider: null,
   // (String, required): connection name at CARTO platform
   connection: null,
- 
+
   // override carto config for the layer, set to null to read from default
   config: null,
   // sublayer used to render. Any deck.gl layer or null to autodetect
