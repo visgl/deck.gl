@@ -23,7 +23,7 @@ export const PROVIDERS = {
 // AVAILABLE FORMATS
 export const FORMATS = {
   GEOJSON: 'geojson',
-  JSON: 'json',
+  NDJSON: 'ndjson',
   TILEJSON: 'tilejson'
 };
 

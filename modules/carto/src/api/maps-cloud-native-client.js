@@ -8,7 +8,7 @@ import {log} from '@deck.gl/core';
 /**
  * Request against Maps API
  */
-async function request({url, config}) {
+async function request({url, format}) {
   let response;
 
   try {
@@ -23,10 +23,14 @@ async function request({url, config}) {
     throw new Error(`Failed to connect to Maps API: ${error}`);
   }
 
+  if (format === FORMATS.NDJSON) {
+    return response;
+  }
+
   const json = await response.json();
 
   if (!response.ok) {
-    dealWithError({response, json});
+    dealWithError({response, error: json.error});
   }
 
   return json.rows ? json.rows : json;
@@ -35,32 +39,27 @@ async function request({url, config}) {
 /**
  * Display proper message from Maps API error
  */
-function dealWithError({response, json}) {
+function dealWithError({response, error}) {
   switch (response.status) {
     case 401:
     case 403:
       throw new Error(`Unauthorized access to Maps API`);
 
     default:
-      const e = json.error;
-      throw new Error(e);
+      throw new Error(error);
   }
 }
 
 /**
  * Build a URL with all required parameters
  */
-function buildURL({provider, type, source, connection, config, format}) {
+function buildURL({provider, type, source, connection, config}) {
   const encodedClient = encodeParameter('client', 'deck-gl-carto');
   const parameters = [encodedClient];
 
   parameters.push(encodeParameter('access_token', config.accessToken));
   parameters.push(encodeParameter('source', source));
   parameters.push(encodeParameter('connection', connection));
-
-  if (format) {
-    parameters.push(encodeParameter('format', format));
-  }
 
   return `${mapsUrl(config)}/${provider}/${type}?${parameters.join('&')}`;
 }
@@ -72,25 +71,17 @@ function mapsUrl(config) {
 async function getMapMetadata({provider, type, source, connection, config}) {
   const url = buildURL({provider, type, source, connection, config});
 
-  return await request({url, config});
+  return await request({url, format: 'json'});
 }
 
-function getUrlFromMetadata(metadata) {
-  if (metadata.size === undefined) {
-    throw Error('Undefined response size');
+function getUrlFromMetadata(metadata, format) {
+  const m = metadata[format];
+
+  if (m && !m.error && m.url) {
+    return [m.url[0], format];
   }
 
-  const priorizedFormats = [FORMATS.GEOJSON, FORMATS.JSON, FORMATS.TILEJSON];
-
-  for (const format of priorizedFormats) {
-    const m = metadata[format];
-
-    if (m && !m.error && m.url) {
-      return [m.url[0], format];
-    }
-  }
-
-  throw new Error('Layer not available');
+  return null;
 }
 
 export async function getMapCartoCloudNative({provider, type, source, connection, config, format}) {
@@ -98,12 +89,27 @@ export async function getMapCartoCloudNative({provider, type, source, connection
 
   log.assert(localConfig.accessToken, 'Must define an access token');
 
+  const metadata = await getMapMetadata({provider, type, source, connection, config: localConfig});
+
+  let url;
+  let mapFormat;
+
   if (format) {
-    const formatUrl = buildURL({provider, type, source, connection, config: localConfig, format});
-    return [await request({url: formatUrl, config: localConfig}), format];
+    mapFormat = format;
+    url = getUrlFromMetadata(metadata, format);
+    log.assert(url, `Format ${format} not available`);
+  } else {
+    // guess map format
+    const priorizedFormats = [FORMATS.GEOJSON, FORMATS.NDJSON, FORMATS.TILEJSON];
+
+    for (const f of priorizedFormats) {
+      url = getUrlFromMetadata(metadata, f);
+      if (url) {
+        mapFormat = f;
+        break;
+      }
+    }
   }
 
-  const metadata = await getMapMetadata({provider, type, source, connection, config: localConfig});
-  const [url, mapFormat] = await getUrlFromMetadata(metadata);
-  return [await request({url, config: localConfig}), mapFormat];
+  return [await request({url, format: mapFormat}), mapFormat];
 }
