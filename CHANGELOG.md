@@ -19,6 +19,10 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v8.4
 
+#### deck.gl [8.4.15] - May 3 2021
+
+- Fix TileLayer rerender after props change (#5721)
+
 #### deck.gl [8.4.14] - May 3 2021
 
 - Fix ScreenGridLayer picking error w/ cpu aggregation (#5710)
