@@ -194,6 +194,7 @@
           "title": "@deck.gl/carto",
           "entries": [
             {"entry": "docs/api-reference/carto/overview"},
+            {"entry": "docs/api-reference/carto/carto-layer"},
             {"entry": "docs/api-reference/carto/carto-sql-layer"},
             {"entry": "docs/api-reference/carto/carto-bqtiler-layer"},
             {"entry": "docs/api-reference/carto/basemap"},
