@@ -488,7 +488,7 @@ export default class Layer extends Component {
 
     // calculateInstancePickingColors always generates the same sequence.
     // pickingColorCache saves the largest generated sequence for reuse
-    const cacheSize = pickingColorCache.length / 3;
+    const cacheSize = Math.floor(pickingColorCache.length / 3);
 
     // Record when using the picking buffer cache, so that layers can always point at the most recently allocated cache
     this.internalState.usesPickingColorCache = true;
@@ -507,7 +507,7 @@ export default class Layer extends Component {
       });
 
       // If the attribute is larger than the cache, resize the cache and populate the missing chunk
-      const newCacheSize = pickingColorCache.length / 3;
+      const newCacheSize = Math.floor(pickingColorCache.length / 3);
       const pickingColor = [];
       for (let i = cacheSize; i < newCacheSize; i++) {
         this.encodePickingColor(i, pickingColor);
