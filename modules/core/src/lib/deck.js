@@ -174,11 +174,6 @@ export default class Deck {
     this._onEvent = this._onEvent.bind(this);
     this._onPointerDown = this._onPointerDown.bind(this);
     this._onPointerMove = this._onPointerMove.bind(this);
-    this._pickAndCallback = this._pickAndCallback.bind(this);
-    this._onRendererInitialized = this._onRendererInitialized.bind(this);
-    this._onRenderFrame = this._onRenderFrame.bind(this);
-    this._onViewStateChange = this._onViewStateChange.bind(this);
-    this._onInteractionStateChange = this._onInteractionStateChange.bind(this);
 
     if (props.viewState && props.initialViewState) {
       log.warn(
@@ -497,8 +492,8 @@ export default class Deck {
       autoResizeViewport: false,
       gl,
       onCreateContext: opts => createGLContext({...glOptions, ...opts, canvas: this.canvas, debug}),
-      onInitialize: this._onRendererInitialized,
-      onRender: this._onRenderFrame,
+      onInitialize: context => this._setGLContext(context.gl),
+      onRender: this._onRenderFrame.bind(this),
       onBeforeRender: props.onBeforeRender,
       onAfterRender: props.onAfterRender,
       onError: props.onError
@@ -647,8 +642,8 @@ export default class Deck {
     this.viewManager = new ViewManager({
       timeline,
       eventManager: this.eventManager,
-      onViewStateChange: this._onViewStateChange,
-      onInteractionStateChange: this._onInteractionStateChange,
+      onViewStateChange: this._onViewStateChange.bind(this),
+      onInteractionStateChange: this._onInteractionStateChange.bind(this),
       views: this._getViews(),
       viewState: this._getViewState(),
       width: this.width,
@@ -702,10 +697,6 @@ export default class Deck {
   }
 
   // Callbacks
-
-  _onRendererInitialized({gl}) {
-    this._setGLContext(gl);
-  }
 
   _onRenderFrame(animationProps) {
     this._getFrameStats();
