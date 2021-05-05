@@ -86,7 +86,7 @@ export default class LayersPass extends Pass {
   // TODO - when picking we could completely skip rendering viewports that dont
   // intersect with the picking rect
   /* eslint-disable max-depth, max-statements */
-  _drawLayersInViewport(gl, {layers, pass, onError, viewport, view}, drawLayerParams) {
+  _drawLayersInViewport(gl, {layers, pass, viewport, view}, drawLayerParams) {
     const glViewport = getGLViewport(gl, {viewport});
 
     if (view && view.props.clear) {
@@ -142,7 +142,7 @@ export default class LayersPass extends Pass {
           });
         } catch (err) {
           err.message = `drawing ${layer} to ${pass}: ${err.message}`;
-          onError?.(err, layer);
+          layer.throw(err);
         }
       }
     }

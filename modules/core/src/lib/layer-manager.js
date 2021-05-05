@@ -88,7 +88,6 @@ export default class LayerManager {
     this._needsRedraw = 'Initial render';
     this._needsUpdate = false;
     this._debug = false;
-    this._onError = null;
 
     this.activateViewport = this.activateViewport.bind(this);
 
@@ -167,7 +166,7 @@ export default class LayerManager {
     }
 
     if ('onError' in props) {
-      this._onError = props.onError;
+      this.context.onError = props.onError;
     }
   }
 
@@ -218,7 +217,7 @@ export default class LayerManager {
 
   _handleError(stage, error, layer) {
     error.message = `${stage} of ${layerName(layer)}: ${error.message}`;
-    this._onError?.(error, layer);
+    layer.throw(error);
   }
 
   // Match all layers, checking for caught errors

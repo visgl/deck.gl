@@ -65,6 +65,7 @@ const defaultProps = {
   _dataDiff: {type: 'function', value: data => data && data.__diff, compare: false, optional: true},
   dataTransform: {type: 'function', value: null, compare: false, optional: true},
   onDataLoad: {type: 'function', value: null, compare: false, optional: true},
+  onError: {type: 'function', value: null, compare: false, optional: true},
   fetch: {
     type: 'function',
     value: (url, {propName, layer}) => {
@@ -134,6 +135,12 @@ export default class Layer extends Component {
   toString() {
     const className = this.constructor.layerName || this.constructor.name;
     return `${className}({id: '${this.props.id}'})`;
+  }
+
+  throw(error) {
+    if (!this.props.onError?.(error)) {
+      this.context?.onError?.(error, this);
+    }
   }
 
   // Public API
