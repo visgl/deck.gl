@@ -435,6 +435,24 @@ export default class MapController extends Controller {
     super(MapState, props);
   }
 
+  setProps(props) {
+    const oldProps = this.controllerStateProps;
+
+    super.setProps(props);
+
+    const dimensionChanged = !oldProps || oldProps.height !== props.height;
+    if (dimensionChanged) {
+      // Dimensions changed, normalize the props
+      this.updateViewport(
+        new this.ControllerState({
+          makeViewport: this.makeViewport,
+          ...this.controllerStateProps,
+          ...this._state
+        })
+      );
+    }
+  }
+
   _getTransitionProps(opts) {
     // Enables Transitions on double-tap and key-down events.
     return opts

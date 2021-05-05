@@ -2,7 +2,11 @@ import test from 'tape-catch';
 import {MapController, OrbitController, FirstPersonController} from '@deck.gl/core';
 
 test('MapViewState', t => {
-  const MapViewState = new MapController({}).ControllerState;
+  const MapViewState = new MapController({
+    longitude: 0,
+    latitude: 0,
+    zoom: 0
+  }).ControllerState;
 
   const viewState = new MapViewState({
     width: 800,
