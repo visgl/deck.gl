@@ -141,7 +141,7 @@ export default class ComponentState {
 
     // interpret value string as url and start a new load tracked by a promise
     if (typeof value === 'string') {
-      const fetch = this.layer && this.layer.props.fetch;
+      const fetch = this.layer?.props.fetch;
       const url = value;
       if (fetch) {
         value = fetch(url, {propName, layer: this.layer});
@@ -215,10 +215,8 @@ export default class ComponentState {
         }
       })
       .catch(error => {
-        if (this.layer) {
-          error.message = `loading ${propName} of ${this.layer}: ${error.message}`;
-          this.layer.throw(error);
-        }
+        error.message = `loading ${propName} of ${this.layer}: ${error.message}`;
+        this.layer?.throw(error);
       });
   }
 
@@ -252,7 +250,7 @@ export default class ComponentState {
       this._setAsyncPropValue(propName, data, loadCount);
     }
 
-    const onDataLoad = this.layer && this.layer.props.onDataLoad;
+    const onDataLoad = this.layer?.props.onDataLoad;
     if (onDataLoad) {
       onDataLoad(data, {propName, layer: this.layer});
     }

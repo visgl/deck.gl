@@ -129,6 +129,15 @@ Remarks:
 Add additional functionalities to this layer. See the [list of available extensions](/docs/api-reference/extensions/overview.md).
 
 
+##### `onError` (Function, optional)
+
+Called when this layer encounters an error, with the following arguments:
+
+- `error` - a JavaScript `Error` object.
+
+If this callback is supplied and returns `true`, the error is marked as handled and will not bubble up to the [`onError`](/docs/api-reference/react/deckgl.md#onerror) callback of the `Deck` instance.
+
+
 ### Interaction Properties
 
 Layers can be interacted with using these properties.
@@ -561,6 +570,10 @@ Used to update the layers [`state`](/docs/api-reference/core/layer.md#state) obj
 ##### `setModuleParameters`
 
 Used to update the settings of shader modules.
+
+##### `throw`
+
+Send an `Error` object to the error handling pipeline.
 
 ### Layer Lifecycle Methods
 
