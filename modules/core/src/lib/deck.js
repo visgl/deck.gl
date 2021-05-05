@@ -133,7 +133,7 @@ const defaultProps = {
   onBeforeRender: noop,
   onAfterRender: noop,
   onLoad: noop,
-  onError: (error, context) => log.error(`Error during ${context.operation}`, error)(),
+  onError: (error, layer) => log.error(error)(),
   _onMetrics: null,
 
   getCursor,
@@ -487,16 +487,7 @@ export default class Deck {
   }
 
   _createAnimationLoop(props) {
-    const {
-      width,
-      height,
-      gl,
-      glOptions,
-      debug,
-      onError,
-      useDevicePixels,
-      autoResizeDrawingBuffer
-    } = props;
+    const {width, height, gl, glOptions, debug, useDevicePixels, autoResizeDrawingBuffer} = props;
 
     return new AnimationLoop({
       width,
@@ -510,7 +501,7 @@ export default class Deck {
       onRender: this._onRenderFrame,
       onBeforeRender: props.onBeforeRender,
       onAfterRender: props.onAfterRender,
-      onError: onError && (error => onError(error, {operation: 'initialization'}))
+      onError: props.onError
     });
   }
 

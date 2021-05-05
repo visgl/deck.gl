@@ -177,7 +177,7 @@ test('LayerManager#setLayers', t => {
 
 test('LayerManager#error handling', t => {
   const errorArgs = [];
-  const onError = (error, context) => errorArgs.push({error, layer: context.layer});
+  const onError = (error, layer) => errorArgs.push({error, layer});
 
   class BadLayer extends Layer {
     initializeState() {}

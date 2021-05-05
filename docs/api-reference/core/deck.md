@@ -566,9 +566,7 @@ Called if deck.gl encounters an error. By default, deck logs the error to consol
 Receives arguments:
 
 * `error` ([Error](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Error))
-* `context` (Object) - the context of the error
-  + `operation` (String) - description of the operation during which the error was thrown
-  + `layer` (Layer?) - the layer where the error is originated, if applicable
+* `layer` (Layer?) - the layer where the error is originated, if applicable
 
 
 ##### `_onMetrics` (Function)
