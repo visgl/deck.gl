@@ -8,7 +8,7 @@ Note:
 
 - Our recommendation is to migrate the existing code to the new `CartoLayer` because this layer will be removed in a future version. 
  
-With the legacy layer, your code will look like this:
+With the legacy layer, your code looks like this:
 
 ```js
 import DeckGL from '@deck.gl/react';
@@ -35,7 +35,7 @@ function App({viewState}) {
 To migrate the code to use the new `CartoLayer`, you need to make the following changes:
 
 - Use the `setConfig` function instead of the `setCredentials` function. Parameters are the same but you need to add the `apiVersion` property if you want to use v1 (the default `apiVersion` is v2)
-- Instantiate a `CartoLayer` instead of a `CartoSQLLayer`. Comparing to the CartoSQLLayer instantiation, you need to provide one additional property: `type` with the value `MAP_TYPES.SQL` or `MAP_TYPES.TABLE`
+- Instantiate a `CartoLayer` instead of a `CartoSQLLayer`. Comparing to the CartoSQLLayer instantiation, you need to provide one additional property: `type` with the value `MAP_TYPES.SQL`; the value `MAP_TYPES.TABLE` is not supported for API versions v1 and v2.
 
 ```js
 import DeckGL from '@deck.gl/react';
@@ -107,7 +107,6 @@ Required. Either a sql query or a name of dataset
 * Default: `cartodb_id`
 
 Optional. A string pointing to a unique attribute at the result of the query. A unique attribute is needed for highlighting a feature split across two or more tiles.
-
 
 ##### `config` (Object)
 

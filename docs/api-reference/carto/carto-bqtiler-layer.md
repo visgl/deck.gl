@@ -10,7 +10,7 @@ Note:
 
 - Our recommendation is to migrate the existing code to the new `CartoLayer` because this layer will be removed in a future version. 
  
-With the legacy layer, your code to visualize a public tileset will look like this (no need to set the default credentials):
+With the legacy layer, your code to visualize a public tileset looks like this (no need to set the default credentials):
 
 ```js
 import DeckGL from '@deck.gl/react';
@@ -31,7 +31,7 @@ function App({viewState}) {
 
 To migrate the code to use the new `CartoLayer`, you need to make the following changes:
 
-- Use the `setConfig` function instead of the `setCredentials` function. You need to provide a username/api key combination both for public and private tilesets. For private tilesets, the API key needs to have access to the Maps API and the user must have configured a BigQuery connection.
+- Use the `setConfig` function instead of the `setCredentials` function. You need to provide a username/api key combination both for public and private tilesets. For private tilesets, the API key needs to have access to the Maps API and the user must have configured a BigQuery connection in the CARTO dashboard.
 - Instantiate a `CartoLayer` instead of a `CartoBQTilerLayer`. Comparing to the `CartoSQLLayer` instantiation, you need to provide one additional property: `type` with the value `MAP_TYPES.TILESET`
 
 ```js

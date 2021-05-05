@@ -1,6 +1,6 @@
 # @deck.gl/carto
 
-Deck.gl is the preferred and official solution for creating modern web apps using the [CARTO Location Intelligence platform](https://carto.com/)
+The preferred and official solution for creating modern web apps using the [CARTO Location Intelligence platform](https://carto.com/) is deck.gl.
 
 <img src="https://raw.githubusercontent.com/CartoDB/viz-doc/master/deck.gl/img/osm_buildings.jpg" />
 
@@ -60,7 +60,10 @@ You can see real examples for the following:
 
 This is an object to define the configuration to use in order to connect to the CARTO platform. The configuration properties that must be defined depend on the CARTO Maps API version used:
 
-* `apiVersion` (optional): Maps API version. Default: API_VERSIONS.V2
+* `apiVersion` (optional): Maps API version. Default: API_VERSIONS.V2. Possible values are:
+  * API_VERSIONS.V1
+  * API_VERSIONS.V2
+  * API_VERSIONS.V3
 
 If using Maps API v1 or v2, the following properties are used:
 
@@ -71,7 +74,7 @@ If using Maps API v1 or v2, the following properties are used:
 
 If using Maps API v3, these are the available properties:
 
-* `email` (required): email associated to the CARTO user with access to the datasets
+* `email` (optional): email associated to the CARTO user with access to the datasets
 * `token` (required): token to authenticate/authorize requests to the Maps API
 * `tenant` (optional): tenant where the CARTO instance is located. Default: `gcp-us-east1.app.carto.com`
 
