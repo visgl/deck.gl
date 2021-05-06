@@ -65,7 +65,7 @@ function makeLocalDevConfig(EXAMPLE_DIR = LIB_DIR, linkToLuma, linkToMath) {
       'sun',
       'web'
     ];
-    for (let module of MATH_MODULES) {
+    for (const module of MATH_MODULES) {
       MATH_ALIASES[`@math.gl/${module}`] = `${ROOT_DIR}/../math.gl/modules/${module}/src`;
     }
   } else {
