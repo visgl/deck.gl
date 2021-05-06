@@ -482,7 +482,18 @@ export default class Deck {
   }
 
   _createAnimationLoop(props) {
-    const {width, height, gl, glOptions, debug, useDevicePixels, autoResizeDrawingBuffer} = props;
+    const {
+      width,
+      height,
+      gl,
+      glOptions,
+      debug,
+      onError,
+      onBeforeRender,
+      onAfterRender,
+      useDevicePixels,
+      autoResizeDrawingBuffer
+    } = props;
 
     return new AnimationLoop({
       width,
@@ -491,12 +502,19 @@ export default class Deck {
       autoResizeDrawingBuffer,
       autoResizeViewport: false,
       gl,
-      onCreateContext: opts => createGLContext({...glOptions, ...opts, canvas: this.canvas, debug}),
+      onCreateContext: opts =>
+        createGLContext({
+          ...glOptions,
+          ...opts,
+          canvas: this.canvas,
+          debug,
+          onContextLost: _ => onError?.(new Error(`WebGL context is lost`))
+        }),
       onInitialize: context => this._setGLContext(context.gl),
       onRender: this._onRenderFrame.bind(this),
-      onBeforeRender: props.onBeforeRender,
-      onAfterRender: props.onAfterRender,
-      onError: props.onError
+      onBeforeRender,
+      onAfterRender,
+      onError
     });
   }
 
