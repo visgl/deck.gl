@@ -133,7 +133,7 @@ const defaultProps = {
   onBeforeRender: noop,
   onAfterRender: noop,
   onLoad: noop,
-  onError: null,
+  onError: (error, layer) => log.error(error)(),
   _onMetrics: null,
 
   getCursor,
