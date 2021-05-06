@@ -141,8 +141,7 @@ export default class LayersPass extends Pass {
             parameters: layerParameters
           });
         } catch (err) {
-          err.message = `drawing ${layer} to ${pass}: ${err.message}`;
-          layer.throw(err);
+          layer.raiseError(err, `drawing ${layer} to ${pass}`);
         }
       }
     }

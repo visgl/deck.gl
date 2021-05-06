@@ -137,7 +137,10 @@ export default class Layer extends Component {
     return `${className}({id: '${this.props.id}'})`;
   }
 
-  throw(error) {
+  raiseError(error, message) {
+    if (message) {
+      error.message = `${message}: ${error.message}`;
+    }
     if (!this.props.onError?.(error)) {
       this.context?.onError?.(error, this);
     }

@@ -19,7 +19,6 @@
 // THE SOFTWARE.
 
 import {Timeline} from '@luma.gl/core';
-import Layer from './layer';
 import {LIFECYCLE} from '../lifecycle/constants';
 import log from '../utils/log';
 import debug from '../debug';
@@ -51,8 +50,6 @@ const INITIAL_CONTEXT = Object.seal({
 
   userData: {} // Place for any custom app `context`
 });
-
-const layerName = layer => (layer instanceof Layer ? `${layer}` : !layer ? 'null' : 'invalid');
 
 export default class LayerManager {
   // eslint-disable-next-line
@@ -216,8 +213,7 @@ export default class LayerManager {
   }
 
   _handleError(stage, error, layer) {
-    error.message = `${stage} of ${layerName(layer)}: ${error.message}`;
-    layer.throw(error);
+    layer.raiseError(error, `${stage} of ${layer}`);
   }
 
   // Match all layers, checking for caught errors
@@ -228,7 +224,7 @@ export default class LayerManager {
     const oldLayerMap = {};
     for (const oldLayer of oldLayers) {
       if (oldLayerMap[oldLayer.id]) {
-        log.warn(`Multiple old layers with same id ${layerName(oldLayer)}`)();
+        log.warn(`Multiple old layers with same id ${oldLayer.id}`)();
       } else {
         oldLayerMap[oldLayer.id] = oldLayer;
       }
@@ -265,7 +261,7 @@ export default class LayerManager {
       const oldLayer = oldLayerMap[newLayer.id];
       if (oldLayer === null) {
         // null, rather than undefined, means this id was originally there
-        log.warn(`Multiple new layers with same id ${layerName(newLayer)}`)();
+        log.warn(`Multiple new layers with same id ${newLayer.id}`)();
       }
       // Remove the old layer from candidates, as it has been matched with this layer
       oldLayerMap[newLayer.id] = null;
@@ -343,7 +339,7 @@ export default class LayerManager {
 
   // Finalizes a single layer
   _finalizeLayer(layer) {
-    this._needsRedraw = this._needsRedraw || `finalized ${layerName(layer)}`;
+    this._needsRedraw = this._needsRedraw || `finalized ${layer}`;
 
     layer.lifecycle = LIFECYCLE.AWAITING_FINALIZATION;
 

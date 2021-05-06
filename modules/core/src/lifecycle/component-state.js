@@ -215,8 +215,7 @@ export default class ComponentState {
         }
       })
       .catch(error => {
-        error.message = `loading ${propName} of ${this.layer}: ${error.message}`;
-        this.layer?.throw(error);
+        this.layer?.raiseError(error, `loading ${propName} of ${this.layer}`);
       });
   }
 

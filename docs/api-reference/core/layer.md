@@ -571,9 +571,14 @@ Used to update the layers [`state`](/docs/api-reference/core/layer.md#state) obj
 
 Used to update the settings of shader modules.
 
-##### `throw`
+##### `raiseError`
 
-Send an `Error` object to the error handling pipeline.
+Used to propagate errors thrown in layers to the deck.gl error handling system. This prevents rendering from being interrupted by exceptions in layers.
+
+`raiseError(error, message)`
+
+- `error` (Error) - a JavaScript Error object
+- `message` (String, optional) - additional contextual description to amend the error message with
 
 ### Layer Lifecycle Methods
 
