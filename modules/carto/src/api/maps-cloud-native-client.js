@@ -78,7 +78,7 @@ function getUrlFromMetadata(metadata, format) {
   const m = metadata[format];
 
   if (m && !m.error && m.url) {
-    return [m.url[0], format];
+    return m.url[0];
   }
 
   return null;
@@ -93,8 +93,9 @@ export async function getMapCartoCloudNative({provider, type, source, connection
 
   let url;
   let mapFormat;
-
+  
   if (format) {
+
     mapFormat = format;
     url = getUrlFromMetadata(metadata, format);
     log.assert(url, `Format ${format} not available`);
