@@ -19,6 +19,10 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v8.4
 
+#### deck.gl [8.4.16] - May 7 2021
+
+- fix for picking buffer generation with custom buffer over alloc (#5729)
+
 #### deck.gl [8.4.15] - May 3 2021
 
 - Fix TileLayer rerender after props change (#5721)
