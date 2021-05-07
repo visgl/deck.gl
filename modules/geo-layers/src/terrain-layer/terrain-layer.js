@@ -33,7 +33,7 @@ const defaultProps = {
   // Image url that encodes height data
   elevationData: urlType,
   // Image url to use as texture
-  texture: urlType,
+  texture: {...urlType, optional: true},
   // Martini error tolerance in meters, smaller number -> more detailed mesh
   meshMaxError: {type: 'number', value: 4.0},
   // Bounding box of the terrain image, [minX, minY, maxX, maxY] in world coordinates
