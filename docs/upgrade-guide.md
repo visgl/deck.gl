@@ -13,6 +13,7 @@ The module entry point is now only lightly transpiled for the most commonly used
 - `PathLayer`'s `rounded` prop is deprecated, replaced by two separate flags `jointRounded` and `capRounded`.
 - `GeoJsonLayer`'s `lineJointRounded` prop now only controls line joints. To use rounded line caps, set `lineCapRounded` to `true`.
 - Dashed lines via `PathStyleExtension` now draw rounded dash caps if `capRounded` is `true`.
+- `@deck.gl/geo-layers` now requires `@deck.gl/extensions`, due to `ClipExtension` dependency.
 
 ### onError Callback
 
