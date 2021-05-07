@@ -65,6 +65,7 @@ const defaultProps = {
   _dataDiff: {type: 'function', value: data => data && data.__diff, compare: false, optional: true},
   dataTransform: {type: 'function', value: null, compare: false, optional: true},
   onDataLoad: {type: 'function', value: null, compare: false, optional: true},
+  onError: {type: 'function', value: null, compare: false, optional: true},
   fetch: {
     type: 'function',
     value: (url, {propName, layer}) => {
@@ -134,6 +135,15 @@ export default class Layer extends Component {
   toString() {
     const className = this.constructor.layerName || this.constructor.name;
     return `${className}({id: '${this.props.id}'})`;
+  }
+
+  raiseError(error, message) {
+    if (message) {
+      error.message = `${message}: ${error.message}`;
+    }
+    if (!this.props.onError?.(error)) {
+      this.context?.onError?.(error, this);
+    }
   }
 
   // Public API
@@ -488,7 +498,7 @@ export default class Layer extends Component {
 
     // calculateInstancePickingColors always generates the same sequence.
     // pickingColorCache saves the largest generated sequence for reuse
-    const cacheSize = pickingColorCache.length / 3;
+    const cacheSize = Math.floor(pickingColorCache.length / 3);
 
     // Record when using the picking buffer cache, so that layers can always point at the most recently allocated cache
     this.internalState.usesPickingColorCache = true;
@@ -507,7 +517,7 @@ export default class Layer extends Component {
       });
 
       // If the attribute is larger than the cache, resize the cache and populate the missing chunk
-      const newCacheSize = pickingColorCache.length / 3;
+      const newCacheSize = Math.floor(pickingColorCache.length / 3);
       const pickingColor = [];
       for (let i = cacheSize; i < newCacheSize; i++) {
         this.encodePickingColor(i, pickingColor);
