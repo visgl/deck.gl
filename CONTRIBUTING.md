@@ -44,7 +44,7 @@ To do so use the `yarn start-local` command present in each example's directory.
 Deck.gl has a number of dependencies that fall under vis.gl, and there may be times when it is necessary to make a change in one of these.
 Thus for development it is necessary to checkout a copy of such a dependency and make local changes.
 
-When running an example using `yarn start-local` you can use local version of [luma.gl](https://github.com/visgl/luma.gl/) or [math.gl](https://github.com/uber-web/math.gl) by appending the `--local-luma` or `--local-math` option.
+When running an example using `yarn start-local` you can use local version of [luma.gl](https://github.com/visgl/luma.gl/) or [math.gl](https://github.com/uber-web/math.gl) by appending the `--env.local-luma` or `--env.local-math` option.
 
 ### Specific module overrides
 

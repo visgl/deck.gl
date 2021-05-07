@@ -5,9 +5,7 @@
 // This enables using the examples to debug the main deck.gl library source
 // without publishing or npm linking, with conveniences such hot reloading etc.
 // To use a local copy of luma.gl or math.gl when using
-// `yarn start-local` modify the relevant package.json
-// such that the `start-local` script includes one or more of
-// the following options:
+// `yarn start-local` use the following options:
 //   --env.local-luma
 //   --env.local-math
 
