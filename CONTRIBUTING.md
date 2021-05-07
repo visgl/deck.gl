@@ -33,30 +33,31 @@ If you consider opening a PR, here is some documentation to get you started:
 - vis.gl [developer process](https://www.github.com/visgl/tsc/tree/master/developer-process)
 - [deck.gl API design guidelines](/dev-docs/deckgl-api-guidelines.md)
 
+## Testing examples with modified deck.gl source
 
-## Working with other vis.gl dependencies
+Each example can be run so that it is built against the deck.gl source code in this repo instead of building against the installed version of deck.gl. This enables using the examples to debug the main deck.gl library source.
+
+To do so use the `yarn start-local` command present in each example's directory. See [webpack.config.local.js](https://github.com/visgl/deck.gl/blob/master/examples/webpack.config.local.js) for details.
+
+### Working with other vis.gl dependencies
 
 Deck.gl has a number of dependencies that fall under vis.gl, and there may be times when it is necessary to make a change in one of these.
 Thus for development it is necessary to checkout a copy of such a dependency and make local changes.
 
+When running an example using `yarn start-local` you can use local version of [luma.gl](https://github.com/visgl/luma.gl/) or [math.gl](https://github.com/uber-web/math.gl) by appending the `--local-luma` or `--local-math` option.
+
+### Specific module overrides
+
 To get the local build of deck.gl to pick up the local code rather than the modules from npm, there are two important config files:
 
-- `ocular-dev-tools.config.js`
-- `examples/webpack.config.local.js`
+- [ocular-dev-tools.config.js](https://github.com/visgl/deck.gl/blob/master/ocular-dev-tools.config.js) - See [Ocular documentation for details](https://uber-web.github.io/docs/dev-tools)
+- [examples/webpack.config.local.js](https://github.com/visgl/deck.gl/blob/master/examples/webpack.config.local.js)
 
-In `ocular-dev-tools.config.js` there is `aliases` config option which can be used to pull in specific dependencies.
-For example if you have the `loaders.gl` repo checked out at the same level as deck.gl and want to work with a local copy of the `mvt` module, you would add the following line of configuration:
+For example if you have the `loaders.gl` repo checked out at the same level as deck.gl and want to work with a local copy of the `mvt` module, you would add the following `alias` to the configuration:
 
 `'@loaders.gl/mvt': resolve(__dirname, '../loaders.gl/modules/mvt/src')`
 
 _Note that the configuration in `examples/webpack.config.local.js` will potentially override the ocular configuration._
-
-The configuration in `examples/webpack.config.local.js` is mostly to allow running examples in deck.gl using locally checked out dependency. To do so when running an example using the `yarn start-local` command, modify the definition of that command in the relevant `package.json` file to add one or more of the following options:
-
-- `--local-luma` to use the local `luma.gl` repo
-- `--local-math` to use the local `math.gl` repo
-
-For more fine-grained control you can also make changes to `examples/webpack.config.local.js` directly.
 
 ## Community Governance
 
