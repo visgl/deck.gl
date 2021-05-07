@@ -34,6 +34,30 @@ If you consider opening a PR, here is some documentation to get you started:
 - [deck.gl API design guidelines](/dev-docs/deckgl-api-guidelines.md)
 
 
+## Working with other vis.gl dependencies
+
+Deck.gl has a number of dependencies that fall under vis.gl, and there may be times when it is necessary to make a change in one of these.
+Thus for development it is necessary to checkout a copy of such a dependency and make local changes.
+
+To get the local build of deck.gl to pick up the local code rather than the modules from npm, there are two important config files:
+
+- `ocular-dev-tools.config.js`
+- `examples/webpack.config.local.js`
+
+In `ocular-dev-tools.config.js` there is `aliases` config option which can be used to pull in specific dependencies.
+For example if you have the `loaders.gl` repo checked out at the same level as deck.gl and want to work with a local copy of the `mvt` module, you would add the following line of configuration:
+
+`'@loaders.gl/mvt': resolve(__dirname, '../loaders.gl/modules/mvt/src')`
+
+_Note that the configuration in `examples/webpack.config.local.js` will potentially override the ocular configuration._
+
+The configuration in `examples/webpack.config.local.js` is mostly to allow running examples in deck.gl using locally checked out dependency. To do so when running an example using the `yarn start-local` command, modify the definition of that command in the relevant `package.json` file to add one or more of the following options:
+
+- `--local-luma` to use the local `luma.gl` repo
+- `--local-math` to use the local `math.gl` repo
+
+For more fine-grained control you can also make changes to `examples/webpack.config.local.js` directly.
+
 ## Community Governance
 
 vis.gl is part of the [Urban Computing Foundation](https://uc.foundation/). See the organization's [Technical Charter](https://github.com/visgl/tsc/blob/master/Technical%20Charter.md).
