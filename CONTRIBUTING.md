@@ -53,10 +53,6 @@ To get the local build of deck.gl to pick up the local code rather than the modu
 - [ocular-dev-tools.config.js](https://github.com/visgl/deck.gl/blob/master/ocular-dev-tools.config.js) - See [Ocular documentation for details](https://uber-web.github.io/docs/dev-tools)
 - [examples/webpack.config.local.js](https://github.com/visgl/deck.gl/blob/master/examples/webpack.config.local.js)
 
-For example if you have the `loaders.gl` repo checked out at the same level as deck.gl and want to work with a local copy of the `mvt` module, you would add the following `alias` to the configuration:
-
-`'@loaders.gl/mvt': resolve(__dirname, '../loaders.gl/modules/mvt/src')`
-
 _Note that the configuration in `examples/webpack.config.local.js` will potentially override the ocular configuration._
 
 ## Community Governance

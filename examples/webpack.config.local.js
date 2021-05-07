@@ -8,6 +8,10 @@
 // `yarn start-local` use the following options:
 //   --env.local-luma
 //   --env.local-math
+//
+// To specify more fine-grained overrides you can add to the aliases
+// below. For example if you have the `loaders.gl` repo checked out at the same level as deck.gl and want to work with a local copy of the `mvt` module, you would add the following `alias` to the configuration:
+// `'@loaders.gl/mvt': resolve(__dirname, '../loaders.gl/modules/mvt/src')`
 
 // avoid destructuring for older Node version support
 const resolve = require('path').resolve;
