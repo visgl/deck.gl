@@ -68,7 +68,7 @@ function mapsUrl(config) {
   return config.mapsUrl.replace('{tenant}', config.tenant);
 }
 
-async function getMapMetadata({provider, type, source, connection, config}) {
+export async function getMapMetadata({provider, type, source, connection, config}) {
   const url = buildURL({provider, type, source, connection, config});
 
   return await request({url, format: 'json'});
@@ -95,7 +95,6 @@ export async function getMapCartoCloudNative({provider, type, source, connection
   let mapFormat;
   
   if (format) {
-
     mapFormat = format;
     url = getUrlFromMetadata(metadata, format);
     log.assert(url, `Format ${format} not available`);

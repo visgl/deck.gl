@@ -12,6 +12,7 @@ export {
   MAP_TYPES,
   PROVIDERS,
   API_VERSIONS,
-  getMapCarto,
-  getMapCartoCloudNative
+  getMapCarto as _getMapCarto,
+  getMapCartoCloudNative as _getMapCartoCloudNative, 
+  getMapMetadata as _getMapMetadata
 } from './api';
