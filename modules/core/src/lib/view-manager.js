@@ -237,7 +237,9 @@ export default class ViewManager {
 
   _onViewStateChange(viewId, event) {
     event.viewId = viewId;
-    this._eventCallbacks.onViewStateChange(event);
+    if (this._eventCallbacks.onViewStateChange) {
+      this._eventCallbacks.onViewStateChange(event);
+    }
   }
 
   _createController(view, props) {
