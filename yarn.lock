@@ -2119,6 +2119,11 @@
   resolved "https://registry.yarnpkg.com/@luma.gl/constants/-/constants-8.5.0-alpha.1.tgz#6e237a48f6de670b99d1f064e80c91e3b80c9382"
   integrity sha512-2NWGtLhmzCbe7wX4l9S7BO7cQc7gu2xQsOrkJ58axUkHh7C514iTelQXlrdBNGnCR47bAmMWnG5rEhemDwRxdQ==
 
+"@luma.gl/constants@8.5.0-alpha.2":
+  version "8.5.0-alpha.2"
+  resolved "https://registry.yarnpkg.com/@luma.gl/constants/-/constants-8.5.0-alpha.2.tgz#4adb909f7e89e1acd82bfae4397bdc542f0dd5d1"
+  integrity sha512-ehcsIa7lpO66IqRBIKeeiiukNZTVzMTJQ9m6mxtxy/HJAlA3+8bIeMjJs40Y6aWn8fmbxFO6aOYGAi+VFwljWg==
+
 "@luma.gl/constants@^8.4.0":
   version "8.4.0"
   resolved "https://registry.yarnpkg.com/@luma.gl/constants/-/constants-8.4.0.tgz#07584e76fbb184f8b26d323b8d52e3a6c8815ce8"
@@ -2149,12 +2154,12 @@
     "@math.gl/core" "^3.4.2"
     probe.gl "^3.2.1"
 
-"@luma.gl/experimental@^8.5.0-alpha.1":
-  version "8.5.0-alpha.1"
-  resolved "https://registry.yarnpkg.com/@luma.gl/experimental/-/experimental-8.5.0-alpha.1.tgz#f33a75a7b4ea0ad30a9569e0b4ab10997c50e909"
-  integrity sha512-kY7LMx1w08tpbdXbRm9aCPDmmkfLT7WyIV8f0p6Wfb9d/eE0qtUfzx275SUBh07PdfDIetfQBvdNPxO6fcUszA==
+"@luma.gl/experimental@^8.5.0-alpha.2":
+  version "8.5.0-alpha.2"
+  resolved "https://registry.yarnpkg.com/@luma.gl/experimental/-/experimental-8.5.0-alpha.2.tgz#729f0a19a777268379663c67f1694bf4caf3b77d"
+  integrity sha512-eHp9VetIcU+Oj+/QxZWfr6CUjWGvBFgLpzqyQLk7nqqU5K/loLr+RPUJeZgn878jMao0WeP54j8QxrpQ6K6MYw==
   dependencies:
-    "@luma.gl/constants" "8.5.0-alpha.1"
+    "@luma.gl/constants" "8.5.0-alpha.2"
     "@math.gl/core" "^3.4.1"
     earcut "^2.0.6"
 
@@ -2182,7 +2187,7 @@
   dependencies:
     probe.gl "^3.2.1"
 
-"@luma.gl/webgl@8.5.0-alpha.1":
+"@luma.gl/webgl@8.5.0-alpha.1", "@luma.gl/webgl@^8.5.0-alpha.1":
   version "8.5.0-alpha.1"
   resolved "https://registry.yarnpkg.com/@luma.gl/webgl/-/webgl-8.5.0-alpha.1.tgz#6c88cb18dabfaf48e9d9a4627b4b3e3ac65c4f4b"
   integrity sha512-TnTQn+J+PWC+xiby8dX/eDFHKSTGquqGMYUvs9xz6dU5lBPwH4t5hrX8ZRPbFKCRoD6okc+F//EYAU8b79oeUw==

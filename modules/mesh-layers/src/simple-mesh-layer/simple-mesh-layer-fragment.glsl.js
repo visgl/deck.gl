@@ -17,6 +17,15 @@ in vec4 vColor;
 out vec4 fragColor;
 
 void main(void) {
+  
+#ifdef MODULE_PBR
+
+  fragColor = vColor * pbr_filterColor(vec4(0));
+  geometry.uv = pbr_vUV;
+  fragColor.a *= opacity;
+
+#else
+
   geometry.uv = vTexCoord;
 
   vec3 normal;
@@ -38,6 +47,8 @@ void main(void) {
   vec4 color = hasTexture ? texture(sampler, vTexCoord) : vColor;
   vec3 lightColor = lighting_getLightColor(color.rgb, cameraPosition, position_commonspace.xyz, normal);
   fragColor = vec4(lightColor, color.a * opacity);
+
+#endif
 
   DECKGL_FILTER_COLOR(fragColor, geometry);
 }
