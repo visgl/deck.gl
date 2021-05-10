@@ -42,7 +42,7 @@ if (existingVersion && existingVersion !== version) {
 if (!existingVersion) {
   log.log(
     1,
-    `deck.gl ${version} - set deck.log.level=1 (or higher) to trace attribute updates`
+    `deck.gl ${version}`
   )();
 
   global.deck = Object.assign(global.deck || {}, {
