@@ -2,7 +2,11 @@ import test from 'tape-catch';
 import {MapController, OrbitController, FirstPersonController} from '@deck.gl/core';
 
 test('MapViewState', t => {
-  const MapViewState = new MapController({}).ControllerState;
+  const MapViewState = new MapController({
+    longitude: 0,
+    latitude: 0,
+    zoom: 0
+  }).ControllerState;
 
   const viewState = new MapViewState({
     width: 800,
@@ -17,8 +21,22 @@ test('MapViewState', t => {
   t.is(viewportProps.pitch, 0, 'added default pitch');
   t.is(viewportProps.longitude, 178, 'props are normalized');
   t.not(viewportProps.latitude, 36, 'props are normalized');
+  t.not(viewportProps.zoom, 0, 'props are normalized');
 
   const viewState2 = new MapViewState({
+    width: 800,
+    height: 600,
+    longitude: -182,
+    latitude: 36,
+    zoom: 0,
+    bearing: 180,
+    normalize: false
+  });
+  const viewportProps2 = viewState2.getViewportProps();
+
+  t.is(viewportProps2.zoom, 0, 'props are not normalized');
+
+  const viewState3 = new MapViewState({
     width: 800,
     height: 600,
     longitude: -160,
@@ -27,7 +45,7 @@ test('MapViewState', t => {
     bearing: -30
   });
 
-  const transitionViewportProps = viewState2.shortestPathFrom(viewState);
+  const transitionViewportProps = viewState3.shortestPathFrom(viewState);
   t.is(transitionViewportProps.longitude, 200, 'found shortest path for longitude');
   t.is(transitionViewportProps.bearing, 330, 'found shortest path for bearing');
 

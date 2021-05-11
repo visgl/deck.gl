@@ -52,7 +52,7 @@ To install the dependencies from NPM:
 ```bash
 npm install deck.gl
 # or
-npm install @deck.gl/core @deck.gl/layers @deck.gl/geo-layers
+npm install @deck.gl/core @deck.gl/layers @deck.gl/extensions @deck.gl/geo-layers
 ```
 
 ```js
