@@ -1,5 +1,6 @@
 import test from 'tape-catch';
 import {Controller} from '@deck.gl/core';
+import ViewState from '@deck.gl/core/controllers/view-state';
 
 class MockEventManager {
   constructor() {
@@ -21,7 +22,7 @@ class MockEventManager {
 
 class TestController extends Controller {
   constructor(props) {
-    super({}, props);
+    super(ViewState, props);
     this.events = ['press', 'wheel'];
   }
 }
