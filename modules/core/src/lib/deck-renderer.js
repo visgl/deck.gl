@@ -16,7 +16,6 @@ export default class DeckRenderer {
     this._needsRedraw = 'Initial render';
     this.renderBuffers = [];
     this.lastPostProcessEffect = null;
-    this._onError = null;
   }
 
   setProps(props) {
@@ -28,10 +27,6 @@ export default class DeckRenderer {
     if ('drawPickingColors' in props && this.drawPickingColors !== props.drawPickingColors) {
       this.drawPickingColors = props.drawPickingColors;
       this._needsRedraw = 'drawPickingColors changed';
-    }
-
-    if ('onError' in props) {
-      this._onError = props.onError;
     }
   }
 
@@ -51,7 +46,6 @@ export default class DeckRenderer {
     const layerPass = this.drawPickingColors ? this.pickLayersPass : this.drawLayersPass;
 
     opts.layerFilter = this.layerFilter;
-    opts.onError = this._onError;
     opts.effects = opts.effects || [];
     opts.target = opts.target || Framebuffer.getDefaultFramebuffer(this.gl);
 

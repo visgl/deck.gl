@@ -559,12 +559,14 @@ Receives arguments:
 
 ##### `onError` (Function)
 
-Called if deck.gl encounters an error. By default, deck logs the error to console and attempt to continue rendering the rest of the scene.
+* Default: `console.error`
+
+Called if deck.gl encounters an error. By default, deck logs the error to console and attempt to continue rendering the rest of the scene. If this callback is set to `null`, errors are silently ignored.
 
 Receives arguments:
 
 * `error` ([Error](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Error))
-* `source` - the source of the error, likely a Layer instance
+* `layer` (Layer?) - the layer where the error is originated, if applicable
 
 
 ##### `_onMetrics` (Function)
