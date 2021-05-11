@@ -251,7 +251,8 @@ export default class Tile3DLayer extends CompositeLayer {
         texture,
         modelMatrix,
         coordinateOrigin: cartographicOrigin,
-        coordinateSystem: COORDINATE_SYSTEM.METER_OFFSETS
+        coordinateSystem: COORDINATE_SYSTEM.METER_OFFSETS,
+        _useMeshColors: true
       }
     );
   }
