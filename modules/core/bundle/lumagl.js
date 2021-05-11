@@ -40,3 +40,21 @@ export {
   SphereGeometry,
   TruncatedConeGeometry
 } from '@luma.gl/core';
+
+// Constants
+import GL from '@luma.gl/constants';
+
+export const TEXTURE_MAG_FILTER = GL.TEXTURE_MAG_FILTER;
+export const TEXTURE_MIN_FILTER = GL.TEXTURE_MIN_FILTER;
+export const LINEAR = GL.LINEAR;
+export const NEAREST = GL.NEAREST;
+export const NEAREST_MIPMAP_NEARST = GL.NEAREST_MIPMAP_NEAREST;
+export const LINEAR_MIPMAP_NEAREST = GL.LINEAR_MIPMAP_NEAREST;
+export const NEAREST_MIPMAP_LINEAR = GL.NEAREST_MIPMAP_LINEAR;
+export const LINEAR_MIPMAP_LINEAR = GL.LINEAR_MIPMAP_LINEAR;
+
+export const TEXTURE_WRAP_S = GL.TEXTURE_WRAP_S;
+export const TEXTURE_WRAP_T = GL.TEXTURE_WRAP_T;
+export const REPEAT = GL.REPEAT;
+export const CLAMP_TO_EDGE = GL.CLAMP_TO_EDGE;
+export const MIRRORED_REPEAT = GL.MIRRORED_REPEAT;
