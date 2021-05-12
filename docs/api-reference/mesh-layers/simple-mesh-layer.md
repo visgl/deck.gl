@@ -101,10 +101,10 @@ The geometry to render for each data object. One of:
 - An URL to a mesh description file in a format supported by [loaders.gl](https://loaders.gl/docs/specifications/category-mesh). The appropriate loader will have to be registered via the loaders.gl `registerLoaders` function for this usage.
 - A luma.gl [Geometry](https://luma.gl/docs/api-reference/engine/geometry) instance
 - An object containing the following fields:
-  + `positions` (Float32Array) - 3d vertex offset from the object center, in meters
-  + `normals` (Float32Array) - 3d normals
-  + `texCoords` (Float32Array) - 2d texture coordinates
-  + `colors` (Uint8Array) - per-vertex colors. If the texture is set, the resulting color is product of per-vertex color and texture color
+  + `positions` (Float32Array) - 3d vertex offset from the object center, in meters (required)
+  + `normals` (Float32Array) - 3d normals (optional)
+  + `texCoords` (Float32Array) - 2d texture coordinates (optional)
+  + `colors` (Uint8Array) - per-vertex colors. If the texture is set, the resulting color is product of per-vertex color and texture color (optional)
 
 
 ##### `texture` (String|Texture2D|Image|ImageData|HTMLCanvasElement|HTMLVideoElement|ImageBitmap|Object, optional)
