@@ -4,10 +4,6 @@
 
 `CartoLayer` is the layer to visualize data using the CARTO Maps API. You can apply custom SQL with moderately sized datasets (< 50 MB) and visualize really large datasets (up to billions of features) using pre-generated tilesets.
 
-Note:
-
-- This is the recommended layer to use with the CARTO platform. If you have existing code using `CartoSQLLayer` or `CartoBQTilerLayer`, we recommend you to migrate the code to this layer using the guidelines provided in the documentation for those layers.
-
 ```js
 import DeckGL from '@deck.gl/react';
 import {CartoLayer, setConfig} from '@deck.gl/carto';
@@ -70,19 +66,19 @@ This layer allows to work with the different CARTO Maps API versions (v1, v2 and
 
 ##### `data` (String)
 
-Required. Either a SQL query or a name of dataset/tileset
+Required. Either a SQL query or a name of dataset/tileset.
 
 ##### `type` (String)
 
 Required. Data type. Possible values are:
 
-- `MAP_TYPES.SQL`, if `data` is a SQL query. For API v1 and v2, it is possible to indicate the table name in the `data` parameter.
+- `MAP_TYPES.SQL`, if `data` is a SQL query. For API v2, it is possible to indicate the dataset name in the `data` parameter.
 - `MAP_TYPES.TABLE`, if `data` is a dataset name. Only compatible with API v3.
 - `MAP_TYPES.TILESET`, if `data` is a tileset name. Not compatible with API v1.
 
 ##### `provider` (String)
 
-Required when `apiVersion` is `API_VERSIONS.V3`, ignored for `API_VERSIONS.V1` and `API_VERSIONS.V2`. Provider where the data is stored. Possible values are:
+Required when `apiVersion` is `API_VERSIONS.V3`. Provider where the data is stored. Possible values are:
 
 - `PROVIDERS.BIGQUERY`
 - `PROVIDERS.POSTGRES`
@@ -91,11 +87,13 @@ Required when `apiVersion` is `API_VERSIONS.V3`, ignored for `API_VERSIONS.V1` a
 
 ##### `connection` (String)
 
-Required when apiVersion is `API_VERSIONS.V3`, ignored for `API_VERSIONS.V1` and `API_VERSIONS.V2`. Name of the connection in the CARTO workspace.
+Required when apiVersion is `API_VERSIONS.V3`. Name of the connection in the CARTO workspace.
 
 ##### `renderSubLayers` (String)
 
-Optional. Layer to use for rendering. Default: 
+Optional. Layer to use for rendering. 
+
+Default: 
 
 - `MVTLayer` when `type` is `MAP_TYPES.TILESET`. Not all the deck.gl layers are compatible with vector tiles.
 - `GeoJsonLayer` when type is `MAP_TYPES.SQL` or `MAP_TYPES.TABLE`
@@ -105,7 +103,6 @@ Optional. Layer to use for rendering. Default:
 Optional when `apiVersion` is `API_VERSIONS.V3`, ignored for `API_VERSIONS.V1` and `API_VERSIONS.V2`. Data format for features. Possible values are:
 
 - `FORMATS.GEOJSON`
-- `FORMATS.NDJSON`, newline delimited JSON, use it for streaming
 - `FORMATS.TILEJSON`
  
 Default: 

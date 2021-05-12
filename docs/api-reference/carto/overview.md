@@ -1,15 +1,18 @@
 # @deck.gl/carto
 
-The preferred and official solution for creating modern web apps using the [CARTO Location Intelligence platform](https://carto.com/) is deck.gl.
+The preferred and official solution for creating modern web apps using the [CARTO Location Intelligence platform](https://carto.com/) is deck.gl. The CARTO platform provides cloud native integrations with Google BigQuery, Amazon Redshift, Snowflake and PostgreSQL-compatible databases.
+
+With deck.gl and the CARTO platform you can access directly your datasets and tilesets hosted in cloud native data platforms. It supports both medium-size (up to 50 MB) datasets using the GeoJSON format and very large datasets using vector tiles from pre-generated tilesets.
 
 <img src="https://raw.githubusercontent.com/CartoDB/viz-doc/master/deck.gl/img/osm_buildings.jpg" />
-
 
 It integrates with the [CARTO Maps API](https://carto.com/developers/maps-api/reference/) to:
 
 * Provide a geospatial backend storage for your geospatial data.
 * Visualize large datasets which do not fit within browser memory.
 * Provide an SQL spatial interface to work with your data.
+
+<img src="https://raw.githubusercontent.com/CartoDB/viz-doc/master/deck.gl/img/eu_rivers.jpg" />
 
 
 ## Install package
@@ -36,7 +39,7 @@ function App({viewState}) {
     type: MAP_TYPES.SQL,
     data: 'SELECT * FROM world_population_2015',
     pointRadiusMinPixels: 2,
-    getLineColor: [0, 0, 0, 0.75],
+    getLineColor: [0, 0, 0, 200],
     getFillColor: [238, 77, 90],
     lineWidthMinPixels: 1
   })
@@ -95,6 +98,10 @@ setConfig({
   sqlUrl: 'https://<domain>/user/{user}/api/v2/sql',
 });
 ```
+
+### Working with Tilesets and Maps API v2
+
+You can visualize public tilesets created in BigQuery with the default credentials, but if you want to use private tilesets, you first need to create a BigQuery connection in the CARTO dashboard with access to the tileset table. Then you need to create an API key with access to the Maps API and use it in the configuration object.
 
 ### Constants
 

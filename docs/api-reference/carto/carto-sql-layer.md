@@ -3,13 +3,7 @@
 # CartoSQLLayer
 
 `CartoSQLLayer` is the legacy layer to visualize data hosted in your CARTO account and to apply custom SQL.
-
-Note:
-
-- Our recommendation is to migrate the existing code to the new `CartoLayer` because this layer will be removed in a future version. 
  
-With the legacy layer, your code looks like this:
-
 ```js
 import DeckGL from '@deck.gl/react';
 import {CartoSQLLayer, setDefaultCredentials} from '@deck.gl/carto';
@@ -32,10 +26,7 @@ function App({viewState}) {
 }
 ```
 
-To migrate the code to use the new `CartoLayer`, you need to make the following changes:
-
-- Use the `setConfig` function instead of the `setCredentials` function. Parameters are the same but you need to add the `apiVersion` property if you want to use v1 (the default `apiVersion` is v2)
-- Instantiate a `CartoLayer` instead of a `CartoSQLLayer`. Comparing to the CartoSQLLayer instantiation, you need to provide one additional property: `type` with the value `MAP_TYPES.SQL`; the value `MAP_TYPES.TABLE` is not supported for API versions v1 and v2.
+CartoSQLLayer will be deprecated in future versions so our recommendation is to migrate the existing code to the new `CartoLayer` with the `type` property set to `MAP_TYPES.SQL`:
 
 ```js
 import DeckGL from '@deck.gl/react';
