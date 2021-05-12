@@ -104,6 +104,7 @@ The geometry to render for each data object. One of:
   + `positions` (Float32Array) - 3d vertex offset from the object center, in meters
   + `normals` (Float32Array) - 3d normals
   + `texCoords` (Float32Array) - 2d texture coordinates
+  + `colors` (Uint8Array) - per-vertex colors. If the texture is set, the resulting color is product of per-vertex color and texture color
 
 
 ##### `texture` (String|Texture2D|Image|ImageData|HTMLCanvasElement|HTMLVideoElement|ImageBitmap|Object, optional)
