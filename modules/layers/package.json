@@ -35,6 +35,6 @@
   },
   "peerDependencies": {
     "@deck.gl/core": "^8.0.0",
-    "@loaders.gl/core": "^3.0.0-alpha.14"
+    "@loaders.gl/core": "^3.0.0-alpha"
   }
 }
