@@ -65,7 +65,7 @@ function getGeometry(data, useMeshColors) {
   throw Error('Invalid mesh');
 }
 
-const DEFAULT_COLOR = [0, 0, 0, 255];
+const DEFAULT_COLOR = [255, 255, 255, 255];
 
 const defaultProps = {
   mesh: {value: null, type: 'object', async: true},
@@ -133,7 +133,7 @@ export default class SimpleMeshLayer extends Layer {
         size: this.props.colorFormat.length,
         normalized: true,
         accessor: 'getColor',
-        defaultValue: [0, 0, 0, 255]
+        defaultValue: DEFAULT_COLOR
       },
       instanceModelMatrix: MATRIX_ATTRIBUTES
     });
