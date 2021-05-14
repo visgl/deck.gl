@@ -1,7 +1,7 @@
 /**
  * Maps API Client for Carto Cloud Native
  */
-import {getConfig} from '../config';
+import {getDefaultCredentials} from '../config';
 import {encodeParameter, FORMATS} from './maps-api-common';
 import {log} from '@deck.gl/core';
 
@@ -53,23 +53,23 @@ function dealWithError({response, error}) {
 /**
  * Build a URL with all required parameters
  */
-function buildURL({provider, type, source, connection, config}) {
+function buildURL({provider, type, source, connection, credentials}) {
   const encodedClient = encodeParameter('client', 'deck-gl-carto');
   const parameters = [encodedClient];
 
-  parameters.push(encodeParameter('access_token', config.accessToken));
+  parameters.push(encodeParameter('access_token', credentials.accessToken));
   parameters.push(encodeParameter('source', source));
   parameters.push(encodeParameter('connection', connection));
 
-  return `${mapsUrl(config)}/${provider}/${type}?${parameters.join('&')}`;
+  return `${mapsUrl(credentials)}/${provider}/${type}?${parameters.join('&')}`;
 }
 
-function mapsUrl(config) {
-  return config.mapsUrl.replace('{tenant}', config.tenant);
+function mapsUrl(credentials) {
+  return credentials.mapsUrl.replace('{tenant}', credentials.tenant);
 }
 
-export async function getMapMetadata({provider, type, source, connection, config}) {
-  const url = buildURL({provider, type, source, connection, config});
+export async function getMapMetadata({provider, type, source, connection, credentials}) {
+  const url = buildURL({provider, type, source, connection, credentials});
 
   return await request({url, format: 'json'});
 }
@@ -84,12 +84,12 @@ function getUrlFromMetadata(metadata, format) {
   return null;
 }
 
-export async function getMapCartoCloudNative({provider, type, source, connection, config, format}) {
-  const localConfig = {...getConfig(), ...config};
+export async function getMapCartoCloudNative({provider, type, source, connection, credentials, format}) {
+  const localCreds = {...getDefaultCredentials(), ...credentials};
 
-  log.assert(localConfig.accessToken, 'Must define an access token');
+  log.assert(localCreds.accessToken, 'Must define an access token');
 
-  const metadata = await getMapMetadata({provider, type, source, connection, config: localConfig});
+  const metadata = await getMapMetadata({provider, type, source, connection, credentials: localCreds});
 
   let url;
   let mapFormat;

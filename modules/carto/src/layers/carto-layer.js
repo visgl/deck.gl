@@ -3,7 +3,7 @@ import {MVTLayer} from '@deck.gl/geo-layers';
 import {GeoJsonLayer} from '@deck.gl/layers';
 import {getMapCartoCloudNative, getMapCarto, FORMATS, API_VERSIONS} from '../api';
 import {MAP_TYPES, PROVIDERS} from '../api/maps-api-common';
-import {getConfig} from '../config';
+import {getDefaultCredentials} from '../config';
 
 const defaultProps = {
   // (String, required): data resource to load. table name, sql query or tileset name.
@@ -22,8 +22,8 @@ const defaultProps = {
   // (String, required): connection name at CARTO platform
   connection: null,
 
-  // override carto config for the layer, set to null to read from default
-  config: null,
+  // override carto credentials for the layer, set to null to read from default
+  credentials: null,
   // sublayer used to render. Any deck.gl layer or null to autodetect
   renderSubLayer: null,
   // (String {geojson, json, tileset}, optional). Desired data format. By default, it's guessed automaticaly
@@ -43,9 +43,9 @@ export default class CartoLayer extends CompositeLayer {
   }
 
   _checkProps(props) {
-    const {provider, type, format, config} = this.props;
-    const localConfig = {...getConfig(), ...config};
-    const {apiVersion} = localConfig;
+    const {provider, type, format, credentials} = this.props;
+    const localCreds = {...getDefaultCredentials(), ...credentials};
+    const {apiVersion} = localCreds;
 
     log.assert(
       Object.values(API_VERSIONS).includes(apiVersion),
@@ -84,7 +84,7 @@ export default class CartoLayer extends CompositeLayer {
       props.provider !== oldProps.provider ||
       props.connection !== oldProps.connection ||
       props.type !== oldProps.type ||
-      JSON.stringify(props.config) !== JSON.stringify(oldProps.config);
+      JSON.stringify(props.credentials) !== JSON.stringify(oldProps.credentials);
 
     if (shouldUpdateData) {
       this.setState({data: null, renderSubLayer: null});
@@ -94,8 +94,8 @@ export default class CartoLayer extends CompositeLayer {
 
   async _updateData() {
     try {
-      const {provider, type, data: source, connection, config, format} = this.props;
-      const localConfig = {...getConfig(), ...config};
+      const {provider, type, data: source, connection, credentials, format} = this.props;
+      const localConfig = {...getDefaultCredentials(), ...credentials};
       const {apiVersion} = localConfig;
 
       let data;
@@ -107,11 +107,11 @@ export default class CartoLayer extends CompositeLayer {
           type,
           source,
           connection,
-          config,
+          credentials,
           format
         });
       } else if (apiVersion === API_VERSIONS.V1 || apiVersion === API_VERSIONS.V2) {
-        [data, mapFormat] = await getMapCarto({type, source, config});
+        [data, mapFormat] = await getMapCarto({type, source, credentials});
       } else {
         log.assert(
           `Unknow apiVersion ${apiVersion}. Possible values are ${Object.values(
