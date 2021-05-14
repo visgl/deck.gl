@@ -21,7 +21,8 @@ const defaultProps = {
   onTilesetLoad: {type: 'function', value: tileset3d => {}, compare: false},
   onTileLoad: {type: 'function', value: tileHeader => {}, compare: false},
   onTileUnload: {type: 'function', value: tileHeader => {}, compare: false},
-  onTileError: {type: 'function', value: (tile, message, url) => {}, compare: false}
+  onTileError: {type: 'function', value: (tile, message, url) => {}, compare: false},
+  getSimpleMeshLayerColor: {type: 'function', value: tileHeader => [255, 255, 255], compare: false}
 };
 
 export default class Tile3DLayer extends CompositeLayer {
@@ -228,6 +229,7 @@ export default class Tile3DLayer extends CompositeLayer {
   _makeSimpleMeshLayer(tileHeader, oldLayer) {
     const content = tileHeader.content;
     const {attributes, modelMatrix, cartographicOrigin, texture} = content;
+    const {getSimpleMeshLayerColor} = this.props;
 
     const geometry =
       (oldLayer && oldLayer.props.mesh) ||
@@ -247,7 +249,7 @@ export default class Tile3DLayer extends CompositeLayer {
         mesh: geometry,
         data: SINGLE_DATA,
         getPosition: [0, 0, 0],
-        getColor: [255, 255, 255],
+        getColor: getSimpleMeshLayerColor(tileHeader),
         texture,
         modelMatrix,
         coordinateOrigin: cartographicOrigin,
