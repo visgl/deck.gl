@@ -96,10 +96,10 @@ test('Tile3DLayer', async t => {
         testCases,
         onError: t.notOk
       });
-
       if (oldFetch) {
         global.fetch = oldFetch;
       }
+      deck.finalize();
       t.end();
     }
   });
