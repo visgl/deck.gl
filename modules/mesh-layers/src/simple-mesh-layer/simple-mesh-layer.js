@@ -22,10 +22,9 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {GLTFMaterialParser} from '@luma.gl/experimental';
 import {Layer, project32, phongLighting, picking, COORDINATE_SYSTEM, log} from '@deck.gl/core';
 import GL from '@luma.gl/constants';
-import {Model, Geometry, Texture2D, isWebGL2, pbr} from '@luma.gl/core';
+import {Model, Geometry, Texture2D, isWebGL2} from '@luma.gl/core';
 import {hasFeature, FEATURES} from '@luma.gl/webgl';
 
 import {MATRIX_ATTRIBUTES, shouldComposeModelMatrix} from '../utils/matrix';
@@ -85,8 +84,6 @@ const defaultProps = {
   wireframe: false,
   // Optional material for 'lighting' shader module
   material: true,
-  // PBR material object
-  pbrMaterial: null,
   getPosition: {type: 'accessor', value: x => x.position},
   getColor: {type: 'accessor', value: DEFAULT_COLOR},
 
@@ -102,22 +99,18 @@ const defaultProps = {
 
 export default class SimpleMeshLayer extends Layer {
   getShaders() {
-    const {pbrMaterial} = this.props;
     const transpileToGLSL100 = !isWebGL2(this.context.gl);
 
     const defines = {};
+
     if (hasFeature(this.context.gl, FEATURES.GLSL_DERIVATIVES)) {
       defines.DERIVATIVES_AVAILABLE = 1;
-    }
-    const modules = [project32, phongLighting, picking];
-    if (pbrMaterial) {
-      modules.push(pbr);
     }
 
     return super.getShaders({
       vs,
       fs,
-      modules,
+      modules: [project32, phongLighting, picking],
       transpileToGLSL100,
       defines
     });
@@ -176,10 +169,6 @@ export default class SimpleMeshLayer extends Layer {
       this.setTexture(props.texture);
     }
 
-    if (props.pbrMaterial !== oldProps.pbrMaterial) {
-      this.setPbrMaterial(props.pbrMaterial);
-    }
-
     if (this.state.model) {
       this.state.model.setDrawMode(this.props.wireframe ? GL.LINE_STRIP : GL.TRIANGLES);
     }
@@ -204,89 +193,38 @@ export default class SimpleMeshLayer extends Layer {
       .setUniforms({
         sizeScale,
         composeModelMatrix: !_instanced || shouldComposeModelMatrix(viewport, coordinateSystem),
-        flatShading: !this.state.hasNormals,
-        // Needed for PBR (TODO: find better way to get it)
-        u_Camera: this.state.model.getUniforms().project_uCameraPosition
+        flatShading: !this.state.hasNormals
       })
       .draw();
   }
 
   getModel(mesh) {
-    let materialParser = null;
-    if (this.props.pbrMaterial) {
-      const pbrMaterial = this.props.pbrMaterial;
-      const unlit = Boolean(
-        pbrMaterial.pbrMetallicRoughness && pbrMaterial.pbrMetallicRoughness.baseColorTexture
-      );
-      materialParser = new GLTFMaterialParser(this.context.gl, {
-        attributes: {NORMAL: mesh.attributes.normals, TEXCOORD_0: mesh.attributes.texCoords},
-        material: {unlit, ...pbrMaterial},
-        pbrDebug: false,
-        imageBasedLightingEnvironment: null,
-        lights: true,
-        useTangents: false
-      });
-    }
-
-    const shaders = this.getShaders();
-
     const model = new Model(this.context.gl, {
       ...this.getShaders(),
       id: this.props.id,
       geometry: getGeometry(mesh, this.props._useMeshColors),
-      defines: {...shaders.defines, ...materialParser?.defines},
-      parameters: materialParser?.parameters,
       isInstanced: true
     });
 
     const {texture} = this.props;
     const {emptyTexture} = this.state;
-    if (materialParser) {
-      model.setUniforms(materialParser.uniforms);
-    } else {
-      model.setUniforms({
-        sampler: texture || emptyTexture,
-        hasTexture: Boolean(texture)
-      });
-    }
+    model.setUniforms({
+      sampler: texture || emptyTexture,
+      hasTexture: Boolean(texture)
+    });
 
     return model;
   }
 
   setTexture(texture) {
-    if (!this.props.pbrMaterial) {
-      const {emptyTexture, model} = this.state;
+    const {emptyTexture, model} = this.state;
 
-      // props.mesh may not be ready at this time.
-      // The sampler will be set when `getModel` is called
-      model?.setUniforms({
-        sampler: texture || emptyTexture,
-        hasTexture: Boolean(texture)
-      });
-    }
-  }
-
-  setPbrMaterial(pbrMaterial) {
-    if (!pbrMaterial) {
-      return;
-    }
-    const {model} = this.state;
-    if (model) {
-      const unlit = Boolean(
-        pbrMaterial.pbrMetallicRoughness && pbrMaterial.pbrMetallicRoughness.baseColorTexture
-      );
-      const {mesh} = this.props;
-      const materialParser = new GLTFMaterialParser(this.context.gl, {
-        attributes: {NORMAL: mesh.attributes.normals, TEXCOORD_0: mesh.attributes.texCoords},
-        material: {unlit, ...pbrMaterial},
-        pbrDebug: false,
-        imageBasedLightingEnvironment: null,
-        lights: true,
-        useTangents: false
-      });
-
-      model.setUniforms(materialParser.uniforms);
-    }
+    // props.mesh may not be ready at this time.
+    // The sampler will be set when `getModel` is called
+    model?.setUniforms({
+      sampler: texture || emptyTexture,
+      hasTexture: Boolean(texture)
+    });
   }
 }
 

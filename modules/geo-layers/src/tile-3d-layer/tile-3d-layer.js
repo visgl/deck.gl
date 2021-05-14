@@ -2,7 +2,8 @@ import GL from '@luma.gl/constants';
 import {Geometry} from '@luma.gl/core';
 import {COORDINATE_SYSTEM, CompositeLayer} from '@deck.gl/core';
 import {PointCloudLayer} from '@deck.gl/layers';
-import {ScenegraphLayer, SimpleMeshLayer} from '@deck.gl/mesh-layers';
+import {ScenegraphLayer} from '@deck.gl/mesh-layers';
+import {default as _MeshLayer} from '../mesh-layer/mesh-layer';
 import {log} from '@deck.gl/core';
 
 import {load} from '@loaders.gl/core';
@@ -236,7 +237,7 @@ export default class Tile3DLayer extends CompositeLayer {
         attributes: getMeshGeometry(attributes)
       });
 
-    const SubLayerClass = this.getSubLayerClass('mesh', SimpleMeshLayer);
+    const SubLayerClass = this.getSubLayerClass('mesh', _MeshLayer);
 
     return new SubLayerClass(
       this.getSubLayerProps({
@@ -249,6 +250,7 @@ export default class Tile3DLayer extends CompositeLayer {
         getPosition: [0, 0, 0],
         getColor: [255, 255, 255],
         texture,
+        _lighting: material ? 'pbr' : 'flat',
         pbrMaterial: material,
         modelMatrix,
         coordinateOrigin: cartographicOrigin,
