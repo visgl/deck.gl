@@ -769,7 +769,9 @@ export default class Deck {
       this.viewState = {...this.viewState, [params.viewId]: viewState};
       if (!this.props.viewState) {
         // Apply internal view state
-        this.viewManager.setProps({viewState: this.viewState});
+        if (this.viewManager) {
+          this.viewManager.setProps({viewState: this.viewState});
+        }
       }
     }
   }
