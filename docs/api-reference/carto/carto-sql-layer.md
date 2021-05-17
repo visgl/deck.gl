@@ -30,9 +30,9 @@ CartoSQLLayer will be deprecated in future versions so our recommendation is to 
 
 ```js
 import DeckGL from '@deck.gl/react';
-import {CartoLayer, setConfig, MAP_TYPES} from '@deck.gl/carto';
+import {CartoLayer, setDefaultCredentials, MAP_TYPES} from '@deck.gl/carto';
 
-setConfig({
+setDefaultCredentials({
   username: 'public',
   apiKey: 'default_public'
 });
@@ -99,7 +99,7 @@ Required. Either a sql query or a name of dataset
 
 Optional. A string pointing to a unique attribute at the result of the query. A unique attribute is needed for highlighting a feature split across two or more tiles.
 
-##### `config` (Object)
+##### `credentials` (Object)
 
 Optional. Object with the configuration to connect with CARTO.
 

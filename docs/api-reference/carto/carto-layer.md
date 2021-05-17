@@ -6,9 +6,9 @@
 
 ```js
 import DeckGL from '@deck.gl/react';
-import {CartoLayer, setConfig} from '@deck.gl/carto';
+import {CartoLayer, setDefaultCredentials} from '@deck.gl/carto';
 
-setConfig({
+setDefaultCredentials({
   username: 'public',
   apiKey: 'default_public'
 });
@@ -89,7 +89,7 @@ Required when `apiVersion` is `API_VERSIONS.V3`. Provider where the data is stor
 
 Required when apiVersion is `API_VERSIONS.V3`. Name of the connection in the CARTO workspace.
 
-##### `renderSubLayers` (String)
+##### `SubLayer` (String)
 
 Optional. Layer to use for rendering. 
 
@@ -116,7 +116,7 @@ Default:
 
 Optional. A string pointing to a unique attribute at the result of the query. A unique attribute is needed for highlighting with vector tiles when a feature is split across two or more tiles.
 
-##### `config` (Object)
+##### `credentials` (Object)
 
 Optional. Object with the configuration to connect with CARTO.
 

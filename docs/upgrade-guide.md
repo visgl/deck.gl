@@ -16,8 +16,6 @@ The module entry point is now only lightly transpiled for the most commonly used
 
 ### CARTO module
 
-- `credentials` parameter has been renamed to `config`.
-- `setDefaultCredentials` will be removed in future versions. Use `setConfig` instead.
 - `CartoBQTilerLayer` will be removed in future versions. Use `CartoLayer` with `type=MAP_TYPES.TILESET`.
 - `CartoSQLLayer` will be removed in future versions. Use `CartoLayer` with `type=MAP_TYPES.SQL`.
 

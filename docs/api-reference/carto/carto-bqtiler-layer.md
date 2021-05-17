@@ -93,7 +93,7 @@ Optional. Needed for highlighting a feature split across two or more tiles if no
 
 A string pointing to a tile attribute containing a unique identifier for features across tiles.
 
-##### `config` (Object)
+##### `credentials` (Object)
 
 Optional. Object with the configuration to connect with CARTO. Check the configuration parameters [here](overview#carto-configuration-object).
 

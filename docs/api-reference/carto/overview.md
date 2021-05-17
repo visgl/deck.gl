@@ -27,9 +27,9 @@ npm install @deck.gl/core @deck.gl/layers @deck.gl/geo-layers @deck.gl/carto
 
 ```js
 import DeckGL from '@deck.gl/react';
-import {CartoLayer, setConfig, MAP_TYPES} from '@deck.gl/carto';
+import {CartoLayer, setDefaultCredentials, MAP_TYPES} from '@deck.gl/carto';
 
-setConfig({
+setDefaultCredentials({
   username: 'public',
   apiKey: 'default_public'
 });
@@ -91,7 +91,7 @@ The following properties are available with all the Maps API versions:
 If you have a custom CARTO deployment (on-premise user or you're running CARTO from [Google Cloud Marketplace](https://console.cloud.google.com/marketplace/product/cartodb-public/carto-enterprise-byol)), you need to set the URLs to point to your instance. 
 
 ```js
-setConfig({
+setDefaultCredentials({
   username: 'public',
   apiKey: 'default_public',
   mapsUrl: 'https://<domain>/user/{user}/api/v2/map',
