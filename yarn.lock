@@ -2154,7 +2154,7 @@
     "@math.gl/core" "^3.4.2"
     probe.gl "^3.2.1"
 
-"@luma.gl/experimental@^8.5.0-alpha.2":
+"@luma.gl/experimental@^8.5.0-alpha.1", "@luma.gl/experimental@^8.5.0-alpha.2":
   version "8.5.0-alpha.2"
   resolved "https://registry.yarnpkg.com/@luma.gl/experimental/-/experimental-8.5.0-alpha.2.tgz#729f0a19a777268379663c67f1694bf4caf3b77d"
   integrity sha512-eHp9VetIcU+Oj+/QxZWfr6CUjWGvBFgLpzqyQLk7nqqU5K/loLr+RPUJeZgn878jMao0WeP54j8QxrpQ6K6MYw==
@@ -2187,7 +2187,7 @@
   dependencies:
     probe.gl "^3.2.1"
 
-"@luma.gl/webgl@8.5.0-alpha.1", "@luma.gl/webgl@^8.5.0-alpha.1":
+"@luma.gl/webgl@8.5.0-alpha.1":
   version "8.5.0-alpha.1"
   resolved "https://registry.yarnpkg.com/@luma.gl/webgl/-/webgl-8.5.0-alpha.1.tgz#6c88cb18dabfaf48e9d9a4627b4b3e3ac65c4f4b"
   integrity sha512-TnTQn+J+PWC+xiby8dX/eDFHKSTGquqGMYUvs9xz6dU5lBPwH4t5hrX8ZRPbFKCRoD6okc+F//EYAU8b79oeUw==

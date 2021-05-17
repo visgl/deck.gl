@@ -6,10 +6,9 @@ import {SimpleMeshLayer} from '@deck.gl/mesh-layers';
 import vs from './mesh-layer-vertex.glsl';
 import fs from './mesh-layer-fragment.glsl';
 
-function validateGeometryAttributes(attributes, useMeshColors) {
+function validateGeometryAttributes(attributes) {
   const hasColorAttribute = attributes.COLOR_0 || attributes.colors;
-  const useColorAttribute = hasColorAttribute && useMeshColors;
-  if (!useColorAttribute) {
+  if (!hasColorAttribute) {
     attributes.colors = {constant: true, value: new Float32Array([1, 1, 1])};
   }
   log.assert(
@@ -22,15 +21,15 @@ function validateGeometryAttributes(attributes, useMeshColors) {
  * Convert mesh data into geometry
  * @returns {Geometry} geometry
  */
-function getGeometry(data, useMeshColors) {
+function getGeometry(data) {
   if (data.attributes) {
-    validateGeometryAttributes(data.attributes, useMeshColors);
+    validateGeometryAttributes(data.attributes);
     if (data instanceof Geometry) {
       return data;
     }
     return new Geometry(data);
   } else if (data.positions || data.POSITION) {
-    validateGeometryAttributes(data, useMeshColors);
+    validateGeometryAttributes(data);
     return new Geometry({
       attributes: data
     });
@@ -95,7 +94,7 @@ export default class _MeshLayer extends SimpleMeshLayer {
     const model = new Model(this.context.gl, {
       ...this.getShaders(),
       id: this.props.id,
-      geometry: getGeometry(mesh, this.props._useMeshColors),
+      geometry: getGeometry(mesh),
       defines: {...shaders.defines, ...materialParser?.defines},
       parameters: materialParser?.parameters,
       isInstanced: true
