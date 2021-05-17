@@ -21,6 +21,12 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ### deck.gl v8.5 Prereleases
 
+#### deck.gl [8.5.0-alpha.6] - May 17 2021
+
+- Bump @loaders.gl to 3.0.0-alpha.14 (#5780)
+- Tile3DLayer: Ability to override color per tile (#5759)
+- Support local-math env option (#5737)
+
 #### deck.gl [8.5.0-alpha.5] - May 10 2021
 
 - Do not log init message unless log priority set to 1 (#5718)
