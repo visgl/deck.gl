@@ -419,7 +419,9 @@ test('MVTLayer#triangulation', async t => {
   });
 
   const onAfterUpdate = ({layer}) => {
-    if (!layer.isLoaded) { return }
+    if (!layer.isLoaded) {
+      return;
+    }
     const geoJsonLayer = layer.internalState.subLayers[0];
     const data = geoJsonLayer.props.data;
     if (geoJsonLayer.state.binary) {
@@ -435,8 +437,7 @@ test('MVTLayer#triangulation', async t => {
   const props = {
     data: ['./test/data/mvt-with-hole/{z}/{x}/{y}.mvt'],
     onTileError: error => {
-      if (error.message.includes('404')) {
-      } else {
+      if (!error.message.includes('404')) {
         throw error;
       }
     },
