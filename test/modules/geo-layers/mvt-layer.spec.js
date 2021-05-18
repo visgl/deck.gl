@@ -408,3 +408,50 @@ test('MVTLayer#dataInWGS84', async t => {
 
   t.end();
 });
+
+test('MVTLayer#triangulation', async t => {
+  const viewport = new WebMercatorViewport({
+    longitude: -100,
+    latitude: 40,
+    zoom: 3,
+    pitch: 0,
+    bearing: 0
+  });
+
+  const onAfterUpdate = ({layer}) => {
+    if (!layer.isLoaded) { return }
+    const geoJsonLayer = layer.internalState.subLayers[0];
+    const data = geoJsonLayer.props.data;
+    if (geoJsonLayer.state.binary) {
+      // Triangulated binary data should be passed
+      t.ok(data.polygons.triangles, 'should triangulate');
+    } else {
+      // GeoJSON should be passed (3 Features)
+      t.ok(!data.polygons, 'should not triangulate');
+      t.equals(data.length, 3, 'should pass GeoJson');
+    }
+  };
+
+  const props = {
+    data: ['./test/data/mvt-with-hole/{z}/{x}/{y}.mvt'],
+    onTileError: error => {
+      if (error.message.includes('404')) {
+      } else {
+        throw error;
+      }
+    },
+    loadOptions: {
+      mvt: {
+        workerUrl: null
+      }
+    }
+  };
+  const testCases = [
+    {props: {binary: true, ...props}, onAfterUpdate},
+    {props: {binary: false, ...props}, onAfterUpdate}
+  ];
+
+  await testLayerAsync({Layer: MVTLayer, viewport, testCases, onError: t.notOk});
+
+  t.end();
+});
