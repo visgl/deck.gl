@@ -409,7 +409,22 @@ test('MVTLayer#dataInWGS84', async t => {
   t.end();
 });
 
+const fetchFile = url => {
+  url = url
+    .replace(/\?.+$/, '') // strip query parameters
+    .replace(/^\//, './test/data/3d-tiles/');
+  return require('fs').readFileSync(url);
+};
+
 test('MVTLayer#triangulation', async t => {
+  let oldFetch;
+  /* global Response */
+  const needsFetchPolyfill = typeof Response === 'undefined';
+  if (needsFetchPolyfill) {
+    oldFetch = global.fetch;
+    global.fetch = fetchFile;
+  }
+
   const viewport = new WebMercatorViewport({
     longitude: -100,
     latitude: 40,
@@ -424,7 +439,7 @@ test('MVTLayer#triangulation', async t => {
     }
     const geoJsonLayer = layer.internalState.subLayers[0];
     const data = geoJsonLayer.props.data;
-    if (geoJsonLayer.state.binary) {
+    if (layer.props.binary) {
       // Triangulated binary data should be passed
       t.ok(data.polygons.triangles, 'should triangulate');
     } else {
@@ -436,8 +451,9 @@ test('MVTLayer#triangulation', async t => {
 
   const props = {
     data: ['./test/data/mvt-with-hole/{z}/{x}/{y}.mvt'],
+    binary: true,
     onTileError: error => {
-      if (!error.message.includes('404')) {
+      if (!(error.message && error.message.includes('404'))) {
         throw error;
       }
     },
@@ -447,12 +463,15 @@ test('MVTLayer#triangulation', async t => {
       }
     }
   };
-  const testCases = [
-    {props: {binary: true, ...props}, onAfterUpdate},
-    {props: {binary: false, ...props}, onAfterUpdate}
-  ];
+  const testCases = [{props, onAfterUpdate}];
 
+  // Run as separate test runs otherwise data is cached
+  testLayerAsync({Layer: MVTLayer, viewport, testCases, onError: t.notOk});
+  testCases[0].props.binary = false;
   await testLayerAsync({Layer: MVTLayer, viewport, testCases, onError: t.notOk});
 
+  if (oldFetch) {
+    global.fetch = oldFetch;
+  }
   t.end();
 });
