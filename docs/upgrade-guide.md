@@ -8,7 +8,7 @@ The module entry point is now only lightly transpiled for the most commonly used
 
 ### Layers
 
-- A bug is fixed in calculating pixel sizes in billboard mode. Pixel sizes now match their CSS counterparts. This change affects the following layers when used with a `MapView`:
+- A bug is fixed in projecting sizes in billboard mode. Pixel sizes now match their CSS counterparts. This change affects the following layers when used with a `MapView`:
   + `ArcLayer`, `LineLayer` and `PointCloudLayer`
   + `IconLayer` and `TextLayer` with the default `billboard` prop
   + `PathLayer` with `billboard: true`
