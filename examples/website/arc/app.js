@@ -76,7 +76,7 @@ function getTooltip({object}) {
 }
 
 /* eslint-disable react/no-deprecated */
-export default function App({data, strokeWidth = 2, mapStyle = MAP_STYLE}) {
+export default function App({data, strokeWidth = 1, mapStyle = MAP_STYLE}) {
   const [selectedCounty, selectCounty] = useState(null);
 
   const arcs = useMemo(() => calculateArcs(data, selectedCounty), [data, selectedCounty]);
