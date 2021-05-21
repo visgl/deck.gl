@@ -33,7 +33,8 @@ export default class Tile3DLayer extends CompositeLayer {
     // prop verification
     this.state = {
       layerMap: {},
-      tileset3d: null
+      tileset3d: null,
+      activatedViewports: {}
     };
   }
 
@@ -61,6 +62,13 @@ export default class Tile3DLayer extends CompositeLayer {
         layerMap[key].needsUpdate = true;
       }
     }
+  }
+
+  activateViewport(viewport) {
+    super.activateViewport(viewport);
+
+    const {activatedViewports} = this.state;
+    activatedViewports[viewport.id] = viewport;
   }
 
   getPickingInfo({info, sourceLayer}) {
@@ -127,12 +135,13 @@ export default class Tile3DLayer extends CompositeLayer {
   }
 
   _updateTileset(tileset3d) {
-    const {timeline, deck} = this.context;
-    const viewports = deck.viewManager.getViewports();
-    if (!timeline || !viewports || !tileset3d) {
+    const {timeline} = this.context;
+    const {activatedViewports = {}} = this.state;
+    const viewportsNumber = Object.keys(activatedViewports).length;
+    if (!timeline || !viewportsNumber || !tileset3d) {
       return;
     }
-    const frameNumber = tileset3d.update(viewports);
+    const frameNumber = tileset3d.update(Object.values(activatedViewports));
     const tilesetChanged = this.state.frameNumber !== frameNumber;
     if (tilesetChanged) {
       this.setState({frameNumber});
