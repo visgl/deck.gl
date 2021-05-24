@@ -12,7 +12,7 @@ The `binary` prop of `MVTLayer` is set to `true` by default.
 
 #### Direct binary parsing
 
-Binary output is now 2-3X faster for large datasets thanks to parsing directly from PBF to binary, rather than going through GeoJSON as an intermediate representation. Speed comparison on some example data sets (MVT tiles parsed per second):
+Mapbox Vector Tiles parsing throughput is now 2-3x faster, due to MVT tiles being parsed directly into binary attributes rather than GeoJSON, and additional work being performed on worker threads. Speed comparison on some example data sets (MVT tiles parsed per second):
 
 |                    | Via GeoJSON | Direct | Speed increase |
 | ------------------ | ----------- | ------ | -------------- |
