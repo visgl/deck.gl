@@ -12,7 +12,7 @@ The module entry point is now only lightly transpiled for the most commonly used
   + `ArcLayer`, `LineLayer` and `PointCloudLayer`
   + `IconLayer` and `TextLayer` with the default `billboard` prop
   + `PathLayer` with `billboard: true`
-  After upgrading to v8.5, in order to maintain the same appearance, you need to multiply `2/3` to the objects' width/size. This can be done by either changing the accessor (`getWidth`/`getSize`) or the scaling prop (`sizeScle`/`widthScale`).
+  After upgrading to v8.5, in order to maintain the same appearance, you need to multiply `2/3` to the objects' width/size. This can be done by either changing the accessor (`getWidth`/`getSize`) or the scaling prop (`sizeScale`/`widthScale`).
 - `TextLayer`'s `backgroundColor` prop is deprecated. Use `background: true` and `getBackgroundColor` instead.
 - `TextLayer`'s default `fontSettings` have changed. When using `sdf`, the default `buffer` is now `4` and the default `radius` is now `12`.
 - `PathLayer`'s `rounded` prop is deprecated, replaced by two separate flags `jointRounded` and `capRounded`.
