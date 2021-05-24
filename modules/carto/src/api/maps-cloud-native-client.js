@@ -2,7 +2,7 @@
  * Maps API Client for Carto Cloud Native
  */
 import {getDefaultCredentials} from '../config';
-import {encodeParameter, FORMATS} from './maps-api-common';
+import {encodeParameter, FORMATS, MAP_TYPES} from './maps-api-common';
 import {log} from '@deck.gl/core';
 
 /**
@@ -53,23 +53,23 @@ function dealWithError({response, error}) {
 /**
  * Build a URL with all required parameters
  */
-function buildURL({provider, type, source, connection, credentials}) {
+function buildURL({type, source, connection, credentials}) {
   const encodedClient = encodeParameter('client', 'deck-gl-carto');
   const parameters = [encodedClient];
 
   parameters.push(encodeParameter('access_token', credentials.accessToken));
-  parameters.push(encodeParameter('source', source));
-  parameters.push(encodeParameter('connection', connection));
+  const sourceName = type === MAP_TYPES.QUERY ? 'q' : 'name';
+  parameters.push(encodeParameter(sourceName, source));
 
-  return `${mapsUrl(credentials)}/${provider}/${type}?${parameters.join('&')}`;
+  return `${mapsUrl(credentials)}/${connection}/${type}?${parameters.join('&')}`;
 }
 
 function mapsUrl(credentials) {
   return credentials.mapsUrl.replace('{tenant}', credentials.tenant);
 }
 
-export async function getMapMetadata({provider, type, source, connection, credentials}) {
-  const url = buildURL({provider, type, source, connection, credentials});
+export async function getMapMetadata({ type, source, connection, credentials}) {
+  const url = buildURL({ type, source, connection, credentials});
 
   return await request({url, format: 'json'});
 }
@@ -84,13 +84,12 @@ function getUrlFromMetadata(metadata, format) {
   return null;
 }
 
-export async function getMapCartoCloudNative({provider, type, source, connection, credentials, format}) {
+export async function getMapCartoCloudNative({ type, source, connection, credentials, format}) {
   const localCreds = {...getDefaultCredentials(), ...credentials};
 
   log.assert(localCreds.accessToken, 'Must define an access token');
 
-  const metadata = await getMapMetadata({provider, type, source, connection, credentials: localCreds});
-
+  const metadata = await getMapMetadata({ type, source, connection, credentials: localCreds});
   let url;
   let mapFormat;
   
@@ -101,7 +100,6 @@ export async function getMapCartoCloudNative({provider, type, source, connection
   } else {
     // guess map format
     const priorizedFormats = [FORMATS.GEOJSON, FORMATS.NDJSON, FORMATS.TILEJSON];
-
     for (const f of priorizedFormats) {
       url = getUrlFromMetadata(metadata, f);
       if (url) {

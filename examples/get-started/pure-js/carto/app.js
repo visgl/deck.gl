@@ -58,7 +58,7 @@ function render() {
   const layers = [
     new CartoLayer({
       id: 'airports',
-      type: MAP_TYPES.SQL,
+      type: MAP_TYPES.QUERY,
       data: 'SELECT cartodb_id, the_geom_webmercator, scalerank FROM ne_10m_airports',
       visible: visibleLayer === 'airports',
       filled: true,

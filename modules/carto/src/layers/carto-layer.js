@@ -2,7 +2,7 @@ import {CompositeLayer, log} from '@deck.gl/core';
 import {MVTLayer} from '@deck.gl/geo-layers';
 import {GeoJsonLayer} from '@deck.gl/layers';
 import {getMapCartoCloudNative, getMapCarto, FORMATS, API_VERSIONS} from '../api';
-import {MAP_TYPES, PROVIDERS} from '../api/maps-api-common';
+import {MAP_TYPES} from '../api/maps-api-common';
 import {getDefaultCredentials} from '../config';
 
 const defaultProps = {
@@ -16,9 +16,6 @@ const defaultProps = {
   /*********************/
   /* API v3 PARAMETERS */
   /**********************/
-
-  // (String {bigquery, snowflake,redshift, postgres}, required)
-  provider: null,
   // (String, required): connection name at CARTO platform
   connection: null,
 
@@ -43,7 +40,7 @@ export default class CartoLayer extends CompositeLayer {
   }
 
   _checkProps(props) {
-    const {provider, type, format, credentials} = this.props;
+    const { type, format, credentials, connection } = this.props;
     const localCreds = {...getDefaultCredentials(), ...credentials};
     const {apiVersion} = localCreds;
 
@@ -55,20 +52,19 @@ export default class CartoLayer extends CompositeLayer {
     );
 
     if (apiVersion === API_VERSIONS.V1 || apiVersion === API_VERSIONS.V2) {
-      log.assert(!provider, `Provider not suport for apiVersion ${apiVersion}`);
-      log.assert(!format, `Format not suport for apiVersion ${apiVersion}`);
+      log.assert(!format, `Format not supported for apiVersion ${apiVersion}`);
       log.assert(
         type !== MAP_TYPES.TABLE,
-        `Use type ${MAP_TYPES.SQL} or ${MAP_TYPES.TILESET} for apiVersion ${apiVersion}`
+        `Use type ${MAP_TYPES.QUERY} or ${MAP_TYPES.TILESET} for apiVersion ${apiVersion}`
+      )
+      log.assert(
+        !connection,
+        `Connection prop is not supported for apiVersion ${apiVersion}`
       );
     } else if (apiVersion === API_VERSIONS.V3) {
       log.assert(
         Object.values(MAP_TYPES).includes(type),
         `Invalid type ${type}. Possible values are ${Object.values(MAP_TYPES).toString()}`
-      );
-      log.assert(
-        Object.values(PROVIDERS).includes(provider),
-        `Invalid provider ${provider}. Possible values are ${Object.values(PROVIDERS).toString()}`
       );
       log.assert(
         !format || Object.values(FORMATS).includes(format),
@@ -81,7 +77,6 @@ export default class CartoLayer extends CompositeLayer {
     this._checkProps(props);
     const shouldUpdateData =
       changeFlags.dataChanged ||
-      props.provider !== oldProps.provider ||
       props.connection !== oldProps.connection ||
       props.type !== oldProps.type ||
       JSON.stringify(props.credentials) !== JSON.stringify(oldProps.credentials);
@@ -94,7 +89,7 @@ export default class CartoLayer extends CompositeLayer {
 
   async _updateData() {
     try {
-      const {provider, type, data: source, connection, credentials, format} = this.props;
+      const { type, data: source, connection, credentials, format} = this.props;
       const localConfig = {...getDefaultCredentials(), ...credentials};
       const {apiVersion} = localConfig;
 
@@ -103,13 +98,13 @@ export default class CartoLayer extends CompositeLayer {
 
       if (apiVersion === API_VERSIONS.V3) {
         [data, mapFormat] = await getMapCartoCloudNative({
-          provider,
           type,
           source,
           connection,
           credentials,
           format
         });
+        debugger;
       } else if (apiVersion === API_VERSIONS.V1 || apiVersion === API_VERSIONS.V2) {
         [data, mapFormat] = await getMapCarto({type, source, credentials});
       } else {
