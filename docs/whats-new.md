@@ -6,13 +6,9 @@ This page contains highlights of each deck.gl release. Also check our [vis.gl bl
 
 ### MVT Layer
 
-#### Binary mode
-
-The `binary` prop of `MVTLayer` is set to `true` by default.
-
 #### Direct binary parsing
 
-Mapbox Vector Tiles parsing throughput is now 2-3x faster, due to MVT tiles being parsed directly into binary attributes rather than GeoJSON, and additional work being performed on worker threads. Speed comparison on some example data sets (MVT tiles parsed per second):
+Mapbox Vector Tiles parsing throughput is now 2-3x faster, due to MVT tiles being parsed directly into binary attributes rather than GeoJSON, and additional work (including [triangulation](https://github.com/visgl/loaders.gl/blob/master/docs/whats-new.md#v30-in-development))being performed on worker threads. Speed comparison on some example data sets (MVT tiles parsed per second):
 
 |  Data set                 | `binary: false` | `binary: true` | Speed increase |
 | ------------------ | ----------- | ------ | -------------- |
@@ -22,10 +18,6 @@ Mapbox Vector Tiles parsing throughput is now 2-3x faster, due to MVT tiles bein
 | Usa Zip Code Layer | 8.45/s      | 20.3/s | 2.4x           |
 
 _Benchmarks ran using scripts on a 2012 MacBook Pro, 2.3 GHz Intel Core i7, 8 GB, measuring parsing time of MVTLoader only (network time and rendering is not included)_
-
-#### Polygon triangulation in worker
-
-The MVTLoader now peforms the triangulation of polygons in a worker, speeding up loading of polygon geometries and easing the work on the main thread.
 
 ## deck.gl v8.4
 
