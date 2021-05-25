@@ -21,6 +21,13 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ### deck.gl v8.5 Prereleases
 
+#### deck.gl [8.5.0-alpha.7] - May 25 2021
+
+- geo: i3s - support indices (#5807)
+- Bump @loaders.gl to 3.0.0-alpha.16 to pick up earcut migration to math.gl (#5805)
+- Set default of MVTLayer binary to true (#5800)
+- Fix size projection in billboard mode (#5798)
+
 #### deck.gl [8.5.0-alpha.6] - May 17 2021
 
 - Bump @loaders.gl to 3.0.0-alpha.14 (#5780)
