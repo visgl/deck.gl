@@ -9,6 +9,8 @@ import TileLayer from '../tile-layer/tile-layer';
 import {getURLFromTemplate, isURLTemplate} from '../tile-layer/utils';
 import {transform} from './coordinate-transform';
 
+import {GeoJsonLayer} from '@deck.gl/layers';
+
 const WORLD_SIZE = 512;
 
 const defaultProps = {
@@ -134,7 +136,13 @@ export default class MVTLayer extends TileLayer {
       props.extensions = [...(props.extensions || []), new ClipExtension()];
     }
 
-    return super.renderSubLayers(props);
+    const subLayers = super.renderSubLayers(props);
+
+    if (this.props.binary && !(subLayers instanceof GeoJsonLayer)) {
+      throw new Error('renderSubLayers() must return GeoJsonLayer when using binary:true');
+    }
+
+    return subLayers;
   }
 
   _updateAutoHighlight(info) {

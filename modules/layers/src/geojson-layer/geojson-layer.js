@@ -19,7 +19,9 @@
 // THE SOFTWARE.
 
 import {CompositeLayer, log} from '@deck.gl/core';
+import IconLayer from '../icon-layer/icon-layer';
 import ScatterplotLayer from '../scatterplot-layer/scatterplot-layer';
+import TextLayer from '../text-layer/text-layer';
 import PathLayer from '../path-layer/path-layer';
 // Use primitive layer to avoid "Composite Composite" layers for now
 import SolidPolygonLayer from '../solid-polygon-layer/solid-polygon-layer';
@@ -48,6 +50,7 @@ const defaultProps = {
 
   elevationScale: 1,
 
+  pointType: 'circle',
   pointRadiusUnits: 'meters',
   pointRadiusScale: 1,
   pointRadiusMinPixels: 0, //  min point radius in pixels
@@ -163,6 +166,7 @@ export default class GeoJsonLayer extends CompositeLayer {
       lineJointRounded,
       lineCapRounded,
       lineMiterLimit,
+      pointType,
       pointRadiusUnits,
       pointRadiusScale,
       pointRadiusMinPixels,
@@ -185,7 +189,17 @@ export default class GeoJsonLayer extends CompositeLayer {
     const PolygonFillLayer = this.getSubLayerClass('polygons-fill', SolidPolygonLayer);
     const PolygonStrokeLayer = this.getSubLayerClass('polygons-stroke', PathLayer);
     const LineStringsLayer = this.getSubLayerClass('line-strings', PathLayer);
-    const PointsLayer = this.getSubLayerClass('points', ScatterplotLayer);
+
+    const PointsLayerClassMap = {
+      circle: ScatterplotLayer,
+      icon: IconLayer,
+      text: TextLayer
+    };
+    const PointsLayerClass = PointsLayerClassMap[pointType];
+    if (!PointsLayerClass) {
+      throw new Error(`pointType must be one of: ${Object.keys(PointsLayerClassMap)}`);
+    }
+    const PointsLayer = this.getSubLayerClass('points', PointsLayerClass);
 
     const {layerProps} = this.state;
 
@@ -324,6 +338,7 @@ export default class GeoJsonLayer extends CompositeLayer {
         },
         this.getSubLayerProps({
           id: 'points',
+          type: PointsLayerClass,
           updateTriggers: {
             getFillColor: updateTriggers.getFillColor,
             getLineColor: updateTriggers.getLineColor,
