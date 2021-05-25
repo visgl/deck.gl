@@ -19,9 +19,9 @@
 // THE SOFTWARE.
 import test from 'tape-catch';
 
-import {testLayerAsync, gl} from '@deck.gl/test-utils';
+import {testLayerAsync} from '@deck.gl/test-utils';
 import {Tile3DLayer} from '@deck.gl/geo-layers';
-import {Deck, WebMercatorViewport} from '@deck.gl/core';
+import {WebMercatorViewport} from '@deck.gl/core';
 
 const fetchFile = url => {
   url = url
@@ -66,41 +66,21 @@ test('Tile3DLayer', async t => {
     }
   ];
 
-  const deck = new Deck({
-    gl,
-    width: 1,
-    height: 1,
-    // This is required because the jsdom canvas does not have client width/height
-    autoResizeDrawingBuffer: gl.canvas.clientWidth > 0,
-
-    viewState: {
-      longitude: 0,
-      latitude: 0,
-      zoom: 0
-    },
-
-    layers: [],
-
-    onError: () => null,
-    onLoad: async () => {
-      await testLayerAsync({
-        Layer: Tile3DLayer,
-        deck,
-        viewport: new WebMercatorViewport({
-          width: 400,
-          height: 300,
-          longitude: -1.3197,
-          latitude: 0.69885,
-          zoom: 12
-        }),
-        testCases,
-        onError: t.notOk
-      });
-      if (oldFetch) {
-        global.fetch = oldFetch;
-      }
-      deck.finalize();
-      t.end();
-    }
+  await testLayerAsync({
+    Layer: Tile3DLayer,
+    viewport: new WebMercatorViewport({
+      width: 400,
+      height: 300,
+      longitude: -1.3197,
+      latitude: 0.69885,
+      zoom: 12
+    }),
+    testCases,
+    onError: t.notOk
   });
+
+  if (oldFetch) {
+    global.fetch = oldFetch;
+  }
+  t.end();
 });
