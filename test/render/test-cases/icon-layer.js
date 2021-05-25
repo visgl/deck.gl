@@ -109,7 +109,7 @@ export default [
         updateTriggers: {
           getIcon: 1
         },
-        sizeScale: 24,
+        sizeScale: 16,
         opacity: 0.8,
         getSize: d => (d.RACKS > 2 ? 2 : 1),
         getPosition: d => d.COORDINATES,
@@ -146,7 +146,7 @@ export default [
         updateTriggers: {
           getIcon: 2
         },
-        sizeScale: 24,
+        sizeScale: 16,
         opacity: 0.8,
         getSize: d => (d.RACKS > 2 ? 2 : 1),
         getPosition: d => d.COORDINATES,

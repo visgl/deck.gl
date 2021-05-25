@@ -111,8 +111,7 @@ export default class WebMercatorViewport extends Viewport {
       orthographic,
       fovyRadians: fov,
       aspect,
-      // TODO Viewport is already carefully set up to "focus" on ground, so can't use focal distance
-      focalDistance: orthographic ? focalDistance : 1,
+      focalDistance,
       near,
       far
     });
