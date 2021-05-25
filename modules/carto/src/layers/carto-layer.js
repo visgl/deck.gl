@@ -104,7 +104,6 @@ export default class CartoLayer extends CompositeLayer {
           credentials,
           format
         });
-        debugger;
       } else if (apiVersion === API_VERSIONS.V1 || apiVersion === API_VERSIONS.V2) {
         [data, mapFormat] = await getMapCarto({type, source, credentials});
       } else {
