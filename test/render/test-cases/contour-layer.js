@@ -74,8 +74,8 @@ export default [
         cellSize: 200,
         getPosition: d => d.COORDINATES,
         contours: [
-          {threshold: 1, color: [255, 0, 0], strokeWidth: 6},
-          {threshold: 5, color: [0, 255, 0], strokeWidth: 3},
+          {threshold: 1, color: [255, 0, 0], strokeWidth: 4},
+          {threshold: 5, color: [0, 255, 0], strokeWidth: 2},
           {threshold: 15, color: [0, 0, 255]}
         ],
         gpuAggregation: false
@@ -99,8 +99,8 @@ export default [
         cellSize: 200,
         getPosition: d => d.COORDINATES,
         contours: [
-          {threshold: 1, color: [255, 0, 0], strokeWidth: 6},
-          {threshold: 5, color: [0, 255, 0], strokeWidth: 3},
+          {threshold: 1, color: [255, 0, 0], strokeWidth: 4},
+          {threshold: 5, color: [0, 255, 0], strokeWidth: 2},
           {threshold: 15, color: [0, 0, 255]}
         ],
         gpuAggregation: true
