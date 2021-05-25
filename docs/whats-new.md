@@ -8,7 +8,7 @@ This page contains highlights of each deck.gl release. Also check our [vis.gl bl
 
 #### Direct binary parsing
 
-Mapbox Vector Tiles parsing throughput is now 2-3x faster, due to MVT tiles being parsed directly into binary attributes rather than GeoJSON, and additional work (including [triangulation](https://github.com/visgl/loaders.gl/blob/master/docs/whats-new.md#v30-in-development))being performed on worker threads. Speed comparison on some example data sets (MVT tiles parsed per second):
+Mapbox Vector Tiles parsing throughput is now 2-3x faster, due to MVT tiles being parsed directly into binary attributes rather than GeoJSON, and additional work (including [triangulation](https://github.com/visgl/loaders.gl/blob/master/docs/whats-new.md#v30-in-development)) being performed on worker threads. Speed comparison on some example data sets (MVT tiles parsed per second):
 
 |  Data set                 | `binary: false` | `binary: true` | Speed increase |
 | ------------------ | ----------- | ------ | -------------- |
