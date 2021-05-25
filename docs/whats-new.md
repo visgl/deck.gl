@@ -15,7 +15,7 @@ Mapbox Vector Tiles parsing throughput is now 2-3x faster, due to MVT tiles bein
 | Block groups       | 2.86/s      | 5.57/s | 1.94x          |
 | Census layer       | 6.09/s      | 11.9/s | 1.95x          |
 | Counties Layer     | 72.5/s      | 141/s  | 1.94x          |
-| Usa Zip Code Layer | 8.45/s      | 20.3/s | 2.4x           |
+| USA Zip Code Layer | 8.45/s      | 20.3/s | 2.4x           |
 
 _Benchmarks ran using scripts on a 2012 MacBook Pro, 2.3 GHz Intel Core i7, 8 GB, measuring parsing time of MVTLoader only (network time and rendering is not included)_
 
