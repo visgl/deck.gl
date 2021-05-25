@@ -49,7 +49,7 @@ export default [
         getPosition: d => [d.position[0] * 1e-5, d.position[1] * 1e-5, d.position[2]],
         getNormal: d => d.normal,
         getColor: d => d.color,
-        pointSize: 2,
+        pointSize: 1.333333,
         pickable: true
       })
     ],
@@ -77,7 +77,7 @@ export default [
         },
         coordinateSystem: COORDINATE_SYSTEM.METER_OFFSETS,
         coordinateOrigin: positionOrigin,
-        pointSize: 2,
+        pointSize: 1.333333,
         pickable: true
       })
     ],
