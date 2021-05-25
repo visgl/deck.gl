@@ -12,8 +12,8 @@ Mapbox Vector Tiles parsing throughput is now 2-3x faster, due to MVT tiles bein
 
 |  Data set                 | `binary: false` | `binary: true` | Speed increase |
 | ------------------ | ----------- | ------ | -------------- |
-| Block groups       | 2.86/s      | 5.57/s | 1.94x          |
-| Census layer       | 6.09/s      | 11.9/s | 1.95x          |
+| Block Groups       | 2.86/s      | 5.57/s | 1.94x          |
+| Census Layer       | 6.09/s      | 11.9/s | 1.95x          |
 | Counties Layer     | 72.5/s      | 141/s  | 1.94x          |
 | USA Zip Code Layer | 8.45/s      | 20.3/s | 2.4x           |
 
