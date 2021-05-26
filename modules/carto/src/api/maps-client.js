@@ -6,7 +6,8 @@ import {
   API_VERSIONS,
   DEFAULT_REGION_COMPONENT_IN_URL,
   DEFAULT_USER_COMPONENT_IN_URL,
-  encodeParameter
+  encodeParameter,
+  MAP_TYPES
 } from './maps-api-common';
 
 export const CONNECTIONS = {
@@ -115,7 +116,9 @@ function buildURLMapsAPIv1({mapConfig, credentials}) {
 
 function buildURLMapsAPIv2({connection, type, source, credentials}) {
   const parameters = initURLParameters(credentials);
-  let url = `${mapsUrl(credentials)}/${connection}/${type}?`;
+  // Query type is mapped to 'sql' at maps api v1
+  const mapsApiType = type === MAP_TYPES.QUERY ? 'sql' : type;
+  let url = `${mapsUrl(credentials)}/${connection}/${mapsApiType}?`;
   url += `${encodeParameter('source', source)}&format=tilejson&${parameters.join('&')}`;
   return url;
 }
