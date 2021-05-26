@@ -10,7 +10,6 @@ export {default as colorContinuous} from './style/color-continuous-style';
 export {
   FORMATS,
   MAP_TYPES,
-  PROVIDERS,
   API_VERSIONS,
   getMapCarto as _getMapCarto,
   getMapCartoCloudNative as _getMapCartoCloudNative, 

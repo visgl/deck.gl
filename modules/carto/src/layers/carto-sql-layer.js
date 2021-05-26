@@ -4,7 +4,7 @@ import {MAP_TYPES} from '../api';
 
 const defaultProps = {
   ...CartoLayer.defaultProps,
-  type: MAP_TYPES.SQL,
+  type: MAP_TYPES.QUERY,
   uniqueIdProperty: 'cartodb_id'
 };
 
@@ -14,7 +14,7 @@ export default class CartoSQLLayer extends CartoLayer {
 
     log.warn(
       `CartoSQLLayer will be removed in future versions. Use CartoLayer with type='${
-        MAP_TYPES.SQL
+        MAP_TYPES.QUERY
       }' and apiVersion='v2'`
     )();
   }
