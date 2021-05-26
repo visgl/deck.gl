@@ -214,10 +214,6 @@ export default class TileLayer extends CompositeLayer {
   renderLayers() {
     const {visible} = this.props;
     return this.state.tileset.tiles.map(tile => {
-      // For a tile to be visible:
-      // - parent layer must be visible
-      // - tile must be visible in the current viewport
-      const isVisible = visible && tile.isVisible;
       const highlightedObjectIndex = this.getHighlightedObjectIndex(tile);
       // cache the rendered layer in the tile
       if (!tile.isLoaded) {
@@ -227,20 +223,23 @@ export default class TileLayer extends CompositeLayer {
           ...this.props,
           id: `${this.id}-${tile.x}-${tile.y}-${tile.z}`,
           data: tile.data,
-          visible: isVisible,
           _offset: 0,
-          tile,
-          highlightedObjectIndex
+          tile
         });
-        tile.layers = flatten(layers, Boolean);
+        tile.layers = flatten(layers, Boolean).map(layer =>
+          layer.clone({
+            // For a tile to be visible:
+            // - parent layer must be visible
+            // - tile must be visible in the current viewport
+            visible: visible && (() => tile.isVisible),
+            highlightedObjectIndex
+          })
+        );
       } else if (
         tile.layers[0] &&
-        (tile.layers[0].props.visible !== isVisible ||
-          tile.layers[0].props.highlightedObjectIndex !== highlightedObjectIndex)
+        tile.layers[0].props.highlightedObjectIndex !== highlightedObjectIndex
       ) {
-        tile.layers = tile.layers.map(layer =>
-          layer.clone({visible: isVisible, highlightedObjectIndex})
-        );
+        tile.layers = tile.layers.map(layer => layer.clone({highlightedObjectIndex}));
       }
       return tile.layers;
     });

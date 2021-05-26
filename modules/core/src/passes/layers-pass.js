@@ -165,22 +165,29 @@ export default class LayersPass extends Pass {
 
   /* Private */
   _shouldDrawLayer(layer, viewport, pass, layerFilter) {
-    let shouldDrawLayer = this.shouldDrawLayer(layer) && layer.props.visible;
+    const shouldDrawLayer = this.shouldDrawLayer(layer) && layer.props.visible;
 
-    if (shouldDrawLayer && layerFilter) {
-      shouldDrawLayer = layerFilter({
-        layer,
-        viewport,
-        isPicking: pass.startsWith('picking'),
-        renderPass: pass
-      });
-    }
-    if (shouldDrawLayer) {
-      // If a layer is drawn, update its viewportChanged flag
-      layer.activateViewport(viewport);
+    if (!shouldDrawLayer) {
+      return false;
     }
 
-    return shouldDrawLayer;
+    const drawContext = {
+      layer,
+      viewport,
+      isPicking: pass.startsWith('picking'),
+      renderPass: pass
+    };
+    if (typeof shouldDrawLayer === 'function' && !shouldDrawLayer(drawContext)) {
+      return false;
+    }
+    if (layerFilter && !layerFilter(drawContext)) {
+      return false;
+    }
+
+    // If a layer is drawn, update its viewportChanged flag
+    layer.activateViewport(viewport);
+
+    return true;
   }
 
   _getModuleParameters(layer, effects, pass, overrides) {
