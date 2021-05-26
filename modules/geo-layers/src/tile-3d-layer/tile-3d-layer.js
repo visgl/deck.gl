@@ -2,7 +2,8 @@ import GL from '@luma.gl/constants';
 import {Geometry} from '@luma.gl/core';
 import {COORDINATE_SYSTEM, CompositeLayer} from '@deck.gl/core';
 import {PointCloudLayer} from '@deck.gl/layers';
-import {ScenegraphLayer, SimpleMeshLayer} from '@deck.gl/mesh-layers';
+import {ScenegraphLayer} from '@deck.gl/mesh-layers';
+import {default as _MeshLayer} from '../mesh-layer/mesh-layer';
 import {log} from '@deck.gl/core';
 
 import {load} from '@loaders.gl/core';
@@ -228,7 +229,7 @@ export default class Tile3DLayer extends CompositeLayer {
 
   _makeSimpleMeshLayer(tileHeader, oldLayer) {
     const content = tileHeader.content;
-    const {attributes, indices, modelMatrix, cartographicOrigin, texture} = content;
+    const {attributes, indices, modelMatrix, cartographicOrigin, material} = content;
     const {getSimpleMeshLayerColor} = this.props;
 
     const geometry =
@@ -239,7 +240,7 @@ export default class Tile3DLayer extends CompositeLayer {
         indices
       });
 
-    const SubLayerClass = this.getSubLayerClass('mesh', SimpleMeshLayer);
+    const SubLayerClass = this.getSubLayerClass('mesh', _MeshLayer);
 
     return new SubLayerClass(
       this.getSubLayerProps({
@@ -249,9 +250,8 @@ export default class Tile3DLayer extends CompositeLayer {
         id: `${this.id}-mesh-${tileHeader.id}`,
         mesh: geometry,
         data: SINGLE_DATA,
-        getPosition: [0, 0, 0],
         getColor: getSimpleMeshLayerColor(tileHeader),
-        texture,
+        pbrMaterial: material,
         modelMatrix,
         coordinateOrigin: cartographicOrigin,
         coordinateSystem: COORDINATE_SYSTEM.METER_OFFSETS
