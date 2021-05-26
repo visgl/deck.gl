@@ -229,14 +229,15 @@ export default class Tile3DLayer extends CompositeLayer {
 
   _makeSimpleMeshLayer(tileHeader, oldLayer) {
     const content = tileHeader.content;
-    const {attributes, modelMatrix, cartographicOrigin, material} = content;
+    const {attributes, indices, modelMatrix, cartographicOrigin, material} = content;
     const {getSimpleMeshLayerColor} = this.props;
 
     const geometry =
       (oldLayer && oldLayer.props.mesh) ||
       new Geometry({
         drawMode: GL.TRIANGLES,
-        attributes: getMeshGeometry(attributes)
+        attributes: getMeshGeometry(attributes),
+        indices
       });
 
     const SubLayerClass = this.getSubLayerClass('mesh', _MeshLayer);
