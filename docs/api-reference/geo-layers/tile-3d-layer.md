@@ -196,6 +196,13 @@ When [`picking`](/docs/developer-guide/custom-layers/picking.md) is enabled, `in
   - `url`: the url of the failed tile.
   - `message`: the error message.
 
+##### `getSimpleMeshLayerColor` (Function, optional)
+`getSimpleMeshLayerColor` is a function which allows to change color of mesh based on `tileHeader` object.
+The rgb color at the target, in `r, g, b`. Each component is in the 0-255 range.
+This value is only applied when tile format is `mesh`
+
+- Default: `getSimpleMeshLayerColor: (tileHeader) => [255, 255, 255]`
+
 ## Sub Layers
 
 The Tile3DLayer renders the following sublayers based on tile [format](https://github.com/AnalyticalGraphicsInc/3d-tiles/tree/master/specification#introduction):
