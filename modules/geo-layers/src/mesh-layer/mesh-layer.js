@@ -32,7 +32,7 @@ export default class _MeshLayer extends SimpleMeshLayer {
     }
   }
 
-  draw({uniforms}) {
+  draw(opts) {
     if (!this.state.model) {
       return;
     }
@@ -40,7 +40,7 @@ export default class _MeshLayer extends SimpleMeshLayer {
       // Needed for PBR (TODO: find better way to get it)
       u_Camera: this.state.model.getUniforms().project_uCameraPosition
     });
-    super.draw({uniforms});
+    super.draw(opts);
   }
 
   getModel(mesh) {

@@ -12,12 +12,9 @@ in vec3 colors;
 in vec2 texCoords;
 
 // Instance attributes
-in vec3 instancePositions;
-in vec3 instancePositions64Low;
 in vec4 instanceColors;
 in vec3 instancePickingColors;
 in mat3 instanceModelMatrix;
-in vec3 instanceTranslation;
 
 // Outputs to fragment shader
 out vec2 vTexCoord;
@@ -27,7 +24,6 @@ out vec4 position_commonspace;
 out vec4 vColor;
 
 void main(void) {
-  geometry.worldPosition = instancePositions;
   geometry.uv = texCoords;
   geometry.pickingColor = instancePickingColors;
 
@@ -52,17 +48,10 @@ void main(void) {
   vColor = vec4(colors * instanceColors.rgb, instanceColors.a);
   geometry.normal = normals_commonspace;
 
-  vec3 pos = (instanceModelMatrix * positions) * sizeScale + instanceTranslation;
-
-  if (composeModelMatrix) {
-    DECKGL_FILTER_SIZE(pos, geometry);
-    gl_Position = project_position_to_clipspace(pos + instancePositions, instancePositions64Low, vec3(0.0), position_commonspace);
-  }
-  else {
-    pos = project_size(pos);
-    DECKGL_FILTER_SIZE(pos, geometry);
-    gl_Position = project_position_to_clipspace(instancePositions, instancePositions64Low, pos, position_commonspace);
-  }
+  vec3 pos = (instanceModelMatrix * positions) * sizeScale;
+  vec3 projectedPosition = project_position(positions);
+  position_commonspace = vec4(projectedPosition, 1.0);
+  gl_Position = project_common_position_to_clipspace(position_commonspace);
 
   geometry.position = position_commonspace;
 
