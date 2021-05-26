@@ -89,7 +89,7 @@ export default function App({
   };
 
   const layer = showCluster
-    ? new IconClusterLayer({...layerProps, id: 'icon-cluster', sizeScale: 60})
+    ? new IconClusterLayer({...layerProps, id: 'icon-cluster', sizeScale: 40})
     : new IconLayer({
         ...layerProps,
         id: 'icon',
