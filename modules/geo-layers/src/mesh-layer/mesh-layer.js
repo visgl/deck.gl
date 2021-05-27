@@ -20,7 +20,7 @@ const defaultProps = {
   // PBR material object. _lighting must be pbr for this to work
   pbrMaterial: {type: 'object', value: null},
   pickFeatures: {type: 'boolean', value: false},
-  segmentationData: {type: 'Uint32Array', value: null}
+  objectIds: {type: 'Uint32Array', value: null}
 };
 
 export default class _MeshLayer extends SimpleMeshLayer {
@@ -33,16 +33,16 @@ export default class _MeshLayer extends SimpleMeshLayer {
 
   initializeState() {
     const {attributeManager} = this.state;
-    const {pickFeatures, segmentationData} = this.props;
+    const {pickFeatures, objectIds} = this.props;
     super.initializeState();
 
-    if (pickFeatures && segmentationData) {
+    if (pickFeatures && objectIds) {
       attributeManager.add({
-        segmentationPickingColors: {
+        objectIdsPickingColors: {
           type: GL.UNSIGNED_BYTE,
           size: 3,
           noAlloc: true,
-          update: this.calculateSegmentationPickingColors
+          update: this.calculateObjectIdsPickingColors
         }
       });
     }
@@ -67,7 +67,7 @@ export default class _MeshLayer extends SimpleMeshLayer {
   }
 
   getModel(mesh) {
-    const {id, pickFeatures, segmentationData, pbrMaterial} = this.props;
+    const {id, pickFeatures, objectIds, pbrMaterial} = this.props;
     const materialParser = this.parseMaterial(pbrMaterial, mesh);
     const shaders = this.getShaders();
     validateGeometryAttributes(mesh.attributes);
@@ -82,7 +82,7 @@ export default class _MeshLayer extends SimpleMeshLayer {
 
     model.setUniforms({
       // eslint-disable-next-line camelcase
-      u_pickSegmentation: Boolean(pickFeatures && segmentationData)
+      u_pickObjectIds: Boolean(pickFeatures && objectIds)
     });
 
     return model;
@@ -112,17 +112,17 @@ export default class _MeshLayer extends SimpleMeshLayer {
     return materialParser;
   }
 
-  calculateSegmentationPickingColors(attribute) {
-    const {segmentationData} = this.props;
+  calculateObjectIdsPickingColors(attribute) {
+    const {objectIds} = this.props;
 
-    if (!segmentationData) {
+    if (!objectIds) {
       return;
     }
 
-    const value = new Uint8ClampedArray(segmentationData.length * attribute.size);
+    const value = new Uint8ClampedArray(objectIds.length * attribute.size);
 
-    for (let index = 0; index < segmentationData.length; index++) {
-      const color = this.encodePickingColor(segmentationData[index]);
+    for (let index = 0; index < objectIds.length; index++) {
+      const color = this.encodePickingColor(objectIds[index]);
 
       value[index * 3] = color[0];
       value[index * 3 + 1] = color[1];

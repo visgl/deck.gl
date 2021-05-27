@@ -234,14 +234,7 @@ export default class Tile3DLayer extends CompositeLayer {
 
   _makeSimpleMeshLayer(tileHeader, oldLayer) {
     const content = tileHeader.content;
-    const {
-      attributes,
-      indices,
-      modelMatrix,
-      cartographicOrigin,
-      material,
-      segmentationData
-    } = content;
+    const {attributes, indices, modelMatrix, cartographicOrigin, material, objectIds} = content;
     const {
       pickable,
       pickFeatures,
@@ -277,7 +270,7 @@ export default class Tile3DLayer extends CompositeLayer {
         autoHighlight,
         highlightColor,
         pickFeatures,
-        segmentationData
+        objectIds
       }
     );
   }

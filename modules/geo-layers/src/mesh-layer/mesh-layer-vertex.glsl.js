@@ -4,7 +4,7 @@ export default `#version 300 es
 // Scale the model
 uniform float sizeScale;
 uniform bool composeModelMatrix;
-uniform bool u_pickSegmentation;
+uniform bool u_pickObjectIds;
 
 // Primitive attributes
 in vec3 positions;
@@ -12,7 +12,7 @@ in vec3 normals;
 in vec3 colors;
 in vec2 texCoords;
 in vec4 uvRegions;
-in vec3 segmentationPickingColors;
+in vec3 objectIdsPickingColors;
 
 // Instance attributes
 in vec4 instanceColors;
@@ -33,8 +33,8 @@ void main(void) {
   geometry.uv = uv;
   geometry.uv = texCoords;
 
-  if (u_pickSegmentation) {
-    geometry.pickingColor = segmentationPickingColors;
+  if (u_pickObjectIds) {
+    geometry.pickingColor = objectIdsPickingColors;
   } else {
     geometry.pickingColor = instancePickingColors;
   }
