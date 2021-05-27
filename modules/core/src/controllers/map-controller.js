@@ -3,18 +3,9 @@ import Controller from './controller';
 import ViewState from './view-state';
 import {normalizeViewportProps} from '@math.gl/web-mercator';
 import assert from '../utils/assert';
-import LinearInterpolator from '../transitions/linear-interpolator';
-import {TRANSITION_EVENTS} from './transition-manager';
 
 const PITCH_MOUSE_THRESHOLD = 5;
 const PITCH_ACCEL = 1.2;
-
-const LINEAR_TRANSITION_PROPS = {
-  transitionDuration: 300,
-  transitionEasing: t => t,
-  transitionInterpolator: new LinearInterpolator(),
-  transitionInterruption: TRANSITION_EVENTS.BREAK
-};
 
 const DEFAULT_STATE = {
   pitch: 0,
@@ -132,12 +123,10 @@ export class MapState extends ViewState {
       return this;
     }
 
-    const [longitude, latitude] = this._calculateNewLngLat({startPanLngLat, pos});
+    const viewport = this.makeViewport(this._viewportProps);
+    const newProps = viewport.panByPosition(startPanLngLat, pos);
 
-    return this._getUpdatedState({
-      longitude,
-      latitude
-    });
+    return this._getUpdatedState(newProps);
   }
 
   /**
@@ -236,15 +225,10 @@ export class MapState extends ViewState {
     const zoom = this._calculateNewZoom({scale, startZoom});
 
     const zoomedViewport = this.makeViewport({...this._viewportProps, zoom});
-    const [longitude, latitude] = zoomedViewport.getMapCenterByLngLatPosition({
-      lngLat: startZoomLngLat,
-      pos
-    });
 
     return this._getUpdatedState({
       zoom,
-      longitude,
-      latitude
+      ...zoomedViewport.panByPosition(startZoomLngLat, pos)
     });
   }
 
@@ -374,12 +358,6 @@ export class MapState extends ViewState {
     return pos && viewport.unproject(pos);
   }
 
-  // Calculate a new lnglat based on pixel dragging position
-  _calculateNewLngLat({startPanLngLat, pos}) {
-    const viewport = this.makeViewport(this._viewportProps);
-    return viewport.getMapCenterByLngLatPosition({lngLat: startPanLngLat, pos});
-  }
-
   // Calculates new zoom
   _calculateNewZoom({scale, startZoom}) {
     const {maxZoom, minZoom} = this._viewportProps;
@@ -461,16 +439,7 @@ export default class MapController extends Controller {
     }
   }
 
-  _getTransitionProps(opts) {
-    // Enables Transitions on double-tap and key-down events.
-    return opts
-      ? {
-          ...LINEAR_TRANSITION_PROPS,
-          transitionInterpolator: new LinearInterpolator({
-            ...opts,
-            makeViewport: this.controllerState.makeViewport
-          })
-        }
-      : LINEAR_TRANSITION_PROPS;
+  get linearTransitionProps() {
+    return ['longitude', 'latitude', 'zoom', 'bearing', 'pitch'];
   }
 }

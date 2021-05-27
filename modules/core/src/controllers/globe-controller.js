@@ -3,15 +3,6 @@ import Controller from './controller';
 
 import {MapState} from './map-controller';
 import {mod} from '../utils/math-utils';
-import LinearInterpolator from '../transitions/linear-interpolator';
-import {TRANSITION_EVENTS} from './transition-manager';
-
-const LINEAR_TRANSITION_PROPS = {
-  transitionDuration: 300,
-  transitionEasing: t => t,
-  transitionInterpolator: new LinearInterpolator(['longitude', 'latitude', 'zoom']),
-  transitionInterruption: TRANSITION_EVENTS.BREAK
-};
 
 class GlobeState extends MapState {
   // Apply any constraints (mathematical or defined by _viewportProps) to map state
@@ -44,8 +35,7 @@ export default class GlobeController extends Controller {
     this.touchRotate = false;
   }
 
-  _getTransitionProps() {
-    // Enables Transitions on double-tap and key-down events.
-    return LINEAR_TRANSITION_PROPS;
+  get linearTransitionProps() {
+    return ['longitude', 'latitude', 'zoom'];
   }
 }
