@@ -223,15 +223,13 @@ export default class TileLayer extends CompositeLayer {
           ...this.props,
           id: `${this.id}-${tile.x}-${tile.y}-${tile.z}`,
           data: tile.data,
+          visible,
           _offset: 0,
           tile
         });
         tile.layers = flatten(layers, Boolean).map(layer =>
           layer.clone({
-            // For a tile to be visible:
-            // - parent layer must be visible
-            // - tile must be visible in the current viewport
-            visible: visible && (() => tile.isVisible),
+            tile,
             highlightedObjectIndex
           })
         );
@@ -243,6 +241,10 @@ export default class TileLayer extends CompositeLayer {
       }
       return tile.layers;
     });
+  }
+
+  filterSubLayer({layer}) {
+    return layer.props.tile.isVisible;
   }
 }
 
