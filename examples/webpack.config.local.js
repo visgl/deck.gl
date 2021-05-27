@@ -4,6 +4,14 @@
 //
 // This enables using the examples to debug the main deck.gl library source
 // without publishing or npm linking, with conveniences such hot reloading etc.
+// To use a local copy of luma.gl or math.gl when using
+// `yarn start-local` use the following options:
+//   --env.local-luma
+//   --env.local-math
+//
+// To specify more fine-grained overrides you can add to the aliases
+// below. For example if you have the `loaders.gl` repo checked out at the same level as deck.gl and want to work with a local copy of the `mvt` module, you would add the following `alias` to the configuration:
+// `'@loaders.gl/mvt': resolve(__dirname, '../loaders.gl/modules/mvt/src')`
 
 // avoid destructuring for older Node version support
 const resolve = require('path').resolve;
@@ -16,7 +24,7 @@ const ALIASES = require('ocular-dev-tools/config/ocular.config')({
 }).aliases;
 
 // Support for hot reloading changes to the deck.gl library:
-function makeLocalDevConfig(EXAMPLE_DIR = LIB_DIR, linkToLuma) {
+function makeLocalDevConfig(EXAMPLE_DIR = LIB_DIR, linkToLuma, linkToMath) {
   const LUMA_LINK_ALIASES = {
     '@luma.gl/constants': `${ROOT_DIR}/../luma.gl/modules/constants/src`,
     '@luma.gl/core': `${ROOT_DIR}/../luma.gl/modules/core/src`,
@@ -45,6 +53,27 @@ function makeLocalDevConfig(EXAMPLE_DIR = LIB_DIR, linkToLuma) {
   // console.warn(JSON.stringify(LUMA_ALIASES, null, 2)); // uncomment to debug config
   // require('fs').writeFileSync('/tmp/ocular.log', JSON.stringify(config, null, 2));
 
+  const MATH_ALIASES = {};
+  if (linkToMath) {
+    const MATH_MODULES = [
+      'core',
+      'culling',
+      'geoid',
+      'geospatial',
+      'main',
+      'mercator',
+      'polygon',
+      'proj4',
+      'sun',
+      'web'
+    ];
+    for (const module of MATH_MODULES) {
+      MATH_ALIASES[`@math.gl/${module}`] = `${ROOT_DIR}/../math.gl/modules/${module}/src`;
+    }
+  } else {
+    MATH_ALIASES['math.gl'] = resolve(LIB_DIR, './node_modules/math.gl');
+  }
+
   return {
     // TODO - Uncomment when all examples use webpack 4 for faster bundling
     // mode: 'development',
@@ -61,11 +90,10 @@ function makeLocalDevConfig(EXAMPLE_DIR = LIB_DIR, linkToLuma) {
     resolve: {
       // mainFields: ['esnext', 'module', 'main'],
 
-      alias: Object.assign({}, ALIASES, LUMA_ALIASES, {
+      alias: Object.assign({}, ALIASES, LUMA_ALIASES, MATH_ALIASES, {
         // Use luma.gl installed in parallel with deck.gl
         // Important: ensure shared dependencies come from the main node_modules dir
         // Versions will be controlled by the deck.gl top level package.json
-        'math.gl': resolve(LIB_DIR, './node_modules/math.gl'),
         'viewport-mercator-project': resolve(LIB_DIR, './node_modules/viewport-mercator-project'),
         react: resolve(LIB_DIR, './node_modules/react')
       })
@@ -94,8 +122,8 @@ function makeLocalDevConfig(EXAMPLE_DIR = LIB_DIR, linkToLuma) {
   };
 }
 
-function addLocalDevSettings(config, exampleDir, linkToLuma) {
-  const LOCAL_DEV_CONFIG = makeLocalDevConfig(exampleDir, linkToLuma);
+function addLocalDevSettings(config, exampleDir, linkToLuma, linkToMath) {
+  const LOCAL_DEV_CONFIG = makeLocalDevConfig(exampleDir, linkToLuma, linkToMath);
   config = Object.assign({}, LOCAL_DEV_CONFIG, config);
   config.resolve = Object.assign({}, LOCAL_DEV_CONFIG.resolve, config.resolve || {});
   config.resolve.alias = config.resolve.alias || {};
@@ -115,12 +143,12 @@ module.exports = (config, exampleDir) => env => {
   }
 
   if (env.local) {
-    config = addLocalDevSettings(config, exampleDir, env['local-luma']);
+    config = addLocalDevSettings(config, exampleDir, env['local-luma'], env['local-math']);
   }
 
   // npm run start-es6 does not transpile the lib
   if (env && env.es6) {
-    config = addLocalDevSettings(config, exampleDir, env['local-luma']);
+    config = addLocalDevSettings(config, exampleDir, env['local-luma'], env['local-math']);
   }
 
   if (env && env.production) {

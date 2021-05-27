@@ -21,6 +21,19 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ### deck.gl v8.5 Prereleases
 
+#### deck.gl [8.5.0-alpha.7] - May 25 2021
+
+- geo: i3s - support indices (#5807)
+- Bump @loaders.gl to 3.0.0-alpha.16 to pick up earcut migration to math.gl (#5805)
+- Set default of MVTLayer binary to true (#5800)
+- Fix size projection in billboard mode (#5798)
+
+#### deck.gl [8.5.0-alpha.6] - May 17 2021
+
+- Bump @loaders.gl to 3.0.0-alpha.14 (#5780)
+- Tile3DLayer: Ability to override color per tile (#5759)
+- Support local-math env option (#5737)
+
 #### deck.gl [8.5.0-alpha.5] - May 10 2021
 
 - Do not log init message unless log priority set to 1 (#5718)

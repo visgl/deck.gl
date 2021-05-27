@@ -2,6 +2,23 @@
 
 This page contains highlights of each deck.gl release. Also check our [vis.gl blog](https://medium.com/vis-gl) for news about new releases and features in deck.gl.
 
+## deck.gl v8.5 (In development)
+
+### MVT Layer
+
+#### Direct binary parsing
+
+Mapbox Vector Tiles parsing throughput is now 2-3x faster, due to MVT tiles being parsed directly into binary attributes rather than GeoJSON, and additional work (including [triangulation](https://github.com/visgl/loaders.gl/blob/master/docs/whats-new.md#v30-in-development)) being performed on worker threads. Speed comparison on some example data sets (MVT tiles parsed per second):
+
+|  Data set                 | `binary: false` | `binary: true` | Speed increase |
+| ------------------ | ----------- | ------ | -------------- |
+| Block Groups       | 2.86/s      | 5.57/s | 1.94x          |
+| Census Layer       | 6.09/s      | 11.9/s | 1.95x          |
+| Counties Layer     | 72.5/s      | 141/s  | 1.94x          |
+| USA Zip Code Layer | 8.45/s      | 20.3/s | 2.4x           |
+
+_Benchmarks ran using scripts on a 2012 MacBook Pro, 2.3 GHz Intel Core i7, 8 GB, measuring parsing time of MVTLoader only (network time and rendering is not included)_
+
 ## deck.gl v8.4
 
 Release date: Jan 31, 2021
