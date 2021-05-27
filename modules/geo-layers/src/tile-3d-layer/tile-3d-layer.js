@@ -19,6 +19,11 @@ const defaultProps = {
   data: null,
   loader: Tiles3DLoader,
 
+  pickable: {type: 'boolean', value: false},
+  pickFeatures: {type: 'boolean', value: false},
+  autoHighlight: {type: 'boolean', value: false},
+  highlightColor: {type: 'array', value: [0, 0, 255, 150]},
+
   onTilesetLoad: {type: 'function', value: tileset3d => {}, compare: false},
   onTileLoad: {type: 'function', value: tileHeader => {}, compare: false},
   onTileUnload: {type: 'function', value: tileHeader => {}, compare: false},
@@ -229,8 +234,21 @@ export default class Tile3DLayer extends CompositeLayer {
 
   _makeSimpleMeshLayer(tileHeader, oldLayer) {
     const content = tileHeader.content;
-    const {attributes, indices, modelMatrix, cartographicOrigin, material} = content;
-    const {getSimpleMeshLayerColor} = this.props;
+    const {
+      attributes,
+      indices,
+      modelMatrix,
+      cartographicOrigin,
+      material,
+      segmentationData
+    } = content;
+    const {
+      pickable,
+      pickFeatures,
+      autoHighlight,
+      highlightColor,
+      getSimpleMeshLayerColor
+    } = this.props;
 
     const geometry =
       (oldLayer && oldLayer.props.mesh) ||
@@ -254,7 +272,12 @@ export default class Tile3DLayer extends CompositeLayer {
         pbrMaterial: material,
         modelMatrix,
         coordinateOrigin: cartographicOrigin,
-        coordinateSystem: COORDINATE_SYSTEM.METER_OFFSETS
+        coordinateSystem: COORDINATE_SYSTEM.METER_OFFSETS,
+        pickable,
+        autoHighlight,
+        highlightColor,
+        pickFeatures,
+        segmentationData
       }
     );
   }

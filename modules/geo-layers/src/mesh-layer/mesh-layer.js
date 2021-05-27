@@ -1,5 +1,6 @@
 import {GLTFMaterialParser} from '@luma.gl/experimental';
 import {Model, pbr} from '@luma.gl/core';
+import GL from '@luma.gl/constants';
 import {SimpleMeshLayer} from '@deck.gl/mesh-layers';
 
 import vs from './mesh-layer-vertex.glsl';
@@ -17,7 +18,9 @@ function validateGeometryAttributes(attributes) {
 
 const defaultProps = {
   // PBR material object. _lighting must be pbr for this to work
-  pbrMaterial: {type: 'object', value: null}
+  pbrMaterial: {type: 'object', value: null},
+  pickFeatures: {type: 'boolean', value: false},
+  segmentationData: {type: 'Uint32Array', value: null}
 };
 
 export default class _MeshLayer extends SimpleMeshLayer {
@@ -26,6 +29,23 @@ export default class _MeshLayer extends SimpleMeshLayer {
     const modules = shaders.modules;
     modules.push(pbr);
     return {...shaders, vs, fs};
+  }
+
+  initializeState() {
+    const {attributeManager} = this.state;
+    const {pickFeatures, segmentationData} = this.props;
+    super.initializeState();
+
+    if (pickFeatures && segmentationData) {
+      attributeManager.add({
+        segmentationPickingColors: {
+          type: GL.UNSIGNED_BYTE,
+          size: 3,
+          noAlloc: true,
+          update: this.calculateSegmentationPickingColors
+        }
+      });
+    }
   }
 
   updateState({props, oldProps, changeFlags}) {
@@ -47,17 +67,22 @@ export default class _MeshLayer extends SimpleMeshLayer {
   }
 
   getModel(mesh) {
-    const pbrMaterial = this.props.pbrMaterial;
+    const {id, pickFeatures, segmentationData, pbrMaterial} = this.props;
     const materialParser = this.parseMaterial(pbrMaterial, mesh);
     const shaders = this.getShaders();
     validateGeometryAttributes(mesh.attributes);
     const model = new Model(this.context.gl, {
       ...this.getShaders(),
-      id: this.props.id,
+      id,
       geometry: mesh,
       defines: {...shaders.defines, ...materialParser?.defines},
       parameters: materialParser?.parameters,
       isInstanced: true
+    });
+
+    model.setUniforms({
+      // eslint-disable-next-line camelcase
+      u_pickSegmentation: Boolean(pickFeatures && segmentationData)
     });
 
     return model;
@@ -85,6 +110,26 @@ export default class _MeshLayer extends SimpleMeshLayer {
       useTangents: false
     });
     return materialParser;
+  }
+
+  calculateSegmentationPickingColors(attribute) {
+    const {segmentationData} = this.props;
+
+    if (!segmentationData) {
+      return;
+    }
+
+    const value = new Uint8ClampedArray(segmentationData.length * attribute.size);
+
+    for (let index = 0; index < segmentationData.length; index++) {
+      const color = this.encodePickingColor(segmentationData[index]);
+
+      value[index * 3] = color[0];
+      value[index * 3 + 1] = color[1];
+      value[index * 3 + 2] = color[2];
+    }
+
+    attribute.value = value;
   }
 }
 
