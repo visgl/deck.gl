@@ -63,7 +63,7 @@ export default (OS === 'Mac'
             getText: x => `${x.PLACEMENT}-${x.YR_INSTALLED}`,
             getPosition: x => x.COORDINATES,
             getColor: x => [255, 0, 0],
-            getSize: x => 32,
+            getSize: x => 20,
             getAngle: x => 0,
             sizeScale: 1,
             getTextAnchor: x => 'start',
@@ -91,7 +91,7 @@ export default (OS === 'Mac'
             getText: x => `${x.PLACEMENT}-${x.YR_INSTALLED}`,
             getPosition: x => x.COORDINATES,
             getColor: x => [255, 0, 0],
-            getSize: x => 32,
+            getSize: x => 20,
             getAngle: x => 0,
             sizeScale: 21.343755,
             sizeUnits: 'meters',
@@ -124,7 +124,7 @@ export default (OS === 'Mac'
               }
             ),
             fontFamily: 'Arial',
-            getSize: 32,
+            getSize: 20,
             getAngle: 0,
             sizeScale: 1,
             getTextAnchor: 'start',
@@ -154,7 +154,7 @@ export default (OS === 'Mac'
             getText: x => `${x.ADDRESS}\n${x.SPACES}`,
             getPosition: (_, {index}) => [0, (index - 5) * 1000],
             getColor: [255, 0, 0],
-            getSize: 32,
+            getSize: 20,
             getTextAnchor: 'middle',
             getAlignmentBaseline: 'center'
           })
@@ -183,7 +183,7 @@ export default (OS === 'Mac'
             getText: x => `${x.LOCATION_NAME} ${x.ADDRESS}`,
             getPosition: (_, {index}) => [0, (index - 2) * 2000],
             getColor: [255, 0, 0],
-            getSize: 32,
+            getSize: 20,
             getTextAnchor: 'middle',
             getAlignmentBaseline: 'center'
           })
@@ -215,7 +215,7 @@ export default (OS === 'Mac'
             getPosition: (_, {index}) => [0, (index - 5) * 1000],
             getColor: [255, 0, 0],
             getAngle: 15,
-            getSize: 32,
+            getSize: 20,
             getTextAnchor: 'start',
             getAlignmentBaseline: 'center'
           })

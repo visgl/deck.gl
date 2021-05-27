@@ -4,10 +4,10 @@ import {binaryToGeoJson} from '@loaders.gl/gis';
 import {load} from '@loaders.gl/core';
 import {COORDINATE_SYSTEM} from '@deck.gl/core';
 import {_binaryToFeature, _findIndexBinary} from '@deck.gl/layers';
+import {ClipExtension} from '@deck.gl/extensions';
 
 import TileLayer from '../tile-layer/tile-layer';
 import {getURLFromTemplate, isURLTemplate} from '../tile-layer/utils';
-import ClipExtension from './clip-extension';
 import {transform} from './coordinate-transform';
 
 const WORLD_SIZE = 512;
@@ -16,7 +16,7 @@ const defaultProps = {
   uniqueIdProperty: {type: 'string', value: ''},
   highlightedFeatureId: null,
   loaders: [MVTLoader],
-  binary: false
+  binary: true
 };
 
 async function fetchTileJSON(url) {

@@ -25,7 +25,8 @@ import {dist} from 'gl-matrix/vec3';
 const defaultProps = {
   getDashArray: {type: 'accessor', value: [0, 0]},
   getOffset: {type: 'accessor', value: 0},
-  dashJustified: false
+  dashJustified: false,
+  dashGapPickable: false
 };
 
 export default class PathStyleExtension extends LayerExtension {
@@ -93,6 +94,7 @@ export default class PathStyleExtension extends LayerExtension {
 
     if (extension.opts.dash) {
       uniforms.dashAlignMode = this.props.dashJustified ? 1 : 0;
+      uniforms.dashGapPickable = Boolean(this.props.dashGapPickable);
     }
 
     this.state.model.setUniforms(uniforms);
