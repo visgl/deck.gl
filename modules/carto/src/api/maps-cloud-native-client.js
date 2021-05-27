@@ -61,11 +61,7 @@ function buildURL({type, source, connection, credentials}) {
   const sourceName = type === MAP_TYPES.QUERY ? 'q' : 'name';
   parameters.push(encodeParameter(sourceName, source));
 
-  return `${mapsUrl(credentials)}/${connection}/${type}?${parameters.join('&')}`;
-}
-
-function mapsUrl(credentials) {
-  return credentials.mapsUrl.replace('{tenant}', credentials.tenant);
+  return `${credentials.mapsUrl}/${connection}/${type}?${parameters.join('&')}`;
 }
 
 export async function getMapMetadata({ type, source, connection, credentials}) {
