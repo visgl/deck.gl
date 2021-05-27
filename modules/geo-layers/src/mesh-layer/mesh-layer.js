@@ -10,6 +10,9 @@ function validateGeometryAttributes(attributes) {
   if (!hasColorAttribute) {
     attributes.colors = {constant: true, value: new Float32Array([1, 1, 1])};
   }
+  if (!attributes.uvRegions) {
+    attributes.uvRegions = {constant: true, value: new Float32Array([0, 0, 1, 1])};
+  }
 }
 
 const defaultProps = {

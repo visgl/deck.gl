@@ -310,6 +310,9 @@ function getMeshGeometry(contentAttributes) {
   if (contentAttributes.colors) {
     attributes.colors = contentAttributes.colors;
   }
+  if (contentAttributes.uvRegions) {
+    attributes.uvRegions = contentAttributes.uvRegions;
+  }
   return attributes;
 }
 
