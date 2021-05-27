@@ -196,12 +196,12 @@ When [`picking`](/docs/developer-guide/custom-layers/picking.md) is enabled, `in
   - `url`: the url of the failed tile.
   - `message`: the error message.
 
-##### `getSimpleMeshLayerColor` (Function, optional)
-`getSimpleMeshLayerColor` is a function which allows to change color of mesh based on `tileHeader` object.
+##### `getTileColor` (Function, optional)
+`getTileColor` is a function which allows to change color of mesh based on `tileHeader` object.
 The rgb color at the target, in `r, g, b`. Each component is in the 0-255 range.
 This value is only applied when tile format is `mesh`
 
-- Default: `getSimpleMeshLayerColor: (tileHeader) => [255, 255, 255]`
+- Default: `getTileColor: (tileHeader) => [255, 255, 255]`
 
 ## Sub Layers
 
