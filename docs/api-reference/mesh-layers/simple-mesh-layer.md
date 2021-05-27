@@ -101,10 +101,9 @@ The geometry to render for each data object. One of:
 - An URL to a mesh description file in a format supported by [loaders.gl](https://loaders.gl/docs/specifications/category-mesh). The appropriate loader will have to be registered via the loaders.gl `registerLoaders` function for this usage.
 - A luma.gl [Geometry](https://luma.gl/docs/api-reference/engine/geometry) instance
 - An object containing the following fields:
-  + `positions` (Float32Array, required) - 3d vertex offset from the object center, in meters
-  + `normals` (Float32Array, optional) - 3d normals
-  + `texCoords` (Float32Array, optional) - 2d texture coordinates
-  + `colors` (Uint8Array, optional) - per-vertex colors. If the texture is set, the resulting color is product of per-vertex color and texture color
+  + `positions` (Float32Array) - 3d vertex offset from the object center, in meters
+  + `normals` (Float32Array) - 3d normals
+  + `texCoords` (Float32Array) - 2d texture coordinates
 
 
 ##### `texture` (String|Texture2D|Image|ImageData|HTMLCanvasElement|HTMLVideoElement|ImageBitmap|Object, optional)
@@ -183,7 +182,7 @@ Method called to retrieve the center position for each object in the `data` stre
 
 - Default: `[0, 0, 0, 255]`
 
-If `mesh` does not contain vertex colors, use this color to render each object. If `mesh` contains vertex colors, then the two colors are mixed together. Use `[255, 255, 255]` to use the original mesh colors. If `texture` is assigned, then both colors will be mixed with texture color.
+If `mesh` does not contain vertex colors, use this color to render each object. If `mesh` contains vertex colors, then the two colors are mixed together. Use `[255, 255, 255]` to use the original mesh colors. If `texture` is assigned, then both colors will be ignored.
 
 The color is in the format of `[r, g, b, [a]]`. Each channel is a number between 0-255 and `a` is 255 if not supplied.
 
