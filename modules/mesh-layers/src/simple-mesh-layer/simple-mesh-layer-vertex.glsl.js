@@ -10,7 +10,6 @@ in vec3 positions;
 in vec3 normals;
 in vec3 colors;
 in vec2 texCoords;
-in vec4 uvRegions;
 
 // Instance attributes
 in vec3 instancePositions;
@@ -28,14 +27,11 @@ out vec4 position_commonspace;
 out vec4 vColor;
 
 void main(void) {
-  // https://github.com/Esri/i3s-spec/blob/master/docs/1.7/geometryUVRegion.cmn.md
-  vec2 uv = fract(texCoords) * (uvRegions.zw - uvRegions.xy) + uvRegions.xy;
-
   geometry.worldPosition = instancePositions;
-  geometry.uv = uv;
+  geometry.uv = texCoords;
   geometry.pickingColor = instancePickingColors;
 
-  vTexCoord = uv;
+  vTexCoord = texCoords;
   cameraPosition = project_uCameraPosition;
   normals_commonspace = project_normal(instanceModelMatrix * normals);
   vColor = vec4(colors * instanceColors.rgb, instanceColors.a);

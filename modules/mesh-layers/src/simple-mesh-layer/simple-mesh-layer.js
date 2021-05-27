@@ -38,10 +38,6 @@ function validateGeometryAttributes(attributes, useMeshColors) {
   if (!useColorAttribute) {
     attributes.colors = {constant: true, value: new Float32Array([1, 1, 1])};
   }
-  if (!attributes.uvRegions) {
-    attributes.uvRegions = {constant: true, value: new Float32Array([0, 0, 1, 1])};
-  }
-
   log.assert(
     attributes.positions || attributes.POSITION,
     'no "postions" or "POSITION" attribute in mesh'
