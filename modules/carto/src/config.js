@@ -10,7 +10,7 @@ const defaultClassicCredentials = {
 
 const defaultCloudNativeCredentials = {
   accessToken: null,
-  apiBaseUrl: 'gcp-us-east1.app.carto.com'
+  apiBaseUrl: null
 };
 
 let credentials = {}
@@ -41,6 +41,10 @@ export function setDefaultCredentials(opts) {
 
       break;
     case API_VERSIONS.V3:
+      if (!opts.apiBaseUrl) {
+        throw new Error(`API version ${API_VERSIONS.V3} requires to define apiBaseUrl at credentials. Go to https://app.carto.com to get your apiBaseUrl.`);
+      }
+
       let apiBaseUrl = opts.apiBaseUrl || defaultCloudNativeCredentials.apiBaseUrl;
       if (!apiBaseUrl.endsWith('/')) {
         apiBaseUrl += '/'
