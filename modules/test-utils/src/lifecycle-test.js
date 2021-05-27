@@ -235,7 +235,7 @@ function update({layerManager, deckRenderer}) {
         return;
       }
 
-      setTimeout(onAnimationFrame, 10);
+      setTimeout(onAnimationFrame, 50);
     };
 
     onAnimationFrame();
