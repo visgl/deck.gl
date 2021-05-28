@@ -76,6 +76,18 @@ export default class CompositeLayer extends Layer {
     return null;
   }
 
+  /**
+   * Filters sub layers at draw time
+   * @param {Layer} context.layer - sub layer instance
+   * @param {Viewport} context.viewport - the viewport being rendered in
+   * @param {Boolean} context.isPicking - whether it is a picking pass
+   * @param {String} context.pass - the current pass
+   * @return {Boolean} true if the sub layer should be drawn
+   */
+  filterSubLayer(context) {
+    return true;
+  }
+
   // Returns true if sub layer needs to be rendered
   shouldRenderSubLayer(id, data) {
     const {_subLayerProps: overridingProps} = this.props;
