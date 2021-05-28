@@ -262,6 +262,18 @@ export default class Viewport {
 
   // EXPERIMENTAL METHODS
 
+  /**
+   * Needed by panning and linear transition
+   * Pan the viewport to place a given world coordinate at screen point [x, y]
+   *
+   * @param {Array} coords - world coordinates
+   * @param {Array} pixel - [x,y] coordinates on screen
+   * @return {Object} props of the new viewport
+   */
+  panByPosition(coords, pixel) {
+    return null;
+  }
+
   getCameraPosition() {
     return this.cameraPosition;
   }
