@@ -19,6 +19,7 @@ The module entry point is now only lightly transpiled for the most commonly used
 - `GeoJsonLayer`'s `lineJointRounded` prop now only controls line joints. To use rounded line caps, set `lineCapRounded` to `true`.
 - Dashed lines via `PathStyleExtension` now draw rounded dash caps if `capRounded` is `true`.
 - `@deck.gl/geo-layers` now requires `@deck.gl/extensions`, due to `ClipExtension` dependency.
+- `HeatmapLayer`'s `colorDomain` prop has redefined the unit of its values. See updated layer documentation for details.
 - `MVTLayer`'s `binary` prop is now set to `true` by default.
 
 ### onError Callback

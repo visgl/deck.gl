@@ -1,8 +1,6 @@
 import {clamp, Vector2} from 'math.gl';
 import Controller from './controller';
 import ViewState from './view-state';
-import LinearInterpolator from '../transitions/linear-interpolator';
-import {TRANSITION_EVENTS} from './transition-manager';
 import {mod} from '../utils/math-utils';
 
 const DEFAULT_STATE = {
@@ -15,13 +13,6 @@ const DEFAULT_STATE = {
   maxRotationX: 90,
   minZoom: -Infinity,
   maxZoom: Infinity
-};
-
-const LINEAR_TRANSITION_PROPS = {
-  transitionDuration: 300,
-  transitionEasing: t => t,
-  transitionInterpolator: new LinearInterpolator(['target', 'zoom', 'rotationX', 'rotationOrbit']),
-  transitionInterruption: TRANSITION_EVENTS.BREAK
 };
 
 /* Helpers */
@@ -373,8 +364,7 @@ export default class OrbitController extends Controller {
     super(OrbitState, props);
   }
 
-  _getTransitionProps() {
-    // Enables Transitions on double-tap and key-down events.
-    return LINEAR_TRANSITION_PROPS;
+  get linearTransitionProps() {
+    return ['target', 'zoom', 'rotationX', 'rotationOrbit'];
   }
 }

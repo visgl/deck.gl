@@ -2,7 +2,8 @@ import GL from '@luma.gl/constants';
 import {Geometry} from '@luma.gl/core';
 import {COORDINATE_SYSTEM, CompositeLayer} from '@deck.gl/core';
 import {PointCloudLayer} from '@deck.gl/layers';
-import {ScenegraphLayer, SimpleMeshLayer} from '@deck.gl/mesh-layers';
+import {ScenegraphLayer} from '@deck.gl/mesh-layers';
+import {default as _MeshLayer} from '../mesh-layer/mesh-layer';
 import {log} from '@deck.gl/core';
 
 import {load} from '@loaders.gl/core';
@@ -22,7 +23,7 @@ const defaultProps = {
   onTileLoad: {type: 'function', value: tileHeader => {}, compare: false},
   onTileUnload: {type: 'function', value: tileHeader => {}, compare: false},
   onTileError: {type: 'function', value: (tile, message, url) => {}, compare: false},
-  getSimpleMeshLayerColor: {type: 'function', value: tileHeader => [255, 255, 255], compare: false}
+  _getMeshColor: {type: 'function', value: tileHeader => [255, 255, 255], compare: false}
 };
 
 export default class Tile3DLayer extends CompositeLayer {
@@ -228,8 +229,8 @@ export default class Tile3DLayer extends CompositeLayer {
 
   _makeSimpleMeshLayer(tileHeader, oldLayer) {
     const content = tileHeader.content;
-    const {attributes, indices, modelMatrix, cartographicOrigin, texture} = content;
-    const {getSimpleMeshLayerColor} = this.props;
+    const {attributes, indices, modelMatrix, cartographicOrigin, material} = content;
+    const {_getMeshColor} = this.props;
 
     const geometry =
       (oldLayer && oldLayer.props.mesh) ||
@@ -239,7 +240,7 @@ export default class Tile3DLayer extends CompositeLayer {
         indices
       });
 
-    const SubLayerClass = this.getSubLayerClass('mesh', SimpleMeshLayer);
+    const SubLayerClass = this.getSubLayerClass('mesh', _MeshLayer);
 
     return new SubLayerClass(
       this.getSubLayerProps({
@@ -249,9 +250,8 @@ export default class Tile3DLayer extends CompositeLayer {
         id: `${this.id}-mesh-${tileHeader.id}`,
         mesh: geometry,
         data: SINGLE_DATA,
-        getPosition: [0, 0, 0],
-        getColor: getSimpleMeshLayerColor(tileHeader),
-        texture,
+        getColor: _getMeshColor(tileHeader),
+        pbrMaterial: material,
         modelMatrix,
         coordinateOrigin: cartographicOrigin,
         coordinateSystem: COORDINATE_SYSTEM.METER_OFFSETS
@@ -306,6 +306,12 @@ function getMeshGeometry(contentAttributes) {
   }
   if (contentAttributes.texCoords) {
     attributes.texCoords = contentAttributes.texCoords;
+  }
+  if (contentAttributes.colors) {
+    attributes.colors = contentAttributes.colors;
+  }
+  if (contentAttributes.uvRegions) {
+    attributes.uvRegions = contentAttributes.uvRegions;
   }
   return attributes;
 }
