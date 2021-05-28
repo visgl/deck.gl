@@ -19,11 +19,7 @@ const defaultProps = {
   data: null,
   loader: Tiles3DLoader,
 
-  pickable: {type: 'boolean', value: false},
   pickFeatures: {type: 'boolean', value: false},
-  autoHighlight: {type: 'boolean', value: false},
-  highlightColor: {type: 'array', value: [0, 0, 255, 150]},
-
   onTilesetLoad: {type: 'function', value: tileset3d => {}, compare: false},
   onTileLoad: {type: 'function', value: tileHeader => {}, compare: false},
   onTileUnload: {type: 'function', value: tileHeader => {}, compare: false},
