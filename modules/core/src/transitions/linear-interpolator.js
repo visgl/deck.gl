@@ -34,11 +34,11 @@ export default class LinearInterpolator extends TransitionInterpolator {
     if (makeViewport && around) {
       const startViewport = makeViewport(startProps);
       const endViewport = makeViewport(endProps);
-      const aroundLngLat = startViewport.unproject(around);
+      const aroundPosition = startViewport.unproject(around);
       result.start.around = around;
       Object.assign(result.end, {
-        around: endViewport.project(aroundLngLat),
-        aroundLngLat,
+        around: endViewport.project(aroundPosition),
+        aroundPosition,
         width: endProps.width,
         height: endProps.height
       });
@@ -53,16 +53,17 @@ export default class LinearInterpolator extends TransitionInterpolator {
       propsInTransition[key] = lerp(startProps[key] || 0, endProps[key] || 0, t);
     }
 
-    if (endProps.aroundLngLat) {
+    if (endProps.aroundPosition) {
       // Linear transition should be performed in common space
       const viewport = this.opts.makeViewport({...endProps, ...propsInTransition});
-      const [longitude, latitude] = viewport.getMapCenterByLngLatPosition({
-        lngLat: endProps.aroundLngLat,
-        // anchor point in current screen coordinates
-        pos: lerp(startProps.around, endProps.around, t)
-      });
-      propsInTransition.longitude = longitude;
-      propsInTransition.latitude = latitude;
+      Object.assign(
+        propsInTransition,
+        viewport.panByPosition(
+          endProps.aroundPosition,
+          // anchor point in current screen coordinates
+          lerp(startProps.around, endProps.around, t)
+        )
+      );
     }
     return propsInTransition;
   }
