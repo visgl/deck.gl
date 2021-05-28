@@ -56,18 +56,21 @@ export default class _MeshLayer extends SimpleMeshLayer {
   }
 
   draw(opts) {
+    const {pickFeatures, objectIds} = this.props;
     if (!this.state.model) {
       return;
     }
     this.state.model.setUniforms({
       // Needed for PBR (TODO: find better way to get it)
-      u_Camera: this.state.model.getUniforms().project_uCameraPosition
+      u_Camera: this.state.model.getUniforms().project_uCameraPosition,
+      u_pickObjectIds: Boolean(pickFeatures && objectIds)
     });
+
     super.draw(opts);
   }
 
   getModel(mesh) {
-    const {id, pickFeatures, objectIds, pbrMaterial} = this.props;
+    const {id, pbrMaterial} = this.props;
     const materialParser = this.parseMaterial(pbrMaterial, mesh);
     const shaders = this.getShaders();
     validateGeometryAttributes(mesh.attributes);
@@ -78,11 +81,6 @@ export default class _MeshLayer extends SimpleMeshLayer {
       defines: {...shaders.defines, ...materialParser?.defines},
       parameters: materialParser?.parameters,
       isInstanced: true
-    });
-
-    model.setUniforms({
-      // eslint-disable-next-line camelcase
-      u_pickObjectIds: Boolean(pickFeatures && objectIds)
     });
 
     return model;
@@ -114,11 +112,6 @@ export default class _MeshLayer extends SimpleMeshLayer {
 
   calculateObjectIdsPickingColors(attribute) {
     const {objectIds} = this.props;
-
-    if (!objectIds) {
-      return;
-    }
-
     const value = new Uint8ClampedArray(objectIds.length * attribute.size);
 
     for (let index = 0; index < objectIds.length; index++) {
