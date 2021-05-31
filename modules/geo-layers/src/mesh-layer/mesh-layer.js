@@ -19,7 +19,6 @@ function validateGeometryAttributes(attributes) {
 const defaultProps = {
   // PBR material object. _lighting must be pbr for this to work
   pbrMaterial: {type: 'object', value: null},
-  pickFeatures: {type: 'boolean', value: false},
   featureIds: {type: 'Uint32Array', value: null}
 };
 
@@ -32,12 +31,11 @@ export default class _MeshLayer extends SimpleMeshLayer {
   }
 
   initializeState() {
-    const {attributeManager} = this.state;
-    const {pickFeatures, featureIds} = this.props;
+    const {featureIds} = this.props;
     super.initializeState();
 
-    if (pickFeatures && featureIds) {
-      attributeManager.add({
+    if (featureIds) {
+      this.state.attributeManager.add({
         featureIdsPickingColors: {
           type: GL.UNSIGNED_BYTE,
           size: 3,
@@ -56,14 +54,14 @@ export default class _MeshLayer extends SimpleMeshLayer {
   }
 
   draw(opts) {
-    const {pickFeatures, featureIds} = this.props;
+    const {featureIds} = this.props;
     if (!this.state.model) {
       return;
     }
     this.state.model.setUniforms({
       // Needed for PBR (TODO: find better way to get it)
       u_Camera: this.state.model.getUniforms().project_uCameraPosition,
-      u_pickFeatureIds: Boolean(pickFeatures && featureIds)
+      u_pickFeatureIds: Boolean(featureIds)
     });
 
     super.draw(opts);
