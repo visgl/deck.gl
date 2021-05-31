@@ -20,7 +20,7 @@ const defaultProps = {
   // PBR material object. _lighting must be pbr for this to work
   pbrMaterial: {type: 'object', value: null},
   pickFeatures: {type: 'boolean', value: false},
-  objectIds: {type: 'Uint32Array', value: null}
+  featureIds: {type: 'Uint32Array', value: null}
 };
 
 export default class _MeshLayer extends SimpleMeshLayer {
@@ -33,16 +33,16 @@ export default class _MeshLayer extends SimpleMeshLayer {
 
   initializeState() {
     const {attributeManager} = this.state;
-    const {pickFeatures, objectIds} = this.props;
+    const {pickFeatures, featureIds} = this.props;
     super.initializeState();
 
-    if (pickFeatures && objectIds) {
+    if (pickFeatures && featureIds) {
       attributeManager.add({
-        objectIdsPickingColors: {
+        featureIdsPickingColors: {
           type: GL.UNSIGNED_BYTE,
           size: 3,
           noAlloc: true,
-          update: this.calculateObjectIdsPickingColors
+          update: this.calculateFeatureIdsPickingColors
         }
       });
     }
@@ -56,14 +56,14 @@ export default class _MeshLayer extends SimpleMeshLayer {
   }
 
   draw(opts) {
-    const {pickFeatures, objectIds} = this.props;
+    const {pickFeatures, featureIds} = this.props;
     if (!this.state.model) {
       return;
     }
     this.state.model.setUniforms({
       // Needed for PBR (TODO: find better way to get it)
       u_Camera: this.state.model.getUniforms().project_uCameraPosition,
-      u_pickObjectIds: Boolean(pickFeatures && objectIds)
+      u_pickFeatureIds: Boolean(pickFeatures && featureIds)
     });
 
     super.draw(opts);
@@ -110,12 +110,12 @@ export default class _MeshLayer extends SimpleMeshLayer {
     return materialParser;
   }
 
-  calculateObjectIdsPickingColors(attribute) {
-    const {objectIds} = this.props;
-    const value = new Uint8ClampedArray(objectIds.length * attribute.size);
+  calculateFeatureIdsPickingColors(attribute) {
+    const {featureIds} = this.props;
+    const value = new Uint8ClampedArray(featureIds.length * attribute.size);
 
-    for (let index = 0; index < objectIds.length; index++) {
-      const color = this.encodePickingColor(objectIds[index]);
+    for (let index = 0; index < featureIds.length; index++) {
+      const color = this.encodePickingColor(featureIds[index]);
 
       value[index * 3] = color[0];
       value[index * 3 + 1] = color[1];

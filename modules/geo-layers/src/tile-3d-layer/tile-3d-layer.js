@@ -230,14 +230,8 @@ export default class Tile3DLayer extends CompositeLayer {
 
   _makeSimpleMeshLayer(tileHeader, oldLayer) {
     const content = tileHeader.content;
-    const {attributes, indices, modelMatrix, cartographicOrigin, material, objectIds} = content;
-    const {
-      pickable,
-      pickFeatures,
-      autoHighlight,
-      highlightColor,
-      _getMeshColor
-    } = this.props;
+    const {attributes, indices, modelMatrix, cartographicOrigin, material, featureIds} = content;
+    const {pickFeatures, _getMeshColor} = this.props;
 
     const geometry =
       (oldLayer && oldLayer.props.mesh) ||
@@ -262,11 +256,8 @@ export default class Tile3DLayer extends CompositeLayer {
         modelMatrix,
         coordinateOrigin: cartographicOrigin,
         coordinateSystem: COORDINATE_SYSTEM.METER_OFFSETS,
-        pickable,
-        autoHighlight,
-        highlightColor,
         pickFeatures,
-        objectIds
+        featureIds
       }
     );
   }
