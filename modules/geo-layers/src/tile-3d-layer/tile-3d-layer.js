@@ -81,9 +81,9 @@ export default class Tile3DLayer extends CompositeLayer {
   // Controls layer visibility when rendering into different viewports
   filterSubLayer({layer, viewport, isPicking, pass}) {
     const {tileset3d} = this.state;
-    const tile = _getLayerFromLayerId(layer.id);
-    const view = viewport.id;
-    return tileset3d && tileset3d.isTileInView(tile, view);
+    const tile = _getTileFromLayerId(layer.id);
+    const viewId = viewport.id;
+    return tileset3d && tileset3d.isTileInView(tile, viewId);
   }
 
   // Layer Map Helpers
@@ -163,7 +163,6 @@ export default class Tile3DLayer extends CompositeLayer {
 
   _updateTileset(tileset3d) {
     const {timeline} = this.context;
-    const {activeViewports} = this.state;
     const viewportsNumber = Object.keys(activeViewports).length;
     if (!timeline || !viewportsNumber || !tileset3d) {
       return;
