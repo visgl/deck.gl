@@ -17,7 +17,7 @@ function App({viewState}) {
   const layer = new CartoSQLLayer({
     data: 'SELECT * FROM world_population_2015',
     pointRadiusMinPixels: 2,
-    getLineColor: [0, 0, 0, 0.75],
+    getLineColor: [0, 0, 0, 125],
     getFillColor: [238, 77, 90],
     lineWidthMinPixels: 1
   })
@@ -26,7 +26,7 @@ function App({viewState}) {
 }
 ```
 
-CartoSQLLayer will be deprecated in future versions so our recommendation is to migrate the existing code to the new `CartoLayer` with the `type` property set to `MAP_TYPES.SQL`:
+CartoSQLLayer will be deprecated in future versions so our recommendation is to migrate the existing code to the new `CartoLayer` with the `type` property set to `MAP_TYPES.qUERY`:
 
 ```js
 import DeckGL from '@deck.gl/react';
@@ -42,7 +42,7 @@ function App({viewState}) {
     type: MAP_TYPES.SQL,
     data: 'SELECT * FROM world_population_2015',
     pointRadiusMinPixels: 2,
-    getLineColor: [0, 0, 0, 0.75],
+    getLineColor: [0, 0, 0, 125],
     getFillColor: [238, 77, 90],
     lineWidthMinPixels: 1
   })

@@ -2,7 +2,7 @@
 
 Helper functions to create data-driven map visualizations.
 
-Take the advantage of [CARTOColors](https://carto.com/carto-colors/), custom color schemes built on top of well-known standards for color use on maps, with next generation enhancements for the web and CARTO basemaps.
+These helpers take advantage of [CARTOColors](https://carto.com/carto-colors/), custom color schemes built on top of well-known standards for color use on maps, with next generation enhancements for the web and CARTO basemaps.
 
 ## colorBins
 
@@ -12,9 +12,9 @@ Data values of each attribute are rounded down to the nearest value in the domai
 
 ```javascript
 new CartoLayer({
-  type: MAP_TYPES.SQL,
+  type: MAP_TYPES.QUERY,
   data: 'SELECT the_geom_webmercator, gn_pop FROM populated_places',
-  getFillColor:  colorBins({
+  getFillColor: colorBins({
     attr: 'gn_pop',
     domain: [1e5, 2e5, 3e5],
     colors: 'Teal'
@@ -55,7 +55,7 @@ Data values of each attribute listed in the domain are mapped one to one with co
 
 ```javascript
 new CartoLayer({
-  type: MAP_TYPES.SQL,
+  type: MAP_TYPES.QUERY,
   data: 'SELECT the_geom_webmercator, type FROM ne_10m_airports',
   getFillColor: colorCategories({
     attr: 'type',
@@ -104,7 +104,7 @@ Data values of each field are interpolated linearly across values in the domain 
 
 ```javascript
 new CartoLayer({
-  type: MAP_TYPES.SQL,
+  type: MAP_TYPES.QUERY,
   data: 'SELECT the_geom_webmercator, gn_pop FROM populated_places',
   getFillColor: colorContinuous({
     attr: 'gn_pop',

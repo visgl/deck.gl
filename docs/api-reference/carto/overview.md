@@ -36,7 +36,7 @@ setDefaultCredentials({
 
 function App({viewState}) {
   const layer = new CartoLayer({
-    type: MAP_TYPES.SQL,
+    type: MAP_TYPES.QUERY,
     data: 'SELECT * FROM world_population_2015',
     pointRadiusMinPixels: 2,
     getLineColor: [0, 0, 0, 200],
@@ -61,32 +61,31 @@ You can see real examples for the following:
 
 ### CARTO configuration object
 
-This is an object to define the configuration to use in order to connect to the CARTO platform. The configuration properties that must be defined depend on the CARTO Maps API version used:
+This is an object to define the configuration to use in order to connect to the CARTO platform. The configuration properties that must be defined depend on the CARTO API version used:
 
-* `apiVersion` (optional): Maps API version. Default: API_VERSIONS.V2. Possible values are:
+* `apiVersion` (optional): API version. Default: `API_VERSIONS.V2`. Possible values are:
   * API_VERSIONS.V1
   * API_VERSIONS.V2
   * API_VERSIONS.V3
 
-If using Maps API v1 or v2, the following properties are used:
+If using API v1 or v2, the following properties are used:
 
 * `username` (required): unique username in the platform
 * `apiKey` (optional): api key. Default: `default_public`
 * `region` (optional): region where the user database is located, possible values are `us` or `eu`. Default: `us`, only need to be specified if you've specifically requested an account in `eu`
 * `sqlUrl` (optional): SQL API URL Template. Default: `https://{user}.carto.com/api/v2/sql`
 
-If using Maps API v3, these are the available properties:
+If using API v3, these are the available properties:
 
-* `email` (optional): email associated to the CARTO user with access to the datasets
-* `token` (required): token to authenticate/authorize requests to the Maps API
-* `tenant` (optional): tenant where the CARTO instance is located. Default: `gcp-us-east1.app.carto.com`
+* `accessToken` (required): token to authenticate/authorize requests to the Maps API
+* `apiBaseUrl` (required): base URL for requests to the API (can be obtained in the CARTO Cloud Native Workspace)
 
-The following properties are available with all the Maps API versions:
+The following properties are available with all the API versions:
 
 * `mapsUrl` (optional): Maps API URL Template. Default: 
   * `https://{username}.carto.com/api/v1/map` for v1
   * `https://maps-api-v2.{region}.carto.com/user/{username}` for v2
-  * `https://maps-{tenant}` for v3
+  * `https://{apiBaseUrl}/v3/maps` for v3
 
 If you have a custom CARTO deployment (on-premise user or you're running CARTO from [Google Cloud Marketplace](https://console.cloud.google.com/marketplace/product/cartodb-public/carto-enterprise-byol)), you need to set the URLs to point to your instance. 
 
@@ -112,13 +111,9 @@ To make it easier to work with the CARTO module the following constants are prov
 | API_VERSIONS    | V1          |
 |                 | V2          | 
 |                 | V3          |
-| MAP_TYPES       | SQL         |       
+| MAP_TYPES       | QUERY       |       
 |                 | TABLE       |
 |                 | TILESET     |
-| PROVIDERS       | BIGQUERY    |
-|                 | SNOWFLAKE   |
-|                 | REDSHIFT    |
-|                 | POSTGRES    |
 | FORMATS         | GEOJSON     |
-|                 | NDJSON      |
+|                 | JSON        |
 |                 | TILEJSON    |
