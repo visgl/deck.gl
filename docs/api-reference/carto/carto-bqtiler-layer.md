@@ -95,7 +95,7 @@ A string pointing to a tile attribute containing a unique identifier for feature
 
 ##### `credentials` (Object)
 
-Optional. Object with the configuration to connect with CARTO. Check the configuration parameters [here](overview#carto-configuration-object).
+Optional. Overrides the configuration to connect with CARTO. Check the configuration parameters [here](overview#carto-configuration-object).
 
 * Default:
 

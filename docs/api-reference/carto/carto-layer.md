@@ -91,7 +91,7 @@ Default:
 
 ##### `format` (String)
 
-Optional when `apiVersion` is `API_VERSIONS.V3`, ignored for `API_VERSIONS.V1` and `API_VERSIONS.V2`. Data format for features. Possible values are:
+Optional. Only available when `apiVersion` is `API_VERSIONS.V3`. Force a specific data format to Maps API. Possible values are:
 
 - `FORMATS.GEOJSON`
 - `FORMATS.JSON`
@@ -110,7 +110,7 @@ Optional. A string pointing to a unique attribute at the result of the query. A 
 
 ##### `credentials` (Object)
 
-Optional. Object with the configuration to connect with CARTO.
+Optional. Overrides the configuration to connect with CARTO. Check the configuration parameters [here](overview#carto-configuration-object).
 
 * Default:
 
@@ -119,8 +119,7 @@ Optional. Object with the configuration to connect with CARTO.
   apiVersion: API_VERSIONS.V2,
   username: 'public',
   apiKey: 'default_public',
-  region: 'us',
-  sqlUrl: `https://{user}.carto.com/api/v2/sql`
+  region: 'us'
 }
 ```
 

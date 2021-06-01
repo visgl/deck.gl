@@ -73,18 +73,15 @@ If using API v1 or v2, the following properties are used:
 * `username` (required): unique username in the platform
 * `apiKey` (optional): api key. Default: `default_public`
 * `region` (optional): region where the user database is located, possible values are `us` or `eu`. Default: `us`, only need to be specified if you've specifically requested an account in `eu`
-* `sqlUrl` (optional): SQL API URL Template. Default: `https://{user}.carto.com/api/v2/sql`
+* `mapsUrl` (optional): Maps API URL Template. Default: 
+  * `https://{username}.carto.com/api/v1/map` for v1
+  * `https://maps-api-v2.{region}.carto.com/user/{username}` for v2
 
 If using API v3, these are the available properties:
 
 * `accessToken` (required): token to authenticate/authorize requests to the Maps API
 * `apiBaseUrl` (required): base URL for requests to the API (can be obtained in the CARTO Cloud Native Workspace)
-
-The following properties are available with all the API versions:
-
 * `mapsUrl` (optional): Maps API URL Template. Default: 
-  * `https://{username}.carto.com/api/v1/map` for v1
-  * `https://maps-api-v2.{region}.carto.com/user/{username}` for v2
   * `https://{apiBaseUrl}/v3/maps` for v3
 
 If you have a custom CARTO deployment (on-premise user or you're running CARTO from [Google Cloud Marketplace](https://console.cloud.google.com/marketplace/product/cartodb-public/carto-enterprise-byol)), you need to set the URLs to point to your instance. 
@@ -94,7 +91,6 @@ setDefaultCredentials({
   username: 'public',
   apiKey: 'default_public',
   mapsUrl: 'https://<domain>/user/{user}/api/v2/map',
-  sqlUrl: 'https://<domain>/user/{user}/api/v2/sql',
 });
 ```
 

@@ -101,7 +101,7 @@ Optional. A string pointing to a unique attribute at the result of the query. A 
 
 ##### `credentials` (Object)
 
-Optional. Object with the configuration to connect with CARTO.
+Optional. Overrides the configuration to connect with CARTO. Check the configuration parameters [here](overview#carto-configuration-object).
 
 * Default:
 
@@ -112,7 +112,6 @@ Optional. Object with the configuration to connect with CARTO.
   apiKey: 'default_public',
   region: 'us',
   mapsUrl: 'https://maps-api-v2.{region}.carto.com/user/{user}',
-  sqlUrl: 'https://{user}.carto.com/api/v2/sql'
 }
 ```
 
