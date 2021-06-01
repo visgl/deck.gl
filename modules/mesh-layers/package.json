@@ -2,7 +2,7 @@
   "name": "@deck.gl/mesh-layers",
   "description": "deck.gl layers that loads 3D meshes or scene graphs",
   "license": "MIT",
-  "version": "8.5.0-alpha.4",
+  "version": "8.5.0-alpha.6",
   "publishConfig": {
     "access": "public"
   },
@@ -32,7 +32,7 @@
     "@deck.gl/core": "^8.0.0"
   },
   "dependencies": {
-    "@loaders.gl/gltf": "^3.0.0-alpha",
+    "@loaders.gl/gltf": "^3.0.0-alpha.16",
     "@luma.gl/experimental": "^8.5.0-alpha.1",
     "@luma.gl/shadertools": "^8.5.0-alpha.1"
   }

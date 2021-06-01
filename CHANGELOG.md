@@ -21,6 +21,29 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ### deck.gl v8.5 Prereleases
 
+#### deck.gl [8.5.0-alpha.6] - May 17 2021
+
+- Bump @loaders.gl to 3.0.0-alpha.14 (#5780)
+- Tile3DLayer: Ability to override color per tile (#5759)
+- Support local-math env option (#5737)
+
+#### deck.gl [8.5.0-alpha.5] - May 10 2021
+
+- Do not log init message unless log priority set to 1 (#5718)
+- Normalize viewState on MapController initialization + add normalize flag (#5727)
+- Move ClipExtension to @deck.gl/extensions (#5726)
+- Add onError to Layer props (#5732)
+- Invoke onError when GL context is lost (#5731)
+- Clean up Deck's internal method bindings (#5730)
+- Update onError callback default (#5702)
+- Support triangulation of polygons for MVTLoader in loaders.gl (#5712)
+- Revert "[feat] WebGL context lost handling > pass to listeners of onError (#5399)" (#5604)
+
+#### deck.gl [8.5.0-alpha.4] - Mar 22 2021
+
+[feat] WebGL context lost handling > pass to listeners of on
+Error (#5399)
+
 #### deck.gl [8.5.0-alpha.3] - Feb 25 2021
 
 - Bump luma.gl dependencies to 8.5.0-alpha (#5535)

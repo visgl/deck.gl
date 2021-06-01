@@ -12,6 +12,7 @@ This module contains the following extensions:
 - [DataFilterExtension](/docs/api-reference/extensions/data-filter-extension.md)
 - [Fp64Extension](/docs/api-reference/extensions/fp64-extension.md)
 - [PathStyleExtension](/docs/api-reference/extensions/path-style-extension.md)
+- [ClipExtension](/docs/api-reference/extensions/clip-extension.md)
 
 For instructions on authoring your own layer extensions, visit [developer guide](/docs/developer-guide/custom-layers/layer-extensions.md).
 

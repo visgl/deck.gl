@@ -2,7 +2,7 @@
   "name": "@deck.gl/geo-layers",
   "description": "deck.gl layers supporting geospatial use cases and GIS formats",
   "license": "MIT",
-  "version": "8.5.0-alpha.4",
+  "version": "8.5.0-alpha.6",
   "publishConfig": {
     "access": "public"
   },
@@ -29,12 +29,12 @@
     "prepublishOnly": "npm run build-bundle && npm run build-bundle -- --env.dev"
   },
   "dependencies": {
-    "@loaders.gl/3d-tiles": "^3.0.0-alpha",
-    "@loaders.gl/gis": "^3.0.0-alpha",
-    "@loaders.gl/loader-utils": "^3.0.0-alpha",
-    "@loaders.gl/mvt": "^3.0.0-alpha",
-    "@loaders.gl/terrain": "^3.0.0-alpha",
-    "@loaders.gl/tiles": "^3.0.0-alpha",
+    "@loaders.gl/3d-tiles": "^3.0.0-alpha.16",
+    "@loaders.gl/gis": "^3.0.0-alpha.16",
+    "@loaders.gl/loader-utils": "^3.0.0-alpha.16",
+    "@loaders.gl/mvt": "^3.0.0-alpha.16",
+    "@loaders.gl/terrain": "^3.0.0-alpha.16",
+    "@loaders.gl/tiles": "^3.0.0-alpha.16",
     "@math.gl/culling": "^3.4.2",
     "@math.gl/web-mercator": "^3.4.2",
     "h3-js": "^3.6.0",
@@ -43,6 +43,7 @@
   },
   "peerDependencies": {
     "@deck.gl/core": "^8.0.0",
+    "@deck.gl/extensions": "^8.0.0",
     "@deck.gl/layers": "^8.0.0",
     "@deck.gl/mesh-layers": "^8.0.0",
     "@loaders.gl/core": "^3.0.0-alpha"

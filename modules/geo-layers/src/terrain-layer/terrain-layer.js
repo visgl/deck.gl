@@ -33,7 +33,7 @@ const defaultProps = {
   // Image url that encodes height data
   elevationData: urlType,
   // Image url to use as texture
-  texture: urlType,
+  texture: {...urlType, optional: true},
   // Martini error tolerance in meters, smaller number -> more detailed mesh
   meshMaxError: {type: 'number', value: 4.0},
   // Bounding box of the terrain image, [minX, minY, maxX, maxY] in world coordinates
@@ -203,7 +203,14 @@ export default class TerrainLayer extends CompositeLayer {
       maxZoom,
       minZoom,
       extent,
-      maxRequests
+      maxRequests,
+      onTileLoad,
+      onTileUnload,
+      onTileError,
+      maxCacheSize,
+      maxCacheByteSize,
+      refinementStrategy,
+      fetch
     } = this.props;
 
     if (this.state.isTiled) {
@@ -231,7 +238,14 @@ export default class TerrainLayer extends CompositeLayer {
           maxZoom,
           minZoom,
           extent,
-          maxRequests
+          maxRequests,
+          onTileLoad,
+          onTileUnload,
+          onTileError,
+          maxCacheSize,
+          maxCacheByteSize,
+          refinementStrategy,
+          fetch
         }
       );
     }

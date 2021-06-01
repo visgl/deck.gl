@@ -87,7 +87,7 @@ Note that the set of view state parameters that will be used varies between View
 | [`MapView`](/docs/api-reference/core/map-view.md) (default)         | geospatial | full support | This class renders data using the [Web Mercator projection](https://en.wikipedia.org/wiki/Web_Mercator_projection) and is designed to match an external base map library such as mapbox-gl or Google Maps.
 | [`FirstPersonView`](/docs/api-reference/core/first-person-view.md)  | geospatial | full support | The camera is positioned in a provided geolocation and looks in a provided direction, similar to that of a [first-person game](https://en.wikipedia.org/wiki/First-person_(gaming)). |
 | [`OrthographicView`](/docs/api-reference/core/orthographic-view.md) | info-vis (2D)     | full support | The camera looks at a target point from top-down. Does not rotate. |
-| [`OrbitView`](/docs/api-reference/core/perspective-view.md)         | info-vis (3D)     | full support | The camera looks at a target point from a provided direction. Rotates around the target. |
+| [`OrbitView`](/docs/api-reference/core/orbit-view.md)         | info-vis (3D)     | full support | The camera looks at a target point from a provided direction. Rotates around the target. |
 
 
 ## Examples

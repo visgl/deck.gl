@@ -64,7 +64,7 @@ export default class TileLayer extends CompositeLayer {
     return changeFlags.somethingChanged;
   }
 
-  updateState({props, oldProps, context, changeFlags}) {
+  updateState({props, changeFlags}) {
     let {tileset} = this.state;
     const createTileCache =
       !tileset ||
@@ -76,33 +76,16 @@ export default class TileLayer extends CompositeLayer {
       if (tileset) {
         tileset.finalize();
       }
-      const maxZoom = Number.isFinite(this.state.maxZoom) ? this.state.maxZoom : props.maxZoom;
-      const minZoom = Number.isFinite(this.state.minZoom) ? this.state.minZoom : props.minZoom;
-      const {
-        tileSize,
-        maxCacheSize,
-        maxCacheByteSize,
-        refinementStrategy,
-        extent,
-        maxRequests
-      } = props;
       tileset = new Tileset2D({
+        ...this._getTilesetOptions(props),
         getTileData: this.getTileData.bind(this),
-        maxCacheSize,
-        maxCacheByteSize,
-        maxZoom,
-        minZoom,
-        tileSize,
-        refinementStrategy,
-        extent,
         onTileLoad: this._onTileLoad.bind(this),
         onTileError: this._onTileError.bind(this),
-        onTileUnload: this._onTileUnload.bind(this),
-        maxRequests
+        onTileUnload: this._onTileUnload.bind(this)
       });
       this.setState({tileset});
     } else if (changeFlags.propsChanged || changeFlags.updateTriggersChanged) {
-      tileset.setOptions(props);
+      tileset.setOptions(this._getTilesetOptions(props));
       // if any props changed, delete the cached layers
       this.state.tileset.tiles.forEach(tile => {
         tile.layers = null;
@@ -110,6 +93,30 @@ export default class TileLayer extends CompositeLayer {
     }
 
     this._updateTileset();
+  }
+
+  _getTilesetOptions(props) {
+    const maxZoom = Number.isFinite(this.state.maxZoom) ? this.state.maxZoom : props.maxZoom;
+    const minZoom = Number.isFinite(this.state.minZoom) ? this.state.minZoom : props.minZoom;
+    const {
+      tileSize,
+      maxCacheSize,
+      maxCacheByteSize,
+      refinementStrategy,
+      extent,
+      maxRequests
+    } = props;
+
+    return {
+      maxCacheSize,
+      maxCacheByteSize,
+      maxZoom,
+      minZoom,
+      tileSize,
+      refinementStrategy,
+      extent,
+      maxRequests
+    };
   }
 
   _updateTileset() {

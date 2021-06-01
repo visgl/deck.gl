@@ -2,10 +2,16 @@
 
 [CARTO basemaps](https://carto.com/basemaps/) are available and they can be used without a token.
 
-Ensure you follow the [Terms and Conditions](https://drive.google.com/file/d/0B3OBExqwT6KJNHp3U3VUamx6U1U/view) when using them.
+Ensure you follow the [Terms and Conditions](https://drive.google.com/file/d/1P7bhSE-N9iegI398QYDjKeVhnbS7-Ilk/view) when using them.
 
 
 ## Usage
+
+### React
+
+**Important Note:** Mapbox-GL-JS v2.0 changed to a license that requires an API key for loading the library, which will prevent you from using `react-map-gl` ( a higher level library). They have an in-depth guide about it [here](https://github.com/visgl/react-map-gl/blob/v6.0.0/docs/get-started/mapbox-tokens.md).
+
+In short, if you want to use the library without a Mapbox token, then you have two options: use a `react-map-gl` version less than 6.0 (`npm i react-map-gl@5`), or [substitute `mapbox-gl` with a fork](https://github.com/visgl/react-map-gl/blob/v6.0.0/docs/get-started/get-started.md#using-with-a-mapbox-gl-fork).
 
 To install the dependencies from NPM:
 
@@ -23,6 +29,8 @@ import {BASEMAP} from '@deck.gl/carto';
   <StaticMap mapStyle={BASEMAP.POSITRON} />
 </DeckGL>
 ```
+
+### Standalone
 
 To use pre-bundled scripts:
 

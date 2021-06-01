@@ -135,6 +135,7 @@ const GeoJsonLayerExample = {
     lineWidthMinPixels: 1,
     pickable: true,
     dashJustified: true,
+    dashGapPickable: true,
     extensions: [new PathStyleExtension({dash: true})]
   }
 };

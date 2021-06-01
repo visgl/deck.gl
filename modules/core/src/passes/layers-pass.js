@@ -1,7 +1,6 @@
 import GL from '@luma.gl/constants';
 import Pass from './pass';
 import {clear, setParameters, withParameters, cssToDeviceRatio} from '@luma.gl/core';
-import log from '../utils/log';
 
 export default class LayersPass extends Pass {
   render(props) {
@@ -15,6 +14,7 @@ export default class LayersPass extends Pass {
   // Draw a list of layers in a list of viewports
   _drawLayers(props) {
     const {viewports, views, onViewportActive, clearCanvas = true} = props;
+    props.pass = props.pass || 'unknown';
 
     const gl = this.gl;
     if (clearCanvas) {
@@ -50,10 +50,7 @@ export default class LayersPass extends Pass {
   // Resolve the parameters needed to draw each layer
   // When a viewport contains multiple subviewports (e.g. repeated web mercator map),
   // this is only done once for the parent viewport
-  _getDrawLayerParams(
-    viewport,
-    {layers, pass = 'unknown', layerFilter, effects, moduleParameters}
-  ) {
+  _getDrawLayerParams(viewport, {layers, pass, layerFilter, effects, moduleParameters}) {
     const drawLayerParams = [];
     const indexResolver = layerIndexResolver();
     for (let layerIndex = 0; layerIndex < layers.length; layerIndex++) {
@@ -89,7 +86,7 @@ export default class LayersPass extends Pass {
   // TODO - when picking we could completely skip rendering viewports that dont
   // intersect with the picking rect
   /* eslint-disable max-depth, max-statements */
-  _drawLayersInViewport(gl, {layers, onError, viewport, view}, drawLayerParams) {
+  _drawLayersInViewport(gl, {layers, pass, viewport, view}, drawLayerParams) {
     const glViewport = getGLViewport(gl, {viewport});
 
     if (view && view.props.clear) {
@@ -144,11 +141,7 @@ export default class LayersPass extends Pass {
             parameters: layerParameters
           });
         } catch (err) {
-          if (onError) {
-            onError(err, layer);
-          } else {
-            log.error(`error during drawing of ${layer}`, err)();
-          }
+          layer.raiseError(err, `drawing ${layer} to ${pass}`);
         }
       }
     }

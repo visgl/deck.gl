@@ -16,6 +16,7 @@ Use deck.gl layers as custom Mapbox layers, enabling seamless interleaving of Ma
 
 * deck.gl's multi-view system cannot be used.
 * Unless used with react-map-gl, WebGL2 based deck.gl features, such as attribute transitions and GPU accelerated aggregation layers cannot be used.
+* Mapbox 2.0's terrain feature is currently not supported.
 
 ## Installation
 
@@ -72,7 +73,8 @@ const map = new mapboxgl.Map({
   container: 'map',
   style: 'mapbox://styles/mapbox/streets-v9',
   center: [-74.50, 40],
-  zoom: 9
+  zoom: 9,
+  antialias: true // Mapbox disables WebGL's antialiasing by default
 });
 
 map.on('load', () => {

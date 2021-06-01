@@ -134,9 +134,11 @@ export default class ScreenGridLayer extends GridAggregationLayer {
   getPickingInfo({info, mode}) {
     const {index} = info;
     if (index >= 0) {
-      const {gpuGridAggregator} = this.state;
+      const {gpuGridAggregator, gpuAggregation, weights} = this.state;
       // Get count aggregation results
-      const aggregationResults = gpuGridAggregator.getData('count');
+      const aggregationResults = gpuAggregation
+        ? gpuGridAggregator.getData('count')
+        : weights.count;
 
       // Each instance (one cell) is aggregated into single pixel,
       // Get current instance's aggregation details.

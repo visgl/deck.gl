@@ -214,6 +214,13 @@ function calculateViewportUniforms({
 
   const viewportSize = [viewport.width * devicePixelRatio, viewport.height * devicePixelRatio];
 
+  // Distance at which screen pixels are projected.
+  // Used to scale sizes in clipspace to match screen pixels.
+  // When using Viewport class's default projection matrix, this yields 1 for orthographic
+  // and `viewport.focalDistance` for perspective views
+  const focalDistance =
+    viewport.projectionMatrix.transform([0, 0, -viewport.focalDistance, 1])[3] || 1;
+
   const uniforms = {
     // Projection mode values
     project_uCoordinateSystem: coordinateSystem,
@@ -225,8 +232,7 @@ function calculateViewportUniforms({
     project_uViewportSize: viewportSize,
     project_uDevicePixelRatio: devicePixelRatio,
 
-    // Distance at which screen pixels are projected
-    project_uFocalDistance: viewport.focalDistance || 1,
+    project_uFocalDistance: focalDistance,
     project_uCommonUnitsPerMeter: distanceScales.unitsPerMeter,
     project_uCommonUnitsPerWorldUnit: distanceScales.unitsPerMeter,
     project_uCommonUnitsPerWorldUnit2: DEFAULT_PIXELS_PER_UNIT2,

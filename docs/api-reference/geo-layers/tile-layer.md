@@ -217,6 +217,11 @@ Renders one or an array of Layer instances with all the `TileLayer` props and th
 
 - Default: `props => new GeoJsonLayer(props)`
 
+Note that the following sub layer props are overridden by `TileLayer` internally:
+
+- `visible` (toggled based on tile visibility)
+- `highlightedObjectIndex` (set based on the parent layer's highlight state)
+
 ##### `zRange` (Array, optional)
 
 An array representing the range of minimum and maximum heights in the tile. This is designed to support extruded layers, such as the TerrainLayer, ensuring the right tiles are loaded and rendered. This prop currently only has effect when used with a geospatial view.

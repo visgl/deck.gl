@@ -5,8 +5,9 @@ const DEFAULT_EXTENT = [-Infinity, -Infinity, Infinity, Infinity];
 
 export const urlType = {
   type: 'url',
-  value: '',
-  validate: value =>
+  value: null,
+  validate: (value, propType) =>
+    (propType.optional && value === null) ||
     typeof value === 'string' ||
     (Array.isArray(value) && value.every(url => typeof url === 'string')),
   equals: (value1, value2) => {

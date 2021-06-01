@@ -8,16 +8,9 @@ export const API_VERSIONS = {
 };
 
 export const MAP_TYPES = {
-  SQL: 'sql',
+  QUERY: 'query',
   TABLE: 'table',
   TILESET: 'tileset'
-};
-
-export const PROVIDERS = {
-  BIGQUERY: 'bigquery',
-  SNOWFLAKE: 'snowflake',
-  REDSHIFT: 'redshift',
-  POSTGRES: 'postgres'
 };
 
 // AVAILABLE FORMATS

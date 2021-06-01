@@ -1,7 +1,7 @@
 import test from 'tape-catch';
 import {testLayer} from '@deck.gl/test-utils';
 import {MVTLayer} from '@deck.gl/geo-layers';
-import ClipExtension from '@deck.gl/geo-layers/mvt-layer/clip-extension';
+import {ClipExtension} from '@deck.gl/extensions';
 import {transform} from '@deck.gl/geo-layers/mvt-layer/coordinate-transform';
 import {GeoJsonLayer} from '@deck.gl/layers';
 import {geojsonToBinary} from '@loaders.gl/gis';
@@ -406,5 +406,72 @@ test('MVTLayer#dataInWGS84', async t => {
 
   await testLayerAsync({Layer: TestMVTLayer, viewport, testCases, onError: t.notOk});
 
+  t.end();
+});
+
+const fetchFile = url => {
+  url = url
+    .replace(/\?.+$/, '') // strip query parameters
+    .replace(/^\//, './test/data/3d-tiles/');
+  return require('fs').readFileSync(url);
+};
+
+test('MVTLayer#triangulation', async t => {
+  let oldFetch;
+  /* global Response */
+  const needsFetchPolyfill = typeof Response === 'undefined';
+  if (needsFetchPolyfill) {
+    oldFetch = global.fetch;
+    global.fetch = fetchFile;
+  }
+
+  const viewport = new WebMercatorViewport({
+    longitude: -100,
+    latitude: 40,
+    zoom: 3,
+    pitch: 0,
+    bearing: 0
+  });
+
+  const onAfterUpdate = ({layer}) => {
+    if (!layer.isLoaded) {
+      return;
+    }
+    const geoJsonLayer = layer.internalState.subLayers[0];
+    const data = geoJsonLayer.props.data;
+    if (layer.props.binary) {
+      // Triangulated binary data should be passed
+      t.ok(data.polygons.triangles, 'should triangulate');
+    } else {
+      // GeoJSON should be passed (3 Features)
+      t.ok(!data.polygons, 'should not triangulate');
+      t.equals(data.length, 3, 'should pass GeoJson');
+    }
+  };
+
+  const props = {
+    data: ['./test/data/mvt-with-hole/{z}/{x}/{y}.mvt'],
+    binary: true,
+    onTileError: error => {
+      if (!(error.message && error.message.includes('404'))) {
+        throw error;
+      }
+    },
+    loadOptions: {
+      mvt: {
+        workerUrl: null
+      }
+    }
+  };
+  const testCases = [{props, onAfterUpdate}];
+
+  // Run as separate test runs otherwise data is cached
+  testLayerAsync({Layer: MVTLayer, viewport, testCases, onError: t.notOk});
+  testCases[0].props.binary = false;
+  await testLayerAsync({Layer: MVTLayer, viewport, testCases, onError: t.notOk});
+
+  if (oldFetch) {
+    global.fetch = oldFetch;
+  }
   t.end();
 });

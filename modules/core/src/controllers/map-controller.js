@@ -72,7 +72,10 @@ export class MapState extends ViewState {
     /** Pitch when current perspective rotate operation started */
     startPitch,
     /** Zoom when current zoom operation started */
-    startZoom
+    startZoom,
+
+    /** Normalize viewport props to fit map height into viewport. Default `true` */
+    normalize
   } = {}) {
     assert(Number.isFinite(longitude)); // `longitude` must be supplied
     assert(Number.isFinite(latitude)); // `latitude` must be supplied
@@ -90,7 +93,8 @@ export class MapState extends ViewState {
       maxZoom,
       minZoom,
       maxPitch,
-      minPitch
+      minPitch,
+      normalize
     });
 
     this._state = {
@@ -356,7 +360,11 @@ export class MapState extends ViewState {
     const {maxPitch, minPitch, pitch} = props;
     props.pitch = clamp(pitch, minPitch, maxPitch);
 
-    Object.assign(props, normalizeViewportProps(props));
+    // Normalize viewport props to fit map height into viewport
+    const {normalize = true} = props;
+    if (normalize) {
+      Object.assign(props, normalizeViewportProps(props));
+    }
 
     return props;
   }
@@ -433,6 +441,24 @@ export default class MapController extends Controller {
   constructor(props) {
     props.dragMode = props.dragMode || 'pan';
     super(MapState, props);
+  }
+
+  setProps(props) {
+    const oldProps = this.controllerStateProps;
+
+    super.setProps(props);
+
+    const dimensionChanged = !oldProps || oldProps.height !== props.height;
+    if (dimensionChanged) {
+      // Dimensions changed, normalize the props
+      this.updateViewport(
+        new this.ControllerState({
+          makeViewport: this.makeViewport,
+          ...this.controllerStateProps,
+          ...this._state
+        })
+      );
+    }
   }
 
   _getTransitionProps(opts) {

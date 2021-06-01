@@ -1,7 +1,6 @@
 import {API_VERSIONS} from './api/maps-api-common';
-import {log} from '@deck.gl/core';
 
-const defaultClassicConfig = {
+const defaultClassicCredentials = {
   username: 'public',
   apiKey: 'default_public',
   region: 'us',
@@ -9,54 +8,51 @@ const defaultClassicConfig = {
   sqlUrl: 'https://{user}.carto.com/api/v2/sql'
 };
 
-const defaultCloudNativeConfig = {
+const defaultCloudNativeCredentials = {
   accessToken: null,
-  tenant: 'gcp-us-east1.app.carto.com'
+  apiBaseUrl: null
 };
 
-let config = {};
+let credentials = {}
+
+setDefaultCredentials({})
 
 export function setDefaultCredentials(opts) {
-  log.warn(
-    'setDefaultCredentials will be deprecated in future versions. Use setConfig method instead.'
-  )();
-  setConfig({
-    apiVersion: API_VERSIONS.V2,
-    ...opts
-  });
-}
 
-export function getDefaultCredentials() {
-  return config;
-}
-
-export function setConfig(opts) {
   const apiVersion = opts.apiVersion || API_VERSIONS.V2;
 
   switch (apiVersion) {
     case API_VERSIONS.V1:
       opts.mapsUrl = opts.mapsUrl || 'https://{user}.carto.com/api/v1/map';
-      config = {
+      credentials = {
         apiVersion,
-        ...defaultClassicConfig,
+        ...defaultClassicCredentials,
         ...opts
       };
       break;
 
     case API_VERSIONS.V2:
       opts.mapsUrl = opts.mapsUrl || 'https://maps-api-v2.{region}.carto.com/user/{user}';
-      config = {
+      credentials = {
         apiVersion,
-        ...defaultClassicConfig,
+        ...defaultClassicCredentials,
         ...opts
       };
 
       break;
     case API_VERSIONS.V3:
-      opts.mapsUrl = opts.mapsUrl || 'https://maps-{tenant}';
-      config = {
+      if (!opts.apiBaseUrl) {
+        throw new Error(`API version ${API_VERSIONS.V3} requires to define apiBaseUrl at credentials. Go to https://app.carto.com to get your apiBaseUrl.`);
+      }
+
+      let apiBaseUrl = opts.apiBaseUrl || defaultCloudNativeCredentials.apiBaseUrl;
+      if (!apiBaseUrl.endsWith('/')) {
+        apiBaseUrl += '/'
+      }
+      opts.mapsUrl = `${apiBaseUrl}v3/maps`;
+      credentials = {
         apiVersion,
-        ...defaultCloudNativeConfig,
+        ...defaultCloudNativeCredentials,
         ...opts
       };
       break;
@@ -65,6 +61,6 @@ export function setConfig(opts) {
   }
 }
 
-export function getConfig() {
-  return config;
+export function getDefaultCredentials() {
+  return credentials;
 }

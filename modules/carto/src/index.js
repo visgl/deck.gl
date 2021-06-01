@@ -1,4 +1,4 @@
-export {getDefaultCredentials, setDefaultCredentials, getConfig, setConfig} from './config.js';
+export {getDefaultCredentials, setDefaultCredentials} from './config.js';
 export {default as CartoSQLLayer} from './layers/carto-sql-layer';
 export {default as CartoBQTilerLayer} from './layers/carto-bqtiler-layer';
 export {default as CartoLayer} from './layers/carto-layer';
@@ -10,8 +10,8 @@ export {default as colorContinuous} from './style/color-continuous-style';
 export {
   FORMATS,
   MAP_TYPES,
-  PROVIDERS,
   API_VERSIONS,
-  getMapCarto,
-  getMapCartoCloudNative
+  getMapCarto as _getMapCarto,
+  getMapCartoCloudNative as _getMapCartoCloudNative, 
+  getMapMetadata as _getMapMetadata
 } from './api';

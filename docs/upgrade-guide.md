@@ -8,11 +8,22 @@ The module entry point is now only lightly transpiled for the most commonly used
 
 ### Layers
 
+- A bug is fixed in projecting sizes in billboard mode. Pixel sizes now match their CSS counterparts. This change affects the following layers when used with a `MapView`:
+  + `ArcLayer`, `LineLayer` and `PointCloudLayer`
+  + `IconLayer` and `TextLayer` with the default `billboard` prop
+  + `PathLayer` with `billboard: true`
+  After upgrading to v8.5, in order to maintain the same appearance, you need to multiply `2/3` to the objects' width/size. This can be done by either changing the accessor (`getWidth`/`getSize`) or the scaling prop (`sizeScale`/`widthScale`).
 - `TextLayer`'s `backgroundColor` prop is deprecated. Use `background: true` and `getBackgroundColor` instead.
 - `TextLayer`'s default `fontSettings` have changed. When using `sdf`, the default `buffer` is now `4` and the default `radius` is now `12`.
 - `PathLayer`'s `rounded` prop is deprecated, replaced by two separate flags `jointRounded` and `capRounded`.
 - `GeoJsonLayer`'s `lineJointRounded` prop now only controls line joints. To use rounded line caps, set `lineCapRounded` to `true`.
 - Dashed lines via `PathStyleExtension` now draw rounded dash caps if `capRounded` is `true`.
+- `@deck.gl/geo-layers` now requires `@deck.gl/extensions`, due to `ClipExtension` dependency.
+- `MVTLayer`'s `binary` prop is now set to `true` by default.
+
+### onError Callback
+
+`Deck`'s default `onError` callback is changed to `console.error`. Explicitly setting `onError` to `null` now silently ignores all errors, instead of logging them to console.
 
 ### CARTO module
 

@@ -1,9 +1,14 @@
 import {MVTLayer} from '@deck.gl/geo-layers';
 
-function createMVTLayer(id, {highlight = false, binary = false} = {}) {
-  const goldenImage = highlight
-    ? './test/render/golden-images/mvt-layer-highlight.png'
-    : './test/render/golden-images/mvt-layer.png';
+function createMVTLayer(id, {highlight = false, binary = false, holes = false} = {}) {
+  let goldenImage;
+  if (holes) {
+    goldenImage = './test/render/golden-images/mvt-layer-holes.png';
+  } else if (highlight) {
+    goldenImage = './test/render/golden-images/mvt-layer-highlight.png';
+  } else {
+    goldenImage = './test/render/golden-images/mvt-layer.png';
+  }
   const highlightProps = highlight
     ? {highlightedFeatureId: 1862, uniqueIdProperty: 'cartodb_id'}
     : {};
@@ -28,7 +33,7 @@ function createMVTLayer(id, {highlight = false, binary = false} = {}) {
     layers: [
       new MVTLayer({
         id,
-        data: ['./test/data/mvt-tiles/{z}/{x}/{y}.mvt'],
+        data: [`./test/data/${holes ? 'mvt-with-hole' : 'mvt-tiles'}/{z}/{x}/{y}.mvt`],
         getFillColor: [0, 0, 0, 128],
         getLineColor: [255, 0, 0, 128],
         ...highlightProps,
@@ -56,5 +61,7 @@ export default [
   createMVTLayer('mvt-layer'),
   createMVTLayer('mvt-layer-highlight', {highlight: true}),
   createMVTLayer('mvt-layer-binary', {binary: true}),
-  createMVTLayer('mvt-layer-binary-highlight', {highlight: true, binary: true})
+  createMVTLayer('mvt-layer-binary-highlight', {highlight: true, binary: true}),
+  createMVTLayer('mvt-with-holes', {holes: true}),
+  createMVTLayer('mvt-with-holes-binary', {binary: true, holes: true})
 ];

@@ -1,6 +1,6 @@
 import mapboxgl from 'mapbox-gl';
 import {Deck} from '@deck.gl/core';
-import {CartoLayer, setConfig, BASEMAP, colorBins, MAP_TYPES} from '@deck.gl/carto';
+import {CartoLayer, setDefaultCredentials, BASEMAP, colorBins, MAP_TYPES} from '@deck.gl/carto';
 
 const INITIAL_VIEW_STATE = {
   latitude: 0,
@@ -8,7 +8,7 @@ const INITIAL_VIEW_STATE = {
   zoom: 1
 };
 
-setConfig({
+setDefaultCredentials({
   username: 'public',
   apiKey: 'default_public'
 });
@@ -58,7 +58,7 @@ function render() {
   const layers = [
     new CartoLayer({
       id: 'airports',
-      type: MAP_TYPES.SQL,
+      type: MAP_TYPES.QUERY,
       data: 'SELECT cartodb_id, the_geom_webmercator, scalerank FROM ne_10m_airports',
       visible: visibleLayer === 'airports',
       filled: true,
