@@ -19,7 +19,7 @@ function validateGeometryAttributes(attributes) {
 const defaultProps = {
   // PBR material object. _lighting must be pbr for this to work
   pbrMaterial: {type: 'object', value: null},
-  featureIds: {type: 'Uint32Array', value: null}
+  featureIds: {type: 'array', value: null}
 };
 
 export default class _MeshLayer extends SimpleMeshLayer {
@@ -112,12 +112,13 @@ export default class _MeshLayer extends SimpleMeshLayer {
     const {featureIds} = this.props;
     const value = new Uint8ClampedArray(featureIds.length * attribute.size);
 
+    const pickingColor = [];
     for (let index = 0; index < featureIds.length; index++) {
-      const color = this.encodePickingColor(featureIds[index]);
+      this.encodePickingColor(featureIds[index], pickingColor);
 
-      value[index * 3] = color[0];
-      value[index * 3 + 1] = color[1];
-      value[index * 3 + 2] = color[2];
+      value[index * 3] = pickingColor[0];
+      value[index * 3 + 1] = pickingColor[1];
+      value[index * 3 + 2] = pickingColor[2];
     }
 
     attribute.value = value;
