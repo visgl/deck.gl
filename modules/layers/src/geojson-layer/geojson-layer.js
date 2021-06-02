@@ -19,14 +19,12 @@
 // THE SOFTWARE.
 
 import {CompositeLayer, log} from '@deck.gl/core';
-import IconLayer from '../icon-layer/icon-layer';
-import ScatterplotLayer from '../scatterplot-layer/scatterplot-layer';
-import TextLayer from '../text-layer/text-layer';
 import PathLayer from '../path-layer/path-layer';
 // Use primitive layer to avoid "Composite Composite" layers for now
 import SolidPolygonLayer from '../solid-polygon-layer/solid-polygon-layer';
 import {replaceInRange} from '../utils';
 import {binaryToFeatureForAccesor} from './geojson-binary';
+import PointsLayerClassMap from './points-layer-class-map';
 
 import {getGeojsonFeatures, separateGeojsonFeatures} from './geojson';
 import {createLayerPropsFromFeatures, createLayerPropsFromBinary} from './geojson-layer-props';
@@ -190,11 +188,6 @@ export default class GeoJsonLayer extends CompositeLayer {
     const PolygonStrokeLayer = this.getSubLayerClass('polygons-stroke', PathLayer);
     const LineStringsLayer = this.getSubLayerClass('line-strings', PathLayer);
 
-    const PointsLayerClassMap = {
-      circle: ScatterplotLayer,
-      icon: IconLayer,
-      text: TextLayer
-    };
     const PointsLayerClass = PointsLayerClassMap[pointType];
     if (!PointsLayerClass) {
       throw new Error(`pointType must be one of: ${Object.keys(PointsLayerClassMap)}`);
