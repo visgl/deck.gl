@@ -19,6 +19,7 @@
 // THE SOFTWARE.
 
 import {CompositeLayer, log} from '@deck.gl/core';
+import IconLayer from '../icon-layer/icon-layer';
 import TextLayer from '../text-layer/text-layer';
 import PathLayer from '../path-layer/path-layer';
 // Use primitive layer to avoid "Composite Composite" layers for now
@@ -56,6 +57,7 @@ const defaultProps = {
   pointRadiusMinPixels: 0, //  min point radius in pixels
   pointRadiusMaxPixels: Number.MAX_SAFE_INTEGER, // max point radius in pixels
 
+  ...IconLayer.defaultProps,
   ...TextLayer.defaultProps,
 
   // Line and polygon outline color
@@ -177,35 +179,39 @@ export default class GeoJsonLayer extends CompositeLayer {
       lineDashJustified
     } = this.props;
 
-    // Rendering props for TextLayer
+    // Rendering props for IconLayer & TextLayer
     const {
-      billboard,
-      sizeScale,
-      sizeUnits,
-      sizeMinPixels,
-      sizeMaxPixels,
+      alphaCutoff,
       background,
       backgroundPadding,
+      billboard,
       characterSet,
       fontFamily,
-      fontWeight,
-      lineHeight,
-      outlineWidth,
-      outlineColor,
       fontSettings,
-      wordBreak,
-      maxWidth,
+      fontWeight,
       getAlignmentBaseline,
       getAngle,
       getBackgroundColor,
       getBorderColor,
       getBorderWidth,
       getColor,
+      getIcon,
       getPixelOffset,
       getSize,
       getText,
       getTextAnchor,
-      backgroundColor
+      iconAtlas,
+      iconMapping,
+      lineHeight,
+      maxWidth,
+      onIconError,
+      outlineColor,
+      outlineWidth,
+      sizeMaxPixels,
+      sizeMinPixels,
+      sizeScale,
+      sizeUnits,
+      wordBreak
     } = this.props;
 
     // Accessor props for underlying layers
@@ -371,25 +377,56 @@ export default class GeoJsonLayer extends CompositeLayer {
         getLineWidth: updateTriggers.getLineWidth
       };
     } else if (pointType === 'icon') {
-    } else if (pointType === 'text') {
       pointLayerProps = {
+        alphaCutoff,
         billboard,
+        // iconAtlas, // Enabling doesn't work!!!
+        iconMapping,
+        onIconError,
+        sizeMaxPixels,
+        sizeMinPixels,
         sizeScale,
         sizeUnits,
-        sizeMinPixels,
-        sizeMaxPixels,
+
+        getAngle: this.getSubLayerAccessor(getAngle),
+        getColor: this.getSubLayerAccessor(getColor),
+        getIcon: this.getSubLayerAccessor(getIcon),
+        getPixelOffset: this.getSubLayerAccessor(getPixelOffset),
+        getSize: this.getSubLayerAccessor(getSize),
+
+        transitions: transitions && {
+          getPosition: transitions.geometry,
+          getAngle: transitions.getAngle,
+          getColor: transitions.getColor,
+          getPixelOffset: transitions.getPixelOffset,
+          getSize: transitions.getSize,
+        }
+      }
+      pointLayerUpdateTriggers = {
+        getAngle: updateTriggers.getAngle,
+        getColor: updateTriggers.getColor,
+        getIcon: updateTriggers.getIcon,
+        getPixelOffset: updateTriggers.getPixelOffset,
+        getSize: updateTriggers.getSize,
+      }
+    } else if (pointType === 'text') {
+      pointLayerProps = {
         background,
         backgroundPadding,
+        billboard,
         characterSet,
         fontFamily,
+        fontSettings,
         fontWeight,
         lineHeight,
-        outlineWidth,
-        outlineColor,
-        fontSettings,
-        wordBreak,
         maxWidth,
-        backgroundColor,
+        outlineColor,
+        outlineWidth,
+        sizeMaxPixels,
+        sizeMinPixels,
+        sizeScale,
+        sizeUnits,
+        wordBreak,
 
         getAlignmentBaseline: this.getSubLayerAccessor(getAlignmentBaseline),
         getAngle: this.getSubLayerAccessor(getAngle),
@@ -430,15 +467,15 @@ export default class GeoJsonLayer extends CompositeLayer {
       };
     }
 
+    const pointsSubLayerProps = this.getSubLayerProps({
+      id: 'points',
+      type: PointsLayerClass,
+      updateTriggers: pointLayerUpdateTriggers
+    });
     const pointLayer =
       this.shouldRenderSubLayer('points', layerProps.points.data) &&
       new PointsLayer(
-        pointLayerProps,
-        this.getSubLayerProps({
-          id: 'points',
-          type: PointsLayerClass,
-          updateTriggers: pointLayerUpdateTriggers
-        }),
+        pointLayerProps, pointsSubLayerProps,
         {
           ...layerProps.points,
           highlightedObjectIndex: this._getHighlightedIndex(layerProps.points.data)
