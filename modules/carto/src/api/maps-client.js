@@ -94,7 +94,8 @@ function dealWithError({response, json, credentials}) {
       );
 
     default:
-      const e = credentials.apiVersion === API_VERSIONS.V1 ? JSON.stringify(json.errors) : json.error;
+      const e =
+        credentials.apiVersion === API_VERSIONS.V1 ? JSON.stringify(json.errors) : json.error;
       throw new Error(e);
   }
 }

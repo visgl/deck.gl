@@ -13,12 +13,11 @@ const defaultCloudNativeCredentials = {
   apiBaseUrl: null
 };
 
-let credentials = {}
+let credentials = {};
 
-setDefaultCredentials({})
+setDefaultCredentials({});
 
 export function setDefaultCredentials(opts) {
-
   const apiVersion = opts.apiVersion || API_VERSIONS.V2;
 
   switch (apiVersion) {
@@ -42,12 +41,16 @@ export function setDefaultCredentials(opts) {
       break;
     case API_VERSIONS.V3:
       if (!opts.apiBaseUrl) {
-        throw new Error(`API version ${API_VERSIONS.V3} requires to define apiBaseUrl at credentials. Go to https://app.carto.com to get your apiBaseUrl.`);
+        throw new Error(
+          `API version ${
+            API_VERSIONS.V3
+          } requires to define apiBaseUrl at credentials. Go to https://app.carto.com to get your apiBaseUrl.`
+        );
       }
 
       let apiBaseUrl = opts.apiBaseUrl || defaultCloudNativeCredentials.apiBaseUrl;
       if (!apiBaseUrl.endsWith('/')) {
-        apiBaseUrl += '/'
+        apiBaseUrl += '/';
       }
       opts.mapsUrl = `${apiBaseUrl}v3/maps`;
       credentials = {
