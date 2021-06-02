@@ -200,7 +200,7 @@ export default class GeoJsonLayer extends CompositeLayer {
       getSize,
       getText,
       getTextAnchor,
-      iconAtlas,
+      pointIconAtlas,
       iconMapping,
       lineHeight,
       maxWidth,
@@ -380,7 +380,7 @@ export default class GeoJsonLayer extends CompositeLayer {
       pointLayerProps = {
         alphaCutoff,
         billboard,
-        // iconAtlas, // Enabling doesn't work!!!
+        iconAtlas: pointIconAtlas, // if we use `iconAtlas` it does not work
         iconMapping,
         onIconError,
         sizeMaxPixels,
@@ -399,16 +399,16 @@ export default class GeoJsonLayer extends CompositeLayer {
           getAngle: transitions.getAngle,
           getColor: transitions.getColor,
           getPixelOffset: transitions.getPixelOffset,
-          getSize: transitions.getSize,
+          getSize: transitions.getSize
         }
-      }
+      };
       pointLayerUpdateTriggers = {
         getAngle: updateTriggers.getAngle,
         getColor: updateTriggers.getColor,
         getIcon: updateTriggers.getIcon,
         getPixelOffset: updateTriggers.getPixelOffset,
-        getSize: updateTriggers.getSize,
-      }
+        getSize: updateTriggers.getSize
+      };
     } else if (pointType === 'text') {
       pointLayerProps = {
         background,
@@ -452,7 +452,7 @@ export default class GeoJsonLayer extends CompositeLayer {
           getText: transitions.getText,
           getTextAnchor: transitions.getTextAnchor
         }
-      }
+      };
       pointLayerUpdateTriggers = {
         getAlignmentBaseline: updateTriggers.getAlignmentBaseline,
         getAngle: updateTriggers.getAngle,
@@ -474,13 +474,10 @@ export default class GeoJsonLayer extends CompositeLayer {
     });
     const pointLayer =
       this.shouldRenderSubLayer('points', layerProps.points.data) &&
-      new PointsLayer(
-        pointLayerProps, pointsSubLayerProps,
-        {
-          ...layerProps.points,
-          highlightedObjectIndex: this._getHighlightedIndex(layerProps.points.data)
-        }
-      );
+      new PointsLayer(pointLayerProps, pointsSubLayerProps, {
+        ...layerProps.points,
+        highlightedObjectIndex: this._getHighlightedIndex(layerProps.points.data)
+      });
 
     return [
       // If not extruded: flat fill layer is drawn below outlines
