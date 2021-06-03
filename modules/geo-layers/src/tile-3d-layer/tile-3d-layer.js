@@ -56,7 +56,14 @@ export default class Tile3DLayer extends CompositeLayer {
 
     if (changeFlags.viewportChanged) {
       const {tileset3d} = this.state;
-      this._updateTileset(tileset3d);
+
+      const {activeViewports} = this.state;
+      const viewportsNumber = Object.keys(activeViewports).length;
+      if (viewportsNumber) {
+        this._updateTileset(tileset3d);
+        this.state.lastUpdatedViewports = activeViewports;
+        this.state.activeViewports = {};
+      }
     }
     if (changeFlags.propsChanged) {
       const {layerMap} = this.state;
@@ -137,10 +144,6 @@ export default class Tile3DLayer extends CompositeLayer {
     const {tileset3d} = this.state;
     this.props.onTileLoad(tileHeader);
     this._updateTileset(tileset3d);
-    if (tileset3d.isLoaded) {
-      this.state.lastUpdatedViewports = this.state.activeViewports;
-      this.state.activeViewports = {};
-    }
     this.setNeedsUpdate();
   }
 
