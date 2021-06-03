@@ -143,7 +143,7 @@ export default class TerrainLayer extends CompositeLayer {
     });
     const surface = textureUrl
       ? // If surface image fails to load, the tile should still be displayed
-        load(textureUrl).catch(_ => null)
+        load(textureUrl, {fetch: {signal}}).catch(_ => null)
       : Promise.resolve(null);
 
     return Promise.all([terrain, surface]);
