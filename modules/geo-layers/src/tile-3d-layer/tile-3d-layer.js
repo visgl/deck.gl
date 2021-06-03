@@ -141,9 +141,9 @@ export default class Tile3DLayer extends CompositeLayer {
   }
 
   _onTileLoad(tileHeader) {
-    const {tileset3d} = this.state;
+    const {tileset3d, lastUpdatedViewports} = this.state;
     this.props.onTileLoad(tileHeader);
-    this._updateTileset(tileset3d);
+    this._updateTileset(tileset3d, lastUpdatedViewports);
     this.setNeedsUpdate();
   }
 
@@ -153,14 +153,13 @@ export default class Tile3DLayer extends CompositeLayer {
     this.props.onTileUnload(tileHeader);
   }
 
-  _updateTileset(tileset3d) {
+  _updateTileset(tileset3d, viewports = this.state?.activeViewports) {
     const {timeline} = this.context;
-    const {activeViewports} = this.state;
-    const viewportsNumber = Object.keys(activeViewports).length;
+    const viewportsNumber = Object.keys(viewports).length;
     if (!timeline || !viewportsNumber || !tileset3d) {
       return;
     }
-    const frameNumber = tileset3d.update(Object.values(activeViewports));
+    const frameNumber = tileset3d.update(Object.values(viewports));
     const tilesetChanged = this.state.frameNumber !== frameNumber;
     if (tilesetChanged) {
       this.setState({frameNumber});
