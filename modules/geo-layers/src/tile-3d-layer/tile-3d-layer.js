@@ -35,7 +35,8 @@ export default class Tile3DLayer extends CompositeLayer {
     this.state = {
       layerMap: {},
       tileset3d: null,
-      activeViewports: {}
+      activeViewports: {},
+      lastUpdatedViewports: null
     };
   }
 
@@ -66,10 +67,19 @@ export default class Tile3DLayer extends CompositeLayer {
   }
 
   activateViewport(viewport) {
-    super.activateViewport(viewport);
+    const {activeViewports, lastUpdatedViewports} = this.state;
+    const oldViewport = this.internalState.viewport;
+    this.internalState.viewport = viewport;
 
-    const {activeViewports} = this.state;
     activeViewports[viewport.id] = viewport;
+    const lastViewport = lastUpdatedViewports?.[viewport.id];
+    if (
+      !(oldViewport && viewport.equals(oldViewport)) &&
+      !(lastViewport && viewport.equals(lastViewport))
+    ) {
+      this.setChangeFlags({viewportChanged: true});
+      this.setNeedsUpdate();
+    }
   }
 
   getPickingInfo({info, sourceLayer}) {
@@ -128,6 +138,7 @@ export default class Tile3DLayer extends CompositeLayer {
     this.props.onTileLoad(tileHeader);
     this._updateTileset(tileset3d);
     if (tileset3d.isLoaded) {
+      this.state.lastUpdatedViewports = this.state.activeViewports;
       this.state.activeViewports = {};
     }
     this.setNeedsUpdate();
