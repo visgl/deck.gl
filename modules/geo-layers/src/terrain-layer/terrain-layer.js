@@ -106,7 +106,7 @@ export default class TerrainLayer extends CompositeLayer {
     const options = {
       ...loadOptions,
       fetch: {
-        ...loadOptions.fetch,
+        ...(loadOptions && loadOptions.fetch),
         signal
       },
       terrain: {
