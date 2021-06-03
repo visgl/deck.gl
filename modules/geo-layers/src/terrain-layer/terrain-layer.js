@@ -99,11 +99,14 @@ export default class TerrainLayer extends CompositeLayer {
   }
 
   loadTerrain({elevationData, bounds, elevationDecoder, meshMaxError, signal, workerUrl}) {
+    const loadOptions = this.getLoadOptions();
     if (!elevationData) {
       return null;
     }
     const options = {
+      ...loadOptions,
       fetch: {
+        ...loadOptions.fetch,
         signal
       },
       terrain: {
@@ -119,7 +122,7 @@ export default class TerrainLayer extends CompositeLayer {
   }
 
   getTiledTerrainData(tile) {
-    const {elevationData, texture, elevationDecoder, meshMaxError, workerUrl} = this.props;
+    const {elevationData, fetch, texture, elevationDecoder, meshMaxError, workerUrl} = this.props;
     const dataUrl = getURLFromTemplate(elevationData, tile);
     const textureUrl = getURLFromTemplate(texture, tile);
 
@@ -143,7 +146,7 @@ export default class TerrainLayer extends CompositeLayer {
     });
     const surface = textureUrl
       ? // If surface image fails to load, the tile should still be displayed
-        load(textureUrl, {fetch: {signal}}).catch(_ => null)
+        fetch(textureUrl, {layer: this, signal}).catch(_ => null)
       : Promise.resolve(null);
 
     return Promise.all([terrain, surface]);
