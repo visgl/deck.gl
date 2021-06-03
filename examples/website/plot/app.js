@@ -9,7 +9,6 @@ const EQUATION = (x, y) => (Math.sin(x * x + y * y) * x) / Math.PI;
 
 const INITIAL_VIEW_STATE = {
   target: [0.5, 0.5, 0.5],
-  orbitAxis: 'Y',
   rotationX: 30,
   rotationOrbit: -30,
   /* global window */
@@ -55,7 +54,7 @@ export default function App({resolution = 200, showAxis = true, equation = EQUAT
   return (
     <DeckGL
       layers={layers}
-      views={new OrbitView()}
+      views={new OrbitView({orbitAxis: 'Y'})}
       initialViewState={INITIAL_VIEW_STATE}
       controller={true}
       getTooltip={getTooltip}
