@@ -196,6 +196,14 @@ When [`picking`](/docs/developer-guide/custom-layers/picking.md) is enabled, `in
   - `url`: the url of the failed tile.
   - `message`: the error message.
 
+##### `_getMeshColor` (Function, optional)
+`_getMeshColor` is a function which allows to change color of mesh based on properties of [tileHeader](https://loaders.gl/docs/specifications/category-3d-tiles#tileheader-fields) object.
+It recieves `tileHeader` object as argument and return type is array of [r, g, b] values in the 0-255 range.
+This value is only applied when tile format is `mesh`.
+Can be used only for I3S debugging purposes.
+
+- Default: `_getMeshColor: (tileHeader) => [255, 255, 255]`
+
 ## Sub Layers
 
 The Tile3DLayer renders the following sublayers based on tile [format](https://github.com/AnalyticalGraphicsInc/3d-tiles/tree/master/specification#introduction):
