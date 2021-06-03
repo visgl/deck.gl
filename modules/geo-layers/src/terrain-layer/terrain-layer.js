@@ -98,11 +98,14 @@ export default class TerrainLayer extends CompositeLayer {
     }
   }
 
-  loadTerrain({elevationData, bounds, elevationDecoder, meshMaxError, workerUrl}) {
+  loadTerrain({elevationData, bounds, elevationDecoder, meshMaxError, signal, workerUrl}) {
     if (!elevationData) {
       return null;
     }
     const options = {
+      fetch: {
+        signal
+      },
       terrain: {
         bounds,
         meshMaxError,
@@ -120,7 +123,7 @@ export default class TerrainLayer extends CompositeLayer {
     const dataUrl = getURLFromTemplate(elevationData, tile);
     const textureUrl = getURLFromTemplate(texture, tile);
 
-    const {bbox, z} = tile;
+    const {bbox, signal, z} = tile;
     const viewport = new WebMercatorViewport({
       longitude: (bbox.west + bbox.east) / 2,
       latitude: (bbox.north + bbox.south) / 2,
@@ -135,6 +138,7 @@ export default class TerrainLayer extends CompositeLayer {
       bounds,
       elevationDecoder,
       meshMaxError,
+      signal,
       workerUrl
     });
     const surface = textureUrl
