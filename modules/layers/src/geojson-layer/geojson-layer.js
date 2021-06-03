@@ -60,6 +60,8 @@ const defaultProps = {
   ...IconLayer.defaultProps,
   ...TextLayer.defaultProps,
 
+  iconAtlas: {type: 'string', value: null},
+
   // Line and polygon outline color
   getLineColor: {type: 'accessor', value: defaultLineColor},
   // Point and polygon fill color
@@ -200,7 +202,7 @@ export default class GeoJsonLayer extends CompositeLayer {
       getSize,
       getText,
       getTextAnchor,
-      pointIconAtlas,
+      iconAtlas,
       iconMapping,
       lineHeight,
       maxWidth,
@@ -380,7 +382,7 @@ export default class GeoJsonLayer extends CompositeLayer {
       pointLayerProps = {
         alphaCutoff,
         billboard,
-        iconAtlas: pointIconAtlas, // if we use `iconAtlas` it does not work
+        iconAtlas,
         iconMapping,
         onIconError,
         sizeMaxPixels,
