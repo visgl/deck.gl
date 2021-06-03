@@ -28,13 +28,13 @@ const defaultProps = {
   fetch: {
     type: 'function',
     value: (url, {layer, loaders, options, signal}) => {
-      const loadOptions = {...options, ...layer.getLoadOptions()};
+      const loadOptions = options || layer.getLoadOptions();
       loadOptions.fetch = {
         ...loadOptions.fetch,
         signal
       };
 
-      return load(url, loaders, loadOptions);
+      return loaders ? load(url, loaders, loadOptions) : load(url, loadOptions);
     },
     compare: false
   },
