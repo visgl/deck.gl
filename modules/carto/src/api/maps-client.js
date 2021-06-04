@@ -21,7 +21,7 @@ const TILE_EXTENT = 4096;
 /**
  * Obtain a TileJson from Maps API v1 and v2
  */
-export async function getMapCarto({type, source, credentials}) {
+export async function getDataV1({type, source, credentials}) {
   const localCreds = {...getDefaultCredentials(), ...credentials};
   const {apiVersion} = localCreds;
   let url;
@@ -34,12 +34,12 @@ export async function getMapCarto({type, source, credentials}) {
       const mapConfig = createMapConfig(source);
       url = buildURLMapsAPIv1({mapConfig, credentials: localCreds});
       const layergroup = await request({url, credentials: localCreds});
-      return [layergroup.metadata.tilejson.vector, 'tilejson'];
+      return layergroup.metadata.tilejson.vector;
 
     case API_VERSIONS.V2:
       // Maps API v2
       url = buildURLMapsAPIv2({connection, type, source, credentials: localCreds});
-      return [await request({url, credentials: localCreds}), 'tilejson'];
+      return await request({url, credentials: localCreds});
 
     default:
       throw new Error(

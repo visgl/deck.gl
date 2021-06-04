@@ -1,7 +1,7 @@
 import {CompositeLayer, log} from '@deck.gl/core';
 import {MVTLayer} from '@deck.gl/geo-layers';
 import {GeoJsonLayer} from '@deck.gl/layers';
-import {getMapCartoCloudNative, getMapCarto, FORMATS, API_VERSIONS} from '../api';
+import {getData, getDataV1, FORMATS, API_VERSIONS} from '../api';
 import {MAP_TYPES} from '../api/maps-api-common';
 import {getDefaultCredentials} from '../config';
 
@@ -18,11 +18,8 @@ const defaultProps = {
   /**********************/
   // (String, required): connection name at CARTO platform
   connection: null,
-
   // override carto credentials for the layer, set to null to read from default
   credentials: null,
-  // sublayer used to render. Any deck.gl layer or null to autodetect
-  renderSubLayer: null,
   // (String {geojson, json, tileset}, optional). Desired data format. By default, it's guessed automaticaly
   format: null
 };
@@ -31,7 +28,7 @@ export default class CartoLayer extends CompositeLayer {
   initializeState() {
     this.state = {
       data: null,
-      renderSubLayer: null
+      apiVersion: null
     };
   }
 
@@ -79,7 +76,7 @@ export default class CartoLayer extends CompositeLayer {
       JSON.stringify(props.credentials) !== JSON.stringify(oldProps.credentials);
 
     if (shouldUpdateData) {
-      this.setState({data: null, renderSubLayer: null});
+      this.setState({data: null, apiVersion: null});
       this._updateData();
     }
   }
@@ -91,10 +88,9 @@ export default class CartoLayer extends CompositeLayer {
       const {apiVersion} = localConfig;
 
       let data;
-      let mapFormat;
 
       if (apiVersion === API_VERSIONS.V3) {
-        [data, mapFormat] = await getMapCartoCloudNative({
+        data = await getData({
           type,
           source,
           connection,
@@ -102,7 +98,7 @@ export default class CartoLayer extends CompositeLayer {
           format
         });
       } else if (apiVersion === API_VERSIONS.V1 || apiVersion === API_VERSIONS.V2) {
-        [data, mapFormat] = await getMapCarto({type, source, credentials});
+        data = await getDataV1({type, source, credentials});
       } else {
         log.assert(
           `Unknow apiVersion ${apiVersion}. Possible values are ${Object.values(
@@ -111,9 +107,7 @@ export default class CartoLayer extends CompositeLayer {
         );
       }
 
-      const renderSubLayer = this.state.renderSubLayer || getRenderSubLayerFromMapFormat(mapFormat);
-
-      this.setState({renderSubLayer, data});
+      this.setState({data, apiVersion});
       this.props.onDataLoad(data);
     } catch (err) {
       if (this.props.onDataError) {
@@ -125,18 +119,32 @@ export default class CartoLayer extends CompositeLayer {
   }
 
   renderLayers() {
-    const {data, renderSubLayer} = this.state;
+    const {data, apiVersion} = this.state;
+    const {type} = this.props;
+
     if (!data) return null;
 
     const {updateTriggers} = this.props;
     const props = {...this.props};
     delete props.data;
 
+    let layer;
+
+    if (
+      apiVersion === API_VERSIONS.V1 ||
+      apiVersion === API_VERSIONS.V2 ||
+      type === MAP_TYPES.TILESET
+    ) {
+      layer = MVTLayer;
+    } else {
+      layer = GeoJsonLayer;
+    }
+
     // eslint-disable-next-line new-cap
-    return new renderSubLayer(
+    return new layer(
       props,
       this.getSubLayerProps({
-        id: `carto-${renderSubLayer.layerName}`,
+        id: `carto-${layer.layerName}`,
         data,
         updateTriggers
       })
@@ -146,14 +154,3 @@ export default class CartoLayer extends CompositeLayer {
 
 CartoLayer.layerName = 'CartoLayer';
 CartoLayer.defaultProps = defaultProps;
-
-function getRenderSubLayerFromMapFormat(format) {
-  switch (format) {
-    case 'tilejson':
-      return MVTLayer;
-    case 'geojson':
-      return GeoJsonLayer;
-    default:
-      return null;
-  }
-}

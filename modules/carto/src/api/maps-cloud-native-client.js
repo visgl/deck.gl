@@ -80,7 +80,7 @@ function getUrlFromMetadata(metadata, format) {
   return null;
 }
 
-export async function getMapCartoCloudNative({type, source, connection, credentials, format}) {
+export async function getData({type, source, connection, credentials, format}) {
   const localCreds = {...getDefaultCredentials(), ...credentials};
 
   log.assert(localCreds.accessToken, 'Must define an access token');
@@ -105,5 +105,5 @@ export async function getMapCartoCloudNative({type, source, connection, credenti
     }
   }
 
-  return [await request({url, format: mapFormat}), mapFormat];
+  return await request({url, format: mapFormat});
 }
