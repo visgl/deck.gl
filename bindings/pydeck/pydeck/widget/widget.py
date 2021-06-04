@@ -84,7 +84,7 @@ class DeckGLWidget(DOMWidget):
         self._resize_handlers.register_callback(callback, remove=remove)
 
     def on_view_state_change(self, callback, debounce_seconds=0.2, remove=False):
-        callback = debounce(debouce_seconds)(callback) if debounce_seconds > 0 else callback
+        callback = debounce(debounce_seconds)(callback) if debounce_seconds > 0 else callback
         self._view_state_handlers.register_callback(callback, remove=remove)
 
     def on_click(self, callback, remove=False):
