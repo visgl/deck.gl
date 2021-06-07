@@ -68,6 +68,8 @@ This is an object to define the configuration to use in order to connect to the 
   * API_VERSIONS.V2
   * API_VERSIONS.V3
 
+API version v3 is currently available only in a private beta. If you want to test it, please contact us at [support@carto.com](mailto:support@carto.com?subject=Access%20to%20Cloud%20%Native%20%API%20(v3)).
+
 If using API v1 or v2, the following properties are used:
 
 * `username` (required): unique username in the platform
@@ -79,10 +81,11 @@ If using API v1 or v2, the following properties are used:
 
 If using API v3, these are the available properties:
 
-* `accessToken` (required): token to authenticate/authorize requests to the Maps API
 * `apiBaseUrl` (required): base URL for requests to the API (can be obtained in the CARTO Cloud Native Workspace)
+* `accessToken` (optional): token to authenticate/authorize requests to the Maps API (private datasets)
+* `publicToken` (optional): token to use with public datasets
 * `mapsUrl` (optional): Maps API URL Template. Default: 
-  * `https://{apiBaseUrl}/v3/maps` for v3
+  * `https://{apiBaseUrl}/v3/maps` 
 
 If you have a custom CARTO deployment (on-premise user or you're running CARTO from [Google Cloud Marketplace](https://console.cloud.google.com/marketplace/product/cartodb-public/carto-enterprise-byol)), you need to set the URLs to point to your instance. 
 
@@ -90,9 +93,36 @@ If you have a custom CARTO deployment (on-premise user or you're running CARTO f
 setDefaultCredentials({
   username: 'public',
   apiKey: 'default_public',
-  mapsUrl: 'https://<domain>/user/{user}/api/v2/map',
+  mapsUrl: 'https://<domain>/maps-v2/user/{user}',
 });
 ```
+
+### Support for other deck.gl layers
+
+The CARTO submodule includes layers (CartoLayer, CartoSQLLayer, CartoBQTilerLayer) that simplify interaction with the CARTO platform. These layers make use of the GeoJsonLayer composite layer for rendering vector tilesets and GeoJSON datasets served using the CARTO Maps API.
+
+If you want to use other deck.gl layers (i.e. ArcLayer, H3HexagonLayer...), there are two possibilities depending on the API version you are using:
+
+* If you are using the cloud native API version (v3), you can directly retrieve the data in the format expected by the layer using the `getData` function:
+
+```js
+import carto from '@deck.gl/carto';
+import { H3HexagonLayer } from '@deck.gl/geo-layers/';
+ 
+new H3HexagonLayer({
+  data: await carto.getData({
+    type: 'sql',
+    source: 'SELECT hex, count FROM populated_places'
+    connection: 'bigquery',
+    format: 'json',
+    filled: true,
+    getHexagon: d => d.hex,
+    getFillColor: d => [255, (1 - d.count / 500) * 255, 0],
+  })
+})
+```
+
+* If not using the cloud native API version, you can use the SQL API to retrieve the data in the required format. Please check the examples [here](https://docs.carto.com/deck-gl/examples/clustering-and-aggregation/h3-hexagon-layer/)
 
 ### Working with Tilesets and Maps API v2
 
