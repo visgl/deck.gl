@@ -52,26 +52,42 @@ const defaultProps = {
 
   pointType: 'circle',
 
-  ...IconLayer.defaultProps,
+  // TODO remove!!!
+  //...IconLayer.defaultProps,
   ...TextLayer.defaultProps,
 
-  sizeUnits: 'meters',
+  sizeUnits: 'pixels',
   sizeScale: 1,
   sizeMinPixels: 0,
   sizeMaxPixels: Number.MAX_SAFE_INTEGER,
 
+  alphaCutoff: 0.05,
+  billboard: true,
   iconAtlas: {type: 'string', value: null},
+  iconMapping: {},
+  onIconError: null,
 
-  // Line and polygon outline color
-  getLineColor: {type: 'accessor', value: defaultLineColor},
-  // Point and polygon fill color
-  getFillColor: {type: 'accessor', value: defaultFillColor},
-  // Point radius
-  getRadius: {type: 'accessor', value: 1},
-  // Line and polygon outline accessors
-  getLineWidth: {type: 'accessor', value: 1},
+  // Point (icon & text) angle
+  getAngle: {type: 'accessor', value: 0},
+  // Point (icon & text) color
+  getColor: {type: 'accessor', value: [0, 0, 0, 255]},
   // Polygon extrusion accessor
   getElevation: {type: 'accessor', value: 1000},
+  // Point (circle) and polygon fill color
+  getFillColor: {type: 'accessor', value: defaultFillColor},
+  // Point (icon) icon
+  getIcon: {type: 'accessor', value: x => x.icon},
+  // Line and polygon outline color
+  getLineColor: {type: 'accessor', value: defaultLineColor},
+  // Line and polygon outline accessors
+  getLineWidth: {type: 'accessor', value: 1},
+  // Point (icon & text) pixel offset
+  getPixelOffset: {type: 'accessor', value: [0, 0]},
+  // Point (circle) radius
+  getRadius: {type: 'accessor', value: 1},
+  // Point (icon & text) size
+  getSize: {type: 'accessor', value: 1},
+
   // Optional material for 'lighting' shader module
   material: true,
 

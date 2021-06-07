@@ -66,7 +66,8 @@ export default [
         getElevation: f => 500,
         lineWidthScale: 10,
         lineWidthMinPixels: 1,
-        pickable: true
+        pickable: true,
+        sizeUnits: 'meters'
       })
     ],
     goldenImage: './test/render/golden-images/geojson-lnglat.png'
@@ -102,7 +103,8 @@ export default [
         getElevation: f => 500,
         lineWidthScale: 10,
         lineWidthMinPixels: 1,
-        pickable: true
+        pickable: true,
+        sizeUnits: 'meters'
       })
     ],
     goldenImage: './test/render/golden-images/geojson-extruded-lnglat.png'
@@ -230,7 +232,7 @@ export default [
         getRadius: d => 10 + 3 * d.properties.name.length,
         opacity: 0.3,
         lineWidthMinPixels: 2,
-        pointRadiusUnits: 'pixels'
+        sizeUnits: 'pixels'
       }),
       new GeoJsonLayer({
         id: 'text',
