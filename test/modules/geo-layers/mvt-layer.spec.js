@@ -457,3 +457,52 @@ test('MVTLayer#triangulation', async t => {
 
   t.end();
 });
+
+test('MVTLayer#data.length', async t => {
+  const viewport = new WebMercatorViewport({
+    longitude: -100,
+    latitude: 40,
+    zoom: 3,
+    pitch: 0,
+    bearing: 0
+  });
+
+  let binaryDataLength;
+  const onAfterUpdate = ({layer}) => {
+    if (!layer.isLoaded) {
+      return;
+    }
+    const geoJsonLayer = layer.internalState.subLayers[0];
+    const polygons = geoJsonLayer.state.layerProps.polygons;
+    if (layer.props.binary) {
+      /* eslint-disable no-console, no-undef */
+      // console.log(geoJsonLayer.props.data.polygons);
+      binaryDataLength = polygons.data.length;
+    } else {
+      t.equals(polygons.data.length, binaryDataLength, 'should have equal length');
+    }
+  };
+
+  const props = {
+    data: ['./test/data/mvt-tiles/{z}/{x}/{y}.mvt'],
+    binary: true,
+    onTileError: error => {
+      if (!(error.message && error.message.includes('404'))) {
+        throw error;
+      }
+    },
+    loadOptions: {
+      mvt: {
+        workerUrl: null
+      }
+    }
+  };
+  const testCases = [{props, onAfterUpdate}];
+
+  // Run as separate test runs otherwise data is cached
+  testLayerAsync({Layer: MVTLayer, viewport, testCases, onError: t.notOk});
+  testCases[0].props.binary = false;
+  await testLayerAsync({Layer: MVTLayer, viewport, testCases, onError: t.notOk});
+
+  t.end();
+});
