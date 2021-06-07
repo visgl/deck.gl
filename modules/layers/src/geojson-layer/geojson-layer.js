@@ -19,8 +19,7 @@
 // THE SOFTWARE.
 
 import {CompositeLayer, log} from '@deck.gl/core';
-import IconLayer from '../icon-layer/icon-layer';
-import TextLayer from '../text-layer/text-layer';
+import {DEFAULT_CHAR_SET, DEFAULT_FONT_FAMILY, DEFAULT_FONT_WEIGHT} from '../text-layer/font-atlas-manager';
 import PathLayer from '../path-layer/path-layer';
 // Use primitive layer to avoid "Composite Composite" layers for now
 import SolidPolygonLayer from '../solid-polygon-layer/solid-polygon-layer';
@@ -52,10 +51,7 @@ const defaultProps = {
 
   pointType: 'circle',
 
-  // TODO remove!!!
-  //...IconLayer.defaultProps,
-  ...TextLayer.defaultProps,
-
+  // Point props
   sizeUnits: 'pixels',
   sizeScale: 1,
   sizeMinPixels: 0,
@@ -67,8 +63,28 @@ const defaultProps = {
   iconMapping: {},
   onIconError: null,
 
+  background: false,
+  backgroundPadding: [0, 0],
+  characterSet: DEFAULT_CHAR_SET,
+  fontFamily: DEFAULT_FONT_FAMILY,
+  lineHeight: 1,
+  fontWeight: DEFAULT_FONT_WEIGHT,
+  fontSettings: {},
+  maxWidth: -1,
+  outlineWidth: 0,
+  outlineColor: [0, 0, 0, 255],
+  wordBreak: 'break-word',
+
+  // Point (text) alignement baseline
+  getAlignmentBaseline: {type: 'accessor', value: 'center'},
   // Point (icon & text) angle
   getAngle: {type: 'accessor', value: 0},
+  // Point (text) background color
+  getBackgroundColor: {type: 'accessor', value: [255, 255, 255, 255]},
+  // Point (text) border color
+  getBorderColor: {type: 'accessor', value: [0, 0, 0, 255]},
+  // Point (text) border width
+  getBorderWidth: {type: 'accessor', value: 0},
   // Point (icon & text) color
   getColor: {type: 'accessor', value: [0, 0, 0, 255]},
   // Polygon extrusion accessor
@@ -87,6 +103,10 @@ const defaultProps = {
   getRadius: {type: 'accessor', value: 1},
   // Point (icon & text) size
   getSize: {type: 'accessor', value: 32},
+  // Point (text) text
+  getText: {type: 'accessor', value: x => x.properties?.name},
+  // Point (text) text anchor
+  getTextAnchor: {type: 'accessor', value: 'middle'},
 
   // Optional material for 'lighting' shader module
   material: true,
