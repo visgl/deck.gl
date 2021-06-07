@@ -52,13 +52,13 @@ const defaultProps = {
 
   pointType: 'circle',
 
-  pointRadiusUnits: 'meters',
-  pointRadiusScale: 1,
-  pointRadiusMinPixels: 0, //  min point radius in pixels
-  pointRadiusMaxPixels: Number.MAX_SAFE_INTEGER, // max point radius in pixels
-
   ...IconLayer.defaultProps,
   ...TextLayer.defaultProps,
+
+  sizeUnits: 'meters',
+  sizeScale: 1,
+  sizeMinPixels: 0,
+  sizeMaxPixels: Number.MAX_SAFE_INTEGER,
 
   iconAtlas: {type: 'string', value: null},
 
@@ -73,7 +73,13 @@ const defaultProps = {
   // Polygon extrusion accessor
   getElevation: {type: 'accessor', value: 1000},
   // Optional material for 'lighting' shader module
-  material: true
+  material: true,
+
+  // deprecated
+  pointRadiusUnits: {deprecatedFor: 'sizeUnits'},
+  pointRadiusScale: {deprecatedFor: 'sizeScale'},
+  pointRadiusMinPixels: {deprecatedFor: 'sizeMinPixels'},
+  pointRadiusMaxPixels: {deprecatedFor: 'sizeMaxPixels'}
 };
 export default class GeoJsonLayer extends CompositeLayer {
   initializeState() {
@@ -173,10 +179,10 @@ export default class GeoJsonLayer extends CompositeLayer {
       lineCapRounded,
       lineMiterLimit,
       pointType,
-      pointRadiusUnits,
-      pointRadiusScale,
-      pointRadiusMinPixels,
-      pointRadiusMaxPixels,
+      sizeUnits,
+      sizeScale,
+      sizeMinPixels,
+      sizeMaxPixels,
       elevationScale,
       lineDashJustified
     } = this.props;
@@ -209,10 +215,6 @@ export default class GeoJsonLayer extends CompositeLayer {
       onIconError,
       outlineColor,
       outlineWidth,
-      sizeMaxPixels,
-      sizeMinPixels,
-      sizeScale,
-      sizeUnits,
       wordBreak
     } = this.props;
 
@@ -350,10 +352,10 @@ export default class GeoJsonLayer extends CompositeLayer {
       pointLayerProps = {
         stroked,
         filled,
-        radiusUnits: pointRadiusUnits,
-        radiusScale: pointRadiusScale,
-        radiusMinPixels: pointRadiusMinPixels,
-        radiusMaxPixels: pointRadiusMaxPixels,
+        radiusUnits: sizeUnits,
+        radiusScale: sizeScale,
+        radiusMinPixels: sizeMinPixels,
+        radiusMaxPixels: sizeMaxPixels,
         lineWidthUnits,
         lineWidthScale,
         lineWidthMinPixels,
