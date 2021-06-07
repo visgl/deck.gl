@@ -51,7 +51,7 @@ export default [
         id: 'geojson-lnglat',
         data: geojson,
         opacity: 0.8,
-        getRadius: f => MARKER_SIZE_MAP[f.properties['marker-size']],
+        getSize: f => MARKER_SIZE_MAP[f.properties['marker-size']],
         getFillColor: f => {
           const color = parseColor(f.properties.fill || f.properties['marker-color']);
           const opacity = (f.properties['fill-opacity'] || 1) * 255;
@@ -88,7 +88,7 @@ export default [
         opacity: 0.8,
         extruded: true,
         wireframe: true,
-        getRadius: f => MARKER_SIZE_MAP[f.properties['marker-size']],
+        getSize: f => MARKER_SIZE_MAP[f.properties['marker-size']],
         getFillColor: f => {
           const color = parseColor(f.properties.fill || f.properties['marker-color']);
           const opacity = (f.properties['fill-opacity'] || 1) * 255;
@@ -229,7 +229,7 @@ export default [
         filled: true,
         getFillColor: [255, 255, 0],
         getLineColor: [0, 0, 255],
-        getRadius: d => 10 + 3 * d.properties.name.length,
+        getSize: d => 10 + 3 * d.properties.name.length,
         opacity: 0.3,
         lineWidthMinPixels: 2,
         sizeUnits: 'pixels'

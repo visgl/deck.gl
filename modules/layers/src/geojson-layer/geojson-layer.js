@@ -101,8 +101,6 @@ const defaultProps = {
   getLineWidth: {type: 'accessor', value: 1},
   // Point (icon & text) pixel offset
   getPixelOffset: {type: 'accessor', value: [0, 0]},
-  // Point (circle) radius
-  getRadius: {type: 'accessor', value: 1},
   // Point (icon & text) size
   getSize: {type: 'accessor', value: 32},
   // Point (text) text
@@ -114,6 +112,7 @@ const defaultProps = {
   material: true,
 
   // deprecated
+  getRadius: {deprecatedFor: 'getSize'},
   pointRadiusUnits: {deprecatedFor: 'sizeUnits'},
   pointRadiusScale: {deprecatedFor: 'sizeScale'},
   pointRadiusMinPixels: {deprecatedFor: 'sizeMinPixels'},
@@ -255,7 +254,6 @@ export default class GeoJsonLayer extends CompositeLayer {
       getLineDashArray,
       getLineWidth,
       getPixelOffset,
-      getRadius,
       getSize,
       getText,
       getTextAnchor,
@@ -397,21 +395,21 @@ export default class GeoJsonLayer extends CompositeLayer {
 
           getFillColor: this.getSubLayerAccessor(getFillColor),
           getLineColor: this.getSubLayerAccessor(getLineColor),
-          getRadius: this.getSubLayerAccessor(getRadius),
+          getRadius: this.getSubLayerAccessor(getSize),
           getLineWidth: this.getSubLayerAccessor(getLineWidth),
 
           transitions: transitions && {
             getPosition: transitions.geometry,
             getFillColor: transitions.getFillColor,
             getLineColor: transitions.getLineColor,
-            getRadius: transitions.getRadius,
+            getRadius: transitions.getSize,
             getLineWidth: transitions.getLineWidth
           }
         };
         pointLayerUpdateTriggers = {
           getFillColor: updateTriggers.getFillColor,
           getLineColor: updateTriggers.getLineColor,
-          getRadius: updateTriggers.getRadius,
+          getRadius: updateTriggers.getSize,
           getLineWidth: updateTriggers.getLineWidth
         };
         break;
