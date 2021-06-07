@@ -89,8 +89,6 @@ const defaultProps = {
   getBorderColor: {type: 'accessor', value: [0, 0, 0, 255]},
   // Point (text) border width
   getBorderWidth: {type: 'accessor', value: 0},
-  // Point (icon & text) color
-  getColor: {type: 'accessor', value: [0, 0, 0, 255]},
   // Polygon extrusion accessor
   getElevation: {type: 'accessor', value: 1000},
   // Point (circle) and polygon fill color
@@ -250,7 +248,6 @@ export default class GeoJsonLayer extends CompositeLayer {
       getBackgroundColor,
       getBorderColor,
       getBorderWidth,
-      getColor,
       getElevation,
       getFillColor,
       getIcon,
@@ -431,7 +428,7 @@ export default class GeoJsonLayer extends CompositeLayer {
           sizeUnits,
 
           getAngle: this.getSubLayerAccessor(getAngle),
-          getColor: this.getSubLayerAccessor(getColor),
+          getColor: this.getSubLayerAccessor(getFillColor),
           getIcon: this.getSubLayerAccessor(getIcon),
           getPixelOffset: this.getSubLayerAccessor(getPixelOffset),
           getSize: this.getSubLayerAccessor(getSize),
@@ -439,14 +436,14 @@ export default class GeoJsonLayer extends CompositeLayer {
           transitions: transitions && {
             getPosition: transitions.geometry,
             getAngle: transitions.getAngle,
-            getColor: transitions.getColor,
+            getColor: transitions.getFillColor,
             getPixelOffset: transitions.getPixelOffset,
             getSize: transitions.getSize
           }
         };
         pointLayerUpdateTriggers = {
           getAngle: updateTriggers.getAngle,
-          getColor: updateTriggers.getColor,
+          getColor: updateTriggers.getFillColor,
           getIcon: updateTriggers.getIcon,
           getPixelOffset: updateTriggers.getPixelOffset,
           getSize: updateTriggers.getSize
@@ -476,7 +473,7 @@ export default class GeoJsonLayer extends CompositeLayer {
           getBackgroundColor: this.getSubLayerAccessor(getBackgroundColor),
           getBorderColor: this.getSubLayerAccessor(getBorderColor),
           getBorderWidth: this.getSubLayerAccessor(getBorderWidth),
-          getColor: this.getSubLayerAccessor(getColor),
+          getColor: this.getSubLayerAccessor(getFillColor),
           getPixelOffset: this.getSubLayerAccessor(getPixelOffset),
           getSize: this.getSubLayerAccessor(getSize),
           getText: this.getSubLayerAccessor(getText),
@@ -489,7 +486,7 @@ export default class GeoJsonLayer extends CompositeLayer {
             getBackgroundColor: transitions.getBackgroundColor,
             getBorderColor: transitions.getBorderColor,
             getBorderWidth: transitions.getBorderWidth,
-            getColor: transitions.getColor,
+            getColor: transitions.getFillColor,
             getPixelOffset: transitions.getPixelOffset,
             getSize: transitions.getSize,
             getText: transitions.getText,
@@ -502,7 +499,7 @@ export default class GeoJsonLayer extends CompositeLayer {
           getBackgroundColor: updateTriggers.getBackgroundColor,
           getBorderColor: updateTriggers.getBorderColor,
           getBorderWidth: updateTriggers.getBorderWidth,
-          getColor: updateTriggers.getColor,
+          getColor: updateTriggers.getFillColor,
           getPixelOffset: updateTriggers.getPixelOffset,
           getSize: updateTriggers.getSize,
           getText: updateTriggers.getText,
