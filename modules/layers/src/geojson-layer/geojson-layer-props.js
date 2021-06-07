@@ -79,7 +79,6 @@ export function createLayerPropsFromBinary(geojsonBinary, uniqueIdProperty, enco
   layerProps.lines._pathType = 'open';
 
   layerProps.polygons.data = {
-    length: polygons.primitivePolygonIndices.value.length - 1,
     startIndices: polygons.primitivePolygonIndices.value,
     attributes: {
       getPolygon: polygons.positions,
@@ -95,6 +94,9 @@ export function createLayerPropsFromBinary(geojsonBinary, uniqueIdProperty, enco
   layerProps.polygons._normalize = false;
   if (polygons.triangles) {
     layerProps.polygons.data.attributes.indices = polygons.triangles.value;
+    layerProps.polygons.data.length = polygons.polygonIndices.value.length - 1;
+  } else {
+    layerProps.polygons.data.length = polygons.primitivePolygonIndices.value.length - 1;
   }
 
   layerProps.polygonsOutline.data = {
