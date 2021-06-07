@@ -475,8 +475,6 @@ test('MVTLayer#data.length', async t => {
     const geoJsonLayer = layer.internalState.subLayers[0];
     const polygons = geoJsonLayer.state.layerProps.polygons;
     if (layer.props.binary) {
-      /* eslint-disable no-console, no-undef */
-      // console.log(geoJsonLayer.props.data.polygons);
       binaryDataLength = polygons.data.length;
     } else {
       t.equals(polygons.data.length, binaryDataLength, 'should have equal length');
