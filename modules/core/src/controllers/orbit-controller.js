@@ -1,4 +1,4 @@
-import {clamp, Vector2} from 'math.gl';
+import {clamp} from 'math.gl';
 import Controller from './controller';
 import ViewState from './view-state';
 import {mod} from '../utils/math-utils';
@@ -16,8 +16,6 @@ const DEFAULT_STATE = {
 };
 
 /* Helpers */
-
-const zoom2Scale = zoom => Math.pow(2, zoom);
 
 export class OrbitState extends ViewState {
   constructor({
@@ -41,7 +39,6 @@ export class OrbitState extends ViewState {
     /** Interaction states, required to calculate change during transform */
     // Model state when the pan operation first started
     startPanPosition,
-    startTarget,
     // Model state when the rotate operation first started
     startRotatePos,
     startRotationX,
@@ -66,7 +63,6 @@ export class OrbitState extends ViewState {
 
     this._state = {
       startPanPosition,
-      startTarget,
       startRotatePos,
       startRotationX,
       startRotationOrbit,
@@ -82,11 +78,8 @@ export class OrbitState extends ViewState {
    * @param {[Number, Number]} pos - position on screen where the pointer grabs
    */
   panStart({pos}) {
-    const {target} = this._viewportProps;
-
     return this._getUpdatedState({
-      startPanPosition: pos,
-      startTarget: target
+      startPanPosition: this._unproject(pos)
     });
   }
 
@@ -94,13 +87,17 @@ export class OrbitState extends ViewState {
    * Pan
    * @param {[Number, Number]} pos - position on screen where the pointer is
    */
-  pan({pos, startPos}) {
-    const {startPanPosition, startTarget} = this._state;
-    const delta = new Vector2(pos).subtract(startPanPosition);
+  pan({pos, startPosition}) {
+    const startPanPosition = this._state.startPanPosition || startPosition;
 
-    return this._getUpdatedState({
-      target: this._calculateNewTarget({startTarget, pixelOffset: delta})
-    });
+    if (!startPanPosition) {
+      return this;
+    }
+
+    const viewport = this.makeViewport(this._viewportProps);
+    const newProps = viewport.panByPosition(startPanPosition, pos);
+
+    return this._getUpdatedState(newProps);
   }
 
   /**
@@ -109,8 +106,7 @@ export class OrbitState extends ViewState {
    */
   panEnd() {
     return this._getUpdatedState({
-      startPanPosition: null,
-      startTarget: null
+      startPanPosition: null
     });
   }
 
@@ -196,8 +192,7 @@ export class OrbitState extends ViewState {
    */
   zoomStart({pos}) {
     return this._getUpdatedState({
-      startZoomPosition: pos,
-      startTarget: this._viewportProps.target,
+      startZoomPosition: this._unproject(pos),
       startZoom: this._viewportProps.zoom
     });
   }
@@ -211,8 +206,8 @@ export class OrbitState extends ViewState {
    *   relative scale.
    */
   zoom({pos, startPos, scale}) {
-    const {zoom, width, height, target} = this._viewportProps;
-    let {startZoom, startZoomPosition, startTarget} = this._state;
+    const {zoom} = this._viewportProps;
+    let {startZoom, startZoomPosition} = this._state;
     if (!Number.isFinite(startZoom)) {
       // We have two modes of zoom:
       // scroll zoom that are discrete events (transform from the current zoom level),
@@ -221,20 +216,15 @@ export class OrbitState extends ViewState {
       // If startZoom state is defined, then use the startZoom state;
       // otherwise assume discrete zooming
       startZoom = zoom;
-      startTarget = target;
-      startZoomPosition = startPos || pos;
+      startZoomPosition = this._unproject(startPos) || this._unproject(pos);
     }
 
     const newZoom = this._calculateNewZoom({scale, startZoom});
-    const startScale = zoom2Scale(startZoom);
-    const newScale = zoom2Scale(newZoom);
-
-    const dX = (width / 2 - startZoomPosition[0]) * (newScale / startScale - 1);
-    const dY = (height / 2 - startZoomPosition[1]) * (newScale / startScale - 1);
+    const zoomedViewport = this.makeViewport({...this._viewportProps, zoom: newZoom});
 
     return this._getUpdatedState({
       zoom: newZoom,
-      target: this._calculateNewTarget({startTarget, zoom: newZoom, pixelOffset: [dX, dY]})
+      ...zoomedViewport.panByPosition(startZoomPosition, pos)
     });
   }
 
@@ -245,7 +235,6 @@ export class OrbitState extends ViewState {
   zoomEnd() {
     return this._getUpdatedState({
       startZoomPosition: null,
-      startTarget: null,
       startZoom: null
     });
   }
@@ -263,31 +252,19 @@ export class OrbitState extends ViewState {
   }
 
   moveLeft(speed = 50) {
-    const pixelOffset = [-speed, 0];
-    return this._getUpdatedState({
-      target: this._calculateNewTarget({pixelOffset})
-    });
+    return this._panFromCenter([-speed, 0]);
   }
 
   moveRight(speed = 50) {
-    const pixelOffset = [speed, 0];
-    return this._getUpdatedState({
-      target: this._calculateNewTarget({pixelOffset})
-    });
+    return this._panFromCenter([speed, 0]);
   }
 
   moveUp(speed = 50) {
-    const pixelOffset = [0, -speed];
-    return this._getUpdatedState({
-      target: this._calculateNewTarget({pixelOffset})
-    });
+    return this._panFromCenter([0, -speed]);
   }
 
   moveDown(speed = 50) {
-    const pixelOffset = [0, speed];
-    return this._getUpdatedState({
-      target: this._calculateNewTarget({pixelOffset})
-    });
+    return this._panFromCenter([0, speed]);
   }
 
   rotateLeft(speed = 15) {
@@ -316,6 +293,11 @@ export class OrbitState extends ViewState {
 
   /* Private methods */
 
+  _unproject(pos) {
+    const viewport = this.makeViewport(this._viewportProps);
+    return pos && viewport.unproject(pos);
+  }
+
   // Calculates new zoom
   _calculateNewZoom({scale, startZoom}) {
     const {maxZoom, minZoom} = this._viewportProps;
@@ -326,17 +308,12 @@ export class OrbitState extends ViewState {
     return clamp(zoom, minZoom, maxZoom);
   }
 
-  _calculateNewTarget({startTarget, zoom, pixelOffset}) {
-    const viewportProps = {...this._viewportProps};
-    if (Number.isFinite(zoom)) {
-      viewportProps.zoom = zoom;
-    }
-    if (startTarget) {
-      viewportProps.target = startTarget;
-    }
-    const viewport = this.makeViewport(viewportProps);
-    const center = viewport.project(viewportProps.target);
-    return viewport.unproject([center[0] - pixelOffset[0], center[1] - pixelOffset[1], center[2]]);
+  _panFromCenter(offset) {
+    const {width, height, target} = this._viewportProps;
+    return this.pan({
+      startPosition: target,
+      pos: [width / 2 + offset[0], height / 2 + offset[1]]
+    });
   }
 
   _getUpdatedState(newProps) {
