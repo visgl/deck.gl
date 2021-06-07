@@ -295,19 +295,26 @@ export default class ViewManager {
     this._viewports = [];
     this.controllers = {};
 
+    let invalidateControllers = false;
     // Create controllers in reverse order, so that views on top receive events first
     for (let i = views.length; i--; ) {
       const view = views[i];
       const viewState = this.getViewState(view);
       const viewport = view.makeViewport({width, height, viewState});
 
+      let oldController = oldControllers[view.id];
+      if (!oldController) {
+        // When a new controller is added, invalidate all controllers below it so that
+        // events are registered in the correct order
+        invalidateControllers = true;
+      } else if (invalidateControllers) {
+        // Remove and reattach invalidated controller
+        oldController.finalize();
+        oldController = null;
+      }
+
       // Update the controller
-      this.controllers[view.id] = this._updateController(
-        view,
-        viewState,
-        viewport,
-        oldControllers[view.id]
-      );
+      this.controllers[view.id] = this._updateController(view, viewState, viewport, oldController);
 
       this._viewports.unshift(viewport);
     }
