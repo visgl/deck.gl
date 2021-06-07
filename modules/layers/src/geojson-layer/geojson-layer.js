@@ -269,9 +269,9 @@ export default class GeoJsonLayer extends CompositeLayer {
     const PolygonStrokeLayer = this.getSubLayerClass('polygons-stroke', PathLayer);
     const LineStringsLayer = this.getSubLayerClass('line-strings', PathLayer);
 
-    const PointsLayerClass = PointsLayerClassMap[pointType];
+    let PointsLayerClass = PointsLayerClassMap[pointType];
     if (!PointsLayerClass) {
-      throw new Error(`pointType must be one of: ${Object.keys(PointsLayerClassMap)}`);
+      PointsLayerClass = PointsLayerClassMap[defaultProps.pointType];
     }
     const PointsLayer = this.getSubLayerClass('points', PointsLayerClass);
 

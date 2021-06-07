@@ -1,3 +1,4 @@
+import {log} from '@deck.gl/core';
 import {Matrix4} from 'math.gl';
 import {MVTLoader} from '@loaders.gl/mvt';
 import {binaryToGeoJson} from '@loaders.gl/gis';
@@ -139,7 +140,7 @@ export default class MVTLayer extends TileLayer {
     const subLayers = super.renderSubLayers(props);
 
     if (this.props.binary && !(subLayers instanceof GeoJsonLayer)) {
-      throw new Error('renderSubLayers() must return GeoJsonLayer when using binary:true');
+      log.warn('renderSubLayers() must return GeoJsonLayer when using binary:true');
     }
 
     return subLayers;
