@@ -54,14 +54,14 @@ export default class _MeshLayer extends SimpleMeshLayer {
   }
 
   draw(opts) {
-    const {featureIds} = this.props;
+    const {pickFeatures} = this.props;
     if (!this.state.model) {
       return;
     }
     this.state.model.setUniforms({
       // Needed for PBR (TODO: find better way to get it)
       u_Camera: this.state.model.getUniforms().project_uCameraPosition,
-      u_pickFeatureIds: Boolean(featureIds)
+      u_pickFeatureIds: pickFeatures
     });
 
     super.draw(opts);

@@ -19,6 +19,7 @@ const defaultProps = {
   data: null,
   loader: Tiles3DLoader,
 
+  pickFeatures: {type: 'boolean', value: false},
   onTilesetLoad: {type: 'function', value: tileset3d => {}, compare: false},
   onTileLoad: {type: 'function', value: tileHeader => {}, compare: false},
   onTileUnload: {type: 'function', value: tileHeader => {}, compare: false},
@@ -230,7 +231,7 @@ export default class Tile3DLayer extends CompositeLayer {
   _makeSimpleMeshLayer(tileHeader, oldLayer) {
     const content = tileHeader.content;
     const {attributes, indices, modelMatrix, cartographicOrigin, material, featureIds} = content;
-    const {_getMeshColor} = this.props;
+    const {_getMeshColor, pickFeatures} = this.props;
 
     const geometry =
       (oldLayer && oldLayer.props.mesh) ||
@@ -255,7 +256,8 @@ export default class Tile3DLayer extends CompositeLayer {
         modelMatrix,
         coordinateOrigin: cartographicOrigin,
         coordinateSystem: COORDINATE_SYSTEM.METER_OFFSETS,
-        featureIds
+        featureIds,
+        pickFeatures
       }
     );
   }
