@@ -96,14 +96,14 @@ export default class MVTLayer extends TileLayer {
     if (!url) {
       return Promise.reject('Invalid URL');
     }
-    let options = this.getLoadOptions();
+    let loadOptions = this.getLoadOptions();
     const {binary, fetch} = this.props;
     const {signal, x, y, z} = tile;
     const loaders = this.props.loaders[0];
-    options = {
-      ...options,
+    loadOptions = {
+      ...loadOptions,
       mvt: {
-        ...(options && options.mvt),
+        ...loadOptions?.mvt,
         coordinates: this.context.viewport.resolution ? 'wgs84' : 'local',
         tileIndex: {x, y, z}
         // Local worker debug
@@ -113,7 +113,7 @@ export default class MVTLayer extends TileLayer {
       },
       gis: binary ? {format: 'binary'} : {}
     };
-    return fetch(url, {layer: this, loaders, options, signal});
+    return fetch(url, {propName: 'data', layer: this, loaders, loadOptions, signal});
   }
 
   renderSubLayers(props) {

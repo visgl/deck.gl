@@ -27,14 +27,20 @@ const defaultProps = {
   // Use load directly so we don't use ResourceManager
   fetch: {
     type: 'function',
-    value: (url, {layer, loaders, options, signal}) => {
-      const loadOptions = options || layer.getLoadOptions();
-      loadOptions.fetch = {
-        ...loadOptions.fetch,
-        signal
-      };
+    value: (url, {layer, loaders, loadOptions, signal}) => {
+      loadOptions = loadOptions || layer.getLoadOptions();
+      loaders = loaders || layer.props.loaders;
+      if (signal) {
+        loadOptions = {
+          ...loadOptions,
+          fetch: {
+            ...loadOptions?.fetch,
+            signal
+          }
+        };
+      }
 
-      return loaders ? load(url, loaders, loadOptions) : load(url, loadOptions);
+      return load(url, loaders, loadOptions);
     },
     compare: false
   },
