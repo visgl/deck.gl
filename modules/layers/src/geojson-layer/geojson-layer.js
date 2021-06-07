@@ -19,7 +19,11 @@
 // THE SOFTWARE.
 
 import {CompositeLayer, log} from '@deck.gl/core';
-import {DEFAULT_CHAR_SET, DEFAULT_FONT_FAMILY, DEFAULT_FONT_WEIGHT} from '../text-layer/font-atlas-manager';
+import {
+  DEFAULT_CHAR_SET,
+  DEFAULT_FONT_FAMILY,
+  DEFAULT_FONT_WEIGHT
+} from '../text-layer/font-atlas-manager';
 import PathLayer from '../path-layer/path-layer';
 // Use primitive layer to avoid "Composite Composite" layers for now
 import SolidPolygonLayer from '../solid-polygon-layer/solid-polygon-layer';
@@ -200,68 +204,64 @@ export default class GeoJsonLayer extends CompositeLayer {
     }
   }
 
-  /* eslint-disable complexity */
+  /* eslint-disable complexity, max-statements */
   renderLayers() {
     // Layer composition props
     const {stroked, filled, extruded, wireframe, material, transitions} = this.props;
 
     // Rendering props underlying layer
     const {
-      lineWidthUnits,
-      lineWidthScale,
-      lineWidthMinPixels,
-      lineWidthMaxPixels,
-      lineJointRounded,
-      lineCapRounded,
-      lineMiterLimit,
-      pointType,
-      sizeUnits,
-      sizeScale,
-      sizeMinPixels,
-      sizeMaxPixels,
-      elevationScale,
-      lineDashJustified
-    } = this.props;
-
-    // Rendering props for IconLayer & TextLayer
-    const {
       alphaCutoff,
       background,
       backgroundPadding,
       billboard,
       characterSet,
+      elevationScale,
       fontFamily,
       fontSettings,
       fontWeight,
+      iconAtlas,
+      iconMapping,
+      lineCapRounded,
+      lineDashJustified,
+      lineHeight,
+      lineJointRounded,
+      lineMiterLimit,
+      lineWidthMaxPixels,
+      lineWidthMinPixels,
+      lineWidthScale,
+      lineWidthUnits,
+      maxWidth,
+      onIconError,
+      outlineColor,
+      outlineWidth,
+      pointType,
+      sizeMaxPixels,
+      sizeMinPixels,
+      sizeScale,
+      sizeUnits,
+      wordBreak
+    } = this.props;
+
+    // Accessor props for underlying layers
+    const {
       getAlignmentBaseline,
       getAngle,
       getBackgroundColor,
       getBorderColor,
       getBorderWidth,
       getColor,
+      getElevation,
+      getFillColor,
       getIcon,
+      getLineColor,
+      getLineDashArray,
+      getLineWidth,
       getPixelOffset,
+      getRadius,
       getSize,
       getText,
       getTextAnchor,
-      iconAtlas,
-      iconMapping,
-      lineHeight,
-      maxWidth,
-      onIconError,
-      outlineColor,
-      outlineWidth,
-      wordBreak
-    } = this.props;
-
-    // Accessor props for underlying layers
-    const {
-      getLineColor,
-      getFillColor,
-      getRadius,
-      getLineWidth,
-      getLineDashArray,
-      getElevation,
       updateTriggers
     } = this.props;
 
