@@ -459,7 +459,7 @@ export default class HeatmapLayer extends AggregationLayer {
         textureSize;
       this.state.colorDomain = colorDomain.map(x => x * metersPerPixel * weightsScale);
     } else {
-      this.state.colorDomain = colorDomain ? colorDomain : DEFAULT_COLOR_DOMAIN;
+      this.state.colorDomain = colorDomain || DEFAULT_COLOR_DOMAIN;
     }
 
     const uniforms = {
