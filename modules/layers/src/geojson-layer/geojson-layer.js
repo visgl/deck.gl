@@ -86,7 +86,7 @@ const defaultProps = {
   // Point (circle) radius
   getRadius: {type: 'accessor', value: 1},
   // Point (icon & text) size
-  getSize: {type: 'accessor', value: 1},
+  getSize: {type: 'accessor', value: 32},
 
   // Optional material for 'lighting' shader module
   material: true,
