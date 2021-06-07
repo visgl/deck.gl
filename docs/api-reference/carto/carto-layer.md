@@ -80,15 +80,6 @@ Required. Data type. Possible values are:
 
 Required when apiVersion is `API_VERSIONS.V3`. Name of the connection in the CARTO workspace.
 
-##### `SubLayer` (String)
-
-Optional. Layer to use for rendering. 
-
-Default: 
-
-- `MVTLayer` when `type` is `MAP_TYPES.TILESET`. Not all the deck.gl layers are compatible with vector tiles.
-- `GeoJsonLayer` when type is `MAP_TYPES.SQL` or `MAP_TYPES.TABLE`
-
 ##### `format` (String)
 
 Optional. Only available when `apiVersion` is `API_VERSIONS.V3`. Force a specific data format to Maps API. Possible values are:
