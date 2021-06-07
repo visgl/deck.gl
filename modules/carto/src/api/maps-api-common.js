@@ -17,7 +17,8 @@ export const MAP_TYPES = {
 export const FORMATS = {
   GEOJSON: 'geojson',
   NDJSON: 'ndjson',
-  TILEJSON: 'tilejson'
+  TILEJSON: 'tilejson',
+  JSON: 'json'
 };
 
 /**

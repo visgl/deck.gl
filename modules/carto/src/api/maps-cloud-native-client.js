@@ -64,8 +64,8 @@ function buildURL({type, source, connection, credentials}) {
   return `${credentials.mapsUrl}/${connection}/${type}?${parameters.join('&')}`;
 }
 
-export async function getMapMetadata({ type, source, connection, credentials}) {
-  const url = buildURL({ type, source, connection, credentials});
+export async function getMapMetadata({type, source, connection, credentials}) {
+  const url = buildURL({type, source, connection, credentials});
 
   return await request({url, format: 'json'});
 }
@@ -80,15 +80,15 @@ function getUrlFromMetadata(metadata, format) {
   return null;
 }
 
-export async function getMapCartoCloudNative({ type, source, connection, credentials, format}) {
+export async function getData({type, source, connection, credentials, format}) {
   const localCreds = {...getDefaultCredentials(), ...credentials};
 
   log.assert(localCreds.accessToken, 'Must define an access token');
 
-  const metadata = await getMapMetadata({ type, source, connection, credentials: localCreds});
+  const metadata = await getMapMetadata({type, source, connection, credentials: localCreds});
   let url;
   let mapFormat;
-  
+
   if (format) {
     mapFormat = format;
     url = getUrlFromMetadata(metadata, format);
@@ -105,5 +105,5 @@ export async function getMapCartoCloudNative({ type, source, connection, credent
     }
   }
 
-  return [await request({url, format: mapFormat}), mapFormat];
+  return await request({url, format: mapFormat});
 }
