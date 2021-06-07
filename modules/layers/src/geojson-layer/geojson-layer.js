@@ -384,127 +384,132 @@ export default class GeoJsonLayer extends CompositeLayer {
 
     let pointLayerProps;
     let pointLayerUpdateTriggers;
-    if (pointType === 'circle') {
-      pointLayerProps = {
-        stroked,
-        filled,
-        radiusUnits: sizeUnits,
-        radiusScale: sizeScale,
-        radiusMinPixels: sizeMinPixels,
-        radiusMaxPixels: sizeMaxPixels,
-        lineWidthUnits,
-        lineWidthScale,
-        lineWidthMinPixels,
-        lineWidthMaxPixels,
+    switch (pointType) {
+      case 'circle':
+        pointLayerProps = {
+          stroked,
+          filled,
+          radiusUnits: sizeUnits,
+          radiusScale: sizeScale,
+          radiusMinPixels: sizeMinPixels,
+          radiusMaxPixels: sizeMaxPixels,
+          lineWidthUnits,
+          lineWidthScale,
+          lineWidthMinPixels,
+          lineWidthMaxPixels,
 
-        getFillColor: this.getSubLayerAccessor(getFillColor),
-        getLineColor: this.getSubLayerAccessor(getLineColor),
-        getRadius: this.getSubLayerAccessor(getRadius),
-        getLineWidth: this.getSubLayerAccessor(getLineWidth),
+          getFillColor: this.getSubLayerAccessor(getFillColor),
+          getLineColor: this.getSubLayerAccessor(getLineColor),
+          getRadius: this.getSubLayerAccessor(getRadius),
+          getLineWidth: this.getSubLayerAccessor(getLineWidth),
 
-        transitions: transitions && {
-          getPosition: transitions.geometry,
-          getFillColor: transitions.getFillColor,
-          getLineColor: transitions.getLineColor,
-          getRadius: transitions.getRadius,
-          getLineWidth: transitions.getLineWidth
-        }
-      };
-      pointLayerUpdateTriggers = {
-        getFillColor: updateTriggers.getFillColor,
-        getLineColor: updateTriggers.getLineColor,
-        getRadius: updateTriggers.getRadius,
-        getLineWidth: updateTriggers.getLineWidth
-      };
-    } else if (pointType === 'icon') {
-      pointLayerProps = {
-        alphaCutoff,
-        billboard,
-        iconAtlas,
-        iconMapping,
-        onIconError,
-        sizeMaxPixels,
-        sizeMinPixels,
-        sizeScale,
-        sizeUnits,
+          transitions: transitions && {
+            getPosition: transitions.geometry,
+            getFillColor: transitions.getFillColor,
+            getLineColor: transitions.getLineColor,
+            getRadius: transitions.getRadius,
+            getLineWidth: transitions.getLineWidth
+          }
+        };
+        pointLayerUpdateTriggers = {
+          getFillColor: updateTriggers.getFillColor,
+          getLineColor: updateTriggers.getLineColor,
+          getRadius: updateTriggers.getRadius,
+          getLineWidth: updateTriggers.getLineWidth
+        };
+        break;
+      case 'icon':
+        pointLayerProps = {
+          alphaCutoff,
+          billboard,
+          iconAtlas,
+          iconMapping,
+          onIconError,
+          sizeMaxPixels,
+          sizeMinPixels,
+          sizeScale,
+          sizeUnits,
 
-        getAngle: this.getSubLayerAccessor(getAngle),
-        getColor: this.getSubLayerAccessor(getColor),
-        getIcon: this.getSubLayerAccessor(getIcon),
-        getPixelOffset: this.getSubLayerAccessor(getPixelOffset),
-        getSize: this.getSubLayerAccessor(getSize),
+          getAngle: this.getSubLayerAccessor(getAngle),
+          getColor: this.getSubLayerAccessor(getColor),
+          getIcon: this.getSubLayerAccessor(getIcon),
+          getPixelOffset: this.getSubLayerAccessor(getPixelOffset),
+          getSize: this.getSubLayerAccessor(getSize),
 
-        transitions: transitions && {
-          getPosition: transitions.geometry,
-          getAngle: transitions.getAngle,
-          getColor: transitions.getColor,
-          getPixelOffset: transitions.getPixelOffset,
-          getSize: transitions.getSize
-        }
-      };
-      pointLayerUpdateTriggers = {
-        getAngle: updateTriggers.getAngle,
-        getColor: updateTriggers.getColor,
-        getIcon: updateTriggers.getIcon,
-        getPixelOffset: updateTriggers.getPixelOffset,
-        getSize: updateTriggers.getSize
-      };
-    } else if (pointType === 'text') {
-      pointLayerProps = {
-        background,
-        backgroundPadding,
-        billboard,
-        characterSet,
-        fontFamily,
-        fontSettings,
-        fontWeight,
-        lineHeight,
-        maxWidth,
-        outlineColor,
-        outlineWidth,
-        sizeMaxPixels,
-        sizeMinPixels,
-        sizeScale,
-        sizeUnits,
-        wordBreak,
+          transitions: transitions && {
+            getPosition: transitions.geometry,
+            getAngle: transitions.getAngle,
+            getColor: transitions.getColor,
+            getPixelOffset: transitions.getPixelOffset,
+            getSize: transitions.getSize
+          }
+        };
+        pointLayerUpdateTriggers = {
+          getAngle: updateTriggers.getAngle,
+          getColor: updateTriggers.getColor,
+          getIcon: updateTriggers.getIcon,
+          getPixelOffset: updateTriggers.getPixelOffset,
+          getSize: updateTriggers.getSize
+        };
+        break;
+      case 'text':
+        pointLayerProps = {
+          background,
+          backgroundPadding,
+          billboard,
+          characterSet,
+          fontFamily,
+          fontSettings,
+          fontWeight,
+          lineHeight,
+          maxWidth,
+          outlineColor,
+          outlineWidth,
+          sizeMaxPixels,
+          sizeMinPixels,
+          sizeScale,
+          sizeUnits,
+          wordBreak,
 
-        getAlignmentBaseline: this.getSubLayerAccessor(getAlignmentBaseline),
-        getAngle: this.getSubLayerAccessor(getAngle),
-        getBackgroundColor: this.getSubLayerAccessor(getBackgroundColor),
-        getBorderColor: this.getSubLayerAccessor(getBorderColor),
-        getBorderWidth: this.getSubLayerAccessor(getBorderWidth),
-        getColor: this.getSubLayerAccessor(getColor),
-        getPixelOffset: this.getSubLayerAccessor(getPixelOffset),
-        getSize: this.getSubLayerAccessor(getSize),
-        getText: this.getSubLayerAccessor(getText),
-        getTextAnchor: this.getSubLayerAccessor(getTextAnchor),
+          getAlignmentBaseline: this.getSubLayerAccessor(getAlignmentBaseline),
+          getAngle: this.getSubLayerAccessor(getAngle),
+          getBackgroundColor: this.getSubLayerAccessor(getBackgroundColor),
+          getBorderColor: this.getSubLayerAccessor(getBorderColor),
+          getBorderWidth: this.getSubLayerAccessor(getBorderWidth),
+          getColor: this.getSubLayerAccessor(getColor),
+          getPixelOffset: this.getSubLayerAccessor(getPixelOffset),
+          getSize: this.getSubLayerAccessor(getSize),
+          getText: this.getSubLayerAccessor(getText),
+          getTextAnchor: this.getSubLayerAccessor(getTextAnchor),
 
-        transitions: transitions && {
-          getPosition: transitions.geometry,
-          getAlignmentBaseline: transitions.getAlignmentBaseline,
-          getAngle: transitions.getAngle,
-          getBackgroundColor: transitions.getBackgroundColor,
-          getBorderColor: transitions.getBorderColor,
-          getBorderWidth: transitions.getBorderWidth,
-          getColor: transitions.getColor,
-          getPixelOffset: transitions.getPixelOffset,
-          getSize: transitions.getSize,
-          getText: transitions.getText,
-          getTextAnchor: transitions.getTextAnchor
-        }
-      };
-      pointLayerUpdateTriggers = {
-        getAlignmentBaseline: updateTriggers.getAlignmentBaseline,
-        getAngle: updateTriggers.getAngle,
-        getBackgroundColor: updateTriggers.getBackgroundColor,
-        getBorderColor: updateTriggers.getBorderColor,
-        getBorderWidth: updateTriggers.getBorderWidth,
-        getColor: updateTriggers.getColor,
-        getPixelOffset: updateTriggers.getPixelOffset,
-        getSize: updateTriggers.getSize,
-        getText: updateTriggers.getText,
-        getTextAnchor: updateTriggers.getTextAnchor
-      };
+          transitions: transitions && {
+            getPosition: transitions.geometry,
+            getAlignmentBaseline: transitions.getAlignmentBaseline,
+            getAngle: transitions.getAngle,
+            getBackgroundColor: transitions.getBackgroundColor,
+            getBorderColor: transitions.getBorderColor,
+            getBorderWidth: transitions.getBorderWidth,
+            getColor: transitions.getColor,
+            getPixelOffset: transitions.getPixelOffset,
+            getSize: transitions.getSize,
+            getText: transitions.getText,
+            getTextAnchor: transitions.getTextAnchor
+          }
+        };
+        pointLayerUpdateTriggers = {
+          getAlignmentBaseline: updateTriggers.getAlignmentBaseline,
+          getAngle: updateTriggers.getAngle,
+          getBackgroundColor: updateTriggers.getBackgroundColor,
+          getBorderColor: updateTriggers.getBorderColor,
+          getBorderWidth: updateTriggers.getBorderWidth,
+          getColor: updateTriggers.getColor,
+          getPixelOffset: updateTriggers.getPixelOffset,
+          getSize: updateTriggers.getSize,
+          getText: updateTriggers.getText,
+          getTextAnchor: updateTriggers.getTextAnchor
+        };
+        break;
+      default:
     }
 
     const pointsSubLayerProps = this.getSubLayerProps({
