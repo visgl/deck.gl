@@ -8,6 +8,8 @@ import {
 import {GeoJsonLayer} from '@deck.gl/layers';
 import {geojson, geojsonLarge, geojsonHole} from 'deck.gl-test/data';
 import antarctica from 'deck.gl-test/data/antarctica.geo.json';
+import capitals from 'deck.gl-test/data/us-state-capitals.geo.json';
+import {iconAtlas as iconMapping} from 'deck.gl-test/data';
 import {parseColor, setOpacity} from '../../../examples/layer-browser/src/utils/color';
 import {SimpleMeshLayer} from '@deck.gl/mesh-layers';
 import {SphereGeometry} from '@luma.gl/core';
@@ -16,6 +18,8 @@ const sphere = new SphereGeometry({
   nlat: 20,
   nlong: 20
 });
+
+const ICON_ATLAS = './test/data/icon-atlas.png';
 
 const MARKER_SIZE_MAP = {
   small: 200,
@@ -206,5 +210,46 @@ export default [
       })
     ],
     goldenImage: './test/render/golden-images/geojson-wrap-longitude.png'
+  },
+  {
+    name: 'geojson-point-types',
+    viewState: {
+      longitude: -100,
+      latitude: 40,
+      zoom: 4
+    },
+    layers: [
+      new GeoJsonLayer({
+        id: 'circle',
+        data: capitals,
+        pointType: 'circle',
+        stroked: true,
+        filled: true,
+        getFillColor: [255, 255, 0],
+        getLineColor: [0, 0, 255],
+        getRadius: d => 10 + 3 * d.properties.name.length,
+        opacity: 0.3,
+        lineWidthMinPixels: 2,
+        pointRadiusUnits: 'pixels'
+      }),
+      new GeoJsonLayer({
+        id: 'text',
+        data: capitals,
+        pointType: 'text',
+        getText: d => d.properties.name
+      }),
+      new GeoJsonLayer({
+        id: 'icon',
+        data: capitals,
+        pointType: 'icon',
+        iconAtlas: ICON_ATLAS,
+        iconMapping,
+        sizeScale: 5,
+        getSize: 10,
+        getPosition: d => d.coordinates,
+        getIcon: d => (d.properties.state.length % 2 ? 'marker' : 'marker-warning')
+      })
+    ],
+    goldenImage: './test/render/golden-images/geojson-point-types.png'
   }
 ];
