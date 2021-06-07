@@ -2,7 +2,7 @@
  * Maps API Client for Carto Cloud Native
  */
 import {getDefaultCredentials} from '../config';
-import {encodeParameter, FORMATS, MAP_TYPES} from './maps-api-common';
+import {API_VERSIONS, encodeParameter, FORMATS, MAP_TYPES} from './maps-api-common';
 import {log} from '@deck.gl/core';
 
 /**
@@ -64,7 +64,7 @@ function buildURL({type, source, connection, credentials}) {
   return `${credentials.mapsUrl}/${connection}/${type}?${parameters.join('&')}`;
 }
 
-export async function getMapMetadata({type, source, connection, credentials}) {
+export async function mapInstantiation({type, source, connection, credentials}) {
   const url = buildURL({type, source, connection, credentials});
 
   return await request({url, format: 'json'});
@@ -83,9 +83,16 @@ function getUrlFromMetadata(metadata, format) {
 export async function getData({type, source, connection, credentials, format}) {
   const localCreds = {...getDefaultCredentials(), ...credentials};
 
-  log.assert(localCreds.accessToken, 'Must define an access token');
+  log.assert(connection, 'Must define connection');
+  log.assert(type, 'Must define a type');
+  log.assert(source, 'Must define a source');
 
-  const metadata = await getMapMetadata({type, source, connection, credentials: localCreds});
+  log.assert(localCreds.apiVersion === API_VERSIONS.V3, 'Method only available for v3');
+  log.assert(localCreds.apiBaseUrl, 'Must define apiBaseUrl');
+  log.assert(localCreds.accessToken, 'Must define an accessToken');
+  log.assert(localCreds.mapsUrl, 'mapsUrl cannot be undefined');
+
+  const metadata = await mapInstantiation({type, source, connection, credentials: localCreds});
   let url;
   let mapFormat;
 

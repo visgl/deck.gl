@@ -37,7 +37,7 @@ export default class CartoLayer extends CompositeLayer {
   }
 
   _checkProps(props) {
-    const {type, format, credentials, connection} = this.props;
+    const {type, format, credentials, connection} = props;
     const localCreds = {...getDefaultCredentials(), ...credentials};
     const {apiVersion} = localCreds;
 
@@ -51,11 +51,14 @@ export default class CartoLayer extends CompositeLayer {
     if (apiVersion === API_VERSIONS.V1 || apiVersion === API_VERSIONS.V2) {
       log.assert(!format, `Format not supported for apiVersion ${apiVersion}`);
       log.assert(
-        type !== MAP_TYPES.TABLE,
-        `Use type ${MAP_TYPES.QUERY} or ${MAP_TYPES.TILESET} for apiVersion ${apiVersion}`
+        type === MAP_TYPES.QUERY || type === MAP_TYPES.TILESET,
+        `Invalid type ${type}. Use type ${MAP_TYPES.QUERY} or ${
+          MAP_TYPES.TILESET
+        } for apiVersion ${apiVersion}`
       );
       log.assert(!connection, `Connection prop is not supported for apiVersion ${apiVersion}`);
     } else if (apiVersion === API_VERSIONS.V3) {
+      log.assert(connection, 'Missing mandatory connection parameter');
       log.assert(
         Object.values(MAP_TYPES).includes(type),
         `Invalid type ${type}. Possible values are ${Object.values(MAP_TYPES).toString()}`

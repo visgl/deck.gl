@@ -4,13 +4,13 @@ const defaultClassicCredentials = {
   username: 'public',
   apiKey: 'default_public',
   region: 'us',
-  // SQL API URL
-  sqlUrl: 'https://{user}.carto.com/api/v2/sql'
+  mapsUrl: null
 };
 
 const defaultCloudNativeCredentials = {
   accessToken: null,
-  apiBaseUrl: null
+  apiBaseUrl: null,
+  mapsUrl: null
 };
 
 let credentials = {};
@@ -52,7 +52,7 @@ export function setDefaultCredentials(opts) {
       if (!apiBaseUrl.endsWith('/')) {
         apiBaseUrl += '/';
       }
-      opts.mapsUrl = `${apiBaseUrl}v3/maps`;
+      opts.mapsUrl = opts.mapsUrl || `${apiBaseUrl}v3/maps`;
       credentials = {
         apiVersion,
         ...defaultCloudNativeCredentials,
