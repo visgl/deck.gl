@@ -1,5 +1,6 @@
 import {GLTFMaterialParser} from '@luma.gl/experimental';
 import {Model, pbr} from '@luma.gl/core';
+import GL from '@luma.gl/constants';
 import {SimpleMeshLayer} from '@deck.gl/mesh-layers';
 
 import vs from './mesh-layer-vertex.glsl';
@@ -17,7 +18,8 @@ function validateGeometryAttributes(attributes) {
 
 const defaultProps = {
   // PBR material object. _lighting must be pbr for this to work
-  pbrMaterial: {type: 'object', value: null}
+  pbrMaterial: {type: 'object', value: null},
+  featureIds: {type: 'array', value: null, optional: true}
 };
 
 export default class _MeshLayer extends SimpleMeshLayer {
@@ -28,6 +30,22 @@ export default class _MeshLayer extends SimpleMeshLayer {
     return {...shaders, vs, fs};
   }
 
+  initializeState() {
+    const {featureIds} = this.props;
+    super.initializeState();
+
+    if (featureIds) {
+      this.state.attributeManager.add({
+        featureIdsPickingColors: {
+          type: GL.UNSIGNED_BYTE,
+          size: 3,
+          noAlloc: true,
+          update: this.calculateFeatureIdsPickingColors
+        }
+      });
+    }
+  }
+
   updateState({props, oldProps, changeFlags}) {
     super.updateState({props, oldProps, changeFlags});
     if (props.pbrMaterial !== oldProps.pbrMaterial) {
@@ -36,24 +54,27 @@ export default class _MeshLayer extends SimpleMeshLayer {
   }
 
   draw(opts) {
+    const {featureIds} = this.props;
     if (!this.state.model) {
       return;
     }
     this.state.model.setUniforms({
       // Needed for PBR (TODO: find better way to get it)
-      u_Camera: this.state.model.getUniforms().project_uCameraPosition
+      u_Camera: this.state.model.getUniforms().project_uCameraPosition,
+      u_pickFeatureIds: Boolean(featureIds)
     });
+
     super.draw(opts);
   }
 
   getModel(mesh) {
-    const pbrMaterial = this.props.pbrMaterial;
+    const {id, pbrMaterial} = this.props;
     const materialParser = this.parseMaterial(pbrMaterial, mesh);
     const shaders = this.getShaders();
     validateGeometryAttributes(mesh.attributes);
     const model = new Model(this.context.gl, {
       ...this.getShaders(),
-      id: this.props.id,
+      id,
       geometry: mesh,
       defines: {...shaders.defines, ...materialParser?.defines},
       parameters: materialParser?.parameters,
@@ -85,6 +106,22 @@ export default class _MeshLayer extends SimpleMeshLayer {
       useTangents: false
     });
     return materialParser;
+  }
+
+  calculateFeatureIdsPickingColors(attribute) {
+    const {featureIds} = this.props;
+    const value = new Uint8ClampedArray(featureIds.length * attribute.size);
+
+    const pickingColor = [];
+    for (let index = 0; index < featureIds.length; index++) {
+      this.encodePickingColor(featureIds[index], pickingColor);
+
+      value[index * 3] = pickingColor[0];
+      value[index * 3 + 1] = pickingColor[1];
+      value[index * 3 + 2] = pickingColor[2];
+    }
+
+    attribute.value = value;
   }
 }
 
