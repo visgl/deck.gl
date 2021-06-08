@@ -70,8 +70,6 @@ const defaultProps = {
   textOutlineColor: [0, 0, 0, 255],
   textWordBreak: 'break-word',
 
-  // Point (icon & text) angle
-  getAngle: {type: 'accessor', value: 0},
   // Polygon extrusion accessor
   getElevation: {type: 'accessor', value: 1000},
   // Point (circle) and polygon fill color
@@ -82,8 +80,10 @@ const defaultProps = {
   getLineColor: {type: 'accessor', value: defaultLineColor},
   // Line and polygon outline accessors
   getLineWidth: {type: 'accessor', value: 1},
+  // Point (icon & text) angle
+  getPointAngle: {type: 'accessor', value: 0},
   // Point (icon & text) pixel offset
-  getPixelOffset: {type: 'accessor', value: [0, 0]},
+  getPointPixelOffset: {type: 'accessor', value: [0, 0]},
   // Point (icon & text) size
   getPointSize: {type: 'accessor', value: 32},
   // Point (text) text
@@ -229,7 +229,7 @@ export default class GeoJsonLayer extends CompositeLayer {
     // Accessor props for underlying layers
     const {
       getTextAlignmentBaseline,
-      getAngle,
+      getPointAngle,
       getTextBackgroundColor,
       getTextBorderColor,
       getTextBorderWidth,
@@ -239,7 +239,7 @@ export default class GeoJsonLayer extends CompositeLayer {
       getLineColor,
       getLineDashArray,
       getLineWidth,
-      getPixelOffset,
+      getPointPixelOffset,
       getPointSize,
       getText,
       getTextAnchor,
@@ -408,26 +408,26 @@ export default class GeoJsonLayer extends CompositeLayer {
           sizeScale: pointSizeScale,
           sizeUnits: pointSizeUnits,
 
-          getAngle: this.getSubLayerAccessor(getAngle),
+          getAngle: this.getSubLayerAccessor(getPointAngle),
           getColor: this.getSubLayerAccessor(getFillColor),
           getIcon: this.getSubLayerAccessor(getIcon),
-          getPixelOffset: this.getSubLayerAccessor(getPixelOffset),
+          getPixelOffset: this.getSubLayerAccessor(getPointPixelOffset),
           getSize: this.getSubLayerAccessor(getPointSize),
 
           transitions: transitions && {
             getPosition: transitions.geometry,
-            getAngle: transitions.getAngle,
+            getAngle: transitions.getPointAngle,
             getColor: transitions.getFillColor,
-            getPixelOffset: transitions.getPixelOffset,
+            getPixelOffset: transitions.getPointPixelOffset,
             getSize: transitions.getPointSize
           }
         };
         pointLayerUpdateTriggers = {
-          getAngle: updateTriggers.getAngle,
+          getAngle: updateTriggers.getPointAngle,
           getColor: updateTriggers.getFillColor,
           getIcon: updateTriggers.getIcon,
-          getPixelOffset: updateTriggers.getPixelOffset,
-          getSize: updateTriggers.getSize
+          getPixelOffset: updateTriggers.getPointPixelOffset,
+          getSize: updateTriggers.getPointSize
         };
         break;
       case 'text':
@@ -447,12 +447,12 @@ export default class GeoJsonLayer extends CompositeLayer {
           wordBreak: textWordBreak,
 
           getAlignmentBaseline: this.getSubLayerAccessor(getTextAlignmentBaseline),
-          getAngle: this.getSubLayerAccessor(getAngle),
+          getAngle: this.getSubLayerAccessor(getPointAngle),
           getBackgroundColor: this.getSubLayerAccessor(getTextBackgroundColor),
           getBorderColor: this.getSubLayerAccessor(getTextBorderColor),
           getBorderWidth: this.getSubLayerAccessor(getTextBorderWidth),
           getColor: this.getSubLayerAccessor(getFillColor),
-          getPixelOffset: this.getSubLayerAccessor(getPixelOffset),
+          getPixelOffset: this.getSubLayerAccessor(getPointPixelOffset),
           getSize: this.getSubLayerAccessor(getPointSize),
           getText: this.getSubLayerAccessor(getText),
           getTextAnchor: this.getSubLayerAccessor(getTextAnchor),
@@ -460,12 +460,12 @@ export default class GeoJsonLayer extends CompositeLayer {
           transitions: transitions && {
             getPosition: transitions.geometry,
             getAlignmentBaseline: transitions.getTextAlignmentBaseline,
-            getAngle: transitions.getAngle,
+            getAngle: transitions.getPointAngle,
             getBackgroundColor: transitions.getTextBackgroundColor,
             getBorderColor: transitions.getTextBorderColor,
             getBorderWidth: transitions.getTextBorderWidth,
             getColor: transitions.getFillColor,
-            getPixelOffset: transitions.getPixelOffset,
+            getPixelOffset: transitions.getPointPixelOffset,
             getSize: transitions.getPointSize,
             getText: transitions.getText,
             getTextAnchor: transitions.getTextAnchor
@@ -473,12 +473,12 @@ export default class GeoJsonLayer extends CompositeLayer {
         };
         pointLayerUpdateTriggers = {
           getAlignmentBaseline: updateTriggers.getTextAlignmentBaseline,
-          getAngle: updateTriggers.getAngle,
+          getAngle: updateTriggers.getPointAngle,
           getBackgroundColor: updateTriggers.getTextBackgroundColor,
           getBorderColor: updateTriggers.getTextBorderColor,
           getBorderWidth: updateTriggers.getTextBorderWidth,
           getColor: updateTriggers.getFillColor,
-          getPixelOffset: updateTriggers.getPixelOffset,
+          getPixelOffset: updateTriggers.getPointPixelOffset,
           getSize: updateTriggers.getPointSize,
           getText: updateTriggers.getText,
           getTextAnchor: updateTriggers.getTextAnchor
