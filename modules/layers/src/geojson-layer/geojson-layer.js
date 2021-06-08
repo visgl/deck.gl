@@ -56,10 +56,10 @@ const defaultProps = {
   pointType: 'circle',
 
   // Point props
-  sizeUnits: 'pixels',
-  sizeScale: 1,
-  sizeMinPixels: 0,
-  sizeMaxPixels: Number.MAX_SAFE_INTEGER,
+  pointSizeUnits: 'pixels',
+  pointSizeScale: 1,
+  pointSizeMinPixels: 0,
+  pointSizeMaxPixels: Number.MAX_SAFE_INTEGER,
 
   alphaCutoff: 0.05,
   billboard: true,
@@ -113,10 +113,10 @@ const defaultProps = {
 
   // deprecated
   getRadius: {deprecatedFor: 'getPointSize'},
-  pointRadiusUnits: {deprecatedFor: 'sizeUnits'},
-  pointRadiusScale: {deprecatedFor: 'sizeScale'},
-  pointRadiusMinPixels: {deprecatedFor: 'sizeMinPixels'},
-  pointRadiusMaxPixels: {deprecatedFor: 'sizeMaxPixels'}
+  pointRadiusUnits: {deprecatedFor: 'pointSizeUnits'},
+  pointRadiusScale: {deprecatedFor: 'pointSizeScale'},
+  pointRadiusMinPixels: {deprecatedFor: 'pointSizeMinPixels'},
+  pointRadiusMaxPixels: {deprecatedFor: 'pointSizeMaxPixels'}
 };
 export default class GeoJsonLayer extends CompositeLayer {
   initializeState() {
@@ -233,10 +233,10 @@ export default class GeoJsonLayer extends CompositeLayer {
       outlineColor,
       outlineWidth,
       pointType,
-      sizeMaxPixels,
-      sizeMinPixels,
-      sizeScale,
-      sizeUnits,
+      pointSizeMaxPixels,
+      pointSizeMinPixels,
+      pointSizeScale,
+      pointSizeUnits,
       wordBreak
     } = this.props;
 
@@ -384,10 +384,10 @@ export default class GeoJsonLayer extends CompositeLayer {
         pointLayerProps = {
           stroked,
           filled,
-          radiusUnits: sizeUnits,
-          radiusScale: sizeScale,
-          radiusMinPixels: sizeMinPixels,
-          radiusMaxPixels: sizeMaxPixels,
+          radiusUnits: pointSizeUnits,
+          radiusScale: pointSizeScale,
+          radiusMinPixels: pointSizeMinPixels,
+          radiusMaxPixels: pointSizeMaxPixels,
           lineWidthUnits,
           lineWidthScale,
           lineWidthMinPixels,
@@ -420,10 +420,10 @@ export default class GeoJsonLayer extends CompositeLayer {
           iconAtlas,
           iconMapping,
           onIconError,
-          sizeMaxPixels,
-          sizeMinPixels,
-          sizeScale,
-          sizeUnits,
+          sizeMaxPixels: pointSizeMaxPixels,
+          sizeMinPixels: pointSizeMinPixels,
+          sizeScale: pointSizeScale,
+          sizeUnits: pointSizeUnits,
 
           getAngle: this.getSubLayerAccessor(getAngle),
           getColor: this.getSubLayerAccessor(getFillColor),
@@ -460,10 +460,10 @@ export default class GeoJsonLayer extends CompositeLayer {
           maxWidth,
           outlineColor,
           outlineWidth,
-          sizeMaxPixels,
-          sizeMinPixels,
-          sizeScale,
-          sizeUnits,
+          sizeMaxPixels: pointSizeMaxPixels,
+          sizeMinPixels: pointSizeMinPixels,
+          sizeScale: pointSizeScale,
+          sizeUnits: pointSizeUnits,
           wordBreak,
 
           getAlignmentBaseline: this.getSubLayerAccessor(getAlignmentBaseline),

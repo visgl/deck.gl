@@ -67,7 +67,7 @@ export default [
         lineWidthScale: 10,
         lineWidthMinPixels: 1,
         pickable: true,
-        sizeUnits: 'meters'
+        pointSizeUnits: 'meters'
       })
     ],
     goldenImage: './test/render/golden-images/geojson-lnglat.png'
@@ -104,7 +104,7 @@ export default [
         lineWidthScale: 10,
         lineWidthMinPixels: 1,
         pickable: true,
-        sizeUnits: 'meters'
+        pointSizeUnits: 'meters'
       })
     ],
     goldenImage: './test/render/golden-images/geojson-extruded-lnglat.png'
@@ -232,7 +232,7 @@ export default [
         getPointSize: d => 10 + 3 * d.properties.name.length,
         opacity: 0.3,
         lineWidthMinPixels: 2,
-        sizeUnits: 'pixels'
+        pointSizeUnits: 'pixels'
       }),
       new GeoJsonLayer({
         id: 'text',
@@ -246,7 +246,7 @@ export default [
         pointType: 'icon',
         iconAtlas: ICON_ATLAS,
         iconMapping,
-        sizeScale: 5,
+        pointSizeScale: 5,
         getPointSize: 10,
         getPosition: d => d.coordinates,
         getIcon: d => (d.properties.state.length % 2 ? 'marker' : 'marker-warning')
