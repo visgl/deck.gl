@@ -228,21 +228,21 @@ export default class GeoJsonLayer extends CompositeLayer {
 
     // Accessor props for underlying layers
     const {
-      getTextAlignmentBaseline,
-      getPointAngle,
-      getTextBackgroundColor,
-      getTextBorderColor,
-      getTextBorderWidth,
       getElevation,
       getFillColor,
       getIcon,
       getLineColor,
       getLineDashArray,
       getLineWidth,
+      getPointAngle,
       getPointPixelOffset,
       getPointSize,
       getText,
+      getTextAlignmentBaseline,
       getTextAnchor,
+      getTextBackgroundColor,
+      getTextBorderColor,
+      getTextBorderWidth,
       updateTriggers
     } = this.props;
 
