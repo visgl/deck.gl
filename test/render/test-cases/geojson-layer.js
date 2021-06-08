@@ -51,7 +51,7 @@ export default [
         id: 'geojson-lnglat',
         data: geojson,
         opacity: 0.8,
-        getSize: f => MARKER_SIZE_MAP[f.properties['marker-size']],
+        getPointSize: f => MARKER_SIZE_MAP[f.properties['marker-size']],
         getFillColor: f => {
           const color = parseColor(f.properties.fill || f.properties['marker-color']);
           const opacity = (f.properties['fill-opacity'] || 1) * 255;
@@ -88,7 +88,7 @@ export default [
         opacity: 0.8,
         extruded: true,
         wireframe: true,
-        getSize: f => MARKER_SIZE_MAP[f.properties['marker-size']],
+        getPointSize: f => MARKER_SIZE_MAP[f.properties['marker-size']],
         getFillColor: f => {
           const color = parseColor(f.properties.fill || f.properties['marker-color']);
           const opacity = (f.properties['fill-opacity'] || 1) * 255;
@@ -229,7 +229,7 @@ export default [
         filled: true,
         getFillColor: [255, 255, 0],
         getLineColor: [0, 0, 255],
-        getSize: d => 10 + 3 * d.properties.name.length,
+        getPointSize: d => 10 + 3 * d.properties.name.length,
         opacity: 0.3,
         lineWidthMinPixels: 2,
         sizeUnits: 'pixels'
@@ -247,7 +247,7 @@ export default [
         iconAtlas: ICON_ATLAS,
         iconMapping,
         sizeScale: 5,
-        getSize: 10,
+        getPointSize: 10,
         getPosition: d => d.coordinates,
         getIcon: d => (d.properties.state.length % 2 ? 'marker' : 'marker-warning')
       })
