@@ -76,7 +76,7 @@ function App({viewState}) {
 }
 ```
 
->**CARTO Cloud Native** is currently available only in a private beta. If you want to test it, please contact us at [support@carto.com](mailto:support@carto.com?subject=Access%20to%20Cloud%20%Native%20%API%20(v3)).
+> **CARTO Cloud Native** is currently available only in a private beta. If you want to test it, please contact us at [support@carto.com](mailto:support@carto.com?subject=Access%20to%20Cloud%20%Native%20%API%20(v3)).
 
 ### Examples
 
