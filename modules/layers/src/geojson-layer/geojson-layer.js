@@ -248,7 +248,7 @@ export default class GeoJsonLayer extends CompositeLayer {
       );
 
     const pathLayer =
-      this.shouldRenderSubLayer('linestrings', layerProps.lines.data) &&
+      this.shouldRenderSubLayer('line-strings', layerProps.lines.data) &&
       new LineStringsLayer(
         {
           widthUnits: lineWidthUnits,
