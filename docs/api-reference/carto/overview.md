@@ -2,7 +2,7 @@
 
 The preferred and official solution for creating modern web apps using the [CARTO Location Intelligence platform](https://carto.com/) is deck.gl. 
 
-With deck.gl and the CARTO Cloud Native platform you can access directly your datasets and tilesets hosted in your current data warehouse. The Cloud Native platform provides integrations with Google BigQuery, Amazon Redshift, Snowflake and PostgreSQL-compatible databases.
+With deck.gl and **CARTO Cloud Native platform** you can access directly your datasets and tilesets hosted in your current data warehouse. The Cloud Native platform provides integrations with Google BigQuery, Amazon Redshift, Snowflake and PostgreSQL-compatible databases. Don't need to move your data to CARTO plaform.
 
 <img src="https://raw.githubusercontent.com/CartoDB/viz-doc/master/deck.gl/img/osm_buildings.jpg" />
 
@@ -76,7 +76,7 @@ function App({viewState}) {
 }
 ```
 
-**CARTO Cloud Native** is currently available only in a private beta. If you want to test it, please contact us at [support@carto.com](mailto:support@carto.com?subject=Access%20to%20Cloud%20%Native%20%API%20(v3)).
+>**CARTO Cloud Native** is currently available only in a private beta. If you want to test it, please contact us at [support@carto.com](mailto:support@carto.com?subject=Access%20to%20Cloud%20%Native%20%API%20(v3)).
 
 ### Examples
 

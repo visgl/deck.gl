@@ -76,7 +76,7 @@ The `DeckGL` React component is rewritten using functional component and hooks.
 
 ### @deck.gl/carto
 
-- Integration with **CARTO Cloud Native beta**. With deck.gl and the CARTO Cloud Native platform you can access directly your datasets and tilesets hosted in your current data warehouse (BigQuery, Snowflake, Redshift, Postgres). Don't need to move your data to carto plaform.
+- Integration with **CARTO Cloud Native beta**. With deck.gl and the CARTO Cloud Native platform you can access directly your datasets and tilesets hosted in your current data warehouse (BigQuery, Snowflake, Redshift, Postgres). Don't need to move your data to CARTO plaform.
 - A new `CartoLayer` is available to unify `CartoBQTilerLayer` and `CartoSQLLayer`. There are a migration guides for both: [CartoSQLLayer](/docs/api-reference/carto/carto-sql-layer.md#migration-to-cartolayer) and [CartoBQTilerLayer](/docs/api-reference/carto/carto-sql-layer.md#migration-to-cartolayer).
 - New `getData` method in CARTO Cloud Native [to support other deck.gl layers](/docs/api-reference/carto/overview.md#support-for-other-deck.gl-layers). 
 

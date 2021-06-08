@@ -1,5 +1,3 @@
-
-
 # CartoLayer
 
 `CartoLayer` is the layer to visualize data using the CARTO Maps API.
