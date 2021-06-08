@@ -280,7 +280,7 @@ The GeoJsonLayer renders the following sublayers:
 
 * `polygons-fill` - a [SolidPolygonLayer](/docs/api-reference/layers/solid-polygon-layer.md) rendering all the `Polygon` and `MultiPolygon` features.
 * `polygons-stroke` - a [PathLayer](/docs/api-reference/layers/path-layer.md) rendering the outline of all the `Polygon` and `MultiPolygon` features. Only rendered if `stroked: true` and `extruded: false`.
-* `linestrings` - a [PathLayer](/docs/api-reference/layers/path-layer.md) rendering all the `LineString` and `MultiLineString` features.
+* `line-strings` - a [PathLayer](/docs/api-reference/layers/path-layer.md) rendering all the `LineString` and `MultiLineString` features.
 * `points` - a [ScatterplotLayer](/docs/api-reference/layers/scatterplot-layer.md) rendering all the `Point` and `MultiPoint` features.
 
 
