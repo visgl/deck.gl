@@ -75,29 +75,29 @@ const defaultProps = {
   // Point (circle) and polygon fill color
   getFillColor: {type: 'accessor', value: defaultFillColor},
   // Point (icon) icon
-  getIcon: {type: 'accessor', value: x => x.icon},
+  getIcon: {type: 'accessor', value: x => x.icon, optional: true},
   // Line and polygon outline color
   getLineColor: {type: 'accessor', value: defaultLineColor},
   // Line and polygon outline accessors
   getLineWidth: {type: 'accessor', value: 1},
   // Point (icon & text) angle
-  getPointAngle: {type: 'accessor', value: 0},
+  getPointAngle: {type: 'accessor', value: 0, optional: true},
   // Point (icon & text) pixel offset
-  getPointPixelOffset: {type: 'accessor', value: [0, 0]},
+  getPointPixelOffset: {type: 'accessor', value: [0, 0], optional: true},
   // Point (icon & text) size
   getPointSize: {type: 'accessor', value: 32},
   // Point (text) text
-  getText: {type: 'accessor', value: x => x.properties?.name},
+  getText: {type: 'accessor', value: x => x.properties?.name, optional: true},
   // Point (text) alignement baseline
-  getTextAlignmentBaseline: {type: 'accessor', value: 'center'},
+  getTextAlignmentBaseline: {type: 'accessor', value: 'center', optional: true},
   // Point (text) text anchor
-  getTextAnchor: {type: 'accessor', value: 'middle'},
+  getTextAnchor: {type: 'accessor', value: 'middle', optional: true},
   // Point (text) background color
-  getTextBackgroundColor: {type: 'accessor', value: [255, 255, 255, 255]},
+  getTextBackgroundColor: {type: 'accessor', value: [255, 255, 255, 255], optional: true},
   // Point (text) border color
-  getTextBorderColor: {type: 'accessor', value: [0, 0, 0, 255]},
+  getTextBorderColor: {type: 'accessor', value: [0, 0, 0, 255], optional: true},
   // Point (text) border width
-  getTextBorderWidth: {type: 'accessor', value: 0},
+  getTextBorderWidth: {type: 'accessor', value: 0, optional: true},
 
   // Optional material for 'lighting' shader module
   material: true,

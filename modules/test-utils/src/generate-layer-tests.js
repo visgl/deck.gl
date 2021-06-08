@@ -146,7 +146,7 @@ function makeAltPropTestCase({propName, propTypes, defaultProps, sampleProps, as
       ];
 
     case 'accessor': {
-      if (typeof defaultProps[propName] === 'function') {
+      if (typeof defaultProps[propName] === 'function' || propDef.optional) {
         return null;
       }
       let callCount = 0;
