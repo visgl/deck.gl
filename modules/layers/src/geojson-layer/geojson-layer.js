@@ -70,16 +70,8 @@ const defaultProps = {
   textOutlineColor: [0, 0, 0, 255],
   textWordBreak: 'break-word',
 
-  // Point (text) alignement baseline
-  getAlignmentBaseline: {type: 'accessor', value: 'center'},
   // Point (icon & text) angle
   getAngle: {type: 'accessor', value: 0},
-  // Point (text) background color
-  getBackgroundColor: {type: 'accessor', value: [255, 255, 255, 255]},
-  // Point (text) border color
-  getBorderColor: {type: 'accessor', value: [0, 0, 0, 255]},
-  // Point (text) border width
-  getBorderWidth: {type: 'accessor', value: 0},
   // Polygon extrusion accessor
   getElevation: {type: 'accessor', value: 1000},
   // Point (circle) and polygon fill color
@@ -96,8 +88,16 @@ const defaultProps = {
   getPointSize: {type: 'accessor', value: 32},
   // Point (text) text
   getText: {type: 'accessor', value: x => x.properties?.name},
+  // Point (text) alignement baseline
+  getTextAlignmentBaseline: {type: 'accessor', value: 'center'},
   // Point (text) text anchor
   getTextAnchor: {type: 'accessor', value: 'middle'},
+  // Point (text) background color
+  getTextBackgroundColor: {type: 'accessor', value: [255, 255, 255, 255]},
+  // Point (text) border color
+  getTextBorderColor: {type: 'accessor', value: [0, 0, 0, 255]},
+  // Point (text) border width
+  getTextBorderWidth: {type: 'accessor', value: 0},
 
   // Optional material for 'lighting' shader module
   material: true,
@@ -228,11 +228,11 @@ export default class GeoJsonLayer extends CompositeLayer {
 
     // Accessor props for underlying layers
     const {
-      getAlignmentBaseline,
+      getTextAlignmentBaseline,
       getAngle,
-      getBackgroundColor,
-      getBorderColor,
-      getBorderWidth,
+      getTextBackgroundColor,
+      getTextBorderColor,
+      getTextBorderWidth,
       getElevation,
       getFillColor,
       getIcon,
@@ -446,11 +446,11 @@ export default class GeoJsonLayer extends CompositeLayer {
           sizeUnits: pointSizeUnits,
           wordBreak: textWordBreak,
 
-          getAlignmentBaseline: this.getSubLayerAccessor(getAlignmentBaseline),
+          getAlignmentBaseline: this.getSubLayerAccessor(getTextAlignmentBaseline),
           getAngle: this.getSubLayerAccessor(getAngle),
-          getBackgroundColor: this.getSubLayerAccessor(getBackgroundColor),
-          getBorderColor: this.getSubLayerAccessor(getBorderColor),
-          getBorderWidth: this.getSubLayerAccessor(getBorderWidth),
+          getBackgroundColor: this.getSubLayerAccessor(getTextBackgroundColor),
+          getBorderColor: this.getSubLayerAccessor(getTextBorderColor),
+          getBorderWidth: this.getSubLayerAccessor(getTextBorderWidth),
           getColor: this.getSubLayerAccessor(getFillColor),
           getPixelOffset: this.getSubLayerAccessor(getPixelOffset),
           getSize: this.getSubLayerAccessor(getPointSize),
@@ -459,11 +459,11 @@ export default class GeoJsonLayer extends CompositeLayer {
 
           transitions: transitions && {
             getPosition: transitions.geometry,
-            getAlignmentBaseline: transitions.getAlignmentBaseline,
+            getAlignmentBaseline: transitions.getTextAlignmentBaseline,
             getAngle: transitions.getAngle,
-            getBackgroundColor: transitions.getBackgroundColor,
-            getBorderColor: transitions.getBorderColor,
-            getBorderWidth: transitions.getBorderWidth,
+            getBackgroundColor: transitions.getTextBackgroundColor,
+            getBorderColor: transitions.getTextBorderColor,
+            getBorderWidth: transitions.getTextBorderWidth,
             getColor: transitions.getFillColor,
             getPixelOffset: transitions.getPixelOffset,
             getSize: transitions.getPointSize,
@@ -472,11 +472,11 @@ export default class GeoJsonLayer extends CompositeLayer {
           }
         };
         pointLayerUpdateTriggers = {
-          getAlignmentBaseline: updateTriggers.getAlignmentBaseline,
+          getAlignmentBaseline: updateTriggers.getTextAlignmentBaseline,
           getAngle: updateTriggers.getAngle,
-          getBackgroundColor: updateTriggers.getBackgroundColor,
-          getBorderColor: updateTriggers.getBorderColor,
-          getBorderWidth: updateTriggers.getBorderWidth,
+          getBackgroundColor: updateTriggers.getTextBackgroundColor,
+          getBorderColor: updateTriggers.getTextBorderColor,
+          getBorderWidth: updateTriggers.getTextBorderWidth,
           getColor: updateTriggers.getFillColor,
           getPixelOffset: updateTriggers.getPixelOffset,
           getSize: updateTriggers.getPointSize,
