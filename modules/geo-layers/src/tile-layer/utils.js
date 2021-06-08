@@ -117,8 +117,8 @@ function getIndexingCoords(bbox, scale, modelMatrixInverse) {
   return bbox.map(i => (i * scale) / TILE_SIZE);
 }
 
-function getScale(z) {
-  return Math.pow(2, z);
+function getScale(z, tileSize = TILE_SIZE) {
+  return (Math.pow(2, z) * TILE_SIZE) / tileSize;
 }
 
 // https://wiki.openstreetmap.org/wiki/Slippy_map_tilenames#Lon..2Flat._to_tile_numbers_2
@@ -130,25 +130,24 @@ export function osmTile2lngLat(x, y, z) {
   return [lng, lat];
 }
 
-function tile2XY(x, y, z) {
-  const scale = getScale(z);
+function tile2XY(x, y, z, tileSize) {
+  const scale = getScale(z, tileSize);
   return [(x / scale) * TILE_SIZE, (y / scale) * TILE_SIZE];
 }
-
-export function tileToBoundingBox(viewport, x, y, z) {
+export function tileToBoundingBox(viewport, x, y, z, tileSize = TILE_SIZE) {
   if (viewport.isGeospatial) {
     const [west, north] = osmTile2lngLat(x, y, z);
     const [east, south] = osmTile2lngLat(x + 1, y + 1, z);
     return {west, north, east, south};
   }
-  const [left, top] = tile2XY(x, y, z);
-  const [right, bottom] = tile2XY(x + 1, y + 1, z);
+  const [left, top] = tile2XY(x, y, z, tileSize);
+  const [right, bottom] = tile2XY(x + 1, y + 1, z, tileSize);
   return {left, top, right, bottom};
 }
 
-function getIdentityTileIndices(viewport, z, extent, modelMatrixInverse) {
+function getIdentityTileIndices(viewport, z, tileSize, extent, modelMatrixInverse) {
   const bbox = getBoundingBox(viewport, null, extent);
-  const scale = getScale(z);
+  const scale = getScale(z, tileSize);
   const [minX, minY, maxX, maxY] = getIndexingCoords(bbox, scale, modelMatrixInverse);
   const indices = [];
 
@@ -180,7 +179,9 @@ export function getTileIndices({
   modelMatrix,
   modelMatrixInverse
 }) {
-  let z = Math.round(viewport.zoom + Math.log2(TILE_SIZE / tileSize));
+  let z = viewport.isGeospatial
+    ? Math.round(viewport.zoom + Math.log2(TILE_SIZE / tileSize))
+    : Math.ceil(viewport.zoom);
   if (Number.isFinite(minZoom) && z < minZoom) {
     if (!extent) {
       return [];
@@ -196,7 +197,13 @@ export function getTileIndices({
   }
   return viewport.isGeospatial
     ? getOSMTileIndices(viewport, z, zRange, extent || DEFAULT_EXTENT)
-    : getIdentityTileIndices(viewport, z, transformedExtent || DEFAULT_EXTENT, modelMatrixInverse);
+    : getIdentityTileIndices(
+        viewport,
+        z,
+        tileSize,
+        transformedExtent || DEFAULT_EXTENT,
+        modelMatrixInverse
+      );
 }
 
 /**

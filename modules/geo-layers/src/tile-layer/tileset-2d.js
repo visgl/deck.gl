@@ -174,7 +174,8 @@ export default class Tileset2D {
 
   // Add custom metadata to tiles
   getTileMetadata({x, y, z}) {
-    return {bbox: tileToBoundingBox(this._viewport, x, y, z)};
+    const {tileSize} = this.opts;
+    return {bbox: tileToBoundingBox(this._viewport, x, y, z, tileSize)};
   }
 
   // Returns {x, y, z} of the parent tile
