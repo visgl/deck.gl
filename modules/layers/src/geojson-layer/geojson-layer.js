@@ -102,7 +102,7 @@ const defaultProps = {
   // Point (icon & text) pixel offset
   getPixelOffset: {type: 'accessor', value: [0, 0]},
   // Point (icon & text) size
-  getSize: {type: 'accessor', value: 32},
+  getPointSize: {type: 'accessor', value: 32},
   // Point (text) text
   getText: {type: 'accessor', value: x => x.properties?.name},
   // Point (text) text anchor
@@ -112,7 +112,7 @@ const defaultProps = {
   material: true,
 
   // deprecated
-  getRadius: {deprecatedFor: 'getSize'},
+  getRadius: {deprecatedFor: 'getPointSize'},
   pointRadiusUnits: {deprecatedFor: 'sizeUnits'},
   pointRadiusScale: {deprecatedFor: 'sizeScale'},
   pointRadiusMinPixels: {deprecatedFor: 'sizeMinPixels'},
@@ -254,7 +254,7 @@ export default class GeoJsonLayer extends CompositeLayer {
       getLineDashArray,
       getLineWidth,
       getPixelOffset,
-      getSize,
+      getPointSize,
       getText,
       getTextAnchor,
       updateTriggers
@@ -395,21 +395,21 @@ export default class GeoJsonLayer extends CompositeLayer {
 
           getFillColor: this.getSubLayerAccessor(getFillColor),
           getLineColor: this.getSubLayerAccessor(getLineColor),
-          getRadius: this.getSubLayerAccessor(getSize),
+          getRadius: this.getSubLayerAccessor(getPointSize),
           getLineWidth: this.getSubLayerAccessor(getLineWidth),
 
           transitions: transitions && {
             getPosition: transitions.geometry,
             getFillColor: transitions.getFillColor,
             getLineColor: transitions.getLineColor,
-            getRadius: transitions.getSize,
+            getRadius: transitions.getPointSize,
             getLineWidth: transitions.getLineWidth
           }
         };
         pointLayerUpdateTriggers = {
           getFillColor: updateTriggers.getFillColor,
           getLineColor: updateTriggers.getLineColor,
-          getRadius: updateTriggers.getSize,
+          getRadius: updateTriggers.getPointSize,
           getLineWidth: updateTriggers.getLineWidth
         };
         break;
@@ -429,14 +429,14 @@ export default class GeoJsonLayer extends CompositeLayer {
           getColor: this.getSubLayerAccessor(getFillColor),
           getIcon: this.getSubLayerAccessor(getIcon),
           getPixelOffset: this.getSubLayerAccessor(getPixelOffset),
-          getSize: this.getSubLayerAccessor(getSize),
+          getSize: this.getSubLayerAccessor(getPointSize),
 
           transitions: transitions && {
             getPosition: transitions.geometry,
             getAngle: transitions.getAngle,
             getColor: transitions.getFillColor,
             getPixelOffset: transitions.getPixelOffset,
-            getSize: transitions.getSize
+            getSize: transitions.getPointSize
           }
         };
         pointLayerUpdateTriggers = {
@@ -473,7 +473,7 @@ export default class GeoJsonLayer extends CompositeLayer {
           getBorderWidth: this.getSubLayerAccessor(getBorderWidth),
           getColor: this.getSubLayerAccessor(getFillColor),
           getPixelOffset: this.getSubLayerAccessor(getPixelOffset),
-          getSize: this.getSubLayerAccessor(getSize),
+          getSize: this.getSubLayerAccessor(getPointSize),
           getText: this.getSubLayerAccessor(getText),
           getTextAnchor: this.getSubLayerAccessor(getTextAnchor),
 
@@ -486,7 +486,7 @@ export default class GeoJsonLayer extends CompositeLayer {
             getBorderWidth: transitions.getBorderWidth,
             getColor: transitions.getFillColor,
             getPixelOffset: transitions.getPixelOffset,
-            getSize: transitions.getSize,
+            getSize: transitions.getPointSize,
             getText: transitions.getText,
             getTextAnchor: transitions.getTextAnchor
           }
@@ -499,7 +499,7 @@ export default class GeoJsonLayer extends CompositeLayer {
           getBorderWidth: updateTriggers.getBorderWidth,
           getColor: updateTriggers.getFillColor,
           getPixelOffset: updateTriggers.getPixelOffset,
-          getSize: updateTriggers.getSize,
+          getSize: updateTriggers.getPointSize,
           getText: updateTriggers.getText,
           getTextAnchor: updateTriggers.getTextAnchor
         };
