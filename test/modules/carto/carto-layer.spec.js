@@ -1,7 +1,7 @@
 import test from 'tape-catch';
 import {testLayerAsync} from '@deck.gl/test-utils';
 import {makeSpy} from '@probe.gl/test-utils';
-import {CartoLayer, API_VERSIONS, MAP_TYPES, FORMATS} from '@deck.gl/carto';
+import {CartoLayer, API_VERSIONS, MAP_TYPES} from '@deck.gl/carto';
 import {MVTLayer} from '@deck.gl/geo-layers';
 import {GeoJsonLayer} from '@deck.gl/layers';
 import {mockFetchMapsV2, mockFetchMapsV1, mockFetchMapsV3, restoreFetch} from './mock-fetch';
@@ -128,24 +128,6 @@ test('CartoLayer#should throws with invalid params for v1 and v2', t => {
       title: 'throws on invalid api version',
       props: {...layer.props, credentials: {apiVersion: 'wrong'}},
       regex: /invalid apiVersion/i
-    },
-    {
-      title: 'throws when format prop is used for v1',
-      props: {
-        ...layer.props,
-        format: FORMATS.TILEJSON,
-        credentials: {apiVersion: API_VERSIONS.V1}
-      },
-      regex: /format not supported/i
-    },
-    {
-      title: 'throws when format prop is used for v2',
-      props: {
-        ...layer.props,
-        format: FORMATS.TILEJSON,
-        credentials: {apiVersion: API_VERSIONS.V2}
-      },
-      regex: /format not supported/i
     },
     {
       title: 'throws when type is not defined for v1',

@@ -1,7 +1,7 @@
 import {CompositeLayer, log} from '@deck.gl/core';
 import {MVTLayer} from '@deck.gl/geo-layers';
 import {GeoJsonLayer} from '@deck.gl/layers';
-import {getData, getDataV1, FORMATS, API_VERSIONS} from '../api';
+import {getData, getDataV1, API_VERSIONS} from '../api';
 import {MAP_TYPES} from '../api/maps-api-common';
 import {getDefaultCredentials} from '../config';
 
@@ -13,15 +13,14 @@ const defaultProps = {
   onDataLoad: {type: 'function', value: data => {}, compare: false},
   onDataError: {type: 'function', value: null, compare: false, optional: true},
 
+  // override carto credentials for the layer, set to null to read from default
+  credentials: null,
+
   /*********************/
   /* API v3 PARAMETERS */
   /**********************/
   // (String, required): connection name at CARTO platform
-  connection: null,
-  // override carto credentials for the layer, set to null to read from default
-  credentials: null,
-  // (String {geojson, json, tileset}, optional). Desired data format. By default, it's guessed automaticaly
-  format: null
+  connection: null
 };
 
 export default class CartoLayer extends CompositeLayer {
@@ -37,7 +36,7 @@ export default class CartoLayer extends CompositeLayer {
   }
 
   _checkProps(props) {
-    const {type, format, credentials, connection} = props;
+    const {type, credentials, connection} = props;
     const localCreds = {...getDefaultCredentials(), ...credentials};
     const {apiVersion} = localCreds;
 
@@ -49,7 +48,6 @@ export default class CartoLayer extends CompositeLayer {
     );
 
     if (apiVersion === API_VERSIONS.V1 || apiVersion === API_VERSIONS.V2) {
-      log.assert(!format, `Format not supported for apiVersion ${apiVersion}`);
       log.assert(
         type === MAP_TYPES.QUERY || type === MAP_TYPES.TILESET,
         `Invalid type ${type}. Use type ${MAP_TYPES.QUERY} or ${
@@ -62,10 +60,6 @@ export default class CartoLayer extends CompositeLayer {
       log.assert(
         Object.values(MAP_TYPES).includes(type),
         `Invalid type ${type}. Possible values are ${Object.values(MAP_TYPES).toString()}`
-      );
-      log.assert(
-        !format || Object.values(FORMATS).includes(format),
-        `Invalid format ${format}. Possible values are ${Object.values(FORMATS).toString()}`
       );
     }
   }
@@ -86,7 +80,7 @@ export default class CartoLayer extends CompositeLayer {
 
   async _updateData() {
     try {
-      const {type, data: source, connection, credentials, format} = this.props;
+      const {type, data: source, connection, credentials} = this.props;
       const localConfig = {...getDefaultCredentials(), ...credentials};
       const {apiVersion} = localConfig;
 
@@ -97,8 +91,7 @@ export default class CartoLayer extends CompositeLayer {
           type,
           source,
           connection,
-          credentials,
-          format
+          credentials
         });
       } else if (apiVersion === API_VERSIONS.V1 || apiVersion === API_VERSIONS.V2) {
         data = await getDataV1({type, source, credentials});

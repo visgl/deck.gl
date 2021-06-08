@@ -2,13 +2,16 @@
 
 # CartoLayer
 
-`CartoLayer` is the layer to visualize data using the CARTO Maps API. You can apply custom SQL with moderately sized datasets (< 50 MB) and visualize really large datasets (up to billions of features) using pre-generated tilesets.
+`CartoLayer` is the layer to visualize data using the CARTO Maps API.
+
+## Usage
 
 ```js
 import DeckGL from '@deck.gl/react';
 import {CartoLayer, setDefaultCredentials} from '@deck.gl/carto';
 
 setDefaultCredentials({
+  apiVersion: API_VERSIONS.V2,
   username: 'public',
   apiKey: 'default_public'
 });
@@ -27,6 +30,32 @@ function App({viewState}) {
 }
 ```
 
+## Usage Carto Cloud Native
+
+```js
+import DeckGL from '@deck.gl/react';
+import {CartoLayer, setDefaultCredentials, MAP_TYPES, API_VERSIONS} from '@deck.gl/carto';
+
+setDefaultCredentials({
+  apiVersion: API_VERSIONS.V3
+  apiBaseUrl: 'https://gcp-us-east1.api.carto.com', 
+  accessToken: 'XXX',
+});
+
+function App({viewState}) {
+  const layer = new CartoLayer({
+    type: MAP_TYPES.QUERY,
+    connection: 'bigquery'
+    data: 'SELECT * FROM cartobq.testtables.points_10k',
+    pointRadiusMinPixels: 2,
+    getLineColor: [0, 0, 0, 200],
+    getFillColor: [238, 77, 90],
+    lineWidthMinPixels: 1
+  })
+
+  return <DeckGL viewState={viewState} layers={[layer]} />;
+}
+```
 ## Installation
 
 To install the dependencies from NPM:
@@ -59,7 +88,6 @@ To use pre-bundled scripts:
 new deck.carto.CartoLayer({});
 ```
 
-
 ## Properties
 
 This layer allows to work with the different CARTO Maps API versions (v1, v2 and v3). When using version v1 and v2, the layer always works with vector tiles so it inherits all properties from [`MVTLayer`](/docs/api-reference/geo-layers/mvt-layer.md). When using v3, the layer works with vector tiles if the `type` property is `MAP_TYPES.TILESET` and with GeoJSON data if the `type` is `MAP_TYPES.QUERY` or `MAP_TYPES.TABLE`. When using GeoJSON data, the layer inherits all properties from [`GeoJsonLayer`](/docs/api-reference/layers/geojson-layer.md).
@@ -72,26 +100,15 @@ Required. Either a SQL query or a name of dataset/tileset.
 
 Required. Data type. Possible values are:
 
-- `MAP_TYPES.QUERY`, if `data` is a SQL query. For API v2, it is possible to indicate the dataset name in the `data` parameter.
-- `MAP_TYPES.TABLE`, if `data` is a dataset name. Only compatible with API v3.
-- `MAP_TYPES.TILESET`, if `data` is a tileset name. Not compatible with API v1.
+- `MAP_TYPES.QUERY`, if `data` is a SQL query. 
+- `MAP_TYPES.TILESET`, if `data` is a tileset name.
+- `MAP_TYPES.TABLE`, if `data` is a dataset name. Only supported with API v3.
 
 ##### `connection` (String)
 
-Required when apiVersion is `API_VERSIONS.V3`. Name of the connection in the CARTO workspace.
+Required when apiVersion is `API_VERSIONS.V3`. 
 
-##### `format` (String)
-
-Optional. Only available when `apiVersion` is `API_VERSIONS.V3`. Force a specific data format to Maps API. Possible values are:
-
-- `FORMATS.GEOJSON`
-- `FORMATS.JSON`
-- `FORMATS.TILEJSON`
- 
-Default: 
-
-- `FORMATS.TILEJSON` when `apiVersion` is `API_VERSIONS.V1` or `API_VERSIONS.V2` or when `apiVersion` is `API_VERSIONS.V3` and `type` is `MAP_TYPES.TILESET`
-- `FORMATS.GEOJSON` when `apiVersion` is `API_VERSIONS.V3` and `type` is `MAP_TYPES.QUERY` or `MAP_TYPES.TABLE`. If the output size from the Maps API is > 50 MB, an error will be thrown. In that case, you need to pre-generate a tileset if you want to visualize this dataset.
+Name of the connection registered in the [CARTO workspace].
 
 ##### `uniqueIdProperty` (String)
 
@@ -124,7 +141,7 @@ Optional. Overrides the configuration to connect with CARTO. Check the configura
 
 Receives arguments:
 
-* `data` (Object) - Data in the format specified in the `format` property.
+* `data` (Object) - Data received from CARTO Maps API
 
 ##### `onDataError` (Function, optional)
 
