@@ -61,10 +61,8 @@ const defaultProps = {
   pointSizeMinPixels: 0,
   pointSizeMaxPixels: Number.MAX_SAFE_INTEGER,
 
-  alphaCutoff: 0.05,
   iconAtlas: {type: 'string', value: null},
   iconMapping: {},
-  onIconError: null,
 
   background: false,
   backgroundPadding: [0, 0],
@@ -72,7 +70,6 @@ const defaultProps = {
   fontFamily: DEFAULT_FONT_FAMILY,
   lineHeight: 1,
   fontWeight: DEFAULT_FONT_WEIGHT,
-  fontSettings: {},
   maxWidth: -1,
   outlineWidth: 0,
   outlineColor: [0, 0, 0, 255],
@@ -207,13 +204,11 @@ export default class GeoJsonLayer extends CompositeLayer {
 
     // Rendering props underlying layer
     const {
-      alphaCutoff,
       background,
       backgroundPadding,
       characterSet,
       elevationScale,
       fontFamily,
-      fontSettings,
       fontWeight,
       iconAtlas,
       iconMapping,
@@ -227,7 +222,6 @@ export default class GeoJsonLayer extends CompositeLayer {
       lineWidthScale,
       lineWidthUnits,
       maxWidth,
-      onIconError,
       outlineColor,
       outlineWidth,
       pointType,
@@ -413,10 +407,8 @@ export default class GeoJsonLayer extends CompositeLayer {
         break;
       case 'icon':
         pointLayerProps = {
-          alphaCutoff,
           iconAtlas,
           iconMapping,
-          onIconError,
           sizeMaxPixels: pointSizeMaxPixels,
           sizeMinPixels: pointSizeMinPixels,
           sizeScale: pointSizeScale,
@@ -450,7 +442,6 @@ export default class GeoJsonLayer extends CompositeLayer {
           backgroundPadding,
           characterSet,
           fontFamily,
-          fontSettings,
           fontWeight,
           lineHeight,
           maxWidth,
