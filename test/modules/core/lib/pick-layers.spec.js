@@ -370,6 +370,7 @@ const TEST_CASES = [
           getPointSize: 100,
           getLineWidth: 20,
           getElevation: 500,
+          pointSizeUnits: 'meters',
           lineWidthMinPixels: 1,
           pickable: true
         })
