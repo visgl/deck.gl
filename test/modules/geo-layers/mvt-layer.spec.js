@@ -468,6 +468,8 @@ test('MVTLayer#data.length', async t => {
   });
 
   let binaryDataLength;
+  let geoJsonDataLength;
+  let requests = 0;
   const onAfterUpdate = ({layer}) => {
     if (!layer.isLoaded) {
       return;
@@ -476,14 +478,19 @@ test('MVTLayer#data.length', async t => {
     const polygons = geoJsonLayer.state.layerProps.polygons;
     if (layer.props.binary) {
       binaryDataLength = polygons.data.length;
+      requests++;
     } else {
-      t.equals(polygons.data.length, binaryDataLength, 'should have equal length');
+      geoJsonDataLength = polygons.data.length;
+      requests++;
+    }
+
+    if (requests === 2) {
+      t.equals(geoJsonDataLength, binaryDataLength, 'should have equal length');
     }
   };
 
   const props = {
     data: ['./test/data/mvt-tiles/{z}/{x}/{y}.mvt'],
-    binary: true,
     onTileError: error => {
       if (!(error.message && error.message.includes('404'))) {
         throw error;
@@ -495,12 +502,11 @@ test('MVTLayer#data.length', async t => {
       }
     }
   };
-  const testCases = [{props, onAfterUpdate}];
+  const testCases = [
+    {props: {binary: false, ...props}, onAfterUpdate},
+    {props: {binary: true, ...props}, onAfterUpdate}
+  ];
 
-  // Run as separate test runs otherwise data is cached
-  testLayerAsync({Layer: MVTLayer, viewport, testCases, onError: t.notOk});
-  testCases[0].props.binary = false;
   await testLayerAsync({Layer: MVTLayer, viewport, testCases, onError: t.notOk});
-
   t.end();
 });
