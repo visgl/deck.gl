@@ -23,6 +23,8 @@ function App({viewState}) {
 }
 ```
 
+## Migration to CartoLayer
+
 CartoBQTilerLayer will be deprecated in future versions so our recommendation is to migrate the existing code to the new `CartoLayer` with the `type` property set to `MAP_TYPES.TILESET`:
 
 ```js

@@ -8,7 +8,7 @@ import {getDefaultCredentials} from '../config';
 const defaultProps = {
   // (String, required): data resource to load. table name, sql query or tileset name.
   data: null,
-  // (String {table, sql, tileset}, required)
+  // (Enum (MAP_TYPES), required)
   type: null,
   onDataLoad: {type: 'function', value: data => {}, compare: false},
   onDataError: {type: 'function', value: null, compare: false, optional: true},

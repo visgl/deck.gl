@@ -74,6 +74,11 @@ The `DeckGL` React component is rewritten using functional component and hooks.
 - `PolygonLayer` and `GeoJsonLayer`: `autoHighlight` now highlights both the outline and the fill of the hovered polygon, instead of either the outline or the fill.
 
 
+### @deck.gl/carto
+
+- Integration with **CARTO Cloud Native beta**. With deck.gl and the CARTO Cloud Native platform you can access directly your datasets and tilesets hosted in your current data warehouse (BigQuery, Snowflake, Redshift, Postgres). Don't need to move your data to carto plaform.
+- A new `CartoLayer` is available to unify `CartoBQTilerLayer` and `CartoSQLLayer`. There are a migration guides for both: [CartoSQLLayer](/docs/api-reference/carto/carto-sql-layer.md#migration-to-cartolayer) and [CartoBQTilerLayer](/docs/api-reference/carto/carto-sql-layer.md#migration-to-cartolayer).
+- New `getData` method in CARTO Cloud Native [to support other deck.gl layers](/docs/api-reference/carto/overview.md#support-for-other-deck.gl-layers). 
 
 ## deck.gl v8.4
 

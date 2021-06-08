@@ -23,7 +23,7 @@ npm install deck.gl
 npm install @deck.gl/core @deck.gl/layers @deck.gl/geo-layers @deck.gl/carto
 ```
 
-## Usage CARTO
+## Usage
 
 ```js
 import DeckGL from '@deck.gl/react';
