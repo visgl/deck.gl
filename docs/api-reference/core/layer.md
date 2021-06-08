@@ -423,7 +423,7 @@ Find usage examples in the [data loading guide](/docs/developer-guide/loading-da
 
 ##### `fetch` (Function, optional)
 
-Called to fetch and parse data.
+Called to fetch and parse content from URLs.
 
 The function receives the following arguments:
 
