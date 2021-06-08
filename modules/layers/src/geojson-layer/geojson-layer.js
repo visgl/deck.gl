@@ -62,7 +62,6 @@ const defaultProps = {
   pointSizeMaxPixels: Number.MAX_SAFE_INTEGER,
 
   alphaCutoff: 0.05,
-  billboard: true,
   iconAtlas: {type: 'string', value: null},
   iconMapping: {},
   onIconError: null,
@@ -211,7 +210,6 @@ export default class GeoJsonLayer extends CompositeLayer {
       alphaCutoff,
       background,
       backgroundPadding,
-      billboard,
       characterSet,
       elevationScale,
       fontFamily,
@@ -416,7 +414,6 @@ export default class GeoJsonLayer extends CompositeLayer {
       case 'icon':
         pointLayerProps = {
           alphaCutoff,
-          billboard,
           iconAtlas,
           iconMapping,
           onIconError,
@@ -451,7 +448,6 @@ export default class GeoJsonLayer extends CompositeLayer {
         pointLayerProps = {
           background,
           backgroundPadding,
-          billboard,
           characterSet,
           fontFamily,
           fontSettings,
