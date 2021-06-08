@@ -222,7 +222,7 @@ export default [
     },
     layers: [
       new GeoJsonLayer({
-        id: 'circle',
+        id: 'geojson-point-circle',
         data: capitals,
         pointType: 'circle',
         stroked: true,
@@ -235,18 +235,19 @@ export default [
         pointSizeUnits: 'pixels'
       }),
       new GeoJsonLayer({
-        id: 'text',
+        id: 'geojson-point-text',
         data: capitals,
         pointType: 'text',
         getText: d => d.properties.name
       }),
       new GeoJsonLayer({
-        id: 'icon',
+        id: 'geojson-point-icon',
         data: capitals,
         pointType: 'icon',
         iconAtlas: ICON_ATLAS,
         iconMapping,
         pointSizeScale: 5,
+        pointSizeUnits: 'pixels',
         getPointSize: 10,
         getPosition: d => d.coordinates,
         getIcon: d => (d.properties.state.length % 2 ? 'marker' : 'marker-warning')
