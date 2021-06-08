@@ -19,11 +19,11 @@
 // THE SOFTWARE.
 
 import test from 'tape-catch';
-import {generateLayerTests, testLayer} from '@deck.gl/test-utils';
+import {generateLayerTests, testLayerAsync} from '@deck.gl/test-utils';
 import {TerrainLayer, TileLayer} from '@deck.gl/geo-layers';
 import {SimpleMeshLayer} from '@deck.gl/mesh-layers';
 
-test('TerrainLayer', t => {
+test('TerrainLayer', async t => {
   const testCases = generateLayerTests({
     Layer: TerrainLayer,
     sampleProps: {
@@ -38,7 +38,7 @@ test('TerrainLayer', t => {
       }
     }
   });
-  testLayer({Layer: TerrainLayer, testCases, onError: t.notOk});
+  await testLayerAsync({Layer: TerrainLayer, testCases, onError: t.notOk});
 
   const testCasesNonTiled = generateLayerTests({
     Layer: TerrainLayer,
@@ -54,7 +54,7 @@ test('TerrainLayer', t => {
       }
     }
   });
-  testLayer({Layer: TerrainLayer, testCases: testCasesNonTiled, onError: t.notOk});
+  await testLayerAsync({Layer: TerrainLayer, testCases: testCasesNonTiled, onError: t.notOk});
 
   t.end();
 });

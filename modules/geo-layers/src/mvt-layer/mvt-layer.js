@@ -97,20 +97,23 @@ export default class MVTLayer extends TileLayer {
       return Promise.reject('Invalid URL');
     }
     let options = this.getLoadOptions();
+    const {binary, fetch} = this.props;
+    const {signal, x, y, z} = tile;
+    const loaders = this.props.loaders[0];
     options = {
       ...options,
       mvt: {
         ...(options && options.mvt),
         coordinates: this.context.viewport.resolution ? 'wgs84' : 'local',
-        tileIndex: {x: tile.x, y: tile.y, z: tile.z}
+        tileIndex: {x, y, z}
         // Local worker debug
         // workerUrl: `modules/mvt/dist/mvt-loader.worker.js`
         // Set worker to null to skip web workers
         // workerUrl: null
       },
-      gis: this.props.binary ? {format: 'binary'} : {}
+      gis: binary ? {format: 'binary'} : {}
     };
-    return load(url, this.props.loaders[0], options);
+    return fetch(url, {layer: this, loaders, options, signal});
   }
 
   renderSubLayers(props) {

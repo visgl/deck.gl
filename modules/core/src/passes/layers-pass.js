@@ -53,10 +53,15 @@ export default class LayersPass extends Pass {
   _getDrawLayerParams(viewport, {layers, pass, layerFilter, effects, moduleParameters}) {
     const drawLayerParams = [];
     const indexResolver = layerIndexResolver();
+    const drawContext = {
+      viewport,
+      isPicking: pass.startsWith('picking'),
+      renderPass: pass
+    };
     for (let layerIndex = 0; layerIndex < layers.length; layerIndex++) {
       const layer = layers[layerIndex];
       // Check if we should draw layer
-      const shouldDrawLayer = this._shouldDrawLayer(layer, viewport, pass, layerFilter);
+      const shouldDrawLayer = this._shouldDrawLayer(layer, drawContext, layerFilter);
 
       // This is the "logical" index for ordering this layer in the stack
       // used to calculate polygon offsets
@@ -164,23 +169,32 @@ export default class LayersPass extends Pass {
   }
 
   /* Private */
-  _shouldDrawLayer(layer, viewport, pass, layerFilter) {
-    let shouldDrawLayer = this.shouldDrawLayer(layer) && layer.props.visible;
+  _shouldDrawLayer(layer, drawContext, layerFilter) {
+    const shouldDrawLayer = this.shouldDrawLayer(layer) && layer.props.visible;
 
-    if (shouldDrawLayer && layerFilter) {
-      shouldDrawLayer = layerFilter({
-        layer,
-        viewport,
-        isPicking: pass.startsWith('picking'),
-        renderPass: pass
-      });
-    }
-    if (shouldDrawLayer) {
-      // If a layer is drawn, update its viewportChanged flag
-      layer.activateViewport(viewport);
+    if (!shouldDrawLayer) {
+      return false;
     }
 
-    return shouldDrawLayer;
+    drawContext.layer = layer;
+
+    if (layerFilter && !layerFilter(drawContext)) {
+      return false;
+    }
+
+    let parent = layer.parent;
+    while (parent) {
+      if (!parent.filterSubLayer(drawContext)) {
+        return false;
+      }
+      drawContext.layer = parent;
+      parent = parent.parent;
+    }
+
+    // If a layer is drawn, update its viewportChanged flag
+    layer.activateViewport(drawContext.viewport);
+
+    return true;
   }
 
   _getModuleParameters(layer, effects, pass, overrides) {

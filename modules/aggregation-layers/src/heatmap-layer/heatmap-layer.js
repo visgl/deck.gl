@@ -95,7 +95,7 @@ export default class HeatmapLayer extends AggregationLayer {
       return;
     }
     super.initializeState(DIMENSIONS);
-    this.setState({supported: true});
+    this.setState({supported: true, colorDomain: DEFAULT_COLOR_DOMAIN});
     this._setupTextureParams();
     this._setupAttributes();
     this._setupResources();
@@ -131,23 +131,6 @@ export default class HeatmapLayer extends AggregationLayer {
 
     if (props.colorRange !== oldProps.colorRange) {
       this._updateColorTexture(opts);
-    }
-
-    if (oldProps.colorDomain !== props.colorDomain || changeFlags.viewportChanged) {
-      const {viewport} = this.context;
-      const {weightsScale} = this.state;
-      const domainScale = (viewport ? 1024 / viewport.scale : 1) * weightsScale;
-      const colorDomain = props.colorDomain
-        ? props.colorDomain.map(x => x * domainScale)
-        : DEFAULT_COLOR_DOMAIN;
-      if (colorDomain[1] > 0 && weightsScale < 1) {
-        // Hack - when low precision texture is used, aggregated weights are in the [0, 1]
-        // range. Scale colorDomain to fit.
-        const max = Math.min(colorDomain[1], 1);
-        colorDomain[0] *= max / colorDomain[1];
-        colorDomain[1] = max;
-      }
-      this.setState({colorDomain});
     }
 
     if (this.state.isWeightMapDirty) {
@@ -459,14 +442,25 @@ export default class HeatmapLayer extends AggregationLayer {
   }
 
   _updateWeightmap() {
-    const {radiusPixels} = this.props;
+    const {radiusPixels, colorDomain, aggregation} = this.props;
     const {weightsTransform, worldBounds, textureSize, weightsTexture, weightsScale} = this.state;
     this.state.isWeightMapDirty = false;
 
-    // #5: convert world bounds to common using Layer's coordiante system and origin
+    // convert world bounds to common using Layer's coordiante system and origin
     const commonBounds = this._worldToCommonBounds(worldBounds, {
       useLayerCoordinateSystem: true
     });
+
+    if (colorDomain && aggregation === 'SUM') {
+      // scale color domain to weight per pixel
+      const {viewport} = this.context;
+      const metersPerPixel =
+        (viewport.distanceScales.metersPerUnit[2] * (commonBounds[2] - commonBounds[0])) /
+        textureSize;
+      this.state.colorDomain = colorDomain.map(x => x * metersPerPixel * weightsScale);
+    } else {
+      this.state.colorDomain = colorDomain || DEFAULT_COLOR_DOMAIN;
+    }
 
     const uniforms = {
       radiusPixels,

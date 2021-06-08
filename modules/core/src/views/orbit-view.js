@@ -2,6 +2,7 @@ import View from './view';
 import Viewport from '../viewports/viewport';
 
 import {Matrix4} from 'math.gl';
+import {pixelsToWorld} from '@math.gl/web-mercator';
 import OrbitController from '../controllers/orbit-controller';
 
 const DEGREES_TO_RADIANS = Math.PI / 180;
@@ -67,6 +68,28 @@ class OrbitViewport extends Viewport {
       position: target,
       zoom
     });
+
+    this.projectedCenter = this.project(this.center);
+  }
+
+  unproject(xyz, {topLeft = true} = {}) {
+    const [x, y, z = this.projectedCenter[2]] = xyz;
+
+    const y2 = topLeft ? y : this.height - y;
+    const [X, Y, Z] = pixelsToWorld([x, y2, z], this.pixelUnprojectionMatrix);
+    return [X, Y, Z];
+  }
+
+  panByPosition(coords, pixel) {
+    const p0 = this.project(coords);
+    const nextCenter = [
+      this.width / 2 + p0[0] - pixel[0],
+      this.height / 2 + p0[1] - pixel[1],
+      this.projectedCenter[2]
+    ];
+    return {
+      target: this.unproject(nextCenter)
+    };
   }
 }
 

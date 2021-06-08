@@ -168,12 +168,12 @@ export default class GlobeViewport extends Viewport {
     return xyz;
   }
 
-  getMapCenterByLngLatPosition({lngLat, pos}) {
-    const fromPosition = this.unproject(pos);
-    return [
-      lngLat[0] - fromPosition[0] + this.longitude,
-      lngLat[1] - fromPosition[1] + this.latitude
-    ];
+  panByPosition(coords, pixel) {
+    const fromPosition = this.unproject(pixel);
+    return {
+      longitude: coords[0] - fromPosition[0] + this.longitude,
+      latitude: coords[1] - fromPosition[1] + this.latitude
+    };
   }
 }
 

@@ -27,14 +27,14 @@ const defaultProps = {
   // Use load directly so we don't use ResourceManager
   fetch: {
     type: 'function',
-    value: (url, {layer, signal}) => {
-      const loadOptions = {...layer.getLoadOptions()};
+    value: (url, {layer, loaders, options, signal}) => {
+      const loadOptions = options || layer.getLoadOptions();
       loadOptions.fetch = {
         ...loadOptions.fetch,
         signal
       };
 
-      return load(url, loadOptions);
+      return loaders ? load(url, loaders, loadOptions) : load(url, loadOptions);
     },
     compare: false
   },
@@ -214,10 +214,6 @@ export default class TileLayer extends CompositeLayer {
   renderLayers() {
     const {visible} = this.props;
     return this.state.tileset.tiles.map(tile => {
-      // For a tile to be visible:
-      // - parent layer must be visible
-      // - tile must be visible in the current viewport
-      const isVisible = visible && tile.isVisible;
       const highlightedObjectIndex = this.getHighlightedObjectIndex(tile);
       // cache the rendered layer in the tile
       if (!tile.isLoaded) {
@@ -227,23 +223,28 @@ export default class TileLayer extends CompositeLayer {
           ...this.props,
           id: `${this.id}-${tile.x}-${tile.y}-${tile.z}`,
           data: tile.data,
-          visible: isVisible,
+          visible,
           _offset: 0,
-          tile,
-          highlightedObjectIndex
+          tile
         });
-        tile.layers = flatten(layers, Boolean);
+        tile.layers = flatten(layers, Boolean).map(layer =>
+          layer.clone({
+            tile,
+            highlightedObjectIndex
+          })
+        );
       } else if (
         tile.layers[0] &&
-        (tile.layers[0].props.visible !== isVisible ||
-          tile.layers[0].props.highlightedObjectIndex !== highlightedObjectIndex)
+        tile.layers[0].props.highlightedObjectIndex !== highlightedObjectIndex
       ) {
-        tile.layers = tile.layers.map(layer =>
-          layer.clone({visible: isVisible, highlightedObjectIndex})
-        );
+        tile.layers = tile.layers.map(layer => layer.clone({highlightedObjectIndex}));
       }
       return tile.layers;
     });
+  }
+
+  filterSubLayer({layer}) {
+    return layer.props.tile.isVisible;
   }
 }
 

@@ -19,10 +19,17 @@
 // THE SOFTWARE.
 
 /* eslint-disable max-statements, complexity */
-import TransitionManager from './transition-manager';
+import TransitionManager, {TRANSITION_EVENTS} from './transition-manager';
+import LinearInterpolator from '../transitions/linear-interpolator';
 
 const NO_TRANSITION_PROPS = {
   transitionDuration: 0
+};
+
+const LINEAR_TRANSITION_PROPS = {
+  transitionDuration: 300,
+  transitionEasing: t => t,
+  transitionInterruption: TRANSITION_EVENTS.BREAK
 };
 
 const DEFAULT_INERTIA = 300;
@@ -48,6 +55,15 @@ export default class Controller {
       onViewStateChange: this._onTransition.bind(this),
       onStateChange: this._setInteractionState.bind(this)
     });
+
+    const linearTransitionProps = this.linearTransitionProps;
+    this._transition = linearTransitionProps && {
+      ...LINEAR_TRANSITION_PROPS,
+      transitionInterpolator: new LinearInterpolator({
+        transitionProps: linearTransitionProps
+      })
+    };
+
     this._events = null;
     this._interactionState = {
       isDragging: false
@@ -59,6 +75,10 @@ export default class Controller {
     this.handleEvent = this.handleEvent.bind(this);
 
     this.setProps(options);
+  }
+
+  get linearTransitionProps() {
+    return null;
   }
 
   set events(customEvents) {
@@ -688,8 +708,23 @@ export default class Controller {
     return true;
   }
 
-  _getTransitionProps() {
-    // Transitions on double-tap and key-down are only supported by MapController
-    return NO_TRANSITION_PROPS;
+  _getTransitionProps(opts) {
+    const {_transition} = this;
+
+    if (!_transition) {
+      return NO_TRANSITION_PROPS;
+    }
+
+    // Enables Transitions on double-tap and key-down events.
+    return opts
+      ? {
+          ..._transition,
+          transitionInterpolator: new LinearInterpolator({
+            ...opts,
+            transitionProps: this.linearTransitionProps,
+            makeViewport: this.controllerState.makeViewport
+          })
+        }
+      : _transition;
   }
 }

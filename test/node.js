@@ -1,8 +1,10 @@
 require('@babel/register');
 
+// Must import before the polyfills for h3 to detect the environment correctly
+require('h3-js');
+
 // Polyfill for loaders
-// TODO - @loaders.gl/polyfills seems to freeze the tests
-global.fetch = () => Promise.reject('fetch not available in node');
+require('@loaders.gl/polyfills');
 
 // Polyfill with JSDOM
 const {JSDOM} = require('jsdom');
@@ -14,7 +16,6 @@ global.navigator = dom.window.navigator;
 global.document = dom.window.document;
 global.Element = dom.window.Element;
 global.__JSDOM__ = true;
-global.Image = dom.window.Image;
 global.HTMLCanvasElement = dom.window.HTMLCanvasElement;
 global.HTMLVideoElement = dom.window.HTMLVideoElement;
 

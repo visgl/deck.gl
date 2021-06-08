@@ -409,22 +409,7 @@ test('MVTLayer#dataInWGS84', async t => {
   t.end();
 });
 
-const fetchFile = url => {
-  url = url
-    .replace(/\?.+$/, '') // strip query parameters
-    .replace(/^\//, './test/data/3d-tiles/');
-  return require('fs').readFileSync(url);
-};
-
 test('MVTLayer#triangulation', async t => {
-  let oldFetch;
-  /* global Response */
-  const needsFetchPolyfill = typeof Response === 'undefined';
-  if (needsFetchPolyfill) {
-    oldFetch = global.fetch;
-    global.fetch = fetchFile;
-  }
-
   const viewport = new WebMercatorViewport({
     longitude: -100,
     latitude: 40,
@@ -470,8 +455,5 @@ test('MVTLayer#triangulation', async t => {
   testCases[0].props.binary = false;
   await {Layer: MVTLayer, viewport, testCases, onError: t.notOk};
 
-  if (oldFetch) {
-    global.fetch = oldFetch;
-  }
   t.end();
 });
