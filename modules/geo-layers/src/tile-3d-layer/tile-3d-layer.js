@@ -34,7 +34,9 @@ export default class Tile3DLayer extends CompositeLayer {
     // prop verification
     this.state = {
       layerMap: {},
-      tileset3d: null
+      tileset3d: null,
+      activeViewports: {},
+      lastUpdatedViewports: null
     };
   }
 
@@ -53,14 +55,31 @@ export default class Tile3DLayer extends CompositeLayer {
     }
 
     if (changeFlags.viewportChanged) {
-      const {tileset3d} = this.state;
-      this._updateTileset(tileset3d);
+      const {activeViewports} = this.state;
+      const viewportsNumber = Object.keys(activeViewports).length;
+      if (viewportsNumber) {
+        this._updateTileset(activeViewports);
+        this.state.lastUpdatedViewports = activeViewports;
+        this.state.activeViewports = {};
+      }
     }
     if (changeFlags.propsChanged) {
       const {layerMap} = this.state;
       for (const key in layerMap) {
         layerMap[key].needsUpdate = true;
       }
+    }
+  }
+
+  activateViewport(viewport) {
+    const {activeViewports, lastUpdatedViewports} = this.state;
+    this.internalState.viewport = viewport;
+
+    activeViewports[viewport.id] = viewport;
+    const lastViewport = lastUpdatedViewports?.[viewport.id];
+    if (!lastViewport || !viewport.equals(lastViewport)) {
+      this.setChangeFlags({viewportChanged: true});
+      this.setNeedsUpdate();
     }
   }
 
@@ -111,13 +130,14 @@ export default class Tile3DLayer extends CompositeLayer {
       layerMap: {}
     });
 
-    this._updateTileset(tileset3d);
+    this._updateTileset(this.state.activeViewports);
     this.props.onTilesetLoad(tileset3d);
   }
 
   _onTileLoad(tileHeader) {
+    const {lastUpdatedViewports} = this.state;
     this.props.onTileLoad(tileHeader);
-    this._updateTileset(this.state.tileset3d);
+    this._updateTileset(lastUpdatedViewports);
     this.setNeedsUpdate();
   }
 
@@ -127,12 +147,14 @@ export default class Tile3DLayer extends CompositeLayer {
     this.props.onTileUnload(tileHeader);
   }
 
-  _updateTileset(tileset3d) {
-    const {timeline, viewport} = this.context;
-    if (!timeline || !viewport || !tileset3d) {
+  _updateTileset(viewports) {
+    const {tileset3d} = this.state;
+    const {timeline} = this.context;
+    const viewportsNumber = Object.keys(viewports).length;
+    if (!timeline || !viewportsNumber || !tileset3d) {
       return;
     }
-    const frameNumber = tileset3d.update(viewport);
+    const frameNumber = tileset3d.update(Object.values(viewports));
     const tilesetChanged = this.state.frameNumber !== frameNumber;
     if (tilesetChanged) {
       this.setState({frameNumber});
