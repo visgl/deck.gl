@@ -19,7 +19,7 @@ function validateGeometryAttributes(attributes) {
 const defaultProps = {
   // PBR material object. _lighting must be pbr for this to work
   pbrMaterial: {type: 'object', value: null},
-  featureIds: {type: 'array', value: null}
+  featureIds: {type: 'array', value: null, optional: true}
 };
 
 export default class _MeshLayer extends SimpleMeshLayer {
@@ -54,14 +54,14 @@ export default class _MeshLayer extends SimpleMeshLayer {
   }
 
   draw(opts) {
-    const {pickFeatures} = this.props;
+    const {featureIds} = this.props;
     if (!this.state.model) {
       return;
     }
     this.state.model.setUniforms({
       // Needed for PBR (TODO: find better way to get it)
       u_Camera: this.state.model.getUniforms().project_uCameraPosition,
-      u_pickFeatureIds: pickFeatures
+      u_pickFeatureIds: Boolean(featureIds)
     });
 
     super.draw(opts);
