@@ -1,7 +1,6 @@
 import {Matrix4} from 'math.gl';
 import {MVTLoader} from '@loaders.gl/mvt';
 import {binaryToGeoJson} from '@loaders.gl/gis';
-import {load} from '@loaders.gl/core';
 import {COORDINATE_SYSTEM} from '@deck.gl/core';
 import {_binaryToFeature, _findIndexBinary} from '@deck.gl/layers';
 import {ClipExtension} from '@deck.gl/extensions';
@@ -19,14 +18,6 @@ const defaultProps = {
   binary: true
 };
 
-async function fetchTileJSON(url) {
-  try {
-    return await load(url);
-  } catch (error) {
-    throw new Error(`An error occurred fetching TileJSON: ${error}`);
-  }
-}
-
 export default class MVTLayer extends TileLayer {
   initializeState() {
     super.initializeState();
@@ -42,7 +33,7 @@ export default class MVTLayer extends TileLayer {
 
   updateState({props, oldProps, context, changeFlags}) {
     if (changeFlags.dataChanged) {
-      this._updateTileData({props});
+      this._updateTileData();
     }
 
     if (this.state.data) {
@@ -51,15 +42,20 @@ export default class MVTLayer extends TileLayer {
     }
   }
 
-  async _updateTileData({props}) {
-    const {onDataLoad} = this.props;
-    let {data} = props;
+  /* eslint-disable complexity */
+  async _updateTileData() {
+    let {data, minZoom, maxZoom} = this.props;
     let tileJSON = null;
-    let {minZoom, maxZoom} = props;
 
     if (typeof data === 'string' && !isURLTemplate(data)) {
+      const {onDataLoad, fetch} = this.props;
       this.setState({data: null, tileJSON: null});
-      tileJSON = await fetchTileJSON(data);
+      try {
+        tileJSON = await fetch(data, {propName: 'data', layer: this, loaders: []});
+      } catch (error) {
+        this.raiseError(error, 'loading TileJSON');
+        data = null;
+      }
 
       if (onDataLoad) {
         onDataLoad(tileJSON);
@@ -85,6 +81,7 @@ export default class MVTLayer extends TileLayer {
 
     this.setState({data, tileJSON, minZoom, maxZoom});
   }
+  /* eslint-disable complexity */
 
   renderLayers() {
     if (!this.state.data) return null;

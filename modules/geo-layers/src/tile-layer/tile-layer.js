@@ -1,6 +1,5 @@
 import {CompositeLayer, _flatten as flatten} from '@deck.gl/core';
 import {GeoJsonLayer} from '@deck.gl/layers';
-import {load} from '@loaders.gl/core';
 
 import Tileset2D, {STRATEGY_DEFAULT} from './tileset-2d';
 import {urlType, getURLFromTemplate} from './utils';
@@ -24,26 +23,6 @@ const defaultProps = {
   maxCacheByteSize: null,
   refinementStrategy: STRATEGY_DEFAULT,
   zRange: null,
-  // Use load directly so we don't use ResourceManager
-  fetch: {
-    type: 'function',
-    value: (url, {layer, loaders, loadOptions, signal}) => {
-      loadOptions = loadOptions || layer.getLoadOptions();
-      loaders = loaders || layer.props.loaders;
-      if (signal) {
-        loadOptions = {
-          ...loadOptions,
-          fetch: {
-            ...loadOptions?.fetch,
-            signal
-          }
-        };
-      }
-
-      return load(url, loaders, loadOptions);
-    },
-    compare: false
-  },
   maxRequests: 6
 };
 

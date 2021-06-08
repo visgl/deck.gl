@@ -68,10 +68,20 @@ const defaultProps = {
   onError: {type: 'function', value: null, compare: false, optional: true},
   fetch: {
     type: 'function',
-    value: (url, {propName, layer}) => {
+    value: (url, {propName, layer, loaders, loadOptions, signal}) => {
       const {resourceManager} = layer.context;
-      const loadOptions = layer.getLoadOptions();
-      const {loaders} = layer.props;
+      loadOptions = loadOptions || layer.getLoadOptions();
+      loaders = loaders || layer.props.loaders;
+      if (signal) {
+        loadOptions = {
+          ...loadOptions,
+          fetch: {
+            ...loadOptions?.fetch,
+            signal
+          }
+        };
+      }
+
       let inResourceManager = resourceManager.contains(url);
 
       if (!inResourceManager && !loadOptions) {
