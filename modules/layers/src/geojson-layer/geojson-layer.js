@@ -19,11 +19,7 @@
 // THE SOFTWARE.
 
 import {CompositeLayer, log} from '@deck.gl/core';
-import {
-  DEFAULT_CHAR_SET,
-  DEFAULT_FONT_FAMILY,
-  DEFAULT_FONT_WEIGHT
-} from '../text-layer/font-atlas-manager';
+import {DEFAULT_FONT_FAMILY, DEFAULT_FONT_WEIGHT} from '../text-layer/font-atlas-manager';
 import PathLayer from '../path-layer/path-layer';
 // Use primitive layer to avoid "Composite Composite" layers for now
 import SolidPolygonLayer from '../solid-polygon-layer/solid-polygon-layer';
@@ -64,16 +60,15 @@ const defaultProps = {
   iconAtlas: {type: 'string', value: null},
   iconMapping: {},
 
-  background: false,
-  backgroundPadding: [0, 0],
-  characterSet: DEFAULT_CHAR_SET,
-  fontFamily: DEFAULT_FONT_FAMILY,
-  lineHeight: 1,
-  fontWeight: DEFAULT_FONT_WEIGHT,
-  maxWidth: -1,
-  outlineWidth: 0,
-  outlineColor: [0, 0, 0, 255],
-  wordBreak: 'break-word',
+  textBackground: false,
+  textBackgroundPadding: [0, 0],
+  textFontFamily: DEFAULT_FONT_FAMILY,
+  textLineHeight: 1,
+  textFontWeight: DEFAULT_FONT_WEIGHT,
+  textMaxWidth: -1,
+  textOutlineWidth: 0,
+  textOutlineColor: [0, 0, 0, 255],
+  textWordBreak: 'break-word',
 
   // Point (text) alignement baseline
   getAlignmentBaseline: {type: 'accessor', value: 'center'},
@@ -204,32 +199,31 @@ export default class GeoJsonLayer extends CompositeLayer {
 
     // Rendering props underlying layer
     const {
-      background,
-      backgroundPadding,
-      characterSet,
       elevationScale,
-      fontFamily,
-      fontWeight,
       iconAtlas,
       iconMapping,
       lineCapRounded,
       lineDashJustified,
-      lineHeight,
       lineJointRounded,
       lineMiterLimit,
       lineWidthMaxPixels,
       lineWidthMinPixels,
       lineWidthScale,
       lineWidthUnits,
-      maxWidth,
-      outlineColor,
-      outlineWidth,
-      pointType,
       pointSizeMaxPixels,
       pointSizeMinPixels,
       pointSizeScale,
       pointSizeUnits,
-      wordBreak
+      pointType,
+      textBackground,
+      textBackgroundPadding,
+      textFontFamily,
+      textFontWeight,
+      textLineHeight,
+      textMaxWidth,
+      textOutlineColor,
+      textOutlineWidth,
+      textWordBreak
     } = this.props;
 
     // Accessor props for underlying layers
@@ -438,20 +432,19 @@ export default class GeoJsonLayer extends CompositeLayer {
         break;
       case 'text':
         pointLayerProps = {
-          background,
-          backgroundPadding,
-          characterSet,
-          fontFamily,
-          fontWeight,
-          lineHeight,
-          maxWidth,
-          outlineColor,
-          outlineWidth,
+          background: textBackground,
+          backgroundPadding: textBackgroundPadding,
+          fontFamily: textFontFamily,
+          fontWeight: textFontWeight,
+          lineHeight: textLineHeight,
+          maxWidth: textMaxWidth,
+          outlineColor: textOutlineColor,
+          outlineWidth: textOutlineWidth,
           sizeMaxPixels: pointSizeMaxPixels,
           sizeMinPixels: pointSizeMinPixels,
           sizeScale: pointSizeScale,
           sizeUnits: pointSizeUnits,
-          wordBreak,
+          wordBreak: textWordBreak,
 
           getAlignmentBaseline: this.getSubLayerAccessor(getAlignmentBaseline),
           getAngle: this.getSubLayerAccessor(getAngle),
