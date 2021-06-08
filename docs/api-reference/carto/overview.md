@@ -1,15 +1,18 @@
 # @deck.gl/carto
 
-Deck.gl is the preferred and official solution for creating modern Webapps using the [CARTO Location Intelligence platform](https://carto.com/)
+The preferred and official solution for creating modern web apps using the [CARTO Location Intelligence platform](https://carto.com/) is deck.gl. The CARTO platform provides cloud native integrations with Google BigQuery, Amazon Redshift, Snowflake and PostgreSQL-compatible databases.
+
+With deck.gl and the CARTO platform you can access directly your datasets and tilesets hosted in cloud native data platforms. It supports both medium-size (up to 50 MB) datasets using the GeoJSON format and very large datasets using vector tiles from pre-generated tilesets.
 
 <img src="https://raw.githubusercontent.com/CartoDB/viz-doc/master/deck.gl/img/osm_buildings.jpg" />
-
 
 It integrates with the [CARTO Maps API](https://carto.com/developers/maps-api/reference/) to:
 
 * Provide a geospatial backend storage for your geospatial data.
 * Visualize large datasets which do not fit within browser memory.
 * Provide an SQL spatial interface to work with your data.
+
+<img src="https://raw.githubusercontent.com/CartoDB/viz-doc/master/deck.gl/img/eu_rivers.jpg" />
 
 
 ## Install package
@@ -24,7 +27,7 @@ npm install @deck.gl/core @deck.gl/layers @deck.gl/geo-layers @deck.gl/carto
 
 ```js
 import DeckGL from '@deck.gl/react';
-import {CartoSQLLayer, setDefaultCredentials} from '@deck.gl/carto';
+import {CartoLayer, setDefaultCredentials, MAP_TYPES} from '@deck.gl/carto';
 
 setDefaultCredentials({
   username: 'public',
@@ -32,10 +35,11 @@ setDefaultCredentials({
 });
 
 function App({viewState}) {
-  const layer = new CartoSQLLayer({
+  const layer = new CartoLayer({
+    type: MAP_TYPES.QUERY,
     data: 'SELECT * FROM world_population_2015',
     pointRadiusMinPixels: 2,
-    getLineColor: [0, 0, 0, 0.75],
+    getLineColor: [0, 0, 0, 200],
     getFillColor: [238, 77, 90],
     lineWidthMinPixels: 1
   })
@@ -55,24 +59,87 @@ You can see real examples for the following:
 * [Pure JS](https://github.com/CartoDB/viz-doc/tree/master/deck.gl/examples/pure-js): integrate in a pure js application, using webpack.
 
 
-### CARTO credentials
+### CARTO configuration object
 
-This is an object to define the connection to CARTO, including the credentials (and optionally the parameters to point to specific api endpoints):
+This is an object to define the configuration to use in order to connect to the CARTO platform. The configuration properties that must be defined depend on the CARTO API version used:
 
-* username (required): unique username in the platform
-* apiKey (optional): api key. default to `public_user`
-* region (optional): region of the user, possible values are `us` or `eu`. Only need to be specified if you've specifically requested an account in `eu`
-* sqlUrl (optional): SQL API URL Template. Default to `https://{user}.carto.com/api/v2/sql`
-* mapsUrl (optional): MAPS API URL Template. Default to `https://maps-api-v2.{region}.carto.com/user/{user}`
+* `apiVersion` (optional): API version. Default: `API_VERSIONS.V2`. Possible values are:
+  * API_VERSIONS.V1
+  * API_VERSIONS.V2
+  * API_VERSIONS.V3
 
-If you're an on-premise user or you're running CARTO from [Google's Market place](https://console.cloud.google.com/marketplace/details/cartodb-public/carto-enterprise-payg), you need to set the URLs to point to your instance. 
+API version v3 is currently available only in a private beta. If you want to test it, please contact us at [support@carto.com](mailto:support@carto.com?subject=Access%20to%20Cloud%20%Native%20%API%20(v3)).
+
+If using API v1 or v2, the following properties are used:
+
+* `username` (required): unique username in the platform
+* `apiKey` (optional): api key. Default: `default_public`
+* `region` (optional): region where the user database is located, possible values are `us` or `eu`. Default: `us`, only need to be specified if you've specifically requested an account in `eu`
+* `mapsUrl` (optional): Maps API URL Template. Default: 
+  * `https://{username}.carto.com/api/v1/map` for v1
+  * `https://maps-api-v2.{region}.carto.com/user/{username}` for v2
+
+If using API v3, these are the available properties:
+
+* `apiBaseUrl` (required): base URL for requests to the API (can be obtained in the CARTO Cloud Native Workspace)
+* `accessToken` (optional): token to authenticate/authorize requests to the Maps API (private datasets)
+* `publicToken` (optional): token to use with public datasets
+* `mapsUrl` (optional): Maps API URL Template. Default: 
+  * `https://{apiBaseUrl}/v3/maps` 
+
+If you have a custom CARTO deployment (on-premise user or you're running CARTO from [Google Cloud Marketplace](https://console.cloud.google.com/marketplace/product/cartodb-public/carto-enterprise-byol)), you need to set the URLs to point to your instance. 
 
 ```js
 setDefaultCredentials({
   username: 'public',
   apiKey: 'default_public',
-  mapsUrl: 'https://<domain>/user/{user}/api/v1/map',
-  sqlUrl: 'https://<domain>/user/{user}/api/v2/sql',
+  mapsUrl: 'https://<domain>/maps-v2/user/{user}',
 });
 ```
 
+### Support for other deck.gl layers
+
+The CARTO submodule includes layers (CartoLayer, CartoSQLLayer, CartoBQTilerLayer) that simplify interaction with the CARTO platform. These layers make use of the GeoJsonLayer composite layer for rendering vector tilesets and GeoJSON datasets served using the CARTO Maps API.
+
+If you want to use other deck.gl layers (i.e. ArcLayer, H3HexagonLayer...), there are two possibilities depending on the API version you are using:
+
+* If you are using the cloud native API version (v3), you can directly retrieve the data in the format expected by the layer using the `getData` function:
+
+```js
+import carto from '@deck.gl/carto';
+import { H3HexagonLayer } from '@deck.gl/geo-layers/';
+ 
+new H3HexagonLayer({
+  data: await carto.getData({
+    type: 'sql',
+    source: 'SELECT hex, count FROM populated_places'
+    connection: 'bigquery',
+    format: 'json',
+    filled: true,
+    getHexagon: d => d.hex,
+    getFillColor: d => [255, (1 - d.count / 500) * 255, 0],
+  })
+})
+```
+
+* If not using the cloud native API version, you can use the SQL API to retrieve the data in the required format. Please check the examples [here](https://docs.carto.com/deck-gl/examples/clustering-and-aggregation/h3-hexagon-layer/)
+
+### Working with Tilesets and Maps API v2
+
+You can visualize public tilesets created in BigQuery with the default credentials, but if you want to use private tilesets, you first need to create a BigQuery connection in the CARTO dashboard with access to the tileset table. Then you need to create an API key with access to the Maps API and use it in the configuration object.
+
+### Constants
+
+To make it easier to work with the CARTO module the following constants are provided:
+
+| ENUMERATION     | VALUES      |
+| --------------- | ----------- |
+| API_VERSIONS    | V1          |
+|                 | V2          | 
+|                 | V3          |
+| MAP_TYPES       | QUERY       |       
+|                 | TABLE       |
+|                 | TILESET     |
+| FORMATS         | GEOJSON     |
+|                 | JSON        |
+|                 | TILEJSON    |

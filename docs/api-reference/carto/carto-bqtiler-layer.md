@@ -2,16 +2,36 @@
 
 # CartoBQTilerLayer
 
-`CartoBQTilerLayer` is a layer to visualize large datasets (millions or billions of rows) directly from [Google BigQuery](https://cloud.google.com/bigquery) without having to move data outside of BigQuery.
+`CartoBQTilerLayer` is the legacy layer to visualize large datasets (millions or billions of rows) directly from [Google BigQuery](https://cloud.google.com/bigquery) without having to move data outside of BigQuery.
 
-First you need first to generate a tileset of your dataset in your BigQuery account using CARTO BigQuery Tiler. For more info click [here](https://carto.com/bigquery/beta/).
-
+First you need first to generate a tileset of your dataset in your BigQuery account using CARTO BigQuery Tiler. For more info click [here](https://carto.com/bigquery-tiler/).
+ 
 ```js
 import DeckGL from '@deck.gl/react';
 import {CartoBQTilerLayer} from '@deck.gl/carto';
 
 function App({viewState}) {
   const layer = new CartoBQTilerLayer({
+    data: 'cartobq.maps.nyc_taxi_points_demo_id',
+    getLineColor: [255, 255, 255],
+    getFillColor: [238, 77, 90],
+    pointRadiusMinPixels: 2,
+    lineWidthMinPixels: 1
+  });
+
+  return <DeckGL viewState={viewState} layers={[layer]} />;
+}
+```
+
+CartoBQTilerLayer will be deprecated in future versions so our recommendation is to migrate the existing code to the new `CartoLayer` with the `type` property set to `MAP_TYPES.TILESET`:
+
+```js
+import DeckGL from '@deck.gl/react';
+import {CartoLayer, MAP_TYPES} from '@deck.gl/carto';
+
+function App({viewState}) {
+  const layer = new CartoLayer({
+    type: MAP_TYPES.TILESET,
     data: 'cartobq.maps.nyc_taxi_points_demo_id',
     getLineColor: [255, 255, 255],
     getFillColor: [238, 77, 90],
@@ -45,7 +65,7 @@ To use pre-bundled scripts:
 <script src="https://unpkg.com/@deck.gl/carto@^8.2.0/dist.min.js"></script>
 
 <!-- or -->
-<script src="https://unpkg.com/@deck.gl/core@^8.0.0/dist.min.js"></script>
+<script src="https://unpkg.com/@deck.gl/core@^8.2.0/dist.min.js"></script>
 <script src="https://unpkg.com/@deck.gl/layers@^8.2.0/dist.min.js"></script>
 <script src="https://unpkg.com/@deck.gl/geo-layers@^8.2.0/dist.min.js"></script>
 <script src="https://unpkg.com/@deck.gl/carto@^8.2.0/dist.min.js"></script>
@@ -72,6 +92,22 @@ Required. Tileset id
 Optional. Needed for highlighting a feature split across two or more tiles if no [feature id](https://github.com/mapbox/vector-tile-spec/tree/master/2.1#42-features) is provided.
 
 A string pointing to a tile attribute containing a unique identifier for features across tiles.
+
+##### `credentials` (Object)
+
+Optional. Overrides the configuration to connect with CARTO. Check the configuration parameters [here](overview#carto-configuration-object).
+
+* Default:
+
+```js
+{
+  apiVersion: API_VERSIONS.V2,
+  username: 'public',
+  apiKey: 'default_public',
+  region: 'us',
+  mapsUrl: 'https://maps-api-v2.{region}.carto.com/user/{user}',
+}
+```
 
 ### Callbacks
 
