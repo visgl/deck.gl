@@ -1,6 +1,7 @@
 # CartoBQTilerLayer
+>CartoBQTilerLayer will be deprecated in future versions. Use CartoLayer instead.  If you've existing code using this layer, check [the migration steps](#migration-to-cartolayer).
 
-`CartoBQTilerLayer` is the legacy layer to visualize large datasets (millions or billions of rows) directly from [Google BigQuery](https://cloud.google.com/bigquery) without having to move data outside of BigQuery.
+`CartoBQTilerLayer` is a layer to visualize large datasets (millions or billions of rows) directly from [Google BigQuery](https://cloud.google.com/bigquery) without having to move data outside of BigQuery.
 
 First you need first to generate a tileset of your dataset in your BigQuery account using CARTO BigQuery Tiler. For more info click [here](https://carto.com/bigquery-tiler/).
  
@@ -23,7 +24,7 @@ function App({viewState}) {
 
 ## Migration to CartoLayer
 
-CartoBQTilerLayer will be deprecated in future versions so our recommendation is to migrate the existing code to the new `CartoLayer` with the `type` property set to `MAP_TYPES.TILESET`:
+To migrate from `CartoBQTilerLayer` to `CartoLayer` you only need to change the layer name and set `type` property to `MAP_TYPES.TILESET`:
 
 ```js
 import DeckGL from '@deck.gl/react';

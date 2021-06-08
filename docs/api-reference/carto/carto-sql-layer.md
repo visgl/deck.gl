@@ -1,6 +1,7 @@
 # CartoSQLLayer
+>CartoSQLLayer will be deprecated in future versions. Use CartoLayer instead.  If you've existing code using this layer, check [the migration steps](#migration-to-cartolayer).
 
-`CartoSQLLayer` is the legacy layer to visualize data hosted in your CARTO account and to apply custom SQL.
+`CartoSQLLayer` is a layer to visualize data hosted in your CARTO account and to apply custom SQL.
  
 ```js
 import DeckGL from '@deck.gl/react';
@@ -26,7 +27,7 @@ function App({viewState}) {
 
 ## Migration to CartoLayer
 
-CartoSQLLayer will be deprecated in future versions so our recommendation is to migrate the existing code to the new `CartoLayer` with the `type` property set to `MAP_TYPES.QUERY`:
+To migrate from `CartoSQLLayer` to `CartoLayer` you only need to change the layer name and set `type` property to `MAP_TYPES.QUERY`:
 
 ```js
 import DeckGL from '@deck.gl/react';
@@ -39,7 +40,7 @@ setDefaultCredentials({
 
 function App({viewState}) {
   const layer = new CartoLayer({
-    type: MAP_TYPES.SQL,
+    type: MAP_TYPES.QUERY,
     data: 'SELECT * FROM world_population_2015',
     pointRadiusMinPixels: 2,
     getLineColor: [0, 0, 0, 125],
