@@ -22,7 +22,7 @@ test('CartoLayer#v2', async t => {
     } else {
       t.is(subLayers.length, 1, 'should render a subLayer');
       t.ok(Array.isArray(data.tiles), 'tiles should be an array');
-      t.ok(subLayer instanceof MVTLayer, 'subLayer should be a MVT layer ');
+      t.ok(subLayer instanceof MVTLayer, 'subLayer should be an MVTLayer ');
     }
   };
 
@@ -71,7 +71,7 @@ test('CartoLayer#v3', async t => {
           break;
         case MAP_TYPES.TABLE:
         case MAP_TYPES.QUERY:
-          t.ok(subLayer instanceof GeoJsonLayer, 'should be an GeoJsonLayer');
+          t.ok(subLayer instanceof GeoJsonLayer, 'should be a GeoJsonLayer');
           break;
         default:
           t.ok(false, 'invalid prop type');
@@ -118,19 +118,19 @@ test('CartoLayer#v3', async t => {
   t.end();
 });
 
-test('CartoLayer#should throws with invalid params for v1 and v2', t => {
+test('CartoLayer#should throw with invalid params for v1 and v2', t => {
   const fetchMock = mockFetchMapsV1();
 
   const layer = new CartoLayer();
 
   const TEST_CASES = [
     {
-      title: 'throws on invalid api version',
+      title: 'should throw on invalid api version',
       props: {...layer.props, credentials: {apiVersion: 'wrong'}},
       regex: /invalid apiVersion/i
     },
     {
-      title: 'throws when type is not defined for v1',
+      title: 'should throw when type is not defined for v1',
       props: {
         ...layer.props,
         type: null,
@@ -139,7 +139,7 @@ test('CartoLayer#should throws with invalid params for v1 and v2', t => {
       regex: /invalid type/i
     },
     {
-      title: 'throws when type is not defined for v2',
+      title: 'should throw when type is not defined for v2',
       props: {
         ...layer.props,
         type: null,
@@ -148,7 +148,7 @@ test('CartoLayer#should throws with invalid params for v1 and v2', t => {
       regex: /invalid type/i
     },
     {
-      title: `throws when ${MAP_TYPES.TABLE} prop is used for v1`,
+      title: `should throw when ${MAP_TYPES.TABLE} prop is used for v1`,
       props: {
         ...layer.props,
         type: MAP_TYPES.TABLE,
@@ -157,7 +157,7 @@ test('CartoLayer#should throws with invalid params for v1 and v2', t => {
       regex: /Invalid type/i
     },
     {
-      title: `throws when ${MAP_TYPES.TABLE} prop is used for v2`,
+      title: `should throw when ${MAP_TYPES.TABLE} prop is used for v2`,
       props: {
         ...layer.props,
         type: MAP_TYPES.TABLE,
@@ -176,13 +176,13 @@ test('CartoLayer#should throws with invalid params for v1 and v2', t => {
   t.end();
 });
 
-test('CartoLayer#should throws with invalid params for v3', t => {
+test('CartoLayer#should throw with invalid params for v3', t => {
   const fetchMock = mockFetchMapsV1();
   const layer = new CartoLayer();
 
   const TEST_CASES = [
     {
-      title: 'throws when connection mandatory prop is not defined for v3',
+      title: 'should throw when connection mandatory prop is not defined for v3',
       props: {
         ...layer.props,
         type: MAP_TYPES.TILESET,
@@ -191,7 +191,7 @@ test('CartoLayer#should throws with invalid params for v3', t => {
       regex: /missing mandatory connection parameter/i
     },
     {
-      title: 'throws when type prop is not defined for v3',
+      title: 'should throw when type prop is not defined for v3',
       props: {
         ...layer.props,
         type: null,
@@ -201,7 +201,7 @@ test('CartoLayer#should throws with invalid params for v3', t => {
       regex: /invalid type/i
     },
     {
-      title: 'throws when type prop is not valid for v3',
+      title: 'should throw when type prop is not valid for v3',
       props: {
         ...layer.props,
         type: 'no-valid',

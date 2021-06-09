@@ -124,7 +124,7 @@ test('getData#parameters', async t => {
         apiVersion: API_VERSIONS.V2
       }
     });
-    t.fail('it should throws an error');
+    t.fail('it should throw an error');
   } catch (e) {
     t.is(e.message, 'Method only available for v3', 'should throw when no v3');
   }
@@ -136,7 +136,7 @@ test('getData#parameters', async t => {
         apiVersion: API_VERSIONS.V3
       }
     });
-    t.fail('it should throws an error');
+    t.fail('it should throw an error');
   } catch (e) {
     t.is(e.message, 'Must define apiBaseUrl', 'should throw when no apiBaseUrl');
   }
@@ -151,7 +151,7 @@ test('getData#parameters', async t => {
         apiBaseUrl: 'http://maps-v3'
       }
     });
-    t.fail('it should throws an error');
+    t.fail('it should throw an error');
   } catch (e) {
     t.is(e.message, 'Must define an accessToken', 'should throw when no accessToken');
   }

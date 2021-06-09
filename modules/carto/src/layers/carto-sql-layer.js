@@ -13,9 +13,7 @@ export default class CartoSQLLayer extends CartoLayer {
     super(...args);
 
     log.warn(
-      `CartoSQLLayer will be removed in future versions. Use CartoLayer with type='${
-        MAP_TYPES.QUERY
-      }' and apiVersion='v2'`
+      'CartoSQLLayer will be removed in future versions. Use CartoLayer with type=MAP_TYPES.QUERY and apiVersion=API_VERSIONS.V2'
     )();
   }
 }

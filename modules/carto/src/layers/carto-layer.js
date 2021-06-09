@@ -44,24 +44,20 @@ export default class CartoLayer extends CompositeLayer {
 
     log.assert(
       Object.values(API_VERSIONS).includes(apiVersion),
-      `Invalid apiVersion ${apiVersion}. Possible values are ${Object.values(
-        API_VERSIONS
-      ).toString()}`
+      `Invalid apiVersion ${apiVersion}. Use API_VERSIONS enum.`
     );
 
     if (apiVersion === API_VERSIONS.V1 || apiVersion === API_VERSIONS.V2) {
       log.assert(
         type === MAP_TYPES.QUERY || type === MAP_TYPES.TILESET,
-        `Invalid type ${type}. Use type ${MAP_TYPES.QUERY} or ${
-          MAP_TYPES.TILESET
-        } for apiVersion ${apiVersion}`
+        `Invalid type ${type}. Use type MAP_TYPES.QUERY or MAP_TYPES.TILESET for apiVersion ${apiVersion}`
       );
       log.assert(!connection, `Connection prop is not supported for apiVersion ${apiVersion}`);
     } else if (apiVersion === API_VERSIONS.V3) {
       log.assert(connection, 'Missing mandatory connection parameter');
       log.assert(
         Object.values(MAP_TYPES).includes(type),
-        `Invalid type ${type}. Possible values are ${Object.values(MAP_TYPES).toString()}`
+        `Invalid type ${type}. Use MAP_TYPES enum.`
       );
     }
   }
@@ -98,11 +94,7 @@ export default class CartoLayer extends CompositeLayer {
       } else if (apiVersion === API_VERSIONS.V1 || apiVersion === API_VERSIONS.V2) {
         data = await getDataV1({type, source, credentials});
       } else {
-        log.assert(
-          `Unknow apiVersion ${apiVersion}. Possible values are ${Object.values(
-            API_VERSIONS
-          ).toString()}`
-        );
+        log.assert(`Unknow apiVersion ${apiVersion}. Use API_VERSIONS enum.`);
       }
 
       this.setState({data, apiVersion});

@@ -12,9 +12,7 @@ export default class CartoBQTilerLayer extends CartoLayer {
     super(...args);
 
     log.warn(
-      `CartoBQTilerLayer will be removed in future versions. Use CartoLayer with type='${
-        MAP_TYPES.TILESET
-      }' and apiVersion='v2'`
+      'CartoBQTilerLayer will be removed in future versions. Use CartoLayer with type=MAP_TYPES.TILESET and apiVersion=API_VERSIONS.V2'
     )();
   }
 }

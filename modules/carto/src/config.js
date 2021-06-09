@@ -60,7 +60,7 @@ export function setDefaultCredentials(opts) {
       };
       break;
     default:
-      throw new Error(`Invalid API version ${apiVersion}`);
+      throw new Error(`Invalid API version ${apiVersion}. Use API_VERSIONS enum.`);
   }
 }
 
