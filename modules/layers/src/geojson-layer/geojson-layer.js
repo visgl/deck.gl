@@ -33,6 +33,53 @@ import {createLayerPropsFromFeatures, createLayerPropsFromBinary} from './geojso
 const defaultLineColor = [0, 0, 0, 255];
 const defaultFillColor = [0, 0, 0, 255];
 
+const POINT_ICON_PROPS = {
+  iconAtlas: 'iconAtlas',
+  iconMapping: 'iconMapping',
+  pointSizeMaxPixels: 'sizeMaxPixels',
+  pointSizeMinPixels: 'sizeMinPixels',
+  pointSizeScale: 'sizeScale',
+  pointSizeUnits: 'sizeUnits',
+  getPointAngle: 'getAngle',
+  getFillColor: 'getColor',
+  getIcon: 'getIcon',
+  getPointPixelOffset: 'getPixelOffset',
+  getPointSize: 'getSize'
+};
+
+function generateSubLayerProps(layer, mapping) {
+  const result = {};
+  const {transitions} = layer.props;
+  if (transitions) {
+    result.transitions = {
+      getPosition: transitions.geometry
+    };
+  }
+
+  for (const key in mapping) {
+    let value = layer.props[key];
+    if (key.startsWith('get')) {
+      value = layer.getSubLayerAccessor(value);
+      if (transitions) {
+        result.transitions[mapping[key]] = transitions[key];
+      }
+    }
+    result[mapping[key]] = value;
+  }
+  return result;
+}
+
+function generateSubLayerUpdateTriggers(layer, mapping) {
+  const result = {};
+  const {updateTriggers} = layer.props;
+  for (const key in mapping) {
+    if (key.startsWith('get')) {
+      result[mapping[key]] = updateTriggers[key];
+    }
+  }
+  return result;
+}
+
 const defaultProps = {
   stroked: true,
   filled: true,
@@ -200,8 +247,6 @@ export default class GeoJsonLayer extends CompositeLayer {
     // Rendering props underlying layer
     const {
       elevationScale,
-      iconAtlas,
-      iconMapping,
       lineCapRounded,
       lineDashJustified,
       lineJointRounded,
@@ -230,7 +275,6 @@ export default class GeoJsonLayer extends CompositeLayer {
     const {
       getElevation,
       getFillColor,
-      getIcon,
       getLineColor,
       getLineDashArray,
       getLineWidth,
@@ -400,35 +444,8 @@ export default class GeoJsonLayer extends CompositeLayer {
         };
         break;
       case 'icon':
-        pointLayerProps = {
-          iconAtlas,
-          iconMapping,
-          sizeMaxPixels: pointSizeMaxPixels,
-          sizeMinPixels: pointSizeMinPixels,
-          sizeScale: pointSizeScale,
-          sizeUnits: pointSizeUnits,
-
-          getAngle: this.getSubLayerAccessor(getPointAngle),
-          getColor: this.getSubLayerAccessor(getFillColor),
-          getIcon: this.getSubLayerAccessor(getIcon),
-          getPixelOffset: this.getSubLayerAccessor(getPointPixelOffset),
-          getSize: this.getSubLayerAccessor(getPointSize),
-
-          transitions: transitions && {
-            getPosition: transitions.geometry,
-            getAngle: transitions.getPointAngle,
-            getColor: transitions.getFillColor,
-            getPixelOffset: transitions.getPointPixelOffset,
-            getSize: transitions.getPointSize
-          }
-        };
-        pointLayerUpdateTriggers = {
-          getAngle: updateTriggers.getPointAngle,
-          getColor: updateTriggers.getFillColor,
-          getIcon: updateTriggers.getIcon,
-          getPixelOffset: updateTriggers.getPointPixelOffset,
-          getSize: updateTriggers.getPointSize
-        };
+        pointLayerProps = generateSubLayerProps(this, POINT_ICON_PROPS);
+        pointLayerUpdateTriggers = generateSubLayerUpdateTriggers(this, POINT_ICON_PROPS);
         break;
       case 'text':
         pointLayerProps = {
