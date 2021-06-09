@@ -94,22 +94,6 @@ Optional. Needed for highlighting a feature split across two or more tiles if no
 
 A string pointing to a tile attribute containing a unique identifier for features across tiles.
 
-##### `credentials` (Object)
-
-Optional. Overrides the configuration to connect with CARTO. Check the configuration parameters [here](overview#carto-configuration-object).
-
-* Default:
-
-```js
-{
-  apiVersion: API_VERSIONS.V2,
-  username: 'public',
-  apiKey: 'default_public',
-  region: 'us',
-  mapsUrl: 'https://maps-api-v2.{region}.carto.com/user/{user}',
-}
-```
-
 ### Callbacks
 
 #### `onDataLoad` (Function, optional)

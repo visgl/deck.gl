@@ -100,22 +100,6 @@ Required. Either a sql query or a name of dataset
 
 Optional. A string pointing to a unique attribute at the result of the query. A unique attribute is needed for highlighting a feature split across two or more tiles.
 
-##### `credentials` (Object)
-
-Optional. Overrides the configuration to connect with CARTO. Check the configuration parameters [here](overview#carto-configuration-object).
-
-* Default:
-
-```js
-{
-  apiVersion: API_VERSIONS.V2,
-  username: 'public',
-  apiKey: 'default_public',
-  region: 'us',
-  mapsUrl: 'https://maps-api-v2.{region}.carto.com/user/{user}',
-}
-```
-
 ### Callbacks
 
 #### `onDataLoad` (Function, optional)
