@@ -5,19 +5,33 @@ import {getDefaultCredentials} from '../config';
 import {API_VERSIONS, encodeParameter, FORMATS, MAP_TYPES} from './maps-api-common';
 import {log} from '@deck.gl/core';
 
+const MAX_GET_LENGTH = 2048;
+
 /**
  * Request against Maps API
  */
-async function request({url, format}) {
+async function request({method, url, format, accessToken, body}) {
   let response;
+
+  const headers = {
+    Accept: 'application/json'
+  };
+
+  if (accessToken) {
+    headers.Authorization = `Bearer ${accessToken}`;
+  }
+
+  if (method === 'POST') {
+    headers['Content-Type'] = 'application/json';
+  }
 
   try {
     /* global fetch */
     /* eslint no-undef: "error" */
     response = await fetch(url, {
-      headers: {
-        Accept: 'application/json'
-      }
+      method,
+      headers,
+      body
     });
   } catch (error) {
     throw new Error(`Failed to connect to Maps API: ${error}`);
@@ -53,21 +67,33 @@ function dealWithError({response, error}) {
 /**
  * Build a URL with all required parameters
  */
-function buildURL({type, source, connection, credentials}) {
+function getParameters({type, source}) {
   const encodedClient = encodeParameter('client', 'deck-gl-carto');
   const parameters = [encodedClient];
 
-  parameters.push(encodeParameter('access_token', credentials.accessToken));
   const sourceName = type === MAP_TYPES.QUERY ? 'q' : 'name';
   parameters.push(encodeParameter(sourceName, source));
 
-  return `${credentials.mapsUrl}/${connection}/${type}?${parameters.join('&')}`;
+  return parameters.join('&');
 }
 
 export async function mapInstantiation({type, source, connection, credentials}) {
-  const url = buildURL({type, source, connection, credentials});
+  const baseUrl = `${credentials.mapsUrl}/${connection}/${type}`;
+  const url = `${baseUrl}?${getParameters({type, source})}`;
+  const {accessToken} = credentials;
 
-  return await request({url, format: 'json'});
+  const format = 'json';
+
+  if (url.length > MAX_GET_LENGTH && type === MAP_TYPES.QUERY) {
+    // need to be a POST request
+    const body = JSON.stringify({
+      q: source,
+      client: 'deck-gl-carto'
+    });
+    return await request({method: 'POST', url: baseUrl, format, accessToken, body});
+  }
+
+  return await request({url, format, accessToken});
 }
 
 function getUrlFromMetadata(metadata, format) {
