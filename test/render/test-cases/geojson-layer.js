@@ -14,6 +14,8 @@ import {parseColor, setOpacity} from '../../../examples/layer-browser/src/utils/
 import {SimpleMeshLayer} from '@deck.gl/mesh-layers';
 import {SphereGeometry} from '@luma.gl/core';
 
+import {OS} from '../constants';
+
 const sphere = new SphereGeometry({
   nlat: 20,
   nlong: 20
@@ -35,6 +37,71 @@ const lightingEffect = new LightingEffect({
     direction: [5, 5, -1]
   })
 });
+
+// Tests that contain text render differently depending on the OS,
+// currently only do comparisons on Mac
+const macOnlyTests = [
+  {
+    name: 'geojson-point-types',
+    viewState: {
+      longitude: -100,
+      latitude: 40,
+      zoom: 4
+    },
+    layers: [
+      new GeoJsonLayer({
+        id: 'geojson-point-circle',
+        data: capitals,
+        pointType: 'circle',
+        stroked: true,
+        filled: true,
+        getFillColor: [255, 255, 0],
+        getLineColor: [0, 0, 255],
+        getPointSize: d => 10 + 3 * d.properties.name.length,
+        opacity: 0.3,
+        lineWidthMinPixels: 2,
+        pointSizeUnits: 'pixels'
+      }),
+      new GeoJsonLayer({
+        id: 'geojson-point-text',
+        data: capitals,
+        pointType: 'text',
+        getText: d => d.properties.name
+      }),
+      new GeoJsonLayer({
+        id: 'geojson-point-icon',
+        data: capitals,
+        pointType: 'icon',
+        iconAtlas: ICON_ATLAS,
+        iconMapping,
+        pointSizeScale: 5,
+        pointSizeUnits: 'pixels',
+        getPointSize: 10,
+        getPosition: d => d.coordinates,
+        getIcon: d => (d.properties.state.length % 2 ? 'marker' : 'marker-warning')
+      })
+    ],
+    goldenImage: './test/render/golden-images/geojson-point-types.png'
+  },
+  {
+    name: 'geojson-text',
+    viewState: {
+      longitude: -100,
+      latitude: 40,
+      zoom: 4
+    },
+    layers: [
+      new GeoJsonLayer({
+        id: 'geojson-text',
+        data: capitals,
+        pointType: 'text',
+        getText: d => d.properties.name
+      })
+    ],
+    goldenImage: './test/render/golden-images/geojson-text.png'
+  }
+];
+const optionalTests = OS === 'Mac' ? macOnlyTests : [];
 
 export default [
   {
@@ -214,48 +281,6 @@ export default [
     goldenImage: './test/render/golden-images/geojson-wrap-longitude.png'
   },
   {
-    name: 'geojson-point-types',
-    viewState: {
-      longitude: -100,
-      latitude: 40,
-      zoom: 4
-    },
-    layers: [
-      new GeoJsonLayer({
-        id: 'geojson-point-circle',
-        data: capitals,
-        pointType: 'circle',
-        stroked: true,
-        filled: true,
-        getFillColor: [255, 255, 0],
-        getLineColor: [0, 0, 255],
-        getPointSize: d => 10 + 3 * d.properties.name.length,
-        opacity: 0.3,
-        lineWidthMinPixels: 2,
-        pointSizeUnits: 'pixels'
-      }),
-      new GeoJsonLayer({
-        id: 'geojson-point-text',
-        data: capitals,
-        pointType: 'text',
-        getText: d => d.properties.name
-      }),
-      new GeoJsonLayer({
-        id: 'geojson-point-icon',
-        data: capitals,
-        pointType: 'icon',
-        iconAtlas: ICON_ATLAS,
-        iconMapping,
-        pointSizeScale: 5,
-        pointSizeUnits: 'pixels',
-        getPointSize: 10,
-        getPosition: d => d.coordinates,
-        getIcon: d => (d.properties.state.length % 2 ? 'marker' : 'marker-warning')
-      })
-    ],
-    goldenImage: './test/render/golden-images/geojson-point-types.png'
-  },
-  {
     name: 'geojson-circle',
     viewState: {
       longitude: -100,
@@ -280,23 +305,6 @@ export default [
     goldenImage: './test/render/golden-images/geojson-circle.png'
   },
   {
-    name: 'geojson-text',
-    viewState: {
-      longitude: -100,
-      latitude: 40,
-      zoom: 4
-    },
-    layers: [
-      new GeoJsonLayer({
-        id: 'geojson-text',
-        data: capitals,
-        pointType: 'text',
-        getText: d => d.properties.name
-      })
-    ],
-    goldenImage: './test/render/golden-images/geojson-text.png'
-  },
-  {
     name: 'geojson-icon',
     viewState: {
       longitude: -100,
@@ -318,5 +326,6 @@ export default [
       })
     ],
     goldenImage: './test/render/golden-images/geojson-icon.png'
-  }
+  },
+  ...optionalTests
 ];
