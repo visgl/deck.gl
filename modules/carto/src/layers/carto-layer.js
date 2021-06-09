@@ -6,8 +6,6 @@ import {MAP_TYPES} from '../api/maps-api-common';
 import {getDefaultCredentials} from '../config';
 
 const defaultProps = {
-  ...GeoJsonLayer.defaultProps,
-  ...MVTLayer.defaultProps,
   // (String, required): data resource to load. table name, sql query or tileset name.
   data: null,
   // (Enum (MAP_TYPES), required)
@@ -115,8 +113,6 @@ export default class CartoLayer extends CompositeLayer {
     if (!data) return null;
 
     const {updateTriggers} = this.props;
-    const props = {...this.props};
-    delete props.data;
 
     let layer;
 
@@ -129,6 +125,9 @@ export default class CartoLayer extends CompositeLayer {
     } else {
       layer = GeoJsonLayer;
     }
+
+    const props = {...layer.defaultProps, ...this.props};
+    delete props.data;
 
     // eslint-disable-next-line new-cap
     return new layer(
