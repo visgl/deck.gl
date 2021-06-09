@@ -21,6 +21,15 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ### deck.gl v8.5 Prereleases
 
+#### deck.gl [8.5.0-alpha.9] - Jun 9 2021
+
+- CARTO cloud native integration (#5859)
+- Fix inconsistent path layer id in GeoJSONLayer (#5855)
+- Tile3DLayer: multiple viewports (#5758)
+- Tile3DLayer: segmentation picking (#5757)
+- Fix event order when dynamically add/remove controllers (#5852)
+- Fix heatmap colorDomain (#5846)
+
 #### deck.gl [8.5.0-alpha.8] - Jun 5 2021
 
 - Pass through loadOptions and AbortSignal to MVTLayer & TerrainLayer (#5837)
