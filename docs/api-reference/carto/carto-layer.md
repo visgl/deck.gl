@@ -43,7 +43,7 @@ setDefaultCredentials({
 function App({viewState}) {
   const layer = new CartoLayer({
     type: MAP_TYPES.QUERY,
-    connection: 'bigquery'
+    connection: 'bigquery',
     data: 'SELECT * FROM cartobq.testtables.points_10k',
     pointRadiusMinPixels: 2,
     getLineColor: [0, 0, 0, 200],

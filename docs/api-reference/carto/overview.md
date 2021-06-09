@@ -64,7 +64,7 @@ setDefaultCredentials({
 function App({viewState}) {
   const layer = new CartoLayer({
     type: MAP_TYPES.QUERY,
-    connection: 'bigquery'
+    connection: 'bigquery',
     data: 'SELECT * FROM cartobq.testtables.points_10k',
     pointRadiusMinPixels: 2,
     getLineColor: [0, 0, 0, 200],
@@ -131,20 +131,25 @@ The CARTO submodule includes the CartoLayer that simplify interaction with the C
 * If you are using the cloud native API version (v3), you can directly retrieve the data in the format expected by the layer using the `getData` function:
 
 ```js
-import carto from '@deck.gl/carto';
+import { getData } from '@deck.gl/carto';
 import { H3HexagonLayer } from '@deck.gl/geo-layers/';
- 
+
+const data =  await getData({
+  type: MAP_TYPES.QUERY,
+  source: `SELECT bqcarto.h3.ST_ASH3(geom, 2) as h3, count(*) as count 
+              FROM cartobq.testtables.points_10k 
+            GROUP BY h3`,
+  connection: 'connection_name',
+  format: 'json'
+});
+
 new H3HexagonLayer({
-  data: await carto.getData({
-    type: MAP_TYPES.QUERY,
-    source: 'SELECT hex, count FROM populated_places'
-    connection: 'connection_name',
-    format: 'json',
-    filled: true,
-    getHexagon: d => d.hex,
-    getFillColor: d => [255, (1 - d.count / 500) * 255, 0],
-  })
-})
+  data,
+  filled: true,
+  getHexagon: d => d.h3,
+  getFillColor: d => [255, (1 - d.count / 500) * 255, 0],
+  getLineColor: [0, 0, 0, 200],
+});
 ```
 
 The formats available are JSON, GEOJSON, TILEJSON and NDJSON. [NDJSON](http://ndjson.org/) (Newline Delimited JSON) allows to handle incremental data loading https://deck.gl/docs/developer-guide/performance#handle-incremental-data-loading.
