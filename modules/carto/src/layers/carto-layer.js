@@ -6,6 +6,8 @@ import {MAP_TYPES} from '../api/maps-api-common';
 import {getDefaultCredentials} from '../config';
 
 const defaultProps = {
+  ...GeoJsonLayer.defaultProps,
+  ...MVTLayer.defaultProps,
   // (String, required): data resource to load. table name, sql query or tileset name.
   data: null,
   // (Enum (MAP_TYPES), required)

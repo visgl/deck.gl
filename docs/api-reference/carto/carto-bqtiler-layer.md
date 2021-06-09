@@ -94,6 +94,10 @@ Optional. Needed for highlighting a feature split across two or more tiles if no
 
 A string pointing to a tile attribute containing a unique identifier for features across tiles.
 
+##### `credentials` (Object)
+
+Optional. Overrides the configuration to connect with CARTO. Check the parameters [here](overview#carto-credentials).
+
 ### Callbacks
 
 #### `onDataLoad` (Function, optional)

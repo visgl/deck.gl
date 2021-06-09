@@ -100,6 +100,10 @@ Required. Either a sql query or a name of dataset
 
 Optional. A string pointing to a unique attribute at the result of the query. A unique attribute is needed for highlighting a feature split across two or more tiles.
 
+##### `credentials` (Object)
+
+Optional. Overrides the configuration to connect with CARTO. Check the parameters [here](overview#carto-credentials).
+
 ### Callbacks
 
 #### `onDataLoad` (Function, optional)

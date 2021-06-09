@@ -119,18 +119,8 @@ Optional. A string pointing to a unique attribute at the result of the query. A 
 
 ##### `credentials` (Object)
 
-Optional. Overrides the configuration to connect with CARTO. Check the configuration parameters [here](overview#carto-configuration-object).
+Optional. Overrides the configuration to connect with CARTO. Check the parameters [here](overview#carto-credentials).
 
-* Default:
-
-```js
-{
-  apiVersion: API_VERSIONS.V2,
-  username: 'public',
-  apiKey: 'default_public',
-  region: 'us'
-}
-```
 
 ### Callbacks
 
@@ -146,7 +136,7 @@ Receives arguments:
 
 ##### `onDataError` (Function, optional)
 
-`onDataError` is called when the request to the CARTO tiler failed. By default the Error is thrown.
+`onDataError` is called when the request to the CARTO Maps API failed. By default the Error is thrown.
 
 * Default: `null`
 
