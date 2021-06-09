@@ -1,6 +1,13 @@
 import mapboxgl from 'mapbox-gl';
 import {Deck} from '@deck.gl/core';
-import {CartoLayer, setDefaultCredentials, BASEMAP, colorBins, API_VERSIONS, MAP_TYPES} from '@deck.gl/carto';
+import {
+  CartoLayer,
+  setDefaultCredentials,
+  BASEMAP,
+  colorBins,
+  API_VERSIONS,
+  MAP_TYPES
+} from '@deck.gl/carto';
 
 const INITIAL_VIEW_STATE = {
   latitude: 0,

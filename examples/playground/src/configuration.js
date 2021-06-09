@@ -49,7 +49,7 @@ export default {
   enumerations: {
     COORDINATE_SYSTEM,
     GL,
-    CARTO_MAP_TYPES,
+    CARTO_MAP_TYPES
   },
 
   // Constants that should be resolved with the provided values by JSON converter
