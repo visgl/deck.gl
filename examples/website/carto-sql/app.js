@@ -3,7 +3,7 @@ import {render} from 'react-dom';
 import {StaticMap} from 'react-map-gl';
 import DeckGL from '@deck.gl/react';
 import {LinearInterpolator} from '@deck.gl/core';
-import {CartoSQLLayer, setDefaultCredentials} from '@deck.gl/carto';
+import {CartoLayer, setDefaultCredentials, API_VERSIONS, MAP_TYPES} from '@deck.gl/carto';
 
 const INITIAL_VIEW_STATE = {
   latitude: 40.7368521,
@@ -25,6 +25,7 @@ const POLYGON_COLORS = {
 };
 
 setDefaultCredentials({
+  apiVersion: API_VERSIONS.V2,
   username: 'public',
   apiKey: 'SdBjYyF8NhILWw7kU0n2NQ'
 });
@@ -56,8 +57,9 @@ export default function App({
             GROUP BY the_geom_webmercator`;
 
   const layers = [
-    new CartoSQLLayer({
+    new CartoLayer({
       id: 'carto-layer',
+      type: MAP_TYPES.QUERY,
       data: SQL,
       getFillColor: object => {
         if (object.properties.index > 1000) {
