@@ -21,7 +21,7 @@ const requestBody = {
   tag_name: tag,
   name: tag,
   body: changelog,
-  prerelease: tag.indexOf(/alpha|beta|rc/) > 0
+  prerelease: tag.search(/alpha|beta|rc/) > 0
 };
 
 console.log(JSON.stringify(requestBody));
