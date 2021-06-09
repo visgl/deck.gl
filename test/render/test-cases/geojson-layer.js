@@ -254,5 +254,69 @@ export default [
       })
     ],
     goldenImage: './test/render/golden-images/geojson-point-types.png'
+  },
+  {
+    name: 'geojson-circle',
+    viewState: {
+      longitude: -100,
+      latitude: 40,
+      zoom: 4
+    },
+    layers: [
+      new GeoJsonLayer({
+        id: 'geojson-circle',
+        data: capitals,
+        pointType: 'circle',
+        stroked: true,
+        filled: true,
+        getFillColor: [255, 255, 0],
+        getLineColor: [0, 0, 255],
+        getPointSize: d => 10 + 3 * d.properties.name.length,
+        opacity: 0.3,
+        lineWidthMinPixels: 2,
+        pointSizeUnits: 'pixels'
+      })
+    ],
+    goldenImage: './test/render/golden-images/geojson-circle.png'
+  },
+  {
+    name: 'geojson-text',
+    viewState: {
+      longitude: -100,
+      latitude: 40,
+      zoom: 4
+    },
+    layers: [
+      new GeoJsonLayer({
+        id: 'geojson-text',
+        data: capitals,
+        pointType: 'text',
+        getText: d => d.properties.name
+      })
+    ],
+    goldenImage: './test/render/golden-images/geojson-text.png'
+  },
+  {
+    name: 'geojson-icon',
+    viewState: {
+      longitude: -100,
+      latitude: 40,
+      zoom: 4
+    },
+    layers: [
+      new GeoJsonLayer({
+        id: 'geojson-icon',
+        data: capitals,
+        pointType: 'icon',
+        iconAtlas: ICON_ATLAS,
+        iconMapping,
+        pointSizeScale: 5,
+        pointSizeUnits: 'pixels',
+        getPointSize: 10,
+        getPosition: d => d.coordinates,
+        getIcon: d => (d.properties.state.length % 2 ? 'marker' : 'marker-warning')
+      })
+    ],
+    goldenImage: './test/render/golden-images/geojson-icon.png'
   }
 ];
