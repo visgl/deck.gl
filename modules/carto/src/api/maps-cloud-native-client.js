@@ -128,8 +128,8 @@ export async function getData({type, source, connection, credentials, format}) {
     log.assert(url, `Format ${format} not available`);
   } else {
     // guess map format
-    const priorizedFormats = [FORMATS.GEOJSON, FORMATS.NDJSON, FORMATS.TILEJSON];
-    for (const f of priorizedFormats) {
+    const prioritizedFormats = [FORMATS.GEOJSON, FORMATS.NDJSON, FORMATS.TILEJSON];
+    for (const f of prioritizedFormats) {
       url = getUrlFromMetadata(metadata, f);
       if (url) {
         mapFormat = f;
