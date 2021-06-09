@@ -1,4 +1,4 @@
-name: website
+name: release
 
 on:
   create:
@@ -7,7 +7,7 @@ on:
       - '*-release'
 
 jobs:
-  publish-website:
+  release-notes:
     runs-on: ubuntu-latest
 
     if: github.repository_owner == 'visgl'
