@@ -33,6 +33,24 @@ import {createLayerPropsFromFeatures, createLayerPropsFromBinary} from './geojso
 const defaultLineColor = [0, 0, 0, 255];
 const defaultFillColor = [0, 0, 0, 255];
 
+const POINT_CIRCLE_PROPS = {
+  filled: 'filled',
+  lineWidthMaxPixels: 'lineWidthMaxPixels',
+  lineWidthMinPixels: 'lineWidthMinPixels',
+  lineWidthScale: 'lineWidthScale',
+  lineWidthUnits: 'lineWidthUnits',
+  pointSizeMaxPixels: 'radiusMaxPixels',
+  pointSizeMinPixels: 'radiusMinPixels',
+  pointSizeScale: 'radiusScale',
+  pointSizeUnits: 'radiusUnits',
+  stroked: 'stroked',
+
+  getFillColor: 'getFillColor',
+  getLineColor: 'getLineColor',
+  getLineWidth: 'getLineWidth',
+  getPointSize: 'getRadius'
+};
+
 const POINT_ICON_PROPS = {
   iconAtlas: 'iconAtlas',
   iconMapping: 'iconMapping',
@@ -282,10 +300,6 @@ export default class GeoJsonLayer extends CompositeLayer {
       lineWidthMinPixels,
       lineWidthScale,
       lineWidthUnits,
-      pointSizeMaxPixels,
-      pointSizeMinPixels,
-      pointSizeScale,
-      pointSizeUnits,
       pointType
     } = this.props;
 
@@ -296,7 +310,6 @@ export default class GeoJsonLayer extends CompositeLayer {
       getLineColor,
       getLineDashArray,
       getLineWidth,
-      getPointSize,
       updateTriggers
     } = this.props;
 
@@ -421,37 +434,8 @@ export default class GeoJsonLayer extends CompositeLayer {
     let pointLayerUpdateTriggers;
     switch (pointType) {
       case 'circle':
-        pointLayerProps = {
-          stroked,
-          filled,
-          radiusUnits: pointSizeUnits,
-          radiusScale: pointSizeScale,
-          radiusMinPixels: pointSizeMinPixels,
-          radiusMaxPixels: pointSizeMaxPixels,
-          lineWidthUnits,
-          lineWidthScale,
-          lineWidthMinPixels,
-          lineWidthMaxPixels,
-
-          getFillColor: this.getSubLayerAccessor(getFillColor),
-          getLineColor: this.getSubLayerAccessor(getLineColor),
-          getRadius: this.getSubLayerAccessor(getPointSize),
-          getLineWidth: this.getSubLayerAccessor(getLineWidth),
-
-          transitions: transitions && {
-            getPosition: transitions.geometry,
-            getFillColor: transitions.getFillColor,
-            getLineColor: transitions.getLineColor,
-            getRadius: transitions.getPointSize,
-            getLineWidth: transitions.getLineWidth
-          }
-        };
-        pointLayerUpdateTriggers = {
-          getFillColor: updateTriggers.getFillColor,
-          getLineColor: updateTriggers.getLineColor,
-          getRadius: updateTriggers.getPointSize,
-          getLineWidth: updateTriggers.getLineWidth
-        };
+        pointLayerProps = generateSubLayerProps(this, POINT_CIRCLE_PROPS);
+        pointLayerUpdateTriggers = generateSubLayerUpdateTriggers(this, POINT_CIRCLE_PROPS);
         break;
       case 'icon':
         pointLayerProps = generateSubLayerProps(this, POINT_ICON_PROPS);
