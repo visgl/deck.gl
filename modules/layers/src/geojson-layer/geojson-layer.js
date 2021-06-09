@@ -47,6 +47,33 @@ const POINT_ICON_PROPS = {
   getPointSize: 'getSize'
 };
 
+const POINT_TEXT_PROPS = {
+  pointSizeMaxPixels: 'sizeMaxPixels',
+  pointSizeMinPixels: 'sizeMinPixels',
+  pointSizeScale: 'sizeScale',
+  pointSizeUnits: 'sizeUnits',
+  textBackground: 'background',
+  textBackgroundPadding: 'backgroundPadding',
+  textFontFamily: 'fontFamily',
+  textFontWeight: 'fontWeight',
+  textLineHeight: 'lineHeight',
+  textMaxWidth: 'maxWidth',
+  textOutlineColor: 'outlineColor',
+  textOutlineWidth: 'outlineWidth',
+  textWordBreak: 'wordBreak',
+
+  getTextAlignmentBaseline: 'getAlignmentBaseline',
+  getPointAngle: 'getAngle',
+  getTextBackgroundColor: 'getBackgroundColor',
+  getTextBorderColor: 'getBorderColor',
+  getTextBorderWidth: 'getBorderWidth',
+  getFillColor: 'getColor',
+  getPointPixelOffset: 'getPixelOffset',
+  getPointSize: 'getSize',
+  getText: 'getText',
+  getTextAnchor: 'getTextAnchor'
+};
+
 function generateSubLayerProps(layer, mapping) {
   const result = {};
   const {transitions} = layer.props;
@@ -259,16 +286,7 @@ export default class GeoJsonLayer extends CompositeLayer {
       pointSizeMinPixels,
       pointSizeScale,
       pointSizeUnits,
-      pointType,
-      textBackground,
-      textBackgroundPadding,
-      textFontFamily,
-      textFontWeight,
-      textLineHeight,
-      textMaxWidth,
-      textOutlineColor,
-      textOutlineWidth,
-      textWordBreak
+      pointType
     } = this.props;
 
     // Accessor props for underlying layers
@@ -278,15 +296,7 @@ export default class GeoJsonLayer extends CompositeLayer {
       getLineColor,
       getLineDashArray,
       getLineWidth,
-      getPointAngle,
-      getPointPixelOffset,
       getPointSize,
-      getText,
-      getTextAlignmentBaseline,
-      getTextAnchor,
-      getTextBackgroundColor,
-      getTextBorderColor,
-      getTextBorderWidth,
       updateTriggers
     } = this.props;
 
@@ -448,58 +458,8 @@ export default class GeoJsonLayer extends CompositeLayer {
         pointLayerUpdateTriggers = generateSubLayerUpdateTriggers(this, POINT_ICON_PROPS);
         break;
       case 'text':
-        pointLayerProps = {
-          background: textBackground,
-          backgroundPadding: textBackgroundPadding,
-          fontFamily: textFontFamily,
-          fontWeight: textFontWeight,
-          lineHeight: textLineHeight,
-          maxWidth: textMaxWidth,
-          outlineColor: textOutlineColor,
-          outlineWidth: textOutlineWidth,
-          sizeMaxPixels: pointSizeMaxPixels,
-          sizeMinPixels: pointSizeMinPixels,
-          sizeScale: pointSizeScale,
-          sizeUnits: pointSizeUnits,
-          wordBreak: textWordBreak,
-
-          getAlignmentBaseline: this.getSubLayerAccessor(getTextAlignmentBaseline),
-          getAngle: this.getSubLayerAccessor(getPointAngle),
-          getBackgroundColor: this.getSubLayerAccessor(getTextBackgroundColor),
-          getBorderColor: this.getSubLayerAccessor(getTextBorderColor),
-          getBorderWidth: this.getSubLayerAccessor(getTextBorderWidth),
-          getColor: this.getSubLayerAccessor(getFillColor),
-          getPixelOffset: this.getSubLayerAccessor(getPointPixelOffset),
-          getSize: this.getSubLayerAccessor(getPointSize),
-          getText: this.getSubLayerAccessor(getText),
-          getTextAnchor: this.getSubLayerAccessor(getTextAnchor),
-
-          transitions: transitions && {
-            getPosition: transitions.geometry,
-            getAlignmentBaseline: transitions.getTextAlignmentBaseline,
-            getAngle: transitions.getPointAngle,
-            getBackgroundColor: transitions.getTextBackgroundColor,
-            getBorderColor: transitions.getTextBorderColor,
-            getBorderWidth: transitions.getTextBorderWidth,
-            getColor: transitions.getFillColor,
-            getPixelOffset: transitions.getPointPixelOffset,
-            getSize: transitions.getPointSize,
-            getText: transitions.getText,
-            getTextAnchor: transitions.getTextAnchor
-          }
-        };
-        pointLayerUpdateTriggers = {
-          getAlignmentBaseline: updateTriggers.getTextAlignmentBaseline,
-          getAngle: updateTriggers.getPointAngle,
-          getBackgroundColor: updateTriggers.getTextBackgroundColor,
-          getBorderColor: updateTriggers.getTextBorderColor,
-          getBorderWidth: updateTriggers.getTextBorderWidth,
-          getColor: updateTriggers.getFillColor,
-          getPixelOffset: updateTriggers.getPointPixelOffset,
-          getSize: updateTriggers.getPointSize,
-          getText: updateTriggers.getText,
-          getTextAnchor: updateTriggers.getTextAnchor
-        };
+        pointLayerProps = generateSubLayerProps(this, POINT_TEXT_PROPS);
+        pointLayerUpdateTriggers = generateSubLayerUpdateTriggers(this, POINT_TEXT_PROPS);
         break;
       default:
     }
