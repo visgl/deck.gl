@@ -33,7 +33,8 @@ import {createLayerPropsFromFeatures, createLayerPropsFromBinary} from './geojso
 const defaultLineColor = [0, 0, 0, 255];
 const defaultFillColor = [0, 0, 0, 255];
 
-const POINT_CIRCLE_PROPS = {
+const POINT_PROPS_MAPPING = {};
+POINT_PROPS_MAPPING.circle = {
   filled: 'filled',
   lineWidthMaxPixels: 'lineWidthMaxPixels',
   lineWidthMinPixels: 'lineWidthMinPixels',
@@ -51,7 +52,7 @@ const POINT_CIRCLE_PROPS = {
   getPointSize: 'getRadius'
 };
 
-const POINT_ICON_PROPS = {
+POINT_PROPS_MAPPING.icon = {
   iconAtlas: 'iconAtlas',
   iconMapping: 'iconMapping',
   pointSizeMaxPixels: 'sizeMaxPixels',
@@ -65,7 +66,7 @@ const POINT_ICON_PROPS = {
   getPointSize: 'getSize'
 };
 
-const POINT_TEXT_PROPS = {
+POINT_PROPS_MAPPING.text = {
   pointSizeMaxPixels: 'sizeMaxPixels',
   pointSizeMinPixels: 'sizeMinPixels',
   pointSizeScale: 'sizeScale',
@@ -284,7 +285,7 @@ export default class GeoJsonLayer extends CompositeLayer {
     }
   }
 
-  /* eslint-disable complexity, max-statements */
+  /* eslint-disable complexity */
   renderLayers() {
     // Layer composition props
     const {stroked, filled, extruded, wireframe, material, transitions} = this.props;
@@ -430,23 +431,9 @@ export default class GeoJsonLayer extends CompositeLayer {
         layerProps.lines
       );
 
-    let pointLayerProps;
-    let pointLayerUpdateTriggers;
-    switch (pointType) {
-      case 'circle':
-        pointLayerProps = generateSubLayerProps(this, POINT_CIRCLE_PROPS);
-        pointLayerUpdateTriggers = generateSubLayerUpdateTriggers(this, POINT_CIRCLE_PROPS);
-        break;
-      case 'icon':
-        pointLayerProps = generateSubLayerProps(this, POINT_ICON_PROPS);
-        pointLayerUpdateTriggers = generateSubLayerUpdateTriggers(this, POINT_ICON_PROPS);
-        break;
-      case 'text':
-        pointLayerProps = generateSubLayerProps(this, POINT_TEXT_PROPS);
-        pointLayerUpdateTriggers = generateSubLayerUpdateTriggers(this, POINT_TEXT_PROPS);
-        break;
-      default:
-    }
+    const pointPropMapping = POINT_PROPS_MAPPING[pointType];
+    const pointLayerProps = generateSubLayerProps(this, pointPropMapping);
+    const pointLayerUpdateTriggers = generateSubLayerUpdateTriggers(this, pointPropMapping);
 
     const pointsSubLayerProps = this.getSubLayerProps({
       id: 'points',
