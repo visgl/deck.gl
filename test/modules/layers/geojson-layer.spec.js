@@ -143,7 +143,7 @@ test('GeoJsonLayer#picking', async t => {
     testCases: [
       {
         pickedColor: new Uint8Array([1, 0, 0, 0]),
-        pickedLayerId: 'geojson-points',
+        pickedLayerId: 'geojson-points-circle',
         mode: 'hover',
         onAfterUpdate: ({layer, subLayers, info}) => {
           t.comment('hover over point feature');
@@ -155,7 +155,7 @@ test('GeoJsonLayer#picking', async t => {
             const uniforms = subLayer.getModels()[0].getUniforms();
             t.is(
               uniforms.picking_uSelectedColorValid,
-              subLayer.id === 'geojson-points' ? 1 : 0,
+              subLayer.id === 'geojson-points-circle' ? 1 : 0,
               `auto highlight is set for ${subLayer.id}`
             );
             if (uniforms.picking_uSelectedColorValid) {
@@ -170,7 +170,7 @@ test('GeoJsonLayer#picking', async t => {
       },
       {
         pickedColor: new Uint8Array([2, 0, 0, 0]),
-        pickedLayerId: 'geojson-points',
+        pickedLayerId: 'geojson-points-circle',
         mode: 'hover',
         onAfterUpdate: ({layer, subLayers, info}) => {
           t.comment('hover over point feature');
@@ -182,7 +182,7 @@ test('GeoJsonLayer#picking', async t => {
             const uniforms = subLayer.getModels()[0].getUniforms();
             t.is(
               uniforms.picking_uSelectedColorValid,
-              subLayer.id === 'geojson-points' ? 1 : 0,
+              subLayer.id === 'geojson-points-circle' ? 1 : 0,
               `auto highlight is set for ${subLayer.id}`
             );
             if (uniforms.picking_uSelectedColorValid) {
@@ -209,7 +209,7 @@ test('GeoJsonLayer#picking', async t => {
             const uniforms = subLayer.getModels()[0].getUniforms();
             t.is(
               uniforms.picking_uSelectedColorValid,
-              subLayer.id === 'geojson-points' ? 0 : 1,
+              subLayer.id === 'geojson-points-circle' ? 0 : 1,
               `auto highlight is set for ${subLayer.id}`
             );
             if (uniforms.picking_uSelectedColorValid) {

@@ -34,13 +34,11 @@ export const deck = new Deck({
       id: 'airports',
       data: AIR_PORTS,
       // Styles
-      pointType: 'circle+text',
       filled: true,
       pointRadiusMinPixels: 2,
       pointRadiusScale: 2000,
       getRadius: f => 11 - f.properties.scalerank,
       getFillColor: [200, 0, 80, 180],
-      getText: f => f.properties.name,
       // Interactive props
       pickable: true,
       autoHighlight: true,

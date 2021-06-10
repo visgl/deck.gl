@@ -32,16 +32,6 @@ import {
 import {getGeojsonFeatures, separateGeojsonFeatures} from './geojson';
 import {createLayerPropsFromFeatures, createLayerPropsFromBinary} from './geojson-layer-props';
 
-function parsePointType(pointType) {
-  const types = new Set();
-  for (const type of pointType.split('+')) {
-    if (type in POINT_LAYER) {
-      types.add(type);
-    }
-  }
-  return Array.from(types);
-}
-
 const defaultProps = {
   ...getDefaultProps(POINT_LAYER.circle),
   ...getDefaultProps(POINT_LAYER.icon),
@@ -134,33 +124,23 @@ export default class GeoJsonLayer extends CompositeLayer {
   _updateAutoHighlight(info) {
     // All sub layers except the points layer use source feature index to encode the picking color
     // The points layer uses indices from the points data array.
-    const sourceIsPoints = info.sourceLayer.id.endsWith('points');
+    const sourceIsPoints = info.sourceLayer.id.includes('-points-');
     for (const layer of this.getSubLayers()) {
-      if (layer.id.endsWith('points') === sourceIsPoints) {
+      if (layer.id.includes('-points-') === sourceIsPoints) {
         layer.updateAutoHighlight(info);
       }
     }
   }
 
-  /* eslint-disable complexity */
-  renderLayers() {
-    const {pointType, extruded, stroked, wireframe} = this.props;
+  _renderPolygonLayer() {
+    const {extruded, wireframe} = this.props;
     const {layerProps} = this.state;
+    const id = 'polygons-fill';
 
     const PolygonFillLayer =
-      this.shouldRenderSubLayer('polygons-fill', layerProps.polygons.data) &&
-      this.getSubLayerClass('polygons-fill', POLYGON_LAYER.type);
-    const PolygonStrokeLayer =
-      !extruded &&
-      stroked &&
-      this.shouldRenderSubLayer('polygons-stroke', layerProps.polygonsOutline.data) &&
-      this.getSubLayerClass('polygons-stroke', LINE_LAYER.type);
-    const LineStringsLayer =
-      this.shouldRenderSubLayer('linestrings', layerProps.lines.data) &&
-      this.getSubLayerClass('linestrings', LINE_LAYER.type);
+      this.shouldRenderSubLayer(id, layerProps.polygons.data) &&
+      this.getSubLayerClass(id, POLYGON_LAYER.type);
 
-    // Filled Polygon Layer
-    let polygonFillLayer = null;
     if (PolygonFillLayer) {
       const forwardedProps = forwardProps(this, POLYGON_LAYER.props);
       // Avoid building the lineColors attribute if wireframe is off
@@ -171,49 +151,80 @@ export default class GeoJsonLayer extends CompositeLayer {
       // using a legacy API to invalid lineColor attributes
       forwardedProps.updateTriggers.lineColors = useLineColor;
 
-      polygonFillLayer = new PolygonFillLayer(
+      return new PolygonFillLayer(
         forwardedProps,
         this.getSubLayerProps({
-          id: 'polygons-fill',
+          id,
           updateTriggers: forwardedProps.updateTriggers
         }),
         layerProps.polygons
       );
     }
+    return null;
+  }
 
-    let polygonLineLayer = null;
-    let pathLayer = null;
+  _renderLineLayers() {
+    const {extruded, stroked} = this.props;
+    const {layerProps} = this.state;
+    const polygonStrokeLayerId = 'polygons-stroke';
+    const lineStringsLayerId = 'linestrings';
+
+    const PolygonStrokeLayer =
+      !extruded &&
+      stroked &&
+      this.shouldRenderSubLayer(polygonStrokeLayerId, layerProps.polygonsOutline.data) &&
+      this.getSubLayerClass(polygonStrokeLayerId, LINE_LAYER.type);
+    const LineStringsLayer =
+      this.shouldRenderSubLayer(lineStringsLayerId, layerProps.lines.data) &&
+      this.getSubLayerClass(lineStringsLayerId, LINE_LAYER.type);
+
     if (PolygonStrokeLayer || LineStringsLayer) {
       const forwardedProps = forwardProps(this, LINE_LAYER.props);
 
-      polygonLineLayer =
+      return [
         PolygonStrokeLayer &&
-        new PolygonStrokeLayer(
-          forwardedProps,
-          this.getSubLayerProps({
-            id: 'polygons-stroke',
-            updateTriggers: forwardedProps.updateTriggers
-          }),
-          layerProps.polygonsOutline
-        );
+          new PolygonStrokeLayer(
+            forwardedProps,
+            this.getSubLayerProps({
+              id: polygonStrokeLayerId,
+              updateTriggers: forwardedProps.updateTriggers
+            }),
+            layerProps.polygonsOutline
+          ),
 
-      pathLayer =
         LineStringsLayer &&
-        new LineStringsLayer(
-          forwardedProps,
-          this.getSubLayerProps({
-            id: 'linestrings',
-            updateTriggers: forwardedProps.updateTriggers
-          }),
-          layerProps.lines
-        );
+          new LineStringsLayer(
+            forwardedProps,
+            this.getSubLayerProps({
+              id: lineStringsLayerId,
+              updateTriggers: forwardedProps.updateTriggers
+            }),
+            layerProps.lines
+          )
+      ];
+    }
+    return null;
+  }
+
+  _renderPointLayers() {
+    const {pointType} = this.props;
+    const {layerProps, binary} = this.state;
+    let {highlightedObjectIndex} = this.props;
+
+    if (!binary && Number.isFinite(highlightedObjectIndex)) {
+      highlightedObjectIndex = layerProps.points.data.findIndex(
+        d => d.__source.index === highlightedObjectIndex
+      );
     }
 
+    // Avoid duplicate sub layer ids
+    const types = new Set(pointType.split('+'));
     const pointLayers = [];
-    for (const type of parsePointType(pointType)) {
+    for (const type of types) {
       const id = `points-${type}`;
       const PointLayerMapping = POINT_LAYER[type];
       const PointsLayer =
+        PointLayerMapping &&
         this.shouldRenderSubLayer(id, layerProps.points.data) &&
         this.getSubLayerClass(id, PointLayerMapping.type);
       if (PointsLayer) {
@@ -225,35 +236,31 @@ export default class GeoJsonLayer extends CompositeLayer {
             this.getSubLayerProps({
               id,
               updateTriggers: forwardedProps.updateTriggers,
-              highlightedObjectIndex: this._getHighlightedIndex(layerProps.points.data)
+              highlightedObjectIndex
             }),
             layerProps.points
           )
         );
       }
     }
+    return pointLayers;
+  }
+
+  renderLayers() {
+    const {extruded} = this.props;
+
+    const polygonFillLayer = this._renderPolygonLayer();
+    const lineLayers = this._renderLineLayers();
+    const pointLayers = this._renderPointLayers();
 
     return [
       // If not extruded: flat fill layer is drawn below outlines
       !extruded && polygonFillLayer,
-      polygonLineLayer,
-      pathLayer,
+      lineLayers,
       pointLayers,
       // If extruded: draw fill layer last for correct blending behavior
       extruded && polygonFillLayer
     ];
-  }
-
-  _getHighlightedIndex(data) {
-    const {highlightedObjectIndex} = this.props;
-    const {binary} = this.state;
-
-    if (!binary) {
-      return Number.isFinite(highlightedObjectIndex)
-        ? data.findIndex(d => d.__source.index === highlightedObjectIndex)
-        : null;
-    }
-    return highlightedObjectIndex;
   }
 
   getSubLayerAccessor(accessor) {
