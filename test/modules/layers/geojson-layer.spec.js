@@ -31,7 +31,14 @@ test('GeoJsonLayer#tests', t => {
   const testCases = generateLayerTests({
     Layer: GeoJsonLayer,
     sampleProps: {
-      data: FIXTURES.geojson
+      data: FIXTURES.geojson,
+      pointType: 'circle+icon+text',
+      textBackground: true,
+      iconAtlas: {data: new Uint8ClampedArray(4), width: 1, height: 1},
+      iconMapping: {
+        marker: {x: 0, y: 0, width: 1, height: 1}
+      },
+      getIcon: () => 'marker'
     },
     assert: t.ok,
     onBeforeUpdate: ({testCase}) => t.comment(testCase.title),
@@ -40,7 +47,7 @@ test('GeoJsonLayer#tests', t => {
       const hasData = layer.props && layer.props.data && Object.keys(layer.props.data).length;
       t.is(
         subLayers.length,
-        !hasData ? 0 : layer.props.stroked && !layer.props.extruded ? 4 : 3,
+        !hasData ? 0 : layer.props.stroked && !layer.props.extruded ? 6 : 5,
         'correct number of sublayers'
       );
     }
@@ -54,6 +61,13 @@ test('GeoJsonLayer#tests', t => {
         subLayers.every(l => Number.isFinite(l.props.highlightedObjectIndex)),
         "sublayers' highlightedObjectIndex prop is populated"
       );
+      // check prop forwarding
+      for (const l of subLayers) {
+        t.ok(
+          Object.keys(l.props).every(key => key.startsWith('_') || l.props[key] !== undefined),
+          'sublayer props are defined'
+        );
+      }
     },
     updateProps: {
       highlightedObjectIndex: 5

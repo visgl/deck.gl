@@ -367,10 +367,9 @@ const TEST_CASES = [
       layers: [
         new GeoJsonLayer({
           data: DATA.geojson,
-          getPointSize: 100,
+          getPointRadius: 100,
           getLineWidth: 20,
           getElevation: 500,
-          pointSizeUnits: 'meters',
           lineWidthMinPixels: 1,
           pickable: true
         })

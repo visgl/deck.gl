@@ -57,10 +57,10 @@ const macOnlyTests = [
         filled: true,
         getFillColor: [255, 255, 0],
         getLineColor: [0, 0, 255],
-        getPointSize: d => 10 + 3 * d.properties.name.length,
+        getPointRadius: d => 10 + 3 * d.properties.name.length,
         opacity: 0.3,
         lineWidthMinPixels: 2,
-        pointSizeUnits: 'pixels'
+        pointRadiusUnits: 'pixels'
       }),
       new GeoJsonLayer({
         id: 'geojson-point-text',
@@ -74,10 +74,9 @@ const macOnlyTests = [
         pointType: 'icon',
         iconAtlas: ICON_ATLAS,
         iconMapping,
-        pointSizeScale: 5,
-        pointSizeUnits: 'pixels',
-        getPointSize: 10,
-        getPosition: d => d.coordinates,
+        iconSizeScale: 5,
+        iconSizeUnits: 'pixels',
+        getIconSize: 10,
         getIcon: d => (d.properties.state.length % 2 ? 'marker' : 'marker-warning')
       })
     ],
@@ -118,7 +117,7 @@ export default [
         id: 'geojson-lnglat',
         data: geojson,
         opacity: 0.8,
-        getPointSize: f => MARKER_SIZE_MAP[f.properties['marker-size']],
+        getPointRadius: f => MARKER_SIZE_MAP[f.properties['marker-size']],
         getFillColor: f => {
           const color = parseColor(f.properties.fill || f.properties['marker-color']);
           const opacity = (f.properties['fill-opacity'] || 1) * 255;
@@ -133,8 +132,7 @@ export default [
         getElevation: f => 500,
         lineWidthScale: 10,
         lineWidthMinPixels: 1,
-        pickable: true,
-        pointSizeUnits: 'meters'
+        pickable: true
       })
     ],
     goldenImage: './test/render/golden-images/geojson-lnglat.png'
@@ -155,7 +153,7 @@ export default [
         opacity: 0.8,
         extruded: true,
         wireframe: true,
-        getPointSize: f => MARKER_SIZE_MAP[f.properties['marker-size']],
+        getPointRadius: f => MARKER_SIZE_MAP[f.properties['marker-size']],
         getFillColor: f => {
           const color = parseColor(f.properties.fill || f.properties['marker-color']);
           const opacity = (f.properties['fill-opacity'] || 1) * 255;
@@ -170,8 +168,7 @@ export default [
         getElevation: f => 500,
         lineWidthScale: 10,
         lineWidthMinPixels: 1,
-        pickable: true,
-        pointSizeUnits: 'meters'
+        pickable: true
       })
     ],
     goldenImage: './test/render/golden-images/geojson-extruded-lnglat.png'
@@ -296,10 +293,10 @@ export default [
         filled: true,
         getFillColor: [255, 255, 0],
         getLineColor: [0, 0, 255],
-        getPointSize: d => 10 + 3 * d.properties.name.length,
+        getPointRadius: d => 10 + 3 * d.properties.name.length,
         opacity: 0.3,
         lineWidthMinPixels: 2,
-        pointSizeUnits: 'pixels'
+        pointRadiusUnits: 'pixels'
       })
     ],
     goldenImage: './test/render/golden-images/geojson-circle.png'
@@ -318,10 +315,9 @@ export default [
         pointType: 'icon',
         iconAtlas: ICON_ATLAS,
         iconMapping,
-        pointSizeScale: 5,
-        pointSizeUnits: 'pixels',
-        getPointSize: 10,
-        getPosition: d => d.coordinates,
+        iconSizeScale: 5,
+        iconSizeUnits: 'pixels',
+        getIconSize: 10,
         getIcon: d => (d.properties.state.length % 2 ? 'marker' : 'marker-warning')
       })
     ],
