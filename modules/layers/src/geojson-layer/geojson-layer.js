@@ -39,10 +39,15 @@ const defaultProps = {
   ...getDefaultProps(LINE_LAYER),
   ...getDefaultProps(POLYGON_LAYER),
 
+  // Overwrite sub layer defaults
   stroked: true,
   filled: true,
   extruded: false,
   wireframe: false,
+  iconAtlas: {type: 'object', value: null},
+  iconMapping: {type: 'object', value: {}},
+
+  // Self props
   pointType: 'circle',
 
   // TODO: deprecated, remove in v9

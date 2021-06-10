@@ -52,32 +52,21 @@ const macOnlyTests = [
       new GeoJsonLayer({
         id: 'geojson-point-circle',
         data: capitals,
-        pointType: 'circle',
+        pointType: 'circle+text+icon',
         stroked: true,
         filled: true,
         getFillColor: [255, 255, 0],
         getLineColor: [0, 0, 255],
         getPointRadius: d => 10 + 3 * d.properties.name.length,
-        opacity: 0.3,
-        lineWidthMinPixels: 2,
-        pointRadiusUnits: 'pixels'
-      }),
-      new GeoJsonLayer({
-        id: 'geojson-point-text',
-        data: capitals,
-        pointType: 'text',
-        getText: d => d.properties.name
-      }),
-      new GeoJsonLayer({
-        id: 'geojson-point-icon',
-        data: capitals,
-        pointType: 'icon',
+        getText: d => d.properties.name,
         iconAtlas: ICON_ATLAS,
         iconMapping,
         iconSizeScale: 5,
         iconSizeUnits: 'pixels',
         getIconSize: 10,
-        getIcon: d => (d.properties.state.length % 2 ? 'marker' : 'marker-warning')
+        getIcon: d => (d.properties.state.length % 2 ? 'marker' : 'marker-warning'),
+        lineWidthMinPixels: 2,
+        pointRadiusUnits: 'pixels'
       })
     ],
     goldenImage: './test/render/golden-images/geojson-point-types.png'
