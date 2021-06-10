@@ -152,6 +152,7 @@ export default class CompositeLayer extends Layer {
       positionFormat,
       modelMatrix,
       extensions,
+      fetch,
       _subLayerProps: overridingProps
     } = this.props;
     const newProps = {
@@ -168,7 +169,8 @@ export default class CompositeLayer extends Layer {
       wrapLongitude,
       positionFormat,
       modelMatrix,
-      extensions
+      extensions,
+      fetch
     };
 
     const overridingSublayerProps = overridingProps && overridingProps[sublayerProps.id];

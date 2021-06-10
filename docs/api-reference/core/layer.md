@@ -421,6 +421,25 @@ Layers may also include specialized loaders for their own use case, such as imag
 Find usage examples in the [data loading guide](/docs/developer-guide/loading-data.md).
 
 
+##### `fetch` (Function, optional)
+
+Called to fetch and parse content from URLs.
+
+The function receives the following arguments:
+
+- `url` (String) - the URL to fetch
+- `context` (Object)
+  + `layer` (Layer) - the current layer
+  + `propName` (String) - the name of the prop that is making the request
+  + `loaders` (Array?) - an array of [loaders.gl loaders](https://loaders.gl/docs/developer-guide/using-loaders) to parse this request with, default to `props.loaders`.
+  + `loadOptions` (Object?) - loader options for this request, default to `props.loadOptions`.
+  + `signal` ([AbortSignal](https://developer.mozilla.org/en-US/docs/Web/API/AbortController)?) - the signal to abort the request
+
+The function is expected to return a Promise that resolves to loaded data.
+
+* Default: `load(url, loaders, loadOptions)`
+
+
 ##### `onDataLoad` (Function, optional)
 
 Called when remote data is fully loaded. This callback applies when `data` is assigned a value that is either string (URL), Promise or an async iterable.
