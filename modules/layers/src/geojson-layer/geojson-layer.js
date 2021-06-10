@@ -46,6 +46,8 @@ const defaultProps = {
   wireframe: false,
   iconAtlas: {type: 'object', value: null},
   iconMapping: {type: 'object', value: {}},
+  getIcon: {type: 'accessor', value: f => f.properties.icon},
+  getText: {type: 'accessor', value: f => f.properties.text},
 
   // Self props
   pointType: 'circle',
