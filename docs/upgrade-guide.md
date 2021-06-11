@@ -23,6 +23,8 @@ The module entry point is now only lightly transpiled for the most commonly used
 - `MVTLayer`'s `binary` prop is now set to `true` by default.
 - `CartoBQTilerLayer` will be deprecated in 8.6. Use `CartoLayer` instead with `type` to `MAP_TYPES.TILESET`.
 - `CartoSQLLayer` will be deprecated in 8.6. Use `CartoLayer` instead with `type` to `MAP_TYPES.QUERY`.
+- `GeoJsonLayer`'s `getRadius` props is deprecated, replaced by `getPointRadius`.
+
 ### onError Callback
 
 `Deck`'s default `onError` callback is changed to `console.error`. Explicitly setting `onError` to `null` now silently ignores all errors, instead of logging them to console.
