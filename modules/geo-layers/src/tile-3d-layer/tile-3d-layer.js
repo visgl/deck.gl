@@ -219,6 +219,7 @@ export default class Tile3DLayer extends CompositeLayer {
       }),
       {
         id: `${this.id}-pointcloud-${tileHeader.id}`,
+        tile: tileHeader,
         data,
         coordinateSystem: COORDINATE_SYSTEM.METER_OFFSETS,
         coordinateOrigin: cartographicOrigin,
@@ -243,6 +244,7 @@ export default class Tile3DLayer extends CompositeLayer {
       }),
       {
         id: `${this.id}-scenegraph-${tileHeader.id}`,
+        tile: tileHeader,
         data: instances || SINGLE_DATA,
         scenegraph: gltf,
 
