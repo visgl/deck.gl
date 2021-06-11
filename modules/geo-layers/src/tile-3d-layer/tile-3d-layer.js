@@ -96,6 +96,12 @@ export default class Tile3DLayer extends CompositeLayer {
     return info;
   }
 
+  filterSubLayer({layer, viewport}) {
+    const {tile} = layer.props;
+    const {id: viewportId} = viewport;
+    return tile.viewportIds.includes(viewportId);
+  }
+
   _updateAutoHighlight(info) {
     if (info.sourceLayer) {
       info.sourceLayer.updateAutoHighlight(info);
@@ -213,6 +219,7 @@ export default class Tile3DLayer extends CompositeLayer {
       }),
       {
         id: `${this.id}-pointcloud-${tileHeader.id}`,
+        tile: tileHeader,
         data,
         coordinateSystem: COORDINATE_SYSTEM.METER_OFFSETS,
         coordinateOrigin: cartographicOrigin,
@@ -237,6 +244,7 @@ export default class Tile3DLayer extends CompositeLayer {
       }),
       {
         id: `${this.id}-scenegraph-${tileHeader.id}`,
+        tile: tileHeader,
         data: instances || SINGLE_DATA,
         scenegraph: gltf,
 
@@ -270,6 +278,7 @@ export default class Tile3DLayer extends CompositeLayer {
       }),
       {
         id: `${this.id}-mesh-${tileHeader.id}`,
+        tile: tileHeader,
         mesh: geometry,
         data: SINGLE_DATA,
         getColor: _getMeshColor(tileHeader),
