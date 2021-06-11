@@ -21,6 +21,12 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ### deck.gl v8.5 Prereleases
 
+#### deck.gl [8.5.0-alpha.10] - Jun 11 2021
+
+- Support pointType prop to allow changing point rendering in GeoJsonLayer (#5835)
+- geo: tile-3d viewport filter (#5866)
+- Consolidate and document fetch prop (#5854)
+
 #### deck.gl [8.5.0-alpha.9] - Jun 9 2021
 
 - CARTO cloud native integration (#5859)
