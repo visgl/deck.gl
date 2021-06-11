@@ -96,6 +96,12 @@ export default class Tile3DLayer extends CompositeLayer {
     return info;
   }
 
+  filterSubLayer({layer, viewport}) {
+    const {tile} = layer.props;
+    const {id: viewportId} = viewport;
+    return tile.viewportIds.includes(viewportId);
+  }
+
   _updateAutoHighlight(info) {
     if (info.sourceLayer) {
       info.sourceLayer.updateAutoHighlight(info);
@@ -270,6 +276,7 @@ export default class Tile3DLayer extends CompositeLayer {
       }),
       {
         id: `${this.id}-mesh-${tileHeader.id}`,
+        tile: tileHeader,
         mesh: geometry,
         data: SINGLE_DATA,
         getColor: _getMeshColor(tileHeader),
