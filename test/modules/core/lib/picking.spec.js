@@ -199,7 +199,7 @@ test('processPickInfo', t => {
         layer: testCompositeLayer,
         object: {type: 'Feature', geometry: {type: 'Point', coordinates: [0, 0]}}
       },
-      lastPickedInfo: {layerId: 'test-composite-layer-points', index: 0},
+      lastPickedInfo: {layerId: 'test-composite-layer-points-circle', index: 0},
       testLayerUniforms: {picking_uSelectedColorValid: 0}
     },
     {
