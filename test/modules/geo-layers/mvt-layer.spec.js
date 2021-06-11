@@ -133,7 +133,7 @@ test('ClipExtension', t => {
       onAfterUpdate: ({subLayers}) => {
         for (const layer of subLayers) {
           const uniforms = layer.getModels()[0].getUniforms();
-          if (layer.id.endsWith('points')) {
+          if (layer.id.includes('-points-')) {
             t.ok(uniforms.clip_bounds && uniforms.clip_bounds[0] === 0, 'has clip_bounds uniform');
           } else {
             t.ok(
