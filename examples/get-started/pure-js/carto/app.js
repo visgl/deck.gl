@@ -72,7 +72,7 @@ function render() {
       filled: true,
       pointRadiusMinPixels: 2,
       pointRadiusScale: 2000,
-      getRadius: f => 11 - f.properties.scalerank,
+      getPointRadius: f => 11 - f.properties.scalerank,
       getFillColor: [200, 0, 80, 180],
       autoHighlight: true,
       highlightColor: [0, 0, 128, 128],
