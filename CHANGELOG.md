@@ -19,6 +19,11 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v8.4
 
+#### deck.gl [8.4.17] - May 7 2021
+
+- Fix event order when dynamically add/remove controllers (#5852)
+- Fix inconsistent path layer id in GeoJSONLayer (#5855)
+
 #### deck.gl [8.4.16] - May 7 2021
 
 - fix for picking buffer generation with custom buffer over alloc (#5729)
