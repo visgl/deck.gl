@@ -1,10 +1,9 @@
 name: release
 
 on:
-  create:
-    branches:
-      - master
-      - '*-release'
+  push:
+    tags:
+      - v*
 
 jobs:
   release-notes:
