@@ -48,11 +48,8 @@ export function setDefaultCredentials(opts) {
         );
       }
 
-      let apiBaseUrl = opts.apiBaseUrl || defaultCloudNativeCredentials.apiBaseUrl;
-      if (!apiBaseUrl.endsWith('/')) {
-        apiBaseUrl += '/';
-      }
-      opts.mapsUrl = opts.mapsUrl || `${apiBaseUrl}v3/maps`;
+      const apiBaseUrl = opts.apiBaseUrl || defaultCloudNativeCredentials.apiBaseUrl;
+      opts.mapsUrl = opts.mapsUrl || buildMapsUrlFromBase(apiBaseUrl);
       credentials = {
         apiVersion,
         ...defaultCloudNativeCredentials,
@@ -66,4 +63,13 @@ export function setDefaultCredentials(opts) {
 
 export function getDefaultCredentials() {
   return credentials;
+}
+
+export function buildMapsUrlFromBase(apiBaseUrl) {
+  let suffix = '/v3/maps';
+  if (apiBaseUrl.endsWith('/')) {
+    suffix = suffix.substring(1);
+  }
+
+  return `${apiBaseUrl}${suffix}`;
 }
