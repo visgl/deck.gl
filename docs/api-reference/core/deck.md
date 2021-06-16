@@ -293,6 +293,12 @@ The array of effects to be rendered. A lighting effect will be added if an empty
 
 (Experimental) Forces deck.gl to redraw layers every animation frame. Normally deck.gl layers are only redrawn if any change is detected.
 
+##### `_timeline` (Timeline)
+
+* Default: `null`
+
+(Experimental) Supply an external timeline for animations. If not supplied deck will use an internal timeline.
+
 
 ### Interaction Settings
 
