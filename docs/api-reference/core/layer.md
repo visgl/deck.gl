@@ -425,7 +425,7 @@ The function receives two arguments:
 
 ### Render Properties
 
-##### `parameters` (Function, optional)
+##### `parameters` (Object, optional)
 
 The `parameters` allows applications to specify values for WebGL parameters such as blending mode, depth testing etc. Any `parameters` will be applied temporarily while rendering this layer only.
 
