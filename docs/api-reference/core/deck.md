@@ -293,7 +293,7 @@ The array of effects to be rendered. A lighting effect will be added if an empty
 
 (Experimental) Forces deck.gl to redraw layers every animation frame. Normally deck.gl layers are only redrawn if any change is detected.
 
-##### `_timeline` (Timeline)
+##### `_timeline` ([Timeline](https://luma.gl/docs/api-reference/engine/animation/timeline))
 
 * Default: `null`
 
