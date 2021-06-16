@@ -79,8 +79,8 @@ export function createLayerPropsFromBinary(geojsonBinary, uniqueIdProperty, enco
   layerProps.lines._pathType = 'open';
 
   layerProps.polygons.data = {
-    length: polygons.primitivePolygonIndices.value.length,
-    startIndices: polygons.primitivePolygonIndices.value,
+    length: polygons.polygonIndices.value.length - 1,
+    startIndices: polygons.polygonIndices.value,
     attributes: {
       getPolygon: polygons.positions,
       pickingColors: {
@@ -98,7 +98,7 @@ export function createLayerPropsFromBinary(geojsonBinary, uniqueIdProperty, enco
   }
 
   layerProps.polygonsOutline.data = {
-    length: polygons.primitivePolygonIndices.value.length,
+    length: polygons.primitivePolygonIndices.value.length - 1,
     startIndices: polygons.primitivePolygonIndices.value,
     attributes: {
       getPath: polygons.positions,
