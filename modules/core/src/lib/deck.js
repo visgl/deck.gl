@@ -289,6 +289,9 @@ export default class Deck {
 
     // Update the animation loop
     this.animationLoop.setProps(resolvedProps);
+    if ('_timeline' in props) {
+      this.animationLoop.attachTimeline(props._timeline);
+    }
 
     // If initialized, update sub manager props
     if (this.layerManager) {
