@@ -44,9 +44,9 @@ See the [Properties](#properties) section.
 
 The following properties are used to initialize a `Deck` instance. Any custom value should always be provided to the `Deck` constructor. Changing them with `setProps` afterwards will have no effect.
 
-##### `canvas` (HTMLCanvasElement)
+##### `canvas` (HTMLCanvasElement | String, optional)
 
-The canvas to render into. Will be auto-created if not supplied.
+The canvas to render into. Can be either a HTMLCanvasElement or the element id. Will be auto-created if not supplied.
 
 ##### `gl` (WebGLContext)
 
