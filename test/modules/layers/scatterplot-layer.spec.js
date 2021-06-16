@@ -14,7 +14,7 @@ test('ScatterplotLayer points size by radiusUnits prop', t => {
         pointRadiusUnits: 'meters'
       },
       onAfterUpdate: ({subLayers}) => {
-        const filteredLayers = subLayers.filter(l => l.id === 'GeoJsonLayer-points');
+        const filteredLayers = subLayers.filter(l => l.id === 'GeoJsonLayer-points-circle');
         t.ok(filteredLayers.length === 1);
 
         const scatterplotLayer = filteredLayers[0];
@@ -29,7 +29,7 @@ test('ScatterplotLayer points size by radiusUnits prop', t => {
         pointRadiusUnits: 'pixels'
       },
       onAfterUpdate: ({subLayers}) => {
-        const filteredLayers = subLayers.filter(l => l.id === 'GeoJsonLayer-points');
+        const filteredLayers = subLayers.filter(l => l.id === 'GeoJsonLayer-points-circle');
         t.ok(filteredLayers.length === 1);
 
         const scatterplotLayer = filteredLayers[0];

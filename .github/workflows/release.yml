@@ -1,0 +1,33 @@
+name: release
+
+on:
+  push:
+    tags:
+      - v*
+
+jobs:
+  release-notes:
+    runs-on: ubuntu-latest
+
+    if: github.repository_owner == 'visgl'
+
+    env:
+      ADMIN_TOKEN: ${{ secrets.ADMIN_TOKEN }}
+
+    steps:
+      - uses: actions/checkout@v2.1.1
+
+      - name: Use Node.js
+        uses: actions/setup-node@v1
+        with:
+          node-version: '12.x'
+
+      - name: Publish release
+        run: |
+          body=$(node scripts/github-release.js) &&
+          curl \
+            -X POST \
+            -H "Accept: application/vnd.github.v3+json" \
+            https://api.github.com/repos/visgl/deck.gl/releases \
+            -d "${body}" \
+            -H "Authorization: token ${ADMIN_TOKEN}"

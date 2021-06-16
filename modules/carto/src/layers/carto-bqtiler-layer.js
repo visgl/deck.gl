@@ -1,17 +1,21 @@
+import {log} from '@deck.gl/core';
 import CartoLayer from './carto-layer';
-import {getTileJSON, CONNECTIONS, MAP_TYPES} from '../api/maps-api-client';
+import {MAP_TYPES} from '../api';
+
+const defaultProps = {
+  ...CartoLayer.defaultProps,
+  type: MAP_TYPES.TILESET
+};
 
 export default class CartoBQTilerLayer extends CartoLayer {
-  async updateTileJSON() {
-    const {credentials, data} = this.props;
+  constructor(...args) {
+    super(...args);
 
-    return await getTileJSON({
-      connection: CONNECTIONS.BIGQUERY,
-      type: MAP_TYPES.TILESET,
-      source: data,
-      credentials
-    });
+    log.warn(
+      'CartoBQTilerLayer will be removed in future versions. Use CartoLayer with type=MAP_TYPES.TILESET and apiVersion=API_VERSIONS.V2'
+    )();
   }
 }
 
 CartoBQTilerLayer.layerName = 'CartoBQTilerLayer';
+CartoBQTilerLayer.defaultProps = defaultProps;

@@ -4,6 +4,7 @@ export default `#version 300 es
 // Scale the model
 uniform float sizeScale;
 uniform bool composeModelMatrix;
+uniform bool u_pickFeatureIds;
 
 // Primitive attributes
 in vec3 positions;
@@ -11,6 +12,7 @@ in vec3 normals;
 in vec3 colors;
 in vec2 texCoords;
 in vec4 uvRegions;
+in vec3 featureIdsPickingColors;
 
 // Instance attributes
 in vec4 instanceColors;
@@ -29,7 +31,13 @@ void main(void) {
   vec2 uv = fract(texCoords) * (uvRegions.zw - uvRegions.xy) + uvRegions.xy;
 
   geometry.uv = uv;
-  geometry.pickingColor = instancePickingColors;
+  geometry.uv = texCoords;
+
+  if (u_pickFeatureIds) {
+    geometry.pickingColor = featureIdsPickingColors;
+  } else {
+    geometry.pickingColor = instancePickingColors;
+  }
 
   #ifdef MODULE_PBR
     // set PBR data

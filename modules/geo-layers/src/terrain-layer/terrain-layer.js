@@ -21,7 +21,6 @@
 import {CompositeLayer} from '@deck.gl/core';
 import {SimpleMeshLayer} from '@deck.gl/mesh-layers';
 import {WebMercatorViewport, COORDINATE_SYSTEM} from '@deck.gl/core';
-import {load} from '@loaders.gl/core';
 import {TerrainLoader} from '@loaders.gl/terrain';
 import TileLayer from '../tile-layer/tile-layer';
 import {urlType, getURLFromTemplate} from '../tile-layer/utils';
@@ -98,11 +97,12 @@ export default class TerrainLayer extends CompositeLayer {
     }
   }
 
-  loadTerrain({elevationData, bounds, elevationDecoder, meshMaxError, workerUrl}) {
+  loadTerrain({elevationData, bounds, elevationDecoder, meshMaxError, signal, workerUrl}) {
     if (!elevationData) {
       return null;
     }
-    const options = {
+    const loadOptions = {
+      ...this.getLoadOptions(),
       terrain: {
         bounds,
         meshMaxError,
@@ -110,17 +110,18 @@ export default class TerrainLayer extends CompositeLayer {
       }
     };
     if (workerUrl !== null) {
-      options.terrain.workerUrl = workerUrl;
+      loadOptions.terrain.workerUrl = workerUrl;
     }
-    return load(elevationData, this.props.loaders, options);
+    const {fetch} = this.props;
+    return fetch(elevationData, {propName: 'elevationData', layer: this, loadOptions, signal});
   }
 
   getTiledTerrainData(tile) {
-    const {elevationData, texture, elevationDecoder, meshMaxError, workerUrl} = this.props;
+    const {elevationData, fetch, texture, elevationDecoder, meshMaxError, workerUrl} = this.props;
     const dataUrl = getURLFromTemplate(elevationData, tile);
     const textureUrl = getURLFromTemplate(texture, tile);
 
-    const {bbox, z} = tile;
+    const {bbox, signal, z} = tile;
     const viewport = new WebMercatorViewport({
       longitude: (bbox.west + bbox.east) / 2,
       latitude: (bbox.north + bbox.south) / 2,
@@ -135,11 +136,12 @@ export default class TerrainLayer extends CompositeLayer {
       bounds,
       elevationDecoder,
       meshMaxError,
+      signal,
       workerUrl
     });
     const surface = textureUrl
       ? // If surface image fails to load, the tile should still be displayed
-        load(textureUrl).catch(_ => null)
+        fetch(textureUrl, {propName: 'texture', layer: this, loaders: [], signal}).catch(_ => null)
       : Promise.resolve(null);
 
     return Promise.all([terrain, surface]);
@@ -209,8 +211,7 @@ export default class TerrainLayer extends CompositeLayer {
       onTileError,
       maxCacheSize,
       maxCacheByteSize,
-      refinementStrategy,
-      fetch
+      refinementStrategy
     } = this.props;
 
     if (this.state.isTiled) {
@@ -244,8 +245,7 @@ export default class TerrainLayer extends CompositeLayer {
           onTileError,
           maxCacheSize,
           maxCacheByteSize,
-          refinementStrategy,
-          fetch
+          refinementStrategy
         }
       );
     }

@@ -1,11 +1,12 @@
 import mapboxgl from 'mapbox-gl';
 import {Deck} from '@deck.gl/core';
 import {
-  CartoSQLLayer,
-  CartoBQTilerLayer,
+  CartoLayer,
   setDefaultCredentials,
   BASEMAP,
-  colorBins
+  colorBins,
+  API_VERSIONS,
+  MAP_TYPES
 } from '@deck.gl/carto';
 
 const INITIAL_VIEW_STATE = {
@@ -15,6 +16,7 @@ const INITIAL_VIEW_STATE = {
 };
 
 setDefaultCredentials({
+  apiVersion: API_VERSIONS.V2,
   username: 'public',
   apiKey: 'default_public'
 });
@@ -62,21 +64,24 @@ render();
 // Function to render the layers. Will be invoked any time visibility changes.
 function render() {
   const layers = [
-    new CartoSQLLayer({
+    new CartoLayer({
       id: 'airports',
+      type: MAP_TYPES.QUERY,
       data: 'SELECT cartodb_id, the_geom_webmercator, scalerank FROM ne_10m_airports',
       visible: visibleLayer === 'airports',
       filled: true,
       pointRadiusMinPixels: 2,
       pointRadiusScale: 2000,
-      getRadius: f => 11 - f.properties.scalerank,
+      getPointRadius: f => 11 - f.properties.scalerank,
       getFillColor: [200, 0, 80, 180],
       autoHighlight: true,
       highlightColor: [0, 0, 128, 128],
       pickable: true
     }),
-    new CartoBQTilerLayer({
+
+    new CartoLayer({
       id: 'osm_buildings',
+      type: MAP_TYPES.TILESET,
       data: 'cartobq.maps.osm_buildings',
       visible: visibleLayer === 'building',
       getFillColor: colorBins({

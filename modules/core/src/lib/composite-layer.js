@@ -136,6 +136,7 @@ export default class CompositeLayer extends Layer {
   }
 
   // Returns sub layer props for a specific sublayer
+  // eslint-disable-next-line complexity
   getSubLayerProps(sublayerProps = {}) {
     const {
       opacity,
@@ -152,6 +153,7 @@ export default class CompositeLayer extends Layer {
       positionFormat,
       modelMatrix,
       extensions,
+      fetch,
       _subLayerProps: overridingProps
     } = this.props;
     const newProps = {
@@ -168,7 +170,8 @@ export default class CompositeLayer extends Layer {
       wrapLongitude,
       positionFormat,
       modelMatrix,
-      extensions
+      extensions,
+      fetch
     };
 
     const overridingSublayerProps = overridingProps && overridingProps[sublayerProps.id];
@@ -178,8 +181,9 @@ export default class CompositeLayer extends Layer {
 
     if (overridingSublayerProps) {
       const propTypes = this.constructor._propTypes;
+      const subLayerPropTypes = sublayerProps.type ? sublayerProps.type._propTypes : {};
       for (const key in overridingSublayerProps) {
-        const propType = propTypes[key];
+        const propType = subLayerPropTypes[key] || propTypes[key];
         // eslint-disable-next-line
         if (propType && propType.type === 'accessor') {
           overridingSublayerProps[key] = this.getSubLayerAccessor(overridingSublayerProps[key]);

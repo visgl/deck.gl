@@ -31,7 +31,14 @@ test('GeoJsonLayer#tests', t => {
   const testCases = generateLayerTests({
     Layer: GeoJsonLayer,
     sampleProps: {
-      data: FIXTURES.geojson
+      data: FIXTURES.geojson,
+      pointType: 'circle+icon+text',
+      textBackground: true,
+      iconAtlas: {data: new Uint8ClampedArray(4), width: 1, height: 1},
+      iconMapping: {
+        marker: {x: 0, y: 0, width: 1, height: 1}
+      },
+      getIcon: () => 'marker'
     },
     assert: t.ok,
     onBeforeUpdate: ({testCase}) => t.comment(testCase.title),
@@ -40,7 +47,7 @@ test('GeoJsonLayer#tests', t => {
       const hasData = layer.props && layer.props.data && Object.keys(layer.props.data).length;
       t.is(
         subLayers.length,
-        !hasData ? 0 : layer.props.stroked && !layer.props.extruded ? 4 : 3,
+        !hasData ? 0 : layer.props.stroked && !layer.props.extruded ? 6 : 5,
         'correct number of sublayers'
       );
     }
@@ -54,6 +61,13 @@ test('GeoJsonLayer#tests', t => {
         subLayers.every(l => Number.isFinite(l.props.highlightedObjectIndex)),
         "sublayers' highlightedObjectIndex prop is populated"
       );
+      // check prop forwarding
+      for (const l of subLayers) {
+        t.ok(
+          Object.keys(l.props).every(key => key.startsWith('_') || l.props[key] !== undefined),
+          'sublayer props are defined'
+        );
+      }
     },
     updateProps: {
       highlightedObjectIndex: 5
@@ -129,7 +143,7 @@ test('GeoJsonLayer#picking', async t => {
     testCases: [
       {
         pickedColor: new Uint8Array([1, 0, 0, 0]),
-        pickedLayerId: 'geojson-points',
+        pickedLayerId: 'geojson-points-circle',
         mode: 'hover',
         onAfterUpdate: ({layer, subLayers, info}) => {
           t.comment('hover over point feature');
@@ -141,7 +155,7 @@ test('GeoJsonLayer#picking', async t => {
             const uniforms = subLayer.getModels()[0].getUniforms();
             t.is(
               uniforms.picking_uSelectedColorValid,
-              subLayer.id === 'geojson-points' ? 1 : 0,
+              subLayer.id === 'geojson-points-circle' ? 1 : 0,
               `auto highlight is set for ${subLayer.id}`
             );
             if (uniforms.picking_uSelectedColorValid) {
@@ -156,7 +170,7 @@ test('GeoJsonLayer#picking', async t => {
       },
       {
         pickedColor: new Uint8Array([2, 0, 0, 0]),
-        pickedLayerId: 'geojson-points',
+        pickedLayerId: 'geojson-points-circle',
         mode: 'hover',
         onAfterUpdate: ({layer, subLayers, info}) => {
           t.comment('hover over point feature');
@@ -168,7 +182,7 @@ test('GeoJsonLayer#picking', async t => {
             const uniforms = subLayer.getModels()[0].getUniforms();
             t.is(
               uniforms.picking_uSelectedColorValid,
-              subLayer.id === 'geojson-points' ? 1 : 0,
+              subLayer.id === 'geojson-points-circle' ? 1 : 0,
               `auto highlight is set for ${subLayer.id}`
             );
             if (uniforms.picking_uSelectedColorValid) {
@@ -195,7 +209,7 @@ test('GeoJsonLayer#picking', async t => {
             const uniforms = subLayer.getModels()[0].getUniforms();
             t.is(
               uniforms.picking_uSelectedColorValid,
-              subLayer.id === 'geojson-points' ? 0 : 1,
+              subLayer.id === 'geojson-points-circle' ? 0 : 1,
               `auto highlight is set for ${subLayer.id}`
             );
             if (uniforms.picking_uSelectedColorValid) {

@@ -1,9 +1,8 @@
-
-
 # CartoSQLLayer
+>CartoSQLLayer will be deprecated in future versions. Use CartoLayer instead.  If you've existing code using this layer, check [the migration steps](#migration-to-cartolayer).
 
 `CartoSQLLayer` is a layer to visualize data hosted in your CARTO account and to apply custom SQL.
-
+ 
 ```js
 import DeckGL from '@deck.gl/react';
 import {CartoSQLLayer, setDefaultCredentials} from '@deck.gl/carto';
@@ -17,7 +16,34 @@ function App({viewState}) {
   const layer = new CartoSQLLayer({
     data: 'SELECT * FROM world_population_2015',
     pointRadiusMinPixels: 2,
-    getLineColor: [0, 0, 0, 0.75],
+    getLineColor: [0, 0, 0, 125],
+    getFillColor: [238, 77, 90],
+    lineWidthMinPixels: 1
+  })
+
+  return <DeckGL viewState={viewState} layers={[layer]} />;
+}
+```
+
+## Migration to CartoLayer
+
+To migrate from `CartoSQLLayer` to `CartoLayer` you only need to change the layer name and set `type` property to `MAP_TYPES.QUERY`:
+
+```js
+import DeckGL from '@deck.gl/react';
+import {CartoLayer, setDefaultCredentials, MAP_TYPES} from '@deck.gl/carto';
+
+setDefaultCredentials({
+  username: 'public',
+  apiKey: 'default_public'
+});
+
+function App({viewState}) {
+  const layer = new CartoLayer({
+    type: MAP_TYPES.QUERY,
+    data: 'SELECT * FROM world_population_2015',
+    pointRadiusMinPixels: 2,
+    getLineColor: [0, 0, 0, 125],
     getFillColor: [238, 77, 90],
     lineWidthMinPixels: 1
   })
@@ -44,14 +70,14 @@ new CartoSQLLayer({});
 To use pre-bundled scripts:
 
 ```html
-<script src="https://unpkg.com/deck.gl@^8.2.0/dist.min.js"></script>
-<script src="https://unpkg.com/@deck.gl/carto@^8.2.0/dist.min.js"></script>
+<script src="https://unpkg.com/deck.gl@^8.5.0/dist.min.js"></script>
+<script src="https://unpkg.com/@deck.gl/carto@^8.5.0/dist.min.js"></script>
 
 <!-- or -->
-<script src="https://unpkg.com/@deck.gl/core@^8.0.0/dist.min.js"></script>
-<script src="https://unpkg.com/@deck.gl/layers@^8.2.0/dist.min.js"></script>
-<script src="https://unpkg.com/@deck.gl/geo-layers@^8.2.0/dist.min.js"></script>
-<script src="https://unpkg.com/@deck.gl/carto@^8.2.0/dist.min.js"></script>
+<script src="https://unpkg.com/@deck.gl/core@^8.5.0/dist.min.js"></script>
+<script src="https://unpkg.com/@deck.gl/layers@^8.5.0/dist.min.js"></script>
+<script src="https://unpkg.com/@deck.gl/geo-layers@^8.5.0/dist.min.js"></script>
+<script src="https://unpkg.com/@deck.gl/carto@^8.5.0/dist.min.js"></script>
 ```
 
 ```js
@@ -74,32 +100,9 @@ Required. Either a sql query or a name of dataset
 
 Optional. A string pointing to a unique attribute at the result of the query. A unique attribute is needed for highlighting a feature split across two or more tiles.
 
-
 ##### `credentials` (Object)
 
-Optional. Object with the credentials to connect with CARTO.
-
-* Default:
-
-```js
-{
-  username: 'public',
-  apiKey: 'default_public'
-}
-```
-
-##### `bufferSize` (Number)
-
-Optional. MVT BufferSize in tile coordinate space as defined by MVT specification
-
-* Default: `16`
-
-
-##### `tileExtent` (String)
-
-Optional. Tile extent in tile coordinate space as defined by MVT specification.
-
-* Default: `4096`
+Optional. Overrides the configuration to connect with CARTO. Check the parameters [here](overview#carto-credentials).
 
 ### Callbacks
 

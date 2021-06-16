@@ -21,6 +21,33 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ### deck.gl v8.5 Prereleases
 
+#### deck.gl [8.5.0-alpha.10] - Jun 11 2021
+
+- Support pointType prop to allow changing point rendering in GeoJsonLayer (#5835)
+- geo: tile-3d viewport filter (#5866)
+- Consolidate and document fetch prop (#5854)
+
+#### deck.gl [8.5.0-alpha.9] - Jun 9 2021
+
+- CARTO cloud native integration (#5859)
+- Fix inconsistent path layer id in GeoJSONLayer (#5855)
+- Tile3DLayer: multiple viewports (#5758)
+- Tile3DLayer: segmentation picking (#5757)
+- Fix event order when dynamically add/remove controllers (#5852)
+- Fix heatmap colorDomain (#5846)
+
+#### deck.gl [8.5.0-alpha.8] - Jun 5 2021
+
+- Pass through loadOptions and AbortSignal to MVTLayer & TerrainLayer (#5837)
+- Refactor OrbitController (#5825)
+- Allow CompositeLayer to filter sub layers during redraw (#5820)
+- Add getTilerColor method to tile-3d-layer (#5814)
+- Refactor linear transition in controllers (#5824)
+- i3s: support vertex colors (#5756)
+- i3s: support uvRegions (#5760)
+- Fix heatmap colorDomain (#5802)
+- feat(geo-layers): Private MeshLayer with pbr material support (I3S) (#5761)
+
 #### deck.gl [8.5.0-alpha.7] - May 25 2021
 
 - geo: i3s - support indices (#5807)

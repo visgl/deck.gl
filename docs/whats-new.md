@@ -18,9 +18,7 @@ Release date: TBD
   </tbody>
 </table>
 
-### MVT Layer
-
-#### Direct binary parsing
+### MVTLayer performance
 
 Mapbox Vector Tiles parsing throughput is now 2-3x faster, due to MVT tiles being parsed directly into binary attributes rather than GeoJSON, and additional work (including [triangulation](https://github.com/visgl/loaders.gl/blob/master/docs/whats-new.md#v30-in-development)) being performed on worker threads. Speed comparison on some example data sets (MVT tiles parsed per second):
 
@@ -33,6 +31,20 @@ Mapbox Vector Tiles parsing throughput is now 2-3x faster, due to MVT tiles bein
 
 _Benchmarks ran using scripts on a 2012 MacBook Pro, 2.3 GHz Intel Core i7, 8 GB, measuring parsing time of MVTLoader only (network time and rendering is not included)_
 
+### GeoJsonLayer point types
+
+GeoJSONLayer now supports rendering point features as icons and/or text labels in addition to circles. Use the new `pointType` prop:
+
+```js
+new GeoJsonLayer({
+  ...
+  pointType: 'circle+text',
+  getText: f => f.properties.name,
+  getTextSize: 12
+})
+```
+
+For a full list of new props, visit the updated [documentation](/docs/api-reference/layers/geojson-layer.md).
 
 ### Default transpilation and bundle size
 
@@ -74,6 +86,11 @@ The `DeckGL` React component is rewritten using functional component and hooks.
 - `PolygonLayer` and `GeoJsonLayer`: `autoHighlight` now highlights both the outline and the fill of the hovered polygon, instead of either the outline or the fill.
 
 
+### @deck.gl/carto
+
+- Integration with **CARTO Cloud Native beta**. With deck.gl and the CARTO Cloud Native platform you can access directly your datasets and tilesets hosted in your current data warehouse (BigQuery, Snowflake, Redshift, Postgres). Don't need to move your data to CARTO plaform.
+- A new `CartoLayer` is available to unify `CartoBQTilerLayer` and `CartoSQLLayer`. There are migration guides for both: [CartoSQLLayer](/docs/api-reference/carto/carto-sql-layer.md#migration-to-cartolayer) and [CartoBQTilerLayer](/docs/api-reference/carto/carto-sql-layer.md#migration-to-cartolayer).
+- New `getData` method in CARTO Cloud Native [to support other deck.gl layers](/docs/api-reference/carto/overview.md#support-for-other-deck.gl-layers). 
 
 ## deck.gl v8.4
 
