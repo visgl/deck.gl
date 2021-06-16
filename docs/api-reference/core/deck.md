@@ -297,8 +297,7 @@ The array of effects to be rendered. A lighting effect will be added if an empty
 
 * Default: `null`
 
-(Experimental) Supply an external timeline for animations. If not supplied deck will use an internal timeline.
-
+(Experimental) Supply an external timeline for animations. If not supplied deck will use an internal timeline. See the [luma.gl Timeline](https://luma.gl/docs/api-reference/engine/animation/timeline) documentation.
 
 ### Interaction Settings
 
