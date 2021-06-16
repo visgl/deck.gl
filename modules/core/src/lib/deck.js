@@ -94,6 +94,8 @@ function getPropTypes(PropTypes) {
     _framebuffer: PropTypes.object,
     // Forces a redraw every animation frame
     _animate: PropTypes.bool,
+    // supply an external Timeline
+    _timeline: PropTypes.object,
 
     // UNSAFE options - not exhaustively tested, not guaranteed to work in all cases, use at your own risk
 
@@ -640,8 +642,11 @@ export default class Deck {
     this.props.onWebGLInitialized(gl);
 
     // timeline for transitions
-    const timeline = new Timeline();
-    timeline.play();
+    let timeline = this.props._timeline;
+    if (!timeline) {
+      timeline = new Timeline();
+      timeline.play();
+    }
     this.animationLoop.attachTimeline(timeline);
 
     this.eventManager = new EventManager(this.props.parent || gl.canvas, {
