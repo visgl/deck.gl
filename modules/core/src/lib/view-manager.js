@@ -292,7 +292,7 @@ export default class ViewManager {
     const {width, height, views} = this;
 
     const oldControllers = this.controllers;
-    this._viewports = [];
+    this._viewports.length = 0;
     this.controllers = {};
 
     let invalidateControllers = false;
