@@ -126,9 +126,16 @@ Specifies a prioritized list of one or more font family names and/or generic fam
 
 See the [remarks](#remarks) section below for tips on using web fonts.
 
-##### `characterSet` (Array | String, optional)
+##### `characterSet` (Array | Set | String, optional)
 
-Specifies a list of characters to include in the font. By default, only characters in the Ascii code range 32-128 are included. Use this prop if you need to display special characters.
+* Default: ASCII characters 32-128
+
+Specifies a list of characters to include in the font.
+
+- If set to `'auto'`, automatically detects the characters used in the data. This option has a performance overhead and may cause the layer to take longer to load if the data is very large.
+- If set to an array or set of characters, the generated font will be limited to these characters. If you already know all the characters that are needed (e.g. numbers, latin alphabet), using this option provides better performance. If a character outside of the specified range is referenced by `getText`, a warning will be logged to the JavaScript console.
+
+Note that there is a limit to the number of unique characters supported by a single layer. The maximum number subjects to `fontSettings.fontSize` and the [MAX_TEXTURE_SIZE](https://developer.mozilla.org/en-US/docs/Web/API/WebGL_API/WebGL_best_practices#understand_system_limits) of the device/browser.
 
 ##### `fontWeight` (Number | String, optional)
 

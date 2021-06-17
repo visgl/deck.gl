@@ -74,6 +74,8 @@ New props are added for more flexible styling of the texts:
 * `getBorderWidth`
 * `getBorderColor`
 
+The layer now supports automatically detecting the characters used in the data. Set `characterSet: 'auto'` to enable this feature.
+
 See [documentation](/docs/api-reference/layers/text-layer.md) for details.
 
 ### React

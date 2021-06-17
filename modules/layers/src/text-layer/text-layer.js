@@ -73,7 +73,7 @@ const defaultProps = {
   getBorderWidth: {type: 'accessor', value: 0},
   backgroundPadding: {type: 'array', value: [0, 0]},
 
-  characterSet: DEFAULT_CHAR_SET,
+  characterSet: {type: 'object', value: DEFAULT_CHAR_SET},
   fontFamily: DEFAULT_FONT_FAMILY,
   fontWeight: DEFAULT_FONT_WEIGHT,
   lineHeight: DEFAULT_LINE_HEIGHT,
@@ -108,7 +108,16 @@ export default class TextLayer extends CompositeLayer {
 
   // eslint-disable-next-line complexity
   updateState({props, oldProps, changeFlags}) {
-    const fontChanged = this._fontChanged(oldProps, props);
+    const textChanged =
+      changeFlags.dataChanged ||
+      (changeFlags.updateTriggersChanged &&
+        (changeFlags.updateTriggersChanged.all || changeFlags.updateTriggersChanged.getText));
+
+    if (textChanged) {
+      this._updateText();
+    }
+
+    const fontChanged = textChanged || this._fontChanged(oldProps, props);
 
     if (fontChanged) {
       this._updateFontAtlas(oldProps, props);
@@ -120,14 +129,6 @@ export default class TextLayer extends CompositeLayer {
       props.wordBreak !== oldProps.wordBreak ||
       props.maxWidth !== oldProps.maxWidth;
 
-    const textChanged =
-      changeFlags.dataChanged ||
-      (changeFlags.updateTriggersChanged &&
-        (changeFlags.updateTriggersChanged.all || changeFlags.updateTriggersChanged.getText));
-
-    if (textChanged) {
-      this._updateText();
-    }
     if (styleChanged) {
       this.setState({
         styleVersion: this.state.styleVersion + 1
@@ -143,10 +144,10 @@ export default class TextLayer extends CompositeLayer {
   }
 
   _updateFontAtlas(oldProps, props) {
-    const {characterSet, fontSettings, fontFamily, fontWeight} = props;
+    const {fontSettings, fontFamily, fontWeight} = props;
 
     // generate test characterSet
-    const {fontAtlasManager} = this.state;
+    const {fontAtlasManager, characterSet} = this.state;
     fontAtlasManager.setProps({
       ...DEFAULT_FONT_SETTINGS,
       ...fontSettings,
@@ -154,8 +155,6 @@ export default class TextLayer extends CompositeLayer {
       fontFamily,
       fontWeight
     });
-
-    this.setNeedsRedraw(true);
   }
 
   _fontChanged(oldProps, props) {
@@ -180,17 +179,20 @@ export default class TextLayer extends CompositeLayer {
   // Text strings are variable width objects
   // Returns the index at the start of each string (every character is rendered by one instance)
   _updateText() {
-    const {data} = this.props;
+    const {data, characterSet} = this.props;
     const textBuffer = data.attributes && data.attributes.getText;
     let {getText} = this.props;
     let {startIndices} = data;
     let numInstances;
 
+    const autoCharacterSet = characterSet === 'auto' && new Set(DEFAULT_CHAR_SET);
+
     if (textBuffer && startIndices) {
       const {texts, characterCount} = getTextFromBuffer({
         ...(ArrayBuffer.isView(textBuffer) ? {value: textBuffer} : textBuffer),
         length: data.length,
-        startIndices
+        startIndices,
+        characterSet: autoCharacterSet
       });
       numInstances = characterCount;
       getText = (_, {index}) => texts[index];
@@ -201,14 +203,22 @@ export default class TextLayer extends CompositeLayer {
 
       for (const object of iterable) {
         objectInfo.index++;
-        const text = getText(object, objectInfo) || '';
+        const text = Array.from(getText(object, objectInfo) || '');
+        if (autoCharacterSet) {
+          text.forEach(autoCharacterSet.add, autoCharacterSet);
+        }
         // When dealing with double-length unicode characters, `str.length` is incorrect
-        numInstances += Array.from(text).length;
+        numInstances += text.length;
         startIndices.push(numInstances);
       }
     }
 
-    this.setState({getText, startIndices, numInstances});
+    this.setState({
+      getText,
+      startIndices,
+      numInstances,
+      characterSet: autoCharacterSet || characterSet
+    });
   }
 
   // Returns the x, y offsets of each character in a text string
