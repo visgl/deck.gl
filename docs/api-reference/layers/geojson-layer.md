@@ -313,7 +313,7 @@ The following props are forwarded to a `TextLayer` if `pointType` is `'text'`.
 | `textSizeScale` | `1` | [sizeScale](/docs/api-reference/layers/text-layer.md#sizescale) |
 | `textSizeMinPixels` | `0` | [sizeMinPixels](/docs/api-reference/layers/text-layer.md#sizeminpixels) |
 | `textSizeMaxPixels` | `Number.MAX_SAFE_INTEGER` | [sizeMaxPixels](/docs/api-reference/layers/text-layer.md#sizemaxpixels) |
-| `textCharacterSet` | `'auto'` | [characterSet](/docs/api-reference/layers/text-layer.md#characterset) |
+| `textCharacterSet` | ASCII chars 32-128 | [characterSet](/docs/api-reference/layers/text-layer.md#characterset) |
 | `textFontFamily` | `'Monaco, monospace'` | [fontFamily](/docs/api-reference/layers/text-layer.md#fontfamily) |
 | `textFontWeight` | `'normal'` | [fontWeight](/docs/api-reference/layers/text-layer.md#fontweight) |
 | `textLineHeight` | `1` | [lineHeight](/docs/api-reference/layers/text-layer.md#lineheight) |

@@ -112,12 +112,14 @@ export default class TextLayer extends CompositeLayer {
       changeFlags.dataChanged ||
       (changeFlags.updateTriggersChanged &&
         (changeFlags.updateTriggersChanged.all || changeFlags.updateTriggersChanged.getText));
+    const oldCharacterSet = this.state.characterSet;
 
     if (textChanged) {
       this._updateText();
     }
 
-    const fontChanged = textChanged || this._fontChanged(oldProps, props);
+    const fontChanged =
+      oldCharacterSet !== this.state.characterSet || this._fontChanged(oldProps, props);
 
     if (fontChanged) {
       this._updateFontAtlas(oldProps, props);
@@ -158,11 +160,7 @@ export default class TextLayer extends CompositeLayer {
   }
 
   _fontChanged(oldProps, props) {
-    if (
-      oldProps.fontFamily !== props.fontFamily ||
-      oldProps.characterSet !== props.characterSet ||
-      oldProps.fontWeight !== props.fontWeight
-    ) {
+    if (oldProps.fontFamily !== props.fontFamily || oldProps.fontWeight !== props.fontWeight) {
       return true;
     }
 
@@ -177,7 +175,7 @@ export default class TextLayer extends CompositeLayer {
   }
 
   // Text strings are variable width objects
-  // Returns the index at the start of each string (every character is rendered by one instance)
+  // Count characters and start offsets
   _updateText() {
     const {data, characterSet} = this.props;
     const textBuffer = data.attributes && data.attributes.getText;
@@ -185,7 +183,7 @@ export default class TextLayer extends CompositeLayer {
     let {startIndices} = data;
     let numInstances;
 
-    const autoCharacterSet = characterSet === 'auto' && new Set(DEFAULT_CHAR_SET);
+    const autoCharacterSet = characterSet === 'auto' && new Set();
 
     if (textBuffer && startIndices) {
       const {texts, characterCount} = getTextFromBuffer({
@@ -203,11 +201,12 @@ export default class TextLayer extends CompositeLayer {
 
       for (const object of iterable) {
         objectInfo.index++;
+        // Break into an array of characters
+        // When dealing with double-length unicode characters, `str.length` or `str[i]` do not work
         const text = Array.from(getText(object, objectInfo) || '');
         if (autoCharacterSet) {
           text.forEach(autoCharacterSet.add, autoCharacterSet);
         }
-        // When dealing with double-length unicode characters, `str.length` is incorrect
         numInstances += text.length;
         startIndices.push(numInstances);
       }
