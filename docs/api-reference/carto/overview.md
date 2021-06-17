@@ -136,8 +136,8 @@ import { H3HexagonLayer } from '@deck.gl/geo-layers/';
 
 const data =  await getData({
   type: MAP_TYPES.QUERY,
-  source: `SELECT bqcarto.h3.ST_ASH3(geom, 2) as h3, count(*) as count 
-              FROM cartobq.testtables.points_10k 
+  source: `SELECT bqcarto.h3.ST_ASH3(internal_point_geom, 4) as h3, count(*) as count
+              FROM bigquery-public-data.geo_us_census_places.us_national_places 
             GROUP BY h3`,
   connection: 'connection_name',
   format: 'json'
@@ -147,7 +147,7 @@ new H3HexagonLayer({
   data,
   filled: true,
   getHexagon: d => d.h3,
-  getFillColor: d => [255, (1 - d.count / 500) * 255, 0],
+  getFillColor: d => [0, (1 - d.count / 10) * 255, 0],
   getLineColor: [0, 0, 0, 200],
 });
 ```
