@@ -23,7 +23,8 @@ const defaultProps = {
   maxCacheByteSize: null,
   refinementStrategy: STRATEGY_DEFAULT,
   zRange: null,
-  maxRequests: 6
+  maxRequests: 6,
+  tileOffset: 0
 };
 
 export default class TileLayer extends CompositeLayer {
@@ -89,7 +90,8 @@ export default class TileLayer extends CompositeLayer {
       maxCacheByteSize,
       refinementStrategy,
       extent,
-      maxRequests
+      maxRequests,
+      tileOffset
     } = props;
 
     return {
@@ -100,7 +102,8 @@ export default class TileLayer extends CompositeLayer {
       tileSize,
       refinementStrategy,
       extent,
-      maxRequests
+      maxRequests,
+      tileOffset
     };
   }
 
