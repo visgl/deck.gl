@@ -270,13 +270,13 @@ export function transformParagraph(paragraph, lineHeight, wordBreak, maxWidth, i
   return {x, y, rowWidth, size};
 }
 
-export function getTextFromBuffer({value, length, stride, offset, startIndices}) {
+export function getTextFromBuffer({value, length, stride, offset, startIndices, characterSet}) {
   const bytesPerElement = value.BYTES_PER_ELEMENT;
   const elementStride = stride ? stride / bytesPerElement : 1;
   const elementOffset = offset ? offset / bytesPerElement : 0;
   const characterCount =
-    startIndices[length] ||
-    Math.floor((value.length - elementOffset - bytesPerElement) / elementStride) + 1;
+    startIndices[length] || Math.ceil((value.length - elementOffset) / elementStride);
+  const autoCharacterSet = characterSet && new Set();
 
   const texts = new Array(length);
 
@@ -291,7 +291,17 @@ export function getTextFromBuffer({value, length, stride, offset, startIndices})
   for (let index = 0; index < length; index++) {
     const startIndex = startIndices[index];
     const endIndex = startIndices[index + 1] || characterCount;
-    texts[index] = String.fromCodePoint.apply(null, codes.subarray(startIndex, endIndex));
+    const codesAtIndex = codes.subarray(startIndex, endIndex);
+    texts[index] = String.fromCodePoint.apply(null, codesAtIndex);
+    if (autoCharacterSet) {
+      codesAtIndex.forEach(autoCharacterSet.add, autoCharacterSet);
+    }
+  }
+
+  if (autoCharacterSet) {
+    for (const charCode of autoCharacterSet) {
+      characterSet.add(String.fromCodePoint(charCode));
+    }
   }
 
   return {texts, characterCount};
