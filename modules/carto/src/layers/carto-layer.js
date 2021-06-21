@@ -126,7 +126,7 @@ export default class CartoLayer extends CompositeLayer {
       layer = GeoJsonLayer;
     }
 
-    const props = {...layer.defaultProps, ...this.props};
+    const props = {...this.props};
     delete props.data;
 
     // eslint-disable-next-line new-cap
