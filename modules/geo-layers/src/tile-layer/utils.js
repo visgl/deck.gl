@@ -178,11 +178,11 @@ export function getTileIndices({
   tileSize = TILE_SIZE,
   modelMatrix,
   modelMatrixInverse,
-  tileOffset = 0
+  zoomOffset = 0
 }) {
   let z = viewport.isGeospatial
     ? Math.round(viewport.zoom + Math.log2(TILE_SIZE / tileSize))
-    : Math.ceil(viewport.zoom) + tileOffset;
+    : Math.ceil(viewport.zoom) + zoomOffset;
   if (Number.isFinite(minZoom) && z < minZoom) {
     if (!extent) {
       return [];

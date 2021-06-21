@@ -24,7 +24,7 @@ const defaultProps = {
   refinementStrategy: STRATEGY_DEFAULT,
   zRange: null,
   maxRequests: 6,
-  tileOffset: 0
+  zoomOffset: 0
 };
 
 export default class TileLayer extends CompositeLayer {
@@ -91,7 +91,7 @@ export default class TileLayer extends CompositeLayer {
       refinementStrategy,
       extent,
       maxRequests,
-      tileOffset
+      zoomOffset
     } = props;
 
     return {
@@ -103,7 +103,7 @@ export default class TileLayer extends CompositeLayer {
       refinementStrategy,
       extent,
       maxRequests,
-      tileOffset
+      zoomOffset
     };
   }
 

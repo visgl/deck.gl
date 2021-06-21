@@ -82,7 +82,7 @@ At each integer zoom level (`z`), the XY plane in the view space is divided into
 
 When the `TileLayer` is used with a geospatial view such as the [MapView](/docs/api-reference/core/map-view.md), x, y, and z are determined from [the OSM tile index](https://wiki.openstreetmap.org/wiki/Slippy_map_tilenames).
 
-When the `TileLayer` is used used with a non-geospatial view such as the [OrthographicView](/docs/api-reference/core/orthographic-view.md) or the [OrbitView](/docs/api-reference/core/orbit-view.md), `x` and `y` increment from the world origin, and each tile's width and height match that defined by the `tileSize` prop. For example, the tile `x: 0, y: 0` occupies the square between `[0, 0]` and `[tileSize, tileSize]`.  If you need to offset the `z` level at which the tiles are fetched, there is a `tileOffset` prop.
+When the `TileLayer` is used used with a non-geospatial view such as the [OrthographicView](/docs/api-reference/core/orthographic-view.md) or the [OrbitView](/docs/api-reference/core/orbit-view.md), `x` and `y` increment from the world origin, and each tile's width and height match that defined by the `tileSize` prop. For example, the tile `x: 0, y: 0` occupies the square between `[0, 0]` and `[tileSize, tileSize]`.  If you need to offset the `z` level at which the tiles are fetched, there is a `zoomOffset` prop.
 
 
 ## Properties
@@ -144,7 +144,7 @@ For non-geospatial viewports, the tile size should correspond to the true pixel 
 
 - Default: `512`
 
-##### `tileOffset` (Number, optional)
+##### `zoomOffset` (Number, optional)
 
 For non-geospatial viewports, this offset changes the zoom level at which the tiles are fetched.
 
