@@ -181,7 +181,7 @@ export function getTileIndices({
   zoomOffset = 0
 }) {
   let z = viewport.isGeospatial
-    ? Math.round(viewport.zoom + Math.log2(TILE_SIZE / tileSize))
+    ? Math.round(viewport.zoom + Math.log2(TILE_SIZE / tileSize)) + zoomOffset
     : Math.ceil(viewport.zoom) + zoomOffset;
   if (Number.isFinite(minZoom) && z < minZoom) {
     if (!extent) {
