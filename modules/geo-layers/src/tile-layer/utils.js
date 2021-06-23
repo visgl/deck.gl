@@ -117,13 +117,13 @@ function getIndexingCoords(bbox, scale, modelMatrixInverse) {
   return bbox.map(i => (i * scale) / TILE_SIZE);
 }
 
-function getScale(z, tileSize = TILE_SIZE) {
+function getScale(z, tileSize) {
   return (Math.pow(2, z) * TILE_SIZE) / tileSize;
 }
 
 // https://wiki.openstreetmap.org/wiki/Slippy_map_tilenames#Lon..2Flat._to_tile_numbers_2
 export function osmTile2lngLat(x, y, z) {
-  const scale = getScale(z);
+  const scale = getScale(z, TILE_SIZE);
   const lng = (x / scale) * 360 - 180;
   const n = Math.PI - (2 * Math.PI * y) / scale;
   const lat = (180 / Math.PI) * Math.atan(0.5 * (Math.exp(n) - Math.exp(-n)));
