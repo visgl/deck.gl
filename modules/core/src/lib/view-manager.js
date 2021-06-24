@@ -303,7 +303,7 @@ export default class ViewManager {
       const viewport = view.makeViewport({width, height, viewState});
 
       let oldController = oldControllers[view.id];
-      if (!oldController) {
+      if (view.controller && !oldController) {
         // When a new controller is added, invalidate all controllers below it so that
         // events are registered in the correct order
         invalidateControllers = true;
