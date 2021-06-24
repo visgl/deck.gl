@@ -90,7 +90,7 @@ If the forked libraries and Mapbox API diverge in the future, compatibility issu
 
 ## Using deck.gl with Google Maps
 
-Starting v7.0, deck.gl has support for Google Maps with the [@deck.gl/google-maps](/docs/api-reference/google-maps/overview.md) module. It allows you to construct a Deck instance as a custom Google Maps [OverlayView](https://developers.google.com/maps/documentation/javascript/reference/#OverlayView).
+Starting with v7.0, deck.gl has support for Google Maps with the [@deck.gl/google-maps](/docs/api-reference/google-maps/overview.md) module. It allows you to construct a Deck instance as a custom Google Maps [OverlayView](https://developers.google.com/maps/documentation/javascript/reference/#OverlayView).
 
 ![deck.gl as a Google Maps overlay](https://raw.github.com/visgl/deck.gl-data/master/images/whats-new/google-maps.jpg)
 
