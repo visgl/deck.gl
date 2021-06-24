@@ -18,7 +18,7 @@ jobs:
       - uses: actions/checkout@v2.1.1
 
       - name: Get git tags (https://github.com/actions/checkout/issues/206)
-        run: git fetch --prune --unshallow --tags
+        run: git fetch --tags -f
 
       - name: Use Node.js
         uses: actions/setup-node@v1
