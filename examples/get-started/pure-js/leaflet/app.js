@@ -1,5 +1,6 @@
-import * as Leaflet from 'leaflet';
-import * as DeckGlLeaflet from 'deck.gl-leaflet';
+/* eslint-disable */
+import * as L from 'leaflet';
+import {LeafletLayer} from 'deck.gl-leaflet';
 import {MapView} from '@deck.gl/core';
 import {GeoJsonLayer, ArcLayer} from '@deck.gl/layers';
 
@@ -7,17 +8,16 @@ import {GeoJsonLayer, ArcLayer} from '@deck.gl/layers';
 const AIR_PORTS =
   'https://d2ad6b4ur7yvpq.cloudfront.net/naturalearth-3.3.0/ne_10m_airports.geojson';
 
-/* global document */
-const map = Leaflet.map(document.getElementById('map'), {
+const map = L.map(document.getElementById('map'), {
   center: [51.47, 0.45],
   zoom: 4
 });
-Leaflet.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
   attribution:
     '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
 }).addTo(map);
 
-const deckLayer = new DeckGlLeaflet.LeafletLayer({
+const deckLayer = new LeafletLayer({
   views: [
     new MapView({
       repeat: true
@@ -49,6 +49,6 @@ const deckLayer = new DeckGlLeaflet.LeafletLayer({
 });
 map.addLayer(deckLayer);
 
-const featureGroup = Leaflet.featureGroup();
-featureGroup.addLayer(Leaflet.marker([51.4709959, -0.4531566]));
+const featureGroup = L.featureGroup();
+featureGroup.addLayer(L.marker([51.4709959, -0.4531566]));
 map.addLayer(featureGroup);
