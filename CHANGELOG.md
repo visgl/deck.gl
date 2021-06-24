@@ -19,6 +19,10 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v8.4
 
+#### deck.gl [8.4.18] - May 7 2021
+
+- Fix: new controller added check (#5908)
+
 #### deck.gl [8.4.17] - May 7 2021
 
 - Fix event order when dynamically add/remove controllers (#5852)

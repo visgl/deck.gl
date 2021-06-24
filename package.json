@@ -74,5 +74,6 @@
   "pre-commit": [
     "test-fast",
     "bindings-precommit-tests"
-  ]
+  ],
+  "dependencies": {}
 }
