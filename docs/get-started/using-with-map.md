@@ -101,7 +101,7 @@ Note that to run the examples, you need a [Google Maps API key](https://develope
 
 ## Using deck.gl with ArcGIS
 
-Starting v8.1, deck.gl has support for ArcGIS with the [@deck.gl/arcgis](/docs/api-reference/arcgis/overview.md) module.
+Starting with v8.1, deck.gl has support for ArcGIS with the [@deck.gl/arcgis](/docs/api-reference/arcgis/overview.md) module.
 
 ![deck.gl as a ArcGIS map layer](https://raw.github.com/visgl/deck.gl-data/master/images/whats-new/arcgis.jpg)
 
