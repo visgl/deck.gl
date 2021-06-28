@@ -21,6 +21,13 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ### deck.gl v8.5 Prereleases
 
+#### deck.gl [8.5.0-alpha.11] - Jun 21 2021
+
+- Fix: CARTO module WebGL invalid value for table (#5894)
+- TextLayer supports characterSet:auto (#5889)
+- Bump @loaders.gl to 3.0.0-alpha.21 (#5879)
+- Correct data.length for MVTLayer polygons (#5853)
+
 #### deck.gl [8.5.0-alpha.10] - Jun 11 2021
 
 - Support pointType prop to allow changing point rendering in GeoJsonLayer (#5835)

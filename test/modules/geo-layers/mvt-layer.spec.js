@@ -457,3 +457,60 @@ test('MVTLayer#triangulation', async t => {
 
   t.end();
 });
+
+for (const tileset of ['mvt-tiles', 'mvt-with-hole']) {
+  test(`MVTLayer#data.length ${tileset}`, async t => {
+    const viewport = new WebMercatorViewport({
+      longitude: -100,
+      latitude: 40,
+      zoom: 3,
+      pitch: 0,
+      bearing: 0
+    });
+
+    let binaryDataLength;
+    let geoJsonDataLength;
+    let requests = 0;
+    const onAfterUpdate = ({layer}) => {
+      if (!layer.isLoaded) {
+        return;
+      }
+      const geoJsonLayer = layer.internalState.subLayers[0];
+      const polygons = geoJsonLayer.state.layerProps.polygons;
+      if (layer.props.binary) {
+        binaryDataLength = polygons.data.length;
+        requests++;
+      } else {
+        geoJsonDataLength = polygons.data.length;
+        requests++;
+      }
+
+      if (requests === 2) {
+        t.equals(geoJsonDataLength, binaryDataLength, 'should have equal length');
+      }
+    };
+
+    // To avoid caching use different URLs
+    const url1 = [`./test/data/${tileset}/{z}/{x}/{y}.mvt?test1`];
+    const url2 = [`./test/data/${tileset}/{z}/{x}/{y}.mvt?test2`];
+    const props = {
+      onTileError: error => {
+        if (!(error.message && error.message.includes('404'))) {
+          throw error;
+        }
+      },
+      loadOptions: {
+        mvt: {
+          workerUrl: null
+        }
+      }
+    };
+    const testCases = [
+      {props: {binary: false, data: url1, ...props}, onAfterUpdate},
+      {props: {binary: true, data: url2, ...props}, onAfterUpdate}
+    ];
+
+    await testLayerAsync({Layer: MVTLayer, viewport, testCases, onError: t.notOk});
+    t.end();
+  });
+}

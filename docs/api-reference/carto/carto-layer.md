@@ -109,7 +109,7 @@ Required. Data type. Possible values are:
 
 Required when apiVersion is `API_VERSIONS.V3`. 
 
-Name of the connection registered in the [CARTO workspace].
+Name of the connection registered in the CARTO workspace.
 
 ##### `uniqueIdProperty` (String)
 
