@@ -307,7 +307,8 @@ export default class ViewManager {
         // When a new controller is added, invalidate all controllers below it so that
         // events are registered in the correct order
         invalidateControllers = true;
-      } else if (invalidateControllers) {
+      }
+      if ((invalidateControllers || !view.controller) && oldController) {
         // Remove and reattach invalidated controller
         oldController.finalize();
         oldController = null;
