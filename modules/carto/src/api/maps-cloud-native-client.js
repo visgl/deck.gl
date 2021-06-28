@@ -1,7 +1,7 @@
 /**
  * Maps API Client for Carto Cloud Native
  */
-import {getDefaultCredentials} from '../config';
+import {getDefaultCredentials, buildMapsUrlFromBase} from '../config';
 import {API_VERSIONS, encodeParameter, FORMATS, MAP_TYPES} from './maps-api-common';
 import {log} from '@deck.gl/core';
 
@@ -117,6 +117,10 @@ export async function getData({type, source, connection, credentials, format}) {
   log.assert(localCreds.apiBaseUrl, 'Must define apiBaseUrl');
   log.assert(localCreds.accessToken, 'Must define an accessToken');
   log.assert(localCreds.mapsUrl, 'mapsUrl cannot be undefined');
+
+  if (!localCreds.mapsUrl) {
+    localCreds.mapsUrl = buildMapsUrlFromBase(localCreds.apiBaseUrl);
+  }
 
   const metadata = await mapInstantiation({type, source, connection, credentials: localCreds});
   let url;
