@@ -19,11 +19,15 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v8.4
 
-#### deck.gl [8.4.18] - May 7 2021
+#### deck.gl [8.4.19] - June 28 2021
+
+- Fix ViewManager crash on multi-view (#5919)
+
+#### deck.gl [8.4.18] - June 24 2021
 
 - Fix: new controller added check (#5908)
 
-#### deck.gl [8.4.17] - May 7 2021
+#### deck.gl [8.4.17] - June 10 2021
 
 - Fix event order when dynamically add/remove controllers (#5852)
 - Fix inconsistent path layer id in GeoJSONLayer (#5855)
