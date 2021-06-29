@@ -57,6 +57,7 @@ const landCover = [[[-74.0, 40.7], [-74.02, 40.7], [-74.02, 40.72], [-74.0, 40.7
 export default function App({
   buildings = DATA_URL.BUILDINGS,
   trips = DATA_URL.TRIPS,
+  trailFade = false,
   trailLength = 180,
   initialViewState = INITIAL_VIEW_STATE,
   mapStyle = MAP_STYLE,
@@ -98,6 +99,7 @@ export default function App({
       opacity: 0.3,
       widthMinPixels: 2,
       rounded: true,
+      trailFade,
       trailLength,
       currentTime: time,
 

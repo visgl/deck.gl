@@ -33,6 +33,7 @@ function App({data, viewState}) {
     opacity: 0.8,
     widthMinPixels: 5,
     rounded: true,
+    trailFade: true,
     trailLength: 200,
     currentTime: 100
   });
@@ -84,6 +85,14 @@ Inherits from all [Base Layer](/docs/api-reference/core/layer.md) and [PathLayer
 The current time of the frame, i.e. the playhead of the animation.
 
 This value should be in the same units as the timestamps from `getPath`.
+
+##### `trailFade` (Boolean, optional)
+
+- Default: `true`
+
+Whether or not the path fades out.
+
+If `false`, `trailLength` has no effect.
 
 ##### `trailLength` (Number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
 
