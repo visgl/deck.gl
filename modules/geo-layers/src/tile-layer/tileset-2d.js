@@ -159,7 +159,7 @@ export default class Tileset2D {
 
   // Returns array of {x, y, z}
   getTileIndices({viewport, maxZoom, minZoom, zRange, modelMatrix, modelMatrixInverse}) {
-    const {tileSize, extent} = this.opts;
+    const {tileSize, extent, zoomOffset} = this.opts;
     return getTileIndices({
       viewport,
       maxZoom,
@@ -168,7 +168,8 @@ export default class Tileset2D {
       tileSize,
       extent,
       modelMatrix,
-      modelMatrixInverse
+      modelMatrixInverse,
+      zoomOffset
     });
   }
 
