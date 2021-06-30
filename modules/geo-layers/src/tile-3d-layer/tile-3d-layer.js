@@ -125,7 +125,7 @@ export default class Tile3DLayer extends CompositeLayer {
         options.loadOptions.fetch = {
           ...options.loadOptions.fetch,
           headers: preloadOptions.headers
-        }
+        };
       }
       Object.assign(options, preloadOptions);
     }
