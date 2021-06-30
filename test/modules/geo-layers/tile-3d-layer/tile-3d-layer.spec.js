@@ -55,8 +55,8 @@ test('Tile3DLayer', async t => {
     viewport: new WebMercatorViewport({
       width: 400,
       height: 300,
-      longitude: -1.3197,
-      latitude: 0.69885,
+      longitude: -75.61209423,
+      latitude: 40.042530625,
       zoom: 12
     }),
     testCases,
