@@ -31,8 +31,8 @@
     "prepublishOnly": "npm run build-debugger && npm run build-bundle && npm run build-bundle -- --env.dev"
   },
   "dependencies": {
-    "@loaders.gl/core": "^3.0.0-alpha.21",
-    "@loaders.gl/images": "^3.0.0-alpha.21",
+    "@loaders.gl/core": "^3.0.0-beta.5",
+    "@loaders.gl/images": "^3.0.0-beta.5",
     "@luma.gl/core": "^8.5.0-alpha.1",
     "@math.gl/web-mercator": "^3.4.2",
     "gl-matrix": "^3.0.0",
