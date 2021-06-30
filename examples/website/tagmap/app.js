@@ -32,6 +32,7 @@ export default function App({
     ? new TagmapLayer({
         id: 'twitter-topics-tagmap',
         data,
+        characterSet: 'auto',
         getLabel: x => x.label,
         getPosition: x => x.coordinates,
         minFontSize: 14,
@@ -40,6 +41,7 @@ export default function App({
     : new TextLayer({
         id: 'twitter-topics-raw',
         data,
+        characterSet: 'auto',
         getText: d => d.label,
         getPosition: x => x.coordinates,
         getColor: d => DEFAULT_COLOR,

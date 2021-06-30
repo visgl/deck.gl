@@ -59,12 +59,14 @@ test('TextLayer - special texts', t => {
     {
       props: {
         data: ['\u{F0004}', null, '\u{F0004}+\u{F0005}'],
+        characterSet: 'auto',
         getText: d => d,
         getPosition: d => [0, 0]
       },
       onAfterUpdate: ({layer, subLayer}) => {
         t.is(subLayer.props.numInstances, 4, 'sublayer has correct prop');
         t.deepEqual(subLayer.props.startIndices, [0, 1, 1, 4], 'sublayer has correct prop');
+        t.ok(layer.state.characterSet.has('\u{F0005}'), 'characterSet is auto populated');
       }
     }
   ];
@@ -109,6 +111,36 @@ test('TextLayer - binary', t => {
       onAfterUpdate: ({layer, subLayer}) => {
         t.is(subLayer.props.numInstances, 6, 'sublayer has correct prop');
         t.is(subLayer.props.startIndices, startIndices2, 'sublayer has correct prop');
+      }
+    }
+  ];
+
+  testLayer({Layer: TextLayer, testCases, onError: t.notOk});
+
+  t.end();
+});
+
+test('TextLayer - binary unicode characters', t => {
+  const value = new Uint32Array([7200, 983044, 983045, 43, 983044]);
+  const startIndices = [0, 3];
+
+  const testCases = [
+    {
+      props: {
+        data: {
+          length: 2,
+          startIndices,
+          attributes: {
+            getText: value
+          }
+        },
+        characterSet: 'auto',
+        getPosition: d => [0, 0]
+      },
+      onAfterUpdate: ({layer, subLayer}) => {
+        t.is(subLayer.props.numInstances, 5, 'sublayer has correct prop');
+        t.is(subLayer.props.startIndices, startIndices, 'sublayer has correct prop');
+        t.ok(layer.state.characterSet.has('\u{F0005}'), 'characterSet is auto populated');
       }
     }
   ];

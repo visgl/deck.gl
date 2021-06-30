@@ -61,6 +61,7 @@ export const POINT_LAYER = {
       textOutlineColor: 'outlineColor',
       textOutlineWidth: 'outlineWidth',
       textWordBreak: 'wordBreak',
+      textCharacterSet: 'characterSet',
 
       getText: 'getText',
       getTextAngle: 'getAngle',
