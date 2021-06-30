@@ -111,8 +111,10 @@ test('ViewManager#unproject', t => {
   t.end();
 });
 
+/* eslint-disable max-statements */
 test('ViewManager#controllers', t => {
   const mainView = new MapView({id: 'main', controller: true});
+  const mainViewDisabled = new MapView({id: 'main', controller: false});
   const minimapView = new MapView({
     id: 'minimap',
     width: '10%',
@@ -121,9 +123,17 @@ test('ViewManager#controllers', t => {
     y: '5%',
     controller: true
   });
+  const minimapViewDisabled = new MapView({
+    id: 'minimap',
+    width: '10%',
+    height: '10%',
+    x: '5%',
+    y: '5%',
+    controller: false
+  });
 
   const viewManager = new ViewManager({
-    views: [mainView, minimapView],
+    views: [mainViewDisabled, minimapView],
     viewState: {
       longitude: -122,
       latitude: 38,
@@ -135,15 +145,35 @@ test('ViewManager#controllers', t => {
     height: 100
   });
 
-  t.ok(
-    viewManager.controllers.main && viewManager.controllers.minimap,
-    'controllers are constructed'
-  );
+  t.notOk(viewManager.controllers.main, 'main controller is disabled');
+  t.ok(viewManager.controllers.minimap, 'minimap controller is constructed');
 
   const viewport = viewManager.controllers.minimap.makeViewport(
     viewManager.controllers.minimap.controllerStateProps
   );
   t.ok(viewport.viewProjectionMatrix.every(Number.isFinite), 'makeViewport returns valid viewport');
+
+  // Enable main controller
+  let oldControllers = viewManager.controllers;
+  viewManager.setProps({views: [mainView, minimapView]});
+  t.ok(viewManager.controllers.main, 'main controller is constructed');
+  t.is(viewManager.controllers.minimap, oldControllers.minimap, 'minimap controller is persistent');
+
+  // Update viewport dimensions
+  oldControllers = viewManager.controllers;
+  viewManager.setProps({width: 200, height: 100});
+  t.is(viewManager.controllers.main, oldControllers.main, 'main controller is persistent');
+  t.is(viewManager.controllers.minimap, oldControllers.minimap, 'minimap controller is persistent');
+
+  // Disable minimap controller
+  viewManager.setProps({views: [mainView, minimapViewDisabled]});
+  t.is(viewManager.controllers.main, oldControllers.main, 'main controller is persistent');
+  t.notOk(viewManager.controllers.minimap, 'minimap controller is removed');
+
+  // Enable minimap controller
+  viewManager.setProps({views: [mainView, minimapView]});
+  t.not(viewManager.controllers.main, oldControllers.main, 'main controller is invalidated');
+  t.ok(viewManager.controllers.minimap, 'minimap controller is recreated');
 
   viewManager.finalize();
   t.notOk(

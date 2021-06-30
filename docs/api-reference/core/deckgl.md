@@ -49,9 +49,11 @@ The scripting API offers out-of-the-box integration with Mapbox. To add a base m
 <link href='https://api.tiles.mapbox.com/mapbox-gl-js/v0.53.0/mapbox-gl.css' rel='stylesheet' />
 ```
 
+The above script adds `mapboxgl` to the global scope, which will be picked up by default. 
+
 To disable the base map, simply exclude the mapbox script or set `map` to false.
 
-`map` is default to the global variable `mapboxgl`. In some environments such as Observable, libraries cannot be imported into the global scope, in which case you need to manually pass the mapboxgl object to `map`:
+In some environments such as Observable, libraries cannot be imported into the global scope, in which case you need to manually pass the mapboxgl object to `map`:
 
 ```js
 mapboxgl = require('mapbox-gl@~0.44.1/dist/mapbox-gl.js');
@@ -63,6 +65,22 @@ And
 new deck.DeckGL({
   ...
   map: mapboxgl
+});
+```
+
+To use a mapbox-gl fork such as [MapLibre GL JS](https://maplibre.org), pass the corresponding library entry point to `map`:
+
+```html
+<script src="https://unpkg.com/maplibre-gl@latest/dist/maplibre-gl.js"></script>
+<link href="https://unpkg.com/maplibre-gl@latest/dist/maplibre-gl.css" rel="stylesheet" />
+```
+
+And 
+
+```js
+new deck.DeckGL({
+  ...
+  map: maplibregl
 });
 ```
 
