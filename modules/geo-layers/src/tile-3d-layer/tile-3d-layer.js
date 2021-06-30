@@ -117,13 +117,15 @@ export default class Tile3DLayer extends CompositeLayer {
       loader = loader[0];
     }
 
-    const options = {loadOptions};
+    const options = {loadOptions: {...loadOptions}};
     if (loader.preload) {
       const preloadOptions = await loader.preload(tilesetUrl, loadOptions);
 
-      options.loadOptions.fetch = options.loadOptions.fetch || {};
       if (preloadOptions.headers) {
-        options.loadOptions.fetch.headers = preloadOptions.headers;
+        options.loadOptions.fetch = {
+          ...options.loadOptions.fetch,
+          headers: preloadOptions.headers
+        }
       }
       Object.assign(options, preloadOptions);
     }
