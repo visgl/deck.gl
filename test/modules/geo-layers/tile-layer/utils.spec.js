@@ -132,6 +132,32 @@ const TEST_CASES = [
     output: ['2,2,4', '2,3,4', '3,2,4', '3,3,4']
   },
   {
+    title: 'non-geospatial with zoom offset',
+    viewport: new OrthographicView().makeViewport({
+      width: 800,
+      height: 400,
+      viewState: {
+        target: [100, 100],
+        zoom: 4
+      }
+    }),
+    zoomOffset: 1,
+    output: [
+      '4,5,5',
+      '4,6,5',
+      '4,7,5',
+      '5,5,5',
+      '5,6,5',
+      '5,7,5',
+      '6,5,5',
+      '6,6,5',
+      '6,7,5',
+      '7,5,5',
+      '7,6,5',
+      '7,7,5'
+    ]
+  },
+  {
     title: 'non-geospatial with tile size',
     viewport: new OrthographicView().makeViewport({
       width: 800,
@@ -295,7 +321,8 @@ test('getTileIndices', t => {
       tileSize,
       modelMatrix,
       extent,
-      modelMatrixInverse
+      modelMatrixInverse,
+      zoomOffset
     } = testCase;
     const result = getTileIndices({
       viewport,
@@ -305,7 +332,8 @@ test('getTileIndices', t => {
       tileSize,
       modelMatrix,
       modelMatrixInverse,
-      extent
+      extent,
+      zoomOffset
     });
     t.deepEqual(getTileIds(result), testCase.output, testCase.title);
   }
