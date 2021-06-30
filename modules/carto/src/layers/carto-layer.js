@@ -1,7 +1,7 @@
 import {CompositeLayer, log} from '@deck.gl/core';
 import {MVTLayer} from '@deck.gl/geo-layers';
 import {GeoJsonLayer} from '@deck.gl/layers';
-import {getData, getDataV1, API_VERSIONS} from '../api';
+import {getData, getDataV2, API_VERSIONS} from '../api';
 import {MAP_TYPES} from '../api/maps-api-common';
 import {getDefaultCredentials} from '../config';
 
@@ -90,7 +90,7 @@ export default class CartoLayer extends CompositeLayer {
           credentials
         });
       } else if (apiVersion === API_VERSIONS.V1 || apiVersion === API_VERSIONS.V2) {
-        data = await getDataV1({type, source, credentials});
+        data = await getDataV2({type, source, credentials});
       } else {
         log.assert(`Unknow apiVersion ${apiVersion}. Use API_VERSIONS enum.`);
       }
