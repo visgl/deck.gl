@@ -109,7 +109,7 @@ export default class Tile3DLayer extends CompositeLayer {
   }
 
   async _loadTileset(tilesetUrl) {
-    const {loadOptions} = this.props;
+    const {loadOptions = {}} = this.props;
 
     // TODO: deprecate `loader` in v9.0
     let loader = this.props.loader || this.props.loaders;
@@ -117,12 +117,19 @@ export default class Tile3DLayer extends CompositeLayer {
       loader = loader[0];
     }
 
-    const options = {...loadOptions};
+    const options = {loadOptions: {...loadOptions}};
     if (loader.preload) {
       const preloadOptions = await loader.preload(tilesetUrl, loadOptions);
+
+      if (preloadOptions.headers) {
+        options.loadOptions.fetch = {
+          ...options.loadOptions.fetch,
+          headers: preloadOptions.headers
+        };
+      }
       Object.assign(options, preloadOptions);
     }
-    const tilesetJson = await load(tilesetUrl, loader, options);
+    const tilesetJson = await load(tilesetUrl, loader, options.loadOptions);
 
     const tileset3d = new Tileset3D(tilesetJson, {
       onTileLoad: this._onTileLoad.bind(this),
