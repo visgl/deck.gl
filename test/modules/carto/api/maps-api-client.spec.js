@@ -3,7 +3,7 @@
 import test from 'tape-catch';
 
 import {
-  _getDataV1,
+  _getDataV2,
   MAP_TYPES,
   API_VERSIONS,
   getData,
@@ -12,7 +12,7 @@ import {
 } from '@deck.gl/carto';
 import {MAPS_API_V1_RESPONSE, TILEJSON_RESPONSE} from '../mock-fetch';
 
-test('getDataV1', async t => {
+test('getDataV2#v1', async t => {
   setDefaultCredentials({
     apiVersion: API_VERSIONS.V1,
     mapsUrl: 'https://maps-v1'
@@ -33,7 +33,7 @@ test('getDataV1', async t => {
     });
   };
 
-  const data = await _getDataV1({
+  const data = await _getDataV2({
     type: MAP_TYPES.QUERY,
     source: 'select * from a',
     credentials: getDefaultCredentials()
@@ -50,7 +50,7 @@ test('getDataV1', async t => {
   t.end();
 });
 
-test('getDataV1#v2', async t => {
+test('getDataV2#v2', async t => {
   setDefaultCredentials({
     apiVersion: API_VERSIONS.V2,
     mapsUrl: 'https://maps-v2'
@@ -71,7 +71,7 @@ test('getDataV1#v2', async t => {
     });
   };
 
-  let data = await _getDataV1({
+  let data = await _getDataV2({
     type: MAP_TYPES.QUERY,
     source: 'select * from a',
     credentials: getDefaultCredentials()
@@ -94,7 +94,7 @@ test('getDataV1#v2', async t => {
     });
   };
 
-  data = await _getDataV1({
+  data = await _getDataV2({
     type: MAP_TYPES.TILESET,
     source: 'tileset',
     credentials: getDefaultCredentials()

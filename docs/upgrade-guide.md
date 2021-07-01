@@ -24,6 +24,7 @@ The module entry point is now only lightly transpiled for the most commonly used
 - `CartoBQTilerLayer` will be deprecated in 8.6. Use `CartoLayer` instead with `type` to `MAP_TYPES.TILESET`.
 - `CartoSQLLayer` will be deprecated in 8.6. Use `CartoLayer` instead with `type` to `MAP_TYPES.QUERY`.
 - `GeoJsonLayer`'s `getRadius` props is deprecated, replaced by `getPointRadius`.
+- It is recommended to use `zoomOffset` in the `TileLayer` when trying to affect the `zoom` resolution at which tiles are fetched.
 
 ### onError Callback
 

@@ -142,5 +142,7 @@ export async function getData({type, source, connection, credentials, format}) {
     }
   }
 
-  return await request({url, format: mapFormat});
+  const {accessToken} = localCreds;
+
+  return await request({url, format: mapFormat, accessToken});
 }
