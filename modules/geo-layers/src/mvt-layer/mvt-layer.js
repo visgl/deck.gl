@@ -99,9 +99,9 @@ export default class MVTLayer extends TileLayer {
     let loadOptions = this.getLoadOptions();
     const {binary, fetch} = this.props;
     const {signal, x, y, z} = tile;
-    const loaders = this.props.loaders[0];
     loadOptions = {
       ...loadOptions,
+      mimeType: 'application/x-protobuf',
       mvt: {
         ...loadOptions?.mvt,
         coordinates: this.context.viewport.resolution ? 'wgs84' : 'local',
@@ -113,7 +113,7 @@ export default class MVTLayer extends TileLayer {
       },
       gis: binary ? {format: 'binary'} : {}
     };
-    return fetch(url, {propName: 'data', layer: this, loaders, loadOptions, signal});
+    return fetch(url, {propName: 'data', layer: this, loadOptions, signal});
   }
 
   renderSubLayers(props) {
