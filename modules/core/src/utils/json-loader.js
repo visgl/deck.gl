@@ -10,6 +10,7 @@ export default {
   // TODO - can we stream process geojson?
   extensions: ['json', 'geojson'],
   mimeTypes: ['application/json', 'application/geo+json'],
+  text: true,
   testText: isJSON,
   parseTextSync: JSON.parse
 };
