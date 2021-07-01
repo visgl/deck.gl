@@ -21,7 +21,7 @@
 import {PathLayer} from '@deck.gl/layers';
 
 const defaultProps = {
-  fadeTrail: {type: 'boolean', value: true},
+  fadeTrail: true,
   trailLength: {type: 'number', value: 120, min: 0},
   currentTime: {type: 'number', value: 0, min: 0},
   getTimestamps: {type: 'accessor', value: null}
