@@ -19,6 +19,10 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v8.4
 
+#### deck.gl [8.4.20] - July 1 2021
+
+- Fix PostProcessEffect in multi-view (#5935)
+
 #### deck.gl [8.4.19] - June 28 2021
 
 - Fix ViewManager crash on multi-view (#5919)
