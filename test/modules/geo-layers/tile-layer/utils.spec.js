@@ -132,6 +132,32 @@ const TEST_CASES = [
     output: ['2,2,4', '2,3,4', '3,2,4', '3,3,4']
   },
   {
+    title: 'non-geospatial with zoom offset',
+    viewport: new OrthographicView().makeViewport({
+      width: 800,
+      height: 400,
+      viewState: {
+        target: [100, 100],
+        zoom: 4
+      }
+    }),
+    zoomOffset: 1,
+    output: [
+      '4,5,5',
+      '4,6,5',
+      '4,7,5',
+      '5,5,5',
+      '5,6,5',
+      '5,7,5',
+      '6,5,5',
+      '6,6,5',
+      '6,7,5',
+      '7,5,5',
+      '7,6,5',
+      '7,7,5'
+    ]
+  },
+  {
     title: 'non-geospatial with tile size',
     viewport: new OrthographicView().makeViewport({
       width: 800,
@@ -142,7 +168,7 @@ const TEST_CASES = [
       }
     }),
     tileSize: 256,
-    output: ['1,2,4', '1,3,4', '2,2,4', '2,3,4', '3,2,4', '3,3,4', '4,2,4', '4,3,4']
+    output: ['1,2,3', '1,3,3', '2,2,3', '2,3,3', '3,2,3', '3,3,3', '4,2,3', '4,3,3']
   },
   {
     title: 'non-geospatial modelMatrix identity',
@@ -295,7 +321,8 @@ test('getTileIndices', t => {
       tileSize,
       modelMatrix,
       extent,
-      modelMatrixInverse
+      modelMatrixInverse,
+      zoomOffset
     } = testCase;
     const result = getTileIndices({
       viewport,
@@ -305,7 +332,8 @@ test('getTileIndices', t => {
       tileSize,
       modelMatrix,
       modelMatrixInverse,
-      extent
+      extent,
+      zoomOffset
     });
     t.deepEqual(getTileIds(result), testCase.output, testCase.title);
   }
@@ -397,6 +425,12 @@ test('tileToBoundingBox#Infovis', t => {
   );
 
   t.deepEqual(
+    tileToBoundingBox(viewport, 0, 0, 0, 256),
+    {left: 0, top: 0, right: 256, bottom: 256},
+    '0,0,0 with custom tileSize Should match the results.'
+  );
+
+  t.deepEqual(
     tileToBoundingBox(viewport, 4, -1, 2),
     {left: 512, top: -128, right: 640, bottom: 0},
     '4,-1,2 Should match the results.'
@@ -406,6 +440,12 @@ test('tileToBoundingBox#Infovis', t => {
     tileToBoundingBox(viewport, 4, -1, 3),
     {left: 256, top: -64, right: 320, bottom: 0},
     '4,-1,3 Should match the results.'
+  );
+
+  t.deepEqual(
+    tileToBoundingBox(viewport, 4, -1, 2, 256),
+    {left: 256, top: -64, right: 320, bottom: 0},
+    '4,-1,2 with custom tileSize Should match the results.'
   );
 
   t.end();
