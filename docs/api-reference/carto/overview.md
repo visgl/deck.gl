@@ -2,11 +2,11 @@
 
 The preferred and official solution for creating modern web apps using the [CARTO Location Intelligence platform](https://carto.com/) is deck.gl. 
 
-With deck.gl and **CARTO Cloud Native platform** you can access directly your datasets and tilesets hosted in your current data warehouse. The Cloud Native platform provides integrations with Google BigQuery, Amazon Redshift, Snowflake and PostgreSQL-compatible databases. Don't need to move your data to CARTO plaform.
+With deck.gl and the **CARTO 3 platform** you can access directly your datasets and tilesets hosted in your current data warehouse. The CARTO 3 platform provides integrations with Google BigQuery, Amazon Redshift, Snowflake and PostgreSQL-compatible databases. You don't need to move your data to CARTO plaform.
 
 <img src="https://raw.githubusercontent.com/CartoDB/viz-doc/master/deck.gl/img/osm_buildings.jpg" />
 
-It integrates with the [CARTO Maps API](https://carto.com/developers/maps-api/reference/) to:
+It integrates with the CARTO Maps API to:
 
 * Provide a geospatial backend storage for your geospatial data.
 * Visualize large datasets which do not fit within browser memory.
@@ -23,7 +23,7 @@ npm install deck.gl
 npm install @deck.gl/core @deck.gl/layers @deck.gl/geo-layers @deck.gl/carto
 ```
 
-## Usage
+## Usage CARTO 2
 
 ```js
 import DeckGL from '@deck.gl/react';
@@ -49,7 +49,7 @@ function App({viewState}) {
 }
 ```
 
-## Usage CARTO Cloud Native
+## Usage CARTO 3
 
 ```js
 import DeckGL from '@deck.gl/react';
@@ -76,7 +76,7 @@ function App({viewState}) {
 }
 ```
 
-> **CARTO Cloud Native** is currently available only in a private beta. If you want to test it, please contact us at [support@carto.com](mailto:support@carto.com?subject=Access%20to%20Cloud%20%Native%20%API%20(v3)).
+> **CARTO 3** is currently available only in a private beta. If you want to test it, please contact us at [support@carto.com](mailto:support@carto.com?subject=Access%20to%20CARTO%203).
 
 ### Examples
 
@@ -95,7 +95,7 @@ This is an object to define the connection to CARTO, including the credentials (
 * `apiVersion` (optional): API version. Default: `API_VERSIONS.V2`. Possible values are:
   * API_VERSIONS.V1
   * API_VERSIONS.V2
-  * API_VERSIONS.V3 (**CARTO Cloud Native**)
+  * API_VERSIONS.V3 (**CARTO 3**)
 
 If using API v1 or v2, the following properties are used:
 
@@ -108,9 +108,8 @@ If using API v1 or v2, the following properties are used:
 
 If using API v3, these are the available properties:
 
-* `apiBaseUrl` (required): base URL for requests to the API (can be obtained in the CARTO Cloud Native Workspace)
+* `apiBaseUrl` (required): base URL for requests to the API (can be obtained in the CARTO 3 Workspace)
 * `accessToken` (required): token to authenticate/authorize requests to the Maps API (private datasets)
-* 
 * `mapsUrl` (optional): Maps API URL Template. Default: 
   * `https://{apiBaseUrl}/v3/maps` 
 
@@ -128,33 +127,33 @@ setDefaultCredentials({
 
 The CARTO submodule includes the CartoLayer that simplify interaction with the CARTO platform. If you want to use other deck.gl layers (i.e. ArcLayer, H3HexagonLayer...), there are two possibilities depending on the API version you are using:
 
-* If you are using the cloud native API version (v3), you can directly retrieve the data in the format expected by the layer using the `getData` function:
+* If you are using the API v3, you can directly retrieve the data in the format expected by the layer using the `getData` function:
 
-```js
-import { getData } from '@deck.gl/carto';
-import { H3HexagonLayer } from '@deck.gl/geo-layers/';
+    ```js
+    import { getData } from '@deck.gl/carto';
+    import { H3HexagonLayer } from '@deck.gl/geo-layers/';
 
-const data =  await getData({
-  type: MAP_TYPES.QUERY,
-  source: `SELECT bqcarto.h3.ST_ASH3(internal_point_geom, 4) as h3, count(*) as count
-              FROM bigquery-public-data.geo_us_census_places.us_national_places 
-            GROUP BY h3`,
-  connection: 'connection_name',
-  format: 'json'
-});
+    const data =  await getData({
+      type: MAP_TYPES.QUERY,
+      source: `SELECT bqcarto.h3.ST_ASH3(internal_point_geom, 4) as h3, count(*) as count
+                  FROM bigquery-public-data.geo_us_census_places.us_national_places 
+                GROUP BY h3`,
+      connection: 'connection_name',
+      format: 'json'
+    });
 
-new H3HexagonLayer({
-  data,
-  filled: true,
-  getHexagon: d => d.h3,
-  getFillColor: d => [0, (1 - d.count / 10) * 255, 0],
-  getLineColor: [0, 0, 0, 200],
-});
-```
+    new H3HexagonLayer({
+      data,
+      filled: true,
+      getHexagon: d => d.h3,
+      getFillColor: d => [0, (1 - d.count / 10) * 255, 0],
+      getLineColor: [0, 0, 0, 200],
+    });
+    ```
 
-The formats available are JSON, GEOJSON, TILEJSON and NDJSON. [NDJSON](http://ndjson.org/) (Newline Delimited JSON) allows to handle incremental data loading https://deck.gl/docs/developer-guide/performance#handle-incremental-data-loading.
+    The formats available are JSON, GEOJSON, TILEJSON and NDJSON. [NDJSON](http://ndjson.org/) (Newline Delimited JSON) allows to handle incremental data loading https://deck.gl/docs/developer-guide/performance#handle-incremental-data-loading.
 
-* If not using the cloud native API version, you can use the SQL API to retrieve the data in the required format. Please check the examples [here](https://docs.carto.com/deck-gl/examples/clustering-and-aggregation/h3-hexagon-layer/)
+* If not using the CARTO 3 API version, you can use the SQL API to retrieve the data in the required format. Please check the examples [here](https://docs.carto.com/deck-gl/examples/clustering-and-aggregation/h3-hexagon-layer/)
 
 ### Constants
 
@@ -172,4 +171,4 @@ To make it easier to work with the CARTO module the following constants are prov
 |                 | JSON        |
 |                 | TILEJSON    |
 |                 | NDJSON      |
-|                 |             |
+
