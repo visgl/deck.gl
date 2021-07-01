@@ -33,7 +33,7 @@ function App({data, viewState}) {
     opacity: 0.8,
     widthMinPixels: 5,
     rounded: true,
-    trailFade: true,
+    fadeTrail: true,
     trailLength: 200,
     currentTime: 100
   });
@@ -86,7 +86,7 @@ The current time of the frame, i.e. the playhead of the animation.
 
 This value should be in the same units as the timestamps from `getPath`.
 
-##### `trailFade` (Boolean, optional)
+##### `fadeTrail` (Boolean, optional)
 
 - Default: `true`
 

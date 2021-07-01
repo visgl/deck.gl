@@ -21,7 +21,7 @@
 import {PathLayer} from '@deck.gl/layers';
 
 const defaultProps = {
-  trailFade: {type: 'boolean', value: true},
+  fadeTrail: {type: 'boolean', value: true},
   trailLength: {type: 'number', value: 120, min: 0},
   currentTime: {type: 'number', value: 0, min: 0},
   getTimestamps: {type: 'accessor', value: null}
@@ -42,20 +42,20 @@ varying float vTime;
 vTime = instanceTimestamps + (instanceNextTimestamps - instanceTimestamps) * vPathPosition.y / vPathLength;
 `,
       'fs:#decl': `\
-uniform bool trailFade;
+uniform bool fadeTrail;
 uniform float trailLength;
 uniform float currentTime;
 varying float vTime;
 `,
       // Drop the segments outside of the time window
       'fs:#main-start': `\
-if(vTime > currentTime || (trailFade && (vTime < currentTime - trailLength))) {
+if(vTime > currentTime || (fadeTrail && (vTime < currentTime - trailLength))) {
   discard;
 }
 `,
       // Fade the color (currentTime - 100%, end of trail - 0%)
       'fs:DECKGL_FILTER_COLOR': `\
-if(trailFade) {
+if(fadeTrail) {
   color.a *= 1.0 - (currentTime - vTime) / trailLength;
 }
 `
@@ -84,11 +84,11 @@ if(trailFade) {
   }
 
   draw(params) {
-    const {trailFade, trailLength, currentTime} = this.props;
+    const {fadeTrail, trailLength, currentTime} = this.props;
 
     params.uniforms = {
       ...params.uniforms,
-      trailFade,
+      fadeTrail,
       trailLength,
       currentTime
     };
