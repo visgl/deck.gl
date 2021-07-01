@@ -145,20 +145,26 @@ Must be supplied when using non-tiled elevation data.
 - Default: `null`
 
 
-##### `workerUrl` (String, optional)
-
-**Advanced** Supply url to local terrain worker bundle. By default, it points to the latest published `@loaders.gl/terrain` NPM module on [unpkg.com](unpkg.com). Custom `workerUrl` may be desirable if the application wishes to serve the worker code itself without relying on the CDN. The worker bundle can be located locally in `"node_modules/@loaders.gl/terrain/dist/terrain-loader.worker.js"`.
-
-Set `workerUrl` to an empty string to disable worker during debugging (improves error messages).
-
-- Default: `null`
-
-
 ##### `loadOptions` (Object, optional)
 
 On top of the [default options](/docs/api-reference/core/layer.md#loadoptions), also accepts options for the following loaders:
 
+- [TerrainLoader](https://loaders.gl/modules/terrain/docs/api-reference/terrain-loader)
 - [ImageLoader](https://loaders.gl/modules/images/docs/api-reference/image-loader) if the `texture` prop is supplied
+
+Note that by default, the `TerrainLoader` parses data using web workers. The worker bundle points to the latest published `@loaders.gl/terrain` NPM module on [unpkg.com](unpkg.com). Custom `workerUrl` may be desirable if the application wishes to serve the worker code itself without relying on the CDN. The worker bundle can be located locally in `"node_modules/@loaders.gl/terrain/dist/terrain-loader.worker.js"`.
+
+```js
+loadOptions: {
+  terrain: {
+    workerUrl: <my_worker_url>
+  }
+}
+```
+
+Set `workerUrl` to an empty string to disable worker during debugging (improves error messages).
+
+- Default: `null`
 
 
 ### Render Options

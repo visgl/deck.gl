@@ -117,6 +117,17 @@ On top of the [default options](/docs/api-reference/core/layer.md#loadoptions), 
 
 - [MVTLoader](https://loaders.gl/modules/mvt/docs/api-reference/mvt-loader)
 
+
+Note that by default, the `MVTLoader` parses data using web workers. The worker bundle points to the latest published `@loaders.gl/mvt` NPM module on [unpkg.com](unpkg.com). Custom `workerUrl` may be desirable if the application wishes to serve the worker code itself without relying on the CDN. The worker bundle can be located locally in `"node_modules/@loaders.gl/mvt/dist/mvt-loader.worker.js"`.
+
+```js
+loadOptions: {
+  mvt: {
+    workerUrl: <my_worker_url>
+  }
+}
+```
+
 ##### `binary` (Boolean, optional)
 
 * Default: true
