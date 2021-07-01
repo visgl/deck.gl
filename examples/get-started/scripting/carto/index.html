@@ -1,9 +1,8 @@
 <html>
   <head>
     <!-- deck.gl standalone bundle -->
-    <script src="https://unpkg.com/deck.gl@^8.3.0/dist.min.js"></script>
-    <script src="https://unpkg.com/@deck.gl/carto@^8.3.0/dist.min.js"></script>
-
+    <script src="https://unpkg.com/deck.gl@^8.5.0/dist.min.js"></script>
+    <script src="https://unpkg.com/@deck.gl/carto@^8.5.0/dist.min.js"></script>
     <!-- Mapbox dependencies -->
     <script src="https://api.tiles.mapbox.com/mapbox-gl-js/v1.4.0/mapbox-gl.js"></script>
     <link href="https://api.tiles.mapbox.com/mapbox-gl-js/v1.4.0/mapbox-gl.css" rel="stylesheet" />
@@ -90,9 +89,10 @@
     // Function to render the layers. Will be invoked any time visibility changes.
     function render() {
       const layers = [
-        new deck.carto.CartoSQLLayer({
+        new deck.carto.CartoLayer({
           id: 'airports',
           data: 'SELECT * FROM ne_10m_airports',
+          type: deck.carto.MAP_TYPES.QUERY,
           visible: visibleLayer === 'airports',
           filled: true,
           pointRadiusMinPixels: 2,
@@ -101,9 +101,10 @@
           getFillColor: [200, 0, 80, 180],
           autoHighlight: true
         }),
-        new deck.carto.CartoBQTilerLayer({
+        new deck.carto.CartoLayer({
           id: 'osm_buildings',
           data: 'cartobq.maps.osm_buildings',
+          type: deck.carto.MAP_TYPES.TILESET,
           visible: visibleLayer === 'building',
           getFillColor: object => {
             // Apply color based on an attribute

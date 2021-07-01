@@ -10,7 +10,7 @@ export {
   FORMATS,
   MAP_TYPES,
   API_VERSIONS,
-  getDataV1 as _getDataV1,
+  getDataV2 as _getDataV2,
   getData,
   mapInstantiation as _mapInstantiation
 } from './api';
