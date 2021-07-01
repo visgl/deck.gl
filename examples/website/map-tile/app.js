@@ -42,8 +42,8 @@ export default function App({showBorder = false, onTilesLoad = null}) {
     // https://wiki.openstreetmap.org/wiki/Zoom_levels
     minZoom: 0,
     maxZoom: 19,
-    tileSize: 512 / devicePixelRatio,
-
+    tileSize: 256,
+    zoomOffset: devicePixelRatio === 1 ? -1 : 0,
     renderSubLayers: props => {
       const {
         bbox: {west, south, east, north}

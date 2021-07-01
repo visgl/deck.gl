@@ -21,7 +21,7 @@ const TILE_EXTENT = 4096;
 /**
  * Obtain a TileJson from Maps API v1 and v2
  */
-export async function getDataV1({type, source, credentials}) {
+export async function getDataV2({type, source, credentials}) {
   const localCreds = {...getDefaultCredentials(), ...credentials};
   const {apiVersion} = localCreds;
   let url;
