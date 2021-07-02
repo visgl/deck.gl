@@ -2,7 +2,7 @@
 
 `CartoLayer` is the layer to visualize data using the CARTO Maps API.
 
-## Usage
+## Usage CARTO 2
 
 ```js
 import DeckGL from '@deck.gl/react';
@@ -28,7 +28,7 @@ function App({viewState}) {
 }
 ```
 
-## Usage Carto Cloud Native
+## Usage CARTO 3
 
 ```js
 import DeckGL from '@deck.gl/react';
@@ -55,7 +55,7 @@ function App({viewState}) {
 }
 ```
 
-> **CARTO Cloud Native** is currently available only in a private beta. If you want to test it, please contact us at [support@carto.com](mailto:support@carto.com?subject=Access%20to%20Cloud%20%Native%20%API%20(v3)).
+> **CARTO 3** is currently available only in a private beta. If you want to test it, please contact us at [support@carto.com](mailto:support@carto.com?subject=Access%20to%20CARTO%203).
 
 ## Installation
 

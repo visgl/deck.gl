@@ -1,5 +1,5 @@
 /**
- * Maps API Client for Carto Cloud Native
+ * Maps API Client for Carto 3
  */
 import {getDefaultCredentials, buildMapsUrlFromBase} from '../config';
 import {API_VERSIONS, encodeParameter, FORMATS, MAP_TYPES} from './maps-api-common';
