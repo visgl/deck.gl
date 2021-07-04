@@ -62,7 +62,9 @@ const config = {
         loader: 'babel-loader',
         include: [/src/, /bundle/, /esm/],
         options: {
-          presets: [['@babel/preset-env', {forceAllTransforms: true}]],
+          presets: [['@babel/preset-env', {
+            targets: ["supports webgl", "not dead"]
+          }]],
           // all of the helpers will reference the module @babel/runtime to avoid duplication
           // across the compiled output.
           plugins: [
