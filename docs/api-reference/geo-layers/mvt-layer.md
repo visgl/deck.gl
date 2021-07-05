@@ -117,6 +117,8 @@ On top of the [default options](/docs/api-reference/core/layer.md#loadoptions), 
 
 - [MVTLoader](https://loaders.gl/modules/mvt/docs/api-reference/mvt-loader)
 
+Note that by default, the `MVTLoader` parses data using web workers, with code loaded from a [CDN](https://unpkg.com). To change this behavior, see [loaders and workers](/docs/developer-guide/loading-data.md#loaders-and-web-workers).
+
 ##### `binary` (Boolean, optional)
 
 * Default: true

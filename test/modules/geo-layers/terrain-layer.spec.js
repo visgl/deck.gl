@@ -22,13 +22,15 @@ import test from 'tape-catch';
 import {generateLayerTests, testLayerAsync} from '@deck.gl/test-utils';
 import {TerrainLayer, TileLayer} from '@deck.gl/geo-layers';
 import {SimpleMeshLayer} from '@deck.gl/mesh-layers';
+import {TerrainLoader} from '@loaders.gl/terrain';
 
 test('TerrainLayer', async t => {
   const testCases = generateLayerTests({
     Layer: TerrainLayer,
     sampleProps: {
       elevationData: 'https://s3.amazonaws.com/elevation-tiles-prod/terrarium/{z}/{x}/{y}.png',
-      texture: 'https://wms.chartbundle.com/tms/1.0.0/sec/{z}/{x}/{y}.png?origin=nw'
+      texture: 'https://wms.chartbundle.com/tms/1.0.0/sec/{z}/{x}/{y}.png?origin=nw',
+      loaders: [TerrainLoader]
     },
     assert: t.ok,
     onBeforeUpdate: ({testCase}) => t.comment(testCase.title),
@@ -44,7 +46,8 @@ test('TerrainLayer', async t => {
     Layer: TerrainLayer,
     sampleProps: {
       elevationData: 'https://s3.amazonaws.com/elevation-tiles-prod/terrarium/1/0/0.png',
-      bounds: [-180, 85, 0, 0]
+      bounds: [-180, 85, 0, 0],
+      loaders: [TerrainLoader]
     },
     assert: t.ok,
     onBeforeUpdate: ({testCase}) => t.comment(testCase.title),

@@ -1,6 +1,6 @@
 import {log} from '@deck.gl/core';
 import {Matrix4} from 'math.gl';
-import {MVTLoader} from '@loaders.gl/mvt';
+import {MVTWorkerLoader} from '@loaders.gl/mvt';
 import {binaryToGeoJson} from '@loaders.gl/gis';
 import {COORDINATE_SYSTEM} from '@deck.gl/core';
 import {_binaryToFeature, _findIndexBinary} from '@deck.gl/layers';
@@ -17,7 +17,7 @@ const WORLD_SIZE = 512;
 const defaultProps = {
   uniqueIdProperty: {type: 'string', value: ''},
   highlightedFeatureId: null,
-  loaders: [MVTLoader],
+  loaders: [MVTWorkerLoader],
   binary: true
 };
 

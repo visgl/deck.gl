@@ -18,10 +18,10 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {CompositeLayer} from '@deck.gl/core';
+import {CompositeLayer, log} from '@deck.gl/core';
 import {SimpleMeshLayer} from '@deck.gl/mesh-layers';
 import {WebMercatorViewport, COORDINATE_SYSTEM} from '@deck.gl/core';
-import {TerrainLoader} from '@loaders.gl/terrain';
+import {TerrainWorkerLoader} from '@loaders.gl/terrain';
 import TileLayer from '../tile-layer/tile-layer';
 import {urlType, getURLFromTemplate} from '../tile-layer/utils';
 
@@ -55,7 +55,7 @@ const defaultProps = {
   wireframe: false,
   material: true,
 
-  loaders: [TerrainLoader]
+  loaders: [TerrainWorkerLoader]
 };
 
 // Turns array of templates into a single string to work around shallow change
@@ -95,29 +95,33 @@ export default class TerrainLayer extends CompositeLayer {
       const terrain = this.loadTerrain(props);
       this.setState({terrain});
     }
+
+    // TODO - remove in v9
+    if (props.workerUrl) {
+      log.removed('workerUrl', 'loadOptions.terrain.workerUrl')();
+    }
   }
 
-  loadTerrain({elevationData, bounds, elevationDecoder, meshMaxError, signal, workerUrl}) {
+  loadTerrain({elevationData, bounds, elevationDecoder, meshMaxError, signal}) {
     if (!elevationData) {
       return null;
     }
-    const loadOptions = {
-      ...this.getLoadOptions(),
+    let loadOptions = this.getLoadOptions();
+    loadOptions = {
+      ...loadOptions,
       terrain: {
+        ...loadOptions?.terrain,
         bounds,
         meshMaxError,
         elevationDecoder
       }
     };
-    if (workerUrl !== null) {
-      loadOptions.terrain.workerUrl = workerUrl;
-    }
     const {fetch} = this.props;
     return fetch(elevationData, {propName: 'elevationData', layer: this, loadOptions, signal});
   }
 
   getTiledTerrainData(tile) {
-    const {elevationData, fetch, texture, elevationDecoder, meshMaxError, workerUrl} = this.props;
+    const {elevationData, fetch, texture, elevationDecoder, meshMaxError} = this.props;
     const dataUrl = getURLFromTemplate(elevationData, tile);
     const textureUrl = getURLFromTemplate(texture, tile);
 
@@ -136,8 +140,7 @@ export default class TerrainLayer extends CompositeLayer {
       bounds,
       elevationDecoder,
       meshMaxError,
-      signal,
-      workerUrl
+      signal
     });
     const surface = textureUrl
       ? // If surface image fails to load, the tile should still be displayed
