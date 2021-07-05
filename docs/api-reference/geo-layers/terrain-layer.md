@@ -152,19 +152,7 @@ On top of the [default options](/docs/api-reference/core/layer.md#loadoptions), 
 - [TerrainLoader](https://loaders.gl/modules/terrain/docs/api-reference/terrain-loader)
 - [ImageLoader](https://loaders.gl/modules/images/docs/api-reference/image-loader) if the `texture` prop is supplied
 
-Note that by default, the `TerrainLoader` parses data using web workers. The worker bundle points to the latest published `@loaders.gl/terrain` NPM module on [unpkg.com](unpkg.com). Custom `workerUrl` may be desirable if the application wishes to serve the worker code itself without relying on the CDN. The worker bundle can be located locally in `"node_modules/@loaders.gl/terrain/dist/terrain-loader.worker.js"`.
-
-```js
-loadOptions: {
-  terrain: {
-    workerUrl: <my_worker_url>
-  }
-}
-```
-
-Set `workerUrl` to an empty string to disable worker during debugging (improves error messages).
-
-- Default: `null`
+Note that by default, the `TerrainLoader` parses data using web workers, with code loaded from a [CDN](https://unpkg.com). To change this behavior, see [loaders and workers](/docs/developer-guide/loading-data.md#loaders-and-web-workers).
 
 
 ### Render Options

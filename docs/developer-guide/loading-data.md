@@ -136,6 +136,36 @@ setInterval(() => {
 }, 5 * 60 * 1000);
 ```
 
+
+## Loaders and Web Workers
+
+For the best performance, some specialized loaders parse data using web workers, for example `TerrainLoader` in the [TerrainLayer](/docs/api-reference/geo-layers/terrain-layer.md) and `MVTLoader` in the [MVTLayer](/docs/api-reference/geo-layers/mvt-layer.md). By default, the worker code is loaded from from the latest published NPM module on [unpkg.com](https://unpkg.com).
+
+It might be desirable for some applications to serve the worker code itself without relying on the CDN. To do this, locate the worker bundle locally in `node_modules/@loaders.gl/<module>/dist/<name>-loader.worker.js` and serve it as a static asset with your server. Point the loader to use this alternative URL using `loadOptions.<name>.workerUrl`:
+
+```js
+new MVTLayer({
+  loadOptions: {
+    mvt: {
+      workerUrl: <my_worker_url>
+    }
+  }
+}
+```
+
+If the layer is used in an environment that does not support web workers, or you need to debug the loader code on the main thread, you may import the full loader like this:
+
+```js
+import {MVTLoader} from '@loaders.gl/mvt';
+new MVTLayer({
+  loaders: [MVTLoader],
+  loadOptions: {worker: false}
+});
+```
+
+Refer to each specific layer's documentation to see which loaders are used.
+
+
 ## Load Resource Without an URL
 
 In some use cases, resources do not exist at a static URL. For example, some applications construct images dynamically based on user input. Some applications receive arbitrary binary blobs from a server via a WebSocket connection.
