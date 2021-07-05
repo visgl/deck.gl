@@ -5,6 +5,7 @@ import {ClipExtension} from '@deck.gl/extensions';
 import {transform} from '@deck.gl/geo-layers/mvt-layer/coordinate-transform';
 import {GeoJsonLayer} from '@deck.gl/layers';
 import {geojsonToBinary} from '@loaders.gl/gis';
+import {MVTLoader} from '@loaders.gl/mvt';
 
 import {ScatterplotLayer} from '@deck.gl/layers';
 import {WebMercatorViewport} from '@deck.gl/core';
@@ -442,11 +443,7 @@ test('MVTLayer#triangulation', async t => {
         throw error;
       }
     },
-    loadOptions: {
-      mvt: {
-        workerUrl: null
-      }
-    }
+    loaders: [MVTLoader]
   };
   const testCases = [{props, onAfterUpdate}];
 
@@ -499,11 +496,7 @@ for (const tileset of ['mvt-tiles', 'mvt-with-hole']) {
           throw error;
         }
       },
-      loadOptions: {
-        mvt: {
-          workerUrl: null
-        }
-      }
+      loaders: [MVTLoader]
     };
     const testCases = [
       {props: {binary: false, data: url1, ...props}, onAfterUpdate},

@@ -1,6 +1,6 @@
 import {log} from '@deck.gl/core';
 import {Matrix4} from 'math.gl';
-import {MVTLoader} from '@loaders.gl/mvt';
+import {MVTWorkerLoader} from '@loaders.gl/mvt';
 import {binaryToGeoJson} from '@loaders.gl/gis';
 import {COORDINATE_SYSTEM} from '@deck.gl/core';
 import {_binaryToFeature, _findIndexBinary} from '@deck.gl/layers';
@@ -17,7 +17,7 @@ const WORLD_SIZE = 512;
 const defaultProps = {
   uniqueIdProperty: {type: 'string', value: ''},
   highlightedFeatureId: null,
-  loaders: [MVTLoader],
+  loaders: [MVTWorkerLoader],
   binary: true
 };
 
@@ -99,9 +99,9 @@ export default class MVTLayer extends TileLayer {
     let loadOptions = this.getLoadOptions();
     const {binary, fetch} = this.props;
     const {signal, x, y, z} = tile;
-    const loaders = this.props.loaders[0];
     loadOptions = {
       ...loadOptions,
+      mimeType: 'application/x-protobuf',
       mvt: {
         ...loadOptions?.mvt,
         coordinates: this.context.viewport.resolution ? 'wgs84' : 'local',
@@ -113,7 +113,7 @@ export default class MVTLayer extends TileLayer {
       },
       gis: binary ? {format: 'binary'} : {}
     };
-    return fetch(url, {propName: 'data', layer: this, loaders, loadOptions, signal});
+    return fetch(url, {propName: 'data', layer: this, loadOptions, signal});
   }
 
   renderSubLayers(props) {
