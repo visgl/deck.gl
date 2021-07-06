@@ -76,7 +76,7 @@ function App({viewState}) {
 }
 ```
 
-> **CARTO 3** is currently available as a private beta. If you’d like to evaluate the new platform, click on the following link: [https://go.carto.com/carto3-beta](https://go.carto.com/carto3-beta) and our team will be in contact.
+> **CARTO 3** is our new cloud-native platform. If you'd like to get access, click on the following link for more information: [https://carto.com/carto3](https://carto.com/carto3).
 
 ### Examples
 
