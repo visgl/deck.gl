@@ -71,9 +71,13 @@ See [documentation](/docs/api-reference/layers/text-layer.md) for details.
 (TODO)
 - Tile3DLayer: multiple viewports (#5758)
 - Tile3DLayer: segmentation picking (#5757)
-- i3s: support vertex colors (#5756)
-- i3s: support uvRegions (#5760)
-- feat(geo-layers): Private MeshLayer with pbr material support (I3S) (#5761)
+- `Tile3DLayer` now takes full advantage of new features in I3S 1.7 tile sets, including
+    - Page nodes (improved performance)
+    - Draco compressed meshes (improved performance)
+    - Compressed textures (improved performance)
+    - PBR materials (#5761)
+    - Vertex colors (#5756)
+    - UVRegions (#5760)
 
 
 #### Other layer improvements
