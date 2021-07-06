@@ -29,7 +29,7 @@ export default [
       latitude: 37.751537058389985,
       longitude: -122.42694203247012,
       zoom: 11.5,
-      pitch: 0,
+      pitch: 45,
       bearing: 0
     },
     layers: [
@@ -53,7 +53,7 @@ export default [
       latitude: 37.751537058389985,
       longitude: -122.42694203247012,
       zoom: 11.5,
-      pitch: 0,
+      pitch: 45,
       bearing: 0
     },
     layers: [
@@ -72,6 +72,30 @@ export default [
       })
     ],
     goldenImage: './test/render/golden-images/scatterplot-lnglat.png'
+  },
+  {
+    name: 'scatterplot-lnglat-billboard',
+    viewState: {
+      latitude: 37.751537058389985,
+      longitude: -122.42694203247012,
+      zoom: 11.5,
+      pitch: 45,
+      bearing: 0
+    },
+    layers: [
+      new ScatterplotLayer({
+        id: 'scatterplot-lnglat-billboard',
+        data: dataSamples.points,
+        getPosition: d => d.COORDINATES,
+        getFillColor: d => [255, 128, 0],
+        getRadius: d => d.SPACES,
+        billboard: true,
+        radiusScale: 30,
+        radiusMinPixels: 1,
+        radiusMaxPixels: 30
+      })
+    ],
+    goldenImage: './test/render/golden-images/scatterplot-lnglat-billboard.png'
   },
   {
     name: 'line-lnglat',

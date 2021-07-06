@@ -136,6 +136,11 @@ The minimum line width in pixels. This prop can be used to prevent the stroke fr
 
 The maximum line width in pixels. This prop can be used to prevent the path from getting too thick when zoomed in.
 
+##### `billboard` (Boolean, optional)
+
+- Default: `false`
+
+If on, the circle always faces the camera. Otherwise the circle faces up (z)
 
 ### Data Accessors
 
