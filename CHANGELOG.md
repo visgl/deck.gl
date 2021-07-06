@@ -21,6 +21,21 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ### deck.gl v8.5 Prereleases
 
+#### deck.gl [8.5.0-beta.1] - Jul 5 2021
+
+- Bump dependencies (#5951)
+- MVTLayer and TerrainLayer switch to use worker-only loaders (#5946)
+- update bundle config (#5949)
+- Bump loaders to 3.0.0-beta.6 (#5943)
+- MVTLayer use all loaders (#5934)
+- CARTO module: bearer token always in header (#5933)
+- TileLayer: add zoomOffset prop  (#5896)
+- Don't Use `tileSize` for Determining `z` of Tile Indexing in InfoVis (#5895)
+- CARTO module: rename code from cloud-native to carto3 (#5932)
+- tile-3d: update with new loaders version (#5920)
+- Fix: Initialize mapsUrl in cloud native (#5868)
+- Upgrade ocular-dev-tools (#5910)
+
 #### deck.gl [8.5.0-alpha.11] - Jun 21 2021
 
 - Fix: CARTO module WebGL invalid value for table (#5894)
