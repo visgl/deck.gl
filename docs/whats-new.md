@@ -83,6 +83,7 @@ The layer now takes full advantage of new features in I3S 1.7 tile sets, includi
 #### Other layer improvements
 
 - `ScatterplotLayer` adds `billboard` mode
+- `TripLayer` adds `fadeTrail` mode
 - `PathLayer` now supports controlling `jointRounded` and `capRounded` separately. Dashed lines via `PathStyleExtension` also respects the cap type.
 - `PolygonLayer` and `GeoJsonLayer`: `autoHighlight` now highlight both the outline and the fill of the hovered polygon, instead of either the outline or the fill.
 - `HeatmapLayer` now correctly renders `aggregation: 'MEAN'` with user-supplied `colorDomain`.
