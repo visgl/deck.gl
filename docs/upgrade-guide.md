@@ -8,46 +8,35 @@ The module entry point is now only lightly transpiled for the most commonly used
 
 ### Layers
 
+#### Breaking changes
+
 - A bug is fixed in projecting sizes in billboard mode. Pixel sizes now match their CSS counterparts. This change affects the following layers when used with a `MapView`:
   + `ArcLayer`, `LineLayer` and `PointCloudLayer`
   + `IconLayer` and `TextLayer` with the default `billboard` prop
   + `PathLayer` with `billboard: true`
   After upgrading to v8.5, in order to maintain the same appearance, you need to multiply `2/3` to the objects' width/size. This can be done by either changing the accessor (`getWidth`/`getSize`) or the scaling prop (`sizeScale`/`widthScale`).
-- `TextLayer`'s `backgroundColor` prop is deprecated. Use `background: true` and `getBackgroundColor` instead.
 - `TextLayer`'s default `fontSettings` have changed. When using `sdf`, the default `buffer` is now `4` and the default `radius` is now `12`.
-- `PathLayer`'s `rounded` prop is deprecated, replaced by two separate flags `jointRounded` and `capRounded`.
 - `GeoJsonLayer`'s `lineJointRounded` prop now only controls line joints. To use rounded line caps, set `lineCapRounded` to `true`.
 - Dashed lines via `PathStyleExtension` now draw rounded dash caps if `capRounded` is `true`.
-- `@deck.gl/geo-layers` now requires `@deck.gl/extensions`, due to `ClipExtension` dependency.
-- `HeatmapLayer`'s `colorDomain` prop has redefined the unit of its values. See updated layer documentation for details.
-- `MVTLayer`'s `binary` prop is now set to `true` by default.
-- `CartoBQTilerLayer` will be deprecated in 8.6. Use `CartoLayer` instead with `type` set to `MAP_TYPES.TILESET`.
-- `CartoSQLLayer` will be deprecated in 8.6. Use `CartoLayer` instead with `type` set to `MAP_TYPES.QUERY`.
-- `GeoJsonLayer`'s `getRadius` props is deprecated, replaced by `getPointRadius`.
-- It is recommended to use `zoomOffset` in the `TileLayer` when trying to affect the `zoom` resolution at which tiles are fetched.
-- `MVTLayer` and `TerrainLayer`'s default loaders no longer support parsing on the main thread. This is the same behavior as before, just dropping unused code from the bundle. Should you need to use the layers in an environment where web worker is not available, or debug the loaders, you can supply the full loader as such:
-
-  ```js
-  import {MVTLoader} from '@loaders.gl/mvt';
-  new MVTLayer({
-    loaders: [MVTLoader],
-    loadOptions: {worker: false}
-  });
-  ```
-
-  ```js
-  import {TerrainLoader} from '@loaders.gl/terrain';
-  new TerrainLayer({
-    loaders: [TerrainLoader],
-    loadOptions: {worker: false}
-  });
-  ```
+- `@deck.gl/geo-layers` now depends on `@deck.gl/extensions`.
+- `HeatmapLayer`'s `colorDomain` prop has redefined the unit of its values. See updated [layer documentation](/docs/api-reference/aggregation-layers/heatmap-layer.md) for details.
+- `MVTLayer`'s `binary` prop is now set to `true` by default to take advantage of the performance boost.
+- `TileLayer` no longer uses `tileSize` to offset zoom in non-geospatial views. It is recommended to use the new `zoomOffset` prop to affect the `zoom` resolution at which tiles are fetched.
+- `MVTLayer` and `TerrainLayer`'s default loaders no longer support parsing on the main thread. This does not change the layers' default behavior, just reduces the bundle size by dropping unused code. Should you need to use the layers in an environment where web worker is not available, or debug the loaders, follow the examples in [loaders and workers](/docs/developer-guide/loading-data.md#loaders-and-web-workers).
 - `TerrainLayer`'s `workerUrl` prop is removed, use `loadOptions.terrain.workerUrl` instead.
 
+#### Deprecations
+
+- `TextLayer`'s `backgroundColor` prop is deprecated. Use `background: true` and `getBackgroundColor` instead.
+- `PathLayer`'s `rounded` prop is deprecated, replaced by two separate flags `jointRounded` and `capRounded`.
+- `GeoJsonLayer`'s `getRadius` props is deprecated, replaced by `getPointRadius`.
+- `CartoBQTilerLayer` is deprecated and will be removed in 8.6. Use `CartoLayer` instead with `type` set to `MAP_TYPES.TILESET`.
+- `CartoSQLLayer` is deprecated and will be removed in 8.6. Use `CartoLayer` instead with `type` set to `MAP_TYPES.QUERY`.
 
 ### onError Callback
 
 `Deck`'s default `onError` callback is changed to `console.error`. Explicitly setting `onError` to `null` now silently ignores all errors, instead of logging them to console.
+
 
 ## Upgrading from deck.gl v8.3 to v8.4
 

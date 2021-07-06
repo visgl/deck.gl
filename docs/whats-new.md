@@ -2,9 +2,9 @@
 
 This page contains highlights of each deck.gl release. Also check our [vis.gl blog](https://medium.com/vis-gl) for news about new releases and features in deck.gl.
 
-## deck.gl v8.5 (In development)
+## deck.gl v8.5
 
-Release date: TBD
+Release date: July 2021 (beta available)
 
 
 <table style="border: 0;" align="center">
@@ -18,7 +18,9 @@ Release date: TBD
   </tbody>
 </table>
 
-### MVTLayer performance
+### Layer Improvements
+
+#### MVTLayer performance
 
 Mapbox Vector Tiles parsing throughput is now 2-3x faster, due to MVT tiles being parsed directly into binary attributes rather than GeoJSON, and additional work (including [triangulation](https://github.com/visgl/loaders.gl/blob/master/docs/whats-new.md#v30-in-development)) being performed on worker threads. Speed comparison on some example data sets (MVT tiles parsed per second):
 
@@ -31,7 +33,7 @@ Mapbox Vector Tiles parsing throughput is now 2-3x faster, due to MVT tiles bein
 
 _Benchmarks ran using scripts on a 2012 MacBook Pro, 2.3 GHz Intel Core i7, 8 GB, measuring parsing time of MVTLoader only (network time and rendering is not included)_
 
-### GeoJsonLayer point types
+#### GeoJsonLayer point types
 
 GeoJSONLayer now supports rendering point features as icons and/or text labels in addition to circles. Use the new `pointType` prop:
 
@@ -45,6 +47,41 @@ new GeoJsonLayer({
 ```
 
 For a full list of new props, visit the updated [documentation](/docs/api-reference/layers/geojson-layer.md).
+
+
+#### TextLayer styling
+
+New props are added for more flexible styling of the texts:
+
+* `background`
+* `backgroundPadding`
+* `outlineWidth`
+* `outlineColor`
+* `getBackgroundColor`
+* `getBorderWidth`
+* `getBorderColor`
+
+The layer also added support for automatically detecting the characters used in the data. Set `characterSet: 'auto'` to enable this feature.
+
+See [documentation](/docs/api-reference/layers/text-layer.md) for details.
+
+
+#### Tile3DLayer
+
+(TODO)
+- Tile3DLayer: multiple viewports (#5758)
+- Tile3DLayer: segmentation picking (#5757)
+- i3s: support vertex colors (#5756)
+- i3s: support uvRegions (#5760)
+- feat(geo-layers): Private MeshLayer with pbr material support (I3S) (#5761)
+
+
+#### Other layer improvements
+
+- `PathLayer` now supports controlling `jointRounded` and `capRounded` separately. Dashed lines via `PathStyleExtension` also respects the cap type.
+- `PolygonLayer` and `GeoJsonLayer`: `autoHighlight` now highlights both the outline and the fill of the hovered polygon, instead of either the outline or the fill.
+- `HeatmapLayer` now correctly renders `aggregation: 'MEAN'` with user-supplied `colorDomain`.
+
 
 ### Default transpilation and bundle size
 
@@ -62,30 +99,9 @@ To support older or less common browsers, make sure that `node_modules` is inclu
 For backward compatibility, the pre-built bundle (`dist.min.js`) is not affected by this change.
 
 
-### TextLayer
-
-New props are added for more flexible styling of the texts:
-
-* `background`
-* `backgroundPadding`
-* `outlineWidth`
-* `outlineColor`
-* `getBackgroundColor`
-* `getBorderWidth`
-* `getBorderColor`
-
-The layer now supports automatically detecting the characters used in the data. Set `characterSet: 'auto'` to enable this feature.
-
-See [documentation](/docs/api-reference/layers/text-layer.md) for details.
-
-### React
+### @deck.gl/react
 
 The `DeckGL` React component is rewritten using functional component and hooks.
-
-### Other layer improvements
-
-- `PathLayer` now supports controlling `jointRounded` and `capRounded` separately. Dashed lines via `PathStyleExtension` also respects the cap type.
-- `PolygonLayer` and `GeoJsonLayer`: `autoHighlight` now highlights both the outline and the fill of the hovered polygon, instead of either the outline or the fill.
 
 
 ### @deck.gl/carto
