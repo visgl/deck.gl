@@ -1,9 +1,9 @@
 # CartoBQTilerLayer
->CartoBQTilerLayer will be deprecated in future versions. Use CartoLayer instead.  If you've existing code using this layer, check [the migration steps](#migration-to-cartolayer).
+>CartoBQTilerLayer will be deprecated in future versions. Use CartoLayer instead.  If you have existing code using this layer, check [the migration steps](#migration-to-cartolayer).
 
 `CartoBQTilerLayer` is a layer to visualize large datasets (millions or billions of rows) directly from [Google BigQuery](https://cloud.google.com/bigquery) without having to move data outside of BigQuery.
 
-First you need first to generate a tileset of your dataset in your BigQuery account using CARTO BigQuery Tiler. For more info click [here](https://carto.com/bigquery-tiler/).
+First you need to generate a tileset of your dataset in your BigQuery account using CARTO BigQuery Tiler. For more info click [here](https://carto.com/bigquery-tiler/).
  
 ```js
 import DeckGL from '@deck.gl/react';
