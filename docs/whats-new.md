@@ -20,7 +20,7 @@ Release date: July 2021 (beta available)
 
 ### Layer Improvements
 
-#### MVTLayer performance
+#### MVTLayer
 
 Mapbox Vector Tiles parsing throughput is now 2-3x faster, due to MVT tiles being parsed directly into binary attributes rather than GeoJSON, and additional work (including [triangulation](https://github.com/visgl/loaders.gl/blob/master/docs/whats-new.md#v30-in-development)) being performed on worker threads. Speed comparison on some example data sets (MVT tiles parsed per second):
 
@@ -33,7 +33,7 @@ Mapbox Vector Tiles parsing throughput is now 2-3x faster, due to MVT tiles bein
 
 _Benchmarks ran using scripts on a 2012 MacBook Pro, 2.3 GHz Intel Core i7, 8 GB, measuring parsing time of MVTLoader only (network time and rendering is not included)_
 
-#### GeoJsonLayer point types
+#### GeoJsonLayer
 
 GeoJSONLayer now supports rendering point features as icons and/or text labels in addition to circles. Use the new `pointType` prop:
 
@@ -49,7 +49,9 @@ new GeoJsonLayer({
 For a full list of new props, visit the updated [documentation](/docs/api-reference/layers/geojson-layer.md).
 
 
-#### TextLayer styling
+#### TextLayer
+
+The layer now supports automatically detecting the characters used in the data. Set `characterSet: 'auto'` to enable this feature.
 
 New props are added for more flexible styling of the texts:
 
@@ -61,29 +63,28 @@ New props are added for more flexible styling of the texts:
 * `getBorderWidth`
 * `getBorderColor`
 
-The layer also added support for automatically detecting the characters used in the data. Set `characterSet: 'auto'` to enable this feature.
-
 See [documentation](/docs/api-reference/layers/text-layer.md) for details.
 
 
 #### Tile3DLayer
 
-(TODO)
-- Tile3DLayer: multiple viewports (#5758)
-- Tile3DLayer: segmentation picking (#5757)
-- `Tile3DLayer` now takes full advantage of new features in I3S 1.7 tile sets, including
-    - Page nodes (improved performance)
-    - Draco compressed meshes (improved performance)
-    - Compressed textures (improved performance)
-    - PBR materials (#5761)
-    - Vertex colors (#5756)
-    - UVRegions (#5760)
+Tile3DLayer can now be rendered in multiple views. Previously if you use multiple views it was required to create one Tile3DLayer for each view. Using a single layer is more efficient by sharing the tile cache.
+
+The layer now takes full advantage of new features in I3S 1.7 tile sets, including:
+  + Picking individual objects inside a tile
+  + Page nodes (improved performance)
+  + Draco compressed meshes (improved performance)
+  + Compressed textures (improved performance)
+  + PBR materials
+  + Vertex colors
+  + UVRegions
 
 
 #### Other layer improvements
 
+- `ScatterplotLayer` adds `billboard` mode
 - `PathLayer` now supports controlling `jointRounded` and `capRounded` separately. Dashed lines via `PathStyleExtension` also respects the cap type.
-- `PolygonLayer` and `GeoJsonLayer`: `autoHighlight` now highlights both the outline and the fill of the hovered polygon, instead of either the outline or the fill.
+- `PolygonLayer` and `GeoJsonLayer`: `autoHighlight` now highlight both the outline and the fill of the hovered polygon, instead of either the outline or the fill.
 - `HeatmapLayer` now correctly renders `aggregation: 'MEAN'` with user-supplied `colorDomain`.
 
 

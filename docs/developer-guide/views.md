@@ -307,7 +307,7 @@ const deck = new Deck({
 });
 ```
 
-Some layers, including `TileLayer`, `Tile3DLayer`, `HeatmapLayer` and `ScreenGridLayer`, perform expensive operations (data fetching/aggregation) on viewport change. Therefore, it is generally NOT recommended to render them into multiple views. If you do need to show e.g. tiled base map in multiple views, create one layer instance for each view and limit their rendering with `layerFilter`:
+Some layers, including `TileLayer`, `HeatmapLayer` and `ScreenGridLayer`, perform expensive operations (data fetching/aggregation) on viewport change. Therefore, it is generally NOT recommended to render them into multiple views. If you do need to show e.g. tiled base map in multiple views, create one layer instance for each view and limit their rendering with `layerFilter`:
 
 ```js
 const deck = new Deck({
@@ -328,6 +328,8 @@ const deck = new Deck({
   });
 });
 ```
+
+Starting with v8.5, `Tile3DLayer` supports rendering in multiple views with a single tile cache.
 
 
 ### Picking in Multiple Views
