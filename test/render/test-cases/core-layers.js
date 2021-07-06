@@ -29,7 +29,7 @@ export default [
       latitude: 37.751537058389985,
       longitude: -122.42694203247012,
       zoom: 11.5,
-      pitch: 45,
+      pitch: 0,
       bearing: 0
     },
     layers: [
@@ -53,7 +53,7 @@ export default [
       latitude: 37.751537058389985,
       longitude: -122.42694203247012,
       zoom: 11.5,
-      pitch: 45,
+      pitch: 0,
       bearing: 0
     },
     layers: [
