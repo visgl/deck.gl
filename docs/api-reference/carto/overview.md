@@ -1,16 +1,16 @@
 # @deck.gl/carto
 
-The preferred and official solution for creating modern web apps using the [CARTO Location Intelligence platform](https://carto.com/) is deck.gl. 
+Deck.gl is the preferred and official solution for creating modern geospatial web applications using [CARTO Location Intelligence platform](https://carto.com/). 
 
-With deck.gl and the **CARTO 3 platform** you can access directly your datasets and tilesets hosted in your current data warehouse. The CARTO 3 platform provides integrations with Google BigQuery, Amazon Redshift, Snowflake and PostgreSQL-compatible databases. You don't need to move your data to CARTO plaform.
+With deck.gl and the all-new **CARTO 3 platform** you can directly access spatial datasets and tilesets that are hosted in your current cloud data warehouse. CARTO 3 provides seamless integrations with Google BigQuery, Amazon Redshift, Snowflake and PostgreSQL-compatible databases, eliminating the need to move your data into CARTO.
 
 <img src="https://raw.githubusercontent.com/CartoDB/viz-doc/master/deck.gl/img/osm_buildings.jpg" />
 
-It integrates with the CARTO Maps API to:
+The platform integrates with the CARTO Maps API to:
 
 * Provide a geospatial backend storage for your geospatial data.
-* Visualize large datasets which do not fit within browser memory.
-* Provide an SQL spatial interface to work with your data.
+* Visualize large datasets overcoming browser memory limitations.
+* Provide an SQL spatial interface to work directly with your data.
 
 <img src="https://raw.githubusercontent.com/CartoDB/viz-doc/master/deck.gl/img/eu_rivers.jpg" />
 
@@ -76,21 +76,21 @@ function App({viewState}) {
 }
 ```
 
-> **CARTO 3** is currently available only in a private beta. If you want to test it, please contact us at [support@carto.com](mailto:support@carto.com?subject=Access%20to%20CARTO%203).
+> **CARTO 3** is our new cloud-native platform. If you'd like to get access, click on the following link for more information: [https://carto.com/carto3](https://carto.com/carto3).
 
 ### Examples
 
-You can see real examples for the following:
+You can see working examples for the following:
 
 * [Scripting](https://carto.com/developers/deck-gl/examples/): Quick scripting examples to play with the module without NPM or Webpack. If you're not a web developer, this is probably what you're looking for.
 
-* [React](https://github.com/CartoDB/viz-doc/tree/master/deck.gl/examples/react): integrate in a React application.
+* [React](https://github.com/CartoDB/viz-doc/tree/master/deck.gl/examples/react): Integrate in a React application.
 
-* [Pure JS](https://github.com/CartoDB/viz-doc/tree/master/deck.gl/examples/pure-js): integrate in a pure js application, using webpack.
+* [Pure JS](https://github.com/CartoDB/viz-doc/tree/master/deck.gl/examples/pure-js): Integrate in a pure js application, using webpack.
 
 ### CARTO credentials
 
-This is an object to define the connection to CARTO, including the credentials (and optionally the parameters to point to specific api endpoints). The configuration properties that must be defined depend on the CARTO API version used:
+This is an object to define the connection to CARTO, including the credentials (and optionally the parameters to point to specific API endpoints). The configuration properties that must be defined depend on the CARTO API version used:
 
 * `apiVersion` (optional): API version. Default: `API_VERSIONS.V2`. Possible values are:
   * API_VERSIONS.V1
@@ -113,7 +113,7 @@ If using API v3, these are the available properties:
 * `mapsUrl` (optional): Maps API URL Template. Default: 
   * `https://{apiBaseUrl}/v3/maps` 
 
-If you have a custom CARTO deployment (on-premise user or you're running CARTO from [Google Cloud Marketplace](https://console.cloud.google.com/marketplace/product/cartodb-public/carto-enterprise-byol)), you need to set the URLs to point to your instance. 
+If you have a custom CARTO deployment (an on-premise user or you're running CARTO from [Google Cloud Marketplace](https://console.cloud.google.com/marketplace/product/cartodb-public/carto-enterprise-byol)), you’ll need to set the URLs to point to your instance.
 
 ```js
 setDefaultCredentials({
@@ -125,7 +125,7 @@ setDefaultCredentials({
 
 ### Support for other deck.gl layers
 
-The CARTO submodule includes the CartoLayer that simplify interaction with the CARTO platform. If you want to use other deck.gl layers (i.e. ArcLayer, H3HexagonLayer...), there are two possibilities depending on the API version you are using:
+The CARTO submodule includes the CartoLayer that simplifies the interaction with the CARTO platform. If you want to use other deck.gl layers (i.e. ArcLayer, H3HexagonLayer...), there are two possibilities depending on the API version you are using:
 
 * If you are using the API v3, you can directly retrieve the data in the format expected by the layer using the `getData` function:
 
@@ -151,7 +151,7 @@ The CARTO submodule includes the CartoLayer that simplify interaction with the C
     });
     ```
 
-    The formats available are JSON, GEOJSON, TILEJSON and NDJSON. [NDJSON](http://ndjson.org/) (Newline Delimited JSON) allows to handle incremental data loading https://deck.gl/docs/developer-guide/performance#handle-incremental-data-loading.
+    The formats available are JSON, GEOJSON, TILEJSON, and NDJSON. [NDJSON](http://ndjson.org/) (Newline Delimited JSON) allows to handle incremental data loading https://deck.gl/docs/developer-guide/performance#handle-incremental-data-loading.
 
 * If not using the CARTO 3 API version, you can use the SQL API to retrieve the data in the required format. Please check the examples [here](https://docs.carto.com/deck-gl/examples/clustering-and-aggregation/h3-hexagon-layer/)
 
