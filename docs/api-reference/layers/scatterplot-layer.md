@@ -140,7 +140,7 @@ The maximum line width in pixels. This prop can be used to prevent the path from
 
 - Default: `false`
 
-If on, the circle always faces the camera. Otherwise the circle faces up (z)
+If `true`, rendered circles always face the camera. If `false` circles face up (i.e. are parallel with the ground plane).
 
 ### Data Accessors
 
