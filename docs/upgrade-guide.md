@@ -37,6 +37,10 @@ The module entry point is now only lightly transpiled for the most commonly used
 
 `Deck`'s default `onError` callback is changed to `console.error`. Explicitly setting `onError` to `null` now silently ignores all errors, instead of logging them to console.
 
+### loaders.gl v3.0
+
+deck.gl now depends on `@loaders.gl/core@^3.0.0`. It is strongly recommended that you upgrade all loaders.gl dependencies to v3 as v2.x loaders are not tested with the v3.0 core. Visit loaders.gl's [upgrade guide](https://loaders.gl/docs/upgrade-guide) for instructions on each loader module.
+
 
 ## Upgrading from deck.gl v8.3 to v8.4
 
