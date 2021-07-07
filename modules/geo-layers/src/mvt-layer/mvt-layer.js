@@ -172,13 +172,15 @@ export default class MVTLayer extends TileLayer {
     } else if (this.props.binary && info.index !== -1) {
       // get the feature from the binary at the given index.
       const {data} = params.sourceLayer.props;
-      info.object =
-        _binaryToFeature(data.points, info.index) ||
-        _binaryToFeature(data.lines, info.index) ||
-        _binaryToFeature(data.polygons, info.index);
+      info.object = this._binaryToFeature(data, info.index);
+      info.object = transformTileCoordsToWGS84(info.object, info.tile.bbox, this.context.viewport);
     }
 
     return info;
+  }
+
+  _binaryToFeature(data, index) {
+    return binaryToGeoJson(data)[index];
   }
 
   getHighlightedObjectIndex(tile) {
