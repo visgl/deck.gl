@@ -49,6 +49,12 @@ The module entry point is now only lightly transpiled for the most commonly used
 
 `Deck`'s default `onError` callback is changed to `console.error`. Explicitly setting `onError` to `null` now silently ignores all errors, instead of logging them to console.
 
+
+### OrbitView
+
+`OrbitView` no longer allows `orbitAxis` to be specified in the view state. Set `orbitAxis` in the `OrbitView` constructor instead.
+
+
 ## Upgrading from deck.gl v8.3 to v8.4
 
 ### wrapLongitude

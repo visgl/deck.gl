@@ -41,8 +41,8 @@ class OrbitViewport extends Viewport {
   constructor(props) {
     const {
       height,
-      fovy = 50, // From eye position to lookAt
-      orbitAxis = 'Z', // Orbit axis with 360 degrees rotating freedom, can only be 'Y' or 'Z'
+      fovy, // For setting camera position
+      orbitAxis, // Orbit axis with 360 degrees rotating freedom, can only be 'Y' or 'Z'
       target = [0, 0, 0], // Which point is camera looking at, default origin
 
       rotationX = 0, // Rotating angle around X axis
@@ -94,9 +94,12 @@ class OrbitViewport extends Viewport {
 }
 
 export default class OrbitView extends View {
-  constructor(props) {
+  constructor(props = {}) {
+    const {orbitAxis = 'Z'} = props;
+
     super({
       ...props,
+      orbitAxis,
       type: OrbitViewport
     });
   }
