@@ -102,6 +102,7 @@ export default class MVTLayer extends TileLayer {
     loadOptions = {
       ...loadOptions,
       mimeType: 'application/x-protobuf',
+      nothrow: true, 
       mvt: {
         ...loadOptions?.mvt,
         coordinates: this.context.viewport.resolution ? 'wgs84' : 'local',
