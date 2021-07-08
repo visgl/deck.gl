@@ -122,7 +122,10 @@ function createStandaloneFromProvider({
           viewState.nw = viewport.unproject([0, 0]);
           viewState.se = viewport.unproject([viewport.width, viewport.height]);
           handleEvent('deck-view-state-change-event', viewState);
-        }
+        },
+        onDragStart: info => handleEvent('deck-drag-start-event', info),
+        onDrag: info => handleEvent('deck-drag-event', info),
+        onDragEnd: info => handleEvent('deck-drag-end-event', info)
       }
     : null;
 
