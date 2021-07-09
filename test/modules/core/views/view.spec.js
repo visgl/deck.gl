@@ -139,7 +139,7 @@ test('OrbitView', t => {
 
 // eslint-disable-next-line complexity
 test('OrbitView#project', t => {
-  const view = new OrbitView({id: '3d-view'});
+  let view = new OrbitView({id: '3d-view', orbitAxis: 'Z'});
   let viewport;
   let p;
   let center;
@@ -161,7 +161,6 @@ test('OrbitView#project', t => {
     width: 100,
     height: 100,
     viewState: {
-      orbitAxis: 'Z',
       target: [0, 0, 0],
       zoom: 1,
       rotationOrbit: 0,
@@ -176,11 +175,11 @@ test('OrbitView#project', t => {
   p = viewport.project([1, 0, 0]);
   t.ok(p[0] > 50 && p[1] === 50 && p[2] === center[2], 'x axis points right');
 
+  view = new OrbitView({id: '3d-view', orbitAxis: 'Y'});
   viewport = view.makeViewport({
     width: 100,
     height: 100,
     viewState: {
-      orbitAxis: 'Y',
       target: [0, 0, 0],
       zoom: 1,
       rotationOrbit: 0,
