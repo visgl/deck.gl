@@ -1,9 +1,9 @@
 import {log} from '@deck.gl/core';
 import {Matrix4} from 'math.gl';
 import {MVTWorkerLoader} from '@loaders.gl/mvt';
-import {binaryToGeoJson} from '@loaders.gl/gis';
+import {binaryToGeoJson, getSingleFeature} from '@loaders.gl/gis';
 import {COORDINATE_SYSTEM} from '@deck.gl/core';
-import {_binaryToFeature, _findIndexBinary} from '@deck.gl/layers';
+import {_findIndexBinary} from '@deck.gl/layers';
 import {ClipExtension} from '@deck.gl/extensions';
 
 import TileLayer from '../tile-layer/tile-layer';
@@ -170,17 +170,12 @@ export default class MVTLayer extends TileLayer {
     if (info.object && !isWGS84) {
       info.object = transformTileCoordsToWGS84(info.object, info.tile.bbox, this.context.viewport);
     } else if (this.props.binary && info.index !== -1) {
-      // get the feature from the binary at the given index.
       const {data} = params.sourceLayer.props;
-      info.object = this._binaryToFeature(data, info.index);
+      info.object = getSingleFeature(data, info.index);
       info.object = transformTileCoordsToWGS84(info.object, info.tile.bbox, this.context.viewport);
     }
 
     return info;
-  }
-
-  _binaryToFeature(data, index) {
-    return binaryToGeoJson(data)[index];
   }
 
   getHighlightedObjectIndex(tile) {
