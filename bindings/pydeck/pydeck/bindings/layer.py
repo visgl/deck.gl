@@ -151,7 +151,7 @@ class Layer(JSONMixin):
         for column in data_set.columns:
             # np.stack will take data arrays and conveniently extract the shape
             np_data = np.stack(data_set[column].to_numpy())
-            # Get rid of the accssor so it doesn't appear in the JSON output
+            # Get rid of the accessor so it doesn't appear in the JSON output
             del self.__dict__[inverted_accessor_map[column]]
             binary_transmission.append(
                 {
