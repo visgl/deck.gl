@@ -61,12 +61,12 @@ export default [
       target: [0, 0, 0],
       rotationX: 0,
       rotationOrbit: 0,
-      orbitAxis: 'Y',
       fov: 30,
       zoom: -1.5
     },
     views: [
       new OrbitView({
+        orbitAxis: 'Y',
         near: 0.1,
         far: 2
       })
@@ -117,11 +117,11 @@ export default [
       target: [0, 0, 0],
       rotationX: 0,
       rotationOrbit: 0,
-      orbitAxis: 'Y',
       zoom: 0
     },
     views: [
       new OrbitView({
+        orbitAxis: 'Y',
         near: 0.1,
         far: 10
       })
@@ -148,11 +148,11 @@ export default [
       target: [0, 0, 0],
       rotationX: 0,
       rotationOrbit: 0,
-      orbitAxis: 'Y',
       zoom: 0
     },
     views: [
       new OrbitView({
+        orbitAxis: 'Y',
         near: 0.1,
         far: 10
       })
