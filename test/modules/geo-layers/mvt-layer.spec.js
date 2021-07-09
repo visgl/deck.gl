@@ -226,59 +226,64 @@ test('MVTLayer#autoHighlight', async t => {
   t.end();
 });
 
-test('MVTLayer#picking', async t => {
-  class TestMVTLayer extends MVTLayer {
-    getTileData() {
-      return geoJSONData;
-    }
-  }
-
-  TestMVTLayer.componentName = 'TestMVTLayer';
-
-  await testPickingLayer({
-    layer: new TestMVTLayer({
-      id: 'mvt',
-      data: ['https://json_2/{z}/{x}/{y}.mvt'],
-      uniqueIdProperty: 'cartodb_id',
-      autoHighlight: true
-    }),
-    viewport: new WebMercatorViewport({
-      latitude: 0,
-      longitude: 0,
-      zoom: 1
-    }),
-    testCases: [
-      {
-        pickedColor: new Uint8Array([1, 0, 0, 0]),
-        pickedLayerId: 'mvt-0-0-1-polygons-fill',
-        mode: 'hover',
-        onAfterUpdate: ({layer, subLayers, info}) => {
-          t.comment('hover over polygon');
-          t.ok(info.object, 'info.object is populated');
-          t.ok(
-            subLayers.every(l => l.props.highlightedObjectIndex === 0),
-            'set sub layers highlightedObjectIndex'
-          );
-        }
-      },
-      {
-        pickedColor: new Uint8Array([0, 0, 0, 0]),
-        pickedLayerId: '',
-        mode: 'hover',
-        onAfterUpdate: ({layer, subLayers, info}) => {
-          t.comment('pointer leave');
-          t.notOk(info.object, 'info.object is not populated');
-          t.ok(
-            subLayers.every(l => l.props.highlightedObjectIndex === -1),
-            'cleared sub layers highlightedObjectIndex'
-          );
-        }
+for (const binary of [true, false]) {
+  test(`MVTLayer#picking binary:${binary}`, async t => {
+    class TestMVTLayer extends MVTLayer {
+      getTileData() {
+        return this.props.binary ? geoJSONBinaryData : geoJSONData;
       }
-    ]
-  });
+    }
 
-  t.end();
-});
+    TestMVTLayer.componentName = 'TestMVTLayer';
+
+    await testPickingLayer({
+      layer: new TestMVTLayer({
+        id: 'mvt',
+        binary,
+        data: ['https://json_2/{z}/{x}/{y}.mvt'],
+        uniqueIdProperty: 'cartodb_id',
+        autoHighlight: true
+      }),
+      viewport: new WebMercatorViewport({
+        latitude: 0,
+        longitude: 0,
+        zoom: 1
+      }),
+      testCases: [
+        {
+          pickedColor: new Uint8Array([1, 0, 0, 0]),
+          pickedLayerId: 'mvt-0-0-1-polygons-fill',
+          mode: 'hover',
+          onAfterUpdate: ({layer, subLayers, info}) => {
+            t.comment('hover over polygon');
+            t.ok(info.object, 'info.object is populated');
+            t.ok(info.object.properties, 'info.object.properties is populated');
+            t.ok(info.object.geometry, 'info.object.geometry is populated');
+            t.ok(
+              subLayers.every(l => l.props.highlightedObjectIndex === 0),
+              'set sub layers highlightedObjectIndex'
+            );
+          }
+        },
+        {
+          pickedColor: new Uint8Array([0, 0, 0, 0]),
+          pickedLayerId: '',
+          mode: 'hover',
+          onAfterUpdate: ({layer, subLayers, info}) => {
+            t.comment('pointer leave');
+            t.notOk(info.object, 'info.object is not populated');
+            t.ok(
+              subLayers.every(l => l.props.highlightedObjectIndex === -1),
+              'cleared sub layers highlightedObjectIndex'
+            );
+          }
+        }
+      ]
+    });
+
+    t.end();
+  });
+}
 
 test('MVTLayer#TileJSON', async t => {
   class TestMVTLayer extends MVTLayer {
