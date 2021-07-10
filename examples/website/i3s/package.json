@@ -7,7 +7,7 @@
     "start-local": "webpack-dev-server --env.local --progress --hot --open"
   },
   "dependencies": {
-    "@loaders.gl/i3s": "^3.0.0-beta.8",
+    "@loaders.gl/i3s": "^3.0.0-beta.9",
     "deck.gl": "^8.4.0"
   },
   "devDependencies": {

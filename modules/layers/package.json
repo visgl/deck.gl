@@ -28,7 +28,7 @@
     "prepublishOnly": "npm run build-bundle && npm run build-bundle -- --env.dev"
   },
   "dependencies": {
-    "@loaders.gl/images": "^3.0.0-beta.8",
+    "@loaders.gl/images": "^3.0.0-beta.9",
     "@mapbox/tiny-sdf": "^1.1.0",
     "@math.gl/polygon": "^3.5.0-beta.1",
     "earcut": "^2.0.6"
