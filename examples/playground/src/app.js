@@ -18,7 +18,7 @@ import JSON_TEMPLATES from '../json-examples';
 const INITIAL_TEMPLATE = Object.keys(JSON_TEMPLATES)[0];
 
 // Set your mapbox token here
-const GOOGLE_MAPS_TOKEN = process.env.GoogleMapsToken; // eslint-disable-line
+const GOOGLE_MAPS_TOKEN = process.env.GoogleMapsAPIKey; // eslint-disable-line
 
 function isFunctionObject(value) {
   return typeof value === 'object' && '@@function' in value;

@@ -31,7 +31,7 @@ const CONFIG = {
     ]
   },
 
-  plugins: [new webpack.EnvironmentPlugin(['GoogleMapsToken'])],
+  plugins: [new webpack.EnvironmentPlugin(['GoogleMapsAPIKey'])],
 
   node: {fs: 'empty'}
 };

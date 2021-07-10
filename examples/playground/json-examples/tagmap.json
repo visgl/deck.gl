@@ -12,23 +12,15 @@
     {
       "@@type": "MapView",
       "controller": true,
-      "mapStyle": "https://rivulet-zhang.github.io/dataRepo/mapbox/style/map-style-dark-v9-no-labels.json"
+      "mapStyle": "https://basemaps.cartocdn.com/gl/dark-matter-nolabels-gl-style/style.json"
     }
   ],
   "layers": [
     {
-      "@@type": "TagmapLayer",
-      "id": "twitter-topics-tagmap",
-      "data": "https://rivulet-zhang.github.io/dataRepo/tagmap/hashtags10k.json",
-      "getLabel": "@@=label",
-      "getPosition": "@@=coordinates",
-      "minFontSize": 14,
-      "maxFontSize": 50
-    },
-    {
       "@@type": "TextLayer",
       "id": "twitter-topics-raw",
       "data": "https://rivulet-zhang.github.io/dataRepo/tagmap/hashtags10k.json",
+      "characterSet": "auto",
       "getText": "@@=label",
       "getPosition": "@@=coordinates",
       "getColor": [
@@ -36,8 +28,7 @@
         145,
         192
       ],
-      "getSize": 20,
-      "sizeScale": 1.6
+      "getSize": 12
     }
   ]
 }
