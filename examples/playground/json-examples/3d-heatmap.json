@@ -24,7 +24,7 @@
       "data": "https://raw.githubusercontent.com/visgl/deck.gl-data/master/examples/3d-heatmap/heatmap-data.csv",
       "loadOptions": {
         "csv": {
-          "header": false
+          "shape": "array-row-table"
         }
       },
       "coverage": 1,
