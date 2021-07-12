@@ -15,8 +15,6 @@ const INITIAL_VIEW_STATE = {
   target: [0, 0, 0],
   rotationX: 0,
   rotationOrbit: 0,
-  orbitAxis: 'Y',
-  fov: 50,
   minZoom: 0,
   maxZoom: 10,
   zoom: 1
@@ -82,7 +80,7 @@ export default function App({onLoad}) {
 
   return (
     <DeckGL
-      views={new OrbitView()}
+      views={new OrbitView({orbitAxis: 'Y', fov: 50})}
       viewState={viewState}
       controller={true}
       onViewStateChange={v => updateViewState(v.viewState)}

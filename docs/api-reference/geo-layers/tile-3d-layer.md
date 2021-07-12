@@ -215,6 +215,10 @@ The Tile3DLayer renders the following sublayers based on tile [format](https://g
 
 Follow [CompositeLayer](/docs/api-reference/core/composite-layer.md#_subLayerProp) and example in this layer doc to see how to override sub layer props.
 
+## Remarks
+
+- The `Tile3DLayer` can be rendered in multiple views. A tile is loaded if it is required by any of the viewports, and shared across all views via a single cache system.
+
 ## Source
 
 [modules/geo-layers/src/tile-3d-layer](https://github.com/visgl/deck.gl/tree/master/modules/geo-layers/src/tile-3d-layer)
