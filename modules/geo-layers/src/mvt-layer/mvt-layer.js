@@ -167,11 +167,11 @@ export default class MVTLayer extends TileLayer {
 
     const isWGS84 = this.context.viewport.resolution;
 
-    if (info.object && !isWGS84) {
-      info.object = transformTileCoordsToWGS84(info.object, info.tile.bbox, this.context.viewport);
-    } else if (this.props.binary && info.index !== -1) {
+    if (this.props.binary && info.index !== -1) {
       const {data} = params.sourceLayer.props;
       info.object = getSingleFeature(data, info.index);
+    }
+    if (info.object && !isWGS84) {
       info.object = transformTileCoordsToWGS84(info.object, info.tile.bbox, this.context.viewport);
     }
 
