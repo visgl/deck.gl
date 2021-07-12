@@ -5,26 +5,6 @@
 const GEOM_TYPES = ['points', 'lines', 'polygons'];
 
 /**
- * Return the feature for a given featureId index value
- *
- * @param {Object} data - The data in binary format
- * @param {Number} featureIdIndex - The requested picking index
- */
-export function binaryToFeature(data, featureIdIndex) {
-  if (!data) {
-    return null;
-  }
-
-  const index = data.featureIds.value.indexOf(featureIdIndex);
-
-  if (index !== -1) {
-    return getPropertiesForIndex(data, featureIdIndex, index);
-  }
-
-  return null;
-}
-
-/**
  * Return the feature for an accesor
  *
  * @param {Object} data - The data in binary format
