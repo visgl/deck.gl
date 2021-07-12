@@ -40,6 +40,7 @@ uniform float lineWidthMinPixels;
 uniform float lineWidthMaxPixels;
 uniform float stroked;
 uniform bool filled;
+uniform bool billboard;
 
 varying vec4 vFillColor;
 varying vec4 vLineColor;
@@ -72,9 +73,17 @@ void main(void) {
 
   innerUnitRadius = 1.0 - stroked * lineWidthPixels / outerRadiusPixels;
   
-  vec3 offset = positions * project_pixel_size(outerRadiusPixels);
-  DECKGL_FILTER_SIZE(offset, geometry);
-  gl_Position = project_position_to_clipspace(instancePositions, instancePositions64Low, offset, geometry.position);
+  if (billboard) {
+    gl_Position = project_position_to_clipspace(instancePositions, instancePositions64Low, vec3(0.0), geometry.position);
+    vec3 offset = positions * outerRadiusPixels;
+    DECKGL_FILTER_SIZE(offset, geometry);
+    gl_Position.xy += project_pixel_size_to_clipspace(offset.xy);
+  } else {
+    vec3 offset = positions * project_pixel_size(outerRadiusPixels);
+    DECKGL_FILTER_SIZE(offset, geometry);
+    gl_Position = project_position_to_clipspace(instancePositions, instancePositions64Low, offset, geometry.position);
+  }
+
   DECKGL_FILTER_GL_POSITION(gl_Position, geometry);
 
   // Apply opacity to instance color, or return instance picking color

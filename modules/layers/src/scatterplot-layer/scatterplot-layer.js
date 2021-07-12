@@ -40,6 +40,7 @@ const defaultProps = {
 
   stroked: false,
   filled: true,
+  billboard: false,
 
   getPosition: {type: 'accessor', value: x => x.position},
   getRadius: {type: 'accessor', value: 1},
@@ -117,6 +118,7 @@ export default class ScatterplotLayer extends Layer {
       radiusMaxPixels,
       stroked,
       filled,
+      billboard,
       lineWidthUnits,
       lineWidthScale,
       lineWidthMinPixels,
@@ -131,6 +133,7 @@ export default class ScatterplotLayer extends Layer {
       .setUniforms({
         stroked: stroked ? 1 : 0,
         filled,
+        billboard,
         radiusScale: radiusScale * pointRadiusMultiplier,
         radiusMinPixels,
         radiusMaxPixels,
