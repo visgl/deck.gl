@@ -1,7 +1,7 @@
 import {log} from '@deck.gl/core';
 import {Matrix4} from 'math.gl';
 import {MVTWorkerLoader} from '@loaders.gl/mvt';
-import {binaryToGeoJson, getSingleFeature} from '@loaders.gl/gis';
+import {binaryToGeojson} from '@loaders.gl/gis';
 import {COORDINATE_SYSTEM} from '@deck.gl/core';
 import {_findIndexBinary} from '@deck.gl/layers';
 import {ClipExtension} from '@deck.gl/extensions';
@@ -169,7 +169,7 @@ export default class MVTLayer extends TileLayer {
 
     if (this.props.binary && info.index !== -1) {
       const {data} = params.sourceLayer.props;
-      info.object = getSingleFeature(data, info.index);
+      info.object = binaryToGeojson(data, {globalFeatureId: info.index});
     }
     if (info.object && !isWGS84) {
       info.object = transformTileCoordsToWGS84(info.object, info.tile.bbox, this.context.viewport);
@@ -268,7 +268,7 @@ export default class MVTLayer extends TileLayer {
 
             if (tile._contentWGS84 === undefined) {
               // Create a cache to transform only once
-              const content = this.props.binary ? binaryToGeoJson(tile.content) : tile.content;
+              const content = this.props.binary ? binaryToGeojson(tile.content) : tile.content;
               tile._contentWGS84 = content.map(feature =>
                 transformTileCoordsToWGS84(feature, tile.bbox, this.context.viewport)
               );
