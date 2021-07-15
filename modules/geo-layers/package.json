@@ -6,23 +6,14 @@
   "publishConfig": {
     "access": "public"
   },
-  "keywords": [
-    "webgl",
-    "visualization",
-    "geospatial",
-    "layer"
-  ],
+  "keywords": ["webgl", "visualization", "geospatial", "layer"],
   "repository": {
     "type": "git",
     "url": "https://github.com/visgl/deck.gl.git"
   },
   "main": "dist/es5/index.js",
   "module": "dist/esm/index.js",
-  "files": [
-    "dist",
-    "src",
-    "dist.min.js"
-  ],
+  "files": ["dist", "src", "dist.min.js"],
   "sideEffects": false,
   "scripts": {
     "build-bundle": "webpack --config ../../scripts/bundle.config.js",
@@ -36,11 +27,11 @@
     "@loaders.gl/terrain": "^3.0.0-beta.8",
     "@loaders.gl/tiles": "^3.0.0-beta.8",
     "@luma.gl/experimental": "^8.5.0-beta.1",
-    "@math.gl/culling": "^3.5.0-beta.1",
-    "@math.gl/web-mercator": "^3.5.0-beta.1",
+    "@math.gl/culling": "^3.5.1",
+    "@math.gl/web-mercator": "^3.5.1",
     "h3-js": "^3.6.0",
     "long": "^3.2.0",
-    "math.gl": "^3.5.0-beta.1"
+    "math.gl": "^3.5.1"
   },
   "peerDependencies": {
     "@deck.gl/core": "^8.0.0",

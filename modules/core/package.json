@@ -6,24 +6,14 @@
   "publishConfig": {
     "access": "public"
   },
-  "keywords": [
-    "webgl",
-    "visualization",
-    "overlay",
-    "layer"
-  ],
+  "keywords": ["webgl", "visualization", "overlay", "layer"],
   "repository": {
     "type": "git",
     "url": "https://github.com/visgl/deck.gl.git"
   },
   "main": "dist/es5/index.js",
   "module": "dist/esm/index.js",
-  "files": [
-    "dist",
-    "src",
-    "debug.min.js",
-    "dist.min.js"
-  ],
+  "files": ["dist", "src", "debug.min.js", "dist.min.js"],
   "sideEffects": false,
   "scripts": {
     "build-debugger": "webpack ./bundle/debug.js -p -o ./debug.min.js --config ../../scripts/bundle.config.js",
@@ -34,9 +24,9 @@
     "@loaders.gl/core": "^3.0.0-beta.8",
     "@loaders.gl/images": "^3.0.0-beta.8",
     "@luma.gl/core": "^8.5.0-beta.1",
-    "@math.gl/web-mercator": "^3.5.0-beta.1",
+    "@math.gl/web-mercator": "^3.5.1",
     "gl-matrix": "^3.0.0",
-    "math.gl": "^3.5.0-beta.1",
+    "math.gl": "^3.5.1",
     "mjolnir.js": "^2.5.0",
     "probe.gl": "^3.4.0-beta.1"
   }

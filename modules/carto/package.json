@@ -6,25 +6,14 @@
   "publishConfig": {
     "access": "public"
   },
-  "keywords": [
-    "carto",
-    "cartodb",
-    "mvt",
-    "visualization",
-    "geospatial",
-    "layer"
-  ],
+  "keywords": ["carto", "cartodb", "mvt", "visualization", "geospatial", "layer"],
   "repository": {
     "type": "git",
     "url": "https://github.com/visgl/deck.gl.git"
   },
   "main": "dist/es5/index.js",
   "module": "dist/esm/index.js",
-  "files": [
-    "dist",
-    "src",
-    "dist.min.js"
-  ],
+  "files": ["dist", "src", "dist.min.js"],
   "sideEffects": false,
   "scripts": {
     "build-bundle": "webpack --config ../../scripts/bundle.config.js",
@@ -34,7 +23,7 @@
     "@loaders.gl/loader-utils": "^3.0.0-beta.8",
     "@loaders.gl/mvt": "^3.0.0-beta.8",
     "@loaders.gl/tiles": "^3.0.0-beta.8",
-    "@math.gl/web-mercator": "^3.5.0-beta.1",
+    "@math.gl/web-mercator": "^3.5.1",
     "cartocolor": "^4.0.2",
     "d3-scale": "^3.2.3"
   },
