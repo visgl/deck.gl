@@ -6,14 +6,22 @@
   "publishConfig": {
     "access": "public"
   },
-  "keywords": ["webgl", "visualization", "layer"],
+  "keywords": [
+    "webgl",
+    "visualization",
+    "layer"
+  ],
   "repository": {
     "type": "git",
     "url": "https://github.com/visgl/deck.gl.git"
   },
   "main": "dist/es5/index.js",
   "module": "dist/esm/index.js",
-  "files": ["dist", "src", "dist.min.js"],
+  "files": [
+    "dist",
+    "src",
+    "dist.min.js"
+  ],
   "sideEffects": false,
   "scripts": {
     "build-bundle": "webpack --config ../../scripts/bundle.config.js",
