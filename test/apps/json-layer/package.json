@@ -7,9 +7,9 @@
     "start": "webpack-dev-server --progress --hot --open"
   },
   "dependencies": {
-    "@deck.gl/core": "^7.3.0-beta",
-    "@deck.gl/react": "^7.3.0-beta",
-    "@deck.gl/json": "^7.3.0-beta",
+    "@deck.gl/core": "^8.4.0",
+    "@deck.gl/react": "^8.4.0",
+    "@deck.gl/json": "^8.4.0",
     "react": "^16.9.0",
     "react-dom": "^16.9.0"
   },
