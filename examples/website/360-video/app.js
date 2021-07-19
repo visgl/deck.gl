@@ -1,4 +1,4 @@
-import React, {useMemo, useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {render} from 'react-dom';
 
 import DeckGL from '@deck.gl/react';
@@ -35,11 +35,13 @@ const INITIAL_VIEW_STATE = {
 
 export default function App() {
   const [isPlaying, setPlaying] = useState(false);
+  const [video, setVideo] = useState(null);
 
-  const video = useMemo(() => {
+  useEffect(() => {
+    let videoEl;
     /* global document */
     if (typeof document !== 'undefined') {
-      const videoEl = document.createElement('video');
+      videoEl = document.createElement('video');
       videoEl.crossOrigin = 'anonymous';
       videoEl.preload = 'auto';
       videoEl.loop = true;
@@ -48,9 +50,9 @@ export default function App() {
       source.src = VIDEO_URL;
       videoEl.append(source);
 
-      return videoEl;
+      setVideo(videoEl);
     }
-    return null;
+    return () => videoEl && videoEl.pause();
   }, []);
 
   const layer = new SimpleMeshLayer({
