@@ -1,7 +1,7 @@
 import test from 'tape-catch';
 import {geojsonToBinary} from '@loaders.gl/gis';
 import {calculatePickingColors} from '@deck.gl/layers/geojson-layer/geojson-binary';
-import {_binaryToFeature, _findIndexBinary} from '@deck.gl/layers';
+import {_findIndexBinary} from '@deck.gl/layers';
 import {Layer} from '@deck.gl/core';
 import {geoJSONData, pickingColorsSample} from './data/fixtures';
 
@@ -23,19 +23,6 @@ test('calculatePickingColors', t => {
     pickingColorsSample,
     'creates a right picking colors array for binary geojson'
   );
-
-  t.end();
-});
-
-test('binaryToFeature', t => {
-  const feature = _binaryToFeature(geoJSONBinaryData.polygons, 1);
-  const expectedFeature = {
-    properties: {
-      cartodb_id: 149,
-      name: 'Second'
-    }
-  };
-  t.deepEqual(feature, expectedFeature, 'finds a feature by its feature index');
 
   t.end();
 });
