@@ -110,6 +110,7 @@ export default class TerrainLayer extends CompositeLayer {
     loadOptions = {
       ...loadOptions,
       terrain: {
+        skirtHeight: this.state.isTiled ? meshMaxError * 2 : 0,
         ...loadOptions?.terrain,
         bounds,
         meshMaxError,
