@@ -11,7 +11,7 @@
     "deck.gl": "^8.4.0",
     "react": "^16.3.0",
     "react-dom": "^16.3.0",
-    "math.gl": "^3.5.1"
+    "math.gl": "^3.5.2"
   },
   "devDependencies": {
     "@babel/core": "^7.4.0",
