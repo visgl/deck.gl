@@ -34,7 +34,7 @@
     "@loaders.gl/loader-utils": "^3.0.6",
     "@loaders.gl/mvt": "^3.0.6",
     "@loaders.gl/tiles": "^3.0.6",
-    "@math.gl/web-mercator": "^3.5.1",
+    "@math.gl/web-mercator": "^3.5.3",
     "cartocolor": "^4.0.2",
     "d3-scale": "^3.2.3"
   },
