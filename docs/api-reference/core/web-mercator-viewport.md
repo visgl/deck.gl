@@ -59,7 +59,7 @@ Remarks:
 * `width` and `height` are forced to 1 if supplied as 0, to avoid division by zero. This is intended to reduce the burden of apps to check values before instantiating a `Viewport`.
 *  When using Mercator projection, per cartographic tradition, longitudes and latitudes are specified as degrees.
 * `latitude` of `90` or `-90` are projected to infinity in [Web Mercator projection](https://en.wikipedia.org/wiki/Web_Mercator_projection). Using pole locations with this viewport may result in `NaN`s. Many base map providers cut off at `85.051129` at which the full world becomes a square.
-* When constructing the viewport, a field of view is not specified, but rather is calculated from the `altitude` or (if present) the `projectionMatrix`. The value can be obtained from `this.fovy` (in radians).
+* When constructing the viewport, a field of view is not specified, but rather is calculated from the `altitude` or (if present) the `projectionMatrix`. The value can be obtained from `this.fovy` (in degrees).
 
 Inherits all [Viewport methods](/docs/api-reference/core/viewport.md#methods).
 
