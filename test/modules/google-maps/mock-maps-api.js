@@ -80,6 +80,17 @@ export class Map {
     this._callbacks = {};
 
     this.projection = new Projection(opts);
+    this.coordinateTransformer = {
+      getCameraParams: () => {
+        return {
+          lat: this.opts.latitude,
+          lng: this.opts.longitude,
+          heading: this.getHeading(),
+          tilt: this.getTilt(),
+          zoom: this.getZoom()
+        };
+      }
+    };
   }
 
   addListener(event, cb) {
@@ -105,7 +116,9 @@ export class Map {
 
   draw() {
     for (const overlay of this._overlays) {
-      overlay.draw();
+      this.getRenderingType() === RenderingType.RASTER
+        ? overlay.draw()
+        : overlay.onDraw(undefined, this.coordinateTransformer);
     }
   }
 
@@ -124,6 +137,14 @@ export class Map {
 
   getZoom() {
     return this.opts.zoom;
+  }
+
+  setHeading(heading) {
+    this.opts.heading = heading;
+  }
+
+  getHeading() {
+    return this.opts.heading || 0;
   }
 
   setTilt(tilt) {

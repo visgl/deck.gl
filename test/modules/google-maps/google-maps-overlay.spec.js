@@ -124,53 +124,62 @@ test('GoogleMapsOverlay#style', t => {
   t.end();
 });
 
-test('GoogleMapsOverlay#draw, pick', t => {
-  const map = new mapsApi.Map({
-    width: 800,
-    height: 400,
-    longitude: -122.45,
-    latitude: 37.78,
-    zoom: 13
+function drawPickTest(renderingType) {
+  test(`GoogleMapsOverlay#draw, pick ${renderingType}`, t => {
+    const map = new mapsApi.Map({
+      width: 800,
+      height: 400,
+      longitude: -122.45,
+      latitude: 37.78,
+      zoom: 13,
+      renderingType
+    });
+
+    const overlay = new GoogleMapsOverlay({
+      layers: [
+        new ScatterplotLayer({
+          data: [{position: [0, 0]}, {position: [0, 0]}],
+          radiusMinPixels: 100,
+          pickable: true
+        })
+      ]
+    });
+
+    overlay.setMap(map);
+    map.emit({type: 'renderingtype_changed'});
+    const deck = overlay._deck;
+
+    t.notOk(deck.props.viewState, 'Deck does not have view state');
+
+    map.draw();
+    const {viewState, width, height} = deck.props;
+    t.ok(equals(viewState.longitude, map.opts.longitude), 'longitude is set');
+    t.ok(equals(viewState.latitude, map.opts.latitude), 'latitude is set');
+    t.ok(equals(viewState.zoom, map.opts.zoom - 1), 'zoom is set');
+    t.ok(equals(width, map.opts.width), 'width is set');
+    t.ok(equals(height, map.opts.height), 'height is set');
+
+    if (renderingType === mapsApi.RenderingType.RASTER) {
+      t.notOk(deck.props.layerFilter, 'layerFilter is empty');
+
+      map.setTilt(45);
+      map.draw();
+      t.ok(deck.props.layerFilter, 'layerFilter should be set to block drawing');
+    }
+
+    const pointerMoveSpy = makeSpy(overlay._deck, '_onPointerMove');
+    map.emit({type: 'mousemove', pixel: [0, 0]});
+    t.is(pointerMoveSpy.callCount, 1, 'pointer move event is handled');
+
+    map.emit({type: 'mouseout', pixel: [0, 0]});
+    t.is(pointerMoveSpy.callCount, 2, 'pointer leave event is handled');
+    pointerMoveSpy.reset();
+
+    overlay.finalize();
+
+    t.end();
   });
-
-  const overlay = new GoogleMapsOverlay({
-    layers: [
-      new ScatterplotLayer({
-        data: [{position: [0, 0]}, {position: [0, 0]}],
-        radiusMinPixels: 100,
-        pickable: true
-      })
-    ]
-  });
-
-  overlay.setMap(map);
-  map.emit({type: 'renderingtype_changed'});
-  const deck = overlay._deck;
-
-  t.notOk(deck.props.viewState, 'Deck does not have view state');
-
-  map.draw();
-  const {viewState, width, height} = deck.props;
-  t.ok(equals(viewState.longitude, map.opts.longitude), 'longitude is set');
-  t.ok(equals(viewState.latitude, map.opts.latitude), 'latitude is set');
-  t.ok(equals(viewState.zoom, map.opts.zoom - 1), 'zoom is set');
-  t.ok(equals(width, map.opts.width), 'width is set');
-  t.ok(equals(height, map.opts.height), 'height is set');
-  t.notOk(deck.props.layerFilter, 'layerFilter is empty');
-
-  map.setTilt(45);
-  map.draw();
-  t.ok(deck.props.layerFilter, 'layerFilter should be set to block drawing');
-
-  const pointerMoveSpy = makeSpy(overlay._deck, '_onPointerMove');
-  map.emit({type: 'mousemove', pixel: [0, 0]});
-  t.is(pointerMoveSpy.callCount, 1, 'pointer move event is handled');
-
-  map.emit({type: 'mouseout', pixel: [0, 0]});
-  t.is(pointerMoveSpy.callCount, 2, 'pointer leave event is handled');
-  pointerMoveSpy.reset();
-
-  overlay.finalize();
-
-  t.end();
-});
+}
+for (const renderingType of [mapsApi.RenderingType.RASTER, mapsApi.RenderingType.VECTOR]) {
+  drawPickTest(renderingType);
+}
