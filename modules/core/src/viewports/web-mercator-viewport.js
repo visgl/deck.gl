@@ -72,10 +72,9 @@ export default class WebMercatorViewport extends Viewport {
     altitude = Math.max(0.75, altitude);
 
     let fovy;
-    let projectionParameters;
+    let projectionParameters = null;
     if (projectionMatrix) {
       fovy = altitudeToFovy(projectionMatrix[5] / 2);
-      projectionParameters = {focalDistance: altitude, projectionMatrix};
     } else {
       fovy = altitudeToFovy(altitude);
       const {aspect, fov: fovyRadians, near, far} = getProjectionParameters({
@@ -87,10 +86,8 @@ export default class WebMercatorViewport extends Viewport {
         farZMultiplier
       });
       projectionParameters = {
-        orthographic,
         fovyRadians,
         aspect,
-        focalDistance: altitude,
         near,
         far
       };
@@ -126,7 +123,9 @@ export default class WebMercatorViewport extends Viewport {
       zoom,
 
       // projection matrix parameters
-      ...projectionParameters
+      ...projectionParameters,
+      fovy,
+      focalDistance: altitude
     });
 
     // Save parameters
