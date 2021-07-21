@@ -137,6 +137,9 @@ export class Map {
   _addOverlay(overlay) {
     this._overlays.add(overlay);
     overlay.onAdd();
+    if (this.getRenderingType() === RenderingType.VECTOR) {
+      overlay.onContextRestored();
+    }
   }
 
   _removeOverlay(overlay) {
@@ -168,6 +171,25 @@ export class OverlayView {
       mapPane: this._container,
       markerLayer: this._container,
       overlayLayer: this._container
+    };
+  }
+}
+
+export class WebglOverlayView {
+  constructor() {
+    this.map = null;
+    this._container = document.createElement('div');
+  }
+
+  setMap(map) {
+    this.map?._removeOverlay(this);
+    map?._addOverlay(this);
+    this.map = map;
+  }
+
+  getMap() {
+    return {
+      getDiv: () => this._container
     };
   }
 }

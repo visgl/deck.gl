@@ -42,6 +42,56 @@ test('GoogleMapsOverlay#constructor', t => {
   t.end();
 });
 
+test('GoogleMapsOverlay#raster lifecycle', t => {
+  const map = new mapsApi.Map({
+    width: 1,
+    height: 1,
+    longitude: 0,
+    latitude: 0,
+    zoom: 1,
+    renderingType: mapsApi.RenderingType.RASTER
+  });
+
+  const overlay = new GoogleMapsOverlay({
+    layers: []
+  });
+
+  overlay.setMap(map);
+  map.emit({type: 'renderingtype_changed'});
+  t.ok(overlay._overlay.onAdd, 'onAdd lifecycle function is registered');
+  t.ok(overlay._overlay.draw, 'draw lifecycle function is registered');
+  t.ok(overlay._overlay.onRemove, 'onRemove lifecycle function is registered');
+  overlay.finalize();
+
+  t.end();
+});
+
+test('GoogleMapsOverlay#vector lifecycle', t => {
+  const map = new mapsApi.Map({
+    width: 1,
+    height: 1,
+    longitude: 0,
+    latitude: 0,
+    zoom: 1,
+    renderingType: mapsApi.RenderingType.VECTOR
+  });
+
+  const overlay = new GoogleMapsOverlay({
+    layers: []
+  });
+
+  overlay.setMap(map);
+  map.emit({type: 'renderingtype_changed'});
+  t.ok(overlay._overlay.onAdd, 'onAdd lifecycle function is registered');
+  t.ok(overlay._overlay.onContextLost, 'onContextLost lifecycle function is registered');
+  t.ok(overlay._overlay.onContextRestored, 'onContextRestored lifecycle function is registered');
+  t.ok(overlay._overlay.onDraw, 'onDraw lifecycle function is registered');
+  t.ok(overlay._overlay.onRemove, 'onRemove lifecycle function is registered');
+  overlay.finalize();
+
+  t.end();
+});
+
 test('GoogleMapsOverlay#style', t => {
   const map = new mapsApi.Map({
     width: 1,
