@@ -1,5 +1,11 @@
 import {WebMercatorViewport} from '@deck.gl/core';
 
+export const RenderingType = {
+  VECTOR: 'VECTOR',
+  RASTER: 'RASTER',
+  UNINITIALIZED: 'UNINITIALIZED'
+};
+
 export class Point {
   constructor(x, y) {
     this.x = x;
@@ -91,6 +97,10 @@ export class Map {
     for (const func of this._callbacks[event.type]) {
       func(event);
     }
+  }
+
+  getRenderingType() {
+    return this.opts.renderingType || RenderingType.RASTER;
   }
 
   draw() {

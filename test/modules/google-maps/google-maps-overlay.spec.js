@@ -26,6 +26,7 @@ test('GoogleMapsOverlay#constructor', t => {
   });
 
   overlay.setMap(map);
+  map.emit({type: 'renderingtype_changed'});
   const deck = overlay._deck;
   t.ok(deck, 'Deck instance is created');
 
@@ -56,6 +57,7 @@ test('GoogleMapsOverlay#style', t => {
   });
 
   overlay.setMap(map);
+  map.emit({type: 'renderingtype_changed'});
   const deck = overlay._deck;
 
   t.is(deck.props.parent.style.zIndex, '10', 'parent zIndex is set');
@@ -92,6 +94,7 @@ test('GoogleMapsOverlay#draw, pick', t => {
   });
 
   overlay.setMap(map);
+  map.emit({type: 'renderingtype_changed'});
   const deck = overlay._deck;
 
   t.notOk(deck.props.viewState, 'Deck does not have view state');
