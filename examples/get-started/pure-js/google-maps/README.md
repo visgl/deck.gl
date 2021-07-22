@@ -9,13 +9,14 @@ with [webpack-dev-server](https://webpack.js.org/guides/development/#webpack-dev
 
 ## Usage
 
-To run this example, you need a [Google Maps API key](https://developers.google.com/maps/documentation/javascript/get-api-key). You can either set an environment variable:
+To run this example, you need a [Google Maps API key](https://developers.google.com/maps/documentation/javascript/get-api-key) and a map id. You can either set an environment variable:
 
 ```bash
 export GoogleMapsAPIKey=<google_maps_api_key>
+export GoogleMapsMapId=<google_maps_map_id>
 ```
 
-Or set the `GOOGLE_MAPS_API_KEY` variable in `app.js`.
+Or set the `GOOGLE_MAPS_API_KEY` and `GOOGLE_MAP_ID` variables in `app.js`.
 
 To install dependencies:
 

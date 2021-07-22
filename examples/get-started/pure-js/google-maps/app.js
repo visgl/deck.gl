@@ -6,10 +6,9 @@ import {GeoJsonLayer, ArcLayer} from '@deck.gl/layers';
 const AIR_PORTS =
   'https://d2ad6b4ur7yvpq.cloudfront.net/naturalearth-3.3.0/ne_10m_airports.geojson';
 
-const GOOGLE_MAP_ID = 'f865292e93a85c6c';
-
 // Set your Google Maps API key here or via environment variable
 const GOOGLE_MAPS_API_KEY = process.env.GoogleMapsAPIKey; // eslint-disable-line
+const GOOGLE_MAP_ID = process.env.GoogleMapsMapId; // eslint-disable-line
 const GOOGLE_MAPS_API_URL = `https://maps.googleapis.com/maps/api/js?key=${GOOGLE_MAPS_API_KEY}&v=beta&map_ids=${GOOGLE_MAP_ID}`;
 
 function loadScript(url) {
