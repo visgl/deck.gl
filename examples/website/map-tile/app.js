@@ -15,7 +15,7 @@ const INITIAL_VIEW_STATE = {
   bearing: 0
 };
 
-const COPYRIGHT_LICENCE_STYLE = {
+const COPYRIGHT_LICENSE_STYLE = {
   position: 'absolute',
   right: 0,
   bottom: 0,
@@ -83,16 +83,6 @@ export default function App({showBorder = false, onTilesLoad = null}) {
     }
   });
 
-  const renderCopyrightAndLicense = () => (
-    <div style={COPYRIGHT_LICENCE_STYLE}>
-      {'© '}
-      <a style={LINK_STYLE} href="http://www.openstreetmap.org/copyright" target="blank">
-        OpenStreetMap
-      </a>
-      {' contributors'}
-    </div>
-  );
-
   return (
     <DeckGL
       layers={[tileLayer]}
@@ -101,7 +91,12 @@ export default function App({showBorder = false, onTilesLoad = null}) {
       controller={true}
       getTooltip={getTooltip}
     >
-      {renderCopyrightAndLicense()}
+      <div style={COPYRIGHT_LICENSE_STYLE}>
+        {'© '}
+        <a style={LINK_STYLE} href="http://www.openstreetmap.org/copyright" target="blank">
+          OpenStreetMap contributors
+        </a>
+      </div>
     </DeckGL>
   );
 }
