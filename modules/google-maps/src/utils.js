@@ -31,7 +31,7 @@ export function createDeckInstance(map, overlay, deck, props) {
   deck = new Deck({
     ...props,
     style: null,
-    parent: overlay && getContainer(overlay, props.style),
+    parent: getContainer(overlay, props.style),
     initialViewState: {
       longitude: 0,
       latitude: 0,
@@ -59,6 +59,9 @@ function getContainer(overlay, style) {
   const container = document.createElement('div');
   container.style.position = 'absolute';
   Object.assign(container.style, style);
+
+  // The DOM structure has a different structure depending on whether
+  // the Google map is rendered as vector or raster
   if (overlay.getPanes) {
     overlay.getPanes().overlayLayer.appendChild(container);
   } else {
