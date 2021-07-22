@@ -1,5 +1,11 @@
 import {WebMercatorViewport} from '@deck.gl/core';
 
+export const RenderingType = {
+  VECTOR: 'VECTOR',
+  RASTER: 'RASTER',
+  UNINITIALIZED: 'UNINITIALIZED'
+};
+
 export class Point {
   constructor(x, y) {
     this.x = x;
@@ -74,6 +80,17 @@ export class Map {
     this._callbacks = {};
 
     this.projection = new Projection(opts);
+    this.coordinateTransformer = {
+      getCameraParams: () => {
+        return {
+          lat: this.opts.latitude,
+          lng: this.opts.longitude,
+          heading: this.getHeading(),
+          tilt: this.getTilt(),
+          zoom: this.getZoom()
+        };
+      }
+    };
   }
 
   addListener(event, cb) {
@@ -93,9 +110,15 @@ export class Map {
     }
   }
 
+  getRenderingType() {
+    return this.opts.renderingType || RenderingType.RASTER;
+  }
+
   draw() {
     for (const overlay of this._overlays) {
-      overlay.draw();
+      this.getRenderingType() === RenderingType.RASTER
+        ? overlay.draw()
+        : overlay.onDraw(undefined, this.coordinateTransformer);
     }
   }
 
@@ -116,6 +139,14 @@ export class Map {
     return this.opts.zoom;
   }
 
+  setHeading(heading) {
+    this.opts.heading = heading;
+  }
+
+  getHeading() {
+    return this.opts.heading || 0;
+  }
+
   setTilt(tilt) {
     this.opts.pitch = tilt;
   }
@@ -127,6 +158,9 @@ export class Map {
   _addOverlay(overlay) {
     this._overlays.add(overlay);
     overlay.onAdd();
+    if (this.getRenderingType() === RenderingType.VECTOR) {
+      overlay.onContextRestored();
+    }
   }
 
   _removeOverlay(overlay) {
@@ -158,6 +192,25 @@ export class OverlayView {
       mapPane: this._container,
       markerLayer: this._container,
       overlayLayer: this._container
+    };
+  }
+}
+
+export class WebglOverlayView {
+  constructor() {
+    this.map = null;
+    this._container = document.createElement('div');
+  }
+
+  setMap(map) {
+    this.map?._removeOverlay(this);
+    map?._addOverlay(this);
+    this.map = map;
+  }
+
+  getMap() {
+    return {
+      getDiv: () => this._container
     };
   }
 }
