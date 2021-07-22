@@ -1,6 +1,5 @@
 /* global google, document */
 import {Deck} from '@deck.gl/core';
-import {MapView} from '@deck.gl/core';
 import {Matrix4} from 'math.gl';
 
 // https://en.wikipedia.org/wiki/Web_Mercator_projection#Formulas
@@ -191,18 +190,13 @@ export function getViewPropsFromCoordinateTransformer(map, coordinateTransformer
   return {
     width,
     height,
-    views: [
-      new MapView({
-        id: 'google-maps-overlay-view',
-        projectionMatrix
-      })
-    ],
     viewState: {
       altitude: focalDistance,
       bearing,
       latitude,
       longitude,
       pitch,
+      projectionMatrix,
       repeat: true,
       zoom: zoom - 1
     }
