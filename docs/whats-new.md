@@ -4,7 +4,7 @@ This page contains highlights of each deck.gl release. Also check our [vis.gl bl
 
 ## deck.gl v8.5
 
-Release date: July 2021 (beta available)
+Release date: July 22, 2021
 
 
 <table style="border: 0;" align="center">
@@ -12,7 +12,15 @@ Release date: July 2021 (beta available)
     <tr>
       <td>
         <img style="max-height:200px" src="https://github.com/visgl/deck.gl-data/blob/master/images/whats-new/text-layer-styling.gif?raw=true" />
-        <p><i>TextLayer styling</i></p>
+        <p><i>TextLayer background, border, padding and outline</i></p>
+      </td>
+      <td>
+        <img style="max-height:200px" src="https://github.com/visgl/deck.gl-data/blob/master/images/whats-new/geojson-point-type.png?raw=true" />
+        <p><i>GeoJsonLayer pointType</i></p>
+      </td>
+      <td>
+        <img style="max-height:200px" src="https://github.com/visgl/deck.gl-data/blob/master/images/whats-new/i3s-picking.gif?raw=true" />
+        <p><i>Tile3DLayer+I3S picking individual objects</i></p>
       </td>
     </tr>
   </tbody>
