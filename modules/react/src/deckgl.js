@@ -190,7 +190,7 @@ const DeckGL = forwardRef((props, ref) => {
   const {viewManager} = thisRef.deck || {};
   const currentViewports = viewManager && viewManager.getViewports();
 
-  const {ContextProvider, width, height, style} = props;
+  const {ContextProvider, width, height, id, style} = props;
 
   const {containerStyle, canvasStyle} = useMemo(() => extractStyles({width, height, style}), [
     width,
@@ -221,6 +221,7 @@ const DeckGL = forwardRef((props, ref) => {
 
     const canvas = createElement('canvas', {
       key: 'canvas',
+      id: id || 'deckgl-overlay',
       ref: canvasRef,
       style: canvasStyle
     });
@@ -228,7 +229,7 @@ const DeckGL = forwardRef((props, ref) => {
     // Render deck.gl as the last child
     thisRef.control = createElement(
       'div',
-      {id: 'deckgl-wrapper', ref: containerRef, style: containerStyle},
+      {id: `${id || 'deckgl'}-wrapper`, ref: containerRef, style: containerStyle},
       [canvas, childrenUnderViews]
     );
   }

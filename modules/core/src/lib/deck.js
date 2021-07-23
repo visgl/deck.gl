@@ -106,7 +106,7 @@ function getPropTypes(PropTypes) {
 }
 
 const defaultProps = {
-  id: 'deckgl-overlay',
+  id: '',
   width: '100%',
   height: '100%',
 
@@ -424,13 +424,12 @@ export default class Deck {
 
     if (!canvas) {
       canvas = document.createElement('canvas');
+      canvas.id = props.id || 'deckgl-overlay';
       const parent = props.parent || document.body;
       parent.appendChild(canvas);
     }
 
-    const {id, style} = props;
-    canvas.id = id;
-    Object.assign(canvas.style, style);
+    Object.assign(canvas.style, props.style);
 
     return canvas;
   }
