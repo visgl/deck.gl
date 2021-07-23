@@ -131,9 +131,10 @@ export default class GeoJsonLayer extends CompositeLayer {
   _updateAutoHighlight(info) {
     // All sub layers except the points layer use source feature index to encode the picking color
     // The points layer uses indices from the points data array.
-    const sourceIsPoints = info.sourceLayer.id.includes('-points-');
+    const pointLayerIdPrefix = `${this.id}-points-`;
+    const sourceIsPoints = info.sourceLayer.id.startsWith(pointLayerIdPrefix);
     for (const layer of this.getSubLayers()) {
-      if (layer.id.includes('-points-') === sourceIsPoints) {
+      if (layer.id.startsWith(pointLayerIdPrefix) === sourceIsPoints) {
         layer.updateAutoHighlight(info);
       }
     }
