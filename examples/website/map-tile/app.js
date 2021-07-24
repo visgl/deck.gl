@@ -15,6 +15,21 @@ const INITIAL_VIEW_STATE = {
   bearing: 0
 };
 
+const COPYRIGHT_LICENSE_STYLE = {
+  position: 'absolute',
+  right: 0,
+  bottom: 0,
+  backgroundColor: 'hsla(0,0%,100%,.5)',
+  padding: '0 5px',
+  font: '12px/20px Helvetica Neue,Arial,Helvetica,sans-serif'
+};
+
+const LINK_STYLE = {
+  textDecoration: 'none',
+  color: 'rgba(0,0,0,.75)',
+  cursor: 'grab'
+};
+
 /* global window */
 const devicePixelRatio = (typeof window !== 'undefined' && window.devicePixelRatio) || 1;
 
@@ -75,7 +90,14 @@ export default function App({showBorder = false, onTilesLoad = null}) {
       initialViewState={INITIAL_VIEW_STATE}
       controller={true}
       getTooltip={getTooltip}
-    />
+    >
+      <div style={COPYRIGHT_LICENSE_STYLE}>
+        {'© '}
+        <a style={LINK_STYLE} href="http://www.openstreetmap.org/copyright" target="blank">
+          OpenStreetMap contributors
+        </a>
+      </div>
+    </DeckGL>
   );
 }
 
