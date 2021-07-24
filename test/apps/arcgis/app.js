@@ -30,7 +30,9 @@ loadArcGISModules([
 ]).then(({DeckLayer, DeckRenderer, modules}) => {
   const [ArcGISMap, MapView, SceneView, externalRenderers] = modules;
 
-  const layer = new DeckLayer({});
+  const layer = new DeckLayer({
+    effect: "bloom(1.5, 0.5px, 0.1)"
+  });
 
   // In the ArcGIS API for JavaScript the MapView is responsible
   // for displaying a Map, which usually contains at least a basemap.
