@@ -66,16 +66,19 @@ export const GeoJsonLayerDemo = makeLayerDemo({
     stroked: false,
     filled: true,
     extruded: true,
-    lineWidthScale: 20,
     lineWidthMinPixels: 2,
+    pointType: 'circle+text',
+    pointRadiusUnits: 'pixels',
+    getText: f => f.properties.name,
+    getTextSize: 12,
     getFillColor: [160, 160, 180, 200],
     getLineColor: f => {
       const hex = f.properties.color;
       // convert to RGB
       return hex ? hex.match(/[0-9a-f]{2}/g).map(x => parseInt(x, 16)) : [0, 0, 0];
     },
-    getRadius: 100,
-    getLineWidth: 1,
+    getPointRadius: 4,
+    getLineWidth: 20,
     getElevation: 30
   }`
 });
