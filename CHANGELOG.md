@@ -21,6 +21,19 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ### deck.gl v8.5 Prereleases
 
+#### deck.gl [8.5.0-beta.2] - Jul 20 2021
+
+- Avoid onError call if context is lost after finalization (#5992)
+- Bump math.gl to 3.5.3 (#5994)
+- Binary MVTLayer returns geometry when picking (#5965)
+- Bump dependencies (#5990)
+- Provide default skirt height for tiled TerrainLayer (#5982)
+- Bump loaders.gl to 3.0.2, luma.gl to 8.5.0 (#5979)
+- Bump math.gl to 3.5.1 (#5972)
+- Billboard prop for Scatterplot layer (#5956)
+- Enforce OrbitView orbitAxis prop (#5962)
+- Add `fadeTrail` prop to TripLayer (#5921)
+
 #### deck.gl [8.5.0-beta.1] - Jul 5 2021
 
 - Bump dependencies (#5951)

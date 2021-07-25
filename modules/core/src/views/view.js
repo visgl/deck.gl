@@ -15,11 +15,9 @@ export default class View {
       height = '100%',
 
       // Viewport Options
-      projectionMatrix = null, // Projection matrix
       fovy = 50, // Perspective projection parameters, used if projectionMatrix not supplied
       near = 0.1, // Distance of near clipping plane
       far = 1000, // Distance of far clipping plane
-      modelMatrix = null, // A model matrix to be applied to position, to match the layer props API
 
       // A View can be a wrapper for a viewport instance
       viewportInstance = null,
@@ -38,11 +36,9 @@ export default class View {
     this.props = {
       ...props,
       id: this.id,
-      projectionMatrix,
       fovy,
       near,
-      far,
-      modelMatrix
+      far
     };
 
     // Extents
