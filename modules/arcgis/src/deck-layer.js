@@ -3,7 +3,9 @@ export default function createDeckLayer(DeckProps, Layer, DeckLayerView2D) {
   // of the layer view defined above.
   return Layer.createSubclass({
     properties: {
-      deck: {}
+      deck: {},
+      blendMode: {},
+      effect: {}
     },
 
     constructor() {
