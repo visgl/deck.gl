@@ -145,10 +145,23 @@ export const MVTLayerDemo = makeLayerDemo({
     ],
 
     minZoom: 0,
-    maxZoom: 23,
+    maxZoom: 14,
+    stroked: false,
     getLineColor: [192, 192, 192],
-    getFillColor: [140, 170, 180],
-
+    getFillColor: f => {
+      switch (f.properties.layerName) {
+        case 'poi':
+          return [255, 0, 0];
+        case 'water':
+          return [120, 150, 180];
+        case 'building':
+          return [218, 218, 218];
+        default:
+          return [240, 240, 240];
+      }
+    },
+    getPointRadius: 2,
+    pointRadiusUnits: 'pixels',
     getLineWidth: f => {
       switch (f.properties.class) {
         case 'street':
