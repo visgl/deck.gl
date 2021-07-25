@@ -89,7 +89,7 @@ export function calculatePickingColors(geojsonBinary, encodePickingColor) {
     polygons: null
   };
   for (const key in pickingColors) {
-    const featureIds = geojsonBinary[key].featureIds.value;
+    const featureIds = geojsonBinary[key].globalFeatureIds.value;
     pickingColors[key] = new Uint8ClampedArray(featureIds.length * 3);
     const pickingColor = [];
     for (let i = 0; i < featureIds.length; i++) {

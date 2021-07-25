@@ -38,21 +38,17 @@ export function createLayerPropsFromFeatures(features, featuresDiff) {
   return layerProps;
 }
 
-export function createLayerPropsFromBinary(geojsonBinary, uniqueIdProperty, encodePickingColor) {
+export function createLayerPropsFromBinary(geojsonBinary, encodePickingColor) {
   const layerProps = createEmptyLayerProps();
   const {points, lines, polygons} = geojsonBinary;
 
-  const customPickingColors = calculatePickingColors(
-    geojsonBinary,
-    uniqueIdProperty,
-    encodePickingColor
-  );
+  const customPickingColors = calculatePickingColors(geojsonBinary, encodePickingColor);
 
   layerProps.points.data = {
     length: points.positions.value.length / points.positions.size,
     attributes: {
       getPosition: points.positions,
-      pickingColors: {
+      instancePickingColors: {
         size: 3,
         value: customPickingColors.points
       }
@@ -67,7 +63,7 @@ export function createLayerPropsFromBinary(geojsonBinary, uniqueIdProperty, enco
     startIndices: lines.pathIndices.value,
     attributes: {
       getPath: lines.positions,
-      pickingColors: {
+      instancePickingColors: {
         size: 3,
         value: customPickingColors.lines
       }

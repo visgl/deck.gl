@@ -32,6 +32,6 @@
     "@deck.gl/core": "^8.0.0"
   },
   "dependencies": {
-    "esri-loader": "^2.13.0"
+    "esri-loader": "^3.2.0"
   }
 }
