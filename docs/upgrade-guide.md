@@ -20,7 +20,6 @@ The module entry point is now only lightly transpiled for the most commonly used
 - Dashed lines via `PathStyleExtension` now draw rounded dash caps if `capRounded` is `true`.
 - `@deck.gl/geo-layers` now depends on `@deck.gl/extensions`.
 - `HeatmapLayer`'s `colorDomain` prop has redefined the unit of its values. See updated [layer documentation](/docs/api-reference/aggregation-layers/heatmap-layer.md) for details.
-- `MVTLayer`'s `binary` prop is now set to `true` by default to take advantage of the performance boost.
 - `TileLayer` no longer uses `tileSize` to offset zoom in non-geospatial views. It is recommended to use the new `zoomOffset` prop to affect the `zoom` resolution at which tiles are fetched.
 - `MVTLayer` and `TerrainLayer`'s default loaders no longer support parsing on the main thread. This does not change the layers' default behavior, just reduces the bundle size by dropping unused code. Should you need to use the layers in an environment where web worker is not available, or debug the loaders, follow the examples in [loaders and workers](/docs/developer-guide/loading-data.md#loaders-and-web-workers).
 - `TerrainLayer`'s `workerUrl` prop is removed, use `loadOptions.terrain.workerUrl` instead.
