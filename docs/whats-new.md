@@ -4,7 +4,7 @@ This page contains highlights of each deck.gl release. Also check our [vis.gl bl
 
 ## deck.gl v8.5
 
-Release date: July 22, 2021
+Release date: July 26, 2021
 
 
 <table style="border: 0;" align="center">
