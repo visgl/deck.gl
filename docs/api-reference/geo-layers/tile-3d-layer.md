@@ -221,4 +221,4 @@ Follow [CompositeLayer](/docs/api-reference/core/composite-layer.md#_subLayerPro
 
 ## Source
 
-[modules/geo-layers/src/tile-3d-layer](https://github.com/visgl/deck.gl/tree/master/modules/geo-layers/src/tile-3d-layer)
+[modules/geo-layers/src/tile-3d-layer](https://github.com/visgl/deck.gl/tree/8.5-release/modules/geo-layers/src/tile-3d-layer)

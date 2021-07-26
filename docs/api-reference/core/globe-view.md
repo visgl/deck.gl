@@ -105,4 +105,4 @@ parameters: {
 
 ## Source
 
-[modules/core/src/views/globe-view.js](https://github.com/visgl/deck.gl/blob/master/modules/core/src/views/globe-view.js)
+[modules/core/src/views/globe-view.js](https://github.com/visgl/deck.gl/tree/8.5-release/modules/core/src/views/globe-view.js)

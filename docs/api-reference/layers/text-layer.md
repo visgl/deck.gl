@@ -463,4 +463,4 @@ At the moment this layer doesn't render multi-color emojis.
 
 ## Source
 
-[modules/layers/src/text-layer](https://github.com/visgl/deck.gl/tree/master/modules/layers/src/text-layer)
+[modules/layers/src/text-layer](https://github.com/visgl/deck.gl/tree/8.5-release/modules/layers/src/text-layer)

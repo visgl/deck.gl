@@ -129,4 +129,4 @@ Receives arguments:
 
 ## Source
 
-[modules/carto/src/layers/carto-sql-layer.js](https://github.com/visgl/deck.gl/tree/master/modules/carto/src/layers/carto-sql-layer.js)
+[modules/carto/src/layers/carto-sql-layer.js](https://github.com/visgl/deck.gl/tree/8.5-release/modules/carto/src/layers/carto-sql-layer.js)
