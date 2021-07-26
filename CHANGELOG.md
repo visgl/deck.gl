@@ -19,6 +19,14 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v8.5
 
+#### deck.gl [8.5.0] - Jul 26 2021
+
+- Bump luma.gl (#6014)
+- allow user to control React wrapper id (#6010)
+- Adopt version 4.20 of the ArcGIS API for JavaScript and enable blend modes and layer effects (#6013)
+- fix picking with binary geojson (#6011)
+- fix: MVTLayer set binary to false by default (#6009)
+
 ### deck.gl v8.5 Prereleases
 
 #### deck.gl [8.5.0-beta.2] - Jul 20 2021
