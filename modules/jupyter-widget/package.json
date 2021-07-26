@@ -40,7 +40,7 @@
     "@loaders.gl/3d-tiles": "^3.0.6",
     "@loaders.gl/core": "^3.0.6",
     "@loaders.gl/csv": "^3.0.6",
-    "@luma.gl/constants": "^8.5.3",
+    "@luma.gl/constants": "^8.5.4",
     "mapbox-gl": "^1.2.1"
   },
   "jupyterlab": {
