@@ -45,6 +45,14 @@ const view = new GlobeView({id, ...});
 
 The resolution at which to turn flat features into 3D meshes, in degrees. Smaller numbers will generate more detailed mesh. Default `10`.
 
+##### `nearZMultiplier` (Number, optional)
+
+Scaler for the near plane, 1 unit equals to the height of the viewport. Default to `0.1`. Overwrites the `near` parameter.
+
+##### `farZMultiplier` (Number, optional)
+
+Scaler for the far plane, 1 unit equals to the distance from the camera to the edge of the screen. Default to `2`. Overwrites the `far` parameter.
+
 
 ## View State
 
@@ -56,10 +64,6 @@ To render, `GlobeView` needs to be used together with a `viewState` with the fol
 - `maxZoom` (Number, optional) - max zoom level. Default `20`.
 - `minZoom` (Number, optional) - min zoom level. Default `0`.
 
-Additional projection matrix arguments:
-
-+ `nearZMultiplier` (Number, optional) - Scaler for the near plane, 1 unit equals to the height of the viewport. Default to `0.1`.
-+ `farZMultiplier` (Number, optional) - Scaler for the far plane, 1 unit equals to the distance from the camera to the edge of the screen. Default to `2`.
 
 ## Controller
 

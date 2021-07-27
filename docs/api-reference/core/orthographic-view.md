@@ -26,6 +26,14 @@ const view = new OrthographicView({id, ...});
 
 Whether to use top-left coordinates (`true`) or bottom-left coordinates (`false`). Default `true`.
 
+##### `near` (Number, optional)
+
+Distance of near clipping plane. Default `0.1`.
+
+##### `far` (Number, optional)
+
+Distance of far clipping plane. Default `1000`.
+
 
 ## View State
 

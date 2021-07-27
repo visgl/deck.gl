@@ -2,20 +2,19 @@ import View from './view';
 import Viewport from '../viewports/viewport';
 
 import {Matrix4} from 'math.gl';
-import {pixelsToWorld} from '@math.gl/web-mercator';
+import {pixelsToWorld, fovyToAltitude} from '@math.gl/web-mercator';
 import OrbitController from '../controllers/orbit-controller';
 
 const DEGREES_TO_RADIANS = Math.PI / 180;
 
-function getViewMatrix({height, fovy, orbitAxis, rotationX, rotationOrbit, zoom}) {
+function getViewMatrix({height, focalDistance, orbitAxis, rotationX, rotationOrbit, zoom}) {
   // We position the camera so that one common space unit (world space unit scaled by zoom)
   // at the target maps to one screen pixel.
   // This is a similar technique to that used in web mercator projection
   // By doing so we are able to convert between common space and screen space sizes efficiently
   // in the vertex shader.
-  const distance = 0.5 / Math.tan((fovy * DEGREES_TO_RADIANS) / 2);
   const up = orbitAxis === 'Z' ? [0, 0, 1] : [0, 1, 0];
-  const eye = orbitAxis === 'Z' ? [0, -distance, 0] : [0, 0, distance];
+  const eye = orbitAxis === 'Z' ? [0, -focalDistance, 0] : [0, 0, focalDistance];
 
   const viewMatrix = new Matrix4().lookAt({eye, up});
 
@@ -41,7 +40,10 @@ class OrbitViewport extends Viewport {
   constructor(props) {
     const {
       height,
-      fovy, // For setting camera position
+
+      projectionMatrix,
+
+      fovy = 50, // For setting camera position
       orbitAxis, // Orbit axis with 360 degrees rotating freedom, can only be 'Y' or 'Z'
       target = [0, 0, 0], // Which point is camera looking at, default origin
 
@@ -51,6 +53,8 @@ class OrbitViewport extends Viewport {
       zoom = 0
     } = props;
 
+    const focalDistance = projectionMatrix ? projectionMatrix[5] / 2 : fovyToAltitude(fovy);
+
     super({
       ...props,
       // in case viewState contains longitude/latitude values,
@@ -58,13 +62,14 @@ class OrbitViewport extends Viewport {
       longitude: null,
       viewMatrix: getViewMatrix({
         height,
-        fovy,
+        focalDistance,
         orbitAxis,
         rotationX,
         rotationOrbit,
         zoom
       }),
       fovy,
+      focalDistance,
       position: target,
       zoom
     });

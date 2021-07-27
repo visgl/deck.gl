@@ -14,13 +14,8 @@ export default class View {
       width = '100%',
       height = '100%',
 
-      // Viewport Options
-      fovy = 50, // Perspective projection parameters, used if projectionMatrix not supplied
-      near = 0.1, // Distance of near clipping plane
-      far = 1000, // Distance of far clipping plane
-
       // A View can be a wrapper for a viewport instance
-      viewportInstance = null,
+      viewportInstance,
 
       // Internal: Viewport Type
       type = Viewport // TODO - default to WebMercator?
@@ -33,13 +28,7 @@ export default class View {
     this.id = id || this.constructor.displayName || 'view';
     this.type = type;
 
-    this.props = {
-      ...props,
-      id: this.id,
-      fovy,
-      near,
-      far
-    };
+    this.props = {...props, id: this.id};
 
     // Extents
     this._parseDimensions({x, y, width, height});

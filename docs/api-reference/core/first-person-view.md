@@ -20,7 +20,29 @@ import {FirstPersonView} from '@deck.gl/core';
 new FirstPersonView({id, ...});
 ```
 
-`FirstPersonView` takes the same parameters as the [View](/docs/api-reference/core/view.md) superclass constructor.
+`FirstPersonView` takes the same parameters as the [View](/docs/api-reference/core/view.md) superclass constructor, plus the following:
+
+##### `projectionMatrix` (Array[16], optional)
+
+Projection matrix.
+
+If `projectionMatrix` is not supplied, the `View` class will build a projection matrix from the following parameters:
+
+##### `fovy` (Number, optional)
+
+Field of view covered by camera, in the perspective case. In degrees. Default `75`.
+
+##### `near` (Number, optional)
+
+Distance of near clipping plane. Default `0.1`.
+
+##### `far` (Number, optional)
+
+Distance of far clipping plane. Default `1000`.
+
+##### `focalDistance` (Number, optional)
+
+Modifier of viewport scale. Corresponds to the number of pixels per meter. Default `1`.
 
 
 ## View State

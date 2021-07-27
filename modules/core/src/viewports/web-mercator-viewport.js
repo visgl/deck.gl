@@ -28,6 +28,7 @@ import {
   addMetersToLngLat,
   getProjectionParameters,
   altitudeToFovy,
+  fovyToAltitude,
   fitBounds,
   getBounds
 } from '@math.gl/web-mercator';
@@ -67,17 +68,19 @@ export default class WebMercatorViewport extends Viewport {
     width = width || 1;
     height = height || 1;
 
-    // Altitude - prevent division by 0
-    // TODO - just throw an Error instead?
-    altitude = Math.max(0.75, altitude);
-
     let fovy;
     let projectionParameters = null;
     if (projectionMatrix) {
-      fovy = altitudeToFovy(projectionMatrix[5] / 2);
-    } else {
+      altitude = projectionMatrix[5] / 2;
       fovy = altitudeToFovy(altitude);
-      const {aspect, fov: fovyRadians, near, far} = getProjectionParameters({
+    } else {
+      if (opts.fovy) {
+        fovy = opts.fovy;
+        altitude = fovyToAltitude(fovy);
+      } else {
+        fovy = altitudeToFovy(altitude);
+      }
+      projectionParameters = getProjectionParameters({
         width,
         height,
         pitch,
@@ -85,12 +88,6 @@ export default class WebMercatorViewport extends Viewport {
         nearZMultiplier,
         farZMultiplier
       });
-      projectionParameters = {
-        fovyRadians,
-        aspect,
-        near,
-        far
-      };
     }
 
     // The uncentered matrix allows us two move the center addition to the
