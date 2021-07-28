@@ -19,7 +19,7 @@ uniform float opacity;
 uniform float sizeScale;
 uniform float sizeMinPixels;
 uniform float sizeMaxPixels;
-uniform vec2 padding;
+uniform vec4 padding;
 
 varying vec4 vFillColor;
 varying vec4 vLineColor;
@@ -50,9 +50,9 @@ void main(void) {
     sizeMinPixels, sizeMaxPixels
   );
 
-  dimensions = instanceRects.zw * sizePixels + padding;
+  dimensions = instanceRects.zw * sizePixels + padding.xy + padding.zw;
 
-  vec2 pixelOffset = (positions * instanceRects.zw + instanceRects.xy) * sizePixels + padding * (positions * 2.0 - 1.0);
+  vec2 pixelOffset = (positions * instanceRects.zw + instanceRects.xy) * sizePixels + mix(-padding.xy, padding.zw, positions);
   pixelOffset = rotate_by_angle(pixelOffset, instanceAngles);
   pixelOffset += instancePixelOffsets;
   pixelOffset.y *= -1.0;

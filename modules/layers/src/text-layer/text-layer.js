@@ -71,7 +71,7 @@ const defaultProps = {
   getBackgroundColor: {type: 'accessor', value: [255, 255, 255, 255]},
   getBorderColor: {type: 'accessor', value: DEFAULT_COLOR},
   getBorderWidth: {type: 'accessor', value: 0},
-  backgroundPadding: {type: 'array', value: [0, 0]},
+  backgroundPadding: {type: 'array', value: [0, 0, 0, 0]},
 
   characterSet: {type: 'object', value: DEFAULT_CHAR_SET},
   fontFamily: DEFAULT_FONT_FAMILY,
