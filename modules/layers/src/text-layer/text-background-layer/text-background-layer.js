@@ -12,7 +12,7 @@ const defaultProps = {
   sizeMinPixels: 0,
   sizeMaxPixels: Number.MAX_SAFE_INTEGER,
 
-  padding: {type: 'array', value: [0, 0]},
+  padding: {type: 'array', value: [0, 0, 0, 0]},
 
   getPosition: {type: 'accessor', value: x => x.position},
   getSize: {type: 'accessor', value: 1},
@@ -101,11 +101,14 @@ export default class TextBackgroundLayer extends Layer {
       sizeUnits,
       sizeMinPixels,
       sizeMaxPixels,
-      padding,
       getLineWidth
     } = this.props;
+    let {padding} = this.props;
 
     const sizeScaleMultiplier = sizeUnits === 'pixels' ? viewport.metersPerPixel : 1;
+    if (padding.length < 4) {
+      padding = [padding[0], padding[1], padding[0], padding[1]];
+    }
 
     this.state.model
       .setUniforms(uniforms)
