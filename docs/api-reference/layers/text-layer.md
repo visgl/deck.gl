@@ -114,9 +114,12 @@ Whether to render background for the text blocks.
 
 ##### `backgroundPadding` (Array, optional)
 
-- Default `[0, 0]`
+- Default `[0, 0, 0, 0]`
 
-The padding of the background, `[padding_x, padding_y]` in pixels.
+The padding of the background, an array of either 2 or 4 numbers.
+
++ If an array of 2 is supplied, it is interpreted as `[padding_x, padding_y]` in pixels.
++ If an array of 4 is supplied, it is interpreted as `[padding_left, padding_top, padding_right, padding_bottom]` in pixels.
 
 ##### `fontFamily` (String, optional)
 
