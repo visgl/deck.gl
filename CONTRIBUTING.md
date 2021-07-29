@@ -77,10 +77,9 @@ deck.gl development is governed by the vis.gl Technical Steering Committee (TSC)
 - [Kyle Barron](https://github.com/kylebarron) - tiles
 - [Chris Gervang](https://github.com/chrisgervang) - terrain
 - [Dario D'Amico](https://github.com/damix911) - ArcGIS
-- [Jesús Botella](https://github.com/jesusbotella) - MVT
 - [Javier Aragón](https://github.com/padawannn) - MVT, CARTO
 - [Víctor Velarde](https://github.com/https://github.com/VictorVelarde) - MVT, CARTO
-- [Raúl Yeguas](https://github.com/neokore) - MVT, CARTO
+- [Felix Palmer](https://github.com/felixpalmer) - MVT, GoogleMaps, CARTO
 
 Maintainers of deck.gl have commit access to this GitHub repository, and take part in the decision making process.
 
