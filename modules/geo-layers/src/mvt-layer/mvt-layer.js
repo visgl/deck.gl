@@ -78,7 +78,7 @@ export default class MVTLayer extends TileLayer {
 
       if (
         Number.isFinite(tileJSON.maxzoom) &&
-        (!Number.isFinite(maxZoom) || tileJSON.maxzoom < this.props.maxZoom)
+        (!Number.isFinite(this.props.maxZoom) || tileJSON.maxzoom < this.props.maxZoom)
       ) {
         maxZoom = tileJSON.maxzoom;
       }
