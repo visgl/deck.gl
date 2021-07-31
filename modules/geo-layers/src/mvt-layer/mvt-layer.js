@@ -47,7 +47,7 @@ export default class MVTLayer extends TileLayer {
 
   /* eslint-disable complexity */
   async _updateTileData() {
-    let {data, minZoom, maxZoom} = this.props;
+    let {data} = this.props;
     let tileJSON = null;
 
     if (typeof data === 'string' && !isURLTemplate(data)) {
@@ -69,21 +69,30 @@ export default class MVTLayer extends TileLayer {
 
     if (tileJSON) {
       data = tileJSON.tiles;
+    }
 
-      if (Number.isFinite(tileJSON.minzoom) && tileJSON.minzoom > minZoom) {
-        minZoom = tileJSON.minzoom;
+    this.setState({data, tileJSON});
+  }
+
+  _getTilesetOptions(props) {
+    const opts = super._getTilesetOptions(props);
+    const {tileJSON} = this.state;
+
+    if (tileJSON) {
+      if (Number.isFinite(tileJSON.minzoom) && tileJSON.minzoom > props.minZoom) {
+        opts.minZoom = tileJSON.minzoom;
       }
 
       if (
         Number.isFinite(tileJSON.maxzoom) &&
-        (!Number.isFinite(maxZoom) || tileJSON.maxzoom < maxZoom)
+        (!Number.isFinite(props.maxZoom) || tileJSON.maxzoom < props.maxZoom)
       ) {
-        maxZoom = tileJSON.maxzoom;
+        opts.maxZoom = tileJSON.maxzoom;
       }
     }
-
-    this.setState({data, tileJSON, minZoom, maxZoom});
+    return opts;
   }
+
   /* eslint-disable complexity */
 
   renderLayers() {

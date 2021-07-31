@@ -82,14 +82,14 @@ export default class TileLayer extends CompositeLayer {
   }
 
   _getTilesetOptions(props) {
-    const maxZoom = Number.isFinite(this.state.maxZoom) ? this.state.maxZoom : props.maxZoom;
-    const minZoom = Number.isFinite(this.state.minZoom) ? this.state.minZoom : props.minZoom;
     const {
       tileSize,
       maxCacheSize,
       maxCacheByteSize,
       refinementStrategy,
       extent,
+      maxZoom,
+      minZoom,
       maxRequests,
       zoomOffset
     } = props;

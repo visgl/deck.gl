@@ -18,7 +18,7 @@ yarn bootstrap
 yarn test
 ```
 
-Additional instructions for [Windows](/CONTRIBUTING.md#develop-on-windows).
+See [additional instructions](#troubleshooting) for Windows, Linux and Apple M1.
 
 Run the layer browser application:
 
@@ -77,10 +77,9 @@ deck.gl development is governed by the vis.gl Technical Steering Committee (TSC)
 - [Kyle Barron](https://github.com/kylebarron) - tiles
 - [Chris Gervang](https://github.com/chrisgervang) - terrain
 - [Dario D'Amico](https://github.com/damix911) - ArcGIS
-- [Jesús Botella](https://github.com/jesusbotella) - MVT
 - [Javier Aragón](https://github.com/padawannn) - MVT, CARTO
 - [Víctor Velarde](https://github.com/https://github.com/VictorVelarde) - MVT, CARTO
-- [Raúl Yeguas](https://github.com/neokore) - MVT, CARTO
+- [Felix Palmer](https://github.com/felixpalmer) - MVT, GoogleMaps, CARTO
 
 Maintainers of deck.gl have commit access to this GitHub repository, and take part in the decision making process.
 
@@ -96,28 +95,43 @@ Please be mindful of and adhere to the Linux Foundation's [Code of Conduct](http
 
 ## Troubleshooting
 
+### Develop on Linux
+
+To run the test suite, you may need to install additional dependencies (verified on Ubuntu LTS):
+
+- [headless-gl dependencies](https://github.com/stackgl/headless-gl#system-dependencies) for the Node tests
+- [puppeteer dependencies](https://github.com/puppeteer/puppeteer/blob/main/docs/troubleshooting.md#chrome-headless-doesnt-launch-on-unix) for the integration tests
+
+Verify that everything works by running `yarn test`.
+
 ### Develop on Windows
 
 It's possible to set up the dev environment in [Windows Subsystem for Linux](https://docs.microsoft.com/en-us/windows/wsl/install-win10).
 
-To get OpenGL support, install [VcXsrv](https://sourceforge.net/projects/vcxsrv/). In xlaunch.exe, choose multiple windows, display 0, start no client, disable native opengl. ([source](https://github.com/Microsoft/WSL/issues/2855#issuecomment-358861903))
+To run the Node tests, you need to set up OpenGL support via X11 forwarding:
+
+- Install [VcXsrv](https://sourceforge.net/projects/vcxsrv/).
+- Run `xlaunch.exe`, choose multiple windows, display 0, start no client, disable native opengl, disable access control. [reference](https://github.com/Microsoft/WSL/issues/2855#issuecomment-358861903)
+- If working with WSL2, allow WSL to access your X server with [firewall rules](https://github.com/cascadium/wsl-windows-toolbar-launcher#firewall-rules).
+- Set the `DISPLAY` environment variable:
+
+    ```bash
+    # WSL 1
+    export DISPLAY=localhost:0
+    # WSL 2
+    export DISPLAY=$(grep -m 1 nameserver /etc/resolv.conf | awk '{print $2}'):0.0
+    ```
+
+You can test that it is set up successfully with:
 
 ```bash
-sudo apt-get update
-sudo apt install mesa-utils
-export DISPLAY=localhost:0
+sudo apt-get install mesa-utils
 glxgears
 ```
 
-If successful, you should see a window open with gears turning.
+You should see a window open with gears turning at this point.
 
-Next, install [headless-gl dependencies](https://github.com/stackgl/headless-gl#system-dependencies):
-
-```bash
-sudo apt-get install -y build-essential libxi-dev libglu1-mesa-dev libglew-dev pkg-config
-```
-
-Verify that everything works by running `yarn test node`.
+Follow instructions for [developing on linux](#develop-on-linux).
 
 ### Develop on MacOs on Apple Silicon (M1 chip)
 
