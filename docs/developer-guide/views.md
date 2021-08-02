@@ -322,10 +322,7 @@ const deck = new Deck({
     new TileLayer({id: 'tiles-for-mini-map', ...})
   ],
   layerFilter: ({layer, viewport} => {
-    if (layer.id.startsWith('tiles-for')) {
-      return layer.id.startsWith(`tiles-for-${viewport.id}`);
-    }
-    return true;
+    return layer.id === `tiles-for-${viewport.id}`;
   });
 });
 ```
