@@ -19,6 +19,12 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v8.5
 
+#### deck.gl [8.5.1] - Aug 2 2021
+
+- Fix: MVT update min/maxZoom props (#6040)
+- improve GeoJsonLayer auto highlighting logic (#6018)
+- TextLayer supports backgroundPadding as vec4 (#6017)
+
 #### deck.gl [8.5.0] - Jul 26 2021
 
 - Bump luma.gl (#6014)
