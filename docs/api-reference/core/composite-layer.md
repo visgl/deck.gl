@@ -116,6 +116,81 @@ The default implementation of `renderLayers` returns `null`.
 `renderLayers` can return a nested arrays with `null` values. deck.gl will automatically flatten and filter the array. See usage above.
 
 
+##### `filterSubLayer`
+
+Allows a layer to dynamically show/hide sub layers based on the render context.
+
+Receives arguments:
+
+- `layer` (Layer) - the sub layer to be drawn
+- `viewport` (Viewport) - the current viewport
+- `isPicking` (Boolean) - whether this is a picking pass
+- `renderPass` (String) - the name of the current render pass. See [layerFilter](/docs/api-reference/core/deck.md#layerfilter) for possible values.
+
+Returns:
+
+`true` if the layer should be drawn.
+
+This method achieves the same result as toggling sub layers' `visible` prop in `renderLayers`. The difference is that, `renderLayers` is only called when the layer is updated due to props or state change, and will recursively create new instances of all decendant layers, therefore is more expensive to invoke. `filterSubLayer` is evaluated before every redraw, and is intended to be a more performant solution to setting `visible` props dynamically during continuous viewport updates. Generally speaking, `filterSubLayer` is favorable if the visibilities of sub layers change frequently, and the logic to determine visibility is very cheap to compute.
+
+An example of leveraging this method is to switch sub layers on viewport change:
+
+```js
+/*
+ * A layer that renders different dataset based on zoom level
+ */
+// Implementation A
+class LODLayer extends CompositeLayer {
+  
+  // Force update layer and re-render sub layers when viewport changes
+  shouldUpdateState({changeFlags}) {
+    return changeFlags.somethingChanged;
+  }
+
+  renderSubLayers() {
+    const {lowResData, hiResData} = this.props;
+    const {zoom} = this.context.viewport;
+    return [
+      new ScatterplotLayer({
+        id: 'points-low-zoom',
+        data: lowResData,
+        visible: zoom < 8
+      }),
+      new ScatterplotLayer({
+        id: 'points-high-zoom',
+        data: highResData,
+        visible: zoom >= 8
+      })
+    ]
+  }
+}
+
+// Implementation B
+class LODLayer extends CompositeLayer {
+  renderSubLayers() {
+    const {lowResData, hiResData} = this.props;
+    return [
+      new ScatterplotLayer({
+        id: 'points-low-zoom'
+        data: lowResData,
+      }),
+      new ScatterplotLayer({
+        id: 'points-high-zoom',
+        data: highResData
+      })
+    ]
+  }
+
+  filterSubLayer({layer, viewport}) {
+    if (viewport.zoom < 8) {
+      return layer.id === 'points-low-zoom';
+    } else {
+      return layer.id === 'points-high-zoom';
+    }
+  }
+}
+```
+
 ##### `getPickingInfo`
 
 Called when a sublayer is being hovered or clicked, after the `getPickingInfo`
