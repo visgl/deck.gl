@@ -94,7 +94,7 @@ const DeckGL = forwardRef((props, ref) => {
   const _thisRef = useRef({});
   const thisRef = _thisRef.current;
   // A mechanism to force redraw
-  const [, setVersion] = useState(0);
+  const [version, setVersion] = useState(0);
   thisRef.forceUpdate = setVersion;
   // DOM refs
   const containerRef = useRef(null);
@@ -205,11 +205,11 @@ const DeckGL = forwardRef((props, ref) => {
   //    before Deck redraw to ensure perfect synchronization & avoid excessive redraw
   //    This is because multiple changes may happen to Deck between two frames e.g. transition
   if (
-    !thisRef.control || // initial mount
     (!thisRef.viewStateUpdateRequested && thisRef.lastRenderedViewports === currentViewports) || // case 2
-    thisRef.redrawReason // case 3 just before deck redraws
+    thisRef.version !== version // case 3 just before deck redraws
   ) {
     thisRef.lastRenderedViewports = currentViewports;
+    thisRef.version = version;
 
     // Render the background elements (typically react-map-gl instances)
     // using the view descriptors
