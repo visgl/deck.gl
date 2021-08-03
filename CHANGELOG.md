@@ -19,6 +19,10 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v8.5
 
+#### deck.gl [8.5.2] - Aug 3 2021
+
+- Fix MapboxLayer React integration (#6053)
+
 #### deck.gl [8.5.1] - Aug 2 2021
 
 - Fix: MVT update min/maxZoom props (#6040)
