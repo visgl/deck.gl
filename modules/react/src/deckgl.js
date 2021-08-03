@@ -94,7 +94,7 @@ const DeckGL = forwardRef((props, ref) => {
   const _thisRef = useRef({});
   const thisRef = _thisRef.current;
   // A mechanism to force redraw
-  const [, setVersion] = useState(0);
+  const [version, setVersion] = useState(0);
   thisRef.forceUpdate = setVersion;
   // DOM refs
   const containerRef = useRef(null);
@@ -137,32 +137,35 @@ const DeckGL = forwardRef((props, ref) => {
   // Update Deck's props. If Deck needs redraw, this will trigger a call to `_customRender` in
   // the next animation frame.
   // Needs to be called both from initial mount, and when new props are received
-  const updateFromProps = () => {
-    if (!thisRef.deck) {
-      return;
-    }
-    const deckProps = {
-      ...props,
-      // Override user styling props. We will set the canvas style in render()
-      style: null,
-      width: '100%',
-      height: '100%',
-      layers: jsxProps.layers,
-      views: jsxProps.views,
-      onViewStateChange: handleViewStateChange,
-      onInteractionStateChange: handleInteractionStateChange
-    };
+  const deckProps = useMemo(
+    () => {
+      const forwardProps = {
+        ...props,
+        // Override user styling props. We will set the canvas style in render()
+        style: null,
+        width: '100%',
+        height: '100%',
+        layers: jsxProps.layers,
+        views: jsxProps.views,
+        onViewStateChange: handleViewStateChange,
+        onInteractionStateChange: handleInteractionStateChange
+      };
 
-    thisRef.deck.setProps(deckProps);
-  };
+      if (thisRef.deck) {
+        thisRef.deck.setProps(forwardProps);
+      }
+
+      return forwardProps;
+    },
+    [props]
+  );
 
   useEffect(() => {
     thisRef.deck = createDeckInstance(thisRef, {
-      ...props,
+      ...deckProps,
       parent: containerRef.current,
       canvas: canvasRef.current
     });
-    updateFromProps();
 
     return () => thisRef.deck.finalize();
   }, []);
@@ -185,8 +188,6 @@ const DeckGL = forwardRef((props, ref) => {
 
   useImperativeHandle(ref, () => getRefHandles(thisRef), []);
 
-  updateFromProps();
-
   const {viewManager} = thisRef.deck || {};
   const currentViewports = viewManager && viewManager.getViewports();
 
@@ -205,11 +206,11 @@ const DeckGL = forwardRef((props, ref) => {
   //    before Deck redraw to ensure perfect synchronization & avoid excessive redraw
   //    This is because multiple changes may happen to Deck between two frames e.g. transition
   if (
-    !thisRef.control || // initial mount
     (!thisRef.viewStateUpdateRequested && thisRef.lastRenderedViewports === currentViewports) || // case 2
-    thisRef.redrawReason // case 3 just before deck redraws
+    thisRef.version !== version // case 3 just before deck redraws
   ) {
     thisRef.lastRenderedViewports = currentViewports;
+    thisRef.version = version;
 
     // Render the background elements (typically react-map-gl instances)
     // using the view descriptors
