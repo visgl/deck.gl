@@ -137,32 +137,35 @@ const DeckGL = forwardRef((props, ref) => {
   // Update Deck's props. If Deck needs redraw, this will trigger a call to `_customRender` in
   // the next animation frame.
   // Needs to be called both from initial mount, and when new props are received
-  const updateFromProps = () => {
-    if (!thisRef.deck) {
-      return;
-    }
-    const deckProps = {
-      ...props,
-      // Override user styling props. We will set the canvas style in render()
-      style: null,
-      width: '100%',
-      height: '100%',
-      layers: jsxProps.layers,
-      views: jsxProps.views,
-      onViewStateChange: handleViewStateChange,
-      onInteractionStateChange: handleInteractionStateChange
-    };
+  const deckProps = useMemo(
+    () => {
+      const forwardProps = {
+        ...props,
+        // Override user styling props. We will set the canvas style in render()
+        style: null,
+        width: '100%',
+        height: '100%',
+        layers: jsxProps.layers,
+        views: jsxProps.views,
+        onViewStateChange: handleViewStateChange,
+        onInteractionStateChange: handleInteractionStateChange
+      };
 
-    thisRef.deck.setProps(deckProps);
-  };
+      if (thisRef.deck) {
+        thisRef.deck.setProps(forwardProps);
+      }
+
+      return forwardProps;
+    },
+    [props]
+  );
 
   useEffect(() => {
     thisRef.deck = createDeckInstance(thisRef, {
-      ...props,
+      ...deckProps,
       parent: containerRef.current,
       canvas: canvasRef.current
     });
-    updateFromProps();
 
     return () => thisRef.deck.finalize();
   }, []);
@@ -184,8 +187,6 @@ const DeckGL = forwardRef((props, ref) => {
   });
 
   useImperativeHandle(ref, () => getRefHandles(thisRef), []);
-
-  updateFromProps();
 
   const {viewManager} = thisRef.deck || {};
   const currentViewports = viewManager && viewManager.getViewports();
