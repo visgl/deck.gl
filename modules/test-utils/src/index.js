@@ -2,7 +2,12 @@ export {toLowPrecision} from './utils/precision';
 export {default as gl} from './utils/setup-gl';
 
 // Utilities for update tests (lifecycle tests)
-export {testLayer, testLayerAsync, testInitializeLayer} from './lifecycle-test';
+export {
+  testLayer,
+  testLayerAsync,
+  testInitializeLayer,
+  testInitializeLayerAsync
+} from './lifecycle-test';
 export {generateLayerTests} from './generate-layer-tests';
 
 // Basic utility for rendering multiple scenes (could go into "deck.gl/core")
