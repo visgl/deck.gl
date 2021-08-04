@@ -158,16 +158,25 @@ export default class MVTLayer extends TileLayer {
   _updateAutoHighlight(info) {
     const {uniqueIdProperty} = this.props;
 
-    const {hoveredFeatureId} = this.state;
+    const {hoveredFeatureId, hoveredFeatureLayerName} = this.state;
     const hoveredFeature = info.object;
     let newHoveredFeatureId;
+    let newHoveredFeatureLayerName;
 
     if (hoveredFeature) {
       newHoveredFeatureId = getFeatureUniqueId(hoveredFeature, uniqueIdProperty);
+      newHoveredFeatureLayerName = getFeatureLayerName(hoveredFeature);
     }
 
-    if (hoveredFeatureId !== newHoveredFeatureId && newHoveredFeatureId !== -1) {
-      this.setState({hoveredFeatureId: newHoveredFeatureId});
+    if (
+      (hoveredFeatureId !== newHoveredFeatureId && newHoveredFeatureId !== -1) ||
+      (hoveredFeatureLayerName !== newHoveredFeatureLayerName &&
+        newHoveredFeatureLayerName !== null)
+    ) {
+      this.setState({
+        hoveredFeatureId: newHoveredFeatureId,
+        hoveredFeatureLayerName: newHoveredFeatureLayerName
+      });
     }
   }
 
@@ -188,26 +197,27 @@ export default class MVTLayer extends TileLayer {
   }
 
   getHighlightedObjectIndex(tile) {
-    const {hoveredFeatureId} = this.state;
+    const {hoveredFeatureId, hoveredFeatureLayerName} = this.state;
     const {uniqueIdProperty, highlightedFeatureId, binary} = this.props;
     const {data} = tile;
 
-    const isFeatureIdPresent =
-      isFeatureIdDefined(hoveredFeatureId) || isFeatureIdDefined(highlightedFeatureId);
+    const isHighlighted = isFeatureIdDefined(highlightedFeatureId);
+    const isFeatureIdPresent = isFeatureIdDefined(hoveredFeatureId) || isHighlighted;
 
     if (!isFeatureIdPresent) {
       return -1;
     }
 
-    const featureIdToHighlight = isFeatureIdDefined(highlightedFeatureId)
-      ? highlightedFeatureId
-      : hoveredFeatureId;
+    const featureIdToHighlight = isHighlighted ? highlightedFeatureId : hoveredFeatureId;
 
     // Iterable data
     if (Array.isArray(data)) {
-      return data.findIndex(
-        feature => getFeatureUniqueId(feature, uniqueIdProperty) === featureIdToHighlight
-      );
+      return data.findIndex(feature => {
+        const isMatchingId = getFeatureUniqueId(feature, uniqueIdProperty) === featureIdToHighlight;
+        const isMatchingLayer =
+          isHighlighted || getFeatureLayerName(feature) === hoveredFeatureLayerName;
+        return isMatchingId && isMatchingLayer;
+      });
 
       // Non-iterable data
     } else if (data && binary) {
@@ -300,6 +310,14 @@ function getFeatureUniqueId(feature, uniqueIdProperty) {
   }
 
   return -1;
+}
+
+function getFeatureLayerName(feature) {
+  if (feature.properties && feature.properties.layerName) {
+    return feature.properties.layerName;
+  }
+
+  return null;
 }
 
 function isFeatureIdDefined(value) {
