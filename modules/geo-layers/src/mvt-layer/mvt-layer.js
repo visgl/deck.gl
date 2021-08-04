@@ -169,9 +169,8 @@ export default class MVTLayer extends TileLayer {
     }
 
     if (
-      (hoveredFeatureId !== newHoveredFeatureId && newHoveredFeatureId !== -1) ||
-      (hoveredFeatureLayerName !== newHoveredFeatureLayerName &&
-        newHoveredFeatureLayerName !== null)
+      hoveredFeatureId !== newHoveredFeatureId ||
+      hoveredFeatureLayerName !== newHoveredFeatureLayerName
     ) {
       this.setState({
         hoveredFeatureId: newHoveredFeatureId,
@@ -313,11 +312,7 @@ function getFeatureUniqueId(feature, uniqueIdProperty) {
 }
 
 function getFeatureLayerName(feature) {
-  if (feature.properties && feature.properties.layerName) {
-    return feature.properties.layerName;
-  }
-
-  return null;
+  return feature.properties?.layerName || null;
 }
 
 function isFeatureIdDefined(value) {
