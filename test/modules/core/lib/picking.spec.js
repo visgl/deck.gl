@@ -57,6 +57,7 @@ TestMVTLayer.componentName = 'TestMVTLayer';
 
 const testMVTLayer = new TestMVTLayer({
   id: 'test-mvt-layer',
+  autoHighlight: true,
   data: [
     {
       id: 12,
@@ -248,6 +249,7 @@ test('processPickInfo', async t => {
           properties: {layerName: 'layerA'}
         }
       },
+      highlightedObjectIndex: 0,
       lastPickedInfo: {layerId: 'test-mvt-layer-0-0-1-points-circle', index: 0},
       testLayerUniforms: {picking_uSelectedColorValid: 0}
     },
@@ -269,6 +271,7 @@ test('processPickInfo', async t => {
           properties: {layerName: 'layerB'}
         }
       },
+      highlightedObjectIndex: 1,
       lastPickedInfo: {layerId: 'test-mvt-layer-0-0-1-points-circle', index: 1},
       testLayerUniforms: {picking_uSelectedColorValid: 0}
     },
@@ -346,6 +349,12 @@ test('processPickInfo', async t => {
         validateUniforms(currentLayerUniforms, testCase.currentLayerUniforms),
         'currentLayerUniforms'
       );
+    }
+
+    if (testCase.highlightedObjectIndex !== undefined) {
+      const renderedLayer = info.layer.renderLayers()[0][0];
+      const {highlightedObjectIndex} = renderedLayer.props;
+      t.deepEqual(highlightedObjectIndex, testCase.highlightedObjectIndex, 'highlightObjectIndex');
     }
   }
 
