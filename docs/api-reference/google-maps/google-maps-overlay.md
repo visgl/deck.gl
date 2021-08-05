@@ -1,6 +1,10 @@
 # GoogleMapsOverlay
 
-This class implements the [OverlayView](https://developers.google.com/maps/documentation/javascript/reference/#OverlayView) interface and can be used as any other Google Maps overlay.
+This class implements the [OverlayView](https://developers.google.com/maps/documentation/javascript/reference/overlay-view#OverlayView)/[WebglOverlayView](https://developers.google.com/maps/documentation/javascript/reference/webgl#WebglOverlayView) (depending on map rendering type) interface and can be used as any other Google Maps overlay.
+
+## Vector/Raster maps
+
+As detailed in the [overview](/docs/api-reference/google-maps/overview.md), the overlay supports both Vector and Raster Google map rendering. Depending on the Google Map configuration, the correct deck.gl overlay rendering method will be chosen at runtime.
 
 ## Usage
 
@@ -11,7 +15,8 @@ This class implements the [OverlayView](https://developers.google.com/maps/docum
   // Create map
   const map = new google.maps.Map(document.getElementById('map'), {
     center: { lat: 40, lng: -100 },
-    zoom: 5
+    zoom: 5,
+    mapId: GOOGLE_MAP_ID // Only required for Vector maps
   });
 
   // Create overlay instance
