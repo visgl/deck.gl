@@ -1,5 +1,14 @@
 [
   {
+    "name": "Vizgen Single-Cell MERFISH Spatial Visualizer",
+    "url": "https://vizgen.com/applications/",
+    "image": "/images/showcase/vizgen_single_cell_spatial.jpg",
+    "links": {
+      "by Vizgen": "https://vizgen.com/"
+    },
+    "description": "Vizgen's Interactive Single-Cell Spatial Visualizer enables users to explore single-cell gene expression data from our MERFISH Mouse Brain Receptor Map. Cells can be visualized using a UMAP embedding or the spatial coordinates within the brain - providing a detailed spatial map of the cell clusters and gene expression patterns in the tissue. Users can select a gene of interest from the dropdown list, click individual cells to highlight the cell clusters, and toggle between UMAP and spatial views."
+  },  
+  {
     "name": "ISB Covid19",
     "url": "https://atlas.fredhutch.org/isb/covid/",
     "image": "/images/showcase/isb-covid.jpg",
