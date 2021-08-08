@@ -128,7 +128,7 @@ const TEST_CASES = [
       },
       {
         name: 'project_position_to_clipspace',
-        skipGPUs: ['Intel'],
+        skipGPUs: ['Intel', 'Apple'],
         func: ({project_position_to_clipspace_vec3_vec3_vec3}) =>
           project_position_to_clipspace_vec3_vec3_vec3([-122.45, 37.78, 0], [0, 0, 0], [0, 0, 0]),
         mapResult: coords => clipspaceToScreen(TEST_VIEWPORT, coords),
@@ -142,7 +142,7 @@ const TEST_CASES = [
       },
       {
         name: 'project_position_to_clipspace (non-zero Z)',
-        skipGPUs: ['Intel'],
+        skipGPUs: ['Intel', 'Apple'],
         func: ({project_position_to_clipspace_vec3_vec3_vec3}) =>
           project_position_to_clipspace_vec3_vec3_vec3([-122.45, 37.78, 100], [0, 0, 0], [0, 0, 0]),
         mapResult: coords => clipspaceToScreen(TEST_VIEWPORT, coords),
@@ -166,7 +166,7 @@ const TEST_CASES = [
       {
         name: 'project_position_to_clipspace_world_position',
         // disableTranspileFor64: true,
-        skipGPUs: ['Intel'],
+        skipGPUs: ['Intel', 'Apple'],
 
         func: ({project_position_to_clipspace}) => {
           let worldPosition = [];
@@ -187,7 +187,7 @@ const TEST_CASES = [
       },
       {
         name: 'project_position_to_clipspace',
-        skipGPUs: ['Intel'],
+        skipGPUs: ['Intel', 'Apple'],
 
         func: ({project_position_to_clipspace_vec3_vec3_vec3}) =>
           project_position_to_clipspace_vec3_vec3_vec3([-122.05, 37.92, 0], [0, 0, 0], [0, 0, 0]),
@@ -250,6 +250,7 @@ const TEST_CASES = [
 test('project32&64#vs', t => {
   const oldEpsilon = config.EPSILON;
   const vendor = getVendor(gl);
+  // eslint-disable-next-line no-console, no-undef
   [false, true].forEach(usefp64 => {
     /* eslint-disable max-nested-callbacks, complexity */
     TEST_CASES.forEach(testCase => {
