@@ -250,7 +250,6 @@ const TEST_CASES = [
 test('project32&64#vs', t => {
   const oldEpsilon = config.EPSILON;
   const vendor = getVendor(gl);
-  // eslint-disable-next-line no-console, no-undef
   [false, true].forEach(usefp64 => {
     /* eslint-disable max-nested-callbacks, complexity */
     TEST_CASES.forEach(testCase => {
