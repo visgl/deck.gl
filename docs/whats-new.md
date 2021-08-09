@@ -2,6 +2,20 @@
 
 This page contains highlights of each deck.gl release. Also check our [vis.gl blog](https://medium.com/vis-gl) for news about new releases and features in deck.gl.
 
+## deck.gl v8.6
+
+Release date: TBD
+
+### Google Maps + deck.gl
+
+#### @deck.gl/googlemaps
+
+[Vector rendering](https://developers.google.com/maps/documentation/javascript/vector-map) of Google Maps is now supported in by the [GoogleMapsOverlay class](/docs/api-reference/google-maps/google-maps-overlay.md), providing the following enhancements:
+
+- Shared 3D space: objects drawn by the `GoogleMapsOverlay` class appear inside the Google Maps scene, correctly intersecting with 3D buildings and behind the contextual labels drawn by Google Maps
+- Tilting and rotating the view is supported
+- Rendering uses the same WebGL context as Google Maps, improving performance
+
 ## deck.gl v8.5
 
 Release date: July 26, 2021
