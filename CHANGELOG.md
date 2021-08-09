@@ -17,7 +17,14 @@ Each version should:
 Ref: http://keepachangelog.com/en/0.3.0/
 -->
 
-## deck.gl v8.5
+## deck.gl v8.6
+
+### deck.gl v8.6 Prereleases
+
+#### deck.gl [8.6.0-alpha.1] - Aug 9 2021
+
+- Support vector maps in google module (#5981)
+- Check for correct layerName when highlighting in MVTLayer (#6062)
 
 ### deck.gl v8.5 Prereleases
 
