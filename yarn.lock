@@ -1992,14 +1992,6 @@
     "@loaders.gl/worker-utils" "3.0.8"
     probe.gl "^3.4.0"
 
-"@loaders.gl/csv@^3.0.6":
-  version "3.0.6"
-  resolved "https://registry.yarnpkg.com/@loaders.gl/csv/-/csv-3.0.6.tgz#0d4b7700bddea82e3c759b6650cc66ecbc2d05c1"
-  integrity sha512-oHCpdlE0TPG4uMgxoOFytNpLtFA/qSvSdcZkX6MAPDgXBDluJGeLtDDtmiI483mtYkAWgAAphPoHwxy4PLUY1w==
-  dependencies:
-    "@loaders.gl/loader-utils" "3.0.6"
-    "@loaders.gl/schema" "3.0.6"
-
 "@loaders.gl/csv@^3.0.8":
   version "3.0.8"
   resolved "https://registry.yarnpkg.com/@loaders.gl/csv/-/csv-3.0.8.tgz#2d6d5793eedf5315f83a62000b2aec5f9f7a2c7a"
@@ -2046,15 +2038,6 @@
   dependencies:
     "@loaders.gl/loader-utils" "3.0.8"
 
-"@loaders.gl/loader-utils@3.0.6":
-  version "3.0.6"
-  resolved "https://registry.yarnpkg.com/@loaders.gl/loader-utils/-/loader-utils-3.0.6.tgz#bef5d09a026c0855db0f509117a6e68ab5517150"
-  integrity sha512-0kbBz3kIrx7BBWmTwVEhLA081S/043NCdahgxqrzanpB2o7BDeNZ+HLPybfBWGhUwbgbm77OpvUT7ALbZLFx4w==
-  dependencies:
-    "@babel/runtime" "^7.3.1"
-    "@loaders.gl/worker-utils" "3.0.6"
-    "@probe.gl/stats" "^3.4.0"
-
 "@loaders.gl/loader-utils@3.0.8", "@loaders.gl/loader-utils@^3.0.8":
   version "3.0.8"
   resolved "https://registry.yarnpkg.com/@loaders.gl/loader-utils/-/loader-utils-3.0.8.tgz#4bb57ccaa2f44689a06dde67d3adba3ceee07c4d"
@@ -2083,10 +2066,10 @@
     "@math.gl/polygon" "^3.5.1"
     pbf "^3.2.1"
 
-"@loaders.gl/polyfills@^3.0.6":
-  version "3.0.6"
-  resolved "https://registry.yarnpkg.com/@loaders.gl/polyfills/-/polyfills-3.0.6.tgz#546d30265500a417abe06ef773ee9d7efb9b328f"
-  integrity sha512-EW8nPt+394w2cVMV51VzxTUDIwPVmzuzbWojM3kZP+9+lxfWHHcEZ4ZFL56xLWyNTNP2fJMoEZMLC8RIE5u9Eg==
+"@loaders.gl/polyfills@^3.0.8":
+  version "3.0.8"
+  resolved "https://registry.yarnpkg.com/@loaders.gl/polyfills/-/polyfills-3.0.8.tgz#e098e89a26b5720d0cdfef417b22d10e9a01f169"
+  integrity sha512-jGvXl1iEtZ8i72jE9HHQzHPx9HQBayIBw3OYvt8NSFQuPusbhVvJFIhMW8pSDwAGUqCz82ELSa/sa6j+v3DMhg==
   dependencies:
     "@babel/runtime" "^7.3.1"
     get-pixels "^3.3.2"
@@ -2096,15 +2079,6 @@
     through "^2.3.8"
     web-streams-polyfill "^3.0.0"
     xmldom "^0.5.0"
-
-"@loaders.gl/schema@3.0.6":
-  version "3.0.6"
-  resolved "https://registry.yarnpkg.com/@loaders.gl/schema/-/schema-3.0.6.tgz#fd26e699b72ec25f11a40aad1ca736caaf4a5d8d"
-  integrity sha512-uXJ1/dsPXO5xOw9Fb7rBDo8qtZIruXXlRBpg2HkCHq/RuxZHhJ55aRbyT5XA51jYLQY3/ZMuIyNeWtd0LzukKw==
-  dependencies:
-    "@types/geojson" "^7946.0.7"
-    apache-arrow "^4.0.0"
-    d3-dsv "^1.2.0"
 
 "@loaders.gl/schema@3.0.8":
   version "3.0.8"
@@ -2138,13 +2112,6 @@
     "@math.gl/geospatial" "^3.5.1"
     "@math.gl/web-mercator" "^3.5.1"
     "@probe.gl/stats" "^3.4.0"
-
-"@loaders.gl/worker-utils@3.0.6":
-  version "3.0.6"
-  resolved "https://registry.yarnpkg.com/@loaders.gl/worker-utils/-/worker-utils-3.0.6.tgz#c7fdeae5c74c6fd83daf76bdeaf34d4b9e9f72a0"
-  integrity sha512-fEWXC/ImKqfwhAQW/EGN+UAk/FkH8nEZ8BoWRmkfNwUZ1ZeQHTItpVgZp9F0WYdN7Pz1j2KIqTa27W10afnhmQ==
-  dependencies:
-    "@babel/runtime" "^7.3.1"
 
 "@loaders.gl/worker-utils@3.0.8":
   version "3.0.8"
