@@ -10,7 +10,6 @@ export const POINT_LAYER = {
     props: {
       filled: 'filled',
       stroked: 'stroked',
-      smoothEdges: 'smoothEdges',
 
       lineWidthMaxPixels: 'lineWidthMaxPixels',
       lineWidthMinPixels: 'lineWidthMinPixels',
@@ -20,6 +19,7 @@ export const POINT_LAYER = {
       pointRadiusMinPixels: 'radiusMinPixels',
       pointRadiusScale: 'radiusScale',
       pointRadiusUnits: 'radiusUnits',
+      pointAntialiasing: 'antialiasing',
 
       getFillColor: 'getFillColor',
       getLineColor: 'getLineColor',

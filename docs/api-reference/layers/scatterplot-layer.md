@@ -142,12 +142,11 @@ The maximum line width in pixels. This prop can be used to prevent the path from
 
 If `true`, rendered circles always face the camera. If `false` circles face up (i.e. are parallel with the ground plane).
 
-##### `smoothEdges` (Boolean, optional)
+##### `antialiasing` (Boolean, optional)
 
 - Default: `true`
 
-If `true`, circles are rendered with smoothed edges.
-
+If `true`, circles are rendered with smoothed edges. If `false`, circles are rendered with rough edges. Antialiasing can cause artifacts on edges of overlapping circles. Also, antialiasing isn't supported in FirstPersonView. 
 
 ### Data Accessors
 
