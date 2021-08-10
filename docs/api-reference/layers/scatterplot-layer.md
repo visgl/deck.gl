@@ -142,6 +142,13 @@ The maximum line width in pixels. This prop can be used to prevent the path from
 
 If `true`, rendered circles always face the camera. If `false` circles face up (i.e. are parallel with the ground plane).
 
+##### `smoothEdges` (Boolean, optional)
+
+- Default: `true`
+
+If `true`, circles are rendered with smoothed edges.
+
+
 ### Data Accessors
 
 ##### `getPosition` ([Function](/docs/developer-guide/using-layers.md#accessors), optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")

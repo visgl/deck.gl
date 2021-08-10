@@ -10,6 +10,7 @@ export const POINT_LAYER = {
     props: {
       filled: 'filled',
       stroked: 'stroked',
+      smoothEdges: 'smoothEdges',
 
       lineWidthMaxPixels: 'lineWidthMaxPixels',
       lineWidthMinPixels: 'lineWidthMinPixels',

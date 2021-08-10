@@ -25,6 +25,7 @@ precision highp float;
 
 uniform bool filled;
 uniform float stroked;
+uniform bool smoothEdges;
 
 varying vec4 vFillColor;
 varying vec4 vLineColor;
@@ -36,7 +37,9 @@ void main(void) {
   geometry.uv = unitPosition;
 
   float distToCenter = length(unitPosition) * outerRadiusPixels;
-  float inCircle = smoothedge(distToCenter, outerRadiusPixels);
+  float inCircle = smoothEdges ? 
+    smoothedge(distToCenter, outerRadiusPixels) : 
+    distToCenter < outerRadiusPixels ? 1.0 : 0.0;
 
   if (inCircle == 0.0) {
     discard;
