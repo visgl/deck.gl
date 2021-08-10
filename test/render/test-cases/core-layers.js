@@ -90,7 +90,7 @@ export default [
         getFillColor: d => [255, 128, 0],
         getRadius: d => d.SPACES,
         billboard: true,
-        smoothEdge: false,
+        smoothEdges: false,
         radiusScale: 30,
         radiusMinPixels: 1,
         radiusMaxPixels: 30
