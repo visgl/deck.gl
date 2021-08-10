@@ -19,6 +19,7 @@ export const POINT_LAYER = {
       pointRadiusMinPixels: 'radiusMinPixels',
       pointRadiusScale: 'radiusScale',
       pointRadiusUnits: 'radiusUnits',
+      pointAntialiasing: 'antialiasing',
 
       getFillColor: 'getFillColor',
       getLineColor: 'getLineColor',

@@ -25,6 +25,7 @@ precision highp float;
 
 uniform bool filled;
 uniform float stroked;
+uniform bool antialiasing;
 
 varying vec4 vFillColor;
 varying vec4 vLineColor;
@@ -36,14 +37,19 @@ void main(void) {
   geometry.uv = unitPosition;
 
   float distToCenter = length(unitPosition) * outerRadiusPixels;
-  float inCircle = smoothedge(distToCenter, outerRadiusPixels);
+  float inCircle = antialiasing ? 
+    smoothedge(distToCenter, outerRadiusPixels) : 
+    step(distToCenter, outerRadiusPixels);
 
   if (inCircle == 0.0) {
     discard;
   }
 
   if (stroked > 0.5) {
-    float isLine = smoothedge(innerUnitRadius * outerRadiusPixels, distToCenter);
+    float isLine = antialiasing ? 
+      smoothedge(innerUnitRadius * outerRadiusPixels, distToCenter) :
+      step(innerUnitRadius * outerRadiusPixels, distToCenter);
+
     if (filled) {
       gl_FragColor = mix(vFillColor, vLineColor, isLine);
     } else {

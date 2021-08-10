@@ -41,6 +41,7 @@ const defaultProps = {
   stroked: false,
   filled: true,
   billboard: false,
+  antialiasing: true,
 
   getPosition: {type: 'accessor', value: x => x.position},
   getRadius: {type: 'accessor', value: 1},
@@ -119,6 +120,7 @@ export default class ScatterplotLayer extends Layer {
       stroked,
       filled,
       billboard,
+      antialiasing,
       lineWidthUnits,
       lineWidthScale,
       lineWidthMinPixels,
@@ -134,6 +136,7 @@ export default class ScatterplotLayer extends Layer {
         stroked: stroked ? 1 : 0,
         filled,
         billboard,
+        antialiasing,
         radiusScale: radiusScale * pointRadiusMultiplier,
         radiusMinPixels,
         radiusMaxPixels,

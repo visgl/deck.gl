@@ -272,6 +272,7 @@ The following props are forwarded to a `ScatterplotLayer` if `pointType` is `'ci
 | `pointRadiusScale` | `1` | [radiusScale](/docs/api-reference/layers/scatterplot-layer.md#radiusscale) |
 | `pointRadiusMinPixels` | `0` | [radiusMinPixels](/docs/api-reference/layers/scatterplot-layer.md#radiusminpixels) |
 | `pointRadiusMaxPixels` | `Number.MAX_SAFE_INTEGER` | [radiusMaxPixels](/docs/api-reference/layers/scatterplot-layer.md#radiusmaxpixels) |
+| `pointAntialiasing` | `true` | [antialiasing](/docs/api-reference/layers/scatterplot-layer.md#antialiasing) |
 
 
 ### pointType:icon Options
