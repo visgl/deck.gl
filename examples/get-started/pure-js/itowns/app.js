@@ -13,9 +13,6 @@ const INITIAL_VIEW_STATE = {
   bearing: 0,
   pitch: 30
 };
-
-const MAP_STYLE = 'https://basemaps.cartocdn.com/gl/positron-nolabels-gl-style/style.json';
-
 // # Orthographic viewer
 
 // Define geographic extent: CRS, min/max X, min/max Y
@@ -37,12 +34,8 @@ var view = new itowns.PlanarView(viewerDiv, extent, { disableSkirt: false, maxSu
 // view.controls.addInputListenersToElement(document.getElementById('deckCanvas'));
 
 // Add a TMS imagery source
-var opensmSource = new itowns.VectorTilesSource({
+var ignSource = new itowns.VectorTilesSource({
     style: 'https://wxs.ign.fr/static/vectorTiles/styles/PLAN.IGN/standard.json', 
-    attribution: {
-        name: 'OpenStreetMap',
-        url: 'http://www.openstreetmap.org/',
-    },
     zoom: {
         min: 2,
         max: 18,
@@ -51,15 +44,15 @@ var opensmSource = new itowns.VectorTilesSource({
 
 
 // Add a TMS imagery layer
-var opensmLayer = new itowns.ColorLayer('OPENSM', {
+var colorLayer = new itowns.ColorLayer('OPENSM', {
     updateStrategy: {
         type: itowns.STRATEGY_DICHOTOMY,
     },
-    source: opensmSource,
+    source: ignSource,
     opcaity: 0.5,
 });
 
-view.addLayer(opensmLayer);
+view.addLayer(colorLayer);
 
 
 export const deck = new Deck({

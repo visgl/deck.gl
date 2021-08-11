@@ -2,7 +2,7 @@
    <img width="150" heigth="150" src="https://webpack.js.org/assets/icon-square-big.svg" />
 </div>
 
-## Example: Use deck.gl with Mapbox
+## Example: Use deck.gl with iTowns
 
 Uses [Webpack](https://github.com/webpack/webpack) to bundle files and serves it
 with [webpack-dev-server](https://webpack.js.org/guides/development/#webpack-dev-server).
@@ -23,4 +23,4 @@ Commands:
 
 ### Basemap
 
-The basemap in this example is provided by [CARTO free basemap service](https://carto.com/basemaps). To use an alternative base map solution, visit [this guide](https://deck.gl/docs/get-started/using-with-map#using-other-basemap-services)
+The basemap in this example is provided by IGN (https://www.ign.fr/)
