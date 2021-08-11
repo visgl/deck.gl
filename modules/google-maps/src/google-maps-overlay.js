@@ -79,7 +79,7 @@ export default class GoogleMapsOverlay {
     if (renderingType === UNINITIALIZED) {
       return;
     }
-    const isVectorMap = renderingType === VECTOR;
+    const isVectorMap = renderingType === VECTOR && google.maps.WebglOverlayView;
     const OverlayView = isVectorMap ? google.maps.WebglOverlayView : google.maps.OverlayView;
     const overlay = new OverlayView();
 
