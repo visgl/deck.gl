@@ -63,7 +63,7 @@ export const deck = new Deck({
   map: false,
   controller: true,
   onViewStateChange: ({viewState}) => {
-  const cam3D = view.camera.camera3D;
+    const cam3D = view.camera.camera3D;
     const prev = itowns.CameraUtils.getTransformCameraLookingAtTarget(view, cam3D);
     const newPos = prev;
     newPos.coord = new itowns.Coordinates('EPSG:4326', viewState.longitude, viewState.latitude, 0);
@@ -76,6 +76,7 @@ export const deck = new Deck({
 
     itowns.CameraUtils.transformCameraToLookAtTarget(view, cam3D, newPos);
     view.notifyChange();
+    cam3D.updateMatrixWorld();
     // We can set pitch and bearing to 0 to disable tilting and turning 
     // viewState.pitch = 0;
     // viewState.bearing = 0;
