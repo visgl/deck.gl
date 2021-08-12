@@ -19,6 +19,11 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v8.5
 
+#### deck.gl [8.5.3] - Aug 12 2021
+
+- Scatterplot layer: antialising prop (#6081)
+- Check for correct layerName when highlighting in MVTLayer (#6062)
+
 #### deck.gl [8.5.2] - Aug 3 2021
 
 - Fix MapboxLayer React integration (#6053)
