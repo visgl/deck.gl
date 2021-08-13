@@ -20,7 +20,13 @@ const defaultProps = {
   /* API v3 PARAMETERS */
   /**********************/
   // (String, required): connection name at CARTO platform
-  connection: null
+  connection: null,
+
+  // (String, optional): name of geo_column in CARTO platform
+  geoColumn: null,
+
+  // (Array<String>, optional): names of columns to fetch
+  columns: null
 };
 
 export default class CartoLayer extends CompositeLayer {
@@ -36,7 +42,7 @@ export default class CartoLayer extends CompositeLayer {
   }
 
   _checkProps(props) {
-    const {type, credentials, connection} = props;
+    const {type, credentials, connection, geoColumn, columns} = props;
     const localCreds = {...getDefaultCredentials(), ...credentials};
     const {apiVersion} = localCreds;
 
@@ -51,12 +57,17 @@ export default class CartoLayer extends CompositeLayer {
         `Invalid type ${type}. Use type MAP_TYPES.QUERY or MAP_TYPES.TILESET for apiVersion ${apiVersion}`
       );
       log.assert(!connection, `Connection prop is not supported for apiVersion ${apiVersion}`);
+      log.assert(!geoColumn, `geoColumn prop is not supported for apiVersion ${apiVersion}`);
+      log.assert(!columns, `columns prop is not supported for apiVersion ${apiVersion}`);
     } else if (apiVersion === API_VERSIONS.V3) {
       log.assert(connection, 'Missing mandatory connection parameter');
       log.assert(
         Object.values(MAP_TYPES).includes(type),
         `Invalid type ${type}. Use MAP_TYPES enum.`
       );
+      if (columns) {
+        log.assert(Array.isArray(columns), 'columns prop must be an Array');
+      }
     }
   }
 
@@ -65,6 +76,8 @@ export default class CartoLayer extends CompositeLayer {
     const shouldUpdateData =
       changeFlags.dataChanged ||
       props.connection !== oldProps.connection ||
+      props.geoColumn !== oldProps.geoColumn ||
+      JSON.stringify(props.columns) !== JSON.stringify(oldProps.columns) ||
       props.type !== oldProps.type ||
       JSON.stringify(props.credentials) !== JSON.stringify(oldProps.credentials);
 
@@ -76,7 +89,7 @@ export default class CartoLayer extends CompositeLayer {
 
   async _updateData() {
     try {
-      const {type, data: source, connection, credentials} = this.props;
+      const {type, data: source, connection, credentials, geoColumn, columns} = this.props;
       const localConfig = {...getDefaultCredentials(), ...credentials};
       const {apiVersion} = localConfig;
 
@@ -87,7 +100,9 @@ export default class CartoLayer extends CompositeLayer {
           type,
           source,
           connection,
-          credentials
+          credentials,
+          geoColumn,
+          columns
         });
       } else if (apiVersion === API_VERSIONS.V1 || apiVersion === API_VERSIONS.V2) {
         data = await getDataV2({type, source, credentials});
