@@ -3,12 +3,12 @@ import {Matrix4} from 'math.gl';
 import {MVTWorkerLoader} from '@loaders.gl/mvt';
 import {binaryToGeojson} from '@loaders.gl/gis';
 import {COORDINATE_SYSTEM} from '@deck.gl/core';
-import {_findIndexBinary} from '@deck.gl/layers';
 import {ClipExtension} from '@deck.gl/extensions';
 
 import TileLayer from '../tile-layer/tile-layer';
 import {getURLFromTemplate, isURLTemplate} from '../tile-layer/utils';
 import {transform} from './coordinate-transform';
+import findIndexBinary from './find-index-binary';
 
 import {GeoJsonLayer} from '@deck.gl/layers';
 
@@ -221,13 +221,12 @@ export default class MVTLayer extends TileLayer {
       // Non-iterable data
     } else if (data && binary) {
       // Get the feature index of the selected item to highlight
-      const featureIdIndex = _findIndexBinary(data, uniqueIdProperty, featureIdToHighlight);
-
-      const geometries = ['points', 'lines', 'polygons'];
-      for (const geometry of geometries) {
-        const index = data[geometry] && data[geometry].featureIds.value[featureIdIndex];
-        if (index !== undefined) return index;
-      }
+      return findIndexBinary(
+        data,
+        uniqueIdProperty,
+        featureIdToHighlight,
+        isHighlighted ? '' : hoveredFeatureLayerName
+      );
     }
 
     return -1;
