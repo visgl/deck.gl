@@ -1,11 +1,18 @@
 /* eslint-disable complexity */
-import {CullingVolume, Plane, AxisAlignedBoundingBox, BoundingSphere} from '@math.gl/culling';
-import {Vector3} from 'math.gl';
+import {
+  CullingVolume,
+  Plane,
+  AxisAlignedBoundingBox,
+  makeOrientedBoundingBoxFromPoints
+} from '@math.gl/culling';
 import {osmTile2lngLat} from './utils';
 
 const TILE_SIZE = 512;
 // number of world copies to check
 const MAX_MAPS = 3;
+// for calculating bounding volume of a tile in a non-web-mercator viewport
+const REF_POINTS_5 = [[0.5, 0.5], [0, 0], [0, 1], [1, 0], [1, 1]]; // 4 corners and center
+const REF_POINTS_9 = REF_POINTS_5.concat([[0, 0.5], [0.5, 0], [1, 0.5], [0.5, 1]]); // 4 corners, center and 4 mid points
 
 class OSMNode {
   constructor(x, y, z) {
@@ -80,19 +87,25 @@ class OSMNode {
   getBoundingVolume(zRange, worldOffset, project) {
     if (project) {
       // Custom projection
-      const corner0 = osmTile2lngLat(this.x, this.y, this.z);
-      const corner1 = osmTile2lngLat(this.x + 1, this.y + 1, this.z);
-      const center = osmTile2lngLat(this.x + 0.5, this.y + 0.5, this.z);
-      corner0.z = zRange[1];
-      corner1.z = zRange[1];
-      center.z = zRange[0];
+      // Estimate bounding box from sample points
+      // At low zoom level we need more samples to calculate the bounding volume correctly
+      const refPoints = this.z < 2 ? REF_POINTS_9 : REF_POINTS_5;
 
-      const cornerPos0 = project(corner0);
-      const cornerPos1 = project(corner1);
-      const centerPos = new Vector3(project(center));
-      const R = Math.max(centerPos.distance(cornerPos0), centerPos.distance(cornerPos1));
+      // Convert from tile-relative coordinates to common space
+      const refPointPositions = [];
+      for (const p of refPoints) {
+        const lngLat = osmTile2lngLat(this.x + p[0], this.y + p[1], this.z);
+        lngLat[2] = zRange[0];
+        refPointPositions.push(project(lngLat));
 
-      return new BoundingSphere(centerPos, R);
+        if (zRange[0] !== zRange[1]) {
+          // Account for the elevation volume
+          lngLat[2] = zRange[1];
+          refPointPositions.push(project(lngLat));
+        }
+      }
+
+      return makeOrientedBoundingBoxFromPoints(refPointPositions);
     }
 
     // Use WebMercator projection
