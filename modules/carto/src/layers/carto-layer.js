@@ -22,10 +22,10 @@ const defaultProps = {
   // (String, required): connection name at CARTO platform
   connection: null,
 
-  // (String, optional): name of geo_column in CARTO platform
+  // (String, optional): name of the `geo_column` in the CARTO platform. Use this override the default column ('geom'), from which the geometry information should be fetched.
   geoColumn: null,
 
-  // (Array<String>, optional): names of columns to fetch
+  // (Array<String>, optional): names of columns to fetch. By default, all columns are fetched.
   columns: {type: 'array', value: null}
 };
 

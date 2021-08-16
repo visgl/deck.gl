@@ -111,6 +111,14 @@ Required when apiVersion is `API_VERSIONS.V3`.
 
 Name of the connection registered in the CARTO workspace.
 
+##### `geoColumn` (String, optional)
+
+Name of the `geo_column` in the CARTO platform. Use this override the default column ('geom'), from which the geometry information should be fetched.
+
+##### `columns` (Array<String>, optional)
+
+Names of columns to fetch. By default, all columns are fetched.
+
 ##### `uniqueIdProperty` (String)
 
 * Default: `cartodb_id`
