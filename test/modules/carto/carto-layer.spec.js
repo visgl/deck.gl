@@ -164,7 +164,27 @@ test('CartoLayer#should throw with invalid params for v1 and v2', t => {
         credentials: {apiVersion: API_VERSIONS.V2}
       },
       regex: /Invalid type/i
-    }
+    },
+    ...[API_VERSIONS.V1, API_VERSIONS.V2]
+      .map(apiVersion => {
+        return [{connection: 'connection'}, {geoColumn: 'geoColumn'}, {columns: ['a', 'b']}].map(
+          prop => {
+            return {
+              title: `should throw when ${
+                Object.keys(prop)[0]
+              } prop is used for apiVersion ${apiVersion}`,
+              props: {
+                ...layer.props,
+                type: MAP_TYPES.QUERY,
+                credentials: {apiVersion},
+                ...prop
+              },
+              regex: /prop is not supported for apiVersion/i
+            };
+          }
+        );
+      })
+      .flat()
   ];
 
   TEST_CASES.forEach(c => {
