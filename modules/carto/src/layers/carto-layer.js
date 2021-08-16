@@ -26,7 +26,7 @@ const defaultProps = {
   geoColumn: null,
 
   // (Array<String>, optional): names of columns to fetch
-  columns: null
+  columns: {type: 'array', value: null}
 };
 
 export default class CartoLayer extends CompositeLayer {
