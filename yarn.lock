@@ -992,9 +992,9 @@
     regenerator-runtime "^0.13.2"
 
 "@babel/runtime@^7.12.0":
-  version "7.12.5"
-  resolved "https://registry.yarnpkg.com/@babel/runtime/-/runtime-7.12.5.tgz#410e7e487441e1b360c29be715d870d9b985882e"
-  integrity sha512-plcc+hbExy3McchJCEQG3knOsuh3HH+Prx1P6cLIkET/0dLuQDEnrT+s27Axgc9bqfsmNUNHfscgMUdBpC9xfg==
+  version "7.15.3"
+  resolved "https://registry.yarnpkg.com/@babel/runtime/-/runtime-7.15.3.tgz#2e1c2880ca118e5b2f9988322bd8a7656a32502b"
+  integrity sha512-OvwMLqNXkCXSz1kSm58sEsNuhqOx/fKpnUnKnFB5v8uDda5bLNEHNgKPvhDN6IU0LDcnHQ90LlJ0Q6jnyBSIBA==
   dependencies:
     regenerator-runtime "^0.13.4"
 
@@ -2371,43 +2371,43 @@
   resolved "https://registry.yarnpkg.com/@mapbox/whoots-js/-/whoots-js-3.1.0.tgz#497c67a1cef50d1a2459ba60f315e448d2ad87fe"
   integrity sha512-Es6WcD0nO5l+2BOQS4uLfNPYQaNDfbot3X1XUoloz+x0mPDS3eeORZJl06HXjwBG1fOGwCRnzK88LMdxKRrd6Q==
 
-"@math.gl/core@3.5.3", "@math.gl/core@^3.5.0", "@math.gl/core@^3.5.1":
-  version "3.5.3"
-  resolved "https://registry.yarnpkg.com/@math.gl/core/-/core-3.5.3.tgz#8f40c374c68cf2731f7e2c2b7609094b10ff767a"
-  integrity sha512-TaSnvG0qFh1VxeNW5L58jSx0nJUMWMpUl6zo6Z3ScQzFySG5cicGOBzk/D40RkIZWPazCKCZ+ZThg5npSK9y3g==
+"@math.gl/core@3.5.4", "@math.gl/core@^3.5.0", "@math.gl/core@^3.5.1":
+  version "3.5.4"
+  resolved "https://registry.yarnpkg.com/@math.gl/core/-/core-3.5.4.tgz#dcddb9a774e30e15d30451081e8dbbd84fa882bf"
+  integrity sha512-P+Ya0TKe13tnrti+8VVFvzArTZ7zcSzZeyrHeV+IlnLCOcqYArvi/0nmeBRc524qXqTOfUYLfT2uSI+pEHXsTw==
   dependencies:
     "@babel/runtime" "^7.12.0"
     gl-matrix "^3.0.0"
 
-"@math.gl/culling@^3.5.1", "@math.gl/culling@^3.5.3":
-  version "3.5.3"
-  resolved "https://registry.yarnpkg.com/@math.gl/culling/-/culling-3.5.3.tgz#5b87646b42b76d1bba1a8f41e0d65447944a43fd"
-  integrity sha512-ABpAcrvoIOLSm1EUkwgDem4RfO28HWPBs/+taZ/ZSpJG6KiVPklpKU1NCK+05HuJStkpFZ+XlWtehWU6FAMCyA==
+"@math.gl/culling@3.5.4", "@math.gl/culling@^3.5.1", "@math.gl/culling@^3.5.4":
+  version "3.5.4"
+  resolved "https://registry.yarnpkg.com/@math.gl/culling/-/culling-3.5.4.tgz#f7b60e7e4259f28bc04d505c1602b5160a64588b"
+  integrity sha512-P2XOAxZEm08FjAlwqW5ONcLuMDit88cdiQJ5z6mvmAmJ5kwfKw1L4d6jIEA1YJ3auSuI19iaVdUvCqJUmXLH3Q==
   dependencies:
     "@babel/runtime" "^7.12.0"
-    "@math.gl/core" "3.5.3"
+    "@math.gl/core" "3.5.4"
     gl-matrix "^3.0.0"
 
-"@math.gl/geospatial@^3.5.1":
-  version "3.5.3"
-  resolved "https://registry.yarnpkg.com/@math.gl/geospatial/-/geospatial-3.5.3.tgz#90a39fea16bca6c32a471cd89699c3831fb347e7"
-  integrity sha512-cnc8VMQrt30JmlG200VDJmmvSjaGW57gY9KEZ+raapxyyFyfDNuAuIrIxe+zbK66FbvFWTbJlDaNmKqVG+ohyw==
+"@math.gl/geospatial@3.5.4", "@math.gl/geospatial@^3.5.1":
+  version "3.5.4"
+  resolved "https://registry.yarnpkg.com/@math.gl/geospatial/-/geospatial-3.5.4.tgz#7f5aa00b512604b659aeea0d599cf9901275351a"
+  integrity sha512-iuEz19OXlPs9RxZ1t47B+7t+9hpJ/9LzmceNg8FMXuotZEakF0XVV3Ddi3hG4sy5tTBhbDBt+K22pbEVgwCgtQ==
   dependencies:
     "@babel/runtime" "^7.12.0"
-    "@math.gl/core" "3.5.3"
+    "@math.gl/core" "3.5.4"
     gl-matrix "^3.0.0"
 
-"@math.gl/polygon@^3.5.1", "@math.gl/polygon@^3.5.3":
-  version "3.5.3"
-  resolved "https://registry.yarnpkg.com/@math.gl/polygon/-/polygon-3.5.3.tgz#5cdd6ad623e3a9652ed25eb52bb9941c657ee78d"
-  integrity sha512-VktscmyQg/Rd56nJk0Nj/UyvnPDbsnZNMWCdl3G5AYenYzLWy6h4FEWhLx8pD+Xw7VuFot8LR4WAK2TPzXzrWw==
+"@math.gl/polygon@3.5.4", "@math.gl/polygon@^3.5.1", "@math.gl/polygon@^3.5.4":
+  version "3.5.4"
+  resolved "https://registry.yarnpkg.com/@math.gl/polygon/-/polygon-3.5.4.tgz#61e2545015725d69f5eb382b1a935315e8d8eb94"
+  integrity sha512-Qco432yukFC+mJum/CgCVX2AT0JOmSlOhwC2mHQWUJlDLe9mSYZ9SmIKHfxSsY8uRxkzqQAxBJoHPKgyoTJbag==
   dependencies:
-    "@math.gl/core" "3.5.3"
+    "@math.gl/core" "3.5.4"
 
-"@math.gl/web-mercator@^3.1.3", "@math.gl/web-mercator@^3.5.1", "@math.gl/web-mercator@^3.5.3":
-  version "3.5.3"
-  resolved "https://registry.yarnpkg.com/@math.gl/web-mercator/-/web-mercator-3.5.3.tgz#4cc7ba98a48580a18ad683206a6f6002fa9d2d7e"
-  integrity sha512-WZE9ALeTS4n3HDgkqTxcNLBU7DL0mjmPXSrcqSZIUeDY00+LCtNvMQWUAwqolpB7nD71vD6HLW8delzVuy4teA==
+"@math.gl/web-mercator@3.5.4", "@math.gl/web-mercator@^3.1.3", "@math.gl/web-mercator@^3.5.1", "@math.gl/web-mercator@^3.5.4":
+  version "3.5.4"
+  resolved "https://registry.yarnpkg.com/@math.gl/web-mercator/-/web-mercator-3.5.4.tgz#2eca3136d33a66be665c08de01671c2ebd46867b"
+  integrity sha512-oSicpji8Rdyil2xWC5G3UrVVONl3vEvH8F0f6HgZHyQDw1LDiauthnTNIUbdWIvm6TF+WGd+GZ/mMLCmlKs+6w==
   dependencies:
     "@babel/runtime" "^7.12.0"
     gl-matrix "^3.0.0"
@@ -6235,9 +6235,9 @@ github-from-package@0.0.0:
   integrity sha1-l/tdlr/eiXMxPyDoKI75oWf6ZM4=
 
 gl-matrix@^3.0.0:
-  version "3.1.0"
-  resolved "https://registry.yarnpkg.com/gl-matrix/-/gl-matrix-3.1.0.tgz#f5b2de17d8fed95a79e5025b10cded0ab9ccbed0"
-  integrity sha512-526NA+3EA+ztAQi0IZpSWiM0fyQXIp7IbRvfJ4wS/TjjQD0uv0fVybXwwqqSOlq33UckivI0yMDlVtboWm3k7A==
+  version "3.3.0"
+  resolved "https://registry.yarnpkg.com/gl-matrix/-/gl-matrix-3.3.0.tgz#232eef60b1c8b30a28cbbe75b2caf6c48fd6358b"
+  integrity sha512-COb7LDz+SXaHtl/h4LeaFcNdJdAQSDeVqjiIihSXNrkWObZLhDI4hIkZC11Aeqp7bcE72clzB0BnDXr2SmslRA==
 
 gl@^4.9.0:
   version "4.9.0"
@@ -7928,12 +7928,12 @@ mapbox-gl@^1.0.0, mapbox-gl@^1.2.1:
     tinyqueue "^2.0.0"
     vt-pbf "^3.1.1"
 
-math.gl@^3.5.3:
-  version "3.5.3"
-  resolved "https://registry.yarnpkg.com/math.gl/-/math.gl-3.5.3.tgz#aeb6745ece33bb9207c74d866ab6a265a74ddd06"
-  integrity sha512-cRQRZlc+XvNHd3bIfu3kdPPPAW0vwDelZJmkjn2TDvCyPcmyDtAiZ2Poo1aFoINP7HzN6oHYxapc/0wV3q6Opg==
+math.gl@3.5.4, math.gl@^3.5.4:
+  version "3.5.4"
+  resolved "https://registry.yarnpkg.com/math.gl/-/math.gl-3.5.4.tgz#80ecebb5268394ab141e4c83c02170d9b8956d3c"
+  integrity sha512-WD4PwQ7WoYBcCMDKJUHdYeC+aye0OMrtsp1zHlTXVKpc+r7r0QCfgvoWDSRPeH6hQQt3CipT9HE/zWoM5xu1LA==
   dependencies:
-    "@math.gl/core" "3.5.3"
+    "@math.gl/core" "3.5.4"
 
 md5.js@^1.3.4:
   version "1.3.5"
@@ -9268,9 +9268,9 @@ path-key@^3.1.0:
   integrity sha512-ojmeN0qd+y0jszEtoY48r0Peq5dwMEkIlCOu6Q5f41lfkswXuKtYrhgoTpLnyIcHm24Uhqx+5Tqm2InSwLhE6Q==
 
 path-parse@^1.0.6:
-  version "1.0.6"
-  resolved "https://registry.yarnpkg.com/path-parse/-/path-parse-1.0.6.tgz#d62dbb5679405d72c4737ec58600e9ddcf06d24c"
-  integrity sha512-GSmOT2EbHrINBf9SR7CDELwlJ8AENk3Qn7OikK4nFYAu3Ote2+JYNVvkpAEQm3/TLNEJFD/xZJjzyxg3KBWOzw==
+  version "1.0.7"
+  resolved "https://registry.yarnpkg.com/path-parse/-/path-parse-1.0.7.tgz#fbc114b60ca42b30d9daf5858e4bd68bbedb6735"
+  integrity sha512-LDJzPVEEEPR+y48z93A0Ed0yXb8pAByGWo/k5YYdYgpY2/2EsOsksJrq7lOHxryrVOn1ejG6oAp8ahvOIQD8sw==
 
 path-posix@~1.0.0:
   version "1.0.0"
@@ -10030,9 +10030,9 @@ regenerator-runtime@^0.13.2:
   integrity sha512-naKIZz2GQ8JWh///G7L3X6LaQUAMp2lvb1rvwwsURe/VXwD6VMfr+/1NuNw3ag8v2kY1aQ/go5SNn79O9JU7yw==
 
 regenerator-runtime@^0.13.4:
-  version "0.13.5"
-  resolved "https://registry.yarnpkg.com/regenerator-runtime/-/regenerator-runtime-0.13.5.tgz#d878a1d094b4306d10b9096484b33ebd55e26697"
-  integrity sha512-ZS5w8CpKFinUzOwW3c83oPeVXoNsrLsaCoLtJvAClH135j/R77RuymhiSErhm2lKcwSCIpmvIWSbDkIfAqKQlA==
+  version "0.13.9"
+  resolved "https://registry.yarnpkg.com/regenerator-runtime/-/regenerator-runtime-0.13.9.tgz#8925742a98ffd90814988d7566ad30ca3b263b52"
+  integrity sha512-p3VT+cOEgxFsRRA9X4lkI1E+k2/CtnKtU4gcxyaCUreilL/vqI6CdZ3wxVUx3UOUg+gnUOQQcRI7BmSI656MYA==
 
 regenerator-transform@^0.14.2:
   version "0.14.5"
