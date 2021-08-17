@@ -19,6 +19,13 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v8.5
 
+#### deck.gl [8.5.4] - Aug 17 2021
+
+- Fix polygon offset in Tile3DLayer (#6108)
+- Fix MVTLayer autoHighlight with binary data (#6098)
+- Improve tile traversal in GlobeView (#6106)
+- Bump loaders to 3.0.8 (#6075)
+
 #### deck.gl [8.5.3] - Aug 12 2021
 
 - Scatterplot layer: antialising prop (#6081)

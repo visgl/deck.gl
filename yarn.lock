@@ -2379,7 +2379,7 @@
     "@babel/runtime" "^7.12.0"
     gl-matrix "^3.0.0"
 
-"@math.gl/culling@3.5.4", "@math.gl/culling@^3.5.1", "@math.gl/culling@^3.5.4":
+"@math.gl/culling@^3.5.1", "@math.gl/culling@^3.5.4":
   version "3.5.4"
   resolved "https://registry.yarnpkg.com/@math.gl/culling/-/culling-3.5.4.tgz#f7b60e7e4259f28bc04d505c1602b5160a64588b"
   integrity sha512-P2XOAxZEm08FjAlwqW5ONcLuMDit88cdiQJ5z6mvmAmJ5kwfKw1L4d6jIEA1YJ3auSuI19iaVdUvCqJUmXLH3Q==
@@ -2388,7 +2388,7 @@
     "@math.gl/core" "3.5.4"
     gl-matrix "^3.0.0"
 
-"@math.gl/geospatial@3.5.4", "@math.gl/geospatial@^3.5.1":
+"@math.gl/geospatial@^3.5.1":
   version "3.5.4"
   resolved "https://registry.yarnpkg.com/@math.gl/geospatial/-/geospatial-3.5.4.tgz#7f5aa00b512604b659aeea0d599cf9901275351a"
   integrity sha512-iuEz19OXlPs9RxZ1t47B+7t+9hpJ/9LzmceNg8FMXuotZEakF0XVV3Ddi3hG4sy5tTBhbDBt+K22pbEVgwCgtQ==
@@ -2397,14 +2397,14 @@
     "@math.gl/core" "3.5.4"
     gl-matrix "^3.0.0"
 
-"@math.gl/polygon@3.5.4", "@math.gl/polygon@^3.5.1", "@math.gl/polygon@^3.5.4":
+"@math.gl/polygon@^3.5.1", "@math.gl/polygon@^3.5.4":
   version "3.5.4"
   resolved "https://registry.yarnpkg.com/@math.gl/polygon/-/polygon-3.5.4.tgz#61e2545015725d69f5eb382b1a935315e8d8eb94"
   integrity sha512-Qco432yukFC+mJum/CgCVX2AT0JOmSlOhwC2mHQWUJlDLe9mSYZ9SmIKHfxSsY8uRxkzqQAxBJoHPKgyoTJbag==
   dependencies:
     "@math.gl/core" "3.5.4"
 
-"@math.gl/web-mercator@3.5.4", "@math.gl/web-mercator@^3.1.3", "@math.gl/web-mercator@^3.5.1", "@math.gl/web-mercator@^3.5.4":
+"@math.gl/web-mercator@^3.1.3", "@math.gl/web-mercator@^3.5.1", "@math.gl/web-mercator@^3.5.4":
   version "3.5.4"
   resolved "https://registry.yarnpkg.com/@math.gl/web-mercator/-/web-mercator-3.5.4.tgz#2eca3136d33a66be665c08de01671c2ebd46867b"
   integrity sha512-oSicpji8Rdyil2xWC5G3UrVVONl3vEvH8F0f6HgZHyQDw1LDiauthnTNIUbdWIvm6TF+WGd+GZ/mMLCmlKs+6w==
@@ -7928,7 +7928,7 @@ mapbox-gl@^1.0.0, mapbox-gl@^1.2.1:
     tinyqueue "^2.0.0"
     vt-pbf "^3.1.1"
 
-math.gl@3.5.4, math.gl@^3.5.4:
+math.gl@^3.5.4:
   version "3.5.4"
   resolved "https://registry.yarnpkg.com/math.gl/-/math.gl-3.5.4.tgz#80ecebb5268394ab141e4c83c02170d9b8956d3c"
   integrity sha512-WD4PwQ7WoYBcCMDKJUHdYeC+aye0OMrtsp1zHlTXVKpc+r7r0QCfgvoWDSRPeH6hQQt3CipT9HE/zWoM5xu1LA==
