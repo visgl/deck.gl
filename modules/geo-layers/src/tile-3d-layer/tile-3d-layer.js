@@ -231,8 +231,8 @@ export default class Tile3DLayer extends CompositeLayer {
         coordinateSystem: COORDINATE_SYSTEM.METER_OFFSETS,
         coordinateOrigin: cartographicOrigin,
         modelMatrix,
-
-        getColor: constantRGBA || getPointColor
+        getColor: constantRGBA || getPointColor,
+        _offset: 0
       }
     );
   }
@@ -259,7 +259,8 @@ export default class Tile3DLayer extends CompositeLayer {
         coordinateOrigin: cartographicOrigin,
         modelMatrix,
         getTransformMatrix: instance => instance.modelMatrix,
-        getPosition: [0, 0, 0]
+        getPosition: [0, 0, 0],
+        _offset: 0
       }
     );
   }
@@ -293,7 +294,8 @@ export default class Tile3DLayer extends CompositeLayer {
         modelMatrix,
         coordinateOrigin: cartographicOrigin,
         coordinateSystem: COORDINATE_SYSTEM.METER_OFFSETS,
-        featureIds
+        featureIds,
+        _offset: 0
       }
     );
   }
