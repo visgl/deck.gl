@@ -28,7 +28,7 @@
   }
   ```
 
-  This change is intended to make this callback easier to use for the most common use cases. If you were using this callback to filter sub layers specifically, it is no longer supportd. Instead, you need to either set the [_subLayerProps](/docs/api-reference/core/composite-layer.md#_subLayerProps) prop (stock layer) or implement the [filterSubLayer](/docs/api-reference/core/composite-layer.md#filtersublayer) method (custom layer).
+  This change is intended to make this callback easier to use for the most common use cases. Using this callback to filter out specific nested sub layers is no longer supportd. Instead, you need to either set the [_subLayerProps](/docs/api-reference/core/composite-layer.md#_subLayerProps) prop (stock layer) or implement the [filterSubLayer](/docs/api-reference/core/composite-layer.md#filtersublayer) method (custom layer).
 
 
 ## Upgrading from deck.gl v8.4 to v8.5
