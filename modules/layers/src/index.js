@@ -39,5 +39,3 @@ export {default as _MultiIconLayer} from './text-layer/multi-icon-layer/multi-ic
 export {
   default as _TextBackgroundLayer
 } from './text-layer/text-background-layer/text-background-layer';
-
-export {findIndexBinary as _findIndexBinary} from './geojson-layer/geojson-binary';
