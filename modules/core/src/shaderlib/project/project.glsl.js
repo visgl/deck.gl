@@ -67,7 +67,8 @@ float project_size() {
     // Otherwise use geometry.worldPosition (anchor in world space)
     
     if (geometry.position.w == 0.0) {
-      return 1.0 / cos(radians(geometry.worldPosition.y));
+      float y = clamp(geometry.worldPosition.y, -89.9, 89.9);
+      return 1.0 / cos(radians(y));
     }
 
     // latitude from common y: 2.0 * (atan(exp(y / TILE_SIZE * 2.0 * PI - PI)) - PI / 4.0)

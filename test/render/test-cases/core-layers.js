@@ -22,6 +22,16 @@ const BINARY_DATA = [
   0.8, 0, 0.6, 15, 15, 0
 ];
 
+const TISSOTS_INDICATRIX = (function() {
+  const result = [];
+  for (let lng = -180; lng <= 180; lng += 30) {
+    for (let lat = -60; lat <= 60; lat += 30) {
+      result.push([lng, lat]);
+    }
+  }
+  return result;
+})();
+
 export default [
   {
     name: 'scatterplot-lnglat',
@@ -97,6 +107,26 @@ export default [
       })
     ],
     goldenImage: './test/render/golden-images/scatterplot-lnglat-billboard.png'
+  },
+  {
+    name: 'scatterplot-tissot',
+    viewState: {
+      latitude: 0,
+      longitude: 0,
+      zoom: 0,
+      pitch: 0,
+      bearing: 0
+    },
+    layers: [
+      new ScatterplotLayer({
+        id: 'scatterplot-tissot',
+        data: TISSOTS_INDICATRIX,
+        getPosition: d => d,
+        getFillColor: [255, 0, 0, 200],
+        getRadius: 1e6
+      })
+    ],
+    goldenImage: './test/render/golden-images/scatterplot-tissot.png'
   },
   {
     name: 'line-lnglat',
