@@ -56,20 +56,46 @@ const vec3 ZERO_64_LOW = vec3(0.0);
 const float EARTH_RADIUS = 6370972.0; // meters
 const float GLOBE_RADIUS = 256.0;
 
+// returns an adjustment factor for uCommonUnitsPerMeter
+float project_size() {
+  if (project_uProjectionMode == PROJECTION_MODE_WEB_MERCATOR &&
+    project_uCoordinateSystem == COORDINATE_SYSTEM_LNGLAT) {
+
+    // uCommonUnitsPerMeter in low-zoom Web Mercator is non-linear
+    // Adjust by 1 / cos(latitude)
+    // If geometry.position (vertex in common space) is populated, use it
+    // Otherwise use geometry.worldPosition (anchor in world space)
+    
+    if (geometry.position.w == 0.0) {
+      return 1.0 / cos(radians(geometry.worldPosition.y));
+    }
+
+    // latitude from common y: 2.0 * (atan(exp(y / TILE_SIZE * 2.0 * PI - PI)) - PI / 4.0)
+    // Taylor series of 1 / cos(latitude)
+    // Max error < 0.003
+  
+    float y = geometry.position.y / TILE_SIZE * 2.0 - 1.0;
+    float y2 = y * y;
+    float y4 = y2 * y2;
+    float y6 = y4 * y2;
+    return 1.0 + 4.9348 * y2 + 4.0587 * y4 + 1.5642 * y6;
+  }
+  return 1.0;
+}
 //
 // Scaling offsets - scales meters to "world distance"
 // Note the scalar version of project_size is for scaling the z component only
 //
 float project_size(float meters) {
-  return meters * project_uCommonUnitsPerMeter.z;
+  return meters * project_uCommonUnitsPerMeter.z * project_size();
 }
 
 vec2 project_size(vec2 meters) {
-  return meters * project_uCommonUnitsPerMeter.xy;
+  return meters * project_uCommonUnitsPerMeter.xy * project_size();
 }
 
 vec3 project_size(vec3 meters) {
-  return meters * project_uCommonUnitsPerMeter;
+  return meters * project_uCommonUnitsPerMeter * project_size();
 }
 
 vec4 project_size(vec4 meters) {

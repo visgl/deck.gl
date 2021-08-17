@@ -192,7 +192,6 @@ export default class IconLayer extends Layer {
   draw({uniforms}) {
     const {sizeScale, sizeMinPixels, sizeMaxPixels, sizeUnits, billboard, alphaCutoff} = this.props;
     const {iconManager} = this.state;
-    const {viewport} = this.context;
 
     const iconsTexture = iconManager.getTexture();
     if (iconsTexture) {
@@ -201,7 +200,8 @@ export default class IconLayer extends Layer {
         .setUniforms({
           iconsTexture,
           iconsTextureDim: [iconsTexture.width, iconsTexture.height],
-          sizeScale: sizeScale * (sizeUnits === 'pixels' ? viewport.metersPerPixel : 1),
+          pixelSize: sizeUnits === 'pixels',
+          sizeScale,
           sizeMinPixels,
           sizeMaxPixels,
           billboard,

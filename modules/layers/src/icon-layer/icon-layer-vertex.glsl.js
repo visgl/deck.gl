@@ -39,6 +39,7 @@ uniform vec2 iconsTextureDim;
 uniform float sizeMinPixels;
 uniform float sizeMaxPixels;
 uniform bool billboard;
+uniform bool pixelSize;
 
 varying float vColorMode;
 varying vec4 vColor;
@@ -64,7 +65,7 @@ void main(void) {
  
   // project meters to pixels and clamp to limits 
   float sizePixels = clamp(
-    project_size_to_pixel(instanceSizes * sizeScale), 
+    pixelSize ? instanceSizes * sizeScale : project_size_to_pixel(instanceSizes * sizeScale), 
     sizeMinPixels, sizeMaxPixels
   );
 

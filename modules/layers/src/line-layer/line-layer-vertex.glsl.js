@@ -35,6 +35,7 @@ uniform float widthScale;
 uniform float widthMinPixels;
 uniform float widthMaxPixels;
 uniform float useShortestPath;
+uniform bool pixelWidth;
 
 varying vec4 vColor;
 varying vec2 uv;
@@ -89,12 +90,6 @@ void main(void) {
   vec4 target_commonspace;
   vec4 source = project_position_to_clipspace(source_world, source_world_64low, vec3(0.), source_commonspace);
   vec4 target = project_position_to_clipspace(target_world, target_world_64low, vec3(0.), target_commonspace);
-
-  // Multiply out width and clamp to limits
-  float widthPixels = clamp(
-    project_size_to_pixel(instanceWidths * widthScale),
-    widthMinPixels, widthMaxPixels
-  );
   
   // linear interpolation of source & target to pick right coord
   float segmentIndex = positions.x;
@@ -103,6 +98,12 @@ void main(void) {
   uv = positions.xy;
   geometry.uv = uv;
   geometry.pickingColor = instancePickingColors;
+
+  // Multiply out width and clamp to limits
+  float widthPixels = clamp(
+    pixelWidth ? instanceWidths * widthScale : project_size_to_pixel(instanceWidths * widthScale),
+    widthMinPixels, widthMaxPixels
+  );
 
   // extrude
   vec3 offset = vec3(

@@ -47,7 +47,7 @@ const TEST_CASES = [
       viewport: TEST_VIEWPORT_2,
       coordinateSystem: COORDINATE_SYSTEM.DEFAULT
     },
-    result: [156.44444444444446, 320.0378755678335, 0.01687089818244227]
+    result: [156.44444444444446, 320.0378755678335, 0.01694745572307248]
   },
   {
     title: 'LNGLAT:WEB_MERCATOR_AUTO_OFFSET',
@@ -152,12 +152,17 @@ test('project#projectPosition', t => {
 test('project#projectPosition vs project_position', t => {
   config.EPSILON = 1e-5;
 
-  const vsSource = project.dependencies.map(dep => dep.vs).join('') + project.vs;
+  const vsSource =
+    `${project.dependencies.map(dep => dep.vs).join('') 
+    // for setting test context
+    }void set_geometry(vec3 pos) {geometry.worldPosition = pos;}\n${ 
+    project.vs}`;
   const projectVS = compileVertexShader(vsSource);
 
   TEST_CASES.filter(testCase => !testCase.params.fromCoordinateSystem).forEach(testCase => {
     const uniforms = project.getUniforms(testCase.params);
     const module = projectVS(uniforms);
+    module.set_geometry(testCase.position);
 
     const cpuResult = projectPosition(testCase.position, testCase.params);
     const shaderResult = module.project_position_vec3(testCase.position);

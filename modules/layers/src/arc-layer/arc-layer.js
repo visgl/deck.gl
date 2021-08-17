@@ -124,7 +124,6 @@ export default class ArcLayer extends Layer {
   }
 
   draw({uniforms}) {
-    const {viewport} = this.context;
     const {
       widthUnits,
       widthScale,
@@ -134,13 +133,12 @@ export default class ArcLayer extends Layer {
       wrapLongitude
     } = this.props;
 
-    const widthMultiplier = widthUnits === 'pixels' ? viewport.metersPerPixel : 1;
-
     this.state.model
       .setUniforms(uniforms)
       .setUniforms({
         greatCircle,
-        widthScale: widthScale * widthMultiplier,
+        pixelWidth: widthUnits === 'pixels',
+        widthScale,
         widthMinPixels,
         widthMaxPixels,
         useShortestPath: wrapLongitude

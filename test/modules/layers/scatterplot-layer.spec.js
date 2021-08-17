@@ -19,7 +19,7 @@ test('ScatterplotLayer points size by radiusUnits prop', t => {
 
         const scatterplotLayer = filteredLayers[0];
         const uniforms = scatterplotLayer.getModels()[0].getUniforms();
-        t.ok(uniforms.radiusScale === SIZE);
+        t.notOk(uniforms.pixelRadius);
       }
     },
     {
@@ -34,8 +34,7 @@ test('ScatterplotLayer points size by radiusUnits prop', t => {
 
         const scatterplotLayer = filteredLayers[0];
         const uniforms = scatterplotLayer.getModels()[0].getUniforms();
-        const {viewport} = scatterplotLayer.context;
-        t.ok(uniforms.radiusScale === SIZE * viewport.metersPerPixel);
+        t.ok(uniforms.pixelRadius);
       }
     }
   ];

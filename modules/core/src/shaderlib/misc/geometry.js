@@ -26,7 +26,14 @@ struct VertexGeometry {
   vec3 normal;
   vec2 uv;
   vec3 pickingColor;
-} geometry;
+} geometry = VertexGeometry(
+  vec4(0.0),
+  vec3(0.0),
+  vec3(0.0),
+  vec3(0.0),
+  vec2(0.0),
+  vec3(0.0)
+);
 `;
 
 const fs = `

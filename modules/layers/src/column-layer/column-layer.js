@@ -173,7 +173,6 @@ export default class ColumnLayer extends Layer {
   }
 
   draw({uniforms}) {
-    const {viewport} = this.context;
     const {
       lineWidthUnits,
       lineWidthScale,
@@ -192,8 +191,6 @@ export default class ColumnLayer extends Layer {
     } = this.props;
     const {model, fillVertexCount, wireframeVertexCount, edgeDistance} = this.state;
 
-    const widthMultiplier = lineWidthUnits === 'pixels' ? viewport.metersPerPixel : 1;
-
     model.setUniforms(uniforms).setUniforms({
       radius,
       angle: (angle / 180) * Math.PI,
@@ -202,7 +199,8 @@ export default class ColumnLayer extends Layer {
       coverage,
       elevationScale,
       edgeDistance,
-      widthScale: lineWidthScale * widthMultiplier,
+      pixelWidth: lineWidthUnits === 'pixels',
+      widthScale: lineWidthScale,
       widthMinPixels: lineWidthMinPixels,
       widthMaxPixels: lineWidthMaxPixels
     });

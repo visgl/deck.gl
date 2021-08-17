@@ -210,7 +210,6 @@ export default class PathLayer extends Layer {
   }
 
   draw({uniforms}) {
-    const {viewport} = this.context;
     const {
       jointRounded,
       capRounded,
@@ -222,15 +221,14 @@ export default class PathLayer extends Layer {
       widthMaxPixels
     } = this.props;
 
-    const widthMultiplier = widthUnits === 'pixels' ? viewport.metersPerPixel : 1;
-
     this.state.model
       .setUniforms(uniforms)
       .setUniforms({
         jointType: Number(jointRounded),
         capType: Number(capRounded),
         billboard,
-        widthScale: widthScale * widthMultiplier,
+        pixelWidth: widthUnits === 'pixels',
+        widthScale,
         miterLimit,
         widthMinPixels,
         widthMaxPixels

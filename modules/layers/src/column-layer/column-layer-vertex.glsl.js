@@ -47,6 +47,7 @@ uniform float edgeDistance;
 uniform float widthScale;
 uniform float widthMinPixels;
 uniform float widthMaxPixels;
+uniform bool pixelWidth;
 
 // Result
 varying vec4 vColor;
@@ -67,7 +68,8 @@ void main(void) {
   if (extruded) {
     elevation = instanceElevations * (positions.z + 1.0) / 2.0 * elevationScale;
   } else if (isStroke) {
-    float widthPixels = clamp(project_size_to_pixel(instanceStrokeWidths * widthScale),
+    float widthPixels = clamp(
+      pixelWidth ? instanceStrokeWidths * widthScale : project_size_to_pixel(instanceStrokeWidths * widthScale),
       widthMinPixels, widthMaxPixels) / 2.0;
     strokeOffsetRatio -= sign(positions.z) * project_pixel_size(widthPixels) / project_size(edgeDistance * coverage * radius);
   }

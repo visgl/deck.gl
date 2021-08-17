@@ -94,7 +94,6 @@ export default class TextBackgroundLayer extends Layer {
   }
 
   draw({uniforms}) {
-    const {viewport} = this.context;
     const {
       billboard,
       sizeScale,
@@ -105,7 +104,6 @@ export default class TextBackgroundLayer extends Layer {
     } = this.props;
     let {padding} = this.props;
 
-    const sizeScaleMultiplier = sizeUnits === 'pixels' ? viewport.metersPerPixel : 1;
     if (padding.length < 4) {
       padding = [padding[0], padding[1], padding[0], padding[1]];
     }
@@ -116,7 +114,8 @@ export default class TextBackgroundLayer extends Layer {
         billboard,
         stroked: Boolean(getLineWidth),
         padding,
-        sizeScale: sizeScale * sizeScaleMultiplier,
+        pixelSize: sizeUnits === 'pixels',
+        sizeScale,
         sizeMinPixels,
         sizeMaxPixels
       })

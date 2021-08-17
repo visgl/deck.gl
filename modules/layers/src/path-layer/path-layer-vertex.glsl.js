@@ -43,6 +43,7 @@ uniform float jointType;
 uniform float capType;
 uniform float miterLimit;
 uniform bool billboard;
+uniform bool pixelWidth;
 
 uniform float opacity;
 
@@ -171,13 +172,7 @@ void clipLine(inout vec4 position, vec4 refPosition) {
 }
 
 void main() {
-  geometry.worldPosition = instanceStartPositions;
-  geometry.worldPositionAlt = instanceEndPositions;
   geometry.pickingColor = instancePickingColors;
-
-  vec2 widthPixels = vec2(clamp(project_size_to_pixel(instanceStrokeWidths * widthScale),
-    widthMinPixels, widthMaxPixels) / 2.0);
-  vec3 width;
 
   vColor = vec4(instanceColors.rgb, instanceColors.a * opacity);
 
@@ -191,6 +186,12 @@ void main() {
 
   vec3 nextPosition = mix(instanceEndPositions, instanceRightPositions, isEnd);
   vec3 nextPosition64Low = mix(instanceEndPositions64Low, instanceRightPositions64Low, isEnd);
+
+  geometry.worldPosition = currPosition;
+  vec2 widthPixels = vec2(clamp(
+    pixelWidth ? instanceStrokeWidths * widthScale : project_size_to_pixel(instanceStrokeWidths * widthScale),
+    widthMinPixels, widthMaxPixels) / 2.0);
+  vec3 width;
 
   if (billboard) {
     // Extrude in clipspace

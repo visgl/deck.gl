@@ -65,48 +65,37 @@ const OUT_BUFFER = new Buffer(gl, 16);
 
 // used in printing a float into GLSL code, 1 will be 1.0 to avoid GLSL compile errors
 const MAX_FRACTION_DIGITS = 5;
+function getScalerType(a) {
+  if (Array.isArray(a)) {
+    return `vec${a.length}`;
+  }
+  return 'float';
+}
+function getScaler(a) {
+  if (Array.isArray(a)) {
+    return `${getScalerType(a)}(${a.map(x => x.toFixed(MAX_FRACTION_DIGITS)).join(',')})`;
+  }
+  return a.toFixed(MAX_FRACTION_DIGITS);
+}
 
 const TRANSFORM_VS = {
-  project_size: meter => `\
-varying float outValue;
+  project_size: (meter, worldPosition, commonPosition = [0, 0, 0, 0]) => `\
+varying ${getScalerType(meter)} outValue;
 
 void main()
 {
-  outValue = project_size(${meter.toFixed(MAX_FRACTION_DIGITS)});
+  geometry.worldPosition = ${getScaler(worldPosition)};
+  geometry.position = ${getScaler(commonPosition)};
+  outValue = project_size(${getScaler(meter)});
 }
 `,
-  project_size_vec2: meter => `\
-  varying vec2 outValue;
-
-  void main()
-  {
-    outValue = project_size(vec2(${meter[0].toFixed(MAX_FRACTION_DIGITS)}, ${meter[1].toFixed(
-    MAX_FRACTION_DIGITS
-  )}));
-  }
-  `,
-  project_size_vec3: meter => `\
-  varying vec3 outValue;
-
-  void main()
-  {
-    outValue = project_size(vec3(${meter[0].toFixed(MAX_FRACTION_DIGITS)}, ${meter[1].toFixed(
-    MAX_FRACTION_DIGITS
-  )}, ${meter[2].toFixed(MAX_FRACTION_DIGITS)}));
-  }
-  `,
   project_position: (pos, pos64Low = [0, 0, 0]) => `\
 varying vec4 outValue;
 
 void main()
 {
-  outValue = project_position(vec4(${pos[0].toFixed(MAX_FRACTION_DIGITS)}, ${pos[1].toFixed(
-    MAX_FRACTION_DIGITS
-  )}, ${pos[2].toFixed(MAX_FRACTION_DIGITS)}, ${pos[3].toFixed(
-    MAX_FRACTION_DIGITS
-  )}), vec3(${pos64Low[0].toFixed(MAX_FRACTION_DIGITS)}, ${pos64Low[1].toFixed(
-    MAX_FRACTION_DIGITS
-  )}, ${pos64Low[2].toFixed(MAX_FRACTION_DIGITS)}));
+  geometry.worldPosition = ${getScaler(pos.slice(0, 3))};
+  outValue = project_position(${getScaler(pos)}, ${getScaler(pos64Low)});
 }
 `,
   project_common_position_to_clipspace_vec4: pos => `\
@@ -114,9 +103,8 @@ varying vec4 outValue;
 
 void main()
 {
-  vec4 pos = project_position(vec4(${pos[0].toFixed(MAX_FRACTION_DIGITS)}, ${pos[1].toFixed(
-    MAX_FRACTION_DIGITS
-  )}, ${pos[2].toFixed(MAX_FRACTION_DIGITS)}, ${pos[3].toFixed(MAX_FRACTION_DIGITS)}), vec3(0.));
+  geometry.worldPosition = ${getScaler(pos.slice(0, 3))};
+  vec4 pos = project_position(${getScaler(pos)}, vec3(0.));
   outValue = project_common_position_to_clipspace(pos);
 }
 `
@@ -131,21 +119,24 @@ const TEST_CASES = [
     tests: [
       {
         name: 'project_size(float)',
-        func: ({project_size}) => project_size(1),
+        func: ({project_size_float}) => project_size_float(1),
         output: TEST_VIEWPORT.getDistanceScales().unitsPerMeter[2],
-        vs: TRANSFORM_VS.project_size(1)
+        vs: TRANSFORM_VS.project_size(1, [TEST_VIEWPORT.longitude, TEST_VIEWPORT.latitude, 0])
       },
       {
         name: 'project_size(vec2)',
         func: ({project_size_vec2}) => project_size_vec2([1, 1]),
         output: TEST_VIEWPORT.getDistanceScales().unitsPerMeter.slice(0, 2),
-        vs: TRANSFORM_VS.project_size_vec2([1, 1])
+        vs: TRANSFORM_VS.project_size([1, 1], [TEST_VIEWPORT.longitude, TEST_VIEWPORT.latitude, 0])
       },
       {
         name: 'project_size(vec3)',
         func: ({project_size_vec3}) => project_size_vec3([1, 1, 1]),
         output: TEST_VIEWPORT.getDistanceScales().unitsPerMeter,
-        vs: TRANSFORM_VS.project_size_vec3([1, 1, 1])
+        vs: TRANSFORM_VS.project_size(
+          [1, 1, 1],
+          [TEST_VIEWPORT.longitude, TEST_VIEWPORT.latitude, 0]
+        )
       },
       {
         name: 'project_position',
@@ -325,15 +316,21 @@ const TEST_CASES = [
 test('project#vs', t => {
   // TODO - resolve dependencies properly
   // luma's assembleShaders require WebGL context to work
-  const vsSource = project.dependencies.map(dep => dep.vs).join('') + project.vs;
+  const vsSource =
+    `${project.dependencies.map(dep => dep.vs).join('') 
+    // for setting test context
+    }void set_geometry(vec4 position) {geometry.position = position;}\n${ 
+    project.vs}`;
   const projectVS = compileVertexShader(vsSource);
   const oldEpsilon = config.EPSILON;
 
   TEST_CASES.forEach(testCase => {
     t.comment(testCase.title);
 
+    const {viewport} = testCase.params;
     const uniforms = project.getUniforms(testCase.params);
     const module = projectVS(uniforms);
+    module.set_geometry(viewport.center.concat(1));
 
     testCase.tests.forEach(c => {
       const expected = c.output;

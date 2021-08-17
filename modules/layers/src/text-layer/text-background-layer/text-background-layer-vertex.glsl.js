@@ -20,6 +20,7 @@ uniform float sizeScale;
 uniform float sizeMinPixels;
 uniform float sizeMaxPixels;
 uniform vec4 padding;
+uniform bool pixelSize;
 
 varying vec4 vFillColor;
 varying vec4 vLineColor;
@@ -46,7 +47,7 @@ void main(void) {
 
   // project meters to pixels and clamp to limits
   float sizePixels = clamp(
-    project_size_to_pixel(instanceSizes * sizeScale),
+    pixelSize ? instanceSizes * sizeScale : project_size_to_pixel(instanceSizes * sizeScale),
     sizeMinPixels, sizeMaxPixels
   );
 

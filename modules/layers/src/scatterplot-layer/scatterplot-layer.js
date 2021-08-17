@@ -111,7 +111,6 @@ export default class ScatterplotLayer extends Layer {
   }
 
   draw({uniforms}) {
-    const {viewport} = this.context;
     const {
       radiusUnits,
       radiusScale,
@@ -127,9 +126,6 @@ export default class ScatterplotLayer extends Layer {
       lineWidthMaxPixels
     } = this.props;
 
-    const pointRadiusMultiplier = radiusUnits === 'pixels' ? viewport.metersPerPixel : 1;
-    const lineWidthMultiplier = lineWidthUnits === 'pixels' ? viewport.metersPerPixel : 1;
-
     this.state.model
       .setUniforms(uniforms)
       .setUniforms({
@@ -137,10 +133,12 @@ export default class ScatterplotLayer extends Layer {
         filled,
         billboard,
         antialiasing,
-        radiusScale: radiusScale * pointRadiusMultiplier,
+        pixelRadius: radiusUnits === 'pixels',
+        radiusScale,
         radiusMinPixels,
         radiusMaxPixels,
-        lineWidthScale: lineWidthScale * lineWidthMultiplier,
+        pixelLineWidth: lineWidthUnits === 'pixels',
+        lineWidthScale,
         lineWidthMinPixels,
         lineWidthMaxPixels
       })

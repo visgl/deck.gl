@@ -98,15 +98,13 @@ export default class LineLayer extends Layer {
   }
 
   draw({uniforms}) {
-    const {viewport} = this.context;
     const {widthUnits, widthScale, widthMinPixels, widthMaxPixels, wrapLongitude} = this.props;
-
-    const widthMultiplier = widthUnits === 'pixels' ? viewport.metersPerPixel : 1;
 
     this.state.model
       .setUniforms(uniforms)
       .setUniforms({
-        widthScale: widthScale * widthMultiplier,
+        pixelWidth: widthUnits === 'pixels',
+        widthScale,
         widthMinPixels,
         widthMaxPixels,
         useShortestPath: wrapLongitude ? 1 : 0
