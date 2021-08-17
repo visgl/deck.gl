@@ -17,41 +17,27 @@ const INITIAL_VIEW_STATE = {
 };
 
 const MAP_LAYER_STYLES = {
-  stroked: true,
-  extruded: true,
-
-  getElevation: f => (f.properties.extrude && f.properties.height) || 0,
-
-  getLineColor: [192, 192, 192],
+  maxZoom: 14,
 
   getFillColor: f => {
-    switch (f.properties.layer) {
+    switch (f.properties.layerName) {
+      case 'poi':
+        return [255, 0, 0];
       case 'water':
-        return [140, 170, 180];
-      case 'landcover':
-        return [120, 190, 100];
-      default:
+        return [120, 150, 180];
+      case 'building':
         return [218, 218, 218];
+      default:
+        return [240, 240, 240];
     }
   },
 
-  getLineWidth: f => {
-    if (f.properties.layer === 'transportation') {
-      switch (f.properties.class) {
-        case 'primary':
-          return 12;
-        case 'motorway':
-          return 16;
-        default:
-          return 6;
-      }
-    }
-    return 1;
-  },
-  lineWidthMinPixels: 1,
+  getLineWidth: 1,
+  lineWidthUnits: 'pixels',
+  getLineColor: [192, 192, 192],
 
-  getPointRadius: 100,
-  pointRadiusMinPixels: 2
+  getPointRadius: 4,
+  pointRadiusUnits: 'pixels'
 };
 
 class Root extends PureComponent {
@@ -73,7 +59,11 @@ class Root extends PureComponent {
       return null;
     }
 
-    return <div className="clicked-info">{JSON.stringify(clickedItem.properties)}</div>;
+    return (
+      <div className="clicked-info">
+        id: {clickedItem.id} {JSON.stringify(clickedItem.properties)}
+      </div>
+    );
   }
 
   render() {
@@ -85,8 +75,13 @@ class Root extends PureComponent {
         layers={[
           new MVTLayer({
             ...MAP_LAYER_STYLES,
-            data: `https://a.tiles.mapbox.com/v4/mapbox.mapbox-streets-v7/{z}/{x}/{y}.vector.pbf?access_token=${MAPBOX_TOKEN}`,
-            pickable: true
+            data:
+              'https://tiles-a.basemaps.cartocdn.com/vectortiles/carto.streets/v1/{z}/{x}/{y}.mvt',
+
+            onClick: this._onClick.bind(this),
+            pickable: true,
+            autoHighlight: true,
+            binary: true
           })
         ]}
       >
