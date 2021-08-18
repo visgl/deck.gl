@@ -49,6 +49,9 @@ class OrthographicState extends OrbitState {
       }
       return [newZoomX, newZoomY];
     }
+    // Ignore `zoomAxis`
+    // `LinearTransitionInterpolator` does not support interpolation between a number and an array
+    // So if zoom is a number (legacy use case), new zoom still has to be a number
     return clamp(startZoom + deltaZoom, minZoom, maxZoom);
   }
 }
