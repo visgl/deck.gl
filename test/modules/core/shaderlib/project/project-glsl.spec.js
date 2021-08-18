@@ -316,11 +316,10 @@ const TEST_CASES = [
 test('project#vs', t => {
   // TODO - resolve dependencies properly
   // luma's assembleShaders require WebGL context to work
-  const vsSource =
-    `${project.dependencies.map(dep => dep.vs).join('') 
+  const vsSource = `${
+    project.dependencies.map(dep => dep.vs).join('')
     // for setting test context
-    }void set_geometry(vec4 position) {geometry.position = position;}\n${ 
-    project.vs}`;
+  }void set_geometry(vec4 position) {geometry.position = position;}\n${project.vs}`;
   const projectVS = compileVertexShader(vsSource);
   const oldEpsilon = config.EPSILON;
 

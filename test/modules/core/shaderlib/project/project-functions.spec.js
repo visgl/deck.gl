@@ -152,11 +152,10 @@ test('project#projectPosition', t => {
 test('project#projectPosition vs project_position', t => {
   config.EPSILON = 1e-5;
 
-  const vsSource =
-    `${project.dependencies.map(dep => dep.vs).join('') 
+  const vsSource = `${
+    project.dependencies.map(dep => dep.vs).join('')
     // for setting test context
-    }void set_geometry(vec3 pos) {geometry.worldPosition = pos;}\n${ 
-    project.vs}`;
+  }void set_geometry(vec3 pos) {geometry.worldPosition = pos;}\n${project.vs}`;
   const projectVS = compileVertexShader(vsSource);
 
   TEST_CASES.filter(testCase => !testCase.params.fromCoordinateSystem).forEach(testCase => {

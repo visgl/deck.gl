@@ -22,6 +22,7 @@ const BINARY_DATA = [
   0.8, 0, 0.6, 15, 15, 0
 ];
 
+// eslint-disable-next-line
 const TISSOTS_INDICATRIX = (function() {
   const result = [];
   for (let lng = -180; lng <= 180; lng += 30) {
