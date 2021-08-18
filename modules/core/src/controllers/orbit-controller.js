@@ -202,7 +202,7 @@ export class OrbitState extends ViewState {
    * @param {Number} scale - a number between [0, 1] specifying the accumulated
    *   relative scale.
    */
-  zoom({pos, startPos, scale}) {
+  zoom({pos, startPos, scale, axis}) {
     const {zoom} = this._viewportProps;
     let {startZoom, startZoomPosition} = this._state;
     if (!Number.isFinite(startZoom)) {
@@ -216,7 +216,7 @@ export class OrbitState extends ViewState {
       startZoomPosition = this._unproject(startPos) || this._unproject(pos);
     }
 
-    const newZoom = this._calculateNewZoom({scale, startZoom});
+    const newZoom = this._calculateNewZoom({scale, startZoom, axis});
     const zoomedViewport = this.makeViewport({...this._viewportProps, zoom: newZoom});
 
     return this._getUpdatedState({
@@ -315,7 +315,7 @@ export class OrbitState extends ViewState {
 
   _getUpdatedState(newProps) {
     // Update _viewportProps
-    return new OrbitState({...this._viewportProps, ...this._state, ...newProps});
+    return new this.constructor({...this._viewportProps, ...this._state, ...newProps});
   }
 
   // Apply any constraints (mathematical or defined by _viewportProps) to map state
