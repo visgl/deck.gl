@@ -58,10 +58,16 @@ export default class LayersPass extends Pass {
       isPicking: pass.startsWith('picking'),
       renderPass: pass
     };
+    const layerFilterCache = {};
     for (let layerIndex = 0; layerIndex < layers.length; layerIndex++) {
       const layer = layers[layerIndex];
       // Check if we should draw layer
-      const shouldDrawLayer = this._shouldDrawLayer(layer, drawContext, layerFilter);
+      const shouldDrawLayer = this._shouldDrawLayer(
+        layer,
+        drawContext,
+        layerFilter,
+        layerFilterCache
+      );
 
       // This is the "logical" index for ordering this layer in the stack
       // used to calculate polygon offsets
@@ -169,7 +175,7 @@ export default class LayersPass extends Pass {
   }
 
   /* Private */
-  _shouldDrawLayer(layer, drawContext, layerFilter) {
+  _shouldDrawLayer(layer, drawContext, layerFilter, layerFilterCache) {
     const shouldDrawLayer = this.shouldDrawLayer(layer) && layer.props.visible;
 
     if (!shouldDrawLayer) {
@@ -178,10 +184,6 @@ export default class LayersPass extends Pass {
 
     drawContext.layer = layer;
 
-    if (layerFilter && !layerFilter(drawContext)) {
-      return false;
-    }
-
     let parent = layer.parent;
     while (parent) {
       if (!parent.filterSubLayer(drawContext)) {
@@ -189,6 +191,16 @@ export default class LayersPass extends Pass {
       }
       drawContext.layer = parent;
       parent = parent.parent;
+    }
+
+    if (layerFilter) {
+      const rootLayerId = drawContext.layer.id;
+      if (!(rootLayerId in layerFilterCache)) {
+        layerFilterCache[rootLayerId] = layerFilter(drawContext);
+      }
+      if (!layerFilterCache[rootLayerId]) {
+        return false;
+      }
     }
 
     // If a layer is drawn, update its viewportChanged flag
