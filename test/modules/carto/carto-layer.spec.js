@@ -184,7 +184,18 @@ test('CartoLayer#should throw with invalid params for v1 and v2', t => {
           }
         );
       })
-      .flat()
+      .flat(),
+    {
+      title: `should throw when geoColumn prop is used with type ${MAP_TYPES.QUERY}`,
+      props: {
+        ...layer.props,
+        connection: 'conn_name',
+        type: MAP_TYPES.QUERY,
+        credentials: {apiVersion: API_VERSIONS.V3},
+        geoColumn: 'geoColumn'
+      },
+      regex: /prop is only supported for type/i
+    }
   ];
 
   TEST_CASES.forEach(c => {
@@ -234,7 +245,7 @@ test('CartoLayer#should throw with invalid params for v3', t => {
       title: 'should throw when columns prop is not an Array',
       props: {
         ...layer.props,
-        type: MAP_TYPES.TILESET,
+        type: MAP_TYPES.TABLE,
         connection: 'bigqquery',
         credentials: {apiVersion: API_VERSIONS.V3},
         columns: 'a'
@@ -323,7 +334,7 @@ test('CartoLayer#_updateData executed when props changes', async t => {
       }
     },
     {
-      updateProps: {geoColumn: 'geog'},
+      updateProps: {type: MAP_TYPES.TABLE, geoColumn: 'geog'},
       spies: ['_updateData'],
       onAfterUpdate({layer, spies}) {
         if (layer.isLoaded) {
