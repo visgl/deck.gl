@@ -185,17 +185,23 @@ test('CartoLayer#should throw with invalid params for v1 and v2', t => {
         );
       })
       .flat(),
-    {
-      title: `should throw when geoColumn prop is used with type ${MAP_TYPES.QUERY}`,
-      props: {
-        ...layer.props,
-        connection: 'conn_name',
-        type: MAP_TYPES.QUERY,
-        credentials: {apiVersion: API_VERSIONS.V3},
-        geoColumn: 'geoColumn'
-      },
-      regex: /prop is only supported for type/i
-    }
+    ...[MAP_TYPES.QUERY, MAP_TYPES.TILESET]
+      .map(type => {
+        return [{geoColumn: 'geoColumn'}, {columns: ['a', 'b']}].map(prop => {
+          return {
+            title: `should throw when geoColumn prop is used with type ${type}`,
+            props: {
+              ...layer.props,
+              connection: 'conn_name',
+              type,
+              credentials: {apiVersion: API_VERSIONS.V3},
+              ...prop
+            },
+            regex: /prop is only supported for type/i
+          };
+        });
+      })
+      .flat()
   ];
 
   TEST_CASES.forEach(c => {
