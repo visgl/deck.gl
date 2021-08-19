@@ -65,6 +65,10 @@ export default class CartoLayer extends CompositeLayer {
         Object.values(MAP_TYPES).includes(type),
         `Invalid type ${type}. Use MAP_TYPES enum.`
       );
+      if (type !== MAP_TYPES.TABLE) {
+        log.assert(!geoColumn, `geoColumn prop is only supported for type ${MAP_TYPES.TABLE}`);
+        log.assert(!columns, `columns prop is only supported for type ${MAP_TYPES.TABLE}`);
+      }
       if (columns) {
         log.assert(Array.isArray(columns), 'columns prop must be an Array');
       }

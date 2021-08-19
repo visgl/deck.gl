@@ -74,11 +74,13 @@ function getParameters({type, source, geoColumn, columns}) {
   const sourceName = type === MAP_TYPES.QUERY ? 'q' : 'name';
   parameters.push(encodeParameter(sourceName, source));
 
-  if (geoColumn) {
-    parameters.push(encodeParameter('geo_column', geoColumn));
-  }
-  if (columns) {
-    parameters.push(encodeParameter('columns', columns.join(',')));
+  if (type === MAP_TYPES.TABLE) {
+    if (geoColumn) {
+      parameters.push(encodeParameter('geo_column', geoColumn));
+    }
+    if (columns) {
+      parameters.push(encodeParameter('columns', columns.join(',')));
+    }
   }
 
   return parameters.join('&');

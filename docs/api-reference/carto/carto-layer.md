@@ -113,9 +113,13 @@ Name of the connection registered in the CARTO workspace.
 
 ##### `geoColumn` (String, optional)
 
+Only supported when apiVersion is `API_VERSIONS.V3` and `type` is `MAP_TYPES.TABLE`.
+
 Name of the `geo_column` in the CARTO platform. Use this override the default column ('geom'), from which the geometry information should be fetched.
 
 ##### `columns` (Array<String>, optional)
+
+Only supported when apiVersion is `API_VERSIONS.V3` and `type` is `MAP_TYPES.TABLE`.
 
 Names of columns to fetch. By default, all columns are fetched.
 
