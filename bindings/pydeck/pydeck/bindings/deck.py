@@ -17,6 +17,7 @@ class Deck(JSONMixin):
         layers=None,
         views=[View(type="MapView", controller=True)],
         map_style=DARK,
+        custom_map_style=None,
         api_keys=None,
         initial_view_state=ViewState(latitude=0, longitude=0, zoom=1),
         width="100%",
@@ -50,6 +51,9 @@ class Deck(JSONMixin):
             URI for basemap style, which varies by provider. The default is Carto's Dark Matter map.
             For Mapbox examples, see  Mapbox's `gallery <https://www.mapbox.com/gallery/>`_.
             If not using a basemap, set ``map_provider=None``.
+        custom_map_style : dict, default None
+            A dictionary definition for a Mapbox style json for providing a custom source such as WMS or XYZ tiles.
+            See the Mapbox style `specification <https://docs.mapbox.com/mapbox-gl-js/style-spec/>`.
         initial_view_state : pydeck.ViewState, default ``pydeck.ViewState(latitude=0, longitude=0, zoom=1)``
             Initial camera angle relative to the map, defaults to a fully zoomed out 0, 0-centered map
             To compute a viewport from data, see :func:`pydeck.data_utils.viewport_helpers.compute_view`
@@ -91,7 +95,10 @@ class Deck(JSONMixin):
         self.map_provider = str(map_provider).lower() if map_provider else None
         self.deck_widget.map_provider = map_provider
 
-        self.map_style = get_from_map_identifier(map_style, map_provider)
+        if custom_map_style is not None:
+            self.map_style = custom_map_style
+        else:
+            self.map_style = get_from_map_identifier(map_style, map_provider)
 
         self.parameters = parameters
 
