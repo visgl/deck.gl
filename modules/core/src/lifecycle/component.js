@@ -28,6 +28,15 @@ export default class Component {
     Object.seal(this);
   }
 
+  get root() {
+    // eslint-disable-next-line consistent-this
+    let component = this;
+    while (component.parent) {
+      component = component.parent;
+    }
+    return component;
+  }
+
   // clone this layer with modified props
   clone(newProps) {
     const {props} = this;
