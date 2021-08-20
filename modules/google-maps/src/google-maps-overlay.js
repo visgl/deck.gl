@@ -12,6 +12,7 @@ const HIDE_ALL_LAYERS = () => false;
 const GL_STATE = {
   depthMask: true,
   depthTest: true,
+  blend: true,
   blendFunc: [GL.SRC_ALPHA, GL.ONE_MINUS_SRC_ALPHA, GL.ONE, GL.ONE_MINUS_SRC_ALPHA],
   blendEquation: GL.FUNC_ADD
 };
