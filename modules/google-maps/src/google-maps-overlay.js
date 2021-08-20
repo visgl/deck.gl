@@ -36,9 +36,15 @@ export default class GoogleMapsOverlay {
     }
     if (map) {
       this._map = map;
-      map.addListener('renderingtype_changed', () => {
+      const {UNINITIALIZED} = google.maps.RenderingType;
+      const renderingType = map.getRenderingType();
+      if (renderingType !== UNINITIALIZED) {
         this._createOverlay(map);
-      });
+      } else {
+        map.addListener('renderingtype_changed', () => {
+          this._createOverlay(map);
+        });
+      }
     }
   }
 
