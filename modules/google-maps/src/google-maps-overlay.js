@@ -166,9 +166,7 @@ export default class GoogleMapsOverlay {
       // the GL state can be inconsistent
       setParameters(gl, {
         scissor: [0, 0, gl.canvas.width, gl.canvas.height],
-        stencilFunc: [gl.ALWAYS, 0, 255, gl.ALWAYS, 0, 255],
-        depthMask: true,
-        depthTest: true
+        stencilFunc: [gl.ALWAYS, 0, 255, gl.ALWAYS, 0, 255]
       });
     }
   }
