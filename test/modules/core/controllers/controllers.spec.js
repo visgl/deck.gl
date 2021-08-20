@@ -77,6 +77,21 @@ test('OrthographicController', async t => {
   t.end();
 });
 
+test('OrthographicController#2d zoom', async t => {
+  await testController(
+    t,
+    OrthographicView,
+    {
+      target: [1, 1, 0],
+      zoom: [1, 2]
+    },
+    // OrthographicView cannot be rotated
+    ['pan#function key', 'tripan']
+  );
+
+  t.end();
+});
+
 test('FirstPersonController', async t => {
   await testController(
     t,

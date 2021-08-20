@@ -43,6 +43,10 @@ Supports all [Controller options](/docs/api-reference/core/controller.md#options
 - `touchRotate`: not effective, this view cannot be rotated
 - `keyboard`: arrow keys to pan, +/- to zoom
 
+Also accepts additional options:
+
+- `zoomAxis` (String) - which axes to apply zoom to. Affects scroll, keyboard +/- and double tap. One of `X` (zoom along the X axis only), `Y` (zoom along the Y axis only), `all`. Default `all`. If this option is set to `X` or `Y`, `viewState.zoom` must be an array to enable independent zoom for each axis.
+
 ## Custom OrthographicController
 
 You can further customize the `OrthographicController`'s behavior by extending the class:
