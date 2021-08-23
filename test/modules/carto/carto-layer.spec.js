@@ -164,7 +164,44 @@ test('CartoLayer#should throw with invalid params for v1 and v2', t => {
         credentials: {apiVersion: API_VERSIONS.V2}
       },
       regex: /Invalid type/i
-    }
+    },
+    ...[API_VERSIONS.V1, API_VERSIONS.V2]
+      .map(apiVersion => {
+        return [{connection: 'connection'}, {geoColumn: 'geoColumn'}, {columns: ['a', 'b']}].map(
+          prop => {
+            return {
+              title: `should throw when ${
+                Object.keys(prop)[0]
+              } prop is used for apiVersion ${apiVersion}`,
+              props: {
+                ...layer.props,
+                type: MAP_TYPES.QUERY,
+                credentials: {apiVersion},
+                ...prop
+              },
+              regex: /prop is not supported for apiVersion/i
+            };
+          }
+        );
+      })
+      .flat(),
+    ...[MAP_TYPES.QUERY, MAP_TYPES.TILESET]
+      .map(type => {
+        return [{geoColumn: 'geoColumn'}, {columns: ['a', 'b']}].map(prop => {
+          return {
+            title: `should throw when geoColumn prop is used with type ${type}`,
+            props: {
+              ...layer.props,
+              connection: 'conn_name',
+              type,
+              credentials: {apiVersion: API_VERSIONS.V3},
+              ...prop
+            },
+            regex: /prop is only supported for type/i
+          };
+        });
+      })
+      .flat()
   ];
 
   TEST_CASES.forEach(c => {
@@ -209,6 +246,17 @@ test('CartoLayer#should throw with invalid params for v3', t => {
         credentials: {apiVersion: API_VERSIONS.V3}
       },
       regex: /invalid type/i
+    },
+    {
+      title: 'should throw when columns prop is not an Array',
+      props: {
+        ...layer.props,
+        type: MAP_TYPES.TABLE,
+        connection: 'bigqquery',
+        credentials: {apiVersion: API_VERSIONS.V3},
+        columns: 'a'
+      },
+      regex: /prop must be an Array/i
     }
   ];
 
@@ -288,6 +336,36 @@ test('CartoLayer#_updateData executed when props changes', async t => {
       onAfterUpdate({layer, spies}) {
         if (layer.isLoaded) {
           t.ok(spies._updateData.callCount === 1, 'update credentials trigger a map instantiation');
+        }
+      }
+    },
+    {
+      updateProps: {type: MAP_TYPES.TABLE, geoColumn: 'geog'},
+      spies: ['_updateData'],
+      onAfterUpdate({layer, spies}) {
+        if (layer.isLoaded) {
+          t.ok(spies._updateData.callCount === 1, 'update geoColumns trigger a map instantiation');
+        }
+      }
+    },
+    {
+      updateProps: {columns: ['geog', 'a']},
+      spies: ['_updateData'],
+      onAfterUpdate({layer, spies}) {
+        if (layer.isLoaded) {
+          t.ok(spies._updateData.callCount === 1, 'update columns trigger a map instantiation');
+        }
+      }
+    },
+    {
+      updateProps: {columns: ['geog', 'b']},
+      spies: ['_updateData'],
+      onAfterUpdate({layer, spies}) {
+        if (layer.isLoaded) {
+          t.ok(
+            spies._updateData.callCount === 1,
+            'update single column trigger a map instantiation'
+          );
         }
       }
     }
