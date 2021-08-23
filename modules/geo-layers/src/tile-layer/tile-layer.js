@@ -200,7 +200,6 @@ export default class TileLayer extends CompositeLayer {
   }
 
   renderLayers() {
-    const {visible} = this.props;
     return this.state.tileset.tiles.map(tile => {
       const highlightedObjectIndex = this.getHighlightedObjectIndex(tile);
       // cache the rendered layer in the tile
@@ -211,7 +210,6 @@ export default class TileLayer extends CompositeLayer {
           ...this.props,
           id: `${this.id}-${tile.x}-${tile.y}-${tile.z}`,
           data: tile.data,
-          visible,
           _offset: 0,
           tile
         });
@@ -232,7 +230,7 @@ export default class TileLayer extends CompositeLayer {
   }
 
   filterSubLayer({layer}) {
-    return layer.props.tile.isVisible;
+    return this.props.visible && layer.props.tile.isVisible;
   }
 }
 
