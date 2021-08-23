@@ -255,27 +255,16 @@ const TEST_CASES = [
   {
     title: 'globe',
     viewport: new GlobeView().makeViewport({
-      width: 800,
-      height: 800,
+      width: 400,
+      height: 400,
       viewState: {
         longitude: -6,
         latitude: 58,
-        zoom: 0.5
+        zoom: 1.5
       }
     }),
-    tileSize: 256,
-    output: [
-      '0,0,2',
-      '0,1,1',
-      '0,1,2',
-      '1,0,2',
-      '1,1,1',
-      '1,1,2',
-      '2,0,2',
-      '2,1,2',
-      '3,0,2',
-      '3,1,2'
-    ]
+    tileSize: 512,
+    output: ['0,1,1', '0,1,2', '1,0,2', '1,1,1', '1,1,2', '2,0,2', '2,1,2', '3,1,2']
   }
 ];
 

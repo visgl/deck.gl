@@ -1,5 +1,36 @@
 # Upgrade Guide
 
+## Upgrading from deck.gl v8.5 to v8.6
+
+#### Breaking changes
+
+- `layerFilter` is now only called with top-level layers. For example, if you have a `GeoJsonLayer` with `id: 'regions'`, in previous versions the callback would look like:
+
+  ```js
+  layerFilter: ({layer, viewport}) => {
+    if (layer.id.startsWith('regions')) {
+      // regions-points, regions-polygons, etc.
+      return viewport.id === 'main';
+    }
+    return true;
+  }
+  ```
+
+  Now the callback can be:
+
+  ```js
+  layerFilter: ({layer, viewport}) => {
+    if (layer.id === 'region') {
+      // everything rendered by the GeoJsonLayer
+      return viewport.id === 'main';
+    }
+    return true;
+  }
+  ```
+
+  This change is intended to make this callback easier to use for the most common use cases. Using this callback to filter out specific nested sub layers is no longer supportd. Instead, you need to either set the [_subLayerProps](/docs/api-reference/core/composite-layer.md#_subLayerProps) prop (stock layer) or implement the [filterSubLayer](/docs/api-reference/core/composite-layer.md#filtersublayer) method (custom layer).
+
+
 ## Upgrading from deck.gl v8.4 to v8.5
 
 ### Transpilation

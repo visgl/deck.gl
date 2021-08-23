@@ -315,7 +315,7 @@ export class OrbitState extends ViewState {
 
   _getUpdatedState(newProps) {
     // Update _viewportProps
-    return new OrbitState({...this._viewportProps, ...this._state, ...newProps});
+    return new this.constructor({...this._viewportProps, ...this._state, ...newProps});
   }
 
   // Apply any constraints (mathematical or defined by _viewportProps) to map state

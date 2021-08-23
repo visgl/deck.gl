@@ -12,6 +12,7 @@ const HIDE_ALL_LAYERS = () => false;
 const GL_STATE = {
   depthMask: true,
   depthTest: true,
+  blend: true,
   blendFunc: [GL.SRC_ALPHA, GL.ONE_MINUS_SRC_ALPHA, GL.ONE, GL.ONE_MINUS_SRC_ALPHA],
   blendEquation: GL.FUNC_ADD
 };
@@ -35,9 +36,15 @@ export default class GoogleMapsOverlay {
     }
     if (map) {
       this._map = map;
-      map.addListener('renderingtype_changed', () => {
+      const {UNINITIALIZED} = google.maps.RenderingType;
+      const renderingType = map.getRenderingType();
+      if (renderingType !== UNINITIALIZED) {
         this._createOverlay(map);
-      });
+      } else {
+        map.addListener('renderingtype_changed', () => {
+          this._createOverlay(map);
+        });
+      }
     }
   }
 
@@ -79,7 +86,7 @@ export default class GoogleMapsOverlay {
     if (renderingType === UNINITIALIZED) {
       return;
     }
-    const isVectorMap = renderingType === VECTOR;
+    const isVectorMap = renderingType === VECTOR && google.maps.WebglOverlayView;
     const OverlayView = isVectorMap ? google.maps.WebglOverlayView : google.maps.OverlayView;
     const overlay = new OverlayView();
 

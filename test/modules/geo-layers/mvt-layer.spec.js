@@ -3,6 +3,7 @@ import {testLayer} from '@deck.gl/test-utils';
 import {MVTLayer} from '@deck.gl/geo-layers';
 import {ClipExtension} from '@deck.gl/extensions';
 import {transform} from '@deck.gl/geo-layers/mvt-layer/coordinate-transform';
+import findIndexBinary from '@deck.gl/geo-layers/mvt-layer/find-index-binary';
 import {GeoJsonLayer} from '@deck.gl/layers';
 import {geojsonToBinary} from '@loaders.gl/gis';
 import {MVTLoader} from '@loaders.gl/mvt';
@@ -512,3 +513,95 @@ for (const tileset of ['mvt-tiles', 'mvt-with-hole']) {
     t.end();
   });
 }
+
+test('findIndexBinary', t => {
+  const testData = geojsonToBinary([
+    {
+      // For testing id collision
+      id: 1,
+      type: 'Feature',
+      geometry: {
+        type: 'Point',
+        coordinates: [0, 0]
+      },
+      properties: {
+        numericalId: 300,
+        stringId: 'B',
+        layerName: 'label'
+      }
+    },
+    {
+      id: 1,
+      type: 'Feature',
+      geometry: {
+        type: 'Polygon',
+        coordinates: [[[0, 0], [1, 1], [2, 2]]]
+      },
+      properties: {
+        numericalId: 100,
+        stringId: 'A',
+        layerName: 'water'
+      }
+    },
+    {
+      id: 2,
+      type: 'Feature',
+      geometry: {
+        type: 'LineString',
+        coordinates: [[0, 0], [1, 1]]
+      },
+      properties: {
+        numericalId: 200,
+        stringId: 'B',
+        layerName: 'road'
+      }
+    },
+    {
+      id: 3,
+      type: 'Feature',
+      geometry: {
+        type: 'Point',
+        coordinates: [0, 0]
+      },
+      properties: {
+        numericalId: 300,
+        stringId: 'C',
+        layerName: 'poi'
+      }
+    },
+    {
+      id: 3,
+      type: 'Feature',
+      geometry: {
+        type: 'Point',
+        coordinates: [1, 1]
+      },
+      properties: {
+        numericalId: 400,
+        stringId: 'D',
+        layerName: 'poi'
+      }
+    }
+  ]);
+
+  // @loaders.gl/gis does not populate fields as of 3.0.8
+  testData.polygons.fields = [{id: 1}];
+  testData.lines.fields = [{id: 2}];
+  testData.points.fields = [{id: 1}, {id: 3}, {id: 4}];
+
+  t.is(findIndexBinary(testData, '', 3), 3, 'Find by default id');
+  t.is(findIndexBinary(testData, '', 1), 0, 'Find by default id');
+  t.is(findIndexBinary(testData, '', 1, 'water'), 1, 'Find by default id with layer name');
+  t.is(findIndexBinary(testData, 'numericalId', 200), 2, 'Find by numerical id');
+  t.is(findIndexBinary(testData, 'numericalId', 300), 0, 'Find by numerical id');
+  t.is(
+    findIndexBinary(testData, 'numericalId', 300, 'poi'),
+    3,
+    'Find by numerical id with layer name'
+  );
+  t.is(findIndexBinary(testData, 'stringId', 'A'), 1, 'Find by string id');
+  t.is(findIndexBinary(testData, 'stringId', 'B'), 0, 'Find by string id');
+  t.is(findIndexBinary(testData, 'stringId', 'B', 'road'), 2, 'Find by string id with layer name');
+
+  t.end();
+});

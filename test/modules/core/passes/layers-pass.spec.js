@@ -1,7 +1,8 @@
 import test from 'tape-catch';
 
-import {Layer, CompositeLayer, LayerManager} from '@deck.gl/core';
+import {Layer, CompositeLayer, LayerManager, Viewport} from '@deck.gl/core';
 import {layerIndexResolver} from '@deck.gl/core/passes/layers-pass';
+import DrawLayersPass from '@deck.gl/core/passes/draw-layers-pass';
 import {gl} from '@deck.gl/test-utils';
 
 class TestLayer extends Layer {
@@ -9,6 +10,11 @@ class TestLayer extends Layer {
 }
 
 class TestCompositeLayer extends CompositeLayer {
+  filterSubLayer({layer, viewport}) {
+    const {viewportId} = layer.props;
+    return !viewportId || viewportId === viewport.id;
+  }
+
   renderLayers() {
     const {subLayers} = this.props;
 
@@ -190,6 +196,65 @@ test('LayersPass#layerIndexResolver', t => {
       }
     }
   }
+
+  t.end();
+});
+
+test('LayersPass#shouldDrawLayer', t => {
+  const layers = [
+    new TestCompositeLayer({
+      id: 'test-composite',
+      subLayers: [
+        {
+          id: 'test-sub-1',
+          children: [{id: 'test-sub-1A', viewportId: 'A'}, {id: 'test-sub-1B', viewportId: 'B'}]
+        },
+        {
+          id: 'test-sub-2'
+        }
+      ]
+    }),
+    new TestLayer({
+      id: 'test-primitive',
+      visible: false
+    }),
+    new TestLayer({
+      id: 'test-primitive-visible'
+    })
+  ];
+
+  const layerManager = new LayerManager(gl, {});
+  const layersPass = new DrawLayersPass(gl);
+  layerManager.setLayers(layers);
+
+  const layerFilterCalls = [];
+  let renderStats = layersPass.render({
+    viewports: [new Viewport({id: 'A'})],
+    layers: layerManager.getLayers(),
+    layerFilter: ({layer}) => {
+      layerFilterCalls.push(layer.id);
+      return true;
+    },
+    onViewportActive: layerManager.activateViewport,
+    onError: t.notOk
+  })[0];
+  t.deepEqual(
+    layerFilterCalls,
+    ['test-composite', 'test-primitive-visible'],
+    'layerFilter is called twice'
+  );
+  t.ok(renderStats.totalCount === 7 && renderStats.compositeCount === 2, 'Total # of layers');
+  t.is(renderStats.visibleCount, 3, '# of rendered layers'); // test-sub-1A, test-sub-2, test-primitive-visible
+
+  renderStats = layersPass.render({
+    viewports: [new Viewport({id: 'B'})],
+    layers: layerManager.getLayers(),
+    layerFilter: ({layer}) => layer.id !== 'test-composite',
+    onViewportActive: layerManager.activateViewport,
+    onError: t.notOk
+  })[0];
+  t.ok(renderStats.totalCount === 7 && renderStats.compositeCount === 2, 'Total # of layers');
+  t.is(renderStats.visibleCount, 1, '# of rendered layers'); // test-primitive-visible
 
   t.end();
 });
