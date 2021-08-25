@@ -79,6 +79,16 @@ test('AttributeManager.add', t => {
     {positions: ['positions'], getPosition: ['positions']},
     'AttributeManager.add - build update triggers mapping'
   );
+  t.equals(
+    attributeManager.getAttributes()['positions'].settings.divisor,
+    0,
+    'AttributeManager.add creates attribute with default divisor of 0'
+  );
+  t.equals(
+    attributeManager.getAttributes()['positions'].settings.isIndexed,
+    false,
+    'AttributeManager.add creates attribute with default isIndexed of false'
+  );
   t.end();
 });
 
