@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+    <title>pydeck</title>
+        <script src="https://api.tiles.mapbox.com/mapbox-gl-js/v1.13.0/mapbox-gl.js"></script>
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap-theme.min.css" />
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.3/css/font-awesome.min.css" />
+    <script src='https://cdn.jsdelivr.net/npm/@deck.gl/jupyter-widget@~8.4.*/dist/index.js'></script>
+    <style>
+    body {
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+}
+
+#deck-map-container {
+  width: 100%;
+  height: 100%;
+  background-color: black;
+}
+
+#map {
+  pointer-events: none;
+  height: 100%;
+  width: 100%;
+  position: absolute;
+  z-index: 1;
+}
+
+#deckgl-overlay {
+  z-index: 2;
+  background: none;
+}
+
+#deck-map-wrapper {
+  width: 100%;
+  height: 100%;
+}
+
+#deck-container {
+  width: 100vw;
+  height: 100vh;
+}
+    </style>
+  </head>
+  <body>
+    <div id="deck-container">
+    </div>
+  </body>
+  <script>
+    const jsonInput = {"initialViewState": {"bearing": 0, "latitude": 37.7749295, "longitude": -122.4194155, "pitch": 0, "zoom": 10}, "layers": [{"@@type": "ScatterplotLayer", "data": [{"address": "3601 Deer Hill Road, Lafayette CA 94549", "code": "LF", "coordinates": [-122.123801, 37.893394], "entries": 3481, "exits": 3616, "exits_radius": 60.13318551349163, "name": "Lafayette (LAFY)"}, {"address": "1245 Broadway, Oakland CA 94612", "code": "12", "coordinates": [-122.271604, 37.803664], "entries": 13418, "exits": 13547, "exits_radius": 116.3915804515086, "name": "12th St. Oakland City Center (12TH)"}, {"address": "2000 Mission Street, San Francisco CA 94110", "code": "16", "coordinates": [-122.419694, 37.765062], "entries": 12409, "exits": 12351, "exits_radius": 111.13505297609751, "name": "16th St. Mission (16TH)"}, {"address": "1900 Broadway, Oakland CA 94612", "code": "19", "coordinates": [-122.269029, 37.80787], "entries": 13108, "exits": 13090, "exits_radius": 114.41153787970862, "name": "19th St. Oakland (19TH)"}, {"address": "2800 Mission Street, San Francisco CA 94110", "code": "24", "coordinates": [-122.418466, 37.752254], "entries": 12817, "exits": 12529, "exits_radius": 111.93301568348814, "name": "24th St. Mission (24TH)"}, {"address": "3100 Adeline Street, Berkeley CA 94703", "code": "AS", "coordinates": [-122.26978, 37.853024], "entries": 5452, "exits": 5341, "exits_radius": 73.08214556237385, "name": "Ashby (ASHB)"}, {"address": "401 Geneva Avenue, San Francisco CA 94112", "code": "BP", "coordinates": [-122.447414, 37.721981], "entries": 11170, "exits": 9817, "exits_radius": 99.08077512817509, "name": "Balboa Park (BALB)"}, {"address": "15242 Hesperian Blvd., San Leandro CA 94578", "code": "BF", "coordinates": [-122.126871, 37.697185], "entries": 5564, "exits": 5516, "exits_radius": 74.26977851050857, "name": "Bay Fair (BAYF)"}, {"address": "3301 Norbridge Dr., Castro Valley CA 94546", "code": "CV", "coordinates": [-122.075567, 37.690754], "entries": 2781, "exits": 2735, "exits_radius": 52.29722745997153, "name": "Castro Valley (CAST)"}, {"address": "1150 Market Street, San Francisco CA 94102", "code": "CC", "coordinates": [-122.413756, 37.779528], "entries": 24798, "exits": 22626, "exits_radius": 150.41941364066008, "name": "Civic Center/UN Plaza (CIVC)"}, {"address": "365 D Street, Colma CA 94014", "code": "CM", "coordinates": [-122.466233, 37.684638], "entries": 4397, "exits": 4214, "exits_radius": 64.91532946846992, "name": "Colma (COLM)"}, {"address": "7200 San Leandro St., Oakland CA 94621", "code": "CL", "coordinates": [-122.197273, 37.754006], "entries": 5837, "exits": 5902, "exits_radius": 76.82447526667526, "name": "Coliseum/Oakland Airport (COLS)"}, {"address": "1451 Oakland Avenue, Concord CA 94520", "code": "CN", "coordinates": [-122.029095, 37.973737], "entries": 6035, "exits": 6008, "exits_radius": 77.5112895003044, "name": "Concord (CONC)"}, {"address": "500 John Daly Blvd., Daly City CA 94014", "code": "DC", "coordinates": [-122.469081, 37.706121], "entries": 8681, "exits": 8502, "exits_radius": 92.2062904578641, "name": "Daly City (DALY)"}, {"address": "2160 Shattuck Avenue, Berkeley CA 94704", "code": "BK", "coordinates": [-122.268045, 37.869867], "entries": 11043, "exits": 11762, "exits_radius": 108.45275469069469, "name": "Downtown Berkeley (DBRK)"}, {"address": "6400 Cutting Blvd., El Cerrito CA 94530", "code": "EN", "coordinates": [-122.317269, 37.925655], "entries": 8176, "exits": 8668, "exits_radius": 93.10209449845905, "name": "El Cerrito del Norte (DELN)"}, {"address": "5801 Owens Dr., Pleasanton CA 94588", "code": "ED", "coordinates": [-121.900367, 37.701695], "entries": 7702, "exits": 7554, "exits_radius": 86.91375035056306, "name": "Dublin/Pleasanton (DUBL)"}, {"address": "298 Market Street, San Francisco CA 94111", "code": "EM", "coordinates": [-122.396742, 37.792976], "entries": 40376, "exits": 46951, "exits_radius": 216.6817943436873, "name": "Embarcadero (EMBR)"}, {"address": "2000 BART Way, Fremont CA 94536", "code": "FM", "coordinates": [-121.9764, 37.557355], "entries": 8748, "exits": 8673, "exits_radius": 93.1289428695505, "name": "Fremont (FRMT)"}, {"address": "3401 East 12th Street, Oakland CA 94601", "code": "FV", "coordinates": [-122.224274, 37.774963], "entries": 7701, "exits": 8012, "exits_radius": 89.50977600240098, "name": "Fruitvale (FTVL)"}, {"address": "2901 Diamond Street, San Francisco CA 94131", "code": "GP", "coordinates": [-122.434092, 37.732921], "entries": 7732, "exits": 7072, "exits_radius": 84.09518416651456, "name": "Glen Park (GLEN)"}, {"address": "699 'B' Street, Hayward CA 94541", "code": "HY", "coordinates": [-122.087967, 37.670399], "entries": 4958, "exits": 5003, "exits_radius": 70.73188814106408, "name": "Hayward (HAYW)"}, {"address": "800 Madison Street, Oakland CA 94607", "code": "LM", "coordinates": [-122.265609, 37.797484], "entries": 6539, "exits": 6604, "exits_radius": 81.26499861564018, "name": "Lake Merritt (LAKE)"}, {"address": "555 40th Street, Oakland CA 94609", "code": "MA", "coordinates": [-122.267227, 37.828415], "entries": 9000, "exits": 9228, "exits_radius": 96.06247966818262, "name": "MacArthur (MCAR)"}, {"address": "200 North Rollins Road, Millbrae CA 94030", "code": "MB", "coordinates": [-122.38666, 37.599787], "entries": 6570, "exits": 6149, "exits_radius": 78.41555968046137, "name": "Millbrae (MLBR)"}, {"address": "598 Market Street, San Francisco CA 94104", "code": "MT", "coordinates": [-122.401407, 37.789256], "entries": 43430, "exits": 45128, "exits_radius": 212.4335190124195, "name": "Montgomery St. (MONT)"}, {"address": "1750 Sacramento Street, Berkeley CA 94702", "code": "NB", "coordinates": [-122.283451, 37.87404], "entries": 4363, "exits": 4563, "exits_radius": 67.54998149518622, "name": "North Berkeley (NBRK)"}, {"address": "3700 Port Chicago Highway, Concord CA 94520", "code": "NC", "coordinates": [-122.024597, 38.003275], "entries": 2800, "exits": 2652, "exits_radius": 51.49757275833493, "name": "North Concord/Martinez (NCON)"}, {"address": "11 Camino Pablo, Orinda CA 94563", "code": "OR", "coordinates": [-122.183791, 37.878361], "entries": 2896, "exits": 2970, "exits_radius": 54.49770637375485, "name": "Orinda (ORIN)"}, {"address": "1365 Treat Blvd., Walnut Creek CA 94597", "code": "PH", "coordinates": [-122.056013, 37.928403], "entries": 7574, "exits": 7442, "exits_radius": 86.2670273047588, "name": "Pleasant Hill/Contra Costa Centre (PHIL)"}, {"address": "1700 West Leland Road, Pittsburg CA 94565", "code": "WP", "coordinates": [-121.945154, 38.018914], "entries": 6262, "exits": 6343, "exits_radius": 79.64295323504773, "name": "Pittsburg/Bay Point (PITT)"}, {"address": "6699 Fairmount Avenue, El Cerrito CA 94530", "code": "EP", "coordinates": [-122.299272, 37.903059], "entries": 4763, "exits": 4952, "exits_radius": 70.37044834303673, "name": "El Cerrito Plaza (PLZA)"}, {"address": "899 Market Street, San Francisco CA 94102", "code": "PL", "coordinates": [-122.406857, 37.784991], "entries": 29460, "exits": 25621, "exits_radius": 160.0656115472652, "name": "Powell St. (POWL)"}, {"address": "1700 Nevin Avenue, Richmond CA 94801", "code": "RM", "coordinates": [-122.353165, 37.936887], "entries": 4184, "exits": 4029, "exits_radius": 63.474404290233394, "name": "Richmond (RICH)"}, {"address": "5660 College Avenue, Oakland CA 94618", "code": "RR", "coordinates": [-122.251793, 37.844601], "entries": 5299, "exits": 5775, "exits_radius": 75.99342076785332, "name": "Rockridge (ROCK)"}, {"address": "1401 San Leandro Blvd., San Leandro CA 94577", "code": "SL", "coordinates": [-122.161311, 37.722619], "entries": 5836, "exits": 5921, "exits_radius": 76.94803441284255, "name": "San Leandro (SANL)"}, {"address": "1151 Huntington Avenue, San Bruno CA 94066", "code": "SB", "coordinates": [-122.416038, 37.637753000000004], "entries": 3628, "exits": 3634, "exits_radius": 60.28266749240614, "name": "San Bruno (SBRN)"}, {"address": "International Terminal, Level 3, San Francisco Int'l Airport CA 94128", "code": "SO", "coordinates": [-122.392612, 37.616035], "entries": 5833, "exits": 4904, "exits_radius": 70.02856560004639, "name": "San Francisco Int'l Airport (SFIA)"}, {"address": "28601 Dixon Street, Hayward CA 94544", "code": "SH", "coordinates": [-122.057551, 37.6348], "entries": 3007, "exits": 2829, "exits_radius": 53.1883445878888, "name": "South Hayward (SHAY)"}, {"address": "1333 Mission Road, South San Francisco CA 94080", "code": "SS", "coordinates": [-122.444116, 37.664174], "entries": 3542, "exits": 3441, "exits_radius": 58.66003750424986, "name": "South San Francisco (SSAN)"}, {"address": "10 Union Square, Union City CA 94587", "code": "UC", "coordinates": [-122.017867, 37.591208], "entries": 4772, "exits": 4770, "exits_radius": 69.06518659932803, "name": "Union City (UCTY)"}, {"address": "200 Ygnacio Valley Road, Walnut Creek CA 94596", "code": "WC", "coordinates": [-122.067423, 37.905628], "entries": 6719, "exits": 6917, "exits_radius": 83.16850365372699, "name": "Walnut Creek (WCRK)"}, {"address": "6501 Golden Gate Drive, Dublin CA 94568", "code": "WD", "coordinates": [-121.928099, 37.699759], "entries": 3303, "exits": 3447, "exits_radius": 58.71115737234278, "name": "West Dublin/Pleasanton (WDUB)"}, {"address": "1451 7th Street, Oakland CA 94607", "code": "OW", "coordinates": [-122.294582, 37.804675], "entries": 7312, "exits": 6838, "exits_radius": 82.6922003577121, "name": "West Oakland (WOAK)"}], "filled": true, "getFillColor": [255, 140, 0], "getLineColor": [0, 0, 0], "getPosition": "@@=coordinates", "getRadius": "@@=exits_radius", "id": "9650db2c-a3fa-4c39-a294-75fcdc1210f0", "lineWidthMinPixels": 1, "opacity": 0.8, "pickable": true, "radiusMaxPixels": 100, "radiusMinPixels": 1, "radiusScale": 6, "stroked": true}], "mapProvider": "mapbox", "mapStyle": {"layers": [{"id": "osm", "maxzoom": 20, "minzoom": 0, "source": "osm", "source-layer": "osm", "type": "raster"}], "sources": {"osm": {"scheme": "xyz", "tileSize": 256, "tiles": ["http://c.tile.openstreetmap.org/{z}/{x}/{y}.png"], "type": "raster"}}, "version": 8}, "views": [{"@@type": "MapView", "controller": true}]};
+    const tooltip = {'text': '{name}\n{address}'};
+    const customLibraries = null;
+
+    const deckInstance = createDeck({
+                  container: document.getElementById('deck-container'),
+      jsonInput,
+      tooltip,
+      customLibraries
+    });
+
+  </script>
+</html>

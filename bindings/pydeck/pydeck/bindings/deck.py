@@ -95,7 +95,10 @@ class Deck(JSONMixin):
         self.map_provider = str(map_provider).lower() if map_provider else None
         self.deck_widget.map_provider = map_provider
 
+        custom_map_style_error = "The map_provider parameter must be \'mapbox\' when custom_map_style is provided."
+
         if custom_map_style is not None:
+            assert map_provider == BaseMapProvider.MAPBOX.value, custom_map_style_error
             self.map_style = custom_map_style
         else:
             self.map_style = get_from_map_identifier(map_style, map_provider)
