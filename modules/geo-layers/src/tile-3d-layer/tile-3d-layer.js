@@ -99,7 +99,7 @@ export default class Tile3DLayer extends CompositeLayer {
   filterSubLayer({layer, viewport}) {
     const {tile} = layer.props;
     const {id: viewportId} = viewport;
-    return tile.viewportIds.includes(viewportId);
+    return this.props.visible && tile.selected && tile.viewportIds.includes(viewportId);
   }
 
   _updateAutoHighlight(info) {
@@ -319,15 +319,7 @@ export default class Tile3DLayer extends CompositeLayer {
             // props have changed, rerender layer
             layer = this._getSubLayer(tile, layer);
             layerCache.needsUpdate = false;
-          } else if (!layer.props.visible) {
-            // update layer visibility
-            // Still has GPU resource but visibility is turned off so turn it back on so we can render it.
-            layer = layer.clone({visible: true});
           }
-        } else if (layer && layer.props.visible) {
-          // hide non-selected tiles
-          // Still in tileset cache but doesn't need to render this frame. Keep the GPU resource bound but don't render it.
-          layer = layer.clone({visible: false});
         }
         layerCache.layer = layer;
         return layer;
