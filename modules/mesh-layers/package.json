@@ -33,7 +33,7 @@
   },
   "dependencies": {
     "@loaders.gl/gltf": "^3.0.8",
-    "@luma.gl/experimental": "^8.5.4",
-    "@luma.gl/shadertools": "^8.5.4"
+    "@luma.gl/experimental": "^8.5.5",
+    "@luma.gl/shadertools": "^8.5.5"
   }
 }
