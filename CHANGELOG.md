@@ -19,6 +19,12 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v8.5
 
+#### deck.gl [8.5.5] - Aug 25 2021
+
+- Bump luma.gl to 8.5.5 (#6132)
+- Fix Default Values in `AttributeManager` `add` method (#6130)
+- Fix TileLayer and Tile3DLayer visiblility (#6123)
+
 #### deck.gl [8.5.4] - Aug 17 2021
 
 - Fix polygon offset in Tile3DLayer (#6108)
