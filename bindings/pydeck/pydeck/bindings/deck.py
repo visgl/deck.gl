@@ -93,7 +93,7 @@ class Deck(JSONMixin):
 
         custom_map_style_error = "The map_provider parameter must be 'mapbox' when map_style is provided as a dict."
 
-        if type(map_style) is dict:
+        if isinstance(map_style, dict):
             assert map_provider == BaseMapProvider.MAPBOX.value, custom_map_style_error
             self.map_style = map_style
         else:
