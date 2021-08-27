@@ -3,6 +3,13 @@ CHANGELOG
 
 Releases and associated GitHub PRs for pydeck are documented here.
 
+0.7 Releases
+------------
+
+0.7.0 - Aug 27 2021
+-------------------
+- Lock to @deck.gl/jupyter-widget@~8.5.* (#6141)
+
 0.6 Releases
 ------------
 
