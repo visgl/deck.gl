@@ -55,10 +55,11 @@ async function request({method, url, format, accessToken, body}) {
  */
 function dealWithError({response, error}) {
   switch (response.status) {
+    case 400:
+      throw new Error(`Bad request. ${error}`);
     case 401:
     case 403:
-      throw new Error(`Unauthorized access to Maps API`);
-
+      throw new Error(`Unauthorized access. ${error}`);
     default:
       throw new Error(error);
   }
