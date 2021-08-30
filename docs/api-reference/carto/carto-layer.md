@@ -117,7 +117,7 @@ Only supported when apiVersion is `API_VERSIONS.V3` and `type` is `MAP_TYPES.TAB
 
 Name of the `geo_column` in the CARTO platform. Use this override the default column ('geom'), from which the geometry information should be fetched.
 
-##### `columns` (Array<String>, optional)
+##### `columns` (Array, optional)
 
 Only supported when apiVersion is `API_VERSIONS.V3` and `type` is `MAP_TYPES.TABLE`.
 
