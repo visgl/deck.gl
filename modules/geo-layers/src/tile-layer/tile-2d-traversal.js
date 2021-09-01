@@ -13,6 +13,7 @@ const MAX_MAPS = 3;
 // for calculating bounding volume of a tile in a non-web-mercator viewport
 const REF_POINTS_5 = [[0.5, 0.5], [0, 0], [0, 1], [1, 0], [1, 1]]; // 4 corners and center
 const REF_POINTS_9 = REF_POINTS_5.concat([[0, 0.5], [0.5, 0], [1, 0.5], [0.5, 1]]); // 4 corners, center and 4 mid points
+const REF_POINTS_11 = REF_POINTS_9.concat([[0.25, 0.5], [0.75, 0.5]]); // 2 additional points on equator for top tile
 
 class OSMNode {
   constructor(x, y, z) {
@@ -89,7 +90,7 @@ class OSMNode {
       // Custom projection
       // Estimate bounding box from sample points
       // At low zoom level we need more samples to calculate the bounding volume correctly
-      const refPoints = this.z < 2 ? REF_POINTS_9 : REF_POINTS_5;
+      const refPoints = this.z < 1 ? REF_POINTS_11 : this.z < 2 ? REF_POINTS_9 : REF_POINTS_5;
 
       // Convert from tile-relative coordinates to common space
       const refPointPositions = [];
