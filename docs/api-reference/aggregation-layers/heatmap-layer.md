@@ -120,6 +120,24 @@ Operation used to aggregate all data point weights to calculate a pixel's color 
 
 The weight of each data object is distributed to all the pixels in a circle centered at the object position. The weight that a pixel receives is inversely proportional to its distance from the center. In `'SUM'` mode, pixels that fall into multiple circles will have the sum of all weights. In `'MEAN'` mode, pixels that fall into multiple circles will have their weight calculated as the weighted average from all the neighboring data points. And the weight of the pixel determines its color. 
 
+##### `weightsTextureSize` (String, optional)
+
+* Default: `2048`
+
+`weightsTextureSize` specifies the size of weight texture. Smaller texture sizes can improve rendering performance.
+
+##### `debounceTimeout` (String, optional)
+
+* Default: `500`
+
+`debounceTimeout` is an interval in milliseconds during which changes to the viewport don't trigger aggregation.
+
+##### `_modifyWeightsTransformShaders` (String, optional)
+
+* Default: `{vs: string, _fs: string} => {vs: string, _fs: string}`
+
+A callback to modify default weight transform shaders.
+
 ### Data Accessors
 
 ##### `getPosition` ([Function](/docs/developer-guide/using-layers.md#accessors), optional)

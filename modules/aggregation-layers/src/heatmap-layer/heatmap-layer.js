@@ -44,8 +44,6 @@ import vs_max from './max-vs.glsl';
 import fs_max from './max-fs.glsl';
 
 const RESOLUTION = 2; // (number of common space pixels) / (number texels)
-const SIZE_2K = 2048;
-const ZOOM_DEBOUNCE = 500; // milliseconds
 const TEXTURE_OPTIONS = {
   mipmaps: false,
   parameters: {
@@ -71,7 +69,11 @@ const defaultProps = {
   threshold: {type: 'number', min: 0, max: 1, value: 0.05},
   colorDomain: {type: 'array', value: null, optional: true},
   // 'SUM' or 'MEAN'
-  aggregation: 'SUM'
+  aggregation: 'SUM',
+  weightsTextureSize: {type: 'number', min: 128, max: 2048, value: 2048},
+  debounceTimeout: {type: 'number', min: 0, max: 1000, value: 500},
+
+  _modifyWeightsTransformShaders: f => f
 };
 
 const REQUIRED_FEATURES = [
@@ -112,6 +114,10 @@ export default class HeatmapLayer extends AggregationLayer {
       return;
     }
     super.updateState(opts);
+    this.updateStateLogic(opts);
+  }
+
+  updateStateLogic(opts) {
     const {props, oldProps} = opts;
     const changeFlags = this._getChangeFlags(opts);
 
@@ -139,7 +145,6 @@ export default class HeatmapLayer extends AggregationLayer {
 
     this.setState({zoom: opts.context.viewport.zoom});
   }
-  /* eslint-enable max-statements,complexity */
 
   renderLayers() {
     if (!this.state.supported) {
@@ -262,7 +267,9 @@ export default class HeatmapLayer extends AggregationLayer {
 
   _setupTextureParams() {
     const {gl} = this.context;
-    const textureSize = Math.min(SIZE_2K, getParameters(gl, gl.MAX_TEXTURE_SIZE));
+    const {weightsTextureSize} = this.props;
+
+    const textureSize = Math.min(weightsTextureSize, getParameters(gl, gl.MAX_TEXTURE_SIZE));
     const floatTargetSupport = hasFeatures(gl, FEATURES.COLOR_ATTACHMENT_RGBA32F);
     const {format, type} = getTextureParams({gl, floatTargetSupport});
     const weightsScale = floatTargetSupport ? 1 : 1 / 255;
@@ -278,16 +285,13 @@ export default class HeatmapLayer extends AggregationLayer {
 
   _createWeightsTransform(shaderOptions = {}) {
     const {gl} = this.context;
+    const {_modifyWeightsTransformShaders} = this.props;
     let {weightsTransform} = this.state;
     const {weightsTexture} = this.state;
     weightsTransform?.delete();
-    const shaders = mergeShaders(
-      {
-        vs: weights_vs,
-        _fs: weights_fs
-      },
-      shaderOptions
-    );
+
+    const shaderInfo = _modifyWeightsTransformShaders({vs: weights_vs, _fs: weights_fs});
+    const shaders = mergeShaders(shaderInfo, shaderOptions);
 
     weightsTransform = new Transform(gl, {
       id: `${this.id}-weights-transform`,
@@ -496,17 +500,18 @@ export default class HeatmapLayer extends AggregationLayer {
 
   _debouncedUpdateWeightmap(fromTimer = false) {
     let {updateTimer} = this.state;
+    const {debounceTimeout} = this.props;
 
     if (fromTimer) {
       updateTimer = null;
       // update
       this._updateBounds(true);
       this._updateTextureRenderingBounds();
-      this.setState({isWeightMapDirty: true});
+      this._updateWeightmap();
     } else {
       this.setState({isWeightMapDirty: false});
       clearTimeout(updateTimer);
-      updateTimer = setTimeout(this._debouncedUpdateWeightmap.bind(this, true), ZOOM_DEBOUNCE);
+      updateTimer = setTimeout(this._debouncedUpdateWeightmap.bind(this, true), debounceTimeout);
     }
 
     this.setState({updateTimer});
