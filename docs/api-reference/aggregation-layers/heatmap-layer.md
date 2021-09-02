@@ -132,12 +132,6 @@ The weight of each data object is distributed to all the pixels in a circle cent
 
 `debounceTimeout` is an interval in milliseconds during which changes to the viewport don't trigger aggregation.
 
-##### `_modifyWeightsTransformShaders` (Function, optional)
-
-* Default: `({vs: string, _fs: string}) => {vs: string, _fs: string}`
-
-A callback to modify default weights transform shaders.
-
 ### Data Accessors
 
 ##### `getPosition` ([Function](/docs/developer-guide/using-layers.md#accessors), optional)

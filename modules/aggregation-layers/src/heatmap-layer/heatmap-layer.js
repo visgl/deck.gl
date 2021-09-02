@@ -71,9 +71,7 @@ const defaultProps = {
   // 'SUM' or 'MEAN'
   aggregation: 'SUM',
   weightsTextureSize: {type: 'number', min: 128, max: 2048, value: 2048},
-  debounceTimeout: {type: 'number', min: 0, max: 1000, value: 500},
-
-  _modifyWeightsTransformShaders: shaderInfo => shaderInfo
+  debounceTimeout: {type: 'number', min: 0, max: 1000, value: 500}
 };
 
 const REQUIRED_FEATURES = [
@@ -284,14 +282,17 @@ export default class HeatmapLayer extends AggregationLayer {
     }
   }
 
+  _getWeightsTransformShaders() {
+    return {vs: weights_vs, _fs: weights_fs};
+  }
+
   _createWeightsTransform(shaderOptions = {}) {
     const {gl} = this.context;
-    const {_modifyWeightsTransformShaders} = this.props;
     let {weightsTransform} = this.state;
     const {weightsTexture} = this.state;
     weightsTransform?.delete();
 
-    const shaderInfo = _modifyWeightsTransformShaders({vs: weights_vs, _fs: weights_fs});
+    const shaderInfo = this._getWeightsTransformShaders();
     const shaders = mergeShaders(shaderInfo, shaderOptions);
 
     weightsTransform = new Transform(gl, {
@@ -508,7 +509,7 @@ export default class HeatmapLayer extends AggregationLayer {
       // update
       this._updateBounds(true);
       this._updateTextureRenderingBounds();
-      this._updateWeightmap();
+      this.setState({isWeightMapDirty: true});
     } else {
       this.setState({isWeightMapDirty: false});
       clearTimeout(updateTimer);
