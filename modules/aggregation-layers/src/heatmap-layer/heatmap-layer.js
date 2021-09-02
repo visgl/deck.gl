@@ -114,10 +114,11 @@ export default class HeatmapLayer extends AggregationLayer {
       return;
     }
     super.updateState(opts);
-    this.updateStateLogic(opts);
+
+    this._updateHeatmapState(opts);
   }
 
-  updateStateLogic(opts) {
+  _updateHeatmapState(opts) {
     const {props, oldProps} = opts;
     const changeFlags = this._getChangeFlags(opts);
 
