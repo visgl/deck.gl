@@ -73,7 +73,7 @@ const defaultProps = {
   weightsTextureSize: {type: 'number', min: 128, max: 2048, value: 2048},
   debounceTimeout: {type: 'number', min: 0, max: 1000, value: 500},
 
-  _modifyWeightsTransformShaders: f => f
+  _modifyWeightsTransformShaders: shaderInfo => shaderInfo
 };
 
 const REQUIRED_FEATURES = [
