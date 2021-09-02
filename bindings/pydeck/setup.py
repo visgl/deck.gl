@@ -178,7 +178,7 @@ if __name__ == "__main__":
         description="Widget for deck.gl maps",
         long_description="{}".format(read("README.md")),
         long_description_content_type="text/markdown",
-        license="Apache 2.0 License",
+        license="Apache License 2.0",
         include_package_data=True,
         packages=find_packages(exclude=["tests*"]),
         cmdclass={
