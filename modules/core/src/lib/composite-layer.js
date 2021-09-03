@@ -90,9 +90,7 @@ export default class CompositeLayer extends Layer {
 
   // Returns true if sub layer needs to be rendered
   shouldRenderSubLayer(id, data) {
-    const {_subLayerProps: overridingProps} = this.props;
-
-    return (data && data.length) || (overridingProps && overridingProps[id]);
+    return data && data.length;
   }
 
   // Returns sub layer class for a specific sublayer
