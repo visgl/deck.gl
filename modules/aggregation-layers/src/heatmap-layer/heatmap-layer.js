@@ -286,14 +286,25 @@ export default class HeatmapLayer extends AggregationLayer {
     return {vs: weights_vs, _fs: weights_fs};
   }
 
-  _createWeightsTransform(shaderOptions = {}) {
+  getShaders(type) {
+    return super.getShaders(
+      type === 'max-weights-transform'
+        ? {
+            vs: vs_max,
+            _fs: fs_max
+          }
+        : {
+            vs: weights_vs,
+            _fs: weights_fs
+          }
+    );
+  }
+
+  _createWeightsTransform(shaders = {}) {
     const {gl} = this.context;
     let {weightsTransform} = this.state;
     const {weightsTexture} = this.state;
     weightsTransform?.delete();
-
-    const shaderInfo = this._getWeightsTransformShaders();
-    const shaders = mergeShaders(shaderInfo, shaderOptions);
 
     weightsTransform = new Transform(gl, {
       id: `${this.id}-weights-transform`,
@@ -309,7 +320,9 @@ export default class HeatmapLayer extends AggregationLayer {
     const {gl} = this.context;
     this._createTextures();
     const {textureSize, weightsTexture, maxWeightsTexture} = this.state;
-    this._createWeightsTransform();
+    this._createWeightsTransform(this.getShaders('weights-transform'));
+
+    const maxWeightsShaders = this.getShaders('max-weights-transform');
     const maxWeightTransform = new Transform(gl, {
       id: `${this.id}-max-weights-transform`,
       _sourceTextures: {
@@ -317,8 +330,8 @@ export default class HeatmapLayer extends AggregationLayer {
       },
       _targetTexture: maxWeightsTexture,
       _targetTextureVarying: 'outTexture',
-      vs: vs_max,
-      _fs: fs_max,
+      vs: maxWeightsShaders.vs,
+      _fs: maxWeightsShaders._fs,
       elementCount: textureSize * textureSize
     });
 
