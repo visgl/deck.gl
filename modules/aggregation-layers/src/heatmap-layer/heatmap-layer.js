@@ -107,7 +107,6 @@ export default class HeatmapLayer extends AggregationLayer {
       return;
     }
     super.updateState(opts);
-
     this._updateHeatmapState(opts);
   }
 
@@ -315,9 +314,11 @@ export default class HeatmapLayer extends AggregationLayer {
     const {gl} = this.context;
     this._createTextures();
     const {textureSize, weightsTexture, maxWeightsTexture} = this.state;
-    this._createWeightsTransform(this.getShaders('weights-transform'));
 
-    const maxWeightsShaders = this.getShaders('max-weights-transform');
+    const weightsTransformShaders = this.getShaders('weights-transform');
+    this._createWeightsTransform(weightsTransformShaders);
+
+    const maxWeightsTransformShaders = this.getShaders('max-weights-transform');
     const maxWeightTransform = new Transform(gl, {
       id: `${this.id}-max-weights-transform`,
       _sourceTextures: {
@@ -325,8 +326,7 @@ export default class HeatmapLayer extends AggregationLayer {
       },
       _targetTexture: maxWeightsTexture,
       _targetTextureVarying: 'outTexture',
-      vs: maxWeightsShaders.vs,
-      _fs: maxWeightsShaders._fs,
+      ...maxWeightsTransformShaders,
       elementCount: textureSize * textureSize
     });
 
