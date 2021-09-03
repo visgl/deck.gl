@@ -270,7 +270,7 @@ Parameters:
 * `id` (String) - the sublayer id
 * `data` (Array) - the sublayer data
 
-Returns `true` if the sublayer should be rendered. The base class implementation returns `true` if either `data` is not empty or the `_subLayerProps` prop contains override for this sublayer.
+Returns `true` if the sublayer should be rendered. The base class implementation returns `true` if `data` is not empty.
 
 
 ##### `getSubLayerClass`
