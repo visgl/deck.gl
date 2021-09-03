@@ -29,12 +29,7 @@ import {
   getTextureParams
 } from './heatmap-layer-utils';
 import {Buffer, Texture2D, Transform, getParameters, FEATURES, hasFeatures} from '@luma.gl/core';
-import {
-  AttributeManager,
-  COORDINATE_SYSTEM,
-  log,
-  _mergeShaders as mergeShaders
-} from '@deck.gl/core';
+import {AttributeManager, COORDINATE_SYSTEM, log} from '@deck.gl/core';
 import TriangleLayer from './triangle-layer';
 import AggregationLayer from '../aggregation-layer';
 import {defaultColorRange, colorRangeToFlatArray} from '../utils/color-utils';
