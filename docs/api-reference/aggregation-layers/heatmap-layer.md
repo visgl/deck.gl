@@ -120,6 +120,18 @@ Operation used to aggregate all data point weights to calculate a pixel's color 
 
 The weight of each data object is distributed to all the pixels in a circle centered at the object position. The weight that a pixel receives is inversely proportional to its distance from the center. In `'SUM'` mode, pixels that fall into multiple circles will have the sum of all weights. In `'MEAN'` mode, pixels that fall into multiple circles will have their weight calculated as the weighted average from all the neighboring data points. And the weight of the pixel determines its color. 
 
+##### `weightsTextureSize` (Number, optional)
+
+* Default: `2048`
+
+`weightsTextureSize` specifies the size of weight texture. Smaller texture sizes can improve rendering performance. Heatmap aggregation calculates the maximum weight value in the texture and the process can take 50-100 ms for 2048x2048 texture, but only 5-7ms for 512x512 texture. Smaller texture sizes lead to visible pixelation.
+
+##### `debounceTimeout` (Number, optional)
+
+* Default: `500`
+
+`debounceTimeout` is an interval in milliseconds during which changes to the viewport don't trigger aggregation. Large datasets combined with a large `radiusPixels` can cause freezes during user interactions due to aggregation updates. Setting positive debounceTimeout delays aggregation updates and prevents freezes during the interaction. As a side effect, the user has to wait to see updated results after the end of the interaction. 
+
 ### Data Accessors
 
 ##### `getPosition` ([Function](/docs/developer-guide/using-layers.md#accessors), optional)
