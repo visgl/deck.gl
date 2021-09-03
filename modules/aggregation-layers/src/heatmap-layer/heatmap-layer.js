@@ -276,10 +276,6 @@ export default class HeatmapLayer extends AggregationLayer {
     }
   }
 
-  _getWeightsTransformShaders() {
-    return {vs: weights_vs, _fs: weights_fs};
-  }
-
   getShaders(type) {
     return super.getShaders(
       type === 'max-weights-transform'
