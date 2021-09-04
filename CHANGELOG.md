@@ -19,9 +19,17 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v8.5
 
+#### deck.gl [8.5.7] - Sep 3 2021
+
+- Drop sublayers with no data even if the _subLayerProps prop contains (#6160)
+- HeatmapLayer - expose additional properties (#6158)
+- GlobeView - Additional reference points for bounding volume calculation (#6148)
+
 #### deck.gl [8.5.6] - Aug 28 2021
+
 - CARTO: include API error at the exception message (#6143)
 - Add geoColumn & columns props to CartoLayer (#6097)
+
 #### deck.gl [8.5.5] - Aug 25 2021
 
 - Bump luma.gl to 8.5.5 (#6132)
