@@ -21,6 +21,24 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ### deck.gl v8.6 Prereleases
 
+- Drop sublayers with no data even if the _subLayerProps prop contains (#6160)
+- Heatmap - expose additional properties (#6158)
+- pydeck: Enable custom_map_style and file encoding for HTML on Windows (#6121)
+- Additional reference points for bounding volume calculation - globe view (#6148)
+- CARTO: include API error at the exception message (#6143)
+- Bump luma.gl to 8.5.5 (#6132)
+- Fix Default Values in `AttributeManager` `add` method (#6130)
+- Fix TileLayer and Tile3DLayer visiblility (#6123)
+- Add geoColumn & columns props to CartoLayer (#6097)
+- Bug fixes in google overlay (#6083)
+- OrthographicView supports independent x/y zoom levels (#6116)
+- Only call layerFilter with top-level layers (#6049)
+- Add zero _offset to Tile3DLayer (#6108)
+- Fix MVTLayer autoHighlight with binary data (#6098)
+- Improve tile traversal in GlobeView (#6106)
+- Bump loaders to 3.0.8 (#6075)
+- Scatterplot layer: smooth edges prop (#6081)
+
 #### deck.gl [8.6.0-alpha.1] - Aug 9 2021
 
 - Support vector maps in google module (#5981)
