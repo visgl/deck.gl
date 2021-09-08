@@ -156,10 +156,7 @@ export default class GoogleMapsOverlay {
     const deck = this._deck;
 
     deck.setProps({
-      ...getViewPropsFromCoordinateTransformer(this._map, coordinateTransformer),
-      _customRender: reason => {
-        this._overlay.requestRedraw();
-      }
+      ...getViewPropsFromCoordinateTransformer(this._map, coordinateTransformer)
     });
 
     if (deck.layerManager) {
@@ -175,15 +172,11 @@ export default class GoogleMapsOverlay {
 
       // Workaround for bug in Google maps where viewport state is wrong
       // TODO remove once fixed
-      const viewport = getParameters(gl, GL.VIEWPORT);
-      const canvasViewport = [0, 0, gl.canvas.width, gl.canvas.height];
-      if (!canvasViewport.every((v, i) => v === viewport[i])) {
-        setParameters(gl, {
-          viewport: [0, 0, gl.canvas.width, gl.canvas.height],
-          scissor: [0, 0, gl.canvas.width, gl.canvas.height],
-          stencilFunc: [gl.ALWAYS, 0, 255, gl.ALWAYS, 0, 255]
-        });
-      }
+      setParameters(gl, {
+        viewport: [0, 0, gl.canvas.width, gl.canvas.height],
+        scissor: [0, 0, gl.canvas.width, gl.canvas.height],
+        stencilFunc: [gl.ALWAYS, 0, 255, gl.ALWAYS, 0, 255]
+      });
 
       withParameters(gl, GL_STATE, () => {
         deck._drawLayers('google-vector', {
