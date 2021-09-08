@@ -228,7 +228,6 @@ function getEventPixel(event, deck) {
 
 // Triggers picking on a mouse event
 function handleMouseEvent(deck, type, event) {
-  return; // Disable event handling to avoid touching state outside of lifecycle methods
   const mockEvent = {
     type,
     offsetCenter: getEventPixel(event, deck),
