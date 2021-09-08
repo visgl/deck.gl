@@ -157,7 +157,13 @@ export default class GoogleMapsOverlay {
 
     deck.setProps({
       ...getViewPropsFromCoordinateTransformer(this._map, coordinateTransformer),
-      _customRender: () => {}
+      _customRender: reason => {
+        if (reason !== 'viewState changed') {
+          // The viewState is controlled by Google Maps, but other
+          // renders need to explicitly trigger a redraw
+          this._overlay.requestRedraw();
+        }
+      }
     });
 
     if (deck.layerManager) {
@@ -177,8 +183,6 @@ export default class GoogleMapsOverlay {
           stencilFunc: [gl.ALWAYS, 0, 255, gl.ALWAYS, 0, 255]
         });
       }
-
-      //this._overlay.requestRedraw();
 
       withParameters(gl, GL_STATE, () => {
         deck._drawLayers('google-vector', {
