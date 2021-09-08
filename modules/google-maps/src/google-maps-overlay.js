@@ -156,7 +156,8 @@ export default class GoogleMapsOverlay {
     const deck = this._deck;
 
     deck.setProps({
-      ...getViewPropsFromCoordinateTransformer(this._map, coordinateTransformer)
+      ...getViewPropsFromCoordinateTransformer(this._map, coordinateTransformer),
+      _customRender: () => {}
     });
 
     if (deck.layerManager) {
