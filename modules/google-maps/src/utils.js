@@ -37,9 +37,6 @@ export function createDeckInstance(map, overlay, deck, props) {
       zoom: 1
     },
     controller: false,
-    _customRender: () => {
-      overlay.requestRedraw();
-    },
     userData: {
       _googleMap: map,
       _eventListeners: eventListeners

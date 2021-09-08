@@ -111,7 +111,14 @@ export default class GoogleMapsOverlay {
   }
 
   _onContextRestored(gl) {
-    this._deck = createDeckInstance(this._map, this._overlay, this._deck, {gl, ...this.props});
+    const _customRender = () => {
+      this._overlay.requestRedraw();
+    };
+    this._deck = createDeckInstance(this._map, this._overlay, this._deck, {
+      gl,
+      _customRender,
+      ...this.props
+    });
   }
 
   _onContextLost() {
