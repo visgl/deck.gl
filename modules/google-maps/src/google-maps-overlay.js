@@ -161,7 +161,13 @@ export default class GoogleMapsOverlay {
     });
 
     if (deck.layerManager) {
-      this._overlay.requestRedraw();
+      // As an optimization, some renders are to an separate framebuffer
+      // which we need to pass onto deck
+      const _framebuffer = gl.getParameter(gl.FRAMEBUFFER_BINDING);
+      deck.setProps({_framebuffer});
+
+      //this._overlay.requestRedraw();
+
       withParameters(gl, GL_STATE, () => {
         deck._drawLayers('google-vector', {
           clearCanvas: false
