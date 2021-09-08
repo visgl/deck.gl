@@ -158,11 +158,7 @@ export default class GoogleMapsOverlay {
     deck.setProps({
       ...getViewPropsFromCoordinateTransformer(this._map, coordinateTransformer),
       _customRender: reason => {
-        if (reason !== 'viewState changed') {
-          // The viewState is controlled by Google Maps, but other
-          // renders need to explicitly trigger a redraw
-          this._overlay.requestRedraw();
-        }
+        this._overlay.requestRedraw();
       }
     });
 
@@ -171,6 +167,11 @@ export default class GoogleMapsOverlay {
       // which we need to pass onto deck
       const _framebuffer = getParameters(gl, GL.FRAMEBUFFER_BINDING);
       deck.setProps({_framebuffer});
+
+      // Camera changed, will trigger a map repaint right after this
+      // Clear any change flag triggered by setting viewState so that deck does not request
+      // a second repaint
+      deck.needsRedraw({clearRedrawFlags: true});
 
       // Workaround for bug in Google maps where viewport state is wrong
       // TODO remove once fixed
