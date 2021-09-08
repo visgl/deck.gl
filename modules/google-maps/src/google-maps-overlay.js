@@ -169,7 +169,7 @@ export default class GoogleMapsOverlay {
     if (deck.layerManager) {
       // As an optimization, some renders are to an separate framebuffer
       // which we need to pass onto deck
-      const _framebuffer = gl.getParameter(gl.FRAMEBUFFER_BINDING);
+      const _framebuffer = getParameters(gl, GL.FRAMEBUFFER_BINDING);
       deck.setProps({_framebuffer});
 
       // Workaround for bug in Google maps where viewport state is wrong
