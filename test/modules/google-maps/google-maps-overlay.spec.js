@@ -156,8 +156,13 @@ function drawPickTest(renderingType) {
     t.ok(equals(viewState.longitude, map.opts.longitude), 'longitude is set');
     t.ok(equals(viewState.latitude, map.opts.latitude), 'latitude is set');
     t.ok(equals(viewState.zoom, map.opts.zoom - 1), 'zoom is set');
-    t.ok(equals(width, map.opts.width), 'width is set');
-    t.ok(equals(height, map.opts.height), 'height is set');
+    if (renderingType === mapsApi.RenderingType.RASTER) {
+      t.ok(equals(width, map.opts.width), 'width is set');
+      t.ok(equals(height, map.opts.height), 'height is set');
+    } else {
+      t.ok(equals(width, false), 'width is not set');
+      t.ok(equals(height, false), 'height is not set');
+    }
 
     if (renderingType === mapsApi.RenderingType.RASTER) {
       t.notOk(deck.props.layerFilter, 'layerFilter is empty');
