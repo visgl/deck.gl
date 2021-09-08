@@ -1,5 +1,5 @@
 /* global google */
-import {setParameters, withParameters} from '@luma.gl/core';
+import {getParameters, setParameters, withParameters} from '@luma.gl/core';
 import GL from '@luma.gl/constants';
 import {
   createDeckInstance,
@@ -166,21 +166,24 @@ export default class GoogleMapsOverlay {
       const _framebuffer = gl.getParameter(gl.FRAMEBUFFER_BINDING);
       deck.setProps({_framebuffer});
 
+      // Workaround for bug in Google maps where viewport state is wrong
+      // TODO remove once fixed
+      const viewport = getParameters(gl, GL.VIEWPORT);
+      const canvasViewport = [0, 0, gl.canvas.width, gl.canvas.height];
+      if (!canvasViewport.every((v, i) => v === viewport[i])) {
+        setParameters(gl, {
+          viewport: [0, 0, gl.canvas.width, gl.canvas.height],
+          scissor: [0, 0, gl.canvas.width, gl.canvas.height],
+          stencilFunc: [gl.ALWAYS, 0, 255, gl.ALWAYS, 0, 255]
+        });
+      }
+
       //this._overlay.requestRedraw();
 
       withParameters(gl, GL_STATE, () => {
         deck._drawLayers('google-vector', {
           clearCanvas: false
         });
-      });
-
-      // Reset state otherwise get rendering errors in
-      // Google library. These occur because the picking
-      // code is run outside of the _onDrawVector() method and
-      // the GL state can be inconsistent
-      setParameters(gl, {
-        scissor: [0, 0, gl.canvas.width, gl.canvas.height],
-        stencilFunc: [gl.ALWAYS, 0, 255, gl.ALWAYS, 0, 255]
       });
     }
   }
