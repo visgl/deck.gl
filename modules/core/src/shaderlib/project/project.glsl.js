@@ -47,6 +47,7 @@ uniform float project_uDevicePixelRatio;
 uniform float project_uFocalDistance;
 uniform vec3 project_uCameraPosition;
 uniform vec3 project_uCoordinateOrigin;
+uniform vec3 project_uCommonOrigin;
 
 const float TILE_SIZE = 512.0;
 const float PI = 3.1415926536;
@@ -87,9 +88,6 @@ vec3 project_normal(vec3 vector) {
 
 vec4 project_offset_(vec4 offset) {
   float dy = offset.y;
-  if (project_uCoordinateSystem == COORDINATE_SYSTEM_LNGLAT) {
-    dy = clamp(dy, -1., 1.);
-  }
   vec3 commonUnitsPerWorldUnit = project_uCommonUnitsPerWorldUnit + project_uCommonUnitsPerWorldUnit2 * dy;
   return vec4(offset.xyz * commonUnitsPerWorldUnit, offset.w);
 }
@@ -106,7 +104,7 @@ vec2 project_mercator_(vec2 lnglat) {
   return vec2(
     radians(x) + PI,
     PI + log(tan_fp32(PI * 0.25 + radians(y) * 0.5))
-  );
+  ) * WORLD_SCALE;
 }
 
 vec3 project_globe_(vec3 lnglatz) {
@@ -132,7 +130,7 @@ vec4 project_position(vec4 position, vec3 position64Low) {
   if (project_uProjectionMode == PROJECTION_MODE_WEB_MERCATOR) {
     if (project_uCoordinateSystem == COORDINATE_SYSTEM_LNGLAT) {
       return vec4(
-        project_mercator_(position_world.xy) * WORLD_SCALE,
+        project_mercator_(position_world.xy),
         project_size(position_world.z),
         position_world.w
       );
@@ -147,6 +145,19 @@ vec4 project_position(vec4 position, vec3 position64Low) {
         project_globe_(position_world.xyz),
         position_world.w
       );
+    }
+  }
+  if (project_uProjectionMode == PROJECTION_MODE_WEB_MERCATOR_AUTO_OFFSET) {
+    if (project_uCoordinateSystem == COORDINATE_SYSTEM_LNGLAT) {
+      if (abs(position_world.y - project_uCoordinateOrigin.y) > 0.25) {
+        // Too far from the projection center for offset mode to be accurate
+        // Only use high parts
+        return vec4(
+          project_mercator_(position_world.xy) - project_uCommonOrigin.xy,
+          project_size(position_world.z),
+          position_world.w
+        );
+      }
     }
   }
   if (project_uProjectionMode == PROJECTION_MODE_IDENTITY ||
