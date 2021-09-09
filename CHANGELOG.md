@@ -21,6 +21,8 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ### deck.gl v8.6 Prereleases
 
+#### deck.gl [8.6.0-alpha.2] - Sep 6 2021
+
 - Drop sublayers with no data even if the _subLayerProps prop contains (#6160)
 - Heatmap - expose additional properties (#6158)
 - pydeck: Enable custom_map_style and file encoding for HTML on Windows (#6121)
