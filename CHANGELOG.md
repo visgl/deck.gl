@@ -21,6 +21,11 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ### deck.gl v8.6 Prereleases
 
+#### deck.gl [8.6.0-alpha.3] - Sep 9 2021
+
+- Improve shader projection in auto offset mode (#6161)
+- Google overlay state synchronization (#6177)
+
 #### deck.gl [8.6.0-alpha.2] - Sep 6 2021
 
 - Drop sublayers with no data even if the _subLayerProps prop contains (#6160)
