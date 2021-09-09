@@ -1,5 +1,5 @@
 /* global google */
-import {setParameters, withParameters} from '@luma.gl/core';
+import {getParameters, setParameters, withParameters} from '@luma.gl/core';
 import GL from '@luma.gl/constants';
 import {
   createDeckInstance,
@@ -111,7 +111,14 @@ export default class GoogleMapsOverlay {
   }
 
   _onContextRestored(gl) {
-    this._deck = createDeckInstance(this._map, this._overlay, this._deck, {gl, ...this.props});
+    const _customRender = () => {
+      this._overlay.requestRedraw();
+    };
+    this._deck = createDeckInstance(this._map, this._overlay, this._deck, {
+      gl,
+      _customRender,
+      ...this.props
+    });
   }
 
   _onContextLost() {
@@ -160,20 +167,28 @@ export default class GoogleMapsOverlay {
     });
 
     if (deck.layerManager) {
-      this._overlay.requestRedraw();
+      // As an optimization, some renders are to an separate framebuffer
+      // which we need to pass onto deck
+      const _framebuffer = getParameters(gl, GL.FRAMEBUFFER_BINDING);
+      deck.setProps({_framebuffer});
+
+      // Camera changed, will trigger a map repaint right after this
+      // Clear any change flag triggered by setting viewState so that deck does not request
+      // a second repaint
+      deck.needsRedraw({clearRedrawFlags: true});
+
+      // Workaround for bug in Google maps where viewport state is wrong
+      // TODO remove once fixed
+      setParameters(gl, {
+        viewport: [0, 0, gl.canvas.width, gl.canvas.height],
+        scissor: [0, 0, gl.canvas.width, gl.canvas.height],
+        stencilFunc: [gl.ALWAYS, 0, 255, gl.ALWAYS, 0, 255]
+      });
+
       withParameters(gl, GL_STATE, () => {
         deck._drawLayers('google-vector', {
           clearCanvas: false
         });
-      });
-
-      // Reset state otherwise get rendering errors in
-      // Google library. These occur because the picking
-      // code is run outside of the _onDrawVector() method and
-      // the GL state can be inconsistent
-      setParameters(gl, {
-        scissor: [0, 0, gl.canvas.width, gl.canvas.height],
-        stencilFunc: [gl.ALWAYS, 0, 255, gl.ALWAYS, 0, 255]
       });
     }
   }
