@@ -188,8 +188,9 @@ export function getViewPropsFromCoordinateTransformer(map, coordinateTransformer
   const focalDistance = 0.5 * projectionMatrix[5];
 
   return {
-    width,
-    height,
+    // Using external gl context - do not set css size
+    width: false,
+    height: false,
     viewState: {
       altitude: focalDistance,
       bearing,
