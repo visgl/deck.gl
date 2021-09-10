@@ -27,7 +27,6 @@ import {
   cssToDevicePixels
 } from '@luma.gl/core';
 import GL from '@luma.gl/constants';
-import log from '../utils/log';
 import PickLayersPass from '../passes/pick-layers-pass';
 import {getClosestObject, getUniqueObjects} from './picking/query-object';
 import {processPickInfo, getLayerPickingInfo, getEmptyPickingInfo} from './picking/pick-info';
@@ -131,10 +130,6 @@ export default class DeckPicker {
       return null;
     }
     const pickableLayers = layers.filter(layer => layer.isPickable() && !layer.isComposite);
-    if (pickableLayers.length > 255) {
-      log.warn('Too many pickable layers, only picking the first 255')();
-      return pickableLayers.slice(0, 255);
-    }
     return pickableLayers.length ? pickableLayers : null;
   }
 
@@ -188,7 +183,7 @@ export default class DeckPicker {
     const affectedLayers = {};
 
     for (let i = 0; i < depth; i++) {
-      const pickedColors =
+      const pickedResult =
         deviceRect &&
         this._drawAndSample({
           layers,
@@ -201,8 +196,7 @@ export default class DeckPicker {
         });
 
       const pickInfo = getClosestObject({
-        pickedColors,
-        layers,
+        ...pickedResult,
         deviceX: devicePixel[0],
         deviceY: devicePixel[1],
         deviceRadius,
@@ -220,7 +214,7 @@ export default class DeckPicker {
           pass: `picking:${mode}`,
           redrawReason: 'pick-z',
           pickZ: true
-        });
+        })?.pickedColors;
         // picked value is in common space (pixels) from the camera target (viewport.position)
         // convert it to meters from the ground
         z = zValues[0] * viewports[0].distanceScales.metersPerUnit[2] + viewports[0].position[2];
@@ -241,7 +235,6 @@ export default class DeckPicker {
         lastPickedInfo: this.lastPickedInfo,
         mode,
         layers,
-        layerFilter: this.layerFilter,
         viewports,
         x,
         y,
@@ -311,7 +304,7 @@ export default class DeckPicker {
       height: deviceTop - deviceBottom
     };
 
-    const pickedColors = this._drawAndSample({
+    const pickedResult = this._drawAndSample({
       layers,
       views,
       viewports,
@@ -321,7 +314,7 @@ export default class DeckPicker {
       redrawReason: mode
     });
 
-    const pickInfos = getUniqueObjects({pickedColors, layers});
+    const pickInfos = getUniqueObjects(pickedResult);
 
     // Only return unique infos, identified by info.object
     const uniqueInfos = new Map();
@@ -365,13 +358,9 @@ export default class DeckPicker {
     redrawReason,
     pickZ
   }) {
-    if (layers.length < 1) {
-      return null;
-    }
-
     const pickingFBO = pickZ ? this.depthFBO : this.pickingFBO;
 
-    this.pickLayersPass.render({
+    const {decodePickingColor} = this.pickLayersPass.render({
       layers,
       layerFilter: this.layerFilter,
       views,
@@ -396,7 +385,7 @@ export default class DeckPicker {
       target: pickedColors
     });
 
-    return pickedColors;
+    return {pickedColors, decodePickingColor};
   }
 
   // Calculate a picking rect centered on deviceX and deviceY and clipped to device

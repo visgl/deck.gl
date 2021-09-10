@@ -120,12 +120,6 @@ const parameters = {
     })
   ],
   layers: [testLayer, testLayerWithCallback, testCompositeLayer, testMVTLayer, testMVTLayerBinary],
-  layerFilter: ({layer, viewport}) => {
-    if (viewport.id === 'minimap') {
-      return layer.id !== 'test-layer-with-callback';
-    }
-    return true;
-  },
   pixelRatio: 2
 };
 
@@ -201,6 +195,7 @@ test('processPickInfo', async t => {
       pickInfo: {
         pickedColor: [1, 0, 0, 0],
         pickedLayer: testLayerWithCallback,
+        pickedViewports: parameters.viewports.slice(0, 2),
         pickedObjectIndex: 0
       },
       x: 100,
@@ -226,6 +221,7 @@ test('processPickInfo', async t => {
       pickInfo: {
         pickedColor: [2, 0, 0, 0],
         pickedLayer: testLayerWithCallback,
+        pickedViewports: parameters.viewports.slice(0, 2),
         pickedObjectIndex: 1
       },
       x: 100,
@@ -361,6 +357,7 @@ test('processPickInfo', async t => {
       pickInfo: {
         pickedColor: [2, 0, 0, 0],
         pickedLayer: testLayerWithCallback,
+        pickedViewports: parameters.viewports.slice(0, 2),
         pickedObjectIndex: 1
       },
       x: 300,

@@ -86,7 +86,7 @@ export default class LayersPass extends Pass {
           pass,
           moduleParameters
         );
-        layerParam.layerParameters = this.getLayerParameters(layer, layerIndex);
+        layerParam.layerParameters = this.getLayerParameters(layer, layerIndex, viewport);
       }
       drawLayerParams[layerIndex] = layerParam;
     }
