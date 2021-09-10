@@ -117,6 +117,7 @@ export default class PickLayersPass extends LayersPass {
 
     if (encodedColors) {
       // Encode layerIndex in the alpha channel
+      // TODO - combine small layers to better utilize the picking color space
       if (encodedColors.byLayer.has(layer)) {
         const entry = encodedColors.byLayer.get(layer);
         a = entry.a;
