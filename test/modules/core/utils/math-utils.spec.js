@@ -1,4 +1,4 @@
-import test from 'tape-catch';
+import test from 'tape-promise/tape';
 import {floatEquals, vecEquals} from '../../../utils/utils';
 import {getFrustumPlanes, toDoublePrecisionArray} from '@deck.gl/core/utils/math-utils';
 import {equals, Matrix4} from 'math.gl';

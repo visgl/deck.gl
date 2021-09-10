@@ -1,4 +1,4 @@
-import test from 'tape-catch';
+import test from 'tape-promise/tape';
 import {shouldComposeModelMatrix} from '@deck.gl/mesh-layers/utils/matrix';
 import {COORDINATE_SYSTEM} from '@deck.gl/core';
 

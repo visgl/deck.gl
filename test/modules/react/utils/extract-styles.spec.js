@@ -1,4 +1,4 @@
-import test from 'tape-catch';
+import test from 'tape-promise/tape';
 import extractStyles from '@deck.gl/react/utils/extract-styles';
 
 test('extractStyles', t => {

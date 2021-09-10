@@ -62,7 +62,10 @@ const LAYER_CONSTRUCT_TEST_CASES = [
   },
   {
     title: 'With data map',
-    props: {id: 'testLayer', data: new Map([['a', 'a'], ['b', 'b'], ['c', 'c']])}
+    props: {
+      id: 'testLayer',
+      data: new Map([['a', 'a'], ['b', 'b'], ['c', 'c']])
+    }
   }
 ];
 

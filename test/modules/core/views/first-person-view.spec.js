@@ -1,4 +1,4 @@
-import test from 'tape-catch';
+import test from 'tape-promise/tape';
 import {FirstPersonView} from '@deck.gl/core';
 
 test('FirstPersonView#makeViewport', t => {

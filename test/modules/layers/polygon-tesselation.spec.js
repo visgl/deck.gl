@@ -18,7 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import test from 'tape-catch';
+import test from 'tape-promise/tape';
 
 import * as Polygon from '@deck.gl/layers/solid-polygon-layer/polygon';
 import PolygonTesselator from '@deck.gl/layers/solid-polygon-layer/polygon-tesselator';
@@ -29,8 +29,15 @@ import {gl} from '@deck.gl/test-utils';
 const SAMPLE_DATA = [
   {polygon: [], name: 'empty array'},
   {polygon: [[1, 1]], name: 'too few points', height: 1, color: [255, 0, 0]},
-  {polygon: [[1, 1], [2, 2], [3, 0]], name: 'open path', height: 2},
-  {polygon: [[1, 1], [2, 2], [3, 0], [1, 1]], name: 'closed loop'},
+  {
+    polygon: [[1, 1], [2, 2], [3, 0]],
+    name: 'open path',
+    height: 2
+  },
+  {
+    polygon: [[1, 1], [2, 2], [3, 0], [1, 1]],
+    name: 'closed loop'
+  },
   {
     polygon: [[[0, 0], [2, 0], [2, 2], [0, 2]], [[0.5, 0.5], [1, 0.5], [0.5, 1]]],
     name: 'with 1 hole'
@@ -192,8 +199,14 @@ test('PolygonTesselator#tesselation', t => {
 test('PolygonTesselator#partial update', t => {
   const accessorCalled = new Set();
   const sampleData = [
-    {polygon: [[1, 1], [2, 2], [3, 0]], id: 'A'},
-    {polygon: [[[0, 0], [2, 0], [2, 2], [0, 2]]], id: 'B'}
+    {
+      polygon: [[1, 1], [2, 2], [3, 0]],
+      id: 'A'
+    },
+    {
+      polygon: [[[0, 0], [2, 0], [2, 2], [0, 2]]],
+      id: 'B'
+    }
   ];
   const tesselator = new PolygonTesselator({
     data: sampleData,
@@ -216,7 +229,10 @@ test('PolygonTesselator#partial update', t => {
 
   t.deepEquals(Array.from(accessorCalled), ['A', 'B'], 'Accessor called on all data');
 
-  sampleData[2] = {polygon: [[4, 4], [5, 5], [6, 4]], id: 'C'};
+  sampleData[2] = {
+    polygon: [[4, 4], [5, 5], [6, 4]],
+    id: 'C'
+  };
   accessorCalled.clear();
   tesselator.updatePartialGeometry({startRow: 2});
   positions = tesselator.get('positions').slice(0, 39);
@@ -233,7 +249,10 @@ test('PolygonTesselator#partial update', t => {
   t.deepEquals(indices, [1, 3, 2, 5, 8, 7, 7, 6, 5, 10, 12, 11], 'incides');
   t.deepEquals(Array.from(accessorCalled), ['C'], 'Accessor called only on partial data');
 
-  sampleData[0] = {polygon: [[2, 2], [3, 0], [1, 1]], id: 'A'};
+  sampleData[0] = {
+    polygon: [[2, 2], [3, 0], [1, 1]],
+    id: 'A'
+  };
   accessorCalled.clear();
   tesselator.updatePartialGeometry({startRow: 0, endRow: 1});
   positions = tesselator.get('positions').slice(0, 39);

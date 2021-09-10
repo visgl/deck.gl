@@ -18,7 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import test from 'tape-catch';
+import test from 'tape-promise/tape';
 import {h3ToGeoBoundary, h3ToGeo, kRing, compact} from 'h3-js';
 import {_count as count, WebMercatorViewport} from '@deck.gl/core';
 import {testLayer, generateLayerTests} from '@deck.gl/test-utils';

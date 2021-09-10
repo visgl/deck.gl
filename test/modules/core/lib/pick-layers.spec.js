@@ -20,7 +20,7 @@
 
 /* eslint-disable dot-notation, max-statements, no-unused-vars */
 
-import test from 'tape-catch';
+import test from 'tape-promise/tape';
 import {
   MapView,
   ScatterplotLayer,

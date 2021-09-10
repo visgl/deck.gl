@@ -1,5 +1,5 @@
 import {WebMercatorViewport} from 'deck.gl';
-import test from 'tape-catch';
+import test from 'tape-promise/tape';
 import {toLowPrecision} from '@deck.gl/test-utils';
 
 const viewportProps = {

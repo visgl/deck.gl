@@ -1,4 +1,4 @@
-import test from 'tape-catch';
+import test from 'tape-promise/tape';
 import {TypedArrayManager} from '@deck.gl/core/utils/typed-array-manager';
 
 test('TypedArrayManager#allocate', t => {

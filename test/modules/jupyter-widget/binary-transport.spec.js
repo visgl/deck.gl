@@ -1,4 +1,4 @@
-import test from 'tape-catch';
+import test from 'tape-promise/tape';
 import {deserializeMatrix} from '@deck.gl/jupyter-widget/lib/utils/deserialize-matrix';
 import {jsonConverter} from '@deck.gl/jupyter-widget/playground/create-deck';
 import {processDataBuffer} from '@deck.gl/jupyter-widget/playground/playground';

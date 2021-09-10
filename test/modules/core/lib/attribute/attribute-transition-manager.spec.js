@@ -1,7 +1,7 @@
 /* eslint-disable max-statements */
 import AttributeTransitionManager from '@deck.gl/core/lib/attribute/attribute-transition-manager';
 import Attribute from '@deck.gl/core/lib/attribute/attribute';
-import test from 'tape-catch';
+import test from 'tape-promise/tape';
 import {isWebGL2, Timeline} from '@luma.gl/core';
 import {gl} from '@deck.gl/test-utils';
 

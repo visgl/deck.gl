@@ -1,4 +1,4 @@
-import test from 'tape-catch';
+import test from 'tape-promise/tape';
 import {vecNormalized} from '../../../utils/utils';
 import {Viewport} from 'deck.gl';
 import {Matrix4, Vector3} from 'math.gl';

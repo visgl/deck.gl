@@ -1,5 +1,5 @@
 /* global setTimeout */
-import test from 'tape-catch';
+import test from 'tape-promise/tape';
 import {gl} from '@deck.gl/test-utils';
 import Resource from '@deck.gl/core/lib/resource/resource';
 

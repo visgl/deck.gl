@@ -18,17 +18,32 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import test from 'tape-catch';
+import test from 'tape-promise/tape';
 
 import PathTesselator from '@deck.gl/layers/path-layer/path-tesselator';
 
 const SAMPLE_DATA = [
   {path: [], width: 1, dashArray: [0, 0], color: [0, 0, 0]},
   {path: [[1, 1]], width: 1, dashArray: [0, 0], color: [0, 0, 0]},
-  {path: [[1, 1], [1, 1]], width: 1, dashArray: [0, 0], color: [0, 0, 0]},
-  {path: [[1, 1], [2, 2], [3, 3]], width: 2, dashArray: [0, 0], color: [255, 0, 0]},
+  {
+    path: [[1, 1], [1, 1]],
+    width: 1,
+    dashArray: [0, 0],
+    color: [0, 0, 0]
+  },
+  {
+    path: [[1, 1], [2, 2], [3, 3]],
+    width: 2,
+    dashArray: [0, 0],
+    color: [255, 0, 0]
+  },
   {path: new Float64Array([1, 1, 2, 2, 3, 3]), width: 1, dashArray: [0, 0], color: [0, 0, 0]},
-  {path: [[1, 1], [2, 2], [3, 3], [1, 1]], width: 3, dashArray: [2, 1], color: [0, 0, 255]}
+  {
+    path: [[1, 1], [2, 2], [3, 3], [1, 1]],
+    width: 3,
+    dashArray: [2, 1],
+    color: [0, 0, 255]
+  }
 ];
 const INSTANCE_COUNT = 12;
 
@@ -104,8 +119,14 @@ test('PathTesselator#constructor', t => {
 test('PathTesselator#partial update', t => {
   const accessorCalled = new Set();
   const sampleData = [
-    {path: [[1, 1], [2, 2], [3, 3]], id: 'A'},
-    {path: [[1, 1], [2, 2], [3, 3], [1, 1]], id: 'B'}
+    {
+      path: [[1, 1], [2, 2], [3, 3]],
+      id: 'A'
+    },
+    {
+      path: [[1, 1], [2, 2], [3, 3], [1, 1]],
+      id: 'B'
+    }
   ];
   const tesselator = new PathTesselator({
     data: sampleData,
@@ -125,7 +146,10 @@ test('PathTesselator#partial update', t => {
   );
   t.deepEquals(Array.from(accessorCalled), ['A', 'B'], 'Accessor called on all data');
 
-  sampleData[2] = {path: [[4, 4], [5, 5], [6, 6]], id: 'C'};
+  sampleData[2] = {
+    path: [[4, 4], [5, 5], [6, 6]],
+    id: 'C'
+  };
   accessorCalled.clear();
   tesselator.updatePartialGeometry({startRow: 2});
   positions = tesselator.get('positions').slice(0, 36);
@@ -151,7 +175,10 @@ test('PathTesselator#partial update', t => {
   );
   t.deepEquals(Array.from(accessorCalled), ['C'], 'Accessor called only on partial data');
 
-  sampleData[0] = {path: [[6, 6], [5, 5], [4, 4]], id: 'A'};
+  sampleData[0] = {
+    path: [[6, 6], [5, 5], [4, 4]],
+    id: 'A'
+  };
   accessorCalled.clear();
   tesselator.updatePartialGeometry({startRow: 0, endRow: 1});
   positions = tesselator.get('positions').slice(0, 27);
