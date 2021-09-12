@@ -99,7 +99,7 @@ export default class Tile3DLayer extends CompositeLayer {
   filterSubLayer({layer, viewport}) {
     const {tile} = layer.props;
     const {id: viewportId} = viewport;
-    return this.props.visible && tile.selected && tile.viewportIds.includes(viewportId);
+    return tile.selected && tile.viewportIds.includes(viewportId);
   }
 
   _updateAutoHighlight(info) {
