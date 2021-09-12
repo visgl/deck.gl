@@ -10,11 +10,12 @@ The module entry point is now only lightly transpiled for the most commonly used
 
 #### Breaking changes
 
-- A bug is fixed in projecting sizes in billboard mode. Pixel sizes now match their CSS counterparts. This change affects the following layers when used with a `MapView`:
+- A bug is fixed in projecting sizes in billboard mode. Pixel sizes now match their CSS counterparts and objects now have the same size whether in billboard mode or not. As a result, some items are now 1.5 times bigger than they used to be in many common cases, because previously you didn't get the sizes you were asking for. This change affects the following layers when used with a `MapView`:
   + `ArcLayer`, `LineLayer` and `PointCloudLayer`
   + `IconLayer` and `TextLayer` with the default `billboard` prop
   + `PathLayer` with `billboard: true`
-  After upgrading to v8.5, in order to maintain the same appearance, you need to multiply `2/3` to the objects' width/size. This can be done by either changing the accessor (`getWidth`/`getSize`) or the scaling prop (`sizeScale`/`widthScale`).
+
+  After upgrading to v8.5, in order to maintain the same appearance in these cases, you need to multiply the objects' width/size by `2/3`. This can be done by either changing the accessor (`getWidth`/`getSize`) or the scaling prop (`sizeScale`/`widthScale`).
 - `TextLayer`'s default `fontSettings` have changed. When using `sdf`, the default `buffer` is now `4` and the default `radius` is now `12`.
 - `GeoJsonLayer`'s `lineJointRounded` prop now only controls line joints. To use rounded line caps, set `lineCapRounded` to `true`.
 - Dashed lines via `PathStyleExtension` now draw rounded dash caps if `capRounded` is `true`.
