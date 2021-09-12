@@ -38,6 +38,22 @@ const TEST_CASES = [
     output: ['0,2,3', '0,3,3', '1,2,3', '1,3,3', '2,1,3', '2,2,3', '2,3,3', '3,2,3', '3,3,3']
   },
   {
+    title: 'tilted viewport with extent',
+    viewport: new WebMercatorViewport({
+      width: 800,
+      height: 400,
+      pitch: 30,
+      bearing: -25,
+      longitude: -90,
+      latitude: 45,
+      zoom: 2.5
+    }),
+    minZoom: undefined,
+    maxZoom: undefined,
+    extent: [-90, 30, 0, 60],
+    output: ['2,2,3', '2,3,3', '3,2,3', '3,3,3']
+  },
+  {
     title: 'extreme pitch',
     viewport: new WebMercatorViewport({
       width: 800,
