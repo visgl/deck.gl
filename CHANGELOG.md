@@ -19,6 +19,11 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v8.5
 
+#### deck.gl [8.5.8] - Sep 13 2021
+
+- TileLayer uses props.extent to cull tiles in geospatial mode (#6191)
+- Improve shader projection in auto offset mode (#6161)
+
 #### deck.gl [8.5.7] - Sep 3 2021
 
 - Drop sublayers with no data even if the _subLayerProps prop contains (#6160)

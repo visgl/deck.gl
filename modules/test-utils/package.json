@@ -2,7 +2,7 @@
   "name": "@deck.gl/test-utils",
   "description": "Test utilities for deck.gl layers",
   "license": "MIT",
-  "version": "8.5.7",
+  "version": "8.5.8",
   "publishConfig": {
     "access": "public"
   },
