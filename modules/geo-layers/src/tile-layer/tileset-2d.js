@@ -45,6 +45,38 @@ export default class Tileset2D {
    * Cache size defaults to 5 * number of tiles in the current viewport
    */
   constructor(opts) {
+    this._loadOptions(opts);
+
+    // Maps tile id in string {z}-{x}-{y} to a Tile object
+    this._cache = new Map();
+    this._tiles = [];
+    this._dirty = false;
+    this._cacheByteSize = 0;
+
+    // Cache the last processed viewport
+    this._viewport = null;
+    this._selectedTiles = null;
+    this._frameNumber = 0;
+  }
+
+  loadOptions(opts) {
+    this._loadOptions(opts);
+  }
+
+  /**
+   * Reload function is called to force a reload of the tile data and clear out the cache of tiles not on the screen.
+   * This gives a sort of "lazy reload" of the cache - visible tiles are reloaded while others are discarded instead of loaded.
+   */
+  reload() {
+    this._selectedTiles = this._selectedTiles.map(index => this._getTile(index, true, true));
+    for (const [tileId, tile] of this._cache) {
+      if (!this._selectedTiles.includes(tile)) {
+        this._cache.delete(tileId);
+      }
+    }
+  }
+
+  _loadOptions(opts) {
     this.opts = opts;
     this._getTileData = opts.getTileData;
 
@@ -62,17 +94,6 @@ export default class Tileset2D {
       maxRequests: opts.maxRequests,
       throttleRequests: opts.maxRequests > 0
     });
-
-    // Maps tile id in string {z}-{x}-{y} to a Tile object
-    this._cache = new Map();
-    this._tiles = [];
-    this._dirty = false;
-    this._cacheByteSize = 0;
-
-    // Cache the last processed viewport
-    this._viewport = null;
-    this._selectedTiles = null;
-    this._frameNumber = 0;
 
     this.setOptions(opts);
   }
@@ -323,7 +344,7 @@ export default class Tileset2D {
   }
   /* eslint-enable complexity */
 
-  _getTile({x, y, z}, create) {
+  _getTile({x, y, z}, create, reload) {
     const tileId = `${x},${y},${z}`;
     let tile = this._cache.get(tileId);
 
@@ -340,6 +361,11 @@ export default class Tileset2D {
       this._cache.set(tileId, tile);
       this._dirty = true;
     } else if (tile && tile.isCancelled && !tile.isLoading) {
+      tile.loadData(this._getTileData, this._requestScheduler);
+    } else if (reload) {
+      tile.onTileLoad = this.onTileLoad;
+      tile.onTileError = this.onTileError;
+      Object.assign(tile, this.getTileMetadata(tile));
       tile.loadData(this._getTileData, this._requestScheduler);
     }
 

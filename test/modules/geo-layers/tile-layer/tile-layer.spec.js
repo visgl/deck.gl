@@ -163,7 +163,7 @@ test('TileLayer', async t => {
       onAfterUpdate: ({layer, subLayers}) => {
         if (layer.isLoaded) {
           t.is(getTileDataCalled, 6, 'Refetched tile data');
-          t.is(subLayers.length, 4, 'Invalidated cached sublayers with prop change');
+          t.is(subLayers.length, 8, 'Update trigger does not change reset number of layers.');
         }
       }
     }
