@@ -230,7 +230,7 @@ export default class TileLayer extends CompositeLayer {
   }
 
   filterSubLayer({layer}) {
-    return this.props.visible && layer.props.tile.isVisible;
+    return layer.props.tile.isVisible;
   }
 }
 

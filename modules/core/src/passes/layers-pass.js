@@ -186,7 +186,7 @@ export default class LayersPass extends Pass {
 
     let parent = layer.parent;
     while (parent) {
-      if (!parent.filterSubLayer(drawContext)) {
+      if (!parent.props.visible || !parent.filterSubLayer(drawContext)) {
         return false;
       }
       drawContext.layer = parent;
