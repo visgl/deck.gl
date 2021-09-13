@@ -175,6 +175,9 @@ export default class ComponentState {
 
   // Set normal, non-async value
   _setPropValue(propName, value) {
+    // Save the current value before overwriting so that diffProps can access both
+    this.freezeAsyncOldProps();
+
     const asyncProp = this.asyncProps[propName];
     value = this._postProcessValue(asyncProp, value);
     asyncProp.resolvedValue = value;
@@ -188,7 +191,7 @@ export default class ComponentState {
     // otherwise a more recent load has already completed
     const asyncProp = this.asyncProps[propName];
     if (asyncProp && loadCount >= asyncProp.resolvedLoadCount && value !== undefined) {
-      // A chance to copy old props before updating
+      // Save the current value before overwriting so that diffProps can access both
       this.freezeAsyncOldProps();
 
       asyncProp.resolvedValue = value;

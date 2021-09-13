@@ -97,8 +97,14 @@ test('LayerManager#setLayers', t => {
     }
   }
 
+  SubLayer.defaultProps = {
+    image: {type: 'object', value: null, async: true}
+  };
+
   const DATA = [];
   const ALT_DATA = [1];
+  const IMAGE = {};
+  const ALT_IMAGE = {};
   const TEST_CASES = [
     {
       layers: [new SubLayer({id: 'primitive'})],
@@ -137,6 +143,22 @@ test('LayerManager#setLayers', t => {
       finalize: false,
       dataChanged: true,
       propsChanged: false
+    },
+    {
+      layers: [new SubLayer({id: 'primitive', data: ALT_DATA, size: 1, image: IMAGE})],
+      initialize: false,
+      update: true,
+      finalize: false,
+      dataChanged: false,
+      propsChanged: true
+    },
+    {
+      layers: [new SubLayer({id: 'primitive', data: ALT_DATA, size: 1, image: ALT_IMAGE})],
+      initialize: false,
+      update: true,
+      finalize: false,
+      dataChanged: false,
+      propsChanged: true
     },
     {
       layers: [],
