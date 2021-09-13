@@ -45,7 +45,7 @@ export default class DeckRenderer {
   renderLayers(opts) {
     const layerPass = this.drawPickingColors ? this.pickLayersPass : this.drawLayersPass;
 
-    opts.layerFilter = this.layerFilter;
+    opts.layerFilter = opts.layerFilter || this.layerFilter;
     opts.effects = opts.effects || [];
     opts.target = opts.target || Framebuffer.getDefaultFramebuffer(this.gl);
 
