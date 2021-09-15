@@ -131,8 +131,9 @@ function getUrlFromMetadata(metadata, format) {
   return null;
 }
 
-function csvToGeoJson(csv) {
-  const GEOM = 'geom';
+function csvToGeoJson(csv, {geoColumn}) {
+  const GEOM = geoColumn || 'geom';
+  log.assert(csv[0][GEOM], `geoColumn ${GEOM} not present in data`);
   return csv.map(value => {
     const geometry = parseSync(value[GEOM], WKTLoader);
     const {...properties} = value;
@@ -188,7 +189,7 @@ export async function getData({type, source, connection, credentials, geoColumn,
 
   const data = await request({url, format: mapFormat, accessToken});
   if (mapFormat === FORMATS.CSV) {
-    return csvToGeoJson(data);
+    return csvToGeoJson(data, {geoColumn});
   } else {
     return data;
   }
