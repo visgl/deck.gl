@@ -31,9 +31,11 @@
     "prepublishOnly": "npm run build-bundle && npm run build-bundle -- --env.dev"
   },
   "dependencies": {
+    "@loaders.gl/csv": "^3.0.8",
     "@loaders.gl/loader-utils": "^3.0.8",
     "@loaders.gl/mvt": "^3.0.8",
     "@loaders.gl/tiles": "^3.0.8",
+    "@loaders.gl/wkt": "^3.0.8",
     "@math.gl/web-mercator": "^3.5.4",
     "cartocolor": "^4.0.2",
     "d3-scale": "^3.2.3"

@@ -4,6 +4,9 @@
 import {getDefaultCredentials, buildMapsUrlFromBase} from '../config';
 import {API_VERSIONS, encodeParameter, FORMATS, MAP_TYPES} from './maps-api-common';
 import {log} from '@deck.gl/core';
+import {parse, parseSync} from '@loaders.gl/core';
+import {CSVLoader} from '@loaders.gl/csv';
+import {WKTLoader} from '@loaders.gl/wkt';
 
 const MAX_GET_LENGTH = 2048;
 
@@ -39,6 +42,20 @@ async function request({method, url, format, accessToken, body}) {
 
   if (format === FORMATS.NDJSON) {
     return response;
+  }
+
+  if (format === FORMATS.CSV) {
+    const GEOM = 'geom';
+    const arrayBuffer = await response.arrayBuffer();
+    const data = await parse(arrayBuffer, CSVLoader);
+    const json = data.map(value => {
+      const geometry = parseSync(value[GEOM], WKTLoader);
+      const {...properties} = value;
+      delete properties[GEOM];
+      return {type: 'Feature', geometry, properties};
+    });
+
+    return json;
   }
 
   const json = await response.json();
@@ -156,7 +173,7 @@ export async function getData({type, source, connection, credentials, geoColumn,
     log.assert(url, `Format ${format} not available`);
   } else {
     // guess map format
-    const prioritizedFormats = [FORMATS.GEOJSON, FORMATS.NDJSON, FORMATS.TILEJSON];
+    const prioritizedFormats = [FORMATS.CSV, FORMATS.GEOJSON, FORMATS.NDJSON, FORMATS.TILEJSON];
     for (const f of prioritizedFormats) {
       url = getUrlFromMetadata(metadata, f);
       if (url) {
