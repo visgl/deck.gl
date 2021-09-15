@@ -133,13 +133,18 @@ function getUrlFromMetadata(metadata, format) {
 
 function csvToGeoJson(csv, {geoColumn}) {
   const GEOM = geoColumn || 'geom';
-  log.assert(csv[0][GEOM], `geoColumn ${GEOM} not present in data`);
-  return csv.map(value => {
-    const geometry = parseSync(value[GEOM], WKTLoader);
-    const {...properties} = value;
-    delete properties[GEOM];
-    return {type: 'Feature', geometry, properties};
+  const json = csv.map(value => {
+    try {
+      const geometry = value[GEOM] && parseSync(value[GEOM], WKTLoader);
+      const {...properties} = value;
+      delete properties[GEOM];
+      return {type: 'Feature', geometry, properties};
+    } catch (error) {
+      throw new Error(`Failed to parse geometry: ${value}`);
+    }
   });
+
+  return json.filter(value => value.geometry);
 }
 
 export async function getData({type, source, connection, credentials, geoColumn, columns, format}) {
