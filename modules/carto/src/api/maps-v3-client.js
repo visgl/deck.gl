@@ -45,17 +45,8 @@ async function request({method, url, format, accessToken, body}) {
   }
 
   if (format === FORMATS.CSV) {
-    const GEOM = 'geom';
     const arrayBuffer = await response.arrayBuffer();
-    const data = await parse(arrayBuffer, CSVLoader);
-    const json = data.map(value => {
-      const geometry = parseSync(value[GEOM], WKTLoader);
-      const {...properties} = value;
-      delete properties[GEOM];
-      return {type: 'Feature', geometry, properties};
-    });
-
-    return json;
+    return await parse(arrayBuffer, CSVLoader);
   }
 
   const json = await response.json();
@@ -140,6 +131,16 @@ function getUrlFromMetadata(metadata, format) {
   return null;
 }
 
+function csvToGeoJson(csv) {
+  const GEOM = 'geom';
+  return csv.map(value => {
+    const geometry = parseSync(value[GEOM], WKTLoader);
+    const {...properties} = value;
+    delete properties[GEOM];
+    return {type: 'Feature', geometry, properties};
+  });
+}
+
 export async function getData({type, source, connection, credentials, geoColumn, columns, format}) {
   const localCreds = {...getDefaultCredentials(), ...credentials};
 
@@ -185,5 +186,10 @@ export async function getData({type, source, connection, credentials, geoColumn,
 
   const {accessToken} = localCreds;
 
-  return await request({url, format: mapFormat, accessToken});
+  const data = await request({url, format: mapFormat, accessToken});
+  if (mapFormat === FORMATS.CSV) {
+    return csvToGeoJson(data);
+  } else {
+    return data;
+  }
 }
