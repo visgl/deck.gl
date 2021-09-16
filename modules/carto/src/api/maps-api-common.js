@@ -1,5 +1,3 @@
-import {parseSync} from '@loaders.gl/core';
-
 export const DEFAULT_USER_COMPONENT_IN_URL = '{user}';
 export const DEFAULT_REGION_COMPONENT_IN_URL = '{region}';
 

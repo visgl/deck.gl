@@ -1,3 +1,4 @@
+/* global setTimeout */
 import {CompositeLayer, log} from '@deck.gl/core';
 import {MVTLayer} from '@deck.gl/geo-layers';
 import {GeoJsonLayer} from '@deck.gl/layers';
@@ -119,12 +120,16 @@ export default class CartoLayer extends CompositeLayer {
               escapeChar: '\\'
             }
           });
-          data = (async function*() {
+
+          const wait = r => setTimeout(r, 0);
+          const getDataAsync = async function* getDataAsync() {
             for await (const batch of batches) {
-              await new Promise(r => setTimeout(r, 0));
+              // To avoid UI locking up, only yield once per frame
+              await new Promise(wait);
               yield csvToGeoJson(batch.data, {geoColumn});
             }
-          })();
+          };
+          data = getDataAsync();
         } else {
           data = result.data;
         }
