@@ -1,6 +1,8 @@
 import {CompositeLayer, log} from '@deck.gl/core';
 import {MVTLayer} from '@deck.gl/geo-layers';
 import {GeoJsonLayer} from '@deck.gl/layers';
+import {parseInBatches} from '@loaders.gl/core';
+import {CSVLoader} from '@loaders.gl/csv';
 import {getData, getDataV2, API_VERSIONS} from '../api';
 import {FORMATS, MAP_TYPES, csvToGeoJson} from '../api/maps-api-common';
 import {getDefaultCredentials} from '../config';
@@ -110,9 +112,10 @@ export default class CartoLayer extends CompositeLayer {
         });
 
         if (result.format === FORMATS.CSV) {
+          const batches = await parseInBatches(result.data, CSVLoader, {batchSize: 4000});
           data = (async function*() {
-            for await (const batch of result.data) {
-              await new Promise(r => setTimeout(r, 200));
+            for await (const batch of batches) {
+              await new Promise(r => setTimeout(r, 0));
               yield csvToGeoJson(batch.data, {geoColumn});
             }
           })();

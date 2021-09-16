@@ -4,8 +4,6 @@
 import {getDefaultCredentials, buildMapsUrlFromBase} from '../config';
 import {API_VERSIONS, encodeParameter, FORMATS, MAP_TYPES} from './maps-api-common';
 import {log} from '@deck.gl/core';
-import {parseInBatches} from '@loaders.gl/core';
-import {CSVLoader} from '@loaders.gl/csv';
 
 const MAX_GET_LENGTH = 2048;
 
@@ -39,13 +37,8 @@ async function request({method, url, format, accessToken, body}) {
     throw new Error(`Failed to connect to Maps API: ${error}`);
   }
 
-  if (format === FORMATS.NDJSON) {
+  if (format === FORMATS.NDJSON || format === FORMATS.CSV) {
     return response;
-  }
-
-  if (format === FORMATS.CSV) {
-    //const arrayBuffer = await response.arrayBuffer();
-    return await parseInBatches(response, CSVLoader, {batchSize: 1000});
   }
 
   const json = await response.json();
