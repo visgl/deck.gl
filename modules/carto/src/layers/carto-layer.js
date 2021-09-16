@@ -112,7 +112,6 @@ export default class CartoLayer extends CompositeLayer {
         if (result.format === FORMATS.CSV) {
           data = (async function*() {
             for await (const batch of result.data) {
-              console.log('batch', batch.data.length);
               yield csvToGeoJson(batch.data, {geoColumn});
             }
           })();

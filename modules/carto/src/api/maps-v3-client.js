@@ -45,7 +45,7 @@ async function request({method, url, format, accessToken, body}) {
 
   if (format === FORMATS.CSV) {
     //const arrayBuffer = await response.arrayBuffer();
-    return await parseInBatches(response, CSVLoader, {batchSize: 200});
+    return await parseInBatches(response, CSVLoader, {batchSize: 1000});
   }
 
   const json = await response.json();
