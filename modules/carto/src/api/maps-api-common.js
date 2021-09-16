@@ -31,7 +31,7 @@ export function encodeParameter(name, value) {
 
 export function csvToGeoJson(csv, {geoColumn}) {
   const GEOM = geoColumn || 'geom';
-  const json = csv.map(value => {
+  return csv.map(value => {
     try {
       const geometry = JSON.parse(value[GEOM]);
       const {...properties} = value;
@@ -41,6 +41,4 @@ export function csvToGeoJson(csv, {geoColumn}) {
       throw new Error(`Failed to parse geometry: ${value}`);
     }
   });
-
-  return json.filter(value => value.geometry);
 }
