@@ -4,7 +4,7 @@
 import {getDefaultCredentials, buildMapsUrlFromBase} from '../config';
 import {API_VERSIONS, encodeParameter, FORMATS, MAP_TYPES} from './maps-api-common';
 import {log} from '@deck.gl/core';
-import {parse} from '@loaders.gl/core';
+import {parseInBatches} from '@loaders.gl/core';
 import {CSVLoader} from '@loaders.gl/csv';
 
 const MAX_GET_LENGTH = 2048;
@@ -44,8 +44,8 @@ async function request({method, url, format, accessToken, body}) {
   }
 
   if (format === FORMATS.CSV) {
-    const arrayBuffer = await response.arrayBuffer();
-    return await parse(arrayBuffer, CSVLoader);
+    //const arrayBuffer = await response.arrayBuffer();
+    return await parseInBatches(response, CSVLoader, {batchSize: 200});
   }
 
   const json = await response.json();

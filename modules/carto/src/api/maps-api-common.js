@@ -36,6 +36,10 @@ export function csvToGeoJson(csv, {geoColumn}) {
   const GEOM = geoColumn || 'geom';
   const json = csv.map(value => {
     try {
+      if (Array.isArray(value[GEOM])) {
+        // TODO when is this needed? Parser bug?
+        value[GEOM] = value[GEOM].join('');
+      }
       const geometry = value[GEOM] && parseSync(value[GEOM], WKTLoader);
       const {...properties} = value;
       delete properties[GEOM];
