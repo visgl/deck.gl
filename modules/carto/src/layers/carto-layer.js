@@ -110,11 +110,12 @@ export default class CartoLayer extends CompositeLayer {
         });
 
         if (result.format === FORMATS.CSV) {
-          data = [];
-          for await (const batch of result.data) {
-            console.log('batch', batch.data.length);
-            data = data.concat(csvToGeoJson(batch.data, {geoColumn}));
-          }
+          data = (async function*() {
+            for await (const batch of result.data) {
+              console.log('batch', batch.data.length);
+              yield csvToGeoJson(batch.data, {geoColumn});
+            }
+          })();
         } else {
           data = result.data;
         }
