@@ -136,7 +136,6 @@ export async function getData({type, source, connection, credentials, geoColumn,
   log.assert(connection, 'Must define connection');
   log.assert(type, 'Must define a type');
   log.assert(source, 'Must define a source');
-
   log.assert(localCreds.apiVersion === API_VERSIONS.V3, 'Method only available for v3');
   log.assert(localCreds.apiBaseUrl, 'Must define apiBaseUrl');
   log.assert(localCreds.accessToken, 'Must define an accessToken');
