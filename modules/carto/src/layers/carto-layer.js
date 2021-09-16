@@ -2,7 +2,7 @@ import {CompositeLayer, log} from '@deck.gl/core';
 import {MVTLayer} from '@deck.gl/geo-layers';
 import {GeoJsonLayer} from '@deck.gl/layers';
 import {getData, getDataV2, API_VERSIONS} from '../api';
-import {MAP_TYPES} from '../api/maps-api-common';
+import {FORMATS, MAP_TYPES, csvToGeoJson} from '../api/maps-api-common';
 import {getDefaultCredentials} from '../config';
 
 const defaultProps = {
@@ -100,7 +100,7 @@ export default class CartoLayer extends CompositeLayer {
       let data;
 
       if (apiVersion === API_VERSIONS.V3) {
-        data = await getData({
+        const result = await getData({
           type,
           source,
           connection,
@@ -108,6 +108,7 @@ export default class CartoLayer extends CompositeLayer {
           geoColumn,
           columns
         });
+        data = result.format === FORMATS.CSV ? csvToGeoJson(result.data, {geoColumn}) : result.data;
       } else if (apiVersion === API_VERSIONS.V1 || apiVersion === API_VERSIONS.V2) {
         data = await getDataV2({type, source, credentials});
       } else {

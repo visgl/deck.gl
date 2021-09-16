@@ -4,9 +4,8 @@
 import {getDefaultCredentials, buildMapsUrlFromBase} from '../config';
 import {API_VERSIONS, encodeParameter, FORMATS, MAP_TYPES} from './maps-api-common';
 import {log} from '@deck.gl/core';
-import {parse, parseSync} from '@loaders.gl/core';
+import {parse} from '@loaders.gl/core';
 import {CSVLoader} from '@loaders.gl/csv';
-import {WKTLoader} from '@loaders.gl/wkt';
 
 const MAX_GET_LENGTH = 2048;
 
@@ -131,22 +130,6 @@ function getUrlFromMetadata(metadata, format) {
   return null;
 }
 
-function csvToGeoJson(csv, {geoColumn}) {
-  const GEOM = geoColumn || 'geom';
-  const json = csv.map(value => {
-    try {
-      const geometry = value[GEOM] && parseSync(value[GEOM], WKTLoader);
-      const {...properties} = value;
-      delete properties[GEOM];
-      return {type: 'Feature', geometry, properties};
-    } catch (error) {
-      throw new Error(`Failed to parse geometry: ${value}`);
-    }
-  });
-
-  return json.filter(value => value.geometry);
-}
-
 export async function getData({type, source, connection, credentials, geoColumn, columns, format}) {
   const localCreds = {...getDefaultCredentials(), ...credentials};
 
@@ -193,9 +176,5 @@ export async function getData({type, source, connection, credentials, geoColumn,
   const {accessToken} = localCreds;
 
   const data = await request({url, format: mapFormat, accessToken});
-  if (mapFormat === FORMATS.CSV) {
-    return csvToGeoJson(data, {geoColumn});
-  } else {
-    return data;
-  }
+  return {data, format: mapFormat};
 }

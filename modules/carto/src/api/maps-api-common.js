@@ -1,3 +1,6 @@
+import {parseSync} from '@loaders.gl/core';
+import {WKTLoader} from '@loaders.gl/wkt';
+
 export const DEFAULT_USER_COMPONENT_IN_URL = '{user}';
 export const DEFAULT_REGION_COMPONENT_IN_URL = '{region}';
 
@@ -27,4 +30,20 @@ export const FORMATS = {
  */
 export function encodeParameter(name, value) {
   return `${name}=${encodeURIComponent(value)}`;
+}
+
+export function csvToGeoJson(csv, {geoColumn}) {
+  const GEOM = geoColumn || 'geom';
+  const json = csv.map(value => {
+    try {
+      const geometry = value[GEOM] && parseSync(value[GEOM], WKTLoader);
+      const {...properties} = value;
+      delete properties[GEOM];
+      return {type: 'Feature', geometry, properties};
+    } catch (error) {
+      throw new Error(`Failed to parse geometry: ${value}`);
+    }
+  });
+
+  return json.filter(value => value.geometry);
 }
