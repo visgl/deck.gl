@@ -2113,14 +2113,6 @@
     "@math.gl/web-mercator" "^3.5.1"
     "@probe.gl/stats" "^3.4.0"
 
-"@loaders.gl/wkt@3.0.8":
-  version "3.0.8"
-  resolved "https://registry.yarnpkg.com/@loaders.gl/wkt/-/wkt-3.0.8.tgz#a9e280901a4fa0ed057b9a06d309285798b22f08"
-  integrity sha512-KKoWqy255V7rrYguTsHOy+GfKbBoSLdesAanxc9L6zmrRc2JXWtGxWSk8L/l03pWSor45drvCTBoRrytZCpcYg==
-  dependencies:
-    "@loaders.gl/loader-utils" "3.0.8"
-    "@loaders.gl/schema" "3.0.8"
-
 "@loaders.gl/worker-utils@3.0.8":
   version "3.0.8"
   resolved "https://registry.yarnpkg.com/@loaders.gl/worker-utils/-/worker-utils-3.0.8.tgz#34198435bef9b1659fc64bcf2b99e9b379655ee6"
