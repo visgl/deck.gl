@@ -112,7 +112,13 @@ export default class CartoLayer extends CompositeLayer {
         });
 
         if (result.format === FORMATS.CSV) {
-          const batches = await parseInBatches(result.data, CSVLoader, {batchSize: 4000});
+          const batches = await parseInBatches(result.data, CSVLoader, {
+            batchSize: 5000,
+            csv: {
+              dynamicTyping: false,
+              escapeChar: '\\'
+            }
+          });
           data = (async function*() {
             for await (const batch of batches) {
               await new Promise(r => setTimeout(r, 0));
