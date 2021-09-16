@@ -36,7 +36,7 @@ export function csvToGeoJson(csv, {geoColumn}) {
       const geometry = JSON.parse(value[GEOM]);
       const {...properties} = value;
       delete properties[GEOM];
-      return {...geometry, properties};
+      return {type: 'Feature', geometry, properties};
     } catch (error) {
       throw new Error(`Failed to parse geometry: ${value}`);
     }
