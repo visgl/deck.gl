@@ -223,7 +223,8 @@ function getEventPixel(event, deck) {
   const point = deck.getViewports()[0].project([event.latLng.lng(), event.latLng.lat()]);
   return {
     x: point[0],
-    y: point[1]
+    y: point[1],
+    radius: deck.props.pickingRadius
   };
 }
 
