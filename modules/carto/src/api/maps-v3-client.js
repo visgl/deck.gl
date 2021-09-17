@@ -158,7 +158,7 @@ export async function getData({type, source, connection, credentials, geoColumn,
     log.assert(url, `Format ${format} not available`);
   } else {
     // guess map format
-    const prioritizedFormats = [FORMATS.CSV, FORMATS.GEOJSON, FORMATS.NDJSON, FORMATS.TILEJSON];
+    const prioritizedFormats = [FORMATS.NDJSON, FORMATS.CSV, FORMATS.GEOJSON, FORMATS.TILEJSON];
     for (const f of prioritizedFormats) {
       url = getUrlFromMetadata(metadata, f);
       if (url) {
