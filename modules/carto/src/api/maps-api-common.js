@@ -1,5 +1,3 @@
-import {WKTLoader} from '@loaders.gl/wkt';
-import {parseSync} from '@loaders.gl/core';
 export const DEFAULT_USER_COMPONENT_IN_URL = '{user}';
 export const DEFAULT_REGION_COMPONENT_IN_URL = '{region}';
 
@@ -47,10 +45,9 @@ export function csvToGeoJson(csv, {geoColumn}) {
 
 export function ndJsonToGeoJson(ndjson, {geoColumn}) {
   const GEOM = geoColumn || 'geom';
-  const json = ndjson.map(value => {
+  return ndjson.map(value => {
     try {
-      // TODO remove WKT once API passes geom as JSON
-      const geometry = value[GEOM] && parseSync(value[GEOM], WKTLoader);
+      const geometry = value[GEOM];
       const {...properties} = value;
       delete properties[GEOM];
       return {type: 'Feature', geometry, properties};
@@ -58,6 +55,4 @@ export function ndJsonToGeoJson(ndjson, {geoColumn}) {
       throw new Error(`Failed to parse geometry: ${value}`);
     }
   });
-
-  return json.filter(value => value.geometry);
 }
