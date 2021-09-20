@@ -57,42 +57,28 @@ export default class TileLayer extends CompositeLayer {
       changeFlags.dataChanged ||
       (changeFlags.updateTriggersChanged &&
         (changeFlags.updateTriggersChanged.all || changeFlags.updateTriggersChanged.getTileData));
+
     if (createTileCache) {
-      const opts = {
+      if (tileset) {
+        tileset.finalize();
+      }
+      tileset = new Tileset2D({
         ...this._getTilesetOptions(props),
         getTileData: this.getTileData.bind(this),
         onTileLoad: this._onTileLoad.bind(this),
         onTileError: this._onTileError.bind(this),
         onTileUnload: this._onTileUnload.bind(this)
-      };
-      let reload = false;
-      // If there is a tileset already, update it and force a reload.
-      if (tileset) {
-        reload = true;
-        tileset.finalize();
-        tileset.loadOptions(opts);
-        this._updateTileset(tileset, reload);
-        // Otherwise, we need to create a new tileset.
-      } else {
-        tileset = new Tileset2D(opts);
-        this._updateTileset(tileset, reload);
-        this.setState({tileset});
-      }
-      // Force an update of the tile layers without deleting them to prevent skipped frames.
-      tileset.tiles.forEach(tile => {
-        tile.updateLayers = true;
       });
+      this.setState({tileset});
     } else if (changeFlags.propsChanged || changeFlags.updateTriggersChanged) {
       tileset.setOptions(this._getTilesetOptions(props));
       // if any props changed, delete the cached layers
-      // Should we do the same as the above?  Not delete but use a boolean to cause an update?
-      tileset.tiles.forEach(tile => {
+      this.state.tileset.tiles.forEach(tile => {
         tile.layers = null;
       });
-      this._updateTileset(tileset);
-    } else {
-      this._updateTileset(tileset);
     }
+
+    this._updateTileset();
   }
 
   _getTilesetOptions(props) {
@@ -121,19 +107,17 @@ export default class TileLayer extends CompositeLayer {
     };
   }
 
-  _updateTileset(tileset, reload = false) {
+  _updateTileset() {
+    const {tileset} = this.state;
     const {zRange, modelMatrix} = this.props;
     const frameNumber = tileset.update(this.context.viewport, {zRange, modelMatrix});
-    if (reload) {
-      tileset.reload();
-    }
     const {isLoaded} = tileset;
 
     const loadingStateChanged = this.state.isLoaded !== isLoaded;
     const tilesetChanged = this.state.frameNumber !== frameNumber;
 
     if (isLoaded && (loadingStateChanged || tilesetChanged)) {
-      this._onViewportLoad(tileset);
+      this._onViewportLoad();
     }
 
     if (tilesetChanged) {
@@ -144,7 +128,8 @@ export default class TileLayer extends CompositeLayer {
     this.state.isLoaded = isLoaded;
   }
 
-  _onViewportLoad(tileset) {
+  _onViewportLoad() {
+    const {tileset} = this.state;
     const {onViewportLoad} = this.props;
 
     if (onViewportLoad) {
@@ -165,7 +150,7 @@ export default class TileLayer extends CompositeLayer {
     const layer = this.getCurrentLayer();
     layer.props.onTileError(error);
     // errorred tiles should not block rendering, are considered "loaded" with empty data
-    layer._updateTileset(this.state.tileset);
+    layer._updateTileset();
 
     if (tile.isVisible) {
       this.setNeedsUpdate();
@@ -220,7 +205,7 @@ export default class TileLayer extends CompositeLayer {
       // cache the rendered layer in the tile
       if (!tile.isLoaded) {
         // no op
-      } else if (!tile.layers || tile.updateLayers) {
+      } else if (!tile.layers) {
         const layers = this.renderSubLayers({
           ...this.props,
           id: `${this.id}-${tile.x}-${tile.y}-${tile.z}`,
