@@ -10,7 +10,13 @@ import {
   setDefaultCredentials,
   getDefaultCredentials
 } from '@deck.gl/carto';
-import {MAPS_API_V1_RESPONSE, TILEJSON_RESPONSE} from '../mock-fetch';
+import {
+  MAPS_API_V1_RESPONSE,
+  TILEJSON_RESPONSE,
+  GEOJSON,
+  mockFetchMapsV3,
+  restoreFetch
+} from '../mock-fetch';
 
 test('getDataV2#v1', async t => {
   setDefaultCredentials({
@@ -106,6 +112,30 @@ test('getDataV2#v2', async t => {
   );
 
   _global.fetch = fetch;
+  setDefaultCredentials({});
+  t.end();
+});
+
+test('getDataV3#formats', async t => {
+  setDefaultCredentials({
+    apiVersion: API_VERSIONS.V3,
+    apiBaseUrl: 'https://maps-v3',
+    accessToken: 'ABCD1234'
+  });
+
+  const fetchMock = mockFetchMapsV3();
+
+  const result = await getData({
+    type: MAP_TYPES.TABLE,
+    connection: 'connection_name',
+    source: 'table'
+  });
+
+  /*eslint-disable */
+  t.is(result.format, 'geojson', 'should be correct format');
+  t.is(result.data, GEOJSON, 'should return correct data');
+
+  restoreFetch(fetchMock);
   setDefaultCredentials({});
   t.end();
 });

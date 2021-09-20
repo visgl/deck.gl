@@ -6,7 +6,7 @@ export const TILEJSON_RESPONSE = {
   tiles: ['https://xyz.com/{z}/{x}/{y}']
 };
 
-const GEOJSON = {
+export const GEOJSON = {
   type: 'FeatureCollection',
   features: [
     {
