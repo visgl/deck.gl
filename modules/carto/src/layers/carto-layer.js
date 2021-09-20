@@ -3,10 +3,9 @@ import {CompositeLayer, log} from '@deck.gl/core';
 import {MVTLayer} from '@deck.gl/geo-layers';
 import {GeoJsonLayer} from '@deck.gl/layers';
 import {parseInBatches} from '@loaders.gl/core';
-import {CSVLoader} from '@loaders.gl/csv';
 import {NDJSONLoader} from '@loaders.gl/json';
 import {getData, getDataV2, API_VERSIONS} from '../api';
-import {FORMATS, MAP_TYPES, csvToGeoJson, ndJsonToGeoJson} from '../api/maps-api-common';
+import {FORMATS, MAP_TYPES, ndJsonToGeoJson} from '../api/maps-api-common';
 import {getDefaultCredentials} from '../config';
 
 const defaultProps = {
@@ -113,25 +112,7 @@ export default class CartoLayer extends CompositeLayer {
           columns
         });
 
-        if (result.format === FORMATS.CSV) {
-          const batches = await parseInBatches(result.data, CSVLoader, {
-            batchSize: 5000,
-            csv: {
-              dynamicTyping: false,
-              escapeChar: '\\'
-            }
-          });
-
-          const wait = r => setTimeout(r, 0);
-          const getDataAsync = async function* getDataAsync() {
-            for await (const batch of batches) {
-              // To avoid UI locking up, only yield once per frame
-              await new Promise(wait);
-              yield csvToGeoJson(batch.data, {geoColumn});
-            }
-          };
-          data = getDataAsync();
-        } else if (result.format === FORMATS.NDJSON) {
+        if (result.format === FORMATS.NDJSON) {
           const batches = await parseInBatches(result.data, NDJSONLoader, {
             batchSize: 5000
           });

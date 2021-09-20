@@ -16,7 +16,6 @@ export const MAP_TYPES = {
 // AVAILABLE FORMATS
 export const FORMATS = {
   GEOJSON: 'geojson',
-  CSV: 'csv',
   NDJSON: 'ndjson',
   TILEJSON: 'tilejson',
   JSON: 'json'
@@ -27,20 +26,6 @@ export const FORMATS = {
  */
 export function encodeParameter(name, value) {
   return `${name}=${encodeURIComponent(value)}`;
-}
-
-export function csvToGeoJson(csv, {geoColumn}) {
-  const GEOM = geoColumn || 'geom';
-  return csv.map(value => {
-    try {
-      const geometry = JSON.parse(value[GEOM]);
-      const {...properties} = value;
-      delete properties[GEOM];
-      return {type: 'Feature', geometry, properties};
-    } catch (error) {
-      throw new Error(`Failed to parse geometry: ${value}`);
-    }
-  });
 }
 
 export function ndJsonToGeoJson(ndjson, {geoColumn}) {

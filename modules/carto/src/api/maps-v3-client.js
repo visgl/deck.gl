@@ -37,7 +37,7 @@ async function request({method, url, format, accessToken, body}) {
     throw new Error(`Failed to connect to Maps API: ${error}`);
   }
 
-  if (format === FORMATS.NDJSON || format === FORMATS.CSV) {
+  if (format === FORMATS.NDJSON) {
     return response;
   }
 
@@ -158,7 +158,7 @@ export async function getData({type, source, connection, credentials, geoColumn,
     log.assert(url, `Format ${format} not available`);
   } else {
     // guess map format
-    const prioritizedFormats = [FORMATS.NDJSON, FORMATS.CSV, FORMATS.GEOJSON, FORMATS.TILEJSON];
+    const prioritizedFormats = [FORMATS.NDJSON, FORMATS.GEOJSON, FORMATS.TILEJSON];
     for (const f of prioritizedFormats) {
       url = getUrlFromMetadata(metadata, f);
       if (url) {
