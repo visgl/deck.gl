@@ -1,4 +1,4 @@
-/* global global, window */
+/* global global, window, TextEncoder, Response */
 const _global = typeof global !== 'undefined' ? global : window;
 
 export const TILEJSON_RESPONSE = {
@@ -19,6 +19,15 @@ export const GEOJSON = {
     }
   ]
 };
+
+export const NDJSON = [
+  {
+    geom: {
+      type: 'Point',
+      coordinates: [-6.7531585693359375, 37.57505900514996]
+    }
+  }
+];
 
 export const MAPS_API_V1_RESPONSE = {
   metadata: {
@@ -49,9 +58,16 @@ export function mockFetchMapsV2() {
   return fetch;
 }
 
-export function mockFetchMapsV3() {
+export function mockFetchMapsV3(formats = ['geojson']) {
   const fetch = _global.fetch;
   _global.fetch = url => {
+    if (url.indexOf('format=ndjson') !== -1) {
+      const ndJsonText = NDJSON.map(line => JSON.stringify(line)).join('\n');
+      const encoder = new TextEncoder();
+      const array = encoder.encode(ndJsonText);
+      return new Response(array.buffer);
+    }
+
     return Promise.resolve({
       json: () => {
         if (url.indexOf('format=tilejson') !== -1) {
@@ -68,12 +84,14 @@ export function mockFetchMapsV3() {
             }
           };
         }
-        if (url.indexOf('query') !== -1 || url.indexOf('table')) {
-          return {
-            geojson: {
-              url: ['https://xyz.com?format=geojson']
-            }
-          };
+        if (url.indexOf('query') !== -1 || url.indexOf('table') !== -1) {
+          const urls = {};
+          formats.forEach(format => {
+            urls[format] = {
+              url: [`https://xyz.com?format=${format}`]
+            };
+          });
+          return urls;
         }
         return null;
       },

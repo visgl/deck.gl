@@ -131,7 +131,6 @@ test('getDataV3#formats', async t => {
     source: 'table'
   });
 
-  /*eslint-disable */
   t.is(result.format, 'geojson', 'should be correct format');
   t.is(result.data, GEOJSON, 'should return correct data');
 
