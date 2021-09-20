@@ -45,58 +45,52 @@ export default class Tile2DHeader {
 
   /* eslint-disable max-statements */
   async _loadData(getTileData, requestScheduler) {
+    const {x, y, z, bbox} = this;
+
+    this._abortController = new AbortController(); // eslint-disable-line no-undef
+    const {signal} = this._abortController;
+
+    const requestToken = await requestScheduler.scheduleRequest(this, tile => {
+      return tile.isSelected ? 1 : -1;
+    });
+
+    if (!requestToken) {
+      this._isCancelled = true;
+      return;
+    }
+    // A tile can be cancelled while being scheduled
+    if (this._isCancelled) {
+      requestToken.done();
+      return;
+    }
+
+    let tileData;
+    let error;
     try {
-      const {x, y, z, bbox} = this;
-
-      this._abortController = new AbortController(); // eslint-disable-line no-undef
-      const {signal} = this._abortController;
-      this._isLoaded = false;
-      console.log('here!', x, y, z); // eslint-disable-line
-      const requestToken = await requestScheduler.scheduleRequest(this, tile => {
-        return tile.isSelected ? 1 : -1;
-      });
-      console.log('here!', x, y, z); // eslint-disable-line
-
-      if (!requestToken) {
-        this._isCancelled = true;
-        return;
-      }
-      // A tile can be cancelled while being scheduled
-      if (this._isCancelled) {
-        requestToken.done();
-        return;
-      }
-
-      let tileData;
-      let error;
-      try {
-        tileData = await getTileData({x, y, z, bbox, signal});
-      } catch (err) {
-        error = err || true;
-      } finally {
-        requestToken.done();
-
-        if (this._isCancelled && !tileData) {
-          this._isLoaded = false;
-        } else {
-          // Consider it loaded if we tried to cancel but `getTileData` still returned data
-          this._isLoaded = true;
-          this._isCancelled = false;
-        }
-      }
-
-      if (!this._isLoaded) {
-        return;
-      }
-
-      if (error) {
-        this.onTileError(error, this);
-      } else {
-        this.content = tileData;
-        this.onTileLoad(this);
-      }
+      tileData = await getTileData({x, y, z, bbox, signal});
     } catch (err) {
-      console.log(err); // eslint-disable-line
+      error = err || true;
+    } finally {
+      requestToken.done();
+
+      if (this._isCancelled && !tileData) {
+        this._isLoaded = false;
+      } else {
+        // Consider it loaded if we tried to cancel but `getTileData` still returned data
+        this._isLoaded = true;
+        this._isCancelled = false;
+      }
+    }
+
+    if (!this._isLoaded) {
+      return;
+    }
+
+    if (error) {
+      this.onTileError(error, this);
+    } else {
+      this.content = tileData;
+      this.onTileLoad(this);
     }
   }
   /* eslint-enable max-statements */
