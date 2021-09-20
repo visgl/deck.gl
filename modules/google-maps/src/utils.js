@@ -1,6 +1,6 @@
 /* global google, document */
-import {Deck} from '@deck.gl/core';
-import {Matrix4} from 'math.gl';
+import { Deck } from '@deck.gl/core';
+import { Matrix4 } from 'math.gl';
 
 // https://en.wikipedia.org/wiki/Web_Mercator_projection#Formulas
 const MAX_LATITUDE = 85.05113;
@@ -77,7 +77,7 @@ function getContainer(overlay, style) {
  * @param deck (Deck) - a previously created instances
  */
 export function destroyDeckInstance(deck) {
-  const {_eventListeners: eventListeners} = deck.props.userData;
+  const { _eventListeners: eventListeners } = deck.props.userData;
 
   // Unregister event listeners
   for (const eventType in eventListeners) {
@@ -94,7 +94,7 @@ export function destroyDeckInstance(deck) {
  * @param overlay (google.maps.OverlayView) - A maps Overlay instance
  */
 export function getViewPropsFromOverlay(map, overlay) {
-  const {width, height} = getMapSize(map);
+  const { width, height } = getMapSize(map);
 
   // Canvas position relative to draggable map's container depends on
   // overlayView's projection, not the map's. Have to use the center of the
@@ -161,7 +161,7 @@ export function getViewPropsFromOverlay(map, overlay) {
  * @param coordinateTransformer (google.maps.CoordinateTransformer) - A CoordinateTransformer instance
  */
 export function getViewPropsFromCoordinateTransformer(map, coordinateTransformer) {
-  const {width, height} = getMapSize(map);
+  const { width, height } = getMapSize(map);
   const {
     lat: latitude,
     lng: longitude,
@@ -223,8 +223,7 @@ function getEventPixel(event, deck) {
   const point = deck.getViewports()[0].project([event.latLng.lng(), event.latLng.lat()]);
   return {
     x: point[0],
-    y: point[1],
-    radius: deck.props.pickingRadius
+    y: point[1]
   };
 }
 
@@ -239,7 +238,10 @@ function handleMouseEvent(deck, type, event) {
   switch (type) {
     case 'click':
       // Hack: because we do not listen to pointer down, perform picking now
-      deck._lastPointerDownInfo = deck.pickObject(mockEvent.offsetCenter);
+      deck._lastPointerDownInfo = deck.pickObject({
+        ...mockEvent.offsetCenter,
+        radius: deck.props.pickingRadius
+      });
       mockEvent.tapCount = 1;
       deck._onEvent(mockEvent);
       break;
