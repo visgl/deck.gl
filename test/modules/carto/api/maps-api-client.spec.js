@@ -132,15 +132,17 @@ test('getDataV3#formats', async t => {
 
   let fetchMock = mockFetchMapsV3(['geojson']);
   let result = await getData(config);
-  t.is(result.format, 'geojson', 'should be correct format');
+  t.is(result.format, 'geojson', 'should be in geojson format');
   t.is(result.data, GEOJSON, 'should return correct data');
 
-  // NDJSON should be prioritized
   fetchMock = mockFetchMapsV3(['geojson', 'ndjson']);
   result = await getData(config);
-  t.is(result.format, 'ndjson', 'should be correct format');
+  t.is(result.format, 'ndjson', 'should prioritize ndjson format');
   const body = await result.data.text();
   t.is(body, NDJSON, 'should return correct data');
+
+  result = await getData({...config, format: 'geojson'});
+  t.is(result.format, 'geojson', 'override format should be respected');
 
   restoreFetch(fetchMock);
   setDefaultCredentials({});
