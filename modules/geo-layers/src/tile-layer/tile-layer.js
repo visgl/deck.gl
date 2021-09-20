@@ -84,9 +84,10 @@ export default class TileLayer extends CompositeLayer {
       });
     } else if (changeFlags.propsChanged || changeFlags.updateTriggersChanged) {
       tileset.setOptions(this._getTilesetOptions(props));
-      // Force an update of the tile layers without deleting them to prevent skipped frames.
+      // if any props changed, delete the cached layers
+      // Should we do the same as the above?  Not delete but use a boolean to cause an update?
       tileset.tiles.forEach(tile => {
-        tile.updateLayers = true;
+        tile.layers = null;
       });
       this._updateTileset(tileset);
     } else {
