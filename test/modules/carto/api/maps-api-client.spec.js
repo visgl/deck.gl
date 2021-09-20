@@ -14,6 +14,7 @@ import {
   MAPS_API_V1_RESPONSE,
   TILEJSON_RESPONSE,
   GEOJSON,
+  NDJSON,
   mockFetchMapsV3,
   restoreFetch
 } from '../mock-fetch';
@@ -123,16 +124,23 @@ test('getDataV3#formats', async t => {
     accessToken: 'ABCD1234'
   });
 
-  const fetchMock = mockFetchMapsV3();
-
-  const result = await getData({
+  const config = {
     type: MAP_TYPES.TABLE,
     connection: 'connection_name',
     source: 'table'
-  });
+  };
 
+  let fetchMock = mockFetchMapsV3(['geojson']);
+  let result = await getData(config);
   t.is(result.format, 'geojson', 'should be correct format');
   t.is(result.data, GEOJSON, 'should return correct data');
+
+  // NDJSON should be prioritized
+  fetchMock = mockFetchMapsV3(['geojson', 'ndjson']);
+  result = await getData(config);
+  t.is(result.format, 'ndjson', 'should be correct format');
+  const body = await result.data.text();
+  t.is(body, NDJSON, 'should return correct data');
 
   restoreFetch(fetchMock);
   setDefaultCredentials({});

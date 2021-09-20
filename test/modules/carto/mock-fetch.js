@@ -27,7 +27,9 @@ export const NDJSON = [
       coordinates: [-6.7531585693359375, 37.57505900514996]
     }
   }
-];
+]
+  .map(line => JSON.stringify(line))
+  .join('\n');
 
 export const MAPS_API_V1_RESPONSE = {
   metadata: {
@@ -62,9 +64,8 @@ export function mockFetchMapsV3(formats = ['geojson']) {
   const fetch = _global.fetch;
   _global.fetch = url => {
     if (url.indexOf('format=ndjson') !== -1) {
-      const ndJsonText = NDJSON.map(line => JSON.stringify(line)).join('\n');
       const encoder = new TextEncoder();
-      const array = encoder.encode(ndJsonText);
+      const array = encoder.encode(NDJSON);
       return new Response(array.buffer);
     }
 
