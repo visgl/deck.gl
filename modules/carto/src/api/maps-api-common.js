@@ -31,13 +31,9 @@ export function encodeParameter(name, value) {
 export function ndJsonToGeoJson(ndjson, {geoColumn}) {
   const GEOM = geoColumn || 'geom';
   return ndjson.map(value => {
-    try {
-      const geometry = value[GEOM];
-      const {...properties} = value;
-      delete properties[GEOM];
-      return {type: 'Feature', geometry, properties};
-    } catch (error) {
-      throw new Error(`Failed to parse geometry: ${value}`);
-    }
+    const geometry = value[GEOM];
+    const {...properties} = value;
+    delete properties[GEOM];
+    return {type: 'Feature', geometry, properties};
   });
 }
