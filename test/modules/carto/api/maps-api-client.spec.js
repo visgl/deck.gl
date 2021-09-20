@@ -15,6 +15,7 @@ import {
   TILEJSON_RESPONSE,
   GEOJSON,
   NDJSON,
+  JSONDATA,
   mockFetchMapsV3,
   restoreFetch
 } from '../mock-fetch';
@@ -143,6 +144,10 @@ test('getDataV3#formats', async t => {
 
   result = await getData({...config, format: 'geojson'});
   t.is(result.format, 'geojson', 'override format should be respected');
+  fetchMock = mockFetchMapsV3(['geojson', 'ndjson', 'json']);
+  result = await getData({...config, format: 'json'});
+  t.is(result.format, 'json', 'should return json format');
+  t.is(result.data, JSONDATA, 'should return correct data');
 
   restoreFetch(fetchMock);
   setDefaultCredentials({});

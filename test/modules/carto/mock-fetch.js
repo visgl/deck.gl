@@ -20,16 +20,16 @@ export const GEOJSON = {
   ]
 };
 
-export const NDJSON = [
+export const JSONDATA = [
   {
     geom: {
       type: 'Point',
       coordinates: [-6.7531585693359375, 37.57505900514996]
     }
   }
-]
-  .map(line => JSON.stringify(line))
-  .join('\n');
+];
+
+export const NDJSON = JSONDATA.map(line => JSON.stringify(line)).join('\n');
 
 export const MAPS_API_V1_RESPONSE = {
   metadata: {
@@ -76,6 +76,9 @@ export function mockFetchMapsV3(formats = ['geojson']) {
         }
         if (url.indexOf('format=geojson') !== -1) {
           return GEOJSON;
+        }
+        if (url.indexOf('format=json') !== -1) {
+          return JSONDATA;
         }
 
         if (url.indexOf('tileset') !== -1) {
