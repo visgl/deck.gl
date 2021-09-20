@@ -357,3 +357,33 @@ test('getData#post', async t => {
 
   t.end();
 });
+
+test('getData#mapsApiError', async t => {
+  setDefaultCredentials({
+    apiVersion: API_VERSIONS.V3,
+    apiBaseUrl: 'http://carto-api',
+    accessToken: '1234'
+  });
+
+  const _global = typeof global !== 'undefined' ? global : window;
+  const fetch = _global.fetch;
+
+  _global.fetch = () => {
+    throw new Error('1234');
+  };
+
+  try {
+    await getData({
+      type: MAP_TYPES.TABLE,
+      connection: 'connection_name',
+      source: 'table'
+    });
+    t.fail('it should throw an error');
+  } catch (e) {
+    t.is(e.message, 'Failed to connect to Maps API: Error: 1234', 'should throw when fetch fails');
+  }
+
+  setDefaultCredentials({});
+  _global.fetch = fetch;
+  t.end();
+});
