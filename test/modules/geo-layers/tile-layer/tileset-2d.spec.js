@@ -63,6 +63,7 @@ test('Tileset2D#finalize', async t => {
     onTileLoad: () => {}
   });
   tileset.update(testViewport);
+  const tile1 = tileset.selectedTiles[0];
 
   await sleep(60);
 
@@ -74,64 +75,17 @@ test('Tileset2D#finalize', async t => {
       })
     )
   );
+  const tile2 = tileset.selectedTiles[0];
 
   tileset.finalize();
+  t.notOk(tileset._cache.size, 'cache is purged');
 
   t.is(
-    tileset._cache.get('1171,1566,12')._isCancelled,
+    tile1.isCancelled,
     false,
     'first tile should not have been loading and thus not been aborteed'
   );
-  t.is(tileset._cache.get('910,459,12')._isCancelled, true, 'second tile should have been aborted');
-
-  t.end();
-});
-
-test('Tileset2D#finalize-partial', async t => {
-  const tileset = new Tileset2D({
-    getTileData: () => sleep(10),
-    onTileLoad: () => {},
-    onTileError: () => {}
-  });
-  tileset.update(new WebMercatorViewport({longitude: 0, latitude: 0, zoom: 0}));
-
-  // Tiles that should be loaded
-  tileset._getTile({x: 1, y: 1, z: 1}, true);
-  await sleep(20);
-
-  // Tiles that should be cancelled
-  tileset._getTile({x: 0, y: 0, z: 1}, true);
-  tileset.finalize();
-
-  // Tiles that should be loaded
-  tileset._getTile({x: 1, y: 0, z: 1}, true);
-  await sleep(20);
-
-  t.is(
-    tileset._cache.get('0,0,0').isCancelled,
-    false,
-    'visible tile should have loaded and thus not been aborted'
-  );
-  t.is(
-    tileset._cache.get('1,1,1').isCancelled,
-    false,
-    'first tile should not have been loading and thus not been aborted'
-  );
-  t.is(tileset._cache.get('0,0,1').isCancelled, true, 'second tile should have been aborted');
-  t.is(
-    tileset._cache.get('1,0,1').isCancelled,
-    false,
-    'third tile should not have been loading and thus not been aborted'
-  );
-
-  // Now, these tiles should be loaded
-  tileset._getTile({x: 0, y: 0, z: 1}, true);
-  await sleep(20);
-  t.is(
-    tileset._cache.get('0,0,1').isCancelled,
-    false,
-    'second tile should should have loaded and not been aborted'
-  );
+  t.is(tile2.isCancelled, true, 'second tile should have been aborted');
 
   t.end();
 });

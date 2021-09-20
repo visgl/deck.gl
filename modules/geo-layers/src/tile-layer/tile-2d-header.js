@@ -2,7 +2,7 @@
 import {log} from '@deck.gl/core';
 
 export default class Tile2DHeader {
-  constructor({x, y, z, onTileLoad, onTileError}) {
+  constructor({x, y, z}) {
     this.x = x;
     this.y = y;
     this.z = z;
@@ -12,11 +12,11 @@ export default class Tile2DHeader {
     this.children = [];
 
     this.content = null;
+
+    this._loaderId = 0;
     this._isLoaded = false;
     this._isCancelled = false;
-
-    this.onTileLoad = onTileLoad;
-    this.onTileError = onTileError;
+    this._needsReload = false;
   }
 
   get data() {
@@ -35,6 +35,10 @@ export default class Tile2DHeader {
     return this._isCancelled;
   }
 
+  get needsReload() {
+    return this._needsReload || this._isCancelled;
+  }
+
   get byteLength() {
     const result = this.content ? this.content.byteLength : 0;
     if (!Number.isFinite(result)) {
@@ -44,8 +48,9 @@ export default class Tile2DHeader {
   }
 
   /* eslint-disable max-statements */
-  async _loadData(getTileData, requestScheduler) {
+  async _loadData({getData, requestScheduler, onLoad, onError}) {
     const {x, y, z, bbox} = this;
+    const loaderId = this._loaderId;
 
     this._abortController = new AbortController(); // eslint-disable-line no-undef
     const {signal} = this._abortController;
@@ -64,47 +69,56 @@ export default class Tile2DHeader {
       return;
     }
 
-    let tileData;
+    let tileData = null;
     let error;
     try {
-      tileData = await getTileData({x, y, z, bbox, signal});
+      tileData = await getData({x, y, z, bbox, signal});
     } catch (err) {
       error = err || true;
     } finally {
       requestToken.done();
-
-      if (this._isCancelled && !tileData) {
-        this._isLoaded = false;
-      } else {
-        // Consider it loaded if we tried to cancel but `getTileData` still returned data
-        this._isLoaded = true;
-        this._isCancelled = false;
-      }
     }
 
-    if (!this._isLoaded) {
+    // If loadData has been called with a newer version, discard the result from this operation
+    if (loaderId !== this._loaderId) {
       return;
     }
+    // Clear the `isLoading` flag
+    this._loader = undefined;
+    // Rewrite tile content with the result of getTileData if successful, or `null` in case of
+    // error or cancellation
+    this.content = tileData;
+    // If cancelled, do not invoke the callbacks
+    // Consider it loaded if we tried to cancel but `getTileData` still returned data
+    if (this._isCancelled && !tileData) {
+      this._isLoaded = false;
+      return;
+    }
+    this._isLoaded = true;
+    this._isCancelled = false;
 
     if (error) {
-      this.onTileError(error, this);
+      onError(error, this);
     } else {
-      this.content = tileData;
-      this.onTileLoad(this);
+      onLoad(this);
     }
   }
   /* eslint-enable max-statements */
 
-  loadData(getTileData, requestScheduler) {
-    if (!getTileData) {
-      return;
-    }
-
+  loadData(opts) {
     this._isCancelled = false;
-    this._loader = this._loadData(getTileData, requestScheduler);
-    this._loader.finally(() => {
+    this._needsReload = false;
+    this._loaderId++;
+    this._loader = this._loadData(opts);
+    return this._loader;
+  }
+
+  setNeedsReload() {
+    if (this.isLoading) {
+      this.abort();
       this._loader = undefined;
-    });
+    }
+    this._needsReload = true;
   }
 
   abort() {
