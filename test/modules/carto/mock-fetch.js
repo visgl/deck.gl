@@ -60,7 +60,7 @@ export function mockFetchMapsV2() {
   return fetch;
 }
 
-export function mockFetchMapsV3(formats = ['geojson']) {
+export function mockFetchMapsV3(formats = ['geojson'], status = 200) {
   const fetch = _global.fetch;
   _global.fetch = url => {
     if (url.indexOf('format=ndjson') !== -1) {
@@ -99,7 +99,8 @@ export function mockFetchMapsV3(formats = ['geojson']) {
         }
         return null;
       },
-      ok: true
+      ok: status === 200,
+      status
     });
   };
   return fetch;

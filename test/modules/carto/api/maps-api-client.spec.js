@@ -118,6 +118,36 @@ test('getDataV2#v2', async t => {
   t.end();
 });
 
+test('getDataV3#errors', async t => {
+  setDefaultCredentials({
+    apiVersion: API_VERSIONS.V3,
+    apiBaseUrl: 'https://maps-v3',
+    accessToken: 'ABCD1234'
+  });
+
+  const config = {
+    type: MAP_TYPES.TABLE,
+    connection: 'connection_name',
+    source: 'table'
+  };
+
+  const errorCodes = [400, 401, 403, 500];
+  let fetchMock;
+  for (const status of errorCodes) {
+    fetchMock = mockFetchMapsV3(['geojson'], status);
+    try {
+      await getData(config);
+      t.fail('it should throw an error');
+    } catch (e) {
+      t.ok(e, `should throw when fetch status is ${status}`);
+    }
+  }
+
+  restoreFetch(fetchMock);
+  setDefaultCredentials({});
+  t.end();
+});
+
 test('getDataV3#formats', async t => {
   setDefaultCredentials({
     apiVersion: API_VERSIONS.V3,
