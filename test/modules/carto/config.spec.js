@@ -51,6 +51,14 @@ test('config#setDefaultCredentials', t => {
     'should throw when apiBaseUrl is not defined at v3'
   );
 
+  t.throws(
+    () => {
+      setDefaultCredentials({apiVersion: 'INVALID'});
+    },
+    /Invalid API version/i,
+    'should throw when apiVersion is invalid'
+  );
+
   credentials = getDefaultCredentials();
 
   setDefaultCredentials({});
