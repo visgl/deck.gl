@@ -1,7 +1,7 @@
 /**
  * Maps API Client for Carto 3
  */
-import {getDefaultCredentials, buildMapsUrlFromBase} from '../config';
+import {getDefaultCredentials} from '../config';
 import {API_VERSIONS, encodeParameter, FORMATS, MAP_TYPES} from './maps-api-common';
 import {log} from '@deck.gl/core';
 
@@ -137,9 +137,6 @@ function checkGetDataParameters({type, source, connection, localCreds}) {
 export async function getData({type, source, connection, credentials, geoColumn, columns, format}) {
   const localCreds = {...getDefaultCredentials(), ...credentials};
   checkGetDataParameters({type, source, connection, localCreds});
-  if (!localCreds.mapsUrl) {
-    localCreds.mapsUrl = buildMapsUrlFromBase(localCreds.apiBaseUrl);
-  }
 
   const metadata = await mapInstantiation({
     type,
