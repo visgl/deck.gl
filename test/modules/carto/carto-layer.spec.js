@@ -54,68 +54,70 @@ test('CartoLayer#v2', async t => {
   t.end();
 });
 
-test('CartoLayer#v3', async t => {
-  const fetchMock = mockFetchMapsV3();
-  const spy = makeSpy(MVTLayer.prototype, 'getTileData');
-  spy.returns([]);
+['ndjson', 'geojson'].forEach(format => {
+  test(`CartoLayer#v3#${format}`, async t => {
+    const fetchMock = mockFetchMapsV3([format]);
+    const spy = makeSpy(MVTLayer.prototype, 'getTileData');
+    spy.returns([]);
 
-  const onAfterUpdate = ({layer, subLayer, subLayers}) => {
-    const {data} = layer.state;
-    if (!data) {
-      t.is(subLayers.length, 0, 'should no render subLayers');
-    } else {
-      t.is(subLayers.length, 1, 'should have only 1 sublayer');
-      switch (layer.props.type) {
-        case MAP_TYPES.TILESET:
-          t.ok(subLayer instanceof MVTLayer, 'should be an MVTLayer');
-          break;
-        case MAP_TYPES.TABLE:
-        case MAP_TYPES.QUERY:
-          t.ok(subLayer instanceof GeoJsonLayer, 'should be a GeoJsonLayer');
-          break;
-        default:
-          t.ok(false, 'invalid prop type');
+    const onAfterUpdate = ({layer, subLayer, subLayers}) => {
+      const {data} = layer.state;
+      if (!data) {
+        t.is(subLayers.length, 0, 'should no render subLayers');
+      } else {
+        t.is(subLayers.length, 1, 'should have only 1 sublayer');
+        switch (layer.props.type) {
+          case MAP_TYPES.TILESET:
+            t.ok(subLayer instanceof MVTLayer, 'should be an MVTLayer');
+            break;
+          case MAP_TYPES.TABLE:
+          case MAP_TYPES.QUERY:
+            t.ok(subLayer instanceof GeoJsonLayer, 'should be a GeoJsonLayer');
+            break;
+          default:
+            t.ok(false, 'invalid prop type');
+        }
       }
-    }
-  };
+    };
 
-  await testLayerAsync({
-    Layer: CartoLayer,
-    testCases: [
-      {
-        props: {
-          data: 'select * from table',
-          type: MAP_TYPES.QUERY,
-          connection: 'conn_name',
-          credentials: CREDENTIALS_V3
+    await testLayerAsync({
+      Layer: CartoLayer,
+      testCases: [
+        {
+          props: {
+            data: 'select * from table',
+            type: MAP_TYPES.QUERY,
+            connection: 'conn_name',
+            credentials: CREDENTIALS_V3
+          },
+          onAfterUpdate
         },
-        onAfterUpdate
-      },
-      {
-        props: {
-          data: 'tileset',
-          connection: 'conn_name',
-          type: MAP_TYPES.TILESET,
-          credentials: CREDENTIALS_V3
+        {
+          props: {
+            data: 'tileset',
+            connection: 'conn_name',
+            type: MAP_TYPES.TILESET,
+            credentials: CREDENTIALS_V3
+          },
+          onAfterUpdate
         },
-        onAfterUpdate
-      },
-      {
-        props: {
-          data: 'table',
-          connection: 'conn_name',
-          type: MAP_TYPES.TABLE,
-          credentials: CREDENTIALS_V3
-        },
-        onAfterUpdate
-      }
-    ]
+        {
+          props: {
+            data: 'table',
+            connection: 'conn_name',
+            type: MAP_TYPES.TABLE,
+            credentials: CREDENTIALS_V3
+          },
+          onAfterUpdate
+        }
+      ]
+    });
+
+    restoreFetch(fetchMock);
+    spy.restore();
+
+    t.end();
   });
-
-  restoreFetch(fetchMock);
-  spy.restore();
-
-  t.end();
 });
 
 test('CartoLayer#should throw with invalid params for v1 and v2', t => {
