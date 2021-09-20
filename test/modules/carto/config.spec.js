@@ -37,6 +37,17 @@ test('config#setDefaultCredentials', t => {
 
   setDefaultCredentials({
     apiVersion: API_VERSIONS.V3,
+    apiBaseUrl: 'http://server-trailing-slash/'
+  });
+  credentials = getDefaultCredentials();
+  t.is(
+    credentials.mapsUrl,
+    'http://server-trailing-slash/v3/maps',
+    'should remove trailing slash from apiBaseUrl'
+  );
+
+  setDefaultCredentials({
+    apiVersion: API_VERSIONS.V3,
     apiBaseUrl: 'http://server',
     mapsUrl: 'http://server2'
   });
@@ -58,8 +69,6 @@ test('config#setDefaultCredentials', t => {
     /Invalid API version/i,
     'should throw when apiVersion is invalid'
   );
-
-  credentials = getDefaultCredentials();
 
   setDefaultCredentials({});
   t.end();
