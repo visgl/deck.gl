@@ -239,7 +239,7 @@ function handleMouseEvent(deck, type, event) {
     case 'click':
       // Hack: because we do not listen to pointer down, perform picking now
       deck._lastPointerDownInfo = deck.pickObject({
-        ...mockEvent.offsetCenter, 
+        ...mockEvent.offsetCenter,
         radius: deck.props.pickingRadius
       });
       mockEvent.tapCount = 1;
