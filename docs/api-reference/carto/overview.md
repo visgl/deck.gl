@@ -133,7 +133,7 @@ The CARTO submodule includes the CartoLayer that simplifies the interaction with
     import { getData } from '@deck.gl/carto';
     import { H3HexagonLayer } from '@deck.gl/geo-layers/';
 
-    const data =  await getData({
+    const result = await getData({
       type: MAP_TYPES.QUERY,
       source: `SELECT bqcarto.h3.ST_ASH3(internal_point_geom, 4) as h3, count(*) as count
                   FROM bigquery-public-data.geo_us_census_places.us_national_places 
@@ -141,6 +141,7 @@ The CARTO submodule includes the CartoLayer that simplifies the interaction with
       connection: 'connection_name',
       format: 'json'
     });
+    const data = result.data;
 
     new H3HexagonLayer({
       data,
@@ -151,7 +152,12 @@ The CARTO submodule includes the CartoLayer that simplifies the interaction with
     });
     ```
 
-    The formats available are JSON, GEOJSON, TILEJSON, and NDJSON. [NDJSON](http://ndjson.org/) (Newline Delimited JSON) allows to handle incremental data loading https://deck.gl/docs/developer-guide/performance#handle-incremental-data-loading.
+    The formats available are JSON, GEOJSON, TILEJSON, and NDJSON. [NDJSON](http://ndjson.org/) (Newline Delimited JSON) allows to handle incremental data loading https://deck.gl/docs/developer-guide/performance#handle-incremental-data-loading. 
+
+* If the format is not explicitly specified, `getData` will pick a format automatically, depending on what is available from the CARTO API. The `getData` function returns a `Object` with the following properties:
+  * `format`: the format of the returned data (see `FORMATS` below)
+  * `data`: the actual data response
+
 
 * If not using the CARTO 3 API version, you can use the SQL API to retrieve the data in the required format. Please check the examples [here](https://docs.carto.com/deck-gl/examples/clustering-and-aggregation/h3-hexagon-layer/)
 
@@ -171,4 +177,3 @@ To make it easier to work with the CARTO module the following constants are prov
 |                 | JSON        |
 |                 | TILEJSON    |
 |                 | NDJSON      |
-
