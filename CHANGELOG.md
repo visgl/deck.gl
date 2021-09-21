@@ -19,6 +19,12 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v8.5
 
+#### deck.gl [8.5.9] - Sep 13 2021
+
+- Fix diffProps when an async prop is set synchronously (#6193)
+- Fix TileLayer getTileData not using the latest loadOptions (#6209)
+- [google-maps] Fix missing picking radius for onClick handlers (#6208)
+
 #### deck.gl [8.5.8] - Sep 13 2021
 
 - TileLayer uses props.extent to cull tiles in geospatial mode (#6191)
