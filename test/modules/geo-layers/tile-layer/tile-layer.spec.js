@@ -24,6 +24,9 @@ import {ScatterplotLayer} from '@deck.gl/layers';
 import {generateLayerTests, testLayerAsync, testLayer} from '@deck.gl/test-utils';
 import {TileLayer} from '@deck.gl/geo-layers';
 
+const DUMMY_DATA =
+  'https://raw.githubusercontent.com/visgl/deck.gl-data/master/test-data/geojson-point.json';
+
 test('TileLayer', async t => {
   const testCases = generateLayerTests({
     Layer: TileLayer,
@@ -69,7 +72,7 @@ test('TileLayer', async t => {
   const testCases = [
     {
       props: {
-        data: 'http://echo.jsontest.com/type/Point'
+        data: DUMMY_DATA
       },
       onBeforeUpdate: () => {
         t.comment('Default getTileData');
@@ -188,7 +191,7 @@ test('TileLayer#MapView:repeat', async t => {
   const testCases = [
     {
       props: {
-        data: 'http://echo.jsontest.com/key/value',
+        data: DUMMY_DATA,
         renderSubLayers
       },
       onAfterUpdate: ({layer, subLayers}) => {
