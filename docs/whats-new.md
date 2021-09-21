@@ -16,6 +16,10 @@ Release date: TBD
 - Tilting and rotating the view is supported
 - Rendering uses the same WebGL context as Google Maps, improving performance
 
+### @deck.gl/carto
+
+- Support for data streaming using `NDJSON`. Large datasets will be displayed progressively as they are loaded, meaning that the user will see something on screen earlier, rather than having to wait for all the data to be loaded before the layer is updated.
+
 ## deck.gl v8.5
 
 Release date: July 26, 2021
