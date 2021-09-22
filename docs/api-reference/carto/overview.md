@@ -130,7 +130,7 @@ The CARTO submodule includes the CartoLayer that simplifies the interaction with
 * If you are using the API v3, you can directly retrieve the data in the format expected by the layer using the `getData` function:
 
     ```js
-    import { getData } from '@deck.gl/carto';
+    import { getData, MAP_TYPES, FORMATS } from '@deck.gl/carto';
     import { H3HexagonLayer } from '@deck.gl/geo-layers/';
 
     const result = await getData({
@@ -139,7 +139,7 @@ The CARTO submodule includes the CartoLayer that simplifies the interaction with
                   FROM bigquery-public-data.geo_us_census_places.us_national_places 
                 GROUP BY h3`,
       connection: 'connection_name',
-      format: 'json'
+      format: FORMATS.JSON
     });
     const data = result.data;
 
@@ -154,9 +154,9 @@ The CARTO submodule includes the CartoLayer that simplifies the interaction with
 
     The formats available are JSON, GEOJSON, TILEJSON, and NDJSON. [NDJSON](http://ndjson.org/) (Newline Delimited JSON) allows to handle incremental data loading https://deck.gl/docs/developer-guide/performance#handle-incremental-data-loading. 
 
-* If the format is not explicitly specified, `getData` will pick a format automatically, depending on what is available from the CARTO API. The `getData` function returns a `Object` with the following properties:
-  * `format`: the format of the returned data (see `FORMATS` below)
-  * `data`: the actual data response
+  If the format is not explicitly specified, `getData` will pick a format automatically, depending on what is available from the CARTO API. The `getData` function returns a `Object` with the following properties:
+    * `format`: the format of the returned data (see `FORMATS` below)
+    * `data`: the actual data response
 
 
 * If not using the CARTO 3 API version, you can use the SQL API to retrieve the data in the required format. Please check the examples [here](https://docs.carto.com/deck-gl/examples/clustering-and-aggregation/h3-hexagon-layer/)
