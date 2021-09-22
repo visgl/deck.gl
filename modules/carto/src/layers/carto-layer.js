@@ -114,7 +114,7 @@ export default class CartoLayer extends CompositeLayer {
 
         if (result.format === FORMATS.NDJSON) {
           const batches = await parseInBatches(result.data, NDJSONLoader, {
-            batchSize: 5000
+            batchSize: 10000
           });
           const wait = r => setTimeout(r, 0);
           const getDataAsync = async function* getDataAsync() {
