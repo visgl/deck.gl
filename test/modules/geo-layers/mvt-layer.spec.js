@@ -338,7 +338,7 @@ test('MVTLayer#TileJSON', async t => {
   const testCases = [
     {
       props: {
-        data: 'http://echo.jsontest.com/key/value',
+        data: tileJSON.tiles,
         binary: false
       },
       onAfterUpdate
