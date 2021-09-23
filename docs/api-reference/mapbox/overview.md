@@ -118,7 +118,7 @@ function App() {
       // This id has to match the id of the deck.gl layer
       new MapboxLayer({ id: "my-scatterplot", deck }),
       // Optionally define id from Mapbox layer stack under which to add deck layer
-      'beforeId'
+      // 'before-layer-id'
     );
   }, []);
 
@@ -159,6 +159,21 @@ function App() {
 }
 ```
 
+Note that this usage pattern has a catch: the `DeckGL` instance does not know that it is sharing a context with Mapbox until `map.addLayer` is called for the first time. You may find the map blink due to competing rendering attempts between deck.gl and Mapbox if:
+
+- `map.addLayer` is not immediately called on `StaticMap`'s `onLoad` event
+- `map.addLayer` is called, but an invalid `beforeId` is supplied that does not match any layer id in the loaded map style. This causes `addLayer` to fail.
+
+If data layers are not immediately available when the component is mounted, you can work around this issue by:
+
+```js
+const onMapLoad = () => {
+  ...
+  // Insert a placeholder layer to connect Mapbox to Deck
+  // The id does not exist so it won't actually draw anything
+  map.addLayer(new MapboxLayer({ id: "dummy-layer", deck }));
+}
+```
 
 ## Injecting Layers into Mapbox
 
