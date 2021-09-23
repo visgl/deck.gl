@@ -860,7 +860,7 @@ As the number of deck.gl layers grow, we are splitting existing and new layers i
 
 ### glTF Support and Loaders.gl
 
-<img height="150" src="https://raw.github.com/visgl/deck.gl-data/master/images/gltf.png" />
+<img height="150" src="https://raw.github.com/visgl/deck.gl-data/master/images/branding/gltf.png" />
 
 The new [ScenegraphLayer](/docs/api-reference/mesh-layers/scenegraph-layer.md) and [SimpleMeshLayer](/docs/api-reference/mesh-layers/simple-mesh-layer.md) support loading 3D models and scenegraphs in the popular [glTF™](https://www.khronos.org/gltf/) asset format.  glTF is a royalty-free specification for the efficient transmission and loading of 3D assets, with a rich ecosystem of tools and extensions.  All variants of glTF 2.0 are supported, including binary `.glb` files as well as JSON `.gltf` files with binary assets in base64 encoding or in separate files.
 
@@ -1072,7 +1072,7 @@ Release date: July 18, 2018
   <tbody>
     <tr>
       <td>
-        <img style="max-height:200px" src="https://raw.github.com/visgl/deck.gl-data/master/images/attribute-transition.gif" />
+        <img style="max-height:200px" src="https://raw.github.com/visgl/deck.gl-data/master/images/whats-new/attribute-transition.gif" />
         <p><i>GeoJson Transition</i></p>
       </td>
       <td>

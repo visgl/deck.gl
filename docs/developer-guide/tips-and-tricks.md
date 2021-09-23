@@ -3,14 +3,14 @@
 
 ## Rendering Tips
 
-## Per Layer Control of WebGL parameters
+### Per Layer Control of WebGL parameters
 
 The base `Layer` class (which is inherited by all layers) supports a `parameters` property that allows applications to specify the state of WebGL parameters such as blending mode, depth testing etc. This can provide signigicant extra control over rendering.
 
 The new `parameters` prop leverages the luma.gl v4 [setParameters](https://luma.gl/docs/api-reference/gltools/parameter-setting) API, which allows all WebGL parameters to be specified as keys in a single parameter object.
 
 
-## z-fighting and Depth Testing
+### z-fighting and Depth Testing
 
 A common problem faced by 3D application developers is known as "z fighting". It relates to multiple objects being drawn at the same depth in the 3D scene, and due to rounding artifacts in the so called z buffer the GPU cannot accurately determine whether a pixel has already been drawn in a specific place.
 
@@ -28,7 +28,7 @@ new ...Layer({
 Also, if the z-fighting occurs between layers (rather than between elements within a single layers), deck.gl offers a slightly more sophisticated `polygonOffset` property.
 
 
-## Browser Blending Modes
+### Browser Blending Modes
 
 > Occasionally, the default blending in the browser does not give ideal results. In that case you may want to test the tips in this section.
 
