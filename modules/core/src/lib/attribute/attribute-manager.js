@@ -349,6 +349,13 @@ export default class AttributeManager {
     const {attribute, numInstances} = opts;
     debug(TRACE_ATTRIBUTE_UPDATE_START, attribute);
 
+    if (attribute.constant) {
+      // The attribute is flagged as constant outside of an update cycle
+      // Skip allocation and updater call
+      attribute.setConstantValue(attribute.value);
+      return;
+    }
+
     if (attribute.allocate(numInstances)) {
       debug(TRACE_ATTRIBUTE_ALLOCATE, attribute, numInstances);
     }
