@@ -161,6 +161,9 @@ export default class Attribute extends DataColumn {
           value: this.value,
           constant: this.constant
         });
+        // Setting attribute.constant in updater is a legacy approach that interferes with allocation in the next cycle
+        // Respect it here but reset after use
+        this.constant = false;
       } else {
         for (const [startRow, endRow] of updateRanges) {
           const startOffset = Number.isFinite(startRow) ? this.getVertexOffset(startRow) : 0;
