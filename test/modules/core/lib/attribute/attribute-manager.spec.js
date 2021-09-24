@@ -150,6 +150,75 @@ test('AttributeManager.update - 0 numInstances', t => {
   t.end();
 });
 
+test('AttributeManager.update - constant attribute', t => {
+  const attributeManager = new AttributeManager(gl);
+  let updateCalled = 0;
+  attributeManager.add({
+    colors: {
+      size: 3,
+      update: (attr, {numInstances, data, props}) => {
+        updateCalled++;
+        if (Array.isArray(props.getColor)) {
+          attr.constant = true;
+          attr.value = props.getColor;
+        } else {
+          for (let i = 0, j = 0; i < numInstances; i++) {
+            const color = props.getColor(data[i]);
+            attr.value[j++] = color[0];
+            attr.value[j++] = color[1];
+            attr.value[j++] = color[2];
+          }
+        }
+      }
+    }
+  });
+
+  const attribute = attributeManager.getAttributes()['colors'];
+  attribute.constant = true;
+  attribute.value = [0, 1, 0];
+
+  // First update, should set constant value
+  attributeManager.update({
+    numInstances: 2,
+    props: {getColor: [0.5, 0.8, 0.1]},
+    data: [1, 2]
+  });
+
+  t.is(updateCalled, 0, 'should not call updater for constant attribute');
+  t.is(attribute.state.allocatedValue, null, 'should not allocate for constant attribute');
+  t.ok(attribute.state.constant, 'constant value is set');
+
+  attribute.constant = false;
+  attributeManager.invalidate('colors');
+
+  // second update, should autoalloc and update the value array
+  attributeManager.update({
+    numInstances: 2,
+    props: {getColor: [0.5, 0.8, 0.1]},
+    data: [1, 2]
+  });
+
+  t.is(updateCalled, 1, 'updater is called');
+  t.ok(attribute.state.allocatedValue, 'should allocate new value array');
+  t.deepEqual(attribute.value, [0.5, 0.8, 0.1], 'correct attribute value');
+  t.ok(attribute.state.constant, 'constant value is set');
+
+  attributeManager.invalidate('colors');
+
+  // third update, should autoalloc and update the value array
+  attributeManager.update({
+    numInstances: 2,
+    props: {getColor: x => [x, x, x]},
+    data: [1, 2]
+  });
+
+  t.is(updateCalled, 2, 'updater is called');
+  t.deepEqual(attribute.value.slice(0, 6), [1, 1, 1, 2, 2, 2], 'correct attribute value');
+  t.notOk(attribute.state.constant, 'no longer a constant');
+
+  t.end();
+});
+
 test('AttributeManager.update - external virtual buffers', t => {
   const attributeManager = new AttributeManager(gl);
 
