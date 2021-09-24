@@ -114,8 +114,9 @@ export default class HeatmapLayer extends AggregationLayer {
     const {props, oldProps} = opts;
     const changeFlags = this._getChangeFlags(opts);
 
-    if (changeFlags.viewportChanged) {
-      changeFlags.boundsChanged = this._updateBounds();
+    if (changeFlags.dataChanged || changeFlags.viewportChanged) {
+      // if data is changed, do not debounce and immediately update the weight map
+      changeFlags.boundsChanged = this._updateBounds(changeFlags.dataChanged);
       this._updateTextureRenderingBounds();
     }
 
