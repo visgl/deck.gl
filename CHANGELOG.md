@@ -19,7 +19,12 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v8.5
 
-#### deck.gl [8.5.9] - Sep 13 2021
+#### deck.gl [8.5.10] - Sep 24 2021
+
+- Fix excessive allocation for constant attributes (#6233)
+- Fix Heatmap data update (#6231)
+
+#### deck.gl [8.5.9] - Sep 21 2021
 
 - Fix diffProps when an async prop is set synchronously (#6193)
 - Fix TileLayer getTileData not using the latest loadOptions (#6209)
