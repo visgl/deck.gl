@@ -92,6 +92,9 @@ function mergeTriggers(getHexagon, coverage) {
 const defaultProps = {
   ...PolygonLayer.defaultProps,
   highPrecision: false,
+  _lowPrecision: false,
+  _resolution: -1,
+  _hasPentagon: null,
   coverage: {type: 'number', min: 0, max: 1, value: 1},
   centerHexagon: null,
   getHexagon: {type: 'accessor', value: x => x.hexagon},
@@ -121,12 +124,23 @@ export default class H3HexagonLayer extends CompositeLayer {
 
   updateState({props, oldProps, changeFlags}) {
     if (
-      changeFlags.dataChanged ||
-      (changeFlags.updateTriggers && changeFlags.updateTriggers.getHexagon)
+      !props.highPrecision &&
+      (changeFlags.dataChanged ||
+        (changeFlags.updateTriggers && changeFlags.updateTriggers.getHexagon))
     ) {
-      let resolution = -1;
-      let hasPentagon = false;
-      let hasMultipleRes = false;
+      const dataProps = this._calculateHexDataProps(props);
+      this.setState(dataProps);
+    }
+
+    this._updateVertices(this.context.viewport);
+  }
+
+  _calculateHexDataProps(props) {
+    let resolution = props._resolution ?? -1;
+    let hasPentagon = props._hasPentagon ?? false;
+    let hasMultipleRes = false;
+
+    if (props._resolution < 0 || (props._resolution < 1 && props._hasPentagon === null)) {
       const {iterable, objectInfo} = createIterable(props.data);
       for (const object of iterable) {
         objectInfo.index++;
@@ -143,18 +157,21 @@ export default class H3HexagonLayer extends CompositeLayer {
           break;
         }
       }
-      this.setState({
-        resolution,
-        edgeLengthKM: resolution >= 0 ? edgeLength(resolution, UNITS.km) : 0,
-        hasMultipleRes,
-        hasPentagon
-      });
     }
 
-    this._updateVertices(this.context.viewport);
+    return {
+      resolution,
+      edgeLengthKM: resolution >= 0 ? edgeLength(resolution, UNITS.km) : 0,
+      hasMultipleRes,
+      hasPentagon
+    };
   }
 
   _shouldUseHighPrecision() {
+    if (this.props._lowPrecision) {
+      return false;
+    }
+
     const {resolution, hasPentagon, hasMultipleRes} = this.state;
     const {viewport} = this.context;
     return (
