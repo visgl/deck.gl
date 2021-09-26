@@ -92,9 +92,9 @@ function mergeTriggers(getHexagon, coverage) {
 const defaultProps = {
   ...PolygonLayer.defaultProps,
   highPrecision: false,
-  _lowPrecision: false,
-  _resolution: -1,
-  _hasPentagon: null,
+  lowPrecision: false,
+  resolution: -1,
+  hasPentagon: null,
   coverage: {type: 'number', min: 0, max: 1, value: 1},
   centerHexagon: null,
   getHexagon: {type: 'accessor', value: x => x.hexagon},
@@ -136,11 +136,11 @@ export default class H3HexagonLayer extends CompositeLayer {
   }
 
   _calculateHexDataProps(props) {
-    let resolution = props._resolution ?? -1;
-    let hasPentagon = props._hasPentagon ?? false;
+    let resolution = props.resolution ?? -1;
+    let hasPentagon = props.hasPentagon ?? false;
     let hasMultipleRes = false;
 
-    if (props._resolution < 0 || (props._resolution < 1 && props._hasPentagon === null)) {
+    if (resolution < 0 || (resolution < 1 && props.hasPentagon === null)) {
       const {iterable, objectInfo} = createIterable(props.data);
       for (const object of iterable) {
         objectInfo.index++;
@@ -168,7 +168,7 @@ export default class H3HexagonLayer extends CompositeLayer {
   }
 
   _shouldUseHighPrecision() {
-    if (this.props._lowPrecision) {
+    if (this.props.lowPrecision) {
       return false;
     }
 

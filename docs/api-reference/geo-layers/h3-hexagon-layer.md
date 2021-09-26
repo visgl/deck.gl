@@ -103,6 +103,38 @@ Possible values:
 * `false`: The layer chooses the mode automatically. High-precision rendering is only used if an edge case is encountered in the data.
 * `true`: always use high-precision rendering.
 
+##### `lowPrecision` (Boolean, optional)
+
+* Default: `false`
+
+Used to draw a large number of hexagons efficiently. Forces `H3HexagonLayer` to use low-precision instanced drawing by assuming that all hexagons within the current viewport have the same shape as the one at the center of the current viewport. The discrepancy is usually too small to be visible for resolutions higher than 5.
+
+Possible values:
+
+* `false`: The layer chooses the rendering mode automatically.
+* `true`: Forces low-precision drawing regardless of resolution of the data and other factors. Has a priority over `highPrecision` property.
+
+##### `resolution` (number, optional)
+
+* Default: `-1`
+
+Resolution of the data. It's possible to save some initialization time by passing the resolution, especially for larger datasets. Values other than `-1` indicates that the data has only one resolution.
+
+Possible values:
+* `-1`: Indicates that the resolution is unknown and should be calculated.
+* `[0, 15]`: Valid h3 resolution.
+
+##### `hasPentagon` (boolean | null, optional)
+
+* Default: `null`
+
+By passing non-null `hasPentagon` property it's possible to save some initialization time, especially for larger datasets.
+
+Possible values:
+
+* `true`: Indicates that the data contains at least one h3 index which represent a pentagon.
+* `false`: Indicates that all h3 indices in the data represent hexagons.
+* `null`: Indicates that it's unknown whether all h3 indices represent hexagons. In such case `hasPentagon` property will be calculated for resolution 0.
 
 ##### `coverage` (Number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
 
