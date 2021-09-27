@@ -124,18 +124,18 @@ export default class H3HexagonLayer extends CompositeLayer {
 
   updateState({props, oldProps, changeFlags}) {
     if (
-      !props.highPrecision &&
+      !(props.highPrecision && !props.lowPrecision) &&
       (changeFlags.dataChanged ||
         (changeFlags.updateTriggers && changeFlags.updateTriggers.getHexagon))
     ) {
-      const dataProps = this._calculateHexDataProps(props);
+      const dataProps = this._calculateH3DataProps(props);
       this.setState(dataProps);
     }
 
     this._updateVertices(this.context.viewport);
   }
 
-  _calculateHexDataProps(props) {
+  _calculateH3DataProps(props) {
     let resolution = props.resolution ?? -1;
     let hasPentagon = props.hasPentagon ?? false;
     let hasMultipleRes = false;
