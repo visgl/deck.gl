@@ -1,8 +1,7 @@
 import html
 import os
-from os.path import relpath, realpath, join, dirname
+from os.path import realpath, join, dirname
 import sys
-import tempfile
 import time
 import warnings
 import webbrowser
@@ -87,19 +86,31 @@ def display_html(filename):
 
 
 def iframe_with_srcdoc(html_str, width="100%", height=500):
-    width = '"{}"'.format(width) if type(width) == str else width
-    iframe = """<iframe src="about:blank" frameborder="0" srcdoc="{}" width={} height={}></iframe>""".format(
-        html.escape(html_str), width, height
-    )
+    if isinstance(width, str):
+        width = f'"{width}"'
+    srcdoc = html.escape(html_str)
+
+    iframe = f"""
+        <iframe
+            width={width}
+            height={height}
+            frameborder="0"
+            srcdoc="{srcdoc}"
+        ></iframe>
+    """
+
     from IPython.display import HTML  # noqa
 
     with warnings.catch_warnings():
-        warnings.filterwarnings("ignore", message="Consider using IPython.display.iframe instead")
+        msg = "Consider using IPython.display.IFrame instead"
+        warnings.filterwarnings("ignore", message=msg)
         return HTML(iframe)
 
 
 def render_for_colab(html_str, iframe_height):
-    js_height_snippet = "google.colab.output.setIframeHeight(0, true, {maxHeight: %s})" % iframe_height
+    from IPython.display import HTML, Javascript  # noqa
+
+    js_height_snippet = f"google.colab.output.setIframeHeight({iframe_height}, true, {{minHeight: {iframe_height}}})"
     display(Javascript(js_height_snippet))  # noqa
     display(HTML(html_str))  # noqa
 
@@ -131,7 +142,7 @@ def deck_to_html(
     )
 
     if filename:
-        with open(filename, "w+") as f:
+        with open(filename, "w+", encoding="utf-8") as f:
             f.write(html_str)
 
         if open_browser:
@@ -142,7 +153,7 @@ def deck_to_html(
 
     if notebook_display and in_google_colab:
         render_for_colab(html_str, iframe_height)
-        return
+        return html_str
     elif not filename and as_string:
         return html_str
     elif notebook_display:

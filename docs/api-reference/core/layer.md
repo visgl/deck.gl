@@ -129,6 +129,15 @@ Remarks:
 Add additional functionalities to this layer. See the [list of available extensions](/docs/api-reference/extensions/overview.md).
 
 
+##### `onError` (Function, optional)
+
+Called when this layer encounters an error, with the following arguments:
+
+- `error` - a JavaScript `Error` object.
+
+If this callback is supplied and returns `true`, the error is marked as handled and will not bubble up to the [`onError`](/docs/api-reference/react/deckgl.md#onerror) callback of the `Deck` instance.
+
+
 ### Interaction Properties
 
 Layers can be interacted with using these properties.
@@ -412,6 +421,25 @@ Layers may also include specialized loaders for their own use case, such as imag
 Find usage examples in the [data loading guide](/docs/developer-guide/loading-data.md).
 
 
+##### `fetch` (Function, optional)
+
+Called to fetch and parse content from URLs.
+
+The function receives the following arguments:
+
+- `url` (String) - the URL to fetch
+- `context` (Object)
+  + `layer` (Layer) - the current layer
+  + `propName` (String) - the name of the prop that is making the request
+  + `loaders` (Array?) - an array of [loaders.gl loaders](https://loaders.gl/docs/developer-guide/using-loaders) to parse this request with, default to `props.loaders`.
+  + `loadOptions` (Object?) - loader options for this request, default to `props.loadOptions`.
+  + `signal` ([AbortSignal](https://developer.mozilla.org/en-US/docs/Web/API/AbortController)?) - the signal to abort the request
+
+The function is expected to return a Promise that resolves to loaded data.
+
+* Default: `load(url, loaders, loadOptions)`
+
+
 ##### `onDataLoad` (Function, optional)
 
 Called when remote data is fully loaded. This callback applies when `data` is assigned a value that is either string (URL), Promise or an async iterable.
@@ -425,7 +453,7 @@ The function receives two arguments:
 
 ### Render Properties
 
-##### `parameters` (Function, optional)
+##### `parameters` (Object, optional)
 
 The `parameters` allows applications to specify values for WebGL parameters such as blending mode, depth testing etc. Any `parameters` will be applied temporarily while rendering this layer only.
 
@@ -561,6 +589,15 @@ Used to update the layers [`state`](/docs/api-reference/core/layer.md#state) obj
 ##### `setModuleParameters`
 
 Used to update the settings of shader modules.
+
+##### `raiseError`
+
+Used to propagate errors thrown in layers to the deck.gl error handling system. This prevents rendering from being interrupted by exceptions in layers.
+
+`raiseError(error, message)`
+
+- `error` (Error) - a JavaScript Error object
+- `message` (String, optional) - additional contextual description to amend the error message with
 
 ### Layer Lifecycle Methods
 

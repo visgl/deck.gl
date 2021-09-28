@@ -9,7 +9,7 @@ PRs and bug reports are welcome, and we are actively looking for new maintainers
 
 The **master** branch is the active development branch.
 
-Building deck.gl locally from the source requires node.js `>=10`. Further limitations on the Node version may be imposed by [puppeteer](https://github.com/puppeteer/puppeteer#usage) and [headless-gl](https://github.com/stackgl/headless-gl#supported-platforms-and-nodejs-versions).
+Building deck.gl locally from the source requires node.js `>=14`. Further limitations on the Node version may be imposed by [puppeteer](https://github.com/puppeteer/puppeteer#usage) and [headless-gl](https://github.com/stackgl/headless-gl#supported-platforms-and-nodejs-versions).
 We use [yarn](https://yarnpkg.com/en/docs/install) to manage the dependencies of deck.gl.
 
 ```bash
@@ -18,7 +18,7 @@ yarn bootstrap
 yarn test
 ```
 
-Additional instructions for [Windows](/CONTRIBUTING.md#develop-on-windows).
+See [additional instructions](#troubleshooting) for Windows, Linux and Apple M1.
 
 Run the layer browser application:
 
@@ -33,6 +33,27 @@ If you consider opening a PR, here is some documentation to get you started:
 - vis.gl [developer process](https://www.github.com/visgl/tsc/tree/master/developer-process)
 - [deck.gl API design guidelines](/dev-docs/deckgl-api-guidelines.md)
 
+## Testing examples with modified deck.gl source
+
+Each example can be run so that it is built against the deck.gl source code in this repo instead of building against the installed version of deck.gl. This enables using the examples to debug the main deck.gl library source.
+
+To do so use the `yarn start-local` command present in each example's directory. See [webpack.config.local.js](https://github.com/visgl/deck.gl/blob/master/examples/webpack.config.local.js) for details.
+
+### Working with other vis.gl dependencies
+
+Deck.gl has a number of dependencies that fall under vis.gl, and there may be times when it is necessary to make a change in one of these.
+Thus for development it is necessary to checkout a copy of such a dependency and make local changes.
+
+When running an example using `yarn start-local` you can use local version of [luma.gl](https://github.com/visgl/luma.gl/) or [math.gl](https://github.com/uber-web/math.gl) by appending the `--env.local-luma` or `--env.local-math` option.
+
+### Specific module overrides
+
+To get the local build of deck.gl to pick up the local code rather than the modules from npm, there are two important config files:
+
+- [ocular-dev-tools.config.js](https://github.com/visgl/deck.gl/blob/master/ocular-dev-tools.config.js) - See [Ocular documentation for details](https://uber-web.github.io/docs/dev-tools)
+- [examples/webpack.config.local.js](https://github.com/visgl/deck.gl/blob/master/examples/webpack.config.local.js)
+
+_Note that the configuration in `examples/webpack.config.local.js` will potentially override the ocular configuration._
 
 ## Community Governance
 
@@ -56,10 +77,10 @@ deck.gl development is governed by the vis.gl Technical Steering Committee (TSC)
 - [Kyle Barron](https://github.com/kylebarron) - tiles
 - [Chris Gervang](https://github.com/chrisgervang) - terrain
 - [Dario D'Amico](https://github.com/damix911) - ArcGIS
-- [Jesús Botella](https://github.com/jesusbotella) - MVT
 - [Javier Aragón](https://github.com/padawannn) - MVT, CARTO
 - [Víctor Velarde](https://github.com/https://github.com/VictorVelarde) - MVT, CARTO
-- [Raúl Yeguas](https://github.com/neokore) - MVT, CARTO
+- [Felix Palmer](https://github.com/felixpalmer) - MVT, GoogleMaps, CARTO
+- [Ilan Gold](https://github.com/ilan-gold) - tiles
 
 Maintainers of deck.gl have commit access to this GitHub repository, and take part in the decision making process.
 
@@ -75,25 +96,52 @@ Please be mindful of and adhere to the Linux Foundation's [Code of Conduct](http
 
 ## Troubleshooting
 
+### Develop on Linux
+
+To run the test suite, you may need to install additional dependencies (verified on Ubuntu LTS):
+
+- [headless-gl dependencies](https://github.com/stackgl/headless-gl#system-dependencies) for the Node tests
+- [puppeteer dependencies](https://github.com/puppeteer/puppeteer/blob/main/docs/troubleshooting.md#chrome-headless-doesnt-launch-on-unix) for the integration tests
+
+Verify that everything works by running `yarn test`.
+
 ### Develop on Windows
 
 It's possible to set up the dev environment in [Windows Subsystem for Linux](https://docs.microsoft.com/en-us/windows/wsl/install-win10).
 
-To get OpenGL support, install [VcXsrv](https://sourceforge.net/projects/vcxsrv/). In xlaunch.exe, choose multiple windows, display 0, start no client, disable native opengl. ([source](https://github.com/Microsoft/WSL/issues/2855#issuecomment-358861903))
+To run the Node tests, you need to set up OpenGL support via X11 forwarding:
+
+- Install [VcXsrv](https://sourceforge.net/projects/vcxsrv/).
+- Run `xlaunch.exe`, choose multiple windows, display 0, start no client, disable native opengl, disable access control. [reference](https://github.com/Microsoft/WSL/issues/2855#issuecomment-358861903)
+- If working with WSL2, allow WSL to access your X server with [firewall rules](https://github.com/cascadium/wsl-windows-toolbar-launcher#firewall-rules).
+- Set the `DISPLAY` environment variable:
+
+    ```bash
+    # WSL 1
+    export DISPLAY=localhost:0
+    # WSL 2
+    export DISPLAY=$(grep -m 1 nameserver /etc/resolv.conf | awk '{print $2}'):0.0
+    ```
+
+You can test that it is set up successfully with:
 
 ```bash
-sudo apt-get update
-sudo apt install mesa-utils
-export DISPLAY=localhost:0
+sudo apt-get install mesa-utils
 glxgears
 ```
 
-If successful, you should see a window open with gears turning.
+You should see a window open with gears turning at this point.
 
-Next, install [headless-gl dependencies](https://github.com/stackgl/headless-gl#system-dependencies):
+Follow instructions for [developing on linux](#develop-on-linux).
 
-```bash
-sudo apt-get install -y build-essential libxi-dev libglu1-mesa-dev libglew-dev pkg-config
+### Develop on MacOs on Apple Silicon (M1 chip)
+
+To install dependencies specify that you explicitly need the arm64 version
+```
+arch -arm64 brew install pkg-config cairo pango libpng jpeg giflib librsvg
 ```
 
-Verify that everything works by running `yarn test node`.
+After this `yarn bootstrap` can be run with
+```
+CPLUS_INCLUDE_PATH=/opt/homebrew/include yarn bootstrap
+```

@@ -2,7 +2,8 @@ import GL from '@luma.gl/constants';
 import {Geometry} from '@luma.gl/core';
 import {COORDINATE_SYSTEM, CompositeLayer} from '@deck.gl/core';
 import {PointCloudLayer} from '@deck.gl/layers';
-import {ScenegraphLayer, SimpleMeshLayer} from '@deck.gl/mesh-layers';
+import {ScenegraphLayer} from '@deck.gl/mesh-layers';
+import {default as _MeshLayer} from '../mesh-layer/mesh-layer';
 import {log} from '@deck.gl/core';
 
 import {load} from '@loaders.gl/core';
@@ -21,7 +22,8 @@ const defaultProps = {
   onTilesetLoad: {type: 'function', value: tileset3d => {}, compare: false},
   onTileLoad: {type: 'function', value: tileHeader => {}, compare: false},
   onTileUnload: {type: 'function', value: tileHeader => {}, compare: false},
-  onTileError: {type: 'function', value: (tile, message, url) => {}, compare: false}
+  onTileError: {type: 'function', value: (tile, message, url) => {}, compare: false},
+  _getMeshColor: {type: 'function', value: tileHeader => [255, 255, 255], compare: false}
 };
 
 export default class Tile3DLayer extends CompositeLayer {
@@ -32,7 +34,9 @@ export default class Tile3DLayer extends CompositeLayer {
     // prop verification
     this.state = {
       layerMap: {},
-      tileset3d: null
+      tileset3d: null,
+      activeViewports: {},
+      lastUpdatedViewports: null
     };
   }
 
@@ -51,14 +55,31 @@ export default class Tile3DLayer extends CompositeLayer {
     }
 
     if (changeFlags.viewportChanged) {
-      const {tileset3d} = this.state;
-      this._updateTileset(tileset3d);
+      const {activeViewports} = this.state;
+      const viewportsNumber = Object.keys(activeViewports).length;
+      if (viewportsNumber) {
+        this._updateTileset(activeViewports);
+        this.state.lastUpdatedViewports = activeViewports;
+        this.state.activeViewports = {};
+      }
     }
     if (changeFlags.propsChanged) {
       const {layerMap} = this.state;
       for (const key in layerMap) {
         layerMap[key].needsUpdate = true;
       }
+    }
+  }
+
+  activateViewport(viewport) {
+    const {activeViewports, lastUpdatedViewports} = this.state;
+    this.internalState.viewport = viewport;
+
+    activeViewports[viewport.id] = viewport;
+    const lastViewport = lastUpdatedViewports?.[viewport.id];
+    if (!lastViewport || !viewport.equals(lastViewport)) {
+      this.setChangeFlags({viewportChanged: true});
+      this.setNeedsUpdate();
     }
   }
 
@@ -75,6 +96,12 @@ export default class Tile3DLayer extends CompositeLayer {
     return info;
   }
 
+  filterSubLayer({layer, viewport}) {
+    const {tile} = layer.props;
+    const {id: viewportId} = viewport;
+    return tile.selected && tile.viewportIds.includes(viewportId);
+  }
+
   _updateAutoHighlight(info) {
     if (info.sourceLayer) {
       info.sourceLayer.updateAutoHighlight(info);
@@ -82,7 +109,7 @@ export default class Tile3DLayer extends CompositeLayer {
   }
 
   async _loadTileset(tilesetUrl) {
-    const {loadOptions} = this.props;
+    const {loadOptions = {}} = this.props;
 
     // TODO: deprecate `loader` in v9.0
     let loader = this.props.loader || this.props.loaders;
@@ -90,12 +117,19 @@ export default class Tile3DLayer extends CompositeLayer {
       loader = loader[0];
     }
 
-    const options = {...loadOptions};
+    const options = {loadOptions: {...loadOptions}};
     if (loader.preload) {
       const preloadOptions = await loader.preload(tilesetUrl, loadOptions);
+
+      if (preloadOptions.headers) {
+        options.loadOptions.fetch = {
+          ...options.loadOptions.fetch,
+          headers: preloadOptions.headers
+        };
+      }
       Object.assign(options, preloadOptions);
     }
-    const tilesetJson = await load(tilesetUrl, loader, options);
+    const tilesetJson = await load(tilesetUrl, loader, options.loadOptions);
 
     const tileset3d = new Tileset3D(tilesetJson, {
       onTileLoad: this._onTileLoad.bind(this),
@@ -109,13 +143,14 @@ export default class Tile3DLayer extends CompositeLayer {
       layerMap: {}
     });
 
-    this._updateTileset(tileset3d);
+    this._updateTileset(this.state.activeViewports);
     this.props.onTilesetLoad(tileset3d);
   }
 
   _onTileLoad(tileHeader) {
+    const {lastUpdatedViewports} = this.state;
     this.props.onTileLoad(tileHeader);
-    this._updateTileset(this.state.tileset3d);
+    this._updateTileset(lastUpdatedViewports);
     this.setNeedsUpdate();
   }
 
@@ -125,12 +160,14 @@ export default class Tile3DLayer extends CompositeLayer {
     this.props.onTileUnload(tileHeader);
   }
 
-  _updateTileset(tileset3d) {
-    const {timeline, viewport} = this.context;
-    if (!timeline || !viewport || !tileset3d) {
+  _updateTileset(viewports) {
+    const {tileset3d} = this.state;
+    const {timeline} = this.context;
+    const viewportsNumber = Object.keys(viewports).length;
+    if (!timeline || !viewportsNumber || !tileset3d) {
       return;
     }
-    const frameNumber = tileset3d.update(viewport);
+    const frameNumber = tileset3d.update(Object.values(viewports));
     const tilesetChanged = this.state.frameNumber !== frameNumber;
     if (tilesetChanged) {
       this.setState({frameNumber});
@@ -189,12 +226,13 @@ export default class Tile3DLayer extends CompositeLayer {
       }),
       {
         id: `${this.id}-pointcloud-${tileHeader.id}`,
+        tile: tileHeader,
         data,
         coordinateSystem: COORDINATE_SYSTEM.METER_OFFSETS,
         coordinateOrigin: cartographicOrigin,
         modelMatrix,
-
-        getColor: constantRGBA || getPointColor
+        getColor: constantRGBA || getPointColor,
+        _offset: 0
       }
     );
   }
@@ -213,6 +251,7 @@ export default class Tile3DLayer extends CompositeLayer {
       }),
       {
         id: `${this.id}-scenegraph-${tileHeader.id}`,
+        tile: tileHeader,
         data: instances || SINGLE_DATA,
         scenegraph: gltf,
 
@@ -220,23 +259,26 @@ export default class Tile3DLayer extends CompositeLayer {
         coordinateOrigin: cartographicOrigin,
         modelMatrix,
         getTransformMatrix: instance => instance.modelMatrix,
-        getPosition: [0, 0, 0]
+        getPosition: [0, 0, 0],
+        _offset: 0
       }
     );
   }
 
   _makeSimpleMeshLayer(tileHeader, oldLayer) {
     const content = tileHeader.content;
-    const {attributes, modelMatrix, cartographicOrigin, texture} = content;
+    const {attributes, indices, modelMatrix, cartographicOrigin, material, featureIds} = content;
+    const {_getMeshColor} = this.props;
 
     const geometry =
       (oldLayer && oldLayer.props.mesh) ||
       new Geometry({
         drawMode: GL.TRIANGLES,
-        attributes: getMeshGeometry(attributes)
+        attributes: getMeshGeometry(attributes),
+        indices
       });
 
-    const SubLayerClass = this.getSubLayerClass('mesh', SimpleMeshLayer);
+    const SubLayerClass = this.getSubLayerClass('mesh', _MeshLayer);
 
     return new SubLayerClass(
       this.getSubLayerProps({
@@ -244,14 +286,16 @@ export default class Tile3DLayer extends CompositeLayer {
       }),
       {
         id: `${this.id}-mesh-${tileHeader.id}`,
+        tile: tileHeader,
         mesh: geometry,
         data: SINGLE_DATA,
-        getPosition: [0, 0, 0],
-        getColor: [255, 255, 255],
-        texture,
+        getColor: _getMeshColor(tileHeader),
+        pbrMaterial: material,
         modelMatrix,
         coordinateOrigin: cartographicOrigin,
-        coordinateSystem: COORDINATE_SYSTEM.METER_OFFSETS
+        coordinateSystem: COORDINATE_SYSTEM.METER_OFFSETS,
+        featureIds,
+        _offset: 0
       }
     );
   }
@@ -275,15 +319,7 @@ export default class Tile3DLayer extends CompositeLayer {
             // props have changed, rerender layer
             layer = this._getSubLayer(tile, layer);
             layerCache.needsUpdate = false;
-          } else if (!layer.props.visible) {
-            // update layer visibility
-            // Still has GPU resource but visibility is turned off so turn it back on so we can render it.
-            layer = layer.clone({visible: true});
           }
-        } else if (layer && layer.props.visible) {
-          // hide non-selected tiles
-          // Still in tileset cache but doesn't need to render this frame. Keep the GPU resource bound but don't render it.
-          layer = layer.clone({visible: false});
         }
         layerCache.layer = layer;
         return layer;
@@ -303,6 +339,12 @@ function getMeshGeometry(contentAttributes) {
   }
   if (contentAttributes.texCoords) {
     attributes.texCoords = contentAttributes.texCoords;
+  }
+  if (contentAttributes.colors) {
+    attributes.colors = contentAttributes.colors;
+  }
+  if (contentAttributes.uvRegions) {
+    attributes.uvRegions = contentAttributes.uvRegions;
   }
   return attributes;
 }

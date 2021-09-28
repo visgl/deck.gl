@@ -5,8 +5,8 @@
     "start-local": "webpack-dev-server --env.local --progress --hot --open"
   },
   "dependencies": {
-    "deck.gl": "^8.4.0",
-    "@loaders.gl/3d-tiles": "^2.3.9",
+    "deck.gl": "^8.5.0",
+    "@loaders.gl/3d-tiles": "^3.0.8",
     "react": "^16.8.0",
     "react-dom": "^16.8.0",
     "react-map-gl": "^5.0.0"

@@ -84,6 +84,8 @@ When the `TileLayer` is used with a geospatial view such as the [MapView](/docs/
 
 When the `TileLayer` is used used with a non-geospatial view such as the [OrthographicView](/docs/api-reference/core/orthographic-view.md) or the [OrbitView](/docs/api-reference/core/orbit-view.md), `x` and `y` increment from the world origin, and each tile's width and height match that defined by the `tileSize` prop. For example, the tile `x: 0, y: 0` occupies the square between `[0, 0]` and `[tileSize, tileSize]`.
 
+If you need to offset the `z` level at which the tiles are fetched in order to fetch tiles at a higher resolution in order to produce a "crisper" picture, there is a `zoomOffset` prop.
+
 
 ## Properties
 
@@ -138,31 +140,35 @@ if (signal.aborted) {
 
 The pixel dimension of the tiles, usually a power of 2.
 
-The tile size represents the target pixel width and height of each tile when rendered. Smaller tile sizes display the content at higher resolution, while the layer needs to load more tiles to fill the same viewport.
+For geospatial viewports, tile size represents the target pixel width and height of each tile when rendered. Smaller tile sizes display the content at higher resolution, while the layer needs to load more tiles to fill the same viewport.
+
+For non-geospatial viewports, the tile size should correspond to the true pixel size of the tiles.
 
 - Default: `512`
 
+##### `zoomOffset` (Number, optional)
+
+This offset changes the zoom level at which the tiles are fetched.  Needs to be an integer.
+
+- Default: `0`
 
 ##### `maxZoom` (Number|Null, optional)
 
-Use tiles from this level when over-zoomed.
+The max zoom level of the layer's data. When overzoomed (i.e. `zoom > maxZoom`), tiles from this level will be displayed.
 
 - Default: `null`
 
-
 ##### `minZoom` (Number, optional)
 
-Hide tiles when under-zoomed.
+The min zoom level of the layer's data. When underzoomed (i.e. `zoom < minZoom`), the layer will not display any tiles unless `extent` is defined, to avoid issuing too many tile requests.
 
 - Default: 0
 
 ##### `extent` (Array, optional)
 
-If provided, the layer will load and render the tiles in this box at `minZoom` when underzoomed (i.e. `zoom < minZoom`).  The box is of the form `[minX, minY, maxX, maxY]`.
+The bounding box of the layer's data, in the form of `[minX, minY, maxX, maxY]`. If provided, the layer will only load and render the tiles that are needed to fill this box. 
 
-If `null`, the layer will not display any tiles when underzoomed to avoid issuing too many tile requests.
-
-- Default: null
+- Default: `null`
 
 
 ##### `maxCacheSize` (Number, optional)
@@ -216,6 +222,11 @@ Renders one or an array of Layer instances with all the `TileLayer` props and th
 * `tile`: An object containing tile index `x`, `y`, `z`, and `bbox` of the tile.
 
 - Default: `props => new GeoJsonLayer(props)`
+
+Note that the following sub layer props are overridden by `TileLayer` internally:
+
+- `visible` (toggled based on tile visibility)
+- `highlightedObjectIndex` (set based on the parent layer's highlight state)
 
 ##### `zRange` (Array, optional)
 

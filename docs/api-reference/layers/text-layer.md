@@ -114,9 +114,12 @@ Whether to render background for the text blocks.
 
 ##### `backgroundPadding` (Array, optional)
 
-- Default `[0, 0]`
+- Default `[0, 0, 0, 0]`
 
-The padding of the background, `[padding_x, padding_y]` in pixels.
+The padding of the background, an array of either 2 or 4 numbers.
+
++ If an array of 2 is supplied, it is interpreted as `[padding_x, padding_y]` in pixels.
++ If an array of 4 is supplied, it is interpreted as `[padding_left, padding_top, padding_right, padding_bottom]` in pixels.
 
 ##### `fontFamily` (String, optional)
 
@@ -124,9 +127,18 @@ The padding of the background, `[padding_x, padding_y]` in pixels.
 
 Specifies a prioritized list of one or more font family names and/or generic family names. Follow the specs for CSS [font-family](https://developer.mozilla.org/en-US/docs/Web/CSS/font-family).
 
-##### `characterSet` (Array | String, optional)
+See the [remarks](#remarks) section below for tips on using web fonts.
 
-Specifies a list of characters to include in the font. By default, only characters in the Ascii code range 32-128 are included. Use this prop if you need to display special characters.
+##### `characterSet` (Array | Set | String, optional)
+
+* Default: ASCII characters 32-128
+
+Specifies a list of characters to include in the font.
+
+- If set to `'auto'`, automatically detects the characters used in the data. This option has a performance overhead and may cause the layer to take longer to load if the data is very large.
+- If set to an array or set of characters, the generated font will be limited to these characters. If you already know all the characters that are needed (e.g. numbers, latin alphabet), using this option provides better performance. If a character outside of the specified range is referenced by `getText`, a warning will be logged to the JavaScript console.
+
+Note that there is a limit to the number of unique characters supported by a single layer. The maximum number subjects to `fontSettings.fontSize` and the [MAX_TEXTURE_SIZE](https://developer.mozilla.org/en-US/docs/Web/API/WebGL_API/WebGL_best_practices#understand_system_limits) of the device/browser.
 
 ##### `fontWeight` (Number | String, optional)
 
@@ -169,7 +181,7 @@ Available options are `break-all` and `break-word`. A valid `maxWidth` has to be
 
 * Default: `0`
 
-Width of outline around the text, relative to the font size.
+Width of outline around the text, relative to the font size. Only effective if `fontSettings.sdf` is `true`.
 
 ##### `outlineColor` (Array, optional)
 
@@ -402,6 +414,54 @@ new TextLayer({
   background: true
 })
 ```
+
+
+## Remarks
+
+### Use web fonts
+
+The `TextLayer` creates a font texture when it is first added with the [fillText](https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/fillText) API. If the font specified by `fontFamily` is not loaded at this point, it will fall back to using the default font just like regular CSS behavior. The loading sequence may become an issue when a web font is used, due to [lazy loading](https://developer.mozilla.org/en-US/docs/Web/Performance/Lazy_loading#fonts).
+
+One way to force a web font to load before the script execution is to preload the font resource:
+
+```html
+<link rel="preload" href="https://fonts.gstatic.com/s/materialicons/v90/flUhRq6tzZclQEJ-Vdg-IuiaDsNcIhQ8tQ.woff2" as="font" crossorigin="anonymous" type="font/woff2" />
+```
+
+```css
+@font-face {
+  font-family: 'Material Icons';
+  font-style: normal;
+  font-weight: 400;
+  src: url(https://fonts.gstatic.com/s/materialicons/v90/flUhRq6tzZclQEJ-Vdg-IuiaDsNcIhQ8tQ.woff2) format('woff2');
+}
+```
+
+Another way is to use the [FontFace](https://developer.mozilla.org/en-US/docs/Web/API/FontFace/FontFace) API to load a web font before adding the `TextLayer`:
+
+```js
+async function renderLayers() {
+  const font = new FontFace('Material Icons', 'url(https://fonts.gstatic.com/s/materialicons/v90/flUhRq6tzZclQEJ-Vdg-IuiaDsNcIhQ8tQ.woff2)');
+  // wait for font to be loaded
+  await font.load();
+  // add font to document
+  document.fonts.add(font);
+  // add TextLayer
+  const textLayer = new TextLayer({
+    fontFamily: 'Material Icons',
+    // ...
+  });
+  deck.setProps({
+    layers: [textLayer]
+  });
+}
+```
+
+### Unicode support
+
+The TextLayer has full support for Unicode characters. To reference a Unicode character in JavaScript you can either use a string literal (`'日本語'`, `'©'`) or [escaped code point](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Lexical_grammar#unicode_code_point_escapes) (`'\u{1F436}'`).
+
+At the moment this layer doesn't render multi-color emojis.
 
 
 ## Source

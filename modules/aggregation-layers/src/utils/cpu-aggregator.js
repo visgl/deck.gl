@@ -174,24 +174,25 @@ export default class CPUAggregator {
 
   // Update private state
   setState(updateObject) {
-    this.state = Object.assign({}, this.state, updateObject);
+    this.state = {...this.state, ...updateObject};
   }
 
   // Update private state.dimensions
   setDimensionState(key, updateObject) {
     this.setState({
-      dimensions: Object.assign({}, this.state.dimensions, {
-        [key]: Object.assign({}, this.state.dimensions[key], updateObject)
-      })
+      dimensions: {
+        ...this.state.dimensions,
+        [key]: {...this.state.dimensions[key], ...updateObject}
+      }
     });
   }
 
   normalizeResult(result = {}) {
     // support previous hexagonAggregator API
     if (result.hexagons) {
-      return Object.assign({data: result.hexagons}, result);
+      return {data: result.hexagons, ...result};
     } else if (result.layerData) {
-      return Object.assign({data: result.layerData}, result);
+      return {data: result.layerData, ...result};
     }
 
     return result;
@@ -268,9 +269,9 @@ export default class CPUAggregator {
       key,
       accessor,
       pickingInfo,
-      getBins: Object.assign({updater: this.getDimensionSortedBins}, getBins),
-      getDomain: Object.assign({updater: this.getDimensionValueDomain}, getDomain),
-      getScaleFunc: Object.assign({updater: this.getDimensionScale}, getScaleFunc),
+      getBins: {updater: this.getDimensionSortedBins, ...getBins},
+      getDomain: {updater: this.getDimensionValueDomain, ...getDomain},
+      getScaleFunc: {updater: this.getDimensionScale, ...getScaleFunc},
       attributeAccessor: this.getSubLayerDimensionAttribute(key, nullValue)
     };
   }
@@ -474,12 +475,11 @@ export default class CPUAggregator {
       });
     }
 
-    // add bin colorValue and elevationValue to info
-    return Object.assign(info, {
-      picked: Boolean(object),
-      // override object with picked cell
-      object
-    });
+    // override object with picked cell
+    info.picked = Boolean(object);
+    info.object = object;
+
+    return info;
   }
 
   getAccessor(dimensionKey) {

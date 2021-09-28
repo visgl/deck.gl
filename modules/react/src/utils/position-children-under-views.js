@@ -5,7 +5,7 @@ import evaluateChildren from './evaluate-children';
 
 // Iterate over views and reposition children associated with views
 // TODO - Can we supply a similar function for the non-React case?
-export default function positionChildrenUnderViews({children, viewports, deck, ContextProvider}) {
+export default function positionChildrenUnderViews({children, deck, ContextProvider}) {
   const {viewManager} = deck || {};
 
   if (!viewManager || !viewManager.views.length) {

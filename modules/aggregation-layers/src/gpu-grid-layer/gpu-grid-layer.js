@@ -166,12 +166,14 @@ export default class GPUGridLayer extends GridAggregationLayer {
     if (index >= 0) {
       const {gpuGridAggregator} = this.state;
       const position = this.getPositionForIndex(index);
-      const colorInfo = GPUGridAggregator.getAggregationData(
-        Object.assign({pixelIndex: index}, gpuGridAggregator.getData('color'))
-      );
-      const elevationInfo = GPUGridAggregator.getAggregationData(
-        Object.assign({pixelIndex: index}, gpuGridAggregator.getData('elevation'))
-      );
+      const colorInfo = GPUGridAggregator.getAggregationData({
+        pixelIndex: index,
+        ...gpuGridAggregator.getData('color')
+      });
+      const elevationInfo = GPUGridAggregator.getAggregationData({
+        pixelIndex: index,
+        ...gpuGridAggregator.getData('elevation')
+      });
 
       object = {
         colorValue: colorInfo.cellWeight,
@@ -204,11 +206,11 @@ export default class GPUGridLayer extends GridAggregationLayer {
       }
     }
 
-    return Object.assign(info, {
-      picked: Boolean(object),
-      // override object with picked cell
-      object
-    });
+    // override object with picked cell
+    info.picked = Boolean(object);
+    info.object = object;
+
+    return info;
   }
 
   renderLayers() {
@@ -270,9 +272,7 @@ export default class GPUGridLayer extends GridAggregationLayer {
     [color, elevation].forEach(weight => {
       const {aggregationBuffer, maxMinBuffer} = weight;
       maxMinBuffer.delete();
-      if (aggregationBuffer) {
-        aggregationBuffer.delete();
-      }
+      aggregationBuffer?.delete();
     });
     super.finalizeState();
   }

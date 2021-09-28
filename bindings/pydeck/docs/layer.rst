@@ -20,7 +20,7 @@ Understanding keyword arguments in pydeck layers
 
 Keyword arguments vary by layer. A catalog of available layers in
 deck.gl is viewable
-`in the deck.gl layer catalog <https://github.com/visgl/deck.gl/tree/master/docs/layers#deckgl-layer-catalog-overview>`__.
+`in the deck.gl layer catalog <https://github.com/visgl/deck.gl/tree/master/docs/api-reference/layers#layer-catalog-overview>`__.
 
 A few important observations:
 

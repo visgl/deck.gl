@@ -44,9 +44,9 @@ See the [Properties](#properties) section.
 
 The following properties are used to initialize a `Deck` instance. Any custom value should always be provided to the `Deck` constructor. Changing them with `setProps` afterwards will have no effect.
 
-##### `canvas` (HTMLCanvasElement)
+##### `canvas` (HTMLCanvasElement | String, optional)
 
-The canvas to render into. Will be auto-created if not supplied.
+The canvas to render into. Can be either a HTMLCanvasElement or the element id. Will be auto-created if not supplied.
 
 ##### `gl` (WebGLContext)
 
@@ -559,12 +559,14 @@ Receives arguments:
 
 ##### `onError` (Function)
 
-Called if deck.gl encounters an error. By default, deck logs the error to console and attempt to continue rendering the rest of the scene.
+* Default: `console.error`
+
+Called if deck.gl encounters an error. By default, deck logs the error to console and attempt to continue rendering the rest of the scene. If this callback is set to `null`, errors are silently ignored.
 
 Receives arguments:
 
 * `error` ([Error](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Error))
-* `source` - the source of the error, likely a Layer instance
+* `layer` (Layer?) - the layer where the error is originated, if applicable
 
 
 ##### `_onMetrics` (Function)

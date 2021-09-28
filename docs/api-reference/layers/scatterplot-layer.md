@@ -136,6 +136,17 @@ The minimum line width in pixels. This prop can be used to prevent the stroke fr
 
 The maximum line width in pixels. This prop can be used to prevent the path from getting too thick when zoomed in.
 
+##### `billboard` (Boolean, optional)
+
+- Default: `false`
+
+If `true`, rendered circles always face the camera. If `false` circles face up (i.e. are parallel with the ground plane).
+
+##### `antialiasing` (Boolean, optional)
+
+- Default: `true`
+
+If `true`, circles are rendered with smoothed edges. If `false`, circles are rendered with rough edges. Antialiasing can cause artifacts on edges of overlapping circles. Also, antialiasing isn't supported in FirstPersonView. 
 
 ### Data Accessors
 
@@ -185,7 +196,7 @@ The rgba color is in the format of `[r, g, b, [a]]`. Each channel is a number be
 * If a function is provided, it is called on each object to retrieve its color.
 * If not provided, it falls back to `getColor`.
 
-##### `getLineWidth` ([Function](/docs/developer-guide/using-layers.md#accessors)|Array, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
+##### `getLineWidth` ([Function](/docs/developer-guide/using-layers.md#accessors)|Number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
 
 * Default: `1`
 

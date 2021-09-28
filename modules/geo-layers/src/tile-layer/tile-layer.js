@@ -1,6 +1,5 @@
 import {CompositeLayer, _flatten as flatten} from '@deck.gl/core';
 import {GeoJsonLayer} from '@deck.gl/layers';
-import {load} from '@loaders.gl/core';
 
 import Tileset2D, {STRATEGY_DEFAULT} from './tileset-2d';
 import {urlType, getURLFromTemplate} from './utils';
@@ -24,17 +23,8 @@ const defaultProps = {
   maxCacheByteSize: null,
   refinementStrategy: STRATEGY_DEFAULT,
   zRange: null,
-  // Use load directly so we don't use ResourceManager
-  fetch: {
-    type: 'function',
-    value: (url, {layer, signal}) => {
-      const loadOptions = {signal, ...(layer.getLoadOptions() || {})};
-
-      return load(url, loadOptions);
-    },
-    compare: false
-  },
   maxRequests: 6,
+  zoomOffset: 0,
   Tileset2D
 };
 
@@ -47,10 +37,7 @@ export default class TileLayer extends CompositeLayer {
   }
 
   finalizeState() {
-    const {tileset} = this.state;
-    if (tileset) {
-      tileset.finalize();
-    }
+    this.state.tileset?.finalize();
   }
 
   get isLoaded() {
@@ -64,7 +51,7 @@ export default class TileLayer extends CompositeLayer {
     return changeFlags.somethingChanged;
   }
 
-  updateState({props, oldProps, context, changeFlags}) {
+  updateState({props, changeFlags}) {
     let {tileset} = this.state;
     const createTileCache =
       !tileset ||
@@ -76,33 +63,16 @@ export default class TileLayer extends CompositeLayer {
       if (tileset) {
         tileset.finalize();
       }
-      const maxZoom = Number.isFinite(this.state.maxZoom) ? this.state.maxZoom : props.maxZoom;
-      const minZoom = Number.isFinite(this.state.minZoom) ? this.state.minZoom : props.minZoom;
-      const {
-        tileSize,
-        maxCacheSize,
-        maxCacheByteSize,
-        refinementStrategy,
-        extent,
-        maxRequests
-      } = props;
       tileset = new props.Tileset2D({
+        ...this._getTilesetOptions(props),
         getTileData: this.getTileData.bind(this),
-        maxCacheSize,
-        maxCacheByteSize,
-        maxZoom,
-        minZoom,
-        tileSize,
-        refinementStrategy,
-        extent,
         onTileLoad: this._onTileLoad.bind(this),
         onTileError: this._onTileError.bind(this),
-        onTileUnload: this._onTileUnload.bind(this),
-        maxRequests
+        onTileUnload: this._onTileUnload.bind(this)
       });
       this.setState({tileset});
     } else if (changeFlags.propsChanged || changeFlags.updateTriggersChanged) {
-      tileset.setOptions(props);
+      tileset.setOptions(this._getTilesetOptions(props));
       // if any props changed, delete the cached layers
       this.state.tileset.tiles.forEach(tile => {
         tile.layers = null;
@@ -110,6 +80,32 @@ export default class TileLayer extends CompositeLayer {
     }
 
     this._updateTileset();
+  }
+
+  _getTilesetOptions(props) {
+    const {
+      tileSize,
+      maxCacheSize,
+      maxCacheByteSize,
+      refinementStrategy,
+      extent,
+      maxZoom,
+      minZoom,
+      maxRequests,
+      zoomOffset
+    } = props;
+
+    return {
+      maxCacheSize,
+      maxCacheByteSize,
+      maxZoom,
+      minZoom,
+      tileSize,
+      refinementStrategy,
+      extent,
+      maxRequests,
+      zoomOffset
+    };
   }
 
   _updateTileset() {
@@ -170,8 +166,8 @@ export default class TileLayer extends CompositeLayer {
   // Methods for subclass to override
 
   getTileData(tile) {
-    const {data} = this.props;
-    const {getTileData, fetch} = this.getCurrentLayer().props;
+    const layer = this.getCurrentLayer();
+    const {data, getTileData, fetch} = layer.props;
     const {signal} = tile;
 
     tile.url = getURLFromTemplate(data, tile);
@@ -180,7 +176,7 @@ export default class TileLayer extends CompositeLayer {
       return getTileData(tile);
     }
     if (tile.url) {
-      return fetch(tile.url, {layer: this, signal});
+      return fetch(tile.url, {propName: 'data', layer, signal});
     }
     return null;
   }
@@ -205,39 +201,37 @@ export default class TileLayer extends CompositeLayer {
   }
 
   renderLayers() {
-    const {visible} = this.props;
     return this.state.tileset.tiles.map(tile => {
-      // For a tile to be visible:
-      // - parent layer must be visible
-      // - tile must be visible in the current viewport
-      const isVisible = visible && tile.isVisible;
       const highlightedObjectIndex = this.getHighlightedObjectIndex(tile);
       // cache the rendered layer in the tile
       if (!tile.isLoaded) {
         // no op
       } else if (!tile.layers) {
-        const layers = this.renderSubLayers(
-          Object.assign({}, this.props, {
-            id: `${this.id}-${tile.x}-${tile.y}-${tile.z}`,
-            data: tile.data,
-            visible: isVisible,
-            _offset: 0,
+        const layers = this.renderSubLayers({
+          ...this.props,
+          id: `${this.id}-${tile.x}-${tile.y}-${tile.z}`,
+          data: tile.data,
+          _offset: 0,
+          tile
+        });
+        tile.layers = flatten(layers, Boolean).map(layer =>
+          layer.clone({
             tile,
             highlightedObjectIndex
           })
         );
-        tile.layers = flatten(layers, Boolean);
       } else if (
         tile.layers[0] &&
-        (tile.layers[0].props.visible !== isVisible ||
-          tile.layers[0].props.highlightedObjectIndex !== highlightedObjectIndex)
+        tile.layers[0].props.highlightedObjectIndex !== highlightedObjectIndex
       ) {
-        tile.layers = tile.layers.map(layer =>
-          layer.clone({visible: isVisible, highlightedObjectIndex})
-        );
+        tile.layers = tile.layers.map(layer => layer.clone({highlightedObjectIndex}));
       }
       return tile.layers;
     });
+  }
+
+  filterSubLayer({layer}) {
+    return layer.props.tile.isVisible;
   }
 }
 

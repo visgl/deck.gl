@@ -23,28 +23,12 @@ import {testLayerAsync} from '@deck.gl/test-utils';
 import {Tile3DLayer} from '@deck.gl/geo-layers';
 import {WebMercatorViewport} from '@deck.gl/core';
 
-const fetchFile = url => {
-  url = url
-    .replace(/\?.+$/, '') // strip query parameters
-    .replace(/^\//, './test/data/3d-tiles/');
-  return require('fs').readFileSync(url);
-};
-
 test('Tile3DLayer', async t => {
-  let oldFetch;
-  /* global global, Response */
-  const needsFetchPolyfill = typeof Response === 'undefined';
-  if (needsFetchPolyfill) {
-    oldFetch = global.fetch;
-    global.fetch = fetchFile;
-  }
-
   const testCases = [
     {
       props: {
         data: './test/data/3d-tiles/tileset.json',
-        getPointColor: [0, 0, 0],
-        loadOptions: needsFetchPolyfill ? {'3d-tiles': {isTileset: true}} : {}
+        getPointColor: [0, 0, 0]
       },
       onBeforeUpdate: () => t.comment('inital load'),
       onAfterUpdate: ({layer, subLayers}) => {
@@ -71,16 +55,13 @@ test('Tile3DLayer', async t => {
     viewport: new WebMercatorViewport({
       width: 400,
       height: 300,
-      longitude: -1.3197,
-      latitude: 0.69885,
+      longitude: -75.61209423,
+      latitude: 40.042530625,
       zoom: 12
     }),
     testCases,
     onError: t.notOk
   });
 
-  if (oldFetch) {
-    global.fetch = oldFetch;
-  }
   t.end();
 });

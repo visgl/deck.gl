@@ -18,11 +18,10 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {CompositeLayer} from '@deck.gl/core';
+import {CompositeLayer, log} from '@deck.gl/core';
 import {SimpleMeshLayer} from '@deck.gl/mesh-layers';
 import {WebMercatorViewport, COORDINATE_SYSTEM} from '@deck.gl/core';
-import {load} from '@loaders.gl/core';
-import {TerrainLoader} from '@loaders.gl/terrain';
+import {TerrainWorkerLoader} from '@loaders.gl/terrain';
 import TileLayer from '../tile-layer/tile-layer';
 import {urlType, getURLFromTemplate} from '../tile-layer/utils';
 
@@ -33,7 +32,7 @@ const defaultProps = {
   // Image url that encodes height data
   elevationData: urlType,
   // Image url to use as texture
-  texture: urlType,
+  texture: {...urlType, optional: true},
   // Martini error tolerance in meters, smaller number -> more detailed mesh
   meshMaxError: {type: 'number', value: 4.0},
   // Bounding box of the terrain image, [minX, minY, maxX, maxY] in world coordinates
@@ -56,7 +55,7 @@ const defaultProps = {
   wireframe: false,
   material: true,
 
-  loaders: [TerrainLoader]
+  loaders: [TerrainWorkerLoader]
 };
 
 // Turns array of templates into a single string to work around shallow change
@@ -96,31 +95,38 @@ export default class TerrainLayer extends CompositeLayer {
       const terrain = this.loadTerrain(props);
       this.setState({terrain});
     }
+
+    // TODO - remove in v9
+    if (props.workerUrl) {
+      log.removed('workerUrl', 'loadOptions.terrain.workerUrl')();
+    }
   }
 
-  loadTerrain({elevationData, bounds, elevationDecoder, meshMaxError, workerUrl}) {
+  loadTerrain({elevationData, bounds, elevationDecoder, meshMaxError, signal}) {
     if (!elevationData) {
       return null;
     }
-    const options = {
+    let loadOptions = this.getLoadOptions();
+    loadOptions = {
+      ...loadOptions,
       terrain: {
+        skirtHeight: this.state.isTiled ? meshMaxError * 2 : 0,
+        ...loadOptions?.terrain,
         bounds,
         meshMaxError,
         elevationDecoder
       }
     };
-    if (workerUrl !== null) {
-      options.terrain.workerUrl = workerUrl;
-    }
-    return load(elevationData, this.props.loaders, options);
+    const {fetch} = this.props;
+    return fetch(elevationData, {propName: 'elevationData', layer: this, loadOptions, signal});
   }
 
   getTiledTerrainData(tile) {
-    const {elevationData, texture, elevationDecoder, meshMaxError, workerUrl} = this.props;
+    const {elevationData, fetch, texture, elevationDecoder, meshMaxError} = this.props;
     const dataUrl = getURLFromTemplate(elevationData, tile);
     const textureUrl = getURLFromTemplate(texture, tile);
 
-    const {bbox, z} = tile;
+    const {bbox, signal, z} = tile;
     const viewport = new WebMercatorViewport({
       longitude: (bbox.west + bbox.east) / 2,
       latitude: (bbox.north + bbox.south) / 2,
@@ -135,11 +141,11 @@ export default class TerrainLayer extends CompositeLayer {
       bounds,
       elevationDecoder,
       meshMaxError,
-      workerUrl
+      signal
     });
     const surface = textureUrl
       ? // If surface image fails to load, the tile should still be displayed
-        load(textureUrl).catch(_ => null)
+        fetch(textureUrl, {propName: 'texture', layer: this, loaders: [], signal}).catch(_ => null)
       : Promise.resolve(null);
 
     return Promise.all([terrain, surface]);
@@ -203,7 +209,13 @@ export default class TerrainLayer extends CompositeLayer {
       maxZoom,
       minZoom,
       extent,
-      maxRequests
+      maxRequests,
+      onTileLoad,
+      onTileUnload,
+      onTileError,
+      maxCacheSize,
+      maxCacheByteSize,
+      refinementStrategy
     } = this.props;
 
     if (this.state.isTiled) {
@@ -231,7 +243,13 @@ export default class TerrainLayer extends CompositeLayer {
           maxZoom,
           minZoom,
           extent,
-          maxRequests
+          maxRequests,
+          onTileLoad,
+          onTileUnload,
+          onTileError,
+          maxCacheSize,
+          maxCacheByteSize,
+          refinementStrategy
         }
       );
     }

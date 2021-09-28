@@ -98,20 +98,10 @@ export function render({gl, width, height, viewState}) {
 }
 
 export function finalizeResources() {
-  if (this.deckInstance) {
-    this.deckInstance.finalize();
-    this.deckInstance = null;
-  }
+  this.deckInstance?.finalize();
+  this.deckInstance = null;
 
-  if (this.model) {
-    this.model.delete();
-  }
-
-  if (this.buffer) {
-    this.buffer.delete();
-  }
-
-  if (this.deckFbo) {
-    this.deckFbo.delete();
-  }
+  this.model?.delete();
+  this.buffer?.delete();
+  this.deckFbo?.delete();
 }

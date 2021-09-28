@@ -120,16 +120,14 @@ function getGridLayerDataFromGridHash({gridHash, gridOffset, offsets}) {
     const lonIdx = parseInt(idxs[1], 10);
     const index = i++;
 
-    data[index] = Object.assign(
-      {
-        index,
-        position: [
-          offsets[0] + gridOffset.xOffset * lonIdx,
-          offsets[1] + gridOffset.yOffset * latIdx
-        ]
-      },
-      gridHash[key]
-    );
+    data[index] = {
+      index,
+      position: [
+        offsets[0] + gridOffset.xOffset * lonIdx,
+        offsets[1] + gridOffset.yOffset * latIdx
+      ],
+      ...gridHash[key]
+    };
   }
   return data;
 }

@@ -1,11 +1,20 @@
 /* eslint-disable complexity */
-import {CullingVolume, Plane, AxisAlignedBoundingBox, BoundingSphere} from '@math.gl/culling';
-import {Vector3} from 'math.gl';
+import {
+  CullingVolume,
+  Plane,
+  AxisAlignedBoundingBox,
+  makeOrientedBoundingBoxFromPoints
+} from '@math.gl/culling';
+import {lngLatToWorld} from '@math.gl/web-mercator';
 import {osmTile2lngLat} from './utils';
 
 const TILE_SIZE = 512;
 // number of world copies to check
 const MAX_MAPS = 3;
+// for calculating bounding volume of a tile in a non-web-mercator viewport
+const REF_POINTS_5 = [[0.5, 0.5], [0, 0], [0, 1], [1, 0], [1, 1]]; // 4 corners and center
+const REF_POINTS_9 = REF_POINTS_5.concat([[0, 0.5], [0.5, 0], [1, 0.5], [0.5, 1]]); // 4 corners, center and 4 mid points
+const REF_POINTS_11 = REF_POINTS_9.concat([[0.25, 0.5], [0.75, 0.5]]); // 2 additional points on equator for top tile
 
 class OSMNode {
   constructor(x, y, z) {
@@ -30,10 +39,14 @@ class OSMNode {
   }
 
   update(params) {
-    const {viewport, cullingVolume, elevationBounds, minZ, maxZ, offset, project} = params;
+    const {viewport, cullingVolume, elevationBounds, minZ, maxZ, bounds, offset, project} = params;
     const boundingVolume = this.getBoundingVolume(elevationBounds, offset, project);
 
     // First, check if this tile is visible
+    if (bounds && !this.insideBounds(bounds)) {
+      return false;
+    }
+
     const isInside = cullingVolume.computeVisibility(boundingVolume);
     if (isInside < 0) {
       return false;
@@ -77,22 +90,40 @@ class OSMNode {
     return result;
   }
 
+  insideBounds([minX, minY, maxX, maxY]) {
+    const scale = Math.pow(2, this.z);
+    const extent = TILE_SIZE / scale;
+
+    return (
+      this.x * extent < maxX &&
+      this.y * extent < maxY &&
+      (this.x + 1) * extent > minX &&
+      (this.y + 1) * extent > minY
+    );
+  }
+
   getBoundingVolume(zRange, worldOffset, project) {
     if (project) {
       // Custom projection
-      const corner0 = osmTile2lngLat(this.x, this.y, this.z);
-      const corner1 = osmTile2lngLat(this.x + 1, this.y + 1, this.z);
-      const center = osmTile2lngLat(this.x + 0.5, this.y + 0.5, this.z);
-      corner0.z = zRange[1];
-      corner1.z = zRange[1];
-      center.z = zRange[0];
+      // Estimate bounding box from sample points
+      // At low zoom level we need more samples to calculate the bounding volume correctly
+      const refPoints = this.z < 1 ? REF_POINTS_11 : this.z < 2 ? REF_POINTS_9 : REF_POINTS_5;
 
-      const cornerPos0 = project(corner0);
-      const cornerPos1 = project(corner1);
-      const centerPos = new Vector3(project(center));
-      const R = Math.max(centerPos.distance(cornerPos0), centerPos.distance(cornerPos1));
+      // Convert from tile-relative coordinates to common space
+      const refPointPositions = [];
+      for (const p of refPoints) {
+        const lngLat = osmTile2lngLat(this.x + p[0], this.y + p[1], this.z);
+        lngLat[2] = zRange[0];
+        refPointPositions.push(project(lngLat));
 
-      return new BoundingSphere(centerPos, R);
+        if (zRange[0] !== zRange[1]) {
+          // Account for the elevation volume
+          lngLat[2] = zRange[1];
+          refPointPositions.push(project(lngLat));
+        }
+      }
+
+      return makeOrientedBoundingBoxFromPoints(refPointPositions);
     }
 
     // Use WebMercator projection
@@ -109,7 +140,7 @@ class OSMNode {
   }
 }
 
-export function getOSMTileIndices(viewport, maxZ, zRange) {
+export function getOSMTileIndices(viewport, maxZ, zRange, bounds) {
   const project = viewport.resolution ? viewport.projectPosition : null;
 
   // Get the culling volume of the current camera
@@ -126,6 +157,14 @@ export function getOSMTileIndices(viewport, maxZ, zRange) {
   // Always load at the current zoom level if pitch is small
   const minZ = viewport.pitch <= 60 ? maxZ : 0;
 
+  // Map extent to OSM position
+  if (bounds) {
+    const [minLng, minLat, maxLng, maxLat] = bounds;
+    const topLeft = lngLatToWorld([minLng, maxLat]);
+    const bottomRight = lngLatToWorld([maxLng, minLat]);
+    bounds = [topLeft[0], TILE_SIZE - topLeft[1], bottomRight[0], TILE_SIZE - bottomRight[1]];
+  }
+
   const root = new OSMNode(0, 0, 0);
   const traversalParams = {
     viewport,
@@ -134,6 +173,7 @@ export function getOSMTileIndices(viewport, maxZ, zRange) {
     elevationBounds: [elevationMin, elevationMax],
     minZ,
     maxZ,
+    bounds,
     // num. of worlds from the center. For repeated maps
     offset: 0
   };

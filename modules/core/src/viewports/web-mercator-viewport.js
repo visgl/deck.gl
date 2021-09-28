@@ -27,6 +27,8 @@ import {
   getViewMatrix,
   addMetersToLngLat,
   getProjectionParameters,
+  altitudeToFovy,
+  fovyToAltitude,
   fitBounds,
   getBounds
 } from '@math.gl/web-mercator';
@@ -53,6 +55,7 @@ export default class WebMercatorViewport extends Viewport {
       nearZMultiplier = 0.1,
       farZMultiplier = 1.01,
       orthographic = false,
+      projectionMatrix,
 
       repeat = false,
       worldOffset = 0
@@ -65,18 +68,27 @@ export default class WebMercatorViewport extends Viewport {
     width = width || 1;
     height = height || 1;
 
-    // Altitude - prevent division by 0
-    // TODO - just throw an Error instead?
-    altitude = Math.max(0.75, altitude);
-
-    const {fov, aspect, focalDistance, near, far} = getProjectionParameters({
-      width,
-      height,
-      pitch,
-      altitude,
-      nearZMultiplier,
-      farZMultiplier
-    });
+    let fovy;
+    let projectionParameters = null;
+    if (projectionMatrix) {
+      altitude = projectionMatrix[5] / 2;
+      fovy = altitudeToFovy(altitude);
+    } else {
+      if (opts.fovy) {
+        fovy = opts.fovy;
+        altitude = fovyToAltitude(fovy);
+      } else {
+        fovy = altitudeToFovy(altitude);
+      }
+      projectionParameters = getProjectionParameters({
+        width,
+        height,
+        pitch,
+        fovy,
+        nearZMultiplier,
+        farZMultiplier
+      });
+    }
 
     // The uncentered matrix allows us two move the center addition to the
     // shader (cheap) which gives a coordinate system that has its center in
@@ -95,7 +107,8 @@ export default class WebMercatorViewport extends Viewport {
       viewMatrixUncentered = viewOffset.multiplyLeft(viewMatrixUncentered);
     }
 
-    const viewportOpts = Object.assign({}, opts, {
+    super({
+      ...opts,
       // x, y,
       width,
       height,
@@ -107,16 +120,10 @@ export default class WebMercatorViewport extends Viewport {
       zoom,
 
       // projection matrix parameters
-      orthographic,
-      fovyRadians: fov,
-      aspect,
-      // TODO Viewport is already carefully set up to "focus" on ground, so can't use focal distance
-      focalDistance: orthographic ? focalDistance : 1,
-      near,
-      far
+      ...projectionParameters,
+      fovy,
+      focalDistance: altitude
     });
-
-    super(viewportOpts);
 
     // Save parameters
     this.latitude = latitude;
@@ -125,6 +132,7 @@ export default class WebMercatorViewport extends Viewport {
     this.pitch = pitch;
     this.bearing = bearing;
     this.altitude = altitude;
+    this.fovy = fovy;
 
     this.orthographic = orthographic;
 
@@ -169,24 +177,15 @@ export default class WebMercatorViewport extends Viewport {
     return addMetersToLngLat(lngLatZ, xyz);
   }
 
-  /**
-   * Get the map center that place a given [lng, lat] coordinate at screen
-   * point [x, y]
-   *
-   * @param {Array} lngLat - [lng,lat] coordinates
-   *   Specifies a point on the sphere.
-   * @param {Array} pos - [x,y] coordinates
-   *   Specifies a point on the screen.
-   * @return {Array} [lng,lat] new map center.
-   */
-  getMapCenterByLngLatPosition({lngLat, pos}) {
-    const fromLocation = pixelsToWorld(pos, this.pixelUnprojectionMatrix);
-    const toLocation = this.projectFlat(lngLat);
+  panByPosition(coords, pixel) {
+    const fromLocation = pixelsToWorld(pixel, this.pixelUnprojectionMatrix);
+    const toLocation = this.projectFlat(coords);
 
     const translate = vec2.add([], toLocation, vec2.negate([], fromLocation));
     const newCenter = vec2.add([], this.center, translate);
 
-    return this.unprojectFlat(newCenter);
+    const [longitude, latitude] = this.unprojectFlat(newCenter);
+    return {longitude, latitude};
   }
 
   getBounds(options = {}) {
@@ -211,7 +210,7 @@ export default class WebMercatorViewport extends Viewport {
    */
   fitBounds(bounds, options = {}) {
     const {width, height} = this;
-    const {longitude, latitude, zoom} = fitBounds(Object.assign({width, height, bounds}, options));
+    const {longitude, latitude, zoom} = fitBounds({width, height, bounds, ...options});
     return new WebMercatorViewport({width, height, longitude, latitude, zoom});
   }
 }

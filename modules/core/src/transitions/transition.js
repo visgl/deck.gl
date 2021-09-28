@@ -31,7 +31,7 @@ export default class Transition {
    */
   start(props) {
     this.cancel();
-    this.settings = Object.assign({}, DEFAULT_SETTINGS, props);
+    this.settings = {...DEFAULT_SETTINGS, ...props};
     this._inProgress = true;
     this.settings.onStart(this);
   }

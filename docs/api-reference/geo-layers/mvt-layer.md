@@ -52,7 +52,7 @@ To install the dependencies from NPM:
 ```bash
 npm install deck.gl
 # or
-npm install @deck.gl/core @deck.gl/layers @deck.gl/geo-layers
+npm install @deck.gl/core @deck.gl/layers @deck.gl/extensions @deck.gl/geo-layers
 ```
 
 ```js
@@ -117,16 +117,17 @@ On top of the [default options](/docs/api-reference/core/layer.md#loadoptions), 
 
 - [MVTLoader](https://loaders.gl/modules/mvt/docs/api-reference/mvt-loader)
 
+Note that by default, the `MVTLoader` parses data using web workers, with code loaded from a [CDN](https://unpkg.com). To change this behavior, see [loaders and workers](/docs/developer-guide/loading-data.md#loaders-and-web-workers).
+
 ##### `binary` (Boolean, optional)
 
 * Default: false
 
-Use tile data in [binary format](https://github.com/visgl/loaders.gl/blob/master/modules/gis/docs/api-reference/geojson-to-binary.md) to improve performance. It removes the need for serialization and deserialization of data transferred by the worker back to the main process.
+Use tile data in [binary format](https://github.com/visgl/loaders.gl/blob/master/modules/gis/docs/api-reference/geojson-to-binary.md) to improve performance (2-3x faster on large datasets). It removes the need for serialization and deserialization of data transferred by the worker back to the main process. 
 
 Remarks: 
 
 - It requires using `GeoJsonLayer` in the `renderSubLayers` callback.
-- In binary format, there are some rendering issues with polygons or multipolygons which contain holes (the holes won't appear as expected), we're working to fix it for the next release.
 
 ### Callbacks
 
@@ -140,7 +141,7 @@ Receives arguments:
 
 ## Methods
 
-#### `getRenderedFeatures` (Function)
+##### `getRenderedFeatures` (Function)
 
 Get the rendered features in the current viewport.
 

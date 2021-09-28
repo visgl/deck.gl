@@ -41,6 +41,8 @@ export default class Tooltip {
       Object.assign(this.el.style, defaultStyle);
       canvasParent.appendChild(this.el);
     }
+
+    this.isVisible = false;
   }
 
   setTooltip(displayInfo, x, y) {
@@ -49,6 +51,7 @@ export default class Tooltip {
     if (typeof displayInfo === 'string') {
       el.innerText = displayInfo;
     } else if (!displayInfo) {
+      this.isVisible = false;
       el.style.display = 'none';
       return;
     } else {
@@ -63,6 +66,7 @@ export default class Tooltip {
       }
       Object.assign(el.style, displayInfo.style);
     }
+    this.isVisible = true;
     el.style.display = 'block';
     el.style.transform = `translate(${x}px, ${y}px)`;
   }

@@ -1,5 +1,5 @@
 import {COORDINATE_SYSTEM, MapView, FirstPersonView, MapController} from '@deck.gl/core';
-import GL from '@luma.gl/constants';
+import GLConstants from '@luma.gl/constants';
 
 export const log = console; // eslint-disable-line
 
@@ -17,7 +17,7 @@ export default {
   // Will be resolved as `<enum-name>.<enum-value>`
   enumerations: {
     COORDINATE_SYSTEM,
-    GL
+    GL: GLConstants
   },
   constants: {
     MapController

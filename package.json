@@ -16,6 +16,9 @@
   "workspaces": [
     "modules/*"
   ],
+  "resolutions": {
+    "acorn": "7.4.1"
+  },
   "scripts": {
     "bootstrap": "PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true yarn && ocular-bootstrap",
     "clean": "ocular-clean",
@@ -41,11 +44,12 @@
     "jsdom": false
   },
   "devDependencies": {
-    "@loaders.gl/csv": "^2.3.9",
-    "@loaders.gl/polyfills": "^2.3.9",
-    "@luma.gl/test-utils": "^8.4.1",
-    "@probe.gl/bench": "^3.3.1",
-    "@probe.gl/test-utils": "^3.3.1",
+    "@babel/register": "^7.13.0",
+    "@loaders.gl/csv": "^3.0.8",
+    "@loaders.gl/polyfills": "^3.0.8",
+    "@luma.gl/test-utils": "^8.5.5",
+    "@probe.gl/bench": "^3.4.0",
+    "@probe.gl/test-utils": "^3.4.0",
     "abortcontroller-polyfill": "^1.5.0",
     "babel-loader": "^8.0.0",
     "babel-plugin-inline-webgl-constants": "^1.0.3",
@@ -60,18 +64,21 @@
     "gl": "^4.9.0",
     "glsl-transpiler": "^1.8.3",
     "jsdom": "^15.0.0",
-    "ocular-dev-tools": "^0.2.3",
+    "ocular-dev-tools": "^0.3.1",
     "pre-commit": "^1.2.2",
     "pre-push": "^0.1.1",
     "raw-loader": "^0.5.1",
     "react": "^16.2.0",
     "react-dom": "^16.2.0",
     "react-map-gl": "^5.1.0",
-    "reify": "^0.18.1",
-    "s2-geometry": "^1.2.10"
+    "s2-geometry": "^1.2.10",
+    "typescript": "^4.2.3"
   },
   "pre-commit": [
     "test-fast",
     "bindings-precommit-tests"
-  ]
+  ],
+  "engines": {
+    "node": ">=14"
+  }
 }

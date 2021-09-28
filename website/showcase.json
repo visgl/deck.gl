@@ -1,11 +1,38 @@
 [
   {
+    "name": "Vizgen Single-Cell MERFISH Spatial Visualizer",
+    "url": "https://vizgen.com/applications/#visual",
+    "image": "/images/showcase/vizgen_single_cell_spatial.jpg",
+    "links": {
+      "by Vizgen": "https://vizgen.com/"
+    },
+    "description": "Vizgen's Interactive Single-Cell Spatial Visualizer enables users to explore single-cell gene expression data from our MERFISH Mouse Brain Receptor Map. Cells can be visualized using a UMAP embedding or the spatial coordinates within the brain - providing a detailed spatial map of the tissue."
+  },  
+  {
+    "name": "ISB Covid19",
+    "url": "https://atlas.fredhutch.org/isb/covid/",
+    "image": "/images/showcase/isb-covid.jpg",
+    "links": {
+      "by Data Visualization Center at Fred Hutch": "https://viz.fredhutch.org/"
+    },
+    "description": "The Institute for Systems Biology Covid19 Atlas provides insights into how the immune system responds with disease progression. The website features single-cell multi-omics time-series data as well as clinical annotations on more than 400 patients."
+  },
+  {
+    "name": "Descartes",
+    "url": "https://descartes.brotmanbaty.org/",
+    "image": "/images/showcase/descartes.jpg",
+    "links": {
+      "by Data Visualization Center at Fred Hutch": "https://viz.fredhutch.org/"
+    },
+    "description": "Understanding the trajectory of a developing human requires understanding of how genes are regulated and expressed. The Descartes Human Cell Atlases features the largest single cell dataset generated to date. It contains data on ~5 million individual cells that when analyzed provides a comprehensive atlas of early human development."
+  },
+  {
     "name": "Viv",
     "url": "http://avivator.gehlenborglab.org/?image_url=https://viv-demo.storage.googleapis.com/Vanderbilt-Spraggins-Kidney-MxIF.ome.tif",
     "image": "/images/showcase/viv.jpg",
     "links": {
       "Source code": "https://github.com/hms-dbmi/viv",
-      "By Gehlenborg Lab/Harvard Medical School": "http://gehlenborglab.org/"
+      "by Gehlenborg Lab/Harvard Medical School": "http://gehlenborglab.org/"
     },
     "description": "Viv is a library for multiscale visualization of high-resolution, highly multiplexed bioimaging data on the web. It directly renders data in Bio-Formats-compatible Zarr and OME-TIFF formats. Avivator is a lightweight image viewer that showcases the capabilities of Viv. The development of Viv and Avivator was supported with funding from the National Institutes of Health and Harvard University."
   },

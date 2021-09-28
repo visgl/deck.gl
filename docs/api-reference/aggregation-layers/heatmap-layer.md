@@ -5,7 +5,7 @@ import {HeatmapLayerDemo} from 'website-components/doc-demos/aggregation-layers'
 
 # HeatmapLayer
 
-`HeatmapLayer` can be used to visualize spatial distribution of data. It internally implements [Gaussian Kernel Density Estimation](https://en.wikipedia.org/wiki/Kernel_(statistics%29#Kernel_functions_in_common_use) to render heatmaps. Note that this layer does not support all platforms; see "limitations" section below.
+`HeatmapLayer` can be used to visualize spatial distribution of data. It internally implements [Gaussian Kernel Density Estimation](https://en.wikipedia.org/wiki/Kernel_(statistics%29#Kernel_functions_in_common_use)) to render heatmaps. Note that this layer does not support all platforms; see "limitations" section below.
 
 ```js
 import DeckGL from '@deck.gl/react';
@@ -78,9 +78,9 @@ Radius of the circle in pixels, to which the weight of an object is distributed.
 
 * Default: [colorbrewer](http://colorbrewer2.org/#type=sequential&scheme=YlOrRd&n=6) `6-class YlOrRd` <img src="https://deck.gl/images/colorbrewer_YlOrRd_6.png"/>
 
-Specified as an array of colors [color1, color2, ...]. Each color is an array of 3 or 4 values [R, G, B] or [R, G, B, A], representing intensities of Red, Green, Blue and Alpha channels.  Each intensity is a value between 0 and 255. When Alpha not provided a value of 255 is used.
+The color palette used in the heatmap, as an array of colors [color1, color2, ...]. Each color is in the format of `[r, g, b, [a]]`. Each channel is a number between 0-255 and `a` is 255 if not supplied.
 
-`colorDomain` is divided into `colorRange.length` equal segments, each mapped to one color in `colorRange`.
+See the `colorDomain` section below for how weight values are mapped to colors in `colorRange`.
 
 ##### `intensity` (Number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
 
@@ -102,15 +102,35 @@ The `HeatmapLayer` reduces the opacity of the pixels with relatively low weight 
 
 * Default: `null`
 
-Weight of each data object is distributed to to all the pixels in a circle centered at the object position, weight a pixel receives is inversely proportional to its distance from the center. Pixels that fall into multiple circles will have sum of all weights. And the weight of the pixel determines its color. When `colorDomain` is specified, all pixels with weight with in specified `colorDomain` will get mapped to `colorRange`, pixels with weight less than `colorDomain[0]` will fade out (reduced alpha) and pixels with weight more than `colorDomain[1]` will mapped to the highest color in `colorRange`.
+Controls how weight values are mapped to the `colorRange`, as an array of two numbers [`minValue`, `maxValue`].
 
-When not specified, maximum weight (`maxWeight`) is auto calculated and domain will be set to [`maxWeight * threshold`, `maxWeight`].
+When `colorDomain` is specified, a pixel with `minValue` is assigned the first color in `colorRange`, a pixel with `maxValue` is assigned the last color in `colorRange`, and any value in between is linearly interpolated. Pixels with weight less than `minValue` gradually fade out by reducing alpha, until 100% transparency representing `0`. Pixels with weight more than `maxValue` are capped to the last color in `colorRange`.
+
+- If using `aggregation: 'SUM'`, values in `colorDomain` are interpreted as weight per square meter.
+- If using `aggregation: 'MEAN'`, values in `colorDomain` are interpreted as weight.
+
+When this prop is not specified, the maximum value is automatically determined from the current viewport, and the domain is set to [`maxValue * threshold`, `maxValue`]. This default behavior ensures that the colors are distributed somewhat reasonably regardless of the data in display. However, as a result, the color at a specific location is dependent on the current viewport and any other data points within view. To obtain a stable color mapping (e.g. for displaying a legend), you need to provide a custom `colorDomain`.
+
 
 ##### `aggregation` (String, optional)
 
 * Default: `'SUM'`
 
 Operation used to aggregate all data point weights to calculate a pixel's color value. One of `'SUM'` or `'MEAN'`. `'SUM'` is used when an invalid value is provided.
+
+The weight of each data object is distributed to all the pixels in a circle centered at the object position. The weight that a pixel receives is inversely proportional to its distance from the center. In `'SUM'` mode, pixels that fall into multiple circles will have the sum of all weights. In `'MEAN'` mode, pixels that fall into multiple circles will have their weight calculated as the weighted average from all the neighboring data points. And the weight of the pixel determines its color. 
+
+##### `weightsTextureSize` (Number, optional)
+
+* Default: `2048`
+
+`weightsTextureSize` specifies the size of weight texture. Smaller texture sizes can improve rendering performance. Heatmap aggregation calculates the maximum weight value in the texture and the process can take 50-100 ms for 2048x2048 texture, but only 5-7ms for 512x512 texture. Smaller texture sizes lead to visible pixelation.
+
+##### `debounceTimeout` (Number, optional)
+
+* Default: `500`
+
+`debounceTimeout` is an interval in milliseconds during which changes to the viewport don't trigger aggregation. Large datasets combined with a large `radiusPixels` can cause freezes during user interactions due to aggregation updates. Setting positive debounceTimeout delays aggregation updates and prevents freezes during the interaction. As a side effect, the user has to wait to see updated results after the end of the interaction. 
 
 ### Data Accessors
 

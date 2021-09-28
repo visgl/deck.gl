@@ -59,7 +59,9 @@ class DeckGLWidget(DOMWidget):
     google_maps_key = Unicode("", allow_none=True).tag(sync=True)
 
     json_input = Unicode("").tag(sync=True)
-    data_buffer = Any(default_value=None, allow_none=True).tag(sync=True, **data_buffer_serialization)
+    data_buffer = Any(default_value=None, allow_none=True).tag(
+        sync=True, **data_buffer_serialization
+    )
     custom_libraries = Any(allow_none=True).tag(sync=True)
     tooltip = Any(True).tag(sync=True)
     height = Int(500).tag(sync=True)
@@ -71,6 +73,9 @@ class DeckGLWidget(DOMWidget):
         self._click_handlers = CallbackDispatcher()
         self._resize_handlers = CallbackDispatcher()
         self._view_state_handlers = CallbackDispatcher()
+        self._drag_handlers = CallbackDispatcher()
+        self._drag_start_handlers = CallbackDispatcher()
+        self._drag_end_handlers = CallbackDispatcher()
         self.on_msg(self._handle_custom_msgs)
 
         self.handler_exception = None
@@ -83,12 +88,23 @@ class DeckGLWidget(DOMWidget):
     def on_resize(self, callback, remove=False):
         self._resize_handlers.register_callback(callback, remove=remove)
 
-    def on_view_state_change(self, callback, debouce_seconds=0.2, remove=False):
-        callback = debounce(debouce_seconds)(callback) if debouce_seconds > 0 else callback
+    def on_view_state_change(self, callback, debounce_seconds=0.2, remove=False):
+        callback = (
+            debounce(debounce_seconds)(callback) if debounce_seconds > 0 else callback
+        )
         self._view_state_handlers.register_callback(callback, remove=remove)
 
     def on_click(self, callback, remove=False):
         self._click_handlers.register_callback(callback, remove=remove)
+
+    def on_drag_start(self, callback, remove=False):
+        self._drag_start_handlers.register_callback(callback, remove=remove)
+
+    def on_drag(self, callback, remove=False):
+        self._drag_handlers.register_callback(callback, remove=remove)
+
+    def on_drag_end(self, callback, remove=False):
+        self._drag_end_handlers.register_callback(callback, remove=remove)
 
     def _handle_custom_msgs(self, _, content, buffers=None):
         content = json.loads(content)
@@ -101,3 +117,9 @@ class DeckGLWidget(DOMWidget):
             self._view_state_handlers(self, content)
         elif event_type == "deck-click-event":
             self._click_handlers(self, content)
+        elif event_type == "deck-drag-start-event":
+            self._drag_start_handlers(self, content)
+        elif event_type == "deck-drag-event":
+            self._drag_handlers(self, content)
+        elif event_type == "deck-drag-end-event":
+            self._drag_end_handlers(self, content)

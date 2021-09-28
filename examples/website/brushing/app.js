@@ -116,7 +116,7 @@ export default function App({
   data,
   enableBrushing = true,
   brushRadius = 100000,
-  strokeWidth = 2,
+  strokeWidth = 1,
   opacity = 0.7,
   mapStyle = MAP_STYLE
 }) {

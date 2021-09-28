@@ -63,23 +63,23 @@ export default class SnapshotTestRunner extends TestRunner {
   runTestCase(testCase, onDone) {
     const {deck} = this;
 
-    deck.setProps(
-      Object.assign({}, this.props, testCase, {
-        onBeforeRender: () => {
-          testCase.onBeforeRender({
-            deck,
-            layers: deck.props.layers
-          });
-        },
-        onAfterRender: () => {
-          testCase.onAfterRender({
-            deck,
-            layers: deck.props.layers,
-            done: onDone
-          });
-        }
-      })
-    );
+    deck.setProps({
+      ...this.props,
+      ...testCase,
+      onBeforeRender: () => {
+        testCase.onBeforeRender({
+          deck,
+          layers: deck.props.layers
+        });
+      },
+      onAfterRender: () => {
+        testCase.onAfterRender({
+          deck,
+          layers: deck.props.layers,
+          done: onDone
+        });
+      }
+    });
   }
 
   shouldRender() {
@@ -94,15 +94,12 @@ export default class SnapshotTestRunner extends TestRunner {
     }
     this.isDiffing = true;
 
-    const diffOptions = Object.assign(
-      {},
-      this.testOptions.imageDiffOptions,
-      testCase.imageDiffOptions,
-      {
-        goldenImage: testCase.goldenImage,
-        region: getBoundingBoxInPage(this.deck.canvas)
-      }
-    );
+    const diffOptions = {
+      ...this.testOptions.imageDiffOptions,
+      ...testCase.imageDiffOptions,
+      goldenImage: testCase.goldenImage,
+      region: getBoundingBoxInPage(this.deck.canvas)
+    };
     // Take screenshot and compare
     window.browserTestDriver_captureAndDiffScreen(diffOptions).then(result => {
       // invoke user callback

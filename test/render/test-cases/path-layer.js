@@ -13,6 +13,8 @@ const DASH_TEST_DATA = [
   [-147.88,-152.35,-97.88,-238.95,2.12,-238.95,52.12,-152.35,2.12,-65.75,-97.88,-65.75,-147.88,-152.35]
 ];
 
+const ROUNDED_TEST_DATA = [{path: [[-200, -200], [-100, 200], [-25, -100], [25, 100], [75, -100]]}];
+
 export default [
   {
     name: 'path-miter',
@@ -29,36 +31,13 @@ export default [
         data: zigzag,
         opacity: 0.6,
         getPath: f => f.path,
-        getColor: f => [255, 0, 0],
-        getWidth: f => 200,
+        getColor: [255, 0, 0],
+        getWidth: 200,
         miterLimit: 0,
         widthMinPixels: 1
       })
     ],
     goldenImage: './test/render/golden-images/path-lnglat.png'
-  },
-  {
-    name: 'path-rounded',
-    viewState: {
-      latitude: 37.751537058389985,
-      longitude: -122.42694203247012,
-      zoom: 11.5,
-      pitch: 0,
-      bearing: 0
-    },
-    layers: [
-      new PathLayer({
-        id: 'path-lnglat',
-        data: zigzag,
-        opacity: 0.6,
-        getPath: f => f.path,
-        getColor: f => [255, 0, 0],
-        getWidth: f => 200,
-        rounded: true,
-        widthMinPixels: 1
-      })
-    ],
-    goldenImage: './test/render/golden-images/path-rounded.png'
   },
   {
     name: 'path-lnglat-binary',
@@ -135,18 +114,57 @@ export default [
       new PathLayer({
         id: 'path-meter',
         data: meterPaths,
-        getColor: f => [255, 0, 0],
-        getWidth: f => 10,
-        widthMinPixels: 1,
+        getColor: [255, 0, 0],
+        getWidth: 10,
         widthScale: 100,
-        sizeScale: 200,
-        rounded: false,
-        getMarkerPercentages: () => [],
         coordinateSystem: COORDINATE_SYSTEM.METER_OFFSETS,
         coordinateOrigin: positionOrigin
       })
     ],
     goldenImage: './test/render/golden-images/path-meter.png'
+  },
+  {
+    name: 'path-rounded',
+    viewState: {
+      latitude: 37.79,
+      longitude: -122.41,
+      zoom: 15,
+      pitch: 0,
+      bearing: 0
+    },
+    layers: [
+      new PathLayer({
+        id: 'path-rounded',
+        data: ROUNDED_TEST_DATA,
+        getColor: [255, 0, 0],
+        getWidth: 60,
+        jointRounded: true,
+        capRounded: true,
+        coordinateSystem: COORDINATE_SYSTEM.METER_OFFSETS,
+        coordinateOrigin: [-122.41, 37.79]
+      }),
+      new PathLayer({
+        id: 'path-rounded-cap',
+        data: ROUNDED_TEST_DATA,
+        getColor: [0, 255, 0],
+        getWidth: 60,
+        jointRounded: false,
+        capRounded: true,
+        coordinateSystem: COORDINATE_SYSTEM.METER_OFFSETS,
+        coordinateOrigin: [-122.415, 37.79]
+      }),
+      new PathLayer({
+        id: 'path-rounded-joint',
+        data: ROUNDED_TEST_DATA,
+        getColor: [0, 0, 255],
+        getWidth: 60,
+        jointRounded: true,
+        capRounded: false,
+        coordinateSystem: COORDINATE_SYSTEM.METER_OFFSETS,
+        coordinateOrigin: [-122.405, 37.79]
+      })
+    ],
+    goldenImage: './test/render/golden-images/path-rounded.png'
   },
   {
     name: 'path-dash',
@@ -180,6 +198,43 @@ export default [
       })
     ],
     goldenImage: './test/render/golden-images/path-dash.png'
+  },
+  {
+    name: 'path-dash-rounded',
+    views: new OrthographicView(),
+    viewState: {
+      target: [0, 0, 0],
+      zoom: -0.5
+    },
+    layers: [
+      new PathLayer({
+        id: 'path-dash-justified',
+        data: DASH_TEST_DATA,
+        getPath: d => d,
+        positionFormat: 'XY',
+        getDashArray: [4, 5],
+        getLineColor: [200, 0, 0],
+        widthMinPixels: 10,
+        dashJustified: true,
+        capRounded: true,
+        jointRounded: true,
+        extensions: [new PathStyleExtension({dash: true})]
+      }),
+      new PathLayer({
+        id: 'path-dash-high-precision',
+        modelMatrix: [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 300, 0, 0, 1],
+        data: DASH_TEST_DATA,
+        getPath: d => d,
+        positionFormat: 'XY',
+        getDashArray: [4, 5],
+        getLineColor: [200, 0, 0],
+        widthMinPixels: 10,
+        capRounded: true,
+        jointRounded: true,
+        extensions: [new PathStyleExtension({highPrecisionDash: true})]
+      })
+    ],
+    goldenImage: './test/render/golden-images/path-dash-rounded.png'
   },
   {
     name: 'path-offset',

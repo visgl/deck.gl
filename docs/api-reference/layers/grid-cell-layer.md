@@ -12,7 +12,7 @@ import {GridCellLayerDemo} from 'website-components/doc-demos/layers';
 
 The GridCellLayer can render a grid-based heatmap.
 It is a variation of the [ColumnLayer](/docs/api-reference/layers/column-layer.md).
-It takes the constant width / height of all cells and top-left coordinate of
+It takes the constant width / height of all cells and bottom-left coordinate of
 each cell. The grid cells can be given a height using the `getElevation` accessor.
 
 ```js
@@ -121,8 +121,8 @@ Check [the lighting guide](/docs/developer-guide/using-lighting.md#constructing-
 
 * Default: `x => x.position`
 
-Method called to retrieve the top left corner of each cell.
-Expecting [lon, lat].
+Method called to retrieve the bottom-left corner (`[minX, minY]`) of each cell.
+
 
 ##### `getColor` ([Function](/docs/developer-guide/using-layers.md#accessors)|Array, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
 

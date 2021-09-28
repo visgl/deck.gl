@@ -19,10 +19,12 @@
 // THE SOFTWARE.
 
 import test from 'tape-catch';
+import {geojsonToBinary} from '@loaders.gl/gis';
 import {processPickInfo} from '@deck.gl/core/lib/picking/pick-info';
 import {WebMercatorViewport} from '@deck.gl/core';
 import {ScatterplotLayer, GeoJsonLayer} from '@deck.gl/layers';
-import {testInitializeLayer} from '@deck.gl/test-utils';
+import {MVTLayer} from '@deck.gl/geo-layers';
+import {testInitializeLayer, testInitializeLayerAsync} from '@deck.gl/test-utils';
 
 import {equals} from 'math.gl';
 
@@ -44,6 +46,45 @@ const testLayerWithCallback = new ScatterplotLayer({
 const testCompositeLayer = new GeoJsonLayer({
   id: 'test-composite-layer',
   data: [{type: 'Feature', geometry: {type: 'Point', coordinates: [0, 0]}}]
+});
+
+const geoJSONData = [
+  {
+    id: 12,
+    type: 'Feature',
+    geometry: {type: 'Point', coordinates: [0, 0]},
+    properties: {layerName: 'layerA'}
+  },
+  {
+    id: 12,
+    type: 'Feature',
+    geometry: {type: 'Point', coordinates: [0, 0]},
+    properties: {layerName: 'layerB'}
+  }
+];
+
+class TestMVTLayer extends MVTLayer {
+  getTileData() {
+    return this.props.data;
+  }
+}
+
+TestMVTLayer.componentName = 'TestMVTLayer';
+
+const testMVTLayer = new TestMVTLayer({
+  id: 'test-mvt-layer',
+  autoHighlight: true,
+  data: geoJSONData
+});
+
+const geoJSONBinaryData = geojsonToBinary(JSON.parse(JSON.stringify(geoJSONData)));
+geoJSONBinaryData.points.fields = geoJSONData.map(({id}) => ({id}));
+
+const testMVTLayerBinary = new TestMVTLayer({
+  id: 'test-mvt-layer-binary',
+  autoHighlight: true,
+  binary: true,
+  data: geoJSONBinaryData
 });
 
 const parameters = {
@@ -78,7 +119,7 @@ const parameters = {
       height: 100
     })
   ],
-  layers: [testLayer, testLayerWithCallback, testCompositeLayer],
+  layers: [testLayer, testLayerWithCallback, testCompositeLayer, testMVTLayer, testMVTLayerBinary],
   layerFilter: ({layer, viewport}) => {
     if (viewport.id === 'minimap') {
       return layer.id !== 'test-layer-with-callback';
@@ -98,10 +139,12 @@ function validateUniforms(actual, expected) {
 }
 
 /* eslint-disable max-statements */
-test('processPickInfo', t => {
+test('processPickInfo', async t => {
   testInitializeLayer({layer: testLayer});
   testInitializeLayer({layer: testLayerWithCallback});
   testInitializeLayer({layer: testCompositeLayer});
+  await testInitializeLayerAsync({layer: testMVTLayer});
+  await testInitializeLayerAsync({layer: testMVTLayerBinary});
 
   const TEST_CASES = [
     {
@@ -199,7 +242,95 @@ test('processPickInfo', t => {
         layer: testCompositeLayer,
         object: {type: 'Feature', geometry: {type: 'Point', coordinates: [0, 0]}}
       },
-      lastPickedInfo: {layerId: 'test-composite-layer-points', index: 0},
+      lastPickedInfo: {layerId: 'test-composite-layer-points-circle', index: 0},
+      testLayerUniforms: {picking_uSelectedColorValid: 0}
+    },
+    {
+      pickInfo: {
+        pickedColor: [1, 0, 0, 0],
+        pickedLayer: testMVTLayer.getSubLayers()[0].getSubLayers()[0],
+        pickedObjectIndex: 0
+      },
+      x: 100,
+      y: 100,
+      size: 2,
+      info: {
+        layer: testMVTLayer,
+        object: {
+          id: 12,
+          type: 'Feature',
+          geometry: {type: 'Point'},
+          properties: {layerName: 'layerA'}
+        }
+      },
+      highlightedObjectIndex: 0,
+      lastPickedInfo: {layerId: 'test-mvt-layer-0-0-1-points-circle', index: 0},
+      testLayerUniforms: {picking_uSelectedColorValid: 0}
+    },
+    {
+      pickInfo: {
+        pickedColor: [2, 0, 0, 0],
+        pickedLayer: testMVTLayer.getSubLayers()[0].getSubLayers()[0],
+        pickedObjectIndex: 1
+      },
+      x: 100,
+      y: 100,
+      size: 2,
+      info: {
+        layer: testMVTLayer,
+        object: {
+          id: 12,
+          type: 'Feature',
+          geometry: {type: 'Point'},
+          properties: {layerName: 'layerB'}
+        }
+      },
+      highlightedObjectIndex: 1,
+      lastPickedInfo: {layerId: 'test-mvt-layer-0-0-1-points-circle', index: 1},
+      testLayerUniforms: {picking_uSelectedColorValid: 0}
+    },
+    {
+      pickInfo: {
+        pickedColor: [1, 0, 0, 0],
+        pickedLayer: testMVTLayerBinary.getSubLayers()[0].getSubLayers()[0],
+        pickedObjectIndex: 0
+      },
+      x: 100,
+      y: 100,
+      size: 2,
+      info: {
+        layer: testMVTLayerBinary,
+        object: {
+          id: 12,
+          type: 'Feature',
+          geometry: {type: 'Point'},
+          properties: {layerName: 'layerA'}
+        }
+      },
+      highlightedObjectIndex: 0,
+      lastPickedInfo: {layerId: 'test-mvt-layer-binary-0-0-1-points-circle', index: 0},
+      testLayerUniforms: {picking_uSelectedColorValid: 0}
+    },
+    {
+      pickInfo: {
+        pickedColor: [2, 0, 0, 0],
+        pickedLayer: testMVTLayerBinary.getSubLayers()[0].getSubLayers()[0],
+        pickedObjectIndex: 1
+      },
+      x: 100,
+      y: 100,
+      size: 2,
+      info: {
+        layer: testMVTLayerBinary,
+        object: {
+          id: 12,
+          type: 'Feature',
+          geometry: {type: 'Point'},
+          properties: {layerName: 'layerB'}
+        }
+      },
+      highlightedObjectIndex: 1,
+      lastPickedInfo: {layerId: 'test-mvt-layer-binary-0-0-1-points-circle', index: 1},
       testLayerUniforms: {picking_uSelectedColorValid: 0}
     },
     {
@@ -277,11 +408,19 @@ test('processPickInfo', t => {
         'currentLayerUniforms'
       );
     }
+
+    if (testCase.highlightedObjectIndex !== undefined) {
+      const renderedLayer = info.layer.renderLayers()[0][0];
+      const {highlightedObjectIndex} = renderedLayer.props;
+      t.deepEqual(highlightedObjectIndex, testCase.highlightedObjectIndex, 'highlightObjectIndex');
+    }
   }
 
   testLayer._finalize();
   testLayerWithCallback._finalize();
   testCompositeLayer._finalize();
+  testMVTLayer._finalize();
+  testMVTLayerBinary._finalize();
 
   t.end();
 });

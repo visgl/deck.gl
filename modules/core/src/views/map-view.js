@@ -4,11 +4,10 @@ import MapController from '../controllers/map-controller';
 
 export default class MapView extends View {
   constructor(props) {
-    super(
-      Object.assign({}, props, {
-        type: WebMercatorViewport
-      })
-    );
+    super({
+      ...props,
+      type: WebMercatorViewport
+    });
   }
 
   get controller() {

@@ -112,7 +112,7 @@ export function getCode(opts) {
 // [x, y] refers current marching cell, reference vertex is always top-right corner
 export function getVertices(opts) {
   const {gridOrigin, cellSize, x, y, code, meanCode, type = CONTOUR_TYPE.ISO_LINES} = opts;
-  const thresholdData = Object.assign({}, DEFAULT_THRESHOLD_DATA, opts.thresholdData);
+  const thresholdData = {...DEFAULT_THRESHOLD_DATA, ...opts.thresholdData};
   let offsets =
     type === CONTOUR_TYPE.ISO_BANDS
       ? ISOBANDS_CODE_OFFSET_MAP[code]

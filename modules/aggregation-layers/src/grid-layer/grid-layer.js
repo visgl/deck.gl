@@ -3,9 +3,11 @@ import GPUGridAggregator from '../utils/gpu-grid-aggregation/gpu-grid-aggregator
 import GPUGridLayer from '../gpu-grid-layer/gpu-grid-layer';
 import CPUGridLayer from '../cpu-grid-layer/cpu-grid-layer';
 
-const defaultProps = Object.assign({}, GPUGridLayer.defaultProps, CPUGridLayer.defaultProps, {
+const defaultProps = {
+  ...GPUGridLayer.defaultProps,
+  ...CPUGridLayer.defaultProps,
   gpuAggregation: false
-});
+};
 
 export default class GridLayer extends CompositeLayer {
   initializeState() {

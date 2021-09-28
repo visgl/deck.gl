@@ -12,7 +12,7 @@ const defaultProps = {
   sizeMinPixels: 0,
   sizeMaxPixels: Number.MAX_SAFE_INTEGER,
 
-  padding: {type: 'array', value: [0, 0]},
+  padding: {type: 'array', value: [0, 0, 0, 0]},
 
   getPosition: {type: 'accessor', value: x => x.position},
   getSize: {type: 'accessor', value: 1},
@@ -87,10 +87,8 @@ export default class TextBackgroundLayer extends Layer {
     super.updateState({props, oldProps, changeFlags});
     if (changeFlags.extensionsChanged) {
       const {gl} = this.context;
-      if (this.state.model) {
-        this.state.model.delete();
-      }
-      this.setState({model: this._getModel(gl)});
+      this.state.model?.delete();
+      this.state.model = this._getModel(gl);
       this.getAttributeManager().invalidateAll();
     }
   }
@@ -103,11 +101,14 @@ export default class TextBackgroundLayer extends Layer {
       sizeUnits,
       sizeMinPixels,
       sizeMaxPixels,
-      padding,
       getLineWidth
     } = this.props;
+    let {padding} = this.props;
 
     const sizeScaleMultiplier = sizeUnits === 'pixels' ? viewport.metersPerPixel : 1;
+    if (padding.length < 4) {
+      padding = [padding[0], padding[1], padding[0], padding[1]];
+    }
 
     this.state.model
       .setUniforms(uniforms)
@@ -126,20 +127,18 @@ export default class TextBackgroundLayer extends Layer {
     // a square that minimally cover the unit circle
     const positions = [0, 0, 1, 0, 1, 1, 0, 1];
 
-    return new Model(
-      gl,
-      Object.assign(this.getShaders(), {
-        id: this.props.id,
-        geometry: new Geometry({
-          drawMode: GL.TRIANGLE_FAN,
-          vertexCount: 4,
-          attributes: {
-            positions: {size: 2, value: new Float32Array(positions)}
-          }
-        }),
-        isInstanced: true
-      })
-    );
+    return new Model(gl, {
+      ...this.getShaders(),
+      id: this.props.id,
+      geometry: new Geometry({
+        drawMode: GL.TRIANGLE_FAN,
+        vertexCount: 4,
+        attributes: {
+          positions: {size: 2, value: new Float32Array(positions)}
+        }
+      }),
+      isInstanced: true
+    });
   }
 }
 

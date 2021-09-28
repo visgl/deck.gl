@@ -35,15 +35,29 @@ function defaultOnError(error, title) {
   }
 }
 
-export function testInitializeLayer({layer, viewport = testViewport, onError = defaultOnError}) {
+function initializeLayerManager({layer, viewport = testViewport, onError = defaultOnError}) {
   const layerManager = new LayerManager(gl, {viewport});
   layerManager.setProps({
     onError: error => onError(error, `initializing ${layer.id}`)
   });
 
   layerManager.setLayers([layer]);
-  layerManager.finalize();
+  return layerManager;
+}
 
+export function testInitializeLayer(opts) {
+  const layerManager = initializeLayerManager(opts);
+  layerManager.finalize();
+  return null;
+}
+
+export async function testInitializeLayerAsync(opts) {
+  const layerManager = initializeLayerManager(opts);
+  const deckRenderer = new DeckRenderer(gl);
+  while (!opts.layer.isLoaded) {
+    await update({layerManager, deckRenderer});
+  }
+  layerManager.finalize();
   return null;
 }
 
@@ -56,7 +70,7 @@ export function testLayer(opts) {
   // Run successive update tests
   for (const testCase of testCases) {
     // Save old state before update
-    const oldState = Object.assign({}, layer.state);
+    const oldState = {...layer.state};
 
     const {layer: newLayer, spyMap} = runLayerTestUpdate(testCase, resources, layer, spies);
 
@@ -82,7 +96,7 @@ export async function testLayerAsync(opts) {
   // Run successive update tests
   for (const testCase of testCases) {
     // Save old state before update
-    const oldState = Object.assign({}, layer.state);
+    const oldState = {...layer.state};
 
     const {layer: newLayer, spyMap} = runLayerTestUpdate(testCase, resources, layer, spies);
 

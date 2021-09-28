@@ -19,52 +19,43 @@
 // THE SOFTWARE.
 
 import {CompositeLayer, log} from '@deck.gl/core';
-import ScatterplotLayer from '../scatterplot-layer/scatterplot-layer';
-import PathLayer from '../path-layer/path-layer';
-// Use primitive layer to avoid "Composite Composite" layers for now
-import SolidPolygonLayer from '../solid-polygon-layer/solid-polygon-layer';
 import {replaceInRange} from '../utils';
 import {binaryToFeatureForAccesor} from './geojson-binary';
+import {
+  POINT_LAYER,
+  LINE_LAYER,
+  POLYGON_LAYER,
+  getDefaultProps,
+  forwardProps
+} from './sub-layer-map';
 
 import {getGeojsonFeatures, separateGeojsonFeatures} from './geojson';
 import {createLayerPropsFromFeatures, createLayerPropsFromBinary} from './geojson-layer-props';
 
-const defaultLineColor = [0, 0, 0, 255];
-const defaultFillColor = [0, 0, 0, 255];
-
 const defaultProps = {
+  ...getDefaultProps(POINT_LAYER.circle),
+  ...getDefaultProps(POINT_LAYER.icon),
+  ...getDefaultProps(POINT_LAYER.text),
+  ...getDefaultProps(LINE_LAYER),
+  ...getDefaultProps(POLYGON_LAYER),
+
+  // Overwrite sub layer defaults
   stroked: true,
   filled: true,
   extruded: false,
   wireframe: false,
+  iconAtlas: {type: 'object', value: null},
+  iconMapping: {type: 'object', value: {}},
+  getIcon: {type: 'accessor', value: f => f.properties.icon},
+  getText: {type: 'accessor', value: f => f.properties.text},
 
-  lineWidthUnits: 'meters',
-  lineWidthScale: 1,
-  lineWidthMinPixels: 0,
-  lineWidthMaxPixels: Number.MAX_SAFE_INTEGER,
-  lineJointRounded: false,
-  lineMiterLimit: 4,
+  // Self props
+  pointType: 'circle',
 
-  elevationScale: 1,
-
-  pointRadiusUnits: 'meters',
-  pointRadiusScale: 1,
-  pointRadiusMinPixels: 0, //  min point radius in pixels
-  pointRadiusMaxPixels: Number.MAX_SAFE_INTEGER, // max point radius in pixels
-
-  // Line and polygon outline color
-  getLineColor: {type: 'accessor', value: defaultLineColor},
-  // Point and polygon fill color
-  getFillColor: {type: 'accessor', value: defaultFillColor},
-  // Point radius
-  getRadius: {type: 'accessor', value: 1},
-  // Line and polygon outline accessors
-  getLineWidth: {type: 'accessor', value: 1},
-  // Polygon extrusion accessor
-  getElevation: {type: 'accessor', value: 1000},
-  // Optional material for 'lighting' shader module
-  material: true
+  // TODO: deprecated, remove in v9
+  getRadius: {deprecatedFor: 'getPointRadius'}
 };
+
 export default class GeoJsonLayer extends CompositeLayer {
   initializeState() {
     this.state = {
@@ -140,220 +131,144 @@ export default class GeoJsonLayer extends CompositeLayer {
   _updateAutoHighlight(info) {
     // All sub layers except the points layer use source feature index to encode the picking color
     // The points layer uses indices from the points data array.
-    const sourceIsPoints = info.sourceLayer.id.endsWith('points');
+    const pointLayerIdPrefix = `${this.id}-points-`;
+    const sourceIsPoints = info.sourceLayer.id.startsWith(pointLayerIdPrefix);
     for (const layer of this.getSubLayers()) {
-      if (layer.id.endsWith('points') === sourceIsPoints) {
+      if (layer.id.startsWith(pointLayerIdPrefix) === sourceIsPoints) {
         layer.updateAutoHighlight(info);
       }
     }
   }
 
-  /* eslint-disable complexity */
-  renderLayers() {
-    // Layer composition props
-    const {stroked, filled, extruded, wireframe, material, transitions} = this.props;
-
-    // Rendering props underlying layer
-    const {
-      lineWidthUnits,
-      lineWidthScale,
-      lineWidthMinPixels,
-      lineWidthMaxPixels,
-      lineJointRounded,
-      lineMiterLimit,
-      pointRadiusUnits,
-      pointRadiusScale,
-      pointRadiusMinPixels,
-      pointRadiusMaxPixels,
-      elevationScale,
-      lineDashJustified
-    } = this.props;
-
-    // Accessor props for underlying layers
-    const {
-      getLineColor,
-      getFillColor,
-      getRadius,
-      getLineWidth,
-      getLineDashArray,
-      getElevation,
-      updateTriggers
-    } = this.props;
-
-    const PolygonFillLayer = this.getSubLayerClass('polygons-fill', SolidPolygonLayer);
-    const PolygonStrokeLayer = this.getSubLayerClass('polygons-stroke', PathLayer);
-    const LineStringsLayer = this.getSubLayerClass('line-strings', PathLayer);
-    const PointsLayer = this.getSubLayerClass('points', ScatterplotLayer);
-
+  _renderPolygonLayer() {
+    const {extruded, wireframe} = this.props;
     const {layerProps} = this.state;
+    const id = 'polygons-fill';
 
-    // Filled Polygon Layer
-    const polygonFillLayer =
-      this.shouldRenderSubLayer('polygons-fill', layerProps.polygons.data) &&
-      new PolygonFillLayer(
-        {
-          extruded,
-          elevationScale,
-          filled,
-          wireframe,
-          material,
-          getElevation: this.getSubLayerAccessor(getElevation),
-          getFillColor: this.getSubLayerAccessor(getFillColor),
-          getLineColor: this.getSubLayerAccessor(
-            extruded && wireframe ? getLineColor : defaultLineColor
-          ),
-          transitions: transitions && {
-            getPolygon: transitions.geometry,
-            getElevation: transitions.getElevation,
-            getFillColor: transitions.getFillColor,
-            getLineColor: transitions.getLineColor
-          }
-        },
+    const PolygonFillLayer =
+      this.shouldRenderSubLayer(id, layerProps.polygons.data) &&
+      this.getSubLayerClass(id, POLYGON_LAYER.type);
+
+    if (PolygonFillLayer) {
+      const forwardedProps = forwardProps(this, POLYGON_LAYER.props);
+      // Avoid building the lineColors attribute if wireframe is off
+      const useLineColor = extruded && wireframe;
+      if (!useLineColor) {
+        delete forwardedProps.getLineColor;
+      }
+      // using a legacy API to invalid lineColor attributes
+      forwardedProps.updateTriggers.lineColors = useLineColor;
+
+      return new PolygonFillLayer(
+        forwardedProps,
         this.getSubLayerProps({
-          id: 'polygons-fill',
-          updateTriggers: {
-            getElevation: updateTriggers.getElevation,
-            getFillColor: updateTriggers.getFillColor,
-            // using a legacy API to invalid lineColor attributes
-            // if (extruded && wireframe) has changed
-            lineColors: extruded && wireframe,
-            getLineColor: updateTriggers.getLineColor
-          }
+          id,
+          updateTriggers: forwardedProps.updateTriggers
         }),
         layerProps.polygons
       );
+    }
+    return null;
+  }
 
-    const polygonLineLayer =
+  _renderLineLayers() {
+    const {extruded, stroked} = this.props;
+    const {layerProps} = this.state;
+    const polygonStrokeLayerId = 'polygons-stroke';
+    const lineStringsLayerId = 'linestrings';
+
+    const PolygonStrokeLayer =
       !extruded &&
       stroked &&
-      this.shouldRenderSubLayer('polygons-stroke', layerProps.polygonsOutline.data) &&
-      new PolygonStrokeLayer(
-        {
-          widthUnits: lineWidthUnits,
-          widthScale: lineWidthScale,
-          widthMinPixels: lineWidthMinPixels,
-          widthMaxPixels: lineWidthMaxPixels,
-          rounded: lineJointRounded,
-          miterLimit: lineMiterLimit,
-          dashJustified: lineDashJustified,
+      this.shouldRenderSubLayer(polygonStrokeLayerId, layerProps.polygonsOutline.data) &&
+      this.getSubLayerClass(polygonStrokeLayerId, LINE_LAYER.type);
+    const LineStringsLayer =
+      this.shouldRenderSubLayer(lineStringsLayerId, layerProps.lines.data) &&
+      this.getSubLayerClass(lineStringsLayerId, LINE_LAYER.type);
 
-          getColor: this.getSubLayerAccessor(getLineColor),
-          getWidth: this.getSubLayerAccessor(getLineWidth),
-          getDashArray: this.getSubLayerAccessor(getLineDashArray),
+    if (PolygonStrokeLayer || LineStringsLayer) {
+      const forwardedProps = forwardProps(this, LINE_LAYER.props);
 
-          transitions: transitions && {
-            getPath: transitions.geometry,
-            getColor: transitions.getLineColor,
-            getWidth: transitions.getLineWidth
-          }
-        },
-        this.getSubLayerProps({
-          id: 'polygons-stroke',
-          updateTriggers: {
-            getColor: updateTriggers.getLineColor,
-            getWidth: updateTriggers.getLineWidth,
-            getDashArray: updateTriggers.getLineDashArray
-          }
-        }),
-        layerProps.polygonsOutline
+      return [
+        PolygonStrokeLayer &&
+          new PolygonStrokeLayer(
+            forwardedProps,
+            this.getSubLayerProps({
+              id: polygonStrokeLayerId,
+              updateTriggers: forwardedProps.updateTriggers
+            }),
+            layerProps.polygonsOutline
+          ),
+
+        LineStringsLayer &&
+          new LineStringsLayer(
+            forwardedProps,
+            this.getSubLayerProps({
+              id: lineStringsLayerId,
+              updateTriggers: forwardedProps.updateTriggers
+            }),
+            layerProps.lines
+          )
+      ];
+    }
+    return null;
+  }
+
+  _renderPointLayers() {
+    const {pointType} = this.props;
+    const {layerProps, binary} = this.state;
+    let {highlightedObjectIndex} = this.props;
+
+    if (!binary && Number.isFinite(highlightedObjectIndex)) {
+      highlightedObjectIndex = layerProps.points.data.findIndex(
+        d => d.__source.index === highlightedObjectIndex
       );
+    }
 
-    const pathLayer =
-      this.shouldRenderSubLayer('linestrings', layerProps.lines.data) &&
-      new LineStringsLayer(
-        {
-          widthUnits: lineWidthUnits,
-          widthScale: lineWidthScale,
-          widthMinPixels: lineWidthMinPixels,
-          widthMaxPixels: lineWidthMaxPixels,
-          rounded: lineJointRounded,
-          miterLimit: lineMiterLimit,
-          dashJustified: lineDashJustified,
+    // Avoid duplicate sub layer ids
+    const types = new Set(pointType.split('+'));
+    const pointLayers = [];
+    for (const type of types) {
+      const id = `points-${type}`;
+      const PointLayerMapping = POINT_LAYER[type];
+      const PointsLayer =
+        PointLayerMapping &&
+        this.shouldRenderSubLayer(id, layerProps.points.data) &&
+        this.getSubLayerClass(id, PointLayerMapping.type);
+      if (PointsLayer) {
+        const forwardedProps = forwardProps(this, PointLayerMapping.props);
 
-          getColor: this.getSubLayerAccessor(getLineColor),
-          getWidth: this.getSubLayerAccessor(getLineWidth),
-          getDashArray: this.getSubLayerAccessor(getLineDashArray),
+        pointLayers.push(
+          new PointsLayer(
+            forwardedProps,
+            this.getSubLayerProps({
+              id,
+              updateTriggers: forwardedProps.updateTriggers,
+              highlightedObjectIndex
+            }),
+            layerProps.points
+          )
+        );
+      }
+    }
+    return pointLayers;
+  }
 
-          transitions: transitions && {
-            getPath: transitions.geometry,
-            getColor: transitions.getLineColor,
-            getWidth: transitions.getLineWidth
-          }
-        },
-        this.getSubLayerProps({
-          id: 'line-strings',
-          updateTriggers: {
-            getColor: updateTriggers.getLineColor,
-            getWidth: updateTriggers.getLineWidth,
-            getDashArray: updateTriggers.getLineDashArray
-          }
-        }),
-        layerProps.lines
-      );
+  renderLayers() {
+    const {extruded} = this.props;
 
-    const pointLayer =
-      this.shouldRenderSubLayer('points', layerProps.points.data) &&
-      new PointsLayer(
-        {
-          stroked,
-          filled,
-          radiusUnits: pointRadiusUnits,
-          radiusScale: pointRadiusScale,
-          radiusMinPixels: pointRadiusMinPixels,
-          radiusMaxPixels: pointRadiusMaxPixels,
-          lineWidthUnits,
-          lineWidthScale,
-          lineWidthMinPixels,
-          lineWidthMaxPixels,
-
-          getFillColor: this.getSubLayerAccessor(getFillColor),
-          getLineColor: this.getSubLayerAccessor(getLineColor),
-          getRadius: this.getSubLayerAccessor(getRadius),
-          getLineWidth: this.getSubLayerAccessor(getLineWidth),
-
-          transitions: transitions && {
-            getPosition: transitions.geometry,
-            getFillColor: transitions.getFillColor,
-            getLineColor: transitions.getLineColor,
-            getRadius: transitions.getRadius,
-            getLineWidth: transitions.getLineWidth
-          }
-        },
-        this.getSubLayerProps({
-          id: 'points',
-          updateTriggers: {
-            getFillColor: updateTriggers.getFillColor,
-            getLineColor: updateTriggers.getLineColor,
-            getRadius: updateTriggers.getRadius,
-            getLineWidth: updateTriggers.getLineWidth
-          }
-        }),
-        {
-          ...layerProps.points,
-          highlightedObjectIndex: this._getHighlightedIndex(layerProps.points.data)
-        }
-      );
+    const polygonFillLayer = this._renderPolygonLayer();
+    const lineLayers = this._renderLineLayers();
+    const pointLayers = this._renderPointLayers();
 
     return [
       // If not extruded: flat fill layer is drawn below outlines
       !extruded && polygonFillLayer,
-      polygonLineLayer,
-      pathLayer,
-      pointLayer,
+      lineLayers,
+      pointLayers,
       // If extruded: draw fill layer last for correct blending behavior
       extruded && polygonFillLayer
     ];
-  }
-  _getHighlightedIndex(data) {
-    const {highlightedObjectIndex} = this.props;
-    const {binary} = this.state;
-
-    if (!binary) {
-      return Number.isFinite(highlightedObjectIndex)
-        ? data.findIndex(d => d.__source.index === highlightedObjectIndex)
-        : null;
-    }
-    return highlightedObjectIndex;
   }
 
   getSubLayerAccessor(accessor) {

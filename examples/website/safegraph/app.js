@@ -67,7 +67,7 @@ function renderLayers(map, data) {
     getTargetPosition: d => [d.home_lng, d.home_lat],
     getSourceColor: [255, 0, 128],
     getTargetColor: [0, 200, 255],
-    getWidth: d => Math.max(2, d.count / 10)
+    getWidth: d => Math.max(2, d.count / 15)
   });
 
   const selectPOI = hex => {

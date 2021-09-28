@@ -24,6 +24,9 @@ import {ScatterplotLayer} from '@deck.gl/layers';
 import {generateLayerTests, testLayerAsync, testLayer} from '@deck.gl/test-utils';
 import {TileLayer} from '@deck.gl/geo-layers';
 
+const DUMMY_DATA =
+  'https://raw.githubusercontent.com/visgl/deck.gl-data/master/test-data/geojson-point.json';
+
 test('TileLayer', async t => {
   const testCases = generateLayerTests({
     Layer: TileLayer,
@@ -69,7 +72,7 @@ test('TileLayer', async t => {
   const testCases = [
     {
       props: {
-        data: 'http://echo.jsontest.com/type/Point'
+        data: DUMMY_DATA
       },
       onBeforeUpdate: () => {
         t.comment('Default getTileData');
@@ -98,7 +101,10 @@ test('TileLayer', async t => {
           t.is(subLayers.length, 2, 'Rendered sublayers');
           t.is(getTileDataCalled, 2, 'Fetched tile data');
           t.ok(layer.isLoaded, 'Layer is loaded');
-          t.ok(subLayers.every(l => l.props.visible), 'Sublayers at z=2 are visible');
+          t.ok(
+            subLayers.every(l => layer.filterSubLayer({layer: l})),
+            'Sublayers at z=2 are visible'
+          );
         }
       }
     },
@@ -109,7 +115,9 @@ test('TileLayer', async t => {
           t.is(subLayers.length, 4, 'Rendered new sublayers');
           t.is(getTileDataCalled, 4, 'Fetched tile data');
           t.ok(
-            subLayers.filter(l => l.props.tile.z === 3).every(l => l.props.visible),
+            subLayers
+              .filter(l => l.props.tile.z === 3)
+              .every(l => layer.filterSubLayer({layer: l})),
             'Sublayers at z=3 are visible'
           );
         }
@@ -122,7 +130,9 @@ test('TileLayer', async t => {
           t.is(subLayers.length, 4, 'Rendered cached sublayers');
           t.is(getTileDataCalled, 4, 'Used cached data');
           t.ok(
-            subLayers.filter(l => l.props.tile.z === 3).every(l => !l.props.visible),
+            subLayers
+              .filter(l => l.props.tile.z === 3)
+              .every(l => !layer.filterSubLayer({layer: l})),
             'Sublayers at z=3 are hidden'
           );
         }
@@ -181,12 +191,16 @@ test('TileLayer#MapView:repeat', async t => {
   const testCases = [
     {
       props: {
-        data: 'http://echo.jsontest.com/key/value',
+        data: DUMMY_DATA,
         renderSubLayers
       },
       onAfterUpdate: ({layer, subLayers}) => {
         if (layer.isLoaded) {
-          t.is(subLayers.filter(l => l.props.visible).length, 4, 'Should contain 4 visible tiles');
+          t.is(
+            subLayers.filter(l => layer.filterSubLayer({layer: l})).length,
+            4,
+            'Should contain 4 visible tiles'
+          );
         }
       }
     }

@@ -196,6 +196,14 @@ When [`picking`](/docs/developer-guide/custom-layers/picking.md) is enabled, `in
   - `url`: the url of the failed tile.
   - `message`: the error message.
 
+##### `_getMeshColor` (Function, optional)
+`_getMeshColor` is a function which allows to change color of mesh based on properties of [tileHeader](https://loaders.gl/docs/specifications/category-3d-tiles#tileheader-fields) object.
+It recieves `tileHeader` object as argument and return type is array of [r, g, b] values in the 0-255 range.
+This value is only applied when tile format is `mesh`.
+Can be used only for I3S debugging purposes.
+
+- Default: `_getMeshColor: (tileHeader) => [255, 255, 255]`
+
 ## Sub Layers
 
 The Tile3DLayer renders the following sublayers based on tile [format](https://github.com/AnalyticalGraphicsInc/3d-tiles/tree/master/specification#introduction):
@@ -206,6 +214,10 @@ The Tile3DLayer renders the following sublayers based on tile [format](https://g
 * `mesh` - a [SimpleMeshLayer](/docs/api-reference/mesh-layers/simple-mesh-layer.md) rendering all the tiles ESRI `MeshPyramids` data.
 
 Follow [CompositeLayer](/docs/api-reference/core/composite-layer.md#_subLayerProp) and example in this layer doc to see how to override sub layer props.
+
+## Remarks
+
+- The `Tile3DLayer` can be rendered in multiple views. A tile is loaded if it is required by any of the viewports, and shared across all views via a single cache system.
 
 ## Source
 

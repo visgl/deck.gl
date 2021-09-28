@@ -2,6 +2,142 @@
 
 This page contains highlights of each deck.gl release. Also check our [vis.gl blog](https://medium.com/vis-gl) for news about new releases and features in deck.gl.
 
+## deck.gl v8.6
+
+Release date: TBD
+
+### Google Maps + deck.gl
+
+#### @deck.gl/googlemaps
+
+[Vector rendering](https://developers.google.com/maps/documentation/javascript/vector-map) of Google Maps is now supported in by the [GoogleMapsOverlay class](/docs/api-reference/google-maps/google-maps-overlay.md), providing the following enhancements:
+
+- Shared 3D space: objects drawn by the `GoogleMapsOverlay` class appear inside the Google Maps scene, correctly intersecting with 3D buildings and behind the contextual labels drawn by Google Maps
+- Tilting and rotating the view is supported
+- Rendering uses the same WebGL context as Google Maps, improving performance
+
+## deck.gl v8.5
+
+Release date: July 26, 2021
+
+
+<table style="border: 0;" align="center">
+  <tbody>
+    <tr>
+      <td>
+        <img style="max-height:200px" src="https://github.com/visgl/deck.gl-data/blob/master/images/whats-new/text-layer-styling.gif?raw=true" />
+        <p><i>TextLayer background, border, padding and outline</i></p>
+      </td>
+      <td>
+        <img style="max-height:200px" src="https://github.com/visgl/deck.gl-data/blob/master/images/whats-new/geojson-point-type.png?raw=true" />
+        <p><i>GeoJsonLayer pointType</i></p>
+      </td>
+      <td>
+        <img style="max-height:200px" src="https://github.com/visgl/deck.gl-data/blob/master/images/whats-new/i3s-picking.gif?raw=true" />
+        <p><i>Tile3DLayer+I3S picking individual objects</i></p>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+### Layer Improvements
+
+#### MVTLayer
+
+Mapbox Vector Tiles parsing throughput is now 2-3x faster, due to MVT tiles being parsed directly into binary attributes rather than GeoJSON, and additional work (including [triangulation](https://github.com/visgl/loaders.gl/blob/master/docs/whats-new.md#v30-in-development)) being performed on worker threads. Speed comparison on some example data sets (MVT tiles parsed per second):
+
+|  Data set                 | `binary: false` | `binary: true` | Speed increase |
+| ------------------ | ----------- | ------ | -------------- |
+| Block Groups       | 2.86/s      | 5.57/s | 1.94x          |
+| Census Layer       | 6.09/s      | 11.9/s | 1.95x          |
+| Counties Layer     | 72.5/s      | 141/s  | 1.94x          |
+| USA Zip Code Layer | 8.45/s      | 20.3/s | 2.4x           |
+
+_Benchmarks ran using scripts on a 2012 MacBook Pro, 2.3 GHz Intel Core i7, 8 GB, measuring parsing time of MVTLoader only (network time and rendering is not included)_
+
+#### GeoJsonLayer
+
+GeoJSONLayer now supports rendering point features as icons and/or text labels in addition to circles. Use the new `pointType` prop:
+
+```js
+new GeoJsonLayer({
+  ...
+  pointType: 'circle+text',
+  getText: f => f.properties.name,
+  getTextSize: 12
+})
+```
+
+For a full list of new props, visit the updated [documentation](/docs/api-reference/layers/geojson-layer.md).
+
+
+#### TextLayer
+
+The layer now supports automatically detecting the characters used in the data. Set `characterSet: 'auto'` to enable this feature.
+
+New props are added for more flexible styling of the texts:
+
+* `background`
+* `backgroundPadding`
+* `outlineWidth`
+* `outlineColor`
+* `getBackgroundColor`
+* `getBorderWidth`
+* `getBorderColor`
+
+See [documentation](/docs/api-reference/layers/text-layer.md) for details.
+
+
+#### Tile3DLayer
+
+Tile3DLayer can now be rendered in multiple views. Previously if you use multiple views it was required to create one Tile3DLayer for each view. Using a single layer is more efficient by sharing the tile cache.
+
+The layer now takes full advantage of new features in I3S 1.7 tile sets, including:
+  + Picking individual objects inside a tile
+  + Page nodes (improved performance)
+  + Draco compressed meshes (improved performance)
+  + Compressed textures (improved performance)
+  + PBR materials
+  + Vertex colors
+  + UVRegions
+
+
+#### Other layer improvements
+
+- `ScatterplotLayer` adds `billboard` mode
+- `TripLayer` adds `fadeTrail` mode
+- `PathLayer` now supports controlling `jointRounded` and `capRounded` separately. Dashed lines via `PathStyleExtension` also respects the cap type.
+- `PolygonLayer` and `GeoJsonLayer`: `autoHighlight` now highlight both the outline and the fill of the hovered polygon, instead of either the outline or the fill.
+- `HeatmapLayer` now correctly renders `aggregation: 'MEAN'` with user-supplied `colorDomain`.
+
+
+### Default transpilation and bundle size
+
+The NPM distribution has dropped IE 11 support in exchange for an almost 20% reduction in size.
+
+| Entry point | 8.5 Bundle (gzipped) | 8.4 Bundle (gzipped) | Comments |
+| ---  | ---                     | ---                 | ---                 |
+| module (dist/esm)  | 398 KB (115 KB)         | 485 KB (128 KB)     | Transpiled, tree-shaking enabled   |
+| main (dist/es5)    | 686 KB (178 KB)         | 812 KB (197 KB)     | Transpiled, no tree-shaking |
+
+*Measured as the footprint of @deck.gl/core, bundled and minified with Webpack 4*
+
+To support older or less common browsers, make sure that `node_modules` is included in your application's babel settings.
+
+For backward compatibility, the pre-built bundle (`dist.min.js`) is not affected by this change.
+
+
+### @deck.gl/react
+
+The `DeckGL` React component is rewritten using functional component and hooks.
+
+
+### @deck.gl/carto
+
+- Integration with **CARTO 3 platform**. With deck.gl and the CARTO 3 platform you can access directly your datasets and tilesets hosted in your current data warehouse (BigQuery, Snowflake, Redshift, Postgres). You don't need to move your data to CARTO plaform.
+- A new `CartoLayer` is available to unify `CartoBQTilerLayer` and `CartoSQLLayer`. There are migration guides for both: [CartoSQLLayer](/docs/api-reference/carto/carto-sql-layer.md#migration-to-cartolayer) and [CartoBQTilerLayer](/docs/api-reference/carto/carto-sql-layer.md#migration-to-cartolayer).
+- New `getData` method in CARTO 3 [to support other deck.gl layers](/docs/api-reference/carto/overview.md#support-for-other-deck.gl-layers). 
+
 ## deck.gl v8.4
 
 Release date: Jan 31, 2021
@@ -724,7 +860,7 @@ As the number of deck.gl layers grow, we are splitting existing and new layers i
 
 ### glTF Support and Loaders.gl
 
-<img height="150" src="https://raw.github.com/visgl/deck.gl-data/master/images/gltf.png" />
+<img height="150" src="https://raw.github.com/visgl/deck.gl-data/master/images/branding/gltf.png" />
 
 The new [ScenegraphLayer](/docs/api-reference/mesh-layers/scenegraph-layer.md) and [SimpleMeshLayer](/docs/api-reference/mesh-layers/simple-mesh-layer.md) support loading 3D models and scenegraphs in the popular [glTF™](https://www.khronos.org/gltf/) asset format.  glTF is a royalty-free specification for the efficient transmission and loading of 3D assets, with a rich ecosystem of tools and extensions.  All variants of glTF 2.0 are supported, including binary `.glb` files as well as JSON `.gltf` files with binary assets in base64 encoding or in separate files.
 
@@ -936,7 +1072,7 @@ Release date: July 18, 2018
   <tbody>
     <tr>
       <td>
-        <img style="max-height:200px" src="https://raw.github.com/visgl/deck.gl-data/master/images/attribute-transition.gif" />
+        <img style="max-height:200px" src="https://raw.github.com/visgl/deck.gl-data/master/images/whats-new/attribute-transition.gif" />
         <p><i>GeoJson Transition</i></p>
       </td>
       <td>

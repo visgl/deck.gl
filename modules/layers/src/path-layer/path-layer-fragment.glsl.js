@@ -23,7 +23,6 @@ export default `\
 
 precision highp float;
 
-uniform float jointType;
 uniform float miterLimit;
 
 varying vec4 vColor;
@@ -36,17 +35,18 @@ varying float vMiterLength;
  */
 varying vec2 vPathPosition;
 varying float vPathLength;
+varying float vJointType;
 
 void main(void) {
   geometry.uv = vPathPosition;
 
   if (vPathPosition.y < 0.0 || vPathPosition.y > vPathLength) {
     // if joint is rounded, test distance from the corner
-    if (jointType > 0.0 && length(vCornerOffset) > 1.0) {
+    if (vJointType > 0.5 && length(vCornerOffset) > 1.0) {
       discard;
     }
     // trim miter
-    if (jointType == 0.0 && vMiterLength > miterLimit + 1.0) {
+    if (vJointType < 0.5 && vMiterLength > miterLimit + 1.0) {
       discard;
     }
   }

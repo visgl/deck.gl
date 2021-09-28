@@ -85,24 +85,21 @@ export default class ScreenGridCellLayer extends Layer {
     // maxCount value will be sampled form maxTexture in vertex shader.
     const colorDomain = this.props.colorDomain || [1, 0];
     const {model} = this.state;
-    const layerUniforms = {
-      minColor,
-      maxColor,
-      maxTexture,
-      colorDomain
-    };
-
-    uniforms = Object.assign(layerUniforms, uniforms);
-    model.draw({
-      uniforms,
-      parameters: Object.assign(
-        {
+    model
+      .setUniforms(uniforms)
+      .setUniforms({
+        minColor,
+        maxColor,
+        maxTexture,
+        colorDomain
+      })
+      .draw({
+        parameters: {
           depthTest: false,
-          depthMask: false
-        },
-        parameters
-      )
-    });
+          depthMask: false,
+          ...parameters
+        }
+      });
   }
 
   calculateInstancePositions(attribute, {numInstances}) {
@@ -124,19 +121,17 @@ export default class ScreenGridCellLayer extends Layer {
   // Private Methods
 
   _getModel(gl) {
-    return new Model(
-      gl,
-      Object.assign({}, this.getShaders(), {
-        id: this.props.id,
-        geometry: new Geometry({
-          drawMode: GL.TRIANGLE_FAN,
-          attributes: {
-            positions: new Float32Array([0, 0, 0, 1, 0, 0, 1, 1, 0, 0, 1, 0])
-          }
-        }),
-        isInstanced: true
-      })
-    );
+    return new Model(gl, {
+      ...this.getShaders(),
+      id: this.props.id,
+      geometry: new Geometry({
+        drawMode: GL.TRIANGLE_FAN,
+        attributes: {
+          positions: new Float32Array([0, 0, 0, 1, 0, 0, 1, 1, 0, 0, 1, 0])
+        }
+      }),
+      isInstanced: true
+    });
   }
 
   _shouldUseMinMax() {

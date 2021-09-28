@@ -21,11 +21,14 @@
 import test from 'tape-catch';
 import {equals, config, Vector3} from 'math.gl';
 import {WebMercatorViewport} from 'deck.gl';
+import {Matrix4} from 'math.gl';
 
 // Adjust sensitivity of math.gl's equals
 const LNGLAT_TOLERANCE = 1e-6;
 const ALT_TOLERANCE = 1e-5;
 const OFFSET_TOLERANCE = 1e-5;
+
+const DEGREES_TO_RADIANS = Math.PI / 180;
 
 /* eslint-disable */
 const TEST_VIEWPORTS = [
@@ -273,6 +276,38 @@ test('WebMercatorViewport.subViewports', t => {
 
   t.is(viewport.subViewports, subViewports, 'subViewports are cached');
 
+  t.end();
+});
+
+test('WebMercatorViewport#constructor#fovy', t => {
+  const oldEpsilon = config.EPSILON;
+  config.EPSILON = 0.01;
+
+  const fovy = 25;
+  const projectionMatrix = new Matrix4().perspective({
+    fovy: fovy * DEGREES_TO_RADIANS,
+    aspect: 4 / 3,
+    near: 0.1,
+    far: 10
+  });
+
+  let viewport = new WebMercatorViewport({...TEST_VIEWPORTS[0], projectionMatrix});
+  t.is(viewport.fovy, fovy, 'fovy is calculated from projectionMatrix');
+  t.ok(equals(viewport.altitude, 2.255), 'altitude is calculated from projectionMatrix');
+
+  viewport = new WebMercatorViewport({...TEST_VIEWPORTS[0], fovy});
+  t.is(viewport.fovy, fovy, 'fovy is passed through');
+  t.ok(equals(viewport.altitude, 2.255), 'altitude is calculated from fovy');
+
+  viewport = new WebMercatorViewport({...TEST_VIEWPORTS[0], altitude: 2});
+  t.is(viewport.altitude, 2, 'altitude is passed through');
+  t.ok(equals(viewport.fovy, 28.072), 'fovy is calculated from altitude');
+
+  viewport = new WebMercatorViewport(TEST_VIEWPORTS[0]);
+  t.is(viewport.altitude, 1.5, 'using default altitude');
+  t.ok(equals(viewport.fovy, 36.87), 'fovy is calculated from altitude');
+
+  config.EPSILON = oldEpsilon;
   t.end();
 });
 

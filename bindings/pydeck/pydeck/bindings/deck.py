@@ -45,10 +45,10 @@ class Deck(JSONMixin):
         map_provider : str, default 'carto'
             If multiple API keys are set (e.g., both Mapbox and Google Maps), inform pydeck which basemap provider to prefer.
             Values can be ``carto``, ``mapbox`` or ``google_maps``
-        map_style : str, default 'dark'
-            One of 'light', 'dark', 'road', 'satellite', 'dark_no_labels', and 'light_no_labels', or
-            URI for basemap style, which varies by provider. The default is Carto's Dark Matter map.
-            For Mapbox examples, see  Mapbox's `gallery <https://www.mapbox.com/gallery/>`_.
+        map_style : str or dict, default 'dark'
+            One of 'light', 'dark', 'road', 'satellite', 'dark_no_labels', and 'light_no_labels', a URI for a basemap
+            style, which varies by provider, or a dict that follows the Mapbox style `specification <https://docs.mapbox.com/mapbox-gl-js/style-spec/>`.
+            The default is Carto's Dark Matter map. For Mapbox examples, see  Mapbox's `gallery <https://www.mapbox.com/gallery/>`.
             If not using a basemap, set ``map_provider=None``.
         initial_view_state : pydeck.ViewState, default ``pydeck.ViewState(latitude=0, longitude=0, zoom=1)``
             Initial camera angle relative to the map, defaults to a fully zoomed out 0, 0-centered map
@@ -91,7 +91,13 @@ class Deck(JSONMixin):
         self.map_provider = str(map_provider).lower() if map_provider else None
         self.deck_widget.map_provider = map_provider
 
-        self.map_style = get_from_map_identifier(map_style, map_provider)
+        custom_map_style_error = "The map_provider parameter must be 'mapbox' when map_style is provided as a dict."
+
+        if isinstance(map_style, dict):
+            assert map_provider == BaseMapProvider.MAPBOX.value, custom_map_style_error
+            self.map_style = map_style
+        else:
+            self.map_style = get_from_map_identifier(map_style, map_provider)
 
         self.parameters = parameters
 
@@ -188,3 +194,8 @@ class Deck(JSONMixin):
             **kwargs,
         )
         return f
+
+    def _repr_html_(self):
+        # doesn't actually need the HTML packaging in iframe_with_srcdoc,
+        # so we just take the HTML.data part
+        return self.to_html(notebook_display=True).data

@@ -82,20 +82,21 @@ function mergeTriggers(getHexagon, coverage) {
   if (getHexagon === undefined || getHexagon === null) {
     trigger = coverage;
   } else if (typeof getHexagon === 'object') {
-    trigger = Object.assign({}, getHexagon, {coverage});
+    trigger = {...getHexagon, coverage};
   } else {
     trigger = {getHexagon, coverage};
   }
   return trigger;
 }
 
-const defaultProps = Object.assign({}, PolygonLayer.defaultProps, {
+const defaultProps = {
+  ...PolygonLayer.defaultProps,
   highPrecision: false,
   coverage: {type: 'number', min: 0, max: 1, value: 1},
   centerHexagon: null,
   getHexagon: {type: 'accessor', value: x => x.hexagon},
   extruded: true
-});
+};
 
 // not supported
 delete defaultProps.getLineDashArray;

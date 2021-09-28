@@ -40,6 +40,7 @@ export function getDeckInstance({map, gl, deck}) {
       gl,
       width: false,
       height: false,
+      touchAction: 'unset',
       viewState: getViewState(map)
     });
     deck = new Deck(deckProps);
@@ -89,8 +90,7 @@ export function drawLayer(deck, map, layer) {
   }
   deck._drawLayers('mapbox-repaint', {
     viewports: [currentViewport],
-    // TODO - accept layerFilter in drawLayers' renderOptions
-    layers: getLayers(deck, deckLayer => shouldDrawLayer(layer.id, deckLayer)),
+    layerFilter: ({layer: deckLayer}) => layer.id === deckLayer.id,
     clearCanvas: false
   });
 }
@@ -156,18 +156,11 @@ function afterRender(deck, map) {
   if (isExternal) {
     // Draw non-Mapbox layers
     const mapboxLayerIds = Array.from(mapboxLayers, layer => layer.id);
-    const layers = getLayers(deck, deckLayer => {
-      for (const id of mapboxLayerIds) {
-        if (shouldDrawLayer(id, deckLayer)) {
-          return false;
-        }
-      }
-      return true;
-    });
-    if (layers.length > 0) {
+    const hasNonMapboxLayers = deck.props.layers.some(layer => !mapboxLayerIds.includes(layer.id));
+    if (hasNonMapboxLayers) {
       deck._drawLayers('mapbox-repaint', {
         viewports: [getViewport(deck, map, false)],
-        layers,
+        layerFilter: ({layer}) => !mapboxLayerIds.includes(layer.id),
         clearCanvas: false
       });
     }
@@ -185,22 +178,6 @@ function onMapMove(deck, map) {
   // Clear any change flag triggered by setting viewState so that deck does not request
   // a second repaint
   deck.needsRedraw({clearRedrawFlags: true});
-}
-
-function getLayers(deck, layerFilter) {
-  const layers = deck.layerManager.getLayers();
-  return layers.filter(layerFilter);
-}
-
-function shouldDrawLayer(id, layer) {
-  let layerInstance = layer;
-  while (layerInstance) {
-    if (layerInstance.id === id) {
-      return true;
-    }
-    layerInstance = layerInstance.parent;
-  }
-  return false;
 }
 
 function updateLayers(deck) {

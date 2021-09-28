@@ -3,18 +3,9 @@ import Controller from './controller';
 import ViewState from './view-state';
 import {normalizeViewportProps} from '@math.gl/web-mercator';
 import assert from '../utils/assert';
-import LinearInterpolator from '../transitions/linear-interpolator';
-import {TRANSITION_EVENTS} from './transition-manager';
 
 const PITCH_MOUSE_THRESHOLD = 5;
 const PITCH_ACCEL = 1.2;
-
-const LINEAR_TRANSITION_PROPS = {
-  transitionDuration: 300,
-  transitionEasing: t => t,
-  transitionInterpolator: new LinearInterpolator(),
-  transitionInterruption: TRANSITION_EVENTS.BREAK
-};
 
 const DEFAULT_STATE = {
   pitch: 0,
@@ -72,7 +63,10 @@ export class MapState extends ViewState {
     /** Pitch when current perspective rotate operation started */
     startPitch,
     /** Zoom when current zoom operation started */
-    startZoom
+    startZoom,
+
+    /** Normalize viewport props to fit map height into viewport. Default `true` */
+    normalize
   } = {}) {
     assert(Number.isFinite(longitude)); // `longitude` must be supplied
     assert(Number.isFinite(latitude)); // `latitude` must be supplied
@@ -90,7 +84,8 @@ export class MapState extends ViewState {
       maxZoom,
       minZoom,
       maxPitch,
-      minPitch
+      minPitch,
+      normalize
     });
 
     this._state = {
@@ -128,12 +123,10 @@ export class MapState extends ViewState {
       return this;
     }
 
-    const [longitude, latitude] = this._calculateNewLngLat({startPanLngLat, pos});
+    const viewport = this.makeViewport(this._viewportProps);
+    const newProps = viewport.panByPosition(startPanLngLat, pos);
 
-    return this._getUpdatedState({
-      longitude,
-      latitude
-    });
+    return this._getUpdatedState(newProps);
   }
 
   /**
@@ -232,15 +225,10 @@ export class MapState extends ViewState {
     const zoom = this._calculateNewZoom({scale, startZoom});
 
     const zoomedViewport = this.makeViewport({...this._viewportProps, zoom});
-    const [longitude, latitude] = zoomedViewport.getMapCenterByLngLatPosition({
-      lngLat: startZoomLngLat,
-      pos
-    });
 
     return this._getUpdatedState({
       zoom,
-      longitude,
-      latitude
+      ...zoomedViewport.panByPosition(startZoomLngLat, pos)
     });
   }
 
@@ -306,7 +294,7 @@ export class MapState extends ViewState {
   shortestPathFrom(viewState) {
     // const endViewStateProps = new this.ControllerState(endProps).shortestPathFrom(startViewstate);
     const fromProps = viewState.getViewportProps();
-    const props = Object.assign({}, this._viewportProps);
+    const props = {...this._viewportProps};
     const {bearing, longitude} = props;
 
     if (Math.abs(bearing - fromProps.bearing) > 180) {
@@ -356,7 +344,11 @@ export class MapState extends ViewState {
     const {maxPitch, minPitch, pitch} = props;
     props.pitch = clamp(pitch, minPitch, maxPitch);
 
-    Object.assign(props, normalizeViewportProps(props));
+    // Normalize viewport props to fit map height into viewport
+    const {normalize = true} = props;
+    if (normalize) {
+      Object.assign(props, normalizeViewportProps(props));
+    }
 
     return props;
   }
@@ -364,12 +356,6 @@ export class MapState extends ViewState {
   _unproject(pos) {
     const viewport = this.makeViewport(this._viewportProps);
     return pos && viewport.unproject(pos);
-  }
-
-  // Calculate a new lnglat based on pixel dragging position
-  _calculateNewLngLat({startPanLngLat, pos}) {
-    const viewport = this.makeViewport(this._viewportProps);
-    return viewport.getMapCenterByLngLatPosition({lngLat: startPanLngLat, pos});
   }
 
   // Calculates new zoom
@@ -435,16 +421,25 @@ export default class MapController extends Controller {
     super(MapState, props);
   }
 
-  _getTransitionProps(opts) {
-    // Enables Transitions on double-tap and key-down events.
-    return opts
-      ? {
-          ...LINEAR_TRANSITION_PROPS,
-          transitionInterpolator: new LinearInterpolator({
-            ...opts,
-            makeViewport: this.controllerState.makeViewport
-          })
-        }
-      : LINEAR_TRANSITION_PROPS;
+  setProps(props) {
+    const oldProps = this.controllerStateProps;
+
+    super.setProps(props);
+
+    const dimensionChanged = !oldProps || oldProps.height !== props.height;
+    if (dimensionChanged) {
+      // Dimensions changed, normalize the props
+      this.updateViewport(
+        new this.ControllerState({
+          makeViewport: this.makeViewport,
+          ...this.controllerStateProps,
+          ...this._state
+        })
+      );
+    }
+  }
+
+  get linearTransitionProps() {
+    return ['longitude', 'latitude', 'zoom', 'bearing', 'pitch'];
   }
 }

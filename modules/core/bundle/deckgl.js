@@ -64,13 +64,12 @@ export default class DeckGL extends Deck {
       // Default create mapbox map
       this._map =
         isMap &&
-        new Mapbox(
-          Object.assign({}, props, {
-            viewState,
-            container: mapCanvas,
-            mapboxgl: map
-          })
-        );
+        new Mapbox({
+          ...props,
+          viewState,
+          container: mapCanvas,
+          mapboxgl: map
+        });
     } else {
       this._map = map;
     }

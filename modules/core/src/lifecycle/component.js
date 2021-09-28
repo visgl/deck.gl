@@ -28,6 +28,15 @@ export default class Component {
     Object.seal(this);
   }
 
+  get root() {
+    // eslint-disable-next-line consistent-this
+    let component = this;
+    while (component.parent) {
+      component = component.parent;
+    }
+    return component;
+  }
+
   // clone this layer with modified props
   clone(newProps) {
     const {props} = this;
@@ -45,7 +54,7 @@ export default class Component {
     }
 
     // Some custom layer implementation may not support multiple arguments in the constructor
-    return new this.constructor(Object.assign({}, props, asyncProps, newProps));
+    return new this.constructor({...props, ...asyncProps, ...newProps});
   }
 
   get stats() {

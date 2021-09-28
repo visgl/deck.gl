@@ -81,14 +81,12 @@ export default class GPUGridCellLayer extends Layer {
   }
 
   _getModel(gl) {
-    return new Model(
-      gl,
-      Object.assign({}, this.getShaders(), {
-        id: this.props.id,
-        geometry: new CubeGeometry(),
-        isInstanced: true
-      })
-    );
+    return new Model(gl, {
+      ...this.getShaders(),
+      id: this.props.id,
+      geometry: new CubeGeometry(),
+      isInstanced: true
+    });
   }
 
   draw({uniforms}) {
@@ -112,22 +110,22 @@ export default class GPUGridCellLayer extends Layer {
     const colorRange = colorRangeToFlatArray(this.props.colorRange);
     this.bindUniformBuffers(colorMaxMinBuffer, elevationMaxMinBuffer);
     this.state.model
-      .setUniforms(
-        Object.assign({}, uniforms, domainUniforms, {
-          cellSize,
-          offset,
-          extruded,
-          elevationScale,
-          coverage,
-          gridSize,
-          gridOrigin,
-          gridOriginLow,
-          gridOffset,
-          gridOffsetLow,
-          colorRange,
-          elevationRange
-        })
-      )
+      .setUniforms(uniforms)
+      .setUniforms(domainUniforms)
+      .setUniforms({
+        cellSize,
+        offset,
+        extruded,
+        elevationScale,
+        coverage,
+        gridSize,
+        gridOrigin,
+        gridOriginLow,
+        gridOffset,
+        gridOffsetLow,
+        colorRange,
+        elevationRange
+      })
       .draw();
     this.unbindUniformBuffers(colorMaxMinBuffer, elevationMaxMinBuffer);
   }

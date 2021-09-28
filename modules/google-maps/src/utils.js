@@ -1,5 +1,6 @@
 /* global google, document */
 import {Deck} from '@deck.gl/core';
+import {Matrix4} from 'math.gl';
 
 // https://en.wikipedia.org/wiki/Web_Mercator_projection#Formulas
 const MAX_LATITUDE = 85.05113;
@@ -57,7 +58,17 @@ function getContainer(overlay, style) {
   const container = document.createElement('div');
   container.style.position = 'absolute';
   Object.assign(container.style, style);
-  overlay.getPanes().overlayLayer.appendChild(container);
+
+  // The DOM structure has a different structure depending on whether
+  // the Google map is rendered as vector or raster
+  if (overlay.getPanes) {
+    overlay.getPanes().overlayLayer.appendChild(container);
+  } else {
+    overlay
+      .getMap()
+      .getDiv()
+      .appendChild(container);
+  }
   return container;
 }
 
@@ -82,12 +93,8 @@ export function destroyDeckInstance(deck) {
  * @param map (google.maps.Map) - The parent Map instance
  * @param overlay (google.maps.OverlayView) - A maps Overlay instance
  */
-export function getViewState(map, overlay) {
-  // The map fills the container div unless it's in fullscreen mode
-  // at which point the first child of the container is promoted
-  const container = map.getDiv().firstChild;
-  const width = container.offsetWidth;
-  const height = container.offsetHeight;
+export function getViewPropsFromOverlay(map, overlay) {
+  const {width, height} = getMapSize(map);
 
   // Canvas position relative to draggable map's container depends on
   // overlayView's projection, not the map's. Have to use the center of the
@@ -145,7 +152,67 @@ export function getViewState(map, overlay) {
     longitude
   };
 }
+
 /* eslint-enable max-statements */
+
+/**
+ * Get the current view state
+ * @param map (google.maps.Map) - The parent Map instance
+ * @param coordinateTransformer (google.maps.CoordinateTransformer) - A CoordinateTransformer instance
+ */
+export function getViewPropsFromCoordinateTransformer(map, coordinateTransformer) {
+  const {width, height} = getMapSize(map);
+  const {
+    lat: latitude,
+    lng: longitude,
+    heading: bearing,
+    tilt: pitch,
+    zoom
+  } = coordinateTransformer.getCameraParams();
+
+  // Match Google projection matrix
+  const fovy = 25;
+  const aspect = width / height;
+
+  // Match depth range (crucial for correct z-sorting)
+  const near = 0.75;
+  const far = 300000000000000;
+  // const far = Infinity;
+
+  const projectionMatrix = new Matrix4().perspective({
+    fovy: (fovy * Math.PI) / 180,
+    aspect,
+    near,
+    far
+  });
+  const focalDistance = 0.5 * projectionMatrix[5];
+
+  return {
+    // Using external gl context - do not set css size
+    width: false,
+    height: false,
+    viewState: {
+      altitude: focalDistance,
+      bearing,
+      latitude,
+      longitude,
+      pitch,
+      projectionMatrix,
+      repeat: true,
+      zoom: zoom - 1
+    }
+  };
+}
+
+function getMapSize(map) {
+  // The map fills the container div unless it's in fullscreen mode
+  // at which point the first child of the container is promoted
+  const container = map.getDiv().firstChild;
+  return {
+    width: container.offsetWidth,
+    height: container.offsetHeight
+  };
+}
 
 function getEventPixel(event, deck) {
   if (event.pixel) {
@@ -171,7 +238,10 @@ function handleMouseEvent(deck, type, event) {
   switch (type) {
     case 'click':
       // Hack: because we do not listen to pointer down, perform picking now
-      deck._lastPointerDownInfo = deck.pickObject(mockEvent.offsetCenter);
+      deck._lastPointerDownInfo = deck.pickObject({
+        ...mockEvent.offsetCenter,
+        radius: deck.props.pickingRadius
+      });
       mockEvent.tapCount = 1;
       deck._onEvent(mockEvent);
       break;

@@ -1,19 +1,65 @@
+import {clamp} from 'math.gl';
 import Controller from './controller';
 import {OrbitState} from './orbit-controller';
-import LinearInterpolator from '../transitions/linear-interpolator';
-import {TRANSITION_EVENTS} from './transition-manager';
 
-const LINEAR_TRANSITION_PROPS = {
-  transitionDuration: 300,
-  transitionEasing: t => t,
-  transitionInterpolator: new LinearInterpolator(['target', 'zoom']),
-  transitionInterruption: TRANSITION_EVENTS.BREAK
-};
+class OrthographicState extends OrbitState {
+  constructor(props) {
+    super(props);
+
+    this.zoomAxis = props.zoomAxis || 'all';
+  }
+
+  _applyConstraints(props) {
+    const {maxZoom, minZoom, zoom} = props;
+    props.zoom = Array.isArray(zoom)
+      ? [clamp(zoom[0], minZoom, maxZoom), clamp(zoom[1], minZoom, maxZoom)]
+      : clamp(zoom, minZoom, maxZoom);
+    return props;
+  }
+
+  _calculateNewZoom({scale, startZoom}) {
+    const {maxZoom, minZoom} = this._viewportProps;
+    if (!startZoom && startZoom !== 0) {
+      startZoom = this._viewportProps.zoom;
+    }
+    let deltaZoom = Math.log2(scale);
+    if (Array.isArray(startZoom)) {
+      let [newZoomX, newZoomY] = startZoom;
+      switch (this.zoomAxis) {
+        case 'X':
+          // Scale x only
+          newZoomX = clamp(newZoomX + deltaZoom, minZoom, maxZoom);
+          break;
+        case 'Y':
+          // Scale y only
+          newZoomY = clamp(newZoomY + deltaZoom, minZoom, maxZoom);
+          break;
+        default:
+          // Lock aspect ratio
+          let z = Math.min(newZoomX + deltaZoom, newZoomY + deltaZoom);
+          if (z < minZoom) {
+            deltaZoom += minZoom - z;
+          }
+          z = Math.max(newZoomX + deltaZoom, newZoomY + deltaZoom);
+          if (z > maxZoom) {
+            deltaZoom += maxZoom - z;
+          }
+          newZoomX += deltaZoom;
+          newZoomY += deltaZoom;
+      }
+      return [newZoomX, newZoomY];
+    }
+    // Ignore `zoomAxis`
+    // `LinearTransitionInterpolator` does not support interpolation between a number and an array
+    // So if zoom is a number (legacy use case), new zoom still has to be a number
+    return clamp(startZoom + deltaZoom, minZoom, maxZoom);
+  }
+}
 
 export default class OrthographicController extends Controller {
   constructor(props) {
     props.dragMode = props.dragMode || 'pan';
-    super(OrbitState, props);
+    super(OrthographicState, props);
   }
 
   _onPanRotate(event) {
@@ -21,8 +67,7 @@ export default class OrthographicController extends Controller {
     return false;
   }
 
-  _getTransitionProps() {
-    // Enables Transitions on double-tap and key-down events.
-    return LINEAR_TRANSITION_PROPS;
+  get linearTransitionProps() {
+    return ['target', 'zoom'];
   }
 }

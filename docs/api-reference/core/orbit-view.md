@@ -26,6 +26,28 @@ const view = new OrbitView({id, ...});
 
 Axis with 360 degrees rotating freedom, either `'Y'` or `'Z'`, default to `'Z'`.
 
+##### `projectionMatrix` (Array[16], optional)
+
+Projection matrix.
+
+If `projectionMatrix` is not supplied, the `View` class will build a projection matrix from the following parameters:
+
+##### `fovy` (Number, optional)
+
+Field of view covered by camera, in the perspective case. In degrees. Default `50`.
+
+##### `near` (Number, optional)
+
+Distance of near clipping plane. Default `0.1`.
+
+##### `far` (Number, optional)
+
+Distance of far clipping plane. Default `1000`.
+
+##### `orthographic` (Boolean)
+
+Whether to create an orthographic or perspective projection matrix. Default is `false` (perspective projection).
+
 
 ## View State
 

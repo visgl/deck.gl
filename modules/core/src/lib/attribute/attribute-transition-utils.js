@@ -19,12 +19,11 @@ export function normalizeTransitionSettings(userSettings, layerSettings) {
     userSettings = {duration: userSettings};
   }
   userSettings.type = userSettings.type || 'interpolation';
-  return Object.assign(
-    {},
-    DEFAULT_TRANSITION_SETTINGS[userSettings.type],
-    layerSettings,
-    userSettings
-  );
+  return {
+    ...DEFAULT_TRANSITION_SETTINGS[userSettings.type],
+    ...layerSettings,
+    ...userSettings
+  };
 }
 
 // NOTE: NOT COPYING OVER OFFSET OR STRIDE HERE BECAUSE:

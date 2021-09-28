@@ -18,7 +18,6 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import log from '../utils/log';
 import {isAsyncIterable} from '../utils/iterable-utils';
 import {PROP_SYMBOLS} from './constants';
 const {ASYNC_ORIGINAL, ASYNC_RESOLVED, ASYNC_DEFAULTS} = PROP_SYMBOLS;
@@ -142,7 +141,7 @@ export default class ComponentState {
 
     // interpret value string as url and start a new load tracked by a promise
     if (typeof value === 'string') {
-      const fetch = this.layer && this.layer.props.fetch;
+      const fetch = this.layer?.props.fetch;
       const url = value;
       if (fetch) {
         value = fetch(url, {propName, layer: this.layer});
@@ -176,6 +175,9 @@ export default class ComponentState {
 
   // Set normal, non-async value
   _setPropValue(propName, value) {
+    // Save the current value before overwriting so that diffProps can access both
+    this.freezeAsyncOldProps();
+
     const asyncProp = this.asyncProps[propName];
     value = this._postProcessValue(asyncProp, value);
     asyncProp.resolvedValue = value;
@@ -189,7 +191,7 @@ export default class ComponentState {
     // otherwise a more recent load has already completed
     const asyncProp = this.asyncProps[propName];
     if (asyncProp && loadCount >= asyncProp.resolvedLoadCount && value !== undefined) {
-      // A chance to copy old props before updating
+      // Save the current value before overwriting so that diffProps can access both
       this.freezeAsyncOldProps();
 
       asyncProp.resolvedValue = value;
@@ -210,12 +212,14 @@ export default class ComponentState {
         data = this._postProcessValue(asyncProp, data);
         this._setAsyncPropValue(propName, data, loadCount);
 
-        const onDataLoad = this.layer && this.layer.props.onDataLoad;
+        const onDataLoad = this.layer?.props.onDataLoad;
         if (propName === 'data' && onDataLoad) {
           onDataLoad(data, {propName, layer: this.layer});
         }
       })
-      .catch(error => log.error(error)());
+      .catch(error => {
+        this.layer?.raiseError(error, `loading ${propName} of ${this.layer}`);
+      });
   }
 
   async _resolveAsyncIterable(propName, iterable) {
@@ -248,7 +252,7 @@ export default class ComponentState {
       this._setAsyncPropValue(propName, data, loadCount);
     }
 
-    const onDataLoad = this.layer && this.layer.props.onDataLoad;
+    const onDataLoad = this.layer?.props.onDataLoad;
     if (onDataLoad) {
       onDataLoad(data, {propName, layer: this.layer});
     }

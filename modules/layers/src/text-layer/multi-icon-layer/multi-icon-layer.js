@@ -76,21 +76,21 @@ export default class MultiIconLayer extends IconLayer {
     }
   }
 
-  draw({uniforms}) {
+  draw(params) {
     const {sdf, smoothing, outlineWidth} = this.props;
     const {outlineColor} = this.state;
 
-    super.draw({
-      uniforms: Object.assign({}, uniforms, {
-        // Refer the following doc about gamma and buffer
-        // https://blog.mapbox.com/drawing-text-with-signed-distance-fields-in-mapbox-gl-b0933af6f817
-        buffer: DEFAULT_BUFFER,
-        outlineBuffer: outlineWidth ? Math.max(smoothing, DEFAULT_BUFFER * (1 - outlineWidth)) : -1,
-        gamma: smoothing,
-        sdf: Boolean(sdf),
-        outlineColor
-      })
-    });
+    params.uniforms = {
+      ...params.uniforms,
+      // Refer the following doc about gamma and buffer
+      // https://blog.mapbox.com/drawing-text-with-signed-distance-fields-in-mapbox-gl-b0933af6f817
+      buffer: DEFAULT_BUFFER,
+      outlineBuffer: outlineWidth ? Math.max(smoothing, DEFAULT_BUFFER * (1 - outlineWidth)) : -1,
+      gamma: smoothing,
+      sdf: Boolean(sdf),
+      outlineColor
+    };
+    super.draw(params);
   }
 
   getInstanceOffset(icons) {

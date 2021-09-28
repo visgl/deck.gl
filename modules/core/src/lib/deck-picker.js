@@ -44,16 +44,11 @@ export default class DeckPicker {
       layerId: null,
       info: null
     };
-    this._onError = null;
   }
 
   setProps(props) {
     if ('layerFilter' in props) {
       this.layerFilter = props.layerFilter;
-    }
-
-    if ('onError' in props) {
-      this._onError = props.onError;
     }
 
     if ('_pickable' in props) {
@@ -100,7 +95,7 @@ export default class DeckPicker {
     };
 
     if (layer) {
-      return Object.assign({}, lastPickedInfo, info);
+      return {...lastPickedInfo, ...info};
     }
     return Object.assign(info, {color: null, object: null, index: -1});
   }
@@ -379,7 +374,6 @@ export default class DeckPicker {
     this.pickLayersPass.render({
       layers,
       layerFilter: this.layerFilter,
-      onError: this._onError,
       views,
       viewports,
       onViewportActive,

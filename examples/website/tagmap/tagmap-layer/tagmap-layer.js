@@ -127,7 +127,7 @@ export default class TagmapLayer extends CompositeLayer {
     const {tags, colorScale} = this.state;
 
     return [
-      new TextLayer({
+      new TextLayer(this.props, {
         id: 'tagmap-layer',
         data: tags,
         getText: d => d.label,

@@ -1,20 +1,26 @@
 /* global google */
-import {createDeckInstance, destroyDeckInstance, getViewState} from './utils';
+import {getParameters, setParameters, withParameters} from '@luma.gl/core';
+import GL from '@luma.gl/constants';
+import {
+  createDeckInstance,
+  destroyDeckInstance,
+  getViewPropsFromOverlay,
+  getViewPropsFromCoordinateTransformer
+} from './utils';
 
 const HIDE_ALL_LAYERS = () => false;
+const GL_STATE = {
+  depthMask: true,
+  depthTest: true,
+  blend: true,
+  blendFunc: [GL.SRC_ALPHA, GL.ONE_MINUS_SRC_ALPHA, GL.ONE, GL.ONE_MINUS_SRC_ALPHA],
+  blendEquation: GL.FUNC_ADD
+};
 
 export default class GoogleMapsOverlay {
   constructor(props) {
     this.props = {};
-
     this._map = null;
-
-    const overlay = new google.maps.OverlayView();
-    overlay.onAdd = this._onAdd.bind(this);
-    overlay.onRemove = this._onRemove.bind(this);
-    overlay.draw = this._draw.bind(this);
-    this._overlay = overlay;
-
     this.setProps(props);
   }
 
@@ -30,7 +36,15 @@ export default class GoogleMapsOverlay {
     }
     if (map) {
       this._map = map;
-      this._overlay.setMap(map);
+      const {UNINITIALIZED} = google.maps.RenderingType;
+      const renderingType = map.getRenderingType();
+      if (renderingType !== UNINITIALIZED) {
+        this._createOverlay(map);
+      } else {
+        map.addListener('renderingtype_changed', () => {
+          this._createOverlay(map);
+        });
+      }
     }
   }
 
@@ -66,8 +80,53 @@ export default class GoogleMapsOverlay {
   }
 
   /* Private API */
+  _createOverlay(map) {
+    const {VECTOR, UNINITIALIZED} = google.maps.RenderingType;
+    const renderingType = map.getRenderingType();
+    if (renderingType === UNINITIALIZED) {
+      return;
+    }
+    const isVectorMap = renderingType === VECTOR && google.maps.WebglOverlayView;
+    const OverlayView = isVectorMap ? google.maps.WebglOverlayView : google.maps.OverlayView;
+    const overlay = new OverlayView();
+
+    // Lifecycle methods are different depending on map type
+    if (isVectorMap) {
+      overlay.onAdd = () => {};
+      overlay.onContextLost = this._onContextLost.bind(this);
+      overlay.onContextRestored = this._onContextRestored.bind(this);
+      overlay.onDraw = this._onDrawVector.bind(this);
+    } else {
+      overlay.onAdd = this._onAdd.bind(this);
+      overlay.draw = this._onDrawRaster.bind(this);
+    }
+    overlay.onRemove = this._onRemove.bind(this);
+
+    this._overlay = overlay;
+    this._overlay.setMap(map);
+  }
+
   _onAdd() {
     this._deck = createDeckInstance(this._map, this._overlay, this._deck, this.props);
+  }
+
+  _onContextRestored(gl) {
+    const _customRender = () => {
+      this._overlay.requestRedraw();
+    };
+    this._deck = createDeckInstance(this._map, this._overlay, this._deck, {
+      gl,
+      _customRender,
+      ...this.props
+    });
+  }
+
+  _onContextLost() {
+    // TODO this isn't working
+    if (this._deck) {
+      destroyDeckInstance(this._deck);
+      this._deck = null;
+    }
   }
 
   _onRemove() {
@@ -75,9 +134,9 @@ export default class GoogleMapsOverlay {
     this._deck.setProps({layerFilter: HIDE_ALL_LAYERS});
   }
 
-  _draw() {
+  _onDrawRaster() {
     const deck = this._deck;
-    const {width, height, left, top, zoom, pitch, latitude, longitude} = getViewState(
+    const {width, height, left, top, zoom, pitch, latitude, longitude} = getViewPropsFromOverlay(
       this._map,
       this._overlay
     );
@@ -97,5 +156,40 @@ export default class GoogleMapsOverlay {
     });
     // Deck is initialized
     deck.redraw();
+  }
+
+  // Vector code path
+  _onDrawVector(gl, coordinateTransformer) {
+    const deck = this._deck;
+
+    deck.setProps({
+      ...getViewPropsFromCoordinateTransformer(this._map, coordinateTransformer)
+    });
+
+    if (deck.layerManager) {
+      // As an optimization, some renders are to an separate framebuffer
+      // which we need to pass onto deck
+      const _framebuffer = getParameters(gl, GL.FRAMEBUFFER_BINDING);
+      deck.setProps({_framebuffer});
+
+      // Camera changed, will trigger a map repaint right after this
+      // Clear any change flag triggered by setting viewState so that deck does not request
+      // a second repaint
+      deck.needsRedraw({clearRedrawFlags: true});
+
+      // Workaround for bug in Google maps where viewport state is wrong
+      // TODO remove once fixed
+      setParameters(gl, {
+        viewport: [0, 0, gl.canvas.width, gl.canvas.height],
+        scissor: [0, 0, gl.canvas.width, gl.canvas.height],
+        stencilFunc: [gl.ALWAYS, 0, 255, gl.ALWAYS, 0, 255]
+      });
+
+      withParameters(gl, GL_STATE, () => {
+        deck._drawLayers('google-vector', {
+          clearCanvas: false
+        });
+      });
+    }
   }
 }

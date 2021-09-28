@@ -1,10 +1,12 @@
 import test from 'tape-catch';
 import {testLayer} from '@deck.gl/test-utils';
 import {MVTLayer} from '@deck.gl/geo-layers';
-import ClipExtension from '@deck.gl/geo-layers/mvt-layer/clip-extension';
+import {ClipExtension} from '@deck.gl/extensions';
 import {transform} from '@deck.gl/geo-layers/mvt-layer/coordinate-transform';
+import findIndexBinary from '@deck.gl/geo-layers/mvt-layer/find-index-binary';
 import {GeoJsonLayer} from '@deck.gl/layers';
 import {geojsonToBinary} from '@loaders.gl/gis';
+import {MVTLoader} from '@loaders.gl/mvt';
 
 import {ScatterplotLayer} from '@deck.gl/layers';
 import {WebMercatorViewport} from '@deck.gl/core';
@@ -133,7 +135,7 @@ test('ClipExtension', t => {
       onAfterUpdate: ({subLayers}) => {
         for (const layer of subLayers) {
           const uniforms = layer.getModels()[0].getUniforms();
-          if (layer.id.endsWith('points')) {
+          if (layer.id.includes('-points-')) {
             t.ok(uniforms.clip_bounds && uniforms.clip_bounds[0] === 0, 'has clip_bounds uniform');
           } else {
             t.ok(
@@ -225,59 +227,64 @@ test('MVTLayer#autoHighlight', async t => {
   t.end();
 });
 
-test('MVTLayer#picking', async t => {
-  class TestMVTLayer extends MVTLayer {
-    getTileData() {
-      return geoJSONData;
-    }
-  }
-
-  TestMVTLayer.componentName = 'TestMVTLayer';
-
-  await testPickingLayer({
-    layer: new TestMVTLayer({
-      id: 'mvt',
-      data: ['https://json_2/{z}/{x}/{y}.mvt'],
-      uniqueIdProperty: 'cartodb_id',
-      autoHighlight: true
-    }),
-    viewport: new WebMercatorViewport({
-      latitude: 0,
-      longitude: 0,
-      zoom: 1
-    }),
-    testCases: [
-      {
-        pickedColor: new Uint8Array([1, 0, 0, 0]),
-        pickedLayerId: 'mvt-0-0-1-polygons-fill',
-        mode: 'hover',
-        onAfterUpdate: ({layer, subLayers, info}) => {
-          t.comment('hover over polygon');
-          t.ok(info.object, 'info.object is populated');
-          t.ok(
-            subLayers.every(l => l.props.highlightedObjectIndex === 0),
-            'set sub layers highlightedObjectIndex'
-          );
-        }
-      },
-      {
-        pickedColor: new Uint8Array([0, 0, 0, 0]),
-        pickedLayerId: '',
-        mode: 'hover',
-        onAfterUpdate: ({layer, subLayers, info}) => {
-          t.comment('pointer leave');
-          t.notOk(info.object, 'info.object is not populated');
-          t.ok(
-            subLayers.every(l => l.props.highlightedObjectIndex === -1),
-            'cleared sub layers highlightedObjectIndex'
-          );
-        }
+for (const binary of [true, false]) {
+  test(`MVTLayer#picking binary:${binary}`, async t => {
+    class TestMVTLayer extends MVTLayer {
+      getTileData() {
+        return this.props.binary ? geoJSONBinaryData : geoJSONData;
       }
-    ]
-  });
+    }
 
-  t.end();
-});
+    TestMVTLayer.componentName = 'TestMVTLayer';
+
+    await testPickingLayer({
+      layer: new TestMVTLayer({
+        id: 'mvt',
+        binary,
+        data: ['https://json_2/{z}/{x}/{y}.mvt'],
+        uniqueIdProperty: 'cartodb_id',
+        autoHighlight: true
+      }),
+      viewport: new WebMercatorViewport({
+        latitude: 0,
+        longitude: 0,
+        zoom: 1
+      }),
+      testCases: [
+        {
+          pickedColor: new Uint8Array([1, 0, 0, 0]),
+          pickedLayerId: 'mvt-0-0-1-polygons-fill',
+          mode: 'hover',
+          onAfterUpdate: ({layer, subLayers, info}) => {
+            t.comment('hover over polygon');
+            t.ok(info.object, 'info.object is populated');
+            t.ok(info.object.properties, 'info.object.properties is populated');
+            t.ok(info.object.geometry, 'info.object.geometry is populated');
+            t.ok(
+              subLayers.every(l => l.props.highlightedObjectIndex === 0),
+              'set sub layers highlightedObjectIndex'
+            );
+          }
+        },
+        {
+          pickedColor: new Uint8Array([0, 0, 0, 0]),
+          pickedLayerId: '',
+          mode: 'hover',
+          onAfterUpdate: ({layer, subLayers, info}) => {
+            t.comment('pointer leave');
+            t.notOk(info.object, 'info.object is not populated');
+            t.ok(
+              subLayers.every(l => l.props.highlightedObjectIndex === -1),
+              'cleared sub layers highlightedObjectIndex'
+            );
+          }
+        }
+      ]
+    });
+
+    t.end();
+  });
+}
 
 test('MVTLayer#TileJSON', async t => {
   class TestMVTLayer extends MVTLayer {
@@ -331,7 +338,7 @@ test('MVTLayer#TileJSON', async t => {
   const testCases = [
     {
       props: {
-        data: 'http://echo.jsontest.com/key/value',
+        data: tileJSON.tiles,
         binary: false
       },
       onAfterUpdate
@@ -405,6 +412,196 @@ test('MVTLayer#dataInWGS84', async t => {
   ];
 
   await testLayerAsync({Layer: TestMVTLayer, viewport, testCases, onError: t.notOk});
+
+  t.end();
+});
+
+test('MVTLayer#triangulation', async t => {
+  const viewport = new WebMercatorViewport({
+    longitude: -100,
+    latitude: 40,
+    zoom: 3,
+    pitch: 0,
+    bearing: 0
+  });
+
+  const onAfterUpdate = ({layer}) => {
+    if (!layer.isLoaded) {
+      return;
+    }
+    const geoJsonLayer = layer.internalState.subLayers[0];
+    const data = geoJsonLayer.props.data;
+    if (layer.props.binary) {
+      // Triangulated binary data should be passed
+      t.ok(data.polygons.triangles, 'should triangulate');
+    } else {
+      // GeoJSON should be passed (3 Features)
+      t.ok(!data.polygons, 'should not triangulate');
+      t.equals(data.length, 3, 'should pass GeoJson');
+    }
+  };
+
+  const props = {
+    data: ['./test/data/mvt-with-hole/{z}/{x}/{y}.mvt'],
+    binary: true,
+    onTileError: error => {
+      if (!(error.message && error.message.includes('404'))) {
+        throw error;
+      }
+    },
+    loaders: [MVTLoader]
+  };
+  const testCases = [{props, onAfterUpdate}];
+
+  // Run as separate test runs otherwise data is cached
+  testLayerAsync({Layer: MVTLayer, viewport, testCases, onError: t.notOk});
+  testCases[0].props.binary = false;
+  await testLayerAsync({Layer: MVTLayer, viewport, testCases, onError: t.notOk});
+
+  t.end();
+});
+
+for (const tileset of ['mvt-tiles', 'mvt-with-hole']) {
+  test(`MVTLayer#data.length ${tileset}`, async t => {
+    const viewport = new WebMercatorViewport({
+      longitude: -100,
+      latitude: 40,
+      zoom: 3,
+      pitch: 0,
+      bearing: 0
+    });
+
+    let binaryDataLength;
+    let geoJsonDataLength;
+    let requests = 0;
+    const onAfterUpdate = ({layer}) => {
+      if (!layer.isLoaded) {
+        return;
+      }
+      const geoJsonLayer = layer.internalState.subLayers[0];
+      const polygons = geoJsonLayer.state.layerProps.polygons;
+      if (layer.props.binary) {
+        binaryDataLength = polygons.data.length;
+        requests++;
+      } else {
+        geoJsonDataLength = polygons.data.length;
+        requests++;
+      }
+
+      if (requests === 2) {
+        t.equals(geoJsonDataLength, binaryDataLength, 'should have equal length');
+      }
+    };
+
+    // To avoid caching use different URLs
+    const url1 = [`./test/data/${tileset}/{z}/{x}/{y}.mvt?test1`];
+    const url2 = [`./test/data/${tileset}/{z}/{x}/{y}.mvt?test2`];
+    const props = {
+      onTileError: error => {
+        if (!(error.message && error.message.includes('404'))) {
+          throw error;
+        }
+      },
+      loaders: [MVTLoader]
+    };
+    const testCases = [
+      {props: {binary: false, data: url1, ...props}, onAfterUpdate},
+      {props: {binary: true, data: url2, ...props}, onAfterUpdate}
+    ];
+
+    await testLayerAsync({Layer: MVTLayer, viewport, testCases, onError: t.notOk});
+    t.end();
+  });
+}
+
+test('findIndexBinary', t => {
+  const testData = geojsonToBinary([
+    {
+      // For testing id collision
+      id: 1,
+      type: 'Feature',
+      geometry: {
+        type: 'Point',
+        coordinates: [0, 0]
+      },
+      properties: {
+        numericalId: 300,
+        stringId: 'B',
+        layerName: 'label'
+      }
+    },
+    {
+      id: 1,
+      type: 'Feature',
+      geometry: {
+        type: 'Polygon',
+        coordinates: [[[0, 0], [1, 1], [2, 2]]]
+      },
+      properties: {
+        numericalId: 100,
+        stringId: 'A',
+        layerName: 'water'
+      }
+    },
+    {
+      id: 2,
+      type: 'Feature',
+      geometry: {
+        type: 'LineString',
+        coordinates: [[0, 0], [1, 1]]
+      },
+      properties: {
+        numericalId: 200,
+        stringId: 'B',
+        layerName: 'road'
+      }
+    },
+    {
+      id: 3,
+      type: 'Feature',
+      geometry: {
+        type: 'Point',
+        coordinates: [0, 0]
+      },
+      properties: {
+        numericalId: 300,
+        stringId: 'C',
+        layerName: 'poi'
+      }
+    },
+    {
+      id: 3,
+      type: 'Feature',
+      geometry: {
+        type: 'Point',
+        coordinates: [1, 1]
+      },
+      properties: {
+        numericalId: 400,
+        stringId: 'D',
+        layerName: 'poi'
+      }
+    }
+  ]);
+
+  // @loaders.gl/gis does not populate fields as of 3.0.8
+  testData.polygons.fields = [{id: 1}];
+  testData.lines.fields = [{id: 2}];
+  testData.points.fields = [{id: 1}, {id: 3}, {id: 4}];
+
+  t.is(findIndexBinary(testData, '', 3), 3, 'Find by default id');
+  t.is(findIndexBinary(testData, '', 1), 0, 'Find by default id');
+  t.is(findIndexBinary(testData, '', 1, 'water'), 1, 'Find by default id with layer name');
+  t.is(findIndexBinary(testData, 'numericalId', 200), 2, 'Find by numerical id');
+  t.is(findIndexBinary(testData, 'numericalId', 300), 0, 'Find by numerical id');
+  t.is(
+    findIndexBinary(testData, 'numericalId', 300, 'poi'),
+    3,
+    'Find by numerical id with layer name'
+  );
+  t.is(findIndexBinary(testData, 'stringId', 'A'), 1, 'Find by string id');
+  t.is(findIndexBinary(testData, 'stringId', 'B'), 0, 'Find by string id');
+  t.is(findIndexBinary(testData, 'stringId', 'B', 'road'), 2, 'Find by string id with layer name');
 
   t.end();
 });

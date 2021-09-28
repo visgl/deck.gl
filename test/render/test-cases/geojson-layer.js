@@ -8,14 +8,20 @@ import {
 import {GeoJsonLayer} from '@deck.gl/layers';
 import {geojson, geojsonLarge, geojsonHole} from 'deck.gl-test/data';
 import antarctica from 'deck.gl-test/data/antarctica.geo.json';
+import capitals from 'deck.gl-test/data/us-state-capitals.geo.json';
+import {iconAtlas as iconMapping} from 'deck.gl-test/data';
 import {parseColor, setOpacity} from '../../../examples/layer-browser/src/utils/color';
 import {SimpleMeshLayer} from '@deck.gl/mesh-layers';
 import {SphereGeometry} from '@luma.gl/core';
+
+import {OS} from '../constants';
 
 const sphere = new SphereGeometry({
   nlat: 20,
   nlong: 20
 });
+
+const ICON_ATLAS = './test/data/icon-atlas.png';
 
 const MARKER_SIZE_MAP = {
   small: 200,
@@ -32,6 +38,59 @@ const lightingEffect = new LightingEffect({
   })
 });
 
+// Tests that contain text render differently depending on the OS,
+// currently only do comparisons on Mac
+const macOnlyTests = [
+  {
+    name: 'geojson-point-types',
+    viewState: {
+      longitude: -100,
+      latitude: 40,
+      zoom: 4
+    },
+    layers: [
+      new GeoJsonLayer({
+        id: 'geojson-point-circle',
+        data: capitals,
+        pointType: 'circle+text+icon',
+        stroked: true,
+        filled: true,
+        getFillColor: [255, 255, 0],
+        getLineColor: [0, 0, 255],
+        getPointRadius: d => 10 + 3 * d.properties.name.length,
+        getText: d => d.properties.name,
+        iconAtlas: ICON_ATLAS,
+        iconMapping,
+        iconSizeScale: 5,
+        iconSizeUnits: 'pixels',
+        getIconSize: 10,
+        getIcon: d => (d.properties.state.length % 2 ? 'marker' : 'marker-warning'),
+        lineWidthMinPixels: 2,
+        pointRadiusUnits: 'pixels'
+      })
+    ],
+    goldenImage: './test/render/golden-images/geojson-point-types.png'
+  },
+  {
+    name: 'geojson-text',
+    viewState: {
+      longitude: -100,
+      latitude: 40,
+      zoom: 4
+    },
+    layers: [
+      new GeoJsonLayer({
+        id: 'geojson-text',
+        data: capitals,
+        pointType: 'text',
+        getText: d => d.properties.name
+      })
+    ],
+    goldenImage: './test/render/golden-images/geojson-text.png'
+  }
+];
+const optionalTests = OS === 'Mac' ? macOnlyTests : [];
+
 export default [
   {
     name: 'geojson-lnglat',
@@ -47,7 +106,7 @@ export default [
         id: 'geojson-lnglat',
         data: geojson,
         opacity: 0.8,
-        getRadius: f => MARKER_SIZE_MAP[f.properties['marker-size']],
+        getPointRadius: f => MARKER_SIZE_MAP[f.properties['marker-size']],
         getFillColor: f => {
           const color = parseColor(f.properties.fill || f.properties['marker-color']);
           const opacity = (f.properties['fill-opacity'] || 1) * 255;
@@ -83,7 +142,7 @@ export default [
         opacity: 0.8,
         extruded: true,
         wireframe: true,
-        getRadius: f => MARKER_SIZE_MAP[f.properties['marker-size']],
+        getPointRadius: f => MARKER_SIZE_MAP[f.properties['marker-size']],
         getFillColor: f => {
           const color = parseColor(f.properties.fill || f.properties['marker-color']);
           const opacity = (f.properties['fill-opacity'] || 1) * 255;
@@ -206,5 +265,52 @@ export default [
       })
     ],
     goldenImage: './test/render/golden-images/geojson-wrap-longitude.png'
-  }
+  },
+  {
+    name: 'geojson-circle',
+    viewState: {
+      longitude: -100,
+      latitude: 40,
+      zoom: 4
+    },
+    layers: [
+      new GeoJsonLayer({
+        id: 'geojson-circle',
+        data: capitals,
+        pointType: 'circle',
+        stroked: true,
+        filled: true,
+        getFillColor: [255, 255, 0],
+        getLineColor: [0, 0, 255],
+        getPointRadius: d => 10 + 3 * d.properties.name.length,
+        opacity: 0.3,
+        lineWidthMinPixels: 2,
+        pointRadiusUnits: 'pixels'
+      })
+    ],
+    goldenImage: './test/render/golden-images/geojson-circle.png'
+  },
+  {
+    name: 'geojson-icon',
+    viewState: {
+      longitude: -100,
+      latitude: 40,
+      zoom: 4
+    },
+    layers: [
+      new GeoJsonLayer({
+        id: 'geojson-icon',
+        data: capitals,
+        pointType: 'icon',
+        iconAtlas: ICON_ATLAS,
+        iconMapping,
+        iconSizeScale: 5,
+        iconSizeUnits: 'pixels',
+        getIconSize: 10,
+        getIcon: d => (d.properties.state.length % 2 ? 'marker' : 'marker-warning')
+      })
+    ],
+    goldenImage: './test/render/golden-images/geojson-icon.png'
+  },
+  ...optionalTests
 ];

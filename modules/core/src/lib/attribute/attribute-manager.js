@@ -242,7 +242,7 @@ export default class AttributeManager {
   getChangedAttributes(opts = {clearChangedFlags: false}) {
     const {attributes, attributeTransitionManager} = this;
 
-    const changedAttributes = Object.assign({}, attributeTransitionManager.getAttributes());
+    const changedAttributes = {...attributeTransitionManager.getAttributes()};
 
     for (const attributeName in attributes) {
       const attribute = attributes[attributeName];
@@ -284,35 +284,33 @@ export default class AttributeManager {
       log.warn('AttributeManager.add({updaters}) - updater map no longer supported')();
     }
 
-    const newAttributes = {};
-
     for (const attributeName in attributes) {
       const attribute = attributes[attributeName];
 
       // Initialize the attribute descriptor, with WebGL and metadata fields
-      const newAttribute = this._createAttribute(attributeName, attribute, extraProps);
-
-      newAttributes[attributeName] = newAttribute;
+      this.attributes[attributeName] = this._createAttribute(attributeName, attribute, extraProps);
     }
-
-    Object.assign(this.attributes, newAttributes);
 
     this._mapUpdateTriggersToAttributes();
   }
   /* eslint-enable max-statements */
 
   _createAttribute(name, attribute, extraProps) {
+    // For expected default values see:
+    // https://github.com/visgl/luma.gl/blob/1affe21352e289eeaccee2a876865138858a765c/modules/webgl/src/classes/accessor.js#L5-L13
+    // and https://deck.gl/docs/api-reference/core/attribute-manager#add
     const props = {
+      ...attribute,
       id: name,
+      isIndexed: attribute.isIndexed || attribute.elements || false,
       // Luma fields
       constant: attribute.constant || false,
-      isIndexed: attribute.isIndexed || attribute.elements,
-      size: (attribute.elements && 1) || attribute.size,
+      size: (attribute.elements && 1) || attribute.size || 1,
       value: attribute.value || null,
-      divisor: attribute.instanced || extraProps.instanced ? 1 : attribute.divisor
+      divisor: attribute.instanced || extraProps.instanced ? 1 : attribute.divisor || 0
     };
 
-    return new Attribute(this.gl, Object.assign({}, attribute, props));
+    return new Attribute(this.gl, props);
   }
 
   // build updateTrigger name to attribute name mapping
@@ -350,6 +348,13 @@ export default class AttributeManager {
   _updateAttribute(opts) {
     const {attribute, numInstances} = opts;
     debug(TRACE_ATTRIBUTE_UPDATE_START, attribute);
+
+    if (attribute.constant) {
+      // The attribute is flagged as constant outside of an update cycle
+      // Skip allocation and updater call
+      attribute.setConstantValue(attribute.value);
+      return;
+    }
 
     if (attribute.allocate(numInstances)) {
       debug(TRACE_ATTRIBUTE_ALLOCATE, attribute, numInstances);

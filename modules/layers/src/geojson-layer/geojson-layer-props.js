@@ -38,21 +38,17 @@ export function createLayerPropsFromFeatures(features, featuresDiff) {
   return layerProps;
 }
 
-export function createLayerPropsFromBinary(geojsonBinary, uniqueIdProperty, encodePickingColor) {
+export function createLayerPropsFromBinary(geojsonBinary, encodePickingColor) {
   const layerProps = createEmptyLayerProps();
   const {points, lines, polygons} = geojsonBinary;
 
-  const customPickingColors = calculatePickingColors(
-    geojsonBinary,
-    uniqueIdProperty,
-    encodePickingColor
-  );
+  const customPickingColors = calculatePickingColors(geojsonBinary, encodePickingColor);
 
   layerProps.points.data = {
     length: points.positions.value.length / points.positions.size,
     attributes: {
       getPosition: points.positions,
-      pickingColors: {
+      instancePickingColors: {
         size: 3,
         value: customPickingColors.points
       }
@@ -67,7 +63,7 @@ export function createLayerPropsFromBinary(geojsonBinary, uniqueIdProperty, enco
     startIndices: lines.pathIndices.value,
     attributes: {
       getPath: lines.positions,
-      pickingColors: {
+      instancePickingColors: {
         size: 3,
         value: customPickingColors.lines
       }
@@ -79,8 +75,8 @@ export function createLayerPropsFromBinary(geojsonBinary, uniqueIdProperty, enco
   layerProps.lines._pathType = 'open';
 
   layerProps.polygons.data = {
-    length: polygons.primitivePolygonIndices.value.length,
-    startIndices: polygons.primitivePolygonIndices.value,
+    length: polygons.polygonIndices.value.length - 1,
+    startIndices: polygons.polygonIndices.value,
     attributes: {
       getPolygon: polygons.positions,
       pickingColors: {
@@ -93,9 +89,12 @@ export function createLayerPropsFromBinary(geojsonBinary, uniqueIdProperty, enco
     featureIds: polygons.featureIds
   };
   layerProps.polygons._normalize = false;
+  if (polygons.triangles) {
+    layerProps.polygons.data.attributes.indices = polygons.triangles.value;
+  }
 
   layerProps.polygonsOutline.data = {
-    length: polygons.primitivePolygonIndices.value.length,
+    length: polygons.primitivePolygonIndices.value.length - 1,
     startIndices: polygons.primitivePolygonIndices.value,
     attributes: {
       getPath: polygons.positions,

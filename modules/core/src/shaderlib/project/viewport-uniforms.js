@@ -111,6 +111,7 @@ function calculateMatrixAndOffset(viewport, coordinateSystem, coordinateOrigin) 
   let {viewMatrix, viewProjectionMatrix} = viewport;
 
   let projectionCenter = ZERO_VECTOR;
+  let originCommon = ZERO_VECTOR;
   let cameraPosCommon = viewport.cameraPosition;
   const {geospatialOrigin, shaderCoordinateOrigin, offsetMode} = getOffsetOrigin(
     viewport,
@@ -122,21 +123,19 @@ function calculateMatrixAndOffset(viewport, coordinateSystem, coordinateOrigin) 
     // Calculate transformed projectionCenter (using 64 bit precision JS)
     // This is the key to offset mode precision
     // (avoids doing this addition in 32 bit precision in GLSL)
-    const positionCommonSpace = viewport.projectPosition(
-      geospatialOrigin || shaderCoordinateOrigin
-    );
+    originCommon = viewport.projectPosition(geospatialOrigin || shaderCoordinateOrigin);
 
     cameraPosCommon = [
-      cameraPosCommon[0] - positionCommonSpace[0],
-      cameraPosCommon[1] - positionCommonSpace[1],
-      cameraPosCommon[2] - positionCommonSpace[2]
+      cameraPosCommon[0] - originCommon[0],
+      cameraPosCommon[1] - originCommon[1],
+      cameraPosCommon[2] - originCommon[2]
     ];
 
-    positionCommonSpace[3] = 1;
+    originCommon[3] = 1;
 
     // projectionCenter = new Matrix4(viewProjectionMatrix)
     //   .transformVector([positionPixels[0], positionPixels[1], 0.0, 1.0]);
-    projectionCenter = vec4.transformMat4([], positionCommonSpace, viewProjectionMatrix);
+    projectionCenter = vec4.transformMat4([], originCommon, viewProjectionMatrix);
 
     // Always apply uncentered projection matrix if available (shader adds center)
     viewMatrix = viewMatrixUncentered || viewMatrix;
@@ -152,6 +151,7 @@ function calculateMatrixAndOffset(viewport, coordinateSystem, coordinateOrigin) 
     viewMatrix,
     viewProjectionMatrix,
     projectionCenter,
+    originCommon,
     cameraPosCommon,
     shaderCoordinateOrigin,
     geospatialOrigin
@@ -204,6 +204,7 @@ function calculateViewportUniforms({
   const {
     projectionCenter,
     viewProjectionMatrix,
+    originCommon,
     cameraPosCommon,
     shaderCoordinateOrigin,
     geospatialOrigin
@@ -214,19 +215,26 @@ function calculateViewportUniforms({
 
   const viewportSize = [viewport.width * devicePixelRatio, viewport.height * devicePixelRatio];
 
+  // Distance at which screen pixels are projected.
+  // Used to scale sizes in clipspace to match screen pixels.
+  // When using Viewport class's default projection matrix, this yields 1 for orthographic
+  // and `viewport.focalDistance` for perspective views
+  const focalDistance =
+    viewport.projectionMatrix.transform([0, 0, -viewport.focalDistance, 1])[3] || 1;
+
   const uniforms = {
     // Projection mode values
     project_uCoordinateSystem: coordinateSystem,
     project_uProjectionMode: viewport.projectionMode,
     project_uCoordinateOrigin: shaderCoordinateOrigin,
+    project_uCommonOrigin: originCommon.slice(0, 3),
     project_uCenter: projectionCenter,
 
     // Screen size
     project_uViewportSize: viewportSize,
     project_uDevicePixelRatio: devicePixelRatio,
 
-    // Distance at which screen pixels are projected
-    project_uFocalDistance: viewport.focalDistance || 1,
+    project_uFocalDistance: focalDistance,
     project_uCommonUnitsPerMeter: distanceScales.unitsPerMeter,
     project_uCommonUnitsPerWorldUnit: distanceScales.unitsPerMeter,
     project_uCommonUnitsPerWorldUnit2: DEFAULT_PIXELS_PER_UNIT2,

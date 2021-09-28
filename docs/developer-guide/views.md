@@ -84,10 +84,11 @@ Note that the set of view state parameters that will be used varies between View
 | View Class                                                     | Use Case  | Status | Description |
 | ---                                                            | ---         | ---         | ---         |
 | [`View`](/docs/api-reference/core/view.md)                          |    |    | The base view has to be supplied with raw view and projection matrices. It is typically only instantiated directly if the application needs to work with views that have been supplied from external sources, such as the [WebVR API](https://developer.mozilla.org/en-US/docs/Web/API/WebVR_API). |
-| [`MapView`](/docs/api-reference/core/map-view.md) (default)         | geospatial | full support | This class renders data using the [Web Mercator projection](https://en.wikipedia.org/wiki/Web_Mercator_projection) and is designed to match an external base map library such as mapbox-gl or Google Maps.
+| [`MapView`](/docs/api-reference/core/map-view.md) (default)         | geospatial | full support | This view renders data using the [Web Mercator projection](https://en.wikipedia.org/wiki/Web_Mercator_projection) and is designed to match an external base map library such as Mapbox or Google Maps.
+| [`GlobeView`](/docs/api-reference/core/globe-view.md)               | geospatial | experimental | This view renders data as a 3D globe.
 | [`FirstPersonView`](/docs/api-reference/core/first-person-view.md)  | geospatial | full support | The camera is positioned in a provided geolocation and looks in a provided direction, similar to that of a [first-person game](https://en.wikipedia.org/wiki/First-person_(gaming)). |
 | [`OrthographicView`](/docs/api-reference/core/orthographic-view.md) | info-vis (2D)     | full support | The camera looks at a target point from top-down. Does not rotate. |
-| [`OrbitView`](/docs/api-reference/core/perspective-view.md)         | info-vis (3D)     | full support | The camera looks at a target point from a provided direction. Rotates around the target. |
+| [`OrbitView`](/docs/api-reference/core/orbit-view.md)         | info-vis (3D)     | full support | The camera looks at a target point from a provided direction. Rotates around the target. |
 
 
 ## Examples
@@ -307,7 +308,7 @@ const deck = new Deck({
 });
 ```
 
-Some layers, including `TileLayer`, `Tile3DLayer`, `HeatmapLayer` and `ScreenGridLayer`, perform expensive operations (data fetching/aggregation) on viewport change. Therefore, it is generally NOT recommended to render them into multiple views. If you do need to show e.g. tiled base map in multiple views, create one layer instance for each view and limit their rendering with `layerFilter`:
+Some layers, including `TileLayer`, `HeatmapLayer` and `ScreenGridLayer`, perform expensive operations (data fetching/aggregation) on viewport change. Therefore, it is generally NOT recommended to render them into multiple views. If you do need to show e.g. tiled base map in multiple views, create one layer instance for each view and limit their rendering with `layerFilter`:
 
 ```js
 const deck = new Deck({
@@ -321,13 +322,12 @@ const deck = new Deck({
     new TileLayer({id: 'tiles-for-mini-map', ...})
   ],
   layerFilter: ({layer, viewport} => {
-    if (layer.id.startsWith('tiles-for')) {
-      return layer.id.startsWith(`tiles-for-${viewport.id}`);
-    }
-    return true;
+    return layer.id === `tiles-for-${viewport.id}`;
   });
 });
 ```
+
+Starting with v8.5, `Tile3DLayer` supports rendering in multiple views with a single tile cache.
 
 
 ### Picking in Multiple Views

@@ -106,7 +106,7 @@ function getPropTypes(PropTypes) {
 }
 
 const defaultProps = {
-  id: 'deckgl-overlay',
+  id: '',
   width: '100%',
   height: '100%',
 
@@ -133,7 +133,7 @@ const defaultProps = {
   onBeforeRender: noop,
   onAfterRender: noop,
   onLoad: noop,
-  onError: null,
+  onError: (error, layer) => log.error(error)(),
   _onMetrics: null,
 
   getCursor,
@@ -145,7 +145,7 @@ const defaultProps = {
 /* eslint-disable max-statements */
 export default class Deck {
   constructor(props) {
-    props = Object.assign({}, defaultProps, props);
+    props = {...defaultProps, ...props};
     this.props = {};
 
     this.width = 0; // "read-only", auto-updated from canvas
@@ -174,11 +174,6 @@ export default class Deck {
     this._onEvent = this._onEvent.bind(this);
     this._onPointerDown = this._onPointerDown.bind(this);
     this._onPointerMove = this._onPointerMove.bind(this);
-    this._pickAndCallback = this._pickAndCallback.bind(this);
-    this._onRendererInitialized = this._onRendererInitialized.bind(this);
-    this._onRenderFrame = this._onRenderFrame.bind(this);
-    this._onViewStateChange = this._onViewStateChange.bind(this);
-    this._onInteractionStateChange = this._onInteractionStateChange.bind(this);
 
     if (props.viewState && props.initialViewState) {
       log.warn(
@@ -404,17 +399,13 @@ export default class Deck {
     stats.get('Pick Count').incrementCount();
     stats.get(statKey).timeStart();
 
-    const infos = this.deckPicker[method](
-      Object.assign(
-        {
-          layers: this.layerManager.getLayers(opts),
-          views: this.viewManager.getViews(),
-          viewports: this.getViewports(opts),
-          onViewportActive: this.layerManager.activateViewport
-        },
-        opts
-      )
-    );
+    const infos = this.deckPicker[method]({
+      layers: this.layerManager.getLayers(opts),
+      views: this.viewManager.getViews(),
+      viewports: this.getViewports(opts),
+      onViewportActive: this.layerManager.activateViewport,
+      ...opts
+    });
 
     stats.get(statKey).timeEnd();
 
@@ -433,13 +424,12 @@ export default class Deck {
 
     if (!canvas) {
       canvas = document.createElement('canvas');
+      canvas.id = props.id || 'deckgl-overlay';
       const parent = props.parent || document.body;
       parent.appendChild(canvas);
     }
 
-    const {id, style} = props;
-    canvas.id = id;
-    Object.assign(canvas.style, style);
+    Object.assign(canvas.style, props.style);
 
     return canvas;
   }
@@ -491,7 +481,18 @@ export default class Deck {
   }
 
   _createAnimationLoop(props) {
-    const {width, height, gl, glOptions, debug, useDevicePixels, autoResizeDrawingBuffer} = props;
+    const {
+      width,
+      height,
+      gl,
+      glOptions,
+      debug,
+      onError,
+      onBeforeRender,
+      onAfterRender,
+      useDevicePixels,
+      autoResizeDrawingBuffer
+    } = props;
 
     return new AnimationLoop({
       width,
@@ -501,12 +502,18 @@ export default class Deck {
       autoResizeViewport: false,
       gl,
       onCreateContext: opts =>
-        createGLContext(Object.assign({}, glOptions, opts, {canvas: this.canvas, debug})),
-      onInitialize: this._onRendererInitialized,
-      onRender: this._onRenderFrame,
-      onBeforeRender: props.onBeforeRender,
-      onAfterRender: props.onAfterRender,
-      onError: props.onError
+        createGLContext({
+          ...glOptions,
+          ...opts,
+          canvas: this.canvas,
+          debug,
+          onContextLost: () => this._onContextLost()
+        }),
+      onInitialize: context => this._setGLContext(context.gl),
+      onRender: this._onRenderFrame.bind(this),
+      onBeforeRender,
+      onAfterRender,
+      onError
     });
   }
 
@@ -526,6 +533,13 @@ export default class Deck {
       views[0].props.controller = this.props.controller;
     }
     return views;
+  }
+
+  _onContextLost() {
+    const {onError} = this.props;
+    if (this.animationLoop && onError) {
+      onError(new Error(`WebGL context is lost`));
+    }
   }
 
   // The `pointermove` event may fire multiple times in between two animation frames,
@@ -652,8 +666,8 @@ export default class Deck {
     this.viewManager = new ViewManager({
       timeline,
       eventManager: this.eventManager,
-      onViewStateChange: this._onViewStateChange,
-      onInteractionStateChange: this._onInteractionStateChange,
+      onViewStateChange: this._onViewStateChange.bind(this),
+      onInteractionStateChange: this._onInteractionStateChange.bind(this),
       views: this._getViews(),
       viewState: this._getViewState(),
       width: this.width,
@@ -691,30 +705,22 @@ export default class Deck {
 
     this.props.onBeforeRender({gl});
 
-    this.deckRenderer.renderLayers(
-      Object.assign(
-        {
-          target: this.props._framebuffer,
-          layers: this.layerManager.getLayers(),
-          viewports: this.viewManager.getViewports(),
-          onViewportActive: this.layerManager.activateViewport,
-          views: this.viewManager.getViews(),
-          pass: 'screen',
-          redrawReason,
-          effects: this.effectManager.getEffects()
-        },
-        renderOptions
-      )
-    );
+    this.deckRenderer.renderLayers({
+      target: this.props._framebuffer,
+      layers: this.layerManager.getLayers(),
+      viewports: this.viewManager.getViewports(),
+      onViewportActive: this.layerManager.activateViewport,
+      views: this.viewManager.getViews(),
+      pass: 'screen',
+      redrawReason,
+      effects: this.effectManager.getEffects(),
+      ...renderOptions
+    });
 
     this.props.onAfterRender({gl});
   }
 
   // Callbacks
-
-  _onRendererInitialized({gl}) {
-    this._setGLContext(gl);
-  }
 
   _onRenderFrame(animationProps) {
     this._getFrameStats();
@@ -734,6 +740,11 @@ export default class Deck {
     this._updateCanvasSize();
 
     this._updateCursor();
+
+    // If view state has changed, clear tooltip
+    if (this.tooltip.isVisible && this.viewManager.needsRedraw()) {
+      this.tooltip.setTooltip(null);
+    }
 
     // Update layers if needed (e.g. some async prop has loaded)
     // Note: This can trigger a redraw
@@ -764,7 +775,9 @@ export default class Deck {
       this.viewState = {...this.viewState, [params.viewId]: viewState};
       if (!this.props.viewState) {
         // Apply internal view state
-        this.viewManager.setProps({viewState: this.viewState});
+        if (this.viewManager) {
+          this.viewManager.setProps({viewState: this.viewState});
+        }
       }
     }
   }

@@ -16,6 +16,7 @@ Use deck.gl layers as custom Mapbox layers, enabling seamless interleaving of Ma
 
 * deck.gl's multi-view system cannot be used.
 * Unless used with react-map-gl, WebGL2 based deck.gl features, such as attribute transitions and GPU accelerated aggregation layers cannot be used.
+* Mapbox 2.0's terrain feature is currently not supported.
 
 ## Installation
 
@@ -72,7 +73,8 @@ const map = new mapboxgl.Map({
   container: 'map',
   style: 'mapbox://styles/mapbox/streets-v9',
   center: [-74.50, 40],
-  zoom: 9
+  zoom: 9,
+  antialias: true // Mapbox disables WebGL's antialiasing by default
 });
 
 map.on('load', () => {
@@ -116,7 +118,7 @@ function App() {
       // This id has to match the id of the deck.gl layer
       new MapboxLayer({ id: "my-scatterplot", deck }),
       // Optionally define id from Mapbox layer stack under which to add deck layer
-      'beforeId'
+      // 'before-layer-id'
     );
   }, []);
 
@@ -157,6 +159,21 @@ function App() {
 }
 ```
 
+Note that this usage pattern has a catch: the `DeckGL` instance does not know that it is sharing a context with Mapbox until `map.addLayer` is called for the first time. You may find the map blink due to competing rendering attempts between deck.gl and Mapbox if:
+
+- `map.addLayer` is not immediately called on `StaticMap`'s `onLoad` event
+- `map.addLayer` is called, but an invalid `beforeId` is supplied that does not match any layer id in the loaded map style. This causes `addLayer` to fail.
+
+If data layers are not immediately available when the component is mounted, you can work around this issue by:
+
+```js
+const onMapLoad = () => {
+  ...
+  // Insert a placeholder layer to connect Mapbox to Deck
+  // The id does not exist so it won't actually draw anything
+  map.addLayer(new MapboxLayer({ id: "dummy-layer", deck }));
+}
+```
 
 ## Injecting Layers into Mapbox
 

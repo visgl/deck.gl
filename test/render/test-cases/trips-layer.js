@@ -20,7 +20,8 @@ export default [
         getTimestamps: d => [d[0].begin_time].concat(d.map(leg => leg.end_time)),
         getColor: [253, 128, 93],
         widthMinPixels: 4,
-        rounded: true,
+        jointRounded: true,
+        capRounded: true,
         trailLength: 500,
         currentTime: 500
       })

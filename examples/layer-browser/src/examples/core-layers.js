@@ -117,7 +117,7 @@ const GeoJsonLayerExample = {
   },
   props: {
     id: 'geojsonLayer',
-    getRadius: f => MARKER_SIZE_MAP[f.properties['marker-size']],
+    getPointRadius: f => MARKER_SIZE_MAP[f.properties['marker-size']],
     getFillColor: f => {
       const color = parseColor(f.properties.fill || f.properties['marker-color']);
       const opacity = (f.properties['fill-opacity'] || 1) * 255;
@@ -135,6 +135,7 @@ const GeoJsonLayerExample = {
     lineWidthMinPixels: 1,
     pickable: true,
     dashJustified: true,
+    dashGapPickable: true,
     extensions: [new PathStyleExtension({dash: true})]
   }
 };

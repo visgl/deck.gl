@@ -29,13 +29,7 @@ import {
   getTextureParams
 } from './heatmap-layer-utils';
 import {Buffer, Texture2D, Transform, getParameters, FEATURES, hasFeatures} from '@luma.gl/core';
-import {
-  AttributeManager,
-  COORDINATE_SYSTEM,
-  log,
-  _mergeShaders as mergeShaders,
-  project32
-} from '@deck.gl/core';
+import {AttributeManager, COORDINATE_SYSTEM, log} from '@deck.gl/core';
 import TriangleLayer from './triangle-layer';
 import AggregationLayer from '../aggregation-layer';
 import {defaultColorRange, colorRangeToFlatArray} from '../utils/color-utils';
@@ -45,8 +39,6 @@ import vs_max from './max-vs.glsl';
 import fs_max from './max-fs.glsl';
 
 const RESOLUTION = 2; // (number of common space pixels) / (number texels)
-const SIZE_2K = 2048;
-const ZOOM_DEBOUNCE = 500; // milliseconds
 const TEXTURE_OPTIONS = {
   mipmaps: false,
   parameters: {
@@ -72,7 +64,9 @@ const defaultProps = {
   threshold: {type: 'number', min: 0, max: 1, value: 0.05},
   colorDomain: {type: 'array', value: null, optional: true},
   // 'SUM' or 'MEAN'
-  aggregation: 'SUM'
+  aggregation: 'SUM',
+  weightsTextureSize: {type: 'number', min: 128, max: 2048, value: 2048},
+  debounceTimeout: {type: 'number', min: 0, max: 1000, value: 500}
 };
 
 const REQUIRED_FEATURES = [
@@ -96,7 +90,7 @@ export default class HeatmapLayer extends AggregationLayer {
       return;
     }
     super.initializeState(DIMENSIONS);
-    this.setState({supported: true});
+    this.setState({supported: true, colorDomain: DEFAULT_COLOR_DOMAIN});
     this._setupTextureParams();
     this._setupAttributes();
     this._setupResources();
@@ -113,11 +107,16 @@ export default class HeatmapLayer extends AggregationLayer {
       return;
     }
     super.updateState(opts);
+    this._updateHeatmapState(opts);
+  }
+
+  _updateHeatmapState(opts) {
     const {props, oldProps} = opts;
     const changeFlags = this._getChangeFlags(opts);
 
-    if (changeFlags.viewportChanged) {
-      changeFlags.boundsChanged = this._updateBounds();
+    if (changeFlags.dataChanged || changeFlags.viewportChanged) {
+      // if data is changed, do not debounce and immediately update the weight map
+      changeFlags.boundsChanged = this._updateBounds(changeFlags.dataChanged);
       this._updateTextureRenderingBounds();
     }
 
@@ -134,30 +133,12 @@ export default class HeatmapLayer extends AggregationLayer {
       this._updateColorTexture(opts);
     }
 
-    if (oldProps.colorDomain !== props.colorDomain || changeFlags.viewportChanged) {
-      const {viewport} = this.context;
-      const {weightsScale} = this.state;
-      const domainScale = (viewport ? 1024 / viewport.scale : 1) * weightsScale;
-      const colorDomain = props.colorDomain
-        ? props.colorDomain.map(x => x * domainScale)
-        : DEFAULT_COLOR_DOMAIN;
-      if (colorDomain[1] > 0 && weightsScale < 1) {
-        // Hack - when low precision texture is used, aggregated weights are in the [0, 1]
-        // range. Scale colorDomain to fit.
-        const max = Math.min(colorDomain[1], 1);
-        colorDomain[0] *= max / colorDomain[1];
-        colorDomain[1] = max;
-      }
-      this.setState({colorDomain});
-    }
-
     if (this.state.isWeightMapDirty) {
       this._updateWeightmap();
     }
 
     this.setState({zoom: opts.context.viewport.zoom});
   }
-  /* eslint-enable max-statements,complexity */
 
   renderLayers() {
     if (!this.state.supported) {
@@ -181,6 +162,9 @@ export default class HeatmapLayer extends AggregationLayer {
         updateTriggers
       }),
       {
+        // position buffer is filled with world coordinates generated from viewport.unproject
+        // i.e. LNGLAT if geospatial, CARTESIAN otherwise
+        coordinateSystem: COORDINATE_SYSTEM.DEFAULT,
         data: {
           attributes: {
             positions: triPositionBuffer,
@@ -211,16 +195,14 @@ export default class HeatmapLayer extends AggregationLayer {
       colorTexture,
       updateTimer
     } = this.state;
-    /* eslint-disable no-unused-expressions */
-    weightsTransform && weightsTransform.delete();
-    weightsTexture && weightsTexture.delete();
-    maxWeightTransform && maxWeightTransform.delete();
-    maxWeightsTexture && maxWeightsTexture.delete();
-    triPositionBuffer && triPositionBuffer.delete();
-    triTexCoordBuffer && triTexCoordBuffer.delete();
-    colorTexture && colorTexture.delete();
+    weightsTransform?.delete();
+    weightsTexture?.delete();
+    maxWeightTransform?.delete();
+    maxWeightsTexture?.delete();
+    triPositionBuffer?.delete();
+    triTexCoordBuffer?.delete();
+    colorTexture?.delete();
     updateTimer && clearTimeout(updateTimer);
-    /* eslint-enable no-unused-expressions */
   }
 
   // PRIVATE
@@ -271,7 +253,7 @@ export default class HeatmapLayer extends AggregationLayer {
   _setupAttributes() {
     const attributeManager = this.getAttributeManager();
     attributeManager.add({
-      positions: {size: 3, accessor: 'getPosition'},
+      positions: {size: 3, type: GL.DOUBLE, accessor: 'getPosition'},
       weights: {size: 1, accessor: 'getWeight'}
     });
     this.setState({positionAttributeName: 'positions'});
@@ -279,7 +261,9 @@ export default class HeatmapLayer extends AggregationLayer {
 
   _setupTextureParams() {
     const {gl} = this.context;
-    const textureSize = Math.min(SIZE_2K, getParameters(gl, gl.MAX_TEXTURE_SIZE));
+    const {weightsTextureSize} = this.props;
+
+    const textureSize = Math.min(weightsTextureSize, getParameters(gl, gl.MAX_TEXTURE_SIZE));
     const floatTargetSupport = hasFeatures(gl, FEATURES.COLOR_ATTACHMENT_RGBA32F);
     const {format, type} = getTextureParams({gl, floatTargetSupport});
     const weightsScale = floatTargetSupport ? 1 : 1 / 255;
@@ -293,21 +277,25 @@ export default class HeatmapLayer extends AggregationLayer {
     }
   }
 
-  _createWeightsTransform(shaderOptions = {}) {
+  getShaders(type) {
+    return super.getShaders(
+      type === 'max-weights-transform'
+        ? {
+            vs: vs_max,
+            _fs: fs_max
+          }
+        : {
+            vs: weights_vs,
+            _fs: weights_fs
+          }
+    );
+  }
+
+  _createWeightsTransform(shaders = {}) {
     const {gl} = this.context;
     let {weightsTransform} = this.state;
     const {weightsTexture} = this.state;
-    if (weightsTransform) {
-      weightsTransform.delete();
-    }
-    const shaders = mergeShaders(
-      {
-        vs: weights_vs,
-        _fs: weights_fs,
-        modules: [project32]
-      },
-      shaderOptions
-    );
+    weightsTransform?.delete();
 
     weightsTransform = new Transform(gl, {
       id: `${this.id}-weights-transform`,
@@ -323,7 +311,11 @@ export default class HeatmapLayer extends AggregationLayer {
     const {gl} = this.context;
     this._createTextures();
     const {textureSize, weightsTexture, maxWeightsTexture} = this.state;
-    this._createWeightsTransform();
+
+    const weightsTransformShaders = this.getShaders('weights-transform');
+    this._createWeightsTransform(weightsTransformShaders);
+
+    const maxWeightsTransformShaders = this.getShaders('max-weights-transform');
     const maxWeightTransform = new Transform(gl, {
       id: `${this.id}-max-weights-transform`,
       _sourceTextures: {
@@ -331,8 +323,7 @@ export default class HeatmapLayer extends AggregationLayer {
       },
       _targetTexture: maxWeightsTexture,
       _targetTextureVarying: 'outTexture',
-      vs: vs_max,
-      _fs: fs_max,
+      ...maxWeightsTransformShaders,
       elementCount: textureSize * textureSize
     });
 
@@ -381,7 +372,7 @@ export default class HeatmapLayer extends AggregationLayer {
       viewport.unproject([viewport.width, 0]),
       viewport.unproject([viewport.width, viewport.height]),
       viewport.unproject([0, viewport.height])
-    ];
+    ].map(p => p.map(Math.fround));
 
     // #1: get world bounds for current viewport extends
     const visibleWorldBounds = getBounds(viewportCorners); // TODO: Change to visible bounds
@@ -462,14 +453,25 @@ export default class HeatmapLayer extends AggregationLayer {
   }
 
   _updateWeightmap() {
-    const {radiusPixels} = this.props;
+    const {radiusPixels, colorDomain, aggregation} = this.props;
     const {weightsTransform, worldBounds, textureSize, weightsTexture, weightsScale} = this.state;
     this.state.isWeightMapDirty = false;
 
-    // #5: convert world bounds to common using Layer's coordiante system and origin
+    // convert world bounds to common using Layer's coordiante system and origin
     const commonBounds = this._worldToCommonBounds(worldBounds, {
       useLayerCoordinateSystem: true
     });
+
+    if (colorDomain && aggregation === 'SUM') {
+      // scale color domain to weight per pixel
+      const {viewport} = this.context;
+      const metersPerPixel =
+        (viewport.distanceScales.metersPerUnit[2] * (commonBounds[2] - commonBounds[0])) /
+        textureSize;
+      this.state.colorDomain = colorDomain.map(x => x * metersPerPixel * weightsScale);
+    } else {
+      this.state.colorDomain = colorDomain || DEFAULT_COLOR_DOMAIN;
+    }
 
     const uniforms = {
       radiusPixels,
@@ -505,6 +507,7 @@ export default class HeatmapLayer extends AggregationLayer {
 
   _debouncedUpdateWeightmap(fromTimer = false) {
     let {updateTimer} = this.state;
+    const {debounceTimeout} = this.props;
 
     if (fromTimer) {
       updateTimer = null;
@@ -515,7 +518,7 @@ export default class HeatmapLayer extends AggregationLayer {
     } else {
       this.setState({isWeightMapDirty: false});
       clearTimeout(updateTimer);
-      updateTimer = setTimeout(this._debouncedUpdateWeightmap.bind(this, true), ZOOM_DEBOUNCE);
+      updateTimer = setTimeout(this._debouncedUpdateWeightmap.bind(this, true), debounceTimeout);
     }
 
     this.setState({updateTimer});
@@ -529,14 +532,22 @@ export default class HeatmapLayer extends AggregationLayer {
     const [minLong, minLat, maxLong, maxLat] = worldBounds;
     const {viewport} = this.context;
     const {textureSize} = this.state;
+    const {coordinateSystem} = this.props;
 
+    const offsetMode =
+      useLayerCoordinateSystem &&
+      (coordinateSystem === COORDINATE_SYSTEM.LNGLAT_OFFSETS ||
+        coordinateSystem === COORDINATE_SYSTEM.METER_OFFSETS);
+    const offsetOriginCommon = offsetMode
+      ? viewport.projectPosition(this.props.coordinateOrigin)
+      : [0, 0];
     const size = (textureSize * RESOLUTION) / viewport.scale;
 
     let bottomLeftCommon;
     let topRightCommon;
 
     // Y-axis is flipped between World and Common bounds
-    if (useLayerCoordinateSystem) {
+    if (useLayerCoordinateSystem && !offsetMode) {
       bottomLeftCommon = this.projectPosition([minLong, minLat, 0]);
       topRightCommon = this.projectPosition([maxLong, maxLat, 0]);
     } else {
@@ -544,9 +555,16 @@ export default class HeatmapLayer extends AggregationLayer {
       topRightCommon = viewport.projectPosition([maxLong, maxLat, 0]);
     }
     // Ignore z component
-    let commonBounds = bottomLeftCommon.slice(0, 2).concat(topRightCommon.slice(0, 2));
-    commonBounds = scaleToAspectRatio(commonBounds, size, size);
-    return commonBounds;
+    return scaleToAspectRatio(
+      [
+        bottomLeftCommon[0] - offsetOriginCommon[0],
+        bottomLeftCommon[1] - offsetOriginCommon[1],
+        topRightCommon[0] - offsetOriginCommon[0],
+        topRightCommon[1] - offsetOriginCommon[1]
+      ],
+      size,
+      size
+    );
   }
 
   // input commonBounds: [xMin, yMin, xMax, yMax]

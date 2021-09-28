@@ -9,7 +9,7 @@ Since binary transfer relies on Jupyter's kernel communication,
 note that the .html in the pydeck documentation does not use binary transfer
 and is just for illustration.
 """
-import pydeck
+import pydeck as pdk
 
 import pandas as pd
 
@@ -34,13 +34,21 @@ def generate_graph_data(num_nodes, random_seed):
     return force_layout_df
 
 
-def make_renderer(nodes, use_binary_transport=False):
+def make_renderer(nodes: pd.DataFrame, use_binary_transport: bool = False) -> pdk.Deck:
     """Creates the pydeck visualization for rendering"""
-    view_state = pydeck.ViewState(offset=[0, 0], latitude=None, longitude=None, bearing=None, pitch=None, zoom=10,)
+    view_state = pdk.ViewState(
+        offset=[0, 0],
+        target=[0, 0, 0],
+        latitude=None,
+        longitude=None,
+        bearing=None,
+        pitch=None,
+        zoom=10,
+    )
 
-    views = [pydeck.View(type="OrbitView", controller=True)]
+    views = [pdk.View(type="OrbitView", controller=True)]
 
-    nodes_layer = pydeck.Layer(
+    nodes_layer = pdk.Layer(
         "PointCloudLayer",
         nodes,
         get_position="position",
@@ -54,17 +62,17 @@ def make_renderer(nodes, use_binary_transport=False):
         radius=50,
     )
 
-    return pydeck.Deck(layers=[nodes_layer], initial_view_state=view_state, views=views, map_provider=None)
+    return pdk.Deck(layers=[nodes_layer], initial_view_state=view_state, views=views, map_provider=None)
 
 
 r = None
 
 
-def generate_vis(notebook_display=False):
+def generate_vis(notebook_display: bool = False):
     global r
     nodes = pd.read_csv(NODES_URL)
 
-    colors = pydeck.data_utils.assign_random_colors(nodes["group"])
+    colors = pdk.data_utils.assign_random_colors(nodes["group"])
     # Divide by 255 to normalize the colors
     # Specify positions and colors as columns of lists
     nodes["color"] = nodes.apply(

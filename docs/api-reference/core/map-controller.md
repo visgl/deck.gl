@@ -38,6 +38,7 @@ Supports all [Controller options](/docs/api-reference/core/controller.md#options
 
 - `dragMode` - default `'pan'` (drag to pan, shift/ctrl + drag to rotate)
 - `keyboard` - arrow keys to pan, arrow keys with shift/ctrl down to rotate, +/- to zoom
+- `normalize` - normalize viewport props to fit map height into viewport. Default `true`
 
 ## Custom MapController
 

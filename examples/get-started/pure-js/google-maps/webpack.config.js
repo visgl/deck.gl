@@ -12,7 +12,7 @@ const CONFIG = {
 
   plugins: [
     // Read google maps token from environment variable
-    new webpack.EnvironmentPlugin(['GoogleMapsAPIKey'])
+    new webpack.EnvironmentPlugin(['GoogleMapsAPIKey', 'GoogleMapsMapId'])
   ]
 };
 

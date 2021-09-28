@@ -1,8 +1,8 @@
 <html>
   <head>
     <!-- deck.gl standalone bundle -->
-    <script src="https://unpkg.com/deck.gl@^8.1.0/dist.min.js"></script>
-    <script src="https://unpkg.com/@deck.gl/arcgis@^8.1.0/dist.min.js"></script>
+    <script src="https://unpkg.com/deck.gl@^8.5.0/dist.min.js"></script>
+    <script src="https://unpkg.com/@deck.gl/arcgis@^8.5.0/dist.min.js"></script>
 
     <!-- ArcGIS dependencies -->
     <link rel="stylesheet" href="https://js.arcgis.com/4.14/esri/themes/light/main.css"/>
@@ -37,7 +37,7 @@ loadArcGISModules(['esri/Map', 'esri/views/MapView']).then(({DeckLayer, modules}
         filled: true,
         pointRadiusMinPixels: 2,
         pointRadiusScale: 2000,
-        getRadius: f => (11 - f.properties.scalerank),
+        getPointRadius: f => (11 - f.properties.scalerank),
         getFillColor: [200, 0, 80, 180],
         // Interactive props
         pickable: true,

@@ -34,6 +34,24 @@ Scaler for the near plane, 1 unit equals to the height of the viewport. Default 
 
 Scaler for the far plane, 1 unit equals to the distance from the camera to the top edge of the screen. Default to `1.01`. Overwrites the `far` parameter.
 
+##### `projectionMatrix` (Array[16], optional)
+
+Projection matrix.
+
+If `projectionMatrix` is not supplied, the `View` class will build a projection matrix from the following parameters:
+
+##### `fovy` (Number, optional)
+
+Field of view covered by the camera, in the perspective case. In degrees. If not supplied, will be calculated from `altitude`.
+
+##### `altitude` (Number, optional)
+
+Distance of the camera relative to viewport height. Default `1.5`.
+
+##### `orthographic` (Boolean)
+
+Whether to create an orthographic or perspective projection matrix. Default is `false` (perspective projection).
+
 
 ## View State
 

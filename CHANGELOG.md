@@ -17,7 +17,209 @@ Each version should:
 Ref: http://keepachangelog.com/en/0.3.0/
 -->
 
+## deck.gl v8.6
+
+### deck.gl v8.6 Prereleases
+
+#### deck.gl [8.6.0-alpha.3] - Sep 9 2021
+
+- Improve shader projection in auto offset mode (#6161)
+- Google overlay state synchronization (#6177)
+
+#### deck.gl [8.6.0-alpha.2] - Sep 6 2021
+
+- Drop sublayers with no data even if the _subLayerProps prop contains (#6160)
+- Heatmap - expose additional properties (#6158)
+- pydeck: Enable custom_map_style and file encoding for HTML on Windows (#6121)
+- Additional reference points for bounding volume calculation - globe view (#6148)
+- CARTO: include API error at the exception message (#6143)
+- Bump luma.gl to 8.5.5 (#6132)
+- Fix Default Values in `AttributeManager` `add` method (#6130)
+- Fix TileLayer and Tile3DLayer visiblility (#6123)
+- Add geoColumn & columns props to CartoLayer (#6097)
+- Bug fixes in google overlay (#6083)
+- OrthographicView supports independent x/y zoom levels (#6116)
+- Only call layerFilter with top-level layers (#6049)
+- Add zero _offset to Tile3DLayer (#6108)
+- Fix MVTLayer autoHighlight with binary data (#6098)
+- Improve tile traversal in GlobeView (#6106)
+- Bump loaders to 3.0.8 (#6075)
+- Scatterplot layer: smooth edges prop (#6081)
+
+#### deck.gl [8.6.0-alpha.1] - Aug 9 2021
+
+- Support vector maps in google module (#5981)
+- Check for correct layerName when highlighting in MVTLayer (#6062)
+
+### deck.gl v8.5 Prereleases
+
+#### deck.gl [8.5.0-beta.2] - Jul 20 2021
+
+- Avoid onError call if context is lost after finalization (#5992)
+- Bump math.gl to 3.5.3 (#5994)
+- Binary MVTLayer returns geometry when picking (#5965)
+- Bump dependencies (#5990)
+- Provide default skirt height for tiled TerrainLayer (#5982)
+- Bump loaders.gl to 3.0.2, luma.gl to 8.5.0 (#5979)
+- Bump math.gl to 3.5.1 (#5972)
+- Billboard prop for Scatterplot layer (#5956)
+- Enforce OrbitView orbitAxis prop (#5962)
+- Add `fadeTrail` prop to TripLayer (#5921)
+
+#### deck.gl [8.5.0-beta.1] - Jul 5 2021
+
+- Bump dependencies (#5951)
+- MVTLayer and TerrainLayer switch to use worker-only loaders (#5946)
+- update bundle config (#5949)
+- Bump loaders to 3.0.0-beta.6 (#5943)
+- MVTLayer use all loaders (#5934)
+- CARTO module: bearer token always in header (#5933)
+- TileLayer: add zoomOffset prop  (#5896)
+- Don't Use `tileSize` for Determining `z` of Tile Indexing in InfoVis (#5895)
+- CARTO module: rename code from cloud-native to carto3 (#5932)
+- tile-3d: update with new loaders version (#5920)
+- Fix: Initialize mapsUrl in cloud native (#5868)
+- Upgrade ocular-dev-tools (#5910)
+
+#### deck.gl [8.5.0-alpha.11] - Jun 21 2021
+
+- Fix: CARTO module WebGL invalid value for table (#5894)
+- TextLayer supports characterSet:auto (#5889)
+- Bump @loaders.gl to 3.0.0-alpha.21 (#5879)
+- Correct data.length for MVTLayer polygons (#5853)
+
+#### deck.gl [8.5.0-alpha.10] - Jun 11 2021
+
+- Support pointType prop to allow changing point rendering in GeoJsonLayer (#5835)
+- geo: tile-3d viewport filter (#5866)
+- Consolidate and document fetch prop (#5854)
+
+#### deck.gl [8.5.0-alpha.9] - Jun 9 2021
+
+- CARTO cloud native integration (#5859)
+- Fix inconsistent path layer id in GeoJSONLayer (#5855)
+- Tile3DLayer: multiple viewports (#5758)
+- Tile3DLayer: segmentation picking (#5757)
+- Fix event order when dynamically add/remove controllers (#5852)
+- Fix heatmap colorDomain (#5846)
+
+#### deck.gl [8.5.0-alpha.8] - Jun 5 2021
+
+- Pass through loadOptions and AbortSignal to MVTLayer & TerrainLayer (#5837)
+- Refactor OrbitController (#5825)
+- Allow CompositeLayer to filter sub layers during redraw (#5820)
+- Add getTilerColor method to tile-3d-layer (#5814)
+- Refactor linear transition in controllers (#5824)
+- i3s: support vertex colors (#5756)
+- i3s: support uvRegions (#5760)
+- Fix heatmap colorDomain (#5802)
+- feat(geo-layers): Private MeshLayer with pbr material support (I3S) (#5761)
+
+#### deck.gl [8.5.0-alpha.7] - May 25 2021
+
+- geo: i3s - support indices (#5807)
+- Bump @loaders.gl to 3.0.0-alpha.16 to pick up earcut migration to math.gl (#5805)
+- Set default of MVTLayer binary to true (#5800)
+- Fix size projection in billboard mode (#5798)
+
+#### deck.gl [8.5.0-alpha.6] - May 17 2021
+
+- Bump @loaders.gl to 3.0.0-alpha.14 (#5780)
+- Tile3DLayer: Ability to override color per tile (#5759)
+- Support local-math env option (#5737)
+
+#### deck.gl [8.5.0-alpha.5] - May 10 2021
+
+- Do not log init message unless log priority set to 1 (#5718)
+- Normalize viewState on MapController initialization + add normalize flag (#5727)
+- Move ClipExtension to @deck.gl/extensions (#5726)
+- Add onError to Layer props (#5732)
+- Invoke onError when GL context is lost (#5731)
+- Clean up Deck's internal method bindings (#5730)
+- Update onError callback default (#5702)
+- Support triangulation of polygons for MVTLoader in loaders.gl (#5712)
+- Revert "[feat] WebGL context lost handling > pass to listeners of onError (#5399)" (#5604)
+
+#### deck.gl [8.5.0-alpha.4] - Mar 22 2021
+
+[feat] WebGL context lost handling > pass to listeners of on
+Error (#5399)
+
+#### deck.gl [8.5.0-alpha.3] - Feb 25 2021
+
+- Bump luma.gl dependencies to 8.5.0-alpha (#5535)
+- Change build targets (#5528)
+- Bump loaders version to 3.0.0-alpha (#5531)
+- Syntax pass (#5520)
+- Update dev setup to support modern JS syntax (#5517)
+
+#### deck.gl [8.5.0-alpha.2] - Feb 22 2021
+
+- PathLayer: separate joint type and cap type props (#5508)
+- [react] Fix flickering in React.StrictMode (#5511)
+- Clear tooltip when viewport changes (#5509)
+
+#### deck.gl [8.5.0-alpha.1] - Feb 19 2021
+
+- Migrate DeckGL to functional component (#5495)
+- LayerManager: avoid layer update during setProps (#5494)
+- Add outline rendering to TextLayer (#5483)
+- Add background rendering to TextLayer (#5460)
+- Clean up assertions in core and layer modules (#5480)
+- Standardize autoHighlight logic in CompositeLayer (#5454)
+
 ## deck.gl v8.4
+
+#### deck.gl [8.4.9] - Feb 25 2021
+
+- Fix zero height arc rendering between coordinates with different z components (#5527)
+
+#### deck.gl [8.4.8] - Feb 23 2021
+
+- Fix TileLayer fetch options (#5521)
+- Force OrbitView/OrthographicView to create non-geospatial viewports (#5525)
+
+#### deck.gl [8.4.7] - Feb 19 2021
+
+- Force using a single loader for MVT data (#5507)
+- Fix picking color values coming from a reallocated buffer (#5503)
+
+#### deck.gl [8.4.6] - Feb 16 2021
+
+- Fix for inconsistent column geometry's top cap winding order (#5492)
+- Tile3DLayer - fix render when normals are missing (#5485)
+
+#### deck.gl [8.4.5] - Feb 12 2021
+
+- Bump loaders.gl dependencies (#5477)
+- Fix ArcLayer with wrapLongitude:true at high zoom (#5478)
+
+#### deck.gl [8.4.4] - Feb 12 2021
+
+- MVT: fix picking non-binary (#5471)
+
+#### deck.gl [8.4.3] - Feb 10 2021
+
+- Fix MVTLayer loader propagation (#5455)
+- Restore default transitionInterpolator (#5459)
+
+#### deck.gl [8.4.2] - Feb 5 2021
+
+- Bump luma.gl dependencies (#5441)
+- Fix drawPickingColors usability (#5437)
+- Fix FillStyleExtension bugs (#5438)
+
+#### deck.gl [8.4.1] - Feb 3 2021
+
+- Fix controller.makeViewport when using percentage dimensions (#5431)
+
+#### deck.gl [8.4.0] - Feb 1 2021
+
+- Bump luma.gl to 8.4.0 (#5416)
+- Fix FirstPersonView "matrix not invertible" error at pitch=-90 (#5415)
+- Orbit and Ortho viewports pass additional props to the Viewport constructor (#5407)
+- Avoid silencing errors by default in CartoLayer (#5402)
+- Fix TerrainLayer error (#5404)
 
 ### deck.gl v8.4 Prereleases
 

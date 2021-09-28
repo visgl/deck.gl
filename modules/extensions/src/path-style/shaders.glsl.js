@@ -14,6 +14,8 @@ vDashOffset = instanceDashOffsets / width.x;
 
     'fs:#decl': `
 uniform float dashAlignMode;
+uniform float capType;
+uniform bool dashGapPickable;
 varying vec2 vDashArray;
 varying float vDashOffset;
 
@@ -45,11 +47,25 @@ float round(float x) {
       offset = solidLength / 2.0;
     }
 
-    if (
-      gapLength > 0.0 &&
-      mod(clamp(vPathPosition.y, 0.0, vPathLength) + offset, unitLength) > solidLength
-    ) {
-      discard;
+    float unitOffset = mod(clamp(vPathPosition.y, 0.0, vPathLength) + offset, unitLength);
+
+    if (gapLength > 0.0 && unitOffset > solidLength) {
+      if (capType <= 0.5) {
+        if (!(dashGapPickable && picking_uActive)) {
+          discard;
+        }
+      } else {
+        // caps are rounded, test the distance to solid ends
+        float distToEnd = length(vec2(
+          min(unitOffset - solidLength, unitLength - unitOffset),
+          vPathPosition.x
+        ));
+        if (distToEnd > 1.0) {
+          if (!(dashGapPickable && picking_uActive)) {
+            discard;
+          }
+        }
+      }
     }
   }
 `

@@ -1,7 +1,6 @@
 import GL from '@luma.gl/constants';
 import Pass from './pass';
 import {clear, setParameters, withParameters, cssToDeviceRatio} from '@luma.gl/core';
-import log from '../utils/log';
 
 export default class LayersPass extends Pass {
   render(props) {
@@ -15,6 +14,7 @@ export default class LayersPass extends Pass {
   // Draw a list of layers in a list of viewports
   _drawLayers(props) {
     const {viewports, views, onViewportActive, clearCanvas = true} = props;
+    props.pass = props.pass || 'unknown';
 
     const gl = this.gl;
     if (clearCanvas) {
@@ -50,16 +50,24 @@ export default class LayersPass extends Pass {
   // Resolve the parameters needed to draw each layer
   // When a viewport contains multiple subviewports (e.g. repeated web mercator map),
   // this is only done once for the parent viewport
-  _getDrawLayerParams(
-    viewport,
-    {layers, pass = 'unknown', layerFilter, effects, moduleParameters}
-  ) {
+  _getDrawLayerParams(viewport, {layers, pass, layerFilter, effects, moduleParameters}) {
     const drawLayerParams = [];
     const indexResolver = layerIndexResolver();
+    const drawContext = {
+      viewport,
+      isPicking: pass.startsWith('picking'),
+      renderPass: pass
+    };
+    const layerFilterCache = {};
     for (let layerIndex = 0; layerIndex < layers.length; layerIndex++) {
       const layer = layers[layerIndex];
       // Check if we should draw layer
-      const shouldDrawLayer = this._shouldDrawLayer(layer, viewport, pass, layerFilter);
+      const shouldDrawLayer = this._shouldDrawLayer(
+        layer,
+        drawContext,
+        layerFilter,
+        layerFilterCache
+      );
 
       // This is the "logical" index for ordering this layer in the stack
       // used to calculate polygon offsets
@@ -89,7 +97,7 @@ export default class LayersPass extends Pass {
   // TODO - when picking we could completely skip rendering viewports that dont
   // intersect with the picking rect
   /* eslint-disable max-depth, max-statements */
-  _drawLayersInViewport(gl, {layers, onError, viewport, view}, drawLayerParams) {
+  _drawLayersInViewport(gl, {layers, pass, viewport, view}, drawLayerParams) {
     const glViewport = getGLViewport(gl, {viewport});
 
     if (view && view.props.clear) {
@@ -144,11 +152,7 @@ export default class LayersPass extends Pass {
             parameters: layerParameters
           });
         } catch (err) {
-          if (onError) {
-            onError(err, layer);
-          } else {
-            log.error(`error during drawing of ${layer}`, err)();
-          }
+          layer.raiseError(err, `drawing ${layer} to ${pass}`);
         }
       }
     }
@@ -171,23 +175,38 @@ export default class LayersPass extends Pass {
   }
 
   /* Private */
-  _shouldDrawLayer(layer, viewport, pass, layerFilter) {
-    let shouldDrawLayer = this.shouldDrawLayer(layer) && layer.props.visible;
+  _shouldDrawLayer(layer, drawContext, layerFilter, layerFilterCache) {
+    const shouldDrawLayer = this.shouldDrawLayer(layer) && layer.props.visible;
 
-    if (shouldDrawLayer && layerFilter) {
-      shouldDrawLayer = layerFilter({
-        layer,
-        viewport,
-        isPicking: pass.startsWith('picking'),
-        renderPass: pass
-      });
-    }
-    if (shouldDrawLayer) {
-      // If a layer is drawn, update its viewportChanged flag
-      layer.activateViewport(viewport);
+    if (!shouldDrawLayer) {
+      return false;
     }
 
-    return shouldDrawLayer;
+    drawContext.layer = layer;
+
+    let parent = layer.parent;
+    while (parent) {
+      if (!parent.props.visible || !parent.filterSubLayer(drawContext)) {
+        return false;
+      }
+      drawContext.layer = parent;
+      parent = parent.parent;
+    }
+
+    if (layerFilter) {
+      const rootLayerId = drawContext.layer.id;
+      if (!(rootLayerId in layerFilterCache)) {
+        layerFilterCache[rootLayerId] = layerFilter(drawContext);
+      }
+      if (!layerFilterCache[rootLayerId]) {
+        return false;
+      }
+    }
+
+    // If a layer is drawn, update its viewportChanged flag
+    layer.activateViewport(drawContext.viewport);
+
+    return true;
   }
 
   _getModuleParameters(layer, effects, pass, overrides) {

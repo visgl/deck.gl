@@ -8,8 +8,8 @@
     "build": "webpack -p"
   },
   "dependencies": {
-    "@deck.gl/core": "^8.2.0-beta.1",
-    "@deck.gl/layers": "^8.2.0-beta.1"
+    "@deck.gl/core": "^8.5.0",
+    "@deck.gl/layers": "^8.5.0"
   },
   "devDependencies": {
     "html-webpack-plugin": "^3.0.7",

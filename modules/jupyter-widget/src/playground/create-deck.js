@@ -2,7 +2,8 @@
 /* eslint-disable no-console */
 import {CSVLoader} from '@loaders.gl/csv';
 import {registerLoaders} from '@loaders.gl/core';
-import GL from '@luma.gl/constants';
+// Avoid calling it GL - would be removed by babel-plugin-inline-webgl-constants
+import GLConstants from '@luma.gl/constants';
 
 import makeTooltip from './widget-tooltip';
 
@@ -30,7 +31,7 @@ const jsonConverterConfiguration = {
   // Will be resolved as `<enum-name>.<enum-value>`
   enumerations: {
     COORDINATE_SYSTEM: deck.COORDINATE_SYSTEM,
-    GL
+    GL: GLConstants
   }
 };
 
@@ -121,7 +122,10 @@ function createStandaloneFromProvider({
           viewState.nw = viewport.unproject([0, 0]);
           viewState.se = viewport.unproject([viewport.width, viewport.height]);
           handleEvent('deck-view-state-change-event', viewState);
-        }
+        },
+        onDragStart: info => handleEvent('deck-drag-start-event', info),
+        onDrag: info => handleEvent('deck-drag-event', info),
+        onDragEnd: info => handleEvent('deck-drag-end-event', info)
       }
     : null;
 

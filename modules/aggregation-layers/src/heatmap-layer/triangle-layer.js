@@ -44,16 +44,14 @@ export default class TriangleLayer extends Layer {
   _getModel(gl) {
     const {vertexCount} = this.props;
 
-    return new Model(
-      gl,
-      Object.assign({}, this.getShaders(), {
-        id: this.props.id,
-        geometry: new Geometry({
-          drawMode: GL.TRIANGLE_FAN,
-          vertexCount
-        })
+    return new Model(gl, {
+      ...this.getShaders(),
+      id: this.props.id,
+      geometry: new Geometry({
+        drawMode: GL.TRIANGLE_FAN,
+        vertexCount
       })
-    );
+    });
   }
 
   draw({uniforms}) {

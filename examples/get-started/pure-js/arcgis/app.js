@@ -8,6 +8,7 @@ const AIR_PORTS =
 loadArcGISModules(['esri/Map', 'esri/views/MapView']).then(({DeckLayer, modules}) => {
   const [ArcGISMap, MapView] = modules;
   const layer = new DeckLayer({
+    effect: 'bloom(1.5, 0.5px, 0.1)',
     'deck.getTooltip': info => info.object && info.object.properties.name,
     'deck.layers': [
       new GeoJsonLayer({
@@ -17,7 +18,7 @@ loadArcGISModules(['esri/Map', 'esri/views/MapView']).then(({DeckLayer, modules}
         filled: true,
         pointRadiusMinPixels: 2,
         pointRadiusScale: 2000,
-        getRadius: f => 11 - f.properties.scalerank,
+        getPointRadius: f => 11 - f.properties.scalerank,
         getFillColor: [200, 0, 80, 180],
         // Interactive props
         pickable: true,

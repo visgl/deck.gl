@@ -6,8 +6,10 @@ import * as AggregationLayers from '@deck.gl/aggregation-layers';
 import * as GeoLayers from '@deck.gl/geo-layers';
 import * as MeshLayers from '@deck.gl/mesh-layers';
 import {
+  CartoLayer,
   CartoSQLLayer,
   CartoBQTilerLayer,
+  MAP_TYPES as CARTO_MAP_TYPES,
   colorBins,
   colorCategories,
   colorContinuous
@@ -34,7 +36,7 @@ export default {
     AggregationLayers,
     GeoLayers,
     MeshLayers,
-    {CartoBQTilerLayer, CartoSQLLayer},
+    {CartoLayer, CartoBQTilerLayer, CartoSQLLayer},
     // Any non-standard views
     {}
   ),
@@ -46,7 +48,8 @@ export default {
   // Will be resolved as `<enum-name>.<enum-value>`
   enumerations: {
     COORDINATE_SYSTEM,
-    GL
+    GL,
+    CARTO_MAP_TYPES
   },
 
   // Constants that should be resolved with the provided values by JSON converter

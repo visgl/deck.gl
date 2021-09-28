@@ -31,7 +31,7 @@ export default class FlyToInterpolator extends TransitionInterpolator {
       extract: ['width', 'height', 'longitude', 'latitude', 'zoom', 'bearing', 'pitch'],
       required: ['width', 'height', 'latitude', 'longitude', 'zoom']
     });
-    this.props = Object.assign({}, DEFAULT_OPTS, props);
+    this.props = {...DEFAULT_OPTS, ...props};
   }
 
   interpolateProps(startProps, endProps, t) {

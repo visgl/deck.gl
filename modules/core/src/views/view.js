@@ -14,15 +14,8 @@ export default class View {
       width = '100%',
       height = '100%',
 
-      // Viewport Options
-      projectionMatrix = null, // Projection matrix
-      fovy = 50, // Perspective projection parameters, used if projectionMatrix not supplied
-      near = 0.1, // Distance of near clipping plane
-      far = 1000, // Distance of far clipping plane
-      modelMatrix = null, // A model matrix to be applied to position, to match the layer props API
-
       // A View can be a wrapper for a viewport instance
-      viewportInstance = null,
+      viewportInstance,
 
       // Internal: Viewport Type
       type = Viewport // TODO - default to WebMercator?
@@ -35,14 +28,7 @@ export default class View {
     this.id = id || this.constructor.displayName || 'view';
     this.type = type;
 
-    this.props = Object.assign({}, props, {
-      id: this.id,
-      projectionMatrix,
-      fovy,
-      near,
-      far,
-      modelMatrix
-    });
+    this.props = {...props, id: this.id};
 
     // Extents
     this._parseDimensions({x, y, width, height});
@@ -108,7 +94,7 @@ export default class View {
       }
 
       // Merge in all props from View's viewState, except id
-      const newViewState = Object.assign({}, viewState);
+      const newViewState = {...viewState};
       for (const key in this.props.viewState) {
         if (key !== 'id') {
           newViewState[key] = this.props.viewState[key];
@@ -143,7 +129,7 @@ export default class View {
     if (typeof opts === 'function') {
       opts = {type: opts};
     }
-    return Object.assign({}, defaultOpts, opts);
+    return {...defaultOpts, ...opts};
   }
 
   // Overridable method
