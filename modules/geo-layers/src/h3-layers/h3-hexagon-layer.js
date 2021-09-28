@@ -135,7 +135,7 @@ export default class H3HexagonLayer extends CompositeLayer {
   }
 
   _calculateH3DataProps(props) {
-    let resolution = props.resolution ?? -1;
+    let resolution = props.resolution;
     let hasPentagon = props.hasPentagon ?? false;
     let hasMultipleRes = false;
 
