@@ -88,7 +88,7 @@ Inherits from all [Base Layer](/docs/api-reference/core/layer.md), [CompositeLay
 
 ##### `highPrecision` (Boolean, optional)
 
-* Default: `false`
+* Default: `'auto'`
 
 Each hexagon in the H3 indexing system is [slightly different in shape](https://h3geo.org/docs/core-library/coordsystems). To draw a large number of hexagons efficiently, the `H3HexagonLayer` may choose to use instanced drawing by assuming that all hexagons within the current viewport have the same shape as the one at the center of the current viewport. The discrepancy is usually too small to be visible.
 
@@ -100,19 +100,9 @@ There are several cases in which high-precision mode is required. In these cases
 
 Possible values:
 
-* `false`: The layer chooses the mode automatically. High-precision rendering is only used if an edge case is encountered in the data.
-* `true`: always use high-precision rendering.
-
-##### `lowPrecision` (Boolean, optional)
-
-* Default: `false`
-
-Used to draw a large number of hexagons efficiently. Forces `H3HexagonLayer` to use low-precision instanced drawing by assuming that all hexagons within the current viewport have the same shape as the one at the center of the current viewport. The discrepancy is usually too small to be visible for resolutions higher than 5.
-
-Possible values:
-
-* `false`: The layer chooses the rendering mode automatically.
-* `true`: Forces low-precision drawing regardless of resolution of the data and other factors. Has a priority over `highPrecision` property.
+* `'auto'`: The layer chooses the mode automatically. High-precision rendering is only used if an edge case is encountered in the data.
+* `true`: Always use high-precision rendering.
+* `false`: Always use low-precision rendering regardless of the resolution of the data.
 
 ##### `resolution` (number, optional)
 
@@ -134,7 +124,7 @@ Possible values:
 
 * `true`: Indicates that the data contains at least one h3 index which represents a pentagon.
 * `false`: Indicates that all h3 indices in the data represent hexagons.
-* `null`: Indicates that it's unknown whether all h3 indices represent hexagons. In such case `hasPentagon` property will be calculated for resolution 0.
+* `null`: Indicates that it's unknown whether all h3 indices represent hexagons. In such case `hasPentagon` property will be calculated.
 
 ##### `coverage` (Number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
 

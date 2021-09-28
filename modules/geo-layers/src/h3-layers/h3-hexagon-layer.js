@@ -91,8 +91,7 @@ function mergeTriggers(getHexagon, coverage) {
 
 const defaultProps = {
   ...PolygonLayer.defaultProps,
-  highPrecision: false,
-  lowPrecision: false,
+  highPrecision: 'auto',
   resolution: -1,
   hasPentagon: null,
   coverage: {type: 'number', min: 0, max: 1, value: 1},
@@ -124,7 +123,7 @@ export default class H3HexagonLayer extends CompositeLayer {
 
   updateState({props, oldProps, changeFlags}) {
     if (
-      !(props.highPrecision && !props.lowPrecision) &&
+      props.highPrecision !== true &&
       (changeFlags.dataChanged ||
         (changeFlags.updateTriggers && changeFlags.updateTriggers.getHexagon))
     ) {
@@ -140,7 +139,7 @@ export default class H3HexagonLayer extends CompositeLayer {
     let hasPentagon = props.hasPentagon ?? false;
     let hasMultipleRes = false;
 
-    if (resolution < 0 || (resolution < 1 && props.hasPentagon === null)) {
+    if (resolution < 0 || props.hasPentagon === null) {
       const {iterable, objectInfo} = createIterable(props.data);
       for (const object of iterable) {
         objectInfo.index++;
@@ -168,19 +167,15 @@ export default class H3HexagonLayer extends CompositeLayer {
   }
 
   _shouldUseHighPrecision() {
-    if (this.props.lowPrecision) {
-      return false;
+    if (this.props.highPrecision === 'auto') {
+      const {resolution, hasPentagon, hasMultipleRes} = this.state;
+      const {viewport} = this.context;
+      return (
+        viewport.resolution || hasMultipleRes || hasPentagon || (resolution >= 0 && resolution <= 5)
+      );
     }
 
-    const {resolution, hasPentagon, hasMultipleRes} = this.state;
-    const {viewport} = this.context;
-    return (
-      this.props.highPrecision ||
-      viewport.resolution ||
-      hasMultipleRes ||
-      hasPentagon ||
-      (resolution >= 0 && resolution <= 5)
-    );
+    return this.props.highPrecision;
   }
 
   _updateVertices(viewport) {
