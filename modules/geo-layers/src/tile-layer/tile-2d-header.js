@@ -20,19 +20,15 @@ export default class Tile2DHeader {
   }
 
   get data() {
-    return this._isLoaded ? this.content : this._loader;
+    return this._isLoaded || this._isCancelled ? this.content : this._loader.then(() => this.data);
   }
 
   get isLoaded() {
-    return this._isLoaded;
+    return this._isLoaded && !this._needsReload;
   }
 
   get isLoading() {
-    return Boolean(this._loader);
-  }
-
-  get isCancelled() {
-    return this._isCancelled;
+    return Boolean(this._loader) && !this._isCancelled;
   }
 
   get needsReload() {
@@ -106,6 +102,7 @@ export default class Tile2DHeader {
   /* eslint-enable max-statements */
 
   loadData(opts) {
+    this._isLoaded = false;
     this._isCancelled = false;
     this._needsReload = false;
     this._loaderId++;

@@ -42,7 +42,7 @@ export default class TileLayer extends CompositeLayer {
   get isLoaded() {
     const {tileset} = this.state;
     return tileset.selectedTiles.every(
-      tile => !tile.isLoading && tile.layers && tile.layers.every(layer => layer.isLoaded)
+      tile => tile.isLoaded && tile.layers && tile.layers.every(layer => layer.isLoaded)
     );
   }
 
@@ -174,7 +174,7 @@ export default class TileLayer extends CompositeLayer {
       return getTileData(tile);
     }
     if (tile.url) {
-      return fetch(tile.url, {propName: 'data', layer, signal});
+      return fetch(tile.url, {propName: 'data', layer: this, signal});
     }
     return null;
   }
@@ -202,13 +202,13 @@ export default class TileLayer extends CompositeLayer {
     return this.state.tileset.tiles.map(tile => {
       const highlightedObjectIndex = this.getHighlightedObjectIndex(tile);
       // cache the rendered layer in the tile
-      if (!tile.isLoaded) {
-        // no op
+      if (!tile.isLoaded && !tile.content) {
+        // nothing to show
       } else if (!tile.layers) {
         const layers = this.renderSubLayers({
           ...this.props,
           id: `${this.id}-${tile.x}-${tile.y}-${tile.z}`,
-          data: tile.data,
+          data: tile.content,
           _offset: 0,
           tile
         });

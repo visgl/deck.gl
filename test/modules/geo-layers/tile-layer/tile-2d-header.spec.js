@@ -59,8 +59,8 @@ test('Tile2DHeader#Cancel request if not selected', async t => {
   await loader2;
 
   t.equals(tileRequestCount, 1, 'One successful request');
-  t.notOk(tile1.isCancelled, 'First request was not cancelled');
-  t.ok(tile2.isCancelled, 'Second request was cancelled');
+  t.notOk(tile1._isCancelled, 'First request was not cancelled');
+  t.ok(tile2._isCancelled, 'Second request was cancelled');
   t.ok(onTileLoadCalled === 1 && onTileErrorCalled === 0, 'Callbacks invoked');
   t.end();
 });
@@ -120,18 +120,15 @@ test('Tile2DHeader#reload', async t => {
 
   // Reload before a load is finished
   const loaderc1 = tile.loadData({...opts, getData: () => getTileData('c1', 0)});
-  const loaderc2 = tile.loadData({...opts, getData: () => getTileData('c2', 10)});
+  tile.loadData({...opts, getData: () => getTileData('c2', 10)});
   await loaderc1;
-  t.is(tile.data, 'b', 'outdated result is discarded');
-  await loaderc2;
-  t.is(tile.data, 'c2', 'loaded the result of the last request');
+  t.is(tile.content, 'b', 'outdated result is discarded');
+  t.is(await tile.data, 'c2', 'loaded the result of the last request');
 
   // Multiple load requests resolved out of order
-  const loaderd1 = tile.loadData({...opts, getData: () => getTileData('d1', 50)});
-  const loaderd2 = tile.loadData({...opts, getData: () => getTileData('d2', 0)});
-  await loaderd2;
-  await loaderd1;
-  t.is(tile.data, 'd2', 'loaded the result of the last request');
+  tile.loadData({...opts, getData: () => getTileData('d1', 50)});
+  tile.loadData({...opts, getData: () => getTileData('d2', 0)});
+  t.is(await tile.data, 'd2', 'loaded the result of the last request');
 
   t.end();
 });

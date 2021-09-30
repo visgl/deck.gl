@@ -278,7 +278,7 @@ test('TileLayer#AbortRequestsOnNewLayer', async t => {
       },
       onAfterUpdate: () => {
         t.is(
-          tiles.map(tile => tile.isCancelled).length,
+          tiles.filter(tile => tile._isCancelled).length,
           4,
           'all tiles from discarded layer should be cancelled'
         );

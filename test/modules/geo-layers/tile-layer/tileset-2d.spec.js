@@ -81,11 +81,11 @@ test('Tileset2D#finalize', async t => {
   t.notOk(tileset._cache.size, 'cache is purged');
 
   t.is(
-    tile1.isCancelled,
+    tile1._isCancelled,
     false,
     'first tile should not have been loading and thus not been aborteed'
   );
-  t.is(tile2.isCancelled, true, 'second tile should have been aborted');
+  t.is(tile2._isCancelled, true, 'second tile should have been aborted');
 
   t.end();
 });
