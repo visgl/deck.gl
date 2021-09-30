@@ -340,7 +340,7 @@ export default class Tileset2D {
       needsReload = true;
       this._cache.set(tileId, tile);
       this._dirty = true;
-    } else if (tile && tile.needsReload && !tile.isLoading) {
+    } else if (tile && tile.needsReload) {
       needsReload = true;
     }
     if (needsReload) {

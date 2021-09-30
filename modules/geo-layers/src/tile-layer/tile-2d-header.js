@@ -20,7 +20,7 @@ export default class Tile2DHeader {
   }
 
   get data() {
-    return this._isLoaded || this._isCancelled ? this.content : this._loader.then(() => this.data);
+    return this.isLoading ? this._loader.then(() => this.data) : this.content;
   }
 
   get isLoaded() {
