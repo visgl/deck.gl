@@ -102,7 +102,7 @@ Possible values:
 
 * `'auto'`: The layer chooses the mode automatically. High-precision rendering is only used if an edge case is encountered in the data.
 * `true`: Always use high-precision rendering.
-* `false`: Always use low-precision rendering regardless of the resolution of the data.
+* `false`: Always use instanced rendering, regardless of the characteristics of the data.
 
 ##### `resolution` (number, optional)
 
