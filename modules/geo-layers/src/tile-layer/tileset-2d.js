@@ -110,8 +110,13 @@ export default class Tileset2D {
   }
 
   reloadAll() {
-    for (const tile of this._cache.values()) {
-      tile.setNeedsReload();
+    for (const tileId of this._cache.keys()) {
+      const tile = this._cache.get(tileId);
+      if (!this._selectedTiles.includes(tile)) {
+        this._cache.delete(tileId);
+      } else {
+        tile.setNeedsReload();
+      }
     }
   }
 
