@@ -198,7 +198,7 @@ export default class MVTLayer extends TileLayer {
   getHighlightedObjectIndex(tile) {
     const {hoveredFeatureId, hoveredFeatureLayerName} = this.state;
     const {uniqueIdProperty, highlightedFeatureId, binary} = this.props;
-    const {data} = tile;
+    const data = tile.content;
 
     const isHighlighted = isFeatureIdDefined(highlightedFeatureId);
     const isFeatureIdPresent = isFeatureIdDefined(hoveredFeatureId) || isHighlighted;
