@@ -178,12 +178,20 @@ export default class WebMercatorViewport extends Viewport {
   }
 
   projectPosition(xyz) {
+    if (this._pseudoMeters) {
+      // Backward compatibility
+      return super.projectPosition(xyz);
+    }
     const [X, Y] = this.projectFlat(xyz);
     const Z = (xyz[2] || 0) * unitsPerMeter(xyz[1]);
     return [X, Y, Z];
   }
 
   unprojectPosition(xyz) {
+    if (this._pseudoMeters) {
+      // Backward compatibility
+      return super.unprojectPosition(xyz);
+    }
     const [X, Y] = this.unprojectFlat(xyz);
     const Z = (xyz[2] || 0) / unitsPerMeter(Y);
     return [X, Y, Z];
