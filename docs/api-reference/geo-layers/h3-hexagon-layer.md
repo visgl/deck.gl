@@ -104,28 +104,6 @@ Possible values:
 * `true`: Always use high-precision rendering.
 * `false`: Always use instanced rendering, regardless of the characteristics of the data.
 
-##### `resolution` (number, optional)
-
-* Default: `-1`
-
-Resolution of the data. It's possible to save some initialization time by passing the resolution, especially for large datasets. Values other than `-1` indicate that the data has only one resolution.
-
-Possible values:
-* `-1`: Indicates that the resolution is unknown and should be calculated.
-* `[0, 15]`: Valid h3 resolution.
-
-##### `hasPentagon` (boolean | null, optional)
-
-* Default: `null`
-
-By passing non-null `hasPentagon` property it's possible to save some initialization time, especially for large datasets.
-
-Possible values:
-
-* `true`: Indicates that the data contains at least one h3 index which represents a pentagon.
-* `false`: Indicates that all h3 indices in the data represent hexagons.
-* `null`: Indicates that it's unknown whether all h3 indices represent hexagons. In such case `hasPentagon` property will be calculated.
-
 ##### `coverage` (Number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
 
 * Default: `1`

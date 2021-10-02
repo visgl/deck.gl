@@ -92,8 +92,6 @@ function mergeTriggers(getHexagon, coverage) {
 const defaultProps = {
   ...PolygonLayer.defaultProps,
   highPrecision: 'auto',
-  resolution: -1,
-  hasPentagon: null,
   coverage: {type: 'number', min: 0, max: 1, value: 1},
   centerHexagon: null,
   getHexagon: {type: 'accessor', value: x => x.hexagon},
@@ -135,26 +133,26 @@ export default class H3HexagonLayer extends CompositeLayer {
   }
 
   _calculateH3DataProps(props) {
-    let resolution = props.resolution;
-    let hasPentagon = props.hasPentagon ?? false;
+    let resolution = -1;
+    let hasPentagon = false;
     let hasMultipleRes = false;
 
-    if (resolution < 0 || props.hasPentagon === null) {
-      const {iterable, objectInfo} = createIterable(props.data);
-      for (const object of iterable) {
-        objectInfo.index++;
-        const hexId = props.getHexagon(object, objectInfo);
-        // Take the resolution of the first hex
-        const hexResolution = h3GetResolution(hexId);
-        if (resolution < 0) resolution = hexResolution;
-        else if (resolution !== hexResolution) {
-          hasMultipleRes = true;
-          break;
-        }
-        if (h3IsPentagon(hexId)) {
-          hasPentagon = true;
-          break;
-        }
+    const {iterable, objectInfo} = createIterable(props.data);
+    for (const object of iterable) {
+      objectInfo.index++;
+      const hexId = props.getHexagon(object, objectInfo);
+      // Take the resolution of the first hex
+      const hexResolution = h3GetResolution(hexId);
+      if (resolution < 0) {
+        resolution = hexResolution;
+        if (props.highPrecision === false) break;
+      } else if (resolution !== hexResolution) {
+        hasMultipleRes = true;
+        break;
+      }
+      if (h3IsPentagon(hexId)) {
+        hasPentagon = true;
+        break;
       }
     }
 
