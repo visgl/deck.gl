@@ -18,7 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {COORDINATE_SYSTEM, PROJECTION_MODE} from '../../lib/constants';
+import {COORDINATE_SYSTEM, PROJECTION_MODE, UNIT} from '../../lib/constants';
 
 // We are generating these from the js code in constants.js
 const COORDINATE_SYSTEM_GLSL_CONSTANTS = Object.keys(COORDINATE_SYSTEM)
@@ -27,10 +27,14 @@ const COORDINATE_SYSTEM_GLSL_CONSTANTS = Object.keys(COORDINATE_SYSTEM)
 const PROJECTION_MODE_GLSL_CONSTANTS = Object.keys(PROJECTION_MODE)
   .map(key => `const int PROJECTION_MODE_${key} = ${PROJECTION_MODE[key]};`)
   .join('');
+const UNIT_GLSL_CONSTANTS = Object.keys(UNIT)
+  .map(key => `const int UNIT_${key.toUpperCase()} = ${UNIT[key]};`)
+  .join('');
 
 export default `\
 ${COORDINATE_SYSTEM_GLSL_CONSTANTS}
 ${PROJECTION_MODE_GLSL_CONSTANTS}
+${UNIT_GLSL_CONSTANTS}
 
 uniform int project_uCoordinateSystem;
 uniform int project_uProjectionMode;
@@ -238,6 +242,12 @@ vec2 project_pixel_size_to_clipspace(vec2 pixels) {
 
 float project_size_to_pixel(float meters) {
   return project_size(meters) * project_uScale;
+}
+float project_size_to_pixel(float size, int unit) {
+  if (unit == UNIT_METERS) return project_size_to_pixel(size);
+  if (unit == UNIT_COMMON) return size * project_uScale;
+  // UNIT_PIXELS
+  return size;
 }
 float project_pixel_size(float pixels) {
   return pixels / project_uScale;

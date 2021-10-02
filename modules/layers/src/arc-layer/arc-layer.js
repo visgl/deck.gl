@@ -18,7 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {Layer, project32, picking} from '@deck.gl/core';
+import {Layer, project32, picking, UNIT} from '@deck.gl/core';
 
 import GL from '@luma.gl/constants';
 import {Model, Geometry} from '@luma.gl/core';
@@ -137,7 +137,7 @@ export default class ArcLayer extends Layer {
       .setUniforms(uniforms)
       .setUniforms({
         greatCircle,
-        pixelWidth: widthUnits === 'pixels',
+        widthUnits: UNIT[widthUnits],
         widthScale,
         widthMinPixels,
         widthMaxPixels,

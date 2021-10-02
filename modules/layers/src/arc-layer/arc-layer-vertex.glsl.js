@@ -40,7 +40,7 @@ uniform float opacity;
 uniform float widthScale;
 uniform float widthMinPixels;
 uniform float widthMaxPixels;
-uniform bool pixelWidth;
+uniform int widthUnits;
 
 varying vec4 vColor;
 varying vec2 uv;
@@ -237,7 +237,7 @@ void main(void) {
   // Multiply out width and clamp to limits
   // mercator pixels are interpreted as screen pixels
   float widthPixels = clamp(
-    pixelWidth ? instanceWidths * widthScale : project_size_to_pixel(instanceWidths * widthScale),
+    project_size_to_pixel(instanceWidths * widthScale, widthUnits),
     widthMinPixels, widthMaxPixels
   );
 

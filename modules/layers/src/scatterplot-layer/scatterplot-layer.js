@@ -18,7 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {Layer, project32, picking} from '@deck.gl/core';
+import {Layer, project32, picking, UNIT} from '@deck.gl/core';
 import GL from '@luma.gl/constants';
 import {Model, Geometry} from '@luma.gl/core';
 
@@ -133,11 +133,11 @@ export default class ScatterplotLayer extends Layer {
         filled,
         billboard,
         antialiasing,
-        pixelRadius: radiusUnits === 'pixels',
+        radiusUnits: UNIT[radiusUnits],
         radiusScale,
         radiusMinPixels,
         radiusMaxPixels,
-        pixelLineWidth: lineWidthUnits === 'pixels',
+        lineWidthUnits: UNIT[lineWidthUnits],
         lineWidthScale,
         lineWidthMinPixels,
         lineWidthMaxPixels

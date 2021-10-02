@@ -41,8 +41,8 @@ uniform float lineWidthMaxPixels;
 uniform float stroked;
 uniform bool filled;
 uniform bool billboard;
-uniform bool pixelRadius;
-uniform bool pixelLineWidth;
+uniform int radiusUnits;
+uniform int lineWidthUnits;
 
 varying vec4 vFillColor;
 varying vec4 vLineColor;
@@ -55,13 +55,13 @@ void main(void) {
 
   // Multiply out radius and clamp to limits
   outerRadiusPixels = clamp(
-    pixelRadius ? radiusScale * instanceRadius: project_size_to_pixel(radiusScale * instanceRadius),
+    project_size_to_pixel(radiusScale * instanceRadius, radiusUnits),
     radiusMinPixels, radiusMaxPixels
   );
   
   // Multiply out line width and clamp to limits
   float lineWidthPixels = clamp(
-    pixelLineWidth ? lineWidthScale * instanceLineWidths : project_size_to_pixel(lineWidthScale * instanceLineWidths),
+    project_size_to_pixel(lineWidthScale * instanceLineWidths, lineWidthUnits),
     lineWidthMinPixels, lineWidthMaxPixels
   );
 

@@ -43,7 +43,7 @@ uniform float jointType;
 uniform float capType;
 uniform float miterLimit;
 uniform bool billboard;
-uniform bool pixelWidth;
+uniform int widthUnits;
 
 uniform float opacity;
 
@@ -189,7 +189,7 @@ void main() {
 
   geometry.worldPosition = currPosition;
   vec2 widthPixels = vec2(clamp(
-    pixelWidth ? instanceStrokeWidths * widthScale : project_size_to_pixel(instanceStrokeWidths * widthScale),
+    project_size_to_pixel(instanceStrokeWidths * widthScale, widthUnits),
     widthMinPixels, widthMaxPixels) / 2.0);
   vec3 width;
 

@@ -18,7 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {Layer, project32, gouraudLighting, picking} from '@deck.gl/core';
+import {Layer, project32, gouraudLighting, picking, UNIT} from '@deck.gl/core';
 import GL from '@luma.gl/constants';
 import {Model} from '@luma.gl/core';
 import ColumnGeometry from './column-geometry';
@@ -199,7 +199,7 @@ export default class ColumnLayer extends Layer {
       coverage,
       elevationScale,
       edgeDistance,
-      pixelWidth: lineWidthUnits === 'pixels',
+      widthUnits: UNIT[lineWidthUnits],
       widthScale: lineWidthScale,
       widthMinPixels: lineWidthMinPixels,
       widthMaxPixels: lineWidthMaxPixels

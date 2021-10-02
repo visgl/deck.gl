@@ -35,7 +35,7 @@ uniform float widthScale;
 uniform float widthMinPixels;
 uniform float widthMaxPixels;
 uniform float useShortestPath;
-uniform bool pixelWidth;
+uniform int widthUnits;
 
 varying vec4 vColor;
 varying vec2 uv;
@@ -101,7 +101,7 @@ void main(void) {
 
   // Multiply out width and clamp to limits
   float widthPixels = clamp(
-    pixelWidth ? instanceWidths * widthScale : project_size_to_pixel(instanceWidths * widthScale),
+    project_size_to_pixel(instanceWidths * widthScale, widthUnits),
     widthMinPixels, widthMaxPixels
   );
 

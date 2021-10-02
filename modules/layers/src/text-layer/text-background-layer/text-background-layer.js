@@ -1,4 +1,4 @@
-import {Layer, project32, picking} from '@deck.gl/core';
+import {Layer, project32, picking, UNIT} from '@deck.gl/core';
 import GL from '@luma.gl/constants';
 import {Model, Geometry} from '@luma.gl/core';
 
@@ -114,7 +114,7 @@ export default class TextBackgroundLayer extends Layer {
         billboard,
         stroked: Boolean(getLineWidth),
         padding,
-        pixelSize: sizeUnits === 'pixels',
+        sizeUnits: UNIT[sizeUnits],
         sizeScale,
         sizeMinPixels,
         sizeMaxPixels

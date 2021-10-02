@@ -30,6 +30,7 @@ attribute vec3 instancePickingColors;
 
 uniform float opacity;
 uniform float radiusPixels;
+uniform int sizeUnits;
 
 varying vec4 vColor;
 varying vec2 unitPosition;
@@ -44,7 +45,7 @@ void main(void) {
   geometry.pickingColor = instancePickingColors;
 
   // Find the center of the point and add the current vertex
-  vec3 offset = vec3(positions.xy * radiusPixels, 0.0);
+  vec3 offset = vec3(positions.xy * project_size_to_pixel(radiusPixels, sizeUnits), 0.0);
   DECKGL_FILTER_SIZE(offset, geometry);
 
   gl_Position = project_position_to_clipspace(instancePositions, instancePositions64Low, vec3(0.), geometry.position);
