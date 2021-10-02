@@ -145,7 +145,7 @@ export default class H3HexagonLayer extends CompositeLayer {
       const hexResolution = h3GetResolution(hexId);
       if (resolution < 0) {
         resolution = hexResolution;
-        if (props.highPrecision === false) break;
+        if (!props.highPrecision) break;
       } else if (resolution !== hexResolution) {
         hasMultipleRes = true;
         break;
