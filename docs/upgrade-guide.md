@@ -56,7 +56,7 @@ The module entry point is now only lightly transpiled for the most commonly used
 - `TileLayer` no longer uses `tileSize` to offset zoom in non-geospatial views. It is recommended to use the new `zoomOffset` prop to affect the `zoom` resolution at which tiles are fetched.
 - `MVTLayer` and `TerrainLayer`'s default loaders no longer support parsing on the main thread. This does not change the layers' default behavior, just reduces the bundle size by dropping unused code. Should you need to use the layers in an environment where web worker is not available, or debug the loaders, follow the examples in [loaders and workers](/docs/developer-guide/loading-data.md#loaders-and-web-workers).
 - `TerrainLayer`'s `workerUrl` prop is removed, use `loadOptions.terrain.workerUrl` instead.
-- `H3HexagonLayer`'s `highPrecision` prop default value is changed to `'auto'`. Setting `highPrecision` to `false` now forces instanced rendering. See updated [layer documentation](/docs/api-reference/geo-layers/h3-hexagon-layer.md) for details.
+- `H3HexagonLayer`'s `highPrecision` prop default value is changed to `'auto'`. Setting `highPrecision` to `false` now forces instanced rendering. See updated [layer documentation](/docs/api-reference/geo-layers/h3-hexagon-layer.md#highprecision-boolean-optional) for details.
 
 #### Deprecations
 
