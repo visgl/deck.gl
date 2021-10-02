@@ -67,7 +67,11 @@ export default class WebMercatorViewport extends Viewport {
       projectionMatrix,
 
       repeat = false,
-      worldOffset = 0
+      worldOffset = 0,
+
+      // backward compatibility
+      // TODO: remove in v9
+      legacyMeterSizes = false
     } = opts;
 
     let {width, height, altitude = 1.5} = opts;
@@ -146,6 +150,7 @@ export default class WebMercatorViewport extends Viewport {
     this.orthographic = orthographic;
 
     this._subViewports = repeat ? [] : null;
+    this._pseudoMeters = legacyMeterSizes;
 
     Object.freeze(this);
   }

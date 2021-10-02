@@ -52,6 +52,7 @@ uniform float project_uFocalDistance;
 uniform vec3 project_uCameraPosition;
 uniform vec3 project_uCoordinateOrigin;
 uniform vec3 project_uCommonOrigin;
+uniform bool project_uPseudoMeters;
 
 const float TILE_SIZE = 512.0;
 const float PI = 3.1415926536;
@@ -63,7 +64,8 @@ const float GLOBE_RADIUS = 256.0;
 // returns an adjustment factor for uCommonUnitsPerMeter
 float project_size() {
   if (project_uProjectionMode == PROJECTION_MODE_WEB_MERCATOR &&
-    project_uCoordinateSystem == COORDINATE_SYSTEM_LNGLAT) {
+    project_uCoordinateSystem == COORDINATE_SYSTEM_LNGLAT &&
+    project_uPseudoMeters == false) {
 
     // uCommonUnitsPerMeter in low-zoom Web Mercator is non-linear
     // Adjust by 1 / cos(latitude)
