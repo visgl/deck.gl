@@ -81,18 +81,7 @@ export default class PickLayersPass extends LayersPass {
 
     // Clear the temp field
     this._colors = null;
-    const decodePickingColor =
-      encodedColors &&
-      (pickedColor => {
-        const entry = encodedColors.byAlpha[pickedColor[3]];
-        return (
-          entry && {
-            pickedLayer: entry.layer,
-            pickedViewports: entry.viewports,
-            pickedObjectIndex: entry.layer.decodePickingColor(pickedColor)
-          }
-        );
-      });
+    const decodePickingColor = encodedColors && decodeColor.bind(null, encodedColors);
     return {decodePickingColor, stats: renderStatus};
   }
 
@@ -112,42 +101,54 @@ export default class PickLayersPass extends LayersPass {
   }
 
   getLayerParameters(layer, layerIndex, viewport) {
-    let a = 255;
-    const encodedColors = this._colors;
+    const pickParameters = {...layer.props.parameters};
 
-    if (encodedColors) {
-      // Encode layerIndex in the alpha channel
-      // TODO - combine small layers to better utilize the picking color space
-      if (encodedColors.byLayer.has(layer)) {
-        const entry = encodedColors.byLayer.get(layer);
-        a = entry.a;
-        entry.viewports.push(viewport);
-      } else {
-        a = encodedColors.byLayer.size + 1;
-        if (a <= 255) {
-          const entry = {a, layer, viewports: [viewport]};
-          encodedColors.byLayer.set(layer, entry);
-          encodedColors.byAlpha[a] = entry;
-        } else {
-          log.warn('Too many pickable layers, only picking the first 255')();
-          a = 0;
-        }
-      }
+    if (this.pickZ) {
+      pickParameters.blend = false;
+    } else {
+      Object.assign(pickParameters, PICKING_PARAMETERS);
+      pickParameters.blend = true;
+      pickParameters.blendColor = encodeColor(this._colors, layer, viewport);
     }
 
-    // These will override any layer parameters
-    const pickParameters = this.pickZ
-      ? {blend: false}
-      : {
-          ...PICKING_PARAMETERS,
-          blend: true,
-          blendColor: [0, 0, 0, a / 255]
-        };
-
-    // Override layer parameters with pick parameters
-    return {
-      ...layer.props.parameters,
-      ...pickParameters
-    };
+    return pickParameters;
   }
+}
+
+// Assign an unique alpha value for each pickable layer and track the encoding in the cache object
+// Returns normalized blend color
+function encodeColor(encoded, layer, viewport) {
+  const {byLayer, byAlpha} = encoded;
+  let a;
+
+  // Encode layerIndex in the alpha channel
+  // TODO - combine small layers to better utilize the picking color space
+  if (byLayer.has(layer)) {
+    const entry = byLayer.get(layer);
+    entry.viewports.push(viewport);
+    a = entry.a;
+  } else {
+    a = byLayer.size + 1;
+    if (a <= 255) {
+      const entry = {a, layer, viewports: [viewport]};
+      byLayer.set(layer, entry);
+      byAlpha[a] = entry;
+    } else {
+      log.warn('Too many pickable layers, only picking the first 255')();
+      a = 0;
+    }
+  }
+  return [0, 0, 0, a / 255];
+}
+
+// Given a picked color, retrieve the corresponding layer and viewports from cache
+function decodeColor(encoded, pickedColor) {
+  const entry = encoded.byAlpha[pickedColor[3]];
+  return (
+    entry && {
+      pickedLayer: entry.layer,
+      pickedViewports: entry.viewports,
+      pickedObjectIndex: entry.layer.decodePickingColor(pickedColor)
+    }
+  );
 }

@@ -205,7 +205,7 @@ export default class DeckPicker {
 
       let z;
       if (pickInfo.pickedLayer && unproject3D && this.depthFBO) {
-        const zValues = this._drawAndSample({
+        const pickedResultPass2 = this._drawAndSample({
           layers: [pickInfo.pickedLayer],
           views,
           viewports,
@@ -214,10 +214,12 @@ export default class DeckPicker {
           pass: `picking:${mode}`,
           redrawReason: 'pick-z',
           pickZ: true
-        })?.pickedColors;
+        });
         // picked value is in common space (pixels) from the camera target (viewport.position)
         // convert it to meters from the ground
-        z = zValues[0] * viewports[0].distanceScales.metersPerUnit[2] + viewports[0].position[2];
+        z =
+          pickedResultPass2.pickedColors[0] * viewports[0].distanceScales.metersPerUnit[2] +
+          viewports[0].position[2];
       }
 
       // Only exclude if we need to run picking again.
