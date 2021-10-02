@@ -46,17 +46,14 @@ export default class Tileset2D {
    */
   constructor(opts) {
     this.opts = opts;
-    this._getTileData = opts.getTileData;
 
-    this.onTileError = opts.onTileError;
     this.onTileLoad = tile => {
-      opts.onTileLoad(tile);
+      this.opts.onTileLoad(tile);
       if (this.opts.maxCacheByteSize) {
         this._cacheByteSize += tile.byteLength;
         this._resizeCache();
       }
     };
-    this.onTileUnload = opts.onTileUnload;
 
     this._requestScheduler = new RequestScheduler({
       maxRequests: opts.maxRequests,
@@ -105,6 +102,20 @@ export default class Tileset2D {
     for (const tile of this._cache.values()) {
       if (tile.isLoading) {
         tile.abort();
+      }
+    }
+    this._cache.clear();
+    this._tiles = [];
+    this._selectedTiles = null;
+  }
+
+  reloadAll() {
+    for (const tileId of this._cache.keys()) {
+      const tile = this._cache.get(tileId);
+      if (!this._selectedTiles.includes(tile)) {
+        this._cache.delete(tileId);
+      } else {
+        tile.setNeedsReload();
       }
     }
   }
@@ -304,7 +315,7 @@ export default class Tileset2D {
           // delete tile
           this._cacheByteSize -= opts.maxCacheByteSize ? tile.byteLength : 0;
           _cache.delete(tileId);
-          this.onTileUnload(tile);
+          this.opts.onTileUnload(tile);
         }
         if (_cache.size <= maxCacheSize && this._cacheByteSize <= maxCacheByteSize) {
           break;
@@ -326,21 +337,24 @@ export default class Tileset2D {
   _getTile({x, y, z}, create) {
     const tileId = `${x},${y},${z}`;
     let tile = this._cache.get(tileId);
+    let needsReload = false;
 
     if (!tile && create) {
-      tile = new Tile2DHeader({
-        x,
-        y,
-        z,
-        onTileLoad: this.onTileLoad,
-        onTileError: this.onTileError
-      });
+      tile = new Tile2DHeader({x, y, z});
       Object.assign(tile, this.getTileMetadata(tile));
-      tile.loadData(this._getTileData, this._requestScheduler);
+      needsReload = true;
       this._cache.set(tileId, tile);
       this._dirty = true;
-    } else if (tile && tile.isCancelled && !tile.isLoading) {
-      tile.loadData(this._getTileData, this._requestScheduler);
+    } else if (tile && tile.needsReload) {
+      needsReload = true;
+    }
+    if (needsReload) {
+      tile.loadData({
+        getData: this.opts.getTileData,
+        requestScheduler: this._requestScheduler,
+        onLoad: this.onTileLoad,
+        onError: this.opts.onTileError
+      });
     }
 
     return tile;
