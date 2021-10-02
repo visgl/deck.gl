@@ -241,9 +241,9 @@ See the article on [Coordinate Systems](/docs/developer-guide/coordinate-systems
 
 ##### `coordinateOrigin` ([Number, Number], optional)
 
-Required when the `coordinateSystem` is set to `COORDINATE_SYSTEM.METER_OFFSETS`.
+Required if the `coordinateSystem` is set to offset modes.
 
-Specifies a longitude and a latitude from which meter offsets are calculated. See the article on [Coordinate Systems](/docs/developer-guide/coordinate-systems.md) for details.
+Specifies a reference point from which coordinates are measured. See the article on [Coordinate Systems](/docs/developer-guide/coordinate-systems.md) for details.
 
 ##### `wrapLongitude` (Boolean, optional)
 

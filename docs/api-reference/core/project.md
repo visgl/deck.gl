@@ -44,7 +44,7 @@ The uniforms of the `project` shader module are prefixed with `project_` in thei
 
 ## GLSL Functions
 
-The projection module makes it easy to write vertex shaders that follow deck.gl's projection methods, enabling your layer to accept coordinates in both [longitude,latitude,altitude] or [metersX,metersY,metersZ] format. To support the basic features expected of a deck.gl layer, such as various viewport types and coordinate systems, your own shaders should always use the built-in projection functions.
+The projection module makes it easy to write vertex shaders that follow deck.gl's projection methods, enabling your layer to accept coordinates in various formats such as `[longitude, latitude, altitude]` or `[metersX, metersY, metersZ]`. To support the basic features expected of a deck.gl layer, such as various viewport types and coordinate systems, your own shaders should always use the built-in projection functions.
 
 The functions converts positions/vectors between 4 coordinate spaces:
 
@@ -54,6 +54,8 @@ The functions converts positions/vectors between 4 coordinate spaces:
 | Common space | `common` | A normalized intermediate 3D space that deck.gl uses for consistent processing of geometries, guaranteed to be linear and uniform. Therefore, it is safe to add/rotate/scale positions and vectors in this space. |
 | Screen space | `pixel` | Top-left coordinate system runs from `[0, 0]` to `[viewportWidth, viewportHeight]` (see remarks below). |
 | [Clip space](https://developer.mozilla.org/en-US/docs/Web/API/WebGL_API/WebGL_model_view_projection#Clip_space) | `clipspace` | Output of the vertex shader. |
+
+More detailed explanation of each coordinate space can be found in the [coordinate systems guide](/docs/developer-guide/coordinate-systems.md).
 
 The GLSL functions of the `project` shader module uses the following naming convention:
 
@@ -97,9 +99,10 @@ Converts the size of a geometry from the world space (meters if geospatial, and 
 
 ```glsl
 float project_size_to_pixel(float size)
+float project_size_to_pixel(float size, int units)
 ```
 
-Converts the size of a geometry from the world space (meters if geospatial, and absolute units otherwise) to the common space. The result corresponds to the number of screen pixels when the given size is viewed with a top-down camera.
+Converts the size of a geometry from the given units in the world space to the common space. If unspecified, units is meters. The result corresponds to the number of screen pixels when the given size is viewed with a top-down camera.
 
 ### project_pixel_size
 
