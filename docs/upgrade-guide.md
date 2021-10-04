@@ -4,6 +4,7 @@
 
 #### Breaking changes
 
+- `H3HexagonLayer`'s `highPrecision` prop default value is changed to `'auto'`. Setting `highPrecision` to `false` now forces instanced rendering. See updated [layer documentation](/docs/api-reference/geo-layers/h3-hexagon-layer.md#highprecision-boolean-optional) for details.
 - `layerFilter` is now only called with top-level layers. For example, if you have a `GeoJsonLayer` with `id: 'regions'`, in previous versions the callback would look like:
 
   ```js
