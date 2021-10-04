@@ -36,7 +36,7 @@ const defaultProps = {
   offset: {type: 'array', value: [0, 0]},
   coverage: {type: 'number', min: 0, max: 1, value: 1},
   elevationScale: {type: 'number', min: 0, value: 1},
-
+  radiusUnits: 'meters',
   lineWidthUnits: 'meters',
   lineWidthScale: 1,
   lineWidthMinPixels: 0,
@@ -178,7 +178,7 @@ export default class ColumnLayer extends Layer {
       lineWidthScale,
       lineWidthMinPixels,
       lineWidthMaxPixels,
-
+      radiusUnits,
       elevationScale,
       extruded,
       filled,
@@ -199,6 +199,7 @@ export default class ColumnLayer extends Layer {
       coverage,
       elevationScale,
       edgeDistance,
+      radiusUnits: UNIT[radiusUnits],
       widthUnits: UNIT[lineWidthUnits],
       widthScale: lineWidthScale,
       widthMinPixels: lineWidthMinPixels,

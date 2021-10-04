@@ -47,6 +47,7 @@ uniform float edgeDistance;
 uniform float widthScale;
 uniform float widthMinPixels;
 uniform float widthMaxPixels;
+uniform int radiusUnits;
 uniform int widthUnits;
 
 // Result
@@ -84,7 +85,11 @@ void main(void) {
   // project center of column
   vec3 centroidPosition = vec3(instancePositions.xy, instancePositions.z + elevation);
   vec3 centroidPosition64Low = instancePositions64Low;
-  vec3 pos = vec3(project_size(rotationMatrix * positions.xy * strokeOffsetRatio + offset) * dotRadius, 0.);
+  vec2 offset = (rotationMatrix * positions.xy * strokeOffsetRatio + offset) * dotRadius;
+  if (radiusUnits == UNIT_METERS) {
+    offset = project_size(offset);
+  }
+  vec3 pos = vec3(offset, 0.);
   DECKGL_FILTER_SIZE(pos, geometry);
 
   gl_Position = project_position_to_clipspace(centroidPosition, centroidPosition64Low, pos, geometry.position);
