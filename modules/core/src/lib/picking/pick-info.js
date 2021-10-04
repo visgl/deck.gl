@@ -20,26 +20,13 @@
 
 // Even if nothing gets picked, we need to expose some information of the picking action:
 // x, y, coordinates etc.
-export function getEmptyPickingInfo({pickInfo, mode, viewports, layerFilter, pixelRatio, x, y, z}) {
-  const layer = pickInfo && pickInfo.pickedLayer;
-
+export function getEmptyPickingInfo({pickInfo, viewports, pixelRatio, x, y, z}) {
   // If more than one viewports are used in the picking pass, locate the viewport that
   // drew the picked pixel
   let pickedViewport = viewports[0];
   if (viewports.length > 1) {
-    if (layerFilter && layer) {
-      // Find the viewports that drew the picked layer
-      viewports = viewports.filter(v =>
-        layerFilter({
-          layer: layer.root,
-          viewport: v,
-          isPicking: true,
-          renderPass: `picking:${mode}`
-        })
-      );
-    }
     // Find the viewport that contain the picked pixel
-    pickedViewport = getViewportFromCoordinates(viewports, {x, y});
+    pickedViewport = getViewportFromCoordinates(pickInfo?.pickedViewports || viewports, {x, y});
   }
   const coordinate =
     pickedViewport &&
