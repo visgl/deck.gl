@@ -19,6 +19,7 @@
 // THE SOFTWARE.
 
 import {CubeGeometry} from '@luma.gl/core';
+import {UNIT} from '@deck.gl/core';
 import ColumnLayer from './column-layer';
 
 const defaultProps = {
@@ -32,11 +33,12 @@ export default class GridCellLayer extends ColumnLayer {
   }
 
   draw({uniforms}) {
-    const {elevationScale, extruded, offset, coverage, cellSize, angle} = this.props;
+    const {elevationScale, extruded, offset, coverage, cellSize, angle, radiusUnits} = this.props;
     this.state.model
       .setUniforms(uniforms)
       .setUniforms({
         radius: cellSize / 2,
+        radiusUnits: UNIT[radiusUnits],
         angle,
         offset,
         extruded,
