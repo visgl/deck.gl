@@ -6,13 +6,14 @@ Note that this example demonstrates using deck.gl with Google Maps. For other ba
 
 ### Usage
 
-To run this example, you need a [Google Maps API key](https://developers.google.com/maps/documentation/javascript/get-api-key). You can either set an environment variable:
+To run this example, you need a [Google Maps API key](https://developers.google.com/maps/documentation/javascript/get-api-key) and a [Google Maps Map ID](https://developers.google.com/maps/documentation/javascript/webgl) for a map that is configured to use the Vector rendering mode. You can either set an environment variables:
 
 ```bash
 export GoogleMapsAPIKey=<google_maps_api_key>
+export GoogleMapsMapId=<google_maps_map_id>
 ```
 
-Or set the `GOOGLE_MAPS_API_KEY` variable in `app.js`.
+Or set the `GOOGLE_MAPS_API_KEY` and `GOOGLE_MAPS_MAP_ID` variables in `app.js`.
 
 ```bash
 # install dependencies
