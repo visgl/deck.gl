@@ -92,7 +92,7 @@ Inherits from all [Base Layer](/docs/api-reference/core/layer.md) properties.
 
 * Default: `'pixels'`
 
-The units of the point size, one of `'meters'`, `'pixels'`. When zooming in and out, meter sizes scale with the base map, and pixel sizes remain the same on screen.
+The units of the point size, one of `'meters'`, `'common'`, and `'pixels'`. See [unit system](/docs/developer-guide/coordinate-system.md#supported-units).
 
 ##### `pointSize` (Number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
 
