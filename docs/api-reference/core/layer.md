@@ -233,17 +233,30 @@ Normally only used when the application wants to work with coordinates that are 
 
 ##### `coordinateSystem` (Number, optional)
 
-Specifies how layer positions and offsets should be geographically interpreted.
+* Default: `COORDINATE_SYSTEM.DEFAULT`
+
+Specifies how layer positions and offsets should be geographically interpreted. One of:
+
+- `COORDINATE_SYSTEM.CARTESIAN`
+- `COORDINATE_SYSTEM.LNGLAT`
+- `COORDINATE_SYSTEM.METER_OFFSETS`
+- `COORDINATE_SYSTEM.LNGLAT_OFFSETS`
 
 The default is to interpret positions as latitude and longitude, however it is also possible to interpret positions as meter offsets added to projection center specified by the `coordinateOrigin` prop.
 
 See the article on [Coordinate Systems](/docs/developer-guide/coordinate-systems.md) for details.
 
-##### `coordinateOrigin` ([Number, Number], optional)
+##### `coordinateOrigin` ([Number, Number, Number], optional)
 
-Required if the `coordinateSystem` is set to offset modes.
+* Default: `[0, 0, 0]`
 
-Specifies a reference point from which coordinates are measured. See the article on [Coordinate Systems](/docs/developer-guide/coordinate-systems.md) for details.
+Specifies a reference point for coordinates that are expressed as offsets. Used when the `coordinateSystem` is set to one of the following modes:
+
+- `COORDINATE_SYSTEM.CARTESIAN` (optional)
+- `COORDINATE_SYSTEM.METER_OFFSETS` (required)
+- `COORDINATE_SYSTEM.LNGLAT_OFFSETS` (required)
+
+See the article on [Coordinate Systems](/docs/developer-guide/coordinate-systems.md) for details.
 
 ##### `wrapLongitude` (Boolean, optional)
 

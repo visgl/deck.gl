@@ -44,7 +44,7 @@ The uniforms of the `project` shader module are prefixed with `project_` in thei
 
 ## GLSL Functions
 
-The projection module makes it easy to write vertex shaders that follow deck.gl's projection methods, enabling your layer to accept coordinates in various formats such as `[longitude, latitude, altitude]` or `[metersX, metersY, metersZ]`. To support the basic features expected of a deck.gl layer, such as various viewport types and coordinate systems, your own shaders should always use the built-in projection functions.
+The projection module enables you to write vertex shaders that support deck.gl's coordinate systems and projection methods. Using the projection module ensures that you layer will be able accept position coordinates in the various formats supported by deck.gl, such as `[longitude, latitude, altitude]` or `[metersX, metersY, metersZ]`. To support the basic features expected of a deck.gl layer, such as various viewport types and coordinate systems, your own shaders should always use the built-in projection functions.
 
 The functions converts positions/vectors between 4 coordinate spaces:
 

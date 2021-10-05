@@ -2,7 +2,7 @@
 
 In most deck.gl layers, every data object is expected to contain one or more **positions** (e.g. the center of a point, or the start and end of an arc, the vertices of a polygon, etc). Positions are expected to be supplied as two or three element arrays (`[x, y]` or `[x, y, z]`). Objects can also have **dimensions** (e.g. the radius of a circle, the width of a path, etc), most of which are specified as a single number. Positions and dimensions are used to construct a 3D world with your data.
 
-deck.gl supports a selection of coordinate systems, addressing diverse geospatial and non-geospatial [use cases](#world-space). Each layer can set its own `coordinateSystem` prop to specify how its positions should be interpreted. Layers using different coordinate systems can be composed together, which is very useful when dealing with datasets from different sources.
+deck.gl supports a selection of coordinate systems, addressing diverse geospatial and non-geospatial use cases. Each layer can set its own `coordinateSystem` prop to specify how its positions should be interpreted. Layers using different coordinate systems can be composed together, which is very useful when dealing with datasets from different sources.
 
 Many layers also provide props for defining the units that dimensions are measured in, usually named as `*Units`. A layer can leverage such props to control its appearance in a way that makes the most sense for the data and the desired user experience.
 
@@ -33,17 +33,17 @@ The natural coordinate system of a dataset. It is usually determined by the sour
 
 Some examples of different world space definitions include a [Shapefile](https://en.wikipedia.org/wiki/Shapefile) with any [standard geospatial reference](https://epsg.io/); WGS84 as used by GeoJSON or KML; GPS traces; LIDAR scans; info-vis values that do not map to real-world dimensions; [Slippy Map](https://wiki.openstreetmap.org/wiki/Slippy_Map) tiles from services like OpenStreetMaps and Mapbox; 3D tiling standards such as [Cesium 3D Tiles](https://www.ogc.org/standards/3DTiles) and [Esri I3S](https://www.ogc.org/standards/i3s).
 
-Positions in different world spaces come with different scales and orientations, may be measured relative to static or dynamic reference points, and in many cases are not linear. It is common for an application to overlay multiple datasets from different world spaces into the same 3D view.
+Positions in different world spaces come with different scales and orientations, may be measured relative to static or dynamic reference points, and in many cases their scales are not linear. It is common for an application to overlay multiple datasets from different world spaces into the same 3D view.
 
 ##### Common space
 
-To correctly compose data from various world spaces together, deck.gl transforms them into common space - an unified, intermediate 3D space that is a [right-handed Cartesian coordinate system](https://en.wikipedia.org/wiki/Cartesian_coordinate_system#In_three_dimensions). Once positions are in the common space, it is safe to add, substract, rotate, scale and extrude them as 3D vectors using standard linear algebra. This is the basis of all geometry processing in deck.gl layers.
+To correctly compose data from various world spaces together, deck.gl transforms them into common space - a unified, intermediate 3D space that is a [right-handed Cartesian coordinate system](https://en.wikipedia.org/wiki/Cartesian_coordinate_system#In_three_dimensions). Once positions are in the common space, it is safe to add, substract, rotate, scale and extrude them as 3D vectors using standard linear algebra. This is the basis of all geometry processing in deck.gl layers.
 
-The transformation between the world space and the common space is referred to in deck.gl documentation as "project" and "unproject", a process controlled by both the specification of the world space, such as WGS84, and the [projection mode](/docs/developer-guide/views.md), such as Web Mercator. Projections are implemented as part of deck.gl's core.
+The transformation between the world space and the common space is referred to in deck.gl documentation as "project" (world space to common space) and "unproject" (common space to world space), a process controlled by both the specification of the world space, such as WGS84, and the [projection mode](/docs/developer-guide/views.md), such as Web Mercator. Projections are implemented as part of deck.gl's core.
 
 ##### Screen space
 
-Top-left coordinate system runs from `[0, 0]` to `[viewportWidth, viewportHeight]`, measured in pixels.
+A top-left coordinate system that runs from `[0, 0]` to `[viewportWidth, viewportHeight]`, measured in pixels.
 
 For a given dataset, positions in the common space normally do not change with user interaction, while their appearance in screen space can be frequently changing as the user pans, zooms and rotates the camera.
 
@@ -69,7 +69,7 @@ Some coordinate systems need to be used with the [coordinateOrigin](/docs/api-re
 Remarks:
 
 * Although [Universal Transverse Mercator](https://en.wikipedia.org/wiki/Universal_Transverse_Mercator_coordinate_system) uses similar notions as the `METER_OFFSETS` mode, be aware that the deck.gl offset system does not have the sophistication of the UTM spec and should not be used interchangeably. See the [limitations](#limitations-of-the-offset-system) section for details.
-* The `CARTESIAN` mode describes positions that are identical in the world space and the common space. It is the default coordinate system when rendering into non-geopatial views. When combined with geospatial views, the positions are treated as common space coordinates for that particular projection mode. The latter can be seen used by the [MVTLayer](/docs/api-reference/geo-layers/mvt-layer.md), where the data decoded from the tiles are already pre-projected onto the Web Mercator plane.
+* The `CARTESIAN` mode describes positions that are identical in the world space and the common space. It is the default coordinate system when rendering into non-geospatial views. When combined with geospatial views, the positions are treated as common space coordinates for that particular projection mode. The latter can be seen used by the [MVTLayer](/docs/api-reference/geo-layers/mvt-layer.md), where the data decoded from the tiles are already pre-projected onto the Web Mercator plane.
 
 
 ### Limitations of the offset systems
