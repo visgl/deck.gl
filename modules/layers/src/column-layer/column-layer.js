@@ -18,7 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {Layer, project32, gouraudLighting, picking} from '@deck.gl/core';
+import {Layer, project32, gouraudLighting, picking, UNIT} from '@deck.gl/core';
 import GL from '@luma.gl/constants';
 import {Model} from '@luma.gl/core';
 import ColumnGeometry from './column-geometry';
@@ -173,7 +173,6 @@ export default class ColumnLayer extends Layer {
   }
 
   draw({uniforms}) {
-    const {viewport} = this.context;
     const {
       lineWidthUnits,
       lineWidthScale,
@@ -192,8 +191,6 @@ export default class ColumnLayer extends Layer {
     } = this.props;
     const {model, fillVertexCount, wireframeVertexCount, edgeDistance} = this.state;
 
-    const widthMultiplier = lineWidthUnits === 'pixels' ? viewport.metersPerPixel : 1;
-
     model.setUniforms(uniforms).setUniforms({
       radius,
       angle: (angle / 180) * Math.PI,
@@ -202,7 +199,8 @@ export default class ColumnLayer extends Layer {
       coverage,
       elevationScale,
       edgeDistance,
-      widthScale: lineWidthScale * widthMultiplier,
+      widthUnits: UNIT[lineWidthUnits],
+      widthScale: lineWidthScale,
       widthMinPixels: lineWidthMinPixels,
       widthMaxPixels: lineWidthMaxPixels
     });

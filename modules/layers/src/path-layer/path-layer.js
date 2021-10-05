@@ -18,7 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {Layer, project32, picking, log} from '@deck.gl/core';
+import {Layer, project32, picking, log, UNIT} from '@deck.gl/core';
 import GL from '@luma.gl/constants';
 import {Model, Geometry} from '@luma.gl/core';
 
@@ -210,7 +210,6 @@ export default class PathLayer extends Layer {
   }
 
   draw({uniforms}) {
-    const {viewport} = this.context;
     const {
       jointRounded,
       capRounded,
@@ -222,15 +221,14 @@ export default class PathLayer extends Layer {
       widthMaxPixels
     } = this.props;
 
-    const widthMultiplier = widthUnits === 'pixels' ? viewport.metersPerPixel : 1;
-
     this.state.model
       .setUniforms(uniforms)
       .setUniforms({
         jointType: Number(jointRounded),
         capType: Number(capRounded),
         billboard,
-        widthScale: widthScale * widthMultiplier,
+        widthUnits: UNIT[widthUnits],
+        widthScale,
         miterLimit,
         widthMinPixels,
         widthMaxPixels

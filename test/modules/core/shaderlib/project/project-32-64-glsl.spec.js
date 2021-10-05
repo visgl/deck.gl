@@ -88,6 +88,7 @@ varying vec4 outValue;
 
 void main()
 {
+  geometry.worldPosition = ${toGLSLVec(pos)};
   outValue = project_position_to_clipspace(${toGLSLVec(pos)}, ${toGLSLVec(
     pos64Low
   )}, vec3(0, 0, 0));
@@ -98,6 +99,7 @@ varying vec4 outValue;
 
 void main()
 {
+  geometry.worldPosition = ${toGLSLVec(pos)};
   project_position_to_clipspace(${toGLSLVec(pos)}, ${toGLSLVec(pos64Low)}, vec3(0, 0, 0), outValue);
 }
 `
@@ -148,7 +150,7 @@ const TEST_CASES = [
         mapResult: coords => clipspaceToScreen(TEST_VIEWPORT, coords),
         output: TEST_VIEWPORT.project([-122.45, 37.78, 100]),
         precision: PIXEL_TOLERANCE,
-        gpu64BitPrecision: 1e-6, // test fails with 1e-7
+        gpu64BitPrecision: 1e-5, // test fails with 1e-7
         vs: TRANSFORM_VS.project_position_to_clipspace(
           [-122.45, 37.78, 100],
           [fp64LowPart(-122.45), fp64LowPart(37.78), 0]

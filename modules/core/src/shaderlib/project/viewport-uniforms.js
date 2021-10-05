@@ -62,6 +62,7 @@ export function getOffsetOrigin(
         coordinateSystem === COORDINATE_SYSTEM.LNGLAT ||
         coordinateSystem === COORDINATE_SYSTEM.CARTESIAN
       ) {
+        geospatialOrigin = [0, 0, 0];
         offsetMode = false;
       }
       break;
@@ -230,6 +231,10 @@ function calculateViewportUniforms({
     project_uCommonOrigin: originCommon.slice(0, 3),
     project_uCenter: projectionCenter,
 
+    // Backward compatibility
+    // TODO: remove in v9
+    project_uPseudoMeters: Boolean(viewport._pseudoMeters),
+
     // Screen size
     project_uViewportSize: viewportSize,
     project_uDevicePixelRatio: devicePixelRatio,
@@ -256,6 +261,9 @@ function calculateViewportUniforms({
 
       case COORDINATE_SYSTEM.LNGLAT:
       case COORDINATE_SYSTEM.LNGLAT_OFFSETS:
+        if (!viewport._pseudoMeters) {
+          uniforms.project_uCommonUnitsPerMeter = distanceScalesAtOrigin.unitsPerMeter;
+        }
         uniforms.project_uCommonUnitsPerWorldUnit = distanceScalesAtOrigin.unitsPerDegree;
         uniforms.project_uCommonUnitsPerWorldUnit2 = distanceScalesAtOrigin.unitsPerDegree2;
         break;

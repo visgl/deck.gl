@@ -37,6 +37,15 @@ import {
 import * as vec2 from 'gl-matrix/vec2';
 import {Matrix4} from 'math.gl';
 
+const TILE_SIZE = 512;
+const EARTH_CIRCUMFERENCE = 40.03e6;
+const DEGREES_TO_RADIANS = Math.PI / 180;
+
+function unitsPerMeter(latitude) {
+  const latCosine = Math.cos(latitude * DEGREES_TO_RADIANS);
+  return TILE_SIZE / EARTH_CIRCUMFERENCE / latCosine;
+}
+
 export default class WebMercatorViewport extends Viewport {
   /**
    * @classdesc
@@ -58,7 +67,11 @@ export default class WebMercatorViewport extends Viewport {
       projectionMatrix,
 
       repeat = false,
-      worldOffset = 0
+      worldOffset = 0,
+
+      // backward compatibility
+      // TODO: remove in v9
+      legacyMeterSizes = false
     } = opts;
 
     let {width, height, altitude = 1.5} = opts;
@@ -137,6 +150,7 @@ export default class WebMercatorViewport extends Viewport {
     this.orthographic = orthographic;
 
     this._subViewports = repeat ? [] : null;
+    this._pseudoMeters = legacyMeterSizes;
 
     Object.freeze(this);
   }
@@ -161,6 +175,26 @@ export default class WebMercatorViewport extends Viewport {
       }
     }
     return this._subViewports;
+  }
+
+  projectPosition(xyz) {
+    if (this._pseudoMeters) {
+      // Backward compatibility
+      return super.projectPosition(xyz);
+    }
+    const [X, Y] = this.projectFlat(xyz);
+    const Z = (xyz[2] || 0) * unitsPerMeter(xyz[1]);
+    return [X, Y, Z];
+  }
+
+  unprojectPosition(xyz) {
+    if (this._pseudoMeters) {
+      // Backward compatibility
+      return super.unprojectPosition(xyz);
+    }
+    const [X, Y] = this.unprojectFlat(xyz);
+    const Z = (xyz[2] || 0) / unitsPerMeter(Y);
+    return [X, Y, Z];
   }
 
   /**

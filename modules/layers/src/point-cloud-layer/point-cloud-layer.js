@@ -18,7 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {Layer, project32, gouraudLighting, picking} from '@deck.gl/core';
+import {Layer, project32, gouraudLighting, picking, UNIT} from '@deck.gl/core';
 import GL from '@luma.gl/constants';
 import {Model, Geometry} from '@luma.gl/core';
 
@@ -109,15 +109,13 @@ export default class PointCloudLayer extends Layer {
   }
 
   draw({uniforms}) {
-    const {viewport} = this.context;
     const {pointSize, sizeUnits} = this.props;
-
-    const sizeMultiplier = sizeUnits === 'meters' ? 1 / viewport.metersPerPixel : 1;
 
     this.state.model
       .setUniforms(uniforms)
       .setUniforms({
-        radiusPixels: pointSize * sizeMultiplier
+        sizeUnits: UNIT[sizeUnits],
+        radiusPixels: pointSize
       })
       .draw();
   }
