@@ -47,7 +47,7 @@
     "@babel/register": "^7.13.0",
     "@loaders.gl/csv": "^3.0.8",
     "@loaders.gl/polyfills": "^3.0.8",
-    "@luma.gl/test-utils": "8.5.6",
+    "@luma.gl/test-utils": "^8.5.10",
     "@probe.gl/bench": "^3.4.0",
     "@probe.gl/test-utils": "^3.4.0",
     "abortcontroller-polyfill": "^1.5.0",
