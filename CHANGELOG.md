@@ -21,6 +21,23 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ### deck.gl v8.6 Prereleases
 
+### deck.gl [8.6.0-alpha.4] - Oct 6 2021
+
+- Google Maps Overlay: Safely invoke onRender by resetting arrayBuffer (#6224)
+- Bump luma to 8.5.10 (#6267)
+- Update HexagonLayer to use the new unit system (#6260)
+- Use accurate meter size in Web Mercator projection (#6117)
+- Improve picking index encoding (#6184)
+- H3HexagonLayer: force low precision; early exit for data analysis loop (#6242)
+- TileLayer retains cache on data change (#6194)
+- Fix excessive allocation for constant attributes (#6233)
+- Fix Heatmap data update (#6231)
+- Fix diffProps when an async prop is set synchronously (#6193)
+- Fix TileLayer getTileData not using the latest loadOptions (#6209)
+- Fix missing picking radius for onClick handlers (#6208)
+- Check visible recursively (#6190)
+- TileLayer uses props.extent to cull tiles in geospatial mode (#6191)
+- Use layerFilter in MapboxLayer (#6189)
 #### deck.gl [8.6.0-alpha.3] - Sep 9 2021
 
 - Improve shader projection in auto offset mode (#6161)
