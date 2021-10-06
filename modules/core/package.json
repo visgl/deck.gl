@@ -33,7 +33,7 @@
   "dependencies": {
     "@loaders.gl/core": "^3.0.8",
     "@loaders.gl/images": "^3.0.8",
-    "@luma.gl/core": "^8.5.5",
+    "@luma.gl/core": "^8.5.10",
     "@math.gl/web-mercator": "^3.5.4",
     "gl-matrix": "^3.0.0",
     "math.gl": "^3.5.4",
