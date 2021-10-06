@@ -114,11 +114,23 @@ export default class GoogleMapsOverlay {
     const _customRender = () => {
       this._overlay.requestRedraw();
     };
-    this._deck = createDeckInstance(this._map, this._overlay, this._deck, {
+    const deck = createDeckInstance(this._map, this._overlay, this._deck, {
       gl,
       _customRender,
       ...this.props
     });
+    this._deck = deck;
+
+    // By default, animationLoop._renderFrame invokes
+    // animationLoop.onRender. We override this to wrap
+    // in withParameters so we don't modify the GL state
+    deck.animationLoop._renderFrame = () => {
+      const ab = gl.getParameter(gl.ARRAY_BUFFER_BINDING);
+      withParameters(gl, {}, () => {
+        deck.animationLoop.onRender();
+      });
+      gl.bindBuffer(gl.ARRAY_BUFFER, ab);
+    };
   }
 
   _onContextLost() {
