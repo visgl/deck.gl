@@ -59,7 +59,7 @@ Two new props are added:
 
 #### MVTLayer
 
-Autohighlighting now also works when `binary` is set to `true`.
+Auto highlighting now also works when `binary` is set to `true`.
 
 #### Scatterplot & GeoJsonLayer 
 
