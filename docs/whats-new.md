@@ -78,6 +78,8 @@ It is now possible to independently control the zoom of the X and Y axes.
 
 Meter sizes are now correctly calculated based on the latitude of the point being drawn (previously was based on the center point of the viewport).
 
+`projectionMatrix` prop is added to allow overriding of the Matrix that would otherwise be created from the other props ([details](docs/api-reference/core/web-mercator-viewport.md)).
+
 ## deck.gl v8.5
 
 Release date: July 26, 2021
