@@ -1,0 +1,31 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset='UTF-8' />
+    <title>google-maps-example</title>
+    <style>
+      body {
+        font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+        font-size: 13px;
+        -webkit-font-smoothing: antialiased;
+        margin:0;
+        padding:0;
+        overflow:hidden;
+      }
+      #app {
+        width: 100vw;
+        height: 100vh;
+      }
+      .deck-tooltip {
+        white-space: nowrap;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="app"></div>
+    <script src='app.js'></script>
+  </body>
+  <script type="text/javascript">
+    App.renderToDOM(document.getElementById('app'));
+  </script>
+</html>

@@ -1,0 +1,19 @@
+{
+  "name": "google-maps",
+  "version": "0.0.0",
+  "license": "MIT",
+  "scripts": {
+    "start": "webpack-dev-server --progress --hot --open",
+    "start-local": "webpack-dev-server --env.local --progress --hot --open"
+  },
+  "dependencies": {
+    "@turf/rhumb-bearing": "^6.5.0",
+    "@turf/rhumb-distance": "^6.5.0",
+    "deck.gl": "^8.6.0-alpha.4"
+  },
+  "devDependencies": {
+    "webpack": "^4.20.2",
+    "webpack-cli": "^3.1.2",
+    "webpack-dev-server": "^3.1.11"
+  }
+}
