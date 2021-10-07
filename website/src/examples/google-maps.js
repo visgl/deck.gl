@@ -1,5 +1,5 @@
 import React, {Component, createRef} from 'react';
-import {DATA_URI, GITHUB_TREE} from '../constants/defaults';
+import {GITHUB_TREE} from '../constants/defaults';
 import {renderToDOM} from 'website-examples/election/app';
 
 import makeExample from '../components/example';
@@ -7,12 +7,7 @@ import makeExample from '../components/example';
 class GoogleMapsDemo extends Component {
   static title = 'US Presidential Election 2000-2016';
   
-  static code = `${GITHUB_TREE}/examples/website/election`;
-
-  static data = {
-    url: `${DATA_URI}/election.txt`,
-    worker: '/workers/election-data-decoder.js'
-  };
+  static code = `${GITHUB_TREE}/examples/website/google-3d`;
 
   static parameters = {
     year: {displayName: 'Year', type: 'range', value: 2016, step: 4, min: 2000, max: 2016}
@@ -21,21 +16,11 @@ class GoogleMapsDemo extends Component {
   static renderInfo(meta) {
     return (
       <div>
-        <p>How each county voted in historic presidencial elections.</p>
+        <p>Interleaving 3D layers with Google Maps</p>
 
-        <div className="layout">
-          <div className="legend"
-            style={{
-              background: 'linear-gradient(90deg, rgb(43,131,186) 0%, rgb(255,255,191) 50%, rgb(215,25,28) 100%)',
-              width: '100%'
-            }} />
-        </div>
-        <p className="layout">
-          <span className="col-1-2">100% Democrat</span>
-          <span className="col-1-2 text-right">100% Republican</span>
-        </p>
-
-        <p>Data source: <a href="http://dataverse.harvard.edu/">Harvard Dataverse</a></p>
+        <p><a href="https://sketchfab.com/3d-models/low-poly-truck-98826ebd44e2492298ac925461509216">Low Poly Truck</a>
+        model by <a href="https://sketchfab.com/Arifido._">Arifido._</a>
+        licensed under <a href="http://creativecommons.org/licenses/by/4.0/">CC-BY-4.0</a></p>
       </div>
     );
   }
@@ -44,20 +29,7 @@ class GoogleMapsDemo extends Component {
 
   componentDidMount() {
     const {data, params} = this.props;
-    renderToDOM(this._containerRef.current, {
-      data,
-      year: params.year.value
-    }).then(instance => (this._view = instance));
-  }
-
-  componentDidUpdate() {
-    if (this._view) {
-      const {data, params} = this.props;
-      this._view.update({
-        data,
-        year: params.year.value
-      })
-    }
+    renderToDOM(this._containerRef.current).then(instance => (this._view = instance));
   }
 
   componentWillUnmount() {
