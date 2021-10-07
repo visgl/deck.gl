@@ -32,15 +32,15 @@ Release date: October 11, 2021
 
 [Vector rendering](https://developers.google.com/maps/documentation/javascript/vector-map) of Google Maps is now supported in by the [GoogleMapsOverlay class](/docs/api-reference/google-maps/google-maps-overlay.md), providing the following enhancements:
 
-* Shared 3D space: objects drawn by the `GoogleMapsOverlay` class appear inside the Google Maps scene, correctly intersecting with 3D buildings and behind the contextual labels drawn by Google Maps
-* Tilting and rotating the view is supported
-* Rendering uses the same WebGL context as Google Maps, improving performance
+* Shared 3D space: objects drawn by the `GoogleMapsOverlay` class appear inside the Google Maps scene, correctly intersecting with 3D buildings and behind the contextual labels drawn by Google Maps.
+* Tilting and rotating the view is supported.
+* Rendering uses the same WebGL context as Google Maps, improving performance.
 
 ### Layer Enhancements
 
 #### CartoLayer
 
-`geoColumn` and `columns` props added to enable more granular data fetching from CARTO backend.
+New `geoColumn` and `columns` props enable more granular data fetching from CARTO backend.
 
 #### ColumnLayer & GridCellLayer
 
@@ -48,14 +48,14 @@ Added `radiusUnits` prop.
 
 #### H3HexagonLayer
 
-Layer now automatically chooses whether to use high-precision rendering if an edge case is detected in the source data.
+The layer now automatically chooses whether to use high-precision rendering if an edge case is detected in the source data.
 
 #### HeatmapLayer
 
 Two new props are added:
 
-* `weightsTextureSize` specifies the size of weight texture, enabling tuning between performance and accuracy 
-* `debounceTimeout` is an interval in milliseconds during which changes to the viewport don't trigger aggregation
+* `weightsTextureSize` specifies the size of weight texture, enabling tuning between performance and accuracy.
+* `debounceTimeout` is an interval in milliseconds during which changes to the viewport don't trigger aggregation.
 
 #### MVTLayer
 
@@ -63,7 +63,7 @@ Auto highlighting now also works when `binary` is set to `true`.
 
 #### Scatterplot & GeoJsonLayer 
 
-Circles are now rendered with antialiasing (configurable with the `antialiasing` prop)
+Circles are now rendered with antialiasing (configurable with the `antialiasing` prop).
 
 ### Other Improvements
 
@@ -71,7 +71,7 @@ Circles are now rendered with antialiasing (configurable with the `antialiasing`
 
 It is now possible to independently control the zoom of the X and Y axes.
 
-* The `zoom` prop of the `OrthographicView` now also supports an `[x, y]` Array to specify independent zoom levels
+* The `zoom` prop of the `OrthographicView` now also supports an `[x, y]` Array to specify independent zoom levels.
 * A `zoomAxis` prop is added to the `OrthographicController` to restrict zooming to the X or Y axes.
 
 #### Web Mercator
