@@ -10,6 +10,26 @@ Release date: TBD
 
 #### @deck.gl/googlemaps
 
+<table style="border: 0;" align="center">
+  <tbody>
+    <tr>
+      <td>
+        <!-- TODO host images on deck.gl-data -->
+        <img style="max-height:200px" src="https://user-images.githubusercontent.com/453755/136397290-495fae68-a26c-47f0-9526-b46d6bd03e39.png" />
+        <p><i>H3HexagonLayer overlay</i></p>
+      </td>
+      <td>
+        <img style="max-height:200px" src="https://user-images.githubusercontent.com/453755/136398923-e4f034c6-683c-493e-aea4-778983e673e8.png" />
+        <p><i>ArcLayer overlay</i></p>
+      </td>
+      <td>
+        <img style="max-height:200px" src="https://user-images.githubusercontent.com/453755/136398935-ec42ad8b-3ddb-4e1c-8d90-288a8a9e7c7e.png" />
+        <p><i>ScenegraphLayer overlay</i></p>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
 [Vector rendering](https://developers.google.com/maps/documentation/javascript/vector-map) of Google Maps is now supported in by the [GoogleMapsOverlay class](/docs/api-reference/google-maps/google-maps-overlay.md), providing the following enhancements:
 
 - Shared 3D space: objects drawn by the `GoogleMapsOverlay` class appear inside the Google Maps scene, correctly intersecting with 3D buildings and behind the contextual labels drawn by Google Maps
