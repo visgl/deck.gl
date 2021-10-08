@@ -74,6 +74,7 @@ TestMVTLayer.componentName = 'TestMVTLayer';
 const testMVTLayer = new TestMVTLayer({
   id: 'test-mvt-layer',
   autoHighlight: true,
+  binary: false,
   data: geoJSONData
 });
 
