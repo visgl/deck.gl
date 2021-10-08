@@ -18,7 +18,7 @@ const defaultProps = {
   uniqueIdProperty: {type: 'string', value: ''},
   highlightedFeatureId: null,
   loaders: [MVTWorkerLoader],
-  binary: false
+  binary: true
 };
 
 export default class MVTLayer extends TileLayer {
