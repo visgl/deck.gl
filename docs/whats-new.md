@@ -4,17 +4,81 @@ This page contains highlights of each deck.gl release. Also check our [vis.gl bl
 
 ## deck.gl v8.6
 
-Release date: TBD
+Release date: October 11, 2021
 
 ### Google Maps + deck.gl
 
 #### @deck.gl/googlemaps
 
+<table style="border: 0;" align="center">
+  <tbody>
+    <tr>
+      <td>
+        <!-- TODO host images on deck.gl-data -->
+        <img style="max-height:200px" src="https://user-images.githubusercontent.com/453755/136397290-495fae68-a26c-47f0-9526-b46d6bd03e39.png" />
+        <p><i>H3HexagonLayer overlay</i></p>
+      </td>
+      <td>
+        <img style="max-height:200px" src="https://user-images.githubusercontent.com/453755/136398923-e4f034c6-683c-493e-aea4-778983e673e8.png" />
+        <p><i>ArcLayer overlay</i></p>
+      </td>
+      <td>
+        <img style="max-height:200px" src="https://user-images.githubusercontent.com/453755/136398935-ec42ad8b-3ddb-4e1c-8d90-288a8a9e7c7e.png" />
+        <p><i>ScenegraphLayer overlay</i></p>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
 [Vector rendering](https://developers.google.com/maps/documentation/javascript/vector-map) of Google Maps is now supported in by the [GoogleMapsOverlay class](/docs/api-reference/google-maps/google-maps-overlay.md), providing the following enhancements:
 
-- Shared 3D space: objects drawn by the `GoogleMapsOverlay` class appear inside the Google Maps scene, correctly intersecting with 3D buildings and behind the contextual labels drawn by Google Maps
-- Tilting and rotating the view is supported
-- Rendering uses the same WebGL context as Google Maps, improving performance
+* Shared 3D space: objects drawn by the `GoogleMapsOverlay` class appear inside the Google Maps scene, correctly intersecting with 3D buildings and behind the contextual labels drawn by Google Maps.
+* Tilting and rotating the view is supported.
+* Rendering uses the same WebGL context as Google Maps, improving performance.
+
+### Layer Enhancements
+
+#### CartoLayer
+
+New `geoColumn` and `columns` props enable more granular data fetching from CARTO backend.
+
+#### ColumnLayer & GridCellLayer
+
+Added `radiusUnits` prop.
+
+#### H3HexagonLayer
+
+The layer now automatically chooses whether to use high-precision rendering if an edge case is detected in the source data.
+
+#### HeatmapLayer
+
+Two new props are added:
+
+* `weightsTextureSize` specifies the size of weight texture, enabling tuning between performance and accuracy.
+* `debounceTimeout` is an interval in milliseconds during which changes to the viewport don't trigger aggregation.
+
+#### MVTLayer
+
+Auto highlighting now also works when `binary` is set to `true`.
+
+#### Scatterplot & GeoJsonLayer 
+
+Circles are now rendered with antialiasing (configurable with the `antialiasing` prop).
+
+### Other Improvements
+
+#### OrthographicView
+
+It is now possible to independently control the zoom of the X and Y axes.
+
+* The `zoom` prop of the `OrthographicView` now also supports an `[x, y]` Array to specify independent zoom levels.
+* A `zoomAxis` prop is added to the `OrthographicController` to restrict zooming to the X or Y axes.
+
+#### Web Mercator
+
+Meter sizes are now correctly calculated based on the latitude of the point being drawn (previously was based on the center point of the viewport).
+
+A new `projectionMatrix` prop allows overriding of the Matrix that would otherwise be created from the other props ([details](docs/api-reference/core/web-mercator-viewport.md)).
 
 ## deck.gl v8.5
 
