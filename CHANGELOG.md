@@ -21,6 +21,10 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ### deck.gl v8.6 Prereleases
 
+### deck.gl [8.6.0-beta.1] - Oct 9 2021
+
+- Default to binary mode in MVTLayer (#6282)
+
 ### deck.gl [8.6.0-alpha.4] - Oct 6 2021
 
 - Google Maps Overlay: Safely invoke onRender by resetting arrayBuffer (#6224)
