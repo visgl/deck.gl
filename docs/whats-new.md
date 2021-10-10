@@ -14,7 +14,6 @@ Release date: October 11, 2021
   <tbody>
     <tr>
       <td>
-        <!-- TODO host images on deck.gl-data -->
         <img style="max-height:200px" src="https://user-images.githubusercontent.com/453755/136397290-495fae68-a26c-47f0-9526-b46d6bd03e39.png" />
         <p><i>H3HexagonLayer overlay</i></p>
       </td>
