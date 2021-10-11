@@ -97,23 +97,24 @@ export default class IndexPage extends React.Component {
 
             <h3>
               <img src={withPrefix('/images/icon-react.svg')} />
-              Integrated with React framework
+              React Friendly
             </h3>
             <p>
-            deck.gl is a great match with React, supporting
-            efficient WebGL rendering under the Reactive programming
-            paradigm. 
+            deck.gl APIs are designed to reflect the reactive programming
+            paradigm. Whether using Vanilla JS or the React interface,
+            it can handle efficient WebGL rendering under heavy data load.
             </p>
 
             <h3>
               <img src={withPrefix('/images/icon-basemap.webp')} />
-              Supporting all major basemaps with interleaving
+              Integration with Base Map Providers
             </h3>
             <p>
-              You can use deck.gl without a basemap, but if you are representing geographic data
-              you can use different libraries and providers such as Google Maps, Mapbox GL and others.
+              While deck.gl works standalone without a base map, it plays nicely with your
+              favorite base map providers such as Google Maps, Mapbox, ArcGIS and more.
               <br> 
-              deck.gl coordinates with the basemap supporting 2D and 3D visualizations.
+              Where the base map library permits, deck.gl may interleave with 3D map layers
+              to create seamless visualizations.
             </p>
 
           </TextContainer>
