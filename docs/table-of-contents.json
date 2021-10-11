@@ -6,6 +6,7 @@
       "entries": [
         {"entry": "docs"},
         {"entry": "docs/whats-new"},
+        {"entry": "docs/base-maps"},
         {"entry": "docs/upgrade-guide"},
         {"entry": "docs/contributing"},
         {"entry": "docs/faq"}
@@ -17,7 +18,10 @@
         {"entry": "docs/get-started/getting-started"},
         {"entry": "docs/get-started/using-standalone"},
         {"entry": "docs/get-started/using-with-react"},
-        {"entry": "docs/get-started/using-with-map"},
+        {"entry": "docs/get-started/using-with-google-maps"},
+        {"entry": "docs/get-started/using-with-mapbox"},
+        {"entry": "docs/get-started/using-with-arcgis"},
+        {"entry": "docs/get-started/using-with-other-maps"},
         {"entry": "docs/get-started/learning-resources"}
       ]
     },
