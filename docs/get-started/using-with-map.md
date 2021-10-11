@@ -18,7 +18,7 @@ There are two types of integration between deck.gl and a base map solution:
 | Library | Pure JS | React | Overlaid | Interleaved |
 | ----- | ----- | ----- | ----- | ----- |
 | [ArcGIS API for JavaScript](https://developers.arcgis.com/javascript/latest/) | ✓ | ✓ | | [example](https://github.com/visgl/deck.gl/tree/master/examples/get-started/pure-js/arcgis) |
-| [Google Maps JS API](https://developers.google.com/maps/documentation/javascript/overview) | ✓ | ✓ | [example](https://github.com/visgl/deck.gl/tree/master/examples/get-started/pure-js/google-maps) | 
+| [Google Maps JS API](https://developers.google.com/maps/documentation/javascript/overview) | ✓ | | | [example](https://github.com/visgl/deck.gl/tree/master/examples/get-started/pure-js/google-maps) | 
 | [harp.gl](https://www.harp.gl/) | ✓ | | [example](https://github.com/visgl/deck.gl/tree/master/examples/get-started/pure-js/harp.gl) |  |
 | [Leaflet](https://leafletjs.com/) | ✓ | | [example](https://github.com/visgl/deck.gl/tree/master/examples/get-started/pure-js/leaflet) |  |
 | [Mapbox GL JS](https://docs.mapbox.com/mapbox-gl-js/api/) | ✓ | ✓ | [example](https://github.com/visgl/deck.gl/tree/master/examples/get-started/pure-js/mapbox) | [example](https://deck.gl/gallery/mapbox-layer) |
