@@ -58,7 +58,7 @@ export default class TripBuilder {
     const prevKeyframe = this.keyframes[this.keyframes.length - 1];
     const angle = Math.abs(getTurnAngle(prevKeyframe.heading, heading));
 
-    if (angle > 1) {
+    if (angle > 0) {
       const duration = angle / this.turnSpeed;
       this.keyframes.push({
         point: prevKeyframe.point,
