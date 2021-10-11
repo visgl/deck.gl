@@ -14,16 +14,15 @@ Release date: October 11, 2021
   <tbody>
     <tr>
       <td>
-        <!-- TODO host images on deck.gl-data -->
-        <img style="max-height:200px" src="https://user-images.githubusercontent.com/453755/136397290-495fae68-a26c-47f0-9526-b46d6bd03e39.png" />
+        <img style="max-height:200px" src="https://github.com/visgl/deck.gl-data/blob/master/images/whats-new/googlemaps-h3.png?raw=true" />
         <p><i>H3HexagonLayer overlay</i></p>
       </td>
       <td>
-        <img style="max-height:200px" src="https://user-images.githubusercontent.com/453755/136398923-e4f034c6-683c-493e-aea4-778983e673e8.png" />
+        <img style="max-height:200px" src="https://github.com/visgl/deck.gl-data/blob/master/images/whats-new/googlemaps-arc.png?raw=true" />
         <p><i>ArcLayer overlay</i></p>
       </td>
       <td>
-        <img style="max-height:200px" src="https://user-images.githubusercontent.com/453755/136398935-ec42ad8b-3ddb-4e1c-8d90-288a8a9e7c7e.png" />
+        <img style="max-height:200px" src="https://github.com/visgl/deck.gl-data/blob/master/images/whats-new/googlemaps-scenegraph.png?raw=true" />
         <p><i>ScenegraphLayer overlay</i></p>
       </td>
     </tr>
