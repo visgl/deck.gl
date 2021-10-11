@@ -106,12 +106,12 @@ export default class IndexPage extends React.Component {
             </p>
 
             <h3>
-              <img src={withPrefix('/images/icon-basemap.svg')} />
+              <img src={withPrefix('/images/icon-basemap.webp')} />
               Supporting all major basemaps with interleaving
             </h3>
             <p>
               You can use deck.gl without a basemap, but if you are representing geographic data
-              you can use different libraries and providers such as Google Maps Javascript API, Mapbox GL, Maplibre, harp.gl, leaflet and others.
+              you can use different libraries and providers such as Google Maps, Mapbox GL and others.
               <br> 
               deck.gl coordinates with the basemap supporting 2D and 3D visualizations.
             </p>
