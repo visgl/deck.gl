@@ -2,6 +2,11 @@
 
 ## Upgrading from deck.gl v8.5 to v8.6
 
+### Changes to layer prop defaults
+
+- `H3HexagonLayer`'s `highPrecision` prop now defaults to `'auto'`. Explicitly setting `highPrecision: false` now forces the layer to use low-precision (instanced rendering) mode.
+- `MVTLayer`'s `binary` prop now defaults to `true`.
+
 ### Meter size projection
 
 Dimensions (radius/width/size) that are defined in meters are now projected accurately in the `MapView` according to the Web Mercator projection. This means that scatterplot radius, path widths etc. may now appear larger than they used to at high latitudes, reflecting the [distortion of the Mercator projection](https://en.wikipedia.org/wiki/Mercator_projection#/media/File:Mercator_with_Tissot's_Indicatrices_of_Distortion.svg). The visual difference is visible when viewing a dataset covering a large range of latitudes on a global scale.
