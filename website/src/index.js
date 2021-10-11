@@ -97,16 +97,25 @@ export default class IndexPage extends React.Component {
 
             <h3>
               <img src={withPrefix('/images/icon-react.svg')} />
-              React and Mapbox GL Integrations
+              Integrated with React framework
             </h3>
             <p>
             deck.gl is a great match with React, supporting
             efficient WebGL rendering under the Reactive programming
-            paradigm. And when used with Mapbox GL it automatically
-            coordinates with the Mapbox camera system to provide
-            compelling 2D and 3D visualizations on top of your Mapbox
-            based maps.
+            paradigm. 
             </p>
+
+            <h3>
+              <img src={withPrefix('/images/icon-basemap.svg')} />
+              Supporting all major basemaps with interleaving
+            </h3>
+            <p>
+              You can use deck.gl without a basemap, but if you are representing geographic data
+              you can use different libraries and providers such as Google Maps Javascript API, Mapbox GL, Maplibre, harp.gl, leaflet and others.
+              <br> 
+              deck.gl coordinates with the basemap supporting 2D and 3D visualizations.
+            </p>
+
           </TextContainer>
         </div>
       </Home>
