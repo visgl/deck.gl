@@ -1,7 +1,7 @@
 /* global document, google, fetch, requestAnimationFrame, cancelAnimationFrame */
 import {GoogleMapsOverlay as DeckOverlay} from '@deck.gl/google-maps';
 import {ScenegraphLayer} from '@deck.gl/mesh-layers';
-// import {PathLayer} from '@deck.gl/layers';
+import {PathLayer} from '@deck.gl/layers';
 
 import TripBuilder from './trip-builder';
 
@@ -28,7 +28,13 @@ function loadScript(url) {
   });
 }
 
-export async function renderToDOM(container) {
+export async function renderToDOM(
+  container,
+  options = {
+    tracking: true,
+    showPaths: true
+  }
+) {
   await loadScript(GOOGLE_MAPS_API_URL);
 
   const resp = await fetch(DATA_URL);
@@ -50,9 +56,10 @@ export async function renderToDOM(container) {
   const overlay = new DeckOverlay({});
   overlay.setMap(map);
 
-  const stopAnimation = startAnimation(map, overlay, data);
+  const stopAnimation = startAnimation(map, overlay, data, options);
 
   return {
+    update: newOpts => Object.assign(options, newOpts),
     remove: () => {
       stopAnimation();
       overlay.finalize();
@@ -60,7 +67,7 @@ export async function renderToDOM(container) {
   };
 }
 
-function startAnimation(map, overlay, data) {
+function startAnimation(map, overlay, data, options) {
   const trips = data.map(waypoints => new TripBuilder({waypoints, loop: true}));
   let timestamp = 0;
   let animation = null;
@@ -71,25 +78,31 @@ function startAnimation(map, overlay, data) {
     const frame = trips.map(trip => trip.getFrame(timestamp));
 
     // Set the camera to follow the first truck
-    map.moveCamera({
-      center: {lat: frame[0].point[1], lng: frame[0].point[0]},
-      heading: frame[0].heading
-    });
+    if (options.tracking) {
+      map.moveCamera({
+        center: {lat: frame[0].point[1], lng: frame[0].point[0]},
+        heading: frame[0].heading
+      });
+    }
 
     const layers = [
-      // new PathLayer({
-      //   id: 'trip-lines',
-      //   data: trips,
-      //   getPath: d => d.keyframes.map(f => f.point),
-      //   getColor: d => [255 * Math.random(), 255 * Math.random(), 255],
-      //   getWidth: 0.3
-      // }),
+      options.showPaths &&
+        new PathLayer({
+          id: 'trip-lines',
+          data: trips,
+          getPath: d => d.keyframes.map(f => f.point),
+          getColor: _ => [128 * Math.random(), 255 * Math.random(), 255],
+          jointRounded: true,
+          opacity: 0.5,
+          getWidth: 0.5
+        }),
       new ScenegraphLayer({
         id: 'truck',
         data: frame,
         scenegraph: MODEL_URL,
         sizeScale: 2,
         getPosition: d => d.point,
+        getTranslation: [0, 0, 1],
         getOrientation: d => [0, 180 - d.heading, 90],
         _lighting: 'pbr'
       })
