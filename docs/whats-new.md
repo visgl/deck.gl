@@ -54,7 +54,7 @@ It is now possible to independently control the zoom of the X and Y axes.
 - `HeatmapLayer` adds `weightsTextureSize` and `debounceTimeout` props for fine-tuning performance.
 - `MVTLayer` now defaults to handling geometries in binary.
 - `Scatterplot` and `GeoJsonLayer` add option to turn off antialiasing to avoid artifacts in depth oclusion.
-
+- `TileLayer` no longer purges its cache when data changes, resulting in a smoother "reload" experience
 
 ## deck.gl v8.5
 
