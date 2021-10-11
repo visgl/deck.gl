@@ -9,7 +9,7 @@
   "dependencies": {
     "@turf/rhumb-bearing": "^6.5.0",
     "@turf/rhumb-distance": "^6.5.0",
-    "deck.gl": "^8.6.0-alpha.4"
+    "deck.gl": "^8.6.0"
   },
   "devDependencies": {
     "webpack": "^4.20.2",

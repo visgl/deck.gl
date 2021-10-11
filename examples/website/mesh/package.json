@@ -8,7 +8,7 @@
   },
   "dependencies": {
     "@loaders.gl/obj": "^3.0.8",
-    "deck.gl": "^8.6.0-alpha.0",
+    "deck.gl": "^8.6.0",
     "react": "^16.3.0",
     "react-dom": "^16.3.0",
     "math.gl": "^3.5.3"

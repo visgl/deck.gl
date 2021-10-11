@@ -123,4 +123,4 @@ Receives arguments:
 
 ## Source
 
-[modules/carto/src/layers/carto-bqtiler-layer.js](https://github.com/visgl/deck.gl/tree/master/modules/carto/src/layers/carto-bqtiler-layer.js)
+[modules/carto/src/layers/carto-bqtiler-layer.js](https://github.com/visgl/deck.gl/tree/8.6-release/modules/carto/src/layers/carto-bqtiler-layer.js)

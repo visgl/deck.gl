@@ -17,12 +17,13 @@ There are two types of integration between deck.gl and a base map solution:
 
 | Library | Pure JS | React | Overlaid | Interleaved |
 | ----- | ----- | ----- | ----- | ----- |
-| [ArcGIS API for JavaScript](https://developers.arcgis.com/javascript/latest/) | ✓ | ✓ | | [example](https://github.com/visgl/deck.gl/tree/master/examples/get-started/pure-js/arcgis) |
-| [Google Maps JS API](https://developers.google.com/maps/documentation/javascript/overview) | ✓ | | | [example](https://github.com/visgl/deck.gl/tree/master/examples/get-started/pure-js/google-maps) | 
-| [harp.gl](https://www.harp.gl/) | ✓ | | [example](https://github.com/visgl/deck.gl/tree/master/examples/get-started/pure-js/harp.gl) |  |
-| [Leaflet](https://leafletjs.com/) | ✓ | | [example](https://github.com/visgl/deck.gl/tree/master/examples/get-started/pure-js/leaflet) |  |
-| [Mapbox GL JS](https://docs.mapbox.com/mapbox-gl-js/api/) | ✓ | ✓ | [example](https://github.com/visgl/deck.gl/tree/master/examples/get-started/pure-js/mapbox) | [example](https://deck.gl/gallery/mapbox-layer) |
-| [MapLibre GL JS](https://maplibre.org/maplibre-gl-js-docs/api/) | ✓ | ✓ | [example](https://github.com/visgl/deck.gl/tree/master/examples/get-started/pure-js/mapbox) | [example](https://deck.gl/gallery/mapbox-layer) |
+| [ArcGIS API for JavaScript](https://developers.arcgis.com/javascript/latest/) | ✓ | ✓ | | [example](https://github.com/visgl/deck.gl/tree/8.6-release/examples/get-started/pure-js/arcgis) |
+| [Google Maps JS API](https://developers.google.com/maps/documentation/javascript/overview) | ✓ | | | [example](https://github.com/visgl/deck.gl/tree/8.6-release/examples/get-started/pure-js/google-maps) | 
+| [harp.gl](https://www.harp.gl/) | ✓ | | [example](https://github.com/visgl/deck.gl/tree/8.6-release/examples/get-started/pure-js/harp.gl) |  |
+| [Leaflet](https://leafletjs.com/) | ✓ | | [example](https://github.com/visgl/deck.gl/tree/8.6-release/examples/get-started/pure-js/leaflet) |  |
+| [Mapbox GL JS](https://docs.mapbox.com/mapbox-gl-js/api/) | ✓ | ✓ | [example](https://github.com/visgl/deck.gl/tree/8.6-release/examples/get-started/pure-js/mapbox) | [example](https://deck.gl/gallery/mapbox-layer) |
+| [MapLibre GL JS](https://maplibre.org/maplibre-gl-js-docs/api/) | ✓ | ✓ | [example](https://github.com/visgl/deck.gl/tree/8.6-release/examples/get-started/pure-js/mapbox) | [example](https://deck.gl/gallery/mapbox-layer) |
+
 
 It is also important to understand the difference between the JS library that renders the map and the map data provider. For example, you can use Mapbox GL JS with the Mapbox service, but also with any other service that hosts Mapbox Vector Tiles. When using a base map, be sure to follow the terms and conditions, as well as the attribution requirements of both the JS library and the data provider.
 
@@ -34,7 +35,7 @@ Read on for notes on provider-specific support.
 
 When using deck.gl and Mapbox, there are two options you can choose from:
 
-- Using the Deck canvas as a overlay on top of the Mapbox map, in [pure JS](https://github.com/visgl/deck.gl/tree/master/examples/get-started/pure-js/mapbox) or [React](https://github.com/visgl/deck.gl/tree/master/examples/get-started/react/mapbox). This is the most tested and robust use case.
+- Using the Deck canvas as a overlay on top of the Mapbox map, in [pure JS](https://github.com/visgl/deck.gl/tree/8.6-release/examples/get-started/pure-js/mapbox) or [React](https://github.com/visgl/deck.gl/tree/8.6-release/examples/get-started/react/mapbox). This is the most tested and robust use case.
 - Using deck.gl layers as custom Mapbox layers, using the [@deck.gl/mapbox](/docs/api-reference/mapbox/overview.md) module. This allows you to interleave deck.gl layers with base map layers, e.g. below text labels or occlude each other correctly in 3D. Be cautious that this feature is experimental: we are working closely with Mapbox to evolve the API.
 
 ![deck.gl interleaved with Mapbox layers](https://raw.github.com/visgl/deck.gl-data/master/images/whats-new/mapbox-layers.jpg)
@@ -43,7 +44,7 @@ When using deck.gl and Mapbox, there are two options you can choose from:
 
 [react-map-gl](https://github.com/visgl/react-map-gl) is a React wrapper around mapbox-gl. If you'd like to use deck.gl with React, this component is the recommended companion.
 
-All the [examples on this website](https://github.com/visgl/deck.gl/tree/master/examples/website) are implemented using the React integration. The `DeckGL` React component works especially well as the parent of a react-map-gl [StaticMap](https://visgl.github.io/react-map-gl/docs/api-reference/static-map), which automatically interprets the deck.gl view state (i.e. latitude, longitude, zoom etc). In this configuration your deck.gl layers will render as a perfectly synchronized geospatial overlay over the underlying map.
+All the [examples on this website](https://github.com/visgl/deck.gl/tree/8.6-release/examples/website) are implemented using the React integration. The `DeckGL` React component works especially well as the parent of a react-map-gl [StaticMap](https://visgl.github.io/react-map-gl/docs/api-reference/static-map), which automatically interprets the deck.gl view state (i.e. latitude, longitude, zoom etc). In this configuration your deck.gl layers will render as a perfectly synchronized geospatial overlay over the underlying map.
 
 ### Using Mapbox basemap service (with Mapbox token)
 
@@ -94,7 +95,7 @@ Starting with v7.0, deck.gl has support for Google Maps with the [@deck.gl/googl
 
 ![deck.gl as a Google Maps overlay](https://raw.github.com/visgl/deck.gl-data/master/images/whats-new/google-maps.jpg)
 
-The Deck canvas can only be used as a overlay on top of Google Maps, see [pure JS example](https://github.com/visgl/deck.gl/tree/master/examples/get-started/pure-js/google-maps). Tilting is not supported due to Google Maps API restrictions. See module documentation page for a full list of features.
+The Deck canvas can only be used as a overlay on top of Google Maps, see [pure JS example](https://github.com/visgl/deck.gl/tree/8.6-release/examples/get-started/pure-js/google-maps). Tilting is not supported due to Google Maps API restrictions. See module documentation page for a full list of features.
 
 Note that to run the examples, you need a [Google Maps API key](https://developers.google.com/maps/documentation/javascript/get-api-key).
 
@@ -105,6 +106,6 @@ Starting with v8.1, deck.gl has support for ArcGIS with the [@deck.gl/arcgis](/d
 
 ![deck.gl as a ArcGIS map layer](https://raw.github.com/visgl/deck.gl-data/master/images/whats-new/arcgis.jpg)
 
-2D integration with `MapView` is supported by the [DeckLayer](/docs/api-reference/arcgis/deck-layer.md) class, see [pure JS example](https://github.com/visgl/deck.gl/tree/master/examples/get-started/pure-js/arcgis).
+2D integration with `MapView` is supported by the [DeckLayer](/docs/api-reference/arcgis/deck-layer.md) class, see [pure JS example](https://github.com/visgl/deck.gl/tree/8.6-release/examples/get-started/pure-js/arcgis).
 
 3D integration with `SceneView` is experimental: see the [DeckRenderer](/docs/api-reference/arcgis/deck-renderer.md) class.

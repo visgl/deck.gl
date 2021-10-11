@@ -79,4 +79,4 @@ Visit the [MapController](/docs/api-reference/core/map-controller.md) documentat
 
 ## Source
 
-[modules/core/src/views/map-view.js](https://github.com/visgl/deck.gl/blob/master/modules/core/src/views/map-view.js)
+[modules/core/src/views/map-view.js](https://github.com/visgl/deck.gl/tree/8.6-release/modules/core/src/views/map-view.js)

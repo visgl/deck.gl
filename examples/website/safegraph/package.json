@@ -9,7 +9,7 @@
   "dependencies": {
     "@loaders.gl/csv": "^3.0.8",
     "d3-scale": "^2.0.0",
-    "deck.gl": "^8.6.0-alpha.0",
+    "deck.gl": "^8.6.0",
     "mapbox-gl": "^1.0.0"
   },
   "devDependencies": {
