@@ -14,6 +14,7 @@ jobs:
     env:
       MapboxAccessToken: ${{ secrets.MAPBOX_ACCESS_TOKEN }}
       GoogleMapsAPIKey: ${{ secrets.GOOGLE_MAPS_API_KEY }}
+      GoogleMapsMapId: ${{ secrets.GOOGLE_MAPS_MAP_ID }}
 
     steps:
       - uses: actions/checkout@v2.1.1

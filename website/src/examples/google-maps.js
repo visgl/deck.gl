@@ -9,6 +9,11 @@ class GoogleMapsDemo extends Component {
 
   static code = `${GITHUB_TREE}/examples/website/google-3d`;
 
+  static parameters = {
+    tracking: {displayName: 'Camera tracking', type: 'checkbox', value: true},
+    paths: {displayName: 'Show paths', type: 'checkbox', value: false}
+  };
+
   static renderInfo(meta) {
     return (
       <div>
@@ -28,8 +33,11 @@ class GoogleMapsDemo extends Component {
   _containerRef = createRef();
 
   componentDidMount() {
-    const {data, params} = this.props;
-    renderToDOM(this._containerRef.current).then(instance => (this._view = instance));
+    const {params} = this.props;
+    renderToDOM(this._containerRef.current, {
+      tracking: params.tracking.value,
+      showPaths: params.paths.value
+    }).then(instance => (this._view = instance));
   }
 
   componentWillUnmount() {
@@ -39,6 +47,15 @@ class GoogleMapsDemo extends Component {
   }
 
   render() {
+    const {params} = this.props;
+
+    if (this._view) {
+      this._view.update({
+        tracking: params.tracking.value,
+        showPaths: params.paths.value
+      });
+    }
+
     return <div ref={this._containerRef} style={{width: '100%', height: '100%'}} />;
   }
 }
