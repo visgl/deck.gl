@@ -10,11 +10,13 @@ Release date: October 11, 2021
 
 ![Interleaving deck.gl layers with Google Maps vector buildings](https://github.com/visgl/deck.gl-data/blob/master/images/whats-new/googlemaps-scenegraph.png?raw=true)
 
-The [GoogleMapsOverlay class](/docs/api-reference/google-maps/google-maps-overlay.md) supports Google Maps' new [vector map](https://developers.google.com/maps/documentation/javascript/vector-map) on its launch day, providing the following advantages:
+The [GoogleMapsOverlay class](/docs/api-reference/google-maps/google-maps-overlay.md) supports Google Maps' new [vector map](https://developers.google.com/maps/documentation/javascript/vector-map), providing the following advantages:
 
 * Shared 3D space: objects drawn by the `GoogleMapsOverlay` class appear inside the Google Maps scene, correctly intersecting with 3D buildings and behind the contextual labels drawn by Google Maps.
 * Tilting and rotating the view is supported.
 * Rendering uses the same WebGL context as Google Maps, improving performance.
+
+See blog posts from [Google Cloud](https://cloud.google.com/blog/products/maps-platform/richer-data-visualization-google-maps-platform-using-deckgl) and [our own](https://medium.com/vis-gl/deck-gl-v8-6-now-available-with-deeper-google-maps-support-b734719076a7) for the potentials of this feature.
 
 Visit the new [Google Maps integration example](/examples/google-maps) to get started.
 
