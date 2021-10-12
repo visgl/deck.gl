@@ -112,7 +112,7 @@ export default class IndexPage extends React.Component {
             <p>
               While deck.gl works standalone without a base map, it plays nicely with your
               favorite base map providers such as Google Maps, Mapbox, ArcGIS and more.
-              Where the base map library permits, deck.gl may also interleave with 3D map layers
+              Where the base map library permits, deck.gl may interleave with 3D map layers
               to create seamless visualizations.
             </p>
 
