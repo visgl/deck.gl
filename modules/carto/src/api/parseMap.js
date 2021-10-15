@@ -1,6 +1,15 @@
 import CartoLayer from '../layers/carto-layer';
 import {log} from '@deck.gl/core';
 
+const sharedPropMap = {
+  filled: 'filled',
+  radius: 'getPointRadius',
+  opacity: 'opacity',
+  fixedRadius: {pointRadiusUnits: v => (v ? 'meters' : 'pixels')},
+  outline: 'stroked',
+  isVisible: 'visible'
+};
+
 export default function parseMap(json) {
   const {
     id,
@@ -8,7 +17,7 @@ export default function parseMap(json) {
     description,
     createdAt,
     updatedAt,
-    publicToken,
+    publicToken: accessToken,
     keplerMapConfig,
     datasets
   } = json;
@@ -37,7 +46,9 @@ export default function parseMap(json) {
       const {Layer, propMap} = LAYER_MAPPING[type];
       return new Layer({
         id,
-        ...createProps(config, propMap)
+        credentials: {accessToken},
+        ...createDataProps(config.dataId, datasets),
+        ...createStyleProps(config, propMap)
       });
     })
   };
@@ -45,22 +56,21 @@ export default function parseMap(json) {
   return map;
 }
 
-const sharedPropMap = {
-  filled: 'filled',
-  radius: 'getPointRadius',
-  opacity: 'opacity',
-  fixedRadius: {pointRadiusUnits: v => (v ? 'meters' : 'pixels')},
-  outline: 'stroked',
-  isVisible: 'visible'
-};
+function createDataProps(dataId, datasets) {
+  const dataset = datasets.find(d => d.id === dataId);
+  log.assert(dataset, `No dataset matching dataId: ${dataId}`);
+  const {connectionName: connection, source: data, type} = dataset;
+  return {connection, data, type};
+}
 
-function createProps(config, mapping) {
+function createStyleProps(config, mapping) {
   // Flatten configuration
   const {visConfig, ...rest} = config;
   config = {...visConfig, ...rest};
 
   const result = {};
-  let targetKey, convert;
+  let convert;
+  let targetKey;
   for (const sourceKey in mapping) {
     targetKey = mapping[sourceKey];
     if (typeof targetKey === 'string') {
