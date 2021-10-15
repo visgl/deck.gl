@@ -211,3 +211,18 @@ export async function getData({type, source, connection, credentials, geoColumn,
   });
   return layerData.data;
 }
+
+export async function getMap({id, credentials}) {
+  const localCreds = {...getDefaultCredentials(), ...credentials};
+
+  log.assert(id, 'Must define map id');
+
+  log.assert(localCreds.apiVersion === API_VERSIONS.V3, 'Method only available for v3');
+  log.assert(localCreds.apiBaseUrl, 'Must define apiBaseUrl');
+  if (!localCreds.mapsUrl) {
+    localCreds.mapsUrl = buildMapsUrlFromBase(localCreds.apiBaseUrl);
+  }
+
+  const url = `${localCreds.mapsUrl}/public/${id}`;
+  return await request({url});
+}
