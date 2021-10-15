@@ -14,7 +14,8 @@ setDefaultCredentials({
 });
 
 async function createMap() {
-  const {layers} = await getMap({id: 'e787df8e-7459-46ea-ade3-55462a44131a'});
+  //const {layers} = await getMap({id: 'e787df8e-7459-46ea-ade3-55462a44131a'});
+  const {layers} = await getMap({id: 'ae3ab696-3992-4d46-bdd2-b137ef9715d6'});
   const overlay = new GoogleMapsOverlay({layers});
   overlay.setMap(map);
 }
