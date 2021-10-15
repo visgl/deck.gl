@@ -21,7 +21,8 @@
   },
   "eslintConfig": {
     "globals": {
-      "document": true
+      "document": true,
+      "google": true
     }
   }
 }
