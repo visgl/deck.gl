@@ -32,23 +32,43 @@ export default function parseMap(json) {
     description,
     createdAt,
     updatedAt,
-    layers: layers.map(({type, config}) => {
+    layers: layers.map(({id, type, config}) => {
       log.assert(type in LAYER_MAPPING, `Unsupported layer type: ${type}`);
       const {Layer, propMap} = LAYER_MAPPING[type];
-      return new Layer(createProps(config, propMap));
+      return new Layer({
+        id,
+        ...createProps(config, propMap)
+      });
     })
   };
 
   return map;
 }
 
-const sharedPropMap = {};
+const sharedPropMap = {
+  filled: 'filled',
+  radius: 'getPointRadius',
+  opacity: 'opacity',
+  fixedRadius: {pointRadiusUnits: v => (v ? 'meters' : 'pixels')},
+  outline: 'stroked',
+  isVisible: 'visible'
+};
 
 function createProps(config, mapping) {
+  // Flatten configuration
+  const {visConfig, ...rest} = config;
+  config = {...visConfig, ...rest};
+
   const result = {};
+  let targetKey, convert;
   for (const sourceKey in mapping) {
-    const targetKey = mapping[sourceKey];
-    result[targetKey] = config[sourceKey];
+    targetKey = mapping[sourceKey];
+    if (typeof targetKey === 'string') {
+      result[targetKey] = config[sourceKey];
+    } else {
+      [targetKey, convert] = Object.entries(targetKey)[0];
+      result[targetKey] = convert(config[sourceKey]);
+    }
   }
   return result;
 }
