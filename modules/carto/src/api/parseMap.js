@@ -1,49 +1,21 @@
-import CartoLayer from '../layers/carto-layer';
+import {getLayerMap} from './layer-map';
 import {log} from '@deck.gl/core';
 
-const sharedPropMap = {
-  filled: 'filled',
-  radius: 'getPointRadius',
-  opacity: 'opacity',
-  fixedRadius: {pointRadiusUnits: v => (v ? 'meters' : 'pixels')},
-  outline: 'stroked',
-  isVisible: 'visible'
-};
-
 export default function parseMap(json) {
-  const {
-    id,
-    title,
-    description,
-    createdAt,
-    updatedAt,
-    publicToken: accessToken,
-    keplerMapConfig,
-    datasets
-  } = json;
-
+  const {publicToken: accessToken, keplerMapConfig, datasets} = json;
   log.assert(keplerMapConfig.version === 'v1', 'Only support Kepler v1');
   const {layers} = keplerMapConfig.config.visState;
+  const layerMap = getLayerMap();
 
-  const LAYER_MAPPING = {
-    point: {
-      Layer: CartoLayer,
-      propMap: {
-        color: 'getFillColor',
-        ...sharedPropMap
-      }
-    }
-  };
-
-  const map = {
-    id,
-    title,
-    description,
-    createdAt,
-    updatedAt,
+  return {
+    id: json.id,
+    title: json.title,
+    description: json.description,
+    createdAt: json.createdAt,
+    updatedAt: json.updatedAt,
     layers: layers.map(({id, type, config}) => {
-      log.assert(type in LAYER_MAPPING, `Unsupported layer type: ${type}`);
-      const {Layer, propMap} = LAYER_MAPPING[type];
+      log.assert(type in layerMap, `Unsupported layer type: ${type}`);
+      const {Layer, propMap} = layerMap[type];
       return new Layer({
         id,
         credentials: {accessToken},
@@ -52,8 +24,6 @@ export default function parseMap(json) {
       });
     })
   };
-
-  return map;
 }
 
 function createDataProps(dataId, datasets) {
