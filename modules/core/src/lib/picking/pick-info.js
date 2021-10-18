@@ -42,7 +42,7 @@ export function getEmptyPickingInfo({pickInfo, viewports, pixelRatio, x, y, z}) 
     y,
     pixel: [x, y],
     coordinate,
-    devicePixel: pickInfo && [pickInfo.pickedX, pickInfo.pickedY],
+    devicePixel: pickInfo && 'pickedX' in pickInfo ? [pickInfo.pickedX, pickInfo.pickedY] : null,
     pixelRatio
   };
 }
