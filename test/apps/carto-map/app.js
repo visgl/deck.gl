@@ -6,13 +6,14 @@ const id = params.has('id') ? params.get('id') : 'ae3ab696-3992-4d46-bdd2-b137ef
 
 const iframe = document.createElement('iframe');
 iframe.style.width = '100%';
-iframe.style.height = '50%';
+iframe.style.height = 'calc(50% + 25px)';
 iframe.src = `https://gcp-us-east1.app.carto.com/map/${id}`;
 
 document.body.appendChild(iframe);
 
 const mapContainer = document.getElementById('map');
-mapContainer.style.height = '50%';
+mapContainer.style.height = 'calc(50% - 21px)';
+mapContainer.style.margin = '5px';
 
 setDefaultCredentials({
   apiVersion: API_VERSIONS.V3,
