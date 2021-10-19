@@ -1,5 +1,6 @@
 import CartoLayer from '../layers/carto-layer';
 
+// Kepler -> Deck.gl
 const sharedPropMap = {
   color: 'getFillColor',
   extruded: 'enable3d',
@@ -32,11 +33,12 @@ export function getLayerMap() {
       point: {
         Layer: CartoLayer,
         propMap: {
-          ...sharedPropMap
+          ...sharedPropMap,
+          outline: 'stroked',
+          thickness: 'getLineWidth'
         },
         defaultProps: {
-          ...defaultProps,
-          lineWidthUnits: 'meters'
+          ...defaultProps
         }
       },
       geojson: {
