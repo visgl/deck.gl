@@ -6,10 +6,13 @@ const sharedPropMap = {
   filled: 'filled',
   fixedRadius: {pointRadiusUnits: v => (v ? 'meters' : 'pixels')},
   getLineColor: 'strokeColor',
+  highlightColor: 'highlightColor',
   isVisible: 'visible',
   opacity: 'opacity',
   outline: 'stroked',
-  radius: 'getPointRadius',
+  // Hack: match Builder output
+  // radius: 'getPointRadius',
+  radius: {getPointRadius: r => r / 4},
   wireframe: 'wireframe'
 };
 

@@ -5,7 +5,7 @@ export default function parseMap(json) {
   const {publicToken: accessToken, keplerMapConfig, datasets} = json;
   log.assert(keplerMapConfig.version === 'v1', 'Only support Kepler v1');
   const {mapState} = keplerMapConfig.config;
-  const {layers} = keplerMapConfig.config.visState;
+  const {layers, interactionConfig} = keplerMapConfig.config.visState;
   const layerMap = getLayerMap();
 
   return {
@@ -22,6 +22,7 @@ export default function parseMap(json) {
         id,
         credentials: {accessToken},
         ...createDataProps(config.dataId, datasets),
+        ...createInteractionProps(interactionConfig),
         ...createStyleProps(config, propMap)
       });
     })
@@ -35,9 +36,19 @@ function createDataProps(dataId, datasets) {
   return {connection, data, type};
 }
 
+function createInteractionProps(interactionConfig) {
+  // TODO these seem to be the correct properties but
+  // autoHighlight doesn't work
+  const pickable = interactionConfig.tooltip.enabled;
+  return {
+    autoHighlight: pickable,
+    pickable
+  };
+}
+
 function createStyleProps(config, mapping) {
   // Flatten configuration
-  const {visConfig, ...rest} = config;
+  const {visConfig, interactionConfig, ...rest} = config;
   config = {...visConfig, ...rest};
 
   const result = {};
