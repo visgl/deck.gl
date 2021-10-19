@@ -5,15 +5,23 @@ const sharedPropMap = {
   extruded: 'enable3d',
   filled: 'filled',
   fixedRadius: {pointRadiusUnits: v => (v ? 'meters' : 'pixels')},
-  getLineColor: 'strokeColor',
   highlightColor: 'highlightColor',
   isVisible: 'visible',
   opacity: 'opacity',
-  outline: 'stroked',
   // Hack: match Builder output
   // radius: 'getPointRadius',
   radius: {getPointRadius: r => r / 4},
+  strokeColor: 'getLineColor',
+  stroked: 'stroked',
+  thickness: {getLineWidth: w => 2 * w},
   wireframe: 'wireframe'
+};
+
+const defaultProps = {
+  lineMiterLimit: 2,
+  lineWidthUnits: 'pixels',
+  rounded: true,
+  wrapLongitude: false
 };
 
 // Have to wrap in function to be able to import CartoLayer without errors
@@ -25,13 +33,22 @@ export function getLayerMap() {
         Layer: CartoLayer,
         propMap: {
           ...sharedPropMap
-        }
+        },
+        defaultProps
+      },
+      geojson: {
+        Layer: CartoLayer,
+        propMap: {
+          ...sharedPropMap
+        },
+        defaultProps
       },
       mvt: {
         Layer: CartoLayer,
         propMap: {
           ...sharedPropMap
-        }
+        },
+        defaultProps
       }
     };
   }

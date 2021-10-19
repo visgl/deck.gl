@@ -17,13 +17,14 @@ export default function parseMap(json) {
     mapState,
     layers: layers.map(({id, type, config}) => {
       log.assert(type in layerMap, `Unsupported layer type: ${type}`);
-      const {Layer, propMap} = layerMap[type];
+      const {Layer, propMap, defaultProps} = layerMap[type];
       return new Layer({
         id,
         credentials: {accessToken},
         ...createDataProps(config.dataId, datasets),
         ...createInteractionProps(interactionConfig),
-        ...createStyleProps(config, propMap)
+        ...createStyleProps(config, propMap),
+        ...defaultProps
       });
     })
   };
@@ -48,7 +49,7 @@ function createInteractionProps(interactionConfig) {
 
 function createStyleProps(config, mapping) {
   // Flatten configuration
-  const {visConfig, interactionConfig, ...rest} = config;
+  const {visConfig, ...rest} = config;
   config = {...visConfig, ...rest};
 
   const result = {};
