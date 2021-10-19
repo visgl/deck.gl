@@ -45,6 +45,9 @@ function createStyleProps(config, mapping) {
   let targetKey;
   for (const sourceKey in mapping) {
     targetKey = mapping[sourceKey];
+    if (config[sourceKey] === undefined) {
+      continue;
+    }
     if (typeof targetKey === 'string') {
       result[targetKey] = config[sourceKey];
     } else {

@@ -22,7 +22,10 @@
   "eslintConfig": {
     "globals": {
       "document": true,
-      "google": true
+      "location": true,
+      "google": true,
+      "URLSearchParams": true,
+      "window": true
     }
   }
 }

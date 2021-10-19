@@ -1,7 +1,8 @@
 import {getMap, setDefaultCredentials, API_VERSIONS} from '@deck.gl/carto';
 import {GoogleMapsOverlay} from '@deck.gl/google-maps';
 
-const id = 'ae3ab696-3992-4d46-bdd2-b137ef9715d6';
+const params = new URLSearchParams(location.search.slice(1));
+const id = params.has('id') ? params.get('id') : 'ae3ab696-3992-4d46-bdd2-b137ef9715d6';
 
 const iframe = document.createElement('iframe');
 iframe.style.width = '100%';
@@ -21,6 +22,7 @@ setDefaultCredentials({
 async function createMap() {
   const {mapState, layers} = await getMap({id});
   const overlay = new GoogleMapsOverlay({layers});
+  window.layers = layers;
 
   const {latitude: lat, longitude: lng, zoom} = mapState;
   const map = new google.maps.Map(mapContainer, {
