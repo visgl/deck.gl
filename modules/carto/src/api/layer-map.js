@@ -14,7 +14,7 @@ const sharedPropMap = {
   radius: {getPointRadius: r => r / 4},
   strokeColor: 'getLineColor',
   stroked: 'stroked',
-  thickness: {getLineWidth: w => 2 * w},
+  thickness: 'getLineWidth',
   wireframe: 'wireframe'
 };
 
@@ -34,8 +34,7 @@ export function getLayerMap() {
         Layer: CartoLayer,
         propMap: {
           ...sharedPropMap,
-          outline: 'stroked',
-          thickness: 'getLineWidth'
+          outline: 'stroked'
         },
         defaultProps: {
           ...defaultProps
@@ -44,7 +43,8 @@ export function getLayerMap() {
       geojson: {
         Layer: CartoLayer,
         propMap: {
-          ...sharedPropMap
+          ...sharedPropMap,
+          thickness: {getLineWidth: w => 2 * w}
         },
         defaultProps
       },
