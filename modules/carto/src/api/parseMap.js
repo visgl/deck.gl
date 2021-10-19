@@ -4,6 +4,7 @@ import {log} from '@deck.gl/core';
 export default function parseMap(json) {
   const {publicToken: accessToken, keplerMapConfig, datasets} = json;
   log.assert(keplerMapConfig.version === 'v1', 'Only support Kepler v1');
+  const {mapState} = keplerMapConfig.config;
   const {layers} = keplerMapConfig.config.visState;
   const layerMap = getLayerMap();
 
@@ -13,6 +14,7 @@ export default function parseMap(json) {
     description: json.description,
     createdAt: json.createdAt,
     updatedAt: json.updatedAt,
+    mapState,
     layers: layers.map(({id, type, config}) => {
       log.assert(type in layerMap, `Unsupported layer type: ${type}`);
       const {Layer, propMap} = layerMap[type];
