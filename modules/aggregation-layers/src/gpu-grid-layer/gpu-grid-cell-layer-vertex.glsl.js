@@ -95,7 +95,6 @@ float linearScale(vec2 domain, vec2 range, float value) {
 }
 
 void main(void) {
-
   vec2 clrDomain = colorDomainValid ? colorDomain : vec2(colorData.maxMinCount.a, colorData.maxMinCount.r);
   vec4 color = quantizeScale(clrDomain, colorRange, colors.r);
 
@@ -121,6 +120,7 @@ void main(void) {
 
   vec3 centroidPosition = vec3(instancePositionXFP64[0], instancePositionYFP64[0], elevation);
   vec3 centroidPosition64Low = vec3(instancePositionXFP64[1], instancePositionYFP64[1], 0.0);
+  geometry.worldPosition = centroidPosition;
   vec3 pos = vec3(project_size(positions.xy + offset) * dotRadius, 0.);
 
   // Set color to be rendered to picking fbo (also used to check for selection highlight).

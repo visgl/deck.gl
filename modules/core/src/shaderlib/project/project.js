@@ -19,6 +19,7 @@
 // THE SOFTWARE.
 
 import {fp32} from '@luma.gl/core';
+import geometry from '../misc/geometry';
 import projectShader from './project.glsl';
 import {getUniformsFromViewport} from './viewport-uniforms';
 
@@ -33,7 +34,7 @@ function getUniforms(opts = INITIAL_MODULE_OPTIONS) {
 
 export default {
   name: 'project',
-  dependencies: [fp32],
+  dependencies: [fp32, geometry],
   vs: projectShader,
   getUniforms
 };

@@ -66,9 +66,6 @@ const defaultProps = {
 };
 
 export default class HexagonLayer extends AggregationLayer {
-  shouldUpdateState({changeFlags}) {
-    return changeFlags.somethingChanged;
-  }
   initializeState() {
     const cpuAggregator = new CPUAggregator({
       getAggregator: props => props.hexagonAggregator,
@@ -78,7 +75,7 @@ export default class HexagonLayer extends AggregationLayer {
     this.state = {
       cpuAggregator,
       aggregatorState: cpuAggregator.state,
-      hexagonVertices: null
+      vertices: null
     };
     const attributeManager = this.getAttributeManager();
     attributeManager.add({
@@ -90,47 +87,25 @@ export default class HexagonLayer extends AggregationLayer {
 
   updateState(opts) {
     super.updateState(opts);
-    const {cpuAggregator, hexagonVertices: oldVertices} = this.state;
 
     if (opts.changeFlags.propsOrDataChanged) {
-      this.setState({
-        // make a copy of the internal state of cpuAggregator for testing
-        aggregatorState: cpuAggregator.updateState(opts, {
-          viewport: this.context.viewport,
-          attributes: this.getAttributes()
-        })
+      const aggregatorState = this.state.cpuAggregator.updateState(opts, {
+        viewport: this.context.viewport,
+        attributes: this.getAttributes()
       });
-    }
-
-    // if user provided custom aggregator and returns hexagonVertices,
-    // Need to recalculate radius and angle based on vertices
-    const {hexagonVertices} = cpuAggregator.state.layerData || {};
-
-    if (hexagonVertices && oldVertices !== hexagonVertices) {
-      const vertices = this.convertLatLngToMeterOffset(hexagonVertices);
-      if (vertices) {
+      if (this.state.aggregatorState.layerData !== aggregatorState.layerData) {
+        // if user provided custom aggregator and returns hexagonVertices,
+        // Need to recalculate radius and angle based on vertices
+        const {hexagonVertices} = aggregatorState.layerData || {};
         this.setState({
-          hexagonVertices,
-          vertices
+          vertices: hexagonVertices && this.convertLatLngToMeterOffset(hexagonVertices)
         });
       }
-    } else {
-      // update radius angle by viewport
-      this.updateRadiusAngle();
-    }
-  }
 
-  updateRadiusAngle(vertices) {
-    const {viewport} = this.context;
-    const {unitsPerMeter} = viewport.getDistanceScales();
-    const {cpuAggregator} = this.state;
-
-    if (cpuAggregator.state.layerData && cpuAggregator.state.layerData.radiusCommon) {
-      const {radiusCommon} = cpuAggregator.state.layerData;
-      const radius = radiusCommon / unitsPerMeter[0];
-
-      // convert radius in common to meter
-      this.setState({angle: 90, radius});
+      this.setState({
+        // make a copy of the internal state of cpuAggregator for testing
+        aggregatorState
+      });
     }
   }
 
@@ -183,12 +158,19 @@ export default class HexagonLayer extends AggregationLayer {
 
   renderLayers() {
     const {elevationScale, extruded, coverage, material, transitions} = this.props;
-    const {angle, radius, cpuAggregator, vertices} = this.state;
+    const {aggregatorState, vertices} = this.state;
 
     const SubLayerClass = this.getSubLayerClass('hexagon-cell', ColumnLayer);
     const updateTriggers = this._getSublayerUpdateTriggers();
 
-    const geometry = vertices && vertices.length ? {vertices, radius: 1} : {radius, angle};
+    const geometry = vertices
+      ? {vertices, radius: 1}
+      : {
+          // default geometry
+          radius: aggregatorState.layerData.radiusCommon || 1,
+          radiusUnits: 'common',
+          angle: 90
+        };
     return new SubLayerClass(
       {
         ...geometry,
@@ -210,7 +192,7 @@ export default class HexagonLayer extends AggregationLayer {
         updateTriggers
       }),
       {
-        data: cpuAggregator.state.layerData.data
+        data: aggregatorState.layerData.data
       }
     );
   }

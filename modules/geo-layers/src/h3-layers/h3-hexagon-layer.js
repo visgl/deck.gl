@@ -91,7 +91,7 @@ function mergeTriggers(getHexagon, coverage) {
 
 const defaultProps = {
   ...PolygonLayer.defaultProps,
-  highPrecision: false,
+  highPrecision: 'auto',
   coverage: {type: 'number', min: 0, max: 1, value: 1},
   centerHexagon: null,
   getHexagon: {type: 'accessor', value: x => x.hexagon},
@@ -121,49 +121,59 @@ export default class H3HexagonLayer extends CompositeLayer {
 
   updateState({props, oldProps, changeFlags}) {
     if (
-      changeFlags.dataChanged ||
-      (changeFlags.updateTriggers && changeFlags.updateTriggers.getHexagon)
+      props.highPrecision !== true &&
+      (changeFlags.dataChanged ||
+        (changeFlags.updateTriggers && changeFlags.updateTriggers.getHexagon))
     ) {
-      let resolution = -1;
-      let hasPentagon = false;
-      let hasMultipleRes = false;
-      const {iterable, objectInfo} = createIterable(props.data);
-      for (const object of iterable) {
-        objectInfo.index++;
-        const hexId = props.getHexagon(object, objectInfo);
-        // Take the resolution of the first hex
-        const hexResolution = h3GetResolution(hexId);
-        if (resolution < 0) resolution = hexResolution;
-        else if (resolution !== hexResolution) {
-          hasMultipleRes = true;
-          break;
-        }
-        if (h3IsPentagon(hexId)) {
-          hasPentagon = true;
-          break;
-        }
-      }
-      this.setState({
-        resolution,
-        edgeLengthKM: resolution >= 0 ? edgeLength(resolution, UNITS.km) : 0,
-        hasMultipleRes,
-        hasPentagon
-      });
+      const dataProps = this._calculateH3DataProps(props);
+      this.setState(dataProps);
     }
 
     this._updateVertices(this.context.viewport);
   }
 
+  _calculateH3DataProps(props) {
+    let resolution = -1;
+    let hasPentagon = false;
+    let hasMultipleRes = false;
+
+    const {iterable, objectInfo} = createIterable(props.data);
+    for (const object of iterable) {
+      objectInfo.index++;
+      const hexId = props.getHexagon(object, objectInfo);
+      // Take the resolution of the first hex
+      const hexResolution = h3GetResolution(hexId);
+      if (resolution < 0) {
+        resolution = hexResolution;
+        if (!props.highPrecision) break;
+      } else if (resolution !== hexResolution) {
+        hasMultipleRes = true;
+        break;
+      }
+      if (h3IsPentagon(hexId)) {
+        hasPentagon = true;
+        break;
+      }
+    }
+
+    return {
+      resolution,
+      edgeLengthKM: resolution >= 0 ? edgeLength(resolution, UNITS.km) : 0,
+      hasMultipleRes,
+      hasPentagon
+    };
+  }
+
   _shouldUseHighPrecision() {
-    const {resolution, hasPentagon, hasMultipleRes} = this.state;
-    const {viewport} = this.context;
-    return (
-      this.props.highPrecision ||
-      viewport.resolution ||
-      hasMultipleRes ||
-      hasPentagon ||
-      (resolution >= 0 && resolution <= 5)
-    );
+    if (this.props.highPrecision === 'auto') {
+      const {resolution, hasPentagon, hasMultipleRes} = this.state;
+      const {viewport} = this.context;
+      return (
+        viewport.resolution || hasMultipleRes || hasPentagon || (resolution >= 0 && resolution <= 5)
+      );
+    }
+
+    return this.props.highPrecision;
   }
 
   _updateVertices(viewport) {

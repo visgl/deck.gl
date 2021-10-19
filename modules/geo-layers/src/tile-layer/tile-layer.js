@@ -42,7 +42,7 @@ export default class TileLayer extends CompositeLayer {
   get isLoaded() {
     const {tileset} = this.state;
     return tileset.selectedTiles.every(
-      tile => tile.layers && tile.layers.every(layer => layer.isLoaded)
+      tile => tile.isLoaded && tile.layers && tile.layers.every(layer => layer.isLoaded)
     );
   }
 
@@ -52,30 +52,28 @@ export default class TileLayer extends CompositeLayer {
 
   updateState({props, changeFlags}) {
     let {tileset} = this.state;
-    const createTileCache =
-      !tileset ||
+    const propsChanged = changeFlags.propsOrDataChanged || changeFlags.updateTriggersChanged;
+    const dataChanged =
       changeFlags.dataChanged ||
       (changeFlags.updateTriggersChanged &&
         (changeFlags.updateTriggersChanged.all || changeFlags.updateTriggersChanged.getTileData));
 
-    if (createTileCache) {
-      if (tileset) {
-        tileset.finalize();
-      }
-      tileset = new Tileset2D({
-        ...this._getTilesetOptions(props),
-        getTileData: this.getTileData.bind(this),
-        onTileLoad: this._onTileLoad.bind(this),
-        onTileError: this._onTileError.bind(this),
-        onTileUnload: this._onTileUnload.bind(this)
-      });
+    if (!tileset) {
+      tileset = new Tileset2D(this._getTilesetOptions(props));
       this.setState({tileset});
-    } else if (changeFlags.propsChanged || changeFlags.updateTriggersChanged) {
+    } else if (propsChanged) {
       tileset.setOptions(this._getTilesetOptions(props));
-      // if any props changed, delete the cached layers
-      this.state.tileset.tiles.forEach(tile => {
-        tile.layers = null;
-      });
+
+      if (dataChanged) {
+        // reload all tiles
+        // use cached layers until new content is loaded
+        tileset.reloadAll();
+      } else {
+        // some render options changed, regenerate sub layers now
+        this.state.tileset.tiles.forEach(tile => {
+          tile.layers = null;
+        });
+      }
     }
 
     this._updateTileset();
@@ -103,7 +101,12 @@ export default class TileLayer extends CompositeLayer {
       refinementStrategy,
       extent,
       maxRequests,
-      zoomOffset
+      zoomOffset,
+
+      getTileData: this.getTileData.bind(this),
+      onTileLoad: this._onTileLoad.bind(this),
+      onTileError: this._onTileError.bind(this),
+      onTileUnload: this._onTileUnload.bind(this)
     };
   }
 
@@ -138,8 +141,8 @@ export default class TileLayer extends CompositeLayer {
   }
 
   _onTileLoad(tile) {
-    const layer = this.getCurrentLayer();
-    layer.props.onTileLoad(tile);
+    this.props.onTileLoad(tile);
+    tile.layers = null;
 
     if (tile.isVisible) {
       this.setNeedsUpdate();
@@ -147,10 +150,8 @@ export default class TileLayer extends CompositeLayer {
   }
 
   _onTileError(error, tile) {
-    const layer = this.getCurrentLayer();
-    layer.props.onTileError(error);
-    // errorred tiles should not block rendering, are considered "loaded" with empty data
-    layer._updateTileset();
+    this.props.onTileError(error);
+    tile.layers = null;
 
     if (tile.isVisible) {
       this.setNeedsUpdate();
@@ -158,15 +159,13 @@ export default class TileLayer extends CompositeLayer {
   }
 
   _onTileUnload(tile) {
-    const layer = this.getCurrentLayer();
-    layer.props.onTileUnload(tile);
+    this.props.onTileUnload(tile);
   }
 
   // Methods for subclass to override
 
   getTileData(tile) {
-    const layer = this.getCurrentLayer();
-    const {data, getTileData, fetch} = layer.props;
+    const {data, getTileData, fetch} = this.props;
     const {signal} = tile;
 
     tile.url = getURLFromTemplate(data, tile);
@@ -175,7 +174,7 @@ export default class TileLayer extends CompositeLayer {
       return getTileData(tile);
     }
     if (tile.url) {
-      return fetch(tile.url, {propName: 'data', layer, signal});
+      return fetch(tile.url, {propName: 'data', layer: this, signal});
     }
     return null;
   }
@@ -203,13 +202,13 @@ export default class TileLayer extends CompositeLayer {
     return this.state.tileset.tiles.map(tile => {
       const highlightedObjectIndex = this.getHighlightedObjectIndex(tile);
       // cache the rendered layer in the tile
-      if (!tile.isLoaded) {
-        // no op
+      if (!tile.isLoaded && !tile.content) {
+        // nothing to show
       } else if (!tile.layers) {
         const layers = this.renderSubLayers({
           ...this.props,
           id: `${this.id}-${tile.x}-${tile.y}-${tile.z}`,
-          data: tile.data,
+          data: tile.content,
           _offset: 0,
           tile
         });

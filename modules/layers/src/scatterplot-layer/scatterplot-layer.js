@@ -18,7 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {Layer, project32, picking} from '@deck.gl/core';
+import {Layer, project32, picking, UNIT} from '@deck.gl/core';
 import GL from '@luma.gl/constants';
 import {Model, Geometry} from '@luma.gl/core';
 
@@ -111,7 +111,6 @@ export default class ScatterplotLayer extends Layer {
   }
 
   draw({uniforms}) {
-    const {viewport} = this.context;
     const {
       radiusUnits,
       radiusScale,
@@ -127,9 +126,6 @@ export default class ScatterplotLayer extends Layer {
       lineWidthMaxPixels
     } = this.props;
 
-    const pointRadiusMultiplier = radiusUnits === 'pixels' ? viewport.metersPerPixel : 1;
-    const lineWidthMultiplier = lineWidthUnits === 'pixels' ? viewport.metersPerPixel : 1;
-
     this.state.model
       .setUniforms(uniforms)
       .setUniforms({
@@ -137,10 +133,12 @@ export default class ScatterplotLayer extends Layer {
         filled,
         billboard,
         antialiasing,
-        radiusScale: radiusScale * pointRadiusMultiplier,
+        radiusUnits: UNIT[radiusUnits],
+        radiusScale,
         radiusMinPixels,
         radiusMaxPixels,
-        lineWidthScale: lineWidthScale * lineWidthMultiplier,
+        lineWidthUnits: UNIT[lineWidthUnits],
+        lineWidthScale,
         lineWidthMinPixels,
         lineWidthMaxPixels
       })

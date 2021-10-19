@@ -302,12 +302,11 @@ test('Layer#project', t => {
     height: 300,
     viewState: {longitude: 0, latitude: 0, zoom: 10}
   });
-
   t.ok(
     equals(layer.project([100, 100, 100]), [
-      215.91962780165122,
-      134.08037212774843,
-      0.9981698636949582
+      215.9196278025254,
+      134.08037212692722,
+      0.9981698636873962
     ]),
     'returns correct value'
   );

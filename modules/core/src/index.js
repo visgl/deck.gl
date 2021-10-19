@@ -26,7 +26,7 @@ import './lib/init';
 import './shaderlib';
 
 // Core Library
-export {COORDINATE_SYSTEM} from './lib/constants';
+export {COORDINATE_SYSTEM, UNIT} from './lib/constants';
 
 // Effects
 export {default as LightingEffect} from './effects/lighting/lighting-effect';
