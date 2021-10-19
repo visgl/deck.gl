@@ -1,12 +1,16 @@
 import CartoLayer from '../layers/carto-layer';
 
 const sharedPropMap = {
+  color: 'getFillColor',
+  extruded: 'enable3d',
   filled: 'filled',
-  radius: 'getPointRadius',
-  opacity: 'opacity',
   fixedRadius: {pointRadiusUnits: v => (v ? 'meters' : 'pixels')},
+  getLineColor: 'strokeColor',
+  isVisible: 'visible',
+  opacity: 'opacity',
   outline: 'stroked',
-  isVisible: 'visible'
+  radius: 'getPointRadius',
+  wireframe: 'wireframe'
 };
 
 // Have to wrap in function to be able to import CartoLayer without errors
@@ -17,14 +21,12 @@ export function getLayerMap() {
       point: {
         Layer: CartoLayer,
         propMap: {
-          color: 'getFillColor',
           ...sharedPropMap
         }
       },
       mvt: {
         Layer: CartoLayer,
         propMap: {
-          color: 'getFillColor',
           ...sharedPropMap
         }
       }
