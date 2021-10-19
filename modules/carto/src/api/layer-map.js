@@ -34,7 +34,10 @@ export function getLayerMap() {
         propMap: {
           ...sharedPropMap
         },
-        defaultProps
+        defaultProps: {
+          ...defaultProps,
+          lineWidthUnits: 'meters'
+        }
       },
       geojson: {
         Layer: CartoLayer,
