@@ -93,10 +93,7 @@ export default class DeckPicker {
       layer
     };
 
-    if (layer) {
-      return {...lastPickedInfo, ...info};
-    }
-    return Object.assign(info, {color: null, object: null, index: -1});
+    return {...lastPickedInfo, ...info};
   }
 
   // Private
