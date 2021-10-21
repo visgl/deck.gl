@@ -25,7 +25,7 @@ that acts as an interface between deck.gl and ArcGIS.
 </script>
 ```
 
-Note that only `loadArcGISModules` is avalable in the standalone bundle because it does not include code from ESRI. `DeckLayer` and `DeckRenderer` only available when `loadArcGISModules()` is resolved. See example in [loadArcGISModules](/docs/api-reference/arcgis/load-arcgis-modules.md#usage).
+Note that only [loadArcGISModules](/docs/api-reference/arcgis/load-arcgis-modules.md#usage) is expoted by the standalone bundle. `DeckLayer` and `DeckRenderer` are avalaible when `loadArcGISModule()` is resolved.
 
 ### Install from NPM
 
@@ -36,8 +36,18 @@ npm install @deck.gl/core @deck.gl/arcgis @arcgis/core
 ```
 
 ```js
-import {DeckLayer, DeckRenderer} from '@deck.gl/arcgis';
+// if using with esri-loader
+import {loadArcGISModules} from '@deck.gl/arcgis';
+// if using with @arcgis/core
+import {DeckLayer} from '@deck.gl/arcgis';
 ```
+
+The integration classes (`DeckLayer` and `DeckRenderer`) extend ArcGIS core classes, therefore they are only available when ArcGIS is available. To load ArcGIS, applications have [two options](https://developers.arcgis.com/javascript/latest/install-and-set-up/): from AMD modules on CDN or from locally installed ES modules. It is important that the Deck classes are imported in the same way as the ArcGIS dependency.
+
+If the application is importing the ArcGIS Map via AMD modules (`esri-loader`), then the Deck classes should be accessed by calling `loadArcGISModules`. This is the case if you are using `@esri/react-arcgis`, which utilizes `esri-loader` under the hood.
+
+If the application is importing the ArcGIS Map from locally installed ES modules (`@arcgis/core`), then the Deck classes should be imported directly from `@deck.gl/arcgis`.
+
 
 ## Supported Features and Limitations
 
