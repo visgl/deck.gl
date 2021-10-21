@@ -21,50 +21,22 @@ that acts as an interface between deck.gl and ArcGIS.
 <script src="https://unpkg.com/@deck.gl/arcgis@^1.0.0/dist.min.js"></script>
 <!-- usage -->
 <script type="text/javascript">
-  const {loadArcGISModules} = deck;
+  deck.loadArcGISModules();
 </script>
 ```
+
+Note that only `loadArcGISModules` is avalable in the standalone bundle because it does not include code from ESRI. `DeckLayer` and `DeckRenderer` only available when `loadArcGISModules()` is resolved. See example in [loadArcGISModules](/docs/api-reference/arcgis/load-arcgis-modules.md#usage).
 
 ### Install from NPM
 
 ```bash
-npm install deck.gl
+npm install deck.gl @arcgis/core
 # or
-npm install @deck.gl/core @deck.gl/arcgis
+npm install @deck.gl/core @deck.gl/arcgis @arcgis/core
 ```
 
 ```js
-import {loadArcGISModules} from '@deck.gl/arcgis';
-
-loadArcGISModules([
-  'esri/Map',
-  'esri/views/MapView'
-]).then(({DeckLayer, modules}) => {
-  const [ArcGISMap, MapView] = modules;
-
-  const layer = new DeckLayer({
-    'deck.layers': [
-      new ScatterplotLayer({
-        data: [
-          {position: [0.119, 52.205]}
-        ],
-        getPosition: d => d.position,
-        getColor: [255, 0, 0],
-        radiusMinPixels: 20
-      })
-    ]
-  });
-
-  const mapView = new MapView({
-    container: "viewDiv",
-    map: new ArcGISMap({
-      basemap: "dark-gray-vector",
-      layers: [layer]
-    }),
-    center: [0.119, 52.205],
-    zoom: 5
-  });
-});
+import {DeckLayer, DeckRenderer} from '@deck.gl/arcgis';
 ```
 
 ## Supported Features and Limitations

@@ -19,7 +19,7 @@ const properties = {
 };
 
 /* eslint-disable callback-return */
-export default function loadDeckProps(Accessor) {
+export default function createDeckProps(Accessor) {
   const DeckProps = Accessor.createSubclass({
     properties,
 
