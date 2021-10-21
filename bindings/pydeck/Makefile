@@ -13,13 +13,13 @@ help:
 
 init:
 	cd ../..; yarn bootstrap; cd -; \
-	python -m pip install -r requirements/requirements.txt; \
-	python -m pip install -r requirements/requirements-dev.txt; \
-	python -m pip install -e .
+	pip install -r requirements/requirements.txt; \
+	pip install -r requirements/requirements-dev.txt; \
+	pip install -e .
 
 fast-build:
 	cd ../../modules/jupyter-widget; webpack; cd -; \
-	python -m pip install -e .
+	pip install -e .
 
 pre-commit:
 	python -m black . --target-version py34 && $(MAKE) test
@@ -52,16 +52,16 @@ bump-version:
 
 publish-pypi:
 	rm -rf ./dist/*
-	python -m pip install .
+	pip install .
 	python setup.py sdist bdist_wheel
-	python -m pip install twine
+	pip install twine
 	python -m twine upload dist/*
 
 publish-test-pypi:
 	rm -rf ./dist/*
-	python -m pip install .
+	pip install .
 	python setup.py sdist bdist_wheel
-	python -m pip install twine
+	pip install twine
 	python -m twine upload --repository-url https://test.pypi.org/legacy/ dist/*
 
 release:
