@@ -1,3 +1,5 @@
+BIN=env/bin/
+
 help:
 	@echo "\nPlease use \`make target\` where target is one of\n"
 	@echo "init - build deck.gl and install all requirements for development"
@@ -12,10 +14,11 @@ help:
 	@echo "pre-commit - run pre-commit hook for pydeck"
 
 init:
-	cd ../..; yarn bootstrap; cd -; \
-	pip install -r requirements/requirements.txt; \
-	pip install -r requirements/requirements-dev.txt; \
-	pip install -e .
+	source $(BIN)/activate; \
+	yarn bootstrap; \
+	$(BIN)pip install -r requirements/requirements.txt; \
+	$(BIN)pip install -r requirements/requirements-dev.txt; \
+	$(BIN)pip install -e .;
 
 fast-build:
 	cd ../../modules/jupyter-widget; webpack; cd -; \
@@ -43,8 +46,8 @@ prepare-jupyter:
 	cd ../../bindings/pydeck
 
 test:
-	python -m flake8 . && \
-	python -m pytest --cov=pydeck 
+	$(BIN)python -m flake8 . && \
+	$(BIN)python -m pytest --cov=pydeck 
 
 bump-version:
 	@read -p "Choose a release type {MAJOR, MINOR, PATCH, BETA, ALPHA, RC}:" choice; \
