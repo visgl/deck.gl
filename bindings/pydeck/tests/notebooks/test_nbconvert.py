@@ -9,7 +9,7 @@ nb_path = os.path.join(here, "../../examples")
 nb_glob = os.path.join(nb_path, "*.ipynb")
 
 
-@pytest.mark.skipif(os.getenv("GITHUB_ACTIONS"), "Skipping in CI tests")
+@pytest.mark.skipif(os.getenv("GITHUB_ACTIONS") == "true", "Skipping in CI tests")
 def test_nbconvert():
     for fname in glob.glob(nb_glob):
         # NOTE Massive data sets notebook takes too long to render, skipping for now
