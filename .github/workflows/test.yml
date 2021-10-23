@@ -52,6 +52,7 @@ jobs:
           curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.37.1/install.sh | bash
           nvm install 12.12.0 && nvm use 12.12.0
           cd bindings/pydeck
+          make setup-env
           make init
 
       - name: Run tests
