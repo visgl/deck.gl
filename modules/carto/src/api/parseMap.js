@@ -1,7 +1,23 @@
+import {getData} from './maps-v3-client';
 import {getLayerMap, getSizeAccessor} from './layer-map';
 import {log} from '@deck.gl/core';
 
-export default function parseMap(json) {
+export async function getMapData(json) {
+  const {publicToken: accessToken, keplerMapConfig, datasets} = json;
+  const {layers} = keplerMapConfig.config.visState;
+  const {dataId} = layers[0].config;
+  const dataset = datasets.find(d => d.id === dataId);
+  log.assert(dataset, `No dataset matching dataId: ${dataId}`);
+  const {connectionName: connection, source, type} = dataset;
+  return await getData({
+    credentials: {accessToken},
+    connection,
+    source,
+    type
+  });
+}
+
+export function parseMap(json) {
   const {publicToken: accessToken, keplerMapConfig, datasets} = json;
   log.assert(keplerMapConfig.version === 'v1', 'Only support Kepler v1');
   const {mapState} = keplerMapConfig.config;

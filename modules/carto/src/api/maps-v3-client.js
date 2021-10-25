@@ -1,9 +1,10 @@
 /**
  * Maps API Client for Carto 3
  */
+import {extent} from 'd3-array';
 import {getDefaultCredentials, buildMapsUrlFromBase} from '../config';
 import {API_VERSIONS, encodeParameter, FORMATS, MAP_TYPES} from './maps-api-common';
-import parseMap from './parseMap';
+import {getMapData, parseMap} from './parseMap';
 import {log} from '@deck.gl/core';
 
 const MAX_GET_LENGTH = 2048;
@@ -226,5 +227,11 @@ export async function getMap({id, credentials}) {
 
   const url = `${localCreds.mapsUrl}/public/${id}`;
   const map = await request({url});
+
+  const data = await getMapData(map);
+  const ex = extent(data.features, ({properties}) => properties['size_m2']);
+  console.log(data);
+  console.log(ex);
+
   return parseMap(map);
 }
