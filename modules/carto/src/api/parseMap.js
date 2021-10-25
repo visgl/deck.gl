@@ -1,4 +1,4 @@
-import {getLayerMap} from './layer-map';
+import {getLayerMap, getSizeAccessor} from './layer-map';
 import {log} from '@deck.gl/core';
 
 export default function parseMap(json) {
@@ -15,16 +15,17 @@ export default function parseMap(json) {
     createdAt: json.createdAt,
     updatedAt: json.updatedAt,
     mapState,
-    layers: layers.map(({id, type, config}) => {
+    layers: layers.map(({id, type, config, visualChannels}) => {
       log.assert(type in layerMap, `Unsupported layer type: ${type}`);
       const {Layer, propMap, defaultProps} = layerMap[type];
       return new Layer({
         id,
         credentials: {accessToken},
+        ...defaultProps,
         ...createDataProps(config.dataId, datasets),
         ...createInteractionProps(interactionConfig),
         ...createStyleProps(config, propMap),
-        ...defaultProps
+        ...createChannelProps(visualChannels, propMap) // Must come after style
       });
     })
   };
@@ -58,6 +59,7 @@ function createStyleProps(config, mapping) {
   for (const sourceKey in mapping) {
     targetKey = mapping[sourceKey];
     if (config[sourceKey] === undefined) {
+      // eslint-disable-next-line no-continue
       continue;
     }
     if (typeof targetKey === 'string') {
@@ -67,5 +69,14 @@ function createStyleProps(config, mapping) {
       result[targetKey] = convert(config[sourceKey]);
     }
   }
+  return result;
+}
+
+function createChannelProps({sizeField, sizeScale}) {
+  const result = {};
+  if (sizeField) {
+    result.getPointRadius = getSizeAccessor(sizeField, sizeScale);
+  }
+
   return result;
 }

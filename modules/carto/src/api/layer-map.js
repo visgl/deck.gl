@@ -1,5 +1,7 @@
 import CartoLayer from '../layers/carto-layer';
 
+const RADIUS_DOWNSCALE = 4;
+
 // Kepler -> Deck.gl
 const sharedPropMap = {
   color: 'getFillColor',
@@ -11,7 +13,7 @@ const sharedPropMap = {
   opacity: 'opacity',
   // Hack: match Builder output
   // radius: 'getPointRadius',
-  radius: {getPointRadius: r => r / 4},
+  radius: {getPointRadius: r => r / RADIUS_DOWNSCALE},
   strokeColor: 'getLineColor',
   stroked: 'stroked',
   thickness: 'getLineWidth',
@@ -59,4 +61,16 @@ export function getLayerMap() {
   }
 
   return layerMap;
+}
+
+// Manually transform data
+// Range of input data
+const low = 10;
+const high = 31.606961258558215;
+export function getSizeAccessor({name}, scale) {
+  return ({properties}) => {
+    const r = Math.sqrt(properties[name]);
+    const f = (r - low) / (high - low);
+    return (0 + 37.7 * f) / 4;
+  };
 }
