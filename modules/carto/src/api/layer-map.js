@@ -1,3 +1,4 @@
+import {scaleSqrt} from 'd3-scale';
 import CartoLayer from '../layers/carto-layer';
 
 const RADIUS_DOWNSCALE = 4;
@@ -65,12 +66,11 @@ export function getLayerMap() {
 
 // Manually transform data
 // Range of input data
-const low = 10;
-const high = 31.606961258558215;
 export function getSizeAccessor({name}, scale) {
+  const scaler = scaleSqrt()
+    .domain([100, 999])
+    .range([0, 37.7 / 4]);
   return ({properties}) => {
-    const r = Math.sqrt(properties[name]);
-    const f = (r - low) / (high - low);
-    return (0 + 37.7 * f) / 4;
+    return scaler(properties[name]);
   };
 }
