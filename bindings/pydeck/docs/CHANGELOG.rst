@@ -6,6 +6,11 @@ Releases and associated GitHub PRs for pydeck are documented here.
 0.7 Releases
 ------------
 
+0.7.1 - Oct 25 2021
+-------------------
+- Add support for experimental props and add ScenegraphLayer example (#6308)
+- Enable custom_map_style and file encoding for HTML on Windows (#6121)
+
 0.7.0 - Aug 27 2021
 -------------------
 - Lock to @deck.gl/jupyter-widget@~8.5.* (#6141)
