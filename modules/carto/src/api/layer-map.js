@@ -67,11 +67,12 @@ export function getLayerMap() {
 
 // Manually transform data
 // Range of input data
-export function getSizeAccessor({name}, scale, {data}) {
+export function getSizeAccessor({name}, scale, range, {data}) {
   const dataExtent = extent(data.features, ({properties}) => properties[name]);
+  const radiusRange = range.map(r => r / RADIUS_DOWNSCALE);
   const scaler = scaleSqrt()
     .domain(dataExtent)
-    .range([0, 37.7 / 4]);
+    .range(radiusRange);
   return ({properties}) => {
     return scaler(properties[name]);
   };

@@ -4,8 +4,6 @@ import {log} from '@deck.gl/core';
 
 export async function getMapDatasets(json) {
   const {publicToken: accessToken, keplerMapConfig, datasets} = json;
-  const {layers} = keplerMapConfig.config.visState;
-
   const promises = datasets.map(dataset => {
     const {connectionName: connection, source, type} = dataset;
     return getData({
@@ -50,7 +48,7 @@ export function parseMap(json) {
         ...createDataProps(dataId, datasets),
         ...createInteractionProps(interactionConfig),
         ...createStyleProps(config, propMap),
-        ...createChannelProps(visualChannels, dataset) // Must come after style
+        ...createChannelProps(visualChannels, config, dataset) // Must come after style
       });
     })
   };
@@ -97,11 +95,12 @@ function createStyleProps(config, mapping) {
   return result;
 }
 
-function createChannelProps(visualChannels, dataset) {
+function createChannelProps(visualChannels, config, dataset) {
   const {sizeField, sizeScale} = visualChannels;
+  const {visConfig} = config;
   const result = {};
   if (sizeField) {
-    result.getPointRadius = getSizeAccessor(sizeField, sizeScale, dataset);
+    result.getPointRadius = getSizeAccessor(sizeField, sizeScale, visConfig.radiusRange, dataset);
   }
 
   return result;
