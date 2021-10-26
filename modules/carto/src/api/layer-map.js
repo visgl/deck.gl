@@ -1,9 +1,26 @@
 import {extent} from 'd3-array';
 import {rgb} from 'd3-color';
-import {scaleLinear, scaleOrdinal, scaleSqrt, scaleQuantize} from 'd3-scale';
+import {
+  scaleLinear,
+  scaleOrdinal,
+  scaleLog,
+  scalePoint,
+  scaleQuantile,
+  scaleQuantize,
+  scaleSqrt
+} from 'd3-scale';
 import CartoLayer from '../layers/carto-layer';
 
 const RADIUS_DOWNSCALE = 4;
+const SCALE_FUNCS = {
+  linear: scaleLinear,
+  ordinal: scaleOrdinal,
+  log: scaleLog,
+  point: scalePoint,
+  quantile: scaleQuantile,
+  quantize: scaleQuantize,
+  sqrt: scaleSqrt
+};
 
 // Kepler -> Deck.gl
 const sharedPropMap = {
@@ -66,31 +83,16 @@ export function getLayerMap() {
   return layerMap;
 }
 
-const SCALE_TYPES = {
-  ordinal: 'ordinal',
-  quantile: 'quantile',
-  quantize: 'quantize',
-  linear: 'linear',
-  sqrt: 'sqrt',
-  log: 'log',
-  point: 'point'
-};
-
 function domainFromAttribute(attribute, scaleType) {
-  switch (scaleType) {
-    case SCALE_TYPES.ordinal:
-    case SCALE_TYPES.point:
-      return attribute.categories.map(c => c.category).filter(c => c !== undefined && c !== null);
-    case SCALE_TYPES.log: {
-      const [d0, d1] = [attribute.min, attribute.max];
-      return [d0 === 0 ? 1e-5 : d0, d1];
-    }
-    case SCALE_TYPES.quantize:
-    case SCALE_TYPES.linear:
-    case SCALE_TYPES.sqrt:
-    default:
-      return [attribute.min, attribute.max];
+  if (scaleType === 'ordinal' || scaleType === 'point') {
+    return attribute.categories.map(c => c.category).filter(c => c !== undefined && c !== null);
   }
+
+  let {min} = attribute;
+  if (scaleType === 'log' && min === 0) {
+    min = 1e-5;
+  }
+  return [min, attribute.max];
 }
 
 function calculateDomain(data, name, scaleType) {
@@ -112,36 +114,29 @@ function calculateDomain(data, name, scaleType) {
 }
 
 export function getColorAccessor({name}, scaleType, {colorRange}, {data}) {
-  let scaler;
-  if (scaleType === 'quantize') {
-    scaler = scaleQuantize();
-  } else if (scaleType === 'ordinal') {
-    scaler = scaleOrdinal();
-  }
-
-  scaler.domain(calculateDomain(data, name, scaleType));
-  scaler.range(colorRange.colors);
+  const scale = SCALE_FUNCS[scaleType]();
+  scale.domain(calculateDomain(data, name, scaleType));
+  scale.range(colorRange.colors);
 
   return ({properties}) => {
-    const rgba = rgb(scaler(properties[name]));
+    const rgba = rgb(scale(properties[name]));
     return [rgba.r, rgba.g, rgba.b, 255 * rgba.a];
   };
 }
 
 export function getElevationAccessor({name}, scaleType, {heightRange}, {data}) {
-  const scaler = scaleLinear()
-    .domain(calculateDomain(data, name, scaleType))
-    .range(heightRange);
+  const scale = SCALE_FUNCS[scaleType]();
+  scale.domain(calculateDomain(data, name, scaleType));
+  scale.range(heightRange);
   return ({properties}) => {
-    return scaler(properties[name]);
+    return scale(properties[name]);
   };
 }
-export function getSizeAccessor({name}, scaleType, visConfig, {data}) {
-  const range = visConfig.radiusRange.map(r => r / RADIUS_DOWNSCALE);
-  const scaler = scaleSqrt()
-    .domain(calculateDomain(data, name, scaleType))
-    .range(range);
+export function getSizeAccessor({name}, scaleType, {radiusRange}, {data}) {
+  const scale = SCALE_FUNCS[scaleType]();
+  scale.domain(calculateDomain(data, name, scaleType));
+  scale.range(radiusRange.map(r => r / RADIUS_DOWNSCALE));
   return ({properties}) => {
-    return scaler(properties[name]);
+    return scale(properties[name]);
   };
 }
