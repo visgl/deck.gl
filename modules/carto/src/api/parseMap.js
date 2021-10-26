@@ -100,23 +100,13 @@ function createChannelProps(visualChannels, config, dataset) {
   const {visConfig} = config;
   const result = {};
   if (colorField) {
-    result.getFillColor = getColorAccessor(
-      colorField,
-      colorScale,
-      visConfig.colorRange.colors,
-      dataset
-    );
+    result.getFillColor = getColorAccessor(colorField, colorScale, visConfig, dataset);
   }
   if (heightField) {
-    result.getElevation = getElevationAccessor(
-      heightField,
-      heightScale,
-      visConfig.heightRange,
-      dataset
-    );
+    result.getElevation = getElevationAccessor(heightField, heightScale, visConfig, dataset);
   }
   if (sizeField) {
-    result.getPointRadius = getSizeAccessor(sizeField, sizeScale, visConfig.radiusRange, dataset);
+    result.getPointRadius = getSizeAccessor(sizeField, sizeScale, visConfig, dataset);
   }
 
   return result;

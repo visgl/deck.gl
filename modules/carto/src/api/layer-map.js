@@ -66,7 +66,7 @@ export function getLayerMap() {
   return layerMap;
 }
 
-export function getColorAccessor({name}, scale, range, {data}) {
+export function getColorAccessor({name}, scale, {colorRange}, {data}) {
   let scaler;
   let domain;
   if (scale === 'quantize') {
@@ -89,7 +89,7 @@ export function getColorAccessor({name}, scale, range, {data}) {
   }
 
   scaler.domain(domain);
-  scaler.range(range);
+  scaler.range(colorRange.colors);
 
   return ({properties}) => {
     const rgba = rgb(scaler(properties[name]));
@@ -97,22 +97,21 @@ export function getColorAccessor({name}, scale, range, {data}) {
   };
 }
 
-export function getElevationAccessor({name}, scale, range, {data}) {
+export function getElevationAccessor({name}, scale, {heightRange}, {data}) {
   const domain = extent(data.features, ({properties}) => properties[name]);
-  const radiusRange = range.map(r => r / RADIUS_DOWNSCALE);
   const scaler = scaleLinear()
     .domain(domain)
-    .range(radiusRange);
+    .range(heightRange);
   return ({properties}) => {
     return scaler(properties[name]);
   };
 }
-export function getSizeAccessor({name}, scale, range, {data}) {
+export function getSizeAccessor({name}, scale, visConfig, {data}) {
   const domain = extent(data.features, ({properties}) => properties[name]);
-  const radiusRange = range.map(r => r / RADIUS_DOWNSCALE);
+  const range = visConfig.radiusRange.map(r => r / RADIUS_DOWNSCALE);
   const scaler = scaleSqrt()
     .domain(domain)
-    .range(radiusRange);
+    .range(range);
   return ({properties}) => {
     return scaler(properties[name]);
   };
