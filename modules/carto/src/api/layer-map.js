@@ -1,6 +1,6 @@
 import {extent} from 'd3-array';
 import {rgb} from 'd3-color';
-import {scaleSqrt, scaleQuantize} from 'd3-scale';
+import {scaleOrdinal, scaleSqrt, scaleQuantize} from 'd3-scale';
 import CartoLayer from '../layers/carto-layer';
 
 const RADIUS_DOWNSCALE = 4;
@@ -67,10 +67,18 @@ export function getLayerMap() {
 }
 
 export function getColorAccessor({name}, scale, range, {data}) {
-  const dataExtent = extent(data.features, ({properties}) => properties[name]);
-  const scaler = scaleQuantize()
-    .domain(dataExtent)
-    .range(range);
+  let scaler;
+  if (scale === 'quantize') {
+    scaler = scaleQuantize();
+    const dataExtent = extent(data.features, ({properties}) => properties[name]);
+    scaler.domain(dataExtent);
+  } else if (scale === 'ordinal') {
+    scaler = scaleOrdinal();
+    // TODO how do we get the domain?
+  }
+
+  scaler.range(range);
+
   return ({properties}) => {
     const rgba = rgb(scaler(properties[name]));
     return [rgba.r, rgba.g, rgba.b, 255 * rgba.a];
