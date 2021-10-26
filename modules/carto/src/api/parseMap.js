@@ -1,9 +1,9 @@
 import {getData} from './maps-v3-client';
-import {getLayerMap, getSizeAccessor} from './layer-map';
+import {getLayerMap, getColorAccessor, getSizeAccessor} from './layer-map';
 import {log} from '@deck.gl/core';
 
 export async function getMapDatasets(json) {
-  const {publicToken: accessToken, keplerMapConfig, datasets} = json;
+  const {publicToken: accessToken, datasets} = json;
   const promises = datasets.map(dataset => {
     const {connectionName: connection, source, type} = dataset;
     return getData({
@@ -96,9 +96,17 @@ function createStyleProps(config, mapping) {
 }
 
 function createChannelProps(visualChannels, config, dataset) {
-  const {sizeField, sizeScale} = visualChannels;
+  const {colorField, colorScale, sizeField, sizeScale} = visualChannels;
   const {visConfig} = config;
   const result = {};
+  if (colorField) {
+    result.getFillColor = getColorAccessor(
+      colorField,
+      colorScale,
+      visConfig.colorRange.colors,
+      dataset
+    );
+  }
   if (sizeField) {
     result.getPointRadius = getSizeAccessor(sizeField, sizeScale, visConfig.radiusRange, dataset);
   }

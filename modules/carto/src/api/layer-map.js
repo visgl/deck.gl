@@ -1,5 +1,6 @@
 import {extent} from 'd3-array';
-import {scaleSqrt} from 'd3-scale';
+import {rgb} from 'd3-color';
+import {scaleSqrt, scaleQuantize} from 'd3-scale';
 import CartoLayer from '../layers/carto-layer';
 
 const RADIUS_DOWNSCALE = 4;
@@ -65,8 +66,17 @@ export function getLayerMap() {
   return layerMap;
 }
 
-// Manually transform data
-// Range of input data
+export function getColorAccessor({name}, scale, range, {data}) {
+  const dataExtent = extent(data.features, ({properties}) => properties[name]);
+  const scaler = scaleQuantize()
+    .domain(dataExtent)
+    .range(range);
+  return ({properties}) => {
+    const rgba = rgb(scaler(properties[name]));
+    return [rgba.r, rgba.g, rgba.b, 255 * rgba.a];
+  };
+}
+
 export function getSizeAccessor({name}, scale, range, {data}) {
   const dataExtent = extent(data.features, ({properties}) => properties[name]);
   const radiusRange = range.map(r => r / RADIUS_DOWNSCALE);

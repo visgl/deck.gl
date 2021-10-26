@@ -36,6 +36,8 @@
     "@loaders.gl/tiles": "^3.0.8",
     "@math.gl/web-mercator": "^3.5.4",
     "cartocolor": "^4.0.2",
+    "d3-array": "^3.1.1",
+    "d3-color": "^3.0.1",
     "d3-scale": "^3.2.3"
   },
   "peerDependencies": {
