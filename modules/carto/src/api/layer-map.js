@@ -68,15 +68,18 @@ export function getLayerMap() {
 
 export function getColorAccessor({name}, scale, range, {data}) {
   let scaler;
+  let domain;
   if (scale === 'quantize') {
     scaler = scaleQuantize();
-    const dataExtent = extent(data.features, ({properties}) => properties[name]);
-    scaler.domain(dataExtent);
+    domain = extent(data.features, ({properties}) => properties[name]);
   } else if (scale === 'ordinal') {
     scaler = scaleOrdinal();
-    // TODO how do we get the domain?
+    const {attributes} = data.tilestats.layers[0];
+    const attribute = attributes.find(a => a.attribute === name);
+    domain = attribute.categories.map(c => c.category).filter(c => c !== undefined && c !== null);
   }
 
+  scaler.domain(domain);
   scaler.range(range);
 
   return ({properties}) => {
