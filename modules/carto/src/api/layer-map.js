@@ -1,6 +1,6 @@
 import {extent} from 'd3-array';
 import {rgb} from 'd3-color';
-import {scaleOrdinal, scaleSqrt, scaleQuantize} from 'd3-scale';
+import {scaleLinear, scaleOrdinal, scaleSqrt, scaleQuantize} from 'd3-scale';
 import CartoLayer from '../layers/carto-layer';
 
 const RADIUS_DOWNSCALE = 4;
@@ -8,7 +8,7 @@ const RADIUS_DOWNSCALE = 4;
 // Kepler -> Deck.gl
 const sharedPropMap = {
   color: 'getFillColor',
-  extruded: 'enable3d',
+  enable3d: 'extruded',
   filled: 'filled',
   fixedRadius: {pointRadiusUnits: v => (v ? 'meters' : 'pixels')},
   highlightColor: 'highlightColor',
@@ -97,11 +97,21 @@ export function getColorAccessor({name}, scale, range, {data}) {
   };
 }
 
+export function getElevationAccessor({name}, scale, range, {data}) {
+  const domain = extent(data.features, ({properties}) => properties[name]);
+  const radiusRange = range.map(r => r / RADIUS_DOWNSCALE);
+  const scaler = scaleLinear()
+    .domain(domain)
+    .range(radiusRange);
+  return ({properties}) => {
+    return scaler(properties[name]);
+  };
+}
 export function getSizeAccessor({name}, scale, range, {data}) {
-  const dataExtent = extent(data.features, ({properties}) => properties[name]);
+  const domain = extent(data.features, ({properties}) => properties[name]);
   const radiusRange = range.map(r => r / RADIUS_DOWNSCALE);
   const scaler = scaleSqrt()
-    .domain(dataExtent)
+    .domain(domain)
     .range(radiusRange);
   return ({properties}) => {
     return scaler(properties[name]);

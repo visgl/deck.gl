@@ -1,5 +1,5 @@
 import {getData} from './maps-v3-client';
-import {getLayerMap, getColorAccessor, getSizeAccessor} from './layer-map';
+import {getLayerMap, getElevationAccessor, getColorAccessor, getSizeAccessor} from './layer-map';
 import {log} from '@deck.gl/core';
 
 export async function getMapDatasets(json) {
@@ -96,7 +96,7 @@ function createStyleProps(config, mapping) {
 }
 
 function createChannelProps(visualChannels, config, dataset) {
-  const {colorField, colorScale, sizeField, sizeScale} = visualChannels;
+  const {colorField, colorScale, heightField, heightScale, sizeField, sizeScale} = visualChannels;
   const {visConfig} = config;
   const result = {};
   if (colorField) {
@@ -104,6 +104,14 @@ function createChannelProps(visualChannels, config, dataset) {
       colorField,
       colorScale,
       visConfig.colorRange.colors,
+      dataset
+    );
+  }
+  if (heightField) {
+    result.getElevation = getElevationAccessor(
+      heightField,
+      heightScale,
+      visConfig.heightRange,
       dataset
     );
   }
