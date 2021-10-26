@@ -11,12 +11,28 @@
         height: 100vh;
         overflow: hidden;
       }
+      #container {
+        position: relative;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+      }
+      #container > * {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+      }
     </style>
-    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyC-D3n4Imi9m9KrCaa6p75qO525OoQE2Sk&v=beta"
-    ></script>
+    <link href='https://api.tiles.mapbox.com/mapbox-gl-js/v1.4.0/mapbox-gl.css' rel='stylesheet' />
   </head>
   <body>
-    <div id="map"></div>
+    <div id="container">
+      <div id="map"></div>
+      <canvas id="deck-canvas"></canvas>
+    </div>
     <script src='app.js'></script>
   </body>
 </html>
