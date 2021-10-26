@@ -71,9 +71,18 @@ export function getColorAccessor({name}, scale, range, {data}) {
   let domain;
   if (scale === 'quantize') {
     scaler = scaleQuantize();
-    domain = extent(data.features, ({properties}) => properties[name]);
   } else if (scale === 'ordinal') {
     scaler = scaleOrdinal();
+  }
+
+  if (data.features) {
+    const values = data.features.map(({properties}) => properties[name]);
+    if (scale === 'ordinal') {
+      domain = [...new Set(values)].sort();
+    } else {
+      domain = extent(data.features);
+    }
+  } else if (data.tilestats) {
     const {attributes} = data.tilestats.layers[0];
     const attribute = attributes.find(a => a.attribute === name);
     domain = attribute.categories.map(c => c.category).filter(c => c !== undefined && c !== null);
