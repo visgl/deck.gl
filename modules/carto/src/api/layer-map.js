@@ -66,29 +66,60 @@ export function getLayerMap() {
   return layerMap;
 }
 
-export function getColorAccessor({name}, scale, {colorRange}, {data}) {
+const SCALE_TYPES = {
+  ordinal: 'ordinal',
+  quantile: 'quantile',
+  quantize: 'quantize',
+  linear: 'linear',
+  sqrt: 'sqrt',
+  log: 'log',
+  point: 'point'
+};
+
+function domainFromAttribute(attribute, scaleType) {
+  switch (scaleType) {
+    case SCALE_TYPES.ordinal:
+    case SCALE_TYPES.point:
+      return attribute.categories.map(c => c.category).filter(c => c !== undefined && c !== null);
+    case SCALE_TYPES.log: {
+      const [d0, d1] = [attribute.min, attribute.max];
+      return [d0 === 0 ? 1e-5 : d0, d1];
+    }
+    case SCALE_TYPES.quantize:
+    case SCALE_TYPES.linear:
+    case SCALE_TYPES.sqrt:
+    default:
+      return [attribute.min, attribute.max];
+  }
+}
+
+function calculateDomain(data, name, scaleType) {
+  if (data.features) {
+    // GeoJSON data type
+    const values = data.features.map(({properties}) => properties[name]);
+    if (scaleType === 'ordinal') {
+      return [...new Set(values)].sort();
+    }
+    return extent(data.features);
+  } else if (data.tilestats) {
+    // Tileset data type
+    const {attributes} = data.tilestats.layers[0];
+    const attribute = attributes.find(a => a.attribute === name);
+    return domainFromAttribute(attribute, scaleType);
+  }
+
+  return [0, 1];
+}
+
+export function getColorAccessor({name}, scaleType, {colorRange}, {data}) {
   let scaler;
-  let domain;
-  if (scale === 'quantize') {
+  if (scaleType === 'quantize') {
     scaler = scaleQuantize();
-  } else if (scale === 'ordinal') {
+  } else if (scaleType === 'ordinal') {
     scaler = scaleOrdinal();
   }
 
-  if (data.features) {
-    const values = data.features.map(({properties}) => properties[name]);
-    if (scale === 'ordinal') {
-      domain = [...new Set(values)].sort();
-    } else {
-      domain = extent(data.features);
-    }
-  } else if (data.tilestats) {
-    const {attributes} = data.tilestats.layers[0];
-    const attribute = attributes.find(a => a.attribute === name);
-    domain = attribute.categories.map(c => c.category).filter(c => c !== undefined && c !== null);
-  }
-
-  scaler.domain(domain);
+  scaler.domain(calculateDomain(data, name, scaleType));
   scaler.range(colorRange.colors);
 
   return ({properties}) => {
@@ -97,20 +128,18 @@ export function getColorAccessor({name}, scale, {colorRange}, {data}) {
   };
 }
 
-export function getElevationAccessor({name}, scale, {heightRange}, {data}) {
-  const domain = extent(data.features, ({properties}) => properties[name]);
+export function getElevationAccessor({name}, scaleType, {heightRange}, {data}) {
   const scaler = scaleLinear()
-    .domain(domain)
+    .domain(calculateDomain(data, name, scaleType))
     .range(heightRange);
   return ({properties}) => {
     return scaler(properties[name]);
   };
 }
-export function getSizeAccessor({name}, scale, visConfig, {data}) {
-  const domain = extent(data.features, ({properties}) => properties[name]);
+export function getSizeAccessor({name}, scaleType, visConfig, {data}) {
   const range = visConfig.radiusRange.map(r => r / RADIUS_DOWNSCALE);
   const scaler = scaleSqrt()
-    .domain(domain)
+    .domain(calculateDomain(data, name, scaleType))
     .range(range);
   return ({properties}) => {
     return scaler(properties[name]);
