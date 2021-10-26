@@ -45,6 +45,7 @@ export function parseMap(json) {
         id,
         credentials: {accessToken},
         ...defaultProps,
+        // TODO we don't need to load data again, as we already have it!
         ...createDataProps(dataId, datasets),
         ...createInteractionProps(interactionConfig),
         ...createStyleProps(config, propMap),
@@ -96,11 +97,23 @@ function createStyleProps(config, mapping) {
 }
 
 function createChannelProps(visualChannels, config, dataset) {
-  const {colorField, colorScale, heightField, heightScale, sizeField, sizeScale} = visualChannels;
+  const {
+    colorField,
+    colorScale,
+    heightField,
+    heightScale,
+    sizeField,
+    sizeScale,
+    strokeColorField,
+    strokeColorScale
+  } = visualChannels;
   const {visConfig} = config;
   const result = {};
   if (colorField) {
     result.getFillColor = getColorAccessor(colorField, colorScale, visConfig, dataset);
+  }
+  if (strokeColorField) {
+    result.getLineColor = getColorAccessor(strokeColorField, strokeColorScale, visConfig, dataset);
   }
   if (heightField) {
     result.getElevation = getElevationAccessor(heightField, heightScale, visConfig, dataset);

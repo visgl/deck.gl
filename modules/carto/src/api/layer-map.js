@@ -102,7 +102,7 @@ function calculateDomain(data, name, scaleType) {
     if (scaleType === 'ordinal') {
       return [...new Set(values)].sort();
     }
-    return extent(data.features);
+    return extent(values);
   } else if (data.tilestats) {
     // Tileset data type
     const {attributes} = data.tilestats.layers[0];
