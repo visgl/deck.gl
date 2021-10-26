@@ -1,7 +1,6 @@
 /**
  * Maps API Client for Carto 3
  */
-import {extent} from 'd3-array';
 import {getDefaultCredentials, buildMapsUrlFromBase} from '../config';
 import {API_VERSIONS, encodeParameter, FORMATS, MAP_TYPES} from './maps-api-common';
 import {getMapDatasets, parseMap} from './parseMap';
@@ -230,8 +229,6 @@ export async function getMap({id, credentials}) {
 
   // Mutates map.datasets so that dataset.data contains data
   await getMapDatasets(map);
-  const ex = extent(map.datasets[0].data.features, ({properties}) => properties['size_m2']);
-  console.log(ex);
 
   return parseMap(map);
 }

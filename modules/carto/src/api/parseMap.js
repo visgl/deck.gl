@@ -39,14 +39,18 @@ export function parseMap(json) {
     layers: layers.map(({id, type, config, visualChannels}) => {
       log.assert(type in layerMap, `Unsupported layer type: ${type}`);
       const {Layer, propMap, defaultProps} = layerMap[type];
+
+      const {dataId} = config;
+      const dataset = datasets.find(d => d.id === dataId);
+      log.assert(dataset, `No dataset matching dataId: ${dataId}`);
       return new Layer({
         id,
         credentials: {accessToken},
         ...defaultProps,
-        ...createDataProps(config.dataId, datasets),
+        ...createDataProps(dataId, datasets),
         ...createInteractionProps(interactionConfig),
         ...createStyleProps(config, propMap),
-        ...createChannelProps(visualChannels, propMap) // Must come after style
+        ...createChannelProps(visualChannels, dataset) // Must come after style
       });
     })
   };
@@ -93,10 +97,11 @@ function createStyleProps(config, mapping) {
   return result;
 }
 
-function createChannelProps({sizeField, sizeScale}) {
+function createChannelProps(visualChannels, dataset) {
+  const {sizeField, sizeScale} = visualChannels;
   const result = {};
   if (sizeField) {
-    result.getPointRadius = getSizeAccessor(sizeField, sizeScale);
+    result.getPointRadius = getSizeAccessor(sizeField, sizeScale, dataset);
   }
 
   return result;

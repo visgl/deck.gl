@@ -1,3 +1,4 @@
+import {extent} from 'd3-array';
 import {scaleSqrt} from 'd3-scale';
 import CartoLayer from '../layers/carto-layer';
 
@@ -66,9 +67,10 @@ export function getLayerMap() {
 
 // Manually transform data
 // Range of input data
-export function getSizeAccessor({name}, scale) {
+export function getSizeAccessor({name}, scale, {data}) {
+  const dataExtent = extent(data.features, ({properties}) => properties[name]);
   const scaler = scaleSqrt()
-    .domain([100, 999])
+    .domain(dataExtent)
     .range([0, 37.7 / 4]);
   return ({properties}) => {
     return scaler(properties[name]);
