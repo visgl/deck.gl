@@ -155,8 +155,10 @@ function afterRender(deck, map) {
     const mapboxLayerIds = Array.from(mapboxLayers, layer => layer.id);
     const hasNonMapboxLayers = deck.props.layers.some(layer => !mapboxLayerIds.includes(layer.id));
     if (hasNonMapboxLayers) {
+      const viewports = deck.viewManager.getViewports();
+      viewports[0] = getViewport(deck, map, false);
       deck._drawLayers('mapbox-repaint', {
-        viewports: [getViewport(deck, map, false)],
+        viewports,
         layerFilter: ({layer}) => !mapboxLayerIds.includes(layer.id),
         clearCanvas: false
       });
