@@ -23,7 +23,7 @@ export async function getMapDatasets(json) {
 export function parseMap(json) {
   const {publicToken: accessToken, keplerMapConfig, datasets} = json;
   log.assert(keplerMapConfig.version === 'v1', 'Only support Kepler v1');
-  const {mapState} = keplerMapConfig.config;
+  const {mapState, mapStyle} = keplerMapConfig.config;
   const {layers, interactionConfig} = keplerMapConfig.config.visState;
   const layerMap = getLayerMap();
 
@@ -34,6 +34,7 @@ export function parseMap(json) {
     createdAt: json.createdAt,
     updatedAt: json.updatedAt,
     mapState,
+    mapStyle,
     layers: layers.map(({id, type, config, visualChannels}) => {
       log.assert(type in layerMap, `Unsupported layer type: ${type}`);
       const {Layer, propMap, defaultProps} = layerMap[type];

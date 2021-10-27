@@ -11,7 +11,7 @@ import {
 } from 'd3-scale';
 import CartoLayer from '../layers/carto-layer';
 
-const RADIUS_DOWNSCALE = 4;
+const RADIUS_DOWNSCALE = 5;
 const SCALE_FUNCS = {
   linear: scaleLinear,
   ordinal: scaleOrdinal,
