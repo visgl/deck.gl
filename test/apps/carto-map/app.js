@@ -8,11 +8,10 @@ setDefaultCredentials({
 });
 
 async function createMap(mapId) {
-  let deck;
-  let map;
+  const deck = new Deck({canvas: 'deck-canvas'});
   const mapConfiguration = {mapId};
 
-  // Auto-refresh is optional
+  // Auto-refresh (optional)
   const autoRefresh = true;
   if (autoRefresh) {
     // Autorefresh the data every 5 seconds
@@ -22,26 +21,19 @@ async function createMap(mapId) {
     };
   }
 
-  const {mapState, mapStyle, layers} = await getMap(mapConfiguration);
+  // Get map info from CARTO and update deck
+  const {mapState: initialViewState, mapStyle, layers} = await getMap(mapConfiguration);
+  deck.setProps({initialViewState, layers});
 
-  deck = new Deck({
-    canvas: 'deck-canvas',
-    initialViewState: mapState,
+  // Mapbox basemap (optional)
+  const MAP_STYLE = `https://basemaps.cartocdn.com/gl/${mapStyle.styleType}-gl-style/style.json`;
+  const map = new mapboxgl.Map({container: 'map', style: MAP_STYLE, interactive: false});
+  deck.setProps({
     controller: true,
     onViewStateChange: ({viewState}) => {
       const {longitude, latitude, ...rest} = viewState;
       map.jumpTo({center: [longitude, latitude], ...rest});
-    },
-    layers
-  });
-
-  // Mapbox basemap
-  const MAP_STYLE = `https://basemaps.cartocdn.com/gl/${mapStyle.styleType}-gl-style/style.json`;
-
-  map = new mapboxgl.Map({
-    container: 'map',
-    style: MAP_STYLE,
-    interactive: false
+    }
   });
 }
 
