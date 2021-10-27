@@ -284,7 +284,10 @@ export async function getMap({id, credentials}) {
   // Mutates map.datasets so that dataset.data contains data
   await getMapDatasets(map);
 
-  //setTimeout(
+  setInterval(async () => {
+    await getMapDatasets(map);
+    console.log('done');
+  }, 5000);
 
   return parseMap(map);
 }
