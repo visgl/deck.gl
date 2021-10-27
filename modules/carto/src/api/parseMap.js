@@ -1,24 +1,5 @@
-import {getData} from './maps-v3-client';
 import {LAYER_MAP, getElevationAccessor, getColorAccessor, getSizeAccessor} from './layer-map';
 import {log} from '@deck.gl/core';
-
-export async function getMapDatasets(json) {
-  const {publicToken: accessToken, datasets} = json;
-  const promises = datasets.map(dataset => {
-    const {connectionName: connection, source, type} = dataset;
-    return getData({
-      credentials: {accessToken},
-      connection,
-      source,
-      type
-    });
-  });
-
-  const fetchedDatasets = await Promise.all(promises);
-  datasets.forEach((dataset, index) => {
-    dataset.data = fetchedDatasets[index];
-  });
-}
 
 export function parseMap(json) {
   const {keplerMapConfig, datasets} = json;

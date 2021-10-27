@@ -3,7 +3,7 @@
  */
 import {getDefaultCredentials, buildMapsUrlFromBase} from '../config';
 import {API_VERSIONS, encodeParameter, FORMATS, MAP_TYPES} from './maps-api-common';
-import {getMapDatasets, parseMap} from './parseMap';
+import {parseMap} from './parseMap';
 import {log} from '@deck.gl/core';
 
 const MAX_GET_LENGTH = 2048;
@@ -127,7 +127,7 @@ function getUrlFromMetadata(metadata, format) {
   return null;
 }
 
-function checkGetLayerDataParameters({type, source, connection, localCreds}) {
+function checkFetchLayerDataParameters({type, source, connection, localCreds}) {
   log.assert(connection, 'Must define connection');
   log.assert(type, 'Must define a type');
   log.assert(source, 'Must define a source');
@@ -147,6 +147,38 @@ export async function fetchLayerData({
   format,
   schema
 }) {
+  // Internally we split data fetching into two parts to allow us to
+  // conditionally fetch the actual data, depending on the metadata state
+  const {url, accessToken, mapFormat, metadata} = await _fetchDataUrl({
+    type,
+    source,
+    connection,
+    credentials,
+    geoColumn,
+    columns,
+    format,
+    schema
+  });
+
+  const data = await request({url, format: mapFormat, accessToken});
+  const result = {data, format: mapFormat};
+  if (schema) {
+    result.schema = metadata.schema;
+  }
+
+  return result;
+}
+
+async function _fetchDataUrl({
+  type,
+  source,
+  connection,
+  credentials,
+  geoColumn,
+  columns,
+  format,
+  schema
+}) {
   const defaultCredentials = getDefaultCredentials();
   // Only pick up default credentials if they have been defined for
   // correct API version
@@ -154,7 +186,7 @@ export async function fetchLayerData({
     ...(defaultCredentials.apiVersion === API_VERSIONS.V3 && defaultCredentials),
     ...credentials
   };
-  checkGetLayerDataParameters({type, source, connection, localCreds});
+  checkFetchLayerDataParameters({type, source, connection, localCreds});
 
   if (!localCreds.mapsUrl) {
     localCreds.mapsUrl = buildMapsUrlFromBase(localCreds.apiBaseUrl);
@@ -189,14 +221,7 @@ export async function fetchLayerData({
   }
 
   const {accessToken} = localCreds;
-
-  const data = await request({url, format: mapFormat, accessToken});
-  const result = {data, format: mapFormat};
-  if (schema) {
-    result.schema = metadata.schema;
-  }
-
-  return result;
+  return {url, accessToken, mapFormat, metadata};
 }
 
 export async function getData({type, source, connection, credentials, geoColumn, columns, format}) {
@@ -211,6 +236,29 @@ export async function getData({type, source, connection, credentials, geoColumn,
     schema: false
   });
   return layerData.data;
+}
+
+async function getMapDataset(datasets, accessToken) {
+  // First fetch metadata for each dataset
+  const metadataRequests = datasets.map(dataset => {
+    const {connectionName: connection, source, type} = dataset;
+    return _getDataUrl({
+      credentials: {accessToken},
+      connection,
+      source,
+      type
+    });
+  });
+  const metadata = await Promise.all(metadataRequests);
+
+  const dataRequests = metadata.map(({mapFormat: format, ...rest}) => {
+    return request({format, ...rest});
+  });
+  const fetchedDatasets = await Promise.all(dataRequests);
+
+  datasets.forEach((dataset, index) => {
+    dataset.data = fetchedDatasets[index];
+  });
 }
 
 export async function getMap({id, credentials}) {
@@ -228,7 +276,7 @@ export async function getMap({id, credentials}) {
   const map = await request({url});
 
   // Mutates map.datasets so that dataset.data contains data
-  await getMapDatasets(map);
+  await getMapDataset(map);
 
   return parseMap(map);
 }
