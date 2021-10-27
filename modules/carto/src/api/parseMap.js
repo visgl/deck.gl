@@ -1,5 +1,5 @@
 import {getData} from './maps-v3-client';
-import {getLayerMap, getElevationAccessor, getColorAccessor, getSizeAccessor} from './layer-map';
+import {LAYER_MAP, getElevationAccessor, getColorAccessor, getSizeAccessor} from './layer-map';
 import {log} from '@deck.gl/core';
 
 export async function getMapDatasets(json) {
@@ -21,11 +21,10 @@ export async function getMapDatasets(json) {
 }
 
 export function parseMap(json) {
-  const {publicToken: accessToken, keplerMapConfig, datasets} = json;
+  const {keplerMapConfig, datasets} = json;
   log.assert(keplerMapConfig.version === 'v1', 'Only support Kepler v1');
   const {mapState, mapStyle} = keplerMapConfig.config;
   const {layers, interactionConfig} = keplerMapConfig.config.visState;
-  const layerMap = getLayerMap();
 
   return {
     id: json.id,
@@ -36,31 +35,24 @@ export function parseMap(json) {
     mapState,
     mapStyle,
     layers: layers.map(({id, type, config, visualChannels}) => {
-      log.assert(type in layerMap, `Unsupported layer type: ${type}`);
-      const {Layer, propMap, defaultProps} = layerMap[type];
+      log.assert(type in LAYER_MAP, `Unsupported layer type: ${type}`);
+      const {Layer, propMap, defaultProps} = LAYER_MAP[type];
 
       const {dataId} = config;
       const dataset = datasets.find(d => d.id === dataId);
       log.assert(dataset, `No dataset matching dataId: ${dataId}`);
+      const {data} = dataset;
+      log.assert(data, `No data loaded for dataId: ${dataId}`);
       return new Layer({
         id,
-        credentials: {accessToken},
+        data,
         ...defaultProps,
-        // TODO we don't need to load data again, as we already have it!
-        ...createDataProps(dataId, datasets),
         ...createInteractionProps(interactionConfig),
         ...createStyleProps(config, propMap),
-        ...createChannelProps(visualChannels, config, dataset) // Must come after style
+        ...createChannelProps(visualChannels, config, data) // Must come after style
       });
     })
   };
-}
-
-function createDataProps(dataId, datasets) {
-  const dataset = datasets.find(d => d.id === dataId);
-  log.assert(dataset, `No dataset matching dataId: ${dataId}`);
-  const {connectionName: connection, source: data, type} = dataset;
-  return {connection, data, type};
 }
 
 function createInteractionProps(interactionConfig) {
@@ -97,7 +89,7 @@ function createStyleProps(config, mapping) {
   return result;
 }
 
-function createChannelProps(visualChannels, config, dataset) {
+function createChannelProps(visualChannels, config, data) {
   const {
     colorField,
     colorScale,
@@ -111,16 +103,16 @@ function createChannelProps(visualChannels, config, dataset) {
   const {visConfig} = config;
   const result = {};
   if (colorField) {
-    result.getFillColor = getColorAccessor(colorField, colorScale, visConfig, dataset);
+    result.getFillColor = getColorAccessor(colorField, colorScale, visConfig, data);
   }
   if (strokeColorField) {
-    result.getLineColor = getColorAccessor(strokeColorField, strokeColorScale, visConfig, dataset);
+    result.getLineColor = getColorAccessor(strokeColorField, strokeColorScale, visConfig, data);
   }
   if (heightField) {
-    result.getElevation = getElevationAccessor(heightField, heightScale, visConfig, dataset);
+    result.getElevation = getElevationAccessor(heightField, heightScale, visConfig, data);
   }
   if (sizeField) {
-    result.getPointRadius = getSizeAccessor(sizeField, sizeScale, visConfig, dataset);
+    result.getPointRadius = getSizeAccessor(sizeField, sizeScale, visConfig, data);
   }
 
   return result;

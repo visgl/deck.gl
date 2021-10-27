@@ -9,7 +9,8 @@ import {
   scaleQuantize,
   scaleSqrt
 } from 'd3-scale';
-import CartoLayer from '../layers/carto-layer';
+import {MVTLayer} from '@deck.gl/geo-layers';
+import {GeoJsonLayer} from '@deck.gl/layers';
 
 const RADIUS_DOWNSCALE = 5;
 const SCALE_FUNCS = {
@@ -47,41 +48,33 @@ const defaultProps = {
   wrapLongitude: false
 };
 
-// Have to wrap in function to be able to import CartoLayer without errors
-let layerMap;
-export function getLayerMap() {
-  if (!layerMap) {
-    layerMap = {
-      point: {
-        Layer: CartoLayer,
-        propMap: {
-          ...sharedPropMap,
-          outline: 'stroked'
-        },
-        defaultProps: {
-          ...defaultProps
-        }
-      },
-      geojson: {
-        Layer: CartoLayer,
-        propMap: {
-          ...sharedPropMap,
-          thickness: {getLineWidth: w => 2 * w}
-        },
-        defaultProps
-      },
-      mvt: {
-        Layer: CartoLayer,
-        propMap: {
-          ...sharedPropMap
-        },
-        defaultProps
-      }
-    };
+export const LAYER_MAP = {
+  point: {
+    Layer: GeoJsonLayer,
+    propMap: {
+      ...sharedPropMap,
+      outline: 'stroked'
+    },
+    defaultProps: {
+      ...defaultProps
+    }
+  },
+  geojson: {
+    Layer: GeoJsonLayer,
+    propMap: {
+      ...sharedPropMap,
+      thickness: {getLineWidth: w => 2 * w}
+    },
+    defaultProps
+  },
+  mvt: {
+    Layer: MVTLayer,
+    propMap: {
+      ...sharedPropMap
+    },
+    defaultProps
   }
-
-  return layerMap;
-}
+};
 
 function domainFromAttribute(attribute, scaleType) {
   if (scaleType === 'ordinal' || scaleType === 'point') {
@@ -113,7 +106,7 @@ function calculateDomain(data, name, scaleType) {
   return [0, 1];
 }
 
-export function getColorAccessor({name}, scaleType, {colorRange}, {data}) {
+export function getColorAccessor({name}, scaleType, {colorRange}, data) {
   const scale = SCALE_FUNCS[scaleType]();
   scale.domain(calculateDomain(data, name, scaleType));
   scale.range(colorRange.colors);
@@ -124,7 +117,7 @@ export function getColorAccessor({name}, scaleType, {colorRange}, {data}) {
   };
 }
 
-export function getElevationAccessor({name}, scaleType, {heightRange}, {data}) {
+export function getElevationAccessor({name}, scaleType, {heightRange}, data) {
   const scale = SCALE_FUNCS[scaleType]();
   scale.domain(calculateDomain(data, name, scaleType));
   scale.range(heightRange);
@@ -132,7 +125,7 @@ export function getElevationAccessor({name}, scaleType, {heightRange}, {data}) {
     return scale(properties[name]);
   };
 }
-export function getSizeAccessor({name}, scaleType, {radiusRange}, {data}) {
+export function getSizeAccessor({name}, scaleType, {radiusRange}, data) {
   const scale = SCALE_FUNCS[scaleType]();
   scale.domain(calculateDomain(data, name, scaleType));
   scale.range(radiusRange.map(r => r / RADIUS_DOWNSCALE));
