@@ -15,7 +15,8 @@ async function createMap(mapId) {
   // Auto-refresh is optional
   const autoRefresh = true;
   if (autoRefresh) {
-    mapConfiguration.autoRefresh = true;
+    // Autorefresh the data every 5 seconds
+    mapConfiguration.autoRefresh = 5;
     mapConfiguration.onNewData = ({layers}) => {
       deck.setProps({layers});
     };

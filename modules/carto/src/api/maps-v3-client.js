@@ -238,6 +238,7 @@ export async function getData({type, source, connection, credentials, geoColumn,
   return layerData.data;
 }
 
+/* global setInterval, URLSearchParams */
 async function _getMapDataset(dataset, accessToken) {
   // First fetch metadata
   const {connectionName: connection, source, type} = dataset;
@@ -249,17 +250,16 @@ async function _getMapDataset(dataset, accessToken) {
   });
 
   // Extract the last time the data changed
-  const cache = parseInt(new URLSearchParams(url).get('cache'));
+  const cache = parseInt(new URLSearchParams(url).get('cache'), 10);
   if (cache && dataset.cache === cache) {
-    console.log('Skipping data fetch, using cached data');
-    return;
+    return false;
   }
   dataset.cache = cache;
 
   // Only fetch if the data has changed
-  console.log('Fetching data...');
   const data = await request({url, format: mapFormat, accessToken});
   dataset.data = data;
+  return true;
 }
 
 async function getMapDatasets({datasets, publicToken}) {
@@ -281,20 +281,24 @@ export async function getMap({mapId, credentials, autoRefresh, onNewData}) {
   if (autoRefresh || onNewData) {
     log.assert(onNewData, 'Must define `onNewData` when using autoRefresh');
     log.assert(typeof onNewData === 'function', '`onNewData` must be a function');
+    log.assert(autoRefresh > 0, '`autoRefresh` must be a positive number');
   }
 
   const url = `${localCreds.mapsUrl}/public/${mapId}`;
   const map = await request({url});
 
-  // Mutates map.datasets so that dataset.data contains data
-  await getMapDatasets(map);
-
+  // Periodically check if the data has changed. Note that this
+  // will not update when a map is published.
   if (autoRefresh) {
     setInterval(async () => {
-      await getMapDatasets(map);
-      onNewData(parseMap(map));
-    }, 5000);
+      const changed = await getMapDatasets(map);
+      if (changed.some(v => v === true)) {
+        onNewData(parseMap(map));
+      }
+    }, autoRefresh * 1000);
   }
 
+  // Mutates map.datasets so that dataset.data contains data
+  await getMapDatasets(map);
   return parseMap(map);
 }
