@@ -267,10 +267,10 @@ async function getMapDatasets({datasets, publicToken}) {
   return await Promise.all(promises);
 }
 
-export async function getMap({id, credentials}) {
+export async function getMap({mapId, credentials, autoRefresh, onNewData}) {
   const localCreds = {...getDefaultCredentials(), ...credentials};
 
-  log.assert(id, 'Must define map id');
+  log.assert(mapId, 'Must define map id');
 
   log.assert(localCreds.apiVersion === API_VERSIONS.V3, 'Method only available for v3');
   log.assert(localCreds.apiBaseUrl, 'Must define apiBaseUrl');
@@ -278,16 +278,23 @@ export async function getMap({id, credentials}) {
     localCreds.mapsUrl = buildMapsUrlFromBase(localCreds.apiBaseUrl);
   }
 
-  const url = `${localCreds.mapsUrl}/public/${id}`;
+  if (autoRefresh || onNewData) {
+    log.assert(onNewData, 'Must define `onNewData` when using autoRefresh');
+    log.assert(typeof onNewData === 'function', '`onNewData` must be a function');
+  }
+
+  const url = `${localCreds.mapsUrl}/public/${mapId}`;
   const map = await request({url});
 
   // Mutates map.datasets so that dataset.data contains data
   await getMapDatasets(map);
 
-  setInterval(async () => {
-    await getMapDatasets(map);
-    console.log('done');
-  }, 5000);
+  if (autoRefresh) {
+    setInterval(async () => {
+      await getMapDatasets(map);
+      onNewData(parseMap(map));
+    }, 5000);
+  }
 
   return parseMap(map);
 }

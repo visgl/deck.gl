@@ -7,27 +7,24 @@ setDefaultCredentials({
   apiBaseUrl: 'https://gcp-us-east1.api.carto.com'
 });
 
-async function createMap(id) {
-  const {mapState, mapStyle, layers} = await getMap({id});
-  window.layers = layers;
-  window.props = layers[0].props;
+async function createMap(mapId) {
+  let deck;
+  let map;
+  const mapConfiguration = {mapId};
 
-  const {latitude, longitude, ...rest} = mapState;
+  // Auto-refresh is optional
+  const autoRefresh = true;
+  if (autoRefresh) {
+    mapConfiguration.autoRefresh = true;
+    mapConfiguration.onNewData = ({layers}) => {
+      deck.setProps({layers});
+    };
+  }
 
-  const MAP_STYLE = `https://basemaps.cartocdn.com/gl/${mapStyle.styleType}-gl-style/style.json`;
+  const {mapState, mapStyle, layers} = await getMap(mapConfiguration);
 
-  const map = new mapboxgl.Map({
-    container: 'map',
-    style: MAP_STYLE,
-    interactive: false,
-    center: [longitude, latitude],
-    ...rest
-  });
-
-  const deck = new Deck({
+  deck = new Deck({
     canvas: 'deck-canvas',
-    width: '100%',
-    height: '100%',
     initialViewState: mapState,
     controller: true,
     onViewStateChange: ({viewState}) => {
@@ -35,6 +32,15 @@ async function createMap(id) {
       map.jumpTo({center: [longitude, latitude], ...rest});
     },
     layers
+  });
+
+  // Mapbox basemap
+  const MAP_STYLE = `https://basemaps.cartocdn.com/gl/${mapStyle.styleType}-gl-style/style.json`;
+
+  map = new mapboxgl.Map({
+    container: 'map',
+    style: MAP_STYLE,
+    interactive: false
   });
 }
 
