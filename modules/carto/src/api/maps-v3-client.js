@@ -238,27 +238,33 @@ export async function getData({type, source, connection, credentials, geoColumn,
   return layerData.data;
 }
 
-async function getMapDataset(datasets, accessToken) {
-  // First fetch metadata for each dataset
-  const metadataRequests = datasets.map(dataset => {
-    const {connectionName: connection, source, type} = dataset;
-    return _getDataUrl({
-      credentials: {accessToken},
-      connection,
-      source,
-      type
-    });
+async function _getMapDataset(dataset, accessToken) {
+  // First fetch metadata
+  const {connectionName: connection, source, type} = dataset;
+  const {url, mapFormat} = await _getDataUrl({
+    credentials: {accessToken},
+    connection,
+    source,
+    type
   });
-  const metadata = await Promise.all(metadataRequests);
 
-  const dataRequests = metadata.map(({mapFormat: format, ...rest}) => {
-    return request({format, ...rest});
-  });
-  const fetchedDatasets = await Promise.all(dataRequests);
+  // Extract the last time the data changed
+  const cache = parseInt(new URLSearchParams(url).get('cache'));
+  if (cache && dataset.cache === cache) {
+    console.log('Skipping data fetch, using cached data');
+    return;
+  }
+  dataset.cache = cache;
 
-  datasets.forEach((dataset, index) => {
-    dataset.data = fetchedDatasets[index];
-  });
+  // Only fetch if the data has changed
+  console.log('Fetching data...');
+  const data = await request({url, format: mapFormat, accessToken});
+  dataset.data = data;
+}
+
+async function getMapDatasets({datasets, publicToken}) {
+  const promises = datasets.map(dataset => _getMapDataset(dataset, publicToken));
+  return await Promise.all(promises);
 }
 
 export async function getMap({id, credentials}) {
@@ -276,7 +282,9 @@ export async function getMap({id, credentials}) {
   const map = await request({url});
 
   // Mutates map.datasets so that dataset.data contains data
-  await getMapDataset(map);
+  await getMapDatasets(map);
+
+  //setTimeout(
 
   return parseMap(map);
 }
