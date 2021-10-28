@@ -20,6 +20,7 @@ export const POINT_LAYER = {
       pointRadiusScale: 'radiusScale',
       pointRadiusUnits: 'radiusUnits',
       pointAntialiasing: 'antialiasing',
+      pointBillboard: 'billboard',
 
       getFillColor: 'getFillColor',
       getLineColor: 'getLineColor',
@@ -37,6 +38,8 @@ export const POINT_LAYER = {
       iconSizeMinPixels: 'sizeMinPixels',
       iconSizeScale: 'sizeScale',
       iconSizeUnits: 'sizeUnits',
+      iconAlphaCutoff: 'alphaCutoff',
+      iconBillboard: 'billboard',
 
       getIcon: 'getIcon',
       getIconAngle: 'getAngle',
@@ -63,6 +66,8 @@ export const POINT_LAYER = {
       textOutlineWidth: 'outlineWidth',
       textWordBreak: 'wordBreak',
       textCharacterSet: 'characterSet',
+      textBillboard: 'billboard',
+      textFontSettings: 'fontSettings',
 
       getText: 'getText',
       getTextAngle: 'getAngle',
