@@ -38,7 +38,8 @@
     "cartocolor": "^4.0.2",
     "d3-array": "^3.1.1",
     "d3-color": "^3.0.1",
-    "d3-scale": "^3.2.3"
+    "d3-scale": "^3.2.3",
+    "moment-timezone": "^0.5.33"
   },
   "peerDependencies": {
     "@deck.gl/core": "^8.0.0",

@@ -9,6 +9,7 @@ import {
   scaleQuantize,
   scaleSqrt
 } from 'd3-scale';
+import moment from 'moment-timezone';
 import {MVTLayer} from '@deck.gl/geo-layers';
 import {GeoJsonLayer} from '@deck.gl/layers';
 
@@ -27,7 +28,12 @@ const sharedPropMap = {
   color: 'getFillColor',
   highlightColor: 'highlightColor',
   isVisible: 'visible',
-  textLabel: {},
+  textLabel: {
+    alignment: 'getTextAlignmentBaseline',
+    anchor: 'getTextAnchor',
+    color: 'getTextColor',
+    size: 'getTextSize'
+  },
   visConfig: {
     enable3d: 'extruded',
     filled: 'filled',
@@ -128,5 +134,20 @@ export function getSizeAccessor({name}, scaleType, {radiusRange}, data) {
   scale.range(radiusRange);
   return ({properties}) => {
     return scale(properties[name]);
+  };
+}
+
+export function getTextAccessor({name, type}) {
+  let format;
+  switch (type) {
+    case 'timestamp':
+      format = ts => moment.utc(ts).format('X');
+      break;
+    default:
+      format = s => s;
+  }
+
+  return ({properties}) => {
+    return format(properties[name]);
   };
 }

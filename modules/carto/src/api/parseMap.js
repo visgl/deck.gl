@@ -1,5 +1,11 @@
 import GL from '@luma.gl/constants';
-import {LAYER_MAP, getElevationAccessor, getColorAccessor, getSizeAccessor} from './layer-map';
+import {
+  LAYER_MAP,
+  getElevationAccessor,
+  getColorAccessor,
+  getSizeAccessor,
+  getTextAccessor
+} from './layer-map';
 import {log} from '@deck.gl/core';
 
 export function parseMap(json) {
@@ -67,6 +73,9 @@ function createInteractionProps(interactionConfig) {
 }
 
 function mapProps(source, target, mapping) {
+  if (Array.isArray(source)) {
+    source = source[0];
+  }
   for (const sourceKey in mapping) {
     const sourceValue = source[sourceKey];
     const targetKey = mapping[sourceKey];
@@ -100,8 +109,9 @@ function createChannelProps(visualChannels, config, data) {
     strokeColorField,
     strokeColorScale
   } = visualChannels;
-  const {visConfig} = config;
+  const {textLabel, visConfig} = config;
   const result = {};
+  const textLabelField = textLabel[0].field;
   if (colorField) {
     result.getFillColor = getColorAccessor(colorField, colorScale, visConfig, data);
   }
@@ -113,6 +123,11 @@ function createChannelProps(visualChannels, config, data) {
   }
   if (sizeField) {
     result.getPointRadius = getSizeAccessor(sizeField, sizeScale, visConfig, data);
+  }
+  if (textLabelField) {
+    result.getText = getTextAccessor(textLabelField);
+    result.pointType = 'circle+text';
+    // TODO getTextPixelOffset needs to be computed
   }
 
   return result;
