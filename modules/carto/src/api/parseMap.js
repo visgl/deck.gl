@@ -1,3 +1,4 @@
+import GL from '@luma.gl/constants';
 import {LAYER_MAP, getElevationAccessor, getColorAccessor, getSizeAccessor} from './layer-map';
 import {log} from '@deck.gl/core';
 
@@ -5,7 +6,7 @@ export function parseMap(json) {
   const {keplerMapConfig, datasets} = json;
   log.assert(keplerMapConfig.version === 'v1', 'Only support Kepler v1');
   const {mapState, mapStyle} = keplerMapConfig.config;
-  const {layers, interactionConfig} = keplerMapConfig.config.visState;
+  const {layers, layerBlending, interactionConfig} = keplerMapConfig.config.visState;
 
   return {
     id: json.id,
@@ -28,12 +29,33 @@ export function parseMap(json) {
         id,
         data,
         ...defaultProps,
+        ...createBlendingProps(layerBlending),
         ...createInteractionProps(interactionConfig),
         ...createStyleProps(config, propMap),
         ...createChannelProps(visualChannels, config, data) // Must come after style
       });
     })
   };
+}
+
+function createBlendingProps(layerBlending) {
+  if (layerBlending === 'additive') {
+    return {
+      parameters: {
+        blendFunc: [GL.SRC_ALPHA, GL.DST_ALPHA],
+        blendEquation: GL.FUNC_ADD
+      }
+    };
+  } else if (layerBlending === 'subtractive') {
+    return {
+      parameters: {
+        blendFunc: [GL.ONE, GL.ONE_MINUS_DST_COLOR, GL.SRC_ALPHA, GL.DST_ALPHA],
+        blendEquation: [GL.FUNC_SUBTRACT, GL.FUNC_ADD]
+      }
+    };
+  }
+
+  return {};
 }
 
 function createInteractionProps(interactionConfig) {
