@@ -4,7 +4,8 @@ import {
   getElevationAccessor,
   getColorAccessor,
   getSizeAccessor,
-  getTextAccessor
+  getTextAccessor,
+  getTextPixelOffsetAccessor
 } from './layer-map';
 import {log} from '@deck.gl/core';
 
@@ -127,17 +128,8 @@ function createChannelProps(visualChannels, config, data) {
   if (textLabelField) {
     result.getText = getTextAccessor(textLabelField);
     result.pointType = 'circle+text';
-
-    const {alignment, anchor, size} = textLabel[0];
-    const padding = 20;
-    const radius = visConfig.radius * 0.2;
-    const signX = anchor === 'middle' ? 0 : anchor === 'start' ? 1 : -1;
-    const signY = alignment === 'center' ? 0 : alignment === 'bottom' ? 1 : -1;
-    const sizeOffset = alignment === 'center' ? 0 : size;
-    result.getTextPixelOffset = [
-      signX * (radius + padding),
-      signY * (radius + padding + sizeOffset)
-    ];
+    const radius = visConfig.radius;
+    result.getTextPixelOffset = getTextPixelOffsetAccessor(textLabel[0], radius);
   }
 
   return result;

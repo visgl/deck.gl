@@ -46,10 +46,12 @@ const sharedPropMap = {
   wireframe: 'wireframe'
 };
 
+const RADIUS_DOWNSCALE = 0.2;
+
 const defaultProps = {
   lineMiterLimit: 2,
   lineWidthUnits: 'pixels',
-  pointRadiusScale: 0.2,
+  pointRadiusScale: RADIUS_DOWNSCALE,
   pointRadiusUnits: 'pixels',
   rounded: true,
   wrapLongitude: false
@@ -150,4 +152,13 @@ export function getTextAccessor({name, type}) {
   return ({properties}) => {
     return format(properties[name]);
   };
+}
+
+export function getTextPixelOffsetAccessor({alignment, anchor, size}, radius) {
+  const padding = 20;
+  radius = RADIUS_DOWNSCALE * radius;
+  const signX = anchor === 'middle' ? 0 : anchor === 'start' ? 1 : -1;
+  const signY = alignment === 'center' ? 0 : alignment === 'bottom' ? 1 : -1;
+  const sizeOffset = alignment === 'center' ? 0 : size;
+  return [signX * (radius + padding), signY * (radius + padding + sizeOffset)];
 }
