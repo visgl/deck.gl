@@ -25,18 +25,18 @@ const SCALE_FUNCS = {
 // Kepler -> Deck.gl
 const sharedPropMap = {
   color: 'getFillColor',
-  enable3d: 'extruded',
   highlightColor: 'highlightColor',
   isVisible: 'visible',
-  opacity: 'opacity',
-  radius: 'getPointRadius',
-  strokeColor: 'getLineColor',
-  stroked: 'stroked',
   textLabel: {},
-  thickness: 'getLineWidth',
-  //visConfig: {
-  //  filled: 'filled'
-  //},
+  visConfig: {
+    enable3d: 'extruded',
+    filled: 'filled',
+    opacity: 'opacity',
+    strokeColor: 'getLineColor',
+    stroked: 'stroked',
+    thickness: 'getLineWidth',
+    radius: 'getPointRadius'
+  },
   wireframe: 'wireframe'
 };
 
@@ -49,30 +49,26 @@ const defaultProps = {
   wrapLongitude: false
 };
 
+function mergePropMaps(a, b) {
+  return {...a, ...b, visConfig: {...a.visConfig, ...b.visConfig}};
+}
+
 export const LAYER_MAP = {
   point: {
     Layer: GeoJsonLayer,
-    propMap: {
-      ...sharedPropMap,
-      outline: 'stroked'
-    },
-    defaultProps: {
-      ...defaultProps
-    }
+    propMap: mergePropMaps(sharedPropMap, {
+      visConfig: {outline: 'stroked'}
+    }),
+    defaultProps
   },
   geojson: {
     Layer: GeoJsonLayer,
-    propMap: {
-      ...sharedPropMap,
-      thickness: {getLineWidth: w => 2 * w}
-    },
-    defaultProps
+    propMap: sharedPropMap,
+    defaultProps: {...defaultProps, lineWidthScale: 2}
   },
   mvt: {
     Layer: MVTLayer,
-    propMap: {
-      ...sharedPropMap
-    },
+    propMap: sharedPropMap,
     defaultProps
   }
 };

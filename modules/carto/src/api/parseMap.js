@@ -59,8 +59,6 @@ function createBlendingProps(layerBlending) {
 }
 
 function createInteractionProps(interactionConfig) {
-  // TODO these seem to be the correct properties but
-  // autoHighlight doesn't work
   const pickable = interactionConfig.tooltip.enabled;
   return {
     autoHighlight: pickable,
@@ -69,24 +67,23 @@ function createInteractionProps(interactionConfig) {
 }
 
 function mapProps(source, target, mapping) {
-  let targetKey;
   for (const sourceKey in mapping) {
-    targetKey = mapping[sourceKey];
-    if (source[sourceKey] === undefined) {
+    const sourceValue = source[sourceKey];
+    const targetKey = mapping[sourceKey];
+    if (sourceValue === undefined) {
       // eslint-disable-next-line no-continue
       continue;
     }
     if (typeof targetKey === 'string') {
-      target[targetKey] = source[sourceKey];
+      target[targetKey] = sourceValue;
+    } else if (typeof targetKey === 'object') {
+      // Nested definition, recurse down one level
+      mapProps(sourceValue, target, targetKey);
     }
   }
 }
 
 function createStyleProps(config, mapping) {
-  // Flatten configuration
-  const {visConfig, ...rest} = config;
-  config = {...visConfig, ...rest};
-
   const result = {};
   mapProps(config, result, mapping);
   return result;
