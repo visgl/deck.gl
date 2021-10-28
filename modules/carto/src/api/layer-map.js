@@ -69,7 +69,7 @@ export const LAYER_MAP = {
   mvt: {
     Layer: MVTLayer,
     propMap: sharedPropMap,
-    defaultProps
+    defaultProps: {...defaultProps, pointRadiusScale: 0.3, lineWidthScale: 2}
   }
 };
 
