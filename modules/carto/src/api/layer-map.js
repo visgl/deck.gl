@@ -12,7 +12,6 @@ import {
 import {MVTLayer} from '@deck.gl/geo-layers';
 import {GeoJsonLayer} from '@deck.gl/layers';
 
-const RADIUS_DOWNSCALE = 5;
 const SCALE_FUNCS = {
   linear: scaleLinear,
   ordinal: scaleOrdinal,
@@ -31,7 +30,7 @@ const sharedPropMap = {
   highlightColor: 'highlightColor',
   isVisible: 'visible',
   opacity: 'opacity',
-  radius: {getPointRadius: r => r / RADIUS_DOWNSCALE},
+  radius: 'getPointRadius',
   strokeColor: 'getLineColor',
   stroked: 'stroked',
   thickness: 'getLineWidth',
@@ -41,6 +40,7 @@ const sharedPropMap = {
 const defaultProps = {
   lineMiterLimit: 2,
   lineWidthUnits: 'pixels',
+  pointRadiusScale: 0.2,
   pointRadiusUnits: 'pixels',
   rounded: true,
   wrapLongitude: false
@@ -126,7 +126,7 @@ export function getElevationAccessor({name}, scaleType, {heightRange}, data) {
 export function getSizeAccessor({name}, scaleType, {radiusRange}, data) {
   const scale = SCALE_FUNCS[scaleType]();
   scale.domain(calculateDomain(data, name, scaleType));
-  scale.range(radiusRange.map(r => r / RADIUS_DOWNSCALE));
+  scale.range(radiusRange);
   return ({properties}) => {
     return scale(properties[name]);
   };
