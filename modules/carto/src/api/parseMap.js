@@ -128,7 +128,7 @@ function createChannelProps(visualChannels, config, data) {
   if (textLabelField) {
     result.getText = getTextAccessor(textLabelField);
     result.pointType = 'circle+text';
-    const radius = visConfig.radius;
+    const radius = result.getPointRadius || visConfig.radius;
     result.getTextPixelOffset = getTextPixelOffsetAccessor(textLabel[0], radius);
   }
 
