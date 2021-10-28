@@ -28,12 +28,9 @@ const sharedPropMap = {
   color: 'getFillColor',
   enable3d: 'extruded',
   filled: 'filled',
-  fixedRadius: {pointRadiusUnits: v => (v ? 'meters' : 'pixels')},
   highlightColor: 'highlightColor',
   isVisible: 'visible',
   opacity: 'opacity',
-  // Hack: match Builder output
-  // radius: 'getPointRadius',
   radius: {getPointRadius: r => r / RADIUS_DOWNSCALE},
   strokeColor: 'getLineColor',
   stroked: 'stroked',
@@ -44,6 +41,7 @@ const sharedPropMap = {
 const defaultProps = {
   lineMiterLimit: 2,
   lineWidthUnits: 'pixels',
+  pointRadiusUnits: 'pixels',
   rounded: true,
   wrapLongitude: false
 };
