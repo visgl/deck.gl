@@ -26,14 +26,17 @@ const SCALE_FUNCS = {
 const sharedPropMap = {
   color: 'getFillColor',
   enable3d: 'extruded',
-  filled: 'filled',
   highlightColor: 'highlightColor',
   isVisible: 'visible',
   opacity: 'opacity',
   radius: 'getPointRadius',
   strokeColor: 'getLineColor',
   stroked: 'stroked',
+  textLabel: {},
   thickness: 'getLineWidth',
+  //visConfig: {
+  //  filled: 'filled'
+  //},
   wireframe: 'wireframe'
 };
 
