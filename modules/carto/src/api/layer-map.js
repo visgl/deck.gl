@@ -144,7 +144,7 @@ const FORMATS = {
   date: s => moment.utc(s).format('MM/DD/YY HH:mm:ssa'),
   integer: d3Format('i'),
   float: d3Format('.5f'),
-  timestamp: s => moment.utc(s).format('MM/DD/YY HH:mm:ssa'),
+  timestamp: s => moment.utc(s).format('X'),
   default: String
 };
 
