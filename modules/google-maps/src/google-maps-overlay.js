@@ -153,6 +153,10 @@ export default class GoogleMapsOverlay {
 
   // Vector code path
   _onDrawVector(gl, coordinateTransformer) {
+    if (!this._deck || !this._map) {
+      return;
+    }
+
     const deck = this._deck;
 
     deck.setProps({
