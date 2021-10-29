@@ -9,6 +9,7 @@ import {
   scaleQuantize,
   scaleSqrt
 } from 'd3-scale';
+import {format as d3Format} from 'd3-format';
 import moment from 'moment-timezone';
 import {MVTLayer} from '@deck.gl/geo-layers';
 import {GeoJsonLayer} from '@deck.gl/layers';
@@ -139,16 +140,16 @@ export function getSizeAccessor({name}, scaleType, {radiusRange}, data) {
   };
 }
 
-export function getTextAccessor({name, type}) {
-  let format;
-  switch (type) {
-    case 'timestamp':
-      format = ts => moment.utc(ts).format('X');
-      break;
-    default:
-      format = s => s;
-  }
+const FORMATS = {
+  date: s => moment.utc(s).format('MM/DD/YY HH:mm:ssa'),
+  integer: d3Format('i'),
+  float: d3Format('.5f'),
+  timestamp: s => moment.utc(s).format('MM/DD/YY HH:mm:ssa'),
+  default: String
+};
 
+export function getTextAccessor({name, type}) {
+  const format = FORMATS[type] || FORMATS.default;
   return ({properties}) => {
     return format(properties[name]);
   };
