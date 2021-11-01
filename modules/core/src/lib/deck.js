@@ -823,11 +823,12 @@ export default class Deck {
 
   _onPointerDown(event) {
     const pos = event.offsetCenter;
-    this._lastPointerDownInfo = this.pickObject({
+    const pickedInfo = this._pick('pickObject', 'pickObject Time', {
       x: pos.x,
       y: pos.y,
       radius: this.props.pickingRadius
     });
+    this._lastPointerDownInfo = pickedInfo.result[0] || pickedInfo.emptyInfo;
   }
 
   _getFrameStats() {

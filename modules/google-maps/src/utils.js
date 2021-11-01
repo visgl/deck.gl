@@ -188,8 +188,9 @@ export function getViewPropsFromCoordinateTransformer(map, coordinateTransformer
   const focalDistance = 0.5 * projectionMatrix[5];
 
   return {
-    width,
-    height,
+    // Using external gl context - do not set css size
+    width: false,
+    height: false,
     viewState: {
       altitude: focalDistance,
       bearing,
@@ -237,7 +238,10 @@ function handleMouseEvent(deck, type, event) {
   switch (type) {
     case 'click':
       // Hack: because we do not listen to pointer down, perform picking now
-      deck._lastPointerDownInfo = deck.pickObject(mockEvent.offsetCenter);
+      deck._lastPointerDownInfo = deck.pickObject({
+        ...mockEvent.offsetCenter,
+        radius: deck.props.pickingRadius
+      });
       mockEvent.tapCount = 1;
       deck._onEvent(mockEvent);
       break;

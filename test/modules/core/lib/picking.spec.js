@@ -21,10 +21,10 @@
 import test from 'tape-catch';
 import {geojsonToBinary} from '@loaders.gl/gis';
 import {processPickInfo} from '@deck.gl/core/lib/picking/pick-info';
-import {WebMercatorViewport} from '@deck.gl/core';
+import {LayerManager, WebMercatorViewport, DeckRenderer} from '@deck.gl/core';
 import {ScatterplotLayer, GeoJsonLayer} from '@deck.gl/layers';
 import {MVTLayer} from '@deck.gl/geo-layers';
-import {testInitializeLayer, testInitializeLayerAsync} from '@deck.gl/test-utils';
+import {gl} from '@deck.gl/test-utils';
 
 import {equals} from 'math.gl';
 
@@ -74,6 +74,7 @@ TestMVTLayer.componentName = 'TestMVTLayer';
 const testMVTLayer = new TestMVTLayer({
   id: 'test-mvt-layer',
   autoHighlight: true,
+  binary: false,
   data: geoJSONData
 });
 
@@ -120,12 +121,6 @@ const parameters = {
     })
   ],
   layers: [testLayer, testLayerWithCallback, testCompositeLayer, testMVTLayer, testMVTLayerBinary],
-  layerFilter: ({layer, viewport}) => {
-    if (viewport.id === 'minimap') {
-      return layer.id !== 'test-layer-with-callback';
-    }
-    return true;
-  },
   pixelRatio: 2
 };
 
@@ -140,11 +135,22 @@ function validateUniforms(actual, expected) {
 
 /* eslint-disable max-statements */
 test('processPickInfo', async t => {
-  testInitializeLayer({layer: testLayer});
-  testInitializeLayer({layer: testLayerWithCallback});
-  testInitializeLayer({layer: testCompositeLayer});
-  await testInitializeLayerAsync({layer: testMVTLayer});
-  await testInitializeLayerAsync({layer: testMVTLayerBinary});
+  const layerManager = new LayerManager(gl, {viewport: parameters.viewports[0]});
+  layerManager.setProps({onError: t.notOk});
+  const deckRenderer = new DeckRenderer(gl);
+
+  layerManager.setLayers(parameters.layers);
+
+  while (!parameters.layers.every(l => l.isLoaded)) {
+    layerManager.updateLayers();
+
+    deckRenderer.renderLayers({
+      viewports: [layerManager.context.viewport],
+      layers: layerManager.getLayers(),
+      onViewportActive: layerManager.activateViewport
+    });
+    await sleep(100);
+  }
 
   const TEST_CASES = [
     {
@@ -190,6 +196,7 @@ test('processPickInfo', async t => {
       pickInfo: {
         pickedColor: [1, 0, 0, 0],
         pickedLayer: testLayerWithCallback,
+        pickedViewports: parameters.viewports.slice(0, 2),
         pickedObjectIndex: 0
       },
       x: 100,
@@ -215,6 +222,7 @@ test('processPickInfo', async t => {
       pickInfo: {
         pickedColor: [2, 0, 0, 0],
         pickedLayer: testLayerWithCallback,
+        pickedViewports: parameters.viewports.slice(0, 2),
         pickedObjectIndex: 1
       },
       x: 100,
@@ -350,6 +358,7 @@ test('processPickInfo', async t => {
       pickInfo: {
         pickedColor: [2, 0, 0, 0],
         pickedLayer: testLayerWithCallback,
+        pickedViewports: parameters.viewports.slice(0, 2),
         pickedObjectIndex: 1
       },
       x: 300,
@@ -416,11 +425,14 @@ test('processPickInfo', async t => {
     }
   }
 
-  testLayer._finalize();
-  testLayerWithCallback._finalize();
-  testCompositeLayer._finalize();
-  testMVTLayer._finalize();
-  testMVTLayerBinary._finalize();
+  layerManager.finalize();
 
   t.end();
 });
+
+function sleep(ms) {
+  return new Promise(resolve => {
+    /* global setTimeout */
+    setTimeout(resolve, ms);
+  });
+}

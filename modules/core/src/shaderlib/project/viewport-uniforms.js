@@ -62,6 +62,7 @@ export function getOffsetOrigin(
         coordinateSystem === COORDINATE_SYSTEM.LNGLAT ||
         coordinateSystem === COORDINATE_SYSTEM.CARTESIAN
       ) {
+        geospatialOrigin = [0, 0, 0];
         offsetMode = false;
       }
       break;
@@ -111,6 +112,7 @@ function calculateMatrixAndOffset(viewport, coordinateSystem, coordinateOrigin) 
   let {viewMatrix, viewProjectionMatrix} = viewport;
 
   let projectionCenter = ZERO_VECTOR;
+  let originCommon = ZERO_VECTOR;
   let cameraPosCommon = viewport.cameraPosition;
   const {geospatialOrigin, shaderCoordinateOrigin, offsetMode} = getOffsetOrigin(
     viewport,
@@ -122,21 +124,19 @@ function calculateMatrixAndOffset(viewport, coordinateSystem, coordinateOrigin) 
     // Calculate transformed projectionCenter (using 64 bit precision JS)
     // This is the key to offset mode precision
     // (avoids doing this addition in 32 bit precision in GLSL)
-    const positionCommonSpace = viewport.projectPosition(
-      geospatialOrigin || shaderCoordinateOrigin
-    );
+    originCommon = viewport.projectPosition(geospatialOrigin || shaderCoordinateOrigin);
 
     cameraPosCommon = [
-      cameraPosCommon[0] - positionCommonSpace[0],
-      cameraPosCommon[1] - positionCommonSpace[1],
-      cameraPosCommon[2] - positionCommonSpace[2]
+      cameraPosCommon[0] - originCommon[0],
+      cameraPosCommon[1] - originCommon[1],
+      cameraPosCommon[2] - originCommon[2]
     ];
 
-    positionCommonSpace[3] = 1;
+    originCommon[3] = 1;
 
     // projectionCenter = new Matrix4(viewProjectionMatrix)
     //   .transformVector([positionPixels[0], positionPixels[1], 0.0, 1.0]);
-    projectionCenter = vec4.transformMat4([], positionCommonSpace, viewProjectionMatrix);
+    projectionCenter = vec4.transformMat4([], originCommon, viewProjectionMatrix);
 
     // Always apply uncentered projection matrix if available (shader adds center)
     viewMatrix = viewMatrixUncentered || viewMatrix;
@@ -152,6 +152,7 @@ function calculateMatrixAndOffset(viewport, coordinateSystem, coordinateOrigin) 
     viewMatrix,
     viewProjectionMatrix,
     projectionCenter,
+    originCommon,
     cameraPosCommon,
     shaderCoordinateOrigin,
     geospatialOrigin
@@ -204,6 +205,7 @@ function calculateViewportUniforms({
   const {
     projectionCenter,
     viewProjectionMatrix,
+    originCommon,
     cameraPosCommon,
     shaderCoordinateOrigin,
     geospatialOrigin
@@ -226,7 +228,12 @@ function calculateViewportUniforms({
     project_uCoordinateSystem: coordinateSystem,
     project_uProjectionMode: viewport.projectionMode,
     project_uCoordinateOrigin: shaderCoordinateOrigin,
+    project_uCommonOrigin: originCommon.slice(0, 3),
     project_uCenter: projectionCenter,
+
+    // Backward compatibility
+    // TODO: remove in v9
+    project_uPseudoMeters: Boolean(viewport._pseudoMeters),
 
     // Screen size
     project_uViewportSize: viewportSize,
@@ -254,6 +261,9 @@ function calculateViewportUniforms({
 
       case COORDINATE_SYSTEM.LNGLAT:
       case COORDINATE_SYSTEM.LNGLAT_OFFSETS:
+        if (!viewport._pseudoMeters) {
+          uniforms.project_uCommonUnitsPerMeter = distanceScalesAtOrigin.unitsPerMeter;
+        }
         uniforms.project_uCommonUnitsPerWorldUnit = distanceScalesAtOrigin.unitsPerDegree;
         uniforms.project_uCommonUnitsPerWorldUnit2 = distanceScalesAtOrigin.unitsPerDegree2;
         break;

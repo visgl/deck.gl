@@ -97,10 +97,17 @@ test('LayerManager#setLayers', t => {
     }
   }
 
+  SubLayer.defaultProps = {
+    image: {type: 'object', value: null, async: true}
+  };
+
   const DATA = [];
   const ALT_DATA = [1];
+  const IMAGE = {};
+  const ALT_IMAGE = {};
   const TEST_CASES = [
     {
+      title: 'add layer with empty props',
       layers: [new SubLayer({id: 'primitive'})],
       initialize: true,
       update: true,
@@ -109,6 +116,7 @@ test('LayerManager#setLayers', t => {
       propsChanged: true
     },
     {
+      title: 'set data prop',
       layers: [new SubLayer({id: 'primitive', data: DATA})],
       initialize: false,
       update: true,
@@ -117,6 +125,7 @@ test('LayerManager#setLayers', t => {
       propsChanged: false
     },
     {
+      title: 'set non-data prop',
       layers: [new SubLayer({id: 'primitive', data: DATA, size: 1})],
       initialize: false,
       update: true,
@@ -125,12 +134,14 @@ test('LayerManager#setLayers', t => {
       propsChanged: true
     },
     {
+      title: 'no prop change',
       layers: [new SubLayer({id: 'primitive', data: DATA, size: 1})],
       initialize: false,
       update: false,
       propsChanged: false
     },
     {
+      title: 'change data prop',
       layers: [new SubLayer({id: 'primitive', data: ALT_DATA, size: 1})],
       initialize: false,
       update: true,
@@ -139,6 +150,25 @@ test('LayerManager#setLayers', t => {
       propsChanged: false
     },
     {
+      title: 'set non-data async prop',
+      layers: [new SubLayer({id: 'primitive', data: ALT_DATA, size: 1, image: IMAGE})],
+      initialize: false,
+      update: true,
+      finalize: false,
+      dataChanged: false,
+      propsChanged: true
+    },
+    {
+      title: 'change non-data async prop',
+      layers: [new SubLayer({id: 'primitive', data: ALT_DATA, size: 1, image: ALT_IMAGE})],
+      initialize: false,
+      update: true,
+      finalize: false,
+      dataChanged: false,
+      propsChanged: true
+    },
+    {
+      title: 'remove layer',
       layers: [],
       initialize: false,
       update: false,
@@ -149,6 +179,7 @@ test('LayerManager#setLayers', t => {
   const layerManager = new LayerManager(gl);
 
   TEST_CASES.forEach(testCase => {
+    t.comment(testCase.title);
     const oldStats = Object.assign({}, stats);
     layerManager.setLayers(testCase.layers);
     t.is(

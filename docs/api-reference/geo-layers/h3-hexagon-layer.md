@@ -88,7 +88,7 @@ Inherits from all [Base Layer](/docs/api-reference/core/layer.md), [CompositeLay
 
 ##### `highPrecision` (Boolean, optional)
 
-* Default: `false`
+* Default: `'auto'`
 
 Each hexagon in the H3 indexing system is [slightly different in shape](https://h3geo.org/docs/core-library/coordsystems). To draw a large number of hexagons efficiently, the `H3HexagonLayer` may choose to use instanced drawing by assuming that all hexagons within the current viewport have the same shape as the one at the center of the current viewport. The discrepancy is usually too small to be visible.
 
@@ -100,9 +100,9 @@ There are several cases in which high-precision mode is required. In these cases
 
 Possible values:
 
-* `false`: The layer chooses the mode automatically. High-precision rendering is only used if an edge case is encountered in the data.
-* `true`: always use high-precision rendering.
-
+* `'auto'`: The layer chooses the mode automatically. High-precision rendering is only used if an edge case is encountered in the data.
+* `true`: Always use high-precision rendering.
+* `false`: Always use instanced rendering, regardless of the characteristics of the data.
 
 ##### `coverage` (Number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
 

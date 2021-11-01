@@ -10,13 +10,18 @@ assignees: ''
 #### Description
 <!-- What is happening? -->
 
+<!-- Please specify if you are using one of the following:
+- React
+- Python / Jupyter widget
+- Vendor integration: MapboxLayer / GoogleMapsOverlay / CartoLayer/ DeckRenderer (ArcGIS) -->
+
 #### Expected Behavior
 <!-- What is the expected behavior? -->
 
 #### Repro Steps
 <!-- Steps to reproduce the behavior. -->
 <!-- Providing the following could help us resolve this issue faster:
-- A Codepen [example](https://codepen.io/vis-gl) that reproduces the behavior
+- A Codepen that reproduces the behavior. A good starting point is the "edit in CodePen" links in the layer documentations.
 - A sample of your dataset -->
 
 #### Environment

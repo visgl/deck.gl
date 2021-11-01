@@ -90,7 +90,7 @@ The number of sides to render the disk as. The disk is a regular polygon that fi
 
 * Default: `1000`
 
-Disk radius in meters.
+Disk size in units specified by `radiusUnits` (default meters).
 
 ##### `angle` (Number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
 
@@ -149,11 +149,17 @@ Whether to generate a line wireframe of the column. The outline will have
 "horizontal" lines closing the top and bottom polygons and a vertical line
 (a "strut") for each vertex around the disk. Only applies if `extruded: true`.
 
+##### `radiusUnits` (String, optional)
+
+* Default: `'meters'`
+
+The units of the radius, one of `'meters'`, `'common'`, and `'pixels'`. See [unit system](/docs/developer-guide/coordinate-system.md#supported-units).
+
 ##### `lineWidthUnits` (String, optional)
 
 * Default: `'meters'`
 
-The units of the outline width, one of `'meters'`, `'pixels'`. When zooming in and out, meter sizes scale with the base map, and pixel sizes remain the same on screen.
+The units of the line width, one of `'meters'`, `'common'`, and `'pixels'`. See [unit system](/docs/developer-guide/coordinate-system.md#supported-units).
 
 ##### `lineWidthScale` (Boolean, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
 

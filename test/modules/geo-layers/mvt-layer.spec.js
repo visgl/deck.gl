@@ -324,21 +324,18 @@ test('MVTLayer#TileJSON', async t => {
   };
 
   const onAfterUpdate = ({layer, subLayers}) => {
-    if (!layer.isLoaded) {
-      t.is(subLayers.length, 0);
-    } else {
+    if (layer.isLoaded) {
       t.is(subLayers.length, 2, 'Rendered sublayers');
       t.is(layer.state.data.length, 3, 'Data is loaded');
       t.is(layer.state.tileset.minZoom, tileJSON.minZoom, 'Min zoom layer is correct');
       t.is(layer.state.tileset.minZoom, tileJSON.maxZoom, 'Max zoom layer is correct');
-      t.ok(layer.isLoaded, 'Layer is loaded');
     }
   };
 
   const testCases = [
     {
       props: {
-        data: 'http://echo.jsontest.com/key/value',
+        data: tileJSON.tiles,
         binary: false
       },
       onAfterUpdate

@@ -114,7 +114,7 @@ The opacity of the layer. The same as defined in [layer](/docs/api-reference/cor
 
 - Default `1.0`
 
-Global radius of all points, in units specified by `sizeUnits` (default pixels).
+Global radius of all points in pixels.
 This value is only applied when [tile format](https://github.com/AnalyticalGraphicsInc/3d-tiles/tree/master/specification#introduction) is `pnts`.
 
 ### Data Properties

@@ -119,7 +119,7 @@ test('Attribute#allocate', t => {
   t.is(attribute.value, allocatedValue, 'reused the same typed array');
 
   attribute.setConstantValue([1, 1]);
-  t.notOk(attributeNoAlloc.allocate(4), 'Should not allocate if constant value is used');
+  t.deepEquals(attribute.value, [1, 1], 'value overwritten by external constant');
 
   attribute.setConstantValue(undefined);
   t.ok(attribute.allocate(4), 'allocate successful');

@@ -131,7 +131,7 @@ Some good places to check for performance improvements are:
       // radius depends on `currentYear`
       getRadius: d => Math.sqrt(d.populationsByYear[currentYear]),
       updateTriggers: {
-        // This tells deck.gl to recalculat radius when `currentYear` changes
+        // This tells deck.gl to recalculate radius when `currentYear` changes
         getRadius: currentYear
       },
       ...

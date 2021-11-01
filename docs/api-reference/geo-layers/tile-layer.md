@@ -154,24 +154,21 @@ This offset changes the zoom level at which the tiles are fetched.  Needs to be 
 
 ##### `maxZoom` (Number|Null, optional)
 
-Use tiles from this level when over-zoomed.
+The max zoom level of the layer's data. When overzoomed (i.e. `zoom > maxZoom`), tiles from this level will be displayed.
 
 - Default: `null`
 
-
 ##### `minZoom` (Number, optional)
 
-Hide tiles when under-zoomed.
+The min zoom level of the layer's data. When underzoomed (i.e. `zoom < minZoom`), the layer will not display any tiles unless `extent` is defined, to avoid issuing too many tile requests.
 
 - Default: 0
 
 ##### `extent` (Array, optional)
 
-If provided, the layer will load and render the tiles in this box at `minZoom` when underzoomed (i.e. `zoom < minZoom`).  The box is of the form `[minX, minY, maxX, maxY]`.
+The bounding box of the layer's data, in the form of `[minX, minY, maxX, maxY]`. If provided, the layer will only load and render the tiles that are needed to fill this box. 
 
-If `null`, the layer will not display any tiles when underzoomed to avoid issuing too many tile requests.
-
-- Default: null
+- Default: `null`
 
 
 ##### `maxCacheSize` (Number, optional)
@@ -293,7 +290,8 @@ Properties:
 - `y` (Number) - y index of the tile
 - `z` (Number) - z index of the tile
 - `bbox` (Object) - bounding box of the tile. When used with a geospatial view, `bbox` is in the shape of `{west: <longitude>, north: <latitude>, east: <longitude>, south: <latitude>}`. When used with a non-geospatial view, `bbox` is in the shape of `{left, top, right, bottom}`.
-- `data` (Array) - tiles content as returned by `getTileData`. 
+- `content` (Object) - the tile's cached content. `null` if the tile's initial load is pending, cancelled, or encountered an error.
+- `data` (Object|Promise) - the tile's requested content. If the tile is loading, returns a Promise that resolves to the loaded content when loading is completed.
 
 ## Source
 

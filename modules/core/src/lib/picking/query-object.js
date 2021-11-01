@@ -33,7 +33,7 @@ const NO_PICKED_OBJECT = {
  */
 export function getClosestObject({
   pickedColors,
-  layers,
+  decodePickingColor,
   deviceX,
   deviceY,
   deviceRadius,
@@ -75,14 +75,17 @@ export function getClosestObject({
 
     if (closestPixelIndex >= 0) {
       // Decode picked object index from color
-      const pickedLayerIndex = pickedColors[closestPixelIndex + 3] - 1;
       const pickedColor = pickedColors.slice(closestPixelIndex, closestPixelIndex + 4);
-      const pickedLayer = layers[pickedLayerIndex];
-      if (pickedLayer) {
-        const pickedObjectIndex = pickedLayer.decodePickingColor(pickedColor);
+      const pickedObject = decodePickingColor(pickedColor);
+      if (pickedObject) {
         const dy = Math.floor(closestPixelIndex / 4 / width);
         const dx = closestPixelIndex / 4 - dy * width;
-        return {pickedColor, pickedLayer, pickedObjectIndex, pickedX: x + dx, pickedY: y + dy};
+        return {
+          ...pickedObject,
+          pickedColor,
+          pickedX: x + dx,
+          pickedY: y + dy
+        };
       }
       log.error('Picked non-existent layer. Is picking buffer corrupt?')();
     }
@@ -94,7 +97,7 @@ export function getClosestObject({
  * Examines a picking buffer for unique colors
  * Returns array of unique objects in shape `{x, y, pickedColor, pickedLayer, pickedObjectIndex}`
  */
-export function getUniqueObjects({pickedColors, layers}) {
+export function getUniqueObjects({pickedColors, decodePickingColor}) {
   const uniqueColors = new Map();
 
   // Traverse all pixels in picking results and get unique colors
@@ -108,13 +111,12 @@ export function getUniqueObjects({pickedColors, layers}) {
         const colorKey = pickedColor.join(',');
         // eslint-disable-next-line
         if (!uniqueColors.has(colorKey)) {
-          const pickedLayer = layers[pickedLayerIndex];
+          const pickedObject = decodePickingColor(pickedColor);
           // eslint-disable-next-line
-          if (pickedLayer) {
+          if (pickedObject) {
             uniqueColors.set(colorKey, {
-              pickedColor,
-              pickedLayer,
-              pickedObjectIndex: pickedLayer.decodePickingColor(pickedColor)
+              ...pickedObject,
+              pickedColor
             });
           } else {
             log.error('Picked non-existent layer. Is picking buffer corrupt?')();

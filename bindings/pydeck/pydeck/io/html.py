@@ -142,7 +142,7 @@ def deck_to_html(
     )
 
     if filename:
-        with open(filename, "w+") as f:
+        with open(filename, "w+", encoding="utf-8") as f:
             f.write(html_str)
 
         if open_browser:

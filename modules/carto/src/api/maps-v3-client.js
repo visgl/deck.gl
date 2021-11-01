@@ -55,10 +55,11 @@ async function request({method, url, format, accessToken, body}) {
  */
 function dealWithError({response, error}) {
   switch (response.status) {
+    case 400:
+      throw new Error(`Bad request. ${error}`);
     case 401:
     case 403:
-      throw new Error(`Unauthorized access to Maps API`);
-
+      throw new Error(`Unauthorized access. ${error}`);
     default:
       throw new Error(error);
   }
@@ -67,19 +68,35 @@ function dealWithError({response, error}) {
 /**
  * Build a URL with all required parameters
  */
-function getParameters({type, source}) {
+function getParameters({type, source, geoColumn, columns}) {
   const encodedClient = encodeParameter('client', 'deck-gl-carto');
   const parameters = [encodedClient];
 
   const sourceName = type === MAP_TYPES.QUERY ? 'q' : 'name';
   parameters.push(encodeParameter(sourceName, source));
 
+  if (type === MAP_TYPES.TABLE) {
+    if (geoColumn) {
+      parameters.push(encodeParameter('geo_column', geoColumn));
+    }
+    if (columns) {
+      parameters.push(encodeParameter('columns', columns.join(',')));
+    }
+  }
+
   return parameters.join('&');
 }
 
-export async function mapInstantiation({type, source, connection, credentials}) {
+export async function mapInstantiation({
+  type,
+  source,
+  connection,
+  credentials,
+  geoColumn,
+  columns
+}) {
   const baseUrl = `${credentials.mapsUrl}/${connection}/${type}`;
-  const url = `${baseUrl}?${getParameters({type, source})}`;
+  const url = `${baseUrl}?${getParameters({type, source, geoColumn, columns})}`;
   const {accessToken} = credentials;
 
   const format = 'json';
@@ -106,7 +123,7 @@ function getUrlFromMetadata(metadata, format) {
   return null;
 }
 
-export async function getData({type, source, connection, credentials, format}) {
+export async function getData({type, source, connection, credentials, geoColumn, columns, format}) {
   const localCreds = {...getDefaultCredentials(), ...credentials};
 
   log.assert(connection, 'Must define connection');
@@ -122,7 +139,14 @@ export async function getData({type, source, connection, credentials, format}) {
     localCreds.mapsUrl = buildMapsUrlFromBase(localCreds.apiBaseUrl);
   }
 
-  const metadata = await mapInstantiation({type, source, connection, credentials: localCreds});
+  const metadata = await mapInstantiation({
+    type,
+    source,
+    connection,
+    credentials: localCreds,
+    geoColumn,
+    columns
+  });
   let url;
   let mapFormat;
 

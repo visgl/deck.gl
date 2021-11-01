@@ -197,7 +197,7 @@ export function getTileIndices({
     transformedExtent = transformBox(extent, modelMatrix);
   }
   return viewport.isGeospatial
-    ? getOSMTileIndices(viewport, z, zRange, extent || DEFAULT_EXTENT)
+    ? getOSMTileIndices(viewport, z, zRange, extent)
     : getIdentityTileIndices(
         viewport,
         z,

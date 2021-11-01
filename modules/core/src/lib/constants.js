@@ -61,6 +61,12 @@ export const PROJECTION_MODE = {
   IDENTITY: 0
 };
 
+export const UNIT = {
+  common: 0,
+  meters: 1,
+  pixels: 2
+};
+
 export const EVENTS = {
   click: {handler: 'onClick'},
   panstart: {handler: 'onDragStart'},

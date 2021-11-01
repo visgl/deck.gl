@@ -1,6 +1,6 @@
 import test from 'tape-catch';
 import {testLayer} from '@deck.gl/test-utils';
-import {equals} from 'math.gl';
+import {UNIT} from '@deck.gl/core';
 
 import {PointCloudLayer} from '@deck.gl/layers';
 
@@ -40,10 +40,7 @@ test('PointCloudLayer#loaders.gl support', t => {
       },
       onAfterUpdate: ({layer}) => {
         const uniforms = layer.state.model.getUniforms();
-        t.ok(
-          equals(uniforms.radiusPixels, 0.000255808143),
-          'radiusPixels correct for sizeUnits "meters"'
-        );
+        t.ok(uniforms.sizeUnits, UNIT.meters, 'sizeUnits uniform "meters"');
       }
     },
     {
@@ -52,7 +49,7 @@ test('PointCloudLayer#loaders.gl support', t => {
       },
       onAfterUpdate: ({layer}) => {
         const uniforms = layer.state.model.getUniforms();
-        t.is(uniforms.radiusPixels, 10, 'radiusPixels is correct for sizeUnits "pixels"');
+        t.is(uniforms.sizeUnits, UNIT.pixels, 'sizeUnits uniform "pixels"');
       }
     }
   ];

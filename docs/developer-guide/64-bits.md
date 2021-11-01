@@ -6,7 +6,7 @@ deck.gl can leverage high precision GPU floating point using emulated 64-bit flo
 
 <div align="center">
   <div>
-    <img src="https://raw.github.com/visgl/deck.gl-data/master/images/fp64-mandelbrot.gif" />
+    <img src="https://raw.github.com/visgl/deck.gl-data/master/images/docs/fp64-mandelbrot.gif" />
     <p><i>32-bit vs 64-bit Mandelbrot Set Zoom</i></p>
   </div>
 </div>
