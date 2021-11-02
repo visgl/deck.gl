@@ -77,6 +77,9 @@ function mapProps(source, target, mapping) {
   if (Array.isArray(source)) {
     source = source[0];
   }
+  if (!source) {
+    return;
+  }
   for (const sourceKey in mapping) {
     const sourceValue = source[sourceKey];
     const targetKey = mapping[sourceKey];
@@ -112,7 +115,7 @@ function createChannelProps(visualChannels, config, data) {
   } = visualChannels;
   const {textLabel, visConfig} = config;
   const result = {};
-  const textLabelField = textLabel[0].field;
+  const textLabelField = textLabel && textLabel[0] && textLabel[0].field;
   if (colorField) {
     result.getFillColor = getColorAccessor(colorField, colorScale, visConfig, data);
   }
