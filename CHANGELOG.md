@@ -19,6 +19,10 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v8.6
 
+#### deck.gl [8.6.1] - Nov 2 2021
+
+- Skip rendering out-of-DOM Google Maps (#6340)
+
 #### deck.gl [8.6.0] - Oct 11 2021
 
 - Google Maps Overlay: Safely invoke onRender by resetting arrayBuffer (#6224)
