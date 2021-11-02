@@ -1,7 +1,15 @@
 import test from 'tape-catch';
 import {getTextAccessor} from '@deck.gl/carto/api/layer-map';
 
-const TESTS = [
+const TEXT_TESTS = [
+  {
+    colorField: {name: 'color'},
+    colorScale: 'linear'
+    data: {properties: {color: '2021-10-29T13:25:01.067Z'}},
+    expected: '10/29/21 13:25:01pm'
+  },
+];
+const TEXT_TESTS = [
   {
     textLabelField: {name: 'date', type: 'date'},
     data: {properties: {date: '2021-10-29T13:25:01.067Z'}},
@@ -24,7 +32,7 @@ const TESTS = [
   }
 ];
 
-for (const {textLabelField, data, expected} of TESTS) {
+for (const {textLabelField, data, expected} of TEXT_TESTS) {
   test(`getTextAccessor#${textLabelField.type}`, t => {
     const accessor = getTextAccessor(textLabelField);
     t.deepEquals(accessor(data), expected, `getTextAccessor correctly returns ${expected}`);
