@@ -124,7 +124,13 @@ function getUrlFromMetadata(metadata, format) {
 }
 
 export async function getData({type, source, connection, credentials, geoColumn, columns, format}) {
-  const localCreds = {...getDefaultCredentials(), ...credentials};
+  const defaultCredentials = getDefaultCredentials();
+  // Only pick up default credentials if they have been defined for
+  // correct API version
+  const localCreds = {
+    ...(defaultCredentials.apiVersion === API_VERSIONS.V3 && defaultCredentials),
+    ...credentials
+  };
 
   log.assert(connection, 'Must define connection');
   log.assert(type, 'Must define a type');
@@ -133,7 +139,6 @@ export async function getData({type, source, connection, credentials, geoColumn,
   log.assert(localCreds.apiVersion === API_VERSIONS.V3, 'Method only available for v3');
   log.assert(localCreds.apiBaseUrl, 'Must define apiBaseUrl');
   log.assert(localCreds.accessToken, 'Must define an accessToken');
-  log.assert(localCreds.mapsUrl, 'mapsUrl cannot be undefined');
 
   if (!localCreds.mapsUrl) {
     localCreds.mapsUrl = buildMapsUrlFromBase(localCreds.apiBaseUrl);
