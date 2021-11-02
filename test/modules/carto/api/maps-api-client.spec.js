@@ -181,69 +181,72 @@ test('getData#parameters', async t => {
       'http://carto-api/v3/maps/connection_name/table?client=deck-gl-carto&name=table&geo_column=geog&columns=a%2Cb%2Cc'
   }
 ].forEach(({props, mapInstantiationUrl}) => {
-  test('getData', async t => {
-    const geojsonURL = 'http://geojson';
-    const accessToken = 'XXX';
+  for (const useSetDefaultCredentials of [true, false]) {
+    test(`getData#setDefaultCredentials(${String(useSetDefaultCredentials)})`, async t => {
+      const geojsonURL = 'http://geojson';
+      const accessToken = 'XXX';
+      const credentials = {
+        apiVersion: API_VERSIONS.V3,
+        apiBaseUrl: 'http://carto-api',
+        accessToken
+      };
 
-    setDefaultCredentials({
-      apiVersion: API_VERSIONS.V3,
-      apiBaseUrl: 'http://carto-api',
-      accessToken
-    });
+      setDefaultCredentials(useSetDefaultCredentials ? credentials : {});
 
-    const _global = typeof global !== 'undefined' ? global : window;
-    const fetch = _global.fetch;
+      const _global = typeof global !== 'undefined' ? global : window;
+      const fetch = _global.fetch;
 
-    _global.fetch = (url, options) => {
-      if (url === mapInstantiationUrl) {
-        t.pass('should call to the right instantiation url');
-        t.is(
-          options.headers.Authorization,
-          `Bearer ${accessToken}`,
-          'should provide a valid authentication header'
-        );
-        return Promise.resolve({
-          json: () => {
-            return {
-              geojson: {url: [geojsonURL]}
-            };
-          },
-          ok: true
+      _global.fetch = (url, options) => {
+        if (url === mapInstantiationUrl) {
+          t.pass('should call to the right instantiation url');
+          t.is(
+            options.headers.Authorization,
+            `Bearer ${accessToken}`,
+            'should provide a valid authentication header'
+          );
+          return Promise.resolve({
+            json: () => {
+              return {
+                geojson: {url: [geojsonURL]}
+              };
+            },
+            ok: true
+          });
+        } else if (url === geojsonURL) {
+          t.pass('should call to the right geojson url');
+          return Promise.resolve({
+            json: () => {
+              return {
+                geojson: {url: [geojsonURL]}
+              };
+            },
+            ok: true
+          });
+        }
+
+        t.fail(`Invalid URL request : ${url}`);
+        return null;
+      };
+
+      try {
+        await getData({
+          type: MAP_TYPES.TABLE,
+          connection: 'connection_name',
+          source: 'table',
+          credentials: useSetDefaultCredentials ? getDefaultCredentials() : credentials,
+          ...props
         });
-      } else if (url === geojsonURL) {
-        t.pass('should call to the right geojson url');
-        return Promise.resolve({
-          json: () => {
-            return {
-              geojson: {url: [geojsonURL]}
-            };
-          },
-          ok: true
-        });
+      } catch (e) {
+        t.error(e, 'should not throw');
       }
 
-      t.fail(`Invalid URL request : ${url}`);
-      return null;
-    };
+      setDefaultCredentials({});
 
-    try {
-      await getData({
-        type: MAP_TYPES.TABLE,
-        connection: 'connection_name',
-        source: 'table',
-        credentials: getDefaultCredentials(),
-        ...props
-      });
-    } catch (e) {
-      t.error(e, 'should not throw');
-    }
+      _global.fetch = fetch;
 
-    setDefaultCredentials({});
-
-    _global.fetch = fetch;
-
-    t.end();
-  });
+      t.end();
+    });
+  }
 });
 
 test('getData#post', async t => {
