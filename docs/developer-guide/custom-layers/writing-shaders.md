@@ -81,7 +81,7 @@ Inject into the the very beginning of the main function in the vertex shader.
 
 Inject into the the very end of the main function in the vertex shader.
 
-##### vs:DeckGL_FILTER_SIZE
+##### vs:DECKGL_FILTER_SIZE
 
 Inject into a function in the vertex shader to manipulate the size of a geometry. Called before projection.
 
@@ -91,7 +91,7 @@ Arguments:
 - `VertexGeometry geometry` - descriptor of the current geometry
 
 
-##### vs:DeckGL_FILTER_GL_POSITION
+##### vs:DECKGL_FILTER_GL_POSITION
 
 Inject into a function in the vertex shader to manipulate the projected position of the current vertex. Called after projection.
 
@@ -101,7 +101,7 @@ Arguments:
 - `VertexGeometry geometry` - descriptor of the current geometry
 
 
-##### vs:DeckGL_FILTER_COLOR
+##### vs:DECKGL_FILTER_COLOR
 
 Inject into a function in the vertex shader to manipulate the color of the current geometry. Called after projection.
 
@@ -123,7 +123,7 @@ Inject into the the very beginning of the main function in the fragment shader.
 
 Inject into the the very end of the main function in the fragment shader.
 
-##### fs:DeckGL_FILTER_COLOR
+##### fs:DECKGL_FILTER_COLOR
 
 Inject into a function in the vertex shader to manipulate the color of the current geometry. Called after projection.
 
