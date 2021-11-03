@@ -19,6 +19,10 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v8.6
 
+#### deck.gl [8.6.2] - Nov 3 2021
+
+- CARTO: fix layer credentials overwrite (#6349)
+
 #### deck.gl [8.6.1] - Nov 2 2021
 
 - Skip rendering out-of-DOM Google Maps (#6340)
