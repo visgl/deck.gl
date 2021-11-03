@@ -12,5 +12,6 @@ export {
   API_VERSIONS,
   getDataV2 as _getDataV2,
   getData,
+  getLayerData,
   mapInstantiation as _mapInstantiation
 } from './api';

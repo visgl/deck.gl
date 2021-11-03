@@ -7,6 +7,7 @@ import {
   MAP_TYPES,
   API_VERSIONS,
   getData,
+  getLayerData,
   setDefaultCredentials,
   getDefaultCredentials
 } from '@deck.gl/carto';
@@ -183,10 +184,15 @@ test('getData#parameters', async t => {
     props: {columns: ['a', 'b', 'c'], geoColumn: 'geog'},
     mapInstantiationUrl:
       'http://carto-api/v3/maps/connection_name/table?client=deck-gl-carto&name=table&geo_column=geog&columns=a%2Cb%2Cc'
+  },
+  {
+    props: {schema: true},
+    mapInstantiationUrl:
+      'http://carto-api/v3/maps/connection_name/table?client=deck-gl-carto&schema=true&name=table'
   }
 ].forEach(({props, mapInstantiationUrl}) => {
   for (const useSetDefaultCredentials of [true, false]) {
-    test(`getData#setDefaultCredentials(${String(useSetDefaultCredentials)})`, async t => {
+    test(`getLayerData#setDefaultCredentials(${String(useSetDefaultCredentials)})`, async t => {
       const geojsonURL = 'http://geojson';
       const accessToken = 'XXX';
       const credentials = {
@@ -233,7 +239,7 @@ test('getData#parameters', async t => {
       };
 
       try {
-        await getData({
+        await getLayerData({
           type: MAP_TYPES.TABLE,
           connection: 'connection_name',
           source: 'table',
