@@ -1,6 +1,6 @@
 import {API_VERSIONS, DEFAULT_MAPS_URL_FORMAT} from './api/maps-api-common';
 
-const defaultClassicCredentials = {
+export const defaultClassicCredentials = {
   username: 'public',
   apiKey: 'default_public',
   region: 'us',

@@ -1,7 +1,7 @@
 /**
  * Maps API Client for Maps API v1 and Maps API v2
  */
-import {getDefaultCredentials} from '../config';
+import {defaultClassicCredentials, getDefaultCredentials} from '../config';
 import {
   API_VERSIONS,
   DEFAULT_MAPS_URL_FORMAT,
@@ -28,6 +28,7 @@ export async function getDataV2({type, source, credentials}) {
   // Only pick up default credentials if they have been defined for
   // correct API version
   const localCreds = {
+    ...defaultClassicCredentials,
     ...(defaultCredentials.apiVersion === apiVersion && defaultCredentials),
     ...credentials
   };
