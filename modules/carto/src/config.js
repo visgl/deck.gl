@@ -1,4 +1,4 @@
-import {API_VERSIONS} from './api/maps-api-common';
+import {API_VERSIONS, DEFAULT_MAPS_URL_FORMAT} from './api/maps-api-common';
 
 const defaultClassicCredentials = {
   username: 'public',
@@ -22,7 +22,7 @@ export function setDefaultCredentials(opts) {
 
   switch (apiVersion) {
     case API_VERSIONS.V1:
-      opts.mapsUrl = opts.mapsUrl || 'https://{user}.carto.com/api/v1/map';
+      opts.mapsUrl = opts.mapsUrl || DEFAULT_MAPS_URL_FORMAT[apiVersion];
       credentials = {
         apiVersion,
         ...defaultClassicCredentials,
@@ -31,7 +31,7 @@ export function setDefaultCredentials(opts) {
       break;
 
     case API_VERSIONS.V2:
-      opts.mapsUrl = opts.mapsUrl || 'https://maps-api-v2.{region}.carto.com/user/{user}';
+      opts.mapsUrl = opts.mapsUrl || DEFAULT_MAPS_URL_FORMAT[apiVersion];
       credentials = {
         apiVersion,
         ...defaultClassicCredentials,
