@@ -7,7 +7,7 @@ import {
   MAP_TYPES,
   API_VERSIONS,
   getData,
-  getLayerData,
+  fetchLayerData,
   setDefaultCredentials,
   getDefaultCredentials
 } from '@deck.gl/carto';
@@ -192,7 +192,7 @@ test('getData#parameters', async t => {
   }
 ].forEach(({props, mapInstantiationUrl}) => {
   for (const useSetDefaultCredentials of [true, false]) {
-    test(`getLayerData#setDefaultCredentials(${String(useSetDefaultCredentials)})`, async t => {
+    test(`fetchLayerData#setDefaultCredentials(${String(useSetDefaultCredentials)})`, async t => {
       const geojsonURL = 'http://geojson';
       const accessToken = 'XXX';
       const credentials = {
@@ -239,7 +239,7 @@ test('getData#parameters', async t => {
       };
 
       try {
-        await getLayerData({
+        await fetchLayerData({
           type: MAP_TYPES.TABLE,
           connection: 'connection_name',
           source: 'table',

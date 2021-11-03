@@ -136,7 +136,7 @@ function checkGetLayerDataParameters({type, source, connection, localCreds}) {
   log.assert(localCreds.accessToken, 'Must define an accessToken');
 }
 
-export async function getLayerData({
+export async function fetchLayerData({
   type,
   source,
   connection,
@@ -199,7 +199,7 @@ export async function getLayerData({
 }
 
 export async function getData({type, source, connection, credentials, geoColumn, columns, format}) {
-  const layerData = await getLayerData({
+  const layerData = await fetchLayerData({
     type,
     source,
     connection,
