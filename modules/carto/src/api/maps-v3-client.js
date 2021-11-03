@@ -68,9 +68,11 @@ function dealWithError({response, error}) {
 /**
  * Build a URL with all required parameters
  */
-function getParameters({type, source, geoColumn, columns}) {
-  const encodedClient = encodeParameter('client', 'deck-gl-carto');
-  const parameters = [encodedClient];
+function getParameters({type, source, geoColumn, columns, schema}) {
+  const parameters = [encodeParameter('client', 'deck-gl-carto')];
+  if (schema) {
+    parameters.push(encodeParameter('schema', true));
+  }
 
   const sourceName = type === MAP_TYPES.QUERY ? 'q' : 'name';
   parameters.push(encodeParameter(sourceName, source));
@@ -93,10 +95,11 @@ export async function mapInstantiation({
   connection,
   credentials,
   geoColumn,
-  columns
+  columns,
+  schema
 }) {
   const baseUrl = `${credentials.mapsUrl}/${connection}/${type}`;
-  const url = `${baseUrl}?${getParameters({type, source, geoColumn, columns})}`;
+  const url = `${baseUrl}?${getParameters({type, source, geoColumn, columns, schema})}`;
   const {accessToken} = credentials;
 
   const format = 'json';
@@ -123,9 +126,7 @@ function getUrlFromMetadata(metadata, format) {
   return null;
 }
 
-export async function getData({type, source, connection, credentials, geoColumn, columns, format}) {
-  const localCreds = {...getDefaultCredentials(), ...credentials};
-
+function checkGetLayerDataParameters({type, source, connection, localCreds}) {
   log.assert(connection, 'Must define connection');
   log.assert(type, 'Must define a type');
   log.assert(source, 'Must define a source');
@@ -133,7 +134,26 @@ export async function getData({type, source, connection, credentials, geoColumn,
   log.assert(localCreds.apiVersion === API_VERSIONS.V3, 'Method only available for v3');
   log.assert(localCreds.apiBaseUrl, 'Must define apiBaseUrl');
   log.assert(localCreds.accessToken, 'Must define an accessToken');
-  log.assert(localCreds.mapsUrl, 'mapsUrl cannot be undefined');
+}
+
+export async function fetchLayerData({
+  type,
+  source,
+  connection,
+  credentials,
+  geoColumn,
+  columns,
+  format,
+  schema
+}) {
+  const defaultCredentials = getDefaultCredentials();
+  // Only pick up default credentials if they have been defined for
+  // correct API version
+  const localCreds = {
+    ...(defaultCredentials.apiVersion === API_VERSIONS.V3 && defaultCredentials),
+    ...credentials
+  };
+  checkGetLayerDataParameters({type, source, connection, localCreds});
 
   if (!localCreds.mapsUrl) {
     localCreds.mapsUrl = buildMapsUrlFromBase(localCreds.apiBaseUrl);
@@ -145,7 +165,8 @@ export async function getData({type, source, connection, credentials, geoColumn,
     connection,
     credentials: localCreds,
     geoColumn,
-    columns
+    columns,
+    schema
   });
   let url;
   let mapFormat;
@@ -168,5 +189,25 @@ export async function getData({type, source, connection, credentials, geoColumn,
 
   const {accessToken} = localCreds;
 
-  return await request({url, format: mapFormat, accessToken});
+  const data = await request({url, format: mapFormat, accessToken});
+  const result = {data, format: mapFormat};
+  if (schema) {
+    result.schema = metadata.schema;
+  }
+
+  return result;
+}
+
+export async function getData({type, source, connection, credentials, geoColumn, columns, format}) {
+  const layerData = await fetchLayerData({
+    type,
+    source,
+    connection,
+    credentials,
+    geoColumn,
+    columns,
+    format,
+    schema: false
+  });
+  return layerData.data;
 }
