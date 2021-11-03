@@ -68,9 +68,10 @@ function dealWithError({response, error}) {
 /**
  * Build a URL with all required parameters
  */
-function getParameters({type, source, geoColumn, columns}) {
+function getParameters({type, source, geoColumn, columns, schema}) {
   const encodedClient = encodeParameter('client', 'deck-gl-carto');
-  const parameters = [encodedClient];
+  const encodedSchema = encodeParameter('schema', Boolean(schema));
+  const parameters = [encodedClient, encodedSchema];
 
   const sourceName = type === MAP_TYPES.QUERY ? 'q' : 'name';
   parameters.push(encodeParameter(sourceName, source));
@@ -93,10 +94,11 @@ export async function mapInstantiation({
   connection,
   credentials,
   geoColumn,
-  columns
+  columns,
+  schema
 }) {
   const baseUrl = `${credentials.mapsUrl}/${connection}/${type}`;
-  const url = `${baseUrl}?${getParameters({type, source, geoColumn, columns})}`;
+  const url = `${baseUrl}?${getParameters({type, source, geoColumn, columns, schema})}`;
   const {accessToken} = credentials;
 
   const format = 'json';
@@ -123,7 +125,16 @@ function getUrlFromMetadata(metadata, format) {
   return null;
 }
 
-export async function getData({type, source, connection, credentials, geoColumn, columns, format}) {
+export async function getLayerData({
+  type,
+  source,
+  connection,
+  credentials,
+  geoColumn,
+  columns,
+  format,
+  schema
+}) {
   const defaultCredentials = getDefaultCredentials();
   // Only pick up default credentials if they have been defined for
   // correct API version
@@ -150,7 +161,8 @@ export async function getData({type, source, connection, credentials, geoColumn,
     connection,
     credentials: localCreds,
     geoColumn,
-    columns
+    columns,
+    schema
   });
   let url;
   let mapFormat;
@@ -173,5 +185,25 @@ export async function getData({type, source, connection, credentials, geoColumn,
 
   const {accessToken} = localCreds;
 
-  return await request({url, format: mapFormat, accessToken});
+  const data = await request({url, format: mapFormat, accessToken});
+  const result = {data, format: mapFormat};
+  if (schema) {
+    result.schema = metadata.schema;
+  }
+
+  return result;
+}
+
+export async function getData({type, source, connection, credentials, geoColumn, columns, format}) {
+  const layerData = await getLayerData({
+    type,
+    source,
+    connection,
+    credentials,
+    geoColumn,
+    columns,
+    format,
+    schema: false
+  });
+  return layerData.data;
 }
