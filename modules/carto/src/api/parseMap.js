@@ -7,7 +7,7 @@ import {
   getTextAccessor,
   getTextPixelOffsetAccessor
 } from './layer-map';
-import {log} from '@deck.gl/core';
+import {_flatten as flatten, log} from '@deck.gl/core';
 
 export function parseMap(json) {
   const {keplerMapConfig, datasets} = json;
@@ -23,7 +23,7 @@ export function parseMap(json) {
     updatedAt: json.updatedAt,
     mapState,
     mapStyle,
-    layers: layers.map(({id, type, config, visualChannels}) => {
+    layers: extractTextLayers(layers).map(({id, type, config, visualChannels}) => {
       log.assert(type in LAYER_MAP, `Unsupported layer type: ${type}`);
       const {Layer, propMap, defaultProps} = LAYER_MAP[type];
 
@@ -43,6 +43,31 @@ export function parseMap(json) {
       });
     })
   };
+}
+
+function extractTextLayers(layers) {
+  return flatten(
+    layers.map(({id, config, ...rest}) => {
+      const {textLabel, ...configRest} = config;
+      return [
+        // Original layer without textLabel
+        {id, config: configRest, ...rest},
+
+        // One layer per valid text label, with full opacity
+        ...textLabel.filter(t => t.field).map(t => {
+          return {
+            id: `id-label-${t.field.name}`,
+            config: {
+              textLabel: t,
+              ...configRest,
+              visConfig: {...configRest.visConfig, opacity: 1}
+            },
+            ...rest
+          };
+        })
+      ];
+    })
+  );
 }
 
 function createBlendingProps(layerBlending) {
@@ -66,7 +91,7 @@ function createBlendingProps(layerBlending) {
 }
 
 function createInteractionProps(interactionConfig) {
-  const pickable = interactionConfig.tooltip.enabled;
+  const pickable = interactionConfig && interactionConfig.tooltip.enabled;
   return {
     autoHighlight: pickable,
     pickable
@@ -115,7 +140,7 @@ function createChannelProps(visualChannels, config, data) {
   } = visualChannels;
   const {textLabel, visConfig} = config;
   const result = {};
-  const textLabelField = textLabel && textLabel[0] && textLabel[0].field;
+  const textLabelField = textLabel && textLabel.field;
   if (colorField) {
     result.getFillColor = getColorAccessor(colorField, colorScale, visConfig, data);
   }
@@ -132,7 +157,7 @@ function createChannelProps(visualChannels, config, data) {
     result.getText = getTextAccessor(textLabelField);
     result.pointType = 'circle+text';
     const radius = result.getPointRadius || visConfig.radius;
-    result.getTextPixelOffset = getTextPixelOffsetAccessor(textLabel[0], radius);
+    result.getTextPixelOffset = getTextPixelOffsetAccessor(textLabel, radius);
   }
 
   return result;
