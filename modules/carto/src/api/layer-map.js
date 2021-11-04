@@ -27,7 +27,6 @@ const SCALE_FUNCS = {
 // Kepler -> Deck.gl
 const sharedPropMap = {
   color: 'getFillColor',
-  highlightColor: 'highlightColor',
   isVisible: 'visible',
   textLabel: {
     alignment: 'getTextAlignmentBaseline',
@@ -50,6 +49,7 @@ const sharedPropMap = {
 const RADIUS_DOWNSCALE = 0.2;
 
 const defaultProps = {
+  highlightColor: [255, 255, 255, 60],
   lineMiterLimit: 2,
   lineWidthUnits: 'pixels',
   pointRadiusScale: RADIUS_DOWNSCALE,
