@@ -131,10 +131,10 @@ function unwrapGeoJson(accessor) {
   };
 }
 
-export function getColorAccessor({name}, scaleType, {colorRange}, data) {
+export function getColorAccessor({name}, scaleType, {colors}, data) {
   const scale = SCALE_FUNCS[scaleType]();
   scale.domain(calculateDomain(data, name, scaleType));
-  scale.range(colorRange.colors);
+  scale.range(colors);
 
   const accessor = properties => {
     const rgba = rgb(scale(properties[name]));
@@ -147,6 +147,7 @@ export function getSizeAccessor({name}, scaleType, range, data) {
   const scale = SCALE_FUNCS[scaleType]();
   scale.domain(calculateDomain(data, name, scaleType));
   scale.range(range);
+
   const accessor = properties => {
     return scale(properties[name]);
   };

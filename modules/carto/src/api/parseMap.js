@@ -36,7 +36,7 @@ export function parseMap(json) {
         data,
         ...defaultProps,
         ...createBlendingProps(layerBlending),
-        ...createInteractionProps(interactionConfig),
+        ...(!config.textLabel && createInteractionProps(interactionConfig)),
         ...createStyleProps(config, propMap),
         ...createChannelProps(visualChannels, type, config, data) // Must come after style
       });
@@ -145,10 +145,15 @@ function createChannelProps(visualChannels, type, config, data) {
   const result = {};
   const textLabelField = textLabel && textLabel.field;
   if (colorField) {
-    result.getFillColor = getColorAccessor(colorField, colorScale, visConfig, data);
+    result.getFillColor = getColorAccessor(colorField, colorScale, visConfig.colorRange, data);
   }
   if (strokeColorField) {
-    result.getLineColor = getColorAccessor(strokeColorField, strokeColorScale, visConfig, data);
+    result.getLineColor = getColorAccessor(
+      strokeColorField,
+      strokeColorScale,
+      visConfig.colorRange,
+      data
+    );
   }
   if (heightField) {
     result.getElevation = getSizeAccessor(
@@ -168,7 +173,7 @@ function createChannelProps(visualChannels, type, config, data) {
   }
   if (textLabelField) {
     result.getText = getTextAccessor(textLabelField);
-    result.pointType = 'circle+text';
+    result.pointType = 'text';
     const radius = result.getPointRadius || visConfig.radius;
     result.getTextPixelOffset = getTextPixelOffsetAccessor(textLabel, radius);
   }
