@@ -101,6 +101,7 @@ Parameters:
 - `props` (Object)
   + `props.id` (String) - an unique id is required for each layer.
   + `props.deck` (`Deck`, optional) - a `Deck` instance that controls the rendering of this layer. If provided, the layer will be looked up from its layer stack by `id` at render time, and all other props are ignored.
+  + `props.viewId` (String, optional) - If provided, the view will be looked up from the `Deck` instance's view stack by `id` at render time. Intended to only be used when a `Deck` instance is provided that has multiple `views`. If it is not provided or cannot be found, the first view will be used instead.
   + `props.type` (`Layer`, optional) - a class that extends deck.gl's base `Layer` class. Required if `deck` is not provided.
   + Optional: any other prop needed by this type of layer. See deck.gl's [layer catalog](/docs/api-reference/layers/README.md) for documentation and examples on how to create layers.
 

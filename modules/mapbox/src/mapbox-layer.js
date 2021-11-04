@@ -19,7 +19,7 @@ export default class MapboxLayer {
 
   onAdd(map, gl) {
     this.map = map;
-    this.deck = getDeckInstance({map, gl, deck: this.props.deck});
+    this.deck = getDeckInstance({map, gl, deck: this.props.deck, viewId: this.props.viewId});
     addLayer(this.deck, this);
   }
 

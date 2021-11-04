@@ -1,6 +1,6 @@
 import test from 'tape-promise/tape';
 
-import {Deck} from '@deck.gl/core';
+import {Deck, MapView} from '@deck.gl/core';
 import {ScatterplotLayer} from '@deck.gl/layers';
 import {MapboxLayer} from '@deck.gl/mapbox';
 import {gl} from '@deck.gl/test-utils';
@@ -177,6 +177,63 @@ test('MapboxLayer#external Deck', t => {
     t.pass('Map render does not throw');
 
     layer.render();
+    t.pass('Map render does not throw');
+
+    t.end();
+  };
+});
+
+test('MapboxLayer#external Deck multiple views', t => {
+  const deck = new Deck({
+    gl,
+    views: [new MapView({id: 'view-one'}), new MapView({id: 'view-two'})],
+    viewState: {
+      longitude: 0,
+      latitude: 0,
+      zoom: 1
+    },
+    layers: [
+      new ScatterplotLayer({
+        id: 'scatterplot-layer-0',
+        data: [],
+        getPosition: d => d.position,
+        getRadius: 10,
+        getFillColor: [255, 0, 0]
+      })
+    ]
+  });
+
+  const layerDefaultView = new MapboxLayer({id: 'scatterplot-layer-0', deck});
+  const layerSecondView = new MapboxLayer({id: 'scatterplot-layer-0', deck, viewId: 'view-two'});
+
+  const map = new MockMapboxMap({
+    center: {lng: -122.45, lat: 37.78},
+    zoom: 12
+  });
+
+  deck.props.onLoad = () => {
+    map.addLayer(layerDefaultView);
+    t.is(layerDefaultView.deck, deck, 'Used external Deck instance');
+    t.ok(deck.props.userData.mapboxVersion, 'Mapbox version is parsed');
+
+    map.addLayer(layerSecondView);
+    t.is(layerSecondView.deck, deck, 'Used external Deck instance');
+
+    map.emit('render');
+    t.pass('Map render does not throw');
+
+    map.emit('remove');
+    t.ok(deck.layerManager, 'External Deck should not be finalized with map');
+
+    deck.finalize();
+
+    map.emit('render');
+    t.pass('Map render does not throw');
+
+    layerDefaultView.render();
+    t.pass('Map render does not throw');
+
+    layerSecondView.render();
     t.pass('Map render does not throw');
 
     t.end();

@@ -1,6 +1,6 @@
 import {Deck, WebMercatorViewport} from '@deck.gl/core';
 
-export function getDeckInstance({map, gl, deck}) {
+export function getDeckInstance({map, gl, deck, viewId}) {
   // Only create one deck instance per context
   if (map.__deck) {
     return map.__deck;
@@ -57,7 +57,7 @@ export function getDeckInstance({map, gl, deck}) {
   deck.props.userData.mapboxVersion = getMapboxVersion(map);
   map.__deck = deck;
   map.on('render', () => {
-    if (deck.layerManager) afterRender(deck, map);
+    if (deck.layerManager) afterRender(deck, map, viewId);
   });
 
   return deck;
@@ -88,8 +88,11 @@ export function drawLayer(deck, map, layer) {
   if (!deck.layerManager) {
     return;
   }
+  const viewports = deck.viewManager.getViewports();
+  const viewportIdx = getViewportIdx(viewports, layer.viewId);
+  viewports[viewportIdx] = currentViewport;
   deck._drawLayers('mapbox-repaint', {
-    viewports: [currentViewport],
+    viewports,
     layerFilter: ({layer: deckLayer}) => layer.id === deckLayer.id,
     clearCanvas: false
   });
@@ -114,6 +117,15 @@ function getMapboxVersion(map) {
     [major, minor] = map.version.split('.').slice(0, 2).map(Number);
   }
   return {major, minor};
+}
+
+function getViewportIdx(viewports, viewId) {
+  // Use first view or the view with matching id.
+  const viewIdIdx = viewports.findIndex(viewport => viewport.id === viewId);
+  if (viewId && viewIdIdx >= 0) {
+    return viewIdIdx;
+  }
+  return 0;
 }
 
 function getViewport(deck, map, useMapboxProjection = true) {
@@ -147,7 +159,7 @@ function getViewport(deck, map, useMapboxProjection = true) {
   );
 }
 
-function afterRender(deck, map) {
+function afterRender(deck, map, viewId) {
   const {mapboxLayers, isExternal} = deck.props.userData;
 
   if (isExternal) {
@@ -156,7 +168,8 @@ function afterRender(deck, map) {
     const hasNonMapboxLayers = deck.props.layers.some(layer => !mapboxLayerIds.includes(layer.id));
     if (hasNonMapboxLayers) {
       const viewports = deck.viewManager.getViewports();
-      viewports[0] = getViewport(deck, map, false);
+      const viewportIdx = getViewportIdx(viewports, viewId);
+      viewports[viewportIdx] = getViewport(deck, map, false);
       deck._drawLayers('mapbox-repaint', {
         viewports,
         layerFilter: ({layer}) => !mapboxLayerIds.includes(layer.id),
