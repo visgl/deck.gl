@@ -49,7 +49,6 @@ const sharedPropMap = {
 const RADIUS_DOWNSCALE = 0.2;
 
 const defaultProps = {
-  highlightColor: [255, 255, 255, 60],
   lineMiterLimit: 2,
   lineWidthUnits: 'pixels',
   pointRadiusScale: RADIUS_DOWNSCALE,

@@ -124,6 +124,7 @@ function mapProps(source, target, mapping) {
 function createStyleProps(config, mapping) {
   const result = {};
   mapProps(config, result, mapping);
+  result.highlightColor = config.visConfig.enable3d ? [255, 255, 255, 60] : [252, 242, 26, 255];
   return result;
 }
 
