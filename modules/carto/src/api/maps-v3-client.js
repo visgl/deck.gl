@@ -225,6 +225,7 @@ async function _fetchDataUrl({
 }
 
 export async function getData({type, source, connection, credentials, geoColumn, columns, format}) {
+  log.depreacted('getData', 'fetchLayerData')();
   const layerData = await fetchLayerData({
     type,
     source,
@@ -239,10 +240,10 @@ export async function getData({type, source, connection, credentials, geoColumn,
 }
 
 /* global setInterval, URLSearchParams */
-async function _getMapDataset(dataset, accessToken) {
+async function _fetchMapDataset(dataset, accessToken) {
   // First fetch metadata
   const {connectionName: connection, source, type} = dataset;
-  const {url, mapFormat} = await _getDataUrl({
+  const {url, mapFormat} = await _fetchDataUrl({
     credentials: {accessToken},
     connection,
     source,
@@ -262,12 +263,12 @@ async function _getMapDataset(dataset, accessToken) {
   return true;
 }
 
-async function getMapDatasets({datasets, publicToken}) {
-  const promises = datasets.map(dataset => _getMapDataset(dataset, publicToken));
+async function fillInMapDatasets({datasets, publicToken}) {
+  const promises = datasets.map(dataset => _fetchMapDataset(dataset, publicToken));
   return await Promise.all(promises);
 }
 
-export async function getMap({mapId, credentials, autoRefresh, onNewData}) {
+export async function fetchMap({mapId, credentials, autoRefresh, onNewData}) {
   const localCreds = {...getDefaultCredentials(), ...credentials};
 
   log.assert(mapId, 'Must define map id');
@@ -291,7 +292,7 @@ export async function getMap({mapId, credentials, autoRefresh, onNewData}) {
   // will not update when a map is published.
   if (autoRefresh) {
     setInterval(async () => {
-      const changed = await getMapDatasets(map);
+      const changed = await fillInMapDatasets(map);
       if (changed.some(v => v === true)) {
         onNewData(parseMap(map));
       }
@@ -299,6 +300,6 @@ export async function getMap({mapId, credentials, autoRefresh, onNewData}) {
   }
 
   // Mutates map.datasets so that dataset.data contains data
-  await getMapDatasets(map);
+  await fillInMapDatasets(map);
   return parseMap(map);
 }

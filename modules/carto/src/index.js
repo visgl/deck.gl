@@ -11,8 +11,8 @@ export {
   MAP_TYPES,
   API_VERSIONS,
   fetchLayerData,
+  fetchMap,
   getDataV2 as _getDataV2,
   getData,
-  getMap,
   mapInstantiation as _mapInstantiation
 } from './api';

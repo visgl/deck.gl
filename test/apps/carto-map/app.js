@@ -1,4 +1,4 @@
-import {getMap, setDefaultCredentials, API_VERSIONS} from '@deck.gl/carto';
+import {fetchMap, setDefaultCredentials, API_VERSIONS} from '@deck.gl/carto';
 import {Deck} from '@deck.gl/core';
 import mapboxgl from 'mapbox-gl';
 
@@ -22,7 +22,7 @@ async function createMap(mapId) {
   }
 
   // Get map info from CARTO and update deck
-  const {mapState: initialViewState, mapStyle, layers} = await getMap(mapConfiguration);
+  const {mapState: initialViewState, mapStyle, layers} = await fetchMap(mapConfiguration);
   deck.setProps({initialViewState, layers});
 
   // Mapbox basemap (optional)
