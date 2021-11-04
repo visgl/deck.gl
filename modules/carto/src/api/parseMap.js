@@ -1,7 +1,6 @@
 import GL from '@luma.gl/constants';
 import {
   LAYER_MAP,
-  getElevationAccessor,
   getColorAccessor,
   getSizeAccessor,
   getTextAccessor,
@@ -39,7 +38,7 @@ export function parseMap(json) {
         ...createBlendingProps(layerBlending),
         ...createInteractionProps(interactionConfig),
         ...createStyleProps(config, propMap),
-        ...createChannelProps(visualChannels, config, data) // Must come after style
+        ...createChannelProps(visualChannels, type, config, data) // Must come after style
       });
     })
   };
@@ -128,17 +127,20 @@ function createStyleProps(config, mapping) {
   return result;
 }
 
-function createChannelProps(visualChannels, config, data) {
+function createChannelProps(visualChannels, type, config, data) {
   const {
     colorField,
     colorScale,
-    heightField,
-    heightScale,
     sizeField,
     sizeScale,
     strokeColorField,
     strokeColorScale
   } = visualChannels;
+  let {heightField, heightScale} = visualChannels;
+  if (type === 'hexagonId') {
+    heightField = sizeField;
+    heightScale = sizeScale;
+  }
   const {textLabel, visConfig} = config;
   const result = {};
   const textLabelField = textLabel && textLabel.field;
@@ -149,10 +151,20 @@ function createChannelProps(visualChannels, config, data) {
     result.getLineColor = getColorAccessor(strokeColorField, strokeColorScale, visConfig, data);
   }
   if (heightField) {
-    result.getElevation = getElevationAccessor(heightField, heightScale, visConfig, data);
+    result.getElevation = getSizeAccessor(
+      heightField,
+      heightScale,
+      visConfig.heightRange || visConfig.sizeRange,
+      data
+    );
   }
   if (sizeField) {
-    result.getPointRadius = getSizeAccessor(sizeField, sizeScale, visConfig, data);
+    result.getPointRadius = getSizeAccessor(
+      sizeField,
+      sizeScale,
+      visConfig.radiusRange || visConfig.sizeRange,
+      data
+    );
   }
   if (textLabelField) {
     result.getText = getTextAccessor(textLabelField);

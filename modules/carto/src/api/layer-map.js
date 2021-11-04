@@ -11,7 +11,7 @@ import {
 } from 'd3-scale';
 import {format as d3Format} from 'd3-format';
 import moment from 'moment-timezone';
-import {MVTLayer} from '@deck.gl/geo-layers';
+import {H3HexagonLayer, MVTLayer} from '@deck.gl/geo-layers';
 import {GeoJsonLayer} from '@deck.gl/layers';
 
 const SCALE_FUNCS = {
@@ -74,6 +74,13 @@ export const LAYER_MAP = {
     propMap: sharedPropMap,
     defaultProps: {...defaultProps, lineWidthScale: 2}
   },
+  hexagonId: {
+    Layer: H3HexagonLayer,
+    propMap: mergePropMaps(sharedPropMap, {
+      visConfig: {coverage: 'coverage', elevationScale: 'elevationScale'}
+    }),
+    defaultProps: {...defaultProps, getHexagon: d => d.h3}
+  },
   mvt: {
     Layer: MVTLayer,
     propMap: sharedPropMap,
@@ -101,6 +108,13 @@ function calculateDomain(data, name, scaleType) {
       return [...new Set(values)].sort();
     }
     return extent(values);
+  } else if (Array.isArray(data) && data[0][name]) {
+    // JSON data type
+    const values = data.map(properties => properties[name]);
+    if (scaleType === 'ordinal') {
+      return [...new Set(values)].sort();
+    }
+    return extent(values);
   } else if (data.tilestats) {
     // Tileset data type
     const {attributes} = data.tilestats.layers[0];
@@ -111,32 +125,32 @@ function calculateDomain(data, name, scaleType) {
   return [0, 1];
 }
 
+function unwrapGeoJson(accessor) {
+  return ({properties}) => {
+    return accessor(properties);
+  };
+}
+
 export function getColorAccessor({name}, scaleType, {colorRange}, data) {
   const scale = SCALE_FUNCS[scaleType]();
   scale.domain(calculateDomain(data, name, scaleType));
   scale.range(colorRange.colors);
 
-  return ({properties}) => {
+  const accessor = properties => {
     const rgba = rgb(scale(properties[name]));
     return [rgba.r, rgba.g, rgba.b, 255 * rgba.a];
   };
+  return data.features ? unwrapGeoJson(accessor) : accessor;
 }
 
-export function getElevationAccessor({name}, scaleType, {heightRange}, data) {
+export function getSizeAccessor({name}, scaleType, range, data) {
   const scale = SCALE_FUNCS[scaleType]();
   scale.domain(calculateDomain(data, name, scaleType));
-  scale.range(heightRange);
-  return ({properties}) => {
+  scale.range(range);
+  const accessor = properties => {
     return scale(properties[name]);
   };
-}
-export function getSizeAccessor({name}, scaleType, {radiusRange}, data) {
-  const scale = SCALE_FUNCS[scaleType]();
-  scale.domain(calculateDomain(data, name, scaleType));
-  scale.range(radiusRange);
-  return ({properties}) => {
-    return scale(properties[name]);
-  };
+  return data.features ? unwrapGeoJson(accessor) : accessor;
 }
 
 const FORMATS = {
