@@ -22,7 +22,7 @@ export function parseMap(json) {
     updatedAt: json.updatedAt,
     mapState,
     mapStyle,
-    layers: extractTextLayers(layers).map(({id, type, config, visualChannels}) => {
+    layers: extractTextLayers(layers.reverse()).map(({id, type, config, visualChannels}) => {
       log.assert(type in LAYER_MAP, `Unsupported layer type: ${type}`);
       const {Layer, propMap, defaultProps} = LAYER_MAP[type];
 
