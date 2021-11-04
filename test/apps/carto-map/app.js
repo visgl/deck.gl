@@ -45,7 +45,11 @@ const examples = [
   'ba2ef0ba-e7bb-4a9a-a2a0-e8ade556b3d2',
   '20c51f51-dedb-4cc2-b0c0-151137977a19',
   '3b47f2df-b4af-4505-a586-c4ac0ded4e14',
-  'ae3ab696-3992-4d46-bdd2-b137ef9715d6'
+  'ae3ab696-3992-4d46-bdd2-b137ef9715d6',
+  '968c03bd-375c-4ec1-92e4-a4caef6efbfb',
+  '7537fa69-ce7b-4242-9db1-2de8c8526808',
+  '6a447e5b-9bb8-41f0-99aa-2e081371b7da',
+  'eb6fa89b-d8d1-4431-ab40-73b0c4b290bd'
 ];
 const params = new URLSearchParams(location.search.slice(1));
 const id = params.has('id') ? params.get('id') : examples[0];
