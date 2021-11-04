@@ -100,35 +100,39 @@ function domainFromAttribute(attribute, scaleType) {
   return [min, attribute.max];
 }
 
+function domainFromValues(values, scaleType) {
+  if (scaleType === 'ordinal') {
+    return [...new Set(values)].sort();
+  }
+  return extent(values);
+}
+
 function calculateDomain(data, name, scaleType) {
-  if (data.features) {
-    // GeoJSON data type
-    const values = data.features.map(({properties}) => properties[name]);
-    if (scaleType === 'ordinal') {
-      return [...new Set(values)].sort();
-    }
-    return extent(values);
-  } else if (Array.isArray(data) && data[0][name]) {
-    // JSON data type
-    const values = data.map(properties => properties[name]);
-    if (scaleType === 'ordinal') {
-      return [...new Set(values)].sort();
-    }
-    return extent(values);
-  } else if (data.tilestats) {
+  if (data.tilestats) {
     // Tileset data type
     const {attributes} = data.tilestats.layers[0];
     const attribute = attributes.find(a => a.attribute === name);
     return domainFromAttribute(attribute, scaleType);
+  } else if (data.features) {
+    // GeoJSON data type
+    const values = data.features.map(({properties}) => properties[name]);
+    return domainFromValues(values, scaleType);
+  } else if (Array.isArray(data) && data[0][name]) {
+    // JSON data type
+    const values = data.map(properties => properties[name]);
+    return domainFromValues(values, scaleType);
   }
 
   return [0, 1];
 }
 
-function unwrapGeoJson(accessor) {
-  return ({properties}) => {
-    return accessor(properties);
-  };
+function normalizeAccessor(accessor, data) {
+  if (data.features || data.tilestats) {
+    return ({properties}) => {
+      return accessor(properties);
+    };
+  }
+  return accessor;
 }
 
 export function getColorAccessor({name}, scaleType, {colors}, data) {
@@ -140,7 +144,7 @@ export function getColorAccessor({name}, scaleType, {colors}, data) {
     const rgba = rgb(scale(properties[name]));
     return [rgba.r, rgba.g, rgba.b, 255 * rgba.a];
   };
-  return data.features ? unwrapGeoJson(accessor) : accessor;
+  return normalizeAccessor(accessor, data);
 }
 
 export function getSizeAccessor({name}, scaleType, range, data) {
@@ -151,7 +155,7 @@ export function getSizeAccessor({name}, scaleType, range, data) {
   const accessor = properties => {
     return scale(properties[name]);
   };
-  return data.features ? unwrapGeoJson(accessor) : accessor;
+  return normalizeAccessor(accessor, data);
 }
 
 const FORMATS = {
@@ -162,11 +166,12 @@ const FORMATS = {
   default: String
 };
 
-export function getTextAccessor({name, type}) {
+export function getTextAccessor({name, type}, data) {
   const format = FORMATS[type] || FORMATS.default;
-  return ({properties}) => {
+  const accessor = properties => {
     return format(properties[name]);
   };
+  return normalizeAccessor(accessor, data);
 }
 
 export function getTextPixelOffsetAccessor({alignment, anchor, size}, radius) {

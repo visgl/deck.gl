@@ -172,7 +172,7 @@ function createChannelProps(visualChannels, type, config, data) {
     );
   }
   if (textLabelField) {
-    result.getText = getTextAccessor(textLabelField);
+    result.getText = getTextAccessor(textLabelField, data);
     result.pointType = 'text';
     const radius = result.getPointRadius || visConfig.radius;
     result.getTextPixelOffset = getTextPixelOffsetAccessor(textLabel, radius);
