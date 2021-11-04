@@ -42,9 +42,9 @@ const sharedPropMap = {
     strokeColor: 'getLineColor',
     stroked: 'stroked',
     thickness: 'getLineWidth',
-    radius: 'getPointRadius'
-  },
-  wireframe: 'wireframe'
+    radius: 'getPointRadius',
+    wireframe: 'wireframe'
+  }
 };
 
 const RADIUS_DOWNSCALE = 0.2;
