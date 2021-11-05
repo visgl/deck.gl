@@ -1,5 +1,5 @@
 import test from 'tape-catch';
-import {getColorAccessor, getTextAccessor} from '@deck.gl/carto/api/layer-map';
+import {getColorAccessor, getSizeAccessor, getTextAccessor} from '@deck.gl/carto/api/layer-map';
 
 const colors = ['#5A1846', '#900C3F', '#C70039', '#E3611C', '#F1920E', '#FFC300'];
 const COLOR_TESTS = [
@@ -27,6 +27,41 @@ for (const {colorField, colorScale, colorRange, opacity, data, d, expected} of C
   test(`getColorAccessor#${colorScale}`, t => {
     const accessor = getColorAccessor(colorField, colorScale, colorRange, opacity, data);
     t.deepEquals(accessor(d), expected, `getColorAccessor correctly returns ${expected}`);
+    t.end();
+  });
+}
+
+const SIZE_TESTS = [
+  {
+    sizeField: {name: 'v'},
+    sizeScale: 'linear',
+    sizeRange: [0, 1000],
+    data: [{v: 1}, {v: 5}, {v: 10}],
+    d: {v: 1},
+    expected: 0
+  },
+  {
+    sizeField: {name: 'v'},
+    sizeScale: 'sqrt',
+    sizeRange: [100, 1000],
+    data: [{v: 1}, {v: 5}, {v: 10}],
+    d: {v: 1},
+    expected: 100
+  },
+  {
+    sizeField: {name: 'v'},
+    sizeScale: 'log',
+    sizeRange: [0, 1000],
+    data: [{v: 1}, {v: 10}],
+    d: {v: 5},
+    expected: 698.9700043360187
+  }
+];
+
+for (const {sizeField, sizeScale, sizeRange, data, d, expected} of SIZE_TESTS) {
+  test(`getSizeAccessor#${sizeScale}`, t => {
+    const accessor = getSizeAccessor(sizeField, sizeScale, sizeRange, data);
+    t.deepEquals(accessor(d), expected, `getSizeAccessor correctly returns ${expected}`);
     t.end();
   });
 }
