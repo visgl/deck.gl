@@ -150,19 +150,20 @@ function createChannelProps(visualChannels, type, config, data) {
       colorField,
       colorScale,
       visConfig.colorRange,
-      visConfig.opacity,
+      1, // Rely on layer opacity
       data
     );
   }
   if (strokeColorField) {
+    const opacity =
+      visConfig.strokeOpacity !== undefined ? visConfig.strokeOpacity / visConfig.opacity : 1;
     result.getLineColor = getColorAccessor(
       strokeColorField,
       strokeColorScale,
       visConfig.colorRange,
-      visConfig.strokeOpacity || visConfig.opacity,
+      opacity,
       data
     );
-    result.opacity = 1;
   }
   if (heightField) {
     result.getElevation = getSizeAccessor(
