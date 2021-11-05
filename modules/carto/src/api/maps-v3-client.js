@@ -225,7 +225,7 @@ async function _fetchDataUrl({
 }
 
 export async function getData({type, source, connection, credentials, geoColumn, columns, format}) {
-  log.depreacted('getData', 'fetchLayerData')();
+  log.deprecated('getData', 'fetchLayerData')();
   const layerData = await fetchLayerData({
     type,
     source,
