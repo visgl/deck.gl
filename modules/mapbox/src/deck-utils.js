@@ -91,8 +91,8 @@ export function drawLayer(deck, map, layer) {
 
   deck._drawLayers('mapbox-repaint', {
     viewports: layer.viewId
-      ? applyViewport(deck, map, layer.viewId)
-      : [getViewport(deck, map, false)],
+      ? applyViewport(deck, map, layer.viewId, currentViewport)
+      : [currentViewport],
     layerFilter: ({layer: deckLayer}) => layer.id === deckLayer.id,
     clearCanvas: false
   });
@@ -119,12 +119,12 @@ function getMapboxVersion(map) {
   return {major, minor};
 }
 
-function applyViewport(deck, map, viewId) {
+function applyViewport(deck, map, viewId, viewport) {
   // Use first view or the view with matching id.
   const viewports = deck.viewManager.getViewports();
-  const viewportIdx = viewports.findIndex(viewport => viewport.id === viewId);
+  const viewportIdx = viewports.findIndex(vp => vp.id === viewId);
   if (viewportIdx >= 0) {
-    viewports[viewportIdx] = getViewport(deck, map, false);
+    viewports[viewportIdx] = viewport || getViewport(deck, map, false);
   }
   return viewports;
 }
