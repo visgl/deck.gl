@@ -127,6 +127,7 @@ function createStyleProps(config, mapping) {
   return result;
 }
 
+/* eslint-disable complexity */
 function createChannelProps(visualChannels, type, config, data) {
   const {
     colorField,
@@ -145,15 +146,23 @@ function createChannelProps(visualChannels, type, config, data) {
   const result = {};
   const textLabelField = textLabel && textLabel.field;
   if (colorField) {
-    result.getFillColor = getColorAccessor(colorField, colorScale, visConfig.colorRange, data);
+    result.getFillColor = getColorAccessor(
+      colorField,
+      colorScale,
+      visConfig.colorRange,
+      visConfig.opacity,
+      data
+    );
   }
   if (strokeColorField) {
     result.getLineColor = getColorAccessor(
       strokeColorField,
       strokeColorScale,
       visConfig.colorRange,
+      visConfig.strokeOpacity || visConfig.opacity,
       data
     );
+    result.opacity = 1;
   }
   if (heightField) {
     result.getElevation = getSizeAccessor(

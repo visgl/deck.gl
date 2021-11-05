@@ -135,14 +135,15 @@ function normalizeAccessor(accessor, data) {
   return accessor;
 }
 
-export function getColorAccessor({name}, scaleType, {colors}, data) {
+export function getColorAccessor({name}, scaleType, {colors}, opacity, data) {
   const scale = SCALE_FUNCS[scaleType]();
   scale.domain(calculateDomain(data, name, scaleType));
   scale.range(colors);
+  const alpha = opacity !== undefined ? 255 * Math.pow(opacity, 1 / 2.2) : 255;
 
   const accessor = properties => {
     const rgba = rgb(scale(properties[name]));
-    return [rgba.r, rgba.g, rgba.b, 255 * rgba.a];
+    return [rgba.r, rgba.g, rgba.b, alpha];
   };
   return normalizeAccessor(accessor, data);
 }
