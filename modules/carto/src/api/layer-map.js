@@ -139,7 +139,7 @@ export function getColorAccessor({name}, scaleType, {colors}, opacity, data) {
   const scale = SCALE_FUNCS[scaleType]();
   scale.domain(calculateDomain(data, name, scaleType));
   scale.range(colors);
-  const alpha = opacity !== undefined ? 255 * Math.pow(opacity, 1 / 2.2) : 255;
+  const alpha = opacity !== undefined ? Math.round(255 * Math.pow(opacity, 1 / 2.2)) : 255;
 
   const accessor = properties => {
     const rgba = rgb(scale(properties[name]));
