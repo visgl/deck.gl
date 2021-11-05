@@ -3,6 +3,7 @@
  */
 import {getDefaultCredentials, buildMapsUrlFromBase} from '../config';
 import {API_VERSIONS, encodeParameter, FORMATS, MAP_TYPES} from './maps-api-common';
+import {parseMap} from './parseMap';
 import {log} from '@deck.gl/core';
 
 const MAX_GET_LENGTH = 2048;
@@ -126,7 +127,7 @@ function getUrlFromMetadata(metadata, format) {
   return null;
 }
 
-function checkGetLayerDataParameters({type, source, connection, localCreds}) {
+function checkFetchLayerDataParameters({type, source, connection, localCreds}) {
   log.assert(connection, 'Must define connection');
   log.assert(type, 'Must define a type');
   log.assert(source, 'Must define a source');
@@ -146,6 +147,38 @@ export async function fetchLayerData({
   format,
   schema
 }) {
+  // Internally we split data fetching into two parts to allow us to
+  // conditionally fetch the actual data, depending on the metadata state
+  const {url, accessToken, mapFormat, metadata} = await _fetchDataUrl({
+    type,
+    source,
+    connection,
+    credentials,
+    geoColumn,
+    columns,
+    format,
+    schema
+  });
+
+  const data = await request({url, format: mapFormat, accessToken});
+  const result = {data, format: mapFormat};
+  if (schema) {
+    result.schema = metadata.schema;
+  }
+
+  return result;
+}
+
+async function _fetchDataUrl({
+  type,
+  source,
+  connection,
+  credentials,
+  geoColumn,
+  columns,
+  format,
+  schema
+}) {
   const defaultCredentials = getDefaultCredentials();
   // Only pick up default credentials if they have been defined for
   // correct API version
@@ -153,7 +186,7 @@ export async function fetchLayerData({
     ...(defaultCredentials.apiVersion === API_VERSIONS.V3 && defaultCredentials),
     ...credentials
   };
-  checkGetLayerDataParameters({type, source, connection, localCreds});
+  checkFetchLayerDataParameters({type, source, connection, localCreds});
 
   if (!localCreds.mapsUrl) {
     localCreds.mapsUrl = buildMapsUrlFromBase(localCreds.apiBaseUrl);
@@ -177,7 +210,7 @@ export async function fetchLayerData({
     log.assert(url, `Format ${format} not available`);
   } else {
     // guess map format
-    const prioritizedFormats = [FORMATS.GEOJSON, FORMATS.NDJSON, FORMATS.TILEJSON];
+    const prioritizedFormats = [FORMATS.GEOJSON, FORMATS.JSON, FORMATS.NDJSON, FORMATS.TILEJSON];
     for (const f of prioritizedFormats) {
       url = getUrlFromMetadata(metadata, f);
       if (url) {
@@ -188,17 +221,11 @@ export async function fetchLayerData({
   }
 
   const {accessToken} = localCreds;
-
-  const data = await request({url, format: mapFormat, accessToken});
-  const result = {data, format: mapFormat};
-  if (schema) {
-    result.schema = metadata.schema;
-  }
-
-  return result;
+  return {url, accessToken, mapFormat, metadata};
 }
 
 export async function getData({type, source, connection, credentials, geoColumn, columns, format}) {
+  log.deprecated('getData', 'fetchLayerData')();
   const layerData = await fetchLayerData({
     type,
     source,
@@ -210,4 +237,69 @@ export async function getData({type, source, connection, credentials, geoColumn,
     schema: false
   });
   return layerData.data;
+}
+
+/* global setInterval, URLSearchParams */
+async function _fetchMapDataset(dataset, accessToken) {
+  // First fetch metadata
+  const {connectionName: connection, source, type} = dataset;
+  const {url, mapFormat} = await _fetchDataUrl({
+    credentials: {accessToken},
+    connection,
+    source,
+    type
+  });
+
+  // Extract the last time the data changed
+  const cache = parseInt(new URLSearchParams(url).get('cache'), 10);
+  if (cache && dataset.cache === cache) {
+    return false;
+  }
+  dataset.cache = cache;
+
+  // Only fetch if the data has changed
+  const data = await request({url, format: mapFormat, accessToken});
+  dataset.data = data;
+  return true;
+}
+
+async function fillInMapDatasets({datasets, publicToken}) {
+  const promises = datasets.map(dataset => _fetchMapDataset(dataset, publicToken));
+  return await Promise.all(promises);
+}
+
+export async function fetchMap({mapId, credentials, autoRefresh, onNewData}) {
+  const localCreds = {...getDefaultCredentials(), ...credentials};
+
+  log.assert(mapId, 'Must define map id');
+
+  log.assert(localCreds.apiVersion === API_VERSIONS.V3, 'Method only available for v3');
+  log.assert(localCreds.apiBaseUrl, 'Must define apiBaseUrl');
+  if (!localCreds.mapsUrl) {
+    localCreds.mapsUrl = buildMapsUrlFromBase(localCreds.apiBaseUrl);
+  }
+
+  if (autoRefresh || onNewData) {
+    log.assert(onNewData, 'Must define `onNewData` when using autoRefresh');
+    log.assert(typeof onNewData === 'function', '`onNewData` must be a function');
+    log.assert(autoRefresh > 0, '`autoRefresh` must be a positive number');
+  }
+
+  const url = `${localCreds.mapsUrl}/public/${mapId}`;
+  const map = await request({url});
+
+  // Periodically check if the data has changed. Note that this
+  // will not update when a map is published.
+  if (autoRefresh) {
+    setInterval(async () => {
+      const changed = await fillInMapDatasets(map);
+      if (changed.some(v => v === true)) {
+        onNewData(parseMap(map));
+      }
+    }, autoRefresh * 1000);
+  }
+
+  // Mutates map.datasets so that dataset.data contains data
+  await fillInMapDatasets(map);
+  return parseMap(map);
 }
