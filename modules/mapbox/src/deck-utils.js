@@ -90,8 +90,8 @@ export function drawLayer(deck, map, layer) {
   }
 
   deck._drawLayers('mapbox-repaint', {
-    viewports: layer.viewId
-      ? applyViewport(deck, map, layer.viewId, currentViewport)
+    viewports: layer.props.viewId
+      ? applyViewport(deck, map, layer.props.viewId, currentViewport)
       : [currentViewport],
     layerFilter: ({layer: deckLayer}) => layer.id === deckLayer.id,
     clearCanvas: false
