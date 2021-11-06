@@ -203,6 +203,12 @@ Type of line joint. If `true`, draw round joints. Otherwise draw miter joints.
 The maximum extent of a joint in ratio to the stroke width.
 Only works if `lineJointRounded` is `false`.
 
+##### `lineBillboard` (Boolean, optional)
+
+* Default: `false`
+
+If `true`, extrude the line in screen space (width always faces the camera).
+If `false`, the width always faces up.
 
 ### 3D Options
 

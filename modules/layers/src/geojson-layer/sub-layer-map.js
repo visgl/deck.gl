@@ -93,6 +93,7 @@ export const LINE_LAYER = {
     lineJointRounded: 'jointRounded',
     lineCapRounded: 'capRounded',
     lineMiterLimit: 'miterLimit',
+    lineBillboard: 'billboard',
 
     getLineColor: 'getColor',
     getLineWidth: 'getWidth'
