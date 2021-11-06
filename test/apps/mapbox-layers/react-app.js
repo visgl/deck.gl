@@ -1,7 +1,7 @@
 /* global document */
 import React, {useState, useRef, useCallback} from 'react';
 import {render} from 'react-dom';
-import DeckGL, {ScatterplotLayer, ArcLayer} from 'deck.gl';
+import DeckGL, {ScatterplotLayer, ArcLayer, TextLayer} from 'deck.gl';
 import {StaticMap} from 'react-map-gl';
 
 import {MapboxLayer} from '@deck.gl/mapbox';
@@ -29,12 +29,10 @@ const INITIAL_VIEW_STATE = {
 const mainView = new MapView({id: 'main', controller: true});
 const widgetView = new OrthographicView({
   id: 'widget',
-  controller: true,
   x: 20,
   y: 20,
-  width: '20%',
-  height: '20%',
-  clear: true
+  width: 150,
+  height: 36
 });
 
 function layerFilter({layer, viewport}) {
@@ -77,7 +75,13 @@ function App() {
   const layers = [
     new ScatterplotLayer(deckPoiLayer),
     new ArcLayer(deckRouteLayer),
-    new ScatterplotLayer({id: 'widget-point', data: [{position: [0, 0]}], getRadius: 10})
+    new TextLayer({
+      id: 'widget-title',
+      data: [{position: [0, 0], text: 'New York City'}],
+      getSize: 18,
+      background: true,
+      backgroundPadding: [4, 4]
+    })
   ];
 
   return (
