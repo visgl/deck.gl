@@ -94,26 +94,26 @@ const macOnlyTests = [
     ],
     goldenImage: './test/render/golden-images/geojson-text.png'
   },
-  {
-    name: 'geojson-text-billboard',
-    viewState: {
-      longitude: -100,
-      latitude: 40,
-      zoom: 4,
-      pitch: 60,
-      bearing: 0
-    },
-    layers: [
-      new GeoJsonLayer({
-        id: 'geojson-text',
-        data: capitals,
-        pointType: 'text',
-        getText: d => d.properties.name,
-        textBillboard: false // default value is true
-      })
-    ],
-    goldenImage: './test/render/golden-images/geojson-text-billboard.png'
-  },
+  // {
+  //   name: 'geojson-text-billboard',
+  //   viewState: {
+  //     longitude: -100,
+  //     latitude: 40,
+  //     zoom: 4,
+  //     pitch: 60,
+  //     bearing: 0
+  //   },
+  //   layers: [
+  //     new GeoJsonLayer({
+  //       id: 'geojson-text',
+  //       data: capitals,
+  //       pointType: 'text',
+  //       getText: d => d.properties.name,
+  //       textBillboard: false // default value is true
+  //     })
+  //   ],
+  //   goldenImage: './test/render/golden-images/geojson-text-billboard.png'
+  // },
   {
     name: 'geojson-text-font-settings',
     viewState: {

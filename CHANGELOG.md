@@ -19,6 +19,11 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v8.6
 
+#### deck.gl [8.6.3] - Nov 7 2021
+
+- Multi-view picking consistency (#6306)
+- Add missing prop mappings for GeoJsonLayer (#6336)
+
 #### deck.gl [8.6.2] - Nov 3 2021
 
 - CARTO: fix layer credentials overwrite (#6349)
