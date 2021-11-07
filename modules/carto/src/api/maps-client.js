@@ -1,9 +1,10 @@
 /**
  * Maps API Client for Maps API v1 and Maps API v2
  */
-import {getDefaultCredentials} from '../config';
+import {defaultClassicCredentials, getDefaultCredentials} from '../config';
 import {
   API_VERSIONS,
+  DEFAULT_MAPS_URL_FORMAT,
   DEFAULT_REGION_COMPONENT_IN_URL,
   DEFAULT_USER_COMPONENT_IN_URL,
   encodeParameter,
@@ -22,8 +23,20 @@ const TILE_EXTENT = 4096;
  * Obtain a TileJson from Maps API v1 and v2
  */
 export async function getDataV2({type, source, credentials}) {
-  const localCreds = {...getDefaultCredentials(), ...credentials};
-  const {apiVersion} = localCreds;
+  const defaultCredentials = getDefaultCredentials();
+  const apiVersion = (credentials && credentials.apiVersion) || defaultCredentials.apiVersion;
+  // Only pick up default credentials if they have been defined for
+  // correct API version
+  const localCreds = {
+    ...defaultClassicCredentials,
+    ...(defaultCredentials.apiVersion === apiVersion && defaultCredentials),
+    ...credentials
+  };
+
+  if (!localCreds.mapsUrl) {
+    localCreds.mapsUrl = DEFAULT_MAPS_URL_FORMAT[apiVersion];
+  }
+
   let url;
 
   const connection = type === 'tileset' ? CONNECTIONS.BIGQUERY : CONNECTIONS.CARTO;
