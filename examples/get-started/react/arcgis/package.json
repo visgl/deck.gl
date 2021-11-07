@@ -8,8 +8,9 @@
     "build": "webpack -p"
   },
   "dependencies": {
-    "@esri/react-arcgis": "^4.0.0",
-    "esri-loader": "^2.16.0",
+    "@arcgis/core": "^4.21.0",
+    "@esri/react-arcgis": "^5.1.0",
+    "esri-loader": "^3.3.0",
     "deck.gl": "^8.6.0-alpha.0",
     "react": "^16.3.0",
     "react-dom": "^16.3.0"

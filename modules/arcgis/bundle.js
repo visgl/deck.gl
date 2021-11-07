@@ -1,4 +1,4 @@
-const ArcGISUtils = require('./src');
+const ArcGISUtils = require('./src/load-modules');
 
 /* global window, global */
 const _global = typeof window === 'undefined' ? global : window;

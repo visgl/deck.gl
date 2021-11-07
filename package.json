@@ -44,6 +44,7 @@
     "jsdom": false
   },
   "devDependencies": {
+    "@arcgis/core": "^4.21.0",
     "@babel/register": "^7.13.0",
     "@loaders.gl/csv": "^3.0.8",
     "@loaders.gl/polyfills": "^3.0.8",

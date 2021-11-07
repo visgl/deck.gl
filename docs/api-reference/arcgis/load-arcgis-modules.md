@@ -7,11 +7,32 @@ This utility function initializes the classes in this module by loading ArcGIS d
 ```js
 import {loadArcGISModules} from '@deck.gl/arcgis';
 
-loadArcGISModules(['esri/Map', 'esri/views/MapView'], {version: '4.14'})
+loadArcGISModules(['esri/Map', 'esri/views/MapView'], {version: '4.21'})
   .then(({DeckLayer, DeckRenderer, modules}) => {
     const [ArcGISMap, MapView] = modules;
 
-    // Create map
+    const layer = new DeckLayer({
+      'deck.layers': [
+        new ScatterplotLayer({
+          data: [
+            {position: [0.119, 52.205]}
+          ],
+          getPosition: d => d.position,
+          getColor: [255, 0, 0],
+          radiusMinPixels: 20
+        })
+      ]
+    });
+
+    const mapView = new MapView({
+      container: "viewDiv",
+      map: new ArcGISMap({
+        basemap: "dark-gray-vector",
+        layers: [layer]
+      }),
+      center: [0.119, 52.205],
+      zoom: 5
+    });
   });
 ```
 

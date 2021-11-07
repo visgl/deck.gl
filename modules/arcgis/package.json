@@ -29,9 +29,10 @@
     "prepublishOnly": "npm run build-bundle && npm run build-bundle -- --env.dev"
   },
   "peerDependencies": {
-    "@deck.gl/core": "^8.0.0"
+    "@deck.gl/core": "^8.0.0",
+    "@arcgis/core": "^4.0.0"
   },
   "dependencies": {
-    "esri-loader": "^3.2.0"
+    "esri-loader": "^3.3.0"
   }
 }
