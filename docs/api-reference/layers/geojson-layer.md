@@ -203,6 +203,12 @@ Type of line joint. If `true`, draw round joints. Otherwise draw miter joints.
 The maximum extent of a joint in ratio to the stroke width.
 Only works if `lineJointRounded` is `false`.
 
+##### `lineBillboard` (Boolean, optional)
+
+* Default: `false`
+
+If `true`, extrude the line in screen space (width always faces the camera).
+If `false`, the width always faces up.
 
 ### 3D Options
 
@@ -273,7 +279,7 @@ The following props are forwarded to a `ScatterplotLayer` if `pointType` is `'ci
 | `pointRadiusMinPixels` | `0` | [radiusMinPixels](/docs/api-reference/layers/scatterplot-layer.md#radiusminpixels) |
 | `pointRadiusMaxPixels` | `Number.MAX_SAFE_INTEGER` | [radiusMaxPixels](/docs/api-reference/layers/scatterplot-layer.md#radiusmaxpixels) |
 | `pointAntialiasing` | `true` | [antialiasing](/docs/api-reference/layers/scatterplot-layer.md#antialiasing) |
-
+| `pointBillboard` | `false` | [billboard](/docs/api-reference/layers/scatterplot-layer.md#billboard) |
 
 ### pointType:icon Options
 
@@ -292,7 +298,8 @@ The following props are forwarded to an `IconLayer` if `pointType` is `'icon'`.
 | `iconSizeScale` | `1` | [sizeScale](/docs/api-reference/layers/icon-layer.md#sizescale) |
 | `iconSizeMinPixels` | `0` | [sizeMinPixels](/docs/api-reference/layers/icon-layer.md#sizeminpixels) |
 | `iconSizeMaxPixels` | `Number.MAX_SAFE_INTEGER` | [sizeMaxPixels](/docs/api-reference/layers/icon-layer.md#sizemaxpixels) |
-
+| `iconBillboard` | `true` | [billboard](/docs/api-reference/layers/icon-layer.md#billboard) |
+| `iconAlphaCutoff` | `0.05` | [alphaCutoff](/docs/api-reference/layers/icon-layer.md#alphaCutoff) |
 
 ### pointType:text Options
 
@@ -324,7 +331,8 @@ The following props are forwarded to a `TextLayer` if `pointType` is `'text'`.
 | `textBackgroundPadding` | `[0, 0]` | [backgroundPadding](/docs/api-reference/layers/text-layer.md#backgroundpadding) |
 | `textOutlineColor` | `[0, 0, 0, 255]` | [outlineColor](/docs/api-reference/layers/text-layer.md#outlinecolor) |
 | `textOutlineWidth` | `0` | [outlineWidth](/docs/api-reference/layers/text-layer.md#outlinewidth) |
-
+| `textBillboard` | `true` | [billboard](/docs/api-reference/layers/text-layer.md#billboard) |
+| `textFontSettings` | `{}` | [fontSettings](/docs/api-reference/layers/text-layer.md#fontSettings) |
 
 ## Sub Layers
 
