@@ -14,7 +14,7 @@ Use deck.gl layers as custom Mapbox layers, enabling seamless interleaving of Ma
 
 ### Limitations
 
-* deck.gl's multi-view system only supports one MapView (e.g. minimaps are not supported).
+* deck.gl's multi-view system only supports rendering one mapbox basemap into one MapView (e.g. a mapbox minimap is not supported along with a background basemap).
 * Unless used with react-map-gl, WebGL2 based deck.gl features, such as attribute transitions and GPU accelerated aggregation layers cannot be used.
 * Mapbox 2.0's terrain feature is currently not supported.
 

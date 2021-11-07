@@ -1,12 +1,17 @@
-import {Deck, WebMercatorViewport} from '@deck.gl/core';
+import {Deck, WebMercatorViewport, MapView} from '@deck.gl/core';
 
-export function getDeckInstance({map, gl, deck, viewId}) {
+export function getDeckInstance({map, gl, deck}) {
   // Only create one deck instance per context
   if (map.__deck) {
     return map.__deck;
   }
 
   const customRender = deck && deck.props._customRender;
+
+  if (deck.props.views && !deck.props.views.some(view => view.id === 'mapbox')) {
+    // Add mapbox view to the bottom of teh stack if it is missing.
+    deck.views.unshift(new MapView({id: 'mapbox'}));
+  }
 
   const deckProps = {
     useDevicePixels: true,
@@ -28,7 +33,8 @@ export function getDeckInstance({map, gl, deck, viewId}) {
     userData: {
       isExternal: false,
       mapboxLayers: new Set()
-    }
+    },
+    views: deck.props.views || [new MapView({id: 'mapbox'})]
   };
 
   if (deck) {
@@ -57,7 +63,7 @@ export function getDeckInstance({map, gl, deck, viewId}) {
   deck.props.userData.mapboxVersion = getMapboxVersion(map);
   map.__deck = deck;
   map.on('render', () => {
-    if (deck.layerManager) afterRender(deck, map, viewId);
+    if (deck.layerManager) afterRender(deck, map);
   });
 
   return deck;
@@ -90,10 +96,10 @@ export function drawLayer(deck, map, layer) {
   }
 
   deck._drawLayers('mapbox-repaint', {
-    viewports: layer.props.viewId
-      ? applyViewport(deck, map, layer.props.viewId, currentViewport)
-      : [currentViewport],
-    layerFilter: ({layer: deckLayer}) => layer.id === deckLayer.id,
+    viewports: applyViewport(deck, map, currentViewport),
+    layerFilter: props =>
+      (deck.props.layerFilter && deck.props.layerFilter(props)) ||
+      (props.viewport.id === 'mapbox' && layer.id === props.layer.id),
     clearCanvas: false
   });
 }
@@ -119,10 +125,10 @@ function getMapboxVersion(map) {
   return {major, minor};
 }
 
-function applyViewport(deck, map, viewId, viewport) {
+function applyViewport(deck, map, viewport) {
   // Use first view or the view with matching id.
   const viewports = deck.viewManager.getViewports();
-  const viewportIdx = viewports.findIndex(vp => vp.id === viewId);
+  const viewportIdx = viewports.findIndex(vp => vp.id === 'mapbox');
   if (viewportIdx >= 0) {
     viewports[viewportIdx] = viewport || getViewport(deck, map, false);
   }
@@ -160,7 +166,7 @@ function getViewport(deck, map, useMapboxProjection = true) {
   );
 }
 
-function afterRender(deck, map, viewId) {
+function afterRender(deck, map) {
   const {mapboxLayers, isExternal} = deck.props.userData;
 
   if (isExternal) {
@@ -169,8 +175,10 @@ function afterRender(deck, map, viewId) {
     const hasNonMapboxLayers = deck.props.layers.some(layer => !mapboxLayerIds.includes(layer.id));
     if (hasNonMapboxLayers) {
       deck._drawLayers('mapbox-repaint', {
-        viewports: viewId ? applyViewport(deck, map, viewId) : [getViewport(deck, map, false)],
-        layerFilter: ({layer}) => !mapboxLayerIds.includes(layer.id),
+        viewports: applyViewport(deck, map),
+        layerFilter: props =>
+          (deck.props.layerFilter && deck.props.layerFilter(props)) ||
+          !mapboxLayerIds.includes(props.layer.id),
         clearCanvas: false
       });
     }

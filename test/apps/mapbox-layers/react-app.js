@@ -13,7 +13,7 @@ import {MapView, OrthographicView} from '@deck.gl/core';
 const MAPBOX_TOKEN = process.env.MapboxAccessToken; // eslint-disable-line
 
 const INITIAL_VIEW_STATE = {
-  main: {
+  mapbox: {
     longitude: -74.012,
     latitude: 40.705,
     zoom: 15.5,
@@ -26,7 +26,7 @@ const INITIAL_VIEW_STATE = {
   }
 };
 
-const mainView = new MapView({id: 'main', controller: true});
+const mapboxView = new MapView({id: 'mapbox', controller: true});
 const widgetView = new OrthographicView({
   id: 'widget',
   x: 20,
@@ -65,11 +65,8 @@ function App() {
     const deck = deckRef.current.deck;
 
     map.addLayer(mapboxBuildingLayer);
-    map.addLayer(
-      new MapboxLayer({id: 'deckgl-pois', deck, viewId: 'main'}),
-      getFirstTextLayerId(map.getStyle())
-    );
-    map.addLayer(new MapboxLayer({id: 'deckgl-tour-route', deck, viewId: 'main'}));
+    map.addLayer(new MapboxLayer({id: 'deckgl-pois', deck}), getFirstTextLayerId(map.getStyle()));
+    map.addLayer(new MapboxLayer({id: 'deckgl-tour-route', deck}));
   }, []);
 
   const layers = [
@@ -88,7 +85,7 @@ function App() {
     <DeckGL
       ref={deckRef}
       layers={layers}
-      views={[mainView, widgetView]}
+      views={[mapboxView, widgetView]}
       initialViewState={INITIAL_VIEW_STATE}
       controller={true}
       onWebGLInitialized={setGLContext}

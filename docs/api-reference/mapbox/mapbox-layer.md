@@ -89,6 +89,58 @@ map.on('load', () => {
 }
 ```
 
+### Using Multiple Views from an Existing Deck Instance
+
+This option allows one to take advantage of deck's multi-view system and render a mapbox base map onto any one MapView of your choice by setting the `views` array and a `layerFilter` callback.
+
+- To to use multiple views, define a `MapView` with the id `“mapbox”`. This view will receive the state that matches the base map at each render.
+- If views are provided but the array does not contain this id, then a `MapView({id: 'mapbox'})` will be inserted at the bottom of the stack.
+- If the views prop is not provided, then the default is a single `MapView({id: 'mapbox'})`.
+
+```js
+import {MapboxLayer} from '@deck.gl/mapbox';
+import {Deck, MapView, OrthographicView} from '@deck.gl/core';
+import {ScatterplotLayer} from '@deck.gl/layers';
+
+const map = new mapboxgl.Map({...});
+
+const deck = new Deck({
+    gl: map.painter.context.gl,
+    views: [new MapView({id: 'mapbox'}), new OrthographicView({id: 'widget'})],
+    layerFilter: ({layer, viewport}) => {
+        const shouldDrawInWidget = layer.id.startsWith('widget');
+        if (viewport.id === 'widget') return shouldDrawInWidget;
+        return !shouldDrawInWidget;
+    },
+    layers: [
+        new ScatterplotLayer({
+            id: 'my-scatterplot',
+            data: [
+                {position: [-74.5, 40], size: 100}
+            ],
+            getPosition: d => d.position,
+            getRadius: d => d.size,
+            getFillColor: [255, 0, 0]
+        }),
+        new ScatterplotLayer({
+            id: 'widget-scatterplot',
+            data: [
+                {position: [0, 0], size: 100}
+            ],
+            getPosition: d => d.position,
+            getRadius: d => d.size,
+            getFillColor: [255, 0, 0]
+        })
+    ]
+});
+
+// wait for map to be ready
+map.on('load', () => {
+    // add to mapbox
+    map.addLayer(new MapboxLayer({id: 'my-scatterplot', deck}));
+});
+```
+
 ## Constructor
 
 ```js
@@ -101,7 +153,6 @@ Parameters:
 - `props` (Object)
   + `props.id` (String) - an unique id is required for each layer.
   + `props.deck` (`Deck`, optional) - a `Deck` instance that controls the rendering of this layer. If provided, the layer will be looked up from its layer stack by `id` at render time, and all other props are ignored.
-  + `props.viewId` (String, optional) - Provide the `id` of a `MapView` instance to render the Map to (e.g. if using multiple `views` on a `Deck` instance). If it is not provided, the Map will be rendered on a single viewport. If a viewId is not found, nothing will be done to the viewports.
   + `props.type` (`Layer`, optional) - a class that extends deck.gl's base `Layer` class. Required if `deck` is not provided.
   + Optional: any other prop needed by this type of layer. See deck.gl's [layer catalog](/docs/api-reference/layers/README.md) for documentation and examples on how to create layers.
 
