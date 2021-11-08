@@ -19,7 +19,7 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v8.7
 
-### deck.gl [8.7.0-alpha.0] - Nov 8 2021
+### deck.gl [8.7.0-alpha.1] - Nov 8 2021
 - Add missing prop mappings for GeoJsonLayer (#6336)
 - Add `fetchMap` function to carto module (#6341)
 - CARTO: fix layer credentials overwrite (#6349)
