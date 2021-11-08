@@ -17,6 +17,16 @@ Each version should:
 Ref: http://keepachangelog.com/en/0.3.0/
 -->
 
+## deck.gl v8.7
+
+### deck.gl [8.7.0-alpha.0] - Nov 8 2021
+- Add missing prop mappings for GeoJsonLayer (#6336)
+- Add `fetchMap` function to carto module (#6341)
+- CARTO: fix layer credentials overwrite (#6349)
+- Skip rendering out-of-DOM Google Maps (#6340)
+- pydeck: Bump version to 0.7.1 (#6322)
+- Multi-view picking consistency (#6306)
+
 ## deck.gl v8.6
 
 ### deck.gl v8.6 Prereleases
