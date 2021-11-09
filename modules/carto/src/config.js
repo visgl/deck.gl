@@ -14,16 +14,16 @@ let credentials = {};
 
 setDefaultCredentials({});
 
-export function setDefaultCredentials(opts) {
-  const apiVersion = opts.apiVersion || API_VERSIONS.V3;
+export function setDefaultCredentials({apiVersion, ...rest}) {
+  apiVersion = apiVersion || API_VERSIONS.V3;
 
   switch (apiVersion) {
     case API_VERSIONS.V1:
     case API_VERSIONS.V2:
-      credentials = {apiVersion, ...defaultClassicCredentials, ...opts};
+      credentials = {apiVersion, ...defaultClassicCredentials, ...rest};
       break;
     case API_VERSIONS.V3:
-      credentials = {apiVersion, ...defaultCloudNativeCredentials, ...opts};
+      credentials = {apiVersion, ...defaultCloudNativeCredentials, ...rest};
       break;
     default:
       throw new Error(`Invalid API version ${apiVersion}. Use API_VERSIONS enum.`);

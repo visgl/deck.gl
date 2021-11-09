@@ -17,24 +17,26 @@ for (const apiVersion of [API_VERSIONS.V1, API_VERSIONS.V2]) {
   });
 }
 
-test('config#default values v3', t => {
-  setDefaultCredentials({});
+for (const apiVersion of [API_VERSIONS.V3, undefined]) {
+  test(`config#default values ${apiVersion || ''}`, t => {
+    setDefaultCredentials({apiVersion});
 
-  const credentials = getDefaultCredentials();
-  t.notOk(credentials === null, 'default credentials available');
-  t.is(credentials.apiVersion, API_VERSIONS.V3, 'v3 is the default');
-  t.is(
-    credentials.apiBaseUrl,
-    'https://gcp-us-east1.api.carto.com',
-    'us-east1 region is the default'
-  );
-  t.is(credentials.mapsUrl, undefined, 'mapsUrl has no default value');
+    const credentials = getDefaultCredentials();
+    t.notOk(credentials === null, 'default credentials available');
+    t.is(credentials.apiVersion, API_VERSIONS.V3, 'v3 is the default');
+    t.is(
+      credentials.apiBaseUrl,
+      'https://gcp-us-east1.api.carto.com',
+      'us-east1 region is the default'
+    );
+    t.is(credentials.mapsUrl, undefined, 'mapsUrl has no default value');
 
-  setDefaultCredentials({});
-  t.end();
-});
+    setDefaultCredentials({});
+    t.end();
+  });
+}
 
-test('config#setDefaultCredentials', t => {
+test('config#setDefaultCredentials invalid version', t => {
   t.throws(
     () => setDefaultCredentials({apiVersion: -123}),
     /Invalid API version -123/,
