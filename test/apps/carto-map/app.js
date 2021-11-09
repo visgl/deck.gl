@@ -1,15 +1,14 @@
-import {fetchMap, setDefaultCredentials, API_VERSIONS} from '@deck.gl/carto';
+import {fetchMap} from '@deck.gl/carto';
 import {Deck} from '@deck.gl/core';
 import mapboxgl from 'mapbox-gl';
 
-setDefaultCredentials({
-  apiVersion: API_VERSIONS.V3,
-  apiBaseUrl: 'https://gcp-us-east1.api.carto.com'
-});
+// // Simplest instantiation
+// const cartoMapId = 'ff6ac53f-741a-49fb-b615-d040bc5a96b8';
+// fetchMap({cartoMapId}).then(map => new Deck(map));
 
-async function createMap(mapId) {
+async function createMap(cartoMapId) {
   const deck = new Deck({canvas: 'deck-canvas'});
-  const mapConfiguration = {mapId};
+  const mapConfiguration = {cartoMapId};
 
   // Auto-refresh (optional)
   const autoRefresh = true;
@@ -22,7 +21,7 @@ async function createMap(mapId) {
   }
 
   // Get map info from CARTO and update deck
-  const {mapState: initialViewState, mapStyle, layers} = await fetchMap(mapConfiguration);
+  const {initialViewState, mapStyle, layers} = await fetchMap(mapConfiguration);
   deck.setProps({initialViewState, layers});
 
   // Mapbox basemap (optional)
@@ -81,4 +80,5 @@ for (const e of examples) {
 const mapContainer = document.getElementById('container');
 mapContainer.style.height = 'calc(50% - 26px)';
 mapContainer.style.margin = '5px';
+
 createMap(id);

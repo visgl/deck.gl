@@ -20,7 +20,7 @@ export function parseMap(json) {
     description: json.description,
     createdAt: json.createdAt,
     updatedAt: json.updatedAt,
-    mapState,
+    initialViewState: mapState,
     mapStyle,
     layers: extractTextLayers(layers.reverse()).map(({id, type, config, visualChannels}) => {
       log.assert(type in LAYER_MAP, `Unsupported layer type: ${type}`);
