@@ -1,4 +1,4 @@
-# Using deck.gl with ArcGIS
+# ArcGIS
 
 Starting with v8.1, deck.gl has support for ArcGIS with the [@deck.gl/arcgis](/docs/api-reference/arcgis/overview.md) module.
 
