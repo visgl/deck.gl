@@ -1,13 +1,10 @@
-import test from 'tape-catch';
 import {log} from '@deck.gl/core';
 import {testLayer, generateLayerTests} from '@deck.gl/test-utils';
 import {CartoSQLLayer} from '@deck.gl/carto';
-import {mockFetchMapsV2, restoreFetch} from './mock-fetch';
+import {mockedV2Test} from './mock-fetch';
 import {makeSpy} from '@probe.gl/test-utils';
 
-test('CartoSQLLayer', t => {
-  const fetchMock = mockFetchMapsV2();
-
+mockedV2Test('CartoSQLLayer', t => {
   const testCases = generateLayerTests({
     Layer: CartoSQLLayer,
     assert: t.ok,
@@ -15,13 +12,10 @@ test('CartoSQLLayer', t => {
   });
 
   testLayer({Layer: CartoSQLLayer, testCases, onError: t.notOk});
-
-  restoreFetch(fetchMock);
   t.end();
 });
 
-test('CartoSQLLayer#should throw warning message', t => {
-  const fetchMock = mockFetchMapsV2();
+mockedV2Test('CartoSQLLayer#should throw warning message', t => {
   makeSpy(log, 'warn');
 
   const testCases = [
@@ -38,6 +32,5 @@ test('CartoSQLLayer#should throw warning message', t => {
   testLayer({Layer: CartoSQLLayer, testCases, onError: t.notOk});
 
   log.warn.restore();
-  restoreFetch(fetchMock);
   t.end();
 });

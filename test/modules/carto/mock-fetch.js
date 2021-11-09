@@ -1,4 +1,5 @@
 /* global global, window */
+import test from 'tape-catch';
 const _global = typeof global !== 'undefined' ? global : window;
 
 export const TILEJSON_RESPONSE = {
@@ -85,4 +86,10 @@ export function mockFetchMapsV3() {
 
 export function restoreFetch(fetch) {
   _global.fetch = fetch;
+}
+
+export function mockedV2Test(name, testFunc) {
+  const fetchMock = mockFetchMapsV2();
+  test(name, testFunc);
+  restoreFetch(fetchMock);
 }
