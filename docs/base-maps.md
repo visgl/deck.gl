@@ -1,8 +1,11 @@
-# Suppported Base Maps
+# Base Maps
 
-While deck.gl works independently without any map component, when visualizing geospatial datasets, a base map can offer the invaluable context for understanding the overlay layers.
+While deck.gl works independently without any map component, when visualizing geospatial datasets, a base map can offer invaluable context for understanding the overlay layers.
+
+## Base Maps Renderers
 
 deck.gl has been designed to work in tandem with popular JavaScript base map providers. Depending on your tech stack, deck.gl's support for a particular base map solution may come with different level of compatibility and limitations.
+
 
 There are two types of integration between deck.gl and a base map renderer:
 
