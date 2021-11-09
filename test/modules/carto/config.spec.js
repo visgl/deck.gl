@@ -1,19 +1,21 @@
 import test from 'tape-catch';
 import {getDefaultCredentials, setDefaultCredentials, API_VERSIONS} from '@deck.gl/carto';
 
-test('config#default values v2', t => {
-  setDefaultCredentials({apiVersion: API_VERSIONS.V2});
+for (const apiVersion of [API_VERSIONS.V1, API_VERSIONS.V2]) {
+  test(`config#default values ${apiVersion}`, t => {
+    setDefaultCredentials({apiVersion});
 
-  const credentials = getDefaultCredentials();
-  t.notOk(credentials === null, 'default credentials available');
-  t.is(credentials.apiVersion, API_VERSIONS.V2, 'version is retained');
-  t.is(credentials.apiKey, 'default_public', 'default_public is the default apiKey');
-  t.is(credentials.username, 'public', 'public is the default username');
-  t.is(credentials.region, 'us', 'us region is the default');
-  t.is(credentials.mapsUrl, undefined, 'mapsUrl has no default value');
-  setDefaultCredentials({});
-  t.end();
-});
+    const credentials = getDefaultCredentials();
+    t.notOk(credentials === null, 'default credentials available');
+    t.is(credentials.apiVersion, apiVersion, 'version is retained');
+    t.is(credentials.apiKey, 'default_public', 'default_public is the default apiKey');
+    t.is(credentials.username, 'public', 'public is the default username');
+    t.is(credentials.region, 'us', 'us region is the default');
+    t.is(credentials.mapsUrl, undefined, 'mapsUrl has no default value');
+    setDefaultCredentials({});
+    t.end();
+  });
+}
 
 test('config#default values v3', t => {
   setDefaultCredentials({});
