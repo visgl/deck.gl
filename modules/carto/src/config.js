@@ -1,16 +1,13 @@
-import {API_VERSIONS, DEFAULT_MAPS_URL_FORMAT} from './api/maps-api-common';
+import {API_VERSIONS} from './api/maps-api-common';
 
 export const defaultClassicCredentials = {
-  username: 'public',
   apiKey: 'default_public',
   region: 'us',
-  mapsUrl: null
+  username: 'public'
 };
 
-const defaultCloudNativeCredentials = {
-  accessToken: null,
-  apiBaseUrl: null,
-  mapsUrl: null
+export const defaultCloudNativeCredentials = {
+  apiBaseUrl: 'https://gcp-us-east1.api.carto.com'
 };
 
 let credentials = {};
@@ -18,43 +15,15 @@ let credentials = {};
 setDefaultCredentials({});
 
 export function setDefaultCredentials(opts) {
-  const apiVersion = opts.apiVersion || API_VERSIONS.V2;
+  const apiVersion = opts.apiVersion || API_VERSIONS.V3;
 
   switch (apiVersion) {
     case API_VERSIONS.V1:
-      opts.mapsUrl = opts.mapsUrl || DEFAULT_MAPS_URL_FORMAT[apiVersion];
-      credentials = {
-        apiVersion,
-        ...defaultClassicCredentials,
-        ...opts
-      };
-      break;
-
     case API_VERSIONS.V2:
-      opts.mapsUrl = opts.mapsUrl || DEFAULT_MAPS_URL_FORMAT[apiVersion];
-      credentials = {
-        apiVersion,
-        ...defaultClassicCredentials,
-        ...opts
-      };
-
+      credentials = {apiVersion, ...defaultClassicCredentials, ...opts};
       break;
     case API_VERSIONS.V3:
-      if (!opts.apiBaseUrl) {
-        throw new Error(
-          `API version ${
-            API_VERSIONS.V3
-          } requires to define apiBaseUrl at credentials. Go to https://app.carto.com to get your apiBaseUrl.`
-        );
-      }
-
-      const apiBaseUrl = opts.apiBaseUrl || defaultCloudNativeCredentials.apiBaseUrl;
-      opts.mapsUrl = opts.mapsUrl || buildMapsUrlFromBase(apiBaseUrl);
-      credentials = {
-        apiVersion,
-        ...defaultCloudNativeCredentials,
-        ...opts
-      };
+      credentials = {apiVersion, ...defaultCloudNativeCredentials, ...opts};
       break;
     default:
       throw new Error(`Invalid API version ${apiVersion}. Use API_VERSIONS enum.`);

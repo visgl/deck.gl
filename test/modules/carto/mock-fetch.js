@@ -1,5 +1,6 @@
 /* global global, window */
 import test from 'tape-catch';
+import {API_VERSIONS, setDefaultCredentials} from '@deck.gl/carto';
 const _global = typeof global !== 'undefined' ? global : window;
 
 export const TILEJSON_RESPONSE = {
@@ -41,6 +42,7 @@ function mockFetchMapsV1() {
 
 function mockFetchMapsV2() {
   const fetch = _global.fetch;
+
   _global.fetch = url => {
     return Promise.resolve({
       json: () => TILEJSON_RESPONSE,
@@ -100,6 +102,7 @@ export function mockedV1Test(name, testFunc) {
 export function mockedV2Test(name, testFunc) {
   test(name, async t => {
     const fetchMock = mockFetchMapsV2();
+    setDefaultCredentials({apiVersion: API_VERSIONS.V2});
     await testFunc(t);
     restoreFetch(fetchMock);
     t.end();

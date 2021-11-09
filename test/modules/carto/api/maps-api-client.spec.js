@@ -136,18 +136,6 @@ test('getData#parameters', async t => {
 
   try {
     await getData({
-      ...params,
-      credentials: {
-        apiVersion: API_VERSIONS.V3
-      }
-    });
-    t.fail('it should throw an error');
-  } catch (e) {
-    t.is(e.message, 'Must define apiBaseUrl', 'should throw when no apiBaseUrl');
-  }
-
-  try {
-    await getData({
       type: MAP_TYPES.TABLE,
       connection: 'connection_name',
       source: 'table',
