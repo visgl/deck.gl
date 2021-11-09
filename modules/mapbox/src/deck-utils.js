@@ -8,9 +8,9 @@ export function getDeckInstance({map, gl, deck}) {
 
   const customRender = deck && deck.props._customRender;
 
-  if (deck.props.views && !deck.props.views.some(view => view.id === 'mapbox')) {
+  if (deck && deck.props.views && !deck.props.views.some(view => view.id === 'mapbox')) {
     // Add mapbox view to the bottom of teh stack if it is missing.
-    deck.views.unshift(new MapView({id: 'mapbox'}));
+    deck.props.views.unshift(new MapView({id: 'mapbox'}));
   }
 
   const deckProps = {
@@ -34,7 +34,7 @@ export function getDeckInstance({map, gl, deck}) {
       isExternal: false,
       mapboxLayers: new Set()
     },
-    views: deck.props.views || [new MapView({id: 'mapbox'})]
+    views: (deck && deck.props.views) || [new MapView({id: 'mapbox'})]
   };
 
   if (deck) {
