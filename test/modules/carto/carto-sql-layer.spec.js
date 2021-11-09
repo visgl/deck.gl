@@ -12,7 +12,6 @@ mockedV2Test('CartoSQLLayer', t => {
   });
 
   testLayer({Layer: CartoSQLLayer, testCases, onError: t.notOk});
-  t.end();
 });
 
 mockedV2Test('CartoSQLLayer#should throw warning message', t => {
@@ -32,5 +31,4 @@ mockedV2Test('CartoSQLLayer#should throw warning message', t => {
   testLayer({Layer: CartoSQLLayer, testCases, onError: t.notOk});
 
   log.warn.restore();
-  t.end();
 });

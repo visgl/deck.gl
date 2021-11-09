@@ -29,7 +29,7 @@ export const MAPS_API_V1_RESPONSE = {
   }
 };
 
-export function mockFetchMapsV1() {
+function mockFetchMapsV1() {
   const fetch = _global.fetch;
   _global.fetch = url =>
     Promise.resolve({
@@ -39,7 +39,7 @@ export function mockFetchMapsV1() {
   return fetch;
 }
 
-export function mockFetchMapsV2() {
+function mockFetchMapsV2() {
   const fetch = _global.fetch;
   _global.fetch = url => {
     return Promise.resolve({
@@ -88,8 +88,19 @@ export function restoreFetch(fetch) {
   _global.fetch = fetch;
 }
 
+export function mockedV1Test(name, testFunc) {
+  test(name, async t => {
+    const fetchMock = mockFetchMapsV1();
+    await testFunc(t);
+    restoreFetch(fetchMock);
+    t.end();
+  });
+}
 export function mockedV2Test(name, testFunc) {
-  const fetchMock = mockFetchMapsV2();
-  test(name, testFunc);
-  restoreFetch(fetchMock);
+  test(name, async t => {
+    const fetchMock = mockFetchMapsV2();
+    await testFunc(t);
+    restoreFetch(fetchMock);
+    t.end();
+  });
 }
