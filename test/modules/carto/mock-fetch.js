@@ -50,7 +50,7 @@ function mockFetchMapsV2() {
   return fetch;
 }
 
-export function mockFetchMapsV3() {
+function mockFetchMapsV3() {
   const fetch = _global.fetch;
   _global.fetch = url => {
     return Promise.resolve({
@@ -96,9 +96,19 @@ export function mockedV1Test(name, testFunc) {
     t.end();
   });
 }
+
 export function mockedV2Test(name, testFunc) {
   test(name, async t => {
     const fetchMock = mockFetchMapsV2();
+    await testFunc(t);
+    restoreFetch(fetchMock);
+    t.end();
+  });
+}
+
+export function mockedV3Test(name, testFunc) {
+  test(name, async t => {
+    const fetchMock = mockFetchMapsV3();
     await testFunc(t);
     restoreFetch(fetchMock);
     t.end();
