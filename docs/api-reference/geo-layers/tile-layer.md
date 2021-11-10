@@ -202,7 +202,7 @@ This prop accepts one of the following:
 
 ##### custom strategy
 
-Apps may defin a custom `refinementStrategy` by supplying its own callback function. The function will be called frequently on every viewport update and every tile loaded event.
+Apps may define a custom `refinementStrategy` by supplying its own callback function. The function will be called frequently on every viewport update and every tile loaded event.
 
 When called, the function receives an array of `Tile` instances representing every tile that is currently in the cache. Each tile is populated with the following properties:
   - `x` (Number) - x index of the tile
