@@ -187,15 +187,34 @@ The maximum memory used for caching tiles. If this limit is supplied, `getTileDa
 - Default: `null`
 
 
-##### `refinementStrategy` (Enum, optional)
+##### `refinementStrategy` (String|Function, optional)
 
-How the tile layer refines the visibility of tiles. One of the following:
+How the tile layer refines the visibility of tiles. When zooming in and out, if the layer only shows tiles from the current zoom level, then the user may observe undesirable flashing while new data is loading. By setting `refinementStrategy` the layer can attempt to maintain visual continuity by displaying cached data from a different zoom level before data is available.
+
+This prop accepts one of the following:
 
 * `'best-available'`: If a tile in the current viewport is waiting for its data to load, use cached content from the closest zoom level to fill the empty space. This approach minimizes the visual flashing due to missing content.
 * `'no-overlap'`: Avoid showing overlapping tiles when backfilling with cached content. This is usually favorable when tiles do not have opaque backgrounds.
 * `'never'`: Do not display any tile that is not selected.
+* A custom function. See "custom strategy" below.
 
 - Default: `'best-available'`
+
+##### custom strategy
+
+Apps may defin a custom `refinementStrategy` by supplying its own callback function. The function will be called frequently on every viewport update and every tile loaded event.
+
+When called, the function receives an array of `Tile` instances representing every tile that is currently in the cache. Each tile is populated with the following properties:
+  - `x` (Number) - x index of the tile
+  - `y` (Number) - y index of the tile
+  - `z` (Number) - z index of the tile
+  - `parent` (Tile) - the parent tile (a tile on `z-1` that contains this tile), if present in the cache
+  - `children` (Tile[]) - the sub tiles (tiles on `z+1` that are contained by this tile), if present in the cache
+  - `isSelected` (Boolean) - if the tile is expected to show up in the current viewport
+  - `isVisible` (Boolean) - if the tile should be rendered
+  - `isLoaded` (Boolean) - if the content of the tile has been loaded
+
+The callback is an opportunity to manipulate `isVisible` before sub layers are rendered. `isVisible` is initially set to the value to `isSelected` (equivalent to `refinementStrategy: 'never'`).
 
 ##### `maxRequests` (Number, optional)
 
