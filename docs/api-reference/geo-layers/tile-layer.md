@@ -204,17 +204,7 @@ This prop accepts one of the following:
 
 Apps may define a custom `refinementStrategy` by supplying its own callback function. The function will be called frequently on every viewport update and every tile loaded event.
 
-When called, the function receives an array of `Tile` instances representing every tile that is currently in the cache. Each tile is populated with the following properties:
-  - `x` (Number) - x index of the tile
-  - `y` (Number) - y index of the tile
-  - `z` (Number) - z index of the tile
-  - `parent` (Tile) - the parent tile (a tile on `z-1` that contains this tile), if present in the cache
-  - `children` (Tile[]) - the sub tiles (tiles on `z+1` that are contained by this tile), if present in the cache
-  - `isSelected` (Boolean) - if the tile is expected to show up in the current viewport
-  - `isVisible` (Boolean) - if the tile should be rendered
-  - `isLoaded` (Boolean) - if the content of the tile has been loaded
-
-The callback is an opportunity to manipulate `isVisible` before sub layers are rendered. `isVisible` is initially set to the value to `isSelected` (equivalent to `refinementStrategy: 'never'`).
+When called, the function receives an array of [Tile](#tile) instances representing every tile that is currently in the cache. It is an opportunity to manipulate `tile.isVisible` before sub layers are rendered. `isVisible` is initially set to the value of `isSelected` (equivalent to `refinementStrategy: 'never'`).
 
 ##### `maxRequests` (Number, optional)
 
@@ -311,6 +301,11 @@ Properties:
 - `bbox` (Object) - bounding box of the tile. When used with a geospatial view, `bbox` is in the shape of `{west: <longitude>, north: <latitude>, east: <longitude>, south: <latitude>}`. When used with a non-geospatial view, `bbox` is in the shape of `{left, top, right, bottom}`.
 - `content` (Object) - the tile's cached content. `null` if the tile's initial load is pending, cancelled, or encountered an error.
 - `data` (Object|Promise) - the tile's requested content. If the tile is loading, returns a Promise that resolves to the loaded content when loading is completed.
+- `parent` (Tile) - the nearest ancestor tile (a tile on a lower `z` that contains this tile), if present in the cache
+- `children` (Tile[]) - the nearest sub tiles (tiles on higher `z` that are contained by this tile), if present in the cache
+- `isSelected` (Boolean) - if the tile is expected to show up in the current viewport
+- `isVisible` (Boolean) - if the tile should be rendered
+- `isLoaded` (Boolean) - if the content of the tile has been loaded
 
 ## Source
 
