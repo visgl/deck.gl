@@ -3,6 +3,8 @@ import Controller from './controller';
 import {OrbitState} from './orbit-controller';
 
 class OrthographicState extends OrbitState {
+  zoomAxis: 'X' | 'Y' | 'all';
+
   constructor(props) {
     super(props);
 
@@ -67,7 +69,7 @@ export default class OrthographicController extends Controller {
     return false;
   }
 
-  get linearTransitionProps() {
+  get linearTransitionProps(): string[] | null {
     return ['target', 'zoom'];
   }
 }
