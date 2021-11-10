@@ -4,8 +4,8 @@ import {RequestScheduler} from '@loaders.gl/loader-utils';
 import {Matrix4} from 'math.gl';
 
 // bit masks
-const TILE_STATE_HIDDEN = 0;
-const TILE_STATE_VISIBLE = 1;
+const TILE_STATE_VISITED = 1;
+const TILE_STATE_VISIBLE = 2;
 /*
    show cached parent tile if children are loading
    +-----------+       +-----+            +-----+-----+
@@ -24,7 +24,6 @@ const TILE_STATE_VISIBLE = 1;
    +-------+----  -->  |
    |       |           |
  */
-const TILE_STATE_DESIRABLE = 2;
 
 export const STRATEGY_NEVER = 'never';
 export const STRATEGY_REPLACE = 'no-overlap';
@@ -364,17 +363,32 @@ export default class Tileset2D {
 }
 
 /* -- Refinement strategies --*/
+/* eslint-disable max-depth */
 
 // For all the selected && pending tiles:
 // - pick the closest ancestor as placeholder
 // - if no ancestor is visible, pick the closest children as placeholder
 function updateTileStateDefault(allTiles) {
   for (const tile of allTiles) {
-    tile.state = tile.isSelected ? TILE_STATE_DESIRABLE | TILE_STATE_VISIBLE : TILE_STATE_HIDDEN;
+    tile.state = 0;
   }
   for (const tile of allTiles) {
-    if (tile.isSelected && !getPlaceholderInAncestors(tile)) {
-      getPlaceholderInChildren(tile);
+    if (tile.isSelected) {
+      // Walk up the tree until we find one ancestor that is loaded
+      let needsPlaceholder = true;
+      let t = tile;
+      while (t) {
+        t.state |= TILE_STATE_VISIBLE; // set the visible flag
+        if (t.isLoaded) {
+          needsPlaceholder = false;
+          break;
+        }
+        t = t.parent;
+      }
+
+      if (needsPlaceholder) {
+        getPlaceholderInChildren(tile);
+      }
     }
   }
   for (const tile of allTiles) {
@@ -382,51 +396,43 @@ function updateTileStateDefault(allTiles) {
   }
 }
 
-/* eslint-disable max-depth */
 // Until a selected tile and all its selected siblings are loaded, use the closest ancestor as placeholder
 function updateTileStateReplace(allTiles) {
   for (const tile of allTiles) {
-    tile.state = tile.isSelected ? TILE_STATE_DESIRABLE | TILE_STATE_VISIBLE : TILE_STATE_HIDDEN;
+    tile.state = 0;
   }
   for (const tile of allTiles) {
     if (tile.isSelected) {
-      getPlaceholderInAncestors(tile);
-    }
-  }
-  const sortedTiles = Array.from(allTiles).sort((t1, t2) => t1.z - t2.z);
-
-  for (const tile of sortedTiles) {
-    tile.isVisible = tile.state & TILE_STATE_VISIBLE;
-    if (tile.state & TILE_STATE_DESIRABLE) {
-      if (tile.isLoaded || !tile.isVisible) {
-        for (const child of tile.children) {
-          child.state &= TILE_STATE_DESIRABLE;
+      let needsPlaceholder = true;
+      let t = tile;
+      while (t) {
+        if (!needsPlaceholder) {
+          t.state &= ~TILE_STATE_VISIBLE; // Hide all ancestors of a loaded tile
+        } else if (!t.state) {
+          t.state |= TILE_STATE_VISIBLE; // if the ancestor has not been visited, mark it visible
         }
-      } else if (tile.isSelected) {
+        t.state |= TILE_STATE_VISITED; // set the visited flag
+
+        if (t.isLoaded) {
+          needsPlaceholder = false;
+        }
+        t = t.parent;
+      }
+
+      if (needsPlaceholder) {
         getPlaceholderInChildren(tile);
       }
     }
   }
-}
-
-// Walk up the tree until we find one ancestor that is loaded. Returns true if successful.
-function getPlaceholderInAncestors(tile) {
-  while (tile) {
-    if (tile.isLoaded) {
-      return true;
-    }
-    if (tile.parent) {
-      tile.parent.state |= TILE_STATE_DESIRABLE | TILE_STATE_VISIBLE;
-    }
-    tile = tile.parent;
+  for (const tile of allTiles) {
+    tile.isVisible = Boolean(tile.state & TILE_STATE_VISIBLE);
   }
-  return false;
 }
 
 // Recursively set children as placeholder
 function getPlaceholderInChildren(tile) {
   for (const child of tile.children) {
-    child.state |= TILE_STATE_DESIRABLE | TILE_STATE_VISIBLE;
+    child.state |= TILE_STATE_VISIBLE; // set the visible flag
     if (!child.isLoaded) {
       getPlaceholderInChildren(child);
     }
