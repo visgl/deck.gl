@@ -1,5 +1,5 @@
 import test from 'tape-catch';
-import VISCONFIG_DATA from '../data/visConfig.json';
+import VISSTATE_DATA from '../data/visState.json';
 import {parseMap} from '@deck.gl/carto/api/parseMap';
 
 const METADATA = {
@@ -47,13 +47,13 @@ test('parseMap#metadata', t => {
   t.end();
 });
 
-for (const {title, visConfig, layers} of VISCONFIG_DATA) {
-  test(`parseMap#visConfig ${title}`, t => {
+for (const {title, visState, layers} of VISSTATE_DATA) {
+  test(`parseMap#visState ${title}`, t => {
     const json = {
       ...METADATA,
       keplerMapConfig: {
         ...EMPTY_KEPLER_MAP_CONFIG,
-        visConfig
+        visState
       }
     };
     const map = parseMap(json);
