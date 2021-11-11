@@ -21,6 +21,11 @@ const EMPTY_KEPLER_MAP_CONFIG = {
   }
 };
 
+const DATASET = {
+  id: 'DATA_ID',
+  data: {type: 'FeatureCollection', features: []}
+};
+
 test('parseMap#invalid version', t => {
   const json = {
     ...METADATA,
@@ -51,13 +56,26 @@ for (const {title, visState, layers} of VISSTATE_DATA) {
   test(`parseMap#visState ${title}`, t => {
     const json = {
       ...METADATA,
-      keplerMapConfig: {
-        ...EMPTY_KEPLER_MAP_CONFIG,
-        visState
-      }
+      datasets: [DATASET],
+      keplerMapConfig: {version: 'v1', config: {visState}}
     };
     const map = parseMap(json);
-    t.deepEquals(map.layers, layers, 'Layers are correctly instantiated');
+
+    const names = map.layers.map(layer => layer.toString());
+    t.deepEquals(names, layers.map(l => l.name), 'Layers have correct types');
+
+    // Get all non-dynamic props to compare
+    const props = map.layers.map(layer => {
+      const layerProps = {...layer.props};
+      for (const [key, value] of Object.entries(layerProps)) {
+        if (typeof value === 'function') {
+          delete layerProps[key];
+        }
+      }
+      return layerProps;
+    });
+
+    t.deepEquals(props, layers.map(l => l.props), 'Layers are correctly instantiated');
     t.end();
   });
 }
