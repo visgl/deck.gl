@@ -177,7 +177,7 @@ export default class DeckPicker {
 
     let infos;
     const result = [];
-    const affectedLayers = {};
+    const affectedLayers = new Set();
 
     for (let i = 0; i < depth; i++) {
       const pickedResult =
@@ -222,10 +222,9 @@ export default class DeckPicker {
       // Only exclude if we need to run picking again.
       // We need to run picking again if an object is detected AND
       // we have not exhausted the requested depth.
-      if (pickInfo.pickedColor && i + 1 < depth) {
-        const layerId = pickInfo.pickedColor[3] - 1;
-        affectedLayers[layerId] = true;
-        layers[layerId].disablePickingIndex(pickInfo.pickedObjectIndex);
+      if (pickInfo.pickedLayer && i + 1 < depth) {
+        affectedLayers.add(pickInfo.pickedLayer);
+        pickInfo.pickedLayer.disablePickingIndex(pickInfo.pickedObjectIndex);
       }
 
       // This logic needs to run even if no object is picked.
@@ -254,8 +253,8 @@ export default class DeckPicker {
     }
 
     // reset only affected buffers
-    for (const layerId in affectedLayers) {
-      layers[layerId].restorePickingColors();
+    for (const layer of affectedLayers) {
+      layer.restorePickingColors();
     }
 
     return {result, emptyInfo: infos && infos.get(null)};
