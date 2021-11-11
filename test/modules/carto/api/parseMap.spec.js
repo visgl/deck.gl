@@ -1,4 +1,5 @@
 import test from 'tape-catch';
+import VISCONFIG_DATA from '../data/visConfig.json';
 import {parseMap} from '@deck.gl/carto/api/parseMap';
 
 const METADATA = {
@@ -19,18 +20,6 @@ const EMPTY_KEPLER_MAP_CONFIG = {
     }
   }
 };
-
-// const TESTS = [
-//   {
-//     title: 'point',
-//     json: {},
-//     layers: []
-//     ]
-//   }
-// ];
-//
-// for (const {title, json, layers} of TESTS) {
-// }
 
 test('parseMap#invalid version', t => {
   const json = {
@@ -57,3 +46,18 @@ test('parseMap#metadata', t => {
   t.deepEquals(mapStyle, 'MAP_STYLE', 'Map style is passed through');
   t.end();
 });
+
+for (const {title, visConfig, layers} of VISCONFIG_DATA) {
+  test(`parseMap#visConfig ${title}`, t => {
+    const json = {
+      ...METADATA,
+      keplerMapConfig: {
+        ...EMPTY_KEPLER_MAP_CONFIG,
+        visConfig
+      }
+    };
+    const map = parseMap(json);
+    t.deepEquals(map.layers, layers, 'Layers are correctly instantiated');
+    t.end();
+  });
+}
