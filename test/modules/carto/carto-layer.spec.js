@@ -1,10 +1,9 @@
-import test from 'tape-catch';
 import {testLayerAsync} from '@deck.gl/test-utils';
 import {makeSpy} from '@probe.gl/test-utils';
 import {CartoLayer, API_VERSIONS, MAP_TYPES} from '@deck.gl/carto';
 import {MVTLayer} from '@deck.gl/geo-layers';
 import {GeoJsonLayer} from '@deck.gl/layers';
-import {mockFetchMapsV2, mockFetchMapsV1, mockFetchMapsV3, restoreFetch} from './mock-fetch';
+import {mockedV1Test, mockedV2Test, mockedV3Test} from './mock-fetch';
 
 const CREDENTIALS_V3 = {
   apiVersion: API_VERSIONS.V3,
@@ -12,9 +11,7 @@ const CREDENTIALS_V3 = {
   accessToken: 'XXX'
 };
 
-test('CartoLayer#v2', async t => {
-  const fetchMock = mockFetchMapsV2();
-
+mockedV2Test('CartoLayer#v2', async t => {
   const onAfterUpdate = ({layer, subLayers, subLayer}) => {
     const {data} = layer.state;
     if (!data) {
@@ -49,13 +46,10 @@ test('CartoLayer#v2', async t => {
     ]
   });
 
-  restoreFetch(fetchMock);
   spy.restore();
-  t.end();
 });
 
-test('CartoLayer#v3', async t => {
-  const fetchMock = mockFetchMapsV3();
+mockedV3Test('CartoLayer#v3', async t => {
   const spy = makeSpy(MVTLayer.prototype, 'getTileData');
   spy.returns([]);
 
@@ -112,15 +106,10 @@ test('CartoLayer#v3', async t => {
     ]
   });
 
-  restoreFetch(fetchMock);
   spy.restore();
-
-  t.end();
 });
 
-test('CartoLayer#should throw with invalid params for v1 and v2', t => {
-  const fetchMock = mockFetchMapsV1();
-
+mockedV1Test('CartoLayer#should throw with invalid params for v1 and v2', t => {
   const layer = new CartoLayer();
 
   const TEST_CASES = [
@@ -207,14 +196,9 @@ test('CartoLayer#should throw with invalid params for v1 and v2', t => {
   TEST_CASES.forEach(c => {
     t.throws(() => layer._checkProps(c.props), c.regex, c.title);
   });
-
-  restoreFetch(fetchMock);
-
-  t.end();
 });
 
-test('CartoLayer#should throw with invalid params for v3', t => {
-  const fetchMock = mockFetchMapsV1();
+mockedV1Test('CartoLayer#should throw with invalid params for v3', t => {
   const layer = new CartoLayer();
 
   const TEST_CASES = [
@@ -263,15 +247,9 @@ test('CartoLayer#should throw with invalid params for v3', t => {
   TEST_CASES.forEach(c => {
     t.throws(() => layer._checkProps(c.props), c.regex, c.title);
   });
-
-  restoreFetch(fetchMock);
-
-  t.end();
 });
 
-test('CartoLayer#_updateData executed when props changes', async t => {
-  const fetchMock = mockFetchMapsV3();
-
+mockedV3Test('CartoLayer#_updateData executed when props changes', async t => {
   const testCases = [
     {
       spies: ['_updateData'],
@@ -372,15 +350,9 @@ test('CartoLayer#_updateData executed when props changes', async t => {
   ];
 
   await testLayerAsync({Layer: CartoLayer, testCases, onError: t.notOk});
-
-  restoreFetch(fetchMock);
-
-  t.end();
 });
 
-test('CartoSQLLayer#onDataLoad', async t => {
-  const fetchMock = mockFetchMapsV3();
-
+mockedV3Test('CartoSQLLayer#onDataLoad', async t => {
   const spy = makeSpy(MVTLayer.prototype, 'getTileData');
   spy.returns([]);
 
@@ -418,7 +390,4 @@ test('CartoSQLLayer#onDataLoad', async t => {
   await testLayerAsync({Layer: CartoLayer, testCases, onError: t.notOk});
 
   spy.restore();
-  t.end();
-
-  restoreFetch(fetchMock);
 });

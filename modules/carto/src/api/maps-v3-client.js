@@ -268,10 +268,14 @@ async function fillInMapDatasets({datasets, publicToken}) {
   return await Promise.all(promises);
 }
 
-export async function fetchMap({mapId, credentials, autoRefresh, onNewData}) {
-  const localCreds = {...getDefaultCredentials(), ...credentials};
+export async function fetchMap({cartoMapId, credentials, autoRefresh, onNewData}) {
+  const defaultCredentials = getDefaultCredentials();
+  const localCreds = {
+    ...(defaultCredentials.apiVersion === API_VERSIONS.V3 && defaultCredentials),
+    ...credentials
+  };
 
-  log.assert(mapId, 'Must define map id');
+  log.assert(cartoMapId, `Must define CARTO map id: fetchMap({cartoMapId: 'XXXX-XXXX-XXXX'})`);
 
   log.assert(localCreds.apiVersion === API_VERSIONS.V3, 'Method only available for v3');
   log.assert(localCreds.apiBaseUrl, 'Must define apiBaseUrl');
@@ -285,7 +289,7 @@ export async function fetchMap({mapId, credentials, autoRefresh, onNewData}) {
     log.assert(autoRefresh > 0, '`autoRefresh` must be a positive number');
   }
 
-  const url = `${localCreds.mapsUrl}/public/${mapId}`;
+  const url = `${localCreds.mapsUrl}/public/${cartoMapId}`;
   const map = await request({url});
 
   // Periodically check if the data has changed. Note that this

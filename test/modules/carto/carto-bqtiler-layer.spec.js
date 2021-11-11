@@ -1,13 +1,10 @@
-import test from 'tape-catch';
 import {testLayer, generateLayerTests} from '@deck.gl/test-utils';
 import {CartoBQTilerLayer} from '@deck.gl/carto';
-import {mockFetchMapsV2, restoreFetch} from './mock-fetch';
+import {mockedV2Test} from './mock-fetch';
 import {makeSpy} from '@probe.gl/test-utils';
 import {log} from '@deck.gl/core';
 
-test('CartoBQTilerLayer', t => {
-  const fetchMock = mockFetchMapsV2();
-
+mockedV2Test('CartoBQTilerLayer', t => {
   const testCases = generateLayerTests({
     Layer: CartoBQTilerLayer,
     assert: t.ok,
@@ -15,13 +12,9 @@ test('CartoBQTilerLayer', t => {
   });
 
   testLayer({Layer: CartoBQTilerLayer, testCases, onError: t.notOk});
-
-  restoreFetch(fetchMock);
-  t.end();
 });
 
-test('CartoBQTilerLayer#should throw warning message', t => {
-  const fetchMock = mockFetchMapsV2();
+mockedV2Test('CartoBQTilerLayer#should throw warning message', t => {
   makeSpy(log, 'warn');
 
   const testCases = [
@@ -38,6 +31,4 @@ test('CartoBQTilerLayer#should throw warning message', t => {
   testLayer({Layer: CartoBQTilerLayer, testCases, onError: t.notOk});
 
   log.warn.restore();
-  restoreFetch(fetchMock);
-  t.end();
 });
