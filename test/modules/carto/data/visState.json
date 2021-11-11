@@ -663,5 +663,124 @@
         }
       }
     ]
+  },
+  {
+    "title": "Polygon tileset",
+    "visState": {
+      "layers": [
+        {
+          "id": "3btkipv",
+          "type": "mvt",
+          "config": {
+            "color": [18, 147, 154],
+            "label": "Layer 1",
+            "dataId": "DATA_TILESET_ID",
+            "hidden": false,
+            "columns": {},
+            "isVisible": true,
+            "textLabel": [
+              {
+                "size": 18,
+                "color": [255, 255, 255],
+                "field": null,
+                "anchor": "start",
+                "offset": [0, 0],
+                "alignment": "center"
+              }
+            ],
+            "visConfig": {
+              "filled": true,
+              "radius": 10,
+              "opacity": 0.8,
+              "stroked": false,
+              "enable3d": false,
+              "sizeRange": [0, 10],
+              "thickness": 0.5,
+              "wireframe": false,
+              "colorRange": {
+                "name": "Global Warming",
+                "type": "sequential",
+                "colors": ["#5A1846", "#900C3F", "#C70039", "#E3611C", "#F1920E", "#FFC300"],
+                "category": "Uber"
+              },
+              "heightRange": [0, 500],
+              "radiusRange": [0, 50],
+              "strokeColor": [221, 178, 124],
+              "strokeOpacity": 0.8,
+              "elevationScale": 5,
+              "strokeColorRange": {
+                "name": "Global Warming",
+                "type": "sequential",
+                "colors": ["#5A1846", "#900C3F", "#C70039", "#E3611C", "#F1920E", "#FFC300"],
+                "category": "Uber"
+              }
+            },
+            "highlightColor": [252, 242, 26, 255]
+          },
+          "visualChannels": {
+            "sizeField": null,
+            "sizeScale": "linear",
+            "colorField": {"name": "ATTRIBUTE_NAME", "type": "string"},
+            "colorScale": "ordinal",
+            "heightField": null,
+            "heightScale": "linear",
+            "radiusField": null,
+            "radiusScale": "linear",
+            "strokeColorField": null,
+            "strokeColorScale": "quantile"
+          }
+        }
+      ],
+      "filters": [],
+      "splitMaps": [],
+      "layerBlending": "normal",
+      "animationConfig": {"speed": 1, "currentTime": null},
+      "interactionConfig": {
+        "brush": {"size": 0.5, "enabled": false},
+        "tooltip": {
+          "enabled": true,
+          "compareMode": false,
+          "compareType": "absolute",
+          "fieldsToShow": {
+            "4eebbc75-4331-409e-8c71-16ed67429177": [
+              {"name": "geoid", "format": null},
+              {"name": "construction_date", "format": null},
+              {"name": "current_use", "format": null},
+              {"name": "number_floors_above_ground", "format": null}
+            ]
+          }
+        },
+        "geocoder": {"enabled": false},
+        "coordinate": {"enabled": false}
+      }
+    },
+    "layers": [
+      {
+        "name": "MVTLayer({id: '3btkipv'})",
+        "props": {
+          "id": "3btkipv",
+          "data": "DATA_TILESET",
+          "lineMiterLimit": 2,
+          "lineWidthUnits": "pixels",
+          "pointRadiusScale": 0.3,
+          "pointRadiusUnits": "pixels",
+          "rounded": true,
+          "wrapLongitude": false,
+          "lineWidthScale": 2,
+          "autoHighlight": true,
+          "pickable": true,
+          "visible": true,
+          "extruded": false,
+          "filled": true,
+          "opacity": 0.8,
+          "getLineColor": [221, 178, 124],
+          "stroked": false,
+          "getLineWidth": 0.5,
+          "getPointRadius": 10,
+          "wireframe": false,
+          "highlightColor": [252, 242, 26, 255]
+        }
+      }
+    ]
   }
 ]

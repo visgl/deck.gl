@@ -21,10 +21,29 @@ const EMPTY_KEPLER_MAP_CONFIG = {
   }
 };
 
-const DATASET = {
-  id: 'DATA_ID',
-  data: {type: 'FeatureCollection', features: []}
-};
+const DATASETS = [
+  {
+    id: 'DATA_ID',
+    data: {type: 'FeatureCollection', features: []}
+  },
+  {
+    id: 'DATA_TILESET_ID',
+    data: {
+      tilestats: {
+        layers: [
+          {
+            attributes: [
+              {
+                attribute: 'ATTRIBUTE_NAME',
+                categories: [{category: '1'}, {category: '2'}, {category: '3'}]
+              }
+            ]
+          }
+        ]
+      }
+    }
+  }
+];
 
 test('parseMap#invalid version', t => {
   const json = {
@@ -56,7 +75,7 @@ for (const {title, visState, layers} of VISSTATE_DATA) {
   test(`parseMap#visState ${title}`, t => {
     const json = {
       ...METADATA,
-      datasets: [DATASET],
+      datasets: DATASETS,
       keplerMapConfig: {version: 'v1', config: {visState}}
     };
     const map = parseMap(json);
@@ -75,7 +94,16 @@ for (const {title, visState, layers} of VISSTATE_DATA) {
       return layerProps;
     });
 
+    // Fill in tileset data to avoid duplicatation
+    layers.forEach(({props: layerProps}) => {
+      if (layerProps.data === 'DATA_TILESET') {
+        layerProps.data = DATASETS[1].data;
+      }
+    });
+
     t.deepEquals(props, layers.map(l => l.props), 'Layers are correctly instantiated');
     t.end();
   });
 }
+
+// TODO test for no matching dataId
