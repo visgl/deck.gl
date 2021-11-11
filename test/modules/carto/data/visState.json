@@ -271,5 +271,296 @@
         }
       }
     ]
+  },
+  {
+    "title": "tileset point and line",
+    "visState": {
+      "layers": [
+        {
+          "id": "87swuny",
+          "type": "mvt",
+          "config": {
+            "color": [18, 147, 154],
+            "label": "transmission lines",
+            "dataId": "DATA_ID",
+            "hidden": false,
+            "columns": {},
+            "isVisible": true,
+            "textLabel": [
+              {
+                "size": 18,
+                "color": [255, 255, 255],
+                "field": null,
+                "anchor": "start",
+                "offset": [0, 0],
+                "alignment": "center"
+              }
+            ],
+            "visConfig": {
+              "filled": true,
+              "radius": 10,
+              "opacity": 0.8,
+              "stroked": true,
+              "enable3d": false,
+              "sizeRange": [0, 10],
+              "thickness": 0.6,
+              "wireframe": false,
+              "colorRange": {
+                "name": "Global Warming",
+                "type": "sequential",
+                "colors": ["#5A1846", "#900C3F", "#C70039", "#E3611C", "#F1920E", "#FFC300"],
+                "category": "Uber"
+              },
+              "heightRange": [0, 500],
+              "radiusRange": [0, 50],
+              "strokeColor": [250, 116, 0],
+              "strokeOpacity": 0.8,
+              "elevationScale": 5,
+              "strokeColorRange": {
+                "name": "Global Warming",
+                "type": "sequential",
+                "colors": ["#5A1846", "#900C3F", "#C70039", "#E3611C", "#F1920E", "#FFC300"],
+                "category": "Uber"
+              }
+            },
+            "highlightColor": [252, 242, 26, 255]
+          },
+          "visualChannels": {
+            "sizeField": null,
+            "sizeScale": "linear",
+            "colorField": null,
+            "colorScale": "quantile",
+            "heightField": null,
+            "heightScale": "linear",
+            "radiusField": null,
+            "radiusScale": "linear",
+            "strokeColorField": null,
+            "strokeColorScale": "quantile"
+          }
+        },
+        {
+          "id": "w04u776",
+          "type": "geojson",
+          "config": {
+            "color": [231, 159, 213],
+            "label": "boundary",
+            "dataId": "DATA_ID",
+            "hidden": false,
+            "columns": {"geojson": "geom"},
+            "isVisible": true,
+            "textLabel": [
+              {
+                "size": 18,
+                "color": [255, 255, 255],
+                "field": null,
+                "anchor": "start",
+                "offset": [0, 0],
+                "alignment": "center"
+              }
+            ],
+            "visConfig": {
+              "filled": false,
+              "radius": 10,
+              "opacity": 0.8,
+              "stroked": true,
+              "enable3d": false,
+              "sizeRange": [0, 10],
+              "thickness": 5.2,
+              "wireframe": false,
+              "colorRange": {
+                "name": "Global Warming",
+                "type": "sequential",
+                "colors": ["#5A1846", "#900C3F", "#C70039", "#E3611C", "#F1920E", "#FFC300"],
+                "category": "Uber"
+              },
+              "heightRange": [0, 500],
+              "radiusRange": [0, 50],
+              "strokeColor": [77, 181, 217],
+              "strokeOpacity": 0.8,
+              "elevationScale": 5,
+              "strokeColorRange": {
+                "name": "Global Warming",
+                "type": "sequential",
+                "colors": ["#5A1846", "#900C3F", "#C70039", "#E3611C", "#F1920E", "#FFC300"],
+                "category": "Uber"
+              },
+              "enableElevationZoomFactor": true
+            },
+            "highlightColor": [252, 242, 26, 255]
+          },
+          "visualChannels": {
+            "sizeField": null,
+            "sizeScale": "linear",
+            "colorField": null,
+            "colorScale": "quantile",
+            "heightField": null,
+            "heightScale": "linear",
+            "radiusField": null,
+            "radiusScale": "linear",
+            "strokeColorField": null,
+            "strokeColorScale": "quantile"
+          }
+        },
+        {
+          "id": "iim6w8",
+          "type": "point",
+          "config": {
+            "color": [87, 173, 87],
+            "label": "Layer 3",
+            "dataId": "DATA_ID",
+            "hidden": false,
+            "columns": {"lat": "latitude", "lng": "longitude", "altitude": null},
+            "isVisible": true,
+            "textLabel": [
+              {
+                "size": 18,
+                "color": [255, 255, 255],
+                "field": null,
+                "anchor": "start",
+                "offset": [0, 0],
+                "alignment": "center"
+              }
+            ],
+            "visConfig": {
+              "filled": true,
+              "radius": 35.8,
+              "opacity": 0.8,
+              "outline": false,
+              "thickness": 2,
+              "colorRange": {
+                "name": "Global Warming",
+                "type": "sequential",
+                "colors": ["#5A1846", "#900C3F", "#C70039", "#E3611C", "#F1920E", "#FFC300"],
+                "category": "Uber"
+              },
+              "fixedRadius": false,
+              "radiusRange": [0, 50],
+              "strokeColor": null,
+              "strokeColorRange": {
+                "name": "Global Warming",
+                "type": "sequential",
+                "colors": ["#5A1846", "#900C3F", "#C70039", "#E3611C", "#F1920E", "#FFC300"],
+                "category": "Uber"
+              }
+            },
+            "highlightColor": [252, 242, 26, 255]
+          },
+          "visualChannels": {
+            "sizeField": null,
+            "sizeScale": "linear",
+            "colorField": null,
+            "colorScale": "quantile",
+            "strokeColorField": null,
+            "strokeColorScale": "quantile"
+          }
+        }
+      ],
+      "filters": [],
+      "splitMaps": [],
+      "layerBlending": "subtractive",
+      "animationConfig": {"speed": 1, "currentTime": null},
+      "interactionConfig": {
+        "brush": {"size": 0.5, "enabled": false},
+        "tooltip": {
+          "enabled": true,
+          "compareMode": false,
+          "compareType": "absolute",
+          "fieldsToShow": {
+            "6184df9c-bb75-4fa3-abe5-e3b51bc1e63b": [],
+            "6da2452e-0390-4392-88ae-b8314cd68060": [],
+            "b3079c06-4ce1-4030-85a0-db79865a5e80": [
+              {"name": "type", "format": null},
+              {"name": "name", "format": null},
+              {"name": "location", "format": null},
+              {"name": "capacity_mw", "format": null},
+              {"name": "year_opened", "format": null}
+            ]
+          }
+        },
+        "geocoder": {"enabled": false},
+        "coordinate": {"enabled": false}
+      }
+    },
+    "layers": [
+      {
+        "name": "GeoJsonLayer({id: 'iim6w8'})",
+        "props": {
+          "id": "iim6w8",
+          "lineMiterLimit": 2,
+          "lineWidthUnits": "pixels",
+          "pointRadiusScale": 0.2,
+          "pointRadiusUnits": "pixels",
+          "rounded": true,
+          "wrapLongitude": false,
+          "parameters": {"blendFunc": [1, 775, 770, 772], "blendEquation": [32778, 32774]},
+          "autoHighlight": true,
+          "pickable": true,
+          "getFillColor": [87, 173, 87],
+          "visible": true,
+          "filled": true,
+          "opacity": 0.8,
+          "getLineColor": null,
+          "getLineWidth": 2,
+          "getPointRadius": 35.8,
+          "stroked": false,
+          "highlightColor": [252, 242, 26, 255]
+        }
+      },
+      {
+        "name": "GeoJsonLayer({id: 'w04u776'})",
+        "props": {
+          "id": "w04u776",
+          "lineMiterLimit": 2,
+          "lineWidthUnits": "pixels",
+          "pointRadiusScale": 0.2,
+          "pointRadiusUnits": "pixels",
+          "rounded": true,
+          "wrapLongitude": false,
+          "lineWidthScale": 2,
+          "parameters": {"blendFunc": [1, 775, 770, 772], "blendEquation": [32778, 32774]},
+          "autoHighlight": true,
+          "pickable": true,
+          "getFillColor": [231, 159, 213],
+          "visible": true,
+          "extruded": false,
+          "filled": false,
+          "opacity": 0.8,
+          "getLineColor": [77, 181, 217],
+          "stroked": true,
+          "getLineWidth": 5.2,
+          "getPointRadius": 10,
+          "wireframe": false,
+          "highlightColor": [252, 242, 26, 255]
+        }
+      },
+      {
+        "name": "MVTLayer({id: '87swuny'})",
+        "props": {
+          "id": "87swuny",
+          "data": {"type": "FeatureCollection", "features": []},
+          "lineMiterLimit": 2,
+          "lineWidthUnits": "pixels",
+          "pointRadiusScale": 0.3,
+          "pointRadiusUnits": "pixels",
+          "rounded": true,
+          "wrapLongitude": false,
+          "lineWidthScale": 2,
+          "parameters": {"blendFunc": [1, 775, 770, 772], "blendEquation": [32778, 32774]},
+          "autoHighlight": true,
+          "pickable": true,
+          "getFillColor": [18, 147, 154],
+          "visible": true,
+          "extruded": false,
+          "filled": true,
+          "opacity": 0.8,
+          "getLineColor": [250, 116, 0],
+          "stroked": true,
+          "getLineWidth": 0.6,
+          "getPointRadius": 10,
+          "wireframe": false,
+          "highlightColor": [252, 242, 26, 255]
+        }
+      }
+    ]
   }
 ]
