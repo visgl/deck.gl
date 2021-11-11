@@ -19,7 +19,28 @@ const COLOR_TESTS = [
     opacity: 0.5,
     data: [{v: 0}, {v: 1}, {v: 5}],
     d: {v: 1},
-    expected: [144, 12, 63, 186]
+    expected: [101, 22, 69, 186]
+  },
+  {
+    colorField: {name: 'v'},
+    colorScale: 'linear',
+    colorRange: {colors},
+    opacity: 0.5,
+    data: {
+      type: 'FeatureCollection',
+      features: [{properties: {v: 0}}, {properties: {v: 1}}, {properties: {v: 5}}]
+    },
+    d: {properties: {v: 1}},
+    expected: [101, 22, 69, 186]
+  },
+  {
+    colorField: {name: 'v'},
+    colorScale: 'linear',
+    colorRange: {colors},
+    opacity: 0.5,
+    data: [{}], // Default range will be [0, 1]
+    d: {v: 0.5},
+    expected: [117, 18, 67, 186]
   }
 ];
 

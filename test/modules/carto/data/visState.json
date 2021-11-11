@@ -606,7 +606,7 @@
           },
           "visualChannels": {
             "sizeField": {"name": "pop", "type": "integer"},
-            "sizeScale": "linear",
+            "sizeScale": "ordinal",
             "colorField": {"name": "pop", "type": "integer"},
             "colorScale": "quantile",
             "coverageField": null,

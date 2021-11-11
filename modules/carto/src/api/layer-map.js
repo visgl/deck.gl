@@ -117,7 +117,7 @@ function calculateDomain(data, name, scaleType) {
     // GeoJSON data type
     const values = data.features.map(({properties}) => properties[name]);
     return domainFromValues(values, scaleType);
-  } else if (Array.isArray(data) && data[0][name]) {
+  } else if (Array.isArray(data) && data[0][name] !== undefined) {
     // JSON data type
     const values = data.map(properties => properties[name]);
     return domainFromValues(values, scaleType);
