@@ -97,9 +97,9 @@ export function drawLayer(deck, map, layer) {
 
   deck._drawLayers('mapbox-repaint', {
     viewports: applyViewport(deck, map, currentViewport),
-    layerFilter: props =>
-      (deck.props.layerFilter && deck.props.layerFilter(props)) ||
-      (props.viewport.id === 'mapbox' && layer.id === props.layer.id),
+    layerFilter: params =>
+      (!deck.props.layerFilter || deck.props.layerFilter(params)) &&
+      (params.viewport.id === 'mapbox' && layer.id === params.layer.id),
     clearCanvas: false
   });
 }
@@ -176,9 +176,9 @@ function afterRender(deck, map) {
     if (hasNonMapboxLayers) {
       deck._drawLayers('mapbox-repaint', {
         viewports: applyViewport(deck, map),
-        layerFilter: props =>
-          (deck.props.layerFilter && deck.props.layerFilter(props)) ||
-          !mapboxLayerIds.includes(props.layer.id),
+        layerFilter: params =>
+          (!deck.props.layerFilter || deck.props.layerFilter(params)) &&
+          !mapboxLayerIds.includes(params.layer.id),
         clearCanvas: false
       });
     }
