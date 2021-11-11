@@ -154,6 +154,71 @@ test('getData#parameters', async t => {
 
 [
   {
+    status: 401,
+    title: 'Should catch unauthorized access to API',
+    regex: /Unauthorized access to Maps API: invalid combination of user \('USER'\) and apiKey \('API_KEY'\)/i
+  },
+  {
+    status: 403,
+    title: 'Should catch unauthorized access to data',
+    regex: /Unauthorized access to dataset: the provided apiKey\('API_KEY'\) doesn't provide access to the requested data/i
+  },
+  {
+    status: 500,
+    title: 'Should catch unknown API error',
+    regex: /SERVER ERROR MESSAGE/i
+  }
+].forEach(({status, title, regex}) => {
+  test(`dealWithError#(${String(status)})`, async t => {
+    const credentials = {
+      apiKey: 'API_KEY',
+      apiVersion: API_VERSIONS.V2,
+      username: 'USER',
+      mapsUrl: 'https://maps-v2'
+    };
+
+    setDefaultCredentials(credentials);
+
+    const _global = typeof global !== 'undefined' ? global : window;
+    const fetch = _global.fetch;
+
+    _global.fetch = (url, options) => {
+      return Promise.resolve({
+        json: () => {
+          return {
+            error: 'SERVER ERROR MESSAGE'
+          };
+        },
+        ok: false,
+        status
+      });
+    };
+
+    try {
+      await _getDataV2({
+        type: MAP_TYPES.QUERY,
+        source: 'select * from a'
+      });
+      t.error('should throw');
+    } catch (e) {
+      t.throws(
+        () => {
+          throw e;
+        },
+        regex,
+        title
+      );
+    }
+
+    setDefaultCredentials({});
+    _global.fetch = fetch;
+
+    t.end();
+  });
+});
+
+[
+  {
     props: {},
     mapInstantiationUrl:
       'http://carto-api/v3/maps/connection_name/table?client=deck-gl-carto&name=table'
