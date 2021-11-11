@@ -33,6 +33,15 @@ const EMPTY_KEPLER_MAP_CONFIG = {
 // }
 
 test('parseMap#invalid version', t => {
+  const json = {
+    ...METADATA,
+    keplerMapConfig: {...EMPTY_KEPLER_MAP_CONFIG, version: 'invalid'}
+  };
+  t.throws(
+    () => parseMap(json),
+    /Only support Kepler v1/,
+    'Throws on invalid Kepler schema version'
+  );
   t.end();
 });
 
@@ -41,6 +50,7 @@ test('parseMap#metadata', t => {
     ...METADATA,
     keplerMapConfig: EMPTY_KEPLER_MAP_CONFIG
   };
+  /* eslint-disable no-unused-vars */
   const {layers, mapState, mapStyle, ...metadata} = parseMap(json);
   t.deepEquals(metadata, METADATA, 'Metadata is passed through');
   t.end();
