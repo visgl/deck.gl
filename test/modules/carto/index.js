@@ -1,4 +1,5 @@
 import './api/layer-map.spec';
+import './api/parseMap.spec';
 import './api/maps-api-client.spec';
 import './carto-bqtiler-layer.spec';
 import './carto-layer.spec';

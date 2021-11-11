@@ -562,5 +562,106 @@
         }
       }
     ]
+  },
+  {
+    "title": "hexagon",
+    "visState": {
+      "layers": [
+        {
+          "id": "jc4657",
+          "type": "hexagonId",
+          "config": {
+            "color": [225, 49, 106],
+            "label": "Population",
+            "dataId": "DATA_ID",
+            "hidden": false,
+            "columns": {"hex_id": "h3"},
+            "isVisible": true,
+            "textLabel": [
+              {
+                "size": 18,
+                "color": [255, 255, 255],
+                "field": null,
+                "anchor": "start",
+                "offset": [0, 0],
+                "alignment": "center"
+              }
+            ],
+            "visConfig": {
+              "opacity": 0.8,
+              "coverage": 0.9,
+              "enable3d": true,
+              "sizeRange": [0, 1000],
+              "colorRange": {
+                "name": "ColorBrewer RdPu-5",
+                "type": "sequential",
+                "colors": ["#feebe2", "#fbb4b9", "#f768a1", "#c51b8a", "#7a0177"],
+                "category": "ColorBrewer"
+              },
+              "coverageRange": [0, 1],
+              "elevationScale": 70.1,
+              "enableElevationZoomFactor": true
+            },
+            "highlightColor": [252, 242, 26, 255]
+          },
+          "visualChannels": {
+            "sizeField": {"name": "pop", "type": "integer"},
+            "sizeScale": "linear",
+            "colorField": {"name": "pop", "type": "integer"},
+            "colorScale": "quantile",
+            "coverageField": null,
+            "coverageScale": "linear"
+          }
+        }
+      ],
+      "filters": [],
+      "splitMaps": [],
+      "layerBlending": "additive",
+      "animationConfig": {"speed": 1, "currentTime": null},
+      "interactionConfig": {
+        "brush": {"size": 0.5, "enabled": false},
+        "tooltip": {
+          "enabled": true,
+          "compareMode": false,
+          "compareType": "absolute",
+          "fieldsToShow": {
+            "449d39e6-c637-4317-a88c-061f720b2786": [],
+            "69bbdd03-4e8a-4927-9fa4-e38836c6c7ba": [
+              {"name": "h3", "format": null},
+              {"name": "pop", "format": null}
+            ],
+            "fb3901f4-224a-4365-8535-393365706e5d": [
+              {"name": "fips_code", "format": null},
+              {"name": "name", "format": null}
+            ]
+          }
+        },
+        "geocoder": {"enabled": false},
+        "coordinate": {"enabled": false}
+      }
+    },
+    "layers": [
+      {
+        "name": "H3HexagonLayer({id: 'jc4657'})",
+        "props": {
+          "id": "jc4657",
+          "lineMiterLimit": 2,
+          "lineWidthUnits": "pixels",
+          "pointRadiusScale": 0.2,
+          "pointRadiusUnits": "pixels",
+          "rounded": true,
+          "wrapLongitude": false,
+          "parameters": {"blendFunc": [770, 772], "blendEquation": 32774},
+          "autoHighlight": true,
+          "pickable": true,
+          "visible": true,
+          "extruded": true,
+          "opacity": 0.8,
+          "coverage": 0.9,
+          "elevationScale": 70.1,
+          "highlightColor": [255, 255, 255, 60]
+        }
+      }
+    ]
   }
 ]
