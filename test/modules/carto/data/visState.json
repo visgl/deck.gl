@@ -720,12 +720,12 @@
           "visualChannels": {
             "sizeField": null,
             "sizeScale": "linear",
-            "colorField": {"name": "ATTRIBUTE_NAME", "type": "string"},
+            "colorField": {"name": "STRING_ATTR", "type": "string"},
             "colorScale": "ordinal",
-            "heightField": null,
-            "heightScale": "linear",
+            "heightField": {"name": "NUMBER_ATTR", "type": "number"},
+            "heightScale": "log",
             "radiusField": null,
-            "radiusScale": "linear",
+            "radiusScale": "log",
             "strokeColorField": null,
             "strokeColorScale": "quantile"
           }

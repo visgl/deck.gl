@@ -34,8 +34,13 @@ const DATASETS = [
           {
             attributes: [
               {
-                attribute: 'ATTRIBUTE_NAME',
+                attribute: 'STRING_ATTR',
                 categories: [{category: '1'}, {category: '2'}, {category: '3'}]
+              },
+              {
+                attribute: 'NUMBER_ATTR',
+                min: 0,
+                max: 10
               }
             ]
           }
