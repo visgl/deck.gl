@@ -53,5 +53,7 @@ test('parseMap#metadata', t => {
   /* eslint-disable no-unused-vars */
   const {layers, mapState, mapStyle, ...metadata} = parseMap(json);
   t.deepEquals(metadata, METADATA, 'Metadata is passed through');
+  t.deepEquals(mapState, 'MAP_STATE', 'Map state is passed through');
+  t.deepEquals(mapStyle, 'MAP_STYLE', 'Map style is passed through');
   t.end();
 });
