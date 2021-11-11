@@ -98,12 +98,6 @@ function createInteractionProps(interactionConfig) {
 }
 
 function mapProps(source, target, mapping) {
-  if (Array.isArray(source)) {
-    source = source[0];
-  }
-  if (!source) {
-    return;
-  }
   for (const sourceKey in mapping) {
     const sourceValue = source[sourceKey];
     const targetKey = mapping[sourceKey];
