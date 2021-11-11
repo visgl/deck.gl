@@ -1,5 +1,10 @@
 import test from 'tape-catch';
-import {getColorAccessor, getSizeAccessor, getTextAccessor} from '@deck.gl/carto/api/layer-map';
+import {
+  getColorAccessor,
+  getSizeAccessor,
+  getTextAccessor,
+  getTextPixelOffsetAccessor
+} from '@deck.gl/carto/api/layer-map';
 
 const colors = ['#5A1846', '#900C3F', '#C70039', '#E3611C', '#F1920E', '#FFC300'];
 const COLOR_TESTS = [
@@ -114,6 +119,43 @@ for (const {textLabelField, data, expected} of TEXT_TESTS) {
   test(`getTextAccessor#${textLabelField.type}`, t => {
     const accessor = getTextAccessor(textLabelField, [data]);
     t.deepEquals(accessor(data), expected, `getTextAccessor correctly returns ${expected}`);
+    t.end();
+  });
+}
+
+const TEXT_PIXEL_OFFSET_TESTS = [
+  {
+    anchor: 'middle',
+    alignment: 'center',
+    radius: 20,
+    size: 10,
+    expected: [0, 0]
+  },
+  {
+    anchor: 'start',
+    alignment: 'bottom',
+    radius: 20,
+    size: 10,
+    expected: [24, 34]
+  },
+  {
+    anchor: 'end',
+    alignment: 'top',
+    radius: r => 2 * r,
+    data: 10,
+    size: 10,
+    expected: [-24, -34]
+  }
+];
+
+for (const {anchor, alignment, radius, size, data, expected} of TEXT_PIXEL_OFFSET_TESTS) {
+  test(`getTextPixelOffsetAccessor#${anchor} ${alignment}`, t => {
+    const accessor = getTextPixelOffsetAccessor({alignment, anchor, size}, radius);
+    t.deepEquals(
+      typeof radius === 'function' ? accessor(data) : accessor,
+      expected,
+      `getTextPixelOffsetAccessor correctly returns ${expected}`
+    );
     t.end();
   });
 }
