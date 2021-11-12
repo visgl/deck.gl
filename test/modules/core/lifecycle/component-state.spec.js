@@ -1,4 +1,4 @@
-import test from 'tape-catch';
+import test from 'tape-promise/tape';
 import ComponentState from '@deck.gl/core/lifecycle/component-state';
 import Component from '@deck.gl/core/lifecycle/component';
 import {gl} from '@deck.gl/test-utils';

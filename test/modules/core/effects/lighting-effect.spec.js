@@ -1,4 +1,4 @@
-import test from 'tape-catch';
+import test from 'tape-promise/tape';
 import LightingEffect from '@deck.gl/core/effects/lighting/lighting-effect';
 import {_CameraLight as CameraLight, DirectionalLight, PointLight} from '@deck.gl/core';
 import {ProgramManager} from '@luma.gl/core';

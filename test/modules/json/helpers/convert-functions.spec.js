@@ -1,5 +1,5 @@
 // Based on https://github.com/donmccurdy/expression-eval under MIT license
-import test from 'tape-catch';
+import test from 'tape-promise/tape';
 import convertFunctions from '@deck.gl/json/helpers/convert-functions';
 
 const TEST_CASES = [

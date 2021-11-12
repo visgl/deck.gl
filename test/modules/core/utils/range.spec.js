@@ -1,4 +1,4 @@
-import test from 'tape-catch';
+import test from 'tape-promise/tape';
 import * as range from '@deck.gl/core/utils/range';
 
 const TEST_CASES = [

@@ -1,4 +1,4 @@
-import test from 'tape-catch';
+import test from 'tape-promise/tape';
 import {FillStyleExtension} from '@deck.gl/extensions';
 import {PolygonLayer} from '@deck.gl/layers';
 import {testLayer} from '@deck.gl/test-utils';

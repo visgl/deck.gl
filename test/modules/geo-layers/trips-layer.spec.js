@@ -1,4 +1,4 @@
-import test from 'tape-catch';
+import test from 'tape-promise/tape';
 import {testLayer, generateLayerTests} from '@deck.gl/test-utils';
 import {TripsLayer} from '@deck.gl/geo-layers';
 import {trips} from 'deck.gl-test/data';

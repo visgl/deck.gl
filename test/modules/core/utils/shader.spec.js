@@ -1,4 +1,4 @@
-import test from 'tape-catch';
+import test from 'tape-promise/tape';
 import {project, phongLighting} from '@deck.gl/core';
 import {mergeShaders} from '@deck.gl/core/utils/shader';
 

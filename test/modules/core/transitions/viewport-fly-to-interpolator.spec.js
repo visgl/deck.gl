@@ -1,4 +1,4 @@
-import test from 'tape-catch';
+import test from 'tape-promise/tape';
 import FlyToInterpolator from '@deck.gl/core/transitions/viewport-fly-to-interpolator';
 import {toLowPrecision} from '@deck.gl/test-utils';
 

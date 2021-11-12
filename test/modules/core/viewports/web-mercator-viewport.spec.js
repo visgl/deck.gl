@@ -18,7 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import test from 'tape-catch';
+import test from 'tape-promise/tape';
 import {equals, config, Vector3} from 'math.gl';
 import {WebMercatorViewport} from 'deck.gl';
 import {Matrix4} from 'math.gl';

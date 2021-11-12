@@ -16,8 +16,12 @@
   "workspaces": [
     "modules/*"
   ],
+  "resolutions_comments": [
+    "prettier: ocular bumps prettier to v2 which modifies a lot of source files"
+  ],
   "resolutions": {
-    "acorn": "7.4.1"
+    "acorn": "7.4.1",
+    "prettier": "1.14.3"
   },
   "scripts": {
     "bootstrap": "PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true yarn && ocular-bootstrap",
@@ -65,7 +69,7 @@
     "gl": "^4.9.0",
     "glsl-transpiler": "^1.8.3",
     "jsdom": "^15.0.0",
-    "ocular-dev-tools": "^0.3.1",
+    "ocular-dev-tools": "1.0.0-alpha.7",
     "pre-commit": "^1.2.2",
     "pre-push": "^0.1.1",
     "raw-loader": "^0.5.1",
@@ -73,6 +77,7 @@
     "react-dom": "^16.2.0",
     "react-map-gl": "^5.1.0",
     "s2-geometry": "^1.2.10",
+    "tape-catch": "^1.0.6",
     "typescript": "^4.2.3"
   },
   "pre-commit": [
@@ -81,5 +86,6 @@
   ],
   "engines": {
     "node": ">=14"
-  }
+  },
+  "dependencies": {}
 }

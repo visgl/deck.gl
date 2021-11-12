@@ -1,4 +1,4 @@
-import test from 'tape-catch';
+import test from 'tape-promise/tape';
 import {createIterable, getAccessorFromBuffer} from '@deck.gl/core/utils/iterable-utils';
 
 test('createIterable', t => {

@@ -1,4 +1,4 @@
-import test from 'tape-catch';
+import test from 'tape-promise/tape';
 import {Layer, LayerExtension} from '@deck.gl/core';
 import {ScatterplotLayer, GeoJsonLayer} from '@deck.gl/layers';
 import {testLayer} from '@deck.gl/test-utils';

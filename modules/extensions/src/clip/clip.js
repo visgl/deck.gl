@@ -58,7 +58,7 @@ varying float clip_isVisible;
 
 /*
  * The fragment-shader version clips pixels at the bounds
- * e.g. PolygonLayer - show the part of the polygon that intersect with the bounds 
+ * e.g. PolygonLayer - show the part of the polygon that intersect with the bounds
  */
 const shaderModuleFs = {
   name: 'clip-fs',

@@ -1,4 +1,4 @@
-import test from 'tape-catch';
+import test from 'tape-promise/tape';
 import {shallowEqualObjects} from '@deck.gl/json/utils/shallow-equal-objects';
 
 const TEST_CASES = [

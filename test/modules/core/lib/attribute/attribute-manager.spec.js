@@ -21,7 +21,7 @@
 /* eslint-disable dot-notation, max-statements, no-unused-vars */
 import AttributeManager from '@deck.gl/core/lib/attribute/attribute-manager';
 import GL from '@luma.gl/constants';
-import test from 'tape-catch';
+import test from 'tape-promise/tape';
 import {gl} from '@deck.gl/test-utils';
 
 function update(attribute, {data}) {

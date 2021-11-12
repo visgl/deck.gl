@@ -1,4 +1,4 @@
-import test from 'tape-catch';
+import test from 'tape-promise/tape';
 
 import {LayerManager, MapView, PolygonLayer} from 'deck.gl';
 import PickLayersPass from '@deck.gl/core/passes/pick-layers-pass';

@@ -1,4 +1,4 @@
-import test from 'tape-catch';
+import test from 'tape-promise/tape';
 import {testLayer} from '@deck.gl/test-utils';
 import {UNIT} from '@deck.gl/core';
 import {GeoJsonLayer} from '@deck.gl/layers';

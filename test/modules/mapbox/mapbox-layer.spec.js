@@ -1,4 +1,4 @@
-import test from 'tape-catch';
+import test from 'tape-promise/tape';
 
 import {Deck} from '@deck.gl/core';
 import {ScatterplotLayer} from '@deck.gl/layers';

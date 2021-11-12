@@ -1,4 +1,4 @@
-import test from 'tape-catch';
+import test from 'tape-promise/tape';
 import {gl} from '@deck.gl/test-utils';
 import {Framebuffer} from '@luma.gl/core';
 import PostProcessEffect from '@deck.gl/core/effects/post-process-effect';

@@ -1,4 +1,4 @@
-import test from 'tape-catch';
+import test from 'tape-promise/tape';
 import {replaceInRange} from '@deck.gl/layers/utils';
 
 const TEST_DATA = ['A0', 'A1', 'A2', 'B0', 'B1', 'C0', 'D0', 'D1', 'D2', 'D3'];

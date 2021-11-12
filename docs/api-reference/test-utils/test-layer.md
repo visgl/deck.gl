@@ -9,7 +9,7 @@ The `testLayerAsync` utility is like `testLayer`, but designed for layers that n
 Example of layer unit tests using `tape`. The test utility itself is test framework agnostic.
 
 ```js
-import test from 'tape-catch';
+import test from 'tape-promise/tape';
 import {testLayer, testLayerAsync} from '@deck.gl/test-utils';
 import {GeoJsonLayer} from '@deck.gl/layers';
 

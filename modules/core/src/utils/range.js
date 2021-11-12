@@ -1,4 +1,4 @@
-/* 
+/*
  * range (Array)
  *   + start (Number) - the start index (incl.)
  *   + end (Number) - the end index (excl.)

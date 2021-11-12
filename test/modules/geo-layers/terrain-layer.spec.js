@@ -18,7 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import test from 'tape-catch';
+import test from 'tape-promise/tape';
 import {generateLayerTests, testLayerAsync} from '@deck.gl/test-utils';
 import {TerrainLayer, TileLayer} from '@deck.gl/geo-layers';
 import {SimpleMeshLayer} from '@deck.gl/mesh-layers';

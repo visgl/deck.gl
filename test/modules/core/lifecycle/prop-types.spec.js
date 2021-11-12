@@ -1,4 +1,4 @@
-import test from 'tape-catch';
+import test from 'tape-promise/tape';
 
 import {parsePropTypes} from '@deck.gl/core/lifecycle/prop-types';
 

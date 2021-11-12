@@ -1,4 +1,4 @@
-import test from 'tape-catch';
+import test from 'tape-promise/tape';
 // import VS from '@deck.gl/aggregation-layers/gpu-grid-layer/gpu-grid-cell-layer-vertex.glsl';
 import {getQuantizeScale} from '@deck.gl/aggregation-layers/utils/scale-utils';
 import {project32, gouraudLighting, picking} from '@deck.gl/core';

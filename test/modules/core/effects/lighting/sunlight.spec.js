@@ -1,5 +1,5 @@
 /* eslint-disable */
-import test from 'tape-catch';
+import test from 'tape-promise/tape';
 import {getSolarPosition} from '@deck.gl/core/effects/lighting/suncalc';
 import {equals, config} from 'math.gl';
 import {WebMercatorViewport, _GlobeViewport as GlobeViewport, PolygonLayer} from 'deck.gl';

@@ -1,4 +1,4 @@
-import test from 'tape-catch';
+import test from 'tape-promise/tape';
 import Transition from '@deck.gl/core/transitions/transition';
 import {Timeline} from '@luma.gl/core';
 

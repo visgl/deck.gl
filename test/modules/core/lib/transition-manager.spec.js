@@ -1,4 +1,4 @@
-import test from 'tape-catch';
+import test from 'tape-promise/tape';
 import TransitionManager from '@deck.gl/core/controllers/transition-manager';
 import {MapState} from '@deck.gl/core/controllers/map-controller';
 import {Timeline} from '@luma.gl/core';

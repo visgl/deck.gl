@@ -18,7 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import test from 'tape-catch';
+import test from 'tape-promise/tape';
 import GridAggregationLayer from '@deck.gl/aggregation-layers/grid-aggregation-layer';
 import GPUGridAggregator from '@deck.gl/aggregation-layers/utils/gpu-grid-aggregation/gpu-grid-aggregator';
 import {

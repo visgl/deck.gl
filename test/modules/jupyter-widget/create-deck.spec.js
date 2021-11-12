@@ -1,6 +1,6 @@
 // eslint-disable-next-line
 /* global document, window, global */
-import test from 'tape-catch';
+import test from 'tape-promise/tape';
 
 import {CompositeLayer} from '@deck.gl/core';
 import {ScatterplotLayer} from '@deck.gl/layers';

@@ -1,4 +1,4 @@
-import test from 'tape-catch';
+import test from 'tape-promise/tape';
 import {BrushingExtension} from '@deck.gl/extensions';
 import {ScatterplotLayer} from '@deck.gl/layers';
 import {testLayer} from '@deck.gl/test-utils';

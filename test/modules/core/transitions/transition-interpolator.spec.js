@@ -1,4 +1,4 @@
-import test from 'tape-catch';
+import test from 'tape-promise/tape';
 import TransitionInterpolator from '@deck.gl/core/transitions/transition-interpolator';
 
 const TEST_CASES = [

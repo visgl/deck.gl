@@ -1,5 +1,5 @@
 /* eslint-disable no-unused-vars */
-import test from 'tape-catch';
+import test from 'tape-promise/tape';
 import React, {createElement, Fragment} from 'react';
 
 import {View, MapView, FirstPersonView, ScatterplotLayer, LineLayer} from 'deck.gl';

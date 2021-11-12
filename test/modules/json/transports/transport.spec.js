@@ -1,4 +1,4 @@
-import test from 'tape-catch';
+import test from 'tape-promise/tape';
 import Transport from '@deck.gl/json/transports/transport';
 
 test('delayed onInitialized()', t => {

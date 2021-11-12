@@ -1,4 +1,4 @@
-import test from 'tape-catch';
+import test from 'tape-promise/tape';
 import {Controller} from '@deck.gl/core';
 import ViewState from '@deck.gl/core/controllers/view-state';
 

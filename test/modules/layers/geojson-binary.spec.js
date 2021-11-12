@@ -1,4 +1,4 @@
-import test from 'tape-catch';
+import test from 'tape-promise/tape';
 import {geojsonToBinary} from '@loaders.gl/gis';
 import {calculatePickingColors} from '@deck.gl/layers/geojson-layer/geojson-binary';
 import {Layer} from '@deck.gl/core';
