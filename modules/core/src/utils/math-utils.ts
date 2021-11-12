@@ -83,14 +83,16 @@ let scratchArray;
 
 /**
  * Split a Float64Array into a double-length Float32Array
- * @param typedArray {Float64Array}
- * @param size {Number} - per attribute size
- * @param [startIndex] {Number} - start index in the source array
- * @param [endIndex] {Number} - end index in the source array
- * @returns {Float32Array} - high part, low part for each attribute:
+ * @param typedArray
+ * @param options
+ * @param options.size  - per attribute size
+ * @param options.startIndex - start index in the source array
+ * @param options.endIndex  - end index in the source array
+ * @returns {} - high part, low part for each attribute:
     [1xHi, 1yHi, 1zHi, 1xLow, 1yLow, 1zLow, 2xHi, ...]
  */
-export function toDoublePrecisionArray(typedArray, {size = 1, startIndex = 0, endIndex}) {
+export function toDoublePrecisionArray(typedArray: Float64Array, options: {size?: number; startIndex?: Number; endIndex?: number}): Float32Array {
+  const {size = 1, startIndex = 0, endIndex} = options;
   if (!Number.isFinite(endIndex)) {
     endIndex = typedArray.length;
   }
