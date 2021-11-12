@@ -18,6 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
+// eslint-disable-next-line import/named
 import {ScatterplotLayer, experimental} from 'deck.gl';
 
 import vertex from './time-sliced-scatterplot-layer-vertex-64.glsl';

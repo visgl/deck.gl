@@ -202,7 +202,9 @@ export default class HeatmapLayer extends AggregationLayer {
     triPositionBuffer?.delete();
     triTexCoordBuffer?.delete();
     colorTexture?.delete();
-    updateTimer && clearTimeout(updateTimer);
+    if (updateTimer) {
+      clearTimeout(updateTimer);
+    }
   }
 
   // PRIVATE
