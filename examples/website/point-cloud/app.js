@@ -26,24 +26,21 @@ export default function App({onLoad}) {
   const [viewState, updateViewState] = useState(INITIAL_VIEW_STATE);
   const [isLoaded, setIsLoaded] = useState(false);
 
-  useEffect(
-    () => {
-      if (!isLoaded) {
-        return;
-      }
-      const rotateCamera = () => {
-        updateViewState(v => ({
-          ...v,
-          rotationOrbit: v.rotationOrbit + 120,
-          transitionDuration: 2400,
-          transitionInterpolator,
-          onTransitionEnd: rotateCamera
-        }));
-      };
-      rotateCamera();
-    },
-    [isLoaded]
-  );
+  useEffect(() => {
+    if (!isLoaded) {
+      return;
+    }
+    const rotateCamera = () => {
+      updateViewState(v => ({
+        ...v,
+        rotationOrbit: v.rotationOrbit + 120,
+        transitionDuration: 2400,
+        transitionInterpolator,
+        onTransitionEnd: rotateCamera
+      }));
+    };
+    rotateCamera();
+  }, [isLoaded]);
 
   const onDataLoad = ({header}) => {
     if (header.boundingBox) {

@@ -13,7 +13,12 @@ mapboxgl.accessToken = process.env.MapboxAccessToken; // eslint-disable-line
 
 const colorScale = scaleLog()
   .domain([10, 100, 1000, 10000])
-  .range([[255, 255, 178], [254, 204, 92], [253, 141, 60], [227, 26, 28]]);
+  .range([
+    [255, 255, 178],
+    [254, 204, 92],
+    [253, 141, 60],
+    [227, 26, 28]
+  ]);
 
 export function renderToDOM(container, data) {
   const map = new mapboxgl.Map({

@@ -74,7 +74,15 @@ export default function App({showBorder = false, onTilesLoad = null}) {
           new PathLayer({
             id: `${props.id}-border`,
             visible: props.visible,
-            data: [[[west, north], [west, south], [east, south], [east, north], [west, north]]],
+            data: [
+              [
+                [west, north],
+                [west, south],
+                [east, south],
+                [east, north],
+                [west, north]
+              ]
+            ],
             getPath: d => d,
             getColor: [255, 0, 0],
             widthMinPixels: 4

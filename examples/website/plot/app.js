@@ -16,9 +16,7 @@ const INITIAL_VIEW_STATE = {
 };
 
 function getScale({min, max}) {
-  return scaleLinear()
-    .domain([min, max])
-    .range([0, 1]);
+  return scaleLinear().domain([min, max]).range([0, 1]);
 }
 
 function getTooltip({sample}) {

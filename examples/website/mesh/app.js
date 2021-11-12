@@ -58,7 +58,12 @@ const dirLight = new DirectionalLight({
 const lightingEffect = new LightingEffect({ambientLight, dirLight});
 
 const background = [
-  [[-1000.0, -1000.0, -40], [1000.0, -1000.0, -40], [1000.0, 1000.0, -40], [-1000.0, 1000.0, -40]]
+  [
+    [-1000.0, -1000.0, -40],
+    [1000.0, -1000.0, -40],
+    [1000.0, 1000.0, -40],
+    [-1000.0, 1000.0, -40]
+  ]
 ];
 
 export default function App() {
