@@ -44,8 +44,14 @@ test('DataFilterExtension', t => {
     {
       updateProps: {
         getFilterValue: d => [d.entry, d.exit],
-        filterRange: [[10000, 20000], [0, 100000]],
-        filterSoftRange: [[12000, 18000], [2000, 8000]],
+        filterRange: [
+          [10000, 20000],
+          [0, 100000]
+        ],
+        filterSoftRange: [
+          [12000, 18000],
+          [2000, 8000]
+        ],
         filterEnabled: false,
         filterTransformSize: true,
         extensions: [new DataFilterExtension({filterSize: 2})]

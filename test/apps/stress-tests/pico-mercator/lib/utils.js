@@ -1,5 +1,5 @@
 /* eslint-disable */
-(function() {
+(function () {
   const EARTH_RADIUS = 6378000;
   const SF_MIN = [-122.511289, 37.709481];
   const SF_MAX = [-122.37646761, 37.806013];

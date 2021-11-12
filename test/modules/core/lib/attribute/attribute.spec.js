@@ -451,11 +451,7 @@ test('Attribute#updateBuffer _checkAttributeArray', t => {
       id: 'values',
       size,
       update: attr => {
-        attr.value = new Float32Array(
-          Array(4)
-            .fill(NaN)
-            .fill(size, 0, size)
-        );
+        attr.value = new Float32Array(Array(4).fill(NaN).fill(size, 0, size));
       }
     });
 
@@ -538,12 +534,18 @@ test('Attribute#standard accessor - variable width', t => {
       {
         id: 'A',
         value: [10, 11],
-        color: [[255, 0, 0], [255, 255, 0]]
+        color: [
+          [255, 0, 0],
+          [255, 255, 0]
+        ]
       },
       {
         id: 'B',
         value: [20],
-        color: [[128, 128, 128], [128, 128, 128]]
+        color: [
+          [128, 128, 128],
+          [128, 128, 128]
+        ]
       },
       {id: 'C', value: [30, 31, 32], color: [255, 255, 255]}
     ],

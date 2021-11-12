@@ -25,7 +25,12 @@ test('BitmapLayer#constructor', t => {
       },
       {
         updateProps: {
-          bounds: [[2, 4, 1], [2, 8, 1], [16, 8, 1], [16, 4, 1]]
+          bounds: [
+            [2, 4, 1],
+            [2, 8, 1],
+            [16, 8, 1],
+            [16, 4, 1]
+          ]
         },
         onAfterUpdate({layer, oldState}) {
           t.ok(layer.state, 'should update layer state');
@@ -147,7 +152,12 @@ test('BitmapLayer#imageCoordinateSystem', t => {
 
   testInitializeLayer({
     layer: new BitmapLayer({
-      bounds: [[0, 0, 0], [0, 2, 1], [2, 3, 0], [2, 1, 1]],
+      bounds: [
+        [0, 0, 0],
+        [0, 2, 1],
+        [2, 3, 0],
+        [2, 1, 1]
+      ],
       _imageCoordinateSystem: COORDINATE_SYSTEM.CARTESIAN
     }),
     onError: () => t.pass('Layer should throw if _imageCoordinateSystem is used with quad bounds')
@@ -155,7 +165,12 @@ test('BitmapLayer#imageCoordinateSystem', t => {
 });
 
 test('createMesh', t => {
-  const bounds = [[0, 0, 0], [0, 2, 1], [2, 3, 0], [2, 1, 1]];
+  const bounds = [
+    [0, 0, 0],
+    [0, 2, 1],
+    [2, 3, 0],
+    [2, 1, 1]
+  ];
 
   const result1 = createMesh(bounds);
   t.is(result1.vertexCount, 6, 'returns 1 quad');

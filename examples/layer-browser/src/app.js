@@ -56,7 +56,14 @@ const GLOBAL_LIGHTING_WITH_SHADOW = new LightingEffect({
 
 const POST_PROCESS = new PostProcessEffect(ink, {strength: 0.5});
 
-const LAND_COVER = [[[-122.3, 37.7], [-122.3, 37.9], [-122.6, 37.9], [-122.6, 37.7]]];
+const LAND_COVER = [
+  [
+    [-122.3, 37.7],
+    [-122.3, 37.9],
+    [-122.6, 37.9],
+    [-122.6, 37.7]
+  ]
+];
 
 // ---- View ---- //
 export default class App extends PureComponent {

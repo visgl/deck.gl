@@ -30,7 +30,11 @@ import {
 test('HeatmapLayerUtils#getBounds', t => {
   const TESTS = [
     {
-      input: [[0, 1], [-1, -1], [2, 0]],
+      input: [
+        [0, 1],
+        [-1, -1],
+        [2, 0]
+      ],
       output: [-1, -1, 2, 1]
     },
     {
@@ -96,13 +100,21 @@ test('HeatmapLayerUtils#packVertices', t => {
   const TESTS = [
     {
       name: '2D',
-      points: [[0, 0], [1, 1], [2, 2]],
+      points: [
+        [0, 0],
+        [1, 1],
+        [2, 2]
+      ],
       dimensions: 2,
       expected: [0, 0, 1, 1, 2, 2]
     },
     {
       name: '3D',
-      points: [[0, 0], [1, 1], [2, 2]],
+      points: [
+        [0, 0],
+        [1, 1],
+        [2, 2]
+      ],
       dimensions: 3,
       expected: [0, 0, 0, 1, 1, 0, 2, 2, 0]
     }

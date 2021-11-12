@@ -111,10 +111,7 @@ function getMapboxVersion(map) {
   let major = 0;
   let minor = 0;
   if (map.version) {
-    [major, minor] = map.version
-      .split('.')
-      .slice(0, 2)
-      .map(Number);
+    [major, minor] = map.version.split('.').slice(0, 2).map(Number);
   }
   return {major, minor};
 }

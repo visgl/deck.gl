@@ -34,8 +34,7 @@ const SimpleMeshLayerExample = {
   props: {
     id: 'mesh-layer',
     data: dataSamples.points,
-    mesh:
-      'https://raw.githubusercontent.com/uber-web/loaders.gl/e8e7f724cc1fc1d5882125b13e672e44e5ada14e/modules/ply/test/data/cube_att.ply',
+    mesh: 'https://raw.githubusercontent.com/uber-web/loaders.gl/e8e7f724cc1fc1d5882125b13e672e44e5ada14e/modules/ply/test/data/cube_att.ply',
     sizeScale: 40,
     getPosition: d => d.COORDINATES,
     getColor: d => [Math.random() * 255, Math.random() * 255, Math.random() * 255],

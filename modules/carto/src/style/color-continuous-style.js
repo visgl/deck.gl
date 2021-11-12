@@ -11,9 +11,7 @@ export default function colorContinuous({
   assert(Array.isArray(domain), 'Expected "domain" to be an array of numbers');
 
   const palette = typeof colors === 'string' ? getPalette(colors) : colors;
-  const color = scaleLinear()
-    .domain(domain)
-    .range(palette);
+  const color = scaleLinear().domain(domain).range(palette);
 
   return d => {
     const value = getAttrValue(attr, d);

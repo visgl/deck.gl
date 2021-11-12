@@ -153,20 +153,18 @@ test('WebMercatorViewport.getScales', t => {
     );
 
     t.ok(
-      equals(distanceScales.metersPerUnit.map((d, i) => d * distanceScales.unitsPerMeter[i]), [
-        1,
-        1,
-        1
-      ]),
+      equals(
+        distanceScales.metersPerUnit.map((d, i) => d * distanceScales.unitsPerMeter[i]),
+        [1, 1, 1]
+      ),
       'metersPerUnit/unitsPerMeter match'
     );
 
     t.ok(
-      equals(distanceScales.degreesPerUnit.map((d, i) => d * distanceScales.unitsPerDegree[i]), [
-        1,
-        1,
-        1
-      ]),
+      equals(
+        distanceScales.degreesPerUnit.map((d, i) => d * distanceScales.unitsPerDegree[i]),
+        [1, 1, 1]
+      ),
       'degreesPerUnit/unitsPerDegree match'
     );
 

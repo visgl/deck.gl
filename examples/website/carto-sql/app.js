@@ -51,9 +51,7 @@ export default function App({
   }, []);
 
   const SQL = `SELECT the_geom_webmercator, avg(${mrliIndex}) as index
-            FROM mrli_ny_jan WHERE industry ='${industry}' AND timeinstant BETWEEN '${
-    week[0]
-  }' AND '${week[1]}'
+            FROM mrli_ny_jan WHERE industry ='${industry}' AND timeinstant BETWEEN '${week[0]}' AND '${week[1]}'
             GROUP BY the_geom_webmercator`;
 
   const layers = [

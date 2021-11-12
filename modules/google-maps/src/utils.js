@@ -64,10 +64,7 @@ function getContainer(overlay, style) {
   if (overlay.getPanes) {
     overlay.getPanes().overlayLayer.appendChild(container);
   } else {
-    overlay
-      .getMap()
-      .getDiv()
-      .appendChild(container);
+    overlay.getMap().getDiv().appendChild(container);
   }
   return container;
 }

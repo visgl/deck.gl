@@ -17,13 +17,19 @@ test('color-utils#colorRangeToFlatArray', t => {
     },
     {
       title: 'nested array',
-      colorRange: [[255, 0, 0, 0], [255, 255, 0]],
+      colorRange: [
+        [255, 0, 0, 0],
+        [255, 255, 0]
+      ],
       normalize: false,
       output: [255, 0, 0, 0, 255, 255, 0, 255]
     },
     {
       title: 'nested array normalized',
-      colorRange: [[255, 0, 0, 0], [255, 255, 0]],
+      colorRange: [
+        [255, 0, 0, 0],
+        [255, 255, 0]
+      ],
       normalize: true,
       output: [1, 0, 0, 0, 1, 1, 0, 1]
     }

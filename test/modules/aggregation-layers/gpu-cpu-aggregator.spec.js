@@ -26,9 +26,7 @@ function verifyResults({t, cpuResults, gpuResults, testName, skipTotalCount = fa
       t.pass(`${testName}: ${name} CPU and GPU results matched`);
     } else {
       t.fail(
-        `${testName}: ${name}: results didn't match cpu: ${cpuResults[name]} gpu: ${
-          gpuResults[name]
-        }`
+        `${testName}: ${name}: results didn't match cpu: ${cpuResults[name]} gpu: ${gpuResults[name]}`
       );
     }
   }

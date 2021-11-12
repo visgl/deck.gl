@@ -55,7 +55,11 @@ test('S2Layer', t => {
 });
 
 test('S2Layer#getS2QuadKey', t => {
-  const TEST_COORDINATES = [{lat: 0, lng: 0}, {lat: -122.45, lng: 37.78}, {lat: 85, lng: 180}];
+  const TEST_COORDINATES = [
+    {lat: 0, lng: 0},
+    {lat: -122.45, lng: 37.78},
+    {lat: 85, lng: 180}
+  ];
 
   const TEST_LEVELS = [1, 2, 4, 8, 16];
 

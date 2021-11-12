@@ -51,7 +51,11 @@ test('colorCategories', t => {
   const colorCategoriesManual = colorCategories({
     attr: 'target',
     domain: ['Category 1', 'Category 2', 'Category 3'],
-    colors: [[255, 0, 0], [0, 255, 0], [0, 0, 255]]
+    colors: [
+      [255, 0, 0],
+      [0, 255, 0],
+      [0, 0, 255]
+    ]
   });
 
   for (const tc of CATEGORIES_TEST_CASES) {

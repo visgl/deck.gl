@@ -163,10 +163,7 @@ if (isWebGL2(gl)) {
     timeline.setTime(1500);
     manager.run();
     t.deepEquals(
-      manager
-        .getAttributes()
-        .instanceSizes.getBuffer()
-        .getData(),
+      manager.getAttributes().instanceSizes.getBuffer().getData(),
       [2, 2, 2, 2],
       'attribute in transition'
     );
@@ -182,10 +179,7 @@ if (isWebGL2(gl)) {
     timeline.setTime(2000);
     manager.run();
     t.deepEquals(
-      manager
-        .getAttributes()
-        .instanceSizes.getBuffer()
-        .getData(),
+      manager.getAttributes().instanceSizes.getBuffer().getData(),
       [3, 3, 3, 3],
       'attribute in transition'
     );

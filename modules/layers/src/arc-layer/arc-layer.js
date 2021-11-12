@@ -124,14 +124,8 @@ export default class ArcLayer extends Layer {
   }
 
   draw({uniforms}) {
-    const {
-      widthUnits,
-      widthScale,
-      widthMinPixels,
-      widthMaxPixels,
-      greatCircle,
-      wrapLongitude
-    } = this.props;
+    const {widthUnits, widthScale, widthMinPixels, widthMaxPixels, greatCircle, wrapLongitude} =
+      this.props;
 
     this.state.model
       .setUniforms(uniforms)

@@ -22,7 +22,11 @@ test('createIterable', t => {
     {
       title: 'iterable data',
       input: {
-        data: new Map([['x', 1], ['y', 2], ['z', 3]])
+        data: new Map([
+          ['x', 1],
+          ['y', 2],
+          ['z', 3]
+        ])
       },
       count: 3,
       firstObject: ['x', 1],
@@ -61,7 +65,11 @@ test('createIterable', t => {
     {
       title: 'iterable data with range',
       input: {
-        data: new Map([['x', 1], ['y', 2], ['z', 3]]),
+        data: new Map([
+          ['x', 1],
+          ['y', 2],
+          ['z', 3]
+        ]),
         startIndex: 1,
         endIndex: 4
       },
@@ -116,7 +124,11 @@ test('getAccessorFromBuffer', t => {
         value: new Float32Array([1, 1, 0, 2, 2, 0, 3, 3, 0]),
         size: 3
       },
-      output: [[1, 1, 0], [2, 2, 0], [3, 3, 0]]
+      output: [
+        [1, 1, 0],
+        [2, 2, 0],
+        [3, 3, 0]
+      ]
     },
     {
       title: 'buffer with stride and offset',
@@ -126,7 +138,11 @@ test('getAccessorFromBuffer', t => {
         stride: 12,
         offset: 12
       },
-      output: [[1, 1], [2, 2], [3, 3]]
+      output: [
+        [1, 1],
+        [2, 2],
+        [3, 3]
+      ]
     },
     {
       title: 'variable-width buffer',
@@ -135,7 +151,10 @@ test('getAccessorFromBuffer', t => {
         size: 3,
         startIndices: [0, 2]
       },
-      output: [[1, 1, 0, 2, 2, 0], [3, 3, 0]]
+      output: [
+        [1, 1, 0, 2, 2, 0],
+        [3, 3, 0]
+      ]
     },
     {
       title: 'variable-width buffer with offset',
@@ -145,7 +164,10 @@ test('getAccessorFromBuffer', t => {
         offset: 12,
         startIndices: [0, 2]
       },
-      output: [[1, 1, 0, 2, 2, 0], [3, 3, 0]]
+      output: [
+        [1, 1, 0, 2, 2, 0],
+        [3, 3, 0]
+      ]
     },
     {
       title: 'variable-width buffer with stride and offset',
@@ -156,7 +178,10 @@ test('getAccessorFromBuffer', t => {
         offset: 12,
         startIndices: [0, 2]
       },
-      output: [[1, 1, 2, 2], [3, 3]]
+      output: [
+        [1, 1, 2, 2],
+        [3, 3]
+      ]
     },
     {
       title: 'variable-width buffer nested',
@@ -166,7 +191,13 @@ test('getAccessorFromBuffer', t => {
         startIndices: [0, 2],
         nested: true
       },
-      output: [[[1, 1, 0], [2, 2, 0]], [[3, 3, 0]]]
+      output: [
+        [
+          [1, 1, 0],
+          [2, 2, 0]
+        ],
+        [[3, 3, 0]]
+      ]
     }
   ];
 

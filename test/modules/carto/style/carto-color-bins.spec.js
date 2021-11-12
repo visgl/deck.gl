@@ -43,7 +43,11 @@ const ERROR_TEST_CASES_DOMAIN = [
   {
     title: 'Feature with invalid domain',
     domain: -1,
-    colors: [[255, 0, 0], [0, 255, 0], [0, 0, 255]]
+    colors: [
+      [255, 0, 0],
+      [0, 255, 0],
+      [0, 0, 255]
+    ]
   }
 ];
 
@@ -51,7 +55,11 @@ test('colorBins', t => {
   const colorBinsManual = colorBins({
     attr: 'target',
     domain: [1, 50, 100],
-    colors: [[255, 0, 0], [0, 255, 0], [0, 0, 255]]
+    colors: [
+      [255, 0, 0],
+      [0, 255, 0],
+      [0, 0, 255]
+    ]
   });
 
   for (const tc of OK_TEST_CASES) {

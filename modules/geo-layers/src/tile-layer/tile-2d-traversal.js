@@ -12,9 +12,23 @@ const TILE_SIZE = 512;
 // number of world copies to check
 const MAX_MAPS = 3;
 // for calculating bounding volume of a tile in a non-web-mercator viewport
-const REF_POINTS_5 = [[0.5, 0.5], [0, 0], [0, 1], [1, 0], [1, 1]]; // 4 corners and center
-const REF_POINTS_9 = REF_POINTS_5.concat([[0, 0.5], [0.5, 0], [1, 0.5], [0.5, 1]]); // 4 corners, center and 4 mid points
-const REF_POINTS_11 = REF_POINTS_9.concat([[0.25, 0.5], [0.75, 0.5]]); // 2 additional points on equator for top tile
+const REF_POINTS_5 = [
+  [0.5, 0.5],
+  [0, 0],
+  [0, 1],
+  [1, 0],
+  [1, 1]
+]; // 4 corners and center
+const REF_POINTS_9 = REF_POINTS_5.concat([
+  [0, 0.5],
+  [0.5, 0],
+  [1, 0.5],
+  [0.5, 1]
+]); // 4 corners, center and 4 mid points
+const REF_POINTS_11 = REF_POINTS_9.concat([
+  [0.25, 0.5],
+  [0.75, 0.5]
+]); // 2 additional points on equator for top tile
 
 class OSMNode {
   constructor(x, y, z) {

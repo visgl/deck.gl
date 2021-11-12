@@ -446,7 +446,11 @@ test('HexagonLayer#updateLayer', t => {
       },
       {
         updateProps: {
-          colorRange: [[1, 1, 1], [2, 2, 2], [3, 3, 3]]
+          colorRange: [
+            [1, 1, 1],
+            [2, 2, 2],
+            [3, 3, 3]
+          ]
         },
         onAfterUpdate: getChecksForDomainOrRangeUpdate('Range', 'fillColor')
       },
@@ -668,7 +672,11 @@ test('HexagonLayer#updateTriggers', t => {
       },
       {
         updateProps: {
-          colorRange: [[1, 2, 3], [2, 3, 4], [3, 4, 5]]
+          colorRange: [
+            [1, 2, 3],
+            [2, 3, 4],
+            [3, 4, 5]
+          ]
         },
         onAfterUpdate: getSublayerAttributeUpdateCheck('colorRange', {
           color: true,

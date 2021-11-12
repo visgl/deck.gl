@@ -15,7 +15,10 @@ const TEST_CASES = [
       layers: [
         {
           '@@type': 'ScatterplotLayer',
-          data: [[0, 0], [0.01, 0.01]],
+          data: [
+            [0, 0],
+            [0.01, 0.01]
+          ],
           getPosition: '@@=-',
           getRadius: 500,
           getFillColor: [255, 0, 0]
@@ -312,7 +315,14 @@ const TEST_CASES = [
       layers: [
         {
           '@@type': 'DemoCompositeLayer',
-          data: [[0, 0], [2, 0], [0, 2], [2, 2], [3, 3], [4, 4]],
+          data: [
+            [0, 0],
+            [2, 0],
+            [0, 2],
+            [2, 2],
+            [3, 3],
+            [4, 4]
+          ],
           getPosition: '@@=-',
           getLineColor: [0, 0, 0],
           getFillColor: [20, 160, 0, 180],

@@ -18,14 +18,13 @@ class TestCompositeLayer extends CompositeLayer {
   renderLayers() {
     const {subLayers} = this.props;
 
-    return subLayers.map(
-      props =>
-        props.children
-          ? new TestCompositeLayer(
-              this.getSubLayerProps({id: props.id, subLayers: props.children}),
-              props
-            )
-          : new TestLayer(this.getSubLayerProps({id: props.id}), props)
+    return subLayers.map(props =>
+      props.children
+        ? new TestCompositeLayer(
+            this.getSubLayerProps({id: props.id, subLayers: props.children}),
+            props
+          )
+        : new TestLayer(this.getSubLayerProps({id: props.id}), props)
     );
   }
 }
@@ -207,7 +206,10 @@ test('LayersPass#shouldDrawLayer', t => {
       subLayers: [
         {
           id: 'test-sub-1',
-          children: [{id: 'test-sub-1A', viewportId: 'A'}, {id: 'test-sub-1B', viewportId: 'B'}]
+          children: [
+            {id: 'test-sub-1A', viewportId: 'A'},
+            {id: 'test-sub-1B', viewportId: 'B'}
+          ]
         },
         {
           id: 'test-sub-2'

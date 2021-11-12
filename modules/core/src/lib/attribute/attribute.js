@@ -170,8 +170,8 @@ export default class Attribute extends DataColumn {
           const endOffset = Number.isFinite(endRow)
             ? this.getVertexOffset(endRow)
             : noAlloc || !Number.isFinite(numInstances)
-              ? this.value.length
-              : numInstances * this.size;
+            ? this.value.length
+            : numInstances * this.size;
 
           super.updateSubBuffer({startOffset, endOffset});
         }

@@ -17,11 +17,11 @@
     "modules/*"
   ],
   "resolutions_comments": [
-    "prettier: ocular bumps prettier to v2 which modifies a lot of source files"
+    "prettier: 2.3.2 breaks on `import type`, remove when ocular bumps"
   ],
   "resolutions": {
     "acorn": "7.4.1",
-    "prettier": "1.14.3"
+    "prettier": "^2.4.1"
   },
   "scripts": {
     "bootstrap": "PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true yarn && ocular-bootstrap",
