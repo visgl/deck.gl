@@ -52,14 +52,7 @@ const INITIAL_VIEW_STATE = {
 
 const MAP_STYLE = 'https://basemaps.cartocdn.com/gl/dark-matter-nolabels-gl-style/style.json';
 
-const landCover = [
-  [
-    [-74.0, 40.7],
-    [-74.02, 40.7],
-    [-74.02, 40.72],
-    [-74.0, 40.72]
-  ]
-];
+const landCover = [[[-74.0, 40.7], [-74.02, 40.7], [-74.02, 40.72], [-74.0, 40.72]]];
 
 export default function App({
   buildings = DATA_URL.BUILDINGS,
@@ -79,10 +72,13 @@ export default function App({
     animation.id = window.requestAnimationFrame(animate);
   };
 
-  useEffect(() => {
-    animation.id = window.requestAnimationFrame(animate);
-    return () => window.cancelAnimationFrame(animation.id);
-  }, [animation]);
+  useEffect(
+    () => {
+      animation.id = window.requestAnimationFrame(animate);
+      return () => window.cancelAnimationFrame(animation.id);
+    },
+    [animation]
+  );
 
   const layers = [
     // This is only needed when using shadow effects

@@ -95,11 +95,15 @@ function dealWithError({response, json, credentials}) {
   switch (response.status) {
     case 401:
       throw new Error(
-        `Unauthorized access to Maps API: invalid combination of user ('${credentials.username}') and apiKey ('${credentials.apiKey}')`
+        `Unauthorized access to Maps API: invalid combination of user ('${
+          credentials.username
+        }') and apiKey ('${credentials.apiKey}')`
       );
     case 403:
       throw new Error(
-        `Unauthorized access to dataset: the provided apiKey('${credentials.apiKey}') doesn't provide access to the requested data`
+        `Unauthorized access to dataset: the provided apiKey('${
+          credentials.apiKey
+        }') doesn't provide access to the requested data`
       );
 
     default:

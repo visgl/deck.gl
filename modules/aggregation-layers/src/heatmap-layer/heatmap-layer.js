@@ -270,7 +270,9 @@ export default class HeatmapLayer extends AggregationLayer {
     this.setState({textureSize, format, type, weightsScale});
     if (!floatTargetSupport) {
       log.warn(
-        `HeatmapLayer: ${this.id} rendering to float texture not supported, fallingback to low precession format`
+        `HeatmapLayer: ${
+          this.id
+        } rendering to float texture not supported, fallingback to low precession format`
       )();
     }
   }
@@ -412,8 +414,12 @@ export default class HeatmapLayer extends AggregationLayer {
 
   _updateTextureRenderingBounds() {
     // Just render visible portion of the texture
-    const {triPositionBuffer, triTexCoordBuffer, normalizedCommonBounds, viewportCorners} =
-      this.state;
+    const {
+      triPositionBuffer,
+      triTexCoordBuffer,
+      normalizedCommonBounds,
+      viewportCorners
+    } = this.state;
 
     const {viewport} = this.context;
 

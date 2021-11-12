@@ -104,9 +104,6 @@ function wrapAccessor(accessor, context = {}) {
 export function wrapGetValueFunc(getValue, context = {}) {
   return pts => {
     context.indices = pts.map(pt => pt.index);
-    return getValue(
-      pts.map(pt => pt.source),
-      context
-    );
+    return getValue(pts.map(pt => pt.source), context);
   };
 }
