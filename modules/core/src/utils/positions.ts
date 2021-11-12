@@ -10,7 +10,7 @@ export function parsePosition(value) {
       };
 
     case 'string':
-      const match = value.match(PERCENT_OR_PIXELS_REGEX);
+      const match = PERCENT_OR_PIXELS_REGEX.exec(value);
       if (match && match.length >= 3) {
         const relative = match[2] === '%';
         const position = parseFloat(match[1]);
