@@ -1,6 +1,6 @@
 import {log} from '@deck.gl/core';
 import {Matrix4} from 'math.gl';
-import {MVTWorkerLoader} from '@loaders.gl/mvt';
+import {MVTLoader} from '@loaders.gl/mvt';
 import {binaryToGeojson} from '@loaders.gl/gis';
 import {COORDINATE_SYSTEM} from '@deck.gl/core';
 import {ClipExtension} from '@deck.gl/extensions';
@@ -17,7 +17,7 @@ const WORLD_SIZE = 512;
 const defaultProps = {
   uniqueIdProperty: {type: 'string', value: ''},
   highlightedFeatureId: null,
-  loaders: [MVTWorkerLoader],
+  loaders: [MVTLoader],
   binary: true
 };
 
@@ -108,13 +108,15 @@ export default class MVTLayer extends TileLayer {
     let loadOptions = this.getLoadOptions();
     const {binary, fetch} = this.props;
     const {signal, x, y, z} = tile;
+
     loadOptions = {
       ...loadOptions,
       mimeType: 'application/x-protobuf',
+      worker: false,
       mvt: {
         ...loadOptions?.mvt,
         coordinates: this.context.viewport.resolution ? 'wgs84' : 'local',
-        tileIndex: {x, y, z}
+        tileIndex: {x, y, z},
         // Local worker debug
         // workerUrl: `modules/mvt/dist/mvt-loader.worker.js`
         // Set worker to null to skip web workers

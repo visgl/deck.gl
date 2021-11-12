@@ -91,6 +91,7 @@ export default class GeoJsonLayer extends CompositeLayer {
 
   _updateStateJSON({props, changeFlags}) {
     const features = getGeojsonFeatures(props.data);
+    console.log(props.data, features)
     const wrapFeature = this.getSubLayerRow.bind(this);
     let newFeatures = {};
     const featuresDiff = {};

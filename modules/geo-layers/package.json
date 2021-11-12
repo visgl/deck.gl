@@ -40,7 +40,8 @@
     "@math.gl/web-mercator": "^3.5.4",
     "h3-js": "^3.6.0",
     "long": "^3.2.0",
-    "math.gl": "^3.5.4"
+    "math.gl": "^3.5.4",
+    "pbf": "^3.2.1"
   },
   "peerDependencies": {
     "@deck.gl/core": "^8.0.0",
