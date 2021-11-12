@@ -221,7 +221,7 @@ function calculateViewportUniforms({
   // When using Viewport class's default projection matrix, this yields 1 for orthographic
   // and `viewport.focalDistance` for perspective views
   const focalDistance =
-    viewport.projectionMatrix.transform([0, 0, -viewport.focalDistance, 1])[3] || 1;
+    vec4.transformMat4([], [0, 0, -viewport.focalDistance, 1], viewport.projectionMatrix)[3] || 1;
 
   const uniforms = {
     // Projection mode values
