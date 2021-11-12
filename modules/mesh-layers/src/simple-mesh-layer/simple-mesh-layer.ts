@@ -153,7 +153,9 @@ export default class SimpleMeshLayer extends Layer {
     super.updateState({props, oldProps, changeFlags});
 
     if (props.mesh !== oldProps.mesh || changeFlags.extensionsChanged) {
-      this.state.model?.delete();
+      if (this.state.model) {
+        this.state.model.delete();
+      }
       if (props.mesh) {
         this.state.model = this.getModel(props.mesh);
 
@@ -221,10 +223,12 @@ export default class SimpleMeshLayer extends Layer {
 
     // props.mesh may not be ready at this time.
     // The sampler will be set when `getModel` is called
-    model?.setUniforms({
-      sampler: texture || emptyTexture,
-      hasTexture: Boolean(texture)
-    });
+    if (model) {
+      model.setUniforms({
+        sampler: texture || emptyTexture,
+        hasTexture: Boolean(texture)
+      });
+    }
   }
 }
 

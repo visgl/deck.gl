@@ -1,6 +1,6 @@
 import {COORDINATE_SYSTEM, createIterable} from '@deck.gl/core';
 
-/* eslint-disable max-statements, complexity */
+/* eslint-disable max-statements, complexity, camelcase */
 const RADIAN_PER_DEGREE = Math.PI / 180;
 const modelMatrix = new Float32Array(16);
 const valueArray = new Float32Array(12);

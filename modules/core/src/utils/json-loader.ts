@@ -1,4 +1,4 @@
-function isJSON(text) {
+function isJSON(text: string): boolean {
   const firstChar = text[0];
   const lastChar = text[text.length - 1];
   return (firstChar === '{' && lastChar === '}') || (firstChar === '[' && lastChar === ']');

@@ -1,20 +1,42 @@
+import {TypedArray} from '../types/types';
+
+export type TypedArrayManagerProps = {
+  overAlloc?: number;
+  poolSize?: number;
+};
+
+const DEFAULT_PROPS: Required<TypedArrayManagerProps> = {
+  overAlloc: 2,
+  poolSize: 100
+};
+
 export class TypedArrayManager {
-  constructor(props) {
-    this._pool = [];
-    this.props = {overAlloc: 2, poolSize: 100};
+  _pool = [];
+  props: Required<TypedArrayManagerProps> = DEFAULT_PROPS;
+
+  constructor(props: TypedArrayManagerProps = {}) {
     this.setProps(props);
   }
 
-  setProps(props) {
+  setProps(props: TypedArrayManagerProps) {
     Object.assign(this.props, props);
   }
 
   allocate(
-    typedArray,
-    count,
-    {size = 1, type, padding = 0, copy = false, initialize = false, maxCount}
-  ) {
+    typedArray: TypedArray,
+    count: number,
+    options: {
+      size?: number;
+      type;
+      padding?: number;
+      copy?: boolean;
+      initialize?: boolean;
+      maxCount?: number;
+    }
+  ): TypedArray {
+    // @ts-expect-error
     const Type = type || (typedArray && typedArray.constructor) || Float32Array;
+    const {size = 1, type, padding = 0, copy = false, initialize = false, maxCount} = options;
 
     const newSize = count * size + padding;
     if (ArrayBuffer.isView(typedArray)) {
@@ -44,7 +66,7 @@ export class TypedArrayManager {
     return newArray;
   }
 
-  release(typedArray) {
+  release(typedArray): void {
     this._release(typedArray);
   }
 
@@ -59,6 +81,7 @@ export class TypedArrayManager {
     // Check if available in pool
     const pool = this._pool;
     const byteLength = Type.BYTES_PER_ELEMENT * sizeToAllocate;
+    // @ts-expect-error
     const i = pool.findIndex(b => b.byteLength >= byteLength);
     if (i >= 0) {
       // Create a new array using an existing buffer
@@ -76,7 +99,7 @@ export class TypedArrayManager {
     if (!ArrayBuffer.isView(typedArray)) {
       return;
     }
-    const pool = this._pool;
+    const pool: any[] = this._pool;
     const {buffer} = typedArray;
     // Save the buffer of the released array into the pool
     // Sort buffers by size
