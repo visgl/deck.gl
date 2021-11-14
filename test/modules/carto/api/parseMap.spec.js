@@ -10,7 +10,7 @@ const METADATA = {
   updatedAt: 'updatedAt timestamp'
 };
 
-const EMPTY_KEPLER_MAP_CONFIG = {
+export const EMPTY_KEPLER_MAP_CONFIG = {
   version: 'v1',
   config: {
     mapState: 'INITIAL_VIEW_STATE',

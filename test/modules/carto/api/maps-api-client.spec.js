@@ -8,10 +8,12 @@ import {
   API_VERSIONS,
   getData,
   fetchLayerData,
+  fetchMap,
   setDefaultCredentials,
   getDefaultCredentials
 } from '@deck.gl/carto';
 import {MAPS_API_V1_RESPONSE, TILEJSON_RESPONSE} from '../mock-fetch';
+import {EMPTY_KEPLER_MAP_CONFIG} from './parseMap.spec';
 
 for (const useSetDefaultCredentials of [true, false]) {
   test(`getDataV2#v1#setDefaultCredentials(${String(useSetDefaultCredentials)})`, async t => {
@@ -449,6 +451,42 @@ test('getData#post', async t => {
 
   setDefaultCredentials({});
 
+  _global.fetch = fetch;
+
+  t.end();
+});
+
+test('fetchMap#no datasets', async t => {
+  const cartoMapId = 'abcd-1234';
+  const mapUrl = `http://carto-api/v3/maps/public/${cartoMapId}`;
+  const mapResponse = {
+    id: cartoMapId,
+    datasets: [],
+    keplerMapConfig: EMPTY_KEPLER_MAP_CONFIG
+  };
+
+  setDefaultCredentials({apiVersion: API_VERSIONS.V3, apiBaseUrl: 'http://carto-api'});
+
+  const _global = typeof global !== 'undefined' ? global : window;
+  const fetch = _global.fetch;
+
+  _global.fetch = (url, options) => {
+    if (url === mapUrl) {
+      t.pass('should call to the right instantiation url');
+      return Promise.resolve({json: () => mapResponse, ok: true});
+    }
+
+    t.fail(`Invalid URL request : ${url}`);
+    return null;
+  };
+
+  try {
+    await fetchMap({cartoMapId});
+  } catch (e) {
+    t.error(e, 'should not throw');
+  }
+
+  setDefaultCredentials({});
   _global.fetch = fetch;
 
   t.end();
