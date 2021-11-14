@@ -107,6 +107,9 @@ const macOnlyTests = [
       new GeoJsonLayer({
         id: 'geojson-text',
         data: capitals,
+        parameters: {
+          depthTest: false
+        },
         pointType: 'text',
         getText: d => d.properties.name,
         textBillboard: false // default value is true
