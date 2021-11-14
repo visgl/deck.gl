@@ -13,7 +13,7 @@ const METADATA = {
 const EMPTY_KEPLER_MAP_CONFIG = {
   version: 'v1',
   config: {
-    mapState: 'MAP_STATE',
+    mapState: 'INITIAL_VIEW_STATE',
     mapStyle: 'MAP_STYLE',
     visState: {
       layers: []
@@ -69,9 +69,9 @@ test('parseMap#metadata', t => {
     keplerMapConfig: EMPTY_KEPLER_MAP_CONFIG
   };
   /* eslint-disable no-unused-vars */
-  const {layers, mapState, mapStyle, ...metadata} = parseMap(json);
+  const {layers, initialViewState, mapStyle, ...metadata} = parseMap(json);
   t.deepEquals(metadata, METADATA, 'Metadata is passed through');
-  t.deepEquals(mapState, 'MAP_STATE', 'Map state is passed through');
+  t.deepEquals(initialViewState, 'INITIAL_VIEW_STATE', 'Map state is passed through');
   t.deepEquals(mapStyle, 'MAP_STYLE', 'Map style is passed through');
   t.end();
 });
