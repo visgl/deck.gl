@@ -224,6 +224,17 @@ test('getData#parameters', async t => {
       'http://carto-api/v3/maps/connection_name/table?client=deck-gl-carto&name=table'
   },
   {
+    props: {
+      credentials: {
+        apiVersion: API_VERSIONS.V3,
+        apiBaseUrl: 'http://carto-api-with-slash/',
+        accessToken: 'XXX'
+      }
+    },
+    mapInstantiationUrl:
+      'http://carto-api-with-slash/v3/maps/connection_name/table?client=deck-gl-carto&name=table'
+  },
+  {
     props: {geoColumn: 'geog'},
     mapInstantiationUrl:
       'http://carto-api/v3/maps/connection_name/table?client=deck-gl-carto&name=table&geo_column=geog'
