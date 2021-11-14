@@ -8,7 +8,7 @@ export const TILEJSON_RESPONSE = {
   tiles: ['https://xyz.com/{z}/{x}/{y}']
 };
 
-const GEOJSON = {
+export const GEOJSON_RESPONSE = {
   type: 'FeatureCollection',
   features: [
     {
@@ -61,7 +61,7 @@ export function mockFetchMapsV3() {
           return TILEJSON_RESPONSE;
         }
         if (url.indexOf('format=geojson') !== -1) {
-          return GEOJSON;
+          return GEOJSON_RESPONSE;
         }
 
         if (url.indexOf('tileset') !== -1) {

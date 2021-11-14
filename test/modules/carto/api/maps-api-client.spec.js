@@ -12,7 +12,12 @@ import {
   setDefaultCredentials,
   getDefaultCredentials
 } from '@deck.gl/carto';
-import {MAPS_API_V1_RESPONSE, TILEJSON_RESPONSE, mockFetchMapsV3} from '../mock-fetch';
+import {
+  GEOJSON_RESPONSE,
+  MAPS_API_V1_RESPONSE,
+  TILEJSON_RESPONSE,
+  mockFetchMapsV3
+} from '../mock-fetch';
 import {EMPTY_KEPLER_MAP_CONFIG} from './parseMap.spec';
 
 for (const useSetDefaultCredentials of [true, false]) {
@@ -492,15 +497,16 @@ test('fetchMap#datasets', async t => {
   const cartoMapId = 'abcd-1234';
   const mapUrl = `http://carto-api/v3/maps/public/${cartoMapId}`;
   const publicToken = 'public_token';
+
+  const connectionName = 'test_connection';
+  const source = 'test_source';
+  const table = {type: MAP_TYPES.TABLE, connectionName, source};
+  const tileset = {type: MAP_TYPES.TILESET, connectionName, source};
+  const query = {type: MAP_TYPES.QUERY, connectionName, source};
+
   const mapResponse = {
     id: cartoMapId,
-    datasets: [
-      {
-        connectionName: 'test_connection',
-        source: 'test_source',
-        type: MAP_TYPES.TILESET
-      }
-    ],
+    datasets: [table, tileset, query],
     keplerMapConfig: EMPTY_KEPLER_MAP_CONFIG,
     publicToken
   };
@@ -523,8 +529,9 @@ test('fetchMap#datasets', async t => {
 
   try {
     await fetchMap({cartoMapId});
-    const tileset = mapResponse.datasets[0];
+    t.deepEquals(table.data, GEOJSON_RESPONSE, 'Table has filled in data');
     t.deepEquals(tileset.data, TILEJSON_RESPONSE, 'Tileset has filled in data');
+    t.deepEquals(query.data, GEOJSON_RESPONSE, 'Query has filled in data');
   } catch (e) {
     t.error(e, 'should not throw');
   }
