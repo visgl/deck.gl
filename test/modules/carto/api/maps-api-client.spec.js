@@ -3,14 +3,15 @@
 import test from 'tape-catch';
 
 import {
-  _getDataV2,
-  MAP_TYPES,
   API_VERSIONS,
-  getData,
+  FORMATS,
+  MAP_TYPES,
+  _getDataV2,
   fetchLayerData,
   fetchMap,
-  setDefaultCredentials,
-  getDefaultCredentials
+  getData,
+  getDefaultCredentials,
+  setDefaultCredentials
 } from '@deck.gl/carto';
 import {
   GEOJSON_RESPONSE,
@@ -351,6 +352,20 @@ test(`getDataV2#versionError`, async t => {
   },
   {
     props: {
+      format: FORMATS.GEOJSON
+    },
+    mapInstantiationUrl:
+      'http://carto-api/v3/maps/connection_name/table?client=deck-gl-carto&name=table'
+  },
+  {
+    props: {
+      format: FORMATS.NDJSON
+    },
+    mapInstantiationUrl:
+      'http://carto-api/v3/maps/connection_name/table?client=deck-gl-carto&name=table'
+  },
+  {
+    props: {
       credentials: {
         apiVersion: API_VERSIONS.V3,
         apiBaseUrl: 'http://carto-api-with-slash/',
@@ -384,6 +399,7 @@ test(`getDataV2#versionError`, async t => {
   for (const useSetDefaultCredentials of [true, false]) {
     test(`fetchLayerData#setDefaultCredentials(${String(useSetDefaultCredentials)})`, async t => {
       const geojsonURL = 'http://geojson';
+      const ndjsonURL = 'http://ndjson';
       const accessToken = 'XXX';
       const credentials = {
         apiVersion: API_VERSIONS.V3,
@@ -407,7 +423,8 @@ test(`getDataV2#versionError`, async t => {
           return Promise.resolve({
             json: () => {
               return {
-                geojson: {url: [geojsonURL]}
+                geojson: {url: [geojsonURL]},
+                ndjson: {url: [ndjsonURL]}
               };
             },
             ok: true
@@ -420,6 +437,11 @@ test(`getDataV2#versionError`, async t => {
                 geojson: {url: [geojsonURL]}
               };
             },
+            ok: true
+          });
+        } else if (url === ndjsonURL) {
+          t.pass('should call to the right ndjson url');
+          return Promise.resolve({
             ok: true
           });
         }
