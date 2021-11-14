@@ -352,6 +352,34 @@ mockedV3Test('CartoLayer#_updateData executed when props changes', async t => {
   await testLayerAsync({Layer: CartoLayer, testCases, onError: t.notOk});
 });
 
+mockedV3Test('CartoLayer#_updateData invalid apiVersion', async t => {
+  const testCases = [
+    {
+      props: {
+        type: MAP_TYPES.TABLE,
+        data: 'table',
+        connection: 'connection_name',
+        credentials: CREDENTIALS_V3
+      }
+    },
+    {
+      updateProps: {credentials: {apiVersion: 'wrong'}}
+    }
+  ];
+
+  let didThrow = false;
+  const regex = /Invalid apiVersion wrong. Use API_VERSIONS enum./;
+  await testLayerAsync({
+    Layer: CartoLayer,
+    testCases,
+    onError: e => {
+      t.ok(e.message.match(regex), 'Correct error message');
+      didThrow = true;
+    }
+  });
+  t.ok(didThrow, 'exception was thrown on invalid apiVersion prop update');
+});
+
 mockedV3Test('CartoSQLLayer#onDataLoad', async t => {
   const spy = makeSpy(MVTLayer.prototype, 'getTileData');
   spy.returns([]);
