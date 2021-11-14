@@ -217,6 +217,45 @@ test('getData#parameters', async t => {
   });
 });
 
+Object.values(API_VERSIONS).forEach(apiVersion => {
+  test(`connectionError#(${apiVersion})`, async t => {
+    setDefaultCredentials({apiVersion});
+
+    const _global = typeof global !== 'undefined' ? global : window;
+    const fetch = _global.fetch;
+
+    _global.fetch = (url, options) => {
+      throw new Error('Connection error');
+    };
+
+    const legacy = [API_VERSIONS.V1, API_VERSIONS.V2].includes(apiVersion);
+    try {
+      await (legacy ? _getDataV2 : getData)({
+        type: MAP_TYPES.QUERY,
+        source: 'select * from a',
+        ...(!legacy && {
+          connection: 'connection_name',
+          credentials: {accessToken: 'XXX'}
+        })
+      });
+      t.error('should throw');
+    } catch (e) {
+      t.throws(
+        () => {
+          throw e;
+        },
+        /Connection error/,
+        'Throws error when connection fails'
+      );
+    }
+
+    setDefaultCredentials({});
+    _global.fetch = fetch;
+
+    t.end();
+  });
+});
+
 [
   {
     props: {},
