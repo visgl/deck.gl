@@ -12,7 +12,7 @@ import {
   setDefaultCredentials,
   getDefaultCredentials
 } from '@deck.gl/carto';
-import {MAPS_API_V1_RESPONSE, TILEJSON_RESPONSE} from '../mock-fetch';
+import {MAPS_API_V1_RESPONSE, TILEJSON_RESPONSE, mockFetchMapsV3} from '../mock-fetch';
 import {EMPTY_KEPLER_MAP_CONFIG} from './parseMap.spec';
 
 for (const useSetDefaultCredentials of [true, false]) {
@@ -459,11 +459,7 @@ test('getData#post', async t => {
 test('fetchMap#no datasets', async t => {
   const cartoMapId = 'abcd-1234';
   const mapUrl = `http://carto-api/v3/maps/public/${cartoMapId}`;
-  const mapResponse = {
-    id: cartoMapId,
-    datasets: [],
-    keplerMapConfig: EMPTY_KEPLER_MAP_CONFIG
-  };
+  const mapResponse = {id: cartoMapId, datasets: [], keplerMapConfig: EMPTY_KEPLER_MAP_CONFIG};
 
   setDefaultCredentials({apiVersion: API_VERSIONS.V3, apiBaseUrl: 'http://carto-api'});
 
@@ -482,6 +478,53 @@ test('fetchMap#no datasets', async t => {
 
   try {
     await fetchMap({cartoMapId});
+  } catch (e) {
+    t.error(e, 'should not throw');
+  }
+
+  setDefaultCredentials({});
+  _global.fetch = fetch;
+
+  t.end();
+});
+
+test('fetchMap#datasets', async t => {
+  const cartoMapId = 'abcd-1234';
+  const mapUrl = `http://carto-api/v3/maps/public/${cartoMapId}`;
+  const publicToken = 'public_token';
+  const mapResponse = {
+    id: cartoMapId,
+    datasets: [
+      {
+        connectionName: 'test_connection',
+        source: 'test_source',
+        type: MAP_TYPES.TILESET
+      }
+    ],
+    keplerMapConfig: EMPTY_KEPLER_MAP_CONFIG,
+    publicToken
+  };
+
+  setDefaultCredentials({apiVersion: API_VERSIONS.V3, apiBaseUrl: 'http://carto-api'});
+
+  const _global = typeof global !== 'undefined' ? global : window;
+  const fetch = _global.fetch;
+
+  _global.fetch = (url, options) => {
+    if (url === mapUrl) {
+      t.pass('should call to the right instantiation url');
+      mockFetchMapsV3();
+      return Promise.resolve({json: () => mapResponse, ok: true});
+    }
+
+    t.fail(`Invalid URL request : ${url}`);
+    return null;
+  };
+
+  try {
+    await fetchMap({cartoMapId});
+    const tileset = mapResponse.datasets[0];
+    t.deepEquals(tileset.data, TILEJSON_RESPONSE, 'Tileset has filled in data');
   } catch (e) {
     t.error(e, 'should not throw');
   }

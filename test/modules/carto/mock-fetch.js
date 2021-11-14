@@ -52,7 +52,7 @@ function mockFetchMapsV2() {
   return fetch;
 }
 
-function mockFetchMapsV3() {
+export function mockFetchMapsV3() {
   const fetch = _global.fetch;
   _global.fetch = url => {
     return Promise.resolve({
