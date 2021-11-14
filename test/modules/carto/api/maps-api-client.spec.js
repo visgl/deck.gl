@@ -1,4 +1,4 @@
-/* global global, window */
+/* global global, setTimeout, window */
 
 import test from 'tape-catch';
 
@@ -593,6 +593,67 @@ test('fetchMap#datasets', async t => {
   }
 
   setDefaultCredentials({});
+  _global.fetch = fetch;
+
+  t.end();
+});
+
+function sleep(ms) {
+  return new Promise(resolve => {
+    setTimeout(resolve, ms);
+  });
+}
+
+test('fetchMap#autoRefresh', async t => {
+  const cartoMapId = 'abcd-1234';
+  const mapUrl = `https://gcp-us-east1.api.carto.com/v3/maps/public/${cartoMapId}`;
+  const publicToken = 'public_token';
+
+  const connectionName = 'test_connection';
+  const source = 'test_source';
+  const tileset = {type: MAP_TYPES.TILESET, connectionName, source};
+
+  const mapResponse = {
+    id: cartoMapId,
+    datasets: [tileset],
+    keplerMapConfig: EMPTY_KEPLER_MAP_CONFIG,
+    publicToken
+  };
+
+  const _global = typeof global !== 'undefined' ? global : window;
+  const fetch = _global.fetch;
+
+  _global.fetch = (url, options) => {
+    if (url === mapUrl) {
+      t.pass('should call to the right instantiation url');
+      mockFetchMapsV3();
+      return Promise.resolve({json: () => mapResponse, ok: true});
+    }
+
+    t.fail(`Invalid URL request : ${url}`);
+    return null;
+  };
+
+  let haveNewData = false;
+  const onNewData = () => {
+    haveNewData = true;
+  };
+  try {
+    const map = await fetchMap({cartoMapId, autoRefresh: 0.1, onNewData});
+    t.deepEquals(tileset.data, TILEJSON_RESPONSE, 'Tileset has filled in data');
+    await sleep(200);
+    t.ok(!haveNewData, 'Data has not been updated');
+
+    // Modify cache to force an update
+    tileset.cache -= 1;
+    await sleep(200);
+    t.ok(haveNewData, 'Data has been updated');
+
+    map.stopAutoRefresh();
+  } catch (e) {
+    t.error(e, 'should not throw');
+  }
+
   _global.fetch = fetch;
 
   t.end();

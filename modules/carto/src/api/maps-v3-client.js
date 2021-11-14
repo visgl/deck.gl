@@ -239,7 +239,7 @@ export async function getData({type, source, connection, credentials, geoColumn,
   return layerData.data;
 }
 
-/* global setInterval, URLSearchParams */
+/* global clearInterval, setInterval, URLSearchParams */
 async function _fetchMapDataset(dataset, accessToken) {
   // First fetch metadata
   const {connectionName: connection, source, type} = dataset;
@@ -294,16 +294,23 @@ export async function fetchMap({cartoMapId, credentials, autoRefresh, onNewData}
 
   // Periodically check if the data has changed. Note that this
   // will not update when a map is published.
+  let stopAutoRefresh;
   if (autoRefresh) {
-    setInterval(async () => {
+    const intervalId = setInterval(async () => {
       const changed = await fillInMapDatasets(map);
       if (changed.some(v => v === true)) {
         onNewData(parseMap(map));
       }
     }, autoRefresh * 1000);
+    stopAutoRefresh = () => {
+      clearInterval(intervalId);
+    };
   }
 
   // Mutates map.datasets so that dataset.data contains data
   await fillInMapDatasets(map);
-  return parseMap(map);
+  return {
+    ...parseMap(map),
+    ...{stopAutoRefresh}
+  };
 }
