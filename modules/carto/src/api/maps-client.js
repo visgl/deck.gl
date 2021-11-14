@@ -56,7 +56,7 @@ export async function getDataV2({type, source, credentials}) {
 
     default:
       throw new Error(
-        `Invalid maps API version. It shoud be ${API_VERSIONS.V1} or ${API_VERSIONS.V2}`
+        `Invalid maps API version. It should be ${API_VERSIONS.V1} or ${API_VERSIONS.V2}`
       );
   }
 }

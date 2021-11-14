@@ -256,6 +256,30 @@ Object.values(API_VERSIONS).forEach(apiVersion => {
   });
 });
 
+test(`getDataV2#versionError`, async t => {
+  setDefaultCredentials({apiVersion: API_VERSIONS.V3});
+
+  try {
+    await _getDataV2({
+      type: MAP_TYPES.QUERY,
+      source: 'select * from a'
+    });
+    t.error('should throw');
+  } catch (e) {
+    t.throws(
+      () => {
+        throw e;
+      },
+      /Invalid maps API version. It should be v1 or v2/,
+      'Throws error when incorrect API version used'
+    );
+  }
+
+  setDefaultCredentials({});
+
+  t.end();
+});
+
 [
   {
     props: {},
