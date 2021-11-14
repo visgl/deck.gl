@@ -176,7 +176,7 @@ test('getData#parameters', async t => {
     regex: /SERVER ERROR MESSAGE/i
   }
 ].forEach(({status, title, regex}) => {
-  test(`dealWithError#(${String(status)})`, async t => {
+  test(`dealWithError#v2#(${String(status)})`, async t => {
     const credentials = {
       apiKey: 'API_KEY',
       apiVersion: API_VERSIONS.V2,
@@ -224,6 +224,62 @@ test('getData#parameters', async t => {
   });
 });
 
+[
+  {
+    status: 400,
+    title: 'Should catch bad request',
+    regex: /Bad request. SERVER ERROR MESSAGE/i
+  },
+  ...[401, 403].map(status => ({
+    status,
+    title: 'Should catch unauthorized access to data',
+    regex: /Unauthorized access. SERVER ERROR MESSAGE/i
+  })),
+  {
+    status: 500,
+    title: 'Should catch unknown API error',
+    regex: /SERVER ERROR MESSAGE/i
+  }
+].forEach(({status, title, regex}) => {
+  test(`dealWithError#v3#(${String(status)})`, async t => {
+    const _global = typeof global !== 'undefined' ? global : window;
+    const fetch = _global.fetch;
+
+    _global.fetch = (url, options) => {
+      return Promise.resolve({
+        json: () => {
+          return {
+            error: 'SERVER ERROR MESSAGE'
+          };
+        },
+        ok: false,
+        status
+      });
+    };
+
+    try {
+      await getData({
+        type: MAP_TYPES.QUERY,
+        source: 'select * from a',
+        connection: 'connection_name',
+        credentials: {accessToken: 'XXX'}
+      });
+      t.error('should throw');
+    } catch (e) {
+      t.throws(
+        () => {
+          throw e;
+        },
+        regex,
+        title
+      );
+    }
+
+    _global.fetch = fetch;
+
+    t.end();
+  });
+});
 Object.values(API_VERSIONS).forEach(apiVersion => {
   test(`connectionError#(${apiVersion})`, async t => {
     setDefaultCredentials({apiVersion});
