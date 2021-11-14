@@ -19,6 +19,11 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v8.6
 
+#### deck.gl [8.6.4] - Nov 14 2021
+
+- Fix multi-depth picking with layerFilter (#6380)
+- Remove Matrix4 dependency from project module getUniforms (#6384)
+
 #### deck.gl [8.6.3] - Nov 7 2021
 
 - Multi-view picking consistency (#6306)
