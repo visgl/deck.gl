@@ -3,7 +3,8 @@ import {
   getColorAccessor,
   getSizeAccessor,
   getTextAccessor,
-  getTextPixelOffsetAccessor
+  getTextPixelOffsetAccessor,
+  LAYER_MAP
 } from '@deck.gl/carto/api/layer-map';
 
 const colors = ['#5A1846', '#900C3F', '#C70039', '#E3611C', '#F1920E', '#FFC300'];
@@ -159,3 +160,10 @@ for (const {anchor, alignment, radius, size, data, expected} of TEXT_PIXEL_OFFSE
     t.end();
   });
 }
+
+test('getHexagon', t => {
+  const accessor = LAYER_MAP.hexagonId.defaultProps.getHexagon;
+  const data = {h3: 1234};
+  t.deepEquals(accessor(data), 1234, 'getHexagon correctly returns 1234');
+  t.end();
+});
