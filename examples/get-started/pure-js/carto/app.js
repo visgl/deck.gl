@@ -7,16 +7,15 @@ const deck = new Deck({canvas: 'deck-canvas'});
 
 // Get map info from CARTO and update deck
 fetchMap({cartoMapId}).then(({initialViewState, mapStyle, layers}) => {
-  deck.setProps({initialViewState, layers});
-
   // Add Mapbox GL for the basemap. It's not a requirement if you don't need a basemap.
   const MAP_STYLE = `https://basemaps.cartocdn.com/gl/${mapStyle.styleType}-gl-style/style.json`;
   const map = new mapboxgl.Map({container: 'map', style: MAP_STYLE, interactive: false});
   deck.setProps({
-    controller: true,
     onViewStateChange: ({viewState}) => {
       const {longitude, latitude, ...rest} = viewState;
       map.jumpTo({center: [longitude, latitude], ...rest});
     }
   });
+
+  deck.setProps({controller: true, initialViewState, layers});
 });
