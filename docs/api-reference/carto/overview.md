@@ -127,13 +127,13 @@ setDefaultCredentials({
 
 The CARTO submodule includes the CartoLayer that simplifies the interaction with the CARTO platform. If you want to use other deck.gl layers (i.e. ArcLayer, H3HexagonLayer...), there are two possibilities depending on the API version you are using:
 
-* If you are using the API v3, you can directly retrieve the data in the format expected by the layer using the `getData` function:
+* If you are using the API v3, you can directly retrieve the data in the format expected by the layer using the `fetchLayerData` function:
 
     ```js
-    import { getData } from '@deck.gl/carto';
-    import { H3HexagonLayer } from '@deck.gl/geo-layers/';
+    import {fetchLayerData} from '@deck.gl/carto';
+    import {H3HexagonLayer} from '@deck.gl/geo-layers/';
 
-    const data =  await getData({
+    const {data} = await fetchLayerData({
       type: MAP_TYPES.QUERY,
       source: `SELECT bqcarto.h3.ST_ASH3(internal_point_geom, 4) as h3, count(*) as count
                   FROM bigquery-public-data.geo_us_census_places.us_national_places 
@@ -171,4 +171,3 @@ To make it easier to work with the CARTO module the following constants are prov
 |                 | JSON        |
 |                 | TILEJSON    |
 |                 | NDJSON      |
-
