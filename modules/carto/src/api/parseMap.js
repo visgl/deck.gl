@@ -53,17 +53,19 @@ function extractTextLayers(layers) {
         {id, config: configRest, ...rest},
 
         // One layer per valid text label, with full opacity
-        ...textLabel.filter(t => t.field).map(t => {
-          return {
-            id: `${id}-label-${t.field.name}`,
-            config: {
-              textLabel: t,
-              ...configRest,
-              visConfig: {...configRest.visConfig, opacity: 1}
-            },
-            ...rest
-          };
-        })
+        ...textLabel
+          .filter(t => t.field)
+          .map(t => {
+            return {
+              id: `${id}-label-${t.field.name}`,
+              config: {
+                textLabel: t,
+                ...configRest,
+                visConfig: {...configRest.visConfig, opacity: 1}
+              },
+              ...rest
+            };
+          })
       ];
     })
   );
@@ -123,14 +125,8 @@ function createStyleProps(config, mapping) {
 
 /* eslint-disable complexity */
 function createChannelProps(visualChannels, type, config, data) {
-  const {
-    colorField,
-    colorScale,
-    sizeField,
-    sizeScale,
-    strokeColorField,
-    strokeColorScale
-  } = visualChannels;
+  const {colorField, colorScale, sizeField, sizeScale, strokeColorField, strokeColorScale} =
+    visualChannels;
   let {heightField, heightScale} = visualChannels;
   if (type === 'hexagonId') {
     heightField = sizeField;

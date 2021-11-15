@@ -86,7 +86,11 @@ for (const {title, visState, layers} of VISSTATE_DATA) {
     const map = parseMap(json);
 
     const names = map.layers.map(layer => layer.toString());
-    t.deepEquals(names, layers.map(l => l.name), 'Layers have correct types');
+    t.deepEquals(
+      names,
+      layers.map(l => l.name),
+      'Layers have correct types'
+    );
 
     // Get all non-dynamic props to compare
     const props = map.layers.map(layer => {
@@ -106,7 +110,11 @@ for (const {title, visState, layers} of VISSTATE_DATA) {
       }
     });
 
-    t.deepEquals(props, layers.map(l => l.props), 'Layers are correctly instantiated');
+    t.deepEquals(
+      props,
+      layers.map(l => l.props),
+      'Layers are correctly instantiated'
+    );
     t.end();
   });
 }

@@ -164,12 +164,14 @@ test('getData#parameters', async t => {
   {
     status: 401,
     title: 'Should catch unauthorized access to API',
-    regex: /Unauthorized access to Maps API: invalid combination of user \('USER'\) and apiKey \('API_KEY'\)/i
+    regex:
+      /Unauthorized access to Maps API: invalid combination of user \('USER'\) and apiKey \('API_KEY'\)/i
   },
   {
     status: 403,
     title: 'Should catch unauthorized access to data',
-    regex: /Unauthorized access to dataset: the provided apiKey\('API_KEY'\) doesn't provide access to the requested data/i
+    regex:
+      /Unauthorized access to dataset: the provided apiKey\('API_KEY'\) doesn't provide access to the requested data/i
   },
   {
     status: 500,
