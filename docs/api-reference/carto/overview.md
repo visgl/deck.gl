@@ -117,9 +117,9 @@ If using API v1 or v2, the following properties are used:
 
 If using API v3, these are the available properties:
 
-- `apiBaseUrl` (required): base URL for requests to the API (can be obtained in the CARTO 3 Workspace)
-- `accessToken` (required): token to authenticate/authorize requests to the Maps API (private datasets)
-- `mapsUrl` (optional): Maps API URL Template. Default:
+- `apiBaseUrl` (optional): base URL for requests to the API (can be obtained in the CARTO 3 Workspace). Default: `https://gcp-us-east1.api.carto.com`.
+- `accessToken` (optional): token to authenticate/authorize requests to the Maps API (private datasets)
+- `mapsUrl` (optional): Maps API URL Template. By default it is derived from `apiBaseUrl`:
   - `https://{apiBaseUrl}/v3/maps`
 
 If you have a custom CARTO deployment (an on-premise user or you're running CARTO from [Google Cloud Marketplace](https://console.cloud.google.com/marketplace/product/cartodb-public/carto-enterprise-byol)), you’ll need to set the URLs to point to your instance.
