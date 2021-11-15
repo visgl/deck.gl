@@ -59,13 +59,23 @@ const INITIAL_VIEW_STATE = {
 
 const coverageColorScale = scaleSqrt()
   .domain([1, 10, 100])
-  .range([[237, 248, 177], [127, 205, 187], [44, 127, 184]]);
+  .range([
+    [237, 248, 177],
+    [127, 205, 187],
+    [44, 127, 184]
+  ]);
 const fmColorScale = scaleLinear()
   .domain([87, 108])
-  .range([[0, 60, 255], [0, 255, 40]]);
+  .range([
+    [0, 60, 255],
+    [0, 255, 40]
+  ]);
 const amColorScale = scaleLinear()
   .domain([530, 1700])
-  .range([[200, 0, 0], [255, 240, 0]]);
+  .range([
+    [200, 0, 0],
+    [255, 240, 0]
+  ]);
 
 function layerFilter({layer, viewport}) {
   const shouldDrawInMinimap =
@@ -96,19 +106,16 @@ export default function App({
   const [viewState, setViewState] = useState(INITIAL_VIEW_STATE);
   const [highlight, setHighlight] = useState(null);
 
-  const stationMap = useMemo(
-    () => {
-      if (data) {
-        const result = {};
-        for (const station of data) {
-          result[station.callSign] = station;
-        }
-        return result;
+  const stationMap = useMemo(() => {
+    if (data) {
+      const result = {};
+      for (const station of data) {
+        result[station.callSign] = station;
       }
-      return null;
-    },
-    [data]
-  );
+      return result;
+    }
+    return null;
+  }, [data]);
 
   const onViewStateChange = useCallback(({viewState: newViewState}) => {
     setViewState(() => ({
@@ -138,21 +145,18 @@ export default function App({
     setHighlight(station && station.callSign);
   }, []);
 
-  const viewportBounds = useMemo(
-    () => {
-      const {width, height} = viewState.main;
-      if (!width) return null;
-      const viewport = new WebMercatorViewport(viewState.main);
+  const viewportBounds = useMemo(() => {
+    const {width, height} = viewState.main;
+    if (!width) return null;
+    const viewport = new WebMercatorViewport(viewState.main);
 
-      const topLeft = viewport.unproject([0, 0]);
-      const topRight = viewport.unproject([width, 0]);
-      const bottomLeft = viewport.unproject([0, height]);
-      const bottomRight = viewport.unproject([width, height]);
+    const topLeft = viewport.unproject([0, 0]);
+    const topRight = viewport.unproject([width, 0]);
+    const bottomLeft = viewport.unproject([0, height]);
+    const bottomRight = viewport.unproject([width, height]);
 
-      return [[topLeft, topRight, bottomRight, bottomLeft, topLeft]];
-    },
-    [viewState]
-  );
+    return [[topLeft, topRight, bottomRight, bottomLeft, topLeft]];
+  }, [viewState]);
 
   const getTooltip = useCallback(info => getTooltipText(stationMap, info), [stationMap]);
 

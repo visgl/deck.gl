@@ -31,10 +31,7 @@ export const COLOR_SCALE = scaleThreshold()
     [168, 0, 0]
   ]);
 
-const WIDTH_SCALE = scaleLinear()
-  .clamp(true)
-  .domain([0, 200])
-  .range([10, 2000]);
+const WIDTH_SCALE = scaleLinear().clamp(true).domain([0, 200]).range([10, 2000]);
 
 const INITIAL_VIEW_STATE = {
   latitude: 38,

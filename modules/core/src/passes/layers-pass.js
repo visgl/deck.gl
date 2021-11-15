@@ -125,12 +125,8 @@ export default class LayersPass extends Pass {
     // render layers in normal colors
     for (let layerIndex = 0; layerIndex < layers.length; layerIndex++) {
       const layer = layers[layerIndex];
-      const {
-        shouldDrawLayer,
-        layerRenderIndex,
-        moduleParameters,
-        layerParameters
-      } = drawLayerParams[layerIndex];
+      const {shouldDrawLayer, layerRenderIndex, moduleParameters, layerParameters} =
+        drawLayerParams[layerIndex];
 
       // Calculate stats
       if (shouldDrawLayer && layer.props.pickable) {

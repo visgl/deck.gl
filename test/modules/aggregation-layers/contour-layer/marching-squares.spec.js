@@ -48,17 +48,11 @@ const GETCODE_TESTS = [
       // | 5  |  5 |  5 | => row-0
       // ---------------
       // row-0
-      5,
-      5,
-      5,
+      5, 5, 5,
       // row-1
-      5,
-      5,
-      5,
+      5, 5, 5,
       // row-2
-      5,
-      10,
-      10
+      5, 10, 10
     ],
     gridSize: [3, 3],
     x: 1,
@@ -68,17 +62,11 @@ const GETCODE_TESTS = [
   {
     cellWeights: [
       // row-0
-      5,
-      5,
-      5,
+      5, 5, 5,
       // row-1
-      10,
-      5,
-      5,
+      10, 5, 5,
       // row-2
-      10,
-      5,
-      5
+      10, 5, 5
     ],
     gridSize: [3, 3],
     x: 0,
@@ -90,17 +78,11 @@ const GETCODE_TESTS = [
   {
     cellWeights: [
       // row-0
-      5,
-      5,
-      5,
+      5, 5, 5,
       // row-1
-      5,
-      1,
-      6,
+      5, 1, 6,
       // row-2
-      5,
-      6,
-      1
+      5, 6, 1
     ],
     gridSize: [3, 3],
     x: 1,
@@ -111,17 +93,11 @@ const GETCODE_TESTS = [
   {
     cellWeights: [
       // row-0
-      5,
-      5,
-      5,
+      5, 5, 5,
       // row-1
-      5,
-      5,
-      10,
+      5, 5, 10,
       // row-2
-      5,
-      10,
-      5
+      5, 10, 5
     ],
     gridSize: [3, 3],
     x: 1,
@@ -192,17 +168,11 @@ const GETCODE_TESTS = [
       // | 5  |  5 |  5 | => row-0
       // ---------------
       // row-0
-      5,
-      5,
-      5,
+      5, 5, 5,
       // row-1
-      5,
-      15,
-      15,
+      5, 15, 15,
       // row-2
-      5,
-      5,
-      10
+      5, 5, 10
     ],
     threshold: [6, 11],
     gridSize: [3, 3],
@@ -214,17 +184,11 @@ const GETCODE_TESTS = [
     // 2110
     cellWeights: [
       // row-0
-      5,
-      1,
-      6,
+      5, 1, 6,
       // row-1
-      5,
-      10,
-      6,
+      5, 10, 6,
       // row-2
-      5,
-      5,
-      10
+      5, 5, 10
     ],
     threshold: [6, 7],
     gridSize: [3, 3],
@@ -253,7 +217,10 @@ const GETVERTEX_TESTS = [
   {
     gridOrigin: [100, 200],
     code: 4,
-    vertices: [[110, 230], [115, 220]]
+    vertices: [
+      [110, 230],
+      [115, 220]
+    ]
   },
   {
     gridOrigin: [100, 200],
@@ -263,7 +230,10 @@ const GETVERTEX_TESTS = [
   {
     gridOrigin: [100, 200],
     code: 6,
-    vertices: [[110, 230], [110, 210]]
+    vertices: [
+      [110, 230],
+      [110, 210]
+    ]
   },
   {
     gridOrigin: [100, 200],
@@ -277,7 +247,10 @@ const GETVERTEX_TESTS = [
     code: 12,
     x: 1,
     y: 1,
-    vertices: [[115, 240], [125, 240]],
+    vertices: [
+      [115, 240],
+      [125, 240]
+    ],
     gridSize: [3, 3]
   },
   {
@@ -285,7 +258,10 @@ const GETVERTEX_TESTS = [
     code: 9,
     x: 0,
     y: 1,
-    vertices: [[110, 250], [110, 230]],
+    vertices: [
+      [110, 250],
+      [110, 230]
+    ],
     gridSize: [3, 3]
   },
 
@@ -296,7 +272,12 @@ const GETVERTEX_TESTS = [
     meanCode: 1,
     x: 0,
     y: 0,
-    vertices: [[105, 220], [110, 230], [110, 210], [115, 220]],
+    vertices: [
+      [105, 220],
+      [110, 230],
+      [110, 210],
+      [115, 220]
+    ],
     gridSize: [3, 3]
   },
   {
@@ -305,7 +286,12 @@ const GETVERTEX_TESTS = [
     meanCode: 0,
     x: 0,
     y: 0,
-    vertices: [[105, 220], [110, 210], [110, 230], [115, 220]],
+    vertices: [
+      [105, 220],
+      [110, 210],
+      [110, 230],
+      [115, 220]
+    ],
     gridSize: [3, 3]
   },
 
@@ -322,7 +308,13 @@ const GETVERTEX_TESTS = [
     name: 'single-triangle',
     gridOrigin: [100, 200],
     code: 154,
-    vertices: [[[115, 220], [115, 230], [110, 230]]],
+    vertices: [
+      [
+        [115, 220],
+        [115, 230],
+        [110, 230]
+      ]
+    ],
     type: CONTOUR_TYPE.ISO_BANDS
   },
   {
@@ -331,7 +323,14 @@ const GETVERTEX_TESTS = [
     gridOrigin: [100, 200],
     code: 8,
     cellSize: [12, 24],
-    vertices: [[[110, 212], [114, 212], [118, 220], [118, 228]]],
+    vertices: [
+      [
+        [110, 212],
+        [114, 212],
+        [118, 220],
+        [118, 228]
+      ]
+    ],
     type: CONTOUR_TYPE.ISO_BANDS
   },
   {
@@ -340,7 +339,14 @@ const GETVERTEX_TESTS = [
     gridOrigin: [100, 200],
     code: 40,
     cellSize: [12, 24],
-    vertices: [[[110, 212], [114, 212], [114, 236], [110, 236]]],
+    vertices: [
+      [
+        [110, 212],
+        [114, 212],
+        [114, 236],
+        [110, 236]
+      ]
+    ],
     type: CONTOUR_TYPE.ISO_BANDS
   },
   {
@@ -349,7 +355,14 @@ const GETVERTEX_TESTS = [
     gridOrigin: [100, 200],
     code: 85,
     cellSize: [12, 24],
-    vertices: [[[106, 236], [106, 212], [118, 212], [118, 236]]],
+    vertices: [
+      [
+        [106, 236],
+        [106, 212],
+        [118, 212],
+        [118, 236]
+      ]
+    ],
     type: CONTOUR_TYPE.ISO_BANDS
   },
   {
@@ -358,7 +371,15 @@ const GETVERTEX_TESTS = [
     gridOrigin: [100, 200],
     code: 129,
     cellSize: [12, 24],
-    vertices: [[[106, 224], [106, 212], [112, 212], [114, 236], [110, 236]]],
+    vertices: [
+      [
+        [106, 224],
+        [106, 212],
+        [112, 212],
+        [114, 236],
+        [110, 236]
+      ]
+    ],
     type: CONTOUR_TYPE.ISO_BANDS
   },
   {
@@ -367,7 +388,16 @@ const GETVERTEX_TESTS = [
     gridOrigin: [100, 200],
     code: 37,
     cellSize: [12, 24],
-    vertices: [[[106, 224], [106, 212], [118, 212], [118, 224], [114, 236], [110, 236]]],
+    vertices: [
+      [
+        [106, 224],
+        [106, 212],
+        [118, 212],
+        [118, 224],
+        [114, 236],
+        [110, 236]
+      ]
+    ],
     type: CONTOUR_TYPE.ISO_BANDS
   },
   // saddle cases
@@ -378,7 +408,18 @@ const GETVERTEX_TESTS = [
     code: 68,
     meanCode: 0,
     cellSize: [12, 24],
-    vertices: [[[106, 236], [106, 224], [112, 236]], [[112, 212], [118, 212], [118, 224]]],
+    vertices: [
+      [
+        [106, 236],
+        [106, 224],
+        [112, 236]
+      ],
+      [
+        [112, 212],
+        [118, 212],
+        [118, 224]
+      ]
+    ],
     type: CONTOUR_TYPE.ISO_BANDS
   },
   {
@@ -388,7 +429,16 @@ const GETVERTEX_TESTS = [
     code: 68,
     meanCode: 2, // merged with mean-code 1
     cellSize: [12, 24],
-    vertices: [[[106, 236], [106, 224], [112, 212], [118, 212], [118, 224], [112, 236]]],
+    vertices: [
+      [
+        [106, 236],
+        [106, 224],
+        [112, 212],
+        [118, 212],
+        [118, 224],
+        [112, 236]
+      ]
+    ],
     type: CONTOUR_TYPE.ISO_BANDS
   }
 ];
@@ -442,14 +492,14 @@ test('MarchingSquares#getVertices', t => {
         if (!polygon) {
           return;
         }
-        const expectedPolygon = polygon.map(
-          vertex => (vertex.length === 2 ? vertex.concat(0) : vertex)
+        const expectedPolygon = polygon.map(vertex =>
+          vertex.length === 2 ? vertex.concat(0) : vertex
         );
         expectedVertices.push(expectedPolygon);
       });
     } else {
-      expectedVertices = testCase.vertices.map(
-        vertex => (vertex.length === 2 ? vertex.concat(0) : vertex)
+      expectedVertices = testCase.vertices.map(vertex =>
+        vertex.length === 2 ? vertex.concat(0) : vertex
       );
     }
     t.deepEquals(

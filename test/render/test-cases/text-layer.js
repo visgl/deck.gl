@@ -44,7 +44,7 @@ function getBinaryAttributes(data, getText, accessors) {
 // Use lower threshold to account for differences in font hinting/antialiasing
 const imageDiffOptions = {threshold: 0.96};
 
-export default (OS === 'Mac'
+export default OS === 'Mac'
   ? [
       {
         name: 'text-layer',
@@ -224,4 +224,4 @@ export default (OS === 'Mac'
         goldenImage: './test/render/golden-images/text-layer-background.png'
       }
     ]
-  : []);
+  : [];

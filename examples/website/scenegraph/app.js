@@ -64,40 +64,37 @@ export default function App({sizeScale = 25, onDataLoad, mapStyle = MAP_STYLE}) 
   const [data, setData] = useState(null);
   const [timer, setTimer] = useState({});
 
-  useEffect(
-    () => {
-      fetch(DATA_URL)
-        .then(resp => resp.json())
-        .then(resp => {
-          if (resp && resp.states && timer.id !== null) {
-            // In order to keep the animation smooth we need to always return the same
-            // objects in the exact same order. This function will discard new objects
-            // and only update existing ones.
-            let sortedData = resp.states;
-            if (data) {
-              const dataAsObj = {};
-              sortedData.forEach(entry => (dataAsObj[entry[DATA_INDEX.UNIQUE_ID]] = entry));
-              sortedData = data.map(entry => dataAsObj[entry[DATA_INDEX.UNIQUE_ID]] || entry);
-            }
-
-            setData(sortedData);
-
-            if (onDataLoad) {
-              onDataLoad(sortedData.length);
-            }
+  useEffect(() => {
+    fetch(DATA_URL)
+      .then(resp => resp.json())
+      .then(resp => {
+        if (resp && resp.states && timer.id !== null) {
+          // In order to keep the animation smooth we need to always return the same
+          // objects in the exact same order. This function will discard new objects
+          // and only update existing ones.
+          let sortedData = resp.states;
+          if (data) {
+            const dataAsObj = {};
+            sortedData.forEach(entry => (dataAsObj[entry[DATA_INDEX.UNIQUE_ID]] = entry));
+            sortedData = data.map(entry => dataAsObj[entry[DATA_INDEX.UNIQUE_ID]] || entry);
           }
-        })
-        .finally(() => {
-          timer.nextTimeoutId = setTimeout(() => setTimer({id: timer.nextTimeoutId}), REFRESH_TIME);
-        });
 
-      return () => {
-        clearTimeout(timer.nextTimeoutId);
-        timer.id = null;
-      };
-    },
-    [timer]
-  );
+          setData(sortedData);
+
+          if (onDataLoad) {
+            onDataLoad(sortedData.length);
+          }
+        }
+      })
+      .finally(() => {
+        timer.nextTimeoutId = setTimeout(() => setTimer({id: timer.nextTimeoutId}), REFRESH_TIME);
+      });
+
+    return () => {
+      clearTimeout(timer.nextTimeoutId);
+      timer.id = null;
+    };
+  }, [timer]);
 
   const layer =
     data &&

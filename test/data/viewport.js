@@ -11,7 +11,4 @@ export const sampleViewport = new WebMercatorViewport({
   bearing: 0
 });
 
-export const sampleModelMatrix = new Matrix4()
-  .rotateX(0.1)
-  .rotateY(-0.2)
-  .translate([1, 1, 0]);
+export const sampleModelMatrix = new Matrix4().rotateX(0.1).rotateY(-0.2).translate([1, 1, 0]);

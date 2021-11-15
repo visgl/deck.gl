@@ -117,7 +117,10 @@ test('project#getUniforms', t => {
 
   uniforms = project.getUniforms({viewport: TEST_VIEWPORTS.mapHighZoom});
   t.notOk(getUniformsError(uniforms, UNIFORMS), 'Uniforms validated');
-  t.ok(uniforms.project_uCenter.some(x => x), 'Returned non-trivial projection center');
+  t.ok(
+    uniforms.project_uCenter.some(x => x),
+    'Returned non-trivial projection center'
+  );
   t.ok(
     Math.abs(uniforms.project_uCenter[0]) < EPSILON &&
       Math.abs(uniforms.project_uCenter[1]) < EPSILON,
@@ -128,7 +131,10 @@ test('project#getUniforms', t => {
     [-122.42694091796875, 37.75153732299805, 0],
     'Returned shader coordinate origin'
   );
-  t.ok(uniforms.project_uCenter.some(x => x), 'Returned non-trivial projection center');
+  t.ok(
+    uniforms.project_uCenter.some(x => x),
+    'Returned non-trivial projection center'
+  );
 
   uniforms = project.getUniforms({
     viewport: TEST_VIEWPORTS.mapHighZoom,
@@ -136,14 +142,20 @@ test('project#getUniforms', t => {
     coordinateOrigin: [-122.4, 37.7]
   });
   t.notOk(getUniformsError(uniforms, UNIFORMS), 'Uniforms validated');
-  t.ok(uniforms.project_uCenter.some(x => x), 'Returned non-trivial projection center');
+  t.ok(
+    uniforms.project_uCenter.some(x => x),
+    'Returned non-trivial projection center'
+  );
 
   uniforms = project.getUniforms({
     viewport: TEST_VIEWPORTS.mapHighZoom,
     coordinateSystem: COORDINATE_SYSTEM.CARTESIAN
   });
   t.notOk(getUniformsError(uniforms, UNIFORMS), 'Uniforms validated');
-  t.ok(uniforms.project_uCenter.some(x => x), 'Returned non-trivial projection center');
+  t.ok(
+    uniforms.project_uCenter.some(x => x),
+    'Returned non-trivial projection center'
+  );
   // CARTESIAN + WEB_MERCATOR_AUTO_OFFSET is rounded in the common space
   t.ok(
     Math.abs(uniforms.project_uCenter[0]) < EPSILON * 10 &&
@@ -166,7 +178,10 @@ test('project#getUniforms', t => {
     [10.285714149475098, -3.1415927410125732, 0],
     'Returned shader coordinate origin'
   );
-  t.ok(uniforms.project_uCenter.some(x => x), 'Returned non-trivial projection center');
+  t.ok(
+    uniforms.project_uCenter.some(x => x),
+    'Returned non-trivial projection center'
+  );
 
   t.end();
 });

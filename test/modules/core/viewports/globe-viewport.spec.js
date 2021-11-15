@@ -40,12 +40,8 @@ test('GlobeViewport#distanceScale', t => {
   for (const testCase of TEST_VIEWPORTS) {
     const viewport = new GlobeViewport(testCase);
 
-    const {
-      unitsPerMeter,
-      metersPerUnit,
-      unitsPerDegree,
-      degreesPerUnit
-    } = viewport.getDistanceScales();
+    const {unitsPerMeter, metersPerUnit, unitsPerDegree, degreesPerUnit} =
+      viewport.getDistanceScales();
     t.ok(
       equals(
         [

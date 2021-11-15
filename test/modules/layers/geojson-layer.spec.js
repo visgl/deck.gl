@@ -90,7 +90,10 @@ test('GeoJsonLayer#tests', t => {
         },
         'created diff for subLayers'
       );
-      t.ok(subLayers.every(l => l.props._dataDiff), "sublayers' dataDiff prop is populated");
+      t.ok(
+        subLayers.every(l => l.props._dataDiff),
+        "sublayers' dataDiff prop is populated"
+      );
     },
     updateProps: {
       data: Object.assign({}, FIXTURES.choropleths),

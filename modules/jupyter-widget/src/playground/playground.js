@@ -12,9 +12,8 @@ export function initPlayground() {
   Transport.setCallbacks({
     onInitialize({transport}) {
       // Extract "deck.gl playground" props
-      const {width, height, customLibraries, mapboxApiKey, jsonInput, tooltip} = getPlaygroundProps(
-        transport
-      );
+      const {width, height, customLibraries, mapboxApiKey, jsonInput, tooltip} =
+        getPlaygroundProps(transport);
 
       // Load mapbox CSS
       loadMapboxCSS();

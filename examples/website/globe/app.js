@@ -52,12 +52,9 @@ export default function App({data}) {
 
   const groups = useMemo(() => sliceData(data), [data]);
 
-  const endTime = useMemo(
-    () => {
-      return groups.reduce((max, group) => Math.max(max, group.endTime), 0);
-    },
-    [groups]
-  );
+  const endTime = useMemo(() => {
+    return groups.reduce((max, group) => Math.max(max, group.endTime), 0);
+  }, [groups]);
 
   const timeRange = [currentTime, currentTime + TIME_WINDOW];
 

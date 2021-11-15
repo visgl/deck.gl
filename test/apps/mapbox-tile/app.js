@@ -75,8 +75,7 @@ class Root extends PureComponent {
         layers={[
           new MVTLayer({
             ...MAP_LAYER_STYLES,
-            data:
-              'https://tiles-a.basemaps.cartocdn.com/vectortiles/carto.streets/v1/{z}/{x}/{y}.mvt',
+            data: 'https://tiles-a.basemaps.cartocdn.com/vectortiles/carto.streets/v1/{z}/{x}/{y}.mvt',
 
             onClick: this._onClick.bind(this),
             pickable: true,

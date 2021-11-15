@@ -28,10 +28,16 @@ function loadScript(url) {
 // Map delta percentage points to color
 const repColorScale = scaleLog()
   .domain([1, 100])
-  .range([[255, 255, 191], [215, 25, 28]]);
+  .range([
+    [255, 255, 191],
+    [215, 25, 28]
+  ]);
 const demColorScale = scaleLog()
   .domain([1, 100])
-  .range([[255, 255, 191], [43, 131, 186]]);
+  .range([
+    [255, 255, 191],
+    [43, 131, 186]
+  ]);
 
 export async function renderToDOM(container, options = {}) {
   await loadScript(

@@ -101,11 +101,10 @@ const DeckGL = forwardRef((props, ref) => {
   const canvasRef = useRef(null);
 
   // extract any deck.gl layers masquerading as react elements from props.children
-  const jsxProps = useMemo(() => extractJSXLayers(props), [
-    props.layers,
-    props.views,
-    props.children
-  ]);
+  const jsxProps = useMemo(
+    () => extractJSXLayers(props),
+    [props.layers, props.views, props.children]
+  );
 
   // Callbacks
   let inRender = true;
@@ -137,28 +136,25 @@ const DeckGL = forwardRef((props, ref) => {
   // Update Deck's props. If Deck needs redraw, this will trigger a call to `_customRender` in
   // the next animation frame.
   // Needs to be called both from initial mount, and when new props are received
-  const deckProps = useMemo(
-    () => {
-      const forwardProps = {
-        ...props,
-        // Override user styling props. We will set the canvas style in render()
-        style: null,
-        width: '100%',
-        height: '100%',
-        layers: jsxProps.layers,
-        views: jsxProps.views,
-        onViewStateChange: handleViewStateChange,
-        onInteractionStateChange: handleInteractionStateChange
-      };
+  const deckProps = useMemo(() => {
+    const forwardProps = {
+      ...props,
+      // Override user styling props. We will set the canvas style in render()
+      style: null,
+      width: '100%',
+      height: '100%',
+      layers: jsxProps.layers,
+      views: jsxProps.views,
+      onViewStateChange: handleViewStateChange,
+      onInteractionStateChange: handleInteractionStateChange
+    };
 
-      if (thisRef.deck) {
-        thisRef.deck.setProps(forwardProps);
-      }
+    if (thisRef.deck) {
+      thisRef.deck.setProps(forwardProps);
+    }
 
-      return forwardProps;
-    },
-    [props]
-  );
+    return forwardProps;
+  }, [props]);
 
   useEffect(() => {
     thisRef.deck = createDeckInstance(thisRef, {
@@ -193,11 +189,10 @@ const DeckGL = forwardRef((props, ref) => {
 
   const {ContextProvider, width, height, id, style} = props;
 
-  const {containerStyle, canvasStyle} = useMemo(() => extractStyles({width, height, style}), [
-    width,
-    height,
-    style
-  ]);
+  const {containerStyle, canvasStyle} = useMemo(
+    () => extractStyles({width, height, style}),
+    [width, height, style]
+  );
 
   // Props changes may lead to 3 types of updates:
   // 1. Only the WebGL canvas - updated in Deck's render cycle (next animation frame)

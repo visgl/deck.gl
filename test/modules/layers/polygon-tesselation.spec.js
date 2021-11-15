@@ -30,32 +30,94 @@ const SAMPLE_DATA = [
   {polygon: [], name: 'empty array'},
   {polygon: [[1, 1]], name: 'too few points', height: 1, color: [255, 0, 0]},
   {
-    polygon: [[1, 1], [2, 2], [3, 0]],
+    polygon: [
+      [1, 1],
+      [2, 2],
+      [3, 0]
+    ],
     name: 'open path',
     height: 2
   },
   {
-    polygon: [[1, 1], [2, 2], [3, 0], [1, 1]],
+    polygon: [
+      [1, 1],
+      [2, 2],
+      [3, 0],
+      [1, 1]
+    ],
     name: 'closed loop'
   },
   {
-    polygon: [[[0, 0], [2, 0], [2, 2], [0, 2]], [[0.5, 0.5], [1, 0.5], [0.5, 1]]],
-    name: 'with 1 hole'
-  },
-  {
-    polygon: [[[0, 0], [2, 0], [2, 2], [0, 2]], [[0.5, 0.5], [1, 1], [0.5, 1]]],
+    polygon: [
+      [
+        [0, 0],
+        [2, 0],
+        [2, 2],
+        [0, 2]
+      ],
+      [
+        [0.5, 0.5],
+        [1, 0.5],
+        [0.5, 1]
+      ]
+    ],
     name: 'with 1 hole'
   },
   {
     polygon: [
-      [[0, 0], [2, 0], [2, 2], [0, 2]],
-      [[0.5, 0.5], [1, 0.5], [0.5, 1]],
-      [[1, 1], [1.5, 1.5], [1.5, 1]]
+      [
+        [0, 0],
+        [2, 0],
+        [2, 2],
+        [0, 2]
+      ],
+      [
+        [0.5, 0.5],
+        [1, 1],
+        [0.5, 1]
+      ]
+    ],
+    name: 'with 1 hole'
+  },
+  {
+    polygon: [
+      [
+        [0, 0],
+        [2, 0],
+        [2, 2],
+        [0, 2]
+      ],
+      [
+        [0.5, 0.5],
+        [1, 0.5],
+        [0.5, 1]
+      ],
+      [
+        [1, 1],
+        [1.5, 1.5],
+        [1.5, 1]
+      ]
     ],
     name: 'with 2 holes'
   },
   {
-    polygon: [[[0, 0], [2, 0], [2, 2], [0, 2]], [[0.5, 0.5], [1, 0.5], [0.5, 1]], [[1, 1], [2, 2]]],
+    polygon: [
+      [
+        [0, 0],
+        [2, 0],
+        [2, 2],
+        [0, 2]
+      ],
+      [
+        [0.5, 0.5],
+        [1, 0.5],
+        [0.5, 1]
+      ],
+      [
+        [1, 1],
+        [2, 2]
+      ]
+    ],
     name: 'with invalid hole'
   },
   {
@@ -169,11 +231,28 @@ test('PolygonTesselator#tesselation', t => {
   const tesselator = new PolygonTesselator({
     data: [
       {
-        polygon: [[1, 1], [2, 2], [3, 0], [1, 1]],
+        polygon: [
+          [1, 1],
+          [2, 2],
+          [3, 0],
+          [1, 1]
+        ],
         name: 'simple loop'
       },
       {
-        polygon: [[[0, 0], [2, 0], [2, 2], [0, 2]], [[0.5, 0.5], [1, 0.5], [0.5, 1]]],
+        polygon: [
+          [
+            [0, 0],
+            [2, 0],
+            [2, 2],
+            [0, 2]
+          ],
+          [
+            [0.5, 0.5],
+            [1, 0.5],
+            [0.5, 1]
+          ]
+        ],
         name: 'with 1 hole'
       }
     ],
@@ -200,11 +279,22 @@ test('PolygonTesselator#partial update', t => {
   const accessorCalled = new Set();
   const sampleData = [
     {
-      polygon: [[1, 1], [2, 2], [3, 0]],
+      polygon: [
+        [1, 1],
+        [2, 2],
+        [3, 0]
+      ],
       id: 'A'
     },
     {
-      polygon: [[[0, 0], [2, 0], [2, 2], [0, 2]]],
+      polygon: [
+        [
+          [0, 0],
+          [2, 0],
+          [2, 2],
+          [0, 2]
+        ]
+      ],
       id: 'B'
     }
   ];
@@ -230,7 +320,11 @@ test('PolygonTesselator#partial update', t => {
   t.deepEquals(Array.from(accessorCalled), ['A', 'B'], 'Accessor called on all data');
 
   sampleData[2] = {
-    polygon: [[4, 4], [5, 5], [6, 4]],
+    polygon: [
+      [4, 4],
+      [5, 5],
+      [6, 4]
+    ],
     id: 'C'
   };
   accessorCalled.clear();
@@ -250,7 +344,11 @@ test('PolygonTesselator#partial update', t => {
   t.deepEquals(Array.from(accessorCalled), ['C'], 'Accessor called only on partial data');
 
   sampleData[0] = {
-    polygon: [[2, 2], [3, 0], [1, 1]],
+    polygon: [
+      [2, 2],
+      [3, 0],
+      [1, 1]
+    ],
     id: 'A'
   };
   accessorCalled.clear();
@@ -414,7 +512,15 @@ test('PolygonTesselator#geometryBuffer#buffer', t => {
 });
 
 test('PolygonTesselator#normalizeGeometry', t => {
-  const sampleData = [[[150, 30], [-150, 30], [-150, -30], [150, -30], [150, 30]]];
+  const sampleData = [
+    [
+      [150, 30],
+      [-150, 30],
+      [-150, -30],
+      [150, -30],
+      [150, 30]
+    ]
+  ];
   const tesselator = new PolygonTesselator({
     data: sampleData,
     getGeometry: d => d

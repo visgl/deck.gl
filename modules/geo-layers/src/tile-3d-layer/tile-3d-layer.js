@@ -192,13 +192,8 @@ export default class Tile3DLayer extends CompositeLayer {
   }
 
   _makePointCloudLayer(tileHeader, oldLayer) {
-    const {
-      attributes,
-      pointCount,
-      constantRGBA,
-      cartographicOrigin,
-      modelMatrix
-    } = tileHeader.content;
+    const {attributes, pointCount, constantRGBA, cartographicOrigin, modelMatrix} =
+      tileHeader.content;
     const {positions, normals, colors} = attributes;
 
     if (!positions) {

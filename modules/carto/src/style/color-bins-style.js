@@ -12,9 +12,7 @@ export default function colorBins({
 
   const palette = typeof colors === 'string' ? getPalette(colors, domain.length) : colors;
 
-  const color = scaleThreshold()
-    .domain(domain)
-    .range(palette);
+  const color = scaleThreshold().domain(domain).range(palette);
 
   return d => {
     const value = getAttrValue(attr, d);

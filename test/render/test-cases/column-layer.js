@@ -7,7 +7,13 @@ const cullBackParameters = {
   cullFace: GL.BACK
 };
 
-export const polygonCCW = [[1, 0, 0], [0.3, 1, 0], [-0.6, 1, 0], [-1, -0.3, 0], [0, -1, 0]];
+export const polygonCCW = [
+  [1, 0, 0],
+  [0.3, 1, 0],
+  [-0.6, 1, 0],
+  [-1, -0.3, 0],
+  [0, -1, 0]
+];
 
 function genColumnLayerTestCase(settings, props = {}, visState = {}) {
   return {
