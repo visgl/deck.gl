@@ -12,6 +12,7 @@ const defaultProps = {
   type: null,
   onDataLoad: {type: 'function', value: data => {}, compare: false},
   onDataError: {type: 'function', value: null, compare: false, optional: true},
+  uniqueIdProperty: 'cartodb_id',
 
   // override carto credentials for the layer, set to null to read from default
   credentials: null,
@@ -143,7 +144,8 @@ export default class CartoLayer extends CompositeLayer {
       layer = GeoJsonLayer;
     }
 
-    const props = {...this.props};
+    const {uniqueIdProperty} = defaultProps;
+    const props = {uniqueIdProperty, ...this.props};
     delete props.data;
 
     // eslint-disable-next-line new-cap
