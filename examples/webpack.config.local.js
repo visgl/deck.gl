@@ -15,11 +15,12 @@
 
 // avoid destructuring for older Node version support
 const resolve = require('path').resolve;
+const {getOcularConfig} = require('ocular-dev-tools');
 
 const ROOT_DIR = resolve(__dirname, '..');
 const LIB_DIR = resolve(__dirname, '..');
 
-const ALIASES = require('ocular-dev-tools/config/ocular.config')({
+const ALIASES = getOcularConfig({
   root: resolve(__dirname, '..')
 }).aliases;
 

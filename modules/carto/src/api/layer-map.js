@@ -117,7 +117,7 @@ function calculateDomain(data, name, scaleType) {
     // GeoJSON data type
     const values = data.features.map(({properties}) => properties[name]);
     return domainFromValues(values, scaleType);
-  } else if (Array.isArray(data) && data[0][name]) {
+  } else if (Array.isArray(data) && data[0][name] !== undefined) {
     // JSON data type
     const values = data.map(properties => properties[name]);
     return domainFromValues(values, scaleType);
@@ -139,7 +139,7 @@ export function getColorAccessor({name}, scaleType, {colors}, opacity, data) {
   const scale = SCALE_FUNCS[scaleType]();
   scale.domain(calculateDomain(data, name, scaleType));
   scale.range(colors);
-  const alpha = opacity !== undefined ? 255 * Math.pow(opacity, 1 / 2.2) : 255;
+  const alpha = opacity !== undefined ? Math.round(255 * Math.pow(opacity, 1 / 2.2)) : 255;
 
   const accessor = properties => {
     const rgba = rgb(scale(properties[name]));

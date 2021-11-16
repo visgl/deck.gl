@@ -1,11 +1,13 @@
-import './carto-sql-layer.spec';
+import './api/layer-map.spec';
+import './api/parseMap.spec';
+import './api/maps-api-client.spec';
 import './carto-bqtiler-layer.spec';
 import './carto-layer.spec';
+import './carto-sql-layer.spec';
+import './config.spec';
 import './style/carto-color-bins.spec';
 import './style/carto-color-categories.spec';
 import './style/carto-color-continuous.spec';
 import './style/carto-hex-to-rgb.spec';
 import './style/carto-palette.spec';
 import './style/carto-utils.spec';
-import './api/maps-api-client.spec';
-import './config.spec';

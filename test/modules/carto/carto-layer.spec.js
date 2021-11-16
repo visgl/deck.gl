@@ -352,7 +352,35 @@ mockedV3Test('CartoLayer#_updateData executed when props changes', async t => {
   await testLayerAsync({Layer: CartoLayer, testCases, onError: t.notOk});
 });
 
-mockedV3Test('CartoSQLLayer#onDataLoad', async t => {
+mockedV3Test('CartoLayer#_updateData invalid apiVersion', async t => {
+  const testCases = [
+    {
+      props: {
+        type: MAP_TYPES.TABLE,
+        data: 'table',
+        connection: 'connection_name',
+        credentials: CREDENTIALS_V3
+      }
+    },
+    {
+      updateProps: {credentials: {apiVersion: 'wrong'}}
+    }
+  ];
+
+  let didThrow = false;
+  const regex = /Invalid apiVersion wrong. Use API_VERSIONS enum./;
+  await testLayerAsync({
+    Layer: CartoLayer,
+    testCases,
+    onError: e => {
+      t.ok(e.message.match(regex), 'Correct error message');
+      didThrow = true;
+    }
+  });
+  t.ok(didThrow, 'exception was thrown on invalid apiVersion prop update');
+});
+
+mockedV3Test('CartoLayer#onDataLoad', async t => {
   const spy = makeSpy(MVTLayer.prototype, 'getTileData');
   spy.returns([]);
 
@@ -383,6 +411,53 @@ mockedV3Test('CartoSQLLayer#onDataLoad', async t => {
       },
       onAfterUpdate: ({layer}) => {
         if (layer.isLoaded) t.is(counter, 2, 'should call twice to onDataLoad');
+      }
+    }
+  ];
+
+  await testLayerAsync({Layer: CartoLayer, testCases, onError: t.notOk});
+
+  spy.restore();
+});
+
+mockedV3Test('CartoLayer#onDataError', async t => {
+  const spy = makeSpy(MVTLayer.prototype, 'getTileData');
+  spy.returns([]);
+
+  const onDataLoad = () => {
+    throw new Error('onDataLoad ERROR');
+  };
+
+  let counter = 0;
+  const onDataError = () => {
+    counter++;
+  };
+
+  const testCases = [
+    {
+      props: {
+        data: 'tileset',
+        type: MAP_TYPES.TILESET,
+        connection: 'connection_name',
+        credentials: CREDENTIALS_V3,
+        onDataError
+      },
+      onAfterUpdate: ({layer}) => {
+        if (layer.isLoaded) {
+          t.is(counter, 0, 'should not call to onDataError');
+        }
+      }
+    },
+    {
+      updateProps: {
+        data: 'table',
+        type: MAP_TYPES.TABLE,
+        onDataLoad // <-- will throw error
+      },
+      onAfterUpdate: ({layer}) => {
+        if (layer.isLoaded) {
+          t.is(counter, 1, 'should call to onDataError');
+        }
       }
     }
   ];

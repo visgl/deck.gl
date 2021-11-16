@@ -57,7 +57,7 @@ function extractTextLayers(layers) {
           .filter(t => t.field)
           .map(t => {
             return {
-              id: `id-label-${t.field.name}`,
+              id: `${id}-label-${t.field.name}`,
               config: {
                 textLabel: t,
                 ...configRest,
@@ -100,12 +100,6 @@ function createInteractionProps(interactionConfig) {
 }
 
 function mapProps(source, target, mapping) {
-  if (Array.isArray(source)) {
-    source = source[0];
-  }
-  if (!source) {
-    return;
-  }
   for (const sourceKey in mapping) {
     const sourceValue = source[sourceKey];
     const targetKey = mapping[sourceKey];

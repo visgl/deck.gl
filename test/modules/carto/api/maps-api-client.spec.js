@@ -1,17 +1,25 @@
-/* global global, window */
+/* global global, setTimeout, window */
 
 import test from 'tape-catch';
 
 import {
-  _getDataV2,
-  MAP_TYPES,
   API_VERSIONS,
-  getData,
+  FORMATS,
+  MAP_TYPES,
+  _getDataV2,
   fetchLayerData,
-  setDefaultCredentials,
-  getDefaultCredentials
+  fetchMap,
+  getData,
+  getDefaultCredentials,
+  setDefaultCredentials
 } from '@deck.gl/carto';
-import {MAPS_API_V1_RESPONSE, TILEJSON_RESPONSE} from '../mock-fetch';
+import {
+  GEOJSON_RESPONSE,
+  MAPS_API_V1_RESPONSE,
+  TILEJSON_RESPONSE,
+  mockFetchMapsV3
+} from '../mock-fetch';
+import {EMPTY_KEPLER_MAP_CONFIG} from './parseMap.spec';
 
 for (const useSetDefaultCredentials of [true, false]) {
   test(`getDataV2#v1#setDefaultCredentials(${String(useSetDefaultCredentials)})`, async t => {
@@ -154,9 +162,220 @@ test('getData#parameters', async t => {
 
 [
   {
+    status: 401,
+    title: 'Should catch unauthorized access to API',
+    regex:
+      /Unauthorized access to Maps API: invalid combination of user \('USER'\) and apiKey \('API_KEY'\)/i
+  },
+  {
+    status: 403,
+    title: 'Should catch unauthorized access to data',
+    regex:
+      /Unauthorized access to dataset: the provided apiKey\('API_KEY'\) doesn't provide access to the requested data/i
+  },
+  {
+    status: 500,
+    title: 'Should catch unknown API error',
+    regex: /SERVER ERROR MESSAGE/i
+  }
+].forEach(({status, title, regex}) => {
+  test(`dealWithError#v2#(${String(status)})`, async t => {
+    const credentials = {
+      apiKey: 'API_KEY',
+      apiVersion: API_VERSIONS.V2,
+      username: 'USER',
+      mapsUrl: 'https://maps-v2'
+    };
+
+    setDefaultCredentials(credentials);
+
+    const _global = typeof global !== 'undefined' ? global : window;
+    const fetch = _global.fetch;
+
+    _global.fetch = (url, options) => {
+      return Promise.resolve({
+        json: () => {
+          return {
+            error: 'SERVER ERROR MESSAGE'
+          };
+        },
+        ok: false,
+        status
+      });
+    };
+
+    try {
+      await _getDataV2({
+        type: MAP_TYPES.QUERY,
+        source: 'select * from a'
+      });
+      t.error('should throw');
+    } catch (e) {
+      t.throws(
+        () => {
+          throw e;
+        },
+        regex,
+        title
+      );
+    }
+
+    setDefaultCredentials({});
+    _global.fetch = fetch;
+
+    t.end();
+  });
+});
+
+[
+  {
+    status: 400,
+    title: 'Should catch bad request',
+    regex: /Bad request. SERVER ERROR MESSAGE/i
+  },
+  ...[401, 403].map(status => ({
+    status,
+    title: 'Should catch unauthorized access to data',
+    regex: /Unauthorized access. SERVER ERROR MESSAGE/i
+  })),
+  {
+    status: 500,
+    title: 'Should catch unknown API error',
+    regex: /SERVER ERROR MESSAGE/i
+  }
+].forEach(({status, title, regex}) => {
+  test(`dealWithError#v3#(${String(status)})`, async t => {
+    const _global = typeof global !== 'undefined' ? global : window;
+    const fetch = _global.fetch;
+
+    _global.fetch = (url, options) => {
+      return Promise.resolve({
+        json: () => {
+          return {
+            error: 'SERVER ERROR MESSAGE'
+          };
+        },
+        ok: false,
+        status
+      });
+    };
+
+    try {
+      await getData({
+        type: MAP_TYPES.QUERY,
+        source: 'select * from a',
+        connection: 'connection_name',
+        credentials: {accessToken: 'XXX'}
+      });
+      t.error('should throw');
+    } catch (e) {
+      t.throws(
+        () => {
+          throw e;
+        },
+        regex,
+        title
+      );
+    }
+
+    _global.fetch = fetch;
+
+    t.end();
+  });
+});
+Object.values(API_VERSIONS).forEach(apiVersion => {
+  test(`connectionError#(${apiVersion})`, async t => {
+    setDefaultCredentials({apiVersion});
+
+    const _global = typeof global !== 'undefined' ? global : window;
+    const fetch = _global.fetch;
+
+    _global.fetch = (url, options) => {
+      throw new Error('Connection error');
+    };
+
+    const legacy = [API_VERSIONS.V1, API_VERSIONS.V2].includes(apiVersion);
+    try {
+      await (legacy ? _getDataV2 : getData)({
+        type: MAP_TYPES.QUERY,
+        source: 'select * from a',
+        ...(!legacy && {
+          connection: 'connection_name',
+          credentials: {accessToken: 'XXX'}
+        })
+      });
+      t.error('should throw');
+    } catch (e) {
+      t.throws(
+        () => {
+          throw e;
+        },
+        /Connection error/,
+        'Throws error when connection fails'
+      );
+    }
+
+    setDefaultCredentials({});
+    _global.fetch = fetch;
+
+    t.end();
+  });
+});
+
+test(`getDataV2#versionError`, async t => {
+  setDefaultCredentials({apiVersion: API_VERSIONS.V3});
+
+  try {
+    await _getDataV2({
+      type: MAP_TYPES.QUERY,
+      source: 'select * from a'
+    });
+    t.error('should throw');
+  } catch (e) {
+    t.throws(
+      () => {
+        throw e;
+      },
+      /Invalid maps API version. It should be v1 or v2/,
+      'Throws error when incorrect API version used'
+    );
+  }
+
+  setDefaultCredentials({});
+
+  t.end();
+});
+
+[
+  {
     props: {},
     mapInstantiationUrl:
       'http://carto-api/v3/maps/connection_name/table?client=deck-gl-carto&name=table'
+  },
+  {
+    props: {
+      format: FORMATS.GEOJSON
+    },
+    mapInstantiationUrl:
+      'http://carto-api/v3/maps/connection_name/table?client=deck-gl-carto&name=table'
+  },
+  {
+    props: {
+      format: FORMATS.NDJSON
+    },
+    mapInstantiationUrl:
+      'http://carto-api/v3/maps/connection_name/table?client=deck-gl-carto&name=table'
+  },
+  {
+    props: {
+      credentials: {
+        apiVersion: API_VERSIONS.V3,
+        apiBaseUrl: 'http://carto-api-with-slash/',
+        accessToken: 'XXX'
+      }
+    },
+    mapInstantiationUrl:
+      'http://carto-api-with-slash/v3/maps/connection_name/table?client=deck-gl-carto&name=table'
   },
   {
     props: {geoColumn: 'geog'},
@@ -182,6 +401,7 @@ test('getData#parameters', async t => {
   for (const useSetDefaultCredentials of [true, false]) {
     test(`fetchLayerData#setDefaultCredentials(${String(useSetDefaultCredentials)})`, async t => {
       const geojsonURL = 'http://geojson';
+      const ndjsonURL = 'http://ndjson';
       const accessToken = 'XXX';
       const credentials = {
         apiVersion: API_VERSIONS.V3,
@@ -205,7 +425,8 @@ test('getData#parameters', async t => {
           return Promise.resolve({
             json: () => {
               return {
-                geojson: {url: [geojsonURL]}
+                geojson: {url: [geojsonURL]},
+                ndjson: {url: [ndjsonURL]}
               };
             },
             ok: true
@@ -218,6 +439,11 @@ test('getData#parameters', async t => {
                 geojson: {url: [geojsonURL]}
               };
             },
+            ok: true
+          });
+        } else if (url === ndjsonURL) {
+          t.pass('should call to the right ndjson url');
+          return Promise.resolve({
             ok: true
           });
         }
@@ -309,6 +535,148 @@ test('getData#post', async t => {
   }
 
   setDefaultCredentials({});
+
+  _global.fetch = fetch;
+
+  t.end();
+});
+
+test('fetchMap#no datasets', async t => {
+  const cartoMapId = 'abcd-1234';
+  const mapUrl = `http://carto-api/v3/maps/public/${cartoMapId}`;
+  const mapResponse = {id: cartoMapId, datasets: [], keplerMapConfig: EMPTY_KEPLER_MAP_CONFIG};
+
+  setDefaultCredentials({apiVersion: API_VERSIONS.V3, apiBaseUrl: 'http://carto-api'});
+
+  const _global = typeof global !== 'undefined' ? global : window;
+  const fetch = _global.fetch;
+
+  _global.fetch = (url, options) => {
+    if (url === mapUrl) {
+      t.pass('should call to the right instantiation url');
+      return Promise.resolve({json: () => mapResponse, ok: true});
+    }
+
+    t.fail(`Invalid URL request : ${url}`);
+    return null;
+  };
+
+  try {
+    await fetchMap({cartoMapId});
+  } catch (e) {
+    t.error(e, 'should not throw');
+  }
+
+  setDefaultCredentials({});
+  _global.fetch = fetch;
+
+  t.end();
+});
+
+test('fetchMap#datasets', async t => {
+  const cartoMapId = 'abcd-1234';
+  const mapUrl = `http://carto-api/v3/maps/public/${cartoMapId}`;
+  const publicToken = 'public_token';
+
+  const connectionName = 'test_connection';
+  const source = 'test_source';
+  const table = {type: MAP_TYPES.TABLE, connectionName, source};
+  const tileset = {type: MAP_TYPES.TILESET, connectionName, source};
+  const query = {type: MAP_TYPES.QUERY, connectionName, source};
+
+  const mapResponse = {
+    id: cartoMapId,
+    datasets: [table, tileset, query],
+    keplerMapConfig: EMPTY_KEPLER_MAP_CONFIG,
+    publicToken
+  };
+
+  setDefaultCredentials({apiVersion: API_VERSIONS.V3, apiBaseUrl: 'http://carto-api'});
+
+  const _global = typeof global !== 'undefined' ? global : window;
+  const fetch = _global.fetch;
+
+  _global.fetch = (url, options) => {
+    if (url === mapUrl) {
+      t.pass('should call to the right instantiation url');
+      mockFetchMapsV3();
+      return Promise.resolve({json: () => mapResponse, ok: true});
+    }
+
+    t.fail(`Invalid URL request : ${url}`);
+    return null;
+  };
+
+  try {
+    await fetchMap({cartoMapId});
+    t.deepEquals(table.data, GEOJSON_RESPONSE, 'Table has filled in data');
+    t.deepEquals(tileset.data, TILEJSON_RESPONSE, 'Tileset has filled in data');
+    t.deepEquals(query.data, GEOJSON_RESPONSE, 'Query has filled in data');
+  } catch (e) {
+    t.error(e, 'should not throw');
+  }
+
+  setDefaultCredentials({});
+  _global.fetch = fetch;
+
+  t.end();
+});
+
+function sleep(ms) {
+  return new Promise(resolve => {
+    setTimeout(resolve, ms);
+  });
+}
+
+test('fetchMap#autoRefresh', async t => {
+  const cartoMapId = 'abcd-1234';
+  const mapUrl = `https://gcp-us-east1.api.carto.com/v3/maps/public/${cartoMapId}`;
+  const publicToken = 'public_token';
+
+  const connectionName = 'test_connection';
+  const source = 'test_source';
+  const tileset = {type: MAP_TYPES.TILESET, connectionName, source};
+
+  const mapResponse = {
+    id: cartoMapId,
+    datasets: [tileset],
+    keplerMapConfig: EMPTY_KEPLER_MAP_CONFIG,
+    publicToken
+  };
+
+  const _global = typeof global !== 'undefined' ? global : window;
+  const fetch = _global.fetch;
+
+  _global.fetch = (url, options) => {
+    if (url === mapUrl) {
+      t.pass('should call to the right instantiation url');
+      mockFetchMapsV3();
+      return Promise.resolve({json: () => mapResponse, ok: true});
+    }
+
+    t.fail(`Invalid URL request : ${url}`);
+    return null;
+  };
+
+  let haveNewData = false;
+  const onNewData = () => {
+    haveNewData = true;
+  };
+  try {
+    const map = await fetchMap({cartoMapId, autoRefresh: 0.1, onNewData});
+    t.deepEquals(tileset.data, TILEJSON_RESPONSE, 'Tileset has filled in data');
+    await sleep(200);
+    t.ok(!haveNewData, 'Data has not been updated');
+
+    // Modify cache to force an update
+    tileset.cache -= 1;
+    await sleep(200);
+    t.ok(haveNewData, 'Data has been updated');
+
+    map.stopAutoRefresh();
+  } catch (e) {
+    t.error(e, 'should not throw');
+  }
 
   _global.fetch = fetch;
 

@@ -99,7 +99,9 @@ export default class CartoLayer extends CompositeLayer {
 
       let data;
 
-      if (apiVersion === API_VERSIONS.V3) {
+      if (apiVersion === API_VERSIONS.V1 || apiVersion === API_VERSIONS.V2) {
+        data = await getDataV2({type, source, credentials});
+      } else {
         data = await getData({
           type,
           source,
@@ -108,10 +110,6 @@ export default class CartoLayer extends CompositeLayer {
           geoColumn,
           columns
         });
-      } else if (apiVersion === API_VERSIONS.V1 || apiVersion === API_VERSIONS.V2) {
-        data = await getDataV2({type, source, credentials});
-      } else {
-        log.assert(`Unknow apiVersion ${apiVersion}. Use API_VERSIONS enum.`);
       }
 
       this.setState({data, apiVersion});
