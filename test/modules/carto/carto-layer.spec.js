@@ -13,6 +13,7 @@ const CREDENTIALS_V3 = {
 
 mockedV2Test('CartoLayer#v2', async t => {
   const onAfterUpdate = ({layer, subLayers, subLayer}) => {
+    t.is(layer.props.uniqueIdProperty, 'cartodb_id', 'should default to correct uniqueIdProperty');
     const {data} = layer.state;
     if (!data) {
       t.is(subLayers.length, 0, 'should no render subLayers');
@@ -54,6 +55,7 @@ mockedV3Test('CartoLayer#v3', async t => {
   spy.returns([]);
 
   const onAfterUpdate = ({layer, subLayer, subLayers}) => {
+    t.is(layer.props.uniqueIdProperty, 'cartodb_id', 'should default to correct uniqueIdProperty');
     const {data} = layer.state;
     if (!data) {
       t.is(subLayers.length, 0, 'should no render subLayers');

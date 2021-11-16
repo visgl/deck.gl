@@ -12,6 +12,7 @@ const defaultProps = {
   type: null,
   onDataLoad: {type: 'function', value: data => {}, compare: false},
   onDataError: {type: 'function', value: null, compare: false, optional: true},
+  uniqueIdProperty: 'cartodb_id',
 
   // override carto credentials for the layer, set to null to read from default
   credentials: null,
