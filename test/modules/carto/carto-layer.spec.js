@@ -13,7 +13,6 @@ const CREDENTIALS_V3 = {
 
 mockedV2Test('CartoLayer#v2', async t => {
   const onAfterUpdate = ({layer, subLayers, subLayer}) => {
-    t.is(layer.props.uniqueIdProperty, 'cartodb_id', 'should default to correct uniqueIdProperty');
     const {data} = layer.state;
     if (!data) {
       t.is(subLayers.length, 0, 'should no render subLayers');
@@ -21,6 +20,11 @@ mockedV2Test('CartoLayer#v2', async t => {
       t.is(subLayers.length, 1, 'should render a subLayer');
       t.ok(Array.isArray(data.tiles), 'tiles should be an array');
       t.ok(subLayer instanceof MVTLayer, 'subLayer should be an MVTLayer ');
+      t.is(
+        subLayer.props.uniqueIdProperty,
+        'cartodb_id',
+        'should default to correct uniqueIdProperty'
+      );
     }
   };
 
@@ -55,7 +59,6 @@ mockedV3Test('CartoLayer#v3', async t => {
   spy.returns([]);
 
   const onAfterUpdate = ({layer, subLayer, subLayers}) => {
-    t.is(layer.props.uniqueIdProperty, 'cartodb_id', 'should default to correct uniqueIdProperty');
     const {data} = layer.state;
     if (!data) {
       t.is(subLayers.length, 0, 'should no render subLayers');
@@ -64,6 +67,11 @@ mockedV3Test('CartoLayer#v3', async t => {
       switch (layer.props.type) {
         case MAP_TYPES.TILESET:
           t.ok(subLayer instanceof MVTLayer, 'should be an MVTLayer');
+          t.is(
+            subLayer.props.uniqueIdProperty,
+            'cartodb_id',
+            'should default to correct uniqueIdProperty'
+          );
           break;
         case MAP_TYPES.TABLE:
         case MAP_TYPES.QUERY:
