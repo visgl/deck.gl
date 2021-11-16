@@ -19,6 +19,11 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v8.7
 
+### deck.gl [8.7.0-alpha.2] - Nov 16 2021
+- Bump prettier to v2 (#6386)
+- CARTO default to v3 API (#6376)
+- Fix multi-depth picking with layerFilter (#6380)
+
 ### deck.gl [8.7.0-alpha.1] - Nov 8 2021
 - Add missing prop mappings for GeoJsonLayer (#6336)
 - Add `fetchMap` function to carto module (#6341)
