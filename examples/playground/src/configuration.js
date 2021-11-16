@@ -7,8 +7,6 @@ import * as GeoLayers from '@deck.gl/geo-layers';
 import * as MeshLayers from '@deck.gl/mesh-layers';
 import {
   CartoLayer,
-  CartoSQLLayer,
-  CartoBQTilerLayer,
   MAP_TYPES as CARTO_MAP_TYPES,
   colorBins,
   colorCategories,
@@ -36,7 +34,7 @@ export default {
     AggregationLayers,
     GeoLayers,
     MeshLayers,
-    {CartoLayer, CartoBQTilerLayer, CartoSQLLayer},
+    {CartoLayer},
     // Any non-standard views
     {}
   ),
