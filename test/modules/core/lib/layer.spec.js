@@ -29,7 +29,7 @@ import {
 } from '@deck.gl/core';
 import {testInitializeLayer, testLayer, testLayerAsync} from '@deck.gl/test-utils';
 import {makeSpy} from '@probe.gl/test-utils';
-import {equals, Matrix4} from 'math.gl';
+import {equals, Matrix4} from '@math.gl/core';
 import {Timeline, Model} from '@luma.gl/core';
 
 import {sleep, testAsyncData} from './async-iterator-test-utils';

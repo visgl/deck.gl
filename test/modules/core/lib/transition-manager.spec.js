@@ -2,7 +2,7 @@ import test from 'tape-promise/tape';
 import TransitionManager from '@deck.gl/core/controllers/transition-manager';
 import {MapState} from '@deck.gl/core/controllers/map-controller';
 import {Timeline} from '@luma.gl/core';
-import {config} from 'math.gl';
+import {config} from '@math.gl/core';
 import {LinearInterpolator, FlyToInterpolator} from '@deck.gl/core';
 
 /* global setTimeout, clearTimeout */

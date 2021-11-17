@@ -1,6 +1,6 @@
 /* global google, document */
 import {Deck} from '@deck.gl/core';
-import {Matrix4} from 'math.gl';
+import {Matrix4} from '@math.gl/core';
 
 // https://en.wikipedia.org/wiki/Web_Mercator_projection#Formulas
 const MAX_LATITUDE = 85.05113;

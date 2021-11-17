@@ -1,4 +1,4 @@
-import {equals} from 'math.gl';
+import {equals} from '@math.gl/core';
 import assert from '../utils/assert';
 
 export default class TransitionInterpolator {

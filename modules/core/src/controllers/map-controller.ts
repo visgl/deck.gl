@@ -1,4 +1,4 @@
-import {clamp} from 'math.gl';
+import {clamp} from '@math.gl/core';
 import Controller from './controller';
 import ViewState from './view-state';
 import {normalizeViewportProps} from '@math.gl/web-mercator';

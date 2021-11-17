@@ -1,6 +1,6 @@
 import test from 'tape-promise/tape';
 import {_GlobeViewport as GlobeViewport} from '@deck.gl/core';
-import {equals, config} from 'math.gl';
+import {equals, config} from '@math.gl/core';
 
 const TEST_VIEWPORTS = [
   {
