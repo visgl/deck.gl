@@ -10,14 +10,13 @@ require('@loaders.gl/polyfills');
 const {JSDOM} = require('jsdom');
 const dom = new JSDOM(`<!DOCTYPE html>`);
 // These globals are required by @jupyter-widgets/base
-/* global global */
-global.window = dom.window;
-global.navigator = dom.window.navigator;
-global.document = dom.window.document;
-global.Element = dom.window.Element;
-global.__JSDOM__ = true;
-global.HTMLCanvasElement = dom.window.HTMLCanvasElement;
-global.HTMLVideoElement = dom.window.HTMLVideoElement;
+globalThis.window = dom.window;
+globalThis.navigator = dom.window.navigator;
+globalThis.document = dom.window.document;
+globalThis.Element = dom.window.Element;
+globalThis.__JSDOM__ = true;
+globalThis.HTMLCanvasElement = dom.window.HTMLCanvasElement;
+globalThis.HTMLVideoElement = dom.window.HTMLVideoElement;
 
 // Polyfill AbortController
 require('abortcontroller-polyfill');
@@ -34,7 +33,7 @@ moduleAlias.addAlias('react-map-gl/dist/esm/mapbox/mapbox', (fromPath, request, 
 
 const {gl} = require('@deck.gl/test-utils');
 // Create a dummy canvas for the headless gl context
-const canvas = global.document.createElement('canvas');
+const canvas = globalThis.document.createElement('canvas');
 canvas.width = gl.drawingBufferWidth;
 canvas.height = gl.drawingBufferHeight;
 gl.canvas = canvas;

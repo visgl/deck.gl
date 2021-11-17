@@ -36,8 +36,8 @@ const TEST_VIEW_STATE = {
 };
 
 // If testing under node, provide a headless context
-/* global global, document */
-const getMockContext = () => (typeof global !== 'undefined' && global.__JSDOM__ ? gl : null);
+/* global document */
+const getMockContext = () => (globalThis.__JSDOM__ ? gl : null);
 
 test('DeckGL#mount/unmount', t => {
   const ref = createRef();

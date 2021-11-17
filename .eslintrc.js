@@ -2,6 +2,9 @@
 module.exports = {
   plugins: ['react', 'import'],
   extends: ['uber-jsx', 'uber-es2015', 'prettier', 'prettier/react', 'plugin:import/errors'],
+  "globals": {
+    "globalThis": false // means it is not writeable
+  },
   overrides: [{
     files: ['*.spec.js', 'webpack.config.js', '**/bundle/*.js'],
     rules: {
