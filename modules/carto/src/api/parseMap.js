@@ -61,6 +61,7 @@ function extractTextLayers(layers) {
               config: {
                 textLabel: t,
                 ...configRest,
+                label: `${config.label}-label-${t.field.name}`,
                 visConfig: {...configRest.visConfig, opacity: 1}
               },
               ...rest
