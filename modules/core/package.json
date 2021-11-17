@@ -38,6 +38,8 @@
     "gl-matrix": "^3.0.0",
     "math.gl": "^3.5.4",
     "mjolnir.js": "^2.5.0",
-    "probe.gl": "^3.4.0"
+    "@probe.gl/env": "^3.5.0-alpha.4",
+    "@probe.gl/log": "^3.5.0-alpha.4",
+    "@probe.gl/stats": "^3.5.0-alpha.4"
   }
 }

@@ -2793,13 +2793,28 @@
   resolved "https://registry.yarnpkg.com/@popperjs/core/-/core-2.9.3.tgz#8b68da1ebd7fc603999cf6ebee34a4899a14b88e"
   integrity sha512-xDu17cEfh7Kid/d95kB6tZsLOmSWKCZKtprnhVepjsSaCij+lM3mItSJDuuHDMbCWTh8Ejmebwb+KONcCJ0eXQ==
 
-"@probe.gl/bench@^3.4.0":
-  version "3.4.0"
-  resolved "https://registry.yarnpkg.com/@probe.gl/bench/-/bench-3.4.0.tgz#8e358bcfdcc5429eb9f85b48f5ab53b1762f1e10"
-  integrity sha512-S7iNPz5G3zEfEP0S4SAMvtj+dwP7EWfVBaA8Cy5CVIgM1lnpUbXvqoAJxlVEedNC32Icxwq65XQheufy1Zzmug==
+"@probe.gl/bench@3.5.0-alpha.4":
+  version "3.5.0-alpha.4"
+  resolved "https://registry.yarnpkg.com/@probe.gl/bench/-/bench-3.5.0-alpha.4.tgz#50573e2f8bd347ee3ff931619ce31df91fc24a53"
+  integrity sha512-N70nDI/Cd71Q9v9p8Dyli0totCcZAwG+GiAPMluRmYLO5L5bGts4loeSXlvsa0ylMvBFwqabGhNB+jE3xyF+ew==
   dependencies:
     "@babel/runtime" "^7.0.0"
-    probe.gl "3.4.0"
+    "@probe.gl/log" "3.5.0-alpha.4"
+
+"@probe.gl/env@3.5.0-alpha.4", "@probe.gl/env@^3.5.0-alpha.4":
+  version "3.5.0-alpha.4"
+  resolved "https://registry.yarnpkg.com/@probe.gl/env/-/env-3.5.0-alpha.4.tgz#7b902a16eff84f67a729960a28cff75636c66c2f"
+  integrity sha512-8QWv17Cb0xMCXMMyrFyVO2Bz2JPWGl59TU6+nzAk+LASkR9+bVAXbHt9Iq3BxznItJUyFj6uJUo4hDlq3YT3pA==
+  dependencies:
+    "@babel/runtime" "^7.0.0"
+
+"@probe.gl/log@3.5.0-alpha.4", "@probe.gl/log@^3.5.0-alpha.4":
+  version "3.5.0-alpha.4"
+  resolved "https://registry.yarnpkg.com/@probe.gl/log/-/log-3.5.0-alpha.4.tgz#0c7c2a1412e8d3641739d03b00fd8cd7bfc27ec3"
+  integrity sha512-bqrma+KDrfubmPznWEtHGfjECkqoNg1CCEQrfSFzqWswkvJ6s40zoxZGh44n0OUOzMon8O83pXxBK2SC8seFEg==
+  dependencies:
+    "@babel/runtime" "^7.0.0"
+    "@probe.gl/env" "3.5.0-alpha.4"
 
 "@probe.gl/stats@3.4.0", "@probe.gl/stats@^3.4.0":
   version "3.4.0"
@@ -2815,6 +2830,23 @@
   dependencies:
     "@babel/runtime" "^7.0.0"
 
+"@probe.gl/stats@^3.5.0-alpha.4":
+  version "3.5.0-alpha.4"
+  resolved "https://registry.yarnpkg.com/@probe.gl/stats/-/stats-3.5.0-alpha.4.tgz#699d5487b17e0a52006cf726f7ee3a6ebbaae055"
+  integrity sha512-7F9arpLIoT1MJjah1XB5dUwKOGUwdoJJWdTZpkbOOZk4UyPkgvcg2TNAI49QLz0hupGpk6jDXML7GS8dgDZ8Tg==
+  dependencies:
+    "@babel/runtime" "^7.0.0"
+
+"@probe.gl/test-utils@3.5.0-alpha.4":
+  version "3.5.0-alpha.4"
+  resolved "https://registry.yarnpkg.com/@probe.gl/test-utils/-/test-utils-3.5.0-alpha.4.tgz#34d21648cf33ded712e438b1a6accd7e750be808"
+  integrity sha512-OIzvFHkfbu6C+Tnbzvm55wIWWzYaW2OGAwYoPdFGnIJdX6Nq68VpTyvHOaE1StrPuP9sh1gCe4QmTN0TnipeTw==
+  dependencies:
+    "@babel/runtime" "^7.0.0"
+    "@probe.gl/log" "3.5.0-alpha.4"
+    pixelmatch "^4.0.2"
+    puppeteer "*"
+
 "@probe.gl/test-utils@^3.0.2":
   version "3.4.1"
   resolved "https://registry.yarnpkg.com/@probe.gl/test-utils/-/test-utils-3.4.1.tgz#d82d9e345945f8d361bc4460fb18a7844877b43c"
@@ -2823,16 +2855,6 @@
     "@babel/runtime" "^7.0.0"
     pixelmatch "^4.0.2"
     probe.gl "3.4.1"
-    puppeteer "*"
-
-"@probe.gl/test-utils@^3.4.0":
-  version "3.4.0"
-  resolved "https://registry.yarnpkg.com/@probe.gl/test-utils/-/test-utils-3.4.0.tgz#5427d8923a0921dc28ae3e59fe597f9a807bb28f"
-  integrity sha512-CraP/2z+LQLgK2E1rs9v/TcNcS0ULnu8l/u1ZOAFBa7PRxNMdC9R5pb05yXLiqxOmTYR+sQWLT4tYa+kYPwjCw==
-  dependencies:
-    "@babel/runtime" "^7.0.0"
-    pixelmatch "^4.0.2"
-    probe.gl "3.4.0"
     puppeteer "*"
 
 "@stencil/core@2.6.0":
@@ -10764,14 +10786,6 @@ pretty-error@^2.0.2:
     renderkid "^2.0.1"
     utila "~0.4"
 
-probe.gl@3.4.0, probe.gl@^3.4.0:
-  version "3.4.0"
-  resolved "https://registry.yarnpkg.com/probe.gl/-/probe.gl-3.4.0.tgz#f35029b0041fb909caff493ab23feae53339261e"
-  integrity sha512-9CLByZATuhuG/Viq3ckfWU+dAhb7dMmjzsyCy4s7ds9ueTejcVRENxL197/XacOK/AN61YrEERB0QnouB0Qc0Q==
-  dependencies:
-    "@babel/runtime" "^7.0.0"
-    "@probe.gl/stats" "3.4.0"
-
 probe.gl@3.4.1:
   version "3.4.1"
   resolved "https://registry.yarnpkg.com/probe.gl/-/probe.gl-3.4.1.tgz#88d8629fbac5a627049d6fdc6b8c364d56f00815"
@@ -10779,6 +10793,14 @@ probe.gl@3.4.1:
   dependencies:
     "@babel/runtime" "^7.0.0"
     "@probe.gl/stats" "3.4.1"
+
+probe.gl@^3.4.0:
+  version "3.4.0"
+  resolved "https://registry.yarnpkg.com/probe.gl/-/probe.gl-3.4.0.tgz#f35029b0041fb909caff493ab23feae53339261e"
+  integrity sha512-9CLByZATuhuG/Viq3ckfWU+dAhb7dMmjzsyCy4s7ds9ueTejcVRENxL197/XacOK/AN61YrEERB0QnouB0Qc0Q==
+  dependencies:
+    "@babel/runtime" "^7.0.0"
+    "@probe.gl/stats" "3.4.0"
 
 process-nextick-args@~2.0.0:
   version "2.0.1"
