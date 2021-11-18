@@ -1,8 +1,8 @@
 import {CompositeLayer, log} from '@deck.gl/core';
 import {MVTLayer} from '@deck.gl/geo-layers';
 import {GeoJsonLayer} from '@deck.gl/layers';
-import {getData, getDataV2, API_VERSIONS} from '../api';
-import {MAP_TYPES} from '../api/maps-api-common';
+import {fetchLayerData, getDataV2, API_VERSIONS} from '../api';
+import {FORMATS, MAP_TYPES} from '../api/maps-api-common';
 import {getDefaultCredentials} from '../config';
 
 const defaultProps = {
@@ -98,12 +98,12 @@ export default class CartoLayer extends CompositeLayer {
       const localConfig = {...getDefaultCredentials(), ...credentials};
       const {apiVersion} = localConfig;
 
-      let data;
+      let result;
 
       if (apiVersion === API_VERSIONS.V1 || apiVersion === API_VERSIONS.V2) {
-        data = await getDataV2({type, source, credentials});
+        result = await getDataV2({type, source, credentials});
       } else {
-        data = await getData({
+        result = await fetchLayerData({
           type,
           source,
           connection,
@@ -113,7 +113,8 @@ export default class CartoLayer extends CompositeLayer {
         });
       }
 
-      this.setState({data, apiVersion});
+      const {data, format} = result;
+      this.setState({data, format, apiVersion});
       this.props.onDataLoad(data);
     } catch (err) {
       if (this.props.onDataError) {
@@ -125,7 +126,7 @@ export default class CartoLayer extends CompositeLayer {
   }
 
   renderLayers() {
-    const {data, apiVersion} = this.state;
+    const {data, format, apiVersion} = this.state;
 
     if (!data) return null;
 
@@ -136,7 +137,7 @@ export default class CartoLayer extends CompositeLayer {
     if (
       apiVersion === API_VERSIONS.V1 ||
       apiVersion === API_VERSIONS.V2 ||
-      (data && data.tilejson === '2.2.0' && data.tiles)
+      format === FORMATS.TILEJSON
     ) {
       layer = MVTLayer;
     } else {
