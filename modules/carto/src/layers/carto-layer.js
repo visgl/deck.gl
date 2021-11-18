@@ -126,7 +126,6 @@ export default class CartoLayer extends CompositeLayer {
 
   renderLayers() {
     const {data, apiVersion} = this.state;
-    const {type} = this.props;
 
     if (!data) return null;
 
@@ -137,7 +136,7 @@ export default class CartoLayer extends CompositeLayer {
     if (
       apiVersion === API_VERSIONS.V1 ||
       apiVersion === API_VERSIONS.V2 ||
-      type === MAP_TYPES.TILESET
+      (data && data.tilejson === '2.2.0' && data.tiles)
     ) {
       layer = MVTLayer;
     } else {
