@@ -102,16 +102,14 @@ export default class CartoLayer extends CompositeLayer {
       const {apiVersion} = localConfig;
 
       let result;
-
       if (apiVersion === API_VERSIONS.V1 || apiVersion === API_VERSIONS.V2) {
-        result = await getDataV2({type, source, credentials});
+        result = {data: await getDataV2({type, source, credentials})};
       } else {
         result = await fetchLayerData({type, source, credentials, ...rest});
       }
 
-      const {data, format} = result;
-      this.setState({data, format, apiVersion});
-      this.props.onDataLoad(data);
+      this.setState({...result, apiVersion});
+      this.props.onDataLoad(result.data);
     } catch (err) {
       if (this.props.onDataError) {
         this.props.onDataError(err);
