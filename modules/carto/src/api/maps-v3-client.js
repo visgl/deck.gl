@@ -210,7 +210,7 @@ async function _fetchDataUrl({
     log.assert(url, `Format ${format} not available`);
   } else {
     // guess map format
-    const prioritizedFormats = [FORMATS.TILEJSON, FORMATS.GEOJSON, FORMATS.JSON, FORMATS.NDJSON];
+    const prioritizedFormats = [FORMATS.GEOJSON, FORMATS.JSON, FORMATS.NDJSON, FORMATS.TILEJSON];
     for (const f of prioritizedFormats) {
       url = getUrlFromMetadata(metadata, f);
       if (url) {
