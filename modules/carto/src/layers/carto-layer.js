@@ -23,6 +23,9 @@ const defaultProps = {
   // (String, required): connection name at CARTO platform
   connection: null,
 
+  // (String, optional): format of data
+  format: null,
+
   // (String, optional): name of the `geo_column` in the CARTO platform. Use this override the default column ('geom'), from which the geometry information should be fetched.
   geoColumn: null,
 
@@ -94,7 +97,7 @@ export default class CartoLayer extends CompositeLayer {
 
   async _updateData() {
     try {
-      const {type, data: source, connection, credentials, geoColumn, columns} = this.props;
+      const {type, data: source, credentials, ...rest} = this.props;
       const localConfig = {...getDefaultCredentials(), ...credentials};
       const {apiVersion} = localConfig;
 
@@ -103,14 +106,7 @@ export default class CartoLayer extends CompositeLayer {
       if (apiVersion === API_VERSIONS.V1 || apiVersion === API_VERSIONS.V2) {
         result = await getDataV2({type, source, credentials});
       } else {
-        result = await fetchLayerData({
-          type,
-          source,
-          connection,
-          credentials,
-          geoColumn,
-          columns
-        });
+        result = await fetchLayerData({type, source, credentials, ...rest});
       }
 
       const {data, format} = result;
