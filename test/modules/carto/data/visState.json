@@ -82,6 +82,7 @@
         "name": "GeoJsonLayer({id: 'vlu4f7d'})",
         "props": {
           "id": "vlu4f7d",
+          "cartoLabel": "Stores",
           "lineMiterLimit": 2,
           "lineWidthUnits": "pixels",
           "pointRadiusScale": 0.2,
@@ -197,6 +198,7 @@
         "name": "GeoJsonLayer({id: 'vlu4f7d'})",
         "props": {
           "id": "vlu4f7d",
+          "cartoLabel": "Stores",
           "lineMiterLimit": 2,
           "lineWidthUnits": "pixels",
           "pointRadiusScale": 0.2,
@@ -220,6 +222,7 @@
         "name": "GeoJsonLayer({id: 'vlu4f7d-label-city'})",
         "props": {
           "id": "vlu4f7d-label-city",
+          "cartoLabel": "Stores-label-city",
           "lineMiterLimit": 2,
           "lineWidthUnits": "pixels",
           "pointRadiusScale": 0.2,
@@ -247,6 +250,7 @@
         "name": "GeoJsonLayer({id: 'vlu4f7d-label-state'})",
         "props": {
           "id": "vlu4f7d-label-state",
+          "cartoLabel": "Stores-label-state",
           "lineMiterLimit": 2,
           "lineWidthUnits": "pixels",
           "pointRadiusScale": 0.2,
@@ -486,6 +490,7 @@
         "name": "GeoJsonLayer({id: 'iim6w8'})",
         "props": {
           "id": "iim6w8",
+          "cartoLabel": "Layer 3",
           "lineMiterLimit": 2,
           "lineWidthUnits": "pixels",
           "pointRadiusScale": 0.2,
@@ -510,6 +515,7 @@
         "name": "GeoJsonLayer({id: 'w04u776'})",
         "props": {
           "id": "w04u776",
+          "cartoLabel": "boundary",
           "lineMiterLimit": 2,
           "lineWidthUnits": "pixels",
           "pointRadiusScale": 0.2,
@@ -537,6 +543,7 @@
         "name": "MVTLayer({id: '87swuny'})",
         "props": {
           "id": "87swuny",
+          "cartoLabel": "transmission lines",
           "data": {"type": "FeatureCollection", "features": []},
           "lineMiterLimit": 2,
           "lineWidthUnits": "pixels",
@@ -645,6 +652,7 @@
         "name": "H3HexagonLayer({id: 'jc4657'})",
         "props": {
           "id": "jc4657",
+          "cartoLabel": "Population",
           "lineMiterLimit": 2,
           "lineWidthUnits": "pixels",
           "pointRadiusScale": 0.2,
@@ -759,6 +767,7 @@
         "name": "MVTLayer({id: '3btkipv'})",
         "props": {
           "id": "3btkipv",
+          "cartoLabel": "Layer 1",
           "data": "DATA_TILESET",
           "lineMiterLimit": 2,
           "lineWidthUnits": "pixels",
