@@ -55,7 +55,11 @@ export default class LinearInterpolator extends TransitionInterpolator {
 
     if (endProps.aroundPosition) {
       // Linear transition should be performed in common space
-      const viewport = this.opts.makeViewport({...endProps, ...propsInTransition});
+      const viewport = this.opts.makeViewport({
+        ...endProps,
+        ...propsInTransition,
+        position: [0, 0, 400]
+      });
       Object.assign(
         propsInTransition,
         viewport.panByPosition(

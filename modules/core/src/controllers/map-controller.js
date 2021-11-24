@@ -66,7 +66,9 @@ export class MapState extends ViewState {
     startZoom,
 
     /** Normalize viewport props to fit map height into viewport. Default `true` */
-    normalize
+    normalize,
+
+    position
   } = {}) {
     assert(Number.isFinite(longitude)); // `longitude` must be supplied
     assert(Number.isFinite(latitude)); // `latitude` must be supplied
@@ -85,7 +87,8 @@ export class MapState extends ViewState {
       minZoom,
       maxPitch,
       minPitch,
-      normalize
+      normalize,
+      position
     });
 
     this._state = {
