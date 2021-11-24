@@ -240,11 +240,11 @@ export async function getData({type, source, connection, credentials, geoColumn,
 }
 
 /* global clearInterval, setInterval, URLSearchParams */
-async function _fetchMapDataset(dataset, accessToken) {
+async function _fetchMapDataset(dataset, accessToken, credentials) {
   // First fetch metadata
   const {connectionName: connection, source, type} = dataset;
   const {url, mapFormat} = await _fetchDataUrl({
-    credentials: {accessToken},
+    credentials: {...credentials, accessToken},
     connection,
     source,
     type
@@ -263,8 +263,8 @@ async function _fetchMapDataset(dataset, accessToken) {
   return true;
 }
 
-async function fillInMapDatasets({datasets, publicToken}) {
-  const promises = datasets.map(dataset => _fetchMapDataset(dataset, publicToken));
+async function fillInMapDatasets({datasets, publicToken}, credentials) {
+  const promises = datasets.map(dataset => _fetchMapDataset(dataset, publicToken, credentials));
   return await Promise.all(promises);
 }
 
@@ -297,7 +297,7 @@ export async function fetchMap({cartoMapId, credentials, autoRefresh, onNewData}
   let stopAutoRefresh;
   if (autoRefresh) {
     const intervalId = setInterval(async () => {
-      const changed = await fillInMapDatasets(map);
+      const changed = await fillInMapDatasets(map, credentials);
       if (changed.some(v => v === true)) {
         onNewData(parseMap(map));
       }
@@ -308,7 +308,7 @@ export async function fetchMap({cartoMapId, credentials, autoRefresh, onNewData}
   }
 
   // Mutates map.datasets so that dataset.data contains data
-  await fillInMapDatasets(map);
+  await fillInMapDatasets(map, credentials);
   return {
     ...parseMap(map),
     ...{stopAutoRefresh}
