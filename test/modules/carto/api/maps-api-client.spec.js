@@ -576,7 +576,7 @@ test('fetchMap#no datasets', async t => {
 test('fetchMap#datasets', async t => {
   const cartoMapId = 'abcd-1234';
   const mapUrl = `http://carto-api/v3/maps/public/${cartoMapId}`;
-  const publicToken = 'public_token';
+  const token = 'public_token';
 
   const connectionName = 'test_connection';
   const source = 'test_source';
@@ -588,7 +588,7 @@ test('fetchMap#datasets', async t => {
     id: cartoMapId,
     datasets: [table, tileset, query],
     keplerMapConfig: EMPTY_KEPLER_MAP_CONFIG,
-    publicToken
+    token
   };
 
   setDefaultCredentials({apiVersion: API_VERSIONS.V3, apiBaseUrl: 'http://carto-api'});
@@ -631,7 +631,7 @@ function sleep(ms) {
 test('fetchMap#autoRefresh', async t => {
   const cartoMapId = 'abcd-1234';
   const mapUrl = `https://gcp-us-east1.api.carto.com/v3/maps/public/${cartoMapId}`;
-  const publicToken = 'public_token';
+  const token = 'public_token';
 
   const connectionName = 'test_connection';
   const source = 'test_source';
@@ -641,7 +641,7 @@ test('fetchMap#autoRefresh', async t => {
     id: cartoMapId,
     datasets: [tileset],
     keplerMapConfig: EMPTY_KEPLER_MAP_CONFIG,
-    publicToken
+    token
   };
 
   const _global = typeof global !== 'undefined' ? global : window;
