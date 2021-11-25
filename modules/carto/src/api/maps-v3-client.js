@@ -263,8 +263,8 @@ async function _fetchMapDataset(dataset, accessToken, credentials) {
   return true;
 }
 
-async function fillInMapDatasets({datasets, publicToken}, credentials) {
-  const promises = datasets.map(dataset => _fetchMapDataset(dataset, publicToken, credentials));
+async function fillInMapDatasets({datasets, token}, credentials) {
+  const promises = datasets.map(dataset => _fetchMapDataset(dataset, token, credentials));
   return await Promise.all(promises);
 }
 
