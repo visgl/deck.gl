@@ -28,7 +28,7 @@ class Deck(JSONMixin):
         parameters=None,
     ):
         """This is the renderer and configuration for a deck.gl visualization, similar to the
-        `Deck <https://deck.gl/#/documentation/deckgl-api-reference/deck>`_ class from deck.gl.
+        `Deck <https://deck.gl/docs/api-reference/core/deck>`_ class from deck.gl.
         Pass `Deck` a Mapbox API token to display a basemap; see the notes below.
 
         Parameters
@@ -64,7 +64,7 @@ class Deck(JSONMixin):
             Further documentation is `here <tooltip.html>`_.
 
         .. _Deck:
-            https://deck.gl/#/documentation/deckgl-api-reference/deck
+            https://deck.gl/docs/api-reference/core/deck
         .. _gallery:
             https://www.mapbox.com/gallery/
         """
