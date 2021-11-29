@@ -11,6 +11,7 @@
     "allowSyntheticDefaultImports": true,
     "noEmit": true,
     "resolveJsonModule": true,
+    "skipLibCheck": false,
     "baseUrl": ".",
     "paths": {
       "@deck.gl/core/*": ["modules/core/src/*"],
@@ -52,32 +53,33 @@
     }
   },
   "include": [
-    "modules/core/src/**/*.js",
-    "modules/extensions/src/**/*.js",
-    "modules/json/src/**/*.js",
-    "modules/main/src/**/*.js",
-    "modules/test-utils/src/**/*.js",
-    "modules/react/src/**/*.js",
-    "modules/arcgis/src/**/*.js",
-    "modules/carto/src/**/*.js",
-    "modules/mapbox/src/**/*.js",
-    "modules/google/src/**/*.js",
-    "modules/layers/src/**/*.js",
-    "modules/geo-layers/src/**/*.js",
-    "modules/aggregation-layers/src/**/*.js",
-    "modules/mesh-layers/src/**/*.js"
+    "modules"
   ],
-  "exclude":[
-    "modules/jupyter-widget/src/**/*.js",
+  "exclude": [
+    // "modules/core/src",
+    // "modules/extensions/src",
+    // "modules/json/src",
+    // "modules/main/src",
+    // "modules/test-utils/src",
+    // "modules/react/src",
+    // "modules/arcgis/src",
+    // "modules/carto/src",
+    // "modules/mapbox/src",
+    // "modules/google/src",
+    // "modules/layers/src",
+    // "modules/geo-layers/src",
+    // "modules/aggregation-layers/src",
+    // "modules/mesh-layers/srs",
+    // "modules/jupyter-widget/src",
 
-    "modules/**/test/**/**/*.js",
+    // "modules/**/test/**/**/*.js",
 
-    "modules/**/src/libs/*",
-    "modules/*/dist/**/*",
-    "modules/**/wip/**/*",
-    "examples",
-    "coverage",
-    "website",
-    "test",
+    // "modules/**/src/libs/*",
+    // "modules/*/dist/**/*",
+    // "modules/**/wip/**/*",
+    // "examples",
+    // "coverage",
+    // "website",
+    // "test",
   ]
 }
