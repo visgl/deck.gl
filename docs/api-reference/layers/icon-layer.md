@@ -63,7 +63,7 @@ In this case, you can follow the example. Auto packing icons is less efficient t
 
 ```js
 import DeckGL, {IconLayer} from 'deck.gl';
-import Octokit from '@octokit/rest';
+import {Octokit} from '@octokit/rest';
 const octokit = new Octokit()
 
 function App({data, viewState}) {
