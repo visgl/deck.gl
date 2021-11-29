@@ -28,6 +28,7 @@ const SCALE_FUNCS = {
 const sharedPropMap = {
   color: 'getFillColor',
   isVisible: 'visible',
+  label: 'cartoLabel',
   textLabel: {
     alignment: 'getTextAlignmentBaseline',
     anchor: 'getTextAnchor',
