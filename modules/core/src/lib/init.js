@@ -28,7 +28,6 @@ import jsonLoader from '../utils/json-loader';
 
 // Version detection using babel plugin
 // Fallback for tests and SSR since global variable is defined by Webpack.
-/* global __VERSION__ */
 const version =
   typeof __VERSION__ !== 'undefined' ? __VERSION__ : global.DECK_VERSION || 'untranspiled source';
 

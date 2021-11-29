@@ -377,8 +377,8 @@ test('project#vs#project_get_orientation_matrix', t => {
 
     const result = matrix.transform([0, 0, 1]);
     const expected = new Vector3(testVector).normalize();
-    t.comment(`result: ${result.join(',')}`);
-    t.comment(`expected: ${expected.join(',')}`);
+    t.comment(`result=${result.join(',')}`);
+    t.comment(`expected=${expected.join(',')}`);
     t.ok(equals(result, expected), 'Transformed unit vector as expected');
 
     const result2 = new Vector3(matrix.transform(vectorA));
