@@ -8,7 +8,7 @@ export const TILEJSON_RESPONSE = {
   tiles: ['https://xyz.com/{z}/{x}/{y}']
 };
 
-const GEOJSON = {
+export const GEOJSON_RESPONSE = {
   type: 'FeatureCollection',
   features: [
     {
@@ -52,7 +52,7 @@ function mockFetchMapsV2() {
   return fetch;
 }
 
-function mockFetchMapsV3() {
+export function mockFetchMapsV3() {
   const fetch = _global.fetch;
   _global.fetch = url => {
     return Promise.resolve({
@@ -61,20 +61,20 @@ function mockFetchMapsV3() {
           return TILEJSON_RESPONSE;
         }
         if (url.indexOf('format=geojson') !== -1) {
-          return GEOJSON;
+          return GEOJSON_RESPONSE;
         }
 
         if (url.indexOf('tileset') !== -1) {
           return {
             tilejson: {
-              url: ['https://xyz.com?format=tilejson']
+              url: ['https://xyz.com?format=tilejson&cache=12345678']
             }
           };
         }
         if (url.indexOf('query') !== -1 || url.indexOf('table')) {
           return {
             geojson: {
-              url: ['https://xyz.com?format=geojson']
+              url: ['https://xyz.com?format=geojson&cache=12345678']
             }
           };
         }

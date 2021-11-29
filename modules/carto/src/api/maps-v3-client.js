@@ -239,12 +239,12 @@ export async function getData({type, source, connection, credentials, geoColumn,
   return layerData.data;
 }
 
-/* global setInterval, URLSearchParams */
-async function _fetchMapDataset(dataset, accessToken) {
+/* global clearInterval, setInterval, URLSearchParams */
+async function _fetchMapDataset(dataset, accessToken, credentials) {
   // First fetch metadata
   const {connectionName: connection, source, type} = dataset;
   const {url, mapFormat} = await _fetchDataUrl({
-    credentials: {accessToken},
+    credentials: {...credentials, accessToken},
     connection,
     source,
     type
@@ -263,8 +263,8 @@ async function _fetchMapDataset(dataset, accessToken) {
   return true;
 }
 
-async function fillInMapDatasets({datasets, publicToken}) {
-  const promises = datasets.map(dataset => _fetchMapDataset(dataset, publicToken));
+async function fillInMapDatasets({datasets, token}, credentials) {
+  const promises = datasets.map(dataset => _fetchMapDataset(dataset, token, credentials));
   return await Promise.all(promises);
 }
 
@@ -294,16 +294,23 @@ export async function fetchMap({cartoMapId, credentials, autoRefresh, onNewData}
 
   // Periodically check if the data has changed. Note that this
   // will not update when a map is published.
+  let stopAutoRefresh;
   if (autoRefresh) {
-    setInterval(async () => {
-      const changed = await fillInMapDatasets(map);
+    const intervalId = setInterval(async () => {
+      const changed = await fillInMapDatasets(map, credentials);
       if (changed.some(v => v === true)) {
         onNewData(parseMap(map));
       }
     }, autoRefresh * 1000);
+    stopAutoRefresh = () => {
+      clearInterval(intervalId);
+    };
   }
 
   // Mutates map.datasets so that dataset.data contains data
-  await fillInMapDatasets(map);
-  return parseMap(map);
+  await fillInMapDatasets(map, credentials);
+  return {
+    ...parseMap(map),
+    ...{stopAutoRefresh}
+  };
 }

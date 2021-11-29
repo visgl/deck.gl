@@ -1,5 +1,12 @@
 # Upgrade Guide
 
+## Upgrading from deck.gl v8.6 to v8.7
+
+#### Deprecations
+
+- `CartoBQTilerLayer` is removed. Use `CartoLayer` instead with `type` set to `MAP_TYPES.TILESET`.
+- `CartoSQLLayer` is removed. Use `CartoLayer` instead with `type` set to `MAP_TYPES.QUERY`.
+
 ## Upgrading from deck.gl v8.5 to v8.6
 
 ### Changes to layer prop defaults

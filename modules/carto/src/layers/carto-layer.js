@@ -1,8 +1,8 @@
 import {CompositeLayer, log} from '@deck.gl/core';
 import {MVTLayer} from '@deck.gl/geo-layers';
 import {GeoJsonLayer} from '@deck.gl/layers';
-import {getData, getDataV2, API_VERSIONS} from '../api';
-import {MAP_TYPES} from '../api/maps-api-common';
+import {fetchLayerData, getDataV2, API_VERSIONS} from '../api';
+import {FORMATS, MAP_TYPES} from '../api/maps-api-common';
 import {getDefaultCredentials} from '../config';
 
 const defaultProps = {
@@ -12,6 +12,7 @@ const defaultProps = {
   type: null,
   onDataLoad: {type: 'function', value: data => {}, compare: false},
   onDataError: {type: 'function', value: null, compare: false, optional: true},
+  uniqueIdProperty: 'cartodb_id',
 
   // override carto credentials for the layer, set to null to read from default
   credentials: null,
@@ -21,6 +22,9 @@ const defaultProps = {
   /**********************/
   // (String, required): connection name at CARTO platform
   connection: null,
+
+  // (String, optional): format of data
+  format: null,
 
   // (String, optional): name of the `geo_column` in the CARTO platform. Use this override the default column ('geom'), from which the geometry information should be fetched.
   geoColumn: null,
@@ -93,29 +97,19 @@ export default class CartoLayer extends CompositeLayer {
 
   async _updateData() {
     try {
-      const {type, data: source, connection, credentials, geoColumn, columns} = this.props;
+      const {type, data: source, credentials, ...rest} = this.props;
       const localConfig = {...getDefaultCredentials(), ...credentials};
       const {apiVersion} = localConfig;
 
-      let data;
-
-      if (apiVersion === API_VERSIONS.V3) {
-        data = await getData({
-          type,
-          source,
-          connection,
-          credentials,
-          geoColumn,
-          columns
-        });
-      } else if (apiVersion === API_VERSIONS.V1 || apiVersion === API_VERSIONS.V2) {
-        data = await getDataV2({type, source, credentials});
+      let result;
+      if (apiVersion === API_VERSIONS.V1 || apiVersion === API_VERSIONS.V2) {
+        result = {data: await getDataV2({type, source, credentials})};
       } else {
-        log.assert(`Unknow apiVersion ${apiVersion}. Use API_VERSIONS enum.`);
+        result = await fetchLayerData({type, source, credentials, ...rest});
       }
 
-      this.setState({data, apiVersion});
-      this.props.onDataLoad(data);
+      this.setState({...result, apiVersion});
+      this.props.onDataLoad(result.data);
     } catch (err) {
       if (this.props.onDataError) {
         this.props.onDataError(err);
@@ -126,8 +120,7 @@ export default class CartoLayer extends CompositeLayer {
   }
 
   renderLayers() {
-    const {data, apiVersion} = this.state;
-    const {type} = this.props;
+    const {data, format, apiVersion} = this.state;
 
     if (!data) return null;
 
@@ -138,14 +131,15 @@ export default class CartoLayer extends CompositeLayer {
     if (
       apiVersion === API_VERSIONS.V1 ||
       apiVersion === API_VERSIONS.V2 ||
-      type === MAP_TYPES.TILESET
+      format === FORMATS.TILEJSON
     ) {
       layer = MVTLayer;
     } else {
       layer = GeoJsonLayer;
     }
 
-    const props = {...this.props};
+    const {uniqueIdProperty} = defaultProps;
+    const props = {uniqueIdProperty, ...this.props};
     delete props.data;
 
     // eslint-disable-next-line new-cap
