@@ -1,4 +1,3 @@
-/* global __VERSION__ */
 /**
  * The _model_module_version/_view_module_version this package implements.
  *
