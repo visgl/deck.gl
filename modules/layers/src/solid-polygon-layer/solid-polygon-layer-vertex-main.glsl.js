@@ -91,6 +91,13 @@ void calculatePosition(PolygonProps props) {
   }
 
   gl_Position = project_position_to_clipspace(pos, pos64Low, vec3(0.), geometry.position);
+  
+  if (extruded) {
+#ifndef IS_SIDE_VERTEX
+    normal = normalize( geometry.position.xyz);
+#endif
+  } 
+
   DECKGL_FILTER_GL_POSITION(gl_Position, geometry);
 
   if (extruded) {
