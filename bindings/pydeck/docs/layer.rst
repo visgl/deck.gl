@@ -3,7 +3,7 @@ Layer Overview and Examples
 
 :class:`pydeck.bindings.layer.Layer` represents a kind of data visualization, like a scatterplot
 or a hexbin chart.
-The full `deck.gl layer catalog </docs/api-reference/layers/README.md>`__ is accessible via pydeck.
+The full `deck.gl layer catalog <https://deck.gl/docs/api-reference/layers>`__ is accessible via pydeck.
 This page will provide more examples of how to utilize the deck.gl catalog in Python via pydeck.
 
 .. warning:: **pydeck does not currently raise an error on
@@ -20,7 +20,7 @@ Understanding keyword arguments in pydeck layers
 
 Keyword arguments vary by layer. A catalog of available layers in
 deck.gl is viewable
-`in the deck.gl layer catalog <https://github.com/visgl/deck.gl/tree/master/docs/api-reference/layers#layer-catalog-overview>`__.
+`in the deck.gl layer catalog <https://deck.gl/docs/api-reference/layers#layer-catalog-overview>`__.
 
 A few important observations:
 
@@ -46,7 +46,7 @@ In the ``pydeck.Layer`` object, ``type`` is a required argument and
 where you pass the desired layer's deck.gl class name–that is, you
 should set it to the deck.gl layer you wish to plot. For example, notice
 how passing ``"HexagonLayer"`` to``type`` below gives you a `deck.gl
-HexagonLayer <https://deck.gl/#/examples/core-layers/hexagon-layer>`__:
+HexagonLayer <https://deck.gl/examples/hexagon-layer>`__:
 
 .. code:: python
 
@@ -226,7 +226,7 @@ Example: Vancouver property values
 ----------------------------------
 
 Below, an example combining the expression parser with multiple layers, based on the deck.gl
-`Vancouver property values example <https://deck.gl/#/examples/core-layers/geojson-layer-polygons>`_.
+`Vancouver property values example <https://deck.gl/examples/geojson-layer-polygons>`_.
 
 .. code:: python
 
