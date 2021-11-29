@@ -1,4 +1,6 @@
-require('@babel/register');
+require('@babel/register')({
+  extensions: ['.js', '.jsx', '.ts', '.tsx']
+});
 
 // Must import before the polyfills for h3 to detect the environment correctly
 require('h3-js');

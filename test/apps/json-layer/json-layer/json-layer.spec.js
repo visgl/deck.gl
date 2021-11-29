@@ -1,5 +1,6 @@
 import test from 'tape-promise/tape';
 import {testLayer, testInitializeLayer} from '@deck.gl/test-utils';
+// eslint-disable-next-line import/named
 import {JSONLayer} from '@deck.gl/json';
 import {configuration, JSON_DATA} from '../../../../test/modules/json/deck-json-converter.spec';
 

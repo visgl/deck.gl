@@ -19,6 +19,13 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v8.7
 
+### deck.gl [8.7.0-alpha.3] - Nov 25 2021
+
+- Fix: Rename publicToken to token (#6425)
+- Fix: CartoLayer support `format` prop (#6416)
+- Default to `cartodb_id` for uniqueIdProperty in CartoLayer (#6404)
+- Deprecate CartoBQTilerLayer and CartoSQLLayer (#6402)
+
 ### deck.gl [8.7.0-alpha.2] - Nov 16 2021
 - Bump prettier to v2 (#6386)
 - CARTO default to v3 API (#6376)

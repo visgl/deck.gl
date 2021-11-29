@@ -51,20 +51,24 @@ const config = {
   },
 
   resolve: {
-    alias: ALIASES
+    alias: ALIASES,
+    extensions: ['.ts', '.tsx', '.js', '.json']
   },
 
   module: {
     rules: [
       {
         // Compile ES2015 using babel
-        test: /\.js$/,
+        test: /(\.js|\.ts|\.tsx)$/,
         loader: 'babel-loader',
         include: [/src/, /bundle/, /esm/],
         options: {
-          presets: [['@babel/preset-env', {
-            targets: ["supports webgl", "not dead"]
-          }]],
+          presets: [
+            '@babel/preset-typescript',
+            ['@babel/preset-env', {
+              targets: ["supports webgl", "not dead"]
+            }]
+          ],
           // all of the helpers will reference the module @babel/runtime to avoid duplication
           // across the compiled output.
           plugins: [
