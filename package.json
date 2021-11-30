@@ -28,7 +28,7 @@
     "clean": "ocular-clean",
     "build": "ocular-clean && ocular-build && lerna run build",
     "version": "ocular-build core",
-    "lint": "time ocular-lint",
+    "lint": "ocular-lint",
     "cover": "ocular-test cover",
     "publish": "ocular-publish",
     "start": "open https://deck.gl/docs/get-started/getting-started",
