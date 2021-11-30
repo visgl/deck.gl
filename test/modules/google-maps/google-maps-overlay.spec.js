@@ -8,9 +8,7 @@ import {equals} from 'math.gl';
 
 import * as mapsApi from './mock-maps-api';
 
-/* global global, window */
-const _global = typeof global === 'undefined' ? window : global;
-_global.google = {maps: mapsApi};
+globalThis.google = {maps: mapsApi};
 
 test('GoogleMapsOverlay#constructor', t => {
   const map = new mapsApi.Map({

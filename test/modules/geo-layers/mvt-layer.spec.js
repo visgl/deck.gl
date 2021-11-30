@@ -384,11 +384,9 @@ test('MVTLayer#TileJSON', async t => {
   };
 
   // polyfill/hijack fetch
-  /* global global, window */
-  const _global = typeof global !== 'undefined' ? global : window;
-  const fetch = _global.fetch;
+  const fetch = globalThis.fetch;
 
-  _global.fetch = url => {
+  globalThis.fetch = url => {
     return Promise.resolve(JSON.stringify(tileJSON));
   };
 
@@ -421,7 +419,7 @@ test('MVTLayer#TileJSON', async t => {
   t.end();
 
   // restore fetcch
-  _global.fetch = fetch;
+  globalThis.fetch = fetch;
 });
 
 test('MVTLayer#dataInWGS84', async t => {
