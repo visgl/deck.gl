@@ -62,9 +62,7 @@ void main(void) {
 
   vTexCoord = uv;
   cameraPosition = project_uCameraPosition;
-  normals_commonspace = project_normal(instanceModelMatrix * normals);
   vColor = vec4(colors * instanceColors.rgb, instanceColors.a);
-  geometry.normal = normals_commonspace;
 
   vec3 pos = (instanceModelMatrix * positions) * sizeScale;
   vec3 projectedPosition = project_position(positions);
@@ -72,6 +70,8 @@ void main(void) {
   gl_Position = project_common_position_to_clipspace(position_commonspace);
 
   geometry.position = position_commonspace;
+  normals_commonspace = project_normal(instanceModelMatrix * normals);
+  geometry.normal = normals_commonspace;
 
   #ifdef MODULE_PBR
     // set PBR data

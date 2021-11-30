@@ -82,7 +82,6 @@ void main(void) {
   float shouldRender = float(color.a > 0.0 && instanceElevations >= 0.0);
   float dotRadius = radius * coverage * shouldRender;
 
-  geometry.normal = project_normal(vec3(rotationMatrix * normals.xy, normals.z));
   geometry.pickingColor = instancePickingColors;
 
   // project center of column
@@ -96,6 +95,7 @@ void main(void) {
   DECKGL_FILTER_SIZE(pos, geometry);
 
   gl_Position = project_position_to_clipspace(centroidPosition, centroidPosition64Low, pos, geometry.position);
+  geometry.normal = project_normal(vec3(rotationMatrix * normals.xy, normals.z));
   DECKGL_FILTER_GL_POSITION(gl_Position, geometry);
 
   // Light calculations
