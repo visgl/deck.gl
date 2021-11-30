@@ -9,6 +9,7 @@ export default self => {
     const testCase = TEST_CASES[id];
 
     fetchJSON(testCase.data).then(data => {
+      // eslint-disable-next-line import/namespace
       const LayerType = Layers[id];
       const {props, transferList} = getLayerSnapshot(new LayerType({...testCase, data}));
       self.postMessage(props, transferList);

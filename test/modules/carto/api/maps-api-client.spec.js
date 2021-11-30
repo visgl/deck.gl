@@ -29,10 +29,9 @@ for (const useSetDefaultCredentials of [true, false]) {
     };
     setDefaultCredentials(useSetDefaultCredentials ? credentials : {});
 
-    const _global = typeof global !== 'undefined' ? global : window;
-    const fetch = _global.fetch;
+    const fetch = globalThis.fetch;
 
-    _global.fetch = url => {
+    globalThis.fetch = url => {
       t.is(
         url,
         'https://maps-v1?api_key=default_public&client=deck-gl-carto&config=%7B%22version%22%3A%221.3.1%22%2C%22buffersize%22%3A%7B%22mvt%22%3A16%7D%2C%22layers%22%3A%5B%7B%22type%22%3A%22mapnik%22%2C%22options%22%3A%7B%22sql%22%3A%22select%20*%20from%20a%22%2C%22vector_extent%22%3A4096%7D%7D%5D%7D',
@@ -56,7 +55,7 @@ for (const useSetDefaultCredentials of [true, false]) {
     );
 
     setDefaultCredentials({});
-    _global.fetch = fetch;
+    globalThis.fetch = fetch;
 
     t.end();
   });
@@ -68,10 +67,9 @@ for (const useSetDefaultCredentials of [true, false]) {
     };
     setDefaultCredentials(useSetDefaultCredentials ? credentials : {});
 
-    const _global = typeof global !== 'undefined' ? global : window;
-    const fetch = _global.fetch;
+    const fetch = globalThis.fetch;
 
-    _global.fetch = url => {
+    globalThis.fetch = url => {
       t.is(
         url,
         'https://maps-v2/carto/sql?source=select%20*%20from%20a&format=tilejson&api_key=default_public&client=deck-gl-carto',
@@ -94,7 +92,7 @@ for (const useSetDefaultCredentials of [true, false]) {
       'tiles should be an array with content'
     );
 
-    _global.fetch = url => {
+    globalThis.fetch = url => {
       t.is(
         url,
         'https://maps-v2/bigquery/tileset?source=tileset&format=tilejson&api_key=default_public&client=deck-gl-carto',
@@ -117,7 +115,7 @@ for (const useSetDefaultCredentials of [true, false]) {
       'tiles should be an array with content'
     );
 
-    _global.fetch = fetch;
+    globalThis.fetch = fetch;
     setDefaultCredentials({});
     t.end();
   });
@@ -189,10 +187,9 @@ test('getData#parameters', async t => {
 
     setDefaultCredentials(credentials);
 
-    const _global = typeof global !== 'undefined' ? global : window;
-    const fetch = _global.fetch;
+    const fetch = globalThis.fetch;
 
-    _global.fetch = (url, options) => {
+    globalThis.fetch = (url, options) => {
       return Promise.resolve({
         json: () => {
           return {
@@ -221,7 +218,7 @@ test('getData#parameters', async t => {
     }
 
     setDefaultCredentials({});
-    _global.fetch = fetch;
+    globalThis.fetch = fetch;
 
     t.end();
   });
@@ -245,10 +242,9 @@ test('getData#parameters', async t => {
   }
 ].forEach(({status, title, regex}) => {
   test(`dealWithError#v3#(${String(status)})`, async t => {
-    const _global = typeof global !== 'undefined' ? global : window;
-    const fetch = _global.fetch;
+    const fetch = globalThis.fetch;
 
-    _global.fetch = (url, options) => {
+    globalThis.fetch = (url, options) => {
       return Promise.resolve({
         json: () => {
           return {
@@ -278,7 +274,7 @@ test('getData#parameters', async t => {
       );
     }
 
-    _global.fetch = fetch;
+    globalThis.fetch = fetch;
 
     t.end();
   });
@@ -287,10 +283,9 @@ Object.values(API_VERSIONS).forEach(apiVersion => {
   test(`connectionError#(${apiVersion})`, async t => {
     setDefaultCredentials({apiVersion});
 
-    const _global = typeof global !== 'undefined' ? global : window;
-    const fetch = _global.fetch;
+    const fetch = globalThis.fetch;
 
-    _global.fetch = (url, options) => {
+    globalThis.fetch = (url, options) => {
       throw new Error('Connection error');
     };
 
@@ -316,7 +311,7 @@ Object.values(API_VERSIONS).forEach(apiVersion => {
     }
 
     setDefaultCredentials({});
-    _global.fetch = fetch;
+    globalThis.fetch = fetch;
 
     t.end();
   });
@@ -411,10 +406,9 @@ test(`getDataV2#versionError`, async t => {
 
       setDefaultCredentials(useSetDefaultCredentials ? credentials : {});
 
-      const _global = typeof global !== 'undefined' ? global : window;
-      const fetch = _global.fetch;
+      const fetch = globalThis.fetch;
 
-      _global.fetch = (url, options) => {
+      globalThis.fetch = (url, options) => {
         if (url === mapInstantiationUrl) {
           t.pass('should call to the right instantiation url');
           t.is(
@@ -466,7 +460,7 @@ test(`getDataV2#versionError`, async t => {
 
       setDefaultCredentials({});
 
-      _global.fetch = fetch;
+      globalThis.fetch = fetch;
 
       t.end();
     });
@@ -485,10 +479,10 @@ test('getData#post', async t => {
     accessToken
   });
 
-  const _global = typeof global !== 'undefined' ? global : window;
-  const fetch = _global.fetch;
+  const globalThis = typeof global !== 'undefined' ? global : window;
+  const fetch = globalThis.fetch;
 
-  _global.fetch = (url, options) => {
+  globalThis.fetch = (url, options) => {
     if (url === mapInstantiationUrl) {
       t.pass('should call to the right instantiation url');
       t.is(options.method, 'POST', 'should make a POST request on instantiation');
@@ -536,7 +530,7 @@ test('getData#post', async t => {
 
   setDefaultCredentials({});
 
-  _global.fetch = fetch;
+  globalThis.fetch = fetch;
 
   t.end();
 });
@@ -548,10 +542,10 @@ test('fetchMap#no datasets', async t => {
 
   setDefaultCredentials({apiVersion: API_VERSIONS.V3, apiBaseUrl: 'http://carto-api'});
 
-  const _global = typeof global !== 'undefined' ? global : window;
-  const fetch = _global.fetch;
+  const globalThis = typeof global !== 'undefined' ? global : window;
+  const fetch = globalThis.fetch;
 
-  _global.fetch = (url, options) => {
+  globalThis.fetch = (url, options) => {
     if (url === mapUrl) {
       t.pass('should call to the right instantiation url');
       return Promise.resolve({json: () => mapResponse, ok: true});
@@ -568,7 +562,7 @@ test('fetchMap#no datasets', async t => {
   }
 
   setDefaultCredentials({});
-  _global.fetch = fetch;
+  globalThis.fetch = fetch;
 
   t.end();
 });
@@ -576,7 +570,7 @@ test('fetchMap#no datasets', async t => {
 test('fetchMap#datasets', async t => {
   const cartoMapId = 'abcd-1234';
   const mapUrl = `http://carto-api/v3/maps/public/${cartoMapId}`;
-  const publicToken = 'public_token';
+  const token = 'public_token';
 
   const connectionName = 'test_connection';
   const source = 'test_source';
@@ -588,15 +582,15 @@ test('fetchMap#datasets', async t => {
     id: cartoMapId,
     datasets: [table, tileset, query],
     keplerMapConfig: EMPTY_KEPLER_MAP_CONFIG,
-    publicToken
+    token
   };
 
   setDefaultCredentials({apiVersion: API_VERSIONS.V3, apiBaseUrl: 'http://carto-api'});
 
-  const _global = typeof global !== 'undefined' ? global : window;
-  const fetch = _global.fetch;
+  const globalThis = typeof global !== 'undefined' ? global : window;
+  const fetch = globalThis.fetch;
 
-  _global.fetch = (url, options) => {
+  globalThis.fetch = (url, options) => {
     if (url === mapUrl) {
       t.pass('should call to the right instantiation url');
       mockFetchMapsV3();
@@ -617,7 +611,7 @@ test('fetchMap#datasets', async t => {
   }
 
   setDefaultCredentials({});
-  _global.fetch = fetch;
+  globalThis.fetch = fetch;
 
   t.end();
 });
@@ -631,7 +625,7 @@ function sleep(ms) {
 test('fetchMap#autoRefresh', async t => {
   const cartoMapId = 'abcd-1234';
   const mapUrl = `https://gcp-us-east1.api.carto.com/v3/maps/public/${cartoMapId}`;
-  const publicToken = 'public_token';
+  const token = 'public_token';
 
   const connectionName = 'test_connection';
   const source = 'test_source';
@@ -641,13 +635,13 @@ test('fetchMap#autoRefresh', async t => {
     id: cartoMapId,
     datasets: [tileset],
     keplerMapConfig: EMPTY_KEPLER_MAP_CONFIG,
-    publicToken
+    token
   };
 
-  const _global = typeof global !== 'undefined' ? global : window;
-  const fetch = _global.fetch;
+  const globalThis = typeof global !== 'undefined' ? global : window;
+  const fetch = globalThis.fetch;
 
-  _global.fetch = (url, options) => {
+  globalThis.fetch = (url, options) => {
     if (url === mapUrl) {
       t.pass('should call to the right instantiation url');
       mockFetchMapsV3();
@@ -678,7 +672,7 @@ test('fetchMap#autoRefresh', async t => {
     t.error(e, 'should not throw');
   }
 
-  _global.fetch = fetch;
+  globalThis.fetch = fetch;
 
   t.end();
 });

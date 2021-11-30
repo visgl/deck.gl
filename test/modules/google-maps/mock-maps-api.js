@@ -116,9 +116,11 @@ export class Map {
 
   draw() {
     for (const overlay of this._overlays) {
-      this.getRenderingType() === RenderingType.RASTER
-        ? overlay.draw()
-        : overlay.onDraw(undefined, this.coordinateTransformer);
+      if (this.getRenderingType() === RenderingType.RASTER) {
+        overlay.draw();
+      } else {
+        overlay.onDraw(undefined, this.coordinateTransformer);
+      }
     }
   }
 

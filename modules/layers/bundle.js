@@ -1,8 +1,6 @@
 const deckGLLayers = require('./src');
 
-/* global window, global */
-const _global = typeof window === 'undefined' ? global : window;
-const deck = _global.deck || {};
+const deck = globalThis.deck || {};
 
 // Check if peer dependencies are included
 if (!deck.Layer) {

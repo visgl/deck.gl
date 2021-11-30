@@ -17,8 +17,7 @@ const useLocalLuma = false;
 
 const config = {
   lint: {
-    paths: ['modules', 'examples', 'test'],
-    extensions: ['js']
+    paths: ['modules', 'test'] // , 'examples',
   },
 
   aliases: {
