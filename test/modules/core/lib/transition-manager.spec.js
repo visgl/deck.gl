@@ -5,11 +5,11 @@ import {Timeline} from '@luma.gl/core';
 import {config} from 'math.gl';
 import {LinearInterpolator, FlyToInterpolator} from '@deck.gl/core';
 
-/* global global, setTimeout, clearTimeout */
+/* global setTimeout, clearTimeout */
 // backfill requestAnimationFrame on Node
-if (typeof global !== 'undefined' && !global.requestAnimationFrame) {
-  global.requestAnimationFrame = callback => setTimeout(callback, 100);
-  global.cancelAnimationFrame = frameId => clearTimeout(frameId);
+if (!globalThis.requestAnimationFrame) {
+  globalThis.requestAnimationFrame = callback => setTimeout(callback, 100);
+  globalThis.cancelAnimationFrame = frameId => clearTimeout(frameId);
 }
 
 /* eslint-disable */
