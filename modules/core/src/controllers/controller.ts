@@ -785,13 +785,13 @@ export default class Controller {
     // Enables Transitions on double-tap and key-down events.
     return opts
       ? {
-        ..._transition,
-        transitionInterpolator: new LinearInterpolator({
-          ...opts,
-          transitionProps: this.linearTransitionProps,
-          makeViewport: this.controllerState.makeViewport
-        })
-      }
+          ..._transition,
+          transitionInterpolator: new LinearInterpolator({
+            ...opts,
+            transitionProps: this.linearTransitionProps,
+            makeViewport: this.controllerState.makeViewport
+          })
+        }
       : _transition;
   }
 }

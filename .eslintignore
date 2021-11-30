@@ -5,5 +5,3 @@ workers/
 dist.js
 *.min.js
 mapbox-gl.js
-
-modules/core/src/controllers/controller.ts
