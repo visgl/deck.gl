@@ -1,4 +1,4 @@
-import {lerp} from 'math.gl';
+import {lerp} from '@math.gl/core';
 import Transition from './transition';
 
 export default class CPUInterpolationTransition extends Transition {

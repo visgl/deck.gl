@@ -1,5 +1,5 @@
 import test from 'tape-promise/tape';
-import {equals} from 'math.gl';
+import {equals} from '@math.gl/core';
 
 import ColumnGeometry from '@deck.gl/layers/column-layer/column-geometry';
 

@@ -35,7 +35,7 @@ import {
 
 // TODO - import from math.gl
 import * as vec2 from 'gl-matrix/vec2';
-import {Matrix4} from 'math.gl';
+import {Matrix4} from '@math.gl/core';
 
 const TILE_SIZE = 512;
 const EARTH_CIRCUMFERENCE = 40.03e6;

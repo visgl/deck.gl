@@ -1,4 +1,4 @@
-import {Vector3} from 'math.gl';
+import {Vector3} from '@math.gl/core';
 
 /* load data samples for display */
 import allPoints from '../data/sf.bike.parking.json';

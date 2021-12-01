@@ -22,7 +22,7 @@ import test from 'tape-promise/tape';
 
 import {COORDINATE_SYSTEM, WebMercatorViewport, OrthographicView} from 'deck.gl';
 import {project} from '@deck.gl/core/shaderlib';
-import {Matrix4, Matrix3, Vector3, config, equals} from 'math.gl';
+import {Matrix4, Matrix3, Vector3, config, equals} from '@math.gl/core';
 import {gl} from '@deck.gl/test-utils';
 import {Transform, Buffer, fp64} from '@luma.gl/core';
 const {fp64LowPart} = fp64;
