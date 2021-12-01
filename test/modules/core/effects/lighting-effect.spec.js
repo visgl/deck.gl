@@ -3,7 +3,7 @@ import LightingEffect from '@deck.gl/core/effects/lighting/lighting-effect';
 import {_CameraLight as CameraLight, DirectionalLight, PointLight} from '@deck.gl/core';
 import {ProgramManager} from '@luma.gl/core';
 import {MapView, PolygonLayer, LayerManager} from 'deck.gl';
-import {equals} from 'math.gl';
+import {equals} from '@math.gl/core';
 import * as FIXTURES from 'deck.gl-test/data';
 import {gl} from '@deck.gl/test-utils';
 

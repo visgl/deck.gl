@@ -1,5 +1,5 @@
 import TransitionInterpolator from './transition-interpolator';
-import {lerp} from 'math.gl';
+import {lerp} from '@math.gl/core';
 
 const DEFAULT_PROPS = ['longitude', 'latitude', 'zoom', 'bearing', 'pitch'];
 const DEFAULT_REQUIRED_PROPS = ['longitude', 'latitude', 'zoom'];

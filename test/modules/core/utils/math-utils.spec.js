@@ -1,7 +1,7 @@
 import test from 'tape-promise/tape';
 import {floatEquals, vecEquals} from '../../../utils/utils';
 import {getFrustumPlanes, toDoublePrecisionArray} from '@deck.gl/core/utils/math-utils';
-import {equals, Matrix4} from 'math.gl';
+import {equals, Matrix4} from '@math.gl/core';
 
 const ROOT2 = 0.7071;
 

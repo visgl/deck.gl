@@ -2,7 +2,7 @@ import test from 'tape-promise/tape';
 import TransitionManager from '@deck.gl/core/controllers/transition-manager';
 import {MapState} from '@deck.gl/core/controllers/map-controller';
 import {Timeline} from '@luma.gl/core';
-import {config} from 'math.gl';
+import {config} from '@math.gl/core';
 import {LinearInterpolator, FlyToInterpolator} from '@deck.gl/core';
 
 /* global setTimeout, clearTimeout */
@@ -173,10 +173,16 @@ test('TransitionManager#callbacks', t => {
     },
     onTransitionInterrupt: () => interruptCount++,
     onTransitionEnd: () => {
+      config.EPSILON = 1e-7;
+      if (!transitionInterpolator.arePropsEqual(viewport, transitionProps)) {
+        console.error(viewport, transitionProps);
+        debugger;
+      }
       t.ok(
         transitionInterpolator.arePropsEqual(viewport, transitionProps),
         'viewport matches end props'
       );
+      config.EPSILON = oldEpsilon;
       endCount++;
     },
     onViewStateChange: ({viewState}) => {

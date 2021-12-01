@@ -1,5 +1,5 @@
 import {WebMercatorViewport} from 'deck.gl';
-import {Matrix4} from 'math.gl';
+import {Matrix4} from '@math.gl/core';
 
 export const sampleViewport = new WebMercatorViewport({
   width: 1024,

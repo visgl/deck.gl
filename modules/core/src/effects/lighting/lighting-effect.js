@@ -2,7 +2,7 @@ import {Texture2D, ProgramManager} from '@luma.gl/core';
 import {AmbientLight} from './ambient-light';
 import {DirectionalLight} from './directional-light';
 import Effect from '../../lib/effect';
-import {Matrix4, Vector3} from 'math.gl';
+import {Matrix4, Vector3} from '@math.gl/core';
 import ShadowPass from '../../passes/shadow-pass';
 import {default as shadow} from '../../shaderlib/shadow/shadow';
 
