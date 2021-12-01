@@ -151,7 +151,7 @@ test('TransitionManager#processViewStateChange', t => {
   t.end();
 });
 
-test.only('TransitionManager#callbacks', t => {
+test('TransitionManager#callbacks', t => {
   const oldEpsilon = config.EPSILON;
   config.EPSILON = 1e-7;
   const timeline = new Timeline();
@@ -173,7 +173,7 @@ test.only('TransitionManager#callbacks', t => {
     },
     onTransitionInterrupt: () => interruptCount++,
     onTransitionEnd: () => {
-      config.EPSILON = 1e-0;
+      config.EPSILON = 1e-7;
       if (!transitionInterpolator.arePropsEqual(viewport, transitionProps)) {
         console.error(viewport, transitionProps);
         debugger;
