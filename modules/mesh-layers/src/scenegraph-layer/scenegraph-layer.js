@@ -268,6 +268,7 @@ export default class ScenegraphLayer extends Layer {
           composeModelMatrix: shouldComposeModelMatrix(viewport, coordinateSystem),
           sceneModelMatrix: worldMatrix,
           // Needed for PBR (TODO: find better way to get it)
+          // eslint-disable-next-line camelcase
           u_Camera: model.model.getUniforms().project_uCameraPosition
         }
       });
