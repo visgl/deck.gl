@@ -16,7 +16,7 @@ import {SolidPolygonLayer} from '@deck.gl/layers';
 import React, {PureComponent} from 'react';
 import autobind from 'react-autobind';
 
-import {Matrix4} from 'math.gl';
+import {Matrix4} from '@math.gl/core';
 
 import LayerSelector from './components/layer-selector';
 import LayerControls from './components/layer-controls';

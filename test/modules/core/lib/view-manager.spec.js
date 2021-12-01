@@ -21,7 +21,7 @@
 import test from 'tape-promise/tape';
 import {MapView} from '@deck.gl/core';
 import ViewManager from '@deck.gl/core/lib/view-manager';
-import {equals} from 'math.gl';
+import {equals} from '@math.gl/core';
 
 test('ViewManager#constructor', t => {
   const viewManager = new ViewManager({

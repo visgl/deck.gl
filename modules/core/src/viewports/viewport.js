@@ -21,7 +21,7 @@
 import log from '../utils/log';
 import {createMat4, getCameraPosition, getFrustumPlanes} from '../utils/math-utils';
 
-import {Matrix4, Vector3, equals} from 'math.gl';
+import {Matrix4, Vector3, equals} from '@math.gl/core';
 import * as mat4 from 'gl-matrix/mat4';
 
 import {

@@ -6,7 +6,7 @@ import {OrthographicView} from '@deck.gl/core';
 import {TextLayer, PathLayer} from '@deck.gl/layers';
 import {SimpleMeshLayer} from '@deck.gl/mesh-layers';
 import DeckGL from '@deck.gl/react';
-import {Matrix4} from 'math.gl';
+import {Matrix4} from '@math.gl/core';
 
 import {scaleLinear} from 'd3-scale';
 import {sortData} from './sort-data';

@@ -1,5 +1,5 @@
 import {log} from '@deck.gl/core';
-import {Matrix4} from 'math.gl';
+import {Matrix4} from '@math.gl/core';
 import {MVTWorkerLoader} from '@loaders.gl/mvt';
 import {binaryToGeojson} from '@loaders.gl/gis';
 import {COORDINATE_SYSTEM} from '@deck.gl/core';
