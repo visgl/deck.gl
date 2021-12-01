@@ -1,5 +1,5 @@
 import TransitionInterpolator from './transition-interpolator';
-import {lerp} from 'math.gl';
+import {lerp} from '@math.gl/core';
 
 import {flyToViewport, getFlyToDuration} from '@math.gl/web-mercator';
 

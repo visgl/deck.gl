@@ -4,7 +4,7 @@ import test from 'tape-promise/tape';
 import {GoogleMapsOverlay} from '@deck.gl/google-maps';
 import {ScatterplotLayer} from '@deck.gl/layers';
 import {makeSpy} from '@probe.gl/test-utils';
-import {equals} from 'math.gl';
+import {equals} from '@math.gl/core';
 
 import * as mapsApi from './mock-maps-api';
 

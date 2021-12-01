@@ -23,7 +23,7 @@ import test from 'tape-promise/tape';
 import {COORDINATE_SYSTEM, WebMercatorViewport, OrthographicView} from 'deck.gl';
 import {project} from '@deck.gl/core/shaderlib';
 import {projectPosition} from '@deck.gl/core/shaderlib/project/project-functions';
-import {equals, config} from 'math.gl';
+import {equals, config} from '@math.gl/core';
 
 import {compileVertexShader} from '../shaderlib-test-utils';
 

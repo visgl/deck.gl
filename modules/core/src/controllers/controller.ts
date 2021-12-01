@@ -44,12 +44,67 @@ const EVENT_TYPES = {
   KEYBOARD: ['keydown']
 };
 
+type ControllerProps = {
+  scrollZoom?: boolean | {speed?: number; smooth?: boolean};
+  dragPan?: boolean;
+  dragRotate?: boolean;
+  doubleClickZoom?: boolean;
+  touchZoom?: boolean;
+  touchRotate?: boolean;
+  keyboard?:
+    | boolean
+    | {
+        zoomSpeed?: number; //  speed of zoom using +/- keys. Default 2.
+        moveSpeed?: number; //  speed of movement using arrow keys, in pixels.
+        rotateSpeedX?: number; //  speed of rotation using shift + left/right arrow keys, in degrees. Default 15.
+        rotateSpeedY?: number; //  speed of rotation using shift + up/down arrow keys, in degrees. Default 10.
+      };
+  dragMode?: 'pan' | 'rotate';
+  inertia?: boolean | number;
+};
+
 export default class Controller {
-  constructor(ControllerState, options = {}) {
+  ControllerState;
+  controllerState: Record<string, any> | null = null;
+  controllerStateProps: Record<string, any> | null = null;
+  transitionManager: TransitionManager;
+  _transition;
+  _events: Record<string, any> | null = null;
+  eventManager: any = null;
+  _interactionState = {
+    isDragging: false
+  };
+  _customEvents = [];
+  onViewStateChange = null;
+  onStateChange = null;
+
+  makeViewport;
+  _eventStartBlocked;
+  _state;
+
+  _panMove;
+  invertPan;
+  dragMode: 'pan' | 'rotate' = 'rotate';
+
+  inertia: number = 0;
+
+  scrollZoom: boolean | {speed?: number; smooth?: boolean} = true;
+  dragPan: boolean = true;
+  dragRotate: boolean = true;
+  doubleClickZoom: boolean = true;
+  touchZoom: boolean = true;
+  touchRotate: boolean = false;
+  keyboard:
+    | boolean
+    | {
+        zoomSpeed: number; //  speed of zoom using +/- keys. Default 2.
+        moveSpeed: number; //  speed of movement using arrow keys, in pixels.
+        rotateSpeedX: number; //  speed of rotation using shift + left/right arrow keys, in degrees. Default 15.
+        rotateSpeedY: number; //  speed of rotation using shift + up/down arrow keys, in degrees. Default 10.
+      } = true;
+
+  constructor(ControllerState, options: ControllerProps = {}) {
     this.ControllerState = ControllerState;
-    this.controllerState = null;
-    this.controllerStateProps = null;
-    this.eventManager = null;
     this.transitionManager = new TransitionManager(ControllerState, {
       ...options,
       onViewStateChange: this._onTransition.bind(this),
@@ -59,25 +114,18 @@ export default class Controller {
     const linearTransitionProps = this.linearTransitionProps;
     this._transition = linearTransitionProps && {
       ...LINEAR_TRANSITION_PROPS,
+      // @ts-expect-error
       transitionInterpolator: new LinearInterpolator({
         transitionProps: linearTransitionProps
       })
     };
-
-    this._events = null;
-    this._interactionState = {
-      isDragging: false
-    };
-    this._customEvents = [];
-    this.onViewStateChange = null;
-    this.onStateChange = null;
 
     this.handleEvent = this.handleEvent.bind(this);
 
     this.setProps(options);
   }
 
-  get linearTransitionProps() {
+  get linearTransitionProps(): string[] | null {
     return null;
   }
 
@@ -92,6 +140,7 @@ export default class Controller {
   finalize() {
     for (const eventName in this._events) {
       if (this._events[eventName]) {
+        // eslint-disable-next-line @typescript-eslint/unbound-method
         this.eventManager.off(eventName, this.handleEvent);
       }
     }
@@ -150,6 +199,7 @@ export default class Controller {
   }
 
   isPointInBounds(pos, event) {
+    // @ts-expect-error
     const {width, height} = this.controllerStateProps;
     if (event && event.handled) {
       return false;
@@ -259,11 +309,15 @@ export default class Controller {
   toggleEvents(eventNames, enabled) {
     if (this.eventManager) {
       eventNames.forEach(eventName => {
+        // @ts-expect-error
         if (this._events[eventName] !== enabled) {
+          // @ts-expect-error
           this._events[eventName] = enabled;
           if (enabled) {
+            // eslint-disable-next-line @typescript-eslint/unbound-method
             this.eventManager.on(eventName, this.handleEvent);
           } else {
+            // eslint-disable-next-line @typescript-eslint/unbound-method
             this.eventManager.off(eventName, this.handleEvent);
           }
         }
@@ -289,6 +343,7 @@ export default class Controller {
     if (changed) {
       const oldViewState = this.controllerState ? this.controllerState.getViewportProps() : null;
       if (this.onViewStateChange) {
+        // @ts-expect-error
         this.onViewStateChange({viewState, interactionState: this._interactionState, oldViewState});
       }
     }
@@ -297,6 +352,7 @@ export default class Controller {
   _onTransition(params) {
     if (this.onViewStateChange) {
       params.interactionState = this._interactionState;
+      // @ts-expect-error
       this.onViewStateChange(params);
     }
   }
@@ -304,6 +360,7 @@ export default class Controller {
   _setInteractionState(newStates) {
     Object.assign(this._interactionState, newStates);
     if (this.onStateChange) {
+      // @ts-expect-error
       this.onStateChange(this._interactionState);
     }
   }
@@ -320,6 +377,7 @@ export default class Controller {
       // invertPan is replaced by props.dragMode, keeping for backward compatibility
       alternateMode = !alternateMode;
     }
+    // @ts-expect-error
     const newControllerState = this.controllerState[alternateMode ? 'panStart' : 'rotateStart']({
       pos
     });
@@ -350,6 +408,7 @@ export default class Controller {
       return false;
     }
     const pos = this.getCenter(event);
+    // @ts-expect-error
     const newControllerState = this.controllerState.pan({pos});
     this.updateViewport(newControllerState, NO_TRANSITION_PROPS, {
       isDragging: true,
@@ -366,6 +425,7 @@ export default class Controller {
         pos[0] + (event.velocityX * inertia) / 2,
         pos[1] + (event.velocityY * inertia) / 2
       ];
+      // @ts-expect-error
       const newControllerState = this.controllerState.pan({pos: endPos}).panEnd();
       this.updateViewport(
         newControllerState,
@@ -380,7 +440,9 @@ export default class Controller {
         }
       );
     } else {
+      // @ts-expect-error
       const newControllerState = this.controllerState.panEnd();
+      // @ts-expect-error
       this.updateViewport(newControllerState, null, {
         isDragging: false,
         isPanning: false
@@ -397,6 +459,7 @@ export default class Controller {
     }
 
     const pos = this.getCenter(event);
+    // @ts-expect-error
     const newControllerState = this.controllerState.rotate({pos});
     this.updateViewport(newControllerState, NO_TRANSITION_PROPS, {
       isDragging: true,
@@ -413,6 +476,7 @@ export default class Controller {
         pos[0] + (event.velocityX * inertia) / 2,
         pos[1] + (event.velocityY * inertia) / 2
       ];
+      // @ts-expect-error
       const newControllerState = this.controllerState.rotate({pos: endPos}).rotateEnd();
       this.updateViewport(
         newControllerState,
@@ -427,7 +491,9 @@ export default class Controller {
         }
       );
     } else {
+      // @ts-expect-error
       const newControllerState = this.controllerState.rotateEnd();
+      // @ts-expect-error
       this.updateViewport(newControllerState, null, {
         isDragging: false,
         isRotating: false
@@ -448,6 +514,7 @@ export default class Controller {
       return false;
     }
 
+    // @ts-expect-error
     const {speed = 0.01, smooth = false} = this.scrollZoom;
     const {delta} = event;
 
@@ -708,7 +775,7 @@ export default class Controller {
     return true;
   }
 
-  _getTransitionProps(opts) {
+  _getTransitionProps(opts?) {
     const {_transition} = this;
 
     if (!_transition) {
@@ -718,13 +785,13 @@ export default class Controller {
     // Enables Transitions on double-tap and key-down events.
     return opts
       ? {
-          ..._transition,
-          transitionInterpolator: new LinearInterpolator({
-            ...opts,
-            transitionProps: this.linearTransitionProps,
-            makeViewport: this.controllerState.makeViewport
-          })
-        }
+        ..._transition,
+        transitionInterpolator: new LinearInterpolator({
+          ...opts,
+          transitionProps: this.linearTransitionProps,
+          makeViewport: this.controllerState.makeViewport
+        })
+      }
       : _transition;
   }
 }

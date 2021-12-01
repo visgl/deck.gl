@@ -13,7 +13,7 @@ import {
 } from '@deck.gl/aggregation-layers/utils/grid-aggregation-utils';
 import {COORDINATE_SYSTEM} from '@deck.gl/core';
 import {GridAggregationData} from 'deck.gl-test/data';
-import {equals, config} from 'math.gl';
+import {equals, config} from '@math.gl/core';
 
 const {fixture, buildAttributes, generateRandomGridPoints} = GridAggregationData;
 
