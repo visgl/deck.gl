@@ -39,16 +39,21 @@ void main(void) {
 
   if (composeModelMatrix) {
     DECKGL_FILTER_SIZE(pos, geometry);
+    // using instancePositions as world coordinates
+    // when using globe mode, this branch does not re-orient the model to align with the surface of the earth
+    // call project_normal before setting position to avoid rotation
+    normals_commonspace = project_normal(instanceModelMatrix * normals);
     gl_Position = project_position_to_clipspace(pos + instancePositions, instancePositions64Low, vec3(0.0), position_commonspace);
+    geometry.position = position_commonspace;
   }
   else {
     pos = project_size(pos);
     DECKGL_FILTER_SIZE(pos, geometry);
     gl_Position = project_position_to_clipspace(instancePositions, instancePositions64Low, pos, position_commonspace);
+    geometry.position = position_commonspace;
+    normals_commonspace = project_normal(instanceModelMatrix * normals);
   }
 
-  geometry.position = position_commonspace;
-  normals_commonspace = project_normal(instanceModelMatrix * normals);
   geometry.normal = normals_commonspace;
   DECKGL_FILTER_GL_POSITION(gl_Position, geometry);
 

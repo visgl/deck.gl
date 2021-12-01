@@ -65,7 +65,7 @@ void main(void) {
   vColor = vec4(colors * instanceColors.rgb, instanceColors.a);
 
   vec3 pos = (instanceModelMatrix * positions) * sizeScale;
-  vec3 projectedPosition = project_position(positions);
+  vec3 projectedPosition = project_position(pos);
   position_commonspace = vec4(projectedPosition, 1.0);
   gl_Position = project_common_position_to_clipspace(position_commonspace);
 
