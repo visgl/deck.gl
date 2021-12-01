@@ -1,4 +1,7 @@
 export default class ViewState {
+  _viewportProps: Record<string, any>;
+  _state: Record<string, any> | undefined;
+
   constructor(opts) {
     this._viewportProps = this._applyConstraints(opts);
   }

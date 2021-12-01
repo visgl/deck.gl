@@ -18,7 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {equals} from 'math.gl';
+import {equals} from '@math.gl/core';
 import {Transform} from '@luma.gl/core';
 import {project32} from '@deck.gl/core';
 import {project64} from '@deck.gl/extensions';

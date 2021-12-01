@@ -1,7 +1,7 @@
 import View from './view';
 import Viewport from '../viewports/viewport';
 
-import {Matrix4} from 'math.gl';
+import {Matrix4} from '@math.gl/core';
 import {pixelsToWorld, fovyToAltitude} from '@math.gl/web-mercator';
 import OrbitController from '../controllers/orbit-controller';
 
@@ -37,6 +37,10 @@ function getViewMatrix({height, focalDistance, orbitAxis, rotationX, rotationOrb
 }
 
 class OrbitViewport extends Viewport {
+  static displayName = 'OrbitView';
+
+  projectedCenter;
+
   constructor(props) {
     const {
       height,
@@ -100,6 +104,7 @@ class OrbitViewport extends Viewport {
 
 export default class OrbitView extends View {
   constructor(props = {}) {
+    // @ts-expect-error
     const {orbitAxis = 'Z'} = props;
 
     super({
@@ -115,5 +120,3 @@ export default class OrbitView extends View {
     });
   }
 }
-
-OrbitView.displayName = 'OrbitView';

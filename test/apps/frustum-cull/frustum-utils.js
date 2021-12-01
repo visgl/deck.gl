@@ -1,4 +1,4 @@
-import {Vector3} from 'math.gl';
+import {Vector3} from '@math.gl/core';
 import * as mat3 from 'gl-matrix/mat3';
 
 const NEAR = [255, 0, 128];
