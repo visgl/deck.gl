@@ -88,7 +88,7 @@ new deck.DeckGL({
 
 The style JSON or URL for the Mapbox map.
 
-##### `mapboxAccessToken` (String)
+##### `mapboxApiAccessToken` (String)
 
 The API access token to use Mapbox tiles. See [Mapbox GL JS](https://www.mapbox.com/mapbox-gl-js/api) documentation for how to use Mapbox.
 
