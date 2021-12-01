@@ -6,6 +6,7 @@ export default class CameraLight extends PointLight {
     const {projectedLight} = this;
     const viewport = layer.context.viewport;
     const {coordinateSystem, coordinateOrigin, modelMatrix} = layer.props;
+    // @ts-expect-error
     const {project_uCameraPosition} = getUniformsFromViewport({
       viewport,
       modelMatrix,
