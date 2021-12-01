@@ -1,8 +1,7 @@
 import View from './view';
 import Viewport from '../viewports/viewport';
 
-import {Matrix4} from 'math.gl';
-// @ts-expect-error
+import {Matrix4} from '@math.gl/core';
 import {pixelsToWorld, fovyToAltitude} from '@math.gl/web-mercator';
 import OrbitController from '../controllers/orbit-controller';
 

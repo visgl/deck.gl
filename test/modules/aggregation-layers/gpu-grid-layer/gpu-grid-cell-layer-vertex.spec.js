@@ -4,7 +4,7 @@ import {getQuantizeScale} from '@deck.gl/aggregation-layers/utils/scale-utils';
 import {project32, gouraudLighting, picking} from '@deck.gl/core';
 import {gl} from '@deck.gl/test-utils';
 import {Transform, Buffer} from '@luma.gl/core';
-import {equals, config} from 'math.gl';
+import {equals, config} from '@math.gl/core';
 
 test('gpu-grid-cell-layer-vertex#quantizeScale', t => {
   if (!Transform.isSupported(gl)) {

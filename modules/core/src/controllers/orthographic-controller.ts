@@ -1,4 +1,4 @@
-import {clamp} from 'math.gl';
+import {clamp} from '@math.gl/core';
 import Controller from './controller';
 import {OrbitState} from './orbit-controller';
 

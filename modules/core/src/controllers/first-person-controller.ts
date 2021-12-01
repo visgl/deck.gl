@@ -2,7 +2,7 @@ import Controller from './controller';
 import ViewState from './view-state';
 import {mod} from '../utils/math-utils';
 
-import {Vector3, _SphericalCoordinates as SphericalCoordinates, clamp} from 'math.gl';
+import {Vector3, _SphericalCoordinates as SphericalCoordinates, clamp} from '@math.gl/core';
 
 const MOVEMENT_SPEED = 20;
 const DEFAULT_STATE = {

@@ -19,9 +19,9 @@
 // THE SOFTWARE.
 
 import test from 'tape-promise/tape';
-import {equals, config, Vector3} from 'math.gl';
+import {equals, config, Vector3} from '@math.gl/core';
 import {WebMercatorViewport} from 'deck.gl';
-import {Matrix4} from 'math.gl';
+import {Matrix4} from '@math.gl/core';
 
 // Adjust sensitivity of math.gl's equals
 const LNGLAT_TOLERANCE = 1e-6;
