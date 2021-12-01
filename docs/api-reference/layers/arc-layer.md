@@ -89,7 +89,7 @@ If `true`, create the arc along the shortest path on the earth surface. This opt
 
 * Default: `'pixels'`
 
-The units of the line width, one of `'meters'`, `'common'`, and `'pixels'`. See [unit system](/docs/developer-guide/coordinate-system.md#supported-units).
+The units of the line width, one of `'meters'`, `'common'`, and `'pixels'`. See [unit system](/docs/developer-guide/coordinate-systems.md#supported-units).
 
 ##### `widthScale` (Number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
 

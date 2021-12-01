@@ -45,7 +45,7 @@ It is now possible to independently control the zoom of the X and Y axes.
 </table>
 
 - Meter sizes are now correctly calculated based on the latitude of the point being drawn, whereas they previously were based on the center point of the viewport. This brings the view into full compliance with the Web Mercator projection.
-- A new unit enum `common` is added for scaling geometries without the distortion of the projection method. See updated documentation about the [unit system](/docs/developer-guide/coordinate-system.md#dimensions).
+- A new unit enum `common` is added for scaling geometries without the distortion of the projection method. See updated documentation about the [unit system](/docs/developer-guide/coordinate-systems.md#dimensions).
 - A new `projectionMatrix` option allows overriding of the matrix that would otherwise be created from the other view states.
 
 ### Layer Enhancements

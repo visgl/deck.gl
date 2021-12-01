@@ -77,7 +77,7 @@ Inherits from all [Base Layer](/docs/api-reference/core/layer.md) properties.
 
 * Default: `'meters'`
 
-The units of the line width, one of `'meters'`, `'common'`, and `'pixels'`. See [unit system](/docs/developer-guide/coordinate-system.md#supported-units).
+The units of the line width, one of `'meters'`, `'common'`, and `'pixels'`. See [unit system](/docs/developer-guide/coordinate-systems.md#supported-units).
 
 ##### `widthScale` (Number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
 

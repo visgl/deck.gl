@@ -11,7 +11,7 @@
 
 Dimensions (radius/width/size) that are defined in meters are now projected accurately in the `MapView` according to the Web Mercator projection. This means that scatterplot radius, path widths etc. may now appear larger than they used to at high latitudes, reflecting the [distortion of the Mercator projection](https://en.wikipedia.org/wiki/Mercator_projection#/media/File:Mercator_with_Tissot's_Indicatrices_of_Distortion.svg). The visual difference is visible when viewing a dataset covering a large range of latitudes on a global scale.
 
-This change is technically a bug fix. However, if you have been using meter sizes to visualize non-cartographic values (e.g. population, income), the Mercator distortion may be undesirable. If this is the case, consider moving to `radiusUnits`/`widthUnits`/`sizeUnits`: `'common'`, as detailed in the updated documentation on the [unit system](/docs/developer-guide/coordinate-system.md#supported-units).
+This change is technically a bug fix. However, if you have been using meter sizes to visualize non-cartographic values (e.g. population, income), the Mercator distortion may be undesirable. If this is the case, consider moving to `radiusUnits`/`widthUnits`/`sizeUnits`: `'common'`, as detailed in the updated documentation on the [unit system](/docs/developer-guide/coordinate-systems.md#supported-units).
 
 As a stop-gap measure, applications can revert to the old projection behavior with the following prop on `Deck`/`DeckGL`:
 
