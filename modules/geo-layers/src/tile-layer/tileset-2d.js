@@ -1,7 +1,7 @@
 import Tile2DHeader from './tile-2d-header';
 import {getTileIndices, tileToBoundingBox} from './utils';
 import {RequestScheduler} from '@loaders.gl/loader-utils';
-import {Matrix4} from 'math.gl';
+import {Matrix4} from '@math.gl/core';
 
 const TILE_STATE_UNKNOWN = 0;
 const TILE_STATE_VISIBLE = 1;

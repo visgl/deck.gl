@@ -26,7 +26,7 @@ import {ScatterplotLayer, GeoJsonLayer} from '@deck.gl/layers';
 import {MVTLayer} from '@deck.gl/geo-layers';
 import {gl} from '@deck.gl/test-utils';
 
-import {equals} from 'math.gl';
+import {equals} from '@math.gl/core';
 
 const testLayer = new ScatterplotLayer({
   id: 'test-layer',

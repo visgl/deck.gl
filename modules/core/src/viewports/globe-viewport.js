@@ -1,4 +1,4 @@
-import {Matrix4} from 'math.gl';
+import {Matrix4} from '@math.gl/core';
 import Viewport from './viewport';
 import {PROJECTION_MODE} from '../lib/constants';
 

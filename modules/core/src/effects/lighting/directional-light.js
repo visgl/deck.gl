@@ -1,4 +1,4 @@
-import {Vector3} from 'math.gl';
+import {Vector3} from '@math.gl/core';
 
 const DEFAULT_LIGHT_COLOR = [255, 255, 255];
 const DEFAULT_LIGHT_INTENSITY = 1.0;

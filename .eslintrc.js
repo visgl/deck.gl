@@ -126,7 +126,7 @@ module.exports = {
     'import/core-modules': [
       '@luma.gl/core',
       '@luma.gl/constants',
-      'math.gl',
+      '@math.gl/core',
       '@math.gl/web-mercator'
     ],
     react: {

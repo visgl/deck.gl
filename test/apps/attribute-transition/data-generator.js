@@ -1,4 +1,4 @@
-import {lerp} from 'math.gl';
+import {lerp} from '@math.gl/core';
 
 function random(min, max) {
   if (Array.isArray(min)) {
