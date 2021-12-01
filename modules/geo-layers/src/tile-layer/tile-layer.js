@@ -144,18 +144,14 @@ export default class TileLayer extends CompositeLayer {
     this.props.onTileLoad(tile);
     tile.layers = null;
 
-    if (tile.isVisible) {
-      this.setNeedsUpdate();
-    }
+    this.setNeedsUpdate();
   }
 
   _onTileError(error, tile) {
     this.props.onTileError(error);
     tile.layers = null;
 
-    if (tile.isVisible) {
-      this.setNeedsUpdate();
-    }
+    this.setNeedsUpdate();
   }
 
   _onTileUnload(tile) {
