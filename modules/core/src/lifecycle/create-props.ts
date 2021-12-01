@@ -1,14 +1,15 @@
 import log from '../utils/log';
 import {isAsyncIterable} from '../utils/iterable-utils';
 import {parsePropTypes} from './prop-types';
-import {PROP_SYMBOLS} from './constants';
-
-const {COMPONENT, ASYNC_ORIGINAL, ASYNC_RESOLVED, ASYNC_DEFAULTS} = PROP_SYMBOLS;
+import {COMPONENT, ASYNC_ORIGINAL, ASYNC_RESOLVED, ASYNC_DEFAULTS} from './constants';
+import {ComponentProps, StatefulComponentProps} from './component';
+import type Component from './component';
 
 // Create a property object
-export function createProps() {
-  const component = this; // eslint-disable-line
-
+export function createProps<T extends ComponentProps>(
+  component: Component<T>,
+  propObjects: Partial<T>[]
+): StatefulComponentProps<T> {
   // Get default prop object (a prototype chain for now)
   const propsPrototype = getPropsPrototype(component.constructor);
 
@@ -25,8 +26,8 @@ export function createProps() {
   propsInstance[ASYNC_RESOLVED] = {};
 
   // "Copy" all sync props
-  for (let i = 0; i < arguments.length; ++i) {
-    const props = arguments[i];
+  for (let i = 0; i < propObjects.length; ++i) {
+    const props = propObjects[i];
     // Do not use Object.assign here to avoid Symbols in props overwriting our private fields
     // This might happen if one of the arguments is another props instance
     for (const key in props) {
@@ -148,7 +149,7 @@ function addAsyncPropsToPropPrototype(defaultProps, propTypes) {
     // Note: async is ES7 keyword, can't destructure
     if (propType.async) {
       defaultValues[name] = value;
-      descriptors[name] = getDescriptorForAsyncProp(name, value);
+      descriptors[name] = getDescriptorForAsyncProp(name);
     }
   }
 

@@ -41,7 +41,7 @@ export const COORDINATE_SYSTEM = {
 
   // Non-geospatial
   CARTESIAN: 0
-};
+} as const;
 
 // Deprecated
 /* eslint-disable accessor-pairs */
@@ -59,17 +59,17 @@ export const PROJECTION_MODE = {
   WEB_MERCATOR_AUTO_OFFSET: 4,
 
   IDENTITY: 0
-};
+} as const;
 
 export const UNIT = {
   common: 0,
   meters: 1,
   pixels: 2
-};
+} as const;
 
 export const EVENTS = {
   click: {handler: 'onClick'},
   panstart: {handler: 'onDragStart'},
   panmove: {handler: 'onDrag'},
   panend: {handler: 'onDragEnd'}
-};
+} as const;
