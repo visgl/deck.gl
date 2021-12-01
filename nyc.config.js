@@ -6,7 +6,5 @@ module.exports = {
   instrument: true,
   extensions: ['.ts'],
   include: ['modules/**/src'],
-  exclude: [
-    'modules/test-utils/'
-  ]
+  exclude: ['modules/test-utils/']
 };
