@@ -1,8 +1,9 @@
 import {testLayerAsync} from '@deck.gl/test-utils';
 import {makeSpy} from '@probe.gl/test-utils';
-import {CartoLayer, API_VERSIONS, MAP_TYPES} from '@deck.gl/carto';
+import {CartoLayer, API_VERSIONS, FORMATS, MAP_TYPES} from '@deck.gl/carto';
 import {MVTLayer} from '@deck.gl/geo-layers';
 import {GeoJsonLayer} from '@deck.gl/layers';
+import CartoDynamicTileLayer from '@deck.gl/carto/layers/carto-dynamic-tile-layer';
 import {mockedV1Test, mockedV2Test, mockedV3Test} from './mock-fetch';
 
 const CREDENTIALS_V3 = {
@@ -74,6 +75,12 @@ mockedV3Test('CartoLayer#v3', async t => {
           );
           break;
         case MAP_TYPES.TABLE:
+          if (layer.props.format === FORMATS.TILEJSON) {
+            t.ok(subLayer instanceof CartoDynamicTileLayer, 'should be a CartoDynamicTileLayer');
+          } else {
+            t.ok(subLayer instanceof GeoJsonLayer, 'should be a GeoJsonLayer');
+          }
+          break;
         case MAP_TYPES.QUERY:
           t.ok(subLayer instanceof GeoJsonLayer, 'should be a GeoJsonLayer');
           break;
@@ -109,6 +116,16 @@ mockedV3Test('CartoLayer#v3', async t => {
           data: 'table',
           connection: 'conn_name',
           type: MAP_TYPES.TABLE,
+          credentials: CREDENTIALS_V3
+        },
+        onAfterUpdate
+      },
+      {
+        props: {
+          data: 'dynamic_tileset',
+          connection: 'conn_name',
+          type: MAP_TYPES.TABLE,
+          format: FORMATS.TILEJSON,
           credentials: CREDENTIALS_V3
         },
         onAfterUpdate

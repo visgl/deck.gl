@@ -1,0 +1,56 @@
+syntax = "proto3";
+package carto;
+
+message Coords {
+    map<string, double> value = 1;
+    int32 size = 2;
+}
+
+message NumericProp {
+  map<string, double> value = 1;
+}
+
+message StringProp {
+  repeated string value = 1;
+}
+message Points  {
+    Coords positions = 1 ;
+    Coords globalFeatureIds = 2 ;
+    Coords featureIds = 3 ;
+    repeated Properties properties = 4;
+    map<string, NumericProp> numericProps = 5;
+
+}
+message Lines {
+    Coords positions = 1;
+    Coords pathIndices = 2;
+    Coords featureIds = 3;
+    repeated Properties properties = 4;
+    map<string, NumericProp> numericProps = 5;
+}
+message Polygons {
+    Coords positions = 1;
+    Coords polygonIndices = 2;
+    Coords featureIds = 3;
+    Coords primitivePolygonIndices = 4;
+    repeated Properties properties = 5;
+    map<string, NumericProp> numericProps = 6;
+
+}
+message Tile {
+    Points points = 1;
+    Lines lines = 2;
+    Polygons polygons = 3;
+}
+
+
+
+message Properties {
+    repeated KeyValueObject data = 1;
+}
+
+
+message KeyValueObject {
+    string key = 1;
+    string value = 2;
+}

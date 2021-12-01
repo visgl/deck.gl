@@ -26,6 +26,13 @@ export const FORMATS = {
   JSON: 'json'
 };
 
+// AVAILABLE FORMATS FOR TILES
+export const FORMAT_TILES = {
+  BINARY: 'binary',
+  GEOJSON: 'geojson',
+  WIP: 'wip'
+};
+
 /**
  * Simple encode parameter
  */

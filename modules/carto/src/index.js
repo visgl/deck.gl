@@ -6,6 +6,7 @@ export {default as colorCategories} from './style/color-categories-style';
 export {default as colorContinuous} from './style/color-continuous-style';
 export {
   FORMATS,
+  FORMAT_TILES,
   MAP_TYPES,
   API_VERSIONS,
   fetchLayerData,
