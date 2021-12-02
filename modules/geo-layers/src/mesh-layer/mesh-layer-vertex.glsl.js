@@ -26,12 +26,18 @@ out vec3 normals_commonspace;
 out vec4 position_commonspace;
 out vec4 vColor;
 
-void main(void) {
-  // https://github.com/Esri/i3s-spec/blob/master/docs/1.7/geometryUVRegion.cmn.md
-  vec2 uv = fract(texCoords) * (uvRegions.zw - uvRegions.xy) + uvRegions.xy;
+vec2 applyUVRegion(vec2 uv) {
+  #ifdef HAS_UV_REGIONS
+    // https://github.com/Esri/i3s-spec/blob/master/docs/1.7/geometryUVRegion.cmn.md
+    return fract(uv) * (uvRegions.zw - uvRegions.xy) + uvRegions.xy;
+  #else
+    return uv;
+  #endif
+}
 
+void main(void) {
+  vec2 uv = applyUVRegion(texCoords);
   geometry.uv = uv;
-  geometry.uv = texCoords;
 
   if (u_pickFeatureIds) {
     geometry.pickingColor = featureIdsPickingColors;
