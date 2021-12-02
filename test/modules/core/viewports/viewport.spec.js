@@ -1,7 +1,7 @@
 import test from 'tape-promise/tape';
 import {vecNormalized} from '../../../utils/utils';
 import {Viewport} from 'deck.gl';
-import {Matrix4, Vector3} from 'math.gl';
+import {Matrix4, Vector3} from '@math.gl/core';
 
 /* eslint-disable */
 const TEST_VIEWPORTS = [

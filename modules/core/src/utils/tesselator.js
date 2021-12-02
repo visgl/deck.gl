@@ -106,6 +106,7 @@ export default class Tesselator {
     const value = geometryBuffer.value || geometryBuffer;
     assert(ArrayBuffer.isView(value)); // invalid binary geometries
 
+    // @ts-expect-error
     return getAccessorFromBuffer(value, {
       size: this.positionSize,
       offset: geometryBuffer.offset,

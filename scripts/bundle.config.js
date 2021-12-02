@@ -40,7 +40,7 @@ const config = {
   mode: 'production',
 
   entry: {
-    main: resolve('./bundle')
+    main: resolve('./bundle.ts')
   },
 
   output: {
