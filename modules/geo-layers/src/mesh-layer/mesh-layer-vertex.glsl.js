@@ -37,9 +37,7 @@ vec2 applyUVRegion(vec2 uv) {
 
 void main(void) {
   vec2 uv = applyUVRegion(texCoords);
-
   geometry.uv = uv;
-  geometry.uv = texCoords;
 
   if (u_pickFeatureIds) {
     geometry.pickingColor = featureIdsPickingColors;
