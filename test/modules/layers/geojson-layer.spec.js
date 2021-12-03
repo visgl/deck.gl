@@ -27,7 +27,7 @@ import {GeoJsonLayer} from 'deck.gl';
 import * as FIXTURES from 'deck.gl-test/data';
 import {testPickingLayer} from './test-picking-layer';
 
-test('GeoJsonLayer#tests', t => {
+test.only('GeoJsonLayer#tests', t => {
   const testCases = generateLayerTests({
     Layer: GeoJsonLayer,
     sampleProps: {
@@ -103,7 +103,8 @@ test('GeoJsonLayer#tests', t => {
 
   // TODO: @loaders.gl binaryToGeojson should no modify input data
   // TODO: Set a right geojson example as the provided from 'deck.gl-data' contains 'GeometryCollection' types that are not compatible with geojsonToBinary
-  const binaryData = JSON.parse(JSON.stringify(FIXTURES.geojson.features)).slice(0, 7);
+  const geojsonData = JSON.parse(JSON.stringify(FIXTURES.geojson.features)).slice(0, 7);
+  const binaryData = geojsonToBinary(geojsonData);
 
   testCases.push({
     title: 'GeoJsonLayer#binary',
@@ -126,7 +127,41 @@ test('GeoJsonLayer#tests', t => {
     },
     props: {
       // TODO: Set a right geojson example as the provided from 'deck.gl-data' contains 'GeometryCollection' types that are not compatible with geojsonToBinary
-      data: geojsonToBinary(binaryData)
+      data: binaryData
+    }
+  });
+
+  const binaryDataWithAttributes = Object.entries(binaryData).reduce((acc, [key, value]) => {
+    acc[key] = {
+      ...value,
+      attributes: {
+        getFilterValue: {
+          value: value.featureIds.value.map(_ => 0),
+          size: 1
+        }
+      }
+    };
+    return acc;
+  }, {});
+
+  testCases.push({
+    title: 'GeoJsonLayer#binaryAttributes',
+    onBeforeUpdate: ({testCase}) => t.comment(testCase.title),
+    onAfterUpdate: ({layer, subLayers, subLayer}) => {
+      t.ok(
+        subLayer.props.data.attributes.getFilterValue,
+        'subLayer should receive passed binary attribute'
+      );
+      const hasData = layer.props && layer.props.data && Object.keys(layer.props.data).length;
+      t.is(
+        subLayers.length,
+        !hasData ? 0 : layer.props.stroked && !layer.props.extruded ? 4 : 3,
+        'correct number of sublayers'
+      );
+    },
+    props: {
+      // TODO: Set a right geojson example as the provided from 'deck.gl-data' contains 'GeometryCollection' types that are not compatible with geojsonToBinary
+      data: binaryDataWithAttributes
     }
   });
 
