@@ -68,6 +68,42 @@ test('colorContinuous', t => {
   t.end();
 });
 
+const CONTINUOUS_TEST_CASES_USING_CARTO_COLORS = [
+  {
+    title: 'Feature 1',
+    argument: {
+      properties: {
+        target: 0
+      }
+    },
+    result: [252, 222, 156, 255]
+  },
+  {
+    title: 'Feature 2',
+    argument: {
+      properties: {
+        target: 100
+      }
+    },
+    result: [124, 29, 111, 255]
+  }
+];
+
+test('colorContinuous#colorsAsCARTOColors', t => {
+  const colorContinuousManual = colorContinuous({
+    attr: 'target',
+    domain: [0, 100],
+    colors: 'SunsetDark'
+  });
+
+  for (const tc of CONTINUOUS_TEST_CASES_USING_CARTO_COLORS) {
+    const func = colorContinuousManual(tc.argument);
+    t.deepEqual(func, tc.result, `colorContinuous ${tc.title} returned expected result`);
+  }
+
+  t.end();
+});
+
 test('colorContinuous#invalidColorsArgument', t => {
   for (const tc of ERROR_TEST_CASES_COLORS) {
     t.throws(
