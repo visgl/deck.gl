@@ -187,15 +187,24 @@ The maximum memory used for caching tiles. If this limit is supplied, `getTileDa
 - Default: `null`
 
 
-##### `refinementStrategy` (Enum, optional)
+##### `refinementStrategy` (String|Function, optional)
 
-How the tile layer refines the visibility of tiles. One of the following:
+How the tile layer refines the visibility of tiles. When zooming in and out, if the layer only shows tiles from the current zoom level, then the user may observe undesirable flashing while new data is loading. By setting `refinementStrategy` the layer can attempt to maintain visual continuity by displaying cached data from a different zoom level before data is available.
+
+This prop accepts one of the following:
 
 * `'best-available'`: If a tile in the current viewport is waiting for its data to load, use cached content from the closest zoom level to fill the empty space. This approach minimizes the visual flashing due to missing content.
 * `'no-overlap'`: Avoid showing overlapping tiles when backfilling with cached content. This is usually favorable when tiles do not have opaque backgrounds.
 * `'never'`: Do not display any tile that is not selected.
+* A custom function. See "custom strategy" below.
 
 - Default: `'best-available'`
+
+##### custom strategy
+
+Apps may define a custom `refinementStrategy` by supplying its own callback function. The function will be called frequently on every viewport update and every tile loaded event.
+
+When called, the function receives an array of [Tile](#tile) instances representing every tile that is currently in the cache. It is an opportunity to manipulate `tile.isVisible` before sub layers are rendered. `isVisible` is initially set to the value of `isSelected` (equivalent to `refinementStrategy: 'never'`).
 
 ##### `maxRequests` (Number, optional)
 
@@ -292,6 +301,11 @@ Properties:
 - `bbox` (Object) - bounding box of the tile. When used with a geospatial view, `bbox` is in the shape of `{west: <longitude>, north: <latitude>, east: <longitude>, south: <latitude>}`. When used with a non-geospatial view, `bbox` is in the shape of `{left, top, right, bottom}`.
 - `content` (Object) - the tile's cached content. `null` if the tile's initial load is pending, cancelled, or encountered an error.
 - `data` (Object|Promise) - the tile's requested content. If the tile is loading, returns a Promise that resolves to the loaded content when loading is completed.
+- `parent` (Tile) - the nearest ancestor tile (a tile on a lower `z` that contains this tile), if present in the cache
+- `children` (Tile[]) - the nearest sub tiles (tiles on higher `z` that are contained by this tile), if present in the cache
+- `isSelected` (Boolean) - if the tile is expected to show up in the current viewport
+- `isVisible` (Boolean) - if the tile should be rendered
+- `isLoaded` (Boolean) - if the content of the tile has been loaded
 
 ## Source
 

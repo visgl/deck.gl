@@ -5,3 +5,5 @@ workers/
 dist.js
 *.min.js
 mapbox-gl.js
+
+modules/core/src/utils/positions.ts

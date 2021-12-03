@@ -11,9 +11,6 @@ function validateGeometryAttributes(attributes) {
   if (!hasColorAttribute) {
     attributes.colors = {constant: true, value: new Float32Array([1, 1, 1])};
   }
-  if (!attributes.uvRegions) {
-    attributes.uvRegions = {constant: true, value: new Float32Array([0, 0, 1, 1])};
-  }
 }
 
 const defaultProps = {
@@ -76,7 +73,11 @@ export default class _MeshLayer extends SimpleMeshLayer {
       ...this.getShaders(),
       id,
       geometry: mesh,
-      defines: {...shaders.defines, ...materialParser?.defines},
+      defines: {
+        ...shaders.defines,
+        ...materialParser?.defines,
+        HAS_UV_REGIONS: mesh.attributes.uvRegions
+      },
       parameters: materialParser?.parameters,
       isInstanced: true
     });
