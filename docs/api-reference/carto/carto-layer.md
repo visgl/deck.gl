@@ -2,6 +2,33 @@
 
 `CartoLayer` is the layer to visualize data using the CARTO Maps API.
 
+## Usage CARTO 3
+
+```js
+import DeckGL from '@deck.gl/react';
+import {CartoLayer, setDefaultCredentials, MAP_TYPES, API_VERSIONS} from '@deck.gl/carto';
+
+setDefaultCredentials({
+  apiVersion: API_VERSIONS.V3
+  apiBaseUrl: 'https://gcp-us-east1.api.carto.com',
+  accessToken: 'XXX',
+});
+
+function App({viewState}) {
+  const layer = new CartoLayer({
+    type: MAP_TYPES.QUERY,
+    connection: 'bigquery',
+    data: 'SELECT * FROM cartobq.testtables.points_10k',
+    pointRadiusMinPixels: 2,
+    getLineColor: [0, 0, 0, 200],
+    getFillColor: [238, 77, 90],
+    lineWidthMinPixels: 1
+  })
+
+  return <DeckGL viewState={viewState} layers={[layer]} />;
+}
+```
+
 ## Usage CARTO 2
 
 ```js
@@ -22,40 +49,11 @@ function App({viewState}) {
     getLineColor: [0, 0, 0, 125],
     getFillColor: [238, 77, 90],
     lineWidthMinPixels: 1
-  })
+  });
 
   return <DeckGL viewState={viewState} layers={[layer]} />;
 }
 ```
-
-## Usage CARTO 3
-
-```js
-import DeckGL from '@deck.gl/react';
-import {CartoLayer, setDefaultCredentials, MAP_TYPES, API_VERSIONS} from '@deck.gl/carto';
-
-setDefaultCredentials({
-  apiVersion: API_VERSIONS.V3
-  apiBaseUrl: 'https://gcp-us-east1.api.carto.com', 
-  accessToken: 'XXX',
-});
-
-function App({viewState}) {
-  const layer = new CartoLayer({
-    type: MAP_TYPES.QUERY,
-    connection: 'bigquery',
-    data: 'SELECT * FROM cartobq.testtables.points_10k',
-    pointRadiusMinPixels: 2,
-    getLineColor: [0, 0, 0, 200],
-    getFillColor: [238, 77, 90],
-    lineWidthMinPixels: 1
-  })
-
-  return <DeckGL viewState={viewState} layers={[layer]} />;
-}
-```
-
-> **CARTO 3** is our new cloud-native platform. If you'd like to get access, click on the following link for more information: [https://carto.com/carto3](https://carto.com/carto3).
 
 ## Installation
 
@@ -75,14 +73,14 @@ new CartoLayer({});
 To use pre-bundled scripts:
 
 ```html
-<script src="https://unpkg.com/deck.gl@^8.5.0/dist.min.js"></script>
-<script src="https://unpkg.com/@deck.gl/carto@^8.5.0/dist.min.js"></script>
+<script src="https://unpkg.com/deck.gl@^8.7.0/dist.min.js"></script>
+<script src="https://unpkg.com/@deck.gl/carto@^8.7.0/dist.min.js"></script>
 
 <!-- or -->
-<script src="https://unpkg.com/@deck.gl/core@^8.5.0/dist.min.js"></script>
-<script src="https://unpkg.com/@deck.gl/layers@^8.5.0/dist.min.js"></script>
-<script src="https://unpkg.com/@deck.gl/geo-layers@^8.5.0/dist.min.js"></script>
-<script src="https://unpkg.com/@deck.gl/carto@^8.5.0/dist.min.js"></script>
+<script src="https://unpkg.com/@deck.gl/core@^8.7.0/dist.min.js"></script>
+<script src="https://unpkg.com/@deck.gl/layers@^8.7.0/dist.min.js"></script>
+<script src="https://unpkg.com/@deck.gl/geo-layers@^8.7.0/dist.min.js"></script>
+<script src="https://unpkg.com/@deck.gl/carto@^8.7.0/dist.min.js"></script>
 ```
 
 ```js
@@ -101,13 +99,13 @@ Required. Either a SQL query or a name of dataset/tileset.
 
 Required. Data type. Possible values are:
 
-- `MAP_TYPES.QUERY`, if `data` is a SQL query. 
+- `MAP_TYPES.QUERY`, if `data` is a SQL query.
 - `MAP_TYPES.TILESET`, if `data` is a tileset name.
 - `MAP_TYPES.TABLE`, if `data` is a dataset name. Only supported with API v3.
 
 ##### `connection` (String)
 
-Required when apiVersion is `API_VERSIONS.V3`. 
+Required when apiVersion is `API_VERSIONS.V3`.
 
 Name of the connection registered in the CARTO workspace.
 
@@ -125,7 +123,7 @@ Names of columns to fetch. By default, all columns are fetched.
 
 ##### `uniqueIdProperty` (String)
 
-* Default: `cartodb_id`
+- Default: `cartodb_id`
 
 Optional. A string pointing to a unique attribute at the result of the query. A unique attribute is needed for highlighting with vector tiles when a feature is split across two or more tiles.
 
@@ -133,28 +131,27 @@ Optional. A string pointing to a unique attribute at the result of the query. A 
 
 Optional. Overrides the configuration to connect with CARTO. Check the parameters [here](overview#carto-credentials).
 
-
 ### Callbacks
 
 #### `onDataLoad` (Function, optional)
 
 `onDataLoad` is called when the request to the CARTO Maps API was completed successfully.
 
-* Default: `data => {}`
+- Default: `data => {}`
 
 Receives arguments:
 
-* `data` (Object) - Data received from CARTO Maps API
+- `data` (Object) - Data received from CARTO Maps API
 
 ##### `onDataError` (Function, optional)
 
 `onDataError` is called when the request to the CARTO Maps API failed. By default the Error is thrown.
 
-* Default: `null`
+- Default: `null`
 
 Receives arguments:
 
-* `error` (`Error`)
+- `error` (`Error`)
 
 ## Source
 
