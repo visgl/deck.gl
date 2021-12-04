@@ -18,15 +18,30 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-export default `\
+export default `#version 300 es
 #define SHADER_NAME column-layer-fragment-shader
 
 precision highp float;
 
-varying vec4 vColor;
+uniform vec3 project_uCameraPosition;
+uniform bool extruded;
+uniform bool isStroke;
+
+out vec4 fragColor;
+
+in vec4 vColor;
+#ifdef FLAT_SHADING
+in vec4 position_commonspace;
+#endif
 
 void main(void) {
-  gl_FragColor = vColor;
-  DECKGL_FILTER_COLOR(gl_FragColor, geometry);
+  fragColor = vColor;
+#ifdef FLAT_SHADING
+  if (extruded && !isStroke && !picking_uActive) {
+    vec3 normal = normalize(cross(dFdx(position_commonspace.xyz), dFdy(position_commonspace.xyz)));
+    fragColor.rgb = lighting_getLightColor(vColor.rgb, project_uCameraPosition, position_commonspace.xyz, normal);
+  }
+#endif
+  DECKGL_FILTER_COLOR(fragColor, geometry);
 }
 `;
