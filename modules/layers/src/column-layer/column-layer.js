@@ -18,9 +18,9 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {Layer, project32, gouraudLighting, picking, UNIT} from '@deck.gl/core';
+import {Layer, project32, gouraudLighting, phongLighting, picking, UNIT} from '@deck.gl/core';
 import GL from '@luma.gl/constants';
-import {Model} from '@luma.gl/core';
+import {Model, isWebGL2, hasFeature, FEATURES} from '@luma.gl/core';
 import ColumnGeometry from './column-geometry';
 
 import vs from './column-layer-vertex.glsl';
@@ -58,7 +58,21 @@ const defaultProps = {
 
 export default class ColumnLayer extends Layer {
   getShaders() {
-    return super.getShaders({vs, fs, modules: [project32, gouraudLighting, picking]});
+    const {gl} = this.context;
+    const transpileToGLSL100 = !isWebGL2(gl);
+    const defines = {};
+
+    const useDerivatives = this.props.flatShading && hasFeature(gl, FEATURES.GLSL_DERIVATIVES);
+    if (useDerivatives) {
+      defines.FLAT_SHADING = 1;
+    }
+    return super.getShaders({
+      vs,
+      fs,
+      defines,
+      transpileToGLSL100,
+      modules: [project32, useDerivatives ? phongLighting : gouraudLighting, picking]
+    });
   }
 
   /**
@@ -109,7 +123,8 @@ export default class ColumnLayer extends Layer {
   updateState({props, oldProps, changeFlags}) {
     super.updateState({props, oldProps, changeFlags});
 
-    const regenerateModels = changeFlags.extensionsChanged;
+    const regenerateModels =
+      changeFlags.extensionsChanged || props.flatShading !== oldProps.flatShading;
 
     if (regenerateModels) {
       const {gl} = this.context;
