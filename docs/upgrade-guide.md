@@ -6,6 +6,13 @@
 
 - `CartoBQTilerLayer` is removed. Use `CartoLayer` instead with `type` set to `MAP_TYPES.TILESET`.
 - `CartoSQLLayer` is removed. Use `CartoLayer` instead with `type` set to `MAP_TYPES.QUERY`.
+- `H3HexagonLayer` now uses flat shading when it renders a `ColumnLayer`. This change improves the visual consistency when using `highPrecision: 'auto'`. To revert to the old behavior, set the following prop:
+
+  ```js
+  _subLayerProps: {
+    'hexagon-cell': {flatShading: false}
+  }
+  ```
 
 ## Upgrading from deck.gl v8.5 to v8.6
 
