@@ -45,11 +45,26 @@ void main(void) {
     geometry.pickingColor = instancePickingColors;
   }
 
+  vTexCoord = uv;
+  cameraPosition = project_uCameraPosition;
+  vColor = vec4(colors * instanceColors.rgb, instanceColors.a);
+
+  vec3 pos = (instanceModelMatrix * positions) * sizeScale;
+  vec3 projectedPosition = project_position(positions);
+  position_commonspace = vec4(projectedPosition, 1.0);
+  gl_Position = project_common_position_to_clipspace(position_commonspace);
+
+  geometry.position = position_commonspace;
+  normals_commonspace = project_normal(instanceModelMatrix * normals);
+  geometry.normal = normals_commonspace;
+
+  DECKGL_FILTER_GL_POSITION(gl_Position, geometry);
+
   #ifdef MODULE_PBR
     // set PBR data
+    pbr_vPosition = geometry.position.xyz;
     #ifdef HAS_NORMALS
-      pbr_vNormal = project_normal(instanceModelMatrix * normals);
-      geometry.normal = pbr_vNormal;
+      pbr_vNormal = geometry.normal;
     #endif
 
     #ifdef HAS_UV
@@ -59,26 +74,6 @@ void main(void) {
     #endif
     geometry.uv = pbr_vUV;
   #endif
-
-  vTexCoord = uv;
-  cameraPosition = project_uCameraPosition;
-  vColor = vec4(colors * instanceColors.rgb, instanceColors.a);
-
-  vec3 pos = (instanceModelMatrix * positions) * sizeScale;
-  vec3 projectedPosition = project_position(pos);
-  position_commonspace = vec4(projectedPosition, 1.0);
-  gl_Position = project_common_position_to_clipspace(position_commonspace);
-
-  geometry.position = position_commonspace;
-  normals_commonspace = project_normal(instanceModelMatrix * normals);
-  geometry.normal = normals_commonspace;
-
-  #ifdef MODULE_PBR
-    // set PBR data
-    pbr_vPosition = geometry.position.xyz;
-  #endif
-
-  DECKGL_FILTER_GL_POSITION(gl_Position, geometry);
 
   DECKGL_FILTER_COLOR(vColor, geometry);
 }
