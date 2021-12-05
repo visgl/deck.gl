@@ -221,6 +221,9 @@ function diffExtensions(props, oldProps) {
   if (extensions === oldExtensions) {
     return false;
   }
+  if (!oldExtensions || !extensions) {
+    return true;
+  }
   if (extensions.length !== oldExtensions.length) {
     return true;
   }
