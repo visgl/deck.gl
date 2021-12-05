@@ -149,6 +149,13 @@ Whether to generate a line wireframe of the column. The outline will have
 "horizontal" lines closing the top and bottom polygons and a vertical line
 (a "strut") for each vertex around the disk. Only applies if `extruded: true`.
 
+##### `flatShading` (Boolean, optional)
+
+* Default: `false`
+
+If `true`, the vertical surfaces of the columns use [flat shading](https://en.wikipedia.org/wiki/Shading#Flat_vs._smooth_shading).
+If `false`, use smooth shading. Only effective if `extruded` is `true`.
+
 ##### `radiusUnits` (String, optional)
 
 * Default: `'meters'`

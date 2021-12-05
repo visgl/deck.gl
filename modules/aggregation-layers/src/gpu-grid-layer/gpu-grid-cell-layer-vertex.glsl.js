@@ -126,8 +126,7 @@ void main(void) {
   // Set color to be rendered to picking fbo (also used to check for selection highlight).
   picking_setPickingColor(instancePickingColors);
 
-  vec4 position_commonspace;
-  gl_Position = project_position_to_clipspace(centroidPosition, centroidPosition64Low, pos, position_commonspace);
+  gl_Position = project_position_to_clipspace(centroidPosition, centroidPosition64Low, pos, geometry.position);
 
   // Light calculations
   // Worldspace is the linear space after Mercator projection
@@ -135,7 +134,7 @@ void main(void) {
   vec3 normals_commonspace = project_normal(normals);
 
    if (extruded) {
-    vec3 lightColor = lighting_getLightColor(color.rgb, project_uCameraPosition, position_commonspace.xyz, normals_commonspace);
+    vec3 lightColor = lighting_getLightColor(color.rgb, project_uCameraPosition, geometry.position.xyz, normals_commonspace);
     vColor = vec4(lightColor, color.a * opacity) / 255.;
   } else {
     vColor = vec4(color.rgb, color.a * opacity) / 255.;
