@@ -2,54 +2,60 @@ import {createTexture, destroyTexture} from '../utils/texture';
 
 import type Component from './component';
 
-export interface PropType {
-  name: string;
-  type: string;
+type BasePropType = {
   value: any;
   async?: boolean;
   validate?: (value: any, propType: PropType) => boolean;
   equal?: (value1: any, value2: any, propType: PropType) => boolean;
+};
+
+/**
+ * Normalized prop type definition
+ */
+export type PropType = BasePropType & {
+  type: string;
+  name: string;
   transform?: (value: any, propType: PropType, component: Component<any>) => any;
   release?: (value: any, propType: PropType, component: Component<any>) => void;
-}
+};
 
-type BooleanPropType = Omit<PropType, 'name'> & {
+type BooleanPropType = BasePropType & {
   type: 'boolean';
   value: boolean;
 };
-type NumberPropType = Omit<PropType, 'name'> & {
+type NumberPropType = BasePropType & {
   type: 'number';
   value: number;
   min?: number;
   max?: number;
 };
-type ColorPropType = Omit<PropType, 'name'> & {
+type ColorPropType = BasePropType & {
   type: 'color';
   value: [number, number, number, number];
   optional?: boolean;
 };
-type ArrayPropType = Omit<PropType, 'name'> & {
+type ArrayPropType = BasePropType & {
   type: 'array';
   value: any[];
   optional?: boolean;
   compare?: boolean;
 };
-type AccessorPropType = Omit<PropType, 'name'> & {
+type AccessorPropType = BasePropType & {
   type: 'accessor';
 };
-type FunctionPropType = Omit<PropType, 'name'> & {
+type FunctionPropType = BasePropType & {
   type: 'function';
   value: Function;
   optional?: boolean;
   compare?: boolean;
 };
-type DataPropType = Omit<PropType, 'name'> & {
+type DataPropType = BasePropType & {
   type: 'data';
 };
-type ImagePropType = Omit<PropType, 'name'> & {
+type ImagePropType = BasePropType & {
   type: 'image';
 };
-type ObjectPropType = Omit<PropType, 'name'> & {
+type ObjectPropType = BasePropType & {
   type: 'object';
 };
 type DeprecatedProp = {
@@ -212,7 +218,7 @@ function parsePropType(name: string, propDef: PropTypeDef): PropType {
   }
 }
 
-function normalizePropDefinition(name, propDef) {
+function normalizePropDefinition(name, propDef): PropType {
   if (!('type' in propDef)) {
     if (!('value' in propDef)) {
       // If no type and value this object is likely the value
@@ -223,12 +229,12 @@ function normalizePropDefinition(name, propDef) {
   return {name, ...TYPE_DEFINITIONS[propDef.type], ...propDef};
 }
 
-function isArray(value) {
+function isArray(value: any): boolean {
   return Array.isArray(value) || ArrayBuffer.isView(value);
 }
 
 // improved version of javascript typeof that can distinguish arrays and null values
-function getTypeOf(value) {
+function getTypeOf(value: any): string {
   if (isArray(value)) {
     return 'array';
   }

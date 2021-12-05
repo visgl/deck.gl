@@ -1,7 +1,12 @@
 import log from '../utils/log';
 import {isAsyncIterable} from '../utils/iterable-utils';
 import {parsePropTypes} from './prop-types';
-import {COMPONENT, ASYNC_ORIGINAL, ASYNC_RESOLVED, ASYNC_DEFAULTS} from './constants';
+import {
+  COMPONENT_SYMBOL,
+  ASYNC_ORIGINAL_SYMBOL,
+  ASYNC_RESOLVED_SYMBOL,
+  ASYNC_DEFAULTS_SYMBOL
+} from './constants';
 import {ComponentProps, StatefulComponentProps} from './component';
 import type Component from './component';
 
@@ -17,13 +22,13 @@ export function createProps<T extends ComponentProps>(
   const propsInstance = Object.create(propsPrototype);
 
   // Props need a back pointer to the owning component
-  propsInstance[COMPONENT] = component;
+  propsInstance[COMPONENT_SYMBOL] = component;
   // The supplied (original) values for those async props that are set to url strings or Promises.
   // In this case, the actual (i.e. resolved) values are looked up from component.internalState
-  propsInstance[ASYNC_ORIGINAL] = {};
+  propsInstance[ASYNC_ORIGINAL_SYMBOL] = {};
   // Note: the actual (resolved) values for props that are NOT set to urls or Promises.
   // in this case the values are served directly from this map
-  propsInstance[ASYNC_RESOLVED] = {};
+  propsInstance[ASYNC_RESOLVED_SYMBOL] = {};
 
   // "Copy" all sync props
   for (let i = 0; i < propObjects.length; ++i) {
@@ -154,9 +159,9 @@ function addAsyncPropsToPropPrototype(defaultProps, propTypes) {
   }
 
   // Default "resolved" values for async props, returned if value not yet resolved/set.
-  defaultProps[ASYNC_DEFAULTS] = defaultValues;
+  defaultProps[ASYNC_DEFAULTS_SYMBOL] = defaultValues;
   // Shadowed object, just to make sure "early indexing" into the instance does not fail
-  defaultProps[ASYNC_ORIGINAL] = {};
+  defaultProps[ASYNC_ORIGINAL_SYMBOL] = {};
 
   Object.defineProperties(defaultProps, descriptors);
 }
@@ -172,33 +177,33 @@ function getDescriptorForAsyncProp(name) {
         newValue instanceof Promise ||
         isAsyncIterable(newValue)
       ) {
-        this[ASYNC_ORIGINAL][name] = newValue;
+        this[ASYNC_ORIGINAL_SYMBOL][name] = newValue;
       } else {
-        this[ASYNC_RESOLVED][name] = newValue;
+        this[ASYNC_RESOLVED_SYMBOL][name] = newValue;
       }
     },
     // Only the component's state knows the true value of async prop
     get() {
-      if (this[ASYNC_RESOLVED]) {
+      if (this[ASYNC_RESOLVED_SYMBOL]) {
         // Prop value isn't async, so just return it
-        if (name in this[ASYNC_RESOLVED]) {
-          const value = this[ASYNC_RESOLVED][name];
+        if (name in this[ASYNC_RESOLVED_SYMBOL]) {
+          const value = this[ASYNC_RESOLVED_SYMBOL][name];
 
-          return value || this[ASYNC_DEFAULTS][name];
+          return value || this[ASYNC_DEFAULTS_SYMBOL][name];
         }
 
-        if (name in this[ASYNC_ORIGINAL]) {
+        if (name in this[ASYNC_ORIGINAL_SYMBOL]) {
           // It's an async prop value: look into component state
-          const state = this[COMPONENT] && this[COMPONENT].internalState;
+          const state = this[COMPONENT_SYMBOL] && this[COMPONENT_SYMBOL].internalState;
           if (state && state.hasAsyncProp(name)) {
-            return state.getAsyncProp(name) || this[ASYNC_DEFAULTS][name];
+            return state.getAsyncProp(name) || this[ASYNC_DEFAULTS_SYMBOL][name];
           }
         }
       }
 
       // the prop is not supplied, or
       // component not yet initialized/matched, return the component's default value for the prop
-      return this[ASYNC_DEFAULTS][name];
+      return this[ASYNC_DEFAULTS_SYMBOL][name];
     }
   };
 }

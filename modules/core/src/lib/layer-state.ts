@@ -7,14 +7,20 @@ import {LayerProps} from './layer-props';
 export default class LayerState<T extends LayerProps> extends ComponentState<T> {
   attributeManager: AttributeManager;
   needsRedraw: boolean;
+  /**
+   * Sublayers rendered in a previous cycle
+   */
   subLayers: any;
+  /**
+   * If the layer is using the shared instancedPickingColors buffer
+   */
   usesPickingColorCache: boolean;
 
   constructor({attributeManager, layer}: {attributeManager: AttributeManager; layer: Layer}) {
     super(layer);
     this.attributeManager = attributeManager;
     this.needsRedraw = true;
-    this.subLayers = null; // reference to sublayers rendered in a previous cycle
+    this.subLayers = null;
     this.usesPickingColorCache = false;
   }
 
@@ -25,6 +31,8 @@ export default class LayerState<T extends LayerProps> extends ComponentState<T> 
   set layer(layer: Layer) {
     this.component = layer;
   }
+
+  /* Override base Component methods with Layer-specific handling */
 
   protected _fetch(propName, url: string) {
     const fetch = this.component.props.fetch;

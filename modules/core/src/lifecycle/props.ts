@@ -1,4 +1,4 @@
-import {COMPONENT} from './constants';
+import {COMPONENT_SYMBOL} from './constants';
 import {PropType} from './prop-types';
 
 export function validateProps(props) {
@@ -28,8 +28,10 @@ export function diffProps(props, oldProps) {
 
   // Check update triggers to determine if any attributes need regeneration
   // Note - if data has changed, all attributes will need regeneration, so skip this step
-  const updateTriggersChangedReason =
-    (!dataChangedReason && diffUpdateTriggers(props, oldProps)) || false;
+  let updateTriggersChangedReason: boolean | string | Record<string, true> = false;
+  if (!dataChangedReason) {
+    updateTriggersChangedReason = diffUpdateTriggers(props, oldProps);
+  }
 
   return {
     dataChanged: dataChangedReason,
@@ -40,9 +42,9 @@ export function diffProps(props, oldProps) {
   };
 }
 
-function diffTransitions(props, oldProps): boolean | Record<string, true> {
+function diffTransitions(props, oldProps): null | Record<string, true> {
   if (!props.transitions) {
-    return false;
+    return null;
   }
   const result = {};
   const propTypes = getPropTypes(props);
@@ -177,9 +179,9 @@ function diffDataProps(props, oldProps): string | null | {startRow: number; endR
 
 // Checks if any update triggers have changed
 // also calls callback to invalidate attributes accordingly.
-function diffUpdateTriggers(props, oldProps): boolean | Record<string, true> {
+function diffUpdateTriggers(props, oldProps): string | Record<string, true> {
   if (oldProps === null) {
-    return true;
+    return 'oldProps is null, initial diff';
   }
 
   // If the 'all' updateTrigger fires, ignore testing others
@@ -246,7 +248,7 @@ function diffUpdateTrigger(props, oldProps, triggerName) {
 }
 
 function getPropTypes(props): Record<string, PropType> {
-  const layer = props[COMPONENT];
+  const layer = props[COMPONENT_SYMBOL];
   const LayerType = layer && layer.constructor;
   return LayerType ? LayerType._propTypes : {};
 }

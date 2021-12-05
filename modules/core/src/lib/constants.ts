@@ -23,23 +23,37 @@
 // updated.
 import log from '../utils/log';
 
-// Describes the format of positions
+/**
+ * The coordinate system that positions/dimensions are defined in.
+ */
 export const COORDINATE_SYSTEM = {
-  // `LNGLAT` if rendering into a geospatial viewport, `CARTESIAN` otherwise
+  /**
+   * `LNGLAT` if rendering into a geospatial viewport, `CARTESIAN` otherwise
+   */
   DEFAULT: -1,
-  // Positions are interpreted as [lng, lat, elevation]
-  // lng lat are degrees, elevation is meters. distances as meters.
+  /**
+   * Positions are interpreted as [longitude, latitude, elevation]
+   * longitude/latitude are in degrees, elevation is in meters.
+   * Dimensions are in meters.
+   */
   LNGLAT: 1,
 
-  // Positions are interpreted as meter offsets, distances as meters
+  /**
+   * Positions are interpreted as [x, y, z] in meter offsets from the coordinate origin.
+   * Dimensions are in meters.
+   */
   METER_OFFSETS: 2,
 
-  // Positions are interpreted as lng lat offsets: [deltaLng, deltaLat, elevation]
-  // deltaLng, deltaLat are delta degrees, elevation is meters.
-  // distances as meters.
+  /**
+   * Positions are interpreted as [deltaLng, deltaLat, elevation] from the coordinate origin.
+   * deltaLng/deltaLat are in degrees, elevation is in meters.
+   * Dimensions are in meters.
+   */
   LNGLAT_OFFSETS: 3,
 
-  // Non-geospatial
+  /**
+   * Positions and dimensions are in the common units of the viewport.
+   */
   CARTESIAN: 0
 } as const;
 
@@ -50,14 +64,27 @@ Object.defineProperty(COORDINATE_SYSTEM, 'IDENTITY', {
 });
 /* eslint-enable accessor-pairs */
 
-// Describes the common space
+/**
+ * How coordinates are transformed from the world space into the common space.
+ */
 export const PROJECTION_MODE = {
+  /**
+   * Render geospatial data in Web Mercator projection
+   */
   WEB_MERCATOR: 1,
+  /**
+   * Render geospatial data as a 3D globe
+   */
   GLOBE: 2,
 
-  // This is automatically assigned by the project module
+  /**
+   * (Internal use only) Web Mercator projection at high zoom
+   */
   WEB_MERCATOR_AUTO_OFFSET: 4,
 
+  /**
+   * No transformation
+   */
   IDENTITY: 0
 } as const;
 
