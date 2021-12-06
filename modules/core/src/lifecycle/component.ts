@@ -1,18 +1,44 @@
-import {LIFECYCLE} from '../lifecycle/constants';
+import {
+  LIFECYCLE,
+  Lifecycle,
+  COMPONENT_SYMBOL,
+  ASYNC_ORIGINAL_SYMBOL,
+  ASYNC_RESOLVED_SYMBOL,
+  ASYNC_DEFAULTS_SYMBOL
+} from './constants';
 import {createProps} from './create-props';
-import {PROP_SYMBOLS} from './constants';
-const {ASYNC_ORIGINAL, ASYNC_RESOLVED, ASYNC_DEFAULTS} = PROP_SYMBOLS;
 import ComponentState from './component-state';
-
-const defaultProps = {};
 
 let counter = 0;
 
-export default class Component {
-  constructor(/* ...propObjects */) {
+export type ComponentProps = {
+  id: string;
+};
+
+export type StatefulComponentProps<PropsT extends ComponentProps> = PropsT & {
+  [COMPONENT_SYMBOL]: Component<PropsT>;
+  [ASYNC_DEFAULTS_SYMBOL]: Partial<PropsT>;
+  [ASYNC_ORIGINAL_SYMBOL]: Partial<PropsT>;
+  [ASYNC_RESOLVED_SYMBOL]: Partial<PropsT>;
+};
+
+export default class Component<PropsT extends ComponentProps> {
+  static componentName: string = 'Component';
+  static defaultProps: Readonly<{}> = {};
+
+  id: string;
+  props: StatefulComponentProps<PropsT>;
+  count: number;
+  lifecycle: Lifecycle;
+  parent: Component<any> | null;
+  context: Record<string, any> | null;
+  state: Record<string, any> | null;
+  internalState: ComponentState<PropsT> | null;
+
+  constructor(...propObjects: Partial<PropsT>[]) {
     // Merge supplied props with default props and freeze them.
     /* eslint-disable prefer-spread */
-    this.props = createProps.apply(this, arguments);
+    this.props = createProps<PropsT>(this, propObjects);
     /* eslint-enable prefer-spread */
 
     // Define all members before layer is sealed
@@ -29,8 +55,8 @@ export default class Component {
   }
 
   get root() {
-    // eslint-disable-next-line consistent-this
-    let component = this;
+    // eslint-disable-next-line
+    let component: Component<any> = this;
     while (component.parent) {
       component = component.parent;
     }
@@ -42,31 +68,25 @@ export default class Component {
     const {props} = this;
 
     // Async props cannot be copied with Object.assign, copy them separately
-    const asyncProps = {};
+    const asyncProps: Partial<PropsT> = {};
 
     // See async props definition in create-props.js
-    for (const key in props[ASYNC_DEFAULTS]) {
-      if (key in props[ASYNC_RESOLVED]) {
-        asyncProps[key] = props[ASYNC_RESOLVED][key];
-      } else if (key in props[ASYNC_ORIGINAL]) {
-        asyncProps[key] = props[ASYNC_ORIGINAL][key];
+    for (const key in props[ASYNC_DEFAULTS_SYMBOL]) {
+      if (key in props[ASYNC_RESOLVED_SYMBOL]) {
+        asyncProps[key] = props[ASYNC_RESOLVED_SYMBOL][key];
+      } else if (key in props[ASYNC_ORIGINAL_SYMBOL]) {
+        asyncProps[key] = props[ASYNC_ORIGINAL_SYMBOL][key];
       }
     }
 
     // Some custom layer implementation may not support multiple arguments in the constructor
+    // @ts-ignore
     return new this.constructor({...props, ...asyncProps, ...newProps});
-  }
-
-  get stats() {
-    return this.internalState.stats;
   }
 
   // PROTECTED METHODS, override in subclass
 
   _initState() {
-    this.internalState = new ComponentState({});
+    this.internalState = new ComponentState(this);
   }
 }
-
-Component.componentName = 'Component';
-Component.defaultProps = defaultProps;
