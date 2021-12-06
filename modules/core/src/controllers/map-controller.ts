@@ -14,7 +14,8 @@ const DEFAULT_STATE = {
   minZoom: 0,
   maxZoom: 20,
   minPitch: 0,
-  maxPitch: 60
+  maxPitch: 60,
+  position: [0, 0, 0]
 };
 
 type MapStateProps = {

@@ -15,7 +15,8 @@ test('MapController', async t => {
     latitude: 37.78,
     zoom: 10,
     pitch: 30,
-    bearing: -45
+    bearing: -45,
+    position: [0, 0, 0]
   });
 
   t.end();
@@ -28,7 +29,8 @@ test('MapController#inertia', async t => {
     zoom: 10,
     pitch: 30,
     bearing: -45,
-    inertia: true
+    inertia: true,
+    position: [0, 0, 0]
   });
 
   t.end();
