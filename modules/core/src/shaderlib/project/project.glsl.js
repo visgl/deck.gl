@@ -109,6 +109,24 @@ vec4 project_size(vec4 meters) {
   return vec4(meters.xyz * project_uCommonUnitsPerMeter, meters.w);
 }
 
+// Get rotation matrix that aligns the z axis with the given up vector
+// Find 3 unit vectors ux, uy, uz that are perpendicular to each other and uz == up
+mat3 project_get_orientation_matrix(vec3 up) {
+  vec3 uz = normalize(up);
+  // Tangent on XY plane
+  vec3 ux = abs(uz.z) == 1.0 ? vec3(1.0, 0.0, 0.0) : normalize(vec3(uz.y, -uz.x, 0));
+  vec3 uy = cross(uz, ux);
+  return mat3(ux, uy, uz);
+}
+
+bool project_needs_rotation(vec3 commonPosition, out mat3 transform) {
+  if (project_uProjectionMode == PROJECTION_MODE_GLOBE) {
+    transform = project_get_orientation_matrix(commonPosition);
+    return true;
+  }
+  return false;
+}
+
 //
 // Projecting normal - transform deltas from current coordinate system to
 // normals in the worldspace
@@ -116,7 +134,12 @@ vec4 project_size(vec4 meters) {
 vec3 project_normal(vec3 vector) {
   // Apply model matrix
   vec4 normal_modelspace = project_uModelMatrix * vec4(vector, 0.0);
-  return normalize(normal_modelspace.xyz * project_uCommonUnitsPerMeter);
+  vec3 n = normalize(normal_modelspace.xyz * project_uCommonUnitsPerMeter);
+  mat3 rotation;
+  if (project_needs_rotation(geometry.position.xyz, rotation)) {
+    n = rotation * n;
+  }
+  return n;
 }
 
 vec4 project_offset_(vec4 offset) {
@@ -256,23 +279,5 @@ float project_pixel_size(float pixels) {
 }
 vec2 project_pixel_size(vec2 pixels) {
   return pixels / project_uScale;
-}
-
-// Get rotation matrix that aligns the z axis with the given up vector
-// Find 3 unit vectors ux, uy, uz that are perpendicular to each other and uz == up
-mat3 project_get_orientation_matrix(vec3 up) {
-  vec3 uz = normalize(up);
-  // Tangent on XY plane
-  vec3 ux = abs(uz.z) == 1.0 ? vec3(1.0, 0.0, 0.0) : normalize(vec3(uz.y, -uz.x, 0));
-  vec3 uy = cross(uz, ux);
-  return mat3(ux, uy, uz);
-}
-
-bool project_needs_rotation(vec3 commonPosition, out mat3 transform) {
-  if (project_uProjectionMode == PROJECTION_MODE_GLOBE) {
-    transform = project_get_orientation_matrix(commonPosition);
-    return true;
-  }
-  return false;
 }
 `;

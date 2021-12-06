@@ -146,5 +146,19 @@ export default [
       vertices: polygonCCW.reverse()
     },
     {pitch: 0}
+  ),
+  genColumnLayerTestCase(
+    {
+      name: 'column-lnglat-extruded-wireframe-flatshading',
+      goldenImage: 'column-lnglat-extruded-wireframe-flatshading'
+    },
+    {
+      extruded: true,
+      wireframe: true,
+      flatShading: true,
+      diskResolution: polygonCCW.length,
+      vertices: polygonCCW,
+      getElevation: h => h.value * 5000
+    }
   )
 ];

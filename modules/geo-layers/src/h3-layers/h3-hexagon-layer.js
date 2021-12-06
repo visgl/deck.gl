@@ -304,6 +304,7 @@ export default class H3HexagonLayer extends CompositeLayer {
       forwardProps,
       this.getSubLayerProps({
         id: 'hexagon-cell',
+        flatShading: true,
         updateTriggers: forwardProps.updateTriggers
       }),
       {
