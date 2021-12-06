@@ -13,8 +13,7 @@ const DEFAULT_PROPS = {
   transitionInterruption: TRANSITION_EVENTS.BREAK,
   onTransitionStart: noop,
   onTransitionInterrupt: noop,
-  onTransitionEnd: noop,
-  position: [0, 0, 0]
+  onTransitionEnd: noop
 };
 
 export default class TransitionManager {
