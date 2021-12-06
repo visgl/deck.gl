@@ -21,19 +21,20 @@
 import {registerLoaders} from '@loaders.gl/core';
 import {ImageLoader} from '@loaders.gl/images';
 
-import {global} from 'probe.gl/env';
 import log from '../utils/log';
 import {register} from '../debug';
 import jsonLoader from '../utils/json-loader';
 
 // Version detection using babel plugin
 // Fallback for tests and SSR since global variable is defined by Webpack.
-/* global __VERSION__ */
 const version =
-  typeof __VERSION__ !== 'undefined' ? __VERSION__ : global.DECK_VERSION || 'untranspiled source';
+  // @ts-expect-error
+  typeof __VERSION__ !== 'undefined'
+    ? __VERSION__
+    : globalThis.DECK_VERSION || 'untranspiled source';
 
 // Note: a `deck` object not created by deck.gl may exist in the global scope
-const existingVersion = global.deck && global.deck.VERSION;
+const existingVersion = globalThis.deck && globalThis.deck.VERSION;
 
 if (existingVersion && existingVersion !== version) {
   throw new Error(`deck.gl - multiple versions detected: ${existingVersion} vs ${version}`);
@@ -42,15 +43,16 @@ if (existingVersion && existingVersion !== version) {
 if (!existingVersion) {
   log.log(1, `deck.gl ${version}`)();
 
-  global.deck = Object.assign(global.deck || {}, {
+  globalThis.deck = {
+    ...globalThis.deck,
     VERSION: version,
     version,
     log,
     // experimental
     _registerLoggers: register
-  });
+  };
 
   registerLoaders([jsonLoader, [ImageLoader, {imagebitmap: {premultiplyAlpha: 'none'}}]]);
 }
 
-export default global.deck;
+export default globalThis.deck;

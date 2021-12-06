@@ -18,21 +18,21 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-export default `\
+export default `#version 300 es
 
 #define SHADER_NAME column-layer-vertex-shader
 
-attribute vec3 positions;
-attribute vec3 normals;
+in vec3 positions;
+in vec3 normals;
 
-attribute vec3 instancePositions;
-attribute float instanceElevations;
-attribute vec3 instancePositions64Low;
-attribute vec4 instanceFillColors;
-attribute vec4 instanceLineColors;
-attribute float instanceStrokeWidths;
+in vec3 instancePositions;
+in float instanceElevations;
+in vec3 instancePositions64Low;
+in vec4 instanceFillColors;
+in vec4 instanceLineColors;
+in float instanceStrokeWidths;
 
-attribute vec3 instancePickingColors;
+in vec3 instancePickingColors;
 
 // Custom uniforms
 uniform float opacity;
@@ -51,7 +51,10 @@ uniform int radiusUnits;
 uniform int widthUnits;
 
 // Result
-varying vec4 vColor;
+out vec4 vColor;
+#ifdef FLAT_SHADING
+out vec4 position_commonspace;
+#endif
 
 void main(void) {
   geometry.worldPosition = instancePositions;
@@ -79,7 +82,6 @@ void main(void) {
   float shouldRender = float(color.a > 0.0 && instanceElevations >= 0.0);
   float dotRadius = radius * coverage * shouldRender;
 
-  geometry.normal = project_normal(vec3(rotationMatrix * normals.xy, normals.z));
   geometry.pickingColor = instancePickingColors;
 
   // project center of column
@@ -93,12 +95,18 @@ void main(void) {
   DECKGL_FILTER_SIZE(pos, geometry);
 
   gl_Position = project_position_to_clipspace(centroidPosition, centroidPosition64Low, pos, geometry.position);
+  geometry.normal = project_normal(vec3(rotationMatrix * normals.xy, normals.z));
   DECKGL_FILTER_GL_POSITION(gl_Position, geometry);
 
   // Light calculations
   if (extruded && !isStroke) {
+#ifdef FLAT_SHADING
+    position_commonspace = geometry.position;
+    vColor = vec4(color.rgb, color.a * opacity);
+#else
     vec3 lightColor = lighting_getLightColor(color.rgb, project_uCameraPosition, geometry.position.xyz, geometry.normal);
     vColor = vec4(lightColor, color.a * opacity);
+#endif
   } else {
     vColor = vec4(color.rgb, color.a * opacity);
   }

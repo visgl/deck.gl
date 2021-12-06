@@ -31,7 +31,7 @@ import {deepEqual} from '../utils/deep-equal';
 import typedArrayManager from '../utils/typed-array-manager';
 import deckGlobal from './init';
 
-import {getBrowser} from 'probe.gl/env';
+import {getBrowser} from '@probe.gl/env';
 import GL from '@luma.gl/constants';
 import {
   AnimationLoop,
@@ -41,7 +41,7 @@ import {
   Timeline,
   lumaStats
 } from '@luma.gl/core';
-import {Stats} from 'probe.gl';
+import {Stats} from '@probe.gl/stats';
 import {EventManager} from 'mjolnir.js';
 
 import assert from '../utils/assert';

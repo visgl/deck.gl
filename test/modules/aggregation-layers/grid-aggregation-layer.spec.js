@@ -29,7 +29,7 @@ import GL from '@luma.gl/constants';
 import {Layer} from 'deck.gl';
 import {testLayer, gl} from '@deck.gl/test-utils';
 import {GridAggregationData} from 'deck.gl-test/data';
-import {equals} from 'math.gl';
+import {equals} from '@math.gl/core';
 import {Buffer} from '@luma.gl/core';
 
 const BASE_LAYER_ID = 'composite-layer-id';

@@ -1,7 +1,7 @@
 import test from 'tape-promise/tape';
 import {MapView, OrbitView, COORDINATE_SYSTEM} from '@deck.gl/core';
 import {shadow, project} from '@deck.gl/core/shaderlib';
-import {Matrix4, Vector3} from 'math.gl';
+import {Matrix4, Vector3} from '@math.gl/core';
 
 const TEST_VIEWPORT1 = new MapView().makeViewport({
   width: 800,

@@ -8,7 +8,7 @@ import {
   FirstPersonView,
   _GlobeView as GlobeView
 } from 'deck.gl';
-import {equals} from 'math.gl';
+import {equals} from '@math.gl/core';
 
 test('View#imports', t => {
   t.ok(View, 'View import ok');
