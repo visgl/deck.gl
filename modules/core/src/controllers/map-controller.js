@@ -443,6 +443,6 @@ export default class MapController extends Controller {
   }
 
   get linearTransitionProps() {
-    return ['longitude', 'latitude', 'zoom', 'bearing', 'pitch'];
+    return ['longitude', 'latitude', 'zoom', 'bearing', 'pitch', 'position'];
   }
 }
