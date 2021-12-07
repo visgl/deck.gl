@@ -10,7 +10,7 @@ export default function colorBins({
 }) {
   assert(Array.isArray(domain), 'Expected "domain" to be an array of numbers');
 
-  const palette = typeof colors === 'string' ? getPalette(colors, domain.length) : colors;
+  const palette = typeof colors === 'string' ? getPalette(colors, domain.length + 1) : colors;
 
   const color = scaleThreshold().domain(domain).range(palette);
 
