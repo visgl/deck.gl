@@ -18,7 +18,7 @@ const OK_TEST_CASES = [
         target: 50
       }
     },
-    result: [0, 0, 255]
+    result: [0, 255, 0]
   },
   {
     title: 'Feature 3',
@@ -54,7 +54,10 @@ const ERROR_TEST_CASES_DOMAIN = [
 test('colorBins', t => {
   const colorBinsManual = colorBins({
     attr: 'target',
-    domain: [1, 50, 100],
+    domain: [50, 100],
+    // [,50) -> colors[0]
+    // [50, 100) -> colors[1]
+    // [100,] --> colors[2]
     colors: [
       [255, 0, 0],
       [0, 255, 0],
@@ -63,6 +66,51 @@ test('colorBins', t => {
   });
 
   for (const tc of OK_TEST_CASES) {
+    const func = colorBinsManual(tc.argument);
+    t.deepEqual(func, tc.result, `colorBins ${tc.title} returned expected result`);
+  }
+
+  t.end();
+});
+
+const TEST_CASES_USING_CARTO_COLORS = [
+  {
+    title: 'Feature 1',
+    argument: {
+      properties: {
+        target: 0
+      }
+    },
+    result: [252, 222, 156, 255]
+  },
+  {
+    title: 'Feature 2',
+    argument: {
+      properties: {
+        target: 75
+      }
+    },
+    result: [227, 79, 111, 255]
+  },
+  {
+    title: 'Feature 3',
+    argument: {
+      properties: {
+        target: 125
+      }
+    },
+    result: [124, 29, 111, 255]
+  }
+];
+
+test('colorBins#colorsAsCARTOColors', t => {
+  const colorBinsManual = colorBins({
+    attr: 'target',
+    domain: [50, 100],
+    colors: 'SunsetDark'
+  });
+
+  for (const tc of TEST_CASES_USING_CARTO_COLORS) {
     const func = colorBinsManual(tc.argument);
     t.deepEqual(func, tc.result, `colorBins ${tc.title} returned expected result`);
   }
