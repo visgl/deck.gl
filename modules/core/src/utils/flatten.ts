@@ -28,7 +28,7 @@
  *   determine if it should be included (pushed onto) the resulting array.
  * @return Returns the new flattened array (new array or `result` if provided)
  */
-export function flatten(array: any[], filter = (...args) => true): any[] {
+export function flatten(array: any[], filter: (element: any) => boolean = () => true): any[] {
   // Wrap single object in array
   if (!Array.isArray(array)) {
     return filter(array) ? [array] : [];
