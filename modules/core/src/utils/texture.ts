@@ -28,7 +28,7 @@ export function createTexture(layer, image) {
     image = {data: image};
   }
 
-  let specialTextureParameters = null;
+  let specialTextureParameters: Record<string, any> | null = null;
   if (image.compressed) {
     specialTextureParameters = {
       [GL.TEXTURE_MIN_FILTER]: image.data.length > 1 ? GL.LINEAR_MIPMAP_NEAREST : GL.LINEAR

@@ -26,8 +26,19 @@ const placeholderArray = [];
  * https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Iteration_protocols
  * and a "context" tracker from the given data
  */
-export function createIterable(data, startRow = 0, endRow = Infinity) {
-  let iterable = EMPTY_ARRAY;
+export function createIterable(
+  data,
+  startRow = 0,
+  endRow = Infinity
+): {
+  iterable: Iterable<any>;
+  objectInfo: {
+    index: number;
+    data: any;
+    target: any[];
+  };
+} {
+  let iterable: Iterable<any> = EMPTY_ARRAY;
 
   const objectInfo = {
     index: -1,
@@ -57,14 +68,24 @@ export function createIterable(data, startRow = 0, endRow = Infinity) {
 /*
  * Returns true if data is an async iterable object
  */
-export function isAsyncIterable(data) {
+export function isAsyncIterable(data): boolean {
   return data && data[Symbol.asyncIterator];
 }
 
 /*
  * Create an accessor function from a flat buffer that yields the value at each object index
  */
-export function getAccessorFromBuffer(typedArray, {size, stride, offset, startIndices, nested}) {
+export function getAccessorFromBuffer(
+  typedArray,
+  options: {
+    size: number;
+    stride: number;
+    offset: number;
+    startIndices: number;
+    nested?: boolean;
+  }
+) {
+  const {size, stride, offset, startIndices, nested} = options;
   const bytesPerElement = typedArray.BYTES_PER_ELEMENT;
   const elementStride = stride ? stride / bytesPerElement : size;
   const elementOffset = offset ? offset / bytesPerElement : 0;

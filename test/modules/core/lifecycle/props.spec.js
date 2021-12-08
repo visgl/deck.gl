@@ -207,14 +207,14 @@ test('createProps', t => {
   class B extends A {}
   B.defaultProps = {b: 2};
 
-  let mergedProps = createProps.call(new B(), {data: [0, 1]});
+  let mergedProps = createProps(new B(), [{data: [0, 1]}]);
 
   t.equal(mergedProps.a, 1, 'base class props merged');
   t.equal(mergedProps.b, 2, 'sub class props merged');
   t.deepEqual(mergedProps.data, [0, 1], 'user props merged');
   t.equal(mergedProps.c, 0, 'default prop value used');
 
-  mergedProps = createProps.call(new B(), {c0: 4});
+  mergedProps = createProps(new B(), [{c0: 4}]);
 
   t.deepEqual(mergedProps.c, 4, 'user props merged');
 

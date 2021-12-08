@@ -1,6 +1,5 @@
-import {PROP_SYMBOLS} from './constants';
-
-const {COMPONENT} = PROP_SYMBOLS;
+import {COMPONENT_SYMBOL} from './constants';
+import {PropType} from './prop-types';
 
 export function validateProps(props) {
   const propTypes = getPropTypes(props);
@@ -29,7 +28,7 @@ export function diffProps(props, oldProps) {
 
   // Check update triggers to determine if any attributes need regeneration
   // Note - if data has changed, all attributes will need regeneration, so skip this step
-  let updateTriggersChangedReason = false;
+  let updateTriggersChangedReason: boolean | string | Record<string, true> = false;
   if (!dataChangedReason) {
     updateTriggersChangedReason = diffUpdateTriggers(props, oldProps);
   }
@@ -43,7 +42,7 @@ export function diffProps(props, oldProps) {
   };
 }
 
-function diffTransitions(props, oldProps) {
+function diffTransitions(props, oldProps): null | Record<string, true> {
   if (!props.transitions) {
     return null;
   }
@@ -82,7 +81,7 @@ export function compareProps({
   ignoreProps = {},
   propTypes = {},
   triggerName = 'props'
-} = {}) {
+}): string | null {
   // shallow equality => deep equality
   if (oldProps === newProps) {
     return null;
@@ -155,12 +154,12 @@ function comparePropValues(newProp, oldProp, propType) {
 
 // The comparison of the data prop requires special handling
 // the dataComparator should be used if supplied
-function diffDataProps(props, oldProps) {
+function diffDataProps(props, oldProps): string | null | {startRow: number; endRow?: number}[] {
   if (oldProps === null) {
     return 'oldProps is null, initial diff';
   }
 
-  let dataChanged = null;
+  let dataChanged: any = null;
   // Support optional app defined comparison of data
   const {dataComparator, _dataDiff} = props;
   if (dataComparator) {
@@ -180,7 +179,7 @@ function diffDataProps(props, oldProps) {
 
 // Checks if any update triggers have changed
 // also calls callback to invalidate attributes accordingly.
-function diffUpdateTriggers(props, oldProps) {
+function diffUpdateTriggers(props, oldProps): string | Record<string, true> {
   if (oldProps === null) {
     return 'oldProps is null, initial diff';
   }
@@ -194,7 +193,7 @@ function diffUpdateTriggers(props, oldProps) {
   }
 
   const triggerChanged = {};
-  let reason = false;
+  let reason: any = false;
   // If the 'all' updateTrigger didn't fire, need to check all others
   for (const triggerName in props.updateTriggers) {
     if (triggerName !== 'all') {
@@ -210,9 +209,9 @@ function diffUpdateTriggers(props, oldProps) {
 }
 
 // Returns true if any extensions have changed
-function diffExtensions(props, oldProps) {
+function diffExtensions(props, oldProps): boolean {
   if (oldProps === null) {
-    return 'oldProps is null, initial diff';
+    return true;
   }
 
   const oldExtensions = oldProps.extensions;
@@ -220,6 +219,9 @@ function diffExtensions(props, oldProps) {
 
   if (extensions === oldExtensions) {
     return false;
+  }
+  if (!oldExtensions || !extensions) {
+    return true;
   }
   if (extensions.length !== oldExtensions.length) {
     return true;
@@ -245,8 +247,8 @@ function diffUpdateTrigger(props, oldProps, triggerName) {
   return diffReason;
 }
 
-function getPropTypes(props) {
-  const layer = props[COMPONENT];
+function getPropTypes(props): Record<string, PropType> {
+  const layer = props[COMPONENT_SYMBOL];
   const LayerType = layer && layer.constructor;
   return LayerType ? LayerType._propTypes : {};
 }
