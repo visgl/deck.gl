@@ -23,7 +23,7 @@ export function add(rangeList, range) {
   }
 
   // TODO - split off to tree-shakable Range class
-  const newRangeList = [];
+  const newRangeList: number[] = [];
   const len = rangeList.length;
   let insertPosition = 0;
 

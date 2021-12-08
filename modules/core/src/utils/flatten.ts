@@ -23,14 +23,12 @@
  * or a single value into an array with one value
  * @example flatten([[1, [2]], [3], 4]) => [1, 2, 3, 4]
  * @example flatten(1) => [1]
- * @param {Array} array The array to flatten.
- * @param {Function} filter= - Optional predicate called on each `value` to
+ * @param array The array to flatten.
+ * @param filter= - Optional predicate called on each `value` to
  *   determine if it should be included (pushed onto) the resulting array.
- * @param {Function} map= - Optional transform applied to each array elements.
- * @param {Array} result=[] - Optional array to push value into
- * @return {Array} Returns the new flattened array (new array or `result` if provided)
+ * @return Returns the new flattened array (new array or `result` if provided)
  */
-export function flatten(array, filter = () => true) {
+export function flatten(array: any[], filter: (element: any) => boolean = () => true): any[] {
   // Wrap single object in array
   if (!Array.isArray(array)) {
     return filter(array) ? [array] : [];
@@ -39,7 +37,7 @@ export function flatten(array, filter = () => true) {
   return flattenArray(array, filter, []);
 }
 
-// Deep flattens an array. Helper to `flatten`, see its parameters
+/** Deep flattens an array. Helper to `flatten`, see its parameters */
 function flattenArray(array, filter, result) {
   let index = -1;
   while (++index < array.length) {
@@ -53,7 +51,7 @@ function flattenArray(array, filter, result) {
   return result;
 }
 
-// Uses copyWithin to significantly speed up typed array value filling
+/** Uses copyWithin to significantly speed up typed array value filling */
 export function fillArray({target, source, start = 0, count = 1}) {
   const length = source.length;
   const total = count * length;

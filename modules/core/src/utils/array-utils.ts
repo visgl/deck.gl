@@ -21,8 +21,16 @@
 /*
  * Helper function for padArray
  */
-function padArrayChunk({source, target, start = 0, end, size, getData}) {
-  end = end || target.length;
+function padArrayChunk(options: {
+  source;
+  target;
+  start?: number;
+  end?: number;
+  size: number;
+  getData;
+}): void {
+  const {source, target, start = 0, size, getData} = options;
+  const end = options.end || target.length;
 
   const sourceLength = source.length;
   const targetLength = end - start;
