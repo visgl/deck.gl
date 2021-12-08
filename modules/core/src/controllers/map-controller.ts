@@ -477,11 +477,11 @@ export class MapState extends ViewState {
 export default class MapController extends Controller {
   constructor(props) {
     props.dragMode = props.dragMode || 'pan';
-    props.position = props.position || [0, 0, 0];
     super(MapState, props);
   }
 
   setProps(props) {
+    props.position = props.position || [0, 0, 0];
     const oldProps = this.controllerStateProps;
 
     super.setProps(props);
