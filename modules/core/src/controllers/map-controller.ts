@@ -14,7 +14,8 @@ const DEFAULT_STATE = {
   minZoom: 0,
   maxZoom: 20,
   minPitch: 0,
-  maxPitch: 60
+  maxPitch: 60,
+  position: [0, 0, 0]
 };
 
 type MapStateProps = {
@@ -41,6 +42,8 @@ type MapStateProps = {
    * Non-public API, see https://github.com/mapbox/mapbox-gl-js/issues/1137
    */
   altitude?: number;
+  /** Viewport position */
+  position?: [number, number, number];
 
   /** Viewport constraints */
   maxZoom?: number;
@@ -96,6 +99,8 @@ export class MapState extends ViewState {
        * Non-public API, see https://github.com/mapbox/mapbox-gl-js/issues/1137
        */
       altitude,
+      /** Viewport position */
+      position,
 
       /** Viewport constraints */
       maxZoom,
@@ -138,7 +143,8 @@ export class MapState extends ViewState {
       minZoom,
       maxPitch,
       minPitch,
-      normalize
+      normalize,
+      position
     });
 
     this._state = {
@@ -475,6 +481,7 @@ export default class MapController extends Controller {
   }
 
   setProps(props) {
+    props.position = props.position || [0, 0, 0];
     const oldProps = this.controllerStateProps;
 
     super.setProps(props);
@@ -493,6 +500,6 @@ export default class MapController extends Controller {
   }
 
   get linearTransitionProps() {
-    return ['longitude', 'latitude', 'zoom', 'bearing', 'pitch'];
+    return ['longitude', 'latitude', 'zoom', 'bearing', 'pitch', 'position'];
   }
 }
