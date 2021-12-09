@@ -43,6 +43,10 @@ export default class MVTLayer extends TileLayer {
       super.updateState({props, oldProps, context, changeFlags});
       this._setWGS84PropertyForTiles();
     }
+    const {highlightColor} = props;
+    if (highlightColor !== oldProps.highlightColor && Array.isArray(highlightColor)) {
+      this.setState({highlightColor});
+    }
   }
 
   /* eslint-disable complexity */
@@ -167,12 +171,17 @@ export default class MVTLayer extends TileLayer {
       newHoveredFeatureId = getFeatureUniqueId(hoveredFeature, uniqueIdProperty);
       newHoveredFeatureLayerName = getFeatureLayerName(hoveredFeature);
     }
+    let {highlightColor} = this.props;
+    if (typeof highlightColor === 'function') {
+      highlightColor = highlightColor(info);
+    }
 
     if (
       hoveredFeatureId !== newHoveredFeatureId ||
       hoveredFeatureLayerName !== newHoveredFeatureLayerName
     ) {
       this.setState({
+        highlightColor,
         hoveredFeatureId: newHoveredFeatureId,
         hoveredFeatureLayerName: newHoveredFeatureLayerName
       });
@@ -193,6 +202,13 @@ export default class MVTLayer extends TileLayer {
     }
 
     return info;
+  }
+
+  getSubLayerPropsByTile(tile) {
+    return {
+      highlightedObjectIndex: this.getHighlightedObjectIndex(tile),
+      highlightColor: this.state.highlightColor
+    };
   }
 
   getHighlightedObjectIndex(tile) {

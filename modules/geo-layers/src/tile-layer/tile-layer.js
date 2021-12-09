@@ -179,8 +179,8 @@ export default class TileLayer extends CompositeLayer {
     return this.props.renderSubLayers(props);
   }
 
-  getHighlightedObjectIndex() {
-    return -1;
+  getSubLayerPropsByTile(tile) {
+    return null;
   }
 
   getPickingInfo({info, sourceLayer}) {
@@ -196,7 +196,7 @@ export default class TileLayer extends CompositeLayer {
 
   renderLayers() {
     return this.state.tileset.tiles.map(tile => {
-      const highlightedObjectIndex = this.getHighlightedObjectIndex(tile);
+      const subLayerProps = this.getSubLayerPropsByTile(tile);
       // cache the rendered layer in the tile
       if (!tile.isLoaded && !tile.content) {
         // nothing to show
@@ -211,14 +211,17 @@ export default class TileLayer extends CompositeLayer {
         tile.layers = flatten(layers, Boolean).map(layer =>
           layer.clone({
             tile,
-            highlightedObjectIndex
+            ...subLayerProps
           })
         );
       } else if (
+        subLayerProps &&
         tile.layers[0] &&
-        tile.layers[0].props.highlightedObjectIndex !== highlightedObjectIndex
+        Object.keys(subLayerProps).some(
+          propName => tile.layers[0].props[propName] !== subLayerProps[propName]
+        )
       ) {
-        tile.layers = tile.layers.map(layer => layer.clone({highlightedObjectIndex}));
+        tile.layers = tile.layers.map(layer => layer.clone(subLayerProps));
       }
       return tile.layers;
     });
