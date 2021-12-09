@@ -133,7 +133,7 @@ test('project#getUniforms', t => {
   uniforms = project.getUniforms({
     viewport: TEST_VIEWPORTS.mapHighZoom,
     coordinateSystem: COORDINATE_SYSTEM.METER_OFFSETS,
-    coordinateOrigin: [-122.4, 37.7]
+    coordinateOrigin: Object.freeze([-122.4, 37.7])
   });
   t.notOk(getUniformsError(uniforms, UNIFORMS), 'Uniforms validated');
   t.ok(uniforms.project_uCenter.some(x => x), 'Returned non-trivial projection center');
