@@ -1,26 +1,26 @@
 "use strict";
 
 importScripts('./util.js');
-let result = [];
+var result = [];
 
-onmessage = function (e) {
-  const lines = e.data.text.split('\n');
+onmessage = function onmessage(e) {
+  var lines = e.data.text.split('\n');
   lines.forEach(function (line) {
     if (!line) {
       return;
     }
 
-    const parts = line.split('\x01');
+    var parts = line.split('\x01');
 
     if (parts.length < 2) {
       return;
     }
 
-    const label = parts[0];
-    const coordinates = decodePolyline(parts[1]);
-    coordinates.forEach(p => {
+    var label = parts[0];
+    var coordinates = decodePolyline(parts[1]);
+    coordinates.forEach(function (p) {
       result.push({
-        label,
+        label: label,
         coordinates: p
       });
     });

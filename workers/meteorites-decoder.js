@@ -1,11 +1,11 @@
 "use strict";
 
 importScripts('./util.js');
-let coordinates;
-let result = [];
+var coordinates;
+var result = [];
 
-onmessage = function (e) {
-  const lines = e.data.text.split('\n');
+onmessage = function onmessage(e) {
+  var lines = e.data.text.split('\n');
   lines.forEach(function (line) {
     if (!line) {
       return;
@@ -16,7 +16,7 @@ onmessage = function (e) {
       return;
     }
 
-    const parts = line.split('\t');
+    var parts = line.split('\t');
 
     if (parts.length < 5) {
       return;

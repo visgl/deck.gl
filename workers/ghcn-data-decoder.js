@@ -1,12 +1,12 @@
 "use strict";
 
 importScripts('./util.js');
-let result = [];
-const countries = {};
-let vertices = 0;
+var result = [];
+var countries = {};
+var vertices = 0;
 
-onmessage = function (e) {
-  const lines = e.data.text.split('\n');
+onmessage = function onmessage(e) {
+  var lines = e.data.text.split('\n');
   lines.forEach(function (line) {
     if (!line) {
       return;
@@ -17,14 +17,14 @@ onmessage = function (e) {
       return;
     }
 
-    const parts = line.split('\t');
-    const startYear = decodeNumber(parts[3], 90, 32);
-    const meanTemp = [];
+    var parts = line.split('\t');
+    var startYear = decodeNumber(parts[3], 90, 32);
+    var meanTemp = [];
 
-    for (let i = 4; i < parts.length; i++) {
+    for (var i = 4; i < parts.length; i++) {
       if (parts[i]) {
-        const year = startYear + i - 4;
-        const value = usePrecision(40 - decodeNumber(parts[i], 90, 32) / 100, 2);
+        var year = startYear + i - 4;
+        var value = usePrecision(40 - decodeNumber(parts[i], 90, 32) / 100, 2);
         meanTemp.push([year, value]);
         vertices++;
       }
@@ -36,7 +36,7 @@ onmessage = function (e) {
       name: parts[0].slice(11),
       latitude: usePrecision(decodeNumber(parts[1], 90, 32) / 1e4 - 90, 4),
       altitude: usePrecision(decodeNumber(parts[2], 90, 32) / 10 - 500, 1),
-      meanTemp
+      meanTemp: meanTemp
     });
   });
 
@@ -54,13 +54,13 @@ function flush() {
     data: result,
     meta: {
       stations: result.length,
-      vertices
+      vertices: vertices
     }
   });
   result = [];
 }
 
 function usePrecision(x, precision) {
-  const m = Math.pow(10, precision);
+  var m = Math.pow(10, precision);
   return Math.round(x * m) / m;
 }

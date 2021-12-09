@@ -1,10 +1,10 @@
 "use strict";
 
 function decodeNumberArr(str, b, shift, length) {
-  const result = [];
+  var result = [];
 
-  for (let j = 0; j < str.length; j += length) {
-    const token = str.slice(j, j + length);
+  for (var j = 0; j < str.length; j += length) {
+    var token = str.slice(j, j + length);
     result.push(decodeNumber(token, b, shift));
   }
 
@@ -12,10 +12,10 @@ function decodeNumberArr(str, b, shift, length) {
 }
 
 function decodeNumber(str, b, shift) {
-  let x = 0;
-  let p = 1;
+  var x = 0;
+  var p = 1;
 
-  for (let i = str.length; i--;) {
+  for (var i = str.length; i--;) {
     x += (str.charCodeAt(i) - shift) * p;
     p *= b;
   }
@@ -24,7 +24,7 @@ function decodeNumber(str, b, shift) {
 }
 
 function decodePolyline(str, precision) {
-  let index = 0,
+  var index = 0,
       lat = 0,
       lng = 0,
       coordinates = [],
