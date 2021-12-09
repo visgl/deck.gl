@@ -19,19 +19,48 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v8.7
 
-### deck.gl [8.7.0-alpha.3] - Nov 25 2021
+### deck.gl v8.7 Prereleases
+
+#### deck.gl [8.7.0-alpha.6] - Dec 9 2021
+
+- Fix pre-built bundles (#6498)
+
+#### deck.gl [8.7.0-alpha.4] - Dec 9 2021
+
+- TileLayer: reduce flashing when using no-overlap strategy (#6477)
+- feat(geo): controller position (#6478)
+- chore: Bump to loaders.gl@3.1.0 (#6484)
+- chore(core): Move utils to .ts (#6452)
+- CARTO: Fix domain length for CartoColors in colorBins  (#6475)
+- Migrate core/lifecycle to TypeScript (#6454)
+- feat(geo-layers): Tile3DLayer pass coordinateSystem as prop (#6466)
+- Fix project_normal in GlobeView (#6445)
+- Add flatShading prop to ColumnLayer (#6392)
+- TerrainLayer handle non-WebMercator viewports (#6461)
+- colorContinuous - Use domain length to get palette (#6447)
+- fix(geo-layers): _MeshLayer & repeating textures (#6468)
+- TileLayer support custom refinementStrategy (#6382)
+- chore: Move to @math.gl/core (#6405)
+- chore: Lint fixes (#6443)
+- chore: Move controllers to .ts (#6440)
+- chore: loaders.gl@3.1.0-beta.5 (#6388)
+- feat: Typescript monorepo (#6381)
+- chore: Replace `global` with `globalThis` (#6407)
+- feat: Upgrade tooling to support TypeScript (#6390)
+
+#### deck.gl [8.7.0-alpha.3] - Nov 25 2021
 
 - Fix: Rename publicToken to token (#6425)
 - Fix: CartoLayer support `format` prop (#6416)
 - Default to `cartodb_id` for uniqueIdProperty in CartoLayer (#6404)
 - Deprecate CartoBQTilerLayer and CartoSQLLayer (#6402)
 
-### deck.gl [8.7.0-alpha.2] - Nov 16 2021
+#### deck.gl [8.7.0-alpha.2] - Nov 16 2021
 - Bump prettier to v2 (#6386)
 - CARTO default to v3 API (#6376)
 - Fix multi-depth picking with layerFilter (#6380)
 
-### deck.gl [8.7.0-alpha.1] - Nov 8 2021
+#### deck.gl [8.7.0-alpha.1] - Nov 8 2021
 - Add missing prop mappings for GeoJsonLayer (#6336)
 - Add `fetchMap` function to carto module (#6341)
 - CARTO: fix layer credentials overwrite (#6349)
@@ -43,11 +72,11 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ### deck.gl v8.6 Prereleases
 
-### deck.gl [8.6.0-beta.1] - Oct 9 2021
+#### deck.gl [8.6.0-beta.1] - Oct 9 2021
 
 - Default to binary mode in MVTLayer (#6282)
 
-### deck.gl [8.6.0-alpha.4] - Oct 6 2021
+#### deck.gl [8.6.0-alpha.4] - Oct 6 2021
 
 - Google Maps Overlay: Safely invoke onRender by resetting arrayBuffer (#6224)
 - Bump luma to 8.5.10 (#6267)
