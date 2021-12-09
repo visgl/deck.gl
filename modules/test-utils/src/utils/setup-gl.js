@@ -1,10 +1,7 @@
 import {createTestContext} from '@luma.gl/test-utils';
 
-/* global window, global*/
-const _global = typeof global !== 'undefined' ? global : window;
-
-_global.glContext =
-  _global.glContext ||
+globalThis.glContext =
+  globalThis.glContext ||
   createTestContext({
     width: 1,
     height: 1,
@@ -14,6 +11,6 @@ _global.glContext =
   });
 //   // TODO - Seems to be an issue in luma.gl
 //   (createContext && createContext(100, 100, {}));
-// // console.log('Context', _global.glContext);
+// // console.log('Context', globalThis.glContext);
 
-export default _global.glContext;
+export default globalThis.glContext;

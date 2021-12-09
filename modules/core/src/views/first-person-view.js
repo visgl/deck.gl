@@ -1,7 +1,7 @@
 import View from './view';
 import Viewport from '../viewports/viewport';
 import {getMeterZoom} from '@math.gl/web-mercator';
-import {Matrix4, _SphericalCoordinates as SphericalCoordinates} from 'math.gl';
+import {Matrix4, _SphericalCoordinates as SphericalCoordinates} from '@math.gl/core';
 import FirstPersonController from '../controllers/first-person-controller';
 
 function getDirectionFromBearingAndPitch({bearing, pitch}) {

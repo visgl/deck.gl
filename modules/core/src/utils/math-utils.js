@@ -1,6 +1,6 @@
 // Extensions to math.gl library. Intended to be folded back.
 import typedArrayManager from './typed-array-manager';
-import {Vector3} from 'math.gl';
+import {Vector3} from '@math.gl/core';
 
 // Helper, avoids low-precision 32 bit matrices from gl-matrix mat4.create()
 export function createMat4() {

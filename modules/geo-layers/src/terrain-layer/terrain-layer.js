@@ -20,7 +20,7 @@
 
 import {CompositeLayer, log} from '@deck.gl/core';
 import {SimpleMeshLayer} from '@deck.gl/mesh-layers';
-import {WebMercatorViewport, COORDINATE_SYSTEM} from '@deck.gl/core';
+import {COORDINATE_SYSTEM} from '@deck.gl/core';
 import {TerrainWorkerLoader} from '@loaders.gl/terrain';
 import TileLayer from '../tile-layer/tile-layer';
 import {urlType, getURLFromTemplate} from '../tile-layer/utils';
@@ -123,17 +123,17 @@ export default class TerrainLayer extends CompositeLayer {
 
   getTiledTerrainData(tile) {
     const {elevationData, fetch, texture, elevationDecoder, meshMaxError} = this.props;
+    const {viewport} = this.context;
     const dataUrl = getURLFromTemplate(elevationData, tile);
     const textureUrl = getURLFromTemplate(texture, tile);
 
-    const {bbox, signal, z} = tile;
-    const viewport = new WebMercatorViewport({
-      longitude: (bbox.west + bbox.east) / 2,
-      latitude: (bbox.north + bbox.south) / 2,
-      zoom: z
-    });
-    const bottomLeft = viewport.projectFlat([bbox.west, bbox.south]);
-    const topRight = viewport.projectFlat([bbox.east, bbox.north]);
+    const {bbox, signal} = tile;
+    const bottomLeft = viewport.isGeospatial
+      ? viewport.projectFlat([bbox.west, bbox.south])
+      : [bbox.left, bbox.bottom];
+    const topRight = viewport.isGeospatial
+      ? viewport.projectFlat([bbox.east, bbox.north])
+      : [bbox.right, bbox.top];
     const bounds = [bottomLeft[0], bottomLeft[1], topRight[0], topRight[1]];
 
     const terrain = this.loadTerrain({
@@ -165,6 +165,7 @@ export default class TerrainLayer extends CompositeLayer {
       data: DUMMY_DATA,
       mesh,
       texture,
+      _instanced: false,
       coordinateSystem: COORDINATE_SYSTEM.CARTESIAN,
       getPosition: d => [0, 0, 0],
       getColor: color

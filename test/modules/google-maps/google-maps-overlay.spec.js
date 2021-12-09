@@ -4,13 +4,11 @@ import test from 'tape-promise/tape';
 import {GoogleMapsOverlay} from '@deck.gl/google-maps';
 import {ScatterplotLayer} from '@deck.gl/layers';
 import {makeSpy} from '@probe.gl/test-utils';
-import {equals} from 'math.gl';
+import {equals} from '@math.gl/core';
 
 import * as mapsApi from './mock-maps-api';
 
-/* global global, window */
-const _global = typeof global === 'undefined' ? window : global;
-_global.google = {maps: mapsApi};
+globalThis.google = {maps: mapsApi};
 
 test('GoogleMapsOverlay#constructor', t => {
   const map = new mapsApi.Map({

@@ -27,7 +27,7 @@ struct VertexGeometry {
   vec2 uv;
   vec3 pickingColor;
 } geometry = VertexGeometry(
-  vec4(0.0),
+  vec4(0.0, 0.0, 1.0, 0.0),
   vec3(0.0),
   vec3(0.0),
   vec3(0.0),

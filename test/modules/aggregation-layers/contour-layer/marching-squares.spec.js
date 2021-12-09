@@ -457,13 +457,13 @@ test('MarchingSquares#getCode', t => {
       width: testCase.gridSize ? testCase.gridSize[0] : gridSize[0],
       height: testCase.gridSize ? testCase.gridSize[1] : gridSize[1]
     });
-    t.equals(code, testCase.code, `Code: expected: ${testCase.code}, actual: ${code}`);
+    t.equals(code, testCase.code, `Code: expected=${testCase.code}, actual=${code}`);
     if (testCase.meanCode) {
       // if meanCode needed for this case
       t.equals(
         meanCode,
         testCase.meanCode,
-        `manCoode: expected: ${testCase.meanCode}, actual: ${meanCode}`
+        `manCoode: expected=${testCase.meanCode}, actual=${meanCode}`
       );
     }
   });
@@ -505,7 +505,7 @@ test('MarchingSquares#getVertices', t => {
     t.deepEquals(
       vertices,
       expectedVertices,
-      `Vertices: expected: ${expectedVertices}, actual: ${vertices}`
+      `Vertices: expected=${expectedVertices}, actual=${vertices}`
     );
   });
   t.end();

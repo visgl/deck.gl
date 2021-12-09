@@ -5,3 +5,5 @@ dist.js
 **/mapbox-gl-dev.js
 **/mapbox-gl.js
 *.md
+
+modules/core/src/controllers/controller.ts

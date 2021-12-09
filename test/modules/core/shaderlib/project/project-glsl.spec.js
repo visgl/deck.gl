@@ -22,7 +22,7 @@ import test from 'tape-promise/tape';
 
 import {COORDINATE_SYSTEM, WebMercatorViewport, OrthographicView} from 'deck.gl';
 import {project} from '@deck.gl/core/shaderlib';
-import {Matrix4, Matrix3, Vector3, config, equals} from 'math.gl';
+import {Matrix4, Matrix3, Vector3, config, equals} from '@math.gl/core';
 import {gl} from '@deck.gl/test-utils';
 import {Transform, Buffer, fp64} from '@luma.gl/core';
 const {fp64LowPart} = fp64;
@@ -377,8 +377,8 @@ test('project#vs#project_get_orientation_matrix', t => {
 
     const result = matrix.transform([0, 0, 1]);
     const expected = new Vector3(testVector).normalize();
-    t.comment(`result: ${result.join(',')}`);
-    t.comment(`expected: ${expected.join(',')}`);
+    t.comment(`result=${result.join(',')}`);
+    t.comment(`expected=${expected.join(',')}`);
     t.ok(equals(result, expected), 'Transformed unit vector as expected');
 
     const result2 = new Vector3(matrix.transform(vectorA));

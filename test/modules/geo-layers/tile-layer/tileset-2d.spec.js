@@ -255,7 +255,7 @@ test('Tileset2D#callbacks', async t => {
   t.end();
 });
 
-/* eslint-disable max-statements */
+/* eslint-disable max-statements, complexity, max-depth */
 test('Tileset2D#traversal', async t => {
   const tileset = new Tileset2D({
     getTileData: () => sleep(10),
@@ -277,107 +277,40 @@ test('Tileset2D#traversal', async t => {
    */
   const TEST_CASES = [
     {
-      selectedTiles: ['0,0,0'],
-      visibleTiles: {
-        [STRATEGY_DEFAULT]: ['0,0,1', '2,0,2', '2,1,2', '6,2,3'],
-        [STRATEGY_REPLACE]: ['0,0,1', '2,0,2', '2,1,2', '6,2,3'],
-        [STRATEGY_NEVER]: []
-      }
+      selectedTiles: ['0,0,0']
     },
     {
-      selectedTiles: ['0,0,1'],
-      visibleTiles: {
-        [STRATEGY_DEFAULT]: ['0,0,1'],
-        [STRATEGY_REPLACE]: ['0,0,1'],
-        [STRATEGY_NEVER]: ['0,0,1']
-      }
+      selectedTiles: ['0,0,1']
     },
     {
-      selectedTiles: ['0,0,1', '1,0,1'],
-      visibleTiles: {
-        [STRATEGY_DEFAULT]: ['0,0,1', '2,0,2', '2,1,2', '6,2,3'],
-        [STRATEGY_REPLACE]: ['0,0,1', '2,0,2', '2,1,2', '6,2,3'],
-        [STRATEGY_NEVER]: ['0,0,1']
-      }
+      selectedTiles: ['0,0,1', '1,0,1']
     },
     {
-      selectedTiles: ['0,0,2', '0,1,2'],
-      visibleTiles: {
-        [STRATEGY_DEFAULT]: ['0,0,1'],
-        [STRATEGY_REPLACE]: ['0,0,1'],
-        [STRATEGY_NEVER]: []
-      }
+      selectedTiles: ['0,0,2', '0,1,2']
     },
     {
-      selectedTiles: ['2,0,2', '2,1,2', '3,0,2', '3,1,2'],
-      visibleTiles: {
-        [STRATEGY_DEFAULT]: ['2,0,2', '2,1,2', '6,2,3'],
-        [STRATEGY_REPLACE]: ['2,0,2', '2,1,2', '6,2,3'],
-        [STRATEGY_NEVER]: ['2,0,2', '2,1,2']
-      }
+      selectedTiles: ['2,0,2', '2,1,2', '3,0,2', '3,1,2']
     },
     {
-      selectedTiles: ['0,0,3', '2,0,3'],
-      visibleTiles: {
-        [STRATEGY_DEFAULT]: ['0,0,1'],
-        [STRATEGY_REPLACE]: ['0,0,1'],
-        [STRATEGY_NEVER]: []
-      }
+      selectedTiles: ['0,0,3', '2,0,3']
     },
     {
-      selectedTiles: ['0,0,3', '0,2,3', '2,0,3', '2,2,3'],
-      visibleTiles: {
-        [STRATEGY_DEFAULT]: ['0,0,1', '0,2,3', '2,2,3'],
-        [STRATEGY_REPLACE]: ['0,2,3', '2,2,3'],
-        [STRATEGY_NEVER]: ['0,2,3', '2,2,3']
-      }
+      selectedTiles: ['0,0,3', '0,2,3', '2,0,3', '2,2,3']
     },
     {
-      selectedTiles: ['4,0,3', '6,0,3'],
-      visibleTiles: {
-        [STRATEGY_DEFAULT]: ['2,0,2'],
-        [STRATEGY_REPLACE]: ['2,0,2'],
-        [STRATEGY_NEVER]: []
-      }
+      selectedTiles: ['4,0,3', '6,0,3']
     },
     {
-      selectedTiles: ['4,0,3', '4,2,3', '6,0,3', '6,2,3'],
-      visibleTiles: {
-        [STRATEGY_DEFAULT]: ['2,0,2', '4,2,3', '6,2,3'],
-        [STRATEGY_REPLACE]: ['2,0,2', '4,2,3', '6,2,3'],
-        [STRATEGY_NEVER]: ['4,2,3', '6,2,3']
-      }
+      selectedTiles: ['4,0,3', '4,2,3', '6,0,3', '6,2,3']
     },
     {
-      selectedTiles: ['0,0,4', '0,4,4'],
-      visibleTiles: {
-        [STRATEGY_DEFAULT]: ['0,0,1', '0,2,3'],
-        [STRATEGY_REPLACE]: ['0,2,3'],
-        [STRATEGY_NEVER]: []
-      }
+      selectedTiles: ['0,0,4', '0,4,4']
     }
   ];
 
   const tileMap = tileset._cache;
   const strategies = [STRATEGY_DEFAULT, STRATEGY_REPLACE, STRATEGY_NEVER];
   tileset._viewport = new WebMercatorViewport({longitude: 0, latitude: 0, zoom: 0});
-
-  const validateVisibility = visibleTiles => {
-    let allMatched = true;
-    for (const [tileId, tile] of tileMap) {
-      const expected = visibleTiles.includes(tileId);
-      const actual = tile.isVisible && tile.isLoaded;
-      if (expected !== actual) {
-        t.fail(
-          `Tile2DHeader ${tileId} has state ${tile.state}, expected ${
-            expected ? 'visible' : 'invisible'
-          }`
-        );
-        allMatched = false;
-      }
-    }
-    t.ok(allMatched, 'Tile2DHeader visibility updated correctly');
-  };
 
   // Tiles that should be loaded
   tileset._getTile({x: 0, y: 0, z: 1}, true);
@@ -406,6 +339,10 @@ test('Tileset2D#traversal', async t => {
 
   tileset._rebuildTree();
 
+  // Sanity check
+  t.ok(tileset._getTile({x: 0, y: 0, z: 1}).isLoaded, '0,0,1 is loaded');
+  t.notOk(tileset._getTile({x: 0, y: 0, z: 0}).isLoaded, '0,0,0 is not loaded');
+
   for (const testCase of TEST_CASES) {
     const selectedTiles = testCase.selectedTiles.map(id => tileMap.get(id));
     tileset._selectedTiles = selectedTiles;
@@ -413,12 +350,81 @@ test('Tileset2D#traversal', async t => {
     for (const strategy of strategies) {
       tileset.setOptions({refinementStrategy: strategy});
       tileset.updateTileStates();
-      validateVisibility(testCase.visibleTiles[strategy] || testCase.visibleTiles);
+      const error = validateVisibility(strategy, selectedTiles, tileset._cache);
+      if (error) {
+        t.fail(`${strategy}: ${error}`);
+      } else {
+        t.pass(`${strategy}: correctly updated tile visibilities`);
+      }
     }
   }
 
   t.end();
 });
+
+function validateVisibility(strategy, selectedTiles, tiles) {
+  switch (strategy) {
+    case STRATEGY_NEVER: {
+      // isVisible should match isSelected
+      for (const [id, tile] of tiles) {
+        const isSelected = selectedTiles.includes(tile);
+        if (isSelected && !tile.isVisible) {
+          return `${id} is selected and should be visible`;
+        }
+        if (!isSelected && tile.isVisible) {
+          return `${id} is not selected and should be hidden`;
+        }
+      }
+      break;
+    }
+    case STRATEGY_DEFAULT:
+      // The best content (at the requested z) should always be visible
+      for (const tile of selectedTiles) {
+        if (tile.isLoaded && !tile.isVisible) {
+          return `${tile.id} is selected and should be visible`;
+        }
+      }
+    // Fall through
+    case STRATEGY_REPLACE: {
+      // Sample four points each selected tile just inside the corners
+      const samplePoints = selectedTiles.flatMap(({bbox}) => [
+        [bbox.west + 1, bbox.north - 1],
+        [bbox.east - 1, bbox.north - 1],
+        [bbox.west + 1, bbox.south + 1],
+        [bbox.east - 1, bbox.south + 1]
+      ]);
+      for (const p of samplePoints) {
+        const loadedTiles = [];
+        const visibleTiles = [];
+        // Check if any content is rendered at this location
+        for (const [id, tile] of tiles) {
+          if (tile.isLoaded && contains(tile.bbox, p)) {
+            loadedTiles.push(id);
+            if (tile.isVisible) {
+              visibleTiles.push(id);
+            }
+          }
+        }
+        if (loadedTiles.length > 0 && visibleTiles.length === 0) {
+          return `One of ${loadedTiles} should be visible`;
+        }
+        if (strategy === STRATEGY_REPLACE && visibleTiles.length > 1) {
+          return `Overlapping tiles: ${visibleTiles}`;
+        }
+      }
+    }
+  }
+  return null;
+}
+
+function contains(bbox, point) {
+  return (
+    point[0] >= bbox.west &&
+    point[0] <= bbox.east &&
+    point[1] >= bbox.south &&
+    point[1] <= bbox.north
+  );
+}
 
 function sleep(ms) {
   return new Promise(resolve => {

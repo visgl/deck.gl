@@ -8,7 +8,7 @@ import {
   edgeLength,
   UNITS
 } from 'h3-js';
-import {lerp} from 'math.gl';
+import {lerp} from '@math.gl/core';
 import {CompositeLayer, createIterable} from '@deck.gl/core';
 import {ColumnLayer, PolygonLayer} from '@deck.gl/layers';
 
@@ -304,6 +304,7 @@ export default class H3HexagonLayer extends CompositeLayer {
       forwardProps,
       this.getSubLayerProps({
         id: 'hexagon-cell',
+        flatShading: true,
         updateTriggers: forwardProps.updateTriggers
       }),
       {

@@ -6,7 +6,7 @@ import {
   getURLFromTemplate
 } from '@deck.gl/geo-layers/tile-layer/utils';
 import {WebMercatorViewport, OrthographicView, _GlobeView as GlobeView} from '@deck.gl/core';
-import {Matrix4} from 'math.gl';
+import {Matrix4} from '@math.gl/core';
 
 const TEST_CASES = [
   {
