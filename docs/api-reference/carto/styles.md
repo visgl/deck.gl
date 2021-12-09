@@ -6,7 +6,7 @@ These helpers take advantage of [CARTOColors](https://carto.com/carto-colors/), 
 
 ## colorBins
 
-Helper function for quickly creating a color bins style.
+Helper function for quickly creating a color bins style based on [d3 scaleThreshold](https://github.com/d3/d3-scale/blob/main/README.md#scaleThreshold).
 
 Data values of each attribute are rounded down to the nearest value in the domain and are then styled with the corresponding color.
 
@@ -20,6 +20,15 @@ new CartoLayer({
     colors: 'Teal'
   })
 });
+```
+
+In this example, using `Teal` of length `domain.length + 1`, the range/color equivalence is:
+
+```
+[, 1e5)     -> Teal[0]
+[1e5, 2e5)  -> Teal[1]
+[2e5, 3e5)  -> Teal[2]
+[3e5,]      -> Teal[3]
 ```
 
 ### Arguments
