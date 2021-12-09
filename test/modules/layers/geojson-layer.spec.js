@@ -28,7 +28,7 @@ import {DataFilterExtension} from '@deck.gl/extensions';
 import * as FIXTURES from 'deck.gl-test/data';
 import {testPickingLayer} from './test-picking-layer';
 
-test.only('GeoJsonLayer#tests', t => {
+test('GeoJsonLayer#tests', t => {
   const testCases = generateLayerTests({
     Layer: GeoJsonLayer,
     sampleProps: {
