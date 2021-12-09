@@ -139,7 +139,7 @@ test('GeoJsonLayer#tests', t => {
       attributes: {
         getRadius: {
           size: 1,
-          value: binaryData.points.featureIds.value.map(_ => Math.round(Math.random() * 10))
+          value: binaryData.points.featureIds.value.map((_, i) => i)
         }
       }
     },
@@ -148,7 +148,7 @@ test('GeoJsonLayer#tests', t => {
       attributes: {
         getWidth: {
           size: 1,
-          value: binaryData.lines.featureIds.value.map(_ => Math.random())
+          value: binaryData.lines.featureIds.value.map((_, i) => i)
         }
       }
     },
@@ -166,7 +166,7 @@ test('GeoJsonLayer#tests', t => {
   testCases.push({
     title: 'GeoJsonLayer#binaryAttributes',
     onBeforeUpdate: ({testCase}) => t.comment(testCase.title),
-    onAfterUpdate: ({layer, subLayers, subLayer}) => {
+    onAfterUpdate: ({subLayers}) => {
       // Polygons-fill
       t.ok(
         subLayers[0].props.data.attributes.getColor,
@@ -195,15 +195,14 @@ test('GeoJsonLayer#tests', t => {
   });
 
   const binaryDataWithGetFilterValue = {
-    ...binaryDataWithAttributes,
+    ...binaryData,
     ...['points', 'lines', 'polygons'].reduce((acc, key) => {
       acc[key] = {
-        ...binaryDataWithAttributes[key],
+        ...binaryData[key],
         attributes: {
-          ...binaryDataWithAttributes[key].attributes,
           getFilterValue: {
             size: 1,
-            value: binaryDataWithAttributes[key].featureIds.value.map(_ => 0)
+            value: binaryData[key].featureIds.value.map(_ => 0)
           }
         }
       };
@@ -214,7 +213,7 @@ test('GeoJsonLayer#tests', t => {
   testCases.push({
     title: 'GeoJsonLayer#DataFilterExtensionWithBinaryAttributes',
     onBeforeUpdate: ({testCase}) => t.comment(testCase.title),
-    onAfterUpdate: ({layer, subLayers, subLayer}) => {
+    onAfterUpdate: ({subLayers, subLayer}) => {
       t.ok(
         subLayers.every(_subLayer => _subLayer.props.data.attributes.getFilterValue),
         'every subLayer should receive getFilterValue binary attribute'
