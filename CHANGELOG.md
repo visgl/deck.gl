@@ -19,6 +19,13 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v8.6
 
+#### deck.gl [8.6.5] - Dec 9 2021
+
+- Avoid mutating coordinateOrigin (#6491)
+- Fix MVTLayer functional highlightColor (#6479)
+- Fix crash when diffing extensions (#6474)
+- TerrainLayer handle non-WebMercator viewports (#6461)
+
 #### deck.gl [8.6.4] - Nov 14 2021
 
 - Fix multi-depth picking with layerFilter (#6380)
