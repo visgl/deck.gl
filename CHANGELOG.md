@@ -21,6 +21,10 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ### deck.gl v8.7 Prereleases
 
+#### deck.gl [8.7.0-alpha.5] - Dec 9 2021
+
+- Fix pre-built bundles (#6498)
+
 #### deck.gl [8.7.0-alpha.4] - Dec 9 2021
 
 - TileLayer: reduce flashing when using no-overlap strategy (#6477)
