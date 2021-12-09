@@ -13,7 +13,7 @@
     "@loaders.gl/csv": "^3.1.0",
     "@loaders.gl/draco": "^3.1.0",
     "@loaders.gl/gltf": "^3.1.0",
-    "@luma.gl/constants": "^8.5.10",
+    "@luma.gl/constants": "8.6.1.alpha.1",
     "brace": "^0.11.1",
     "deck.gl": "^8.3.0",
     "react": "~16.9.0",
