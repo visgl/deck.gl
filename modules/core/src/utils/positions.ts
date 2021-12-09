@@ -19,7 +19,7 @@ export function parsePosition(value) {
           relative
         };
       }
-    // fallthrough
+      // fallthrough
 
     default:
       // eslint-disable-line
