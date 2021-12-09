@@ -23,6 +23,7 @@ import {testLayer, generateLayerTests} from '@deck.gl/test-utils';
 import {geojsonToBinary} from '@loaders.gl/gis';
 
 import {GeoJsonLayer} from 'deck.gl';
+import {DataFilterExtension} from '@deck.gl/extensions';
 
 import * as FIXTURES from 'deck.gl-test/data';
 import {testPickingLayer} from './test-picking-layer';
@@ -131,37 +132,103 @@ test.only('GeoJsonLayer#tests', t => {
     }
   });
 
-  const binaryDataWithAttributes = Object.entries(binaryData).reduce((acc, [key, value]) => {
-    acc[key] = {
-      ...value,
+  const binaryDataWithAttributes = {
+    ...binaryData,
+    points: {
+      ...binaryData.points,
       attributes: {
-        getFilterValue: {
-          value: value.featureIds.value.map(_ => 0),
-          size: 1
+        getRadius: {
+          size: 1,
+          value: binaryData.points.featureIds.value.map(_ => Math.round(Math.random() * 10))
         }
       }
-    };
-    return acc;
-  }, {});
+    },
+    lines: {
+      ...binaryData.lines,
+      attributes: {
+        getWidth: {
+          size: 1,
+          value: binaryData.lines.featureIds.value.map(_ => Math.random())
+        }
+      }
+    },
+    polygons: {
+      ...binaryData.polygons,
+      attributes: {
+        getColor: {
+          size: 3,
+          value: new Uint16Array(binaryData.polygons.featureIds.value.length * 3).fill(255)
+        }
+      }
+    }
+  };
 
   testCases.push({
     title: 'GeoJsonLayer#binaryAttributes',
     onBeforeUpdate: ({testCase}) => t.comment(testCase.title),
     onAfterUpdate: ({layer, subLayers, subLayer}) => {
+      // Polygons-fill
       t.ok(
-        subLayer.props.data.attributes.getFilterValue,
-        'subLayer should receive passed binary attribute'
+        subLayers[0].props.data.attributes.getColor,
+        'polygon-fill subLayer should receive passed binary attribute'
       );
-      const hasData = layer.props && layer.props.data && Object.keys(layer.props.data).length;
-      t.is(
-        subLayers.length,
-        !hasData ? 0 : layer.props.stroked && !layer.props.extruded ? 4 : 3,
-        'correct number of sublayers'
+      // Polygons-stroke
+      t.ok(
+        subLayers[1].props.data.attributes.getColor,
+        'polygon-fill subLayer should receive passed binary attribute'
+      );
+      // Lines
+      t.ok(
+        subLayers[2].props.data.attributes.getWidth,
+        'linestrings subLayer should receive passed binary attribute'
+      );
+      // Points
+      t.ok(
+        subLayers[3].props.data.attributes.getRadius,
+        'points subLayer should receive passed binary attribute'
       );
     },
     props: {
       // TODO: Set a right geojson example as the provided from 'deck.gl-data' contains 'GeometryCollection' types that are not compatible with geojsonToBinary
       data: binaryDataWithAttributes
+    }
+  });
+
+  const binaryDataWithGetFilterValue = {
+    ...binaryDataWithAttributes,
+    ...['points', 'lines', 'polygons'].reduce((acc, key) => {
+      acc[key] = {
+        ...binaryDataWithAttributes[key],
+        attributes: {
+          ...binaryDataWithAttributes[key].attributes,
+          getFilterValue: {
+            size: 1,
+            value: binaryDataWithAttributes[key].featureIds.value.map(_ => 0)
+          }
+        }
+      };
+      return acc;
+    }, {})
+  };
+
+  testCases.push({
+    title: 'GeoJsonLayer#DataFilterExtensionWithBinaryAttributes',
+    onBeforeUpdate: ({testCase}) => t.comment(testCase.title),
+    onAfterUpdate: ({layer, subLayers, subLayer}) => {
+      t.ok(
+        subLayers.every(_subLayer => _subLayer.props.data.attributes.getFilterValue),
+        'every subLayer should receive getFilterValue binary attribute'
+      );
+      const {uniforms} = subLayer.state.models[0];
+      t.is(uniforms.filter_min, 1, 'has correct uniforms');
+      t.is(uniforms.filter_max, 1, 'has correct uniforms');
+      t.is(uniforms.filter_useSoftMargin, false, 'has correct uniforms');
+      t.is(uniforms.filter_enabled, true, 'has correct uniforms');
+    },
+    updateProps: {
+      data: binaryDataWithGetFilterValue,
+      filterRange: [1, 1],
+      extensions: [new DataFilterExtension()]
     }
   });
 
