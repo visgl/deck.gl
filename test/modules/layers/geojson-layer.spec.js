@@ -175,7 +175,7 @@ test('GeoJsonLayer#tests', t => {
       // Polygons-stroke
       t.ok(
         subLayers[1].props.data.attributes.getColor,
-        'polygon-fill subLayer should receive passed binary attribute'
+        'polygon-stroke subLayer should receive passed binary attribute'
       );
       // Lines
       t.ok(
