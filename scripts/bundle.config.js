@@ -108,8 +108,24 @@ module.exports = (env = {}) => {
     config.mode = 'development';
     // Remove .min from the name
     config.output.filename = 'dist/dist.dev.js';
-    // Disable transpilation
-    config.module.rules = [];
+    // Use light transpilation
+    config.module.rules = [
+      {
+        test: /(\.js|\.ts|\.tsx)$/,
+        loader: 'babel-loader',
+        include: [/src/, /bundle/],
+        options: {
+          presets: [
+            '@babel/preset-typescript'
+          ],
+          // TODO - Webpack 4 does not support class properties. Upgrade Webpack and remove
+          plugins: [
+            '@babel/proposal-class-properties'
+          ]
+        }
+      }
+    ];
+
   }
 
   // NOTE uncomment to display config
