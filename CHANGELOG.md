@@ -21,8 +21,9 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ### deck.gl v8.7 Prereleases
 
-#### deck.gl [8.7.0-alpha.6] - Dec 9 2021
+#### deck.gl [8.7.0-alpha.7] - Dec 9 2021
 
+- Fix pre-built dev bundles (#6499)
 - Fix pre-built bundles (#6498)
 
 #### deck.gl [8.7.0-alpha.4] - Dec 9 2021
