@@ -30,7 +30,7 @@
   "dependencies": {
     "@loaders.gl/images": "^3.1.5",
     "@mapbox/tiny-sdf": "^1.1.0",
-    "@math.gl/polygon": "^3.5.7",
+    "@math.gl/polygon": "3.6.0-alpha.1",
     "earcut": "^2.0.6"
   },
   "peerDependencies": {
