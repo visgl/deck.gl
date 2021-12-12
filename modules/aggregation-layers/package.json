@@ -30,7 +30,7 @@
   },
   "dependencies": {
     "@luma.gl/shadertools": "^8.5.10",
-    "@math.gl/web-mercator": "^3.5.7",
+    "@math.gl/web-mercator": "3.6.0-alpha.1",
     "d3-hexbin": "^0.2.1"
   },
   "peerDependencies": {
