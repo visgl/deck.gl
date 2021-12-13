@@ -21,6 +21,10 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ### deck.gl v8.7 Prereleases
 
+#### deck.gl [8.7.0-alpha.8] - Dec 13 2021
+
+- Supply attributes directly in binary GeoJson layer (#6492)
+
 #### deck.gl [8.7.0-alpha.7] - Dec 9 2021
 
 - Fix pre-built dev bundles (#6499)
