@@ -7,6 +7,7 @@ import Protobuf from 'pbf';
 import DeckGL from '@deck.gl/react';
 import {ClipExtension} from '@deck.gl/extensions';
 import {MVTLayer} from '@deck.gl/geo-layers';
+import {CartoLayer, MAP_TYPES} from '@deck.gl/carto';
 import {GeoJsonLayer} from '@deck.gl/layers';
 import {geojsonToBinary} from '@loaders.gl/gis';
 
@@ -33,18 +34,10 @@ function buildUrl({formatTiles}) {
 const geojson = false;
 const wip = true;
 const showBasemap = true;
-const showTile = false;
-const showCBT = true;
-const showMVT = false;
-const showGeojson = false;
+const showCBT = false;
+const showCarto = true;
 
 function Root() {
-  const [binary, setBinary] = useState(false);
-  const [border, setBorder] = useState(true);
-  const [clip, setClip] = useState(true);
-  const [skipOdd, setSkipOdd] = useState(false);
-  const opts = {binary, border, clip, skipOdd};
-
   return (
     <>
       <DeckGL
@@ -52,7 +45,8 @@ function Root() {
         controller={true}
         layers={[
           showBasemap && createBasemap(),
-          showCBT && createCBT(opts),
+          showCBT && createCBT(),
+          showCarto && createCarto()
         ]}
       />
     </>
@@ -128,13 +122,11 @@ class CBTLayer extends MVTLayer {
 
     props.autoHighlight = false;
 
-    if (props.clip) {
-      const {
-        bbox: {west, south, east, north}
-      } = props.tile;
-      props.extensions = [new ClipExtension()];
-      props.clipBounds = [west, south, east, north];
-    }
+    const {
+      bbox: {west, south, east, north}
+    } = props.tile;
+    props.extensions = [new ClipExtension()];
+    props.clipBounds = [west, south, east, north];
 
     const subLayer = new GeoJsonLayer({
       ...props
@@ -146,7 +138,7 @@ class CBTLayer extends MVTLayer {
 CBTLayer.layerName = 'CBTLayer';
 CBTLayer.defaultProps = {...MVTLayer.defaultProps, loaders: [CBTLoader]};
 
-function createCBT({clip, skipOdd}) {
+function createCBT() {
   const formatTiles = geojson ? 'geojson' : wip ? 'wip' : 'binary';
 
   return new CBTLayer({
@@ -163,15 +155,34 @@ function createCBT({clip, skipOdd}) {
     pointRadiusUnits: 'pixels',
     lineWidthMinPixels: 0.5,
     getPointRadius: 1.5,
-    getLineColor: [0, 0, 200],
-    // getFillColor: [255, 50, 11],
-
-    // Debug options
-    clip,
-    skipOdd
+    getLineColor: [0, 0, 200]
   });
 }
 
+
+function createCarto() {
+  return new CartoLayer({
+    id: 'carto',
+    connection,
+    type: MAP_TYPES.TABLE,
+    data: table,
+    credentials: {
+      accessToken: token
+    },
+
+    // Styling
+    getFillColor: [233, 71, 251],
+    getElevation: 1000,
+    // extruded: true,
+    stroked: true,
+    filled: true,
+    pointType: 'circle',
+    pointRadiusUnits: 'pixels',
+    lineWidthMinPixels: 0.5,
+    getPointRadius: 1.5,
+    getLineColor: [0, 0, 200]
+  });
+}
 
 function parsePbf(buffer) {
   const pbf = new Protobuf(buffer);
