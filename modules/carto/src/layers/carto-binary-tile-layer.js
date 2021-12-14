@@ -5,8 +5,7 @@ import Protobuf from 'pbf';
 import {ClipExtension} from '@deck.gl/extensions';
 import {MVTLayer} from '@deck.gl/geo-layers';
 import {GeoJsonLayer} from '@deck.gl/layers';
-
-const wip = false;
+import {geojsonToBinary} from '@loaders.gl/gis';
 
 function parsePbf(buffer) {
   const pbf = new Protobuf(buffer);
@@ -40,9 +39,11 @@ function tileToBinary(tile) {
   };
 }
 
-function parseCartoBinaryTile(arrayBuffer, options) {
+function parseCartoBinaryTile(arrayBuffer, {formatTiles}) {
   if (!arrayBuffer) return null;
-  const tile = wip ? parseJSON(arrayBuffer) : parsePbf(arrayBuffer);
+  formatTiles = formatTiles || 'geojson';
+  if (formatTiles === 'geojson') return geojsonToBinary(parseJSON(arrayBuffer).features);
+  const tile = formatTiles === 'wip' ? parseJSON(arrayBuffer) : parsePbf(arrayBuffer);
   const binary = tileToBinary(tile);
   return binary;
 }
@@ -51,7 +52,6 @@ const CartoBinaryTileLoader = {
   name: 'CARTO Binary Tile',
   id: 'cartoBinaryTile',
   module: 'carto',
-  version: 'dev',
   extensions: ['pbf'],
   mimeTypes: ['application/x-protobuf'],
   category: 'geometry',

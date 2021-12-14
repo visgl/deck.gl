@@ -2,13 +2,11 @@
 /* eslint-disable no-console */
 import React, {useState} from 'react';
 import {render} from 'react-dom';
-import Protobuf from 'pbf';
 import DeckGL from '@deck.gl/react';
 import {ClipExtension} from '@deck.gl/extensions';
 import {MVTLayer} from '@deck.gl/geo-layers';
 import {CartoLayer, FORMATS, MAP_TYPES} from '@deck.gl/carto';
 import {GeoJsonLayer} from '@deck.gl/layers';
-import {geojsonToBinary} from '@loaders.gl/gis';
 
 const INITIAL_VIEW_STATE = {longitude: -73.95643, latitude: 40.8039, zoom: 9};
 const COUNTRIES =
@@ -63,7 +61,7 @@ function createCarto() {
     type: MAP_TYPES.TABLE,
     format: FORMATS.TILEJSON,
     loadOptions: {
-      formatTiles: 'binary'
+      formatTiles: 'geojson' // 'binary' | 'geojson' | 'wip'
     },
 
     // Styling

@@ -145,11 +145,12 @@ export async function fetchLayerData({
   geoColumn,
   columns,
   format,
+  formatTiles,
   schema
 }) {
   // Internally we split data fetching into two parts to allow us to
   // conditionally fetch the actual data, depending on the metadata state
-  const {url, accessToken, mapFormat, metadata} = await _fetchDataUrl({
+  let {url, accessToken, mapFormat, metadata} = await _fetchDataUrl({
     type,
     source,
     connection,
@@ -159,6 +160,11 @@ export async function fetchLayerData({
     format,
     schema
   });
+
+  // HACK in formatTiles
+  if (formatTiles) {
+    url += '&' + encodeParameter('formatTiles', formatTiles);
+  }
 
   const data = await request({url, format: mapFormat, accessToken});
   const result = {data, format: mapFormat};
@@ -208,8 +214,6 @@ async function _fetchDataUrl({
     mapFormat = format;
     url = getUrlFromMetadata(metadata, format);
 
-    // HACK in formatTiles
-    url += '&' + encodeParameter('formatTiles', 'binary');
     log.assert(url, `Format ${format} not available`);
   } else {
     // guess map format

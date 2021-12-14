@@ -8,11 +8,6 @@ const CONFIG = {
     app: './app.js'
   },
 
-  devServer: {
-    port: 8083
-
-  },
-
   module: {
     rules: [
       {
