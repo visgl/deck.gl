@@ -1,4 +1,5 @@
 import {CompositeLayer, log} from '@deck.gl/core';
+import CartoBinaryTileLayer from './carto-binary-tile-layer';
 import {MVTLayer} from '@deck.gl/geo-layers';
 import {GeoJsonLayer} from '@deck.gl/layers';
 import {fetchLayerData, getDataV2, API_VERSIONS} from '../api';
@@ -133,7 +134,7 @@ export default class CartoLayer extends CompositeLayer {
       apiVersion === API_VERSIONS.V2 ||
       format === FORMATS.TILEJSON
     ) {
-      layer = MVTLayer;
+      layer = CartoBinaryTileLayer;
     } else {
       layer = GeoJsonLayer;
     }
