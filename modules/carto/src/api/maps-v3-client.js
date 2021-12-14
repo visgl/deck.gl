@@ -207,6 +207,9 @@ async function _fetchDataUrl({
   if (format) {
     mapFormat = format;
     url = getUrlFromMetadata(metadata, format);
+
+    // HACK in formatTiles
+    url += '&' + encodeParameter('formatTiles', 'wip');
     log.assert(url, `Format ${format} not available`);
   } else {
     // guess map format

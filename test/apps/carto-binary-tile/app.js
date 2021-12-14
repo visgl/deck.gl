@@ -7,7 +7,7 @@ import Protobuf from 'pbf';
 import DeckGL from '@deck.gl/react';
 import {ClipExtension} from '@deck.gl/extensions';
 import {MVTLayer} from '@deck.gl/geo-layers';
-import {CartoLayer, MAP_TYPES} from '@deck.gl/carto';
+import {CartoLayer, FORMATS, MAP_TYPES} from '@deck.gl/carto';
 import {GeoJsonLayer} from '@deck.gl/layers';
 import {geojsonToBinary} from '@loaders.gl/gis';
 
@@ -169,6 +169,7 @@ function createCarto() {
     credentials: {
       accessToken: token
     },
+    format: FORMATS.TILEJSON,
 
     // Styling
     getFillColor: [233, 71, 251],
