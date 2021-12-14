@@ -6,7 +6,7 @@ import {ClipExtension} from '@deck.gl/extensions';
 import {MVTLayer} from '@deck.gl/geo-layers';
 import {GeoJsonLayer} from '@deck.gl/layers';
 
-const wip = true;
+const wip = false;
 
 function parsePbf(buffer) {
   const pbf = new Protobuf(buffer);

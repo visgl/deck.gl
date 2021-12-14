@@ -62,6 +62,9 @@ function createCarto() {
     // Dynamic tiling. Request TILEJSON format with TABLE
     type: MAP_TYPES.TABLE,
     format: FORMATS.TILEJSON,
+    loadOptions: {
+      formatTiles: 'binary'
+    },
 
     // Styling
     getFillColor: [233, 71, 251],
