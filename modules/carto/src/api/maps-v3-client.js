@@ -149,7 +149,7 @@ export async function fetchLayerData({
 }) {
   // Internally we split data fetching into two parts to allow us to
   // conditionally fetch the actual data, depending on the metadata state
-  let {url, accessToken, mapFormat, metadata} = await _fetchDataUrl({
+  const {url, accessToken, mapFormat, metadata} = await _fetchDataUrl({
     type,
     source,
     connection,
@@ -207,7 +207,6 @@ async function _fetchDataUrl({
   if (format) {
     mapFormat = format;
     url = getUrlFromMetadata(metadata, format);
-
     log.assert(url, `Format ${format} not available`);
   } else {
     // guess map format
