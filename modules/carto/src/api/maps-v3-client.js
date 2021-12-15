@@ -145,7 +145,6 @@ export async function fetchLayerData({
   geoColumn,
   columns,
   format,
-  formatTiles,
   schema
 }) {
   // Internally we split data fetching into two parts to allow us to
@@ -160,11 +159,6 @@ export async function fetchLayerData({
     format,
     schema
   });
-
-  // HACK in formatTiles
-  if (formatTiles) {
-    url += '&' + encodeParameter('formatTiles', formatTiles);
-  }
 
   const data = await request({url, format: mapFormat, accessToken});
   const result = {data, format: mapFormat};
