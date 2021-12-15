@@ -99,7 +99,6 @@ export default class CartoLayer extends CompositeLayer {
   async _updateData() {
     try {
       const {type, data: source, credentials, ...rest} = this.props;
-      const {formatTiles} = this.props.loadOptions;
       const localConfig = {...getDefaultCredentials(), ...credentials};
       const {apiVersion} = localConfig;
 
@@ -107,7 +106,7 @@ export default class CartoLayer extends CompositeLayer {
       if (apiVersion === API_VERSIONS.V1 || apiVersion === API_VERSIONS.V2) {
         result = {data: await getDataV2({type, source, credentials})};
       } else {
-        result = await fetchLayerData({type, source, credentials, formatTiles, ...rest});
+        result = await fetchLayerData({type, source, credentials, ...rest});
       }
 
       this.setState({...result, apiVersion});
@@ -126,16 +125,18 @@ export default class CartoLayer extends CompositeLayer {
 
     if (!data) return null;
 
-    const {updateTriggers} = this.props;
+    const {type, updateTriggers} = this.props;
 
     let layer;
 
-    if (
+    if (apiVersion === API_VERSIONS.V3 && type === MAP_TYPES.TABLE && format === FORMATS.TILEJSON) {
+      layer = CartoBinaryTileLayer;
+    } else if (
       apiVersion === API_VERSIONS.V1 ||
       apiVersion === API_VERSIONS.V2 ||
       format === FORMATS.TILEJSON
     ) {
-      layer = CartoBinaryTileLayer;
+      layer = MVTLayer;
     } else {
       layer = GeoJsonLayer;
     }

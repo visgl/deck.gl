@@ -1,51 +1,20 @@
-/* global devicePixelRatio, document, fetch, performance */
-/* eslint-disable no-console */
-import {Tile} from './carto-tile';
-import Protobuf from 'pbf';
+/* global TextDecoder */
+import {log} from '@deck.gl/core';
 import {ClipExtension} from '@deck.gl/extensions';
 import {MVTLayer} from '@deck.gl/geo-layers';
 import {GeoJsonLayer} from '@deck.gl/layers';
 import {geojsonToBinary} from '@loaders.gl/gis';
 
-function parsePbf(buffer) {
-  const pbf = new Protobuf(buffer);
-  const tile = Tile.read(pbf);
-  return tile;
-}
-
 function parseJSON(arrayBuffer) {
   return JSON.parse(new TextDecoder().decode(arrayBuffer));
 }
 
-function tileToBinary(tile) {
-  // Convert to typed arrays
-  tile.points.positions.value = new Float32Array(tile.points.positions.value);
-
-  tile.lines.positions.value = new Float32Array(tile.lines.positions.value);
-  tile.lines.pathIndices.value = new Uint16Array(tile.lines.pathIndices.value);
-  tile.lines.globalFeatureIds = tile.lines.featureIds; // HACK to fix missing data from API
-
-  tile.polygons.positions.value = new Float32Array(tile.polygons.positions.value);
-  tile.polygons.polygonIndices.value = new Uint16Array(tile.polygons.polygonIndices.value);
-  tile.polygons.primitivePolygonIndices.value = new Uint16Array(
-    tile.polygons.primitivePolygonIndices.value
-  );
-  tile.polygons.globalFeatureIds = tile.polygons.featureIds; // HACK to fix missing data from API
-
-  return {
-    points: {type: 'Point', numericProps: {}, properties: [], ...tile.points},
-    lines: {type: 'LineString', numericProps: {}, properties: [], ...tile.lines},
-    polygons: {type: 'Polygon', numericProps: {}, properties: [], ...tile.polygons}
-  };
-}
-
-function parseCartoBinaryTile(arrayBuffer, {formatTiles}) {
+function parseCartoBinaryTile(arrayBuffer, options) {
   if (!arrayBuffer) return null;
-  formatTiles = formatTiles || 'geojson';
+  const formatTiles = (options && options.formatTiles) || 'geojson';
   if (formatTiles === 'geojson') return geojsonToBinary(parseJSON(arrayBuffer).features);
-  const tile = formatTiles === 'wip' ? parseJSON(arrayBuffer) : parsePbf(arrayBuffer);
-  const binary = tileToBinary(tile);
-  return binary;
+  log.assert(formatTiles === 'geojson', `formatTiles must be geojson`);
+  return null;
 }
 
 const CartoBinaryTileLoader = {
@@ -60,6 +29,8 @@ const CartoBinaryTileLoader = {
   parseSync: parseCartoBinaryTile
 };
 
+// Currently we only support loading via geojson, but in future the data
+// format will be binary, as such keep `binary` in layer name
 export default class CartoBinaryTileLayer extends MVTLayer {
   renderSubLayers(props) {
     if (props.data === null) {
