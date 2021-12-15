@@ -16,7 +16,8 @@ const apiBaseUrl = 'https://direct-gcp-us-east1.api.carto.com';
 const connection = 'alasarr';
 const table = 'cartodb-gcp-backend-data-team.dynamic_tiling.polygons_3k_usacounty_viz';
 
-const accessToken = 'XXX';
+const accessToken =
+  'eyJhbGciOiJIUzI1NiJ9.eyJhIjoiYWNfN3hoZnd5bWwiLCJqdGkiOiIyNjkxNTAzOCJ9.v-XDXqLX3oJ_xcbs7pf6_TjM0-u5nuLYFnfBUNWVr_E';
 
 const showBasemap = true;
 const showCarto = true;
@@ -57,9 +58,7 @@ function createCarto() {
     // Dynamic tiling. Request TILEJSON format with TABLE
     type: MAP_TYPES.TABLE,
     format: FORMATS.TILEJSON,
-    loadOptions: {
-      formatTiles: 'geojson' // 'binary' | 'geojson' | 'wip'
-    },
+    formatTiles: 'geojson', // 'geojson' only until binary is implemented
 
     // Styling
     getFillColor: [233, 71, 251],

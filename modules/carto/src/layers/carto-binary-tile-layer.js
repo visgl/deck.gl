@@ -4,6 +4,8 @@ import {ClipExtension} from '@deck.gl/extensions';
 import {MVTLayer} from '@deck.gl/geo-layers';
 import {GeoJsonLayer} from '@deck.gl/layers';
 import {geojsonToBinary} from '@loaders.gl/gis';
+import {encodeParameter} from '../api/maps-api-common';
+import {getURLFromTemplate} from '@deck.gl/geo-layers/tile-layer/utils';
 
 function parseJSON(arrayBuffer) {
   return JSON.parse(new TextDecoder().decode(arrayBuffer));
@@ -11,9 +13,8 @@ function parseJSON(arrayBuffer) {
 
 function parseCartoBinaryTile(arrayBuffer, options) {
   if (!arrayBuffer) return null;
-  const formatTiles = (options && options.formatTiles) || 'geojson';
+  const formatTiles = options && options.cartoBinaryTile && options.cartoBinaryTile.formatTiles;
   if (formatTiles === 'geojson') return geojsonToBinary(parseJSON(arrayBuffer).features);
-  log.assert(formatTiles === 'geojson', `formatTiles must be geojson`);
   return null;
 }
 
@@ -26,12 +27,44 @@ const CartoBinaryTileLoader = {
   category: 'geometry',
   worker: false,
   parse: async (arrayBuffer, options) => parseCartoBinaryTile(arrayBuffer, options),
-  parseSync: parseCartoBinaryTile
+  parseSync: parseCartoBinaryTile,
+  options: {
+    cartoBinaryTile: {
+      formatTiles: 'geojson'
+    }
+  }
 };
 
 // Currently we only support loading via geojson, but in future the data
 // format will be binary, as such keep `binary` in layer name
 export default class CartoBinaryTileLayer extends MVTLayer {
+  getTileData(tile) {
+    let url = getURLFromTemplate(this.state.data, tile);
+    if (!url) {
+      return Promise.reject('Invalid URL');
+    }
+
+    let loadOptions = this.getLoadOptions();
+    const {binary, fetch, formatTiles} = this.props;
+    const {signal} = tile;
+
+    loadOptions = {
+      ...loadOptions,
+      mimeType: 'application/x-protobuf'
+    };
+
+    if (formatTiles) {
+      log.assert(
+        ['geojson'].includes(formatTiles),
+        `Invalid value for formatTiles: ${formatTiles}`
+      );
+      url += '&' + encodeParameter('formatTiles', formatTiles);
+      loadOptions.cartoBinaryTile = {formatTiles};
+    }
+
+    return fetch(url, {propName: 'data', layer: this, loadOptions, signal});
+  }
+
   renderSubLayers(props) {
     if (props.data === null) {
       return null;
