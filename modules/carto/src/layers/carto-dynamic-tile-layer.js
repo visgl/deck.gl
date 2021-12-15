@@ -11,33 +11,31 @@ function parseJSON(arrayBuffer) {
   return JSON.parse(new TextDecoder().decode(arrayBuffer));
 }
 
-function parseCartoBinaryTile(arrayBuffer, options) {
+function parseCartoDynamicTile(arrayBuffer, options) {
   if (!arrayBuffer) return null;
-  const formatTiles = options && options.cartoBinaryTile && options.cartoBinaryTile.formatTiles;
+  const formatTiles = options && options.cartoDynamicTile && options.cartoDynamicTile.formatTiles;
   if (formatTiles === 'geojson') return geojsonToBinary(parseJSON(arrayBuffer).features);
   return null;
 }
 
-const CartoBinaryTileLoader = {
-  name: 'CARTO Binary Tile',
-  id: 'cartoBinaryTile',
+const CartoDynamicTileLoader = {
+  name: 'CARTO Dynamic Tile',
+  id: 'cartoDynamicTile',
   module: 'carto',
   extensions: ['pbf'],
   mimeTypes: ['application/x-protobuf'],
   category: 'geometry',
   worker: false,
-  parse: async (arrayBuffer, options) => parseCartoBinaryTile(arrayBuffer, options),
-  parseSync: parseCartoBinaryTile,
+  parse: async (arrayBuffer, options) => parseCartoDynamicTile(arrayBuffer, options),
+  parseSync: parseCartoDynamicTile,
   options: {
-    cartoBinaryTile: {
+    cartoDynamicTile: {
       formatTiles: 'geojson'
     }
   }
 };
 
-// Currently we only support loading via geojson, but in future the data
-// format will be binary, as such keep `binary` in layer name
-export default class CartoBinaryTileLayer extends MVTLayer {
+export default class CartoDynamicTileLayer extends MVTLayer {
   getTileData(tile) {
     let url = getURLFromTemplate(this.state.data, tile);
     if (!url) {
@@ -45,7 +43,7 @@ export default class CartoBinaryTileLayer extends MVTLayer {
     }
 
     let loadOptions = this.getLoadOptions();
-    const {binary, fetch, formatTiles} = this.props;
+    const {fetch, formatTiles} = this.props;
     const {signal} = tile;
 
     loadOptions = {
@@ -85,5 +83,5 @@ export default class CartoBinaryTileLayer extends MVTLayer {
   }
 }
 
-CartoBinaryTileLayer.layerName = 'CartoBinaryTileLayer';
-CartoBinaryTileLayer.defaultProps = {...MVTLayer.defaultProps, loaders: [CartoBinaryTileLoader]};
+CartoDynamicTileLayer.layerName = 'CartoDynamicTileLayer';
+CartoDynamicTileLayer.defaultProps = {...MVTLayer.defaultProps, loaders: [CartoDynamicTileLoader]};
