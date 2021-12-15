@@ -16,8 +16,7 @@ const apiBaseUrl = 'https://direct-gcp-us-east1.api.carto.com';
 const connection = 'alasarr';
 const table = 'cartodb-gcp-backend-data-team.dynamic_tiling.polygons_3k_usacounty_viz';
 
-const accessToken =
-  'eyJhbGciOiJIUzI1NiJ9.eyJhIjoiYWNfN3hoZnd5bWwiLCJqdGkiOiIyNjkxNTAzOCJ9.v-XDXqLX3oJ_xcbs7pf6_TjM0-u5nuLYFnfBUNWVr_E';
+const accessToken = 'XXX';
 
 const showBasemap = true;
 const showCarto = true;

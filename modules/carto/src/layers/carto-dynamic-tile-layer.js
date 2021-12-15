@@ -56,7 +56,7 @@ export default class CartoDynamicTileLayer extends MVTLayer {
         ['geojson'].includes(formatTiles),
         `Invalid value for formatTiles: ${formatTiles}`
       );
-      url += '&' + encodeParameter('formatTiles', formatTiles);
+      url += `&${encodeParameter('formatTiles', formatTiles)}`;
       loadOptions.cartoBinaryTile = {formatTiles};
     }
 
