@@ -34,8 +34,8 @@
     "math.gl module included as a bonus dependency in case someone was depending on it. Can be removed in deck.gl 9.0"
   ],
   "dependencies": {
-    "@loaders.gl/core": "^3.1.1",
-    "@loaders.gl/images": "^3.1.1",
+    "@loaders.gl/core": "^3.1.2",
+    "@loaders.gl/images": "^3.1.2",
     "@luma.gl/core": "^8.5.10",
     "@math.gl/core": "^3.5.6",
     "@math.gl/web-mercator": "^3.5.6",
