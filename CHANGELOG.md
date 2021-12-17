@@ -21,6 +21,11 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ### deck.gl v8.7 Prereleases
 
+#### deck.gl [8.7.0-alpha.9] - Dec 17 2021
+
+- CartoLayer support for dynamic tiled maps (geojson) (#6509)
+- Bump loaders to 3.1.3 (#6511)
+
 #### deck.gl [8.7.0-alpha.8] - Dec 13 2021
 
 - Supply attributes directly in binary GeoJson layer (#6492)

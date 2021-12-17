@@ -2,7 +2,7 @@
   "name": "@deck.gl/carto",
   "description": "CARTO official integration with Deck.gl. Build geospatial applications using CARTO and Deck.gl.",
   "license": "MIT",
-  "version": "8.7.0-alpha.8",
+  "version": "8.7.0-alpha.9",
   "publishConfig": {
     "access": "public"
   },
@@ -31,8 +31,8 @@
     "prepublishOnly": "npm run build-bundle && npm run build-bundle -- --env.dev"
   },
   "dependencies": {
-    "@loaders.gl/loader-utils": "^3.1.3",
     "@loaders.gl/gis": "^3.1.3",
+    "@loaders.gl/loader-utils": "^3.1.3",
     "@loaders.gl/mvt": "^3.1.3",
     "@loaders.gl/tiles": "^3.1.3",
     "@math.gl/web-mercator": "^3.5.6",
