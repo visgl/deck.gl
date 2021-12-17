@@ -1,12 +1,14 @@
 name: Bug Report
 description: Something does not work as expected
-title: "[Bug]"
+title: ""
 labels: bug
 body:
 - type: markdown
   attributes:
     value: |
-      Thank you for reporting a bug! Filling out this form will help us triage and investigate issues. If you are unsure whether it is a bug in your own implementation, or the library itself, consider starting a conversation in Discussions instead.
+      Thank you for taking the time to report a bug!
+      You may find answers faster by searching in [the documentation](https://deck.gl/search) and [existing issues](https://github.com/visgl/deck.gl/issue).
+      If you are unsure whether it is a bug in your own implementation or the library itself, consider starting a conversation in [Discussions](https://github.com/visgl/deck.gl/discussions) instead.
 - type: textarea
   attributes:
     label: Description
@@ -29,7 +31,7 @@ body:
 - type: textarea
   attributes:
     label: Expected Behavior
-    description: What do you expect to see?
+    description: What you expect to see.
   validations:
     required: false
 - type: textarea
