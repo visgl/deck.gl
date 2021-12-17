@@ -46,6 +46,6 @@
     "@deck.gl/core": "^8.0.0",
     "@deck.gl/geo-layers": "^8.0.0",
     "@deck.gl/layers": "^8.0.0",
-    "@loaders.gl/core": "^3.1.2"
+    "@loaders.gl/core": "^3.1.3"
   }
 }
