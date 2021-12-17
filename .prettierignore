@@ -7,3 +7,4 @@ dist.js
 *.md
 
 modules/core/src/controllers/controller.ts
+modules/core/src/utils/positions.ts
