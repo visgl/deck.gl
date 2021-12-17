@@ -5,9 +5,9 @@ labels: bug
 assignees: ''
 body:
 - type: markdown
-    attributes:
-      value: |
-        Thank you for reporting a bug! Filling out this form will help us triage and investigate issues. If you are unsure whether it is a bug in your own implementation, or the library itself, consider starting a conversation in Discussions instead.
+  attributes:
+    value: |
+      Thank you for reporting a bug! Filling out this form will help us triage and investigate issues. If you are unsure whether it is a bug in your own implementation, or the library itself, consider starting a conversation in Discussions instead.
 - type: textarea
   attributes:
     label: Description
