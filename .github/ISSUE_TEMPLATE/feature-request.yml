@@ -22,14 +22,4 @@ body:
     render: markdown
   validations:
     required: true
-- type: checkboxes
-  id: todo
-  attributes:
-    label: TODO List
-    description: For developer only
-    options:
-      - label: Assign to milestone
-      - label: Coding
-      - label: Documentation
-      - label: What's new / Upgrade guide
-      - label: Test
+    
