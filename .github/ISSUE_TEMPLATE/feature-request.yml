@@ -1,0 +1,35 @@
+name: Feature Request
+description: Request for a new feature or enhancement
+title: "[Request]"
+labels: feature
+body:
+- type: markdown
+  attributes:
+    value: |
+      Tell us what you are using deck.gl for and how we can make it better.
+      This project is maintained by volunteers and sponsoring companies. While we cannot promise a timeline for any specific feature, we try to prioritize those that will benefit the most users.
+- type: textarea
+  attributes:
+    label: Target Use Case
+    description: How would this benefit you and other developers?
+    render: markdown
+  validations:
+    required: true
+- type: textarea
+  attributes:
+    label: Proposal
+    description: How would this feature work? If it's a new API, use code samples to show how it will be used. If it's visual, link to an image that illustrate the desired effect.
+    render: markdown
+  validations:
+    required: true
+- type: checkboxes
+  id: todo
+  attributes:
+    label: TODO List
+    description: For developer only
+    options:
+      - label: Assign to milestone
+      - label: Coding
+      - label: Documentation
+      - label: What's new / Upgrade guide
+      - label: Test
