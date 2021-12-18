@@ -1,4 +1,5 @@
 import {CompositeLayer, log} from '@deck.gl/core';
+import CartoDynamicTileLayer from './carto-dynamic-tile-layer';
 import {MVTLayer} from '@deck.gl/geo-layers';
 import {GeoJsonLayer} from '@deck.gl/layers';
 import {fetchLayerData, getDataV2, API_VERSIONS} from '../api';
@@ -124,11 +125,13 @@ export default class CartoLayer extends CompositeLayer {
 
     if (!data) return null;
 
-    const {updateTriggers} = this.props;
+    const {type, updateTriggers} = this.props;
 
     let layer;
 
-    if (
+    if (apiVersion === API_VERSIONS.V3 && type === MAP_TYPES.TABLE && format === FORMATS.TILEJSON) {
+      layer = CartoDynamicTileLayer;
+    } else if (
       apiVersion === API_VERSIONS.V1 ||
       apiVersion === API_VERSIONS.V2 ||
       format === FORMATS.TILEJSON
