@@ -13,7 +13,6 @@ body:
   attributes:
     label: Description
     description: What you're experiencing.
-    render: markdown
   validations:
     required: true
 - type: checkboxes
@@ -41,7 +40,6 @@ body:
       Providing the following could help us resolve this issue faster:
         - A Codepen that reproduces the behavior. A good starting point is the "edit in CodePen" links in the layer documentations. 
         - A sample of your dataset
-    render: markdown
   validations:
     required: true
 - type: textarea
@@ -56,7 +54,6 @@ body:
         - Framework version:
         - Browser:
         - OS:
-    render: markdown
   validations:
     required: true
 - type: textarea

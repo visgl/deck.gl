@@ -12,14 +12,12 @@ body:
   attributes:
     label: Target Use Case
     description: How would this benefit you and other developers?
-    render: markdown
   validations:
     required: true
 - type: textarea
   attributes:
     label: Proposal
     description: How would this feature work? If it's a new API, use code samples to show how it will be used. If it's visual, link to an image that illustrate the desired effect.
-    render: markdown
   validations:
     required: true
     
