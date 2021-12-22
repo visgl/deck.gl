@@ -3,9 +3,10 @@ import {Deck} from '@deck.gl/core';
 import {fetchMap} from '@deck.gl/carto';
 
 const cartoMapId = '52dcbaa4-f84c-4fc8-93a9-628ed859f937';
+const appClient = 'deck-gl-pure-js-carto';
 
 // Get map info from CARTO and update deck
-fetchMap({cartoMapId}).then(({initialViewState, mapStyle, layers}) => {
+fetchMap({cartoMapId, client: appClient}).then(({initialViewState, mapStyle, layers}) => {
   const deck = new Deck({canvas: 'deck-canvas', controller: true, initialViewState, layers});
 
   // Add Mapbox GL for the basemap. It's not a requirement if you don't need a basemap.

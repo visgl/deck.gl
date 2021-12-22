@@ -7,6 +7,7 @@ import {parseMap} from './parseMap';
 import {log} from '@deck.gl/core';
 
 const MAX_GET_LENGTH = 2048;
+const DEFAULT_CLIENT = 'deck-gl-carto';
 
 /**
  * Request against Maps API
@@ -69,8 +70,8 @@ function dealWithError({response, error}) {
 /**
  * Build a URL with all required parameters
  */
-function getParameters({type, source, geoColumn, columns, schema}) {
-  const parameters = [encodeParameter('client', 'deck-gl-carto')];
+function getParameters({type, source, geoColumn, columns, schema, client}) {
+  const parameters = [encodeParameter('client', client || DEFAULT_CLIENT)];
   if (schema) {
     parameters.push(encodeParameter('schema', true));
   }
@@ -97,10 +98,11 @@ export async function mapInstantiation({
   credentials,
   geoColumn,
   columns,
-  schema
+  schema,
+  client
 }) {
   const baseUrl = `${credentials.mapsUrl}/${connection}/${type}`;
-  const url = `${baseUrl}?${getParameters({type, source, geoColumn, columns, schema})}`;
+  const url = `${baseUrl}?${getParameters({type, source, geoColumn, columns, schema, client})}`;
   const {accessToken} = credentials;
 
   const format = 'json';
@@ -109,7 +111,7 @@ export async function mapInstantiation({
     // need to be a POST request
     const body = JSON.stringify({
       q: source,
-      client: 'deck-gl-carto'
+      client: client || DEFAULT_CLIENT
     });
     return await request({method: 'POST', url: baseUrl, format, accessToken, body});
   }
@@ -145,7 +147,8 @@ export async function fetchLayerData({
   geoColumn,
   columns,
   format,
-  schema
+  schema,
+  client
 }) {
   // Internally we split data fetching into two parts to allow us to
   // conditionally fetch the actual data, depending on the metadata state
@@ -157,7 +160,8 @@ export async function fetchLayerData({
     geoColumn,
     columns,
     format,
-    schema
+    schema,
+    client
   });
 
   const data = await request({url, format: mapFormat, accessToken});
@@ -177,7 +181,8 @@ async function _fetchDataUrl({
   geoColumn,
   columns,
   format,
-  schema
+  schema,
+  client
 }) {
   const defaultCredentials = getDefaultCredentials();
   // Only pick up default credentials if they have been defined for
@@ -199,7 +204,8 @@ async function _fetchDataUrl({
     credentials: localCreds,
     geoColumn,
     columns,
-    schema
+    schema,
+    client
   });
   let url;
   let mapFormat;
@@ -224,7 +230,16 @@ async function _fetchDataUrl({
   return {url, accessToken, mapFormat, metadata};
 }
 
-export async function getData({type, source, connection, credentials, geoColumn, columns, format}) {
+export async function getData({
+  type,
+  source,
+  connection,
+  credentials,
+  geoColumn,
+  columns,
+  format,
+  client
+}) {
   log.deprecated('getData', 'fetchLayerData')();
   const layerData = await fetchLayerData({
     type,
@@ -234,20 +249,22 @@ export async function getData({type, source, connection, credentials, geoColumn,
     geoColumn,
     columns,
     format,
-    schema: false
+    schema: false,
+    client
   });
   return layerData.data;
 }
 
 /* global clearInterval, setInterval, URLSearchParams */
-async function _fetchMapDataset(dataset, accessToken, credentials) {
+async function _fetchMapDataset(dataset, accessToken, credentials, client) {
   // First fetch metadata
   const {connectionName: connection, source, type} = dataset;
   const {url, mapFormat} = await _fetchDataUrl({
     credentials: {...credentials, accessToken},
     connection,
     source,
-    type
+    type,
+    client
   });
 
   // Extract the last time the data changed
@@ -263,12 +280,12 @@ async function _fetchMapDataset(dataset, accessToken, credentials) {
   return true;
 }
 
-async function fillInMapDatasets({datasets, token}, credentials) {
-  const promises = datasets.map(dataset => _fetchMapDataset(dataset, token, credentials));
+async function fillInMapDatasets({datasets, token}, client, credentials) {
+  const promises = datasets.map(dataset => _fetchMapDataset(dataset, token, credentials, client));
   return await Promise.all(promises);
 }
 
-export async function fetchMap({cartoMapId, credentials, autoRefresh, onNewData}) {
+export async function fetchMap({cartoMapId, client, credentials, autoRefresh, onNewData}) {
   const defaultCredentials = getDefaultCredentials();
   const localCreds = {
     ...(defaultCredentials.apiVersion === API_VERSIONS.V3 && defaultCredentials),
@@ -297,7 +314,7 @@ export async function fetchMap({cartoMapId, credentials, autoRefresh, onNewData}
   let stopAutoRefresh;
   if (autoRefresh) {
     const intervalId = setInterval(async () => {
-      const changed = await fillInMapDatasets(map, credentials);
+      const changed = await fillInMapDatasets(map, client, credentials);
       if (changed.some(v => v === true)) {
         onNewData(parseMap(map));
       }
@@ -308,7 +325,7 @@ export async function fetchMap({cartoMapId, credentials, autoRefresh, onNewData}
   }
 
   // Mutates map.datasets so that dataset.data contains data
-  await fillInMapDatasets(map, credentials);
+  await fillInMapDatasets(map, client, credentials);
   return {
     ...parseMap(map),
     ...{stopAutoRefresh}

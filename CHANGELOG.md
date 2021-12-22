@@ -23,6 +23,7 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 #### deck.gl [8.7.0-alpha.9] - Dec 17 2021
 
+- CARTO Maps API V3 with dynamic "client" parameter (#6527)
 - CartoLayer support for dynamic tiled maps (geojson) (#6509)
 - Bump loaders to 3.1.3 (#6511)
 
