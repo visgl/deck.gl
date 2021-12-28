@@ -70,8 +70,8 @@ function dealWithError({response, error}) {
 /**
  * Build a URL with all required parameters
  */
-function getParameters({type, source, geoColumn, columns, schema, client}) {
-  const parameters = [encodeParameter('client', client || DEFAULT_CLIENT)];
+function getParameters({type, source, geoColumn, columns, schema, clientId}) {
+  const parameters = [encodeParameter('client', clientId || DEFAULT_CLIENT)];
   if (schema) {
     parameters.push(encodeParameter('schema', true));
   }
@@ -99,10 +99,10 @@ export async function mapInstantiation({
   geoColumn,
   columns,
   schema,
-  client
+  clientId
 }) {
   const baseUrl = `${credentials.mapsUrl}/${connection}/${type}`;
-  const url = `${baseUrl}?${getParameters({type, source, geoColumn, columns, schema, client})}`;
+  const url = `${baseUrl}?${getParameters({type, source, geoColumn, columns, schema, clientId})}`;
   const {accessToken} = credentials;
 
   const format = 'json';
@@ -111,7 +111,7 @@ export async function mapInstantiation({
     // need to be a POST request
     const body = JSON.stringify({
       q: source,
-      client: client || DEFAULT_CLIENT
+      client: clientId || DEFAULT_CLIENT
     });
     return await request({method: 'POST', url: baseUrl, format, accessToken, body});
   }
@@ -148,7 +148,7 @@ export async function fetchLayerData({
   columns,
   format,
   schema,
-  client
+  clientId
 }) {
   // Internally we split data fetching into two parts to allow us to
   // conditionally fetch the actual data, depending on the metadata state
@@ -161,7 +161,7 @@ export async function fetchLayerData({
     columns,
     format,
     schema,
-    client
+    clientId
   });
 
   const data = await request({url, format: mapFormat, accessToken});
@@ -182,7 +182,7 @@ async function _fetchDataUrl({
   columns,
   format,
   schema,
-  client
+  clientId
 }) {
   const defaultCredentials = getDefaultCredentials();
   // Only pick up default credentials if they have been defined for
@@ -205,7 +205,7 @@ async function _fetchDataUrl({
     geoColumn,
     columns,
     schema,
-    client
+    clientId
   });
   let url;
   let mapFormat;
@@ -238,7 +238,7 @@ export async function getData({
   geoColumn,
   columns,
   format,
-  client
+  clientId
 }) {
   log.deprecated('getData', 'fetchLayerData')();
   const layerData = await fetchLayerData({
@@ -250,13 +250,13 @@ export async function getData({
     columns,
     format,
     schema: false,
-    client
+    clientId
   });
   return layerData.data;
 }
 
 /* global clearInterval, setInterval, URLSearchParams */
-async function _fetchMapDataset(dataset, accessToken, credentials, client) {
+async function _fetchMapDataset(dataset, accessToken, credentials, clientId) {
   // First fetch metadata
   const {connectionName: connection, source, type} = dataset;
   const {url, mapFormat} = await _fetchDataUrl({
@@ -264,7 +264,7 @@ async function _fetchMapDataset(dataset, accessToken, credentials, client) {
     connection,
     source,
     type,
-    client
+    clientId
   });
 
   // Extract the last time the data changed
@@ -280,12 +280,12 @@ async function _fetchMapDataset(dataset, accessToken, credentials, client) {
   return true;
 }
 
-async function fillInMapDatasets({datasets, token}, client, credentials) {
-  const promises = datasets.map(dataset => _fetchMapDataset(dataset, token, credentials, client));
+async function fillInMapDatasets({datasets, token}, clientId, credentials) {
+  const promises = datasets.map(dataset => _fetchMapDataset(dataset, token, credentials, clientId));
   return await Promise.all(promises);
 }
 
-export async function fetchMap({cartoMapId, client, credentials, autoRefresh, onNewData}) {
+export async function fetchMap({cartoMapId, clientId, credentials, autoRefresh, onNewData}) {
   const defaultCredentials = getDefaultCredentials();
   const localCreds = {
     ...(defaultCredentials.apiVersion === API_VERSIONS.V3 && defaultCredentials),
@@ -314,7 +314,7 @@ export async function fetchMap({cartoMapId, client, credentials, autoRefresh, on
   let stopAutoRefresh;
   if (autoRefresh) {
     const intervalId = setInterval(async () => {
-      const changed = await fillInMapDatasets(map, client, credentials);
+      const changed = await fillInMapDatasets(map, clientId, credentials);
       if (changed.some(v => v === true)) {
         onNewData(parseMap(map));
       }
@@ -325,7 +325,7 @@ export async function fetchMap({cartoMapId, client, credentials, autoRefresh, on
   }
 
   // Mutates map.datasets so that dataset.data contains data
-  await fillInMapDatasets(map, client, credentials);
+  await fillInMapDatasets(map, clientId, credentials);
   return {
     ...parseMap(map),
     ...{stopAutoRefresh}
