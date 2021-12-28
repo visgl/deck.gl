@@ -27,7 +27,7 @@ const defaultProps = {
   // (String, optional): format of data
   format: null,
 
-  // (String, optional): clientId, if not provided, the assigned value will be 'deck-gl-carto'
+  // (String, optional): clientId identifier used for internal tracing, place here a string to identify the client who is doing the request.
   clientId: null,
 
   // (String, optional): name of the `geo_column` in the CARTO platform. Use this override the default column ('geom'), from which the geometry information should be fetched.
