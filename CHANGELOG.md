@@ -21,6 +21,10 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ### deck.gl v8.7 Prereleases
 
+#### deck.gl [8.7.0-alpha.11] - Dec 30 2021
+
+- CARTO - add clientId parameter for internal tracing (#6534)
+
 #### deck.gl [8.7.0-alpha.10] - Dec 28 2021
 
 - CARTO - add clientId parameter for internal tracing (#6534)
