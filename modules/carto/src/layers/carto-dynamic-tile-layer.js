@@ -1,11 +1,10 @@
 /* global TextDecoder */
 import {log} from '@deck.gl/core';
 import {ClipExtension} from '@deck.gl/extensions';
-import {MVTLayer} from '@deck.gl/geo-layers';
+import {MVTLayer, _getURLFromTemplate} from '@deck.gl/geo-layers';
 import {GeoJsonLayer} from '@deck.gl/layers';
 import {geojsonToBinary} from '@loaders.gl/gis';
 import {encodeParameter} from '../api/maps-api-common';
-import {getURLFromTemplate} from '@deck.gl/geo-layers/tile-layer/utils';
 
 function parseJSON(arrayBuffer) {
   return JSON.parse(new TextDecoder().decode(arrayBuffer));
@@ -37,7 +36,7 @@ const CartoDynamicTileLoader = {
 
 export default class CartoDynamicTileLayer extends MVTLayer {
   getTileData(tile) {
-    let url = getURLFromTemplate(this.state.data, tile);
+    let url = _getURLFromTemplate(this.state.data, tile);
     if (!url) {
       return Promise.reject('Invalid URL');
     }
