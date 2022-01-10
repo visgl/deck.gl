@@ -22,6 +22,7 @@ import {ProgramManager} from '@luma.gl/core';
 import {gouraudLighting, phongLighting} from '@luma.gl/core';
 import project from './project/project';
 import project32 from './project32/project32';
+import {getUniformsFromViewport} from './project/viewport-uniforms';
 import shadow from './shadow/shadow';
 import picking from './picking/picking';
 
@@ -47,4 +48,12 @@ export function createProgramManager(gl) {
   return programManager;
 }
 
-export {picking, project, project32, gouraudLighting, phongLighting, shadow};
+export {
+  picking,
+  project,
+  project32,
+  getUniformsFromViewport,
+  gouraudLighting,
+  phongLighting,
+  shadow
+};
