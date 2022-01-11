@@ -99,10 +99,14 @@ export default class LayersPass extends Pass {
   /* eslint-disable max-depth, max-statements */
   _drawLayersInViewport(
     gl,
-    {layers, moduleParameters, pass, target, viewport, view},
+    {layers, moduleParameters: globalModuleParameters, pass, target, viewport, view},
     drawLayerParams
   ) {
-    const glViewport = getGLViewport(gl, {moduleParameters, target, viewport});
+    const glViewport = getGLViewport(gl, {
+      moduleParameters: globalModuleParameters,
+      target,
+      viewport
+    });
 
     if (view && view.props.clear) {
       const clearOpts = view.props.clear === true ? {color: true, depth: true} : view.props.clear;
