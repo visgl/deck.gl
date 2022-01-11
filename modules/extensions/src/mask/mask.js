@@ -1,13 +1,5 @@
 import {Framebuffer, withParameters} from '@luma.gl/core';
-import {Matrix4, Vector3} from '@math.gl/core';
-import {
-  getUniformsFromViewport,
-  LayerExtension,
-  LayerManager,
-  WebMercatorViewport,
-  COORDINATE_SYSTEM,
-  PROJECTION_MODE
-} from '@deck.gl/core';
+import {LayerExtension, LayerManager} from '@deck.gl/core';
 import {SolidPolygonLayer} from '@deck.gl/layers';
 import {shaderModuleVs, shaderModuleFs} from './shader-module';
 import {getMaskProjectionMatrix, getMaskViewport, splitMaskProjectionMatrix} from './utils';
@@ -24,7 +16,6 @@ const defaultProps = {
     [-MAX_LNG, MAX_LAT]
   ]
 };
-const VECTOR_TO_POINT_MATRIX = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0];
 
 export default class MaskExtension extends LayerExtension {
   getShaders() {
