@@ -113,7 +113,6 @@ function getLayerData(data) {
 export default function App({data, brushRadius = 100000, strokeWidth = 1, mapStyle = MAP_STYLE}) {
   const {arcs, targets, sources} = useMemo(() => getLayerData(data), [data]);
   const [selectedCounty, selectCounty] = useState(null);
-  console.log(selectedCounty);
   const maskEnabled = selectedCounty;
   const maskPolygon = selectedCounty ? selectedCounty.geometry.coordinates : [];
 
