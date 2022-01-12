@@ -282,19 +282,15 @@ function getGLViewport(gl, {moduleParameters, target, viewport}) {
   const useTarget = target && target.id !== 'default-framebuffer';
   const pixelRatio =
     (moduleParameters && moduleParameters.devicePixelRatio) || cssToDeviceRatio(gl);
-  const targetHeight = target ? target.height / pixelRatio : 100;
-
-  // Fallback to width/height when clientWidth/clientHeight are 0 or undefined.
-  const canvasHeight = gl.canvas ? gl.canvas.clientHeight || gl.canvas.height : 100;
 
   // Default framebuffer is used when writing to canvas
-  const height = useTarget ? targetHeight : canvasHeight;
+  const height = useTarget ? target.height : gl.drawingBufferHeight;
 
   // Convert viewport top-left CSS coordinates to bottom up WebGL coordinates
   const dimensions = viewport;
   return [
     dimensions.x * pixelRatio,
-    (height - dimensions.y - dimensions.height) * pixelRatio,
+    height - (dimensions.y + dimensions.height) * pixelRatio,
     dimensions.width * pixelRatio,
     dimensions.height * pixelRatio
   ];
