@@ -36,65 +36,65 @@ export default class MaskExtension extends LayerExtension {
 
   initializeState({gl}, extension) {
     const [width, height] = [2048, 2048];
-    const filterFBO = new Framebuffer(gl, {width, height, depth: false});
-    const layerManager = new LayerManager(gl);
-    this.setState({filterFBO, layerManager});
+    const maskFBO = new Framebuffer(gl, {width, height, depth: false});
+    const maskLayerManager = new LayerManager(gl);
+    this.setState({maskFBO, maskLayerManager});
   }
 
   updateState({props, oldProps, context: {gl}}, extension) {
-    const filterNeedsUpdate =
+    const maskNeedsUpdate =
       props.maskByInstance !== oldProps.maskByInstance ||
       props.maskEnabled !== oldProps.maskEnabled ||
       JSON.stringify(props.maskPolygon) !== JSON.stringify(oldProps.maskPolygon);
-    if (filterNeedsUpdate) {
+    if (maskNeedsUpdate) {
       const maskLayer = new SolidPolygonLayer({
         id: 'mask-polygon',
         data: [{polygon: props.maskPolygon}],
         getFillColor: [255, 255, 255, 255]
       });
-      this.state.layerManager.setLayers([maskLayer]);
-      this.setState({filterNeedsUpdate});
+      this.state.maskLayerManager.setLayers([maskLayer]);
+      this.setState({maskNeedsUpdate});
     }
   }
 
   draw({uniforms}, extension) {
-    const {filterFBO, filterNeedsUpdate, layerManager} = this.state;
+    const {maskFBO, maskNeedsUpdate, maskLayerManager} = this.state;
     const {deck, gl} = this.context;
     const viewManagerNeedsRedraw = true;
 
     const {maskEnabled = defaultProps.maskEnabled} = this.props;
     const {maskPolygon} = maskEnabled ? this.props : defaultProps;
-    const viewport = getMaskViewport(maskPolygon, this.internalState.viewport, filterFBO);
+    const viewport = getMaskViewport(maskPolygon, this.internalState.viewport, maskFBO);
     const {maskProjectionMatrix, maskProjectCenter} = splitMaskProjectionMatrix(
       getMaskProjectionMatrix(viewport),
       this.internalState.viewport,
       this.props
     );
 
-    if (filterNeedsUpdate && viewManagerNeedsRedraw) {
-      withParameters(gl, {framebuffer: filterFBO}, () => {
+    if (maskNeedsUpdate && viewManagerNeedsRedraw) {
+      withParameters(gl, {framebuffer: maskFBO}, () => {
         deck.deckRenderer.renderLayers({
-          target: filterFBO,
-          layers: layerManager.getLayers(),
+          target: maskFBO,
+          layers: maskLayerManager.getLayers(),
           viewports: [viewport],
-          onViewportActive: layerManager.activateViewport,
+          onViewportActive: maskLayerManager.activateViewport,
           moduleParameters: {
             devicePixelRatio: 1
           }
         });
       });
       uniforms.mask_enabled = Boolean(maskEnabled);
-      uniforms.mask_texture = filterFBO;
+      uniforms.mask_texture = maskFBO;
       uniforms.mask_projectionMatrix = maskProjectionMatrix;
       uniforms.mask_projectCenter = maskProjectCenter;
     }
   }
 
   finalizeState() {
-    const {filterFBO} = this.state;
-    if (filterFBO) {
-      filterFBO.color.delete();
-      filterFBO.delete();
+    const {maskFBO} = this.state;
+    if (maskFBO) {
+      maskFBO.color.delete();
+      maskFBO.delete();
     }
   }
 }
