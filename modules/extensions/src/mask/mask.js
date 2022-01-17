@@ -1,5 +1,5 @@
 import {log, Framebuffer, withParameters} from '@luma.gl/core';
-import {LayerExtension, LayerManager} from '@deck.gl/core';
+import {LayerExtension} from '@deck.gl/core';
 import {SolidPolygonLayer} from '@deck.gl/layers';
 import {shaderModuleVs, shaderModuleFs} from './shader-module';
 import {getMaskProjectionMatrix, getMaskViewport, splitMaskProjectionMatrix} from './utils';
@@ -26,23 +26,19 @@ export default class MaskExtension extends LayerExtension {
   }
 
   initializeState({gl, layerManager}, extension) {
-    const layers = layerManager._nextLayers || layerManager.layers;
-    const {maskId} = this.props;
-    const maskLayer = layers.find(layer => layer.id === maskId);
-    if (maskLayer && !maskLayer.state.maskFBO) {
+    const maskLayer = extension.getMaskLayer(this.props.maskId, layerManager);
+    if (!maskLayer.state.maskFBO) {
       const [width, height] = [2048, 2048];
       const maskFBO = new Framebuffer(gl, {width, height, depth: false});
       maskLayer.setState({maskFBO});
+      // TODO how to best dispose of the FBO?
     }
   }
 
   draw({uniforms}, extension) {
     const {maskEnabled = defaultProps.maskEnabled, maskId} = this.props;
     const {deck, gl, layerManager} = this.context;
-    const maskLayer = layerManager.layers.find(layer => layer.id === maskId);
-
-    log.assert(maskLayer, `{maskId: '${maskId}'} must match the id of another Layer`);
-    log.assert(maskLayer instanceof SolidPolygonLayer, 'Mask Layer must be a SolidPolygonLayer');
+    const maskLayer = extension.getMaskLayer(maskId, layerManager);
     const {maskFBO} = maskLayer.state;
 
     // Using the 'positions' attribute will work for the PolygonLayer,
@@ -77,12 +73,12 @@ export default class MaskExtension extends LayerExtension {
     uniforms.mask_projectCenter = maskProjectCenter;
   }
 
-  finalizeState() {
-    const {maskFBO} = this.state;
-    if (maskFBO) {
-      maskFBO.color.delete();
-      maskFBO.delete();
-    }
+  getMaskLayer(maskId, layerManager) {
+    const layers = layerManager._nextLayers || layerManager.layers;
+    const maskLayer = layers.find(layer => layer.id === maskId);
+    log.assert(maskLayer, `{maskId: '${maskId}'} must match the id of another Layer`);
+    log.assert(maskLayer instanceof SolidPolygonLayer, 'Mask Layer must be a SolidPolygonLayer');
+    return maskLayer;
   }
 }
 
