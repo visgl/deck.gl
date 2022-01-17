@@ -28,10 +28,10 @@ export function getMaskProjectionMatrix({width, height, pixelUnprojectionMatrix}
 
 /*
  * Compute viewport to render the mask into, such that it covers an
- * area currently visible (extended by a buffer) or the are of the masking
- * polygon, whichever is smaller
+ * area currently visible (extended by a buffer) or the area of the masking
+ * data, whichever is smaller
  */
-export function getMaskViewport(maskPolygon, layerViewport, {width, height}) {
+export function getMaskViewport(positions, layerViewport, {width, height}) {
   const bounds = layerViewport.getBounds();
   let viewport = new WebMercatorViewport({width, height}).fitBounds([
     [bounds[0], bounds[1]],
@@ -40,12 +40,12 @@ export function getMaskViewport(maskPolygon, layerViewport, {width, height}) {
   const {longitude, latitude, zoom} = viewport;
   viewport = new WebMercatorViewport({width, height, longitude, latitude, zoom: zoom - 1});
 
-  const polygonViewport = new WebMercatorViewport({width, height}).fitBounds(
-    getPolygonBounds(maskPolygon),
-    {padding: 2}
-  );
+  const dataBounds = getBounds(positions);
+  const dataViewport = new WebMercatorViewport({width, height}).fitBounds(dataBounds, {
+    padding: 2
+  });
 
-  return polygonViewport.zoom > viewport.zoom ? polygonViewport : viewport;
+  return dataViewport.zoom > viewport.zoom ? dataViewport : viewport;
 }
 
 /*
@@ -94,36 +94,35 @@ export function splitMaskProjectionMatrix(
   return {maskProjectionMatrix, maskProjectCenter};
 }
 
-function getPolygonBounds(polygon) {
-  if (!polygon || !Array.isArray(polygon[0])) {
-    return [
-      [0, 0],
-      [1, 1]
-    ];
-  }
-
+function getBounds({startIndices, size, value}) {
   const bounds = [
     [Infinity, Infinity],
     [-Infinity, -Infinity]
   ];
 
-  const polygons = Array.isArray(polygon[0][0]) ? polygon : [polygon];
-  for (const p of polygons) {
-    for (const coord of p) {
-      if (bounds[0][0] > coord[0]) {
-        bounds[0][0] = coord[0];
-      }
-      if (bounds[0][1] > coord[1]) {
-        bounds[0][1] = coord[1];
-      }
-      if (bounds[1][0] < coord[0]) {
-        bounds[1][0] = coord[0];
-      }
-      if (bounds[1][1] < coord[1]) {
-        bounds[1][1] = coord[1];
-      }
+  const start = startIndices[0];
+  const end = startIndices[startIndices.length - 1];
+  for (let i = start; i < end; i++) {
+    const coord = value.subarray(size * i);
+    if (bounds[0][0] > coord[0]) {
+      bounds[0][0] = coord[0];
+    }
+    if (bounds[0][1] > coord[1]) {
+      bounds[0][1] = coord[1];
+    }
+    if (bounds[1][0] < coord[0]) {
+      bounds[1][0] = coord[0];
+    }
+    if (bounds[1][1] < coord[1]) {
+      bounds[1][1] = coord[1];
     }
   }
 
+  if (bounds[0][0] === Infinity) {
+    return [
+      [0, 0],
+      [1, 1]
+    ];
+  }
   return bounds;
 }

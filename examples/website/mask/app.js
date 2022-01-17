@@ -9,11 +9,11 @@ import {MaskExtension} from '@deck.gl/extensions';
 import {scaleLinear} from 'd3-scale';
 
 const rectangle = [
-  [-135, 50],
-  [-135, 20],
+  [-175, 80],
+  [-175, 20],
   [-50, 20],
-  [-50, 50],
-  [-135, 50]
+  [-50, 80],
+  [-175, 80]
 ];
 
 const maskExtension = new MaskExtension();
@@ -117,13 +117,15 @@ export default function App({data, brushRadius = 100000, strokeWidth = 1, mapSty
   const maskEnabled = selectedCounty;
   const maskPolygon = selectedCounty ? selectedCounty.geometry.coordinates : [];
   const maskId = 'county-mask';
+  const maskData =
+    maskPolygon.length === 0 ? [{polygon: []}] : maskPolygon.map(polygon => ({polygon}));
 
   const layers = arcs &&
     targets && [
       new SolidPolygonLayer({
         id: maskId,
         operation: 'mask',
-        data: [{polygon: maskPolygon}],
+        data: maskData,
         getFillColor: [255, 255, 255, 255]
       }),
       // Boundary around USA (masked by selected state)

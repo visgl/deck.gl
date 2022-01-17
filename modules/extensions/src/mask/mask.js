@@ -51,9 +51,11 @@ export default class MaskExtension extends LayerExtension {
     const maskLayer = layerManager.layers.find(layer => layer.id === maskId);
     const {maskFBO} = maskLayer.state;
 
-    const maskPolygon = maskEnabled ? maskLayer.props.data[0].polygon : defaultProps.maskPolygon;
+    // Using the 'positions' attribute will work for the PolygonLayer,
+    // but not for all layers
+    const {positions} = maskLayer.state.attributeManager.attributes;
     const layerViewport = this.internalState.viewport;
-    const maskViewport = getMaskViewport(maskPolygon, layerViewport, maskFBO);
+    const maskViewport = getMaskViewport(positions, layerViewport, maskFBO);
     const {maskProjectionMatrix, maskProjectCenter} = splitMaskProjectionMatrix(
       getMaskProjectionMatrix(maskViewport),
       layerViewport,
