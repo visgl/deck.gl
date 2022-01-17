@@ -705,9 +705,14 @@ export default class Deck {
 
     this.props.onBeforeRender({gl});
 
+    const layers = this.layerManager.getLayers();
+    const drawLayers = layers.filter(l => l.props.operation === 'draw');
+    const maskLayers = layers.filter(l => l.props.operation === 'mask');
+    maskLayers.forEach(layer => layer.setNeedsRedraw());
+
     this.deckRenderer.renderLayers({
       target: this.props._framebuffer,
-      layers: this.layerManager.getLayers(),
+      layers: drawLayers,
       viewports: this.viewManager.getViewports(),
       onViewportActive: this.layerManager.activateViewport,
       views: this.viewManager.getViews(),
