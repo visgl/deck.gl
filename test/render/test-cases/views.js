@@ -1,10 +1,20 @@
-import {COORDINATE_SYSTEM, OrthographicView, MapView, FirstPersonView} from '@deck.gl/core';
+import {SphereGeometry} from '@luma.gl/core';
+import {
+  COORDINATE_SYSTEM,
+  _GlobeView as GlobeView,
+  OrthographicView,
+  MapView,
+  FirstPersonView
+} from '@deck.gl/core';
 import {ScatterplotLayer, GeoJsonLayer} from '@deck.gl/layers';
+import {SimpleMeshLayer} from '@deck.gl/mesh-layers';
+import {MVTLayer} from '@deck.gl/geo-layers';
 import {parseColor} from '../../../examples/layer-browser/src/utils/color';
 
 import * as dataSamples from 'deck.gl-test/data';
 import * as h3 from 'h3-js';
 
+const EARTH_RADIUS_METERS = 6.3e6;
 export default [
   {
     name: 'first-person',
@@ -78,5 +88,52 @@ export default [
       })
     ],
     goldenImage: './test/render/golden-images/map-repeat.png'
-  }
+  },
+  ...[true, false].map(binary => {
+    const id = `globe-mvt${binary ? '-binary' : ''}`;
+    return {
+      name: id,
+      views: new GlobeView(),
+      viewState: {
+        longitude: -100,
+        latitude: 80,
+        zoom: 0,
+        pitch: 0,
+        bearing: 0
+      },
+      layers: [
+        new SimpleMeshLayer({
+          id: 'earth-sphere',
+          data: [{position: [0, 0, 0]}],
+          mesh: new SphereGeometry({radius: EARTH_RADIUS_METERS, nlat: 18, nlong: 36}),
+          coordinateSystem: COORDINATE_SYSTEM.CARTESIAN,
+          getColor: [255, 255, 255]
+        }),
+        new MVTLayer({
+          id,
+          data: ['./test/data/mvt-tiles/{z}/{x}/{y}.mvt'],
+          maxZoom: 3,
+          minZoom: 3,
+          extent: [-180, -80, 180, 80],
+          stroked: false,
+          getFillColor: [0, 0, 0],
+          onTileError: error => {
+            if (error.message.includes('404')) {
+              // trying to load tiles in the previous viewport, ignore
+            } else {
+              throw error;
+            }
+          },
+          lineWidthMinPixels: 1,
+          binary,
+          loadOptions: {
+            mvt: {
+              workerUrl: null
+            }
+          }
+        })
+      ],
+      goldenImage: `./test/render/golden-images/globe-mvt.png`
+    };
+  })
 ];
