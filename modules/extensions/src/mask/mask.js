@@ -1,20 +1,11 @@
-import {Framebuffer, withParameters} from '@luma.gl/core';
+import {log, Framebuffer, withParameters} from '@luma.gl/core';
 import {LayerExtension, LayerManager} from '@deck.gl/core';
 import {SolidPolygonLayer} from '@deck.gl/layers';
 import {shaderModuleVs, shaderModuleFs} from './shader-module';
 import {getMaskProjectionMatrix, getMaskViewport, splitMaskProjectionMatrix} from './utils';
 
-const MAX_LAT = 85.05113;
-const MAX_LNG = 180;
 const defaultProps = {
-  maskEnabled: true,
-  maskPolygon: [
-    [-MAX_LNG, MAX_LAT],
-    [MAX_LNG, MAX_LAT],
-    [MAX_LNG, -MAX_LAT],
-    [-MAX_LNG, -MAX_LAT],
-    [-MAX_LNG, MAX_LAT]
-  ]
+  maskEnabled: true
 };
 
 export default class MaskExtension extends LayerExtension {
@@ -49,6 +40,9 @@ export default class MaskExtension extends LayerExtension {
     const {maskEnabled = defaultProps.maskEnabled, maskId} = this.props;
     const {deck, gl, layerManager} = this.context;
     const maskLayer = layerManager.layers.find(layer => layer.id === maskId);
+
+    log.assert(maskLayer, `{maskId: '${maskId}'} must match the id of another Layer`);
+    log.assert(maskLayer instanceof SolidPolygonLayer, 'Mask Layer must be a SolidPolygonLayer');
     const {maskFBO} = maskLayer.state;
 
     // Using the 'positions' attribute will work for the PolygonLayer,
