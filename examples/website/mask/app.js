@@ -21,7 +21,8 @@ const maskExtension = new MaskExtension();
 // Source data GeoJSON
 const DATA_URL =
   'https://raw.githubusercontent.com/visgl/deck.gl-data/master/examples/arc/counties.json'; // eslint-disable-line
-const US_STATES = 'https://d2ad6b4ur7yvpq.cloudfront.net/naturalearth-3.3.0/ne_110m_admin_1_states_provinces_shp.geojson'; //eslint-disable-line
+const US_STATES =
+  'https://d2ad6b4ur7yvpq.cloudfront.net/naturalearth-3.3.0/ne_110m_admin_1_states_provinces_shp.geojson'; //eslint-disable-line
 
 // migrate out
 const SOURCE_COLOR = [166, 3, 3];
@@ -115,16 +116,23 @@ export default function App({data, brushRadius = 100000, strokeWidth = 1, mapSty
   const [selectedCounty, selectCounty] = useState(null);
   const maskEnabled = selectedCounty;
   const maskPolygon = selectedCounty ? selectedCounty.geometry.coordinates : [];
+  const maskId = 'county-mask';
 
   const layers = arcs &&
     targets && [
+      new SolidPolygonLayer({
+        id: maskId,
+        operation: 'mask',
+        data: [{polygon: maskPolygon}],
+        getFillColor: [255, 255, 255, 255]
+      }),
       // Boundary around USA (masked by selected state)
       new SolidPolygonLayer({
         id: 'masked-layer',
         data: [{polygon: rectangle}],
         getFillColor: [...TARGET_COLOR, 200],
         extensions: [maskExtension],
-        maskPolygon
+        maskId
       }),
       // US states (used to select & define masks)
       new GeoJsonLayer({
@@ -152,7 +160,7 @@ export default function App({data, brushRadius = 100000, strokeWidth = 1, mapSty
         getLineColor: [0, 0, 0, 100],
         parameters: {depthTest: false},
         extensions: [maskExtension],
-        maskPolygon,
+        maskId,
         maskByInstance: false
       }),
       new ScatterplotLayer({
@@ -161,7 +169,7 @@ export default function App({data, brushRadius = 100000, strokeWidth = 1, mapSty
         radiusScale: maskEnabled ? 3000 : 0,
         getFillColor: d => (d.gain > 0 ? TARGET_COLOR : SOURCE_COLOR),
         extensions: [maskExtension],
-        maskPolygon
+        maskId
       }),
       new ScatterplotLayer({
         id: 'targets',
@@ -170,7 +178,7 @@ export default function App({data, brushRadius = 100000, strokeWidth = 1, mapSty
         radiusScale: 3000,
         getFillColor: d => (d.net > 0 ? TARGET_COLOR : SOURCE_COLOR),
         extensions: [maskExtension],
-        maskPolygon
+        maskId
       }),
       new ArcLayer({
         id: 'arc',
@@ -182,7 +190,7 @@ export default function App({data, brushRadius = 100000, strokeWidth = 1, mapSty
         getSourceColor: SOURCE_COLOR,
         getTargetColor: TARGET_COLOR,
         extensions: [maskExtension],
-        maskPolygon,
+        maskId,
         maskByInstance: true
       })
     ];

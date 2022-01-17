@@ -37,33 +37,26 @@ export default class MaskExtension extends LayerExtension {
   initializeState({gl}, extension) {
     const [width, height] = [2048, 2048];
     const maskFBO = new Framebuffer(gl, {width, height, depth: false});
-    const maskLayerManager = new LayerManager(gl);
-    this.setState({maskFBO, maskLayerManager});
+    //const maskLayerManager = new LayerManager(gl);
+    this.setState({maskFBO});
   }
 
   updateState({props, oldProps, context: {gl}}, extension) {
     const maskNeedsUpdate =
       props.maskByInstance !== oldProps.maskByInstance ||
-      props.maskEnabled !== oldProps.maskEnabled ||
-      JSON.stringify(props.maskPolygon) !== JSON.stringify(oldProps.maskPolygon);
+      props.maskEnabled !== oldProps.maskEnabled;
     if (maskNeedsUpdate) {
-      const maskLayer = new SolidPolygonLayer({
-        id: 'mask-polygon',
-        data: [{polygon: props.maskPolygon}],
-        getFillColor: [255, 255, 255, 255]
-      });
-      this.state.maskLayerManager.setLayers([maskLayer]);
       this.setState({maskNeedsUpdate});
     }
   }
 
   draw({uniforms}, extension) {
+    const {maskEnabled = defaultProps.maskEnabled, maskId} = this.props;
     const {maskFBO, maskNeedsUpdate, maskLayerManager} = this.state;
-    const {deck, gl} = this.context;
-    const viewManagerNeedsRedraw = true;
+    const {deck, gl, layerManager} = this.context;
+    const maskLayer = layerManager.layers.find(layer => layer.id === maskId);
 
-    const {maskEnabled = defaultProps.maskEnabled} = this.props;
-    const {maskPolygon} = maskEnabled ? this.props : defaultProps;
+    const maskPolygon = maskEnabled ? maskLayer.props.data[0].polygon : defaultProps.maskPolygon;
     const viewport = getMaskViewport(maskPolygon, this.internalState.viewport, maskFBO);
     const {maskProjectionMatrix, maskProjectCenter} = splitMaskProjectionMatrix(
       getMaskProjectionMatrix(viewport),
@@ -71,23 +64,21 @@ export default class MaskExtension extends LayerExtension {
       this.props
     );
 
-    if (maskNeedsUpdate && viewManagerNeedsRedraw) {
-      withParameters(gl, {framebuffer: maskFBO}, () => {
-        deck.deckRenderer.renderLayers({
-          target: maskFBO,
-          layers: maskLayerManager.getLayers(),
-          viewports: [viewport],
-          onViewportActive: maskLayerManager.activateViewport,
-          moduleParameters: {
-            devicePixelRatio: 1
-          }
-        });
+    withParameters(gl, {framebuffer: maskFBO}, () => {
+      deck.deckRenderer.renderLayers({
+        target: maskFBO,
+        layers: [maskLayer],
+        viewports: [viewport],
+        onViewportActive: layerManager.activateViewport,
+        moduleParameters: {
+          devicePixelRatio: 1
+        }
       });
-      uniforms.mask_enabled = Boolean(maskEnabled);
-      uniforms.mask_texture = maskFBO;
-      uniforms.mask_projectionMatrix = maskProjectionMatrix;
-      uniforms.mask_projectCenter = maskProjectCenter;
-    }
+    });
+    uniforms.mask_enabled = Boolean(maskEnabled);
+    uniforms.mask_texture = maskFBO;
+    uniforms.mask_projectionMatrix = maskProjectionMatrix;
+    uniforms.mask_projectCenter = maskProjectCenter;
   }
 
   finalizeState() {
