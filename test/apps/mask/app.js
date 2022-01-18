@@ -3,6 +3,7 @@ import React, {useState, useMemo} from 'react';
 import {render} from 'react-dom';
 import {StaticMap} from 'react-map-gl';
 import DeckGL from '@deck.gl/react';
+import {MaskEffect} from '@deck.gl/core';
 import {GeoJsonLayer, SolidPolygonLayer} from '@deck.gl/layers';
 import {ScatterplotLayer, ArcLayer} from '@deck.gl/layers';
 import {MaskExtension} from '@deck.gl/extensions';
@@ -217,12 +218,14 @@ export default function App({data, brushRadius = 100000, strokeWidth = 1, mapSty
       })
     ];
 
+  const maskEffect = new MaskEffect();
   return (
     <>
       <DeckGL
         layers={showLayers ? layers : []}
         initialViewState={INITIAL_VIEW_STATE}
         controller={true}
+        effects={[maskEffect]}
       >
         <StaticMap reuseMaps mapStyle={mapStyle} preventStyleDiffing={true} />
       </DeckGL>
