@@ -110,12 +110,26 @@ function getLayerData(data) {
   return {arcs, targets, sources};
 }
 
+const utah = [
+  [
+    [-109.05318294964546, 41.001993720049384],
+    [-109.04522477907253, 36.99991242120524],
+    [-110.49622148317988, 37.00732798923914],
+    [-112.41760291222404, 37.00942088474695],
+    [-114.03052771691799, 36.994098822572425],
+    [-114.03422258182684, 41.993121853191376],
+    [-111.05024451378105, 42.00159678808722],
+    [-111.05448198122899, 41.027935289059904],
+    [-109.05318294964546, 41.001993720049384]
+  ]
+];
+
 /* eslint-disable react/no-deprecated */
 export default function App({data, brushRadius = 100000, strokeWidth = 1, mapStyle = MAP_STYLE}) {
   const {arcs, targets, sources} = useMemo(() => getLayerData(data), [data]);
+  const [maskEnabled, setMaskEnabled] = useState(true);
   const [selectedCounty, selectCounty] = useState(null);
-  const maskEnabled = selectedCounty;
-  const maskPolygon = selectedCounty ? selectedCounty.geometry.coordinates : [];
+  const maskPolygon = selectedCounty ? selectedCounty.geometry.coordinates : utah;
   const maskId = 'county-mask';
   const maskData =
     maskPolygon.length === 0 ? [{polygon: []}] : maskPolygon.map(polygon => ({polygon}));
@@ -134,7 +148,8 @@ export default function App({data, brushRadius = 100000, strokeWidth = 1, mapSty
         data: [{polygon: rectangle}],
         getFillColor: [...TARGET_COLOR, 200],
         extensions: [maskExtension],
-        maskId
+        maskId,
+        maskEnabled
       }),
       // US states (used to select & define masks)
       new GeoJsonLayer({
@@ -157,21 +172,23 @@ export default function App({data, brushRadius = 100000, strokeWidth = 1, mapSty
         lineWidthMinPixels: 2,
         filled: true,
         stroked: true,
-        radiusScale: maskEnabled ? 100000 : 0,
+        radiusScale: 100000,
         getFillColor: [255, 255, 255, 150],
         getLineColor: [0, 0, 0, 100],
         parameters: {depthTest: false},
         extensions: [maskExtension],
         maskId,
+        maskEnabled,
         maskByInstance: false
       }),
       new ScatterplotLayer({
         id: 'sources',
         data: sources,
-        radiusScale: maskEnabled ? 3000 : 0,
+        radiusScale: 3000,
         getFillColor: d => (d.gain > 0 ? TARGET_COLOR : SOURCE_COLOR),
         extensions: [maskExtension],
-        maskId
+        maskId,
+        maskEnabled
       }),
       new ScatterplotLayer({
         id: 'targets',
@@ -180,27 +197,41 @@ export default function App({data, brushRadius = 100000, strokeWidth = 1, mapSty
         radiusScale: 3000,
         getFillColor: d => (d.net > 0 ? TARGET_COLOR : SOURCE_COLOR),
         extensions: [maskExtension],
-        maskId
+        maskId,
+        maskEnabled
       }),
       new ArcLayer({
         id: 'arc',
         data: arcs,
         getWidth: strokeWidth,
-        opacity: maskEnabled ? 0.7 : 0.01,
+        opacity: 0.7,
         getSourcePosition: d => d.source,
         getTargetPosition: d => d.target,
         getSourceColor: SOURCE_COLOR,
         getTargetColor: TARGET_COLOR,
         extensions: [maskExtension],
         maskId,
+        maskEnabled,
         maskByInstance: true
       })
     ];
 
   return (
-    <DeckGL layers={layers} initialViewState={INITIAL_VIEW_STATE} controller={true}>
-      <StaticMap reuseMaps mapStyle={mapStyle} preventStyleDiffing={true} />
-    </DeckGL>
+    <>
+      <DeckGL layers={layers} initialViewState={INITIAL_VIEW_STATE} controller={true}>
+        <StaticMap reuseMaps mapStyle={mapStyle} preventStyleDiffing={true} />
+      </DeckGL>
+      <div style={{position: 'absolute', background: 'white', padding: 10}}>
+        <label>
+          <input
+            type="checkbox"
+            checked={maskEnabled}
+            onChange={() => setMaskEnabled(!maskEnabled)}
+          />
+          Use mask
+        </label>
+      </div>
+    </>
   );
 }
 
