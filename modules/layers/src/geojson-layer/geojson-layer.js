@@ -128,11 +128,19 @@ export default class GeoJsonLayer extends CompositeLayer {
     });
   }
 
+  getPickingInfo(params) {
+    const info = super.getPickingInfo(params);
+    const {sourceLayer} = info;
+    const featureTypes = ['point', 'linestring', 'polygon'];
+    info.featureType = featureTypes.find(ft => sourceLayer.id.includes(ft));
+    return info;
+  }
+
   _updateAutoHighlight(info) {
     // All sub layers except the points layer use source feature index to encode the picking color
     // The points layer uses indices from the points data array.
     const pointLayerIdPrefix = `${this.id}-points-`;
-    const sourceIsPoints = info.sourceLayer.id.startsWith(pointLayerIdPrefix);
+    const sourceIsPoints = info.featureType === 'point';
     for (const layer of this.getSubLayers()) {
       if (layer.id.startsWith(pointLayerIdPrefix) === sourceIsPoints) {
         layer.updateAutoHighlight(info);
