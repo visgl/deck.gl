@@ -32,6 +32,8 @@ import {
 import {getGeojsonFeatures, separateGeojsonFeatures} from './geojson';
 import {createLayerPropsFromFeatures, createLayerPropsFromBinary} from './geojson-layer-props';
 
+const FEATURE_TYPES = ['points', 'linestrings', 'polygons'];
+
 const defaultProps = {
   ...getDefaultProps(POINT_LAYER.circle),
   ...getDefaultProps(POINT_LAYER.icon),
@@ -128,11 +130,18 @@ export default class GeoJsonLayer extends CompositeLayer {
     });
   }
 
+  getPickingInfo(params) {
+    const info = super.getPickingInfo(params);
+    const {sourceLayer} = info;
+    info.featureType = FEATURE_TYPES.find(ft => sourceLayer.id.startsWith(`${this.id}-${ft}-`));
+    return info;
+  }
+
   _updateAutoHighlight(info) {
     // All sub layers except the points layer use source feature index to encode the picking color
     // The points layer uses indices from the points data array.
     const pointLayerIdPrefix = `${this.id}-points-`;
-    const sourceIsPoints = info.sourceLayer.id.startsWith(pointLayerIdPrefix);
+    const sourceIsPoints = info.featureType === 'points';
     for (const layer of this.getSubLayers()) {
       if (layer.id.startsWith(pointLayerIdPrefix) === sourceIsPoints) {
         layer.updateAutoHighlight(info);
