@@ -97,8 +97,16 @@ export default class LayersPass extends Pass {
   // TODO - when picking we could completely skip rendering viewports that dont
   // intersect with the picking rect
   /* eslint-disable max-depth, max-statements */
-  _drawLayersInViewport(gl, {layers, pass, viewport, view}, drawLayerParams) {
-    const glViewport = getGLViewport(gl, {viewport});
+  _drawLayersInViewport(
+    gl,
+    {layers, moduleParameters: globalModuleParameters, pass, target, viewport, view},
+    drawLayerParams
+  ) {
+    const glViewport = getGLViewport(gl, {
+      moduleParameters: globalModuleParameters,
+      target,
+      viewport
+    });
 
     if (view && view.props.clear) {
       const clearOpts = view.props.clear === true ? {color: true, depth: true} : view.props.clear;
@@ -270,16 +278,19 @@ export function layerIndexResolver(startIndex = 0, layerIndices = {}) {
 }
 
 // Convert viewport top-left CSS coordinates to bottom up WebGL coordinates
-function getGLViewport(gl, {viewport}) {
-  // TODO - dummy default for node
-  // Fallback to width/height when clientWidth/clientHeight are 0 or undefined.
-  const height = gl.canvas ? gl.canvas.clientHeight || gl.canvas.height : 100;
+function getGLViewport(gl, {moduleParameters, target, viewport}) {
+  const useTarget = target && target.id !== 'default-framebuffer';
+  const pixelRatio =
+    (moduleParameters && moduleParameters.devicePixelRatio) || cssToDeviceRatio(gl);
+
+  // Default framebuffer is used when writing to canvas
+  const height = useTarget ? target.height : gl.drawingBufferHeight;
+
   // Convert viewport top-left CSS coordinates to bottom up WebGL coordinates
   const dimensions = viewport;
-  const pixelRatio = cssToDeviceRatio(gl);
   return [
     dimensions.x * pixelRatio,
-    (height - dimensions.y - dimensions.height) * pixelRatio,
+    height - (dimensions.y + dimensions.height) * pixelRatio,
     dimensions.width * pixelRatio,
     dimensions.height * pixelRatio
   ];
