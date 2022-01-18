@@ -25,14 +25,29 @@ export default class MaskExtension extends LayerExtension {
     };
   }
 
-  initializeState({gl, layerManager}, extension) {
+  initializeState({gl, layerManager, resourceManager}, extension) {
     const maskLayer = extension.getMaskLayer(this.props.maskId, layerManager);
-    if (!maskLayer.state.maskFBO) {
+    const resourceId = maskLayer.id + '-maskFBO';
+    let inResourceManager = resourceManager.contains(resourceId);
+
+    // Track the framebuffer using the ResourceManager. As Layers
+    // which use a mask are finalized they will be unsubscribed,
+    // with the framebuffer being deleted once no longer needed
+    if (!inResourceManager) {
       const [width, height] = [2048, 2048];
-      const maskFBO = new Framebuffer(gl, {width, height, depth: false});
-      maskLayer.setState({maskFBO});
-      // TODO how to best dispose of the FBO?
+      const framebuffer = new Framebuffer(gl, {width, height, depth: false});
+
+      resourceManager.add({resourceId, data: framebuffer, persistent: false});
+      resourceManager._resources[resourceId].delete = () => {
+        framebuffer.color.delete();
+        framebuffer.delete();
+      };
     }
+    const maskFBO = resourceManager.subscribe({
+      resourceId,
+      consumerId: this.id
+    });
+    maskLayer.setState({maskFBO});
   }
 
   draw({uniforms}, extension) {

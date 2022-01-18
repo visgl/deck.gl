@@ -128,6 +128,7 @@ const utah = [
 export default function App({data, brushRadius = 100000, strokeWidth = 1, mapStyle = MAP_STYLE}) {
   const {arcs, targets, sources} = useMemo(() => getLayerData(data), [data]);
   const [maskEnabled, setMaskEnabled] = useState(true);
+  const [showLayers, setShowLayers] = useState(true);
   const [selectedCounty, selectCounty] = useState(null);
   const maskPolygon = selectedCounty ? selectedCounty.geometry.coordinates : utah;
   const maskId = 'county-mask';
@@ -218,7 +219,11 @@ export default function App({data, brushRadius = 100000, strokeWidth = 1, mapSty
 
   return (
     <>
-      <DeckGL layers={layers} initialViewState={INITIAL_VIEW_STATE} controller={true}>
+      <DeckGL
+        layers={showLayers ? layers : []}
+        initialViewState={INITIAL_VIEW_STATE}
+        controller={true}
+      >
         <StaticMap reuseMaps mapStyle={mapStyle} preventStyleDiffing={true} />
       </DeckGL>
       <div style={{position: 'absolute', background: 'white', padding: 10}}>
@@ -229,6 +234,10 @@ export default function App({data, brushRadius = 100000, strokeWidth = 1, mapSty
             onChange={() => setMaskEnabled(!maskEnabled)}
           />
           Use mask
+        </label>
+        <label>
+          <input type="checkbox" checked={showLayers} onChange={() => setShowLayers(!showLayers)} />
+          Show layers
         </label>
       </div>
     </>
