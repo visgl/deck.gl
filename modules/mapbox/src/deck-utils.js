@@ -186,9 +186,10 @@ function updateLayers(deck) {
   }
 
   const layers = [];
+  let layerIndex = 0;
   deck.props.userData.mapboxLayers.forEach(deckLayer => {
     const LayerType = deckLayer.props.type;
-    const layer = new LayerType(deckLayer.props);
+    const layer = new LayerType(deckLayer.props, {_offset: layerIndex++});
     layers.push(layer);
   });
   deck.setProps({layers});
