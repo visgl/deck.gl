@@ -43,15 +43,15 @@ export type RenderStats = {
 };
 
 export default class LayersPass extends Pass {
-  render(props: LayersPassRenderOptions): any {
+  render(options: LayersPassRenderOptions): any {
     const gl = this.gl;
 
-    setParameters(gl, {framebuffer: props.target});
-    return this._drawLayers(props);
+    setParameters(gl, {framebuffer: options.target});
+    return this._drawLayers(options);
   }
 
   // Draw a list of layers in a list of viewports
-  private _drawLayers(props: LayersPassRenderOptions) {
+  private _drawLayers(options: LayersPassRenderOptions) {
     const {
       target,
       moduleParameters,
@@ -59,8 +59,8 @@ export default class LayersPass extends Pass {
       views,
       onViewportActive,
       clearCanvas = true
-    } = props;
-    props.pass = props.pass || 'unknown';
+    } = options;
+    options.pass = options.pass || 'unknown';
 
     const gl = this.gl;
     if (clearCanvas) {
@@ -75,7 +75,7 @@ export default class LayersPass extends Pass {
       // Update context to point to this viewport
       onViewportActive(viewport);
 
-      const drawLayerParams = this._getDrawLayerParams(viewport, props);
+      const drawLayerParams = this._getDrawLayerParams(viewport, options);
 
       // render this viewport
       // @ts-expect-error
@@ -88,8 +88,8 @@ export default class LayersPass extends Pass {
             moduleParameters,
             viewport: subViewport,
             view,
-            pass: props.pass,
-            layers: props.layers
+            pass: options.pass,
+            layers: options.layers
           },
           drawLayerParams
         );
