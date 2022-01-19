@@ -104,6 +104,11 @@ function domainFromAttribute(attribute, scaleType) {
 function domainFromValues(values, scaleType) {
   if (scaleType === 'ordinal') {
     return [...new Set(values)].sort();
+  } else if (scaleType === 'quantile') {
+    return values.sort((a, b) => a - b);
+  } else if (scaleType === 'log') {
+    const [d0, d1] = extent(values);
+    return [d0 === 0 ? 1e-5 : d0, d1];
   }
   return extent(values);
 }
