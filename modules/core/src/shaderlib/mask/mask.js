@@ -3,6 +3,7 @@ import project from '../project/project';
 const maskProjectionShader = `
 uniform mat4 mask_projectionMatrix;
 uniform vec4 mask_projectCenter;
+uniform bool mask_maskByInstance;
 vec2 mask_clipspace_to_texCoords(vec4 position) {
  return (position.xy / position.w + vec2(1.0)) / 2.0;
 }
@@ -26,7 +27,7 @@ bool mask_isInBounds(vec2 texCoords) {
  */
 const injectVs = {
   'vs:#decl': `
-varying float mask_isVisible;
+varying vec2 mask_texCoords;
 `,
   'vs:DECKGL_FILTER_GL_POSITION': `
   vec4 mask_position = project_common_position_to_clipspace(
@@ -34,14 +35,14 @@ varying float mask_isVisible;
     mask_projectionMatrix,
     mask_projectCenter
   );
-  vec2 mask_texCoords = mask_clipspace_to_texCoords(mask_position);
-  mask_isVisible = float(mask_isInBounds(mask_texCoords));
+  mask_texCoords = mask_clipspace_to_texCoords(mask_position);
 `,
   'fs:#decl': `
-varying float mask_isVisible;
+varying vec2 mask_texCoords;
 `,
   'fs:DECKGL_FILTER_COLOR': `
-   if (mask_isVisible < 0.5) discard;
+   bool mask = mask_isInBounds(mask_texCoords);
+   if (!mask) discard;
 `
 };
 
@@ -54,8 +55,14 @@ const injectFs = {
 varying vec2 mask_texCoords;
 `,
   'vs:DECKGL_FILTER_GL_POSITION': `
+   vec4 mask_common_position;
+   if (mask_maskByInstance) {
+     mask_common_position = project_position(vec4(geometry.worldPosition, 1.0));
+   } else {
+     mask_common_position = geometry.position;
+   }
    vec4 mask_position = project_common_position_to_clipspace(
-     geometry.position,
+     mask_common_position,
      mask_projectionMatrix,
      mask_projectCenter
    );
@@ -87,6 +94,7 @@ const getMaskUniforms = (opts = {}, context = {}) => {
     uniforms.mask_texture = opts.dummyMaskMap;
   } else if (opts.maskEnabled) {
     uniforms.mask_enabled = true;
+    uniforms.mask_maskByInstance = opts.maskByInstance;
     uniforms.mask_projectCenter = opts.maskProjectCenter;
     uniforms.mask_projectionMatrix = opts.maskProjectionMatrix;
     uniforms.mask_texture = opts.maskMap;
@@ -97,7 +105,8 @@ const getMaskUniforms = (opts = {}, context = {}) => {
 export const shaderModuleVs = {
   name: 'mask-vs',
   dependencies: [project],
-  vs: maskProjectionShader + maskSampleShader,
+  vs: maskProjectionShader,
+  fs: maskSampleShader,
   inject: injectVs,
   getUniforms: getMaskUniforms
 };
