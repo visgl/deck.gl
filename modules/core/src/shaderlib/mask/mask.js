@@ -1,6 +1,6 @@
 import project from '../project/project';
 
-const maskProjectionShader = `
+const vs = `
 uniform mat4 mask_projectionMatrix;
 uniform vec4 mask_projectCenter;
 uniform bool mask_maskByInstance;
@@ -9,7 +9,7 @@ vec2 mask_clipspace_to_texCoords(vec4 position) {
 }
 `;
 
-const maskSampleShader = `
+const fs = `
 uniform sampler2D mask_texture;
 uniform bool mask_enabled;
 bool mask_isInBounds(vec2 texCoords) {
@@ -21,36 +21,7 @@ bool mask_isInBounds(vec2 texCoords) {
 }
 `;
 
-/*
- * The vertex-shader version masks geometries by their anchor position
- * e.g. ScatterplotLayer - show if the center of a circle is within bounds
- */
-const injectVs = {
-  'vs:#decl': `
-varying vec2 mask_texCoords;
-`,
-  'vs:DECKGL_FILTER_GL_POSITION': `
-  vec4 mask_position = project_common_position_to_clipspace(
-    project_position(vec4(geometry.worldPosition, 1.0)),
-    mask_projectionMatrix,
-    mask_projectCenter
-  );
-  mask_texCoords = mask_clipspace_to_texCoords(mask_position);
-`,
-  'fs:#decl': `
-varying vec2 mask_texCoords;
-`,
-  'fs:DECKGL_FILTER_COLOR': `
-   bool mask = mask_isInBounds(mask_texCoords);
-   if (!mask) discard;
-`
-};
-
-/*
- * The fragment-shader version masks pixels at the bounds
- * e.g. PolygonLayer - show the part of the polygon that intersect with the bounds
- */
-const injectFs = {
+const inject = {
   'vs:#decl': `
 varying vec2 mask_texCoords;
 `,
@@ -102,20 +73,11 @@ const getMaskUniforms = (opts = {}, context = {}) => {
   return uniforms;
 };
 
-export const shaderModuleVs = {
-  name: 'mask-vs',
+export default {
+  name: 'mask',
   dependencies: [project],
-  vs: maskProjectionShader,
-  fs: maskSampleShader,
-  inject: injectVs,
-  getUniforms: getMaskUniforms
-};
-
-export const shaderModuleFs = {
-  name: 'mask-fs',
-  dependencies: [project],
-  vs: maskProjectionShader,
-  fs: maskSampleShader,
-  inject: injectFs,
+  vs,
+  fs,
+  inject,
   getUniforms: getMaskUniforms
 };

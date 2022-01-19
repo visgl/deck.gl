@@ -10,7 +10,7 @@ import {Matrix4, Vector3} from '@math.gl/core';
 //import {SolidPolygonLayer} from '@deck.gl/layers';
 import MaskPass from '../../passes/mask-pass';
 import Effect from '../../lib/effect';
-import {shaderModuleVs, shaderModuleFs} from '../../shaderlib/mask/mask';
+import {default as mask} from '../../shaderlib/mask/mask';
 import {getMaskProjectionMatrix, getMaskViewport, splitMaskProjectionMatrix} from './utils';
 
 // Class to manage mask effect
@@ -35,9 +35,7 @@ export default class MaskEffect extends Effect {
     const {maskPass, maskMap} = this;
     if (!this.programManager) {
       this.programManager = ProgramManager.getDefaultProgramManager(gl);
-      if (shaderModuleFs) {
-        this.programManager.addDefaultModule(shaderModuleFs);
-      }
+      this.programManager.addDefaultModule(mask);
     }
 
     if (!this.dummyMaskMap) {
