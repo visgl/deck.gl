@@ -1,7 +1,7 @@
 import {log, Framebuffer, withParameters, Texture2D, ProgramManager} from '@luma.gl/core';
 import {Matrix4, Vector3} from '@math.gl/core';
 //import {SolidPolygonLayer} from '@deck.gl/layers';
-import DrawLayersPass from '../../passes/draw-layers-pass';
+import MaskPass from '../../passes/mask-pass';
 import Effect from '../../lib/effect';
 import {shaderModuleVs, shaderModuleFs} from '../../shaderlib/mask/mask';
 import {getMaskProjectionMatrix, getMaskViewport, splitMaskProjectionMatrix} from './utils';
@@ -21,14 +21,11 @@ export default class MaskEffect extends Effect {
     const maskId = 'county-mask';
 
     const maskLayer = this.getMaskLayer(maskId, layers);
-    if (!this.maskFBO) {
-      this.maskFBO = this.createFBO(gl);
+    if (!this.maskPass) {
+      this.maskPass = new MaskPass(gl);
+      this.maskMap = this.maskPass.maskMap;
     }
-    if (!this.drawLayersPass) {
-      this.drawLayersPass = new DrawLayersPass(gl); // TODO use MaskPass
-      // this.maskMap = this.drawLayersPass.maskMap;
-    }
-    const {drawLayersPass, maskFBO} = this;
+    const {maskPass, maskMap} = this;
     if (!this.programManager) {
       this.programManager = ProgramManager.getDefaultProgramManager(gl);
       if (shaderModuleFs) {
@@ -47,7 +44,18 @@ export default class MaskEffect extends Effect {
     // but not for all layers
     const {positions} = maskLayer.state.attributeManager.attributes;
     const layerViewport = viewports[0];
-    this.maskViewport = getMaskViewport(positions, layerViewport, maskFBO);
+    this.maskViewport = getMaskViewport(positions, layerViewport, maskMap);
+
+    maskPass.render({
+      layers,
+      layerFilter,
+      viewports: [this.maskViewport],
+      onViewportActive,
+      views, // ?? remove?
+      moduleParameters: {
+        dummyMaskMap: this.dummyMaskMap
+      }
+    });
   }
 
   getModuleParameters(layer) {
@@ -55,11 +63,6 @@ export default class MaskEffect extends Effect {
   }
 
   cleanup() {}
-
-  createFBO(gl) {
-    const [width, height] = [2048, 2048];
-    return new Framebuffer(gl, {width, height, depth: false});
-  }
 
   getMaskLayer(maskId, layers) {
     const maskLayer = layers.find(layer => layer.id === maskId);
