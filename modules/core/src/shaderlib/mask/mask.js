@@ -1,8 +1,8 @@
 import {Vector3, Matrix4} from '@math.gl/core';
-import {COORDINATE_SYSTEM, PROJECTION_MODE} from '@deck.gl/core';
-const VECTOR_TO_POINT_MATRIX = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0];
-
+import {COORDINATE_SYSTEM, PROJECTION_MODE} from '../../lib/constants';
 import project from '../project/project';
+
+const VECTOR_TO_POINT_MATRIX = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0];
 
 const vs = `
 uniform mat4 mask_projectionMatrix;
@@ -63,6 +63,11 @@ varying vec2 mask_texCoords;
 `
 };
 
+/*
+ * Splits the projection matrix into a centered matrix and a center offset.
+ * This ensures the correct transformation is used when the `WEB_MERCATOR_AUTO_OFFSET`
+ * projection mode is used at higher zoom levels
+ */
 function splitMaskProjectionMatrix(
   projectionMatrix,
   viewport,

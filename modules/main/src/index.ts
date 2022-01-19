@@ -26,7 +26,6 @@
 export {
   // CONSTANTS
   COORDINATE_SYSTEM,
-  PROJECTION_MODE,
   UNIT,
   // Main class
   Deck,
@@ -57,7 +56,6 @@ export {
   picking,
   project,
   project32,
-  getUniformsFromViewport,
   gouraudLighting,
   phongLighting,
   shadow,

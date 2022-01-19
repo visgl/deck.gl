@@ -1,4 +1,4 @@
-This is a minimal standalone version of the MaskExtension example
+This is a minimal standalone version of the MaskEffect example
 on [deck.gl](http://deck.gl) website.
 
 ### Usage
