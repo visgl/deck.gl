@@ -198,3 +198,5 @@ export function getTextPixelOffsetAccessor({alignment, anchor, size}, radius) {
       }
     : calculateOffset(radius);
 }
+
+export {domainFromValues as _domainFromValues};

@@ -4,7 +4,8 @@ import {
   getSizeAccessor,
   getTextAccessor,
   getTextPixelOffsetAccessor,
-  LAYER_MAP
+  LAYER_MAP,
+  _domainFromValues
 } from '@deck.gl/carto/api/layer-map';
 
 const colors = ['#5A1846', '#900C3F', '#C70039', '#E3611C', '#F1920E', '#FFC300'];
@@ -165,5 +166,13 @@ test('getHexagon', t => {
   const accessor = LAYER_MAP.hexagonId.defaultProps.getHexagon;
   const data = {h3: 1234};
   t.deepEquals(accessor(data), 1234, 'getHexagon correctly returns 1234');
+  t.end();
+});
+
+test('domainFromValues', t => {
+  t.deepEquals(_domainFromValues(['a', 'b', 'c', 'b'], 'ordinal'), ['a', 'b', 'c']);
+  t.deepEquals(_domainFromValues([1, 4, 2, 3, 1], 'quantile'), [1, 1, 2, 3, 4]);
+  t.deepEquals(_domainFromValues([1, 0, -3], 'log'), [-3, 1]);
+  t.deepEquals(_domainFromValues([1, 0, 3], 'log'), [0.00001, 3]);
   t.end();
 });
