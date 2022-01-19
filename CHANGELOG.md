@@ -19,6 +19,13 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v8.6
 
+#### deck.gl [8.6.6] - Jan 19 2022
+
+- Fix TileLayer url template resolution (#6566)
+- Fix z-index of MapboxLayers (#6565)
+- Fix highlighting in GeoJsonLayer when it’s used as a sub layer (#6563)
+- Bump loaders.gl to 3.1.5 (#6561)
+
 #### deck.gl [8.6.5] - Dec 9 2021
 
 - Avoid mutating coordinateOrigin (#6491)
