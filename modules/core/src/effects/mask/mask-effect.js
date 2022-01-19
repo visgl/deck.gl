@@ -11,7 +11,7 @@ import {Matrix4, Vector3} from '@math.gl/core';
 import MaskPass from '../../passes/mask-pass';
 import Effect from '../../lib/effect';
 import {default as mask} from '../../shaderlib/mask/mask';
-import {getMaskProjectionMatrix, getMaskViewport, splitMaskProjectionMatrix} from './utils';
+import {getMaskProjectionMatrix, getMaskViewport} from './utils';
 
 // Class to manage mask effect
 export default class MaskEffect extends Effect {
@@ -49,14 +49,15 @@ export default class MaskEffect extends Effect {
     // but not for all layers
     const {positions} = maskLayer.state.attributeManager.attributes;
     const layerViewport = viewports[0];
-    this.maskViewport = getMaskViewport(positions, layerViewport, maskMap);
+    const maskViewport = getMaskViewport(positions, layerViewport, maskMap);
+    this.maskProjectionMatrix = getMaskProjectionMatrix(maskViewport);
 
     maskPass.render({
       layers,
       layerFilter,
-      viewports: [this.maskViewport],
+      viewports: [maskViewport],
       onViewportActive,
-      views, // ?? remove?
+      views,
       moduleParameters: {
         dummyMaskMap: this.dummyMaskMap,
         devicePixelRatio: 1
@@ -101,14 +102,8 @@ export default class MaskEffect extends Effect {
         parameters.maskByInstance = 'instancePositions' in layer.getAttributeManager().attributes;
       }
 
-      const {maskProjectionMatrix, maskProjectCenter} = splitMaskProjectionMatrix(
-        getMaskProjectionMatrix(this.maskViewport),
-        internalState.viewport,
-        props
-      );
       parameters.maskMap = this.maskMap;
-      parameters.maskProjectCenter = maskProjectCenter;
-      parameters.maskProjectionMatrix = maskProjectionMatrix;
+      parameters.maskProjectionMatrix = this.maskProjectionMatrix;
     }
     return parameters;
   }

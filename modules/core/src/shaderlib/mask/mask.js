@@ -1,3 +1,7 @@
+import {Vector3, Matrix4} from '@math.gl/core';
+import {COORDINATE_SYSTEM, PROJECTION_MODE} from '@deck.gl/core';
+const VECTOR_TO_POINT_MATRIX = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0];
+
 import project from '../project/project';
 
 const vs = `
@@ -59,6 +63,37 @@ varying vec2 mask_texCoords;
 `
 };
 
+function splitMaskProjectionMatrix(
+  projectionMatrix,
+  viewport,
+  {project_uCenter, project_uCoordinateSystem, project_uProjectionMode}
+) {
+  // Obtain center relative to which coordinates will be drawn (in common space)
+  const center = project_uCenter;
+  const projectionMatrixCentered = projectionMatrix.clone().translate(new Vector3(center).negate());
+
+  let maskProjectionMatrix = projectionMatrix;
+  let maskProjectCenter = new Matrix4(viewport.viewProjectionMatrix).invert().transform(center);
+
+  if (
+    project_uCoordinateSystem === COORDINATE_SYSTEM.LNGLAT &&
+    project_uProjectionMode === PROJECTION_MODE.WEB_MERCATOR
+  ) {
+    maskProjectionMatrix = projectionMatrixCentered;
+  }
+
+  if (project_uProjectionMode === PROJECTION_MODE.WEB_MERCATOR_AUTO_OFFSET) {
+    maskProjectionMatrix = maskProjectionMatrix.clone().multiplyRight(VECTOR_TO_POINT_MATRIX);
+    maskProjectCenter = projectionMatrixCentered.transform(maskProjectCenter);
+
+    const t = new Matrix4();
+    t.translate(center);
+    maskProjectionMatrix.multiplyRight(t);
+  }
+
+  return {maskProjectionMatrix, maskProjectCenter};
+}
+
 const getMaskUniforms = (opts = {}, context = {}) => {
   const uniforms = {};
   if (opts.drawToMaskMap || opts.pickingActive) {
@@ -67,9 +102,15 @@ const getMaskUniforms = (opts = {}, context = {}) => {
   } else if (opts.maskEnabled) {
     uniforms.mask_enabled = true;
     uniforms.mask_maskByInstance = opts.maskByInstance;
-    uniforms.mask_projectCenter = opts.maskProjectCenter;
-    uniforms.mask_projectionMatrix = opts.maskProjectionMatrix;
     uniforms.mask_texture = opts.maskMap;
+
+    const {maskProjectionMatrix, maskProjectCenter} = splitMaskProjectionMatrix(
+      opts.maskProjectionMatrix,
+      opts.viewport,
+      context
+    );
+    uniforms.mask_projectCenter = maskProjectCenter;
+    uniforms.mask_projectionMatrix = maskProjectionMatrix;
   } else if (opts.maskId) {
     uniforms.mask_enabled = false;
     uniforms.mask_texture = opts.dummyMaskMap;
