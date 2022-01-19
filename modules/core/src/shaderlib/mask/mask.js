@@ -43,18 +43,19 @@ varying vec2 mask_texCoords;
 varying vec2 mask_texCoords;
 `,
   'fs:DECKGL_FILTER_COLOR': `
-  bool mask = mask_isInBounds(mask_texCoords);
+  if (mask_enabled) {
+    bool mask = mask_isInBounds(mask_texCoords);
 
-  // Debug: show extent of render target
-  // if (mask_enabled) {
-  //   if (!mask) color.a = 0.1;
-  //   if (mask_texCoords.x < 0.001 || mask_texCoords.x > 0.999 ||
-  //       mask_texCoords.y < 0.001 || mask_texCoords.y > 0.999) {
-  //     color = vec4(0.0, 0.0, 0.0, 0.5);
-  //   }
-  //   // color = vec4(mask_texCoords.xy, 0.0, 1.0);
-  // }
-  if (!mask) discard;
+    // Debug: show extent of render target
+    // if (!mask) color.a = 0.1;
+    // if (mask_texCoords.x < 0.001 || mask_texCoords.x > 0.999 ||
+    //     mask_texCoords.y < 0.001 || mask_texCoords.y > 0.999) {
+    //   color = vec4(0.0, 0.0, 0.0, 0.5);
+    // }
+    // color = vec4(mask_texCoords.xy, 0.0, 1.0);
+
+    if (!mask) discard;
+  }
 `
 };
 
