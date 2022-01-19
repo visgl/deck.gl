@@ -59,8 +59,16 @@ export default class MaskEffect extends Effect {
   }
 
   getModuleParameters(layer) {
+    const {maskProjectionMatrix, maskProjectCenter} = splitMaskProjectionMatrix(
+      getMaskProjectionMatrix(this.maskViewport),
+      layer.internalState.viewport,
+      layer.props
+    );
     return {
-      dummyMaskMap: this.dummyMaskMap
+      //maskEnabled: layer.props.maskEnabled, // TODO for some reason causes error
+      dummyMaskMap: this.dummyMaskMap,
+      maskProjectCenter,
+      maskProjectionMatrix
     };
   }
 

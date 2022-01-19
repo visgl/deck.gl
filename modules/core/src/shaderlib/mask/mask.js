@@ -97,6 +97,14 @@ export const shaderModuleFs = {
         mask_texture: opts.dummyMaskMap
       };
     }
+    if (opts.maskProjectionMatrix) {
+      return {
+        mask_enabled: true,
+        mask_projectCenter: opts.maskProjectCenter,
+        mask_projectionMatrix: opts.maskProjectionMatrix,
+        mask_texture: opts.dummyMaskMap
+      };
+    }
     return {};
   }
 };
