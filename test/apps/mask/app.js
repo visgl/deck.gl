@@ -17,7 +17,7 @@ const rectangle = [
   [-175, 80]
 ];
 
-const maskExtension = new MaskExtension();
+//const maskExtension = new MaskExtension();
 
 // Source data GeoJSON
 const DATA_URL =
@@ -149,7 +149,7 @@ export default function App({data, brushRadius = 100000, strokeWidth = 1, mapSty
         id: 'masked-layer',
         data: [{polygon: rectangle}],
         getFillColor: [...TARGET_COLOR, 200],
-        extensions: [maskExtension],
+        //extensions: [maskExtension],
         maskId,
         maskEnabled
       }),
@@ -161,11 +161,12 @@ export default function App({data, brushRadius = 100000, strokeWidth = 1, mapSty
         stroked: true,
         filled: true,
         getFillColor: [201, 210, 203, 80],
-        lineWidthMinPixels: 2,
+        lineWidthMinPixels: 4,
         onClick: ({object}) => selectCounty(object),
         pickable: true,
         autoHighlight: true,
-        highlightColor: [255, 255, 255, 150]
+        highlightColor: [255, 255, 255, 150],
+        maskEnabled: false
       }),
       // Rings around target (clipped by mask)
       new ScatterplotLayer({
@@ -178,7 +179,7 @@ export default function App({data, brushRadius = 100000, strokeWidth = 1, mapSty
         getFillColor: [255, 255, 255, 150],
         getLineColor: [0, 0, 0, 100],
         parameters: {depthTest: false},
-        extensions: [maskExtension],
+        //extensions: [maskExtension],
         maskId,
         maskEnabled,
         maskByInstance: false
@@ -188,7 +189,7 @@ export default function App({data, brushRadius = 100000, strokeWidth = 1, mapSty
         data: sources,
         radiusScale: 3000,
         getFillColor: d => (d.gain > 0 ? TARGET_COLOR : SOURCE_COLOR),
-        extensions: [maskExtension],
+        //extensions: [maskExtension],
         maskId,
         maskEnabled
       }),
@@ -198,7 +199,7 @@ export default function App({data, brushRadius = 100000, strokeWidth = 1, mapSty
         pickable: true,
         radiusScale: 3000,
         getFillColor: d => (d.net > 0 ? TARGET_COLOR : SOURCE_COLOR),
-        extensions: [maskExtension],
+        //extensions: [maskExtension],
         maskId,
         maskEnabled
       }),
@@ -211,7 +212,7 @@ export default function App({data, brushRadius = 100000, strokeWidth = 1, mapSty
         getTargetPosition: d => d.target,
         getSourceColor: SOURCE_COLOR,
         getTargetColor: TARGET_COLOR,
-        extensions: [maskExtension],
+        //extensions: [maskExtension],
         maskId,
         maskEnabled,
         maskByInstance: true
