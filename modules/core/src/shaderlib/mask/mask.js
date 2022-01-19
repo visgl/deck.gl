@@ -45,13 +45,6 @@ varying float mask_isVisible;
 `
 };
 
-export const shaderModuleVs = {
-  name: 'mask-vs',
-  dependencies: [project],
-  vs: maskProjectionShader + maskSampleShader,
-  inject: injectVs
-};
-
 /*
  * The fragment-shader version masks pixels at the bounds
  * e.g. PolygonLayer - show the part of the polygon that intersect with the bounds
@@ -87,27 +80,33 @@ varying vec2 mask_texCoords;
 `
 };
 
+const getMaskUniforms = (opts = {}, context = {}) => {
+  const uniforms = {};
+  if (opts.drawToMaskMap || opts.pickingActive) {
+    uniforms.mask_enabled = false;
+    uniforms.mask_texture = opts.dummyMaskMap;
+  } else if (opts.maskEnabled) {
+    uniforms.mask_enabled = true;
+    uniforms.mask_projectCenter = opts.maskProjectCenter;
+    uniforms.mask_projectionMatrix = opts.maskProjectionMatrix;
+    uniforms.mask_texture = opts.maskMap;
+  }
+  return uniforms;
+};
+
+export const shaderModuleVs = {
+  name: 'mask-vs',
+  dependencies: [project],
+  vs: maskProjectionShader + maskSampleShader,
+  inject: injectVs,
+  getUniforms: getMaskUniforms
+};
+
 export const shaderModuleFs = {
   name: 'mask-fs',
   dependencies: [project],
   vs: maskProjectionShader,
   fs: maskSampleShader,
   inject: injectFs,
-  getUniforms: (opts = {}, context = {}) => {
-    if (opts.drawToMaskMap || opts.pickingActive) {
-      return {
-        mask_enabled: false,
-        mask_texture: opts.dummyMaskMap
-      };
-    }
-    if (opts.maskProjectionMatrix) {
-      return {
-        mask_enabled: true,
-        mask_projectCenter: opts.maskProjectCenter,
-        mask_projectionMatrix: opts.maskProjectionMatrix,
-        mask_texture: opts.maskMap
-      };
-    }
-    return {};
-  }
+  getUniforms: getMaskUniforms
 };
