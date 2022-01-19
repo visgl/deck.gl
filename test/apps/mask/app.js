@@ -6,7 +6,6 @@ import DeckGL from '@deck.gl/react';
 import {MaskEffect} from '@deck.gl/core';
 import {GeoJsonLayer, SolidPolygonLayer} from '@deck.gl/layers';
 import {ScatterplotLayer, ArcLayer} from '@deck.gl/layers';
-import {MaskExtension} from '@deck.gl/extensions';
 import {scaleLinear} from 'd3-scale';
 
 const rectangle = [
@@ -16,8 +15,6 @@ const rectangle = [
   [-50, 80],
   [-175, 80]
 ];
-
-//const maskExtension = new MaskExtension();
 
 // Source data GeoJSON
 const DATA_URL =
@@ -149,7 +146,6 @@ export default function App({data, brushRadius = 100000, strokeWidth = 1, mapSty
         id: 'masked-layer',
         data: [{polygon: rectangle}],
         getFillColor: [...TARGET_COLOR, 200],
-        //extensions: [maskExtension],
         maskId,
         maskEnabled
       }),
@@ -179,7 +175,6 @@ export default function App({data, brushRadius = 100000, strokeWidth = 1, mapSty
         getFillColor: [255, 255, 255, 150],
         getLineColor: [0, 0, 0, 100],
         parameters: {depthTest: false},
-        //extensions: [maskExtension],
         maskId,
         maskEnabled,
         maskByInstance: false
@@ -189,7 +184,6 @@ export default function App({data, brushRadius = 100000, strokeWidth = 1, mapSty
         data: sources,
         radiusScale: 3000,
         getFillColor: d => (d.gain > 0 ? TARGET_COLOR : SOURCE_COLOR),
-        //extensions: [maskExtension],
         maskId,
         maskEnabled
       }),
@@ -199,7 +193,6 @@ export default function App({data, brushRadius = 100000, strokeWidth = 1, mapSty
         pickable: true,
         radiusScale: 3000,
         getFillColor: d => (d.net > 0 ? TARGET_COLOR : SOURCE_COLOR),
-        //extensions: [maskExtension],
         maskId,
         maskEnabled
       }),
@@ -212,7 +205,6 @@ export default function App({data, brushRadius = 100000, strokeWidth = 1, mapSty
         getTargetPosition: d => d.target,
         getSourceColor: SOURCE_COLOR,
         getTargetColor: TARGET_COLOR,
-        //extensions: [maskExtension],
         maskId,
         maskEnabled,
         maskByInstance: true
