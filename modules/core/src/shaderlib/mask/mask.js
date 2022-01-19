@@ -1,4 +1,4 @@
-import {project} from '@deck.gl/core';
+import project from '../project/project';
 
 const maskProjectionShader = `
 uniform mat4 mask_projectionMatrix;
@@ -75,7 +75,7 @@ varying vec2 mask_texCoords;
   bool mask = mask_isInBounds(mask_texCoords);
 
   // Debug: show extent of render target
-  // if (!mask) color.a = 0.03;
+  // if (!mask) color.a = 0.3;
   // if (mask_texCoords.x < 0.001 || mask_texCoords.x > 0.999 ||
   //     mask_texCoords.y < 0.001 || mask_texCoords.y > 0.999) {
   //   color = vec4(0.0, 0.0, 0.0, 0.5);
@@ -90,5 +90,9 @@ export const shaderModuleFs = {
   dependencies: [project],
   vs: maskProjectionShader,
   fs: maskSampleShader,
-  inject: injectFs
+  inject: injectFs,
+  getUniforms: (opts = {}, context = {}) => {
+    const uniforms = {};
+    return uniforms;
+  }
 };
