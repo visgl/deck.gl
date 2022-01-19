@@ -161,7 +161,7 @@ export default function App({data, brushRadius = 100000, strokeWidth = 1, mapSty
         stroked: true,
         filled: true,
         getFillColor: [201, 210, 203, 80],
-        lineWidthMinPixels: 4,
+        lineWidthMinPixels: 2,
         onClick: ({object}) => selectCounty(object),
         pickable: true,
         autoHighlight: true,

@@ -94,7 +94,7 @@ export const shaderModuleFs = {
   fs: maskSampleShader,
   inject: injectFs,
   getUniforms: (opts = {}, context = {}) => {
-    if (opts.drawToMaskMap) {
+    if (opts.drawToMaskMap || opts.pickingActive) {
       return {
         mask_enabled: false,
         mask_texture: opts.dummyMaskMap
