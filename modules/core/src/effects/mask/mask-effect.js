@@ -53,7 +53,8 @@ export default class MaskEffect extends Effect {
       onViewportActive,
       views, // ?? remove?
       moduleParameters: {
-        dummyMaskMap: this.dummyMaskMap
+        dummyMaskMap: this.dummyMaskMap,
+        devicePixelRatio: 1
       }
     });
   }

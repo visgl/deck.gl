@@ -75,13 +75,13 @@ varying vec2 mask_texCoords;
   bool mask = mask_isInBounds(mask_texCoords);
 
   // Debug: show extent of render target
-  // if (!mask) color.a = 0.3;
-  // if (mask_texCoords.x < 0.001 || mask_texCoords.x > 0.999 ||
-  //     mask_texCoords.y < 0.001 || mask_texCoords.y > 0.999) {
-  //   color = vec4(0.0, 0.0, 0.0, 0.5);
-  // }
+  if (!mask) color.a = 0.3;
+  if (mask_texCoords.x < 0.001 || mask_texCoords.x > 0.999 ||
+      mask_texCoords.y < 0.001 || mask_texCoords.y > 0.999) {
+    color = vec4(0.0, 0.0, 0.0, 0.5);
+  }
   // color = vec4(mask_texCoords.xy, 0.0, 1.0);
-  if (!mask) discard;
+  // if (!mask) discard;
 `
 };
 
@@ -94,6 +94,7 @@ export const shaderModuleFs = {
   getUniforms: (opts = {}, context = {}) => {
     if (opts.drawToMaskMap) {
       return {
+        mask_enabled: false,
         mask_texture: opts.dummyMaskMap
       };
     }
@@ -102,7 +103,7 @@ export const shaderModuleFs = {
         mask_enabled: true,
         mask_projectCenter: opts.maskProjectCenter,
         mask_projectionMatrix: opts.maskProjectionMatrix,
-        mask_texture: opts.dummyMaskMap
+        mask_texture: opts.maskMap
       };
     }
     return {};
