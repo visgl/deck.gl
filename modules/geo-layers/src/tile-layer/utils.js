@@ -65,10 +65,10 @@ export function getURLFromTemplate(template, properties) {
 
   const {x, y, z} = properties;
   return template
-    .replace('{x}', x)
-    .replace('{y}', y)
-    .replace('{z}', z)
-    .replace('{-y}', Math.pow(2, z) - y - 1);
+    .replace(/\{x\}/g, x)
+    .replace(/\{y\}/g, y)
+    .replace(/\{z\}/g, z)
+    .replace(/\{-y\}/g, Math.pow(2, z) - y - 1);
 }
 
 /**
