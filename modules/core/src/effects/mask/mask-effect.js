@@ -1,13 +1,10 @@
 import {
   log,
-  Framebuffer,
-  withParameters,
   Texture2D,
-  ProgramManager,
-  readPixelsToArray
+  ProgramManager
+  // readPixelsToArray
 } from '@luma.gl/core';
-import {Matrix4, Vector3} from '@math.gl/core';
-//import {SolidPolygonLayer} from '@deck.gl/layers';
+// import {SolidPolygonLayer} from '@deck.gl/layers';
 import MaskPass from '../../passes/mask-pass';
 import Effect from '../../lib/effect';
 import {default as mask} from '../../shaderlib/mask/mask';
@@ -24,7 +21,6 @@ export default class MaskEffect extends Effect {
   preRender(gl, {layers, layerFilter, viewports, onViewportActive, views}) {
     if (layers.length === 0) return;
     // Hardcode for now
-    const maskEnabled = true;
     const maskId = 'county-mask';
 
     const maskLayer = this.getMaskLayer(maskId, layers);
@@ -65,9 +61,9 @@ export default class MaskEffect extends Effect {
     });
 
     // Debug show FBO contents on screen
-    //const color = readPixelsToArray(maskMap);
-    //let canvas = document.getElementById('fbo-canvas');
-    //if (!canvas) {
+    // const color = readPixelsToArray(maskMap);
+    // let canvas = document.getElementById('fbo-canvas');
+    // if (!canvas) {
     //  canvas = document.createElement('canvas');
     //  canvas.id = 'fbo-canvas';
     //  canvas.width = maskMap.width;
@@ -79,20 +75,20 @@ export default class MaskEffect extends Effect {
     //  canvas.style.width = '256px';
     //  canvas.style.transform = 'scaleY(-1)';
     //  document.body.appendChild(canvas);
-    //}
-    //const ctx = canvas.getContext('2d');
-    //const imageData = ctx.createImageData(maskMap.width, maskMap.height);
-    //for (let i = 0; i < color.length; i += 4) {
+    // }
+    // const ctx = canvas.getContext('2d');
+    // const imageData = ctx.createImageData(maskMap.width, maskMap.height);
+    // for (let i = 0; i < color.length; i += 4) {
     //  imageData.data[i + 0] = color[i + 0];
     //  imageData.data[i + 1] = color[i + 1];
     //  imageData.data[i + 2] = color[i + 2];
     //  imageData.data[i + 3] = color[i + 3];
-    //}
-    //ctx.putImageData(imageData, 0, 0);
+    // }
+    // ctx.putImageData(imageData, 0, 0);
   }
 
   getModuleParameters(layer) {
-    const {internalState, props} = layer;
+    const {props} = layer;
     const parameters = {
       dummyMaskMap: this.dummyMaskMap
     };
@@ -113,7 +109,7 @@ export default class MaskEffect extends Effect {
   getMaskLayer(maskId, layers) {
     const maskLayer = layers.find(layer => layer.id === maskId);
     log.assert(maskLayer, `{maskId: '${maskId}'} must match the id of another Layer`);
-    //log.assert(maskLayer instanceof SolidPolygonLayer, 'Mask Layer must be a SolidPolygonLayer');
+    // log.assert(maskLayer instanceof SolidPolygonLayer, 'Mask Layer must be a SolidPolygonLayer');
     return maskLayer;
   }
 }

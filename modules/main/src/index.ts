@@ -72,6 +72,7 @@ export {
   // Effects
   Effect,
   LightingEffect,
+  MaskEffect,
   PostProcessEffect,
   // Lights
   AmbientLight,

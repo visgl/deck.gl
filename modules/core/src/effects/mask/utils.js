@@ -2,8 +2,6 @@ import {Matrix4} from '@math.gl/core';
 import {pixelsToWorld} from '@math.gl/web-mercator';
 import {WebMercatorViewport} from '@deck.gl/core';
 
-const VECTOR_TO_POINT_MATRIX = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0];
-
 /*
  * Compute orthographic projection that converts shader common space coordinates into mask clipspace
  */
