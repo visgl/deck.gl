@@ -28,7 +28,6 @@ export default class MaskPass extends LayersPass {
   }
 
   render(params) {
-    console.log('Render MaskPass');
     const target = this.fbo;
 
     withParameters(

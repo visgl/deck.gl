@@ -92,7 +92,11 @@ export const shaderModuleFs = {
   fs: maskSampleShader,
   inject: injectFs,
   getUniforms: (opts = {}, context = {}) => {
-    const uniforms = {};
-    return uniforms;
+    if (opts.drawToMaskMap) {
+      return {
+        mask_texture: opts.dummyMaskMap
+      };
+    }
+    return {};
   }
 };

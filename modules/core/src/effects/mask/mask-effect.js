@@ -29,7 +29,7 @@ export default class MaskEffect extends Effect {
     if (!this.programManager) {
       this.programManager = ProgramManager.getDefaultProgramManager(gl);
       if (shaderModuleFs) {
-        // this.programManager.addDefaultModule(shaderModuleFs);
+        this.programManager.addDefaultModule(shaderModuleFs);
       }
     }
 
@@ -59,7 +59,9 @@ export default class MaskEffect extends Effect {
   }
 
   getModuleParameters(layer) {
-    return {};
+    return {
+      dummyMaskMap: this.dummyMaskMap
+    };
   }
 
   cleanup() {}
