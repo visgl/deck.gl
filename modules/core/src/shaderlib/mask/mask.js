@@ -70,6 +70,11 @@ const getMaskUniforms = (opts = {}, context = {}) => {
     uniforms.mask_projectCenter = opts.maskProjectCenter;
     uniforms.mask_projectionMatrix = opts.maskProjectionMatrix;
     uniforms.mask_texture = opts.maskMap;
+  } else if (opts.maskId) {
+    uniforms.mask_enabled = false;
+    uniforms.mask_texture = opts.dummyMaskMap;
+  } else {
+    // TODO when/why does this happen?
   }
   return uniforms;
 };
