@@ -92,10 +92,13 @@ export default class MaskEffect extends Effect {
     const parameters = {
       dummyMaskMap: this.dummyMaskMap
     };
-    if (props.maskEnabled) {
+    if (props.maskId) {
       // Infer by geometry if 'maskByInstance' prop isn't explictly set
       if (!('maskByInstance' in props)) {
         parameters.maskByInstance = 'instancePositions' in layer.getAttributeManager().attributes;
+      }
+      if (!('maskEnabled' in props)) {
+        parameters.maskEnabled = true;
       }
 
       parameters.maskMap = this.maskMap;

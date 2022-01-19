@@ -146,8 +146,7 @@ export default function App({data, brushRadius = 100000, strokeWidth = 1, mapSty
         id: 'masked-layer',
         data: [{polygon: rectangle}],
         getFillColor: [...TARGET_COLOR, 200],
-        maskId,
-        maskEnabled
+        maskId
       }),
       // US states (used to select & define masks)
       new GeoJsonLayer({
