@@ -66,30 +66,30 @@ export default class MaskEffect extends Effect {
     });
 
     // Debug show FBO contents on screen
-    const color = readPixelsToArray(maskMap);
-    let canvas = document.getElementById('fbo-canvas');
-    if (!canvas) {
-      canvas = document.createElement('canvas');
-      canvas.id = 'fbo-canvas';
-      canvas.width = maskMap.width;
-      canvas.height = maskMap.height;
-      canvas.style.zIndex = 100;
-      canvas.style.position = 'absolute';
-      canvas.style.right = 0;
-      canvas.style.border = 'blue 1px solid';
-      canvas.style.width = '256px';
-      canvas.style.transform = 'scaleY(-1)';
-      document.body.appendChild(canvas);
-    }
-    const ctx = canvas.getContext('2d');
-    const imageData = ctx.createImageData(maskMap.width, maskMap.height);
-    for (let i = 0; i < color.length; i += 4) {
-      imageData.data[i + 0] = color[i + 0];
-      imageData.data[i + 1] = color[i + 1];
-      imageData.data[i + 2] = color[i + 2];
-      imageData.data[i + 3] = color[i + 3];
-    }
-    ctx.putImageData(imageData, 0, 0);
+    //const color = readPixelsToArray(maskMap);
+    //let canvas = document.getElementById('fbo-canvas');
+    //if (!canvas) {
+    //  canvas = document.createElement('canvas');
+    //  canvas.id = 'fbo-canvas';
+    //  canvas.width = maskMap.width;
+    //  canvas.height = maskMap.height;
+    //  canvas.style.zIndex = 100;
+    //  canvas.style.position = 'absolute';
+    //  canvas.style.right = 0;
+    //  canvas.style.border = 'blue 1px solid';
+    //  canvas.style.width = '256px';
+    //  canvas.style.transform = 'scaleY(-1)';
+    //  document.body.appendChild(canvas);
+    //}
+    //const ctx = canvas.getContext('2d');
+    //const imageData = ctx.createImageData(maskMap.width, maskMap.height);
+    //for (let i = 0; i < color.length; i += 4) {
+    //  imageData.data[i + 0] = color[i + 0];
+    //  imageData.data[i + 1] = color[i + 1];
+    //  imageData.data[i + 2] = color[i + 2];
+    //  imageData.data[i + 3] = color[i + 3];
+    //}
+    //ctx.putImageData(imageData, 0, 0);
   }
 
   getModuleParameters(layer) {
