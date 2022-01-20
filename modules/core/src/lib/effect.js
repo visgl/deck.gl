@@ -3,6 +3,7 @@ export default class Effect {
     const {id = 'effect'} = props;
     this.id = id;
     this.props = {...props};
+    this.enableForPicking = false;
   }
 
   preRender() {}

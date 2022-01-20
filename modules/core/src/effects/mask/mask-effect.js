@@ -17,6 +17,7 @@ export default class MaskEffect extends Effect {
     this.programManager = null;
     this.dummyMaskMap = null;
     this.mask = false;
+    this.enableForPicking = true;
   }
 
   preRender(gl, {layers, layerFilter, viewports, onViewportActive, views}) {
