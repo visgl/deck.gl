@@ -3,7 +3,7 @@ import React, {useState, useMemo} from 'react';
 import {render} from 'react-dom';
 import {StaticMap} from 'react-map-gl';
 import DeckGL from '@deck.gl/react';
-import {MaskEffect} from '@deck.gl/core';
+import {MaskEffect, OPERATION} from '@deck.gl/core';
 import {GeoJsonLayer, SolidPolygonLayer} from '@deck.gl/layers';
 import {ScatterplotLayer, ArcLayer} from '@deck.gl/layers';
 import {scaleLinear} from 'd3-scale';
@@ -137,7 +137,7 @@ export default function App({data, brushRadius = 100000, strokeWidth = 1, mapSty
     targets && [
       new SolidPolygonLayer({
         id: maskId,
-        operation: 'mask',
+        operation: OPERATION.MASK,
         data: maskData,
         getFillColor: [255, 255, 255, 255]
       }),

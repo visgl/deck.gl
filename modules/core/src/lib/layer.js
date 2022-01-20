@@ -19,7 +19,7 @@
 // THE SOFTWARE.
 
 /* eslint-disable react/no-direct-mutation-state */
-import {COORDINATE_SYSTEM} from './constants';
+import {COORDINATE_SYSTEM, OPERATION} from './constants';
 import AttributeManager from './attribute/attribute-manager';
 import UniformTransitionManager from './uniform-transition-manager';
 import {diffProps, validateProps} from '../lifecycle/props';
@@ -107,7 +107,7 @@ const defaultProps = {
   visible: true,
   pickable: false,
   opacity: {type: 'number', min: 0, max: 1, value: 1},
-  operation: 'draw',
+  operation: OPERATION.DRAW,
 
   onHover: {type: 'function', value: null, compare: false, optional: true},
   onClick: {type: 'function', value: null, compare: false, optional: true},

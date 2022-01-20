@@ -100,3 +100,11 @@ export const EVENTS = {
   panmove: {handler: 'onDrag'},
   panend: {handler: 'onDragEnd'}
 } as const;
+
+/**
+ * The rendering operation to perform with a layer, used in the `operation` prop
+ */
+export const OPERATION = {
+  DRAW: 'draw',
+  MASK: 'mask'
+} as const;

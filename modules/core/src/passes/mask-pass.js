@@ -1,5 +1,6 @@
-import {default as LayersPass} from './layers-pass';
 import {Framebuffer, Texture2D, withParameters} from '@luma.gl/core';
+import {OPERATION} from '../lib/constants';
+import LayersPass from './layers-pass';
 
 export default class MaskPass extends LayersPass {
   constructor(gl, props) {
@@ -42,7 +43,7 @@ export default class MaskPass extends LayersPass {
   }
 
   shouldDrawLayer(layer) {
-    return layer.props.operation === 'mask';
+    return layer.props.operation === OPERATION.MASK;
   }
 
   getModuleParameters() {
