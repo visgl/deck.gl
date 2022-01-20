@@ -142,7 +142,8 @@ export default class DeckPicker {
     depth = 1,
     mode = 'query',
     unproject3D,
-    onViewportActive
+    onViewportActive,
+    effects
   }) {
     layers = this._getPickable(layers);
 
@@ -188,6 +189,7 @@ export default class DeckPicker {
           viewports,
           onViewportActive,
           deviceRect,
+          effects,
           pass: `picking:${mode}`,
           redrawReason: mode
         });
@@ -208,6 +210,7 @@ export default class DeckPicker {
           viewports,
           onViewportActive,
           deviceRect: {x: pickInfo.pickedX, y: pickInfo.pickedY, width: 1, height: 1},
+          effects,
           pass: `picking:${mode}`,
           redrawReason: 'pick-z',
           pickZ: true
@@ -271,7 +274,8 @@ export default class DeckPicker {
     height = 1,
     mode = 'query',
     maxObjects = null,
-    onViewportActive
+    onViewportActive,
+    effects
   }) {
     layers = this._getPickable(layers);
 
@@ -308,6 +312,7 @@ export default class DeckPicker {
       viewports,
       onViewportActive,
       deviceRect,
+      effects,
       pass: `picking:${mode}`,
       redrawReason: mode
     });
@@ -352,19 +357,12 @@ export default class DeckPicker {
     viewports,
     onViewportActive,
     deviceRect,
+    effects,
     pass,
     redrawReason,
     pickZ
   }) {
     const pickingFBO = pickZ ? this.depthFBO : this.pickingFBO;
-
-    // TODO masking if not supported when picking
-    if (!this.dummyMaskMap) {
-      this.dummyMaskMap = new Texture2D(this.gl, {
-        width: 1,
-        height: 1
-      });
-    }
 
     const {decodePickingColor} = this.pickLayersPass.render({
       layers,
@@ -374,12 +372,10 @@ export default class DeckPicker {
       onViewportActive,
       pickingFBO,
       deviceRect,
+      effects,
       pass,
       redrawReason,
-      pickZ,
-      moduleParameters: {
-        dummyMaskMap: this.dummyMaskMap
-      }
+      pickZ
     });
 
     // Read from an already rendered picking buffer

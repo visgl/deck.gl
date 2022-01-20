@@ -190,6 +190,11 @@ export default function App({data, brushRadius = 100000, strokeWidth = 1, mapSty
         id: 'targets',
         data: targets,
         pickable: true,
+        onClick: ({object}) => {
+          console.log(object);
+        },
+        autoHighlight: true,
+        highlightColor: [255, 255, 255, 150],
         radiusScale: 3000,
         getFillColor: d => (d.net > 0 ? TARGET_COLOR : SOURCE_COLOR),
         maskId,
