@@ -12,6 +12,18 @@ const testViewport = new MapView().makeViewport({
   viewState: {longitude: -122, latitude: 37, zoom: 13}
 });
 
+const TEST_MASK_LAYER = new SolidPolygonLayer({
+  id: 'test-mask-layer',
+  data: {polygon: FIXTURES.polygons[0]},
+  operation: 'mask'
+});
+
+const TEST_LAYER = new SolidPolygonLayer({
+  data: FIXTURES.polygons.slice(0, 3),
+  getPolygon: f => f,
+  maskId: 'test-mask-layer'
+});
+
 test('MaskEffect#constructor', t => {
   const maskEffect = new MaskEffect();
   t.ok(maskEffect, 'Mask effect created');
@@ -24,28 +36,14 @@ test('MaskEffect#constructor', t => {
 test('MaskEffect#getModuleParameters', t => {
   const maskEffect = new MaskEffect();
 
-  const maskLayer = new SolidPolygonLayer({
-    id: 'test-mask-layer',
-    data: {polygon: FIXTURES.polygons[0]},
-    operation: 'mask',
-    getFillColor: [255, 255, 255, 255]
-  });
-  const layer = new SolidPolygonLayer({
-    data: FIXTURES.polygons.slice(0, 3),
-    getPolygon: f => f,
-    getFillColor: (f, {index}) => [index, 0, 0],
-    maskId: 'test-mask-layer'
-  });
-
   const layerManager = new LayerManager(gl, {viewport: testViewport});
-  layerManager.setLayers([maskLayer, layer]);
+  layerManager.setLayers([TEST_MASK_LAYER, TEST_LAYER]);
   layerManager.updateLayers();
 
   maskEffect.preRender(gl, {
     layers: layerManager.getLayers(),
     onViewportActive: layerManager.activateViewport,
-    viewports: [testViewport],
-    pixelRatio: 1
+    viewports: [testViewport]
   });
 
   t.ok(maskEffect.mask, 'Masking is enabled');
@@ -54,7 +52,7 @@ test('MaskEffect#getModuleParameters', t => {
   t.ok(maskEffect.maskMap, 'Mask map is created');
   t.ok(maskEffect.maskProjectionMatrix, 'Mask projection matrix is created');
 
-  const parameters = maskEffect.getModuleParameters(layer);
+  const parameters = maskEffect.getModuleParameters(TEST_LAYER);
   t.is(parameters.dummyMaskMap, maskEffect.dummyMaskMap, 'Dummy mask map is in parameters');
   t.is(parameters.maskMap, maskEffect.maskMap, 'Mask map is in parameters');
   t.is(
@@ -65,6 +63,54 @@ test('MaskEffect#getModuleParameters', t => {
   t.is(parameters.maskByInstance, false, 'maskByInstance inferred as false for SolidPolygonLayer');
   t.is(parameters.maskByInstance, false, 'maskByInstance inferred as false for SolidPolygonLayer');
   t.is(parameters.maskEnabled, true, 'maskEnabled added to parameters');
+
+  maskEffect.cleanup();
+  t.end();
+});
+
+test('MaskEffect#maskId not matched', t => {
+  const maskEffect = new MaskEffect();
+
+  const layerManager = new LayerManager(gl, {viewport: testViewport});
+  layerManager.setLayers([TEST_LAYER]);
+  layerManager.updateLayers();
+
+  t.throws(
+    () => {
+      maskEffect.preRender(gl, {
+        layers: layerManager.getLayers(),
+        onViewportActive: layerManager.activateViewport,
+        viewports: [testViewport]
+      });
+    },
+    /{maskId: 'test-mask-layer'} must match the id of another Layer/i,
+    'maskId mismatch throws error'
+  );
+
+  maskEffect.cleanup();
+  t.end();
+});
+
+test('MaskEffect#too many masks', t => {
+  const maskEffect = new MaskEffect();
+
+  const layer2 = TEST_LAYER.clone({maskId: 'another-mask-layer'});
+
+  const layerManager = new LayerManager(gl, {viewport: testViewport});
+  layerManager.setLayers([TEST_LAYER, layer2]);
+  layerManager.updateLayers();
+
+  t.throws(
+    () => {
+      maskEffect.preRender(gl, {
+        layers: layerManager.getLayers(),
+        onViewportActive: layerManager.activateViewport,
+        viewports: [testViewport]
+      });
+    },
+    /Only one mask layer supported, but multiple maskIds specified/i,
+    'throws when more than one maskId is found in Layers'
+  );
 
   maskEffect.cleanup();
   t.end();
