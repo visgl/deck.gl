@@ -1,9 +1,9 @@
 import test from 'tape-promise/tape';
-import MaskEffect from '@deck.gl/core/effects/mask/mask-effect';
+import {ProgramManager} from '@luma.gl/core';
 import {MapView, LayerManager} from 'deck.gl';
 import {SolidPolygonLayer} from '@deck.gl/layers';
+import MaskEffect from '@deck.gl/core/effects/mask/mask-effect';
 import * as FIXTURES from 'deck.gl-test/data';
-
 import {gl} from '@deck.gl/test-utils';
 
 const testViewport = new MapView().makeViewport({
@@ -139,5 +139,30 @@ test('MaskEffect#cleanup', t => {
   t.notOk(maskEffect.dummyMaskMap, 'MaskEffect cleans up dummy mask map');
   t.notOk(maskEffect.maskPass, 'MaskEffect cleans up mask pass');
   t.notOk(maskEffect.maskMap, 'MaskEffect cleans up mask map');
+  t.end();
+});
+
+test('MaskEffect#mask module', t => {
+  const maskEffect = new MaskEffect();
+
+  const programManager = ProgramManager.getDefaultProgramManager(gl);
+  const layerManager = new LayerManager(gl, {viewport: testViewport});
+  layerManager.setLayers([TEST_MASK_LAYER, TEST_LAYER]);
+  layerManager.updateLayers();
+
+  maskEffect.preRender(gl, {
+    layers: layerManager.getLayers(),
+    onViewportActive: layerManager.activateViewport,
+    viewports: [testViewport]
+  });
+
+  let defaultModules = programManager._defaultModules;
+  let hasMask = defaultModules.some(m => m.name === 'mask');
+  t.equal(hasMask, true, 'MaskEffect adds mask module to default correctly');
+
+  maskEffect.cleanup();
+  defaultModules = programManager._defaultModules;
+  hasMask = defaultModules.some(m => m.name === 'mask');
+  t.equal(hasMask, false, 'MaskEffect removes mask module to default correctly');
   t.end();
 });
