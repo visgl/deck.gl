@@ -120,7 +120,22 @@ export default class MaskEffect extends Effect {
     return parameters;
   }
 
-  cleanup() {}
+  cleanup() {
+    if (this.dummyMaskMap) {
+      this.dummyMaskMap.delete();
+      this.dummyMaskMap = null;
+    }
+
+    if (this.maskPass) {
+      this.maskPass.delete();
+      this.maskPass = null;
+      this.maskMap = null;
+    }
+    if (this.mask && this.programManager) {
+      this.programManager.removeDefaultModule(mask);
+      this.programManager = null;
+    }
+  }
 
   getMaskLayer(maskId, layers) {
     const maskLayer = layers.find(layer => layer.id === maskId);

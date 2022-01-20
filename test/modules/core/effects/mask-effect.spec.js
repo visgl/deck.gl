@@ -115,3 +115,29 @@ test('MaskEffect#too many masks', t => {
   maskEffect.cleanup();
   t.end();
 });
+
+test('MaskEffect#cleanup', t => {
+  const maskEffect = new MaskEffect();
+
+  const layerManager = new LayerManager(gl, {viewport: testViewport});
+  layerManager.setLayers([TEST_MASK_LAYER, TEST_LAYER]);
+  layerManager.updateLayers();
+
+  maskEffect.preRender(gl, {
+    layers: layerManager.getLayers(),
+    onViewportActive: layerManager.activateViewport,
+    viewports: [testViewport]
+  });
+
+  t.ok(maskEffect.programManager, 'ProgramManager is obtained');
+  t.ok(maskEffect.dummyMaskMap, 'Dummy mask map is created');
+  t.ok(maskEffect.maskPass, 'Mask pass is created');
+  t.ok(maskEffect.maskMap, 'Mask map is created');
+
+  maskEffect.cleanup();
+  t.notOk(maskEffect.programManager, 'ProgramManager is released');
+  t.notOk(maskEffect.dummyMaskMap, 'MaskEffect cleans up dummy mask map');
+  t.notOk(maskEffect.maskPass, 'MaskEffect cleans up mask pass');
+  t.notOk(maskEffect.maskMap, 'MaskEffect cleans up mask map');
+  t.end();
+});
