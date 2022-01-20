@@ -31,7 +31,8 @@ export default class PickLayersPass extends LayersPass {
     deviceRect: {x, y, width, height},
     pass = 'picking',
     redrawReason,
-    pickZ
+    pickZ,
+    moduleParameters
   }) {
     const gl = this.gl;
     this.pickZ = pickZ;
@@ -75,7 +76,8 @@ export default class PickLayersPass extends LayersPass {
           viewports,
           onViewportActive,
           pass,
-          redrawReason
+          redrawReason,
+          moduleParameters
         })
     );
 

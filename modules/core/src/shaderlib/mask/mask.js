@@ -101,10 +101,7 @@ function splitMaskProjectionMatrix(
 
 const getMaskUniforms = (opts = {}, context = {}) => {
   const uniforms = {};
-  if (opts.drawToMaskMap || opts.pickingActive) {
-    uniforms.mask_enabled = false;
-    uniforms.mask_texture = opts.dummyMaskMap;
-  } else if (opts.maskEnabled && opts.maskProjectionMatrix) {
+  if (opts.maskEnabled && opts.maskProjectionMatrix) {
     uniforms.mask_enabled = true;
     uniforms.mask_maskByInstance = opts.maskByInstance;
     uniforms.mask_texture = opts.maskMap;
@@ -116,11 +113,9 @@ const getMaskUniforms = (opts = {}, context = {}) => {
     );
     uniforms.mask_projectCenter = maskProjectCenter;
     uniforms.mask_projectionMatrix = maskProjectionMatrix;
-  } else if (opts.maskId) {
+  } else if (opts.drawToMaskMap || opts.pickingActive || opts.maskId) {
     uniforms.mask_enabled = false;
     uniforms.mask_texture = opts.dummyMaskMap;
-  } else {
-    // TODO when/why does this happen?
   }
   return uniforms;
 };

@@ -358,6 +358,14 @@ export default class DeckPicker {
   }) {
     const pickingFBO = pickZ ? this.depthFBO : this.pickingFBO;
 
+    // TODO masking if not supported when picking
+    if (!this.dummyMaskMap) {
+      this.dummyMaskMap = new Texture2D(this.gl, {
+        width: 1,
+        height: 1
+      });
+    }
+
     const {decodePickingColor} = this.pickLayersPass.render({
       layers,
       layerFilter: this.layerFilter,
@@ -368,7 +376,10 @@ export default class DeckPicker {
       deviceRect,
       pass,
       redrawReason,
-      pickZ
+      pickZ,
+      moduleParameters: {
+        dummyMaskMap: this.dummyMaskMap
+      }
     });
 
     // Read from an already rendered picking buffer
