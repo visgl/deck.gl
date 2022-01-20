@@ -1,6 +1,6 @@
 import test from 'tape-catch';
 import VISSTATE_DATA from '../data/visState.json';
-import UNSUPPORTED_LAYER_TYPEVISSTATE_DATA from '../data/unsupportedLayerTypeVisState.json';
+import UNSUPPORTED_LAYER_TYPE_VISSTATE_DATA from '../data/unsupportedLayerTypeVisState.json';
 import {parseMap} from '@deck.gl/carto/api/parseMap';
 
 const METADATA = {
@@ -124,7 +124,7 @@ test('parseMap#unsupported layer type', t => {
   const json = {
     ...METADATA,
     datasets: DATASETS,
-    keplerMapConfig: {version: 'v1', config: {visState: UNSUPPORTED_LAYER_TYPEVISSTATE_DATA}}
+    keplerMapConfig: {version: 'v1', config: {visState: UNSUPPORTED_LAYER_TYPE_VISSTATE_DATA}}
   };
   const {layers} = parseMap(json);
   t.deepEquals(layers, [undefined]);
