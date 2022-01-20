@@ -104,7 +104,7 @@ const getMaskUniforms = (opts = {}, context = {}) => {
   if (opts.drawToMaskMap || opts.pickingActive) {
     uniforms.mask_enabled = false;
     uniforms.mask_texture = opts.dummyMaskMap;
-  } else if (opts.maskEnabled) {
+  } else if (opts.maskEnabled && opts.maskProjectionMatrix) {
     uniforms.mask_enabled = true;
     uniforms.mask_maskByInstance = opts.maskByInstance;
     uniforms.mask_texture = opts.maskMap;
