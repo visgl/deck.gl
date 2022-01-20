@@ -113,7 +113,7 @@ const getMaskUniforms = (opts = {}, context = {}) => {
     );
     uniforms.mask_projectCenter = maskProjectCenter;
     uniforms.mask_projectionMatrix = maskProjectionMatrix;
-  } else if (opts.drawToMaskMap || opts.pickingActive || opts.maskId) {
+  } else if (opts.dummyMaskMap) {
     uniforms.mask_enabled = false;
     uniforms.mask_texture = opts.dummyMaskMap;
   }
