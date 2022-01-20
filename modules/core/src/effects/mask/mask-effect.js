@@ -16,12 +16,20 @@ export default class MaskEffect extends Effect {
     super(props);
     this.programManager = null;
     this.dummyMaskMap = null;
+    this.mask = false;
   }
 
   preRender(gl, {layers, layerFilter, viewports, onViewportActive, views}) {
-    if (layers.length === 0) return;
-    // Hardcode for now
-    const maskId = 'county-mask';
+    const maskIds = new Set(
+      layers.map(({props}) => props.maskId).filter(maskId => maskId !== undefined)
+    );
+    if (maskIds.size === 0) {
+      return;
+    }
+    log.assert(maskIds.size === 1, 'Only one mask layer supported, but multiple maskIds specified');
+
+    this.mask = true;
+    const maskId = [...maskIds][0];
 
     const maskLayer = this.getMaskLayer(maskId, layers);
     if (!this.maskPass) {
@@ -88,6 +96,10 @@ export default class MaskEffect extends Effect {
   }
 
   getModuleParameters(layer) {
+    if (!this.mask) {
+      return {};
+    }
+
     const {props} = layer;
     const parameters = {
       dummyMaskMap: this.dummyMaskMap
