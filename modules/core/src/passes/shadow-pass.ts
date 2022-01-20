@@ -8,6 +8,10 @@ import {
 } from '@luma.gl/core';
 
 export default class ShadowPass extends LayersPass {
+  shadowMap: Texture2D;
+  depthBuffer: Renderbuffer;
+  fbo: Framebuffer;
+
   constructor(gl, props) {
     super(gl, props);
 

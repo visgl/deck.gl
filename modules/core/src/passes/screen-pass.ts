@@ -14,16 +14,21 @@ type ScreenPassProps = {
   id;
 };
 
+type ScreenPassRenderOptions = {
+  inputBuffer: Framebuffer;
+  outputBuffer: Framebuffer;
+};
+
 export default class ScreenPass extends Pass {
   model: ClipSpace;
 
-  constructor(gl, props: ScreenPassProps) {
+  constructor(gl: WebGLRenderingContext, props: ScreenPassProps) {
     super(gl, props);
     const {module, fs, id} = props;
     this.model = new ClipSpace(gl, {id, fs, modules: [module]});
   }
 
-  render(params): void {
+  render(params: ScreenPassRenderOptions): void {
     const gl = this.gl;
 
     setParameters(gl, {viewport: [0, 0, gl.drawingBufferWidth, gl.drawingBufferHeight]});
@@ -46,14 +51,7 @@ export default class ScreenPass extends Pass {
    * @param inputBuffer - Frame buffer that contains the result of the previous pass
    * @param outputBuffer - Frame buffer that serves as the output render target
    */
-  _renderPass(
-    gl: WebGLRenderingContext,
-    options: {
-      inputBuffer: Framebuffer;
-      /** @deprecated Not currently used? */
-      outputBuffer: Framebuffer;
-    }
-  ) {
+  protected _renderPass(gl: WebGLRenderingContext, options: ScreenPassRenderOptions) {
     const {inputBuffer} = options;
     clear(gl, {color: true});
     this.model.draw({
