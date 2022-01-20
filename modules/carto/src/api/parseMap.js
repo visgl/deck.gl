@@ -23,23 +23,28 @@ export function parseMap(json) {
     initialViewState: mapState,
     mapStyle,
     layers: extractTextLayers(layers.reverse()).map(({id, type, config, visualChannels}) => {
-      log.assert(type in LAYER_MAP, `Unsupported layer type: ${type}`);
-      const {Layer, propMap, defaultProps} = LAYER_MAP[type];
+      try {
+        log.assert(type in LAYER_MAP, `Unsupported layer type: ${type}`);
+        const {Layer, propMap, defaultProps} = LAYER_MAP[type];
 
-      const {dataId} = config;
-      const dataset = datasets.find(d => d.id === dataId);
-      log.assert(dataset, `No dataset matching dataId: ${dataId}`);
-      const {data} = dataset;
-      log.assert(data, `No data loaded for dataId: ${dataId}`);
-      return new Layer({
-        id,
-        data,
-        ...defaultProps,
-        ...createBlendingProps(layerBlending),
-        ...(!config.textLabel && createInteractionProps(interactionConfig)),
-        ...createStyleProps(config, propMap),
-        ...createChannelProps(visualChannels, type, config, data) // Must come after style
-      });
+        const {dataId} = config;
+        const dataset = datasets.find(d => d.id === dataId);
+        log.assert(dataset, `No dataset matching dataId: ${dataId}`);
+        const {data} = dataset;
+        log.assert(data, `No data loaded for dataId: ${dataId}`);
+        return new Layer({
+          id,
+          data,
+          ...defaultProps,
+          ...createBlendingProps(layerBlending),
+          ...(!config.textLabel && createInteractionProps(interactionConfig)),
+          ...createStyleProps(config, propMap),
+          ...createChannelProps(visualChannels, type, config, data) // Must come after style
+        });
+      } catch (e) {
+        log.error(e.message)();
+        return undefined;
+      }
     })
   };
 }
