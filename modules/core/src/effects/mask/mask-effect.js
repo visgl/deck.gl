@@ -36,7 +36,6 @@ export default class MaskEffect extends Effect {
       this.maskPass = new MaskPass(gl);
       this.maskMap = this.maskPass.maskMap;
     }
-    const {maskPass, maskMap} = this;
     if (!this.programManager) {
       this.programManager = ProgramManager.getDefaultProgramManager(gl);
       this.programManager.addDefaultModule(mask);
@@ -51,53 +50,58 @@ export default class MaskEffect extends Effect {
 
     // Using the 'positions' attribute will work for the SolidPolygonLayer,
     // but not for all layers
+    const {dummyMaskMap, maskPass, maskMap} = this;
     const {positions} = maskLayer.getAttributeManager().attributes;
     const layerViewport = viewports[0];
+    const maskChanged = maskLayer.getChangeFlags().propsOrDataChanged;
 
-    if (!this.dataViewport || maskLayer.getChangeFlags().propsOrDataChanged) {
+    if (!this.dataViewport || maskChanged) {
       this.dataViewport = getDataViewport(positions, maskMap);
     }
 
-    this.maskViewport = getMaskViewport(this.dataViewport, layerViewport, maskMap);
-    this.maskProjectionMatrix = getMaskProjectionMatrix(this.maskViewport);
+    const maskViewport = getMaskViewport(this.dataViewport, layerViewport, maskMap);
+    if (!maskViewport.equals(this.maskViewport) || maskChanged) {
+      this.maskViewport = maskViewport;
+      this.maskProjectionMatrix = getMaskProjectionMatrix(this.maskViewport);
 
-    maskPass.render({
-      layers,
-      layerFilter,
-      viewports: [this.maskViewport],
-      onViewportActive,
-      views,
-      moduleParameters: {
-        dummyMaskMap: this.dummyMaskMap,
-        devicePixelRatio: 1
-      }
-    });
+      maskPass.render({
+        layers,
+        layerFilter,
+        viewports: [this.maskViewport],
+        onViewportActive,
+        views,
+        moduleParameters: {
+          dummyMaskMap,
+          devicePixelRatio: 1
+        }
+      });
 
-    // Debug show FBO contents on screen
-    // const color = readPixelsToArray(maskMap);
-    // let canvas = document.getElementById('fbo-canvas');
-    // if (!canvas) {
-    //  canvas = document.createElement('canvas');
-    //  canvas.id = 'fbo-canvas';
-    //  canvas.width = maskMap.width;
-    //  canvas.height = maskMap.height;
-    //  canvas.style.zIndex = 100;
-    //  canvas.style.position = 'absolute';
-    //  canvas.style.right = 0;
-    //  canvas.style.border = 'blue 1px solid';
-    //  canvas.style.width = '256px';
-    //  canvas.style.transform = 'scaleY(-1)';
-    //  document.body.appendChild(canvas);
-    // }
-    // const ctx = canvas.getContext('2d');
-    // const imageData = ctx.createImageData(maskMap.width, maskMap.height);
-    // for (let i = 0; i < color.length; i += 4) {
-    //  imageData.data[i + 0] = color[i + 0];
-    //  imageData.data[i + 1] = color[i + 1];
-    //  imageData.data[i + 2] = color[i + 2];
-    //  imageData.data[i + 3] = color[i + 3];
-    // }
-    // ctx.putImageData(imageData, 0, 0);
+      // // Debug show FBO contents on screen
+      // const color = readPixelsToArray(maskMap);
+      // let canvas = document.getElementById('fbo-canvas');
+      // if (!canvas) {
+      //   canvas = document.createElement('canvas');
+      //   canvas.id = 'fbo-canvas';
+      //   canvas.width = maskMap.width;
+      //   canvas.height = maskMap.height;
+      //   canvas.style.zIndex = 100;
+      //   canvas.style.position = 'absolute';
+      //   canvas.style.right = 0;
+      //   canvas.style.border = 'blue 1px solid';
+      //   canvas.style.width = '256px';
+      //   canvas.style.transform = 'scaleY(-1)';
+      //   document.body.appendChild(canvas);
+      // }
+      // const ctx = canvas.getContext('2d');
+      // const imageData = ctx.createImageData(maskMap.width, maskMap.height);
+      // for (let i = 0; i < color.length; i += 4) {
+      //   imageData.data[i + 0] = color[i + 0];
+      //   imageData.data[i + 1] = color[i + 1];
+      //   imageData.data[i + 2] = color[i + 2];
+      //   imageData.data[i + 3] = color[i + 3];
+      // }
+      // ctx.putImageData(imageData, 0, 0);
+    }
   }
 
   getModuleParameters(layer) {
