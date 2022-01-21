@@ -8,7 +8,7 @@ import {
 import {zoomBlur, vignette} from '@luma.gl/shadertools';
 import {hexagons, points} from 'deck.gl-test/data';
 
-import {PolygonLayer, ScatterplotLayer, SolidPolygonLayer, ColumnLayer} from '@deck.gl/layers';
+import {ScatterplotLayer, SolidPolygonLayer, ColumnLayer} from '@deck.gl/layers';
 import {SimpleMeshLayer} from '@deck.gl/mesh-layers';
 
 import {CubeGeometry} from '@luma.gl/core';

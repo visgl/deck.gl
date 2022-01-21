@@ -4,7 +4,6 @@ import {
   ProgramManager
   // readPixelsToArray
 } from '@luma.gl/core';
-// import {SolidPolygonLayer} from '@deck.gl/layers';
 import MaskPass from '../../passes/mask-pass';
 import Effect from '../../lib/effect';
 import {default as mask} from '../../shaderlib/mask/mask';
@@ -140,7 +139,10 @@ export default class MaskEffect extends Effect {
   getMaskLayer(maskId, layers) {
     const maskLayer = layers.find(layer => layer.id === maskId);
     log.assert(maskLayer, `{maskId: '${maskId}'} must match the id of another Layer`);
-    // log.assert(maskLayer instanceof SolidPolygonLayer, 'Mask Layer must be a SolidPolygonLayer');
+    log.assert(
+      maskLayer.constructor.layerName === 'SolidPolygonLayer',
+      'Mask Layer must be a SolidPolygonLayer'
+    );
     return maskLayer;
   }
 }
