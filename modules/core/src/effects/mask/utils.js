@@ -50,18 +50,19 @@ function getBounds({startIndices, size, value}) {
   const start = startIndices[0];
   const end = startIndices[startIndices.length - 1];
   for (let i = start; i < end; i++) {
-    const coord = value.subarray(size * i);
-    if (bounds[0][0] > coord[0]) {
-      bounds[0][0] = coord[0];
+    const x = size * i;
+    const y = x + 1;
+    if (bounds[0][0] > value[x]) {
+      bounds[0][0] = value[x];
     }
-    if (bounds[0][1] > coord[1]) {
-      bounds[0][1] = coord[1];
+    if (bounds[0][1] > value[y]) {
+      bounds[0][1] = value[y];
     }
-    if (bounds[1][0] < coord[0]) {
-      bounds[1][0] = coord[0];
+    if (bounds[1][0] < value[x]) {
+      bounds[1][0] = value[x];
     }
-    if (bounds[1][1] < coord[1]) {
-      bounds[1][1] = coord[1];
+    if (bounds[1][1] < value[y]) {
+      bounds[1][1] = value[y];
     }
   }
 
