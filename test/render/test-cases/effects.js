@@ -1,12 +1,29 @@
-import {PostProcessEffect, LightingEffect, AmbientLight, DirectionalLight} from '@deck.gl/core';
+import {
+  MaskEffect,
+  PostProcessEffect,
+  LightingEffect,
+  AmbientLight,
+  DirectionalLight
+} from '@deck.gl/core';
 import {zoomBlur, vignette} from '@luma.gl/shadertools';
 import {hexagons, points} from 'deck.gl-test/data';
 
-import {ScatterplotLayer, ColumnLayer} from '@deck.gl/layers';
+import {PolygonLayer, ScatterplotLayer, SolidPolygonLayer, ColumnLayer} from '@deck.gl/layers';
 import {SimpleMeshLayer} from '@deck.gl/mesh-layers';
 
 import {CubeGeometry} from '@luma.gl/core';
+import {polygons} from 'deck.gl-test/data';
+
 const cube = new CubeGeometry();
+
+const MASK_POLYGON = [
+  [-122.48, 37.75],
+  [-122.43, 37.73],
+  [-122.4, 37.76],
+  [-122.41, 37.78],
+  [-122.45, 37.79],
+  [-122.48, 37.75]
+];
 
 export default [
   {
@@ -59,6 +76,54 @@ export default [
       })
     ],
     goldenImage: './test/render/golden-images/shadow-effect.png'
+  },
+
+  {
+    name: 'mask-effect',
+    effects: [new MaskEffect()],
+    viewState: {
+      latitude: 37.751537058389985,
+      longitude: -122.42694203247012,
+      zoom: 11.5,
+      pitch: 0,
+      bearing: 0
+    },
+    layers: [
+      new SolidPolygonLayer({
+        id: 'mask-layer',
+        operation: 'mask',
+        data: [{polygon: MASK_POLYGON}],
+        getFillColor: [255, 255, 255]
+      }),
+      new SolidPolygonLayer({
+        id: 'polygon',
+        data: polygons,
+        getPolygon: f => f,
+        getFillColor: [200, 0, 0]
+      }),
+      new SolidPolygonLayer({
+        id: 'polygon-masked',
+        maskId: 'mask-layer',
+        data: polygons,
+        getPolygon: f => f,
+        getFillColor: [0, 200, 0]
+      }),
+      new ScatterplotLayer({
+        id: 'points',
+        maskId: 'mask-layer',
+        data: points,
+        getPosition: d => d.COORDINATES,
+        getFillColor: d => [0, 0, 200],
+        getRadius: d => d.SPACES,
+        radiusScale: 30,
+        radiusMinPixels: 1,
+        radiusMaxPixels: 30
+      })
+    ],
+    imageDiffOptions: {
+      threshold: 0.985
+    },
+    goldenImage: './test/render/golden-images/mask-effect.png'
   },
 
   {
