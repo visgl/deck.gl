@@ -152,6 +152,9 @@ export default class CompositeLayer extends Layer {
       modelMatrix,
       extensions,
       fetch,
+      maskId,
+      maskByInstance,
+      maskEnabled,
       _subLayerProps: overridingProps
     } = this.props;
     const newProps = {
@@ -169,8 +172,12 @@ export default class CompositeLayer extends Layer {
       positionFormat,
       modelMatrix,
       extensions,
-      fetch
+      fetch,
+      maskId,
+      maskEnabled
     };
+
+    if (maskByInstance !== undefined) newProps.maskByInstance = maskByInstance;
 
     const overridingSublayerProps = overridingProps && overridingProps[sublayerProps.id];
     const overridingSublayerTriggers =
