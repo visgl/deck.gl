@@ -49,9 +49,9 @@ export default class MaskEffect extends Effect {
       });
     }
 
-    // Using the 'positions' attribute will work for the PolygonLayer,
+    // Using the 'positions' attribute will work for the SolidPolygonLayer,
     // but not for all layers
-    const {positions} = maskLayer.state.attributeManager.attributes;
+    const {positions} = maskLayer.getAttributeManager().attributes;
     const layerViewport = viewports[0];
     const maskViewport = getMaskViewport(positions, layerViewport, maskMap);
     this.maskProjectionMatrix = getMaskProjectionMatrix(maskViewport);
