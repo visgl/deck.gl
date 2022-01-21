@@ -24,7 +24,7 @@ export function getMaskProjectionMatrix({width, height, pixelUnprojectionMatrix}
  * area currently visible (extended by a buffer) or the area of the masking
  * data, whichever is smaller
  */
-export function getMaskViewport(positions, layerViewport, {width, height}) {
+export function getMaskViewport(dataViewport, layerViewport, {width, height}) {
   const bounds = layerViewport.getBounds();
   let viewport = new WebMercatorViewport({width, height}).fitBounds([
     [bounds[0], bounds[1]],
@@ -33,12 +33,14 @@ export function getMaskViewport(positions, layerViewport, {width, height}) {
   const {longitude, latitude, zoom} = viewport;
   viewport = new WebMercatorViewport({width, height, longitude, latitude, zoom: zoom - 1});
 
+  return dataViewport.zoom > viewport.zoom ? dataViewport : viewport;
+}
+
+export function getDataViewport(positions, {width, height}) {
   const dataBounds = getBounds(positions);
-  const dataViewport = new WebMercatorViewport({width, height}).fitBounds(dataBounds, {
+  return new WebMercatorViewport({width, height}).fitBounds(dataBounds, {
     padding: 2
   });
-
-  return dataViewport.zoom > viewport.zoom ? dataViewport : viewport;
 }
 
 function getBounds({startIndices, size, value}) {

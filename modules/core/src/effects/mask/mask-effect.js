@@ -7,7 +7,7 @@ import {
 import MaskPass from '../../passes/mask-pass';
 import Effect from '../../lib/effect';
 import {default as mask} from '../../shaderlib/mask/mask';
-import {getMaskProjectionMatrix, getMaskViewport} from './utils';
+import {getDataViewport, getMaskProjectionMatrix, getMaskViewport} from './utils';
 
 // Class to manage mask effect
 export default class MaskEffect extends Effect {
@@ -53,13 +53,18 @@ export default class MaskEffect extends Effect {
     // but not for all layers
     const {positions} = maskLayer.getAttributeManager().attributes;
     const layerViewport = viewports[0];
-    const maskViewport = getMaskViewport(positions, layerViewport, maskMap);
-    this.maskProjectionMatrix = getMaskProjectionMatrix(maskViewport);
+
+    if (!this.dataViewport || maskLayer.getChangeFlags().propsOrDataChanged) {
+      this.dataViewport = getDataViewport(positions, maskMap);
+    }
+
+    this.maskViewport = getMaskViewport(this.dataViewport, layerViewport, maskMap);
+    this.maskProjectionMatrix = getMaskProjectionMatrix(this.maskViewport);
 
     maskPass.render({
       layers,
       layerFilter,
-      viewports: [maskViewport],
+      viewports: [this.maskViewport],
       onViewportActive,
       views,
       moduleParameters: {
@@ -134,6 +139,10 @@ export default class MaskEffect extends Effect {
       this.programManager.removeDefaultModule(mask);
       this.programManager = null;
     }
+
+    this.dataViewport = null;
+    this.maskViewport = null;
+    this.maskProjectionMatrix = null;
   }
 
   getMaskLayer(maskId, layers) {
