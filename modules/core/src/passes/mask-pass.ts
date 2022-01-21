@@ -3,6 +3,9 @@ import {OPERATION} from '../lib/constants';
 import LayersPass from './layers-pass';
 
 export default class MaskPass extends LayersPass {
+  shadowMap: Texture2D;
+  fbo: Framebuffer;
+
   constructor(gl, props) {
     super(gl, props);
 
