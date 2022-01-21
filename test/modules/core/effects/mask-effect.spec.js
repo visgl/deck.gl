@@ -61,8 +61,6 @@ test('MaskEffect#getModuleParameters', t => {
     'Mask projection matrix is in parameters'
   );
   t.is(parameters.maskByInstance, false, 'maskByInstance inferred as false for SolidPolygonLayer');
-  t.is(parameters.maskByInstance, false, 'maskByInstance inferred as false for SolidPolygonLayer');
-  t.is(parameters.maskEnabled, true, 'maskEnabled added to parameters');
 
   maskEffect.cleanup();
   t.end();

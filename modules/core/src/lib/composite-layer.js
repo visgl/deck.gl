@@ -173,10 +173,10 @@ export default class CompositeLayer extends Layer {
       modelMatrix,
       extensions,
       fetch,
-      maskId,
       maskEnabled
     };
 
+    if (maskId !== undefined) newProps.maskId = maskId;
     if (maskByInstance !== undefined) newProps.maskByInstance = maskByInstance;
 
     const overridingSublayerProps = overridingProps && overridingProps[sublayerProps.id];
