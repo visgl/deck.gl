@@ -115,8 +115,9 @@ export default class MaskEffect extends Effect {
     };
     if (props.maskId) {
       // Infer by geometry if 'maskByInstance' prop isn't explictly set
-      if (!('maskByInstance' in props)) {
-        parameters.maskByInstance = 'instancePositions' in layer.getAttributeManager().attributes;
+      const attributeManager = layer.getAttributeManager();
+      if (attributeManager && !('maskByInstance' in props)) {
+        parameters.maskByInstance = 'instancePositions' in attributeManager.attributes;
       }
       if (!('maskEnabled' in props)) {
         parameters.maskEnabled = true;
