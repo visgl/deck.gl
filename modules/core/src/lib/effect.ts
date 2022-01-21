@@ -1,5 +1,11 @@
+import type Layer from './layer';
+
 export default class Effect {
-  constructor(props = {}) {
+  id: string;
+  props: any;
+  enableForPicking: boolean;
+
+  constructor(props: {id?: string} = {}) {
     const {id = 'effect'} = props;
     this.id = id;
     this.props = {...props};
@@ -8,7 +14,7 @@ export default class Effect {
 
   preRender() {}
 
-  getModuleParameters() {}
+  getModuleParameters(layer: Layer): any {}
 
   cleanup() {}
 }
