@@ -37,7 +37,9 @@ export default class MaskPass extends LayersPass {
     withParameters(
       this.gl,
       {
-        framebuffer: this.fbo
+        framebuffer: this.fbo,
+        depthTest: false,
+        blend: false
       },
       () => {
         super.render({...params, target, pass: 'mask'});
