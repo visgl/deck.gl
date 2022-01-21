@@ -39,6 +39,10 @@ export function createLayerPropsFromFeatures(features, featuresDiff) {
 }
 
 export function createLayerPropsFromBinary(geojsonBinary, encodePickingColor) {
+  // The binary data format is documented here
+  // https://github.com/visgl/loaders.gl/blob/master/modules/gis/docs/api-reference/geojson-to-binary.md
+  // It is the default output from the `MVTLoader` and can also be obtained
+  // from GeoJSON by using the `geojsonToBinary` utility function.
   const layerProps = createEmptyLayerProps();
   const {points, lines, polygons} = geojsonBinary;
 

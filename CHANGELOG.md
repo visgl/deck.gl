@@ -21,6 +21,14 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ### deck.gl v8.7 Prereleases
 
+#### deck.gl [8.7.0-alpha.11] - Dec 30 2021
+
+- CARTO - add clientId parameter for internal tracing (#6534)
+
+#### deck.gl [8.7.0-alpha.10] - Dec 28 2021
+
+- CARTO - add clientId parameter for internal tracing (#6534)
+
 #### deck.gl [8.7.0-alpha.9] - Dec 17 2021
 
 - CartoLayer support for dynamic tiled maps (geojson) (#6509)

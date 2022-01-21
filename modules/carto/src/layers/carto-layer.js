@@ -27,6 +27,9 @@ const defaultProps = {
   // (String, optional): format of data
   format: null,
 
+  // (String, optional): clientId identifier used for internal tracing, place here a string to identify the client who is doing the request.
+  clientId: null,
+
   // (String, optional): name of the `geo_column` in the CARTO platform. Use this override the default column ('geom'), from which the geometry information should be fetched.
   geoColumn: null,
 
@@ -98,7 +101,7 @@ export default class CartoLayer extends CompositeLayer {
 
   async _updateData() {
     try {
-      const {type, data: source, credentials, ...rest} = this.props;
+      const {type, data: source, clientId, credentials, ...rest} = this.props;
       const localConfig = {...getDefaultCredentials(), ...credentials};
       const {apiVersion} = localConfig;
 
@@ -106,7 +109,7 @@ export default class CartoLayer extends CompositeLayer {
       if (apiVersion === API_VERSIONS.V1 || apiVersion === API_VERSIONS.V2) {
         result = {data: await getDataV2({type, source, credentials})};
       } else {
-        result = await fetchLayerData({type, source, credentials, ...rest});
+        result = await fetchLayerData({type, source, clientId, credentials, ...rest});
       }
 
       this.setState({...result, apiVersion});

@@ -1,15 +1,37 @@
-import LayersPass from './layers-pass';
+import LayersPass, {LayersPassRenderOptions, RenderStats} from './layers-pass';
 import {withParameters} from '@luma.gl/core';
 import GL from '@luma.gl/constants';
 import log from '../utils/log';
+
+import type {Framebuffer} from '@luma.gl/core';
+import type Viewport from '../viewports/viewport';
+import type Layer from '../lib/layer';
 
 const PICKING_PARAMETERS = {
   blendFunc: [GL.ONE, GL.ZERO, GL.CONSTANT_ALPHA, GL.ZERO],
   blendEquation: GL.FUNC_ADD
 };
 
+type PickLayersPassRenderOptions = LayersPassRenderOptions & {
+  pickingFBO: Framebuffer;
+  deviceRect: {x: number; y: number; width: number; height: number};
+  pickZ: boolean;
+};
+
+type EncodedPickingColors = {
+  a: number;
+  layer: Layer;
+  viewports: Viewport[];
+};
+
 export default class PickLayersPass extends LayersPass {
-  render(props) {
+  private pickZ?: boolean;
+  private _colors: {
+    byLayer: Map<Layer, EncodedPickingColors>;
+    byAlpha: EncodedPickingColors[];
+  } | null = null;
+
+  render(props: PickLayersPassRenderOptions) {
     if (props.pickingFBO) {
       // When drawing into an off-screen buffer, use the alpha channel to encode layer index
       return this._drawPickingBuffer(props);
@@ -30,17 +52,29 @@ export default class PickLayersPass extends LayersPass {
     pickingFBO,
     deviceRect: {x, y, width, height},
     pass = 'picking',
-    redrawReason,
     pickZ
-  }) {
+  }: PickLayersPassRenderOptions): {
+    decodePickingColor:
+      | null
+      | ((pickedColor: number[]) =>
+          | {
+              pickedLayer: Layer;
+              pickedViewports: Viewport[];
+              pickedObjectIndex: number;
+            }
+          | undefined);
+    stats: RenderStats;
+  } {
     const gl = this.gl;
     this.pickZ = pickZ;
 
     // Track encoded layer indices
-    const encodedColors = !pickZ && {
-      byLayer: new Map(),
-      byAlpha: []
-    };
+    const encodedColors = pickZ
+      ? null
+      : {
+          byLayer: new Map(),
+          byAlpha: []
+        };
     // Temporarily store it on the instance so that it can be accessed by this.getLayerParameters
     this._colors = encodedColors;
 
@@ -74,8 +108,7 @@ export default class PickLayersPass extends LayersPass {
           views,
           viewports,
           onViewportActive,
-          pass,
-          redrawReason
+          pass
         })
     );
 
@@ -85,12 +118,11 @@ export default class PickLayersPass extends LayersPass {
     return {decodePickingColor, stats: renderStatus};
   }
 
-  // PRIVATE
-  shouldDrawLayer(layer) {
+  protected shouldDrawLayer(layer: Layer): boolean {
     return layer.props.pickable;
   }
 
-  getModuleParameters() {
+  protected getModuleParameters() {
     return {
       pickingActive: 1,
       pickingAttribute: this.pickZ,
@@ -100,10 +132,10 @@ export default class PickLayersPass extends LayersPass {
     };
   }
 
-  getLayerParameters(layer, layerIndex, viewport) {
+  protected getLayerParameters(layer: Layer, layerIndex: number, viewport: Viewport): any {
     const pickParameters = {...layer.props.parameters};
 
-    if (this.pickZ) {
+    if (!this._colors) {
       pickParameters.blend = false;
     } else {
       Object.assign(pickParameters, PICKING_PARAMETERS);
@@ -117,20 +149,27 @@ export default class PickLayersPass extends LayersPass {
 
 // Assign an unique alpha value for each pickable layer and track the encoding in the cache object
 // Returns normalized blend color
-function encodeColor(encoded, layer, viewport) {
+function encodeColor(
+  encoded: {
+    byLayer: Map<Layer, EncodedPickingColors>;
+    byAlpha: EncodedPickingColors[];
+  },
+  layer: Layer,
+  viewport: Viewport
+): number[] {
   const {byLayer, byAlpha} = encoded;
   let a;
 
   // Encode layerIndex in the alpha channel
   // TODO - combine small layers to better utilize the picking color space
-  if (byLayer.has(layer)) {
-    const entry = byLayer.get(layer);
+  let entry = byLayer.get(layer);
+  if (entry) {
     entry.viewports.push(viewport);
     a = entry.a;
   } else {
     a = byLayer.size + 1;
     if (a <= 255) {
-      const entry = {a, layer, viewports: [viewport]};
+      entry = {a, layer, viewports: [viewport]};
       byLayer.set(layer, entry);
       byAlpha[a] = entry;
     } else {
@@ -142,7 +181,19 @@ function encodeColor(encoded, layer, viewport) {
 }
 
 // Given a picked color, retrieve the corresponding layer and viewports from cache
-function decodeColor(encoded, pickedColor) {
+function decodeColor(
+  encoded: {
+    byLayer: Map<Layer, EncodedPickingColors>;
+    byAlpha: EncodedPickingColors[];
+  },
+  pickedColor: number[]
+):
+  | {
+      pickedLayer: Layer;
+      pickedViewports: Viewport[];
+      pickedObjectIndex: number;
+    }
+  | undefined {
   const entry = encoded.byAlpha[pickedColor[3]];
   return (
     entry && {
