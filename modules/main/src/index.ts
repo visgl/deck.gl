@@ -102,7 +102,8 @@ export {
   PolygonLayer,
   SolidPolygonLayer,
   GeoJsonLayer,
-  TextLayer
+  TextLayer,
+  setFontAtlasCacheLimit
 } from '@deck.gl/layers';
 
 export {

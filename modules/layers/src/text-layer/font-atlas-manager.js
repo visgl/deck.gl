@@ -39,7 +39,7 @@ const CACHE_LIMIT = 3;
  * }
  *
  */
-const cache = new LRUCache(CACHE_LIMIT);
+let cache = new LRUCache(CACHE_LIMIT);
 
 const VALID_PROPS = [
   'fontFamily',
@@ -95,6 +95,22 @@ function setTextStyle(ctx, fontFamily, fontSize, fontWeight) {
   ctx.fillStyle = '#000';
   ctx.textBaseline = 'baseline';
   ctx.textAlign = 'left';
+}
+
+/**
+ * Sets the Font Atlas LRU Cache Limit
+ * @param {number} limit LRU Cache limit
+ */
+export function setFontAtlasCacheLimit(limit) {
+  if (typeof limit !== 'number') {
+    throw new Error(`Invalid limit value for Font Atlas Cache. It should be a positive number.`);
+  }
+
+  if (limit < CACHE_LIMIT) {
+    throw new Error(`Font Atlas Cache Limit should be at least ${CACHE_LIMIT}`);
+  }
+
+  cache = new LRUCache(limit);
 }
 
 export default class FontAtlasManager {

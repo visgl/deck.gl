@@ -32,6 +32,7 @@ import './icon-manager.spec';
 import './text-layer/utils.spec';
 import './text-layer/lru-cache.spec';
 import './text-layer/text-layer.spec';
+import './text-layer/font-atlas.spec';
 import './column-geometry.spec';
 import './utils.spec';
 import './scatterplot-layer.spec';
