@@ -5,7 +5,7 @@ import {ClipExtension} from '@deck.gl/extensions';
 import {MVTLayer, _getURLFromTemplate} from '@deck.gl/geo-layers';
 import {GeoJsonLayer} from '@deck.gl/layers';
 import {geojsonToBinary} from '@loaders.gl/gis';
-import {Tile} from './schema/carto-dynamic-tile-no-props';
+import {Tile} from './schema/carto-dynamic-tile';
 import {encodeParameter, FORMAT_TILES} from '../api/maps-api-common';
 
 function parseJSON(arrayBuffer) {
