@@ -119,35 +119,37 @@ Points._FieldEntry5.write = function (obj, pbf) {
 export const Lines = {};
 
 Lines.read = function (pbf, end) {
-    return pbf.readFields(Lines._readField, {positions: null, pathIndices: null, featureIds: null, properties: [], numericProps: {}}, end);
+    return pbf.readFields(Lines._readField, {positions: null, pathIndices: null, globalFeatureIds: null, featureIds: null, properties: [], numericProps: {}}, end);
 };
 Lines._readField = function (tag, obj, pbf) {
     if (tag === 1) obj.positions = Coords.read(pbf, pbf.readVarint() + pbf.pos);
     else if (tag === 2) obj.pathIndices = Coords.read(pbf, pbf.readVarint() + pbf.pos);
-    else if (tag === 3) obj.featureIds = Coords.read(pbf, pbf.readVarint() + pbf.pos);
-    else if (tag === 4) obj.properties.push(Properties.read(pbf, pbf.readVarint() + pbf.pos));
-    else if (tag === 5)  { var entry = Lines._FieldEntry5.read(pbf, pbf.readVarint() + pbf.pos); obj.numericProps[entry.key] = entry.value; }
+    else if (tag === 3) obj.globalFeatureIds = Coords.read(pbf, pbf.readVarint() + pbf.pos);
+    else if (tag === 4) obj.featureIds = Coords.read(pbf, pbf.readVarint() + pbf.pos);
+    else if (tag === 5) obj.properties.push(Properties.read(pbf, pbf.readVarint() + pbf.pos));
+    else if (tag === 6)  { var entry = Lines._FieldEntry6.read(pbf, pbf.readVarint() + pbf.pos); obj.numericProps[entry.key] = entry.value; }
 };
 Lines.write = function (obj, pbf) {
     if (obj.positions) pbf.writeMessage(1, Coords.write, obj.positions);
     if (obj.pathIndices) pbf.writeMessage(2, Coords.write, obj.pathIndices);
-    if (obj.featureIds) pbf.writeMessage(3, Coords.write, obj.featureIds);
-    if (obj.properties) for (var i = 0; i < obj.properties.length; i++) pbf.writeMessage(4, Properties.write, obj.properties[i]);
-    if (obj.numericProps) for (i in obj.numericProps) if (Object.prototype.hasOwnProperty.call(obj.numericProps, i)) pbf.writeMessage(5, Lines._FieldEntry5.write, { key: i, value: obj.numericProps[i] });
+    if (obj.globalFeatureIds) pbf.writeMessage(3, Coords.write, obj.globalFeatureIds);
+    if (obj.featureIds) pbf.writeMessage(4, Coords.write, obj.featureIds);
+    if (obj.properties) for (var i = 0; i < obj.properties.length; i++) pbf.writeMessage(5, Properties.write, obj.properties[i]);
+    if (obj.numericProps) for (i in obj.numericProps) if (Object.prototype.hasOwnProperty.call(obj.numericProps, i)) pbf.writeMessage(6, Lines._FieldEntry6.write, { key: i, value: obj.numericProps[i] });
 };
 
-// Lines._FieldEntry5 ========================================
+// Lines._FieldEntry6 ========================================
 
-Lines._FieldEntry5 = {};
+Lines._FieldEntry6 = {};
 
-Lines._FieldEntry5.read = function (pbf, end) {
-    return pbf.readFields(Lines._FieldEntry5._readField, {key: "", value: null}, end);
+Lines._FieldEntry6.read = function (pbf, end) {
+    return pbf.readFields(Lines._FieldEntry6._readField, {key: "", value: null}, end);
 };
-Lines._FieldEntry5._readField = function (tag, obj, pbf) {
+Lines._FieldEntry6._readField = function (tag, obj, pbf) {
     if (tag === 1) obj.key = pbf.readString();
     else if (tag === 2) obj.value = NumericProp.read(pbf, pbf.readVarint() + pbf.pos);
 };
-Lines._FieldEntry5.write = function (obj, pbf) {
+Lines._FieldEntry6.write = function (obj, pbf) {
     if (obj.key) pbf.writeStringField(1, obj.key);
     if (obj.value) pbf.writeMessage(2, NumericProp.write, obj.value);
 };
@@ -157,37 +159,39 @@ Lines._FieldEntry5.write = function (obj, pbf) {
 export const Polygons = {};
 
 Polygons.read = function (pbf, end) {
-    return pbf.readFields(Polygons._readField, {positions: null, polygonIndices: null, featureIds: null, primitivePolygonIndices: null, properties: [], numericProps: {}}, end);
+    return pbf.readFields(Polygons._readField, {positions: null, polygonIndices: null, globalFeatureIds: null, featureIds: null, primitivePolygonIndices: null, properties: [], numericProps: {}}, end);
 };
 Polygons._readField = function (tag, obj, pbf) {
     if (tag === 1) obj.positions = Coords.read(pbf, pbf.readVarint() + pbf.pos);
     else if (tag === 2) obj.polygonIndices = Coords.read(pbf, pbf.readVarint() + pbf.pos);
-    else if (tag === 3) obj.featureIds = Coords.read(pbf, pbf.readVarint() + pbf.pos);
-    else if (tag === 4) obj.primitivePolygonIndices = Coords.read(pbf, pbf.readVarint() + pbf.pos);
-    else if (tag === 5) obj.properties.push(Properties.read(pbf, pbf.readVarint() + pbf.pos));
-    else if (tag === 6)  { var entry = Polygons._FieldEntry6.read(pbf, pbf.readVarint() + pbf.pos); obj.numericProps[entry.key] = entry.value; }
+    else if (tag === 3) obj.globalFeatureIds = Coords.read(pbf, pbf.readVarint() + pbf.pos);
+    else if (tag === 4) obj.featureIds = Coords.read(pbf, pbf.readVarint() + pbf.pos);
+    else if (tag === 5) obj.primitivePolygonIndices = Coords.read(pbf, pbf.readVarint() + pbf.pos);
+    else if (tag === 6) obj.properties.push(Properties.read(pbf, pbf.readVarint() + pbf.pos));
+    else if (tag === 7)  { var entry = Polygons._FieldEntry7.read(pbf, pbf.readVarint() + pbf.pos); obj.numericProps[entry.key] = entry.value; }
 };
 Polygons.write = function (obj, pbf) {
     if (obj.positions) pbf.writeMessage(1, Coords.write, obj.positions);
     if (obj.polygonIndices) pbf.writeMessage(2, Coords.write, obj.polygonIndices);
-    if (obj.featureIds) pbf.writeMessage(3, Coords.write, obj.featureIds);
-    if (obj.primitivePolygonIndices) pbf.writeMessage(4, Coords.write, obj.primitivePolygonIndices);
-    if (obj.properties) for (var i = 0; i < obj.properties.length; i++) pbf.writeMessage(5, Properties.write, obj.properties[i]);
-    if (obj.numericProps) for (i in obj.numericProps) if (Object.prototype.hasOwnProperty.call(obj.numericProps, i)) pbf.writeMessage(6, Polygons._FieldEntry6.write, { key: i, value: obj.numericProps[i] });
+    if (obj.globalFeatureIds) pbf.writeMessage(3, Coords.write, obj.globalFeatureIds);
+    if (obj.featureIds) pbf.writeMessage(4, Coords.write, obj.featureIds);
+    if (obj.primitivePolygonIndices) pbf.writeMessage(5, Coords.write, obj.primitivePolygonIndices);
+    if (obj.properties) for (var i = 0; i < obj.properties.length; i++) pbf.writeMessage(6, Properties.write, obj.properties[i]);
+    if (obj.numericProps) for (i in obj.numericProps) if (Object.prototype.hasOwnProperty.call(obj.numericProps, i)) pbf.writeMessage(7, Polygons._FieldEntry7.write, { key: i, value: obj.numericProps[i] });
 };
 
-// Polygons._FieldEntry6 ========================================
+// Polygons._FieldEntry7 ========================================
 
-Polygons._FieldEntry6 = {};
+Polygons._FieldEntry7 = {};
 
-Polygons._FieldEntry6.read = function (pbf, end) {
-    return pbf.readFields(Polygons._FieldEntry6._readField, {key: "", value: null}, end);
+Polygons._FieldEntry7.read = function (pbf, end) {
+    return pbf.readFields(Polygons._FieldEntry7._readField, {key: "", value: null}, end);
 };
-Polygons._FieldEntry6._readField = function (tag, obj, pbf) {
+Polygons._FieldEntry7._readField = function (tag, obj, pbf) {
     if (tag === 1) obj.key = pbf.readString();
     else if (tag === 2) obj.value = NumericProp.read(pbf, pbf.readVarint() + pbf.pos);
 };
-Polygons._FieldEntry6.write = function (obj, pbf) {
+Polygons._FieldEntry7.write = function (obj, pbf) {
     if (obj.key) pbf.writeStringField(1, obj.key);
     if (obj.value) pbf.writeMessage(2, NumericProp.write, obj.value);
 };
