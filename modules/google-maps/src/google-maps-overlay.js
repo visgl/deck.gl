@@ -86,8 +86,8 @@ export default class GoogleMapsOverlay {
     if (renderingType === UNINITIALIZED) {
       return;
     }
-    const isVectorMap = renderingType === VECTOR && google.maps.WebglOverlayView;
-    const OverlayView = isVectorMap ? google.maps.WebglOverlayView : google.maps.OverlayView;
+    const isVectorMap = renderingType === VECTOR && google.maps.WebGLOverlayView;
+    const OverlayView = isVectorMap ? google.maps.WebGLOverlayView : google.maps.OverlayView;
     const overlay = new OverlayView();
 
     // Lifecycle methods are different depending on map type

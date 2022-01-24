@@ -198,7 +198,7 @@ export class OverlayView {
   }
 }
 
-export class WebglOverlayView {
+export class WebGLOverlayView {
   constructor() {
     this.map = null;
     this._container = document.createElement('div');
