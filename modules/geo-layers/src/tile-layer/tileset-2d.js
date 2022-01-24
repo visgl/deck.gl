@@ -134,8 +134,8 @@ export default class Tileset2D {
     const isModelMatrixNew = !modelMatrixAsMatrix4.equals(this._modelMatrix);
     if (!viewport.equals(this._viewport) || isModelMatrixNew) {
       if (isModelMatrixNew) {
-        this._modelMatrixInverse = modelMatrix && modelMatrixAsMatrix4.clone().invert();
-        this._modelMatrix = modelMatrix && modelMatrixAsMatrix4;
+        this._modelMatrixInverse = modelMatrixAsMatrix4.clone().invert();
+        this._modelMatrix = modelMatrixAsMatrix4;
       }
       this._viewport = viewport;
       const tileIndices = this.getTileIndices({
