@@ -18,16 +18,25 @@ function parsePbf(buffer) {
   return tile;
 }
 
+function convertToTypedArray(obj, TypedArray) {
+  obj.value = new TypedArray(Object.values(obj.value));
+}
+
 function tileToBinary({points, lines, polygons}) {
-  // Convert to typed arrays
-  points.positions.value = new Float32Array(points.positions.value);
+  convertToTypedArray(points.positions, Float32Array);
+  convertToTypedArray(points.globalFeatureIds, Uint32Array);
+  convertToTypedArray(points.featureIds, Uint32Array);
 
-  lines.positions.value = new Float32Array(lines.positions.value);
-  lines.pathIndices.value = new Uint16Array(lines.pathIndices.value);
+  convertToTypedArray(lines.positions, Float32Array);
+  convertToTypedArray(lines.pathIndices, Uint32Array);
+  convertToTypedArray(lines.globalFeatureIds, Uint32Array);
+  convertToTypedArray(lines.featureIds, Uint32Array);
 
-  polygons.positions.value = new Float32Array(polygons.positions.value);
-  polygons.polygonIndices.value = new Uint16Array(polygons.polygonIndices.value);
-  polygons.primitivePolygonIndices.value = new Uint16Array(polygons.primitivePolygonIndices.value);
+  convertToTypedArray(polygons.positions, Float32Array);
+  convertToTypedArray(polygons.polygonIndices, Uint32Array);
+  convertToTypedArray(polygons.primitivePolygonIndices, Uint32Array);
+  convertToTypedArray(polygons.globalFeatureIds, Uint32Array);
+  convertToTypedArray(polygons.featureIds, Uint32Array);
 
   return {points, lines, polygons};
 }
