@@ -1,6 +1,6 @@
 # GoogleMapsOverlay
 
-This class implements the [OverlayView](https://developers.google.com/maps/documentation/javascript/reference/overlay-view#OverlayView)/[WebglOverlayView](https://developers.google.com/maps/documentation/javascript/reference/webgl#WebglOverlayView) (depending on map rendering type) interface and can be used as any other Google Maps overlay.
+This class implements the [OverlayView](https://developers.google.com/maps/documentation/javascript/reference/overlay-view#OverlayView)/[WebGLOverlayView](https://developers.google.com/maps/documentation/javascript/reference/webgl#WebGLOverlayView) (depending on map rendering type) interface and can be used as any other Google Maps overlay.
 
 ## Vector/Raster maps
 
