@@ -80,11 +80,13 @@ export class Map {
     this._callbacks = {};
 
     this.projection = new Projection(opts);
-    this.coordinateTransformer = {
+    this.transformer = {
       getCameraParams: () => {
         return {
-          lat: this.opts.latitude,
-          lng: this.opts.longitude,
+          center: {
+            lat: () => this.opts.latitude,
+            lng: () => this.opts.longitude
+          },
           heading: this.getHeading(),
           tilt: this.getTilt(),
           zoom: this.getZoom()
@@ -119,7 +121,7 @@ export class Map {
       if (this.getRenderingType() === RenderingType.RASTER) {
         overlay.draw();
       } else {
-        overlay.onDraw(undefined, this.coordinateTransformer);
+        overlay.onDraw({transformer: this.transformer});
       }
     }
   }
@@ -161,7 +163,7 @@ export class Map {
     this._overlays.add(overlay);
     overlay.onAdd();
     if (this.getRenderingType() === RenderingType.VECTOR) {
-      overlay.onContextRestored();
+      overlay.onContextRestored({});
     }
   }
 
