@@ -151,12 +151,11 @@ function createChannelProps(visualChannels, type, config, data) {
     );
   }
   if (strokeColorField) {
-    const opacity =
-      visConfig.strokeOpacity !== undefined ? visConfig.strokeOpacity / visConfig.opacity : 1;
+    const opacity = visConfig.strokeOpacity !== undefined ? visConfig.strokeOpacity : 1;
     result.getLineColor = getColorAccessor(
       strokeColorField,
       strokeColorScale,
-      visConfig.colorRange,
+      visConfig.strokeColorRange,
       opacity,
       data
     );

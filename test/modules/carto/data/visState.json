@@ -565,7 +565,8 @@
           "getLineWidth": 0.6,
           "getPointRadius": 10,
           "wireframe": false,
-          "highlightColor": [252, 242, 26, 255]
+          "highlightColor": [252, 242, 26, 255],
+          "uniqueIdProperty": "geoid"
         }
       }
     ]
@@ -787,7 +788,8 @@
           "getLineWidth": 0.5,
           "getPointRadius": 10,
           "wireframe": false,
-          "highlightColor": [252, 242, 26, 255]
+          "highlightColor": [252, 242, 26, 255],
+          "uniqueIdProperty": "geoid"
         }
       }
     ]
