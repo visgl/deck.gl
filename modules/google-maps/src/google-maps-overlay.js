@@ -110,7 +110,7 @@ export default class GoogleMapsOverlay {
     this._deck = createDeckInstance(this._map, this._overlay, this._deck, this.props);
   }
 
-  _onContextRestored(gl) {
+  _onContextRestored({gl}) {
     const _customRender = () => {
       this._overlay.requestRedraw();
     };
@@ -171,7 +171,7 @@ export default class GoogleMapsOverlay {
   }
 
   // Vector code path
-  _onDrawVector(gl, coordinateTransformer) {
+  _onDrawVector({gl, transformer}) {
     if (!this._deck || !this._map) {
       return;
     }
@@ -179,7 +179,7 @@ export default class GoogleMapsOverlay {
     const deck = this._deck;
 
     deck.setProps({
-      ...getViewPropsFromCoordinateTransformer(this._map, coordinateTransformer)
+      ...getViewPropsFromCoordinateTransformer(this._map, transformer)
     });
 
     if (deck.layerManager) {

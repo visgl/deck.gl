@@ -155,17 +155,11 @@ export function getViewPropsFromOverlay(map, overlay) {
 /**
  * Get the current view state
  * @param map (google.maps.Map) - The parent Map instance
- * @param coordinateTransformer (google.maps.CoordinateTransformer) - A CoordinateTransformer instance
+ * @param transformer (google.maps.CoordinateTransformer) - A CoordinateTransformer instance
  */
-export function getViewPropsFromCoordinateTransformer(map, coordinateTransformer) {
+export function getViewPropsFromCoordinateTransformer(map, transformer) {
   const {width, height} = getMapSize(map);
-  const {
-    lat: latitude,
-    lng: longitude,
-    heading: bearing,
-    tilt: pitch,
-    zoom
-  } = coordinateTransformer.getCameraParams();
+  const {center, heading: bearing, tilt: pitch, zoom} = transformer.getCameraParams();
 
   // Match Google projection matrix
   const fovy = 25;
@@ -191,8 +185,8 @@ export function getViewPropsFromCoordinateTransformer(map, coordinateTransformer
     viewState: {
       altitude: focalDistance,
       bearing,
-      latitude,
-      longitude,
+      latitude: center.lat(),
+      longitude: center.lng(),
       pitch,
       projectionMatrix,
       repeat: true,
