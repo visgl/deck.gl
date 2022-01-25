@@ -1,18 +1,18 @@
 import test from 'tape-promise/tape';
 
-import {setFontAtlasCacheLimit} from '@deck.gl/layers';
+import {TextLayer} from '@deck.gl/layers';
 
-test('setFontAtlasCacheLimit', t => {
-  setFontAtlasCacheLimit(10);
-  t.ok(true, 'setFontAtlasCacheLimit is called without error');
+test('TextLayer - fontAtlasCacheLimit', t => {
+  TextLayer.fontAtlasCacheLimit = 10;
+  t.ok(true, 'fontAtlasCacheLimit is set without error');
   t.end();
 });
 
-test('setFontAtlasCacheLimit - null argument', t => {
+test('TextLayer - fontAtlasCacheLimit - null argument', t => {
   let didThrow = false;
 
   try {
-    setFontAtlasCacheLimit(null);
+    TextLayer.fontAtlasCacheLimit = null;
   } catch (e) {
     didThrow = true;
   }
@@ -21,11 +21,11 @@ test('setFontAtlasCacheLimit - null argument', t => {
   t.end();
 });
 
-test('setFontAtlasCacheLimit - invalid type argument', t => {
+test('TextLayer - fontAtlasCacheLimit - invalid type argument', t => {
   let didThrow = false;
 
   try {
-    setFontAtlasCacheLimit('Three');
+    TextLayer.fontAtlasCacheLimit = 'Three';
   } catch (e) {
     didThrow = true;
   }
@@ -34,11 +34,11 @@ test('setFontAtlasCacheLimit - invalid type argument', t => {
   t.end();
 });
 
-test('setFontAtlasCacheLimit - less than hard limit', t => {
+test('TextLayer - fontAtlasCacheLimit - less than hard limit', t => {
   let didThrow = false;
 
   try {
-    setFontAtlasCacheLimit(2);
+    TextLayer.fontAtlasCacheLimit = 2;
   } catch (e) {
     didThrow = true;
   }

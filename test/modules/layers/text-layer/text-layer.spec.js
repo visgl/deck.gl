@@ -1,6 +1,6 @@
 import test from 'tape-promise/tape';
 
-import {TextLayer, setFontAtlasCacheLimit} from '@deck.gl/layers';
+import {TextLayer} from '@deck.gl/layers';
 import * as FIXTURES from 'deck.gl-test/data';
 import {testLayer, generateLayerTests} from '@deck.gl/test-utils';
 
@@ -150,8 +150,8 @@ test('TextLayer - binary unicode characters', t => {
   t.end();
 });
 
-test('TextLayer - setFontAtlasCacheLimit', t => {
-  setFontAtlasCacheLimit(5);
+test('TextLayer - fontAtlasCacheLimit', t => {
+  TextLayer.fontAtlasCacheLimit = 5;
 
   const testCases = generateLayerTests({
     Layer: TextLayer,

@@ -1,6 +1,8 @@
 /* global document */
 import TinySDF from '@mapbox/tiny-sdf';
 
+import {log} from '@deck.gl/core';
+
 import {buildMapping} from './utils';
 import LRUCache from './lru-cache';
 
@@ -102,13 +104,7 @@ function setTextStyle(ctx, fontFamily, fontSize, fontWeight) {
  * @param {number} limit LRU Cache limit
  */
 export function setFontAtlasCacheLimit(limit) {
-  if (typeof limit !== 'number') {
-    throw new Error(`Invalid limit value for Font Atlas Cache. It should be a positive number.`);
-  }
-
-  if (limit < CACHE_LIMIT) {
-    throw new Error(`Font Atlas Cache Limit should be at least ${CACHE_LIMIT}`);
-  }
+  log.assert(Number.isFinite(limit) && limit >= CACHE_LIMIT, 'Invalid cache limit');
 
   cache = new LRUCache(limit);
 }

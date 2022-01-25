@@ -468,17 +468,17 @@ At the moment this layer doesn't render multi-color emojis.
 To conserve memory, DeckGL caches the most 3 used `fontAtlas` by default. Creating a `fontAtlas` is a CPU intesive operation specially if `fontSettings.sdf` is set to `true`. 
 If you are using much more than 3 fonts, you might experience perforamnce hits because DeckGL constantly tries to evict the least most used `fontAtlas` from cache and recreate them when needed.
 
-To mitigate the potential performance degradation, you can override the `fontAtlas` default cache limit by calling `setFontAtlasCacheLimit` function:
+To mitigate the potential performance degradation, you can override the `fontAtlas` default cache limit by setting `TextLayer.fontAtlasCacheLimit` value:
 
 ```js
-import {setFontAtlasCacheLimit} from '@deck.gl/react';
+import {TextLayer} from '@deck.gl/layers';
 
-setFontAtlasCacheLimit(10);
+TextLayer.fontAtlasCacheLimit = 10;
 
 // ... rest of the application
 ```
 
-It is recommended to call `setFontAtlasCacheLimit` once in your application since every call recreates the cache and removes existing cached `fontAtals`.
+It is recommended to set `fontAtlasCacheLimit` once in your application since it recreates the cache which removes existing cached `fontAtals`.
 
 ## Source
 
