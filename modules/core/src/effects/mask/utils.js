@@ -33,46 +33,16 @@ export function getMaskViewport(dataViewport, layerViewport, {width, height}) {
   const {longitude, latitude, zoom} = viewport;
   viewport = new WebMercatorViewport({width, height, longitude, latitude, zoom: zoom - 1});
 
-  return dataViewport.zoom > viewport.zoom ? dataViewport : viewport;
+  return dataViewport?.zoom > viewport.zoom ? dataViewport : viewport;
 }
 
-export function getDataViewport(positions, {width, height}) {
-  const dataBounds = getBounds(positions);
+export function getDataViewport(layer, {width, height}) {
+  const dataBounds = layer.getBounds();
+  if (!dataBounds.flat().every(n => isFinite(n))) {
+    return null;
+  }
+
   return new WebMercatorViewport({width, height}).fitBounds(dataBounds, {
     padding: 2
   });
-}
-
-function getBounds({startIndices, size, value}) {
-  const bounds = [
-    [Infinity, Infinity],
-    [-Infinity, -Infinity]
-  ];
-
-  const start = startIndices[0];
-  const end = startIndices[startIndices.length - 1];
-  for (let i = start; i < end; i++) {
-    const x = size * i;
-    const y = x + 1;
-    if (bounds[0][0] > value[x]) {
-      bounds[0][0] = value[x];
-    }
-    if (bounds[0][1] > value[y]) {
-      bounds[0][1] = value[y];
-    }
-    if (bounds[1][0] < value[x]) {
-      bounds[1][0] = value[x];
-    }
-    if (bounds[1][1] < value[y]) {
-      bounds[1][1] = value[y];
-    }
-  }
-
-  if (bounds[0][0] === Infinity) {
-    return [
-      [0, 0],
-      [1, 1]
-    ];
-  }
-  return bounds;
 }
