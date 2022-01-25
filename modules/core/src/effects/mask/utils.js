@@ -1,6 +1,5 @@
 import {Matrix4} from '@math.gl/core';
 import {pixelsToWorld} from '@math.gl/web-mercator';
-import {WebMercatorViewport} from '@deck.gl/core';
 
 /*
  * Compute orthographic projection that converts shader common space coordinates into mask clipspace
@@ -25,24 +24,34 @@ export function getMaskProjectionMatrix({width, height, pixelUnprojectionMatrix}
  * data, whichever is smaller
  */
 export function getMaskViewport(dataViewport, layerViewport, {width, height}) {
+  const Viewport = layerViewport.constructor;
+  if (!layerViewport.fitBounds) {
+    return new Viewport({...layerViewport, x: 0, y: 0, width, height});
+  }
+
   const bounds = layerViewport.getBounds();
-  let viewport = new WebMercatorViewport({width, height}).fitBounds([
+  let viewport = new Viewport({width, height}).fitBounds([
     [bounds[0], bounds[1]],
     [bounds[2], bounds[3]]
   ]);
   const {longitude, latitude, zoom} = viewport;
-  viewport = new WebMercatorViewport({width, height, longitude, latitude, zoom: zoom - 1});
+  viewport = new Viewport({width, height, longitude, latitude, zoom: zoom - 1});
 
   return dataViewport?.zoom > viewport.zoom ? dataViewport : viewport;
 }
 
 export function getDataViewport(layer, {width, height}) {
+  if (!layer.context.viewport.fitBounds) {
+    return null;
+  }
+
   const dataBounds = layer.getBounds();
   if (!dataBounds?.flat().every(n => isFinite(n))) {
     return null;
   }
 
-  return new WebMercatorViewport({width, height}).fitBounds(dataBounds, {
+  const Viewport = layer.context.viewport.constructor;
+  return new Viewport({width, height}).fitBounds(dataBounds, {
     padding: 2
   });
 }

@@ -87,7 +87,10 @@ function splitMaskProjectionMatrix(
     maskProjectionMatrix = projectionMatrixCentered;
   }
 
-  if (project_uProjectionMode === PROJECTION_MODE.WEB_MERCATOR_AUTO_OFFSET) {
+  if (
+    project_uProjectionMode === PROJECTION_MODE.IDENTITY ||
+    project_uProjectionMode === PROJECTION_MODE.WEB_MERCATOR_AUTO_OFFSET
+  ) {
     maskProjectionMatrix = maskProjectionMatrix.clone().multiplyRight(VECTOR_TO_POINT_MATRIX);
     maskProjectCenter = projectionMatrixCentered.transform(maskProjectCenter);
 
