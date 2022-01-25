@@ -294,37 +294,6 @@ export default class Attribute extends DataColumn {
     return shaderAttributes;
   }
 
-  getBounds() {
-    const {startIndices, size, value} = this;
-    const bounds = [
-      [Infinity, Infinity],
-      [-Infinity, -Infinity]
-    ];
-
-    const start = startIndices[0];
-    const end = startIndices[startIndices.length - 1];
-    if (start === end) return null;
-
-    for (let i = start; i < end; i++) {
-      const x = size * i;
-      const y = x + 1;
-      if (bounds[0][0] > value[x]) {
-        bounds[0][0] = value[x];
-      }
-      if (bounds[0][1] > value[y]) {
-        bounds[0][1] = value[y];
-      }
-      if (bounds[1][0] < value[x]) {
-        bounds[1][0] = value[x];
-      }
-      if (bounds[1][1] < value[y]) {
-        bounds[1][1] = value[y];
-      }
-    }
-
-    return bounds;
-  }
-
   /* eslint-disable max-depth, max-statements */
   _autoUpdater(attribute, {data, startRow, endRow, props, numInstances}) {
     if (attribute.constant) {
