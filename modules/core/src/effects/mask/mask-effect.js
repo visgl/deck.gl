@@ -31,7 +31,6 @@ export default class MaskEffect extends Effect {
     this.mask = true;
     const maskId = [...maskIds][0];
 
-    const maskLayer = this.getMaskLayer(maskId, layers);
     if (!this.maskPass) {
       this.maskPass = new MaskPass(gl);
       this.maskMap = this.maskPass.maskMap;
@@ -48,11 +47,13 @@ export default class MaskEffect extends Effect {
       });
     }
 
-    // Using the 'positions' attribute will work for the SolidPolygonLayer,
-    // but not for all layers
+    // When the mask layer is changed the LayerManager will create a new instance
+    const maskLayer = this.getMaskLayer(maskId, layers);
+    const maskChanged = this.maskLayer !== maskLayer;
+    this.maskLayer = maskLayer;
+
     const {dummyMaskMap, maskPass, maskMap} = this;
     const layerViewport = viewports[0];
-    const maskChanged = maskLayer.getChangeFlags().propsOrDataChanged;
 
     if (!this.dataViewport || maskChanged) {
       this.dataViewport = getDataViewport(maskLayer, maskMap);
