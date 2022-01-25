@@ -39,9 +39,9 @@
     "@luma.gl/core": "^8.5.10",
     "@math.gl/core": "^3.5.6",
     "@math.gl/web-mercator": "^3.5.6",
-    "@probe.gl/env": "^3.5.0-alpha.4",
-    "@probe.gl/log": "^3.5.0-alpha.4",
-    "@probe.gl/stats": "^3.5.0-alpha.4",
+    "@probe.gl/env": "^3.5.0",
+    "@probe.gl/log": "^3.5.0",
+    "@probe.gl/stats": "^3.5.0",
     "gl-matrix": "^3.0.0",
     "math.gl": "^3.5.6",
     "mjolnir.js": "^2.5.0"
