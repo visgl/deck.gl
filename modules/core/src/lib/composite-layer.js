@@ -226,7 +226,7 @@ export default class CompositeLayer extends Layer {
 
   // Calcaulates the combined bounds of all sublayer (ignoring null bounds)
   getBounds() {
-    let {subLayers} = this.internalState;
+    const {subLayers} = this.internalState;
     let bounds = null;
     for (const layer of subLayers) {
       const subLayerBounds = layer.getBounds();
