@@ -224,6 +224,26 @@ export default class CompositeLayer extends Layer {
     return newProps;
   }
 
+  // Calcaulates the combined bounds of all sublayer (ignoring null bounds)
+  getBounds() {
+    let {subLayers} = this.internalState;
+    let bounds = null;
+    for (const layer of subLayers) {
+      const subLayerBounds = layer.getBounds();
+      if (subLayerBounds) {
+        if (!bounds) {
+          bounds = subLayerBounds;
+        } else {
+          bounds[0][0] = Math.min(bounds[0][0], subLayerBounds[0][0]);
+          bounds[0][1] = Math.min(bounds[0][1], subLayerBounds[0][1]);
+          bounds[1][0] = Math.max(bounds[1][0], subLayerBounds[1][0]);
+          bounds[1][1] = Math.max(bounds[1][1], subLayerBounds[1][1]);
+        }
+      }
+    }
+    return bounds;
+  }
+
   _updateAutoHighlight(info) {
     for (const layer of this.getSubLayers()) {
       layer.updateAutoHighlight(info);
