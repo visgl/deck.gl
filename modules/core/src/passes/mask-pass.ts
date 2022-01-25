@@ -34,13 +34,20 @@ export default class MaskPass extends LayersPass {
   render(params) {
     const target = this.fbo;
 
+    const {width, height} = target;
+    const padding = 1;
+
     withParameters(
       this.gl,
       {
         framebuffer: this.fbo,
         clearColor: [0, 0, 0, 0],
         blend: false,
-        depthTest: false
+        depthTest: false,
+
+        // Prevent mask bleeding over edge by adding transparent padding
+        scissorTest: true,
+        scissor: [padding, padding, width - 2 * padding, height - 2 * padding]
       },
       () => {
         super.render({...params, target, pass: 'mask'});
