@@ -104,6 +104,8 @@ export default class DataColumn {
       externalBuffer: null,
       bufferAccessor: opts,
       allocatedValue: null,
+      numInstances: 0,
+      bounds: null,
       constant: false
     };
     this._buffer = null;
@@ -130,6 +132,14 @@ export default class DataColumn {
       return accessor.vertexOffset * getStride(accessor);
     }
     return 0;
+  }
+
+  get numInstances() {
+    return this.state.numInstances;
+  }
+
+  set numInstances(n) {
+    this.state.numInstances = n;
   }
 
   delete() {
@@ -181,6 +191,35 @@ export default class DataColumn {
     return this.state.bufferAccessor;
   }
 
+  // Returns [min: Array(size), max: Array(size)]
+  getBounds() {
+    if (this.state.bounds) {
+      return this.state.bounds;
+    }
+    let result = null;
+    if (this.state.constant) {
+      const min = this.value.slice();
+      result = [min, min];
+    } else {
+      const {value, numInstances, size} = this;
+      const len = numInstances * size;
+      if (value && len && value.length >= len) {
+        const min = new Array(size).fill(Infinity);
+        const max = new Array(size).fill(-Infinity);
+        for (let i = 0; i < len; ) {
+          for (let j = 0; j < size; j++) {
+            const v = value[i++];
+            if (v < min[j]) min[j] = v;
+            if (v > max[j]) max[j] = v;
+          }
+        }
+        result = [min, max];
+      }
+    }
+    this.state.bounds = result;
+    return result;
+  }
+
   // returns true if success
   // eslint-disable-next-line max-statements
   setData(opts) {
@@ -193,6 +232,7 @@ export default class DataColumn {
 
     const accessor = {...this.settings, ...opts};
     state.bufferAccessor = accessor;
+    state.bounds = null; // clear cached bounds
 
     if (opts.constant) {
       // set constant
@@ -253,6 +293,8 @@ export default class DataColumn {
   }
 
   updateSubBuffer(opts = {}) {
+    this.state.bounds = null; // clear cached bounds
+
     const {value} = this;
     const {startOffset = 0, endOffset} = opts;
     this.buffer.subData({
