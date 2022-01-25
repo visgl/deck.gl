@@ -38,7 +38,7 @@ export function getMaskViewport(dataViewport, layerViewport, {width, height}) {
 
 export function getDataViewport(layer, {width, height}) {
   const dataBounds = layer.getBounds();
-  if (!dataBounds.flat().every(n => isFinite(n))) {
+  if (!dataBounds?.flat().every(n => isFinite(n))) {
     return null;
   }
 

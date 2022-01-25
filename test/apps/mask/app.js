@@ -127,6 +127,7 @@ export default function App({data, brushRadius = 100000, strokeWidth = 1, mapSty
   const {arcs, targets, sources} = useMemo(() => getLayerData(data), [data]);
   const [maskEnabled, setMaskEnabled] = useState(true);
   const [showLayers, setShowLayers] = useState(true);
+  const [geojsonMask, setGeojsonMask] = useState(false);
   const [selectedCounty, selectCounty] = useState(null);
   const maskPolygon = selectedCounty ? selectedCounty.geometry.coordinates : utah;
   const maskId = 'county-mask';
@@ -135,12 +136,22 @@ export default function App({data, brushRadius = 100000, strokeWidth = 1, mapSty
 
   const layers = arcs &&
     targets && [
-      new SolidPolygonLayer({
-        id: maskId,
-        operation: OPERATION.MASK,
-        data: maskData,
-        getFillColor: [255, 255, 255, 255]
-      }),
+      geojsonMask
+        ? new GeoJsonLayer({
+            id: maskId,
+            operation: OPERATION.MASK,
+            data: {
+              type: 'FeatureCollection',
+              features: selectedCounty ? [selectedCounty] : []
+            },
+            getFillColor: [255, 255, 255, 255]
+          })
+        : new SolidPolygonLayer({
+            id: maskId,
+            operation: OPERATION.MASK,
+            data: maskData,
+            getFillColor: [255, 255, 255, 255]
+          }),
       // Boundary around USA (masked by selected state)
       new SolidPolygonLayer({
         id: 'masked-layer',
@@ -226,7 +237,7 @@ export default function App({data, brushRadius = 100000, strokeWidth = 1, mapSty
       >
         <StaticMap reuseMaps mapStyle={mapStyle} preventStyleDiffing={true} />
       </DeckGL>
-      <div style={{position: 'absolute', background: 'white', padding: 10}}>
+      <div style={{position: 'absolute', background: 'white', padding: 10, userSelect: 'none'}}>
         <label>
           <input
             type="checkbox"
@@ -238,6 +249,14 @@ export default function App({data, brushRadius = 100000, strokeWidth = 1, mapSty
         <label>
           <input type="checkbox" checked={showLayers} onChange={() => setShowLayers(!showLayers)} />
           Show layers
+        </label>
+        <label>
+          <input
+            type="checkbox"
+            checked={geojsonMask}
+            onChange={() => setGeojsonMask(!geojsonMask)}
+          />
+          GeoJSON Mask
         </label>
       </div>
     </>

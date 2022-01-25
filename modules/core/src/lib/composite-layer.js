@@ -152,6 +152,7 @@ export default class CompositeLayer extends Layer {
       modelMatrix,
       extensions,
       fetch,
+      operation,
       maskId,
       maskByInstance,
       maskEnabled,
@@ -173,6 +174,7 @@ export default class CompositeLayer extends Layer {
       modelMatrix,
       extensions,
       fetch,
+      operation,
       maskEnabled
     };
 

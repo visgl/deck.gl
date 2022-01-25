@@ -152,10 +152,6 @@ export default class MaskEffect extends Effect {
   getMaskLayer(maskId, layers) {
     const maskLayer = layers.find(layer => layer.id === maskId);
     log.assert(maskLayer, `{maskId: '${maskId}'} must match the id of another Layer`);
-    log.assert(
-      maskLayer.constructor.layerName === 'SolidPolygonLayer',
-      'Mask Layer must be a SolidPolygonLayer'
-    );
     return maskLayer;
   }
 }
