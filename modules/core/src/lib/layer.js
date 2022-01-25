@@ -332,6 +332,24 @@ export default class Layer extends Component {
     return shaders;
   }
 
+  // Default implementation gives returns an upper limit on the bounds of the Layer.
+  // Sublayers should override to provide an accurate calculation of the bounds
+  // based on rendered data
+  getBounds() {
+    const {viewport} = this.context;
+    if (viewport?.isGeospatial) {
+      return [
+        [-180, -85.051129],
+        [180, 85.051129]
+      ];
+    } else {
+      return [
+        [-Infinity, -Infinity],
+        [Infinity, Infinity]
+      ];
+    }
+  }
+
   // Let's layer control if updateState should be called
   shouldUpdateState({oldProps, props, context, changeFlags}) {
     return changeFlags.propsOrDataChanged;

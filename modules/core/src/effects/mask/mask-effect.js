@@ -51,12 +51,11 @@ export default class MaskEffect extends Effect {
     // Using the 'positions' attribute will work for the SolidPolygonLayer,
     // but not for all layers
     const {dummyMaskMap, maskPass, maskMap} = this;
-    const {positions} = maskLayer.getAttributeManager().attributes;
     const layerViewport = viewports[0];
     const maskChanged = maskLayer.getChangeFlags().propsOrDataChanged;
 
     if (!this.dataViewport || maskChanged) {
-      this.dataViewport = getDataViewport(positions, maskMap);
+      this.dataViewport = getDataViewport(maskLayer, maskMap);
     }
 
     const maskViewport = getMaskViewport(this.dataViewport, layerViewport, maskMap);
