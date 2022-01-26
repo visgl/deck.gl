@@ -7,7 +7,7 @@ export default class MaskPass extends LayersPass {
   maskMap: Texture2D;
   fbo: Framebuffer;
 
-  constructor(gl, props) {
+  constructor(gl, props = {}) {
     super(gl, props);
 
     const {mapSize = 2048} = props;
@@ -37,7 +37,7 @@ export default class MaskPass extends LayersPass {
     const {width, height} = this.fbo;
     const padding = 1;
 
-    withParameters(
+    return withParameters(
       this.gl,
       {
         clearColor: [0, 0, 0, 0],
@@ -48,9 +48,7 @@ export default class MaskPass extends LayersPass {
         scissorTest: true,
         scissor: [padding, padding, width - 2 * padding, height - 2 * padding]
       },
-      () => {
-        super.render({...params, target: this.fbo, pass: 'mask'});
-      }
+      () => super.render({...params, target: this.fbo, pass: 'mask'})
     );
   }
 
