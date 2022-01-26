@@ -32,7 +32,7 @@ test('MaskPass#shouldDrawLayer', t => {
   const maskPass = new MaskPass(gl);
   layerManager.setLayers(layers);
 
-  let renderStats = maskPass.render({
+  const renderStats = maskPass.render({
     viewports: [new Viewport({id: 'A'})],
     layers: layerManager.getLayers(),
     onViewportActive: layerManager.activateViewport,
