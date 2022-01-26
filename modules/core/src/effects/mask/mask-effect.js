@@ -56,6 +56,8 @@ export default class MaskEffect extends Effect {
 
       const bounds = getMaskBounds({layers: maskLayers, viewport});
 
+      // TODO if the mask layer's data has changed and the data bounds are clipped
+      // by the viewport, this condition will prevent the mask from rerendering
       if (!equals(bounds, this.lastBounds)) {
         this.lastBounds = bounds;
 

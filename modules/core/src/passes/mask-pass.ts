@@ -56,12 +56,6 @@ export default class MaskPass extends LayersPass {
     return layer.props.operation === OPERATION.MASK;
   }
 
-  getModuleParameters() {
-    return {
-      drawToMaskMap: true
-    };
-  }
-
   delete() {
     this.fbo.delete();
     this.maskMap.delete();

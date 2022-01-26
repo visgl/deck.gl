@@ -108,7 +108,6 @@ const defaultProps = {
   pickable: false,
   opacity: {type: 'number', min: 0, max: 1, value: 1},
   operation: OPERATION.DRAW,
-  maskEnabled: {type: 'boolean', value: true, optional: true},
 
   onHover: {type: 'function', value: null, compare: false, optional: true},
   onClick: {type: 'function', value: null, compare: false, optional: true},
