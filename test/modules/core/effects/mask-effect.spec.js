@@ -26,7 +26,7 @@ test('MaskEffect#constructor', t => {
   const maskEffect = new MaskEffect();
   t.ok(maskEffect, 'Mask effect created');
   t.ok(maskEffect.useInPicking, 'Mask effect enabled for picking render');
-  t.ok(maskEffect.empty, 'Mask effect disabled by default');
+  t.not(maskEffect.masks, 'Mask effect disabled by default');
   maskEffect.cleanup();
   t.end();
 });
@@ -44,14 +44,14 @@ test('MaskEffect#cleanup', t => {
     viewports: [testViewport]
   });
 
-  t.not(maskEffect.empty, 'Masking is enabled');
+  t.ok(maskEffect.masks, 'Masking is enabled');
   t.ok(maskEffect.dummyMaskMap, 'Dummy mask map is created');
   t.ok(maskEffect.maskPass, 'Mask pass is created');
   t.ok(maskEffect.maskMap, 'Mask map is created');
 
   maskEffect.cleanup();
 
-  t.ok(maskEffect.empty, 'Masking is disabled');
+  t.notOk(maskEffect.masks, 'Masking is disabled');
   t.notOk(maskEffect.dummyMaskMap, 'Dummy mask map is deleted');
   t.notOk(maskEffect.maskPass, 'Mask pass is deleted');
   t.notOk(maskEffect.maskMap, 'Mask map is deleted');
@@ -62,29 +62,67 @@ test('MaskEffect#cleanup', t => {
 test('MaskEffect#update', t => {
   const maskEffect = new MaskEffect();
 
-  const layerManager = new LayerManager(gl, {viewport: testViewport});
-  layerManager.setLayers([TEST_MASK_LAYER, TEST_LAYER]);
-  layerManager.updateLayers();
-
-  maskEffect.preRender(gl, {
-    layers: layerManager.getLayers(),
-    onViewportActive: layerManager.activateViewport,
-    viewports: [testViewport]
+  const TEST_MASK_LAYER2 = TEST_MASK_LAYER.clone({id: 'test-mask-layer-2'});
+  const TEST_MASK_LAYER2_ALT = TEST_MASK_LAYER.clone({
+    id: 'test-mask-layer-2',
+    data: [{polygon: FIXTURES.polygons[1]}]
   });
+  const TEST_MASK_LAYER3 = TEST_MASK_LAYER.clone({id: 'test-mask-layer-3'});
+
+  const layerManager = new LayerManager(gl, {viewport: testViewport});
+
+  const preRenderWithLayers = (layers, description) => {
+    t.comment(description);
+    layerManager.setLayers(layers);
+    layerManager.updateLayers();
+
+    maskEffect.preRender(gl, {
+      layers: layerManager.getLayers(),
+      onViewportActive: layerManager.activateViewport,
+      viewports: [testViewport]
+    });
+  };
+
+  preRenderWithLayers([TEST_MASK_LAYER, TEST_LAYER], 'Initial render');
 
   let parameters = maskEffect.getModuleParameters(TEST_LAYER);
   t.is(parameters.maskMap, maskEffect.maskMap, 'Mask map is in parameters');
-  const bounds = parameters.maskBounds;
-  t.ok(bounds.every(Number.isFinite), 'Mask bounds are populated');
+  let mask = parameters.maskChannels['test-mask-layer'];
+  t.is(mask?.index, 0, 'Mask is rendered in channel 0');
+  t.ok(mask?.bounds, 'Mask has bounds');
+  let bounds = mask.bounds;
 
-  maskEffect.preRender(gl, {
-    layers: layerManager.getLayers(),
-    onViewportActive: layerManager.activateViewport,
-    viewports: [testViewport]
-  });
+  preRenderWithLayers([TEST_MASK_LAYER, TEST_LAYER, TEST_MASK_LAYER2], 'Add second mask');
 
   parameters = maskEffect.getModuleParameters(TEST_LAYER);
-  t.is(parameters.maskBounds, bounds, 'Using cached mask bounds');
+  mask = parameters.maskChannels['test-mask-layer'];
+  t.is(mask?.index, 0, 'Mask is rendered in channel 0');
+  t.is(mask?.bounds, bounds, 'Using cached mask bounds');
+  mask = parameters.maskChannels['test-mask-layer-2'];
+  t.ok(mask?.bounds, 'Second mask has bounds');
+  t.is(mask?.index, 1, 'Second mask is rendered in channel 1');
+  bounds = mask.bounds;
+
+  preRenderWithLayers([TEST_LAYER, TEST_MASK_LAYER2], 'Remove first mask');
+
+  parameters = maskEffect.getModuleParameters(TEST_LAYER);
+  mask = parameters.maskChannels['test-mask-layer'];
+  t.notOk(mask, 'Mask is removed');
+  mask = parameters.maskChannels['test-mask-layer-2'];
+  t.is(mask?.index, 1, 'Second mask is rendered in channel 1');
+  t.is(mask?.bounds, bounds, 'Using cached mask bounds');
+
+  preRenderWithLayers(
+    [TEST_LAYER, TEST_MASK_LAYER2_ALT, TEST_MASK_LAYER3],
+    'Update second mask, add third'
+  );
+
+  parameters = maskEffect.getModuleParameters(TEST_LAYER);
+  mask = parameters.maskChannels['test-mask-layer-2'];
+  t.is(mask?.index, 1, 'Second mask is rendered in channel 1');
+  t.not(mask?.bounds, bounds, 'Second mask is updated');
+  mask = parameters.maskChannels['test-mask-layer-3'];
+  t.is(mask?.index, 0, 'New mask is rendered in channel 0');
 
   maskEffect.cleanup();
   t.end();

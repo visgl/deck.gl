@@ -95,7 +95,7 @@ export default class MaskEffect extends Effect {
           });
         }
       }
-      this.masks[channelInfo.id] = {channel: channelInfo.index, maskBounds: channelInfo.maskBounds};
+      this.masks[channelInfo.id] = {index: channelInfo.index, bounds: channelInfo.maskBounds};
     }
 
     // // Debug show FBO contents on screen
@@ -157,7 +157,7 @@ export default class MaskEffect extends Effect {
     for (let i = 0; i < 4; i++) {
       const channelInfo = this.channels[i];
       if (!channelInfo || !(channelInfo.id in channelMap)) {
-        // The mask id at the channel no longer exists
+        // The mask id at this channel no longer exists
         this.channels[i] = null;
       }
     }

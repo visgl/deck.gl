@@ -12,16 +12,31 @@ test('MaskExtension', t => {
         stroked: true,
         filled: true,
         extensions: [new MaskExtension()],
+        maskId: 'mask',
 
         // simulate MaskEffect parameters
         maskMap: {},
-        maskBounds: [0, 10, 5, 20]
+        maskChannels: {
+          mask: {
+            index: 0,
+            bounds: [0, 10, 5, 20]
+          }
+        }
       },
       onAfterUpdate: ({layer}) => {
         const uniforms = layer.getModels()[0].getUniforms();
         t.ok(uniforms.mask_enabled, 'mask_enabled in uniforms');
         t.ok(uniforms.mask_maskByInstance, 'mask_maskByInstance in uniforms');
         t.ok(uniforms.mask_bounds.every(Number.isFinite), 'mask_bounds in uniforms');
+      }
+    },
+    {
+      updateProps: {
+        maskId: 'mask2'
+      },
+      onAfterUpdate: ({layer}) => {
+        const uniforms = layer.getModels()[0].getUniforms();
+        t.notOk(uniforms.mask_enabled, 'mask disabled for invalid maskId');
       }
     }
   ];

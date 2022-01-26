@@ -29,7 +29,7 @@ test('MaskPass#shouldDrawLayer', t => {
   ];
 
   const layerManager = new LayerManager(gl, {});
-  const maskPass = new MaskPass(gl);
+  const maskPass = new MaskPass(gl, {});
   layerManager.setLayers(layers);
 
   const renderStats = maskPass.render({

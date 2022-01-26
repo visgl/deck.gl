@@ -25,12 +25,12 @@ export default class MaskExtension extends LayerExtension {
     const {maskEnabled = true, maskId} = this.props;
     const {maskChannels} = moduleParameters;
     if (maskChannels && maskChannels[maskId]) {
-      const {channel, maskBounds} = maskChannels[maskId];
+      const {index, bounds} = maskChannels[maskId];
 
-      const bl = this.projectPosition([maskBounds[0], maskBounds[1], 0]);
-      const tr = this.projectPosition([maskBounds[2], maskBounds[3], 0]);
+      const bl = this.projectPosition([bounds[0], bounds[1], 0]);
+      const tr = this.projectPosition([bounds[2], bounds[3], 0]);
       uniforms.mask_enabled = maskEnabled;
-      uniforms.mask_channel = channel;
+      uniforms.mask_channel = index;
       uniforms.mask_bounds = [bl[0], bl[1], tr[0], tr[1]];
     } else {
       log.warn(`Could not find a mask layer with id: ${maskId}`)();
