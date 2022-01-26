@@ -31,18 +31,35 @@ export function getMaskBounds({layers, viewport}) {
   if (!bounds) {
     return viewportBounds;
   }
-  // Intersect the two
-  bounds[0] = Math.max(bounds[0], viewportBounds[0]);
-  bounds[1] = Math.max(bounds[1], viewportBounds[1]);
-  bounds[2] = Math.min(bounds[2], viewportBounds[2]);
-  bounds[3] = Math.min(bounds[3], viewportBounds[3]);
+
+  // Expand viewport bounds by 2X. Heurestically chosen to avoid masking
+  // errors when mask is partially out of view
+  const paddedBounds = _doubleBounds(viewportBounds);
+
+  // When bounds of the mask are smaller than the viewport bounds simply use
+  // mask bounds, so as to maximize resolution & avoid mask rerenders
+  if (
+    bounds[2] - bounds[0] < paddedBounds[2] - paddedBounds[0] ||
+    bounds[3] - bounds[1] < paddedBounds[3] - paddedBounds[1]
+  ) {
+    return bounds;
+  }
+
+  // As viewport shrinks, to avoid pixelation along mask edges
+  // we need to reduce the bounds and only render the visible portion
+  // of the mask.
+  // We pad the viewport bounds to capture the section
+  // of the mask just outside the viewport to correctly maskByInstance.
+  // Intersect mask & padded viewport bounds
+  bounds[0] = Math.max(bounds[0], paddedBounds[0]);
+  bounds[1] = Math.max(bounds[1], paddedBounds[1]);
+  bounds[2] = Math.min(bounds[2], paddedBounds[2]);
+  bounds[3] = Math.min(bounds[3], paddedBounds[3]);
   return bounds;
 }
 
 /*
- * Compute viewport to render the mask into, such that it covers an
- * area currently visible (extended by a buffer) or the area of the masking
- * data, whichever is smaller
+ * Compute viewport to render the mask into, covering the given bounds
  */
 export function getMaskViewport({bounds, viewport, width, height}) {
   if (viewport instanceof WebMercatorViewport) {
@@ -69,4 +86,16 @@ export function getMaskViewport({bounds, viewport, width, height}) {
       zoom: Math.log2(scale)
     }
   });
+}
+
+function _doubleBounds(bounds) {
+  const size = {
+    x: bounds[2] - bounds[0],
+    y: bounds[3] - bounds[1]
+  };
+  const center = {
+    x: bounds[0] + 0.5 * size.x,
+    y: bounds[1] + 0.5 * size.y
+  };
+  return [center.x - size.x, center.y - size.y, center.x + size.x, center.y + size.y];
 }

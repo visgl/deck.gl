@@ -2,6 +2,7 @@ import {
   Texture2D
   // , readPixelsToArray
 } from '@luma.gl/core';
+import {equals} from '@math.gl/core';
 import MaskPass from '../../passes/mask-pass';
 import Effect from '../../lib/effect';
 import {OPERATION} from '../../lib/constants';
@@ -55,50 +56,55 @@ export default class MaskEffect extends Effect {
 
       const bounds = getMaskBounds({layers: maskLayers, viewport});
 
-      const maskViewport = getMaskViewport({
-        bounds,
-        viewport,
-        width: maskMap.width,
-        height: maskMap.height
-      });
-      this.maskBounds = maskViewport.getBounds();
+      if (!equals(bounds, this.lastBounds)) {
+        this.lastBounds = bounds;
 
-      maskPass.render({
-        layers,
-        layerFilter,
-        viewports: [maskViewport],
-        onViewportActive,
-        views,
-        moduleParameters: {
-          devicePixelRatio: 1
-        }
-      });
+        const maskViewport = getMaskViewport({
+          bounds,
+          viewport,
+          width: maskMap.width,
+          height: maskMap.height
+        });
 
-      // // Debug show FBO contents on screen
-      // const color = readPixelsToArray(maskMap);
-      // let canvas = document.getElementById('fbo-canvas');
-      // if (!canvas) {
-      //   canvas = document.createElement('canvas');
-      //   canvas.id = 'fbo-canvas';
-      //   canvas.width = maskMap.width;
-      //   canvas.height = maskMap.height;
-      //   canvas.style.zIndex = 100;
-      //   canvas.style.position = 'absolute';
-      //   canvas.style.right = 0;
-      //   canvas.style.border = 'blue 1px solid';
-      //   canvas.style.width = '256px';
-      //   canvas.style.transform = 'scaleY(-1)';
-      //   document.body.appendChild(canvas);
-      // }
-      // const ctx = canvas.getContext('2d');
-      // const imageData = ctx.createImageData(maskMap.width, maskMap.height);
-      // for (let i = 0; i < color.length; i += 4) {
-      //   imageData.data[i + 0] = color[i + 0];
-      //   imageData.data[i + 1] = color[i + 1];
-      //   imageData.data[i + 2] = color[i + 2];
-      //   imageData.data[i + 3] = color[i + 3];
-      // }
-      // ctx.putImageData(imageData, 0, 0);
+        this.maskBounds = maskViewport.getBounds();
+
+        maskPass.render({
+          layers,
+          layerFilter,
+          viewports: [maskViewport],
+          onViewportActive,
+          views,
+          moduleParameters: {
+            devicePixelRatio: 1
+          }
+        });
+
+        // // Debug show FBO contents on screen
+        // const color = readPixelsToArray(maskMap);
+        // let canvas = document.getElementById('fbo-canvas');
+        // if (!canvas) {
+        //   canvas = document.createElement('canvas');
+        //   canvas.id = 'fbo-canvas';
+        //   canvas.width = maskMap.width;
+        //   canvas.height = maskMap.height;
+        //   canvas.style.zIndex = 100;
+        //   canvas.style.position = 'absolute';
+        //   canvas.style.right = 0;
+        //   canvas.style.border = 'blue 1px solid';
+        //   canvas.style.width = '256px';
+        //   canvas.style.transform = 'scaleY(-1)';
+        //   document.body.appendChild(canvas);
+        // }
+        // const ctx = canvas.getContext('2d');
+        // const imageData = ctx.createImageData(maskMap.width, maskMap.height);
+        // for (let i = 0; i < color.length; i += 4) {
+        //   imageData.data[i + 0] = color[i + 0];
+        //   imageData.data[i + 1] = color[i + 1];
+        //   imageData.data[i + 2] = color[i + 2];
+        //   imageData.data[i + 3] = color[i + 3];
+        // }
+        // ctx.putImageData(imageData, 0, 0);
+      }
     }
   }
 
@@ -121,6 +127,7 @@ export default class MaskEffect extends Effect {
       this.maskMap = null;
     }
 
+    this.lastBounds = null;
     this.lastViewport = null;
     this.maskBounds = null;
     this.empty = true;
