@@ -1,6 +1,6 @@
 import test from 'tape-promise/tape';
 import {MaskExtension} from '@deck.gl/extensions';
-import {ScatterplotLayer} from '@deck.gl/layers';
+import {ScatterplotLayer, SolidPolygonLayer} from '@deck.gl/layers';
 import {testLayer} from '@deck.gl/test-utils';
 
 test('MaskExtension', t => {
@@ -27,6 +27,44 @@ test('MaskExtension', t => {
   ];
 
   testLayer({Layer: ScatterplotLayer, testCases, onError: t.notOk});
+
+  t.end();
+});
+
+test('MaskExtension#maskByInstance', t => {
+  // ScatterPlot infers maskByInstance to true, SolidPolygonLayer to false
+  const testCases = [
+    {Layer: ScatterplotLayer, expectedMaskByInstance: true},
+    {Layer: ScatterplotLayer, props: {maskByInstance: true}, expectedMaskByInstance: true},
+    {Layer: ScatterplotLayer, props: {maskByInstance: false}, expectedMaskByInstance: false},
+    {Layer: SolidPolygonLayer, expectedMaskByInstance: false},
+    {Layer: SolidPolygonLayer, props: {maskByInstance: true}, expectedMaskByInstance: true},
+    {Layer: SolidPolygonLayer, props: {maskByInstance: false}, expectedMaskByInstance: false}
+  ];
+
+  for (const {Layer, props, expectedMaskByInstance} of testCases) {
+    const testCase = {
+      props: {
+        id: 'mask-extension-test',
+        data: [],
+        extensions: [new MaskExtension()],
+        maskMap: {},
+        maskBounds: [0, 10, 5, 20],
+        ...props
+      },
+      onAfterUpdate: ({layer}) => {
+        const uniforms = layer.getModels()[0].getUniforms();
+        t.is(
+          uniforms.mask_maskByInstance,
+          expectedMaskByInstance,
+          `${Layer.layerName}(${
+            props ? JSON.stringify(props) : ''
+          }) mask_maskByInstance set correctly`
+        );
+      }
+    };
+    testLayer({Layer, testCases: [testCase], onError: t.notOk});
+  }
 
   t.end();
 });
