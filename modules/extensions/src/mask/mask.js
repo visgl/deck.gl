@@ -23,9 +23,11 @@ export default class MaskExtension extends LayerExtension {
   draw({uniforms, moduleParameters}) {
     uniforms.mask_maskByInstance = this.state.maskByInstance;
     const {maskBounds} = moduleParameters;
-    const bl = this.projectPosition([maskBounds[0], maskBounds[1], 0]);
-    const tr = this.projectPosition([maskBounds[2], maskBounds[3], 0]);
-    uniforms.mask_bounds = [bl[0], bl[1], tr[0], tr[1]];
+    if (maskBounds) {
+      const bl = this.projectPosition([maskBounds[0], maskBounds[1], 0]);
+      const tr = this.projectPosition([maskBounds[2], maskBounds[3], 0]);
+      uniforms.mask_bounds = [bl[0], bl[1], tr[0], tr[1]];
+    }
   }
 }
 
