@@ -153,9 +153,6 @@ export default class CompositeLayer extends Layer {
       extensions,
       fetch,
       operation,
-      maskId,
-      maskByInstance,
-      maskEnabled,
       _subLayerProps: overridingProps
     } = this.props;
     const newProps = {
@@ -174,12 +171,8 @@ export default class CompositeLayer extends Layer {
       modelMatrix,
       extensions,
       fetch,
-      operation,
-      maskEnabled
+      operation
     };
-
-    if (maskId !== undefined) newProps.maskId = maskId;
-    if (maskByInstance !== undefined) newProps.maskByInstance = maskByInstance;
 
     const overridingSublayerProps = overridingProps && overridingProps[sublayerProps.id];
     const overridingSublayerTriggers =
@@ -222,26 +215,6 @@ export default class CompositeLayer extends Layer {
     }
 
     return newProps;
-  }
-
-  // Calcaulates the combined bounds of all sublayer (ignoring null bounds)
-  getBounds() {
-    const {subLayers} = this.internalState;
-    let bounds = null;
-    for (const layer of subLayers) {
-      const subLayerBounds = layer.getBounds();
-      if (subLayerBounds) {
-        if (!bounds) {
-          bounds = subLayerBounds;
-        } else {
-          bounds[0][0] = Math.min(bounds[0][0], subLayerBounds[0][0]);
-          bounds[0][1] = Math.min(bounds[0][1], subLayerBounds[0][1]);
-          bounds[1][0] = Math.max(bounds[1][0], subLayerBounds[1][0]);
-          bounds[1][1] = Math.max(bounds[1][1], subLayerBounds[1][1]);
-        }
-      }
-    }
-    return bounds;
   }
 
   _updateAutoHighlight(info) {

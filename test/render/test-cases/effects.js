@@ -1,15 +1,10 @@
-import {
-  MaskEffect,
-  PostProcessEffect,
-  LightingEffect,
-  AmbientLight,
-  DirectionalLight
-} from '@deck.gl/core';
+import {PostProcessEffect, LightingEffect, AmbientLight, DirectionalLight} from '@deck.gl/core';
 import {zoomBlur, vignette} from '@luma.gl/shadertools';
 import {hexagons, points} from 'deck.gl-test/data';
 
 import {ScatterplotLayer, SolidPolygonLayer, ColumnLayer} from '@deck.gl/layers';
 import {SimpleMeshLayer} from '@deck.gl/mesh-layers';
+import {MaskExtension} from '@deck.gl/extensions';
 
 import {CubeGeometry} from '@luma.gl/core';
 import {polygons} from 'deck.gl-test/data';
@@ -80,7 +75,6 @@ export default [
 
   {
     name: 'mask-effect',
-    effects: [new MaskEffect()],
     viewState: {
       latitude: 37.751537058389985,
       longitude: -122.42694203247012,
@@ -103,14 +97,14 @@ export default [
       }),
       new SolidPolygonLayer({
         id: 'polygon-masked',
-        maskId: 'mask-layer',
+        extensions: [new MaskExtension()],
         data: polygons,
         getPolygon: f => f,
         getFillColor: [0, 200, 0]
       }),
       new ScatterplotLayer({
         id: 'points',
-        maskId: 'mask-layer',
+        extensions: [new MaskExtension()],
         data: points,
         getPosition: d => d.COORDINATES,
         getFillColor: d => [0, 0, 200],

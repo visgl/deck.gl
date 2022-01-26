@@ -1,18 +1,20 @@
 import {Framebuffer, Texture2D, withParameters} from '@luma.gl/core';
 import {OPERATION} from '../lib/constants';
 import LayersPass from './layers-pass';
+import GL from '@luma.gl/constants';
 
 export default class MaskPass extends LayersPass {
-  shadowMap: Texture2D;
+  maskMap: Texture2D;
   fbo: Framebuffer;
 
   constructor(gl, props) {
     super(gl, props);
 
-    const size = 2048;
+    const {mapSize = 2048} = props;
+
     this.maskMap = new Texture2D(gl, {
-      width: size,
-      height: size,
+      width: mapSize,
+      height: mapSize,
       parameters: {
         [gl.TEXTURE_MIN_FILTER]: gl.LINEAR,
         [gl.TEXTURE_MAG_FILTER]: gl.LINEAR,
@@ -23,8 +25,8 @@ export default class MaskPass extends LayersPass {
 
     this.fbo = new Framebuffer(gl, {
       id: 'maskmap',
-      width: size,
-      height: size,
+      width: mapSize,
+      height: mapSize,
       attachments: {
         [gl.COLOR_ATTACHMENT0]: this.maskMap
       }
@@ -32,15 +34,12 @@ export default class MaskPass extends LayersPass {
   }
 
   render(params) {
-    const target = this.fbo;
-
-    const {width, height} = target;
+    const {width, height} = this.fbo;
     const padding = 1;
 
     withParameters(
       this.gl,
       {
-        framebuffer: this.fbo,
         clearColor: [0, 0, 0, 0],
         blend: false,
         depthTest: false,
@@ -50,7 +49,7 @@ export default class MaskPass extends LayersPass {
         scissor: [padding, padding, width - 2 * padding, height - 2 * padding]
       },
       () => {
-        super.render({...params, target, pass: 'mask'});
+        super.render({...params, target: this.fbo, pass: 'mask'});
       }
     );
   }
@@ -66,14 +65,7 @@ export default class MaskPass extends LayersPass {
   }
 
   delete() {
-    if (this.fbo) {
-      this.fbo.delete();
-      this.fbo = null;
-    }
-
-    if (this.maskMap) {
-      this.maskMap.delete();
-      this.maskMap = null;
-    }
+    this.fbo.delete();
+    this.maskMap.delete();
   }
 }

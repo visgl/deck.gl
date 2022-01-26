@@ -1,21 +1,42 @@
-import {Matrix4} from '@math.gl/core';
-import {pixelsToWorld} from '@math.gl/web-mercator';
-
+import OrthographicView from '../../views/orthographic-view';
+import WebMercatorViewport from '../../viewports/web-mercator-viewport';
+import {fitBounds} from '@math.gl/web-mercator';
 /*
- * Compute orthographic projection that converts shader common space coordinates into mask clipspace
+ * Compute the bounds of the mask in world space, such that it covers an
+ * area currently visible (extended by a buffer) or the area of the masking
+ * data, whichever is smaller
  */
-export function getMaskProjectionMatrix({width, height, pixelUnprojectionMatrix}) {
-  // Unproject corners of viewport into common space (these correspond to the edges
-  // of the framebuffer we are rendering into)
-  const [[left, top], [right, bottom]] = [
-    [0, 0],
-    [width, height]
-  ].map(pixel => pixelsToWorld(pixel, pixelUnprojectionMatrix));
-
-  // Construct orthographic projection that will map common space positions into clipspace
-  const near = 0.1;
-  const far = 1000;
-  return new Matrix4().ortho({left, top, right, bottom, near, far});
+export function getMaskBounds({layers, viewport}) {
+  // Join the bounds of layer data
+  let bounds = null;
+  for (const layer of layers) {
+    const subLayerBounds = layer.getBounds();
+    if (subLayerBounds) {
+      if (bounds) {
+        bounds[0] = Math.min(bounds[0], subLayerBounds[0][0]);
+        bounds[1] = Math.min(bounds[1], subLayerBounds[0][1]);
+        bounds[2] = Math.max(bounds[2], subLayerBounds[1][0]);
+        bounds[3] = Math.max(bounds[3], subLayerBounds[1][1]);
+      } else {
+        bounds = [
+          subLayerBounds[0][0],
+          subLayerBounds[0][1],
+          subLayerBounds[1][0],
+          subLayerBounds[1][1]
+        ];
+      }
+    }
+  }
+  const viewportBounds = viewport.getBounds();
+  if (!bounds) {
+    return viewportBounds;
+  }
+  // Intersect the two
+  bounds[0] = Math.max(bounds[0], viewportBounds[0]);
+  bounds[1] = Math.max(bounds[1], viewportBounds[1]);
+  bounds[2] = Math.min(bounds[2], viewportBounds[2]);
+  bounds[3] = Math.min(bounds[3], viewportBounds[3]);
+  return bounds;
 }
 
 /*
@@ -23,35 +44,29 @@ export function getMaskProjectionMatrix({width, height, pixelUnprojectionMatrix}
  * area currently visible (extended by a buffer) or the area of the masking
  * data, whichever is smaller
  */
-export function getMaskViewport(dataViewport, layerViewport, {width, height}) {
-  const Viewport = layerViewport.constructor;
-  if (!layerViewport.fitBounds) {
-    return new Viewport({...layerViewport, x: 0, y: 0, width, height});
+export function getMaskViewport({bounds, viewport, width, height}) {
+  if (viewport instanceof WebMercatorViewport) {
+    const {longitude, latitude, zoom} = fitBounds({
+      width,
+      height,
+      bounds: [
+        [bounds[0], bounds[1]],
+        [bounds[2], bounds[3]]
+      ],
+      maxZoom: 20
+    });
+    return new WebMercatorViewport({longitude, latitude, zoom, width, height});
   }
 
-  const bounds = layerViewport.getBounds();
-  let viewport = new Viewport({width, height}).fitBounds([
-    [bounds[0], bounds[1]],
-    [bounds[2], bounds[3]]
-  ]);
-  const {longitude, latitude, zoom} = viewport;
-  viewport = new Viewport({width, height, longitude, latitude, zoom: zoom - 1});
+  const center = [(bounds[0] + bounds[2]) / 2, (bounds[1] + bounds[3]) / 2, 0];
+  const scale = Math.min(20, width / (bounds[2] - bounds[0]), height / (bounds[3] - bounds[1]));
 
-  return dataViewport?.zoom > viewport.zoom ? dataViewport : viewport;
-}
-
-export function getDataViewport(layer, {width, height}) {
-  if (!layer.context.viewport.fitBounds) {
-    return null;
-  }
-
-  const dataBounds = layer.getBounds();
-  if (!dataBounds?.flat().every(n => isFinite(n))) {
-    return null;
-  }
-
-  const Viewport = layer.context.viewport.constructor;
-  return new Viewport({width, height}).fitBounds(dataBounds, {
-    padding: 2
+  return new OrthographicView().makeViewport({
+    width,
+    height,
+    viewState: {
+      target: center,
+      zoom: Math.log2(scale)
+    }
   });
 }

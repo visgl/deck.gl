@@ -109,7 +109,7 @@ export default class PickLayersPass extends LayersPass {
           views,
           viewports,
           onViewportActive,
-          effects,
+          effects: effects?.filter(e => e.useInPicking),
           pass
         })
     );

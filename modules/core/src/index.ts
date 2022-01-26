@@ -35,7 +35,6 @@ export {DirectionalLight} from './effects/lighting/directional-light';
 export {PointLight} from './effects/lighting/point-light';
 export {default as _CameraLight} from './effects/lighting/camera-light';
 export {default as _SunLight} from './effects/lighting/sun-light';
-export {default as MaskEffect} from './effects/mask/mask-effect';
 export {default as PostProcessEffect} from './effects/post-process-effect';
 
 // Passes

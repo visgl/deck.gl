@@ -2,8 +2,9 @@
 import React, {useState, useMemo} from 'react';
 import {render} from 'react-dom';
 import DeckGL from '@deck.gl/react';
-import {COORDINATE_SYSTEM, MaskEffect, OrthographicView, OPERATION} from '@deck.gl/core';
+import {COORDINATE_SYSTEM, OrthographicView, OPERATION} from '@deck.gl/core';
 import {SolidPolygonLayer} from '@deck.gl/layers';
+import {MaskExtension} from '@deck.gl/extensions';
 
 /* eslint-disable react/no-deprecated */
 export default function App() {
@@ -28,7 +29,7 @@ export default function App() {
     }),
     new SolidPolygonLayer({
       id: 'square',
-      maskId: 'mask',
+      extensions: [new MaskExtension()],
       maskEnabled,
       coordinateSystem: COORDINATE_SYSTEM.CARTESIAN,
       data: [
@@ -44,7 +45,6 @@ export default function App() {
     })
   ];
 
-  const maskEffect = new MaskEffect();
   const views = new OrthographicView();
   const viewState = {
     target: [0, 0, 0],
@@ -57,7 +57,6 @@ export default function App() {
         initialViewState={viewState}
         views={views}
         controller={true}
-        effects={[maskEffect]}
       ></DeckGL>
       <div style={{position: 'absolute', background: 'white', padding: 10}}>
         <label>

@@ -1,5 +1,4 @@
 import test from 'tape-promise/tape';
-import {ProgramManager} from '@luma.gl/core';
 import {MapView, LayerManager} from 'deck.gl';
 import {SolidPolygonLayer} from '@deck.gl/layers';
 import MaskEffect from '@deck.gl/core/effects/mask/mask-effect';
@@ -20,96 +19,14 @@ const TEST_MASK_LAYER = new SolidPolygonLayer({
 
 const TEST_LAYER = new SolidPolygonLayer({
   data: FIXTURES.polygons.slice(0, 3),
-  getPolygon: f => f,
-  maskId: 'test-mask-layer'
+  getPolygon: f => f
 });
 
 test('MaskEffect#constructor', t => {
   const maskEffect = new MaskEffect();
   t.ok(maskEffect, 'Mask effect created');
-  t.ok(maskEffect.enableForPicking, 'Mask effect enabled for picking render');
-  t.equal(maskEffect.mask, false, 'Mask effect disabled by default');
-  maskEffect.cleanup();
-  t.end();
-});
-
-test('MaskEffect#getModuleParameters', t => {
-  const maskEffect = new MaskEffect();
-
-  const layerManager = new LayerManager(gl, {viewport: testViewport});
-  layerManager.setLayers([TEST_MASK_LAYER, TEST_LAYER]);
-  layerManager.updateLayers();
-
-  maskEffect.preRender(gl, {
-    layers: layerManager.getLayers(),
-    onViewportActive: layerManager.activateViewport,
-    viewports: [testViewport]
-  });
-
-  t.ok(maskEffect.mask, 'Masking is enabled');
-  t.ok(maskEffect.dummyMaskMap, 'Dummy mask map is created');
-  t.ok(maskEffect.maskPass, 'Mask pass is created');
-  t.ok(maskEffect.maskMap, 'Mask map is created');
-  t.ok(maskEffect.maskProjectionMatrix, 'Mask projection matrix is created');
-
-  const parameters = maskEffect.getModuleParameters(TEST_LAYER);
-  t.is(parameters.dummyMaskMap, maskEffect.dummyMaskMap, 'Dummy mask map is in parameters');
-  t.is(parameters.maskMap, maskEffect.maskMap, 'Mask map is in parameters');
-  t.is(
-    parameters.maskProjectionMatrix,
-    maskEffect.maskProjectionMatrix,
-    'Mask projection matrix is in parameters'
-  );
-  t.is(parameters.maskByInstance, false, 'maskByInstance inferred as false for SolidPolygonLayer');
-
-  maskEffect.cleanup();
-  t.end();
-});
-
-test('MaskEffect#maskId not matched', t => {
-  const maskEffect = new MaskEffect();
-
-  const layerManager = new LayerManager(gl, {viewport: testViewport});
-  layerManager.setLayers([TEST_LAYER]);
-  layerManager.updateLayers();
-
-  t.throws(
-    () => {
-      maskEffect.preRender(gl, {
-        layers: layerManager.getLayers(),
-        onViewportActive: layerManager.activateViewport,
-        viewports: [testViewport]
-      });
-    },
-    /{maskId: 'test-mask-layer'} must match the id of another Layer/i,
-    'maskId mismatch throws error'
-  );
-
-  maskEffect.cleanup();
-  t.end();
-});
-
-test('MaskEffect#too many masks', t => {
-  const maskEffect = new MaskEffect();
-
-  const layer2 = TEST_LAYER.clone({maskId: 'another-mask-layer'});
-
-  const layerManager = new LayerManager(gl, {viewport: testViewport});
-  layerManager.setLayers([TEST_LAYER, layer2]);
-  layerManager.updateLayers();
-
-  t.throws(
-    () => {
-      maskEffect.preRender(gl, {
-        layers: layerManager.getLayers(),
-        onViewportActive: layerManager.activateViewport,
-        viewports: [testViewport]
-      });
-    },
-    /Only one mask layer supported, but multiple maskIds specified/i,
-    'throws when more than one maskId is found in Layers'
-  );
-
+  t.ok(maskEffect.useInPicking, 'Mask effect enabled for picking render');
+  t.ok(maskEffect.empty, 'Mask effect disabled by default');
   maskEffect.cleanup();
   t.end();
 });
@@ -127,23 +44,24 @@ test('MaskEffect#cleanup', t => {
     viewports: [testViewport]
   });
 
-  t.ok(maskEffect.programManager, 'ProgramManager is obtained');
+  t.not(maskEffect.empty, 'Masking is enabled');
   t.ok(maskEffect.dummyMaskMap, 'Dummy mask map is created');
   t.ok(maskEffect.maskPass, 'Mask pass is created');
   t.ok(maskEffect.maskMap, 'Mask map is created');
 
   maskEffect.cleanup();
-  t.notOk(maskEffect.programManager, 'ProgramManager is released');
-  t.notOk(maskEffect.dummyMaskMap, 'MaskEffect cleans up dummy mask map');
-  t.notOk(maskEffect.maskPass, 'MaskEffect cleans up mask pass');
-  t.notOk(maskEffect.maskMap, 'MaskEffect cleans up mask map');
+
+  t.ok(maskEffect.empty, 'Masking is disabled');
+  t.notOk(maskEffect.dummyMaskMap, 'Dummy mask map is deleted');
+  t.notOk(maskEffect.maskPass, 'Mask pass is deleted');
+  t.notOk(maskEffect.maskMap, 'Mask map is deleted');
+
   t.end();
 });
 
-test('MaskEffect#mask module', t => {
+test('MaskEffect#update', t => {
   const maskEffect = new MaskEffect();
 
-  const programManager = ProgramManager.getDefaultProgramManager(gl);
   const layerManager = new LayerManager(gl, {viewport: testViewport});
   layerManager.setLayers([TEST_MASK_LAYER, TEST_LAYER]);
   layerManager.updateLayers();
@@ -154,13 +72,20 @@ test('MaskEffect#mask module', t => {
     viewports: [testViewport]
   });
 
-  let defaultModules = programManager._defaultModules;
-  let hasMask = defaultModules.some(m => m.name === 'mask');
-  t.equal(hasMask, true, 'MaskEffect adds mask module to default correctly');
+  let parameters = maskEffect.getModuleParameters(TEST_LAYER);
+  t.is(parameters.maskMap, maskEffect.maskMap, 'Mask map is in parameters');
+  const bounds = parameters.maskBounds;
+  t.ok(bounds.every(Number.isFinite), 'Mask bounds are populated');
+
+  maskEffect.preRender(gl, {
+    layers: layerManager.getLayers(),
+    onViewportActive: layerManager.activateViewport,
+    viewports: [testViewport]
+  });
+
+  parameters = maskEffect.getModuleParameters(TEST_LAYER);
+  t.is(parameters.maskBounds, bounds, 'Using cached mask bounds');
 
   maskEffect.cleanup();
-  defaultModules = programManager._defaultModules;
-  hasMask = defaultModules.some(m => m.name === 'mask');
-  t.equal(hasMask, false, 'MaskEffect removes mask module to default correctly');
   t.end();
 });

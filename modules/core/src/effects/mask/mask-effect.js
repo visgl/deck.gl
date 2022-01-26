@@ -1,45 +1,22 @@
 import {
-  log,
-  Texture2D,
-  ProgramManager
-  // readPixelsToArray
+  Texture2D
+  // , readPixelsToArray
 } from '@luma.gl/core';
 import MaskPass from '../../passes/mask-pass';
 import Effect from '../../lib/effect';
-import {default as mask} from '../../shaderlib/mask/mask';
-import {getDataViewport, getMaskProjectionMatrix, getMaskViewport} from './utils';
+import {OPERATION} from '../../lib/constants';
+import {getMaskBounds, getMaskViewport} from './utils';
 
 // Class to manage mask effect
 export default class MaskEffect extends Effect {
   constructor(props) {
     super(props);
-    this.programManager = null;
     this.dummyMaskMap = null;
-    this.mask = false;
-    this.enableForPicking = true;
+    this.empty = true;
+    this.useInPicking = true;
   }
 
   preRender(gl, {layers, layerFilter, viewports, onViewportActive, views}) {
-    const maskIds = new Set(
-      layers.map(({props}) => props.maskId).filter(maskId => maskId !== undefined)
-    );
-    if (maskIds.size === 0) {
-      return;
-    }
-    log.assert(maskIds.size === 1, 'Only one mask layer supported, but multiple maskIds specified');
-
-    this.mask = true;
-    const maskId = [...maskIds][0];
-
-    if (!this.maskPass) {
-      this.maskPass = new MaskPass(gl);
-      this.maskMap = this.maskPass.maskMap;
-    }
-    if (!this.programManager) {
-      this.programManager = ProgramManager.getDefaultProgramManager(gl);
-      this.programManager.addDefaultModule(mask);
-    }
-
     if (!this.dummyMaskMap) {
       this.dummyMaskMap = new Texture2D(gl, {
         width: 1,
@@ -47,31 +24,52 @@ export default class MaskEffect extends Effect {
       });
     }
 
-    // When the mask layer is changed the LayerManager will create a new instance
-    const maskLayer = this.getMaskLayer(maskId, layers);
-    const maskChanged = this.maskLayer !== maskLayer;
-    this.maskLayer = maskLayer;
+    const maskLayers = layers.filter(l => l.props.operation === OPERATION.MASK);
+    if (maskLayers.length === 0) {
+      this.empty = true;
+      return;
+    }
+    this.empty = false;
 
-    const {dummyMaskMap, maskPass, maskMap} = this;
-    const layerViewport = viewports[0];
-
-    if (!this.dataViewport || maskChanged) {
-      this.dataViewport = getDataViewport(maskLayer, maskMap);
+    if (!this.maskPass) {
+      // TODO - support multiple masks
+      this.maskPass = new MaskPass(gl, {id: 'default-mask'});
+      this.maskMap = this.maskPass.maskMap;
     }
 
-    const maskViewport = getMaskViewport(this.dataViewport, layerViewport, maskMap);
-    if (!maskViewport.equals(this.maskViewport) || maskChanged) {
-      this.maskViewport = maskViewport;
-      this.maskProjectionMatrix = getMaskProjectionMatrix(this.maskViewport);
+    // When the mask layer is changed the LayerManager will create a new instance
+    const oldMaskLayers = this.maskLayers;
+    const maskChanged =
+      !oldMaskLayers ||
+      oldMaskLayers.length !== maskLayers.length ||
+      maskLayers.some((l, i) => l !== oldMaskLayers[i]);
+
+    // To do: support multiple views
+    const viewport = viewports[0];
+
+    if (maskChanged || !this.lastViewport || !viewport.equals(this.lastViewport)) {
+      // Update mask FBO
+      const {maskPass, maskMap} = this;
+      this.lastViewport = viewport;
+      this.maskLayers = maskLayers;
+
+      const bounds = getMaskBounds({layers: maskLayers, viewport});
+
+      const maskViewport = getMaskViewport({
+        bounds,
+        viewport,
+        width: maskMap.width,
+        height: maskMap.height
+      });
+      this.maskBounds = maskViewport.getBounds();
 
       maskPass.render({
         layers,
         layerFilter,
-        viewports: [this.maskViewport],
+        viewports: [maskViewport],
         onViewportActive,
         views,
         moduleParameters: {
-          dummyMaskMap,
           devicePixelRatio: 1
         }
       });
@@ -104,29 +102,11 @@ export default class MaskEffect extends Effect {
     }
   }
 
-  getModuleParameters(layer) {
-    if (!this.mask) {
-      return {};
-    }
-
-    const {props} = layer;
-    const parameters = {
-      dummyMaskMap: this.dummyMaskMap
+  getModuleParameters() {
+    return {
+      maskMap: this.empty ? this.dummyMaskMap : this.maskMap,
+      maskBounds: this.maskBounds
     };
-    if (props.maskId) {
-      // Infer by geometry if 'maskByInstance' prop isn't explictly set
-      const attributeManager = layer.getAttributeManager();
-      if (attributeManager && !('maskByInstance' in props)) {
-        parameters.maskByInstance = 'instancePositions' in attributeManager.attributes;
-      }
-      if (!('maskEnabled' in props)) {
-        parameters.maskEnabled = true;
-      }
-
-      parameters.maskMap = this.maskMap;
-      parameters.maskProjectionMatrix = this.maskProjectionMatrix;
-    }
-    return parameters;
   }
 
   cleanup() {
@@ -140,19 +120,9 @@ export default class MaskEffect extends Effect {
       this.maskPass = null;
       this.maskMap = null;
     }
-    if (this.mask && this.programManager) {
-      this.programManager.removeDefaultModule(mask);
-      this.programManager = null;
-    }
 
-    this.dataViewport = null;
-    this.maskViewport = null;
-    this.maskProjectionMatrix = null;
-  }
-
-  getMaskLayer(maskId, layers) {
-    const maskLayer = layers.find(layer => layer.id === maskId);
-    log.assert(maskLayer, `{maskId: '${maskId}'} must match the id of another Layer`);
-    return maskLayer;
+    this.lastViewport = null;
+    this.maskBounds = null;
+    this.empty = true;
   }
 }
