@@ -142,7 +142,8 @@ export default class DeckPicker {
     depth = 1,
     mode = 'query',
     unproject3D,
-    onViewportActive
+    onViewportActive,
+    effects
   }) {
     layers = this._getPickable(layers);
 
@@ -188,6 +189,7 @@ export default class DeckPicker {
           viewports,
           onViewportActive,
           deviceRect,
+          effects,
           pass: `picking:${mode}`,
           redrawReason: mode
         });
@@ -208,6 +210,7 @@ export default class DeckPicker {
           viewports,
           onViewportActive,
           deviceRect: {x: pickInfo.pickedX, y: pickInfo.pickedY, width: 1, height: 1},
+          effects,
           pass: `picking:${mode}`,
           redrawReason: 'pick-z',
           pickZ: true
@@ -271,7 +274,8 @@ export default class DeckPicker {
     height = 1,
     mode = 'query',
     maxObjects = null,
-    onViewportActive
+    onViewportActive,
+    effects
   }) {
     layers = this._getPickable(layers);
 
@@ -308,6 +312,7 @@ export default class DeckPicker {
       viewports,
       onViewportActive,
       deviceRect,
+      effects,
       pass: `picking:${mode}`,
       redrawReason: mode
     });
@@ -352,6 +357,7 @@ export default class DeckPicker {
     viewports,
     onViewportActive,
     deviceRect,
+    effects,
     pass,
     redrawReason,
     pickZ
@@ -366,6 +372,7 @@ export default class DeckPicker {
       onViewportActive,
       pickingFBO,
       deviceRect,
+      effects,
       pass,
       redrawReason,
       pickZ
