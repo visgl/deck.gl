@@ -10,13 +10,24 @@ vec2 mask_getCoords(vec4 position) {
 
 const fs = `
 uniform sampler2D mask_texture;
+uniform int mask_channel;
 uniform bool mask_enabled;
 bool mask_isInBounds(vec2 texCoords) {
   if (!mask_enabled) {
     return true;
   }
   vec4 maskColor = texture2D(mask_texture, texCoords);
-  return maskColor.a > 0.5;
+  float maskValue = 1.0;
+  if (mask_channel == 0) {
+    maskValue = maskColor.r;
+  } else if (mask_channel == 1) {
+    maskValue = maskColor.g;
+  } else if (mask_channel == 2) {
+    maskValue = maskColor.b;
+  } else if (mask_channel == 3) {
+    maskValue = maskColor.a;
+  }
+  return maskValue < 0.5;
 }
 `;
 
@@ -52,7 +63,6 @@ varying vec2 mask_texCoords;
 const getMaskUniforms = (opts = {}, context = {}) => {
   const uniforms = {};
   if (opts.maskMap) {
-    uniforms.mask_enabled = opts.maskEnabled !== false;
     uniforms.mask_texture = opts.maskMap;
   }
   return uniforms;

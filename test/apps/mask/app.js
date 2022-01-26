@@ -1,5 +1,5 @@
 /* global fetch */
-import React, {useState, useMemo} from 'react';
+import React, {useState, useMemo, useCallback} from 'react';
 import {render} from 'react-dom';
 import {StaticMap} from 'react-map-gl';
 import DeckGL from '@deck.gl/react';
@@ -109,65 +109,68 @@ function getLayerData(data) {
   return {arcs, targets, sources};
 }
 
-const utah = [
-  [
-    [-109.05318294964546, 41.001993720049384],
-    [-109.04522477907253, 36.99991242120524],
-    [-110.49622148317988, 37.00732798923914],
-    [-112.41760291222404, 37.00942088474695],
-    [-114.03052771691799, 36.994098822572425],
-    [-114.03422258182684, 41.993121853191376],
-    [-111.05024451378105, 42.00159678808722],
-    [-111.05448198122899, 41.027935289059904],
-    [-109.05318294964546, 41.001993720049384]
-  ]
-];
-
 /* eslint-disable react/no-deprecated */
-export default function App({data, brushRadius = 100000, strokeWidth = 1, mapStyle = MAP_STYLE}) {
+export default function App({data, strokeWidth = 1, mapStyle = MAP_STYLE}) {
   const {arcs, targets, sources} = useMemo(() => getLayerData(data), [data]);
   const [maskEnabled, setMaskEnabled] = useState(true);
   const [showLayers, setShowLayers] = useState(true);
-  const [geojsonMask, setGeojsonMask] = useState(false);
   const [selectedCounty, selectCounty] = useState(null);
-  const maskPolygon = selectedCounty ? selectedCounty.geometry.coordinates : utah;
-  const maskId = 'county-mask';
-  const maskData =
-    maskPolygon.length === 0 ? [{polygon: []}] : maskPolygon.map(polygon => ({polygon}));
+  const [selectedCounty2, selectCounty2] = useState(null);
+
+  const selectedCounty2Polygons = useMemo(() => {
+    if (!selectedCounty2) return [];
+    if (selectedCounty2.geometry.type === 'MultiPolygon') {
+      return selectedCounty2.geometry.coordinates;
+    }
+    return [selectedCounty2.geometry.coordinates];
+  }, [selectedCounty2]);
+
+  const onClickState = useCallback((info, evt) => {
+    if (evt.srcEvent.shiftKey) {
+      selectCounty2(info.object);
+    } else {
+      selectCounty(info.object);
+    }
+  }, []);
+
+  const onDataLoad = useCallback(geojson => {
+    const california = geojson.features.find(f => f.properties.name === 'California');
+    selectCounty(california);
+    selectCounty2(california);
+  }, []);
 
   const layers = arcs &&
     targets && [
-      geojsonMask
-        ? new GeoJsonLayer({
-            id: maskId,
-            operation: OPERATION.MASK,
-            data: {
-              type: 'FeatureCollection',
-              features: selectedCounty ? [selectedCounty] : []
-            }
-          })
-        : new SolidPolygonLayer({
-            id: maskId,
-            operation: OPERATION.MASK,
-            data: maskData
-          }),
+      new GeoJsonLayer({
+        id: 'mask',
+        operation: OPERATION.MASK,
+        data: selectedCounty || []
+      }),
+      new SolidPolygonLayer({
+        id: 'mask2',
+        operation: OPERATION.MASK,
+        data: selectedCounty2Polygons,
+        getPolygon: d => d
+      }),
       // Boundary around USA (masked by selected state)
       new SolidPolygonLayer({
         id: 'masked-layer',
         data: [{polygon: rectangle}],
         getFillColor: [...TARGET_COLOR, 200],
+        maskId: 'mask',
         extensions: [new MaskExtension()]
       }),
       // US states (used to select & define masks)
       new GeoJsonLayer({
         id: 'us-states',
         data: US_STATES,
+        onDataLoad,
         opacity: 0.3,
         stroked: true,
         filled: true,
         getFillColor: [201, 210, 203, 80],
         lineWidthMinPixels: 2,
-        onClick: ({object}) => selectCounty(object),
+        onClick: onClickState,
         pickable: true,
         autoHighlight: true,
         highlightColor: [255, 255, 255, 150],
@@ -185,6 +188,7 @@ export default function App({data, brushRadius = 100000, strokeWidth = 1, mapSty
         getLineColor: [0, 0, 0, 100],
         parameters: {depthTest: false},
         extensions: [new MaskExtension()],
+        maskId: 'mask2',
         maskEnabled,
         maskByInstance: false
       }),
@@ -194,6 +198,7 @@ export default function App({data, brushRadius = 100000, strokeWidth = 1, mapSty
         radiusScale: 3000,
         getFillColor: d => (d.gain > 0 ? TARGET_COLOR : SOURCE_COLOR),
         extensions: [new MaskExtension()],
+        maskId: 'mask2',
         maskEnabled
       }),
       new ScatterplotLayer({
@@ -208,6 +213,7 @@ export default function App({data, brushRadius = 100000, strokeWidth = 1, mapSty
         radiusScale: 3000,
         getFillColor: d => (d.net > 0 ? TARGET_COLOR : SOURCE_COLOR),
         extensions: [new MaskExtension()],
+        maskId: 'mask2',
         maskEnabled
       }),
       new ArcLayer({
@@ -220,6 +226,7 @@ export default function App({data, brushRadius = 100000, strokeWidth = 1, mapSty
         getSourceColor: SOURCE_COLOR,
         getTargetColor: TARGET_COLOR,
         extensions: [new MaskExtension()],
+        maskId: 'mask',
         maskEnabled,
         maskByInstance: true
       })
@@ -246,14 +253,6 @@ export default function App({data, brushRadius = 100000, strokeWidth = 1, mapSty
         <label>
           <input type="checkbox" checked={showLayers} onChange={() => setShowLayers(!showLayers)} />
           Show layers
-        </label>
-        <label>
-          <input
-            type="checkbox"
-            checked={geojsonMask}
-            onChange={() => setGeojsonMask(!geojsonMask)}
-          />
-          GeoJSON Mask
         </label>
       </div>
     </>

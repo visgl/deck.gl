@@ -62,6 +62,10 @@ export function getMaskBounds({layers, viewport}) {
  * Compute viewport to render the mask into, covering the given bounds
  */
 export function getMaskViewport({bounds, viewport, width, height}) {
+  if (bounds[2] <= bounds[0] || bounds[3] <= bounds[1]) {
+    return null;
+  }
+
   if (viewport instanceof WebMercatorViewport) {
     const {longitude, latitude, zoom} = fitBounds({
       width,
