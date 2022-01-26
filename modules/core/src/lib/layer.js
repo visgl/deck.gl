@@ -332,11 +332,13 @@ export default class Layer extends Component {
     return shaders;
   }
 
-  // Default implementation returns null (unknown bounds)
-  // Sublayers should override to provide an accurate calculation of the bounds
-  // based on rendered data
+  // Default implementation
+  // Sublayers chould override this method to provide an accurate calculation of the bounds
   getBounds() {
-    return null;
+    const attributeManager = this.getAttributeManager();
+    if (!attributeManager) return null;
+    const {positions, instancePositions} = attributeManager.attributes;
+    return (positions || instancePositions)?.getBounds();
   }
 
   // Let's layer control if updateState should be called

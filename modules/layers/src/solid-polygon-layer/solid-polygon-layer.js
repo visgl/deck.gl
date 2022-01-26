@@ -73,12 +73,6 @@ export default class SolidPolygonLayer extends Layer {
     });
   }
 
-  getBounds() {
-    const attributeManager = this.getAttributeManager();
-    if (!attributeManager) return null;
-    return attributeManager.attributes.positions.getBounds();
-  }
-
   get wrapLongitude() {
     return false;
   }
