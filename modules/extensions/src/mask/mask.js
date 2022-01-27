@@ -1,5 +1,6 @@
 import {LayerExtension, log} from '@deck.gl/core';
 import mask from './shader-module';
+import {projectPosition} from '@deck.gl/core/shaderlib/project/project-functions';
 
 const defaultProps = {
   maskId: ''
@@ -20,17 +21,19 @@ export default class MaskExtension extends LayerExtension {
     };
   }
 
-  draw({uniforms, moduleParameters}) {
+  draw({uniforms, context, moduleParameters}) {
     uniforms.mask_maskByInstance = this.state.maskByInstance;
-    const {maskId} = this.props;
+    const {maskId} = this.root.props;
     const {maskChannels} = moduleParameters;
+    const {viewport} = context;
     if (maskChannels && maskChannels[maskId]) {
-      const {index, bounds} = maskChannels[maskId];
-
-      const bl = this.projectPosition([bounds[0], bounds[1], 0]);
-      const tr = this.projectPosition([bounds[2], bounds[3], 0]);
+      const {index, bounds, coordinateOrigin, coordinateSystem} = maskChannels[maskId];
       uniforms.mask_enabled = true;
       uniforms.mask_channel = index;
+
+      const opts = {viewport, coordinateOrigin, coordinateSystem};
+      const bl = projectPosition([bounds[0], bounds[1], 0], opts);
+      const tr = projectPosition([bounds[2], bounds[3], 0], opts);
       uniforms.mask_bounds = [bl[0], bl[1], tr[0], tr[1]];
     } else {
       if (maskId) {

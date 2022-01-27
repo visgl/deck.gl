@@ -127,7 +127,13 @@ export default class MaskEffect extends Effect {
         });
       }
     }
-    this.masks[channelInfo.id] = {index: channelInfo.index, bounds: channelInfo.maskBounds};
+
+    this.masks[channelInfo.id] = {
+      index: channelInfo.index,
+      bounds: channelInfo.maskBounds,
+      coordinateOrigin: channelInfo.coordinateOrigin,
+      coordinateSystem: channelInfo.coordinateSystem
+    };
   }
 
   /**
@@ -157,6 +163,8 @@ export default class MaskEffect extends Effect {
       }
       channelInfo.layers.push(layer);
       channelInfo.layerBounds.push(layer.getBounds());
+      channelInfo.coordinateOrigin = layer.props.coordinateOrigin;
+      channelInfo.coordinateSystem = layer.props.coordinateSystem;
     }
 
     for (let i = 0; i < 4; i++) {
