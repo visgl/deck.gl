@@ -97,6 +97,7 @@ export default [
       }),
       new SolidPolygonLayer({
         id: 'polygon-masked',
+        maskId: 'mask-layer',
         extensions: [new MaskExtension()],
         data: polygons,
         getPolygon: f => f,
@@ -104,6 +105,7 @@ export default [
       }),
       new ScatterplotLayer({
         id: 'points',
+        maskId: 'mask-layer',
         extensions: [new MaskExtension()],
         data: points,
         getPosition: d => d.COORDINATES,

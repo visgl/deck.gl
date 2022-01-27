@@ -1,7 +1,5 @@
-import {
-  Texture2D
-  // , readPixelsToArray
-} from '@luma.gl/core';
+import {Texture2D} from '@luma.gl/core';
+// import {readPixelsToArray} from '@luma.gl/core';
 import {equals} from '@math.gl/core';
 import MaskPass from '../../passes/mask-pass';
 import Effect from '../../lib/effect';
@@ -84,7 +82,7 @@ export default class MaskEffect extends Effect {
 
           maskPass.render({
             channel: channelInfo.index,
-            layers,
+            layers: channelInfo.layers,
             layerFilter,
             viewports: maskViewport ? [maskViewport] : [],
             onViewportActive,

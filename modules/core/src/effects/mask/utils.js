@@ -65,6 +65,9 @@ export function getMaskViewport({bounds, viewport, width, height}) {
   if (bounds[2] <= bounds[0] || bounds[3] <= bounds[1]) {
     return null;
   }
+  const padding = 1;
+  width -= padding * 2;
+  height -= padding * 2;
 
   if (viewport instanceof WebMercatorViewport) {
     const {longitude, latitude, zoom} = fitBounds({
@@ -76,13 +79,24 @@ export function getMaskViewport({bounds, viewport, width, height}) {
       ],
       maxZoom: 20
     });
-    return new WebMercatorViewport({longitude, latitude, zoom, width, height});
+    return new WebMercatorViewport({
+      longitude,
+      latitude,
+      zoom,
+      x: padding,
+      y: padding,
+      width,
+      height
+    });
   }
 
   const center = [(bounds[0] + bounds[2]) / 2, (bounds[1] + bounds[3]) / 2, 0];
   const scale = Math.min(20, width / (bounds[2] - bounds[0]), height / (bounds[3] - bounds[1]));
 
-  return new OrthographicView().makeViewport({
+  return new OrthographicView({
+    x: padding,
+    y: padding
+  }).makeViewport({
     width,
     height,
     viewState: {

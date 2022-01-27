@@ -1,4 +1,4 @@
-import {Framebuffer, Texture2D, withParameters, clearGLCanvas} from '@luma.gl/core';
+import {Framebuffer, Texture2D, withParameters} from '@luma.gl/core';
 import {OPERATION} from '../lib/constants';
 import LayersPass from './layers-pass';
 
@@ -37,25 +37,10 @@ export default class MaskPass extends LayersPass {
         [gl.COLOR_ATTACHMENT0]: this.maskMap
       }
     });
-
-    // Fill the texture with 1
-    withParameters(
-      gl,
-      {
-        framebuffer: this.fbo,
-        viewport: [0, 0, mapSize, mapSize],
-        clearColor: [255, 255, 255, 255]
-      },
-      () => {
-        gl.clear(gl.COLOR_BUFFER_BIT);
-      }
-    );
   }
 
   render(options: MaskPassRenderOptions) {
     const gl = this.gl;
-    const {width, height} = this.fbo;
-    const padding = 1;
 
     const colorMask = [false, false, false, false];
     colorMask[options.channel] = true;
@@ -68,12 +53,7 @@ export default class MaskPass extends LayersPass {
         blendFunc: [gl.ZERO, gl.ONE],
         blendEquation: gl.FUNC_SUBTRACT,
         colorMask,
-
-        depthTest: false,
-
-        // Prevent mask bleeding over edge by adding transparent padding
-        scissorTest: true,
-        scissor: [padding, padding, width - 2 * padding, height - 2 * padding]
+        depthTest: false
       },
       () => super.render({...options, target: this.fbo, pass: 'mask'})
     );
