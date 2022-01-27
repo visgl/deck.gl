@@ -65,11 +65,11 @@ test('EffectManager#set and get Effects', t => {
   const effect2 = new Effect();
   effectManager.setEffects([effect1, effect2]);
   let effects = effectManager.getEffects();
-  t.equal(effects.length, 3, 'Effect set and get successfully');
+  t.equal(effects.length, 4, 'Effect set and get successfully');
 
   effectManager.setProps({effects: [effect1]});
   effects = effectManager.getEffects();
-  t.equal(effects.length, 2, 'Effect set and get successfully');
+  t.equal(effects.length, 3, 'Effect set and get successfully');
   t.end();
 });
 
@@ -105,11 +105,7 @@ test('EffectManager#setProps', t => {
   effectManager.setProps({effects: [effect]});
 
   t.deepEqual(effectManager.effects, [effect], 'Effect manager set props correctly');
-  t.equal(
-    effectManager._internalEffects.length,
-    1,
-    'Effect Manager should not need to apply default lighting'
-  );
+  t.equal(effectManager.getEffects().length, 2, 'Effect Manager should not need default lighting');
   t.equal(effectManager.needsRedraw(), 'effects changed', 'Effect Manager should need redraw');
 
   effectManager.setProps({effects: [effect]});
@@ -125,11 +121,7 @@ test('EffectManager#setProps', t => {
   );
 
   effectManager.setProps({effects: []});
-  t.equal(
-    effectManager._internalEffects.length,
-    1,
-    'Effect Manager should need to apply default lighting'
-  );
+  t.equal(effectManager.getEffects().length, 2, 'Effect Manager should apply default lighting');
 
   t.end();
 });
