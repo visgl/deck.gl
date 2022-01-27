@@ -1,8 +1,8 @@
-import {LayerExtension} from '@deck.gl/core';
+import {LayerExtension, log} from '@deck.gl/core';
 import mask from './shader-module';
 
 const defaultProps = {
-  maskEnabled: true
+  maskId: ''
 };
 
 export default class MaskExtension extends LayerExtension {
@@ -22,11 +22,21 @@ export default class MaskExtension extends LayerExtension {
 
   draw({uniforms, moduleParameters}) {
     uniforms.mask_maskByInstance = this.state.maskByInstance;
-    const {maskBounds} = moduleParameters;
-    if (maskBounds) {
-      const bl = this.projectPosition([maskBounds[0], maskBounds[1], 0]);
-      const tr = this.projectPosition([maskBounds[2], maskBounds[3], 0]);
+    const {maskId} = this.props;
+    const {maskChannels} = moduleParameters;
+    if (maskChannels && maskChannels[maskId]) {
+      const {index, bounds} = maskChannels[maskId];
+
+      const bl = this.projectPosition([bounds[0], bounds[1], 0]);
+      const tr = this.projectPosition([bounds[2], bounds[3], 0]);
+      uniforms.mask_enabled = true;
+      uniforms.mask_channel = index;
       uniforms.mask_bounds = [bl[0], bl[1], tr[0], tr[1]];
+    } else {
+      if (maskId) {
+        log.warn(`Could not find a mask layer with id: ${maskId}`)();
+      }
+      uniforms.mask_enabled = false;
     }
   }
 }

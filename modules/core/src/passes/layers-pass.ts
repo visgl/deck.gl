@@ -10,7 +10,7 @@ import type Effect from '../lib/effect';
 
 export type LayersPassRenderOptions = {
   target?: Framebuffer;
-  pass: string;
+  pass?: string;
   layers: Layer[];
   viewports: Viewport[];
   onViewportActive: (viewport: Viewport) => void;

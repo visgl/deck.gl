@@ -30,6 +30,7 @@ export default function App() {
     new SolidPolygonLayer({
       id: 'square',
       extensions: [new MaskExtension()],
+      maskId: 'mask',
       maskEnabled,
       coordinateSystem: COORDINATE_SYSTEM.CARTESIAN,
       data: [
