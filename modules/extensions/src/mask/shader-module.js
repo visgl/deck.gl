@@ -60,7 +60,7 @@ varying vec2 mask_texCoords;
 `
 };
 
-const getMaskUniforms = (opts = {}, context = {}) => {
+const getMaskUniforms = (opts = {}) => {
   const uniforms = {};
   if (opts.maskMap) {
     uniforms.mask_texture = opts.maskMap;
