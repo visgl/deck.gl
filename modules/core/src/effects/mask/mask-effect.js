@@ -34,7 +34,6 @@ export default class MaskEffect extends Effect {
     this.masks = {};
 
     if (!this.maskPass) {
-      // TODO - support multiple masks
       this.maskPass = new MaskPass(gl, {id: 'default-mask'});
       this.maskMap = this.maskPass.maskMap;
     }
@@ -136,7 +135,7 @@ export default class MaskEffect extends Effect {
       const {id} = layer.root;
       let channelInfo = channelMap[id];
       if (!channelInfo) {
-        if (++channelCount > 3) {
+        if (++channelCount > 4) {
           log.warn('Too many mask layers. The max supported is 4')();
           continue;
         }

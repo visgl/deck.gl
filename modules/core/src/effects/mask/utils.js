@@ -65,6 +65,8 @@ export function getMaskViewport({bounds, viewport, width, height}) {
   if (bounds[2] <= bounds[0] || bounds[3] <= bounds[1]) {
     return null;
   }
+
+  // Single pixel border to prevent mask bleeding at edge of texture
   const padding = 1;
   width -= padding * 2;
   height -= padding * 2;
