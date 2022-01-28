@@ -55,6 +55,9 @@ class MockMapboxMap {
   getBearing() {
     return this.opts.bearing || 0;
   }
+  getRenderWorldCopies() {
+    return true;
+  }
 }
 
 test('MapboxLayer#onAdd, onRemove, setProps', t => {
