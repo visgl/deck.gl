@@ -93,6 +93,10 @@ export default class Tileset2D {
     return this._selectedTiles.every(tile => tile.isLoaded);
   }
 
+  get needsReload() {
+    return this._selectedTiles.some(tile => tile.needsReload);
+  }
+
   setOptions(opts) {
     Object.assign(this.opts, opts);
     if (Number.isFinite(opts.maxZoom)) {
@@ -155,6 +159,11 @@ export default class Tileset2D {
         // Some new tiles are added
         this._rebuildTree();
       }
+      // Check for needed reloads explicitly even if the view/matrix has not changed.
+    } else if (this.needsReload) {
+      this._selectedTiles = this._selectedTiles.map(tile =>
+        this._getTile({x: tile.x, y: tile.y, z: tile.z}, true)
+      );
     }
 
     // Update tile states
