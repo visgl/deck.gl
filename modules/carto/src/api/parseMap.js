@@ -1,6 +1,6 @@
 import GL from '@luma.gl/constants';
 import {
-  LAYER_MAP,
+  getLayer,
   getColorAccessor,
   getSizeAccessor,
   getTextAccessor,
@@ -24,8 +24,10 @@ export function parseMap(json) {
     mapStyle,
     layers: extractTextLayers(layers.reverse()).map(({id, type, config, visualChannels}) => {
       try {
-        log.assert(type in LAYER_MAP, `Unsupported layer type: ${type}`);
-        const {Layer, propMap, defaultProps} = LAYER_MAP[type];
+        const layer = getLayer(type, config);
+
+        log.assert(getLayer(type, config), `Unsupported layer type: ${type}`);
+        const {Layer, propMap, defaultProps} = layer;
 
         const {dataId} = config;
         const dataset = datasets.find(d => d.id === dataId);

@@ -62,37 +62,39 @@ function mergePropMaps(a, b) {
   return {...a, ...b, visConfig: {...a.visConfig, ...b.visConfig}};
 }
 
-export const LAYER_MAP = {
-  point: {
-    Layer: GeoJsonLayer,
-    propMap: mergePropMaps(sharedPropMap, {
-      visConfig: {outline: 'stroked'}
-    }),
-    defaultProps
-  },
-  geojson: {
-    Layer: GeoJsonLayer,
-    propMap: sharedPropMap,
-    defaultProps: {...defaultProps, lineWidthScale: 2}
-  },
-  hexagonId: {
-    Layer: H3HexagonLayer,
-    propMap: mergePropMaps(sharedPropMap, {
-      visConfig: {coverage: 'coverage', elevationScale: 'elevationScale'}
-    }),
-    defaultProps: {...defaultProps, getHexagon: d => d.h3}
-  },
-  mvt: {
-    Layer: MVTLayer,
-    propMap: sharedPropMap,
-    defaultProps: {
-      ...defaultProps,
-      pointRadiusScale: 0.3,
-      lineWidthScale: 2,
-      uniqueIdProperty: 'geoid'
+export function getLayer(type, config) {
+  return {
+    point: {
+      Layer: GeoJsonLayer,
+      propMap: mergePropMaps(sharedPropMap, {
+        visConfig: {outline: 'stroked'}
+      }),
+      defaultProps
+    },
+    geojson: {
+      Layer: GeoJsonLayer,
+      propMap: sharedPropMap,
+      defaultProps: {...defaultProps, lineWidthScale: 2}
+    },
+    hexagonId: {
+      Layer: H3HexagonLayer,
+      propMap: mergePropMaps(sharedPropMap, {
+        visConfig: {coverage: 'coverage', elevationScale: 'elevationScale'}
+      }),
+      defaultProps: {...defaultProps, getHexagon: d => d[config.columns.hex_id]}
+    },
+    mvt: {
+      Layer: MVTLayer,
+      propMap: sharedPropMap,
+      defaultProps: {
+        ...defaultProps,
+        pointRadiusScale: 0.3,
+        lineWidthScale: 2,
+        uniqueIdProperty: 'geoid'
+      }
     }
-  }
-};
+  }[type];
+}
 
 function domainFromAttribute(attribute, scaleType) {
   if (scaleType === 'ordinal' || scaleType === 'point') {
