@@ -361,7 +361,7 @@ function getGLViewport(
     target?: Framebuffer;
     viewport: Viewport;
   }
-): [x: number, y: number, width: number, height: number] {
+): [number, number, number, number] {
   const useTarget = target && target.id !== 'default-framebuffer';
   const pixelRatio =
     (moduleParameters && moduleParameters.devicePixelRatio) || cssToDeviceRatio(gl);
