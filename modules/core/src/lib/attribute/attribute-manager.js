@@ -172,6 +172,7 @@ export default class AttributeManager {
       const attribute = this.attributes[attributeName];
       const accessorName = attribute.settings.accessor;
       attribute.startIndices = startIndices;
+      attribute.numInstances = numInstances;
 
       if (props[attributeName]) {
         log.removed(`props.${attributeName}`, `data.attributes.${attributeName}`)();

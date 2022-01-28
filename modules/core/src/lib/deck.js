@@ -404,6 +404,7 @@ export default class Deck {
       views: this.viewManager.getViews(),
       viewports: this.getViewports(opts),
       onViewportActive: this.layerManager.activateViewport,
+      effects: this.effectManager.getEffects(),
       ...opts
     });
 

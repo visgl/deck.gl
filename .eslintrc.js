@@ -37,6 +37,7 @@ const config = deepMerge(defaultConfig, {
     {
       files: ['**/*.ts', '**/*.tsx', '**/*.d.ts'],
       rules: {
+        indent: 0,
         // For parquet module
         '@typescript-eslint/no-non-null-assertion': 0,
         '@typescript-eslint/no-non-null-asserted-optional-chain': 0,

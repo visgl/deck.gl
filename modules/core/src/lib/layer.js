@@ -19,7 +19,7 @@
 // THE SOFTWARE.
 
 /* eslint-disable react/no-direct-mutation-state */
-import {COORDINATE_SYSTEM} from './constants';
+import {COORDINATE_SYSTEM, OPERATION} from './constants';
 import AttributeManager from './attribute/attribute-manager';
 import UniformTransitionManager from './uniform-transition-manager';
 import {diffProps, validateProps} from '../lifecycle/props';
@@ -107,6 +107,7 @@ const defaultProps = {
   visible: true,
   pickable: false,
   opacity: {type: 'number', min: 0, max: 1, value: 1},
+  operation: OPERATION.DRAW,
 
   onHover: {type: 'function', value: null, compare: false, optional: true},
   onClick: {type: 'function', value: null, compare: false, optional: true},
@@ -328,6 +329,15 @@ export default class Layer extends Component {
       shaders = mergeShaders(shaders, extension.getShaders.call(this, extension));
     }
     return shaders;
+  }
+
+  // Default implementation
+  // Sublayers chould override this method to provide an accurate calculation of the bounds
+  getBounds() {
+    const attributeManager = this.getAttributeManager();
+    if (!attributeManager) return null;
+    const {positions, instancePositions} = attributeManager.attributes;
+    return (positions || instancePositions)?.getBounds();
   }
 
   // Let's layer control if updateState should be called

@@ -1,6 +1,8 @@
 /* global document */
 import TinySDF from '@mapbox/tiny-sdf';
 
+import {log} from '@deck.gl/core';
+
 import {buildMapping} from './utils';
 import LRUCache from './lru-cache';
 
@@ -39,7 +41,7 @@ const CACHE_LIMIT = 3;
  * }
  *
  */
-const cache = new LRUCache(CACHE_LIMIT);
+let cache = new LRUCache(CACHE_LIMIT);
 
 const VALID_PROPS = [
   'fontFamily',
@@ -95,6 +97,16 @@ function setTextStyle(ctx, fontFamily, fontSize, fontWeight) {
   ctx.fillStyle = '#000';
   ctx.textBaseline = 'baseline';
   ctx.textAlign = 'left';
+}
+
+/**
+ * Sets the Font Atlas LRU Cache Limit
+ * @param {number} limit LRU Cache limit
+ */
+export function setFontAtlasCacheLimit(limit) {
+  log.assert(Number.isFinite(limit) && limit >= CACHE_LIMIT, 'Invalid cache limit');
+
+  cache = new LRUCache(limit);
 }
 
 export default class FontAtlasManager {

@@ -21,6 +21,20 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ### deck.gl v8.7 Prereleases
 
+#### deck.gl [8.7.0-beta.1] - Jan 26 2022
+
+- Add MaskExtension (#6554)
+- Add getBounds method to Attribute (#6583)
+- Update to new Google Maps API (#6579)
+- CARTO fetchMap:  Fix no layer shown if one of the map layers fails (#6573)
+- Add uniqueIdProperty to mvt layer props (#6572)
+- Fix fetchMap in Carto module (#6569)
+- Migrate core/passes to TypeScript (#6488)
+- Fix TileLayer url template resolution (#6566)
+- Fix z-index of MapboxLayers (#6565)
+- Fix highlighting in GeoJsonLayer when it’s used as a sub layer (#6563)
+- Correctly calculate GLViewport with Framebuffer (#6553)
+
 #### deck.gl [8.7.0-alpha.11] - Dec 30 2021
 
 - CARTO - add clientId parameter for internal tracing (#6534)
