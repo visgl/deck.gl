@@ -229,6 +229,26 @@ test('Tileset2D#under-zoomed-with-extent', t => {
 
 test('Tileset2D#callbacks', async t => {
   let tileLoadCalled = 0;
+
+  const tileset = new Tileset2D({
+    maxCacheSize: 1,
+    getTileData: () => Promise.resolve(null),
+    onTileLoad: () => tileLoadCalled++,
+    onTileError: () => {},
+    onTileUnload: () => {}
+  });
+
+  tileset.update(testViewport);
+  await sleep(100);
+  tileset.reloadAll();
+  tileset.update(testViewport);
+  await sleep(100);
+
+  t.is(tileLoadCalled, 2, 'tile is reloaded when reloadAll is called');
+});
+
+test('Tileset2D#callbacks', async t => {
+  let tileLoadCalled = 0;
   let tileErrorCalled = 0;
   let tileUnloadCalled = 0;
 
