@@ -162,7 +162,7 @@ export default class Tileset2D {
       // Check for needed reloads explicitly even if the view/matrix has not changed.
     } else if (this.needsReload) {
       this._selectedTiles = this._selectedTiles.map(tile =>
-        this._getTile({x: tile.x, y: tile.y, z: tile.z}, true)
+        this._getTile({x: tile.x, y: tile.y, z: tile.z})
       );
     }
 
