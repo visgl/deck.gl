@@ -4,7 +4,6 @@ import MaskEffect from '../effects/mask/mask-effect';
 import type Effect from './effect';
 
 const DEFAULT_LIGHTING_EFFECT = new LightingEffect();
-const DEFAULT_MASK_EFFECT = new MaskEffect();
 
 export default class EffectManager {
   effects: Effect[];
@@ -49,7 +48,8 @@ export default class EffectManager {
     this.effects = effects;
 
     this._internalEffects = effects.slice();
-    this._internalEffects.push(DEFAULT_MASK_EFFECT);
+    // Unique MaskEffect per EffectManager as GL context may be different
+    this._internalEffects.push(new MaskEffect());
     if (!effects.some(effect => effect instanceof LightingEffect)) {
       this._internalEffects.push(DEFAULT_LIGHTING_EFFECT);
     }
