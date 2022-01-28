@@ -74,6 +74,9 @@ export default class Tileset2D {
     this._selectedTiles = null;
     this._frameNumber = 0;
 
+    this._modelMatrix = new Matrix4();
+    this._modelMatrixInverse = new Matrix4();
+
     this.setOptions(opts);
   }
 
