@@ -2,10 +2,12 @@ import {picking} from '@luma.gl/core';
 
 export default {
   inject: {
+    'vs:DECKGL_FILTER_GL_POSITION': `
+    // for picking depth values
+    picking_setPickingAttribute(position.z / position.w);
+  `,
     'vs:DECKGL_FILTER_COLOR': `
   picking_setPickingColor(geometry.pickingColor);
-  // for picking depth values
-  picking_setPickingAttribute(geometry.position.z);
   `,
     'fs:DECKGL_FILTER_COLOR': {
       order: 99,
