@@ -1,6 +1,7 @@
 import LayersPass, {LayersPassRenderOptions, RenderStats} from './layers-pass';
 import {withParameters} from '@luma.gl/core';
 import GL from '@luma.gl/constants';
+import {OPERATION} from '../lib/constants';
 import log from '../utils/log';
 
 import type {Framebuffer} from '@luma.gl/core';
@@ -51,6 +52,7 @@ export default class PickLayersPass extends LayersPass {
     onViewportActive,
     pickingFBO,
     deviceRect: {x, y, width, height},
+    effects,
     pass = 'picking',
     pickZ
   }: PickLayersPassRenderOptions): {
@@ -108,6 +110,7 @@ export default class PickLayersPass extends LayersPass {
           views,
           viewports,
           onViewportActive,
+          effects: effects?.filter(e => e.useInPicking),
           pass
         })
     );
@@ -119,7 +122,7 @@ export default class PickLayersPass extends LayersPass {
   }
 
   protected shouldDrawLayer(layer: Layer): boolean {
-    return layer.props.pickable;
+    return layer.props.pickable && layer.props.operation === OPERATION.DRAW;
   }
 
   protected getModuleParameters() {

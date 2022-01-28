@@ -1,8 +1,10 @@
 import {deepEqual} from '../utils/deep-equal';
-import {default as LightingEffect} from '../effects/lighting/lighting-effect';
+import LightingEffect from '../effects/lighting/lighting-effect';
+import MaskEffect from '../effects/mask/mask-effect';
 import type Effect from './effect';
 
 const DEFAULT_LIGHTING_EFFECT = new LightingEffect();
+const DEFAULT_MASK_EFFECT = new MaskEffect();
 
 export default class EffectManager {
   effects: Effect[];
@@ -45,7 +47,12 @@ export default class EffectManager {
   setEffects(effects = []) {
     this.cleanup();
     this.effects = effects;
-    this._createInternalEffects();
+
+    this._internalEffects = effects.slice();
+    this._internalEffects.push(DEFAULT_MASK_EFFECT);
+    if (!effects.some(effect => effect instanceof LightingEffect)) {
+      this._internalEffects.push(DEFAULT_LIGHTING_EFFECT);
+    }
   }
 
   cleanup() {
@@ -58,12 +65,5 @@ export default class EffectManager {
     }
     this.effects.length = 0;
     this._internalEffects.length = 0;
-  }
-
-  _createInternalEffects() {
-    this._internalEffects = this.effects.slice();
-    if (!this.effects.some(effect => effect instanceof LightingEffect)) {
-      this._internalEffects.push(DEFAULT_LIGHTING_EFFECT);
-    }
   }
 }
