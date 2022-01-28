@@ -27,7 +27,8 @@ import FontAtlasManager, {
   DEFAULT_FONT_SIZE,
   DEFAULT_BUFFER,
   DEFAULT_RADIUS,
-  DEFAULT_CUTOFF
+  DEFAULT_CUTOFF,
+  setFontAtlasCacheLimit
 } from './font-atlas-manager';
 import {transformParagraph, getTextFromBuffer} from './utils';
 
@@ -436,6 +437,10 @@ export default class TextLayer extends CompositeLayer {
         }
       )
     ];
+  }
+
+  static set fontAtlasCacheLimit(limit) {
+    setFontAtlasCacheLimit(limit);
   }
 }
 
