@@ -200,7 +200,7 @@ test('OrbitView#project', t => {
 
 test('OrthographicView', t => {
   const view = new OrthographicView({id: '2d-view'});
-  const viewport = view.makeViewport({
+  let viewport = view.makeViewport({
     width: 100,
     height: 100,
     viewState: {
@@ -214,6 +214,19 @@ test('OrthographicView', t => {
   t.is(viewport.id, view.id, 'Viewport has correct id');
   t.ok(viewport.width === 100 && viewport.height === 100, 'Viewport has correct size');
   t.is(viewport.zoom, 9, 'Viewport has correct parameters');
+
+  viewport = view.makeViewport({
+    width: 400,
+    height: 300,
+    viewState: {
+      target: [50, 100, 0],
+      zoom: [1, 3]
+    }
+  });
+  const center = viewport.project([50, 100, 0]);
+  t.ok(equals(center[0], 200) && equals(center[1], 150), 'target is at viewport center');
+  const p = viewport.project([40, 90, 0]);
+  t.ok(equals(center[0] - p[0], 20) && equals(center[1] - p[1], 80), 'independent scales');
 
   t.end();
 });
