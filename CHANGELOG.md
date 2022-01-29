@@ -19,6 +19,14 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v8.6
 
+#### deck.gl [8.6.7] - Jan 28 2022
+
+- Fix update behavior in `Tileset2D` (#6602)
+- Fix depth picking accuracy (#6600)
+- MapboxLayer only repeats if the base map renders multiple copies (#6594)
+- Allow setting FontAtlasManager LRU Cache limit (#6576)
+- Update to new Google Maps API (#6579)
+
 #### deck.gl [8.6.6] - Jan 19 2022
 
 - Fix TileLayer url template resolution (#6566)
