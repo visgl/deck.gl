@@ -4,7 +4,8 @@ import Tileset2D, {
   STRATEGY_DEFAULT,
   STRATEGY_NEVER
 } from '@deck.gl/geo-layers/tile-layer/tileset-2d';
-import {WebMercatorViewport} from '@deck.gl/core';
+import {WebMercatorViewport, OrthographicView} from '@deck.gl/core';
+import {Matrix4} from 'math.gl';
 
 const testViewState = {
   bearing: 0,
@@ -53,6 +54,31 @@ test('Tileset2D#update', t => {
   t.equal(tileset.tiles[0].y, 1566);
   t.equal(tileset.tiles[0].z, 12);
   t.ok(tileset.tiles[0].bbox, 'tile has metadata');
+
+  t.end();
+});
+
+test('Tileset2D#updateOnModelMatrix', t => {
+  const tileset = new Tileset2D({
+    getTileData,
+    onTileLoad: () => {}
+  });
+  const testOrthoraphicViewport = new OrthographicView().makeViewport({
+    width: 800,
+    height: 400,
+    viewState: {
+      target: [100, 100],
+      zoom: 4
+    }
+  });
+  tileset.update(testOrthoraphicViewport, {modelMatrix: null});
+  t.is(tileset._cache.size, 4, 'null model matrix updates');
+
+  tileset.update(testOrthoraphicViewport, {modelMatrix: new Matrix4()});
+  t.is(tileset._cache.size, 4, 'identity model matrixs update with same number of tiles as null');
+
+  tileset.update(testOrthoraphicViewport, {modelMatrix: new Matrix4().rotateX(Math.PI / 4)});
+  t.is(tileset._cache.size, 6, 'rotation model matrix updates with new number of tiles');
 
   t.end();
 });
@@ -199,6 +225,26 @@ test('Tileset2D#under-zoomed-with-extent', t => {
   const tileZoomLevels = tileset.tiles.map(tile => tile.z);
   t.assert(tileZoomLevels[0] === 11);
   t.end();
+});
+
+test('Tileset2D#callbacks', async t => {
+  let tileLoadCalled = 0;
+
+  const tileset = new Tileset2D({
+    maxCacheSize: 1,
+    getTileData: () => Promise.resolve(null),
+    onTileLoad: () => tileLoadCalled++,
+    onTileError: () => {},
+    onTileUnload: () => {}
+  });
+
+  tileset.update(testViewport);
+  await sleep(100);
+  tileset.reloadAll();
+  tileset.update(testViewport);
+  await sleep(100);
+
+  t.is(tileLoadCalled, 2, 'tile is reloaded when reloadAll is called');
 });
 
 test('Tileset2D#callbacks', async t => {
