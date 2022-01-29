@@ -74,6 +74,9 @@ export default class Tileset2D {
     this._selectedTiles = null;
     this._frameNumber = 0;
 
+    this._modelMatrix = new Matrix4();
+    this._modelMatrixInverse = new Matrix4();
+
     this.setOptions(opts);
   }
 
@@ -88,6 +91,10 @@ export default class Tileset2D {
 
   get isLoaded() {
     return this._selectedTiles.every(tile => tile.isLoaded);
+  }
+
+  get needsReload() {
+    return this._selectedTiles.some(tile => tile.needsReload);
   }
 
   setOptions(opts) {
@@ -134,8 +141,8 @@ export default class Tileset2D {
     const isModelMatrixNew = !modelMatrixAsMatrix4.equals(this._modelMatrix);
     if (!viewport.equals(this._viewport) || isModelMatrixNew) {
       if (isModelMatrixNew) {
-        this._modelMatrixInverse = modelMatrix && modelMatrixAsMatrix4.clone().invert();
-        this._modelMatrix = modelMatrix && modelMatrixAsMatrix4;
+        this._modelMatrixInverse = modelMatrixAsMatrix4.clone().invert();
+        this._modelMatrix = modelMatrixAsMatrix4;
       }
       this._viewport = viewport;
       const tileIndices = this.getTileIndices({
@@ -152,6 +159,11 @@ export default class Tileset2D {
         // Some new tiles are added
         this._rebuildTree();
       }
+      // Check for needed reloads explicitly even if the view/matrix has not changed.
+    } else if (this.needsReload) {
+      this._selectedTiles = this._selectedTiles.map(tile =>
+        this._getTile({x: tile.x, y: tile.y, z: tile.z})
+      );
     }
 
     // Update tile states
