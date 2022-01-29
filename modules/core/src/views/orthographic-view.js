@@ -39,6 +39,17 @@ class OrthographicViewport extends Viewport {
     const zoom_ = Math.min(zoomX, zoomY);
     const scale = Math.pow(2, zoom_);
 
+    let distanceScales;
+    if (zoomX !== zoomY) {
+      const scaleX = Math.pow(2, zoomX);
+      const scaleY = Math.pow(2, zoomY);
+
+      distanceScales = {
+        unitsPerMeter: [scaleX / scale, scaleY / scale, 1],
+        metersPerUnit: [scale / scaleX, scale / scaleY, 1]
+      };
+    }
+
     super({
       ...props,
       // in case viewState contains longitude/latitude values,
@@ -47,18 +58,9 @@ class OrthographicViewport extends Viewport {
       position: target,
       viewMatrix: viewMatrix.clone().scale([scale, scale * (flipY ? -1 : 1), scale]),
       projectionMatrix: getProjectionMatrix({width, height, near, far}),
-      zoom: zoom_
+      zoom: zoom_,
+      distanceScales
     });
-
-    if (zoomX !== zoomY) {
-      const scaleX = Math.pow(2, zoomX);
-      const scaleY = Math.pow(2, zoomY);
-
-      this.distanceScales = {
-        unitsPerMeter: [scaleX / scale, scaleY / scale, 1],
-        metersPerUnit: [scale / scaleX, scale / scaleY, 1]
-      };
-    }
   }
 
   projectFlat([X, Y]) {
