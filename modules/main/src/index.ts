@@ -57,7 +57,6 @@ export {
   picking,
   project,
   project32,
-  projectPosition,
   gouraudLighting,
   phongLighting,
   shadow,
