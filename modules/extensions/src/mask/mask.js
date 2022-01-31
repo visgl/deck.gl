@@ -1,6 +1,5 @@
-import {LayerExtension, log} from '@deck.gl/core';
+import {LayerExtension, log, projectPosition} from '@deck.gl/core';
 import mask from './shader-module';
-import {projectPosition} from '@deck.gl/core/shaderlib/project/project-functions';
 
 const defaultProps = {
   maskId: ''
