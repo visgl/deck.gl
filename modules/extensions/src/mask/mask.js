@@ -1,4 +1,4 @@
-import {LayerExtension, log, projectPosition} from '@deck.gl/core';
+import {LayerExtension, log} from '@deck.gl/core';
 import mask from './shader-module';
 
 const defaultProps = {
@@ -31,8 +31,8 @@ export default class MaskExtension extends LayerExtension {
       uniforms.mask_channel = index;
 
       const opts = {viewport, coordinateOrigin, coordinateSystem};
-      const bl = projectPosition([bounds[0], bounds[1], 0], opts);
-      const tr = projectPosition([bounds[2], bounds[3], 0], opts);
+      const bl = this.projectPosition([bounds[0], bounds[1], 0], opts);
+      const tr = this.projectPosition([bounds[2], bounds[3], 0], opts);
       uniforms.mask_bounds = [bl[0], bl[1], tr[0], tr[1]];
     } else {
       if (maskId) {

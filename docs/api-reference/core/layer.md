@@ -752,6 +752,11 @@ Projects a map coordinate to world coordinate using the current viewport setting
 Parameters:
 
 * `coordinates` (Array) - `[x, y, z]` in this layer's coordinate system.
+* `params` (Object, optional) - Projection parameters override. It accepts the following fields:
+  - `viewport` (Viewport)
+  - `modelMatrix` (Matrix4)
+  - `coordinateOrigin` ([Number, Number, Number])
+  - `coordinateSystem` (Number)
 
 Returns:
 
