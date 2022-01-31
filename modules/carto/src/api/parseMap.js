@@ -26,7 +26,7 @@ export function parseMap(json) {
       try {
         const layer = getLayer(type, config);
 
-        log.assert(getLayer(type, config), `Unsupported layer type: ${type}`);
+        log.assert(layer, `Unsupported layer type: ${type}`);
         const {Layer, propMap, defaultProps} = layer;
 
         const {dataId} = config;

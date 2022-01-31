@@ -64,6 +64,13 @@ function mergePropMaps(a, b) {
 
 export function getLayer(type, config) {
   return {
+    hexagonId: {
+      Layer: H3HexagonLayer,
+      propMap: mergePropMaps(sharedPropMap, {
+        visConfig: {coverage: 'coverage', elevationScale: 'elevationScale'}
+      }),
+      defaultProps: {...defaultProps, getHexagon: d => d[config.columns.hex_id]}
+    },
     point: {
       Layer: GeoJsonLayer,
       propMap: mergePropMaps(sharedPropMap, {
@@ -75,13 +82,6 @@ export function getLayer(type, config) {
       Layer: GeoJsonLayer,
       propMap: sharedPropMap,
       defaultProps: {...defaultProps, lineWidthScale: 2}
-    },
-    hexagonId: {
-      Layer: H3HexagonLayer,
-      propMap: mergePropMaps(sharedPropMap, {
-        visConfig: {coverage: 'coverage', elevationScale: 'elevationScale'}
-      }),
-      defaultProps: {...defaultProps, getHexagon: d => d[config.columns.hex_id]}
     },
     mvt: {
       Layer: MVTLayer,
