@@ -753,10 +753,12 @@ Parameters:
 
 * `coordinates` (Array) - `[x, y, z]` in this layer's coordinate system.
 * `params` (Object, optional) - Projection parameters override. It accepts the following fields:
-  - `viewport` (Viewport)
-  - `modelMatrix` (Matrix4)
-  - `coordinateOrigin` ([Number, Number, Number])
-  - `coordinateSystem` (Number)
+  - `viewport` (Viewport) - defaults to `this.context.viewport`.
+  - `modelMatrix` (Matrix4) - defaults to `this.props.modelMatrix`.
+  - `coordinateOrigin` ([Number, Number, Number]) - defaults to `this.props.coordinateOrigin`.
+  - `coordinateSystem` (Number) - defaults to `this.props.coordinateSystem`.
+  - `fromCoordinateOrigin` ([Number, Number, Number]) - defaults to passed `coordinateOrigin`.
+  - `fromCoordinateSystem` (Number) - defaults to passed `coordinateSystem`.
 
 Returns:
 
