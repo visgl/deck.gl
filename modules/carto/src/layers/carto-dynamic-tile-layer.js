@@ -71,10 +71,10 @@ function parseCartoDynamicTile(arrayBuffer, options) {
   if (formatTiles === 'geojson') return geojsonToBinary(parseJSON(arrayBuffer).features);
 
   const tile = formatTiles === 'wip' ? parseJSON(arrayBuffer) : parsePbf(arrayBuffer);
-  let binary = tileToBinary(tile);
+  const binary = tileToBinary(tile);
 
   // Temporary fix, which schema is missing values
-  let {points, lines, polygons} = patchMissing(binary);
+  const {points, lines, polygons} = patchMissing(binary);
 
   const data = {
     points: {...points, properties: unpackProperties(points.properties)},
