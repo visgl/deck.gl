@@ -130,7 +130,7 @@ export default class ScenegraphLayer extends Layer {
       const gltfObjects = createGLTFObjects(gl, gltf, this._getModelOptions());
       scenegraphData = {gltf, ...gltfObjects};
 
-      waitForGLTFAssets(gltfObjects).then(() => this.setNeedsRedraw());
+      waitForGLTFAssets(gltfObjects).then(() => this.setNeedsRedraw()); // eslint-disable-line @typescript-eslint/no-floating-promises
     } else if (props.scenegraph) {
       // DEPRECATED PATH: Assumes this data was loaded through GLTFScenegraphLoader
       log.deprecated(

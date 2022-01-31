@@ -135,9 +135,9 @@ export default class ComponentState<PropsT extends ComponentProps> {
     return url;
   }
 
-  protected _onResolve(propName: keyof PropsT, value: any) {}
+  protected _onResolve(propName: keyof PropsT, value: any) {} // eslint-disable-line @typescript-eslint/no-empty-function
 
-  protected _onError(propName: keyof PropsT, error: Error) {}
+  protected _onError(propName: keyof PropsT, error: Error) {} // eslint-disable-line @typescript-eslint/no-empty-function
 
   // Intercept strings (URLs) and Promises and activates loading and prop rewriting
   private _updateAsyncProp(propName: keyof PropsT, value: any) {
@@ -157,7 +157,7 @@ export default class ComponentState<PropsT extends ComponentProps> {
     }
 
     if (isAsyncIterable(value)) {
-      this._resolveAsyncIterable(propName, value);
+      this._resolveAsyncIterable(propName, value); // eslint-disable-line @typescript-eslint/no-floating-promises
       return;
     }
 
