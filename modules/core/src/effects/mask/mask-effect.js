@@ -45,54 +45,13 @@ export default class MaskEffect extends Effect {
     const viewportChanged = !this.lastViewport || !this.lastViewport.equals(viewport);
 
     for (const maskId in channelMap) {
-      const channelInfo = channelMap[maskId];
-
-      const oldChannelInfo = this.channels[channelInfo.index];
-      const maskChanged =
-        // If a channel is new
-        channelInfo === oldChannelInfo ||
-        // If sublayers have changed
-        oldChannelInfo.layers.length !== channelInfo.layers.length ||
-        // If a sublayer's positions have been updated, the cached bounds will change shallowly
-        channelInfo.layerBounds.some((b, i) => b !== oldChannelInfo.layerBounds[i]);
-
-      channelInfo.bounds = oldChannelInfo.bounds;
-      channelInfo.maskBounds = oldChannelInfo.maskBounds;
-      this.channels[channelInfo.index] = channelInfo;
-
-      if (maskChanged || viewportChanged) {
-        // Recalculate mask bounds
-        this.lastViewport = viewport;
-
-        channelInfo.bounds = getMaskBounds({layers: channelInfo.layers, viewport});
-
-        if (maskChanged || !equals(channelInfo.bounds, oldChannelInfo.bounds)) {
-          // Rerender mask FBO
-          const {maskPass, maskMap} = this;
-
-          const maskViewport = getMaskViewport({
-            bounds: channelInfo.bounds,
-            viewport,
-            width: maskMap.width,
-            height: maskMap.height
-          });
-
-          channelInfo.maskBounds = maskViewport ? maskViewport.getBounds() : [0, 0, 1, 1];
-
-          maskPass.render({
-            channel: channelInfo.index,
-            layers: channelInfo.layers,
-            layerFilter,
-            viewports: maskViewport ? [maskViewport] : [],
-            onViewportActive,
-            views,
-            moduleParameters: {
-              devicePixelRatio: 1
-            }
-          });
-        }
-      }
-      this.masks[channelInfo.id] = {index: channelInfo.index, bounds: channelInfo.maskBounds};
+      this._renderChannel(channelMap[maskId], {
+        layerFilter,
+        onViewportActive,
+        views,
+        viewport,
+        viewportChanged
+      });
     }
 
     // // Debug show FBO contents on screen
@@ -122,6 +81,61 @@ export default class MaskEffect extends Effect {
     // ctx.putImageData(imageData, 0, 0);
   }
 
+  _renderChannel(channelInfo, {layerFilter, onViewportActive, views, viewport, viewportChanged}) {
+    const oldChannelInfo = this.channels[channelInfo.index];
+    const maskChanged =
+      // If a channel is new
+      channelInfo === oldChannelInfo ||
+      // If sublayers have changed
+      oldChannelInfo.layers.length !== channelInfo.layers.length ||
+      // If a sublayer's positions have been updated, the cached bounds will change shallowly
+      channelInfo.layerBounds.some((b, i) => b !== oldChannelInfo.layerBounds[i]);
+
+    channelInfo.bounds = oldChannelInfo.bounds;
+    channelInfo.maskBounds = oldChannelInfo.maskBounds;
+    this.channels[channelInfo.index] = channelInfo;
+
+    if (maskChanged || viewportChanged) {
+      // Recalculate mask bounds
+      this.lastViewport = viewport;
+
+      channelInfo.bounds = getMaskBounds({layers: channelInfo.layers, viewport});
+
+      if (maskChanged || !equals(channelInfo.bounds, oldChannelInfo.bounds)) {
+        // Rerender mask FBO
+        const {maskPass, maskMap} = this;
+
+        const maskViewport = getMaskViewport({
+          bounds: channelInfo.bounds,
+          viewport,
+          width: maskMap.width,
+          height: maskMap.height
+        });
+
+        channelInfo.maskBounds = maskViewport ? maskViewport.getBounds() : [0, 0, 1, 1];
+
+        maskPass.render({
+          channel: channelInfo.index,
+          layers: channelInfo.layers,
+          layerFilter,
+          viewports: maskViewport ? [maskViewport] : [],
+          onViewportActive,
+          views,
+          moduleParameters: {
+            devicePixelRatio: 1
+          }
+        });
+      }
+    }
+
+    this.masks[channelInfo.id] = {
+      index: channelInfo.index,
+      bounds: channelInfo.maskBounds,
+      coordinateOrigin: channelInfo.coordinateOrigin,
+      coordinateSystem: channelInfo.coordinateSystem
+    };
+  }
+
   /**
    * Find a channel to render each mask into
    * If a maskId already exists, diff and update the existing channel
@@ -137,13 +151,15 @@ export default class MaskEffect extends Effect {
       if (!channelInfo) {
         if (++channelCount > 4) {
           log.warn('Too many mask layers. The max supported is 4')();
-          continue;
+          continue; // eslint-disable-line no-continue
         }
         channelInfo = {
           id,
           index: this.channels.findIndex(c => c?.id === id),
           layers: [],
-          layerBounds: []
+          layerBounds: [],
+          coordinateOrigin: layer.root.props.coordinateOrigin,
+          coordinateSystem: layer.root.props.coordinateSystem
         };
         channelMap[id] = channelInfo;
       }

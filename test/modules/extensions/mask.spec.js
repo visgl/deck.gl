@@ -19,7 +19,9 @@ test('MaskExtension', t => {
         maskChannels: {
           mask: {
             index: 0,
-            bounds: [0, 10, 5, 20]
+            bounds: [0, 10, 5, 20],
+            coordinateOrigin: [0, 0, 0],
+            coordinateSystem: -1
           }
         }
       },
@@ -64,7 +66,7 @@ test('MaskExtension#maskByInstance', t => {
         data: [],
         extensions: [new MaskExtension()],
         maskMap: {},
-        maskBounds: [0, 10, 5, 20],
+        maskChannels: {},
         ...props
       },
       onAfterUpdate: ({layer}) => {
