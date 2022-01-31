@@ -11,6 +11,7 @@ import {
 } from 'd3-scale';
 import {format as d3Format} from 'd3-format';
 import moment from 'moment-timezone';
+import {log} from '@deck.gl/core';
 import {H3HexagonLayer, MVTLayer} from '@deck.gl/geo-layers';
 import {GeoJsonLayer} from '@deck.gl/layers';
 
@@ -63,14 +64,9 @@ function mergePropMaps(a, b) {
 }
 
 export function getLayer(type, config) {
-  return {
-    hexagonId: {
-      Layer: H3HexagonLayer,
-      propMap: mergePropMaps(sharedPropMap, {
-        visConfig: {coverage: 'coverage', elevationScale: 'elevationScale'}
-      }),
-      defaultProps: {...defaultProps, getHexagon: d => d[config.columns.hex_id]}
-    },
+  const hexagonId = config.columns?.hex_id;
+
+  const layer = {
     point: {
       Layer: GeoJsonLayer,
       propMap: mergePropMaps(sharedPropMap, {
@@ -83,6 +79,13 @@ export function getLayer(type, config) {
       propMap: sharedPropMap,
       defaultProps: {...defaultProps, lineWidthScale: 2}
     },
+    hexagonId: {
+      Layer: H3HexagonLayer,
+      propMap: mergePropMaps(sharedPropMap, {
+        visConfig: {coverage: 'coverage', elevationScale: 'elevationScale'}
+      }),
+      defaultProps: {...defaultProps, getHexagon: d => d[hexagonId]}
+    },
     mvt: {
       Layer: MVTLayer,
       propMap: sharedPropMap,
@@ -94,6 +97,10 @@ export function getLayer(type, config) {
       }
     }
   }[type];
+
+  log.assert(layer, `Unsupported layer type: ${type}`);
+
+  return layer;
 }
 
 function domainFromAttribute(attribute, scaleType) {

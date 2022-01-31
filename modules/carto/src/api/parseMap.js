@@ -24,11 +24,7 @@ export function parseMap(json) {
     mapStyle,
     layers: extractTextLayers(layers.reverse()).map(({id, type, config, visualChannels}) => {
       try {
-        const layer = getLayer(type, config);
-
-        log.assert(layer, `Unsupported layer type: ${type}`);
-        const {Layer, propMap, defaultProps} = layer;
-
+        const {Layer, propMap, defaultProps} = getLayer(type, config);
         const {dataId} = config;
         const dataset = datasets.find(d => d.id === dataId);
         log.assert(dataset, `No dataset matching dataId: ${dataId}`);
