@@ -22,7 +22,7 @@ export default class MaskExtension extends LayerExtension {
 
   draw({uniforms, context, moduleParameters}) {
     uniforms.mask_maskByInstance = this.state.maskByInstance;
-    const {maskId} = this.root.props;
+    const {maskId} = this.props;
     const {maskChannels} = moduleParameters;
     const {viewport} = context;
     if (maskChannels && maskChannels[maskId]) {
