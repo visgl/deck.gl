@@ -11,6 +11,7 @@ import {
 } from 'd3-scale';
 import {format as d3Format} from 'd3-format';
 import moment from 'moment-timezone';
+import {log} from '@deck.gl/core';
 import {H3HexagonLayer, MVTLayer} from '@deck.gl/geo-layers';
 import {GeoJsonLayer} from '@deck.gl/layers';
 
@@ -62,37 +63,45 @@ function mergePropMaps(a, b) {
   return {...a, ...b, visConfig: {...a.visConfig, ...b.visConfig}};
 }
 
-export const LAYER_MAP = {
-  point: {
-    Layer: GeoJsonLayer,
-    propMap: mergePropMaps(sharedPropMap, {
-      visConfig: {outline: 'stroked'}
-    }),
-    defaultProps
-  },
-  geojson: {
-    Layer: GeoJsonLayer,
-    propMap: sharedPropMap,
-    defaultProps: {...defaultProps, lineWidthScale: 2}
-  },
-  hexagonId: {
-    Layer: H3HexagonLayer,
-    propMap: mergePropMaps(sharedPropMap, {
-      visConfig: {coverage: 'coverage', elevationScale: 'elevationScale'}
-    }),
-    defaultProps: {...defaultProps, getHexagon: d => d.h3}
-  },
-  mvt: {
-    Layer: MVTLayer,
-    propMap: sharedPropMap,
-    defaultProps: {
-      ...defaultProps,
-      pointRadiusScale: 0.3,
-      lineWidthScale: 2,
-      uniqueIdProperty: 'geoid'
+export function getLayer(type, config) {
+  const hexagonId = config.columns?.hex_id;
+
+  const layer = {
+    point: {
+      Layer: GeoJsonLayer,
+      propMap: mergePropMaps(sharedPropMap, {
+        visConfig: {outline: 'stroked'}
+      }),
+      defaultProps
+    },
+    geojson: {
+      Layer: GeoJsonLayer,
+      propMap: sharedPropMap,
+      defaultProps: {...defaultProps, lineWidthScale: 2}
+    },
+    hexagonId: {
+      Layer: H3HexagonLayer,
+      propMap: mergePropMaps(sharedPropMap, {
+        visConfig: {coverage: 'coverage', elevationScale: 'elevationScale'}
+      }),
+      defaultProps: {...defaultProps, getHexagon: d => d[hexagonId]}
+    },
+    mvt: {
+      Layer: MVTLayer,
+      propMap: sharedPropMap,
+      defaultProps: {
+        ...defaultProps,
+        pointRadiusScale: 0.3,
+        lineWidthScale: 2,
+        uniqueIdProperty: 'geoid'
+      }
     }
-  }
-};
+  }[type];
+
+  log.assert(layer, `Unsupported layer type: ${type}`);
+
+  return layer;
+}
 
 function domainFromAttribute(attribute, scaleType) {
   if (scaleType === 'ordinal' || scaleType === 'point') {
