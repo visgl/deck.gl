@@ -163,8 +163,8 @@ export default class MaskEffect extends Effect {
       }
       channelInfo.layers.push(layer);
       channelInfo.layerBounds.push(layer.getBounds());
-      channelInfo.coordinateOrigin = layer.props.coordinateOrigin;
-      channelInfo.coordinateSystem = layer.props.coordinateSystem;
+      channelInfo.coordinateOrigin = layer.root.props.coordinateOrigin;
+      channelInfo.coordinateSystem = layer.root.props.coordinateSystem;
     }
 
     for (let i = 0; i < 4; i++) {
