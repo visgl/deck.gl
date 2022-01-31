@@ -59,6 +59,7 @@ test('MaskEffect#cleanup', t => {
   t.end();
 });
 
+/* eslint-disable max-statements */
 test('MaskEffect#update', t => {
   const maskEffect = new MaskEffect();
 
