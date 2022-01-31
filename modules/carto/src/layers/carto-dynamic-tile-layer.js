@@ -54,17 +54,6 @@ function unpackProperties(properties) {
   });
 }
 
-function patchMissing({points, lines, polygons}) {
-  lines.globalFeatureIds = lines.featureIds; // HACK to fix missing data from API
-  polygons.globalFeatureIds = polygons.featureIds; // HACK to fix missing data from API
-  return {
-    // HACK add in missing numericProps&properties
-    points: {type: 'Point', numericProps: {}, properties: [], ...points},
-    lines: {type: 'LineString', numericProps: {}, properties: [], ...lines},
-    polygons: {type: 'Polygon', numericProps: {}, properties: [], ...polygons}
-  };
-}
-
 function parseCartoDynamicTile(arrayBuffer, options) {
   if (!arrayBuffer) return null;
   const formatTiles = options && options.cartoDynamicTile && options.cartoDynamicTile.formatTiles;
@@ -73,9 +62,7 @@ function parseCartoDynamicTile(arrayBuffer, options) {
   const tile = formatTiles === 'wip' ? parseJSON(arrayBuffer) : parsePbf(arrayBuffer);
   const binary = tileToBinary(tile);
 
-  // Temporary fix, which schema is missing values
-  const {points, lines, polygons} = patchMissing(binary);
-
+  const {points, lines, polygons} = binary;
   const data = {
     points: {...points, properties: unpackProperties(points.properties)},
     lines: {...lines, properties: unpackProperties(lines.properties)},
