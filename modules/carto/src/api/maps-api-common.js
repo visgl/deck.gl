@@ -27,7 +27,7 @@ export const FORMATS = {
 };
 
 // AVAILABLE FORMATS FOR TILES
-export const FORMAT_TILES = {
+export const TILE_FORMATS = {
   BINARY: 'binary',
   GEOJSON: 'geojson',
   WIP: 'wip'

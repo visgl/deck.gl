@@ -6,7 +6,7 @@ import {MVTLayer, _getURLFromTemplate} from '@deck.gl/geo-layers';
 import {GeoJsonLayer} from '@deck.gl/layers';
 import {binaryToGeojson, geojsonToBinary} from '@loaders.gl/gis';
 import {Tile} from './schema/carto-dynamic-tile';
-import {encodeParameter, FORMAT_TILES} from '../api/maps-api-common';
+import {encodeParameter, TILE_FORMATS} from '../api/maps-api-common';
 
 function parseJSON(arrayBuffer) {
   return JSON.parse(new TextDecoder().decode(arrayBuffer));
@@ -57,9 +57,9 @@ function unpackProperties(properties) {
 function parseCartoDynamicTile(arrayBuffer, options) {
   if (!arrayBuffer) return null;
   const formatTiles = options && options.cartoDynamicTile && options.cartoDynamicTile.formatTiles;
-  if (formatTiles === 'geojson') return geojsonToBinary(parseJSON(arrayBuffer).features);
+  if (formatTiles === TILE_FORMATS.GEOJSON) return geojsonToBinary(parseJSON(arrayBuffer).features);
 
-  const tile = formatTiles === 'wip' ? parseJSON(arrayBuffer) : parsePbf(arrayBuffer);
+  const tile = formatTiles === TILE_FORMATS.WIP ? parseJSON(arrayBuffer) : parsePbf(arrayBuffer);
   const binary = tileToBinary(tile);
 
   const {points, lines, polygons} = binary;
@@ -89,7 +89,7 @@ const CartoDynamicTileLoader = {
   parseSync: parseCartoDynamicTile,
   options: {
     cartoDynamicTile: {
-      formatTiles: 'geojson'
+      formatTiles: TILE_FORMATS.BINARY
     }
   }
 };
@@ -112,8 +112,8 @@ export default class CartoDynamicTileLayer extends MVTLayer {
 
     if (formatTiles) {
       log.assert(
-        Object.values(FORMAT_TILES).includes(formatTiles),
-        `Invalid value for formatTiles: ${formatTiles}. Use value from FORMAT_TILES`
+        Object.values(TILE_FORMATS).includes(formatTiles),
+        `Invalid value for formatTiles: ${formatTiles}. Use value from TILE_FORMATS`
       );
       url += `&${encodeParameter('formatTiles', formatTiles)}`;
       loadOptions.cartoDynamicTile = {formatTiles};
