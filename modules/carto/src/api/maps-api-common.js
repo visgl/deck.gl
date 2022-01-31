@@ -26,6 +26,12 @@ export const FORMATS = {
   JSON: 'json'
 };
 
+export const TILES_FORMATS = {
+  MVT: 'mvt',
+  GEOJSON: 'geojson',
+  BINARY: 'binary'
+};
+
 /**
  * Simple encode parameter
  */
