@@ -1,5 +1,6 @@
 import test from 'tape-promise/tape';
 import {MapView, LayerManager} from 'deck.gl';
+import {COORDINATE_SYSTEM} from '@deck.gl/core';
 import {SolidPolygonLayer} from '@deck.gl/layers';
 import MaskEffect from '@deck.gl/core/effects/mask/mask-effect';
 import * as FIXTURES from 'deck.gl-test/data';
@@ -124,6 +125,46 @@ test('MaskEffect#update', t => {
   t.not(mask?.bounds, bounds, 'Second mask is updated');
   mask = parameters.maskChannels['test-mask-layer-3'];
   t.is(mask?.index, 0, 'New mask is rendered in channel 0');
+
+  maskEffect.cleanup();
+  t.end();
+});
+
+test('MaskEffect#coordinates', t => {
+  const maskEffect = new MaskEffect();
+
+  const TEST_MASK_LAYER_CARTESIAN = TEST_MASK_LAYER.clone({
+    coordinateOrigin: [1, 2, 3],
+    coordinateSystem: COORDINATE_SYSTEM.CARTESIAN
+  });
+
+  const layerManager = new LayerManager(gl, {viewport: testViewport});
+
+  const preRenderWithLayers = (layers, description) => {
+    t.comment(description);
+    layerManager.setLayers(layers);
+    layerManager.updateLayers();
+
+    maskEffect.preRender(gl, {
+      layers: layerManager.getLayers(),
+      onViewportActive: layerManager.activateViewport,
+      viewports: [testViewport]
+    });
+  };
+
+  preRenderWithLayers([TEST_MASK_LAYER, TEST_LAYER], 'Initial render');
+
+  let parameters = maskEffect.getModuleParameters(TEST_LAYER);
+  let mask = parameters.maskChannels['test-mask-layer'];
+  t.same(mask?.coordinateOrigin, [0, 0, 0], 'Mask has correct coordinate origin');
+  t.is(mask?.coordinateSystem, COORDINATE_SYSTEM.DEFAULT, 'Mask has correct coordinate system');
+
+  preRenderWithLayers([TEST_MASK_LAYER_CARTESIAN, TEST_LAYER], 'Update to cartesion coordinates');
+
+  parameters = maskEffect.getModuleParameters(TEST_LAYER);
+  mask = parameters.maskChannels['test-mask-layer'];
+  t.same(mask?.coordinateOrigin, [1, 2, 3], 'Mask has correct coordinate origin');
+  t.is(mask?.coordinateSystem, COORDINATE_SYSTEM.CARTESIAN, 'Mask has correct coordinate system');
 
   maskEffect.cleanup();
   t.end();

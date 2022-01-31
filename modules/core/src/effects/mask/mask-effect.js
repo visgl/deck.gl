@@ -127,7 +127,13 @@ export default class MaskEffect extends Effect {
         });
       }
     }
-    this.masks[channelInfo.id] = {index: channelInfo.index, bounds: channelInfo.maskBounds};
+
+    this.masks[channelInfo.id] = {
+      index: channelInfo.index,
+      bounds: channelInfo.maskBounds,
+      coordinateOrigin: channelInfo.coordinateOrigin,
+      coordinateSystem: channelInfo.coordinateSystem
+    };
   }
 
   /**
@@ -151,7 +157,9 @@ export default class MaskEffect extends Effect {
           id,
           index: this.channels.findIndex(c => c?.id === id),
           layers: [],
-          layerBounds: []
+          layerBounds: [],
+          coordinateOrigin: layer.root.props.coordinateOrigin,
+          coordinateSystem: layer.root.props.coordinateSystem
         };
         channelMap[id] = channelInfo;
       }
