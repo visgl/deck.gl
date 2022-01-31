@@ -157,7 +157,7 @@ export default class ComponentState<PropsT extends ComponentProps> {
     }
 
     if (isAsyncIterable(value)) {
-      this._resolveAsyncIterable(propName, value);
+      this._resolveAsyncIterable(propName, value); // eslint-disable-line @typescript-eslint/no-floating-promises
       return;
     }
 
