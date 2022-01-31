@@ -157,14 +157,14 @@ export default class MaskEffect extends Effect {
           id,
           index: this.channels.findIndex(c => c?.id === id),
           layers: [],
-          layerBounds: []
+          layerBounds: [],
+          coordinateOrigin: layer.root.props.coordinateOrigin,
+          coordinateSystem: layer.root.props.coordinateSystem
         };
         channelMap[id] = channelInfo;
       }
       channelInfo.layers.push(layer);
       channelInfo.layerBounds.push(layer.getBounds());
-      channelInfo.coordinateOrigin = layer.root.props.coordinateOrigin;
-      channelInfo.coordinateSystem = layer.root.props.coordinateSystem;
     }
 
     for (let i = 0; i < 4; i++) {
