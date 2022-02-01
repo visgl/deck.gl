@@ -3,7 +3,7 @@ import CartoDynamicTileLayer from './carto-dynamic-tile-layer';
 import {MVTLayer} from '@deck.gl/geo-layers';
 import {GeoJsonLayer} from '@deck.gl/layers';
 import {fetchLayerData, getDataV2, API_VERSIONS} from '../api';
-import {FORMATS, MAP_TYPES, TILES_FORMATS} from '../api/maps-api-common';
+import {FORMATS, MAP_TYPES, TILE_FORMATS} from '../api/maps-api-common';
 import {getDefaultCredentials} from '../config';
 
 const defaultProps = {
@@ -135,7 +135,7 @@ export default class CartoLayer extends CompositeLayer {
     if (apiVersion === API_VERSIONS.V3 && format === FORMATS.TILEJSON) {
       /* global URLSearchParams */
       const tilesFormat = new URLSearchParams(data.tiles[0]).get('format');
-      layer = tilesFormat === TILES_FORMATS.MVT ? MVTLayer : CartoDynamicTileLayer;
+      layer = tilesFormat === TILE_FORMATS.MVT ? MVTLayer : CartoDynamicTileLayer;
     } else if (
       apiVersion === API_VERSIONS.V1 ||
       apiVersion === API_VERSIONS.V2 ||

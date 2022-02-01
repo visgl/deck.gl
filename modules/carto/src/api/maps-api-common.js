@@ -26,7 +26,7 @@ export const FORMATS = {
   JSON: 'json'
 };
 
-export const TILES_FORMATS = {
+export const TILE_FORMATS = {
   MVT: 'mvt',
   GEOJSON: 'geojson',
   BINARY: 'binary'
