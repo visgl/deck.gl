@@ -4,7 +4,7 @@ import {
   getSizeAccessor,
   getTextAccessor,
   getTextPixelOffsetAccessor,
-  LAYER_MAP,
+  getLayer,
   _domainFromValues
 } from '@deck.gl/carto/api/layer-map';
 
@@ -163,7 +163,7 @@ for (const {anchor, alignment, radius, size, data, expected} of TEXT_PIXEL_OFFSE
 }
 
 test('getHexagon', t => {
-  const accessor = LAYER_MAP.hexagonId.defaultProps.getHexagon;
+  const accessor = getLayer('hexagonId', {columns: {hex_id: 'h3'}}).defaultProps.getHexagon;
   const data = {h3: 1234};
   t.deepEquals(accessor(data), 1234, 'getHexagon correctly returns 1234');
   t.end();

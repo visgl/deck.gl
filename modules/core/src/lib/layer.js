@@ -255,12 +255,13 @@ export default class Layer extends Component {
     return viewport.unproject(xy);
   }
 
-  projectPosition(xyz) {
+  projectPosition(xyz, params) {
     return projectPosition(xyz, {
       viewport: this.context.viewport,
       modelMatrix: this.props.modelMatrix,
       coordinateOrigin: this.props.coordinateOrigin,
-      coordinateSystem: this.props.coordinateSystem
+      coordinateSystem: this.props.coordinateSystem,
+      ...params
     });
   }
 

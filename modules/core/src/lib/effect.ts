@@ -12,9 +12,9 @@ export default class Effect {
     this.useInPicking = false;
   }
 
-  preRender() {}
+  preRender() {} // eslint-disable-line @typescript-eslint/no-empty-function
 
-  getModuleParameters(layer: Layer): any {}
+  getModuleParameters(layer: Layer): any {} // eslint-disable-line @typescript-eslint/no-empty-function
 
-  cleanup() {}
+  cleanup() {} // eslint-disable-line @typescript-eslint/no-empty-function
 }

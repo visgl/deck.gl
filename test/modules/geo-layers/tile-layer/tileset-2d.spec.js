@@ -409,6 +409,7 @@ test('Tileset2D#traversal', async t => {
 });
 
 function validateVisibility(strategy, selectedTiles, tiles) {
+  /* eslint-disable default-case */
   switch (strategy) {
     case STRATEGY_NEVER: {
       // isVisible should match isSelected

@@ -21,6 +21,18 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ### deck.gl v8.7 Prereleases
 
+#### deck.gl [8.7.0-beta.2] - Feb 1 2022
+
+- Respect mask coordinate system & origin (#6591)
+- CARTO fetchMap: Fix h3 hexagon layers are not shown (#6596)
+- Create unique MaskEffect per EffectManager (#6595)
+- Fix OrthographicView projection when using independent scales (#6604)
+- Fix `update` Behavior in `Tileset2D` (#6602)
+- Fix depth picking accuracy (#6600)
+- MapboxLayer only repeats if the base map renders multiple copies (#6594)
+- Allow setting FontAtlasManager LRU Cache limit (#6576)
+- Support multiple masks (#6589)
+
 #### deck.gl [8.7.0-beta.1] - Jan 26 2022
 
 - Add MaskExtension (#6554)
