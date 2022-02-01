@@ -132,12 +132,14 @@ export default class CartoLayer extends CompositeLayer {
 
     let layer;
 
-    const tilesFormat = apiVersion === API_VERSIONS.V3 && format === FORMATS.TILEJSON) && new URLSearchParams(data.tiles[0]).get('format');
-    if (tilesFormat && tilesFormat !== TILES_FORMATS.MVT) {
+    /* global URLSearchParams */
+    const tilesFormat =
+      apiVersion === API_VERSIONS.V3 &&
+      format === FORMATS.TILEJSON &&
+      new URLSearchParams(data.tiles[0]).get('format');
+
+    if (tilesFormat && tilesFormat !== TILE_FORMATS.MVT) {
       layer = CartoDynamicTileLayer;
-      /* global URLSearchParams */
-      const tilesFormat = new URLSearchParams(data.tiles[0]).get('format');
-      layer = tilesFormat === TILE_FORMATS.MVT ? MVTLayer : CartoDynamicTileLayer;
     } else if (
       apiVersion === API_VERSIONS.V1 ||
       apiVersion === API_VERSIONS.V2 ||
