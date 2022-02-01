@@ -132,7 +132,9 @@ export default class CartoLayer extends CompositeLayer {
 
     let layer;
 
-    if (apiVersion === API_VERSIONS.V3 && format === FORMATS.TILEJSON) {
+    const tilesFormat = apiVersion === API_VERSIONS.V3 && format === FORMATS.TILEJSON) && new URLSearchParams(data.tiles[0]).get('format');
+    if (tilesFormat && tilesFormat !== TILES_FORMATS.MVT) {
+      layer = CartoDynamicTileLayer;
       /* global URLSearchParams */
       const tilesFormat = new URLSearchParams(data.tiles[0]).get('format');
       layer = tilesFormat === TILES_FORMATS.MVT ? MVTLayer : CartoDynamicTileLayer;
