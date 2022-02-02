@@ -12,8 +12,8 @@ const INITIAL_VIEW_STATE = {longitude: -73.95643, latitude: 40.8039, zoom: 9};
 const COUNTRIES =
   'https://d2ad6b4ur7yvpq.cloudfront.net/naturalearth-3.3.0/ne_50m_admin_0_scale_rank.geojson';
 
-const apiBaseUrl = 'https://direct-gcp-us-east1.api.carto.com';
-const connection = 'alasarr';
+const apiBaseUrl = 'https://direct-gcp-us-east1-15.dev.api.carto.com';
+const connection = 'bigquery';
 const table = 'cartodb-gcp-backend-data-team.dynamic_tiling.polygons_3k_usacounty_viz';
 
 const accessToken = 'XXX';
@@ -52,7 +52,7 @@ function createCarto() {
     id: 'carto',
     connection,
     data: table,
-    credentials: {accessToken},
+    credentials: {accessToken, apiBaseUrl},
 
     // Dynamic tiling. Request TILEJSON format with TABLE
     type: MAP_TYPES.TABLE,
