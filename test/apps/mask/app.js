@@ -6,6 +6,7 @@ import DeckGL from '@deck.gl/react';
 import {OPERATION} from '@deck.gl/core';
 import {GeoJsonLayer, SolidPolygonLayer} from '@deck.gl/layers';
 import {ScatterplotLayer, ArcLayer} from '@deck.gl/layers';
+import {MVTLayer} from '@deck.gl/geo-layers';
 import {MaskExtension} from '@deck.gl/extensions';
 import {scaleLinear} from 'd3-scale';
 
@@ -159,6 +160,19 @@ export default function App({data, strokeWidth = 1, mapStyle = MAP_STYLE}) {
         getFillColor: [...TARGET_COLOR, 200],
         maskId: 'mask',
         extensions: [new MaskExtension()]
+      }),
+      new MVTLayer({
+        id: 'mvt-layer',
+        data: 'https://tiles-a.basemaps.cartocdn.com/vectortiles/carto.streets/v1/{z}/{x}/{y}.mvt',
+        maskId: 'mask',
+        extensions: [new MaskExtension()],
+        maxZoom: 14,
+        getFillColor: [255, 255, 255],
+        getLineColor: [192, 192, 192],
+        getLineWidth: 1,
+        getPointRadius: 2,
+        lineWidthUnits: 'pixels',
+        pointRadiusUnits: 'pixels'
       }),
       // US states (used to select & define masks)
       new GeoJsonLayer({

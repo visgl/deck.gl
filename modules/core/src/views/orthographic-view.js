@@ -81,7 +81,7 @@ class OrthographicViewport extends Viewport {
     const translate = vec2.add([], toLocation, vec2.negate([], fromLocation));
     const newCenter = vec2.add([], this.center, translate);
 
-    return {target: newCenter};
+    return {target: this.unprojectFlat(newCenter)};
   }
 }
 

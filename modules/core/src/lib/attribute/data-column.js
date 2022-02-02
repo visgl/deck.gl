@@ -192,6 +192,7 @@ export default class DataColumn {
   }
 
   // Returns [min: Array(size), max: Array(size)]
+  /* eslint-disable max-depth */
   getBounds() {
     if (this.state.bounds) {
       return this.state.bounds;
