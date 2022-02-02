@@ -19,6 +19,11 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v8.6
 
+#### deck.gl [8.6.8] - Feb 1 2022
+
+- Fix OrthographicController drift when using independent scales (#6606)
+- Fix OrthographicView projection when using independent scales (#6604)
+
 #### deck.gl [8.6.7] - Jan 28 2022
 
 - Fix update behavior in `Tileset2D` (#6602)
