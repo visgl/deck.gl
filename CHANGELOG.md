@@ -21,6 +21,10 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ### deck.gl v8.7 Prereleases
 
+#### deck.gl [8.7.0-beta.3] - Feb 2 2022
+
+- CARTO module: Support tiles in different formats (#6609)
+- Fix OrthographicController drift when using independent scales(#6606)
 #### deck.gl [8.7.0-beta.2] - Feb 1 2022
 
 - Respect mask coordinate system & origin (#6591)
