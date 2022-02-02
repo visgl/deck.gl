@@ -37,6 +37,7 @@ function tileToBinary({points, lines, polygons}) {
   convertToTypedArray(polygons.primitivePolygonIndices, Uint32Array);
   convertToTypedArray(polygons.globalFeatureIds, Uint32Array);
   convertToTypedArray(polygons.featureIds, Uint32Array);
+  convertToTypedArray(polygons.triangles, Uint32Array);
 
   return {points, lines, polygons};
 }
@@ -68,11 +69,6 @@ function parseCartoDynamicTile(arrayBuffer, options) {
     lines: {...lines, properties: unpackProperties(lines.properties)},
     polygons: {...polygons, properties: unpackProperties(polygons.properties)}
   };
-
-  // Temporary hack: fill in missing triangles data
-  const geojson = binaryToGeojson(binary);
-  const {triangles} = geojsonToBinary(geojson).polygons;
-  data.polygons.triangles = triangles;
 
   return data;
 }
