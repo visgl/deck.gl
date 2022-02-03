@@ -128,7 +128,7 @@ export default class CartoLayer extends CompositeLayer {
 
     if (!data) return null;
 
-    const {updateTriggers} = this.props;
+    const {type, updateTriggers} = this.props;
 
     let layer;
 
@@ -137,8 +137,12 @@ export default class CartoLayer extends CompositeLayer {
       apiVersion === API_VERSIONS.V3 &&
       format === FORMATS.TILEJSON &&
       new URLSearchParams(data.tiles[0]).get('format');
+    const nonMvtTiles = tilesFormat && tilesFormat !== TILE_FORMATS.MVT;
 
-    if (tilesFormat && tilesFormat !== TILE_FORMATS.MVT) {
+    const dynamicTiles =
+      apiVersion === API_VERSIONS.V3 && type === MAP_TYPES.TABLE && format === FORMATS.TILEJSON;
+
+    if (nonMvtTiles || dynamicTiles) {
       layer = CartoDynamicTileLayer;
     } else if (
       apiVersion === API_VERSIONS.V1 ||
