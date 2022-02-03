@@ -60,7 +60,7 @@ function parseCartoDynamicTile(arrayBuffer, options) {
   const formatTiles = options && options.cartoDynamicTile && options.cartoDynamicTile.formatTiles;
   if (formatTiles === TILE_FORMATS.GEOJSON) return geojsonToBinary(parseJSON(arrayBuffer).features);
 
-  const tile = formatTiles === TILE_FORMATS.WIP ? parseJSON(arrayBuffer) : parsePbf(arrayBuffer);
+  const tile = parsePbf(arrayBuffer);
   const binary = tileToBinary(tile);
 
   const {points, lines, polygons} = binary;
