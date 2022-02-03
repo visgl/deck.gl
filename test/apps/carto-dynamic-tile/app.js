@@ -14,7 +14,10 @@ const COUNTRIES =
 
 const apiBaseUrl = 'https://direct-gcp-us-east1-15.dev.api.carto.com';
 const connection = 'bigquery';
+// const table = 'cartodb-gcp-backend-data-team.dynamic_tiling.points_100K';
+// const table = 'cartodb-gcp-backend-data-team.dynamic_tiling.lines_alasarr';
 const table = 'cartodb-gcp-backend-data-team.dynamic_tiling.polygons_3k_usacounty_viz';
+// const table = 'cartobq.testtables.polygons_10k';
 
 const accessToken = 'XXX';
 
@@ -57,7 +60,7 @@ function createCarto() {
     // Dynamic tiling. Request TILEJSON format with TABLE
     type: MAP_TYPES.TABLE,
     format: FORMATS.TILEJSON,
-    formatTiles: TILE_FORMATS.BINARY,
+    //formatTiles: TILE_FORMATS.GEOJSON,
 
     // Styling
     getFillColor: [233, 71, 251],

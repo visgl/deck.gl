@@ -27,6 +27,9 @@ const defaultProps = {
   // (String, optional): format of data
   format: null,
 
+  // (String, optional): format of data
+  formatTiles: TILE_FORMATS.BINARY,
+
   // (String, optional): clientId identifier used for internal tracing, place here a string to identify the client who is doing the request.
   clientId: null,
 
@@ -154,8 +157,8 @@ export default class CartoLayer extends CompositeLayer {
       layer = GeoJsonLayer;
     }
 
-    const {uniqueIdProperty} = defaultProps;
-    const props = {uniqueIdProperty, ...this.props};
+    const {formatTiles, uniqueIdProperty} = defaultProps;
+    const props = {formatTiles, uniqueIdProperty, ...this.props};
     delete props.data;
 
     // eslint-disable-next-line new-cap
