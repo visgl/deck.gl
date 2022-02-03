@@ -28,25 +28,11 @@ Properties._readField = function (tag, obj, pbf) {
 export const Coords = {};
 
 Coords.read = function (pbf, end) {
-  return pbf.readFields(Coords._readField, {value: {}, size: 0}, end);
+  return pbf.readFields(Coords._readField, {value: [], size: 0}, end);
 };
 Coords._readField = function (tag, obj, pbf) {
-  if (tag === 1) {
-    const entry = Coords._FieldEntry1.read(pbf, pbf.readVarint() + pbf.pos);
-    obj.value[entry.key] = entry.value;
-  } else if (tag === 2) obj.size = pbf.readVarint(true);
-};
-
-// Coords._FieldEntry1 ========================================
-
-Coords._FieldEntry1 = {};
-
-Coords._FieldEntry1.read = function (pbf, end) {
-  return pbf.readFields(Coords._FieldEntry1._readField, {key: '', value: 0}, end);
-};
-Coords._FieldEntry1._readField = function (tag, obj, pbf) {
-  if (tag === 1) obj.key = pbf.readString();
-  else if (tag === 2) obj.value = pbf.readDouble();
+  if (tag === 1) pbf.readPackedDouble(obj.value);
+  else if (tag === 2) obj.size = pbf.readVarint(true);
 };
 
 // NumericProp ========================================
