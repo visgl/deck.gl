@@ -523,7 +523,7 @@ mockedV3Test('CartoLayer#dynamic', async t => {
 
           t.is(data.points.positions.value.length, 0, 'No points');
           t.is(data.lines.positions.value.length, 0, 'No lines');
-          t.is(data.polygons.positions.value.length, 52, 'Polygons');
+          t.is(data.polygons.positions.value.length, 10, 'Polygons');
         }
       }
     }
