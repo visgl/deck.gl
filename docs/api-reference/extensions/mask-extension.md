@@ -83,7 +83,7 @@ When added to a layer via the `extensions` prop, the `MaskExtension` adds the fo
 
 ##### `maskId` (String)
 
-Id of the layer that defines the mask. The mask layer must use the prop `operation: 'mask'`. If no valid mask layer with the specified is is found, masking is disabled.
+Id of the layer that defines the mask. The mask layer must use the prop `operation: 'mask'`. Masking is disabled if `maskId` is empty or no valid mask layer with the specified id is found.
 
 ##### `maskByInstance` (Boolean, optional)
 
