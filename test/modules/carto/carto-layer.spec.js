@@ -493,3 +493,41 @@ mockedV3Test('CartoLayer#onDataError', async t => {
 
   spy.restore();
 });
+
+mockedV3Test('CartoLayer#dynamic', async t => {
+  let counter = 0;
+  const onDataLoad = () => {
+    counter++;
+  };
+
+  const testCases = [
+    {
+      props: {
+        data: 'tileset',
+        type: MAP_TYPES.TABLE,
+        format: FORMATS.TILEJSON,
+        formatTiles: 'binary',
+        connection: 'connection_name',
+        credentials: CREDENTIALS_V3,
+
+        onDataLoad
+      },
+      onAfterUpdate: ({layer, subLayers}) => {
+        if (layer.isLoaded) {
+          t.is(counter, 1, 'should call once to onDataLoad');
+          t.is(subLayers.length, 1, 'Rendered mvt sublayer');
+          const mvtLayer = subLayers[0];
+          t.is(mvtLayer.internalState.subLayers.length, 4, 'Rendered mvt sublayers');
+          const geojsonLayer = mvtLayer.internalState.subLayers[0];
+          const {data} = geojsonLayer.props;
+
+          t.is(data.points.positions.value.length, 0, 'No points');
+          t.is(data.lines.positions.value.length, 0, 'No lines');
+          t.is(data.polygons.positions.value.length, 52, 'Polygons');
+        }
+      }
+    }
+  ];
+
+  await testLayerAsync({Layer: CartoLayer, testCases, onError: t.notOk});
+});

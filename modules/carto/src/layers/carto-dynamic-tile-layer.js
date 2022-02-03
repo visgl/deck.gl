@@ -4,7 +4,7 @@ import {log} from '@deck.gl/core';
 import {ClipExtension} from '@deck.gl/extensions';
 import {MVTLayer, _getURLFromTemplate} from '@deck.gl/geo-layers';
 import {GeoJsonLayer} from '@deck.gl/layers';
-import {binaryToGeojson, geojsonToBinary} from '@loaders.gl/gis';
+import {geojsonToBinary} from '@loaders.gl/gis';
 import {Tile} from './schema/carto-dynamic-tile';
 import {encodeParameter, TILE_FORMATS} from '../api/maps-api-common';
 

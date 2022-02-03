@@ -1,5 +1,8 @@
+/* global Headers */
 import test from 'tape-catch';
 import {API_VERSIONS, setDefaultCredentials} from '@deck.gl/carto';
+import binaryTileData from '@deck.gl/carto/layers/schema/tile2.json';
+const BINARY_TILE = new Uint8Array(binaryTileData).buffer;
 
 export const TILEJSON_RESPONSE = {
   tilejson: '2.2.0',
@@ -52,7 +55,7 @@ function mockFetchMapsV2() {
 
 export function mockFetchMapsV3() {
   const fetch = globalThis.fetch;
-  globalThis.fetch = url => {
+  globalThis.fetch = (url, {headers}) => {
     return Promise.resolve({
       json: () => {
         if (url.indexOf('format=tilejson') !== -1) {
@@ -78,7 +81,10 @@ export function mockFetchMapsV3() {
         }
         return null;
       },
-      ok: true
+      arrayBuffer: () => BINARY_TILE,
+      text: () => null, // Required to get loaders.gl to use arrayBuffer()
+      ok: true,
+      headers: new Headers(headers)
     });
   };
   return fetch;
