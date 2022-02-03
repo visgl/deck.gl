@@ -60,11 +60,14 @@ mockedV3Test('CartoLayer#v3', async t => {
   spy.returns([]);
 
   const onAfterUpdate = ({layer, subLayer, subLayers}) => {
-    const {data} = layer.state;
+    const {data, format} = layer.state;
     if (!data) {
       t.is(subLayers.length, 0, 'should no render subLayers');
     } else {
       t.is(subLayers.length, 1, 'should have only 1 sublayer');
+      /* global URLSearchParams */
+      const tilesFormat = data.tiles && new URLSearchParams(data.tiles[0]).get('format');
+
       switch (layer.props.type) {
         case MAP_TYPES.TILESET:
           t.ok(subLayer instanceof MVTLayer, 'should be an MVTLayer');
@@ -75,7 +78,7 @@ mockedV3Test('CartoLayer#v3', async t => {
           );
           break;
         case MAP_TYPES.TABLE:
-          if (layer.props.format === FORMATS.TILEJSON) {
+          if ((tilesFormat && tilesFormat !== 'mvt') || format === FORMATS.TILEJSON) {
             t.ok(subLayer instanceof CartoDynamicTileLayer, 'should be a CartoDynamicTileLayer');
           } else {
             t.ok(subLayer instanceof GeoJsonLayer, 'should be a GeoJsonLayer');
