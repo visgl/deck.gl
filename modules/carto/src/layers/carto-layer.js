@@ -27,6 +27,9 @@ const defaultProps = {
   // (String, optional): format of data
   format: null,
 
+  // (String, optional): format of data
+  formatTiles: TILE_FORMATS.GEOJSON, // TODO: for 8.7 release switch to BINARY
+
   // (String, optional): clientId identifier used for internal tracing, place here a string to identify the client who is doing the request.
   clientId: null,
 
@@ -128,7 +131,7 @@ export default class CartoLayer extends CompositeLayer {
 
     if (!data) return null;
 
-    const {updateTriggers} = this.props;
+    const {type, updateTriggers} = this.props;
 
     let layer;
 
@@ -137,8 +140,12 @@ export default class CartoLayer extends CompositeLayer {
       apiVersion === API_VERSIONS.V3 &&
       format === FORMATS.TILEJSON &&
       new URLSearchParams(data.tiles[0]).get('format');
+    const nonMvtTiles = tilesFormat && tilesFormat !== TILE_FORMATS.MVT;
 
-    if (tilesFormat && tilesFormat !== TILE_FORMATS.MVT) {
+    const dynamicTiles =
+      apiVersion === API_VERSIONS.V3 && type === MAP_TYPES.TABLE && format === FORMATS.TILEJSON;
+
+    if (nonMvtTiles || dynamicTiles) {
       layer = CartoDynamicTileLayer;
     } else if (
       apiVersion === API_VERSIONS.V1 ||
@@ -150,8 +157,8 @@ export default class CartoLayer extends CompositeLayer {
       layer = GeoJsonLayer;
     }
 
-    const {uniqueIdProperty} = defaultProps;
-    const props = {uniqueIdProperty, ...this.props};
+    const {formatTiles, uniqueIdProperty} = defaultProps;
+    const props = {formatTiles, uniqueIdProperty, ...this.props};
     delete props.data;
 
     // eslint-disable-next-line new-cap

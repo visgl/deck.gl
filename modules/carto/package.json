@@ -41,7 +41,8 @@
     "d3-color": "^2.0.0",
     "d3-format": "^2.0.0",
     "d3-scale": "^3.2.3",
-    "moment-timezone": "^0.5.33"
+    "moment-timezone": "^0.5.33",
+    "pbf": "^3.2.1"
   },
   "peerDependencies": {
     "@deck.gl/core": "^8.0.0",

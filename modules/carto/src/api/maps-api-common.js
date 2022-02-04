@@ -26,6 +26,7 @@ export const FORMATS = {
   JSON: 'json'
 };
 
+// AVAILABLE FORMATS FOR TILES
 export const TILE_FORMATS = {
   MVT: 'mvt',
   GEOJSON: 'geojson',
