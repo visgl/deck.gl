@@ -49,6 +49,18 @@ NumericProp._readField = function (tag, obj, pbf) {
   }
 };
 
+// NumericPropKeyValue ========================================
+
+const NumericPropKeyValue = {};
+
+NumericPropKeyValue.read = function (pbf, end) {
+  return pbf.readFields(NumericPropKeyValue._readField, {key: '', value: null}, end);
+};
+NumericPropKeyValue._readField = function (tag, obj, pbf) {
+  if (tag === 1) obj.key = pbf.readString();
+  else if (tag === 2) obj.value = NumericProp.read(pbf, pbf.readVarint() + pbf.pos);
+};
+
 // NumericProp._FieldEntry1 ========================================
 
 NumericProp._FieldEntry1 = {};
@@ -89,21 +101,9 @@ Points._readField = function (tag, obj, pbf) {
   else if (tag === 3) obj.featureIds = Coords.read(pbf, pbf.readVarint() + pbf.pos);
   else if (tag === 4) obj.properties.push(Properties.read(pbf, pbf.readVarint() + pbf.pos));
   else if (tag === 5) {
-    const entry = Points._FieldEntry5.read(pbf, pbf.readVarint() + pbf.pos);
+    const entry = NumericPropKeyValue.read(pbf, pbf.readVarint() + pbf.pos);
     obj.numericProps[entry.key] = entry.value;
   }
-};
-
-// Points._FieldEntry5 ========================================
-
-Points._FieldEntry5 = {};
-
-Points._FieldEntry5.read = function (pbf, end) {
-  return pbf.readFields(Points._FieldEntry5._readField, {key: '', value: null}, end);
-};
-Points._FieldEntry5._readField = function (tag, obj, pbf) {
-  if (tag === 1) obj.key = pbf.readString();
-  else if (tag === 2) obj.value = NumericProp.read(pbf, pbf.readVarint() + pbf.pos);
 };
 
 // Lines ========================================
@@ -131,21 +131,9 @@ Lines._readField = function (tag, obj, pbf) {
   else if (tag === 4) obj.featureIds = Coords.read(pbf, pbf.readVarint() + pbf.pos);
   else if (tag === 5) obj.properties.push(Properties.read(pbf, pbf.readVarint() + pbf.pos));
   else if (tag === 6) {
-    const entry = Lines._FieldEntry6.read(pbf, pbf.readVarint() + pbf.pos);
+    const entry = NumericPropKeyValue.read(pbf, pbf.readVarint() + pbf.pos);
     obj.numericProps[entry.key] = entry.value;
   }
-};
-
-// Lines._FieldEntry6 ========================================
-
-Lines._FieldEntry6 = {};
-
-Lines._FieldEntry6.read = function (pbf, end) {
-  return pbf.readFields(Lines._FieldEntry6._readField, {key: '', value: null}, end);
-};
-Lines._FieldEntry6._readField = function (tag, obj, pbf) {
-  if (tag === 1) obj.key = pbf.readString();
-  else if (tag === 2) obj.value = NumericProp.read(pbf, pbf.readVarint() + pbf.pos);
 };
 
 // Polygons ========================================
@@ -177,21 +165,9 @@ Polygons._readField = function (tag, obj, pbf) {
   else if (tag === 6) obj.triangles = Coords.read(pbf, pbf.readVarint() + pbf.pos);
   else if (tag === 7) obj.properties.push(Properties.read(pbf, pbf.readVarint() + pbf.pos));
   else if (tag === 8) {
-    const entry = Polygons._FieldEntry8.read(pbf, pbf.readVarint() + pbf.pos);
+    const entry = NumericPropKeyValue.read(pbf, pbf.readVarint() + pbf.pos);
     obj.numericProps[entry.key] = entry.value;
   }
-};
-
-// Polygons._FieldEntry8 ========================================
-
-Polygons._FieldEntry8 = {};
-
-Polygons._FieldEntry8.read = function (pbf, end) {
-  return pbf.readFields(Polygons._FieldEntry8._readField, {key: '', value: null}, end);
-};
-Polygons._FieldEntry8._readField = function (tag, obj, pbf) {
-  if (tag === 1) obj.key = pbf.readString();
-  else if (tag === 2) obj.value = NumericProp.read(pbf, pbf.readVarint() + pbf.pos);
 };
 
 // Tile ========================================
