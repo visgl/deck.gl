@@ -524,9 +524,76 @@ mockedV3Test('CartoLayer#dynamic', async t => {
           const geojsonLayer = mvtLayer.internalState.subLayers[0];
           const {data} = geojsonLayer.props;
 
+          // Test data taken from `cartobq.testtables.polygons_10k` table, tile: 15/9633/12341
           t.is(data.points.positions.value.length, 0, 'No points');
           t.is(data.lines.positions.value.length, 0, 'No lines');
-          t.is(data.polygons.positions.value.length, 10, 'Polygons');
+
+          // positions
+          t.deepEqual(
+            [...data.polygons.positions.value],
+            [
+              -74.15892028808594, 40.5383186340332, -74.15888977050781, 40.538330078125,
+              -74.15872955322266, 40.538169860839844, -74.15850830078125, 40.53828048706055,
+              -74.15876770019531, 40.538551330566406, -74.15901184082031, 40.538421630859375,
+              -74.15892028808594, 40.5383186340332
+            ],
+            'Polygon position data'
+          );
+          t.equal(data.polygons.positions.size, 2, 'Polygon position size');
+
+          // polygonIndices
+          t.deepEqual(
+            [...data.polygons.polygonIndices.value],
+            [0, 7],
+            'Polygon polygonIndices data'
+          );
+          t.equal(data.polygons.polygonIndices.size, 1, 'Polygon polygonIndices size');
+
+          // primitivePolygonIndices
+          t.deepEqual(
+            [...data.polygons.primitivePolygonIndices.value],
+            [0, 7],
+            'Polygons primitivePolygonIndices data'
+          );
+          t.equal(
+            data.polygons.primitivePolygonIndices.size,
+            1,
+            'Polygon primitivePolygonIndices size'
+          );
+
+          // featureIds
+          t.deepEqual(
+            [...data.polygons.featureIds.value],
+            [0, 0, 0, 0, 0, 0, 0],
+            'Polygons featureIds data'
+          );
+          t.equal(data.polygons.featureIds.size, 1, 'Polygon featureIds size');
+
+          // globalFeatureIds
+          t.deepEqual(
+            [...data.polygons.globalFeatureIds.value],
+            [0, 0, 0, 0, 0, 0, 0],
+            'Polygons globalFeatureIds data'
+          );
+          t.equal(data.polygons.globalFeatureIds.size, 1, 'Polygon globalFeatureIds size');
+
+          // triangles
+          t.deepEqual(
+            [...data.polygons.triangles.value],
+            [5, 0, 1, 1, 2, 3, 3, 4, 5, 5, 1, 3],
+            'Polygons triangles data'
+          );
+          t.equal(data.polygons.triangles.size, 1, 'Polygon triangles size');
+
+          // properties
+          t.deepEqual(
+            data.polygons.properties,
+            [{address: '4 PARK ROAD', bbl: '5052680264'}],
+            'Polygons properties data'
+          );
+
+          // numericProps
+          t.deepEqual(data.polygons.numericProps, {}, 'Polygons numericProps data');
         }
       }
     }

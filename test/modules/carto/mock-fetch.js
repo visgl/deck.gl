@@ -1,6 +1,8 @@
 /* global Headers */
 import test from 'tape-catch';
 import {API_VERSIONS, setDefaultCredentials} from '@deck.gl/carto';
+
+// See test/modules/carto/responseToJson for details for creating test data
 import binaryTileData from './data/binaryTile.json';
 const BINARY_TILE = new Uint8Array(binaryTileData).buffer;
 
