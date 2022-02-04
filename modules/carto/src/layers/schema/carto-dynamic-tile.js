@@ -25,13 +25,11 @@ Properties._readField = function (tag, obj, pbf) {
 
 const Doubles = {};
 
-// TODO do not pass in array type!!!
-Doubles.read = function (pbf, end, TypedArray) {
+Doubles.read = function (pbf, end) {
   // TODO perhaps we can do better and directly map from the source
   // ArrayBuffer using ArrayBuffer.slice()
-  TypedArray = TypedArray || Uint32Array;
   const {value, size} = pbf.readFields(Doubles._readField, {value: [], size: 0}, end);
-  return {value: new TypedArray(value), size};
+  return {value: new Float32Array(value), size};
 };
 Doubles._readField = function (tag, obj, pbf) {
   if (tag === 1) pbf.readPackedDouble(obj.value);
@@ -42,12 +40,9 @@ Doubles._readField = function (tag, obj, pbf) {
 
 const Ints = {};
 
-Ints.read = function (pbf, end, TypedArray) {
-  // TODO perhaps we can do better and directly map from the source
-  // ArrayBuffer using ArrayBuffer.slice()
-  TypedArray = TypedArray || Uint32Array;
+Ints.read = function (pbf, end) {
   const {value, size} = pbf.readFields(Ints._readField, {value: [], size: 0}, end);
-  return {value: new TypedArray(value), size};
+  return {value: new Uint32Array(value), size};
 };
 Ints._readField = function (tag, obj, pbf) {
   if (tag === 1) pbf.readPackedVarint(obj.value);
@@ -112,7 +107,7 @@ Points.read = function (pbf, end) {
   );
 };
 Points._readField = function (tag, obj, pbf) {
-  if (tag === 1) obj.positions = Doubles.read(pbf, pbf.readVarint() + pbf.pos, Float32Array);
+  if (tag === 1) obj.positions = Doubles.read(pbf, pbf.readVarint() + pbf.pos);
   else if (tag === 2) obj.globalFeatureIds = Ints.read(pbf, pbf.readVarint() + pbf.pos);
   else if (tag === 3) obj.featureIds = Ints.read(pbf, pbf.readVarint() + pbf.pos);
   else if (tag === 4) obj.properties.push(Properties.read(pbf, pbf.readVarint() + pbf.pos));
@@ -141,7 +136,7 @@ Lines.read = function (pbf, end) {
   );
 };
 Lines._readField = function (tag, obj, pbf) {
-  if (tag === 1) obj.positions = Doubles.read(pbf, pbf.readVarint() + pbf.pos, Float32Array);
+  if (tag === 1) obj.positions = Doubles.read(pbf, pbf.readVarint() + pbf.pos);
   else if (tag === 2) obj.pathIndices = Ints.read(pbf, pbf.readVarint() + pbf.pos);
   else if (tag === 3) obj.globalFeatureIds = Ints.read(pbf, pbf.readVarint() + pbf.pos);
   else if (tag === 4) obj.featureIds = Ints.read(pbf, pbf.readVarint() + pbf.pos);
@@ -173,7 +168,7 @@ Polygons.read = function (pbf, end) {
   );
 };
 Polygons._readField = function (tag, obj, pbf) {
-  if (tag === 1) obj.positions = Doubles.read(pbf, pbf.readVarint() + pbf.pos, Float32Array);
+  if (tag === 1) obj.positions = Doubles.read(pbf, pbf.readVarint() + pbf.pos);
   else if (tag === 2) obj.polygonIndices = Ints.read(pbf, pbf.readVarint() + pbf.pos);
   else if (tag === 3) obj.globalFeatureIds = Ints.read(pbf, pbf.readVarint() + pbf.pos);
   else if (tag === 4) obj.featureIds = Ints.read(pbf, pbf.readVarint() + pbf.pos);
