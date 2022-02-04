@@ -18,30 +18,6 @@ function parsePbf(buffer) {
   return tile;
 }
 
-function convertToTypedArray(obj, TypedArray) {
-  obj.value = new TypedArray(Object.values(obj.value));
-}
-
-function tileToBinary({points, lines, polygons}) {
-  convertToTypedArray(points.positions, Float32Array);
-  convertToTypedArray(points.globalFeatureIds, Uint32Array);
-  convertToTypedArray(points.featureIds, Uint32Array);
-
-  convertToTypedArray(lines.positions, Float32Array);
-  convertToTypedArray(lines.pathIndices, Uint32Array);
-  convertToTypedArray(lines.globalFeatureIds, Uint32Array);
-  convertToTypedArray(lines.featureIds, Uint32Array);
-
-  convertToTypedArray(polygons.positions, Float32Array);
-  convertToTypedArray(polygons.polygonIndices, Uint32Array);
-  convertToTypedArray(polygons.primitivePolygonIndices, Uint32Array);
-  convertToTypedArray(polygons.globalFeatureIds, Uint32Array);
-  convertToTypedArray(polygons.featureIds, Uint32Array);
-  convertToTypedArray(polygons.triangles, Uint32Array);
-
-  return {points, lines, polygons};
-}
-
 function unpackProperties(properties) {
   if (!properties || !properties.length) {
     return [];
@@ -61,9 +37,8 @@ function parseCartoDynamicTile(arrayBuffer, options) {
   if (formatTiles === TILE_FORMATS.GEOJSON) return geojsonToBinary(parseJSON(arrayBuffer).features);
 
   const tile = parsePbf(arrayBuffer);
-  const binary = tileToBinary(tile);
 
-  const {points, lines, polygons} = binary;
+  const {points, lines, polygons} = tile;
   const data = {
     points: {...points, properties: unpackProperties(points.properties)},
     lines: {...lines, properties: unpackProperties(lines.properties)},
