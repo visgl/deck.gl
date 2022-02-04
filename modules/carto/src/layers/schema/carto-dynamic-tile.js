@@ -1,6 +1,6 @@
 // KeyValueObject ========================================
 
-export const KeyValueObject = {};
+const KeyValueObject = {};
 
 KeyValueObject.read = function (pbf, end) {
   return pbf.readFields(KeyValueObject._readField, {key: '', value: ''}, end);
@@ -12,7 +12,7 @@ KeyValueObject._readField = function (tag, obj, pbf) {
 
 // Properties ========================================
 
-export const Properties = {};
+const Properties = {};
 
 Properties.read = function (pbf, end) {
   return pbf.readFields(Properties._readField, {data: []}, end);
@@ -23,9 +23,11 @@ Properties._readField = function (tag, obj, pbf) {
 
 // Coords ========================================
 
-export const Coords = {};
+const Coords = {};
 
 Coords.read = function (pbf, end, TypedArray) {
+  // TODO perhaps we can do better and directly map from the source
+  // ArrayBuffer using ArrayBuffer.slice()
   TypedArray = TypedArray || Uint32Array;
   const {value, size} = pbf.readFields(Coords._readField, {value: [], size: 0}, end);
   return {value: new TypedArray(value), size};
@@ -37,7 +39,7 @@ Coords._readField = function (tag, obj, pbf) {
 
 // NumericProp ========================================
 
-export const NumericProp = {};
+const NumericProp = {};
 
 NumericProp.read = function (pbf, end) {
   return pbf.readFields(NumericProp._readField, {value: {}}, end);
@@ -75,7 +77,7 @@ NumericProp._FieldEntry1._readField = function (tag, obj, pbf) {
 
 // StringProp ========================================
 
-export const StringProp = {};
+const StringProp = {};
 
 StringProp.read = function (pbf, end) {
   return pbf.readFields(StringProp._readField, {value: []}, end);
@@ -86,7 +88,7 @@ StringProp._readField = function (tag, obj, pbf) {
 
 // Points ========================================
 
-export const Points = {};
+const Points = {};
 
 Points.read = function (pbf, end) {
   return pbf.readFields(
@@ -108,7 +110,7 @@ Points._readField = function (tag, obj, pbf) {
 
 // Lines ========================================
 
-export const Lines = {};
+const Lines = {};
 
 Lines.read = function (pbf, end) {
   return pbf.readFields(
@@ -138,7 +140,7 @@ Lines._readField = function (tag, obj, pbf) {
 
 // Polygons ========================================
 
-export const Polygons = {};
+const Polygons = {};
 
 Polygons.read = function (pbf, end) {
   return pbf.readFields(
