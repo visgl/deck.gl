@@ -28,7 +28,7 @@ const defaultProps = {
   format: null,
 
   // (String, optional): format of data
-  formatTiles: TILE_FORMATS.BINARY,
+  formatTiles: TILE_FORMATS.GEOJSON, // TODO: for 8.7 release switch to BINARY
 
   // (String, optional): clientId identifier used for internal tracing, place here a string to identify the client who is doing the request.
   clientId: null,
