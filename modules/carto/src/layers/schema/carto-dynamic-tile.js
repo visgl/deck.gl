@@ -21,19 +21,36 @@ Properties._readField = function (tag, obj, pbf) {
   if (tag === 1) obj.data.push(KeyValueObject.read(pbf, pbf.readVarint() + pbf.pos));
 };
 
-// Coords ========================================
+// Doubles ========================================
 
-const Coords = {};
+const Doubles = {};
 
-Coords.read = function (pbf, end, TypedArray) {
+// TODO do not pass in array type!!!
+Doubles.read = function (pbf, end, TypedArray) {
   // TODO perhaps we can do better and directly map from the source
   // ArrayBuffer using ArrayBuffer.slice()
   TypedArray = TypedArray || Uint32Array;
-  const {value, size} = pbf.readFields(Coords._readField, {value: [], size: 0}, end);
+  const {value, size} = pbf.readFields(Doubles._readField, {value: [], size: 0}, end);
   return {value: new TypedArray(value), size};
 };
-Coords._readField = function (tag, obj, pbf) {
+Doubles._readField = function (tag, obj, pbf) {
   if (tag === 1) pbf.readPackedDouble(obj.value);
+  else if (tag === 2) obj.size = pbf.readVarint(true);
+};
+
+// Ints ========================================
+
+const Ints = {};
+
+Ints.read = function (pbf, end, TypedArray) {
+  // TODO perhaps we can do better and directly map from the source
+  // ArrayBuffer using ArrayBuffer.slice()
+  TypedArray = TypedArray || Uint32Array;
+  const {value, size} = pbf.readFields(Ints._readField, {value: [], size: 0}, end);
+  return {value: new TypedArray(value), size};
+};
+Ints._readField = function (tag, obj, pbf) {
+  if (tag === 1) pbf.readPackedVarint(obj.value);
   else if (tag === 2) obj.size = pbf.readVarint(true);
 };
 
@@ -42,13 +59,10 @@ Coords._readField = function (tag, obj, pbf) {
 const NumericProp = {};
 
 NumericProp.read = function (pbf, end) {
-  return pbf.readFields(NumericProp._readField, {value: {}}, end);
+  return pbf.readFields(NumericProp._readField, {value: []}, end);
 };
 NumericProp._readField = function (tag, obj, pbf) {
-  if (tag === 1) {
-    const entry = NumericProp._FieldEntry1.read(pbf, pbf.readVarint() + pbf.pos);
-    obj.value[entry.key] = entry.value;
-  }
+  if (tag === 1) pbf.readPackedDouble(obj.value);
 };
 
 // NumericPropKeyValue ========================================
@@ -98,9 +112,9 @@ Points.read = function (pbf, end) {
   );
 };
 Points._readField = function (tag, obj, pbf) {
-  if (tag === 1) obj.positions = Coords.read(pbf, pbf.readVarint() + pbf.pos, Float32Array);
-  else if (tag === 2) obj.globalFeatureIds = Coords.read(pbf, pbf.readVarint() + pbf.pos);
-  else if (tag === 3) obj.featureIds = Coords.read(pbf, pbf.readVarint() + pbf.pos);
+  if (tag === 1) obj.positions = Doubles.read(pbf, pbf.readVarint() + pbf.pos, Float32Array);
+  else if (tag === 2) obj.globalFeatureIds = Ints.read(pbf, pbf.readVarint() + pbf.pos);
+  else if (tag === 3) obj.featureIds = Ints.read(pbf, pbf.readVarint() + pbf.pos);
   else if (tag === 4) obj.properties.push(Properties.read(pbf, pbf.readVarint() + pbf.pos));
   else if (tag === 5) {
     const entry = NumericPropKeyValue.read(pbf, pbf.readVarint() + pbf.pos);
@@ -127,10 +141,10 @@ Lines.read = function (pbf, end) {
   );
 };
 Lines._readField = function (tag, obj, pbf) {
-  if (tag === 1) obj.positions = Coords.read(pbf, pbf.readVarint() + pbf.pos, Float32Array);
-  else if (tag === 2) obj.pathIndices = Coords.read(pbf, pbf.readVarint() + pbf.pos);
-  else if (tag === 3) obj.globalFeatureIds = Coords.read(pbf, pbf.readVarint() + pbf.pos);
-  else if (tag === 4) obj.featureIds = Coords.read(pbf, pbf.readVarint() + pbf.pos);
+  if (tag === 1) obj.positions = Doubles.read(pbf, pbf.readVarint() + pbf.pos, Float32Array);
+  else if (tag === 2) obj.pathIndices = Ints.read(pbf, pbf.readVarint() + pbf.pos);
+  else if (tag === 3) obj.globalFeatureIds = Ints.read(pbf, pbf.readVarint() + pbf.pos);
+  else if (tag === 4) obj.featureIds = Ints.read(pbf, pbf.readVarint() + pbf.pos);
   else if (tag === 5) obj.properties.push(Properties.read(pbf, pbf.readVarint() + pbf.pos));
   else if (tag === 6) {
     const entry = NumericPropKeyValue.read(pbf, pbf.readVarint() + pbf.pos);
@@ -159,12 +173,12 @@ Polygons.read = function (pbf, end) {
   );
 };
 Polygons._readField = function (tag, obj, pbf) {
-  if (tag === 1) obj.positions = Coords.read(pbf, pbf.readVarint() + pbf.pos, Float32Array);
-  else if (tag === 2) obj.polygonIndices = Coords.read(pbf, pbf.readVarint() + pbf.pos);
-  else if (tag === 3) obj.globalFeatureIds = Coords.read(pbf, pbf.readVarint() + pbf.pos);
-  else if (tag === 4) obj.featureIds = Coords.read(pbf, pbf.readVarint() + pbf.pos);
-  else if (tag === 5) obj.primitivePolygonIndices = Coords.read(pbf, pbf.readVarint() + pbf.pos);
-  else if (tag === 6) obj.triangles = Coords.read(pbf, pbf.readVarint() + pbf.pos);
+  if (tag === 1) obj.positions = Doubles.read(pbf, pbf.readVarint() + pbf.pos, Float32Array);
+  else if (tag === 2) obj.polygonIndices = Ints.read(pbf, pbf.readVarint() + pbf.pos);
+  else if (tag === 3) obj.globalFeatureIds = Ints.read(pbf, pbf.readVarint() + pbf.pos);
+  else if (tag === 4) obj.featureIds = Ints.read(pbf, pbf.readVarint() + pbf.pos);
+  else if (tag === 5) obj.primitivePolygonIndices = Ints.read(pbf, pbf.readVarint() + pbf.pos);
+  else if (tag === 6) obj.triangles = Ints.read(pbf, pbf.readVarint() + pbf.pos);
   else if (tag === 7) obj.properties.push(Properties.read(pbf, pbf.readVarint() + pbf.pos));
   else if (tag === 8) {
     const entry = NumericPropKeyValue.read(pbf, pbf.readVarint() + pbf.pos);
