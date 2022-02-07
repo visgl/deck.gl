@@ -103,7 +103,7 @@ export default class CartoDynamicTileLayer extends MVTLayer {
     const {
       bbox: {west, south, east, north}
     } = props.tile;
-    props.extensions = [new ClipExtension()];
+    props.extensions = [new ClipExtension(), ...props.extensions];
     props.clipBounds = [west, south, east, north];
 
     const subLayer = new GeoJsonLayer({
