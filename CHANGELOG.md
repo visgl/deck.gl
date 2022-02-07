@@ -21,6 +21,10 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ### deck.gl v8.7 Prereleases
 
+#### deck.gl [8.7.0-beta.4] - Feb 7 2022
+
+- Include extensions sent in properties in the CartoDynamicTileLayer
+- Support TILE_FORMATS.BINARY in CartoDynamicTileLayer (#6580)
 #### deck.gl [8.7.0-beta.3] - Feb 2 2022
 
 - CARTO module: Support tiles in different formats (#6609)
