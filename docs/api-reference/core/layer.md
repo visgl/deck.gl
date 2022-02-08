@@ -212,11 +212,13 @@ RGBA color to blend with the highlighted object (either the hovered over object 
 - If an array is supplied, it is used for the object that is currently highlighted.
 - If a function is supplied, it is called with a [pickingInfo](/docs/developer-guide/interactivity.md#the-picking-info-object) object when the hovered object changes. The return value is used as the highlight color for the picked object. Only works with `autoHighlight: true`.
 
-##### `highlightedObjectIndex` (Integer, optional)
+##### `highlightedObjectIndex` (Number|null, optional)
 
-* Default: `-1`
+* Default: `null`
 
-When provided a valid value corresponding object (one instance in instanced rendering or group of primitives with same picking color) will be highlighted with `highlightColor`.
+The index of the object in `data` to highlight. If specified, overrides the effect of `autoHighlight`.
+
+When set to an integer that corresponds to an object, the object will be highlighted with `highlightColor`. When set to an integer that does not correspond to an object (e.g. `-1`), nothing is highlighted.
 
 ##### `autoHighlight` (Boolean, optional)
 

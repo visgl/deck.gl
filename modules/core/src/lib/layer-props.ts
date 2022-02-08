@@ -118,7 +118,7 @@ export type LayerProps = {
   /**
    * The index of the data object to highlight. If unspecified, the currently hoverred object is highlighted.
    */
-  highlightedObjectIndex?: number;
+  highlightedObjectIndex?: number | null;
   /**
    * The color of the highlight.
    */
