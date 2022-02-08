@@ -93,7 +93,7 @@ map.on('load', () => {
 
 This option allows one to take advantage of deck's multi-view system and render a mapbox base map onto any one MapView of your choice by setting the `views` array and a `layerFilter` callback.
 
-- To to use multiple views, define a `MapView` with the id `“mapbox”`. This view will receive the state that matches the base map at each render.
+- To use multiple views, define a `MapView` with the id `“mapbox”`. This view will receive the state that matches the base map at each render.
 - If views are provided but the array does not contain this id, then a `MapView({id: 'mapbox'})` will be inserted at the bottom of the stack.
 - If the views prop is not provided, then the default is a single `MapView({id: 'mapbox'})`.
 
