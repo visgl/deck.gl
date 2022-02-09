@@ -291,6 +291,7 @@ export async function fetchMap({cartoMapId, clientId, credentials, autoRefresh, 
     ...(defaultCredentials.apiVersion === API_VERSIONS.V3 && defaultCredentials),
     ...credentials
   };
+  const {accessToken} = localCreds;
 
   log.assert(cartoMapId, `Must define CARTO map id: fetchMap({cartoMapId: 'XXXX-XXXX-XXXX'})`);
 
@@ -307,7 +308,7 @@ export async function fetchMap({cartoMapId, clientId, credentials, autoRefresh, 
   }
 
   const url = `${localCreds.mapsUrl}/public/${cartoMapId}`;
-  const map = await request({url});
+  const map = await request({url, accessToken});
 
   // Periodically check if the data has changed. Note that this
   // will not update when a map is published.
