@@ -24,12 +24,12 @@ export function parseMap(json) {
     mapStyle,
     layers: extractTextLayers(layers.reverse()).map(({id, type, config, visualChannels}) => {
       try {
-        const {Layer, propMap, defaultProps} = getLayer(type, config);
         const {dataId} = config;
         const dataset = datasets.find(d => d.id === dataId);
         log.assert(dataset, `No dataset matching dataId: ${dataId}`);
         const {data} = dataset;
         log.assert(data, `No data loaded for dataId: ${dataId}`);
+        const {Layer, propMap, defaultProps} = getLayer(type, config, dataset);
         return new Layer({
           id,
           data,

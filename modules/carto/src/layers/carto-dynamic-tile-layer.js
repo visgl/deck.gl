@@ -6,7 +6,7 @@ import {MVTLayer, _getURLFromTemplate} from '@deck.gl/geo-layers';
 import {GeoJsonLayer} from '@deck.gl/layers';
 import {geojsonToBinary} from '@loaders.gl/gis';
 import {Tile} from './schema/carto-dynamic-tile';
-import {encodeParameter, TILE_FORMATS} from '../api/maps-api-common';
+import {TILE_FORMATS} from '../api/maps-api-common';
 
 function parseJSON(arrayBuffer) {
   return JSON.parse(new TextDecoder().decode(arrayBuffer));
@@ -86,7 +86,10 @@ export default class CartoDynamicTileLayer extends MVTLayer {
         Object.values(TILE_FORMATS).includes(formatTiles),
         `Invalid value for formatTiles: ${formatTiles}. Use value from TILE_FORMATS`
       );
-      url += `&${encodeParameter('formatTiles', formatTiles)}`;
+      // eslint-disable-next-line no-undef
+      const newUrl = new URL(url);
+      newUrl.searchParams.set('formatTiles', formatTiles);
+      url = newUrl.toString();
       loadOptions.cartoDynamicTile = {formatTiles};
     }
 
@@ -103,7 +106,7 @@ export default class CartoDynamicTileLayer extends MVTLayer {
     const {
       bbox: {west, south, east, north}
     } = props.tile;
-    props.extensions = [new ClipExtension(), ...props.extensions];
+    props.extensions = [new ClipExtension(), ...(props.extensions || [])];
     props.clipBounds = [west, south, east, north];
 
     const subLayer = new GeoJsonLayer({
