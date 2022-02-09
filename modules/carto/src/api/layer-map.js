@@ -14,6 +14,7 @@ import moment from 'moment-timezone';
 import {log} from '@deck.gl/core';
 import {H3HexagonLayer, MVTLayer} from '@deck.gl/geo-layers';
 import {GeoJsonLayer} from '@deck.gl/layers';
+import {_CartoDynamicTileLayer, TILE_FORMATS} from '@deck.gl/carto';
 
 const SCALE_FUNCS = {
   linear: scaleLinear,
@@ -63,9 +64,12 @@ function mergePropMaps(a, b) {
   return {...a, ...b, visConfig: {...a.visConfig, ...b.visConfig}};
 }
 
-export function getLayer(type, config) {
-  const hexagonId = config.columns?.hex_id;
+export function getLayer(type, config, dataset) {
+  if (type === 'mvt' || type === 'tileset') {
+    return getTileLayer(dataset);
+  }
 
+  const hexagonId = config.columns?.hex_id;
   const layer = {
     point: {
       Layer: GeoJsonLayer,
@@ -85,22 +89,34 @@ export function getLayer(type, config) {
         visConfig: {coverage: 'coverage', elevationScale: 'elevationScale'}
       }),
       defaultProps: {...defaultProps, getHexagon: d => d[hexagonId]}
-    },
-    mvt: {
-      Layer: MVTLayer,
-      propMap: sharedPropMap,
-      defaultProps: {
-        ...defaultProps,
-        pointRadiusScale: 0.3,
-        lineWidthScale: 2,
-        uniqueIdProperty: 'geoid'
-      }
     }
   }[type];
 
   log.assert(layer, `Unsupported layer type: ${type}`);
 
   return layer;
+}
+
+function getTileLayer(dataset) {
+  const {
+    data: {
+      tiles: [tileUrl]
+    }
+  } = dataset;
+  /* global URLSearchParams */
+  const formatTiles = new URLSearchParams(tileUrl).get('formatTiles');
+
+  return {
+    Layer: formatTiles === TILE_FORMATS.MVT ? MVTLayer : _CartoDynamicTileLayer,
+    propMap: sharedPropMap,
+    defaultProps: {
+      ...defaultProps,
+      pointRadiusScale: 0.3,
+      lineWidthScale: 2,
+      uniqueIdProperty: 'geoid',
+      formatTiles
+    }
+  };
 }
 
 function domainFromAttribute(attribute, scaleType) {

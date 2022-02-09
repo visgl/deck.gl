@@ -286,7 +286,7 @@
           "config": {
             "color": [18, 147, 154],
             "label": "transmission lines",
-            "dataId": "DATA_ID",
+            "dataId": "DATA_TILESET_ID",
             "hidden": false,
             "columns": {},
             "isVisible": true,
@@ -544,7 +544,7 @@
         "props": {
           "id": "87swuny",
           "cartoLabel": "transmission lines",
-          "data": {"type": "FeatureCollection", "features": []},
+          "data": "DATA_TILESET",
           "lineMiterLimit": 2,
           "lineWidthUnits": "pixels",
           "pointRadiusScale": 0.3,
@@ -566,7 +566,8 @@
           "getPointRadius": 10,
           "wireframe": false,
           "highlightColor": [252, 242, 26, 255],
-          "uniqueIdProperty": "geoid"
+          "uniqueIdProperty": "geoid",
+          "formatTiles": "mvt"
         }
       }
     ]
@@ -789,7 +790,252 @@
           "getPointRadius": 10,
           "wireframe": false,
           "highlightColor": [252, 242, 26, 255],
-          "uniqueIdProperty": "geoid"
+          "uniqueIdProperty": "geoid",
+          "formatTiles": "mvt"
+        }
+      }
+    ]
+  },
+  {
+    "title": "Polygon tileset geojson format",
+    "visState": {
+      "layers": [
+        {
+          "id": "3btkipv",
+          "type": "tileset",
+          "config": {
+            "color": [18, 147, 154],
+            "label": "Layer 1",
+            "dataId": "DATA_TILESET_GEOJSON_FORMAT_ID",
+            "hidden": false,
+            "columns": {},
+            "isVisible": true,
+            "textLabel": [
+              {
+                "size": 18,
+                "color": [255, 255, 255],
+                "field": null,
+                "anchor": "start",
+                "offset": [0, 0],
+                "alignment": "center"
+              }
+            ],
+            "visConfig": {
+              "filled": true,
+              "radius": 10,
+              "opacity": 0.8,
+              "stroked": false,
+              "enable3d": false,
+              "sizeRange": [0, 10],
+              "thickness": 0.5,
+              "wireframe": false,
+              "colorRange": {
+                "name": "Global Warming",
+                "type": "sequential",
+                "colors": ["#5A1846", "#900C3F", "#C70039", "#E3611C", "#F1920E", "#FFC300"],
+                "category": "Uber"
+              },
+              "heightRange": [0, 500],
+              "radiusRange": [0, 50],
+              "strokeColor": [221, 178, 124],
+              "strokeOpacity": 0.8,
+              "elevationScale": 5,
+              "strokeColorRange": {
+                "name": "Global Warming",
+                "type": "sequential",
+                "colors": ["#5A1846", "#900C3F", "#C70039", "#E3611C", "#F1920E", "#FFC300"],
+                "category": "Uber"
+              }
+            },
+            "highlightColor": [252, 242, 26, 255]
+          },
+          "visualChannels": {
+            "sizeField": null,
+            "sizeScale": "linear",
+            "colorField": {"name": "STRING_ATTR", "type": "string"},
+            "colorScale": "ordinal",
+            "heightField": {"name": "NUMBER_ATTR", "type": "number"},
+            "heightScale": "log",
+            "radiusField": null,
+            "radiusScale": "log",
+            "strokeColorField": null,
+            "strokeColorScale": "quantile"
+          }
+        }
+      ],
+      "filters": [],
+      "splitMaps": [],
+      "layerBlending": "normal",
+      "animationConfig": {"speed": 1, "currentTime": null},
+      "interactionConfig": {
+        "brush": {"size": 0.5, "enabled": false},
+        "tooltip": {
+          "enabled": true,
+          "compareMode": false,
+          "compareType": "absolute",
+          "fieldsToShow": {
+            "4eebbc75-4331-409e-8c71-16ed67429177": [
+              {"name": "geoid", "format": null},
+              {"name": "construction_date", "format": null},
+              {"name": "current_use", "format": null},
+              {"name": "number_floors_above_ground", "format": null}
+            ]
+          }
+        },
+        "geocoder": {"enabled": false},
+        "coordinate": {"enabled": false}
+      }
+    },
+    "layers": [
+      {
+        "name": "CartoDynamicTileLayer({id: '3btkipv'})",
+        "props": {
+          "id": "3btkipv",
+          "cartoLabel": "Layer 1",
+          "data": "DATA_TILESET_GEOJSON",
+          "lineMiterLimit": 2,
+          "lineWidthUnits": "pixels",
+          "pointRadiusScale": 0.3,
+          "pointRadiusUnits": "pixels",
+          "rounded": true,
+          "wrapLongitude": false,
+          "lineWidthScale": 2,
+          "autoHighlight": true,
+          "pickable": true,
+          "visible": true,
+          "extruded": false,
+          "filled": true,
+          "opacity": 0.8,
+          "getLineColor": [221, 178, 124],
+          "stroked": false,
+          "getLineWidth": 0.5,
+          "getPointRadius": 10,
+          "wireframe": false,
+          "highlightColor": [252, 242, 26, 255],
+          "uniqueIdProperty": "geoid",
+          "formatTiles": "geojson"
+        }
+      }
+    ]
+  },
+  {
+    "title": "Polygon tileset binary format",
+    "visState": {
+      "layers": [
+        {
+          "id": "3btkipv",
+          "type": "tileset",
+          "config": {
+            "color": [18, 147, 154],
+            "label": "Layer 1",
+            "dataId": "DATA_TILESET_BINARY_FORMAT_ID",
+            "hidden": false,
+            "columns": {},
+            "isVisible": true,
+            "textLabel": [
+              {
+                "size": 18,
+                "color": [255, 255, 255],
+                "field": null,
+                "anchor": "start",
+                "offset": [0, 0],
+                "alignment": "center"
+              }
+            ],
+            "visConfig": {
+              "filled": true,
+              "radius": 10,
+              "opacity": 0.8,
+              "stroked": false,
+              "enable3d": false,
+              "sizeRange": [0, 10],
+              "thickness": 0.5,
+              "wireframe": false,
+              "colorRange": {
+                "name": "Global Warming",
+                "type": "sequential",
+                "colors": ["#5A1846", "#900C3F", "#C70039", "#E3611C", "#F1920E", "#FFC300"],
+                "category": "Uber"
+              },
+              "heightRange": [0, 500],
+              "radiusRange": [0, 50],
+              "strokeColor": [221, 178, 124],
+              "strokeOpacity": 0.8,
+              "elevationScale": 5,
+              "strokeColorRange": {
+                "name": "Global Warming",
+                "type": "sequential",
+                "colors": ["#5A1846", "#900C3F", "#C70039", "#E3611C", "#F1920E", "#FFC300"],
+                "category": "Uber"
+              }
+            },
+            "highlightColor": [252, 242, 26, 255]
+          },
+          "visualChannels": {
+            "sizeField": null,
+            "sizeScale": "linear",
+            "colorField": {"name": "STRING_ATTR", "type": "string"},
+            "colorScale": "ordinal",
+            "heightField": {"name": "NUMBER_ATTR", "type": "number"},
+            "heightScale": "log",
+            "radiusField": null,
+            "radiusScale": "log",
+            "strokeColorField": null,
+            "strokeColorScale": "quantile"
+          }
+        }
+      ],
+      "filters": [],
+      "splitMaps": [],
+      "layerBlending": "normal",
+      "animationConfig": {"speed": 1, "currentTime": null},
+      "interactionConfig": {
+        "brush": {"size": 0.5, "enabled": false},
+        "tooltip": {
+          "enabled": true,
+          "compareMode": false,
+          "compareType": "absolute",
+          "fieldsToShow": {
+            "4eebbc75-4331-409e-8c71-16ed67429177": [
+              {"name": "geoid", "format": null},
+              {"name": "construction_date", "format": null},
+              {"name": "current_use", "format": null},
+              {"name": "number_floors_above_ground", "format": null}
+            ]
+          }
+        },
+        "geocoder": {"enabled": false},
+        "coordinate": {"enabled": false}
+      }
+    },
+    "layers": [
+      {
+        "name": "CartoDynamicTileLayer({id: '3btkipv'})",
+        "props": {
+          "id": "3btkipv",
+          "cartoLabel": "Layer 1",
+          "data": "DATA_TILESET_BINARY",
+          "lineMiterLimit": 2,
+          "lineWidthUnits": "pixels",
+          "pointRadiusScale": 0.3,
+          "pointRadiusUnits": "pixels",
+          "rounded": true,
+          "wrapLongitude": false,
+          "lineWidthScale": 2,
+          "autoHighlight": true,
+          "pickable": true,
+          "visible": true,
+          "extruded": false,
+          "filled": true,
+          "opacity": 0.8,
+          "getLineColor": [221, 178, 124],
+          "stroked": false,
+          "getLineWidth": 0.5,
+          "getPointRadius": 10,
+          "wireframe": false,
+          "highlightColor": [252, 242, 26, 255],
+          "uniqueIdProperty": "geoid",
+          "formatTiles": "binary"
         }
       }
     ]
