@@ -136,7 +136,7 @@ export default class CartoLayer extends CompositeLayer {
     if (format === FORMATS.TILEJSON) {
       /* global URLSearchParams */
       const formatTiles = new URLSearchParams(data.tiles[0]).get('formatTiles');
-      return formatTiles === TILE_FORMATS.MVT ? MVTLayer : CartoDynamicTileLayer;
+      return !formatTiles || formatTiles === TILE_FORMATS.MVT ? MVTLayer : CartoDynamicTileLayer;
     }
 
     // It's a geojson layer

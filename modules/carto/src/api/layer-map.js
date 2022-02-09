@@ -107,7 +107,7 @@ function getTileLayer(dataset) {
   const formatTiles = new URLSearchParams(tileUrl).get('formatTiles');
 
   return {
-    Layer: formatTiles === TILE_FORMATS.MVT ? MVTLayer : _CartoDynamicTileLayer,
+    Layer: !formatTiles || formatTiles === TILE_FORMATS.MVT ? MVTLayer : _CartoDynamicTileLayer,
     propMap: sharedPropMap,
     defaultProps: {
       ...defaultProps,
