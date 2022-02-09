@@ -104,7 +104,7 @@ function getTileLayer(dataset) {
     }
   } = dataset;
   /* global URLSearchParams */
-  const formatTiles = new URLSearchParams(tileUrl).get('format');
+  const formatTiles = new URLSearchParams(tileUrl).get('formatTiles');
 
   return {
     Layer: formatTiles === TILE_FORMATS.MVT ? MVTLayer : _CartoDynamicTileLayer,

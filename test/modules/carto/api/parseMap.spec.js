@@ -32,7 +32,7 @@ const DATASETS = [
     id: 'DATA_TILESET_ID',
     data: {
       tiles: [
-        `https://gcp-us-east1.api.carto.com/v3/maps/my_connection/tileset/{z}/{x}/{y}?name=my_data&format=${TILE_FORMATS.MVT}`
+        `https://gcp-us-east1.api.carto.com/v3/maps/my_connection/tileset/{z}/{x}/{y}?name=my_data&formatTiles=${TILE_FORMATS.MVT}`
       ],
       tilestats: {
         layers: [
@@ -57,7 +57,7 @@ const DATASETS = [
     id: 'DATA_TILESET_GEOJSON_FORMAT_ID',
     data: {
       tiles: [
-        `https://gcp-us-east1.api.carto.com/v3/maps/my_connection/tileset/{z}/{x}/{y}?name=my_data&format=${TILE_FORMATS.GEOJSON}`
+        `https://gcp-us-east1.api.carto.com/v3/maps/my_connection/tileset/{z}/{x}/{y}?name=my_data&formatTiles=${TILE_FORMATS.GEOJSON}`
       ],
       tilestats: {
         layers: [
@@ -82,7 +82,7 @@ const DATASETS = [
     id: 'DATA_TILESET_BINARY_FORMAT_ID',
     data: {
       tiles: [
-        `https://gcp-us-east1.api.carto.com/v3/maps/my_connection/tileset/{z}/{x}/{y}?name=my_data&format=${TILE_FORMATS.BINARY}`
+        `https://gcp-us-east1.api.carto.com/v3/maps/my_connection/tileset/{z}/{x}/{y}?name=my_data&formatTiles=${TILE_FORMATS.BINARY}`
       ],
       tilestats: {
         layers: [
