@@ -137,7 +137,7 @@ const defaultProps = {
   },
 
   // Selection/Highlighting
-  highlightedObjectIndex: -1,
+  highlightedObjectIndex: null,
   autoHighlight: false,
   highlightColor: {type: 'accessor', value: [0, 0, 128, 128]}
 };
@@ -363,8 +363,9 @@ export default class Layer extends Component {
       }
     }
 
-    const neededPickingBuffer = oldProps.highlightedObjectIndex >= 0 || oldProps.pickable;
-    const needPickingBuffer = props.highlightedObjectIndex >= 0 || props.pickable;
+    const neededPickingBuffer =
+      Number.isInteger(oldProps.highlightedObjectIndex) || oldProps.pickable;
+    const needPickingBuffer = Number.isInteger(props.highlightedObjectIndex) || props.pickable;
     if (neededPickingBuffer !== needPickingBuffer && attributeManager) {
       const {pickingColors, instancePickingColors} = attributeManager.attributes;
       const pickingColorsAttribute = pickingColors || instancePickingColors;
@@ -905,7 +906,7 @@ export default class Layer extends Component {
   }
 
   updateAutoHighlight(info) {
-    if (this.props.autoHighlight) {
+    if (this.props.autoHighlight && !Number.isInteger(this.props.highlightedObjectIndex)) {
       this._updateAutoHighlight(info);
     }
   }
