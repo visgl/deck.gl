@@ -126,36 +126,31 @@ export default class CartoLayer extends CompositeLayer {
     }
   }
 
-  renderLayers() {
+  _getRenderLayer() {
     const {data, format, apiVersion} = this.state;
+
+    if (apiVersion === API_VERSIONS.V1 || apiVersion === API_VERSIONS.V2) {
+      return MVTLayer;
+    }
+
+    if (format === FORMATS.TILEJSON) {
+      /* global URLSearchParams */
+      const formatTiles = new URLSearchParams(data.tiles[0]).get('formatTiles');
+      return formatTiles === TILE_FORMATS.MVT ? MVTLayer : CartoDynamicTileLayer;
+    }
+
+    // It's a geojson layer
+    return GeoJsonLayer;
+  }
+
+  renderLayers() {
+    const {data} = this.state;
 
     if (!data) return null;
 
-    const {type, updateTriggers} = this.props;
+    const {updateTriggers} = this.props;
 
-    let layer;
-
-    /* global URLSearchParams */
-    const tilesFormat =
-      apiVersion === API_VERSIONS.V3 &&
-      format === FORMATS.TILEJSON &&
-      new URLSearchParams(data.tiles[0]).get('format');
-    const nonMvtTiles = tilesFormat && tilesFormat !== TILE_FORMATS.MVT;
-
-    const dynamicTiles =
-      apiVersion === API_VERSIONS.V3 && type === MAP_TYPES.TABLE && format === FORMATS.TILEJSON;
-
-    if (nonMvtTiles || dynamicTiles) {
-      layer = CartoDynamicTileLayer;
-    } else if (
-      apiVersion === API_VERSIONS.V1 ||
-      apiVersion === API_VERSIONS.V2 ||
-      format === FORMATS.TILEJSON
-    ) {
-      layer = MVTLayer;
-    } else {
-      layer = GeoJsonLayer;
-    }
+    const layer = this._getRenderLayer();
 
     const {formatTiles, uniqueIdProperty} = defaultProps;
     const props = {formatTiles, uniqueIdProperty, ...this.props};
