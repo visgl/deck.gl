@@ -27,8 +27,8 @@ const defaultProps = {
   // (String, optional): format of data
   format: null,
 
-  // (String, optional): format of data
-  formatTiles: TILE_FORMATS.GEOJSON, // TODO: for 8.7 release switch to BINARY
+  // (String, optional): force format of data for tiles
+  formatTiles: null,
 
   // (String, optional): clientId identifier used for internal tracing, place here a string to identify the client who is doing the request.
   clientId: null,
@@ -134,8 +134,11 @@ export default class CartoLayer extends CompositeLayer {
     }
 
     if (format === FORMATS.TILEJSON) {
-      /* global URLSearchParams */
-      const formatTiles = new URLSearchParams(data.tiles[0]).get('formatTiles');
+      /* global URL */
+      const formatTiles =
+        this.props.formatTiles ||
+        new URL(data.tiles[0]).searchParams.get('formatTiles') ||
+        TILE_FORMATS.MVT;
       return formatTiles === TILE_FORMATS.MVT ? MVTLayer : CartoDynamicTileLayer;
     }
 

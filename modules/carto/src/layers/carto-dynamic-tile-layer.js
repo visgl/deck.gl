@@ -60,7 +60,8 @@ const CartoDynamicTileLoader = {
   parseSync: parseCartoDynamicTile,
   options: {
     cartoDynamicTile: {
-      formatTiles: TILE_FORMATS.BINARY
+      // TODO change to BINARY for 8.7 prod release
+      formatTiles: TILE_FORMATS.GEOJSON
     }
   }
 };

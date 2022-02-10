@@ -255,7 +255,7 @@ export async function getData({
   return layerData.data;
 }
 
-/* global clearInterval, setInterval, URLSearchParams */
+/* global clearInterval, setInterval, URL */
 async function _fetchMapDataset(dataset, accessToken, credentials, clientId) {
   // First fetch metadata
   const {connectionName: connection, source, type} = dataset;
@@ -268,7 +268,7 @@ async function _fetchMapDataset(dataset, accessToken, credentials, clientId) {
   });
 
   // Extract the last time the data changed
-  const cache = parseInt(new URLSearchParams(url).get('cache'), 10);
+  const cache = parseInt(new URL(url).searchParams.get('cache'), 10);
   if (cache && dataset.cache === cache) {
     return false;
   }
