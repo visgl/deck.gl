@@ -2,7 +2,7 @@ import mapboxgl from 'mapbox-gl';
 import {Deck} from '@deck.gl/core';
 import {fetchMap} from '@deck.gl/carto';
 
-const cartoMapId = '52dcbaa4-f84c-4fc8-93a9-628ed859f937';
+const cartoMapId = 'ff6ac53f-741a-49fb-b615-d040bc5a96b8';
 
 // Get map info from CARTO and update deck
 fetchMap({cartoMapId}).then(({initialViewState, mapStyle, layers}) => {
