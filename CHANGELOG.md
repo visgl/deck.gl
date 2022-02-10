@@ -21,6 +21,12 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ### deck.gl v8.7 Prereleases
 
+#### deck.gl [8.7.0-beta.5] - Feb 10 2022
+
+- CARTO: fetchMap supports tiles in different formats (#6637)
+- CARTO: Simplify format tiles logic (#6635)
+- Carto: Allow private maps in fetchMap (#6629)
+- Change highlightedObjectIndex default to null (#6631)
 #### deck.gl [8.7.0-beta.4] - Feb 7 2022
 
 - Include extensions sent in properties in the CartoDynamicTileLayer
