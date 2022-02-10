@@ -1,6 +1,6 @@
 import {testLayerAsync} from '@deck.gl/test-utils';
 import {makeSpy} from '@probe.gl/test-utils';
-import {CartoLayer, API_VERSIONS, FORMATS, MAP_TYPES} from '@deck.gl/carto';
+import {CartoLayer, API_VERSIONS, FORMATS, MAP_TYPES, TILE_FORMATS} from '@deck.gl/carto';
 import {MVTLayer} from '@deck.gl/geo-layers';
 import {GeoJsonLayer} from '@deck.gl/layers';
 import CartoDynamicTileLayer from '@deck.gl/carto/layers/carto-dynamic-tile-layer';
@@ -65,8 +65,6 @@ mockedV3Test('CartoLayer#v3', async t => {
       t.is(subLayers.length, 0, 'should no render subLayers');
     } else {
       t.is(subLayers.length, 1, 'should have only 1 sublayer');
-      /* global URLSearchParams */
-      const tilesFormat = data.tiles && new URLSearchParams(data.tiles[0]).get('format');
 
       switch (layer.props.type) {
         case MAP_TYPES.TILESET:
@@ -78,7 +76,7 @@ mockedV3Test('CartoLayer#v3', async t => {
           );
           break;
         case MAP_TYPES.TABLE:
-          if ((tilesFormat && tilesFormat !== 'mvt') || format === FORMATS.TILEJSON) {
+          if (format === FORMATS.TILEJSON) {
             t.ok(subLayer instanceof CartoDynamicTileLayer, 'should be a CartoDynamicTileLayer');
           } else {
             t.ok(subLayer instanceof GeoJsonLayer, 'should be a GeoJsonLayer');
@@ -129,6 +127,7 @@ mockedV3Test('CartoLayer#v3', async t => {
           connection: 'conn_name',
           type: MAP_TYPES.TABLE,
           format: FORMATS.TILEJSON,
+          formatTiles: TILE_FORMATS.BINARY,
           credentials: CREDENTIALS_V3
         },
         onAfterUpdate
@@ -509,7 +508,7 @@ mockedV3Test('CartoLayer#dynamic', async t => {
         data: 'tileset',
         type: MAP_TYPES.TABLE,
         format: FORMATS.TILEJSON,
-        formatTiles: 'binary',
+        formatTiles: TILE_FORMATS.BINARY,
         connection: 'connection_name',
         credentials: CREDENTIALS_V3,
 
@@ -518,10 +517,10 @@ mockedV3Test('CartoLayer#dynamic', async t => {
       onAfterUpdate: ({layer, subLayers}) => {
         if (layer.isLoaded) {
           t.is(counter, 1, 'should call once to onDataLoad');
-          t.is(subLayers.length, 1, 'Rendered mvt sublayer');
-          const mvtLayer = subLayers[0];
-          t.is(mvtLayer.internalState.subLayers.length, 4, 'Rendered mvt sublayers');
-          const geojsonLayer = mvtLayer.internalState.subLayers[0];
+          t.is(subLayers.length, 1, 'Rendered sublayer');
+          const dynLayer = subLayers[0];
+          t.is(dynLayer.internalState.subLayers.length, 4, 'Rendered right number of sublayers');
+          const geojsonLayer = dynLayer.internalState.subLayers[0];
           const {data} = geojsonLayer.props;
 
           // Test data taken from `cartobq.testtables.polygons_10k` table, tile: 15/9633/12341
