@@ -135,7 +135,10 @@ export default class CartoLayer extends CompositeLayer {
 
     if (format === FORMATS.TILEJSON) {
       /* global URL */
-      const formatTiles = this.props.formatTiles || new URL(data.tiles[0]).searchParams.get('formatTiles') || TILE_FORMATS.MVT;
+      const formatTiles =
+        this.props.formatTiles ||
+        new URL(data.tiles[0]).searchParams.get('formatTiles') ||
+        TILE_FORMATS.MVT;
       return formatTiles === TILE_FORMATS.MVT ? MVTLayer : CartoDynamicTileLayer;
     }
 
