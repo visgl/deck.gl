@@ -103,7 +103,8 @@ export {
   PolygonLayer,
   SolidPolygonLayer,
   GeoJsonLayer,
-  TextLayer
+  TextLayer,
+  SpriteLayer
 } from '@deck.gl/layers';
 
 export {

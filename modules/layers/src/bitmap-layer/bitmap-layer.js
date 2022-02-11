@@ -38,7 +38,10 @@ const defaultProps = {
   // alpha is not effective when blending the bitmap layers with the base map.
   // Instead we need to manually dim/blend rgb values with a background color.
   transparentColor: {type: 'color', value: [0, 0, 0, 0]},
-  tintColor: {type: 'color', value: [255, 255, 255]}
+  tintColor: {type: 'color', value: [255, 255, 255]},
+  animationCurrentFrame: {type: 'number', value: 0, min: 0},
+  animationNumCols: {type: 'number', value: 0, min: 1},
+  animationNumRows: {type: 'number', value: 0, min: 1}
 };
 
 /*
@@ -169,7 +172,6 @@ export default class BitmapLayer extends Layer {
         [bounds[2], bounds[1]]
       ];
     }
-
     return createMesh(normalizedBounds, this.context.viewport.resolution);
   }
 
@@ -198,7 +200,6 @@ export default class BitmapLayer extends Layer {
     const {uniforms, moduleParameters} = opts;
     const {model, coordinateConversion, bounds, disablePicking} = this.state;
     const {image, desaturate, transparentColor, tintColor} = this.props;
-
     if (moduleParameters.pickingActive && disablePicking) {
       return;
     }
