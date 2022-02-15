@@ -150,6 +150,48 @@ test('TextLayer - binary unicode characters', t => {
   t.end();
 });
 
+test('TextLayer - binary picking colors', t => {
+  const p1 = [1, 2, 3];
+  const p2 = [4, 5, 6];
+  const c1 = [7, 8, 9];
+  const c2 = [10, 11, 12];
+  const testCases = [
+    {
+      props: {
+        data: {
+          length: 2,
+          attributes: {
+            getPosition: {value: new Float32Array([...p1, ...p2]), size: 3},
+            instancePickingColors: {value: new Uint8ClampedArray([...c1, ...c2]), size: 3}
+          }
+        },
+        getText: d => 'TEXT'
+      },
+      onAfterUpdate: ({layer, subLayer}) => {
+        t.is(subLayer.props.numInstances, 8, 'sublayer has correct numInstances');
+        t.deepEqual(subLayer.props.startIndices, [0, 4, 8], 'sublayer has correct startIndices');
+
+        const attributeManager = subLayer.getAttributeManager();
+        const {instancePositions, instancePickingColors} = attributeManager.attributes;
+        t.deepEqual(
+          [...instancePositions.value].slice(0, 24),
+          [...p1, ...p1, ...p1, ...p1, ...p2, ...p2, ...p2, ...p2],
+          'sublayer has correct instancePositions attribute'
+        );
+        t.deepEqual(
+          [...instancePickingColors.value].slice(0, 24),
+          [...c1, ...c1, ...c1, ...c1, ...c2, ...c2, ...c2, ...c2],
+          'sublayer has correct instancePickingColors attribute'
+        );
+      }
+    }
+  ];
+
+  testLayer({Layer: TextLayer, testCases, onError: t.notOk});
+
+  t.end();
+});
+
 test('TextLayer - fontAtlasCacheLimit', t => {
   TextLayer.fontAtlasCacheLimit = 5;
 
