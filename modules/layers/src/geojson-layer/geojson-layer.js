@@ -18,7 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {CompositeLayer, log} from '@deck.gl/core';
+import {CompositeLayer, createIterable, log} from '@deck.gl/core';
 import {replaceInRange} from '../utils';
 import {binaryToFeatureForAccesor} from './geojson-binary';
 import {
@@ -247,6 +247,14 @@ export default class GeoJsonLayer extends CompositeLayer {
       if (PointsLayer) {
         const forwardedProps = forwardProps(this, PointLayerMapping.props);
 
+        const dataOverride = {};
+        if (type === 'text' && this.state.binary) {
+          dataOverride.data = this._expandTextPickingColors(
+            layerProps.points.data,
+            forwardedProps.getText
+          );
+        }
+
         pointLayers.push(
           new PointsLayer(
             forwardedProps,
@@ -255,12 +263,44 @@ export default class GeoJsonLayer extends CompositeLayer {
               updateTriggers: forwardedProps.updateTriggers,
               highlightedObjectIndex
             }),
-            layerProps.points
+            layerProps.points,
+            dataOverride
           )
         );
       }
     }
     return pointLayers;
+  }
+
+  // Expands picking color attribute from per-point to per-icon
+  _expandTextPickingColors(data, getText) {
+    const {iterable, objectInfo} = createIterable(data);
+    const startIndices = [0];
+    let numInstances = 0;
+    for (const object of iterable) {
+      objectInfo.index++;
+      const text = Array.from(getText(object, objectInfo) || '');
+      numInstances += text.length;
+      startIndices.push(numInstances);
+    }
+
+    const {instancePickingColors} = data.attributes;
+    const {value, size} = instancePickingColors;
+
+    const newValue = new value.constructor(numInstances * size);
+    for (let i = 0; i < startIndices.length - 1; i++) {
+      const color = value.subarray(size * i, size * (i + 1));
+      for (let j = startIndices[i]; j < startIndices[i + 1]; j++) {
+        newValue.set(color, size * j);
+      }
+    }
+    return {
+      ...data,
+      attributes: {
+        ...data.attributes,
+        instancePickingColors: {value: newValue, size}
+      }
+    };
   }
 
   renderLayers() {

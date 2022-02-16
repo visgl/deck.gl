@@ -195,7 +195,7 @@ export default class TextLayer extends CompositeLayer {
       });
       numInstances = characterCount;
       getText = (_, {index}) => texts[index];
-    } else {
+    } else if (autoCharacterSet || !startIndices) {
       const {iterable, objectInfo} = createIterable(data);
       startIndices = [0];
       numInstances = 0;
@@ -211,6 +211,8 @@ export default class TextLayer extends CompositeLayer {
         numInstances += text.length;
         startIndices.push(numInstances);
       }
+    } else {
+      numInstances = startIndices[startIndices - 1];
     }
 
     this.setState({
@@ -219,22 +221,6 @@ export default class TextLayer extends CompositeLayer {
       numInstances,
       characterSet: autoCharacterSet || characterSet
     });
-  }
-
-  // Expands picking color attribute from per-point to per-icon
-  _expandPickingColors() {
-    const {startIndices, numInstances} = this.state;
-    const {instancePickingColors} = this.props.data.attributes;
-    const {value, size} = instancePickingColors;
-
-    const newValue = new value.constructor(numInstances * size);
-    for (let i = 0; i < startIndices.length - 1; i++) {
-      const color = value.subarray(size * i, size * (i + 1));
-      for (let j = startIndices[i]; j < startIndices[i + 1]; j++) {
-        newValue.set(color, size * j);
-      }
-    }
-    instancePickingColors.value = newValue;
   }
 
   // Returns the x, y offsets of each character in a text string
@@ -335,10 +321,6 @@ export default class TextLayer extends CompositeLayer {
 
     const CharactersLayerClass = this.getSubLayerClass('characters', MultiIconLayer);
     const BackgroundLayerClass = this.getSubLayerClass('background', TextBackgroundLayer);
-
-    if (data.attributes && data.attributes.instancePickingColors) {
-      this._expandPickingColors();
-    }
 
     return [
       background &&
