@@ -136,15 +136,18 @@ export function getViewPropsFromOverlay(map, overlay) {
 
   // Compute fractional bearing
   const delta = new Vector2(topLngLat).sub(bottomLngLat);
-  const bearing = (180 * delta.verticalAngle()) / Math.PI;
+  let bearing = (180 * delta.verticalAngle()) / Math.PI;
+  if (bearing < 0) bearing += 360;
 
   let zoom = map.getZoom() - 1;
 
   // Fractional zoom calculation only correct when bearing is not animating
   if (bearing === map.getHeading()) {
-    const viewDiagonal = new Vector2([topRight.x, topRight.y]).sub([topRight.x, bottomLeft.y]);
-    const mapDiagonal = new Vector2([0, -height]);
-    const scale = mapDiagonal.len() ? viewDiagonal.len() / mapDiagonal.len() : 1;
+    const viewDiagonal = new Vector2([topRight.x, topRight.y])
+      .sub([bottomLeft.x, bottomLeft.y])
+      .len();
+    const mapDiagonal = new Vector2([width, -height]).len();
+    const scale = mapDiagonal ? viewDiagonal / mapDiagonal : 1;
 
     // When resizing aggressively, occasionally ne and sw are the same points
     // See https://github.com/visgl/deck.gl/issues/4218
