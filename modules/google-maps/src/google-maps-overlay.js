@@ -148,23 +148,17 @@ export default class GoogleMapsOverlay {
 
   _onDrawRaster() {
     const deck = this._deck;
-    const {width, height, left, top, zoom, pitch, latitude, longitude} = getViewPropsFromOverlay(
-      this._map,
-      this._overlay
-    );
-
-    const canSyncWithGoogleMaps = pitch === 0;
+    const {width, height, left, top, ...rest} = getViewPropsFromOverlay(this._map, this._overlay);
 
     const parentStyle = deck.canvas.parentElement.style;
     parentStyle.left = `${left}px`;
     parentStyle.top = `${top}px`;
 
+    const altitude = 10000;
     deck.setProps({
       width,
       height,
-      viewState: {latitude, longitude, zoom, repeat: true},
-      // deck.gl cannot sync with the base map with zoom < 0 and/or tilt
-      layerFilter: canSyncWithGoogleMaps ? this.props.layerFilter : HIDE_ALL_LAYERS
+      viewState: {altitude, repeat: true, ...rest}
     });
     // Deck is initialized
     deck.redraw();

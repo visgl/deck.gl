@@ -1,6 +1,6 @@
 /* global google, document */
 import {Deck} from '@deck.gl/core';
-import {Matrix4} from '@math.gl/core';
+import {Matrix4, Vector2} from '@math.gl/core';
 
 // https://en.wikipedia.org/wiki/Web_Mercator_projection#Formulas
 const MAX_LATITUDE = 85.05113;
@@ -118,24 +118,37 @@ export function getViewPropsFromOverlay(map, overlay) {
   const mapCount = Math.ceil(width / mapWidth);
   leftOffset -= Math.floor(mapCount / 2) * mapWidth;
 
-  // Compute fractional zoom.
-  const scale = height ? (bottomLeft.y - topRight.y) / height : 1;
-  // When resizing aggressively, occasionally ne and sw are the same points
-  // See https://github.com/visgl/deck.gl/issues/4218
-  const zoom = Math.log2(scale || 1) + map.getZoom() - 1;
+  const topLngLat = pixelToLngLat(projection, width / 2, 0);
+  const centerLngLat = pixelToLngLat(projection, width / 2, height / 2);
+  const bottomLngLat = pixelToLngLat(projection, width / 2, height);
 
   // Compute fractional center.
-  let centerPx = new google.maps.Point(width / 2, height / 2);
-  const centerContainer = projection.fromContainerPixelToLatLng(centerPx);
-  let latitude = centerContainer.lat();
-  const longitude = centerContainer.lng();
+  let latitude = centerLngLat[1];
+  const longitude = centerLngLat[0];
 
   // Adjust vertical offset - limit latitude
   if (Math.abs(latitude) > MAX_LATITUDE) {
     latitude = latitude > 0 ? MAX_LATITUDE : -MAX_LATITUDE;
     const center = new google.maps.LatLng(latitude, longitude);
-    centerPx = projection.fromLatLngToContainerPixel(center);
+    const centerPx = projection.fromLatLngToContainerPixel(center);
     topOffset += centerPx.y - height / 2;
+  }
+
+  // Compute fractional bearing
+  const delta = new Vector2(topLngLat).sub(bottomLngLat);
+  const bearing = (180 * delta.verticalAngle()) / Math.PI;
+
+  let zoom = map.getZoom() - 1;
+
+  // Fractional zoom calculation only correct when bearing is not animating
+  if (bearing === map.getHeading()) {
+    const viewDiagonal = new Vector2([topRight.x, topRight.y]).sub([topRight.x, bottomLeft.y]);
+    const mapDiagonal = new Vector2([0, -height]);
+    const scale = mapDiagonal.len() ? viewDiagonal.len() / mapDiagonal.len() : 1;
+
+    // When resizing aggressively, occasionally ne and sw are the same points
+    // See https://github.com/visgl/deck.gl/issues/4218
+    zoom += Math.log2(scale || 1);
   }
 
   return {
@@ -144,6 +157,7 @@ export function getViewPropsFromOverlay(map, overlay) {
     left: leftOffset,
     top: topOffset,
     zoom,
+    bearing,
     pitch: map.getTilt(),
     latitude,
     longitude
@@ -203,6 +217,12 @@ function getMapSize(map) {
     width: container.offsetWidth,
     height: container.offsetHeight
   };
+}
+
+function pixelToLngLat(projection, x, y) {
+  const point = new google.maps.Point(x, y);
+  const latLng = projection.fromContainerPixelToLatLng(point);
+  return [latLng.lng(), latLng.lat()];
 }
 
 function getEventPixel(event, deck) {
