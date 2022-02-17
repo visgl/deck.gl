@@ -1,4 +1,4 @@
-export {getDefaultCredentials, setDefaultCredentials} from './config.js';
+export {getDefaultCredentials, setDefaultCredentials} from './config';
 export {default as CartoLayer} from './layers/carto-layer';
 export {default as _CartoDynamicTileLayer} from './layers/carto-dynamic-tile-layer';
 export {default as BASEMAP} from './basemap';
