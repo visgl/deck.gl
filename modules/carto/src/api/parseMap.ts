@@ -39,7 +39,7 @@ export function parseMap(json) {
           ...createStyleProps(config, propMap),
           ...createChannelProps(visualChannels, type, config, data) // Must come after style
         });
-      } catch (e) {
+      } catch (e: any) {
         log.error(e.message)();
         return undefined;
       }
@@ -121,7 +121,7 @@ function mapProps(source, target, mapping) {
 }
 
 function createStyleProps(config, mapping) {
-  const result = {};
+  const result: Record<string, any> = {};
   mapProps(config, result, mapping);
   result.highlightColor = config.visConfig.enable3d ? [255, 255, 255, 60] : [252, 242, 26, 255];
   return result;
@@ -137,7 +137,7 @@ function createChannelProps(visualChannels, type, config, data) {
     heightScale = sizeScale;
   }
   const {textLabel, visConfig} = config;
-  const result = {};
+  const result: Record<string, any> = {};
   const textLabelField = textLabel && textLabel.field;
   if (colorField) {
     result.getFillColor = getColorAccessor(

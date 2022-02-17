@@ -14,7 +14,8 @@ import moment from 'moment-timezone';
 import {log} from '@deck.gl/core';
 import {H3HexagonLayer, MVTLayer} from '@deck.gl/geo-layers';
 import {GeoJsonLayer} from '@deck.gl/layers';
-import {_CartoTileLayer, TILE_FORMATS} from '@deck.gl/carto';
+import CartoTileLayer from '../layers/carto-tile-layer';
+import {TILE_FORMATS} from './maps-api-common';
 
 const SCALE_FUNCS = {
   linear: scaleLinear,
@@ -25,6 +26,7 @@ const SCALE_FUNCS = {
   quantize: scaleQuantize,
   sqrt: scaleSqrt
 };
+export type SCALE_TYPE = keyof typeof SCALE_FUNCS;
 
 // Kepler -> Deck.gl
 const sharedPropMap = {
@@ -64,7 +66,11 @@ function mergePropMaps(a, b) {
   return {...a, ...b, visConfig: {...a.visConfig, ...b.visConfig}};
 }
 
-export function getLayer(type, config, dataset) {
+export function getLayer(
+  type: string,
+  config,
+  dataset
+): {Layer: any; propMap: any; defaultProps: any} {
   if (type === 'mvt' || type === 'tileset') {
     return getTileLayer(dataset);
   }
@@ -93,8 +99,7 @@ export function getLayer(type, config, dataset) {
   }[type];
 
   log.assert(layer, `Unsupported layer type: ${type}`);
-
-  return layer;
+  return layer!;
 }
 
 function getTileLayer(dataset) {
@@ -107,7 +112,7 @@ function getTileLayer(dataset) {
   const formatTiles = new URL(tileUrl).searchParams.get('formatTiles') || TILE_FORMATS.MVT;
 
   return {
-    Layer: formatTiles === TILE_FORMATS.MVT ? MVTLayer : _CartoTileLayer,
+    Layer: formatTiles === TILE_FORMATS.MVT ? MVTLayer : CartoTileLayer,
     propMap: sharedPropMap,
     defaultProps: {
       ...defaultProps,
@@ -119,7 +124,7 @@ function getTileLayer(dataset) {
   };
 }
 
-function domainFromAttribute(attribute, scaleType) {
+function domainFromAttribute(attribute, scaleType: SCALE_TYPE) {
   if (scaleType === 'ordinal' || scaleType === 'point') {
     return attribute.categories.map(c => c.category).filter(c => c !== undefined && c !== null);
   }
@@ -131,13 +136,13 @@ function domainFromAttribute(attribute, scaleType) {
   return [min, attribute.max];
 }
 
-function domainFromValues(values, scaleType) {
+function domainFromValues(values, scaleType: SCALE_TYPE) {
   if (scaleType === 'ordinal') {
     return [...new Set(values)].sort();
   } else if (scaleType === 'quantile') {
     return values.sort((a, b) => a - b);
   } else if (scaleType === 'log') {
-    const [d0, d1] = extent(values);
+    const [d0, d1] = extent(values as number[]);
     return [d0 === 0 ? 1e-5 : d0, d1];
   }
   return extent(values);
@@ -171,8 +176,14 @@ function normalizeAccessor(accessor, data) {
   return accessor;
 }
 
-export function getColorAccessor({name}, scaleType, {colors}, opacity, data) {
-  const scale = SCALE_FUNCS[scaleType]();
+export function getColorAccessor(
+  {name},
+  scaleType: SCALE_TYPE,
+  {colors},
+  opacity: number | undefined,
+  data: any
+) {
+  const scale = SCALE_FUNCS[scaleType as any]();
   scale.domain(calculateDomain(data, name, scaleType));
   scale.range(colors);
   const alpha = opacity !== undefined ? Math.round(255 * Math.pow(opacity, 1 / 2.2)) : 255;
@@ -184,8 +195,8 @@ export function getColorAccessor({name}, scaleType, {colors}, opacity, data) {
   return normalizeAccessor(accessor, data);
 }
 
-export function getSizeAccessor({name}, scaleType, range, data) {
-  const scale = SCALE_FUNCS[scaleType]();
+export function getSizeAccessor({name}, scaleType: SCALE_TYPE, range: Iterable<Range>, data: any) {
+  const scale = SCALE_FUNCS[scaleType as any]();
   scale.domain(calculateDomain(data, name, scaleType));
   scale.range(range);
 
@@ -195,7 +206,7 @@ export function getSizeAccessor({name}, scaleType, range, data) {
   return normalizeAccessor(accessor, data);
 }
 
-const FORMATS = {
+const FORMATS: Record<string, (value: any) => string> = {
   date: s => moment.utc(s).format('MM/DD/YY HH:mm:ssa'),
   integer: d3Format('i'),
   float: d3Format('.5f'),
