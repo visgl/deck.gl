@@ -36,6 +36,6 @@ export const TILE_FORMATS = {
 /**
  * Simple encode parameter
  */
-export function encodeParameter(name: string, value: string) {
+export function encodeParameter(name: string, value: string): string {
   return `${name}=${encodeURIComponent(value)}`;
 }
