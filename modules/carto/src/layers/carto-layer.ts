@@ -1,10 +1,10 @@
-import {CompositeLayer, log} from '@deck.gl/core';
+import {CompositeLayer, LayerProps, log} from '@deck.gl/core';
 import CartoTileLayer from './carto-tile-layer';
 import {MVTLayer} from '@deck.gl/geo-layers';
 import {GeoJsonLayer} from '@deck.gl/layers';
 import {fetchLayerData, getDataV2, API_VERSIONS} from '../api';
-import {FORMATS, MAP_TYPES, TILE_FORMATS} from '../api/maps-api-common';
-import {getDefaultCredentials} from '../config';
+import {FORMATS, MapType, MAP_TYPES, TileFormat, TILE_FORMATS} from '../api/maps-api-common';
+import {CloudNativeCredentials, getDefaultCredentials} from '../config';
 
 const defaultProps = {
   // (String, required): data resource to load. table name, sql query or tileset name.
@@ -40,7 +40,21 @@ const defaultProps = {
   columns: {type: 'array', value: null}
 };
 
+
+interface CartoLayerProps extends LayerProps {
+  type: MapType;
+  clientId?: string;
+  formatTiles?: TileFormat;
+  credentials?: CloudNativeCredentials;
+  connection: string;
+  geoColumn?: string;
+  columns?: string[];
+}
+
 export default class CartoLayer extends CompositeLayer {
+  static layerName = 'CartoLayer';
+  static defaultProps = defaultProps;
+
   initializeState() {
     this.state = {
       data: null,
@@ -52,7 +66,7 @@ export default class CartoLayer extends CompositeLayer {
     return this.getSubLayers().length > 0 && super.isLoaded;
   }
 
-  _checkProps(props) {
+  _checkProps(props: CartoLayerProps) {
     const {type, credentials, connection, geoColumn, columns} = props;
     const localCreds = {...getDefaultCredentials(), ...credentials};
     const {apiVersion} = localCreds;
@@ -98,7 +112,7 @@ export default class CartoLayer extends CompositeLayer {
 
     if (shouldUpdateData) {
       this.setState({data: null, apiVersion: null});
-      this._updateData();
+      this._updateData().catch(error => log.error('CartoLayer: _updateData failed', error));
     }
   }
 
@@ -112,7 +126,13 @@ export default class CartoLayer extends CompositeLayer {
       if (apiVersion === API_VERSIONS.V1 || apiVersion === API_VERSIONS.V2) {
         result = {data: await getDataV2({type, source, credentials})};
       } else {
-        result = await fetchLayerData({type, source, clientId, credentials, ...rest});
+        result = await fetchLayerData({
+          type,
+          source,
+          clientId,
+          credentials: credentials as CloudNativeCredentials,
+          ...rest
+        });
       }
 
       this.setState({...result, apiVersion});
@@ -170,6 +190,3 @@ export default class CartoLayer extends CompositeLayer {
     );
   }
 }
-
-CartoLayer.layerName = 'CartoLayer';
-CartoLayer.defaultProps = defaultProps;
