@@ -132,8 +132,11 @@ export default class GeoJsonLayer extends CompositeLayer {
 
   getPickingInfo(params) {
     const info = super.getPickingInfo(params);
-    const {sourceLayer} = info;
+    const {index, sourceLayer} = info;
     info.featureType = FEATURE_TYPES.find(ft => sourceLayer.id.startsWith(`${this.id}-${ft}-`));
+    if (index >= 0 && sourceLayer.id.startsWith(`${this.id}-points-text`) && this.state.binary) {
+      info.index = this.props.data.points.globalFeatureIds.value[index];
+    }
     return info;
   }
 
@@ -246,6 +249,18 @@ export default class GeoJsonLayer extends CompositeLayer {
         this.getSubLayerClass(id, PointLayerMapping.type);
       if (PointsLayer) {
         const forwardedProps = forwardProps(this, PointLayerMapping.props);
+        let pointsLayerProps = layerProps.points;
+
+        if (type === 'text' && this.state.binary) {
+          // Picking colors are per-point but for text per-character are required
+          // getPickingInfo() maps back to the correct index
+          // eslint-disable-next-line no-unused-vars
+          const {instancePickingColors, ...rest} = pointsLayerProps.data.attributes;
+          pointsLayerProps = {
+            ...pointsLayerProps,
+            data: {...pointsLayerProps.data, attributes: rest}
+          };
+        }
 
         pointLayers.push(
           new PointsLayer(
@@ -255,7 +270,7 @@ export default class GeoJsonLayer extends CompositeLayer {
               updateTriggers: forwardedProps.updateTriggers,
               highlightedObjectIndex
             }),
-            layerProps.points
+            pointsLayerProps
           )
         );
       }
