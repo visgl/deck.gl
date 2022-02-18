@@ -195,7 +195,7 @@ export default class TextLayer extends CompositeLayer {
       });
       numInstances = characterCount;
       getText = (_, {index}) => texts[index];
-    } else if (autoCharacterSet || !startIndices) {
+    } else {
       const {iterable, objectInfo} = createIterable(data);
       startIndices = [0];
       numInstances = 0;
@@ -211,8 +211,6 @@ export default class TextLayer extends CompositeLayer {
         numInstances += text.length;
         startIndices.push(numInstances);
       }
-    } else {
-      numInstances = startIndices[startIndices - 1];
     }
 
     this.setState({
