@@ -888,7 +888,7 @@
     },
     "layers": [
       {
-        "name": "CartoDynamicTileLayer({id: '3btkipv'})",
+        "name": "CartoTileLayer({id: '3btkipv'})",
         "props": {
           "id": "3btkipv",
           "cartoLabel": "Layer 1",
@@ -1010,7 +1010,7 @@
     },
     "layers": [
       {
-        "name": "CartoDynamicTileLayer({id: '3btkipv'})",
+        "name": "CartoTileLayer({id: '3btkipv'})",
         "props": {
           "id": "3btkipv",
           "cartoLabel": "Layer 1",

@@ -3,7 +3,7 @@ import {makeSpy} from '@probe.gl/test-utils';
 import {CartoLayer, API_VERSIONS, FORMATS, MAP_TYPES, TILE_FORMATS} from '@deck.gl/carto';
 import {MVTLayer} from '@deck.gl/geo-layers';
 import {GeoJsonLayer} from '@deck.gl/layers';
-import CartoDynamicTileLayer from '@deck.gl/carto/layers/carto-dynamic-tile-layer';
+import CartoTileLayer from '@deck.gl/carto/layers/carto-tile-layer';
 import {mockedV1Test, mockedV2Test, mockedV3Test} from './mock-fetch';
 
 const CREDENTIALS_V3 = {
@@ -77,7 +77,7 @@ mockedV3Test('CartoLayer#v3', async t => {
           break;
         case MAP_TYPES.TABLE:
           if (format === FORMATS.TILEJSON) {
-            t.ok(subLayer instanceof CartoDynamicTileLayer, 'should be a CartoDynamicTileLayer');
+            t.ok(subLayer instanceof CartoTileLayer, 'should be a CartoTileLayer');
           } else {
             t.ok(subLayer instanceof GeoJsonLayer, 'should be a GeoJsonLayer');
           }
