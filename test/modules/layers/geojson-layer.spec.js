@@ -39,8 +39,7 @@ test('GeoJsonLayer#tests', t => {
       iconMapping: {
         marker: {x: 0, y: 0, width: 1, height: 1}
       },
-      getIcon: () => 'marker',
-      getText: () => 'text'
+      getIcon: () => 'marker'
     },
     assert: t.ok,
     onBeforeUpdate: ({testCase}) => t.comment(testCase.title),
@@ -123,23 +122,11 @@ test('GeoJsonLayer#tests', t => {
       const hasData = layer.props && layer.props.data && Object.keys(layer.props.data).length;
       t.is(
         subLayers.length,
-        !hasData ? 0 : layer.props.stroked && !layer.props.extruded ? 6 : 5,
+        !hasData ? 0 : layer.props.stroked && !layer.props.extruded ? 4 : 3,
         'correct number of sublayers'
       );
-
-      const textLayer = subLayers.find(l => l.constructor.layerName === 'TextLayer');
-      if (textLayer) {
-        // 6 2D points, with 4 characters of text
-        const {getPosition, instancePickingColors} = textLayer.props.data.attributes;
-        t.is(getPosition.value.length, 6 * 2, 'TextLayer has correct positions');
-        t.is(
-          instancePickingColors.value.length,
-          6 * 4 * 3,
-          'TextLayer has expanded instancePickingColors'
-        );
-      }
     },
-    updateProps: {
+    props: {
       // TODO: Set a right geojson example as the provided from 'deck.gl-data' contains 'GeometryCollection' types that are not compatible with geojsonToBinary
       data: binaryData
     }
