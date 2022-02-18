@@ -254,6 +254,7 @@ export default class GeoJsonLayer extends CompositeLayer {
         if (type === 'text' && this.state.binary) {
           // Picking colors are per-point but for text per-character are required
           // getPickingInfo() maps back to the correct index
+          // eslint-disable-next-line no-unused-vars
           const {instancePickingColors, ...rest} = pointsLayerProps.data.attributes;
           pointsLayerProps = {
             ...pointsLayerProps,
