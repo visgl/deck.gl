@@ -18,7 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {CompositeLayer, createIterable, log} from '@deck.gl/core';
+import {CompositeLayer, log} from '@deck.gl/core';
 import {replaceInRange} from '../utils';
 import {binaryToFeatureForAccesor} from './geojson-binary';
 import {
@@ -132,8 +132,11 @@ export default class GeoJsonLayer extends CompositeLayer {
 
   getPickingInfo(params) {
     const info = super.getPickingInfo(params);
-    const {sourceLayer} = info;
+    const {index, sourceLayer} = info;
     info.featureType = FEATURE_TYPES.find(ft => sourceLayer.id.startsWith(`${this.id}-${ft}-`));
+    if (index >= 0 && sourceLayer.id.startsWith(`${this.id}-points-text`) && this.state.binary) {
+      info.index = this.props.data.points.globalFeatureIds.value[index];
+    }
     return info;
   }
 
@@ -250,6 +253,7 @@ export default class GeoJsonLayer extends CompositeLayer {
 
         if (type === 'text' && this.state.binary) {
           // Picking colors are per-point but for text per-character are required
+          // getPickingInfo() maps back to the correct index
           const {instancePickingColors, ...rest} = pointsLayerProps.data.attributes;
           pointsLayerProps = {
             ...pointsLayerProps,
