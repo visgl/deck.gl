@@ -1,0 +1,14 @@
+#!/usr/bin/env node
+// Helper to create test data files for CartoDynamicTileLayer
+// Usage:
+//
+// curl 'https://server/binary/tile' | ./responseToJson > binaryTile.json
+//
+// To obtain a cURL command from Chrome, use the dev tools
+// Network tab, right-click a request, then:
+// Copy > Copy as cURL
+fs = require('fs');
+const stdinBuffer = fs.readFileSync(0); // STDIN_FILENO = 0
+const uint8Array = new Uint8Array(stdinBuffer);
+const content = JSON.stringify(Array.from(uint8Array));
+process.stdout.write(content);

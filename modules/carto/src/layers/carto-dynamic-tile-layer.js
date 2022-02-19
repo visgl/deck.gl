@@ -1,20 +1,51 @@
 /* global TextDecoder */
+import Protobuf from 'pbf';
 import {log} from '@deck.gl/core';
 import {ClipExtension} from '@deck.gl/extensions';
 import {MVTLayer, _getURLFromTemplate} from '@deck.gl/geo-layers';
 import {GeoJsonLayer} from '@deck.gl/layers';
 import {geojsonToBinary} from '@loaders.gl/gis';
-import {encodeParameter} from '../api/maps-api-common';
+import {Tile} from './schema/carto-dynamic-tile';
+import {TILE_FORMATS} from '../api/maps-api-common';
 
 function parseJSON(arrayBuffer) {
   return JSON.parse(new TextDecoder().decode(arrayBuffer));
 }
 
+function parsePbf(buffer) {
+  const pbf = new Protobuf(buffer);
+  const tile = Tile.read(pbf);
+  return tile;
+}
+
+function unpackProperties(properties) {
+  if (!properties || !properties.length) {
+    return [];
+  }
+  return properties.map(item => {
+    const currentRecord = {};
+    item.data.forEach(({key, value}) => {
+      currentRecord[key] = value;
+    });
+    return currentRecord;
+  });
+}
+
 function parseCartoDynamicTile(arrayBuffer, options) {
   if (!arrayBuffer) return null;
   const formatTiles = options && options.cartoDynamicTile && options.cartoDynamicTile.formatTiles;
-  if (formatTiles === 'geojson') return geojsonToBinary(parseJSON(arrayBuffer).features);
-  return null;
+  if (formatTiles === TILE_FORMATS.GEOJSON) return geojsonToBinary(parseJSON(arrayBuffer).features);
+
+  const tile = parsePbf(arrayBuffer);
+
+  const {points, lines, polygons} = tile;
+  const data = {
+    points: {...points, properties: unpackProperties(points.properties)},
+    lines: {...lines, properties: unpackProperties(lines.properties)},
+    polygons: {...polygons, properties: unpackProperties(polygons.properties)}
+  };
+
+  return data;
 }
 
 const CartoDynamicTileLoader = {
@@ -29,7 +60,8 @@ const CartoDynamicTileLoader = {
   parseSync: parseCartoDynamicTile,
   options: {
     cartoDynamicTile: {
-      formatTiles: 'geojson'
+      // TODO change to BINARY for 8.7 prod release
+      formatTiles: TILE_FORMATS.GEOJSON
     }
   }
 };
@@ -52,11 +84,14 @@ export default class CartoDynamicTileLayer extends MVTLayer {
 
     if (formatTiles) {
       log.assert(
-        ['geojson'].includes(formatTiles),
-        `Invalid value for formatTiles: ${formatTiles}`
+        Object.values(TILE_FORMATS).includes(formatTiles),
+        `Invalid value for formatTiles: ${formatTiles}. Use value from TILE_FORMATS`
       );
-      url += `&${encodeParameter('formatTiles', formatTiles)}`;
-      loadOptions.cartoBinaryTile = {formatTiles};
+      // eslint-disable-next-line no-undef
+      const newUrl = new URL(url);
+      newUrl.searchParams.set('formatTiles', formatTiles);
+      url = newUrl.toString();
+      loadOptions.cartoDynamicTile = {formatTiles};
     }
 
     return fetch(url, {propName: 'data', layer: this, loadOptions, signal});
@@ -72,7 +107,7 @@ export default class CartoDynamicTileLayer extends MVTLayer {
     const {
       bbox: {west, south, east, north}
     } = props.tile;
-    props.extensions = [new ClipExtension()];
+    props.extensions = [new ClipExtension(), ...(props.extensions || [])];
     props.clipBounds = [west, south, east, north];
 
     const subLayer = new GeoJsonLayer({

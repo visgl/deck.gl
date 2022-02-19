@@ -162,14 +162,6 @@ function drawPickTest(renderingType) {
       t.ok(equals(height, false), 'height is not set');
     }
 
-    if (renderingType === mapsApi.RenderingType.RASTER) {
-      t.notOk(deck.props.layerFilter, 'layerFilter is empty');
-
-      map.setTilt(45);
-      map.draw();
-      t.ok(deck.props.layerFilter, 'layerFilter should be set to block drawing');
-    }
-
     const pointerMoveSpy = makeSpy(overlay._deck, '_onPointerMove');
     map.emit({type: 'mousemove', pixel: [0, 0]});
     t.is(pointerMoveSpy.callCount, 1, 'pointer move event is handled');
