@@ -25,7 +25,7 @@ export interface CloudNativeCredentials {
   mapsUrl?: string;
 }
 
-type Credentials = ClassicCredentials | CloudNativeCredentials;
+export type Credentials = ClassicCredentials | CloudNativeCredentials;
 let credentials: Credentials = {} as Credentials;
 
 setDefaultCredentials({});
