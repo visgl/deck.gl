@@ -11,11 +11,11 @@ import {
 } from 'd3-scale';
 import {format as d3Format} from 'd3-format';
 import moment from 'moment-timezone';
-import {log} from '@deck.gl/core';
 import {H3HexagonLayer, MVTLayer} from '@deck.gl/geo-layers';
 import {GeoJsonLayer} from '@deck.gl/layers';
 import CartoTileLayer from '../layers/carto-tile-layer';
 import {TILE_FORMATS} from './maps-api-common';
+import {assert} from '../utils';
 
 const SCALE_FUNCS = {
   linear: scaleLinear,
@@ -98,8 +98,8 @@ export function getLayer(
     }
   }[type];
 
-  log.assert(layer, `Unsupported layer type: ${type}`);
-  return layer!;
+  assert(layer, `Unsupported layer type: ${type}`);
+  return layer;
 }
 
 function getTileLayer(dataset) {

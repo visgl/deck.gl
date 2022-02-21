@@ -14,6 +14,7 @@ import {
 } from './maps-api-common';
 import {parseMap} from './parseMap';
 import {log} from '@deck.gl/core';
+import {assert} from '../utils';
 
 const MAX_GET_LENGTH = 2048;
 const DEFAULT_CLIENT = 'deck-gl-carto';
@@ -185,13 +186,13 @@ function checkFetchLayerDataParameters({
   connection,
   credentials
 }: FetchLayerDataParams) {
-  log.assert(connection, 'Must define connection');
-  log.assert(type, 'Must define a type');
-  log.assert(source, 'Must define a source');
+  assert(connection, 'Must define connection');
+  assert(type, 'Must define a type');
+  assert(source, 'Must define a source');
 
-  log.assert(credentials.apiVersion === API_VERSIONS.V3, 'Method only available for v3');
-  log.assert(credentials.apiBaseUrl, 'Must define apiBaseUrl');
-  log.assert(credentials.accessToken, 'Must define an accessToken');
+  assert(credentials.apiVersion === API_VERSIONS.V3, 'Method only available for v3');
+  assert(credentials.apiBaseUrl, 'Must define apiBaseUrl');
+  assert(credentials.accessToken, 'Must define an accessToken');
 }
 
 export interface FetchLayerDataResult {
@@ -267,13 +268,13 @@ async function _fetchDataUrl({
     schema,
     clientId
   });
-  let url: string | null;
-  let mapFormat: Format;
+  let url: string | null = null;
+  let mapFormat: Format | undefined;
 
   if (format) {
     mapFormat = format;
     url = getUrlFromMetadata(metadata, format);
-    log.assert(url, `Format ${format} not available`);
+    assert(url, `Format ${format} not available`);
   } else {
     // guess map format
     const prioritizedFormats = [FORMATS.GEOJSON, FORMATS.JSON, FORMATS.NDJSON, FORMATS.TILEJSON];
@@ -284,11 +285,11 @@ async function _fetchDataUrl({
         break;
       }
     }
-    log.assert(url!, 'Unsupported data formats received from backend.');
+    assert(url && mapFormat, 'Unsupported data formats received from backend.');
   }
 
   const {accessToken} = localCreds;
-  return {url: url!, accessToken, mapFormat: mapFormat!, metadata};
+  return {url, accessToken, mapFormat, metadata};
 }
 
 export async function getData({
@@ -377,18 +378,18 @@ export async function fetchMap({
 
   // TODO: prettier conflicts with eslint here
   // eslint-disable-next-line quotes
-  log.assert(cartoMapId, "Must define CARTO map id: fetchMap({cartoMapId: 'XXXX-XXXX-XXXX'})");
+  assert(cartoMapId, "Must define CARTO map id: fetchMap({cartoMapId: 'XXXX-XXXX-XXXX'})");
 
-  log.assert(localCreds.apiVersion === API_VERSIONS.V3, 'Method only available for v3');
-  log.assert(localCreds.apiBaseUrl, 'Must define apiBaseUrl');
+  assert(localCreds.apiVersion === API_VERSIONS.V3, 'Method only available for v3');
+  assert(localCreds.apiBaseUrl, 'Must define apiBaseUrl');
   if (!localCreds.mapsUrl) {
     localCreds.mapsUrl = buildMapsUrlFromBase(localCreds.apiBaseUrl);
   }
 
   if (autoRefresh || onNewData) {
-    log.assert(onNewData, 'Must define `onNewData` when using autoRefresh');
-    log.assert(typeof onNewData === 'function', '`onNewData` must be a function');
-    log.assert(
+    assert(onNewData, 'Must define `onNewData` when using autoRefresh');
+    assert(typeof onNewData === 'function', '`onNewData` must be a function');
+    assert(
       typeof autoRefresh === 'number' && autoRefresh > 0,
       '`autoRefresh` must be a positive number'
     );
