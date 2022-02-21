@@ -96,7 +96,7 @@ function App() {
         <StaticMap
           ref={mapRef}
           gl={glContext}
-          mapStyle="mapbox://styles/mapbox/light-v9"
+          mapStyle="https://basemaps.cartocdn.com/gl/positron-gl-style/style.json"
           mapboxApiAccessToken={MAPBOX_TOKEN}
           onLoad={onMapLoad}
         />
