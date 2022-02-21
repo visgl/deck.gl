@@ -370,9 +370,10 @@ export default class TextLayer extends CompositeLayer {
             }
           }),
           {
-            data: data.attributes
-              ? {length: data.length, attributes: data.attributes.background || {}}
-              : data,
+            data:
+              data.attributes && data.attributes.background
+                ? {length: data.length, attributes: data.attributes.background}
+                : data,
             _dataDiff,
             // Maintain the same background behavior as <=8.3. Remove in v9?
             autoHighlight: false,
