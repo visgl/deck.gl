@@ -14,7 +14,7 @@ import moment from 'moment-timezone';
 import {log} from '@deck.gl/core';
 import {H3HexagonLayer, MVTLayer} from '@deck.gl/geo-layers';
 import {GeoJsonLayer} from '@deck.gl/layers';
-import {_CartoDynamicTileLayer, TILE_FORMATS} from '@deck.gl/carto';
+import {_CartoTileLayer, TILE_FORMATS} from '@deck.gl/carto';
 
 const SCALE_FUNCS = {
   linear: scaleLinear,
@@ -107,7 +107,7 @@ function getTileLayer(dataset) {
   const formatTiles = new URL(tileUrl).searchParams.get('formatTiles') || TILE_FORMATS.MVT;
 
   return {
-    Layer: formatTiles === TILE_FORMATS.MVT ? MVTLayer : _CartoDynamicTileLayer,
+    Layer: formatTiles === TILE_FORMATS.MVT ? MVTLayer : _CartoTileLayer,
     propMap: sharedPropMap,
     defaultProps: {
       ...defaultProps,

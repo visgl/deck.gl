@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// Helper to create test data files for CartoDynamicTileLayer
+// Helper to create test data files for CartoTileLayer
 // Usage:
 //
 // curl 'https://server/binary/tile' | ./responseToJson > binaryTile.json

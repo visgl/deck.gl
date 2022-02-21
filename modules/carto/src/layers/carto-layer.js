@@ -1,5 +1,5 @@
 import {CompositeLayer, log} from '@deck.gl/core';
-import CartoDynamicTileLayer from './carto-dynamic-tile-layer';
+import CartoTileLayer from './carto-tile-layer';
 import {MVTLayer} from '@deck.gl/geo-layers';
 import {GeoJsonLayer} from '@deck.gl/layers';
 import {fetchLayerData, getDataV2, API_VERSIONS} from '../api';
@@ -139,7 +139,7 @@ export default class CartoLayer extends CompositeLayer {
         this.props.formatTiles ||
         new URL(data.tiles[0]).searchParams.get('formatTiles') ||
         TILE_FORMATS.MVT;
-      return formatTiles === TILE_FORMATS.MVT ? MVTLayer : CartoDynamicTileLayer;
+      return formatTiles === TILE_FORMATS.MVT ? MVTLayer : CartoTileLayer;
     }
 
     // It's a geojson layer
