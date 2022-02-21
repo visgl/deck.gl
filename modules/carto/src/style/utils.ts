@@ -1,23 +1,26 @@
 const ALLOWED_ATTR_TYPES = Object.freeze(['function', 'string']);
 
-export function getAttrValue(attr, d) {
+type Row = {properties: Record<string, unknown>};
+export type AttributeSelector = string | ((d: Row) => unknown);
+
+export function getAttrValue(attr: AttributeSelector, d: Row): unknown {
   assert(typeof d === 'object', 'Expected "data" to be an object');
   assert(ALLOWED_ATTR_TYPES.includes(typeof attr), 'Expected "attr" to be a function or string');
 
   // Is function
-  if (typeof attr === ALLOWED_ATTR_TYPES[0]) {
+  if (typeof attr === 'function') {
     return attr(d);
   }
 
   // Is string
-  if (typeof attr === ALLOWED_ATTR_TYPES[1]) {
+  if (typeof attr === 'string') {
     return d.properties[attr];
   }
 
   return {};
 }
 
-export function assert(condition, message = '') {
+export function assert(condition, message = ''): asserts condition {
   if (!condition) {
     throw new Error(`CARTO style error: ${message}`);
   }
