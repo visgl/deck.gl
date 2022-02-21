@@ -1,5 +1,5 @@
-import getPalette, {DEFAULT_PALETTE, NULL_COLOR, OTHERS_COLOR} from './palette';
-import {assert, getAttrValue} from './utils';
+import getPalette, {Color, DEFAULT_PALETTE, NULL_COLOR, OTHERS_COLOR} from './palette';
+import {assert, AttributeSelector, getAttrValue} from './utils';
 
 export default function colorCategories({
   attr,
@@ -7,7 +7,13 @@ export default function colorCategories({
   colors = DEFAULT_PALETTE,
   nullColor = NULL_COLOR,
   othersColor = OTHERS_COLOR
-}) {
+}: {
+  attr: AttributeSelector;
+  domain: number[];
+  colors: string | Color[];
+  nullColor?: Color;
+  othersColor?: Color;
+}): AttributeSelector {
   assert(Array.isArray(domain), 'Expected "domain" to be an array of numbers or strings');
 
   const colorsByCategory = {};
@@ -19,7 +25,7 @@ export default function colorCategories({
 
   return d => {
     const value = getAttrValue(attr, d);
-    return Number.isFinite(value) || typeof value === 'string'
+    return (typeof value === 'number' && Number.isFinite(value)) || typeof value === 'string'
       ? colorsByCategory[value] || othersColor
       : nullColor;
   };

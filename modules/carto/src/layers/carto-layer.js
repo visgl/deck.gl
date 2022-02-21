@@ -1,5 +1,5 @@
 import {CompositeLayer, log} from '@deck.gl/core';
-import CartoDynamicTileLayer from './carto-dynamic-tile-layer';
+import CartoTileLayer from './carto-tile-layer';
 import {MVTLayer} from '@deck.gl/geo-layers';
 import {GeoJsonLayer} from '@deck.gl/layers';
 import {fetchLayerData, getDataV2, API_VERSIONS} from '../api';
@@ -26,6 +26,9 @@ const defaultProps = {
 
   // (String, optional): format of data
   format: null,
+
+  // (String, optional): force format of data for tiles
+  formatTiles: null,
 
   // (String, optional): clientId identifier used for internal tracing, place here a string to identify the client who is doing the request.
   clientId: null,
@@ -123,35 +126,37 @@ export default class CartoLayer extends CompositeLayer {
     }
   }
 
-  renderLayers() {
+  _getRenderLayer() {
     const {data, format, apiVersion} = this.state;
+
+    if (apiVersion === API_VERSIONS.V1 || apiVersion === API_VERSIONS.V2) {
+      return MVTLayer;
+    }
+
+    if (format === FORMATS.TILEJSON) {
+      /* global URL */
+      const formatTiles =
+        this.props.formatTiles ||
+        new URL(data.tiles[0]).searchParams.get('formatTiles') ||
+        TILE_FORMATS.MVT;
+      return formatTiles === TILE_FORMATS.MVT ? MVTLayer : CartoTileLayer;
+    }
+
+    // It's a geojson layer
+    return GeoJsonLayer;
+  }
+
+  renderLayers() {
+    const {data} = this.state;
 
     if (!data) return null;
 
     const {updateTriggers} = this.props;
 
-    let layer;
+    const layer = this._getRenderLayer();
 
-    /* global URLSearchParams */
-    const tilesFormat =
-      apiVersion === API_VERSIONS.V3 &&
-      format === FORMATS.TILEJSON &&
-      new URLSearchParams(data.tiles[0]).get('format');
-
-    if (tilesFormat && tilesFormat !== TILE_FORMATS.MVT) {
-      layer = CartoDynamicTileLayer;
-    } else if (
-      apiVersion === API_VERSIONS.V1 ||
-      apiVersion === API_VERSIONS.V2 ||
-      format === FORMATS.TILEJSON
-    ) {
-      layer = MVTLayer;
-    } else {
-      layer = GeoJsonLayer;
-    }
-
-    const {uniqueIdProperty} = defaultProps;
-    const props = {uniqueIdProperty, ...this.props};
+    const {formatTiles, uniqueIdProperty} = defaultProps;
+    const props = {formatTiles, uniqueIdProperty, ...this.props};
     delete props.data;
 
     // eslint-disable-next-line new-cap

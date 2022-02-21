@@ -1,21 +1,36 @@
 /**
  * Maps API Client for Carto 3
  */
-import {getDefaultCredentials, buildMapsUrlFromBase} from '../config';
-import {API_VERSIONS, encodeParameter, FORMATS, MAP_TYPES} from './maps-api-common';
+import {getDefaultCredentials, buildMapsUrlFromBase, CloudNativeCredentials} from '../config';
+import {
+  API_VERSIONS,
+  encodeParameter,
+  Format,
+  FORMATS,
+  MapInstantiation,
+  MapType,
+  MAP_TYPES,
+  SchemaField
+} from './maps-api-common';
 import {parseMap} from './parseMap';
 import {log} from '@deck.gl/core';
+import {assert} from '../utils';
 
 const MAX_GET_LENGTH = 2048;
 const DEFAULT_CLIENT = 'deck-gl-carto';
 
+interface RequestParams {
+  method?: string;
+  url: string;
+  accessToken?: string;
+  body?: any;
+}
+
 /**
  * Request against Maps API
  */
-async function request({method, url, format, accessToken, body}) {
-  let response;
-
-  const headers = {
+async function request({method, url, accessToken, body}: RequestParams): Promise<Response> {
+  const headers: Record<string, string> = {
     Accept: 'application/json'
   };
 
@@ -29,8 +44,7 @@ async function request({method, url, format, accessToken, body}) {
 
   try {
     /* global fetch */
-    /* eslint no-undef: "error" */
-    response = await fetch(url, {
+    return await fetch(url, {
       method,
       headers,
       body
@@ -38,24 +52,44 @@ async function request({method, url, format, accessToken, body}) {
   } catch (error) {
     throw new Error(`Failed to connect to Maps API: ${error}`);
   }
+}
 
-  if (format === FORMATS.NDJSON) {
-    return response;
-  }
-
+async function requestJson<T = unknown>({
+  method,
+  url,
+  accessToken,
+  body
+}: RequestParams): Promise<T> {
+  const response = await request({method, url, accessToken, body});
   const json = await response.json();
 
   if (!response.ok) {
     dealWithError({response, error: json.error});
   }
+  return json as T;
+}
 
-  return json.rows ? json.rows : json;
+async function requestData({
+  method,
+  url,
+  accessToken,
+  format,
+  body
+}: RequestParams & {
+  format: Format;
+}): Promise<Response | unknown> {
+  if (format === FORMATS.NDJSON) {
+    return request({method, url, accessToken, body});
+  }
+
+  const data = await requestJson<any>({method, url, accessToken, body});
+  return data.rows ? data.rows : data;
 }
 
 /**
  * Display proper message from Maps API error
  */
-function dealWithError({response, error}) {
+function dealWithError({response, error}: {response: Response; error?: string}): never {
   switch (response.status) {
     case 400:
       throw new Error(`Bad request. ${error}`);
@@ -67,10 +101,29 @@ function dealWithError({response, error}) {
   }
 }
 
+type FetchLayerDataParams = {
+  type: MapType;
+  source: string;
+  connection: string;
+  credentials: CloudNativeCredentials;
+  geoColumn?: string;
+  columns?: string[];
+  schema?: boolean;
+  clientId?: string;
+  format?: Format;
+};
+
 /**
  * Build a URL with all required parameters
  */
-function getParameters({type, source, geoColumn, columns, schema, clientId}) {
+function getParameters({
+  type,
+  source,
+  geoColumn,
+  columns,
+  schema,
+  clientId
+}: Omit<FetchLayerDataParams, 'connection' | 'credentials'>) {
   const parameters = [encodeParameter('client', clientId || DEFAULT_CLIENT)];
   if (schema) {
     parameters.push(encodeParameter('schema', true));
@@ -100,12 +153,10 @@ export async function mapInstantiation({
   columns,
   schema,
   clientId
-}) {
+}: FetchLayerDataParams): Promise<MapInstantiation> {
   const baseUrl = `${credentials.mapsUrl}/${connection}/${type}`;
   const url = `${baseUrl}?${getParameters({type, source, geoColumn, columns, schema, clientId})}`;
   const {accessToken} = credentials;
-
-  const format = 'json';
 
   if (url.length > MAX_GET_LENGTH && type === MAP_TYPES.QUERY) {
     // need to be a POST request
@@ -113,13 +164,13 @@ export async function mapInstantiation({
       q: source,
       client: clientId || DEFAULT_CLIENT
     });
-    return await request({method: 'POST', url: baseUrl, format, accessToken, body});
+    return await requestJson({method: 'POST', url: baseUrl, accessToken, body});
   }
 
-  return await request({url, format, accessToken});
+  return await requestJson({url, accessToken});
 }
 
-function getUrlFromMetadata(metadata, format) {
+function getUrlFromMetadata(metadata: MapInstantiation, format: Format): string | null {
   const m = metadata[format];
 
   if (m && !m.error && m.url) {
@@ -129,16 +180,26 @@ function getUrlFromMetadata(metadata, format) {
   return null;
 }
 
-function checkFetchLayerDataParameters({type, source, connection, localCreds}) {
-  log.assert(connection, 'Must define connection');
-  log.assert(type, 'Must define a type');
-  log.assert(source, 'Must define a source');
+function checkFetchLayerDataParameters({
+  type,
+  source,
+  connection,
+  credentials
+}: FetchLayerDataParams) {
+  assert(connection, 'Must define connection');
+  assert(type, 'Must define a type');
+  assert(source, 'Must define a source');
 
-  log.assert(localCreds.apiVersion === API_VERSIONS.V3, 'Method only available for v3');
-  log.assert(localCreds.apiBaseUrl, 'Must define apiBaseUrl');
-  log.assert(localCreds.accessToken, 'Must define an accessToken');
+  assert(credentials.apiVersion === API_VERSIONS.V3, 'Method only available for v3');
+  assert(credentials.apiBaseUrl, 'Must define apiBaseUrl');
+  assert(credentials.accessToken, 'Must define an accessToken');
 }
 
+export interface FetchLayerDataResult {
+  data: any;
+  format: Format;
+  schema?: SchemaField[];
+}
 export async function fetchLayerData({
   type,
   source,
@@ -149,7 +210,7 @@ export async function fetchLayerData({
   format,
   schema,
   clientId
-}) {
+}: FetchLayerDataParams): Promise<FetchLayerDataResult> {
   // Internally we split data fetching into two parts to allow us to
   // conditionally fetch the actual data, depending on the metadata state
   const {url, accessToken, mapFormat, metadata} = await _fetchDataUrl({
@@ -164,8 +225,8 @@ export async function fetchLayerData({
     clientId
   });
 
-  const data = await request({url, format: mapFormat, accessToken});
-  const result = {data, format: mapFormat};
+  const data = await requestData({url, format: mapFormat, accessToken});
+  const result: FetchLayerDataResult = {data, format: mapFormat};
   if (schema) {
     result.schema = metadata.schema;
   }
@@ -183,7 +244,7 @@ async function _fetchDataUrl({
   format,
   schema,
   clientId
-}) {
+}: FetchLayerDataParams) {
   const defaultCredentials = getDefaultCredentials();
   // Only pick up default credentials if they have been defined for
   // correct API version
@@ -191,7 +252,7 @@ async function _fetchDataUrl({
     ...(defaultCredentials.apiVersion === API_VERSIONS.V3 && defaultCredentials),
     ...credentials
   };
-  checkFetchLayerDataParameters({type, source, connection, localCreds});
+  checkFetchLayerDataParameters({type, source, connection, credentials: localCreds});
 
   if (!localCreds.mapsUrl) {
     localCreds.mapsUrl = buildMapsUrlFromBase(localCreds.apiBaseUrl);
@@ -207,13 +268,13 @@ async function _fetchDataUrl({
     schema,
     clientId
   });
-  let url;
-  let mapFormat;
+  let url: string | null = null;
+  let mapFormat: Format | undefined;
 
   if (format) {
     mapFormat = format;
     url = getUrlFromMetadata(metadata, format);
-    log.assert(url, `Format ${format} not available`);
+    assert(url, `Format ${format} not available`);
   } else {
     // guess map format
     const prioritizedFormats = [FORMATS.GEOJSON, FORMATS.JSON, FORMATS.NDJSON, FORMATS.TILEJSON];
@@ -224,6 +285,7 @@ async function _fetchDataUrl({
         break;
       }
     }
+    assert(url && mapFormat, 'Unsupported data formats received from backend.');
   }
 
   const {accessToken} = localCreds;
@@ -239,7 +301,7 @@ export async function getData({
   columns,
   format,
   clientId
-}) {
+}: FetchLayerDataParams) {
   log.deprecated('getData', 'fetchLayerData')();
   const layerData = await fetchLayerData({
     type,
@@ -255,8 +317,13 @@ export async function getData({
   return layerData.data;
 }
 
-/* global clearInterval, setInterval, URLSearchParams */
-async function _fetchMapDataset(dataset, accessToken, credentials, clientId) {
+/* global clearInterval, setInterval, URL */
+async function _fetchMapDataset(
+  dataset,
+  accessToken: string,
+  credentials: CloudNativeCredentials,
+  clientId?: string
+) {
   // First fetch metadata
   const {connectionName: connection, source, type} = dataset;
   const {url, mapFormat} = await _fetchDataUrl({
@@ -268,54 +335,75 @@ async function _fetchMapDataset(dataset, accessToken, credentials, clientId) {
   });
 
   // Extract the last time the data changed
-  const cache = parseInt(new URLSearchParams(url).get('cache'), 10);
+  const cache = parseInt(new URL(url).searchParams.get('cache') || '', 10);
   if (cache && dataset.cache === cache) {
     return false;
   }
   dataset.cache = cache;
 
   // Only fetch if the data has changed
-  const data = await request({url, format: mapFormat, accessToken});
-  dataset.data = data;
+  dataset.data = await requestData({url, format: mapFormat, accessToken});
+
   return true;
 }
 
-async function fillInMapDatasets({datasets, token}, clientId, credentials) {
+async function fillInMapDatasets(
+  {datasets, token},
+  clientId: string,
+  credentials: CloudNativeCredentials
+) {
   const promises = datasets.map(dataset => _fetchMapDataset(dataset, token, credentials, clientId));
   return await Promise.all(promises);
 }
 
-export async function fetchMap({cartoMapId, clientId, credentials, autoRefresh, onNewData}) {
+export async function fetchMap({
+  cartoMapId,
+  clientId,
+  credentials,
+  autoRefresh,
+  onNewData
+}: {
+  cartoMapId: string;
+  clientId: string;
+  credentials?: CloudNativeCredentials;
+  autoRefresh?: number;
+  onNewData?: (map: any) => void;
+}) {
   const defaultCredentials = getDefaultCredentials();
   const localCreds = {
     ...(defaultCredentials.apiVersion === API_VERSIONS.V3 && defaultCredentials),
     ...credentials
-  };
+  } as CloudNativeCredentials;
+  const {accessToken} = localCreds;
 
-  log.assert(cartoMapId, `Must define CARTO map id: fetchMap({cartoMapId: 'XXXX-XXXX-XXXX'})`);
+  assert(cartoMapId, 'Must define CARTO map id: fetchMap({cartoMapId: "XXXX-XXXX-XXXX"})');
 
-  log.assert(localCreds.apiVersion === API_VERSIONS.V3, 'Method only available for v3');
-  log.assert(localCreds.apiBaseUrl, 'Must define apiBaseUrl');
+  assert(localCreds.apiVersion === API_VERSIONS.V3, 'Method only available for v3');
+  assert(localCreds.apiBaseUrl, 'Must define apiBaseUrl');
   if (!localCreds.mapsUrl) {
     localCreds.mapsUrl = buildMapsUrlFromBase(localCreds.apiBaseUrl);
   }
 
   if (autoRefresh || onNewData) {
-    log.assert(onNewData, 'Must define `onNewData` when using autoRefresh');
-    log.assert(typeof onNewData === 'function', '`onNewData` must be a function');
-    log.assert(autoRefresh > 0, '`autoRefresh` must be a positive number');
+    assert(onNewData, 'Must define `onNewData` when using autoRefresh');
+    assert(typeof onNewData === 'function', '`onNewData` must be a function');
+    assert(
+      typeof autoRefresh === 'number' && autoRefresh > 0,
+      '`autoRefresh` must be a positive number'
+    );
   }
 
   const url = `${localCreds.mapsUrl}/public/${cartoMapId}`;
-  const map = await request({url});
+  const map = await requestJson<any>({url, accessToken});
 
   // Periodically check if the data has changed. Note that this
   // will not update when a map is published.
-  let stopAutoRefresh;
+  let stopAutoRefresh: (() => void) | undefined;
   if (autoRefresh) {
+    // eslint-disable-next-line @typescript-eslint/no-misused-promises
     const intervalId = setInterval(async () => {
-      const changed = await fillInMapDatasets(map, clientId, credentials);
-      if (changed.some(v => v === true)) {
+      const changed = await fillInMapDatasets(map, clientId, localCreds);
+      if (onNewData && changed.some(v => v === true)) {
         onNewData(parseMap(map));
       }
     }, autoRefresh * 1000);
@@ -325,7 +413,7 @@ export async function fetchMap({cartoMapId, clientId, credentials, autoRefresh, 
   }
 
   // Mutates map.datasets so that dataset.data contains data
-  await fillInMapDatasets(map, clientId, credentials);
+  await fillInMapDatasets(map, clientId, localCreds);
   return {
     ...parseMap(map),
     ...{stopAutoRefresh}

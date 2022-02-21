@@ -7,10 +7,11 @@ import {
   getTextPixelOffsetAccessor
 } from './layer-map';
 import {_flatten as flatten, log} from '@deck.gl/core';
+import {assert} from '../utils';
 
 export function parseMap(json) {
   const {keplerMapConfig, datasets} = json;
-  log.assert(keplerMapConfig.version === 'v1', 'Only support Kepler v1');
+  assert(keplerMapConfig.version === 'v1', 'Only support Kepler v1');
   const {mapState, mapStyle} = keplerMapConfig.config;
   const {layers, layerBlending, interactionConfig} = keplerMapConfig.config.visState;
 
@@ -24,12 +25,12 @@ export function parseMap(json) {
     mapStyle,
     layers: extractTextLayers(layers.reverse()).map(({id, type, config, visualChannels}) => {
       try {
-        const {Layer, propMap, defaultProps} = getLayer(type, config);
         const {dataId} = config;
         const dataset = datasets.find(d => d.id === dataId);
-        log.assert(dataset, `No dataset matching dataId: ${dataId}`);
+        assert(dataset, `No dataset matching dataId: ${dataId}`);
         const {data} = dataset;
-        log.assert(data, `No data loaded for dataId: ${dataId}`);
+        assert(data, `No data loaded for dataId: ${dataId}`);
+        const {Layer, propMap, defaultProps} = getLayer(type, config, dataset);
         return new Layer({
           id,
           data,
@@ -39,7 +40,7 @@ export function parseMap(json) {
           ...createStyleProps(config, propMap),
           ...createChannelProps(visualChannels, type, config, data) // Must come after style
         });
-      } catch (e) {
+      } catch (e: any) {
         log.error(e.message)();
         return undefined;
       }
@@ -121,7 +122,7 @@ function mapProps(source, target, mapping) {
 }
 
 function createStyleProps(config, mapping) {
-  const result = {};
+  const result: Record<string, any> = {};
   mapProps(config, result, mapping);
   result.highlightColor = config.visConfig.enable3d ? [255, 255, 255, 60] : [252, 242, 26, 255];
   return result;
@@ -137,7 +138,7 @@ function createChannelProps(visualChannels, type, config, data) {
     heightScale = sizeScale;
   }
   const {textLabel, visConfig} = config;
-  const result = {};
+  const result: Record<string, any> = {};
   const textLabelField = textLabel && textLabel.field;
   if (colorField) {
     result.getFillColor = getColorAccessor(

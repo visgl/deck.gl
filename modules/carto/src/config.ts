@@ -4,17 +4,33 @@ export const defaultClassicCredentials = {
   apiKey: 'default_public',
   region: 'us',
   username: 'public'
-};
+} as const;
 
 export const defaultCloudNativeCredentials = {
   apiBaseUrl: 'https://gcp-us-east1.api.carto.com'
-};
+} as const;
 
-let credentials = {};
+export interface ClassicCredentials {
+  apiVersion: 'v1' | 'v2';
+  apiKey: string;
+  region: string;
+  username: string;
+  mapsUrl?: string;
+}
+
+export interface CloudNativeCredentials {
+  apiVersion: 'v3';
+  apiBaseUrl: string;
+  accessToken?: string;
+  mapsUrl?: string;
+}
+
+export type Credentials = ClassicCredentials | CloudNativeCredentials;
+let credentials: Credentials = {} as Credentials;
 
 setDefaultCredentials({});
 
-export function setDefaultCredentials({apiVersion, ...rest}) {
+export function setDefaultCredentials({apiVersion, ...rest}: Partial<Credentials>) {
   apiVersion = apiVersion || API_VERSIONS.V3;
 
   switch (apiVersion) {
@@ -30,11 +46,11 @@ export function setDefaultCredentials({apiVersion, ...rest}) {
   }
 }
 
-export function getDefaultCredentials() {
+export function getDefaultCredentials(): Credentials {
   return credentials;
 }
 
-export function buildMapsUrlFromBase(apiBaseUrl) {
+export function buildMapsUrlFromBase(apiBaseUrl: string): string {
   let suffix = '/v3/maps';
   if (apiBaseUrl.endsWith('/')) {
     suffix = suffix.substring(1);

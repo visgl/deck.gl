@@ -5,16 +5,19 @@ import {render} from 'react-dom';
 import DeckGL from '@deck.gl/react';
 import {ClipExtension} from '@deck.gl/extensions';
 import {MVTLayer} from '@deck.gl/geo-layers';
-import {CartoLayer, FORMATS, MAP_TYPES} from '@deck.gl/carto';
+import {CartoLayer, FORMATS, TILE_FORMATS, MAP_TYPES} from '@deck.gl/carto';
 import {GeoJsonLayer} from '@deck.gl/layers';
 
 const INITIAL_VIEW_STATE = {longitude: -73.95643, latitude: 40.8039, zoom: 9};
 const COUNTRIES =
   'https://d2ad6b4ur7yvpq.cloudfront.net/naturalearth-3.3.0/ne_50m_admin_0_scale_rank.geojson';
 
-const apiBaseUrl = 'https://direct-gcp-us-east1.api.carto.com';
-const connection = 'alasarr';
+const apiBaseUrl = 'https://direct-gcp-us-east1-15.dev.api.carto.com';
+const connection = 'bigquery';
+// const table = 'cartodb-gcp-backend-data-team.dynamic_tiling.points_100K';
+// const table = 'cartodb-gcp-backend-data-team.dynamic_tiling.lines_alasarr';
 const table = 'cartodb-gcp-backend-data-team.dynamic_tiling.polygons_3k_usacounty_viz';
+// const table = 'cartobq.testtables.polygons_10k';
 
 const accessToken = 'XXX';
 
@@ -52,12 +55,12 @@ function createCarto() {
     id: 'carto',
     connection,
     data: table,
-    credentials: {accessToken},
+    credentials: {accessToken, apiBaseUrl},
 
     // Dynamic tiling. Request TILEJSON format with TABLE
     type: MAP_TYPES.TABLE,
     format: FORMATS.TILEJSON,
-    formatTiles: 'geojson', // 'geojson' only until binary is implemented
+    //formatTiles: TILE_FORMATS.GEOJSON,
 
     // Styling
     getFillColor: [233, 71, 251],
