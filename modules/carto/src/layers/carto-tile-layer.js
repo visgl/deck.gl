@@ -5,7 +5,7 @@ import {ClipExtension} from '@deck.gl/extensions';
 import {MVTLayer, _getURLFromTemplate} from '@deck.gl/geo-layers';
 import {GeoJsonLayer} from '@deck.gl/layers';
 import {geojsonToBinary} from '@loaders.gl/gis';
-import {Tile} from './schema/carto-dynamic-tile';
+import {Tile} from './schema/carto-tile';
 import {TILE_FORMATS} from '../api/maps-api-common';
 
 function parseJSON(arrayBuffer) {
@@ -31,9 +31,9 @@ function unpackProperties(properties) {
   });
 }
 
-function parseCartoDynamicTile(arrayBuffer, options) {
+function parseCartoTile(arrayBuffer, options) {
   if (!arrayBuffer) return null;
-  const formatTiles = options && options.cartoDynamicTile && options.cartoDynamicTile.formatTiles;
+  const formatTiles = options && options.cartoTile && options.cartoTile.formatTiles;
   if (formatTiles === TILE_FORMATS.GEOJSON) return geojsonToBinary(parseJSON(arrayBuffer).features);
 
   const tile = parsePbf(arrayBuffer);
@@ -48,25 +48,25 @@ function parseCartoDynamicTile(arrayBuffer, options) {
   return data;
 }
 
-const CartoDynamicTileLoader = {
-  name: 'CARTO Dynamic Tile',
-  id: 'cartoDynamicTile',
+const CartoTileLoader = {
+  name: 'CARTO Tile',
+  id: 'cartoTile',
   module: 'carto',
   extensions: ['pbf'],
   mimeTypes: ['application/x-protobuf'],
   category: 'geometry',
   worker: false,
-  parse: async (arrayBuffer, options) => parseCartoDynamicTile(arrayBuffer, options),
-  parseSync: parseCartoDynamicTile,
+  parse: async (arrayBuffer, options) => parseCartoTile(arrayBuffer, options),
+  parseSync: parseCartoTile,
   options: {
-    cartoDynamicTile: {
+    cartoTile: {
       // TODO change to BINARY for 8.7 prod release
       formatTiles: TILE_FORMATS.GEOJSON
     }
   }
 };
 
-export default class CartoDynamicTileLayer extends MVTLayer {
+export default class CartoTileLayer extends MVTLayer {
   getTileData(tile) {
     let url = _getURLFromTemplate(this.state.data, tile);
     if (!url) {
@@ -91,7 +91,7 @@ export default class CartoDynamicTileLayer extends MVTLayer {
       const newUrl = new URL(url);
       newUrl.searchParams.set('formatTiles', formatTiles);
       url = newUrl.toString();
-      loadOptions.cartoDynamicTile = {formatTiles};
+      loadOptions.cartoTile = {formatTiles};
     }
 
     return fetch(url, {propName: 'data', layer: this, loadOptions, signal});
@@ -117,5 +117,5 @@ export default class CartoDynamicTileLayer extends MVTLayer {
   }
 }
 
-CartoDynamicTileLayer.layerName = 'CartoDynamicTileLayer';
-CartoDynamicTileLayer.defaultProps = {...MVTLayer.defaultProps, loaders: [CartoDynamicTileLoader]};
+CartoTileLayer.layerName = 'CartoTileLayer';
+CartoTileLayer.defaultProps = {...MVTLayer.defaultProps, loaders: [CartoTileLoader]};

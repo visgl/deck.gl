@@ -1,11 +1,13 @@
 export const DEFAULT_USER_COMPONENT_IN_URL = '{user}';
 export const DEFAULT_REGION_COMPONENT_IN_URL = '{region}';
 
+export type ValuesOf<T extends {}> = T[keyof T];
 export const API_VERSIONS = {
   V1: 'v1',
   V2: 'v2',
   V3: 'v3'
 } as const;
+export type ApiVersion = ValuesOf<typeof API_VERSIONS>;
 
 export const DEFAULT_MAPS_URL_FORMAT = {
   [API_VERSIONS.V1]: `https://${DEFAULT_USER_COMPONENT_IN_URL}.carto.com/api/v1/map`,
@@ -17,6 +19,7 @@ export const MAP_TYPES = {
   TABLE: 'table',
   TILESET: 'tileset'
 } as const;
+export type MapType = ValuesOf<typeof MAP_TYPES>;
 
 // AVAILABLE FORMATS
 export const FORMATS = {
@@ -25,6 +28,7 @@ export const FORMATS = {
   TILEJSON: 'tilejson',
   JSON: 'json'
 } as const;
+export type Format = ValuesOf<typeof FORMATS>;
 
 // AVAILABLE FORMATS FOR TILES
 export const TILE_FORMATS = {
@@ -32,10 +36,41 @@ export const TILE_FORMATS = {
   GEOJSON: 'geojson',
   BINARY: 'binary'
 } as const;
+export type TileFormat = ValuesOf<typeof TILE_FORMATS>;
+
+export enum SchemaFieldType {
+  Number = 'number',
+  Bigint = 'bigint',
+  String = 'string',
+  Geometry = 'geometry',
+  Timestamp = 'timestamp',
+  Object = 'object',
+  Boolean = 'boolean',
+  Variant = 'variant',
+  Unknown = 'unknown'
+}
+export interface SchemaField {
+  name: string;
+  type: SchemaFieldType; // Field type in the CARTO stack, common for all providers
+}
+
+export interface MapInstantiation extends MapInstantiationFormats {
+  nrows: number;
+  size?: number;
+  schema?: SchemaField[];
+}
+
+type MapInstantiationFormats = Record<
+  Format,
+  {
+    url: string[];
+    error?: any;
+  }
+>;
 
 /**
  * Simple encode parameter
  */
-export function encodeParameter(name: string, value: string): string {
+export function encodeParameter(name: string, value: string | boolean | number): string {
   return `${name}=${encodeURIComponent(value)}`;
 }
