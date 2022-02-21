@@ -61,7 +61,7 @@ const CartoTileLoader = {
   options: {
     cartoTile: {
       // TODO change to BINARY for 8.7 prod release
-      formatTiles: TILE_FORMATS.GEOJSON
+      formatTiles: TILE_FORMATS.BINARY
     }
   }
 };
