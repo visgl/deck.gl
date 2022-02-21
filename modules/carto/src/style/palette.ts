@@ -1,12 +1,19 @@
 import * as cartoColors from 'cartocolor';
 import {assert} from './utils';
 
-export const DEFAULT_PALETTE = 'PurpOr';
-export const NULL_COLOR = [204, 204, 204];
-export const OTHERS_COLOR = [119, 119, 119];
+export type Color = [r: number, b: number, g: number, a?: number];
 
-export default function getPalette(name, numCategories) {
-  const palette = cartoColors[name];
+export const DEFAULT_PALETTE = 'PurpOr';
+export const NULL_COLOR: Color = [204, 204, 204];
+export const OTHERS_COLOR: Color = [119, 119, 119];
+
+interface CartoColorsPalette {
+  tags?: string[];
+  [key: number]: string[];
+}
+
+export default function getPalette(name: string, numCategories: number): Color[] {
+  const palette: CartoColorsPalette | undefined = cartoColors[name];
   let paletteIndex = numCategories;
 
   assert(palette, `Palette "${name}" not found. Expected a CARTOColors string`);
@@ -33,7 +40,7 @@ export default function getPalette(name, numCategories) {
   return colors.map(c => hexToRgb(c));
 }
 
-export function hexToRgb(hex) {
+export function hexToRgb(hex: string): Color {
   // Evaluate #ABC
   let result = /^#?([a-f\d]{1})([a-f\d]{1})([a-f\d]{1})$/i.exec(hex);
 
@@ -68,16 +75,12 @@ export function hexToRgb(hex) {
   // Evaluate #ABCDEFAF
   result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
 
-  if (result) {
-    return [
-      parseInt(result[1], 16),
-      parseInt(result[2], 16),
-      parseInt(result[3], 16),
-      parseInt(result[4], 16)
-    ];
-  }
-
   assert(result, `Hexadecimal color "${hex}" was not parsed correctly`);
 
-  return NULL_COLOR;
+  return [
+    parseInt(result[1], 16),
+    parseInt(result[2], 16),
+    parseInt(result[3], 16),
+    parseInt(result[4], 16)
+  ];
 }
