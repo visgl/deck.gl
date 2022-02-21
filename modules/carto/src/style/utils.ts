@@ -11,13 +11,7 @@ export function getAttrValue(attr: AttributeSelector, d: Row): unknown {
   if (typeof attr === 'function') {
     return attr(d);
   }
-
-  // Is string
-  if (typeof attr === 'string') {
-    return d.properties[attr];
-  }
-
-  return {};
+  return d.properties[attr];
 }
 
 export function assert(condition, message = ''): asserts condition {
