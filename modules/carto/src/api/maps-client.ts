@@ -1,13 +1,19 @@
 /**
  * Maps API Client for Maps API v1 and Maps API v2
  */
-import {defaultClassicCredentials, getDefaultCredentials} from '../config';
+import {
+  ClassicCredentials,
+  defaultClassicCredentials,
+  defaultCloudNativeCredentials,
+  getDefaultCredentials
+} from '../config';
 import {
   API_VERSIONS,
   DEFAULT_MAPS_URL_FORMAT,
   DEFAULT_REGION_COMPONENT_IN_URL,
   DEFAULT_USER_COMPONENT_IN_URL,
   encodeParameter,
+  MapType,
   MAP_TYPES
 } from './maps-api-common';
 
@@ -22,24 +28,29 @@ const TILE_EXTENT = 4096;
 /**
  * Obtain a TileJson from Maps API v1 and v2
  */
-export async function getDataV2({type, source, credentials}) {
+export async function getDataV2({
+  type,
+  source,
+  credentials
+}: {
+  type: MapType;
+  source: string;
+  credentials?: Partial<ClassicCredentials>;
+}) {
   const defaultCredentials = getDefaultCredentials();
-  const apiVersion = (credentials && credentials.apiVersion) || defaultCredentials.apiVersion;
+  const apiVersion = credentials?.apiVersion || defaultCredentials.apiVersion;
   // Only pick up default credentials if they have been defined for
   // correct API version
   const localCreds = {
-    ...defaultClassicCredentials,
+    ...(apiVersion === API_VERSIONS.V3 ? defaultCloudNativeCredentials : defaultClassicCredentials),
+    mapsUrl: DEFAULT_MAPS_URL_FORMAT[apiVersion],
     ...(defaultCredentials.apiVersion === apiVersion && defaultCredentials),
     ...credentials
-  };
+  } as unknown as Required<ClassicCredentials>;
 
-  if (!localCreds.mapsUrl) {
-    localCreds.mapsUrl = DEFAULT_MAPS_URL_FORMAT[apiVersion];
-  }
+  let url: string;
 
-  let url;
-
-  const connection = type === 'tileset' ? CONNECTIONS.BIGQUERY : CONNECTIONS.CARTO;
+  const connection = type === MAP_TYPES.TILESET ? CONNECTIONS.BIGQUERY : CONNECTIONS.CARTO;
 
   switch (apiVersion) {
     case API_VERSIONS.V1:
@@ -64,12 +75,11 @@ export async function getDataV2({type, source, credentials}) {
 /**
  * Request against Maps API
  */
-async function request({url, credentials}) {
+async function request({url, credentials}: {url: string; credentials: ClassicCredentials}) {
   let response;
 
   try {
     /* global fetch */
-    /* eslint no-undef: "error" */
     response = await fetch(url, {
       headers: {
         Accept: 'application/json'
@@ -91,7 +101,15 @@ async function request({url, credentials}) {
 /**
  * Display proper message from Maps API error
  */
-function dealWithError({response, json, credentials}) {
+function dealWithError({
+  response,
+  json,
+  credentials
+}: {
+  response: Response;
+  json: any;
+  credentials: ClassicCredentials;
+}) {
   switch (response.status) {
     case 401:
       throw new Error(
@@ -109,22 +127,38 @@ function dealWithError({response, json, credentials}) {
   }
 }
 
-function initURLParameters(credentials) {
+function initURLParameters(credentials: ClassicCredentials): string[] {
   const encodedApiKey = encodeParameter('api_key', credentials.apiKey);
-  const encodedClient = encodeParameter('client', `deck-gl-carto`);
+  const encodedClient = encodeParameter('client', 'deck-gl-carto');
   return [encodedApiKey, encodedClient];
 }
 
 /**
  * Build a URL with all required parameters
  */
-function buildURLMapsAPIv1({mapConfig, credentials}) {
+function buildURLMapsAPIv1({
+  mapConfig,
+  credentials
+}: {
+  mapConfig: unknown;
+  credentials: Required<ClassicCredentials>;
+}): string {
   const parameters = initURLParameters(credentials);
   const cfg = JSON.stringify(mapConfig);
   return `${mapsUrl(credentials)}?${parameters.join('&')}&${encodeParameter('config', cfg)}`;
 }
 
-function buildURLMapsAPIv2({connection, type, source, credentials}) {
+function buildURLMapsAPIv2({
+  connection,
+  type,
+  source,
+  credentials
+}: {
+  connection: string;
+  type: MapType;
+  source: string;
+  credentials: Required<ClassicCredentials>;
+}): string {
   const parameters = initURLParameters(credentials);
   // Query type is mapped to 'sql' at maps api v1
   const mapsApiType = type === MAP_TYPES.QUERY ? 'sql' : type;
@@ -136,13 +170,13 @@ function buildURLMapsAPIv2({connection, type, source, credentials}) {
 /**
  * Prepare a url valid for the specified user
  */
-function mapsUrl(credentials) {
+function mapsUrl(credentials: Required<ClassicCredentials>) {
   return credentials.mapsUrl
     .replace(DEFAULT_USER_COMPONENT_IN_URL, credentials.username)
     .replace(DEFAULT_REGION_COMPONENT_IN_URL, credentials.region);
 }
 
-function createMapConfig(sql) {
+function createMapConfig(sql: string) {
   return {
     version: '1.3.1',
     buffersize: {
@@ -153,6 +187,7 @@ function createMapConfig(sql) {
         type: 'mapnik',
         options: {
           sql,
+          // eslint-disable-next-line camelcase
           vector_extent: TILE_EXTENT
         }
       }
