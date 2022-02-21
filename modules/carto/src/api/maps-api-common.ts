@@ -7,7 +7,7 @@ export const API_VERSIONS = {
   V2: 'v2',
   V3: 'v3'
 } as const;
-export type AoiVersion = ValuesOf<typeof API_VERSIONS>;
+export type ApiVersion = ValuesOf<typeof API_VERSIONS>;
 
 export const DEFAULT_MAPS_URL_FORMAT = {
   [API_VERSIONS.V1]: `https://${DEFAULT_USER_COMPONENT_IN_URL}.carto.com/api/v1/map`,

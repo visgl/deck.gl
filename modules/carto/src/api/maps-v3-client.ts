@@ -376,9 +376,7 @@ export async function fetchMap({
   } as CloudNativeCredentials;
   const {accessToken} = localCreds;
 
-  // TODO: prettier conflicts with eslint here
-  // eslint-disable-next-line quotes
-  assert(cartoMapId, "Must define CARTO map id: fetchMap({cartoMapId: 'XXXX-XXXX-XXXX'})");
+  assert(cartoMapId, 'Must define CARTO map id: fetchMap({cartoMapId: "XXXX-XXXX-XXXX"})');
 
   assert(localCreds.apiVersion === API_VERSIONS.V3, 'Method only available for v3');
   assert(localCreds.apiBaseUrl, 'Must define apiBaseUrl');
