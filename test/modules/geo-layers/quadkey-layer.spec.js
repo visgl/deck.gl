@@ -32,24 +32,21 @@ const TEST_DATA = [
     expectedBounds: [
       [0, 512],
       [256, 256]
-    ],
-    expectedPolygon: []
+    ]
   },
   {
     quadkey: '0123',
     expectedBounds: [
       [160, 416],
       [192, 384]
-    ],
-    expectedPolygon: []
+    ]
   },
   {
     quadkey: '333',
     expectedBounds: [
       [448, 64],
       [512, 0]
-    ],
-    expectedPolygon: []
+    ]
   }
 ];
 
@@ -90,7 +87,7 @@ test('QuadkeyLayer#quadkeyToWorldBounds', t => {
 });
 
 test('QuadkeyLayer#getQuadkeyPolygon', t => {
-  for (const {quadkey, expectedPolygon} of TEST_DATA) {
+  for (const {quadkey} of TEST_DATA) {
     const polygon = getQuadkeyPolygon(quadkey);
     t.ok(polygon instanceof Float64Array, 'polygon is flat array');
     t.is(polygon.length / 2 - 1, 4, 'polygon has 4 sides');

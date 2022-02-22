@@ -10,7 +10,7 @@ export function quadkeyToWorldBounds(quadkey) {
 
   for (let i = 0; i < quadkey.length; i++) {
     mask >>= 1;
-    let q = parseInt(quadkey[i]);
+    const q = parseInt(quadkey[i]);
     if (q % 2) x |= mask;
     if (q > 1) y |= mask;
   }
