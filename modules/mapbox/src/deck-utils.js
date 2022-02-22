@@ -1,4 +1,4 @@
-import {Deck, WebMercatorViewport} from '@deck.gl/core';
+import {Deck, WebMercatorViewport, MapView} from '@deck.gl/core';
 
 export function getDeckInstance({map, gl, deck}) {
   // Only create one deck instance per context
@@ -22,13 +22,17 @@ export function getDeckInstance({map, gl, deck}) {
     parameters: {
       depthMask: true,
       depthTest: true,
+      blend: true,
       blendFunc: [gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA, gl.ONE, gl.ONE_MINUS_SRC_ALPHA],
+      polygonOffsetFill: true,
+      depthFunc: gl.LEQUAL,
       blendEquation: gl.FUNC_ADD
     },
     userData: {
       isExternal: false,
       mapboxLayers: new Set()
-    }
+    },
+    views: (deck && deck.props.views) || [new MapView({id: 'mapbox'})]
   };
 
   if (deck) {
@@ -88,6 +92,7 @@ export function drawLayer(deck, map, layer) {
   if (!deck.layerManager) {
     return;
   }
+
   deck._drawLayers('mapbox-repaint', {
     viewports: [currentViewport],
     layerFilter: ({layer: deckLayer}) => layer.id === deckLayer.id,
@@ -122,6 +127,7 @@ function getViewport(deck, map, useMapboxProjection = true) {
   return new WebMercatorViewport(
     Object.assign(
       {
+        id: 'mapbox',
         x: 0,
         y: 0,
         width: deck.width,
@@ -154,10 +160,21 @@ function afterRender(deck, map) {
     // Draw non-Mapbox layers
     const mapboxLayerIds = Array.from(mapboxLayers, layer => layer.id);
     const hasNonMapboxLayers = deck.props.layers.some(layer => !mapboxLayerIds.includes(layer.id));
-    if (hasNonMapboxLayers) {
+    let viewports = deck.getViewports();
+    const mapboxViewportIdx = viewports.findIndex(vp => vp.id === 'mapbox');
+    const hasNonMapboxViews = viewports.length > 1 || mapboxViewportIdx < 0;
+
+    if (hasNonMapboxLayers || hasNonMapboxViews) {
+      if (mapboxViewportIdx >= 0) {
+        viewports = viewports.slice();
+        viewports[mapboxViewportIdx] = getViewport(deck, map, false);
+      }
+
       deck._drawLayers('mapbox-repaint', {
-        viewports: [getViewport(deck, map, false)],
-        layerFilter: ({layer}) => !mapboxLayerIds.includes(layer.id),
+        viewports,
+        layerFilter: params =>
+          (!deck.props.layerFilter || deck.props.layerFilter(params)) &&
+          (params.viewport.id !== 'mapbox' || !mapboxLayerIds.includes(params.layer.id)),
         clearCanvas: false
       });
     }

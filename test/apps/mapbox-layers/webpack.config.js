@@ -9,7 +9,8 @@ const CONFIG = {
   mode: 'development',
 
   entry: {
-    app: resolve('./app.js')
+    app: resolve('./app.js'),
+    reactApp: resolve('./react-app.js')
   },
 
   module: {

@@ -2,14 +2,13 @@ import {ScatterplotLayer, ArcLayer} from '@deck.gl/layers';
 
 export const mapboxBuildingLayer = {
   id: '3d-buildings',
-  source: 'composite',
+  source: 'carto',
   'source-layer': 'building',
-  filter: ['==', 'extrude', 'true'],
   type: 'fill-extrusion',
   minzoom: 14,
   paint: {
     'fill-extrusion-color': '#ccc',
-    'fill-extrusion-height': ['get', 'height']
+    'fill-extrusion-height': ['get', 'render_height']
   }
 };
 
