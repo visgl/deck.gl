@@ -61,7 +61,7 @@ let pickingColorCache = new Uint8ClampedArray(0);
 const defaultProps = {
   // data: Special handling for null, see below
   data: {type: 'data', value: EMPTY_ARRAY, async: true},
-  dataComparator: null,
+  dataComparator: {type: 'function', value: null, compare: false, optional: true},
   _dataDiff: {type: 'function', value: data => data && data.__diff, compare: false, optional: true},
   dataTransform: {type: 'function', value: null, compare: false, optional: true},
   onDataLoad: {type: 'function', value: null, compare: false, optional: true},
