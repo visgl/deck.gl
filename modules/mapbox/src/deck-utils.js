@@ -22,7 +22,10 @@ export function getDeckInstance({map, gl, deck}) {
     parameters: {
       depthMask: true,
       depthTest: true,
+      blend: true,
       blendFunc: [gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA, gl.ONE, gl.ONE_MINUS_SRC_ALPHA],
+      polygonOffsetFill: true,
+      depthFunc: gl.LEQUAL,
       blendEquation: gl.FUNC_ADD
     },
     userData: {
