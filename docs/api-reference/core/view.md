@@ -45,7 +45,7 @@ A relative (e.g. `'50%'`) or absolute extent. Default `'100%'`.
 
 ##### `offset` ([Number, Number], optional)
 
-Pixel offset of the viewport center, in `[x, y]`.
+Pixel offset of the viewport center, in `[x, y]` where x is the number of pixels right, and y is the number of pixels down. This can be used to move the "look at"/target/vanishing point away from the center of the viewport rectangle.
 
 ##### `controller` (Function|Boolean|Object, optional)
 
