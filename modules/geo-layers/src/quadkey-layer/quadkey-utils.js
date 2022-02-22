@@ -24,5 +24,5 @@ export function getQuadkeyPolygon(quadkey) {
   const [topLeft, bottomRight] = quadkeyToWorldBounds(quadkey);
   const [w, n] = worldToLngLat(topLeft);
   const [e, s] = worldToLngLat(bottomRight);
-  return new Float64Array([e, n, e, s, w, s, w, n, e, n]);
+  return [e, n, e, s, w, s, w, n, e, n];
 }
