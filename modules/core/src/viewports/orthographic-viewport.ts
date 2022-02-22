@@ -10,18 +10,31 @@ function getProjectionMatrix({
   width,
   height,
   near,
-  far
+  far,
+  offset
 }: {
   width: number;
   height: number;
   near: number;
   far: number;
+  offset: [number, number] | null;
 }) {
+  let left = -width / 2;
+  let right = width / 2;
+  let bottom = -height / 2;
+  let top = height / 2;
+  if (offset) {
+    left -= offset[0];
+    right -= offset[0];
+    bottom += offset[1];
+    top += offset[1];
+  }
+
   return new Matrix4().ortho({
-    left: -width / 2,
-    right: width / 2,
-    bottom: -height / 2,
-    top: height / 2,
+    left,
+    right,
+    bottom,
+    top,
     near,
     far
   });
@@ -43,6 +56,8 @@ export type OrthographicViewportOptions = {
   /**  The zoom level of the viewport. `zoom: 0` maps one unit distance to one pixel on screen, and increasing `zoom` by `1` scales the same object to twice as large.
    *   To apply independent zoom levels to the X and Y axes, supply an array `[zoomX, zoomY]`. Default `0`. */
   zoom?: number | [number, number];
+  /** Pixel offset of the viewport center, in `[x, y]` where x is the number of pixels right, and y is the number of pixels down. */
+  offset?: [number, number] | null;
   /** Distance of near clipping plane. Default `0.1`. */
   near?: number;
   /** Distance of far clipping plane. Default `1000`. */
@@ -60,6 +75,7 @@ export default class OrthographicViewport extends Viewport {
       far = 1000,
       zoom = 0,
       target = [0, 0, 0],
+      offset = null,
       flipY = true
     } = props;
     const zoomX = Array.isArray(zoom) ? zoom[0] : zoom;
@@ -88,6 +104,7 @@ export default class OrthographicViewport extends Viewport {
       projectionMatrix: getProjectionMatrix({
         width: width || 1,
         height: height || 1,
+        offset,
         near,
         far
       }),

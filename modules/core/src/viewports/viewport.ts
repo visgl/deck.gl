@@ -59,6 +59,8 @@ export type ViewportOptions = {
   position?: number[];
   /** Zoom level */
   zoom?: number;
+  /** Pixel offset of the viewport center, in `[x, y]` where x is the number of pixels right, and y is the number of pixels down. */
+  offset?: [number, number] | null;
   distanceScales?: DistanceScales;
   /** Model matrix of viewport center */
   modelMatrix?: number[] | null;
@@ -91,12 +93,27 @@ const DEFAULT_DISTANCE_SCALES: DistanceScales = {
   metersPerUnit: [1, 1, 1]
 };
 
-// / Helpers
-
-function createProjectionMatrix({orthographic, fovyRadians, aspect, focalDistance, near, far}) {
-  return orthographic
+/// Helpers
+function createProjectionMatrix({width, height, orthographic, fovyRadians, focalDistance, offset, near, far}: {
+  width: number;
+  height: number;
+  orthographic: boolean;
+  fovyRadians: number;
+  focalDistance: number;
+  offset: [number, number] | null;
+  near: number;
+  far: number;
+}) {
+  const aspect = width / height;
+  const matrix = orthographic
     ? new Matrix4().orthographic({fovy: fovyRadians, aspect, focalDistance, near, far})
     : new Matrix4().perspective({fovy: fovyRadians, aspect, near, far});
+  if (offset) {
+    // pixels to clip space
+    matrix[8] -= (offset[0] * 2) / width;
+    matrix[9] += (offset[1] * 2) / height;
+  }
+  return matrix;
 }
 
 /**
@@ -438,6 +455,7 @@ export default class Viewport {
       fovy = 75,
       near = 0.1, // Distance of near clipping plane
       far = 1000, // Distance of far clipping plane
+      offset = null, // Center offset in pixels
       focalDistance = 1
     } = opts;
 
@@ -452,10 +470,12 @@ export default class Viewport {
     this.projectionMatrix =
       projectionMatrix ||
       createProjectionMatrix({
+        width: this.width,
+        height: this.height,
         orthographic,
         fovyRadians: fovyRadians || fovy * DEGREES_TO_RADIANS,
-        aspect: this.width / this.height,
         focalDistance,
+        offset,
         near,
         far
       });

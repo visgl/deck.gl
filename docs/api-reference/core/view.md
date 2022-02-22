@@ -43,6 +43,10 @@ A relative (e.g. `'50%'`) or absolute extent. Default `'100%'`.
 
 A relative (e.g. `'50%'`) or absolute extent. Default `'100%'`.
 
+##### `offset` ([Number, Number], optional)
+
+Pixel offset of the viewport center, in `[x, y]`.
+
 ##### `controller` (Function|Boolean|Object, optional)
 
 Options for viewport interactivity.

@@ -82,6 +82,17 @@ test('WebMercatorViewport#constructor', t => {
   t.end();
 });
 
+test('WebMercatorViewport#offset', t => {
+  const viewport = new WebMercatorViewport({...TEST_VIEWPORTS[0], offset: [100, 20]});
+  const center = viewport.project([viewport.longitude, viewport.latitude]);
+  t.ok(
+    equals(center, [viewport.width / 2 + 100, viewport.height / 2 + 20]),
+    'viewport center is offset'
+  );
+
+  t.end();
+});
+
 test('WebMercatorViewport.projectFlat', t => {
   const oldEpsilon = config.EPSILON;
   config.EPSILON = LNGLAT_TOLERANCE;

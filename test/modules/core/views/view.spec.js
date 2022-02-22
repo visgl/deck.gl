@@ -230,3 +230,22 @@ test('OrthographicView', t => {
 
   t.end();
 });
+
+test('OrthographicView#offset', t => {
+  const view = new OrthographicView({id: '2d-view', offset: [50, -20]});
+  const viewport = view.makeViewport({
+    width: 100,
+    height: 100,
+    viewState: {
+      target: [0, 1, 0],
+      zoom: 4
+    }
+  });
+  const center = viewport.project([0, 1]);
+  t.ok(
+    equals(center, [viewport.width / 2 + 50, viewport.height / 2 - 20]),
+    'viewport center is offset'
+  );
+
+  t.end();
+});
