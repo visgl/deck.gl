@@ -120,6 +120,7 @@ export {
 export {
   GreatCircleLayer,
   S2Layer,
+  QuadkeyLayer,
   H3ClusterLayer,
   H3HexagonLayer,
   TileLayer,

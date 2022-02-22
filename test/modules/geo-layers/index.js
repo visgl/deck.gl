@@ -24,6 +24,7 @@ import {
   GreatCircleLayer,
   H3HexagonLayer,
   H3ClusterLayer,
+  QuadkeyLayer,
   S2Layer,
   TileLayer,
   TripsLayer,
@@ -32,6 +33,7 @@ import {
 
 test('Top-level imports', t => {
   t.ok(GreatCircleLayer, 'GreatCircleLayer symbol imported');
+  t.ok(QuadkeyLayer, 'QuadkeyLayer symbol imported');
   t.ok(S2Layer, 'S2Layer symbol imported');
   t.ok(H3HexagonLayer, 'H3HexagonLayer symbol imported');
   t.ok(H3ClusterLayer, 'H3ClusterLayer symbol imported');
@@ -42,6 +44,7 @@ test('Top-level imports', t => {
 });
 
 import './tile-layer';
+import './quadkey-layer.spec';
 import './s2-layer.spec';
 import './trips-layer.spec';
 import './great-circle-layer.spec';
