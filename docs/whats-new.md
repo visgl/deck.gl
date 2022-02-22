@@ -14,7 +14,7 @@ The new [MaskExtension](/docs/api-reference/extensions/mask-extension) allows la
 
 ### @deck.gl/carto fetchMap
 
-[fetchMap](/docs/api-reference/carto/fetch-map) is added to the [CARTO deck.gl submodule](github.io/deck.gl/docs/api-reference/carto/overview), greatly streamlining the display of maps created using CARTO 3.
+[fetchMap](/docs/api-reference/carto/fetch-map) is added to the [CARTO deck.gl submodule](/docs/api-reference/carto/overview), greatly streamlining the display of maps created using CARTO 3.
 
 ```javascript
 import {Deck} from '@deck.gl/core';
