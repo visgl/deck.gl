@@ -6,6 +6,7 @@
 
 - `CartoBQTilerLayer` is removed. Use `CartoLayer` instead with `type` set to `MAP_TYPES.TILESET`.
 - `CartoSQLLayer` is removed. Use `CartoLayer` instead with `type` set to `MAP_TYPES.QUERY`.
+- `API_VERSIONS.V3` is the default for the CARTO module API calls. Use `setDefaultCredentials` to explictly specify `V2`.
 - `H3HexagonLayer` now uses flat shading when it renders a `ColumnLayer`. This change improves the visual consistency when using `highPrecision: 'auto'`. To revert to the old behavior, set the following prop:
 
   ```js
