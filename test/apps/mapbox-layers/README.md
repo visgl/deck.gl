@@ -1,11 +1,9 @@
-Experimental integration with mapbox-layer API
-
-You need to checkout the `custom-layers` branch in mapbox-gl-js and do a dev-build, and copy `mapbox-gl-dev.js` to this directory before running.
+Integration with mapbox-layer API
 
 ```js
 yarn start-local
 ```
 
 This directory contains two independent examples:
-- `app.js`: the pure-js example entry point.
-- `react-app.js`: the React example entry point.
+- `app.js`: the pure-js example entry point. URL: `/` (root)
+- `react-app.js`: the React example entry point. URL: `/reactApp`
