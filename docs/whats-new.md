@@ -2,6 +2,33 @@
 
 This page contains highlights of each deck.gl release. Also check our [vis.gl blog](https://medium.com/vis-gl) for news about new releases and features in deck.gl.
 
+## deck.gl v8.7
+
+Release date: February 24, 2022
+
+### MaskExtension
+
+The new [MaskExtension](/docs/api-reference/extensions/mask-extension) allows layers to show/hide objects by a geofence. For example, a map may filter a list of user locations by the boundaries of a given country, or highlight part of a base map that is inside a user-drawn circle or lasso area.
+
+![Masking flights and cities in Texas](https://github.com/visgl/deck.gl-data/blob/master/images/whats-new/googlemaps-scenegraph.png?raw=true)
+
+### @deck.gl/carto fetchMap
+
+[fetchMap](/docs/api-reference/carto/fetch-map) is added to the [CARTO deck.gl submodule](github.io/deck.gl/docs/api-reference/carto/overview), greatly streamlining the display of maps created using CARTO 3.
+
+```javascript
+import {Deck} from '@deck.gl/core';
+import {fetchMap} from '@deck.gl/carto';
+
+const cartoMapId = 'ff6ac53f-741a-49fb-b615-d040bc5a96b8';
+fetchMap({cartoMapId}).then(map => new Deck(map));
+```
+
+### Enhancements
+
+- `GoogleMapsOverlay` supports camera tilt and bearing for raster maps.
+- `MVTLayer` supports `pointType: 'text'` in `binary` mode.
+
 ## deck.gl v8.6
 
 Release date: October 11, 2021
