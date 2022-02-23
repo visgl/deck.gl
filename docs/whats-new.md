@@ -12,6 +12,10 @@ The new [MaskExtension](/docs/api-reference/extensions/mask-extension) allows la
 
 ![Masking flights and cities in Texas](https://github.com/visgl/deck.gl-data/blob/master/images/whats-new/googlemaps-scenegraph.png?raw=true)
 
+### QuadkeyLayer
+
+The new [QuadkeyLayer](/docs/api-reference/geo-layers/quadkey-layer) renders filled and/or stroked polygons, with geometry automatically calculated based on a quadkey (geospatial index).
+
 ### @deck.gl/carto fetchMap
 
 [fetchMap](/docs/api-reference/carto/fetch-map) is added to the [CARTO deck.gl submodule](/docs/api-reference/carto/overview), greatly streamlining the display of maps created using CARTO 3.
