@@ -89,7 +89,7 @@ test('QuadkeyLayer#quadkeyToWorldBounds', t => {
 test('QuadkeyLayer#getQuadkeyPolygon', t => {
   for (const {quadkey} of TEST_DATA) {
     const polygon = getQuadkeyPolygon(quadkey);
-    t.ok(polygon instanceof Float64Array, 'polygon is flat array');
+    t.ok(polygon instanceof Array, 'polygon is flat array');
     t.is(polygon.length / 2 - 1, 4, 'polygon has 4 sides');
     t.deepEqual(polygon.slice(0, 2), polygon.slice(-2), 'polygon is closed');
   }
