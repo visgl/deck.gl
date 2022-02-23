@@ -19,6 +19,12 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v8.6
 
+#### deck.gl [8.6.9] - Feb 23 2022
+
+- [mapbox] Fix event handling when using external deck (#6671)
+- Fix math.gl deprecation warning (#6670)
+- Ignore dataComparator change in props diff (#6669)
+
 #### deck.gl [8.6.8] - Feb 1 2022
 
 - Fix OrthographicController drift when using independent scales (#6606)
