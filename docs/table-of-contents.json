@@ -94,6 +94,7 @@
             {"entry": "docs/api-reference/layers/path-layer"},
             {"entry": "docs/api-reference/layers/point-cloud-layer"},
             {"entry": "docs/api-reference/layers/polygon-layer"},
+            {"entry": "docs/api-reference/geo-layers/quadkey-layer"},
             {"entry": "docs/api-reference/geo-layers/s2-layer"},
             {"entry": "docs/api-reference/layers/scatterplot-layer"},
             {"entry": "docs/api-reference/mesh-layers/scenegraph-layer"},

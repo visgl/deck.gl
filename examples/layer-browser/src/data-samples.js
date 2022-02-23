@@ -15,6 +15,7 @@ export {default as routes} from '../data/sfmta.routes.json';
 export {default as trips} from '../data/trips.json';
 export {default as SFTrips} from '../data/sf.trips';
 export {default as iconAtlas} from '../data/icon-atlas.json';
+export {default as quadkeys} from '../data/sf.quadkeys.json';
 export {default as s2cells} from '../data/sf.s2cells.json';
 export {choropleths};
 
