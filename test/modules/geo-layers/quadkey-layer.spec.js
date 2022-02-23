@@ -31,21 +31,21 @@ const TEST_DATA = [
     quadkey: '0',
     expectedBounds: [
       [0, 512],
-      [256, 256]
+      [253.44, 258.56]
     ]
   },
   {
     quadkey: '0123',
     expectedBounds: [
       [160, 416],
-      [192, 384]
+      [191.68, 384.32]
     ]
   },
   {
     quadkey: '333',
     expectedBounds: [
       [448, 64],
-      [512, 0]
+      [511.36, 0.6399999999999864]
     ]
   }
 ];
