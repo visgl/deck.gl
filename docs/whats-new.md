@@ -10,7 +10,7 @@ Release date: February 24, 2022
 
 The new [MaskExtension](/docs/api-reference/extensions/mask-extension) allows layers to show/hide objects by a geofence. For example, a map may filter a list of user locations by the boundaries of a given country, or highlight part of a base map that is inside a user-drawn circle or lasso area.
 
-![Masking flights and cities in Texas](https://github.com/visgl/deck.gl-data/blob/master/images/whats-new/googlemaps-scenegraph.png?raw=true)
+![Masking flights and cities in Texas](https://raw.githubusercontent.com/visgl/deck.gl-data/master/images/whats-new/mask-extension.gif)
 
 ### QuadkeyLayer
 
