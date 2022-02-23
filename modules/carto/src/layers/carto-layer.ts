@@ -40,7 +40,6 @@ const defaultProps = {
   columns: {type: 'array', value: null}
 };
 
-
 interface CartoLayerProps extends LayerProps {
   type: MapType;
   clientId?: string;

@@ -1,7 +1,7 @@
 // TODO: remove once @deck.gl/core has proper typings
 
 declare module '@deck.gl/core' {
-  export class CompositeLayer {
+  class CompositeLayer {
     props: any;
     state: any;
     setState(newState: any): void;
@@ -18,5 +18,17 @@ declare module '@deck.gl/core' {
     onDataError: (err: any) => void;
   }
 
-  export const log: any;
+  const log: any;
+}
+
+declare module '@deck.gl/geo-layers' {
+  function _getURLFromTemplate(data, tile);
+
+  class MVTLayer {
+    static defaultProps: any;
+    props: any;
+    state: any;
+    setState(newState: any): void;
+    getLoadOptions(): any;
+  }
 }

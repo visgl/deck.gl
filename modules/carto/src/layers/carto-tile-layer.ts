@@ -67,6 +67,9 @@ const CartoTileLoader = {
 };
 
 export default class CartoTileLayer extends MVTLayer {
+  static layerName = 'CartoTileLayer';
+  static defaultProps = {...MVTLayer.defaultProps, loaders: [CartoTileLoader]};
+
   getTileData(tile) {
     let url = _getURLFromTemplate(this.state.data, tile);
     if (!url) {
@@ -116,6 +119,3 @@ export default class CartoTileLayer extends MVTLayer {
     return subLayer;
   }
 }
-
-CartoTileLayer.layerName = 'CartoTileLayer';
-CartoTileLayer.defaultProps = {...MVTLayer.defaultProps, loaders: [CartoTileLoader]};
