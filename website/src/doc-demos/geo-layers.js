@@ -28,6 +28,22 @@ export const GreatCircleLayerDemo = makeLayerDemo({
   }`
 });
 
+export const QuadkeyLayerDemo = makeLayerDemo({
+  Layer: QuadkeyLayer,
+  getTooltip: '({object}) => object && `${object.quadkey} value: ${object.value}`',
+  props: `{
+    data: '${DATA_URI}/sf.quadkeys.json',
+    pickable: true,
+    wireframe: false,
+    filled: true,
+    extruded: true,
+    elevationScale: 100,
+    getQuadkey: d => d.quadkey,
+    getFillColor: d => [d.value * 128, (1 - d.value) * 255, (1 - d.value) * 255, 180],
+    getElevation: d => d.value
+  }`
+});
+
 export const S2LayerDemo = makeLayerDemo({
   Layer: S2Layer,
   getTooltip: '({object}) => object && `${object.token} value: ${object.value}`',
@@ -174,4 +190,4 @@ export const MVTLayerDemo = makeLayerDemo({
     },
     lineWidthMinPixels: 1
   }`
-})
+});
