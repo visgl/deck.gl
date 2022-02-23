@@ -8,7 +8,7 @@ import {QuadkeyLayerDemo} from 'website-components/doc-demos/geo-layers';
 
 # QuadkeyLayer
 
-The QuadkeyLayer renders filled and/or stroked polygons, with geometry automatically calculated based on an quadkey (geospatial index).
+The QuadkeyLayer renders filled and/or stroked polygons, with geometry automatically calculated based on a quadkey (geospatial index).
 
 `QuadkeyLayer` is a [CompositeLayer](/docs/api-reference/core/composite-layer.md).
 
