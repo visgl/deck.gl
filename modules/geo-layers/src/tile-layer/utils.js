@@ -33,13 +33,13 @@ export const urlType = {
 function transformBox(bbox, modelMatrix) {
   const transformedCoords = [
     // top-left
-    modelMatrix.transformPoint([bbox[0], bbox[1]]),
+    modelMatrix.transformAsPoint([bbox[0], bbox[1]]),
     // top-right
-    modelMatrix.transformPoint([bbox[2], bbox[1]]),
+    modelMatrix.transformAsPoint([bbox[2], bbox[1]]),
     // bottom-left
-    modelMatrix.transformPoint([bbox[0], bbox[3]]),
+    modelMatrix.transformAsPoint([bbox[0], bbox[3]]),
     // bottom-right
-    modelMatrix.transformPoint([bbox[2], bbox[3]])
+    modelMatrix.transformAsPoint([bbox[2], bbox[3]])
   ];
   const transformedBox = [
     // Minimum x coord
