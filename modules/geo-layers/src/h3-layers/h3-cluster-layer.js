@@ -4,7 +4,6 @@ import {createIterable} from '@deck.gl/core';
 import GeoCellLayer from '../geo-cell-layer/GeoCellLayer';
 
 const defaultProps = {
-  ...GeoCellLayer.defaultProps,
   getHexagons: {type: 'accessor', value: d => d.hexagons}
 };
 

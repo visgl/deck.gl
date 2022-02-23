@@ -22,7 +22,6 @@ import GeoCellLayer from '../geo-cell-layer/GeoCellLayer';
 import {getS2Polygon} from './s2-utils';
 
 const defaultProps = {
-  ...GeoCellLayer.defaultProps,
   getS2Token: {type: 'accessor', value: d => d.token}
 };
 

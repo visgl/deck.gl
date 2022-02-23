@@ -88,7 +88,7 @@ Inherits from all [Base Layer](/docs/api-reference/core/layer.md), [CompositeLay
 
 ### Data Accessors
 
-##### `getQuadkey` ([Function](/docs/developer-guide/using-layers.md#accessors), optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
+##### `getQuadkey` ([Function](/docs/developer-guide/using-layers.md#accessors), optional)
 
 Called for each data object to retrieve the quadkey string identifier.
 
