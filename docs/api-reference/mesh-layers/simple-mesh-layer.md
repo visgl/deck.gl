@@ -99,7 +99,7 @@ Inherits from all [Base Layer](/docs/api-reference/core/layer.md) properties.
 The geometry to render for each data object. One of:
 
 - An URL to a mesh description file in a format supported by [loaders.gl](https://loaders.gl/docs/specifications/category-mesh). The appropriate loader will have to be registered via the loaders.gl `registerLoaders` function for this usage.
-- A luma.gl [Geometry](https://luma.gl/docs/api-reference/engine/geometry) instance
+- A luma.gl [Geometry](https://luma.gl/docs/modules/engine/geometry) instance
 - An object containing the following fields:
   + `positions` (Float32Array) - 3d vertex offset from the object center, in meters
   + `normals` (Float32Array) - 3d normals
@@ -115,10 +115,10 @@ The texture of the geometries.
 - If a string is supplied, it is interpreted as a URL or a [Data URL](https://developer.mozilla.org/en-US/docs/Web/HTTP/Basics_of_HTTP/Data_URIs).
 - One of the following, or a Promise that resolves to one of the following:
   + One of the valid [pixel sources for WebGL texture](https://developer.mozilla.org/en-US/docs/Web/API/WebGLRenderingContext/texImage2D)
-  + A luma.gl [Texture2D](https://luma.gl/docs/api-reference/webgl/texture-2d) instance
+  + A luma.gl [Texture2D](https://luma.gl/docs/api-reference-legacy/classes/texture-2d) instance
   + A plain object that can be passed to the `Texture2D` constructor, e.g. `{width: <number>, height: <number>, data: <Uint8Array>}`. Note that whenever this object shallowly changes, a new texture will be created.
 
-The image data will be converted to a [Texture2D](https://luma.gl/docs/api-reference/webgl/texture-2d) object. See `textureParameters` prop for advanced customization.
+The image data will be converted to a [Texture2D](https://luma.gl/docs/api-reference-legay/classes/texture-2d) object. See `textureParameters` prop for advanced customization.
 
 If `texture` is supplied, texture is used to render the geometries. Otherwise, object color obtained via the `getColor` accessor is used.
 
