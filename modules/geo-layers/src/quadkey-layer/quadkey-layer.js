@@ -18,7 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import GeoCellLayer from '../common/GeoCellLayer';
+import GeoCellLayer from '../geo-cell-layer/GeoCellLayer';
 import {getQuadkeyPolygon} from './quadkey-utils';
 
 const defaultProps = {
