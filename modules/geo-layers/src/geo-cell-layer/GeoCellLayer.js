@@ -54,7 +54,7 @@ export default class GeoCellLayer extends CompositeLayer {
     } = this.props;
 
     // Accessor props for underlying layers
-    const {updateTriggers, material} = this.props;
+    const {updateTriggers, material, transitions} = this.props;
 
     // Filled Polygon Layer
     const CellLayer = this.getSubLayerClass('cell', PolygonLayer);
@@ -76,6 +76,7 @@ export default class GeoCellLayer extends CompositeLayer {
         lineDashJustified,
 
         material,
+        transitions,
 
         getElevation,
         getFillColor,

@@ -1,14 +1,14 @@
 import {h3SetToMultiPolygon} from 'h3-js';
 
-import {CompositeLayer, createIterable} from '@deck.gl/core';
-import {PolygonLayer} from '@deck.gl/layers';
+import {createIterable} from '@deck.gl/core';
+import GeoCellLayer from '../geo-cell-layer/GeoCellLayer';
 
 const defaultProps = {
-  ...PolygonLayer.defaultProps,
+  ...GeoCellLayer.defaultProps,
   getHexagons: {type: 'accessor', value: d => d.hexagons}
 };
 
-export default class H3ClusterLayer extends CompositeLayer {
+export default class H3ClusterLayer extends GeoCellLayer {
   updateState({props, oldProps, changeFlags}) {
     if (
       changeFlags.dataChanged ||
@@ -32,66 +32,11 @@ export default class H3ClusterLayer extends CompositeLayer {
     }
   }
 
-  renderLayers() {
-    const {
-      elevationScale,
-      extruded,
-      wireframe,
-      filled,
-      stroked,
-      lineWidthScale,
-      lineWidthMinPixels,
-      lineWidthMaxPixels,
-      lineJointRounded,
-      lineMiterLimit,
-      lineDashJustified,
-      material,
-
-      getFillColor,
-      getLineColor,
-      getLineWidth,
-      getLineDashArray,
-      getElevation,
-      transitions,
-      updateTriggers
-    } = this.props;
-
-    const SubLayerClass = this.getSubLayerClass('cluster-region', PolygonLayer);
-
-    return new SubLayerClass(
-      {
-        filled,
-        wireframe,
-
-        extruded,
-        elevationScale,
-
-        stroked,
-        lineWidthScale,
-        lineWidthMinPixels,
-        lineWidthMaxPixels,
-        lineJointRounded,
-        lineMiterLimit,
-        lineDashJustified,
-
-        material,
-        transitions,
-
-        getFillColor: this.getSubLayerAccessor(getFillColor),
-        getLineColor: this.getSubLayerAccessor(getLineColor),
-        getLineWidth: this.getSubLayerAccessor(getLineWidth),
-        getLineDashArray: this.getSubLayerAccessor(getLineDashArray),
-        getElevation: this.getSubLayerAccessor(getElevation)
-      },
-      this.getSubLayerProps({
-        id: 'cluster-region',
-        updateTriggers
-      }),
-      {
-        data: this.state.polygons,
-        getPolygon: d => d.polygon
-      }
-    );
+  indexToBounds() {
+    return {
+      data: this.state.polygons,
+      getPolygon: d => d.polygon
+    };
   }
 }
 
