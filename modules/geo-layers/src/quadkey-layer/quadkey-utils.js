@@ -16,7 +16,7 @@ export function quadkeyToWorldBounds(quadkey) {
   }
   return [
     [x / scale, TILE_SIZE - y / scale],
-    [(x + 1) / scale, TILE_SIZE - (y + 1) / scale]
+    [(x + 0.99) / scale, TILE_SIZE - (y + 0.99) / scale]
   ];
 }
 
