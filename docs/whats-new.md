@@ -26,8 +26,14 @@ fetchMap({cartoMapId}).then(map => new Deck(map));
 
 ### Enhancements
 
+- Less flashing when using `TileLayer` with `refinementStrategy: 'no-overlap'`.
+- `TileLayer`'s `refinementStrategy` now accepts a custom callback funcion.
+- `TerrainLayer` can now be used with non-geospatial views.
+- `ColumnLayer` adds `flatShading` prop.
+- Lighting in 3D layers is more consistent in `GlobeView`.
 - `GoogleMapsOverlay` supports camera tilt and bearing for raster maps.
 - `MVTLayer` supports `pointType: 'text'` in `binary` mode.
+- Picking with `project3D: true` now returns more accurate result in non-geospatial views.
 
 ## deck.gl v8.6
 
