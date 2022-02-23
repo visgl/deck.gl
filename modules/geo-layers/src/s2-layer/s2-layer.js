@@ -18,26 +18,24 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {CompositeLayer} from '@deck.gl/core';
-import {PolygonLayer} from '@deck.gl/layers';
-
-import {createCellLayer} from '../common/cell-layer-utils';
+import GeoCellLayer from '../common/GeoCellLayer';
 import {getS2Polygon} from './s2-utils';
 
 const defaultProps = {
-  ...PolygonLayer.defaultProps,
+  ...GeoCellLayer.defaultProps,
   getS2Token: {type: 'accessor', value: d => d.token}
 };
 
-export default class S2Layer extends CompositeLayer {
-  renderLayers() {
+export default class S2Layer extends GeoCellLayer {
+  indexToBounds() {
     const {data, getS2Token} = this.props;
-    return createCellLayer(this, {
+
+    return {
       data,
       _normalize: false,
       positionFormat: 'XY',
       getPolygon: (x, objectInfo) => getS2Polygon(getS2Token(x, objectInfo))
-    });
+    };
   }
 }
 

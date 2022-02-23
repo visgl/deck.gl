@@ -18,26 +18,24 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {CompositeLayer} from '@deck.gl/core';
-import {PolygonLayer} from '@deck.gl/layers';
-
-import {createCellLayer} from '../common/cell-layer-utils';
+import GeoCellLayer from '../common/GeoCellLayer';
 import {getQuadkeyPolygon} from './quadkey-utils';
 
 const defaultProps = {
-  ...PolygonLayer.defaultProps,
+  ...GeoCellLayer.defaultProps,
   getQuadkey: {type: 'accessor', value: d => d.quadkey}
 };
 
-export default class QuadkeyLayer extends CompositeLayer {
-  renderLayers() {
+export default class QuadkeyLayer extends GeoCellLayer {
+  indexToBounds() {
     const {data, getQuadkey} = this.props;
-    return createCellLayer(this, {
+
+    return {
       data,
       _normalize: false,
       positionFormat: 'XY',
       getPolygon: (x, objectInfo) => getQuadkeyPolygon(getQuadkey(x, objectInfo))
-    });
+    };
   }
 }
 
