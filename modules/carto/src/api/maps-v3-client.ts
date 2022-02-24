@@ -324,11 +324,13 @@ async function _fetchMapDataset(
   credentials: CloudNativeCredentials,
   clientId?: string
 ) {
+  const {connectionName: connection, columns, geoColumn, source, type} = dataset;
   // First fetch metadata
-  const {connectionName: connection, source, type} = dataset;
   const {url, mapFormat} = await _fetchDataUrl({
     credentials: {...credentials, accessToken},
     connection,
+    columns,
+    geoColumn,
     source,
     type,
     clientId
