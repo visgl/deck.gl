@@ -16,6 +16,7 @@ import heatmapLayerTests from './heatmap-layer';
 import hexagonLayerTests from './hexagon-layer';
 // geo-layers
 import h3LayersTests from './h3-layers';
+import quadkeyLayerTests from './quadkey-layer';
 import s2LayerTests from './s2-layer';
 import tripsLayerTests from './trips-layer';
 import mvtLayerTests from './mvt-layer';
@@ -43,6 +44,7 @@ export default [].concat(
   screenGridLayerTests,
   heatmapLayerTests,
   h3LayersTests,
+  quadkeyLayerTests,
   s2LayerTests,
   tripsLayerTests,
   mvtLayerTests,
