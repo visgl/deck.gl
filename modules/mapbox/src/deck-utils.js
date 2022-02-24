@@ -35,11 +35,9 @@ export function getDeckInstance({map, gl, deck}) {
     views: (deck && deck.props.views) || [new MapView({id: 'mapbox'})]
   };
 
-  if (deck) {
-    deck.setProps(deckProps);
-    deck.props.userData.isExternal = true;
-  } else {
-    // Using external gl context - do not set css size
+  if (!deck || deck.props.gl === gl) {
+    // deck is using the WebGLContext created by mapbox
+    // block deck from setting the canvas size
     Object.assign(deckProps, {
       gl,
       width: false,
@@ -47,17 +45,22 @@ export function getDeckInstance({map, gl, deck}) {
       touchAction: 'unset',
       viewState: getViewState(map)
     });
-    deck = new Deck(deckProps);
-
-    // If deck is externally provided (React use case), we use deck's viewState to
-    // drive the map.
+    // If using the WebGLContext created by deck (React use case), we use deck's viewState to drive the map.
     // Otherwise (pure JS use case), we use the map's viewState to drive deck.
     map.on('move', () => onMapMove(deck, map));
+  }
+
+  if (deck) {
+    deck.setProps(deckProps);
+    deck.props.userData.isExternal = true;
+  } else {
+    deck = new Deck(deckProps);
     map.on('remove', () => {
       deck.finalize();
       map.__deck = null;
     });
   }
+
   deck.props.userData.mapboxVersion = getMapboxVersion(map);
   map.__deck = deck;
   map.on('render', () => {

@@ -9,10 +9,12 @@ Layer extensions are bonus features that you can optionally add to the core deck
 This module contains the following extensions:
 
 - [BrushingExtension](/docs/api-reference/extensions/brushing-extension.md)
-- [DataFilterExtension](/docs/api-reference/extensions/data-filter-extension.md)
-- [Fp64Extension](/docs/api-reference/extensions/fp64-extension.md)
-- [PathStyleExtension](/docs/api-reference/extensions/path-style-extension.md)
 - [ClipExtension](/docs/api-reference/extensions/clip-extension.md)
+- [DataFilterExtension](/docs/api-reference/extensions/data-filter-extension.md)
+- [FillStyleExtension](/docs/api-reference/extensions/fill-style-extension.md)
+- [Fp64Extension](/docs/api-reference/extensions/fp64-extension.md)
+- [MaskExtension](/docs/api-reference/extensions/mask-extension.md)
+- [PathStyleExtension](/docs/api-reference/extensions/path-style-extension.md)
 
 For instructions on authoring your own layer extensions, visit [developer guide](/docs/developer-guide/custom-layers/layer-extensions.md).
 

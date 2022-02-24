@@ -13,6 +13,7 @@
     'hexagon-cell': {flatShading: false}
   }
   ```
+- `H3ClusterLayer` sublayer is now called `'cell'` not `'cluster-region'`
 
 ## Upgrading from deck.gl v8.5 to v8.6
 

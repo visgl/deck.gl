@@ -1,5 +1,6 @@
 import {
   GreatCircleLayer,
+  QuadkeyLayer,
   S2Layer,
   H3ClusterLayer,
   H3HexagonLayer,
@@ -26,6 +27,18 @@ const GreatCircleLayerExample = {
     getSourceColor: [64, 255, 0],
     getTargetColor: [0, 128, 200],
     widthMinPixels: 5,
+    pickable: true
+  }
+};
+
+const QuadkeyLayerExample = {
+  layer: QuadkeyLayer,
+  props: {
+    data: dataSamples.quadkeys,
+    opacity: 0.6,
+    getQuadkey: f => f.quadkey,
+    getFillColor: f => [f.value * 128, (1 - f.value) * 255, (1 - f.value) * 255, 180],
+    getElevation: f => 100 * f.value,
     pickable: true
   }
 };
@@ -100,6 +113,7 @@ const TripsLayerExample = {
 export default {
   'Geo Layers': {
     S2Layer: S2LayerExample,
+    QuadkeyLayer: QuadkeyLayerExample,
     H3ClusterLayer: H3ClusterLayerExample,
     H3HexagonLayer: H3HexagonLayerExample,
     GreatCircleLayer: GreatCircleLayerExample,
