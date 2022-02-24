@@ -3,23 +3,53 @@
 import React, {useState} from 'react';
 import {render} from 'react-dom';
 import DeckGL from '@deck.gl/react';
-import {ClipExtension} from '@deck.gl/extensions';
-import {MVTLayer} from '@deck.gl/geo-layers';
 import {CartoLayer, FORMATS, TILE_FORMATS, MAP_TYPES} from '@deck.gl/carto';
 import {GeoJsonLayer} from '@deck.gl/layers';
 
-const INITIAL_VIEW_STATE = {longitude: -73.95643, latitude: 40.8039, zoom: 9};
+const INITIAL_VIEW_STATE = {longitude: -73.95643, latitude: 40.8039, zoom: 12};
 const COUNTRIES =
   'https://d2ad6b4ur7yvpq.cloudfront.net/naturalearth-3.3.0/ne_50m_admin_0_scale_rank.geojson';
 
-const apiBaseUrl = 'https://direct-gcp-us-east1-15.dev.api.carto.com';
-const connection = 'bigquery';
-// const table = 'cartodb-gcp-backend-data-team.dynamic_tiling.points_100K';
-// const table = 'cartodb-gcp-backend-data-team.dynamic_tiling.lines_alasarr';
-const table = 'cartodb-gcp-backend-data-team.dynamic_tiling.polygons_3k_usacounty_viz';
-// const table = 'cartobq.testtables.polygons_10k';
+// Skip CDN
+const apiBaseUrl = 'https://direct-gcp-us-east1.api.carto.com';
+// PROD US GCP
+// const apiBaseUrl = 'https://gcp-us-east1.api.carto.com';
+// Localhost
+// const apiBaseUrl = 'http://localhost:8002'
 
-const accessToken = 'XXX';
+const config = {
+  bigquery: {
+    points_1M: 'cartodb-gcp-backend-data-team.dynamic_tiling.points_1M',
+    points_5M: 'cartodb-gcp-backend-data-team.dynamic_tiling.points_5M',
+    censustract: 'carto-do-public-data.carto.geography_usa_censustract_2019',
+    blockgroup: 'carto-do-public-data.carto.geography_usa_blockgroup_2019',
+    zipcodes: 'carto-do-public-data.carto.geography_usa_zcta5_2019',
+    h3: 'carto-do-public-data.carto.geography_usa_h3res8_v1',
+    block: 'carto-do-public-data.carto.geography_usa_block_2019'
+  },
+  snowflake: {
+    points_1M: 'carto_backend_data_team.dynamic_tiling.points_1M',
+    points_5M: 'carto_backend_data_team.dynamic_tiling.points_5M',
+    censustract: 'carto_backend_data_team.dynamic_tiling.usa_censustract_2019',
+    blockgroup: 'carto_backend_data_team.dynamic_tiling.usa_blockgroup_2019',
+    zipcodes: 'carto_backend_data_team.dynamic_tiling.usa_zcta5_2019',
+    h3: 'carto_backend_data_team.dynamic_tiling.usa_h3res8_v1',
+    block: 'carto_backend_data_team.dynamic_tiling.usa_block_2019'
+  },
+  redshift: {
+    points_1M: 'carto_backend_data_team.dynamic_tiling.points_1m',
+    points_5M: 'carto_backend_data_team.dynamic_tiling.points_5m',
+    censustract: 'carto_backend_data_team.dynamic_tiling.usa_censustract_2019',
+    blockgroup: 'carto_backend_data_team.dynamic_tiling.usa_blockgroup_2019',
+    zipcodes: 'carto_backend_data_team.dynamic_tiling.usa_zcta5_2019',
+    h3: 'carto_backend_data_team.dynamic_tiling.usa_h3res8_v1',
+    block: 'carto_backend_data_team.dynamic_tiling.usa_block_2019'
+  }
+};
+
+const connection = 'redshift';
+const table = config[connection]['zipcodes'];
+const accessToken = 'XXXX';
 
 const showBasemap = true;
 const showCarto = true;
@@ -60,7 +90,6 @@ function createCarto() {
     // Dynamic tiling. Request TILEJSON format with TABLE
     type: MAP_TYPES.TABLE,
     format: FORMATS.TILEJSON,
-    //formatTiles: TILE_FORMATS.GEOJSON,
 
     // Styling
     getFillColor: [233, 71, 251],

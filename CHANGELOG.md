@@ -21,6 +21,18 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ### deck.gl v8.7 Prereleases
 
+#### deck.gl [8.7.0-beta.7] - Feb 24 2022
+
+- CARTO: Fix formatTiles propagation at CartoLayer (#6687)
+- Add QuadkeyLayer (#6678)
+- [mapbox] Fix event handling when using external deck (#6671)
+- Fix math.gl deprecation warning (#6670)
+- Doc: Correct links to all extensions (#6680)
+- CartoTileLayer: Default formatTiles to binary (#6668)
+- Ignore dataComparator change in props diff (#6669)
+- fix(mapbox) leave additional views intact (#6329)
+- fix(tets): include Typescript sources in test coverage (#6663)
+
 #### deck.gl [8.7.0-beta.6] - Feb 21 2022
 - CARTO: Rename CartoDynamicTileLayer -> CartoTileLayer (#6658)
 - GeoJsonLayer[binary]: do not pass instancePickingColors attribute to TextLayer (#6650)
