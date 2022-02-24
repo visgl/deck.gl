@@ -714,7 +714,7 @@ test('fetchMap#geoColumn', async t => {
   };
 
   try {
-    const map = await fetchMap({cartoMapId});
+    await fetchMap({cartoMapId});
     t.deepEquals(table.data, GEOJSON_RESPONSE, 'Table has filled in data');
   } catch (e) {
     t.error(e, 'should not throw');
