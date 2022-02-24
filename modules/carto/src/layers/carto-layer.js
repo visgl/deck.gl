@@ -126,24 +126,29 @@ export default class CartoLayer extends CompositeLayer {
     }
   }
 
-  _getRenderLayer() {
+  _getSubLayerAndProps() {
     const {data, format, apiVersion} = this.state;
 
+    const {uniqueIdProperty} = defaultProps;
+    const props = {uniqueIdProperty, ...this.props};
+    delete props.data;
+
     if (apiVersion === API_VERSIONS.V1 || apiVersion === API_VERSIONS.V2) {
-      return MVTLayer;
+      return [MVTLayer, props];
     }
 
     if (format === FORMATS.TILEJSON) {
       /* global URL */
-      const formatTiles =
-        this.props.formatTiles ||
+      props.formatTiles =
+        props.formatTiles ||
         new URL(data.tiles[0]).searchParams.get('formatTiles') ||
         TILE_FORMATS.MVT;
-      return formatTiles === TILE_FORMATS.MVT ? MVTLayer : CartoTileLayer;
+
+      return props.formatTiles === TILE_FORMATS.MVT ? [MVTLayer, props] : [CartoTileLayer, props];
     }
 
     // It's a geojson layer
-    return GeoJsonLayer;
+    return [GeoJsonLayer, props];
   }
 
   renderLayers() {
@@ -153,11 +158,7 @@ export default class CartoLayer extends CompositeLayer {
 
     const {updateTriggers} = this.props;
 
-    const layer = this._getRenderLayer();
-
-    const {formatTiles, uniqueIdProperty} = defaultProps;
-    const props = {formatTiles, uniqueIdProperty, ...this.props};
-    delete props.data;
+    const [layer, props] = this._getSubLayerAndProps();
 
     // eslint-disable-next-line new-cap
     return new layer(
