@@ -8,7 +8,8 @@ import {
   TerrainLayer,
   MVTLayer,
   H3HexagonLayer,
-  H3ClusterLayer
+  H3ClusterLayer,
+  QuadkeyLayer
 } from '@deck.gl/geo-layers';
 
 import {makeLayerDemo} from './demo-base';
