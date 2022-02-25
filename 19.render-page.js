@@ -1,0 +1,97 @@
+exports.ids = [19];
+exports.modules = {
+
+/***/ "../node_modules/@arcgis/core/core/pbf.js":
+/*!************************************************!*\
+  !*** ../node_modules/@arcgis/core/core/pbf.js ***!
+  \************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return a; });
+/* harmony import */ var _has_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./has.js */ "../node_modules/@arcgis/core/core/has.js");
+/* harmony import */ var _ObjectPool_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./ObjectPool.js */ "../node_modules/@arcgis/core/core/ObjectPool.js");
+/*
+All material copyright ESRI, All Rights Reserved, unless otherwise specified.
+See https://js.arcgis.com/4.21/esri/copyright.txt for details.
+*/
+const s=4294967296,i=Object(_has_js__WEBPACK_IMPORTED_MODULE_0__["default"])("esri-text-decoder")?new TextDecoder("utf-8"):null,r=Object(_has_js__WEBPACK_IMPORTED_MODULE_0__["default"])("safari")||Object(_has_js__WEBPACK_IMPORTED_MODULE_0__["default"])("ios")?6:Object(_has_js__WEBPACK_IMPORTED_MODULE_0__["default"])("ff")?12:32;class a{constructor(t,e,s=0,i=(t?t.byteLength:0)){this._tag=0,this._dataType=99,this.init(t,e,s,i)}init(t,e,s,i){this._data=t,this._dataView=e,this._pos=s,this._end=i}clone(){return new a(this._data,this._dataView,this._pos,this._end)}pos(){return this._pos}move(t){this._pos=t}nextTag(t){for(;;){if(this._pos===this._end)return!1;const e=this._decodeVarint();if(this._tag=e>>3,this._dataType=7&e,!t||t===this._tag)break;this.skip()}return!0}next(){if(this._pos===this._end)return!1;const t=this._decodeVarint();return this._tag=t>>3,this._dataType=7&t,!0}empty(){return this._pos>=this._end}tag(){return this._tag}getInt32(){return this._decodeVarint()}getInt64(){return this._decodeVarint()}getUInt32(){let t=4294967295;return t=(127&this._data[this._pos])>>>0,this._data[this._pos++]<128?t:(t=(t|(127&this._data[this._pos])<<7)>>>0,this._data[this._pos++]<128?t:(t=(t|(127&this._data[this._pos])<<14)>>>0,this._data[this._pos++]<128?t:(t=(t|(127&this._data[this._pos])<<21)>>>0,this._data[this._pos++]<128?t:(t=(t|(15&this._data[this._pos])<<28)>>>0,this._data[this._pos++]<128?t:void 0))))}getUInt64(){return this._decodeVarint()}getSInt32(){const t=this.getUInt32();return t>>>1^-(1&t)|0}getSInt64(){return this._decodeSVarint()}getBool(){const t=0!==this._data[this._pos];return this._skip(1),t}getEnum(){return this._decodeVarint()}getFixed64(){const t=this._dataView,e=this._pos,i=t.getUint32(e,!0)+t.getUint32(e+4,!0)*s;return this._skip(8),i}getSFixed64(){const t=this._dataView,e=this._pos,i=t.getUint32(e,!0)+t.getInt32(e+4,!0)*s;return this._skip(8),i}getDouble(){const t=this._dataView.getFloat64(this._pos,!0);return this._skip(8),t}getFixed32(){const t=this._dataView.getUint32(this._pos,!0);return this._skip(4),t}getSFixed32(){const t=this._dataView.getInt32(this._pos,!0);return this._skip(4),t}getFloat(){const t=this._dataView.getFloat32(this._pos,!0);return this._skip(4),t}getString(){const t=this._getLength(),e=this._pos,s=this._toString(this._data,e,e+t);return this._skip(t),s}getBytes(){const t=this._getLength(),e=this._pos,s=this._toBytes(this._data,e,e+t);return this._skip(t),s}getLength(){return this._getLengthUnsafe()}processMessageWithArgs(t,e,s,i){const r=this.getMessage(),a=t(r,e,s,i);return r.release(),a}processMessage(t){const e=this.getMessage(),s=t(e);return e.release(),s}getMessage(){const t=this._getLength(),e=a.pool.acquire();return e.init(this._data,this._dataView,this._pos,this._pos+t),this._skip(t),e}release(){a.pool.release(this)}dataType(){return this._dataType}skip(){switch(this._dataType){case 0:this._decodeVarint();break;case 1:this._skip(8);break;case 2:this._skip(this._getLength());break;case 5:this._skip(4);break;default:throw new Error("Invalid data type!")}}skipLen(t){this._skip(t)}_skip(t){if(this._pos+t>this._end)throw new Error("Attempt to skip past the end of buffer!");this._pos+=t}_decodeVarint(){const t=this._data;let e,s=this._pos,i=0;if(this._end-s>=10)do{if(e=t[s++],i|=127&e,0==(128&e))break;if(e=t[s++],i|=(127&e)<<7,0==(128&e))break;if(e=t[s++],i|=(127&e)<<14,0==(128&e))break;if(e=t[s++],i|=(127&e)<<21,0==(128&e))break;if(e=t[s++],i+=268435456*(127&e),0==(128&e))break;if(e=t[s++],i+=34359738368*(127&e),0==(128&e))break;if(e=t[s++],i+=4398046511104*(127&e),0==(128&e))break;if(e=t[s++],i+=562949953421312*(127&e),0==(128&e))break;if(e=t[s++],i+=72057594037927940*(127&e),0==(128&e))break;if(e=t[s++],i+=0x8000000000000000*(127&e),0==(128&e))break;throw new Error("Varint too long!")}while(0);else{let r=1;for(;s!==this._end&&(e=t[s],0!=(128&e));)++s,i+=(127&e)*r,r*=128;if(s===this._end)throw new Error("Varint overrun!");++s,i+=e*r}return this._pos=s,i}_decodeSVarint(){const t=this._decodeVarint();return t%2?-(t+1)/2:t/2}_getLength(){if(2!==this._dataType)throw new Error("Not a delimited data type!");return this._decodeVarint()}_getLengthUnsafe(){return this.getUInt32()}_toString(t,e,s){if((s=Math.min(this._end,s))-e>r&&i){const r=t.subarray(e,s);return i.decode(r)}let a="",n="";for(let i=e;i<s;++i){const e=t[i];128&e?n+="%"+e.toString(16):(a+=decodeURIComponent(n)+String.fromCharCode(e),n="")}return n.length&&(a+=decodeURIComponent(n)),a}_toBytes(t,e,s){return s=Math.min(this._end,s),new Uint8Array(t.buffer,e,s-e)}}a.pool=new _ObjectPool_js__WEBPACK_IMPORTED_MODULE_1__["default"](a,null,(t=>{t._data=null,t._dataView=null}));
+
+
+/***/ }),
+
+/***/ "../node_modules/@arcgis/core/rest/query/operations/pbfFeatureServiceParser.js":
+/*!*************************************************************************************!*\
+  !*** ../node_modules/@arcgis/core/rest/query/operations/pbfFeatureServiceParser.js ***!
+  \*************************************************************************************/
+/*! exports provided: parseFeatureQuery, parseFieldType, parseTransform */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "parseFeatureQuery", function() { return D; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "parseFieldType", function() { return c; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "parseTransform", function() { return q; });
+/* harmony import */ var _core_Error_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../../core/Error.js */ "../node_modules/@arcgis/core/core/Error.js");
+/* harmony import */ var _core_maybe_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../../core/maybe.js */ "../node_modules/@arcgis/core/core/maybe.js");
+/* harmony import */ var _core_pbf_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../../core/pbf.js */ "../node_modules/@arcgis/core/core/pbf.js");
+/* harmony import */ var _layers_graphics_OptimizedGeometry_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../../../layers/graphics/OptimizedGeometry.js */ "../node_modules/@arcgis/core/layers/graphics/OptimizedGeometry.js");
+/* harmony import */ var _pbfOptimizedFeatureSet_js__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./pbfOptimizedFeatureSet.js */ "../node_modules/@arcgis/core/rest/query/operations/pbfOptimizedFeatureSet.js");
+/*
+All material copyright ESRI, All Rights Reserved, unless otherwise specified.
+See https://js.arcgis.com/4.21/esri/copyright.txt for details.
+*/
+const n=["esriFieldTypeSmallInteger","esriFieldTypeInteger","esriFieldTypeSingle","esriFieldTypeDouble","esriFieldTypeString","esriFieldTypeDate","esriFieldTypeOID","esriFieldTypeGeometry","esriFieldTypeBlob","esriFieldTypeRaster","esriFieldTypeGUID","esriFieldTypeGlobalID","esriFieldTypeXML"],o=["sqlTypeBigInt","sqlTypeBinary","sqlTypeBit","sqlTypeChar","sqlTypeDate","sqlTypeDecimal","sqlTypeDouble","sqlTypeFloat","sqlTypeGeometry","sqlTypeGUID","sqlTypeInteger","sqlTypeLongNVarchar","sqlTypeLongVarbinary","sqlTypeLongVarchar","sqlTypeNChar","sqlTypeNVarchar","sqlTypeOther","sqlTypeReal","sqlTypeSmallInt","sqlTypeSqlXml","sqlTypeTime","sqlTypeTimestamp","sqlTypeTimestamp2","sqlTypeTinyInt","sqlTypeVarbinary","sqlTypeVarchar"],i=["upperLeft","lowerLeft"];function c(e){return e>=n.length?null:n[e]}function l(e){return e>=o.length?null:o[e]}function g(e){return e>=i.length?null:i[e]}function p(e,t){return t>=e.geometryTypes.length?null:e.geometryTypes[t]}function u(e,t,r){const s=3,a=t.createPointGeometry(r);for(;e.next();)switch(e.tag()){case s:{const r=e.getUInt32(),s=e.pos()+r;let n=0;for(;e.pos()<s;)t.addCoordinatePoint(a,e.getSInt64(),n++);break}default:e.skip()}return a}function y(e,t,r){const s=2,a=3,n=t.createGeometry(r),o=2+(r.hasZ?1:0)+(r.hasM?1:0);for(;e.next();)switch(e.tag()){case s:{const r=e.getUInt32(),s=e.pos()+r;let a=0;for(;e.pos()<s;)t.addLength(n,e.getUInt32(),a++);break}case a:{const r=e.getUInt32(),s=e.pos()+r;let a=0;for(t.allocateCoordinates(n);e.pos()<s;)t.addCoordinate(n,e.getSInt64(),a),a++,a===o&&(a=0);break}default:e.skip()}return n}function b(e){const t=1,r=2,n=3,o=new _layers_graphics_OptimizedGeometry_js__WEBPACK_IMPORTED_MODULE_3__["default"];let i="esriGeometryPoint";for(;e.next();)switch(e.tag()){case r:{const t=e.getUInt32(),r=e.pos()+t;for(;e.pos()<r;)o.lengths.push(e.getUInt32());break}case n:{const t=e.getUInt32(),r=e.pos()+t;for(;e.pos()<r;)o.coords.push(e.getSInt64());break}case t:i=_pbfOptimizedFeatureSet_js__WEBPACK_IMPORTED_MODULE_4__["OPTIMIZED_GEOMETRY_TYPES"][e.getEnum()];break;default:e.skip()}return{queryGeometry:o,queryGeometryType:i}}function f(e){const t=1,r=2,s=3,a=4,n=5,o=6,i=7,c=8,l=9;for(;e.next();)switch(e.tag()){case t:return e.getString();case r:return e.getFloat();case s:return e.getDouble();case a:return e.getSInt32();case n:return e.getUInt32();case o:return e.getInt64();case i:return e.getUInt64();case c:return e.getSInt64();case l:return e.getBool();default:return e.skip(),null}return null}function k(e){const t=1,r=2,s=3,a=4,n=5,o=6,i={type:c(0)};for(;e.next();)switch(e.tag()){case t:i.name=e.getString();break;case r:i.type=c(e.getEnum());break;case s:i.alias=e.getString();break;case a:i.sqlType=l(e.getEnum());break;case n:e.skip();break;case o:i.defaultValue=e.getString();break;default:e.skip()}return i}function d(e){const t=1,r=2,s={};for(;e.next();)switch(e.tag()){case t:s.name=e.getString();break;case r:s.isSystemMaintained=e.getBool();break;default:e.skip()}return s}function m(e,t,r,s){const a=1,n=2,o=4,i=t.createFeature(r);let c=0;for(;e.next();)switch(e.tag()){case a:{const t=s[c++].name;i.attributes[t]=e.processMessage(f);break}case n:i.geometry=e.processMessageWithArgs(y,t,r);break;case o:i.centroid=e.processMessageWithArgs(u,t,r);break;default:e.skip()}return i}function h(e){const t=1,r=2,s=3,a=4,n=[1,1,1,1];for(;e.next();)switch(e.tag()){case t:n[0]=e.getDouble();break;case r:n[1]=e.getDouble();break;case a:n[2]=e.getDouble();break;case s:n[3]=e.getDouble();break;default:e.skip()}return n}function T(e){const t=1,r=2,s=3,a=4,n=[0,0,0,0];for(;e.next();)switch(e.tag()){case t:n[0]=e.getDouble();break;case r:n[1]=e.getDouble();break;case a:n[2]=e.getDouble();break;case s:n[3]=e.getDouble();break;default:e.skip()}return n}function q(e){const t=1,r=2,s=3,a={originPosition:g(0)};for(;e.next();)switch(e.tag()){case t:a.originPosition=g(e.getEnum());break;case r:a.scale=e.processMessage(h);break;case s:a.translate=e.processMessage(T);break;default:e.skip()}return a}function I(e){const t=1,r=2,s=3,a={};for(;e.next();)switch(e.tag()){case t:a.shapeAreaFieldName=e.getString();break;case r:a.shapeLengthFieldName=e.getString();break;case s:a.units=e.getString();break;default:e.skip()}return a}function F(e,t){const r=1,s=2,a=3,n=4,o=5,i=t.createSpatialReference();for(;e.next();)switch(e.tag()){case r:i.wkid=e.getUInt32();break;case o:i.wkt=e.getString();break;case s:i.latestWkid=e.getUInt32();break;case a:i.vcsWkid=e.getUInt32();break;case n:i.latestVcsWkid=e.getUInt32();break;default:e.skip()}return i}function S(e,t){const r=1,s=2,a=3,n=4,o=5,i=7,c=8,l=9,g=10,u=11,y=12,b=13,f=15,h=t.createFeatureResult();h.geometryType=p(t,0);let T=!1;for(;e.next();)switch(e.tag()){case r:h.objectIdFieldName=e.getString();break;case a:h.globalIdFieldName=e.getString();break;case n:h.geohashFieldName=e.getString();break;case o:h.geometryProperties=e.processMessage(I);break;case i:h.geometryType=p(t,e.getEnum());break;case c:h.spatialReference=e.processMessageWithArgs(F,t);break;case g:h.hasZ=e.getBool();break;case u:h.hasM=e.getBool();break;case y:h.transform=e.processMessage(q);break;case l:{const t=e.getBool();h.exceededTransferLimit=t;break}case b:t.addField(h,e.processMessage(k));break;case f:T||(t.prepareFeatures(h),T=!0),t.addFeature(h,e.processMessageWithArgs(m,t,h,h.fields));break;case s:h.uniqueIdField=e.processMessage(d);break;default:e.skip()}return t.finishFeatureResult(h),h}function w(e,r){const s=1,a=4,n={};let o=null;for(;e.next();)switch(e.tag()){case a:o=e.processMessageWithArgs(b);break;case s:n.featureResult=e.processMessageWithArgs(S,r);break;default:e.skip()}return Object(_core_maybe_js__WEBPACK_IMPORTED_MODULE_1__["isSome"])(o)&&n.featureResult&&r.addQueryGeometry(n,o),n}function D(t,s){try{const e=2,a=new _core_pbf_js__WEBPACK_IMPORTED_MODULE_2__["default"](new Uint8Array(t),new DataView(t)),n={};for(;a.next();)if(a.tag()===e)n.queryResult=a.processMessageWithArgs(w,s);else a.skip();return n}catch(a){throw new _core_Error_js__WEBPACK_IMPORTED_MODULE_0__["default"]("query:parsing-pbf","Error while parsing FeatureSet PBF payload",{error:a})}}
+
+
+/***/ }),
+
+/***/ "../node_modules/@arcgis/core/rest/query/operations/pbfOptimizedFeatureSet.js":
+/*!************************************************************************************!*\
+  !*** ../node_modules/@arcgis/core/rest/query/operations/pbfOptimizedFeatureSet.js ***!
+  \************************************************************************************/
+/*! exports provided: OPTIMIZED_GEOMETRY_TYPES, OptimizedFeatureSetParserContext */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "OPTIMIZED_GEOMETRY_TYPES", function() { return n; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "OptimizedFeatureSetParserContext", function() { return a; });
+/* harmony import */ var _core_unitUtils_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../../core/unitUtils.js */ "../node_modules/@arcgis/core/core/unitUtils.js");
+/* harmony import */ var _geometry_support_spatialReferenceUtils_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../../geometry/support/spatialReferenceUtils.js */ "../node_modules/@arcgis/core/geometry/support/spatialReferenceUtils.js");
+/* harmony import */ var _layers_graphics_OptimizedFeature_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../../layers/graphics/OptimizedFeature.js */ "../node_modules/@arcgis/core/layers/graphics/OptimizedFeature.js");
+/* harmony import */ var _layers_graphics_OptimizedFeatureSet_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../../../layers/graphics/OptimizedFeatureSet.js */ "../node_modules/@arcgis/core/layers/graphics/OptimizedFeatureSet.js");
+/* harmony import */ var _layers_graphics_OptimizedGeometry_js__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../../../layers/graphics/OptimizedGeometry.js */ "../node_modules/@arcgis/core/layers/graphics/OptimizedGeometry.js");
+/*
+All material copyright ESRI, All Rights Reserved, unless otherwise specified.
+See https://js.arcgis.com/4.21/esri/copyright.txt for details.
+*/
+const n=["esriGeometryPoint","esriGeometryMultipoint","esriGeometryPolyline","esriGeometryPolygon"];class a{constructor(e){this.options=e,this.geometryTypes=n,this._coordinatePtr=0,this._vertexDimension=0}createFeatureResult(){return new _layers_graphics_OptimizedFeatureSet_js__WEBPACK_IMPORTED_MODULE_3__["default"]}prepareFeatures(e){this._vertexDimension=2,e.hasZ&&this._vertexDimension++,e.hasM&&this._vertexDimension++}finishFeatureResult(r){if(!r||!r.features||!r.hasZ||!this.options.sourceSpatialReference||!r.spatialReference||Object(_geometry_support_spatialReferenceUtils_js__WEBPACK_IMPORTED_MODULE_1__["equals"])(r.spatialReference,this.options.sourceSpatialReference)||r.spatialReference.vcsWkid)return;const i=Object(_core_unitUtils_js__WEBPACK_IMPORTED_MODULE_0__["getMetersPerVerticalUnitForSR"])(this.options.sourceSpatialReference)/Object(_core_unitUtils_js__WEBPACK_IMPORTED_MODULE_0__["getMetersPerVerticalUnitForSR"])(r.spatialReference);if(1!==i)for(const e of r.features){if(!Object(_layers_graphics_OptimizedFeature_js__WEBPACK_IMPORTED_MODULE_2__["hasGeometry"])(e))continue;const t=e.geometry.coords;for(let e=2;e<t.length;e+=3)t[e]*=i}}addFeature(e,t){e.features.push(t)}createFeature(){return new _layers_graphics_OptimizedFeature_js__WEBPACK_IMPORTED_MODULE_2__["default"]}createSpatialReference(){return{wkid:0}}createGeometry(){return new _layers_graphics_OptimizedGeometry_js__WEBPACK_IMPORTED_MODULE_4__["default"]}addField(e,t){e.fields.push(t)}allocateCoordinates(e){e.coords.length=e.lengths.reduce(((e,t)=>e+t),0)*this._vertexDimension,this._coordinatePtr=0}addCoordinate(e,t){e.coords[this._coordinatePtr++]=t}addCoordinatePoint(e,t){e.coords.push(t)}addLength(e,t){e.lengths.push(t)}addQueryGeometry(e,t){e.queryGeometry=t.queryGeometry,e.queryGeometryType=t.queryGeometryType}createPointGeometry(){return new _layers_graphics_OptimizedGeometry_js__WEBPACK_IMPORTED_MODULE_4__["default"]}}
+
+
+/***/ }),
+
+/***/ "../node_modules/@arcgis/core/rest/query/operations/pbfQueryUtils.js":
+/*!***************************************************************************!*\
+  !*** ../node_modules/@arcgis/core/rest/query/operations/pbfQueryUtils.js ***!
+  \***************************************************************************/
+/*! exports provided: parsePBFFeatureQuery */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "parsePBFFeatureQuery", function() { return t; });
+/* harmony import */ var _pbfFeatureServiceParser_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./pbfFeatureServiceParser.js */ "../node_modules/@arcgis/core/rest/query/operations/pbfFeatureServiceParser.js");
+/*
+All material copyright ESRI, All Rights Reserved, unless otherwise specified.
+See https://js.arcgis.com/4.21/esri/copyright.txt for details.
+*/
+function t(t,r){const u=Object(_pbfFeatureServiceParser_js__WEBPACK_IMPORTED_MODULE_0__["parseFeatureQuery"])(t,r),o=u.queryResult.featureResult,s=u.queryResult.queryGeometry,y=u.queryResult.queryGeometryType;if(o&&o.features&&o.features.length&&o.objectIdFieldName){const e=o.objectIdFieldName;for(const t of o.features)t.attributes&&(t.objectId=t.attributes[e])}return o&&(o.queryGeometry=s,o.queryGeometryType=y),o}
+
+
+/***/ })
+
+};;
+//# sourceMappingURL=19.render-page.js.map
