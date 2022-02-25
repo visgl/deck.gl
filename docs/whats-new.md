@@ -16,9 +16,7 @@ The new [MaskExtension](/docs/api-reference/extensions/mask-extension) allows la
 
 The new [QuadkeyLayer](/docs/api-reference/geo-layers/quadkey-layer) renders filled and/or stroked polygons, with geometry automatically calculated based on a quadkey (geospatial index).
 
-
 ### CARTO
-
 
 #### fetchMap
 
