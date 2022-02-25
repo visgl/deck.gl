@@ -38,7 +38,7 @@ export const QuadkeyLayerDemo = makeLayerDemo({
     wireframe: false,
     filled: true,
     extruded: true,
-    elevationScale: 100,
+    elevationScale: 1000,
     getQuadkey: d => d.quadkey,
     getFillColor: d => [d.value * 128, (1 - d.value) * 255, (1 - d.value) * 255, 180],
     getElevation: d => d.value
