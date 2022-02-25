@@ -153,7 +153,7 @@ Expects an object with WebGL settings. Before each frame is rendered, this objec
 }
 ```
 
-Refer to the luma.gl [setParameters](https://luma.gl/docs/api-reference/gltools/parameter-setting) API for documentation on supported parameters and values.
+Refer to the luma.gl [setParameters](https://luma.gl/docs/api-reference-legacy/context/parameter-setting) API for documentation on supported parameters and values.
 
 ```js
 import GL from '@luma.gl/constants';

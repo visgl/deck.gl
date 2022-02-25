@@ -126,7 +126,7 @@ MyLayerClass.defaultProps = {
 
 ##### `image`
 
-One of: URL string, [Texture2D](https://luma.gl/docs/api-reference/webgl/texture-2d) object, `Image`, `HTMLCanvasElement`, `HTMLVideoElement`, `ImageBitmap` or `ImageData`.
+One of: URL string, [Texture2D](https://luma.gl/docs/api-reference-legacy/classes/texture-2d) object, `Image`, `HTMLCanvasElement`, `HTMLVideoElement`, `ImageBitmap` or `ImageData`.
 
 - Default `transform`: converts to a `Texture2D` object
 

@@ -144,4 +144,4 @@ void main(void) {
 }
 ```
 
-For more details refer to luma.gl's [`Picking Module`](https://luma.gl/docs/api-reference/shadertools/core-shader-modules).
+For more details refer to luma.gl's [`Picking Module`](https://luma.gl/docs/modules/shadertools/core-shader-modules).

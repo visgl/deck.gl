@@ -94,6 +94,7 @@
             {"entry": "docs/api-reference/layers/path-layer"},
             {"entry": "docs/api-reference/layers/point-cloud-layer"},
             {"entry": "docs/api-reference/layers/polygon-layer"},
+            {"entry": "docs/api-reference/geo-layers/quadkey-layer"},
             {"entry": "docs/api-reference/geo-layers/s2-layer"},
             {"entry": "docs/api-reference/layers/scatterplot-layer"},
             {"entry": "docs/api-reference/mesh-layers/scenegraph-layer"},
@@ -212,9 +213,11 @@
           "entries": [
             {"entry": "docs/api-reference/extensions/overview"},
             {"entry": "docs/api-reference/extensions/brushing-extension"},
+            {"entry": "docs/api-reference/extensions/clip-extension"},
             {"entry": "docs/api-reference/extensions/data-filter-extension"},
             {"entry": "docs/api-reference/extensions/fill-style-extension"},
             {"entry": "docs/api-reference/extensions/fp64-extension"},
+            {"entry": "docs/api-reference/extensions/mask-extension"},
             {"entry": "docs/api-reference/extensions/path-style-extension"}
           ]
         },

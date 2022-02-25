@@ -4,8 +4,8 @@ CARTO [Builder](https://carto.com/builder/) is a powerful tool for designing map
 
 <div align="center">
   <div>
-    <img src="https://user-images.githubusercontent.com/453755/143416216-4f1f8ddb-6ba3-4ed2-a026-d89c0f3e1ec7.gif" />
-    <p><i>CARTO Builder demo</i></p>
+    <img src="https://github.com/visgl/deck.gl-data/blob/master/images/docs/fetch-map.gif" />
+    <p><i>Loading a Builder map with deck.gl</i></p>
   </div>
 </div>
 
