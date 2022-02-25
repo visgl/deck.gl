@@ -16,17 +16,19 @@ The new [MaskExtension](/docs/api-reference/extensions/mask-extension) allows la
 
 The new [QuadkeyLayer](/docs/api-reference/geo-layers/quadkey-layer) renders filled and/or stroked polygons, with geometry automatically calculated based on a quadkey (geospatial index).
 
-### @deck.gl/carto fetchMap
+### @deck.gl/carto 
 
-[fetchMap](/docs/api-reference/carto/fetch-map) is added to the [CARTO deck.gl submodule](/docs/api-reference/carto/overview), greatly streamlining the display of maps created using CARTO 3.
+#### fetchMap
 
-```javascript
-import {Deck} from '@deck.gl/core';
-import {fetchMap} from '@deck.gl/carto';
+[fetchMap](/docs/api-reference/carto/fetch-map) is added to the [CARTO deck.gl submodule](/docs/api-reference/carto/overview), greatly streamlining the display of maps created using CARTO platform.
 
-const cartoMapId = 'ff6ac53f-741a-49fb-b615-d040bc5a96b8';
-fetchMap({cartoMapId}).then(map => new Deck(map));
-```
+#### Support for large tables
+
+CartoLayer at 8.7 allows to visualize large tables from BigQuery, Snowflake, Redshift and PostgreSQL without requiring to pregenerate a tileset. In previous versions, it was limited to 30MB/200K rows of data.
+
+#### Support for Databricks
+
+In 8.7, CartoLayer brings support for [Databricks](https://databricks.com/. It's a seamless integration with the Data Lakehouse Platform, unlocking powerful visualization and geospatial analysis capabilities.
 
 ### Enhancements
 
