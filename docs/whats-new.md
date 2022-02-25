@@ -2,6 +2,47 @@
 
 This page contains highlights of each deck.gl release. Also check our [vis.gl blog](https://medium.com/vis-gl) for news about new releases and features in deck.gl.
 
+## deck.gl v8.7
+
+Release date: February 25, 2022
+
+### MaskExtension
+
+The new [MaskExtension](/docs/api-reference/extensions/mask-extension) allows layers to show/hide objects by a geofence. For example, a map may filter a list of user locations by the boundaries of a given country, or highlight part of a base map that is inside a user-drawn circle or lasso area.
+
+![Masking Manhattan buildings](https://raw.githubusercontent.com/visgl/deck.gl-data/master/images/whats-new/mask-extension.gif)
+
+### QuadkeyLayer
+
+The new [QuadkeyLayer](/docs/api-reference/geo-layers/quadkey-layer) renders filled and/or stroked polygons, with geometry automatically calculated based on a quadkey (geospatial index).
+
+### CARTO
+
+#### fetchMap
+
+[fetchMap](/docs/api-reference/carto/fetch-map) is added to the [CARTO deck.gl submodule](/docs/api-reference/carto/overview), greatly streamlining the display of maps created using CARTO platform.
+
+#### Support for large tables
+
+CartoLayer at 8.7 allows the visualization of large tables (`type: MAP_TYPES.TABLE`) from BigQuery, Snowflake, Redshift and PostgreSQL without requiring a tileset to be pregenerated. Large datasets are visualized via vector tiles. In previous versions, it was limited to 30MB/200K rows of data.
+
+
+#### Support for Databricks
+
+In 8.7, CartoLayer brings support for [Databricks](https://databricks.com/. It's a seamless integration with the Data Lakehouse Platform, unlocking powerful visualization and geospatial analysis capabilities.
+
+
+### Enhancements
+
+- Less flashing when using `TileLayer` with `refinementStrategy: 'no-overlap'`.
+- `TileLayer`'s `refinementStrategy` now accepts a custom callback funcion.
+- `TerrainLayer` can now be used with non-geospatial views.
+- `ColumnLayer` adds `flatShading` prop.
+- Lighting in 3D layers is more consistent in `GlobeView`.
+- `GoogleMapsOverlay` supports camera tilt and bearing for raster maps.
+- `MVTLayer` supports `pointType: 'text'` in `binary` mode.
+- Picking with `project3D: true` now returns more accurate result in non-geospatial views.
+
 ## deck.gl v8.6
 
 Release date: October 11, 2021

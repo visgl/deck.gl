@@ -2,7 +2,7 @@
 
 Deck.gl is the preferred and official solution for creating modern geospatial web applications using [CARTO Location Intelligence platform](https://carto.com/).
 
-With deck.gl and the all-new **CARTO 3 platform** you can directly access spatial datasets and tilesets that are hosted in your current cloud data warehouse. CARTO 3 provides seamless integrations with Google BigQuery, Amazon Redshift, Snowflake and PostgreSQL-compatible databases, eliminating the need to move your data into CARTO.
+With deck.gl and the all-new **CARTO 3 platform** you can directly access spatial datasets and tilesets that are hosted in your current cloud data warehouse. CARTO 3 provides seamless integrations with Google BigQuery, Amazon Redshift, Snowflake, Databricks and PostgreSQL-compatible databases, eliminating the need to move your data into CARTO.
 
 <img src="https://raw.githubusercontent.com/CartoDB/viz-doc/master/deck.gl/img/osm_buildings.jpg" />
 

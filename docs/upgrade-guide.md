@@ -4,8 +4,8 @@
 
 #### Deprecations
 
-- `CartoBQTilerLayer` is removed. Use `CartoLayer` instead with `type` set to `MAP_TYPES.TILESET`.
-- `CartoSQLLayer` is removed. Use `CartoLayer` instead with `type` set to `MAP_TYPES.QUERY`.
+##### Core
+
 - `H3HexagonLayer` now uses flat shading when it renders a `ColumnLayer`. This change improves the visual consistency when using `highPrecision: 'auto'`. To revert to the old behavior, set the following prop:
 
   ```js
@@ -14,6 +14,12 @@
   }
   ```
 - `H3ClusterLayer` sublayer is now called `'cell'` not `'cluster-region'`
+
+##### CARTO
+
+- `CartoBQTilerLayer` is removed. Use `CartoLayer` instead with `type` set to `MAP_TYPES.TILESET`.
+- `CartoSQLLayer` is removed. Use `CartoLayer` instead with `type` set to `MAP_TYPES.QUERY`.
+- `API_VERSIONS.V3` is the default for the CARTO module API calls. Use `setDefaultCredentials` to explicitly specify `V2`.
 
 ## Upgrading from deck.gl v8.5 to v8.6
 
