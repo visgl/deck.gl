@@ -29,7 +29,7 @@ CartoLayer at 8.7 allows the visualization of large tables (`type: MAP_TYPES.TAB
 
 #### Support for Databricks
 
-In 8.7, CartoLayer brings support for [Databricks](https://databricks.com/. It's a seamless integration with the Data Lakehouse Platform, unlocking powerful visualization and geospatial analysis capabilities.
+In 8.7, CartoLayer brings support for [Databricks](https://databricks.com). It's a seamless integration with the Data Lakehouse Platform, unlocking powerful visualization and geospatial analysis capabilities.
 
 
 ### Enhancements
