@@ -70,10 +70,10 @@ The keys in `data.attributes` correspond to the [accessor](/docs/developer-guide
 
 Each value in `data.attributes` may be one of the following formats:
 
-- luma.gl [Buffer](https://luma.gl/docs/api-reference-legacy/classes/buffer) instance
+- luma.gl [Buffer](https://github.com/visgl/luma.gl/blob/8.5-release/modules/webgl/docs/api-reference/buffer.md) instance
 - A typed array, which will be used to create a `Buffer`
 - An object containing the following optional fields. For more information, see [WebGL vertex attribute API](https://developer.mozilla.org/en-US/docs/Web/API/WebGLRenderingContext/vertexAttribPointer).
-  + `buffer` ([Buffer](https://luma.gl/docs/api-reference/webgl/buffer))
+  + `buffer` ([Buffer](https://github.com/visgl/luma.gl/blob/8.5-release/modules/webgl/docs/api-reference/buffer.md))
   + `value` (TypedArray)
   + `type` (GLenum) - A WebGL data type, see [vertexAttribPointer](https://developer.mozilla.org/en-US/docs/Web/API/WebGLRenderingContext/vertexAttribPointer#Parameters).
   + `size` (Number) - the number of elements per vertex attribute.
@@ -472,7 +472,7 @@ The function receives two arguments:
 
 The `parameters` allows applications to specify values for WebGL parameters such as blending mode, depth testing etc. Any `parameters` will be applied temporarily while rendering this layer only.
 
-To get access to static parameter values, applications can `import GL from 'luma.gl'`. Please refer to the luma.gl [setParameters](https://luma.gl/docs/api-reference-legacy/context/parameter-setting) API for documentation on supported parameters and values.
+To get access to static parameter values, applications can `import GL from 'luma.gl'`. Please refer to the luma.gl [setParameters](https://github.com/visgl/luma.gl/blob/8.5-release/modules/gltools/docs/api-reference/parameter-setting.md) API for documentation on supported parameters and values.
 
 
 ##### `getPolygonOffset` (Function, optional)
