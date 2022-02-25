@@ -16,7 +16,9 @@ The new [MaskExtension](/docs/api-reference/extensions/mask-extension) allows la
 
 The new [QuadkeyLayer](/docs/api-reference/geo-layers/quadkey-layer) renders filled and/or stroked polygons, with geometry automatically calculated based on a quadkey (geospatial index).
 
-### @deck.gl/carto fetchMap
+### CARTO
+
+#### fetchMap
 
 [fetchMap](/docs/api-reference/carto/fetch-map) is added to the [CARTO deck.gl submodule](/docs/api-reference/carto/overview), greatly streamlining the display of maps created using CARTO 3.
 
@@ -27,6 +29,10 @@ import {fetchMap} from '@deck.gl/carto';
 const cartoMapId = 'ff6ac53f-741a-49fb-b615-d040bc5a96b8';
 fetchMap({cartoMapId}).then(map => new Deck(map));
 ```
+
+#### Dynamic tiling
+
+Maps with `type: MAP_TYPES.TABLE` can enable dynamic tiling by specifying `format: FORMATS.TILEJSON`. This allows the rendering of large table datasets without need to explicitly create a tileset first.
 
 ### Enhancements
 
