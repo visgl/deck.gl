@@ -208,4 +208,4 @@ The width of the outline of each object, in units specified by `lineWidthUnits` 
 
 ## Source
 
-[modules/layers/src/scatterplot-layer](https://github.com/visgl/deck.gl/tree/master/modules/layers/src/scatterplot-layer)
+[modules/layers/src/scatterplot-layer](https://github.com/visgl/deck.gl/tree/8.7-release/modules/layers/src/scatterplot-layer)

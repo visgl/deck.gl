@@ -187,4 +187,4 @@ The `TerrainLayer` renders the following sublayers:
 
 # Source
 
-[modules/geo-layers/src/terrain-layer](https://github.com/visgl/deck.gl/tree/master/modules/geo-layers/src/terrain-layer)
+[modules/geo-layers/src/terrain-layer](https://github.com/visgl/deck.gl/tree/8.7-release/modules/geo-layers/src/terrain-layer)

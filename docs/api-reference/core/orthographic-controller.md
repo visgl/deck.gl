@@ -77,4 +77,4 @@ See the `Controller` class [documentation](/docs/api-reference/core/controller.m
 
 ## Source
 
-[modules/core/src/controllers/orthographic-controller.js](https://github.com/visgl/deck.gl/blob/master/modules/core/src/controllers/orthographic-controller.js)
+[modules/core/src/controllers/orthographic-controller.js](https://github.com/visgl/deck.gl/tree/8.7-release/modules/core/src/controllers/orthographic-controller.js)

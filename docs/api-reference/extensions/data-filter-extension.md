@@ -218,4 +218,4 @@ Given data filtering happens on GPU, not all layers of `@deck.gl/aggregation-lay
 
 ## Source
 
-[modules/extensions/src/data-filter](https://github.com/visgl/deck.gl/tree/master/modules/extensions/src/data-filter)
+[modules/extensions/src/data-filter](https://github.com/visgl/deck.gl/tree/8.7-release/modules/extensions/src/data-filter)
