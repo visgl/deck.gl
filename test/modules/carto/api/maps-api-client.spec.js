@@ -676,3 +676,51 @@ test('fetchMap#autoRefresh', async t => {
 
   t.end();
 });
+
+test('fetchMap#geoColumn', async t => {
+  const cartoMapId = 'abcd-1234';
+  const mapUrl = `https://gcp-us-east1.api.carto.com/v3/maps/public/${cartoMapId}`;
+  const token = 'public_token';
+
+  const connectionName = 'test_connection';
+  const source = 'test_source';
+  const geoColumn = 'geo_column';
+  const columns = ['a', 'b'];
+
+  const mapInstantiationUrl = `https://gcp-us-east1.api.carto.com/v3/maps/${connectionName}/table?client=deck-gl-carto&name=${source}&geo_column=${geoColumn}&columns=a%2Cb`;
+  const table = {type: MAP_TYPES.TABLE, columns, geoColumn, connectionName, source};
+
+  const mapResponse = {
+    id: cartoMapId,
+    datasets: [table],
+    keplerMapConfig: EMPTY_KEPLER_MAP_CONFIG,
+    token
+  };
+
+  const globalThis = typeof global !== 'undefined' ? global : window;
+  const fetch = globalThis.fetch;
+
+  globalThis.fetch = (url, options) => {
+    if (url === mapUrl) {
+      t.pass('should call to the right instantiation url');
+      return Promise.resolve({json: () => mapResponse, ok: true});
+    } else if (url === mapInstantiationUrl) {
+      t.pass('should pass geoColumn in instantiation url');
+      return mockFetchMapsV3()(url, options);
+    }
+
+    t.fail(`Invalid URL request : ${url}`);
+    return null;
+  };
+
+  try {
+    await fetchMap({cartoMapId});
+    t.deepEquals(table.data, GEOJSON_RESPONSE, 'Table has filled in data');
+  } catch (e) {
+    t.error(e, 'should not throw');
+  }
+
+  globalThis.fetch = fetch;
+
+  t.end();
+});

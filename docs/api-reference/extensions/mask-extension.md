@@ -1,5 +1,3 @@
-https://codepen.io/vis-gl/pen/ExbKoYg
-
 
 # MaskExtension
 

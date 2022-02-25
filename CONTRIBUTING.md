@@ -1,4 +1,4 @@
-## Contributing to deck.gl
+# Contributing to deck.gl
 
 **Thanks for taking the time to contribute!**
 

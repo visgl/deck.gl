@@ -102,10 +102,9 @@ Method called to retrieve the hexagon cluster from each object, as an array of [
 
 The `H3ClusterLayer` renders the following sublayers:
 
-* `cluster-region` - a [PolygonLayer](/docs/api-reference/layers/column-layer.md) rendering all clusters.
+* `cell` - a [PolygonLayer](/docs/api-reference/layers/column-layer.md) rendering all clusters.
 
 
 ## Source
 
 [modules/geo-layers/src/h3-layers/h3-cluster-layer](https://github.com/visgl/deck.gl/tree/master/modules/geo-layers/src/h3-layers/h3-cluster-layer.js)
-
