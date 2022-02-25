@@ -18,20 +18,19 @@ The new [QuadkeyLayer](/docs/api-reference/geo-layers/quadkey-layer) renders fil
 
 ### Enhancements
 
-- Less flashing when using `TileLayer` with `refinementStrategy: 'no-overlap'`.
-- `TileLayer`'s `refinementStrategy` now accepts a custom callback funcion.
+- `TileLayer` reduced `refinementStrategy: 'no-overlap'`.
+- `TileLayer` `refinementStrategy` now accepts a callback function enabling customer refinement strategies.
 - `TerrainLayer` can now be used with non-geospatial views.
 - `ColumnLayer` adds `flatShading` prop.
-- Lighting in 3D layers is more consistent in `GlobeView`.
+- `GlobeView` lighting in 3D layers is more consistent.
 - `GoogleMapsOverlay` supports camera tilt and bearing for raster maps.
-- `MVTLayer` supports `pointType: 'text'` in `binary` mode.
+- `MVTLayer` now supports `pointType: 'text'` in `binary` mode.
 - Picking with `project3D: true` now returns more accurate result in non-geospatial views.
 
 
 ### `@deck.gl/carto`
 
 - **fetchMap** - [fetchMap](/docs/api-reference/carto/fetch-map) is added to the [CARTO deck.gl submodule](/docs/api-reference/carto/overview), streamlining the display of maps created using CARTO platform.
-
 - **Support for large tables and Databricks**. See [CARTO documentation](https://carto.com/docs) for more details.
 
 ## deck.gl v8.6
