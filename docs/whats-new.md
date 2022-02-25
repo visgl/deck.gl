@@ -28,8 +28,6 @@ const cartoMapId = 'ff6ac53f-741a-49fb-b615-d040bc5a96b8';
 fetchMap({cartoMapId}).then(map => new Deck(map));
 ```
 
-![Loading a Builder map](https://raw.githubusercontent.com/visgl/deck.gl-data/master/images/whats-new/fetch-map.gif)
-
 ### Enhancements
 
 - Less flashing when using `TileLayer` with `refinementStrategy: 'no-overlap'`.
