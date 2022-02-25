@@ -24,7 +24,7 @@ The new [QuadkeyLayer](/docs/api-reference/geo-layers/quadkey-layer) renders fil
 
 #### Support for large tables
 
-CartoLayer at 8.7 allows to visualize large tables (`type: MAP_TYPES.TABLE`) from BigQuery, Snowflake, Redshift and PostgreSQL without requiring to pregenerate a tileset. Large datasets are visualed via vector tiles. In previous versions, it was limited to 30MB/200K rows of data.
+CartoLayer at 8.7 allows the visualization of large tables (`type: MAP_TYPES.TABLE`) from BigQuery, Snowflake, Redshift and PostgreSQL without requiring a tileset to be pregenerated. Large datasets are visualized via vector tiles. In previous versions, it was limited to 30MB/200K rows of data.
 
 
 #### Support for Databricks
