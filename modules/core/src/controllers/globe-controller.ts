@@ -1,12 +1,12 @@
 import {clamp} from '@math.gl/core';
-import Controller from './controller';
+import Controller, {ControllerProps} from './controller';
 
-import {MapState} from './map-controller';
+import {MapState, MapStateProps} from './map-controller';
 import {mod} from '../utils/math-utils';
 
 class GlobeState extends MapState {
   // Apply any constraints (mathematical or defined by _viewportProps) to map state
-  _applyConstraints(props) {
+  applyConstraints(props: Required<MapStateProps>): Required<MapStateProps> {
     // Ensure zoom is within specified range
     const {maxZoom, minZoom, zoom} = props;
     props.zoom = clamp(zoom, minZoom, maxZoom);
@@ -21,13 +21,13 @@ class GlobeState extends MapState {
   }
 }
 
-export default class GlobeController extends Controller {
+export default class GlobeController extends Controller<MapState> {
   constructor(props) {
     props.dragMode = props.dragMode || 'pan';
     super(GlobeState, props);
   }
 
-  setProps(props) {
+  setProps(props: ControllerProps) {
     super.setProps(props);
 
     // TODO - support pitching?

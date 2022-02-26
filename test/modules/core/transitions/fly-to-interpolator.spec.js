@@ -1,5 +1,5 @@
 import test from 'tape-promise/tape';
-import FlyToInterpolator from '@deck.gl/core/transitions/viewport-fly-to-interpolator';
+import FlyToInterpolator from '@deck.gl/core/transitions/fly-to-interpolator';
 import {toLowPrecision} from '@deck.gl/test-utils';
 
 const START_PROPS = {

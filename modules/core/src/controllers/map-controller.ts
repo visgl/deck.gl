@@ -1,37 +1,26 @@
 import {clamp} from '@math.gl/core';
-import Controller from './controller';
+import Controller, {ControllerProps} from './controller';
 import ViewState from './view-state';
 import {normalizeViewportProps} from '@math.gl/web-mercator';
 import assert from '../utils/assert';
 
+import type Viewport from '../viewports/viewport';
+
 const PITCH_MOUSE_THRESHOLD = 5;
 const PITCH_ACCEL = 1.2;
 
-const DEFAULT_STATE = {
-  pitch: 0,
-  bearing: 0,
-  altitude: 1.5,
-  minZoom: 0,
-  maxZoom: 20,
-  minPitch: 0,
-  maxPitch: 60,
-  position: [0, 0, 0]
-};
-
-type MapStateProps = {
-  makeViewport;
-
+export type MapStateProps = {
   /** Mapbox viewport properties */
   /** The width of the viewport */
-  width;
+  width: number;
   /** The height of the viewport */
-  height;
+  height: number;
   /** The latitude at the center of the viewport */
-  latitude;
+  latitude: number;
   /** The longitude at the center of the viewport */
-  longitude;
+  longitude: number;
   /** The tile zoom level of the map. */
-  zoom;
+  zoom: number;
   /** The bearing of the viewport in degrees */
   bearing?: number;
   /** The pitch of the viewport in degrees */
@@ -51,33 +40,38 @@ type MapStateProps = {
   maxPitch?: number;
   minPitch?: number;
 
+  /** Normalize viewport props to fit map height into viewport. Default `true` */
+  normalize?: boolean;
+};
+
+type MapStateInternal = {
   /** Interaction states, required to calculate change during transform */
   /* The point on map being grabbed when the operation first started */
-  startPanLngLat;
+  startPanLngLat?: [number, number];
   /* Center of the zoom when the operation first started */
-  startZoomLngLat;
+  startZoomLngLat?: [number, number];
   /* Pointer position when rotation started */
-  startRotatePos;
+  startRotatePos?: [number, number];
   /** Bearing when current perspective rotate operation started */
-  startBearing;
+  startBearing?: number;
   /** Pitch when current perspective rotate operation started */
-  startPitch;
+  startPitch?: number;
   /** Zoom when current zoom operation started */
-  startZoom;
-
-  /** Normalize viewport props to fit map height into viewport. Default `true` */
-  normalize;
+  startZoom?: number;
 };
 
 /* Utils */
 
-export class MapState extends ViewState {
-  constructor(options?: MapStateProps) {
-    // @ts-expect-error
-    options = {...DEFAULT_STATE, ...options};
-    const {
-      makeViewport,
+export class MapState extends ViewState<MapState, MapStateProps, MapStateInternal> {
+  makeViewport: (props: Record<string, any>) => Viewport;
 
+  constructor(
+    options: MapStateProps &
+      MapStateInternal & {
+        makeViewport: (props: Record<string, any>) => Viewport;
+      }
+  ) {
+    const {
       /** Mapbox viewport properties */
       /** The width of the viewport */
       width,
@@ -90,23 +84,23 @@ export class MapState extends ViewState {
       /** The tile zoom level of the map. */
       zoom,
       /** The bearing of the viewport in degrees */
-      bearing,
+      bearing = 0,
       /** The pitch of the viewport in degrees */
-      pitch,
+      pitch = 0,
       /**
        * Specify the altitude of the viewport camera
        * Unit: map heights, default 1.5
        * Non-public API, see https://github.com/mapbox/mapbox-gl-js/issues/1137
        */
-      altitude,
+      altitude = 1.5,
       /** Viewport position */
-      position,
+      position = [0, 0, 0],
 
       /** Viewport constraints */
-      maxZoom,
-      minZoom,
-      maxPitch,
-      minPitch,
+      maxZoom = 20,
+      minZoom = 0,
+      maxPitch = 60,
+      minPitch = 0,
 
       /** Interaction states, required to calculate change during transform */
       /* The point on map being grabbed when the operation first started */
@@ -122,48 +116,49 @@ export class MapState extends ViewState {
       /** Zoom when current zoom operation started */
       startZoom,
 
-      /** Normalize viewport props to fit map height into viewport. Default `true` */
-      normalize
-    } = options || {};
+      /** Normalize viewport props to fit map height into viewport */
+      normalize = true
+    } = options;
 
     assert(Number.isFinite(longitude)); // `longitude` must be supplied
     assert(Number.isFinite(latitude)); // `latitude` must be supplied
     assert(Number.isFinite(zoom)); // `zoom` must be supplied
 
-    super({
-      width,
-      height,
-      latitude,
-      longitude,
-      zoom,
-      bearing,
-      pitch,
-      altitude,
-      maxZoom,
-      minZoom,
-      maxPitch,
-      minPitch,
-      normalize,
-      position
-    });
+    super(
+      {
+        width,
+        height,
+        latitude,
+        longitude,
+        zoom,
+        bearing,
+        pitch,
+        altitude,
+        maxZoom,
+        minZoom,
+        maxPitch,
+        minPitch,
+        normalize,
+        position
+      },
+      {
+        startPanLngLat,
+        startZoomLngLat,
+        startRotatePos,
+        startBearing,
+        startPitch,
+        startZoom
+      }
+    );
 
-    this._state = {
-      startPanLngLat,
-      startZoomLngLat,
-      startRotatePos,
-      startBearing,
-      startPitch,
-      startZoom
-    };
-
-    this.makeViewport = makeViewport;
+    this.makeViewport = options.makeViewport;
   }
 
   /**
    * Start panning
    * @param {[Number, Number]} pos - position on screen where the pointer grabs
    */
-  panStart({pos}) {
+  panStart({pos}: {pos: [number, number]}): MapState {
     return this._getUpdatedState({
       startPanLngLat: this._unproject(pos)
     });
@@ -175,14 +170,14 @@ export class MapState extends ViewState {
    * @param {[Number, Number], optional} startPos - where the pointer grabbed at
    *   the start of the operation. Must be supplied of `panStart()` was not called
    */
-  pan({pos, startPos}) {
-    const startPanLngLat = this._state.startPanLngLat || this._unproject(startPos);
+  pan({pos, startPos}: {pos: [number, number]; startPos?: [number, number]}): MapState {
+    const startPanLngLat = this.getState().startPanLngLat || this._unproject(startPos);
 
     if (!startPanLngLat) {
       return this;
     }
 
-    const viewport = this.makeViewport(this._viewportProps);
+    const viewport = this.makeViewport(this.getViewportProps());
     const newProps = viewport.panByPosition(startPanLngLat, pos);
 
     return this._getUpdatedState(newProps);
@@ -192,7 +187,7 @@ export class MapState extends ViewState {
    * End panning
    * Must call if `panStart()` was called
    */
-  panEnd() {
+  panEnd(): MapState {
     return this._getUpdatedState({
       startPanLngLat: null
     });
@@ -202,11 +197,11 @@ export class MapState extends ViewState {
    * Start rotating
    * @param {[Number, Number]} pos - position on screen where the center is
    */
-  rotateStart({pos}) {
+  rotateStart({pos}: {pos: [number, number]}): MapState {
     return this._getUpdatedState({
       startRotatePos: pos,
-      startBearing: this._viewportProps.bearing,
-      startPitch: this._viewportProps.pitch
+      startBearing: this.getViewportProps().bearing,
+      startPitch: this.getViewportProps().pitch
     });
   }
 
@@ -214,19 +209,23 @@ export class MapState extends ViewState {
    * Rotate
    * @param {[Number, Number]} pos - position on screen where the center is
    */
-  rotate({pos, deltaAngleX = 0, deltaAngleY = 0}) {
-    const {startRotatePos, startBearing, startPitch} = this._state;
+  rotate({
+    pos,
+    deltaAngleX = 0,
+    deltaAngleY = 0
+  }: {
+    pos?: [number, number];
+    deltaAngleX?: number;
+    deltaAngleY?: number;
+  }): MapState {
+    const {startRotatePos, startBearing, startPitch} = this.getState();
 
-    if (!startRotatePos || !Number.isFinite(startBearing) || !Number.isFinite(startPitch)) {
+    if (!startRotatePos || startBearing === undefined || startPitch === undefined) {
       return this;
     }
     let newRotation;
     if (pos) {
-      newRotation = this._calculateNewPitchAndBearing({
-        ...this._getRotationParams(pos, startRotatePos),
-        startBearing,
-        startPitch
-      });
+      newRotation = this._getNewRotation(pos, startRotatePos, startPitch, startBearing);
     } else {
       newRotation = {
         bearing: startBearing + deltaAngleX,
@@ -240,7 +239,7 @@ export class MapState extends ViewState {
    * End rotating
    * Must call if `rotateStart()` was called
    */
-  rotateEnd() {
+  rotateEnd(): MapState {
     return this._getUpdatedState({
       startBearing: null,
       startPitch: null
@@ -251,10 +250,10 @@ export class MapState extends ViewState {
    * Start zooming
    * @param {[Number, Number]} pos - position on screen where the center is
    */
-  zoomStart({pos}) {
+  zoomStart({pos}: {pos: [number, number]}): MapState {
     return this._getUpdatedState({
       startZoomLngLat: this._unproject(pos),
-      startZoom: this._viewportProps.zoom
+      startZoom: this.getViewportProps().zoom
     });
   }
 
@@ -266,24 +265,37 @@ export class MapState extends ViewState {
    * @param {Number} scale - a number between [0, 1] specifying the accumulated
    *   relative scale.
    */
-  zoom({pos, startPos, scale}) {
+  zoom({
+    pos,
+    startPos,
+    scale
+  }: {
+    pos: [number, number];
+    startPos?: [number, number];
+    scale: number;
+  }): MapState {
     // Make sure we zoom around the current mouse position rather than map center
-    let {startZoom, startZoomLngLat} = this._state;
+    let {startZoom, startZoomLngLat} = this.getState();
 
-    if (!Number.isFinite(startZoom)) {
+    if (!startZoomLngLat) {
       // We have two modes of zoom:
       // scroll zoom that are discrete events (transform from the current zoom level),
       // and pinch zoom that are continuous events (transform from the zoom level when
       // pinch started).
       // If startZoom state is defined, then use the startZoom state;
       // otherwise assume discrete zooming
-      startZoom = this._viewportProps.zoom;
+      startZoom = this.getViewportProps().zoom;
       startZoomLngLat = this._unproject(startPos) || this._unproject(pos);
     }
+    if (!startZoomLngLat) {
+      return this;
+    }
 
-    const zoom = this._calculateNewZoom({scale, startZoom});
+    const {maxZoom, minZoom} = this.getViewportProps();
+    let zoom = (startZoom as number) + Math.log2(scale);
+    zoom = clamp(zoom, minZoom, maxZoom);
 
-    const zoomedViewport = this.makeViewport({...this._viewportProps, zoom});
+    const zoomedViewport = this.makeViewport({...this.getViewportProps(), zoom});
 
     return this._getUpdatedState({
       zoom,
@@ -295,65 +307,65 @@ export class MapState extends ViewState {
    * End zooming
    * Must call if `zoomStart()` was called
    */
-  zoomEnd() {
+  zoomEnd(): MapState {
     return this._getUpdatedState({
       startZoomLngLat: null,
       startZoom: null
     });
   }
 
-  zoomIn(speed = 2) {
+  zoomIn(speed: number = 2): MapState {
     return this._zoomFromCenter(speed);
   }
 
-  zoomOut(speed = 2) {
+  zoomOut(speed: number = 2): MapState {
     return this._zoomFromCenter(1 / speed);
   }
 
-  moveLeft(speed = 100) {
+  moveLeft(speed: number = 100): MapState {
     return this._panFromCenter([speed, 0]);
   }
 
-  moveRight(speed = 100) {
+  moveRight(speed: number = 100): MapState {
     return this._panFromCenter([-speed, 0]);
   }
 
-  moveUp(speed = 100) {
+  moveUp(speed: number = 100): MapState {
     return this._panFromCenter([0, speed]);
   }
 
-  moveDown(speed = 100) {
+  moveDown(speed: number = 100): MapState {
     return this._panFromCenter([0, -speed]);
   }
 
-  rotateLeft(speed = 15) {
+  rotateLeft(speed: number = 15): MapState {
     return this._getUpdatedState({
-      bearing: this._viewportProps.bearing - speed
+      bearing: this.getViewportProps().bearing - speed
     });
   }
 
-  rotateRight(speed = 15) {
+  rotateRight(speed: number = 15): MapState {
     return this._getUpdatedState({
-      bearing: this._viewportProps.bearing + speed
+      bearing: this.getViewportProps().bearing + speed
     });
   }
 
-  rotateUp(speed = 10) {
+  rotateUp(speed: number = 10): MapState {
     return this._getUpdatedState({
-      pitch: this._viewportProps.pitch + speed
+      pitch: this.getViewportProps().pitch + speed
     });
   }
 
-  rotateDown(speed = 10) {
+  rotateDown(speed: number = 10): MapState {
     return this._getUpdatedState({
-      pitch: this._viewportProps.pitch - speed
+      pitch: this.getViewportProps().pitch - speed
     });
   }
 
-  shortestPathFrom(viewState) {
+  shortestPathFrom(viewState: MapState): MapStateProps {
     // const endViewStateProps = new this.ControllerState(endProps).shortestPathFrom(startViewstate);
     const fromProps = viewState.getViewportProps();
-    const props = {...this._viewportProps};
+    const props = {...this.getViewportProps()};
     const {bearing, longitude} = props;
 
     if (Math.abs(bearing - fromProps.bearing) > 180) {
@@ -365,36 +377,8 @@ export class MapState extends ViewState {
     return props;
   }
 
-  /* Private methods */
-
-  _zoomFromCenter(scale) {
-    const {width, height} = this._viewportProps;
-    return this.zoom({
-      pos: [width / 2, height / 2],
-      scale
-    });
-  }
-
-  _panFromCenter(offset) {
-    const {width, height} = this._viewportProps;
-    return this.pan({
-      startPos: [width / 2, height / 2],
-      pos: [width / 2 + offset[0], height / 2 + offset[1]]
-    });
-  }
-
-  _getUpdatedState(newProps) {
-    // Update _viewportProps
-    return new this.constructor({
-      makeViewport: this.makeViewport,
-      ...this._viewportProps,
-      ...this._state,
-      ...newProps
-    });
-  }
-
   // Apply any constraints (mathematical or defined by _viewportProps) to map state
-  _applyConstraints(props) {
+  applyConstraints(props: Required<MapStateProps>): Required<MapStateProps> {
     // Ensure zoom is within specified range
     const {maxZoom, minZoom, zoom} = props;
     props.zoom = clamp(zoom, minZoom, maxZoom);
@@ -412,25 +396,74 @@ export class MapState extends ViewState {
     return props;
   }
 
-  _unproject(pos) {
-    const viewport = this.makeViewport(this._viewportProps);
+  /* Private methods */
+
+  _zoomFromCenter(scale) {
+    const {width, height} = this.getViewportProps();
+    return this.zoom({
+      pos: [width / 2, height / 2],
+      scale
+    });
+  }
+
+  _panFromCenter(offset) {
+    const {width, height} = this.getViewportProps();
+    return this.pan({
+      startPos: [width / 2, height / 2],
+      pos: [width / 2 + offset[0], height / 2 + offset[1]]
+    });
+  }
+
+  _getUpdatedState(newProps): MapState {
+    // @ts-ignore
+    return new this.constructor({
+      makeViewport: this.makeViewport,
+      ...this.getViewportProps(),
+      ...this.getState(),
+      ...newProps
+    });
+  }
+
+  _unproject(pos?: [number, number]): [number, number] | undefined {
+    const viewport = this.makeViewport(this.getViewportProps());
+    // @ts-ignore
     return pos && viewport.unproject(pos);
   }
 
-  // Calculates new zoom
-  _calculateNewZoom({scale, startZoom}) {
-    const {maxZoom, minZoom} = this._viewportProps;
-    const zoom = startZoom + Math.log2(scale);
-    return clamp(zoom, minZoom, maxZoom);
-  }
+  _getNewRotation(
+    pos: [number, number],
+    startPos: [number, number],
+    startPitch: number,
+    startBearing: number
+  ): {
+    pitch: number;
+    bearing: number;
+  } {
+    const deltaX = pos[0] - startPos[0];
+    const deltaY = pos[1] - startPos[1];
+    const centerY = pos[1];
+    const startY = startPos[1];
+    const {width, height} = this.getViewportProps();
 
-  // Calculates a new pitch and bearing from a position (coming from an event)
-  _calculateNewPitchAndBearing({deltaScaleX, deltaScaleY, startBearing, startPitch}) {
+    const deltaScaleX = deltaX / width;
+    let deltaScaleY = 0;
+
+    if (deltaY > 0) {
+      if (Math.abs(height - startY) > PITCH_MOUSE_THRESHOLD) {
+        // Move from 0 to -1 as we drag upwards
+        deltaScaleY = (deltaY / (startY - height)) * PITCH_ACCEL;
+      }
+    } else if (deltaY < 0) {
+      if (startY > PITCH_MOUSE_THRESHOLD) {
+        // Move from 0 to 1 as we drag upwards
+        deltaScaleY = 1 - centerY / startY;
+      }
+    }
     // clamp deltaScaleY to [-1, 1] so that rotation is constrained between minPitch and maxPitch.
     // deltaScaleX does not need to be clamped as bearing does not have constraints.
     deltaScaleY = clamp(deltaScaleY, -1, 1);
 
-    const {minPitch, maxPitch} = this._viewportProps;
+    const {minPitch, maxPitch} = this.getViewportProps();
 
     const bearing = startBearing + 180 * deltaScaleX;
     let pitch = startPitch;
@@ -447,42 +480,17 @@ export class MapState extends ViewState {
       bearing
     };
   }
-
-  _getRotationParams(pos, startPos) {
-    const deltaX = pos[0] - startPos[0];
-    const deltaY = pos[1] - startPos[1];
-    const centerY = pos[1];
-    const startY = startPos[1];
-    const {width, height} = this._viewportProps;
-
-    const deltaScaleX = deltaX / width;
-    let deltaScaleY = 0;
-
-    if (deltaY > 0) {
-      if (Math.abs(height - startY) > PITCH_MOUSE_THRESHOLD) {
-        // Move from 0 to -1 as we drag upwards
-        deltaScaleY = (deltaY / (startY - height)) * PITCH_ACCEL;
-      }
-    } else if (deltaY < 0) {
-      if (startY > PITCH_MOUSE_THRESHOLD) {
-        // Move from 0 to 1 as we drag upwards
-        deltaScaleY = 1 - centerY / startY;
-      }
-    }
-    deltaScaleY = Math.min(1, Math.max(-1, deltaScaleY));
-    return {deltaScaleX, deltaScaleY};
-  }
 }
 
-export default class MapController extends Controller {
+export default class MapController extends Controller<MapState> {
   constructor(props) {
     props.dragMode = props.dragMode || 'pan';
     super(MapState, props);
   }
 
-  setProps(props) {
+  setProps(props: ControllerProps & MapStateProps) {
     props.position = props.position || [0, 0, 0];
-    const oldProps = this.controllerStateProps;
+    const oldProps = this.props;
 
     super.setProps(props);
 
@@ -492,14 +500,17 @@ export default class MapController extends Controller {
       this.updateViewport(
         new this.ControllerState({
           makeViewport: this.makeViewport,
-          ...this.controllerStateProps,
-          ...this._state
+          ...this.props,
+          ...this.state
         })
       );
     }
   }
 
   get linearTransitionProps() {
-    return ['longitude', 'latitude', 'zoom', 'bearing', 'pitch', 'position'];
+    return {
+      compare: ['longitude', 'latitude', 'zoom', 'bearing', 'pitch', 'position'],
+      required: ['longitude', 'latitude', 'zoom']
+    };
   }
 }

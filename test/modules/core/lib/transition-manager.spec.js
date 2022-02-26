@@ -249,8 +249,10 @@ test('TransitionManager#auto#duration', t => {
     })
   );
   t.ok(
-    Number.isFinite(transitionManager.duration) && transitionManager.duration > 0,
-    'should set duration when using "auto" mode' + ' ' + transitionManager.duration
+    transitionManager.transition.inProgress && transitionManager.transition.settings.duration > 0,
+    'should set duration when using "auto" mode' +
+      ' ' +
+      transitionManager.transition.settings.duration
   );
   t.end();
 });
