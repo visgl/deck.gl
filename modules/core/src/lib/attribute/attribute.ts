@@ -1,42 +1,81 @@
 /* eslint-disable complexity */
-import DataColumn from './data-column';
+import DataColumn, {DataColumnOptions, ShaderAttributeOptions, BufferAccessor} from './data-column';
+import {IShaderAttribute} from './shader-attribute';
 import assert from '../../utils/assert';
 import {createIterable, getAccessorFromBuffer} from '../../utils/iterable-utils';
 import {fillArray} from '../../utils/flatten';
 import * as range from '../../utils/range';
 import {normalizeTransitionSettings} from './attribute-transition-utils';
+import type {Buffer} from '@luma.gl/webgl';
 
-export default class Attribute extends DataColumn {
-  constructor(gl, opts = {}) {
-    super(gl, opts);
+import type {NumericArray, TypedArray} from '../../types/types';
 
-    const {
-      // deck.gl fields
-      transition = false,
-      noAlloc = false,
-      update = null,
-      accessor = null,
-      transform = null,
-      startIndices = null
-    } = opts;
+export type Accessor<DataType, ReturnType> = (
+  object: DataType,
+  context: {
+    data: any;
+    index: number;
+    target: number[];
+  }
+) => ReturnType;
 
-    Object.assign(this.settings, {
-      transition,
-      noAlloc,
-      update: update || (accessor && this._autoUpdater),
-      accessor,
-      transform
-    });
+export type Updater = (
+  attribute: Attribute,
+  {
+    data,
+    startRow,
+    endRow,
+    props,
+    numInstances
+  }: {
+    data: any;
+    startRow: number;
+    endRow: number;
+    props: any;
+    numInstances: number;
+  }
+) => void;
 
-    Object.assign(this.state, {
+export type AttributeOptions = DataColumnOptions<{
+  transition?: boolean;
+  noAlloc?: boolean;
+  update?: Updater;
+  accessor?: Accessor<any, any> | string | string[];
+  transform?: (value: any) => any;
+  shaderAttributes?: Record<string, Partial<ShaderAttributeOptions>>;
+}>;
+
+export type BinaryAttribute = Partial<BufferAccessor> & {value?: TypedArray; buffer?: Buffer};
+
+type AttributeInternalState = {
+  startIndices: NumericArray | null;
+  /** Legacy: external binary supplied via attribute name */
+  lastExternalBuffer: TypedArray | Buffer | BinaryAttribute | null;
+  /** External binary supplied via accessor name */
+  binaryValue: TypedArray | Buffer | BinaryAttribute | null;
+  binaryAccessor: Accessor<any, any> | null;
+  needsUpdate: string | boolean;
+  needsRedraw: string | boolean;
+  updateRanges: number[][];
+};
+
+export default class Attribute extends DataColumn<AttributeOptions, AttributeInternalState> {
+  /** Legacy field, do not read */
+  constant?: boolean;
+
+  constructor(gl, opts: AttributeOptions) {
+    super(gl, opts, {
+      startIndices: null,
       lastExternalBuffer: null,
       binaryValue: null,
       binaryAccessor: null,
       needsUpdate: true,
       needsRedraw: false,
-      updateRanges: range.FULL,
-      startIndices
+      updateRanges: range.FULL
     });
+
+    // eslint-disable-next-line
+    this.settings.update = opts.update || (opts.accessor ? this._autoUpdater : undefined);
 
     Object.seal(this.settings);
     Object.seal(this.state);
@@ -45,37 +84,37 @@ export default class Attribute extends DataColumn {
     this._validateAttributeUpdaters();
   }
 
-  get startIndices() {
+  get startIndices(): NumericArray | null {
     return this.state.startIndices;
   }
 
-  set startIndices(layout) {
+  set startIndices(layout: NumericArray | null) {
     this.state.startIndices = layout;
   }
 
-  needsUpdate() {
+  needsUpdate(): string | boolean {
     return this.state.needsUpdate;
   }
 
-  needsRedraw({clearChangedFlags = false} = {}) {
+  needsRedraw({clearChangedFlags = false}: {clearChangedFlags?: boolean} = {}): string | boolean {
     const needsRedraw = this.state.needsRedraw;
     this.state.needsRedraw = needsRedraw && !clearChangedFlags;
     return needsRedraw;
   }
 
-  getUpdateTriggers() {
+  getUpdateTriggers(): string[] {
     const {accessor} = this.settings;
 
     // Backards compatibility: allow attribute name to be used as update trigger key
     return [this.id].concat((typeof accessor !== 'function' && accessor) || []);
   }
 
-  supportsTransition() {
+  supportsTransition(): boolean {
     return Boolean(this.settings.transition);
   }
 
   // Resolve transition settings object if transition is enabled, otherwise `null`
-  getTransitionSetting(opts) {
+  getTransitionSetting(opts: Record<string, any>): any {
     if (!opts || !this.supportsTransition()) {
       return null;
     }
@@ -84,14 +123,16 @@ export default class Attribute extends DataColumn {
     const layerSettings = this.settings.transition;
     // these are the transition settings passed in by the user
     const userSettings = Array.isArray(accessor)
-      ? opts[accessor.find(a => opts[a])]
-      : opts[accessor];
+      ? // @ts-ignore
+        opts[accessor.find(a => opts[a])]
+      : // @ts-ignore
+        opts[accessor];
 
     // Shorthand: use duration instead of parameter object
     return normalizeTransitionSettings(userSettings, layerSettings);
   }
 
-  setNeedsUpdate(reason = this.id, dataRange) {
+  setNeedsUpdate(reason: string = this.id, dataRange?: {startRow?: number; endRow?: number}): void {
     this.state.needsUpdate = this.state.needsUpdate || reason;
     this.setNeedsRedraw(reason);
     if (dataRange) {
@@ -102,21 +143,16 @@ export default class Attribute extends DataColumn {
     }
   }
 
-  clearNeedsUpdate() {
+  clearNeedsUpdate(): void {
     this.state.needsUpdate = false;
     this.state.updateRanges = range.EMPTY;
   }
 
-  setNeedsRedraw(reason = this.id) {
+  setNeedsRedraw(reason: string = this.id): void {
     this.state.needsRedraw = this.state.needsRedraw || reason;
   }
 
-  update(opts) {
-    // backward compatibility
-    this.setData(opts);
-  }
-
-  allocate(numInstances) {
+  allocate(numInstances: number): boolean {
     const {state, settings} = this;
 
     if (settings.noAlloc) {
@@ -125,17 +161,24 @@ export default class Attribute extends DataColumn {
     }
 
     if (settings.update) {
-      super.allocate({
-        numInstances,
-        copy: state.updateRanges !== range.FULL
-      });
+      super.allocate(numInstances, state.updateRanges !== range.FULL);
       return true;
     }
 
     return false;
   }
 
-  updateBuffer({numInstances, data, props, context}) {
+  updateBuffer({
+    numInstances,
+    data,
+    props,
+    context
+  }: {
+    numInstances: number;
+    data: any;
+    props: any;
+    context: any;
+  }): boolean {
     if (!this.needsUpdate()) {
       return false;
     }
@@ -155,7 +198,7 @@ export default class Attribute extends DataColumn {
         // no value was assigned during update
       } else if (
         this.constant ||
-        this.buffer.byteLength < this.value.byteLength + this.byteOffset
+        this.buffer.byteLength < (this.value as TypedArray).byteLength + this.byteOffset
       ) {
         this.setData({
           value: this.value,
@@ -189,7 +232,7 @@ export default class Attribute extends DataColumn {
 
   // Use generic value
   // Returns true if successful
-  setConstantValue(value) {
+  setConstantValue(value?: NumericArray): boolean {
     if (value === undefined || typeof value === 'function') {
       return false;
     }
@@ -206,7 +249,7 @@ export default class Attribute extends DataColumn {
   // Use external buffer
   // Returns true if successful
   // eslint-disable-next-line max-statements
-  setExternalBuffer(buffer) {
+  setExternalBuffer(buffer?: TypedArray | Buffer | BinaryAttribute): boolean {
     const {state} = this;
 
     if (!buffer) {
@@ -228,7 +271,10 @@ export default class Attribute extends DataColumn {
   // Binary value is a typed array packed from mapping the source data with the accessor
   // If the returned value from the accessor is the same as the attribute value, set it directly
   // Otherwise use the auto updater for transform/normalization
-  setBinaryValue(buffer, startIndices = null) {
+  setBinaryValue(
+    buffer?: TypedArray | Buffer | BinaryAttribute,
+    startIndices: NumericArray | null = null
+  ): boolean {
     const {state, settings} = this;
 
     if (!buffer) {
@@ -249,20 +295,21 @@ export default class Attribute extends DataColumn {
     state.binaryValue = buffer;
     this.setNeedsRedraw();
 
-    if (ArrayBuffer.isView(buffer)) {
-      buffer = {value: buffer};
-    }
     const needsUpdate = settings.transform || startIndices !== this.startIndices;
 
     if (needsUpdate) {
-      assert(ArrayBuffer.isView(buffer.value), `invalid ${settings.accessor}`);
-      const needsNormalize = buffer.size && buffer.size !== this.size;
+      if (ArrayBuffer.isView(buffer)) {
+        buffer = {value: buffer};
+      }
+      const binaryValue = buffer as BinaryAttribute;
+      assert(ArrayBuffer.isView(binaryValue.value), `invalid ${settings.accessor}`);
+      const needsNormalize = binaryValue.size && binaryValue.size !== this.size;
 
-      state.binaryAccessor = getAccessorFromBuffer(buffer.value, {
-        size: buffer.size || this.size,
-        stride: buffer.stride,
-        offset: buffer.offset,
-        startIndices,
+      state.binaryAccessor = getAccessorFromBuffer(binaryValue.value, {
+        size: binaryValue.size || this.size,
+        stride: binaryValue.stride,
+        offset: binaryValue.offset,
+        startIndices: startIndices as NumericArray,
         nested: needsNormalize
       });
       // Fall through to auto updater
@@ -274,15 +321,15 @@ export default class Attribute extends DataColumn {
     return true;
   }
 
-  getVertexOffset(row) {
+  getVertexOffset(row: number): number {
     const {startIndices} = this;
     const vertexIndex = startIndices ? startIndices[row] : row;
     return vertexIndex * this.size;
   }
 
-  getShaderAttributes() {
+  getShaderAttributes(): Record<string, IShaderAttribute> {
     const shaderAttributeDefs = this.settings.shaderAttributes || {[this.id]: null};
-    const shaderAttributes = {};
+    const shaderAttributes: Record<string, IShaderAttribute> = {};
 
     for (const shaderAttributeName in shaderAttributeDefs) {
       Object.assign(
@@ -295,15 +342,32 @@ export default class Attribute extends DataColumn {
   }
 
   /* eslint-disable max-depth, max-statements */
-  _autoUpdater(attribute, {data, startRow, endRow, props, numInstances}) {
+  private _autoUpdater(
+    attribute: Attribute,
+    {
+      data,
+      startRow,
+      endRow,
+      props,
+      numInstances
+    }: {
+      data: any;
+      startRow: number;
+      endRow: number;
+      props: any;
+      numInstances: number;
+    }
+  ): void {
     if (attribute.constant) {
       return;
     }
     const {settings, state, value, size, startIndices} = attribute;
 
     const {accessor, transform} = settings;
-    const accessorFunc =
-      state.binaryAccessor || (typeof accessor === 'function' ? accessor : props[accessor]);
+    const accessorFunc: Accessor<any, any> =
+      state.binaryAccessor ||
+      // @ts-ignore
+      (typeof accessor === 'function' ? accessor : props[accessor]);
 
     assert(typeof accessorFunc === 'function', `accessor "${accessor}" is not a function`);
 
@@ -327,11 +391,11 @@ export default class Attribute extends DataColumn {
         if (objectValue && Array.isArray(objectValue[0])) {
           let startIndex = i;
           for (const item of objectValue) {
-            attribute._normalizeValue(item, value, startIndex);
+            attribute._normalizeValue(item, value as TypedArray, startIndex);
             startIndex += size;
           }
         } else if (objectValue && objectValue.length > size) {
-          value.set(objectValue, i);
+          (value as TypedArray).set(objectValue, i);
         } else {
           attribute._normalizeValue(objectValue, objectInfo.target, 0);
           fillArray({
@@ -343,7 +407,7 @@ export default class Attribute extends DataColumn {
         }
         i += numVertices * size;
       } else {
-        attribute._normalizeValue(objectValue, value, i);
+        attribute._normalizeValue(objectValue, value as TypedArray, i);
         i += size;
       }
     }
@@ -351,7 +415,7 @@ export default class Attribute extends DataColumn {
   /* eslint-enable max-depth, max-statements */
 
   // Validate deck.gl level fields
-  _validateAttributeUpdaters() {
+  private _validateAttributeUpdaters() {
     const {settings} = this;
 
     // Check that 'update' is a valid function
@@ -363,7 +427,7 @@ export default class Attribute extends DataColumn {
 
   // check that the first few elements of the attribute are reasonable
   /* eslint-disable no-fallthrough */
-  _checkAttributeArray() {
+  private _checkAttributeArray() {
     const {value} = this;
     const limit = Math.min(4, this.size);
     if (value && value.length >= limit) {

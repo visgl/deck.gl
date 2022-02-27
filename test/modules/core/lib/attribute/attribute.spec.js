@@ -46,7 +46,9 @@ test('Attribute#constructor', t => {
 });
 
 test('Attribute#delete', t => {
-  const attribute = new Attribute(gl, {size: 1, accessor: 'a', value: new Float32Array(4)});
+  const attribute = new Attribute(gl, {size: 1, accessor: 'a'});
+  attribute.setData(new Float32Array(4));
+
   t.ok(attribute._buffer, 'Attribute created Buffer object');
 
   attribute.delete();
@@ -255,7 +257,6 @@ test('Attribute#shaderAttributes', t => {
     id: 'positions',
     update,
     size: 3,
-    buffer: buffer1,
     shaderAttributes: {
       positions: {},
       instancePositions: {
@@ -267,6 +268,8 @@ test('Attribute#shaderAttributes', t => {
       }
     }
   });
+  attribute.setData({buffer: buffer1});
+
   const shaderAttributes = attribute.getShaderAttributes();
   t.ok(shaderAttributes.positions, 'Shader attribute created');
   let accessor = shaderAttributes.positions.getAccessor();
@@ -922,7 +925,7 @@ test('Attribute#setBinaryValue', t => {
     size: 3,
     update: () => {}
   });
-  let value = new Float32Array(12);
+  let value = {value: new Float32Array(12)};
 
   attribute.setNeedsUpdate();
   t.notOk(attribute.setBinaryValue(null), 'should do nothing if setting external buffer to null');

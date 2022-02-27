@@ -1,7 +1,8 @@
 import GL from '@luma.gl/constants';
+import type {TypedArrayConstructor} from '../../types/types';
 
 /* eslint-disable complexity */
-export function glArrayFromType(glType) {
+export function glArrayFromType(glType: number): TypedArrayConstructor {
   // Sorted in some order of likelihood to reduce amount of comparisons
   switch (glType) {
     case GL.FLOAT:

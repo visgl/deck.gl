@@ -1,18 +1,30 @@
 /* eslint-disable complexity */
+import type DataColumn from './data-column';
+import type {BufferAccessor, ShaderAttributeOptions} from './data-column';
+import type {Buffer} from '@luma.gl/webgl';
+import type {NumericArray} from '../../types/types';
+
+export interface IShaderAttribute {
+  value: NumericArray | null;
+  getValue(): [Buffer, BufferAccessor] | NumericArray | null;
+}
 
 /* This class creates a luma.gl-compatible "view" on top of a DataColumn instance */
-export default class ShaderAttribute {
-  constructor(dataColumn, opts) {
+export default class ShaderAttribute implements IShaderAttribute {
+  opts: ShaderAttributeOptions;
+  source: DataColumn<any, any>;
+
+  constructor(dataColumn: DataColumn<any, any>, opts: ShaderAttributeOptions) {
     // Options that cannot be changed later
     this.opts = opts;
     this.source = dataColumn;
   }
 
-  get value() {
+  get value(): NumericArray | null {
     return this.source.value;
   }
 
-  getValue() {
+  getValue(): [Buffer, BufferAccessor] | NumericArray | null {
     const buffer = this.source.getBuffer();
     const accessor = this.getAccessor();
     if (buffer) {

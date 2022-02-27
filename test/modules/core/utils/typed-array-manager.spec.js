@@ -77,7 +77,7 @@ test('TypedArrayManager#release', t => {
     .map(count => typedArrayManager.allocate(null, count, {size: 3, type: Float32Array}))
     .forEach(array => typedArrayManager.release(array));
 
-  const pool = typedArrayManager._pool;
+  const pool = typedArrayManager.pool;
 
   t.is(pool.length, 2, 'Has correct pool size');
   t.deepEqual(
