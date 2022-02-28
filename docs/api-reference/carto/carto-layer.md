@@ -89,7 +89,9 @@ new deck.carto.CartoLayer({});
 
 ## Properties
 
-This layer allows to work with the different CARTO Maps API versions (v1, v2, and v3). When using version v1 and v2, the layer always works with vector tiles so it inherits all properties from [`MVTLayer`](/docs/api-reference/geo-layers/mvt-layer.md). When using v3, the layer works with vector tiles if the `type` property is `MAP_TYPES.TILESET` and with GeoJSON data if the `type` is `MAP_TYPES.QUERY` or `MAP_TYPES.TABLE`. When using GeoJSON data, the layer inherits all properties from [`GeoJsonLayer`](/docs/api-reference/layers/geojson-layer.md).
+Inherits the properties of the [`GeoJsonLayer`](/docs/api-reference/layers/geojson-layer.md).
+
+Additional properties may be available depending on the configuration. For details see: [Sublayer details](/docs/api-reference/carto/carto-layer#sublayer-details).
 
 ##### `data` (String)
 
@@ -108,6 +110,14 @@ Required. Data type. Possible values are:
 Required when apiVersion is `API_VERSIONS.V3`.
 
 Name of the connection registered in the CARTO workspace.
+
+##### `format` (String, optional)
+
+Only supported when apiVersion is `API_VERSIONS.V3`. Use to override the default data format. Possible values are: `FORMATS.GEOJSON`, `FORMATS.JSON` and `FORMATS.TILEJSON`. 
+
+##### `formatTiles` (String, optional)
+
+Only supported when apiVersion is `API_VERSIONS.V3` and `format` is `FORMATS.TILEJSON`. Use to override the default tile data format. Possible values are: `TILE_FORMATS.BINARY`, `TILE_FORMATS.GEOJSON` and `TILE_FORMATS.MVT`.
 
 ##### `geoColumn` (String, optional)
 
@@ -152,6 +162,32 @@ Receives arguments:
 Receives arguments:
 
 - `error` (`Error`)
+
+### Sub Layers
+
+The `CartoLayer` is a [`CompositeLayer`](/docs/api-reference/core/composite-layer.md), and will generate different sublayers depending on the configuration. In all cases, properties of the [`GeoJsonLayer`](/docs/api-reference/layers/geojson-layer.md) will be inherited.
+
+#### API v1 & v2
+
+`CartoLayer` works with the different CARTO Maps API versions (v1, v2, and v3). When using version v1 and v2, the layer always works with vector tiles so it inherits all properties from [`MVTLayer`](/docs/api-reference/geo-layers/mvt-layer.md).
+
+#### API v3
+
+When using v3, the behavior depends on the `type` property.
+
+##### `MAP_TYPES.QUERY`
+
+GeoJSON/JSON data will be used, depending on `format`. No additional properties inherited.
+
+##### `MAP_TYPES.TILESET`
+
+Tiled data will be used, depending on `formatTiles`. All [`MVTLayer`](/docs/api-reference/geo-layers/mvt-layer.md) properties will be inherited.
+
+##### `MAP_TYPES.TABLE`
+
+If `format` is `FORMATS.TILEJSON`, or the table is large, dynamic tiling is enabled and the behavior is as per `MAP_TYPES.TILESET`. Otherwise behavior is as per `MAP_TYPES.QUERY`.
+
+the layer works with vector tiles if the `type` property is `MAP_TYPES.TILESET` and with GeoJSON data if the `type` is `MAP_TYPES.QUERY`. If the type is `MAP_TYPES.TABLE`.
 
 ## Source
 
