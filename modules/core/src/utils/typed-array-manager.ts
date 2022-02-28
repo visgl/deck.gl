@@ -6,7 +6,7 @@ export type TypedArrayManagerOptions = {
 };
 
 export class TypedArrayManager {
-  pool: ArrayBuffer[] = [];
+  private _pool: ArrayBuffer[] = [];
   opts: {
     overAlloc: number;
     poolSize: number;
@@ -88,7 +88,7 @@ export class TypedArrayManager {
     }
 
     // Check if available in pool
-    const pool = this.pool;
+    const pool = this._pool;
     const byteLength = Type.BYTES_PER_ELEMENT * sizeToAllocate;
     const i = pool.findIndex(b => b.byteLength >= byteLength);
     if (i >= 0) {
@@ -107,7 +107,7 @@ export class TypedArrayManager {
     if (!ArrayBuffer.isView(typedArray)) {
       return;
     }
-    const pool = this.pool;
+    const pool = this._pool;
     const {buffer} = typedArray;
     // Save the buffer of the released array into the pool
     // Sort buffers by size

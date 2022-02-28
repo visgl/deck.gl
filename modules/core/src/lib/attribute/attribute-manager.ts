@@ -19,11 +19,16 @@
 // THE SOFTWARE.
 
 /* eslint-disable guard-for-in */
-import Attribute from './attribute';
+import Attribute, {AttributeOptions} from './attribute';
+import {IShaderAttribute} from './shader-attribute';
 import log from '../../utils/log';
 import debug from '../../debug';
+import {NumericArray} from '../../types/types';
 
 import AttributeTransitionManager from './attribute-transition-manager';
+
+import type {Stat} from 'probe.gl';
+import type {Timeline} from '@luma.gl/engine';
 
 const TRACE_INVALIDATE = 'attributeManager.invalidate';
 const TRACE_UPDATE_START = 'attributeManager.updateStart';
@@ -56,14 +61,34 @@ export default class AttributeManager {
    * change detection, but instead makes it easy to build such detection
    * by offering the ability to "invalidate" each attribute separately.
    */
-  constructor(gl, {id = 'attribute-manager', stats, timeline} = {}) {
+  id: string;
+  gl: WebGLRenderingContext;
+  attributes: Record<string, Attribute>;
+  updateTriggers: {[name: string]: string[]};
+  needsRedraw: string | boolean;
+  userData: any;
+
+  private stats?: Stat;
+  private attributeTransitionManager: AttributeTransitionManager;
+
+  constructor(
+    gl: WebGLRenderingContext,
+    {
+      id = 'attribute-manager',
+      stats,
+      timeline
+    }: {
+      id?: string;
+      stats?: Stat;
+      timeline?: Timeline;
+    } = {}
+  ) {
     this.id = id;
     this.gl = gl;
 
     this.attributes = {};
 
     this.updateTriggers = {};
-    this.accessors = {};
     this.needsRedraw = true;
 
     this.userData = {};
@@ -91,7 +116,7 @@ export default class AttributeManager {
   //
   // @param {String} [clearRedrawFlags=false] - whether to clear the flag
   // @return {false|String} - reason a redraw is needed.
-  getNeedsRedraw(opts = {clearRedrawFlags: false}) {
+  getNeedsRedraw(opts: {clearRedrawFlags?: boolean} = {clearRedrawFlags: false}): string | boolean {
     const redraw = this.needsRedraw;
     this.needsRedraw = this.needsRedraw && !opts.clearRedrawFlags;
     return redraw && this.id;
@@ -99,20 +124,18 @@ export default class AttributeManager {
 
   // Sets the redraw flag.
   // @param {Boolean} redraw=true
-  // @return {AttributeManager} - for chaining
-  setNeedsRedraw(redraw = true) {
+  setNeedsRedraw() {
     this.needsRedraw = true;
-    return this;
   }
 
   // Adds attributes
-  add(attributes, updaters) {
-    this._add(attributes, updaters);
+  add(attributes: {[id: string]: AttributeOptions}) {
+    this._add(attributes);
   }
 
   // Adds attributes
-  addInstanced(attributes, updaters) {
-    this._add(attributes, updaters, {instanced: 1});
+  addInstanced(attributes: {[id: string]: AttributeOptions}) {
+    this._add(attributes, {instanced: 1});
   }
 
   /**
@@ -125,9 +148,8 @@ export default class AttributeManager {
    *
    * @param {Object} attributeNameArray - attribute name array (see above)
    */
-  remove(attributeNameArray) {
-    for (let i = 0; i < attributeNameArray.length; i++) {
-      const name = attributeNameArray[i];
+  remove(attributeNameArray: string[]) {
+    for (const name of attributeNameArray) {
       if (this.attributes[name] !== undefined) {
         this.attributes[name].delete();
         delete this.attributes[name];
@@ -136,13 +158,13 @@ export default class AttributeManager {
   }
 
   // Marks an attribute for update
-  invalidate(triggerName, dataRange) {
+  invalidate(triggerName: string, dataRange?: {startRow?: number; endRow?: number}) {
     const invalidatedAttributes = this._invalidateTrigger(triggerName, dataRange);
     // For performance tuning
     debug(TRACE_INVALIDATE, this, triggerName, invalidatedAttributes);
   }
 
-  invalidateAll(dataRange) {
+  invalidateAll(dataRange?: {startRow?: number; endRow?: number}) {
     for (const attributeName in this.attributes) {
       this.attributes[attributeName].setNeedsUpdate(attributeName, dataRange);
     }
@@ -159,7 +181,15 @@ export default class AttributeManager {
     props = {},
     buffers = {},
     context = {}
-  } = {}) {
+  }: {
+    data: any;
+    numInstances: number;
+    startIndices?: NumericArray | null;
+    transitions: any;
+    props: any;
+    buffers: any;
+    context: any;
+  }) {
     // keep track of whether some attributes are updated
     let updated = false;
 
@@ -180,9 +210,18 @@ export default class AttributeManager {
 
       if (attribute.setExternalBuffer(buffers[attributeName])) {
         // Step 1: try update attribute directly from external buffers
-      } else if (attribute.setBinaryValue(buffers[accessorName], data.startIndices)) {
+      } else if (
+        attribute.setBinaryValue(
+          typeof accessorName === 'string' ? buffers[accessorName] : undefined,
+          data.startIndices
+        )
+      ) {
         // Step 2: try set packed value from external typed array
-      } else if (!buffers[accessorName] && attribute.setConstantValue(props[accessorName])) {
+      } else if (
+        typeof accessorName === 'string' &&
+        !buffers[accessorName] &&
+        attribute.setConstantValue(props[accessorName])
+      ) {
         // Step 3: try set constant value from props
         // Note: if buffers[accessorName] is supplied, ignore props[accessorName]
         // This may happen when setBinaryValue falls through to use the auto updater
@@ -198,7 +237,7 @@ export default class AttributeManager {
         });
       }
 
-      this.needsRedraw |= attribute.needsRedraw();
+      this.needsRedraw ||= attribute.needsRedraw();
     }
 
     if (updated) {
@@ -231,7 +270,7 @@ export default class AttributeManager {
    * Note: Format matches luma.gl Model/Program.setAttributes()
    * @return {Object} attributes - descriptors
    */
-  getAttributes() {
+  getAttributes(): {[id: string]: Attribute} {
     return this.attributes;
   }
 
@@ -240,7 +279,9 @@ export default class AttributeManager {
    * This indicates which WebGLBuffers need to be updated
    * @return {Object} attributes - descriptors
    */
-  getChangedAttributes(opts = {clearChangedFlags: false}) {
+  getChangedAttributes(opts: {clearChangedFlags?: boolean} = {clearChangedFlags: false}): {
+    [id: string]: Attribute;
+  } {
     const {attributes, attributeTransitionManager} = this;
 
     const changedAttributes = {...attributeTransitionManager.getAttributes()};
@@ -256,7 +297,10 @@ export default class AttributeManager {
   }
 
   // Returns shader attributes
-  getShaderAttributes(attributes, excludeAttributes = {}) {
+  getShaderAttributes(
+    attributes: {[id: string]: Attribute},
+    excludeAttributes: Record<string, boolean> = {}
+  ): {[id: string]: IShaderAttribute} {
     if (!attributes) {
       attributes = this.getAttributes();
     }
@@ -269,22 +313,10 @@ export default class AttributeManager {
     return shaderAttributes;
   }
 
-  // PROTECTED METHODS - Only to be used by collaborating classes, not by apps
-
-  // Returns object containing all accessors as keys, with non-null values
-  // @return {Object} - accessors object
-  getAccessors() {
-    return this.updateTriggers;
-  }
-
   // PRIVATE METHODS
 
   // Used to register an attribute
-  _add(attributes, updaters, extraProps = {}) {
-    if (updaters) {
-      log.warn('AttributeManager.add({updaters}) - updater map no longer supported')();
-    }
-
+  private _add(attributes: {[id: string]: AttributeOptions}, extraProps: any = {}) {
     for (const attributeName in attributes) {
       const attribute = attributes[attributeName];
 
@@ -296,27 +328,23 @@ export default class AttributeManager {
   }
   /* eslint-enable max-statements */
 
-  _createAttribute(name, attribute, extraProps) {
+  private _createAttribute(name: string, attribute: AttributeOptions, extraProps: any) {
     // For expected default values see:
     // https://github.com/visgl/luma.gl/blob/1affe21352e289eeaccee2a876865138858a765c/modules/webgl/src/classes/accessor.js#L5-L13
     // and https://deck.gl/docs/api-reference/core/attribute-manager#add
-    const props = {
+    const props: AttributeOptions = {
       ...attribute,
       id: name,
-      isIndexed: attribute.isIndexed || attribute.elements || false,
-      // Luma fields
-      constant: attribute.constant || false,
-      size: (attribute.elements && 1) || attribute.size || 1,
-      value: attribute.value || null,
-      divisor: attribute.instanced || extraProps.instanced ? 1 : attribute.divisor || 0
+      size: (attribute.isIndexed && 1) || attribute.size || 1,
+      divisor: extraProps.instanced ? 1 : attribute.divisor || 0
     };
 
     return new Attribute(this.gl, props);
   }
 
   // build updateTrigger name to attribute name mapping
-  _mapUpdateTriggersToAttributes() {
-    const triggers = {};
+  private _mapUpdateTriggersToAttributes() {
+    const triggers: {[name: string]: string[]} = {};
 
     for (const attributeName in this.attributes) {
       const attribute = this.attributes[attributeName];
@@ -331,7 +359,10 @@ export default class AttributeManager {
     this.updateTriggers = triggers;
   }
 
-  _invalidateTrigger(triggerName, dataRange) {
+  private _invalidateTrigger(
+    triggerName: string,
+    dataRange?: {startRow?: number; endRow?: number}
+  ): string[] {
     const {attributes, updateTriggers} = this;
     const invalidatedAttributes = updateTriggers[triggerName];
 
@@ -346,14 +377,20 @@ export default class AttributeManager {
     return invalidatedAttributes;
   }
 
-  _updateAttribute(opts) {
+  private _updateAttribute(opts: {
+    attribute: Attribute;
+    numInstances: number;
+    data: any;
+    props: any;
+    context: any;
+  }) {
     const {attribute, numInstances} = opts;
     debug(TRACE_ATTRIBUTE_UPDATE_START, attribute);
 
     if (attribute.constant) {
       // The attribute is flagged as constant outside of an update cycle
       // Skip allocation and updater call
-      attribute.setConstantValue(attribute.value);
+      attribute.setConstantValue(attribute.value as NumericArray);
       return;
     }
 

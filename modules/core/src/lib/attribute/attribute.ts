@@ -63,7 +63,7 @@ export default class Attribute extends DataColumn<AttributeOptions, AttributeInt
   /** Legacy field, do not read */
   constant?: boolean;
 
-  constructor(gl, opts: AttributeOptions) {
+  constructor(gl: WebGLRenderingContext, opts: AttributeOptions) {
     super(gl, opts, {
       startIndices: null,
       lastExternalBuffer: null,

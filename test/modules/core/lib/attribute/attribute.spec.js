@@ -925,7 +925,7 @@ test('Attribute#setBinaryValue', t => {
     size: 3,
     update: () => {}
   });
-  let value = {value: new Float32Array(12)};
+  let value = new Float32Array(12);
 
   attribute.setNeedsUpdate();
   t.notOk(attribute.setBinaryValue(null), 'should do nothing if setting external buffer to null');

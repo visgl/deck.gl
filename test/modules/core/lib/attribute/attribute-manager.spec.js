@@ -35,14 +35,6 @@ function update(attribute, {data}) {
   }
 }
 
-function enable() {
-  return this.enabled; // eslint-disable-line
-}
-
-const fixture = {
-  positions: new Float32Array([0, 1, 0, -1, -1, 0, 1, -1, 0])
-};
-
 test('AttributeManager imports', t => {
   t.equals(typeof AttributeManager, 'function', 'AttributeManager import successful');
   t.end();
@@ -83,11 +75,6 @@ test('AttributeManager.add', t => {
     attributeManager.getAttributes()['positions'].settings.divisor,
     0,
     'AttributeManager.add creates attribute with default divisor of 0'
-  );
-  t.equals(
-    attributeManager.getAttributes()['positions'].settings.isIndexed,
-    false,
-    'AttributeManager.add creates attribute with default isIndexed of false'
   );
   t.end();
 });
@@ -243,6 +230,8 @@ test('AttributeManager.update - external virtual buffers', t => {
   attribute = attributeManager.getAttributes()['colors'];
   t.ok(ArrayBuffer.isView(attribute.value), 'colors attribute has typed array');
 
+  const colors = attribute.getShaderAttributes().colors;
+
   attributeManager.update({
     numInstances: 1,
     buffers: {
@@ -251,7 +240,6 @@ test('AttributeManager.update - external virtual buffers', t => {
     }
   });
 
-  let colors = attribute.getShaderAttributes().colors;
   t.is(colors.getAccessor().type, gl.FLOAT, 'colors accessor is set to correct type');
 
   attributeManager.update({
@@ -261,7 +249,6 @@ test('AttributeManager.update - external virtual buffers', t => {
       colors: new Uint32Array([0, 0, 0])
     }
   });
-  colors = attribute.getShaderAttributes().colors;
   t.is(colors.getAccessor().type, gl.UNSIGNED_INT, 'colors accessor is set to correct type');
 
   t.end();

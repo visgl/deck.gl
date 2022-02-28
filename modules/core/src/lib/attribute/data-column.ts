@@ -12,9 +12,9 @@ import type {TypedArray, NumericArray, TypedArrayConstructor} from '../../types/
 
 export type BufferAccessor = {
   // WebGL attribute pointer parameters
-  type: number;
-  size: 1 | 2 | 3 | 4;
-  divisor: number;
+  type?: number;
+  size?: 1 | 2 | 3 | 4;
+  divisor?: number;
   offset?: number;
   stride?: number;
   normalized?: boolean;
@@ -83,24 +83,20 @@ function resolveDoublePrecisionShaderAttributes(
   };
 }
 
-export type DataColumnOptions<Options> = Options & {
-  id: string;
-  type: number;
-  size: 1 | 2 | 3 | 4;
-  divisor: number;
-  offset?: number;
-  stride?: number;
-  normalized?: boolean;
-  integer?: boolean;
-  vertexOffset?: number;
-  fp64?: boolean;
-  logicalType?: number;
-  isIndexed?: boolean;
-  defaultValue?: number | number[];
-};
+export type DataColumnOptions<Options> = Options &
+  BufferAccessor & {
+    id?: string;
+    vertexOffset?: number;
+    fp64?: boolean;
+    logicalType?: number;
+    isIndexed?: boolean;
+    defaultValue?: number | number[];
+  };
 
 type DataColumnSettings<Options> = DataColumnOptions<Options> & {
-  logicalType: number;
+  type: number;
+  size: 1 | 2 | 3 | 4;
+  logicalType?: number;
   bytesPerElement: number;
   defaultValue: number[];
   defaultType: TypedArrayConstructor;
@@ -129,8 +125,8 @@ export default class DataColumn<Options, State> implements IShaderAttribute {
   /* eslint-disable max-statements */
   constructor(gl: WebGLRenderingContext, opts: DataColumnOptions<Options>, state: State) {
     this.gl = gl;
-    this.id = opts.id;
-    this.size = opts.size;
+    this.id = opts.id || '';
+    this.size = opts.size || 1;
 
     const logicalType = opts.logicalType || opts.type;
     const doublePrecision = logicalType === GL.DOUBLE;
@@ -140,14 +136,14 @@ export default class DataColumn<Options, State> implements IShaderAttribute {
       ? [defaultValue]
       : defaultValue || new Array(this.size).fill(0);
 
-    let bufferType: number = logicalType;
+    let bufferType: number;
     if (doublePrecision) {
       bufferType = GL.FLOAT;
-    } else if (!bufferType && opts.isIndexed) {
+    } else if (!logicalType && opts.isIndexed) {
       bufferType =
         gl && hasFeature(gl, FEATURES.ELEMENT_INDEX_UINT32) ? GL.UNSIGNED_INT : GL.UNSIGNED_SHORT;
-    } else if (!bufferType) {
-      bufferType = GL.FLOAT;
+    } else {
+      bufferType = logicalType || GL.FLOAT;
     }
 
     // This is the attribute type defined by the layer
@@ -171,6 +167,7 @@ export default class DataColumn<Options, State> implements IShaderAttribute {
       defaultValue: defaultValue as number[],
       logicalType,
       type: bufferType,
+      size: this.size,
       bytesPerElement: defaultType.BYTES_PER_ELEMENT
     };
     this.state = {
