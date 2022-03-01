@@ -163,7 +163,7 @@ Receives arguments:
 
 - `error` (`Error`)
 
-### Sub Layers
+### SubLayers
 
 The `CartoLayer` is a [`CompositeLayer`](/docs/api-reference/core/composite-layer.md), and will generate different sublayers depending on the configuration. In all cases, properties of the [`GeoJsonLayer`](/docs/api-reference/layers/geojson-layer.md) will be inherited.
 
