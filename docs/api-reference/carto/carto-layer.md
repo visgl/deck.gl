@@ -181,7 +181,7 @@ GeoJSON/JSON data will be used, depending on `format`. A [`GeoJSONLayer`](/docs/
 
 ##### `MAP_TYPES.TILESET`
 
-Tiled data will be used, depending on `formatTiles`. All [`MVTLayer`](/docs/api-reference/geo-layers/mvt-layer.md) will be created and all properties will be inherited.
+Tiled data will be used, depending on `formatTiles`. A [`MVTLayer`](/docs/api-reference/geo-layers/mvt-layer.md) will be created and all properties will be inherited.
 
 ##### `MAP_TYPES.TABLE`
 
