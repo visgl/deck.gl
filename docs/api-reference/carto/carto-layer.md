@@ -107,27 +107,27 @@ Required. Data type. Possible values are:
 
 ##### `connection` (String)
 
-Required when apiVersion is `API_VERSIONS.V3`.
+Required when `apiVersion` is `API_VERSIONS.V3`.
 
 Name of the connection registered in the CARTO workspace.
 
 ##### `format` (String, optional)
 
-Only supported when apiVersion is `API_VERSIONS.V3`. Use to override the default data format. Possible values are: `FORMATS.GEOJSON`, `FORMATS.JSON` and `FORMATS.TILEJSON`. 
+Only supported when `apiVersion` is `API_VERSIONS.V3`. Use to override the default data format. Possible values are: `FORMATS.GEOJSON`, `FORMATS.JSON` and `FORMATS.TILEJSON`. 
 
 ##### `formatTiles` (String, optional)
 
-Only supported when apiVersion is `API_VERSIONS.V3` and `format` is `FORMATS.TILEJSON`. Use to override the default tile data format. Possible values are: `TILE_FORMATS.BINARY`, `TILE_FORMATS.GEOJSON` and `TILE_FORMATS.MVT`.
+Only supported when `apiVersion` is `API_VERSIONS.V3` and `format` is `FORMATS.TILEJSON`. Use to override the default tile data format. Possible values are: `TILE_FORMATS.BINARY`, `TILE_FORMATS.GEOJSON` and `TILE_FORMATS.MVT`.
 
 ##### `geoColumn` (String, optional)
 
-Only supported when apiVersion is `API_VERSIONS.V3` and `type` is `MAP_TYPES.TABLE`.
+Only supported when `apiVersion` is `API_VERSIONS.V3` and `type` is `MAP_TYPES.TABLE`.
 
 Name of the `geo_column` in the CARTO platform. Use this override the default column ('geom'), from which the geometry information should be fetched.
 
 ##### `columns` (Array, optional)
 
-Only supported when apiVersion is `API_VERSIONS.V3` and `type` is `MAP_TYPES.TABLE`.
+Only supported when `apiVersion` is `API_VERSIONS.V3` and `type` is `MAP_TYPES.TABLE`.
 
 Names of columns to fetch. By default, all columns are fetched.
 
