@@ -187,7 +187,7 @@ Tiled data will be used, depending on `formatTiles`. All [`MVTLayer`](/docs/api-
 
 Automatically based on the size of the table CARTO will decide whether to use tiles or a full document.
 
-For a full document a [`GeoJSONLayer`](/docs/api-reference/layers/geojson-layer.md) will be created, while for tiles a vector tile layer that extends the current [`MVTLayer`](/docs/api-reference/geo-layers/mvt-layer.md) and inherits all the properties will be inherited.
+For a full document a [`GeoJSONLayer`](/docs/api-reference/layers/geojson-layer.md) will be created, while for tiles a vector tile layer that extends the current [`MVTLayer`](/docs/api-reference/geo-layers/mvt-layer.md) and inherits all the properties will be created.
 
 Tiles can be forced by setting `format` to `FORMATS.TILEJSON`.
 
