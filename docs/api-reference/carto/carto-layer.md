@@ -177,17 +177,19 @@ When using v3, the behavior depends on the `type` property.
 
 ##### `MAP_TYPES.QUERY`
 
-GeoJSON/JSON data will be used, depending on `format`. No additional properties inherited.
+GeoJSON/JSON data will be used, depending on `format`. A [`GeoJSONLayer`](/docs/api-reference/layers/geojson-layer.md) will be created.
 
 ##### `MAP_TYPES.TILESET`
 
-Tiled data will be used, depending on `formatTiles`. All [`MVTLayer`](/docs/api-reference/geo-layers/mvt-layer.md) properties will be inherited.
+Tiled data will be used, depending on `formatTiles`. All [`MVTLayer`](/docs/api-reference/geo-layers/mvt-layer.md) will be created and all properties will be inherited.
 
 ##### `MAP_TYPES.TABLE`
 
-If `format` is `FORMATS.TILEJSON`, or the table is large, dynamic tiling is enabled and the behavior is as per `MAP_TYPES.TILESET`. Otherwise behavior is as per `MAP_TYPES.QUERY`.
+Automatically based on the size of the table CARTO will decide whether to use tiles or a full document.
 
-the layer works with vector tiles if the `type` property is `MAP_TYPES.TILESET` and with GeoJSON data if the `type` is `MAP_TYPES.QUERY`. If the type is `MAP_TYPES.TABLE`.
+For a full document a [`GeoJSONLayer`](/docs/api-reference/layers/geojson-layer.md) will be created, while for tiles a vector tile layer that extends the current [`MVTLayer`](/docs/api-reference/geo-layers/mvt-layer.md) and inherits all the properties will be inherited.
+
+Tiles can be forced by setting `format` to `FORMATS.TILEJSON`.
 
 ## Source
 
