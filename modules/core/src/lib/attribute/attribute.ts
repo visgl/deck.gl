@@ -5,7 +5,7 @@ import assert from '../../utils/assert';
 import {createIterable, getAccessorFromBuffer} from '../../utils/iterable-utils';
 import {fillArray} from '../../utils/flatten';
 import * as range from '../../utils/range';
-import {normalizeTransitionSettings} from './attribute-transition-utils';
+import {normalizeTransitionSettings, TransitionSettings} from './attribute-transition-utils';
 import type {Buffer} from '@luma.gl/webgl';
 
 import type {NumericArray, TypedArray} from '../../types/types';
@@ -60,8 +60,8 @@ type AttributeInternalState = {
 };
 
 export default class Attribute extends DataColumn<AttributeOptions, AttributeInternalState> {
-  /** Legacy field, do not read */
-  constant?: boolean;
+  /** Legacy approach to set attribute value - read `isConstant` instead for attribute state */
+  constant: boolean = false;
 
   constructor(gl: WebGLRenderingContext, opts: AttributeOptions) {
     super(gl, opts, {
@@ -114,7 +114,7 @@ export default class Attribute extends DataColumn<AttributeOptions, AttributeInt
   }
 
   // Resolve transition settings object if transition is enabled, otherwise `null`
-  getTransitionSetting(opts: Record<string, any>): any {
+  getTransitionSetting(opts: Record<string, any>): TransitionSettings | null {
     if (!opts || !this.supportsTransition()) {
       return null;
     }

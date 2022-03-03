@@ -114,7 +114,7 @@ type DataColumnInternalState<Options, State> = State & {
 export default class DataColumn<Options, State> implements IShaderAttribute {
   gl: WebGLRenderingContext;
   id: string;
-  size: number;
+  size: 1 | 2 | 3 | 4;
   settings: DataColumnSettings<Options>;
   value: NumericArray | null;
   doublePrecision: boolean;
@@ -182,6 +182,10 @@ export default class DataColumn<Options, State> implements IShaderAttribute {
     this._buffer = null;
   }
   /* eslint-enable max-statements */
+
+  get isConstant(): boolean {
+    return this.state.constant;
+  }
 
   get buffer(): LumaBuffer {
     if (!this._buffer) {
@@ -329,7 +333,7 @@ export default class DataColumn<Options, State> implements IShaderAttribute {
       let value = opts.value as NumericArray;
       value = this._normalizeValue(value, [], 0);
       if (this.settings.normalized) {
-        value = this._normalizeConstant(value);
+        value = this.normalizeConstant(value);
       }
       const hasChanged = !state.constant || !this._areValuesEqual(value, this.value);
 
@@ -467,7 +471,7 @@ export default class DataColumn<Options, State> implements IShaderAttribute {
   }
 
   // https://developer.mozilla.org/en-US/docs/Web/API/WebGLRenderingContext/vertexAttribPointer
-  protected _normalizeConstant(value: NumericArray): NumericArray {
+  normalizeConstant(value: NumericArray): NumericArray {
     switch (this.settings.type) {
       case GL.BYTE:
         // normalize [-128, 127] to [-1, 1]
