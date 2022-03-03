@@ -22,7 +22,8 @@ class MockEventManager {
 
 class TestController extends Controller {
   constructor(props) {
-    super(ViewState, props);
+    super(props);
+    this.ControllerState = ViewState;
     this.events = ['press', 'wheel'];
   }
 }
@@ -31,7 +32,9 @@ test('Custom Controller', t => {
   const eventManager = new MockEventManager();
 
   const controller = new TestController({
-    eventManager,
+    eventManager
+  });
+  controller.setProps({
     scrollZoom: false
   });
 

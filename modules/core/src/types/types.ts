@@ -10,3 +10,7 @@ export type TypedArray =
   | Float64Array;
 
 export type NumericArray = number[] | TypedArray;
+
+export type ConstructorOf<T> = {
+  new (...args): T;
+};

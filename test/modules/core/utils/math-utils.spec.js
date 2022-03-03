@@ -35,7 +35,7 @@ const EXPECTED_PLANES = {
 // Test a simple frustum with all planes
 // at 45 degree angles
 test('getFrustumPlanes#tests', t => {
-  const viewMatrix = new Matrix4().lookAt([0, 0, 1], [0, 0, 0], [0, 1, 0]);
+  const viewMatrix = new Matrix4().lookAt({eye: [0, 0, 1], center: [0, 0, 0], up: [0, 1, 0]});
   const viewProjMatrix = new Matrix4()
     .perspective({
       fovy: Math.PI / 2,

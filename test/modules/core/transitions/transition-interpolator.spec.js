@@ -4,6 +4,9 @@ import TransitionInterpolator from '@deck.gl/core/transitions/transition-interpo
 const TEST_CASES = [
   {
     title: 'any prop changes',
+    opts: {
+      compare: ['width', 'height']
+    },
     props: {width: 100, height: 100},
     nextProps: {width: 200, height: 200},
     equals: false,
@@ -11,7 +14,9 @@ const TEST_CASES = [
   },
   {
     title: 'selected prop changes',
-    opts: ['longitude', 'latitude'],
+    opts: {
+      compare: ['longitude', 'latitude']
+    },
     props: {width: 100, height: 100, longitude: -122, latitude: 38},
     nextProps: {width: 100, height: 100, longitude: -122, latitude: 37},
     equals: false,
@@ -19,21 +24,27 @@ const TEST_CASES = [
   },
   {
     title: 'no valid prop changes',
-    opts: ['width', 'height'],
+    opts: {
+      compare: ['width', 'height']
+    },
     props: {width: 100, height: 100, rotation: 0},
     nextProps: {width: 100, height: 100, rotation: 30},
     equals: true
   },
   {
     title: 'array prop deep equals',
-    opts: ['position', 'angle'],
+    opts: {
+      compare: ['position', 'angle']
+    },
     props: {position: [0, 0, 0], angle: 0},
     nextProps: {position: [0, 0, 0], angle: 0},
     equals: true
   },
   {
     title: 'array prop changes',
-    opts: ['position', 'angle'],
+    opts: {
+      compare: ['position', 'angle']
+    },
     props: {position: [0, 0, 0], angle: 0},
     nextProps: {position: [0, 0, 1], angle: 0},
     equals: false,
@@ -41,7 +52,10 @@ const TEST_CASES = [
   },
   {
     title: 'required prop missing',
-    opts: {compare: ['position', 'angle'], required: ['position', 'angle']},
+    opts: {
+      compare: ['position', 'angle'],
+      required: ['position', 'angle']
+    },
     props: {position: [0, 0, 0]},
     nextProps: {position: [0, 0, 0]},
     equals: false,
@@ -57,8 +71,8 @@ const TEST_CASES = [
     nextProps: {width: 200, height: 200, longitude: -122, latitude: 37},
     equals: false,
     initializeProps: {
-      start: {width: 100, height: 100, zoom: undefined, longitude: -122, latitude: 38},
-      end: {width: 200, height: 200, zoom: undefined, longitude: -122, latitude: 37}
+      start: {width: 100, height: 100, longitude: -122, latitude: 38},
+      end: {width: 200, height: 200, longitude: -122, latitude: 37}
     }
   }
 ];

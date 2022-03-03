@@ -149,7 +149,7 @@ test('ViewManager#controllers', t => {
   t.ok(viewManager.controllers.minimap, 'minimap controller is constructed');
 
   const viewport = viewManager.controllers.minimap.makeViewport(
-    viewManager.controllers.minimap.controllerStateProps
+    viewManager.controllers.minimap.props
   );
   t.ok(viewport.viewProjectionMatrix.every(Number.isFinite), 'makeViewport returns valid viewport');
 
