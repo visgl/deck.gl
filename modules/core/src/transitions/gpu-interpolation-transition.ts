@@ -6,14 +6,39 @@ import {
   getAttributeTypeFromSize,
   getSourceBufferAttribute,
   getAttributeBufferLength,
-  cycleBuffers
+  cycleBuffers,
+  InterpolationTransitionSettings
 } from '../lib/attribute/attribute-transition-utils';
 import Transition from './transition';
 
-export default class GPUInterpolationTransition {
-  constructor({gl, attribute, timeline}) {
+import type {Timeline, Transform as LumaTransform} from '@luma.gl/engine';
+import type {Buffer as LumaBuffer} from '@luma.gl/webgl';
+import type {NumericArray} from '../types/types';
+import type GPUTransition from './gpu-transition';
+
+export default class GPUInterpolationTransition implements GPUTransition {
+  gl: WebGLRenderingContext;
+  type = 'interpolation';
+  attributeInTransition: Attribute;
+
+  private settings?: InterpolationTransitionSettings;
+  private attribute: Attribute;
+  private transition: Transition;
+  private currentStartIndices: NumericArray | null;
+  private currentLength: number;
+  private transform: LumaTransform;
+  private buffers: LumaBuffer[];
+
+  constructor({
+    gl,
+    attribute,
+    timeline
+  }: {
+    gl: WebGLRenderingContext;
+    attribute: Attribute;
+    timeline: Timeline;
+  }) {
     this.gl = gl;
-    this.type = 'interpolation';
     this.transition = new Transition(timeline);
     this.attribute = attribute;
     // this is the attribute we return during the transition - note: if it is a constant
@@ -37,7 +62,7 @@ export default class GPUInterpolationTransition {
     ];
   }
 
-  get inProgress() {
+  get inProgress(): boolean {
     return this.transition.inProgress;
   }
 
@@ -46,11 +71,12 @@ export default class GPUInterpolationTransition {
   // this also correctly resizes / pads the transform's buffers
   // in case the attribute's buffer has changed in length or in
   // startIndices
-  start(transitionSettings, numInstances) {
+  start(transitionSettings: InterpolationTransitionSettings, numInstances: number): void {
     if (transitionSettings.duration <= 0) {
       this.transition.cancel();
       return;
     }
+    this.settings = transitionSettings;
 
     const {gl, buffers, attribute} = this;
     // Alternate between two buffers when new transitions start.
@@ -72,11 +98,11 @@ export default class GPUInterpolationTransition {
 
     this.currentStartIndices = attribute.startIndices;
     this.currentLength = getAttributeBufferLength(attribute, numInstances);
-    this.attributeInTransition.update({
+    this.attributeInTransition.setData({
       buffer: buffers[1],
       // Hack: Float64Array is required for double-precision attributes
       // to generate correct shader attributes
-      value: attribute.value
+      value: attribute.value as NumericArray
     });
 
     this.transition.start(transitionSettings);
@@ -93,14 +119,15 @@ export default class GPUInterpolationTransition {
     });
   }
 
-  update() {
+  update(): boolean {
     const updated = this.transition.update();
     if (updated) {
-      const {
-        time,
-        settings: {duration, easing}
-      } = this.transition;
-      const t = easing(time / duration);
+      const {duration, easing} = this.settings as InterpolationTransitionSettings;
+      const {time} = this.transition;
+      let t = time / duration;
+      if (easing) {
+        t = easing(t);
+      }
       this.transform.run({
         uniforms: {time: t}
       });
@@ -108,12 +135,13 @@ export default class GPUInterpolationTransition {
     return updated;
   }
 
-  cancel() {
+  cancel(): void {
     this.transition.cancel();
     this.transform.delete();
-    while (this.buffers.length) {
-      this.buffers.pop().delete();
+    for (const buffer of this.buffers) {
+      buffer.delete();
     }
+    this.buffers.length = 0;
   }
 }
 
@@ -131,7 +159,7 @@ void main(void) {
 }
 `;
 
-function getTransform(gl, attribute) {
+function getTransform(gl: WebGLRenderingContext, attribute: Attribute): LumaTransform {
   const attributeType = getAttributeTypeFromSize(attribute.size);
   return new Transform(gl, {
     vs,

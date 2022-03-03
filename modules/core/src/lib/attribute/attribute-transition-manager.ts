@@ -3,13 +3,38 @@ import GPUInterpolationTransition from '../../transitions/gpu-interpolation-tran
 import GPUSpringTransition from '../../transitions/gpu-spring-transition';
 import log from '../../utils/log';
 
-const TRANSITION_TYPES = {
+import type {TransitionSettings} from './attribute-transition-utils';
+import type Attribute from './attribute';
+import type {Timeline} from '@luma.gl/engine';
+import type GPUTransition from '../../transitions/gpu-transition';
+import type {ConstructorOf} from '../../types/types';
+
+const TRANSITION_TYPES: Record<string, ConstructorOf<GPUTransition>> = {
   interpolation: GPUInterpolationTransition,
   spring: GPUSpringTransition
 };
 
 export default class AttributeTransitionManager {
-  constructor(gl, {id, timeline}) {
+  id: string;
+  isSupported: boolean;
+
+  private gl: WebGLRenderingContext;
+  private timeline?: Timeline;
+
+  private transitions: {[id: string]: GPUTransition};
+  private needsRedraw: boolean;
+  private numInstances: number;
+
+  constructor(
+    gl: WebGLRenderingContext,
+    {
+      id,
+      timeline
+    }: {
+      id: string;
+      timeline?: Timeline;
+    }
+  ) {
     this.id = id;
     this.gl = gl;
     this.timeline = timeline;
@@ -21,7 +46,7 @@ export default class AttributeTransitionManager {
     this.isSupported = Transform.isSupported(gl);
   }
 
-  finalize() {
+  finalize(): void {
     for (const attributeName in this.transitions) {
       this._removeTransition(attributeName);
     }
@@ -31,7 +56,15 @@ export default class AttributeTransitionManager {
 
   // Called when attribute manager updates
   // Check the latest attributes for updates.
-  update({attributes, transitions, numInstances}) {
+  update({
+    attributes,
+    transitions,
+    numInstances
+  }: {
+    attributes: {[id: string]: Attribute};
+    transitions: any;
+    numInstances: number;
+  }): void {
     // Transform class will crash if elementCount is 0
     this.numInstances = numInstances || 1;
 
@@ -54,13 +87,13 @@ export default class AttributeTransitionManager {
   }
 
   // Returns `true` if attribute is transition-enabled
-  hasAttribute(attributeName) {
+  hasAttribute(attributeName: string): boolean {
     const transition = this.transitions[attributeName];
     return transition && transition.inProgress;
   }
 
   // Get all the animated attributes
-  getAttributes() {
+  getAttributes(): {[id: string]: Attribute} {
     const animatedAttributes = {};
 
     for (const attributeName in this.transitions) {
@@ -76,7 +109,7 @@ export default class AttributeTransitionManager {
   /* eslint-disable max-statements */
   // Called every render cycle, run transform feedback
   // Returns `true` if anything changes
-  run() {
+  run(): boolean {
     if (!this.isSupported || this.numInstances === 0) {
       return false;
     }
@@ -95,14 +128,18 @@ export default class AttributeTransitionManager {
   /* eslint-enable max-statements */
 
   /* Private methods */
-  _removeTransition(attributeName) {
+  private _removeTransition(attributeName: string): void {
     this.transitions[attributeName].cancel();
     delete this.transitions[attributeName];
   }
 
   // Check an attributes for updates
   // Returns a transition object if a new transition is triggered.
-  _updateAttribute(attributeName, attribute, settings) {
+  private _updateAttribute(
+    attributeName: string,
+    attribute: Attribute,
+    settings: TransitionSettings
+  ): void {
     const transition = this.transitions[attributeName];
     // an attribute can change transition type when it updates
     // let's remove the transition when that happens so we can create the new transition type
