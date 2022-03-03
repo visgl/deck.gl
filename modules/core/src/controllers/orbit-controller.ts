@@ -4,12 +4,13 @@ import ViewState from './view-state';
 import {mod} from '../utils/math-utils';
 
 import type Viewport from '../viewports/viewport';
+import LinearInterpolator from '../transitions/linear-interpolator';
 
 export type OrbitStateProps = {
   width: number;
   height: number;
   target?: number[];
-  zoom?: number;
+  zoom?: number | number[];
   rotationX?: number;
   rotationOrbit?: number;
 
@@ -26,7 +27,7 @@ type OrbitStateInternal = {
   startRotationX?: number;
   startRotationOrbit?: number;
   startZoomPosition?: number[];
-  startZoom?: number;
+  startZoom?: number | number[];
 };
 
 export class OrbitState extends ViewState<OrbitState, OrbitStateProps, OrbitStateInternal> {
@@ -331,12 +332,18 @@ export class OrbitState extends ViewState<OrbitState, OrbitStateProps, OrbitStat
   }
 
   // Calculates new zoom
-  _calculateNewZoom({scale, startZoom}: {scale: number; startZoom?: number}): number {
+  _calculateNewZoom({
+    scale,
+    startZoom
+  }: {
+    scale: number;
+    startZoom?: number | number[];
+  }): number | number[] {
     const {maxZoom, minZoom} = this.getViewportProps();
     if (startZoom === undefined) {
       startZoom = this.getViewportProps().zoom;
     }
-    const zoom = startZoom + Math.log2(scale);
+    const zoom = (startZoom as number) + Math.log2(scale);
     return clamp(zoom, minZoom, maxZoom);
   }
 
@@ -363,7 +370,10 @@ export class OrbitState extends ViewState<OrbitState, OrbitStateProps, OrbitStat
     // Ensure zoom is within specified range
     const {maxZoom, minZoom, zoom, maxRotationX, minRotationX, rotationOrbit} = props;
 
-    props.zoom = clamp(zoom, minZoom, maxZoom);
+    props.zoom = Array.isArray(zoom)
+      ? [clamp(zoom[0], minZoom, maxZoom), clamp(zoom[1], minZoom, maxZoom)]
+      : clamp(zoom, minZoom, maxZoom);
+
     props.rotationX = clamp(props.rotationX, minRotationX, maxRotationX);
     if (rotationOrbit < -180 || rotationOrbit > 180) {
       props.rotationOrbit = mod(rotationOrbit + 180, 360) - 180;
@@ -374,14 +384,15 @@ export class OrbitState extends ViewState<OrbitState, OrbitStateProps, OrbitStat
 }
 
 export default class OrbitController extends Controller<OrbitState> {
-  constructor(props) {
-    super(OrbitState, props);
-  }
+  ControllerState = OrbitState;
 
-  get linearTransitionProps() {
-    return {
-      compare: ['target', 'zoom', 'rotationX', 'rotationOrbit'],
-      required: ['target', 'zoom']
-    };
-  }
+  transition = {
+    transitionDuration: 300,
+    transitionInterpolator: new LinearInterpolator({
+      transitionProps: {
+        compare: ['target', 'zoom', 'rotationX', 'rotationOrbit'],
+        required: ['target', 'zoom']
+      }
+    })
+  };
 }

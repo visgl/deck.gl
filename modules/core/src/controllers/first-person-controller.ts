@@ -1,6 +1,7 @@
 import Controller from './controller';
 import ViewState from './view-state';
 import {mod} from '../utils/math-utils';
+import LinearInterpolator from '../transitions/linear-interpolator';
 
 import {Vector3, _SphericalCoordinates as SphericalCoordinates, clamp} from '@math.gl/core';
 
@@ -325,11 +326,10 @@ class FirstPersonState extends ViewState<
 }
 
 export default class FirstPersonController extends Controller<FirstPersonState> {
-  constructor(props) {
-    super(FirstPersonState, props);
-  }
+  ControllerState = FirstPersonState;
 
-  get linearTransitionProps() {
-    return ['position', 'pitch', 'bearing'];
-  }
+  transition = {
+    transitionDuration: 300,
+    transitionInterpolator: new LinearInterpolator(['position', 'pitch', 'bearing'])
+  };
 }

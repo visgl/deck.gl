@@ -97,7 +97,3 @@ export interface IViewState<T> {
   rotateUp(speed?: number): T;
   rotateDown(speed?: number): T;
 }
-
-export type ConstructorOf<T> = {
-  new (...args): T;
-};

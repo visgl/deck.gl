@@ -3,6 +3,7 @@ import Controller, {ControllerProps} from './controller';
 
 import {MapState, MapStateProps} from './map-controller';
 import {mod} from '../utils/math-utils';
+import LinearInterpolator from '../transitions/linear-interpolator';
 
 class GlobeState extends MapState {
   // Apply any constraints (mathematical or defined by _viewportProps) to map state
@@ -22,10 +23,14 @@ class GlobeState extends MapState {
 }
 
 export default class GlobeController extends Controller<MapState> {
-  constructor(props) {
-    props.dragMode = props.dragMode || 'pan';
-    super(GlobeState, props);
-  }
+  ControllerState = GlobeState;
+
+  transition = {
+    transitionDuration: 300,
+    transitionInterpolator: new LinearInterpolator(['longitude', 'latitude', 'zoom'])
+  };
+
+  dragMode: 'pan' | 'rotate' = 'pan';
 
   setProps(props: ControllerProps) {
     super.setProps(props);
@@ -33,9 +38,5 @@ export default class GlobeController extends Controller<MapState> {
     // TODO - support pitching?
     this.dragRotate = false;
     this.touchRotate = false;
-  }
-
-  get linearTransitionProps() {
-    return ['longitude', 'latitude', 'zoom'];
   }
 }

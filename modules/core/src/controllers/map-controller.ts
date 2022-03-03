@@ -4,6 +4,7 @@ import ViewState from './view-state';
 import {normalizeViewportProps} from '@math.gl/web-mercator';
 import assert from '../utils/assert';
 
+import LinearInterpolator from '../transitions/linear-interpolator';
 import type Viewport from '../viewports/viewport';
 
 const PITCH_MOUSE_THRESHOLD = 5;
@@ -483,10 +484,19 @@ export class MapState extends ViewState<MapState, MapStateProps, MapStateInterna
 }
 
 export default class MapController extends Controller<MapState> {
-  constructor(props) {
-    props.dragMode = props.dragMode || 'pan';
-    super(MapState, props);
-  }
+  ControllerState = MapState;
+
+  transition = {
+    transitionDuration: 300,
+    transitionInterpolator: new LinearInterpolator({
+      transitionProps: {
+        compare: ['longitude', 'latitude', 'zoom', 'bearing', 'pitch', 'position'],
+        required: ['longitude', 'latitude', 'zoom']
+      }
+    })
+  };
+
+  dragMode: 'pan' | 'rotate' = 'pan';
 
   setProps(props: ControllerProps & MapStateProps) {
     props.position = props.position || [0, 0, 0];
@@ -500,17 +510,10 @@ export default class MapController extends Controller<MapState> {
       this.updateViewport(
         new this.ControllerState({
           makeViewport: this.makeViewport,
-          ...this.props,
+          ...props,
           ...this.state
         })
       );
     }
-  }
-
-  get linearTransitionProps() {
-    return {
-      compare: ['longitude', 'latitude', 'zoom', 'bearing', 'pitch', 'position'],
-      required: ['longitude', 'latitude', 'zoom']
-    };
   }
 }

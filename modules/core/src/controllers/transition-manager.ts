@@ -1,6 +1,6 @@
 import Transition, {TransitionSettings as BaseTransitionSettings} from '../transitions/transition';
 import TransitionInterpolator from '../transitions/transition-interpolator';
-import type {IViewState, ConstructorOf} from './view-state';
+import type {IViewState} from './view-state';
 
 import type {Timeline} from '@luma.gl/core';
 import type {InteractionState} from './controller';
@@ -35,8 +35,8 @@ type TransitionSettings = BaseTransitionSettings & {
 };
 
 export default class TransitionManager<ControllerState extends IViewState<ControllerState>> {
-  ControllerState: ConstructorOf<ControllerState>;
-  props: TransitionProps;
+  getControllerState: (props: any) => ControllerState;
+  props?: TransitionProps;
   propsInTransition: Record<string, any> | null;
   transition: Transition;
   onViewStateChange: (params: {
@@ -45,24 +45,21 @@ export default class TransitionManager<ControllerState extends IViewState<Contro
   }) => void;
   onStateChange: (state: InteractionState) => void;
 
-  constructor(
-    ControllerState: ConstructorOf<ControllerState>,
-    props: TransitionProps & {
-      timeline: Timeline;
-      onViewStateChange?: (params: {
-        viewState: Record<string, any>;
-        oldViewState: Record<string, any>;
-      }) => void;
-      onStateChange?: (state: InteractionState) => void;
-    }
-  ) {
-    this.ControllerState = ControllerState;
-    this.props = props;
+  constructor(opts: {
+    timeline: Timeline;
+    getControllerState: (props: any) => ControllerState;
+    onViewStateChange?: (params: {
+      viewState: Record<string, any>;
+      oldViewState: Record<string, any>;
+    }) => void;
+    onStateChange?: (state: InteractionState) => void;
+  }) {
+    this.getControllerState = opts.getControllerState;
     this.propsInTransition = null;
-    this.transition = new Transition(props.timeline);
+    this.transition = new Transition(opts.timeline);
 
-    this.onViewStateChange = props.onViewStateChange || noop;
-    this.onStateChange = props.onStateChange || noop;
+    this.onViewStateChange = opts.onViewStateChange || noop;
+    this.onStateChange = opts.onStateChange || noop;
   }
 
   finalize(): void {
@@ -83,8 +80,8 @@ export default class TransitionManager<ControllerState extends IViewState<Contro
     this.props = nextProps;
 
     // NOTE: Be cautious re-ordering statements in this function.
-    if (this._shouldIgnoreViewportChange(currentProps, nextProps)) {
-      return transitionTriggered;
+    if (!currentProps || this._shouldIgnoreViewportChange(currentProps, nextProps)) {
+      return false;
     }
 
     if (this._isTransitionEnabled(nextProps)) {
@@ -142,7 +139,8 @@ export default class TransitionManager<ControllerState extends IViewState<Contro
         // Ignore update if it is due to current active transition.
         this._isUpdateDueToCurrentTransition(nextProps)
       );
-    } else if (this._isTransitionEnabled(nextProps)) {
+    }
+    if (this._isTransitionEnabled(nextProps)) {
       // Ignore if none of the viewport props changed.
       return (nextProps.transitionInterpolator as TransitionInterpolator).arePropsEqual(
         currentProps,
@@ -153,8 +151,8 @@ export default class TransitionManager<ControllerState extends IViewState<Contro
   }
 
   _triggerTransition(startProps: TransitionProps, endProps: TransitionProps): void {
-    const startViewstate = new this.ControllerState(startProps);
-    const endViewStateProps = new this.ControllerState(endProps).shortestPathFrom(startViewstate);
+    const startViewstate = this.getControllerState(startProps);
+    const endViewStateProps = this.getControllerState(endProps).shortestPathFrom(startViewstate);
 
     // update transitionDuration for 'auto' mode
     const transitionInterpolator = endProps.transitionInterpolator as TransitionInterpolator;
@@ -216,14 +214,14 @@ export default class TransitionManager<ControllerState extends IViewState<Contro
 
     // This gurantees all props (e.g. bearing, longitude) are normalized
     // So when viewports are compared they are in same range.
-    this.propsInTransition = new this.ControllerState({
+    this.propsInTransition = this.getControllerState({
       ...this.props,
       ...viewport
     }).getViewportProps();
 
     this.onViewStateChange({
       viewState: this.propsInTransition,
-      oldViewState: this.props
+      oldViewState: this.props as TransitionProps
     });
   };
 }

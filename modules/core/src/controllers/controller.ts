@@ -19,9 +19,10 @@
 // THE SOFTWARE.
 
 /* eslint-disable max-statements, complexity */
-import TransitionManager, {TRANSITION_EVENTS, TransitionProps} from './transition-manager';
+import TransitionManager, {TransitionProps} from './transition-manager';
 import LinearInterpolator from '../transitions/linear-interpolator';
-import {IViewState, ConstructorOf} from './view-state';
+import {IViewState} from './view-state';
+import {ConstructorOf} from '../types/types';
 
 import type Viewport from '../viewports/viewport';
 
@@ -30,12 +31,6 @@ import type {Timeline} from '@luma.gl/core';
 
 const NO_TRANSITION_PROPS = {
   transitionDuration: 0
-} as const;
-
-const LINEAR_TRANSITION_PROPS = {
-  transitionDuration: 300,
-  transitionEasing: t => t,
-  transitionInterruption: TRANSITION_EVENTS.BREAK
 } as const;
 
 const DEFAULT_INERTIA = 300;
@@ -91,8 +86,11 @@ export type ViewStateChangeParameters = {
 
 const pinchEventWorkaround: any = {};
 
-export default class Controller<ControllerState extends IViewState<ControllerState>> {
-  ControllerState: ConstructorOf<ControllerState>;
+export default abstract class Controller<ControllerState extends IViewState<ControllerState>> {
+  abstract get ControllerState(): ConstructorOf<ControllerState>;
+  abstract get transition(): TransitionProps;
+
+  // @ts-expect-error (2564) - not assigned in the constructor
   protected props: ControllerProps;
   protected state: Record<string, any> = {};
 
@@ -103,7 +101,6 @@ export default class Controller<ControllerState extends IViewState<ControllerSta
   protected makeViewport: (opts: Record<string, any>) => Viewport
 
   private _controllerState?: ControllerState;
-  private _transition: TransitionProps | null;
   private _events: Record<string, boolean> = {};
   private _interactionState: InteractionState = {
     isDragging: false
@@ -130,44 +127,26 @@ export default class Controller<ControllerState extends IViewState<ControllerSta
         rotateSpeedY?: number; //  speed of rotation using shift + up/down arrow keys, in degrees. Default 10.
       } = true;
 
-  constructor(ControllerState: ConstructorOf<ControllerState>, props: ControllerProps & {
+  constructor(opts: {
     timeline: Timeline,
     eventManager: EventManager;
     makeViewport: (opts: Record<string, any>) => Viewport;
     onViewStateChange: (params: ViewStateChangeParameters) => void;
     onStateChange: (state: InteractionState) => void;
   }) {
-    this.ControllerState = ControllerState;
-    this.transitionManager = new TransitionManager<ControllerState>(ControllerState, {
-      ...props,
+    this.transitionManager = new TransitionManager<ControllerState>({
+      ...opts,
+      getControllerState: props => new this.ControllerState(props),
       onViewStateChange: this._onTransition.bind(this),
       onStateChange: this._setInteractionState.bind(this)
     });
 
-    const linearTransitionProps = this.linearTransitionProps;
-    this._transition = linearTransitionProps && {
-      ...LINEAR_TRANSITION_PROPS,
-      transitionInterpolator: new LinearInterpolator({
-        transitionProps: linearTransitionProps
-      })
-    };
-
     this.handleEvent = this.handleEvent.bind(this);
 
-    this.props = props;
-    this.eventManager = props.eventManager;
-    this.onViewStateChange = props.onViewStateChange;
-    this.onStateChange = props.onStateChange;
-    this.makeViewport = props.makeViewport;
-    this.setProps(props);
-  }
-
-  get linearTransitionProps(): string[] | {
-    compare: string[];
-    extract?: string[];
-    required?: string[];
-  } | null {
-    return null;
+    this.eventManager = opts.eventManager;
+    this.onViewStateChange = opts.onViewStateChange || (() => {});
+    this.onStateChange = opts.onStateChange || (() => {});
+    this.makeViewport = opts.makeViewport;
   }
 
   set events(customEvents) {
@@ -175,7 +154,9 @@ export default class Controller<ControllerState extends IViewState<ControllerSta
     this.toggleEvents(customEvents, true);
     this._customEvents = customEvents;
     // Make sure default events are not overwritten
-    this.setProps(this.props);
+    if (this.props) {
+      this.setProps(this.props);
+    }
   }
 
   finalize() {
@@ -234,7 +215,7 @@ export default class Controller<ControllerState extends IViewState<ControllerSta
       ...this.props,
       ...this.state
     });
-    return this._controllerState;
+    return this._controllerState ;
   }
 
   getCenter(event: MjolnirGestureEvent | MjolnirWheelEvent) : [number, number] {
@@ -783,22 +764,22 @@ export default class Controller<ControllerState extends IViewState<ControllerSta
   }
 
   protected _getTransitionProps(opts?: any): TransitionProps {
-    const {_transition} = this;
+    const {transition} = this;
 
-    if (!_transition) {
+    if (!transition || !transition.transitionInterpolator) {
       return NO_TRANSITION_PROPS;
     }
 
     // Enables Transitions on double-tap and key-down events.
     return opts
       ? {
-        ..._transition,
+        ...transition,
         transitionInterpolator: new LinearInterpolator({
           ...opts,
-          transitionProps: this.linearTransitionProps,
+          ...(transition.transitionInterpolator as LinearInterpolator).opts,
           makeViewport: this.controllerState.makeViewport
         })
       }
-      : _transition;
+      : transition;
   }
 }

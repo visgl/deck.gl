@@ -210,7 +210,9 @@ export default async function testController(t, ViewClass, defaultProps, blackLi
   let onViewStateChangeCalled = 0;
   const affectedStates = new Set();
   let controllerProps = null;
-  Object.assign(defaultProps, BASE_PROPS, view.controller, {
+  Object.assign(defaultProps, BASE_PROPS, view.controller);
+  const ControllerClass = defaultProps.type;
+  const controller = new ControllerClass({
     timeline,
     onViewStateChange: ({viewState, interactionState}) => {
       if (!interactionState.inTransition) {
@@ -229,8 +231,7 @@ export default async function testController(t, ViewClass, defaultProps, blackLi
     makeViewport: viewState =>
       view.makeViewport({width: BASE_PROPS.width, height: BASE_PROPS.height, viewState})
   });
-  const ControllerClass = defaultProps.type;
-  const controller = new ControllerClass(defaultProps);
+  controller.setProps(defaultProps);
 
   for (const testCase of TEST_CASES) {
     if (blackList.includes(testCase.title)) {
@@ -240,7 +241,7 @@ export default async function testController(t, ViewClass, defaultProps, blackLi
     affectedStates.clear();
     controllerProps = {...defaultProps, ...testCase.props};
     controller.setProps(controllerProps);
-    await triggerEvents(controller, testCase);
+    await triggerEvents(controller, testCase, timeline);
 
     t.is(onViewStateChangeCalled, testCase.viewStateChanges, `${testCase.title} onViewStateChange`);
     t.is(
@@ -251,19 +252,19 @@ export default async function testController(t, ViewClass, defaultProps, blackLi
   }
 }
 
-async function triggerEvents(controller, testCase) {
+async function triggerEvents(controller, testCase, timeline) {
   /* eslint-disable no-loop-func */
   for (const event of testCase.events()) {
     controller.handleEvent(event);
     await waitUntil(
       controller,
+      timeline,
       () => !controller._eventStartBlocked && !controller._interactionState.inTransition
     );
   }
 }
 
-function waitUntil(controller, verify) {
-  const {timeline} = controller.props;
+function waitUntil(controller, timeline, verify) {
   return new Promise(resolve => {
     const check = () => {
       if (verify()) {
