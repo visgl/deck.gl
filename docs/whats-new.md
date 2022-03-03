@@ -31,7 +31,7 @@ The new [QuadkeyLayer](/docs/api-reference/geo-layers/quadkey-layer) renders fil
 ### `@deck.gl/carto`
 
 - **fetchMap** - [fetchMap](/docs/api-reference/carto/fetch-map) is added to the [CARTO deck.gl submodule](/docs/api-reference/carto/overview), streamlining the display of maps created using CARTO platform.
-- **Support for large tables and Databricks**. See [CARTO documentation](https://carto.com/docs) for more details.
+- **Support for large tables and Databricks**. See [CARTO documentation](https://docs.carto.com/deck-gl/getting-started/) for more details.
 
 ## deck.gl v8.6
 
