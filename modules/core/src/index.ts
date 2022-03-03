@@ -53,6 +53,9 @@ export {default as DeckRenderer} from './lib/deck-renderer';
 export {default as Viewport} from './viewports/viewport';
 export {default as WebMercatorViewport} from './viewports/web-mercator-viewport';
 export {default as _GlobeViewport} from './viewports/globe-viewport';
+export {default as OrbitViewport} from './viewports/orbit-viewport';
+export {default as OrthographicViewport} from './viewports/orthographic-viewport';
+export {default as FirstPersonViewport} from './viewports/first-person-viewport';
 
 // Shader modules
 export {picking, project, project32, gouraudLighting, phongLighting, shadow} from './shaderlib';
@@ -94,3 +97,11 @@ export {count as _count} from './utils/count';
 export {default as _memoize} from './utils/memoize';
 export {mergeShaders as _mergeShaders} from './utils/shader';
 export {compareProps as _compareProps} from './lifecycle/props';
+
+/* Types */
+
+export type {MapViewState} from './views/map-view';
+export type {FirstPersonViewState} from './views/first-person-view';
+export type {OrbitViewState} from './views/orbit-view';
+export type {OrthographicViewState} from './views/orthographic-view';
+export type {GlobeViewState} from './views/globe-view';

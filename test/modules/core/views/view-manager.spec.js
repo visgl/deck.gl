@@ -10,13 +10,13 @@ test('ViewManager#imports', t => {
 });
 
 test('ViewManager#constructor', t => {
-  const viewManager = new ViewManager();
+  const viewManager = new ViewManager({});
   t.ok(viewManager, 'Viewport created');
   t.end();
 });
 
 test('ViewManager#getViewports', t => {
-  const viewManager = new ViewManager();
+  const viewManager = new ViewManager({});
   viewManager.setProps({
     views: [new MapView({height: '50%'}), new MapView({height: '50%', y: '50%'})],
     viewState: INITIAL_VIEW_STATE,
@@ -48,7 +48,7 @@ test('ViewManager#getViewports', t => {
 });
 
 test('ViewManager#needsRedraw', t => {
-  const viewManager = new ViewManager();
+  const viewManager = new ViewManager({});
 
   viewManager.getViewports();
 

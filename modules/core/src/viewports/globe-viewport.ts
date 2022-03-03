@@ -123,7 +123,7 @@ export default class GlobeViewport extends Viewport {
     return this.distanceScales;
   }
 
-  getBounds(options: {z?: number} = {}): number[] {
+  getBounds(options: {z?: number} = {}): [number, number, number, number] {
     const unprojectOption = {targetZ: options.z || 0};
 
     const left = this.unproject([0, this.height / 2], unprojectOption);
@@ -181,7 +181,7 @@ export default class GlobeViewport extends Viewport {
     return Number.isFinite(targetZ) ? [X, Y, targetZ as number] : [X, Y];
   }
 
-  projectPosition(xyz: number[]): number[] {
+  projectPosition(xyz: number[]): [number, number, number] {
     const [lng, lat, Z = 0] = xyz;
     const lambda = lng * DEGREES_TO_RADIANS;
     const phi = lat * DEGREES_TO_RADIANS;
@@ -191,7 +191,7 @@ export default class GlobeViewport extends Viewport {
     return [Math.sin(lambda) * cosPhi * D, -Math.cos(lambda) * cosPhi * D, Math.sin(phi) * D];
   }
 
-  unprojectPosition(xyz: number[]): number[] {
+  unprojectPosition(xyz: number[]): [number, number, number] {
     const [x, y, z] = xyz;
     const D = vec3.len(xyz);
     const phi = Math.asin(z / D);
@@ -203,15 +203,15 @@ export default class GlobeViewport extends Viewport {
     return [lng, lat, Z];
   }
 
-  projectFlat(xyz: number[]): number[] {
-    return xyz;
+  projectFlat(xyz: number[]): [number, number] {
+    return xyz as [number, number];
   }
 
-  unprojectFlat(xyz: number[]): number[] {
-    return xyz;
+  unprojectFlat(xyz: number[]): [number, number] {
+    return xyz as [number, number];
   }
 
-  panByPosition(coords: number[], pixel: number[]): any {
+  panByPosition(coords: number[], pixel: number[]): GlobeViewportOptions {
     const fromPosition = this.unproject(pixel);
     return {
       longitude: coords[0] - fromPosition[0] + this.longitude,

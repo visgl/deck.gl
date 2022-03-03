@@ -235,7 +235,7 @@ export default class WebMercatorViewport extends Viewport {
     return this._subViewports;
   }
 
-  projectPosition(xyz: number[]): number[] {
+  projectPosition(xyz: number[]): [number, number, number] {
     if (this._pseudoMeters) {
       // Backward compatibility
       return super.projectPosition(xyz);
@@ -245,7 +245,7 @@ export default class WebMercatorViewport extends Viewport {
     return [X, Y, Z];
   }
 
-  unprojectPosition(xyz: number[]): number[] {
+  unprojectPosition(xyz: number[]): [number, number, number] {
     if (this._pseudoMeters) {
       // Backward compatibility
       return super.unprojectPosition(xyz);
@@ -269,7 +269,7 @@ export default class WebMercatorViewport extends Viewport {
     return addMetersToLngLat(lngLatZ, xyz);
   }
 
-  panByPosition(coords: number[], pixel: number[]): any {
+  panByPosition(coords: number[], pixel: number[]): WebMercatorViewportOptions {
     const fromLocation = pixelsToWorld(pixel, this.pixelUnprojectionMatrix);
     const toLocation = this.projectFlat(coords);
 
@@ -280,7 +280,7 @@ export default class WebMercatorViewport extends Viewport {
     return {longitude, latitude};
   }
 
-  getBounds(options: {z?: number} = {}): number[] {
+  getBounds(options: {z?: number} = {}): [number, number, number, number] {
     // @ts-ignore
     const corners = getBounds(this, options.z || 0);
 

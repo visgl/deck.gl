@@ -224,7 +224,7 @@ export default class Viewport {
    * @param {Object} opts.topLeft=true - Whether projected coords are top left
    * @return {Array} - [x, y] or [x, y, z] in top left coords
    */
-  project(xyz: number[], {topLeft = true}: {topLeft?: boolean} = {}) {
+  project(xyz: number[], {topLeft = true}: {topLeft?: boolean} = {}): number[] {
     const worldPosition = this.projectPosition(xyz);
     const coord = worldToPixels(worldPosition, this.pixelProjectionMatrix);
 
@@ -263,13 +263,13 @@ export default class Viewport {
   // NON_LINEAR PROJECTION HOOKS
   // Used for web meractor projection
 
-  projectPosition(xyz: number[]): number[] {
+  projectPosition(xyz: number[]): [number, number, number] {
     const [X, Y] = this.projectFlat(xyz);
     const Z = (xyz[2] || 0) * this.distanceScales.unitsPerMeter[2];
     return [X, Y, Z];
   }
 
-  unprojectPosition(xyz: number[]): number[] {
+  unprojectPosition(xyz: number[]): [number, number, number] {
     const [X, Y] = this.unprojectFlat(xyz);
     const Z = (xyz[2] || 0) * this.distanceScales.metersPerUnit[2];
     return [X, Y, Z];
@@ -284,11 +284,11 @@ export default class Viewport {
    *   Specifies a point on the sphere to project onto the map.
    * @return {Array} [x,y] coordinates.
    */
-  projectFlat(xyz: number[]): number[] {
+  projectFlat(xyz: number[]): [number, number] {
     if (this.isGeospatial) {
       return lngLatToWorld(xyz);
     }
-    return xyz;
+    return xyz as [number, number];
   }
 
   /**
@@ -299,18 +299,18 @@ export default class Viewport {
    *   Has toArray method if you need a GeoJSON Array.
    *   Per cartographic tradition, lat and lon are specified as degrees.
    */
-  unprojectFlat(xyz: number[]): number[] {
+  unprojectFlat(xyz: number[]): [number, number] {
     if (this.isGeospatial) {
       return worldToLngLat(xyz);
     }
-    return xyz;
+    return xyz as [number, number];
   }
 
   /**
    * Get bounds of the current viewport
    * @return {Array} - [minX, minY, maxX, maxY]
    */
-  getBounds(options: {z?: number} = {}): number[] {
+  getBounds(options: {z?: number} = {}): [number, number, number, number] {
     const unprojectOption = {targetZ: options.z || 0};
 
     const topLeft = this.unproject([0, 0], unprojectOption);
@@ -345,8 +345,8 @@ export default class Viewport {
   }: {
     x: number;
     y: number;
-    width: number;
-    height: number;
+    width?: number;
+    height?: number;
   }): boolean {
     return (
       x < this.x + this.width &&
