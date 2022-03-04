@@ -40,9 +40,12 @@ export type FirstPersonViewportOptions = {
 };
 
 export default class FirstPersonViewport extends Viewport {
+  longitude?: number;
+  latitude?: number;
+
   constructor(props: FirstPersonViewportOptions) {
     // TODO - push direction handling into Matrix4.lookAt
-    const {latitude, modelMatrix = null, bearing = 0, pitch = 0, up = [0, 0, 1]} = props;
+    const {longitude, latitude, modelMatrix, bearing = 0, pitch = 0, up = [0, 0, 1]} = props;
 
     // Always calculate direction from bearing and pitch
     const spherical = new SphericalCoordinates({
@@ -65,5 +68,8 @@ export default class FirstPersonViewport extends Viewport {
       zoom,
       viewMatrix
     });
+
+    this.latitude = latitude;
+    this.longitude = longitude;
   }
 }

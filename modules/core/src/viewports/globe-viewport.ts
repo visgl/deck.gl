@@ -78,11 +78,7 @@ export default class GlobeViewport extends Viewport {
     altitude = Math.max(0.75, altitude);
 
     // Calculate view matrix
-    const viewMatrix = new Matrix4().lookAt({
-      center: [0, 0, 0],
-      eye: [0, -altitude, 0],
-      up: [0, 0, 1]
-    });
+    const viewMatrix = new Matrix4().lookAt({eye: [0, -altitude, 0], up: [0, 0, 1]});
     const scale = Math.pow(2, zoom);
     viewMatrix.rotateX(latitude * DEGREES_TO_RADIANS);
     viewMatrix.rotateZ(-longitude * DEGREES_TO_RADIANS);
@@ -220,7 +216,7 @@ export default class GlobeViewport extends Viewport {
   }
 }
 
-function transformVector(matrix, vector) {
+function transformVector(matrix: number[], vector: number[]): number[] {
   const result = vec4.transformMat4([], vector, matrix);
   vec4.scale(result, result, 1 / result[3]);
   return result;

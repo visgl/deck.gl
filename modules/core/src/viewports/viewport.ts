@@ -401,7 +401,7 @@ export default class Viewport {
       if (!Number.isFinite(opts.zoom)) {
         this.zoom = getMeterZoom({latitude}) + Math.log2(this.focalDistance);
       }
-      this.distanceScales = getDistanceScales({latitude, longitude});
+      this.distanceScales = opts.distanceScales || getDistanceScales({latitude, longitude});
     }
     const scale = Math.pow(2, this.zoom);
     this.scale = scale;
