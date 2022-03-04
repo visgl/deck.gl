@@ -16,4 +16,4 @@ export type Lifecycle = typeof LIFECYCLE[keyof typeof LIFECYCLE];
 export const COMPONENT_SYMBOL: unique symbol = Symbol.for('component');
 export const ASYNC_DEFAULTS_SYMBOL: unique symbol = Symbol.for('asyncPropDefaults');
 export const ASYNC_ORIGINAL_SYMBOL: unique symbol = Symbol.for('asyncPropOriginal');
-export const ASYNC_RESOLVED_SYMBOL: unique symbol = Symbol.for('ASYNC_RESOLVED');
+export const ASYNC_RESOLVED_SYMBOL: unique symbol = Symbol.for('asyncPropResolved');
