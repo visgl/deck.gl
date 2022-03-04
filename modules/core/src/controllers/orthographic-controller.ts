@@ -1,6 +1,7 @@
 import {clamp} from '@math.gl/core';
 import Controller from './controller';
-import {OrbitState} from './orbit-controller';
+import {OrbitState, OrbitStateProps} from './orbit-controller';
+import LinearInterpolator from '../transitions/linear-interpolator';
 
 class OrthographicState extends OrbitState {
   zoomAxis: 'X' | 'Y' | 'all';
@@ -11,18 +12,10 @@ class OrthographicState extends OrbitState {
     this.zoomAxis = props.zoomAxis || 'all';
   }
 
-  _applyConstraints(props) {
-    const {maxZoom, minZoom, zoom} = props;
-    props.zoom = Array.isArray(zoom)
-      ? [clamp(zoom[0], minZoom, maxZoom), clamp(zoom[1], minZoom, maxZoom)]
-      : clamp(zoom, minZoom, maxZoom);
-    return props;
-  }
-
   _calculateNewZoom({scale, startZoom}) {
-    const {maxZoom, minZoom} = this._viewportProps;
-    if (!startZoom && startZoom !== 0) {
-      startZoom = this._viewportProps.zoom;
+    const {maxZoom, minZoom} = this.getViewportProps();
+    if (startZoom === undefined) {
+      startZoom = this.getViewportProps().zoom;
     }
     let deltaZoom = Math.log2(scale);
     if (Array.isArray(startZoom)) {
@@ -58,18 +51,16 @@ class OrthographicState extends OrbitState {
   }
 }
 
-export default class OrthographicController extends Controller {
-  constructor(props) {
-    props.dragMode = props.dragMode || 'pan';
-    super(OrthographicState, props);
-  }
+export default class OrthographicController extends Controller<OrbitState> {
+  ControllerState = OrthographicState;
+  transition = {
+    transitionDuration: 300,
+    transitionInterpolator: new LinearInterpolator(['target', 'zoom'])
+  };
+  dragMode: 'pan' | 'rotate' = 'pan';
 
-  _onPanRotate(event) {
+  _onPanRotate() {
     // No rotation in orthographic view
     return false;
-  }
-
-  get linearTransitionProps(): string[] | null {
-    return ['target', 'zoom'];
   }
 }

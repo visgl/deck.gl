@@ -1,7 +1,11 @@
 import {equals} from '@math.gl/core';
 import assert from '../utils/assert';
 
-export default class TransitionInterpolator {
+export default abstract class TransitionInterpolator {
+  protected _propsToCompare: string[];
+  protected _propsToExtract: string[];
+  protected _requiredProps?: string[];
+
   /**
    * @param opts {array|object}
    * @param opts.compare {array} - prop names used in equality check
@@ -9,18 +13,11 @@ export default class TransitionInterpolator {
    * @param opts.required {array} - prop names that must be supplied
    * alternatively, supply one list of prop names as `opts` if all of the above are the same.
    */
-  constructor(opts = {}) {
-    if (Array.isArray(opts)) {
-      opts = {
-        compare: opts,
-        extract: opts,
-        required: opts
-      };
-    }
+  constructor(opts: {compare: string[]; extract?: string[]; required?: string[]}) {
     const {compare, extract, required} = opts;
 
     this._propsToCompare = compare;
-    this._propsToExtract = extract;
+    this._propsToExtract = extract || compare;
     this._requiredProps = required;
   }
 
@@ -30,8 +27,8 @@ export default class TransitionInterpolator {
    * @param nextProps {object} - a list of viewport props
    * @returns {bool} - true if two props are equivalent
    */
-  arePropsEqual(currentProps, nextProps) {
-    for (const key of this._propsToCompare || Object.keys(nextProps)) {
+  arePropsEqual(currentProps: Record<string, any>, nextProps: Record<string, any>): boolean {
+    for (const key of this._propsToCompare) {
       if (
         !(key in currentProps) ||
         !(key in nextProps) ||
@@ -50,26 +47,27 @@ export default class TransitionInterpolator {
    * @returns {Object} {start, end} - start and end props to be passed
    *   to `interpolateProps`
    */
-  initializeProps(startProps, endProps) {
-    let result;
+  initializeProps(
+    startProps: Record<string, any>,
+    endProps: Record<string, any>
+  ): {
+    start: Record<string, any>;
+    end: Record<string, any>;
+  } {
+    const startViewStateProps = {};
+    const endViewStateProps = {};
 
-    if (this._propsToExtract) {
-      const startViewStateProps = {};
-      const endViewStateProps = {};
-
-      for (const key of this._propsToExtract) {
+    for (const key of this._propsToExtract) {
+      if (key in startProps || key in endProps) {
         startViewStateProps[key] = startProps[key];
         endViewStateProps[key] = endProps[key];
       }
-      result = {start: startViewStateProps, end: endViewStateProps};
-    } else {
-      result = {start: startProps, end: endProps};
     }
 
-    this._checkRequiredProps(result.start);
-    this._checkRequiredProps(result.end);
+    this._checkRequiredProps(startViewStateProps);
+    this._checkRequiredProps(endViewStateProps);
 
-    return result;
+    return {start: startViewStateProps, end: endViewStateProps};
   }
 
   /**
@@ -79,9 +77,11 @@ export default class TransitionInterpolator {
    * @param t {number} - a time factor between [0, 1]
    * @returns {object} - a list of interpolated viewport props
    */
-  interpolateProps(startProps, endProps, t) {
-    return endProps;
-  }
+  abstract interpolateProps(
+    startProps: Record<string, any>,
+    endProps: Record<string, any>,
+    t: number
+  ): Record<string, any>;
 
   /**
    * Returns transition duration
@@ -89,7 +89,7 @@ export default class TransitionInterpolator {
    * @param endProps {object} - a list of target viewport props
    * @returns {Number} - transition duration in milliseconds
    */
-  getDuration(startProps, endProps) {
+  getDuration(startProps: Record<string, any>, endProps: Record<string, any>): number {
     return endProps.transitionDuration;
   }
 

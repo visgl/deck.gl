@@ -5,31 +5,35 @@ import test from 'tape-promise/tape';
 import {isWebGL2, Timeline} from '@luma.gl/core';
 import {gl} from '@deck.gl/test-utils';
 
-const TEST_ATTRIBUTES = {
-  indices: new Attribute(gl, {
+const TEST_ATTRIBUTES = (function () {
+  const indices = new Attribute(gl, {
     id: 'indices',
     isIndexed: true,
     size: 1,
-    update: () => {},
-    value: new Float32Array([0, 1, 2, 1, 3, 2])
-  }),
-  instancePositions: new Attribute(gl, {
+    update: () => {}
+  });
+  indices.setData({value: new Float32Array([0, 1, 2, 1, 3, 2])});
+
+  const instancePositions = new Attribute(gl, {
     id: 'instancePositions',
     size: 3,
     accessor: ['getPosition', 'getElevation'],
     update: () => {},
-    transition: true,
-    value: new Float32Array(12)
-  }),
-  instanceSizes: new Attribute(gl, {
+    transition: true
+  });
+  instancePositions.setData({value: new Float32Array(12)});
+
+  const instanceSizes = new Attribute(gl, {
     id: 'instanceSizes',
     size: 1,
     accessor: 'getSize',
     defaultValue: 1,
-    transition: true,
-    value: new Float32Array(4)
-  })
-};
+    transition: true
+  });
+  instanceSizes.setData({value: new Float32Array(4)});
+
+  return {indices, instancePositions, instanceSizes};
+})();
 
 test('AttributeTransitionManager#constructor', t => {
   let manager = new AttributeTransitionManager(gl, {id: 'attribute-transition'});
@@ -86,7 +90,7 @@ if (isWebGL2(gl)) {
     t.notOk(positionTransform._handle, 'instancePositions transform is deleted');
     t.is(sizeTransition.buffers[0].getElementCount(), 4, 'buffer has correct size');
 
-    attributes.instanceSizes.update({value: new Float32Array(5).fill(1)});
+    attributes.instanceSizes.setData({value: new Float32Array(5).fill(1)});
     manager.update({attributes, transitions: {getSize: 1000}, numInstances: 5});
     manager.run();
     let transitioningBuffer = manager.getAttributes().instanceSizes.getBuffer();
@@ -97,7 +101,7 @@ if (isWebGL2(gl)) {
     );
     t.is(transitioningBuffer.getElementCount(), 5, 'buffer has correct size');
 
-    attributes.instanceSizes.update({constant: true, value: [2]});
+    attributes.instanceSizes.setData({constant: true, value: [2]});
     manager.update({attributes, transitions: {getSize: 1000}, numInstances: 6});
     manager.run();
     transitioningBuffer = manager.getAttributes().instanceSizes.getBuffer();
@@ -138,7 +142,7 @@ if (isWebGL2(gl)) {
       }
     };
 
-    attributes.instanceSizes.update({value: new Float32Array(4).fill(1)});
+    attributes.instanceSizes.setData({value: new Float32Array(4).fill(1)});
     attributes.instanceSizes.setNeedsRedraw('initial');
 
     timeline.setTime(0);
@@ -153,7 +157,7 @@ if (isWebGL2(gl)) {
     t.is(startCounter, 1, 'no new transition is triggered');
 
     timeline.setTime(1000);
-    attributes.instanceSizes.update({value: new Float32Array(4).fill(3)});
+    attributes.instanceSizes.setData({value: new Float32Array(4).fill(3)});
     attributes.instanceSizes.setNeedsRedraw('update');
     manager.update({attributes, transitions, numInstances: 4});
     manager.run();
@@ -168,7 +172,7 @@ if (isWebGL2(gl)) {
       'attribute in transition'
     );
 
-    attributes.instanceSizes.update({value: new Float32Array(4).fill(4)});
+    attributes.instanceSizes.setData({value: new Float32Array(4).fill(4)});
     attributes.instanceSizes.setNeedsRedraw('update');
 
     manager.update({attributes, transitions, numInstances: 4});
