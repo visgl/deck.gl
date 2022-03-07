@@ -1,4 +1,36 @@
 import {padArray} from '../../utils/array-utils';
+import {NumericArray} from '../../types/types';
+import Attribute from './attribute';
+import type {BufferAccessor} from './data-column';
+import type {Buffer} from '@luma.gl/webgl';
+
+export interface TransitionSettings {
+  type: string;
+  /** Callback to get the value that the entering vertices are transitioning from. */
+  enter?: (toValue: NumericArray, chunk?: NumericArray) => NumericArray;
+  /** Callback when the transition is started */
+  onStart?: () => void;
+  /** Callback when the transition is done */
+  onEnd?: () => void;
+  /** Callback when the transition is interrupted */
+  onInterrupt?: () => void;
+}
+
+export type InterpolationTransitionSettings = TransitionSettings & {
+  type?: 'interpolation';
+  /** Duration of the transition animation, in milliseconds */
+  duration: number;
+  /** Easing function that maps a value from [0, 1] to [0, 1], see [http://easings.net/](http://easings.net/) */
+  easing?: (t: number) => number;
+};
+
+export type SpringTransitionSettings = TransitionSettings & {
+  type: 'spring';
+  /** "Tension" factor for the spring */
+  stiffness: number;
+  /** "Friction" factor that counteracts the spring's acceleration */
+  damping: number;
+};
 
 const DEFAULT_TRANSITION_SETTINGS = {
   interpolation: {
@@ -11,18 +43,22 @@ const DEFAULT_TRANSITION_SETTINGS = {
   }
 };
 
-export function normalizeTransitionSettings(userSettings, layerSettings) {
+export function normalizeTransitionSettings(
+  userSettings: number | InterpolationTransitionSettings | SpringTransitionSettings,
+  layerSettings?: boolean | TransitionSettings
+): TransitionSettings | null {
   if (!userSettings) {
     return null;
   }
   if (Number.isFinite(userSettings)) {
-    userSettings = {duration: userSettings};
+    userSettings = {type: 'interpolation', duration: userSettings as number};
   }
-  userSettings.type = userSettings.type || 'interpolation';
+  const type = (userSettings as TransitionSettings).type || 'interpolation';
   return {
-    ...DEFAULT_TRANSITION_SETTINGS[userSettings.type],
-    ...layerSettings,
-    ...userSettings
+    ...DEFAULT_TRANSITION_SETTINGS[type],
+    ...(layerSettings as TransitionSettings),
+    ...(userSettings as TransitionSettings),
+    type
   };
 }
 
@@ -30,14 +66,17 @@ export function normalizeTransitionSettings(userSettings, layerSettings) {
 // (1) WE DON'T SUPPORT INTERLEAVED BUFFERS FOR TRANSITIONS
 // (2) BUFFERS WITH OFFSETS ALWAYS CONTAIN VALUES OF THE SAME SIZE
 // (3) THE OPERATIONS IN THE SHADER ARE PER-COMPONENT (addition and scaling)
-export function getSourceBufferAttribute(gl, attribute) {
+export function getSourceBufferAttribute(
+  gl: WebGLRenderingContext,
+  attribute: Attribute
+): [Buffer, BufferAccessor] | NumericArray {
   // The Attribute we pass to Transform as a sourceBuffer must have {divisor: 0}
   // so we create a copy of the attribute (with divisor=0) to use when running
   // transform feedback
   const buffer = attribute.getBuffer();
   if (buffer) {
     return [
-      attribute.getBuffer(),
+      buffer,
       {
         divisor: 0,
         size: attribute.size,
@@ -48,10 +87,10 @@ export function getSourceBufferAttribute(gl, attribute) {
   // constant
   // don't pass normalized here because the `value` from a normalized attribute is
   // already normalized
-  return attribute.value;
+  return attribute.value as NumericArray;
 }
 
-export function getAttributeTypeFromSize(size) {
+export function getAttributeTypeFromSize(size: number): string {
   switch (size) {
     case 1:
       return 'float';
@@ -66,14 +105,14 @@ export function getAttributeTypeFromSize(size) {
   }
 }
 
-export function cycleBuffers(buffers) {
-  buffers.push(buffers.shift());
+export function cycleBuffers(buffers: Buffer[]): void {
+  buffers.push(buffers.shift() as Buffer);
 }
 
-export function getAttributeBufferLength(attribute, numInstances) {
+export function getAttributeBufferLength(attribute: Attribute, numInstances: number): number {
   const {doublePrecision, settings, value, size} = attribute;
   const multiplier = doublePrecision && value instanceof Float64Array ? 2 : 1;
-  return (settings.noAlloc ? value.length : numInstances * size) * multiplier;
+  return (settings.noAlloc ? (value as NumericArray).length : numInstances * size) * multiplier;
 }
 
 // This helper is used when transitioning attributes from a set of values in one buffer layout
@@ -90,7 +129,14 @@ export function padBuffer({
   fromLength,
   fromStartIndices,
   getData = x => x
-}) {
+}: {
+  buffer: Buffer;
+  numInstances: number;
+  attribute: Attribute;
+  fromLength: number;
+  fromStartIndices?: NumericArray | null;
+  getData?: (toValue: NumericArray, chunk?: NumericArray) => NumericArray;
+}): void {
   // TODO: move the precisionMultiplier logic to the attribute when retrieving
   // its `size` and `elementOffset`?
   const precisionMultiplier =
@@ -100,7 +146,7 @@ export function padBuffer({
   const toStartIndices = attribute.startIndices;
   const hasStartIndices = fromStartIndices && toStartIndices;
   const toLength = getAttributeBufferLength(attribute, numInstances);
-  const isConstant = attribute.state.constant;
+  const isConstant = attribute.isConstant;
 
   // check if buffer needs to be padded
   if (!hasStartIndices && fromLength >= toLength) {
@@ -109,10 +155,10 @@ export function padBuffer({
 
   const toData = isConstant
     ? attribute.value
-    : attribute.getBuffer().getData({srcByteOffset: byteOffset});
+    : (attribute.getBuffer() as Buffer).getData({srcByteOffset: byteOffset});
   if (attribute.settings.normalized && !isConstant) {
     const getter = getData;
-    getData = (value, chunk) => attribute._normalizeConstant(getter(value, chunk));
+    getData = (value, chunk) => attribute.normalizeConstant(getter(value, chunk));
   }
 
   const getMissingData = isConstant

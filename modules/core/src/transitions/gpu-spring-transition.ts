@@ -6,13 +6,45 @@ import {
   getAttributeTypeFromSize,
   getSourceBufferAttribute,
   getAttributeBufferLength,
-  cycleBuffers
+  cycleBuffers,
+  SpringTransitionSettings
 } from '../lib/attribute/attribute-transition-utils';
 import Attribute from '../lib/attribute/attribute';
 import Transition from './transition';
 
-export default class GPUSpringTransition {
-  constructor({gl, attribute, timeline}) {
+import type {Timeline, Transform as LumaTransform} from '@luma.gl/engine';
+import type {
+  Buffer as LumaBuffer,
+  Framebuffer as LumaFramebuffer,
+  Texture2D as LumaTexture2D
+} from '@luma.gl/webgl';
+import type {NumericArray} from '../types/types';
+import type GPUTransition from './gpu-transition';
+
+export default class GPUSpringTransition implements GPUTransition {
+  gl: WebGLRenderingContext;
+  type = 'spring';
+  attributeInTransition: Attribute;
+
+  private settings?: SpringTransitionSettings;
+  private attribute: Attribute;
+  private transition: Transition;
+  private currentStartIndices: NumericArray | null;
+  private currentLength: number;
+  private texture: LumaTexture2D;
+  private framebuffer: LumaFramebuffer;
+  private transform: LumaTransform;
+  private buffers: LumaBuffer[];
+
+  constructor({
+    gl,
+    attribute,
+    timeline
+  }: {
+    gl: WebGLRenderingContext;
+    attribute: Attribute;
+    timeline: Timeline;
+  }) {
     this.gl = gl;
     this.type = 'spring';
     this.transition = new Transition(timeline);
@@ -41,7 +73,7 @@ export default class GPUSpringTransition {
     ];
   }
 
-  get inProgress() {
+  get inProgress(): boolean {
     return this.transition.inProgress;
   }
 
@@ -50,7 +82,7 @@ export default class GPUSpringTransition {
   // this also correctly resizes / pads the transform's buffers
   // in case the attribute's buffer has changed in length or in
   // startIndices
-  start(transitionSettings, numInstances) {
+  start(transitionSettings: SpringTransitionSettings, numInstances: number): void {
     const {gl, buffers, attribute} = this;
     const padBufferOpts = {
       numInstances,
@@ -64,20 +96,21 @@ export default class GPUSpringTransition {
       padBuffer({buffer, ...padBufferOpts});
     }
 
+    this.settings = transitionSettings;
     this.currentStartIndices = attribute.startIndices;
     this.currentLength = getAttributeBufferLength(attribute, numInstances);
-    this.attributeInTransition.update({
+    this.attributeInTransition.setData({
       buffer: buffers[1],
       // Hack: Float64Array is required for double-precision attributes
       // to generate correct shader attributes
-      value: attribute.value
+      value: attribute.value as NumericArray
     });
 
     // when an attribute changes values, a new transition is started. These
     // are properties that we have to store on this.transition but can change
     // when new transitions are started, so we have to keep them up-to-date.
     // this.transition.start() takes the latest settings and updates them.
-    this.transition.start(transitionSettings);
+    this.transition.start({...transitionSettings, duration: Infinity});
 
     this.transform.update({
       elementCount: Math.floor(this.currentLength / attribute.size),
@@ -93,6 +126,7 @@ export default class GPUSpringTransition {
     if (!updated) {
       return false;
     }
+    const settings = this.settings as SpringTransitionSettings;
 
     transform.update({
       sourceBuffers: {
@@ -108,8 +142,8 @@ export default class GPUSpringTransition {
       discard: false,
       clearRenderTarget: true,
       uniforms: {
-        stiffness: transition.settings.stiffness,
-        damping: transition.settings.damping
+        stiffness: settings.stiffness,
+        damping: settings.damping
       },
       parameters: {
         depthTest: false,
@@ -121,11 +155,11 @@ export default class GPUSpringTransition {
     });
 
     cycleBuffers(buffers);
-    this.attributeInTransition.update({
+    this.attributeInTransition.setData({
       buffer: buffers[1],
       // Hack: Float64Array is required for double-precision attributes
       // to generate correct shader attributes
-      value: this.attribute.value
+      value: this.attribute.value as NumericArray
     });
 
     const isTransitioning = readPixelsToArray(framebuffer)[0] > 0;
@@ -140,17 +174,20 @@ export default class GPUSpringTransition {
   cancel() {
     this.transition.cancel();
     this.transform.delete();
-    while (this.buffers.length) {
-      this.buffers.pop().delete();
+    for (const buffer of this.buffers) {
+      buffer.delete();
     }
+    this.buffers.length = 0;
     this.texture.delete();
-    this.texture = null;
     this.framebuffer.delete();
-    this.framebuffer = null;
   }
 }
 
-function getTransform(gl, attribute, framebuffer) {
+function getTransform(
+  gl: WebGLRenderingContext,
+  attribute: Attribute,
+  framebuffer: LumaFramebuffer
+): LumaTransform {
   const attributeType = getAttributeTypeFromSize(attribute.size);
   return new Transform(gl, {
     framebuffer,
@@ -202,7 +239,7 @@ void main(void) {
   });
 }
 
-function getTexture(gl) {
+function getTexture(gl: WebGLRenderingContext): LumaTexture2D {
   return new Texture2D(gl, {
     data: new Uint8Array(4),
     format: GL.RGBA,
@@ -215,7 +252,7 @@ function getTexture(gl) {
   });
 }
 
-function getFramebuffer(gl, texture) {
+function getFramebuffer(gl: WebGLRenderingContext, texture: LumaTexture2D): LumaFramebuffer {
   return new Framebuffer(gl, {
     id: 'spring-transition-is-transitioning-framebuffer',
     width: 1,

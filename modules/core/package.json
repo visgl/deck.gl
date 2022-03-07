@@ -45,6 +45,6 @@
     "@probe.gl/stats": "^3.5.0",
     "gl-matrix": "^3.0.0",
     "math.gl": "^3.5.7",
-    "mjolnir.js": "^2.5.0"
+    "mjolnir.js": "^2.7.0-alpha.2"
   }
 }

@@ -1,27 +1,36 @@
-function noop() {}
+import type {Timeline} from '@luma.gl/core';
 
-const DEFAULT_SETTINGS = {
-  onStart: noop,
-  onUpdate: noop,
-  onInterrupt: noop,
-  onEnd: noop
+export type TransitionSettings = {
+  duration: number;
+  onStart?: (transition: Transition) => void;
+  onUpdate?: (transition: Transition) => void;
+  onInterrupt?: (transition: Transition) => void;
+  onEnd?: (transition: Transition) => void;
 };
 
 export default class Transition {
+  private _inProgress: boolean;
+  private _handle: number | null;
+  private _timeline: Timeline;
+
+  time: number;
+  settings: TransitionSettings;
+
   /**
    * @params timeline {Timeline}
    */
-  constructor(timeline) {
+  constructor(timeline: Timeline) {
     this._inProgress = false;
     this._handle = null;
-    this.timeline = timeline;
+    this._timeline = timeline;
+    this.time = 0;
 
     // Defaults
-    this.settings = {};
+    this.settings = {duration: 0};
   }
 
   /* Public API */
-  get inProgress() {
+  get inProgress(): boolean {
     return this._inProgress;
   }
 
@@ -29,11 +38,11 @@ export default class Transition {
    * (re)start this transition.
    * @params props {object} - optional overriding props. see constructor
    */
-  start(props) {
+  start(settings: TransitionSettings) {
     this.cancel();
-    this.settings = {...DEFAULT_SETTINGS, ...props};
+    this.settings = settings;
     this._inProgress = true;
-    this.settings.onStart(this);
+    this.settings.onStart?.(this);
   }
 
   /**
@@ -41,10 +50,10 @@ export default class Transition {
    */
   end() {
     if (this._inProgress) {
-      this.timeline.removeChannel(this._handle);
+      this._timeline.removeChannel(this._handle);
       this._handle = null;
       this._inProgress = false;
-      this.settings.onEnd(this);
+      this.settings.onEnd?.(this);
     }
   }
 
@@ -53,8 +62,8 @@ export default class Transition {
    */
   cancel() {
     if (this._inProgress) {
-      this.settings.onInterrupt(this);
-      this.timeline.removeChannel(this._handle);
+      this.settings.onInterrupt?.(this);
+      this._timeline.removeChannel(this._handle);
       this._handle = null;
       this._inProgress = false;
     }
@@ -73,22 +82,22 @@ export default class Transition {
     // On the other hand, `update` always happens during a render cycle. The clock starts when the
     // transition is rendered for the first time.
     if (this._handle === null) {
-      const {timeline, settings} = this;
+      const {_timeline: timeline, settings} = this;
       this._handle = timeline.addChannel({
         delay: timeline.getTime(),
         duration: settings.duration
       });
     }
 
-    this.time = this.timeline.getTime(this._handle);
+    this.time = this._timeline.getTime(this._handle);
     // Call subclass method
     this._onUpdate();
     // Call user callback
-    this.settings.onUpdate(this);
+    this.settings.onUpdate?.(this);
 
     // This only works if `settings.duration` is set
     // Spring transition must call `end` manually
-    if (this.timeline.isFinished(this._handle)) {
+    if (this._timeline.isFinished(this._handle)) {
       this.end();
     }
     return true;
@@ -96,7 +105,7 @@ export default class Transition {
 
   /* Private API */
 
-  _onUpdate() {
+  protected _onUpdate() {
     // for subclass override
   }
 }

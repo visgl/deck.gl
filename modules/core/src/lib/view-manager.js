@@ -255,8 +255,7 @@ export default class ViewManager {
         view._getViewport(viewState, {
           width: viewState.width,
           height: viewState.height
-        }),
-      ...props
+        })
     });
 
     return controller;
@@ -277,10 +276,11 @@ export default class ViewManager {
       };
 
       // TODO - check if view / controller type has changed, and replace the controller
+      if (!controller) {
+        controller = this._createController(view, controllerProps);
+      }
       if (controller) {
         controller.setProps(controllerProps);
-      } else {
-        controller = this._createController(view, controllerProps);
       }
       return controller;
     }
