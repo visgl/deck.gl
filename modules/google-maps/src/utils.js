@@ -143,7 +143,7 @@ export function getViewPropsFromOverlay(map, overlay) {
   const heading = map.getHeading() || 0;
 
   let zoom = map.getZoom() - 1;
-  let scale = 1;
+  let scale;
 
   if (bearing === 0) {
     // At full world view (always unrotated) simply compare height, as diagonal
