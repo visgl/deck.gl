@@ -4,7 +4,6 @@ import {MVTWorkerLoader} from '@loaders.gl/mvt';
 import {binaryToGeojson} from '@loaders.gl/gis';
 import {COORDINATE_SYSTEM} from '@deck.gl/core';
 import {ClipExtension} from '@deck.gl/extensions';
-import {_GlobeViewport as GlobeViewport} from '@deck.gl/core';
 
 import TileLayer from '../tile-layer/tile-layer';
 import {getURLFromTemplate, isURLTemplate} from '../tile-layer/utils';
