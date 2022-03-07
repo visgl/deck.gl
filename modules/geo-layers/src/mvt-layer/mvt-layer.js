@@ -15,6 +15,7 @@ import {GeoJsonLayer} from '@deck.gl/layers';
 const WORLD_SIZE = 512;
 
 const defaultProps = {
+  ...GeoJsonLayer.defaultProps,
   uniqueIdProperty: {type: 'string', value: ''},
   highlightedFeatureId: null,
   loaders: [MVTWorkerLoader],

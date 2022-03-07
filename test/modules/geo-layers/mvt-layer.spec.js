@@ -678,3 +678,53 @@ test('findIndexBinary', t => {
 
   t.end();
 });
+
+test('MVTLayer#GeoJsonLayer.defaultProps', t => {
+  let didDraw = false;
+  class TestMVTLayer extends MVTLayer {
+    initializeState() {}
+
+    renderLayers() {
+      didDraw = true;
+    }
+  }
+
+  const onBeforeUpdate = () => (didDraw = false);
+  const testCases = [
+    {
+      title: 'GeoJsonLayer#shallow update',
+      props: {
+        id: 'testLayer',
+        data: [],
+        getTileData: () => {}, // TileLayer prop
+        getFillColor: () => [128, 0, 0, 255] // GeoJsonLayer prop
+      },
+      onBeforeUpdate,
+      onAfterUpdate: ({layer, subLayers}) => {
+        t.ok(didDraw, 'should draw layer');
+      }
+    },
+    {
+      updateProps: {
+        getTileData: () => {}
+      },
+      onBeforeUpdate,
+      onAfterUpdate: ({layer, subLayers}) => {
+        t.notOk(didDraw, 'should not update after shallow TileLayer accessor update');
+      }
+    },
+    {
+      updateProps: {
+        getFillColor: () => [128, 0, 0, 255]
+      },
+      onBeforeUpdate,
+      onAfterUpdate: ({layer, subLayers}) => {
+        t.notOk(didDraw, 'should not update after shallow GeoJsonLayer accessor update');
+      }
+    }
+  ];
+
+  testLayer({Layer: TestMVTLayer, testCases, onError: t.notOk});
+
+  t.end();
+});
