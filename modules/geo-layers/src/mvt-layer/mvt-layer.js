@@ -26,7 +26,8 @@ const defaultProps = {
 export default class MVTLayer extends TileLayer {
   initializeState() {
     super.initializeState();
-    const binary = this.context.viewport instanceof GlobeViewport ? false : this.props.binary;
+    // GlobeView doesn't work well with binary data
+    const binary = this.context.viewport.resolution !== undefined ? false : this.props.binary;
     this.setState({
       binary,
       data: null,
