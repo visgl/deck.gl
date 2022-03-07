@@ -139,20 +139,28 @@ export function getViewPropsFromOverlay(map, overlay) {
   let bearing = (180 * delta.verticalAngle()) / Math.PI;
   if (bearing < 0) bearing += 360;
 
-  let zoom = map.getZoom() - 1;
+  // Maps sometimes returns undefined instead of 0
+  const heading = map.getHeading() || 0;
 
-  // Fractional zoom calculation only correct when bearing is not animating
-  if (bearing === map.getHeading()) {
+  let zoom = map.getZoom() - 1;
+  let scale;
+
+  if (bearing === 0) {
+    // At full world view (always unrotated) simply compare height, as diagonal
+    // is incorrect due to multiple world copies
+    scale = height ? (bottomLeft.y - topRight.y) / height : 1;
+  } else if (bearing === heading) {
+    // Fractional zoom calculation only correct when bearing is not animating
     const viewDiagonal = new Vector2([topRight.x, topRight.y])
       .sub([bottomLeft.x, bottomLeft.y])
       .len();
     const mapDiagonal = new Vector2([width, -height]).len();
-    const scale = mapDiagonal ? viewDiagonal / mapDiagonal : 1;
-
-    // When resizing aggressively, occasionally ne and sw are the same points
-    // See https://github.com/visgl/deck.gl/issues/4218
-    zoom += Math.log2(scale || 1);
+    scale = mapDiagonal ? viewDiagonal / mapDiagonal : 1;
   }
+
+  // When resizing aggressively, occasionally ne and sw are the same points
+  // See https://github.com/visgl/deck.gl/issues/4218
+  zoom += Math.log2(scale || 1);
 
   return {
     width,
