@@ -139,10 +139,13 @@ export function getViewPropsFromOverlay(map, overlay) {
   let bearing = (180 * delta.verticalAngle()) / Math.PI;
   if (bearing < 0) bearing += 360;
 
+  // Maps sometimes returns undefined instead of 0
+  const heading = map.getHeading() || 0;
+
   let zoom = map.getZoom() - 1;
 
   // Fractional zoom calculation only correct when bearing is not animating
-  if (bearing === map.getHeading()) {
+  if (bearing === heading) {
     const viewDiagonal = new Vector2([topRight.x, topRight.y])
       .sub([bottomLeft.x, bottomLeft.y])
       .len();
