@@ -679,7 +679,7 @@ test('findIndexBinary', t => {
   t.end();
 });
 
-test.only('MVTLayer#GeoJsonLayer.defaultProps', t => {
+test('MVTLayer#GeoJsonLayer.defaultProps', t => {
   let didDraw = false;
   class TestMVTLayer extends MVTLayer {
     initializeState() {}
