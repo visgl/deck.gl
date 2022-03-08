@@ -102,8 +102,9 @@ export async function testLayerAsync(opts) {
 
     runLayerTestPostUpdateCheck(testCase, newLayer, oldState, spyMap);
 
-    let n = 0;
-    while (!newLayer.isLoaded && ++n < 10) {
+    let invocation = 0;
+    const maxInvocations = 10;
+    while (!newLayer.isLoaded && invocation++ < maxInvocations) {
       await update(resources);
       runLayerTestPostUpdateCheck(testCase, newLayer, oldState, spyMap);
     }
@@ -236,8 +237,9 @@ function runLayerTestUpdate(testCase, {layerManager, deckRenderer}, layer, spies
 
 /* global setTimeout */
 function update({layerManager, deckRenderer}) {
-  return new Promise((resolve, reject) => {
-    let n = 0;
+  return new Promise(resolve => {
+    let invocation = 0;
+    const maxInvocations = 10;
     const onAnimationFrame = () => {
       if (layerManager.needsUpdate()) {
         layerManager.updateLayers();
@@ -249,7 +251,7 @@ function update({layerManager, deckRenderer}) {
         });
         resolve();
         return;
-      } else if (++n > 10) {
+      } else if (++invocation >= maxInvocations) {
         resolve();
         return;
       }
