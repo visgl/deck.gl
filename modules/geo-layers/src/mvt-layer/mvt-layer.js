@@ -40,7 +40,7 @@ export default class MVTLayer extends TileLayer {
       this._updateTileData();
     }
 
-    if (this.state.data) {
+    if (this.state.data && this.props.visible) {
       super.updateState({props, oldProps, context, changeFlags});
       this._setWGS84PropertyForTiles();
     }
@@ -101,7 +101,7 @@ export default class MVTLayer extends TileLayer {
   /* eslint-disable complexity */
 
   renderLayers() {
-    if (!this.state.data) return null;
+    if (!this.state.data || !this.props.visible) return null;
     return super.renderLayers();
   }
 
