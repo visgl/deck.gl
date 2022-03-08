@@ -101,7 +101,7 @@ export default class MVTLayer extends TileLayer {
   /* eslint-disable complexity */
 
   renderLayers() {
-    if (!this.state.data || !this.props.visible) return null;
+    if (!this.state.data) return null;
     return super.renderLayers();
   }
 

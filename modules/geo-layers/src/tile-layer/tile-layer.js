@@ -51,6 +51,7 @@ export default class TileLayer extends CompositeLayer {
   }
 
   updateState({props, changeFlags}) {
+    if (!props.visible) return;
     let {tileset} = this.state;
     const propsChanged = changeFlags.propsOrDataChanged || changeFlags.updateTriggersChanged;
     const dataChanged =
@@ -195,6 +196,9 @@ export default class TileLayer extends CompositeLayer {
   }
 
   renderLayers() {
+    if (!this.props.visible) {
+      return null;
+    }
     return this.state.tileset.tiles.map(tile => {
       const subLayerProps = this.getSubLayerPropsByTile(tile);
       // cache the rendered layer in the tile
