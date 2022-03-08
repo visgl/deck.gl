@@ -728,3 +728,37 @@ test('MVTLayer#GeoJsonLayer.defaultProps', t => {
 
   t.end();
 });
+
+test('MVTLayer#visible=false', async t => {
+  const testViewport = new WebMercatorViewport({latitude: 0, longitude: 0, zoom: 1});
+  const tileJSON = {tilejson: '2.2.0', tiles: ['https://a.server/{z}/{x}/{y}.mvt']};
+  const tileServerUrl = 'https://tile-server.com';
+  const fetch = globalThis.fetch;
+  globalThis.fetch = url => {
+    t.equal(url, tileServerUrl, 'Fetches correct URL');
+    return Promise.resolve(JSON.stringify(tileJSON));
+  };
+
+  let layer;
+  const onAfterUpdate = params => {
+    layer = params.layer;
+  };
+
+  const testCases = [
+    {
+      props: {
+        data: tileServerUrl,
+        visible: false
+      },
+      onAfterUpdate
+    }
+  ];
+  await testLayerAsync({Layer: MVTLayer, viewport: testViewport, testCases, onError: t.notOk});
+  t.notOk(layer.isLoaded, 'Layer should not load');
+  t.deepEqual(layer.state.data, tileJSON.tiles, 'Layer should retrieve tileJSON');
+  t.notOk(layer.state.tileset, 'Layer should not initialize tileset');
+  t.end();
+
+  // restore fetch
+  globalThis.fetch = fetch;
+});
