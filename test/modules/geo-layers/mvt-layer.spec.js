@@ -242,7 +242,7 @@ test('MVTLayer#transformCoordsToWGS84', t => {
 test('MVTLayer#autoHighlight', async t => {
   class TestMVTLayer extends MVTLayer {
     getTileData() {
-      return this.props.binary ? geoJSONBinaryData : geoJSONData;
+      return this.state.binary ? geoJSONBinaryData : geoJSONData;
     }
   }
 
@@ -300,7 +300,7 @@ for (const binary of [true, false]) {
   test(`MVTLayer#picking binary:${binary}`, async t => {
     class TestMVTLayer extends MVTLayer {
       getTileData() {
-        return this.props.binary ? geoJSONBinaryData : geoJSONData;
+        return this.state.binary ? geoJSONBinaryData : geoJSONData;
       }
     }
 
@@ -425,7 +425,7 @@ test('MVTLayer#TileJSON', async t => {
 test('MVTLayer#dataInWGS84', async t => {
   class TestMVTLayer extends MVTLayer {
     getTileData() {
-      return this.props.binary ? geoJSONBinaryData : geoJSONData;
+      return this.state.binary ? geoJSONBinaryData : geoJSONData;
     }
   }
 
@@ -495,7 +495,7 @@ test('MVTLayer#triangulation', async t => {
     }
     const geoJsonLayer = layer.internalState.subLayers[0];
     const data = geoJsonLayer.props.data;
-    if (layer.props.binary) {
+    if (layer.state.binary) {
       // Triangulated binary data should be passed
       t.ok(data.polygons.triangles, 'should triangulate');
     } else {

@@ -44,6 +44,16 @@ const config = {
     zipcodes: 'carto_backend_data_team.dynamic_tiling.usa_zcta5_2019',
     h3: 'carto_backend_data_team.dynamic_tiling.usa_h3res8_v1',
     block: 'carto_backend_data_team.dynamic_tiling.usa_block_2019'
+  },
+  postgres: {
+    points_1M: 'demo.demo_tables.points_1m',
+    points_5M: 'demo.demo_tables.points_5m',
+    points_10M: 'demo.demo_tables.points_10m',
+    censustract: 'demo.demo_tables.usa_censustract_2019',
+    blockgroup: 'demo.demo_tables.usa_blockgroup_2019',
+    zipcodes: 'demo.demo_tables.usa_zcta5_2019',
+    county: 'demo.demo_tables.usa_county_2019',
+    block: 'demo.demo_tables.usa_block_2019'
   }
 };
 
