@@ -25,7 +25,10 @@ const defaultProps = {
 export default class MVTLayer extends TileLayer {
   initializeState() {
     super.initializeState();
+    // GlobeView doesn't work well with binary data
+    const binary = this.context.viewport.resolution !== undefined ? false : this.props.binary;
     this.setState({
+      binary,
       data: null,
       tileJSON: null
     });
@@ -111,7 +114,8 @@ export default class MVTLayer extends TileLayer {
       return Promise.reject('Invalid URL');
     }
     let loadOptions = this.getLoadOptions();
-    const {binary, fetch} = this.props;
+    const {binary} = this.state;
+    const {fetch} = this.props;
     const {signal, x, y, z} = tile;
     loadOptions = {
       ...loadOptions,
@@ -153,7 +157,7 @@ export default class MVTLayer extends TileLayer {
 
     const subLayers = super.renderSubLayers(props);
 
-    if (this.props.binary && !(subLayers instanceof GeoJsonLayer)) {
+    if (this.state.binary && !(subLayers instanceof GeoJsonLayer)) {
       log.warn('renderSubLayers() must return GeoJsonLayer when using binary:true')();
     }
 
@@ -194,7 +198,7 @@ export default class MVTLayer extends TileLayer {
 
     const isWGS84 = this.context.viewport.resolution;
 
-    if (this.props.binary && info.index !== -1) {
+    if (this.state.binary && info.index !== -1) {
       const {data} = params.sourceLayer.props;
       info.object = binaryToGeojson(data, {globalFeatureId: info.index});
     }
@@ -213,8 +217,8 @@ export default class MVTLayer extends TileLayer {
   }
 
   getHighlightedObjectIndex(tile) {
-    const {hoveredFeatureId, hoveredFeatureLayerName} = this.state;
-    const {uniqueIdProperty, highlightedFeatureId, binary} = this.props;
+    const {hoveredFeatureId, hoveredFeatureLayerName, binary} = this.state;
+    const {uniqueIdProperty, highlightedFeatureId} = this.props;
     const data = tile.content;
 
     const isHighlighted = isFeatureIdDefined(highlightedFeatureId);
@@ -294,7 +298,7 @@ export default class MVTLayer extends TileLayer {
               return null;
             }
 
-            if (this.props.binary && Array.isArray(tile.content) && !tile.content.length) {
+            if (this.state.binary && Array.isArray(tile.content) && !tile.content.length) {
               // TODO: @loaders.gl/mvt returns [] when no content. It should return a valid empty binary.
               // https://github.com/visgl/loaders.gl/pull/1137
               return [];
@@ -302,7 +306,7 @@ export default class MVTLayer extends TileLayer {
 
             if (tile._contentWGS84 === undefined) {
               // Create a cache to transform only once
-              const content = this.props.binary ? binaryToGeojson(tile.content) : tile.content;
+              const content = this.state.binary ? binaryToGeojson(tile.content) : tile.content;
               tile._contentWGS84 = content.map(feature =>
                 transformTileCoordsToWGS84(feature, tile.bbox, this.context.viewport)
               );
