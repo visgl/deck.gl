@@ -57,6 +57,8 @@ type ImagePropType = BasePropType & {
 };
 type ObjectPropType = BasePropType & {
   type: 'object';
+  optional?: boolean;
+  compare?: boolean;
 };
 type DeprecatedProp = {
   deprecatedFor?: string | string[];
@@ -127,6 +129,14 @@ const TYPE_DEFINITIONS = {
       return propType.compare ? arrayEqual(value1, value2) : value1 === value2;
     }
   },
+  object: {
+    validate(value, propType: ObjectPropType) {
+      return (propType.optional && !value) || isObject(value);
+    },
+    equal(value1, value2, propType: ObjectPropType) {
+      return propType.compare ? objectEqual(value1, value2) : value1 === value2;
+    }
+  },
   function: {
     validate(value, propType: FunctionPropType) {
       return (propType.optional && !value) || typeof value === 'function';
@@ -164,6 +174,34 @@ function arrayEqual(array1, array2) {
   }
   for (let i = 0; i < len; i++) {
     if (array1[i] !== array2[i]) {
+      return false;
+    }
+  }
+  return true;
+}
+
+function objectEqual(object1, object2) {
+  if (object1 === object2) {
+    return true;
+  }
+  if (!isObject(object1) || !isObject(object2)) {
+    return false;
+  }
+  const keys1 = Object.keys(object1);
+  const keys2 = Object.keys(object2);
+  if (!arrayEqual(keys1, keys2)) {
+    return false;
+  }
+  for (const key of keys1) {
+    const value1 = object1[key];
+    const value2 = object2[key];
+    if (isObject(value1) && !objectEqual(value1, value2)) {
+      return false;
+    }
+    if (isArray(value1) && !arrayEqual(value1, value2)) {
+      return false;
+    }
+    if (value1 !== value2) {
       return false;
     }
   }
@@ -231,6 +269,10 @@ function normalizePropDefinition(name, propDef): PropType {
 
 function isArray(value: any): boolean {
   return Array.isArray(value) || ArrayBuffer.isView(value);
+}
+
+function isObject(value: any): boolean {
+  return getTypeOf(value) === 'object';
 }
 
 // improved version of javascript typeof that can distinguish arrays and null values
