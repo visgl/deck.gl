@@ -122,7 +122,7 @@ const defaultProps = {
   positionFormat: 'XYZ',
   colorFormat: 'RGBA',
 
-  parameters: {},
+  parameters: {type: 'object', value: {}, optional: true, compare: true},
   transitions: null,
   extensions: [],
   loaders: {type: 'array', value: [], optional: true, compare: true},
