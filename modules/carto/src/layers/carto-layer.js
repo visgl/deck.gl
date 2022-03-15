@@ -92,8 +92,10 @@ export default class CartoLayer extends CompositeLayer {
       changeFlags.dataChanged ||
       props.connection !== oldProps.connection ||
       props.geoColumn !== oldProps.geoColumn ||
-      JSON.stringify(props.columns) !== JSON.stringify(oldProps.columns) ||
+      props.format !== oldProps.format ||
+      props.formatTiles !== oldProps.formatTiles ||
       props.type !== oldProps.type ||
+      JSON.stringify(props.columns) !== JSON.stringify(oldProps.columns) ||
       JSON.stringify(props.credentials) !== JSON.stringify(oldProps.credentials);
 
     if (shouldUpdateData) {
