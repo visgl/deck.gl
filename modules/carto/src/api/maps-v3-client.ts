@@ -10,7 +10,9 @@ import {
   MapInstantiation,
   MapType,
   MAP_TYPES,
-  SchemaField
+  SchemaField,
+  TileFormat,
+  TILE_FORMATS
 } from './maps-api-common';
 import {parseMap} from './parseMap';
 import {log} from '@deck.gl/core';
@@ -111,6 +113,7 @@ type FetchLayerDataParams = {
   schema?: boolean;
   clientId?: string;
   format?: Format;
+  formatTiles?: TileFormat;
 };
 
 /**
@@ -208,6 +211,7 @@ export async function fetchLayerData({
   geoColumn,
   columns,
   format,
+  formatTiles,
   schema,
   clientId
 }: FetchLayerDataParams): Promise<FetchLayerDataResult> {
@@ -221,6 +225,7 @@ export async function fetchLayerData({
     geoColumn,
     columns,
     format,
+    formatTiles,
     schema,
     clientId
   });
@@ -242,6 +247,7 @@ async function _fetchDataUrl({
   geoColumn,
   columns,
   format,
+  formatTiles,
   schema,
   clientId
 }: FetchLayerDataParams) {
@@ -286,6 +292,14 @@ async function _fetchDataUrl({
       }
     }
     assert(url && mapFormat, 'Unsupported data formats received from backend.');
+  }
+
+  if (format === FORMATS.TILEJSON && formatTiles) {
+    log.assert(
+      Object.values(TILE_FORMATS).includes(formatTiles),
+      `Invalid value for formatTiles: ${formatTiles}. Use value from TILE_FORMATS`
+    );
+    url += `&${encodeParameter('formatTiles', formatTiles)}`;
   }
 
   const {accessToken} = localCreds;
