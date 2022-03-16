@@ -151,7 +151,7 @@ function createChannelProps(visualChannels, type, config, data) {
       1, // Rely on layer opacity
       data
     );
-  } else if (type === 'grid') {
+  } else if (colorScale) {
     result.colorScaleType = colorScale;
   }
   if (strokeColorField) {

@@ -61,8 +61,7 @@ const sharedPropMap = {
     stroked: 'stroked',
     thickness: 'getLineWidth',
     radius: 'getPointRadius',
-    wireframe: 'wireframe',
-    worldUnitSize: x => ({cellSize: 1000 * x})
+    wireframe: 'wireframe'
   }
 };
 
@@ -105,10 +104,12 @@ export function getLayer(
     },
     grid: {
       Layer: CPUGridLayer,
+      propMap: {visConfig: {worldUnitSize: x => ({cellSize: 1000 * x})}},
       defaultProps: {getPosition}
     },
     hexagon: {
       Layer: HexagonLayer,
+      propMap: {visConfig: {worldUnitSize: x => ({radius: 1000 * x})}},
       defaultProps: {getPosition}
     },
     hexagonId: {
