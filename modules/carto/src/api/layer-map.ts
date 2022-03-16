@@ -12,7 +12,7 @@ import {
 import {format as d3Format} from 'd3-format';
 import moment from 'moment-timezone';
 
-import {CPUGridLayer, HexagonLayer} from '@deck.gl/aggregation-layers';
+import {CPUGridLayer, HeatmapLayer, HexagonLayer} from '@deck.gl/aggregation-layers';
 import {GeoJsonLayer} from '@deck.gl/layers';
 import {H3HexagonLayer, MVTLayer} from '@deck.gl/geo-layers';
 
@@ -105,6 +105,11 @@ export function getLayer(
     grid: {
       Layer: CPUGridLayer,
       propMap: {visConfig: {worldUnitSize: x => ({cellSize: 1000 * x})}},
+      defaultProps: {getPosition}
+    },
+    heatmap: {
+      Layer: HeatmapLayer,
+      propMap: {visConfig: {radius: 'radiusPixels'}},
       defaultProps: {getPosition}
     },
     hexagon: {
