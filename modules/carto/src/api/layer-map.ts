@@ -54,7 +54,8 @@ const sharedPropMap = {
     stroked: 'stroked',
     thickness: 'getLineWidth',
     radius: 'getPointRadius',
-    wireframe: 'wireframe'
+    wireframe: 'wireframe',
+    worldUnitSize: x => ({cellSize: 1000 * x})
   }
 };
 
