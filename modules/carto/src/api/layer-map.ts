@@ -31,6 +31,11 @@ const SCALE_FUNCS = {
 };
 export type SCALE_TYPE = keyof typeof SCALE_FUNCS;
 
+const hexToRGBA = c => {
+  const {r, g, b, opacity} = rgb(c);
+  return [r, g, b, 255 * opacity];
+};
+
 // Kepler -> Deck.gl
 const sharedPropMap = {
   color: 'getFillColor',
@@ -43,6 +48,8 @@ const sharedPropMap = {
     size: 'getTextSize'
   },
   visConfig: {
+    colorAggregation: 'colorAggregation',
+    colorRange: x => ({colorRange: x.colors.map(hexToRGBA)}),
     coverage: 'coverage',
     enable3d: 'extruded',
     elevationPercentile: ['elevationLowerPercentile', 'elevationUpperPercentile'],
@@ -201,8 +208,8 @@ export function getColorAccessor(
   const alpha = opacity !== undefined ? Math.round(255 * Math.pow(opacity, 1 / 2.2)) : 255;
 
   const accessor = properties => {
-    const rgba = rgb(scale(properties[name]));
-    return [rgba.r, rgba.g, rgba.b, alpha];
+    const {r, g, b} = rgb(scale(properties[name]));
+    return [r, g, b, alpha];
   };
   return normalizeAccessor(accessor, data);
 }
