@@ -47,20 +47,43 @@ const config = {
   }
 };
 
-const connection = 'redshift';
-const table = config[connection]['zipcodes'];
 const accessToken = 'XXXX';
 
 const showBasemap = true;
 const showCarto = true;
 
 function Root() {
+  const [connection, setConnection] = useState('bigquery');
+  const [dataset, setDataset] = useState('points_1M');
+  const [formatTiles, setFormatTiles] = useState(TILE_FORMATS.BINARY);
+  const table = config[connection][dataset];
   return (
     <>
       <DeckGL
         initialViewState={INITIAL_VIEW_STATE}
         controller={true}
-        layers={[showBasemap && createBasemap(), showCarto && createCarto()]}
+        layers={[
+          showBasemap && createBasemap(),
+          showCarto && createCarto(connection, formatTiles, table)
+        ]}
+      />
+      <ObjectSelect
+        title="formatTiles"
+        obj={TILE_FORMATS}
+        value={formatTiles}
+        onSelect={setFormatTiles}
+      />
+      <ObjectSelect
+        title="connection"
+        obj={Object.keys(config)}
+        value={connection}
+        onSelect={setConnection}
+      />
+      <ObjectSelect
+        title="dataset"
+        obj={Object.keys(config[connection])}
+        value={dataset}
+        onSelect={setDataset}
       />
     </>
   );
@@ -80,7 +103,7 @@ function createBasemap() {
   });
 }
 
-function createCarto() {
+function createCarto(connection, formatTiles, table) {
   return new CartoLayer({
     id: 'carto',
     connection,
@@ -90,6 +113,7 @@ function createCarto() {
     // Dynamic tiling. Request TILEJSON format with TABLE
     type: MAP_TYPES.TABLE,
     format: FORMATS.TILEJSON,
+    formatTiles,
 
     // Styling
     getFillColor: [233, 71, 251],
@@ -103,6 +127,27 @@ function createCarto() {
     getPointRadius: 1.5,
     getLineColor: [0, 0, 200]
   });
+}
+
+function ObjectSelect({title, obj, value, onSelect}) {
+  const keys = Object.values(obj).sort();
+  return (
+    <>
+      <select
+        onChange={e => onSelect(e.target.value)}
+        style={{position: 'relative', padding: 4, margin: 2, width: 200}}
+        value={value}
+      >
+        <option hidden>{title}</option>
+        {keys.map(f => (
+          <option key={f} value={f}>
+            {`${title}: ${f}`}
+          </option>
+        ))}
+      </select>
+      <br></br>
+    </>
+  );
 }
 
 render(<Root />, document.body.appendChild(document.createElement('div')));
