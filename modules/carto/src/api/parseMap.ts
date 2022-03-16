@@ -115,7 +115,7 @@ function mapProps(source, target, mapping) {
     if (typeof targetKey === 'string') {
       target[targetKey] = sourceValue;
     } else if (typeof targetKey === 'object') {
-      // Nested definition, recurse down one level
+      // Nested definition, recurse down one level (also handles arrays)
       mapProps(sourceValue, target, targetKey);
     }
   }

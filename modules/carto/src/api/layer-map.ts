@@ -11,8 +11,11 @@ import {
 } from 'd3-scale';
 import {format as d3Format} from 'd3-format';
 import moment from 'moment-timezone';
-import {H3HexagonLayer, MVTLayer} from '@deck.gl/geo-layers';
+
+import {CPUGridLayer} from '@deck.gl/aggregation-layers';
 import {GeoJsonLayer} from '@deck.gl/layers';
+import {H3HexagonLayer, MVTLayer} from '@deck.gl/geo-layers';
+
 import CartoTileLayer from '../layers/carto-tile-layer';
 import {TILE_FORMATS} from './maps-api-common';
 import {assert} from '../utils';
@@ -40,9 +43,13 @@ const sharedPropMap = {
     size: 'getTextSize'
   },
   visConfig: {
+    coverage: 'coverage',
     enable3d: 'extruded',
+    elevationPercentile: ['elevationLowerPercentile', 'elevationUpperPercentile'],
+    elevationScale: 'elevationScale',
     filled: 'filled',
     opacity: 'opacity',
+    percentile: ['lowerPercentile', 'upperPercentile'],
     strokeColor: 'getLineColor',
     stroked: 'stroked',
     thickness: 'getLineWidth',
@@ -75,6 +82,7 @@ export function getLayer(
     return getTileLayer(dataset);
   }
 
+  const {geoColumn} = dataset;
   const hexagonId = config.columns?.hex_id;
   const layer = {
     point: {
@@ -89,11 +97,14 @@ export function getLayer(
       propMap: sharedPropMap,
       defaultProps: {...defaultProps, lineWidthScale: 2}
     },
+    grid: {
+      Layer: CPUGridLayer,
+      propMap: sharedPropMap,
+      defaultProps: {...defaultProps, getPosition: d => d[geoColumn].coordinates}
+    },
     hexagonId: {
       Layer: H3HexagonLayer,
-      propMap: mergePropMaps(sharedPropMap, {
-        visConfig: {coverage: 'coverage', elevationScale: 'elevationScale'}
-      }),
+      propMap: sharedPropMap,
       defaultProps: {...defaultProps, getHexagon: d => d[hexagonId]}
     }
   }[type];

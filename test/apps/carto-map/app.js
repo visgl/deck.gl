@@ -38,6 +38,14 @@ async function createMap(cartoMapId) {
 
 // Helper UI for dev
 const examples = [
+  // New layers
+  '86094c6b-16f7-44fa-aca9-c3dc0617c362', // H3
+  'd91a6a6f-0290-4b22-b9cc-fa174cb31a23', // Grid
+  '4b34fd92-7890-4bab-8601-008aefebc359', // hex bin
+  'b45bb22f-6b2e-4a35-8d46-c8272251f450', // heatmap
+  '0ab8e625-16e3-4dec-ae89-c9250539b111', // cluster
+
+  // Old layers
   '420acda4-088f-448b-82f4-dcaaaf18d5a1',
   'e787df8e-7459-46ea-ade3-55462a44131a',
   'ff6ac53f-741a-49fb-b615-d040bc5a96b8',
