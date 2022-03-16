@@ -19,6 +19,13 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v8.7
 
+#### deck.gl [8.7.1] - Mar 16 2022
+
+- CARTO: Fix MVT tiles for Postgresql in CARTO 3 (#6753)
+- MVTLayer: force binary to false for GlobeView (#6743)
+- Handle undefined heading for raster Google maps (#6744)
+- Merge GeoJsonLayer default props into MVTLayer (#6730)
+
 #### deck.gl [8.7.0] - Feb 25 2022
 
 - The new [MaskExtension](/docs/api-reference/extensions/mask-extension) allows layers to show/hide objects by a geofence. For example, a map may filter a list of user locations by the boundaries of a given country, or highlight part of a base map that is inside a user-drawn circle or lasso area.
