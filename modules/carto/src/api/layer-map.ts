@@ -12,7 +12,7 @@ import {
 import {format as d3Format} from 'd3-format';
 import moment from 'moment-timezone';
 
-import {CPUGridLayer} from '@deck.gl/aggregation-layers';
+import {CPUGridLayer, HexagonLayer} from '@deck.gl/aggregation-layers';
 import {GeoJsonLayer} from '@deck.gl/layers';
 import {H3HexagonLayer, MVTLayer} from '@deck.gl/geo-layers';
 
@@ -77,7 +77,7 @@ const defaultProps = {
   wrapLongitude: false
 };
 
-function mergePropMaps(a, b) {
+function mergePropMaps(a = {}, b = {}) {
   return {...a, ...b, visConfig: {...a.visConfig, ...b.visConfig}};
 }
 
@@ -91,33 +91,35 @@ export function getLayer(
   }
 
   const {geoColumn} = dataset;
+  const getPosition = d => d[geoColumn].coordinates;
+
   const hexagonId = config.columns?.hex_id;
   const layer = {
     point: {
       Layer: GeoJsonLayer,
-      propMap: mergePropMaps(sharedPropMap, {
-        visConfig: {outline: 'stroked'}
-      }),
-      defaultProps
+      propMap: {visConfig: {outline: 'stroked'}}
     },
     geojson: {
       Layer: GeoJsonLayer,
-      propMap: sharedPropMap,
-      defaultProps: {...defaultProps, lineWidthScale: 2}
+      defaultProps: {lineWidthScale: 2}
     },
     grid: {
       Layer: CPUGridLayer,
-      propMap: sharedPropMap,
-      defaultProps: {...defaultProps, getPosition: d => d[geoColumn].coordinates}
+      defaultProps: {getPosition}
+    },
+    hexagon: {
+      Layer: HexagonLayer,
+      defaultProps: {getPosition}
     },
     hexagonId: {
       Layer: H3HexagonLayer,
-      propMap: sharedPropMap,
-      defaultProps: {...defaultProps, getHexagon: d => d[hexagonId]}
+      defaultProps: {getHexagon: d => d[hexagonId]}
     }
   }[type];
 
   assert(layer, `Unsupported layer type: ${type}`);
+  layer.propMap = mergePropMaps(sharedPropMap, layer.propMap);
+  layer.defaultProps = {...defaultProps, ...layer.defaultProps};
   return layer;
 }
 
