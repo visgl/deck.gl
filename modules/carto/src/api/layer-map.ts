@@ -48,21 +48,24 @@ const sharedPropMap = {
     size: 'getTextSize'
   },
   visConfig: {
-    colorAggregation: 'colorAggregation',
-    colorRange: x => ({colorRange: x.colors.map(hexToRGBA)}),
-    coverage: 'coverage',
     enable3d: 'extruded',
-    elevationPercentile: ['elevationLowerPercentile', 'elevationUpperPercentile'],
     elevationScale: 'elevationScale',
     filled: 'filled',
     opacity: 'opacity',
-    percentile: ['lowerPercentile', 'upperPercentile'],
     strokeColor: 'getLineColor',
     stroked: 'stroked',
     thickness: 'getLineWidth',
     radius: 'getPointRadius',
     wireframe: 'wireframe'
   }
+};
+
+const aggregationVisConfig = {
+  colorAggregation: 'colorAggregation',
+  colorRange: x => ({colorRange: x.colors.map(hexToRGBA)}),
+  coverage: 'coverage',
+  elevationPercentile: ['elevationLowerPercentile', 'elevationUpperPercentile'],
+  percentile: ['lowerPercentile', 'upperPercentile']
 };
 
 const RADIUS_DOWNSCALE = 0.2;
@@ -89,7 +92,7 @@ export function getLayer(
     return getTileLayer(dataset);
   }
 
-  const {geoColumn} = dataset;
+  const geoColumn = dataset?.geoColumn;
   const getPosition = d => d[geoColumn].coordinates;
 
   const hexagonId = config.columns?.hex_id;
@@ -104,21 +107,22 @@ export function getLayer(
     },
     grid: {
       Layer: CPUGridLayer,
-      propMap: {visConfig: {worldUnitSize: x => ({cellSize: 1000 * x})}},
+      propMap: {visConfig: {...aggregationVisConfig, worldUnitSize: x => ({cellSize: 1000 * x})}},
       defaultProps: {getPosition}
     },
     heatmap: {
       Layer: HeatmapLayer,
-      propMap: {visConfig: {radius: 'radiusPixels'}},
+      propMap: {visConfig: {...aggregationVisConfig, radius: 'radiusPixels'}},
       defaultProps: {getPosition}
     },
     hexagon: {
       Layer: HexagonLayer,
-      propMap: {visConfig: {worldUnitSize: x => ({radius: 1000 * x})}},
+      propMap: {visConfig: {...aggregationVisConfig, worldUnitSize: x => ({radius: 1000 * x})}},
       defaultProps: {getPosition}
     },
     hexagonId: {
       Layer: H3HexagonLayer,
+      propMap: {visConfig: {coverage: 'coverage'}},
       defaultProps: {getHexagon: d => d[hexagonId]}
     }
   }[type];
