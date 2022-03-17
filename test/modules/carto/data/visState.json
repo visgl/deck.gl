@@ -1187,5 +1187,148 @@
         }
       }
     ]
+  },
+  {
+    "title": "Hex Bin Layer",
+    "visState": {
+      "layers": [
+        {
+          "id": "ja1357",
+          "type": "hexagon",
+          "config": {
+            "color": [18, 147, 154],
+            "label": "Layer 1",
+            "dataId": "DATA_JSON_ID",
+            "hidden": false,
+            "columns": {"lat": "latitude", "lng": "longitude"},
+            "isVisible": true,
+            "textLabel": [
+              {
+                "size": 18,
+                "color": [255, 255, 255],
+                "field": null,
+                "anchor": "start",
+                "offset": [0, 0],
+                "alignment": "center"
+              }
+            ],
+            "visConfig": {
+              "opacity": 0.8,
+              "coverage": 1,
+              "enable3d": false,
+              "sizeRange": [0, 500],
+              "colorRange": {
+                "name": "ColorBrewer YlGn-6",
+                "type": "sequential",
+                "colors": ["#ffffcc", "#d9f0a3", "#addd8e", "#78c679", "#31a354", "#006837"],
+                "category": "ColorBrewer"
+              },
+              "percentile": [0, 100],
+              "resolution": 8,
+              "worldUnitSize": 0.3,
+              "elevationScale": 5,
+              "sizeAggregation": "count",
+              "colorAggregation": "count",
+              "elevationPercentile": [0, 100],
+              "enableElevationZoomFactor": true
+            },
+            "highlightColor": [252, 242, 26, 255]
+          },
+          "visualChannels": {
+            "sizeField": null,
+            "sizeScale": "linear",
+            "colorField": null,
+            "colorScale": "quantile"
+          }
+        }
+      ],
+      "filters": [],
+      "splitMaps": [],
+      "layerBlending": "normal",
+      "animationConfig": {
+        "speed": 1,
+        "currentTime": null
+      },
+      "interactionConfig": {
+        "brush": {
+          "size": 0.5,
+          "enabled": false
+        },
+        "tooltip": {
+          "enabled": true,
+          "compareMode": false,
+          "compareType": "absolute",
+          "fieldsToShow": {
+            "808481b4-9e88-4ccd-85fe-2bcc2b056be8": [
+              {
+                "name": "cartodb_id",
+                "format": null
+              },
+              {
+                "name": "injuries",
+                "format": null
+              },
+              {
+                "name": "x",
+                "format": null
+              },
+              {
+                "name": "y",
+                "format": null
+              },
+              {
+                "name": "objectid",
+                "format": null
+              }
+            ]
+          }
+        },
+        "geocoder": {
+          "enabled": false
+        },
+        "coordinate": {
+          "enabled": false
+        }
+      }
+    },
+    "layers": [
+      {
+        "name": "HexagonLayer({id: 'ja1357'})",
+        "props": {
+          "id": "ja1357",
+          "lineMiterLimit": 2,
+          "lineWidthUnits": "pixels",
+          "pointRadiusScale": 0.2,
+          "pointRadiusUnits": "pixels",
+          "rounded": true,
+          "wrapLongitude": false,
+          "autoHighlight": true,
+          "pickable": true,
+          "getFillColor": [18, 147, 154],
+          "visible": true,
+          "cartoLabel": "Layer 1",
+          "extruded": false,
+          "elevationScale": 5,
+          "opacity": 0.8,
+          "colorAggregation": "count",
+          "colorRange": [
+            [255, 255, 204, 255],
+            [217, 240, 163, 255],
+            [173, 221, 142, 255],
+            [120, 198, 121, 255],
+            [49, 163, 84, 255],
+            [0, 104, 55, 255]
+          ],
+          "coverage": 1,
+          "elevationLowerPercentile": 0,
+          "elevationUpperPercentile": 100,
+          "lowerPercentile": 0,
+          "upperPercentile": 100,
+          "radius": 300,
+          "highlightColor": [252, 242, 26, 255],
+          "colorScaleType": "quantile"
+        }
+      }
+    ]
   }
 ]
