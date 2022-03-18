@@ -19,6 +19,10 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v8.7
 
+#### deck.gl [8.7.1] - Mar 18 2022
+
+- CARTO: Support aggregation layers in fetchMap (#6761)
+
 #### deck.gl [8.7.1] - Mar 16 2022
 
 - CARTO: Fix MVT tiles for Postgresql in CARTO 3 (#6753)
