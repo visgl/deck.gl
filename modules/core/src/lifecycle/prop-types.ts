@@ -130,9 +130,6 @@ const TYPE_DEFINITIONS = {
     }
   },
   object: {
-    validate(value, propType: ObjectPropType) {
-      return (propType.optional && !value) || isObject(value);
-    },
     equal(value1, value2, propType: ObjectPropType) {
       return propType.compare ? objectEqual(value1, value2) : value1 === value2;
     }
