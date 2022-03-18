@@ -29,6 +29,10 @@ const DATASETS = [
     data: {type: 'FeatureCollection', features: []}
   },
   {
+    id: 'DATA_JSON_ID',
+    data: []
+  },
+  {
     id: 'DATA_TILESET_ID',
     data: {
       tiles: [
@@ -161,13 +165,13 @@ for (const {title, visState, layers} of VISSTATE_DATA) {
     // Fill in tileset data to avoid duplicatation
     layers.forEach(({props: layerProps}) => {
       if (layerProps.data === 'DATA_TILESET') {
-        layerProps.data = DATASETS[1].data;
+        layerProps.data = DATASETS.find(({id}) => id === 'DATA_TILESET_ID').data;
       }
       if (layerProps.data === 'DATA_TILESET_GEOJSON') {
-        layerProps.data = DATASETS[2].data;
+        layerProps.data = DATASETS.find(({id}) => id === 'DATA_TILESET_GEOJSON_FORMAT_ID').data;
       }
       if (layerProps.data === 'DATA_TILESET_BINARY') {
-        layerProps.data = DATASETS[3].data;
+        layerProps.data = DATASETS.find(({id}) => id === 'DATA_TILESET_BINARY_FORMAT_ID').data;
       }
     });
 

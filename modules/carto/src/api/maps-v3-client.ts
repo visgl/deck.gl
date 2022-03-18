@@ -338,16 +338,17 @@ async function _fetchMapDataset(
   credentials: CloudNativeCredentials,
   clientId?: string
 ) {
-  const {connectionName: connection, columns, geoColumn, source, type} = dataset;
+  const {connectionName: connection, columns, format, geoColumn, source, type} = dataset;
   // First fetch metadata
   const {url, mapFormat} = await _fetchDataUrl({
+    clientId,
     credentials: {...credentials, accessToken},
     connection,
     columns,
+    format,
     geoColumn,
     source,
-    type,
-    clientId
+    type
   });
 
   // Extract the last time the data changed

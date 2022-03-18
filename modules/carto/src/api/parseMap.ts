@@ -114,8 +114,11 @@ function mapProps(source, target, mapping) {
     }
     if (typeof targetKey === 'string') {
       target[targetKey] = sourceValue;
+    } else if (typeof targetKey === 'function') {
+      const [key, value] = Object.entries(targetKey(sourceValue))[0];
+      target[key] = value;
     } else if (typeof targetKey === 'object') {
-      // Nested definition, recurse down one level
+      // Nested definition, recurse down one level (also handles arrays)
       mapProps(sourceValue, target, targetKey);
     }
   }
@@ -148,6 +151,8 @@ function createChannelProps(visualChannels, type, config, data) {
       1, // Rely on layer opacity
       data
     );
+  } else if (type === 'grid' || type === 'hexagon') {
+    result.colorScaleType = colorScale;
   }
   if (strokeColorField) {
     const opacity = visConfig.strokeOpacity !== undefined ? visConfig.strokeOpacity : 1;
