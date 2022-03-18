@@ -51,6 +51,7 @@
     "@types/d3-scale": "^3.0.0"
   },
   "peerDependencies": {
+    "@deck.gl/aggregation-layers": "^8.0.0",
     "@deck.gl/core": "^8.0.0",
     "@deck.gl/geo-layers": "^8.0.0",
     "@deck.gl/layers": "^8.0.0",
