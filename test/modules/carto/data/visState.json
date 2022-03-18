@@ -529,6 +529,7 @@
           "getFillColor": [231, 159, 213],
           "visible": true,
           "extruded": false,
+          "elevationScale": 5,
           "filled": false,
           "opacity": 0.8,
           "getLineColor": [77, 181, 217],
@@ -558,6 +559,7 @@
           "getFillColor": [18, 147, 154],
           "visible": true,
           "extruded": false,
+          "elevationScale": 5,
           "filled": true,
           "opacity": 0.8,
           "getLineColor": [250, 116, 0],
@@ -666,6 +668,7 @@
           "pickable": true,
           "visible": true,
           "extruded": true,
+          "elevationScale": 70.1,
           "opacity": 0.8,
           "coverage": 0.9,
           "elevationScale": 70.1,
@@ -782,6 +785,7 @@
           "pickable": true,
           "visible": true,
           "extruded": false,
+          "elevationScale": 5,
           "filled": true,
           "opacity": 0.8,
           "getLineColor": [221, 178, 124],
@@ -904,6 +908,7 @@
           "pickable": true,
           "visible": true,
           "extruded": false,
+          "elevationScale": 5,
           "filled": true,
           "opacity": 0.8,
           "getLineColor": [221, 178, 124],
@@ -1026,6 +1031,7 @@
           "pickable": true,
           "visible": true,
           "extruded": false,
+          "elevationScale": 5,
           "filled": true,
           "opacity": 0.8,
           "getLineColor": [221, 178, 124],
@@ -1036,6 +1042,434 @@
           "highlightColor": [252, 242, 26, 255],
           "uniqueIdProperty": "geoid",
           "formatTiles": "binary"
+        }
+      }
+    ]
+  },
+  {
+    "title": "Grid Layer",
+    "visState": {
+      "layers": [
+        {
+          "id": "ij06t3e",
+          "type": "grid",
+          "config": {
+            "color": [137, 218, 193],
+            "label": "Layer 1",
+            "dataId": "DATA_JSON_ID",
+            "hidden": false,
+            "columns": {"lat": "latitude", "lng": "longitude"},
+            "isVisible": true,
+            "textLabel": [
+              {
+                "size": 18,
+                "color": [255, 255, 255],
+                "field": null,
+                "anchor": "start",
+                "offset": [0, 0],
+                "alignment": "center"
+              }
+            ],
+            "visConfig": {
+              "opacity": 0.8,
+              "coverage": 1,
+              "enable3d": false,
+              "sizeRange": [0, 500],
+              "colorRange": {
+                "name": "Global Warming",
+                "type": "sequential",
+                "colors": ["#5A1846", "#900C3F", "#C70039", "#E3611C", "#F1920E", "#FFC300"],
+                "category": "Uber"
+              },
+              "percentile": [0, 100],
+              "worldUnitSize": 0.5,
+              "elevationScale": 5,
+              "sizeAggregation": "count",
+              "colorAggregation": "count",
+              "elevationPercentile": [0, 100],
+              "enableElevationZoomFactor": true
+            },
+            "highlightColor": [252, 242, 26, 255]
+          },
+          "visualChannels": {
+            "sizeField": null,
+            "sizeScale": "linear",
+            "colorField": null,
+            "colorScale": "quantile"
+          }
+        }
+      ],
+      "filters": [],
+      "splitMaps": [],
+      "layerBlending": "normal",
+      "animationConfig": {
+        "speed": 1,
+        "currentTime": null
+      },
+      "interactionConfig": {
+        "brush": {
+          "size": 0.5,
+          "enabled": false
+        },
+        "tooltip": {
+          "enabled": true,
+          "compareMode": false,
+          "compareType": "absolute",
+          "fieldsToShow": {
+            "c2ab5ce4-3ecd-4032-9cb4-33e5e8e800da": [
+              {
+                "name": "cartodb_id",
+                "format": null
+              },
+              {
+                "name": "injuries",
+                "format": null
+              },
+              {
+                "name": "x",
+                "format": null
+              },
+              {
+                "name": "y",
+                "format": null
+              },
+              {
+                "name": "objectid",
+                "format": null
+              }
+            ]
+          }
+        },
+        "geocoder": {
+          "enabled": false
+        },
+        "coordinate": {
+          "enabled": false
+        }
+      }
+    },
+    "layers": [
+      {
+        "name": "CPUGridLayer({id: 'ij06t3e'})",
+        "props": {
+          "id": "ij06t3e",
+          "lineMiterLimit": 2,
+          "lineWidthUnits": "pixels",
+          "pointRadiusScale": 0.2,
+          "pointRadiusUnits": "pixels",
+          "rounded": true,
+          "wrapLongitude": false,
+          "autoHighlight": true,
+          "pickable": true,
+          "getFillColor": [137, 218, 193],
+          "visible": true,
+          "cartoLabel": "Layer 1",
+          "extruded": false,
+          "elevationScale": 5,
+          "opacity": 0.8,
+          "colorAggregation": "count",
+          "colorRange": [
+            [90, 24, 70, 255],
+            [144, 12, 63, 255],
+            [199, 0, 57, 255],
+            [227, 97, 28, 255],
+            [241, 146, 14, 255],
+            [255, 195, 0, 255]
+          ],
+          "coverage": 1,
+          "elevationLowerPercentile": 0,
+          "elevationUpperPercentile": 100,
+          "lowerPercentile": 0,
+          "upperPercentile": 100,
+          "cellSize": 500,
+          "highlightColor": [252, 242, 26, 255],
+          "colorScaleType": "quantile"
+        }
+      }
+    ]
+  },
+  {
+    "title": "Hex Bin Layer",
+    "visState": {
+      "layers": [
+        {
+          "id": "ja1357",
+          "type": "hexagon",
+          "config": {
+            "color": [18, 147, 154],
+            "label": "Layer 1",
+            "dataId": "DATA_JSON_ID",
+            "hidden": false,
+            "columns": {"lat": "latitude", "lng": "longitude"},
+            "isVisible": true,
+            "textLabel": [
+              {
+                "size": 18,
+                "color": [255, 255, 255],
+                "field": null,
+                "anchor": "start",
+                "offset": [0, 0],
+                "alignment": "center"
+              }
+            ],
+            "visConfig": {
+              "opacity": 0.8,
+              "coverage": 1,
+              "enable3d": false,
+              "sizeRange": [0, 500],
+              "colorRange": {
+                "name": "ColorBrewer YlGn-6",
+                "type": "sequential",
+                "colors": ["#ffffcc", "#d9f0a3", "#addd8e", "#78c679", "#31a354", "#006837"],
+                "category": "ColorBrewer"
+              },
+              "percentile": [0, 100],
+              "resolution": 8,
+              "worldUnitSize": 0.3,
+              "elevationScale": 5,
+              "sizeAggregation": "count",
+              "colorAggregation": "count",
+              "elevationPercentile": [0, 100],
+              "enableElevationZoomFactor": true
+            },
+            "highlightColor": [252, 242, 26, 255]
+          },
+          "visualChannels": {
+            "sizeField": null,
+            "sizeScale": "linear",
+            "colorField": null,
+            "colorScale": "quantile"
+          }
+        }
+      ],
+      "filters": [],
+      "splitMaps": [],
+      "layerBlending": "normal",
+      "animationConfig": {
+        "speed": 1,
+        "currentTime": null
+      },
+      "interactionConfig": {
+        "brush": {
+          "size": 0.5,
+          "enabled": false
+        },
+        "tooltip": {
+          "enabled": true,
+          "compareMode": false,
+          "compareType": "absolute",
+          "fieldsToShow": {
+            "808481b4-9e88-4ccd-85fe-2bcc2b056be8": [
+              {
+                "name": "cartodb_id",
+                "format": null
+              },
+              {
+                "name": "injuries",
+                "format": null
+              },
+              {
+                "name": "x",
+                "format": null
+              },
+              {
+                "name": "y",
+                "format": null
+              },
+              {
+                "name": "objectid",
+                "format": null
+              }
+            ]
+          }
+        },
+        "geocoder": {
+          "enabled": false
+        },
+        "coordinate": {
+          "enabled": false
+        }
+      }
+    },
+    "layers": [
+      {
+        "name": "HexagonLayer({id: 'ja1357'})",
+        "props": {
+          "id": "ja1357",
+          "lineMiterLimit": 2,
+          "lineWidthUnits": "pixels",
+          "pointRadiusScale": 0.2,
+          "pointRadiusUnits": "pixels",
+          "rounded": true,
+          "wrapLongitude": false,
+          "autoHighlight": true,
+          "pickable": true,
+          "getFillColor": [18, 147, 154],
+          "visible": true,
+          "cartoLabel": "Layer 1",
+          "extruded": false,
+          "elevationScale": 5,
+          "opacity": 0.8,
+          "colorAggregation": "count",
+          "colorRange": [
+            [255, 255, 204, 255],
+            [217, 240, 163, 255],
+            [173, 221, 142, 255],
+            [120, 198, 121, 255],
+            [49, 163, 84, 255],
+            [0, 104, 55, 255]
+          ],
+          "coverage": 1,
+          "elevationLowerPercentile": 0,
+          "elevationUpperPercentile": 100,
+          "lowerPercentile": 0,
+          "upperPercentile": 100,
+          "radius": 300,
+          "highlightColor": [252, 242, 26, 255],
+          "colorScaleType": "quantile"
+        }
+      }
+    ]
+  },
+  {
+    "title": "Heatmap Layer",
+    "visState": {
+      "layers": [
+        {
+          "id": "fcpl61l",
+          "type": "heatmap",
+          "config": {
+            "color": [18, 147, 154],
+            "label": "Layer 1",
+            "dataId": "DATA_JSON_ID",
+            "hidden": false,
+            "columns": {
+              "lat": "latitude",
+              "lng": "longitude"
+            },
+            "isVisible": true,
+            "textLabel": [
+              {
+                "size": 18,
+                "color": [255, 255, 255],
+                "field": null,
+                "anchor": "start",
+                "offset": [0, 0],
+                "alignment": "center"
+              }
+            ],
+            "visConfig": {
+              "radius": 21.7,
+              "opacity": 0.8,
+              "coverage": 1,
+              "enable3d": false,
+              "sizeRange": [0, 500],
+              "colorRange": {
+                "name": "ColorBrewer OrRd-6",
+                "type": "sequential",
+                "colors": ["#fef0d9", "#fdd49e", "#fdbb84", "#fc8d59", "#e34a33", "#b30000"],
+                "category": "ColorBrewer"
+              },
+              "percentile": [0, 100],
+              "resolution": 8,
+              "worldUnitSize": 1,
+              "elevationScale": 5,
+              "sizeAggregation": "average",
+              "colorAggregation": "average",
+              "elevationPercentile": [0, 100],
+              "enableElevationZoomFactor": true
+            },
+            "highlightColor": [252, 242, 26, 255]
+          },
+          "visualChannels": {
+            "weightField": null
+          }
+        }
+      ],
+      "filters": [],
+      "splitMaps": [],
+      "layerBlending": "normal",
+      "animationConfig": {
+        "speed": 1,
+        "currentTime": null
+      },
+      "interactionConfig": {
+        "brush": {
+          "size": 0.5,
+          "enabled": false
+        },
+        "tooltip": {
+          "enabled": true,
+          "compareMode": false,
+          "compareType": "absolute",
+          "fieldsToShow": {
+            "681ac9b5-ee51-4038-ae8d-dd64b79968a6": [
+              {
+                "name": "cartodb_id",
+                "format": null
+              },
+              {
+                "name": "injuries",
+                "format": null
+              },
+              {
+                "name": "x",
+                "format": null
+              },
+              {
+                "name": "y",
+                "format": null
+              },
+              {
+                "name": "objectid",
+                "format": null
+              }
+            ]
+          }
+        },
+        "geocoder": {
+          "enabled": false
+        },
+        "coordinate": {
+          "enabled": false
+        }
+      }
+    },
+    "layers": [
+      {
+        "name": "HeatmapLayer({id: 'fcpl61l'})",
+        "props": {
+          "id": "fcpl61l",
+          "lineMiterLimit": 2,
+          "lineWidthUnits": "pixels",
+          "pointRadiusScale": 0.2,
+          "pointRadiusUnits": "pixels",
+          "rounded": true,
+          "wrapLongitude": false,
+          "autoHighlight": true,
+          "pickable": true,
+          "getFillColor": [18, 147, 154],
+          "visible": true,
+          "cartoLabel": "Layer 1",
+          "extruded": false,
+          "elevationScale": 5,
+          "opacity": 0.8,
+          "radiusPixels": 21.7,
+          "colorAggregation": "average",
+          "colorRange": [
+            [254, 240, 217, 255],
+            [253, 212, 158, 255],
+            [253, 187, 132, 255],
+            [252, 141, 89, 255],
+            [227, 74, 51, 255],
+            [179, 0, 0, 255]
+          ],
+          "coverage": 1,
+          "elevationLowerPercentile": 0,
+          "elevationUpperPercentile": 100,
+          "lowerPercentile": 0,
+          "upperPercentile": 100,
+          "highlightColor": [252, 242, 26, 255]
         }
       }
     ]
