@@ -48,6 +48,8 @@ function parseCartoTile(arrayBuffer, options) {
   return data;
 }
 
+const defaultTileFormat = TILE_FORMATS.BINARY;
+
 const CartoTileLoader = {
   name: 'CARTO Tile',
   id: 'cartoTile',
@@ -60,15 +62,20 @@ const CartoTileLoader = {
   parseSync: parseCartoTile,
   options: {
     cartoTile: {
-      // TODO change to BINARY for 8.7 prod release
-      formatTiles: TILE_FORMATS.BINARY
+      formatTiles: defaultTileFormat
     }
   }
 };
 
+const defaultProps = {
+  ...MVTLayer.defaultProps,
+  formatTiles: defaultTileFormat,
+  loaders: [CartoTileLoader]
+};
+
 export default class CartoTileLayer extends MVTLayer {
   getTileData(tile) {
-    let url = _getURLFromTemplate(this.state.data, tile);
+    const url = _getURLFromTemplate(this.state.data, tile);
     if (!url) {
       return Promise.reject('Invalid URL');
     }
@@ -87,10 +94,6 @@ export default class CartoTileLayer extends MVTLayer {
         Object.values(TILE_FORMATS).includes(formatTiles),
         `Invalid value for formatTiles: ${formatTiles}. Use value from TILE_FORMATS`
       );
-      // eslint-disable-next-line no-undef
-      const newUrl = new URL(url);
-      newUrl.searchParams.set('formatTiles', formatTiles);
-      url = newUrl.toString();
       loadOptions.cartoTile = {formatTiles};
     }
 
@@ -118,4 +121,4 @@ export default class CartoTileLayer extends MVTLayer {
 }
 
 CartoTileLayer.layerName = 'CartoTileLayer';
-CartoTileLayer.defaultProps = {...MVTLayer.defaultProps, loaders: [CartoTileLoader]};
+CartoTileLayer.defaultProps = defaultProps;
