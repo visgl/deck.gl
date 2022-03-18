@@ -11,8 +11,11 @@ import {
 } from 'd3-scale';
 import {format as d3Format} from 'd3-format';
 import moment from 'moment-timezone';
-import {H3HexagonLayer, MVTLayer} from '@deck.gl/geo-layers';
+
+import {CPUGridLayer, HeatmapLayer, HexagonLayer} from '@deck.gl/aggregation-layers';
 import {GeoJsonLayer} from '@deck.gl/layers';
+import {H3HexagonLayer, MVTLayer} from '@deck.gl/geo-layers';
+
 import CartoTileLayer from '../layers/carto-tile-layer';
 import {TILE_FORMATS} from './maps-api-common';
 import {assert} from '../utils';
@@ -28,6 +31,11 @@ const SCALE_FUNCS = {
 };
 export type SCALE_TYPE = keyof typeof SCALE_FUNCS;
 
+const hexToRGBA = c => {
+  const {r, g, b, opacity} = rgb(c);
+  return [r, g, b, 255 * opacity];
+};
+
 // Kepler -> Deck.gl
 const sharedPropMap = {
   color: 'getFillColor',
@@ -41,6 +49,7 @@ const sharedPropMap = {
   },
   visConfig: {
     enable3d: 'extruded',
+    elevationScale: 'elevationScale',
     filled: 'filled',
     opacity: 'opacity',
     strokeColor: 'getLineColor',
@@ -49,6 +58,14 @@ const sharedPropMap = {
     radius: 'getPointRadius',
     wireframe: 'wireframe'
   }
+};
+
+const aggregationVisConfig = {
+  colorAggregation: 'colorAggregation',
+  colorRange: x => ({colorRange: x.colors.map(hexToRGBA)}),
+  coverage: 'coverage',
+  elevationPercentile: ['elevationLowerPercentile', 'elevationUpperPercentile'],
+  percentile: ['lowerPercentile', 'upperPercentile']
 };
 
 const RADIUS_DOWNSCALE = 0.2;
@@ -62,7 +79,7 @@ const defaultProps = {
   wrapLongitude: false
 };
 
-function mergePropMaps(a, b) {
+function mergePropMaps(a = {}, b = {}) {
   return {...a, ...b, visConfig: {...a.visConfig, ...b.visConfig}};
 }
 
@@ -75,30 +92,44 @@ export function getLayer(
     return getTileLayer(dataset);
   }
 
+  const geoColumn = dataset?.geoColumn;
+  const getPosition = d => d[geoColumn].coordinates;
+
   const hexagonId = config.columns?.hex_id;
   const layer = {
     point: {
       Layer: GeoJsonLayer,
-      propMap: mergePropMaps(sharedPropMap, {
-        visConfig: {outline: 'stroked'}
-      }),
-      defaultProps
+      propMap: {visConfig: {outline: 'stroked'}}
     },
     geojson: {
       Layer: GeoJsonLayer,
-      propMap: sharedPropMap,
-      defaultProps: {...defaultProps, lineWidthScale: 2}
+      defaultProps: {lineWidthScale: 2}
+    },
+    grid: {
+      Layer: CPUGridLayer,
+      propMap: {visConfig: {...aggregationVisConfig, worldUnitSize: x => ({cellSize: 1000 * x})}},
+      defaultProps: {getPosition}
+    },
+    heatmap: {
+      Layer: HeatmapLayer,
+      propMap: {visConfig: {...aggregationVisConfig, radius: 'radiusPixels'}},
+      defaultProps: {getPosition}
+    },
+    hexagon: {
+      Layer: HexagonLayer,
+      propMap: {visConfig: {...aggregationVisConfig, worldUnitSize: x => ({radius: 1000 * x})}},
+      defaultProps: {getPosition}
     },
     hexagonId: {
       Layer: H3HexagonLayer,
-      propMap: mergePropMaps(sharedPropMap, {
-        visConfig: {coverage: 'coverage', elevationScale: 'elevationScale'}
-      }),
-      defaultProps: {...defaultProps, getHexagon: d => d[hexagonId]}
+      propMap: {visConfig: {coverage: 'coverage'}},
+      defaultProps: {getHexagon: d => d[hexagonId]}
     }
   }[type];
 
   assert(layer, `Unsupported layer type: ${type}`);
+  layer.propMap = mergePropMaps(sharedPropMap, layer.propMap);
+  layer.defaultProps = {...defaultProps, ...layer.defaultProps};
   return layer;
 }
 
@@ -189,8 +220,8 @@ export function getColorAccessor(
   const alpha = opacity !== undefined ? Math.round(255 * Math.pow(opacity, 1 / 2.2)) : 255;
 
   const accessor = properties => {
-    const rgba = rgb(scale(properties[name]));
-    return [rgba.r, rgba.g, rgba.b, alpha];
+    const {r, g, b} = rgb(scale(properties[name]));
+    return [r, g, b, alpha];
   };
   return normalizeAccessor(accessor, data);
 }
