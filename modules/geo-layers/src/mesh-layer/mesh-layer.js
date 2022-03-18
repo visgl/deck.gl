@@ -67,6 +67,8 @@ export default class _MeshLayer extends SimpleMeshLayer {
   getModel(mesh) {
     const {id, pbrMaterial} = this.props;
     const materialParser = this.parseMaterial(pbrMaterial, mesh);
+    // Keep material parser to explicitly remove textures
+    this.setState({materialParser});
     const shaders = this.getShaders();
     validateGeometryAttributes(mesh.attributes);
     const model = new Model(this.context.gl, {
@@ -90,6 +92,8 @@ export default class _MeshLayer extends SimpleMeshLayer {
     if (model) {
       const {mesh} = this.props;
       const materialParser = this.parseMaterial(pbrMaterial, mesh);
+      // Keep material parser to explicitly remove textures
+      this.setState({materialParser});
       model.setUniforms(materialParser.uniforms);
     }
   }
@@ -98,7 +102,10 @@ export default class _MeshLayer extends SimpleMeshLayer {
     const unlit = Boolean(
       pbrMaterial.pbrMetallicRoughness && pbrMaterial.pbrMetallicRoughness.baseColorTexture
     );
-    const materialParser = new GLTFMaterialParser(this.context.gl, {
+
+    this.destroyMaterialParserTextures();
+
+    return new GLTFMaterialParser(this.context.gl, {
       attributes: {NORMAL: mesh.attributes.normals, TEXCOORD_0: mesh.attributes.texCoords},
       material: {unlit, ...pbrMaterial},
       pbrDebug: false,
@@ -106,7 +113,6 @@ export default class _MeshLayer extends SimpleMeshLayer {
       lights: true,
       useTangents: false
     });
-    return materialParser;
   }
 
   calculateFeatureIdsPickingColors(attribute) {
@@ -123,6 +129,18 @@ export default class _MeshLayer extends SimpleMeshLayer {
     }
 
     attribute.value = value;
+  }
+
+  destroyMaterialParserTextures() {
+    if (this.state.materialParser) {
+      this.state.materialParser.destroyTextures();
+      this.setState({materialParser: null})
+    }
+  }
+
+  finalizeState() {
+    super.finalizeState();
+    this.destroyMaterialParserTextures();
   }
 }
 
