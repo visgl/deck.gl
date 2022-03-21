@@ -184,6 +184,12 @@ larger than the elevationUpperPercentile will be hidden.
 Filter bins and re-calculate elevation by `elevationLowerPercentile`. Hexagons with elevation value
 smaller than the elevationLowerPercentile will be hidden.
 
+##### `colorScaleType` (String, optional)
+
+* Default: 'quantize'
+
+Scaling function used to determine the color of the grid cell, default value is 'quantize'. Supported Values are 'quantize', 'quantile' and 'ordinal'.
+
 ##### `material` (Object, optional)
 
 * Default: `true`
