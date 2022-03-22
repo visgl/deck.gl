@@ -68,12 +68,9 @@ const aggregationVisConfig = {
   percentile: ['lowerPercentile', 'upperPercentile']
 };
 
-const RADIUS_DOWNSCALE = 0.2;
-
 const defaultProps = {
   lineMiterLimit: 2,
   lineWidthUnits: 'pixels',
-  pointRadiusScale: RADIUS_DOWNSCALE,
   pointRadiusUnits: 'pixels',
   rounded: true,
   wrapLongitude: false
@@ -103,7 +100,7 @@ export function getLayer(
     },
     geojson: {
       Layer: GeoJsonLayer,
-      defaultProps: {lineWidthScale: 2}
+      defaultProps: {}
     },
     grid: {
       Layer: CPUGridLayer,
@@ -147,8 +144,6 @@ function getTileLayer(dataset) {
     propMap: sharedPropMap,
     defaultProps: {
       ...defaultProps,
-      pointRadiusScale: 0.3,
-      lineWidthScale: 2,
       uniqueIdProperty: 'geoid',
       formatTiles
     }
