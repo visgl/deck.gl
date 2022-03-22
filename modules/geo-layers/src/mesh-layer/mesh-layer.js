@@ -134,7 +134,7 @@ export default class _MeshLayer extends SimpleMeshLayer {
   destroyMaterialParserTextures() {
     if (this.state.materialParser) {
       this.state.materialParser.destroyTextures();
-      this.setState({materialParser: null})
+      this.setState({materialParser: null});
     }
   }
 
