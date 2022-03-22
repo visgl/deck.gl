@@ -254,10 +254,7 @@ export function getTextPixelOffsetAccessor({alignment, anchor, size}, radius) {
   const signY = alignment === 'center' ? 0 : alignment === 'bottom' ? 1 : -1;
   const sizeOffset = alignment === 'center' ? 0 : size;
 
-  const calculateOffset = r => {
-    r = RADIUS_DOWNSCALE * r;
-    return [signX * (r + padding), signY * (r + padding + sizeOffset)];
-  };
+  const calculateOffset = r => [signX * (r + padding), signY * (r + padding + sizeOffset)];
 
   return typeof radius === 'function'
     ? d => {
