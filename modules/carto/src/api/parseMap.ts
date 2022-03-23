@@ -127,6 +127,12 @@ function mapProps(source, target, mapping) {
 function createStyleProps(config, mapping) {
   const result: Record<string, any> = {};
   mapProps(config, result, mapping);
+
+  // Kepler format sometimes omits strokeColor. TODO: remove once we can rely on
+  // `strokeColor` always being sert when `stroke: true`.
+  if (result.stroked && !result.getLineColor) {
+    result.getLineColor = result.getFillColor;
+  }
   result.highlightColor = config.visConfig.enable3d ? [255, 255, 255, 60] : [252, 242, 26, 255];
   return result;
 }
