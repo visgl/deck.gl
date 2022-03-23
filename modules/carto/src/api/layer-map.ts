@@ -31,6 +31,13 @@ const SCALE_FUNCS = {
 };
 export type SCALE_TYPE = keyof typeof SCALE_FUNCS;
 
+export const AGGREGATION = {
+  average: 'MEAN',
+  maximum: 'MAX',
+  minimum: 'MIN',
+  sum: 'SUM'
+}
+
 const hexToRGBA = c => {
   const {r, g, b, opacity} = rgb(c);
   return [r, g, b, 255 * opacity];
@@ -61,7 +68,7 @@ const sharedPropMap = {
 };
 
 const aggregationVisConfig = {
-  colorAggregation: 'colorAggregation',
+  colorAggregation: x => ({colorAggregation: AGGREGATION[x]}),
   colorRange: x => ({colorRange: x.colors.map(hexToRGBA)}),
   coverage: 'coverage',
   elevationPercentile: ['elevationLowerPercentile', 'elevationUpperPercentile'],
