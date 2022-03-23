@@ -130,7 +130,7 @@ export function getLayer(
     hexagonId: {
       Layer: H3HexagonLayer,
       propMap: {visConfig: {coverage: 'coverage'}},
-      defaultProps: {getHexagon: d => d[hexagonId]}
+      defaultProps: {getHexagon: d => d[hexagonId], stroked: false}
     }
   }[type];
 
