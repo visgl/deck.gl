@@ -429,6 +429,16 @@ export async function fetchMap({
     };
   }
 
+  const geojsonLayers = map.keplerMapConfig.config.visState.layers.filter(
+    ({type}) => type === 'geojson' || type === 'point'
+  );
+  const geojsonDatasetIds = geojsonLayers.map(({config}) => config.dataId);
+  map.datasets.forEach(dataset => {
+    if (geojsonDatasetIds.includes(dataset.id)) {
+      dataset.format = 'geojson';
+    }
+  });
+
   // Mutates map.datasets so that dataset.data contains data
   await fillInMapDatasets(map, clientId, localCreds);
   return {
