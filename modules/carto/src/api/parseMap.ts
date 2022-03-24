@@ -137,7 +137,7 @@ function createStyleProps(config, mapping) {
   return result;
 }
 
-/* eslint-disable complexity */
+/* eslint-disable complexity, max-statements */
 function createChannelProps(visualChannels, type, config, data) {
   const {colorField, colorScale, sizeField, sizeScale, strokeColorField, strokeColorScale} =
     visualChannels;
@@ -149,7 +149,13 @@ function createChannelProps(visualChannels, type, config, data) {
   const {textLabel, visConfig} = config;
   const result: Record<string, any> = {};
   const textLabelField = textLabel && textLabel.field;
-  if (colorField) {
+
+  if (type === 'grid' || type === 'hexagon') {
+    result.colorScaleType = colorScale;
+    if (colorField) {
+      result.getColorWeight = d => d[colorField.name];
+    }
+  } else if (colorField) {
     result.getFillColor = getColorAccessor(
       colorField,
       colorScale,
@@ -157,9 +163,8 @@ function createChannelProps(visualChannels, type, config, data) {
       1, // Rely on layer opacity
       data
     );
-  } else if (type === 'grid' || type === 'hexagon') {
-    result.colorScaleType = colorScale;
   }
+
   if (strokeColorField) {
     const opacity = visConfig.strokeOpacity !== undefined ? visConfig.strokeOpacity : 1;
     result.getLineColor = getColorAccessor(
