@@ -68,7 +68,7 @@ const sharedPropMap = {
 };
 
 const aggregationVisConfig = {
-  colorAggregation: x => ({colorAggregation: AGGREGATION[x]}),
+  colorAggregation: x => ({colorAggregation: AGGREGATION[x] || AGGREGATION.sum}),
   colorRange: x => ({colorRange: x.colors.map(hexToRGBA)}),
   coverage: 'coverage',
   elevationPercentile: ['elevationLowerPercentile', 'elevationUpperPercentile'],
