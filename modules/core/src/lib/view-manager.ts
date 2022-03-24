@@ -41,8 +41,8 @@ export default class ViewManager {
   private _viewports: Viewport[];
   private _viewportMap: {[viewId: string]: Viewport};
   private _isUpdating: boolean;
-  private _needsRedraw: string | boolean;
-  private _needsUpdate: string | boolean;
+  private _needsRedraw: string | false;
+  private _needsUpdate: string | false;
   private _eventManager: EventManager;
   private _eventCallbacks: {
     onViewStateChange?: (params: ViewStateChangeParameters & {viewId: string}) => void;
@@ -72,8 +72,8 @@ export default class ViewManager {
     this._viewports = []; // Generated viewports
     this._viewportMap = {};
     this._isUpdating = false;
-    this._needsRedraw = 'Initial render';
-    this._needsUpdate = true;
+    this._needsRedraw = 'First render';
+    this._needsUpdate = 'Initialize';
 
     this._eventManager = props.eventManager;
     this._eventCallbacks = {
@@ -87,6 +87,7 @@ export default class ViewManager {
     this.setProps(props);
   }
 
+  /** Remove all resources and event listeners */
   finalize(): void {
     for (const key in this.controllers) {
       const controller = this.controllers[key];
@@ -97,8 +98,13 @@ export default class ViewManager {
     this.controllers = {};
   }
 
-  // Check if a redraw is needed
-  needsRedraw(opts: {clearRedrawFlags?: boolean} = {clearRedrawFlags: false}): string | boolean {
+  /** Check if a redraw is needed */
+  needsRedraw(
+    opts: {
+      /** Reset redraw flags to false */
+      clearRedrawFlags?: boolean;
+    } = {clearRedrawFlags: false}
+  ): string | false {
     const redraw = this._needsRedraw;
     if (opts.clearRedrawFlags) {
       this._needsRedraw = false;
@@ -106,14 +112,13 @@ export default class ViewManager {
     return redraw;
   }
 
-  // Layers will be updated deeply (in next animation frame)
-  // Potentially regenerating attributes and sub layers
-  setNeedsUpdate(reason: string) {
+  /** Mark the manager as dirty. Will rebuild all viewports and update controllers. */
+  setNeedsUpdate(reason: string): void {
     this._needsUpdate = this._needsUpdate || reason;
     this._needsRedraw = this._needsRedraw || reason;
   }
 
-  // Checks each viewport for transition updates
+  /** Checks each viewport for transition updates */
   updateViewStates(): void {
     for (const viewId in this.controllers) {
       const controller = this.controllers[viewId];
@@ -137,6 +142,7 @@ export default class ViewManager {
     return this._viewports;
   }
 
+  /** Get a map of all views */
   getViews(): {[viewId: string]: View} {
     const viewMap = {};
     this.views.forEach(view => {
@@ -145,20 +151,19 @@ export default class ViewManager {
     return viewMap;
   }
 
-  // Resolves a viewId string to a View, if already a View returns it.
-  getView(viewOrViewId: string | View): View | undefined {
-    return typeof viewOrViewId === 'string'
-      ? this.views.find(view => view.id === viewOrViewId)
-      : viewOrViewId;
+  /** Resolves a viewId string to a View */
+  getView(viewId: string): View | undefined {
+    return this.views.find(view => view.id === viewId);
   }
 
-  // Returns the viewState for a specific viewId. Matches the viewState by
-  // 1. view.viewStateId
-  // 2. view.id
-  // 3. root viewState
-  // then applies the view's filter if any
-  getViewState(viewId: string | View): any {
-    const view = this.getView(viewId);
+  /** Returns the viewState for a specific viewId. Matches the viewState by
+    1. view.viewStateId
+    2. view.id
+    3. root viewState
+    then applies the view's filter if any */
+  getViewState(viewOrViewId: string | View): any {
+    const view: View | undefined =
+      typeof viewOrViewId === 'string' ? this.getView(viewOrViewId) : viewOrViewId;
     // Backward compatibility: view state for single view
     const viewState = (view && this.viewState[view.getViewStateId()]) || this.viewState;
     return view ? view.filterViewState(viewState) : viewState;
@@ -193,6 +198,7 @@ export default class ViewManager {
     return null;
   }
 
+  /** Update the manager with new Deck props */
   setProps(props: {views?: View[]; viewState?: any; width?: number; height?: number}) {
     if (props.views) {
       this._setViews(props.views);

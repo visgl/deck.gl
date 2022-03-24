@@ -1,4 +1,4 @@
-import View, {BaseViewProps, BaseViewState} from './view';
+import View, {CommonViewState} from './view';
 import FirstPersonViewport from '../viewports/first-person-viewport';
 import FirstPersonController from '../controllers/first-person-controller';
 
@@ -19,9 +19,9 @@ export type FirstPersonViewState = {
   maxPitch?: number;
   /** Transform applied to the camera position and direction */
   modelMatrix?: number[] | null;
-} & BaseViewState;
+} & CommonViewState;
 
-export type FirstPersonViewProps = BaseViewProps<FirstPersonViewState> & {
+type FirstPersonViewProps = {
   /** Custom projection matrix */
   projectionMatrix?: number[];
   /** Field of view covered by camera, in degrees. Default `75`. */

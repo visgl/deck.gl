@@ -1,4 +1,4 @@
-import View, {BaseViewProps, BaseViewState} from './view';
+import View, {CommonViewState} from './view';
 import OrthographicViewport from '../viewports/orthographic-viewport';
 import OrthographicController from '../controllers/orthographic-controller';
 
@@ -12,9 +12,9 @@ export type OrthographicViewState = {
   minZoom?: number;
   /** The max zoom level of the viewport. Default `Infinity`. */
   maxZoom?: number;
-} & BaseViewState;
+} & CommonViewState;
 
-export type OrthographicViewProps = BaseViewProps<OrthographicViewState> & {
+type OrthographicViewProps = {
   /** Distance of near clipping plane. Default `0.1`. */
   near?: number;
   /** Distance of far clipping plane. Default `1000`. */

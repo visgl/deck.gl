@@ -82,9 +82,7 @@ export type OrbitViewportOptions = {
 };
 
 export default class OrbitViewport extends Viewport {
-  static displayName = 'OrbitView';
-
-  projectedCenter;
+  projectedCenter: number[];
 
   constructor(props: OrbitViewportOptions) {
     const {

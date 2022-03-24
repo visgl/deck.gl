@@ -82,7 +82,7 @@ export type WebMercatorViewportOptions = {
   repeat?: boolean;
   /** Internal use */
   worldOffset?: number;
-  /** Revert to approximated meter size calculation prior to v8.5 */
+  /** @deprecated Revert to approximated meter size calculation prior to v8.5 */
   legacyMeterSizes?: boolean;
 };
 
@@ -91,6 +91,9 @@ function unitsPerMeter(latitude: number): number {
   return TILE_SIZE / EARTH_CIRCUMFERENCE / latCosine;
 }
 
+/**
+ * Manages transformations to/from WGS84 coordinates using the Web Mercator Projection.
+ */
 export default class WebMercatorViewport extends Viewport {
   static displayName = 'WebMercatorViewport';
 
@@ -102,15 +105,11 @@ export default class WebMercatorViewport extends Viewport {
   fovy: number;
   orthographic: boolean;
 
+  /** Each sub viewport renders one copy of the world if repeat:true. The list is generated and cached on first request. */
   private _subViewports: WebMercatorViewport[] | null;
+  /** @deprecated Revert to approximated meter size calculation prior to v8.5 */
   private _pseudoMeters: boolean;
 
-  /**
-   * @classdesc
-   * Creates view/projection matrices from mercator params
-   * Note: The Viewport is immutable in the sense that it only has accessors.
-   * A new viewport instance should be created if any parameters have changed.
-   */
   /* eslint-disable complexity, max-statements */
   constructor(opts: WebMercatorViewportOptions = {}) {
     const {

@@ -98,7 +98,7 @@ export {default as _memoize} from './utils/memoize';
 export {mergeShaders as _mergeShaders} from './utils/shader';
 export {compareProps as _compareProps} from './lifecycle/props';
 
-/* Types */
+// Types
 
 export type {MapViewState} from './views/map-view';
 export type {FirstPersonViewState} from './views/first-person-view';

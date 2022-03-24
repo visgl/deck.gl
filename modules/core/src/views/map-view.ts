@@ -1,4 +1,4 @@
-import View, {BaseViewProps, BaseViewState} from './view';
+import View, {CommonViewState} from './view';
 import WebMercatorViewport from '../viewports/web-mercator-viewport';
 import MapController from '../controllers/map-controller';
 
@@ -23,9 +23,9 @@ export type MapViewState = {
   minPitch?: number;
   /** Max pitch, default `60` */
   maxPitch?: number;
-} & BaseViewState;
+} & CommonViewState;
 
-export type MapViewProps = BaseViewProps<MapViewState> & {
+type MapViewProps = {
   /** Whether to render multiple copies of the map at low zoom levels. Default `false`. */
   repeat?: boolean;
   /** Scaler for the near plane, 1 unit equals to the height of the viewport. Default to `0.1`. Overwrites the `near` parameter. */

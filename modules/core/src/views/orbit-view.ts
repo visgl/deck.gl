@@ -1,4 +1,4 @@
-import View, {BaseViewProps, BaseViewState} from './view';
+import View, {CommonViewState} from './view';
 import OrbitViewport from '../viewports/orbit-viewport';
 import OrbitController from '../controllers/orbit-controller';
 
@@ -19,9 +19,9 @@ export type OrbitViewState = {
   minRotationX?: number;
   /** The max rotating angle around X axis. Default `90`. */
   maxRotationX?: number;
-} & BaseViewState;
+} & CommonViewState;
 
-export type OrbitViewProps = BaseViewProps<OrbitViewState> & {
+type OrbitViewProps = {
   /** Axis with 360 degrees rotating freedom, either `'Y'` or `'Z'`, default to `'Z'`. */
   orbitAxis?: 'Y' | 'Z';
   /** Custom projection matrix */

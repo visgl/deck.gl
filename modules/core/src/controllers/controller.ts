@@ -45,6 +45,7 @@ const EVENT_TYPES = {
   KEYBOARD: ['keydown']
 } as const;
 
+/** Configuration of how user input is handled */
 export type ControllerOptions = {
   /** Enable zooming with mouse wheel. Default `true`. */
   scrollZoom?: boolean | {
@@ -83,24 +84,39 @@ export type ControllerOptions = {
 };
 
 type ControllerProps = {
+  /** Identifier of the controller */
   id: string;
+  /** Viewport x position */
   x: number;
+  /** Viewport y position */
   y: number;
+  /** Viewport width */
   width: number;
+  /** Viewport height */
   height: number;
 } & ControllerOptions & TransitionProps;
 
+/** The state of a controller */
 export type InteractionState = {
+  /** If the view state is in transition */
   inTransition?: boolean;
+  /** If the user is dragging */
   isDragging?: boolean;
+  /** If the view is being panned, either from user input or transition */
   isPanning?: boolean;
+  /** If the view is being rotated, either from user input or transition */
   isRotating?: boolean;
+  /** If the view is being zoomed, either from user input or transition */
   isZooming?: boolean;
 }
 
+/** Parameters passed to the onViewStateChange callback */
 export type ViewStateChangeParameters = {
+  /** The next view state, either from user input or transition */
   viewState: Record<string, any>;
+  /** Object describing the nature of the view state change */
   interactionState: InteractionState;
+  /** The current view state */
   oldViewState?: Record<string, any>;
 }
 

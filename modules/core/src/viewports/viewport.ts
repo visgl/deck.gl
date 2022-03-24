@@ -99,6 +99,12 @@ function createProjectionMatrix({orthographic, fovyRadians, aspect, focalDistanc
     : new Matrix4().perspective({fovy: fovyRadians, aspect, near, far});
 }
 
+/**
+ * Manages coordinate system transformations.
+ *
+ * Note: The Viewport is immutable in the sense that it only has accessors.
+ * A new viewport instance should be created if any parameters have changed.
+ */
 export default class Viewport {
   static displayName = 'Viewport';
 
@@ -117,37 +123,23 @@ export default class Viewport {
 
   /** Derived parameters */
 
+  // `!` post-fix expression operator asserts that its operand is non-null and non-undefined in contexts
+  // where the type checker is unable to conclude that fact.
+
   distanceScales: DistanceScales; /** scale factors between world space and common space */
-  // @ts-ignore
-  scale: number; /** scale factor, equals 2^zoom */
-  // @ts-ignore
-  center: number[]; /** viewport center in common space */
-  // @ts-ignore
-  cameraPosition: number[]; /** Ccamera position in common space */
-  // @ts-ignore
-  projectionMatrix: number[];
-  // @ts-ignore
-  viewMatrix: number[];
-  // @ts-ignore
-  viewMatrixUncentered: number[];
-  // @ts-ignore
-  viewMatrixInverse: number[];
-  // @ts-ignore
-  viewProjectionMatrix: number[];
-  // @ts-ignore
-  pixelProjectionMatrix: number[];
-  // @ts-ignore
-  pixelUnprojectionMatrix: number[];
+  scale!: number; /** scale factor, equals 2^zoom */
+  center!: number[]; /** viewport center in common space */
+  cameraPosition!: number[]; /** Camera position in common space */
+  projectionMatrix!: number[];
+  viewMatrix!: number[];
+  viewMatrixUncentered!: number[];
+  viewMatrixInverse!: number[];
+  viewProjectionMatrix!: number[];
+  pixelProjectionMatrix!: number[];
+  pixelUnprojectionMatrix!: number[];
 
   private _frustumPlanes: {[name: string]: FrustumPlane} = {};
 
-  /**
-   * @classdesc
-   * Manages coordinate system transformations for deck.gl.
-   *
-   * Note: The Viewport is immutable in the sense that it only has accessors.
-   * A new viewport instance should be created if any parameters have changed.
-   */
   constructor(opts: ViewportOptions = {}) {
     // @ts-ignore
     this.id = opts.id || this.constructor.displayName || 'viewport';

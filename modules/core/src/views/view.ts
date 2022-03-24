@@ -8,9 +8,9 @@ import type {TransitionProps} from '../controllers/transition-manager';
 
 import {ConstructorOf} from '../types/types';
 
-export type BaseViewState = TransitionProps;
+export type CommonViewState = TransitionProps;
 
-export type BaseViewProps<ViewState> = {
+type CommonViewProps<ViewState> = {
   /** A unique id of the view. In a multi-view use case, this is important for matching view states and place contents into this view. */
   id?: string;
   /** A relative (e.g. `'50%'`) or absolute position. Default `0`. */
@@ -36,13 +36,13 @@ export type BaseViewProps<ViewState> = {
         type?: ConstructorOf<Controller<any>>;
       });
 
-  /** @deprecated */
+  /** @deprecated Directly wrap a viewport instance */
   viewportInstance?: Viewport;
 };
 
 export default abstract class View<
-  ViewState extends BaseViewState = BaseViewState,
-  ViewProps extends BaseViewProps<ViewState> = BaseViewProps<ViewState>
+  ViewState extends CommonViewState = CommonViewState,
+  ViewProps = {}
 > {
   id: string;
   abstract get ViewportType(): ConstructorOf<Viewport>;
@@ -54,21 +54,10 @@ export default abstract class View<
   private _width: Position;
   private _height: Position;
 
-  protected props: ViewProps;
+  protected props: ViewProps & CommonViewProps<ViewState>;
 
-  constructor(props: ViewProps) {
-    const {
-      id,
-
-      // Window width/height in pixels (for pixel projection)
-      x = 0,
-      y = 0,
-      width = '100%',
-      height = '100%',
-
-      // A View can be a wrapper for a viewport instance
-      viewportInstance
-    } = props || {};
+  constructor(props: ViewProps & CommonViewProps<ViewState>) {
+    const {id, x = 0, y = 0, width = '100%', height = '100%', viewportInstance} = props || {};
 
     assert(!viewportInstance || viewportInstance instanceof Viewport);
     this.viewportInstance = viewportInstance;
