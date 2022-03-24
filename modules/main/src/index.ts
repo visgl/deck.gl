@@ -44,6 +44,9 @@ export {
   Viewport,
   WebMercatorViewport,
   _GlobeViewport,
+  OrbitViewport,
+  OrthographicViewport,
+  FirstPersonViewport,
   // Controllers
   Controller,
   MapController,
@@ -137,3 +140,13 @@ export {SimpleMeshLayer, ScenegraphLayer} from '@deck.gl/mesh-layers';
 //
 
 export {default, DeckGL} from '@deck.gl/react';
+
+/* Types */
+
+export type {
+  MapViewState,
+  FirstPersonViewState,
+  OrbitViewState,
+  OrthographicViewState,
+  GlobeViewState
+} from '@deck.gl/core';

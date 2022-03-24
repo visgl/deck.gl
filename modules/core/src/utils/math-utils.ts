@@ -18,6 +18,11 @@ export function getCameraPosition(viewMatrixInverse) {
   return [viewMatrixInverse[12], viewMatrixInverse[13], viewMatrixInverse[14]];
 }
 
+export type FrustumPlane = {
+  distance: number;
+  normal: Vector3;
+};
+
 // https://www.gamedevs.org/uploads/fast-extraction-viewing-frustum-planes-from-world-view-projection-matrix.pdf
 export function getFrustumPlanes(viewProjectionMatrix) {
   return {

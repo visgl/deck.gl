@@ -114,7 +114,8 @@ test('MapboxLayer#onAdd, onRemove, setProps', t => {
       latitude: 37.78,
       zoom: 12,
       bearing: 0,
-      pitch: 0
+      pitch: 0,
+      repeat: true
     },
     'viewState is set correctly'
   );
