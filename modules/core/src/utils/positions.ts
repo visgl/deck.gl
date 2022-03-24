@@ -1,7 +1,12 @@
 const PERCENT_OR_PIXELS_REGEX = /([0-9]+\.?[0-9]*)(%|px)/;
 
+export type Position = {
+  position: number;
+  relative: boolean;
+};
+
 // Takes a number or a string of formats `50%`, `33.3%` or `200px`
-export function parsePosition(value) {
+export function parsePosition(value: number | string): Position {
   switch (typeof value) {
     case 'number':
       return {
@@ -27,6 +32,6 @@ export function parsePosition(value) {
   }
 }
 
-export function getPosition(position, extent) {
+export function getPosition(position: Position, extent: number): number {
   return position.relative ? Math.round(position.position * extent) : position.position;
 }
