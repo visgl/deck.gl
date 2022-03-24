@@ -1,12 +1,24 @@
 import {Deck} from '@deck.gl/core';
 import {getViewState} from './deck-utils';
 
-export default class MapboxOverlay {
+import type {Map, IControl, MapMouseEvent} from 'mapbox-gl';
+
+/**
+ * Implements Mapbox [IControl](https://docs.mapbox.com/mapbox-gl-js/api/markers/#icontrol) interface
+ * Renders deck.gl layers over the base map and automatically synchronizes with the map's camera
+ */
+export default class MapboxOverlay implements IControl {
+  private _props: any;
+  private _deck: Deck;
+  private _map?: Map;
+  private _container?: HTMLDivElement;
+
   constructor(props) {
     this._props = {...props};
   }
 
-  setProps(props) {
+  /** Update (partial) props of the underlying Deck instance. */
+  setProps(props: any): void {
     Object.assign(this._props, props);
 
     if ('viewState' in this._props) {
@@ -18,7 +30,8 @@ export default class MapboxOverlay {
     }
   }
 
-  onAdd(map) {
+  /** Called when the control is added to a map */
+  onAdd(map: Map) {
     this._map = map;
 
     /* global document */
@@ -48,16 +61,20 @@ export default class MapboxOverlay {
     return container;
   }
 
+  /** Called when the control is removed from a map */
   onRemove() {
     const map = this._map;
-    map.off('resize', this._updateContainerSize);
-    map.off('render', this._updateViewState);
-    map.off('mousemove', this._handleMouseEvent);
-    map.off('mouseout', this._handleMouseEvent);
-    map.off('click', this._handleMouseEvent);
-    map.off('dblclick', this._handleMouseEvent);
 
-    this._deck.finalize();
+    if (map) {
+      map.off('resize', this._updateContainerSize);
+      map.off('render', this._updateViewState);
+      map.off('mousemove', this._handleMouseEvent);
+      map.off('mouseout', this._handleMouseEvent);
+      map.off('click', this._handleMouseEvent);
+      map.off('dblclick', this._handleMouseEvent);
+    }
+
+    this._deck?.finalize();
     this._map = undefined;
     this._container = undefined;
   }
@@ -66,18 +83,22 @@ export default class MapboxOverlay {
     return 'top-left';
   }
 
+  /** Forwards the Deck.pickObject method */
   pickObject(params) {
     return this._deck && this._deck.pickObject(params);
   }
 
+  /** Forwards the Deck.pickMultipleObjects method */
   pickMultipleObjects(params) {
     return this._deck && this._deck.pickMultipleObjects(params);
   }
 
+  /** Forwards the Deck.pickObjects method */
   pickObjects(params) {
     return this._deck && this._deck.pickObjects(params);
   }
 
+  /** Remove from map and releases all resources */
   finalize() {
     if (this._map) {
       this._map.removeControl(this);
@@ -103,13 +124,18 @@ export default class MapboxOverlay {
     }
   };
 
-  _handleMouseEvent = event => {
+  _handleMouseEvent = (event: MapMouseEvent) => {
     const deck = this._deck;
     if (!deck) {
       return;
     }
 
-    const mockEvent = {
+    const mockEvent: {
+      type: string;
+      offsetCenter: {x: number; y: number};
+      srcEvent: MapMouseEvent;
+      tapCount?: number;
+    } = {
       type: event.type,
       offsetCenter: event.point,
       srcEvent: event

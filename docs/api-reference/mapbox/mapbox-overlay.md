@@ -44,7 +44,7 @@ new MapboxOverlay(props);
 
 ##### setProps
 
-Updates (partial) properties.
+Updates (partial) props of the underlying `Deck` instance. See [Deck.setProps](/docs/api-reference/core/deck.md#setprops).
 
 ##### pickObject
 
