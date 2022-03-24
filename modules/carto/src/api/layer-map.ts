@@ -36,7 +36,7 @@ export const AGGREGATION = {
   maximum: 'MAX',
   minimum: 'MIN',
   sum: 'SUM'
-}
+};
 
 const hexToRGBA = c => {
   const {r, g, b, opacity} = rgb(c);

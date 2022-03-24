@@ -163,7 +163,7 @@ function createChannelProps(visualChannels, type, config, data) {
       1, // Rely on layer opacity
       data
     );
-  } 
+  }
 
   if (strokeColorField) {
     const opacity = visConfig.strokeOpacity !== undefined ? visConfig.strokeOpacity : 1;
