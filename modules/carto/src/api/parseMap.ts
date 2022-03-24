@@ -137,7 +137,7 @@ function createStyleProps(config, mapping) {
   return result;
 }
 
-/* eslint-disable complexity */
+/* eslint-disable complexity, max-statements */
 function createChannelProps(visualChannels, type, config, data) {
   const {colorField, colorScale, sizeField, sizeScale, strokeColorField, strokeColorScale} =
     visualChannels;
