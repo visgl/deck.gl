@@ -19,7 +19,12 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v8.7
 
-#### deck.gl [8.7.1] - Mar 18 2022
+#### deck.gl [8.7.3] - Mar 25 2022
+
+- CARTO: Correctly map aggregation weights & methods (#6771)
+- CARTO: Force GeoJSON for geojson/point fetchMap layers (#6767)
+
+#### deck.gl [8.7.2] - Mar 18 2022
 
 - CARTO: Support aggregation layers in fetchMap (#6761)
 
