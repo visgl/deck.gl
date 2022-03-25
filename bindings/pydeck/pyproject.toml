@@ -1,10 +1,12 @@
 [project]
 name = "pydeck"
-version = "0.3.0"
+version = "0.7.1"
+requires-python = ">=3.7"
 
+[build-system]
 requires = [
-    "setuptools",
-    "wheel",
+  "setuptools",
+  "wheel",
 ]
 
 [tool.black]
