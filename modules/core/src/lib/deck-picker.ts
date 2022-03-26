@@ -90,7 +90,7 @@ export default class DeckPicker {
   /** Identifiers of the previously picked object, for callback tracking and auto highlight */
   lastPickedInfo: {
     index: number;
-    layerId: string;
+    layerId: string | null;
     info: PickingInfo | null;
   };
 
@@ -101,7 +101,7 @@ export default class DeckPicker {
     this.pickLayersPass = new PickLayersPass(gl);
     this.lastPickedInfo = {
       index: -1,
-      layerId: '',
+      layerId: null,
       info: null
     };
   }

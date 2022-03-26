@@ -179,14 +179,14 @@ test('compareProps#tests', t => {
       propTypes: tc.propTypes
     });
     t.ok(
-      result === null || typeof result === 'string',
+      result === false || typeof result === 'string',
       `compareProps ${tc.title} returned expected type`
     );
     if (typeof result === 'string') {
       // Hack to make tape show the return value string from compareProps on failure
       const expectedResult = tc.result === SAME ? null : result;
       t.equal(result, expectedResult, `compareProps ${tc.title} returned expected result`);
-    } else if (result === null) {
+    } else if (result === false) {
       t.equal(SAME, tc.result, `compareProps ${tc.title} returned expected result`);
     } else {
       t.fail(`compareProps ${tc.title} returned illegal value`);

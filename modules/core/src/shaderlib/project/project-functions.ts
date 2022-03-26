@@ -10,10 +10,17 @@ import * as vec4 from 'gl-matrix/vec4';
 import * as vec3 from 'gl-matrix/vec3';
 import {addMetersToLngLat} from '@math.gl/web-mercator';
 
+import type Viewport from '../../viewports/viewport';
+import type {NumericArray} from '../../types/types';
+
 // In project.glsl, offset modes calculate z differently from LNG_LAT mode.
 // offset modes apply the y adjustment (unitsPerMeter2) when projecting z
 // LNG_LAT mode only use the linear scale.
-function lngLatZToWorldPosition(lngLatZ, viewport, offsetMode = false) {
+function lngLatZToWorldPosition(
+  lngLatZ: [number, number, number],
+  viewport: Viewport,
+  offsetMode: boolean = false
+): [number, number, number] {
   const p = viewport.projectPosition(lngLatZ);
 
   // TODO - avoid using instanceof
@@ -25,11 +32,23 @@ function lngLatZToWorldPosition(lngLatZ, viewport, offsetMode = false) {
   return p;
 }
 
-function normalizeParameters(opts) {
-  const normalizedParams = {...opts};
-
-  let {coordinateSystem} = opts;
-  const {viewport, coordinateOrigin, fromCoordinateSystem, fromCoordinateOrigin} = opts;
+function normalizeParameters(opts: {
+  viewport: Viewport;
+  coordinateSystem: typeof COORDINATE_SYSTEM[keyof typeof COORDINATE_SYSTEM];
+  coordinateOrigin: [number, number, number];
+  modelMatrix?: NumericArray;
+  fromCoordinateSystem?: typeof COORDINATE_SYSTEM[keyof typeof COORDINATE_SYSTEM];
+  fromCoordinateOrigin?: [number, number, number];
+}): {
+  viewport: Viewport;
+  coordinateSystem: typeof COORDINATE_SYSTEM[keyof typeof COORDINATE_SYSTEM];
+  coordinateOrigin: [number, number, number];
+  modelMatrix?: NumericArray;
+  fromCoordinateSystem: typeof COORDINATE_SYSTEM[keyof typeof COORDINATE_SYSTEM];
+  fromCoordinateOrigin: [number, number, number];
+} {
+  const {viewport, modelMatrix, coordinateOrigin} = opts;
+  let {coordinateSystem, fromCoordinateSystem, fromCoordinateOrigin} = opts;
 
   if (coordinateSystem === COORDINATE_SYSTEM.DEFAULT) {
     coordinateSystem = viewport.isGeospatial
@@ -38,21 +57,39 @@ function normalizeParameters(opts) {
   }
 
   if (fromCoordinateSystem === undefined) {
-    normalizedParams.fromCoordinateSystem = coordinateSystem;
+    fromCoordinateSystem = coordinateSystem;
   }
   if (fromCoordinateOrigin === undefined) {
-    normalizedParams.fromCoordinateOrigin = coordinateOrigin;
+    fromCoordinateOrigin = coordinateOrigin;
   }
 
-  normalizedParams.coordinateSystem = coordinateSystem;
-
-  return normalizedParams;
+  return {
+    viewport,
+    coordinateSystem,
+    coordinateOrigin,
+    modelMatrix,
+    fromCoordinateSystem,
+    fromCoordinateOrigin
+  };
 }
 
+/** Get the common space position from world coordinates in the given coordinate system */
 export function getWorldPosition(
-  position,
-  {viewport, modelMatrix, coordinateSystem, coordinateOrigin, offsetMode}
-) {
+  position: number[],
+  {
+    viewport,
+    modelMatrix,
+    coordinateSystem,
+    coordinateOrigin,
+    offsetMode
+  }: {
+    viewport: Viewport;
+    modelMatrix?: NumericArray;
+    coordinateSystem: typeof COORDINATE_SYSTEM[keyof typeof COORDINATE_SYSTEM];
+    coordinateOrigin: [number, number, number];
+    offsetMode?: boolean;
+  }
+): [number, number, number] {
   let [x, y, z = 0] = position;
 
   if (modelMatrix) {
@@ -72,7 +109,7 @@ export function getWorldPosition(
 
     case COORDINATE_SYSTEM.METER_OFFSETS:
       return lngLatZToWorldPosition(
-        addMetersToLngLat(coordinateOrigin, [x, y, z]),
+        addMetersToLngLat(coordinateOrigin, [x, y, z]) as [number, number, number],
         viewport,
         offsetMode
       );
@@ -89,25 +126,28 @@ export function getWorldPosition(
  * Equivalent to project_position in project.glsl
  * projects a user supplied position to world position directly with or without
  * a reference coordinate system
- * @param {array} position - [x, y, z]
- * @param {object} params
- * @param {Viewport} params.viewport - the current viewport
- * @param {number} params.coordinateSystem - the reference coordinate system used
- *   align world position
- * @param {array} params.coordinateOrigin - the reference coordinate origin used
- *   to align world position
- * @param {Matrix4} [params.modelMatrix] - the model matrix of the supplied position
- * @param {number} [params.fromCoordinateSystem] - the coordinate system that the
- *   supplied position is in. Default to the same as `coordinateSystem`.
- * @param {array} [params.fromCoordinateOrigin] - the coordinate origin that the
- *   supplied position is in. Default to the same as `coordinateOrigin`.
  */
-export function projectPosition(position, params) {
+export function projectPosition(
+  position: number[],
+  params: {
+    /** The current viewport */
+    viewport: Viewport;
+    /** The reference coordinate system used to align world position */
+    coordinateSystem: typeof COORDINATE_SYSTEM[keyof typeof COORDINATE_SYSTEM];
+    /** The reference coordinate origin used to align world position */
+    coordinateOrigin: [number, number, number];
+    /** The model matrix of the supplied position */
+    modelMatrix?: NumericArray;
+    /** The coordinate system that the supplied position is in. Default to the same as `coordinateSystem`. */
+    fromCoordinateSystem?: typeof COORDINATE_SYSTEM[keyof typeof COORDINATE_SYSTEM];
+    /** The coordinate origin that the supplied position is in. Default to the same as `coordinateOrigin`. */
+    fromCoordinateOrigin?: [number, number, number];
+  }
+): [number, number, number] {
   const {
     viewport,
     coordinateSystem,
     coordinateOrigin,
-    // optional
     modelMatrix,
     fromCoordinateSystem,
     fromCoordinateOrigin

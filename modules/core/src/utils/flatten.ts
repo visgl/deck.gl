@@ -18,6 +18,8 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
+type Nested<T> = (T | Nested<T>)[];
+
 /**
  * Flattens a nested array into a single level array,
  * or a single value into an array with one value
@@ -28,7 +30,10 @@
  *   determine if it should be included (pushed onto) the resulting array.
  * @return Returns the new flattened array (new array or `result` if provided)
  */
-export function flatten(array: any[], filter: (element: any) => boolean = () => true): any[] {
+export function flatten<T>(
+  array: T | Nested<T>,
+  filter: (element: T) => boolean = () => true
+): T[] {
   // Wrap single object in array
   if (!Array.isArray(array)) {
     return filter(array) ? [array] : [];
@@ -38,7 +43,7 @@ export function flatten(array: any[], filter: (element: any) => boolean = () => 
 }
 
 /** Deep flattens an array. Helper to `flatten`, see its parameters */
-function flattenArray(array, filter, result) {
+function flattenArray<T>(array: Nested<T>, filter: (element: T) => boolean, result: T[]): T[] {
   let index = -1;
   while (++index < array.length) {
     const value = array[index];

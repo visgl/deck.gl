@@ -35,11 +35,20 @@ import {projectPosition, getWorldPosition} from '../shaderlib/project/project-fu
 import typedArrayManager from '../utils/typed-array-manager';
 
 import Component from '../lifecycle/component';
-import LayerState from './layer-state';
+import LayerState, {ChangeFlags} from './layer-state';
 
 import {worldToPixels} from '@math.gl/web-mercator';
 
 import {load} from '@loaders.gl/core';
+
+import type {StatefulComponentProps} from '../lifecycle/component';
+import type Attribute from './attribute/attribute';
+import type {LayerProps} from '../types/layer-props';
+import type {Model} from '@luma.gl/engine';
+import type {PickingInfo} from './picking/pick-info';
+import type Viewport from '../viewports/viewport';
+import type {NumericArray} from '../types/types';
+import type {LayerContext} from './layer-manager';
 
 const TRACE_CHANGE_FLAG = 'layer.changeFlag';
 const TRACE_INITIALIZE = 'layer.initialize';
@@ -52,9 +61,11 @@ const MAX_PICKING_COLOR_CACHE_SIZE = 2 ** 24 - 1;
 const EMPTY_ARRAY = Object.freeze([]);
 
 // Only compare the same two viewports once
-const areViewportsEqual = memoize(({oldViewport, viewport}) => {
-  return oldViewport.equals(viewport);
-});
+const areViewportsEqual = memoize(
+  ({oldViewport, viewport}: {oldViewport: Viewport; viewport: Viewport}): boolean => {
+    return oldViewport.equals(viewport);
+  }
+);
 
 let pickingColorCache = new Uint8ClampedArray(0);
 
@@ -142,134 +153,140 @@ const defaultProps = {
   highlightColor: {type: 'accessor', value: [0, 0, 128, 128]}
 };
 
-export default class Layer extends Component {
-  toString() {
-    const className = this.constructor.layerName || this.constructor.name;
+export default abstract class Layer<
+  PropsT extends LayerProps = LayerProps
+> extends Component<PropsT> {
+  static defaultProps = defaultProps;
+  static layerName = 'Layer';
+
+  toString(): string {
+    const className = (this.constructor as typeof Layer).layerName || this.constructor.name;
     return `${className}({id: '${this.props.id}'})`;
   }
 
-  get isComposite() {
-    return false;
-  }
+  // Public API for users
 
-  raiseError(error, message) {
-    if (message) {
-      error.message = `${message}: ${error.message}`;
-    }
-    if (!this.props.onError?.(error)) {
-      this.context?.onError?.(error, this);
-    }
-  }
+  /** Projects a point with current view state from the current layer's coordinate system to screen */
+  project(xyz: number[]): number[] {
+    const viewport = this.internalState?.viewport || (this.context?.viewport as Viewport);
 
-  // Public API
-
-  // Updates selected state members and marks the object for redraw
-  setState(updateObject) {
-    this.setChangeFlags({stateChanged: true});
-    Object.assign(this.state, updateObject);
-    this.setNeedsRedraw();
-  }
-
-  // Sets the redraw flag for this layer, will trigger a redraw next animation frame
-  setNeedsRedraw(redraw = true) {
-    if (this.internalState) {
-      this.internalState.needsRedraw = redraw;
-    }
-  }
-
-  // This layer needs a deep update
-  setNeedsUpdate() {
-    this.context.layerManager.setNeedsUpdate(String(this));
-    this.internalState.needsUpdate = true;
-  }
-
-  // Checks state of attributes and model
-  getNeedsRedraw(opts = {clearRedrawFlags: false}) {
-    return this._getNeedsRedraw(opts);
-  }
-
-  // Checks if layer attributes needs updating
-  needsUpdate() {
-    // Call subclass lifecycle method
-    return (
-      this.internalState.needsUpdate ||
-      this.hasUniformTransition() ||
-      this.shouldUpdateState(this._getUpdateParams())
-    );
-    // End lifecycle method
-  }
-
-  hasUniformTransition() {
-    return this.internalState.uniformTransitions.active;
-  }
-
-  get isLoaded() {
-    return this.internalState && !this.internalState.isAsyncPropLoading();
-  }
-
-  get wrapLongitude() {
-    return this.props.wrapLongitude;
-  }
-
-  // Returns true if the layer is pickable and visible.
-  isPickable() {
-    return this.props.pickable && this.props.visible;
-  }
-
-  // Return an array of models used by this layer, can be overriden by layer subclass
-  getModels() {
-    return this.state && (this.state.models || (this.state.model ? [this.state.model] : []));
-  }
-
-  getAttributeManager() {
-    return this.internalState && this.internalState.attributeManager;
-  }
-
-  // Returns the most recent layer that matched to this state
-  // (When reacting to an async event, this layer may no longer be the latest)
-  getCurrentLayer() {
-    return this.internalState && this.internalState.layer;
-  }
-
-  // Returns the default parse options for async props
-  getLoadOptions() {
-    return this.props.loadOptions;
-  }
-
-  // PROJECTION METHODS
-
-  // Projects a point with current map state (lat, lon, zoom, pitch, bearing)
-  // From the current layer's coordinate system to screen
-  project(xyz) {
-    const {viewport} = this.context;
     const worldPosition = getWorldPosition(xyz, {
       viewport,
       modelMatrix: this.props.modelMatrix,
+      // @ts-ignore coordinateOrigin cannot be undefined after merging with default prop
       coordinateOrigin: this.props.coordinateOrigin,
+      // @ts-ignore coordinateSystem cannot be undefined after merging with default prop
       coordinateSystem: this.props.coordinateSystem
     });
     const [x, y, z] = worldToPixels(worldPosition, viewport.pixelProjectionMatrix);
     return xyz.length === 2 ? [x, y] : [x, y, z];
   }
 
-  // Note: this does not reverse `project`.
-  // Always unprojects to the viewport's coordinate system
-  unproject(xy) {
-    const {viewport} = this.context;
+  /** Unprojects a screen pixel to the current view's default coordinate system
+      Note: this does not reverse `project`. */
+  unproject(xy: number[]): number[] {
+    const viewport = this.internalState?.viewport || (this.context?.viewport as Viewport);
     return viewport.unproject(xy);
   }
 
-  projectPosition(xyz, params) {
+  /** Projects a point with current view state from the current layer's coordinate system to the world space */
+  projectPosition(
+    xyz: number[],
+    params?: {
+      /** The viewport to use */
+      viewport?: Viewport;
+      /** The coordinate system that the supplied position is in. Default to the same as `coordinateSystem`. */
+      fromCoordinateSystem?: typeof COORDINATE_SYSTEM[keyof typeof COORDINATE_SYSTEM];
+      /** The coordinate origin that the supplied position is in. Default to the same as `coordinateOrigin`. */
+      fromCoordinateOrigin?: [number, number, number];
+    }
+  ): [number, number, number] {
+    const viewport = this.internalState?.viewport || (this.context?.viewport as Viewport);
+
     return projectPosition(xyz, {
-      viewport: this.context.viewport,
+      viewport,
       modelMatrix: this.props.modelMatrix,
+      // @ts-ignore coordinateOrigin cannot be undefined after merging with default prop
       coordinateOrigin: this.props.coordinateOrigin,
+      // @ts-ignore coordinateSystem cannot be undefined after merging with default prop
       coordinateSystem: this.props.coordinateSystem,
       ...params
     });
   }
 
-  use64bitPositions() {
+  // Public API for custom layer implementation
+
+  /** `true` if this layer renders other layers */
+  get isComposite(): boolean {
+    return false;
+  }
+
+  /** Updates selected state members and marks the layer for redraw */
+  setState(partialState: any): void {
+    this.setChangeFlags({stateChanged: true});
+    Object.assign(this.state, partialState);
+    this.setNeedsRedraw();
+  }
+
+  /** Sets the redraw flag for this layer, will trigger a redraw next animation frame */
+  setNeedsRedraw(): void {
+    if (this.internalState) {
+      this.internalState.needsRedraw = true;
+    }
+  }
+
+  /** Mark this layer as needs a deep update */
+  setNeedsUpdate() {
+    if (this.context && this.internalState) {
+      this.context.layerManager.setNeedsUpdate(String(this));
+      this.internalState.needsUpdate = true;
+    }
+  }
+
+  /** Returns true if all async resources are loaded */
+  get isLoaded(): boolean {
+    return this.internalState ? !this.internalState.isAsyncPropLoading() : false;
+  }
+
+  /** Returns true if using shader-based WGS84 longitude wrapping */
+  get wrapLongitude(): boolean {
+    return this.props.wrapLongitude || false;
+  }
+
+  /** Returns true if the layer is visible in the picking pass */
+  isPickable(): boolean {
+    return (this.props.pickable && this.props.visible) || false;
+  }
+
+  /** Returns an array of models used by this layer, can be overriden by layer subclass */
+  getModels(): Model[] {
+    return this.state && (this.state.models || (this.state.model ? [this.state.model] : []));
+  }
+
+  /** Update shader module parameters */
+  setModuleParameters(moduleParameters: any): void {
+    for (const model of this.getModels()) {
+      model.updateModuleSettings(moduleParameters);
+    }
+  }
+
+  /** Returns the attribute manager of this layer */
+  getAttributeManager(): AttributeManager | null {
+    return this.internalState && this.internalState.attributeManager;
+  }
+
+  /** Returns the most recent layer that matched to this state
+    (When reacting to an async event, this layer may no longer be the latest) */
+  getCurrentLayer(): Layer<PropsT> | null {
+    return this.internalState && this.internalState.layer;
+  }
+
+  /** Returns the default parse options for async props */
+  getLoadOptions(): any {
+    return this.props.loadOptions;
+  }
+
+  use64bitPositions(): boolean {
     const {coordinateSystem} = this.props;
     return (
       coordinateSystem === COORDINATE_SYSTEM.DEFAULT ||
@@ -279,16 +296,16 @@ export default class Layer extends Component {
   }
 
   // Event handling
-  onHover(info, pickingEvent) {
+  onHover(info: PickingInfo, pickingEvent): boolean {
     if (this.props.onHover) {
-      return this.props.onHover(info, pickingEvent);
+      return this.props.onHover(info, pickingEvent) || false;
     }
     return false;
   }
 
-  onClick(info, pickingEvent) {
+  onClick(info: PickingInfo, pickingEvent): boolean {
     if (this.props.onClick) {
-      return this.props.onClick(info, pickingEvent);
+      return this.props.onClick(info, pickingEvent) || false;
     }
     return false;
   }
@@ -302,7 +319,7 @@ export default class Layer extends Component {
 
   // Returns the picking color that doesn't match any subfeature
   // Use if some graphics do not belong to any pickable subfeature
-  encodePickingColor(i, target = []) {
+  encodePickingColor(i, target: number[] = []): number[] {
     target[0] = (i + 1) & 255;
     target[1] = ((i + 1) >> 8) & 255;
     target[2] = (((i + 1) >> 8) >> 8) & 255;
@@ -320,43 +337,87 @@ export default class Layer extends Component {
     return index;
   }
 
-  // //////////////////////////////////////////////////
-  // LIFECYCLE METHODS, overridden by the layer subclasses
+  /** Deduces number of instances. Intention is to support:
+    - Explicit setting of numInstances
+    - Auto-deduction for ES6 containers that define a size member
+    - Auto-deduction for Classic Arrays via the built-in length attribute
+    - Auto-deduction via arrays */
+  getNumInstances(props: PropsT = this.props): number {
+    // First Check if app has provided an explicit value
+    if (props.numInstances !== undefined) {
+      return props.numInstances;
+    }
 
-  // Called once to set up the initial state
-  // App can create WebGL resources
-  initializeState() {
-    throw new Error(`Layer ${this} has not defined initializeState`);
+    // Second check if the layer has set its own value
+    if (this.state && this.state.numInstances !== undefined) {
+      return this.state.numInstances;
+    }
+
+    // Use container library to get a count for any ES6 container or object
+    return count(props.data);
   }
 
-  getShaders(shaders) {
-    for (const extension of this.props.extensions) {
-      shaders = mergeShaders(shaders, extension.getShaders.call(this, extension));
+  /** Buffer layout describes how many attribute values are packed for each data object
+      The default (null) is one value each object.
+      Some data formats (e.g. paths, polygons) have various length. Their buffer layout
+      is in the form of [L0, L1, L2, ...] */
+  getStartIndices(props: PropsT = this.props): NumericArray | null {
+    // First Check if startIndices is provided as an explicit value
+    if (props.startIndices !== undefined) {
+      return props.startIndices;
     }
-    return shaders;
+
+    // Second check if the layer has set its own value
+    if (this.state && this.state.startIndices) {
+      return this.state.startIndices;
+    }
+
+    return null;
   }
 
   // Default implementation
   // Sublayers chould override this method to provide an accurate calculation of the bounds
-  getBounds() {
+  getBounds(): [number[], number[]] | null {
     const attributeManager = this.getAttributeManager();
     if (!attributeManager) return null;
     const {positions, instancePositions} = attributeManager.attributes;
     return (positions || instancePositions)?.getBounds();
   }
 
-  // Let's layer control if updateState should be called
-  shouldUpdateState({oldProps, props, context, changeFlags}) {
-    return changeFlags.propsOrDataChanged;
+  // / LIFECYCLE METHODS - overridden by the layer subclasses
+
+  /** Called once to set up the initial state. Layers can create WebGL resources here. */
+  abstract initializeState(context: LayerContext): void;
+
+  getShaders(shaders: any): any {
+    // @ts-ignore (TS2532) extensions is always defined after merging with default props
+    for (const extension of this.props.extensions) {
+      shaders = mergeShaders(shaders, extension.getShaders.call(this, extension));
+    }
+    return shaders;
   }
 
-  // Default implementation, all attributes will be invalidated and updated
-  // when data changes
+  /** Controls if updateState should be called. By default returns true if any prop has changed */
+  shouldUpdateState(params: {
+    oldProps: PropsT;
+    props: PropsT;
+    context: any;
+    changeFlags: ChangeFlags;
+  }): boolean {
+    return params.changeFlags.propsOrDataChanged;
+  }
+
   /* eslint-disable-next-line complexity */
-  updateState({oldProps, props, context, changeFlags}) {
+  /** Default implementation, all attributes will be invalidated and updated when data changes */
+  updateState(params: {
+    oldProps: PropsT;
+    props: PropsT;
+    context: any;
+    changeFlags: ChangeFlags;
+  }): void {
     const attributeManager = this.getAttributeManager();
-    if (changeFlags.dataChanged && attributeManager) {
-      const {dataChanged} = changeFlags;
+    const {dataChanged} = params.changeFlags;
+    if (dataChanged && attributeManager) {
       if (Array.isArray(dataChanged)) {
         // is partial update
         for (const dataRange of dataChanged) {
@@ -367,6 +428,7 @@ export default class Layer extends Component {
       }
     }
 
+    const {props, oldProps} = params;
     const neededPickingBuffer =
       Number.isInteger(oldProps.highlightedObjectIndex) || oldProps.pickable;
     const needPickingBuffer = Number.isInteger(props.highlightedObjectIndex) || props.pickable;
@@ -386,9 +448,8 @@ export default class Layer extends Component {
     }
   }
 
-  // Called once when layer is no longer matched and state will be discarded
-  // App can destroy WebGL resources here
-  finalizeState() {
+  /** Called once when layer is no longer matched and state will be discarded. Layers can destroy WebGL resources here. */
+  finalizeState(context: LayerContext): void {
     for (const model of this.getModels()) {
       model.delete();
     }
@@ -396,9 +457,13 @@ export default class Layer extends Component {
     if (attributeManager) {
       attributeManager.finalize();
     }
-    this.context.resourceManager.unsubscribe({consumerId: this.id});
-    this.internalState.uniformTransitions.clear();
-    this.internalState.finalize();
+    if (this.context) {
+      this.context.resourceManager.unsubscribe({consumerId: this.id});
+    }
+    if (this.internalState) {
+      this.internalState.uniformTransitions.clear();
+      this.internalState.finalize();
+    }
   }
 
   // If state has a model, draw it with supplied uniforms
@@ -424,10 +489,55 @@ export default class Layer extends Component {
   }
 
   // END LIFECYCLE METHODS
-  // //////////////////////////////////////////////////
 
-  // INTERNAL METHODS
-  activateViewport(viewport) {
+  // / INTERNAL METHODS - called by LayerManager, DeckRenderer and DeckPicker
+
+  /** Propagate an error event through the system */
+  raiseError(error: Error, message: string): void {
+    if (message) {
+      error.message = `${message}: ${error.message}`;
+    }
+    if (!this.props.onError?.(error)) {
+      this.context?.onError?.(error, this);
+    }
+  }
+
+  /** Checks if this layer needs redraw */
+  getNeedsRedraw(
+    opts: {
+      /** Reset redraw flags to false after the check */
+      clearRedrawFlags: boolean;
+    } = {clearRedrawFlags: false}
+  ): string | false {
+    return this._getNeedsRedraw(opts);
+  }
+
+  /** Checks if this layer needs a deep update */
+  needsUpdate(): boolean {
+    if (!this.internalState) {
+      return false;
+    }
+
+    // Call subclass lifecycle method
+    return (
+      this.internalState.needsUpdate ||
+      this.hasUniformTransition() ||
+      this.shouldUpdateState(this._getUpdateParams())
+    );
+    // End lifecycle method
+  }
+
+  /** Checks if this layer has ongoing uniform transition */
+  hasUniformTransition(): boolean {
+    return this.internalState?.uniformTransitions.active || false;
+  }
+
+  /** Called when this layer is rendered into the given viewport */
+  activateViewport(viewport: Viewport): void {
+    if (!this.internalState) {
+      return;
+    }
+
     const oldViewport = this.internalState.viewport;
     this.internalState.viewport = viewport;
 
@@ -447,8 +557,8 @@ export default class Layer extends Component {
     }
   }
 
-  // Default implementation of attribute invalidation, can be redefined
-  invalidateAttribute(name = 'all', diffReason = '') {
+  /** Default implementation of attribute invalidation, can be redefined */
+  protected invalidateAttribute(name = 'all'): void {
     const attributeManager = this.getAttributeManager();
     if (!attributeManager) {
       return;
@@ -461,14 +571,15 @@ export default class Layer extends Component {
     }
   }
 
-  updateAttributes(changedAttributes) {
+  /** Send updated attributes to the WebGL model */
+  protected updateAttributes(changedAttributes: {[id: string]: Attribute}) {
     for (const model of this.getModels()) {
       this._setModelAttributes(model, changedAttributes);
     }
   }
 
-  // Calls attribute manager to update any WebGL attributes
-  _updateAttributes(props) {
+  /** Recalculate any attributes if needed */
+  protected _updateAttributes(props: PropsT): void {
     const attributeManager = this.getAttributeManager();
     if (!attributeManager) {
       return;
@@ -484,26 +595,26 @@ export default class Layer extends Component {
       startIndices,
       props,
       transitions: props.transitions,
+      // @ts-ignore (TS2339) property attribute is not present on some acceptable data types
       buffers: props.data.attributes,
-      context: this,
-      // Don't worry about non-attribute props
-      ignoreUnknownAttributes: true
+      context: this
     });
 
     const changedAttributes = attributeManager.getChangedAttributes({clearChangedFlags: true});
     this.updateAttributes(changedAttributes);
   }
 
-  // Update attribute transitions. This is called in drawLayer, no model updates required.
-  _updateAttributeTransition() {
+  /** Update attribute transitions. This is called in drawLayer, no model updates required. */
+  private _updateAttributeTransition() {
     const attributeManager = this.getAttributeManager();
     if (attributeManager) {
       attributeManager.updateTransition();
     }
   }
 
-  // Update uniform (prop) transitions. This is called in updateState, may result in model updates.
-  _updateUniformTransition() {
+  /** Update uniform (prop) transitions. This is called in updateState, may result in model updates. */
+  private _updateUniformTransition(): StatefulComponentProps<PropsT> {
+    // @ts-ignore (TS2339) internalState is alwasy defined when this method is called
     const {uniformTransitions} = this.internalState;
     if (uniformTransitions.active) {
       // clone props
@@ -517,7 +628,11 @@ export default class Layer extends Component {
     return this.props;
   }
 
-  calculateInstancePickingColors(attribute, {numInstances}) {
+  /** Updater for the automatically populated instancePickingColors attribute */
+  protected calculateInstancePickingColors(
+    attribute: Attribute,
+    {numInstances}: {numInstances: number}
+  ) {
     if (attribute.constant) {
       return;
     }
@@ -527,6 +642,7 @@ export default class Layer extends Component {
     const cacheSize = Math.floor(pickingColorCache.length / 3);
 
     // Record when using the picking buffer cache, so that layers can always point at the most recently allocated cache
+    // @ts-ignore (TS2531) internalState is always defined when this method is called
     this.internalState.usesPickingColorCache = true;
 
     if (cacheSize < numInstances) {
@@ -556,9 +672,17 @@ export default class Layer extends Component {
     attribute.value = pickingColorCache.subarray(0, numInstances * 3);
   }
 
-  _setModelAttributes(model, changedAttributes) {
+  /** Apply changed attributes to  */
+  protected _setModelAttributes(
+    model: Model,
+    changedAttributes: {
+      [id: string]: Attribute;
+    }
+  ) {
     const attributeManager = this.getAttributeManager();
+    // @ts-ignore luma.gl type issue
     const excludeAttributes = model.userData.excludeAttributes || {};
+    // @ts-ignore (TS2531) this method is only called internally with attributeManager defined
     const shaderAttributes = attributeManager.getShaderAttributes(
       changedAttributes,
       excludeAttributes
@@ -567,15 +691,20 @@ export default class Layer extends Component {
     model.setAttributes(shaderAttributes);
   }
 
-  // Sets the picking color at the specified index to null picking color. Used for multi-depth picking.
-  // This method may be overriden by layer implementations
-  disablePickingIndex(objectIndex) {
+  /** (Internal) Sets the picking color at the specified index to null picking color. Used for multi-depth picking.
+     This method may be overriden by layer implementations */
+  disablePickingIndex(objectIndex: number): void {
     this._disablePickingIndex(objectIndex);
   }
 
-  _disablePickingIndex(objectIndex) {
+  // TODO - simplify subclassing interface
+  protected _disablePickingIndex(objectIndex: number): void {
+    // @ts-ignore (TS2531) this method is only called internally with attributeManager defined
     const {pickingColors, instancePickingColors} = this.getAttributeManager().attributes;
     const colors = pickingColors || instancePickingColors;
+    if (!colors) {
+      return;
+    }
 
     const start = colors.getVertexOffset(objectIndex);
     const end = colors.getVertexOffset(objectIndex + 1);
@@ -587,74 +716,83 @@ export default class Layer extends Component {
     });
   }
 
-  restorePickingColors() {
+  /** (Internal) Re-enable all picking indices after multi-depth picking */
+  restorePickingColors(): void {
+    // @ts-ignore (TS2531) this method is only called internally with attributeManager defined
     const {pickingColors, instancePickingColors} = this.getAttributeManager().attributes;
     const colors = pickingColors || instancePickingColors;
+    if (!colors) {
+      return;
+    }
     // The picking color cache may have been freed and then reallocated. This ensures we read from the currently allocated cache.
     if (
+      // @ts-ignore (TS2531) this method is only called internally with internalState defined
       this.internalState.usesPickingColorCache &&
-      colors.value.buffer !== pickingColorCache.buffer
+      (colors.value as Uint8ClampedArray).buffer !== pickingColorCache.buffer
     ) {
-      colors.value = pickingColorCache.subarray(0, colors.value.length);
+      colors.value = pickingColorCache.subarray(0, (colors.value as Uint8ClampedArray).length);
     }
     colors.updateSubBuffer({startOffset: 0});
   }
 
-  // Deduces numer of instances. Intention is to support:
-  // - Explicit setting of numInstances
-  // - Auto-deduction for ES6 containers that define a size member
-  // - Auto-deduction for Classic Arrays via the built-in length attribute
-  // - Auto-deduction via arrays
-  getNumInstances(props) {
-    props = props || this.props;
-
-    // First Check if app has provided an explicit value
-    if (props.numInstances !== undefined) {
-      return props.numInstances;
-    }
-
-    // Second check if the layer has set its own value
-    if (this.state && this.state.numInstances !== undefined) {
-      return this.state.numInstances;
-    }
-
-    // Use container library to get a count for any ES6 container or object
-    return count(props.data);
-  }
-
-  // Buffer layout describes how many attribute values are packed for each data object
-  // The default (null) is one value each object.
-  // Some data formats (e.g. paths, polygons) have various length. Their buffer layout
-  //  is in the form of [L0, L1, L2, ...]
-  getStartIndices(props) {
-    props = props || this.props;
-
-    // First Check if startIndices is provided as an explicit value
-    if (props.startIndices !== undefined) {
-      return props.startIndices;
-    }
-
-    // Second check if the layer has set its own value
-    if (this.state && this.state.startIndices) {
-      return this.state.startIndices;
-    }
-
-    return null;
-  }
-
-  // LAYER MANAGER API
-  // Should only be called by the deck.gl LayerManager class
-
-  // Called by layer manager when a new layer is found
   /* eslint-disable max-statements */
+  /* (Internal) Called by layer manager when a new layer is found */
   _initialize() {
+    assert(!this.internalState && !this.state); // finalized layer cannot be reused
+    assert(Number.isFinite(this.props.coordinateSystem)); // invalid coordinateSystem
+
     debug(TRACE_INITIALIZE, this);
 
-    this._initState();
+    const attributeManager = this._getAttributeManager();
+
+    if (attributeManager) {
+      // All instanced layers get instancePickingColors attribute by default
+      // Their shaders can use it to render a picking scene
+      // TODO - this slightly slows down non instanced layers
+      attributeManager.addInstanced({
+        instancePickingColors: {
+          type: GL.UNSIGNED_BYTE,
+          size: 3,
+          noAlloc: true,
+          // Updaters are always called with `this` pointing to the layer
+          // eslint-disable-next-line @typescript-eslint/unbound-method
+          update: this.calculateInstancePickingColors
+        }
+      });
+    }
+
+    this.internalState = new LayerState<PropsT>({
+      attributeManager,
+      layer: this
+    });
+    this._clearChangeFlags(); // populate this.internalState.changeFlags
+
+    this.state = {};
+    // for backwards compatibility with older layers
+    // TODO - remove in next release
+    /* eslint-disable accessor-pairs */
+    Object.defineProperty(this.state, 'attributeManager', {
+      get: () => {
+        log.deprecated('layer.state.attributeManager', 'layer.getAttributeManager()');
+        return attributeManager;
+      }
+    });
+    /* eslint-enable accessor-pairs */
+
+    this.internalState.layer = this;
+    this.internalState.uniformTransitions = new UniformTransitionManager(
+      (this.context as LayerContext).timeline
+    );
+    this.internalState.onAsyncPropUpdated = this._onAsyncPropUpdated.bind(this);
+
+    // Ensure any async props are updated
+    this.internalState.setAsyncProps(this.props);
 
     // Call subclass lifecycle methods
-    this.initializeState(this.context);
+    this.initializeState(this.context as LayerContext);
+
     // Initialize extensions
+    // @ts-ignore (TS2532) extensions is always defined after merging with default props
     for (const extension of this.props.extensions) {
       extension.initializeState.call(this, this.context, extension);
     }
@@ -662,38 +800,62 @@ export default class Layer extends Component {
 
     // initializeState callback tends to clear state
     this.setChangeFlags({
-      dataChanged: true,
-      propsChanged: true,
+      dataChanged: 'init',
+      propsChanged: 'init',
       viewportChanged: true,
       extensionsChanged: true
     });
 
-    this._updateState();
+    this._update();
   }
 
-  // Called by layer manager
-  // if this layer is new (not matched with an existing layer) oldProps will be empty object
-  _update() {
+  /** (Internal) Called by layer manager to transfer state from an old layer */
+  _transferState(oldLayer: Layer<PropsT>): void {
+    debug(TRACE_MATCHED, this, this === oldLayer);
+
+    const {state, internalState} = oldLayer;
+
+    if (this === oldLayer) {
+      return;
+    }
+
+    // Move internalState
+    this.internalState = internalState as LayerState<PropsT>;
+    this.internalState.layer = this;
+
+    // Move state
+    this.state = state;
+    // We keep the state ref on old layers to support async actions
+    // oldLayer.state = null;
+
+    // Ensure any async props are updated
+    this.internalState.setAsyncProps(this.props);
+
+    this._diffProps(this.props, this.internalState.getOldProps() as PropsT);
+  }
+
+  /** (Internal) Called by layer manager when a new layer is added or an existing layer is matched with a new instance */
+  _update(): void {
     // Call subclass lifecycle method
     const stateNeedsUpdate = this.needsUpdate();
     // End lifecycle method
     debug(TRACE_UPDATE, this, stateNeedsUpdate);
 
-    if (stateNeedsUpdate) {
-      this._updateState();
+    if (!stateNeedsUpdate) {
+      return;
     }
-  }
 
-  // Common code for _initialize and _update
-  _updateState() {
     const currentProps = this.props;
-    const currentViewport = this.context.viewport;
+    const context = this.context as LayerContext;
+    const internalState = this.internalState as LayerState<PropsT>;
+
+    const currentViewport = context.viewport;
     const propsInTransition = this._updateUniformTransition();
-    this.internalState.propsInTransition = propsInTransition;
+    internalState.propsInTransition = propsInTransition;
     // Overwrite this.context.viewport during update to use the last activated viewport on this layer
     // In multi-view applications, a layer may only be drawn in one of the views
     // Which would make the "active" viewport different from the shared context
-    this.context.viewport = this.internalState.viewport || currentViewport;
+    context.viewport = internalState.viewport || currentViewport;
     // Overwrite this.props during update to use in-transition prop values
     this.props = propsInTransition;
 
@@ -702,7 +864,7 @@ export default class Layer extends Component {
       const oldModels = this.getModels();
 
       // Safely call subclass lifecycle methods
-      if (this.context.gl) {
+      if (context.gl) {
         this.updateState(updateParams);
       } else {
         try {
@@ -712,61 +874,59 @@ export default class Layer extends Component {
         }
       }
       // Execute extension updates
+      // @ts-ignore (TS2532) extensions is always defined after merging with default props
       for (const extension of this.props.extensions) {
         extension.updateState.call(this, updateParams, extension);
       }
 
       const modelChanged = this.getModels()[0] !== oldModels[0];
-      this._updateModules(updateParams, modelChanged);
+      this._postUpdate(updateParams, modelChanged);
       // End subclass lifecycle methods
-
-      if (this.isComposite) {
-        // Render or update previously rendered sublayers
-        this._renderLayers(updateParams);
-      } else {
-        this.setNeedsRedraw();
-        // Add any subclass attributes
-        this._updateAttributes(this.props);
-
-        // Note: Automatic instance count update only works for single layers
-        if (this.state.model) {
-          this.state.model.setInstanceCount(this.getNumInstances());
-        }
-      }
     } finally {
       // Restore shared context
-      this.context.viewport = currentViewport;
+      context.viewport = currentViewport;
       this.props = currentProps;
-      this.clearChangeFlags();
-      this.internalState.needsUpdate = false;
-      this.internalState.resetOldProps();
+      this._clearChangeFlags();
+      internalState.needsUpdate = false;
+      internalState.resetOldProps();
     }
   }
   /* eslint-enable max-statements */
 
-  // Called by manager when layer is about to be disposed
-  // Note: not guaranteed to be called on application shutdown
-  _finalize() {
+  /** (Internal) Called by manager when layer is about to be disposed 
+      Note: not guaranteed to be called on application shutdown */
+  _finalize(): void {
     debug(TRACE_FINALIZE, this);
 
     // Call subclass lifecycle method
-    this.finalizeState(this.context);
+    this.finalizeState(this.context as LayerContext);
     // Finalize extensions
+    // @ts-ignore (TS2532) extensions is always defined after merging with default props
     for (const extension of this.props.extensions) {
       extension.finalizeState.call(this, extension);
     }
   }
 
   // Calculates uniforms
-  drawLayer({moduleParameters = null, uniforms = {}, parameters = {}}) {
+  _drawLayer({
+    moduleParameters = null,
+    uniforms = {},
+    parameters = {}
+  }: {
+    moduleParameters: any;
+    uniforms: any;
+    parameters: any;
+  }): void {
     this._updateAttributeTransition();
 
     const currentProps = this.props;
+    const context = this.context as LayerContext;
     // Overwrite this.props during redraw to use in-transition prop values
     // `internalState.propsInTransition` could be missing if `updateState` failed
+    // @ts-ignore (TS2339) internalState is alwasy defined when this method is called
     this.props = this.internalState.propsInTransition || currentProps;
 
-    const {opacity} = this.props;
+    const opacity = this.props.opacity as number;
     // apply gamma to opacity to make it visually "linear"
     uniforms.opacity = Math.pow(opacity, 1 / 2.2);
 
@@ -781,13 +941,14 @@ export default class Layer extends Component {
       const {getPolygonOffset} = this.props;
       const offsets = (getPolygonOffset && getPolygonOffset(uniforms)) || [0, 0];
 
-      setParameters(this.context.gl, {polygonOffset: offsets});
+      setParameters(context.gl, {polygonOffset: offsets});
 
       // Call subclass lifecycle method
-      withParameters(this.context.gl, parameters, () => {
-        const opts = {moduleParameters, uniforms, parameters, context: this.context};
+      withParameters(context.gl, parameters, () => {
+        const opts = {moduleParameters, uniforms, parameters, context};
 
         // extensions
+        // @ts-ignore (TS2532) extensions is always defined after merging with default props
         for (const extension of this.props.extensions) {
           extension.draw.call(this, opts, extension);
         }
@@ -802,13 +963,17 @@ export default class Layer extends Component {
   }
 
   // Helper methods
-  getChangeFlags() {
-    return this.internalState.changeFlags;
+  /** Returns the current change flags */
+  getChangeFlags(): ChangeFlags | undefined {
+    return this.internalState?.changeFlags;
   }
 
-  // Dirty some change flags, will be handled by updateLayer
   /* eslint-disable complexity */
-  setChangeFlags(flags) {
+  /** Dirty some change flags, will be handled by updateLayer */
+  setChangeFlags(flags: Partial<ChangeFlags>): void {
+    if (!this.internalState) {
+      return;
+    }
     const {changeFlags} = this.internalState;
 
     /* eslint-disable no-fallthrough, max-depth */
@@ -818,10 +983,13 @@ export default class Layer extends Component {
         switch (key) {
           case 'dataChanged':
             // changeFlags.dataChanged may be `false`, a string (reason) or an array of ranges
-            if (Array.isArray(changeFlags[key])) {
-              changeFlags[key] = Array.isArray(flags[key])
-                ? changeFlags[key].concat(flags[key])
-                : flags[key];
+            const dataChangedReason = flags[key];
+            const prevDataChangedReason = changeFlags[key];
+            if (dataChangedReason && Array.isArray(prevDataChangedReason)) {
+              // Merge partial updates
+              changeFlags.dataChanged = Array.isArray(dataChangedReason)
+                ? prevDataChangedReason.concat(dataChangedReason)
+                : dataChangedReason;
               flagChanged = true;
             }
 
@@ -839,38 +1007,37 @@ export default class Layer extends Component {
     /* eslint-enable no-fallthrough, max-depth */
 
     // Update composite flags
-    const propsOrDataChanged =
+    const propsOrDataChanged = Boolean(
       changeFlags.dataChanged ||
-      changeFlags.updateTriggersChanged ||
-      changeFlags.propsChanged ||
-      changeFlags.extensionsChanged;
+        changeFlags.updateTriggersChanged ||
+        changeFlags.propsChanged ||
+        changeFlags.extensionsChanged
+    );
     changeFlags.propsOrDataChanged = propsOrDataChanged;
     changeFlags.somethingChanged =
-      propsOrDataChanged || flags.viewportChanged || flags.stateChanged;
+      propsOrDataChanged || changeFlags.viewportChanged || changeFlags.stateChanged;
   }
   /* eslint-enable complexity */
 
-  // Clear all changeFlags, typically after an update
-  clearChangeFlags() {
+  /** Clear all changeFlags, typically after an update */
+  private _clearChangeFlags(): void {
+    // @ts-ignore TS2531 this method can only be called internally with internalState assigned
     this.internalState.changeFlags = {
-      // Primary changeFlags, can be strings stating reason for change
       dataChanged: false,
       propsChanged: false,
       updateTriggersChanged: false,
       viewportChanged: false,
       stateChanged: false,
       extensionsChanged: false,
-
-      // Derived changeFlags
       propsOrDataChanged: false,
       somethingChanged: false
     };
   }
 
-  // Compares the layers props with old props from a matched older layer
-  // and extracts change flags that describe what has change so that state
-  // can be update correctly with minimal effort
-  diffProps(newProps, oldProps) {
+  /** Compares the layers props with old props from a matched older layer
+      and extracts change flags that describe what has change so that state
+      can be update correctly with minimal effort */
+  private _diffProps(newProps: PropsT, oldProps: PropsT) {
     const changeFlags = diffProps(newProps, oldProps);
 
     // iterate over changedTriggers
@@ -886,11 +1053,12 @@ export default class Layer extends Component {
     if (changeFlags.transitionsChanged) {
       for (const key in changeFlags.transitionsChanged) {
         // prop changed and transition is enabled
+        // @ts-ignore (TS2531) internalState is always defined when this method is called
         this.internalState.uniformTransitions.add(
           key,
           oldProps[key],
           newProps[key],
-          newProps.transitions[key]
+          newProps.transitions?.[key]
         );
       }
     }
@@ -898,26 +1066,24 @@ export default class Layer extends Component {
     return this.setChangeFlags(changeFlags);
   }
 
-  // Called by layer manager to validate props (in development)
-  validateProps() {
+  /** (Internal) called by layer manager to perform extra props validation (in development only) */
+  validateProps(): void {
     validateProps(this.props);
   }
 
-  setModuleParameters(moduleParameters) {
-    for (const model of this.getModels()) {
-      model.updateModuleSettings(moduleParameters);
-    }
-  }
-
-  updateAutoHighlight(info) {
+  /** (Internal) Called by deck picker when the hovered object changes to update the auto highlight */
+  updateAutoHighlight(info: PickingInfo): void {
     if (this.props.autoHighlight && !Number.isInteger(this.props.highlightedObjectIndex)) {
       this._updateAutoHighlight(info);
     }
   }
 
-  // May be overriden by classes
-  _updateAutoHighlight(info) {
-    const pickingModuleParameters = {
+  // May be overriden by subclasses
+
+  // TODO - simplify subclassing interface
+  /** Update picking module parameters to highlight the hovered object */
+  protected _updateAutoHighlight(info: PickingInfo): void {
+    const pickingModuleParameters: any = {
       pickingSelectedColor: info.picked ? info.color : null
     };
     const {highlightColor} = this.props;
@@ -929,9 +1095,41 @@ export default class Layer extends Component {
     this.setNeedsRedraw();
   }
 
-  // PRIVATE METHODS
-  _updateModules({props, oldProps}, forceUpdate) {
-    // Picking module parameters
+  /** Create new attribute manager */
+  protected _getAttributeManager(): AttributeManager | null {
+    return (
+      this.context &&
+      new AttributeManager(this.context.gl, {
+        id: this.props.id,
+        stats: this.context.stats,
+        timeline: this.context.timeline
+      })
+    );
+  }
+
+  // Private methods
+
+  /** Called after updateState to perform common tasks */
+  protected _postUpdate(
+    updateParams: {
+      props: PropsT;
+      oldProps: PropsT;
+      context: LayerContext;
+      changeFlags: ChangeFlags;
+    },
+    forceUpdate: boolean
+  ) {
+    const {props, oldProps} = updateParams;
+
+    this.setNeedsRedraw();
+    // Check if attributes need recalculation
+    this._updateAttributes(props);
+
+    // Note: Automatic instance count update only works for single layers
+    const {model} = this.state as any;
+    model?.setInstanceCount(this.getNumInstances());
+
+    // Set picking module parameters to match props
     const {autoHighlight, highlightedObjectIndex, highlightColor} = props;
     if (
       forceUpdate ||
@@ -939,7 +1137,7 @@ export default class Layer extends Component {
       oldProps.highlightedObjectIndex !== highlightedObjectIndex ||
       oldProps.highlightColor !== highlightColor
     ) {
-      const parameters = {};
+      const parameters: any = {};
       if (!autoHighlight) {
         parameters.pickingSelectedColor = null;
       }
@@ -950,127 +1148,57 @@ export default class Layer extends Component {
       // highlightedObjectIndex will overwrite any settings from auto highlighting.
       if (Number.isInteger(highlightedObjectIndex)) {
         parameters.pickingSelectedColor =
-          highlightedObjectIndex >= 0 ? this.encodePickingColor(highlightedObjectIndex) : null;
+          Number.isFinite(highlightedObjectIndex) && (highlightedObjectIndex as number) >= 0
+            ? this.encodePickingColor(highlightedObjectIndex)
+            : null;
       }
 
       this.setModuleParameters(parameters);
     }
   }
 
-  _getUpdateParams() {
+  private _getUpdateParams(): {
+    props: PropsT;
+    oldProps: PropsT;
+    context: LayerContext;
+    changeFlags: ChangeFlags;
+  } {
     return {
       props: this.props,
-      oldProps: this.internalState.getOldProps(),
-      context: this.context,
+      // @ts-ignore TS2531 this method can only be called internally with internalState assigned
+      oldProps: this.internalState.getOldProps() as PropsT,
+      context: this.context as LayerContext,
+      // @ts-ignore TS2531 this method can only be called internally with internalState assigned
       changeFlags: this.internalState.changeFlags
     };
   }
 
-  // Checks state of attributes and model
-  _getNeedsRedraw(opts) {
+  /** Checks state of attributes and model */
+  private _getNeedsRedraw(opts: {clearRedrawFlags: boolean}): string | false {
     // this method may be called by the render loop as soon a the layer
     // has been created, so guard against uninitialized state
     if (!this.internalState) {
       return false;
     }
 
-    let redraw = false;
+    let redraw: string | boolean = false;
     redraw = redraw || (this.internalState.needsRedraw && this.id);
     this.internalState.needsRedraw = this.internalState.needsRedraw && !opts.clearRedrawFlags;
 
     // TODO - is attribute manager needed? - Model should be enough.
     const attributeManager = this.getAttributeManager();
-    const attributeManagerNeedsRedraw = attributeManager && attributeManager.getNeedsRedraw(opts);
+    const attributeManagerNeedsRedraw = attributeManager
+      ? attributeManager.getNeedsRedraw(opts)
+      : false;
     redraw = redraw || attributeManagerNeedsRedraw;
 
     return redraw;
   }
 
-  // Create new attribute manager
-  _getAttributeManager() {
-    return new AttributeManager(this.context.gl, {
-      id: this.props.id,
-      stats: this.context.stats,
-      timeline: this.context.timeline
-    });
-  }
-
-  _initState() {
-    assert(!this.internalState && !this.state); // finalized layer cannot be reused
-    assert(isFinite(this.props.coordinateSystem)); // invalid coordinateSystem
-
-    const attributeManager = this._getAttributeManager();
-
-    if (attributeManager) {
-      // All instanced layers get instancePickingColors attribute by default
-      // Their shaders can use it to render a picking scene
-      // TODO - this slightly slows down non instanced layers
-      attributeManager.addInstanced({
-        instancePickingColors: {
-          type: GL.UNSIGNED_BYTE,
-          size: 3,
-          noAlloc: true,
-          update: this.calculateInstancePickingColors
-        }
-      });
-    }
-
-    this.internalState = new LayerState({
-      attributeManager,
-      layer: this
-    });
-    this.clearChangeFlags(); // populate this.internalState.changeFlags
-
-    this.state = {};
-    // for backwards compatibility with older layers
-    // TODO - remove in next release
-    /* eslint-disable accessor-pairs */
-    Object.defineProperty(this.state, 'attributeManager', {
-      get: () => {
-        log.deprecated('layer.state.attributeManager', 'layer.getAttributeManager()');
-        return attributeManager;
-      }
-    });
-    /* eslint-enable accessor-pairs */
-
-    this.internalState.layer = this;
-    this.internalState.uniformTransitions = new UniformTransitionManager(this.context.timeline);
-    this.internalState.onAsyncPropUpdated = this._onAsyncPropUpdated.bind(this);
-
-    // Ensure any async props are updated
-    this.internalState.setAsyncProps(this.props);
-  }
-
-  // Called by layer manager to transfer state from an old layer
-  _transferState(oldLayer) {
-    debug(TRACE_MATCHED, this, this === oldLayer);
-
-    const {state, internalState} = oldLayer;
-
-    if (this === oldLayer) {
-      return;
-    }
-
-    // Move internalState
-    this.internalState = internalState;
-    this.internalState.layer = this;
-
-    // Move state
-    this.state = state;
-    // We keep the state ref on old layers to support async actions
-    // oldLayer.state = null;
-
-    // Ensure any async props are updated
-    this.internalState.setAsyncProps(this.props);
-
-    this.diffProps(this.props, this.internalState.getOldProps());
-  }
-
-  _onAsyncPropUpdated() {
-    this.diffProps(this.props, this.internalState.getOldProps());
+  /** Callback when asyn prop is loaded */
+  private _onAsyncPropUpdated(): void {
+    // @ts-ignore TS2531 this method can only be called internally with internalState assigned
+    this._diffProps(this.props, this.internalState.getOldProps());
     this.setNeedsUpdate();
   }
 }
-
-Layer.layerName = 'Layer';
-Layer.defaultProps = defaultProps;

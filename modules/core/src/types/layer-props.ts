@@ -1,21 +1,32 @@
-import {COORDINATE_SYSTEM} from './constants';
-import type Layer from './layer';
+import {COORDINATE_SYSTEM} from '../lib/constants';
+import type Layer from '../lib/layer';
 
-interface NonIterableData {
-  length: number;
-  attributes?: Record<string, BinaryAttribute>;
-}
-type LayerData = Iterable<any> | NonIterableData;
+import type {NumericArray} from './types';
+import type {PickingInfo} from '../lib/picking/pick-info';
+import type {MjolnirEvent} from 'mjolnir.js';
+
+export type LayerData<T> =
+  | Iterable<T>
+  | {
+      length: number;
+      attributes?: Record<string, BinaryAttribute>;
+    };
+
+export type AccessorContext<T> = {
+  index: number;
+  data: LayerData<T>;
+  target: number[];
+};
+
+export type Accessor<In, Out> = Out | ((object: In, objectInfo: AccessorContext<In>) => Out);
 
 // TODO
-type PickingInfo = any;
-type MjolnirEvent = any;
 type BinaryAttribute = any;
 
 /**
  * Base Layer prop types
  */
-export type LayerProps = {
+export type LayerProps<DataType = any> = {
   /**
    * Unique identifier of the layer.
    */
@@ -23,19 +34,25 @@ export type LayerProps = {
   /**
    * The data to visualize.
    */
-  data?: LayerData | string | AsyncIterable<any> | Promise<LayerData>;
+  data?: LayerData<DataType> | string | AsyncIterable<DataType> | Promise<LayerData<DataType>>;
   /**
    * Callback to determine if two data values are equal.
    */
-  dataComparator?: (newData: LayerData, oldData?: LayerData) => boolean;
+  dataComparator?: (newData: LayerData<DataType>, oldData?: LayerData<DataType>) => boolean;
   /**
    * Callback to determine the difference between two data values, in order to perform a partial update.
    */
-  _dataDiff?: (newData: LayerData, oldData?: LayerData) => {startRow: number; endRow?: number}[];
+  _dataDiff?: (
+    newData: LayerData<DataType>,
+    oldData?: LayerData<DataType>
+  ) => {startRow: number; endRow?: number}[];
   /**
    * Callback to manipulate remote data when it's fetched and parsed.
    */
-  dataTransform?: (data: LayerData, previousData?: LayerData) => LayerData;
+  dataTransform?: (
+    data: LayerData<DataType>,
+    previousData?: LayerData<DataType>
+  ) => LayerData<DataType>;
   /**
    * Custom implementation to fetch and parse content from URLs.
    */
@@ -53,7 +70,10 @@ export type LayerProps = {
    * The dependencies used to trigger re-evaluation of functional accessors (get*).
    */
   updateTriggers?: Record<string, any>;
-
+  /**
+   * The purpose of the layer
+   */
+  operation?: 'draw' | 'mask';
   /**
    * If the layer should be rendered. Default true.
    */
@@ -77,7 +97,7 @@ export type LayerProps = {
   /**
    * A 4x4 matrix to transform local coordianates to the world space.
    */
-  modelMatrix?: number[];
+  modelMatrix?: NumericArray;
   /**
    * (Geospatial only) normalize geometries that cross the 180th meridian. Default false.
    */
@@ -107,6 +127,10 @@ export type LayerProps = {
    */
   loaders?: any[];
   /**
+   * Options to customize the behavior of loaders
+   */
+  loadOptions?: any;
+  /**
    * Callback to calculate the polygonOffset WebGL parameter.
    */
   getPolygonOffset?: (params: {layerIndex: number}) => [number, number] | null;
@@ -127,7 +151,7 @@ export type LayerProps = {
   /**
    * Called when remote data is fetched and parsed.
    */
-  onDataLoad?: (data: LayerData, context: {propName: string; layer: Layer}) => void;
+  onDataLoad?: (data: LayerData<DataType>, context: {propName: string; layer: Layer}) => void;
   /**
    * Called when the layer encounters an error.
    */
@@ -152,4 +176,22 @@ export type LayerProps = {
    * Called when the mouse releases an object of this layer.
    */
   onDragEnd?: (pickingInfo: PickingInfo, event: MjolnirEvent) => boolean | void;
+
+  /** (Advanced) supply attribute size externally */
+  numInstances?: number;
+
+  /** (Advanced) supply variable-width attribute size externally */
+  startIndices?: NumericArray;
+};
+
+/**
+ * Base CompositeLayer prop types
+ */
+export type CompositeLayerProps<DataType = any> = LayerProps<DataType> & {
+  _subLayerProps: {
+    [subLayerId: string]: {
+      type?: typeof Layer;
+      [propName: string]: any;
+    };
+  };
 };
