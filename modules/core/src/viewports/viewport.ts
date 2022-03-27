@@ -278,7 +278,6 @@ export default class Viewport {
    */
   projectFlat(xyz: number[]): [number, number] {
     if (this.isGeospatial) {
-      const lat = xyz[1];
       // Shader clamps latitude to +-89.9, see /shaderlib/project/project.glsl.js
       // lngLatToWorld([0, -89.9])[1] = -317.9934163758329
       // lngLatToWorld([0, 89.9])[1] = 829.9934163758271
