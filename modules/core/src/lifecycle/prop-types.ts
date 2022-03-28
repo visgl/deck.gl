@@ -241,10 +241,6 @@ function isArray(value: any): boolean {
   return Array.isArray(value) || ArrayBuffer.isView(value);
 }
 
-function isObject(value: any): boolean {
-  return getTypeOf(value) === 'object';
-}
-
 // improved version of javascript typeof that can distinguish arrays and null values
 function getTypeOf(value: any): string {
   if (isArray(value)) {
