@@ -1,4 +1,5 @@
 import {createTexture, destroyTexture} from '../utils/texture';
+import {deepEqual} from '../utils/deep-equal';
 
 import type Component from './component';
 
@@ -131,7 +132,7 @@ const TYPE_DEFINITIONS = {
   },
   object: {
     equal(value1, value2, propType: ObjectPropType) {
-      return propType.compare ? objectEqual(value1, value2) : value1 === value2;
+      return propType.compare ? deepEqual(value1, value2) : value1 === value2;
     }
   },
   function: {
@@ -171,34 +172,6 @@ function arrayEqual(array1, array2) {
   }
   for (let i = 0; i < len; i++) {
     if (array1[i] !== array2[i]) {
-      return false;
-    }
-  }
-  return true;
-}
-
-function objectEqual(object1, object2) {
-  if (object1 === object2) {
-    return true;
-  }
-  if (!isObject(object1) || !isObject(object2)) {
-    return false;
-  }
-  const keys1 = Object.keys(object1);
-  const keys2 = Object.keys(object2);
-  if (!arrayEqual(keys1, keys2)) {
-    return false;
-  }
-  for (const key of keys1) {
-    const value1 = object1[key];
-    const value2 = object2[key];
-    if (isObject(value1) && !objectEqual(value1, value2)) {
-      return false;
-    }
-    if (isArray(value1) && !arrayEqual(value1, value2)) {
-      return false;
-    }
-    if (value1 !== value2) {
       return false;
     }
   }
