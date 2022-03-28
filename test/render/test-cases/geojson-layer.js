@@ -8,6 +8,7 @@ import {
 import {GeoJsonLayer} from '@deck.gl/layers';
 import {geojson, geojsonLarge, geojsonHole} from 'deck.gl-test/data';
 import antarctica from 'deck.gl-test/data/antarctica.geo.json';
+import daynight from 'deck.gl-test/data/daynight.geo.json';
 import capitals from 'deck.gl-test/data/us-state-capitals.geo.json';
 import {iconAtlas as iconMapping} from 'deck.gl-test/data';
 import {parseColor, setOpacity} from '../../../examples/layer-browser/src/utils/color';
@@ -322,6 +323,27 @@ export default [
       })
     ],
     goldenImage: './test/render/golden-images/geojson-wrap-longitude.png'
+  },
+  {
+    name: 'geojson-extreme-latitude',
+    viewState: {
+      longitude: 0,
+      latitude: 0,
+      zoom: -0.3,
+      repeat: true
+    },
+    layers: [
+      new GeoJsonLayer({
+        id: 'geojson-extreme-latitude',
+        data: daynight,
+        stroked: true,
+        filled: true,
+        getLineColor: [0, 0, 0],
+        getFillColor: [255, 0, 0, 100],
+        lineWidthMinPixels: 1
+      })
+    ],
+    goldenImage: './test/render/golden-images/geojson-extreme-latitude.png'
   },
   {
     name: 'geojson-circle',

@@ -21,7 +21,7 @@
 import log from '../utils/log';
 import {createMat4, getCameraPosition, getFrustumPlanes} from '../utils/math-utils';
 
-import {Matrix4, Vector3, equals} from '@math.gl/core';
+import {Matrix4, Vector3, equals, clamp} from '@math.gl/core';
 import * as mat4 from 'gl-matrix/mat4';
 
 import {
@@ -193,7 +193,12 @@ export default class Viewport {
    */
   projectFlat(xyz) {
     if (this.isGeospatial) {
-      return lngLatToWorld(xyz);
+      // Shader clamps latitude to +-89.9, see /shaderlib/project/project.glsl.js
+      // lngLatToWorld([0, -89.9])[1] = -317.9934163758329
+      // lngLatToWorld([0, 89.9])[1] = 829.9934163758271
+      const result = lngLatToWorld(xyz);
+      result[1] = clamp(result[1], -318, 830);
+      return result;
     }
     return xyz;
   }
