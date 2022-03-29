@@ -4,9 +4,11 @@
 import {getDefaultCredentials, buildMapsUrlFromBase, CloudNativeCredentials} from '../config';
 import {
   API_VERSIONS,
+  COLUMNS_SUPPORT,
   encodeParameter,
   Format,
   FORMATS,
+  GEO_COLUMN_SUPPORT,
   MapInstantiation,
   MapType,
   MAP_TYPES,
@@ -135,13 +137,11 @@ function getParameters({
   const sourceName = type === MAP_TYPES.QUERY ? 'q' : 'name';
   parameters.push(encodeParameter(sourceName, source));
 
-  if (type === MAP_TYPES.TABLE) {
-    if (geoColumn) {
-      parameters.push(encodeParameter('geo_column', geoColumn));
-    }
-    if (columns) {
-      parameters.push(encodeParameter('columns', columns.join(',')));
-    }
+  if (COLUMNS_SUPPORT.includes(type) && columns) {
+    parameters.push(encodeParameter('columns', columns.join(',')));
+  }
+  if (GEO_COLUMN_SUPPORT.includes(type) && geoColumn) {
+    parameters.push(encodeParameter('geo_column', geoColumn));
   }
 
   return parameters.join('&');
