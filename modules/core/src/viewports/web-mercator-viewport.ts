@@ -41,24 +41,81 @@ const TILE_SIZE = 512;
 const EARTH_CIRCUMFERENCE = 40.03e6;
 const DEGREES_TO_RADIANS = Math.PI / 180;
 
-function unitsPerMeter(latitude) {
+export type WebMercatorViewportOptions = {
+  /** Name of the viewport */
+  id?: string;
+  /** Left offset from the canvas edge, in pixels */
+  x?: number;
+  /** Top offset from the canvas edge, in pixels */
+  y?: number;
+  /** Viewport width in pixels */
+  width?: number;
+  /** Viewport height in pixels */
+  height?: number;
+  /** Longitude in degrees */
+  longitude?: number;
+  /** Latitude in degrees */
+  latitude?: number;
+  /** Tilt of the camera in degrees */
+  pitch?: number;
+  /** Heading of the camera in degrees */
+  bearing?: number;
+  /** Camera altitude relative to the viewport height, legacy property used to control the FOV. Default `1.5` */
+  altitude?: number;
+  /** Camera fovy in degrees. If provided, overrides `altitude` */
+  fovy?: number;
+  /** Viewport center in world space. If geospatial, refers to meter offsets from lng, lat */
+  position?: number[];
+  /** Zoom level */
+  zoom?: number;
+  /** Model matrix of viewport center */
+  modelMatrix?: number[] | null;
+  /** Custom projection matrix */
+  projectionMatrix?: number[];
+  /** Use orthographic projection */
+  orthographic?: boolean;
+  /** Scaler for the near plane, 1 unit equals to the height of the viewport. Default `0.1` */
+  nearZMultiplier?: number;
+  /** Scaler for the far plane, 1 unit equals to the distance from the camera to the edge of the screen. Default `1.01` */
+  farZMultiplier?: number;
+  /** Render multiple copies of the world */
+  repeat?: boolean;
+  /** Internal use */
+  worldOffset?: number;
+  /** @deprecated Revert to approximated meter size calculation prior to v8.5 */
+  legacyMeterSizes?: boolean;
+};
+
+function unitsPerMeter(latitude: number): number {
   const latCosine = Math.cos(latitude * DEGREES_TO_RADIANS);
   return TILE_SIZE / EARTH_CIRCUMFERENCE / latCosine;
 }
 
+/**
+ * Manages transformations to/from WGS84 coordinates using the Web Mercator Projection.
+ */
 export default class WebMercatorViewport extends Viewport {
-  /**
-   * @classdesc
-   * Creates view/projection matrices from mercator params
-   * Note: The Viewport is immutable in the sense that it only has accessors.
-   * A new viewport instance should be created if any parameters have changed.
-   */
+  static displayName = 'WebMercatorViewport';
+
+  longitude: number;
+  latitude: number;
+  pitch: number;
+  bearing: number;
+  altitude: number;
+  fovy: number;
+  orthographic: boolean;
+
+  /** Each sub viewport renders one copy of the world if repeat:true. The list is generated and cached on first request. */
+  private _subViewports: WebMercatorViewport[] | null;
+  /** @deprecated Revert to approximated meter size calculation prior to v8.5 */
+  private _pseudoMeters: boolean;
+
   /* eslint-disable complexity, max-statements */
-  constructor(opts = {}) {
+  constructor(opts: WebMercatorViewportOptions = {}) {
     const {
       latitude = 0,
       longitude = 0,
-      zoom = 11,
+      zoom = 0,
       pitch = 0,
       bearing = 0,
       nearZMultiplier = 0.1,
@@ -82,7 +139,7 @@ export default class WebMercatorViewport extends Viewport {
     height = height || 1;
 
     let fovy;
-    let projectionParameters = null;
+    let projectionParameters: any = null;
     if (projectionMatrix) {
       altitude = projectionMatrix[5] / 2;
       fovy = altitudeToFovy(altitude);
@@ -156,7 +213,7 @@ export default class WebMercatorViewport extends Viewport {
   }
   /* eslint-enable complexity, max-statements */
 
-  get subViewports() {
+  get subViewports(): WebMercatorViewport[] | null {
     if (this._subViewports && !this._subViewports.length) {
       // Cache sub viewports so that we only calculate them once
       const bounds = this.getBounds();
@@ -177,7 +234,7 @@ export default class WebMercatorViewport extends Viewport {
     return this._subViewports;
   }
 
-  projectPosition(xyz) {
+  projectPosition(xyz: number[]): [number, number, number] {
     if (this._pseudoMeters) {
       // Backward compatibility
       return super.projectPosition(xyz);
@@ -187,7 +244,7 @@ export default class WebMercatorViewport extends Viewport {
     return [X, Y, Z];
   }
 
-  unprojectPosition(xyz) {
+  unprojectPosition(xyz: number[]): [number, number, number] {
     if (this._pseudoMeters) {
       // Backward compatibility
       return super.unprojectPosition(xyz);
@@ -207,11 +264,11 @@ export default class WebMercatorViewport extends Viewport {
    * @param {[Number,Number]|[Number,Number,Number]) xyz - array of meter deltas
    * @return {[Number,Number]|[Number,Number,Number]) array of [lng,lat,z] deltas
    */
-  addMetersToLngLat(lngLatZ, xyz) {
+  addMetersToLngLat(lngLatZ: number[], xyz: number[]): number[] {
     return addMetersToLngLat(lngLatZ, xyz);
   }
 
-  panByPosition(coords, pixel) {
+  panByPosition(coords: number[], pixel: number[]): WebMercatorViewportOptions {
     const fromLocation = pixelsToWorld(pixel, this.pixelUnprojectionMatrix);
     const toLocation = this.projectFlat(coords);
 
@@ -222,7 +279,8 @@ export default class WebMercatorViewport extends Viewport {
     return {longitude, latitude};
   }
 
-  getBounds(options = {}) {
+  getBounds(options: {z?: number} = {}): [number, number, number, number] {
+    // @ts-ignore
     const corners = getBounds(this, options.z || 0);
 
     return [
@@ -242,11 +300,9 @@ export default class WebMercatorViewport extends Viewport {
    *    [x, y] measured in pixels.
    * @returns {WebMercatorViewport}
    */
-  fitBounds(bounds, options = {}) {
+  fitBounds(bounds: [[number, number], [number, number]], options = {}) {
     const {width, height} = this;
     const {longitude, latitude, zoom} = fitBounds({width, height, bounds, ...options});
     return new WebMercatorViewport({width, height, longitude, latitude, zoom});
   }
 }
-
-WebMercatorViewport.displayName = 'WebMercatorViewport';

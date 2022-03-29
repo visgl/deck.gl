@@ -1,6 +1,6 @@
 import {clamp} from '@math.gl/core';
 import Controller from './controller';
-import {OrbitState, OrbitStateProps} from './orbit-controller';
+import {OrbitState} from './orbit-controller';
 import LinearInterpolator from '../transitions/linear-interpolator';
 
 class OrthographicState extends OrbitState {

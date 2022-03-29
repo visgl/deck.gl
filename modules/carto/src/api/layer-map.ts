@@ -31,6 +31,13 @@ const SCALE_FUNCS = {
 };
 export type SCALE_TYPE = keyof typeof SCALE_FUNCS;
 
+export const AGGREGATION = {
+  average: 'MEAN',
+  maximum: 'MAX',
+  minimum: 'MIN',
+  sum: 'SUM'
+};
+
 const hexToRGBA = c => {
   const {r, g, b, opacity} = rgb(c);
   return [r, g, b, 255 * opacity];
@@ -61,7 +68,7 @@ const sharedPropMap = {
 };
 
 const aggregationVisConfig = {
-  colorAggregation: 'colorAggregation',
+  colorAggregation: x => ({colorAggregation: AGGREGATION[x] || AGGREGATION.sum}),
   colorRange: x => ({colorRange: x.colors.map(hexToRGBA)}),
   coverage: 'coverage',
   elevationPercentile: ['elevationLowerPercentile', 'elevationUpperPercentile'],
@@ -123,7 +130,7 @@ export function getLayer(
     hexagonId: {
       Layer: H3HexagonLayer,
       propMap: {visConfig: {coverage: 'coverage'}},
-      defaultProps: {getHexagon: d => d[hexagonId]}
+      defaultProps: {getHexagon: d => d[hexagonId], stroked: false}
     }
   }[type];
 

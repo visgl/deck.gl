@@ -24,20 +24,56 @@ function getDistanceScales() {
   };
 }
 
+export type GlobeViewportOptions = {
+  /** Name of the viewport */
+  id?: string;
+  /** Left offset from the canvas edge, in pixels */
+  x?: number;
+  /** Top offset from the canvas edge, in pixels */
+  y?: number;
+  /** Viewport width in pixels */
+  width?: number;
+  /** Viewport height in pixels */
+  height?: number;
+  /** Longitude in degrees */
+  longitude?: number;
+  /** Latitude in degrees */
+  latitude?: number;
+  /** Camera altitude relative to the viewport height, used to control the FOV. Default `1.5` */
+  altitude?: number;
+  /* Meter offsets of the viewport center from lng, lat */
+  position?: number[];
+  /** Zoom level */
+  zoom?: number;
+  /** Use orthographic projection */
+  orthographic?: boolean;
+  /** Scaler for the near plane, 1 unit equals to the height of the viewport. Default `0.1` */
+  nearZMultiplier?: number;
+  /** Scaler for the far plane, 1 unit equals to the distance from the camera to the edge of the screen. Default `2` */
+  farZMultiplier?: number;
+  /** The resolution at which to turn flat features into 3D meshes, in degrees. Smaller numbers will generate more detailed mesh. Default `10` */
+  resolution?: number;
+};
+
 export default class GlobeViewport extends Viewport {
-  constructor(opts = {}) {
+  // @ts-ignore
+  longitude: number;
+  // @ts-ignore
+  latitude: number;
+  resolution: number;
+
+  constructor(opts: GlobeViewportOptions = {}) {
     const {
       latitude = 0,
       longitude = 0,
-      zoom = 11,
+      zoom = 0,
       nearZMultiplier = 0.1,
       farZMultiplier = 2,
       resolution = 10
     } = opts;
 
-    let {width, height, altitude = 1.5} = opts;
+    let {height, altitude = 1.5} = opts;
 
-    width = width || 1;
     height = height || 1;
     altitude = Math.max(0.75, altitude);
 
@@ -53,8 +89,7 @@ export default class GlobeViewport extends Viewport {
 
     super({
       ...opts,
-      // x, y,
-      width,
+      // x, y, width,
       height,
 
       // view matrix
@@ -64,15 +99,16 @@ export default class GlobeViewport extends Viewport {
       zoom,
 
       // projection matrix parameters
+      distanceScales: getDistanceScales(),
       fovyRadians: halfFov * 2,
-      aspect: width / height,
       focalDistance: altitude,
       near: nearZMultiplier,
       far: Math.min(2, 1 / relativeScale + 1) * altitude * farZMultiplier
     });
 
+    this.latitude = latitude;
+    this.longitude = longitude;
     this.resolution = resolution;
-    this.distanceScales = getDistanceScales();
   }
 
   get projectionMode() {
@@ -83,7 +119,7 @@ export default class GlobeViewport extends Viewport {
     return this.distanceScales;
   }
 
-  getBounds(options = {}) {
+  getBounds(options: {z?: number} = {}): [number, number, number, number] {
     const unprojectOption = {targetZ: options.z || 0};
 
     const left = this.unproject([0, this.height / 2], unprojectOption);
@@ -102,7 +138,10 @@ export default class GlobeViewport extends Viewport {
     ];
   }
 
-  unproject(xyz, {topLeft = true, targetZ} = {}) {
+  unproject(
+    xyz: number[],
+    {topLeft = true, targetZ}: {topLeft?: boolean; targetZ?: number} = {}
+  ): number[] {
     const [x, y, z] = xyz;
 
     const y2 = topLeft ? y : this.height - y;
@@ -135,10 +174,10 @@ export default class GlobeViewport extends Viewport {
     if (Number.isFinite(z)) {
       return [X, Y, Z];
     }
-    return Number.isFinite(targetZ) ? [X, Y, targetZ] : [X, Y];
+    return Number.isFinite(targetZ) ? [X, Y, targetZ as number] : [X, Y];
   }
 
-  projectPosition(xyz) {
+  projectPosition(xyz: number[]): [number, number, number] {
     const [lng, lat, Z = 0] = xyz;
     const lambda = lng * DEGREES_TO_RADIANS;
     const phi = lat * DEGREES_TO_RADIANS;
@@ -148,7 +187,7 @@ export default class GlobeViewport extends Viewport {
     return [Math.sin(lambda) * cosPhi * D, -Math.cos(lambda) * cosPhi * D, Math.sin(phi) * D];
   }
 
-  unprojectPosition(xyz) {
+  unprojectPosition(xyz: number[]): [number, number, number] {
     const [x, y, z] = xyz;
     const D = vec3.len(xyz);
     const phi = Math.asin(z / D);
@@ -160,15 +199,15 @@ export default class GlobeViewport extends Viewport {
     return [lng, lat, Z];
   }
 
-  projectFlat(xyz) {
-    return xyz;
+  projectFlat(xyz: number[]): [number, number] {
+    return xyz as [number, number];
   }
 
-  unprojectFlat(xyz) {
-    return xyz;
+  unprojectFlat(xyz: number[]): [number, number] {
+    return xyz as [number, number];
   }
 
-  panByPosition(coords, pixel) {
+  panByPosition(coords: number[], pixel: number[]): GlobeViewportOptions {
     const fromPosition = this.unproject(pixel);
     return {
       longitude: coords[0] - fromPosition[0] + this.longitude,
@@ -177,7 +216,7 @@ export default class GlobeViewport extends Viewport {
   }
 }
 
-function transformVector(matrix, vector) {
+function transformVector(matrix: number[], vector: number[]): number[] {
   const result = vec4.transformMat4([], vector, matrix);
   vec4.scale(result, result, 1 / result[3]);
   return result;

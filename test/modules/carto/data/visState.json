@@ -667,6 +667,7 @@
           "autoHighlight": true,
           "pickable": true,
           "visible": true,
+          "stroked": false,
           "extruded": true,
           "elevationScale": 70.1,
           "opacity": 0.8,
@@ -1167,7 +1168,7 @@
           "extruded": false,
           "elevationScale": 5,
           "opacity": 0.8,
-          "colorAggregation": "count",
+          "colorAggregation": "SUM",
           "colorRange": [
             [90, 24, 70, 255],
             [144, 12, 63, 255],
@@ -1310,7 +1311,6 @@
           "extruded": false,
           "elevationScale": 5,
           "opacity": 0.8,
-          "colorAggregation": "count",
           "colorRange": [
             [255, 255, 204, 255],
             [217, 240, 163, 255],
@@ -1324,6 +1324,7 @@
           "elevationUpperPercentile": 100,
           "lowerPercentile": 0,
           "upperPercentile": 100,
+          "colorAggregation": "SUM",
           "radius": 300,
           "highlightColor": [252, 242, 26, 255],
           "colorScaleType": "quantile"
@@ -1455,7 +1456,7 @@
           "elevationScale": 5,
           "opacity": 0.8,
           "radiusPixels": 21.7,
-          "colorAggregation": "average",
+          "colorAggregation": "MEAN",
           "colorRange": [
             [254, 240, 217, 255],
             [253, 212, 158, 255],

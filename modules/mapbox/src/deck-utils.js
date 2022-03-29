@@ -103,14 +103,15 @@ export function drawLayer(deck, map, layer) {
   });
 }
 
-function getViewState(map) {
+export function getViewState(map) {
   const {lng, lat} = map.getCenter();
   return {
     longitude: lng,
     latitude: lat,
     zoom: map.getZoom(),
     bearing: map.getBearing(),
-    pitch: map.getPitch()
+    pitch: map.getPitch(),
+    repeat: map.getRenderWorldCopies()
   };
 }
 
@@ -134,8 +135,7 @@ function getViewport(deck, map, useMapboxProjection = true) {
         x: 0,
         y: 0,
         width: deck.width,
-        height: deck.height,
-        repeat: map.getRenderWorldCopies()
+        height: deck.height
       },
       getViewState(map),
       useMapboxProjection

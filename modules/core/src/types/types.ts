@@ -22,6 +22,6 @@ export type TypedArrayConstructor =
 
 export type NumericArray = number[] | TypedArray;
 
-export type ConstructorOf<T> = {
+export interface ConstructorOf<T> {
   new (...args): T;
-};
+}

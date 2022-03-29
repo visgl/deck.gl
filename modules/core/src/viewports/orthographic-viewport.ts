@@ -1,18 +1,22 @@
-import View from './view';
 import Viewport from '../viewports/viewport';
 
 import {Matrix4} from '@math.gl/core';
 import {pixelsToWorld} from '@math.gl/web-mercator';
 import * as vec2 from 'gl-matrix/vec2';
-import OrthographicController from '../controllers/orthographic-controller';
 
 const viewMatrix = new Matrix4().lookAt({eye: [0, 0, 1]});
 
-function getProjectionMatrix({width, height, near, far}) {
-  // Make sure Matrix4.ortho doesn't crash on 0 width/height
-  width = width || 1;
-  height = height || 1;
-
+function getProjectionMatrix({
+  width,
+  height,
+  near,
+  far
+}: {
+  width: number;
+  height: number;
+  near: number;
+  far: number;
+}) {
   return new Matrix4().ortho({
     left: -width / 2,
     right: width / 2,
@@ -23,8 +27,32 @@ function getProjectionMatrix({width, height, near, far}) {
   });
 }
 
-class OrthographicViewport extends Viewport {
-  constructor(props) {
+export type OrthographicViewportOptions = {
+  /** Name of the viewport */
+  id?: string;
+  /** Left offset from the canvas edge, in pixels */
+  x?: number;
+  /** Top offset from the canvas edge, in pixels */
+  y?: number;
+  /** Viewport width in pixels */
+  width?: number;
+  /** Viewport height in pixels */
+  height?: number;
+  /** The world position at the center of the viewport. Default `[0, 0, 0]`. */
+  target?: [number, number, number] | [number, number];
+  /**  The zoom level of the viewport. `zoom: 0` maps one unit distance to one pixel on screen, and increasing `zoom` by `1` scales the same object to twice as large.
+   *   To apply independent zoom levels to the X and Y axes, supply an array `[zoomX, zoomY]`. Default `0`. */
+  zoom?: number | [number, number];
+  /** Distance of near clipping plane. Default `0.1`. */
+  near?: number;
+  /** Distance of far clipping plane. Default `1000`. */
+  far?: number;
+  /** Whether to use top-left coordinates (`true`) or bottom-left coordinates (`false`). Default `true`. */
+  flipY?: boolean;
+};
+
+export default class OrthographicViewport extends Viewport {
+  constructor(props: OrthographicViewportOptions) {
     const {
       width,
       height,
@@ -54,27 +82,32 @@ class OrthographicViewport extends Viewport {
       ...props,
       // in case viewState contains longitude/latitude values,
       // make sure that the base Viewport class does not treat this as a geospatial viewport
-      longitude: null,
+      longitude: undefined,
       position: target,
       viewMatrix: viewMatrix.clone().scale([scale, scale * (flipY ? -1 : 1), scale]),
-      projectionMatrix: getProjectionMatrix({width, height, near, far}),
+      projectionMatrix: getProjectionMatrix({
+        width: width || 1,
+        height: height || 1,
+        near,
+        far
+      }),
       zoom: zoom_,
       distanceScales
     });
   }
 
-  projectFlat([X, Y]) {
+  projectFlat([X, Y]: number[]): [number, number] {
     const {unitsPerMeter} = this.distanceScales;
     return [X * unitsPerMeter[0], Y * unitsPerMeter[1]];
   }
 
-  unprojectFlat([x, y]) {
+  unprojectFlat([x, y]: number[]): [number, number] {
     const {metersPerUnit} = this.distanceScales;
     return [x * metersPerUnit[0], y * metersPerUnit[1]];
   }
 
   /* Needed by LinearInterpolator */
-  panByPosition(coords, pixel) {
+  panByPosition(coords: number[], pixel: number[]): OrthographicViewportOptions {
     const fromLocation = pixelsToWorld(pixel, this.pixelUnprojectionMatrix);
     const toLocation = this.projectFlat(coords);
 
@@ -84,20 +117,3 @@ class OrthographicViewport extends Viewport {
     return {target: this.unprojectFlat(newCenter)};
   }
 }
-
-export default class OrthographicView extends View {
-  constructor(props) {
-    super({
-      ...props,
-      type: OrthographicViewport
-    });
-  }
-
-  get controller() {
-    return this._getControllerProps({
-      type: OrthographicController
-    });
-  }
-}
-
-OrthographicView.displayName = 'OrthographicView';
