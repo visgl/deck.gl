@@ -18,7 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-const defines = '#define SMOOTH_EDGE_RADIUS 10.5';
+const defines = '#define SMOOTH_EDGE_RADIUS 0.5';
 const vs = `
 ${defines}
 
