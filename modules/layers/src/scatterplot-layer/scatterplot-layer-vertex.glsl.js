@@ -40,6 +40,7 @@ uniform float lineWidthMinPixels;
 uniform float lineWidthMaxPixels;
 uniform float stroked;
 uniform bool filled;
+uniform bool antialiasing;
 uniform bool billboard;
 uniform int radiusUnits;
 uniform int lineWidthUnits;
@@ -49,6 +50,7 @@ varying vec4 vLineColor;
 varying vec2 unitPosition;
 varying float innerUnitRadius;
 varying float outerRadiusPixels;
+
 
 void main(void) {
   geometry.worldPosition = instancePositions;
@@ -68,8 +70,11 @@ void main(void) {
   // outer radius needs to offset by half stroke width
   outerRadiusPixels += stroked * lineWidthPixels / 2.0;
 
+  // Expand geometry to accomodate edge smoothing
+  float edgePadding = antialiasing ? (outerRadiusPixels + SMOOTH_EDGE_RADIUS) / outerRadiusPixels : 1.0;
+
   // position on the containing square in [-1, 1] space
-  unitPosition = positions.xy;
+  unitPosition = edgePadding * positions.xy;
   geometry.uv = unitPosition;
   geometry.pickingColor = instancePickingColors;
 
@@ -77,11 +82,11 @@ void main(void) {
   
   if (billboard) {
     gl_Position = project_position_to_clipspace(instancePositions, instancePositions64Low, vec3(0.0), geometry.position);
-    vec3 offset = positions * outerRadiusPixels;
+    vec3 offset = edgePadding * positions * outerRadiusPixels;
     DECKGL_FILTER_SIZE(offset, geometry);
     gl_Position.xy += project_pixel_size_to_clipspace(offset.xy);
   } else {
-    vec3 offset = positions * project_pixel_size(outerRadiusPixels);
+    vec3 offset = edgePadding * positions * project_pixel_size(outerRadiusPixels);
     DECKGL_FILTER_SIZE(offset, geometry);
     gl_Position = project_position_to_clipspace(instancePositions, instancePositions64Low, offset, geometry.position);
   }

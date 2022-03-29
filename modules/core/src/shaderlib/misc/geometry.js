@@ -18,7 +18,10 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
+const defines = '#define SMOOTH_EDGE_RADIUS 10.5';
 const vs = `
+${defines}
+
 struct VertexGeometry {
   vec4 position;
   vec3 worldPosition;
@@ -37,7 +40,7 @@ struct VertexGeometry {
 `;
 
 const fs = `
-#define SMOOTH_EDGE_RADIUS 0.5
+${defines}
 
 struct FragmentGeometry {
   vec2 uv;
